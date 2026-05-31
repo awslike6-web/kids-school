@@ -660,11 +660,40 @@
     const STORAGE_STATS = 'kids_english_stats_v2';
 
     const sampleWords = [
-        { eng: 'apple', kor: '사과', pos: '명사', note: '빨갛고 달콤한 과일' },
-        { eng: 'run', kor: '달리다', pos: '동사', note: '움직임을 나타내요' },
-        { eng: 'happy', kor: '행복한', pos: '형용사', note: '기분을 나타내요' },
-        { eng: 'take care of', kor: '돌보다', pos: '숙어', note: '구동사처럼 익혀요' },
-        { eng: 'I like animals.', kor: '나는 동물을 좋아해요.', pos: '문장', note: '문장 따라쓰기 연습' }
+        // 1단계 단어들
+        { eng: 'bread', kor: '빵', pos: '명사', note: '' },
+        { eng: 'cheese pizza', kor: '치즈 피자', pos: '명사', note: '' },
+        { eng: 'cream', kor: '(우유로 만든)크림, 크림색', pos: '명사', note: '' },
+        { eng: 'curry', kor: '커리', pos: '명사', note: '' },
+        { eng: 'delicious', kor: '맛있는', pos: '형용사', note: '' },
+        { eng: 'drink', kor: '마시다', pos: '동사', note: '' },
+        { eng: 'fruit salad', kor: '과일 샐러드', pos: '명사', note: '' },
+        { eng: 'How's your ~?', kor: '[음식]은 어때요?', pos: '문장', note: '' },
+        { eng: 'I'd like ~.', kor: '[음식]을 주세요.', pos: '문장', note: '' },
+        { eng: 'ice', kor: '얼음', pos: '명사', note: '' },
+        { eng: 'ice cream', kor: '아이스크림', pos: '명사', note: '' },
+        { eng: 'It's ~.', kor: '', pos: '[맛]이에요.', note: '문장' },
+        { eng: 'lemonade', kor: '레모네이드', pos: '명사', note: '' },
+        { eng: 'little', kor: '작은, 어린', pos: '형용사', note: '' },
+        { eng: 'meat', kor: '고기', pos: '명사', note: '' }
+        { eng: 'noodles', kor: '국수', pos: '', note: '' }
+        { eng: 'order', kor: '주문하다, 명령하다', pos: '동사', note: '' }
+        { eng: 'pancakes', kor: '팬케이크', pos: '명사', note: '' }
+        { eng: 'salty', kor: '짠, 짭짤한', pos: '형용사', note: '' }
+        { eng: 'sea', kor: '바다', pos: '명사', note: '' }
+        { eng: 'sour', kor: '신, 시큼한', pos: '형용사', note: '' }
+        { eng: 'spicy', kor: '매운, 매콤한', pos: '형용사', note: '' }
+        { eng: 'sweet', kor: '단, 달콤한', pos: '형용사', note: '' }
+        { eng: 'try', kor: '노력하다, 시도하다', pos: '동사', note: '' }
+        { eng: 'vegetable pizza', kor: '야채 피자', pos: '명사', note: '' }
+        { eng: 'wait', kor: '기다리다', pos: '동사', note: '' }
+        { eng: 'What would you like?', kor: '뭐 드시겠어요?', pos: '문장', note: '' }
+        { eng: 'would', kor: '-하다', pos: '동사', note: '공손한 느낌을 주는 말' }
+
+        //2단계 단어들
+        { eng: 'example', kor: '예시단어', pos: '명사', note: '2단계 테스트용' }
+        { eng: '', kor: '', pos: '', note: '' }
+    
     ];
 
     const modeLabels = {
@@ -698,10 +727,23 @@
     });
 
     function loadAll() {
-        words = safeJSON(localStorage.getItem(STORAGE_WORDS), sampleWords).map(normalizeWord).filter(isUsableWord);
-        if (words.length === 0) words = [...sampleWords];
-        wrongNotes = safeJSON(localStorage.getItem(STORAGE_WRONG), []);
-        stats = safeJSON(localStorage.getItem(STORAGE_STATS), { totalCorrect: 0, bestCombo: 0 });
+        // 1. 주소창에서 ?level=1 또는 ?level=2 같은 숫자를 읽어옵니다. (주소에 없으면 기본 1단계로 설정)
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentLevel = parseInt(urlParams.get('level')) || 1;
+    
+    // 2. 브라우저 창고에서 단어를 가져오거나, 처음이면 아빠가 정한 예시 단어(sampleWords)를 가져옵니다.
+    let allWords = safeJSON(localStorage.getItem(STORAGE_WORDS), sampleWords).map(normalizeWord).filter(isUsableWord);
+    if (allWords.length === 0) allWords = [...sampleWords];
+    
+    // 🔥 [핵심 추가] 전체 단어 중에서 현재 선택한 단계(level)와 일치하는 단어들만 쏙 골라냅니다!
+    words = allWords.filter(w => (w.level || 1) === currentLevel);
+    
+    // 3. 화면 타이틀에 현재 몇 단계를 풀고 있는지 아들이 볼 수 있게 표시해 줍니다.
+    document.getElementById('questionLabel').textContent = currentLevel + "단계 탐험을 시작합니다!";
+    
+    // 4. 기존 오답노트와 기록들을 불러옵니다.
+    wrongNotes = safeJSON(localStorage.getItem(STORAGE_WRONG), []);
+    stats = safeJSON(localStorage.getItem(STORAGE_STATS), { totalCorrect: 0, bestCombo: 0 });
     }
 
     function safeJSON(raw, fallback) {
