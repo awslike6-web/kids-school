@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리가족 종합 교육 포털</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 90%;
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            text-decoration: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        .btn-english { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .btn-math { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .btn-korean { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: #2c3e50; }
+
+        .icon {
+            font-size: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 아빠표 스마트 스쿨</h1>
+    <p class="subtitle">오늘 공부할 과목을 선택해 주세요!</p>
+    
+    <div class="menu-grid">
+        <!-- href 부분에 실제 파일 이름을 적어주면 거기로 이동합니다 -->
+        <a href="english_app.html" class="menu-btn btn-english">
+            <span class="icon">🔤</span> 영단어 마스터
+        </a>
+        <a href="math_app.html" class="menu-btn btn-math">
+            <span class="icon">✖️</span> 구구단 스피드 연산
+        </a>
+        <a href="korean_app.html" class="menu-btn btn-korean">
+            <span class="icon">📖</span> 국어/과학 용어 사전
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
