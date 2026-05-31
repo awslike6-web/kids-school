@@ -13,10 +13,9 @@
         }
         * { box-sizing: border-box; }
         body {
-            margin: 0; min-height: 100vh; color: var(--text);
-            font-family: system-ui, sans-serif;
-            background: linear-gradient(135deg, var(--bg), var(--bg2));
-            padding: 24px; display: flex; align-items: center; justify-content: center;
+            margin: 0; min-height: 100vh; color: var(--text); font-family: system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg), var(--bg2)); padding: 24px;
+            display: flex; align-items: center; justify-content: center;
         }
         .app-shell { max-width: 700px; width: 100%; }
         .study-card {
@@ -26,7 +25,8 @@
         .mascot { width: 88px; height: 88px; display: grid; place-items: center; margin: 0 auto 14px; font-size: 52px; }
         h1, h2 { margin: 0 0 10px; font-weight: 900; color: #2c3e50; }
         .helper { color: var(--muted); margin-bottom: 25px; font-size: 15px; }
-        .word-display { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 1000; }
+        select { padding: 12px; border-radius: 14px; border: 2px solid var(--line); font-size: 16px; font-weight: 700; color: var(--text); outline: none; margin-bottom: 20px; width: 100%; max-width: 350px; text-align: center; }
+        .word-display { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 1000; word-break: keep-all; }
         .pos-badge { display: inline-block; padding: 6px 14px; margin: 10px 0 20px; border-radius: 999px; background: rgba(255, 209, 102, 0.3); font-weight: 900; font-size: 14px; }
         .main-input { width: 100%; padding: 16px; border-radius: 20px; border: 3px solid var(--line); font-size: 24px; text-align: center; font-weight: 900; outline: none; background: white; }
         .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
@@ -43,10 +43,18 @@
     <div id="level-select-zone" class="study-card">
         <div class="mascot">🗺️</div>
         <h2>어디로 탐험을 떠날까요?</h2>
-        <p class="helper">오늘 도전할 단계를 선택해 주세요!</p>
+        <p class="helper">오늘 도전할 단계와 연습 방식을 선택해 주세요!</p>
+        
+        <select id="studyModeSelect">
+            <option value="copy-eng">✍️ 영어 보고 따라 쓰기 (기초 연습)</option>
+            <option value="kor-to-eng">🔤 한글 뜻 보고 영어 맞히기</option>
+            <option value="eng-to-kor">📖 영어 보고 한글 뜻 맞히기</option>
+            <option value="sound-to-eng">🔊 소리만 듣고 영어 맞히기</option>
+        </select>
+
         <div class="button-row" style="flex-direction: column; max-width: 350px; margin: 0 auto; gap: 12px;">
-            <button class="btn" style="width: 100%;" onclick="location.href='english_typing_app1.html?level=1'">⭐ 1단계 (음식과 맛)</button>
-            <button class="btn secondary" style="width: 100%;" onclick="location.href='english_typing_app1.html?level=2'">⭐⭐ 2단계 (필수 복습)</button>
+            <button class="btn" style="width: 100%;" onclick="startAdventure(1)">⭐ 1단계 탐험 (음식과 맛)</button>
+            <button class="btn secondary" style="width: 100%;" onclick="startAdventure(2)">⭐⭐ 2단계 탐험 (필수 복습)</button>
             <button class="btn ghost" style="width: 100%;" onclick="location.href='index.html'">🏠 대문으로 돌아가기</button>
         </div>
     </div>
@@ -62,14 +70,13 @@
             <button class="btn good" onclick="submitAnswer()">정답 확인</button>
             <button class="btn secondary" onclick="speakCurrentWord()">소리 듣기</button>
             <button class="btn ghost" onclick="skipWord()">건너뛰기</button>
-            <button class="btn ghost" onclick="location.href='english_typing_app1.html'">🔙 단계 선택으로</button>
+            <button class="btn ghost" onclick="goBackToMenu()">🔙 단계 선택으로</button>
             <button class="btn ghost" onclick="location.href='index.html'">🏠 홈으로 가기</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 아빠표 정예 단어장 데이터
     const sampleWords = [
         { eng: 'bread', kor: '빵', pos: '명사', level: 1 },
         { eng: 'cheese pizza', kor: '치즈 피자', pos: '명사', level: 1 },
@@ -104,29 +111,46 @@
 
     let words = [];
     let currentIndex = 0;
+    let currentMode = 'copy-eng';
 
     window.addEventListener('load', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const level = urlParams.get('level');
+        const mode = urlParams.get('mode') || 'copy-eng';
 
         if (!level) {
-            // 주소에 레벨이 없으면 선택 메뉴창만 보여줌
             document.getElementById('level-select-zone').style.display = 'block';
             document.getElementById('game-zone').style.display = 'none';
         } else {
-            // 레벨이 있으면 게임 창을 켜고 단어 필터링
             document.getElementById('level-select-zone').style.display = 'none';
             document.getElementById('game-zone').style.display = 'block';
             
             const currentLevel = parseInt(level) || 1;
-            document.getElementById('questionLabel').textContent = currentLevel + "단계 탐험을 시작합니다!";
+            currentMode = mode;
             
-            // 해당 레벨 단어만 쏙 뽑아내기
+            // 상단 타이틀 안내 문구 변경
+            let modeTitle = "따라 쓰기 탐험";
+            if(currentMode === 'kor-to-eng') modeTitle = "뜻 보고 맞히기 탐험";
+            if(currentMode === 'eng-to-kor') modeTitle = "한글 뜻 맞히기 탐험";
+            if(currentMode === 'sound-to-eng') modeTitle = "소리 듣기 탐험";
+
+            document.getElementById('questionLabel').textContent = `${currentLevel}단계 [${modeTitle}] 시작!`;
+            
             words = sampleWords.filter(w => w.level === currentLevel);
             currentIndex = 0;
             renderQuestion();
         }
     });
+
+    function startAdventure(level) {
+        const selectedMode = document.getElementById('studyModeSelect').value;
+        // 주소창에 레벨과 함께 선택한 모드(공부 방식)를 같이 전달합니다!
+        location.href = `english_typing_app1.html?level=${level}&mode=${selectedMode}`;
+    }
+
+    function goBackToMenu() {
+        location.href = 'english_typing_app1.html';
+    }
 
     function renderQuestion() {
         if (words.length === 0) {
@@ -138,20 +162,50 @@
             document.getElementById('answerInput').style.display = 'none';
             return;
         }
+        
         const item = words[currentIndex];
-        document.getElementById('questionText').textContent = item.kor;
         document.getElementById('posBadge').textContent = "품사: " + item.pos;
         document.getElementById('answerInput').value = "";
         document.getElementById('feedbackText').textContent = "";
+
+        // 💡 선택된 모드에 맞춰 화면에 문제 출제!
+        if (currentMode === 'copy-eng') {
+            document.getElementById('questionText').textContent = item.eng; // 영어 보여주기
+            document.getElementById('answerInput').placeholder = `뜻: ${item.kor} (그대로 따라 쓰세요)`;
+        } else if (currentMode === 'kor-to-eng') {
+            document.getElementById('questionText').textContent = item.kor; // 뜻 보여주기
+            document.getElementById('answerInput').placeholder = "영단어·문장을 입력하세요";
+        } else if (currentMode === 'eng-to-kor') {
+            document.getElementById('questionText').textContent = item.eng; // 영어 보여주기
+            document.getElementById('answerInput').placeholder = "한글 뜻을 입력하세요 (예: 빵)";
+        } else if (currentMode === 'sound-to-eng') {
+            document.getElementById('questionText').textContent = "🔊 소리를 잘 들어보세요";
+            document.getElementById('answerInput').placeholder = "들을 영어를 입력하세요";
+            setTimeout(speakCurrentWord, 300);
+        }
+
         setTimeout(() => document.getElementById('answerInput').focus(), 50);
     }
 
     function submitAnswer() {
         if (currentIndex >= words.length) return;
         const input = document.getElementById('answerInput').value.trim().toLowerCase();
-        const answer = words[currentIndex].eng.toLowerCase();
+        const item = words[currentIndex];
+        
+        let isCorrect = false;
 
-        if (input === answer) {
+        // 💡 모드별로 정답 기준 다르게 정하기
+        if (currentMode === 'eng-to-kor') {
+            // 한글 뜻 맞히기 모드일 때는 한글 뜻에 입력값이 포함되어 있는지 검사합니다.
+            const cleanKor = item.kor.replace(/\s+/g, '');
+            const cleanInput = input.replace(/\s+/g, '');
+            isCorrect = cleanKor.includes(cleanInput) && cleanInput !== "";
+        } else {
+            // 나머지 모드는 영어가 정답
+            isCorrect = (input === item.eng.toLowerCase());
+        }
+
+        if (isCorrect) {
             document.getElementById('feedbackText').style.color = "green";
             document.getElementById('feedbackText').textContent = "🎯 정답입니다!";
             currentIndex++;
