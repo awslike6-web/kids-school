@@ -26,6 +26,18 @@
         h1, h2 { margin: 0 0 10px; font-weight: 900; color: #2c3e50; }
         .helper { color: var(--muted); margin-bottom: 25px; font-size: 15px; }
         select { padding: 12px; border-radius: 14px; border: 2px solid var(--line); font-size: 16px; font-weight: 700; color: var(--text); outline: none; margin-bottom: 20px; width: 100%; max-width: 350px; text-align: center; }
+        
+        /* 🔥 버튼 10개를 예쁘게 담을 바둑판 레이아웃 추가! */
+        .level-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 480px) {
+            .level-grid { grid-template-columns: 1fr; } /* 화면이 아주 좁으면 한 줄로 */
+        }
+
         .word-display { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 1000; word-break: keep-all; }
         .pos-badge { display: inline-block; padding: 6px 14px; margin: 10px 0 20px; border-radius: 999px; background: rgba(255, 209, 102, 0.3); font-weight: 900; font-size: 14px; }
         .main-input { width: 100%; padding: 16px; border-radius: 20px; border: 3px solid var(--line); font-size: 24px; text-align: center; font-weight: 900; outline: none; background: white; }
@@ -43,7 +55,7 @@
     <div id="level-select-zone" class="study-card">
         <div class="mascot">🗺️</div>
         <h2>어디로 탐험을 떠날까요?</h2>
-        <p class="helper">오늘 도전할 단계와 연습 방식을 선택해 주세요!</p>
+        <p class="helper">오늘 도전할 단어장과 연습 방식을 선택해 주세요!</p>
         
         <select id="studyModeSelect">
             <option value="copy-eng">✍️ 영어 보고 따라 쓰기 (기초 연습)</option>
@@ -52,11 +64,19 @@
             <option value="sound-to-eng">🔊 소리만 듣고 영어 맞히기</option>
         </select>
 
-        <div class="button-row" style="flex-direction: column; max-width: 350px; margin: 0 auto; gap: 12px;">
-            <button class="btn" style="width: 100%;" onclick="startAdventure(1)">⭐ 1단계 탐험 (음식과 맛)</button>
-            <button class="btn secondary" style="width: 100%;" onclick="startAdventure(2)">⭐⭐ 2단계 탐험 (필수 복습)</button>
-            <button class="btn ghost" style="width: 100%;" onclick="location.href='index.html'">🏠 대문으로 돌아가기</button>
+        <div class="level-grid">
+            <button class="btn" onclick="startAdventure(1)">📕 1번 단어장 (음식)</button>
+            <button class="btn secondary" onclick="startAdventure(2)">📙 2번 단어장 (필수)</button>
+            <button class="btn good" onclick="startAdventure(3)">📒 3번 단어장</button>
+            <button class="btn" onclick="startAdventure(4)">📗 4번 단어장</button>
+            <button class="btn secondary" onclick="startAdventure(5)">📘 5번 단어장</button>
+            <button class="btn good" onclick="startAdventure(6)">📓 6번 단어장</button>
+            <button class="btn" onclick="startAdventure(7)">📔 7번 단어장 (학교 챕터)</button>
+            <button class="btn secondary" onclick="startAdventure(8)">📚 8번 단어장</button>
+            <button class="btn good" onclick="startAdventure(9)">📝 9번 단어장</button>
+            <button class="btn" onclick="startAdventure(10)">🎓 10번 단어장 (마스터)</button>
         </div>
+        <button class="btn ghost" style="width: 100%;" onclick="location.href='index.html'">🏠 대문으로 돌아가기</button>
     </div>
 
     <div id="game-zone" class="study-card" style="display: none;">
@@ -70,7 +90,7 @@
             <button class="btn good" onclick="submitAnswer()">정답 확인</button>
             <button class="btn secondary" onclick="speakCurrentWord()">소리 듣기</button>
             <button class="btn ghost" onclick="skipWord()">건너뛰기</button>
-            <button class="btn ghost" onclick="goBackToMenu()">🔙 단계 선택으로</button>
+            <button class="btn ghost" onclick="goBackToMenu()">🔙 단어장 선택으로</button>
             <button class="btn ghost" onclick="location.href='index.html'">🏠 홈으로 가기</button>
         </div>
     </div>
@@ -78,35 +98,23 @@
 
 <script>
     const sampleWords = [
+        // --- 1번 단어장 ---
         { eng: 'bread', kor: '빵', pos: '명사', level: 1 },
-        { eng: 'cheese pizza', kor: '치즈 피자', pos: '명사', level: 1 },
-        { eng: 'cream', kor: '(우유로 만든)크림, 크림색', pos: '명사', level: 1 },
-        { eng: 'curry', kor: '커리', pos: '명사', level: 1 },
         { eng: 'delicious', kor: '맛있는', pos: '형용사', level: 1 },
-        { eng: 'drink', kor: '마시다', pos: '동사', level: 1 },
-        { eng: 'fruit salad', kor: '과일 샐러드', pos: '명사', level: 1 },
-        { eng: "How's your ~?", kor: '[음식]은 어때요?', pos: '문장', level: 1 },
-        { eng: "I'd like ~.", kor: '[음식]을 주세요.', pos: '문장', level: 1 },
-        { eng: 'ice', kor: '얼음', pos: '명사', level: 1 },
         { eng: 'ice cream', kor: '아이스크림', pos: '명사', level: 1 },
-        { eng: "It's ~.", kor: '[맛]이에요.', pos: '문장', level: 1 },
-        { eng: 'lemonade', kor: '레모네이드', pos: '명사', level: 1 },
-        { eng: 'little', kor: '작은, 어린', pos: '형용사', level: 1 },
-        { eng: 'meat', kor: '고기', pos: '명사', level: 1 },
-        { eng: 'noodles', kor: '국수', pos: '명사', level: 1 },
-        { eng: 'order', kor: '주문하다, 명령하다', pos: '동사', level: 1 },
-        { eng: 'pancakes', kor: '팬케이크', pos: '명사', level: 1 },
-        { eng: 'salty', kor: '짠, 짭짤한', pos: '형용사', level: 1 },
-        { eng: 'sea', kor: '바다', pos: '명사', level: 1 },
-        { eng: 'sour', kor: '신, 시큼한', pos: '형용사', level: 1 },
-        { eng: 'spicy', kor: '매운, 매콤한', pos: '형용사', level: 1 },
-        { eng: 'sweet', kor: '단, 달콤한', pos: '형용사', level: 1 },
-        { eng: 'try', kor: '노력하다, 시도하다', pos: '동사', level: 1 },
-        { eng: 'vegetable pizza', kor: '야채 피자', pos: '명사', level: 1 },
-        { eng: 'wait', kor: '기다리다', pos: '동사', level: 1 },
-        { eng: 'What would you like?', kor: '뭐 드시겠어요?', pos: '문장', level: 1 },
-        { eng: 'would', kor: '-하다', pos: '동사', level: 1 },
-        { eng: 'apple', kor: '사과', pos: '명사', level: 2 }
+        
+        // --- 2번 단어장 ---
+        { eng: 'apple', kor: '사과', pos: '명사', level: 2 },
+        
+        // 🔥 나중에 채워 넣으실 수 있게 3~10번 단어장 임시 단어를 하나씩 넣어두었습니다!
+        { eng: 'school', kor: '학교', pos: '임시', level: 3 },
+        { eng: 'friend', kor: '친구', pos: '임시', level: 4 },
+        { eng: 'family', kor: '가족', pos: '임시', level: 5 },
+        { eng: 'water', kor: '물', pos: '임시', level: 6 },
+        { eng: 'study', kor: '공부하다', pos: '임시', level: 7 }, // 7번째 챕터 자리!
+        { eng: 'play', kor: '놀다', pos: '임시', level: 8 },
+        { eng: 'sleep', kor: '자다', pos: '임시', level: 9 },
+        { eng: 'dream', kor: '꿈', pos: '임시', level: 10 }
     ];
 
     let words = [];
@@ -128,13 +136,12 @@
             const currentLevel = parseInt(level) || 1;
             currentMode = mode;
             
-            // 상단 타이틀 안내 문구 변경
             let modeTitle = "따라 쓰기 탐험";
             if(currentMode === 'kor-to-eng') modeTitle = "뜻 보고 맞히기 탐험";
             if(currentMode === 'eng-to-kor') modeTitle = "한글 뜻 맞히기 탐험";
             if(currentMode === 'sound-to-eng') modeTitle = "소리 듣기 탐험";
 
-            document.getElementById('questionLabel').textContent = `${currentLevel}단계 [${modeTitle}] 시작!`;
+            document.getElementById('questionLabel').textContent = `${currentLevel}번 단어장 [${modeTitle}] 시작!`;
             
             words = sampleWords.filter(w => w.level === currentLevel);
             currentIndex = 0;
@@ -144,11 +151,12 @@
 
     function startAdventure(level) {
         const selectedMode = document.getElementById('studyModeSelect').value;
-        // 주소창에 레벨과 함께 선택한 모드(공부 방식)를 같이 전달합니다!
+        // 🔥 404 에러 나지 않게 새 이름(english-typing.html)으로 완벽하게 수정!
         location.href = `english-typing.html?level=${level}&mode=${selectedMode}`;
     }
 
     function goBackToMenu() {
+        // 🔥 뒤로가기 버튼도 완벽하게 수정!
         location.href = 'english-typing.html';
     }
 
@@ -168,19 +176,18 @@
         document.getElementById('answerInput').value = "";
         document.getElementById('feedbackText').textContent = "";
 
-        // 💡 선택된 모드에 맞춰 화면에 문제 출제!
         if (currentMode === 'copy-eng') {
-            document.getElementById('questionText').textContent = item.eng; // 영어 보여주기
+            document.getElementById('questionText').textContent = item.eng;
             document.getElementById('answerInput').placeholder = `뜻: ${item.kor} (그대로 따라 쓰세요)`;
         } else if (currentMode === 'kor-to-eng') {
-            document.getElementById('questionText').textContent = item.kor; // 뜻 보여주기
+            document.getElementById('questionText').textContent = item.kor;
             document.getElementById('answerInput').placeholder = "영단어·문장을 입력하세요";
         } else if (currentMode === 'eng-to-kor') {
-            document.getElementById('questionText').textContent = item.eng; // 영어 보여주기
+            document.getElementById('questionText').textContent = item.eng;
             document.getElementById('answerInput').placeholder = "한글 뜻을 입력하세요 (예: 빵)";
         } else if (currentMode === 'sound-to-eng') {
             document.getElementById('questionText').textContent = "🔊 소리를 잘 들어보세요";
-            document.getElementById('answerInput').placeholder = "들을 영어를 입력하세요";
+            document.getElementById('answerInput').placeholder = "들리는 영어를 입력하세요";
             setTimeout(speakCurrentWord, 300);
         }
 
@@ -194,14 +201,11 @@
         
         let isCorrect = false;
 
-        // 💡 모드별로 정답 기준 다르게 정하기
         if (currentMode === 'eng-to-kor') {
-            // 한글 뜻 맞히기 모드일 때는 한글 뜻에 입력값이 포함되어 있는지 검사합니다.
             const cleanKor = item.kor.replace(/\s+/g, '');
             const cleanInput = input.replace(/\s+/g, '');
             isCorrect = cleanKor.includes(cleanInput) && cleanInput !== "";
         } else {
-            // 나머지 모드는 영어가 정답
             isCorrect = (input === item.eng.toLowerCase());
         }
 
