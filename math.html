@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 수학방 🌟</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #6EC6F5;
+    --yellow: #FFD93D;
+    --pink: #FF6B9D;
+    --mint: #4ECDC4;
+    --purple: #A78BFA;
+    --orange: #FF9F43;
+    --green: #6BCB77;
+    --white: #FFFEF7;
+    --dark: #2D2D4E;
+    --card: rgba(255,255,255,0.92);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jua', sans-serif;
+    background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--dark);
+  }
+
+  /* ── 떠다니는 배경 파티클 ── */
+  .bg-floats {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .float-item {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.18;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    0%   { transform: translateY(110vh) rotate(0deg);   opacity: 0; }
+    10%  { opacity: 0.18; }
+    90%  { opacity: 0.18; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ── 공통 레이아웃 ── */
+  .screen {
+    position: relative; z-index: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+  }
+  .screen.active { display: flex; }
+
+  /* ── 헤더 타이틀 ── */
+  .main-title {
+    font-family: 'Gaegu', cursive;
+    font-size: clamp(2rem, 8vw, 3.6rem);
+    font-weight: 700;
+    color: var(--dark);
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 4px;
+    filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.08));
+  }
+  .main-title span { color: var(--pink); }
+  .subtitle {
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 24px;
+    font-family: 'Gaegu', cursive;
+  }
+
+  /* ── 카드 ── */
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 22px 24px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.10);
+    margin-bottom: 18px;
+    border: 2.5px solid rgba(255,255,255,0.8);
+  }
+  .card-title {
+    font-size: 1.05rem;
+    color: var(--pink);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── 구구단 체크박스 ── */
+  .times-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .times-cb { display: none; }
+  .times-label {
+    display: flex; align-items: center; justify-content: center;
+    height: 46px;
+    border-radius: 14px;
+    border: 2.5px solid #e0e0e0;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all .18s;
+    background: #fff;
+    user-select: none;
+    color: var(--dark);
+  }
+  .times-label:hover { border-color: var(--sky); transform: scale(1.05); }
+  .times-cb:checked + .times-label {
+    background: var(--sky);
+    border-color: var(--sky);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(110,198,245,0.45);
+    transform: scale(1.07);
+  }
+
+  /* ── 라디오 버튼 공통 ── */
+  .op-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .speed-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+  .op-radio { display: none; }
+  .op-label {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px 6px;
+    border-radius: 16px;
+    border: 2.5px solid #e0e0e0;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all .18s;
+    background: #fff;
+    user-select: none;
+    text-align: center;
+    line-height: 1.4;
+    color: var(--dark);
+  }
+  .op-label .op-icon { font-size: 1.6rem; margin-bottom: 4px; }
+  .op-label:hover { border-color: var(--mint); transform: scale(1.04); }
+  .op-radio:checked + .op-label {
+    background: var(--mint);
+    border-color: var(--mint);
+    color: #fff;
+    box-shadow: 0 3px 10px rgba(78,205,196,0.4);
+    transform: scale(1.06);
+  }
+
+  /* 속도 라디오 전용 색상 */
+  #speed-turtle:checked + .op-label { background: var(--green); border-color: var(--green); box-shadow: 0 3px 10px rgba(107,203,119,0.4); }
+  #speed-rabbit:checked + .op-label { background: var(--orange); border-color: var(--orange); box-shadow: 0 3px 10px rgba(255,159,67,0.4); }
+
+  /* ── 플레이 모드 ── */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mode-btn {
+    padding: 16px 10px;
+    border-radius: 18px;
+    border: none;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all .18s;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: #fff;
+  }
+  .mode-btn .mode-icon { font-size: 2.2rem; }
+  .mode-btn.falling  { background: linear-gradient(135deg, var(--orange), var(--pink)); }
+  .mode-btn.typing   { background: linear-gradient(135deg, var(--purple), var(--sky)); }
+  .mode-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
+  .mode-btn:active { transform: scale(0.97); }
+
+  /* ── 큰 버튼 ── */
+  .big-btn {
+    width: 100%;
+    max-width: 480px;
+    padding: 16px;
+    border-radius: 18px;
+    border: none;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.15rem;
+    cursor: pointer;
+    color: #fff;
+    transition: all .18s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .big-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .big-btn.yellow-btn { background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); }
+  .big-btn.back-btn   { background: #eee; color: #888; margin-top: 8px; }
+
+  /* ════════════════════════════════
+     모드 A: 떨어지는 객관식
+  ════════════════════════════════ */
+  #screen-falling {
+    background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #1a1a3e 100%);
+    color: #fff;
+  }
+  .falling-header {
+    width: 100%; max-width: 520px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4px;
+    margin-bottom: 10px;
+  }
+  .game-stat {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-size: 0.95rem;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .falling-question-box {
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 22px;
+    padding: 16px 28px;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    min-width: 240px;
+  }
+  .falling-arena {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    height: 58vh;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.25);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .fall-ball {
+    position: absolute;
+    width: 62px; height: 62px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    user-select: none;
+    animation: falling linear forwards;
+    color: #fff;
+  }
+  .fall-ball:active { transform: scale(0.88); }
+  @keyframes falling {
+    from { transform: translateY(-70px); }
+    to   { transform: translateY(calc(58vh + 10px)); }
+  }
+  .hit-effect {
+    position: absolute;
+    pointer-events: none;
+    font-size: 2rem;
+    animation: hitPop .6s forwards;
+    z-index: 10;
+  }
+  @keyframes hitPop {
+    0%   { transform: scale(0.5); opacity: 1; }
+    60%  { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(1.8) translateY(-30px); opacity: 0; }
+  }
+  .timer-bar-wrap {
+    width: 100%; max-width: 520px;
+    height: 10px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--yellow));
+    border-radius: 10px;
+    transition: width .3s linear, background .3s;
+  }
+
+ /* ════════════════════════════════
+     모드 B: 차분한 주관식
+  ════════════════════════════════ */
+  #screen-typing {
+    background: linear-gradient(160deg, #fff9f0 0%, #f0f8ff 100%);
+  }
+  .typing-header {
+    width: 100%; max-width: 460px;
+    display: flex; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .typing-stat {
+    background: #fff;
+    border-radius: 14px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    display: flex; align-items: center; gap: 5px;
+    color: var(--dark);
+  }
+  .typing-question-card {
+    background: #fff;
+    border-radius: 28px;
+    padding: 36px 40px;
+    width: 100%; max-width: 460px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+    margin-bottom: 20px;
+    border: 3px solid var(--yellow);
+    position: relative;
+    overflow: hidden;
+  }
+  .typing-question-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(255,217,61,0.12), transparent 60%);
+  }
+  .q-num { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; }
+  .q-text {
+    font-size: clamp(2rem, 8vw, 3.2rem);
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--dark);
+    margin-bottom: 8px;
+    position: relative; z-index: 1;
+  }
+  .q-hint { font-size: 0.8rem; color: #bbb; }
+
+  .answer-input-wrap {
+    display: flex; gap: 10px;
+    width: 100%; max-width: 460px;
+    margin-bottom: 12px;
+  }
+  .answer-input {
+    flex: 1;
+    padding: 16px 20px;
+    border-radius: 18px;
+    border: 3px solid #e0e0e0;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.6rem;
+    text-align: center;
+    outline: none;
+    transition: border-color .15s;
+    background: #fff;
+    color: var(--dark);
+  }
+  .answer-input:focus { border-color: var(--purple); }
+  .answer-input.correct { border-color: var(--green); background: #f0fff4; animation: shake-correct .3s; }
+  .answer-input.wrong   { border-color: var(--pink);  background: #fff5f5; animation: shake-wrong .35s; }
+  @keyframes shake-correct {
+    0%,100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+  }
+  @keyframes shake-wrong {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-8px); }
+    40%,80% { transform: translateX(8px); }
+  }
+  .submit-btn {
+    padding: 16px 24px;
+    border-radius: 18px;
+    border: none;
+    background: linear-gradient(135deg, var(--purple), var(--sky));
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .submit-btn:hover { transform: scale(1.06); }
+  .submit-btn:active { transform: scale(0.95); }
+
+  .feedback-msg {
+    font-size: 1.2rem;
+    height: 1.6rem;
+    text-align: center;
+    transition: all .2s;
+  }
+  .feedback-msg.good  { color: var(--green); }
+  .feedback-msg.bad   { color: var(--pink); }
+
+  .progress-wrap {
+    width: 100%; max-width: 460px;
+    margin-top: 14px;
+  }
+  .progress-info {
+    display: flex; justify-content: space-between;
+    font-size: 0.82rem; color: #aaa;
+    margin-bottom: 4px;
+  }
+  .progress-bar-bg {
+    height: 12px; border-radius: 10px;
+    background: #eee; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 10px;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    transition: width .4s ease;
+  }
+
+  /* ════════════════════════════════
+     결과 화면
+  ════════════════════════════════ */
+  #screen-result { justify-content: center; }
+  .result-card {
+    background: var(--card);
+    border-radius: 30px;
+    padding: 40px 32px;
+    width: 100%; max-width: 460px;
+    text-align: center;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.12);
+  }
+  .result-emoji { font-size: 4rem; margin-bottom: 10px; animation: bounce 1s infinite alternate; }
+  @keyframes bounce { to { transform: translateY(-12px); } }
+  .result-title { font-size: 1.8rem; margin-bottom: 6px; color: var(--dark); }
+  .result-score { font-size: 3.5rem; color: var(--pink); margin-bottom: 8px; }
+  .result-detail { font-size: 0.95rem; color: #999; margin-bottom: 28px; font-family: 'Gaegu', cursive; }
+  .result-stars { font-size: 2.2rem; margin-bottom: 20px; letter-spacing: 4px; }
+  .result-btns { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── 유틸 ── */
+  .select-all-row {
+    display: flex; gap: 8px; margin-bottom: 10px;
+  }
+  .tiny-btn {
+    padding: 5px 14px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    background: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all .15s;
+    color: var(--dark);
+  }
+  .tiny-btn:hover { border-color: var(--sky); color: var(--sky); }
+
+  .no-select-warning {
+    color: var(--pink);
+    font-size: 0.88rem;
+    text-align: center;
+    height: 1.2rem;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 배경 파티클 -->
+<div class="bg-floats" id="bgFloats"></div>
+
+<!-- ══════════════ 설정 화면 ══════════════ -->
+<div class="screen active" id="screen-setup">
+  <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
+  <p class="subtitle">구구단이 재미있어지는 공간 ✨</p>
+
+  <!-- 구구단 선택 -->
+  <div class="card">
+    <div class="card-title">📚 구구단 선택</div>
+    <div class="select-all-row">
+      <button class="tiny-btn" onclick="selectAll(true)">전체 선택</button>
+      <button class="tiny-btn" onclick="selectAll(false)">전체 해제</button>
+    </div>
+    <div class="times-grid" id="timesGrid">
+      <!-- 2~9단 체크박스 동적 생성 -->
+    </div>
+  </div>
+
+  <!-- 연산 모드 -->
+  <div class="card">
+    <div class="card-title">🔢 연산 모드</div>
+    <div class="op-grid">
+      <input type="radio" name="opMode" id="op-mul" class="op-radio" value="mul" checked>
+      <label for="op-mul" class="op-label">
+        <span class="op-icon">✖️</span>곱셈만
+      </label>
+      <input type="radio" name="opMode" id="op-div" class="op-radio" value="div">
+      <label for="op-div" class="op-label">
+        <span class="op-icon">➗</span>나눗셈만
+      </label>
+      <input type="radio" name="opMode" id="op-mix" class="op-radio" value="mix">
+      <label for="op-mix" class="op-label">
+        <span class="op-icon">🔀</span>곱셈+나눗셈
+      </label>
+    </div>
+  </div>
+
+  <!-- 게임 속도 (거북이/토끼) -->
+  <div class="card">
+    <div class="card-title">⏱️ 떨어지는 속도 (모드 A 전용)</div>
+    <div class="speed-grid">
+      <input type="radio" name="speedMode" id="speed-turtle" class="op-radio" value="turtle" checked>
+      <label for="speed-turtle" class="op-label">
+        <span class="op-icon">🐢</span>거북이 (느리게)
+      </label>
+      <input type="radio" name="speedMode" id="speed-rabbit" class="op-radio" value="rabbit">
+      <label for="speed-rabbit" class="op-label">
+        <span class="op-icon">🐇</span>토끼 (빠르게)
+      </label>
+    </div>
+  </div>
+
+  <!-- 플레이 모드 -->
+  <div class="card">
+    <div class="card-title">🎮 플레이 모드 선택</div>
+    <p class="no-select-warning" id="warnMsg"></p>
+    <div class="mode-grid">
+      <button class="mode-btn falling" onclick="startGame('falling')">
+        <span class="mode-icon">☄️</span>
+        <span>모드 A<br><small>떨어지는 객관식</small></span>
+      </button>
+      <button class="mode-btn typing" onclick="startGame('typing')">
+        <span class="mode-icon">⌨️</span>
+        <span>모드 B<br><small>차분한 주관식</small></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ 모드 A: 떨어지는 객관식 ══════════════ -->
+<div class="screen" id="screen-falling">
+  <div class="falling-header">
+    <div class="game-stat">⭐ <span id="f-score">0</span></div>
+    <div class="game-stat">📝 <span id="f-qnum">1</span>/10</div>
+    <div class="game-stat">❤️ <span id="f-lives">3</span></div>
+  </div>
+  <div class="falling-question-box" id="f-question">? × ? = ?</div>
+  <div class="falling-arena" id="fallingArena"></div>
+  <div class="timer-bar-wrap">
+    <div class="timer-bar" id="timerBar" style="width:100%"></div>
+  </div>
+  <button class="big-btn back-btn" style="max-width:520px;margin-top:12px" onclick="goSetup()">← 설정으로</button>
+</div>
+
+<!-- ══════════════ 모드 B: 차분한 주관식 ══════════════ -->
+<div class="screen" id="screen-typing">
+  <div class="typing-header">
+    <div class="typing-stat">⭐ <span id="t-score">0</span>점</div>
+    <div class="typing-stat">📝 <span id="t-qnum">1</span>/10</div>
+    <div class="typing-stat">✅ <span id="t-correct">0</span> ❌ <span id="t-wrong">0</span></div>
+  </div>
+  <div class="typing-question-card">
+    <div class="q-num" id="t-qnum-text">1번 문제</div>
+    <div class="q-text" id="t-question">8 × 7 = ?</div>
+    <div class="q-hint">숫자를 입력하고 Enter 또는 확인을 눌러요!</div>
+  </div>
+  <div class="answer-input-wrap">
+    <input type="number" class="answer-input" id="answerInput" placeholder="?" min="0" max="999" autocomplete="off">
+    <button class="submit-btn" onclick="submitTyping()">확인 ✔</button>
+  </div>
+  <div class="feedback-msg" id="feedbackMsg"></div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>진행도</span><span id="t-progress-text">0/10</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="t-progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+  <button class="big-btn back-btn" style="max-width:460px;margin-top:20px" onclick="goSetup()">← 설정으로</button>
+</div>
+
+<!-- ══════════════ 결과 화면 ══════════════ -->
+<div class="screen" id="screen-result">
+  <div class="result-card">
+    <div class="result-emoji" id="r-emoji">🎉</div>
+    <div class="result-title" id="r-title">정말 잘했어요!</div>
+    <div class="result-stars" id="r-stars">⭐⭐⭐</div>
+    <div class="result-score" id="r-score">10점</div>
+    <div class="result-detail" id="r-detail">10문제 중 10개 정답!</div>
+    <div class="result-btns">
+      <button class="big-btn yellow-btn" onclick="retryGame()">🔄 다시 도전!</button>
+      <button class="big-btn back-btn" onclick="goSetup()">🏠 처음으로</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  배경 파티클 생성
+// ═══════════════════════════════════════════════
+(function(){
+  const emojis = ['➕','✖️','➗','🌟','⭐','💫','🔢','🎈','🌈','🍭','🎀','🦋'];
+  const wrap = document.getElementById('bgFloats');
+  for(let i=0;i<18;i++){
+    const el = document.createElement('div');
+    el.className = 'float-item';
+    el.textContent = emojis[i % emojis.length];
+    el.style.left = (Math.random()*96) + '%';
+    el.style.animationDuration = (12 + Math.random()*18) + 's';
+    el.style.animationDelay = (-Math.random()*20) + 's';
+    el.style.fontSize = (1.4 + Math.random()*1.4) + 'rem';
+    wrap.appendChild(el);
+  }
+})();
+
+// ═══════════════════════════════════════════════
+//  구구단 체크박스 생성
+// ═══════════════════════════════════════════════
+(function(){
+  const grid = document.getElementById('timesGrid');
+  const colors = ['#6EC6F5','#FF9F43','#FF6B9D','#A78BFA','#4ECDC4','#6BCB77','#FFD93D','#FF6B6B'];
+  for(let d=2;d<=9;d++){
+    const inp = document.createElement('input');
+    inp.type = 'checkbox'; inp.id = 'cb'+d; inp.className = 'times-cb'; inp.value = d;
+    if(d===2||d===5) inp.checked = true;
+    const lbl = document.createElement('label');
+    lbl.htmlFor = 'cb'+d; lbl.className = 'times-label';
+    lbl.textContent = d + '단';
+    lbl.dataset.color = colors[d-2];
+    inp.addEventListener('change', ()=>{
+      if(inp.checked) lbl.style.background = colors[d-2];
+      else lbl.style.background = '';
+    });
+    if(inp.checked) lbl.style.background = colors[d-2];
+    grid.appendChild(inp);
+    grid.appendChild(lbl);
+  }
+})();
+
+function selectAll(flag){
+  document.querySelectorAll('.times-cb').forEach((cb,i)=>{
+    cb.checked = flag;
+    const lbl = cb.nextElementSibling;
+    const colors = ['#6EC6F5','#FF9F43','#FF6B9D','#A78BFA','#4ECDC4','#6BCB77','#FFD93D','#FF6B6B'];
+    lbl.style.background = flag ? colors[i] : '';
+  });
+}
+
+// ═══════════════════════════════════════════════
+//  게임 상태
+// ═══════════════════════════════════════════════
+let gameState = {};
+
+function getSelectedDans(){
+  return [...document.querySelectorAll('.times-cb:checked')].map(cb=>+cb.value);
+}
+function getOpMode(){
+  return document.querySelector('input[name="opMode"]:checked').value;
+}
+function getSpeedMode(){
+  return document.querySelector('input[name="speedMode"]:checked').value;
+}
+
+// ═══════════════════════════════════════════════
+//  문제 생성 (나눗셈 역연산 규칙 포함)
+// ═══════════════════════════════════════════════
+function generateQuestion(dans, opMode){
+  const dan = dans[Math.floor(Math.random()*dans.length)];
+  const n   = 1 + Math.floor(Math.random()*9);  // 1~9
+  let op;
+  if(opMode==='mul') op='mul';
+  else if(opMode==='div') op='div';
+  else op = Math.random()<0.5 ? 'mul' : 'div';
+
+  if(op==='mul'){
+    return { text: `${dan} × ${n}`, answer: dan*n, dan, n, type:'mul' };
+  } else {
+    // 역연산: dan*n ÷ dan = n
+    const dividend = dan * n;
+    return { text: `${dividend} ÷ ${dan}`, answer: n, dan, n: dividend, type:'div' };
+  }
+}
+
+// 오답 보기 생성 (정답 포함 5개)
+function makeChoices(correct){
+  const choices = new Set([correct]);
+  const range = Math.max(8, Math.floor(correct * 0.6));
+  let attempts = 0;
+  while(choices.size < 5 && attempts < 200){
+    attempts++;
+    const v = Math.max(1, correct + Math.floor((Math.random()-0.5)*range*2));
+    if(v !== correct) choices.add(v);
+  }
+  return shuffle([...choices]);
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+// ═══════════════════════════════════════════════
+//  화면 전환
+// ═══════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goSetup(){
+  clearFallingGame();
+  showScreen('screen-setup');
+}
+
+// ═══════════════════════════════════════════════
+//  게임 시작
+// ═══════════════════════════════════════════════
+function startGame(mode){
+  const dans = getSelectedDans();
+  if(dans.length === 0){
+    document.getElementById('warnMsg').textContent = '⚠️ 구구단을 하나 이상 선택해 주세요!';
+    return;
+  }
+  document.getElementById('warnMsg').textContent = '';
+  const opMode = getOpMode();
+  const speedMode = getSpeedMode();
+  
+  const questions = [];
+  for(let i=0;i<10;i++) questions.push(generateQuestion(dans, opMode));
+
+  gameState = {
+    mode, questions, current: 0,
+    score: 0, correctCount: 0, wrongCount: 0,
+    dans, opMode, speedMode
+  };
+
+  if(mode==='falling') initFalling();
+  else initTyping();
+}
+
+function retryGame(){
+  startGame(gameState.mode);
+}
+
+// ═══════════════════════════════════════════════
+//  모드 A: 떨어지는 객관식
+// ═══════════════════════════════════════════════
+let fallingTimers = [];
+let timerInterval = null;
+let timeLeft = 0;
+let fallingBalls = [];
+const BALL_COLORS = ['#FF6B9D','#6EC6F5','#FFD93D','#4ECDC4','#A78BFA','#FF9F43','#6BCB77','#FF6B6B'];
+
+function initFalling(){
+  gameState.lives = 3;
+  showScreen('screen-falling');
+  nextFallingQ();
+}
+
+function nextFallingQ(){
+  if(gameState.current >= gameState.questions.length){
+    showResult(); return;
+  }
+  updateFallingUI();
+  const q = gameState.questions[gameState.current];
+  document.getElementById('f-question').textContent = q.text + '  =  ?';
+  launchBalls(q);
+  startTimer();
+}
+
+function updateFallingUI(){
+  document.getElementById('f-score').textContent = gameState.score;
+  document.getElementById('f-qnum').textContent  = gameState.current+1;
+  document.getElementById('f-lives').textContent = gameState.lives;
+}
+
+function launchBalls(q){
+  clearFallingBalls();
+  const arena = document.getElementById('fallingArena');
+  const choices = makeChoices(q.answer);
+  fallingBalls = [];
+
+  choices.forEach((val, i) => {
+    const ball = document.createElement('div');
+    ball.className = 'fall-ball';
+    ball.textContent = val;
+    const color = BALL_COLORS[i % BALL_COLORS.length];
+    ball.style.background = `radial-gradient(circle at 35% 35%, ${lighten(color)}, ${color})`;
+
+    const arenaW = arena.clientWidth || 360;
+    const xMin = 10, xMax = arenaW - 72;
+    ball.style.left = (xMin + Math.random()*(xMax-xMin)) + 'px';
+
+    const delay  = 200 + i * 600;
+    
+       // 🔥 선택한 모드(거북이/토끼)에 따라 공 떨어지는 속도 조절!
+    let speed;
+    if (gameState.speedMode === 'turtle') {
+      speed = 8000 + Math.random() * 3000; // 거북이: 8~11초
+    } else {
+      speed = 5000 + Math.random() * 2000; // 토끼: 5~7초
+    }
+    
+    ball.style.animation = `falling ${speed}ms linear ${delay}ms forwards`;
+
+    ball.addEventListener('click', ()=> onBallClick(val, q.answer, ball));
+    arena.appendChild(ball);
+    fallingBalls.push(ball);
+
+    const t = setTimeout(()=>{
+      if(ball.parentNode) ball.remove();
+    }, delay + speed + 100);
+    fallingTimers.push(t);
+  });
+}
+
+function lighten(hex){
+  const r = parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgb(${Math.min(r+50,255)},${Math.min(g+50,255)},${Math.min(b+50,255)})`;
+}
+
+function onBallClick(val, answer, ball){
+  if(!ball.parentNode) return;
+  const arena = document.getElementById('fallingArena');
+  const rect  = ball.getBoundingClientRect();
+  const arect = arena.getBoundingClientRect();
+  const cx = rect.left - arect.left + rect.width/2;
+  const cy = rect.top  - arect.top  + rect.height/2;
+
+  if(val === answer){
+    showHitEffect(arena, cx, cy, '⭐');
+    gameState.score += 10;
+    gameState.correctCount++;
+    advanceFalling();
+  } else {
+    showHitEffect(arena, cx, cy, '💥');
+    ball.style.opacity = '0.3';
+    ball.style.pointerEvents = 'none';
+    gameState.lives--;
+    gameState.wrongCount++;
+    updateFallingUI();
+    if(gameState.lives <= 0){
+      clearFallingGame();
+      gameState.current = gameState.questions.length; // 강제 종료
+      showResult();
+    }
+  }
+}
+
+function showHitEffect(parent, x, y, emoji){
+  const el = document.createElement('div');
+  el.className = 'hit-effect';
+  el.textContent = emoji;
+  el.style.left = (x-20)+'px';
+  el.style.top  = (y-20)+'px';
+  parent.appendChild(el);
+  setTimeout(()=> el.remove(), 700);
+}
+
+function advanceFalling(){
+  clearFallingGame();
+  gameState.current++;
+  setTimeout(nextFallingQ, 300);
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  
+  // 🔥 선택한 모드(거북이/토끼)에 따라 게임 타이머 제한 시간 조절!
+  const currentFallTime = gameState.speedMode === 'turtle' ? 12000 : 8000;
+  timeLeft = currentFallTime;
+  
+  const bar = document.getElementById('timerBar');
+  bar.style.width = '100%';
+  bar.style.background = 'linear-gradient(90deg,#6BCB77,#FFD93D)';
+
+  timerInterval = setInterval(()=>{
+    timeLeft -= 100;
+    const pct = Math.max(0, Math.floor((timeLeft/currentFallTime)*100));
+    bar.style.width = pct+'%';
+    if(pct < 30) bar.style.background = 'linear-gradient(90deg,#FF6B9D,#FF9F43)';
+    else if(pct < 60) bar.style.background = 'linear-gradient(90deg,#FFD93D,#FF9F43)';
+
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      gameState.lives--;
+      gameState.wrongCount++;
+      updateFallingUI();
+      if(gameState.lives <= 0){
+        clearFallingGame();
+        gameState.current = gameState.questions.length;
+        showResult();
+      } else {
+        clearFallingBalls();
+        gameState.current++;
+        setTimeout(nextFallingQ, 300);
+      }
+    }
+  }, 100);
+}
+
+function clearFallingBalls(){
+  fallingBalls.forEach(b => { if(b.parentNode) b.remove(); });
+  fallingBalls = [];
+}
+
+function clearFallingGame(){
+  clearInterval(timerInterval);
+  fallingTimers.forEach(clearTimeout);
+  fallingTimers = [];
+  clearFallingBalls();
+}
+
+// ═══════════════════════════════════════════════
+//  모드 B: 차분한 주관식
+// ═══════════════════════════════════════════════
+function initTyping(){
+  gameState.current = 0;
+  showScreen('screen-typing');
+  nextTypingQ();
+  document.getElementById('answerInput').focus();
+}
+
+function nextTypingQ(){
+  if(gameState.current >= gameState.questions.length){
+    showResult(); return;
+  }
+  const q = gameState.questions[gameState.current];
+  document.getElementById('t-qnum').textContent = gameState.current+1;
+  document.getElementById('t-qnum-text').textContent = (gameState.current+1)+'번 문제';
+  document.getElementById('t-question').textContent = q.text + '  =  ?';
+  document.getElementById('t-score').textContent    = gameState.score;
+  document.getElementById('t-correct').textContent  = gameState.correctCount;
+  document.getElementById('t-wrong').textContent    = gameState.wrongCount;
+  const pct = (gameState.current / gameState.questions.length * 100).toFixed(0);
+  document.getElementById('t-progress-bar').style.width = pct+'%';
+  document.getElementById('t-progress-text').textContent = gameState.current+'/'+gameState.questions.length;
+
+  const inp = document.getElementById('answerInput');
+  inp.value = '';
+  inp.className = 'answer-input';
+  document.getElementById('feedbackMsg').textContent = '';
+  inp.focus();
+}
+
+function submitTyping(){
+  const inp = document.getElementById('answerInput');
+  const val = inp.value.trim();
+  if(val === '') return;
+  const userAns = parseInt(val, 10);
+  const q = gameState.questions[gameState.current];
+  const fb = document.getElementById('feedbackMsg');
+
+  if(userAns === q.answer){
+    inp.className = 'answer-input correct';
+    fb.className  = 'feedback-msg good';
+    fb.textContent = ['정답이에요! 🎉','완벽해요! ⭐','맞았어요! 🌟','훌륭해요! 🏆'][Math.floor(Math.random()*4)];
+    gameState.score += 10;
+    gameState.correctCount++;
+    gameState.current++;
+    setTimeout(nextTypingQ, 700);
+  } else {
+    inp.className = 'answer-input wrong';
+    fb.className  = 'feedback-msg bad';
+    fb.textContent = `틀렸어요 😢  정답은 ${q.answer} 이에요!`;
+    gameState.wrongCount++;
+    gameState.current++;
+    setTimeout(nextTypingQ, 1200);
+  }
+}
+
+document.addEventListener('keydown', e=>{
+  const screen = document.getElementById('screen-typing');
+  if(screen.classList.contains('active') && e.key==='Enter'){
+    submitTyping();
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  결과 화면
+// ═══════════════════════════════════════════════
+function showResult(){
+  clearFallingGame();
+  const total = gameState.questions.length;
+  const correct = gameState.correctCount;
+  const score   = gameState.score;
+  const pct     = correct / total;
+
+  let emoji, title, stars;
+  if(pct >= 0.9)      { emoji='🏆'; title='완벽해요! 천재인가요?'; stars='⭐⭐⭐'; }
+  else if(pct >= 0.7) { emoji='🎉'; title='정말 잘했어요!';        stars='⭐⭐'; }
+  else if(pct >= 0.5) { emoji='😊'; title='좋아요! 조금 더 연습해요!'; stars='⭐'; }
+  else                { emoji='💪'; title='다시 도전해봐요!';       stars='🔥'; }
+
+  document.getElementById('r-emoji').textContent  = emoji;
+  document.getElementById('r-title').textContent  = title;
+  document.getElementById('r-stars').textContent  = stars;
+  document.getElementById('r-score').textContent  = score + '점';
+  document.getElementById('r-detail').textContent = `${total}문제 중 ${correct}개 정답! (오답 ${gameState.wrongCount}개)`;
+  showScreen('screen-result');
+}
+</script>
+</body>
+</html>
