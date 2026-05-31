@@ -781,7 +781,8 @@
             eng: String(item.eng || item.english || '').trim(),
             kor: String(item.kor || item.korean || item.meaning || '').trim(),
             pos: String(item.pos || item.partOfSpeech || item.type || '').trim(),
-            note: String(item.note || item.memo || '').trim()
+            note: String(item.note || item.memo || '').trim(),
+            level: parseInt(item.level) || 1
         };
     }
 
@@ -1382,6 +1383,7 @@
 }
     function initLevelSystem() {
     loadAll();
+    restartPractice(true);
 }
 setTimeout(initLevelSystem, 100);
     
