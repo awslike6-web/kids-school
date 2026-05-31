@@ -1380,7 +1380,9 @@
     wrongNotes = safeJSON(localStorage.getItem(STORAGE_WRONG), []);
     stats = safeJSON(localStorage.getItem(STORAGE_STATS), { totalCorrect: 0, bestCombo: 0 });
 }
-
+    window.addEventListener('load', () => {
+    loadAll();
+});
     function loadSampleWords() {
         if (!confirm('현재 단어장에 예시 단어를 추가할까요?')) return;
         words = mergeWords(words, sampleWords);
