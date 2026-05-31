@@ -561,6 +561,15 @@
     <main>
         <section id="practice-panel" class="panel active">
             <div class="practice-layout">
+                <div id="level-select-zone" class="study-card" style="display: none; grid-column: 1 / -1; min-height: auto; padding: 40px 20px;">
+    <div class="mascot">🗺️</div>
+    <h2 style="margin: 0 0 10px; font-weight: 900;">어디로 탐험을 떠날까요?</h2>
+    <p class="helper" style="margin-bottom: 25px;">오늘 도전할 단계를 선택해 주세요!</p>
+    <div class="button-row" style="flex-direction: column; max-width: 400px; margin: 0 auto; gap: 12px;">
+        <button class="btn" style="width: 100%; padding: 18px;" onclick="location.href='english_typing_app1.html?level=1'">⭐ 1단계 (음식과 맛)</button>
+        <button class="btn secondary" style="width: 100%; padding: 18px;" onclick="location.href='english_typing_app1.html?level=2'">⭐⭐ 2단계 (필수 복습)</button>
+        </div>
+                </div>
                 <aside class="stats-grid">
                     <div class="stat-card"><div class="stat-label">진행</div><div class="stat-value"><span id="currentIndex">0</span>/<span id="totalCount">0</span></div></div>
                     <div class="stat-card"><div class="stat-label">연속 정답 콤보</div><div class="stat-value"><span id="comboCount">0</span>x</div></div>
@@ -1348,6 +1357,29 @@
             return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
         }).join(',');
     }
+    function loadAll() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasLevel = urlParams.has('level');
+    const currentLevel = parseInt(urlParams.get('level')) || 1;
+    
+    if (!hasLevel) {
+        document.querySelector('.practice-layout').style.display = 'none';
+        document.getElementById('level-select-zone').style.display = 'block';
+        return;
+    }
+    
+    let allWords = safeJSON(localStorage.getItem(STORAGE_WORDS), sampleWords).map(normalizeWord).filter(isUsableWord);
+    if (allWords.length === 0) allWords = [...sampleWords];
+    
+    words = allWords.filter(w => (w.level || 1) === currentLevel);
+    
+    setTimeout(() => {
+        document.getElementById('questionLabel').textContent = currentLevel + "단계 탐험을 시작합니다!";
+    }, 100);
+    
+    wrongNotes = safeJSON(localStorage.getItem(STORAGE_WRONG), []);
+    stats = safeJSON(localStorage.getItem(STORAGE_STATS), { totalCorrect: 0, bestCombo: 0 });
+}
 
     function loadSampleWords() {
         if (!confirm('현재 단어장에 예시 단어를 추가할까요?')) return;
