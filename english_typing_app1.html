@@ -661,38 +661,38 @@
 
     const sampleWords = [
         // 1단계 단어들
-        { eng: 'bread', kor: '빵', pos: '명사', note: '' },
-        { eng: 'cheese pizza', kor: '치즈 피자', pos: '명사', note: '' },
-        { eng: 'cream', kor: '(우유로 만든)크림, 크림색', pos: '명사', note: '' },
-        { eng: 'curry', kor: '커리', pos: '명사', note: '' },
-        { eng: 'delicious', kor: '맛있는', pos: '형용사', note: '' },
-        { eng: 'drink', kor: '마시다', pos: '동사', note: '' },
-        { eng: 'fruit salad', kor: '과일 샐러드', pos: '명사', note: '' },
-        { eng: 'How's your ~?', kor: '[음식]은 어때요?', pos: '문장', note: '' },
-        { eng: 'I'd like ~.', kor: '[음식]을 주세요.', pos: '문장', note: '' },
-        { eng: 'ice', kor: '얼음', pos: '명사', note: '' },
-        { eng: 'ice cream', kor: '아이스크림', pos: '명사', note: '' },
-        { eng: 'It's ~.', kor: '', pos: '[맛]이에요.', note: '문장' },
-        { eng: 'lemonade', kor: '레모네이드', pos: '명사', note: '' },
-        { eng: 'little', kor: '작은, 어린', pos: '형용사', note: '' },
-        { eng: 'meat', kor: '고기', pos: '명사', note: '' }
-        { eng: 'noodles', kor: '국수', pos: '', note: '' }
-        { eng: 'order', kor: '주문하다, 명령하다', pos: '동사', note: '' }
-        { eng: 'pancakes', kor: '팬케이크', pos: '명사', note: '' }
-        { eng: 'salty', kor: '짠, 짭짤한', pos: '형용사', note: '' }
-        { eng: 'sea', kor: '바다', pos: '명사', note: '' }
-        { eng: 'sour', kor: '신, 시큼한', pos: '형용사', note: '' }
-        { eng: 'spicy', kor: '매운, 매콤한', pos: '형용사', note: '' }
-        { eng: 'sweet', kor: '단, 달콤한', pos: '형용사', note: '' }
-        { eng: 'try', kor: '노력하다, 시도하다', pos: '동사', note: '' }
-        { eng: 'vegetable pizza', kor: '야채 피자', pos: '명사', note: '' }
-        { eng: 'wait', kor: '기다리다', pos: '동사', note: '' }
-        { eng: 'What would you like?', kor: '뭐 드시겠어요?', pos: '문장', note: '' }
-        { eng: 'would', kor: '-하다', pos: '동사', note: '공손한 느낌을 주는 말' }
-
+        { eng: 'bread', kor: '빵', pos: '명사', note: '', level: 1 },
+        { eng: 'cheese pizza', kor: '치즈 피자', pos: '명사', note: '', level: 1 },
+        { eng: 'cream', kor: '(우유로 만든)크림, 크림색', pos: '명사', note: '', level: 1 },
+        { eng: 'curry', kor: '커리', pos: '명사', note: '', level: 1 },
+        { eng: 'delicious', kor: '맛있는', pos: '형용사', note: '', level: 1 },
+        { eng: 'drink', kor: '마시다', pos: '동사', note: '', level: 1 },
+        { eng: 'fruit salad', kor: '과일 샐러드', pos: '명사', note: '', level: 1 },
+        { eng: "How's your ~?", kor: '[음식]은 어때요?', pos: '문장', note: '', level: 1 },
+        { eng: "I'd like ~.", kor: '[음식]을 주세요.', pos: '문장', note: '', level: 1 },
+        { eng: 'ice', kor: '얼음', pos: '명사', note: '', level: 1 },
+        { eng: 'ice cream', kor: '아이스크림', pos: '명사', note: '', level: 1 },
+        { eng: "It's ~.", kor: '[맛]이에요.', pos: '문장', note: '', level: 1 },
+        { eng: 'lemonade', kor: '레모네이드', pos: '명사', note: '', level: 1 },
+        { eng: 'little', kor: '작은, 어린', pos: '형용사', note: '', level: 1 },
+        { eng: 'meat', kor: '고기', pos: '명사', note: '', level: 1 },
+        { eng: 'noodles', kor: '국수', pos: '명사', note: '', level: 1 },
+        { eng: 'order', kor: '주문하다, 명령하다', pos: '동사', note: '', level: 1 },
+        { eng: 'pancakes', kor: '팬케이크', pos: '명사', note: '', level: 1 },
+        { eng: 'salty', kor: '짠, 짭짤한', pos: '형용사', note: '', level: 1 },
+        { eng: 'sea', kor: '바다', pos: '명사', note: '', level: 1 },
+        { eng: 'sour', kor: '신, 시큼한', pos: '형용사', note: '', level: 1 },
+        { eng: 'spicy', kor: '매운, 매콤한', pos: '형용사', note: '', level: 1 },
+        { eng: 'sweet', kor: '단, 달콤한', pos: '형용사', note: '', level: 1 },
+        { eng: 'try', kor: '노력하다, 시도하다', pos: '동사', note: '', level: 1 },
+        { eng: 'vegetable pizza', kor: '야채 피자', pos: '명사', note: '', level: 1 },
+        { eng: 'wait', kor: '기다리다', pos: '동사', note: '', level: 1 },
+        { eng: 'What would you like?', kor: '뭐 드시겠어요?', pos: '문장', note: '', level: 1 },
+        { eng: 'would', kor: '-하다', pos: '동사', note: '공손한 느낌을 주는 말', level: 1 },
+        
         //2단계 단어들
-        { eng: 'example', kor: '예시단어', pos: '명사', note: '2단계 테스트용' }
-        { eng: '', kor: '', pos: '', note: '' }
+        { eng: 'example', kor: '예시단어', pos: '명사', note: '2단계 테스트용', level: 2 }
+        { eng: '', kor: '', pos: '', note: '',  level: 2 }
     
     ];
 
