@@ -42,11 +42,6 @@
   input[name="printSource"]:checked + .btn-label { background: var(--orange); border-color: var(--orange); color: #fff; transform: scale(1.06); }
   input[name="printStyle"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.06); }
 
-  .profile-btn { padding: 30px 20px; border-radius: 24px; border: none; font-family: 'Jua', sans-serif; font-size: 1.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #fff; transition: transform .2s; width: 100%; }
-  .profile-btn:hover { transform: translateY(-5px); }
-  .profile-btn.son { background: linear-gradient(135deg, #6EC6F5, #A78BFA); box-shadow: 0 10px 20px rgba(110,198,245,0.3); }
-  .profile-btn.daughter { background: linear-gradient(135deg, #FF6B9D, #FF9F43); box-shadow: 0 10px 20px rgba(255,107,157,0.3); }
-
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .mode-btn { padding: 16px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; transition: transform .18s; }
   .mode-btn.typing { background: linear-gradient(135deg, var(--purple), var(--sky)); grid-column: span 2; padding: 18px; font-size: 1.2rem; }
@@ -79,7 +74,7 @@
   .btn.ghost { background: rgba(120, 130, 160, 0.12); color: var(--dark); border: 1px solid var(--line); }
   .feedback { min-height: 24px; margin-top: 10px; font-weight: bold; font-size: 1.3rem; text-align: center; }
 
-  #loadingBadge { background: #FFD93D; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  #loadingBadge { background: #FFD93D; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: fixed; top: 20px; z-index: 999; }
 
   /* 인쇄 전용 마법 스타일 */
   @media print {
@@ -100,24 +95,12 @@
 <div class="bg-floats" id="bgFloats"></div>
 <div id="print-area" style="display:none;"></div>
 
-<!-- 1. 프로필 선택 대문 -->
-<div class="screen active" id="screen-profile">
-  <h1 class="main-title">🔤 민민이네 <span>영어방</span></h1>
-  <p class="subtitle">누가 단어 공부를 할 차례인가요?</p>
-  <div id="loadingBadge">⏳ 노션 단어장 연결 중...</div>
-  
-  <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; margin-top: 20px;">
-    <!-- 👧 민서 이름 완벽 반영! -->
-    <button class="profile-btn son" onclick="selectProfile('son')"><span style="font-size:3rem;">👦</span><span>첫째 아들 (민수)</span></button>
-    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span style="font-size:3rem;">👧</span><span>둘째 딸 (민서)</span></button>
-  </div>
-  <button class="big-btn back-btn" style="max-width: 400px; margin-top: 30px;" onclick="location.href='index.html'">🏠 공부방 메인으로</button>
-</div>
+<center><div id="loadingBadge">⏳ 노션 단어장 연결 중...</div></center>
 
-<!-- 2. 설정 화면 -->
-<div class="screen" id="screen-setup">
+<!-- 💡 [변경] 프로필 선택 대문 화면 전체 삭제, 곧바로 설정 화면으로 진입 -->
+<div class="screen active" id="screen-setup">
   <h1 class="main-title">🔤 민민이네 <span>영어방</span></h1>
-  <div class="user-badge" id="currentUserBadge">현재 사용자: ?</div>
+  <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
 
   <div class="card">
     <div class="card-title">🎯 연습 방식 선택</div>
@@ -149,7 +132,7 @@
       <button class="mode-btn print-shop" onclick="openPrintShop()"><span style="font-size:1.3rem; margin-right:5px;">🖨️</span>학습지 인쇄소</button>
     </div>
   </div>
-  <button class="big-btn back-btn" onclick="showScreen('screen-profile')">🚪 프로필 다시 선택하기</button>
+  <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
 <!-- 3. 퀴즈 화면 -->
@@ -223,16 +206,31 @@
 
 <script>
 let WORD_DATABASES = {}; 
+let currentProfile = 'son'; // 기본값 세팅
+let wrongWords = [];
+let quizState = {};
+
+// 🚀 [자동 연동] 대문에서 선택한 프로필 연동 로직
+function initProfileFromMainMenu() {
+  const savedUser = localStorage.getItem('currentUser'); // 대문에서 심어놓은 'son' 또는 'daughter' 추출
+  if (savedUser) {
+    currentProfile = savedUser;
+  }
+  
+  const badge = document.getElementById('currentUserBadge');
+  if(badge) {
+    badge.innerHTML = currentProfile === 'son' ? '현재 사용자: 👦 민수' : '현재 사용자: 👧 민서';
+  }
+  loadWrongWords();
+}
 
 async function loadNotionWords() {
     const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
     const dbId = "373a27115b6880ba82cdfeaa1c825547";
     
     try {
-        // 빈 깡통 10개 준비
         for(let i=1; i<=10; i++) WORD_DATABASES[i] = [];
 
-        // 🚀 업그레이드: 100개 제한 뚫고 무한으로 긁어오기
         let allResults = [];
         let hasMore = true;
         let nextCursor = undefined;
@@ -248,12 +246,11 @@ async function loadNotionWords() {
             });
             const data = await response.json();
             
-            allResults = allResults.concat(data.results); // 가져온 단어 바구니에 합치기
-            hasMore = data.has_more; // 노션: "아직 뒤에 단어 더 있어!"
-            nextCursor = data.next_cursor; // 노션: "다음엔 여기서부터 가져가"
+            allResults = allResults.concat(data.results); 
+            hasMore = data.has_more; 
+            nextCursor = data.next_cursor; 
         }
 
-        // 바닥까지 긁어온 모든 단어(169개)를 화면에 뿌려줍니다
         allResults.forEach(page => {
             const props = page.properties;
             const eng = props["영어"]?.title[0]?.plain_text || "";
@@ -263,7 +260,6 @@ async function loadNotionWords() {
 
             if(!eng) return; 
 
-            // 단원 번호 추출
             let levelStr = "L1";
             const levelProp = props["단원"];
             if (levelProp) {
@@ -273,7 +269,6 @@ async function loadNotionWords() {
             }
             const levelNum = parseInt(levelStr.replace(/[^0-9]/g, '')) || 1;
 
-            // 공부할 사람 추출
             let person = "";
             const personProp = props["공부할 사람"];
             if (personProp) {
@@ -308,7 +303,11 @@ async function loadNotionWords() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadNotionWords);
+// 🚀 페이지가 켜지자마자 프로필 연동 및 노션 동기화 실행!
+document.addEventListener('DOMContentLoaded', () => {
+  initProfileFromMainMenu();
+  loadNotionWords();
+});
 
 async function checkWordAsDoneInNotion(pageId) {
     const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
@@ -352,25 +351,11 @@ async function checkWordAsDoneInNotion(pageId) {
 })();
 function selectAllBooks(flag) { document.querySelectorAll('.book-cb').forEach(cb => cb.checked = flag); }
 
-let currentProfile = 'son', wrongWords = [];
-let quizState = {};
-
 function getStorageKey() { return `minmin_eng_wrong_${currentProfile}`; }
 function showScreen(id){ 
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
   document.getElementById(id).classList.add('active'); 
   window.scrollTo(0,0); 
-}
-
-function selectProfile(profile) {
-  currentProfile = profile;
-  const badge = document.getElementById('currentUserBadge');
-  if(badge) {
-    // 👧 민서 배지 완벽 반영!
-    badge.innerHTML = profile === 'son' ? '현재 사용자: 👦 민수' : '현재 사용자: 👧 민서';
-  }
-  loadWrongWords();
-  showScreen('screen-setup');
 }
 
 function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
@@ -413,14 +398,11 @@ function speakCurrentWord() {
 function getSelectedWordsPool() {
   const activeBooks = [...document.querySelectorAll('.book-cb:checked')].map(cb => parseInt(cb.value));
   let pool = [];
-  
-  // 👧 민서 필터 이름 완벽 반영!
   const targetPersonName = currentProfile === 'son' ? '민수' : '민서';
 
   activeBooks.forEach(num => { 
       if(WORD_DATABASES[num]) {
           const filteredWords = WORD_DATABASES[num].filter(w => 
-              // includes를 써서 띄어쓰기가 잘못 들어가도 유연하게 잡아냅니다!
               w.person.includes(targetPersonName) || w.person.trim() === ""
           );
           pool = pool.concat(filteredWords);
@@ -580,7 +562,6 @@ function executePrint() {
   const style = document.querySelector('input[name="printStyle"]:checked').value;
   const printArea = document.getElementById('print-area');
   
-  // 👧 프린트 학습지도 민서 이름 완벽 반영!
   let title = currentProfile === 'son' ? '👦 민수 영어 학습지' : '👧 민서 영어 학습지';
   title += style === 'test' ? ' [단어 테스트지]' : ' [글씨 쓰기 노트]';
   
