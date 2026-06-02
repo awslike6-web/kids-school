@@ -103,8 +103,8 @@
   <h1 class="main-title">🔤 민민이네 <span>영어방</span></h1>
   <p class="subtitle">누가 단어 공부를 할 차례인가요?</p>
   <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; margin-top: 20px;">
-    <button class="profile-btn son" onclick="selectProfile('son')"><span style="font-size:3rem;">👦</span><span>첫째 아들 (5학년)</span></button>
-    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span style="font-size:3rem;">👧</span><span>둘째 딸 (1학년)</span></button>
+    <button class="profile-btn son" onclick="selectProfile('son')"><span style="font-size:3rem;">👦</span><span>첫째 아들</span></button>
+    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span style="font-size:3rem;">👧</span><span>둘째 딸</span></button>
   </div>
   <button class="big-btn back-btn" style="max-width: 400px; margin-top: 30px;" onclick="location.href='index.html'">🏠 공부방 메인으로</button>
 </div>
@@ -461,7 +461,7 @@ function selectProfile(profile) {
   
   const badge = document.getElementById('currentUserBadge');
   if(badge) {
-    badge.innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들 (5학년)' : '현재 사용자: 👧 둘째 딸 (1학년)';
+    badge.innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들' : '현재 사용자: 👧 둘째 딸';
   }
   
   loadWrongWords();
