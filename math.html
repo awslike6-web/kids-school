@@ -153,8 +153,8 @@
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <p class="subtitle">누가 공부할 차례인가요?</p>
   <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; margin-top: 20px;">
-    <button class="profile-btn son" onclick="selectProfile('son')"><span class="profile-emoji">👦</span><span>첫째 아들 (5학년)</span></button>
-    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span class="profile-emoji">👧</span><span>둘째 딸 (1학년)</span></button>
+    <button class="profile-btn son" onclick="selectProfile('son')"><span class="profile-emoji">👦</span><span>첫째 아들</span></button>
+    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span class="profile-emoji">👧</span><span>둘째 딸</span></button>
   </div>
 </div>
 
@@ -179,7 +179,7 @@
   </div>
 
   <div class="card" id="card-level2" style="display:none;">
-    <div class="card-title">⚙️ 2단계 세부 설정 (5학년용)</div>
+    <div class="card-title">⚙️ 2단계 세부 설정</div>
     <div class="sub-title-text">자릿수 (곱셈)</div>
     <div class="grid-2"><input type="radio" name="digitMode" id="digit-21" value="21" checked><label for="digit-21" class="btn-label">2자리 × 1자리</label><input type="radio" name="digitMode" id="digit-22" value="22"><label for="digit-22" class="btn-label">2자리 × 2자리</label></div>
     <div class="sub-title-text">자리올림 (곱셈)</div>
@@ -304,7 +304,7 @@ function toggleLevel(){
 
 function selectProfile(profile) {
   currentProfile = profile;
-  document.getElementById('currentUserBadge').innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들 (5학년)' : '현재 사용자: 👧 둘째 딸 (1학년)';
+  document.getElementById('currentUserBadge').innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들' : '현재 사용자: 👧 둘째 딸';
   document.getElementById(profile === 'son' ? 'lvl-2' : 'lvl-1').checked = true;
   
   const savedW = localStorage.getItem(getWrongKey()); wrongNotes = savedW ? JSON.parse(savedW) : [];
@@ -414,7 +414,7 @@ function executePrint() {
   const source = document.querySelector('input[name="printSource"]:checked').value; const list = source === 'recent' ? recentQuestions : wrongNotes;
   const questionsToPrint = selectedIndices.map(idx => list[idx]); const col = document.querySelector('input[name="printCol"]:checked').value;
   const showAns = document.getElementById('print-ans-key').checked; const printArea = document.getElementById('print-area');
-  let title = currentProfile === 'son' ? '👦 5학년 수학 집중 훈련' : '👧 1학년 수학 집중 훈련';
+  let title = currentProfile === 'son' ? '👦 고학년 수학 집중 훈련' : '👧 저학년 수학 집중 훈련';
   let html = `<div class="print-header">${title}</div><div class="print-grid col-${col}">`;
   questionsToPrint.forEach((q, i) => { html += `<div class="p-item"><span class="p-num">${i+1}.</span> <b>${q.text} =</b></div>`; });
   html += `</div>`;
