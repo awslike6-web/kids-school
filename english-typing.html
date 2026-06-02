@@ -229,15 +229,32 @@ async function loadNotionWords() {
     const dbId = "373a27115b6880ba82cdfeaa1c825547";
     
     try {
-        const response = await fetch(`${proxyUrl}/v1/databases/${dbId}/query`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-        });
-        const data = await response.json();
-        
+        // 빈 깡통 10개 준비
         for(let i=1; i<=10; i++) WORD_DATABASES[i] = [];
 
-        data.results.forEach(page => {
+        // 🚀 업그레이드: 100개 제한 뚫고 무한으로 긁어오기
+        let allResults = [];
+        let hasMore = true;
+        let nextCursor = undefined;
+
+        document.getElementById('loadingBadge').textContent = "⏳ 노션에서 169개 단어 긁어오는 중...";
+
+        while (hasMore) {
+            const bodyData = nextCursor ? { start_cursor: nextCursor } : {};
+            const response = await fetch(`${proxyUrl}/v1/databases/${dbId}/query`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData)
+            });
+            const data = await response.json();
+            
+            allResults = allResults.concat(data.results); // 가져온 단어 바구니에 합치기
+            hasMore = data.has_more; // 노션: "아직 뒤에 단어 더 있어!"
+            nextCursor = data.next_cursor; // 노션: "다음엔 여기서부터 가져가"
+        }
+
+        // 바닥까지 긁어온 모든 단어(169개)를 화면에 뿌려줍니다
+        allResults.forEach(page => {
             const props = page.properties;
             const eng = props["영어"]?.title[0]?.plain_text || "";
             const korRaw = props["한글뜻"]?.rich_text[0]?.plain_text || "";
@@ -246,7 +263,7 @@ async function loadNotionWords() {
 
             if(!eng) return; 
 
-            // 초강력 흡입기 1: 단원 번호 추출 (선택형이든 텍스트형이든 숫자만 완벽하게 뽑아냄)
+            // 단원 번호 추출
             let levelStr = "L1";
             const levelProp = props["단원"];
             if (levelProp) {
@@ -256,7 +273,7 @@ async function loadNotionWords() {
             }
             const levelNum = parseInt(levelStr.replace(/[^0-9]/g, '')) || 1;
 
-            // 초강력 흡입기 2: 공부할 사람 추출 (띄어쓰기 오류 방지)
+            // 공부할 사람 추출
             let person = "";
             const personProp = props["공부할 사람"];
             if (personProp) {
@@ -279,7 +296,7 @@ async function loadNotionWords() {
             });
         });
         
-        document.getElementById('loadingBadge').textContent = `✅ 노션 단어 로딩 완료! (총 ${data.results.length}개)`;
+        document.getElementById('loadingBadge').textContent = `✅ 완벽해요! (총 ${allResults.length}개 단어 장전 완료)`;
         document.getElementById('loadingBadge').style.background = "#6BCB77";
         document.getElementById('loadingBadge').style.color = "#fff";
         setTimeout(() => document.getElementById('loadingBadge').style.display = 'none', 2000);
