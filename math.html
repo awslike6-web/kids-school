@@ -22,14 +22,19 @@
   .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 20px 16px 40px; min-height: 100vh; }
   .screen.active { display: flex; }
 
-  .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 4px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.08)); }
+  .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 4px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.08)); position: relative; }
   .main-title span { color: var(--pink); }
   .subtitle { font-size: 1rem; color: #888; margin-bottom: 24px; font-family: 'Gaegu', cursive; }
+
+  /* 🔄 아빠를 위한 프로필 스위치 버튼 */
+  .profile-switch-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: 2px solid var(--purple); color: var(--dark); padding: 6px 12px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: all 0.2s; }
+  .profile-switch-btn:hover { background: var(--purple); color: #fff; }
 
   .card { background: var(--card); border-radius: 24px; padding: 22px 24px; width: 100%; max-width: 480px; box-shadow: 0 8px 30px rgba(0,0,0,0.10); margin-bottom: 18px; border: 2.5px solid rgba(255,255,255,0.8); }
   .card-title { font-size: 1.05rem; color: var(--pink); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
 
   /* 설정 UI */
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px; }
@@ -69,8 +74,8 @@
   .no-select-warning { color: var(--pink); font-size: 0.88rem; text-align: center; height: 1.2rem; margin-bottom: 4px; }
   .user-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(0,0,0,0.05); font-size: 0.95rem; margin-bottom: 20px; color: var(--dark); border: 2px solid rgba(0,0,0,0.1); }
 
-  /* 시각화 카운팅 블록 스타일 */
-  .visual-block-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px auto; padding: 12px; max-width: 440px; background: rgba(255,255,255,0.6); border-radius: 16px; border: 1.5px dashed rgba(0,0,0,0.08); min-height: 40px; }
+  /* 시각화 카운팅 블록 스타일 (슬라임) */
+  .visual-block-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px auto; padding: 12px; width: 100%; max-width: 440px; background: rgba(255,255,255,0.6); border-radius: 16px; border: 1.5px dashed rgba(0,0,0,0.08); min-height: 40px; }
   .slime-block { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; font-weight: bold; position: relative; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.15), 1px 2px 4px rgba(0,0,0,0.1); animation: popSlime 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
   .slime-block::after { content: '• •'; font-size: 8px; position: absolute; top: 4px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-family: sans-serif; letter-spacing: -1px; }
   .slime-block.pink { background: linear-gradient(135deg, #FF8E9E, #FF5376); }
@@ -93,7 +98,6 @@
   .falling-question-box { background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25); border-radius: 22px; padding: 16px 28px; font-size: 2.2rem; font-weight: 700; text-align: center; margin-bottom: 10px; letter-spacing: 2px; }
   .falling-arena { position: relative; width: 100%; max-width: 520px; height: 50vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
   .fall-ball { position: absolute; width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; cursor: pointer; user-select: none; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-
   @keyframes falling { 0% { top: -80px; } 100% { top: 100%; } }
 
   #screen-typing { background: linear-gradient(160deg, #fff9f0 0%, #f0f8ff 100%); }
@@ -152,38 +156,57 @@
 <div id="print-area" style="display:none;"></div> 
 
 <div class="screen active" id="screen-setup">
+  <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
+
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
 
   <div class="card">
-    <div class="card-title">📈 난이도 선택</div>
-    <div class="grid-2">
-      <input type="radio" name="levelMode" id="lvl-1" value="1" onchange="toggleLevel()">
-      <label for="lvl-1" class="btn-label"><span class="icon" id="lvl1-icon">🌱</span>1단계 <small id="lvl1-text">(구구단)</small></label>
-      <input type="radio" name="levelMode" id="lvl-2" value="2" onchange="toggleLevel()">
-      <label for="lvl-2" class="btn-label"><span class="icon" id="lvl2-icon">🌳</span>2단계 <small id="lvl2-text">(두 자릿수)</small></label>
+    <div class="card-title">🔢 연산 모드 (다 골라봐요!)</div>
+    <div class="grid-5" id="opModeGrid">
+      <input type="radio" name="opMode" id="op-add" value="add" checked onchange="updateVisibleCards()">
+      <label for="op-add" class="btn-label" style="padding: 10px 2px;"><span class="icon">➕</span>덧셈</label>
+      
+      <input type="radio" name="opMode" id="op-sub" value="sub" onchange="updateVisibleCards()">
+      <label for="op-sub" class="btn-label" style="padding: 10px 2px;"><span class="icon">➖</span>뺄셈</label>
+      
+      <input type="radio" name="opMode" id="op-mul" value="mul" onchange="updateVisibleCards()">
+      <label for="op-mul" class="btn-label" style="padding: 10px 2px;"><span class="icon">✖️</span>곱셈</label>
+      
+      <input type="radio" name="opMode" id="op-div" value="div" onchange="updateVisibleCards()">
+      <label for="op-div" class="btn-label" style="padding: 10px 2px;"><span class="icon">➗</span>나눗</label>
+
+      <input type="radio" name="opMode" id="op-mix" value="mix" onchange="updateVisibleCards()">
+      <label for="op-mix" class="btn-label" style="padding: 10px 2px;"><span class="icon">🔀</span>섞어</label>
     </div>
   </div>
 
-  <!-- 오빠 전용 구구단 세팅 -->
-  <div class="card" id="card-level1">
+  <div class="card" id="card-level-select">
+    <div class="card-title">📈 난이도 선택</div>
+    <div class="grid-2">
+      <input type="radio" name="levelMode" id="lvl-1" value="1" checked onchange="updateVisibleCards()">
+      <label for="lvl-1" class="btn-label"><span class="icon" id="lvl1-icon">🌱</span>1단계 <small>(구구단)</small></label>
+      <input type="radio" name="levelMode" id="lvl-2" value="2" onchange="updateVisibleCards()">
+      <label for="lvl-2" class="btn-label"><span class="icon" id="lvl2-icon">🌳</span>2단계 <small>(두 자릿수)</small></label>
+    </div>
+  </div>
+
+  <div class="card" id="card-times">
     <div class="card-title">📚 구구단 선택</div>
     <div style="display: flex; gap: 8px; margin-bottom: 10px;"><button class="tiny-btn" onclick="selectAll(true)">전체 선택</button><button class="tiny-btn" onclick="selectAll(false)">전체 해제</button></div>
     <div class="grid-4" id="timesGrid"></div>
   </div>
 
-  <!-- 오빠 전용 곱셈 세부 세팅 -->
-  <div class="card" id="card-level2" style="display:none;">
-    <div class="card-title">⚙️ 고학년 세부 설정</div>
+  <div class="card" id="card-high-level" style="display:none;">
+    <div class="card-title">⚙️ 고학년 곱셈 세부 설정</div>
     <div class="sub-title-text">자릿수 (곱셈)</div>
     <div class="grid-2"><input type="radio" name="digitMode" id="digit-21" value="21" checked><label for="digit-21" class="btn-label">2자리 × 1자리</label><input type="radio" name="digitMode" id="digit-22" value="22"><label for="digit-22" class="btn-label">2자리 × 2자리</label></div>
     <div class="sub-title-text">자리올림 (곱셈)</div>
     <div class="grid-2"><input type="radio" name="carryMode" id="carry-no" value="no"><label for="carry-no" class="btn-label">없음 (워밍업)</label><input type="radio" name="carryMode" id="carry-yes" value="yes" checked><label for="carry-yes" class="btn-label">포함 (도전!)</label></div>
   </div>
 
-  <!-- 👧 저학년(민서) 전용 덧셈/뺄셈 세부 설정 카드 -->
   <div class="card" id="card-low-level" style="display:none;">
-    <div class="card-title">⚙️ 1학년 맞춤 세부 설정</div>
+    <div class="card-title">⚙️ 덧셈/뺄셈 세부 설정</div>
     <div class="sub-title-text">자릿수 선택</div>
     <div class="grid-3">
       <input type="radio" name="lowDigitMode" id="ldigit-11" value="11" checked>
@@ -199,15 +222,6 @@
       <label for="lcarry-no" class="btn-label">없음 (기초 연습)</label>
       <input type="radio" name="lowCarryMode" id="lcarry-yes" value="yes">
       <label for="lcarry-yes" class="btn-label">있음 (실력 키우기!)</label>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🔢 연산 모드</div>
-    <div class="grid-3" id="opModeGrid">
-      <input type="radio" name="opMode" id="op-mul" value="mul" checked><label for="op-mul" class="btn-label" id="op-lbl-1"><span class="icon">✖️</span>곱셈</label>
-      <input type="radio" name="opMode" id="op-div" value="div"><label for="op-div" class="btn-label" id="op-lbl-2"><span class="icon">➗</span>나눗셈</label>
-      <input type="radio" name="opMode" id="op-mix" value="mix"><label for="op-mix" class="btn-label" id="op-lbl-3"><span class="icon">🔀</span>섞어서</label>
     </div>
   </div>
 
@@ -255,7 +269,7 @@
       <input type="radio" name="printCol" id="pc-2" value="2" checked>
       <label for="pc-2" class="btn-label">2단<br><small>(보통)</small></label>
       <input type="radio" name="printCol" id="pc-3" value="3">
-      <label for="pc-3" class="btn-label">3단<br><small>(단색/구구단)</small></label>
+      <label for="pc-3" class="btn-label">3단<br><small>(구구단)</small></label>
     </div>
     <div style="margin-top:14px; text-align:center;">
       <input type="checkbox" id="print-ans-key" checked style="display:inline-block; width:auto; margin-right:5px;">
@@ -277,7 +291,6 @@
 <div class="screen" id="screen-falling">
   <div style="width:100%; max-width:520px; display:flex; justify-content:space-between; margin-bottom:10px;"><div class="f-header-box">⭐ <span id="f-score">0</span></div><div class="f-header-box">📝 <span id="f-qnum">1</span></div><div class="f-header-box">❤️ <span id="f-lives">3</span></div></div>
   <div class="falling-question-box" id="f-question">? × ? = ?</div>
-  <!-- 👧 동생용 실시간 구슬 피드백 공간 -->
   <div class="visual-block-container" id="f-visual-area" style="display:none;"></div>
   <div class="falling-arena" id="fallingArena"></div>
   <div style="width:100%; max-width:520px; height:10px; background:rgba(255,255,255,0.15); border-radius:10px; margin-top:10px; overflow:hidden;"><div id="timerBar" style="height:100%; width:100%;"></div></div>
@@ -289,7 +302,6 @@
   <div class="typing-question-card">
     <div style="font-size:0.85rem; color:#aaa; margin-bottom:8px;" id="t-qnum-text">1번</div>
     <div class="q-text" id="t-question">8 × 7 = ?</div>
-    <!-- 👧 동생용 주관식 구슬 표시 공간 -->
     <div class="visual-block-container" id="t-visual-area" style="display:none;"></div>
   </div>
   <div class="answer-input-wrap"><input type="number" class="answer-input" id="answerInput" autocomplete="off"><button class="submit-btn" onclick="submitTyping()">확인✔</button></div>
@@ -313,74 +325,77 @@
 </div>
 
 <script>
-let currentProfile = 'son', wrongNotes = [], recentQuestions = [];
+let currentProfile = 'son'; 
+let wrongNotes = [], recentQuestions = [];
 
 function getWrongKey() { return `minmin_math_wrong_${currentProfile}`; }
 function getRecentKey() { return `minmin_math_recent_${currentProfile}`; }
 
-// 🚀 [사용자 인식 및 변경] 대문 정보 연동 후 UI 구조 최적화 변경
+// 🔄 대통합 UI 정리 엔진: 선택한 연산(덧,뺄,곱,나)에 따라 보여줄 카드만 쏙쏙 열어줍니다.
+function updateVisibleCards() {
+  const op = document.querySelector('input[name="opMode"]:checked').value;
+  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
+  
+  if (op === 'add' || op === 'sub' || op === 'mix' && document.getElementById('op-add').checked) {
+    // 덧셈, 뺄셈일 때는 구구단 숨기고 저학년 설정 열기
+    document.getElementById('card-level-select').style.display = 'none';
+    document.getElementById('card-times').style.display = 'none';
+    document.getElementById('card-high-level').style.display = 'none';
+    document.getElementById('card-low-level').style.display = 'block';
+  } else {
+    // 곱셈, 나눗셈일 때는 구구단/고학년 설정 열기
+    document.getElementById('card-level-select').style.display = 'block';
+    document.getElementById('card-low-level').style.display = 'none';
+    
+    if (lvl === '1') {
+      document.getElementById('card-times').style.display = 'block';
+      document.getElementById('card-high-level').style.display = 'none';
+    } else {
+      document.getElementById('card-times').style.display = 'none';
+      if (op === 'mul') {
+        document.getElementById('card-high-level').style.display = 'block';
+      } else {
+        document.getElementById('card-high-level').style.display = 'none';
+      }
+    }
+  }
+}
+
+// 👦👧 로컬 테스트용 직통 버튼 함수
+function toggleProfileManually() {
+  if (currentProfile === 'son') {
+    currentProfile = 'daughter';
+    document.getElementById('currentUserBadge').innerHTML = '현재 사용자: 👧 둘째 딸 (민서)';
+    document.getElementById('op-add').checked = true; // 민서는 기본 덧셈
+  } else {
+    currentProfile = 'son';
+    document.getElementById('currentUserBadge').innerHTML = '현재 사용자: 👦 첫째 아들 (민수)';
+    document.getElementById('op-mul').checked = true; // 민수는 기본 곱셈
+  }
+  localStorage.setItem('currentUser', currentProfile);
+  loadProfileData();
+  updateVisibleCards();
+}
+
+// 초기 프로필 로드
 function initProfileFromMainMenu() {
   const savedUser = localStorage.getItem('currentUser');
-  if (savedUser) {
-    currentProfile = savedUser;
-  }
+  if (savedUser) currentProfile = savedUser;
   
-  const badge = document.getElementById('currentUserBadge');
-  const lvl1Icon = document.getElementById('lvl1-icon');
-  const lvl1Text = document.getElementById('lvl1-text');
-  const lvl2Icon = document.getElementById('lvl2-icon');
-  const lvl2Text = document.getElementById('lvl2-text');
+  document.getElementById('currentUserBadge').innerHTML = currentProfile === 'son' ? '현재 사용자: 👦 첫째 아들 (민수)' : '현재 사용자: 👧 둘째 딸 (민서)';
+  document.getElementById(currentProfile === 'son' ? 'op-mul' : 'op-add').checked = true;
   
-  if (currentProfile === 'daughter') {
-    badge.innerHTML = '현재 사용자: 👧 둘째 딸 (민서)';
-    lvl1Icon.textContent = '🐣';
-    lvl1Text.textContent = '(기본 연산)';
-    lvl2Icon.textContent = '🐔';
-    lvl2Text.textContent = '(발전 연산)';
-    
-    // 1학년 동생 세팅: 덧셈/뺄셈 위주 인터페이스 변환
-    document.getElementById('op-lbl-1').innerHTML = '<span class="icon">➕</span>덧셈';
-    document.getElementById('op-lbl-2').innerHTML = '<span class="icon">➖</span>뺄셈';
-    document.getElementById('op-mul').value = 'add';
-    document.getElementById('op-div').value = 'sub';
-    document.getElementById('op-mul').checked = true;
-  } else {
-    badge.innerHTML = '현재 사용자: 👦 첫째 아들 (민수)';
-    lvl1Icon.textContent = '🌱';
-    lvl1Text.textContent = '(구구단)';
-    lvl2Icon.textContent = '🌳';
-    lvl2Text.textContent = '(두 자릿수)';
-    
-    document.getElementById('op-lbl-1').innerHTML = '<span class="icon">✖️</span>곱셈';
-    document.getElementById('op-lbl-2').innerHTML = '<span class="icon">➗</span>나눗셈';
-    document.getElementById('op-mul').value = 'mul';
-    document.getElementById('op-div').value = 'div';
-    document.getElementById('op-mul').checked = true;
-  }
-  
-  document.getElementById('lvl-1').checked = true;
-  
+  loadProfileData();
+  updateVisibleCards();
+}
+
+function loadProfileData() {
   const savedW = localStorage.getItem(getWrongKey()); wrongNotes = savedW ? JSON.parse(savedW) : [];
   const savedR = localStorage.getItem(getRecentKey()); recentQuestions = savedR ? JSON.parse(savedR) : [];
-  
   document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
-  toggleLevel();
 }
 
 document.addEventListener('DOMContentLoaded', initProfileFromMainMenu);
-
-function toggleLevel(){
-  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-  if (currentProfile === 'daughter') {
-    document.getElementById('card-level1').style.display = 'none';
-    document.getElementById('card-level2').style.display = 'none';
-    document.getElementById('card-low-level').style.display = 'block';
-  } else {
-    document.getElementById('card-low-level').style.display = 'none';
-    document.getElementById('card-level1').style.display = lvl==='1' ? 'block' : 'none';
-    document.getElementById('card-level2').style.display = lvl==='2' ? 'block' : 'none';
-  }
-}
 
 function saveToRecent(q) {
   if(!recentQuestions.some(rq => rq.text === q.text)) {
@@ -389,7 +404,6 @@ function saveToRecent(q) {
     localStorage.setItem(getRecentKey(), JSON.stringify(recentQuestions));
   }
 }
-
 function saveWrongAnswer(q) {
   if(gameState.isWrongNoteMode) return;
   if(!wrongNotes.some(item => item.text === q.text)) {
@@ -402,132 +416,81 @@ function removeWrongAnswer(q) {
   localStorage.setItem(getWrongKey(), JSON.stringify(wrongNotes));
 }
 
-// 🔧 저학년 동생(민서) 전용 문제 출제 로직
-function generateDaughterQuestion(op) {
-  const digitMode = document.querySelector('input[name="lowDigitMode"]:checked').value;
-  const carryMode = document.querySelector('input[name="lowCarryMode"]:checked').value;
-  let a = 0, b = 0, ans = 0, sign = '';
-
-  if (op === 'add') {
-    sign = '＋';
-    if (digitMode === '11') { 
-      // 1자리 + 1자리
-      if (carryMode === 'no') {
-        a = Math.floor(Math.random() * 8) + 1;
-        b = Math.floor(Math.random() * (9 - a)) + 1;
-      } else {
-        a = Math.floor(Math.random() * 8) + 2;
-        b = Math.floor(Math.random() * 8) + 2;
-        if (a + b <= 10) b = 11 - a + Math.floor(Math.random() * 4);
-      }
-    } else if (digitMode === '21') { 
-      // 2자리 + 1자리
-      if (carryMode === 'no') {
-        let ten = (Math.floor(Math.random() * 8) + 1) * 10;
-        let one = Math.floor(Math.random() * 9);
-        b = Math.floor(Math.random() * (9 - one)) + 1;
-        a = ten + one;
-      } else {
-        a = Math.floor(Math.random() * 80) + 11;
-        b = Math.floor(Math.random() * 8) + 2;
-        if (a % 10 + b < 10) b = 10 - (a % 10) + Math.floor(Math.random() * (9 - (10 - (a % 10))));
-      }
-    } else { 
-      // 2자리 + 2자리
-      if (carryMode === 'no') {
-        let a_ten = Math.floor(Math.random() * 7) + 1;
-        let a_one = Math.floor(Math.random() * 9);
-        let b_ten = Math.floor(Math.random() * (8 - a_ten)) + 1;
-        let b_one = Math.floor(Math.random() * (9 - a_one));
-        a = a_ten * 10 + a_one;
-        b = b_ten * 10 + b_one;
-      } else {
-        a = Math.floor(Math.random() * 60) + 15;
-        b = Math.floor(Math.random() * 20) + 15;
-        if (a % 10 + b % 10 < 10) b = b - (b % 10) + (10 - (a % 10) + Math.floor(Math.random() * 5));
-      }
-    }
-    ans = a + b;
-  } else {
-    sign = '－';
-    if (digitMode === '11') { 
-      // 1자리 - 1자리
-      a = Math.floor(Math.random() * 8) + 2;
-      b = Math.floor(Math.random() * (a - 1)) + 1;
-    } else if (digitMode === '21') { 
-      // 2자리 - 1자리
-      if (carryMode === 'no') {
-        let ten = (Math.floor(Math.random() * 8) + 1) * 10;
-        let one = Math.floor(Math.random() * 8) + 1;
-        b = Math.floor(Math.random() * one) + 1;
-        a = ten + one;
-      } else {
-        a = (Math.floor(Math.random() * 8) + 1) * 10 + Math.floor(Math.random() * 8);
-        b = Math.floor(Math.random() * 8) + 2;
-        if (a % 10 >= b) b = (a % 10) + 1 + Math.floor(Math.random() * (9 - (a % 10)));
-      }
-    } else { 
-      // 2자리 - 2자리
-      if (carryMode === 'no') {
-        let a_ten = Math.floor(Math.random() * 7) + 2;
-        let a_one = Math.floor(Math.random() * 10);
-        let b_ten = Math.floor(Math.random() * (a_ten - 1)) + 1;
-        let b_one = Math.floor(Math.random() * (a_one + 1));
-        a = a_ten * 10 + a_one;
-        b = b_ten * 10 + b_one;
-      } else {
-        a = Math.floor(Math.random() * 70) + 25;
-        b = Math.floor(Math.random() * (a - 15)) + 12;
-        if (a % 10 >= b % 10) {
-          b = Math.floor(b / 10) * 10 + (a % 10) + 1 + Math.floor(Math.random() * 4);
-        }
-      }
-    }
-    if (a < b) { let temp = a; a = b; b = temp; }
-    ans = a - b;
-  }
-  return { text: `${a} ${sign} ${b}`, answer: ans, opType: op, numA: a, numB: b };
-}
-
+// 🧠 대통합 문제 생성 엔진
 function generateQuestion() {
   let op = document.querySelector('input[name="opMode"]:checked').value;
   if(op === 'mix') {
-    if (currentProfile === 'daughter') op = Math.random() < 0.5 ? 'add' : 'sub';
-    else op = Math.random() < 0.5 ? 'mul' : 'div';
+    const ops = ['add', 'sub', 'mul', 'div'];
+    op = ops[Math.floor(Math.random() * ops.length)];
   }
 
-  if (currentProfile === 'daughter') {
-    return generateDaughterQuestion(op);
-  }
+  // 1. 덧셈/뺄셈 로직
+  if (op === 'add' || op === 'sub') {
+    const digitMode = document.querySelector('input[name="lowDigitMode"]:checked').value;
+    const carryMode = document.querySelector('input[name="lowCarryMode"]:checked').value;
+    let a = 0, b = 0, ans = 0, sign = '';
 
-  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-  if(lvl === '1') {
-    const dans = [...document.querySelectorAll('.times-cb:checked')].map(cb=>+cb.value);
-    const dan = dans[Math.floor(Math.random()*dans.length)];
-    const n = 1 + Math.floor(Math.random()*9);
-    return op === 'mul' ? { text: `${dan} × ${n}`, answer: dan*n } : { text: `${dan*n} ÷ ${dan}`, answer: n };
-  } else {
-    if(op === 'mul') {
-      const is22 = document.getElementById('digit-22').checked;
-      let a = 10 + Math.floor(Math.random() * 90);
-      let b = is22 ? (10 + Math.floor(Math.random() * 90)) : (2 + Math.floor(Math.random() * 8));
-      return { text: `${a} × ${b}`, answer: a*b };
+    if (op === 'add') {
+      sign = '＋';
+      if (digitMode === '11') { 
+        if (carryMode === 'no') { a = Math.floor(Math.random() * 8) + 1; b = Math.floor(Math.random() * (9 - a)) + 1; }
+        else { a = Math.floor(Math.random() * 8) + 2; b = Math.floor(Math.random() * 8) + 2; if (a + b <= 10) b = 11 - a + Math.floor(Math.random() * 4); }
+      } else if (digitMode === '21') { 
+        if (carryMode === 'no') { let ten = (Math.floor(Math.random() * 8) + 1) * 10; let one = Math.floor(Math.random() * 9); b = Math.floor(Math.random() * (9 - one)) + 1; a = ten + one; }
+        else { a = Math.floor(Math.random() * 80) + 11; b = Math.floor(Math.random() * 8) + 2; if (a % 10 + b < 10) b = 10 - (a % 10) + Math.floor(Math.random() * (9 - (10 - (a % 10)))); }
+      } else { 
+        if (carryMode === 'no') { let a_ten = Math.floor(Math.random() * 7) + 1; let a_one = Math.floor(Math.random() * 9); let b_ten = Math.floor(Math.random() * (8 - a_ten)) + 1; let b_one = Math.floor(Math.random() * (9 - a_one)); a = a_ten * 10 + a_one; b = b_ten * 10 + b_one; }
+        else { a = Math.floor(Math.random() * 60) + 15; b = Math.floor(Math.random() * 20) + 15; if (a % 10 + b % 10 < 10) b = b - (b % 10) + (10 - (a % 10) + Math.floor(Math.random() * 5)); }
+      }
+      ans = a + b;
     } else {
-      let div = 2 + Math.floor(Math.random() * 8);
-      let ans = Math.floor(10/div) + Math.floor(Math.random() * (Math.floor(99/div) - Math.floor(10/div) + 1));
-      if(ans < 2) ans = 2; return { text: `${ans * div} ÷ ${div}`, answer: ans };
+      sign = '－';
+      if (digitMode === '11') { a = Math.floor(Math.random() * 8) + 2; b = Math.floor(Math.random() * (a - 1)) + 1; }
+      else if (digitMode === '21') { 
+        if (carryMode === 'no') { let ten = (Math.floor(Math.random() * 8) + 1) * 10; let one = Math.floor(Math.random() * 8) + 1; b = Math.floor(Math.random() * one) + 1; a = ten + one; }
+        else { a = (Math.floor(Math.random() * 8) + 1) * 10 + Math.floor(Math.random() * 8); b = Math.floor(Math.random() * 8) + 2; if (a % 10 >= b) b = (a % 10) + 1 + Math.floor(Math.random() * (9 - (a % 10))); }
+      } else { 
+        if (carryMode === 'no') { let a_ten = Math.floor(Math.random() * 7) + 2; let a_one = Math.floor(Math.random() * 10); let b_ten = Math.floor(Math.random() * (a_ten - 1)) + 1; let b_one = Math.floor(Math.random() * (a_one + 1)); a = a_ten * 10 + a_one; b = b_ten * 10 + b_one; }
+        else { a = Math.floor(Math.random() * 70) + 25; b = Math.floor(Math.random() * (a - 15)) + 12; if (a % 10 >= b % 10) { b = Math.floor(b / 10) * 10 + (a % 10) + 1 + Math.floor(Math.random() * 4); } }
+      }
+      if (a < b) { let temp = a; a = b; b = temp; }
+      ans = a - b;
+    }
+    return { text: `${a} ${sign} ${b}`, answer: ans, opType: op, numA: a, numB: b };
+  } 
+  // 2. 곱셈/나눗셈 로직
+  else {
+    const lvl = document.querySelector('input[name="levelMode"]:checked').value;
+    if(lvl === '1') {
+      const dans = [...document.querySelectorAll('.times-cb:checked')].map(cb=>+cb.value);
+      if(dans.length === 0) return { text: `2 × 2`, answer: 4, opType: 'mul' }; // 예외 방어
+      const dan = dans[Math.floor(Math.random()*dans.length)];
+      const n = 1 + Math.floor(Math.random()*9);
+      return op === 'mul' ? { text: `${dan} × ${n}`, answer: dan*n, opType: 'mul' } : { text: `${dan*n} ÷ ${dan}`, answer: n, opType: 'div' };
+    } else {
+      if(op === 'mul') {
+        const is22 = document.getElementById('digit-22').checked;
+        let a = 10 + Math.floor(Math.random() * 90);
+        let b = is22 ? (10 + Math.floor(Math.random() * 90)) : (2 + Math.floor(Math.random() * 8));
+        return { text: `${a} × ${b}`, answer: a*b, opType: 'mul' };
+      } else {
+        let div = 2 + Math.floor(Math.random() * 8);
+        let ans = Math.floor(10/div) + Math.floor(Math.random() * (Math.floor(99/div) - Math.floor(10/div) + 1));
+        if(ans < 2) ans = 2; return { text: `${ans * div} ÷ ${div}`, answer: ans, opType: 'div' };
+      }
     }
   }
 }
 
 let gameState = {};
 function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
-function goSetup(){ clearFallingGame(); document.getElementById('wrongCountBadge').textContent = wrongNotes.length; showScreen('screen-setup'); }
+function goSetup(){ clearFallingGame(); loadProfileData(); showScreen('screen-setup'); }
 
 function startGame(mode){
-  if (currentProfile !== 'daughter') {
-    const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-    if(lvl === '1' && document.querySelectorAll('.times-cb:checked').length === 0){ document.getElementById('warnMsg').textContent = '⚠️ 구구단을 선택해주세요!'; return; }
+  const op = document.querySelector('input[name="opMode"]:checked').value;
+  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
+  if((op === 'mul' || op === 'div' || op === 'mix') && lvl === '1' && document.querySelectorAll('.times-cb:checked').length === 0){ 
+    document.getElementById('warnMsg').textContent = '⚠️ 1단계 구구단을 하나 이상 선택해주세요!'; return; 
   }
   document.getElementById('warnMsg').textContent = '';
   
@@ -554,7 +517,6 @@ function startWrongNote() {
 
 function openPrintShop() {
   showScreen('screen-print');
-  document.getElementById(currentProfile === 'son' ? 'pc-2' : 'pc-1').checked = true;
   document.getElementById('ps-recent').checked = true; 
   loadPrintList();
 }
@@ -575,7 +537,7 @@ function executePrint() {
   const source = document.querySelector('input[name="printSource"]:checked').value; const list = source === 'recent' ? recentQuestions : wrongNotes;
   const questionsToPrint = selectedIndices.map(idx => list[idx]); const col = document.querySelector('input[name="printCol"]:checked').value;
   const showAns = document.getElementById('print-ans-key').checked; const printArea = document.getElementById('print-area');
-  let title = currentProfile === 'son' ? '👦 고학년 수학 집중 훈련' : '👧 저학년 수학 집중 훈련';
+  let title = currentProfile === 'son' ? '👦 민수 집중 훈련 학습지' : '👧 민서 집중 훈련 학습지';
   let html = `<div class="print-header">${title}</div><div class="print-grid col-${col}">`;
   questionsToPrint.forEach((q, i) => { html += `<div class="p-item"><span class="p-num">${i+1}.</span> <b>${q.text} =</b></div>`; });
   html += `</div>`;
@@ -583,55 +545,36 @@ function executePrint() {
   printArea.innerHTML = html; printArea.style.display = 'block'; window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 1000); 
 }
 
-// 🍓 [신규 핵심 기능] 시각화 카운팅 블록(슬라임) 빌더 함수
+// 🍓 시각화 카운팅 블록(슬라임) 빌더
 function drawVisualBlocks(q, targetAreaId) {
   const area = document.getElementById(targetAreaId);
   if (!area) return;
   area.innerHTML = '';
   
-  if (!q.opType || (q.opType !== 'add' && q.opType !== 'sub')) {
-    area.style.display = 'none';
-    return;
+  if (q.opType !== 'add' && q.opType !== 'sub') {
+    area.style.display = 'none'; return;
   }
-
-  // 수가 너무 커서 가독성이 저하되는 것을 방지하기 위한 필터링 상한선 배치
   if (q.numA > 20 || q.numB > 20) {
     area.style.display = 'block';
-    area.innerHTML = `<span style="font-size:0.95rem; color:#666;">💡 숫자가 커요! 세로셈 훈련이나 종이에 적어 계산해 보세요!</span>`;
+    area.innerHTML = `<span style="font-size:0.95rem; color:#666;">💡 숫자가 커요! 세로셈이나 종이에 계산해 보세요!</span>`;
     return;
   }
-
   area.style.display = 'flex';
   
   if (q.opType === 'add') {
-    // 덧셈 피드백: 앞의 수(분홍색)와 뒤의 수(노란색) 나란히 생성
-    for (let i = 1; i <= q.numA; i++) {
-      let slime = document.createElement('div');
-      slime.className = 'slime-block pink';
-      slime.innerText = i;
-      area.appendChild(slime);
-    }
-    for (let i = 1; i <= q.numB; i++) {
-      let slime = document.createElement('div');
-      slime.className = 'slime-block yellow';
-      slime.innerText = i;
-      area.appendChild(slime);
-    }
+    for (let i = 1; i <= q.numA; i++) { let slime = document.createElement('div'); slime.className = 'slime-block pink'; slime.innerText = i; area.appendChild(slime); }
+    for (let i = 1; i <= q.numB; i++) { let slime = document.createElement('div'); slime.className = 'slime-block yellow'; slime.innerText = i; area.appendChild(slime); }
   } else if (q.opType === 'sub') {
-    // 뺄셈 피드백: 전체 블록 배치 후 뺄 만큼 흐려짐 및 X 애니메이션 
     for (let i = 1; i <= q.numA; i++) {
       let slime = document.createElement('div');
-      if (i > (q.numA - q.numB)) {
-        slime.className = 'slime-block pink subtracted';
-      } else {
-        slime.className = 'slime-block pink';
-        slime.innerText = i;
-      }
+      if (i > (q.numA - q.numB)) { slime.className = 'slime-block pink subtracted'; } 
+      else { slime.className = 'slime-block pink'; slime.innerText = i; }
       area.appendChild(slime);
     }
   }
 }
 
+// --- 공통 인게임 로직 (떨어지기, 주관식, 세로셈) ---
 let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 function initFalling(){ gameState.lives = 3; showScreen('screen-falling'); nextFallingQ(); }
 function nextFallingQ(){
@@ -639,7 +582,6 @@ function nextFallingQ(){
   document.getElementById('f-score').textContent = gameState.score; document.getElementById('f-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length; document.getElementById('f-lives').textContent = gameState.lives;
   const q = gameState.questions[gameState.current]; document.getElementById('f-question').textContent = q.text + ' = ?';
   
-  // 저학년용 실시간 블록 트리거 반영
   drawVisualBlocks(q, 'f-visual-area');
 
   const choices = new Set([q.answer]); while(choices.size < 5) choices.add(q.answer + Math.floor((Math.random()-0.5)*20) + 1);
@@ -686,7 +628,6 @@ function nextTypingQ(){
   document.getElementById('t-qnum-text').textContent = gameState.isWrongNoteMode ? `📝 오답노트 복수전 (${gameState.current+1}번)` : `${gameState.current+1}번 문제`;
   document.getElementById('t-question').textContent = q.text + ' = ?'; document.getElementById('t-score').textContent = gameState.score;
   
-  // 주관식 카운팅 블록 트리거 반영
   drawVisualBlocks(q, 't-visual-area');
 
   const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
@@ -715,7 +656,6 @@ function nextVerticalQ(){
     const [dividend, divisor] = q.text.split(' ÷ ').map(Number);
     html = `<div class="div-board"><div class="div-top"><input type="number" class="v-input ans" id="v-ans" placeholder="몫" style="width:100px; text-align:center;"></div><div class="div-bottom"><span style="color:var(--pink); margin-right:10px;">${divisor}</span><span class="div-bracket">)</span><span style="letter-spacing:10px; margin-left:10px;">${dividend}</span></div></div>`;
   } else {
-    // 👧 저학년용 세로셈 보조 인터페이스 (메모 전용 미니 격자 인풋) 도입부
     const isAdd = q.text.includes('＋');
     const [a, b] = q.text.split(isAdd ? ' ＋ ' : ' － ').map(Number);
     html = `
@@ -750,27 +690,19 @@ function showResult(){
   document.getElementById('r-detail').innerHTML = detailTxt; showScreen('screen-result');
 }
 
-function retryGame() {
-  startGame(gameState.mode);
-}
+function retryGame() { startGame(gameState.mode); }
 
-// 구구단 기반 초기화 시스템 유지
 (function(){
   const grid = document.getElementById('timesGrid');
   if(grid) {
     grid.innerHTML = '';
     for(let d=2; d<=9; d++){
-      const inp = document.createElement('input');
-      inp.type = 'checkbox'; inp.id = 'cb'+d; inp.className = 'times-cb'; inp.value = d;
-      inp.checked = true;
-      const lbl = document.createElement('label');
-      lbl.htmlFor = 'cb'+d; lbl.className = 'btn-label times-label';
-      lbl.innerHTML = `${d}단`;
+      const inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = 'cb'+d; inp.className = 'times-cb'; inp.value = d; inp.checked = true;
+      const lbl = document.createElement('label'); lbl.htmlFor = 'cb'+d; lbl.className = 'btn-label times-label'; lbl.innerHTML = `${d}단`;
       grid.appendChild(inp); grid.appendChild(lbl);
     }
   }
 })();
-
 function selectAll(flag) { document.querySelectorAll('.times-cb').forEach(cb => cb.checked = flag); }
 </script>
 </body>
