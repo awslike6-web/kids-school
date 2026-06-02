@@ -435,7 +435,7 @@ function nextFallingQ(){
   clearFallingBalls(); const arena = document.getElementById('fallingArena'); const colors = ['#FF6B9D','#6EC6F5','#FFD93D','#4ECDC4','#A78BFA'];
   
   // 아버님이 설정하신 속도에 맞춰 풍선이 내려오는 시간을 다르게 연동합니다.
-  const speed = gameState.speedMode === 'turtle' ? 9500 : 5500; 
+  const speed = gameState.speedMode === 'turtle' ? 14000 : 5500; 
   
   arr.forEach((val, i) => {
     const ball = document.createElement('div'); ball.className = 'fall-ball'; ball.textContent = val; ball.style.background = colors[i]; ball.style.left = (10 + Math.random()*260) + 'px';
@@ -452,7 +452,7 @@ function nextFallingQ(){
   
   // 상단 바 시간 연동 타이머
   clearInterval(timerInterval); 
-  const totalMaxTime = gameState.speedMode === 'turtle' ? 11500 : 7500;
+  const totalMaxTime = gameState.speedMode === 'turtle' ? 16000 : 7500;
   timeLeft = totalMaxTime; 
   document.getElementById('timerBar').style.background = 'var(--green)';
   
