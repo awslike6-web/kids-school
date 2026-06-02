@@ -44,8 +44,8 @@
   
   input[name="opMode"]:checked + .btn-label, input[name="printSource"]:checked + .btn-label { background: var(--mint); border-color: var(--mint); color: #fff; transform: scale(1.06); }
   input[name="levelMode"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.06); }
-  input[name="digitMode"]:checked + .btn-label, input[name="printCol"]:checked + .btn-label { background: var(--purple); border-color: var(--purple); color:#fff; transform: scale(1.06); }
-  input[name="carryMode"]:checked + .btn-label { background: var(--pink); border-color: var(--pink); color:#fff; transform: scale(1.06); }
+  input[name="digitMode"]:checked + .btn-label, input[name="printCol"]:checked + .btn-label, input[name="lowDigitMode"]:checked + .btn-label { background: var(--purple); border-color: var(--purple); color:#fff; transform: scale(1.06); }
+  input[name="carryMode"]:checked + .btn-label, input[name="lowCarryMode"]:checked + .btn-label { background: var(--pink); border-color: var(--pink); color:#fff; transform: scale(1.06); }
   #speed-turtle:checked + .btn-label { background: var(--green); border-color: var(--green); color:#fff; transform: scale(1.06); }
   #speed-rabbit:checked + .btn-label { background: var(--orange); border-color: var(--orange); color:#fff; transform: scale(1.06); }
 
@@ -69,6 +69,17 @@
   .no-select-warning { color: var(--pink); font-size: 0.88rem; text-align: center; height: 1.2rem; margin-bottom: 4px; }
   .user-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(0,0,0,0.05); font-size: 0.95rem; margin-bottom: 20px; color: var(--dark); border: 2px solid rgba(0,0,0,0.1); }
 
+  /* 시각화 카운팅 블록 스타일 */
+  .visual-block-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px auto; padding: 12px; max-width: 440px; background: rgba(255,255,255,0.6); border-radius: 16px; border: 1.5px dashed rgba(0,0,0,0.08); min-height: 40px; }
+  .slime-block { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #fff; font-weight: bold; position: relative; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.15), 1px 2px 4px rgba(0,0,0,0.1); animation: popSlime 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+  .slime-block::after { content: '• •'; font-size: 8px; position: absolute; top: 4px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-family: sans-serif; letter-spacing: -1px; }
+  .slime-block.pink { background: linear-gradient(135deg, #FF8E9E, #FF5376); }
+  .slime-block.yellow { background: linear-gradient(135deg, #FFE79A, #FFAE34); color: #5a3e00; }
+  .slime-block.yellow::after { color: rgba(0,0,0,0.3); }
+  .slime-block.subtracted { opacity: 0.25; transform: scale(0.9); filter: grayscale(40%); }
+  .slime-block.subtracted::before { content: '✕'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #ff0000; font-weight: 900; text-shadow: 1px 1px 2px white; z-index: 2; }
+  @keyframes popSlime { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+
   /* 게임 화면 공통 */
   .game-header { width: 100%; max-width: 460px; display: flex; justify-content: space-between; margin-bottom: 16px; }
   .game-stat-box { background: #fff; border-radius: 14px; padding: 8px 16px; font-size: 0.95rem; box-shadow: 0 2px 10px rgba(0,0,0,0.07); color: var(--dark); }
@@ -80,14 +91,14 @@
   #screen-falling { background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #1a1a3e 100%); color: #fff; }
   .f-header-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px 14px; font-size: 0.95rem; }
   .falling-question-box { background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25); border-radius: 22px; padding: 16px 28px; font-size: 2.2rem; font-weight: 700; text-align: center; margin-bottom: 10px; letter-spacing: 2px; }
-  .falling-arena { position: relative; width: 100%; max-width: 520px; height: 58vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
+  .falling-arena { position: relative; width: 100%; max-width: 520px; height: 50vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
   .fall-ball { position: absolute; width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; cursor: pointer; user-select: none; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 
   @keyframes falling { 0% { top: -80px; } 100% { top: 100%; } }
 
   #screen-typing { background: linear-gradient(160deg, #fff9f0 0%, #f0f8ff 100%); }
-  .typing-question-card { background: #fff; border-radius: 28px; padding: 36px 40px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.10); margin-bottom: 20px; border: 3px solid var(--yellow); }
-  .q-text { font-size: clamp(2rem, 8vw, 3.2rem); font-weight: 700; letter-spacing: 3px; color: var(--dark); margin-bottom: 8px; }
+  .typing-question-card { background: #fff; border-radius: 28px; padding: 24px 30px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.10); margin-bottom: 14px; border: 3px solid var(--yellow); }
+  .q-text { font-size: clamp(2rem, 8vw, 3.2rem); font-weight: 700; letter-spacing: 3px; color: var(--dark); margin-bottom: 4px; }
   .answer-input-wrap { display: flex; gap: 10px; width: 100%; max-width: 460px; margin-bottom: 12px; }
   .answer-input { flex: 1; padding: 16px 20px; border-radius: 18px; border: 3px solid #e0e0e0; font-family: 'Jua', sans-serif; font-size: 1.6rem; text-align: center; outline: none; background: #fff; color: var(--dark); }
   .answer-input.correct { border-color: var(--green); background: #f0fff4; }
@@ -97,9 +108,10 @@
 
   #screen-vertical { background: linear-gradient(160deg, #e0f7fa 0%, #e8f5e9 100%); }
   .v-board-container { width: 100%; max-width: 460px; display: flex; justify-content: center; margin-bottom: 20px; }
-  .v-board { background: #fff; padding: 30px 40px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.6rem; font-family: 'Jua', sans-serif; color: var(--dark); }
+  .v-board { background: #fff; padding: 24px 36px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.6rem; font-family: 'Jua', sans-serif; color: var(--dark); position: relative; }
+  .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 12px; margin-bottom: 2px; height: 32px; }
   .v-row { display: flex; width: 100%; justify-content: flex-end; align-items: center; gap: 15px; margin-bottom: 4px; letter-spacing: 4px; }
-  .v-line { width: 100%; height: 4px; background: var(--dark); margin: 12px 0; border-radius: 2px; }
+  .v-line { width: 100%; height: 4px; background: var(--dark); margin: 10px 0; border-radius: 2px; }
   .v-symbol { margin-right: auto; color: var(--pink); font-size: 2.2rem; }
   .div-board { background: #fff; padding: 30px 40px; border-radius: 24px; border: 4px solid var(--sky); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; font-size: 2.6rem; font-family: 'Jua', sans-serif; color: var(--dark); }
   .div-top { display: flex; justify-content: center; width: 100%; padding-bottom: 8px; border-bottom: 4px solid var(--dark); margin-bottom: 12px; margin-left: 35px; width: calc(100% - 35px); }
@@ -109,7 +121,7 @@
   .v-input:focus { border-color: var(--mint); background: #fff; }
   .v-input.correct { border-color: var(--green); background: #f0fff4; }
   .v-input.wrong { border-color: var(--pink); background: #fff5f5; }
-  .v-input.tiny { font-size: 1.1rem; width: 65px; border: 2px dashed #ccc; padding: 2px; color: #888; margin-bottom: 6px; text-align: center; }
+  .v-input.tiny { font-size: 1.05rem; width: 50px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; background: #fffef0; }
   .v-input.step { width: 130px; font-size: 1.5rem; margin-bottom: 6px; border-color: #dcdde1; }
 
   #screen-result { justify-content: center; }
@@ -138,7 +150,6 @@
 <div class="bg-floats" id="bgFloats"></div>
 <div id="print-area" style="display:none;"></div> 
 
-<!-- 💡 [변경] 프로필 선택 대문 화면 전체 삭제, 곧바로 설정 화면으로 진입 -->
 <div class="screen active" id="screen-setup">
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
@@ -147,9 +158,9 @@
     <div class="card-title">📈 난이도 선택</div>
     <div class="grid-2">
       <input type="radio" name="levelMode" id="lvl-1" value="1" onchange="toggleLevel()">
-      <label for="lvl-1" class="btn-label"><span class="icon">🌱</span>1단계 <small>(구구단)</small></label>
+      <label for="lvl-1" class="btn-label"><span class="icon" id="lvl1-icon">🌱</span>1단계 <small id="lvl1-text">(구구단)</small></label>
       <input type="radio" name="levelMode" id="lvl-2" value="2" onchange="toggleLevel()">
-      <label for="lvl-2" class="btn-label"><span class="icon">🌳</span>2단계 <small>(두 자릿수)</small></label>
+      <label for="lvl-2" class="btn-label"><span class="icon" id="lvl2-icon">🌳</span>2단계 <small id="lvl2-text">(두 자릿수)</small></label>
     </div>
   </div>
 
@@ -160,16 +171,41 @@
   </div>
 
   <div class="card" id="card-level2" style="display:none;">
-    <div class="card-title">⚙️ 2단계 세부 설정</div>
+    <div class="card-title">⚙️ 고학년 세부 설정</div>
     <div class="sub-title-text">자릿수 (곱셈)</div>
     <div class="grid-2"><input type="radio" name="digitMode" id="digit-21" value="21" checked><label for="digit-21" class="btn-label">2자리 × 1자리</label><input type="radio" name="digitMode" id="digit-22" value="22"><label for="digit-22" class="btn-label">2자리 × 2자리</label></div>
     <div class="sub-title-text">자리올림 (곱셈)</div>
     <div class="grid-2"><input type="radio" name="carryMode" id="carry-no" value="no"><label for="carry-no" class="btn-label">없음 (워밍업)</label><input type="radio" name="carryMode" id="carry-yes" value="yes" checked><label for="carry-yes" class="btn-label">포함 (도전!)</label></div>
   </div>
 
+  <!-- 👧 저학년(민서) 전용 세부 설정 카드 -->
+  <div class="card" id="card-low-level" style="display:none;">
+    <div class="card-title">⚙️ 1학년 맞춤 세부 설정</div>
+    <div class="sub-title-text">자릿수 선택</div>
+    <div class="grid-3">
+      <input type="radio" name="lowDigitMode" id="ldigit-11" value="11" checked>
+      <label for="ldigit-11" class="btn-label">1자리 ⇄ 1자리</label>
+      <input type="radio" name="lowDigitMode" id="ldigit-21" value="21">
+      <label for="ldigit-21" class="btn-label">2자리 ⇄ 1자리</label>
+      <input type="radio" name="lowDigitMode" id="ldigit-22" value="22">
+      <label for="ldigit-22" class="btn-label">2자리 ⇄ 2자리</label>
+    </div>
+    <div class="sub-title-text">받아올림 / 받아내림</div>
+    <div class="grid-2">
+      <input type="radio" name="lowCarryMode" id="lcarry-no" value="no" checked>
+      <label for="lcarry-no" class="btn-label">없음 (기초 연습)</label>
+      <input type="radio" name="lowCarryMode" id="lcarry-yes" value="yes">
+      <label for="lcarry-yes" class="btn-label">있음 (실력 키우기!)</label>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">🔢 연산 모드</div>
-    <div class="grid-3"><input type="radio" name="opMode" id="op-mul" value="mul" checked><label for="op-mul" class="btn-label"><span class="icon">✖️</span>곱셈</label><input type="radio" name="opMode" id="op-div" value="div"><label for="op-div" class="btn-label"><span class="icon">➗</span>나눗셈</label><input type="radio" name="opMode" id="op-mix" value="mix"><label for="op-mix" class="btn-label"><span class="icon">🔀</span>섞어서</label></div>
+    <div class="grid-3" id="opModeGrid">
+      <input type="radio" name="opMode" id="op-mul" value="mul" checked><label for="op-mul" class="btn-label" id="op-lbl-1"><span class="icon">✖️</span>곱셈</label>
+      <input type="radio" name="opMode" id="op-div" value="div"><label for="op-div" class="btn-label" id="op-lbl-2"><span class="icon">➗</span>나눗셈</label>
+      <input type="radio" name="opMode" id="op-mix" value="mix"><label for="op-mix" class="btn-label" id="op-lbl-3"><span class="icon">🔀</span>섞어서</label>
+    </div>
   </div>
 
   <div class="card">
@@ -196,7 +232,6 @@
   <button class="big-btn back-btn" style="margin-top: 10px;" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
-<!-- 이하 기존 퀴즈, 인쇄소, 스크립트 로직 동일하게 유지 -->
 <div class="screen" id="screen-print">
   <h1 class="main-title">🖨️ 민민이네 <span>인쇄소</span></h1>
   <p class="subtitle">오직 엄마 아빠를 위한 문제지 제작소!</p>
@@ -217,7 +252,7 @@
       <input type="radio" name="printCol" id="pc-2" value="2" checked>
       <label for="pc-2" class="btn-label">2단<br><small>(보통)</small></label>
       <input type="radio" name="printCol" id="pc-3" value="3">
-      <label for="pc-3" class="btn-label">3단<br><small>(구구단용)</small></label>
+      <label for="pc-3" class="btn-label">3단<br><small>(단색/구구단)</small></label>
     </div>
     <div style="margin-top:14px; text-align:center;">
       <input type="checkbox" id="print-ans-key" checked style="display:inline-block; width:auto; margin-right:5px;">
@@ -238,14 +273,22 @@
 
 <div class="screen" id="screen-falling">
   <div style="width:100%; max-width:520px; display:flex; justify-content:space-between; margin-bottom:10px;"><div class="f-header-box">⭐ <span id="f-score">0</span></div><div class="f-header-box">📝 <span id="f-qnum">1</span></div><div class="f-header-box">❤️ <span id="f-lives">3</span></div></div>
-  <div class="falling-question-box" id="f-question">? × ? = ?</div><div class="falling-arena" id="fallingArena"></div>
+  <div class="falling-question-box" id="f-question">? × ? = ?</div>
+  <!-- 👧 동생용 실시간 구슬 피드백 공간 -->
+  <div class="visual-block-container" id="f-visual-area" style="display:none;"></div>
+  <div class="falling-arena" id="fallingArena"></div>
   <div style="width:100%; max-width:520px; height:10px; background:rgba(255,255,255,0.15); border-radius:10px; margin-top:10px; overflow:hidden;"><div id="timerBar" style="height:100%; width:100%;"></div></div>
   <button class="big-btn back-btn" style="max-width:520px;margin-top:12px" onclick="goSetup()">← 나가기</button>
 </div>
 
 <div class="screen" id="screen-typing">
   <div class="game-header"><div class="game-stat-box">⭐ <span id="t-score">0</span>점</div><div class="game-stat-box">📝 <span id="t-qnum">1</span></div></div>
-  <div class="typing-question-card"><div style="font-size:0.85rem; color:#aaa; margin-bottom:8px;" id="t-qnum-text">1번</div><div class="q-text" id="t-question">8 × 7 = ?</div></div>
+  <div class="typing-question-card">
+    <div style="font-size:0.85rem; color:#aaa; margin-bottom:8px;" id="t-qnum-text">1번</div>
+    <div class="q-text" id="t-question">8 × 7 = ?</div>
+    <!-- 👧 동생용 주관식 구슬 표시 공간 -->
+    <div class="visual-block-container" id="t-visual-area" style="display:none;"></div>
+  </div>
   <div class="answer-input-wrap"><input type="number" class="answer-input" id="answerInput" autocomplete="off"><button class="submit-btn" onclick="submitTyping()">확인✔</button></div>
   <div class="feedback-msg" id="t-feedbackMsg"></div><button class="big-btn back-btn" style="max-width:460px;margin-top:20px" onclick="goSetup()">← 나가기</button>
 </div>
@@ -272,17 +315,47 @@ let currentProfile = 'son', wrongNotes = [], recentQuestions = [];
 function getWrongKey() { return `minmin_math_wrong_${currentProfile}`; }
 function getRecentKey() { return `minmin_math_recent_${currentProfile}`; }
 
-// 🚀 [자동 연동] 대문에서 선택한 프로필 연동 및 최적 초기 난이도 세팅
+// 🚀 [사용자 인식 및 변경] 대문 정보 연동 후 UI 구조 최적화 변경
 function initProfileFromMainMenu() {
   const savedUser = localStorage.getItem('currentUser');
   if (savedUser) {
     currentProfile = savedUser;
   }
   
-  document.getElementById('currentUserBadge').innerHTML = currentProfile === 'son' ? '현재 사용자: 👦 민수' : '현재 사용자: 👧 민서';
+  const badge = document.getElementById('currentUserBadge');
+  const lvl1Icon = document.getElementById('lvl1-icon');
+  const lvl1Text = document.getElementById('lvl1-text');
+  const lvl2Icon = document.getElementById('lvl2-icon');
+  const lvl2Text = document.getElementById('lvl2-text');
   
-  // 첫 진입 시 오빠는 2단계(두자릿수), 동생은 1단계(구구단) 기본 체크!
-  document.getElementById(currentProfile === 'son' ? 'lvl-2' : 'lvl-1').checked = true;
+  if (currentProfile === 'daughter') {
+    badge.innerHTML = '현재 사용자: 👧 둘째 딸 (민서)';
+    lvl1Icon.textContent = '🐣';
+    lvl1Text.textContent = '(기본 연산)';
+    lvl2Icon.textContent = '🐔';
+    lvl2Text.textContent = '(발전 연산)';
+    
+    // 1학년 동생 세팅: 덧셈/뺄셈 위주 인터페이스 변환
+    document.getElementById('op-lbl-1').innerHTML = '<span class="icon">➕</span>덧셈';
+    document.getElementById('op-lbl-2').innerHTML = '<span class="icon">➖</span>뺄셈';
+    document.getElementById('op-mul').value = 'add';
+    document.getElementById('op-div').value = 'sub';
+    document.getElementById('op-mul').checked = true;
+  } else {
+    badge.innerHTML = '현재 사용자: 👦 첫째 아들 (민수)';
+    lvl1Icon.textContent = '🌱';
+    lvl1Text.textContent = '(구구단)';
+    lvl2Icon.textContent = '🌳';
+    lvl2Text.textContent = '(두 자릿수)';
+    
+    document.getElementById('op-lbl-1').innerHTML = '<span class="icon">✖️</span>곱셈';
+    document.getElementById('op-lbl-2').innerHTML = '<span class="icon">➗</span>나눗셈';
+    document.getElementById('op-mul').value = 'mul';
+    document.getElementById('op-div').value = 'div';
+    document.getElementById('op-mul').checked = true;
+  }
+  
+  document.getElementById('lvl-1').checked = true;
   
   const savedW = localStorage.getItem(getWrongKey()); wrongNotes = savedW ? JSON.parse(savedW) : [];
   const savedR = localStorage.getItem(getRecentKey()); recentQuestions = savedR ? JSON.parse(savedR) : [];
@@ -291,13 +364,19 @@ function initProfileFromMainMenu() {
   toggleLevel();
 }
 
-// 🚀 페이지 열리자마자 바로 로드되도록 설정
 document.addEventListener('DOMContentLoaded', initProfileFromMainMenu);
 
 function toggleLevel(){
   const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-  document.getElementById('card-level1').style.display = lvl==='1' ? 'block' : 'none';
-  document.getElementById('card-level2').style.display = lvl==='2' ? 'block' : 'none';
+  if (currentProfile === 'daughter') {
+    document.getElementById('card-level1').style.display = 'none';
+    document.getElementById('card-level2').style.display = 'none';
+    document.getElementById('card-low-level').style.display = 'block';
+  } else {
+    document.getElementById('card-low-level').style.display = 'none';
+    document.getElementById('card-level1').style.display = lvl==='1' ? 'block' : 'none';
+    document.getElementById('card-level2').style.display = lvl==='2' ? 'block' : 'none';
+  }
 }
 
 function saveToRecent(q) {
@@ -320,11 +399,100 @@ function removeWrongAnswer(q) {
   localStorage.setItem(getWrongKey(), JSON.stringify(wrongNotes));
 }
 
-function generateQuestion() {
-  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-  let op = document.querySelector('input[name="opMode"]:checked').value;
-  if(op === 'mix') op = Math.random()<0.5 ? 'mul':'div';
+// 🔧 저학년 동생(민서) 전용 문제 출제 로직
+function generateDaughterQuestion(op) {
+  const digitMode = document.querySelector('input[name="lowDigitMode"]:checked').value;
+  const carryMode = document.querySelector('input[name="lowCarryMode"]:checked').value;
+  let a = 0, b = 0, ans = 0, sign = '';
 
+  if (op === 'add') {
+    sign = '＋';
+    if (digitMode === '11') { // 1자리 + 1자리
+      if (carryMode === 'no') {
+        a = Math.floor(Math.random() * 8) + 1;
+        b = Math.floor(Math.random() * (9 - a)) + 1;
+      } else {
+        a = Math.floor(Math.random() * 8) + 2;
+        b = Math.floor(Math.random() * 8) + 2;
+        if (a + b <= 10) b = 11 - a + Math.floor(Math.random() * 4);
+      }
+    } else if (digitMode === '21') { // 2자리 + 1자리
+      if (carryMode === 'no') {
+        let ten = (Math.floor(Math.random() * 8) + 1) * 10;
+        let one = Math.floor(Math.random() * 9);
+        b = Math.floor(Math.random() * (9 - one)) + 1;
+        a = ten + one;
+      } else {
+        a = Math.floor(Math.random() * 80) + 11;
+        b = Math.floor(Math.random() * 8) + 2;
+        if (a % 10 + b < 10) b = 10 - (a % 10) + Math.floor(Math.random() * (9 - (10 - (a % 10))));
+      }
+    } else { // 2자리 + 2자리
+      if (carryMode === 'no') {
+        let a_ten = Math.floor(Math.random() * 7) + 1;
+        let a_one = Math.floor(Math.random() * 9);
+        let b_ten = Math.floor(Math.random() * (8 - a_ten)) + 1;
+        let b_one = Math.floor(Math.random() * (9 - a_one));
+        a = a_ten * 10 + a_one;
+        b = b_ten * 10 + b_one;
+      } else {
+        a = Math.floor(Math.random() * 60) + 15;
+        b = Math.floor(Math.random() * 20) + 15;
+        if (a % 10 + b % 10 < 10) b = b - (b % 10) + (10 - (a % 10) + Math.floor(Math.random() * 5));
+      }
+    }
+    ans = a + b;
+  } else {
+    sign = '－';
+    if (digitMode === '11') { // 1자리 - 1자리
+      a = Math.floor(Math.random() * 8) + 2;
+      b = Math.floor(Math.random() * (a - 1)) + 1;
+    } else if (digitMode === '21') { // 2자리 - 1자리
+      if (carryMode === 'no') {
+        let ten = (Math.floor(Math.random() * 8) + 1) * 10;
+        let one = Math.floor(Math.random() * 8) + 1;
+        b = Math.floor(Math.random() * one) + 1;
+        a = ten + one;
+      } else {
+        a = (Math.floor(Math.random() * 8) + 1) * 10 + Math.floor(Math.random() * 8);
+        b = Math.floor(Math.random() * 8) + 2;
+        if (a % 10 >= b) b = (a % 10) + 1 + Math.floor(Math.random() * (9 - (a % 10)));
+      }
+    } else { // 2자리 - 2자리
+      if (carryMode === 'no') {
+        let a_ten = Math.floor(Math.random() * 7) + 2;
+        let a_one = Math.floor(Math.random() * 9);
+        let b_ten = Math.floor(Math.random() * (a_ten - 1)) + 1;
+        let b_one = Math.floor(Math.random() * (a_one + 1));
+        a = a_ten * 10 + a_one;
+        b = b_ten * 10 + b_one;
+      } else {
+        a = Math.floor(Math.random() * 70) + 25;
+        b = Math.floor(Math.random() * (a - 15)) + 12;
+        if (a % 10 >= b % 10) {
+          let extra = (b % 10) - (a % 10) - 1;
+          b = Math.floor(b / 10) * 10 + (a % 10) + 1 + Math.floor(Math.random() * 4);
+        }
+      }
+    }
+    if (a < b) { let temp = a; a = b; b = temp; }
+    ans = a - b;
+  }
+  return { text: `${a} ${sign} ${b}`, answer: ans, opType: op, numA: a, numB: b };
+}
+
+function generateQuestion() {
+  let op = document.querySelector('input[name="opMode"]:checked').value;
+  if(op === 'mix') {
+    if (currentProfile === 'daughter') op = Math.random() < 0.5 ? 'add' : 'sub';
+    else op = Math.random() < 0.5 ? 'mul' : 'div';
+  }
+
+  if (currentProfile === 'daughter') {
+    return generateDaughterQuestion(op);
+  }
+
+  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
   if(lvl === '1') {
     const dans = [...document.querySelectorAll('.times-cb:checked')].map(cb=>+cb.value);
     const dan = dans[Math.floor(Math.random()*dans.length)];
@@ -349,8 +517,10 @@ function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.class
 function goSetup(){ clearFallingGame(); document.getElementById('wrongCountBadge').textContent = wrongNotes.length; showScreen('screen-setup'); }
 
 function startGame(mode){
-  const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-  if(lvl === '1' && document.querySelectorAll('.times-cb:checked').length === 0){ document.getElementById('warnMsg').textContent = '⚠️ 구구단을 선택해주세요!'; return; }
+  if (currentProfile !== 'daughter') {
+    const lvl = document.querySelector('input[name="levelMode"]:checked').value;
+    if(lvl === '1' && document.querySelectorAll('.times-cb:checked').length === 0){ document.getElementById('warnMsg').textContent = '⚠️ 구구단을 선택해주세요!'; return; }
+  }
   document.getElementById('warnMsg').textContent = '';
   
   const questions = []; 
@@ -376,7 +546,7 @@ function startWrongNote() {
 
 function openPrintShop() {
   showScreen('screen-print');
-  document.getElementById(currentProfile === 'son' ? 'pc-1' : 'pc-3').checked = true;
+  document.getElementById(currentProfile === 'son' ? 'pc-2' : 'pc-1').checked = true;
   document.getElementById('ps-recent').checked = true; 
   loadPrintList();
 }
@@ -405,6 +575,55 @@ function executePrint() {
   printArea.innerHTML = html; printArea.style.display = 'block'; window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 1000); 
 }
 
+// 🍓 [신규 핵심 기능] 시각화 카운팅 블록(슬라임) 빌더 함수
+function drawVisualBlocks(q, targetAreaId) {
+  const area = document.getElementById(targetAreaId);
+  if (!area) return;
+  area.innerHTML = '';
+  
+  if (!q.opType || (q.opType !== 'add' && q.opType !== 'sub')) {
+    area.style.display = 'none';
+    return;
+  }
+
+  // 수가 너무 커서 가독성이 저하되는 것을 방지하기 위한 필터링 상한선 배치
+  if (q.numA > 20 || q.numB > 20) {
+    area.style.display = 'block';
+    area.innerHTML = `<span style="font-size:0.95rem; color:#666;">💡 숫자가 커요! 세로셈 훈련이나 종이에 적어 계산해 보세요!</span>`;
+    return;
+  }
+
+  area.style.display = 'flex';
+  
+  if (q.opType === 'add') {
+    // 덧셈 피드백: 앞의 수(분홍색)와 뒤의 수(노란색) 나란히 생성
+    for (let i = 1; i <= q.numA; i++) {
+      let slime = document.createElement('div');
+      slime.className = 'slime-block pink';
+      slime.innerText = i;
+      area.appendChild(slime);
+    }
+    for (let i = 1; i <= q.numB; i++) {
+      let slime = document.createElement('div');
+      slime.className = 'slime-block yellow';
+      slime.innerText = i;
+      area.appendChild(slime);
+    }
+  } else if (q.opType === 'sub') {
+    // 뺄셈 피드백: 전체 블록 배치 후 뺄 만큼 흐려짐 및 X 애니메이션 
+    for (let i = 1; i <= q.numA; i++) {
+      let slime = document.createElement('div');
+      if (i > (q.numA - q.numB)) {
+        slime.className = 'slime-block pink subtracted';
+      } else {
+        slime.className = 'slime-block pink';
+        slime.innerText = i;
+      }
+      area.appendChild(slime);
+    }
+  }
+}
+
 let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 function initFalling(){ gameState.lives = 3; showScreen('screen-falling'); nextFallingQ(); }
 function nextFallingQ(){
@@ -412,6 +631,9 @@ function nextFallingQ(){
   document.getElementById('f-score').textContent = gameState.score; document.getElementById('f-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length; document.getElementById('f-lives').textContent = gameState.lives;
   const q = gameState.questions[gameState.current]; document.getElementById('f-question').textContent = q.text + ' = ?';
   
+  // 저학년용 실시간 블록 트리거 반영
+  drawVisualBlocks(q, 'f-visual-area');
+
   const choices = new Set([q.answer]); while(choices.size < 5) choices.add(q.answer + Math.floor((Math.random()-0.5)*20) + 1);
   const arr = [...choices].sort(()=>Math.random()-0.5);
   clearFallingBalls(); const arena = document.getElementById('fallingArena'); const colors = ['#FF6B9D','#6EC6F5','#FFD93D','#4ECDC4','#A78BFA'];
@@ -455,6 +677,10 @@ function nextTypingQ(){
   document.getElementById('t-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length;
   document.getElementById('t-qnum-text').textContent = gameState.isWrongNoteMode ? `📝 오답노트 복수전 (${gameState.current+1}번)` : `${gameState.current+1}번 문제`;
   document.getElementById('t-question').textContent = q.text + ' = ?'; document.getElementById('t-score').textContent = gameState.score;
+  
+  // 주관식 카운팅 블록 트리거 반영
+  drawVisualBlocks(q, 't-visual-area');
+
   const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
 }
 function submitTyping(){
@@ -471,16 +697,33 @@ function nextVerticalQ(){
   document.getElementById('v-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length; document.getElementById('v-qnum-text').textContent = `${gameState.current+1}번 문제`;
   document.getElementById('v-score').textContent = gameState.score; document.getElementById('v-feedbackMsg').textContent = '';
   const container = document.getElementById('vertical-container'); let html = '';
+  
   if(q.text.includes('×')){
     const [a, b] = q.text.split(' × ').map(Number);
     const noCarry = document.getElementById('carry-no') ? document.getElementById('carry-no').checked : false; const showCarry = !noCarry && (a > 9);
     if(b > 9){ html = `<div class="v-board"><div class="v-row" style="padding-right:12px;">${a}</div><div class="v-row"><span class="v-symbol">×</span><span style="padding-right:12px;">${b}</span></div><div class="v-line"></div><div class="v-row"><input type="number" class="v-input step" id="v-step1" placeholder="${a}×${b%10}"></div><div class="v-row"><input type="number" class="v-input step" id="v-step2" placeholder="${a}×${Math.floor(b/10)*10}"></div><div class="v-line"></div><div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="최종 합계"></div></div>`; }
     else { html = `<div class="v-board">${showCarry ? `<div class="v-row"><input type="number" class="v-input tiny" placeholder="올림"></div>` : ''}<div class="v-row" style="padding-right:12px;">${a}</div><div class="v-row"><span class="v-symbol">×</span><span style="padding-right:12px;">${b}</span></div><div class="v-line"></div><div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div></div>`; }
-  } else {
+  } else if(q.text.includes('÷')) {
     const [dividend, divisor] = q.text.split(' ÷ ').map(Number);
     html = `<div class="div-board"><div class="div-top"><input type="number" class="v-input ans" id="v-ans" placeholder="몫" style="width:100px; text-align:center;"></div><div class="div-bottom"><span style="color:var(--pink); margin-right:10px;">${divisor}</span><span class="div-bracket">)</span><span style="letter-spacing:10px; margin-left:10px;">${dividend}</span></div></div>`;
+  } else {
+    // 👧 저학년용 세로셈 보조 인터페이스 (메모 전용 미니 격자 인풋) 도입부
+    const isAdd = q.text.includes('＋');
+    const [a, b] = q.text.split(isAdd ? ' ＋ ' : ' － ').map(Number);
+    html = `
+      <div class="v-board">
+        <div class="v-memo-row">
+          <input type="number" class="v-input tiny" id="v-memo-1" placeholder="10" title="빌려오는 수">
+          <input type="number" class="v-input tiny" id="v-memo-2" placeholder="1" title="받아올림 수">
+        </div>
+        <div class="v-row" style="padding-right:12px; font-size:2.8rem;">${a}</div>
+        <div class="v-row" style="font-size:2.8rem;"><span class="v-symbol">${isAdd ? '＋' : '－'}</span><span style="padding-right:12px;">${b}</span></div>
+        <div class="v-line"></div>
+        <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답" style="width:160px;"></div>
+      </div>
+    `;
   }
-  container.innerHTML = html; setTimeout(()=>{ const firstInp = container.querySelector('input'); if(firstInp) firstInp.focus(); }, 100);
+  container.innerHTML = html; setTimeout(()=>{ const firstInp = container.querySelector('#v-ans'); if(firstInp) firstInp.focus(); }, 100);
 }
 function submitVertical(){
   const ansInp = document.getElementById('v-ans'); if(!ansInp || ansInp.value.trim() === '') return;
@@ -499,7 +742,11 @@ function showResult(){
   document.getElementById('r-detail').innerHTML = detailTxt; showScreen('screen-result');
 }
 
-// 구구단 생성기
+function retryGame() {
+  startGame(gameState.mode);
+}
+
+// 구구단 기반 초기화 시스템 유지
 (function(){
   const grid = document.getElementById('timesGrid');
   if(grid) {
@@ -517,7 +764,6 @@ function showResult(){
 })();
 
 function selectAll(flag) { document.querySelectorAll('.times-cb').forEach(cb => cb.checked = flag); }
-(function(){ selectAll(true); })();
 </script>
 </body>
 </html>
