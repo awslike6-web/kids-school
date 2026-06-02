@@ -79,6 +79,8 @@
   .btn.ghost { background: rgba(120, 130, 160, 0.12); color: var(--dark); border: 1px solid var(--line); }
   .feedback { min-height: 24px; margin-top: 10px; font-weight: bold; font-size: 1.3rem; text-align: center; }
 
+  #loadingBadge { background: #FFD93D; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
   /* 인쇄 전용 마법 스타일 */
   @media print {
     body * { visibility: hidden !important; }
@@ -102,8 +104,10 @@
 <div class="screen active" id="screen-profile">
   <h1 class="main-title">🔤 민민이네 <span>영어방</span></h1>
   <p class="subtitle">누가 단어 공부를 할 차례인가요?</p>
+  <div id="loadingBadge">⏳ 노션 단어장 연결 중...</div>
+  
   <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; margin-top: 20px;">
-    <button class="profile-btn son" onclick="selectProfile('son')"><span style="font-size:3rem;">👦</span><span>첫째 아들</span></button>
+    <button class="profile-btn son" onclick="selectProfile('son')"><span style="font-size:3rem;">👦</span><span>첫째 아들 (민수)</span></button>
     <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span style="font-size:3rem;">👧</span><span>둘째 딸</span></button>
   </div>
   <button class="big-btn back-btn" style="max-width: 400px; margin-top: 30px;" onclick="location.href='index.html'">🏠 공부방 메인으로</button>
@@ -127,7 +131,7 @@
   </div>
 
   <div class="card">
-    <div class="card-title">📖 공부할 단어장 골라잡기 (다중 선택 가능)</div>
+    <div class="card-title">📖 공부할 단어장 골라잡기</div>
     <div style="display: flex; gap: 8px; margin-bottom: 10px;">
       <button class="tiny-btn" onclick="selectAllBooks(true)">전체 선택</button>
       <button class="tiny-btn" onclick="selectAllBooks(false)">전체 해제</button>
@@ -171,10 +175,10 @@
 </div>
 
 <!-- 4. 인쇄소 화면 -->
+<!-- (인쇄소 및 결과 화면 HTML은 기존과 100% 동일하므로 생략 없이 유지됩니다) -->
 <div class="screen" id="screen-print">
   <h1 class="main-title">🖨️ 영어 <span>인쇄소</span></h1>
   <p class="subtitle">아이들을 위한 맞춤 종이 학습지 출력</p>
-  
   <div class="card">
     <div class="card-title">📂 1. 출력할 단어 데이터</div>
     <div class="grid-2">
@@ -184,7 +188,6 @@
       <label for="ps-wrong" class="btn-label">내 오답노트</label>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">📄 2. 인쇄 학습지 스타일</div>
     <div class="grid-2">
@@ -194,7 +197,6 @@
       <label for="pst-test" class="btn-label">📝 시험지 형태<br><small>(영어 빈칸 뚫기)</small></label>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">✅ 3. 단어 골라내기 (<span id="print-total-count">0</span>개)</div>
     <div style="display:flex; gap:8px; margin-bottom:10px;">
@@ -203,12 +205,10 @@
     </div>
     <div id="print-word-list" style="max-height:200px; overflow-y:auto; background:#fafafa; border:2px solid #eee; border-radius:12px; padding:10px;"></div>
   </div>
-
   <button class="big-btn yellow-btn" onclick="executePrint()">🖨️ A4 용지 인쇄하기</button>
   <button class="big-btn back-btn" style="margin-top:10px;" onclick="showScreen('screen-setup')">← 설정으로 돌아가기</button>
 </div>
 
-<!-- 5. 결과 화면 -->
 <div class="screen" id="screen-result">
   <div class="result-card" style="background:var(--card); padding:40px; border-radius:28px; text-align:center;">
     <div style="font-size:4rem; margin-bottom:10px;">🏆</div>
@@ -221,197 +221,84 @@
 </div>
 
 <script>
-// 데이터베이스
-const WORD_DATABASES = {
-  1: [
-    { eng: 'Korea', kor: '대한민국 (명)', pos: '명사', level: 1 },
-    { eng: 'Canada', kor: '캐나다 (명)', pos: '명사', level: 1 },
-    { eng: 'Italy', kor: '이탈리아 (명)', pos: '명사', level: 1 },
-    { eng: 'Mexico', kor: '멕시코 (명)', pos: '명사', level: 1 },
-    { eng: 'Thailand', kor: '태국 (명)', pos: '명사', level: 1 },
-    { eng: 'the U.S.', kor: '미국 (명)', pos: '명사', level: 1 },
-    { eng: 'country', kor: '나라 (명)', pos: '명사', level: 1 },
-    { eng: 'from', kor: '~에서 (전), ~부터 (전)', pos: '전치사', level: 1 },
-    { eng: 'spell', kor: '철자를 말하다 (동), 철자를 맞게 쓰다 (동)', pos: '동사', level: 1 },
-    { eng: 'where', kor: '어디에 (부)', pos: '부사', level: 1 },
-    { eng: 'how', kor: '어떻게 (부), 얼마나 (부)', pos: '부사', level: 1 },
-    { eng: 'all', kor: '모든 (형), 모두 (대)', pos: '형용사/대명사', level: 1 },
-    { eng: 'dream', kor: '꿈 (명), 꿈을 꾸다 (동)', pos: '명사/동사', level: 1 },
-    { eng: 'food', kor: '음식 (명), 식품 (명)', pos: '명사', level: 1 },
-    { eng: 'fruit', kor: '과일 (명)', pos: '명사', level: 1 },
-    { eng: 'give', kor: '주다 (동)', pos: '동사', level: 1 },
-    { eng: 'key', kor: '열쇠 (명), 해결의 실마리 (명), 중요한 (형), 핵심적인 (형)', pos: '명사/형용사', level: 1 },
-    { eng: 'new', kor: '새로운 (형)', pos: '형용사', level: 1 },
-    { eng: 'pop', kor: '대중음악 (명), 소리가 나다 (동), 터지다 (동), 나타나다 (동)', pos: '명사/동사', level: 1 },
-    { eng: 'song', kor: '노래 (명)', pos: '명사', level: 1 },
-    { eng: 'story', kor: '이야기 (명)', pos: '명사', level: 1 },
-    { eng: 'student', kor: '학생 (명)', pos: '명사', level: 1 },
-    { eng: 'video', kor: '비디오 (명), 녹화 (명), 녹화하다 (동)', pos: '명사/동사', level: 1 },
-    { eng: 'world', kor: '세계 (명), 세계적으로 유명한 (형)', pos: '명사/형용사', level: 1 },
-    { eng: 'Where are you from?', kor: '어디에서 오셨어요?', pos: '문장', level: 1 },
-    { eng: 'I\'m from...', kor: '...에서 왔어요.', pos: '문장', level: 1 },
-    { eng: 'How do you spell your name?', kor: '이름 철자가 어떻게 되나요?', pos: '문장', level: 1 }
-  ],
-  2: [
-    { eng: 'borrow', kor: '빌리다 (동)', pos: '동사', level: 2 },
-    { eng: 'bring', kor: '가져오다 (동), 데려오다 (동)', pos: '동사', level: 2 },
-    { eng: 'have some juice', kor: '주스를 마시다', pos: '숙어', level: 2 },
-    { eng: 'touch', kor: '만지다 (동)', pos: '동사', level: 2 },
-    { eng: 'take a picture', kor: '사진을 찍다', pos: '숙어', level: 2 },
-    { eng: 'sit here', kor: '여기에 앉다', pos: '숙어', level: 2 },
-    { eng: 'use', kor: '사용하다 (동), 쓰다 (동)', pos: '동사', level: 2 },
-    { eng: 'keep', kor: '상태를 유지하다 (동), 계속하다 (동)', pos: '동사', level: 2 },
-    { eng: 'plant', kor: '심다 (동), 식물 (명)', pos: '동사/명사', level: 2 },
-    { eng: 'cheese', kor: '치즈 (명)', pos: '명사', level: 2 },
-    { eng: 'delicious', kor: '맛있는 (형)', pos: '형용사', level: 2 },
-    { eng: 'flower', kor: '꽃 (명)', pos: '명사', level: 2 },
-    { eng: 'get', kor: '받다 (동), 얻다 (동), 가져오다 (동)', pos: '동사', level: 2 },
-    { eng: 'juice', kor: '즙 (명), 주스 (명), 액 (명), 즙을 내다 (동), 주스를 짜다 (동)', pos: '명사/동사', level: 2 },
-    { eng: 'lot', kor: '많음 (명), 다수 (명), 제비뽑기 (명), 운 (명)', pos: '명사', level: 2 },
-    { eng: 'museum', kor: '박물관 (명)', pos: '명사', level: 2 },
-    { eng: 'of', kor: '~의 (전), ~중의 (전)', pos: '전치사', level: 2 },
-    { eng: 'over', kor: '~위에 (전), ~너머로 (전), 건너서 (부)', pos: '전치사/부사', level: 2 },
-    { eng: 'present', kor: '현재 (명), 선물 (명)', pos: '명사', level: 2 },
-    { eng: 'problem', kor: '문제 (명)', pos: '명사', level: 2 },
-    { eng: 'river', kor: '강 (명)', pos: '명사', level: 2 },
-    { eng: 'sandwich', kor: '샌드위치 (명)', pos: '명사', level: 2 },
-    { eng: 'see', kor: '보다 (동), 이해하다 (동)', pos: '동사', level: 2 },
-    { eng: 'some', kor: '약간의 (형), 일부의 (형), 조금 (대)', pos: '형용사/대명사', level: 2 },
-    { eng: 'take', kor: '가지고 가다 (동), 데리고 가다 (동), 타다 (동)', pos: '동사', level: 2 },
-    { eng: 'thirsty', kor: '목마른 (형)', pos: '형용사', level: 2 },
-    { eng: 'ticket', kor: '표 (명), 입장권 (명)', pos: '명사', level: 2 },
-    { eng: 'tree', kor: '나무 (명)', pos: '명사', level: 2 },
-    { eng: 'work', kor: '일하다 (동), 기계 작동하다 (동), 일 (명), 작품 (명)', pos: '동사/명사', level: 2 },
-    { eng: 'borrow your pen', kor: '당신의 펜을 빌리다', pos: '숙어', level: 2 },
-    { eng: 'bring my bike', kor: '자전거를 가져오다', pos: '숙어', level: 2 },
-    { eng: 'touch this', kor: '이것을 만지다', pos: '숙어', level: 2 },
-    { eng: 'Can I...?', kor: '...도 되나요?', pos: '문장', level: 2 },
-    { eng: 'Sure, you can.', kor: '네, 해도 돼요.', pos: '문장', level: 2 },
-    { eng: 'Sorry, you can\'t.', kor: '미안해요. 할 수 없어요.', pos: '문장', level: 2 }
-  ],
-  3: [
-    { eng: 'backpack', kor: '배낭 (명)', pos: '명사', level: 3 },
-    { eng: 'bottle', kor: '물통 (명)', pos: '명사', level: 3 },
-    { eng: 'button', kor: '단추 (명)', pos: '명사', level: 3 },
-    { eng: 'jacket', kor: '재킷 (명)', pos: '명사', level: 3 },
-    { eng: 'phone', kor: '휴대 전화 (명)', pos: '명사', level: 3 },
-    { eng: 'textbook', kor: '교과서 (명)', pos: '명사', level: 3 },
-    { eng: 'pencil', kor: '연필 (명)', pos: '명사', level: 3 },
-    { eng: 'eraser', kor: '지우개 (명)', pos: '명사', level: 3 },
-    { eng: 'ruler', kor: '자 (명)', pos: '명사', level: 3 },
-    { eng: 'this', kor: '이것 (대)', pos: '대명사', level: 3 },
-    { eng: 'that', kor: '저것 (대)', pos: '대명사', level: 3 },
-    { eng: 'back', kor: '뒤로 (부), 다시 돌아가서 (부), 뒤쪽 (명), 등 (명)', pos: '부사/명사', level: 3 },
-    { eng: 'case', kor: '상자 (명), 사례 (명)', pos: '명사', level: 3 },
-    { eng: 'Of course', kor: '물론이죠', pos: '숙어', level: 3 },
-    { eng: 'elephant', kor: '코끼리 (명)', pos: '명사', level: 3 },
-    { eng: 'family', kor: '가족 (명), 가족의 (형)', pos: '명사/형용사', level: 3 },
-    { eng: 'find', kor: '찾다 (동), 발견하다 (동)', pos: '동사', level: 3 },
-    { eng: 'home', kor: '집 (명), 고향 (명)', pos: '명사', level: 3 },
-    { eng: 'idea', kor: '생각 (명)', pos: '명사', level: 3 },
-    { eng: 'nose', kor: '코 (명), 후각 (명), 조심스럽게 나아가다 (동)', pos: '명사/동사', level: 3 },
-    { eng: 'out', kor: '밖에 (부), 밖으로 (부)', pos: '부사', level: 3 },
-    { eng: 'star', kor: '별 (명)', pos: '명사', level: 3 },
-    { eng: 'with', kor: '~으로 (전), ~와 함께 (전)', pos: '전치사', level: 3 },
-    { eng: 'Whose ... is this?', kor: '이것은 누구의 물건인가요?', pos: '문장', level: 3 },
-    { eng: 'Whose ... is that?', kor: '저것은 누구의 물건인가요?', pos: '문장', level: 3 },
-    { eng: 'It\'s ...\'s.', kor: '...의 것이에요.', pos: '문장', level: 3 },
-    { eng: 'It\'s mine.', kor: '내 것이에요.', pos: '문장', level: 3 },
-    { eng: 'It\'s yours.', kor: '네 것이에요.', pos: '문장', level: 3 }
-  ],
-  4: [
-    { eng: 'English', kor: '영어 (명)', pos: '명사', level: 4 },
-    { eng: 'Korean', kor: '국어 (명)', pos: '명사', level: 4 },
-    { eng: 'P.E.', kor: '체육 (명)', pos: '명사', level: 4 },
-    { eng: 'art', kor: '미술 (명)', pos: '명사', level: 4 },
-    { eng: 'math', kor: '수학 (명)', pos: '명사', level: 4 },
-    { eng: 'music', kor: '음악 (명)', pos: '명사', level: 4 },
-    { eng: 'science', kor: '과학 (명)', pos: '명사', level: 4 },
-    { eng: 'favorite', kor: '매우 좋아하는 (형)', pos: '형용사', level: 4 },
-    { eng: 'subject', kor: '과목 (명), 주제 (명)', pos: '명사', level: 4 },
-    { eng: 'bird', kor: '새 (명)', pos: '명사', level: 4 },
-    { eng: 'call', kor: '부르다 (동), 전화하다 (동), 호출하다 (동)', pos: '동사', level: 4 },
-    { eng: 'carrot', kor: '당근 (명)', pos: '명사', level: 4 },
-    { eng: 'hair', kor: '머리카락 (명)', pos: '명사', level: 4 },
-    { eng: 'just', kor: '바로 (부), 단지 (부), 방금 (부)', pos: '부사', level: 4 },
-    { eng: 'need', kor: '필요하다 (동), ~할 필요가 있다 (동)', pos: '동사', level: 4 },
-    { eng: 'potato', kor: '감자 (명)', pos: '명사', level: 4 },
-    { eng: 'really', kor: '진짜로 (부)', pos: '부사', level: 4 },
-    { eng: 'second', kor: '둘째의 (형)', pos: '형용사', level: 4 },
-    { eng: 'speak', kor: '말하다 (동)', pos: '동사', level: 4 },
-    { eng: 'spring', kor: '봄 (명)', pos: '명사', level: 4 },
-    { eng: 'start', kor: '시작하다 (동), 출발하다 (동)', pos: '동사', level: 4 },
-    { eng: 'vegetable', kor: '채소 (명)', pos: '명사', level: 4 },
-    { eng: 'What is your favorite subject?', kor: '가장 좋아하는 과목은 무엇인가요?', pos: '문장', level: 4 },
-    { eng: 'My favorite subject is~', kor: '제가 가장 좋아하는 과목은 ~과목이에요.', pos: '문장', level: 4 },
-    { eng: 'I like ~ing.', kor: '저는 ~하는 것을 좋아해요.', pos: '문장', level: 4 },
-    { eng: 'I like reading books.', kor: '난 책 읽는 것을 좋아해요.', pos: '문장', level: 4 },
-    { eng: 'I like drawing.', kor: '저는 그림 그리는 것을 좋아해요.', pos: '문장', level: 4 }
-  ],
-  5: [
-    { eng: 'cheese pizza', kor: '치즈 피자 (명)', pos: '명사', level: 5 },
-    { eng: 'curry', kor: '커리 (명)', pos: '명사', level: 5 },
-    { eng: 'ice cream', kor: '아이스크림 (명)', pos: '명사', level: 5 },
-    { eng: 'lemonade', kor: '레모네이드 (명)', pos: '명사', level: 5 },
-    { eng: 'pancakes', kor: '팬케이크 (명)', pos: '명사', level: 5 },
-    { eng: 'noodles', kor: '국수 (명)', pos: '명사', level: 5 },
-    { eng: 'fruit salad', kor: '과일 샐러드 (명)', pos: '명사', level: 5 },
-    { eng: 'bread', kor: '빵 (명)', pos: '명사', level: 5 },
-    { eng: 'cream', kor: '우유로 만든 크림 (명), 크림색 (명), 크림색의 (형)', pos: '명사/형용사', level: 5 },
-    { eng: 'drink', kor: '마시다 (동), 마실 것 (명)', pos: '동사/명사', level: 5 },
-    { eng: 'ice', kor: '얼음 (명)', pos: '명사', level: 5 },
-    { eng: 'meat', kor: '고기 (명)', pos: '명사', level: 5 },
-    { eng: 'vegetable pizza', kor: '야채 피자 (명)', pos: '명사', level: 5 },
-    { eng: 'delicious', kor: '맛있는 (형)', pos: '형용사', level: 5 },
-    { eng: 'salty', kor: '짠 (형), 짭짤한 (형)', pos: '형용사', level: 5 },
-    { eng: 'sour', kor: '신 (형), 시큼한 (형)', pos: '형용사', level: 5 },
-    { eng: 'spicy', kor: '매운 (형), 매콤한 (형)', pos: '형용사', level: 5 },
-    { eng: 'sweet', kor: '단 (형), 달콤한 (형)', pos: '형용사', level: 5 },
-    { eng: 'order', kor: '주문하다 (동), 명령하다 (동), 순서 (명), 명령 (명), 주문 (명)', pos: '동사/명사', level: 5 },
-    { eng: 'little', kor: '작은 (형), 어린 (형)', pos: '형용사', level: 5 },
-    { eng: 'sea', kor: '바다 (명)', pos: '명사', level: 5 },
-    { eng: 'try', kor: '노력하다 (동), 시도하다 (동), 시도 (명)', pos: '동사/명사', level: 5 },
-    { eng: 'wait', kor: '기다리다 (동)', pos: '동사', level: 5 },
-    { eng: 'would', kor: '-하다 (동)', pos: '동사', level: 5 },
-    { eng: 'What would you like?', kor: '뭐 드시겠어요?', pos: '문장', level: 5 },
-    { eng: 'I\'d like ~.', kor: '음식을 주세요.', pos: '문장', level: 5 },
-    { eng: 'How\'s your ~?', kor: '음식은 어때요?', pos: '문장', level: 5 },
-    { eng: 'It\'s ~.', kor: '맛이에요.', pos: '문장', level: 5 }
-  ],
-  6: [
-    { eng: 'sweet', kor: '달콤한 (형), 단것 (명)', pos: '형용사/명사', level: 6 },
-    { eng: 'salty', kor: '짠 (형)', pos: '형용사', level: 6 },
-    { eng: 'spicy', kor: '매운 (형)', pos: '형용사', level: 6 },
-    { eng: 'sour', kor: '신 (형), 상한 (형)', pos: '형용사', level: 6 },
-    { eng: 'savory', kor: '고소한 (형)', pos: '형용사', level: 6 },
-    { eng: 'bitter', kor: '쓴 (형), 격렬한 (형), 쓰라린 (형), 지독한 (형)', pos: '형용사', level: 6 },
-    { eng: 'soft', kor: '부드러운 (형)', pos: '형용사', level: 6 },
-    { eng: 'hard', kor: '딱딱한 (형)', pos: '형용사', level: 6 },
-    { eng: 'crispy', kor: '바삭한 (형)', pos: '형용사', level: 6 },
-    { eng: 'chewy', kor: '쫀득쫀득한 (형)', pos: '형용사', level: 6 },
-    { eng: 'crunchy', kor: '바삭바삭한 (형)', pos: '형용사', level: 6 },
-    { eng: 'greasy', kor: '기름진 (형)', pos: '형용사', level: 6 },
-    { eng: 'juicy', kor: '즙이 많은 (형)', pos: '형용사', level: 6 },
-    { eng: 'How\'s your ...?', kor: '너의 ... 어때요?', pos: '문장', level: 6 },
-    { eng: 'It\'s salty and sweet.', kor: '짭짤하면서도 달콤해요.', pos: '문장', level: 6 },
-    { eng: 'It\'s soft and juicy.', kor: '부드럽고 즙이 많아요.', pos: '문장', level: 6 },
-    { eng: 'It\'s spicy noodles.', kor: '매운 국수예요.', pos: '문장', level: 6 },
-    { eng: 'paella', kor: '파에야 (명)', pos: '명사', level: 6 },
-    { eng: 'bun cha', kor: '분짜 (명)', pos: '명사', level: 6 },
-    { eng: 'May I take your order?', kor: '주문하시겠어요?', pos: '문장', level: 6 },
-    { eng: 'some', kor: '조금 (대)', pos: '대명사', level: 6 },
-    { eng: 'I\'d like some noodles.', kor: '국수 주세요', pos: '문장', level: 6 },
-    { eng: 'What\'s kimchi jeon?', kor: '김치전 뭐야?', pos: '문장', level: 6 },
-    { eng: 'It\'s a kimchi pancake from Korea.', kor: '그건 한국에서 온 김치 팬케이크야', pos: '문장', level: 6 }
-  ],
-  7: [{ eng: 'would', kor: '-하다', pos: '동사', note: '공손한 느낌을 주는 말', level: 7 }
-  ],
-  8: [{ eng: 'play', kor: '놀다', pos: '동사', level: 8 }], 
-  9: [{ eng: 'sleep', kor: '자다', pos: '동사', level: 9 }], 
-  10: [{ eng: 'dream', kor: '꿈', pos: '명사', level: 10 }]
-};
+// 🚀 [핵심 변경] 수동 단어장을 지우고, 노션 데이터를 담을 빈 깡통을 준비합니다!
+let WORD_DATABASES = {}; 
 
-// --- 배경 파티클 (부활!) ---
+// --- 앱이 켜지자마자 노션에서 단어를 싹 빨아들이는 마법의 함수 ---
+async function loadNotionWords() {
+    const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
+    const dbId = "373a27115b6880ba82cdfeaa1c825547";
+    
+    try {
+        const response = await fetch(`${proxyUrl}/v1/databases/${dbId}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+        const data = await response.json();
+        
+        // 빈 깡통 초기화 (1단원~10단원)
+        for(let i=1; i<=10; i++) WORD_DATABASES[i] = [];
+
+        data.results.forEach(page => {
+            const props = page.properties;
+            const eng = props["영어"]?.title[0]?.plain_text || "";
+            const korRaw = props["한글뜻"]?.rich_text[0]?.plain_text || "";
+            const pos = props["품사"]?.rich_text[0]?.plain_text || "";
+            const levelStr = props["단원"]?.select?.name || "L1"; 
+            const person = props["공부할 사람"]?.select?.name || "";
+            const isDone = props["달성"]?.checkbox || false;
+
+            if(!eng) return; // 영어 단어가 비어있으면 패스!
+
+            // "L1" 같은 글자에서 숫자 '1'만 쏙 뽑아냅니다.
+            const levelNum = parseInt(levelStr.replace(/[^0-9]/g, '')) || 1;
+
+            // 💡 아버님이 원하셨던 바로 그 기능! (명사 -> 명) 추출해서 조립하기
+            const shortPos = pos ? pos.charAt(0) : ""; 
+            const korFormatted = shortPos ? `${korRaw} (${shortPos})` : korRaw;
+
+            WORD_DATABASES[levelNum].push({
+                id: page.id,       // 노션 페이지 고유 번호 (나중에 달성 체크용)
+                eng: eng,
+                kor: korFormatted, // 화면에는 "대한민국 (명)" 으로 예쁘게 나옵니다!
+                pos: pos,          // 품사 뱃지에는 "명사" 원본이 나옵니다.
+                level: levelNum,
+                person: person,
+                isDone: isDone
+            });
+        });
+        
+        document.getElementById('loadingBadge').textContent = `✅ 노션 단어 로딩 완료! (총 ${data.results.length}개)`;
+        document.getElementById('loadingBadge').style.background = "#6BCB77";
+        document.getElementById('loadingBadge').style.color = "#fff";
+        setTimeout(() => document.getElementById('loadingBadge').style.display = 'none', 2000);
+
+    } catch(e) {
+        console.error("단어 로딩 에러:", e);
+        document.getElementById('loadingBadge').textContent = "❌ 단어 로딩 실패! 다시 새로고침 해주세요.";
+        document.getElementById('loadingBadge').style.background = "#FF6B9D";
+    }
+}
+
+// 화면이 열리자마자 백그라운드에서 조용히 노션 단어를 불러옵니다.
+document.addEventListener('DOMContentLoaded', loadNotionWords);
+
+// --- 노션에 "이 단어 달성했어!" 하고 V체크(✅) 남기는 함수 ---
+async function checkWordAsDoneInNotion(pageId) {
+    const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
+    try {
+        await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                properties: { '달성': { checkbox: true } }
+            })
+        });
+        console.log("노션에 달성 체크 완료!");
+    } catch(e) { console.error("노션 업데이트 실패:", e); }
+}
+
+// --- 배경 파티클 ---
 (function(){
   try {
     const wrap = document.getElementById('bgFloats');
@@ -432,9 +319,9 @@ const WORD_DATABASES = {
     const icons = ['📕','📙','📒','📗','📘','📓','📔','📚','📝','🎓'];
     for(let i=1; i<=10; i++){
       const inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = 'bk'+i; inp.className = 'book-cb'; inp.value = i;
-      if(i===7) inp.checked = true; 
+      if(i===1) inp.checked = true; // 기본으로 1단원 체크
       const lbl = document.createElement('label'); lbl.htmlFor = 'bk'+i; lbl.className = 'btn-label book-label';
-      lbl.innerHTML = `${icons[i-1]} ${i}번`;
+      lbl.innerHTML = `${icons[i-1]} L${i}`;
       grid.appendChild(inp); grid.appendChild(lbl);
     }
   } catch(e) { console.error(e); }
@@ -446,41 +333,29 @@ let currentProfile = 'son', wrongWords = [];
 let quizState = {};
 
 function getStorageKey() { return `minmin_eng_wrong_${currentProfile}`; }
-
-// 화면 전환 함수
 function showScreen(id){ 
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); 
   document.getElementById(id).classList.add('active'); 
   window.scrollTo(0,0); 
 }
 
-// 💥 프로필 선택 (클릭 시 작동하는 메인 함수)
 function selectProfile(profile) {
   currentProfile = profile;
-  
   const badge = document.getElementById('currentUserBadge');
   if(badge) {
-    badge.innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들' : '현재 사용자: 👧 둘째 딸';
+    badge.innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들 (민수)' : '현재 사용자: 👧 둘째 딸';
   }
-  
   loadWrongWords();
   showScreen('screen-setup');
 }
 
-function goSetup() { 
-  loadWrongWords(); 
-  showScreen('screen-setup'); 
-}
+function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
 
-// 🛡️ 무적 방어막이 쳐진 로컬 스토리지 함수들
 function loadWrongWords() {
   try {
     const saved = localStorage.getItem(getStorageKey());
     wrongWords = saved ? JSON.parse(saved) : [];
-  } catch (error) {
-    console.warn("로컬 저장소를 불러오는데 실패했습니다.", error);
-    wrongWords = []; // 에러 시 빈 배열로 리셋하여 멈춤 방지
-  }
+  } catch (error) { wrongWords = []; }
   const badge = document.getElementById('wrongBadge');
   if(badge) badge.textContent = wrongWords.length;
 }
@@ -499,7 +374,6 @@ function removeWrongWord(w) {
   try { localStorage.setItem(getStorageKey(), JSON.stringify(wrongWords)); } catch(e){}
 }
 
-// TTS (소리)
 function speakWord(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -512,17 +386,29 @@ function speakCurrentWord() {
   if(q) speakWord(q.eng);
 }
 
-// 게임 시작
+// 💡 단어 가져올 때 프로필 이름으로 필터링!
 function getSelectedWordsPool() {
   const activeBooks = [...document.querySelectorAll('.book-cb:checked')].map(cb => parseInt(cb.value));
   let pool = [];
-  activeBooks.forEach(num => { if(WORD_DATABASES[num]) pool = pool.concat(WORD_DATABASES[num]); });
+  
+  // 현재 선택된 프로필의 노션 이름 설정 (예: 'son' 이면 '민수')
+  const targetPersonName = currentProfile === 'son' ? '민수' : '둘째이름(수정필요)';
+
+  activeBooks.forEach(num => { 
+      if(WORD_DATABASES[num]) {
+          // 해당 단원의 단어 중, 공부할 사람이 일치하거나 아예 비어있는 단어만 쏙 뽑아옵니다.
+          const filteredWords = WORD_DATABASES[num].filter(w => 
+              w.person === targetPersonName || w.person === ""
+          );
+          pool = pool.concat(filteredWords);
+      }
+  });
   return pool;
 }
 
 function startWordsQuiz() {
   const pool = getSelectedWordsPool();
-  if(pool.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 최소 하나의 단어장을 선택해 주세요! (7번 추천)'; return; }
+  if(pool.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 선택한 단원/프로필에 맞는 단어가 아직 노션에 없습니다!'; return; }
   document.getElementById('warnMsg').textContent = '';
   
   const shuffled = [...pool].sort(()=>Math.random()-0.5).slice(0, 10);
@@ -544,7 +430,6 @@ function startWrongWords() {
 }
 function retryQuiz() { quizState.isWrongMode ? startWrongWords() : startWordsQuiz(); }
 
-// 퀴즈 렌더링
 function renderQuestion() {
   if (quizState.current >= quizState.pool.length) { showQuizResult(); return; }
   
@@ -586,7 +471,6 @@ function renderQuestion() {
   setTimeout(() => inputEl.focus(), 100);
 }
 
-// 정답 확인
 function submitAnswer() {
   if (quizState.current >= quizState.pool.length) return;
   const input = document.getElementById('answerInput').value.trim().toLowerCase();
@@ -596,25 +480,28 @@ function submitAnswer() {
   
   let isCorrect = false;
   if (quizState.mode === 'eng-to-kor') {
-      // 1. 아이가 입력한 값에서 괄호() 안의 내용과 띄어쓰기를 싹 무시합니다.
       const cleanInput = input.replace(/\([^)]*\)/g, '').replace(/\s+/g, '');
-      
-      // 2. 문제의 정답(kor)을 쉼표(,) 기준으로 쪼갠 뒤, 각각 괄호와 띄어쓰기를 지웁니다.
       const validAnswers = item.kor.split(',').map(ans => 
           ans.replace(/\([^)]*\)/g, '').replace(/\s+/g, '')
       );
-      
-      // 3. 아이가 입력한 글자가 쪼개진 정답들 중 하나와 일치하면 무조건 정답 인정!
       isCorrect = validAnswers.includes(cleanInput) && cleanInput !== "";
   } else {
       isCorrect = (input === item.eng.toLowerCase().trim());
   }
+
   if (isCorrect) {
       inpBox.className = "main-input correct";
       fb.style.color = "green";
       fb.textContent = ["🎯 정답입니다! Excellent!", "🎉 완벽해요! Great Job!", "⭐ 정답이에요! Beautiful!"][Math.floor(Math.random()*3)];
       quizState.score += 10;
       removeWrongWord(item);
+      
+      // 🚀 정답을 맞히면 노션의 '달성' 칸에 체크박스를 칠합니다! (오답노트 모드가 아닐 때만)
+      if(!quizState.isWrongMode && item.id && !item.isDone) {
+          checkWordAsDoneInNotion(item.id);
+          item.isDone = true; // 게임 중 중복 체크 방지
+      }
+
       quizState.current++;
       setTimeout(renderQuestion, 1000);
   } else {
@@ -636,11 +523,8 @@ function showQuizResult() {
   showScreen('screen-result');
 }
 
-// 🖨️ 인쇄소
-function openPrintShop() {
-  showScreen('screen-print');
-  loadPrintList();
-}
+// 🖨️ 인쇄소 (이하 기존 코드 동일)
+function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
 
 function loadPrintList() {
   const src = document.querySelector('input[name="printSource"]:checked').value;
@@ -672,11 +556,10 @@ function executePrint() {
   const src = document.querySelector('input[name="printSource"]:checked').value;
   const list = src === 'selected' ? getSelectedWordsPool() : wrongWords;
   const selectedWords = checkedBoxes.map(cb => list[parseInt(cb.value)]);
-  
   const style = document.querySelector('input[name="printStyle"]:checked').value;
   const printArea = document.getElementById('print-area');
   
-  let title = currentProfile === 'son' ? '👦 첫째 아들 영어 학습지' : '👧 둘째 딸 영어 학습지';
+  let title = currentProfile === 'son' ? '👦 첫째 아들 (민수) 영어 학습지' : '👧 둘째 딸 영어 학습지';
   title += style === 'test' ? ' [단어 테스트지]' : ' [글씨 쓰기 노트]';
   
   let html = `<div class="print-title">${title}</div>`;
@@ -702,7 +585,6 @@ function executePrint() {
     });
   }
   html += `</tbody></table>`;
-  
   html += `<div class="print-ans-sheet"><strong>🔑 [엄마 아빠 전용 정답 확인 해설지]</strong><br><table style="width:100%; font-size:10pt; margin-top:10px; line-height:1.8;"><tr>`;
   selectedWords.forEach((w, i) => {
     html += `<td style="width:25%; border:none;">${i+1}번: <b>${w.eng}</b></td>`;
