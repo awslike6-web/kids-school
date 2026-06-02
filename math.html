@@ -40,7 +40,9 @@
   .btn-label .icon { font-size: 1.6rem; margin-bottom: 4px; }
   .btn-label:hover { border-color: var(--sky); transform: scale(1.04); }
   
-  input[type="checkbox"]:checked + .times-label { color: #fff; transform: scale(1.07); }
+  /* 💡 구구단 버튼 체크 시 파란색으로 예쁘게 변하도록 수정! */
+  input[type="checkbox"]:checked + .times-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.07); }
+  
   input[name="opMode"]:checked + .btn-label, input[name="printSource"]:checked + .btn-label { background: var(--mint); border-color: var(--mint); color: #fff; transform: scale(1.06); }
   input[name="levelMode"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.06); }
   input[name="digitMode"]:checked + .btn-label, input[name="printCol"]:checked + .btn-label { background: var(--purple); border-color: var(--purple); color:#fff; transform: scale(1.06); }
@@ -89,11 +91,7 @@
   .falling-arena { position: relative; width: 100%; max-width: 520px; height: 58vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
   .fall-ball { position: absolute; width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; cursor: pointer; user-select: none; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
 
-  /* 풍선이 부드럽게 떨어지게 만드는 가상 애니메이션 정의 */
-  @keyframes falling {
-    0% { top: -80px; }
-    100% { top: 100%; }
-  }
+  @keyframes falling { 0% { top: -80px; } 100% { top: 100%; } }
 
   #screen-typing { background: linear-gradient(160deg, #fff9f0 0%, #f0f8ff 100%); }
   .typing-question-card { background: #fff; border-radius: 28px; padding: 36px 40px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.10); margin-bottom: 20px; border: 3px solid var(--yellow); }
@@ -127,7 +125,6 @@
   .result-emoji { font-size: 4rem; margin-bottom: 10px; }
   .result-score { font-size: 3.5rem; color: var(--pink); margin-bottom: 8px; }
 
-  /* 인쇄 레이아웃 CSS */
   @media print {
     body * { visibility: hidden !important; }
     #print-area, #print-area * { visibility: visible !important; }
@@ -153,8 +150,8 @@
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <p class="subtitle">누가 공부할 차례인가요?</p>
   <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 400px; margin-top: 20px;">
-    <button class="profile-btn son" onclick="selectProfile('son')"><span class="profile-emoji">👦</span><span>첫째 아들</span></button>
-    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span class="profile-emoji">👧</span><span>둘째 딸</span></button>
+    <button class="profile-btn son" onclick="selectProfile('son')"><span class="profile-emoji">👦</span><span>첫째 아들 (민수)</span></button>
+    <button class="profile-btn daughter" onclick="selectProfile('daughter')"><span class="profile-emoji">👧</span><span>둘째 딸 (민서)</span></button>
   </div>
 </div>
 
@@ -175,6 +172,7 @@
   <div class="card" id="card-level1">
     <div class="card-title">📚 구구단 선택</div>
     <div style="display: flex; gap: 8px; margin-bottom: 10px;"><button class="tiny-btn" onclick="selectAll(true)">전체 선택</button><button class="tiny-btn" onclick="selectAll(false)">전체 해제</button></div>
+    <!-- 💡 바로 이 구역(timesGrid)에 버튼들이 나타납니다! -->
     <div class="grid-4" id="timesGrid"></div>
   </div>
 
@@ -304,7 +302,7 @@ function toggleLevel(){
 
 function selectProfile(profile) {
   currentProfile = profile;
-  document.getElementById('currentUserBadge').innerHTML = profile === 'son' ? '현재 사용자: 👦 첫째 아들' : '현재 사용자: 👧 둘째 딸';
+  document.getElementById('currentUserBadge').innerHTML = profile === 'son' ? '현재 사용자: 👦 민수' : '현재 사용자: 👧 민서';
   document.getElementById(profile === 'son' ? 'lvl-2' : 'lvl-1').checked = true;
   
   const savedW = localStorage.getItem(getWrongKey()); wrongNotes = savedW ? JSON.parse(savedW) : [];
@@ -375,7 +373,6 @@ function startGame(mode){
     saveToRecent(q);
   }
   
-  // 🔧 [속도 값 수집 및 엔진 복구 핵심 파트]
   const speed = document.querySelector('input[name="speedMode"]:checked').value;
   gameState = { mode, questions, current: 0, score: 0, correctCount: 0, wrongCount: 0, isWrongNoteMode: false, speedMode: speed };
   
@@ -390,7 +387,6 @@ function startWrongNote() {
   initTyping();
 }
 
-// 인쇄소 
 function openPrintShop() {
   showScreen('screen-print');
   document.getElementById(currentProfile === 'son' ? 'pc-1' : 'pc-3').checked = true;
@@ -422,7 +418,6 @@ function executePrint() {
   printArea.innerHTML = html; printArea.style.display = 'block'; window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 1000); 
 }
 
-// 🔧 [객관식 떨어지는 풍선 타이머 및 애니메이션 완전 복구 수술]
 let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 function initFalling(){ gameState.lives = 3; showScreen('screen-falling'); nextFallingQ(); }
 function nextFallingQ(){
@@ -434,14 +429,11 @@ function nextFallingQ(){
   const arr = [...choices].sort(()=>Math.random()-0.5);
   clearFallingBalls(); const arena = document.getElementById('fallingArena'); const colors = ['#FF6B9D','#6EC6F5','#FFD93D','#4ECDC4','#A78BFA'];
   
-  // 아버님이 설정하신 속도에 맞춰 풍선이 내려오는 시간을 다르게 연동합니다.
   const speed = gameState.speedMode === 'turtle' ? 18000 : 5500; 
   
   arr.forEach((val, i) => {
     const ball = document.createElement('div'); ball.className = 'fall-ball'; ball.textContent = val; ball.style.background = colors[i]; ball.style.left = (10 + Math.random()*260) + 'px';
     const delay = i * 400; 
-    
-    // 이 구문이 들어가야 CSS 애니메이션을 타고 풍선이 아래로 이동합니다.
     ball.style.animation = `falling ${speed}ms linear ${delay}ms forwards`;
     
     ball.addEventListener('click', ()=> {
@@ -450,7 +442,6 @@ function nextFallingQ(){
     }); arena.appendChild(ball); fallingBalls.push(ball); fallingTimers.push(setTimeout(()=> ball.remove(), delay+speed));
   });
   
-  // 상단 바 시간 연동 타이머
   clearInterval(timerInterval); 
   const totalMaxTime = gameState.speedMode === 'turtle' ? 20000 : 7500;
   timeLeft = totalMaxTime; 
@@ -521,6 +512,32 @@ function showResult(){
   document.getElementById('r-detail').innerHTML = detailTxt; showScreen('screen-result');
 }
 
+// 🚀 [복구 완료] 구구단(2~9단) 버튼 자동 생성기! 
+(function(){
+  const grid = document.getElementById('timesGrid');
+  if(grid) {
+    grid.innerHTML = '';
+    for(let d=2; d<=9; d++){
+      const inp = document.createElement('input');
+      inp.type = 'checkbox'; inp.id = 'cb'+d; inp.className = 'times-cb'; inp.value = d;
+      inp.checked = true; // 기본적으로 전부 체크되게 세팅
+      
+      const lbl = document.createElement('label');
+      lbl.htmlFor = 'cb'+d; lbl.className = 'btn-label times-label';
+      lbl.innerHTML = `${d}단`;
+      
+      grid.appendChild(inp);
+      grid.appendChild(lbl);
+    }
+  }
+})();
+
+// 🚀 [복구 완료] 구구단 전체 선택/해제 기능
+function selectAll(flag) {
+  document.querySelectorAll('.times-cb').forEach(cb => cb.checked = flag);
+}
+
+// 초기화 실행
 (function(){ selectAll(true); })();
 </script>
 </body>
