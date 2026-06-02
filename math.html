@@ -121,7 +121,8 @@
   .v-input:focus { border-color: var(--mint); background: #fff; }
   .v-input.correct { border-color: var(--green); background: #f0fff4; }
   .v-input.wrong { border-color: var(--pink); background: #fff5f5; }
-  .v-input.tiny { font-size: 1.05rem; width: 50px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; background: #fffef0; }
+  .v-input.tiny { font-size: 1.05rem; width: 50px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; background: #fffef0; outline: none; }
+  .v-input.tiny:focus { border-color: var(--sky); background: #fff; }
   .v-input.step { width: 130px; font-size: 1.5rem; margin-bottom: 6px; border-color: #dcdde1; }
 
   #screen-result { justify-content: center; }
@@ -164,12 +165,14 @@
     </div>
   </div>
 
+  <!-- 오빠 전용 구구단 세팅 -->
   <div class="card" id="card-level1">
     <div class="card-title">📚 구구단 선택</div>
     <div style="display: flex; gap: 8px; margin-bottom: 10px;"><button class="tiny-btn" onclick="selectAll(true)">전체 선택</button><button class="tiny-btn" onclick="selectAll(false)">전체 해제</button></div>
     <div class="grid-4" id="timesGrid"></div>
   </div>
 
+  <!-- 오빠 전용 곱셈 세부 세팅 -->
   <div class="card" id="card-level2" style="display:none;">
     <div class="card-title">⚙️ 고학년 세부 설정</div>
     <div class="sub-title-text">자릿수 (곱셈)</div>
@@ -178,7 +181,7 @@
     <div class="grid-2"><input type="radio" name="carryMode" id="carry-no" value="no"><label for="carry-no" class="btn-label">없음 (워밍업)</label><input type="radio" name="carryMode" id="carry-yes" value="yes" checked><label for="carry-yes" class="btn-label">포함 (도전!)</label></div>
   </div>
 
-  <!-- 👧 저학년(민서) 전용 세부 설정 카드 -->
+  <!-- 👧 저학년(민서) 전용 덧셈/뺄셈 세부 설정 카드 -->
   <div class="card" id="card-low-level" style="display:none;">
     <div class="card-title">⚙️ 1학년 맞춤 세부 설정</div>
     <div class="sub-title-text">자릿수 선택</div>
@@ -407,7 +410,8 @@ function generateDaughterQuestion(op) {
 
   if (op === 'add') {
     sign = '＋';
-    if (digitMode === '11') { // 1자리 + 1자리
+    if (digitMode === '11') { 
+      // 1자리 + 1자리
       if (carryMode === 'no') {
         a = Math.floor(Math.random() * 8) + 1;
         b = Math.floor(Math.random() * (9 - a)) + 1;
@@ -416,7 +420,8 @@ function generateDaughterQuestion(op) {
         b = Math.floor(Math.random() * 8) + 2;
         if (a + b <= 10) b = 11 - a + Math.floor(Math.random() * 4);
       }
-    } else if (digitMode === '21') { // 2자리 + 1자리
+    } else if (digitMode === '21') { 
+      // 2자리 + 1자리
       if (carryMode === 'no') {
         let ten = (Math.floor(Math.random() * 8) + 1) * 10;
         let one = Math.floor(Math.random() * 9);
@@ -427,7 +432,8 @@ function generateDaughterQuestion(op) {
         b = Math.floor(Math.random() * 8) + 2;
         if (a % 10 + b < 10) b = 10 - (a % 10) + Math.floor(Math.random() * (9 - (10 - (a % 10))));
       }
-    } else { // 2자리 + 2자리
+    } else { 
+      // 2자리 + 2자리
       if (carryMode === 'no') {
         let a_ten = Math.floor(Math.random() * 7) + 1;
         let a_one = Math.floor(Math.random() * 9);
@@ -444,10 +450,12 @@ function generateDaughterQuestion(op) {
     ans = a + b;
   } else {
     sign = '－';
-    if (digitMode === '11') { // 1자리 - 1자리
+    if (digitMode === '11') { 
+      // 1자리 - 1자리
       a = Math.floor(Math.random() * 8) + 2;
       b = Math.floor(Math.random() * (a - 1)) + 1;
-    } else if (digitMode === '21') { // 2자리 - 1자리
+    } else if (digitMode === '21') { 
+      // 2자리 - 1자리
       if (carryMode === 'no') {
         let ten = (Math.floor(Math.random() * 8) + 1) * 10;
         let one = Math.floor(Math.random() * 8) + 1;
@@ -458,10 +466,11 @@ function generateDaughterQuestion(op) {
         b = Math.floor(Math.random() * 8) + 2;
         if (a % 10 >= b) b = (a % 10) + 1 + Math.floor(Math.random() * (9 - (a % 10)));
       }
-    } else { // 2자리 - 2자리
+    } else { 
+      // 2자리 - 2자리
       if (carryMode === 'no') {
         let a_ten = Math.floor(Math.random() * 7) + 2;
-        let a_one = Math.floor(Math.random() * 9);
+        let a_one = Math.floor(Math.random() * 10);
         let b_ten = Math.floor(Math.random() * (a_ten - 1)) + 1;
         let b_one = Math.floor(Math.random() * (a_one + 1));
         a = a_ten * 10 + a_one;
@@ -470,7 +479,6 @@ function generateDaughterQuestion(op) {
         a = Math.floor(Math.random() * 70) + 25;
         b = Math.floor(Math.random() * (a - 15)) + 12;
         if (a % 10 >= b % 10) {
-          let extra = (b % 10) - (a % 10) - 1;
           b = Math.floor(b / 10) * 10 + (a % 10) + 1 + Math.floor(Math.random() * 4);
         }
       }
