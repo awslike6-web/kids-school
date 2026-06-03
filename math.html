@@ -130,12 +130,29 @@
   .result-card { background: var(--card); border-radius: 30px; padding: 40px 32px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 16px 50px rgba(0,0,0,0.12); }
   .result-emoji { font-size: 4rem; margin-bottom: 10px; }
   .result-score { font-size: 3.5rem; color: var(--pink); margin-bottom: 8px; }
+
+  @media print {
+    body * { visibility: hidden !important; }
+    #print-area, #print-area * { visibility: visible !important; }
+    #print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; font-family: 'Jua', sans-serif; color: #000; background: #fff; }
+    body { background: #fff !important; min-height: auto; }
+    .print-header { text-align: center; font-size: 24pt; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+    .print-grid { display: grid; width: 100%; }
+    .print-grid.col-1 { grid-template-columns: 1fr; gap: 80px 20px; } 
+    .print-grid.col-2 { grid-template-columns: 1fr 1fr; gap: 60px 20px; } 
+    .print-grid.col-3 { grid-template-columns: 1fr 1fr 1fr; gap: 40px 10px; } 
+    .p-item { font-size: 18pt; letter-spacing: 2px; display: flex; align-items: flex-start; }
+    .p-num { font-size: 12pt; color: #555; margin-right: 8px; margin-top: 4px; }
+    .p-ans-key { margin-top: 80px; border-top: 1px dashed #999; padding-top: 20px; font-size: 11pt; color: #333; line-height: 1.6; break-inside: avoid; }
+  }
 </style>
 </head>
 <body>
 
 <div class="bg-floats" id="bgFloats"></div>
+<div id="print-area" style="display:none;"></div> 
 
+<!-- ════════════ 설정 대문 화면 ════════════ -->
 <div class="screen active" id="screen-setup">
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
@@ -160,9 +177,9 @@
     <div class="card-title">📈 곱셈/나눗셈 난이도</div>
     <div class="grid-2">
       <input type="radio" name="levelMode" id="lvl-1" value="1" checked onchange="updateVisibleCards()">
-      <label for="lvl-1" class="btn-label"><span class="icon">🌱</span>1단계 <small>(구구단)</small></label>
+      <label for="lvl-1" class="btn-label"><span class="icon" id="lvl1-icon">🌱</span>1단계 <small>(구구단)</small></label>
       <input type="radio" name="levelMode" id="lvl-2" value="2" onchange="updateVisibleCards()">
-      <label for="lvl-2" class="btn-label"><span class="icon">🌳</span>2단계 <small>(두 자릿수)</small></label>
+      <label for="lvl-2" class="btn-label"><span class="icon" id="lvl2-icon">🌳</span>2단계 <small>(두 자릿수)</small></label>
     </div>
   </div>
 
@@ -204,6 +221,47 @@
   <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
+<!-- ════════════ 인쇄소 화면 ════════════ -->
+<div class="screen" id="screen-print">
+  <h1 class="main-title">🖨️ 민민이네 <span>인쇄소</span></h1>
+  <p class="subtitle">오직 엄마 아빠를 위한 문제지 제작소!</p>
+  <div class="card">
+    <div class="card-title">📂 1. 출력할 문제 출처</div>
+    <div class="grid-2">
+      <input type="radio" name="printSource" id="ps-recent" value="recent" checked onchange="loadPrintList()">
+      <label for="ps-recent" class="btn-label">기출문제 (최근 50개)</label>
+      <input type="radio" name="printSource" id="ps-wrong" value="wrong" onchange="loadPrintList()">
+      <label for="ps-wrong" class="btn-label">내 오답노트</label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📄 2. 인쇄 레이아웃 설정</div>
+    <div class="grid-3">
+      <input type="radio" name="printCol" id="pc-1" value="1">
+      <label for="pc-1" class="btn-label">1단<br><small>(세로셈용)</small></label>
+      <input type="radio" name="printCol" id="pc-2" value="2" checked>
+      <label for="pc-2" class="btn-label">2단<br><small>(보통)</small></label>
+      <input type="radio" name="printCol" id="pc-3" value="3">
+      <label for="pc-3" class="btn-label">3단<br><small>(구구단)</small></label>
+    </div>
+    <div style="margin-top:14px; text-align:center;">
+      <input type="checkbox" id="print-ans-key" checked style="display:inline-block; width:auto; margin-right:5px;">
+      <label for="print-ans-key" style="font-size:0.95rem; cursor:pointer; user-select:none; font-weight:bold;">✅ 맨 밑에 조그맣게 정답지 포함하기</label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">✅ 3. 인쇄할 문제 고르기 (<span id="print-count">0</span>개 대기중)</div>
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <button class="tiny-btn" onclick="selectPrintAll(true)">전체 선택</button>
+      <button class="tiny-btn" onclick="selectPrintAll(false)">전체 해제</button>
+    </div>
+    <div id="print-list" style="max-height: 220px; overflow-y: auto; background: #fafafa; border: 2px solid #eee; border-radius: 12px; padding: 10px;"></div>
+  </div>
+  <button class="big-btn yellow-btn" onclick="executePrint()">🖨️ A4 용지로 인쇄하기</button>
+  <button class="big-btn back-btn" style="margin-top:10px;" onclick="showScreen('screen-setup')">← 설정으로 돌아가기</button>
+</div>
+
+<!-- ════════════ 퀴즈 화면들 ════════════ -->
 <div class="screen" id="screen-falling">
   <div class="game-header"><div class="game-stat-box">⭐ <span id="f-score">0</span></div><div class="game-stat-box">📝 <span id="f-qnum">1</span></div><div class="game-stat-box">❤️ <span id="f-lives">3</span></div></div>
   <div class="falling-question-box" id="f-question">? × ? = ?</div>
@@ -238,6 +296,10 @@
 </div>
 
 <script>
+// 🚀 [필수] API 설정 영역
+const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+
 let currentProfile = 'son'; 
 let currentTheme = '마인크래프트'; // 기본값 (로컬스토리지에서 읽어옴)
 let wrongNotes = [], recentQuestions = [];
@@ -428,11 +490,101 @@ function submitVertical(){
   handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('v-feedbackMsg'), nextVerticalQ);
 }
 
-// 결과 및 기타 유틸
+// 🏆 결과 화면 및 🚀 노션 보상 자동 적립 (20개 롤오버 로직 적용)
 function showResult(){
   document.getElementById('r-score').textContent = gameState.score + '점';
+  
+  let detailTxt = `${gameState.questions.length}문제 중 ${gameState.correctCount}개 정답!`;
+  if(!gameState.isWrongNoteMode && gameState.wrongCount > 0) detailTxt += `<br><small style="color:var(--pink)">틀린 ${gameState.wrongCount}문제는 오답노트에 저장했어요!</small>`;
+  else if(gameState.isWrongNoteMode && gameState.correctCount > 0) detailTxt += `<br><small style="color:var(--mint)">맞힌 문제는 오답노트에서 지웠어요!</small>`;
+  
+  document.getElementById('r-detail').innerHTML = detailTxt; 
   showScreen('screen-result');
+
+  // 맞힌 개수만큼 노션 보상 적립 실행!
+  if (gameState.correctCount > 0) {
+    saveRewardToNotion(gameState.correctCount);
+  }
 }
+
+// 🚀 노션 보상 통신 함수
+async function saveRewardToNotion(earned) {
+  if (earned <= 0) return;
+  
+  const userName = localStorage.getItem('currentUserName') || (currentProfile === 'son' ? '민수' : '민서');
+  if (userName === '아빠' || userName === '엄마') return; // 부모님은 보상 패스
+
+  const detailEl = document.getElementById('r-detail');
+  const originalText = detailEl.innerHTML;
+  detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#0288D1; font-weight:bold;">⏳ 노션에 보상(${earned}개) 저장 중...</span>`;
+
+  try {
+    // 1. 현재 인벤토리 읽어오기
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filter: { property: "이름", title: { equals: userName } }
+      })
+    });
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+
+    const page = data.results[0];
+    const pageId = page.id;
+    const props = page.properties;
+
+    let level = props["수학 레벨"]?.number || 1;
+    let diamond = props["다이아몬드 개수"]?.number || 0;
+    let slime = props["슬라임 파츠 개수"]?.number || 0;
+    const theme = props["현재 테마"]?.select?.name || (userName === '민수' ? '마인크래프트' : '슬라임');
+
+    let isLevelUp = false;
+    let updateProps = {};
+    let currentCount = 0;
+    let rewardName = theme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
+
+    // 2. 20개 누적 시 레벨업 및 보상 리셋 계산
+    if (theme === '마인크래프트') {
+      let total = diamond + earned;
+      let levelUps = Math.floor(total / 20);
+      if (levelUps > 0) { isLevelUp = true; level += levelUps; total = total % 20; }
+      currentCount = total;
+      updateProps = { "다이아몬드 개수": { number: total }, "수학 레벨": { number: level } };
+    } else {
+      let total = slime + earned;
+      let levelUps = Math.floor(total / 20);
+      if (levelUps > 0) { isLevelUp = true; level += levelUps; total = total % 20; }
+      currentCount = total;
+      updateProps = { "슬라임 파츠 개수": { number: total }, "수학 레벨": { number: level } };
+    }
+
+    // 3. 노션 데이터 덮어쓰기
+    await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ properties: updateProps })
+    });
+
+    // 4. 성공 메시지로 화면 갱신
+    document.getElementById('notion-loading-msg').style.display = 'none';
+    
+    let resultMsg = `<div style="background:rgba(255,255,255,0.8); border:2px solid #6EC6F5; padding:10px; border-radius:12px; margin-top:10px;">`;
+    resultMsg += `<b style="color:#0288D1;">${rewardName} ${earned}개 획득!</b> (현재: ${currentCount}/20)<br>`;
+    if (isLevelUp) {
+      resultMsg += `<span style="font-size:1.3rem; color:#FF6B9D; display:inline-block; margin-top:5px; font-weight:bold; animation: popBlock 0.5s ease;">🎉 레벨 업! Lv.${level} 달성! 🎉</span>`;
+    }
+    resultMsg += `</div>`;
+    
+    detailEl.innerHTML += resultMsg;
+
+  } catch (err) {
+    console.error("보상 저장 실패:", err);
+    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패 (인터넷 연결 확인)`;
+    document.getElementById('notion-loading-msg').style.color = 'var(--pink)';
+  }
+}
+
 function retryGame() { startGame(gameState.mode); }
 
 (function(){
@@ -447,7 +599,7 @@ function selectAll(flag) { document.querySelectorAll('.times-cb').forEach(cb => 
 
 let fallingTimers=[], timerInterval=null;
 function clearFallingGame(){ clearInterval(timerInterval); fallingTimers.forEach(clearTimeout); }
-function initFalling(){ /* 기존 Falling 게임 로직 생략 없이 동일하게 작동하도록 보존 */ alert("떨어지는 모드는 추후 업데이트됩니다!"); goSetup(); }
+function initFalling(){ alert("떨어지는 모드는 추후 업데이트됩니다!"); goSetup(); }
 </script>
 </body>
 </html>
