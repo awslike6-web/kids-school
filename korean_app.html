@@ -254,24 +254,18 @@
     20%, 60% { transform: translateX(-6px); } 
     40%, 80% { transform: translateX(6px); } 
   }
-  @keyframes bounceObj {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-  }
 </style>
 </head>
 <body>
 
 <div class="bg-floats" id="bgFloats"></div>
 
-<!-- 로딩 화면 -->
 <div class="screen active" id="screen-loading">
   <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
   <p id="loadingSubtitle">노션에서 단어를 불러오고 있어요...</p>
   <div class="loading" style="margin-top:20px;"></div>
 </div>
 
-<!-- 설정 화면 -->
 <div class="screen" id="screen-setup">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
@@ -296,7 +290,6 @@
   <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 메인으로 나가기</button>
 </div>
 
-<!-- 🎯 순서 선택 전용 대기화면 스크린 구역 -->
 <div class="screen" id="screen-order-select">
   <h1 class="main-title"><span class="accent2">출제 방식</span><br><span class="accent">선택하기</span></h1>
   <div class="user-welcome" style="margin-bottom:30px;">문제를 어떤 순서로 풀어볼까요?</div>
@@ -311,7 +304,6 @@
   <button class="big-btn back-btn" onclick="goSetup()">🔙 이전 단계로</button>
 </div>
 
-<!-- 민수 퀴즈 화면 -->
 <div class="screen" id="screen-minsu-quiz">
   <div class="game-header">
     <div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div>
@@ -339,7 +331,6 @@
   </div>
 </div>
 
-<!-- 민서 받아쓰기 화면 -->
 <div class="screen" id="screen-minser-dictation">
   <div class="game-header">
     <div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div>
@@ -369,7 +360,6 @@
   </div>
 </div>
 
-<!-- 결과 모달 오버레이 -->
 <div class="result-overlay" id="resultOverlay" onclick="closeResult(event)">
   <div class="result-modal" id="resultModal" onclick="event.stopPropagation()">
     <div class="result-emoji" id="resultEmoji">🎉</div>
@@ -377,21 +367,6 @@
     <div class="result-message" id="resultMessage">좋은 답변입니다!</div>
     <div class="result-stats" id="resultStats"></div>
     <button class="btn btn-primary" onclick="nextQuestion()" style="width:100%;">다음 문제</button>
-  </div>
-</div>
-
-<!-- 소원권 달성 특별 팝업 모달 -->
-<div class="result-overlay" id="wishTicketOverlay" onclick="closeWishTicket()">
-  <div class="result-modal" style="border: 4px solid var(--yellow); box-shadow: 0 0 30px rgba(255, 217, 61, 0.6);" onclick="event.stopPropagation()">
-    <div style="font-size: 4.5rem; animation: bounceObj 1s infinite;">🎫</div>
-    <div class="result-title" style="color: var(--orange); font-size: 2rem; margin-bottom: 6px;">소원권 획득!</div>
-    <div class="result-message" style="font-size: 1.15rem; margin-bottom: 14px; color: var(--dark);">
-      누적 보상 <b style="color:var(--pink);">150개</b> 돌파 기념!<br>특별한 소원권이 지급되었습니다 🎉
-    </div>
-    <div style="background: rgba(167, 139, 250, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--purple); font-size: 1.3rem; margin-bottom: 24px;">
-      총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개
-    </div>
-    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px;">신난다! 닫기</button>
   </div>
 </div>
 
@@ -415,7 +390,7 @@ let score = 0;
 let correctCount = 0; 
 let totalCount = 0;
 
-// 순차/랜덤 필터링용 임시 중간 저장소
+// 🎯 순차/랜덤 필터링용 임시 중간 저장소
 let filteredPool = [];
 
 function updateScoreUI() {
@@ -434,13 +409,11 @@ function initKoreanVoice() {
   if (!window.speechSynthesis) return;
   const voices = window.speechSynthesis.getVoices();
   
-  // 1순위: 구글(Google) 또는 삼성(SAMSUNG)의 고품질 한국어 음성 탐색
   bestKoreanVoice = voices.find(v => 
     (v.lang === 'ko-KR' || v.lang === 'ko_KR') && 
     (v.name.includes('Google') || v.name.includes('SAMSUNG') || v.name.includes('구글') || v.name.includes('삼성'))
   );
   
-  // 2순위: 찾지 못한 경우 일반 한국어 음성으로 대체
   if (!bestKoreanVoice) {
     bestKoreanVoice = voices.find(v => v.lang === 'ko-KR' || v.lang === 'ko_KR');
   }
@@ -453,22 +426,17 @@ if (window.speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) {
 function speakKorean(text) { 
   if (!('speechSynthesis' in window)) return;
   
-  // 진행중인 음성이 있으면 먼저 취소
   window.speechSynthesis.cancel(); 
-  
   const u = new SpeechSynthesisUtterance(text); 
-  
-  // 🛡️ GC 방어막: 생성한 음성 객체를 전역 변수에 연결하여 생명주기 보존
   window.currentUtterance = u;
   
   u.lang = 'ko-KR'; 
-  u.rate = 0.85; // 속도 최적화 (0.65 -> 0.85)
-  u.pitch = 1.0; // 기본 음높이 강제 지정
+  u.rate = 0.85; 
+  u.pitch = 1.0; 
   
   if (!bestKoreanVoice) initKoreanVoice();
   if (bestKoreanVoice) u.voice = bestKoreanVoice; 
   
-  // 음성 재생이 완전히 끝나면 전역 변수를 비워줌
   u.onend = function() {
     window.currentUtterance = null;
   };
@@ -483,28 +451,45 @@ function speakCurrentWord() {
 }
 // ==========================================
 
-// 노션 단어 불러오기
+// 🎯 노션 단어 불러오기 (100개 제한 돌파 엔진 적용 완료)
 async function loadKoreanWords() {
   showScreen('screen-loading'); 
   document.getElementById('loadingSubtitle').textContent = `${currentUserName}의 단어를 불러오고 있어요...`;
   
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, { 
-      method: "POST", 
-      headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ 
+    let allResults = []; 
+    let hasMore = true; 
+    let nextCursor = undefined;
+
+    // while 루프를 통해 100개가 넘어도 끝까지 싹 다 긁어옴
+    while (hasMore) {
+      const bodyData = { 
         filter: { property: "대상", select: { equals: currentUserName } }, 
         page_size: 100 
-      }) 
-    }); 
-    
-    const data = await response.json(); 
-    if (!data.results || data.results.length === 0) throw new Error("단어 없음");
+      };
+      if (nextCursor) bodyData.start_cursor = nextCursor;
 
-    allFetchedWords = data.results.map(item => {
+      const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, { 
+        method: "POST", 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(bodyData) 
+      }); 
+      
+      const data = await response.json(); 
+      if (!data.results) throw new Error("단어 없음");
+
+      allResults = allResults.concat(data.results);
+      hasMore = data.has_more;
+      nextCursor = data.next_cursor;
+    }
+
+    if (allResults.length === 0) throw new Error("단어 없음");
+
+    allFetchedWords = allResults.map(item => {
       const props = item.properties; 
       let sStr = "기본과목";
       
+      // 순정 이름표 '과목' 완벽 호환
       if (props["과목"]) {
         if (props["과목"].select) sStr = props["과목"].select.name;
         else if (props["과목"].multi_select && props["과목"].multi_select.length > 0) sStr = props["과목"].multi_select[0].name;
@@ -515,7 +500,7 @@ async function loadKoreanWords() {
         word: props["단어"]?.title?.[0]?.plain_text || '', 
         hint: props["힌트"]?.rich_text?.[0]?.plain_text || props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
         meaning: props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
-        stage: props["단계"]?.number || 1, 
+        stage: props["단계"]?.number || 1, // 순정 이름표 '단계' 완벽 호환
         subject: sStr 
       };
     });
@@ -605,14 +590,12 @@ function startQuiz() {
     return; 
   }
   
-  // 1차 필터링 풀 가동
   filteredPool = allFetchedWords.filter(w => w.subject === currentSubject && selectedStages.includes(w.stage));
   if(filteredPool.length === 0) { 
     document.getElementById('warnMsg').textContent = '⚠️ 이 단원에 단어가 없어요!'; 
     return; 
   }
 
-  // 바로 문제를 출제하지 않고 순차/랜덤 선택 스크린 화면을 로드!
   showScreen('screen-order-select');
 }
 
@@ -758,10 +741,6 @@ function closeResult(e) {
   document.getElementById('resultOverlay').classList.remove('active'); 
 }
 
-function closeWishTicket() {
-  document.getElementById('wishTicketOverlay').classList.remove('active');
-}
-
 function nextQuestion() { 
   closeResult(); 
   currentIndex++; 
@@ -770,29 +749,6 @@ function nextQuestion() {
   } else { 
     currentUser === 'son' ? displayMinsuQuiz() : displayMinserDictation(); 
   } 
-}
-
-// 🚀 다이내믹 레벨업 계산 엔진
-function calculateLevelInfo(totalRewards) {
-  let level = 1;
-  let requiredForNext = 20; 
-  let accumulatedForCurrentLevel = 0; 
-
-  while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
-    accumulatedForCurrentLevel += requiredForNext;
-    level++;
-    requiredForNext = 20 + (level - 1) * 5; 
-  }
-
-  let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
-  let remainingForNext = requiredForNext - currentLevelProgress; 
-
-  return {
-    level: level,
-    requiredForNext: requiredForNext,
-    remainingForNext: remainingForNext,
-    currentLevelProgress: currentLevelProgress
-  };
 }
 
 async function completeSession() {
@@ -808,27 +764,12 @@ async function completeSession() {
     let rewardResultMsg = "";
     if (correctCount > 0 && currentUserName !== '아빠' && currentUserName !== '엄마') {
       const res = await saveRewardToNotion(correctCount);
-      
-      // 다이내믹 UI 및 남은 보상 개수 출력
       rewardResultMsg = `
-        <div style="background:#fff; border:2px dashed var(--purple); padding:16px; border-radius:12px; margin:15px 0; text-align: left;">
-          <div style="font-size: 1.15rem; margin-bottom: 8px;">
-            <b style="color:var(--purple);">${res.rewardName} x ${res.currentCount}</b>
-          </div>
-          <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
-            다음 레벨(Lv.${res.level + 1})까지 <b>${res.remainingForNext}</b>개 남음!
-          </div>
-          ${res.isLevelUp ? `<div style="text-align:center; font-size:1.3rem; color:#FF6B9D; font-weight:bold; margin-top:10px;">🎉 용어 레벨 업! Lv.${res.level} 🎉</div>` : ''}
+        <div style="background:#fff; border:2px dashed var(--purple); padding:12px; border-radius:12px; margin:15px 0;">
+          <b style="color:var(--purple);">${res.rewardName} 저금통 총합: ${res.currentCount}개</b><br>
+          ${res.isLevelUp ? `<span style="font-size:1.2rem; color:#FF6B9D; font-weight:bold; display:inline-block; margin-top:5px;">🎉 용어 레벨 업! Lv.${res.level} 🎉</span>` : ''}
         </div>
       `;
-
-      // 소원권 획득 시 팝업 지연 호출
-      if (res.isWishTicketEarned) {
-        setTimeout(() => {
-          document.getElementById('wishTicketCountDisplay').textContent = res.newTickets;
-          document.getElementById('wishTicketOverlay').classList.add('active');
-        }, 1500);
-      }
     }
     
     document.querySelectorAll('.loading').forEach(l => l.style.display = 'none'); 
@@ -851,69 +792,54 @@ async function completeSession() {
 
 async function saveRewardToNotion(earned) {
   const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-    method: "POST", headers: { "Content-Type": "application/json" }, 
+    method: "POST", 
+    headers: { "Content-Type": "application/json" }, 
     body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName } } }) 
   });
-  const data = await response.json(); const page = data.results[0]; const props = page.properties;
+  
+  const data = await response.json(); 
+  const page = data.results[0]; 
+  const props = page.properties;
 
+  let level = props["용어 레벨"]?.number || 1; 
   let diamond = props["다이아몬드 개수"]?.number || 0; 
   let slime = props["슬라임 파츠 개수"]?.number || 0;
-  let tickets = props["소원권 개수"]?.number || 0;
   
-  let previousTotal = 0;
-  let currentTotal = 0;
+  let isLevelUp = false; 
+  let updateProps = {}; 
+  let currentCount = 0; 
   let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
-  // 1. 기존 및 현재 보상 총합 계산
   if (currentTheme === '마인크래프트') {
-    previousTotal = diamond;
-    currentTotal = diamond + earned;
+    let total = diamond + earned; 
+    if (total >= level * 20) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+    currentCount = total; 
+    updateProps = { "다이아몬드 개수": { number: total }, "용어 레벨": { number: level } };
   } else {
-    previousTotal = slime;
-    currentTotal = slime + earned;
+    let total = slime + earned; 
+    if (total >= level * 20) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+    currentCount = total; 
+    updateProps = { "슬라임 파츠 개수": { number: total }, "용어 레벨": { number: level } };
   }
-
-  // 2. 다이내믹 레벨업 엔진을 통한 레벨 계산
-  const prevLevelInfo = calculateLevelInfo(previousTotal);
-  const currLevelInfo = calculateLevelInfo(currentTotal);
-  let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
-
-  // 3. 소원권 획득 판별 (150의 배수 돌파 시)
-  let earnedTickets = Math.floor(currentTotal / 150) - Math.floor(previousTotal / 150);
-  let newTickets = tickets + earnedTickets;
-  let isWishTicketEarned = earnedTickets > 0;
-
-  // 4. 노션 DB 업데이트 데이터 세팅
-  let updateProps = {
-    "용어 레벨": { number: currLevelInfo.level },
-    "소원권 개수": { number: newTickets }
-  };
-
-  if (currentTheme === '마인크래프트') { updateProps["다이아몬드 개수"] = { number: currentTotal }; } 
-  else { updateProps["슬라임 파츠 개수"] = { number: currentTotal }; }
   
   await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
-    method: "PATCH", headers: { "Content-Type": "application/json" }, 
+    method: "PATCH", 
+    headers: { "Content-Type": "application/json" }, 
     body: JSON.stringify({ properties: updateProps }) 
   });
   
-  return { 
-    earned: earned, 
-    currentCount: currentTotal, 
-    level: currLevelInfo.level, 
-    isLevelUp: isLevelUp, 
-    rewardName: rewardName,
-    remainingForNext: currLevelInfo.remainingForNext,
-    isWishTicketEarned: isWishTicketEarned,
-    newTickets: newTickets
-  };
+  return { earned, currentCount, level, isLevelUp, rewardName };
 }
 
 function toggleProfileManually() {
   if (currentUser === 'son') {
-    currentUser = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임';
+    currentUser = 'daughter';
+    currentUserName = '민서';
+    currentTheme = '슬라임';
   } else {
-    currentUser = 'son'; currentUserName = '민수'; currentTheme = '마인크래프트';
+    currentUser = 'son';
+    currentUserName = '민수';
+    currentTheme = '마인크래프트';
   }
   localStorage.setItem('currentUser', currentUser);
   localStorage.setItem('currentUserName', currentUserName);
@@ -921,12 +847,14 @@ function toggleProfileManually() {
   location.reload(); 
 }
 
-window.addEventListener('load', () => { applyTheme(); loadKoreanWords(); });
+window.addEventListener('load', () => { 
+  applyTheme(); 
+  loadKoreanWords(); 
+});
+
 document.addEventListener('keydown', function (e) { 
   if (e.key === 'Enter') { 
-    if (document.getElementById('wishTicketOverlay').classList.contains('active')) {
-      closeWishTicket();
-    } else if (document.getElementById('resultOverlay').classList.contains('active')) { 
+    if (document.getElementById('resultOverlay').classList.contains('active')) { 
       nextQuestion(); 
     } else if (document.getElementById('screen-minsu-quiz').classList.contains('active')) { 
       submitAnswer(); 
