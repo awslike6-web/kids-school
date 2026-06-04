@@ -68,10 +68,11 @@
 
   .btn-math    { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 8px 22px rgba(240,147,251,0.35); }
   .btn-english { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 8px 22px rgba(79,172,254,0.35); }
+  .btn-korean  { background: linear-gradient(135deg, #FFD93D 0%, #FF9F43 100%); box-shadow: 0 8px 22px rgba(255,217,61,0.35); }
 
   .back-btn { margin-top: 28px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.09); background: rgba(255,255,255,0.7); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; color: #888; }
 
-  /* --- 🔒 비밀번호 모달 UI 복구 --- */
+  /* --- 🔒 비밀번호 모달 UI --- */
   .pw-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
   .pw-overlay.active { display: flex; opacity: 1; }
   .pw-modal { background: #fff; width: 90%; max-width: 320px; border-radius: 30px; padding: 30px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -142,6 +143,10 @@
       <div class="s-icon"><span style="font-size: 1.8rem; font-family: serif; font-weight: bold;">A</span></div>
       <div class="s-info"><div class="s-label">영단어 탐험대</div><div class="s-desc">노션 단어장 · 퀴즈 · 오답 복습</div></div>
     </a>
+    <a href="korean_app.html" class="subject-btn btn-korean">
+      <div class="s-icon"><span style="font-size: 1.8rem;">📚</span></div>
+      <div class="s-info"><div class="s-label">용어사전방</div><div class="s-desc">새싹 받아쓰기 · 척척박사 개념 사전</div></div>
+    </a>
   </div>
   <button class="back-btn" onclick="goBack()">← 프로필 다시 선택하기</button>
 </div>
@@ -193,7 +198,6 @@ function showScreen(id) {
 }
 function goBack() { showScreen('screen-profile'); document.body.className = ''; }
 
-// 프로필 선택 (아이들)
 function selectChild(profileKey, displayName) {
   localStorage.setItem('currentUser', profileKey);
   localStorage.setItem('currentUserName', displayName);
@@ -202,13 +206,11 @@ function selectChild(profileKey, displayName) {
   loadUserInventory(displayName);
 }
 
-// 노션 인벤토리 불러오기
 async function loadUserInventory(userName) {
   const container = document.getElementById('inventoryDisplay');
   container.className = 'inventory-card'; 
   document.body.className = '';
 
-  // 부모님이 접속했을 때의 특별 처리
   if (userName === '아빠' || userName === '엄마') {
     container.innerHTML = `<div class="reward-badge">☕ <span style="color:#555;">어른 모드</span></div><div class="math-level">관리자</div>`;
     container.classList.add('theme--minecraft');
@@ -245,7 +247,6 @@ async function loadUserInventory(userName) {
       container.classList.add('theme--slime');
       document.body.classList.add('theme--slime');
     }
-
   } catch (error) {
     console.error("인벤토리 로드 에러:", error);
     const defaultTheme = userName === '민수' ? '마인크래프트' : '슬라임';
@@ -254,8 +255,7 @@ async function loadUserInventory(userName) {
   }
 }
 
-// --- 🔒 부모님 비밀번호 로직 ---
-const PARENT_PASSWORD = "0000"; // 비밀번호 설정 (초기값 0000)
+const PARENT_PASSWORD = "0000"; 
 let pwBuffer = "";
 let pendingParentKey = "";
 let pendingParentName = "";
@@ -299,11 +299,9 @@ function updateDots() {
 
 function checkPassword() {
   if (pwBuffer === PARENT_PASSWORD) {
-    // 비밀번호 맞음! 부모님도 과목 화면으로 통과시켜줌
     closePasswordModal();
     selectChild(pendingParentKey, pendingParentName);
   } else {
-    // 비밀번호 틀림
     for (let i = 0; i < 4; i++) {
       const dot = document.getElementById('dot' + i);
       dot.classList.remove('filled');
@@ -322,7 +320,6 @@ function checkPassword() {
   }
 }
 
-// 키보드 숫자 입력도 지원
 document.addEventListener('keydown', function (e) {
   if (!document.getElementById('pwOverlay').classList.contains('active')) return;
   if (e.key >= '0' && e.key <= '9') {
