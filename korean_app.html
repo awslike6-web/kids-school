@@ -31,7 +31,6 @@
   .main-title .accent2 { color: var(--purple); }
   .subtitle { font-family: 'Gaegu', cursive; font-size: 1.05rem; color: #999; margin-bottom: 32px; }
 
-  /* 테스트용 프로필 스위치 버튼 */
   .profile-switch-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: 2px solid var(--purple); color: var(--dark); padding: 6px 12px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: all 0.2s; }
   .profile-switch-btn:hover { background: var(--purple); color: #fff; }
 
@@ -48,9 +47,7 @@
   .flashcard-label { font-size: 0.9rem; color: #999; margin-bottom: 12px; font-family: 'Gaegu', cursive; }
   .flashcard-content { font-size: 1.8rem; font-weight: bold; color: var(--dark); word-break: keep-all; }
   
-  /* 듣기 전용 카드 효과 */
   .audio-card { border-color: var(--sky); background: rgba(255,255,255,0.95); }
-  .audio-card:active { transform: scale(0.95); }
 
   .input-group { width: 100%; max-width: 420px; margin-bottom: 20px; }
   .input-label { font-size: 0.95rem; color: #666; margin-bottom: 8px; display: block; text-align:center; font-weight:bold; }
@@ -85,30 +82,23 @@
   .slide-in { animation: slideInUp 0.4s ease; }
   @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .shake { animation: shake 0.4s; }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
-
-  .back-btn { margin-top: 28px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.09); background: rgba(255,255,255,0.7); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; color: #888; transition: all 0.2s ease; }
 </style>
 </head>
 <body>
 
 <div class="bg-floats" id="bgFloats"></div>
 
-<!-- 로딩 화면 -->
 <div class="screen active" id="screen-loading">
   <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
   <p class="subtitle" id="loadingSubtitle">데이터 준비 중...</p>
   <div class="loading" id="mainLoadingSpinner"></div>
 </div>
 
-<!-- 민수 플래시카드 모드 (개념사전) -->
 <div class="screen" id="screen-minsu-quiz">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title"><span class="accent2">척척박사</span><br><span class="accent">개념 사전</span></h1>
   <div class="user-welcome">안녕하세요, <span id="welcomeName">민수</span>!</div>
-  
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-
   <div class="input-group">
     <label class="input-label" id="quizModeLabel">힌트를 보고 단어를 맞혀보세요</label>
     <div class="flashcard-container">
@@ -118,9 +108,7 @@
       </div>
     </div>
   </div>
-
   <div class="input-group"><input type="text" class="input-field" id="answerInput" placeholder="정답을 입력하세요" autocomplete="off"></div>
-
   <div class="btn-group">
     <button class="btn btn-primary" onclick="submitAnswer()">제출하기</button>
     <button class="btn btn-secondary" onclick="skipQuestion()">건너뛰기</button>
@@ -128,14 +116,11 @@
   <button class="back-btn" onclick="goHome()">← 돌아가기</button>
 </div>
 
-<!-- 🎧 민서 받아쓰기 모드 (소리 듣기) -->
 <div class="screen" id="screen-minser-dictation">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title"><span class="accent2">새싹</span><br><span class="accent">받아쓰기</span></h1>
   <div class="user-welcome">안녕하세요, <span id="welcomeName2">민서</span>!</div>
-  
   <div class="progress-bar"><div class="progress-fill" id="progressFill2"></div></div>
-
   <div class="input-group">
     <label class="input-label" style="color:var(--sky);">🔊 소리를 잘 듣고 적어보세요</label>
     <div class="flashcard-container" style="margin-bottom:10px;">
@@ -144,12 +129,9 @@
         <div style="font-size:1.1rem; color:#888;">화면을 누르면 다시 들려요</div>
       </div>
     </div>
-    <!-- 부수적인 텍스트 힌트 영역 -->
     <div id="textHintArea" style="text-align:center; color:#888; font-size:0.95rem; margin-bottom:15px; font-family:'Gaegu', cursive;"></div>
   </div>
-
   <div class="input-group"><input type="text" class="input-field" id="dictationInput" placeholder="받아쓰기 정답 입력" autocomplete="off"></div>
-
   <div class="btn-group">
     <button class="btn btn-primary" onclick="submitDictation()" style="flex: 2;">제출하기</button>
     <button class="btn btn-audio" onclick="speakCurrentWord()">🔊 다시 듣기</button>
@@ -158,7 +140,6 @@
   <button class="back-btn" onclick="goHome()">← 돌아가기</button>
 </div>
 
-<!-- 퀴즈 1문제 정답 모달 -->
 <div class="result-overlay" id="resultOverlay" onclick="closeResult(event)">
   <div class="result-modal" id="resultModal" onclick="event.stopPropagation()">
     <div class="result-emoji" id="resultEmoji">🎉</div>
@@ -170,331 +151,131 @@
 </div>
 
 <script>
-// 🚀 [필수] 용어사전/받아쓰기용 새로운 노션 DB 아이디를 여기에 넣으세요!
+// 🚨 아버님, 새로 연동하실 32자리 용어사전방 DB ID를 여기에 기입하세요![cite: 3]
 const KOREAN_DB_ID = "375a27115b688038b686d3994ee12919"; 
 
-// 🚀 공통 연결 고리 (경비실 및 인벤토리 지갑)
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
 let currentUser = localStorage.getItem('currentUser') || 'son';
 let currentUserName = localStorage.getItem('currentUserName') || '민수';
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
-let words = [];
-let currentIndex = 0;
-let correctCount = 0;
-let totalCount = 0;
+let words = []; let currentIndex = 0; let correctCount = 0; let totalCount = 0;
 
 (function () {
-  const wrap = document.getElementById('bgFloats');
-  const symbols = ['가', '나', '다', '한', '글', '📚', '✏️', '💭', '🎓', '단', '어', '사', '전'];
+  const wrap = document.getElementById('bgFloats'); const symbols = ['가', '나', '다', '한', '글', '📚', '✏️'];
   for (let i = 0; i < 18; i++) {
     const el = document.createElement('div'); el.className = 'float-item'; el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    el.style.left = (Math.random() * 92) + '%'; el.style.animationDuration = (12 + Math.random() * 14) + 's'; el.style.animationDelay = (-Math.random() * 18) + 's';
-    wrap.appendChild(el);
+    el.style.left = (Math.random() * 92) + '%'; el.style.animationDuration = (12 + Math.random() * 14) + 's'; el.style.animationDelay = (-Math.random() * 18) + 's'; wrap.appendChild(el);
   }
 })();
 
 function applyTheme() {
-  if (currentTheme === '마인크래프트') {
-    document.body.classList.add('theme--minecraft'); document.body.classList.remove('theme--slime');
-  } else {
-    document.body.classList.add('theme--slime'); document.body.classList.remove('theme--minecraft');
-  }
+  if (currentTheme === '마인크래프트') { document.body.classList.add('theme--minecraft'); document.body.classList.remove('theme--slime'); } 
+  else { document.body.classList.add('theme--slime'); document.body.classList.remove('theme--minecraft'); }
 }
-
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function toggleProfileManually() {
-  if (currentUser === 'son') {
-    currentUser = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임';
-  } else {
-    currentUser = 'son'; currentUserName = '민수'; currentTheme = '마인크래프트';
-  }
-  localStorage.setItem('currentUser', currentUser);
-  localStorage.setItem('currentUserName', currentUserName);
-  localStorage.setItem('currentTheme', currentTheme);
-  
-  applyTheme();
-  document.getElementById('welcomeName').textContent = currentUserName;
-  document.getElementById('welcomeName2').textContent = currentUserName;
-  
-  loadKoreanWords();
+  if (currentUser === 'son') { currentUser = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임'; } 
+  else { currentUser = 'son'; currentUserName = '민수'; currentTheme = '마인크래프트'; }
+  localStorage.setItem('currentUser', currentUser); localStorage.setItem('currentUserName', currentUserName); localStorage.setItem('currentTheme', currentTheme);
+  applyTheme(); document.getElementById('welcomeName').textContent = currentUserName; document.getElementById('welcomeName2').textContent = currentUserName; loadKoreanWords();
 }
 
-// 🎧 한국어 TTS (인공지능 성우) 엔진
-function speakKorean(text) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR';
-    u.rate = 0.8; // 받아쓰기용으로 또박또박하게 약간 느리게 설정
-    window.speechSynthesis.speak(u);
-  }
-}
-
-function speakCurrentWord() {
-  if (words[currentIndex]) {
-    speakKorean(words[currentIndex].word);
-  }
-}
+function speakKorean(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; u.rate = 0.8; window.speechSynthesis.speak(u); } }
+function speakCurrentWord() { if (words[currentIndex]) speakKorean(words[currentIndex].word); }
 
 async function loadKoreanWords() {
-  showScreen('screen-loading');
-  document.getElementById('loadingSubtitle').textContent = `${currentUserName}의 단어를 불러오고 있어요...`;
-
-  if (KOREAN_DB_ID === '여기에_용어사전_DB_아이디를_넣어주세요') {
-    alert("아버님! 코드 상단에 용어사전 DB ID를 먼저 넣어주세요!");
-    goHome(); return;
-  }
+  showScreen('screen-loading'); document.getElementById('loadingSubtitle').textContent = `${currentUserName}의 단어를 불러오고 있어요...`;
+  if (KOREAN_DB_ID === '여기에_용어사전_DB_아이디를_넣어주세요') { alert("상단에 용어사전 DB ID를 먼저 기입해주세요!"); goHome(); return; }
 
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filter: { property: "대상", select: { equals: currentUserName } }
-      })
-    });
-
-    const data = await response.json();
-    if (!data.results || data.results.length === 0) throw new Error("단어 데이터 없음");
+    const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "대상", select: { equals: currentUserName } } }) });
+    const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("단어 데이터 없음");
 
     words = data.results.map(item => {
       const props = item.properties;
-      return {
-        id: item.id,
-        word: props["단어"]?.title?.[0]?.plain_text || '',
-        hint: props["힌트"]?.rich_text?.[0]?.plain_text || props["뜻풀이"]?.rich_text?.[0]?.plain_text || '',
-        meaning: props["뜻풀이"]?.rich_text?.[0]?.plain_text || '',
-        subject: props["과목"]?.select?.name || ''
-      };
+      return { id: item.id, word: props["단어"]?.title?.[0]?.plain_text || '', hint: props["힌트"]?.rich_text?.[0]?.plain_text || props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', meaning: props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', subject: props["과목"]?.select?.name || '' };
     });
-
-    words = words.sort(() => Math.random() - 0.5); // 섞기
-    totalCount = words.length;
-    currentIndex = 0;
-    correctCount = 0;
-
-    if (currentUser === 'son') {
-      showScreen('screen-minsu-quiz'); displayMinsuQuiz();
-    } else {
-      showScreen('screen-minser-dictation'); displayMinserDictation();
-    }
+    words = words.sort(() => Math.random() - 0.5); totalCount = words.length; currentIndex = 0; correctCount = 0;
+    if (currentUser === 'son') { showScreen('screen-minsu-quiz'); displayMinsuQuiz(); } else { showScreen('screen-minser-dictation'); displayMinserDictation(); }
   } catch (error) {
-    console.error("단어 로드 에러:", error);
-    document.getElementById('loadingSubtitle').innerHTML = `<span style="color:var(--pink)">아직 노션에 ${currentUserName}의 단어가 없습니다!</span>`;
-    document.getElementById('mainLoadingSpinner').style.display = 'none';
-    setTimeout(goHome, 2000);
+    document.getElementById('loadingSubtitle').innerHTML = `<span style="color:var(--pink)">아직 노션에 ${currentUserName}의 데이터가 없습니다!</span>`; setTimeout(goHome, 2000);
   }
 }
 
 function displayMinsuQuiz() {
   if (currentIndex >= words.length) { completeSession(); return; }
-  const word = words[currentIndex];
-  document.getElementById('cardLabel').textContent = '💡 힌트 (클릭하면 정답이 보여요)';
-  document.getElementById('cardContent').textContent = word.hint;
-  const input = document.getElementById('answerInput');
-  input.value = ''; input.classList.remove('error', 'success'); input.focus();
-  updateProgress();
+  const word = words[currentIndex]; document.getElementById('cardLabel').textContent = '💡 힌트 (클릭하면 정답이 보여요)'; document.getElementById('cardContent').textContent = word.hint;
+  const input = document.getElementById('answerInput'); input.value = ''; input.classList.remove('error', 'success'); input.focus(); updateProgress();
 }
-
 function displayMinserDictation() {
   if (currentIndex >= words.length) { completeSession(); return; }
-  const word = words[currentIndex];
-  
-  // 부수적인 힌트 표시 (비어있으면 숨김)
-  document.getElementById('textHintArea').innerHTML = word.hint ? `💡 보조 힌트: ${word.hint}` : '';
-  
-  const input = document.getElementById('dictationInput');
-  input.value = ''; input.classList.remove('error', 'success'); input.focus();
-  updateProgress();
-
-  // 🎧 화면이 바뀌면 0.5초 뒤에 자동으로 단어를 읽어줌
-  setTimeout(speakCurrentWord, 500);
+  const word = words[currentIndex]; document.getElementById('textHintArea').innerHTML = word.hint ? `💡 보조 힌트: ${word.hint}` : '';
+  const input = document.getElementById('dictationInput'); input.value = ''; input.classList.remove('error', 'success'); input.focus(); updateProgress(); setTimeout(speakCurrentWord, 500);
 }
-
-function updateProgress() {
-  const percentage = totalCount > 0 ? (currentIndex / totalCount) * 100 : 0;
-  document.getElementById('progressFill').style.width = percentage + '%';
-  document.getElementById('progressFill2').style.width = percentage + '%';
-}
-
-function toggleFlashcard() {
-  const card = document.getElementById('flashcard');
-  const label = document.getElementById('cardLabel');
-  const content = document.getElementById('cardContent');
-  const word = words[currentIndex];
-
-  if (card.classList.contains('flipped')) {
-    card.classList.remove('flipped'); label.textContent = '💡 힌트 (클릭하면 정답이 보여요)'; content.textContent = word.hint;
-  } else {
-    card.classList.add('flipped'); label.textContent = '🎯 정답'; content.textContent = word.word;
-  }
-}
-
-function submitAnswer() {
-  const input = document.getElementById('answerInput');
-  if (!input.value.trim()) return;
-  processAnswer(input);
-}
-
-function submitDictation() {
-  const input = document.getElementById('dictationInput');
-  if (!input.value.trim()) return;
-  processAnswer(input);
-}
+function updateProgress() { const percentage = totalCount > 0 ? (currentIndex / totalCount) * 100 : 0; document.getElementById('progressFill').style.width = percentage + '%'; document.getElementById('progressFill2').style.width = percentage + '%'; }
+function toggleFlashcard() { const card = document.getElementById('flashcard'); const label = document.getElementById('cardLabel'); const content = document.getElementById('cardContent'); const word = words[currentIndex]; if (card.classList.contains('flipped')) { card.classList.remove('flipped'); label.textContent = '💡 힌트 (클릭하면 정답이 보여요)'; content.textContent = word.hint; } else { card.classList.add('flipped'); label.textContent = '🎯 정답'; content.textContent = word.word; } }
+function submitAnswer() { const input = document.getElementById('answerInput'); if (!input.value.trim()) return; processAnswer(input); }
+function submitDictation() { const input = document.getElementById('dictationInput'); if (!input.value.trim()) return; processAnswer(input); }
 
 function processAnswer(inputEl) {
-  const word = words[currentIndex];
-  // 띄어쓰기 무시하고 정답 체크
-  const answer = inputEl.value.trim().replace(/\s+/g, '');
-  const cleanWord = word.word.replace(/\s+/g, '');
-  const isCorrect = answer === cleanWord;
-  
-  if (isCorrect) {
-    correctCount++;
-    inputEl.classList.remove('error'); inputEl.classList.add('success');
-    showResult(true, word.word, word.meaning);
-  } else {
-    inputEl.classList.remove('success'); inputEl.classList.add('error');
-    inputEl.classList.add('shake');
-    setTimeout(() => inputEl.classList.remove('shake'), 400);
-    showResult(false, word.word, word.meaning);
-  }
+  const word = words[currentIndex]; const answer = inputEl.value.trim().replace(/\s+/g, ''); const cleanWord = word.word.replace(/\s+/g, '');
+  if (answer === cleanWord) { correctCount++; inputEl.className = 'input-field success'; showResult(true, word.word, word.meaning); } 
+  else { inputEl.className = 'input-field error shake'; setTimeout(() => inputEl.classList.remove('shake'), 400); showResult(false, word.word, word.meaning); }
 }
 
 function showResult(isCorrect, word, meaning) {
-  const overlay = document.getElementById('resultOverlay');
-  document.getElementById('resultEmoji').textContent = isCorrect ? '🎉' : '💭';
-  document.getElementById('resultTitle').textContent = isCorrect ? '정답입니다!' : '아쉬워요!';
-  document.getElementById('resultMessage').innerHTML = isCorrect ? `<span style="font-size:1.5rem; font-weight:bold; color:var(--purple);">${word}</span><br>정확하게 적었어요!` : `정답은 <span style="font-size:1.5rem; font-weight:bold; color:var(--pink);">${word}</span> 입니다.`;
-  
-  // 뜻풀이가 없으면 생략
+  const overlay = document.getElementById('resultOverlay'); document.getElementById('resultEmoji').textContent = isCorrect ? '🎉' : '💭'; document.getElementById('resultTitle').textContent = isCorrect ? '정답입니다!' : '아쉬워요!';
+  document.getElementById('resultMessage').innerHTML = isCorrect ? `<span style="font-size:1.5rem; font-weight:bold; color:var(--purple);">${word}</span><br>참 잘했어요!` : `정답은 <span style="font-size:1.5rem; font-weight:bold; color:var(--pink);">${word}</span> 입니다.`;
   const meaningHtml = meaning ? `<div class="stat-row"><span class="stat-label">뜻풀이:</span><span class="stat-value">${meaning}</span></div>` : '';
-  
-  document.getElementById('resultStats').innerHTML = `
-    ${meaningHtml}
-    <div class="stat-row"><span class="stat-label">진행도:</span><span class="stat-value">${currentIndex + 1} / ${totalCount}</span></div>
-  `;
-  overlay.classList.add('active');
+  document.getElementById('resultStats').innerHTML = `${meaningHtml}<div class="stat-row"><span class="stat-label">진행도:</span><span class="stat-value">${currentIndex + 1} / ${totalCount}</span></div>`; overlay.classList.add('active');
 }
-
 function closeResult(e) { if (e) e.stopPropagation(); document.getElementById('resultOverlay').classList.remove('active'); }
-function nextQuestion() { closeResult(); currentIndex++; currentUser === 'son' ? displayMinsuQuiz() : displayMinserDictation(); }
-function skipQuestion() { currentIndex++; displayMinsuQuiz(); }
-function skipDictation() { currentIndex++; displayMinserDictation(); }
+/* 🎯 패치 완료: 다음 문제로 넘어갈 때 버그 수정 */
+function nextQuestion() { closeResult(); currentIndex++; if (currentIndex >= words.length) { completeSession(); } else { currentUser === 'son' ? displayMinsuQuiz() : displayMinserDictation(); } }
+function skipQuestion() { currentIndex++; if (currentIndex >= words.length) { completeSession(); } else { displayMinsuQuiz(); } }
+function skipDictation() { currentIndex++; if (currentIndex >= words.length) { completeSession(); } else { displayMinserDictation(); } }
 
-// 🏆 인벤토리 자동 롤오버 보상 엔진
 async function completeSession() {
-  showScreen('screen-loading');
-  document.getElementById('screen-loading').innerHTML = `
-    <h1 class="main-title"><span class="accent2">수고했어요!</span><br><span class="accent">완료!</span></h1>
-    <p class="subtitle" id="rewardLoadingMsg">⏳ 공용 인벤토리에 보상 전송 중...</p>
-    <div class="loading" id="rewardLoadingSpinner" style="display:block;"></div>
-    <div id="rewardResultArea"></div>
-  `;
-
+  showScreen('screen-loading'); document.getElementById('screen-loading').innerHTML = `<h1 class="main-title"><span class="accent2">수고했어요!</span></h1><p class="subtitle" id="rewardLoadingMsg">⏳ 공용 인벤토리에 보상 전송 중...</p><div class="loading" id="rewardLoadingSpinner"></div><div id="rewardResultArea"></div>`;
   try {
     let rewardResultMsg = "";
     if (correctCount > 0 && currentUserName !== '아빠' && currentUserName !== '엄마') {
       const res = await saveRewardToNotion(correctCount);
-      rewardResultMsg = `
-        <div style="background:rgba(255,255,255,0.8); border:2px solid #A78BFA; padding:12px; border-radius:12px; margin-top:10px; margin-bottom:15px; font-size:1.1rem;">
-          <b style="color:#A78BFA;">${res.rewardName} ${res.earned}개 적립 완료!</b> (현재: ${res.currentCount}/20)<br>
-          ${res.isLevelUp ? `<span style="font-size:1.3rem; color:#FF6B9D; display:inline-block; margin-top:8px; font-weight:bold;">🎉 레벨 업! Lv.${res.level} 달성! 🎉</span>` : ''}
-        </div>
-      `;
-    } else if (correctCount === 0) {
-      rewardResultMsg = `<div style="color:var(--pink); margin-bottom:15px; font-weight:bold;">맞힌 문제가 없어서 보상이 없어요 😢 다음에 다시 도전!</div>`;
+      rewardResultMsg = `<div style="background:rgba(255,255,255,0.8); border:2px solid #A78BFA; padding:12px; border-radius:12px; margin-top:10px; margin-bottom:15px;"><b style="color:#A78BFA;">${res.rewardName} 저금통 총합: ${res.currentCount}개</b><br>${res.isLevelUp ? `<span style="font-size:1.3rem; color:#FF6B9D; display:inline-block; margin-top:8px; font-weight:bold;">🎉 용어 레벨 업! Lv.${res.level} 달성! 🎉</span>` : ''}</div>`;
     }
-
-    document.getElementById('rewardLoadingSpinner').style.display = 'none';
-    document.getElementById('rewardLoadingMsg').style.display = 'none';
-
+    document.getElementById('rewardLoadingSpinner').style.display = 'none'; document.getElementById('rewardLoadingMsg').style.display = 'none';
     const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-    
-    document.getElementById('rewardResultArea').innerHTML = `
-      <div class="slide-in" style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 30px 24px; max-width: 400px; text-align: center; margin: 0 auto; border:2px solid rgba(0,0,0,0.1);">
-        <div style="font-size: 3rem; margin-bottom: 16px;">${accuracy >= 70 ? '🌟' : '💪'}</div>
-        <div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">최종 정답률: ${accuracy}%</div>
-        <div style="font-size: 1rem; color: #666; margin-bottom: 16px;">총 ${totalCount}문제 중 ${correctCount}문제를 맞혔습니다!</div>
-        ${rewardResultMsg}
-        <button class="btn btn-primary" onclick="goHome()" style="width: 100%; max-width: 300px;">🏠 메인 화면으로</button>
-      </div>
-    `;
-  } catch (error) {
-    document.getElementById('rewardLoadingSpinner').style.display = 'none';
-    document.getElementById('rewardLoadingMsg').innerHTML = `<span style="color:var(--pink)">❌ 보상 저장 실패 (인터넷 상태 확인)</span>`;
-    setTimeout(goHome, 3000);
-  }
+    document.getElementById('rewardResultArea').innerHTML = `<div class="slide-in" style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 30px 24px; max-width: 400px; border:2px solid rgba(0,0,0,0.1); margin: 0 auto;"><div style="font-size: 3rem; margin-bottom: 16px;">🌟</div><div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">최종 정답률: ${accuracy}%</div><div>총 ${totalCount}문제 중 ${correctCount}문제 정답!</div>${rewardResultMsg}<button class="btn btn-primary" onclick="goHome()" style="width: 100%; max-width: 300px; margin-top:10px;">🏠 메인 화면으로</button></div>`;
+  } catch (error) { goHome(); }
 }
 
 async function saveRewardToNotion(earned) {
-  const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName } } })
-  });
-  const data = await response.json();
-  if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+  const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName } } }) });
+  const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+  const page = data.results[0]; const props = page.properties;
 
-  const page = data.results[0];
-  const props = page.properties;
-
-  let level = props["수학 레벨"]?.number || 1;
-  let diamond = props["다이아몬드 개수"]?.number || 0;
-  let slime = props["슬라임 파츠 개수"]?.number || 0;
-  
-  let isLevelUp = false;
-  let updateProps = {};
-  let currentCount = 0;
-  let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
+  let level = props["용어 레벨"]?.number || 1; // 🎯 용어 레벨 독립 분리 완료!
+  let diamond = props["다이아몬드 개수"]?.number || 0; let slime = props["슬라임 파츠 개수"]?.number || 0;
+  let isLevelUp = false; let updateProps = {}; let currentCount = 0; let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
   if (currentTheme === '마인크래프트') {
     let total = diamond + earned;
-    let levelUps = Math.floor(total / 20);
-    if (levelUps > 0) { isLevelUp = true; level += levelUps; total = total % 20; }
-    currentCount = total;
-    updateProps = { "다이아몬드 개수": { number: total }, "수학 레벨": { number: level } };
+    let nextLevelBoundary = level * 20; if (total >= nextLevelBoundary) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+    currentCount = total; updateProps = { "다이아몬드 개수": { number: total }, "용어 레벨": { number: level } };
   } else {
     let total = slime + earned;
-    let levelUps = Math.floor(total / 20);
-    if (levelUps > 0) { isLevelUp = true; level += levelUps; total = total % 20; }
-    currentCount = total;
-    updateProps = { "슬라임 파츠 개수": { number: total }, "수학 레벨": { number: level } };
+    let nextLevelBoundary = level * 20; if (total >= nextLevelBoundary) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+    currentCount = total; updateProps = { "슬라임 파츠 개수": { number: total }, "용어 레벨": { number: level } };
   }
-
-  await fetch(`${PROXY_URL}/v1/pages/${page.id}`, {
-    method: "PATCH", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ properties: updateProps })
-  });
-
+  await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ properties: updateProps }) });
   return { earned, currentCount, level, isLevelUp, rewardName };
 }
 
 function goHome() { window.location.href = 'index.html'; }
-
-window.addEventListener('load', () => {
-  applyTheme();
-  document.getElementById('welcomeName').textContent = currentUserName;
-  document.getElementById('welcomeName2').textContent = currentUserName;
-  loadKoreanWords();
-});
-
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    if (document.getElementById('resultOverlay').classList.contains('active')) {
-      nextQuestion();
-    } else if (document.getElementById('screen-minsu-quiz').classList.contains('active')) {
-      submitAnswer();
-    } else if (document.getElementById('screen-minser-dictation').classList.contains('active')) {
-      submitDictation();
-    }
-  }
-});
+window.addEventListener('load', () => { applyTheme(); document.getElementById('welcomeName').textContent = currentUserName; document.getElementById('welcomeName2').textContent = currentUserName; loadKoreanWords(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter') { if (document.getElementById('resultOverlay').classList.contains('active')) { nextQuestion(); } else if (document.getElementById('screen-minsu-quiz').classList.contains('active')) { submitAnswer(); } else if (document.getElementById('screen-minser-dictation').classList.contains('active')) { submitDictation(); } } });
 </script>
 </body>
 </html>
