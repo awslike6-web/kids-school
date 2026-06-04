@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구구단 탐험대 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F0E17;
+  --surface: #1A1A2E;
+  --card: #16213E;
+  --border: #0F3460;
+  --yellow: #FFD93D;
+  --orange: #FF6B35;
+  --green: #6BCB77;
+  --blue: #4D96FF;
+  --pink: #FF6B9D;
+  --purple: #C77DFF;
+  --cyan: #00D4FF;
+  --white: #F5F5F5;
+  --muted: #8888AA;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nanum Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Starfield */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, white 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 10%, white 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 70% 35%, #FFD93D 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 15%, white 0%, transparent 100%),
+    radial-gradient(1px 1px at 25% 70%, white 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 55% 85%, #4D96FF 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 65%, white 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 50%, #FF6B9D 0%, transparent 100%),
+    radial-gradient(1px 1px at 38% 45%, white 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 95% 80%, #6BCB77 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 16px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HEADER ── */
+header {
+  text-align: center;
+  padding: 28px 0 24px;
+  animation: fadeDown 0.6s ease both;
+}
+
+@keyframes fadeDown {
+  from { opacity:0; transform:translateY(-24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.logo {
+  font-family: 'Jua', cursive;
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  line-height: 1.15;
+  background: linear-gradient(135deg, var(--yellow), var(--orange), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+header p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-top: 8px;
+}
+
+/* ── NAV TABS ── */
+.nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s 0.2s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.nav-btn {
+  padding: 10px 20px;
+  border: 2px solid #333;
+  border-radius: 40px;
+  background: var(--card);
+  color: var(--muted);
+  font-family: 'Nanum Gothic', sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+
+.nav-btn.active {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #1A1A2E;
+}
+
+/* ── SECTIONS ── */
+.section { display: none; }
+.section.active { display: block; animation: fadeUp 0.35s ease both; }
+
+/* ── CONCEPT: REPEATED ADDITION ── */
+.concept-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 26px;
+  margin-bottom: 20px;
+}
+
+.concept-card h2 {
+  font-family: 'Jua', cursive;
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.concept-card p {
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.repeater {
+  margin-bottom: 20px;
+}
+
+.repeater-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.repeater-controls label {
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.num-select {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--white);
+  font-family: 'Gaegu', cursive;
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.num-select:focus { border-color: var(--yellow); }
+
+.viz-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 64px;
+  padding: 14px;
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1.5px solid var(--border);
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.group-block {
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 2px solid;
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes popIn {
+  from { opacity:0; transform:scale(0.6); }
+  to   { opacity:1; transform:scale(1); }
+}
+
+.dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+}
+
+.addition-equation {
+  font-family: 'Gaegu', cursive;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cyan);
+  padding: 10px 16px;
+  background: rgba(0,212,255,0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(0,212,255,0.2);
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.final-eq {
+  font-family: 'Gaegu', cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,217,61,0.15), rgba(255,107,53,0.15));
+  border: 1.5px solid rgba(255,217,61,0.3);
+}
+
+/* ── 10단 / 5단 ANCHOR ── */
+.anchor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 560px) { .anchor-grid { grid-template-columns: 1fr; } }
+
+.anchor-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.anchor-card::before {
+  content: '';
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  opacity: 0.1;
+}
+
+.anchor-card.ten::before  { background: var(--cyan); }
+.anchor-card.five::before { background: var(--green); }
+
+.anchor-title {
+  font-family: 'Jua', cursive;
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anchor-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.92rem;
+}
+
+.anchor-row:last-child { border-bottom: none; }
+
+.anchor-row .eq   { color: var(--muted); font-family: 'Gaegu', cursive; font-size: 1rem; }
+.anchor-row .ans  { font-family: 'Gaegu', cursive; font-size: 1.1rem; font-weight: 700; }
+
+.anchor-card.ten  .anchor-row .ans { color: var(--cyan); }
+.anchor-card.five .anchor-row .ans { color: var(--green); }
+
+/* ── EXPLORE: neighbor trick ── */
+.explorer {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 26px;
+  margin-bottom: 20px;
+}
+
+.explorer h2 {
+  font-family: 'Jua', cursive;
+  font-size: 1.25rem;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selector-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.selector-row label { font-weight: 800; font-size: 0.88rem; color: var(--muted); }
+
+.trick-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+  transition: all 0.4s ease;
+  opacity: 0;
+  transform: translateX(-12px);
+}
+
+.step.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.step.anchor-step  { border-color: rgba(0,212,255,0.3);  background: rgba(0,212,255,0.07); }
+.step.adjust-step  { border-color: rgba(107,203,119,0.3); background: rgba(107,203,119,0.07); }
+.step.result-step  { border-color: rgba(255,217,61,0.4);  background: rgba(255,217,61,0.08); }
+
+.step-num {
+  min-width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.anchor-step .step-num { background: var(--cyan);   color: #0F0E17; }
+.adjust-step .step-num { background: var(--green);  color: #0F0E17; }
+.result-step .step-num { background: var(--yellow); color: #0F0E17; }
+
+.step-body { font-size: 0.95rem; line-height: 1.6; }
+.step-body .big { font-family: 'Gaegu', cursive; font-size: 1.4rem; font-weight: 700; }
+.step-body .sub { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+/* ── FULL TABLE ── */
+.table-section {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.table-section h2 {
+  font-family: 'Jua', cursive;
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.dan-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.dan-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: 'Gaegu', cursive;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.dan-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+.dan-btn.active {
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: #0F0E17;
+  transform: scale(1.15);
+}
+.dan-btn.five-dan  { border-color: var(--green); color: var(--green); }
+.dan-btn.ten-dan   { border-color: var(--cyan);  color: var(--cyan);  }
+.dan-btn.five-dan.active  { background: var(--green);  border-color: var(--green); }
+.dan-btn.ten-dan.active   { background: var(--cyan);   border-color: var(--cyan); }
+
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1.5px solid transparent;
+  transition: all 0.25s;
+  animation: popIn 0.2s ease both;
+}
+
+.table-row:hover { border-color: rgba(255,255,255,0.1); transform: scale(1.03); }
+.table-row .mul { font-family: 'Gaegu', cursive; font-size: 1.1rem; color: var(--muted); }
+.table-row .result-num { font-family: 'Gaegu', cursive; font-size: 1.35rem; font-weight: 700; }
+.table-row .add-hint { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.table-row-inner { display: flex; flex-direction: column; }
+.table-row.is-five  { border-color: rgba(107,203,119,0.35); background: rgba(107,203,119,0.07); }
+.table-row.is-ten   { border-color: rgba(0,212,255,0.35);   background: rgba(0,212,255,0.07); }
+
+/* ── 🔲 숨김 표 디자인 추가부분 ── */
+.hidden-grid-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  overflow-x: auto; 
+  margin-bottom: 20px;
+}
+.hidden-grid-card h2 {
+  font-family: 'Jua', cursive;
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+.full-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(60px, 1fr));
+  gap: 6px;
+  min-width: 600px;
+}
+.grid-cell {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.grid-cell:hover {
+  border-color: var(--yellow);
+  transform: scale(1.05);
+}
+.grid-cell .eq {
+  font-family: 'Gaegu', cursive;
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.grid-cell .ans {
+  font-family: 'Gaegu', cursive;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--white);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.grid-cell.revealed {
+  background: rgba(255, 217, 61, 0.1);
+  border-color: var(--yellow);
+}
+.grid-cell.revealed .ans {
+  opacity: 1;
+  transform: scale(1);
+  color: var(--yellow);
+}
+
+/* ── QUIZ ── */
+.quiz-wrap { max-width: 640px; margin: 0 auto; }
+.quiz-meta { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 0.88rem; color: var(--muted); font-weight: 800; }
+.quiz-meta .score-badge { background: var(--yellow); color: #1A1A2E; padding: 4px 14px; border-radius: 40px; font-weight: 800; }
+.q-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 24px; padding: 36px 28px; text-align: center; margin-bottom: 16px; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.q-tag { font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.q-text { font-family: 'Gaegu', cursive; font-size: clamp(2.2rem, 8vw, 4rem); font-weight: 700; line-height: 1; }
+.q-hint { font-size: 0.82rem; color: rgba(255,217,61,0.7); padding: 4px 12px; background: rgba(255,217,61,0.08); border-radius: 20px; }
+.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.choice { padding: 18px 12px; border: 2px solid var(--border); border-radius: 16px; background: var(--card); color: var(--white); font-family: 'Gaegu', cursive; font-size: 1.7rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+.choice:hover { border-color: var(--yellow); color: var(--yellow); transform: scale(1.04); }
+.choice.correct { background: rgba(107,203,119,0.2); border-color: var(--green); color: var(--green); }
+.choice.wrong   { background: rgba(255,107,157,0.15); border-color: var(--pink); color: var(--pink); opacity:0.7; }
+.choice:disabled { cursor: default; }
+.q-feedback { text-align: center; font-family: 'Jua', cursive; font-size: 1.2rem; padding: 12px 20px; border-radius: 14px; display: none; margin-bottom: 10px; animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
+.q-feedback.ok { display:block; background:rgba(107,203,119,0.15); border:1.5px solid var(--green); color:var(--green); }
+.q-feedback.no { display:block; background:rgba(255,107,157,0.12); border:1.5px solid var(--pink); color:var(--pink); }
+.q-explain { font-size: 0.85rem; color: var(--cyan); padding: 10px 16px; background: rgba(0,212,255,0.07); border-radius: 10px; border: 1px solid rgba(0,212,255,0.2); display: none; text-align: left; line-height: 1.7; margin-bottom: 10px; }
+.q-explain.show { display:block; }
+.next-btn { width: 100%; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: #1A1A2E; font-family: 'Jua', cursive; font-size: 1.15rem; cursor: pointer; display: none; transition: transform 0.15s, opacity 0.15s; }
+.next-btn:hover { transform: scale(1.02); }
+.next-btn.show { display: block; }
+
+/* Result */
+.result-wrap { display: none; text-align: center; background: var(--card); border: 1.5px solid var(--border); border-radius: 24px; padding: 48px 24px; }
+.result-wrap.show { display: block; }
+.r-emoji { font-size: 4.5rem; animation: bounce 0.6s ease infinite alternate; }
+@keyframes bounce { to { transform: translateY(-12px); } }
+.r-title { font-family: 'Jua', cursive; font-size: 2rem; margin: 12px 0 6px; }
+.r-score { font-family: 'Gaegu', cursive; font-size: 3.5rem; font-weight: 700; background: linear-gradient(135deg, var(--yellow), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.r-msg { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; }
+.retry-btn { padding: 14px 40px; border: none; border-radius: 40px; background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; font-family: 'Jua', cursive; font-size: 1.1rem; cursor: pointer; transition: transform 0.15s; }
+.retry-btn:hover { transform: scale(1.05); }
+
+/* Confetti */
+#confetti { position:fixed; inset:0; pointer-events:none; z-index:9999; }
+.cp { position: absolute; width: 10px; height: 10px; top: -20px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+
+/* Progress bar */
+.progress-track { height: 6px; background: var(--surface); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div id="confetti"></div>
+
+<div class="app">
+
+  <header>
+    <div class="logo">구구단 탐험대 🚀</div>
+    <p>곱하기 = 같은 수를 계속 더하는 것! 10단·5단을 기준으로 탐험해요</p>
+  </header>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-tab="concept">🔍 곱셈의 원리</button>
+    <button class="nav-btn" data-tab="anchor">⚓ 10단·5단 기준점</button>
+    <button class="nav-btn" data-tab="explore">🧭 이웃 단 찾기</button>
+    <button class="nav-btn" data-tab="table">📋 구구단 전체</button>
+    <button class="nav-btn" data-tab="hidden">🔲 숨김 표</button>
+    <button class="nav-btn" data-tab="quiz">🎮 퀴즈!</button>
+  </nav>
+
+  <div class="section active" id="sec-concept">
+    <div class="concept-card">
+      <h2>🔍 곱하기란 무엇일까?</h2>
+      <p>
+        <strong style="color:var(--yellow)">3 × 4</strong>는 <strong style="color:var(--cyan)">3을 4번 더하는 것</strong>이에요.<br>
+        숫자를 골라서 직접 눈으로 확인해 보세요!
+      </p>
+
+      <div class="repeater">
+        <div class="repeater-controls">
+          <label>어떤 수를</label>
+          <select class="num-select" id="r-num">
+            <option>1</option><option>2</option><option selected>3</option>
+            <option>4</option><option>5</option><option>6</option>
+            <option>7</option><option>8</option><option>9</option><option>10</option>
+          </select>
+          <label>몇 번 더할까?</label>
+          <select class="num-select" id="r-times">
+            <option>1</option><option>2</option><option>3</option>
+            <option selected>4</option><option>5</option><option>6</option>
+            <option>7</option><option>8</option><option>9</option><option>10</option>
+          </select>
+        </div>
+
+        <div class="viz-track" id="viz-track"></div>
+        <div class="addition-equation" id="add-eq"></div>
+        <div class="final-eq" id="final-eq"></div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h2>📈 곱할수록 얼마씩 커질까?</h2>
+      <p>아래는 <strong id="pattern-num-label" style="color:var(--cyan)">3단</strong>의 패턴이에요. 항상 <strong id="pattern-jump" style="color:var(--yellow)">3씩</strong> 커지죠?</p>
+      <div id="pattern-strip" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;"></div>
+      <p style="margin-top:14px; color:var(--muted); font-size:0.88rem;">※ 위에서 선택한 숫자가 바뀌면 패턴도 바뀌어요!</p>
+    </div>
+  </div>
+
+  <div class="section" id="sec-anchor">
+    <div class="concept-card" style="margin-bottom:20px;">
+      <h2>⚓ 왜 10단과 5단이 기준점일까?</h2>
+      <p>
+        <strong style="color:var(--cyan)">10단</strong>은 뒤에 0만 붙이면 돼서 가장 쉬워요.<br>
+        <strong style="color:var(--green)">5단</strong>은 10단의 딱 절반이에요.<br>
+        이 두 단을 먼저 익히면 다른 단도 여기서 출발할 수 있어요! 🚀
+      </p>
+    </div>
+
+    <div class="anchor-grid">
+      <div class="anchor-card ten">
+        <div class="anchor-title"><span style="color:var(--cyan)">🔵 10단</span> — 뒤에 0!</div>
+        <div id="ten-table"></div>
+      </div>
+      <div class="anchor-card five">
+        <div class="anchor-title"><span style="color:var(--green)">🟢 5단</span> — 10단의 절반!</div>
+        <div id="five-table"></div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h2>🔗 5단 = 10단 ÷ 2</h2>
+      <p>직접 눌러서 확인해 보세요!</p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;" id="conn-btns"></div>
+      <div id="conn-display" style="font-family:'Gaegu',cursive; font-size:1.4rem; line-height:2; min-height:60px; color:var(--muted); text-align:center;">
+        위의 숫자를 눌러보세요!
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-explore">
+    <div class="explorer">
+      <h2>🧭 10단·5단 기준으로 찾기</h2>
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:16px; line-height:1.6;">
+        모르는 곱셈도 10단이나 5단에서 <strong style="color:var(--yellow)">하나 더하거나 빼면</strong> 구할 수 있어요!
+      </p>
+      <div class="selector-row">
+        <label>단 선택</label>
+        <select class="num-select" id="ex-dan">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+        <label>× 몇?</label>
+        <select class="num-select" id="ex-times">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option><option>9</option><option>10</option>
+        </select>
+      </div>
+      <div class="trick-steps" id="trick-steps"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-table">
+    <div class="table-section">
+      <h2>📋 구구단 전체 — 단을 눌러보세요</h2>
+      <div class="dan-selector" id="dan-sel"></div>
+      <div class="table-grid" id="table-grid"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-hidden">
+    <div class="hidden-grid-card">
+      <h2>🔲 1단~10단 전체 숨김 표</h2>
+      <p style="color:var(--muted); margin-bottom: 16px;">칸을 누르면 정답이 짠! 나타나고, 다시 누르면 숨겨져요!</p>
+      <div class="full-grid" id="full-grid"></div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-quiz">
+    <div class="quiz-wrap">
+      <div class="quiz-meta">
+        <span id="q-progress">문제 1 / 10</span>
+        <span class="score-badge" id="q-score">0점</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+
+      <div id="quiz-play">
+        <div class="q-card" id="q-card">
+          <div class="q-tag" id="q-tag"></div>
+          <div class="q-text" id="q-text"></div>
+          <div class="q-hint" id="q-hint"></div>
+        </div>
+        <div class="choice-grid" id="choice-grid"></div>
+        <div class="q-feedback" id="q-feedback"></div>
+        <div class="q-explain" id="q-explain"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQ()">다음 문제 →</button>
+      </div>
+
+      <div class="result-wrap" id="result-wrap">
+        <div class="r-emoji" id="r-emoji"></div>
+        <div class="r-title" id="r-title"></div>
+        <div class="r-score" id="r-score"></div>
+        <div class="r-msg" id="r-msg"></div>
+        <button class="retry-btn" onclick="initQuiz()">🔄 다시 도전!</button>
+      </div>
+    </div>
+  </div>
+
+</div><script>
+// ════════════════════════════════
+//  NAV
+// ════════════════════════════════
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    const id = 'sec-' + btn.dataset.tab;
+    const sec = document.getElementById(id);
+    if(sec) sec.classList.add('active');
+    if (btn.dataset.tab === 'quiz') initQuiz();
+  });
+});
+
+// ════════════════════════════════
+//  COLORS per dan
+// ════════════════════════════════
+const DAN_COLORS = {
+  1: '#AAB7B8', 2: '#4D96FF', 3: '#C77DFF',
+  4: '#FF6B9D', 5: '#6BCB77', 6: '#FF6B35',
+  7: '#FFD93D', 8: '#FF6B9D', 9: '#C77DFF',
+  10: '#00D4FF'
+};
+
+// ════════════════════════════════
+//  CONCEPT: repeated addition
+// ════════════════════════════════
+function renderRepeater() {
+  const num   = parseInt(document.getElementById('r-num').value);
+  const times = parseInt(document.getElementById('r-times').value);
+  const track = document.getElementById('viz-track');
+  const addEq = document.getElementById('add-eq');
+  const finEq = document.getElementById('final-eq');
+  const color = DAN_COLORS[num] || '#FFD93D';
+
+  track.innerHTML = '';
+  const parts = [];
+  let total = 0;
+
+  for (let i = 0; i < times; i++) {
+    const grp = document.createElement('div');
+    grp.className = 'group-block';
+    grp.style.borderColor = color;
+    grp.style.background  = color + '22';
+    grp.style.animationDelay = (i * 0.06) + 's';
+    for (let j = 0; j < num; j++) {
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.style.background = color;
+      grp.appendChild(d);
+    }
+    track.appendChild(grp);
+    parts.push(num);
+    total += num;
+  }
+
+  addEq.textContent = parts.join(' + ') + ' = ' + total;
+  finEq.innerHTML = `<span style="color:${color}">${num}</span> × <span style="color:${color}">${times}</span> = <span style="color:var(--yellow); font-size:1.9rem;">${total}</span>`;
+
+  renderPattern(num);
+}
+
+function renderPattern(num) {
+  const strip = document.getElementById('pattern-strip');
+  strip.innerHTML = '';
+  document.getElementById('pattern-num-label').textContent = num + '단';
+  document.getElementById('pattern-num-label').style.color = DAN_COLORS[num] || '#00D4FF';
+  document.getElementById('pattern-jump').textContent = num + '씩';
+  document.getElementById('pattern-jump').style.color  = DAN_COLORS[num] || '#FFD93D';
+
+  for (let i = 1; i <= 10; i++) {
+    const box = document.createElement('div');
+    box.style.cssText = `
+      padding: 8px 14px; border-radius:10px;
+      border: 1.5px solid ${DAN_COLORS[num]}55;
+      background: ${DAN_COLORS[num]}18;
+      font-family: 'Gaegu', cursive;
+      font-size: 1.05rem;
+      color: ${DAN_COLORS[num]};
+      font-weight: 700;
+      animation: popIn 0.2s ${i*0.05}s ease both;
+    `;
+    box.innerHTML = `${num}×${i}=<strong>${num*i}</strong>`;
+    strip.appendChild(box);
+  }
+}
+
+document.getElementById('r-num').addEventListener('change', renderRepeater);
+document.getElementById('r-times').addEventListener('change', renderRepeater);
+renderRepeater();
+
+// ════════════════════════════════
+//  ANCHOR: 10단 · 5단
+// ════════════════════════════════
+function buildAnchorTable(dan, containerId) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  const color = dan === 10 ? 'var(--cyan)' : 'var(--green)';
+  for (let i = 1; i <= 10; i++) {
+    const row = document.createElement('div');
+    row.className = 'anchor-row';
+    const addHint = Array(i).fill(dan).join('+');
+    row.innerHTML = `
+      <span class="eq">${dan} × ${i} = ${addHint}</span>
+      <span class="ans" style="color:${color}">${dan*i}</span>`;
+    c.appendChild(row);
+  }
+}
+
+buildAnchorTable(10, 'ten-table');
+buildAnchorTable(5,  'five-table');
+
+// Connection buttons 1~10
+const connBtns = document.getElementById('conn-btns');
+for (let i = 1; i <= 10; i++) {
+  const b = document.createElement('button');
+  b.className = 'nav-btn';
+  b.style.padding = '8px 16px';
+  b.textContent = i;
+  b.onclick = () => {
+    document.getElementById('conn-display').innerHTML =
+      `10 × ${i} = <span style="color:var(--cyan);font-size:1.6rem">${10*i}</span><br>` +
+      `<span style="color:var(--muted); font-size:1rem;">÷ 2</span><br>` +
+      `5 × ${i} = <span style="color:var(--green);font-size:1.6rem">${5*i}</span><br>` +
+      `<span style="color:var(--muted); font-size:0.85rem;">${10*i} ÷ 2 = ${5*i} ✅</span>`;
+  };
+  connBtns.appendChild(b);
+}
+
+// ════════════════════════════════
+//  EXPLORE: neighbor trick
+// ════════════════════════════════
+function renderTrick() {
+  const dan   = parseInt(document.getElementById('ex-dan').value);
+  const times = parseInt(document.getElementById('ex-times').value);
+  const result = dan * times;
+  const steps  = document.getElementById('trick-steps');
+  steps.innerHTML = '';
+
+  let anchors = [];
+
+  // Decide anchor strategy
+  if (dan === 10 || dan === 5) {
+    anchors = [{
+      type: 'anchor-step', num: 1,
+      label: `이미 기준단!`,
+      big: `${dan} × ${times} = ${result}`,
+      sub: dan === 10 ? '10단: 뒤에 0을 붙이면 끝!' : '5단: 10단의 딱 절반!'
+    }, {
+      type: 'result-step', num: 2,
+      label: '정답',
+      big: `${dan} × ${times} = ${result}`,
+      sub: '쉽죠? 🎉'
+    }];
+  } else {
+    const anchor10 = 10 * times;
+    const anchor5  = 5  * times;
+    const diff10   = dan - 10;
+    const diff5    = dan - 5;
+    const useAnchor = Math.abs(diff10) <= Math.abs(diff5) ? 10 : 5;
+    const anchorVal = useAnchor * times;
+    const adjust    = result - anchorVal;
+    const adjTimes  = Math.abs(dan - useAnchor);
+    const adjDir    = adjust > 0 ? '+' : '-';
+
+    anchors = [
+      {
+        type: 'anchor-step', num: 1,
+        label: `① ${useAnchor}단 먼저!`,
+        big: `${useAnchor} × ${times} = ${anchorVal}`,
+        sub: useAnchor === 10 ? '10단: 뒤에 0 붙이기' : '5단: 10단 ÷ 2'
+      },
+      {
+        type: 'adjust-step', num: 2,
+        label: `② ${dan}단은 ${useAnchor}단보다 ${adjTimes} 차이!`,
+        big: `${anchorVal} ${adjDir} ${times} × ${adjTimes} = ${anchorVal} ${adjDir} ${Math.abs(adjust)} = ${result}`,
+        sub: `${times}씩 ${adjTimes}번 ${adjust>0?'더하면':'빼면'} ${dan}단!`
+      },
+      {
+        type: 'result-step', num: 3,
+        label: '✅ 정답',
+        big: `${dan} × ${times} = ${result}`,
+        sub: `더하기로 이해하는 구구단!`
+      }
+    ];
+  }
+
+  anchors.forEach((s, idx) => {
+    const el = document.createElement('div');
+    el.className = `step ${s.type}`;
+    el.innerHTML = `
+      <div class="step-num">${s.num}</div>
+      <div class="step-body">
+        <div style="font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">${s.label}</div>
+        <div class="big">${s.big}</div>
+        <div class="sub">${s.sub}</div>
+      </div>`;
+    steps.appendChild(el);
+    setTimeout(() => el.classList.add('visible'), idx * 160);
+  });
+}
+
+document.getElementById('ex-dan').addEventListener('change', renderTrick);
+document.getElementById('ex-times').addEventListener('change', renderTrick);
+renderTrick();
+
+// ════════════════════════════════
+//  TABLE: full 1~10
+// ════════════════════════════════
+let currentDan = 3;
+
+function buildDanSel() {
+  const sel = document.getElementById('dan-sel');
+  sel.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const b = document.createElement('button');
+    b.className = 'dan-btn' + (i===5?' five-dan':'') + (i===10?' ten-dan':'') + (i===currentDan?' active':'');
+    b.textContent = i;
+    b.onclick = () => { currentDan = i; buildDanSel(); renderTable(); };
+    sel.appendChild(b);
+  }
+}
+
+function renderTable() {
+  const grid = document.getElementById('table-grid');
+  grid.innerHTML = '';
+  const color = DAN_COLORS[currentDan] || '#FFD93D';
+
+  for (let i = 1; i <= 10; i++) {
+    const val = currentDan * i;
+    const isFive = currentDan === 5;
+    const isTen  = currentDan === 10;
+
+    const row = document.createElement('div');
+    row.className = 'table-row' + (isFive?' is-five':'') + (isTen?' is-ten':'');
+    row.style.animationDelay = (i * 0.04) + 's';
+
+    const addHint = Array(i).fill(currentDan).join('+');
+
+    row.innerHTML = `
+      <div class="table-row-inner">
+        <span class="mul">${currentDan} × ${i}</span>
+        <span class="add-hint">${addHint}</span>
+      </div>
+      <span class="result-num" style="color:${color}">${val}</span>`;
+    grid.appendChild(row);
+  }
+}
+
+buildDanSel();
+renderTable();
+
+// ════════════════════════════════
+//  HIDDEN TABLE: 전체 숨김 표 기능 추가부분
+// ════════════════════════════════
+function buildFullGrid() {
+  const grid = document.getElementById('full-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
+  for (let d = 1; d <= 10; d++) {
+    for (let t = 1; t <= 10; t++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      cell.innerHTML = `
+        <div class="eq">${d} × ${t}</div>
+        <div class="ans">${d * t}</div>
+      `;
+      
+      cell.onclick = () => {
+        cell.classList.toggle('revealed');
+      };
+      
+      grid.appendChild(cell);
+    }
+  }
+}
+buildFullGrid();
+
+// ════════════════════════════════
+//  QUIZ
+// ════════════════════════════════
+const ALL_QUESTIONS = [];
+for (let d = 1; d <= 10; d++) {
+  for (let t = 1; t <= 10; t++) {
+    const ans = d * t;
+    const wrongs = new Set();
+    while (wrongs.size < 3) {
+      const offset = (Math.floor(Math.random()*5)+1) * (Math.random()>0.5?1:-1);
+      const w = ans + offset * d;
+      if (w > 0 && w !== ans && w <= 100) wrongs.add(w);
+    }
+    let hint = '';
+    if (d !== 10 && d !== 5) {
+      const useA = Math.abs(d-10) <= Math.abs(d-5) ? 10 : 5;
+      const aVal = useA * t;
+      const diff = ans - aVal;
+      hint = `힌트: ${useA}×${t}=${aVal}, 여기서 ${diff>=0?'+':''}${diff}`;
+    } else if (d === 10) {
+      hint = `힌트: 10단! ${t}뒤에 0 → ${ans}`;
+    } else {
+      hint = `힌트: 5단 = 10×${t}÷2 = ${10*t}÷2`;
+    }
+
+    const addExp = Array(t).fill(d).join('+') + ' = ' + ans;
+    ALL_QUESTIONS.push({ d, t, ans, wrongs:[...wrongs], hint, addExp });
+  }
+}
+
+let qList=[], qIdx=0, qScore=0, qAnswered=false;
+
+function initQuiz() {
+  qList = [...ALL_QUESTIONS].sort(()=>Math.random()-0.5).slice(0,10);
+  qIdx=0; qScore=0; qAnswered=false;
+  document.getElementById('quiz-play').style.display='block';
+  document.getElementById('result-wrap').classList.remove('show');
+  renderQ();
+}
+
+function renderQ() {
+  qAnswered = false;
+  const q = qList[qIdx];
+  document.getElementById('q-progress').textContent = `문제 ${qIdx+1} / ${qList.length}`;
+  document.getElementById('q-score').textContent = `${qScore}점`;
+  document.getElementById('prog-fill').style.width = (qIdx/qList.length*100)+'%';
+
+  const isFive = q.d===5, isTen=q.d===10;
+  document.getElementById('q-tag').textContent = isTen ? '🔵 10단 도전!' : isFive ? '🟢 5단 도전!' : `${q.d}단 도전!`;
+  document.getElementById('q-text').textContent = `${q.d} × ${q.t} = ?`;
+  document.getElementById('q-hint').textContent = q.hint;
+
+  document.getElementById('q-feedback').className = 'q-feedback';
+  document.getElementById('q-explain').className = 'q-explain';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  const grid = document.getElementById('choice-grid');
+  grid.innerHTML = '';
+  const choices = [...q.wrongs, q.ans].sort(()=>Math.random()-0.5);
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.textContent = c;
+    btn.onclick = () => checkQ(c, q, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function checkQ(selected, q, btn) {
+  if (qAnswered) return;
+  qAnswered = true;
+
+  document.querySelectorAll('.choice').forEach(b => {
+    b.disabled = true;
+    if (+b.textContent === q.ans) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('q-feedback');
+  const ex = document.getElementById('q-explain');
+
+  if (selected === q.ans) {
+    qScore += 10;
+    btn.classList.add('correct');
+    fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)];
+    fb.className = 'q-feedback ok';
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = `😅 아쉬워요! 정답은 ${q.ans}`;
+    fb.className = 'q-feedback no';
+  }
+
+  ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--cyan)">${q.addExp}</span>`;
+  ex.className = 'q-explain show';
+  document.getElementById('q-score').textContent = `${qScore}점`;
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQ() {
+  qIdx++;
+  if (qIdx >= qList.length) showResult();
+  else renderQ();
+}
+
+function showResult() {
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('quiz-play').style.display='none';
+  const wrap = document.getElementById('result-wrap');
+  wrap.classList.add('show');
+
+  const pct = qScore / (qList.length * 10);
+  let emoji, title, msg;
+  if (pct===1)      { emoji='🏆'; title='완벽해요!'; msg='10문제 전부 맞혔어요! 구구단 마스터!'; launchConfetti(); }
+  else if (pct>=.8) { emoji='🌟'; title='훌륭해요!'; msg='거의 다 맞혔어요. 조금만 더 연습!'; }
+  else if (pct>=.6) { emoji='😊'; title='잘했어요!'; msg='절반 이상 맞혔어요! 10단·5단 다시 보고 재도전!'; }
+  else              { emoji='💪'; title='도전 중!';  msg='개념 탭에서 원리를 다시 보고 와요!'; }
+
+  document.getElementById('r-emoji').textContent = emoji;
+  document.getElementById('r-title').textContent = title;
+  document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`;
+  document.getElementById('r-msg').textContent   = msg;
+}
+
+function launchConfetti() {
+  const c = document.getElementById('confetti');
+  c.innerHTML='';
+  const cols=['#FFD93D','#FF6B35','#6BCB77','#4D96FF','#FF6B9D','#C77DFF','#00D4FF'];
+  for(let i=0;i<90;i++){
+    const el=document.createElement('div');
+    el.className='cp';
+    el.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};
+      border-radius:${Math.random()>.5?'50%':'3px'};
+      animation-duration:${1.8+Math.random()*2}s;
+      animation-delay:${Math.random()*.8}s;
+      transform:rotate(${Math.random()*360}deg);`;
+    c.appendChild(el);
+    el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+initQuiz();
+</script>
+</body>
+</html>
