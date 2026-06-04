@@ -47,21 +47,26 @@
   .flashcard.flipped { transform: rotateY(180deg); }
   .flashcard-label { font-size: 0.9rem; color: #999; margin-bottom: 12px; font-family: 'Gaegu', cursive; }
   .flashcard-content { font-size: 1.8rem; font-weight: bold; color: var(--dark); word-break: keep-all; }
+  
+  /* 듣기 전용 카드 효과 */
+  .audio-card { border-color: var(--sky); background: rgba(255,255,255,0.95); }
+  .audio-card:active { transform: scale(0.95); }
 
   .input-group { width: 100%; max-width: 420px; margin-bottom: 20px; }
-  .input-label { font-size: 0.95rem; color: #666; margin-bottom: 8px; display: block; text-align:center; }
-  .input-field { width: 100%; padding: 16px 18px; border-radius: 16px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1.1rem; color: var(--dark); background: rgba(255,255,255,0.8); transition: all 0.2s ease; text-align:center; }
-  .input-field:focus { outline: none; border-color: var(--purple); background: #fff; box-shadow: 0 0 0 3px rgba(167,139,250,0.1); }
+  .input-label { font-size: 0.95rem; color: #666; margin-bottom: 8px; display: block; text-align:center; font-weight:bold; }
+  .input-field { width: 100%; padding: 16px 18px; border-radius: 16px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1.2rem; color: var(--dark); background: rgba(255,255,255,0.8); transition: all 0.2s ease; text-align:center; font-weight:bold; }
+  .input-field:focus { outline: none; border-color: var(--sky); background: #fff; box-shadow: 0 0 0 3px rgba(110,198,245,0.2); }
   .input-field.error { border-color: var(--pink); }
   .input-field.success { border-color: var(--green); }
 
-  .btn-group { display: flex; gap: 12px; width: 100%; max-width: 420px; margin-bottom: 20px; }
-  .btn { flex: 1; padding: 16px 20px; border-radius: 16px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease; font-weight: bold; }
+  .btn-group { display: flex; flex-wrap:wrap; gap: 10px; width: 100%; max-width: 420px; margin-bottom: 20px; }
+  .btn { flex: 1; padding: 14px 10px; border-radius: 16px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease; font-weight: bold; white-space:nowrap; }
   .btn:active { transform: scale(0.95); }
   .btn-primary { background: linear-gradient(135deg, var(--purple), var(--pink)); color: #fff; box-shadow: 0 6px 16px rgba(167,139,250,0.3); }
   .btn-primary:hover { transform: translateY(-3px); }
   .btn-secondary { background: rgba(255,255,255,0.7); color: var(--dark); border: 2px solid rgba(0,0,0,0.08); }
   .btn-secondary:hover { background: rgba(255,255,255,0.9); }
+  .btn-audio { background: linear-gradient(135deg, #00b8d9, #6EC6F5); color: #fff; }
 
   .result-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
   .result-overlay.active { display: flex; opacity: 1; }
@@ -69,7 +74,7 @@
   @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .result-emoji { font-size: 3.5rem; margin-bottom: 16px; }
   .result-title { font-size: 1.5rem; color: var(--dark); margin-bottom: 12px; font-weight: bold; }
-  .result-message { font-size: 1rem; color: #666; margin-bottom: 24px; line-height: 1.5; }
+  .result-message { font-size: 1.1rem; color: #666; margin-bottom: 24px; line-height: 1.5; word-break:keep-all; }
   .result-stats { background: rgba(0,0,0,0.03); border-radius: 16px; padding: 16px; margin-bottom: 24px; }
   .stat-row { display: flex; justify-content: space-between; margin: 8px 0; font-size: 1rem; text-align:left; gap:10px;}
   .stat-label { color: #999; flex-shrink: 0; }
@@ -96,7 +101,7 @@
   <div class="loading" id="mainLoadingSpinner"></div>
 </div>
 
-<!-- 민수 플래시카드 모드 -->
+<!-- 민수 플래시카드 모드 (개념사전) -->
 <div class="screen" id="screen-minsu-quiz">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title"><span class="accent2">척척박사</span><br><span class="accent">개념 사전</span></h1>
@@ -108,7 +113,7 @@
     <label class="input-label" id="quizModeLabel">힌트를 보고 단어를 맞혀보세요</label>
     <div class="flashcard-container">
       <div class="flashcard" id="flashcard" onclick="toggleFlashcard()">
-        <div class="flashcard-label" id="cardLabel">힌트</div>
+        <div class="flashcard-label" id="cardLabel">💡 힌트 (클릭하면 정답이 보여요)</div>
         <div class="flashcard-content" id="cardContent">로딩 중...</div>
       </div>
     </div>
@@ -117,13 +122,13 @@
   <div class="input-group"><input type="text" class="input-field" id="answerInput" placeholder="정답을 입력하세요" autocomplete="off"></div>
 
   <div class="btn-group">
-    <button class="btn btn-primary" onclick="submitAnswer()">제출</button>
+    <button class="btn btn-primary" onclick="submitAnswer()">제출하기</button>
     <button class="btn btn-secondary" onclick="skipQuestion()">건너뛰기</button>
   </div>
   <button class="back-btn" onclick="goHome()">← 돌아가기</button>
 </div>
 
-<!-- 민서 받아쓰기 모드 -->
+<!-- 🎧 민서 받아쓰기 모드 (소리 듣기) -->
 <div class="screen" id="screen-minser-dictation">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title"><span class="accent2">새싹</span><br><span class="accent">받아쓰기</span></h1>
@@ -132,19 +137,22 @@
   <div class="progress-bar"><div class="progress-fill" id="progressFill2"></div></div>
 
   <div class="input-group">
-    <label class="input-label">힌트를 읽고 단어를 써보세요</label>
-    <div class="flashcard-container">
-      <div class="flashcard" id="hintCard">
-        <div class="flashcard-label">힌트</div>
-        <div class="flashcard-content" id="hintContent">로딩 중...</div>
+    <label class="input-label" style="color:var(--sky);">🔊 소리를 잘 듣고 적어보세요</label>
+    <div class="flashcard-container" style="margin-bottom:10px;">
+      <div class="flashcard audio-card" id="hintCard" onclick="speakCurrentWord()">
+        <div class="flashcard-content" style="font-size:4rem; margin-bottom:10px;">🔊</div>
+        <div style="font-size:1.1rem; color:#888;">화면을 누르면 다시 들려요</div>
       </div>
     </div>
+    <!-- 부수적인 텍스트 힌트 영역 -->
+    <div id="textHintArea" style="text-align:center; color:#888; font-size:0.95rem; margin-bottom:15px; font-family:'Gaegu', cursive;"></div>
   </div>
 
-  <div class="input-group"><input type="text" class="input-field" id="dictationInput" placeholder="단어를 써보세요" autocomplete="off"></div>
+  <div class="input-group"><input type="text" class="input-field" id="dictationInput" placeholder="받아쓰기 정답 입력" autocomplete="off"></div>
 
   <div class="btn-group">
-    <button class="btn btn-primary" onclick="submitDictation()">제출</button>
+    <button class="btn btn-primary" onclick="submitDictation()" style="flex: 2;">제출하기</button>
+    <button class="btn btn-audio" onclick="speakCurrentWord()">🔊 다시 듣기</button>
     <button class="btn btn-secondary" onclick="skipDictation()">건너뛰기</button>
   </div>
   <button class="back-btn" onclick="goHome()">← 돌아가기</button>
@@ -162,7 +170,7 @@
 </div>
 
 <script>
-// 🚀 [필수] 용어사전용 새로운 노션 DB 아이디를 여기에 넣으세요!
+// 🚀 [필수] 용어사전/받아쓰기용 새로운 노션 DB 아이디를 여기에 넣으세요!
 const KOREAN_DB_ID = "여기에_용어사전_DB_아이디를_넣어주세요"; 
 
 // 🚀 공통 연결 고리 (경비실 및 인벤토리 지갑)
@@ -200,7 +208,6 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
 }
 
-// 👦👧 실시간 프로필 체인지 기능 추가
 function toggleProfileManually() {
   if (currentUser === 'son') {
     currentUser = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임';
@@ -216,6 +223,23 @@ function toggleProfileManually() {
   document.getElementById('welcomeName2').textContent = currentUserName;
   
   loadKoreanWords();
+}
+
+// 🎧 한국어 TTS (인공지능 성우) 엔진
+function speakKorean(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.8; // 받아쓰기용으로 또박또박하게 약간 느리게 설정
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function speakCurrentWord() {
+  if (words[currentIndex]) {
+    speakKorean(words[currentIndex].word);
+  }
 }
 
 async function loadKoreanWords() {
@@ -271,7 +295,7 @@ async function loadKoreanWords() {
 function displayMinsuQuiz() {
   if (currentIndex >= words.length) { completeSession(); return; }
   const word = words[currentIndex];
-  document.getElementById('cardLabel').textContent = '힌트';
+  document.getElementById('cardLabel').textContent = '💡 힌트 (클릭하면 정답이 보여요)';
   document.getElementById('cardContent').textContent = word.hint;
   const input = document.getElementById('answerInput');
   input.value = ''; input.classList.remove('error', 'success'); input.focus();
@@ -281,10 +305,16 @@ function displayMinsuQuiz() {
 function displayMinserDictation() {
   if (currentIndex >= words.length) { completeSession(); return; }
   const word = words[currentIndex];
-  document.getElementById('hintContent').textContent = word.hint;
+  
+  // 부수적인 힌트 표시 (비어있으면 숨김)
+  document.getElementById('textHintArea').innerHTML = word.hint ? `💡 보조 힌트: ${word.hint}` : '';
+  
   const input = document.getElementById('dictationInput');
   input.value = ''; input.classList.remove('error', 'success'); input.focus();
   updateProgress();
+
+  // 🎧 화면이 바뀌면 0.5초 뒤에 자동으로 단어를 읽어줌
+  setTimeout(speakCurrentWord, 500);
 }
 
 function updateProgress() {
@@ -300,9 +330,9 @@ function toggleFlashcard() {
   const word = words[currentIndex];
 
   if (card.classList.contains('flipped')) {
-    card.classList.remove('flipped'); label.textContent = '힌트'; content.textContent = word.hint;
+    card.classList.remove('flipped'); label.textContent = '💡 힌트 (클릭하면 정답이 보여요)'; content.textContent = word.hint;
   } else {
-    card.classList.add('flipped'); label.textContent = '정답'; content.textContent = word.word;
+    card.classList.add('flipped'); label.textContent = '🎯 정답'; content.textContent = word.word;
   }
 }
 
@@ -320,6 +350,7 @@ function submitDictation() {
 
 function processAnswer(inputEl) {
   const word = words[currentIndex];
+  // 띄어쓰기 무시하고 정답 체크
   const answer = inputEl.value.trim().replace(/\s+/g, '');
   const cleanWord = word.word.replace(/\s+/g, '');
   const isCorrect = answer === cleanWord;
@@ -340,9 +371,13 @@ function showResult(isCorrect, word, meaning) {
   const overlay = document.getElementById('resultOverlay');
   document.getElementById('resultEmoji').textContent = isCorrect ? '🎉' : '💭';
   document.getElementById('resultTitle').textContent = isCorrect ? '정답입니다!' : '아쉬워요!';
-  document.getElementById('resultMessage').textContent = isCorrect ? `"${word}"가 맞습니다!` : `정답은 "${word}"입니다.`;
+  document.getElementById('resultMessage').innerHTML = isCorrect ? `<span style="font-size:1.5rem; font-weight:bold; color:var(--purple);">${word}</span><br>정확하게 적었어요!` : `정답은 <span style="font-size:1.5rem; font-weight:bold; color:var(--pink);">${word}</span> 입니다.`;
+  
+  // 뜻풀이가 없으면 생략
+  const meaningHtml = meaning ? `<div class="stat-row"><span class="stat-label">뜻풀이:</span><span class="stat-value">${meaning}</span></div>` : '';
+  
   document.getElementById('resultStats').innerHTML = `
-    <div class="stat-row"><span class="stat-label">뜻풀이:</span><span class="stat-value">${meaning}</span></div>
+    ${meaningHtml}
     <div class="stat-row"><span class="stat-label">진행도:</span><span class="stat-value">${currentIndex + 1} / ${totalCount}</span></div>
   `;
   overlay.classList.add('active');
@@ -353,7 +388,7 @@ function nextQuestion() { closeResult(); currentIndex++; currentUser === 'son' ?
 function skipQuestion() { currentIndex++; displayMinsuQuiz(); }
 function skipDictation() { currentIndex++; displayMinserDictation(); }
 
-// 🏆 인벤토리 자동 롤오버 보상 엔진 이식 완료
+// 🏆 인벤토리 자동 롤오버 보상 엔진
 async function completeSession() {
   showScreen('screen-loading');
   document.getElementById('screen-loading').innerHTML = `
