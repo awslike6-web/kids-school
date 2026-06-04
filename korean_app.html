@@ -22,49 +22,59 @@
   .float-item { position: absolute; font-size: 1.8rem; opacity: 0.13; animation: floatUp linear infinite; font-family: 'Gaegu', cursive; font-weight: 700; color: var(--purple); }
   @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.13; } 90% { opacity: 0.13; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
 
-  .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 36px 16px 60px; min-height: 100vh; animation: fadeIn .35s ease; }
+  .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 20px 16px 40px; min-height: 100vh; width: 100%; animation: fadeIn .35s ease; }
   .screen.active { display: flex; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
   .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2.2rem, 9vw, 3.8rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 6px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.07)); }
   .main-title .accent { color: var(--pink); }
   .main-title .accent2 { color: var(--purple); }
-  .subtitle { font-family: 'Gaegu', cursive; font-size: 1.05rem; color: #999; margin-bottom: 32px; }
+  .subtitle { font-family: 'Gaegu', cursive; font-size: 1.05rem; color: #999; margin-bottom: 24px; }
 
   .profile-switch-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: 2px solid var(--purple); color: var(--dark); padding: 6px 12px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: all 0.2s; }
-  .profile-switch-btn:hover { background: var(--purple); color: #fff; }
 
   .user-welcome { display: inline-block; padding: 8px 20px; border-radius: 999px; background: rgba(255,255,255,0.7); border: 2.5px solid rgba(0,0,0,0.08); font-size: 1rem; margin-bottom: 14px; backdrop-filter: blur(8px); }
   .user-welcome span { color: var(--purple); font-weight: bold; }
 
+  /* 설정 화면 UI */
+  .card { background: var(--card); border-radius: 24px; padding: 22px 24px; width: 100%; max-width: 480px; box-shadow: 0 8px 30px rgba(0,0,0,0.10); margin-bottom: 18px; border: 2.5px solid rgba(255,255,255,0.8); }
+  .card-title { font-size: 1.05rem; color: var(--purple); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; font-weight: bold; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  
+  input[type="checkbox"] { display: none; }
+  .btn-label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 14px; border: 2.5px solid #e0e0e0; font-size: 1rem; cursor: pointer; transition: all .18s; background: #fff; user-select: none; text-align: center; color: var(--dark); font-weight: bold; }
+  .btn-label:hover { border-color: var(--sky); transform: scale(1.04); }
+  input[type="checkbox"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.07); }
+
+  .big-btn { width: 100%; max-width: 480px; padding: 16px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top:10px; transition: transform .15s; }
+  .big-btn:active { transform: scale(0.96); }
+  .big-btn.yellow-btn { background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.3rem; padding: 20px;}
+  .big-btn.back-btn { background: #eee; color: #888; }
+  .tiny-btn { background: rgba(0,0,0,0.05); border: none; padding: 4px 10px; border-radius: 8px; font-family: 'Jua'; cursor: pointer; }
+
+  /* 퀴즈 UI */
   .progress-bar { width: 100%; max-width: 420px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 10px; margin-bottom: 24px; overflow: hidden; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 10px; transition: width 0.3s ease; }
-
   .flashcard-container { width: 100%; max-width: 420px; perspective: 1000px; margin-bottom: 24px; }
   .flashcard { background: var(--card); border-radius: 20px; padding: 40px 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 2px solid rgba(255,255,255,0.8); min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; transition: transform 0.3s ease; }
   .flashcard:hover { transform: translateY(-5px); }
   .flashcard.flipped { transform: rotateY(180deg); }
   .flashcard-label { font-size: 0.9rem; color: #999; margin-bottom: 12px; font-family: 'Gaegu', cursive; }
   .flashcard-content { font-size: 1.8rem; font-weight: bold; color: var(--dark); word-break: keep-all; }
-  
   .audio-card { border-color: var(--sky); background: rgba(255,255,255,0.95); }
-
   .input-group { width: 100%; max-width: 420px; margin-bottom: 20px; }
   .input-label { font-size: 0.95rem; color: #666; margin-bottom: 8px; display: block; text-align:center; font-weight:bold; }
   .input-field { width: 100%; padding: 16px 18px; border-radius: 16px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1.2rem; color: var(--dark); background: rgba(255,255,255,0.8); transition: all 0.2s ease; text-align:center; font-weight:bold; }
   .input-field:focus { outline: none; border-color: var(--sky); background: #fff; box-shadow: 0 0 0 3px rgba(110,198,245,0.2); }
   .input-field.error { border-color: var(--pink); }
   .input-field.success { border-color: var(--green); }
-
   .btn-group { display: flex; flex-wrap:wrap; gap: 10px; width: 100%; max-width: 420px; margin-bottom: 20px; }
   .btn { flex: 1; padding: 14px 10px; border-radius: 16px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: all 0.2s ease; font-weight: bold; white-space:nowrap; }
-  .btn:active { transform: scale(0.95); }
   .btn-primary { background: linear-gradient(135deg, var(--purple), var(--pink)); color: #fff; box-shadow: 0 6px 16px rgba(167,139,250,0.3); }
-  .btn-primary:hover { transform: translateY(-3px); }
   .btn-secondary { background: rgba(255,255,255,0.7); color: var(--dark); border: 2px solid rgba(0,0,0,0.08); }
-  .btn-secondary:hover { background: rgba(255,255,255,0.9); }
   .btn-audio { background: linear-gradient(135deg, #00b8d9, #6EC6F5); color: #fff; }
 
+  /* 결과창 */
   .result-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
   .result-overlay.active { display: flex; opacity: 1; }
   .result-modal { background: #fff; width: 90%; max-width: 360px; border-radius: 30px; padding: 40px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.4s ease; }
@@ -88,19 +98,42 @@
 
 <div class="bg-floats" id="bgFloats"></div>
 
+<!-- 로딩 화면 -->
 <div class="screen active" id="screen-loading">
   <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
-  <p class="subtitle" id="loadingSubtitle">데이터 준비 중...</p>
+  <p class="subtitle" id="loadingSubtitle">노션에서 단어를 불러오고 있어요...</p>
   <div class="loading" id="mainLoadingSpinner"></div>
 </div>
 
-<div class="screen" id="screen-minsu-quiz">
+<!-- 🎯 신규 추가! 설정(대기실) 화면 -->
+<div class="screen" id="screen-setup">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
-  <h1 class="main-title"><span class="accent2">척척박사</span><br><span class="accent">개념 사전</span></h1>
-  <div class="user-welcome">안녕하세요, <span id="welcomeName">민수</span>!</div>
+  <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
+  <div class="user-welcome">안녕하세요, <span id="welcomeNameSetup"></span>!</div>
+  
+  <div class="card">
+    <div class="card-title">📚 공부할 단계(단원) 고르기</div>
+    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+      <button class="tiny-btn" onclick="selectAllStages(true)">전체 선택</button>
+      <button class="tiny-btn" onclick="selectAllStages(false)">전체 해제</button>
+    </div>
+    <div class="grid-4" id="stageGrid">
+      <!-- 단계 체크박스가 여기에 자동으로 그려집니다 -->
+    </div>
+  </div>
+  
+  <p id="warnMsg" style="color:var(--pink); font-size:0.9rem; text-align:center; height:1.2rem; margin-top:5px;"></p>
+  <button class="big-btn yellow-btn" onclick="startQuiz()">🚀 선택한 단계 시작하기</button>
+  <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
+</div>
+
+<!-- 민수 퀴즈 화면 -->
+<div class="screen" id="screen-minsu-quiz">
+  <button class="profile-switch-btn" onclick="goSetup()">🔙 단계 다시 고르기</button>
+  <h1 class="main-title" style="margin-top:20px;"><span class="accent2">척척박사</span><br><span class="accent">개념 사전</span></h1>
   <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
   <div class="input-group">
-    <label class="input-label" id="quizModeLabel">힌트를 보고 단어를 맞혀보세요</label>
+    <label class="input-label">힌트를 보고 단어를 맞혀보세요</label>
     <div class="flashcard-container">
       <div class="flashcard" id="flashcard" onclick="toggleFlashcard()">
         <div class="flashcard-label" id="cardLabel">💡 힌트 (클릭하면 정답이 보여요)</div>
@@ -113,13 +146,12 @@
     <button class="btn btn-primary" onclick="submitAnswer()">제출하기</button>
     <button class="btn btn-secondary" onclick="skipQuestion()">건너뛰기</button>
   </div>
-  <button class="back-btn" onclick="goHome()">← 돌아가기</button>
 </div>
 
+<!-- 민서 받아쓰기 화면 -->
 <div class="screen" id="screen-minser-dictation">
-  <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
-  <h1 class="main-title"><span class="accent2">새싹</span><br><span class="accent">받아쓰기</span></h1>
-  <div class="user-welcome">안녕하세요, <span id="welcomeName2">민서</span>!</div>
+  <button class="profile-switch-btn" onclick="goSetup()">🔙 단계 다시 고르기</button>
+  <h1 class="main-title" style="margin-top:20px;"><span class="accent2">새싹</span><br><span class="accent">받아쓰기</span></h1>
   <div class="progress-bar"><div class="progress-fill" id="progressFill2"></div></div>
   <div class="input-group">
     <label class="input-label" style="color:var(--sky);">🔊 소리를 잘 듣고 적어보세요</label>
@@ -137,9 +169,9 @@
     <button class="btn btn-audio" onclick="speakCurrentWord()">🔊 다시 듣기</button>
     <button class="btn btn-secondary" onclick="skipDictation()">건너뛰기</button>
   </div>
-  <button class="back-btn" onclick="goHome()">← 돌아가기</button>
 </div>
 
+<!-- 정답 결과창 오버레이 -->
 <div class="result-overlay" id="resultOverlay" onclick="closeResult(event)">
   <div class="result-modal" id="resultModal" onclick="event.stopPropagation()">
     <div class="result-emoji" id="resultEmoji">🎉</div>
@@ -151,16 +183,18 @@
 </div>
 
 <script>
-// 🚨 아버님, 새로 연동하실 32자리 용어사전방 DB ID를 여기에 기입하세요![cite: 3]
+// 🚨 아버님 ID 유지
 const KOREAN_DB_ID = "375a27115b688038b686d3994ee12919"; 
-
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
 let currentUser = localStorage.getItem('currentUser') || 'son';
 let currentUserName = localStorage.getItem('currentUserName') || '민수';
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
-let words = []; let currentIndex = 0; let correctCount = 0; let totalCount = 0;
+let allFetchedWords = []; 
+let words = []; 
+let currentIndex = 0; let correctCount = 0; let totalCount = 0;
+let availableStages = [];
 
 (function () {
   const wrap = document.getElementById('bgFloats'); const symbols = ['가', '나', '다', '한', '글', '📚', '✏️'];
@@ -179,30 +213,78 @@ function toggleProfileManually() {
   if (currentUser === 'son') { currentUser = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임'; } 
   else { currentUser = 'son'; currentUserName = '민수'; currentTheme = '마인크래프트'; }
   localStorage.setItem('currentUser', currentUser); localStorage.setItem('currentUserName', currentUserName); localStorage.setItem('currentTheme', currentTheme);
-  applyTheme(); document.getElementById('welcomeName').textContent = currentUserName; document.getElementById('welcomeName2').textContent = currentUserName; loadKoreanWords();
+  applyTheme(); document.getElementById('welcomeNameSetup').textContent = currentUserName; loadKoreanWords();
 }
 
-function speakKorean(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; u.rate = 0.8; window.speechSynthesis.speak(u); } }
+function speakKorean(text) { 
+  if ('speechSynthesis' in window) { 
+    window.speechSynthesis.cancel(); 
+    const u = new SpeechSynthesisUtterance(text); 
+    u.lang = 'ko-KR'; u.rate = 0.8; 
+    window.speechSynthesis.speak(u); 
+  } 
+}
 function speakCurrentWord() { if (words[currentIndex]) speakKorean(words[currentIndex].word); }
 
+// 🎯 노션 데이터 가져오기 및 대기실 화면 표시
 async function loadKoreanWords() {
   showScreen('screen-loading'); document.getElementById('loadingSubtitle').textContent = `${currentUserName}의 단어를 불러오고 있어요...`;
-  if (KOREAN_DB_ID === '여기에_용어사전_DB_아이디를_넣어주세요') { alert("상단에 용어사전 DB ID를 먼저 기입해주세요!"); goHome(); return; }
 
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "대상", select: { equals: currentUserName } } }) });
-    const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("단어 데이터 없음");
+    const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "대상", select: { equals: currentUserName } }, page_size: 100 }) }); // 최대 100개 이상 가져오려면 pagination 필요할수있으나 기본 100개
+    const data = await response.json(); 
+    if (!data.results || data.results.length === 0) throw new Error("단어 데이터 없음");
 
-    words = data.results.map(item => {
+    allFetchedWords = data.results.map(item => {
       const props = item.properties;
-      return { id: item.id, word: props["단어"]?.title?.[0]?.plain_text || '', hint: props["힌트"]?.rich_text?.[0]?.plain_text || props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', meaning: props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', subject: props["과목"]?.select?.name || '' };
+      return { 
+        id: item.id, 
+        word: props["단어"]?.title?.[0]?.plain_text || '', 
+        hint: props["힌트"]?.rich_text?.[0]?.plain_text || props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
+        meaning: props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
+        stage: props["단계"]?.number || 1 // 🌟 노션에 추가한 [단계] 칸의 숫자를 가져옵니다.
+      };
     });
-    words = words.sort(() => Math.random() - 0.5); totalCount = words.length; currentIndex = 0; correctCount = 0;
-    if (currentUser === 'son') { showScreen('screen-minsu-quiz'); displayMinsuQuiz(); } else { showScreen('screen-minser-dictation'); displayMinserDictation(); }
+
+    // 존재하는 단계들만 추출해서 중복 제거 후 오름차순 정렬
+    availableStages = [...new Set(allFetchedWords.map(w => w.stage))].sort((a,b) => a - b);
+    
+    buildStageGrid();
+    document.getElementById('welcomeNameSetup').textContent = currentUserName;
+    showScreen('screen-setup'); // 바로 퀴즈로 안 넘어가고 설정 화면 띄우기!
+
   } catch (error) {
-    document.getElementById('loadingSubtitle').innerHTML = `<span style="color:var(--pink)">아직 노션에 ${currentUserName}의 데이터가 없습니다!</span>`; setTimeout(goHome, 2000);
+    document.getElementById('loadingSubtitle').innerHTML = `<span style="color:var(--pink)">아직 노션에 ${currentUserName}의 데이터가 없습니다!</span>`; setTimeout(() => location.href='index.html', 2000);
   }
 }
+
+// 🎯 대기실 단계 버튼 그리기
+function buildStageGrid() {
+  const grid = document.getElementById('stageGrid');
+  grid.innerHTML = '';
+  availableStages.forEach((stageNum, index) => {
+    const inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = 'stage' + stageNum; inp.className = 'stage-cb'; inp.value = stageNum;
+    if(index === 0) inp.checked = true; // 첫 번째 단계는 기본으로 체크
+    const lbl = document.createElement('label'); lbl.htmlFor = 'stage' + stageNum; lbl.className = 'btn-label'; lbl.innerHTML = `${stageNum}단계`;
+    grid.appendChild(inp); grid.appendChild(lbl);
+  });
+}
+function selectAllStages(flag) { document.querySelectorAll('.stage-cb').forEach(cb => cb.checked = flag); }
+
+// 🎯 대기실에서 '시작하기' 누를 때
+function startQuiz() {
+  const selectedStages = [...document.querySelectorAll('.stage-cb:checked')].map(cb => parseInt(cb.value));
+  if(selectedStages.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 공부할 단계를 1개 이상 선택해 주세요!'; return; }
+  
+  // 선택한 단계의 단어만 필터링하고 무작위로 섞기
+  words = allFetchedWords.filter(w => selectedStages.includes(w.stage)).sort(() => Math.random() - 0.5);
+  totalCount = words.length; currentIndex = 0; correctCount = 0;
+
+  if (currentUser === 'son') { showScreen('screen-minsu-quiz'); displayMinsuQuiz(); } 
+  else { showScreen('screen-minser-dictation'); displayMinserDictation(); }
+}
+
+function goSetup() { showScreen('screen-setup'); document.getElementById('warnMsg').textContent = ''; }
 
 function displayMinsuQuiz() {
   if (currentIndex >= words.length) { completeSession(); return; }
@@ -212,7 +294,8 @@ function displayMinsuQuiz() {
 function displayMinserDictation() {
   if (currentIndex >= words.length) { completeSession(); return; }
   const word = words[currentIndex]; document.getElementById('textHintArea').innerHTML = word.hint ? `💡 보조 힌트: ${word.hint}` : '';
-  const input = document.getElementById('dictationInput'); input.value = ''; input.classList.remove('error', 'success'); input.focus(); updateProgress(); setTimeout(speakCurrentWord, 500);
+  const input = document.getElementById('dictationInput'); input.value = ''; input.classList.remove('error', 'success'); input.focus(); updateProgress(); 
+  setTimeout(speakCurrentWord, 200); // 사용자가 이미 '시작하기' 버튼을 눌렀기 때문에 이제 소리가 차단되지 않고 아주 잘 납니다!
 }
 function updateProgress() { const percentage = totalCount > 0 ? (currentIndex / totalCount) * 100 : 0; document.getElementById('progressFill').style.width = percentage + '%'; document.getElementById('progressFill2').style.width = percentage + '%'; }
 function toggleFlashcard() { const card = document.getElementById('flashcard'); const label = document.getElementById('cardLabel'); const content = document.getElementById('cardContent'); const word = words[currentIndex]; if (card.classList.contains('flipped')) { card.classList.remove('flipped'); label.textContent = '💡 힌트 (클릭하면 정답이 보여요)'; content.textContent = word.hint; } else { card.classList.add('flipped'); label.textContent = '🎯 정답'; content.textContent = word.word; } }
@@ -232,7 +315,6 @@ function showResult(isCorrect, word, meaning) {
   document.getElementById('resultStats').innerHTML = `${meaningHtml}<div class="stat-row"><span class="stat-label">진행도:</span><span class="stat-value">${currentIndex + 1} / ${totalCount}</span></div>`; overlay.classList.add('active');
 }
 function closeResult(e) { if (e) e.stopPropagation(); document.getElementById('resultOverlay').classList.remove('active'); }
-/* 🎯 패치 완료: 다음 문제로 넘어갈 때 버그 수정 */
 function nextQuestion() { closeResult(); currentIndex++; if (currentIndex >= words.length) { completeSession(); } else { currentUser === 'son' ? displayMinsuQuiz() : displayMinserDictation(); } }
 function skipQuestion() { currentIndex++; if (currentIndex >= words.length) { completeSession(); } else { displayMinsuQuiz(); } }
 function skipDictation() { currentIndex++; if (currentIndex >= words.length) { completeSession(); } else { displayMinserDictation(); } }
@@ -247,8 +329,8 @@ async function completeSession() {
     }
     document.getElementById('rewardLoadingSpinner').style.display = 'none'; document.getElementById('rewardLoadingMsg').style.display = 'none';
     const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-    document.getElementById('rewardResultArea').innerHTML = `<div class="slide-in" style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 30px 24px; max-width: 400px; border:2px solid rgba(0,0,0,0.1); margin: 0 auto;"><div style="font-size: 3rem; margin-bottom: 16px;">🌟</div><div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">최종 정답률: ${accuracy}%</div><div>총 ${totalCount}문제 중 ${correctCount}문제 정답!</div>${rewardResultMsg}<button class="btn btn-primary" onclick="goHome()" style="width: 100%; max-width: 300px; margin-top:10px;">🏠 메인 화면으로</button></div>`;
-  } catch (error) { goHome(); }
+    document.getElementById('rewardResultArea').innerHTML = `<div class="slide-in" style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 30px 24px; max-width: 400px; border:2px solid rgba(0,0,0,0.1); margin: 0 auto;"><div style="font-size: 3rem; margin-bottom: 16px;">🌟</div><div style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">최종 정답률: ${accuracy}%</div><div>총 ${totalCount}문제 중 ${correctCount}문제 정답!</div>${rewardResultMsg}<button class="btn btn-primary" onclick="goSetup()" style="width: 100%; max-width: 300px; margin-top:10px;">🏠 단계 다시 고르기</button></div>`;
+  } catch (error) { location.href='index.html'; }
 }
 
 async function saveRewardToNotion(earned) {
@@ -256,7 +338,7 @@ async function saveRewardToNotion(earned) {
   const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
   const page = data.results[0]; const props = page.properties;
 
-  let level = props["용어 레벨"]?.number || 1; // 🎯 용어 레벨 독립 분리 완료!
+  let level = props["용어 레벨"]?.number || 1; 
   let diamond = props["다이아몬드 개수"]?.number || 0; let slime = props["슬라임 파츠 개수"]?.number || 0;
   let isLevelUp = false; let updateProps = {}; let currentCount = 0; let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
@@ -273,8 +355,7 @@ async function saveRewardToNotion(earned) {
   return { earned, currentCount, level, isLevelUp, rewardName };
 }
 
-function goHome() { window.location.href = 'index.html'; }
-window.addEventListener('load', () => { applyTheme(); document.getElementById('welcomeName').textContent = currentUserName; document.getElementById('welcomeName2').textContent = currentUserName; loadKoreanWords(); });
+window.addEventListener('load', () => { applyTheme(); loadKoreanWords(); });
 document.addEventListener('keydown', function (e) { if (e.key === 'Enter') { if (document.getElementById('resultOverlay').classList.contains('active')) { nextQuestion(); } else if (document.getElementById('screen-minsu-quiz').classList.contains('active')) { submitAnswer(); } else if (document.getElementById('screen-minser-dictation').classList.contains('active')) { submitDictation(); } } });
 </script>
 </body>
