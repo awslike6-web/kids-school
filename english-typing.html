@@ -44,8 +44,6 @@
   .big-btn { width: 100%; max-width: 440px; padding: 16px; border-radius: 18px; border: none; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; color: #fff; background: #eee; color: #888; }
   .loading { display: inline-block; width: 30px; height: 30px; border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--sky); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .shake { animation: shake 0.4s; }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
 </style>
 </head>
 <body>
@@ -59,6 +57,7 @@
 </div>
 
 <div class="screen" id="screen-quiz">
+  <!-- 🎯 실시간 점수판 -->
   <div class="game-header">
     <div class="game-stat-box">⭐ 점수: <span id="gameScore">0</span></div>
     <div class="game-stat-box">📝 문제: <span id="qNum">1</span> / <span id="qTotal">10</span></div>
@@ -101,7 +100,7 @@ function applyTheme() {
 
 async function loadEnglishWords() {
   try {
-    // 🎯 완벽 패치: 용어방과 동일한 심플한 매칭 로직으로 원복 완료! (공부할 사람)
+    // 🎯 아버님 노션 세팅에 맞춰 '선택(Select)' 알고리즘으로 완벽하게 복구했습니다! (대상 -> 공부할 사람)
     const response = await fetch(`${PROXY_URL}/v1/databases/${ENGLISH_DB_ID}/query`, { 
       method: "POST", 
       headers: { "Content-Type": "application/json" }, 
@@ -113,28 +112,17 @@ async function loadEnglishWords() {
     
     words = data.results.map(item => {
       const p = item.properties;
-      return { 
-        word: p["단어"]?.title?.[0]?.plain_text || '', 
-        meaning: p["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
-        hint: p["힌트"]?.rich_text?.[0]?.plain_text || '' 
-      };
+      return { word: p["단어"]?.title?.[0]?.plain_text || '', meaning: p["뜻풀이"]?.rich_text?.[0]?.plain_text || '', hint: p["힌트"]?.rich_text?.[0]?.plain_text || '' };
     }).sort(() => Math.random() - 0.5).slice(0, 10);
 
     if(words.length === 0) throw new Error("단어 부족");
-    
-    showScreen('screen-quiz'); 
-    document.getElementById('qTotal').textContent = words.length; 
-    displayQuestion();
-
+    showScreen('screen-quiz'); document.getElementById('qTotal').textContent = words.length; displayQuestion();
   } catch (err) {
-    document.getElementById('loadingTxt').innerHTML = `<b style="color:var(--pink)">노션에 ${currentUserName}의 영단어가 없습니다!</b>`;
+    document.getElementById('loadingTxt').innerHTML = `<b style="color:var(--pink)">노션에 ${currentUserName}의 영단어가 없습니다!</b><br><span style="font-size:0.9rem; color:#888;">(노션 칸 이름이 '공부할 사람'인지 확인해주세요)</span>`;
   }
 }
 
-function showScreen(id) { 
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
-  document.getElementById(id).classList.add('active'); 
-}
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
 function displayQuestion() {
   if (currentIndex >= words.length) { showFinalResult(); return; }
@@ -142,93 +130,53 @@ function displayQuestion() {
   document.getElementById('qNum').textContent = currentIndex + 1;
   document.getElementById('quizMeaning').textContent = q.meaning;
   document.getElementById('quizHint').textContent = q.hint ? `💡 힌트: ${q.hint}` : "💡 힌트가 없습니다.";
-  const inp = document.getElementById('wordInput'); 
-  inp.value = ''; 
-  inp.className = 'input-field'; 
-  document.getElementById('feedbackMsg').textContent = ''; 
-  inp.focus();
+  const inp = document.getElementById('wordInput'); inp.value = ''; inp.className = 'input-field'; document.getElementById('feedbackMsg').textContent = ''; inp.focus();
 }
 
 function submitWord() {
   const inp = document.getElementById('wordInput'); if (!inp.value.trim()) return;
-  const userAns = inp.value.trim().toLowerCase(); 
-  const correctAns = words[currentIndex].word.trim().toLowerCase();
+  const userAns = inp.value.trim().toLowerCase(); const correctAns = words[currentIndex].word.trim().toLowerCase();
   const fb = document.getElementById('feedbackMsg');
 
   if (userAns === correctAns) {
-    inp.className = 'input-field success'; 
-    fb.textContent = '정답! ✨'; 
-    fb.style.color = 'var(--green)';
-    score += 10; 
-    correctCount++;
+    inp.className = 'input-field success'; fb.textContent = '정답! ✨'; fb.style.color = 'var(--green)';
+    score += 10; correctCount++;
     document.getElementById('gameScore').textContent = score; 
-    currentIndex++; 
-    setTimeout(displayQuestion, 800);
+    currentIndex++; setTimeout(displayQuestion, 800);
   } else {
-    inp.className = 'input-field error shake'; 
-    fb.innerHTML = `오답 😢 정답: <b style="color:var(--pink)">${words[currentIndex].word}</b>`; 
-    fb.style.color = 'var(--pink)';
-    currentIndex++; 
-    setTimeout(displayQuestion, 1600);
+    inp.className = 'input-field error shake'; fb.innerHTML = `오답 😢 정답: <b style="color:var(--pink)">${words[currentIndex].word}</b>`; fb.style.color = 'var(--pink)';
+    currentIndex++; setTimeout(displayQuestion, 1600);
   }
 }
 
 async function showFinalResult() {
   showScreen('screen-loading');
-  document.getElementById('screen-loading').innerHTML = `<h1 class="main-title"><span class="accent2">탐험 완료!</span></h1><p id="saveTxt" style="margin-top:20px;">⏳ 노션 인벤토리에 보상 전송 중...</p><div class="loading" style="margin-top:20px;"></div><div id="resArea"></div>`;
+  document.getElementById('screen-loading').innerHTML = `<h1 class="main-title"><span class="accent2">탐험 완료!</span></h1><p id="saveTxt">⏳ 노션 인벤토리에 보상 전송 중...</p><div class="loading"></div><div id="resArea"></div>`;
   
   try {
     const res = await saveRewardToNotion(correctCount);
     document.getElementById('saveTxt').style.display = 'none';
     document.querySelectorAll('.loading').forEach(l => l.style.display='none');
-    
-    let rewardHtml = "";
-    if(correctCount > 0) {
-      rewardHtml = `<div style="background:rgba(0,0,0,0.03); border:2px dashed var(--sky); padding:10px; border-radius:12px; margin:14px 0;"><b style="color:var(--sky);">${res.rewardName} 지갑 총합: ${res.currentCount}개</b><br>${res.isLevelUp ? `<span style="color:var(--pink); font-weight:bold; display:inline-block; margin-top:5px;">🎉 영어 레벨 업! Lv.${res.level} 🎉</span>`:''}</div>`;
-    }
-
-    document.getElementById('resArea').innerHTML = `<div style="background:#fff; padding:24px; border-radius:20px; max-width:400px; margin:20px auto; box-shadow:0 6px 20px rgba(0,0,0,0.05); text-align:center;"><div style="font-size:2.5rem; margin-bottom:10px;">🏆</div><h3 style="font-size:1.4rem; margin-bottom:8px;">최종 점수: ${score}점</h3><p>총 10문제 중 ${correctCount}개 성공!</p>${rewardHtml}<button class="btn-submit" onclick="location.href='index.html'" style="width:100%;">🏠 메인으로 나가기</button></div>`;
+    document.getElementById('resArea').innerHTML = `<div style="background:#fff; padding:24px; border-radius:20px; max-width:400px; margin:20px auto; box-shadow:0 6px 20px rgba(0,0,0,0.05); text-align:center;"><div style="font-size:2.5rem; margin-bottom:10px;">🏆</div><h3 style="font-size:1.4rem; margin-bottom:8px;">최종 점수: ${score}점</h3><p>총 10문제 중 ${correctCount}개 성공!</p><div style="background:rgba(0,0,0,0.03); border:2px dashed var(--sky); padding:10px; border-radius:12px; margin:14px 0;"><b style="color:var(--sky);">${res.rewardName} 지갑 총합: ${res.currentCount}개</b><br>${res.isLevelUp ? `<span style="color:var(--pink); font-weight:bold; display:inline-block; margin-top:5px;">🎉 영어 레벨 업! Lv.${res.level} 🎉</span>`:''}</div><button class="btn-submit" onclick="location.href='index.html'" style="width:100%;">🏠 메인으로 나가기</button></div>`;
   } catch (e) { location.href='index.html'; }
 }
 
 async function saveRewardToNotion(earned) {
-  if (earned === 0) return { currentCount: 0, level: 1, isLevelUp: false, rewardName: '' };
-  
-  const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-    method: "POST", 
-    headers: { "Content-Type": "application/json" }, 
-    body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName } } }) 
-  });
-  const data = await response.json(); 
-  const page = data.results[0]; 
-  const props = page.properties;
+  const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName } } }) });
+  const data = await response.json(); const page = data.results[0]; const props = page.properties;
 
   let level = props["영어 레벨"]?.number || 1; 
-  let diamond = props["다이아몬드 개수"]?.number || 0; 
-  let slime = props["슬라임 파츠 개수"]?.number || 0;
-  let isLevelUp = false; 
-  let updateProps = {}; 
-  let currentCount = 0; 
-  let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
+  let diamond = props["다이아몬드 개수"]?.number || 0; let slime = props["슬라임 파츠 개수"]?.number || 0;
+  let isLevelUp = false; let updateProps = {}; let currentCount = 0; let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
   if (currentTheme === '마인크래프트') {
-    let total = diamond + earned; 
-    if (total >= level * 20) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
-    currentCount = total; 
-    updateProps = { "다이아몬드 개수": { number: total }, "영어 레벨": { number: level } };
+    let total = diamond + earned; if (total >= level * 20) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+    currentCount = total; updateProps = { "다이아몬드 개수": { number: total }, "영어 레벨": { number: level } };
   } else {
-    let total = slime + earned; 
-    if (total >= level * 20) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
-    currentCount = total; 
-    updateProps = { "슬라임 파츠 개수": { number: total }, "영어 레벨": { number: level } };
+    let total = slime + earned; if (total >= level * 20) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+    currentCount = total; updateProps = { "슬라임 파츠 개수": { number: total }, "영어 레벨": { number: level } };
   }
-  
-  await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
-    method: "PATCH", 
-    headers: { "Content-Type": "application/json" }, 
-    body: JSON.stringify({ properties: updateProps }) 
-  });
-  
+  await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ properties: updateProps }) });
   return { currentCount, level, isLevelUp, rewardName };
 }
 
