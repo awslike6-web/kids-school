@@ -14,7 +14,6 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); transition: background 0.5s; }
   
-  /* 테마 배경 */
   body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%); }
   body.theme--slime { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); }
 
@@ -28,7 +27,9 @@
   .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 4px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.08)); position: relative; }
   .main-title span { color: var(--pink); }
 
-  /* 설정 UI 카드 */
+  .profile-switch-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: 2px solid var(--pink); color: var(--dark); padding: 6px 12px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: all 0.2s; }
+  .profile-switch-btn:hover { background: var(--pink); color: #fff; }
+
   .card { background: var(--card); border-radius: 24px; padding: 22px 24px; width: 100%; max-width: 480px; box-shadow: 0 8px 30px rgba(0,0,0,0.10); margin-bottom: 18px; border: 2.5px solid rgba(255,255,255,0.8); }
   .card-title { font-size: 1.05rem; color: var(--pink); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
 
@@ -47,59 +48,37 @@
   input[name="levelMode"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.06); }
   input[name="digitMode"]:checked + .btn-label, input[name="printCol"]:checked + .btn-label, input[name="lowDigitMode"]:checked + .btn-label { background: var(--purple); border-color: var(--purple); color:#fff; transform: scale(1.06); }
   input[name="carryMode"]:checked + .btn-label, input[name="lowCarryMode"]:checked + .btn-label { background: var(--pink); border-color: var(--pink); color:#fff; transform: scale(1.06); }
-  #speed-turtle:checked + .btn-label { background: var(--green); border-color: var(--green); color:#fff; transform: scale(1.06); }
-  #speed-rabbit:checked + .btn-label { background: var(--orange); border-color: var(--orange); color:#fff; transform: scale(1.06); }
 
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .mode-btn { padding: 16px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 0.9rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; transition: transform .18s; }
-  .mode-btn .mode-icon { font-size: 2.2rem; }
+  .mode-btn { padding: 16px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; transition: transform .18s; }
   .mode-btn.falling { background: linear-gradient(135deg, var(--orange), var(--pink)); }
   .mode-btn.typing { background: linear-gradient(135deg, var(--purple), var(--sky)); }
   .mode-btn.vertical { grid-column: span 2; background: linear-gradient(135deg, #4ECDC4, #6BCB77); font-size: 1.1rem; padding: 18px; }
   .mode-btn.wrong-note { background: linear-gradient(135deg, var(--dark), #5a5a8a); font-size: 1rem; padding: 18px; }
-  .mode-btn.print-shop { background: linear-gradient(135deg, #FF6B6B, #FF9F43); font-size: 1rem; padding: 18px; }
   .mode-btn:hover { transform: scale(1.03); }
 
   .big-btn { width: 100%; max-width: 480px; padding: 16px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top:10px; }
   .big-btn.yellow-btn { background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); }
   .big-btn.back-btn { background: #eee; color: #888; }
-  
-  .sub-title-text { font-size:0.9rem; color:#666; margin-bottom:6px; margin-top:12px; font-weight:bold; }
-  .tiny-btn { padding: 5px 14px; border-radius: 10px; border: 2px solid #ddd; background: #fff; font-family: 'Jua', sans-serif; font-size: 0.82rem; cursor: pointer; color: var(--dark); }
-  .no-select-warning { color: var(--pink); font-size: 0.88rem; text-align: center; height: 1.2rem; margin-bottom: 4px; }
   .user-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(0,0,0,0.05); font-size: 0.95rem; margin-bottom: 20px; color: var(--dark); border: 2px solid rgba(0,0,0,0.1); }
 
-  /* 💎 💧 시각화 카운팅 블록 (테마별) */
   .visual-block-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px auto; padding: 12px; width: 100%; max-width: 440px; background: rgba(255,255,255,0.7); border-radius: 16px; border: 1.5px dashed rgba(0,0,0,0.15); min-height: 40px; }
   .cnt-block { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #fff; font-weight: bold; position: relative; animation: popBlock 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
   
-  /* 마인크래프트 (네모 다이아) */
   .theme-mine .cnt-block { border-radius: 4px; box-shadow: inset -2px -2px 0 rgba(0,0,0,0.2), inset 2px 2px 0 rgba(255,255,255,0.5); }
-  .theme-mine .cnt-block.first { background: #03A9F4; border: 1px solid #01579B; } /* 다이아 */
-  .theme-mine .cnt-block.second { background: #FBC02D; border: 1px solid #F57F17; } /* 금괴 */
+  .theme-mine .cnt-block.first { background: #03A9F4; border: 1px solid #01579B; }
+  .theme-mine .cnt-block.second { background: #FBC02D; border: 1px solid #F57F17; }
   
-  /* 슬라임 (동그라미 물방울) */
   .theme-sli .cnt-block { border-radius: 50%; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.15), 1px 2px 4px rgba(0,0,0,0.1); }
   .theme-sli .cnt-block::after { content: '• •'; font-size: 8px; position: absolute; top: 4px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-family: sans-serif; letter-spacing: -1px; }
   .theme-sli .cnt-block.first { background: linear-gradient(135deg, #FF8E9E, #FF5376); }
   .theme-sli .cnt-block.second { background: linear-gradient(135deg, #81C784, #388E3C); }
-  
   .cnt-block.subtracted { opacity: 0.3; filter: grayscale(80%); }
   .cnt-block.subtracted::before { content: '❌'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #D32F2F; text-shadow: 1px 1px 0 #fff; z-index: 2; }
-  @keyframes popBlock { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
-  /* 게임 화면 공통 */
   .game-header { width: 100%; max-width: 460px; display: flex; justify-content: space-between; margin-bottom: 16px; }
   .game-stat-box { background: #fff; border-radius: 14px; padding: 8px 16px; font-size: 0.95rem; box-shadow: 0 2px 10px rgba(0,0,0,0.07); color: var(--dark); }
   
-  #screen-falling { background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #1a1a3e 100%); color: #fff; }
-  .f-header-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px 14px; font-size: 0.95rem; }
-  .falling-question-box { background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25); border-radius: 22px; padding: 16px 28px; font-size: 2.2rem; font-weight: 700; text-align: center; margin-bottom: 10px; letter-spacing: 2px; }
-  .falling-arena { position: relative; width: 100%; max-width: 520px; height: 45vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
-  .fall-ball { position: absolute; width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; cursor: pointer; user-select: none; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-  @keyframes falling { 0% { top: -80px; } 100% { top: 100%; } }
-
-  #screen-typing { background: linear-gradient(160deg, #fff9f0 0%, #f0f8ff 100%); }
   .typing-question-card { background: #fff; border-radius: 28px; padding: 24px 30px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.10); margin-bottom: 14px; border: 3px solid var(--yellow); }
   .q-text { font-size: clamp(2rem, 8vw, 3.2rem); font-weight: 700; letter-spacing: 3px; color: var(--dark); margin-bottom: 4px; }
   .answer-input-wrap { display: flex; gap: 10px; width: 100%; max-width: 460px; margin-bottom: 12px; }
@@ -109,14 +88,13 @@
   .submit-btn { padding: 16px 24px; border-radius: 18px; border: none; background: linear-gradient(135deg, var(--purple), var(--sky)); color: #fff; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; }
   .feedback-msg { font-size: 1.2rem; height: 1.6rem; text-align: center; font-weight: bold; }
 
-  #screen-vertical { background: linear-gradient(160deg, #e0f7fa 0%, #e8f5e9 100%); }
   .v-board-container { width: 100%; max-width: 460px; display: flex; justify-content: center; margin-bottom: 20px; }
-  .v-board { background: #fff; padding: 24px 36px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.6rem; font-family: 'Jua', sans-serif; color: var(--dark); }
+  .v-board { background: #fff; padding: 24px 36px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.6rem; color: var(--dark); }
   .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 12px; margin-bottom: 2px; height: 32px; }
   .v-row { display: flex; width: 100%; justify-content: flex-end; align-items: center; gap: 15px; margin-bottom: 4px; letter-spacing: 4px; }
   .v-line { width: 100%; height: 4px; background: var(--dark); margin: 10px 0; border-radius: 2px; }
   .v-symbol { margin-right: auto; color: var(--pink); font-size: 2.2rem; }
-  .div-board { background: #fff; padding: 30px 40px; border-radius: 24px; border: 4px solid var(--sky); display: flex; flex-direction: column; align-items: center; font-size: 2.6rem; font-family: 'Jua', sans-serif; }
+  .div-board { background: #fff; padding: 30px 40px; border-radius: 24px; border: 4px solid var(--sky); display: flex; flex-direction: column; align-items: center; font-size: 2.6rem; }
   .div-top { display: flex; justify-content: center; width: 100%; padding-bottom: 8px; border-bottom: 4px solid var(--dark); margin-bottom: 12px; margin-left: 35px; width: calc(100% - 35px); }
   .div-bottom { display: flex; align-items: center; width: 100%; justify-content: center; }
   .div-bracket { font-weight: 300; margin: 0 15px; font-size: 3rem; color: #555; }
@@ -124,42 +102,24 @@
   .v-input.correct { border-color: var(--green); background: #f0fff4; }
   .v-input.wrong { border-color: var(--pink); background: #fff5f5; }
   .v-input.tiny { font-size: 1.05rem; width: 50px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; outline: none; }
-  .v-input.step { width: 130px; font-size: 1.5rem; margin-bottom: 6px; }
 
-  #screen-result { justify-content: center; }
   .result-card { background: var(--card); border-radius: 30px; padding: 40px 32px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 16px 50px rgba(0,0,0,0.12); }
   .result-emoji { font-size: 4rem; margin-bottom: 10px; }
   .result-score { font-size: 3.5rem; color: var(--pink); margin-bottom: 8px; }
-
-  @media print {
-    body * { visibility: hidden !important; }
-    #print-area, #print-area * { visibility: visible !important; }
-    #print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; font-family: 'Jua', sans-serif; color: #000; background: #fff; }
-    body { background: #fff !important; min-height: auto; }
-    .print-header { text-align: center; font-size: 24pt; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 10px; }
-    .print-grid { display: grid; width: 100%; }
-    .print-grid.col-1 { grid-template-columns: 1fr; gap: 80px 20px; } 
-    .print-grid.col-2 { grid-template-columns: 1fr 1fr; gap: 60px 20px; } 
-    .print-grid.col-3 { grid-template-columns: 1fr 1fr 1fr; gap: 40px 10px; } 
-    .p-item { font-size: 18pt; letter-spacing: 2px; display: flex; align-items: flex-start; }
-    .p-num { font-size: 12pt; color: #555; margin-right: 8px; margin-top: 4px; }
-    .p-ans-key { margin-top: 80px; border-top: 1px dashed #999; padding-top: 20px; font-size: 11pt; color: #333; line-height: 1.6; break-inside: avoid; }
-  }
 </style>
 </head>
 <body>
 
 <div class="bg-floats" id="bgFloats"></div>
-<div id="print-area" style="display:none;"></div> 
 
-<!-- ════════════ 설정 대문 화면 ════════════ -->
 <div class="screen active" id="screen-setup">
+  <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
 
   <div class="card">
-    <div class="card-title">🔢 연산 모드 (전체 개방!)</div>
-    <div class="grid-5" id="opModeGrid">
+    <div class="card-title">🔢 연산 모드 선택</div>
+    <div class="grid-5">
       <input type="radio" name="opMode" id="op-add" value="add" checked onchange="updateVisibleCards()">
       <label for="op-add" class="btn-label"><span style="font-size:1.4rem;">➕</span>덧셈</label>
       <input type="radio" name="opMode" id="op-sub" value="sub" onchange="updateVisibleCards()">
@@ -177,9 +137,9 @@
     <div class="card-title">📈 곱셈/나눗셈 난이도</div>
     <div class="grid-2">
       <input type="radio" name="levelMode" id="lvl-1" value="1" checked onchange="updateVisibleCards()">
-      <label for="lvl-1" class="btn-label"><span class="icon" id="lvl1-icon">🌱</span>1단계 <small>(구구단)</small></label>
+      <label for="lvl-1" class="btn-label">🌱 1단계 (구구단)</label>
       <input type="radio" name="levelMode" id="lvl-2" value="2" onchange="updateVisibleCards()">
-      <label for="lvl-2" class="btn-label"><span class="icon" id="lvl2-icon">🌳</span>2단계 <small>(두 자릿수)</small></label>
+      <label for="lvl-2" class="btn-label">🌳 2단계 (두 자릿수)</label>
     </div>
   </div>
 
@@ -192,7 +152,6 @@
   <div class="card" id="card-high-level" style="display:none;">
     <div class="card-title">⚙️ 2단계 세부 설정</div>
     <div class="grid-2"><input type="radio" name="digitMode" id="digit-21" value="21" checked><label for="digit-21" class="btn-label">2자리 × 1자리</label><input type="radio" name="digitMode" id="digit-22" value="22"><label for="digit-22" class="btn-label">2자리 × 2자리</label></div>
-    <div class="grid-2"><input type="radio" name="carryMode" id="carry-no" value="no"><label for="carry-no" class="btn-label">올림 없음</label><input type="radio" name="carryMode" id="carry-yes" value="yes" checked><label for="carry-yes" class="btn-label">올림 포함</label></div>
   </div>
 
   <div class="card" id="card-low-level" style="display:none;">
@@ -202,166 +161,99 @@
       <input type="radio" name="lowDigitMode" id="ldigit-21" value="21"><label for="ldigit-21" class="btn-label">2자리⇄1자리</label>
       <input type="radio" name="lowDigitMode" id="ldigit-22" value="22"><label for="ldigit-22" class="btn-label">2자리⇄2자리</label>
     </div>
-    <div class="grid-2" style="margin-top:10px;">
-      <input type="radio" name="lowCarryMode" id="lcarry-no" value="no" checked><label for="lcarry-no" class="btn-label">받아올림/내림 없음</label>
-      <input type="radio" name="lowCarryMode" id="lcarry-yes" value="yes"><label for="lcarry-yes" class="btn-label">받아올림/내림 포함</label>
-    </div>
   </div>
 
   <div class="card">
     <div class="card-title">🎮 게임 시작하기</div>
     <p class="no-select-warning" id="warnMsg"></p>
     <div class="mode-grid">
-      <button class="mode-btn falling" onclick="startGame('falling')"><span class="mode-icon">☄️</span>객관식</button>
-      <button class="mode-btn typing" onclick="startGame('typing')"><span class="mode-icon">⌨️</span>주관식</button>
-      <button class="mode-btn vertical" onclick="startGame('vertical')"><span style="font-size: 1.5rem;">📝</span>세로셈</button>
+      <button class="mode-btn typing" onclick="startGame('typing')" style="grid-column: span 2; padding:18px; font-size:1.1rem; background:linear-gradient(135deg, var(--purple), var(--sky));">⌨️ 주관식 실력 테스트</button>
+      <button class="mode-btn vertical" onclick="startGame('vertical')">📝 세로셈 필기 모드</button>
       <button class="mode-btn wrong-note" onclick="startWrongNote()">🖍️ 오답 풀기 (<span id="wrongCountBadge">0</span>)</button>
     </div>
   </div>
   <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
-<!-- ════════════ 인쇄소 화면 ════════════ -->
-<div class="screen" id="screen-print">
-  <h1 class="main-title">🖨️ 민민이네 <span>인쇄소</span></h1>
-  <p class="subtitle">오직 엄마 아빠를 위한 문제지 제작소!</p>
-  <div class="card">
-    <div class="card-title">📂 1. 출력할 문제 출처</div>
-    <div class="grid-2">
-      <input type="radio" name="printSource" id="ps-recent" value="recent" checked onchange="loadPrintList()">
-      <label for="ps-recent" class="btn-label">기출문제 (최근 50개)</label>
-      <input type="radio" name="printSource" id="ps-wrong" value="wrong" onchange="loadPrintList()">
-      <label for="ps-wrong" class="btn-label">내 오답노트</label>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">📄 2. 인쇄 레이아웃 설정</div>
-    <div class="grid-3">
-      <input type="radio" name="printCol" id="pc-1" value="1">
-      <label for="pc-1" class="btn-label">1단<br><small>(세로셈용)</small></label>
-      <input type="radio" name="printCol" id="pc-2" value="2" checked>
-      <label for="pc-2" class="btn-label">2단<br><small>(보통)</small></label>
-      <input type="radio" name="printCol" id="pc-3" value="3">
-      <label for="pc-3" class="btn-label">3단<br><small>(구구단)</small></label>
-    </div>
-    <div style="margin-top:14px; text-align:center;">
-      <input type="checkbox" id="print-ans-key" checked style="display:inline-block; width:auto; margin-right:5px;">
-      <label for="print-ans-key" style="font-size:0.95rem; cursor:pointer; user-select:none; font-weight:bold;">✅ 맨 밑에 조그맣게 정답지 포함하기</label>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">✅ 3. 인쇄할 문제 고르기 (<span id="print-count">0</span>개 대기중)</div>
-    <div style="display:flex; gap:8px; margin-bottom:10px;">
-      <button class="tiny-btn" onclick="selectPrintAll(true)">전체 선택</button>
-      <button class="tiny-btn" onclick="selectPrintAll(false)">전체 해제</button>
-    </div>
-    <div id="print-list" style="max-height: 220px; overflow-y: auto; background: #fafafa; border: 2px solid #eee; border-radius: 12px; padding: 10px;"></div>
-  </div>
-  <button class="big-btn yellow-btn" onclick="executePrint()">🖨️ A4 용지로 인쇄하기</button>
-  <button class="big-btn back-btn" style="margin-top:10px;" onclick="showScreen('screen-setup')">← 설정으로 돌아가기</button>
-</div>
-
-<!-- ════════════ 퀴즈 화면들 ════════════ -->
-<div class="screen" id="screen-falling">
-  <div class="game-header"><div class="game-stat-box">⭐ <span id="f-score">0</span></div><div class="game-stat-box">📝 <span id="f-qnum">1</span></div><div class="game-stat-box">❤️ <span id="f-lives">3</span></div></div>
-  <div class="falling-question-box" id="f-question">? × ? = ?</div>
-  <div class="visual-block-container" id="f-visual-area" style="display:none;"></div>
-  <div class="falling-arena" id="fallingArena"></div>
-  <div style="width:100%; max-width:520px; height:10px; background:rgba(255,255,255,0.15); border-radius:10px; margin-top:10px;"><div id="timerBar" style="height:100%; width:100%;"></div></div>
-  <button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
-</div>
-
+<!-- 주관식 퀴즈 화면 -->
 <div class="screen" id="screen-typing">
-  <div class="game-header"><div class="game-stat-box">⭐ <span id="t-score">0</span>점</div><div class="game-stat-box">📝 <span id="t-qnum">1</span></div></div>
+  <div class="game-header"><div class="game-stat-box">⭐ 점수: <span id="t-score">0</span></div><div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div></div>
   <div class="typing-question-card">
-    <div class="q-text" id="t-question">8 × 7 = ?</div>
+    <div class="q-text" id="t-question">? × ? = ?</div>
     <div class="visual-block-container" id="t-visual-area" style="display:none;"></div>
   </div>
   <div class="answer-input-wrap"><input type="number" class="answer-input" id="answerInput" autocomplete="off"><button class="submit-btn" onclick="submitTyping()">확인✔</button></div>
   <div class="feedback-msg" id="t-feedbackMsg"></div><button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
 </div>
 
+<!-- 세로셈 퀴즈 화면 -->
 <div class="screen" id="screen-vertical">
-  <div class="game-header"><div class="game-stat-box">⭐ <span id="v-score">0</span>점</div><div class="game-stat-box">📝 <span id="v-qnum">1</span></div></div>
+  <div class="game-header"><div class="game-stat-box">⭐ 점수: <span id="v-score">0</span></div><div class="game-stat-box">📝 문제: <span id="v-qnum">1</span></div></div>
   <div class="v-board-container" id="vertical-container"></div>
   <div class="feedback-msg" id="v-feedbackMsg"></div><button class="submit-btn" style="width:100%; max-width:460px; margin-top:10px;" onclick="submitVertical()">정답 확인✔</button>
   <button class="big-btn back-btn" style="max-width:460px;margin-top:20px" onclick="goSetup()">← 나가기</button>
 </div>
 
+<!-- 결과 창 -->
 <div class="screen" id="screen-result">
-  <div class="result-card"><div class="result-emoji" id="r-emoji">🎉</div><div style="font-size:1.8rem; margin-bottom:6px;" id="r-title">잘했어요!</div>
-    <div class="result-score" id="r-score">10점</div><div style="font-size:0.95rem; color:#999; margin-bottom:28px;" id="r-detail">수고했어요!</div>
-    <button class="big-btn yellow-btn" onclick="retryGame()">🔄 다시!</button><button class="big-btn back-btn" onclick="goSetup()">🏠 설정으로</button>
+  <div class="result-card"><div class="result-emoji">🎉</div><div style="font-size:1.8rem; margin-bottom:6px;">수학 탐험 완료!</div>
+    <div class="result-score" id="r-score">0점</div><div style="font-size:1rem; color:#888; margin-bottom:24px;" id="r-detail">수고했어요!</div>
+    <button class="big-btn yellow-btn" onclick="retryGame()">🔄 다시 도전</button><button class="big-btn back-btn" onclick="goSetup()">🏠 설정으로</button>
   </div>
 </div>
 
 <script>
-// 🚀 [필수] API 설정 영역
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
-let currentProfile = 'son'; 
-let currentTheme = '마인크래프트'; // 기본값 (로컬스토리지에서 읽어옴)
-let wrongNotes = [], recentQuestions = [];
+let currentProfile = 'son'; let currentTheme = '마인크래프트';
+let wrongNotes = []; let gameState = {};
 
-function getWrongKey() { return `minmin_math_wrong_${currentProfile}`; }
-function getRecentKey() { return `minmin_math_recent_${currentProfile}`; }
+function toggleProfileManually() {
+  if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
+  else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
+  localStorage.setItem('currentUser', currentProfile); localStorage.setItem('currentTheme', currentTheme);
+  initProfile();
+}
 
-// 대문에서 저장한 프로필 및 테마 읽어오기
 function initProfile() {
-  const savedUser = localStorage.getItem('currentUser');
-  if (savedUser) currentProfile = savedUser;
-  
-  const savedTheme = localStorage.getItem('currentTheme');
-  if (savedTheme) currentTheme = savedTheme;
+  const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
+  const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
 
-  // 테마에 따라 클래스 적용 (마인크래프트 or 슬라임)
   const themeClass = currentTheme === '슬라임' ? 'theme-sli' : 'theme-mine';
-  document.getElementById('f-visual-area').className = `visual-block-container ${themeClass}`;
   document.getElementById('t-visual-area').className = `visual-block-container ${themeClass}`;
 
-  const userName = localStorage.getItem('currentUserName') || (currentProfile === 'son' ? '민수' : '민서');
-  document.getElementById('currentUserBadge').innerHTML = `현재 사용자: ${userName} (${currentTheme} 모드)`;
+  const userName = currentProfile === 'son' ? '민수' : '민서';
+  document.getElementById('currentUserBadge').innerHTML = `현재 사용자: ${currentProfile === 'son' ? '👦' : '👧'} ${userName} (${currentTheme} 모드)`;
   
-  // 기본 연산 세팅: 오빠는 곱셈, 동생은 덧셈
-  document.getElementById(currentProfile === 'son' ? 'op-mul' : 'op-add').checked = true;
-  
-  loadProfileData();
-  updateVisibleCards();
+  loadProfileData(); updateVisibleCards();
 }
 
 document.addEventListener('DOMContentLoaded', initProfile);
 
 function updateVisibleCards() {
   const op = document.querySelector('input[name="opMode"]:checked').value;
-  const isAddSub = (op === 'add' || op === 'sub' || op === 'mix' && currentProfile === 'daughter'); // mix일 때 동생은 덧뺄 우선
-  
+  const isAddSub = (op === 'add' || op === 'sub' || (op === 'mix' && currentProfile === 'daughter'));
   document.getElementById('card-level-select').style.display = isAddSub ? 'none' : 'block';
   document.getElementById('card-low-level').style.display = isAddSub ? 'block' : 'none';
-  
   const lvl = document.querySelector('input[name="levelMode"]:checked').value;
   document.getElementById('card-times').style.display = (!isAddSub && lvl === '1') ? 'block' : 'none';
   document.getElementById('card-high-level').style.display = (!isAddSub && lvl === '2' && op === 'mul') ? 'block' : 'none';
 }
 
 function loadProfileData() {
-  wrongNotes = JSON.parse(localStorage.getItem(getWrongKey())) || [];
-  recentQuestions = JSON.parse(localStorage.getItem(getRecentKey())) || [];
+  wrongNotes = JSON.parse(localStorage.getItem(`minmin_math_wrong_${currentProfile}`)) || [];
   document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
 }
 
-// 🧠 통합 문제 생성 엔진 (덧/뺄/곱/나)
 function generateQuestion() {
   let op = document.querySelector('input[name="opMode"]:checked').value;
   if(op === 'mix') op = ['add', 'sub', 'mul', 'div'][Math.floor(Math.random() * 4)];
-
   if (op === 'add' || op === 'sub') {
     const digit = document.querySelector('input[name="lowDigitMode"]:checked').value;
-    const carry = document.querySelector('input[name="lowCarryMode"]:checked').value === 'yes';
     let a=0, b=0, ans=0, sign = op==='add'?'＋':'－';
-
     if (op === 'add') {
-      if (digit === '11') { a = carry ? Math.floor(Math.random()*5)+5 : Math.floor(Math.random()*4)+1; b = carry ? Math.floor(Math.random()*5)+5 : Math.floor(Math.random()*(4-a))+1; }
+      if (digit === '11') { a = Math.floor(Math.random()*8)+1; b = Math.floor(Math.random()*8)+1; }
       else if (digit === '21') { a = Math.floor(Math.random()*80)+11; b = Math.floor(Math.random()*8)+1; }
       else { a = Math.floor(Math.random()*80)+10; b = Math.floor(Math.random()*80)+10; }
       ans = a + b;
@@ -381,97 +273,71 @@ function generateQuestion() {
       return op === 'mul' ? { text: `${dan} × ${n}`, answer: dan*n, opType: 'mul' } : { text: `${dan*n} ÷ ${dan}`, answer: n, opType: 'div' };
     } else {
       let a = 10 + Math.floor(Math.random() * 80);
-      let b = document.getElementById('digit-22').checked ? (10 + Math.floor(Math.random() * 80)) : (2 + Math.floor(Math.random() * 8));
+      let b = document.getElementById('digit-22')?.checked ? (10 + Math.floor(Math.random() * 80)) : (2 + Math.floor(Math.random() * 8));
       return { text: `${a} × ${b}`, answer: a*b, opType: 'mul' };
     }
   }
 }
 
-// 💎 💧 시각화 블록 렌더링 (테마 연동)
 function drawVisualBlocks(q, targetAreaId) {
-  const area = document.getElementById(targetAreaId);
-  if (!area) return;
-  area.innerHTML = '';
-  
-  if (q.opType !== 'add' && q.opType !== 'sub') { area.style.display = 'none'; return; }
-  if (q.numA > 20 || q.numB > 20) {
-    area.style.display = 'block'; area.innerHTML = `<span style="font-size:0.95rem; color:#666;">💡 숫자가 커서 그림은 생략해요!</span>`; return;
-  }
-  
+  const area = document.getElementById(targetAreaId); if (!area) return; area.innerHTML = '';
+  if (q.opType !== 'add' && q.opType !== 'sub' || q.numA > 20 || q.numB > 20) { area.style.display = 'none'; return; }
   area.style.display = 'flex';
   if (q.opType === 'add') {
     for(let i=0; i<q.numA; i++) { let b=document.createElement('div'); b.className='cnt-block first'; b.innerText=i+1; area.appendChild(b); }
     for(let i=0; i<q.numB; i++) { let b=document.createElement('div'); b.className='cnt-block second'; b.innerText=i+1; area.appendChild(b); }
   } else {
     for(let i=1; i<=q.numA; i++) {
-      let b=document.createElement('div'); b.className='cnt-block first'; 
-      if (i > (q.numA - q.numB)) b.classList.add('subtracted'); else b.innerText = i;
-      area.appendChild(b);
+      let b=document.createElement('div'); b.className='cnt-block first'; if (i > (q.numA - q.numB)) b.classList.add('subtracted'); else b.innerText = i; area.appendChild(b);
     }
   }
 }
 
-// 게임 공통 로직
-let gameState = {};
-function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
-function goSetup(){ clearFallingGame(); loadProfileData(); showScreen('screen-setup'); }
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function goSetup(){ loadProfileData(); showScreen('screen-setup'); }
 
 function startGame(mode){
   const op = document.querySelector('input[name="opMode"]:checked').value;
-  const isAddSub = (op === 'add' || op === 'sub' || op === 'mix' && currentProfile === 'daughter');
-  if(!isAddSub && document.querySelector('input[name="levelMode"]:checked').value === '1' && document.querySelectorAll('.times-cb:checked').length === 0){ 
-    document.getElementById('warnMsg').textContent = '⚠️ 구구단을 선택해주세요!'; return; 
-  }
-  document.getElementById('warnMsg').textContent = '';
-  
+  if((op==='mul'||op==='div') && document.querySelector('input[name="levelMode"]:checked').value==='1' && document.querySelectorAll('.times-cb:checked').length===0){ alert('구구단을 선택해 주세요!'); return; }
   const questions = []; for(let i=0;i<10;i++) questions.push(generateQuestion());
-  gameState = { mode, questions, current: 0, score: 0, correctCount: 0, wrongCount: 0 };
-  
-  if(mode === 'falling') initFalling(); else if(mode === 'typing') initTyping(); else if(mode === 'vertical') initVertical();
+  gameState = { mode, questions, current: 0, score: 0, correctCount: 0 };
+  if(mode === 'typing') initTyping(); else if(mode === 'vertical') initVertical();
 }
 
 function startWrongNote() {
-  if(wrongNotes.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 오답이 없어요!'; return; }
-  document.getElementById('warnMsg').textContent = '';
-  gameState = { mode: 'typing', questions: [...wrongNotes].sort(()=>Math.random()-0.5).slice(0, 10), current: 0, score: 0, correctCount: 0, wrongCount: 0, isWrongNoteMode: true };
+  if(wrongNotes.length === 0) { alert('오답이 없습니다!'); return; }
+  gameState = { mode: 'typing', questions: [...wrongNotes].sort(()=>Math.random()-0.5).slice(0, 10), current: 0, score: 0, correctCount: 0, isWrongMode: true };
   initTyping();
 }
 
 function handleAnswer(isCorrect, q, inpBox, fbBox, nextFunc) {
+  const key = `minmin_math_wrong_${currentProfile}`;
   if (isCorrect) {
-    inpBox.className += ' correct'; fbBox.textContent = '정답! 🎉'; fbBox.style.color = 'var(--green)';
-    gameState.score+=10; gameState.correctCount++; 
-    wrongNotes = wrongNotes.filter(item => item.text !== q.text); localStorage.setItem(getWrongKey(), JSON.stringify(wrongNotes));
+    inpBox.className += ' correct'; fbBox.textContent = '정답! 🎉'; fbBox.style.color = 'var(--green)'; gameState.score+=10; gameState.correctCount++;
+    wrongNotes = wrongNotes.filter(item => item.text !== q.text); localStorage.setItem(key, JSON.stringify(wrongNotes));
     gameState.current++; setTimeout(nextFunc, 700);
   } else {
-    inpBox.className += ' wrong'; fbBox.textContent = `틀렸어요😢 정답: ${q.answer}`; fbBox.style.color = 'var(--pink)';
-    gameState.wrongCount++;
-    if(!gameState.isWrongNoteMode && !wrongNotes.some(item => item.text === q.text)) { wrongNotes.push(q); localStorage.setItem(getWrongKey(), JSON.stringify(wrongNotes)); }
-    gameState.current++; setTimeout(nextFunc, 1200);
+    inpBox.className += ' wrong'; fbBox.textContent = `오답😢 정답: ${q.answer}`; fbBox.style.color = 'var(--pink)';
+    if(!gameState.isWrongMode && !wrongNotes.some(item => item.text === q.text)) { wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); }
+    gameState.current++; setTimeout(nextFunc, 1400);
   }
 }
 
-// 모드 B: 주관식
 function initTyping(){ showScreen('screen-typing'); nextTypingQ(); }
 function nextTypingQ(){
   if(gameState.current >= gameState.questions.length){ showResult(); return; }
-  const q = gameState.questions[gameState.current];
-  document.getElementById('t-qnum').textContent = gameState.current+1; document.getElementById('t-question').textContent = q.text + ' = ?';
-  drawVisualBlocks(q, 't-visual-area');
-  const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
+  const q = gameState.questions[gameState.current]; document.getElementById('t-qnum').textContent = gameState.current+1; document.getElementById('t-question').textContent = q.text + ' = ?';
+  drawVisualBlocks(q, 't-visual-area'); const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
 }
 function submitTyping(){
   const inp = document.getElementById('answerInput'); if(inp.value==='') return;
   handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
 }
-document.addEventListener('keydown', e=>{ if(e.key==='Enter' && document.getElementById('screen-typing').classList.contains('active')) submitTyping(); });
 
-// 모드 C: 세로셈
 function initVertical(){ showScreen('screen-vertical'); nextVerticalQ(); }
 function nextVerticalQ(){
   if(gameState.current >= gameState.questions.length){ showResult(); return; }
-  const q = gameState.questions[gameState.current];
-  document.getElementById('v-qnum').textContent = gameState.current+1; document.getElementById('v-feedbackMsg').textContent='';
+  const q = gameState.questions[gameState.current]; document.getElementById('v-qnum').textContent = gameState.current+1; document.getElementById('v-feedbackMsg').textContent='';
   const container = document.getElementById('vertical-container');
   if(q.text.includes('×')){
     const [a, b] = q.text.split(' × ').map(Number);
@@ -490,116 +356,57 @@ function submitVertical(){
   handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('v-feedbackMsg'), nextVerticalQ);
 }
 
-// 🏆 결과 화면 및 🚀 노션 보상 자동 적립 (20개 롤오버 로직 적용)
+// 🏆 보상 상시 누적 + 수학 레벨 독립 성장 엔진 패치 완료
 function showResult(){
   document.getElementById('r-score').textContent = gameState.score + '점';
-  
-  let detailTxt = `${gameState.questions.length}문제 중 ${gameState.correctCount}개 정답!`;
-  if(!gameState.isWrongNoteMode && gameState.wrongCount > 0) detailTxt += `<br><small style="color:var(--pink)">틀린 ${gameState.wrongCount}문제는 오답노트에 저장했어요!</small>`;
-  else if(gameState.isWrongNoteMode && gameState.correctCount > 0) detailTxt += `<br><small style="color:var(--mint)">맞힌 문제는 오답노트에서 지웠어요!</small>`;
-  
-  document.getElementById('r-detail').innerHTML = detailTxt; 
+  document.getElementById('r-detail').innerHTML = `10문제 중 ${gameState.correctCount}개 수학 퀘스트 성공!`;
   showScreen('screen-result');
-
-  // 맞힌 개수만큼 노션 보상 적립 실행!
-  if (gameState.correctCount > 0) {
-    saveRewardToNotion(gameState.correctCount);
-  }
+  if (gameState.correctCount > 0) saveRewardToNotion(gameState.correctCount);
 }
 
-// 🚀 노션 보상 통신 함수
 async function saveRewardToNotion(earned) {
-  if (earned <= 0) return;
-  
-  const userName = localStorage.getItem('currentUserName') || (currentProfile === 'son' ? '민수' : '민서');
-  if (userName === '아빠' || userName === '엄마') return; // 부모님은 보상 패스
-
-  const detailEl = document.getElementById('r-detail');
-  const originalText = detailEl.innerHTML;
-  detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#0288D1; font-weight:bold;">⏳ 노션에 보상(${earned}개) 저장 중...</span>`;
+  const userName = currentProfile === 'son' ? '민수' : '민서'; if (userName === '아빠' || userName === '엄마') return;
+  const detailEl = document.getElementById('r-detail'); const originalText = detailEl.innerHTML;
+  detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#6EC6F5; font-weight:bold;">⏳ 수학 보상(${earned}개) 지갑에 누적하는 중...</span>`;
 
   try {
-    // 1. 현재 인벤토리 읽어오기
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        filter: { property: "이름", title: { equals: userName } }
-      })
-    });
-    const data = await response.json();
-    if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) });
+    const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+    const page = data.results[0]; const props = page.properties;
 
-    const page = data.results[0];
-    const pageId = page.id;
-    const props = page.properties;
+    let level = props["수학 레벨"]?.number || 1; // 🎯 원래 쓰던 수학 레벨 유지!
+    let diamond = props["다이아몬드 개수"]?.number || 0; let slime = props["슬라임 파츠 개수"]?.number || 0;
+    let isLevelUp = false; let updateProps = {}; let currentCount = 0; let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
-    let level = props["수학 레벨"]?.number || 1;
-    let diamond = props["다이아몬드 개수"]?.number || 0;
-    let slime = props["슬라임 파츠 개수"]?.number || 0;
-    const theme = props["현재 테마"]?.select?.name || (userName === '민수' ? '마인크래프트' : '슬라임');
-
-    let isLevelUp = false;
-    let updateProps = {};
-    let currentCount = 0;
-    let rewardName = theme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
-
-    // 2. 20개 누적 시 레벨업 및 보상 리셋 계산
-    if (theme === '마인크래프트') {
+    if (currentTheme === '마인크래프트') {
       let total = diamond + earned;
-      let levelUps = Math.floor(total / 20);
-      if (levelUps > 0) { isLevelUp = true; level += levelUps; total = total % 20; }
-      currentCount = total;
-      updateProps = { "다이아몬드 개수": { number: total }, "수학 레벨": { number: level } };
+      let nextLevelBoundary = level * 20; if (total >= nextLevelBoundary) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+      currentCount = total; updateProps = { "다이아몬드 개수": { number: total }, "수학 레벨": { number: level } };
     } else {
       let total = slime + earned;
-      let levelUps = Math.floor(total / 20);
-      if (levelUps > 0) { isLevelUp = true; level += levelUps; total = total % 20; }
-      currentCount = total;
-      updateProps = { "슬라임 파츠 개수": { number: total }, "수학 레벨": { number: level } };
+      let nextLevelBoundary = level * 20; if (total >= nextLevelBoundary) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
+      currentCount = total; updateProps = { "슬라임 파츠 개수": { number: total }, "수학 레벨": { number: level } };
     }
 
-    // 3. 노션 데이터 덮어쓰기
-    await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ properties: updateProps })
-    });
-
-    // 4. 성공 메시지로 화면 갱신
+    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ properties: updateProps }) });
     document.getElementById('notion-loading-msg').style.display = 'none';
-    
-    let resultMsg = `<div style="background:rgba(255,255,255,0.8); border:2px solid #6EC6F5; padding:10px; border-radius:12px; margin-top:10px;">`;
-    resultMsg += `<b style="color:#0288D1;">${rewardName} ${earned}개 획득!</b> (현재: ${currentCount}/20)<br>`;
-    if (isLevelUp) {
-      resultMsg += `<span style="font-size:1.3rem; color:#FF6B9D; display:inline-block; margin-top:5px; font-weight:bold; animation: popBlock 0.5s ease;">🎉 레벨 업! Lv.${level} 달성! 🎉</span>`;
-    }
-    resultMsg += `</div>`;
-    
-    detailEl.innerHTML += resultMsg;
-
+    detailEl.innerHTML += `<div style="background:rgba(255,255,255,0.8); border:2px solid #6EC6F5; padding:10px; border-radius:12px; margin-top:10px;"><b style="color:#0288D1;">${rewardName} 지갑 총합: ${currentCount}개</b><br>${isLevelUp ? `<span style="font-size:1.3rem; color:#FF6B9D; display:inline-block; margin-top:5px; font-weight:bold;">🎉 수학 레벨 업! Lv.${level} 달성! 🎉</span>` : ''}</div>`;
   } catch (err) {
-    console.error("보상 저장 실패:", err);
-    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패 (인터넷 연결 확인)`;
-    document.getElementById('notion-loading-msg').style.color = 'var(--pink)';
+    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패`;
   }
 }
 
 function retryGame() { startGame(gameState.mode); }
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') { if(document.getElementById('screen-typing').classList.contains('active')) submitTyping(); else if(document.getElementById('screen-vertical').classList.contains('active')) submitVertical(); } });
 
 (function(){
-  const grid = document.getElementById('timesGrid');
+  const grid = document.getElementById('timesGrid'); if(!grid) return;
   for(let d=2; d<=9; d++){
     const inp = document.createElement('input'); inp.type='checkbox'; inp.id='cb'+d; inp.className='times-cb'; inp.value=d; inp.checked=true;
-    const lbl = document.createElement('label'); lbl.htmlFor='cb'+d; lbl.className='btn-label times-label'; lbl.innerHTML=`${d}단`;
-    grid.appendChild(inp); grid.appendChild(lbl);
+    const lbl = document.createElement('label'); lbl.htmlFor='cb'+d; lbl.className='btn-label times-label'; lbl.innerHTML=`${d}단`; grid.appendChild(inp); grid.appendChild(lbl);
   }
 })();
 function selectAll(flag) { document.querySelectorAll('.times-cb').forEach(cb => cb.checked = flag); }
-
-let fallingTimers=[], timerInterval=null;
-function clearFallingGame(){ clearInterval(timerInterval); fallingTimers.forEach(clearTimeout); }
-function initFalling(){ alert("떨어지는 모드는 추후 업데이트됩니다!"); goSetup(); }
 </script>
 </body>
 </html>
