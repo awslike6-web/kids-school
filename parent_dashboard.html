@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 대시보드 👨‍👩‍👧‍👦</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
+    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
+    --white: #FFFEF7; --dark: #2D2D4E; 
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    font-family: 'Jua', sans-serif; 
+    background: linear-gradient(160deg, #f0f8ff 0%, #fff0f5 50%, #fffbe6 100%); 
+    min-height: 100vh; 
+    overflow-x: hidden; 
+    color: var(--dark); 
+  }
+  
+  .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .float-item { position: absolute; font-size: 2rem; opacity: 0.15; animation: floatUp linear infinite; }
+  @keyframes floatUp { 
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 
+    10% { opacity: 0.15; } 
+    90% { opacity: 0.15; } 
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } 
+  }
+
+  .screen { 
+    position: relative; z-index: 1; display: none; flex-direction: column; 
+    align-items: center; padding: 30px 16px 60px; min-height: 100vh; width: 100%; 
+  }
+  .screen.active { display: flex; }
+
+  .main-title { 
+    font-family: 'Gaegu', cursive; font-size: clamp(2.4rem, 8vw, 4rem); 
+    font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 8px; 
+    filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.08)); 
+  }
+  .main-title span { color: var(--purple); }
+  .subtitle { font-size: 1.1rem; color: #888; margin-bottom: 30px; }
+
+  /* 대시보드 그리드 컨테이너 */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 30px;
+  }
+  
+  @media (max-width: 768px) {
+    .dashboard-container { grid-template-columns: 1fr; }
+  }
+
+  /* 개별 카드 스타일 */
+  .profile-card {
+    border-radius: 30px;
+    padding: 30px 24px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 오빠 (민수) 마인크래프트 테마 */
+  .card-minsu {
+    background: linear-gradient(145deg, #ffffff, #e0f7fa);
+    border: 4px solid var(--sky);
+  }
+  .card-minsu .card-header { color: #0288D1; border-bottom: 2px dashed var(--sky); }
+  .card-minsu .currency-box { border-color: var(--sky); color: #0288D1; }
+
+  /* 동생 (민서) 슬라임 테마 */
+  .card-minser {
+    background: linear-gradient(145deg, #ffffff, #ffe4e6);
+    border: 4px solid var(--pink);
+  }
+  .card-minser .card-header { color: #D81B60; border-bottom: 2px dashed var(--pink); }
+  .card-minser .currency-box { border-color: var(--pink); color: #D81B60; }
+
+  .card-header {
+    font-size: 2rem;
+    font-family: 'Gaegu', cursive;
+    font-weight: 700;
+    text-align: center;
+    padding-bottom: 12px;
+    margin-bottom: 10px;
+  }
+
+  /* 정보 블록 (재화) */
+  .currency-box {
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px dashed;
+    border-radius: 20px;
+    padding: 24px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .currency-title { font-size: 1.1rem; margin-bottom: 4px; color: #666; font-weight: bold; }
+  .currency-amount { font-family: 'Gaegu', cursive; font-size: 3.5rem; font-weight: 700; line-height: 1.1; }
+
+  /* 정보 블록 (레벨) */
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .level-box {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    padding: 16px 8px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  }
+  .level-box .subj { font-size: 0.9rem; color: #888; margin-bottom: 4px; }
+  .level-box .lvl { font-size: 1.6rem; font-weight: bold; color: var(--dark); }
+
+  /* 정보 블록 (소원권) */
+  .ticket-box {
+    background: linear-gradient(135deg, var(--yellow), var(--orange));
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1a1a2e;
+    box-shadow: 0 8px 20px rgba(255, 159, 67, 0.3);
+    margin-top: auto; /* 하단으로 밀기 */
+  }
+  .ticket-box .t-title { font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+  .ticket-box .t-amount { font-family: 'Gaegu', cursive; font-size: 2.2rem; font-weight: 700; }
+
+  /* 버튼 영역 */
+  .big-btn { 
+    width: 100%; max-width: 480px; padding: 18px; border-radius: 20px; 
+    border: none; font-family: 'Jua', sans-serif; font-size: 1.3rem; 
+    cursor: pointer; transition: transform .15s, box-shadow .15s; margin-top: 10px; 
+  }
+  .big-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+  .big-btn.back-btn { background: #fff; color: var(--dark); border: 3px solid #e0e0e0; }
+
+  /* 로딩 UI */
+  .loading-spinner {
+    display: inline-block; width: 40px; height: 40px; 
+    border: 5px solid rgba(0,0,0,0.1); border-top-color: var(--purple); 
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-top: 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .error-msg { color: var(--pink); font-size: 1.2rem; margin-top: 20px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="bg-floats" id="bgFloats"></div>
+
+<div class="screen active" id="screen-loading">
+  <h1 class="main-title">👨‍👩‍👧‍👦 부모님 <span>대시보드</span></h1>
+  <p class="subtitle" id="loadingText">노션에서 아이들의 학습 데이터를 불러오는 중입니다...</p>
+  <div class="loading-spinner" id="spinner"></div>
+</div>
+
+<div class="screen" id="screen-dashboard">
+  <h1 class="main-title">👨‍👩‍👧‍👦 학습 <span>현황판</span></h1>
+  <p class="subtitle">아이들이 모은 보상과 레벨을 확인하세요!</p>
+
+  <div class="dashboard-container">
+    
+    <div class="profile-card card-minsu">
+      <div class="card-header">👦 민수 (오빠)</div>
+      
+      <div class="currency-box">
+        <div class="currency-title">모은 다이아몬드</div>
+        <div class="currency-amount">💎 <span id="ms-dia">0</span></div>
+      </div>
+
+      <div class="level-grid">
+        <div class="level-box">
+          <div class="subj">수학 레벨</div>
+          <div class="lvl">Lv.<span id="ms-math">1</span></div>
+        </div>
+        <div class="level-box">
+          <div class="subj">영어 레벨</div>
+          <div class="lvl">Lv.<span id="ms-eng">1</span></div>
+        </div>
+        <div class="level-box">
+          <div class="subj">용어 레벨</div>
+          <div class="lvl">Lv.<span id="ms-kor">1</span></div>
+        </div>
+      </div>
+
+      <div class="ticket-box">
+        <div class="t-title"><span style="font-size: 1.8rem; animation: floatUp 2s infinite alternate;">🎫</span> 획득한 소원권</div>
+        <div class="t-amount" id="ms-ticket">0장</div>
+      </div>
+    </div>
+
+    <div class="profile-card card-minser">
+      <div class="card-header">👧 민서 (동생)</div>
+      
+      <div class="currency-box">
+        <div class="currency-title">모은 슬라임 파츠</div>
+        <div class="currency-amount">💧 <span id="ds-slime">0</span></div>
+      </div>
+
+      <div class="level-grid">
+        <div class="level-box">
+          <div class="subj">수학 레벨</div>
+          <div class="lvl">Lv.<span id="ds-math">1</span></div>
+        </div>
+        <div class="level-box">
+          <div class="subj">영어 레벨</div>
+          <div class="lvl">Lv.<span id="ds-eng">1</span></div>
+        </div>
+        <div class="level-box">
+          <div class="subj">용어 레벨</div>
+          <div class="lvl">Lv.<span id="ds-kor">1</span></div>
+        </div>
+      </div>
+
+      <div class="ticket-box">
+        <div class="t-title"><span style="font-size: 1.8rem; animation: floatUp 2s infinite alternate-reverse;">🎁</span> 획득한 소원권</div>
+        <div class="t-amount" id="ds-ticket">0장</div>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 대문으로 돌아가기</button>
+</div>
+
+<script>
+// 노션 API 연결 정보
+const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+
+// 둥둥 떠다니는 배경 효과 생성
+(function createFloatingBackground() {
+  const wrap = document.getElementById('bgFloats');
+  const icons = ['🌟', '📚', '💎', '💧', '🎫', '🚀', '🖍️', '🧩'];
+  for (let i = 0; i < 15; i++) {
+    const el = document.createElement('div');
+    el.className = 'float-item';
+    el.textContent = icons[Math.floor(Math.random() * icons.length)];
+    el.style.left = (Math.random() * 95) + '%';
+    el.style.animationDuration = (12 + Math.random() * 15) + 's';
+    el.style.animationDelay = (-Math.random() * 20) + 's';
+    wrap.appendChild(el);
+  }
+})();
+
+// 데이터를 화면에 렌더링하는 함수
+function renderDashboard(results) {
+  results.forEach(page => {
+    const props = page.properties;
+    const name = props["이름"]?.title[0]?.plain_text;
+    
+    if (!name) return;
+
+    // 공통 속성 추출 (기본값 0 또는 1)
+    const mathLvl = props["수학 레벨"]?.number || 1;
+    const engLvl = props["영어 레벨"]?.number || 1;
+    const korLvl = props["용어 레벨"]?.number || 1;
+    const tickets = props["소원권 개수"]?.number || 0;
+
+    if (name === "민수") {
+      const diamond = props["다이아몬드 개수"]?.number || 0;
+      document.getElementById('ms-dia').textContent = diamond;
+      document.getElementById('ms-math').textContent = mathLvl;
+      document.getElementById('ms-eng').textContent = engLvl;
+      document.getElementById('ms-kor').textContent = korLvl;
+      document.getElementById('ms-ticket').textContent = tickets + "장";
+    } 
+    else if (name === "민서") {
+      const slime = props["슬라임 파츠 개수"]?.number || 0;
+      document.getElementById('ds-slime').textContent = slime;
+      document.getElementById('ds-math').textContent = mathLvl;
+      document.getElementById('ds-eng').textContent = engLvl;
+      document.getElementById('ds-kor').textContent = korLvl;
+      document.getElementById('ds-ticket').textContent = tickets + "장";
+    }
+  });
+
+  // 로딩 화면 숨기고 대시보드 보여주기
+  document.getElementById('screen-loading').classList.remove('active');
+  document.getElementById('screen-dashboard').classList.add('active');
+}
+
+// 노션에서 인벤토리 데이터 불러오기
+async function loadInventoryData() {
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page_size: 10 }) // 유저 수가 적으므로 전체(또는 10개) 조회
+    });
+    
+    if (!response.ok) throw new Error("네트워크 응답 오류");
+    
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      renderDashboard(data.results);
+    } else {
+      throw new Error("데이터가 비어있습니다.");
+    }
+  } catch (error) {
+    console.error("데이터 로딩 실패:", error);
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('loadingText').innerHTML = 
+      `<div class="error-msg">❌ 데이터를 불러오지 못했습니다.<br>인터넷 연결이나 프록시 서버 상태를 확인해주세요.</div>`;
+  }
+}
+
+// 페이지 로드 시 데이터 호출 시작
+window.addEventListener('DOMContentLoaded', loadInventoryData);
+</script>
+</body>
+</html>
