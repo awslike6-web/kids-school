@@ -124,6 +124,7 @@
     font-weight: bold; 
   }
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } /* 신규 추가 */
   
   input[type="checkbox"], input[type="radio"] { display: none; }
   .btn-label { 
@@ -147,6 +148,10 @@
   }
   input[name="subjectMode"]:checked + .btn-label { 
     background: var(--mint); border-color: var(--mint); color: #fff; transform: scale(1.07); 
+  }
+  /* 신규 보기방식 라디오 버튼 스타일 */
+  input[name="hintMode"]:checked + .btn-label { 
+    background: var(--pink); border-color: var(--pink); color: #fff; transform: scale(1.07); 
   }
 
   .game-header { 
@@ -205,7 +210,8 @@
     justify-content: center; text-align: center; cursor: pointer; 
   }
   .flashcard-label { font-size: 0.9rem; color: #999; margin-bottom: 12px; font-family: 'Gaegu', cursive; }
-  .flashcard-content { font-size: 1.8rem; font-weight: bold; color: var(--dark); word-break: keep-all; }
+  /* 뜻풀이와 힌트가 두 줄로 잘 나오도록 pre-wrap 추가 */
+  .flashcard-content { font-size: 1.6rem; font-weight: bold; color: var(--dark); word-break: keep-all; white-space: pre-wrap; line-height: 1.4; }
   .audio-card { border-color: var(--sky); background: rgba(255,255,255,0.95); }
 
   .input-group { width: 100%; max-width: 420px; margin-bottom: 20px; }
@@ -284,6 +290,20 @@
     </div>
     <div class="grid-4" id="stageGrid"></div>
   </div>
+
+  <div class="card">
+    <div class="card-title">👀 3. 문제 보기 방식</div>
+    <div class="grid-3">
+      <input type="radio" name="hintMode" id="hm_hint" value="hint" checked>
+      <label for="hm_hint" class="btn-label">💡 힌트만</label>
+      
+      <input type="radio" name="hintMode" id="hm_meaning" value="meaning">
+      <label for="hm_meaning" class="btn-label">📖 뜻풀이만</label>
+      
+      <input type="radio" name="hintMode" id="hm_both" value="both">
+      <label for="hm_both" class="btn-label">👀 둘 다</label>
+    </div>
+  </div>
   
   <p id="warnMsg" style="color:var(--pink); font-size:0.9rem; text-align:center; height:1.2rem; margin-top:5px;"></p>
   <button class="big-btn yellow-btn" onclick="startQuiz()">🚀 탐험 시작하기</button>
@@ -315,7 +335,7 @@
     <label class="input-label" id="minsuSubjectLabel" style="color:var(--purple);"></label>
     <div class="flashcard-container">
       <div class="flashcard" id="flashcard" onclick="toggleFlashcard()">
-        <div class="flashcard-label" id="cardLabel">💡 힌트 (클릭하면 정답이 보여요)</div>
+        <div class="flashcard-label" id="cardLabel">💡 문제를 잘 읽고 정답을 맞혀보세요</div>
         <div class="flashcard-content" id="cardContent">로딩 중...</div>
       </div>
     </div>
@@ -346,7 +366,7 @@
         <div style="font-size:1.1rem; color:#888;">화면을 누르면 다시 들려요</div>
       </div>
     </div>
-    <div id="textHintArea" style="text-align:center; color:#888; font-size:0.95rem; margin-bottom:15px; font-family:'Gaegu', cursive;"></div>
+    <div id="textHintArea" style="text-align:center; color:#888; font-size:1rem; margin-bottom:15px; font-family:'Gaegu', cursive; white-space: pre-wrap;"></div>
   </div>
   
   <div class="input-group">
@@ -390,8 +410,10 @@ let score = 0;
 let correctCount = 0; 
 let totalCount = 0;
 
-// 🎯 순차/랜덤 필터링용 임시 중간 저장소
 let filteredPool = [];
+
+// 🎯 사용자가 선택한 문제 보기 방식 저장 변수
+let currentHintMode = 'hint';
 
 function updateScoreUI() {
   document.querySelectorAll('.shared-score-display').forEach(el => {
@@ -402,7 +424,7 @@ function updateScoreUI() {
 // ==========================================
 // 🚀 TTS 핵심 개선 구역 (가비지 컬렉션 방어 및 최적화)
 // ==========================================
-window.currentUtterance = null; // 🛡️ GC 방어막용 전역 변수
+window.currentUtterance = null; 
 let bestKoreanVoice = null;
 
 function initKoreanVoice() {
@@ -451,7 +473,7 @@ function speakCurrentWord() {
 }
 // ==========================================
 
-// 🎯 노션 단어 불러오기 (100개 제한 돌파 엔진 적용 완료)
+// 노션 단어 불러오기
 async function loadKoreanWords() {
   showScreen('screen-loading'); 
   document.getElementById('loadingSubtitle').textContent = `${currentUserName}의 단어를 불러오고 있어요...`;
@@ -461,7 +483,6 @@ async function loadKoreanWords() {
     let hasMore = true; 
     let nextCursor = undefined;
 
-    // while 루프를 통해 100개가 넘어도 끝까지 싹 다 긁어옴
     while (hasMore) {
       const bodyData = { 
         filter: { property: "대상", select: { equals: currentUserName } }, 
@@ -489,7 +510,6 @@ async function loadKoreanWords() {
       const props = item.properties; 
       let sStr = "기본과목";
       
-      // 순정 이름표 '과목' 완벽 호환
       if (props["과목"]) {
         if (props["과목"].select) sStr = props["과목"].select.name;
         else if (props["과목"].multi_select && props["과목"].multi_select.length > 0) sStr = props["과목"].multi_select[0].name;
@@ -498,9 +518,9 @@ async function loadKoreanWords() {
       return { 
         id: item.id, 
         word: props["단어"]?.title?.[0]?.plain_text || '', 
-        hint: props["힌트"]?.rich_text?.[0]?.plain_text || props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
+        hint: props["힌트"]?.rich_text?.[0]?.plain_text || '', 
         meaning: props["뜻풀이"]?.rich_text?.[0]?.plain_text || '', 
-        stage: props["단계"]?.number || 1, // 순정 이름표 '단계' 완벽 호환
+        stage: props["단계"]?.number || 1, 
         subject: sStr 
       };
     });
@@ -596,6 +616,9 @@ function startQuiz() {
     return; 
   }
 
+  // 🎯 사용자가 선택한 문제 보기 방식 읽기
+  currentHintMode = document.querySelector('input[name="hintMode"]:checked').value;
+
   showScreen('screen-order-select');
 }
 
@@ -636,13 +659,26 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active'); 
 }
 
+// 🎯 선택된 방식에 따라 화면에 출력할 텍스트를 만들어주는 함수
+function getDisplayHint(word) {
+  if (currentHintMode === 'hint') {
+    return word.hint || '힌트가 없습니다.';
+  } else if (currentHintMode === 'meaning') {
+    return word.meaning || '뜻풀이가 없습니다.';
+  } else {
+    return `📖 뜻: ${word.meaning || '없음'}\n💡 힌트: ${word.hint || '없음'}`;
+  }
+}
+
 function displayMinsuQuiz() {
   if (currentIndex >= words.length) { completeSession(); return; }
   
   const word = words[currentIndex]; 
   document.getElementById('minsuQNum').textContent = currentIndex+1;
-  document.getElementById('cardLabel').textContent = '💡 힌트 (클릭하면 정답이 보여요)'; 
-  document.getElementById('cardContent').textContent = word.hint;
+  document.getElementById('cardLabel').textContent = '💡 문제를 잘 읽고 정답을 맞혀보세요 (클릭 시 정답 확인)'; 
+  
+  // 🎯 보기 방식 로직 적용
+  document.getElementById('cardContent').innerText = getDisplayHint(word);
   
   const input = document.getElementById('answerInput'); 
   input.value = ''; 
@@ -657,7 +693,9 @@ function displayMinserDictation() {
   
   const word = words[currentIndex]; 
   document.getElementById('minserQNum').textContent = currentIndex+1;
-  document.getElementById('textHintArea').innerHTML = word.hint ? `💡 보조 힌트: ${word.hint}` : '';
+  
+  // 🎯 보기 방식 로직 적용
+  document.getElementById('textHintArea').innerText = getDisplayHint(word);
   
   const input = document.getElementById('dictationInput'); 
   input.value = ''; 
@@ -682,8 +720,9 @@ function toggleFlashcard() {
   
   if (card.classList.contains('flipped')) { 
     card.classList.remove('flipped'); 
-    label.textContent = '💡 힌트 (클릭하면 정답이 보여요)'; 
-    content.textContent = word.hint; 
+    label.textContent = '💡 문제를 잘 읽고 정답을 맞혀보세요 (클릭 시 정답 확인)'; 
+    // 🎯 보기 방식 로직 적용
+    content.innerText = getDisplayHint(word);
   } else { 
     card.classList.add('flipped'); 
     label.textContent = '🎯 정답'; 
