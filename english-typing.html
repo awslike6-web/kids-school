@@ -63,7 +63,7 @@
   
   .game-zone { width: 100%; max-width: 500px; background: var(--card); border: 1px solid var(--line); border-radius: 28px; box-shadow: 0 24px 60px rgba(35, 52, 90, 0.18); padding: 35px 25px; text-align: center; }
   .word-display { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: bold; word-break: keep-all; color: var(--dark); }
-  .pos-badge { inline-block; padding: 6px 14px; margin: 10px 0 20px; border-radius: 999px; background: rgba(255, 209, 102, 0.3); font-weight: bold; font-size: 14px; }
+  .pos-badge { display: inline-block; padding: 6px 14px; margin: 10px 0 20px; border-radius: 999px; background: rgba(255, 209, 102, 0.3); font-weight: bold; font-size: 14px; }
   
   .answer-input-wrap { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 12px; }
   .main-input { width: 100%; padding: 16px; border-radius: 20px; border: 3px solid var(--line); font-size: 24px; text-align: center; font-weight: bold; outline: none; background: white; color: var(--dark); }
@@ -78,6 +78,23 @@
   .feedback { min-height: 24px; margin-top: 10px; font-weight: bold; font-size: 1.3rem; text-align: center; }
 
   #loadingBadge { background: #FFD93D; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: fixed; top: 20px; z-index: 999; }
+
+  /* 팝업 모달 추가 스타일 */
+  .result-overlay { 
+    position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); 
+    backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; 
+    z-index: 100; opacity: 0; transition: opacity 0.3s; 
+  }
+  .result-overlay.active { display: flex; opacity: 1; }
+  .result-modal { 
+    background: #fff; width: 90%; max-width: 360px; border-radius: 30px; 
+    padding: 40px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+  }
+
+  @keyframes bounceObj {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
 
   @media print {
     body * { visibility: hidden !important; }
@@ -203,6 +220,21 @@
   </div>
 </div>
 
+<!-- 소원권 달성 특별 팝업 모달 -->
+<div class="result-overlay" id="wishTicketOverlay" onclick="closeWishTicket()">
+  <div class="result-modal" style="border: 4px solid var(--yellow); box-shadow: 0 0 30px rgba(255, 217, 61, 0.6);" onclick="event.stopPropagation()">
+    <div style="font-size: 4.5rem; animation: bounceObj 1s infinite;">🎫</div>
+    <div class="result-title" style="color: var(--orange); font-size: 2rem; margin-bottom: 6px;">소원권 획득!</div>
+    <div class="result-message" style="font-size: 1.15rem; margin-bottom: 14px; color: var(--dark);">
+      누적 보상 <b style="color:var(--pink);">150개</b> 돌파 기념!<br>특별한 소원권이 지급되었습니다 🎉
+    </div>
+    <div style="background: rgba(167, 139, 250, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--purple); font-size: 1.3rem; margin-bottom: 24px;">
+      총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개
+    </div>
+    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px;">신난다! 닫기</button>
+  </div>
+</div>
+
 <script>
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
@@ -228,7 +260,7 @@ function updateProfileUI() {
   const badge = document.getElementById('currentUserBadge');
   if(badge) {
     const userName = currentProfile === 'son' ? '민수' : '민서';
-    badge.innerHTML = `current 사용자: ${currentProfile === 'son' ? '👦' : '👧'} ${userName} (${currentTheme} 모드)`;
+    badge.innerHTML = `현재 사용자: ${currentProfile === 'son' ? '👦' : '👧'} ${userName} (${currentTheme} 모드)`;
   }
 }
 
@@ -269,7 +301,6 @@ async function loadNotionWords() {
             }
             const levelNum = parseInt(levelStr.replace(/[^0-9]/g, '')) || 1;
             
-            // 🎯 원본 완벽 복구: 노션 주소 데이터 변경 없이 '공부할 사람' 한 글자만 매칭 완료
             let person = ""; const personProp = props["공부할 사람"];
             if (personProp) {
                 if (personProp.select) person = personProp.select.name;
@@ -391,35 +422,110 @@ function showQuizResult() {
   if (correctCount > 0) saveRewardToNotion(correctCount);
 }
 
+function closeWishTicket() {
+  document.getElementById('wishTicketOverlay').classList.remove('active');
+}
+
+// 🚀 다이내믹 레벨업 계산 엔진 (20개 시작, 5개씩 요구량 증가)
+function calculateLevelInfo(totalRewards) {
+  let level = 1;
+  let requiredForNext = 20; 
+  let accumulatedForCurrentLevel = 0; 
+
+  while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
+    accumulatedForCurrentLevel += requiredForNext;
+    level++;
+    requiredForNext = 20 + (level - 1) * 5; 
+  }
+
+  let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
+  let remainingForNext = requiredForNext - currentLevelProgress; 
+
+  return {
+    level: level,
+    requiredForNext: requiredForNext,
+    remainingForNext: remainingForNext,
+    currentLevelProgress: currentLevelProgress
+  };
+}
+
 async function saveRewardToNotion(earned) {
-  const userName = currentProfile === 'son' ? '민수' : '민서'; if (userName === '아빠' || userName === '엄마') return;
-  const detailEl = document.getElementById('r-detail'); const originalText = detailEl.innerHTML;
+  const userName = currentProfile === 'son' ? '민수' : '민서'; 
+  if (userName === '아빠' || userName === '엄마') return;
+
+  const detailEl = document.getElementById('r-detail'); 
+  const originalText = detailEl.innerHTML;
   detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#a78bfa; font-weight:bold;">⏳ 영어방 보상(${earned}개) 저금통에 저금 중...</span>`;
 
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) });
-    const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
+      method: "POST", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
+    });
+    const data = await response.json(); 
+    if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
 
-    const page = data.results[0]; const props = page.properties;
-    let level = props["영어 레벨"]?.number || 1; 
-    let diamond = props["다이아몬드 개수"]?.number || 0; let slime = props["슬라임 파츠 개수"]?.number || 0;
+    const page = data.results[0]; 
+    const props = page.properties;
 
-    let isLevelUp = false; let updateProps = {}; let currentCount = 0;
+    let diamond = props["다이아몬드 개수"]?.number || 0; 
+    let slime = props["슬라임 파츠 개수"]?.number || 0;
+    let tickets = props["소원권 개수"]?.number || 0;
+
+    let previousTotal = 0;
+    let currentTotal = 0;
     let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
     if (currentTheme === '마인크래프트') {
-      let total = diamond + earned; 
-      let nextLevelBoundary = level * 20; if (total >= nextLevelBoundary) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
-      currentCount = total; updateProps = { "다이아몬드 개수": { number: total }, "영어 레벨": { number: level } };
+      previousTotal = diamond;
+      currentTotal = diamond + earned;
     } else {
-      let total = slime + earned;
-      let nextLevelBoundary = level * 20; if (total >= nextLevelBoundary) { isLevelUp = true; level = Math.floor(total / 20) + 1; }
-      currentCount = total; updateProps = { "슬라임 파츠 개수": { number: total }, "영어 레벨": { number: level } };
+      previousTotal = slime;
+      currentTotal = slime + earned;
     }
 
-    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ properties: updateProps }) });
+    const prevLevelInfo = calculateLevelInfo(previousTotal);
+    const currLevelInfo = calculateLevelInfo(currentTotal);
+    let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
+
+    let earnedTickets = Math.floor(currentTotal / 150) - Math.floor(previousTotal / 150);
+    let newTickets = tickets + earnedTickets;
+    let isWishTicketEarned = earnedTickets > 0;
+
+    let updateProps = {
+      "영어 레벨": { number: currLevelInfo.level },
+      "소원권 개수": { number: newTickets }
+    };
+
+    if (currentTheme === '마인크래프트') { updateProps["다이아몬드 개수"] = { number: currentTotal }; } 
+    else { updateProps["슬라임 파츠 개수"] = { number: currentTotal }; }
+
+    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
+      method: "PATCH", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ properties: updateProps }) 
+    });
+    
     document.getElementById('notion-loading-msg').style.display = 'none';
-    detailEl.innerHTML += `<div style="background:rgba(255,255,255,0.8); border:2px solid #A78BFA; padding:10px; border-radius:12px; margin-top:10px;"><b style="color:#A78BFA;">${rewardName} 지갑 총합: ${currentCount}개</b><br>${isLevelUp ? `<span style="font-size:1.3rem; color:#FF6B9D; display:inline-block; margin-top:5px; font-weight:bold;">🎉 영어 레벨 업! Lv.${level} 달성! 🎉</span>` : ''}</div>`;
+    
+    detailEl.innerHTML = originalText + `
+      <div style="background:#fff; border:2px dashed var(--purple); padding:16px; border-radius:12px; margin:15px 0; text-align: left;">
+        <div style="font-size: 1.15rem; margin-bottom: 8px;">
+          <b style="color:var(--purple);">${rewardName} x ${currentTotal}</b>
+        </div>
+        <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
+          다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b>${currLevelInfo.remainingForNext}</b>개 남음!
+        </div>
+        ${isLevelUp ? `<div style="text-align:center; font-size:1.3rem; color:#FF6B9D; font-weight:bold; margin-top:10px;">🎉 영어 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
+      </div>
+    `;
+
+    if (isWishTicketEarned) {
+      setTimeout(() => {
+        document.getElementById('wishTicketCountDisplay').textContent = newTickets;
+        document.getElementById('wishTicketOverlay').classList.add('active');
+      }, 1000);
+    }
+
   } catch (err) {
     document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패`;
   }
