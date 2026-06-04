@@ -74,7 +74,7 @@
   .v-board-container { width: 100%; max-width: 460px; display: flex; justify-content: center; margin-bottom: 20px; }
   .v-board { background: #fff; padding: 20px 30px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.4rem; color: var(--dark); min-width: 220px; position: relative; }
   
-  .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 10px; margin-bottom: 2px; height: 32px; padding-right: 5px; }
+  .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 10px; margin-bottom: 8px; height: 32px; padding-right: 5px; }
   .v-row { display: flex; width: 100%; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 4px; letter-spacing: 4px; position: relative; }
   .v-line { width: 100%; height: 4px; background: var(--dark); margin: 8px 0; border-radius: 2px; }
   .v-symbol { position: absolute; left: 0; color: var(--pink); font-size: 2rem; }
@@ -95,6 +95,8 @@
   .div-input-group { display: flex; align-items: center; justify-content: space-between; background: #f0f9ff; padding: 10px 15px; border-radius: 15px; }
   .div-input-label { font-size: 1.2rem; color: var(--sky); }
   .div-input { width: 100px; font-size: 1.8rem; text-align: center; border: 3px solid #e0e0e0; border-radius: 12px; font-family: 'Jua', sans-serif; }
+  .div-input.correct { border-color: var(--green); background: #f0fff4; }
+  .div-input.wrong { border-color: var(--pink); background: #fff5f5; }
 
   /* 모바일 대응 */
   @media (max-width: 400px) {
@@ -122,6 +124,7 @@
   .result-emoji { font-size: 4rem; margin-bottom: 10px; }
   .result-score { font-size: 3.5rem; color: var(--pink); margin-bottom: 8px; }
 
+  /* 팝업 모달 추가 스타일 */
   .result-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
   .result-overlay.active { display: flex; opacity: 1; }
   .result-modal { background: #fff; width: 90%; max-width: 360px; border-radius: 30px; padding: 40px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
@@ -133,7 +136,6 @@
 
 <div class="bg-floats" id="bgFloats"></div>
 
-<!-- 🎯 대기실 세팅 화면 -->
 <div class="screen active" id="screen-setup">
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
@@ -159,10 +161,35 @@
 
   <div class="card" id="card-difficulty">
     <div class="card-title">⚙️ 난이도 설정</div>
-    <label class="switch-container" for="force-carry">
-      <span class="switch-label">받아올림/내림 무조건 포함</span>
+    
+    <label class="switch-container" id="toggle-add" style="display:none;">
+      <span class="switch-label">덧셈: 받아올림 포함</span>
       <div class="switch">
-        <input type="checkbox" id="force-carry">
+        <input type="checkbox" class="difficulty-toggle" data-op="add" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-container" id="toggle-sub" style="display:none;">
+      <span class="switch-label">뺄셈: 받아내림 포함</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="sub" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-container" id="toggle-mul" style="display:none;">
+      <span class="switch-label">곱셈: 받아올림 포함</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="mul" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-container" id="toggle-div" style="display:none;">
+      <span class="switch-label">나눗셈: 나머지 있음</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="div" checked>
         <span class="slider"></span>
       </div>
     </label>
@@ -209,7 +236,6 @@
   <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
-<!-- ⌨️ 주관식 퀴즈 화면 -->
 <div class="screen" id="screen-typing">
   <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div></div>
   <div class="typing-question-card">
@@ -219,7 +245,6 @@
   <div class="feedback-msg" id="t-feedbackMsg"></div><button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
 </div>
 
-<!-- 📝 세로셈 퀴즈 화면 -->
 <div class="screen" id="screen-vertical">
   <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="v-qnum">1</span></div></div>
   <div class="v-board-container" id="vertical-container"></div>
@@ -227,7 +252,6 @@
   <button class="big-btn back-btn" style="max-width:460px;margin-top:20px" onclick="goSetup()">← 나가기</button>
 </div>
 
-<!-- 🏆 최종 결과 창 -->
 <div class="screen" id="screen-result">
   <div class="result-card" id="rewardResultArea">
     <div class="result-emoji">🎉</div><div style="font-size:1.8rem; margin-bottom:6px;">수학 탐험 완료!</div>
@@ -236,11 +260,37 @@
   </div>
 </div>
 
+<div class="result-overlay" id="wishTicketOverlay" onclick="closeWishTicket()">
+  <div class="result-modal" style="border: 4px solid var(--yellow); box-shadow: 0 0 30px rgba(255, 217, 61, 0.6);" onclick="event.stopPropagation()">
+    <div style="font-size: 4.5rem; animation: bounceObj 1s infinite;">🎫</div>
+    <div class="result-title" style="color: var(--orange); font-size: 2rem; margin-bottom: 6px;">소원권 획득!</div>
+    <div class="result-message" style="font-size: 1.15rem; margin-bottom: 14px; color: var(--dark);">
+      누적 보상 <b style="color:var(--pink);">150개</b> 돌파 기념!<br>특별한 소원권이 지급되었습니다 🎉
+    </div>
+    <div style="background: rgba(167, 139, 250, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--purple); font-size: 1.3rem; margin-bottom: 24px;">
+      총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개
+    </div>
+    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px; border: none; border-radius: 16px; cursor: pointer;">신난다! 닫기</button>
+  </div>
+</div>
+
 <script>
+// 🚀 노션 API 설정
+const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+
 let currentProfile = 'son'; 
 let currentTheme = '마인크래프트';
 let wrongNotes = []; 
 let gameState = {};
+
+// [개편] 난이도 토글 설정 저장소
+let difficultySettings = {
+  add: true,    // 덧셈: 받아올림 포함
+  sub: true,    // 뺄셈: 받아내림 포함
+  mul: true,    // 곱셈: 받아올림 포함
+  div: true     // 나눗셈: 나머지 있음
+};
 
 function toggleProfileManually() {
   if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
@@ -261,14 +311,28 @@ function initProfile() {
   updateVisibleCards();
 }
 
-document.addEventListener('DOMContentLoaded', initProfile);
+document.addEventListener('DOMContentLoaded', function() {
+  initProfile();
+  // 난이도 토글 이벤트 리스너 등록
+  document.querySelectorAll('.difficulty-toggle').forEach(toggle => {
+    toggle.addEventListener('change', function() {
+      const op = this.dataset.op;
+      difficultySettings[op] = this.checked;
+    });
+  });
+});
 
 function updateVisibleCards() {
   const op = document.querySelector('input[name="opMode"]:checked').value;
   const isAddSub = (op === 'add' || op === 'sub');
   const isMix = (op === 'mix');
   
-  document.getElementById('card-difficulty').style.display = (isAddSub || isMix) ? 'block' : 'none';
+  // [개편] 난이도 토글 표시 업데이트
+  document.getElementById('toggle-add').style.display = (op === 'add' || isMix) ? 'block' : 'none';
+  document.getElementById('toggle-sub').style.display = (op === 'sub' || isMix) ? 'block' : 'none';
+  document.getElementById('toggle-mul').style.display = (op === 'mul' || isMix) ? 'block' : 'none';
+  document.getElementById('toggle-div').style.display = (op === 'div' || isMix) ? 'block' : 'none';
+  
   document.getElementById('card-level-select').style.display = (isAddSub || isMix) ? 'none' : 'block';
   document.getElementById('card-low-level').style.display = (isAddSub || (isMix && currentProfile === 'daughter')) ? 'block' : 'none';
   
@@ -282,55 +346,137 @@ function loadProfileData() {
   document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
 }
 
+/**
+ * [개편] 난수 생성 함수: 사칙연산별 세분화된 로직
+ */
 function generateQuestion() {
   let op = document.querySelector('input[name="opMode"]:checked').value;
-  const forceCarry = document.getElementById('force-carry').checked;
   
   if(op === 'mix') op = ['add', 'sub', 'mul', 'div'][Math.floor(Math.random() * 4)];
   
-  if (op === 'add' || op === 'sub') {
+  // ========== 덧셈 ==========
+  if (op === 'add') {
     const digit = document.querySelector('input[name="lowDigitMode"]:checked').value;
-    let a=0, b=0, ans=0, sign = op==='add'?'＋':'－';
+    const forceCarry = difficultySettings.add;
+    let a = 0, b = 0, ans = 0;
     
     let attempts = 0;
     while(attempts < 100) {
-      if (op === 'add') {
-        if (digit === '11') { a = Math.floor(Math.random()*8)+1; b = Math.floor(Math.random()*8)+1; }
-        else if (digit === '21') { a = Math.floor(Math.random()*80)+11; b = Math.floor(Math.random()*8)+1; }
-        else { a = Math.floor(Math.random()*80)+10; b = Math.floor(Math.random()*80)+10; }
-        ans = a + b;
-        if (!forceCarry) break;
-        // 받아올림 체크
-        if ((a % 10) + (b % 10) >= 10 || (Math.floor(a/10)%10 + Math.floor(b/10)%10 + ( (a%10 + b%10) >= 10 ? 1 : 0 )) >= 10) break;
+      if (digit === '11') { 
+        a = Math.floor(Math.random()*8)+1; 
+        b = Math.floor(Math.random()*8)+1; 
+      }
+      else if (digit === '21') { 
+        a = Math.floor(Math.random()*80)+11; 
+        b = Math.floor(Math.random()*8)+1; 
+      }
+      else { 
+        a = Math.floor(Math.random()*80)+10; 
+        b = Math.floor(Math.random()*80)+10; 
+      }
+      ans = a + b;
+      
+      if (!forceCarry) {
+        // 받아올림 없음: 일의 자리 합이 10 미만
+        if ((a % 10) + (b % 10) < 10) break;
       } else {
-        if (digit === '11') { a = Math.floor(Math.random()*8)+2; b = Math.floor(Math.random()*(a-1))+1; }
-        else if (digit === '21') { a = Math.floor(Math.random()*80)+11; b = Math.floor(Math.random()*8)+1; }
-        else { a = Math.floor(Math.random()*80)+20; b = Math.floor(Math.random()*(a-10))+10; }
-        ans = a - b;
-        if (!forceCarry) break;
-        // 받아내림 체크
+        // 받아올림 있음: 일의 자리 합이 10 이상
+        if ((a % 10) + (b % 10) >= 10) break;
+      }
+      attempts++;
+    }
+    return { text: `${a} ＋ ${b}`, answer: ans, opType: 'add', numA: a, numB: b };
+  }
+  
+  // ========== 뺄셈 ==========
+  else if (op === 'sub') {
+    const digit = document.querySelector('input[name="lowDigitMode"]:checked').value;
+    const forceBarrow = difficultySettings.sub;
+    let a = 0, b = 0, ans = 0;
+    
+    let attempts = 0;
+    while(attempts < 100) {
+      if (digit === '11') { 
+        a = Math.floor(Math.random()*8)+2; 
+        b = Math.floor(Math.random()*(a-1))+1; 
+      }
+      else if (digit === '21') { 
+        a = Math.floor(Math.random()*80)+11; 
+        b = Math.floor(Math.random()*8)+1; 
+      }
+      else { 
+        a = Math.floor(Math.random()*80)+20; 
+        b = Math.floor(Math.random()*(a-10))+10; 
+      }
+      ans = a - b;
+      
+      if (!forceBarrow) {
+        // 받아내림 없음: 일의 자리가 뒤 숫자의 일의 자리보다 크거나 같음
+        if ((a % 10) >= (b % 10)) break;
+      } else {
+        // 받아내림 있음: 일의 자리가 뒤 숫자의 일의 자리보다 작음
         if ((a % 10) < (b % 10)) break;
       }
       attempts++;
     }
-    return { text: `${a} ${sign} ${b}`, answer: ans, opType: op, numA: a, numB: b };
-  } else {
+    return { text: `${a} － ${b}`, answer: ans, opType: 'sub', numA: a, numB: b };
+  }
+  
+  // ========== 곱셈 & 나눗셈 ==========
+  else {
     const lvl = document.querySelector('input[name="levelMode"]:checked').value;
+    
     if(lvl === '1') {
+      // 1단계: 구구단
       const dans = [...document.querySelectorAll('.times-cb:checked')].map(cb=>+cb.value);
       const dan = dans.length > 0 ? dans[Math.floor(Math.random()*dans.length)] : 2;
       const n = 1 + Math.floor(Math.random()*9);
-      return op === 'mul' ? { text: `${dan} × ${n}`, answer: dan*n, opType: 'mul', numA: dan, numB: n } : { text: `${dan*n} ÷ ${dan}`, answer: n, opType: 'div', numA: dan*n, numB: dan, rem: 0 };
-    } else {
+      
       if (op === 'mul') {
+        return { text: `${dan} × ${n}`, answer: dan*n, opType: 'mul', numA: dan, numB: n };
+      } else {
+        // 나눗셈 1단계: 나머지 설정에 따라
+        const allowRemainder = difficultySettings.div;
+        let dividend = dan * n;
+        let remainder = 0;
+        
+        if (allowRemainder && Math.random() > 0.5) {
+          remainder = Math.floor(Math.random() * dan);
+          dividend += remainder;
+        }
+        
+        return { text: `${dividend} ÷ ${dan}`, answer: n, opType: 'div', numA: dividend, numB: dan, rem: remainder };
+      }
+    } 
+    
+    else {
+      // 2단계: 두 자릿수 이상
+      if (op === 'mul') {
+        const forceCarry = difficultySettings.mul;
         let a = 10 + Math.floor(Math.random() * 80);
         let b = document.getElementById('digit-22')?.checked ? (10 + Math.floor(Math.random() * 80)) : (2 + Math.floor(Math.random() * 8));
+        
+        if (!forceCarry) {
+          // 받아올림 없음: 각 자릿수 곱이 10 미만
+          a = 10 + Math.floor(Math.random() * 10);
+          b = 1 + Math.floor(Math.random() * 3);
+        }
+        
         return { text: `${a} × ${b}`, answer: a*b, opType: 'mul', numA: a, numB: b };
       } else {
-        // 나눗셈 2단계: 두자릿수 / 한자릿수 (나머지 있을 수 있음)
+        // 나눗셈 2단계: 두 자릿수 ÷ 한 자릿수
+        const allowRemainder = difficultySettings.div;
         let b = 2 + Math.floor(Math.random() * 8);
-        let a = 11 + Math.floor(Math.random() * 88);
-        return { text: `${a} ÷ ${b}`, answer: Math.floor(a/b), opType: 'div', numA: a, numB: b, rem: a % b };
+        let quotient = 10 + Math.floor(Math.random() * 90);
+        let remainder = 0;
+        
+        if (allowRemainder && Math.random() > 0.5) {
+          remainder = Math.floor(Math.random() * b);
+        }
+        
+        let a = quotient * b + remainder;
+        
+        return { text: `${a} ÷ ${b}`, answer: quotient, opType: 'div', numA: a, numB: b, rem: remainder };
       }
     }
   }
@@ -397,18 +543,22 @@ function nextVerticalQ(){
   document.getElementById('v-feedbackMsg').textContent='';
   const container = document.getElementById('vertical-container');
   
+  // [개편] 곱셈 세로셈
   if(q.opType === 'mul'){
     container.innerHTML = `
       <div class="v-board">
         <div class="v-memo-row">
-          <input type="number" class="v-input tiny"><input type="number" class="v-input tiny">
+          <input type="number" class="v-input tiny" placeholder="올" title="올림수 메모칸"><input type="number" class="v-input tiny" placeholder="올" title="올림수 메모칸">
         </div>
         <div class="v-row">${q.numA}</div>
         <div class="v-row"><span class="v-symbol">×</span>${q.numB}</div>
         <div class="v-line"></div>
         <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div>
       </div>`;
-  } else if(q.opType === 'div') {
+  } 
+  
+  // [개편] 나눗셈 세로셈
+  else if(q.opType === 'div') {
     container.innerHTML = `
       <div class="div-board">
         <div class="div-main-row">
@@ -423,16 +573,19 @@ function nextVerticalQ(){
           </div>
           <div class="div-input-group">
             <span class="div-input-label">나머지</span>
-            <input type="number" class="div-input" id="v-rem" placeholder="?">
+            <input type="number" class="div-input" id="v-rem" placeholder="${q.rem}" ${q.rem === 0 ? 'value="0"' : ''}>
           </div>
         </div>
       </div>`;
-  } else {
+  } 
+  
+  // [개편] 덧셈/뺄셈 세로셈
+  else {
     const isAdd = q.opType === 'add';
     container.innerHTML = `
       <div class="v-board">
         <div class="v-memo-row">
-          <input type="number" class="v-input tiny"><input type="number" class="v-input tiny"><input type="number" class="v-input tiny">
+          <input type="number" class="v-input tiny" placeholder="올/내" title="올림수/내림수 메모칸"><input type="number" class="v-input tiny" placeholder="올/내" title="올림수/내림수 메모칸"><input type="number" class="v-input tiny" placeholder="올/내" title="올림수/내림수 메모칸">
         </div>
         <div class="v-row">${q.numA}</div>
         <div class="v-row"><span class="v-symbol">${isAdd?'＋':'－'}</span>${q.numB}</div>
@@ -462,10 +615,123 @@ function submitVertical(){
   handleAnswer(isCorrect, q, inp, document.getElementById('v-feedbackMsg'), nextVerticalQ);
 }
 
-function showFinalResult(){
+// 🚀 다이내믹 레벨업 계산 엔진
+function calculateLevelInfo(totalRewards) {
+  let level = 1;
+  let requiredForNext = 20; 
+  let accumulatedForCurrentLevel = 0; 
+
+  while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
+    accumulatedForCurrentLevel += requiredForNext;
+    level++;
+    requiredForNext = 20 + (level - 1) * 5; 
+  }
+
+  let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
+  let remainingForNext = requiredForNext - currentLevelProgress; 
+
+  return {
+    level: level,
+    requiredForNext: requiredForNext,
+    remainingForNext: remainingForNext,
+    currentLevelProgress: currentLevelProgress
+  };
+}
+
+async function showFinalResult(){
   document.getElementById('r-score').textContent = gameState.score + '점';
   document.getElementById('r-detail').innerHTML = `10문제 중 ${gameState.correctCount}개 수학 퀘스트 성공!`;
   showScreen('screen-result');
+  if (gameState.correctCount > 0) {
+    await saveRewardToNotion(gameState.correctCount);
+  }
+}
+
+async function saveRewardToNotion(earned) {
+  const userName = currentProfile === 'son' ? '민수' : '민서'; 
+  if (userName === '아빠' || userName === '엄마') return;
+  
+  const detailEl = document.getElementById('r-detail'); 
+  const originalText = detailEl.innerHTML;
+  detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#6EC6F5; font-weight:bold;">⏳ 수학 보상(${earned}개) 지갑에 누적하는 중...</span>`;
+
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
+      method: "POST", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
+    });
+    
+    const data = await response.json(); 
+    if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+    
+    const page = data.results[0]; 
+    const props = page.properties;
+
+    let diamond = props["다이아몬드 개수"]?.number || 0; 
+    let slime = props["슬라임 파츠 개수"]?.number || 0;
+    let tickets = props["소원권 개수"]?.number || 0;
+    
+    let previousTotal = 0;
+    let currentTotal = 0;
+    let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
+
+    if (currentTheme === '마인크래프트') {
+      previousTotal = diamond;
+      currentTotal = diamond + earned;
+    } else {
+      previousTotal = slime;
+      currentTotal = slime + earned;
+    }
+
+    const prevLevelInfo = calculateLevelInfo(previousTotal);
+    const currLevelInfo = calculateLevelInfo(currentTotal);
+    let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
+
+    let earnedTickets = Math.floor(currentTotal / 150) - Math.floor(previousTotal / 150);
+    let newTickets = tickets + earnedTickets;
+    let isWishTicketEarned = earnedTickets > 0;
+
+    let updateProps = {
+      "수학 레벨": { number: currLevelInfo.level },
+      "소원권 개수": { number: newTickets }
+    };
+
+    if (currentTheme === '마인크래프트') { updateProps["다이아몬드 개수"] = { number: currentTotal }; } 
+    else { updateProps["슬라임 파츠 개수"] = { number: currentTotal }; }
+
+    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
+      method: "PATCH", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ properties: updateProps }) 
+    });
+    
+    document.getElementById('notion-loading-msg').style.display = 'none';
+    
+    detailEl.innerHTML = originalText + `
+      <div style="background:rgba(255,255,255,0.8); border:2px dashed var(--sky); padding:16px; border-radius:12px; margin-top:10px; text-align: left;">
+        <div style="font-size: 1.15rem; margin-bottom: 8px;">
+          <b style="color:#0288D1;">${rewardName} x ${currentTotal}</b>
+        </div>
+        <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
+          다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b>${currLevelInfo.remainingForNext}</b>개 남음!
+        </div>
+        ${isLevelUp ? `<div style="text-align:center; font-size:1.3rem; color:#FF6B9D; font-weight:bold; margin-top:10px;">🎉 수학 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
+      </div>
+    `;
+
+    if (isWishTicketEarned) {
+      setTimeout(() => {
+        document.getElementById('wishTicketCountDisplay').textContent = newTickets;
+        document.getElementById('wishTicketOverlay').classList.add('active');
+      }, 1000);
+    }
+
+  } catch (err) {
+    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패`;
+  }
+}
+
+function closeWishTicket() {
+  document.getElementById('wishTicketOverlay').classList.remove('active');
 }
 
 function retryGame() { startGame(gameState.mode); }
