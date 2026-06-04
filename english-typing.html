@@ -79,7 +79,7 @@
 
   #loadingBadge { background: #FFD93D; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: fixed; top: 20px; z-index: 999; }
 
-  /* 팝업 모달 추가 스타일 */
+  /* 팝업 모달 스타일 */
   .result-overlay { 
     position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); 
     backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; 
@@ -231,7 +231,7 @@
     <div style="background: rgba(167, 139, 250, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--purple); font-size: 1.3rem; margin-bottom: 24px;">
       총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개
     </div>
-    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px;">신난다! 닫기</button>
+    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px; border: none; border-radius: 16px; cursor: pointer;">신난다! 닫기</button>
   </div>
 </div>
 
@@ -357,8 +357,52 @@ function loadWrongWords() {
 function saveWrongWord(w) { if(quizState.isWrongMode) return; if(!wrongWords.some(item => item.eng === w.eng)) { wrongWords.push(w); localStorage.setItem(getStorageKey(), JSON.stringify(wrongWords)); } }
 function removeWrongWord(w) { if(!quizState.isWrongMode) return; wrongWords = wrongWords.filter(item => item.eng !== w.eng); localStorage.setItem(getStorageKey(), JSON.stringify(wrongWords)); }
 
-function speakWord(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); } }
-function speakCurrentWord() { const q = quizState.pool[quizState.current]; if(q) speakWord(q.eng); }
+// ==========================================
+// 🚀 완벽한 영어 TTS (en-US 강제 & GC 방어)
+// ==========================================
+window.currentUtterance = null;
+let bestEnglishVoice = null;
+
+function initEnglishVoice() {
+  if (!window.speechSynthesis) return;
+  const voices = window.speechSynthesis.getVoices();
+  
+  bestEnglishVoice = voices.find(v => 
+    (v.lang === 'en-US' || v.lang === 'en_US' || v.lang === 'en-GB') && 
+    (v.name.includes('Google') || v.name.includes('SAMSUNG') || v.name.includes('English') || v.name.includes('Samantha'))
+  );
+  
+  if (!bestEnglishVoice) {
+    bestEnglishVoice = voices.find(v => v.lang.startsWith('en'));
+  }
+}
+
+if (window.speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) { 
+  speechSynthesis.onvoiceschanged = initEnglishVoice; 
+}
+
+function speakWord(text) { 
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel(); 
+  
+  const u = new SpeechSynthesisUtterance(text); 
+  window.currentUtterance = u; 
+  u.lang = 'en-US'; 
+  u.rate = 0.85; 
+  u.pitch = 1.0; 
+  
+  if (!bestEnglishVoice) initEnglishVoice();
+  if (bestEnglishVoice) u.voice = bestEnglishVoice; 
+  
+  u.onend = function() { window.currentUtterance = null; };
+  window.speechSynthesis.speak(u); 
+}
+
+function speakCurrentWord() { 
+  const q = quizState.pool[quizState.current]; 
+  if(q) speakWord(q.eng); 
+}
+// ==========================================
 
 function getSelectedWordsPool() {
   const activeBooks = [...document.querySelectorAll('.book-cb:checked')].map(cb => parseInt(cb.value)); let pool = []; const targetPersonName = currentProfile === 'son' ? '민수' : '민서';
@@ -422,25 +466,18 @@ function showQuizResult() {
   if (correctCount > 0) saveRewardToNotion(correctCount);
 }
 
-function closeWishTicket() {
-  document.getElementById('wishTicketOverlay').classList.remove('active');
-}
-
-// 🚀 다이내믹 레벨업 계산 엔진 (20개 시작, 5개씩 요구량 증가)
+// 🚀 다이내믹 레벨업 계산 엔진
 function calculateLevelInfo(totalRewards) {
   let level = 1;
   let requiredForNext = 20; 
   let accumulatedForCurrentLevel = 0; 
-
   while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
     accumulatedForCurrentLevel += requiredForNext;
     level++;
     requiredForNext = 20 + (level - 1) * 5; 
   }
-
   let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
   let remainingForNext = requiredForNext - currentLevelProgress; 
-
   return {
     level: level,
     requiredForNext: requiredForNext,
@@ -452,7 +489,6 @@ function calculateLevelInfo(totalRewards) {
 async function saveRewardToNotion(earned) {
   const userName = currentProfile === 'son' ? '민수' : '민서'; 
   if (userName === '아빠' || userName === '엄마') return;
-
   const detailEl = document.getElementById('r-detail'); 
   const originalText = detailEl.innerHTML;
   detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#a78bfa; font-weight:bold;">⏳ 영어방 보상(${earned}개) 저금통에 저금 중...</span>`;
@@ -508,9 +544,9 @@ async function saveRewardToNotion(earned) {
     document.getElementById('notion-loading-msg').style.display = 'none';
     
     detailEl.innerHTML = originalText + `
-      <div style="background:#fff; border:2px dashed var(--purple); padding:16px; border-radius:12px; margin:15px 0; text-align: left;">
+      <div style="background:rgba(255,255,255,0.8); border:2px dashed #A78BFA; padding:16px; border-radius:12px; margin-top:10px; text-align: left;">
         <div style="font-size: 1.15rem; margin-bottom: 8px;">
-          <b style="color:var(--purple);">${rewardName} x ${currentTotal}</b>
+          <b style="color:#A78BFA;">${rewardName} x ${currentTotal}</b>
         </div>
         <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
           다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b>${currLevelInfo.remainingForNext}</b>개 남음!
@@ -557,6 +593,10 @@ function executePrint() {
   html += `</tbody></table><div class="print-ans-sheet"><strong>🔑 [정답 해설지]</strong><br><table style="width:100%; font-size:10pt; line-height:1.8;"><tr>`;
   selectedWords.forEach((w, i) => { html += `<td style="width:25%;">${i+1}번: <b>${w.eng}</b></td>`; if((i+1)%4 === 0) html += '</tr><tr>'; });
   printArea.innerHTML = html + `</tr></table></div>`; printArea.style.display = 'block'; window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 1000);
+}
+
+function closeWishTicket() {
+  document.getElementById('wishTicketOverlay').classList.remove('active');
 }
 </script>
 </body>
