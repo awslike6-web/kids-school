@@ -100,7 +100,7 @@ function applyTheme() {
 
 async function loadEnglishWords() {
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${ENGLISH_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "대상", select: { equals: currentUserName } } }) });
+    const response = await fetch(`${PROXY_URL}/v1/databases/${ENGLISH_DB_ID}/query`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "공부하는 사람", select: { equals: currentUserName } } }) });
     const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
     
     words = data.results.map(item => {
