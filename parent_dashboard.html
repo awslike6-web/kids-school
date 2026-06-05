@@ -126,7 +126,15 @@
   .level-box .subj { font-size: 0.9rem; color: #888; margin-bottom: 4px; }
   .level-box .lvl { font-size: 1.6rem; font-weight: bold; color: var(--dark); }
 
-  /* 정보 블록 (소원권) */
+  /* 정보 블록 (소원권 영역 래퍼) */
+  .ticket-wrap {
+    margin-top: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px;
+  }
+
+  /* 정보 블록 (소원권 카드) */
   .ticket-box {
     background: linear-gradient(135deg, var(--yellow), var(--orange));
     border-radius: 20px;
@@ -136,12 +144,39 @@
     align-items: center;
     color: #1a1a2e;
     box-shadow: 0 8px 20px rgba(255, 159, 67, 0.3);
-    margin-top: auto; /* 하단으로 밀기 */
   }
   .ticket-box .t-title { font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
   .ticket-box .t-amount { font-family: 'Gaegu', cursive; font-size: 2.2rem; font-weight: 700; }
 
-  /* 버튼 영역 */
+  /* 소원권 사용 승인 버튼 */
+  .use-ticket-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 16px;
+    border: none;
+    background: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  .use-ticket-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  }
+  .use-ticket-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  /* 민수/민서 전용 버튼 테마 */
+  .card-minsu .use-ticket-btn { border: 2px solid var(--sky); color: #0288D1; }
+  .card-minsu .use-ticket-btn:hover:not(:disabled) { background: var(--sky); color: #fff; }
+  
+  .card-minser .use-ticket-btn { border: 2px solid var(--pink); color: #D81B60; }
+  .card-minser .use-ticket-btn:hover:not(:disabled) { background: var(--pink); color: #fff; }
+
+  /* 하단 공통 버튼 영역 */
   .big-btn { 
     width: 100%; max-width: 480px; padding: 18px; border-radius: 20px; 
     border: none; font-family: 'Jua', sans-serif; font-size: 1.3rem; 
@@ -163,20 +198,24 @@
 </head>
 <body>
 
+<!-- 떠다니는 배경 아이콘들 -->
 <div class="bg-floats" id="bgFloats"></div>
 
+<!-- 로딩 화면 -->
 <div class="screen active" id="screen-loading">
   <h1 class="main-title">👨‍👩‍👧‍👦 부모님 <span>대시보드</span></h1>
   <p class="subtitle" id="loadingText">노션에서 아이들의 학습 데이터를 불러오는 중입니다...</p>
   <div class="loading-spinner" id="spinner"></div>
 </div>
 
+<!-- 대시보드 메인 화면 -->
 <div class="screen" id="screen-dashboard">
   <h1 class="main-title">👨‍👩‍👧‍👦 학습 <span>현황판</span></h1>
   <p class="subtitle">아이들이 모은 보상과 레벨을 확인하세요!</p>
 
   <div class="dashboard-container">
     
+    <!-- 👦 오빠(민수) 카드 -->
     <div class="profile-card card-minsu">
       <div class="card-header">👦 민수 (오빠)</div>
       
@@ -200,12 +239,17 @@
         </div>
       </div>
 
-      <div class="ticket-box">
-        <div class="t-title"><span style="font-size: 1.8rem; animation: floatUp 2s infinite alternate;">🎫</span> 획득한 소원권</div>
-        <div class="t-amount" id="ms-ticket">0장</div>
+      <!-- 소원권 & 사용 버튼 래퍼 -->
+      <div class="ticket-wrap">
+        <div class="ticket-box">
+          <div class="t-title"><span style="font-size: 1.8rem; animation: floatUp 2s infinite alternate;">🎫</span> 획득한 소원권</div>
+          <div class="t-amount" id="ms-ticket">0장</div>
+        </div>
+        <button class="use-ticket-btn" id="btn-ms-ticket" onclick="useWishTicket('민수')">🎫 소원권 1장 사용하기</button>
       </div>
     </div>
 
+    <!-- 👧 동생(민서) 카드 -->
     <div class="profile-card card-minser">
       <div class="card-header">👧 민서 (동생)</div>
       
@@ -229,9 +273,13 @@
         </div>
       </div>
 
-      <div class="ticket-box">
-        <div class="t-title"><span style="font-size: 1.8rem; animation: floatUp 2s infinite alternate-reverse;">🎁</span> 획득한 소원권</div>
-        <div class="t-amount" id="ds-ticket">0장</div>
+      <!-- 소원권 & 사용 버튼 래퍼 -->
+      <div class="ticket-wrap">
+        <div class="ticket-box">
+          <div class="t-title"><span style="font-size: 1.8rem; animation: floatUp 2s infinite alternate-reverse;">🎁</span> 획득한 소원권</div>
+          <div class="t-amount" id="ds-ticket">0장</div>
+        </div>
+        <button class="use-ticket-btn" id="btn-ds-ticket" onclick="useWishTicket('민서')">🎫 소원권 1장 사용하기</button>
       </div>
     </div>
 
@@ -244,6 +292,12 @@
 // 노션 API 연결 정보
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+
+// 🎯 PATCH 통신(소원권 차감)을 위해 유저별 노션 페이지 ID와 현재 소원권 수를 저장해둘 객체
+let userData = {
+  "민수": { pageId: null, ticketCount: 0 },
+  "민서": { pageId: null, ticketCount: 0 }
+};
 
 // 둥둥 떠다니는 배경 효과 생성
 (function createFloatingBackground() {
@@ -266,13 +320,17 @@ function renderDashboard(results) {
     const props = page.properties;
     const name = props["이름"]?.title[0]?.plain_text;
     
-    if (!name) return;
+    if (!name || !userData[name]) return;
 
-    // 공통 속성 추출 (기본값 0 또는 1)
+    // 🎯 PATCH 통신을 위해 유저의 Page ID와 소원권 개수 저장
+    userData[name].pageId = page.id;
+    
     const mathLvl = props["수학 레벨"]?.number || 1;
     const engLvl = props["영어 레벨"]?.number || 1;
     const korLvl = props["용어 레벨"]?.number || 1;
     const tickets = props["소원권 개수"]?.number || 0;
+    
+    userData[name].ticketCount = tickets;
 
     if (name === "민수") {
       const diamond = props["다이아몬드 개수"]?.number || 0;
@@ -297,13 +355,77 @@ function renderDashboard(results) {
   document.getElementById('screen-dashboard').classList.add('active');
 }
 
+// 🎯 소원권 1장 사용하기 (노션 DB 업데이트)
+async function useWishTicket(childName) {
+  const childData = userData[childName];
+  
+  // 예외 처리 (페이지 ID가 아직 없거나 불러오지 못했을 때)
+  if (!childData || !childData.pageId) {
+    alert("데이터를 아직 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+    return;
+  }
+
+  // 1. 유효성 검사: 소원권 0장일 때 차단
+  if (childData.ticketCount <= 0) {
+    alert("소원권이 부족합니다! 더 열심히 공부하라고 전해주세요.");
+    return;
+  }
+
+  // 2. 확인 팝업
+  const isConfirmed = confirm(`정말로 ${childName}의 소원권을 1장 사용하시겠습니까? (예: 아이스크림 사주기)`);
+  if (!isConfirmed) return;
+
+  // 3. 사용 중 버튼 상태 변경 (로딩 효과)
+  const btnId = childName === '민수' ? 'btn-ms-ticket' : 'btn-ds-ticket';
+  const targetBtn = document.getElementById(btnId);
+  const originalHtml = targetBtn.innerHTML;
+  
+  targetBtn.innerHTML = "⏳ 노션 업데이트 중...";
+  targetBtn.disabled = true;
+
+  try {
+    const newCount = childData.ticketCount - 1;
+
+    // 4. 노션 API PATCH 통신을 통해 소원권 -1 개수 적용
+    const response = await fetch(`${PROXY_URL}/v1/pages/${childData.pageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        properties: {
+          "소원권 개수": { number: newCount }
+        }
+      })
+    });
+
+    if (!response.ok) throw new Error("업데이트 통신 실패");
+
+    // 5. 통신 성공 시 로컬 데이터 갱신 및 UI 즉각 반영
+    childData.ticketCount = newCount;
+    const countDisplayId = childName === '민수' ? 'ms-ticket' : 'ds-ticket';
+    document.getElementById(countDisplayId).textContent = newCount + "장";
+
+    // 6. 성공 축하 메시지 팝업 (버튼 텍스트 복구 시간을 살짝 줌)
+    setTimeout(() => {
+      alert("🎉 결제 완료! 아이의 소원을 들어주세요!");
+    }, 100);
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ 소원권 사용 중 오류가 발생했습니다. 다시 시도해주세요.");
+  } finally {
+    // 7. 통신이 완료되면 버튼 상태를 원래대로 복원
+    targetBtn.innerHTML = originalHtml;
+    targetBtn.disabled = false;
+  }
+}
+
 // 노션에서 인벤토리 데이터 불러오기
 async function loadInventoryData() {
   try {
     const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page_size: 10 }) // 유저 수가 적으므로 전체(또는 10개) 조회
+      body: JSON.stringify({ page_size: 10 }) 
     });
     
     if (!response.ok) throw new Error("네트워크 응답 오류");
