@@ -235,16 +235,21 @@
 </div>
 
 <div class="screen" id="screen-typing">
-  <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div></div>
+  <div class="game-header">
+    <div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div>
+    <div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div>
+  </div>
   <div class="typing-question-card">
     <div class="q-text" id="t-question">? × ? = ?</div>
   </div>
-<div class="answer-input-wrap">
-  <input type="number" class="answer-input" id="answerInput" placeholder="정답" autocomplete="off">
-  <input type="number" class="answer-input" id="remInput" placeholder="나머지" autocomplete="off" style="display:none; max-width: 100px;">
-  <button class="submit-btn" onclick="submitTyping()">확인✔</button>
-</div>
-<div class="screen" id="screen-vertical">
+  <div class="answer-input-wrap">
+    <input type="number" class="answer-input" id="answerInput" placeholder="정답" autocomplete="off">
+    <input type="number" class="answer-input" id="remInput" placeholder="나머지" autocomplete="off" style="display:none; max-width: 100px;">
+    <button class="submit-btn" onclick="submitTyping()">확인✔</button>
+  </div>
+  <div class="feedback-msg" id="t-feedbackMsg"></div>
+  <button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
+</div><div class="screen" id="screen-vertical">
   <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="v-qnum">1</span></div></div>
   <div class="v-board-container" id="vertical-container"></div>
   <div class="feedback-msg" id="v-feedbackMsg"></div><button class="submit-btn" style="width:100%; max-width:460px; margin-top:10px;" onclick="submitVertical()">정답 확인✔</button>
