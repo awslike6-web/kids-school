@@ -239,10 +239,11 @@
   <div class="typing-question-card">
     <div class="q-text" id="t-question">? × ? = ?</div>
   </div>
-  <div class="answer-input-wrap"><input type="number" class="answer-input" id="answerInput" autocomplete="off"><button class="submit-btn" onclick="submitTyping()">확인✔</button></div>
-  <div class="feedback-msg" id="t-feedbackMsg"></div><button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
+<div class="answer-input-wrap">
+  <input type="number" class="answer-input" id="answerInput" placeholder="정답" autocomplete="off">
+  <input type="number" class="answer-input" id="remInput" placeholder="나머지" autocomplete="off" style="display:none; max-width: 100px;">
+  <button class="submit-btn" onclick="submitTyping()">확인✔</button>
 </div>
-
 <div class="screen" id="screen-vertical">
   <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="v-qnum">1</span></div></div>
   <div class="v-board-container" id="vertical-container"></div>
@@ -277,7 +278,7 @@ let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 
 // 🚀 주아 전용 노션 API 세팅 (새로운 DB ID를 넣어주세요)
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "377a27115b688057b5fdcad645a6dfb0"; 
+const INVENTORY_DB_ID = "여기에_주아_노션_DB_ID를_넣어주세요"; 
 
 let wrongNotes = JSON.parse(localStorage.getItem(`jua_math_wrong`)) || []; 
 let gameState = {};
@@ -292,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
       difficultySettings[this.dataset.op] = this.checked;
     });
   });
-})
+});
 
 function updateVisibleCards() {
   const op = document.querySelector('input[name="opMode"]:checked').value;
@@ -506,13 +507,25 @@ function nextTypingQ(){
   if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
   const q = gameState.questions[gameState.current]; document.getElementById('t-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length; 
   document.getElementById('t-question').textContent = q.text + ' = ?';
-  const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
+  const inp = document.getElementById('answerInput'); const remInp = document.getElementById('remInput');
+  inp.value=''; inp.className='answer-input'; remInp.value=''; remInp.className='answer-input';
+  document.getElementById('t-feedbackMsg').textContent='';
+  remInp.style.display = (q.opType === 'div') ? 'inline-block' : 'none';
+  inp.focus();
+}function submitTyping(){
+  const inp = document.getElementById('answerInput'); const remInp = document.getElementById('remInput');
+  if(inp.value==='') return;
+  const q = gameState.questions[gameState.current];
+  let isCorrect = false;
+  if (q.opType === 'div') {
+    const userAns = parseInt(inp.value, 10); const userRem = parseInt(remInp.value || 0, 10);
+    isCorrect = (userAns === q.answer && userRem === q.rem);
+    if (!isCorrect) remInp.classList.add('wrong'); else remInp.classList.add('correct');
+  } else {
+    isCorrect = (parseInt(inp.value, 10) === q.answer);
+  }
+  handleAnswer(isCorrect, q, inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
 }
-function submitTyping(){
-  const inp = document.getElementById('answerInput'); if(inp.value==='') return;
-  handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
-}
-
 function initVertical(){ showScreen('screen-vertical'); nextVerticalQ(); }
 function nextVerticalQ(){
   if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
