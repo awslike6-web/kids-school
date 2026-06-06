@@ -48,6 +48,10 @@
   input[name="levelMode"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.06); }
   input[name="digitMode"]:checked + .btn-label, input[name="printCol"]:checked + .btn-label, input[name="lowDigitMode"]:checked + .btn-label { background: var(--purple); border-color: var(--purple); color:#fff; transform: scale(1.06); }
 
+  /* 객관식 공 떨어지기 속도 선택 스위치 스타일 */
+  #speed-turtle:checked + .btn-label { background: var(--green); border-color: var(--green); color:#fff; transform: scale(1.06); }
+  #speed-rabbit:checked + .btn-label { background: var(--orange); border-color: var(--orange); color:#fff; transform: scale(1.06); }
+
   /* 토글 스위치 스타일 */
   .switch-container { display: flex; align-items: center; justify-content: space-between; background: #f9f9f9; padding: 12px 16px; border-radius: 16px; border: 2px solid #eee; margin-top: 8px; cursor: pointer; }
   .switch-label { font-size: 1rem; color: var(--dark); }
@@ -60,6 +64,7 @@
 
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .mode-btn { padding: 16px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; transition: transform .18s; }
+  .mode-btn.falling { background: linear-gradient(135deg, var(--orange), var(--pink)); }
   .mode-btn.typing { background: linear-gradient(135deg, var(--purple), var(--sky)); }
   .mode-btn.vertical { grid-column: span 2; background: linear-gradient(135deg, #4ECDC4, #6BCB77); font-size: 1.1rem; padding: 18px; }
   .mode-btn.wrong-note { background: linear-gradient(135deg, var(--dark), #5a5a8a); font-size: 1rem; padding: 18px; }
@@ -97,6 +102,14 @@
   .div-input { width: 100px; font-size: 1.8rem; text-align: center; border: 3px solid #e0e0e0; border-radius: 12px; font-family: 'Jua', sans-serif; }
   .div-input.correct { border-color: var(--green); background: #f0fff4; }
   .div-input.wrong { border-color: var(--pink); background: #fff5f5; }
+
+  /* 객관식 떨어지는 모드 전용 UI CSS */
+  #screen-falling { background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #1a1a3e 100%); color: #fff; }
+  .f-header-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px 14px; font-size: 0.95rem; }
+  .falling-question-box { background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25); border-radius: 22px; padding: 16px 28px; font-size: 2.2rem; font-weight: 700; text-align: center; margin-bottom: 10px; letter-spacing: 2px; width: 100%; max-width: 460px; }
+  .falling-arena { position: relative; width: 100%; max-width: 460px; height: 50vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
+  .fall-ball { position: absolute; width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; cursor: pointer; user-select: none; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  @keyframes falling { 0% { top: -80px; } 100% { top: 100%; } }
 
   /* 모바일 대응 */
   @media (max-width: 400px) {
@@ -225,9 +238,22 @@
     </div>
   </div>
 
+  <!-- 객관식 공 떨어지는 모드 전용 속도 세팅 UI 복구 -->
+  <div class="card" id="card-speed">
+    <div class="card-title">⏱️ 떨어지는 속도 (객관식 모드용)</div>
+    <div class="grid-2">
+      <input type="radio" name="speedMode" id="speed-turtle" value="turtle" checked>
+      <label for="speed-turtle" class="btn-label"><span style="font-size:1.4rem;">🐢</span>거북이 모드</label>
+      <input type="radio" name="speedMode" id="speed-rabbit" value="rabbit">
+      <label for="speed-rabbit" class="btn-label"><span style="font-size:1.4rem;">🐇</span>토끼 모드</label>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">🎮 게임 시작하기</div>
     <div class="mode-grid">
+      <!-- 객관식 버튼 복구 -->
+      <button class="mode-btn falling" onclick="startGame('falling')" style="grid-column: span 2; padding:18px; font-size:1.1rem;">☄️ 객관식: 떨어지는 공 잡기</button>
       <button class="mode-btn typing" onclick="startGame('typing')" style="grid-column: span 2; padding:18px; font-size:1.1rem;">⌨️ 주관식 실력 테스트</button>
       <button class="mode-btn vertical" onclick="startGame('vertical')">📝 세로셈 전문 학습 모드</button>
       <button class="mode-btn wrong-note" onclick="startWrongNote()">🖍️ 오답 풀기 (<span id="wrongCountBadge">0</span>)</button>
@@ -236,15 +262,37 @@
   <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
+<!-- 객관식 모드 화면 복구 -->
+<div class="screen" id="screen-falling">
+  <div style="width:100%; max-width:460px; display:flex; justify-content:space-between; margin-bottom:10px;">
+    <div class="f-header-box">⭐ 점수: <span class="shared-score-display">0</span></div>
+    <div class="f-header-box">📝 문제: <span id="f-qnum">1</span></div>
+    <div class="f-header-box">❤️ 목숨: <span id="f-lives">3</span></div>
+  </div>
+  <div class="falling-question-box" id="f-question">? × ? = ?</div>
+  <div class="falling-arena" id="fallingArena"></div>
+  <div style="width:100%; max-width:460px; height:10px; background:rgba(255,255,255,0.15); border-radius:10px; margin-top:10px; overflow:hidden;">
+    <div id="timerBar" style="height:100%; width:100%;"></div>
+  </div>
+  <button class="big-btn back-btn" style="max-width:460px;margin-top:20px" onclick="goSetup()">← 나가기</button>
+</div>
+
 <div class="screen" id="screen-typing">
-  <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div></div>
+  <div class="game-header">
+    <div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div>
+    <div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div>
+  </div>
   <div class="typing-question-card">
     <div class="q-text" id="t-question">? × ? = ?</div>
   </div>
-  <div class="answer-input-wrap"><input type="number" class="answer-input" id="answerInput" autocomplete="off"><button class="submit-btn" onclick="submitTyping()">확인✔</button></div>
-  <div class="feedback-msg" id="t-feedbackMsg"></div><button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
+  <div class="answer-input-wrap">
+    <input type="number" class="answer-input" id="answerInput" placeholder="정답" autocomplete="off">
+    <input type="number" class="answer-input" id="remInput" placeholder="나머지" autocomplete="off" style="display:none; max-width: 100px;">
+    <button class="submit-btn" onclick="submitTyping()">확인✔</button>
+  </div>
+  <div class="feedback-msg" id="t-feedbackMsg"></div>
+  <button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
 </div>
-
 <div class="screen" id="screen-vertical">
   <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="v-qnum">1</span></div></div>
   <div class="v-board-container" id="vertical-container"></div>
@@ -275,6 +323,9 @@
 </div>
 
 <script>
+// 객관식 떨어지는 모드 전역 변수
+let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
+
 // 🚀 노션 API 설정
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
@@ -504,7 +555,12 @@ function generateQuestion() {
 }
 
 function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function goSetup(){ loadProfileData(); showScreen('screen-setup'); }
+
+function goSetup(){ 
+  if (typeof clearFallingGame === 'function') clearFallingGame();
+  loadProfileData(); 
+  showScreen('screen-setup'); 
+}
 
 function updateScoreUI() {
   document.querySelectorAll('.shared-score-display').forEach(el => { el.textContent = gameState.score; });
@@ -513,10 +569,19 @@ function updateScoreUI() {
 function startGame(mode){
   const op = document.querySelector('input[name="opMode"]:checked').value;
   if((op==='mul'||op==='div') && document.querySelector('input[name="levelMode"]:checked').value==='1' && document.querySelectorAll('.times-cb:checked').length===0){ alert('구구단을 선택해 주세요!'); return; }
-  const questions = []; for(let i=0;i<10;i++) questions.push(generateQuestion());
-  gameState = { mode, questions, current: 0, score: 0, correctCount: 0 };
+  
+  const questions = []; 
+  for(let i=0;i<10;i++) questions.push(generateQuestion());
+  
+  const speedRadio = document.querySelector('input[name="speedMode"]:checked');
+  const speed = speedRadio ? speedRadio.value : 'turtle';
+  
+  gameState = { mode, questions, current: 0, score: 0, correctCount: 0, speedMode: speed };
   updateScoreUI();
-  if(mode === 'typing') initTyping(); else if(mode === 'vertical') initVertical();
+  
+  if(mode === 'typing') initTyping(); 
+  else if(mode === 'vertical') initVertical();
+  else if(mode === 'falling') initFalling();
 }
 
 function startWrongNote() {
@@ -525,6 +590,91 @@ function startWrongNote() {
   updateScoreUI();
   initTyping();
 }
+
+// ☄️ 객관식 떨어지는 모드 전용 함수 시작
+function initFalling(){ 
+  gameState.lives = 3; 
+  showScreen('screen-falling'); 
+  nextFallingQ(); 
+}
+
+function nextFallingQ(){
+  if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
+  
+  document.querySelectorAll('.shared-score-display').forEach(el => { el.textContent = gameState.score; });
+  document.getElementById('f-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length;
+  document.getElementById('f-lives').textContent = gameState.lives;
+  
+  const q = gameState.questions[gameState.current]; 
+  document.getElementById('f-question').textContent = q.text + ' = ?';
+  
+  const choices = new Set([q.answer]); 
+  while(choices.size < 5) choices.add(q.answer + Math.floor((Math.random()-0.5)*20) + 1);
+  const arr = [...choices].sort(()=>Math.random()-0.5);
+  
+  clearFallingBalls(); 
+  const arena = document.getElementById('fallingArena'); 
+  const colors = ['#FF6B9D','#6EC6F5','#FFD93D','#4ECDC4','#A78BFA'];
+  
+  const speed = gameState.speedMode === 'turtle' ? 18000 : 5500; 
+  
+  arr.forEach((val, i) => {
+    const ball = document.createElement('div'); 
+    ball.className = 'fall-ball'; 
+    ball.textContent = val; 
+    ball.style.background = colors[i]; 
+    ball.style.left = (5 + Math.random()*75) + '%'; 
+    const delay = i * 400; 
+    ball.style.animation = `falling ${speed}ms linear ${delay}ms forwards`;
+    
+    ball.addEventListener('click', ()=> {
+      if(val === q.answer) { 
+        gameState.score+=10; gameState.correctCount++; advanceFalling(); 
+      }
+      else { 
+        ball.style.opacity='0.3'; ball.style.pointerEvents='none'; 
+        gameState.lives--; 
+        
+        const key = `minmin_math_wrong_${currentProfile}`;
+        if(!wrongNotes.some(item => item.text === q.text)) { 
+            wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); 
+            document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
+        }
+        document.getElementById('f-lives').textContent = gameState.lives; 
+        if(gameState.lives<=0) { clearFallingGame(); gameState.current = gameState.questions.length; showFinalResult(); } 
+      }
+    }); 
+    arena.appendChild(ball); fallingBalls.push(ball); fallingTimers.push(setTimeout(()=> ball.remove(), delay+speed));
+  });
+  
+  clearInterval(timerInterval); 
+  const totalMaxTime = gameState.speedMode === 'turtle' ? 20000 : 7500;
+  timeLeft = totalMaxTime; 
+  document.getElementById('timerBar').style.background = 'var(--green)';
+  
+  timerInterval = setInterval(()=>{ 
+    timeLeft -= 100; 
+    document.getElementById('timerBar').style.width = (timeLeft/totalMaxTime*100)+'%'; 
+    if(timeLeft<=0) { 
+      clearInterval(timerInterval); 
+      gameState.lives--; 
+      
+      const key = `minmin_math_wrong_${currentProfile}`;
+      if(!wrongNotes.some(item => item.text === q.text)) { 
+          wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); 
+          document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
+      }
+      
+      if(gameState.lives<=0) { clearFallingGame(); gameState.current = gameState.questions.length; showFinalResult(); } 
+      else advanceFalling(); 
+    } 
+  },100);
+}
+
+function advanceFalling(){ clearFallingGame(); gameState.current++; setTimeout(nextFallingQ, 300); }
+function clearFallingBalls(){ fallingBalls.forEach(b=>b.remove()); fallingBalls=[]; }
+function clearFallingGame(){ clearInterval(timerInterval); fallingTimers.forEach(clearTimeout); fallingTimers=[]; clearFallingBalls(); }
+// ☄️ 객관식 떨어지는 모드 전용 함수 끝
 
 function handleAnswer(isCorrect, q, inpBox, fbBox, nextFunc) {
   const key = `minmin_math_wrong_${currentProfile}`;
@@ -545,17 +695,28 @@ function handleAnswer(isCorrect, q, inpBox, fbBox, nextFunc) {
 function initTyping(){ showScreen('screen-typing'); nextTypingQ(); }
 function nextTypingQ(){
   if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
-  const q = gameState.questions[gameState.current];
-  document.getElementById('t-qnum').textContent = gameState.current+1; 
+  const q = gameState.questions[gameState.current]; document.getElementById('t-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length; 
   document.getElementById('t-question').textContent = q.text + ' = ?';
-  const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; 
-  document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
+  const inp = document.getElementById('answerInput'); const remInp = document.getElementById('remInput');
+  inp.value=''; inp.className='answer-input'; remInp.value=''; remInp.className='answer-input';
+  document.getElementById('t-feedbackMsg').textContent='';
+  remInp.style.display = (q.opType === 'div') ? 'inline-block' : 'none';
+  inp.focus();
 }
 function submitTyping(){
-  const inp = document.getElementById('answerInput'); if(inp.value==='') return;
-  handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
+  const inp = document.getElementById('answerInput'); const remInp = document.getElementById('remInput');
+  if(inp.value==='') return;
+  const q = gameState.questions[gameState.current];
+  let isCorrect = false;
+  if (q.opType === 'div') {
+    const userAns = parseInt(inp.value, 10); const userRem = parseInt(remInp.value || 0, 10);
+    isCorrect = (userAns === q.answer && userRem === q.rem);
+    if (!isCorrect) remInp.classList.add('wrong'); else remInp.classList.add('correct');
+  } else {
+    isCorrect = (parseInt(inp.value, 10) === q.answer);
+  }
+  handleAnswer(isCorrect, q, inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
 }
-
 function initVertical(){ showScreen('screen-vertical'); nextVerticalQ(); }
 function nextVerticalQ(){
   if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
@@ -660,6 +821,8 @@ function calculateLevelInfo(totalRewards) {
 }
 
 async function showFinalResult(){
+  if (typeof clearFallingGame === 'function') clearFallingGame();
+  
   document.getElementById('r-score').textContent = gameState.score + '점';
   document.getElementById('r-detail').innerHTML = `10문제 중 ${gameState.correctCount}개 수학 퀘스트 성공!`;
   showScreen('screen-result');
