@@ -144,6 +144,26 @@
             cursor: pointer; 
         }
         button.send-btn:disabled { background-color: #30363d; color: #8b949e; cursor: not-allowed; }
+
+        /* 🎨 1층: 대문 탈출 버튼 전용 디자인 설정 */
+        button.back-btn {
+            width: 100%; 
+            margin-top: 20px; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #30363d; 
+            background: #21262d; 
+            color: #8b949e; 
+            font-family: 'Malgun Gothic', sans-serif; 
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.2s;
+        }
+        button.back-btn:hover { 
+            background-color: #30363d !important; 
+            color: #ffffff !important; 
+        }
     </style>
 </head>
 <body>
@@ -165,28 +185,18 @@
     <div id="mode-display">인프라 대기 중...</div>
     <div class="chat-box" id="chat-box"></div>
     <div class="hint-area" id="hint-area" style="display: none;"></div>
-    <div class="input-area">
-        <textarea id="user-input" placeholder="문장을 입력하세요..."></textarea>
-        <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
-    </div>
-    <div class="input-area">
-        <textarea id="user-input" placeholder="문장을 입력하세요..."></textarea>
-        <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
-    </div>
     
-    <button class="back-btn" onclick="location.href='../index.html'" style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #21262d; color: #8b949e; font-family: 'Malgun Gothic', sans-serif; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+    <div class="input-area">
+        <textarea id="user-input" placeholder="문장을 입력하세요..."></textarea>
+        <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
+    </div>
+
+    <button class="back-btn" onclick="location.href='../index.html'">
         🚪 공부방 대문으로 돌아가기
     </button>
-</div> ```
-
-그리고 이 버튼이 마우스나 손가락이 올라갔을 때 살짝 밝아지도록, <head> 태그 안의 `<style>` 맨 밑에 아래 효과도 한 줄만 같이 적어주시면 완벽합니다.
-
-```css
-    button.back-btn:hover { background-color: #30363d !important; color: #ffffff !important; }
 </div>
 
 <script>
-    // ⚙️ 엔드포인트 통합 단일 백엔드 인프라 주소 세팅
     const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -200,7 +210,7 @@
             pitch: 1.2,
             placeholder: "아래 단어 버튼을 누르거나 직접 써보세요!",
             welcome: "안녕! 나는 너의 문장 수호신이야! 오늘 있었던 재미난 일을 단어 버튼을 누르거나 글자로 써서 나에게 들려줘! ✨",
-            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬과 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
+            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬และ 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
         },
         base: {
             title: "🤖 레벨 1: 첫째 민수 모드 (대충 쓰기 방어)",
@@ -344,7 +354,6 @@
         conversationHistory.push({ role: "user", parts: [{ text: userText }] });
 
         try {
-            // 🌐 구글 직접연결 차단 -> 커스텀 가상 워커 엔드포인트(/v1/gemini)로 라우팅 우회
             const response = await fetch(`${WORKER_PROXY_URL}/v1/gemini`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
