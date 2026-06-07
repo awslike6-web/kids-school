@@ -79,7 +79,7 @@
 
   #loadingBadge { background: #FFD93D; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: fixed; top: 20px; z-index: 999; }
 
-  /* 팝업 모달 스타일 */
+  /* 팝업 모달 추가 스타일 */
   .result-overlay { 
     position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); 
     backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; 
@@ -151,7 +151,8 @@
       <button class="mode-btn print-shop" onclick="openPrintShop()"><span style="font-size:1.3rem; margin-right:5px;">🖨️</span>학습지 인쇄소</button>
     </div>
   </div>
-  <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
+  
+  <button class="big-btn back-btn" onclick="location.href='../index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
 <div class="screen" id="screen-quiz">
@@ -220,7 +221,6 @@
   </div>
 </div>
 
-<!-- 소원권 달성 특별 팝업 모달 -->
 <div class="result-overlay" id="wishTicketOverlay" onclick="closeWishTicket()">
   <div class="result-modal" style="border: 4px solid var(--yellow); box-shadow: 0 0 30px rgba(255, 217, 61, 0.6);" onclick="event.stopPropagation()">
     <div style="font-size: 4.5rem; animation: bounceObj 1s infinite;">🎫</div>
@@ -231,11 +231,12 @@
     <div style="background: rgba(167, 139, 250, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--purple); font-size: 1.3rem; margin-bottom: 24px;">
       총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개
     </div>
-    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px; border: none; border-radius: 16px; cursor: pointer;">신난다! 닫기</button>
+    <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px;">신난다! 닫기</button>
   </div>
 </div>
 
 <script>
+// ⚙️ 단일 백엔드 프록시 인프라 주소 유지 (보안 통신용)
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
@@ -270,6 +271,7 @@ function initProfileFromMainMenu() {
   updateProfileUI(); loadWrongWords();
 }
 
+// 🌐 보안 워커(Proxy)를 경유하여 노션 단어장 로드
 async function loadNotionWords() {
     const dbId = "373a27115b6880ba82cdfeaa1c825547";
     try {
@@ -282,6 +284,8 @@ async function loadNotionWords() {
             const response = await fetch(`${PROXY_URL}/v1/databases/${dbId}/query`, {
                 method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyData)
             });
+            if (!response.ok) throw new Error("서버 연동 실패");
+            
             const data = await response.json();
             allResults = allResults.concat(data.results); hasMore = data.has_more; nextCursor = data.next_cursor; 
         }
@@ -316,7 +320,10 @@ async function loadNotionWords() {
         document.getElementById('loadingBadge').style.background = "#6BCB77";
         setTimeout(() => document.getElementById('loadingBadge').style.display = 'none', 1500);
     } catch(e) {
-        document.getElementById('loadingBadge').textContent = "❌ 로딩 실패. 새로고침 해주세요.";
+        // 🛠️ 에러 발생 시 사용자 친화적인 안내 메시지 추가
+        console.error("Notion API 연동 에러:", e);
+        document.getElementById('loadingBadge').textContent = "❌ 서버 연동 실패 (통신/프록시 확인)";
+        document.getElementById('loadingBadge').style.background = "#FF6B6B";
     }
 }
 
@@ -357,52 +364,8 @@ function loadWrongWords() {
 function saveWrongWord(w) { if(quizState.isWrongMode) return; if(!wrongWords.some(item => item.eng === w.eng)) { wrongWords.push(w); localStorage.setItem(getStorageKey(), JSON.stringify(wrongWords)); } }
 function removeWrongWord(w) { if(!quizState.isWrongMode) return; wrongWords = wrongWords.filter(item => item.eng !== w.eng); localStorage.setItem(getStorageKey(), JSON.stringify(wrongWords)); }
 
-// ==========================================
-// 🚀 완벽한 영어 TTS (en-US 강제 & GC 방어)
-// ==========================================
-window.currentUtterance = null;
-let bestEnglishVoice = null;
-
-function initEnglishVoice() {
-  if (!window.speechSynthesis) return;
-  const voices = window.speechSynthesis.getVoices();
-  
-  bestEnglishVoice = voices.find(v => 
-    (v.lang === 'en-US' || v.lang === 'en_US' || v.lang === 'en-GB') && 
-    (v.name.includes('Google') || v.name.includes('SAMSUNG') || v.name.includes('English') || v.name.includes('Samantha'))
-  );
-  
-  if (!bestEnglishVoice) {
-    bestEnglishVoice = voices.find(v => v.lang.startsWith('en'));
-  }
-}
-
-if (window.speechSynthesis && speechSynthesis.onvoiceschanged !== undefined) { 
-  speechSynthesis.onvoiceschanged = initEnglishVoice; 
-}
-
-function speakWord(text) { 
-  if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel(); 
-  
-  const u = new SpeechSynthesisUtterance(text); 
-  window.currentUtterance = u; 
-  u.lang = 'en-US'; 
-  u.rate = 0.85; 
-  u.pitch = 1.0; 
-  
-  if (!bestEnglishVoice) initEnglishVoice();
-  if (bestEnglishVoice) u.voice = bestEnglishVoice; 
-  
-  u.onend = function() { window.currentUtterance = null; };
-  window.speechSynthesis.speak(u); 
-}
-
-function speakCurrentWord() { 
-  const q = quizState.pool[quizState.current]; 
-  if(q) speakWord(q.eng); 
-}
-// ==========================================
+function speakWord(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.85; window.speechSynthesis.speak(u); } }
+function speakCurrentWord() { const q = quizState.pool[quizState.current]; if(q) speakWord(q.eng); }
 
 function getSelectedWordsPool() {
   const activeBooks = [...document.querySelectorAll('.book-cb:checked')].map(cb => parseInt(cb.value)); let pool = []; const targetPersonName = currentProfile === 'son' ? '민수' : '민서';
@@ -466,18 +429,24 @@ function showQuizResult() {
   if (correctCount > 0) saveRewardToNotion(correctCount);
 }
 
-// 🚀 다이내믹 레벨업 계산 엔진
+function closeWishTicket() {
+  document.getElementById('wishTicketOverlay').classList.remove('active');
+}
+
 function calculateLevelInfo(totalRewards) {
   let level = 1;
   let requiredForNext = 20; 
   let accumulatedForCurrentLevel = 0; 
+
   while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
     accumulatedForCurrentLevel += requiredForNext;
     level++;
     requiredForNext = 20 + (level - 1) * 5; 
   }
+
   let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
   let remainingForNext = requiredForNext - currentLevelProgress; 
+
   return {
     level: level,
     requiredForNext: requiredForNext,
@@ -489,6 +458,7 @@ function calculateLevelInfo(totalRewards) {
 async function saveRewardToNotion(earned) {
   const userName = currentProfile === 'son' ? '민수' : '민서'; 
   if (userName === '아빠' || userName === '엄마') return;
+
   const detailEl = document.getElementById('r-detail'); 
   const originalText = detailEl.innerHTML;
   detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#a78bfa; font-weight:bold;">⏳ 영어방 보상(${earned}개) 저금통에 저금 중...</span>`;
@@ -498,6 +468,8 @@ async function saveRewardToNotion(earned) {
       method: "POST", headers: { "Content-Type": "application/json" }, 
       body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
     });
+    if (!response.ok) throw new Error("데이터 조회 실패");
+    
     const data = await response.json(); 
     if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
 
@@ -544,9 +516,9 @@ async function saveRewardToNotion(earned) {
     document.getElementById('notion-loading-msg').style.display = 'none';
     
     detailEl.innerHTML = originalText + `
-      <div style="background:rgba(255,255,255,0.8); border:2px dashed #A78BFA; padding:16px; border-radius:12px; margin-top:10px; text-align: left;">
+      <div style="background:#fff; border:2px dashed var(--purple); padding:16px; border-radius:12px; margin:15px 0; text-align: left;">
         <div style="font-size: 1.15rem; margin-bottom: 8px;">
-          <b style="color:#A78BFA;">${rewardName} x ${currentTotal}</b>
+          <b style="color:var(--purple);">${rewardName} x ${currentTotal}</b>
         </div>
         <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
           다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b>${currLevelInfo.remainingForNext}</b>개 남음!
@@ -563,7 +535,9 @@ async function saveRewardToNotion(earned) {
     }
 
   } catch (err) {
-    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패`;
+    console.error(err);
+    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패 (프록시 확인 필요)`;
+    document.getElementById('notion-loading-msg').style.color = "#FF6B6B";
   }
 }
 
@@ -593,10 +567,6 @@ function executePrint() {
   html += `</tbody></table><div class="print-ans-sheet"><strong>🔑 [정답 해설지]</strong><br><table style="width:100%; font-size:10pt; line-height:1.8;"><tr>`;
   selectedWords.forEach((w, i) => { html += `<td style="width:25%;">${i+1}번: <b>${w.eng}</b></td>`; if((i+1)%4 === 0) html += '</tr><tr>'; });
   printArea.innerHTML = html + `</tr></table></div>`; printArea.style.display = 'block'; window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 1000);
-}
-
-function closeWishTicket() {
-  document.getElementById('wishTicketOverlay').classList.remove('active');
 }
 </script>
 </body>
