@@ -169,6 +169,20 @@
         <textarea id="user-input" placeholder="문장을 입력하세요..."></textarea>
         <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
     </div>
+    <div class="input-area">
+        <textarea id="user-input" placeholder="문장을 입력하세요..."></textarea>
+        <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
+    </div>
+    
+    <button class="back-btn" onclick="location.href='../index.html'" style="width: 100%; margin-top: 20px; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #21262d; color: #8b949e; font-family: 'Malgun Gothic', sans-serif; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+        🚪 공부방 대문으로 돌아가기
+    </button>
+</div> ```
+
+그리고 이 버튼이 마우스나 손가락이 올라갔을 때 살짝 밝아지도록, <head> 태그 안의 `<style>` 맨 밑에 아래 효과도 한 줄만 같이 적어주시면 완벽합니다.
+
+```css
+    button.back-btn:hover { background-color: #30363d !important; color: #ffffff !important; }
 </div>
 
 <script>
