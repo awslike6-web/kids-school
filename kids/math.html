@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민이네 수학방 🌟</title>
+<title>민민이네 수학방 🌟 - 세로셈 전문 모드</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -43,13 +43,28 @@
   .times-label { font-size: 1.15rem; height: 46px; flex-direction: row; }
   .btn-label:hover { border-color: var(--sky); transform: scale(1.04); }
   
-  input[type="checkbox"]:checked + .times-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.07); }
+  input[type="checkbox"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.07); }
   input[name="opMode"]:checked + .btn-label { background: var(--mint); border-color: var(--mint); color: #fff; transform: scale(1.06); }
   input[name="levelMode"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.06); }
   input[name="digitMode"]:checked + .btn-label, input[name="printCol"]:checked + .btn-label, input[name="lowDigitMode"]:checked + .btn-label { background: var(--purple); border-color: var(--purple); color:#fff; transform: scale(1.06); }
 
+  /* 객관식 공 떨어지기 속도 선택 스위치 스타일 */
+  #speed-turtle:checked + .btn-label { background: var(--green); border-color: var(--green); color:#fff; transform: scale(1.06); }
+  #speed-rabbit:checked + .btn-label { background: var(--orange); border-color: var(--orange); color:#fff; transform: scale(1.06); }
+
+  /* 토글 스위치 스타일 */
+  .switch-container { display: flex; align-items: center; justify-content: space-between; background: #f9f9f9; padding: 12px 16px; border-radius: 16px; border: 2px solid #eee; margin-top: 8px; cursor: pointer; }
+  .switch-label { font-size: 1rem; color: var(--dark); }
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: var(--pink); }
+  input:checked + .slider:before { transform: translateX(20px); }
+
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .mode-btn { padding: 16px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #fff; transition: transform .18s; }
+  .mode-btn.falling { background: linear-gradient(135deg, var(--orange), var(--pink)); }
   .mode-btn.typing { background: linear-gradient(135deg, var(--purple), var(--sky)); }
   .mode-btn.vertical { grid-column: span 2; background: linear-gradient(135deg, #4ECDC4, #6BCB77); font-size: 1.1rem; padding: 18px; }
   .mode-btn.wrong-note { background: linear-gradient(135deg, var(--dark), #5a5a8a); font-size: 1rem; padding: 18px; }
@@ -60,18 +75,51 @@
   .big-btn.back-btn { background: #eee; color: #888; }
   .user-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(0,0,0,0.05); font-size: 0.95rem; margin-bottom: 20px; color: var(--dark); border: 2px solid rgba(0,0,0,0.1); }
 
-  .visual-block-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 12px auto; padding: 12px; width: 100%; max-width: 440px; background: rgba(255,255,255,0.7); border-radius: 16px; border: 1.5px dashed rgba(0,0,0,0.15); min-height: 40px; }
-  .cnt-block { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #fff; font-weight: bold; position: relative; animation: popBlock 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+  /* 세로셈 보드 스타일 개선 */
+  .v-board-container { width: 100%; max-width: 460px; display: flex; justify-content: center; margin-bottom: 20px; }
+  .v-board { background: #fff; padding: 20px 30px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.4rem; color: var(--dark); min-width: 220px; position: relative; }
   
-  .theme-mine .cnt-block { border-radius: 4px; box-shadow: inset -2px -2px 0 rgba(0,0,0,0.2), inset 2px 2px 0 rgba(255,255,255,0.5); }
-  .theme-mine .cnt-block.first { background: #03A9F4; border: 1px solid #01579B; }
-  .theme-mine .cnt-block.second { background: #FBC02D; border: 1px solid #F57F17; }
+  .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 10px; margin-bottom: 8px; height: 32px; padding-right: 5px; }
+  .v-row { display: flex; width: 100%; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 4px; letter-spacing: 4px; position: relative; }
+  .v-line { width: 100%; height: 4px; background: var(--dark); margin: 8px 0; border-radius: 2px; }
+  .v-symbol { position: absolute; left: 0; color: var(--pink); font-size: 2rem; }
   
-  .theme-sli .cnt-block { border-radius: 50%; box-shadow: inset -2px -2px 6px rgba(0,0,0,0.15), 1px 2px 4px rgba(0,0,0,0.1); }
-  .theme-sli .cnt-block.first { background: linear-gradient(135deg, #FF8E9E, #FF5376); }
-  .theme-sli .cnt-block.second { background: linear-gradient(135deg, #81C784, #388E3C); }
-  .cnt-block.subtracted { opacity: 0.3; filter: grayscale(80%); }
-  .cnt-block.subtracted::before { content: '❌'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #D32F2F; text-shadow: 1px 1px 0 #fff; z-index: 2; }
+  .v-input { text-align: right; font-family: 'Jua', sans-serif; font-size: 2rem; padding: 4px 12px; border: 3px solid #e0e0e0; border-radius: 12px; outline: none; width: 100%; max-width: 180px; }
+  .v-input.correct { border-color: var(--green); background: #f0fff4; }
+  .v-input.wrong { border-color: var(--pink); background: #fff5f5; }
+  .v-input.tiny { font-size: 1rem; width: 36px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; outline: none; background: #fffceb; }
+  
+  /* 나눗셈 세로셈 스타일 */
+  .div-board { background: #fff; padding: 25px; border-radius: 24px; border: 4px solid var(--sky); display: flex; flex-direction: column; align-items: center; min-width: 260px; }
+  .div-top-row { display: flex; justify-content: flex-end; width: 100%; margin-bottom: 5px; padding-right: 10px; }
+  .div-main-row { display: flex; align-items: center; width: 100%; justify-content: center; font-size: 2.4rem; }
+  .div-divisor { color: var(--pink); margin-right: 5px; }
+  .div-bracket { font-size: 3rem; margin-top: -5px; }
+  .div-dividend { border-top: 4px solid var(--dark); padding-top: 5px; padding-left: 10px; letter-spacing: 6px; }
+  .div-result-area { margin-top: 20px; width: 100%; display: flex; flex-direction: column; gap: 10px; }
+  .div-input-group { display: flex; align-items: center; justify-content: space-between; background: #f0f9ff; padding: 10px 15px; border-radius: 15px; }
+  .div-input-label { font-size: 1.2rem; color: var(--sky); }
+  .div-input { width: 100px; font-size: 1.8rem; text-align: center; border: 3px solid #e0e0e0; border-radius: 12px; font-family: 'Jua', sans-serif; }
+  .div-input.correct { border-color: var(--green); background: #f0fff4; }
+  .div-input.wrong { border-color: var(--pink); background: #fff5f5; }
+
+  /* 객관식 떨어지는 모드 전용 UI CSS */
+  #screen-falling { background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #1a1a3e 100%); color: #fff; }
+  .f-header-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px 14px; font-size: 0.95rem; }
+  .falling-question-box { background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.25); border-radius: 22px; padding: 16px 28px; font-size: 2.2rem; font-weight: 700; text-align: center; margin-bottom: 10px; letter-spacing: 2px; width: 100%; max-width: 460px; }
+  .falling-arena { position: relative; width: 100%; max-width: 460px; height: 50vh; border-radius: 20px; overflow: hidden; background: rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.1); }
+  .fall-ball { position: absolute; width: 66px; height: 66px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 700; cursor: pointer; user-select: none; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  @keyframes falling { 0% { top: -80px; } 100% { top: 100%; } }
+
+  /* 모바일 대응 */
+  @media (max-width: 400px) {
+    .v-board { font-size: 1.8rem; padding: 15px 20px; }
+    .v-input { font-size: 1.6rem; }
+    .div-main-row { font-size: 1.8rem; }
+    .div-input { width: 80px; font-size: 1.5rem; }
+    .v-memo-row { height: 28px; }
+    .v-input.tiny { width: 30px; height: 28px; font-size: 0.9rem; }
+  }
 
   .game-header { width: 100%; max-width: 460px; display: flex; justify-content: space-between; margin-bottom: 16px; }
   .game-stat-box { background: #fff; border-radius: 14px; padding: 8px 16px; font-size: 0.95rem; box-shadow: 0 2px 10px rgba(0,0,0,0.07); color: var(--dark); font-weight: bold;}
@@ -83,43 +131,18 @@
   .answer-input.correct { border-color: var(--green); background: #f0fff4; }
   .answer-input.wrong { border-color: var(--pink); background: #fff5f5; }
   .submit-btn { padding: 16px 24px; border-radius: 18px; border: none; background: linear-gradient(135deg, var(--purple), var(--sky)); color: #fff; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; }
-  .feedback-msg { font-size: 1.2rem; height: 1.6rem; text-align: center; font-weight: bold; }
-
-  .v-board-container { width: 100%; max-width: 460px; display: flex; justify-content: center; margin-bottom: 20px; }
-  .v-board { background: #fff; padding: 24px 36px; border-radius: 24px; border: 4px solid var(--mint); box-shadow: 0 12px 30px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.6rem; color: var(--dark); }
-  .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 12px; margin-bottom: 2px; height: 32px; }
-  .v-row { display: flex; width: 100%; justify-content: flex-end; align-items: center; gap: 15px; margin-bottom: 4px; letter-spacing: 4px; }
-  .v-line { width: 100%; height: 4px; background: var(--dark); margin: 10px 0; border-radius: 2px; }
-  .v-symbol { margin-right: auto; color: var(--pink); font-size: 2.2rem; }
-  .div-board { background: #fff; padding: 30px 40px; border-radius: 24px; border: 4px solid var(--sky); display: flex; flex-direction: column; align-items: center; font-size: 2.6rem; }
-  .div-top { display: flex; justify-content: center; width: 100%; padding-bottom: 8px; border-bottom: 4px solid var(--dark); margin-bottom: 12px; margin-left: 35px; width: calc(100% - 35px); }
-  .div-bottom { display: flex; align-items: center; width: 100%; justify-content: center; }
-  .div-bracket { font-weight: 300; margin: 0 15px; font-size: 3rem; color: #555; }
-  .v-input { text-align: right; font-family: 'Jua', sans-serif; font-size: 2rem; padding: 4px 12px; border: 3px solid #e0e0e0; border-radius: 12px; outline: none; width: 150px; }
-  .v-input.correct { border-color: var(--green); background: #f0fff4; }
-  .v-input.wrong { border-color: var(--pink); background: #fff5f5; }
-  .v-input.tiny { font-size: 1.05rem; width: 50px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; outline: none; }
+  .feedback-msg { font-size: 1.2rem; height: 1.6rem; text-align: center; font-weight: bold; margin-bottom: 10px; }
 
   .result-card { background: var(--card); border-radius: 30px; padding: 40px 32px; width: 100%; max-width: 460px; text-align: center; box-shadow: 0 16px 50px rgba(0,0,0,0.12); }
   .result-emoji { font-size: 4rem; margin-bottom: 10px; }
   .result-score { font-size: 3.5rem; color: var(--pink); margin-bottom: 8px; }
 
   /* 팝업 모달 추가 스타일 */
-  .result-overlay { 
-    position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); 
-    backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; 
-    z-index: 100; opacity: 0; transition: opacity 0.3s; 
-  }
+  .result-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
   .result-overlay.active { display: flex; opacity: 1; }
-  .result-modal { 
-    background: #fff; width: 90%; max-width: 360px; border-radius: 30px; 
-    padding: 40px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
-  }
+  .result-modal { background: #fff; width: 90%; max-width: 360px; border-radius: 30px; padding: 40px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 
-  @keyframes bounceObj {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-  }
+  @keyframes bounceObj { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 </style>
 </head>
 <body>
@@ -130,10 +153,9 @@
   <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
   <h1 class="main-title">🌟 민민이네 <span>수학방</span></h1>
   <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
-  <button class="big-btn yellow-btn" onclick="location.href='gugudan.html'" style="margin-bottom: 20px;">
+<button class="big-btn yellow-btn" onclick="location.href='gugudan.html'" style="margin-bottom: 20px;">
     🚀 구구단 탐험대로 이동하기
   </button>
-  
   <div class="card">
     <div class="card-title">🔢 연산 모드 선택</div>
     <div class="grid-5">
@@ -150,6 +172,42 @@
     </div>
   </div>
 
+  <div class="card" id="card-difficulty">
+    <div class="card-title">⚙️ 난이도 설정</div>
+    
+    <label class="switch-container" id="toggle-add" style="display:none;">
+      <span class="switch-label">덧셈: 받아올림 포함</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="add" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-container" id="toggle-sub" style="display:none;">
+      <span class="switch-label">뺄셈: 받아내림 포함</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="sub" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-container" id="toggle-mul" style="display:none;">
+      <span class="switch-label">곱셈: 받아올림 포함</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="mul" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-container" id="toggle-div" style="display:none;">
+      <span class="switch-label">나눗셈: 나머지 있음</span>
+      <div class="switch">
+        <input type="checkbox" class="difficulty-toggle" data-op="div" checked>
+        <span class="slider"></span>
+      </div>
+    </label>
+  </div>
+
   <div class="card" id="card-level-select">
     <div class="card-title">📈 곱셈/나눗셈 난이도</div>
     <div class="grid-2">
@@ -162,7 +220,7 @@
 
   <div class="card" id="card-times">
     <div class="card-title">📚 구구단 선택</div>
-    <div style="display: flex; gap: 8px; margin-bottom: 10px;"><button class="tiny-btn" onclick="selectAll(true)">전체 선택</button><button class="tiny-btn" onclick="selectAll(false)">전체 해제</button></div>
+    <div style="display: flex; gap: 8px; margin-bottom: 10px;"><button class="btn-label" style="padding:4px 8px; font-size:0.8rem;" onclick="selectAll(true)">전체 선택</button><button class="btn-label" style="padding:4px 8px; font-size:0.8rem;" onclick="selectAll(false)">전체 해제</button></div>
     <div class="grid-4" id="timesGrid"></div>
   </div>
 
@@ -180,11 +238,21 @@
     </div>
   </div>
 
+  <div class="card" id="card-speed">
+    <div class="card-title">⏱️ 떨어지는 속도 (객관식 모드용)</div>
+    <div class="grid-2">
+      <input type="radio" name="speedMode" id="speed-turtle" value="turtle" checked>
+      <label for="speed-turtle" class="btn-label"><span style="font-size:1.4rem;">🐢</span>거북이 모드</label>
+      <input type="radio" name="speedMode" id="speed-rabbit" value="rabbit">
+      <label for="speed-rabbit" class="btn-label"><span style="font-size:1.4rem;">🐇</span>토끼 모드</label>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">🎮 게임 시작하기</div>
-    <p class="no-select-warning" id="warnMsg"></p>
     <div class="mode-grid">
-      <button class="mode-btn typing" onclick="startGame('typing')" style="grid-column: span 2; padding:18px; font-size:1.1rem; background:linear-gradient(135deg, var(--purple), var(--sky));">⌨️ 주관식 실력 테스트</button>
+      <button class="mode-btn falling" onclick="startGame('falling')" style="grid-column: span 2; padding:18px; font-size:1.1rem;">☄️ 객관식: 떨어지는 공 잡기</button>
+      <button class="mode-btn typing" onclick="startGame('typing')" style="grid-column: span 2; padding:18px; font-size:1.1rem;">⌨️ 주관식 실력 테스트</button>
       <button class="mode-btn vertical" onclick="startGame('vertical')">📝 세로셈 필기 모드</button>
       <button class="mode-btn wrong-note" onclick="startWrongNote()">🖍️ 오답 풀기 (<span id="wrongCountBadge">0</span>)</button>
     </div>
@@ -192,16 +260,36 @@
   <button class="big-btn back-btn" onclick="location.href='../index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
-<div class="screen" id="screen-typing">
-  <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div></div>
-  <div class="typing-question-card">
-    <div class="q-text" id="t-question">? × ? = ?</div>
-    <div class="visual-block-container" id="t-visual-area" style="display:none;"></div>
+<div class="screen" id="screen-falling">
+  <div style="width:100%; max-width:460px; display:flex; justify-content:space-between; margin-bottom:10px;">
+    <div class="f-header-box">⭐ 점수: <span class="shared-score-display">0</span></div>
+    <div class="f-header-box">📝 문제: <span id="f-qnum">1</span></div>
+    <div class="f-header-box">❤️ 목숨: <span id="f-lives">3</span></div>
   </div>
-  <div class="answer-input-wrap"><input type="number" class="answer-input" id="answerInput" autocomplete="off"><button class="submit-btn" onclick="submitTyping()">확인✔</button></div>
-  <div class="feedback-msg" id="t-feedbackMsg"></div><button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
+  <div class="falling-question-box" id="f-question">? × ? = ?</div>
+  <div class="falling-arena" id="fallingArena"></div>
+  <div style="width:100%; max-width:460px; height:10px; background:rgba(255,255,255,0.15); border-radius:10px; margin-top:10px; overflow:hidden;">
+    <div id="timerBar" style="height:100%; width:100%;"></div>
+  </div>
+  <button class="big-btn back-btn" style="max-width:460px;margin-top:20px" onclick="goSetup()">← 나가기</button>
 </div>
 
+<div class="screen" id="screen-typing">
+  <div class="game-header">
+    <div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div>
+    <div class="game-stat-box">📝 문제: <span id="t-qnum">1</span></div>
+  </div>
+  <div class="typing-question-card">
+    <div class="q-text" id="t-question">? × ? = ?</div>
+  </div>
+  <div class="answer-input-wrap">
+    <input type="number" class="answer-input" id="answerInput" placeholder="정답" autocomplete="off">
+    <input type="number" class="answer-input" id="remInput" placeholder="나머지" autocomplete="off" style="display:none; max-width: 100px;">
+    <button class="submit-btn" onclick="submitTyping()">확인✔</button>
+  </div>
+  <div class="feedback-msg" id="t-feedbackMsg"></div>
+  <button class="big-btn back-btn" onclick="goSetup()">← 나가기</button>
+</div>
 <div class="screen" id="screen-vertical">
   <div class="game-header"><div class="game-stat-box">⭐ 점수: <span class="shared-score-display">0</span></div><div class="game-stat-box">📝 문제: <span id="v-qnum">1</span></div></div>
   <div class="v-board-container" id="vertical-container"></div>
@@ -232,43 +320,73 @@
 </div>
 
 <script>
-// ⚙️ 단일 워커 프록시 통신망
+// 객관식 떨어지는 모드 전역 변수
+let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
+
+// 🚀 노션 API 설정
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
-let currentProfile = 'son'; let currentTheme = '마인크래프트';
-let wrongNotes = []; let gameState = {};
+let currentProfile = 'son'; 
+let currentTheme = '마인크래프트';
+let wrongNotes = []; 
+let gameState = {};
+
+// [개편] 난이도 토글 설정 저장소
+let difficultySettings = {
+  add: true,    // 덧셈: 받아올림 포함
+  sub: true,    // 뺄셈: 받아내림 포함
+  mul: true,    // 곱셈: 받아올림 포함
+  div: true     // 나눗셈: 나머지 있음
+};
 
 function toggleProfileManually() {
   if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
   else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
-  localStorage.setItem('currentUser', currentProfile); localStorage.setItem('currentTheme', currentTheme);
+  localStorage.setItem('currentUser', currentProfile); 
+  localStorage.setItem('currentTheme', currentTheme);
   initProfile();
 }
 
 function initProfile() {
   const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
   const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
-
-  const themeClass = currentTheme === '슬라임' ? 'theme-sli' : 'theme-mine';
-  document.getElementById('t-visual-area').className = `visual-block-container ${themeClass}`;
-
+  const themeClass = currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
+  document.body.className = themeClass;
   const userName = currentProfile === 'son' ? '민수' : '민서';
   document.getElementById('currentUserBadge').innerHTML = `현재 사용자: ${currentProfile === 'son' ? '👦' : '👧'} ${userName} (${currentTheme} 모드)`;
-  
-  loadProfileData(); updateVisibleCards();
+  loadProfileData(); 
+  updateVisibleCards();
 }
 
-document.addEventListener('DOMContentLoaded', initProfile);
+document.addEventListener('DOMContentLoaded', function() {
+  initProfile();
+  // 난이도 토글 이벤트 리스너 등록
+  document.querySelectorAll('.difficulty-toggle').forEach(toggle => {
+    toggle.addEventListener('change', function() {
+      const op = this.dataset.op;
+      difficultySettings[op] = this.checked;
+    });
+  });
+});
 
 function updateVisibleCards() {
   const op = document.querySelector('input[name="opMode"]:checked').value;
-  const isAddSub = (op === 'add' || op === 'sub' || (op === 'mix' && currentProfile === 'daughter'));
-  document.getElementById('card-level-select').style.display = isAddSub ? 'none' : 'block';
-  document.getElementById('card-low-level').style.display = isAddSub ? 'block' : 'none';
+  const isAddSub = (op === 'add' || op === 'sub');
+  const isMix = (op === 'mix');
+  
+  // [개편] 난이도 토글 표시 업데이트
+  document.getElementById('toggle-add').style.display = (op === 'add' || isMix) ? 'block' : 'none';
+  document.getElementById('toggle-sub').style.display = (op === 'sub' || isMix) ? 'block' : 'none';
+  document.getElementById('toggle-mul').style.display = (op === 'mul' || isMix) ? 'block' : 'none';
+  document.getElementById('toggle-div').style.display = (op === 'div' || isMix) ? 'block' : 'none';
+  
+  document.getElementById('card-level-select').style.display = (isAddSub || isMix) ? 'none' : 'block';
+  document.getElementById('card-low-level').style.display = (isAddSub || (isMix && currentProfile === 'daughter')) ? 'block' : 'none';
+  
   const lvl = document.querySelector('input[name="levelMode"]:checked').value;
-  document.getElementById('card-times').style.display = (!isAddSub && lvl === '1') ? 'block' : 'none';
-  document.getElementById('card-high-level').style.display = (!isAddSub && lvl === '2' && op === 'mul') ? 'block' : 'none';
+  document.getElementById('card-times').style.display = (!isAddSub && !isMix && lvl === '1') ? 'block' : 'none';
+  document.getElementById('card-high-level').style.display = (!isAddSub && !isMix && lvl === '2' && op === 'mul') ? 'block' : 'none';
 }
 
 function loadProfileData() {
@@ -276,69 +394,191 @@ function loadProfileData() {
   document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
 }
 
+/**
+ * [개편] 난수 생성 함수: 사칙연산별 세분화된 로직
+ */
 function generateQuestion() {
   let op = document.querySelector('input[name="opMode"]:checked').value;
+  
   if(op === 'mix') op = ['add', 'sub', 'mul', 'div'][Math.floor(Math.random() * 4)];
-  if (op === 'add' || op === 'sub') {
+  
+  // ========== 덧셈 ==========
+  if (op === 'add') {
     const digit = document.querySelector('input[name="lowDigitMode"]:checked').value;
-    let a=0, b=0, ans=0, sign = op==='add'?'＋':'－';
-    if (op === 'add') {
-      if (digit === '11') { a = Math.floor(Math.random()*8)+1; b = Math.floor(Math.random()*8)+1; }
-      else if (digit === '21') { a = Math.floor(Math.random()*80)+11; b = Math.floor(Math.random()*8)+1; }
-      else { a = Math.floor(Math.random()*80)+10; b = Math.floor(Math.random()*80)+10; }
+    const forceCarry = difficultySettings.add;
+    let a = 0, b = 0, ans = 0;
+    
+    let attempts = 0;
+    while(attempts < 100) {
+      if (digit === '11') { 
+        a = Math.floor(Math.random()*8)+1; 
+        b = Math.floor(Math.random()*8)+1; 
+      }
+      else if (digit === '21') { 
+        a = Math.floor(Math.random()*80)+11; 
+        b = Math.floor(Math.random()*8)+1; 
+      }
+      else { 
+        a = Math.floor(Math.random()*80)+10; 
+        b = Math.floor(Math.random()*80)+10; 
+      }
       ans = a + b;
-    } else {
-      if (digit === '11') { a = Math.floor(Math.random()*8)+2; b = Math.floor(Math.random()*(a-1))+1; }
-      else if (digit === '21') { a = Math.floor(Math.random()*80)+11; b = Math.floor(Math.random()*8)+1; }
-      else { a = Math.floor(Math.random()*80)+20; b = Math.floor(Math.random()*(a-10))+10; }
-      ans = a - b;
+      
+      if (!forceCarry) {
+        // 받아올림 없음: 일의 자리 합이 10 미만
+        if ((a % 10) + (b % 10) < 10) break;
+      } else {
+        // 받아올림 있음: 일의 자리 합이 10 이상
+        if ((a % 10) + (b % 10) >= 10) break;
+      }
+      attempts++;
     }
-    return { text: `${a} ${sign} ${b}`, answer: ans, opType: op, numA: a, numB: b };
-  } else {
+    return { text: `${a} ＋ ${b}`, answer: ans, opType: 'add', numA: a, numB: b };
+  }
+  
+  // ========== 뺄셈 ==========
+  else if (op === 'sub') {
+    const digit = document.querySelector('input[name="lowDigitMode"]:checked').value;
+    const forceBarrow = difficultySettings.sub;
+    let a = 0, b = 0, ans = 0;
+    
+    let attempts = 0;
+    while(attempts < 100) {
+      if (digit === '11') { 
+        a = Math.floor(Math.random()*8)+2; 
+        b = Math.floor(Math.random()*(a-1))+1; 
+      }
+      else if (digit === '21') { 
+        a = Math.floor(Math.random()*80)+11; 
+        b = Math.floor(Math.random()*8)+1; 
+      }
+      else { 
+        a = Math.floor(Math.random()*80)+20; 
+        b = Math.floor(Math.random()*(a-10))+10; 
+      }
+      ans = a - b;
+      
+      if (digit === '11') {
+        break; // 1자리 모드면 받아내림 검사 없이 무조건 통과!
+      } else if (!forceBarrow) {
+        if ((a % 10) >= (b % 10)) break;
+      } else {
+        if ((a % 10) < (b % 10)) break;
+      }
+
+      attempts++;
+    }
+    return { text: `${a} － ${b}`, answer: ans, opType: 'sub', numA: a, numB: b };
+  }
+  
+  // ========== 곱셈 & 나눗셈 ==========
+  else {
     const lvl = document.querySelector('input[name="levelMode"]:checked').value;
+    
     if(lvl === '1') {
+      // 1단계: 구구단
       const dans = [...document.querySelectorAll('.times-cb:checked')].map(cb=>+cb.value);
       const dan = dans.length > 0 ? dans[Math.floor(Math.random()*dans.length)] : 2;
       const n = 1 + Math.floor(Math.random()*9);
-      return op === 'mul' ? { text: `${dan} × ${n}`, answer: dan*n, opType: 'mul' } : { text: `${dan*n} ÷ ${dan}`, answer: n, opType: 'div' };
-    } else {
-      let a = 10 + Math.floor(Math.random() * 80);
-      let b = document.getElementById('digit-22')?.checked ? (10 + Math.floor(Math.random() * 80)) : (2 + Math.floor(Math.random() * 8));
-      return { text: `${a} × ${b}`, answer: a*b, opType: 'mul' };
-    }
-  }
-}
-
-function drawVisualBlocks(q, targetAreaId) {
-  const area = document.getElementById(targetAreaId); if (!area) return; area.innerHTML = '';
-  if (q.opType !== 'add' && q.opType !== 'sub' || q.numA > 20 || q.numB > 20) { area.style.display = 'none'; return; }
-  area.style.display = 'flex';
-  if (q.opType === 'add') {
-    for(let i=0; i<q.numA; i++) { let b=document.createElement('div'); b.className='cnt-block first'; b.innerText=i+1; area.appendChild(b); }
-    for(let i=0; i<q.numB; i++) { let b=document.createElement('div'); b.className='cnt-block second'; b.innerText=i+1; area.appendChild(b); }
-  } else {
-    for(let i=1; i<=q.numA; i++) {
-      let b=document.createElement('div'); b.className='cnt-block first'; if (i > (q.numA - q.numB)) b.classList.add('subtracted'); else b.innerText = i; area.appendChild(b);
+      
+      if (op === 'mul') {
+        return { text: `${dan} × ${n}`, answer: dan*n, opType: 'mul', numA: dan, numB: n };
+      } else {
+        // 나눗셈 1단계: 나머지 설정에 따라
+        const allowRemainder = difficultySettings.div;
+        let dividend = dan * n;
+        let remainder = 0;
+        
+        if (allowRemainder && Math.random() > 0.5) {
+          remainder = Math.floor(Math.random() * dan);
+          dividend += remainder;
+        }
+        
+        return { text: `${dividend} ÷ ${dan}`, answer: n, opType: 'div', numA: dividend, numB: dan, rem: remainder };
+      }
+    } 
+    
+    else {
+      // 2단계: 두 자릿수 이상
+      if (op === 'mul') {
+        const forceCarry = difficultySettings.mul;
+        const is2x2 = document.getElementById('digit-22')?.checked;
+        
+        let a = 10 + Math.floor(Math.random() * 80);
+        let b = is2x2 ? (10 + Math.floor(Math.random() * 80)) : (2 + Math.floor(Math.random() * 8));
+        
+        if (!forceCarry) {
+          // 받아올림 없음: 각 자릿수 곱이 10 미만인지 확실하게 검사
+          while (true) {
+            a = 10 + Math.floor(Math.random() * 90); // 10~99
+            b = is2x2 ? (10 + Math.floor(Math.random() * 90)) : (2 + Math.floor(Math.random() * 8));
+            
+            if (is2x2) {
+              // 2자리 × 2자리 받아올림 없음 조건
+              const a_tens = Math.floor(a / 10), a_units = a % 10;
+              const b_tens = Math.floor(b / 10), b_units = b % 10;
+              if (a_units * b_units < 10 && (a_tens * b_units + a_units * b_tens) < 10 && a_tens * b_tens < 10) {
+                break;
+              }
+            } else {
+              // 2자리 × 1자리 받아올림 없음 조건
+              const tens = Math.floor(a / 10);
+              const units = a % 10;
+              if (tens * b < 10 && units * b < 10) {
+                break;
+              }
+            }
+          }
+        }
+        
+        return { text: `${a} × ${b}`, answer: a*b, opType: 'mul', numA: a, numB: b };
+      } else {
+        // 나눗셈 2단계: 두 자릿수 ÷ 한 자릿수
+        const allowRemainder = difficultySettings.div;
+        let b = 2 + Math.floor(Math.random() * 8);
+        let quotient = 10 + Math.floor(Math.random() * 90);
+        let remainder = 0;
+        
+        if (allowRemainder && Math.random() > 0.5) {
+          remainder = Math.floor(Math.random() * b);
+        }
+        
+        let a = quotient * b + remainder;
+        
+        return { text: `${a} ÷ ${b}`, answer: quotient, opType: 'div', numA: a, numB: b, rem: remainder };
+      }
     }
   }
 }
 
 function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function goSetup(){ loadProfileData(); showScreen('screen-setup'); }
+
+function goSetup(){ 
+  if (typeof clearFallingGame === 'function') clearFallingGame();
+  loadProfileData(); 
+  showScreen('screen-setup'); 
+}
 
 function updateScoreUI() {
-  document.querySelectorAll('.shared-score-display').forEach(el => {
-    el.textContent = gameState.score;
-  });
+  document.querySelectorAll('.shared-score-display').forEach(el => { el.textContent = gameState.score; });
 }
 
 function startGame(mode){
   const op = document.querySelector('input[name="opMode"]:checked').value;
   if((op==='mul'||op==='div') && document.querySelector('input[name="levelMode"]:checked').value==='1' && document.querySelectorAll('.times-cb:checked').length===0){ alert('구구단을 선택해 주세요!'); return; }
-  const questions = []; for(let i=0;i<10;i++) questions.push(generateQuestion());
-  gameState = { mode, questions, current: 0, score: 0, correctCount: 0 };
+  
+  const questions = []; 
+  for(let i=0;i<10;i++) questions.push(generateQuestion());
+  
+  const speedRadio = document.querySelector('input[name="speedMode"]:checked');
+  const speed = speedRadio ? speedRadio.value : 'turtle';
+  
+  gameState = { mode, questions, current: 0, score: 0, correctCount: 0, speedMode: speed };
   updateScoreUI();
-  if(mode === 'typing') initTyping(); else if(mode === 'vertical') initVertical();
+  
+  if(mode === 'typing') initTyping(); 
+  else if(mode === 'vertical') initVertical();
+  else if(mode === 'falling') initFalling();
 }
 
 function startWrongNote() {
@@ -348,51 +588,210 @@ function startWrongNote() {
   initTyping();
 }
 
+// ☄️ 객관식 떨어지는 모드 전용 함수 시작
+function initFalling(){ 
+  gameState.lives = 3; 
+  showScreen('screen-falling'); 
+  nextFallingQ(); 
+}
+
+function nextFallingQ(){
+  if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
+  
+  document.querySelectorAll('.shared-score-display').forEach(el => { el.textContent = gameState.score; });
+  document.getElementById('f-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length;
+  document.getElementById('f-lives').textContent = gameState.lives;
+  
+  const q = gameState.questions[gameState.current]; 
+  document.getElementById('f-question').textContent = q.text + ' = ?';
+  
+  const choices = new Set([q.answer]); 
+  while(choices.size < 5) choices.add(q.answer + Math.floor((Math.random()-0.5)*20) + 1);
+  const arr = [...choices].sort(()=>Math.random()-0.5);
+  
+  clearFallingBalls(); 
+  const arena = document.getElementById('fallingArena'); 
+  const colors = ['#FF6B9D','#6EC6F5','#FFD93D','#4ECDC4','#A78BFA'];
+  
+  const speed = gameState.speedMode === 'turtle' ? 18000 : 5500; 
+  
+  arr.forEach((val, i) => {
+    const ball = document.createElement('div'); 
+    ball.className = 'fall-ball'; 
+    ball.textContent = val; 
+    ball.style.background = colors[i]; 
+    ball.style.left = (5 + Math.random()*75) + '%'; 
+    const delay = i * 400; 
+    ball.style.animation = `falling ${speed}ms linear ${delay}ms forwards`;
+    
+    ball.addEventListener('click', ()=> {
+      if(val === q.answer) { 
+        gameState.score+=10; gameState.correctCount++; advanceFalling(); 
+      }
+      else { 
+        ball.style.opacity='0.3'; ball.style.pointerEvents='none'; 
+        gameState.lives--; 
+        
+        const key = `minmin_math_wrong_${currentProfile}`;
+        if(!wrongNotes.some(item => item.text === q.text)) { 
+            wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); 
+            document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
+        }
+        document.getElementById('f-lives').textContent = gameState.lives; 
+        if(gameState.lives<=0) { clearFallingGame(); gameState.current = gameState.questions.length; showFinalResult(); } 
+      }
+    }); 
+    arena.appendChild(ball); fallingBalls.push(ball); fallingTimers.push(setTimeout(()=> ball.remove(), delay+speed));
+  });
+  
+  clearInterval(timerInterval); 
+  const totalMaxTime = gameState.speedMode === 'turtle' ? 20000 : 7500;
+  timeLeft = totalMaxTime; 
+  document.getElementById('timerBar').style.background = 'var(--green)';
+  
+  timerInterval = setInterval(()=>{ 
+    timeLeft -= 100; 
+    document.getElementById('timerBar').style.width = (timeLeft/totalMaxTime*100)+'%'; 
+    if(timeLeft<=0) { 
+      clearInterval(timerInterval); 
+      gameState.lives--; 
+      
+      const key = `minmin_math_wrong_${currentProfile}`;
+      if(!wrongNotes.some(item => item.text === q.text)) { 
+          wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); 
+          document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
+      }
+      
+      if(gameState.lives<=0) { clearFallingGame(); gameState.current = gameState.questions.length; showFinalResult(); } 
+      else advanceFalling(); 
+    } 
+  },100);
+}
+
+function advanceFalling(){ clearFallingGame(); gameState.current++; setTimeout(nextFallingQ, 300); }
+function clearFallingBalls(){ fallingBalls.forEach(b=>b.remove()); fallingBalls=[]; }
+function clearFallingGame(){ clearInterval(timerInterval); fallingTimers.forEach(clearTimeout); fallingTimers=[]; clearFallingBalls(); }
+// ☄️ 객관식 떨어지는 모드 전용 함수 끝
+
 function handleAnswer(isCorrect, q, inpBox, fbBox, nextFunc) {
   const key = `minmin_math_wrong_${currentProfile}`;
   if (isCorrect) {
-    inpBox.className += ' correct'; fbBox.textContent = '정답! 🎉'; fbBox.style.color = 'var(--green)'; gameState.score+=10; gameState.correctCount++;
+    inpBox.classList.add('correct'); fbBox.textContent = '정답! 🎉'; fbBox.style.color = 'var(--green)'; gameState.score+=10; gameState.correctCount++;
     updateScoreUI(); 
     wrongNotes = wrongNotes.filter(item => item.text !== q.text); localStorage.setItem(key, JSON.stringify(wrongNotes));
     gameState.current++; setTimeout(nextFunc, 700);
   } else {
-    inpBox.className += ' wrong'; fbBox.textContent = `오답😢 정답: ${q.answer}`; fbBox.style.color = 'var(--pink)';
+    inpBox.classList.add('wrong'); 
+    let correctMsg = q.opType === 'div' ? `정답: 몫 ${q.answer}, 나머지 ${q.rem}` : `정답: ${q.answer}`;
+    fbBox.textContent = `오답😢 ${correctMsg}`; fbBox.style.color = 'var(--pink)';
     if(!gameState.isWrongMode && !wrongNotes.some(item => item.text === q.text)) { wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); }
-    gameState.current++; setTimeout(nextFunc, 1400);
+    gameState.current++; setTimeout(nextFunc, 2000);
   }
 }
 
 function initTyping(){ showScreen('screen-typing'); nextTypingQ(); }
 function nextTypingQ(){
   if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
-  document.getElementById('t-qnum').textContent = gameState.current+1; document.getElementById('t-question').textContent = q = gameState.questions[gameState.current].text + ' = ?';
-  drawVisualBlocks(gameState.questions[gameState.current], 't-visual-area'); const inp = document.getElementById('answerInput'); inp.value=''; inp.className='answer-input'; document.getElementById('t-feedbackMsg').textContent=''; inp.focus();
+  const q = gameState.questions[gameState.current]; document.getElementById('t-qnum').textContent = (gameState.current+1) + '/' + gameState.questions.length; 
+  document.getElementById('t-question').textContent = q.text + ' = ?';
+  const inp = document.getElementById('answerInput'); const remInp = document.getElementById('remInput');
+  inp.value=''; inp.className='answer-input'; remInp.value=''; remInp.className='answer-input';
+  document.getElementById('t-feedbackMsg').textContent='';
+  remInp.style.display = (q.opType === 'div') ? 'inline-block' : 'none';
+  inp.focus();
 }
 function submitTyping(){
-  const inp = document.getElementById('answerInput'); if(inp.value==='') return;
-  handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
+  const inp = document.getElementById('answerInput'); const remInp = document.getElementById('remInput');
+  if(inp.value==='') return;
+  const q = gameState.questions[gameState.current];
+  let isCorrect = false;
+  if (q.opType === 'div') {
+    const userAns = parseInt(inp.value, 10); const userRem = parseInt(remInp.value || 0, 10);
+    isCorrect = (userAns === q.answer && userRem === q.rem);
+    if (!isCorrect) remInp.classList.add('wrong'); else remInp.classList.add('correct');
+  } else {
+    isCorrect = (parseInt(inp.value, 10) === q.answer);
+  }
+  handleAnswer(isCorrect, q, inp, document.getElementById('t-feedbackMsg'), nextTypingQ);
 }
-
 function initVertical(){ showScreen('screen-vertical'); nextVerticalQ(); }
 function nextVerticalQ(){
   if(gameState.current >= gameState.questions.length){ showFinalResult(); return; }
-  const q = gameState.questions[gameState.current]; document.getElementById('v-qnum').textContent = gameState.current+1; document.getElementById('v-feedbackMsg').textContent='';
+  const q = gameState.questions[gameState.current]; 
+  document.getElementById('v-qnum').textContent = gameState.current+1; 
+  document.getElementById('v-feedbackMsg').textContent='';
   const container = document.getElementById('vertical-container');
-  if(q.text.includes('×')){
-    const [a, b] = q.text.split(' × ').map(Number);
-    container.innerHTML = `<div class="v-board"><div class="v-row" style="padding-right:12px;">${a}</div><div class="v-row"><span class="v-symbol">×</span><span style="padding-right:12px;">${b}</span></div><div class="v-line"></div><div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div></div>`;
-  } else if(q.text.includes('÷')) {
-    const [d1, d2] = q.text.split(' ÷ ').map(Number);
-    container.innerHTML = `<div class="div-board"><div class="div-top"><input type="number" class="v-input ans" id="v-ans" placeholder="몫"></div><div class="div-bottom"><span style="color:var(--pink); margin-right:10px;">${d2}</span><span class="div-bracket">)</span><span style="letter-spacing:10px; margin-left:10px;">${d1}</span></div></div>`;
-  } else {
-    const isAdd = q.text.includes('＋'); const [a, b] = q.text.split(isAdd ? ' ＋ ' : ' － ').map(Number);
-    container.innerHTML = `<div class="v-board"><div class="v-memo-row"><input type="number" class="v-input tiny"><input type="number" class="v-input tiny"></div><div class="v-row" style="padding-right:12px;">${a}</div><div class="v-row"><span class="v-symbol">${isAdd?'＋':'－'}</span><span style="padding-right:12px;">${b}</span></div><div class="v-line"></div><div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답" style="width:160px;"></div></div>`;
+  
+  // [개편] 곱셈 세로셈
+  if(q.opType === 'mul'){
+    container.innerHTML = `
+      <div class="v-board">
+        <div class="v-memo-row">
+          <input type="number" class="v-input tiny" placeholder="올" title="올림수 메모칸"><input type="number" class="v-input tiny" placeholder="올" title="올림수 메모칸">
+        </div>
+        <div class="v-row">${q.numA}</div>
+        <div class="v-row"><span class="v-symbol">×</span>${q.numB}</div>
+        <div class="v-line"></div>
+        <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div>
+      </div>`;
+  } 
+  
+  // [개편] 나눗셈 세로셈
+  else if(q.opType === 'div') {
+    container.innerHTML = `
+      <div class="div-board">
+        <div class="div-main-row">
+          <span class="div-divisor">${q.numB}</span>
+          <span class="div-bracket">)</span>
+          <span class="div-dividend">${q.numA}</span>
+        </div>
+        <div class="div-result-area">
+          <div class="div-input-group">
+            <span class="div-input-label">몫</span>
+            <input type="number" class="div-input" id="v-ans" placeholder="?">
+          </div>
+          <div class="div-input-group">
+            <span class="div-input-label">나머지</span>
+            <input type="number" class="div-input" id="v-rem" placeholder="${q.rem}" ${q.rem === 0 ? 'value="0"' : ''}>
+          </div>
+        </div>
+      </div>`;
+  } 
+  
+  // [개편] 덧셈/뺄셈 세로셈
+  else {
+    const isAdd = q.opType === 'add';
+    container.innerHTML = `
+      <div class="v-board">
+        <div class="v-memo-row">
+          <input type="number" class="v-input tiny" placeholder="올/내" title="올림수/내림수 메모칸"><input type="number" class="v-input tiny" placeholder="올/내" title="올림수/내림수 메모칸"><input type="number" class="v-input tiny" placeholder="올/내" title="올림수/내림수 메모칸">
+        </div>
+        <div class="v-row">${q.numA}</div>
+        <div class="v-row"><span class="v-symbol">${isAdd?'＋':'－'}</span>${q.numB}</div>
+        <div class="v-line"></div>
+        <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답" style="width:160px;"></div>
+      </div>`;
   }
   setTimeout(()=> document.getElementById('v-ans')?.focus(), 100);
 }
+
 function submitVertical(){
-  const inp = document.getElementById('v-ans'); if(!inp || inp.value==='') return;
-  handleAnswer(parseInt(inp.value, 10) === gameState.questions[gameState.current].answer, gameState.questions[gameState.current], inp, document.getElementById('v-feedbackMsg'), nextVerticalQ);
+  const q = gameState.questions[gameState.current];
+  const inp = document.getElementById('v-ans'); 
+  if(!inp || inp.value==='') return;
+  
+  let isCorrect = false;
+  if (q.opType === 'div') {
+    const remInp = document.getElementById('v-rem');
+    const userAns = parseInt(inp.value, 10);
+    const userRem = parseInt(remInp.value || 0, 10);
+    isCorrect = (userAns === q.answer && userRem === q.rem);
+    if (!isCorrect) remInp.classList.add('wrong'); else remInp.classList.add('correct');
+  } else {
+    isCorrect = (parseInt(inp.value, 10) === q.answer);
+  }
+  
+  handleAnswer(isCorrect, q, inp, document.getElementById('v-feedbackMsg'), nextVerticalQ);
 }
 
 // 🚀 다이내믹 레벨업 계산 엔진
@@ -419,6 +818,8 @@ function calculateLevelInfo(totalRewards) {
 }
 
 async function showFinalResult(){
+  if (typeof clearFallingGame === 'function') clearFallingGame();
+  
   document.getElementById('r-score').textContent = gameState.score + '점';
   document.getElementById('r-detail').innerHTML = `10문제 중 ${gameState.correctCount}개 수학 퀘스트 성공!`;
   showScreen('screen-result');
@@ -506,8 +907,7 @@ async function saveRewardToNotion(earned) {
     }
 
   } catch (err) {
-    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패 (프록시 확인 필요)`;
-    document.getElementById('notion-loading-msg').style.color = "var(--pink)";
+    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패`;
   }
 }
 
@@ -516,7 +916,13 @@ function closeWishTicket() {
 }
 
 function retryGame() { startGame(gameState.mode); }
-document.addEventListener('keydown', e=>{ if(e.key==='Enter') { if(document.getElementById('screen-typing').classList.contains('active')) submitTyping(); else if(document.getElementById('screen-vertical').classList.contains('active')) submitVertical(); } });
+
+document.addEventListener('keydown', e=>{ 
+  if(e.key==='Enter') { 
+    if(document.getElementById('screen-typing').classList.contains('active')) submitTyping(); 
+    else if(document.getElementById('screen-vertical').classList.contains('active')) submitVertical(); 
+  } 
+});
 
 (function(){
   const grid = document.getElementById('timesGrid'); if(!grid) return;
@@ -525,6 +931,7 @@ document.addEventListener('keydown', e=>{ if(e.key==='Enter') { if(document.getE
     const lbl = document.createElement('label'); lbl.htmlFor='cb'+d; lbl.className='btn-label times-label'; lbl.innerHTML=`${d}단`; grid.appendChild(inp); grid.appendChild(lbl);
   }
 })();
+
 function selectAll(flag) { document.querySelectorAll('.times-cb').forEach(cb => cb.checked = flag); }
 </script>
 </body>
