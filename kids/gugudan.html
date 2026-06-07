@@ -6,16 +6,37 @@
 <title>구구단 탐험대 🚀</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-/* CSS는 예쁜 우주 디자인을 유지합니다 */
 :root {
-  --bg: #0F0E17; --surface: #1A1A2E; --card: #16213E; --border: #0F3460;
-  --yellow: #FFD93D; --orange: #FF6B35; --green: #6BCB77; --blue: #4D96FF;
-  --pink: #FF6B9D; --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --muted: #8888AA;
+  --bg: #0F0E17;
+  --surface: #1A1A2E;
+  --card: #16213E;
+  --border: #0F3460;
+  --yellow: #FFD93D;
+  --orange: #FF6B35;
+  --green: #6BCB77;
+  --blue: #4D96FF;
+  --pink: #FF6B9D;
+  --purple: #C77DFF;
+  --cyan: #00D4FF;
+  --white: #F5F5F5;
+  --muted: #8888AA;
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Nanum Gothic', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+
+body {
+  font-family: 'Nanum Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Starfield 배경 */
 body::before {
-  content: ''; position: fixed; inset: 0;
+  content: '';
+  position: fixed;
+  inset: 0;
   background-image:
     radial-gradient(1px 1px at 15% 20%, white 0%, transparent 100%),
     radial-gradient(1px 1px at 45% 10%, white 0%, transparent 100%),
@@ -27,41 +48,81 @@ body::before {
     radial-gradient(1px 1px at 10% 50%, #FF6B9D 0%, transparent 100%),
     radial-gradient(1px 1px at 38% 45%, white 0%, transparent 100%),
     radial-gradient(1.5px 1.5px at 95% 80%, #6BCB77 0%, transparent 100%);
-  pointer-events: none; z-index: 0;
+  pointer-events: none;
+  z-index: 0;
 }
-.app { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; position: relative; z-index: 1; }
 
-/* 👤 유저 프로필 UI 스타일 */
-.profile-wrap { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
-.profile-badge { background: var(--card); border: 1.5px solid var(--border); padding: 8px 16px; border-radius: 20px; font-family: 'Jua', sans-serif; font-size: 0.95rem; color: var(--muted); }
-.profile-btn { background: rgba(255,107,157,0.1); border: 1.5px solid var(--pink); color: var(--pink); padding: 8px 16px; border-radius: 20px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
-.profile-btn:hover { background: var(--pink); color: #fff; transform: scale(1.05); }
+/* 🛠️ 상단 고정 UI (프로필 뱃지 & 대문 복귀 버튼) */
+.profile-badge {
+  position: absolute; top: 20px; left: 20px;
+  background: rgba(0,0,0,0.5); border: 1.5px solid var(--border);
+  color: var(--cyan); padding: 8px 16px; border-radius: 20px;
+  font-family: 'Jua', sans-serif; font-size: 1rem; z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.exit-btn {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.3);
+  color: var(--white); padding: 8px 16px; border-radius: 20px;
+  cursor: pointer; font-family: 'Jua', sans-serif; font-size: 1rem;
+  transition: all 0.2s; z-index: 100; backdrop-filter: blur(4px);
+}
+.exit-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--yellow); color: var(--yellow); }
 
-header { text-align: center; padding: 10px 0 24px; animation: fadeDown 0.6s ease both; }
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 60px 16px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HEADER ── */
+header { text-align: center; padding: 28px 0 24px; animation: fadeDown 0.6s ease both; }
 @keyframes fadeDown { from { opacity:0; transform:translateY(-24px); } to { opacity:1; transform:translateY(0); } }
-.logo { font-family: 'Jua', cursive; font-size: clamp(2rem, 7vw, 3.4rem); line-height: 1.15; background: linear-gradient(135deg, var(--yellow), var(--orange), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.logo {
+  font-family: 'Jua', cursive; font-size: clamp(2.2rem, 7vw, 3.6rem); line-height: 1.15;
+  background: linear-gradient(135deg, var(--yellow), var(--orange), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
 header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
+
+/* ── NAV TABS ── */
 .nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; animation: fadeUp 0.5s 0.2s ease both; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-.nav-btn { padding: 10px 20px; border: 2px solid #333; border-radius: 40px; background: var(--card); color: var(--muted); font-family: 'Nanum Gothic', sans-serif; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; }
+
+.nav-btn {
+  padding: 10px 20px; border: 2px solid #333; border-radius: 40px; background: var(--card); color: var(--muted);
+  font-family: 'Nanum Gothic', sans-serif; font-weight: 800; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+}
 .nav-btn:hover { border-color: var(--yellow); color: var(--yellow); }
 .nav-btn.active { background: var(--yellow); border-color: var(--yellow); color: #1A1A2E; }
+
+/* ── SECTIONS ── */
 .section { display: none; }
 .section.active { display: block; animation: fadeUp 0.35s ease both; }
+
 .concept-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; padding: 26px; margin-bottom: 20px; }
 .concept-card h2 { font-family: 'Jua', cursive; font-size: 1.3rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
 .concept-card p { color: var(--muted); font-size: 0.93rem; line-height: 1.7; margin-bottom: 16px; }
+
 .repeater { margin-bottom: 20px; }
 .repeater-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 .repeater-controls label { font-weight: 800; font-size: 0.88rem; color: var(--muted); }
+
 .num-select { background: var(--surface); border: 2px solid var(--border); border-radius: 10px; color: var(--white); font-family: 'Gaegu', cursive; font-size: 1.3rem; font-weight: 700; padding: 6px 12px; cursor: pointer; outline: none; transition: border-color 0.2s; }
 .num-select:focus { border-color: var(--yellow); }
+
 .viz-track { display: flex; flex-wrap: wrap; gap: 8px; min-height: 64px; padding: 14px; background: var(--surface); border-radius: 14px; border: 1.5px solid var(--border); align-items: flex-start; margin-bottom: 12px; }
 .group-block { display: flex; gap: 4px; padding: 6px 10px; border-radius: 10px; border: 2px solid; animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both; }
 @keyframes popIn { from { opacity:0; transform:scale(0.6); } to { opacity:1; transform:scale(1); } }
 .dot { width: 14px; height: 14px; border-radius: 50%; }
+
 .addition-equation { font-family: 'Gaegu', cursive; font-size: 1.25rem; font-weight: 700; color: var(--cyan); padding: 10px 16px; background: rgba(0,212,255,0.08); border-radius: 10px; border: 1px solid rgba(0,212,255,0.2); word-break: break-all; line-height: 1.5; }
 .final-eq { font-family: 'Gaegu', cursive; font-size: 1.6rem; font-weight: 700; text-align: center; margin-top: 12px; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(255,217,61,0.15), rgba(255,107,53,0.15)); border: 1.5px solid rgba(255,217,61,0.3); }
+
+/* ── 10단 / 5단 ANCHOR ── */
 .anchor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 @media (max-width: 560px) { .anchor-grid { grid-template-columns: 1fr; } }
 .anchor-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 18px; padding: 20px; position: relative; overflow: hidden; }
@@ -75,6 +136,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .anchor-row .ans { font-family: 'Gaegu', cursive; font-size: 1.1rem; font-weight: 700; }
 .anchor-card.ten .anchor-row .ans { color: var(--cyan); }
 .anchor-card.five .anchor-row .ans { color: var(--green); }
+
+/* ── EXPLORE: 이웃단 찾기 ── */
 .explorer { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; padding: 26px; margin-bottom: 20px; }
 .explorer h2 { font-family: 'Jua', cursive; font-size: 1.25rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .selector-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
@@ -92,6 +155,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .step-body { font-size: 0.95rem; line-height: 1.6; }
 .step-body .big { font-family: 'Gaegu', cursive; font-size: 1.4rem; font-weight: 700; }
 .step-body .sub { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+/* ── TABLE ── */
 .table-section { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; padding: 24px; }
 .table-section h2 { font-family: 'Jua', cursive; font-size: 1.25rem; margin-bottom: 16px; }
 .dan-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -102,6 +167,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .dan-btn.ten-dan { border-color: var(--cyan); color: var(--cyan); }
 .dan-btn.five-dan.active { background: var(--green); border-color: var(--green); }
 .dan-btn.ten-dan.active { background: var(--cyan); border-color: var(--cyan); }
+
 .table-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
 .table-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 10px; background: var(--surface); border: 1.5px solid transparent; transition: all 0.25s; animation: popIn 0.2s ease both; }
 .table-row:hover { border-color: rgba(255,255,255,0.1); transform: scale(1.03); }
@@ -111,6 +177,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .table-row-inner { display: flex; flex-direction: column; }
 .table-row.is-five { border-color: rgba(107,203,119,0.35); background: rgba(107,203,119,0.07); }
 .table-row.is-ten { border-color: rgba(0,212,255,0.35); background: rgba(0,212,255,0.07); }
+
+/* ── HIDDEN TABLE ── */
 .hidden-grid-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; padding: 24px; overflow-x: auto; margin-bottom: 20px; }
 .hidden-grid-card h2 { font-family: 'Jua', cursive; font-size: 1.25rem; margin-bottom: 8px; }
 .full-grid { display: grid; grid-template-columns: repeat(10, minmax(60px, 1fr)); gap: 6px; min-width: 600px; }
@@ -120,6 +188,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .grid-cell .ans { font-family: 'Gaegu', cursive; font-size: 1.4rem; font-weight: 700; color: var(--white); opacity: 0; transform: scale(0.5); transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .grid-cell.revealed { background: rgba(255, 217, 61, 0.1); border-color: var(--yellow); }
 .grid-cell.revealed .ans { opacity: 1; transform: scale(1); color: var(--yellow); }
+
+/* ── QUIZ ── */
 .quiz-wrap { max-width: 640px; margin: 0 auto; }
 .quiz-meta { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 0.88rem; color: var(--muted); font-weight: 800; }
 .quiz-meta .score-badge { background: var(--yellow); color: #1A1A2E; padding: 4px 14px; border-radius: 40px; font-weight: 800; }
@@ -141,6 +211,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .next-btn { width: 100%; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: #1A1A2E; font-family: 'Jua', cursive; font-size: 1.15rem; cursor: pointer; display: none; transition: transform 0.15s, opacity 0.15s; }
 .next-btn:hover { transform: scale(1.02); }
 .next-btn.show { display: block; }
+
+/* Result */
 .result-wrap { display: none; text-align: center; background: var(--card); border: 1.5px solid var(--border); border-radius: 24px; padding: 48px 24px; }
 .result-wrap.show { display: block; }
 .r-emoji { font-size: 4.5rem; animation: bounce 0.6s ease infinite alternate; }
@@ -150,28 +222,25 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 .r-msg { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; }
 .retry-btn { padding: 14px 40px; border: none; border-radius: 40px; background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; font-family: 'Jua', cursive; font-size: 1.1rem; cursor: pointer; transition: transform 0.15s; }
 .retry-btn:hover { transform: scale(1.05); }
+
+/* Confetti */
 #confetti { position:fixed; inset:0; pointer-events:none; z-index:9999; }
 .cp { position: absolute; width: 10px; height: 10px; top: -20px; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+
+/* Progress bar */
 .progress-track { height: 6px; background: var(--surface); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width 0.4s ease; }
-
-/* 팝업 모달 추가 스타일 */
-.result-overlay { position: fixed; inset: 0; background: rgba(15, 14, 23, 0.8); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
-.result-overlay.active { display: flex !important; opacity: 1 !important; }
 </style>
 </head>
 <body>
 
 <div id="confetti"></div>
 
+<div class="profile-badge" id="profileBadge">👦 민수 (로딩중)</div>
+<button class="exit-btn" onclick="location.href='../index.html'">🚪 대문으로</button>
+
 <div class="app">
-
-  <div class="profile-wrap">
-    <div class="profile-badge" id="currentUserBadge">로딩 중...</div>
-    <button class="profile-btn" onclick="toggleProfileManually()">🔄 변경하기</button>
-  </div>
-
   <header>
     <div class="logo">구구단 탐험대 🚀</div>
     <p>곱하기 = 같은 수를 계속 더하는 것! 10단·5단을 기준으로 탐험해요</p>
@@ -189,7 +258,11 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
   <div class="section active" id="sec-concept">
     <div class="concept-card">
       <h2>🔍 곱하기란 무엇일까?</h2>
-      <p><strong style="color:var(--yellow)">3 × 4</strong>는 <strong style="color:var(--cyan)">3을 4번 더하는 것</strong>이에요.<br>숫자를 골라서 직접 눈으로 확인해 보세요!</p>
+      <p>
+        <strong style="color:var(--yellow)">3 × 4</strong>는 <strong style="color:var(--cyan)">3을 4번 더하는 것</strong>이에요.<br>
+        숫자를 골라서 직접 눈으로 확인해 보세요!
+      </p>
+
       <div class="repeater">
         <div class="repeater-controls">
           <label>어떤 수를</label>
@@ -205,11 +278,13 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             <option>7</option><option>8</option><option>9</option><option>10</option>
           </select>
         </div>
+
         <div class="viz-track" id="viz-track"></div>
         <div class="addition-equation" id="add-eq"></div>
         <div class="final-eq" id="final-eq"></div>
       </div>
     </div>
+
     <div class="concept-card">
       <h2>📈 곱할수록 얼마씩 커질까?</h2>
       <p>아래는 <strong id="pattern-num-label" style="color:var(--cyan)">3단</strong>의 패턴이에요. 항상 <strong id="pattern-jump" style="color:var(--yellow)">3씩</strong> 커지죠?</p>
@@ -221,8 +296,13 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
   <div class="section" id="sec-anchor">
     <div class="concept-card" style="margin-bottom:20px;">
       <h2>⚓ 왜 10단과 5단이 기준점일까?</h2>
-      <p><strong style="color:var(--cyan)">10단</strong>은 뒤에 0만 붙이면 돼서 가장 쉬워요.<br><strong style="color:var(--green)">5단</strong>은 10단의 딱 절반이에요.<br>이 두 단을 먼저 익히면 다른 단도 여기서 출발할 수 있어요! 🚀</p>
+      <p>
+        <strong style="color:var(--cyan)">10단</strong>은 뒤에 0만 붙이면 돼서 가장 쉬워요.<br>
+        <strong style="color:var(--green)">5단</strong>은 10단의 딱 절반이에요.<br>
+        이 두 단을 먼저 익히면 다른 단도 여기서 출발할 수 있어요! 🚀
+      </p>
     </div>
+
     <div class="anchor-grid">
       <div class="anchor-card ten">
         <div class="anchor-title"><span style="color:var(--cyan)">🔵 10단</span> — 뒤에 0!</div>
@@ -233,6 +313,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
         <div id="five-table"></div>
       </div>
     </div>
+
     <div class="concept-card">
       <h2>🔗 5단 = 10단 ÷ 2</h2>
       <p>직접 눌러서 확인해 보세요!</p>
@@ -308,7 +389,6 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
         <div class="r-title" id="r-title"></div>
         <div class="r-score" id="r-score"></div>
         <div class="r-msg" id="r-msg"></div>
-        <div id="rewardResultArea" style="margin-bottom: 20px;"></div>
         <button class="retry-btn" onclick="initQuiz()">🔄 다시 도전!</button>
       </div>
     </div>
@@ -316,57 +396,30 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 
 </div>
 
-<div class="result-overlay" id="wishTicketOverlay" onclick="closeWishTicket()">
-  <div class="result-modal" style="background:var(--card); border: 4px solid var(--yellow); box-shadow: 0 0 30px rgba(255, 217, 61, 0.6);" onclick="event.stopPropagation()">
-    <div style="font-size: 4.5rem; animation: bounce 1s infinite;">🎫</div>
-    <div class="result-title" style="color: var(--orange); font-size: 2rem; margin-bottom: 6px;">소원권 획득!</div>
-    <div class="result-message" style="font-size: 1.15rem; margin-bottom: 14px; color: var(--white);">
-      누적 보상 <b style="color:var(--pink);">150개</b> 돌파 기념!<br>특별한 소원권이 지급되었습니다 🎉
-    </div>
-    <div style="background: rgba(167, 139, 250, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--purple); font-size: 1.3rem; margin-bottom: 24px;">
-      총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개
-    </div>
-    <button class="retry-btn" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: #1A1A2E; font-size: 1.2rem; padding: 16px;">신난다! 닫기</button>
+<div class="result-overlay" id="wishTicketOverlay" onclick="closeWishTicket()" style="display:none; position:fixed; inset:0; background:rgba(15,14,23,0.85); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center;">
+  <div class="result-modal" style="background:var(--card); width:90%; max-width:360px; border-radius:30px; padding:40px 24px; text-align:center; border:4px solid var(--yellow); box-shadow:0 0 30px rgba(255,217,61,0.6);" onclick="event.stopPropagation()">
+    <div style="font-size: 4.5rem; animation: bounce 1s infinite alternate;">🎫</div>
+    <div style="color: var(--orange); font-size: 2rem; margin-bottom: 6px; font-family:'Jua', sans-serif;">소원권 획득!</div>
+    <div style="font-size: 1.15rem; margin-bottom: 14px; color: var(--white);">누적 보상 <b style="color:var(--pink);">150개</b> 돌파 기념!<br>특별한 소원권이 지급되었습니다 🎉</div>
+    <div style="background: rgba(255,255,255, 0.1); border-radius: 12px; padding: 12px; font-weight: bold; color: var(--yellow); font-size: 1.3rem; margin-bottom: 24px;">총 보유 소원권: <span id="wishTicketCountDisplay" style="font-size: 1.6rem;"></span>개</div>
+    <button onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: #1A1A2E; font-size: 1.2rem; padding: 16px; border:none; border-radius:16px; cursor:pointer; font-family:'Jua', sans-serif; font-weight:bold;">신난다! 닫기</button>
   </div>
 </div>
 
 <script>
-// ==========================================
-// 노션 데이터베이스 관련 설정 및 유저 변수
-// ==========================================
+// ⚙️ 보안 워커 파이프라인 연동 상수
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-
-let currentUser = localStorage.getItem('currentUser') || 'son';
-let currentUserName = localStorage.getItem('currentUserName') || '민수';
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12";
+let currentProfile = localStorage.getItem('currentUser') || 'son';
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
 
-function updateProfileUI() {
-  const badge = document.getElementById('currentUserBadge');
-  if (badge) {
-    const icon = currentUser === 'son' ? '👦' : '👧';
-    badge.innerHTML = `접속중: ${icon} <b>${currentUserName}</b> (${currentTheme})`;
+document.addEventListener('DOMContentLoaded', () => {
+  const badge = document.getElementById('profileBadge');
+  if(badge) {
+    const userName = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
+    const icon = currentProfile === 'son' ? '👦' : (currentProfile === 'daughter' ? '👧' : '☕');
+    badge.textContent = `${icon} ${userName} (${currentTheme} 모드)`;
   }
-}
-
-function toggleProfileManually() {
-  if (currentUser === 'son') {
-    currentUser = 'daughter';
-    currentUserName = '민서';
-    currentTheme = '슬라임';
-  } else {
-    currentUser = 'son';
-    currentUserName = '민수';
-    currentTheme = '마인크래프트';
-  }
-  localStorage.setItem('currentUser', currentUser);
-  localStorage.setItem('currentUserName', currentUserName);
-  localStorage.setItem('currentTheme', currentTheme);
-  updateProfileUI();
-}
-
-window.addEventListener('load', () => {
-  updateProfileUI();
 });
 
 // ════════════════════════════════
@@ -384,6 +437,9 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   });
 });
 
+// ════════════════════════════════
+//  COLORS per dan
+// ════════════════════════════════
 const DAN_COLORS = {
   1: '#AAB7B8', 2: '#4D96FF', 3: '#C77DFF',
   4: '#FF6B9D', 5: '#6BCB77', 6: '#FF6B35',
@@ -509,15 +565,9 @@ function renderTrick() {
 
   if (dan === 10 || dan === 5) {
     anchors = [{
-      type: 'anchor-step', num: 1,
-      label: `이미 기준단!`,
-      big: `${dan} × ${times} = ${result}`,
-      sub: dan === 10 ? '10단: 뒤에 0을 붙이면 끝!' : '5단: 10단의 딱 절반!'
+      type: 'anchor-step', num: 1, label: `이미 기준단!`, big: `${dan} × ${times} = ${result}`, sub: dan === 10 ? '10단: 뒤에 0을 붙이면 끝!' : '5단: 10단의 딱 절반!'
     }, {
-      type: 'result-step', num: 2,
-      label: '정답',
-      big: `${dan} × ${times} = ${result}`,
-      sub: '쉽죠? 🎉'
+      type: 'result-step', num: 2, label: '정답', big: `${dan} × ${times} = ${result}`, sub: '쉽죠? 🎉'
     }];
   } else {
     const anchor10 = 10 * times;
@@ -531,37 +581,16 @@ function renderTrick() {
     const adjDir    = adjust > 0 ? '+' : '-';
 
     anchors = [
-      {
-        type: 'anchor-step', num: 1,
-        label: `① ${useAnchor}단 먼저!`,
-        big: `${useAnchor} × ${times} = ${anchorVal}`,
-        sub: useAnchor === 10 ? '10단: 뒤에 0 붙이기' : '5단: 10단 ÷ 2'
-      },
-      {
-        type: 'adjust-step', num: 2,
-        label: `② ${dan}단은 ${useAnchor}단보다 ${adjTimes} 차이!`,
-        big: `${anchorVal} ${adjDir} ${times} × ${adjTimes} = ${anchorVal} ${adjDir} ${Math.abs(adjust)} = ${result}`,
-        sub: `${times}씩 ${adjTimes}번 ${adjust>0?'더하면':'빼면'} ${dan}단!`
-      },
-      {
-        type: 'result-step', num: 3,
-        label: '✅ 정답',
-        big: `${dan} × ${times} = ${result}`,
-        sub: `더하기로 이해하는 구구단!`
-      }
+      { type: 'anchor-step', num: 1, label: `① ${useAnchor}단 먼저!`, big: `${useAnchor} × ${times} = ${anchorVal}`, sub: useAnchor === 10 ? '10단: 뒤에 0 붙이기' : '5단: 10단 ÷ 2' },
+      { type: 'adjust-step', num: 2, label: `② ${dan}단은 ${useAnchor}단보다 ${adjTimes} 차이!`, big: `${anchorVal} ${adjDir} ${times} × ${adjTimes} = ${anchorVal} ${adjDir} ${Math.abs(adjust)} = ${result}`, sub: `${times}씩 ${adjTimes}번 ${adjust>0?'더하면':'빼면'} ${dan}단!` },
+      { type: 'result-step', num: 3, label: '✅ 정답', big: `${dan} × ${times} = ${result}`, sub: `더하기로 이해하는 구구단!` }
     ];
   }
 
   anchors.forEach((s, idx) => {
     const el = document.createElement('div');
     el.className = `step ${s.type}`;
-    el.innerHTML = `
-      <div class="step-num">${s.num}</div>
-      <div class="step-body">
-        <div style="font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">${s.label}</div>
-        <div class="big">${s.big}</div>
-        <div class="sub">${s.sub}</div>
-      </div>`;
+    el.innerHTML = `<div class="step-num">${s.num}</div><div class="step-body"><div style="font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">${s.label}</div><div class="big">${s.big}</div><div class="sub">${s.sub}</div></div>`;
     steps.appendChild(el);
     setTimeout(() => el.classList.add('visible'), idx * 160);
   });
@@ -604,21 +633,14 @@ function renderTable() {
 
     const addHint = Array(i).fill(currentDan).join('+');
 
-    row.innerHTML = `
-      <div class="table-row-inner">
-        <span class="mul">${currentDan} × ${i}</span>
-        <span class="add-hint">${addHint}</span>
-      </div>
-      <span class="result-num" style="color:${color}">${val}</span>`;
+    row.innerHTML = `<div class="table-row-inner"><span class="mul">${currentDan} × ${i}</span><span class="add-hint">${addHint}</span></div><span class="result-num" style="color:${color}">${val}</span>`;
     grid.appendChild(row);
   }
 }
-
-buildDanSel();
-renderTable();
+buildDanSel(); renderTable();
 
 // ════════════════════════════════
-//  HIDDEN TABLE: 전체 숨김 표 기능
+//  HIDDEN TABLE
 // ════════════════════════════════
 function buildFullGrid() {
   const grid = document.getElementById('full-grid');
@@ -629,10 +651,7 @@ function buildFullGrid() {
     for (let t = 1; t <= 10; t++) {
       const cell = document.createElement('div');
       cell.className = 'grid-cell';
-      cell.innerHTML = `
-        <div class="eq">${d} × ${t}</div>
-        <div class="ans">${d * t}</div>
-      `;
+      cell.innerHTML = `<div class="eq">${d} × ${t}</div><div class="ans">${d * t}</div>`;
       cell.onclick = () => { cell.classList.toggle('revealed'); };
       grid.appendChild(cell);
     }
@@ -641,7 +660,7 @@ function buildFullGrid() {
 buildFullGrid();
 
 // ════════════════════════════════
-//  QUIZ
+//  QUIZ & 노션 백엔드 보상 시스템
 // ════════════════════════════════
 const ALL_QUESTIONS = [];
 for (let d = 1; d <= 10; d++) {
@@ -659,12 +678,8 @@ for (let d = 1; d <= 10; d++) {
       const aVal = useA * t;
       const diff = ans - aVal;
       hint = `힌트: ${useA}×${t}=${aVal}, 여기서 ${diff>=0?'+':''}${diff}`;
-    } else if (d === 10) {
-      hint = `힌트: 10단! ${t}뒤에 0 → ${ans}`;
-    } else {
-      hint = `힌트: 5단 = 10×${t}÷2 = ${10*t}÷2`;
-    }
-
+    } else if (d === 10) { hint = `힌트: 10단! ${t}뒤에 0 → ${ans}`; } 
+    else { hint = `힌트: 5단 = 10×${t}÷2 = ${10*t}÷2`; }
     const addExp = Array(t).fill(d).join('+') + ' = ' + ans;
     ALL_QUESTIONS.push({ d, t, ans, wrongs:[...wrongs], hint, addExp });
   }
@@ -708,16 +723,6 @@ function renderQ() {
   });
 }
 
-// 음성 피드백
-function speakOut(text) {
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR'; u.rate = 1.0;
-    window.speechSynthesis.speak(u);
-  }
-}
-
 function checkQ(selected, q, btn) {
   if (qAnswered) return;
   qAnswered = true;
@@ -735,12 +740,10 @@ function checkQ(selected, q, btn) {
     btn.classList.add('correct');
     fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)];
     fb.className = 'q-feedback ok';
-    speakOut('정답!');
   } else {
     btn.classList.add('wrong');
     fb.textContent = `😅 아쉬워요! 정답은 ${q.ans}`;
     fb.className = 'q-feedback no';
-    speakOut('아쉬워요!');
   }
 
   ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--cyan)">${q.addExp}</span>`;
@@ -760,23 +763,20 @@ function showResult() {
   document.getElementById('quiz-play').style.display='none';
   const wrap = document.getElementById('result-wrap');
   wrap.classList.add('show');
-  
-  document.getElementById('rewardResultArea').innerHTML = ''; // 이전 보상 텍스트 리셋
 
   const correctCount = qScore / 10;
-  const pct = qScore / (qList.length * 10);
+  const pct = correctCount / qList.length;
   let emoji, title, msg;
-  if (pct===1)      { emoji='🏆'; title='완벽해요!'; msg='10문제 전부 맞혔어요! 구구단 마스터!'; launchConfetti(); speakOut('완벽해요! 구구단 마스터!'); }
-  else if (pct>=.8) { emoji='🌟'; title='훌륭해요!'; msg='거의 다 맞혔어요. 조금만 더 연습!'; speakOut('훌륭해요!'); }
-  else if (pct>=.6) { emoji='😊'; title='잘했어요!'; msg='절반 이상 맞혔어요! 10단·5단 다시 보고 재도전!'; speakOut('잘했어요!'); }
-  else              { emoji='💪'; title='도전 중!';  msg='개념 탭에서 원리를 다시 보고 와요!'; speakOut('조금만 더 연습해봐요!'); }
+  if (pct===1)      { emoji='🏆'; title='완벽해요!'; msg='10문제 전부 맞혔어요! 구구단 마스터!'; launchConfetti(); }
+  else if (pct>=.8) { emoji='🌟'; title='훌륭해요!'; msg='거의 다 맞혔어요. 조금만 더 연습!'; }
+  else if (pct>=.6) { emoji='😊'; title='잘했어요!'; msg='절반 이상 맞혔어요! 10단·5단 다시 보고 재도전!'; }
+  else              { emoji='💪'; title='도전 중!';  msg='개념 탭에서 원리를 다시 보고 와요!'; }
 
   document.getElementById('r-emoji').textContent = emoji;
   document.getElementById('r-title').textContent = title;
   document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`;
-  document.getElementById('r-msg').textContent   = msg;
+  document.getElementById('r-msg').innerHTML = msg + `<div id="r-detail" style="margin-top:20px;"></div>`;
 
-  // 🎯 정답을 맞힌 갯수만큼 노션 보상 기록
   if (correctCount > 0) {
     saveRewardToNotion(correctCount);
   }
@@ -799,53 +799,43 @@ function launchConfetti() {
   }
 }
 
-// 🚀 다이내믹 레벨업 계산 엔진
+// 🚀 백엔드 보상 연동 로직
 function calculateLevelInfo(totalRewards) {
-  let level = 1;
-  let requiredForNext = 20; 
-  let accumulatedForCurrentLevel = 0; 
-  while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
-    accumulatedForCurrentLevel += requiredForNext;
-    level++;
-    requiredForNext = 20 + (level - 1) * 5; 
+  let level = 1; let requiredForNext = 20; let accumulated = 0;
+  while (totalRewards >= accumulated + requiredForNext) {
+    accumulated += requiredForNext; level++; requiredForNext = 20 + (level - 1) * 5;
   }
-  let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
-  let remainingForNext = requiredForNext - currentLevelProgress; 
-  return { level, requiredForNext, remainingForNext, currentLevelProgress };
+  return { level, requiredForNext, remainingForNext: requiredForNext - (totalRewards - accumulated) };
 }
 
-// 🚀 노션 API 연결 및 보상 업데이트
 async function saveRewardToNotion(earned) {
-  if (currentUserName === '아빠' || currentUserName === '엄마') return;
-  const rewardArea = document.getElementById('rewardResultArea');
-  rewardArea.innerHTML = `<span id="notion-loading-msg" style="color:var(--cyan); font-weight:bold;">⏳ 구구단 보상(${earned}개) 지갑에 누적하는 중...</span>`;
+  const userName = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
+  if (userName === '어른') return;
+
+  const detailEl = document.getElementById('r-detail');
+  const originalText = detailEl.innerHTML;
+  detailEl.innerHTML = originalText + `<div id="notion-loading-msg" style="color:var(--cyan); font-weight:bold; font-size:1.1rem;">⏳ 노션 우주선 통신 중... (보상 ${earned}개 적립)</div>`;
 
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-      method: "POST", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName } } }) 
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } })
     });
-    const data = await response.json(); 
+    if (!response.ok) throw new Error("데이터 조회 실패");
+
+    const data = await response.json();
     if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
-    
-    const page = data.results[0]; 
+
+    const page = data.results[0];
     const props = page.properties;
 
-    let diamond = props["다이아몬드 개수"]?.number || 0; 
+    let diamond = props["다이아몬드 개수"]?.number || 0;
     let slime = props["슬라임 파츠 개수"]?.number || 0;
     let tickets = props["소원권 개수"]?.number || 0;
-    
-    let previousTotal = 0;
-    let currentTotal = 0;
-    let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
-    if (currentTheme === '마인크래프트') {
-      previousTotal = diamond;
-      currentTotal = diamond + earned;
-    } else {
-      previousTotal = slime;
-      currentTotal = slime + earned;
-    }
+    let previousTotal = currentTheme === '마인크래프트' ? diamond : slime;
+    let currentTotal = previousTotal + earned;
+    let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
     const prevLevelInfo = calculateLevelInfo(previousTotal);
     const currLevelInfo = calculateLevelInfo(currentTotal);
@@ -860,44 +850,47 @@ async function saveRewardToNotion(earned) {
       "소원권 개수": { number: newTickets }
     };
 
-    if (currentTheme === '마인크래프트') { updateProps["다이아몬드 개수"] = { number: currentTotal }; } 
+    if (currentTheme === '마인크래프트') { updateProps["다이아몬드 개수"] = { number: currentTotal }; }
     else { updateProps["슬라임 파츠 개수"] = { number: currentTotal }; }
 
-    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
-      method: "PATCH", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ properties: updateProps }) 
+    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ properties: updateProps })
     });
-    
-    // 🎯 구구단 탐험대 다크 테마에 맞는 보상 결과 UI
-    rewardArea.innerHTML = `
-      <div style="background:var(--surface); border:2px dashed var(--cyan); padding:16px; border-radius:12px; margin-top:10px; text-align: center;">
+
+    document.getElementById('notion-loading-msg').style.display = 'none';
+
+    detailEl.innerHTML = originalText + `
+      <div style="background:rgba(255,255,255,0.05); border:2px dashed var(--cyan); padding:16px; border-radius:12px; margin-top:15px; text-align: left;">
         <div style="font-size: 1.15rem; margin-bottom: 8px;">
           <b style="color:var(--cyan);">${rewardName} x ${currentTotal}</b>
         </div>
         <div style="font-size: 0.95rem; color: var(--muted); margin-bottom: 6px;">
-          다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b>${currLevelInfo.remainingForNext}</b>개 남음!
+          다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b style="color:var(--white);">${currLevelInfo.remainingForNext}</b>개 남음!
         </div>
-        ${isLevelUp ? `<div style="font-size:1.3rem; color:var(--pink); font-weight:bold; margin-top:10px;">🎉 수학 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
+        ${isLevelUp ? `<div style="text-align:center; font-size:1.3rem; color:var(--pink); font-weight:bold; margin-top:10px;">🎉 수학 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
       </div>
     `;
 
     if (isWishTicketEarned) {
       setTimeout(() => {
         document.getElementById('wishTicketCountDisplay').textContent = newTickets;
-        document.getElementById('wishTicketOverlay').classList.add('active');
-        speakOut('축하해요! 소원권을 획득했어요!');
+        document.getElementById('wishTicketOverlay').style.display = 'flex';
       }, 1000);
     }
-
   } catch (err) {
-    rewardArea.innerHTML = `<span style="color:var(--pink);">❌ 보상 저장 실패</span>`;
+    console.error(err);
+    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패 (프록시 확인 필요)`;
+    document.getElementById('notion-loading-msg').style.color = "var(--pink)";
   }
 }
 
 function closeWishTicket() {
-  document.getElementById('wishTicketOverlay').classList.remove('active');
+  document.getElementById('wishTicketOverlay').style.display = 'none';
 }
+
+// 퀴즈 초기화는 버튼 클릭으로만 시작하도록 수정 (자동 시작 방지)
+// initQuiz(); 삭제
 </script>
 </body>
 </html>
-
