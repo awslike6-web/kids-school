@@ -63,7 +63,7 @@
 
   .btn-math    { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 8px 22px rgba(240,147,251,0.35); }
   .btn-gugudan { background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%); box-shadow: 0 8px 22px rgba(22,33,62,0.35); }
-  .btn-korean  { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); box-shadow: 0 8px 22px rgba(255,117,140,0.35); } /* 🆕 국어방 전용 테마 */
+  .btn-korean  { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); box-shadow: 0 8px 22px rgba(255,117,140,0.35); }
   .btn-english { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 8px 22px rgba(79,172,254,0.35); }
   .btn-dic     { background: linear-gradient(135deg, #FFD93D 0%, #FF9F43 100%); box-shadow: 0 8px 22px rgba(255,217,61,0.35); }
 
@@ -121,27 +121,27 @@
   <p class="subtitle" style="margin-bottom: 20px;">어떤 곳으로 입장할까요?</p>
 
   <div class="subject-grid">
-    <a href="math.html" class="subject-btn btn-math">
+    <a href="kids/math.html" class="subject-btn btn-math">
       <div class="s-icon">✖️</div>
       <div class="s-info"><div class="s-label">수학 스피드 연산</div><div class="s-desc">구구단 · 덧셈뺄셈 · 떨어지는 게임</div></div>
     </a>
 
-    <a href="gugudan.html" class="subject-btn btn-gugudan">
+    <a href="kids/gugudan.html" class="subject-btn btn-gugudan">
       <div class="s-icon" style="border-color: #00D4FF;">🚀</div>
       <div class="s-info"><div class="s-label" style="color: #FFD93D;">구구단 탐험대</div><div class="s-desc" style="color: #AAB7B8;">우주 테마로 배우는 구구단 원리</div></div>
     </a>
 
-    <a href="korean.html" class="subject-btn btn-korean">
+    <a href="kids/korean.html" class="subject-btn btn-korean">
       <div class="s-icon">📖</div>
       <div class="s-info"><div class="s-label">국어 멀티버스</div><div class="s-desc">문장 실력 테스트 · 맞춤법 · 논리학 대화</div></div>
     </a>
 
-    <a href="english-typing.html" class="subject-btn btn-english">
+    <a href="kids/english-typing.html" class="subject-btn btn-english">
       <div class="s-icon">A</div>
       <div class="s-info"><div class="s-label">영단어 탐험대</div><div class="s-desc">노션 단어장 · 퀴즈 · 오답 복습</div></div>
     </a>
     
-    <a href="korean_app.html" class="subject-btn btn-dic">
+    <a href="kids/korean_app.html" class="subject-btn btn-dic">
       <div class="s-icon">📚</div>
       <div class="s-info"><div class="s-label">용어사전방</div><div class="s-desc">새싹 받아쓰기 · 척척박사 개념 사전</div></div>
     </a>
@@ -182,7 +182,6 @@ function selectChild(profileKey, displayName) {
   document.getElementById('welcomeName').textContent = displayName; showScreen('screen-subjects'); loadUserInventory(displayName);
 }
 
-// 💎 기존 노션 인벤토리 실시간 로딩 로직 완벽 보존
 async function loadUserInventory(userName) {
   const container = document.getElementById('inventoryDisplay'); container.className = 'inventory-card'; document.body.className = '';
   if (userName === '아빠' || userName === '엄마') {
