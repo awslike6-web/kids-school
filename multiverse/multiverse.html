@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지인 공부방 허브</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4; --purple: #A78BFA; --dark: #2D2D4E; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #f5f7fa 0%, #e4e8f0 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: var(--dark); }
+  
+  .main-title { font-family: 'Gaegu', cursive; font-size: 3rem; margin-bottom: 8px; color: var(--purple); text-align: center; }
+  .subtitle { font-size: 1.05rem; color: #778; margin-bottom: 32px; text-align: center; }
+  .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; width: 100%; max-width: 450px; }
+  
+  .profile-btn { border: none; border-radius: 24px; padding: 24px 16px; cursor: pointer; font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: all 0.2s; background: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.06); color: var(--dark); border: 2px solid #e2e8f0; }
+  .profile-btn:hover { transform: translateY(-5px); border-color: var(--pink); box-shadow: 0 12px 24px rgba(255,107,157,0.15); }
+  .profile-btn .avatar { width: 56px; height: 56px; border-radius: 50%; background: #f0f4f8; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+  
+  /* 주아 전용 하이라이트 스타일 */
+  .profile-btn.jua-style:hover { border-color: var(--pink); color: var(--pink); }
+
+  .back-btn { margin-top: 40px; padding: 10px 24px; border-radius: 16px; border: 2px solid #cbd5e1; background: #fff; color: #64748b; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
+  .back-btn:hover { background: #f1f5f9; color: var(--dark); }
+</style>
+</head>
+<body>
+
+  <h1 class="main-title">🌟 지인 공부방 선택</h1>
+  <p class="subtitle">입장할 어린이 공부방을 선택해 주세요!</p>
+
+  <div class="profile-grid">
+    <button class="profile-btn jua-style" onclick="location.href='jua/jua_hub.html'">
+      <div class="avatar">👧</div><div>주아 방</div>
+    </button>
+    
+    <button class="profile-btn" style="opacity: 0.5; cursor: not-allowed;">
+      <div class="avatar">👤</div><div>지인 2호</div>
+    </button>
+    <button class="profile-btn" style="opacity: 0.5; cursor: not-allowed;">
+      <div class="avatar">👤</div><div>지인 3호</div>
+    </button>
+  </div>
+
+  <button class="back-btn" onclick="location.href='index_friends.html'">← 마스터 허브로</button>
+
+</body>
+</html>
