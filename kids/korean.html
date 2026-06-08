@@ -397,6 +397,7 @@ triggerNotionReward(isSuccess); // 성공 여부(true/false)를 함수로 던져
 
 // 1. 매개변수 isSuccess를 받아오도록 수정 (민수/민서 모두 공통)
 async function triggerNotionReward(isSuccess) {
+    const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
     const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
     const childName = currentMode === 'easy' ? '민서' : '민수';
     const rewardProp = currentMode === 'easy' ? '슬라임 파츠 개수' : '다이아몬드 개수';
