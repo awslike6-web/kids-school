@@ -103,6 +103,34 @@
   .div-input.correct { border-color: var(--green); background: #f0fff4; }
   .div-input.wrong { border-color: var(--pink); background: #fff5f5; }
 
+/* 📝 세로셈 전용 연습장(메모장) 스타일 */
+.v-scratchpad {
+  width: 100%;
+  height: 65px;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border: 2px dashed #b0b0b0;
+  border-radius: 14px;
+  background-color: #fffceb; /* 연한 연습장 색상 */
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  color: #555;
+  resize: none; /* 주아가 임의로 크기를 조절하지 못하도록 고정 */
+  outline: none;
+  box-sizing: border-box;
+}
+
+.v-scratchpad:focus {
+  border-color: var(--pink);
+  background-color: #fff;
+}
+
+/* 나눗셈 보드 안에서의 가로폭 최적화 */
+.div-board .v-scratchpad {
+  max-width: 210px;
+  margin: 12px 0 4px 0;
+}
+
   /* 객관식 떨어지는 모드 전용 UI CSS */
   #screen-falling { background: linear-gradient(180deg, #1a1a3e 0%, #2d1b69 60%, #1a1a3e 100%); color: #fff; }
   .f-header-box { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px 14px; font-size: 0.95rem; }
@@ -725,6 +753,10 @@ function nextVerticalQ(){
   document.getElementById('v-feedbackMsg').textContent='';
   const container = document.getElementById('vertical-container');
   
+  // 1️⃣ 여기에 공통 메모장 변수를 딱 한 줄 선언해 둡니다.
+  const scratchpadHtml = `<textarea class="v-scratchpad" placeholder="여기에 풀이 과정을 끄적여보세요" rows="2"></textarea>`;
+
+  // 2️⃣ 아래 각각의 화면(innerHTML) 안에 ${scratchpadHtml}를 끼워 넣어서 출력합니다.
   // [개편] 곱셈 세로셈
   if(q.opType === 'mul'){
     container.innerHTML = `
@@ -735,6 +767,7 @@ function nextVerticalQ(){
         <div class="v-row">${q.numA}</div>
         <div class="v-row"><span class="v-symbol">×</span>${q.numB}</div>
         <div class="v-line"></div>
+        ${scratchpadHtml}
         <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div>
       </div>`;
   } 
@@ -748,6 +781,7 @@ function nextVerticalQ(){
           <span class="div-bracket">)</span>
           <span class="div-dividend">${q.numA}</span>
         </div>
+        ${scratchpadHtml}
         <div class="div-result-area">
           <div class="div-input-group">
             <span class="div-input-label">몫</span>
@@ -772,12 +806,12 @@ function nextVerticalQ(){
         <div class="v-row">${q.numA}</div>
         <div class="v-row"><span class="v-symbol">${isAdd?'＋':'－'}</span>${q.numB}</div>
         <div class="v-line"></div>
+        ${scratchpadHtml}
         <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div>
       </div>`;
   }
   setTimeout(()=> document.getElementById('v-ans')?.focus(), 100);
 }
-
 function submitVertical(){
   const q = gameState.questions[gameState.current];
   const inp = document.getElementById('v-ans'); 
