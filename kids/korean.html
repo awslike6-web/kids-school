@@ -379,10 +379,8 @@
             appendMessage('ai', aiResponse);
             speakTTS(aiResponse, config.pitch);
 
-// [수정 전] if (aiResponse.includes('[SUCCESS]') || currentMode === 'easy') { triggerNotionReward(); }
-// [수정 후] 
-const isSuccess = aiResponse.includes('[SUCCESS]');
-triggerNotionReward(isSuccess); // 성공 여부(true/false)를 함수로 던져줍니다.
+            if (aiResponse.includes('[SUCCESS]') || currentMode === 'easy') {
+                triggerNotionReward();
             }
 
         } catch (error) {
@@ -395,60 +393,48 @@ triggerNotionReward(isSuccess); // 성공 여부(true/false)를 함수로 던져
         }
     }
 
-// 1. 매개변수 isSuccess를 받아오도록 수정 (민수/민서 모두 공통)
-async function triggerNotionReward(isSuccess) {
-    const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-    const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-    const childName = currentMode === 'easy' ? '민서' : '민수';
-    const rewardProp = currentMode === 'easy' ? '슬라임 파츠 개수' : '다이아몬드 개수';
-    const rewardIcon = currentMode === 'easy' ? '💧' : '💎';
-    
-    // 2. 성공 시 5개, 실패 시 1개 로직 적용
-    const earnAmount = isSuccess ? 5 : 1;
-    
-    const detailEl = document.getElementById('r-detail'); 
-    // detailEl이 없는 경우를 대비한 안전장치
-    if (!detailEl) return; 
-    
-    console.log(`🎉 [보상 발송] ${childName} -> ${rewardProp} (+${earnAmount})`);
+    async function triggerNotionReward() {
+        const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+        const childName = currentMode === 'easy' ? '민서' : '민수';
+        const rewardProp = currentMode === 'easy' ? '슬라임 파츠 개수' : '다이아몬드 개수';
+        const rewardIcon = currentMode === 'easy' ? '💧' : '💎';
 
-    try {
-        const queryRes = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                filter: { property: "이름", title: { equals: childName } }
-            })
-        });
-        
-        const data = await queryRes.json();
-        if (!data.results || data.results.length === 0) throw new Error("아이 데이터를 찾을 수 없습니다.");
-        
-        const pageId = data.results[0].id;
-        const currentCount = data.results[0].properties[rewardProp]?.number || 0;
+        console.log(`🎉 [보상 발송] ${childName} -> ${rewardProp} (+1)`);
 
-        const patchRes = await fetch(`${WORKER_PROXY_URL}/v1/pages/${pageId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                properties: { [rewardProp]: { number: currentCount + earnAmount } }
-            })
-        });
+        try {
+            const queryRes = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    filter: { property: "이름", title: { equals: childName } }
+                })
+            });
+            
+            const data = await queryRes.json();
+            if (!data.results || data.results.length === 0) throw new Error("아이 데이터를 찾을 수 없습니다.");
+            
+            const pageId = data.results[0].id;
+            const currentCount = data.results[0].properties[rewardProp]?.number || 0;
 
-        if (!patchRes.ok) throw new Error("보상 적립 통신 실패");
+            const patchRes = await fetch(`${WORKER_PROXY_URL}/v1/pages/${pageId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    properties: { [rewardProp]: { number: currentCount + 1 } }
+                })
+            });
 
-        // 3. 상황에 맞는 메시지 출력
-        const successMsg = isSuccess 
-            ? `미션 성공! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`
-            : `열심히 작성했어요! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`;
-        
-        appendMessage('ai', successMsg);
-        if(isSuccess) speakTTS("미션 성공! 보상이 적립되었습니다.", 1.2);
-        
-    } catch (error) {
-        console.error("노션 자동화 통신 실패:", error);
+            if (!patchRes.ok) throw new Error("보상 적립 통신 실패");
+
+            const successMsg = `미션 성공! ${rewardIcon} ${rewardProp.replace(' 개수', '')} 1개가 적립되었습니다! (총 ${currentCount + 1}개)`;
+            appendMessage('ai', successMsg);
+            speakTTS("미션 성공! 보상이 적립되었습니다.", 1.2);
+
+        } catch (error) {
+            console.error("노션 자동화 통신 실패:", error);
+            appendMessage('ai', "앗! 보상 적립용 프록시 파이프라인에 오류가 났습니다. 아빠에게 말씀해 주세요!");
+        }
     }
-}
 
     window.addEventListener('DOMContentLoaded', () => {
         if(window.speechSynthesis) {
