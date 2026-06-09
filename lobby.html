@@ -1,255 +1,56 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민이네 공부방 - 대형 로비</title>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
-    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
-    --dark: #2D2D4E; --card: rgba(255,255,255,0.94);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Jua', sans-serif; min-height: 100vh; overflow-x: hidden; transition: background 0.5s ease, color 0.5s ease; padding-bottom: 40px; }
-  
-  /* ----------------------------------
-     🎮 민수 테마: 고성능 게임 아케이드 유니버스
-     ---------------------------------- */
-  body.theme--arcade {
-    background: linear-gradient(160deg, #09070f 0%, #110e1c 50%, #1a152e 100%);
-    color: #e2e8f0;
-  }
-  body.theme--arcade .main-title .accent2 { color: #00f2fe; text-shadow: 0 0 12px rgba(0,242,254,0.6); }
-  body.theme--arcade .main-title .accent { color: #ff007f; text-shadow: 0 0 12px rgba(255,0,127,0.6); }
-  body.theme--arcade .subtitle { color: #a0aec0; }
-  body.theme--arcade .user-welcome { background: rgba(30, 25, 50, 0.75); border-color: rgba(0, 242, 254, 0.4); color: #fff; }
-  body.theme--arcade .user-welcome span { color: #00f2fe; }
-  body.theme--arcade .inventory-card { background: rgba(20, 16, 38, 0.85); border-color: #00f2fe; box-shadow: 0 0 15px rgba(0,242,254,0.25); color: #fff; }
-  body.theme--arcade .math-level { background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); }
-  
-  /* 민수용 대형 월드 카드 */
-  body.theme--arcade .world-card { background: rgba(28, 22, 50, 0.85); border: 2.5px solid #2d2454; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-  body.theme--arcade .world-card:hover { border-color: #00f2fe; box-shadow: 0 0 20px rgba(0,242,254,0.3); }
-  body.theme--arcade .world-title { color: #00f2fe; border-bottom: 2px dashed rgba(0,242,254,0.2); }
-  body.theme--arcade .sub-room-btn { background: linear-gradient(135deg, #2a204a 0%, #1b1435 100%); border: 1px solid rgba(255,255,255,0.05); color: #fff; }
-  body.theme--arcade .sub-room-btn:hover { background: linear-gradient(135deg, #ff007f 0%, #7928ca 100%); transform: translateX(5px); }
-  body.theme--arcade .back-btn { background: rgba(30, 25, 50, 0.8); border-color: rgba(255,255,255,0.1); color: #a0aec0; }
-  body.theme--arcade .chatbot-btn { background: linear-gradient(135deg, #00f2fe, #4facfe); box-shadow: 0 8px 25px rgba(0,242,254,0.4); }
-
-  /* ----------------------------------
-     🎠 민서 테마: 아기자기 동화 속 비밀 아지트
-     ---------------------------------- */
-  body.theme--hideout {
-    background: linear-gradient(160deg, #fff0f3 0%, #ffe5ec 50%, #fffbe6 100%);
-    color: #4a384f;
-  }
-  body.theme--hideout .main-title .accent2 { color: #a78bfa; }
-  body.theme--hideout .main-title .accent { color: #ff6b9d; }
-  body.theme--hideout .subtitle { color: #8d6e63; }
-  body.theme--hideout .user-welcome { background: rgba(255,255,255,0.9); border-color: #ffb74d; color: #4a384f; }
-  body.theme--hideout .user-welcome span { color: #ff6b9d; }
-  body.theme--hideout .inventory-card { background: #ffffff; border-color: #ff80ab; box-shadow: 0 8px 22px rgba(255,64,129,0.12); color: #4a384f; }
-  body.theme--hideout .math-level { background: #ffe4e1; color: #ff4081; }
-  
-  /* 민서용 대형 월드 카드 */
-  body.theme--hideout .world-card { background: rgba(255, 255, 255, 0.9); border: 2.5px solid #fff; box-shadow: 0 10px 25px rgba(255,182,193,0.2); }
-  body.theme--hideout .world-card:hover { transform: translateY(-6px); box-shadow: 0 15px 30px rgba(255,107,157,0.25); border-color: #ff6b9d; }
-  body.theme--hideout .world-title { color: #ff6b9d; border-bottom: 2px dashed rgba(255,107,157,0.2); }
-  body.theme--hideout .sub-room-btn { background: #fff; border: 1.5px solid #ffe0e6; color: #5c4663; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-  body.theme--hideout .sub-room-btn:hover { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); color: #fff; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(255,117,140,0.3); }
-  body.theme--hideout .back-btn { background: #ffffff; border-color: rgba(0,0,0,0.06); color: #8d6e63; }
-  body.theme--hideout .chatbot-btn { background: linear-gradient(135deg, #ff758c, #ff9f43); box-shadow: 0 8px 25px rgba(255,117,140,0.4); }
-
-  /* 파티클 및 레이아웃 공통 공정 */
-  .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-  .float-item { position: absolute; font-size: 1.8rem; opacity: 0.14; animation: floatUp linear infinite; font-family: 'Gaegu', cursive; font-weight: 700; }
-  @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.14; } 90% { opacity: 0.14; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
-
-  .screen { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding: 36px 16px 60px; min-height: 100vh; animation: fadeIn .35s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-  .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2.2rem, 9vw, 3.8rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 6px; }
-  .subtitle { font-family: 'Gaegu', cursive; font-size: 1.1rem; margin-bottom: 16px; }
-  .user-welcome { display: inline-block; padding: 8px 22px; border-radius: 999px; font-size: 1.25rem; margin-bottom: 14px; backdrop-filter: blur(8px); font-weight: bold; }
-
-  .inventory-card { border-radius: 22px; padding: 16px; width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border: 2px solid; }
-  .reward-badge { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: bold; }
-  .math-level { font-size: 1.1rem; padding: 4px 14px; border-radius: 12px; font-weight: bold; }
-
-  /* 💎 핵심 인프라: 2x2 대형 월드 그리드 레이아웃 */
-  .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 840px; margin-top: 10px; }
-  @media (max-width: 700px) { .world-grid { grid-template-columns: 1fr; max-width: 440px; } }
-
-  /* 월드 큰 대문 카드 디자인 */
-  .world-card { border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
-  .world-title { font-size: 1.4rem; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-  
-  /* 내부 메뉴 진입 버튼 목록 */
-  .sub-room-list { display: flex; flex-direction: column; gap: 10px; }
-  .sub-room-btn { display: flex; flex-direction: column; padding: 14px 18px; border-radius: 16px; text-decoration: none; transition: all 0.25s ease; cursor: pointer; }
-  .sub-room-name { font-size: 1.15rem; font-weight: bold; margin-bottom: 2px; }
-  .sub-room-desc { font-size: 0.8rem; opacity: 0.8; font-family: 'Gaegu', cursive; }
-
-  .back-btn { margin-top: 36px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
-
-  /* 🧚‍♀️ 우측 하단 고정형 만능 단어 요정 챗봇 컴포넌트 */
-  .chatbot-btn { position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.4); z-index: 999; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: pulseBot 2s infinite; }
-  .chatbot-btn:hover { transform: scale(1.15) rotate(15deg); }
-  @keyframes pulseBot { 0% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0.4); } 70% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 15px rgba(167, 139, 250, 0); } 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0); } }
-</style>
-</head>
-<body>
-
-<div class="bg-floats" id="bgFloats"></div>
-
-<div class="screen" id="screen-subjects">
-  <h1 class="main-title"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
-  
-  <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
-
-  <div class="inventory-card" id="inventoryDisplay">
-    <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
-  </div>
-
-  <p class="subtitle">모험할 메인 월드를 선택해봐!</p>
-
-  <div class="world-grid" id="worldGrid"></div>
-  
-  <a href="index.html" class="back-btn">← 처음 프로필 화면으로</a>
-</div>
-
-<div class="chatbot-btn" onclick="triggerChatbotPopup()">🧚‍♀️</div>
-
-<script>
-// =========================================================
-// 💎 무한 확장 가능한 구조형 카테고리 맵 (예체능 등 추후 추가 용이)
-// =========================================================
-const USER_CONFIGS = {
-  minsu: {
-    name: '민수', key: 'son', themeClass: 'theme--arcade',
-    welcomeText: '🎮 아케이드 가동! 미션 스테이지를 클리어해라, 민수!',
-    bgSymbols: ['🛸', '🚀', '👾', '🕹️', '⚡', '+', '✖️', '=', '🤖', '🔋'],
-    worlds: [
-      {
-        title: '🧮 수학 월드',
-        rooms: [
-          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '사칙연산 스피드 서킷 레이싱! (최고 속도 도전)' },
-          { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '우주 궤도를 돌며 광속으로 파괴하는 배틀 구구단' }
-        ]
-      },
-      {
-        title: '✍️ 국어 월드',
-        rooms: [
-          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '조심해! 오싹오싹 유행어 밈과 빈칸 채우기 퍼즐' },
-          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '논리 회로 분석 모드! 문장을 완벽하게 조립하라' }
-        ]
-      },
-      {
-        title: '🔤 영어 던전',
-        rooms: [
-          { name: '영단어 기억방', href: 'kids/english-typing.html', desc: '노션 단어 데이터 매핑 퀴즈 및 고속 타자 훈련' }
-        ]
-      },
-      {
-        title: '🦖 탐구 그림사전',
-        rooms: [
-          { name: '사회/과학 용어사전', href: 'kids/voca.html', desc: '우주와 지구 백과사전! 마스터 데이터베이스 열람' }
-        ]
-      }
-    ]
-  },
-  minseo: {
-    name: '민서', key: 'daughter', themeClass: 'theme--hideout',
-    welcomeText: '🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, 민서!',
-    bgSymbols: ['🎈', '🧸', '🏰', '✨', '🍭', '🌸', '🧚', '🦄', '🎀', '🍓'],
-    worlds: [
-      {
-        title: '🧮 수학 월드',
-        rooms: [
-          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '신나고 박진감 넘치는 덧셈뺄셈 스피드 게임 놀이터' },
-          { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '환상의 유니콘과 함께 은하수를 건너는 구구단 여행' }
-        ]
-      },
-      {
-        title: '✍️ 국어 월드',
-        rooms: [
-          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '새콤달콤 재미있고 신기한 단어 쏙쏙 채워넣기 퀴즈' },
-          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '비밀 요정들과 함께 나누는 상상력 가득 논리 대화방' }
-        ]
-      },
-      {
-        title: '🔤 영어 던전',
-        rooms: [
-          { name: '영단어 기억방', href: 'kids/english-typing.html', desc: '예쁜 그림 카드로 타이핑하며 깨우치는 마법 단어장' }
-        ]
-      },
-      {
-        title: '🦖 탐구 그림사전',
-        rooms: [
-          { name: '사회/과학 용어사전', href: 'kids/voca.html', desc: '새싹 받아쓰기와 척척박사 개념 동물/곤충 그림 백과' }
-        ]
-      }
-    ]
-  }
-};
-
-const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-
-// 유저 확인 파서
-const urlParams = new URLSearchParams(window.location.search);
-let userKey = urlParams.get('user');
-if (!userKey || !USER_CONFIGS[userKey]) {
-  const savedName = localStorage.getItem('currentUserName');
-  userKey = (savedName === '민서') ? 'minseo' : 'minsu'; 
-}
-const currentConfig = USER_CONFIGS[userKey];
-
-// 동적 엔진 바인딩
-document.body.classList.add(currentConfig.themeClass);
-document.getElementById('welcomeMessage').innerHTML = currentConfig.welcomeText;
-localStorage.setItem('currentUser', currentConfig.key); 
-localStorage.setItem('currentUserName', currentConfig.name);
-
-// 🛠️ 대형 4개 카드 및 내부 메뉴 자동 조립 빌더
-(function buildCategorizedMenu() {
-  const grid = document.getElementById('worldGrid');
-  grid.innerHTML = '';
-
-  currentConfig.worlds.forEach(world => {
-    // 1. 큰 월드 카드 생성
-    const card = document.createElement('div');
-    card.className = 'world-card';
-
-    // 2. 월드 헤더(타이틀) 부착
-    const title = document.createElement('div');
-    title.className = 'world-title';
-    title.textContent = world.title;
-    card.appendChild(title);
-
-    // 3. 내부 서브 메뉴 서랍장 생성
-    const roomList = document.createElement('div');
-    roomList.className = 'sub-room-list';
-
-    world.rooms.forEach(room => {
-      const a = document.createElement('a');
-      a.href = room.href;
-      a.className = 'sub-room-btn';
-      a.innerHTML = `
-        <div class="sub-room-name">${room.name}</div>
-        <div class="sub-room-desc">${room.desc}</div>
-      `;
-      roomList.appendChild(a);
-    });
-
-    card.appendChild(roomList);
-    grid.appendChild(card);
-  });
-})();
-
 // 배경 부유물 애니메이션 모듈
 (function createFloatingParticles() {
   const wrap = document.getElementById('bgFloats');
-  const symbols = currentConfig.bgSymbols
+  const symbols = currentConfig.bgSymbols;
+  for (let i = 0; i < 18; i++) {
+    const el = document.createElement('div');
+    el.className = 'float-item';
+    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.left = (Math.random() * 92) + '%';
+    el.style.animationDuration = (11 + Math.random() * 13) + 's';
+    el.style.animationDelay = (-Math.random() * 15) + 's';
+    wrap.appendChild(el);
+  }
+})();
+
+// 🧚‍♀️ 만능 단어 요정 챗봇 호출 인터페이스
+function triggerChatbotPopup() {
+  alert(`🧚‍♀️ [만능 단어 요정]님이 로비에 나타났습니다!\n"안녕, ${currentConfig.name}! 모르는 단어가 생겼거나 퀴즈 힌트가 필요하면 언제든 나를 불러줘!"`);
+}
+
+// 노션 백엔드 인벤토리 자동 전송기
+window.onload = async function() {
+  const container = document.getElementById('inventoryDisplay');
+  const childName = currentConfig.name;
+  
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+    });
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
+    
+    const props = data.results[0].properties;
+    const theme = props["현재 테마"]?.select?.name || (childName === '민수' ? '마인크래프트' : '슬라임');
+    const diamond = props["다이아몬드 개수"]?.number || 0;
+    const slime = props["슬라임 파츠 개수"]?.number || 0;
+    const level = props["수학 레벨"]?.number || 1;
+    
+    localStorage.setItem('currentTheme', theme);
+    if (theme === '마인크래프트') {
+      container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">Lv. ${level}</div>`;
+      container.classList.add('theme--minecraft');
+    } else {
+      container.innerHTML = `<div class="reward-badge">💧 <span style="color:#388E3C;">x${slime}</span></div><div class="math-level">Lv. ${level}</div>`;
+      container.classList.add('theme--slime');
+    }
+  } catch (error) {
+    console.error("인벤토리 로드 에러:", error);
+    const defaultTheme = childName === '민수' ? '마인크래프트' : '슬라임';
+    localStorage.setItem('currentTheme', defaultTheme);
+    container.innerHTML = `<div class="reward-badge">${defaultTheme === '마인크래프트' ? '💎' : '💧'} <span>x0 (연결 필요)</span></div>`;
+  }
+};
+</script>
+</body>
+</html>
