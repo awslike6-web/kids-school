@@ -531,17 +531,60 @@ function getDisplayInfo(word) {
   return `📖 뜻풀이:\n${word.meaning}\n\n💡 힌트:\n${word.hint || '없음'}`;
 }
 
-function speakCurrentWord() {
-  if(currentIndex >= totalCount) return;
+// 🎯 노션의 오디오 파일이 들어있는 컬럼(속성) 이름을 적어주세요.
+const AUDIO_PROP_NAME = "음성파일"; 
+
+async function speakCurrentWord() {
+  if (currentIndex >= totalCount) return;
   const word = words[currentIndex];
+
+  try {
+    // 1. 해당 단어의 노션 페이지 정보를 '실시간'으로 새로 가져옵니다.
+    const response = await fetch(`${PROXY_URL}/v1/pages/${word.pageId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (!response.ok) throw new Error("노션 페이지 접근 실패");
+    
+    const pageData = await response.json();
+    const audioProp = pageData.properties[AUDIO_PROP_NAME];
+
+    // 2. 파일이 존재하는지 확인하고 최신 URL을 가져옵니다.
+    if (audioProp && audioProp.files && audioProp.files.length > 0) {
+      const latestAudioUrl = audioProp.files[0].file?.url || audioProp.files[0].external?.url;
+      
+      if (latestAudioUrl) {
+        const audio = new Audio(latestAudioUrl);
+        await audio.play();
+        console.log(`[${word.word}] 노션 최신 음성 재생 완료!`);
+        return; 
+      }
+    }
+    
+    throw new Error("오디오 파일이 등록되지 않았습니다.");
+
+  } catch (error) {
+    // 3. 에러 발생 시 지체 없이 TTS로 대체
+    console.log(`[${word.word}] 직접 녹음 오디오 로드 실패, TTS를 실행합니다. (${error.message})`);
+    fallbackToTTS(word.word);
+  }
+}
+
+// 브라우저 기본 TTS (기계음 대체 실행 함수)
+function fallbackToTTS(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(word.word);
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'ko-KR';
     utterance.rate = 0.85; 
     window.speechSynthesis.speak(utterance);
   }
 }
+
+// ==========================================
+// 아래부터는 기존 코드 그대로 유지하시면 됩니다!
+// ==========================================
 
 function submitAnswer() {
   const inputEl = document.getElementById('answerInput');
