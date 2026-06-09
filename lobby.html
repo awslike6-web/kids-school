@@ -466,7 +466,7 @@ window.onload = async function() {
 </script>
 </body>
 </html>
-  daughter: {
+  minseo: {
     name: '민서', key: 'daughter', themeClass: 'theme--hideout',
     welcomeText: '🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, 민서!',
     bgSymbols: ['🎈', '🧸', '🏰', '✨', '🍭', '🌸', '🧚', '🦄', '🎀', '🍓'],
@@ -509,7 +509,7 @@ const urlParams = new URLSearchParams(window.location.search);
 let userKey = urlParams.get('user');
 if (!userKey || !USER_CONFIGS[userKey]) {
   const savedName = localStorage.getItem('currentUserName');
-  userKey = (savedName === '민서') ? 'daughter' : 'minsu'; 
+  userKey = (savedName === '민서') ? 'minseo' : 'minsu'; 
 }
 const currentConfig = USER_CONFIGS[userKey];
 
