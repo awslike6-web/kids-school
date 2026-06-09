@@ -300,6 +300,7 @@ async function loadKoreanWords() {
     allFetchedWords = allResults.map(page => {
       const p = page.properties;
       return {
+        pageId: page.id, // 👉 혹시 이 줄이 빠져있지 않나요?! (아주 중요합니다!)
         word: p["단어"]?.title[0]?.plain_text || "",
         meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", // 🎯 '뜻풀이'와 '뜻' 둘 다 호환되도록 안전장치!
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
