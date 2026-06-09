@@ -4,7 +4,7 @@
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 
 // ⚠️ 아버님 노션에 새로 만드신 '아이들학습일지DB'의 ID를 여기에 넣어주세요!
-const STUDY_LOG_DB_ID = "여기에_학습일지_DB_ID를_넣어주세요"; 
+const STUDY_LOG_DB_ID = "37aa27115b688001b2ffe5e6c8f82ab2"; 
 
 /**
  * 학습 일지를 노션으로 전송하는 범용 함수
