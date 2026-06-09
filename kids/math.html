@@ -89,23 +89,25 @@
   .v-input.wrong { border-color: var(--pink); background: #fff5f5; }
   .v-input.tiny { font-size: 1rem; width: 36px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; text-align: center; border-radius: 8px; outline: none; background: #fffceb; }
 
-  /* ✏️ 세로셈 풀이용 줄 스타일 */
-  .v-scratch-line {
-    width: 100%;
-    height: 40px;
-    border-bottom: 2px dashed #ccc;
-    margin: 5px 0;
-    font-family: 'Jua', sans-serif;
-    font-size: 2rem;
-    text-align: right;
-    letter-spacing: 4px;
-    padding-right: 10px;
-    border-radius: 0;
-    background: transparent;
-    outline: none;
-    border-top: none; border-left: none; border-right: none;
+/* ✏️ 세로셈 풀이용 칸 스타일 (자릿수 정렬) */
+  .v-scratch-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px; /* 위쪽 문제 숫자 간격과 동일하게 맞춤 */
+    margin: 4px 0;
   }
-  .v-scratch-line:focus { border-bottom-color: var(--mint); }
+  .v-scratch-cell {
+    width: 36px;
+    height: 36px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background: #fff;
+    text-align: center;
+    font-size: 1.5rem;
+    font-family: 'Jua', sans-serif;
+    outline: none;
+  }
+  .v-scratch-cell:focus { border-color: var(--mint); background: #f0fff4; }
 
   /* 나눗셈 세로셈 스타일 */
   .div-board { background: #fff; padding: 25px; border-radius: 24px; border: 4px solid var(--sky); display: flex; flex-direction: column; align-items: center; min-width: 260px; }
@@ -792,9 +794,12 @@ function nextVerticalQ(){
         <div class="v-row"><span class="v-symbol">×</span>${q.numB}</div>
         <div class="v-line"></div>
 
-       <input type="text" class="v-scratch-line" placeholder="풀이 1">
-           <input type="text" class="v-scratch-line" placeholder="풀이 2">   
-
+<div class="v-scratch-row">
+      <input type="text" class="v-scratch-cell" maxlength="1"><input type="text" class="v-scratch-cell" maxlength="1">
+    </div>
+    <div class="v-scratch-row">
+      <input type="text" class="v-scratch-cell" maxlength="1"><input type="text" class="v-scratch-cell" maxlength="1">
+    </div>
         <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div>
       </div>`;
   } 
@@ -809,9 +814,12 @@ function nextVerticalQ(){
           <span class="div-dividend">${q.numA}</span>
         </div>
 
-        <input type="text" class="v-scratch-line" placeholder="풀이 1">
-             <input type="text" class="v-scratch-line" placeholder="풀이 2">
-
+<div class="v-scratch-row">
+      <input type="text" class="v-scratch-cell" maxlength="1"><input type="text" class="v-scratch-cell" maxlength="1">
+    </div>
+    <div class="v-scratch-row">
+      <input type="text" class="v-scratch-cell" maxlength="1"><input type="text" class="v-scratch-cell" maxlength="1">
+    </div>
         <div class="div-result-area">
           <div class="div-input-group">
             <span class="div-input-label">몫</span>
@@ -837,8 +845,12 @@ function nextVerticalQ(){
         <div class="v-row"><span class="v-symbol">${isAdd?'＋':'－'}</span>${q.numB}</div>
         <div class="v-line"></div>
 
-        <input type="text" class="v-scratch-line" placeholder="풀이 1">
-             <input type="text" class="v-scratch-line" placeholder="풀이 2">
+<div class="v-scratch-row">
+      <input type="text" class="v-scratch-cell" maxlength="1"><input type="text" class="v-scratch-cell" maxlength="1">
+    </div>
+    <div class="v-scratch-row">
+      <input type="text" class="v-scratch-cell" maxlength="1"><input type="text" class="v-scratch-cell" maxlength="1">
+    </div>
 
         <div class="v-row"><input type="number" class="v-input ans" id="v-ans" placeholder="정답"></div>
       </div>`;
