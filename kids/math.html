@@ -298,7 +298,7 @@
       <button class="mode-btn wrong-note" onclick="startWrongNote()">🖍️ 오답 풀기 (<span id="wrongCountBadge">0</span>)</button>
     </div>
   </div>
-  <button class="big-btn back-btn" onclick="location.href='../lobby.html'">🚪 공부방 메인으로 나가기</button>
+  <button class="big-btn back-btn" onclick="location.href='index.html'">🚪 공부방 메인으로 나가기</button>
 </div>
 
 <!-- 객관식 모드 화면 복구 -->
@@ -364,17 +364,12 @@
     <button class="btn btn-primary" onclick="closeWishTicket()" style="width:100%; background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.2rem; padding: 16px; border: none; border-radius: 16px; cursor: pointer;">신난다! 닫기</button>
   </div>
 </div>
+<script src="math_common.js"></script>
 
 <script>
 // 객관식 떨어지는 모드 전역 변수
 let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 
-// 🚀 노션 API 설정
-const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-
-let currentProfile = 'son'; 
-let currentTheme = '마인크래프트';
 let wrongNotes = []; 
 let gameState = {};
 
@@ -891,29 +886,6 @@ function submitVertical(){
   handleAnswer(isCorrect, q, inp, document.getElementById('v-feedbackMsg'), nextVerticalQ);
 }
 
-// 🚀 다이내믹 레벨업 계산 엔진
-function calculateLevelInfo(totalRewards) {
-  let level = 1;
-  let requiredForNext = 20; 
-  let accumulatedForCurrentLevel = 0; 
-
-  while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
-    accumulatedForCurrentLevel += requiredForNext;
-    level++;
-    requiredForNext = 20 + (level - 1) * 5; 
-  }
-
-  let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
-  let remainingForNext = requiredForNext - currentLevelProgress; 
-
-  return {
-    level: level,
-    requiredForNext: requiredForNext,
-    remainingForNext: remainingForNext,
-    currentLevelProgress: currentLevelProgress
-  };
-}
-
 async function showFinalResult(){
   if (typeof clearFallingGame === 'function') clearFallingGame();
   
@@ -925,92 +897,8 @@ async function showFinalResult(){
   }
 }
 
-async function saveRewardToNotion(earned) {
-  const userName = currentProfile === 'son' ? '민수' : '민서'; 
-  if (userName === '아빠' || userName === '엄마') return;
-  
-  const detailEl = document.getElementById('r-detail'); 
-  const originalText = detailEl.innerHTML;
-  detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#6EC6F5; font-weight:bold;">⏳ 수학 보상(${earned}개) 지갑에 누적하는 중...</span>`;
 
-  try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-      method: "POST", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
-    });
-    
-    const data = await response.json(); 
-    if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
-    
-    const page = data.results[0]; 
-    const props = page.properties;
 
-    let diamond = props["다이아몬드 개수"]?.number || 0; 
-    let slime = props["슬라임 파츠 개수"]?.number || 0;
-    let tickets = props["소원권 개수"]?.number || 0;
-    
-    let previousTotal = 0;
-    let currentTotal = 0;
-    let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
-
-    if (currentTheme === '마인크래프트') {
-      previousTotal = diamond;
-      currentTotal = diamond + earned;
-    } else {
-      previousTotal = slime;
-      currentTotal = slime + earned;
-    }
-
-    const prevLevelInfo = calculateLevelInfo(previousTotal);
-    const currLevelInfo = calculateLevelInfo(currentTotal);
-    let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
-
-    let earnedTickets = Math.floor(currentTotal / 150) - Math.floor(previousTotal / 150);
-    let newTickets = tickets + earnedTickets;
-    let isWishTicketEarned = earnedTickets > 0;
-
-    let updateProps = {
-      "수학 레벨": { number: currLevelInfo.level },
-      "소원권 개수": { number: newTickets }
-    };
-
-    if (currentTheme === '마인크래프트') { updateProps["다이아몬드 개수"] = { number: currentTotal }; } 
-    else { updateProps["슬라임 파츠 개수"] = { number: currentTotal }; }
-
-    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
-      method: "PATCH", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ properties: updateProps }) 
-    });
-    
-    document.getElementById('notion-loading-msg').style.display = 'none';
-    
-    detailEl.innerHTML = originalText + `
-      <div style="background:rgba(255,255,255,0.8); border:2px dashed var(--sky); padding:16px; border-radius:12px; margin-top:10px; text-align: left;">
-        <div style="font-size: 1.15rem; margin-bottom: 8px;">
-          <b style="color:#0288D1;">${rewardName} x ${currentTotal}</b>
-        </div>
-        <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
-          다음 레벨(Lv.${currLevelInfo.level + 1})까지 <b>${currLevelInfo.remainingForNext}</b>개 남음!
-        </div>
-        ${isLevelUp ? `<div style="text-align:center; font-size:1.3rem; color:#FF6B9D; font-weight:bold; margin-top:10px;">🎉 수학 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
-      </div>
-    `;
-
-    if (isWishTicketEarned) {
-      setTimeout(() => {
-        document.getElementById('wishTicketCountDisplay').textContent = newTickets;
-        document.getElementById('wishTicketOverlay').classList.add('active');
-      }, 1000);
-    }
-
-  } catch (err) {
-    document.getElementById('notion-loading-msg').textContent = `❌ 보상 저장 실패`;
-  }
-}
-
-function closeWishTicket() {
-  document.getElementById('wishTicketOverlay').classList.remove('active');
-}
 
 function retryGame() { startGame(gameState.mode); }
 
