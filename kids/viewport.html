@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>기괴하고 유쾌한 국어 퀴즈 탈출방</title>
+    <style>
+        /* 기본 다크 & 네온 테마 설정 */
+        :root {
+            --bg-color: #0d0d1a;
+            --card-bg: #1a1a2e;
+            --neon-green: #39ff14;
+            --neon-purple: #bc13fe;
+            --neon-red: #ff073a;
+            --text-color: #e0e0ff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Nanum Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation; /* 모바일 더블탭 줌 방지 */
+        }
+
+        /* 메인 컨테이너 (모바일 최적화) */
+        .quiz-container {
+            width: 92%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border: 3px solid var(--neon-purple);
+            border-radius: 24px;
+            padding: 25px 20px;
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+            text-align: center;
+            position: relative;
+        }
+
+        /* 유령/괴물 헤더 아이콘 */
+        .ghost-header {
+            font-size: 3.5rem;
+            margin-bottom: 5px;
+            animation: float 2.5s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+            margin-top: 0;
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+
+        /* 프로그레스 바 */
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #111;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-green));
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+/* 문제 화면 */
+.question-box {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 16px;
+    padding: 25px 20px; /* 위아래 여백을 조금 더 확보 */
+    min-height: 110px;
+    display: block; /* flex 속성 해제하여 텍스트 꼬임 방지 */
+    font-size: 1.15rem;
+    line-height: 1.9; /* 줄 간격을 넓혀서 읽기 편하게 */
+    margin-bottom: 25px;
+    border-left: 5px solid var(--neon-green);
+    text-align: left;
+    word-break: keep-all;
+        }
+
+        .blank {
+            color: var(--neon-red);
+            font-weight: bold;
+            letter-spacing: -2px;
+        }
+
+        /* 보기 버튼 스타일 */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .option-btn {
+            background: #252545;
+            color: var(--text-color);
+            border: 2px solid #3a3a5c;
+            border-radius: 50px;
+            padding: 12px 20px;
+            min-height: 56px; /* 모바일 터치 최적화 */
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            word-break: keep-all;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:active {
+            transform: scale(0.96);
+            background: #2d2d52;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* 정답/오답 애니메이션 상태 클래스 */
+        .option-btn.wrong {
+            background: rgba(255, 7, 58, 0.2);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 7, 58, 0.6);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* 피드백 모달/영역 */
+        .feedback-box {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: bold;
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px dashed var(--neon-green);
+            color: var(--neon-green);
+            animation: fadeIn 0.4s ease;
+            word-break: keep-all;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 다음 버튼 */
+        .next-btn {
+            margin-top: 20px;
+            width: 100%;
+            background: linear-gradient(45deg, var(--neon-purple), #8a2be2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            min-height: 56px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(188, 19, 254, 0.5);
+            display: none;
+            transition: opacity 0.3s;
+        }
+
+        .next-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* 최종 축하 화면 */
+        .celebration-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(13, 13, 26, 0.98);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .celebration-content h2 {
+            font-size: 2.2rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 15px var(--neon-green);
+            margin-bottom: 15px;
+            word-break: keep-all;
+        }
+
+        .celebration-content p {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .reward-badge {
+            font-size: 5.5rem;
+            margin-bottom: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); filter: drop-shadow(0 0 20px var(--neon-purple)); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="quiz-container" id="quizContainer">
+        <header>
+            <div class="ghost-header" id="ghostEmoji">👻</div>
+            <h1 id="roomTitle">기괴한 국어방: 탈출 퀴즈</h1>
+        </header>
+        
+        <section aria-label="진행률">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </section>
+
+        <!-- 문제 출력 영역 -->
+        <article class="question-box" id="question">
+            Loading...
+        </article>
+
+        <!-- 보기 버튼 영역 -->
+        <section class="options-container" id="options">
+            <!-- 자바스크립트로 동적 생성 -->
+        </section>
+
+        <!-- 킹받는 AI 칭찬/피드백 영역 -->
+        <aside class="feedback-box" id="feedback"></aside>
+
+        <!-- 다음방 탈출 버튼 -->
+        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">다음 방으로 탈출하기 ➔</button>
+    </main>
+
+    <!-- 최종 탈출 완료 오버레이 -->
+    <div class="celebration-overlay" id="celebration">
+        <div class="celebration-content">
+            <div class="reward-badge">🏆</div>
+            <h2>크크크... 완전 대박 폼 미쳤다!</h2>
+            <p>모든 방을 무사히 탈출했다.<br>꼬맹이 논리력 인정해주지!</p>
+            <p style="color: var(--neon-purple); font-size: 0.95rem; font-weight: bold;">(노션 보상 데이터가 조용히 전송되었습니다... 스산~)</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. 퀴즈 데이터 구조 (빈칸을 span 태그로 변경하여 가독성 강화)
+        const quizData = [
+            {
+                question: "아침에 학교를 가고 싶었다. <br>( <span class='blank'>____</span> ) 아빠가 안 된다고 했다. <br>( <span class='blank'>____</span> ) 무척 속상했다.",
+                options: [
+                    "① [ 그런데 / 그래서 ]",
+                    "② [ 그리고 / 하지만 ]",
+                    "③ [ 왜냐하면 / 만약 ]"
+                ],
+                answer: 0,
+                commentary: "크크크... 제법이군, 하지만 다음 방도 탈출할 수 있을까? 👻"
+            },
+            {
+                question: "민수가 자기 전에 학교에 가기 싫다고 말했다. <br>( <span class='blank'>____</span> ) 일어났을 때 학교에 가지 않을 것이라 말했다. <br>( <span class='blank'>____</span> ) 체육시간이 있다며 가고 싶다고 칭얼댔다.",
+                options: [
+                    "① [ 그래서 / 그런데 ]",
+                    "② [ 하지만 / 그리고 ]",
+                    "③ [ 왜냐하면 / 그래서 ]"
+                ],
+                answer: 0,
+                commentary: "어라? 이걸 맞히네? 뇌 세포 폼 미쳤다... 다음은 쉽지 않을걸? 🧠"
+            },
+            {
+                question: "그토록 가고 싶었던 체육 시간! 다음 주에는 아침에 칭칭 울지 않으려면 어떻게 해야 할까?",
+                options: [
+                    "① [ 전날 밤에 미리 아빠한테 \"내일 체육 있으니까 꼭 갈래요!\"라고 말한다. ]",
+                    "② [ 아침에 발을 쿵쿵 구르며 돌고래 소리로 운다. ]",
+                    "③ [ 학교 운동장을 통째로 우리 집 거실로 훔쳐 온다. ]"
+                ],
+                answer: 0,
+                commentary: "으아악! 논리적인 선택에 내 몸이 녹아내린다아아! 마지막 관문이다! 💀"
+            },
+            {
+                question: "오빠가 아침에 학교 가고 싶다고 칭얼거리는 모습을 본 동생 민서의 진짜 생각은?",
+                options: [
+                    "① [ 우리 오빠 왜 저러지? 아빠, 오빠 몫까지 슬라임 파츠는 내 거야! ]",
+                    "② [ 오빠, 내가 대신 학교에 가서 체육 수업 들을게! ]",
+                    "③ [ 오빠 힘내! 내가 마법으로 학교를 요술 궁전으로 만들어 줄게! ]"
+                ],
+                answer: 0,
+                commentary: "민서의 영혼을 완벽히 꿰뚫어 보았구나! 인간 꼬맹이 완승! 🎉"
+            }
+        ];
+
+        let currentIdx = 0;
+        let isAnswered = false;
+        
+        // [프로 모드 수정] 오디오 컨텍스트 전역 관리 (메모리 누수 방지)
+        let audioCtx = null;
+
+        function playSound(type) {
+            // 사용자 첫 상호작용 시점에 AudioContext 초기화
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(60, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        // 퀴즈 렌더링 함수
+        function loadQuestion() {
+            isAnswered = false;
+            const currentQuiz = quizData[currentIdx];
+            
+            // 프로그레스 바 업데이트
+            const progressPercent = ((currentIdx + 1) / quizData.length) * 100;
+            document.getElementById('progress').style.width = `${progressPercent}%`;
+            
+            // 문제 및 이모지 변경
+            document.getElementById('question').innerHTML = currentQuiz.question;
+            const emojis = ['👻', '🧟', '🧛', '🎃'];
+            document.getElementById('ghostEmoji').innerText = emojis[currentIdx] || '👾';
+
+            // 보기 렌더링
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            currentQuiz.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // 피드백 및 다음 버튼 초기화
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        // 정답 체크 함수
+        function checkAnswer(selectedIndex, clickedBtn) {
+            if (isAnswered) return;
+
+            const currentQuiz = quizData[currentIdx];
+
+            if (selectedIndex === currentQuiz.answer) {
+                // [정답]
+                isAnswered = true;
+                playSound('success');
+                
+                // 모든 버튼 비활성화
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(btn => btn.disabled = true);
+                
+                clickedBtn.style.borderColor = 'var(--neon-green)';
+                clickedBtn.style.boxShadow = '0 0 15px rgba(57, 255, 20, 0.5)';
+                clickedBtn.style.background = 'rgba(57, 255, 20, 0.1)';
+
+                // 피드백 노출
+                const feedbackBox = document.getElementById('feedback');
+                feedbackBox.innerHTML = currentQuiz.commentary;
+                feedbackBox.style.display = 'block';
+
+                // 다음 버튼 표시
+                document.getElementById('nextBtn').style.display = 'block';
+            } else {
+                // [오답]
+                playSound('wrong');
+                clickedBtn.classList.add('wrong');
+                
+                // 애니메이션 종료 후 클래스 제거
+                setTimeout(() => {
+                    clickedBtn.classList.remove('wrong');
+                }, 400);
+            }
+        }
+
+        // 다음 문제 진행
+        function nextQuestion() {
+            currentIdx++;
+            if (currentIdx < quizData.length) {
+                loadQuestion();
+            } else {
+                document.getElementById('celebration').style.display = 'flex';
+                triggerNotionReward(); 
+            }
+        }
+
+        // 3. 최종 보상 기능 (노션 연동)
+        let notionTriggered = false;
+        function triggerNotionReward() {
+            if (notionTriggered) return; // 중복 실행 방지
+            notionTriggered = true;
+            console.log("Notion Reward Triggered! 외부 API 연동 코드를 이 위치에 작성하세요.");
+        }
+
+        // 초기화
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
