@@ -236,6 +236,25 @@
             50% { transform: scale(1.15); filter: drop-shadow(0 0 20px var(--neon-purple)); }
             100% { transform: scale(1); }
         }
+        /* 메인으로 나가기 (비상구) 버튼 */
+        .back-btn {
+            margin-top: 15px; /* 윗 버튼과의 간격 */
+            width: 100%;
+            background: transparent; /* 배경을 투명하게 해서 덜 튀게 */
+            color: #888; /* 글씨도 살짝 어둡게 */
+            border: 2px solid #555;
+            border-radius: 50px;
+            min-height: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:active {
+            transform: scale(0.96);
+            color: var(--neon-red); /* 누를 때 살짝 붉은색으로 공포감 스푼 추가! */
+            border-color: var(--neon-red);
+        }
     </style>
 </head>
 <body>
@@ -267,6 +286,7 @@
 
         <!-- 다음방 탈출 버튼 -->
         <button class="next-btn" id="nextBtn" onclick="nextQuestion()">다음 방으로 탈출하기 ➔</button>
+        <button class="big-btn back-btn" onclick="location.href='../lobby.html'">🚪 공부방 메인으로 도망가기</button>
     </main>
 
     <!-- 최종 탈출 완료 오버레이 -->
