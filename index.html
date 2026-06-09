@@ -3,36 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민이네 공부방</title>
+<title>민민이네 공부방 - 프로필 선택</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
+  /* 기본 설정 및 테마 */
   :root {
     --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
     --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
-    --white: #FFFEF7; --dark: #2D2D4E; --card: rgba(255,255,255,0.93);
-    --line: rgba(98,84,255,0.14);
+    --white: #FFFEF7; --dark: #2D2D4E;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); transition: background 0.5s ease; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); }
   
-  body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%); }
-  body.theme--slime { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); }
-
+  /* 배경 떠다니는 효과 */
   .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
   .float-item { position: absolute; font-size: 1.8rem; opacity: 0.13; animation: floatUp linear infinite; font-family: 'Gaegu', cursive; font-weight: 700; color: var(--purple); }
   @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.13; } 90% { opacity: 0.13; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
 
-  .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 36px 16px 60px; min-height: 100vh; animation: fadeIn .35s ease; }
-  .screen.active { display: flex; }
+  /* 화면 및 타이틀 */
+  .screen { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding: 36px 16px 60px; min-height: 100vh; animation: fadeIn .35s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-
   .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2.2rem, 9vw, 3.8rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 6px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.07)); }
   .main-title .accent { color: var(--pink); }
   .main-title .accent2 { color: var(--purple); }
   .subtitle { font-family: 'Gaegu', cursive; font-size: 1.05rem; color: #999; margin-bottom: 32px; }
 
-  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 400px; margin-bottom: 20px; }
-  .profile-btn { border: none; border-radius: 28px; padding: 28px 16px 22px; cursor: pointer; font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform .2s, box-shadow .2s; position: relative; overflow: hidden; }
+  /* 프로필 버튼 */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 400px; }
+  .profile-btn { border: none; border-radius: 28px; padding: 28px 16px 22px; cursor: pointer; font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform .2s, box-shadow .2s; }
   .profile-btn:hover { transform: translateY(-6px); }
   .profile-btn:active { transform: scale(0.96); }
   .profile-btn.son { background: linear-gradient(145deg, #6EC6F5, #A78BFA); box-shadow: 0 10px 28px rgba(110,198,245,0.35); }
@@ -40,34 +38,6 @@
   .profile-btn.dad { background: linear-gradient(145deg, #4ECDC4, #44A08D); box-shadow: 0 10px 28px rgba(78,205,196,0.35); }
   .profile-btn.mom { background: linear-gradient(145deg, #FFD93D, #FF6B9D); box-shadow: 0 10px 28px rgba(255,217,61,0.35); }
   .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.5); font-size:1.8rem; }
-
-  .user-welcome { display: inline-block; padding: 8px 20px; border-radius: 999px; background: rgba(255,255,255,0.7); border: 2.5px solid rgba(0,0,0,0.08); font-size: 1rem; margin-bottom: 14px; backdrop-filter: blur(8px); }
-  .user-welcome span { color: var(--purple); font-weight: bold; }
-
-  /* 💎 인벤토리 보상 UI */
-  .inventory-card { background: var(--card); border-radius: 20px; padding: 16px; width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 20px rgba(0,0,0,0.08); margin-bottom: 24px; border: 2px solid rgba(255,255,255,0.8); }
-  .inventory-card.theme--minecraft { border-color: #4FC3F7; background: #e1f5fe; }
-  .inventory-card.theme--slime { border-color: #81C784; background: #e8f5e9; }
-  .reward-badge { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: bold; }
-  .math-level { font-size: 1.1rem; color: #555; background: rgba(0,0,0,0.05); padding: 4px 12px; border-radius: 12px; font-weight: bold; }
-
-  /* 과목 버튼 */
-  .subject-grid { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 420px; }
-  .subject-btn { display: flex; align-items: center; gap: 18px; text-decoration: none; padding: 20px 24px; border-radius: 22px; font-family: 'Jua', sans-serif; font-size: 1.3rem; color: #fff; transition: transform .2s; border: none; cursor: pointer; }
-  .subject-btn:hover { transform: translateY(-5px); }
-  .subject-btn:active { transform: scale(0.97); }
-  .subject-btn .s-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,0.22); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.3); font-size: 1.8rem; }
-  .subject-btn .s-info { display: flex; flex-direction: column; gap: 2px; }
-  .subject-btn .s-label { font-size: 1.2rem; }
-  .subject-btn .s-desc { font-size: 0.8rem; opacity: 0.82; font-family: 'Gaegu', cursive; }
-
-  .btn-math    { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 8px 22px rgba(240,147,251,0.35); }
-  .btn-gugudan { background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%); box-shadow: 0 8px 22px rgba(22,33,62,0.35); }
-  .btn-korean  { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); box-shadow: 0 8px 22px rgba(255,117,140,0.35); }
-  .btn-english { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); box-shadow: 0 8px 22px rgba(79,172,254,0.35); }
-  .btn-dic     { background: linear-gradient(135deg, #FFD93D 0%, #FF9F43 100%); box-shadow: 0 8px 22px rgba(255,217,61,0.35); }
-
-  .back-btn { margin-top: 28px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.09); background: rgba(255,255,255,0.7); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; color: #888; }
 
   /* 비밀번호 모달 UI */
   .pw-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
@@ -90,15 +60,15 @@
 
 <div class="bg-floats" id="bgFloats"></div>
 
-<div class="screen active" id="screen-profile">
+<div class="screen" id="screen-profile">
   <h1 class="main-title"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
   <p class="subtitle">누가 접속할까요?</p>
 
-  <div class="profile-grid">
-    <button class="profile-btn son" onclick="selectChild('son', '민수')">
+<div class="profile-grid">
+    <button class="profile-btn son" onclick="location.href='lobby.html?user=minsu'">
       <div class="profile-avatar">👦</div><div>오빠</div><div class="profile-role">민수</div>
     </button>
-    <button class="profile-btn daughter" onclick="selectChild('daughter', '민서')">
+    <button class="profile-btn daughter" onclick="location.href='lobby.html?user=minseo'">
       <div class="profile-avatar">👧</div><div>동생</div><div class="profile-role">민서</div>
     </button>
     <button class="profile-btn dad" onclick="openPasswordModal('dad', '아빠', 'multiverse/index_friends.html')">
@@ -108,45 +78,6 @@
       <div class="profile-avatar">👩</div><div>엄마</div>
     </button>
   </div>
-</div>
-
-<div class="screen" id="screen-subjects">
-  <h1 class="main-title"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
-  <div class="user-welcome">안녕하세요, <span id="welcomeName">?</span>!</div>
-
-  <div class="inventory-card" id="inventoryDisplay">
-    <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">데이터 불러오는 중...</span></div>
-  </div>
-
-  <p class="subtitle" style="margin-bottom: 20px;">어떤 곳으로 입장할까요?</p>
-
-  <div class="subject-grid">
-    <a href="kids/math.html" class="subject-btn btn-math">
-      <div class="s-icon">✖️</div>
-      <div class="s-info"><div class="s-label">수학 스피드 연산</div><div class="s-desc">구구단 · 덧셈뺄셈 · 떨어지는 게임</div></div>
-    </a>
-
-    <a href="kids/gugudan.html" class="subject-btn btn-gugudan">
-      <div class="s-icon" style="border-color: #00D4FF;">🚀</div>
-      <div class="s-info"><div class="s-label" style="color: #FFD93D;">구구단 탐험대</div><div class="s-desc" style="color: #AAB7B8;">우주 테마로 배우는 구구단 원리</div></div>
-    </a>
-
-    <a href="kids/korean.html" class="subject-btn btn-korean">
-      <div class="s-icon">📖</div>
-      <div class="s-info"><div class="s-label">국어 멀티버스</div><div class="s-desc">문장 실력 테스트 · 맞춤법 · 논리학 대화</div></div>
-    </a>
-
-    <a href="kids/english-typing.html" class="subject-btn btn-english">
-      <div class="s-icon">A</div>
-      <div class="s-info"><div class="s-label">영단어 탐험대</div><div class="s-desc">노션 단어장 · 퀴즈 · 오답 복습</div></div>
-    </a>
-    
-    <a href="kids/korean_app.html" class="subject-btn btn-dic">
-      <div class="s-icon">📚</div>
-      <div class="s-info"><div class="s-label">용어사전방</div><div class="s-desc">새싹 받아쓰기 · 척척박사 개념 사전</div></div>
-    </a>
-  </div>
-  <button class="back-btn" onclick="goBack()">← 프로필 다시 선택하기</button>
 </div>
 
 <div class="pw-overlay" id="pwOverlay" onclick="closePasswordModal(event)">
@@ -163,9 +94,7 @@
 </div>
 
 <script>
-const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-
+// 배경 애니메이션
 (function () {
   const wrap = document.getElementById('bgFloats'); const symbols = ['2', '3', '+', 'A', 'B', '*', '7', 'x', '=', '?', '5', 'C'];
   for (let i = 0; i < 18; i++) {
@@ -174,43 +103,7 @@ const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12";
   }
 })();
 
-function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function goBack() { showScreen('screen-profile'); document.body.className = ''; }
-
-function selectChild(profileKey, displayName) {
-  localStorage.setItem('currentUser', profileKey); localStorage.setItem('currentUserName', displayName);
-  document.getElementById('welcomeName').textContent = displayName; showScreen('screen-subjects'); loadUserInventory(displayName);
-}
-
-async function loadUserInventory(userName) {
-  const container = document.getElementById('inventoryDisplay'); container.className = 'inventory-card'; document.body.className = '';
-  if (userName === '아빠' || userName === '엄마') {
-    container.innerHTML = `<div class="reward-badge">☕ <span style="color:#555;">어른 모드</span></div><div class="math-level">관리자</div>`;
-    container.classList.add('theme--minecraft'); document.body.classList.add('theme--minecraft'); return;
-  }
-  try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } })
-    });
-    const data = await response.json(); if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
-    const props = data.results[0].properties;
-    const theme = props["현재 테마"]?.select?.name || (userName === '민수' ? '마인크래프트' : '슬라임');
-    const diamond = props["다이아몬드 개수"]?.number || 0; const slime = props["슬라임 파츠 개수"]?.number || 0; const level = props["수학 레벨"]?.number || 1;
-    localStorage.setItem('currentTheme', theme);
-    if (theme === '마인크래프트') {
-      container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">Lv. ${level}</div>`;
-      container.classList.add('theme--minecraft'); document.body.classList.add('theme--minecraft');
-    } else {
-      container.innerHTML = `<div class="reward-badge">💧 <span style="color:#388E3C;">x${slime}</span></div><div class="math-level">Lv. ${level}</div>`;
-      container.classList.add('theme--slime'); document.body.classList.add('theme--slime');
-    }
-  } catch (error) {
-    console.error("인벤토리 로드 에러:", error);
-    const defaultTheme = userName === '민수' ? '마인크래프트' : '슬라임'; localStorage.setItem('currentTheme', defaultTheme);
-    container.innerHTML = `<div class="reward-badge">${defaultTheme === '마인크래프트' ? '💎' : '💧'} <span>x0 (연결필요)</span></div>`;
-  }
-}
-
+// 부모님 비밀번호 로직
 const PARENT_PASSWORD = "0000"; 
 let pwBuffer = "", pendingParentKey = "", pendingParentName = "", pendingTargetUrl = "";
 
@@ -233,7 +126,6 @@ function checkPassword() {
     setTimeout(() => { pwBuffer = ''; updateDots(); }, 600);
   }
 }
-
 document.addEventListener('keydown', function (e) {
   if (!document.getElementById('pwOverlay').classList.contains('active')) return;
   if (e.key >= '0' && e.key <= '9') addNumber(e.key);
