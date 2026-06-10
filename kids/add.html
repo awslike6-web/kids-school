@@ -166,7 +166,8 @@
       <button class="mode-btn wrong-note" onclick="startWrongNote()">🖍️ 오답 풀기 (<span id="wrongCountBadge">0</span>)</button>
     </div>
   </div>
-  <button class="big-btn back-btn" onclick="location.href='math.html'">🚪 우주 정거장으로 돌아가기</button>
+
+<button class="big-btn back-btn" onclick="exitRoom()">🚪 우주 정거장으로 돌아가기</button>
 </div>
 
 <div class="screen" id="screen-falling">
@@ -224,7 +225,9 @@
 let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 let wrongNotes = []; 
 let gameState = {};
-
+// ⏱️ [추가] 아이들이 방에 발을 디딘 순간 시간을 딱 기록합니다!
+const roomStartTime = new Date();
+  
 // 덧셈 전용 난이도 설정
 let difficultySettings = { add: true };
 
@@ -502,6 +505,46 @@ document.addEventListener('keydown', e=>{
     if(document.getElementById('screen-typing').classList.contains('active')) submitTyping(); 
     else if(document.getElementById('screen-vertical').classList.contains('active')) submitVertical(); 
   } 
+});
+  // 🚀 덧셈방 최종 탈출 및 학습 일지 전송 함수 (여기에 쏙!)
+async function exitRoom() {
+    const roomEndTime = new Date(); 
+
+    // 실제 공부한 시간 계산 (분 단위)
+    const timeDiff = roomEndTime - roomStartTime; 
+    let calculatedMinutes = Math.floor(timeDiff / 60000);
+    if (calculatedMinutes < 1) calculatedMinutes = 1; 
+
+    // 실시간 오답 노트 데이터 가져오기
+    const currentErrorReport = wrongNotes.length > 0 
+        ? wrongNotes.map(q => q.text).join(', ') 
+        : "오답 없음";
+
+    // 민수/민서 덧셈방은 단어요정이 없으므로 0개 고정
+    const currentWordFairy = 0;
+
+    // 아빠가 설계하신 노션 속성 이름에 맞게 세팅해서 헬퍼 함수로 던지기!
+    const success = await sendStudyLogToNotion({
+        childName: currentProfile === 'son' ? '민수' : '민서', 
+        subject: "수학(덧셈)",                  
+        startTime: roomStartTime.toISOString(),  
+        endTime: roomEndTime.toISOString(),      
+        durationMinutes: calculatedMinutes,      
+        errorReport: currentErrorReport,         
+        wordFairyCount: currentWordFairy         
+    });
+
+    if (success) {
+        console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료! 로비로 이동합니다.`);
+        location.href = 'math.html'; 
+    } else {
+        alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다. 아빠에게 말씀해 주세요!");
+    }
+}
+
+// 🚨 창을 닫거나 도망쳐도 강제로 일지를 쓰는 블랙박스 로직
+window.addEventListener('pagehide', () => {
+    exitRoom();
 });
 </script>
 </body>
