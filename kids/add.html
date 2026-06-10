@@ -506,8 +506,15 @@ document.addEventListener('keydown', e=>{
     else if(document.getElementById('screen-vertical').classList.contains('active')) submitVertical(); 
   } 
 });
-  // 🚀 덧셈방 최종 탈출 및 학습 일지 전송 함수 (여기에 쏙!)
+
+// 🔒 [추가] 중복 실행 방지용 자물쇠!
+let isExiting = false; 
+
+// 🚀 덧셈방 최종 탈출 및 학습 일지 전송 함수
 async function exitRoom() {
+    if (isExiting) return; // 이미 자물쇠가 잠겼으면(전송 중이면) 그냥 무시!
+    isExiting = true;      // 실행되는 순간 자물쇠 채우기
+
     const roomEndTime = new Date(); 
 
     // 실제 공부한 시간 계산 (분 단위)
@@ -520,10 +527,9 @@ async function exitRoom() {
         ? wrongNotes.map(q => q.text).join(', ') 
         : "오답 없음";
 
-    // 민수/민서 덧셈방은 단어요정이 없으므로 0개 고정
     const currentWordFairy = 0;
 
-    // 아빠가 설계하신 노션 속성 이름에 맞게 세팅해서 헬퍼 함수로 던지기!
+    // 노션으로 데이터 발사!
     const success = await sendStudyLogToNotion({
         childName: currentProfile === 'son' ? '민수' : '민서', 
         subject: "수학(덧셈)",                  
@@ -538,7 +544,8 @@ async function exitRoom() {
         console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료! 로비로 이동합니다.`);
         location.href = 'math.html'; 
     } else {
-        alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다. 아빠에게 말씀해 주세요!");
+        alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다.");
+        isExiting = false; // 실패하면 다시 시도할 수 있게 자물쇠 풀기
     }
 }
 
