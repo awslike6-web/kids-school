@@ -277,7 +277,7 @@
         </article>
 
         <section class="options-container" id="options">
-        </section>
+            </section>
 
         <aside class="feedback-box" id="feedback"></aside>
 
@@ -297,7 +297,7 @@
     <script src="notion-helper.js"></script>
    
     <script>
-        // 📍 Step 2: 입장 타이머 켜기 완료
+        // [Step 2: 입장 타이머 켜기]
         const roomStartTime = new Date();
 
         // 홈스쿨링 프로필 설정 변수 (기본값 'son'. 환경에 맞게 동적 할당 가능)
@@ -350,9 +350,6 @@
         let currentIdx = 0;
         let isAnswered = false;
         
-        // 실시간 오답 기록 수집통 추가 
-        let wrongAttempts = [];
-
         // 오디오 컨텍스트 전역 관리
         let audioCtx = null;
 
@@ -448,13 +445,6 @@
             } else {
                 playSound('wrong');
                 clickedBtn.classList.add('wrong');
-
-                // 🎯 오답 리포트 연동 고도화 (틀린 보기가 무엇인지 실시간 수집)
-                const wrongText = clickedBtn.innerText.substring(0, 20); // 앞부분만 살짝 잘라서 보관
-                const errorLog = `[${currentIdx + 1}번방 오답]: ${wrongText}...`;
-                if (!wrongAttempts.includes(errorLog)) {
-                    wrongAttempts.push(errorLog);
-                }
                 
                 setTimeout(() => {
                     clickedBtn.classList.remove('wrong');
@@ -486,7 +476,7 @@
             }, 3000);
         }
 
-        // 📍 Step 4: 만능 블랙박스 템플릿 복붙 및 국어방 커스텀 적용 완료
+        // [Step 4: 만능 블랙박스 템플릿 복붙 및 수정 완료]
         // 🔒 중복 전송 방지용 자물쇠
         let isExiting = false; 
 
@@ -500,16 +490,16 @@
             let calculatedMinutes = Math.floor(timeDiff / 60000);
             if (calculatedMinutes < 1) calculatedMinutes = 1; 
 
-            // 🎯 [수정 포인트 1 적용] 국어방 전용 동적 오답 리포트 연동!
-            const currentErrorReport = wrongAttempts.length > 0 ? wrongAttempts.join(' / ') : "오답 없음"; 
+            // 🎯 [수정 포인트 1] 국어방에 맞춤 (필요시 오답 로직 고도화 가능)
+            const currentErrorReport = "오답 없음"; 
 
-            // 🎯 [수정 포인트 2 적용] 국어 퀴즈방은 요정이 없으므로 0 고정
+            // 🎯 [수정 포인트 2] 국어방은 단어요정이 없으므로 0 고정
             const currentWordFairy = 0; 
 
             // ✨ 노션으로 데이터 발사!
             const success = await sendStudyLogToNotion({
                 childName: currentProfile === 'son' ? '민수' : '민서', 
-                // 🎯 [수정 포인트 3 적용] 노션 DB 선택 이름 매칭
+                // 🎯 [수정 포인트 3] 과목명 매칭
                 subject: "국어(빈칸퀴즈)",                  
                 startTime: roomStartTime.toISOString(),  
                 endTime: roomEndTime.toISOString(),      
@@ -520,7 +510,7 @@
 
             if (success) {
                 console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
-                // 🎯 [수정 포인트 4 적용] 탈출 후 돌아갈 메인 로비 주소
+                // 🎯 [수정 포인트 4] 탈출 후 돌아갈 메인 로비 주소
                 location.href = '../lobby.html'; 
             } else {
                 alert("앗! 학습 일지 기록에 문제가 생겨서 나가지 못했습니다.");
