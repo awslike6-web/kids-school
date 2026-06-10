@@ -85,19 +85,19 @@
             transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-/* 문제 화면 */
-.question-box {
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 16px;
-    padding: 25px 20px; /* 위아래 여백을 조금 더 확보 */
-    min-height: 110px;
-    display: block; /* flex 속성 해제하여 텍스트 꼬임 방지 */
-    font-size: 1.15rem;
-    line-height: 1.9; /* 줄 간격을 넓혀서 읽기 편하게 */
-    margin-bottom: 25px;
-    border-left: 5px solid var(--neon-green);
-    text-align: left;
-    word-break: keep-all;
+        /* 문제 화면 */
+        .question-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
+            padding: 25px 20px;
+            min-height: 110px;
+            display: block; /* flex 속성 해제하여 텍스트 꼬임 방지 */
+            font-size: 1.15rem;
+            line-height: 1.9; /* 줄 간격을 넓혀서 읽기 편하게 */
+            margin-bottom: 25px;
+            border-left: 5px solid var(--neon-green);
+            text-align: left;
+            word-break: keep-all;
         }
 
         .blank {
@@ -236,12 +236,13 @@
             50% { transform: scale(1.15); filter: drop-shadow(0 0 20px var(--neon-purple)); }
             100% { transform: scale(1); }
         }
+
         /* 메인으로 나가기 (비상구) 버튼 */
         .back-btn {
-            margin-top: 15px; /* 윗 버튼과의 간격 */
+            margin-top: 15px;
             width: 100%;
-            background: transparent; /* 배경을 투명하게 해서 덜 튀게 */
-            color: #888; /* 글씨도 살짝 어둡게 */
+            background: transparent;
+            color: #888;
             border: 2px solid #555;
             border-radius: 50px;
             min-height: 50px;
@@ -252,7 +253,7 @@
 
         .back-btn:active {
             transform: scale(0.96);
-            color: var(--neon-red); /* 누를 때 살짝 붉은색으로 공포감 스푼 추가! */
+            color: var(--neon-red);
             border-color: var(--neon-red);
         }
     </style>
@@ -271,38 +272,38 @@
             </div>
         </section>
 
-        <!-- 문제 출력 영역 -->
         <article class="question-box" id="question">
             Loading...
         </article>
 
-        <!-- 보기 버튼 영역 -->
         <section class="options-container" id="options">
-            <!-- 자바스크립트로 동적 생성 -->
-        </section>
+            </section>
 
-        <!-- 킹받는 AI 칭찬/피드백 영역 -->
         <aside class="feedback-box" id="feedback"></aside>
 
-        <!-- 다음방 탈출 버튼 -->
         <button class="next-btn" id="nextBtn" onclick="nextQuestion()">다음 방으로 탈출하기 ➔</button>
-        <button class="big-btn back-btn" onclick="location.href='../lobby.html'">🚪 공부방 메인으로 도망가기</button>
+        <button class="big-btn back-btn" onclick="exitRoom()">🚪 공부방 메인으로 도망가기</button>
     </main>
 
-    <!-- 최종 탈출 완료 오버레이 -->
     <div class="celebration-overlay" id="celebration">
         <div class="celebration-content">
             <div class="reward-badge">🏆</div>
             <h2>크크크... 완전 대박 폼 미쳤다!</h2>
             <p>모든 방을 무사히 탈출했다.<br>꼬맹이 논리력 인정해주지!</p>
-            <p style="color: var(--neon-purple); font-size: 0.95rem; font-weight: bold;">(노션 보상 데이터가 조용히 전송되었습니다... 스산~)</p>
+            <p style="color: var(--neon-purple); font-size: 0.95rem; font-weight: bold;">(잠시 후 메인 로비로 안전하게 탈출합니다... 스산~)</p>
         </div>
     </div>
 
-      <script src="notion-helper.js"></script>
+    <script src="notion-helper.js"></script>
    
     <script>
-        // 1. 퀴즈 데이터 구조 (빈칸을 span 태그로 변경하여 가독성 강화)
+        // [Step 2: 입장 타이머 켜기]
+        const roomStartTime = new Date();
+
+        // 홈스쿨링 프로필 설정 변수 (기본값 'son'. 환경에 맞게 동적 할당 가능)
+        let currentProfile = 'son'; 
+
+        // 1. 퀴즈 데이터 구조
         const quizData = [
             {
                 question: "아침에 학교를 가고 싶었다. <br>( <span class='blank'>____</span> ) 아빠가 안 된다고 했다. <br>( <span class='blank'>____</span> ) 무척 속상했다.",
@@ -349,11 +350,10 @@
         let currentIdx = 0;
         let isAnswered = false;
         
-        // [프로 모드 수정] 오디오 컨텍스트 전역 관리 (메모리 누수 방지)
+        // 오디오 컨텍스트 전역 관리
         let audioCtx = null;
 
         function playSound(type) {
-            // 사용자 첫 상호작용 시점에 AudioContext 초기화
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
@@ -427,11 +427,9 @@
             const currentQuiz = quizData[currentIdx];
 
             if (selectedIndex === currentQuiz.answer) {
-                // [정답]
                 isAnswered = true;
                 playSound('success');
                 
-                // 모든 버튼 비활성화
                 const buttons = document.querySelectorAll('.option-btn');
                 buttons.forEach(btn => btn.disabled = true);
                 
@@ -439,19 +437,15 @@
                 clickedBtn.style.boxShadow = '0 0 15px rgba(57, 255, 20, 0.5)';
                 clickedBtn.style.background = 'rgba(57, 255, 20, 0.1)';
 
-                // 피드백 노출
                 const feedbackBox = document.getElementById('feedback');
                 feedbackBox.innerHTML = currentQuiz.commentary;
                 feedbackBox.style.display = 'block';
 
-                // 다음 버튼 표시
                 document.getElementById('nextBtn').style.display = 'block';
             } else {
-                // [오답]
                 playSound('wrong');
                 clickedBtn.classList.add('wrong');
                 
-                // 애니메이션 종료 후 클래스 제거
                 setTimeout(() => {
                     clickedBtn.classList.remove('wrong');
                 }, 400);
@@ -464,18 +458,70 @@
             if (currentIdx < quizData.length) {
                 loadQuestion();
             } else {
+                // 완벽히 탈출했을 때 축하 모달을 띄우고 자동으로 학습일지 전송
                 document.getElementById('celebration').style.display = 'flex';
                 triggerNotionReward(); 
             }
         }
 
-        // 3. 최종 보상 기능 (노션 연동)
+        // 최종 보상 기능 (성공 시 3초 후 메인으로 자동 탈출 유도)
         let notionTriggered = false;
         function triggerNotionReward() {
-            if (notionTriggered) return; // 중복 실행 방지
+            if (notionTriggered) return;
             notionTriggered = true;
-            console.log("Notion Reward Triggered! 외부 API 연동 코드를 이 위치에 작성하세요.");
+            
+            // 축하 메시지를 아이들이 3초간 볼 수 있게 여유를 준 뒤 전송 및 이동
+            setTimeout(() => {
+                exitRoom();
+            }, 3000);
         }
+
+        // [Step 4: 만능 블랙박스 템플릿 복붙 및 수정 완료]
+        // 🔒 중복 전송 방지용 자물쇠
+        let isExiting = false; 
+
+        // 🚀 최종 탈출 및 학습 일지 전송 함수
+        async function exitRoom() {
+            if (isExiting) return; 
+            isExiting = true;      
+
+            const roomEndTime = new Date(); 
+            const timeDiff = roomEndTime - roomStartTime; 
+            let calculatedMinutes = Math.floor(timeDiff / 60000);
+            if (calculatedMinutes < 1) calculatedMinutes = 1; 
+
+            // 🎯 [수정 포인트 1] 국어방에 맞춤 (필요시 오답 로직 고도화 가능)
+            const currentErrorReport = "오답 없음"; 
+
+            // 🎯 [수정 포인트 2] 국어방은 단어요정이 없으므로 0 고정
+            const currentWordFairy = 0; 
+
+            // ✨ 노션으로 데이터 발사!
+            const success = await sendStudyLogToNotion({
+                childName: currentProfile === 'son' ? '민수' : '민서', 
+                // 🎯 [수정 포인트 3] 과목명 매칭
+                subject: "국어(빈칸퀴즈)",                  
+                startTime: roomStartTime.toISOString(),  
+                endTime: roomEndTime.toISOString(),      
+                durationMinutes: calculatedMinutes,      
+                errorReport: currentErrorReport,         
+                wordFairyCount: currentWordFairy         
+            });
+
+            if (success) {
+                console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
+                // 🎯 [수정 포인트 4] 탈출 후 돌아갈 메인 로비 주소
+                location.href = '../lobby.html'; 
+            } else {
+                alert("앗! 학습 일지 기록에 문제가 생겨서 나가지 못했습니다.");
+                isExiting = false; 
+            }
+        }
+
+        // 🚨 블랙박스 강제 종료 생존 로직
+        window.addEventListener('pagehide', () => {
+            exitRoom();
+        });
 
         // 초기화
         window.onload = loadQuestion;
