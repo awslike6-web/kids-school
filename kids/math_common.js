@@ -3,7 +3,7 @@
 // ==========================================
 
 // 1️⃣ 노션 API 설정
-const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 // (나중에 학습 데이터를 보낼 DB ID도 여기에 추가하면 됩니다)
 
