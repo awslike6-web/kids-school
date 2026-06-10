@@ -152,7 +152,7 @@
     </div>
   </div>
   
-  <button class="big-btn back-btn" onclick="location.href='../lobby.html'">🚪 공부방 메인으로 나가기</button>
+<button class="big-btn back-btn" onclick="exitRoom()">🚪 공부방 메인으로 나가기</button>
 </div>
 
 <div class="screen" id="screen-quiz">
@@ -237,8 +237,10 @@
 
     <script src="notion-helper.js"></script>
 <script>
+// ⏱️ [추가] 방 입장 시간 기록
+const roomStartTime = new Date();
+  
 // ⚙️ 단일 백엔드 프록시 인프라 주소 유지 (보안 통신용)
-const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
 let WORD_DATABASES = {}; 
@@ -569,6 +571,55 @@ function executePrint() {
   selectedWords.forEach((w, i) => { html += `<td style="width:25%;">${i+1}번: <b>${w.eng}</b></td>`; if((i+1)%4 === 0) html += '</tr><tr>'; });
   printArea.innerHTML = html + `</tr></table></div>`; printArea.style.display = 'block'; window.print(); setTimeout(() => { printArea.style.display = 'none'; }, 1000);
 }
+
+// 🔒 중복 전송 방지용 자물쇠
+let isExiting = false; 
+
+// 🚀 최종 탈출 및 학습 일지 전송 함수
+async function exitRoom() {
+    if (isExiting) return; 
+    isExiting = true;      
+
+    const roomEndTime = new Date(); 
+    const timeDiff = roomEndTime - roomEndTime; 
+    let calculatedMinutes = Math.floor(timeDiff / 60000);
+    if (calculatedMinutes < 1) calculatedMinutes = 1; 
+
+    // 🎯 [수정 포인트 1 적용] 영단어방의 wrongWords 배열을 사용해 오답 데이터 추출!
+    // 틀린 단어가 있다면 영어 단어들을 쉼표로 연결해서 보냅니다.
+    const currentErrorReport = wrongWords.length > 0 
+        ? wrongWords.map(w => w.eng).join(', ') 
+        : "오답 없음"; 
+
+    // 🎯 [수정 포인트 2 적용] 영단어방은 다이아몬드/슬라임파츠를 쓰므로 단어요정은 0으로 고정
+    const currentWordFairy = 0; 
+
+    // ✨ 노션으로 데이터 발사!
+    const success = await sendStudyLogToNotion({
+        childName: currentProfile === 'son' ? '민수' : '민서', 
+        // 🎯 [수정 포인트 3 적용] 영단어방 과목명 지정
+        subject: "영어",                  
+        startTime: roomStartTime.toISOString(),  
+        endTime: roomEndTime.toISOString(),      
+        durationMinutes: calculatedMinutes,      
+        errorReport: currentErrorReport,         
+        wordFairyCount: currentWordFairy         
+    });
+
+    if (success) {
+        console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
+        // 🎯 [수정 포인트 4 적용] 기존 로비 주소로 복귀
+        location.href = '../lobby.html'; 
+    } else {
+        alert("앗! 학습 일지 기록에 문제가 생겨서 나가지 못했습니다.");
+        isExiting = false; 
+    }
+}
+
+// 🚨 블랙박스 강제 종료 생존 로직
+window.addEventListener('pagehide', () => {
+    exitRoom();
+});  
 </script>
 </body>
 </html>
