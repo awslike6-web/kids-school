@@ -147,7 +147,7 @@
   
   <p id="warnMsg" style="color:var(--pink); font-size:0.9rem; text-align:center; height:1.2rem; margin-top:5px;"></p>
   <button class="big-btn yellow-btn" onclick="startQuiz()">🚀 탐험 시작하기</button>
-  <button class="big-btn back-btn" onclick="location.href='../lobby.html'">🚪 메인으로 나가기</button>
+  <button class="big-btn back-btn" onclick="exitRoom()">🚪 메인으로 나가기</button>
 </div>
 
 <div class="screen" id="screen-order-select">
@@ -156,7 +156,7 @@
     <button class="big-btn order-seq-btn" onclick="selectQuizOrder('sequential')">🟢 순서대로</button>
     <button class="big-btn order-rnd-btn" onclick="selectQuizOrder('random')">🎲 뒤죽박죽</button>
   </div>
-  <button class="big-btn back-btn" onclick="goSetup()">🔙 이전 단계로</button>
+  <button class="big-btn back-btn" onclick="exitRoom()">🔙 이전 단계로</button>
 </div>
 
 <div class="screen" id="screen-minsu-quiz">
@@ -180,7 +180,7 @@
   <div class="btn-group">
     <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">제출</button>
     <button class="btn btn-info" id="justShowBtn" style="display:none;" onclick="showStudyResultDirectly()">바로 정답 확인</button>
-    <button class="btn btn-secondary" onclick="goSetup()">나가기</button>
+    <button class="btn btn-secondary" onclick="exitRoom()">나가기</button>
   </div>
 </div>
 
@@ -206,7 +206,7 @@
   <div class="btn-group">
     <button class="btn btn-primary" id="dictSubmitBtn" onclick="submitDictation()">제출</button>
     <button class="btn btn-info" id="dictJustShowBtn" style="display:none;" onclick="showStudyResultDirectly()">바로 정답 확인</button>
-    <button class="btn btn-secondary" onclick="goSetup()">나가기</button>
+    <button class="btn btn-secondary" onclick="exitRoom()">나가기</button>
   </div>
 </div>
 
@@ -219,9 +219,12 @@
   </div>
 </div>
 
-  <script src="notion-helper.js"></script>
+<script src="notion-helper.js"></script>
   
 <script>
+// 📍 Step 2: 입장 타이머 켜기 완료
+const roomStartTime = new Date();
+
 const KOREAN_DB_ID = "375a27115b688038b686d3994ee12919"; 
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
@@ -242,6 +245,9 @@ let currentHintMode = 'both';
 let currentQuizType = 'quiz'; 
 let userNotionPage = null; 
 let userLevel = 1;
+
+// 🔒 오답 추적용 배관 가방 생성 (오답리포트에 기록할 데이터)
+let wrongWordsList = [];
 
 function createFloats() {
   const container = document.getElementById('bgFloats');
@@ -274,7 +280,6 @@ async function loadKoreanWords() {
     let hasMore = true; 
     let nextCursor = undefined;
 
-    // 1단계: 노션 단어장 DB에서 데이터를 안전하게 다 가져옵니다.
     while (hasMore) {
       const bodyData = { page_size: 100 };
       if (nextCursor) bodyData.start_cursor = nextCursor;
@@ -295,23 +300,20 @@ async function loadKoreanWords() {
 
     if (allResults.length === 0) throw new Error("단어 없음");
     
-    // 2단계: 로그인한 사용자에 맞춰서 매칭할 이름 결정
     const targetMatchName = (currentUserName === '아빠(관리자)') ? '민수' : currentUserName;
 
-    // 3단계: 아버님 노션 컬럼명('단어', '뜻풀이', '힌트', '과목', '단원', '대상') 1:1 매칭
     allFetchedWords = allResults.map(page => {
       const p = page.properties;
       return {
-        pageId: page.id, // 👉 혹시 이 줄이 빠져있지 않나요?! (아주 중요합니다!)
+        pageId: page.id,
         word: p["단어"]?.title[0]?.plain_text || "",
-        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", // 🎯 '뜻풀이'와 '뜻' 둘 다 호환되도록 안전장치!
+        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", 
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
         subject: p["과목"]?.select?.name || "기타",
-        stage: p["단원"]?.number || p["단계"]?.number || 1, // 🎯 '단원'과 '단계' 둘 다 호환되도록 안전장치!
+        stage: p["단원"]?.number || p["단계"]?.number || 1, 
         target: p["대상"]?.select?.name || ""
       };
     }).filter(w => {
-      // 4단계: 이름 공백 청소 및 매칭 검사
       const cleanTarget = w.target.trim();
       const cleanLoginName = targetMatchName.trim();
       return w.word && w.meaning && (cleanTarget === cleanLoginName);
@@ -440,6 +442,7 @@ function selectQuizOrder(orderMode) {
   totalCount = words.length; 
   currentIndex = 0; 
   score = 0;
+  wrongWordsList = []; // 게임 시작 시 오답 초기화
   
   configureInputUI();
   
@@ -534,7 +537,6 @@ function getDisplayInfo(word) {
   return `📖 뜻풀이:\n${word.meaning}\n\n💡 힌트:\n${word.hint || '없음'}`;
 }
 
-// 🎯 노션의 오디오 파일이 들어있는 컬럼(속성) 이름을 적어주세요.
 const AUDIO_PROP_NAME = "음성파일"; 
 
 async function speakCurrentWord() {
@@ -542,7 +544,6 @@ async function speakCurrentWord() {
   const word = words[currentIndex];
 
   try {
-    // 1. 해당 단어의 노션 페이지 정보를 '실시간'으로 새로 가져옵니다.
     const response = await fetch(`${PROXY_URL}/v1/pages/${word.pageId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" }
@@ -553,7 +554,6 @@ async function speakCurrentWord() {
     const pageData = await response.json();
     const audioProp = pageData.properties[AUDIO_PROP_NAME];
 
-    // 2. 파일이 존재하는지 확인하고 최신 URL을 가져옵니다.
     if (audioProp && audioProp.files && audioProp.files.length > 0) {
       const latestAudioUrl = audioProp.files[0].file?.url || audioProp.files[0].external?.url;
       
@@ -568,13 +568,11 @@ async function speakCurrentWord() {
     throw new Error("오디오 파일이 등록되지 않았습니다.");
 
   } catch (error) {
-    // 3. 에러 발생 시 지체 없이 TTS로 대체
     console.log(`[${word.word}] 직접 녹음 오디오 로드 실패, TTS를 실행합니다. (${error.message})`);
     fallbackToTTS(word.word);
   }
 }
 
-// 브라우저 기본 TTS (기계음 대체 실행 함수)
 function fallbackToTTS(text) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
@@ -584,10 +582,6 @@ function fallbackToTTS(text) {
     window.speechSynthesis.speak(utterance);
   }
 }
-
-// ==========================================
-// 아래부터는 기존 코드 그대로 유지하시면 됩니다!
-// ==========================================
 
 function submitAnswer() {
   const inputEl = document.getElementById('answerInput');
@@ -623,6 +617,12 @@ function processAnswer(inputEl) {
       inputEl.className = 'input-field error';
       inputEl.classList.add('shake');
       setTimeout(() => inputEl.classList.remove('shake'), 400);
+      
+      // 🔒 오답이 발생했을 때 리스트에 누적 수집
+      if (!wrongWordsList.includes(word.word)) {
+        wrongWordsList.push(word.word);
+      }
+      
       showResult(false, word.word, word.meaning, false);
     }
   }
@@ -686,8 +686,8 @@ async function finishGame() {
     document.getElementById('resultMessage').innerHTML = finishMsg;
     
     const btn = document.querySelector('#resultModal button');
-    btn.textContent = "첫 화면으로 가기 🌟";
-    btn.onclick = () => { location.reload(); };
+    btn.textContent = "로비로 나가기 🌟";
+    btn.onclick = () => { exitRoom(); }; // 완수 후 나갈 때 블랙박스 구동
     
     document.getElementById('resultOverlay').style.display = 'flex';
     document.getElementById('resultOverlay').classList.add('active');
@@ -718,8 +718,8 @@ async function finishGame() {
     }
     
     const btn = document.querySelector('#resultModal button');
-    btn.textContent = "첫 화면으로 돌아가기";
-    btn.onclick = () => { location.reload(); };
+    btn.textContent = "공부방 종료하기";
+    btn.onclick = () => { exitRoom(); }; // 보상 기록 후 로비로 탈출하며 블랙박스 전송
     
     showScreen('screen-loading');
     document.getElementById('screen-loading').classList.remove('active');
@@ -761,7 +761,6 @@ async function patchRewardToNotion(page, quizScore) {
   }
 }
 
-// 🎯 프로필 순환 스위칭 (민수 👦 ➡️ 민서 👧 ➡️ 아빠(관리자) 👨)
 function toggleProfileManually() {
   if (currentUser === 'son') {
     currentUser = 'daughter';
@@ -800,6 +799,57 @@ window.addEventListener('load', () => {
   createFloats();
   applyTheme(); 
   loadKoreanWords(); 
+});
+
+
+// =================================================================
+// 📍 Step 4: 만능 블랙박스 템플릿 결합 (용어사전방 맞춤형 커스텀)
+// =================================================================
+
+// 🔒 중복 전송 방지용 자물쇠
+let isExiting = false; 
+
+// 🚀 최종 탈출 및 학습 일지 전송 함수
+async function exitRoom() {
+    if (isExiting) return; 
+    isExiting = true;      
+
+    const roomEndTime = new Date(); 
+    const timeDiff = roomEndTime - roomStartTime; 
+    let calculatedMinutes = Math.floor(timeDiff / 60000);
+    if (calculatedMinutes < 1) calculatedMinutes = 1; 
+
+    // 🎯 [수정 포인트 1] 실시간 누적된 오답 배열을 문자열로 결합
+    const currentErrorReport = wrongWordsList.length > 0 ? wrongWordsList.join(', ') : "오답 없음"; 
+
+    // 🎯 [수정 포인트 2] 용어사전방은 단어요정이 없으므로 0 고정
+    const currentWordFairy = 0; 
+
+    // ✨ 노션으로 데이터 발사!
+    const success = await sendStudyLogToNotion({
+        childName: currentUser === 'son' ? '민수' : (currentUser === 'daughter' ? '민서' : '부모관리자'), 
+        // 🎯 [수정 포인트 3] 노션 DB 과목 설계명 매칭
+        subject: "국어(용어사전)",                  
+        startTime: roomStartTime.toISOString(),  
+        endTime: roomEndTime.toISOString(),      
+        durationMinutes: calculatedMinutes,      
+        errorReport: currentErrorReport,         
+        wordFairyCount: currentWordFairy         
+    });
+
+    if (success) {
+        console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
+        // 🎯 [수정 포인트 4] 탈출 후 돌아갈 상위 대시보드 로비 주소
+        location.href = '../lobby.html'; 
+    } else {
+        alert("앗! 학습 일지 기록에 문제가 생겨서 나가지 못했습니다.");
+        isExiting = false; 
+    }
+}
+
+// 🚨 블랙박스 강제 종료 생존 로직
+window.addEventListener('pagehide', () => {
+    exitRoom();
 });
 </script>
 </body>
