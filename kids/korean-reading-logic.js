@@ -2,7 +2,7 @@
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 
 // 🚨 아버님이 새로 만드실 [아빠 도서관 DB]의 ID를 꼭 여기에 넣어주세요!
-const LIBRARY_DB_ID = "여기에_아빠도서관_DB_ID를_넣어주세요"; 
+const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee"; 
 
 let currentStage = 0;       
 let activePassage = null;   // 👈 초기에는 비워둡니다. 노션 스캔 후 화물이 채워집니다.
