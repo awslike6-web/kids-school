@@ -128,7 +128,7 @@ function setupParagraphPuzzle() {
     shuffled.forEach(p => {
         const block = document.createElement('div');
         block.className = 'puzzle-block';
-        block.innerText = `${p.label} ${p.text.substring(0, 25)}...`;
+        block.innerText = `${p.label} ${p.text}`;
         block.onclick = () => {
             if (userOrderTracking.includes(p.id)) return;
             userOrderTracking.push(p.id);
