@@ -286,7 +286,6 @@ async function loadKoreanWords() {
       const bodyData = { page_size: 100 };
       if (nextCursor) bodyData.start_cursor = nextCursor;
 
-      // 🚨 주의: PROXY_URL은 notion-helper.js의 것을 그대로 사용합니다!
       const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, {
         method: "POST", 
         headers: { "Content-Type": "application/json" }, 
@@ -308,18 +307,26 @@ async function loadKoreanWords() {
 
     allFetchedWords = allResults.map(page => {
       const p = page.properties;
+      
+      // 🚨 [핵심 수정 1] 텍스트로 된 '단원'을 무조건 숫자로 변환해서 충돌을 막습니다!
+      let rawStage = p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || "1";
+      let numStage = parseInt(rawStage, 10);
+      if (isNaN(numStage)) numStage = 1;
+
       return {
         pageId: page.id,
         word: p["단어"]?.title[0]?.plain_text || "",
-        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", 
+        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "뜻풀이 없음", 
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
-        subject: p["과목"]?.multi_select?.map(item => item.name) || [],
-        stage: p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || 1,
+        subject: p["과목"]?.multi_select?.map(item => item.name) || ["미분류"], // 과목이 비어있으면 '미분류' 처리
+        stage: numStage, 
         target: p["학생"]?.multi_select?.map(item => item.name) || [],
       };
     }).filter(w => {
       const hasTarget = w.target.some(t => t.trim() === cleanLoginName);
-      return w.word && w.meaning && hasTarget;
+      
+      // 🚨 [핵심 수정 2] 뜻풀이가 비어있어도 통과되도록 w.meaning 조건을 삭제했습니다!
+      return w.word !== "" && hasTarget;
     });
 
     if (allFetchedWords.length === 0) throw new Error("선택된 아이의 단어가 없음");
@@ -346,7 +353,6 @@ async function loadKoreanWords() {
       `<span style="color:var(--pink); font-weight:bold;">⚠️ 연결에 실패했어요!<br><small style="font-size:0.9rem; color:#666;">(${error.message})</small></span>`;
   }
 }
-
 
 async function loadUserProfile() {
   try {
