@@ -1,16 +1,70 @@
-// ⚙️ 국어 멀티버스 코어 운영 엔진 (관제탑 연동 버전)
+// ⚙️ 국어 멀티버스 코어 운영 엔진 (도서 추천 엔진 탑재 최종 버전)
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 
-let currentStage = 0;       // Stage 0~4 제어 변수
-let activePassage = KOREAN_READING_DATABASE[0]; // 현재 로드된 지문 데이터
-let chosenLesson = "";      // 아이가 선택한 교훈 카드 데이터
-let conversationHistory = []; // AI 챗봇 대화 버퍼
+// 🚨 아버님이 새로 만드실 [아빠 도서관 DB]의 ID를 꼭 여기에 넣어주세요!
+const LIBRARY_DB_ID = "여기에_아빠도서관_DB_ID를_넣어주세요"; 
 
-// 화면 로드 시 자동 구동 트리거
+let currentStage = 0;       
+let activePassage = null;   // 👈 초기에는 비워둡니다. 노션 스캔 후 화물이 채워집니다.
+let chosenLesson = "";      
+let conversationHistory = []; 
+let userOrderTracking = []; // 퍼즐 순서 추적용 배낭
+
+// 🎯 화면 로드 시 자동 구동 트리거
 function initKoreanUniverse() {
-    renderStage();
+    // 냅다 화면부터 그리지 않고, 아빠 도서관으로 퀵보이를 보냅니다!
+    fetchRecommendedBook();
 }
 
+// 📡 [초고속 추천 엔진] 노션에서 바코드(ID)만 살짝 긁어오는 함수
+async function fetchRecommendedBook() {
+    const indicator = document.getElementById('stage-indicator');
+    indicator.innerText = "📡 아빠 도서관에서 오늘의 추천 도서 스캔 중... ⏳";
+
+    try {
+        // 노션에 "추천 여부에 체크(true)된 것만 딱 1개 줘!" 하고 요청
+        const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filter: {
+                    property: "추천 여부",
+                    checkbox: { equals: true }
+                },
+                page_size: 1 // 바코드 딱 하나만 가져와서 로딩 극대화!
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!data.results || data.results.length === 0) {
+            throw new Error("오늘의 추천 도서가 없습니다! 노션에서 체크박스를 켜주세요.");
+        }
+
+        // 노션에서 읽어온 가벼운 바코드 (예: "book_01")
+        const bookBarcode = data.results[0].properties["도서 키(ID)"]?.rich_text[0]?.plain_text;
+        console.log("📚 노션 바코드 스캔 완료:", bookBarcode);
+
+        // 🚛 로컬 창고(KOREAN_READING_DATABASE)에서 바코드와 일치하는 무거운 화물 꺼내기!
+        // (이 데이터는 korean-reading-data.js 에서 가져옵니다)
+        activePassage = KOREAN_READING_DATABASE.find(book => book.id === bookBarcode);
+
+        if (!activePassage) {
+            throw new Error(`로컬 창고에 바코드 [${bookBarcode}]와 일치하는 지문 데이터가 없습니다.`);
+        }
+
+        // 화물 적재가 완료되었으니, 본격적으로 게임 스테이지 렌더링 시작!
+        renderStage();
+
+    } catch (error) {
+        console.error("추천 엔진 스캔 실패:", error);
+        indicator.innerHTML = `<span style="color: var(--danger-red);">⚠️ 엔진 오류: ${error.message}</span>`;
+    }
+}
+
+// ----------------------------------------------------
+// 🎮 여기서부터는 게임 화면을 그리고 정답을 체크하는 로직입니다.
+// ----------------------------------------------------
 function renderStage() {
     const zone = document.getElementById('game-zone');
     zone.innerHTML = '';
@@ -68,7 +122,6 @@ function renderStage() {
     }
 }
 
-let userOrderTracking = [];
 function setupParagraphPuzzle() {
     const pool = document.getElementById('puzzle-pool');
     const shuffled = [...activePassage.paragraphs].sort(() => Math.random() - 0.5);
