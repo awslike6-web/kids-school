@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정밀독해 멀티버스방 🌟</title>
+    </head>
+<body>
+    <div id="currentUserBadge" style="padding:10px; font-weight:bold;">현재 사용자 확인 중...</div>
+    <h1>📖 국어 정밀독해 게임장</h1>
+
+    <div id="reading-arena">
+        </div>
+
+    <button onclick="exitRoom('국어(빈칸퀴즈)')" style="padding:15px; margin-top:20px; cursor:pointer;">🚪 공부 완료하고 허브로 나가기</button>
+
+    <script src="notion-helper.js"></script>
+    <script src="korean_common.js"></script>
+    <script src="korean-reading-data.js"></script>
+    <script src="korean-reading-logic.js"></script>
+    <script>
+        // 관제탑 자동 셧다운 센서용 이름표 세팅
+        window.KOREAN_SUBJECT_TITLE = "국어(빈칸퀴즈)";
+    </script>
+</body>
+</html>
