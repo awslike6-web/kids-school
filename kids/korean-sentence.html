@@ -1,27 +1,325 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<title>국어 AI 문장방 ⌨️</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민민이네 국어 멀티버스</title>
+    <style>
+        :root { 
+            --bg-color: #0d1117; 
+            --panel-color: #161b22; 
+            --text-color: #c9d1d9; 
+            --accent-color: #58a6ff; 
+            --success-color: #238636;
+            --easy-color: #ff9800;
+            --base-color: #8b949e;
+            --spell-color: #ab47bc;
+            --logic-color: #26a69a;
+        }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            font-family: 'Malgun Gothic', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box;
+        }
+        .container { 
+            width: 100%; max-width: 600px; background-color: var(--panel-color); 
+            border: 2px solid #30363d; border-radius: 10px; padding: 20px; box-sizing: border-box;
+        }
+        h1 { margin-top: 0; text-align: center; font-size: 1.5rem; }
+        
+        .portal-area { display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; }
+        .mode-btn { background-color: #21262d; color: #8b949e; border: 1px solid #30363d; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.2s; }
+        .mode-btn.active { border-color: var(--accent-color); color: #ffffff; background-color: #1f6feb; }
+        #mode-display { text-align: center; font-weight: bold; padding: 8px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem; }
+        .chat-box { height: 350px; overflow-y: auto; background-color: #0d1117; padding: 15px; border-radius: 5px; display: flex; flex-direction: column; gap: 12px; border: 1px solid #30363d; margin-bottom: 15px; }
+        .msg { max-width: 85%; padding: 10px 14px; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; word-break: break-all; }
+        .msg.ai { background-color: #21262d; align-self: flex-start; border-left: 4px solid var(--accent-color); }
+        .msg.user { background-color: #1f6feb; color: #ffffff; align-self: flex-end; }
+        .hint-area { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; padding: 10px; background: #21262d; border-radius: 5px; }
+        .word-btn { background-color: #30363d; color: #c9d1d9; border: 1px solid #8b949e; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .word-btn:hover { background-color: var(--accent-color); color: #0d1117; }
+        .input-area { display: flex; gap: 10px; }
+        textarea { flex: 1; background-color: #0d1117; color: var(--text-color); border: 1px solid #30363d; padding: 10px; height: 50px; border-radius: 5px; resize: none; font-size: 0.95rem; }
+        textarea:focus { outline: none; border-color: var(--accent-color); }
+        button.send-btn { background-color: var(--accent-color); color: #0d1117; border: none; padding: 0 20px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        button.send-btn:disabled { background-color: #30363d; color: #8b949e; cursor: not-allowed; }
+        button.back-btn { width: 100%; margin-top: 20px; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #21262d; color: #8b949e; font-family: 'Malgun Gothic', sans-serif; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        button.back-btn:hover { background-color: #30363d !important; color: #ffffff !important; }
+    </style>
 </head>
 <body>
+<div id="start-overlay" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(13,17,23,0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <h2 style="color: var(--accent-color); font-family: 'Malgun Gothic', sans-serif;">🚀 국어 멀티버스 마스터 기동 완료</h2>
+    <button onclick="unlockAudioAndStart()" style="padding: 15px 30px; font-size: 1.2rem; background: var(--accent-color); border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 20px;">터치해서 진입하기</button>
+</div>
+
+<div class="container">
+    <h1 id="room-title">🚀 국어 멀티버스 마스터 엔진</h1>
+    
+    <div class="portal-area">
+        <button class="mode-btn" id="btn-easy" onclick="changeMode('easy')">🍬 민서 방</button>
+        <button class="mode-btn" id="btn-base" onclick="changeMode('base')">🤖 민수 방</button>
+        <button class="mode-btn" id="btn-spell" onclick="changeMode('spell')">🔍 맞춤법</button>
+        <button class="mode-btn" id="btn-logic" onclick="changeMode('logic')">🧩 논리학</button>
+    </div>
+
+    <div id="mode-display">인프라 대기 중...</div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="hint-area" id="hint-area" style="display: none;"></div>
+    
+    <div class="input-area">
+        <textarea id="user-input" placeholder="문장을 입력하세요..."></textarea>
+        <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
+    </div>
+
+    <button class="back-btn" onclick="exitRoom('국어(문장)')">
+        🚪 공부방 대문으로 돌아가기
+    </button>
+</div>
+
 <script src="notion-helper.js"></script>
-<script src="korean_common.js"></script> 
+<script src="korean_common.js"></script>
+
 <script>
-    // 관제탑 블랙박스가 자동 인식할 이 방의 노션 저장용 정식 과목 타이틀 지정
-    window.KOREAN_SUBJECT_TITLE = "국어(문장)";
+    const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentMode = urlParams.get('mode') || 'base';
+    let conversationHistory = [];
 
-    // ... (중략: 아버님이 짜신 기존 AI API 통신 및 퀴즈 구동 자바스크립트 소스코드) ...
-
-    // 🚀 수정된 하이브리드 탈출 버튼 대응
-    function exitThisRoom() {
-        // 기존에 수집된 오답이 있다면 공용 관제탑 가방(wrongNotes)에 복사해 줍니다.
-        if (typeof wrongNotesList !== 'undefined') {
-            wrongNotes = wrongNotesList;
+    const modeConfigs = {
+        easy: {
+            title: "🍬 레벨 0: 둘째 민서 모드 (문장 징검다리)", color: "var(--easy-color)", pitch: 1.2,
+            placeholder: "아래 단어 버튼을 누르거나 직접 써보세요!",
+            welcome: "안녕! 나는 너의 문장 수호신이야! 오늘 있었던 재미난 일을 단어 버튼을 누르거나 글자로 써서 나에게 들려줘! ✨",
+            ttsWelcome: "민서 방 충전 완료! 재미있는 문장을 만들어줘!",
+            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬과 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
+        },
+        base: {
+            title: "🤖 레벨 1: 첫째 민수 모드 (대충 쓰기 방어)", color: "var(--base-color)", pitch: 0.7,
+            placeholder: "좋았다, 재밌었다, 나빴다 금지! 꼼수 금지!",
+            welcome: "[시스템 경고] 대충 쓰기 방어 격리실에 온 것을 환영한다. '좋았다, 재밌었다, 나빴다' 따위의 나태한 어휘는 이곳에서 통하지 않는다. 제대로 된 문장을 입력하라.",
+            ttsWelcome: "치직, 감정 격리실 가동. 문장을 입력하라.",
+            systemPrompt: `너는 'SCP 감정 격리실 검사관'이다. 낮고 기계적인 톤으로 차갑고 타이트한 긴장감을 유지하라.\n[엄격 검사 규칙]\n1. '좋았다', '재밌었다', '나빴다' 삼대장 단어가 포함되면 무조건 통과를 거부하고, 구체적인 감정 형용사를 쓰도록 지시하라.\n2. 한 문장 안에 '~고', '~했는데', '~래서' 등의 연결어가 2개 이상 사용되면 무조건 통과를 거부하고, 문장을 쪼개어 마침표(.)를 찍도록 유도하라.\n3. 자음이나 모음만 난사한 경우(예: ㅋㅋㅋ, ㅎㅎㅎ) 노이즈로 간주하고 경고하라.\n4. 위 규칙을 모두 완벽히 통과하고, 완성도 높은 문장인 경우에만 최종 승인하라. 승인 시에는 응답 마지막 줄에 [SUCCESS]를 포함하라.`
+        },
+        spell: {
+            title: "🔍 레벨 2: 맞춤법 스스로 교정 모드", color: "var(--spell-color)", pitch: 1.0,
+            placeholder: "맞춤법과 띄어쓰기를 신경 써서 작성하세요.",
+            welcome: "연구소에 잘 왔다. 네가 쓴 문장의 빈틈을 찾아내지. 어디 한번 맞춤법과 띄어쓰기를 뽐내 보아라.",
+            ttsWelcome: "스캔 엔진 로드 완료. 틀린 곳을 찾아내겠다.",
+            systemPrompt: `너는 '국어 연구소 매니악 검사관'이다.\n[규칙]\n1. 아이가 입력한 문장에서 맞춤법이나 띄어쓰기 오류가 있는지 샅샅이 찾아내라.\n2. 절대 답을 직접 고쳐주거나 올바른 문장을 알려주지 마라.\n3. 오직 문장 안에서 오류가 발생한 지점들만 예리하게 짚어내며 "어디가 틀렸을까? 스스로 고쳐봐라" 등의 뉘앙스로 유도하라.\n4. 오류가 전혀 없고 완벽할 때만 응답 마지막 줄에 [SUCCESS]를 포함하라.`
+        },
+        logic: {
+            title: "🧩 레벨 3: 인과관계 인내 모드", color: "var(--logic-color)", pitch: 1.0,
+            placeholder: "'왜냐하면'과 '~기 때문이다'를 넣으세요.",
+            welcome: "논리학 방이다. 네 주장에는 반드시 타당한 이유가 있어야 한다. '왜냐하면'과 '~기 때문이다' 체계를 갖춰 문장을 증명하라.",
+            ttsWelcome: "논리 회로 연결. 인과 관계를 증명하라.",
+            systemPrompt: `너는 '씽크탱크 논리학 수석 검사관'이다.\n[규칙]\n1. 아이가 작성한 문장 구조 내에 '왜냐하면'과 '~기 때문이다'라는 인과 표현이 명확하게 들어가 있는지 확인하라.\n2. 단순히 단어만 들어간 게 아니라 문맥상 '원인과 결과'가 성립하는 논리적인 구조여야만 통과시킨다.\n3. 조건이 충족되지 않으면 무엇이 부족한지 논리적으로 지적하고 다시 쓰게 하라.\n4. 논리 구조가 완벽히 성립하면 통과 승인하며, 응답 마지막 줄에 [SUCCESS]를 포함하라.`
         }
+    };
+
+    function changeMode(newMode) {
+        currentMode = newMode;
+        const config = modeConfigs[currentMode];
         
-        // 공용 관제탑의 전송엔진 가동! "국어(문장)" 이름표 달고 출고합니다.
-        exitRoom("국어(문장)");
+        document.getElementById('room-title').innerText = config.title;
+        document.getElementById('user-input').placeholder = config.placeholder;
+        
+        const modeDisplay = document.getElementById('mode-display');
+        modeDisplay.innerText = `${currentMode.toUpperCase()} PORTAL ACTIVE`;
+        modeDisplay.style.backgroundColor = config.color;
+        modeDisplay.style.color = "#000";
+
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`btn-${currentMode}`);
+        if(activeBtn) activeBtn.classList.add('active');
+
+        const hintArea = document.getElementById('hint-area');
+        if (currentMode === 'easy') {
+            hintArea.style.display = 'flex';
+            setupEasyHints();
+        } else {
+            hintArea.style.display = 'none';
+        }
+
+        conversationHistory = [];
+        document.getElementById('chat-box').innerHTML = '';
+        
+        appendMessage('ai', config.welcome);
+        speakTTS(config.ttsWelcome, config.pitch);
     }
+
+    function setupEasyHints() {
+        const hintArea = document.getElementById('hint-area');
+        hintArea.innerHTML = '';
+        const easyWords = ['사탕', '강아지', '놀이터', '엄마', '아빠', '컴퓨터', '초콜릿', '고양이', '학교', '친구'];
+        easyWords.forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'word-btn';
+            btn.innerText = word;
+            btn.onclick = () => {
+                const input = document.getElementById('user-input');
+                input.value += (input.value ? ' ' : '') + word;
+                speakTTS(word, 1.2);
+                input.focus();
+            };
+            hintArea.appendChild(btn);
+        });
+    }
+
+    function unlockAudioAndStart() {
+        document.getElementById('start-overlay').style.display = 'none'; 
+        const unlockUtterance = new SpeechSynthesisUtterance('');
+        window.speechSynthesis.speak(unlockUtterance);
+        changeMode(currentMode);
+    }
+
+    function speakTTS(text, pitchValue) {
+        if (!window.speechSynthesis) return;
+        const cleanText = text.replace(/\[SUCCESS\]/g, '').trim();
+        window.speechSynthesis.cancel(); 
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'ko-KR';
+        utterance.pitch = pitchValue;
+        utterance.rate = 1.1; 
+
+        const voices = window.speechSynthesis.getVoices();
+        const googleVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('ko'));
+        if (googleVoice) utterance.voice = googleVoice;
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function appendMessage(sender, text) {
+        const chatBox = document.getElementById('chat-box');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${sender}`;
+        msgDiv.innerText = text.replace(/\[SUCCESS\]/g, '').trim(); 
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function validateInputPattern(text) {
+        const consonantOnly = /^[ㄱ-ㅎ\s]+$/;
+        if (consonantOnly.test(text.replace(/[^ㄱ-ㅎ]/g, '')) && text.trim().length > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    async function processUserStatement() {
+        const inputEl = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const userText = inputEl.value.trim();
+        const config = modeConfigs[currentMode];
+
+        if (!userText) return;
+
+        if (currentMode !== 'easy' && !validateInputPattern(userText)) {
+            const warning = "경고: 무의미한 자음 노이즈가 감지되었다. 온전한 단어와 문장으로 대답하라.";
+            appendMessage('user', userText);
+            appendMessage('ai', warning);
+            speakTTS("자음 노이즈 감지. 똑바로 쓰라.", config.pitch); 
+            inputEl.value = '';
+            
+            // 🌟 오답 발생 시 관제탑 오답 가방(wrongNotes)에 담기
+            wrongNotes.push(`자음 노이즈: ${userText}`);
+            return;
+        }
+
+        appendMessage('user', userText);
+        inputEl.value = '';
+        sendBtn.disabled = true;
+        
+        if (conversationHistory.length >= 6) {
+            conversationHistory = conversationHistory.slice(-4); 
+        }
+        conversationHistory.push({ role: "user", parts: [{ text: userText }] });
+
+        try {
+            const response = await fetch(`${WORKER_PROXY_URL}/v1/gemini`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: config.systemPrompt }] },
+                    contents: conversationHistory,
+                    generationConfig: { temperature: 0.6 }
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || `상태 코드 ${response.status}`);
+            }
+
+            const data = await response.json();
+            const aiResponse = data.candidates[0].content.parts[0].text;
+            
+            conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+            appendMessage('ai', aiResponse);
+            speakTTS(aiResponse, config.pitch);
+
+            const isSuccess = aiResponse.includes('[SUCCESS]');
+            triggerNotionReward(isSuccess);
+
+            // 🌟 미션 실패 시 (통과 거부) 관제탑 오답 가방에 기록 추가
+            if (!isSuccess) {
+                wrongNotes.push(`[수정요청 됨] 작성문장: ${userText}`);
+            }
+
+        } catch (error) {
+            console.error("API 연동 에러:", error);
+            appendMessage('ai', `[시스템 에러] ${error.message}`);
+            speakTTS("시스템 오류 발생", 1.0);
+        } finally {
+            sendBtn.disabled = false;
+        }
+    }
+
+    async function triggerNotionReward(isSuccess) {
+        const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+        const childName = currentMode === 'easy' ? '민서' : '민수';
+        const rewardProp = currentMode === 'easy' ? '슬라임 파츠 개수' : '다이아몬드 개수';
+        const rewardIcon = currentMode === 'easy' ? '💧' : '💎';
+        const earnAmount = isSuccess ? 5 : 1;
+
+        try {
+            const queryRes = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+            });
+            const data = await queryRes.json();
+            if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
+            
+            const pageId = data.results[0].id;
+            const currentCount = data.results[0].properties[rewardProp]?.number || 0;
+
+            await fetch(`${WORKER_PROXY_URL}/v1/pages/${pageId}`, {
+                method: "PATCH", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ properties: { [rewardProp]: { number: currentCount + earnAmount } } })
+            });
+
+            const successMsg = isSuccess 
+                ? `미션 성공! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`
+                : `열심히 작성했어요! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`;
+            
+            appendMessage('ai', successMsg);
+            if(isSuccess) speakTTS(`보상 5개 적립 완료!`, 1.2);
+            else speakTTS(`보상 1개 적립 완료!`, 1.0);
+        } catch (error) {
+            console.error("보상 에러:", error);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if(window.speechSynthesis) {
+            window.speechSynthesis.getVoices();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+            }
+        }
+    });
 </script>
 </body>
 </html>
