@@ -8,202 +8,7 @@
 <style>
   :root {
     --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
-    --purple: #A78BFA; --orange: #FF9F43; --<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>통합 단어 퀴즈방 📖</title>
-    <style>
-        body { font-family: 'Jua', sans-serif; text-align: center; padding: 40px 20px; background: #f4f7f6; }
-        .card { background: white; border-radius: 20px; padding: 30px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .term { font-size: 2.5rem; color: #ff6b6b; margin-bottom: 20px; font-weight: bold; }
-        .meaning { font-size: 1.5rem; color: #333; margin-bottom: 30px; display: none; }
-        .btn { padding: 15px 30px; font-size: 1.2rem; border: none; border-radius: 12px; cursor: pointer; margin: 5px; color: white; }
-        .btn-show { background: #4ecdc4; }
-        .btn-next { background: #ff9f43; display: none; }
-        .btn-exit { background: #555; margin-top: 30px; }
-        #loading { font-size: 1.5rem; color: #888; }
-    </style>
-</head>
-<body>
-
-    <h1 id="room-title">🚀 퀴즈방 로딩 중...</h1>
-
-    <div class="card">
-        <div id="loading">노션에서 단어들을 긁어오는 중입니다... ⏳</div>
-        <div id="quiz-area" style="display: none;">
-            <div class="term" id="term-text">단어</div>
-            <div class="meaning" id="meaning-text">단어의 뜻이 여기에 나옵니다.</div>
-            
-            <button class="btn btn-show" id="btn-show" onclick="showMeaning()">정답 보기 👀</button>
-            <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">다음 문제 ➡</button>
-        </div>
-    </div>
-
-    <button class="btn btn-exit" onclick="exitRoom()">🚪 대문으로 돌아가기</button>
-
-    <script src="notion-helper.js"></script>
-
-    <script>
-        // ==========================================
-        // 1. 초기 세팅 및 URL 파라미터 감지
-        // ==========================================
-        const roomStartTime = new Date();
-        // 로그인 정보 일치화 (기본값 설정)
-        let currentProfile = localStorage.getItem('currentUser') || 'son';
-        let currentUserName = localStorage.getItem('currentUserName') || '민수';
-        let isExiting = false;
-        let vocabList = [];
-        let currentIndex = 0;
-
-        // 🚨 아버님의 단어장 DB ID로 고정 완료!
-        const VOCAB_DB_ID = "375a27115b688038b686d3994ee12919"; 
-        
-
-        // 주소창에서 꼬리표(?subject=...) 가져오기
-        const urlParams = new URLSearchParams(window.location.search);
-        const subjectParam = urlParams.get('subject') || 'science';
-
-        // 꼬리표에 따른 방 설정 매핑 (노션 태그 목록과 정확히 매칭)
-        const configMap = {
-            'science': { tag: '과학', logSubject: '탐구(용어)', title: '🔬 과학 용어 연구소' },
-            'idiom':   { tag: '관용구', logSubject: '국어(관용구)', title: '📜 속담/관용구 달인' },
-            'math':    { tag: '수학', logSubject: '수학(개념)', title: '📐 수학 개념 방' },
-            'society': { tag: '사회', logSubject: '사회(탐구/토론)', title: '🌍 사회 탐구소' },
-            'korean':  { tag: '국어', logSubject: '국어(문장)', title: '📚 국어 문장 훈련소' }
-        };
-        
-        const currentConfig = configMap[subjectParam] || configMap['science'];
-        document.getElementById('room-title').innerText = currentConfig.title;
-
-        // ==========================================
-        // 2. 노션 DB에서 조건에 맞는 단어만 긁어오기 (안전장치 풀가동)
-        // ==========================================
-        async function fetchVocabFromNotion() {
-            try {
-                // 노션 서버에 조건문 전달 (과목 다중선택에 현재 태그가 포함된 것만!)
-                const response = await fetch(`${PROXY_URL}/v1/databases/${VOCAB_DB_ID}/query`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        filter: {
-                            property: "과목",
-                            multi_select: {
-                                contains: currentConfig.tag
-                            }
-                        }
-                    })
-                });
-
-                const data = await response.json();
-                if (!data.results) throw new Error("데이터 응답 없음");
-                
-                const targetMatchName = (currentUserName === '아빠(관리자)') ? '민수' : currentUserName;
-                const cleanLoginName = targetMatchName.trim();
-
-                // ⭕ 가져온 데이터를 아버님 DB 컬럼 규격에 맞춰 안전하게 파싱
-                vocabList = data.results.map(page => {
-                    const p = page.properties;
-                    // 학생 객체 배열에서 텍스트만 깔끔하게 주스 맑게 짜내기
-                    const rawTarget = p["학생"]?.multi_select ? p["학생"].multi_select.map(item => item.name) : [];
-                    
-                    return {
-                        term: p["단어"]?.title[0]?.plain_text || "이름 없음",
-                        // 🎯 아버님 스펙인 '뜻풀이'로 정확하게 매핑!
-                        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "뜻 없음",
-                        target: rawTarget
-                    };
-                }).filter(w => {
-                    // 🚨 [에러 완전 방어] 객체 무너짐 방지용 String 구조 처리
-                    const hasTarget = w.target.some(t => String(t).trim() === cleanLoginName);
-                    return w.term !== "이름 없음" && hasTarget;
-                });
-
-                // 단어 무작위로 섞기
-                vocabList.sort(() => Math.random() - 0.5);
-
-                if (vocabList.length > 0) {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('quiz-area').style.display = 'block';
-                    showQuestion();
-                } else {
-                    document.getElementById('loading').innerHTML = `<span style='color:#ff6b6b;'>⚠️ ${cleanLoginName}의 '${currentConfig.tag}' 단어가 노션에 아직 없습니다!</span>`;
-                }
-
-            } catch (error) {
-                console.error("단어장 로딩 실패:", error);
-                document.getElementById('loading').innerText = "통신 에러 또는 필터 에러! 아빠에게 알려주세요.";
-            }
-        }
-
-        // ==========================================
-        // 3. 퀴즈 진행 로직
-        // ==========================================
-        function showQuestion() {
-            document.getElementById('meaning-text').style.display = 'none';
-            document.getElementById('btn-show').style.display = 'inline-block';
-            document.getElementById('btn-next').style.display = 'none';
-            
-            document.getElementById('term-text').innerText = vocabList[currentIndex].term;
-            document.getElementById('meaning-text').innerText = vocabList[currentIndex].meaning;
-        }
-
-        function showMeaning() {
-            document.getElementById('meaning-text').style.style.display = 'block';
-            document.getElementById('btn-show').style.display = 'none';
-            document.getElementById('btn-next').style.display = 'inline-block';
-        }
-
-        function nextQuestion() {
-            currentIndex++;
-            if (currentIndex >= vocabList.length) {
-                alert("🎉 준비된 모든 단어 탐험을 완수했습니다! 일지를 쓰고 대문으로 이동합니다.");
-                exitRoom();
-            } else {
-                showQuestion();
-            }
-        }
-
-        // ==========================================
-        // 4. 탈출 및 학습 일지 연동 로직
-        // ==========================================
-        async function exitRoom() {
-            if (isExiting) return;
-            isExiting = true;
-
-            const roomEndTime = new Date();
-            const timeDiff = roomEndTime - roomStartTime;
-            let calculatedMinutes = Math.floor(timeDiff / 60000);
-            if (calculatedMinutes < 1) calculatedMinutes = 1;
-
-            // 공통 파일 'notion-helper.js'에 일지 배달 요청하기
-            const success = await sendStudyLogToNotion({
-                childName: currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '부모관리자'),
-                subject: currentConfig.logSubject, // 주소창 파라미터에 따라 노션 일지에 자동 기록
-                startTime: roomStartTime.toISOString(),
-                endTime: roomEndTime.toISOString(),
-                durationMinutes: calculatedMinutes,
-                errorReport: `총 ${currentIndex}개 단어 확인 및 학습 완료`,
-                wordFairyCount: 0
-            });
-
-            if (success) {
-                console.log("학습 일지 작성 성공!");
-                location.href = '../lobby.html';
-            } else {
-                alert("일지 기록에 문제가 발생했습니다. 주소나 연결을 확인해 주세요.");
-                isExiting = false;
-            }
-        }
-
-        window.addEventListener('pagehide', exitRoom);
-
-        // 앱 기동
-        fetchVocabFromNotion();
-    </script>
-</body>
-</html>green: #6BCB77;
+    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
     --white: #FFFEF7; --dark: #2D2D4E; --card: rgba(255,255,255,0.93);
   }
   
@@ -417,8 +222,10 @@
 <script src="notion-helper.js"></script>
   
 <script>
-// 📍 Step 2: 입장 타이머 켜기 완료
-const roomStartTime = new Date();
+// 📍 Step 2: 입장 타이머 켜기 완료 
+// 🚨 주의: notion-helper.js에 선언된 roomStartTime과 충돌을 막기 위해 
+// voca.html 고유의 변수명(vocaRoomStartTime)으로 우회합니다!
+const vocaRoomStartTime = new Date();
 
 const KOREAN_DB_ID = "375a27115b688038b686d3994ee12919"; 
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
@@ -479,6 +286,7 @@ async function loadKoreanWords() {
       const bodyData = { page_size: 100 };
       if (nextCursor) bodyData.start_cursor = nextCursor;
 
+      // 🚨 주의: PROXY_URL은 notion-helper.js의 것을 그대로 사용합니다!
       const response = await fetch(`${PROXY_URL}/v1/databases/${KOREAN_DB_ID}/query`, {
         method: "POST", 
         headers: { "Content-Type": "application/json" }, 
@@ -500,33 +308,22 @@ async function loadKoreanWords() {
 
     allFetchedWords = allResults.map(page => {
       const p = page.properties;
-      
-      // 안전하게 다중 선택 배열에서 '이름' 텍스트만 추출하는 안전장치
-      const rawSubject = p["과목"]?.multi_select ? p["과목"].multi_select.map(item => item.name) : [];
-      const rawTarget = p["학생"]?.multi_select ? p["학생"].multi_select.map(item => item.name) : [];
-
       return {
         pageId: page.id,
         word: p["단어"]?.title[0]?.plain_text || "",
-        // 아버님 DB 스펙에 맞게 '뜻풀이'로 깔끔하게 고정!
-        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || "", 
+        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", 
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
-        subject: rawSubject,
-        // 단원이 Text 타입이므로 안전하게 글자로 가져옵니다.
-        stage: p["단원"]?.rich_text[0]?.plain_text || "1", 
-        target: rawTarget
+        subject: p["과목"]?.multi_select?.map(item => item.name) || [],
+        stage: p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || 1,
+        target: p["학생"]?.multi_select?.map(item => item.name) || [],
       };
     }).filter(w => {
-      // ⭕ [치명적 버그 해결] 에러 없이 안전하게 아이 이름이 포함되어 있는지 검사합니다.
-      const hasTarget = w.target.some(t => String(t).trim() === cleanLoginName);
-      
-      // 단어, 뜻풀이, 학생 이름이 매칭되는 데이터만 최종 통과!
-      return w.word !== "" && w.meaning !== "" && hasTarget;
+      const hasTarget = w.target.some(t => t.trim() === cleanLoginName);
+      return w.word && w.meaning && hasTarget;
     });
 
     if (allFetchedWords.length === 0) throw new Error("선택된 아이의 단어가 없음");
 
-    // 과목 배열들을 일렬로 쫙 펼친 뒤 중복 제거
     availableSubjects = [...new Set(allFetchedWords.flatMap(w => w.subject))];
     
     if(availableSubjects.length > 0) currentSubject = availableSubjects[0];
@@ -595,7 +392,6 @@ function changeSubject(sub) {
 }
 
 function renderStageGrid() {
-  // ⭕ w.subject가 배열이므로 .includes(currentSubject)로 변경
   const stages = [...new Set(allFetchedWords.filter(w => w.subject.includes(currentSubject)).map(w => w.stage))].sort((a,b)=>a-b);
   const stGrid = document.getElementById('stageGrid');
   stGrid.innerHTML = "";
@@ -636,7 +432,6 @@ function startQuiz() {
   const selectedStages = [...document.querySelectorAll('.stage-cb:checked')].map(cb => parseInt(cb.value));
   if(selectedStages.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 공부할 단원을 선택해주세요!'; return; }
   
-  // ⭕ w.subject.includes(currentSubject) 로 매칭 조건 변경
   filteredPool = allFetchedWords.filter(w => w.subject.includes(currentSubject) && selectedStages.includes(w.stage));
   if(filteredPool.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 선택한 단원에 단어가 없습니다!'; return; }
   
@@ -1027,7 +822,8 @@ async function exitRoom() {
     isExiting = true;      
 
     const roomEndTime = new Date(); 
-    const timeDiff = roomEndTime - roomStartTime; 
+    // 🚨 여기서도 우회한 vocaRoomStartTime을 사용하도록 수정 완료!
+    const timeDiff = roomEndTime - vocaRoomStartTime; 
     let calculatedMinutes = Math.floor(timeDiff / 60000);
     if (calculatedMinutes < 1) calculatedMinutes = 1; 
 
@@ -1042,7 +838,7 @@ async function exitRoom() {
         childName: currentUser === 'son' ? '민수' : (currentUser === 'daughter' ? '민서' : '부모관리자'), 
         // 🎯 [수정 포인트 3] 노션 DB 과목 설계명 매칭
         subject: "국어(용어사전)",                  
-        startTime: roomStartTime.toISOString(),  
+        startTime: vocaRoomStartTime.toISOString(),  
         endTime: roomEndTime.toISOString(),      
         durationMinutes: calculatedMinutes,      
         errorReport: currentErrorReport,         
