@@ -310,7 +310,7 @@ async function loadKoreanWords() {
         meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", 
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
         subject: p["과목"]?.multi_select?.map(item => item.name) || [],
-        stage: p["단원"]?.number || p["단계"]?.number || 1, 
+        stage: p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || 1,
         target: p["학생"]?.multi_select?.map(item => item.name) || [],
       };
     }).filter(w => {
