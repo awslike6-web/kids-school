@@ -301,6 +301,7 @@ async function loadKoreanWords() {
     if (allResults.length === 0) throw new Error("단어 없음");
     
     const targetMatchName = (currentUserName === '아빠(관리자)') ? '민수' : currentUserName;
+    const cleanLoginName = targetMatchName.trim();
 
     allFetchedWords = allResults.map(page => {
       const p = page.properties;
@@ -309,19 +310,23 @@ async function loadKoreanWords() {
         word: p["단어"]?.title[0]?.plain_text || "",
         meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", 
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
+        // ⭕ 다중 선택 태그에서 이름들만 쏙쏙 뽑아 배열로 저장
         subject: p["과목"]?.multi_select?.map(item => item.name) || [],
         stage: p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || 1,
         target: p["학생"]?.multi_select?.map(item => item.name) || [],
       };
     }).filter(w => {
-      const cleanTarget = w.target.trim();
-      const cleanLoginName = targetMatchName.trim();
-      return w.word && w.meaning && (cleanTarget === cleanLoginName);
+      // ⭕ [범인 1 해결] w.target 배열 안에 로그인한 아이 이름이 포함되어 있는지 검사!
+      const hasTarget = w.target.some(t => t.trim() === cleanLoginName);
+      return w.word && w.meaning && hasTarget;
     });
 
     if (allFetchedWords.length === 0) throw new Error("선택된 아이의 단어가 없음");
 
-    availableSubjects = [...new Set(allFetchedWords.map(w => w.subject))];
+    // ⭕ [범인 2 해결] 각 단어의 과목 배열들을 일렬로 쫙 펼친 뒤(flat) 중복을 제거합니다.
+    availableSubjects = [...new Set(allFetchedWords.flatMap(w => w.subject))];
+    
+    // 기본 선택 과목 지정 (첫 번째 과목이 배열이 아니도록 확실히 스트링 처리)
     if(availableSubjects.length > 0) currentSubject = availableSubjects[0];
     
     if (currentUser !== 'parent') {
@@ -342,6 +347,7 @@ async function loadKoreanWords() {
       `<span style="color:var(--pink); font-weight:bold;">⚠️ 연결에 실패했어요!<br><small style="font-size:0.9rem; color:#666;">(${error.message})</small></span>`;
   }
 }
+
 
 async function loadUserProfile() {
   try {
@@ -387,7 +393,8 @@ function changeSubject(sub) {
 }
 
 function renderStageGrid() {
-  const stages = [...new Set(allFetchedWords.filter(w => w.subject === currentSubject).map(w => w.stage))].sort((a,b)=>a-b);
+  // ⭕ w.subject가 배열이므로 .includes(currentSubject)로 변경
+  const stages = [...new Set(allFetchedWords.filter(w => w.subject.includes(currentSubject)).map(w => w.stage))].sort((a,b)=>a-b);
   const stGrid = document.getElementById('stageGrid');
   stGrid.innerHTML = "";
   stages.forEach(st => {
@@ -397,6 +404,7 @@ function renderStageGrid() {
     `;
   });
 }
+
 
 function selectAllStages(status) {
   document.querySelectorAll('.stage-cb').forEach(cb => cb.checked = status);
@@ -426,7 +434,8 @@ function startQuiz() {
   const selectedStages = [...document.querySelectorAll('.stage-cb:checked')].map(cb => parseInt(cb.value));
   if(selectedStages.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 공부할 단원을 선택해주세요!'; return; }
   
-  filteredPool = allFetchedWords.filter(w => w.subject === currentSubject && selectedStages.includes(w.stage));
+  // ⭕ w.subject.includes(currentSubject) 로 매칭 조건 변경
+  filteredPool = allFetchedWords.filter(w => w.subject.includes(currentSubject) && selectedStages.includes(w.stage));
   if(filteredPool.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 선택한 단원에 단어가 없습니다!'; return; }
   
   currentQuizType = document.querySelector('input[name="quizType"]:checked').value;
@@ -436,6 +445,7 @@ function startQuiz() {
   
   showScreen('screen-order-select');
 }
+
 
 function selectQuizOrder(orderMode) {
   words = (orderMode === 'random') ? [...filteredPool].sort(() => Math.random() - 0.5) : [...filteredPool];
