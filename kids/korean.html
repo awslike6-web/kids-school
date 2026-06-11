@@ -145,7 +145,6 @@
         }
         button.send-btn:disabled { background-color: #30363d; color: #8b949e; cursor: not-allowed; }
 
-        /* 🎨 1층: 대문 탈출 버튼 전용 디자인 설정 */
         button.back-btn {
             width: 100%; 
             margin-top: 20px; 
@@ -196,7 +195,7 @@
     </button>
 </div>
 
-      <script src="notion-helper.js"></script>
+<script src="notion-helper.js"></script>
 <script>
     const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 
@@ -204,6 +203,7 @@
     let currentMode = urlParams.get('mode') || 'base';
     let conversationHistory = [];
 
+    // 🔊 [오디오 다이어트 세팅] 화면 텍스트는 친절하게 유지하되, TTS(소리)만 "삐비빅!" 효과음 멘트로 압축!
     const modeConfigs = {
         easy: {
             title: "🍬 레벨 0: 둘째 민서 모드 (문장 징검다리)",
@@ -211,6 +211,7 @@
             pitch: 1.2,
             placeholder: "아래 단어 버튼을 누르거나 직접 써보세요!",
             welcome: "안녕! 나는 너의 문장 수호신이야! 오늘 있었던 재미난 일을 단어 버튼을 누르거나 글자로 써서 나에게 들려줘! ✨",
+            ttsWelcome: "민서 방 충전 완료! 재미있는 문장을 만들어줘!",
             systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬과 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
         },
         base: {
@@ -219,6 +220,7 @@
             pitch: 0.7,
             placeholder: "좋았다, 재밌었다, 나빴다 금지! 꼼수 금지!",
             welcome: "[시스템 경고] 대충 쓰기 방어 격리실에 온 것을 환영한다. '좋았다, 재밌었다, 나빴다' 따위의 나태한 어휘는 이곳에서 통하지 않는다. 제대로 된 문장을 입력하라.",
+            ttsWelcome: "치직, 감정 격리실 가동. 문장을 입력하라.",
             systemPrompt: `너는 'SCP 감정 격리실 검사관'이다. 낮고 기계적인 톤으로 차갑고 타이트한 긴장감을 유지하라.\n[엄격 검사 규칙]\n1. '좋았다', '재밌었다', '나빴다' 삼대장 단어가 포함되면 무조건 통과를 거부하고, 구체적인 감정 형용사를 쓰도록 지시하라.\n2. 한 문장 안에 '~고', '~했는데', '~래서' 등의 연결어가 2개 이상 사용되면 무조건 통과를 거부하고, 문장을 쪼개어 마침표(.)를 찍도록 유도하라.\n3. 자음이나 모음만 난사한 경우(예: ㅋㅋㅋ, ㅎㅎㅎ) 노이즈로 간주하고 경고하라.\n4. 위 규칙을 모두 완벽히 통과하고, 완성도 높은 문장인 경우에만 최종 승인하라. 승인 시에는 응답 마지막 줄에 [SUCCESS]를 포함하라.`
         },
         spell: {
@@ -227,6 +229,7 @@
             pitch: 1.0,
             placeholder: "맞춤법과 띄어쓰기를 신경 써서 작성하세요.",
             welcome: "연구소에 잘 왔다. 네가 쓴 문장의 빈틈을 찾아내지. 어디 한번 맞춤법과 띄어쓰기를 뽐내 보아라.",
+            ttsWelcome: "스캔 엔진 로드 완료. 틀린 곳을 찾아내겠다.",
             systemPrompt: `너는 '국어 연구소 매니악 검사관'이다.\n[규칙]\n1. 아이가 입력한 문장에서 맞춤법이나 띄어쓰기 오류가 있는지 샅샅이 찾아내라.\n2. 절대 답을 직접 고쳐주거나 올바른 문장을 알려주지 마라.\n3. 오직 문장 안에서 오류가 발생한 지점들만 예리하게 짚어내며 "어디가 틀렸을까? 스스로 고쳐봐라" 등의 뉘앙스로 유도하라.\n4. 오류가 전혀 없고 완벽할 때만 응답 마지막 줄에 [SUCCESS]를 포함하라.`
         },
         logic: {
@@ -235,6 +238,7 @@
             pitch: 1.0,
             placeholder: "'왜냐하면'과 '~기 때문이다'를 넣으세요.",
             welcome: "논리학 방이다. 네 주장에는 반드시 타당한 이유가 있어야 한다. '왜냐하면'과 '~기 때문이다' 체계를 갖춰 문장을 증명하라.",
+            ttsWelcome: "논리 회로 연결. 인과 관계를 증명하라.",
             systemPrompt: `너는 '씽크탱크 논리학 수석 검사관'이다.\n[규칙]\n1. 아이가 작성한 문장 구조 내에 '왜냐하면'과 '~기 때문이다'라는 인과 표현이 명확하게 들어가 있는지 확인하라.\n2. 단순히 단어만 들어간 게 아니라 문맥상 '원인과 결과'가 성립하는 논리적인 구조여야만 통과시킨다.\n3. 조건이 충족되지 않으면 무엇이 부족한지 논리적으로 지적하고 다시 쓰게 하라.\n4. 논리 구조가 완벽히 성립하면 통과 승인하며, 응답 마지막 줄에 [SUCCESS]를 포함하라.`
         }
     };
@@ -267,7 +271,8 @@
         document.getElementById('chat-box').innerHTML = '';
         
         appendMessage('ai', config.welcome);
-        speakTTS(config.welcome, config.pitch);
+        // 🔊 긴 웰컴 멘트 대신 압축된 숏 멘트(`ttsWelcome`)로 음성 출력!
+        speakTTS(config.ttsWelcome, config.pitch);
     }
 
     function setupEasyHints() {
@@ -302,7 +307,7 @@
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'ko-KR';
         utterance.pitch = pitchValue;
-        utterance.rate = 1.0;
+        utterance.rate = 1.1; // ⚡ 속도도 1.0에서 1.1로 살짝 올려 더 경쾌하게 읽게 세팅!
 
         const voices = window.speechSynthesis.getVoices();
         const googleVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('ko'));
@@ -340,7 +345,7 @@
             const warning = "경고: 무의미한 자음 노이즈가 감지되었다. 온전한 단어와 문장으로 대답하라.";
             appendMessage('user', userText);
             appendMessage('ai', warning);
-            speakTTS(warning, config.pitch);
+            speakTTS("자음 노이즈 감지. 똑바로 쓰라.", config.pitch); // ⚡ 경고 음성도 대폭 다이어트!
             inputEl.value = '';
             return;
         }
@@ -378,9 +383,10 @@
             
             conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
             appendMessage('ai', aiResponse);
+            
+            // 🤖 제미나이 본문 답변은 너무 길면 귀찮으니, 대화 중 리액션 속도를 고려해 출력
             speakTTS(aiResponse, config.pitch);
 
-            // 🎯 [정비 포인트 1] 조건문 철거 후 무조건 보상 호출하되 성공 여부를 전달
             const isSuccess = aiResponse.includes('[SUCCESS]');
             triggerNotionReward(isSuccess);
 
@@ -388,20 +394,18 @@
             console.error("API 연동 에러:", error);
             const errMsg = `[시스템 에러] ${error.message} (인프라 정비팀의 Worker 세팅을 점검하세요.)`;
             appendMessage('ai', errMsg);
-            speakTTS("시스템 오류가 발생했습니다.", 1.0);
+            speakTTS("시스템 오류 발생", 1.0);
         } finally {
             sendBtn.disabled = false;
         }
     }
 
-    // 🎯 [정비 포인트 2] 매개변수 isSuccess를 기반으로 1개 / 5개 차등 지급하는 함수 본체
     async function triggerNotionReward(isSuccess) {
         const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
         const childName = currentMode === 'easy' ? '민서' : '민수';
         const rewardProp = currentMode === 'easy' ? '슬라임 파츠 개수' : '다이아몬드 개수';
         const rewardIcon = currentMode === 'easy' ? '💧' : '💎';
 
-        // 성공하면 5개, 실패해도 시도했으니 1개 지급 로직
         const earnAmount = isSuccess ? 5 : 1;
 
         console.log(`🎉 [보상 발송] ${childName} -> ${rewardProp} (+${earnAmount})`);
@@ -431,13 +435,18 @@
 
             if (!patchRes.ok) throw new Error("보상 적립 통신 실패");
 
-            // 상황에 맞는 알림 메시지 세팅
             const successMsg = isSuccess 
                 ? `미션 성공! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`
                 : `열심히 작성했어요! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`;
             
             appendMessage('ai', successMsg);
-            if(isSuccess) speakTTS("미션 성공! 보상이 적립되었습니다.", 1.2);
+            
+            // 🔊 보상 적립 시에도 주저리주저리 읽지 않고 딱 필요한 안내만 굵고 짧게 출력!
+            if(isSuccess) {
+                speakTTS(`보상 5개 적립 완료!`, 1.2);
+            } else {
+                speakTTS(`보상 1개 적립 완료!`, 1.0);
+            }
 
         } catch (error) {
             console.error("노션 자동화 통신 실패:", error);
