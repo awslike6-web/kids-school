@@ -29,7 +29,6 @@
   body.theme--arcade .inventory-card { background: rgba(20, 16, 38, 0.85); border-color: #00f2fe; box-shadow: 0 0 15px rgba(0,242,254,0.25); color: #fff; }
   body.theme--arcade .math-level { background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); }
   
-  /* 민수용 대형 월드 카드 */
   body.theme--arcade .world-card { background: rgba(28, 22, 50, 0.85); border: 2.5px solid #2d2454; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
   body.theme--arcade .world-card:hover { border-color: #00f2fe; box-shadow: 0 0 20px rgba(0,242,254,0.3); }
   body.theme--arcade .world-title { color: #00f2fe; border-bottom: 2px dashed rgba(0,242,254,0.2); }
@@ -53,7 +52,6 @@
   body.theme--hideout .inventory-card { background: #ffffff; border-color: #ff80ab; box-shadow: 0 8px 22px rgba(255,64,129,0.12); color: #4a384f; }
   body.theme--hideout .math-level { background: #ffe4e1; color: #ff4081; }
   
-  /* 민서용 대형 월드 카드 */
   body.theme--hideout .world-card { background: rgba(255, 255, 255, 0.9); border: 2.5px solid #fff; box-shadow: 0 10px 25px rgba(255,182,193,0.2); }
   body.theme--hideout .world-card:hover { transform: translateY(-6px); box-shadow: 0 15px 30px rgba(255,107,157,0.25); border-color: #ff6b9d; }
   body.theme--hideout .world-title { color: #ff6b9d; border-bottom: 2px dashed rgba(255,107,157,0.2); }
@@ -78,15 +76,13 @@
   .reward-badge { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: bold; }
   .math-level { font-size: 1.1rem; padding: 4px 14px; border-radius: 12px; font-weight: bold; }
 
-  /* 💎 핵심 인프라: 2x2 대형 월드 그리드 레이아웃 */
-  .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 840px; margin-top: 10px; }
-  @media (max-width: 700px) { .world-grid { grid-template-columns: 1fr; max-width: 440px; } }
+  /* 💎 2x3 또는 반응형 그리드 배열 (과목 카드 전용) */
+  .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 860px; margin-top: 10px; }
+  @media (max-width: 768px) { .world-grid { grid-template-columns: 1fr; max-width: 440px; } }
 
-  /* 월드 큰 대문 카드 디자인 */
   .world-card { border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
   .world-title { font-size: 1.4rem; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
   
-  /* 내부 메뉴 진입 버튼 목록 */
   .sub-room-list { display: flex; flex-direction: column; gap: 10px; }
   .sub-room-btn { display: flex; flex-direction: column; padding: 14px 18px; border-radius: 16px; text-decoration: none; transition: all 0.25s ease; cursor: pointer; }
   .sub-room-name { font-size: 1.15rem; font-weight: bold; margin-bottom: 2px; }
@@ -94,7 +90,6 @@
 
   .back-btn { margin-top: 36px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
 
-  /* 🧚‍♀️ 우측 하단 고정형 만능 단어 요정 챗봇 컴포넌트 */
   .chatbot-btn { position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.4); z-index: 999; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: pulseBot 2s infinite; }
   .chatbot-btn:hover { transform: scale(1.15) rotate(15deg); }
   @keyframes pulseBot { 0% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0.4); } 70% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 15px rgba(167, 139, 250, 0); } 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0); } }
@@ -113,8 +108,9 @@
     <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
   </div>
 
-  <p class="subtitle">모험할 메인 월드를 선택해봐!</p>
+  <p class="subtitle">오늘 탐험하고 싶은 월드를 선택해봐!</p>
 
+  <!-- 💡 새로운 6대 카테고리 구성망이 적용되는 카드 영역 -->
   <div class="world-grid" id="worldGrid"></div>
   
   <a href="index.html" class="back-btn">← 처음 프로필 화면으로</a>
@@ -124,7 +120,7 @@
 
 <script>
 // =========================================================
-// 💎 무한 확장 가능한 구조형 카테고리 맵 (예체능 등 추후 추가 용이)
+// 💎 핵심 개편: 요청하신 5대 과목 중문 + 용어사전 전용 방 매핑
 // =========================================================
 const USER_CONFIGS = {
   minsu: {
@@ -135,27 +131,39 @@ const USER_CONFIGS = {
       {
         title: '🧮 수학 월드',
         rooms: [
-          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '사칙연산 스피드 서킷 레이싱! (최고 속도 도전)' },
-          { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '우주 궤도를 돌며 광속으로 파괴하는 배틀 구구단' }
+          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '사칙연산(덧·뺄·곱·나)이 모인 종합 수학 기지 게이트!' },
+          { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '우주 궤도를 돌며 광속으로 해치우는 배틀 구구단 익스프레스' }
         ]
       },
       {
         title: '✍️ 국어 월드',
         rooms: [
-          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '조심해! 오싹오싹 유행어 밈과 빈칸 채우기 퍼즐' },
-          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '논리 회로 분석 모드! 문장을 완벽하게 조립하라' }
+          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '논리 회로 분석 모드! 문장력과 대화 논리를 완성하라' },
+          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '조심해! 오싹오싹 유행어 밈과 국어 낱말 채우기 퍼즐' }
         ]
       },
       {
         title: '🔤 영어 던전',
         rooms: [
-          { name: '영단어 기억방', href: 'kids/english-typing.html', desc: '노션 단어 데이터 매핑 퀴즈 및 고속 타자 훈련' }
+          { name: '영단어 기억방', href: 'kids/english.html', desc: '사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자 트레이닝' }
         ]
       },
       {
-        title: '🦖 탐구 그림사전',
+        title: '🧪 과학 실험실',
         rooms: [
-          { name: '사회/과학 용어사전', href: 'kids/voca.html', desc: '우주와 지구 백과사전! 마스터 데이터베이스 열람' }
+          { name: '과학 개념 탐구방', href: 'kids/science.html', desc: '자연과 우주 생태계의 비밀 법칙을 파헤치는 코어 실험실' }
+        ]
+      },
+      {
+        title: '🏛️ 사회 연대기',
+        rooms: [
+          { name: '사회 역사 탐험방', href: 'kids/society.html', desc: '지리 공간과 옛날 인물 이야기 역사를 추적하는 타임머신' }
+        ]
+      },
+      {
+        title: '🦖 탐구 사전관',
+        rooms: [
+          { name: '종합 용어사전방', href: 'kids/voca.html', desc: '모든 교과서 낱말 총집합! 마스터 데이터베이스 지식 열람' }
         ]
       }
     ]
@@ -168,27 +176,39 @@ const USER_CONFIGS = {
       {
         title: '🧮 수학 월드',
         rooms: [
-          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '신나고 박진감 넘치는 덧셈뺄셈 스피드 게임 놀이터' },
+          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '신나고 재미있는 덧셈·뺄셈·곱셈·나눗셈 종합 연산 방' },
           { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '환상의 유니콘과 함께 은하수를 건너는 구구단 여행' }
         ]
       },
       {
         title: '✍️ 국어 월드',
         rooms: [
-          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '새콤달콤 재미있고 신기한 단어 쏙쏙 채워넣기 퀴즈' },
-          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '비밀 요정들과 함께 나누는 상상력 가득 논리 대화방' }
+          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '비밀 요정들과 도란도란 나누는 상상력 가득 논리 대화방' },
+          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '새콤달콤 재미있고 신기한 단어 쏙쏙 채워넣기 퀴즈' }
         ]
       },
       {
         title: '🔤 영어 던전',
         rooms: [
-          { name: '영단어 기억방', href: 'kids/english-typing.html', desc: '예쁜 그림 카드로 타이핑하며 깨우치는 마법 단어장' }
+          { name: '영단어 기억방', href: 'kids/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
         ]
       },
       {
-        title: '🦖 탐구 그림사전',
+        title: '🧪 과학 실험실',
         rooms: [
-          { name: '사회/과학 용어사전', href: 'kids/voca.html', desc: '새싹 받아쓰기와 척척박사 개념 동물/곤충 그림 백과' }
+          { name: '과학 개념 탐구방', href: 'kids/science.html', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 신기한 과학방' }
+        ]
+      },
+      {
+        title: '🏛️ 사회 연대기',
+        rooms: [
+          { name: '사회 역사 탐험방', href: 'kids/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
+        ]
+      },
+      {
+        title: '🦖 탐구 사전관',
+        rooms: [
+          { name: '종합 용어사전방', href: 'kids/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
         ]
       }
     ]
@@ -213,23 +233,20 @@ document.getElementById('welcomeMessage').innerHTML = currentConfig.welcomeText;
 localStorage.setItem('currentUser', currentConfig.key); 
 localStorage.setItem('currentUserName', currentConfig.name);
 
-// 🛠️ 대형 4개 카드 및 내부 메뉴 자동 조립 빌더
+// 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더
 (function buildCategorizedMenu() {
   const grid = document.getElementById('worldGrid');
   grid.innerHTML = '';
 
   currentConfig.worlds.forEach(world => {
-    // 1. 큰 월드 카드 생성
     const card = document.createElement('div');
     card.className = 'world-card';
 
-    // 2. 월드 헤더(타이틀) 부착
     const title = document.createElement('div');
     title.className = 'world-title';
     title.textContent = world.title;
     card.appendChild(title);
 
-    // 3. 내부 서브 메뉴 서랍장 생성
     const roomList = document.createElement('div');
     roomList.className = 'sub-room-list';
 
@@ -264,7 +281,7 @@ localStorage.setItem('currentUserName', currentConfig.name);
   }
 })();
 
-// 🧚‍♀️ 만능 단어 요정 챗봇 호출 인터페이스 (기능 확장 인터페이스 보존)
+// 🧚‍♀️ 만능 단어 요정 챗봇 호출 인터페이스
 function triggerChatbotPopup() {
   alert(`🧚‍♀️ [만능 단어 요정]님이 로비에 나타났습니다!\n"안녕, ${currentConfig.name}! 모르는 단어가 생겼거나 퀴즈 힌트가 필요하면 언제든 나를 불러줘!"`);
 }
