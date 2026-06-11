@@ -311,7 +311,7 @@ async function loadKoreanWords() {
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
         subject: p["과목"]?.select?.name || "기타",
         stage: p["단원"]?.number || p["단계"]?.number || 1, 
-        target: p["대상"]?.select?.name || ""
+        target: p["학생"]?.multi_select?.map(item => item.name) || []
       };
     }).filter(w => {
       const cleanTarget = w.target.trim();
