@@ -305,28 +305,35 @@ async function loadKoreanWords() {
 
     allFetchedWords = allResults.map(page => {
       const p = page.properties;
+      
+      // 안전하게 다중 선택 배열에서 '이름' 텍스트만 추출하는 안전장치
+      const rawSubject = p["과목"]?.multi_select ? p["과목"].multi_select.map(item => item.name) : [];
+      const rawTarget = p["학생"]?.multi_select ? p["학생"].multi_select.map(item => item.name) : [];
+
       return {
         pageId: page.id,
         word: p["단어"]?.title[0]?.plain_text || "",
-        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "", 
+        // 아버님 DB 스펙에 맞게 '뜻풀이'로 깔끔하게 고정!
+        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || "", 
         hint: p["힌트"]?.rich_text[0]?.plain_text || "",
-        // ⭕ 다중 선택 태그에서 이름들만 쏙쏙 뽑아 배열로 저장
-        subject: p["과목"]?.multi_select?.map(item => item.name) || [],
-        stage: p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || 1,
-        target: p["학생"]?.multi_select?.map(item => item.name) || [],
+        subject: rawSubject,
+        // 단원이 Text 타입이므로 안전하게 글자로 가져옵니다.
+        stage: p["단원"]?.rich_text[0]?.plain_text || "1", 
+        target: rawTarget
       };
     }).filter(w => {
-      // ⭕ [범인 1 해결] w.target 배열 안에 로그인한 아이 이름이 포함되어 있는지 검사!
-      const hasTarget = w.target.some(t => t.trim() === cleanLoginName);
-      return w.word && w.meaning && hasTarget;
+      // ⭕ [치명적 버그 해결] 에러 없이 안전하게 아이 이름이 포함되어 있는지 검사합니다.
+      const hasTarget = w.target.some(t => String(t).trim() === cleanLoginName);
+      
+      // 단어, 뜻풀이, 학생 이름이 매칭되는 데이터만 최종 통과!
+      return w.word !== "" && w.meaning !== "" && hasTarget;
     });
 
     if (allFetchedWords.length === 0) throw new Error("선택된 아이의 단어가 없음");
 
-    // ⭕ [범인 2 해결] 각 단어의 과목 배열들을 일렬로 쫙 펼친 뒤(flat) 중복을 제거합니다.
+    // 과목 배열들을 일렬로 쫙 펼친 뒤 중복 제거
     availableSubjects = [...new Set(allFetchedWords.flatMap(w => w.subject))];
     
-    // 기본 선택 과목 지정 (첫 번째 과목이 배열이 아니도록 확실히 스트링 처리)
     if(availableSubjects.length > 0) currentSubject = availableSubjects[0];
     
     if (currentUser !== 'parent') {
