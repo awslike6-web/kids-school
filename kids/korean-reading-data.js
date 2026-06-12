@@ -15,23 +15,6 @@ const KOREAN_READING_DATABASE = [
             {
                 sentenceBefore: "토끼는 경주 중간에 쿨쿨 낮잠을 잤습니다.",
                 sentenceAfter: "거북이는 쉬지 않고 끝까지 엉금엉금 기어갔습니다.",
-                options: ["그래서", "하지만", "왜냐하면"],// kids/korean-reading-data.js
-// 🚛 [대형 화물 보관소] - V2 버전 (접속사 3연타 콤보 전면 적용 완료)
-
-const KOREAN_READING_DATABASE = [
-    {
-        id: "book_01", 
-        title: "토끼와 거북이",
-        paragraphs: [
-            { id: "p1", label: "A", text: "옛날 옛적에 숲속 마을에 발이 아주 빠른 토끼와 느릿느릿 걷는 거북이가 살고 있었어요." },
-            { id: "p2", label: "B", text: "토끼는 거북이를 놀리며 달리기 경주를 제안했고, 깡충깡충 뛰어가다 나무 그늘에서 잠이 들고 말았죠." },
-            { id: "p3", label: "C", text: "하지만 거북이는 쉬지 않고 끝까지 엉금엉금 기어가 결국 경주에서 승리했답니다." }
-        ],
-        correctOrder: ["p1", "p2", "p3"],
-        conjunctions: [
-            {
-                sentenceBefore: "토끼는 경주 중간에 쿨쿨 낮잠을 잤습니다.",
-                sentenceAfter: "거북이는 쉬지 않고 끝까지 엉금엉금 기어갔습니다.",
                 options: ["그래서", "하지만", "왜냐하면"],
                 answer: "하지만",
                 commentary: "앞의 행동과 뒤의 행동이 반대되므로 '하지만'이 맞아요!"
