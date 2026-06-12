@@ -2,7 +2,6 @@
 // 🔗 국어 멀티버스 공용 관제탑 엔진 V5 (로딩 프리패스 및 방탄 연동 버전)
 
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev"; 
-const WORKER_PROXY_URL = PROXY_URL;
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
 let currentProfile = localStorage.getItem('currentUser') || 'son';
