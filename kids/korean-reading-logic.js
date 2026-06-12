@@ -1,75 +1,94 @@
-// ⚙️ 국어 멀티버스 코어 운영 엔진 (도서 추천 엔진 탑재 최종 버전)
+// ⚙️ 국어 멀티버스 코어 운영 엔진 V2 (지문 선택, 접속사 3콤보, 생각 영구 저장 탑재)
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-
-// 🚨 아버님이 새로 만드실 [아빠 도서관 DB]의 ID를 꼭 여기에 넣어주세요!
-const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee"; 
+const LIBRARY_DB_ID = "여기에_아빠도서관_DB_ID를_넣어주세요"; 
 
 let currentStage = 0;       
-let activePassage = null;   // 👈 초기에는 비워둡니다. 노션 스캔 후 화물이 채워집니다.
+let currentConjunctionIndex = 0; // 접속사 문제 3연타를 추적하는 새 변수!
+let activePassage = null;   
 let chosenLesson = "";      
 let conversationHistory = []; 
-let userOrderTracking = []; // 퍼즐 순서 추적용 배낭
+let userOrderTracking = []; 
+let fetchedBooks = []; // 노션에서 가져온 지문 목록 보관함
 
-// 🎯 화면 로드 시 자동 구동 트리거
+// 🎯 엔진 구동 트리거
 function initKoreanUniverse() {
-    // 냅다 화면부터 그리지 않고, 아빠 도서관으로 퀵보이를 보냅니다!
-    fetchRecommendedBook();
+    fetchRecommendedBooks();
 }
 
-// 📡 [초고속 추천 엔진] 노션에서 바코드(ID)만 살짝 긁어오는 함수
-async function fetchRecommendedBook() {
-    const indicator = document.getElementById('stage-indicator');
-    indicator.innerText = "📡 아빠 도서관에서 오늘의 추천 도서 스캔 중... ⏳";
-
+// 📡 [초고속 추천 엔진] 노션에서 체크(true)된 책을 최대 3개까지 스캔
+async function fetchRecommendedBooks() {
+    const zone = document.getElementById('game-zone');
+    document.getElementById('stage-indicator').innerText = "📡 아빠 도서관에서 오늘의 미션 지문들을 스캔 중... ⏳";
+    
     try {
-        // 노션에 "추천 여부에 체크(true)된 것만 딱 1개 줘!" 하고 요청
         const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                filter: {
-                    property: "추천 여부",
-                    checkbox: { equals: true }
-                },
-                page_size: 1 // 바코드 딱 하나만 가져와서 로딩 극대화!
+                filter: { property: "추천 여부", checkbox: { equals: true } },
+                page_size: 3 // 최대 3개까지 가져옵니다!
             })
         });
 
         const data = await response.json();
         
         if (!data.results || data.results.length === 0) {
-            throw new Error("오늘의 추천 도서가 없습니다! 노션에서 체크박스를 켜주세요.");
+            throw new Error("아빠가 추천해 준 지문이 없습니다! 노션에 체크박스를 켜주세요.");
         }
 
-        // 노션에서 읽어온 가벼운 바코드 (예: "book_01")
-        const bookBarcode = data.results[0].properties["도서 키(ID)"]?.rich_text[0]?.plain_text;
-        console.log("📚 노션 바코드 스캔 완료:", bookBarcode);
+        // 바코드들 추출해서 로컬 창고와 매칭
+        fetchedBooks = data.results.map(res => {
+            const barcode = res.properties["도서 키(ID)"]?.rich_text[0]?.plain_text;
+            return KOREAN_READING_DATABASE.find(book => book.id === barcode);
+        }).filter(book => book !== undefined);
 
-        // 🚛 로컬 창고(KOREAN_READING_DATABASE)에서 바코드와 일치하는 무거운 화물 꺼내기!
-        // (이 데이터는 korean-reading-data.js 에서 가져옵니다)
-        activePassage = KOREAN_READING_DATABASE.find(book => book.id === bookBarcode);
-
-        if (!activePassage) {
-            throw new Error(`로컬 창고에 바코드 [${bookBarcode}]와 일치하는 지문 데이터가 없습니다.`);
+        if (fetchedBooks.length === 0) {
+            throw new Error(`노션에 체크된 바코드와 일치하는 지문 데이터가 창고에 없습니다.`);
         }
 
-        // 화물 적재가 완료되었으니, 본격적으로 게임 스테이지 렌더링 시작!
-        renderStage();
+        // 지문이 준비되었으니 로비 화면을 그립니다.
+        renderLobby();
 
     } catch (error) {
         console.error("추천 엔진 스캔 실패:", error);
-        indicator.innerHTML = `<span style="color: var(--danger-red);">⚠️ 엔진 오류: ${error.message}</span>`;
+        document.getElementById('stage-indicator').innerHTML = `<span style="color: var(--danger-red);">⚠️ 엔진 오류: ${error.message}</span>`;
     }
 }
 
-// ----------------------------------------------------
-// 🎮 여기서부터는 게임 화면을 그리고 정답을 체크하는 로직입니다.
-// ----------------------------------------------------
+// 🏛️ 새 기능: 3개의 지문 중 하나를 고르는 대기실 로비
+function renderLobby() {
+    document.getElementById('stage-indicator').innerText = `📚 오늘의 독해 미션 (선택 대기 중)`;
+    const zone = document.getElementById('game-zone');
+    
+    let buttonsHtml = fetchedBooks.map(book => 
+        `<button class="action-btn" style="margin: 10px; font-size: 1.2rem;" onclick="startReadingSystem('${book.id}')">
+            📖 [${book.title}] 미션 시작하기
+        </button>`
+    ).join('<br>');
+
+    zone.innerHTML = `
+        <h3>아빠가 준비한 오늘의 독해 미션입니다. 원하는 지문을 선택하세요!</h3>
+        <div style="text-align: center; margin-top: 30px;">
+            ${buttonsHtml}
+        </div>
+    `;
+}
+
+// 🚀 아이가 버튼을 누르면 해당 지문으로 게임 시작!
+function startReadingSystem(bookId) {
+    activePassage = fetchedBooks.find(b => b.id === bookId);
+    currentStage = 0;
+    currentConjunctionIndex = 0;
+    userOrderTracking = [];
+    conversationHistory = [];
+    renderStage();
+}
+
 function renderStage() {
     const zone = document.getElementById('game-zone');
     zone.innerHTML = '';
     
-    document.getElementById('stage-indicator').innerText = `현재 미션 단계: ${currentStage + 1} / 5`;
+    document.getElementById('stage-indicator').innerText = `[${activePassage.title}] 미션 단계: ${currentStage + 1} / 5`;
 
     if (currentStage === 0) {
         zone.innerHTML = `
@@ -82,12 +101,13 @@ function renderStage() {
         setupParagraphPuzzle();
     } 
     else if (currentStage === 1) {
-        const conj = activePassage.conjunction;
-        let optionsHtml = conj.options.map(opt => `<button class="opt-btn" onclick="verifyConjunction('${opt}')">${opt}</button>`).join('');
+        // 접속사 3콤보 구역! (currentConjunctionIndex 로 추적)
+        const currentConj = activePassage.conjunctions[currentConjunctionIndex];
+        let optionsHtml = currentConj.options.map(opt => `<button class="opt-btn" onclick="verifyConjunction('${opt}')">${opt}</button>`).join('');
         zone.innerHTML = `
-            <h3>💎 미션 2: 빈칸에 맞는 연결 마법 보석을 끼워라!</h3>
+            <h3>💎 미션 2: 빈칸에 맞는 연결 마법 보석을 끼워라! (${currentConjunctionIndex + 1}/3)</h3>
             <div class="passage-box">
-                "${conj.sentenceBefore} <span class="blank-indicator">[ ? ]</span> ${conj.sentenceAfter}"
+                "${currentConj.sentenceBefore} <span class="blank-indicator">[ ? ]</span> ${currentConj.sentenceAfter}"
             </div>
             <div class="btn-grid">${optionsHtml}</div>
         `;
@@ -112,7 +132,7 @@ function renderStage() {
         zone.innerHTML = `
             <h3>🤖 최종 미션: 검사관과의 대화실</h3>
             <div class="chat-box" id="chat-box"></div>
-            <div class="chat-input-area">
+            <div class="chat-input-area" id="chat-input-area">
                 <textarea id="user-input" placeholder="이 지문을 읽고 느낀 점이나 생각을 온전한 문장으로 적어보세요..."></textarea>
                 <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
             </div>
@@ -128,7 +148,7 @@ function setupParagraphPuzzle() {
     shuffled.forEach(p => {
         const block = document.createElement('div');
         block.className = 'puzzle-block';
-        block.innerText = `${p.label} ${p.text}`;
+        block.innerText = `${p.label} ${p.text}`; // 글자 다 보여주기 적용
         block.onclick = () => {
             if (userOrderTracking.includes(p.id)) return;
             userOrderTracking.push(p.id);
@@ -147,21 +167,28 @@ function verifyParagraphOrder() {
         renderStage();
     } else {
         alert("❌ 문단 흐름이 어색합니다. 결합 장치가 초기화됩니다.");
-        // 🌟 오답 발생 시 관제탑 오답 가방(wrongNotes)에 담기
         wrongNotes.push(`[Stage 1 오답] 문단 순서 틀림`);
         userOrderTracking = [];
         renderStage();
     }
 }
 
+// 🌟 접속사 3콤보 검사 로직
 function verifyConjunction(selected) {
-    if (selected === activePassage.conjunction.answer) {
-        alert(`🎉 정답! ${activePassage.conjunction.commentary}`);
-        currentStage++;
+    const currentConj = activePassage.conjunctions[currentConjunctionIndex];
+    
+    if (selected === currentConj.answer) {
+        alert(`🎉 정답! ${currentConj.commentary}`);
+        currentConjunctionIndex++; // 다음 문제로!
+        
+        // 3문제를 다 맞췄다면 다음 스테이지(주제 찾기)로 이동
+        if (currentConjunctionIndex >= activePassage.conjunctions.length) {
+            currentStage++;
+        }
         renderStage();
     } else {
-        alert("❌ 틀렸습니다. 보석의 마력이 어긋났습니다. 다른 접속사를 고르세요.");
-        wrongNotes.push(`[Stage 2 오답] 접속사 오류: ${selected}`);
+        alert("❌ 틀렸습니다. 보석의 마력이 어긋났습니다. 다시 골라보세요.");
+        wrongNotes.push(`[Stage 2 오답] ${currentConjunctionIndex + 1}번 접속사 오류: ${selected}`);
     }
 }
 
@@ -183,9 +210,21 @@ function selectLessonCard(card) {
     renderStage();
 }
 
+// 💾 영구 저장소 기능이 추가된 챗봇 초기화
 function initChatbot() {
-    const welcome = "반갑다. 나는 이 구역의 독해 마스터 엔진 검사관이다. 네가 선택한 카드 외에, 지문을 통해 깨달은 네 생각을 직접 한 문장 이상으로 정교하게 입력해 보아라. 대충 쓰거나 자음 난사는 통하지 않는다.";
-    appendChatMessage('ai', welcome);
+    const saveKey = `korean_save_${activePassage.id}`;
+    const savedThought = localStorage.getItem(saveKey);
+
+    if (savedThought) {
+        // 이미 저장된 생각이 있다면 화면에 띄워주고 인풋창 숨김
+        appendChatMessage('ai', "이전에 네가 이 지문을 읽고 훌륭하게 남겨둔 기록이 보존되어 있다. 멋진 생각이구나!");
+        appendChatMessage('user', savedThought);
+        document.getElementById('chat-input-area').style.display = 'none';
+        document.getElementById('exit-gate').style.display = 'block';
+    } else {
+        const welcome = "반갑다. 나는 이 구역의 독해 마스터 엔진 검사관이다. 네가 선택한 카드 외에, 지문을 통해 깨달은 네 생각을 직접 한 문장 이상으로 정교하게 입력해 보아라.";
+        appendChatMessage('ai', welcome);
+    }
 }
 
 async function processUserStatement() {
@@ -230,13 +269,15 @@ async function processUserStatement() {
         appendChatMessage('ai', aiResponse);
 
         if (aiResponse.includes('[SUCCESS]')) {
+            // 💾 정답 판정을 받으면 아이의 생각을 로컬 스토리지에 영구 박제!
+            localStorage.setItem(`korean_save_${activePassage.id}`, text);
             document.getElementById('exit-gate').style.display = 'block';
             document.getElementById('exit-gate').scrollIntoView({ behavior: 'smooth' });
         }
 
     } catch (error) {
         console.error("AI 엔진 오류:", error);
-        appendChatMessage('ai', `[엔진 에러] ${error.message} (정비팀의 설정을 확인하세요)`);
+        appendChatMessage('ai', `[엔진 에러] ${error.message}`);
     } finally {
         sendBtn.disabled = false;
     }
@@ -251,11 +292,7 @@ function appendChatMessage(sender, text) {
     box.scrollTop = box.scrollHeight;
 }
 
-// 🌟 최종 탈출 및 마감 연동 (공용 관제탑 호출)
 function triggerFinalExit() {
-    // 아이가 선택한 교훈 카드를 관제탑이 가져갈 수 있도록 오답 가방 맨 앞에 넣어둡니다.
     wrongNotes.unshift(`[선택한 카드]: ${chosenLesson}`);
-    
-    // 공용 관제탑의 exitRoom 함수를 호출하여 노션 일지에 찍고 허브로 나갑니다!
-    exitRoom("국어(정밀독해)");
+    exitRoom(`국어(정밀독해) - ${activePassage.title}`);
 }
