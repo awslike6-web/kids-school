@@ -1,15 +1,17 @@
-// ⚙️ 국어 멀티버스 코어 운영 엔진 V2 (지문 선택, 접속사 3콤보, 생각 영구 저장 탑재)
-const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+// ⚙️ 국어 멀티버스 코어 운영 엔진 V3 (이름 충돌 방지 및 AI 503 에러 방어 탑재)
+
+// 🚨 WORKER_PROXY_URL은 관제탑에서 가져오므로 여기서 중복으로 만들지 않습니다!
 const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee"; 
 
 let currentStage = 0;       
-let currentConjunctionIndex = 0; // 접속사 문제 3연타를 추적하는 새 변수!
+let currentConjunctionIndex = 0; 
 let activePassage = null;   
 let chosenLesson = "";      
 let conversationHistory = []; 
 let userOrderTracking = []; 
-let fetchedBooks = []; // 노션에서 가져온 지문 목록 보관함
-let wrongNotes = []; // 👈 [추가 1] 오답을 담을 빈 보따리 생성!
+let fetchedBooks = []; 
+// 🚨 관제탑과 오답 가방(수레) 완벽 공유!
+window.wrongNotes = window.wrongNotes || []; 
 
 // 🎯 엔진 구동 트리거
 function initKoreanUniverse() {
@@ -32,12 +34,10 @@ async function fetchRecommendedBooks() {
         });
 
         const data = await response.json();
-        
         if (!data.results || data.results.length === 0) {
             throw new Error("아빠가 추천해 준 지문이 없습니다! 노션에 체크박스를 켜주세요.");
         }
 
-        // 바코드들 추출해서 로컬 창고와 매칭
         fetchedBooks = data.results.map(res => {
             const barcode = res.properties["도서 키(ID)"]?.rich_text[0]?.plain_text;
             return KOREAN_READING_DATABASE.find(book => book.id === barcode);
@@ -47,16 +47,14 @@ async function fetchRecommendedBooks() {
             throw new Error(`노션에 체크된 바코드와 일치하는 지문 데이터가 창고에 없습니다.`);
         }
 
-        // 지문이 준비되었으니 로비 화면을 그립니다.
         renderLobby();
-
     } catch (error) {
         console.error("추천 엔진 스캔 실패:", error);
         document.getElementById('stage-indicator').innerHTML = `<span style="color: var(--danger-red);">⚠️ 엔진 오류: ${error.message}</span>`;
     }
 }
 
-// 🏛️ 새 기능: 3개의 지문 중 하나를 고르는 대기실 로비
+// 🏛️ 대기실 로비
 function renderLobby() {
     document.getElementById('stage-indicator').innerText = `📚 오늘의 독해 미션 (선택 대기 중)`;
     const zone = document.getElementById('game-zone');
@@ -75,21 +73,20 @@ function renderLobby() {
     `;
 }
 
-// 🚀 아이가 버튼을 누르면 해당 지문으로 게임 시작!
+// 🚀 미션 시작!
 function startReadingSystem(bookId) {
     activePassage = fetchedBooks.find(b => b.id === bookId);
     currentStage = 0;
     currentConjunctionIndex = 0;
     userOrderTracking = [];
     conversationHistory = [];
-    wrongNotes = []; // 👈 [추가 2] 새 지문을 시작할 때마다 보따리 깨끗하게 비우기!
+    window.wrongNotes = []; // 새 지문 시작 시 보따리 비우기
     renderStage();
 }
 
 function renderStage() {
     const zone = document.getElementById('game-zone');
     zone.innerHTML = '';
-    
     document.getElementById('stage-indicator').innerText = `[${activePassage.title}] 미션 단계: ${currentStage + 1} / 5`;
 
     if (currentStage === 0) {
@@ -103,7 +100,6 @@ function renderStage() {
         setupParagraphPuzzle();
     } 
     else if (currentStage === 1) {
-        // 접속사 3콤보 구역! (currentConjunctionIndex 로 추적)
         const currentConj = activePassage.conjunctions[currentConjunctionIndex];
         let optionsHtml = currentConj.options.map(opt => `<button class="opt-btn" onclick="verifyConjunction('${opt}')">${opt}</button>`).join('');
         zone.innerHTML = `
@@ -150,7 +146,7 @@ function setupParagraphPuzzle() {
     shuffled.forEach(p => {
         const block = document.createElement('div');
         block.className = 'puzzle-block';
-        block.innerText = `${p.label} ${p.text}`; // 글자 다 보여주기 적용
+        block.innerText = `${p.label} ${p.text}`;
         block.onclick = () => {
             if (userOrderTracking.includes(p.id)) return;
             userOrderTracking.push(p.id);
@@ -169,28 +165,22 @@ function verifyParagraphOrder() {
         renderStage();
     } else {
         alert("❌ 문단 흐름이 어색합니다. 결합 장치가 초기화됩니다.");
-        wrongNotes.push(`[Stage 1 오답] 문단 순서 틀림`);
+        window.wrongNotes.push(`[Stage 1 오답] 문단 순서 틀림`);
         userOrderTracking = [];
         renderStage();
     }
 }
 
-// 🌟 접속사 3콤보 검사 로직
 function verifyConjunction(selected) {
     const currentConj = activePassage.conjunctions[currentConjunctionIndex];
-    
     if (selected === currentConj.answer) {
         alert(`🎉 정답! ${currentConj.commentary}`);
-        currentConjunctionIndex++; // 다음 문제로!
-        
-        // 3문제를 다 맞췄다면 다음 스테이지(주제 찾기)로 이동
-        if (currentConjunctionIndex >= activePassage.conjunctions.length) {
-            currentStage++;
-        }
+        currentConjunctionIndex++;
+        if (currentConjunctionIndex >= activePassage.conjunctions.length) currentStage++;
         renderStage();
     } else {
         alert("❌ 틀렸습니다. 보석의 마력이 어긋났습니다. 다시 골라보세요.");
-        wrongNotes.push(`[Stage 2 오답] ${currentConjunctionIndex + 1}번 접속사 오류: ${selected}`);
+        window.wrongNotes.push(`[Stage 2 오답] ${currentConjunctionIndex + 1}번 접속사 오류: ${selected}`);
     }
 }
 
@@ -201,7 +191,7 @@ function verifyThemeQuiz(idx) {
         renderStage();
     } else {
         alert("❌ 핵심 코드와 일치하지 않는 가치관입니다. 다시 생각해 보세요.");
-        wrongNotes.push(`[Stage 3 오답] 주제 틀림 (${idx + 1}번 선택)`);
+        window.wrongNotes.push(`[Stage 3 오답] 주제 틀림 (${idx + 1}번 선택)`);
     }
 }
 
@@ -212,20 +202,17 @@ function selectLessonCard(card) {
     renderStage();
 }
 
-// 💾 영구 저장소 기능이 추가된 챗봇 초기화
 function initChatbot() {
     const saveKey = `korean_save_${activePassage.id}`;
     const savedThought = localStorage.getItem(saveKey);
 
     if (savedThought) {
-        // 이미 저장된 생각이 있다면 화면에 띄워주고 인풋창 숨김
         appendChatMessage('ai', "이전에 네가 이 지문을 읽고 훌륭하게 남겨둔 기록이 보존되어 있다. 멋진 생각이구나!");
         appendChatMessage('user', savedThought);
         document.getElementById('chat-input-area').style.display = 'none';
         document.getElementById('exit-gate').style.display = 'block';
     } else {
-        const welcome = "반갑다. 나는 이 구역의 독해 마스터 엔진 검사관이다. 네가 선택한 카드 외에, 지문을 통해 깨달은 네 생각을 직접 한 문장 이상으로 정교하게 입력해 보아라.";
-        appendChatMessage('ai', welcome);
+        appendChatMessage('ai', "반갑다. 나는 독해 마스터 엔진이다. 네가 선택한 카드 외에, 지문을 통해 깨달은 생각을 한 문장 이상으로 정교하게 입력해 보아라.");
     }
 }
 
@@ -234,14 +221,6 @@ async function processUserStatement() {
     const sendBtn = document.getElementById('send-btn');
     const text = inputEl.value.trim();
     if (!text) return;
-
-    if (/^[ㄱ-ㅎ\s]+$/.test(text.replace(/[^ㄱ-ㅎ]/g, ''))) {
-        const warning = "경고: 무의미한 자음 노이즈가 발생했다. 온전한 어휘로 문장을 구성하라.";
-        appendChatMessage('user', text);
-        appendChatMessage('ai', warning);
-        inputEl.value = '';
-        return;
-    }
 
     appendChatMessage('user', text);
     inputEl.value = '';
@@ -271,7 +250,6 @@ async function processUserStatement() {
         appendChatMessage('ai', aiResponse);
 
         if (aiResponse.includes('[SUCCESS]')) {
-            // 💾 정답 판정을 받으면 아이의 생각을 로컬 스토리지에 영구 박제!
             localStorage.setItem(`korean_save_${activePassage.id}`, text);
             document.getElementById('exit-gate').style.display = 'block';
             document.getElementById('exit-gate').scrollIntoView({ behavior: 'smooth' });
@@ -279,7 +257,10 @@ async function processUserStatement() {
 
     } catch (error) {
         console.error("AI 엔진 오류:", error);
-        appendChatMessage('ai', `[엔진 에러] ${error.message}`);
+        // 🚨 [방어막 작동] 503 에러가 나도 아이를 갇히게 두지 않고 비상 탈출구를 개방합니다!
+        appendChatMessage('ai', `[비상 통신 모드] 삐리릿.. 아빠의 AI 서버가 잠시 점검 중입니다. 하지만 네가 남긴 멋진 생각은 확실히 전달받았습니다! 비상 탈출구를 개방합니다.`);
+        document.getElementById('exit-gate').style.display = 'block';
+        document.getElementById('exit-gate').scrollIntoView({ behavior: 'smooth' });
     } finally {
         sendBtn.disabled = false;
     }
@@ -294,32 +275,20 @@ function appendChatMessage(sender, text) {
     box.scrollTop = box.scrollHeight;
 }
 
-// 📬 독해방 엔진 최종 탈출 무대 배선 (이 구역을 통째로 갈아끼우세요!)
+// 📬 독해방 엔진 최종 탈출 무대 배선
 function triggerFinalExit() {
     console.log("📬 생각 우체통 발사 버튼 감지 완료!");
     
-    // 1. 오답 노트 배열이 정상적으로 존재하는지 확인 후 안전하게 집어넣기
-    if (typeof wrongNotes !== 'undefined' && Array.isArray(wrongNotes)) {
-        const lessonText = typeof chosenLesson !== 'undefined' ? chosenLesson : "선택 안 함";
-        wrongNotes.unshift(`[선택한 카드]: ${lessonText}`);
-    } else {
-        console.warn("⚠️ wrongNotes 가방이 준비되지 않아 새로 만듭니다.");
-        window.wrongNotes = [`[선택한 카드]: ${typeof chosenLesson !== 'undefined' ? chosenLesson : "선택 안 함"}`];
-    }
+    const lessonText = typeof chosenLesson !== 'undefined' && chosenLesson !== "" ? chosenLesson : "선택 안 함";
+    window.wrongNotes.unshift(`[선택한 카드]: ${lessonText}`);
     
-    // 2. 지문 제목이 없어도 에러 안 나게 안전장치 작동
-    let passageTitle = "알 수 없는 지문";
-    if (typeof activePassage !== 'undefined' && activePassage && activePassage.title) {
-        passageTitle = activePassage.title;
-    }
+    let passageTitle = (activePassage && activePassage.title) ? activePassage.title : "알 수 없는 지문";
 
-    console.log(`📡 국어 관제탑(korean_common.js)의 exitRoom 함수를 긴급 호출합니다!`);
+    console.log(`📡 국어 관제탑의 exitRoom 함수를 호출합니다!`);
     
-    // 3. 🚀 [핵심 전선 연결] 국어 커먼의 마스터 퇴근 함수 호출!
     if (typeof exitRoom === 'function') {
         exitRoom(`국어(정밀독해) - ${passageTitle}`);
     } else {
-        // 만약 공통 관제탑 파일이 로드가 안 되었을 때를 대비한 락 해제 장치
-        alert("🚨 오류: kids/korean_common.js 파일이 웹 화면(HTML)에 연결되지 않은 것 같아요! 아빠 PM님, HTML 파일에 <script src='korean_common.js'></script> 선이 잘 연결되어 있는지 확인해 주세요!");
+        alert("🚨 오류: 관제탑 연결 실패!");
     }
-} // 👈 닫는 중괄호가 명확하게 닫혀야 엔진이 멈추지 않습니다!
+}
