@@ -1,182 +1,164 @@
-// kids/korean_common.js
-// 🔗 국어 멀티버스 공용 관제탑 엔진 (학습일지 + 보상 시스템 통합 버전)
+// ==========================================
+// 🌟 민민이네 수학방 공통 시스템 V2 (math_common.js)
+// 📈 경험치/재화 독립 분리 버전 적용 완료!
+// ==========================================
 
-const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; // 아빠의 인벤토리 DB
+// 1️⃣ 노션 API 설정
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
-let currentProfile = localStorage.getItem('currentUser') || 'son';
-let currentUserName = localStorage.getItem('currentUserName') || '민수';
+// 2️⃣ 사용자 프로필 & 테마 관리
+let currentProfile = localStorage.getItem('currentUser') || 'son'; 
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
 
-// ⏱️ 입장 타이머 작동
-const roomStartTime = new Date();
-let wrongNotes = []; 
-let isExiting = false; 
-
-// 🎨 테마 및 프로필 자동 초기화
-function initKoreanTheme() {
-    const themeClass = (currentTheme === '슬라임') ? 'theme--slime' : 'theme--minecraft';
-    document.body.className = themeClass;
-    
-    const badge = document.getElementById('currentUserBadge');
-    if (badge) {
-        const userName = (currentProfile === 'son') ? '민수' : '민서';
-        badge.innerHTML = `현재 사용자: ${currentProfile === 'son' ? '👦' : '👧'} ${userName} (${currentTheme} 모드)`;
-    }
-}
-
-// 🔄 프로필 수동 전환 기능
 function toggleProfileManually() {
-    if (currentProfile === 'son') {
-        currentProfile = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임';
-    } else {
-        currentProfile = 'son'; currentUserName = '민수'; currentTheme = '마인크래프트';
-    }
-    localStorage.setItem('currentUser', currentProfile);
-    localStorage.setItem('currentUserName', currentUserName);
-    localStorage.setItem('currentTheme', currentTheme);
-    location.reload();
+  if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
+  else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
+  localStorage.setItem('currentUser', currentProfile); 
+  localStorage.setItem('currentTheme', currentTheme);
+  
+  const themeClass = currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
+  document.body.className = themeClass;
+  
+  const badge = document.getElementById('currentUserBadge') || document.getElementById('profileBadge');
+  if (badge) {
+    const userName = currentProfile === 'son' ? '민수' : '민서';
+    const icon = currentProfile === 'son' ? '👦' : '👧';
+    badge.innerHTML = `${icon} ${userName} (${currentTheme} 모드)`;
+  }
 }
 
-// 📈 다이내믹 레벨업 계산 엔진 (수학방에서 수입)
+// 3️⃣ 다이내믹 레벨업 계산 엔진
 function calculateLevelInfo(totalRewards) {
-    let level = 1;
-    let requiredForNext = 20; 
-    let accumulatedForCurrentLevel = 0; 
+  let level = 1;
+  let requiredForNext = 20; 
+  let accumulatedForCurrentLevel = 0; 
 
-    while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
-        accumulatedForCurrentLevel += requiredForNext;
-        level++;
-        requiredForNext = 20 + (level - 1) * 5; 
-    }
-    let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
-    let remainingForNext = requiredForNext - currentLevelProgress; 
-    return { level, requiredForNext, remainingForNext, currentLevelProgress };
+  while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
+    accumulatedForCurrentLevel += requiredForNext;
+    level++;
+    requiredForNext = 20 + (level - 1) * 5; 
+  }
+
+  let currentLevelProgress = totalRewards - accumulatedForCurrentLevel; 
+  let remainingForNext = requiredForNext - currentLevelProgress; 
+
+  return { level, requiredForNext, remainingForNext, currentLevelProgress };
 }
 
-// 🎁 노션 인벤토리 보상 전송 로직 (경험치/재화 독립 분리 버전!)
-async function grantRewardAndShowUI(earnedPoints) {
-    const userName = currentProfile === 'son' ? '민수' : '민서'; 
-    if (userName === '아빠' || userName === '엄마' || userName === '어른') return true;
+// 4️⃣ 🎁 노션 보상 전송 로직 (수학 경험치 기반 독립 개조)
+async function saveRewardToNotion(earned, detailElementId = 'r-detail') {
+  const userName = currentProfile === 'son' ? '민수' : '민서'; 
+  if (userName === '아빠' || userName === '엄마' || userName === '어른') return;
+  
+  const detailEl = document.getElementById(detailElementId); 
+  if(!detailEl) return;
+  
+  const originalText = detailEl.innerHTML;
+  detailEl.innerHTML = originalText + `<br><br><span id="notion-loading-msg" style="color:#6EC6F5; font-weight:bold;">⏳ 우주선 통신 중... (보상 ${earned}개 적립)</span>`;
 
-    showRewardModal(`⏳ 우주선 통신 중...<br>학습 일지를 기록하고 보상을 싣고 있습니다!`);
-
-    try {
-        const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-            method: "POST", headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
-        });
-        
-        const data = await response.json(); 
-        if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
-        
-        const page = data.results[0]; 
-        const props = page.properties;
-
-        // 1. 노션에서 현재 자산과 '국어 경험치' 불러오기
-        let diamond = props["다이아몬드 개수"]?.number || 0; 
-        let slime = props["슬라임 파츠 개수"]?.number || 0;
-        let tickets = props["소원권 개수"]?.number || 0;
-        let koreanExp = props["국어 경험치"]?.number || 0; // 👈 새로 만든 국어 경험치!
-        
-        // 2. 공용 재화(돈) 계산
-        let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
-        let currentWealth = previousWealth + earnedPoints;
-        let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
-
-        // 3. 📈 [핵심] 레벨은 오직 '국어 경험치'로만 계산합니다!
-        let newKoreanExp = koreanExp + earnedPoints; // 경험치도 얻은 포인트만큼 증가
-        const prevLevelInfo = calculateLevelInfo(koreanExp);
-        const currLevelInfo = calculateLevelInfo(newKoreanExp);
-        let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
-
-        // 4. 소원권은 전체 돈(Wealth)이 늘어난 기준으로 계산
-        let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
-        let newTickets = tickets + earnedTickets;
-
-        // 5. 노션에 업데이트할 보따리 싸기
-        let updateProps = {
-            "국어 레벨": { number: currLevelInfo.level },
-            "국어 경험치": { number: newKoreanExp }, // 👈 경험치 누적 저장
-            "소원권 개수": { number: newTickets }
-        };
-        if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
-        else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
-
-        // 6. 노션으로 발사!
-        await fetch(`${WORKER_PROXY_URL}/v1/pages/${page.id}`, { 
-            method: "PATCH", headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify({ properties: updateProps }) 
-        });
-        
-        // 7. 성공 화면 업데이트 (경험치 기반으로 남은 개수 표시)
-        updateRewardModal(`
-            <b style="color:#0288D1; font-size: 1.5rem;">${rewardName} ${earnedPoints}개 획득!</b><br><br>
-            현재 총 자산: <b>${currentWealth}</b>개<br>
-            <span style="font-size:0.9rem; color:#666;">다음 국어 레벨(Lv.${currLevelInfo.level + 1})까지 경험치 ${currLevelInfo.remainingForNext} 필요!</span>
-            ${isLevelUp ? `<br><br><span style="font-size:1.3rem; color:#FF6B9D; font-weight:bold;">🎉 국어 레벨 업! Lv.${currLevelInfo.level} 🎉</span>` : ''}
-            ${earnedTickets > 0 ? `<br><br><span style="font-size:1.2rem; color:#FFD700; font-weight:bold;">🎫 소원권 ${earnedTickets}장 추가 획득!!</span>` : ''}
-            <br><br>
-            <button onclick="location.href='korean.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: var(--primary); color: white; cursor: pointer; font-weight: bold;">허브로 돌아가기</button>
-        `);
-        return true;
-
-    } catch (err) {
-        console.error("보상 시스템 오류:", err);
-        updateRewardModal(`❌ 보상 저장 실패. 아빠에게 알려주세요!<br><br><button onclick="location.href='korean.html'">그냥 나가기</button>`);
-        return false;
-    }
-}
-
-// 🚀 [마스터 퇴근 함수] 학습일지 + 보상 동시 처리
-async function exitRoom(subjectName) {
-    if (isExiting) return;
-    isExiting = true;
-
-    const roomEndTime = new Date();
-    const timeDiff = roomEndTime - roomStartTime;
-    let calculatedMinutes = Math.floor(timeDiff / 60000);
-    if (calculatedMinutes < 1) calculatedMinutes = 1; 
-
-    const errorReport = wrongNotes.length > 0 ? wrongNotes.join(', ') : "오답 없음";
-    console.log(`📡 학습일지 출고 준비 ➔ 과목: ${subjectName} | 소요시간: ${calculatedMinutes}분`);
-
-    // 1. 학습일지 노션 전송 (notion-helper.js 의존)
-    // - 오류가 나더라도 보상 로직은 타도록 await만 걸어줍니다.
-    await sendStudyLogToNotion({
-        childName: currentProfile === 'son' ? '민수' : '민서',
-        subject: subjectName, 
-        startTime: roomStartTime.toISOString(),
-        endTime: roomEndTime.toISOString(),
-        durationMinutes: calculatedMinutes,
-        errorReport: errorReport,
-        wordFairyCount: 0
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
+      method: "POST", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
     });
+    
+    const data = await response.json(); 
+    if (!data.results || data.results.length === 0) throw new Error("인벤토리 없음");
+    
+    const page = data.results[0]; 
+    const props = page.properties;
 
-    // 2. 보상 지급 프로세스 가동 (국어 지문 1개당 30포인트 지급!)
-    // 여기서 모달이 뜨고, 아이가 확인을 누르면 알아서 korean.html로 넘어갑니다.
-    await grantRewardAndShowUI(30); 
-}
+    // 노션에서 자산과 '수학 경험치' 가져오기
+    let diamond = props["다이아몬드 개수"]?.number || 0; 
+    let slime = props["슬라임 파츠 개수"]?.number || 0;
+    let tickets = props["소원권 개수"]?.number || 0;
+    let mathExp = props["수학 경험치"]?.number || 0; // 👈 새로 매칭된 수학 경험치 기둥!
+    
+    let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
+    let currentWealth = previousWealth + earned;
+    let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
-// --- 임시 UI 모달 (화면 중앙에 보상창 띄우기) ---
-function showRewardModal(message) {
-    const modalHtml = `
-        <div id="korean-reward-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999;">
-            <div id="korean-reward-content" style="background:white; padding:30px; border-radius:15px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; width: 80%; line-height: 1.5;">
-                ${message}
-            </div>
+    // 📈 [핵심] 레벨 계산 기준을 총 자산에서 '수학 경험치'로 전격 교체!
+    let newMathExp = mathExp + earned; 
+    const prevLevelInfo = calculateLevelInfo(mathExp);
+    const currLevelInfo = calculateLevelInfo(newMathExp);
+    let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
+
+    // 소원권 계산 (공용 자산 늘어난 기준)
+    let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
+    let newTickets = tickets + earnedTickets;
+    let isWishTicketEarned = earnedTickets > 0;
+
+    // 노션 보따리 싸기
+    let updateProps = {
+      "수학 레벨": { number: currLevelInfo.level },
+      "수학 경험치": { number: newMathExp }, // 👈 수학 경험치 누적 저장!
+      "소원권 개수": { number: newTickets }
+    };
+    if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
+    else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
+
+    // 노션으로 업데이트 발사!
+    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
+      method: "PATCH", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ properties: updateProps }) 
+    });
+    
+    document.getElementById('notion-loading-msg').style.display = 'none';
+    
+    // UI 출력 (다음 수학 레벨까지 남은 경험치 표시)
+    detailEl.innerHTML = originalText + `
+      <div style="background:rgba(255,255,255,0.8); border:2px dashed var(--sky); padding:16px; border-radius:12px; margin-top:10px; text-align: left;">
+        <div style="font-size: 1.15rem; margin-bottom: 8px;">
+          <b style="color:#0288D1;">${rewardName} x ${earned} 획득! (총 ${currentWealth}개)</b>
         </div>
+        <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
+          다음 수학 레벨(Lv.${currLevelInfo.level + 1})까지 경험치 <b>${currLevelInfo.remainingForNext}</b> 필요!
+        </div>
+        ${isLevelUp ? `<div style="text-align:center; font-size:1.3rem; color:#FF6B9D; font-weight:bold; margin-top:10px;">🎉 수학 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
+      </div>
     `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    if (isWishTicketEarned) {
+      setTimeout(() => {
+        const ticketDisplay = document.getElementById('wishTicketCountDisplay');
+        if(ticketDisplay) ticketDisplay.textContent = newTickets;
+        const overlay = document.getElementById('wishTicketOverlay');
+        if(overlay) {
+            overlay.classList.add('active'); 
+            overlay.style.display = 'flex';  
+        }
+      }, 1000);
+    }
+  } catch (err) {
+    console.error("수학 보상 저장 오류:", err);
+    const errorMsg = document.getElementById('notion-loading-msg');
+    if(errorMsg) errorMsg.textContent = `❌ 보상 저장 실패`;
+  }
 }
 
-function updateRewardModal(message) {
-    const content = document.getElementById('korean-reward-content');
-    if (content) content.innerHTML = message;
+function closeWishTicket() {
+  const overlay = document.getElementById('wishTicketOverlay');
+  if(overlay) {
+      overlay.classList.remove('active');
+      overlay.style.display = 'none';
+  }
 }
 
-window.addEventListener('pagehide', () => {
-    // pagehide에서는 비동기 처리가 불안정하므로 안전장치 용도로만 둡니다. (보상은 버튼 클릭 시 정상 지급)
-});
+// 5️⃣ 학습 데이터 분석 트래커 그릇 준비
+let learningSession = {
+  studentName: "",
+  roomName: "",
+  startTime: null,
+  endTime: null,
+  problemDetails: [], 
+  fairyClickCount: 0
+};
 
-window.addEventListener('DOMContentLoaded', initKoreanTheme);
+function startLearning(roomName) {
+  learningSession.studentName = currentProfile === 'son' ? '민수' : '민서';
+  learningSession.roomName = roomName;
+  learningSession.startTime = new Date().toISOString();
+  learningSession.problemDetails = [];
+  learningSession.fairyClickCount = 0;
+}
