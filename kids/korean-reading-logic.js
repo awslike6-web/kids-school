@@ -294,7 +294,32 @@ function appendChatMessage(sender, text) {
     box.scrollTop = box.scrollHeight;
 }
 
+// 📬 독해방 엔진 최종 탈출 무대 배선 (이 구역을 통째로 갈아끼우세요!)
 function triggerFinalExit() {
-    wrongNotes.unshift(`[선택한 카드]: ${chosenLesson}`);
-    exitRoom(`국어(정밀독해) - ${activePassage.title}`);
-}
+    console.log("📬 생각 우체통 발사 버튼 감지 완료!");
+    
+    // 1. 오답 노트 배열이 정상적으로 존재하는지 확인 후 안전하게 집어넣기
+    if (typeof wrongNotes !== 'undefined' && Array.isArray(wrongNotes)) {
+        const lessonText = typeof chosenLesson !== 'undefined' ? chosenLesson : "선택 안 함";
+        wrongNotes.unshift(`[선택한 카드]: ${lessonText}`);
+    } else {
+        console.warn("⚠️ wrongNotes 가방이 준비되지 않아 새로 만듭니다.");
+        window.wrongNotes = [`[선택한 카드]: ${typeof chosenLesson !== 'undefined' ? chosenLesson : "선택 안 함"}`];
+    }
+    
+    // 2. 지문 제목이 없어도 에러 안 나게 안전장치 작동
+    let passageTitle = "알 수 없는 지문";
+    if (typeof activePassage !== 'undefined' && activePassage && activePassage.title) {
+        passageTitle = activePassage.title;
+    }
+
+    console.log(`📡 국어 관제탑(korean_common.js)의 exitRoom 함수를 긴급 호출합니다!`);
+    
+    // 3. 🚀 [핵심 전선 연결] 국어 커먼의 마스터 퇴근 함수 호출!
+    if (typeof exitRoom === 'function') {
+        exitRoom(`국어(정밀독해) - ${passageTitle}`);
+    } else {
+        // 만약 공통 관제탑 파일이 로드가 안 되었을 때를 대비한 락 해제 장치
+        alert("🚨 오류: kids/korean_common.js 파일이 웹 화면(HTML)에 연결되지 않은 것 같아요! 아빠 PM님, HTML 파일에 <script src='korean_common.js'></script> 선이 잘 연결되어 있는지 확인해 주세요!");
+    }
+} // 👈 닫는 중괄호가 명확하게 닫혀야 엔진이 멈추지 않습니다!
