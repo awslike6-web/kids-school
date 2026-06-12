@@ -1,6 +1,5 @@
-// ⚙️ 국어 멀티버스 코어 운영 엔진 V3 (이름 충돌 방지 및 AI 503 에러 방어 탑재)
+// ⚙️ 국어 멀티버스 코어 운영 엔진 V4 (수학방 통일: PROXY_URL 단일화 완료)
 
-// 🚨 WORKER_PROXY_URL은 관제탑에서 가져오므로 여기서 중복으로 만들지 않습니다!
 const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee"; 
 
 let currentStage = 0;       
@@ -24,7 +23,8 @@ async function fetchRecommendedBooks() {
     document.getElementById('stage-indicator').innerText = "📡 아빠 도서관에서 오늘의 미션 지문들을 스캔 중... ⏳";
     
     try {
-        const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
+        // 💡 [핵심 수정]: 수학방처럼 notion-helper의 PROXY_URL을 직접 사용!
+        const response = await fetch(`${PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -229,7 +229,8 @@ async function processUserStatement() {
     conversationHistory.push({ role: "user", parts: [{ text: text }] });
 
     try {
-        const response = await fetch(`${WORKER_PROXY_URL}/v1/gemini`, {
+        // 💡 [핵심 수정]: 수학방처럼 AI 엔진 통신도 PROXY_URL로 통일!
+        const response = await fetch(`${PROXY_URL}/v1/gemini`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -257,7 +258,6 @@ async function processUserStatement() {
 
     } catch (error) {
         console.error("AI 엔진 오류:", error);
-        // 🚨 [방어막 작동] 503 에러가 나도 아이를 갇히게 두지 않고 비상 탈출구를 개방합니다!
         appendChatMessage('ai', `[비상 통신 모드] 삐리릿.. 아빠의 AI 서버가 잠시 점검 중입니다. 하지만 네가 남긴 멋진 생각은 확실히 전달받았습니다! 비상 탈출구를 개방합니다.`);
         document.getElementById('exit-gate').style.display = 'block';
         document.getElementById('exit-gate').scrollIntoView({ behavior: 'smooth' });
