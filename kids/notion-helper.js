@@ -21,9 +21,9 @@ async function sendStudyLogToNotion({ childName, subject, startTime, endTime, du
                 "학생": { 
                     select: { name: childName } 
                 },
-                // 3. 과목 (유형: 선택)
+               // 3. 과목 (유형: 텍스트)
                 "과목": { 
-                    select: { name: subject } 
+                    rich_text: [{ text: { content: subject } }] 
                 },
                 // 4. 입장 (유형: 날짜)
                 "입장": { 
