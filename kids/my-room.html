@@ -66,6 +66,7 @@
             
             <!-- 🚪 동선 수정: 한 칸 위(../)에 있는 로비 파일로 연결! -->
             <!-- ⚠️ 주의: 대형 로비 파일 이름이 lobby.html이 아니라면 파일명에 맞게 변경해주세요! -->
+            <button onclick="clearRoom()" class="home-btn" style="background:#E57373; color:white; border:none; border-radius:20px; margin-right:5px;">🧹 방 청소하기</button>
             <a href="../lobby.html" class="home-btn" id="exit-btn">🚪 대형 로비로 나가기</a>
             
         </div>
@@ -352,7 +353,17 @@
 
             activeDragElement = null;
         }
-
+// 🧹 방에 꺼내놓은 가구들 전부 보관함으로 다시 집어넣기
+function clearRoom() {
+    if (!confirm("방에 있는 모든 가구를 다시 보관함으로 집어넣을까요? (구매한 가구는 사라지지 않아요!)")) return;
+    
+    // 배치 정보만 가방에서 삭제
+    localStorage.removeItem(`${currentProfile}_placed_furniture`);
+    
+    // 화면 새로고침해서 깨끗한 방 보여주기
+    renderRoomFurniture();
+    renderDock();
+}
         window.addEventListener('DOMContentLoaded', initRoom);
     </script>
 </body>
