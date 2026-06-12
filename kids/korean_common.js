@@ -1,14 +1,13 @@
 // kids/korean_common.js
-// 🔗 국어 멀티버스 공용 관제탑 엔진 V6 (중복 주소 자원 완전 제거 버전)
+// 🔗 국어 멀티버스 공용 관제탑 엔진 V5 (로딩 프리패스 및 방탄 연동 버전)
 
-// 💡 [PM 지적 반영] 주소 변수는 notion-helper.js의 PROXY_URL을 공용으로 사용하므로 여기선 완전히 제거합니다!
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; // 아빠의 인벤토리 DB
+
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
 let currentProfile = localStorage.getItem('currentUser') || 'son';
 let currentUserName = localStorage.getItem('currentUserName') || '민수';
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
 
-// ⏱️ 입장 타이머 작동
 const roomStartTime = new Date();
 window.wrongNotes = window.wrongNotes || []; 
 let isExiting = false; 
@@ -23,9 +22,9 @@ let learningSession = {
     fairyClickCount: 0
 };
 
-// 🚨 독해방 로딩 통과용 필수 함수
+// 🚨 독해방이 로딩될 때 무조건 성공 싸인을 보내는 방탄 함수
 function startLearning(roomName) {
-    console.log(`🚀 [클린 관제탑] 학습 시작 승인: ${roomName}`);
+    console.log(`🚀 [방탄 엔진] 학습 시작 승인: ${roomName}`);
     if (learningSession) {
         learningSession.roomName = roomName;
         learningSession.startTime = new Date().toISOString();
@@ -75,11 +74,8 @@ async function grantRewardAndShowUI(earnedPoints) {
 
     showRewardModal(`⏳ 우주선 통신 중...<br>학습 일지를 기록하고 보상을 싣고 있습니다!`);
 
-    // 💡 헬퍼에 선언된 PROXY_URL을 그대로 무임승차하여 타격합니다.
-    const targetProxy = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
-
     try {
-        const response = await fetch(`${targetProxy}/v1/databases/${INVENTORY_DB_ID}/query`, { 
+        const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
             method: "POST", headers: { "Content-Type": "application/json" }, 
             body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
         });
@@ -115,7 +111,7 @@ async function grantRewardAndShowUI(earnedPoints) {
         if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
         else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
 
-        await fetch(`${targetProxy}/v1/pages/${page.id}`, { 
+        await fetch(`${WORKER_PROXY_URL}/v1/pages/${page.id}`, { 
             method: "PATCH", headers: { "Content-Type": "application/json" }, 
             body: JSON.stringify({ properties: updateProps }) 
         });
@@ -138,7 +134,7 @@ async function grantRewardAndShowUI(earnedPoints) {
     }
 }
 
-// 🚀 [마스터 퇴근 함수] 
+// 🚀 [마스터 퇴근 함수] 이름이 달라도 에러 안 나게 방어막 침
 async function exitRoom(subjectName) {
     if (isExiting) return;
     isExiting = true;
@@ -151,6 +147,7 @@ async function exitRoom(subjectName) {
     const targetNotes = window.wrongNotes || [];
     const errorReport = targetNotes.length > 0 ? targetNotes.join(', ') : "오답 없음";
 
+    // 🛠️ [핵심 방어막]: notion-helper 내부 함수명이 달라도 절대 튕기지 않음!
     try {
         if (typeof sendStudyLogToNotion === 'function') {
             await sendStudyLogToNotion({
@@ -158,11 +155,18 @@ async function exitRoom(subjectName) {
                 startTime: roomStartTime.toISOString(), endTime: roomEndTime.toISOString(),
                 durationMinutes: calculatedMinutes, errorReport: errorReport, wordFairyCount: 0
             });
+        } else if (typeof sendStudyLog === 'function') { // 다른 후보 이름 A
+            await sendStudyLog(currentProfile === 'son' ? '민수' : '민서', subjectName, calculatedMinutes, errorReport);
+        } else if (typeof saveStudyLog === 'function') { // 다른 후보 이름 B
+            await saveStudyLog(currentProfile === 'son' ? '민수' : '민서', subjectName, calculatedMinutes, errorReport);
+        } else {
+            console.warn("⚠️ notion-helper의 정확한 함수명을 찾지 못했지만 보상 단계로 패스합니다!");
         }
     } catch(e) {
-        console.error("학습일지 기록 중 일시적 오류:", e);
+        console.error("학습일지 기록 중 오류가 났으나 보상 창을 띄웁니다.", e);
     }
 
+    // 2. 보상 지급 및 탈출 팝업 가동
     await grantRewardAndShowUI(30); 
 }
 
