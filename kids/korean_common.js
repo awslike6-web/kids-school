@@ -10,7 +10,9 @@ let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
 
 // ⏱️ 입장 타이머 작동
 const roomStartTime = new Date();
-let wrongNotes = []; 
+
+// 🛠️ [수정됨] 독해방과 관제탑이 하나의 공용 오답 가방을 쓰도록 통합!
+window.wrongNotes = window.wrongNotes || []; 
 let isExiting = false; 
 
 // 🎨 테마 및 프로필 자동 초기화
@@ -38,7 +40,7 @@ function toggleProfileManually() {
     location.reload();
 }
 
-// 📈 다이내믹 레벨업 계산 엔진 (수학방에서 수입)
+// 📈 다이내믹 레벨업 계산 엔진
 function calculateLevelInfo(totalRewards) {
     let level = 1;
     let requiredForNext = 20; 
@@ -54,7 +56,7 @@ function calculateLevelInfo(totalRewards) {
     return { level, requiredForNext, remainingForNext, currentLevelProgress };
 }
 
-// 🎁 노션 인벤토리 보상 전송 로직 (경험치/재화 독립 분리 버전!)
+// 🎁 노션 인벤토리 보상 전송 로직
 async function grantRewardAndShowUI(earnedPoints) {
     const userName = currentProfile === 'son' ? '민수' : '민서'; 
     if (userName === '아빠' || userName === '엄마' || userName === '어른') return true;
@@ -73,43 +75,37 @@ async function grantRewardAndShowUI(earnedPoints) {
         const page = data.results[0]; 
         const props = page.properties;
 
-        // 1. 노션에서 현재 자산과 '국어 경험치' 불러오기
         let diamond = props["다이아몬드 개수"]?.number || 0; 
         let slime = props["슬라임 파츠 개수"]?.number || 0;
         let tickets = props["소원권 개수"]?.number || 0;
-        let koreanExp = props["국어 경험치"]?.number || 0; // 👈 새로 만든 국어 경험치!
+        let koreanExp = props["국어 경험치"]?.number || 0; 
         
-        // 2. 공용 재화(돈) 계산
         let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
         let currentWealth = previousWealth + earnedPoints;
         let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
-        // 3. 📈 [핵심] 레벨은 오직 '국어 경험치'로만 계산합니다!
-        let newKoreanExp = koreanExp + earnedPoints; // 경험치도 얻은 포인트만큼 증가
+        let newKoreanExp = koreanExp + earnedPoints; 
         const prevLevelInfo = calculateLevelInfo(koreanExp);
         const currLevelInfo = calculateLevelInfo(newKoreanExp);
         let isLevelUp = currLevelInfo.level > prevLevelInfo.level;
 
-        // 4. 소원권은 전체 돈(Wealth)이 늘어난 기준으로 계산
         let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
         let newTickets = tickets + earnedTickets;
 
-        // 5. 노션에 업데이트할 보따리 싸기
         let updateProps = {
             "국어 레벨": { number: currLevelInfo.level },
-            "국어 경험치": { number: newKoreanExp }, // 👈 경험치 누적 저장
+            "국어 경험치": { number: newKoreanExp }, 
             "소원권 개수": { number: newTickets }
         };
         if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
         else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
 
-        // 6. 노션으로 발사!
         await fetch(`${WORKER_PROXY_URL}/v1/pages/${page.id}`, { 
             method: "PATCH", headers: { "Content-Type": "application/json" }, 
             body: JSON.stringify({ properties: updateProps }) 
         });
         
-        // 7. 성공 화면 업데이트 (경험치 기반으로 남은 개수 표시)
+        // 🛠️ [수정됨] 허브가 아닌 대형 로비(../lobby.html)로 탈출하도록 버튼 경로 수정!
         updateRewardModal(`
             <b style="color:#0288D1; font-size: 1.5rem;">${rewardName} ${earnedPoints}개 획득!</b><br><br>
             현재 총 자산: <b>${currentWealth}</b>개<br>
@@ -117,13 +113,13 @@ async function grantRewardAndShowUI(earnedPoints) {
             ${isLevelUp ? `<br><br><span style="font-size:1.3rem; color:#FF6B9D; font-weight:bold;">🎉 국어 레벨 업! Lv.${currLevelInfo.level} 🎉</span>` : ''}
             ${earnedTickets > 0 ? `<br><br><span style="font-size:1.2rem; color:#FFD700; font-weight:bold;">🎫 소원권 ${earnedTickets}장 추가 획득!!</span>` : ''}
             <br><br>
-            <button onclick="location.href='korean.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: var(--primary); color: white; cursor: pointer; font-weight: bold;">허브로 돌아가기</button>
+            <button onclick="location.href='../lobby.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: var(--primary); color: white; cursor: pointer; font-weight: bold;">대형 로비로 돌아가기</button>
         `);
         return true;
 
-    } catch (err) {
+        } catch (err) {
         console.error("보상 시스템 오류:", err);
-        updateRewardModal(`❌ 보상 저장 실패. 아빠에게 알려주세요!<br><br><button onclick="location.href='korean.html'">그냥 나가기</button>`);
+        updateRewardModal(`❌ 보상 저장 실패. 아빠에게 알려주세요!<br><br><button onclick="location.href='../lobby.html'">그냥 나가기</button>`);
         return false;
     }
 }
@@ -138,31 +134,31 @@ async function exitRoom(subjectName) {
     let calculatedMinutes = Math.floor(timeDiff / 60000);
     if (calculatedMinutes < 1) calculatedMinutes = 1; 
 
-    const errorReport = wrongNotes.length > 0 ? wrongNotes.join(', ') : "오답 없음";
+    // 🛠️ [수정됨] 공용 오답 가방(window.wrongNotes)에서 오답을 꺼내오도록 변경!
+    const targetNotes = window.wrongNotes || [];
+    const errorReport = targetNotes.length > 0 ? targetNotes.join(', ') : "오답 없음";
     console.log(`📡 학습일지 출고 준비 ➔ 과목: ${subjectName} | 소요시간: ${calculatedMinutes}분`);
 
-    // 1. 학습일지 노션 전송 (notion-helper.js 의존)
-    // - 오류가 나더라도 보상 로직은 타도록 await만 걸어줍니다.
-    await sendStudyLogToNotion({
-        childName: currentProfile === 'son' ? '민수' : '민서',
-        subject: subjectName, 
-        startTime: roomStartTime.toISOString(),
-        endTime: roomEndTime.toISOString(),
-        durationMinutes: calculatedMinutes,
-        errorReport: errorReport,
-        wordFairyCount: 0
-    });
+    if (typeof sendStudyLogToNotion === 'function') {
+        await sendStudyLogToNotion({
+            childName: currentProfile === 'son' ? '민수' : '민서',
+            subject: subjectName, 
+            startTime: roomStartTime.toISOString(),
+            endTime: roomEndTime.toISOString(),
+            durationMinutes: calculatedMinutes,
+            errorReport: errorReport,
+            wordFairyCount: 0
+        });
+    }
 
-    // 2. 보상 지급 프로세스 가동 (국어 지문 1개당 30포인트 지급!)
-    // 여기서 모달이 뜨고, 아이가 확인을 누르면 알아서 korean.html로 넘어갑니다.
     await grantRewardAndShowUI(30); 
 }
 
-// --- 임시 UI 모달 (화면 중앙에 보상창 띄우기) ---
+// --- 임시 UI 모달 ---
 function showRewardModal(message) {
     const modalHtml = `
         <div id="korean-reward-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999;">
-            <div id="korean-reward-content" style="background:white; padding:30px; border-radius:15px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; width: 80%; line-height: 1.5;">
+            <div id="korean-reward-content" style="background:white; padding:30px; border-radius:15px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-width: 400px; width: 80%; line-height: 1.5; color: #333;">
                 ${message}
             </div>
         </div>
@@ -174,9 +170,5 @@ function updateRewardModal(message) {
     const content = document.getElementById('korean-reward-content');
     if (content) content.innerHTML = message;
 }
-
-window.addEventListener('pagehide', () => {
-    // pagehide에서는 비동기 처리가 불안정하므로 안전장치 용도로만 둡니다. (보상은 버튼 클릭 시 정상 지급)
-});
 
 window.addEventListener('DOMContentLoaded', initKoreanTheme);
