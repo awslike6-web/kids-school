@@ -17,18 +17,14 @@
   /* ----------------------------------
      🎮 민수 테마: 고성능 게임 아케이드 유니버스
      ---------------------------------- */
-  body.theme--arcade {
-    background: linear-gradient(160deg, #09070f 0%, #110e1c 50%, #1a152e 100%);
-    color: #e2e8f0;
-  }
+  body.theme--arcade { background: linear-gradient(160deg, #09070f 0%, #110e1c 50%, #1a152e 100%); color: #e2e8f0; }
   body.theme--arcade .main-title .accent2 { color: #00f2fe; text-shadow: 0 0 12px rgba(0,242,254,0.6); }
   body.theme--arcade .main-title .accent { color: #ff007f; text-shadow: 0 0 12px rgba(255,0,127,0.6); }
   body.theme--arcade .subtitle { color: #a0aec0; }
   body.theme--arcade .user-welcome { background: rgba(30, 25, 50, 0.75); border-color: rgba(0, 242, 254, 0.4); color: #fff; }
   body.theme--arcade .user-welcome span { color: #00f2fe; }
-  body.theme--arcade .inventory-card { background: rgba(20, 16, 38, 0.85); border-color: #00f2fe; box-shadow: 0 0 15px rgba(0,242,254,0.25); color: #fff; }
+  body.theme--arcade .inventory-card { background: rgba(20, 16, 38, 0.85); border-color: #00f2fe; box-shadow: 0 0 15px rgba(0,242,254,0.25); color: #fff; border: 2px solid; }
   body.theme--arcade .math-level { background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0,242,254,0.3); }
-  
   body.theme--arcade .world-card { background: rgba(28, 22, 50, 0.85); border: 2.5px solid #2d2454; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
   body.theme--arcade .world-card:hover { border-color: #00f2fe; box-shadow: 0 0 20px rgba(0,242,254,0.3); }
   body.theme--arcade .world-title { color: #00f2fe; border-bottom: 2px dashed rgba(0,242,254,0.2); }
@@ -36,22 +32,22 @@
   body.theme--arcade .sub-room-btn:hover { background: linear-gradient(135deg, #ff007f 0%, #7928ca 100%); transform: translateX(5px); }
   body.theme--arcade .back-btn { background: rgba(30, 25, 50, 0.8); border-color: rgba(255,255,255,0.1); color: #a0aec0; }
   body.theme--arcade .chatbot-btn { background: linear-gradient(135deg, #00f2fe, #4facfe); box-shadow: 0 8px 25px rgba(0,242,254,0.4); }
+  
+  /* ✨ 민수 마이룸 버튼 스타일 */
+  body.theme--arcade .my-room-btn { background: linear-gradient(90deg, #ff007f, #7928ca); color: #fff; border: 2px solid #00f2fe; box-shadow: 0 4px 15px rgba(255,0,127,0.4); }
+  body.theme--arcade .my-room-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,242,254,0.6); }
 
   /* ----------------------------------
      🎠 민서 테마: 아기자기 동화 속 비밀 아지트
      ---------------------------------- */
-  body.theme--hideout {
-    background: linear-gradient(160deg, #fff0f3 0%, #ffe5ec 50%, #fffbe6 100%);
-    color: #4a384f;
-  }
+  body.theme--hideout { background: linear-gradient(160deg, #fff0f3 0%, #ffe5ec 50%, #fffbe6 100%); color: #4a384f; }
   body.theme--hideout .main-title .accent2 { color: #a78bfa; }
   body.theme--hideout .main-title .accent { color: #ff6b9d; }
   body.theme--hideout .subtitle { color: #8d6e63; }
   body.theme--hideout .user-welcome { background: rgba(255,255,255,0.9); border-color: #ffb74d; color: #4a384f; }
   body.theme--hideout .user-welcome span { color: #ff6b9d; }
-  body.theme--hideout .inventory-card { background: #ffffff; border-color: #ff80ab; box-shadow: 0 8px 22px rgba(255,64,129,0.12); color: #4a384f; }
+  body.theme--hideout .inventory-card { background: #ffffff; border-color: #ff80ab; box-shadow: 0 8px 22px rgba(255,64,129,0.12); color: #4a384f; border: 2px solid; }
   body.theme--hideout .math-level { background: #ffe4e1; color: #ff4081; }
-  
   body.theme--hideout .world-card { background: rgba(255, 255, 255, 0.9); border: 2.5px solid #fff; box-shadow: 0 10px 25px rgba(255,182,193,0.2); }
   body.theme--hideout .world-card:hover { transform: translateY(-6px); box-shadow: 0 15px 30px rgba(255,107,157,0.25); border-color: #ff6b9d; }
   body.theme--hideout .world-title { color: #ff6b9d; border-bottom: 2px dashed rgba(255,107,157,0.2); }
@@ -60,7 +56,11 @@
   body.theme--hideout .back-btn { background: #ffffff; border-color: rgba(0,0,0,0.06); color: #8d6e63; }
   body.theme--hideout .chatbot-btn { background: linear-gradient(135deg, #ff758c, #ff9f43); box-shadow: 0 8px 25px rgba(255,117,140,0.4); }
 
-  /* 파티클 및 레이아웃 공통 공정 */
+  /* ✨ 민서 마이룸 버튼 스타일 */
+  body.theme--hideout .my-room-btn { background: linear-gradient(90deg, #ff9a9e, #fecfef); color: #4a384f; border: 2px solid #ff6b9d; box-shadow: 0 4px 15px rgba(255,107,157,0.3); }
+  body.theme--hideout .my-room-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,107,157,0.5); }
+
+  /* 파티클 및 레이아웃 공통 */
   .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
   .float-item { position: absolute; font-size: 1.8rem; opacity: 0.14; animation: floatUp linear infinite; font-family: 'Gaegu', cursive; font-weight: 700; }
   @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.14; } 90% { opacity: 0.14; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
@@ -72,9 +72,14 @@
   .subtitle { font-family: 'Gaegu', cursive; font-size: 1.1rem; margin-bottom: 16px; }
   .user-welcome { display: inline-block; padding: 8px 22px; border-radius: 999px; font-size: 1.25rem; margin-bottom: 14px; backdrop-filter: blur(8px); font-weight: bold; }
 
-  .inventory-card { border-radius: 22px; padding: 16px; width: 100%; max-width: 440px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border: 2px solid; }
+  /* 📦 인벤토리 및 마이룸 래퍼 */
+  .status-wrapper { width: 100%; max-width: 440px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 10px; }
+  .inventory-card { border-radius: 22px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
   .reward-badge { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: bold; }
   .math-level { font-size: 1.1rem; padding: 4px 14px; border-radius: 12px; font-weight: bold; }
+
+  /* 🚪 마이룸 버튼 공통 뼈대 */
+  .my-room-btn { width: 100%; padding: 14px; border-radius: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; text-decoration: none; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Jua', sans-serif; }
 
   /* 💎 2x3 또는 반응형 그리드 배열 (과목 카드 전용) */
   .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 860px; margin-top: 10px; }
@@ -82,14 +87,11 @@
 
   .world-card { border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
   .world-title { font-size: 1.4rem; font-weight: bold; padding-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-  
   .sub-room-list { display: flex; flex-direction: column; gap: 10px; }
   .sub-room-btn { display: flex; flex-direction: column; padding: 14px 18px; border-radius: 16px; text-decoration: none; transition: all 0.25s ease; cursor: pointer; }
   .sub-room-name { font-size: 1.15rem; font-weight: bold; margin-bottom: 2px; }
   .sub-room-desc { font-size: 0.8rem; opacity: 0.8; font-family: 'Gaegu', cursive; }
-
   .back-btn { margin-top: 36px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
-
   .chatbot-btn { position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.4); z-index: 999; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: pulseBot 2s infinite; }
   .chatbot-btn:hover { transform: scale(1.15) rotate(15deg); }
   @keyframes pulseBot { 0% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0.4); } 70% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 15px rgba(167, 139, 250, 0); } 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0); } }
@@ -104,13 +106,15 @@
   
   <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
 
-  <div class="inventory-card" id="inventoryDisplay">
-    <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
+  <div class="status-wrapper">
+      <div class="inventory-card" id="inventoryDisplay">
+        <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
+      </div>
+      <a href="kids/my-room.html" class="my-room-btn">🛒 나만의 마이룸 & 상점 가기</a>
   </div>
 
   <p class="subtitle">오늘 탐험하고 싶은 월드를 선택해봐!</p>
 
-  <!-- 💡 새로운 6대 카테고리 구성망이 적용되는 카드 영역 -->
   <div class="world-grid" id="worldGrid"></div>
   
   <a href="index.html" class="back-btn">← 처음 프로필 화면으로</a>
@@ -302,14 +306,14 @@ window.onload = async function() {
     const theme = props["현재 테마"]?.select?.name || (childName === '민수' ? '마인크래프트' : '슬라임');
     const diamond = props["다이아몬드 개수"]?.number || 0;
     const slime = props["슬라임 파츠 개수"]?.number || 0;
-    const level = props["수학 레벨"]?.number || 1;
+    const level = props["통합 레벨"]?.formula?.number || props["수학 레벨"]?.number || 1; // 통합 레벨이 있으면 우선 표시!
     
     localStorage.setItem('currentTheme', theme);
     if (theme === '마인크래프트') {
-      container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">Lv. ${level}</div>`;
+      container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
       container.classList.add('theme--minecraft');
     } else {
-      container.innerHTML = `<div class="reward-badge">💧 <span style="color:#388E3C;">x${slime}</span></div><div class="math-level">Lv. ${level}</div>`;
+      container.innerHTML = `<div class="reward-badge">💧 <span style="color:#388E3C;">x${slime}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
       container.classList.add('theme--slime');
     }
   } catch (error) {
