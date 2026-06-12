@@ -1,6 +1,6 @@
 // ⚙️ 국어 멀티버스 코어 운영 엔진 V2 (지문 선택, 접속사 3콤보, 생각 영구 저장 탑재)
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const LIBRARY_DB_ID = "여기에_아빠도서관_DB_ID를_넣어주세요"; 
+const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee"; 
 
 let currentStage = 0;       
 let currentConjunctionIndex = 0; // 접속사 문제 3연타를 추적하는 새 변수!
@@ -9,6 +9,7 @@ let chosenLesson = "";
 let conversationHistory = []; 
 let userOrderTracking = []; 
 let fetchedBooks = []; // 노션에서 가져온 지문 목록 보관함
+let wrongNotes = []; // 👈 [추가 1] 오답을 담을 빈 보따리 생성!
 
 // 🎯 엔진 구동 트리거
 function initKoreanUniverse() {
@@ -81,6 +82,7 @@ function startReadingSystem(bookId) {
     currentConjunctionIndex = 0;
     userOrderTracking = [];
     conversationHistory = [];
+    wrongNotes = []; // 👈 [추가 2] 새 지문을 시작할 때마다 보따리 깨끗하게 비우기!
     renderStage();
 }
 
