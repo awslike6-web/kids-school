@@ -54,7 +54,6 @@
         .lesson-card:hover { border-color: var(--mint-success); }
 
         .chat-box { height: 260px; overflow-y: auto; background: #0d1117; border: 1px solid var(--border-line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .chat-box { height: 260px; overflow-y: auto; background: #0d1117; border: 1px solid var(--border-line); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
         .chat-msg { max-width: 85%; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; line-height: 1.4; word-break: break-all; }
         .chat-msg.ai { background: #21262d; align-self: flex-start; border-left: 3px solid var(--neon-accent); }
         .chat-msg.user { background: #1f6feb; color: white; align-self: flex-end; }
@@ -87,34 +86,30 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
     <div id="game-zone"></div>
 </div>
 
-<script>
-    // [트랙 1: 변수 및 입장 타이머 선언공간]
-    const roomStartTime = new Date();
-</script>
-
+<!-- 1. 가문 환경변수 글로벌 관제탑 장착 -->
 <script src="../../config.js"></script>
 
-<script src="korean-reading-data.js"></script>
-
 <script>
-    // 3. 지연 호출하여 결합할 국어 멀티버스 및 인프라 코어 명단
+    // 💡 [정비 완료] 변수 충돌 방지를 위해 roomStartTime 스크립트 제거! (korean_common.js에서 생성함)
+
+    // 2. 실행 순서 제어를 위해 데이터 파일과 로직 파일을 로더 대기열에 순서대로 배치!
     const requiredCores = [
         "notion-helper.js",
         "korean_common.js",
-        "korean-reading-logic.js"
+        "../subjects/korean/korean-reading-data.js", // 데이터가 먼저 로드되고,
+        "../subjects/korean/korean-reading-logic.js"  // 로직 파일이 그 데이터를 읽어야 에러가 없음!
     ];
 
-    // 4. ⚙️ 하이브리드 로더 정교 주입 (점 두 개 core 폴더 스캔)
+    // 3. ⚙️ 하이브리드 로더 주입 가동
     loadCoreScripts("../../core/", requiredCores, () => {
         console.log("📖 국어 정밀독해방 하이브리드 부품 조립 완료!");
 
-        // 🔄 인라인 스타트 버튼 핸들러 글로벌 확장 문법 교정 완료
+        // 🔄 인라인 스타트 버튼 핸들러 글로벌 확장
         window.unlockAudioAndStart = function() {
             document.getElementById('start-overlay').style.display = 'none';
             const unlockUtterance = new SpeechSynthesisUtterance('');
             window.speechSynthesis.speak(unlockUtterance);
             
-            // korean_common.js 조립 완료 상태이므로 안전 시동 보장됨
             if (typeof initKoreanUniverse === 'function') {
                 initKoreanUniverse();
             } else {
