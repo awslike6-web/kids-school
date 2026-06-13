@@ -219,19 +219,33 @@
   </div>
 </div>
 
-  <script src="notion-helper.js"></script>
-<script src="math_common.js"></script>
-<script>
-let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
-let wrongNotes = []; 
-let gameState = {};
-// ⏱️ [추가] 아이들이 방에 발을 디딘 순간 시간을 딱 기록합니다!
-const roomStartTime = new Date();
-  
-// 덧셈 전용 난이도 설정
-let difficultySettings = { add: true };
 
-function toggleProfileManually() {
+<script>
+    // [트랙 1: 순수 변수 선언 공간] - 지붕 바깥(위쪽)에 그대로 유지합니다.
+    let fallingTimers = [], timerInterval = null, timeLeft = 0, fallingBalls = [];
+    let wrongNotes = []; 
+    let gameState = {};
+    const roomStartTime = new Date(); // ⏱️ 입장 시간 기록
+    let difficultySettings = { add: true };
+</script>
+
+<script src="../../../config.js"></script>
+
+<script>
+    const requiredCores = [
+        "notion-helper.js",
+        "math_common.js"
+    ];
+
+    // ⚙️ 하이브리드 로더 시동!
+    loadCoreScripts("../../../core/", requiredCores, () => {
+        console.log("➕ 덧셈방 하이브리드 엔진 조립 완료!");
+
+        // =======================================================
+        // [트랙 3: 엔진 품 안으로 이사 온 실무 함수들]
+        // 기존에 있던 모든 함수와 이벤트 리스너들은 이 아래로 쏙 들어옵니다.
+        // =======================================================
+window.toggleProfileManually =  function() {
   if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
   else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
   localStorage.setItem('currentUser', currentProfile); 
@@ -239,7 +253,7 @@ function toggleProfileManually() {
   initProfile();
 }
 
-function initProfile() {
+window.initProfile =  function() {
   const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
   const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
   const themeClass = currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
@@ -258,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-function loadProfileData() {
+window.loadProfileData =  function() {
   wrongNotes = JSON.parse(localStorage.getItem(`minmin_math_wrong_${currentProfile}`)) || [];
   document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
 }
@@ -498,7 +512,9 @@ async function showFinalResult(){
   }
 }
 
-function retryGame() { startGame(gameState.mode); }
+
+window.retryGame =  function() {
+ startGame(gameState.mode); }
 
 document.addEventListener('keydown', e=>{ 
   if(e.key==='Enter') { 
@@ -511,7 +527,8 @@ document.addEventListener('keydown', e=>{
 let isExiting = false; 
 
 // 🚀 덧셈방 최종 탈출 및 학습 일지 전송 함수
-async function exitRoom() {
+// 🚀 아버님이 보여주신 최종 탈출(블랙박스) 함수도 이 안에 안전하게 입주합니다.
+        window.exitRoom = async function() {
     if (isExiting) return; // 이미 자물쇠가 잠겼으면(전송 중이면) 그냥 무시!
     isExiting = true;      // 실행되는 순간 자물쇠 채우기
 
@@ -529,15 +546,19 @@ async function exitRoom() {
 
     const currentWordFairy = 0;
 
-    // 노션으로 데이터 발사!
-    const success = await sendStudyLogToNotion({
-        childName: currentProfile === 'son' ? '민수' : '민서', 
-        subject: "수학(덧셈)",                  
-        startTime: roomStartTime.toISOString(),  
-        endTime: roomEndTime.toISOString(),      
-        durationMinutes: calculatedMinutes,      
-        errorReport: currentErrorReport,         
-        wordFairyCount: currentWordFairy         
+// 📢 [순정/개조 하이브리드 연동] 
+            // 원래 하드코딩되어 있던 민수 이름을 config.js의 첫째 아이 이름으로 동적 치환!
+            const currentChildName = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
+
+            // 노션으로 데이터 발사!
+            const success = await sendStudyLogToNotion({
+                childName: currentChildName, 
+                subject: "수학(덧셈)", // (뺄셈방은 '수학(뺄셈)'으로 유지)                  
+                startTime: roomStartTime.toISOString(),  
+                endTime: roomEndTime.toISOString(),      
+                durationMinutes: calculatedMinutes,      
+                errorReport: currentErrorReport,         
+                wordFairyCount: currentWordFairy
     });
 
     if (success) {
@@ -550,8 +571,10 @@ async function exitRoom() {
 }
 
 // 🚨 창을 닫거나 도망쳐도 강제로 일지를 쓰는 블랙박스 로직
-window.addEventListener('pagehide', () => {
-    exitRoom();
+// 🚨 블랙박스 이벤트 리스너 등록
+        window.addEventListener('pagehide', () => {
+            if (typeof window.exitRoom === 'function') window.exitRoom();
+        });
 });
 </script>
 </body>
