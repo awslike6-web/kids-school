@@ -74,7 +74,8 @@
         <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
     </div>
 
-    <button class="back-btn" onclick="exitRoom('국어(문장)')">
+    <!-- 🚪 먹튀 버그 해결: 무조건 보상 주는 exitRoom() 대신 순수 로비 이동 버튼으로 개조 -->
+    <button class="back-btn" onclick="location.href='../lobby.html'">
         🚪 공부방 대문으로 돌아가기
     </button>
 </div>
@@ -88,13 +89,21 @@
     let currentMode = urlParams.get('mode') || 'base';
     let conversationHistory = [];
 
+    // 💰 아버님이 기획하신 정확한 단계별 보상 및 제한 룰 세팅
+    const rewardRules = {
+        easy: { reward: 2, limit: 2, name: "1단계 (민서 방)" },
+        base: { reward: 5, limit: 2, name: "2단계 (민수 방)" },
+        spell: { reward: 5, limit: 2, name: "3단계 (맞춤법)" },
+        logic: { reward: 10, limit: 2, name: "4단계 (논리학)" }
+    };
+
     const modeConfigs = {
         easy: {
             title: "🍬 레벨 0: 둘째 민서 모드 (문장 징검다리)", color: "var(--easy-color)", pitch: 1.2,
             placeholder: "아래 단어 버튼을 누르거나 직접 써보세요!",
             welcome: "안녕! 나는 너의 문장 수호신이야! 오늘 있었던 재미난 일을 단어 버튼을 누르거나 글자로 써서 나에게 들려줘! ✨",
             ttsWelcome: "민서 방 충전 완료! 재미있는 문장을 만들어줘!",
-            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬과 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
+            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬และ 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
         },
         base: {
             title: "🤖 레벨 1: 첫째 민수 모드 (대충 쓰기 방어)", color: "var(--base-color)", pitch: 0.7,
@@ -146,7 +155,15 @@
         conversationHistory = [];
         document.getElementById('chat-box').innerHTML = '';
         
-        appendMessage('ai', config.welcome);
+        // 📢 현재 방의 오늘 남은 도전 횟수를 환영 인사에 표시
+        const todayKey = new Date().toLocaleDateString();
+        const countKey = `count_${currentMode}_${todayKey}`;
+        const currentCount = parseInt(localStorage.getItem(countKey) || "0");
+        const remaining = Math.max(0, rewardRules[currentMode].limit - currentCount);
+        
+        const welcomeText = config.welcome + `\n\n🎯 [오늘 보상 가능 횟수: ${remaining}번 / 2번]`;
+        
+        appendMessage('ai', welcomeText);
         speakTTS(config.ttsWelcome, config.pitch);
     }
 
@@ -222,8 +239,6 @@
             appendMessage('ai', warning);
             speakTTS("자음 노이즈 감지. 똑바로 쓰라.", config.pitch); 
             inputEl.value = '';
-            
-            // 🌟 오답 발생 시 관제탑 오답 가방(wrongNotes)에 담기
             wrongNotes.push(`자음 노이즈: ${userText}`);
             return;
         }
@@ -261,10 +276,11 @@
             speakTTS(aiResponse, config.pitch);
 
             const isSuccess = aiResponse.includes('[SUCCESS]');
-            triggerNotionReward(isSuccess);
-
-            // 🌟 미션 실패 시 (통과 거부) 관제탑 오답 가방에 기록 추가
-            if (!isSuccess) {
+            
+            // 🌟 미션 완수 시에만 밸런싱 보상 매커니즘 작동!
+            if (isSuccess) {
+                await triggerBalancedSentenceReward();
+            } else {
                 wrongNotes.push(`[수정요청 됨] 작성문장: ${userText}`);
             }
 
@@ -277,38 +293,45 @@
         }
     }
 
-    async function triggerNotionReward(isSuccess) {
-        const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-        const childName = currentMode === 'easy' ? '민서' : '민수';
-        const rewardProp = currentMode === 'easy' ? '슬라임 파츠 개수' : '다이아몬드 개수';
-        const rewardIcon = currentMode === 'easy' ? '💧' : '💎';
-        const earnAmount = isSuccess ? 5 : 1;
+    // ⚖️ [완벽 밸런싱 패치] 단계별 차등 보상 + 일일 2회 참여 제한 추적기
+    async function triggerBalancedSentenceReward() {
+        const rule = rewardRules[currentMode];
+        const todayKey = new Date().toLocaleDateString();
+        const countKey = `count_${currentMode}_${todayKey}`;
+        
+        // 1. 로컬 저장소에서 오늘 이 방을 몇 번 통과했는지 확인
+        let currentCount = parseInt(localStorage.getItem(countKey) || "0");
+        const rewardIcon = currentProfile === 'son' ? '💎' : '💧';
 
-        try {
-            const queryRes = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
-            });
-            const data = await queryRes.json();
-            if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
+        if (currentCount >= rule.limit) {
+            // 🛑 오늘 2번 다 채운 상태면 보상 제한 차단
+            const limitMsg = `⚠️ [보상 마감] 오늘 ${rule.name}의 미션 보상을 이미 2회 모두 획득했습니다!\n(돈은 쌓이지 않지만 공부 경험치는 계속 올라갑니다!)`;
+            appendMessage('ai', limitMsg);
+            speakTTS("오늘 보상이 마감되었습니다.", 1.0);
             
-            const pageId = data.results[0].id;
-            const currentCount = data.results[0].properties[rewardProp]?.number || 0;
+            // 재화는 0개 주되, 국어 경험치는 공부한 만큼(rule.reward) 그대로 주어 성장 유도!
+            if (typeof grantRewardAndShowUI === 'function') {
+                await grantRewardAndShowUI(rule.reward, true); 
+            }
+            return;
+        }
 
-            await fetch(`${WORKER_PROXY_URL}/v1/pages/${pageId}`, {
-                method: "PATCH", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ properties: { [rewardProp]: { number: currentCount + earnAmount } } })
-            });
+        // 2. 횟수가 남아있다면 카운트 1 올리고 노션 관제탑 호출!
+        currentCount++;
+        localStorage.setItem(countKey, currentCount);
 
-            const successMsg = isSuccess 
-                ? `미션 성공! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`
-                : `열심히 작성했어요! ${rewardIcon} ${earnAmount}개가 적립되었습니다! (총 ${currentCount + earnAmount}개)`;
+        const remaining = rule.limit - currentCount;
+        appendMessage('ai', `✨ 검사관의 승인을 받았습니다! 안전 가방에 보상을 적립합니다...`);
+
+        if (typeof grantRewardAndShowUI === 'function') {
+            // 관제탑 정식 루트 호출 (설정하신 단계별 보상 연동, 사운드는 조용히 처리)
+            const result = await grantRewardAndShowUI(rule.reward, true);
             
-            appendMessage('ai', successMsg);
-            if(isSuccess) speakTTS(`보상 5개 적립 완료!`, 1.2);
-            else speakTTS(`보상 1개 적립 완료!`, 1.0);
-        } catch (error) {
-            console.error("보상 에러:", error);
+            if (result) {
+                const successMsg = `🎉 미션 성공! [${rule.name}] 통과 보상으로 ${rewardIcon} ${rule.reward}개가 적립되었습니다!\n(오늘 이 방에서 보상을 ${remaining}번 더 받을 수 있어요!)`;
+                appendMessage('ai', successMsg);
+                speakTTS(`보상 적립 완료!`, 1.2);
+            }
         }
     }
 
