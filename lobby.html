@@ -120,7 +120,7 @@
   <a href="index.html" class="back-btn">← 처음 프로필 화면으로</a>
 </div>
 
-<div class="chatbot-btn" onclick="triggerChatbotPopup()">🧚‍♀️</div>
+
 
 <script>
 // =========================================================
@@ -285,10 +285,7 @@ localStorage.setItem('currentUserName', currentConfig.name);
   }
 })();
 
-// 🧚‍♀️ 만능 단어 요정 챗봇 호출 인터페이스
-function triggerChatbotPopup() {
-  alert(`🧚‍♀️ [만능 단어 요정]님이 로비에 나타났습니다!\n"안녕, ${currentConfig.name}! 모르는 단어가 생겼거나 퀴즈 힌트가 필요하면 언제든 나를 불러줘!"`);
-}
+// 🧚‍♀️ 만능 단어 요정 챗봇 호출 인터페이스 삭제
 
 // 노션 백엔드 인벤토리 자동 전송기
 window.onload = async function() {
@@ -322,7 +319,13 @@ window.onload = async function() {
     localStorage.setItem('currentTheme', defaultTheme);
     container.innerHTML = `<div class="reward-badge">${defaultTheme === '마인크래프트' ? '💎' : '💧'} <span>x0 (연결 필요)</span></div>`;
   }
-};
+<script src="kids/fairy-config.js?v=2"></script>
+<script src="kids/fairy-engine.js?v=2"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+      // 로비에 국어 단어요정 소환! (나중에 로비 전용 안내 요정으로 바꿀 수도 있습니다)
+      initFairyChat('KOREAN'); 
+  });
 </script>
 </body>
 </html>
