@@ -99,12 +99,11 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
 
 
 <script>
-    // 1. 방 시동 함수 (사용자가 터치하면 실행)
+    // 1. 방 시동 함수
     window.unlockAudioAndStart = function() {
         document.getElementById('start-overlay').style.display = 'none';
         window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
         
-        // 독해방 전용 유니버스 실행
         if (typeof initKoreanUniverse === 'function') {
             initKoreanUniverse();
         } else {
@@ -112,15 +111,17 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
         }
     };
 
-    // 2. 요정 엔진 호출 (페이지가 준비되면 자동으로 실행)
-    window.addEventListener('DOMContentLoaded', () => {
-        // 요정이 준비되었는지 확인 후 시동
-        if (typeof initFairyChat === 'function') {
-            initFairyChat('KOREAN');
-            console.log("요정 엔진 시동 완료!");
-        } else {
-            console.error("요정 엔진이 아직 로드되지 않았습니다.");
-        }
+    // 2. [수정됨] 페이지의 모든 리소스(JS 파일 포함)가 완전히 로드된 후 요정 호출
+    window.addEventListener('load', () => {
+        // 엔진이 로드될 시간을 짧게 확보한 후 호출
+        setTimeout(() => {
+            if (typeof initFairyChat === 'function') {
+                initFairyChat('KOREAN');
+                console.log("요정 엔진 시동 완료!");
+            } else {
+                console.error("요정 엔진이 아직 로드되지 않았습니다.");
+            }
+        }, 300); // 0.3초 지연으로 로딩 안전장치 마련
     });
 </script>
 </body>
