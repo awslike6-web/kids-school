@@ -1,19 +1,17 @@
 // kids/korean_common.js
-// 🔗 국어 멀티버스 공용 관제탑 엔진 V6 (중복 주소 자원 완전 제거 버전)
+// 🔗 국어 멀티버스 공용 관제탑 엔진 V7 (일일 보상 100개 제한 시스템 탑재)
 
-// 💡 [PM 지적 반영] 주소 변수는 notion-helper.js의 PROXY_URL을 공용으로 사용하므로 여기선 완전히 제거합니다!
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; // 아빠의 인벤토리 DB
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+const MAX_DAILY_REWARD = 100; // 🛑 하루 최대 획득 가능한 다이아/파츠 개수
 
 let currentProfile = localStorage.getItem('currentUser') || 'son';
 let currentUserName = localStorage.getItem('currentUserName') || '민수';
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
 
-// ⏱️ 입장 타이머 작동
 const roomStartTime = new Date();
 window.wrongNotes = window.wrongNotes || []; 
 let isExiting = false; 
 
-// 🚨 로딩 프리패스를 위한 데이터 그릇
 let learningSession = {
     studentName: currentProfile === 'son' ? '민수' : '민서',
     roomName: "국어 정밀독해방",
@@ -23,7 +21,6 @@ let learningSession = {
     fairyClickCount: 0
 };
 
-// 🚨 독해방 로딩 통과용 필수 함수
 function startLearning(roomName) {
     console.log(`🚀 [클린 관제탑] 학습 시작 승인: ${roomName}`);
     if (learningSession) {
@@ -32,7 +29,6 @@ function startLearning(roomName) {
     }
 }
 
-// 🎨 테마 및 프로필 자동 초기화
 function initKoreanTheme() {
     const themeClass = (currentTheme === '슬라임') ? 'theme--slime' : 'theme--minecraft';
     if(document.body) document.body.className = themeClass;
@@ -44,7 +40,6 @@ function initKoreanTheme() {
     }
 }
 
-// 🔄 프로필 수동 전환 기능
 function toggleProfileManually() {
     if (currentProfile === 'son') {
         currentProfile = 'daughter'; currentUserName = '민서'; currentTheme = '슬라임';
@@ -57,7 +52,6 @@ function toggleProfileManually() {
     location.reload();
 }
 
-// 📈 다이내믹 레벨업 계산 엔진
 function calculateLevelInfo(totalRewards) {
     let level = 1; let requiredForNext = 20; let accumulatedForCurrentLevel = 0; 
     while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
@@ -68,14 +62,13 @@ function calculateLevelInfo(totalRewards) {
     return { level, requiredForNext, remainingForNext, currentLevelProgress };
 }
 
-// 🎁 노션 인벤토리 보상 전송 로직
+// 🎁 [업그레이드] 일일 보상 제한이 걸린 보상 전송 로직
 async function grantRewardAndShowUI(earnedPoints) {
     const userName = currentProfile === 'son' ? '민수' : '민서'; 
     if (userName === '아빠' || userName === '엄마' || userName === '어른') return true;
 
     showRewardModal(`⏳ 우주선 통신 중...<br>학습 일지를 기록하고 보상을 싣고 있습니다!`);
 
-    // 💡 헬퍼에 선언된 PROXY_URL을 그대로 무임승차하여 타격합니다.
     const targetProxy = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
 
     try {
@@ -90,15 +83,48 @@ async function grantRewardAndShowUI(earnedPoints) {
         const page = data.results[0]; 
         const props = page.properties;
 
+        // 📅 1. 오늘 날짜 구하기 (YYYY-MM-DD 형식)
+        const today = new Date();
+        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+        let lastDateObj = props["최근 접속일"]?.date?.start;
+        let lastDate = lastDateObj ? lastDateObj.split('T')[0] : "";
+
+        // 🛑 2. 과목별 오늘 획득량 확인 및 '날짜 변경' 시 0으로 초기화 로직
+        let todayKorean = props["오늘 획득_국어"]?.number || 0;
+        let updateProps = {};
+
+        if (lastDate !== todayStr) {
+            // 접속일이 오늘이 아니면(자정이 지났으면) 모든 과목 획득량을 0으로 리셋!
+            todayKorean = 0;
+            updateProps["오늘 획득_수학"] = { number: 0 };
+            updateProps["오늘 획득_영어"] = { number: 0 };
+            updateProps["오늘 획득_사회"] = { number: 0 };
+            updateProps["오늘 획득_과학"] = { number: 0 };
+        }
+
+        // ⚖️ 3. 피로도 제한 계산 (100개까지만 재화 지급)
+        let allowedCurrency = earnedPoints;
+        let isLimitReached = false;
+
+        if (todayKorean + earnedPoints > MAX_DAILY_REWARD) {
+            allowedCurrency = Math.max(0, MAX_DAILY_REWARD - todayKorean);
+            isLimitReached = true;
+        }
+
+        let newTodayKorean = todayKorean + allowedCurrency;
+
+        // 💰 4. 자산 및 레벨 계산
         let diamond = props["다이아몬드 개수"]?.number || 0; 
         let slime = props["슬라임 파츠 개수"]?.number || 0;
         let tickets = props["소원권 개수"]?.number || 0;
         let koreanExp = props["국어 경험치"]?.number || 0; 
         
         let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
-        let currentWealth = previousWealth + earnedPoints;
+        let currentWealth = previousWealth + allowedCurrency; // 제한된 만큼만 돈을 줌
         let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
 
+        // 📈 [핵심 디테일] 재화는 막아도 '경험치'는 공부한 만큼 무조건 다 줍니다!
         let newKoreanExp = koreanExp + earnedPoints; 
         const prevLevelInfo = calculateLevelInfo(koreanExp);
         const currLevelInfo = calculateLevelInfo(newKoreanExp);
@@ -107,11 +133,13 @@ async function grantRewardAndShowUI(earnedPoints) {
         let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
         let newTickets = tickets + earnedTickets;
 
-        let updateProps = {
-            "국어 레벨": { number: currLevelInfo.level },
-            "국어 경험치": { number: newKoreanExp }, 
-            "소원권 개수": { number: newTickets }
-        };
+        // 📦 5. 노션에 저장할 보따리 싸기
+        updateProps["최근 접속일"] = { date: { start: todayStr } };
+        updateProps["오늘 획득_국어"] = { number: newTodayKorean };
+        updateProps["국어 레벨"] = { number: currLevelInfo.level };
+        updateProps["국어 경험치"] = { number: newKoreanExp }; 
+        updateProps["소원권 개수"] = { number: newTickets };
+        
         if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
         else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
 
@@ -120,8 +148,19 @@ async function grantRewardAndShowUI(earnedPoints) {
             body: JSON.stringify({ properties: updateProps }) 
         });
         
+        // 💬 6. 피로도 상태에 따른 UI 팝업 출력
+        let limitMessageHtml = "";
+        if (isLimitReached) {
+            if (allowedCurrency === 0) {
+                limitMessageHtml = `<div style="background: rgba(255,7,58,0.1); border: 2px solid #ff073a; padding: 10px; border-radius: 8px; color: #ff073a; font-weight: bold; margin-bottom: 15px;">⚠️ 오늘 국어 광산의 보상을 모두 캤습니다!<br><span style="font-size:0.9rem;">(내일 다시 오거나 다른 과목을 공부하세요!)</span></div>`;
+            } else {
+                limitMessageHtml = `<div style="background: rgba(255,152,0,0.1); border: 2px solid #ff9800; padding: 10px; border-radius: 8px; color: #ff9800; font-weight: bold; margin-bottom: 15px;">⚠️ 일일 최대 보상(100개)에 도달했습니다!<br><span style="font-size:0.9rem;">(이번엔 ${allowedCurrency}개만 획득)</span></div>`;
+            }
+        }
+
         updateRewardModal(`
-            <b style="color:#0288D1; font-size: 1.5rem;">${rewardName} ${earnedPoints}개 획득!</b><br><br>
+            ${limitMessageHtml}
+            <b style="color:#0288D1; font-size: 1.5rem;">${rewardName} ${allowedCurrency}개 획득!</b> <span style="color:#8b949e; font-size:0.9rem;">(경험치 +${earnedPoints})</span><br><br>
             현재 총 자산: <b>${currentWealth}</b>개<br>
             <span style="font-size:0.9rem; color:#666;">다음 국어 레벨(Lv.${currLevelInfo.level + 1})까지 경험치 ${currLevelInfo.remainingForNext} 필요!</span>
             ${isLevelUp ? `<br><br><span style="font-size:1.3rem; color:#FF6B9D; font-weight:bold;">🎉 국어 레벨 업! Lv.${currLevelInfo.level} 🎉</span>` : ''}
@@ -138,7 +177,6 @@ async function grantRewardAndShowUI(earnedPoints) {
     }
 }
 
-// 🚀 [마스터 퇴근 함수] 
 async function exitRoom(subjectName) {
     if (isExiting) return;
     isExiting = true;
@@ -163,10 +201,10 @@ async function exitRoom(subjectName) {
         console.error("학습일지 기록 중 일시적 오류:", e);
     }
 
+    // 기본 보상 30개로 함수 호출 (내부에서 피로도 계산됨)
     await grantRewardAndShowUI(30); 
 }
 
-// --- 임시 UI 모달 ---
 function showRewardModal(message) {
     const modalHtml = `
         <div id="korean-reward-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999;">
