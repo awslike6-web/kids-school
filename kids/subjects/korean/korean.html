@@ -45,28 +45,40 @@
     <button class="back-btn" onclick="location.href='../lobby.html'">🚪 메인 로비로 나가기</button>
 </div>
 
-<script src="notion-helper.js"></script>
-<script src="korean_common.js"></script>
-<script>
-    // 🔀 라우팅 게이트웨이 로직
-    window.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type');
+<script src="../../config.js"></script>
 
-        // 주소 뒤에 ?type= 가 붙어있으면 해당 실제 공부방 html 파일로 즉시 튕겨줍니다.
-        if (type === 'sentence') {
-            location.href = 'korean-sentence.html';
-        } else if (type === 'reading') {
-            location.href = 'korean-reading.html';
-        }
-  });
-</script>
-<script src="fairy-config.js?v=2"></script>
-<script src="fairy-engine.js?v=2"></script>
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-      initFairyChat('KOREAN');
-  });
+    // 2. 이 방에서 필요한 코어 부품들의 목록을 작성합니다.
+    const requiredCores = [
+        "notion-helper.js",
+        "korean_common.js",
+        "fairy-config.js",
+        "fairy-engine.js"
+    ];
+
+    // 3. 로더를 실행하여 엔진을 조립합니다.
+    loadCoreScripts("../../core/", requiredCores, () => {
+        console.log("국어방 중문 하이브리드 엔진 시동 완료! 🚀");
+        
+        // 부품 조립이 다 끝난 후, 라우팅과 요정 소환을 실행합니다.
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            // 🔀 라우팅 게이트웨이 로직
+            const urlParams = new URLSearchParams(window.location.search);
+            const type = urlParams.get('type');
+
+            if (type === 'sentence') {
+                location.href = 'korean-sentence.html';
+            } else if (type === 'reading') {
+                location.href = 'korean-reading.html';
+            }
+
+            // 🧚‍♀️ 요정 소환 로직
+            if (typeof initFairyChat === 'function') {
+                initFairyChat('KOREAN');
+            }
+        });
+    });
 </script>
 </body>
 </html>
