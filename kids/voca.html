@@ -715,6 +715,111 @@ function nextQuestion() {
   else displayMinserDictation();
 }
 
+// 📈 경험치 기반 레벨 계산기
+function calculateLevelInfo(totalRewards) {
+    let level = 1; let requiredForNext = 20; let accumulatedForCurrentLevel = 0; 
+    while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
+        accumulatedForCurrentLevel += requiredForNext; level++; requiredForNext = 20 + (level - 1) * 5; 
+    }
+    return { level };
+}
+
+// 🚚 [핵심 엔진] 과목별 바코드를 읽어 노션의 해당 기둥으로 배송하는 라우팅 시스템
+async function patchRewardToNotion(page, quizScore) {
+    try {
+        const targetProxy = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+        
+        // 1. 배송지(과목) 분류기 작동!
+        // '받아쓰기'는 '국어' 창고로, '탐구'는 '과학' 창고로 묶어줍니다.
+        let subjectColumnName = currentSubject;
+        if (currentSubject === "받아쓰기") subjectColumnName = "국어";
+        else if (currentSubject === "탐구") subjectColumnName = "과학";
+        else if (!["국어", "수학", "사회", "과학", "영어"].includes(currentSubject)) subjectColumnName = "국어"; // 기본값 안전장치
+
+        // 2. 인벤토리 최신 상태 조회 (동기화)
+        const response = await fetch(`${targetProxy}/v1/databases/${INVENTORY_DB_ID}/query`, { 
+            method: "POST", headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName === '아빠(관리자)' ? '민수' : currentUserName } } }) 
+        });
+        const data = await response.json();
+        const currentPage = data.results[0];
+        const props = currentPage.properties;
+
+        // 보상 및 경험치 산정 (10점당 1개 지급)
+        let earnedPoints = Math.floor(quizScore / 10); 
+        if (earnedPoints === 0) return null; // 0점이면 배송 안 함
+
+        // 3. 오늘 날짜 구하기 및 초기화 검사
+        const today = new Date();
+        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+        
+        let lastDateObj = props["최근 접속일"]?.date?.start;
+        let lastDate = lastDateObj ? lastDateObj.split('T')[0] : "";
+        let todaySubjectEarned = props[`오늘 획득_${subjectColumnName}`]?.number || 0;
+        let updateProps = {};
+
+        if (lastDate !== todayStr) {
+            todaySubjectEarned = 0; // 자정 지났으면 초기화
+            updateProps["오늘 획득_국어"] = { number: 0 };
+            updateProps["오늘 획득_수학"] = { number: 0 };
+            updateProps["오늘 획득_영어"] = { number: 0 };
+            updateProps["오늘 획득_사회"] = { number: 0 };
+            updateProps["오늘 획득_과학"] = { number: 0 };
+        }
+
+        // 4. 피로도 시스템 (해당 과목 하루 100개 제한)
+        const MAX_DAILY = 100;
+        let allowedCurrency = earnedPoints;
+        let isLimitReached = false;
+
+        if (todaySubjectEarned + earnedPoints > MAX_DAILY) {
+            allowedCurrency = Math.max(0, MAX_DAILY - todaySubjectEarned);
+            isLimitReached = true;
+        }
+
+        // 5. 창고에 넣을 데이터 조립
+        let diamond = props["다이아몬드 개수"]?.number || 0; 
+        let slime = props["슬라임 파츠 개수"]?.number || 0;
+        let currentExp = props[`${subjectColumnName} 경험치`]?.number || 0; 
+
+        let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
+        let currentWealth = previousWealth + allowedCurrency; // 돈은 제한된 만큼만!
+
+        let newExp = currentExp + earnedPoints; // 📈 경험치는 푼 만큼 무조건 줍니다!
+        const prevLevelInfo = calculateLevelInfo(currentExp);
+        const currLevelInfo = calculateLevelInfo(newExp);
+
+        // 📦 과목 이름이 들어간 '변수 기둥'으로 동적 라우팅
+        updateProps["최근 접속일"] = { date: { start: todayStr } };
+        updateProps[`오늘 획득_${subjectColumnName}`] = { number: todaySubjectEarned + allowedCurrency };
+        updateProps[`${subjectColumnName} 레벨`] = { number: currLevelInfo.level };
+        updateProps[`${subjectColumnName} 경험치`] = { number: newExp };
+
+        if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
+        else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
+
+        // 🚀 최종 배송 (노션 업데이트)
+        await fetch(`${targetProxy}/v1/pages/${currentPage.id}`, {
+            method: "PATCH", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ properties: updateProps })
+        });
+
+        return { 
+            earned: allowedCurrency, 
+            originalEarned: earnedPoints, 
+            currentCount: currentWealth, 
+            level: currLevelInfo.level, 
+            isLevelUp: currLevelInfo.level > prevLevelInfo.level,
+            subject: subjectColumnName,
+            isLimitReached
+        };
+    } catch (err) {
+        console.error("라우팅 배송 실패:", err);
+        return null;
+    }
+}
+
+// 🏁 라우팅 결과를 화면에 예쁘게 띄워주는 게임 종료 함수
 async function finishGame() {
   let finishMsg = "";
   
@@ -731,15 +836,16 @@ async function finishGame() {
     
     const btn = document.querySelector('#resultModal button');
     btn.textContent = "로비로 나가기 🌟";
-    btn.onclick = () => { exitRoom(); }; // 완수 후 나갈 때 블랙박스 구동
+    btn.onclick = () => { exitRoom(); }; 
     
     document.getElementById('resultOverlay').style.display = 'flex';
     document.getElementById('resultOverlay').classList.add('active');
   } else {
+    // 💡 아이들이 퀴즈를 풀었을 때의 물류 배송 처리
     if (document.getElementById('screen-minsu-quiz')) document.getElementById('screen-minsu-quiz').style.display = 'none';
     if (document.getElementById('screen-minser-dictation')) document.getElementById('screen-minser-dictation').style.display = 'none';
     
-    document.getElementById('loadingSubtitle').innerHTML = `🍏 탐험 결과를 기록방에 저장하고 있어요...`;
+    document.getElementById('loadingSubtitle').innerHTML = `🍏 과목 지식 창고로 경험치와 보상을 배송하고 있어요...`;
     showScreen('screen-loading');
     
     let rewardResult = null;
@@ -747,61 +853,34 @@ async function finishGame() {
       rewardResult = await patchRewardToNotion(userNotionPage, score);
     }
     
-    document.getElementById('resultEmoji').textContent = "🎁";
-    document.getElementById('resultTitle').textContent = "모든 탐험 완료!";
+    document.getElementById('resultEmoji').textContent = "🚚";
+    document.getElementById('resultTitle').textContent = "배송 완료!";
     
     if (rewardResult) {
+      const rewardIcon = currentTheme === '마인크래프트' ? '💎' : '💧';
+      let limitMsg = rewardResult.isLimitReached ? `<div style="background: rgba(255,152,0,0.1); border: 2px solid #ff9800; color: #ff9800; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; font-size: 0.9rem;">⚠️ 오늘 ${rewardResult.subject} 광산의 보상을 모두 캤습니다!<br>(경험치만 오릅니다!)</div>` : '';
+      
       document.getElementById('resultMessage').innerHTML = `
-        획득 점수: <strong>${score}점</strong><br>
-        획득 슬라임 파츠: +${rewardResult.earned}개<br>
-        현재 총 파츠: <strong>${rewardResult.currentCount}개</strong><br>
-        공부방 레벨: <strong>Lv.${rewardResult.level}</strong> ${rewardResult.isLevelUp ? '🎉 레벨업!' : ''}
+        ${limitMsg}
+        🎯 <strong>[${rewardResult.subject} 창고]</strong>로 배송 완료!<br><br>
+        획득 점수: <strong>${score}점</strong> (경험치 +${rewardResult.originalEarned})<br>
+        획득 보상: <strong>${rewardIcon} +${rewardResult.earned}개</strong><br>
+        현재 총 자산: <strong>${rewardResult.currentCount}개</strong><br>
+        ${rewardResult.subject} 레벨: <strong>Lv.${rewardResult.level}</strong> ${rewardResult.isLevelUp ? '🎉 레벨업!' : ''}
       `;
     } else {
-      document.getElementById('resultMessage').innerHTML = `획득 점수: <strong>${score}점</strong><br>보상 기록 처리가 완료되었습니다.`;
+      document.getElementById('resultMessage').innerHTML = `획득 점수: <strong>${score}점</strong><br>기록 처리가 완료되었습니다.`;
     }
     
     const btn = document.querySelector('#resultModal button');
     btn.textContent = "공부방 종료하기";
-    btn.onclick = () => { exitRoom(); }; // 보상 기록 후 로비로 탈출하며 블랙박스 전송
+    btn.onclick = () => { exitRoom(); };
     
     showScreen('screen-loading');
     document.getElementById('screen-loading').classList.remove('active');
     
     document.getElementById('resultOverlay').style.display = 'flex';
     document.getElementById('resultOverlay').classList.add('active');
-  }
-}
-
-async function patchRewardToNotion(page, quizScore) {
-  try {
-    const props = page.properties;
-    let earned = Math.floor(quizScore / 10);
-    let total = (props["슬라임 파츠 개수"]?.number || 0) + earned;
-    let level = props["용어 레벨"]?.number || 1;
-    let isLevelUp = false;
-    
-    if (total >= level * 20) {
-      isLevelUp = true;
-      level = Math.floor(total / 20) + 1;
-    }
-    
-    const updateProps = {
-      "슬라임 파츠 개수": { number: total },
-      "용어 레벨": { number: level }
-    };
-    
-    const res = await fetch(`${PROXY_URL}/v1/pages/${page.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ properties: updateProps })
-    });
-    
-    if(!res.ok) throw new Error("패치 실패");
-    return { earned, currentCount: total, level, isLevelUp };
-  } catch (err) {
-    console.error("보상 저장 실패:", err);
-    return null;
   }
 }
 
