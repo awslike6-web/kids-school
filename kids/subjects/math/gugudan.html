@@ -313,301 +313,341 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
   </div>
 </div>
 
-<script src="notion-helper.js"></script>
-<script src="math_common.js"></script>
+<script>
+    // [트랙 1: 순수 변수 선언 공간] - 지붕 바깥(위쪽)에 그대로 유지합니다.
+    let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
+    let wrongNotes = []; 
+    let gameState = {};
+    const roomStartTime = new Date(); // ⏱️ 입장 시간 기록
+    let difficultySettings = { mul: true };
+    
+    // 구구단방 내장 퀴즈 변수
+    let qList=[], qIdx=0, qScore=0, qAnswered=false;
+    let currentDan = 3;
+
+    const DAN_COLORS = {
+        1: '#AAB7B8', 2: '#6EC6F5', 3: '#C77DFF',
+        4: '#FF6B9D', 5: '#6BCB77', 6: '#FF6B35',
+        7: '#FFD93D', 8: '#FF6B9D', 9: '#C77DFF',
+        10: '#00D4FF'
+    };
+</script>
+
+<script src="../../config.js"></script>
 
 <script>
-// ⏱️ 입장 타이머 발동!
-const roomStartTime = new Date();
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof currentProfile !== 'undefined') {
-    const badge = document.getElementById('gugudanProfileBadge');
-    if (badge) {
-      const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
-      const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
-      badge.innerHTML = `접속중: ${icon} <b>${name}</b>`;
-    }
-  }
-});
-
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    btn.classList.add('active');
-    const id = 'sec-' + btn.dataset.tab;
-    const sec = document.getElementById(id);
-    if(sec) sec.classList.add('active');
-    if (btn.dataset.tab === 'quiz') initQuiz();
-  });
-});
-
-const DAN_COLORS = {
-  1: '#AAB7B8', 2: '#6EC6F5', 3: '#C77DFF',
-  4: '#FF6B9D', 5: '#6BCB77', 6: '#FF6B35',
-  7: '#FFD93D', 8: '#FF6B9D', 9: '#C77DFF',
-  10: '#00D4FF'
-};
-
-function renderRepeater() {
-  const num   = parseInt(document.getElementById('r-num').value);
-  const times = parseInt(document.getElementById('r-times').value);
-  const track = document.getElementById('viz-track');
-  const addEq = document.getElementById('add-eq');
-  const finEq = document.getElementById('final-eq');
-  const color = DAN_COLORS[num] || '#FFD93D';
-
-  track.innerHTML = '';
-  const parts = []; let total = 0;
-  for (let i = 0; i < times; i++) {
-    const grp = document.createElement('div');
-    grp.className = 'group-block'; grp.style.borderColor = color; grp.style.background  = color + '22'; grp.style.animationDelay = (i * 0.06) + 's';
-    for (let j = 0; j < num; j++) {
-      const d = document.createElement('div'); d.className = 'dot'; d.style.background = color; grp.appendChild(d);
-    }
-    track.appendChild(grp); parts.push(num); total += num;
-  }
-  addEq.textContent = parts.join(' + ') + ' = ' + total;
-  finEq.innerHTML = `<span style="color:${color}">${num}</span> × <span style="color:${color}">${times}</span> = <span style="color:var(--cyan); font-size:1.9rem;">${total}</span>`;
-  renderPattern(num);
-}
-
-function renderPattern(num) {
-  const strip = document.getElementById('pattern-strip'); strip.innerHTML = '';
-  document.getElementById('pattern-num-label').textContent = num + '단'; document.getElementById('pattern-num-label').style.color = DAN_COLORS[num] || '#00D4FF';
-  document.getElementById('pattern-jump').textContent = num + '씩'; document.getElementById('pattern-jump').style.color  = DAN_COLORS[num] || '#FFD93D';
-
-  for (let i = 1; i <= 10; i++) {
-    const box = document.createElement('div');
-    box.style.cssText = `padding: 8px 14px; border-radius:10px; border: 1.5px solid ${DAN_COLORS[num]}55; background: ${DAN_COLORS[num]}18; font-family: 'Gaegu', cursive; font-size: 1.05rem; color: ${DAN_COLORS[num]}; font-weight: 700; animation: popIn 0.2s ${i*0.05}s ease both;`;
-    box.innerHTML = `${num}×${i}=<strong>${num*i}</strong>`; strip.appendChild(box);
-  }
-}
-
-document.getElementById('r-num').addEventListener('change', renderRepeater); document.getElementById('r-times').addEventListener('change', renderRepeater);
-renderRepeater();
-
-function buildAnchorTable(dan, containerId) {
-  const c = document.getElementById(containerId); c.innerHTML = '';
-  const color = dan === 10 ? 'var(--cyan)' : 'var(--green)';
-  for (let i = 1; i <= 10; i++) {
-    const row = document.createElement('div'); row.className = 'anchor-row';
-    const addHint = Array(i).fill(dan).join('+');
-    row.innerHTML = `<span class="eq">${dan} × ${i} = ${addHint}</span><span class="ans" style="color:${color}">${dan*i}</span>`;
-    c.appendChild(row);
-  }
-}
-buildAnchorTable(10, 'ten-table'); buildAnchorTable(5,  'five-table');
-
-const connBtns = document.getElementById('conn-btns');
-for (let i = 1; i <= 10; i++) {
-  const b = document.createElement('button'); b.className = 'nav-btn'; b.style.padding = '8px 16px'; b.textContent = i;
-  b.onclick = () => {
-    document.getElementById('conn-display').innerHTML = `10 × ${i} = <span style="color:var(--cyan);font-size:1.6rem">${10*i}</span><br><span style="color:var(--muted); font-size:1rem;">÷ 2</span><br>5 × ${i} = <span style="color:var(--green);font-size:1.6rem">${5*i}</span><br><span style="color:var(--muted); font-size:0.85rem;">${10*i} ÷ 2 = ${5*i} ✅</span>`;
-  }; connBtns.appendChild(b);
-}
-
-function renderTrick() {
-  const dan = parseInt(document.getElementById('ex-dan').value); const times = parseInt(document.getElementById('ex-times').value); const result = dan * times;
-  const steps  = document.getElementById('trick-steps'); steps.innerHTML = ''; let anchors = [];
-
-  if (dan === 10 || dan === 5) {
-    anchors = [
-      { type: 'anchor-step', num: 1, label: `이미 기준단!`, big: `${dan} × ${times} = ${result}`, sub: dan === 10 ? '10단: 뒤에 0을 붙이면 끝!' : '5단: 10단의 딱 절반!' }, 
-      { type: 'result-step', num: 2, label: '정답', big: `${dan} × ${times} = ${result}`, sub: '쉽죠? 🎉' }
+    const requiredCores = [
+        "notion-helper.js",
+        "math_common.js"
     ];
-  } else {
-    const anchor10 = 10 * times, anchor5 = 5 * times, diff10 = dan - 10, diff5 = dan - 5;
-    const useAnchor = Math.abs(diff10) <= Math.abs(diff5) ? 10 : 5; const anchorVal = useAnchor * times;
-    const adjust = result - anchorVal, adjTimes = Math.abs(dan - useAnchor), adjDir = adjust > 0 ? '+' : '-';
-    anchors = [
-      { type: 'anchor-step', num: 1, label: `① ${useAnchor}단 먼저!`, big: `${useAnchor} × ${times} = ${anchorVal}`, sub: useAnchor === 10 ? '10단: 뒤에 0 붙이기' : '5단: 10단 ÷ 2' },
-      { type: 'adjust-step', num: 2, label: `② ${dan}단은 ${useAnchor}단보다 ${adjTimes} 차이!`, big: `${anchorVal} ${adjDir} ${times} × ${adjTimes} = ${anchorVal} ${adjDir} ${Math.abs(adjust)} = ${result}`, sub: `${times}씩 ${adjTimes}번 ${adjust>0?'더하면':'빼면'} ${dan}단!` },
-      { type: 'result-step', num: 3, label: '✅ 정답', big: `${dan} × ${times} = ${result}`, sub: `더하기로 이해하는 구구단!` }
-    ];
-  }
 
-  anchors.forEach((s, idx) => {
-    const el = document.createElement('div'); el.className = `step ${s.type}`;
-    el.innerHTML = `<div class="step-num">${s.num}</div><div class="step-body"><div style="font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">${s.label}</div><div class="big">${s.big}</div><div class="sub">${s.sub}</div></div>`;
-    steps.appendChild(el); setTimeout(() => el.classList.add('visible'), idx * 160);
-  });
-}
+    // ⚙️ 하이브리드 로더 시동!
+    loadCoreScripts("../../core/", requiredCores, () => {
+        console.log("🚀 구구단 탐험대 하이브리드 엔진 조립 완료!");
 
-document.getElementById('ex-dan').addEventListener('change', renderTrick); document.getElementById('ex-times').addEventListener('change', renderTrick); renderTrick();
+        // =======================================================
+        // [트랙 3: 엔진 품 안으로 이사 온 실무 함수들]
+        // =======================================================
+        
+        window.toggleProfileManually = function() {
+            if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
+            else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
+            localStorage.setItem('currentUser', currentProfile); 
+            localStorage.setItem('currentTheme', currentTheme);
+            window.initProfile();
+        }
 
-let currentDan = 3;
-function buildDanSel() {
-  const sel = document.getElementById('dan-sel'); sel.innerHTML = '';
-  for (let i = 1; i <= 10; i++) {
-    const b = document.createElement('button'); b.className = 'dan-btn' + (i===currentDan?' active':''); b.textContent = i;
-    b.onclick = () => { currentDan = i; buildDanSel(); renderTable(); }; sel.appendChild(b);
-  }
-}
+        window.initProfile = function() {
+            const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
+            const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
+            const themeClass = currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
+            document.body.className = themeClass;
+            
+            const badge = document.getElementById('gugudanProfileBadge');
+            if (badge) {
+                const name = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
+                const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
+                badge.innerHTML = `접속중: ${icon} <b>${name}</b>`;
+            }
+        }
 
-function renderTable() {
-  const grid = document.getElementById('table-grid'); grid.innerHTML = ''; const color = DAN_COLORS[currentDan] || '#FFD93D';
-  for (let i = 1; i <= 10; i++) {
-    const val = currentDan * i; const row = document.createElement('div'); row.className = 'table-row'; row.style.animationDelay = (i * 0.04) + 's';
-    const addHint = Array(i).fill(currentDan).join('+');
-    row.innerHTML = `<div class="table-row-inner"><span class="mul">${currentDan} × ${i}</span><span class="add-hint">${addHint}</span></div><span class="result-num" style="color:${color}">${val}</span>`;
-    grid.appendChild(row);
-  }
-}
-buildDanSel(); renderTable();
+        // 🚀 최초 1회 프로필 세팅 시동
+        window.initProfile();
 
-function buildFullGrid() {
-  const grid = document.getElementById('full-grid'); if (!grid) return; grid.innerHTML = '';
-  for (let d = 1; d <= 10; d++) {
-    for (let t = 1; t <= 10; t++) {
-      const cell = document.createElement('div'); cell.className = 'grid-cell';
-      cell.innerHTML = `<div class="eq">${d} × ${t}</div><div class="ans">${d * t}</div>`;
-      cell.onclick = () => { cell.classList.toggle('revealed'); }; grid.appendChild(cell);
-    }
-  }
-}
-buildFullGrid();
+        // 🎛️ 상단 탭 전환 리스너 바인딩
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                btn.classList.add('active');
+                const id = 'sec-' + btn.dataset.tab;
+                const sec = document.getElementById(id);
+                if(sec) sec.classList.add('active');
+                if (btn.dataset.tab === 'quiz') window.initQuiz();
+            });
+        });
 
-const ALL_QUESTIONS = [];
-for (let d = 1; d <= 10; d++) {
-  for (let t = 1; t <= 10; t++) {
-    const ans = d * t; const wrongs = new Set();
-    while (wrongs.size < 3) {
-      const offset = (Math.floor(Math.random()*5)+1) * (Math.random()>0.5?1:-1); const w = ans + offset * d;
-      if (w > 0 && w !== ans && w <= 100) wrongs.add(w);
-    }
-    let hint = '';
-    if (d !== 10 && d !== 5) {
-      const useA = Math.abs(d-10) <= Math.abs(d-5) ? 10 : 5; const aVal = useA * t; const diff = ans - aVal;
-      hint = `힌트: ${useA}×${t}=${aVal}, 여기서 ${diff>=0?'+':''}${diff}`;
-    } else if (d === 10) { hint = `힌트: 10단! ${t}뒤에 0 → ${ans}`; } else { hint = `힌트: 5단 = 10×${t}÷2 = ${10*t}÷2`; }
-    const addExp = Array(t).fill(d).join('+') + ' = ' + ans; ALL_QUESTIONS.push({ d, t, ans, wrongs:[...wrongs], hint, addExp });
-  }
-}
+        window.renderRepeater = function() {
+            const num   = parseInt(document.getElementById('r-num').value);
+            const times = parseInt(document.getElementById('r-times').value);
+            const track = document.getElementById('viz-track');
+            const addEq = document.getElementById('add-eq');
+            const finEq = document.getElementById('final-eq');
+            const color = DAN_COLORS[num] || '#FFD93D';
 
-let qList=[], qIdx=0, qScore=0, qAnswered=false;
+            track.innerHTML = '';
+            const parts = []; let total = 0;
+            for (let i = 0; i < times; i++) {
+                const grp = document.createElement('div');
+                grp.className = 'group-block'; grp.style.borderColor = color; grp.style.background  = color + '22'; grp.style.animationDelay = (i * 0.06) + 's';
+                for (let j = 0; j < num; j++) {
+                    const d = document.createElement('div'); d.className = 'dot'; d.style.background = color; grp.appendChild(d);
+                }
+                track.appendChild(grp); parts.push(num); total += num;
+            }
+            addEq.textContent = parts.join(' + ') + ' = ' + total;
+            finEq.innerHTML = `<span style="color:${color}">${num}</span> × <span style="color:${color}">${times}</span> = <span style="color:var(--cyan); font-size:1.9rem;">${total}</span>`;
+            window.renderPattern(num);
+        }
 
-function initQuiz() {
-  // 민수/민서는 10문제!
-  qList = [...ALL_QUESTIONS].sort(()=>Math.random()-0.5).slice(0,10);
-  qIdx=0; qScore=0; qAnswered=false;
-  document.getElementById('quiz-play').style.display='block';
-  document.getElementById('result-wrap').classList.remove('show');
-  renderQ();
-}
+        window.renderPattern = function(num) {
+            const strip = document.getElementById('pattern-strip'); strip.innerHTML = '';
+            document.getElementById('pattern-num-label').textContent = num + '단'; document.getElementById('pattern-num-label').style.color = DAN_COLORS[num] || '#00D4FF';
+            document.getElementById('pattern-jump').textContent = num + '씩'; document.getElementById('pattern-jump').style.color  = DAN_COLORS[num] || '#FFD93D';
 
-function renderQ() {
-  qAnswered = false; const q = qList[qIdx];
-  document.getElementById('q-progress').textContent = `문제 ${qIdx+1} / ${qList.length}`;
-  document.getElementById('q-score').textContent = `${qScore}점`;
-  document.getElementById('prog-fill').style.width = (qIdx/qList.length*100)+'%';
+            for (let i = 1; i <= 10; i++) {
+                const box = document.createElement('div');
+                box.style.cssText = `padding: 8px 14px; border-radius:10px; border: 1.5px solid ${DAN_COLORS[num]}55; background: ${DAN_COLORS[num]}18; font-family: 'Gaegu', cursive; font-size: 1.05rem; color: ${DAN_COLORS[num]}; font-weight: 700; animation: popIn 0.2s ${i*0.05}s ease both;`;
+                box.innerHTML = `${num}×${i}=<strong>${num*i}</strong>`; strip.appendChild(box);
+            }
+        }
 
-  const isFive = q.d===5, isTen=q.d===10;
-  document.getElementById('q-tag').textContent = isTen ? '🔵 10단 도전!' : isFive ? '🟢 5단 도전!' : `${q.d}단 도전!`;
-  document.getElementById('q-text').textContent = `${q.d} × ${q.t} = ?`;
-  document.getElementById('q-hint').textContent = q.hint;
+        document.getElementById('r-num').addEventListener('change', window.renderRepeater); 
+        document.getElementById('r-times').addEventListener('change', window.renderRepeater);
+        window.renderRepeater();
 
-  document.getElementById('q-feedback').className = 'q-feedback'; document.getElementById('q-explain').className = 'q-explain'; document.getElementById('next-btn').className = 'next-btn';
+        function buildAnchorTable(dan, containerId) {
+            const c = document.getElementById(containerId); c.innerHTML = '';
+            const color = dan === 10 ? 'var(--cyan)' : 'var(--green)';
+            for (let i = 1; i <= 10; i++) {
+                const row = document.createElement('div'); row.className = 'anchor-row';
+                const addHint = Array(i).fill(dan).join('+');
+                row.innerHTML = `<span class="eq">${dan} × ${i} = ${addHint}</span><span class="ans" style="color:${color}">${dan*i}</span>`;
+                c.appendChild(row);
+            }
+        }
+        buildAnchorTable(10, 'ten-table'); buildAnchorTable(5,  'five-table');
 
-  const grid = document.getElementById('choice-grid'); grid.innerHTML = '';
-  const choices = [...q.wrongs, q.ans].sort(()=>Math.random()-0.5);
-  choices.forEach(c => {
-    const btn = document.createElement('button'); btn.className = 'choice'; btn.textContent = c; btn.onclick = () => checkQ(c, q, btn); grid.appendChild(btn);
-  });
-}
+        // 🔗 10단 5단 연동 버튼 초기화
+        const connBtns = document.getElementById('conn-btns');
+        if (connBtns && connBtns.children.length === 0) {
+            for (let i = 1; i <= 10; i++) {
+                const b = document.createElement('button'); b.className = 'nav-btn'; b.style.padding = '8px 16px'; b.textContent = i;
+                b.onclick = () => {
+                    document.getElementById('conn-display').innerHTML = `10 × ${i} = <span style="color:var(--cyan);font-size:1.6rem">${10*i}</span><br><span style="color:var(--muted); font-size:1rem;">÷ 2</span><br>5 × ${i} = <span style="color:var(--green);font-size:1.6rem">${5*i}</span><br><span style="color:var(--muted); font-size:0.85rem;">${10*i} ÷ 2 = ${5*i} ✅</span>`;
+                }; connBtns.appendChild(b);
+            }
+        }
 
-function checkQ(selected, q, btn) {
-  if (qAnswered) return; qAnswered = true;
-  document.querySelectorAll('.choice').forEach(b => { b.disabled = true; if (+b.textContent === q.ans) b.classList.add('correct'); });
+        window.renderTrick = function() {
+            const dan = parseInt(document.getElementById('ex-dan').value); const times = parseInt(document.getElementById('ex-times').value); const result = dan * times;
+            const steps  = document.getElementById('trick-steps'); steps.innerHTML = ''; let anchors = [];
 
-  const fb = document.getElementById('q-feedback'); const ex = document.getElementById('q-explain');
+            if (dan === 10 || dan === 5) {
+                anchors = [
+                    { type: 'anchor-step', num: 1, label: `이미 기준단!`, big: `${dan} × ${times} = ${result}`, sub: dan === 10 ? '10단: 뒤에 0을 붙이면 끝!' : '5단: 10단의 딱 절반!' }, 
+                    { type: 'result-step', num: 2, label: '정답', big: `${dan} × ${times} = ${result}`, sub: '쉽죠? 🎉' }
+                ];
+            } else {
+                const anchor10 = 10 * times, anchor5 = 5 * times, diff10 = dan - 10, diff5 = dan - 5;
+                const useAnchor = Math.abs(diff10) <= Math.abs(diff5) ? 10 : 5; const anchorVal = useAnchor * times;
+                const adjust = result - anchorVal, adjTimes = Math.abs(dan - useAnchor), adjDir = adjust > 0 ? '+' : '-';
+                anchors = [
+                    { type: 'anchor-step', num: 1, label: `① ${useAnchor}단 먼저!`, big: `${useAnchor} × ${times} = ${anchorVal}`, sub: useAnchor === 10 ? '10단: 뒤에 0 붙이기' : '5단: 10단 ÷ 2' },
+                    { type: 'adjust-step', num: 2, label: `② ${dan}단은 ${useAnchor}단보다 ${adjTimes} 차이!`, big: `${anchorVal} ${adjDir} ${times} × ${adjTimes} = ${anchorVal} ${adjDir} ${Math.abs(adjust)} = ${result}`, sub: `${times}씩 ${adjTimes}번 ${adjust>0?'더하면':'빼면'} ${dan}단!` },
+                    { type: 'result-step', num: 3, label: '✅ 정답', big: `${dan} × ${times} = ${result}`, sub: `더하기로 이해하는 구구단!` }
+                ];
+            }
 
-  if (selected === q.ans) {
-    qScore += 10; btn.classList.add('correct'); fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)]; fb.className = 'q-feedback ok'; 
-  } else {
-    btn.classList.add('wrong'); fb.textContent = `😅 아쉬워요! 정답은 ${q.ans}`; fb.className = 'q-feedback no'; 
-  }
-  ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--cyan)">${q.addExp}</span>`; ex.className = 'q-explain show';
-  document.getElementById('q-score').textContent = `${qScore}점`; document.getElementById('next-btn').className = 'next-btn show';
-}
+            anchors.forEach((s, idx) => {
+                const el = document.createElement('div'); el.className = `step ${s.type}`;
+                el.innerHTML = `<div class="step-num">${s.num}</div><div class="step-body"><div style="font-size:0.82rem; font-weight:800; color:var(--muted); margin-bottom:4px;">${s.label}</div><div class="big">${s.big}</div><div class="sub">${s.sub}</div></div>`;
+                steps.appendChild(el); setTimeout(() => el.classList.add('visible'), idx * 160);
+            });
+        }
 
-function nextQ() { qIdx++; if (qIdx >= qList.length) showResult(); else renderQ(); }
+        document.getElementById('ex-dan').addEventListener('change', window.renderTrick); 
+        document.getElementById('ex-times').addEventListener('change', window.renderTrick); 
+        window.renderTrick();
 
-async function showResult() {
-  document.getElementById('prog-fill').style.width = '100%'; document.getElementById('quiz-play').style.display='none';
-  const wrap = document.getElementById('result-wrap'); wrap.classList.add('show');
+        window.buildDanSel = function() {
+            const sel = document.getElementById('dan-sel'); sel.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const b = document.createElement('button'); b.className = 'dan-btn' + (i===currentDan?' active':''); b.textContent = i;
+                b.onclick = () => { currentDan = i; window.buildDanSel(); window.renderTable(); }; sel.appendChild(b);
+            }
+        }
 
-  const correctCount = qScore / 10; const pct = correctCount / qList.length;
-  let emoji, title, msg;
-  if (pct===1)      { emoji='🏆'; title='완벽해요!'; msg='전부 맞혔어요! 구구단 마스터!'; launchConfetti(); }
-  else if (pct>=.6) { emoji='🌟'; title='훌륭해요!'; msg='거의 다 맞혔어요. 최고예요!'; }
-  else              { emoji='💪'; title='도전 중!';  msg='원리를 다시 살펴보고 또 도전해 봐요!'; }
+        window.renderTable = function() {
+            const grid = document.getElementById('table-grid'); grid.innerHTML = ''; const color = DAN_COLORS[currentDan] || '#FFD93D';
+            for (let i = 1; i <= 10; i++) {
+                const val = currentDan * i; const row = document.createElement('div'); row.className = 'table-row'; row.style.animationDelay = (i * 0.04) + 's';
+                const addHint = Array(i).fill(currentDan).join('+');
+                row.innerHTML = `<div class="table-row-inner"><span class="mul">${currentDan} × ${i}</span><span class="add-hint">${addHint}</span></div><span class="result-num" style="color:${color}">${val}</span>`;
+                grid.appendChild(row);
+            }
+        }
+        window.buildDanSel(); window.renderTable();
 
-  document.getElementById('r-emoji').textContent = emoji; document.getElementById('r-title').textContent = title;
-  document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`; document.getElementById('r-detail').textContent = msg;
+        window.buildFullGrid = function() {
+            const grid = document.getElementById('full-grid'); if (!grid) return; grid.innerHTML = '';
+            for (let d = 1; d <= 10; d++) {
+                for (let t = 1; t <= 10; t++) {
+                    const cell = document.createElement('div'); cell.className = 'grid-cell';
+                    cell.innerHTML = `<div class="eq">${d} × ${t}</div><div class="ans">${d * t}</div>`;
+                    cell.onclick = () => { cell.classList.toggle('revealed'); }; grid.appendChild(cell);
+                }
+            }
+        }
+        window.buildFullGrid();
 
-  if (correctCount > 0) {
-    // 💡 구구단방 내 인벤토리 보상 저장! (학습 일지 전송은 나갈 때 exitRoom()에서 처리)
-    if (typeof saveRewardToNotion === 'function') {
-      await saveRewardToNotion(correctCount, 'r-detail');
-    }
-  }
-}
+        // 🎲 퀴즈 문제 풀 선포 및 파싱 구역
+        const ALL_QUESTIONS = [];
+        for (let d = 1; d <= 10; d++) {
+            for (let t = 1; t <= 10; t++) {
+                const ans = d * t; const wrongs = new Set();
+                while (wrongs.size < 3) {
+                    const offset = (Math.floor(Math.random()*5)+1) * (Math.random()>0.5?1:-1); const w = ans + offset * d;
+                    if (w > 0 && w !== ans && w <= 100) wrongs.add(w);
+                }
+                let hint = '';
+                if (d !== 10 && d !== 5) {
+                    const useA = Math.abs(d-10) <= Math.abs(d-5) ? 10 : 5; const aVal = useA * t; const diff = ans - aVal;
+                    hint = `힌트: ${useA}×${t}=${aVal}, 여기서 ${diff>=0?'+':''}${diff}`;
+                } else if (d === 10) { hint = `힌트: 10단! ${t}뒤에 0 → ${ans}`; } else { hint = `힌트: 5단 = 10×${t}÷2 = ${10*t}÷2`; }
+                const addExp = Array(t).fill(d).join('+') + ' = ' + ans; ALL_QUESTIONS.push({ d, t, ans, wrongs:[...wrongs], hint, addExp });
+            }
+        }
 
-function launchConfetti() {
-  const c = document.getElementById('confetti'); c.innerHTML=''; const cols=['#FFD93D','#FF9F43','#6BCB77','#6EC6F5','#FF6B9D','#C77DFF','#00D4FF'];
-  for(let i=0;i<90;i++){
-    const el=document.createElement('div'); el.className='cp';
-    el.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]}; border-radius:${Math.random()>.5?'50%':'3px'}; animation-duration:${1.8+Math.random()*2}s; animation-delay:${Math.random()*.8}s; transform:rotate(${Math.random()*360}deg);`;
-    c.appendChild(el); el.addEventListener('animationend',()=>el.remove());
-  }
-}
+        window.initQuiz = function() {
+            qList = [...ALL_QUESTIONS].sort(()=>Math.random()-0.5).slice(0,10);
+            qIdx=0; qScore=0; qAnswered=false;
+            document.getElementById('quiz-play').style.display='block';
+            document.getElementById('result-wrap').classList.remove('show');
+            window.renderQ();
+        }
 
-// 🔒 중복 전송 방지용 자물쇠
-let isExiting = false; 
+        window.renderQ = function() {
+            qAnswered = false; const q = qList[qIdx];
+            document.getElementById('q-progress').textContent = `문제 ${qIdx+1} / ${qList.length}`;
+            document.getElementById('q-score').textContent = `${qScore}점`;
+            document.getElementById('prog-fill').style.width = (qIdx/qList.length*100)+'%';
 
-// 🚀 구구단방 최종 탈출 및 학습 일지 전송 함수
-async function exitRoom() {
-    if (isExiting) return; 
-    isExiting = true;      
+            const isFive = q.d===5, isTen=q.d===10;
+            document.getElementById('q-tag').textContent = isTen ? '🔵 10단 도전!' : isFive ? '🟢 5단 도전!' : `${q.d}단 도전!`;
+            document.getElementById('q-text').textContent = `${q.d} × ${q.t} = ?`;
+            document.getElementById('q-hint').textContent = q.hint;
 
-    const roomEndTime = new Date(); 
+            document.getElementById('q-feedback').className = 'q-feedback'; document.getElementById('q-explain').className = 'q-explain'; document.getElementById('next-btn').className = 'next-btn';
 
-    // 실제 공부한 시간 계산 (분 단위)
-    const timeDiff = roomEndTime - roomStartTime; 
-    let calculatedMinutes = Math.floor(timeDiff / 60000);
-    if (calculatedMinutes < 1) calculatedMinutes = 1; 
+            const grid = document.getElementById('choice-grid'); grid.innerHTML = '';
+            const choices = [...q.wrongs, q.ans].sort(()=>Math.random()-0.5);
+            choices.forEach(c => {
+                const btn = document.createElement('button'); btn.className = 'choice'; btn.textContent = c; 
+                btn.onclick = () => window.checkQ(c, q, btn); grid.appendChild(btn);
+            });
+        }
 
-    // 구구단은 개별 오답 대신 학습 완료 여부와 점수로 전송
-    const currentErrorReport = `구구단 퀴즈 ${qScore}점 달성`;
+        window.checkQ = function(selected, q, btn) {
+            if (qAnswered) return; qAnswered = true;
+            document.querySelectorAll('.choice').forEach(b => { b.disabled = true; if (+b.textContent === q.ans) b.classList.add('correct'); });
 
-    const currentWordFairy = 0;
+            const fb = document.getElementById('q-feedback'); const ex = document.getElementById('q-explain');
 
-    // ✨ 노션 배달 발사 (과목: 수학(구구단) 자동 바인딩 완료)
-    const success = await sendStudyLogToNotion({
-        childName: (typeof currentProfile !== 'undefined' && currentProfile === 'son') ? '민수' : '민서', 
-        subject: "수학(구구단)",                  
-        startTime: roomStartTime.toISOString(),  
-        endTime: roomEndTime.toISOString(),      
-        durationMinutes: calculatedMinutes,      
-        errorReport: currentErrorReport,         
-        wordFairyCount: currentWordFairy         
-    });
+            if (selected === q.ans) {
+                qScore += 10; btn.classList.add('correct'); fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)]; fb.className = 'q-feedback ok'; 
+            } else {
+                btn.classList.add('wrong'); fb.textContent = `😅 아쉬워요! 정답은 ${q.ans}`; fb.className = 'q-feedback no'; 
+            }
+            ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--cyan)">${q.addExp}</span>`; ex.className = 'q-explain show';
+            document.getElementById('q-score').textContent = `${qScore}점`; document.getElementById('next-btn').className = 'next-btn show';
+        }
 
-    if (success) {
-        console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료! 로비로 이동합니다.`);
-        location.href = 'math.html'; 
-    } else {
-        alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다.");
-        isExiting = false; 
-    }
-}
+        window.nextQ = function() { qIdx++; if (qIdx >= qList.length) window.showResult(); else window.renderQ(); }
 
-// 🚨 블랙박스 강제 종료 생존 로직
-window.addEventListener('pagehide', () => {
-    exitRoom();
-});
+        window.showResult = async function() {
+            document.getElementById('prog-fill').style.width = '100%'; document.getElementById('quiz-play').style.display='none';
+            const wrap = document.getElementById('result-wrap'); wrap.classList.add('show');
+
+            const correctCount = qScore / 10; const pct = correctCount / qList.length;
+            let emoji, title, msg;
+            if (pct===1)      { emoji='🏆'; title='완벽해요!'; msg='전부 맞혔어요! 구구단 마스터!'; window.launchConfetti(); }
+            else if (pct>=.6) { emoji='🌟'; title='훌륭해요!'; msg='거의 다 맞혔어요. 최고예요!'; }
+            else              { emoji='💪'; title='도전 중!';  msg='원리를 다시 살펴보고 또 도전해 봐요!'; }
+
+            document.getElementById('r-emoji').textContent = emoji; document.getElementById('r-title').textContent = title;
+            document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`; document.getElementById('r-detail').textContent = msg;
+
+            if (correctCount > 0) {
+                if (typeof saveRewardToNotion === 'function') {
+                    await saveRewardToNotion(correctCount, 'r-detail');
+                }
+            }
+        }
+
+        window.launchConfetti = function() {
+            const c = document.getElementById('confetti'); c.innerHTML=''; const cols=['#FFD93D','#FF9F43','#6BCB77','#6EC6F5','#FF6B9D','#C77DFF','#00D4FF'];
+            for(let i=0;i<90;i++){
+                const el=document.createElement('div'); el.className='cp';
+                el.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]}; border-radius:${Math.random()>.5?'50%':'3px'}; animation-duration:${1.8+Math.random()*2}s; animation-delay:${Math.random()*.8}s; transform:rotate(${Math.random()*360}deg);`;
+                c.appendChild(el); el.addEventListener('animationend',()=>el.remove());
+            }
+        }
+
+        // 🔒 중복 전송 방지용 자물쇠
+        let isExiting = false; 
+
+        // 🚀 구구단방 최종 탈출 및 학습 일지 전송 함수
+        window.exitRoom = async function() {
+            if (isExiting) return; 
+            isExiting = true;      
+
+            const roomEndTime = new Date(); 
+
+            const timeDiff = roomEndTime - roomStartTime; 
+            let calculatedMinutes = Math.floor(timeDiff / 60000);
+            if (calculatedMinutes < 1) calculatedMinutes = 1; 
+
+            const currentErrorReport = `구구단 퀴즈 ${qScore}점 달성`;
+            const currentWordFairy = 0;
+
+            const currentChildName = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
+
+            const success = await sendStudyLogToNotion({
+                childName: currentChildName, 
+                subject: "수학(구구단)", 
+                startTime: roomStartTime.toISOString(),  
+                endTime: roomEndTime.toISOString(),      
+                durationMinutes: calculatedMinutes,      
+                errorReport: currentErrorReport,         
+                wordFairyCount: currentWordFairy         
+            });
+
+            if (success) {
+                console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료! 로비로 이동합니다.`);
+                location.href = 'math.html'; 
+            } else {
+                alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다.");
+                isExiting = false; 
+            }
+        }
+
+        // 🚨 블랙박스 강제 종료 생존 로직
+        window.addEventListener('pagehide', () => {
+            if (typeof window.exitRoom === 'function') window.exitRoom();
+        });
+
+    }); // 👈 하이브리드 엔진 마감 괄호 완벽 체결
 </script>
 </body>
 </html>
