@@ -89,31 +89,39 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
 <script src="../../config.js"></script>
 
 <script>
-    // 2. 🌟 [배관 리팩토링 완료] 
-    // 관제탑 기준 대신 현재 독해방 폴더 주소인 subjects/korean/ 에서 다이렉트로 로드하도록 고정!
-    const requiredCores = [
+    // 1. 코어 엔진 부품들 (core 폴더에 있는 것들)
+    const coreCores = [
         "notion-helper.js",
-        "korean_common.js",
-        "subjects/korean/korean-reading-data.js", 
-        "subjects/korean/korean-reading-logic.js"  
+        "korean_common.js"
     ];
 
-    // 3. ⚙️ 하이브리드 로더 주입 가동
-    loadCoreScripts("../../core/", requiredCores, () => {
-        console.log("📖 국어 정밀독해방 하이브리드 부품 조립 완료!");
+    // 2. 개별 방 부품들 (현재 폴더에 있는 데이터와 로직)
+    const roomCores = [
+        "korean-reading-data.js",
+        "korean-reading-logic.js"
+    ];
 
-        // 🔄 인라인 스타트 버튼 핸들러 글로벌 확장
-        window.unlockAudioAndStart = function() {
-            document.getElementById('start-overlay').style.display = 'none';
-            const unlockUtterance = new SpeechSynthesisUtterance('');
-            window.speechSynthesis.speak(unlockUtterance);
-            
-            if (typeof initKoreanUniverse === 'function') {
-                initKoreanUniverse();
-            } else {
-                console.error("오류: 국어 코어 시동 부품(initKoreanUniverse)을 로드하지 못했습니다.");
-            }
-        }
+    // 3. 먼저 core 엔진을 조립하고, 성공하면 그 안에서 나머지 부품을 호출!
+    loadCoreScripts("../../core/", coreCores, () => {
+        console.log("⚙️ 핵심 엔진 조립 완료!");
+        
+        // 두 번째 로더는 현재 폴더(./)를 기준으로 데이터와 로직을 불러옵니다.
+        loadCoreScripts("./", roomCores, () => {
+            console.log("📖 국어 정밀독해방 전용 부품까지 모두 결합 완료!");
+
+            // 이제 안심하고 시동 함수를 등록합니다.
+            window.unlockAudioAndStart = function() {
+                document.getElementById('start-overlay').style.display = 'none';
+                const unlockUtterance = new SpeechSynthesisUtterance('');
+                window.speechSynthesis.speak(unlockUtterance);
+                
+                if (typeof initKoreanUniverse === 'function') {
+                    initKoreanUniverse();
+                } else {
+                    console.error("오류: initKoreanUniverse 함수가 없습니다. 경로를 확인하세요.");
+                }
+            };
+        });
     });
 </script>
 </body>
