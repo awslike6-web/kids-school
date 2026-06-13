@@ -92,9 +92,6 @@
   .sub-room-name { font-size: 1.15rem; font-weight: bold; margin-bottom: 2px; }
   .sub-room-desc { font-size: 0.8rem; opacity: 0.8; font-family: 'Gaegu', cursive; }
   .back-btn { margin-top: 36px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
-  .chatbot-btn { position: fixed; bottom: 24px; right: 24px; width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.4); z-index: 999; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: pulseBot 2s infinite; }
-  .chatbot-btn:hover { transform: scale(1.15) rotate(15deg); }
-  @keyframes pulseBot { 0% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0.4); } 70% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 15px rgba(167, 139, 250, 0); } 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 0 rgba(167, 139, 250, 0); } }
 </style>
 </head>
 <body>
@@ -132,33 +129,33 @@ const USER_CONFIGS = {
       {
         title: '🧮 수학 월드',
         rooms: [
-          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '사칙연산(덧·뺄·곱·나)이 모인 종합 수학 기지 게이트!' },
-          { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '우주 궤도를 돌며 광속으로 해치우는 배틀 구구단 익스프레스' }
+          { name: '열혈 연산 수학방', href: 'kids/subjects/math/math.html', desc: '사칙연산(덧·뺄·곱·나)이 모인 종합 수학 기지 게이트!' },
+          { name: '구구단 레이싱방', href: 'kids/subjects/math/gugudan.html', desc: '우주 궤도를 돌며 광속으로 해치우는 배틀 구구단 익스프레스' }
         ]
       },
       {
         title: '✍️ 국어 월드',
         rooms: [
-          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '논리 회로 분석 모드! 문장력과 대화 논리를 완성하라' },
-          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '조심해! 오싹오싹 유행어 밈과 국어 낱말 채우기 퍼즐' }
+          { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '논리 회로 분석 모드! 문장력과 대화 논리를 완성하라' },
+          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/subjects/korean/viewport.html', desc: '조심해! 오싹오싹 유행어 밈과 국어 낱말 채우기 퍼즐' }
         ]
       },
       {
         title: '🔤 영어 던전',
         rooms: [
-          { name: '영단어 기억방', href: 'kids/english.html', desc: '사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자 트레이닝' }
+          { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자 트레이닝' }
         ]
       },
       {
         title: '🧪 과학 실험실',
         rooms: [
-          { name: '과학 개념 탐구방', href: 'kids/science.html', desc: '자연과 우주 생태계의 비밀 법칙을 파헤치는 코어 실험실' }
+          { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '자연과 우주 생태계의 비밀 법칙을 파헤치는 코어 실험실' }
         ]
       },
       {
         title: '🏛️ 사회 연대기',
         rooms: [
-          { name: '사회 역사 탐험방', href: 'kids/society.html', desc: '지리 공간과 옛날 인물 이야기 역사를 추적하는 타임머신' }
+          { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '지리 공간과 옛날 인물 이야기 역사를 추적하는 타임머신' }
         ]
       },
       {
@@ -176,33 +173,33 @@ const USER_CONFIGS = {
       {
         title: '🧮 수학 월드',
         rooms: [
-          { name: '열혈 연산 수학방', href: 'kids/math.html', desc: '신나고 재미있는 덧셈·뺄셈·곱셈·나눗셈 종합 연산 방' },
-          { name: '구구단 레이싱방', href: 'kids/gugudan.html', desc: '환상의 유니콘과 함께 은하수를 건너는 구구단 여행' }
+          { name: '열혈 연산 수학방', href: 'kids/subjects/math/math.html', desc: '신나고 재미있는 덧셈·뺄셈·곱셈·나눗셈 종합 연산 방' },
+          { name: '구구단 레이싱방', href: 'kids/subjects/math/gugudan.html', desc: '환상의 유니콘과 함께 은하수를 건너는 구구단 여행' }
         ]
       },
       {
         title: '✍️ 국어 월드',
         rooms: [
-          { name: '국어 문장 구성방', href: 'kids/korean.html', desc: '비밀 요정들과 도란도란 나누는 상상력 가득 논리 대화방' },
-          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/viewport.html', desc: '새콤달콤 재미있고 신기한 단어 쏙쏙 채워넣기 퀴즈' }
+          { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '비밀 요정들과 도란도란 나누는 상상력 가득 논리 대화방' },
+          { name: '공포/밈 빈칸 퀴즈방', href: 'kids/subjects/korean/viewport.html', desc: '새콤달콤 재미있고 신기한 단어 쏙쏙 채워넣기 퀴즈' }
         ]
       },
       {
         title: '🔤 영어 던전',
         rooms: [
-          { name: '영단어 기억방', href: 'kids/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
+          { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
         ]
       },
       {
         title: '🧪 과학 실험실',
         rooms: [
-          { name: '과학 개념 탐구방', href: 'kids/science.html', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 신기한 과학방' }
+          { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 신기한 과학방' }
         ]
       },
       {
         title: '🏛️ 사회 연대기',
         rooms: [
-          { name: '사회 역사 탐험방', href: 'kids/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
+          { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
         ]
       },
       {
@@ -219,18 +216,17 @@ const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 </script>
 
-<!-- 🌟 2. 관제탑 호출 경로 수정 (루트에서 kids 폴더 안으로) -->
 <script src="kids/config.js"></script>
 
 <script>
-// 3. 이 로비에서 지연 호출할 코어 요정 파일 매핑
+// 3. 로비에서 필요한 코어 부품 목록
 const requiredCores = [
     "notion-helper.js",
     "fairy-config.js",
     "fairy-engine.js"
 ];
 
-// 4. ⚙️ 하이브리드 로더 가동 (이제 config.js가 선행 로드되었으므로 정상 작동!)
+// 4. ⚙️ 하이브리드 로더 가동 (루트에서 kids/core/ 안의 부품을 호출)
 loadCoreScripts("kids/core/", requiredCores, () => {
     console.log("🏰 대형 로비 메인 하이브리드 엔진 결합 완료!");
 
@@ -243,10 +239,10 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     }
     const currentConfig = USER_CONFIGS[userKey];
 
-    // 테마 실시간 동적 치환 리팩토링
+    // 테마 실시간 동적 치환 
     document.body.className = currentConfig.themeClass;
     
-    // APP_CONFIG 기반 동적 자녀 명칭 스위칭 체결
+    // APP_CONFIG 기반 동적 자녀 명칭 연동
     const finalRealName = currentConfig.key === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
     const finalWelcomeText = currentConfig.key === 'son' 
         ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
