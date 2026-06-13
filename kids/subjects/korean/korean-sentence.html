@@ -92,7 +92,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     let currentMode = urlParams.get('mode') || 'base';
     let conversationHistory = [];
-
+let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담을 바구니입니다.
     // 💰 아버님이 기획하신 정확한 단계별 보상 및 제한 룰 세팅
     const rewardRules = {
         easy: { reward: 2, limit: 2, name: "1단계 (민서 방)" },
@@ -339,7 +339,8 @@
         }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+// 🧚‍♀️ 요정 및 TTS 안전 시동 (독해방과 동일한 load 방식 적용)
+    window.addEventListener('load', () => {
         if(window.speechSynthesis) {
             window.speechSynthesis.getVoices();
             if (window.speechSynthesis.onvoiceschanged !== undefined) {
@@ -347,7 +348,14 @@
             }
         }
 
-      initFairyChat('KOREAN'); // 🧚‍♀️ 이 주문이 있어야 요정이 화면에 나타납니다!
+        // 엔진이 로드될 시간을 살짝(0.3초) 확보한 후 요정 호출
+        setTimeout(() => {
+            if (typeof initFairyChat === 'function') {
+                initFairyChat('KOREAN');
+            } else {
+                console.warn("요정 엔진 로드 대기 중...");
+            }
+        }, 300);
     });
 </script>
 </body>
