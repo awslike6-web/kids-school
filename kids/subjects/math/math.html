@@ -127,21 +127,36 @@
 
 </div>
 
-<script src="math_common.js"></script>
-<script>
-  // 로비 진입 시 프로필 배지 초기화
-  document.addEventListener('DOMContentLoaded', () => {
-    const badgeName = document.getElementById('userName');
-    const badgeIcon = document.getElementById('userIcon');
-    
-    if (badgeName && badgeIcon) {
-      const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
-      const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
-      badgeName.textContent = `${name} 탐험대원`;
-      badgeIcon.textContent = icon;
-    }
-  });
-</script>
+<script src="../../config.js"></script>
 
+<script>
+    // 2. 수학방에서 필요한 코어 부품들의 목록을 작성합니다.
+    const requiredCores = [
+        "notion-helper.js", // (노션 통신이 필요하다면 필수)
+        "math_common.js"
+        // 🧚‍♀️ 수학방에도 나중에 요정을 띄우려면 여기에 "fairy-config.js", "fairy-engine.js"만 추가하면 끝납니다!
+    ];
+
+    // 3. 로더를 실행하여 엔진을 조립합니다.
+    loadCoreScripts("../../core/", requiredCores, () => {
+        console.log("수학방 중문 하이브리드 엔진 시동 완료! 🚀");
+        
+        // 부품 조립이 다 끝난 후, 기존 배지 초기화 로직을 실행합니다.
+        window.addEventListener('DOMContentLoaded', () => {
+            const badgeName = document.getElementById('userName');
+            const badgeIcon = document.getElementById('userIcon');
+            
+            if (badgeName && badgeIcon) {
+                // 💡 향후 고도화 팁: 이 '민수', '민서' 이름도 config.js의 APP_CONFIG 값을 
+                // 불러오게 바꾸면 분양용(White-label) 세팅이 완벽해집니다! (일단은 기존 로직 유지)
+                const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
+                const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
+                
+                badgeName.textContent = `${name} 탐험대원`;
+                badgeIcon.textContent = icon;
+            }
+        });
+    });
+</script>
 </body>
 </html>
