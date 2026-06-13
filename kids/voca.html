@@ -716,6 +716,7 @@ function nextQuestion() {
 }
 
 // 📈 경험치 기반 레벨 계산기
+// 📈 수정 경험치 20 기준 레벨 계산기 (메인 과목 & 용어 과목 모두 공용으로 사용!)
 function calculateLevelInfo(totalRewards) {
     let level = 1; let requiredForNext = 20; let accumulatedForCurrentLevel = 0; 
     while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
@@ -724,19 +725,18 @@ function calculateLevelInfo(totalRewards) {
     return { level };
 }
 
-// 🚚 [핵심 엔진] 과목별 바코드를 읽어 노션의 해당 기둥으로 배송하는 라우팅 시스템
+// 🚚 [핵심 엔진] 과목 레벨과 '용어 평균 레벨'을 동시에 올려주는 투트랙 라우팅
 async function patchRewardToNotion(page, quizScore) {
     try {
         const targetProxy = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
         
-        // 1. 배송지(과목) 분류기 작동!
-        // '받아쓰기'는 '국어' 창고로, '탐구'는 '과학' 창고로 묶어줍니다.
+        // 1. 배송지(과목) 분류기 작동
         let subjectColumnName = currentSubject;
         if (currentSubject === "받아쓰기") subjectColumnName = "국어";
         else if (currentSubject === "탐구") subjectColumnName = "과학";
-        else if (!["국어", "수학", "사회", "과학", "영어"].includes(currentSubject)) subjectColumnName = "국어"; // 기본값 안전장치
+        else if (!["국어", "수학", "사회", "과학", "영어"].includes(currentSubject)) subjectColumnName = "국어"; 
 
-        // 2. 인벤토리 최신 상태 조회 (동기화)
+        // 2. 인벤토리 최신 상태 조회
         const response = await fetch(`${targetProxy}/v1/databases/${INVENTORY_DB_ID}/query`, { 
             method: "POST", headers: { "Content-Type": "application/json" }, 
             body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName === '아빠(관리자)' ? '민수' : currentUserName } } }) 
@@ -745,11 +745,10 @@ async function patchRewardToNotion(page, quizScore) {
         const currentPage = data.results[0];
         const props = currentPage.properties;
 
-        // 보상 및 경험치 산정 (10점당 1개 지급)
         let earnedPoints = Math.floor(quizScore / 10); 
-        if (earnedPoints === 0) return null; // 0점이면 배송 안 함
+        if (earnedPoints === 0) return null; 
 
-        // 3. 오늘 날짜 구하기 및 초기화 검사
+        // 3. 날짜 초기화 및 피로도 100개 제한 계산
         const today = new Date();
         const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
         
@@ -759,7 +758,7 @@ async function patchRewardToNotion(page, quizScore) {
         let updateProps = {};
 
         if (lastDate !== todayStr) {
-            todaySubjectEarned = 0; // 자정 지났으면 초기화
+            todaySubjectEarned = 0; 
             updateProps["오늘 획득_국어"] = { number: 0 };
             updateProps["오늘 획득_수학"] = { number: 0 };
             updateProps["오늘 획득_영어"] = { number: 0 };
@@ -767,7 +766,6 @@ async function patchRewardToNotion(page, quizScore) {
             updateProps["오늘 획득_과학"] = { number: 0 };
         }
 
-        // 4. 피로도 시스템 (해당 과목 하루 100개 제한)
         const MAX_DAILY = 100;
         let allowedCurrency = earnedPoints;
         let isLimitReached = false;
@@ -777,28 +775,66 @@ async function patchRewardToNotion(page, quizScore) {
             isLimitReached = true;
         }
 
-        // 5. 창고에 넣을 데이터 조립
         let diamond = props["다이아몬드 개수"]?.number || 0; 
         let slime = props["슬라임 파츠 개수"]?.number || 0;
-        let currentExp = props[`${subjectColumnName} 경험치`]?.number || 0; 
-
         let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
-        let currentWealth = previousWealth + allowedCurrency; // 돈은 제한된 만큼만!
+        let currentWealth = previousWealth + allowedCurrency; 
 
-        let newExp = currentExp + earnedPoints; // 📈 경험치는 푼 만큼 무조건 줍니다!
+        // ==========================================
+        // 🌟 트랙 A: 메인 과목 경험치 & 레벨 (기존)
+        // ==========================================
+        let currentExp = props[`${subjectColumnName} 경험치`]?.number || 0; 
+        let newExp = currentExp + earnedPoints; 
         const prevLevelInfo = calculateLevelInfo(currentExp);
         const currLevelInfo = calculateLevelInfo(newExp);
 
-        // 📦 과목 이름이 들어간 '변수 기둥'으로 동적 라우팅
+        // ==========================================
+        // 🌟 트랙 B: 용어 경험치(5과목) & 평균 레벨 계산기
+        // ==========================================
+        // 1. 노션에 있는 5개 과목의 '용어 경험치'를 모조리 긁어옵니다.
+        let gExp_korean = props["용어 경험치_국어"]?.number || 0;
+        let gExp_math = props["용어 경험치_수학"]?.number || 0;
+        let gExp_english = props["용어 경험치_영어"]?.number || 0;
+        let gExp_society = props["용어 경험치_사회"]?.number || 0;
+        let gExp_science = props["용어 경험치_과학"]?.number || 0;
+
+        // 2. 방금 푼 과목에만 경험치를 추가로 더해줍니다!
+        let newGlossaryExp = 0;
+        if (subjectColumnName === "국어") { gExp_korean += earnedPoints; newGlossaryExp = gExp_korean; }
+        else if (subjectColumnName === "수학") { gExp_math += earnedPoints; newGlossaryExp = gExp_math; }
+        else if (subjectColumnName === "영어") { gExp_english += earnedPoints; newGlossaryExp = gExp_english; }
+        else if (subjectColumnName === "사회") { gExp_society += earnedPoints; newGlossaryExp = gExp_society; }
+        else if (subjectColumnName === "과학") { gExp_science += earnedPoints; newGlossaryExp = gExp_science; }
+
+        // 3. 5개 과목의 경험치를 각각 '단일 레벨'로 환산합니다.
+        let gLvl_korean = calculateLevelInfo(gExp_korean).level;
+        let gLvl_math = calculateLevelInfo(gExp_math).level;
+        let gLvl_english = calculateLevelInfo(gExp_english).level;
+        let gLvl_society = calculateLevelInfo(gExp_society).level;
+        let gLvl_science = calculateLevelInfo(gExp_science).level;
+
+        // 4. [핵심] 환산된 5개의 레벨을 모두 더하고 5로 나누어 '평균'을 구합니다. (소수점 버림)
+        let averageGlossaryLevel = Math.floor((gLvl_korean + gLvl_math + gLvl_english + gLvl_society + gLvl_science) / 5);
+
+        // ==========================================
+        // 📦 보따리 싸기 (최종 업데이트)
+        // ==========================================
         updateProps["최근 접속일"] = { date: { start: todayStr } };
         updateProps[`오늘 획득_${subjectColumnName}`] = { number: todaySubjectEarned + allowedCurrency };
-        updateProps[`${subjectColumnName} 레벨`] = { number: currLevelInfo.level };
+        
+        // 트랙 A 업데이트
         updateProps[`${subjectColumnName} 경험치`] = { number: newExp };
+        updateProps[`${subjectColumnName} 레벨`] = { number: currLevelInfo.level };
+        
+        // 트랙 B 업데이트 (방금 푼 과목의 용어 경험치만 덮어쓰기)
+        updateProps[`용어 경험치_${subjectColumnName}`] = { number: newGlossaryExp };
+        
+        // 🎯 최종 산출된 통합 평균 레벨 덮어쓰기!
+        updateProps["용어 레벨"] = { number: averageGlossaryLevel };
 
         if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
         else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
 
-        // 🚀 최종 배송 (노션 업데이트)
         await fetch(`${targetProxy}/v1/pages/${currentPage.id}`, {
             method: "PATCH", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ properties: updateProps })
@@ -841,7 +877,6 @@ async function finishGame() {
     document.getElementById('resultOverlay').style.display = 'flex';
     document.getElementById('resultOverlay').classList.add('active');
   } else {
-    // 💡 아이들이 퀴즈를 풀었을 때의 물류 배송 처리
     if (document.getElementById('screen-minsu-quiz')) document.getElementById('screen-minsu-quiz').style.display = 'none';
     if (document.getElementById('screen-minser-dictation')) document.getElementById('screen-minser-dictation').style.display = 'none';
     
