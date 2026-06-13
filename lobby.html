@@ -38,8 +38,8 @@
   body.theme--arcade .my-room-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,242,254,0.6); }
 
   /* ----------------------------------
-     🎠 민서 테마: 아기자기 동화 속 비밀 아지트
-     ---------------------------------- */
+      🎠 민서 테마: 아기자기 동화 속 비밀 아지트
+      ---------------------------------- */
   body.theme--hideout { background: linear-gradient(160deg, #fff0f3 0%, #ffe5ec 50%, #fffbe6 100%); color: #4a384f; }
   body.theme--hideout .main-title .accent2 { color: #a78bfa; }
   body.theme--hideout .main-title .accent { color: #ff6b9d; }
@@ -58,7 +58,7 @@
 
   /* ✨ 민서 마이룸 버튼 스타일 */
   body.theme--hideout .my-room-btn { background: linear-gradient(90deg, #ff9a9e, #fecfef); color: #4a384f; border: 2px solid #ff6b9d; box-shadow: 0 4px 15px rgba(255,107,157,0.3); }
-  body.theme--hideout .my-room-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,107,157,0.5); }
+  body.theme--hideout .my-room-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,242,254,0.5); }
 
   /* 파티클 및 레이아웃 공통 */
   .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -81,7 +81,7 @@
   /* 🚪 마이룸 버튼 공통 뼈대 */
   .my-room-btn { width: 100%; padding: 14px; border-radius: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; text-decoration: none; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Jua', sans-serif; }
 
-  /* 💎 2x3 또는 반응형 그리드 배열 (과목 카드 전용) */
+  /* 💎 과목 카드 격리 그리드 */
   .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 860px; margin-top: 10px; }
   @media (max-width: 768px) { .world-grid { grid-template-columns: 1fr; max-width: 440px; } }
 
@@ -120,7 +120,8 @@
   <a href="index.html" class="back-btn">← 처음 프로필 화면으로</a>
 </div>
 
-
+<!-- 1. 🚨 메인 로비는 루트에 있으므로 옆방 패스 경로 설정 -->
+<script src="config.js"></script>
 
 <script>
 // =========================================================
@@ -167,7 +168,7 @@ const USER_CONFIGS = {
       {
         title: '🦖 탐구 사전관',
         rooms: [
-          { name: '종합 용어사전방', href: 'kids/voca.html', desc: '모든 교과서 낱말 총집합! 마스터 데이터베이스 지식 열람' }
+          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '모든 교과서 낱말 총집합! 마스터 데이터베이스 지식 열람' }
         ]
       }
     ]
@@ -212,7 +213,7 @@ const USER_CONFIGS = {
       {
         title: '🦖 탐구 사전관',
         rooms: [
-          { name: '종합 용어사전방', href: 'kids/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
+          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
         ]
       }
     ]
@@ -222,112 +223,130 @@ const USER_CONFIGS = {
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
-// 유저 확인 파서
-const urlParams = new URLSearchParams(window.location.search);
-let userKey = urlParams.get('user');
-if (!userKey || !USER_CONFIGS[userKey]) {
-  const savedName = localStorage.getItem('currentUserName');
-  userKey = (savedName === '민서') ? 'minseo' : 'minsu'; 
-}
-const currentConfig = USER_CONFIGS[userKey];
+// 2. 이 로비에서 지연 호출할 코어 요정 파일 매핑
+const requiredCores = [
+    "notion-helper.js",
+    "fairy-config.js",
+    "fairy-engine.js"
+];
 
-// 동적 엔진 바인딩
-document.body.classList.add(currentConfig.themeClass);
-document.getElementById('welcomeMessage').innerHTML = currentConfig.welcomeText;
-localStorage.setItem('currentUser', currentConfig.key); 
-localStorage.setItem('currentUserName', currentConfig.name);
+// 3. ⚙️ 하이브리드 로더 가동 (루트 폴더 기준 패스 주입)
+loadCoreScripts("kids/core/", requiredCores, () => {
+    console.log("🏰 대형 로비 메인 하이브리드 엔진 결합 완료!");
 
-// 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더
-(function buildCategorizedMenu() {
-  const grid = document.getElementById('worldGrid');
-  grid.innerHTML = '';
-
-  currentConfig.worlds.forEach(world => {
-    const card = document.createElement('div');
-    card.className = 'world-card';
-
-    const title = document.createElement('div');
-    title.className = 'world-title';
-    title.textContent = world.title;
-    card.appendChild(title);
-
-    const roomList = document.createElement('div');
-    roomList.className = 'sub-room-list';
-
-    world.rooms.forEach(room => {
-      const a = document.createElement('a');
-      a.href = room.href;
-      a.className = 'sub-room-btn';
-      a.innerHTML = `
-        <div class="sub-room-name">${room.name}</div>
-        <div class="sub-room-desc">${room.desc}</div>
-      `;
-      roomList.appendChild(a);
-    });
-
-    card.appendChild(roomList);
-    grid.appendChild(card);
-  });
-})();
-
-// 배경 부유물 애니메이션 모듈
-(function createFloatingParticles() {
-  const wrap = document.getElementById('bgFloats');
-  const symbols = currentConfig.bgSymbols;
-  for (let i = 0; i < 18; i++) {
-    const el = document.createElement('div');
-    el.className = 'float-item';
-    el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    el.style.left = (Math.random() * 92) + '%';
-    el.style.animationDuration = (11 + Math.random() * 13) + 's';
-    el.style.animationDelay = (-Math.random() * 15) + 's';
-    wrap.appendChild(el);
-  }
-})();
-
-// 🧚‍♀️ 만능 단어 요정 챗봇 호출 인터페이스 삭제
-
-// 노션 백엔드 인벤토리 자동 전송기
-window.onload = async function() {
-  const container = document.getElementById('inventoryDisplay');
-  const childName = currentConfig.name;
-  
-  try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
-    });
-    const data = await response.json();
-    if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
-    
-    const props = data.results[0].properties;
-    const theme = props["현재 테마"]?.select?.name || (childName === '민수' ? '마인크래프트' : '슬라임');
-    const diamond = props["다이아몬드 개수"]?.number || 0;
-    const slime = props["슬라임 파츠 개수"]?.number || 0;
-    const level = props["통합 레벨"]?.formula?.number || props["수학 레벨"]?.number || 1; // 통합 레벨이 있으면 우선 표시!
-    
-    localStorage.setItem('currentTheme', theme);
-    if (theme === '마인크래프트') {
-      container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
-      container.classList.add('theme--minecraft');
-    } else {
-      container.innerHTML = `<div class="reward-badge">💧 <span style="color:#388E3C;">x${slime}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
-      container.classList.add('theme--slime');
+    // 유저 확인 파서
+    const urlParams = new URLSearchParams(window.location.search);
+    let userKey = urlParams.get('user');
+    if (!userKey || !USER_CONFIGS[userKey]) {
+      const savedName = localStorage.getItem('currentUserName');
+      userKey = (savedName === '민서') ? 'minseo' : 'minsu'; 
     }
-  } catch (error) {
-    console.error("인벤토리 로드 에러:", error);
-    const defaultTheme = childName === '민수' ? '마인크래프트' : '슬라임';
-    localStorage.setItem('currentTheme', defaultTheme);
-    container.innerHTML = `<div class="reward-badge">${defaultTheme === '마인크래프트' ? '💎' : '💧'} <span>x0 (연결 필요)</span></div>`;
-  }
-};
-</script>
-<!-- 🧚‍♀️ 여기에 요정 스크립트를 넣어야 합니다! -->
-<script src="kids/fairy-config.js?v=2"></script>
-<script src="kids/fairy-engine.js?v=2"></script>
-<script>
-  window.addEventListener('DOMContentLoaded', () => {
-      initFairyChat('KOREAN'); 
-  });
+    const currentConfig = USER_CONFIGS[userKey];
+
+    // 동적 테마 및 이름 실시간 동적 치환 리팩토링
+    document.body.className = currentConfig.themeClass;
+    
+    // APP_CONFIG 기반 동적 자녀 명칭 스위칭 체결
+    const finalRealName = currentConfig.key === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
+    const finalWelcomeText = currentConfig.key === 'son' 
+        ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
+        : `🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, ${finalRealName}!`;
+
+    document.getElementById('welcomeMessage').innerHTML = finalWelcomeText;
+    localStorage.setItem('currentUser', currentConfig.key); 
+    localStorage.setItem('currentUserName', finalRealName);
+
+    // 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더
+    (function buildCategorizedMenu() {
+      const grid = document.getElementById('worldGrid');
+      grid.innerHTML = '';
+
+      currentConfig.worlds.forEach(world => {
+        const card = document.createElement('div');
+        card.className = 'world-card';
+
+        const title = document.createElement('div');
+        title.className = 'world-title';
+        title.textContent = world.title;
+        card.appendChild(title);
+
+        const roomList = document.createElement('div');
+        roomList.className = 'sub-room-list';
+
+        world.rooms.forEach(room => {
+          const a = document.createElement('a');
+          a.href = room.href;
+          a.className = 'sub-room-btn';
+          a.innerHTML = `
+            <div class="sub-room-name">${room.name}</div>
+            <div class="sub-room-desc">${room.desc}</div>
+          `;
+          roomList.appendChild(a);
+        });
+
+        card.appendChild(roomList);
+        grid.appendChild(card);
+      });
+    })();
+
+    // 배경 부유물 애니메이션 모듈
+    (function createFloatingParticles() {
+      const wrap = document.getElementById('bgFloats');
+      wrap.innerHTML = '';
+      const symbols = currentConfig.bgSymbols;
+      for (let i = 0; i < 18; i++) {
+        const el = document.createElement('div');
+        el.className = 'float-item';
+        el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        el.style.left = (Math.random() * 92) + '%';
+        el.style.animationDuration = (11 + Math.random() * 13) + 's';
+        el.style.animationDelay = (-Math.random() * 15) + 's';
+        wrap.appendChild(el);
+      }
+    })();
+
+    // 노션 백엔드 인벤토리 동기화 통신 모듈 (로더 완료 직후 안전 가동)
+    async function fetchInventory() {
+      const container = document.getElementById('inventoryDisplay');
+      const childName = finalRealName;
+      
+      try {
+        const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+        });
+        const data = await response.json();
+        if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
+        
+        const props = data.results[0].properties;
+        const theme = props["현재 테마"]?.select?.name || (childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임');
+        const diamond = props["다이아몬드 개수"]?.number || 0;
+        const slime = props["슬라임 파츠 개수"]?.number || 0;
+        const level = props["통합 레벨"]?.formula?.number || props["수학 레벨"]?.number || 1;
+        
+        localStorage.setItem('currentTheme', theme);
+        if (theme === '마인크래프트') {
+          container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
+          container.classList.add('theme--minecraft');
+        } else {
+          container.innerHTML = `<div class="reward-badge">💧 <span style="color:#388E3C;">x${slime}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
+          container.classList.add('theme--slime');
+        }
+      } catch (error) {
+        console.error("인벤토리 로드 에러:", error);
+        const defaultTheme = childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임';
+        localStorage.setItem('currentTheme', defaultTheme);
+        container.innerHTML = `<div class="reward-badge">${defaultTheme === '마인크래프트' ? '💎' : '💧'} <span>x0 (연결 필요)</span></div>`;
+      }
+    }
+
+    // 인벤토리 동기화 실행
+    fetchInventory();
+
+    // 🧚‍♀️ 부품 결합 후 안전하게 단어요정 시동
+    if (typeof initFairyChat === 'function') {
+        initFairyChat('KOREAN'); 
+    }
+});
 </script>
 </body>
 </html>
