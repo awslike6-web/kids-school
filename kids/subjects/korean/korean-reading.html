@@ -99,18 +99,29 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
 
 
 <script>
-    // 시동 함수 정의
+    // 1. 방 시동 함수 (사용자가 터치하면 실행)
     window.unlockAudioAndStart = function() {
         document.getElementById('start-overlay').style.display = 'none';
         window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
         
-        // 이제 korean-reading-logic.js가 로드되었으므로 이 함수가 반드시 존재합니다.
+        // 독해방 전용 유니버스 실행
         if (typeof initKoreanUniverse === 'function') {
             initKoreanUniverse();
         } else {
             console.error("오류: initKoreanUniverse가 정의되지 않았습니다.");
         }
     };
+
+    // 2. 요정 엔진 호출 (페이지가 준비되면 자동으로 실행)
+    window.addEventListener('DOMContentLoaded', () => {
+        // 요정이 준비되었는지 확인 후 시동
+        if (typeof initFairyChat === 'function') {
+            initFairyChat('KOREAN');
+            console.log("요정 엔진 시동 완료!");
+        } else {
+            console.error("요정 엔진이 아직 로드되지 않았습니다.");
+        }
+    });
 </script>
 </body>
 </html>
