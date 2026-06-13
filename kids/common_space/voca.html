@@ -219,7 +219,8 @@
   </div>
 </div>
 
-<script src="notion-helper.js"></script>
+<script src="../../config.js"></script>
+<script src="../../core/notion-helper.js"></script>
   
 <script>
 // 📍 Step 2: 입장 타이머 켜기 완료 
@@ -996,11 +997,12 @@ async function exitRoom() {
         wordFairyCount: currentWordFairy         
     });
 
-    if (success) {
-        console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
-        // 🎯 [수정 포인트 4] 탈출 후 돌아갈 상위 대시보드 로비 주소
-        location.href = '../lobby.html'; 
-    } else {
+// [수정 후] 
+if (success) {
+    console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
+    // 🎯 [수정 포인트 4] 탈출 후 돌아갈 상위 대시보드 로비 주소
+    location.href = '../../../lobby.html'; // 👈 여기 점 개수를 늘렸습니다!
+} else {
         alert("앗! 학습 일지 기록에 문제가 생겨서 나가지 못했습니다.");
         isExiting = false; 
     }
