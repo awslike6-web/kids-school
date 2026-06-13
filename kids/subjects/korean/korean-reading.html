@@ -86,18 +86,16 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
     <div id="game-zone"></div>
 </div>
 
-<!-- 1. 가문 환경변수 글로벌 관제탑 장착 -->
 <script src="../../config.js"></script>
 
 <script>
-    // 💡 [정비 완료] 변수 충돌 방지를 위해 roomStartTime 스크립트 제거! (korean_common.js에서 생성함)
-
-    // 2. 실행 순서 제어를 위해 데이터 파일과 로직 파일을 로더 대기열에 순서대로 배치!
+    // 2. 🌟 [배관 리팩토링 완료] 
+    // 관제탑 기준 대신 현재 독해방 폴더 주소인 subjects/korean/ 에서 다이렉트로 로드하도록 고정!
     const requiredCores = [
         "notion-helper.js",
         "korean_common.js",
-        "../subjects/korean/korean-reading-data.js", // 데이터가 먼저 로드되고,
-        "../subjects/korean/korean-reading-logic.js"  // 로직 파일이 그 데이터를 읽어야 에러가 없음!
+        "subjects/korean/korean-reading-data.js", 
+        "subjects/korean/korean-reading-logic.js"  
     ];
 
     // 3. ⚙️ 하이브리드 로더 주입 가동
