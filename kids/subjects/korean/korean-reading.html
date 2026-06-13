@@ -86,32 +86,22 @@ onclick="if(confirm('🚨 경고: 지금 나가면 지금까지 푼 내용이 �
     <div id="game-zone"></div>
 </div>
 
-<!-- 1. 가문 환경변수 글로벌 관제탑 장착 -->
-<script src="../../config.js"></script>
-
-<script>
-    // 2. 엔진 파일들 (core 폴더)
-    const coreCores = ["notion-helper.js", "korean_common.js"];
-    
-    // 엔진은 로더로 조립
-    loadCoreScripts("../../core/", coreCores, () => {
-        console.log("⚙️ 핵심 엔진 조립 완료!");
-    });
-</script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/korean_common.js"></script>
 
 <script src="../../data/korean-reading-data.js"></script>
 <script src="korean-reading-logic.js"></script>
 
 <script>
-    // 4. 안전한 시동 함수 정의
+    // 3. 이제 로더를 부를 필요가 없으니 로직만 호출하면 됩니다.
     window.unlockAudioAndStart = function() {
         document.getElementById('start-overlay').style.display = 'none';
         window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
         
-        if (typeof initKoreanUniverse !== 'undefined') {
+        if (typeof initKoreanUniverse === 'function') {
             initKoreanUniverse();
         } else {
-            console.error("오류: initKoreanUniverse 함수가 없습니다. 파일이 로드되었는지 확인하세요.");
+            console.error("오류: initKoreanUniverse가 정의되지 않았습니다. 파일 로드를 확인하세요.");
         }
     };
 </script>
