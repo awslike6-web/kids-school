@@ -245,7 +245,7 @@
         // [트랙 3: 엔진 품 안으로 이사 온 실무 함수들]
         // =======================================================
         
-        // 🔄 1. 프로필 수동 전환 함수 (window. 전역화 문법 교정)
+        // 🔄 1. 프로필 수동 전환 함수 (window. 전역화 문법 교정 완료)
         window.toggleProfileManually = function() {
             if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
             else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
@@ -254,7 +254,7 @@
             window.initProfile();
         }
 
-        // 🎠 2. 프로필 초기화 함수 (window. 전역화 문법 교정)
+        // 🎠 2. 프로필 초기화 함수 (window. 전역화 문법 교정 완료)
         window.initProfile = function() {
             const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
             const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
@@ -265,7 +265,7 @@
             window.loadProfileData(); 
         }
 
-        // 📈 3. 프로필 데이터 로드 (window. 전역화 문법 교정)
+        // 📈 3. 프로필 데이터 로드 (window. 전역화 문법 교정 완료)
         window.loadProfileData = function() {
             wrongNotes = JSON.parse(localStorage.getItem(`minmin_math_wrong_${currentProfile}`)) || [];
             document.getElementById('wrongCountBadge').textContent = wrongNotes.length;
@@ -516,6 +516,7 @@
             }
         }
 
+        // 🔄 4. 재시작 함수 (window. 전역화 문법 교정 완료)
         window.retryGame = function() { window.startGame(gameState.mode); }
 
         document.addEventListener('keydown', e=>{ 
