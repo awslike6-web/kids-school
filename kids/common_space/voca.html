@@ -318,7 +318,7 @@ while (hasMore) {
   // 여기서부터 그 밑에 있는 아래 fetch 로직들은 "절대 수정 금지" (그대로 유지!)
   // ----------------------------------------------------
 
-      const response = await fetch(`${PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
+      const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
         method: "POST", 
         headers: { "Content-Type": "application/json" }, 
         body: JSON.stringify(bodyData)
@@ -388,7 +388,7 @@ while (hasMore) {
 
 async function loadUserProfile() {
   try {
-    const res = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: 'POST' });
+    const res = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: 'POST' });
     if(!res.ok) return; 
     const data = await res.json();
     const targetName = (currentUser === 'son') ? "민수" : "민서";
@@ -589,7 +589,7 @@ async function speakCurrentWord() {
   const word = words[currentIndex];
 
   try {
-    const response = await fetch(`${PROXY_URL}/v1/pages/${word.pageId}`, {
+    const response = await fetch(`${WORKER_PROXY_URL}/v1/pages/${word.pageId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" }
     });
@@ -729,7 +729,7 @@ function calculateLevelInfo(totalRewards) {
 // 🚚 [핵심 엔진] 과목 레벨과 '용어 평균 레벨'을 동시에 올려주는 투트랙 라우팅
 async function patchRewardToNotion(page, quizScore) {
     try {
-        const targetProxy = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+        const targetProxy = typeof WORKER_PROXY_URL !== 'undefined' ? WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
         
         // 1. 배송지(과목) 분류기 작동
         let subjectColumnName = currentSubject;
