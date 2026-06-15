@@ -33,6 +33,12 @@
   .card { background: var(--card); border-radius: 24px; padding: 25px; width: 100%; max-width: 550px; box-shadow: 0 8px 30px rgba(35, 52, 90, 0.15); margin-bottom: 20px; border: 1px solid var(--line); backdrop-filter: blur(12px); }
   .card-title { font-size: 1.2rem; color: var(--purple); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #eee; padding-bottom: 10px; }
 
+  /* 💡 추가된 단원 선택 버튼 스타일 */
+  .book-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+  .book-label { font-size: 1.1rem; padding: 12px 5px; font-weight: bold; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--dark); user-select: none; }
+  .book-label:hover { border-color: var(--purple); transform: scale(1.02); }
+  input[type="checkbox"]:checked + .book-label { background: var(--purple); border-color: var(--purple); color: #fff; box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3); }
+
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .mode-btn { padding: 20px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #fff; transition: transform .18s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
   .mode-btn.copy { background: linear-gradient(135deg, #4facfe, #00f2fe); }
@@ -97,7 +103,6 @@
 
 <div class="top-nav">
   <div style="font-size: 1.2rem; font-weight: bold; color: var(--dark);">✈️ 영단어 기지</div>
-  <!-- 💡 중문 연결 경로 수정 -->
   <a href="/kids-school/kids/subjects/english/english.html" class="exit-btn">🚪 출국장으로</a>
 </div>
 
@@ -110,8 +115,18 @@
     <p style="text-align: center; color: #666;">노션 데이터베이스에서 단어를 가져오고 있어요!</p>
   </div>
 
+  <!-- 💡 [추가됨] 단원 선택 카드 -->
+  <div class="card" id="lessonCard" style="display: none;">
+    <div class="card-title">📖 1. 공부할 단원 고르기</div>
+    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
+      <button class="btn ghost" style="padding: 5px 15px; font-size: 0.9rem;" onclick="selectAllLessons(true)">전체 선택</button>
+      <button class="btn ghost" style="padding: 5px 15px; font-size: 0.9rem;" onclick="selectAllLessons(false)">전체 해제</button>
+    </div>
+    <div class="book-grid" id="lessonGrid"></div>
+  </div>
+
   <div class="card" id="modeCard" style="display: none;">
-    <div class="card-title">🎯 1. 퀴즈 모드 선택</div>
+    <div class="card-title">🎯 2. 퀴즈 모드 선택</div>
     <div class="mode-grid">
       <button class="mode-btn copy" onclick="startQuiz('copy')"><span style="font-size:2rem;">✏️</span>보고 따라 적기</button>
       <button class="mode-btn tokor" onclick="startQuiz('toKorean')"><span style="font-size:2rem;">🇰🇷</span>한글 뜻 적기</button>
@@ -121,7 +136,7 @@
   </div>
 
   <div class="card" id="toolCard" style="display: none;">
-    <div class="card-title">🛠️ 2. 도우미 도구</div>
+    <div class="card-title">🛠️ 3. 도우미 도구</div>
     <div class="mode-grid">
       <button class="mode-btn wrong-note" onclick="startWrongWords()"><span style="font-size:1.5rem;">🖍️</span>오답 복습 (<span id="wrongBadge">0</span>개)</button>
       <button class="mode-btn print-shop" onclick="openPrintShop()"><span style="font-size:1.5rem;">🖨️</span>학습지 인쇄소</button>
@@ -156,7 +171,7 @@
     <div class="card-title">📂 1. 출력할 단어 데이터</div>
     <div class="grid-2">
       <input type="radio" name="printSource" id="ps-selected" value="selected" checked onchange="loadPrintList()">
-      <label for="ps-selected" class="btn-label">노션 단어 전체</label>
+      <label for="ps-selected" class="btn-label">내가 선택한 단원들</label>
       <input type="radio" name="printSource" id="ps-wrong" value="wrong" onchange="loadPrintList()">
       <label for="ps-wrong" class="btn-label">내 오답노트 모음</label>
     </div>
@@ -193,36 +208,43 @@
   </div>
 </div>
 
-<!-- 1. 중앙 통제탑 연결 -->
 <script src="/kids-school/kids/core/notion-helper.js"></script>
-<!-- 💡 공통 JS 파일 경로 수정 완료 -->
 <script src="/kids-school/kids/core/english_common.js"></script>
 
 <script>
-const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
 
 let allEnglishWords = [];
+let availableLessons = []; // 💡 단원 목록을 담을 배열
 let wrongWords = [];
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
-// 배경 애니메이션 (그대로 유지)
 for(let i=0; i<15; i++){
   const el = document.createElement('div'); el.className = 'float-item'; el.textContent = ['A','B','C','✈️','☁️','✨'][Math.floor(Math.random()*6)];
   el.style.left = (Math.random()*90)+'%'; el.style.animationDuration = (10+Math.random()*12)+'s'; el.style.animationDelay = (-Math.random()*15)+'s';
   document.getElementById('bgFloats').appendChild(el);
 }
 
-// 🚀 새롭게 뼈대를 갈아끼운 초고속 스캔 엔진 적용!
 window.onload = async () => {
   loadWrongWords();
   
-  // 💡 공통 엔진에 DB 아이디와 과목명("영어")만 던져주면 알아서 다 가져옵니다!
   allEnglishWords = await fetchEnglishNotionData(voca_DB_ID, "영어");
 
   document.getElementById('loadingCard').style.display = 'none';
   
   if(allEnglishWords.length > 0) {
+    // 💡 1. 단원 추출 및 정렬 로직
+    const lessonSet = new Set(allEnglishWords.map(w => w.level));
+    availableLessons = Array.from(lessonSet).sort((a, b) => {
+        const numA = parseInt(a); const numB = parseInt(b);
+        if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return String(a).localeCompare(String(b));
+    });
+    
+    // 💡 2. 추출한 단원으로 체크박스 생성
+    renderLessonCheckboxes();
+
+    document.getElementById('lessonCard').style.display = 'block';
     document.getElementById('modeCard').style.display = 'block';
     document.getElementById('toolCard').style.display = 'block';
   } else {
@@ -230,20 +252,44 @@ window.onload = async () => {
   }
 };
 
-// ==========================================
-// 👇 여기서부터는 기존 코드 그대로 두시면 됩니다!
-// ==========================================
+// 💡 단원 체크박스 화면에 그리기
+function renderLessonCheckboxes() {
+  const grid = document.getElementById('lessonGrid');
+  let html = '';
+  availableLessons.forEach((lesson, index) => {
+    const displayLesson = lesson ? lesson : '기본';
+    html += `
+      <input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked style="display:none;">
+      <label for="lesson_${index}" class="book-label">${displayLesson}단원</label>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+// 💡 단원 전체 선택/해제 기능
+function selectAllLessons(flag) {
+  document.querySelectorAll('.lesson-cb').forEach(cb => cb.checked = flag);
+}
+
+// 💡 체크된 단원의 단어만 걸러내는 필터 엔진
+function getFilteredWords() {
+  const checkedLessons = Array.from(document.querySelectorAll('.lesson-cb:checked')).map(cb => cb.value);
+  return allEnglishWords.filter(w => checkedLessons.includes(String(w.level)));
+}
+
 function loadWrongWords() {
   const saved = localStorage.getItem('minmin_eng_wrong');
   wrongWords = saved ? JSON.parse(saved) : [];
   document.getElementById('wrongBadge').textContent = wrongWords.length;
 }
+
 function saveWrongWord(w) {
   if(!quizState.isWrongMode && !wrongWords.some(item => item.word === w.word)) {
     wrongWords.push(w); localStorage.setItem('minmin_eng_wrong', JSON.stringify(wrongWords));
     document.getElementById('wrongBadge').textContent = wrongWords.length;
   }
 }
+
 function removeWrongWord(w) {
   if(quizState.isWrongMode) {
     wrongWords = wrongWords.filter(item => item.word !== w.word);
@@ -258,7 +304,15 @@ function showScreen(id){
 function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
 
 function startQuiz(mode) {
-  const shuffled = [...allEnglishWords].sort(() => Math.random() - 0.5).slice(0, 10);
+  // 💡 선택한 단원 단어만 뽑아오기
+  const filteredWords = getFilteredWords();
+  
+  if (filteredWords.length === 0) {
+    return alert('공부할 단원을 하나 이상 선택해 주세요! (또는 해당 단원에 단어가 없어요)');
+  }
+
+  // 뽑아온 단어 섞기
+  const shuffled = [...filteredWords].sort(() => Math.random() - 0.5).slice(0, 10);
   quizState = { mode: mode, pool: shuffled, current: 0, score: 0, isWrongMode: false };
   showScreen('screen-quiz'); loadQuestion();
 }
@@ -353,9 +407,11 @@ function nextQuestion() {
 }
 
 function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
+
 function loadPrintList() {
   const src = document.querySelector('input[name="printSource"]:checked').value; 
-  const list = src === 'selected' ? allEnglishWords : wrongWords;
+  // 💡 인쇄소에서도 선택한 단원만 출력되도록 필터 엔진 연결
+  const list = src === 'selected' ? getFilteredWords() : wrongWords;
   const container = document.getElementById('print-word-list'); 
   document.getElementById('print-total-count').textContent = list.length;
   
@@ -373,7 +429,7 @@ function executePrint() {
   if(checkedBoxes.length === 0) return alert('단어를 선택해 주세요!'); 
   
   const src = document.querySelector('input[name="printSource"]:checked').value; 
-  const list = src === 'selected' ? allEnglishWords : wrongWords;
+  const list = src === 'selected' ? getFilteredWords() : wrongWords;
   const selectedWords = checkedBoxes.map(cb => list[parseInt(cb.value)]); 
   const style = document.querySelector('input[name="printStyle"]:checked').value;
   
