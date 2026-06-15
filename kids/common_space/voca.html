@@ -3,326 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>용어사전방 - 민민이네 공부방</title>
+<title>지식 도서관 - 민민이네 용어사전</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
     --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
-    --white: #FFFEF7; --dark: #2D2D4E; --card: rgba(255,255,255,0.93);
+    --dark: #2D2D4E; --card: rgba(255,255,255,0.95);
   }
   
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); transition: background 0.5s ease; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); transition: background 0.5s ease; padding-bottom: 50px; }
   
   body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%); }
   body.theme--slime { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); }
-  body.theme--parent { background: linear-gradient(160deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%); }
 
-  .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-  .float-item { position: absolute; font-size: 1.8rem; opacity: 0.13; animation: floatUp linear infinite; font-family: 'Gaegu', cursive; font-weight: 700; color: var(--purple); }
-  @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.13; } 90% { opacity: 0.13; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
-
-  .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 20px 16px 40px; min-height: 100vh; width: 100%; }
-  .screen.active { display: flex; }
-
-  .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2.2rem, 9vw, 3.8rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 6px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.07)); }
+  .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.8); box-shadow: 0 2px 10px rgba(0,0,0,0.05); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50; }
+  .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: var(--dark); font-weight: bold; font-size: 0.9rem; }
+  
+  .header-area { text-align: center; padding: 30px 20px 20px; }
+  .main-title { font-family: 'Gaegu', cursive; font-size: 2.8rem; font-weight: 700; margin-bottom: 15px; }
   .main-title .accent { color: var(--pink); }
   .main-title .accent2 { color: var(--purple); }
 
-  .profile-switch-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); border: 2px solid var(--purple); color: var(--dark); padding: 6px 12px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: all 0.2s; }
-  .user-welcome { display: inline-block; padding: 8px 20px; border-radius: 999px; background: rgba(255,255,255,0.7); border: 2.5px solid rgba(0,0,0,0.08); font-size: 1rem; margin-bottom: 14px; }
-
-  .card { background: var(--card); border-radius: 24px; padding: 22px 24px; width: 100%; max-width: 480px; box-shadow: 0 8px 30px rgba(0,0,0,0.10); margin-bottom: 18px; border: 2.5px solid rgba(255,255,255,0.8); }
-  .card-title { font-size: 1.1rem; color: var(--purple); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; font-weight: bold; }
-  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  /* 🔍 검색 및 필터 영역 */
+  .search-container { max-width: 600px; margin: 0 auto 20px; display: flex; gap: 10px; padding: 0 20px; }
+  .search-input { flex: 1; padding: 15px 20px; border-radius: 25px; border: 3px solid var(--sky); font-family: 'Jua'; font-size: 1.2rem; outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.3s; }
+  .search-input:focus { border-color: var(--purple); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(167, 139, 250, 0.2); }
   
-  input[type="checkbox"], input[type="radio"] { display: none; }
-  .btn-label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 4px; border-radius: 14px; border: 2.5px solid #e0e0e0; font-size: 0.9rem; cursor: pointer; transition: all .18s; background: #fff; text-align: center; color: var(--dark); font-weight: bold; }
-  input[type="checkbox"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.07); }
-  input[name="subjectMode"]:checked + .btn-label { background: var(--mint); border-color: var(--mint); color: #fff; transform: scale(1.07); }
-  input[name="hintMode"]:checked + .btn-label { background: var(--pink); border-color: var(--pink); color: #fff; transform: scale(1.07); }
-  input[name="quizType"]:checked + .btn-label { background: var(--orange); border-color: var(--orange); color: #fff; transform: scale(1.07); }
+  .filter-container { max-width: 600px; margin: 0 auto 30px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 0 20px; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; background: #fff; border: 2px solid #ddd; font-family: 'Jua'; font-size: 0.9rem; cursor: pointer; color: #666; transition: all 0.2s; }
+  .filter-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); }
 
-  .game-header { width: 100%; max-width: 440px; display: flex; justify-content: space-between; margin-bottom: 16px; }
-  .game-stat-box { background: #fff; border-radius: 14px; padding: 8px 16px; font-size: 0.95rem; box-shadow: 0 2px 10px rgba(0,0,0,0.07); color: var(--dark); font-weight: bold; }
-
-  .big-btn { width: 100%; max-width: 480px; padding: 16px; border-radius: 18px; border: none; font-family: 'Jua'; font-size: 1.15rem; cursor: pointer; color: #fff; margin-top: 10px; }
-  .big-btn.yellow-btn { background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); font-size: 1.3rem; padding: 18px;}
-  .big-btn.back-btn { background: #eee; color: #888; }
-  .tiny-btn { background: rgba(0,0,0,0.05); border: none; padding: 4px 10px; border-radius: 8px; font-family: 'Jua'; cursor: pointer; }
-
-  .big-btn.order-seq-btn { background: linear-gradient(135deg, var(--mint), var(--green)); color: #fff; font-size: 1.25rem; padding: 18px; margin-bottom: 8px; }
-  .big-btn.order-rnd-btn { background: linear-gradient(135deg, var(--sky), var(--purple)); color: #fff; font-size: 1.25rem; padding: 18px; }
-
-  .progress-bar { width: 100%; max-width: 420px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 10px; margin-bottom: 24px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink)); border-radius: 10px; transition: width 0.3s ease; }
+  /* 📚 카탈로그 책장 (그리드) */
+  .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto; padding: 0 20px; }
   
-  .flashcard-container { width: 100%; max-width: 420px; perspective: 1000px; margin-bottom: 24px; }
-  .flashcard { background: var(--card); border-radius: 20px; padding: 40px 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); border: 2px solid rgba(255,255,255,0.8); min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; }
-  .flashcard-label { font-size: 0.9rem; color: #999; margin-bottom: 12px; font-family: 'Gaegu', cursive; }
-  .flashcard-content { font-size: 1.6rem; font-weight: bold; color: var(--dark); word-break: keep-all; white-space: pre-wrap; line-height: 1.4; }
-  .audio-card { border-color: var(--sky); background: rgba(255,255,255,0.95); }
+  .word-card { background: var(--card); border-radius: 20px; padding: 20px 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.06); cursor: pointer; border: 2px solid transparent; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; justify-content: center; min-height: 140px; position: relative; }
+  .word-card:hover { transform: translateY(-5px); border-color: var(--sky); box-shadow: 0 12px 25px rgba(110, 198, 245, 0.2); }
+  .word-card.mastered { opacity: 0.8; border: 2px dashed var(--green); } /* 달성 완료된 단어 스타일 */
 
-  .input-group { width: 100%; max-width: 420px; margin-bottom: 20px; }
-  .input-label { font-size: 0.95rem; color: #666; margin-bottom: 8px; display: block; text-align:center; font-weight:bold; }
+  .badge-area { position: absolute; top: 10px; left: 0; width: 100%; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; padding: 0 10px; pointer-events: none; }
+  .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #eee; color: #555; }
+  .badge.grade { background: #ffe4b5; color: #d2691e; }
+  .badge.pos { background: #e6e6fa; color: #8a2be2; }
   
-  .input-field { width: 100%; padding: 16px 18px; border-radius: 16px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua'; font-size: 1.2rem; color: var(--dark); background: rgba(255,255,255,0.8); text-align:center; font-weight:bold; resize: none; }
-  .input-field.success { border-color: var(--green); background: #f0fff4; }
-  .input-field.error { border-color: var(--pink); background: #fff5f5; }
+  .word-title { font-size: 1.6rem; font-weight: bold; color: var(--dark); margin-top: 15px; word-break: keep-all; }
+  .master-crown { position: absolute; top: -10px; right: -10px; font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
 
-  .btn-group { display: flex; flex-wrap:wrap; gap: 10px; width: 100%; max-width: 420px; margin-bottom: 20px; }
-  .btn { flex: 1; padding: 14px 10px; border-radius: 16px; border: none; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; font-weight: bold; }
-  .btn-primary { background: linear-gradient(135deg, var(--purple), var(--pink)); color: #fff; }
-  .btn-secondary { background: rgba(255,255,255,0.7); color: var(--dark); border: 2px solid rgba(0,0,0,0.08); }
-  .btn-info { background: linear-gradient(135deg, var(--sky), var(--mint)); color: #fff; }
-
-  .result-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
-  .result-overlay.active { display: flex; opacity: 1; }
-  .result-modal { background: #fff; width: 90%; max-width: 360px; border-radius: 30px; padding: 40px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-  .result-emoji { font-size: 3.5rem; margin-bottom: 16px; }
-  .result-title { font-size: 1.5rem; color: var(--dark); margin-bottom: 12px; font-weight: bold; }
-  .result-message { font-size: 1.1rem; color: #666; margin-bottom: 24px; line-height: 1.5; text-align: left; background: #f7f9fc; padding: 14px; border-radius: 14px; word-break: keep-all; }
+  /* 📖 단어 상세 모달 팝업 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; padding: 20px; }
+  .modal-overlay.active { display: flex; opacity: 1; }
   
-  .loading { display: inline-block; width: 30px; height: 30px; border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .shake { animation: shake 0.4s; }
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  .modal-content { background: #fff; border-radius: 24px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; padding: 30px 25px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s; }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  
+  .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #999; border: none; background: none; }
+  
+  .modal-word-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px dashed #eee; padding-bottom: 15px; }
+  .modal-word { font-size: 2.2rem; font-weight: bold; color: var(--dark); }
+  .audio-btn { font-size: 1.5rem; cursor: pointer; background: var(--sky); border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(110,198,245,0.4); color: white; transition: transform 0.2s; }
+  .audio-btn:active { transform: scale(0.9); }
+
+  .modal-image { width: 100%; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; object-fit: cover; max-height: 250px; }
+  
+  .modal-meaning { font-size: 1.2rem; line-height: 1.5; margin-bottom: 20px; color: var(--dark); background: #f8f9fa; padding: 15px; border-radius: 15px; border-left: 5px solid var(--purple); }
+  
+  /* 아버님이 요청하신 토글(details/summary) 스타일 */
+  details { background: #fff5f8; border: 2px solid #ffb6c1; border-radius: 15px; padding: 5px 15px; margin-bottom: 20px; }
+  summary { font-size: 1.1rem; font-weight: bold; color: var(--pink); cursor: pointer; padding: 10px 0; outline: none; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: '▶ '; font-size: 0.9rem; transition: transform 0.2s; display: inline-block; }
+  details[open] summary::before { transform: rotate(90deg); }
+  .details-content { padding-bottom: 15px; font-family: 'Malgun Gothic', sans-serif; font-size: 1rem; color: #444; line-height: 1.6; word-break: keep-all; }
+
+  .ask-fairy-btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: linear-gradient(135deg, var(--yellow), var(--orange)); font-family: 'Jua'; font-size: 1.2rem; color: var(--dark); font-weight: bold; cursor: pointer; box-shadow: 0 6px 15px rgba(255,159,67,0.3); transition: transform 0.2s; }
+  .ask-fairy-btn:hover { transform: translateY(-2px); }
+
+  .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--purple); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<div class="bg-floats" id="bgFloats"></div>
-
-<div class="screen active" id="screen-loading">
-  <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
-  <p id="loadingSubtitle">노션에서 단어를 불러오고 있어요...</p>
-  <div class="loading" id="mainLoadingSpinner" style="margin-top:20px;"></div>
-  <button id="retryBtn" class="big-btn yellow-btn" style="display:none; max-width: 280px; margin-top: 20px;" onclick="location.reload()">🔄 다시 시도하기</button>
+<div class="top-nav">
+  <div style="font-size: 1.2rem; font-weight: bold;">📚 지식 도서관</div>
+  <a href="/kids-school/lobby.html" class="exit-btn">🚪 로비로 나가기</a>
 </div>
 
-<div class="screen" id="screen-setup">
-  <button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 프로필 바꾸기</button>
-  <h1 class="main-title"><span class="accent2">용어</span><br><span class="accent">사전방</span></h1>
-  <div class="user-welcome">안녕하세요, <span id="welcomeNameSetup"></span>! <span id="levelDisplayArea">(레벨 <span id="userLevelSetup">1</span>)</span></div>
-  
-  <div class="card">
-    <div class="card-title">📗 1. 공부할 과목 고르기</div>
-    <div class="grid-4" id="subjectGrid"></div>
+<div class="header-area">
+  <h1 class="main-title"><span class="accent2">민민이네</span> <span class="accent">용어사전</span></h1>
+  <p style="color:#666; margin-bottom:10px;" id="welcomeMsg">단어를 찾거나 책장을 둘러보세요!</p>
+</div>
+
+<div class="search-container">
+  <input type="text" id="searchInput" class="search-input" placeholder="🔍 궁금한 단어나 뜻을 검색해보세요!" oninput="filterWords()">
+</div>
+
+<div class="filter-container" id="filterArea">
   </div>
 
-  <div class="card">
-    <div class="card-title">📚 2. 단계 고르기</div>
-    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-      <button class="tiny-btn" onclick="selectAllStages(true)">전체 선택</button>
-      <button class="tiny-btn" onclick="selectAllStages(false)">전체 해제</button>
-    </div>
-    <div class="grid-4" id="stageGrid"></div>
-  </div>
+<div id="loadingArea" class="loading-spinner"></div>
+<div class="catalog-grid" id="catalogGrid"></div>
+<div id="emptySearchMsg" style="display:none; text-align:center; padding: 40px; color:#888; font-size:1.2rem;">검색 결과가 없어요! 😢</div>
 
-  <div class="card">
-    <div class="card-title">🧩 3. 공부 모드</div>
-    <div class="grid-3">
-      <input type="radio" name="quizType" id="qt_quiz" value="quiz" checked onchange="handleQuizTypeChange()">
-      <label for="qt_quiz" class="btn-label">🎮 단어 맞히기<br>(퀴즈)</label>
-      
-      <input type="radio" name="quizType" id="qt_study" value="study" onchange="handleQuizTypeChange()">
-      <label for="qt_study" class="btn-label">📖 뜻 확인하기<br>(공부)</label>
+<div class="modal-overlay" id="wordModal" onclick="closeModal(event)">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal(event, true)">✖</button>
+    
+    <div class="modal-word-header">
+      <div class="modal-word" id="modalWordTitle">단어</div>
+      <button class="audio-btn" id="modalAudioBtn">🔊</button>
     </div>
     
-    <div id="hintViewOptionArea">
-      <div class="card-title" style="margin-top:15px; margin-bottom:5px;">👀 4. 문제 보기 방식</div>
-      <div class="grid-3">
-        <input type="radio" name="hintMode" id="hm_hint" value="hint">
-        <label for="hm_hint" class="btn-label">💡 힌트만</label>
-        <input type="radio" name="hintMode" id="hm_meaning" value="meaning">
-        <label for="hm_meaning" class="btn-label">📖 뜻풀이만</label>
-        <input type="radio" name="hintMode" id="hm_both" value="both" checked>
-        <label for="hm_both" class="btn-label">👀 둘 다</label>
-      </div>
-    </div>
-  </div>
-  
-  <p id="warnMsg" style="color:var(--pink); font-size:0.9rem; text-align:center; height:1.2rem; margin-top:5px;"></p>
-  <button class="big-btn yellow-btn" onclick="startQuiz()">🚀 탐험 시작하기</button>
-  <button class="big-btn back-btn" onclick="exitRoom()">🚪 메인으로 나가기</button>
-</div>
-
-<div class="screen" id="screen-order-select">
-  <h1 class="main-title"><span class="accent2">출제 방식</span><br><span class="accent">선택하기</span></h1>
-  <div class="card" style="text-align:center; padding:30px 20px;">
-    <button class="big-btn order-seq-btn" onclick="selectQuizOrder('sequential')">🟢 순서대로</button>
-    <button class="big-btn order-rnd-btn" onclick="selectQuizOrder('random')">🎲 뒤죽박죽</button>
-  </div>
-  <button class="big-btn back-btn" onclick="goSetup()">🔙 이전 단계로</button> 
-</div>
-
-<div class="screen" id="screen-minsu-quiz">
-  <div class="game-header">
-    <div class="game-stat-box" id="minsuScoreBox">⭐ 점수: <span id="minsuScore">0</span></div>
-    <div class="game-stat-box">📝 <span id="minsuQNum">1</span></div>
-  </div>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-  
-  <div class="input-group">
-    <div class="flashcard-container">
-      <div class="flashcard" id="flashcard" onclick="toggleFlashcard()">
-        <div class="flashcard-label" id="cardLabel">문제</div>
-        <div class="flashcard-content" id="cardContent">단어 샘플</div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="input-group" id="minsuInputArea"></div>
-  
-  <div class="btn-group">
-    <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">제출</button>
-    <button class="btn btn-info" id="justShowBtn" style="display:none;" onclick="showStudyResultDirectly()">바로 정답 확인</button>
-    <button class="btn btn-secondary" onclick="exitRoom()">나가기</button>
-  </div>
-</div>
-
-<div class="screen" id="screen-minser-dictation">
-  <div class="game-header">
-    <div class="game-stat-box" id="minserScoreBox">⭐ 점수: <span id="minserScore">0</span></div>
-    <div class="game-stat-box">📝 <span id="minserQNum">1</span></div>
-  </div>
-  <div class="progress-bar"><div class="progress-fill" id="progressFill2"></div></div>
-  
-  <div class="input-group">
-    <div class="flashcard-container" style="margin-bottom:10px;">
-      <div class="flashcard audio-card" id="hintCard" onclick="speakCurrentWord()">
-        <div class="flashcard-content" style="font-size:3rem;">🔊</div>
-        <div style="color:#888; font-family:'Jua'">다시 듣기</div>
-      </div>
-    </div>
-    <div id="textHintArea" style="text-align:center; color:#555; font-family:'Jua'; margin-bottom:15px; white-space:pre-wrap; font-size:1.1rem;"></div>
-  </div>
-  
-  <div class="input-group" id="minserInputArea"></div>
-  
-  <div class="btn-group">
-    <button class="btn btn-primary" id="dictSubmitBtn" onclick="submitDictation()">제출</button>
-    <button class="btn btn-info" id="dictJustShowBtn" style="display:none;" onclick="showStudyResultDirectly()">바로 정답 확인</button>
-    <button class="btn btn-secondary" onclick="exitRoom()">나가기</button>
-  </div>
-</div>
-
-<div class="result-overlay" id="resultOverlay" onclick="closeResult(event)">
-  <div class="result-modal" id="resultModal">
-    <div class="result-emoji" id="resultEmoji">🎉</div>
-    <div class="result-title" id="resultTitle">정답!</div>
-    <div class="result-message" id="resultMessage">뜻풀이 영역</div>
-    <button class="btn btn-primary" onclick="nextQuestion()" style="width:100%;">다음 문제로 🚀</button>
+    <img id="modalImage" class="modal-image" src="" alt="단어 이미지">
+    
+    <div class="modal-meaning" id="modalMeaning">뜻풀이 영역</div>
+    
+    <details id="modalDetailsGroup">
+      <summary>상세설명 보기 (심화)</summary>
+      <div class="details-content" id="modalDetailContext">상세설명 내용...</div>
+    </details>
+    
+    <button class="ask-fairy-btn" id="askFairyBtn">🧚‍♀️ 요정 선생님께 물어보기</button>
   </div>
 </div>
 
 <script src="/kids-school/kids/config.js"></script>
 <script src="/kids-school/kids/core/notion-helper.js"></script>
-  
+
 <script>
-// 📍 Step 2: 입장 타이머 켜기 완료 
-// 🚨 주의: notion-helper.js에 선언된 roomStartTime과 충돌을 막기 위해 
-// voca.html 고유의 변수명(vocaRoomStartTime)으로 우회합니다!
-const vocaRoomStartTime = new Date();
-
-// 🌟 [추가됨] 이 한 줄이 빠져서 에러가 났습니다! 주소표를 달아줍니다.
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-
-  // 📍 [아빠의 큰그림] 주소창 꼬리표(?subject=...)를 감지하기 위한 만능 변신 지도 신설!
-const urlParams = new URLSearchParams(window.location.search);
-const subjectParam = urlParams.get('subject'); // 주소창에서 subject 값을 긁어옵니다.
-
-// ... (이하 아버님 코드 원본 그대로 유지) ...
-
-const configMap = {
-    'korean':    { tag: '국어', logSubject: '국어(단어)', title: '📚 국어 단어장' },
-    'dictation': { tag: '받아쓰기', logSubject: '국어(받아쓰기)', title: '✍️ 매일 받아쓰기 훈련소' },
-    'society':   { tag: '사회', logSubject: '사회(용어)', title: '🌍 사회 용어 탐구소' },
-    'science':   { tag: '과학', logSubject: '탐구(용어)', title: '🔬 과학 용어 연구소' },
-    'english':   { tag: '영어', logSubject: '영어(단어)', title: '🔤 영어 단어장' }
-};
-
-// 만약 주소창 뒤에 꼬리표가 붙어 들어왔다면, 과목 선택 화면을 건너뛰고 해당 과목으로 타이틀 자동 고정!
-let currentConfig = configMap[subjectParam] || null;
 
 let currentUser = localStorage.getItem('currentUser') || 'son';
 let currentUserName = localStorage.getItem('currentUserName') || '민수';
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
 
-let allFetchedWords = [];
-let availableSubjects = [];
-let currentSubject = "";
-let words = [];
-let currentIndex = 0;
-let score = 0;
-let totalCount = 0;
-let filteredPool = [];
-let currentHintMode = 'both';
-let currentQuizType = 'quiz'; 
-let userNotionPage = null; 
-let userLevel = 1;
+let allDictionaryWords = [];
+let currentFilter = '전체';
 
-// 🔒 오답 추적용 배관 가방 생성 (오답리포트에 기록할 데이터)
-let wrongWordsList = [];
+// 페이지 로드 시 즉시 테마 적용 및 데이터 불러오기
+window.addEventListener('load', () => { 
+  document.body.className = (currentTheme === '슬라임') ? 'theme--slime' : 'theme--minecraft';
+  document.getElementById('welcomeMsg').textContent = `${currentUserName}의 지식 도서관에 오신 것을 환영해요!`;
+  fetchLibraryData(); 
+});
 
-function createFloats() {
-  const container = document.getElementById('bgFloats');
-  const icons = ['✏️','📚','💡','⭐','🍀','🍏','✨','🎈'];
-  for(let i=0; i<15; i++){
-    const el = document.createElement('div');
-    el.className = 'float-item';
-    el.textContent = icons[Math.floor(Math.random()*icons.length)];
-    el.style.left = Math.random() * 100 + 'vw';
-    el.style.animationDuration = (Math.random() * 8 + 6) + 's';
-    el.style.animationDelay = (Math.random() * 5) + 's';
-    el.style.fontSize = (Math.random() * 1 + 1.2) + 'rem';
-    container.appendChild(el);
-  }
-}
-
-function applyTheme() {
-  if (currentUser === 'parent') {
-    document.body.className = 'theme--parent';
-  } else {
-    document.body.className = (currentTheme === '슬라임') ? 'theme--slime' : 'theme--minecraft';
-  }
-}
-
-async function loadvocaWords() {
+async function fetchLibraryData() {
   try {
-    document.getElementById('loadingSubtitle').textContent = "노션에서 단어장을 재미있게 불러오고 있어요...";
-    
     let allResults = []; 
     let hasMore = true; 
     let nextCursor = undefined;
 
-// ➔ 이 부분을 찾아서 싹 교체해 주세요!
-while (hasMore) {
-  // 1. 기본 주문서 작성 (기본 100개씩 커서 위치부터)
-  const bodyData = { page_size: 100 };
-  if (nextCursor) bodyData.start_cursor = nextCursor;
-  
-  // 🎯 [핵심 추가] 만약 중문(로비)에서 ?subject= 꼬리표를 달고 들어왔다면?
-  // 노션 서버에 "과목 다중 선택 태그에 이 과목이 포함된 것만 줘!" 하고 주문서에 필터를 추가합니다.
-  if (currentConfig) {
-    bodyData.filter = {
-      property: "과목",
-      multi_select: {
-        contains: currentConfig.tag // "국어", "과학", "받아쓰기" 등이 자동 매칭됩니다.
-      }
-    };
-  }
-
-  // ----------------------------------------------------
-  // 여기서부터 그 밑에 있는 아래 fetch 로직들은 "절대 수정 금지" (그대로 유지!)
-  // ----------------------------------------------------
-
+    while (hasMore) {
+      const bodyData = { page_size: 100 };
+      if (nextCursor) bodyData.start_cursor = nextCursor;
+      
       const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
         method: "POST", 
         headers: { "Content-Type": "application/json" }, 
@@ -330,693 +166,184 @@ while (hasMore) {
       }); 
       
       const data = await response.json(); 
-      if (!data.results) throw new Error("단어 없음");
+      if (!data.results) throw new Error("단어 데이터가 없습니다.");
 
       allResults = allResults.concat(data.results);
       hasMore = data.has_more;
       nextCursor = data.next_cursor;
     }
 
-    if (allResults.length === 0) throw new Error("단어 없음");
-    
-    const targetMatchName = (currentUserName === '아빠(관리자)') ? '민수' : currentUserName;
-    const cleanLoginName = targetMatchName.trim();
+    const cleanLoginName = currentUserName.trim();
 
-    allFetchedWords = allResults.map(page => {
+    // 🎯 아버님의 1단계 + 2단계 스키마 통합 파싱 엔진
+    allDictionaryWords = allResults.map(page => {
       const p = page.properties;
       
-      // 🚨 [핵심 수정 1] 텍스트로 된 '단원'을 무조건 숫자로 변환해서 충돌을 막습니다!
-      let rawStage = p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number || "1";
-      let numStage = parseInt(rawStage, 10);
-      if (isNaN(numStage)) numStage = 1;
+      const word = p["단어"]?.title[0]?.plain_text || "";
+      const meaning = p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "뜻풀이 없음";
+      
+      // 방어 코드 탑재: 상세설명 조립
+      const detailContext = p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "";
+      
+      // 방어 코드 탑재: 이미지 URL 추출
+      const imgProp = p["이미지파일"]?.files?.[0];
+      const imageUrl = imgProp?.file?.url || imgProp?.external?.url || null;
+
+      // 4총사 속성 추출
+      const pos = p["품사"]?.rich_text?.[0]?.plain_text || ""; 
+      const wordType = p["어휘유형"]?.select?.name || ""; 
+      const grades = p["학년"]?.multi_select?.map(item => item.name) || []; 
+      const isAchieved = p["달성"]?.checkbox || false; 
 
       return {
         pageId: page.id,
-        word: p["단어"]?.title[0]?.plain_text || "",
-        meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "뜻풀이 없음", 
-        hint: p["힌트"]?.rich_text[0]?.plain_text || "",
-        subject: p["과목"]?.multi_select?.map(item => item.name) || ["미분류"], // 과목이 비어있으면 '미분류' 처리
-        stage: numStage, 
-        target: p["학생"]?.multi_select?.map(item => item.name) || [],
+        word, meaning, detailContext, imageUrl, pos, wordType, grades, isAchieved,
+        subject: p["과목"]?.multi_select?.map(item => item.name) || ["미분류"],
+        target: p["학생"]?.multi_select?.map(item => item.name) || []
       };
     }).filter(w => {
-      const hasTarget = w.target.some(t => t.trim() === cleanLoginName);
-      
-      // 🚨 [핵심 수정 2] 뜻풀이가 비어있어도 통과되도록 w.meaning 조건을 삭제했습니다!
-      return w.word !== "" && hasTarget;
+      return w.word !== "" && w.target.some(t => t.trim() === cleanLoginName);
     });
 
-    if (allFetchedWords.length === 0) throw new Error("선택된 아이의 단어가 없음");
+    document.getElementById('loadingArea').style.display = 'none';
+    buildFilters();
+    renderCatalog(allDictionaryWords);
 
-    availableSubjects = [...new Set(allFetchedWords.flatMap(w => w.subject))];
-    
-    if(availableSubjects.length > 0) currentSubject = availableSubjects[0];
-    
-    if (currentUser !== 'parent') {
-      await loadUserProfile();
-    }
-    
-    initSetupUI();
-    showScreen('screen-setup');
-    
   } catch (error) {
     console.error("데이터 로딩 실패:", error);
-    const spinner = document.getElementById('mainLoadingSpinner');
-    const retryBtn = document.getElementById('retryBtn');
-    if (spinner) spinner.style.display = 'none';
-    if (retryBtn) retryBtn.style.display = 'inline-block';
-    
-    document.getElementById('loadingSubtitle').innerHTML = 
-      `<span style="color:var(--pink); font-weight:bold;">⚠️ 연결에 실패했어요!<br><small style="font-size:0.9rem; color:#666;">(${error.message})</small></span>`;
+    document.getElementById('loadingArea').innerHTML = `❌ 데이터를 불러오지 못했어요!<br><br>새로고침을 눌러주세요.`;
   }
 }
 
-async function loadUserProfile() {
-  try {
-    const res = await fetch(`${WORKER_PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { method: 'POST' });
-    if(!res.ok) return; 
-    const data = await res.json();
-    const targetName = (currentUser === 'son') ? "민수" : "민서";
-    userNotionPage = data.results.find(p => p.properties["이름"]?.title[0]?.plain_text === targetName);
-    if (userNotionPage) {
-      userLevel = userNotionPage.properties["용어 레벨"]?.number || 1;
-    }
-  } catch (e) {
-    console.warn("인벤토리 로드 실패:", e);
-  }
-}
-
-function initSetupUI() {
-  document.getElementById('welcomeNameSetup').textContent = currentUserName;
+// 필터 버튼 자동 생성기
+function buildFilters() {
+  const filterArea = document.getElementById('filterArea');
+  // 모든 단어에서 과목 추출 (중복 제거)
+  const subjects = [...new Set(allDictionaryWords.flatMap(w => w.subject))];
   
-  if (currentUser === 'parent') {
-    document.getElementById('levelDisplayArea').style.display = 'none';
-  } else {
-    document.getElementById('levelDisplayArea').style.display = 'inline';
-    document.getElementById('userLevelSetup').textContent = userLevel;
-  }
+  filterArea.innerHTML = `<button class="filter-btn active" onclick="setFilter('전체', this)">전체보기</button>`;
   
-  const sGrid = document.getElementById('subjectGrid');
-  sGrid.innerHTML = "";
-  availableSubjects.forEach((sub, idx) => {
-    const checked = (sub === currentSubject) ? "checked" : "";
-    sGrid.innerHTML += `
-      <input type="radio" name="subjectMode" id="sub_${idx}" value="${sub}" ${checked} onchange="changeSubject('${sub}')">
-      <label for="sub_${idx}" class="btn-label">📚 ${sub}</label>
-    `;
-  });
-  
-  renderStageGrid();
-}
-
-function changeSubject(sub) {
-  currentSubject = sub;
-  renderStageGrid();
-}
-
-function renderStageGrid() {
-  const stages = [...new Set(allFetchedWords.filter(w => w.subject.includes(currentSubject)).map(w => w.stage))].sort((a,b)=>a-b);
-  const stGrid = document.getElementById('stageGrid');
-  stGrid.innerHTML = "";
-  stages.forEach(st => {
-    stGrid.innerHTML += `
-      <input type="checkbox" class="stage-cb" id="st_${st}" value="${st}" checked>
-      <label for="st_${st}" class="btn-label">📍 ${st}단원</label>
-    `;
+  subjects.forEach(sub => {
+    filterArea.innerHTML += `<button class="filter-btn" onclick="setFilter('${sub}', this)">${sub}</button>`;
   });
 }
 
-
-function selectAllStages(status) {
-  document.querySelectorAll('.stage-cb').forEach(cb => cb.checked = status);
+function setFilter(subject, btnEl) {
+  currentFilter = subject;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  filterWords();
 }
 
-function handleQuizTypeChange() {
-  const type = document.querySelector('input[name="quizType"]:checked').value;
-  const hintArea = document.getElementById('hintViewOptionArea');
-  if (type === 'study') {
-    hintArea.style.display = 'none';
+// 돋보기 검색 + 카테고리 필터링 통합 로직
+function filterWords() {
+  const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+  
+  const filtered = allDictionaryWords.filter(w => {
+    const matchSearch = w.word.toLowerCase().includes(searchText) || w.meaning.toLowerCase().includes(searchText);
+    const matchSubject = (currentFilter === '전체') || w.subject.includes(currentFilter);
+    return matchSearch && matchSubject;
+  });
+
+  renderCatalog(filtered);
+}
+
+// 📚 카탈로그 책장 렌더링
+function renderCatalog(wordsToRender) {
+  const grid = document.getElementById('catalogGrid');
+  const emptyMsg = document.getElementById('emptySearchMsg');
+  
+  grid.innerHTML = "";
+  if (wordsToRender.length === 0) {
+    emptyMsg.style.display = 'block';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+
+  wordsToRender.forEach(w => {
+    // 뱃지 HTML 생성
+    let badgesHtml = '';
+    if (w.grades.length > 0) badgesHtml += `<span class="badge grade">${w.grades[0]}</span>`;
+    if (w.pos) badgesHtml += `<span class="badge pos">${w.pos}</span>`;
+    
+    // 달성(마스터) 여부에 따른 왕관 추가
+    const crownHtml = w.isAchieved ? `<div class="master-crown">👑</div>` : '';
+    const masterClass = w.isAchieved ? 'mastered' : '';
+
+    const card = document.createElement('div');
+    card.className = `word-card ${masterClass}`;
+    card.innerHTML = `
+      ${crownHtml}
+      <div class="badge-area">${badgesHtml}</div>
+      <div class="word-title">${w.word}</div>
+    `;
+    
+    // 클릭 시 모달 열기
+    card.onclick = () => openModal(w);
+    grid.appendChild(card);
+  });
+}
+
+// 📖 모달(상세 창) 컨트롤러
+let currentPlayingAudio = null;
+
+function openModal(wordData) {
+  document.getElementById('modalWordTitle').textContent = wordData.word;
+  document.getElementById('modalMeaning').textContent = wordData.meaning;
+  
+  // 이미지 방어 코드 (없으면 display: none)
+  const imgEl = document.getElementById('modalImage');
+  if (wordData.imageUrl) {
+    imgEl.src = wordData.imageUrl;
+    imgEl.style.display = 'block';
   } else {
-    hintArea.style.display = 'block';
+    imgEl.style.display = 'none';
   }
-}
 
-function showScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-}
-
-function goSetup() {
-  document.getElementById('warnMsg').textContent = "";
-  showScreen('screen-setup');
-}
-
-function startQuiz() {
-  const selectedStages = [...document.querySelectorAll('.stage-cb:checked')].map(cb => parseInt(cb.value));
-  if(selectedStages.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 공부할 단원을 선택해주세요!'; return; }
-  
-  filteredPool = allFetchedWords.filter(w => w.subject.includes(currentSubject) && selectedStages.includes(w.stage));
-  if(filteredPool.length === 0) { document.getElementById('warnMsg').textContent = '⚠️ 선택한 단원에 단어가 없습니다!'; return; }
-  
-  currentQuizType = document.querySelector('input[name="quizType"]:checked').value;
-  if (currentQuizType === 'quiz') {
-    currentHintMode = document.querySelector('input[name="hintMode"]:checked').value;
-  }
-  
-  showScreen('screen-order-select');
-}
-
-
-function selectQuizOrder(orderMode) {
-  words = (orderMode === 'random') ? [...filteredPool].sort(() => Math.random() - 0.5) : [...filteredPool];
-  totalCount = words.length; 
-  currentIndex = 0; 
-  score = 0;
-  wrongWordsList = []; // 게임 시작 시 오답 초기화
-  
-  configureInputUI();
-  
-  if (currentUser === 'son' || currentUser === 'parent') {
-    showScreen('screen-minsu-quiz');
-    document.getElementById('minsuScore').textContent = score;
-    displayMinsuQuiz();
+  // 상세설명 토글 방어 코드
+  const detailsGroup = document.getElementById('modalDetailsGroup');
+  if (wordData.detailContext) {
+    document.getElementById('modalDetailContext').innerHTML = wordData.detailContext.replace(/\n/g, '<br>');
+    detailsGroup.style.display = 'block';
+    detailsGroup.removeAttribute('open'); // 열때마다 기본적으로 접어둠
   } else {
-    showScreen('screen-minser-dictation');
-    document.getElementById('minserScore').textContent = score;
-    displayMinserDictation();
+    detailsGroup.style.display = 'none';
+  }
+
+  // 오디오 버튼 연결
+  const audioBtn = document.getElementById('modalAudioBtn');
+  audioBtn.onclick = () => playWordAudio(wordData);
+
+  // 🧚‍♀️ 요정 호출 버튼 연결
+  const fairyBtn = document.getElementById('askFairyBtn');
+  fairyBtn.onclick = () => {
+    alert(`"${wordData.word}"에 대해 요정 선생님을 부릅니다! (요정 채팅창 연동 준비 완료)`);
+    // 차후 요정 스크립트 연결 시: if (typeof openFairyChat === 'function') openFairyChat(wordData.word);
+  };
+
+  const overlay = document.getElementById('wordModal');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('active'), 10);
+}
+
+function closeModal(event, force = false) {
+  const overlay = document.getElementById('wordModal');
+  if (force || event.target === overlay) {
+    overlay.classList.remove('active');
+    setTimeout(() => overlay.style.display = 'none', 300);
   }
 }
 
-function configureInputUI() {
-  const minsuArea = document.getElementById('minsuInputArea');
-  const minserArea = document.getElementById('minserInputArea');
-  
-  if (currentQuizType === 'study') {
-    minsuArea.innerHTML = `<textarea class="input-field" id="answerInput" rows="3" placeholder="뜻을 자유롭게 적어보세요. (비워두고 정답을 확인해도 괜찮아요!)" autocomplete="off"></textarea>`;
-    minserArea.innerHTML = `<textarea class="input-field" id="dictationInput" rows="3" placeholder="뜻을 자유롭게 적어보세요. (비워두고 정답을 확인해도 괜찮아요!)" autocomplete="off"></textarea>`;
-    
-    document.getElementById('submitBtn').textContent = "💡 정답·힌트 확인";
-    document.getElementById('dictSubmitBtn').textContent = "💡 정답·힌트 확인";
-    document.getElementById('justShowBtn').style.display = "inline-block";
-    document.getElementById('dictJustShowBtn').style.display = "inline-block";
-    
-    document.getElementById('minsuScoreBox').style.visibility = 'hidden';
-    document.getElementById('minserScoreBox').style.visibility = 'hidden';
-  } else {
-    minsuArea.innerHTML = `<input type="text" class="input-field" id="answerInput" placeholder="정답 단어를 입력하세요" autocomplete="off">`;
-    minserArea.innerHTML = `<input type="text" class="input-field" id="dictationInput" placeholder="단어를 소리나는 대로 적어보세요" autocomplete="off">`;
-    
-    document.getElementById('submitBtn').textContent = "확인";
-    document.getElementById('dictSubmitBtn').textContent = "확인";
-    document.getElementById('justShowBtn').style.display = "none";
-    document.getElementById('dictJustShowBtn').style.display = "none";
-    
-    document.getElementById('minsuScoreBox').style.visibility = 'visible';
-    document.getElementById('minserScoreBox').style.visibility = 'visible';
-  }
-}
-
-function displayMinsuQuiz() {
-  if(currentIndex >= totalCount) { finishGame(); return; }
-  
-  const word = words[currentIndex];
-  document.getElementById('minsuQNum').textContent = `${currentIndex + 1} / ${totalCount}`;
-  document.getElementById('progressFill').style.width = `${((currentIndex) / totalCount) * 100}%`;
-  
-  const inputEl = document.getElementById('answerInput');
-  inputEl.value = "";
-  inputEl.className = 'input-field';
-  
-  const cardLabel = document.getElementById('cardLabel');
-  const cardContent = document.getElementById('cardContent');
-  
-  if (currentQuizType === 'study') {
-    cardLabel.textContent = "📖 이 단어의 뜻은 무엇일까요?";
-    cardContent.textContent = word.word;
-  } else {
-    cardLabel.textContent = "🧩 단어를 맞춰보세요!";
-    cardContent.textContent = getDisplayInfo(word);
-  }
-}
-
-function displayMinserDictation() {
-  if(currentIndex >= totalCount) { finishGame(); return; }
-  
-  const word = words[currentIndex];
-  document.getElementById('minserQNum').textContent = `${currentIndex + 1} / ${totalCount}`;
-  document.getElementById('progressFill2').style.width = `${((currentIndex) / totalCount) * 100}%`;
-  
-  const inputEl = document.getElementById('dictationInput');
-  inputEl.value = "";
-  inputEl.className = 'input-field';
-  
-  const hintArea = document.getElementById('textHintArea');
-  
-  if (currentQuizType === 'study') {
-    hintArea.textContent = `단어: [ ${word.word} ]\n위의 단어를 읽어보고 뜻을 자유롭게 써보세요!`;
-  } else {
-    hintArea.textContent = word.hint ? `💡 힌트: ${word.hint}` : "🔊 귀를 기울여 소리를 잘 들어보세요!";
-  }
-  
-  speakCurrentWord();
-}
-
-function getDisplayInfo(word) {
-  if (currentHintMode === 'hint') return `💡 힌트:\n${word.hint || '힌트가 없습니다.'}`;
-  if (currentHintMode === 'meaning') return `📖 뜻풀이:\n${word.meaning}`;
-  return `📖 뜻풀이:\n${word.meaning}\n\n💡 힌트:\n${word.hint || '없음'}`;
-}
-
-const AUDIO_PROP_NAME = "음성파일"; 
-
-async function speakCurrentWord() {
-  if (currentIndex >= totalCount) return;
-  const word = words[currentIndex];
-
-  try {
-    const response = await fetch(`${WORKER_PROXY_URL}/v1/pages/${word.pageId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    });
-
-    if (!response.ok) throw new Error("노션 페이지 접근 실패");
-    
-    const pageData = await response.json();
-    const audioProp = pageData.properties[AUDIO_PROP_NAME];
-
-    if (audioProp && audioProp.files && audioProp.files.length > 0) {
-      const latestAudioUrl = audioProp.files[0].file?.url || audioProp.files[0].external?.url;
-      
-      if (latestAudioUrl) {
-        const audio = new Audio(latestAudioUrl);
-        await audio.play();
-        console.log(`[${word.word}] 노션 최신 음성 재생 완료!`);
-        return; 
-      }
-    }
-    
-    throw new Error("오디오 파일이 등록되지 않았습니다.");
-
-  } catch (error) {
-    console.log(`[${word.word}] 직접 녹음 오디오 로드 실패, TTS를 실행합니다. (${error.message})`);
-    fallbackToTTS(word.word);
-  }
-}
-
-function fallbackToTTS(text) {
+// 🔊 오디오/TTS 재생
+async function playWordAudio(word) {
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(word.word);
     utterance.lang = 'ko-KR';
     utterance.rate = 0.85; 
     window.speechSynthesis.speak(utterance);
   }
 }
-
-function submitAnswer() {
-  const inputEl = document.getElementById('answerInput');
-  processAnswer(inputEl);
-}
-
-function submitDictation() {
-  const inputEl = document.getElementById('dictationInput');
-  processAnswer(inputEl);
-}
-
-function showStudyResultDirectly() {
-  const word = words[currentIndex];
-  showResult(true, word.word, word.meaning, true);
-}
-
-function processAnswer(inputEl) {
-  const word = words[currentIndex];
-  const userAns = inputEl.value.trim().replace(/\s+/g, '');
-  const realAns = word.word.replace(/\s+/g, '');
-  
-  if (currentQuizType === 'study') {
-    showResult(true, word.word, word.meaning, true);
-  } else {
-    if (userAns === realAns) {
-      score += 10;
-      if(currentUser === 'son' || currentUser === 'parent') document.getElementById('minsuScore').textContent = score;
-      else document.getElementById('minserScore').textContent = score;
-      
-      inputEl.className = 'input-field success';
-      showResult(true, word.word, word.meaning, false);
-    } else {
-      inputEl.className = 'input-field error';
-      inputEl.classList.add('shake');
-      setTimeout(() => inputEl.classList.remove('shake'), 400);
-      
-      // 🔒 오답이 발생했을 때 리스트에 누적 수집
-      if (!wrongWordsList.includes(word.word)) {
-        wrongWordsList.push(word.word);
-      }
-      
-      showResult(false, word.word, word.meaning, false);
-    }
-  }
-}
-
-function showResult(isCorrect, collectWord, meaning, isStudyMode = false) {
-  const overlay = document.getElementById('resultOverlay');
-  const emoji = document.getElementById('resultEmoji');
-  const title = document.getElementById('resultTitle');
-  const msg = document.getElementById('resultMessage');
-  
-  if (isStudyMode) {
-    emoji.textContent = "📖";
-    title.textContent = `[ ${collectWord} ] 단어 공부`;
-    msg.innerHTML = `정답 단어: <strong>${collectWord}</strong><br><br>💡 <strong>단어의 뜻:</strong><br>${meaning}`;
-  } else {
-    if (isCorrect) {
-      emoji.textContent = "🎉";
-      title.textContent = "정답입니다! 참 잘했어요!";
-      title.style.color = "var(--green)";
-    } else {
-      emoji.textContent = "🔥";
-      title.textContent = "아쉬워요! 다시 확인해봐요!";
-      title.style.color = "var(--pink)";
-    }
-    msg.innerHTML = `정답: <strong>${collectWord}</strong><br><br>📖 <strong>뜻풀이:</strong><br>${meaning}`;
-  }
-  
-  overlay.style.display = 'flex';
-  setTimeout(() => overlay.classList.add('active'), 10);
-}
-
-function closeResult(e) {
-  if(e.target === document.getElementById('resultOverlay')) {
-    nextQuestion();
-  }
-}
-
-function nextQuestion() {
-  const overlay = document.getElementById('resultOverlay');
-  overlay.classList.remove('active');
-  setTimeout(() => overlay.style.display = 'none', 300);
-  
-  currentIndex++;
-  if (currentUser === 'son' || currentUser === 'parent') displayMinsuQuiz();
-  else displayMinserDictation();
-}
-
-// 📈 경험치 기반 레벨 계산기
-// 📈 수정 경험치 20 기준 레벨 계산기 (메인 과목 & 용어 과목 모두 공용으로 사용!)
-function calculateLevelInfo(totalRewards) {
-    let level = 1; let requiredForNext = 20; let accumulatedForCurrentLevel = 0; 
-    while (totalRewards >= accumulatedForCurrentLevel + requiredForNext) {
-        accumulatedForCurrentLevel += requiredForNext; level++; requiredForNext = 20 + (level - 1) * 5; 
-    }
-    return { level };
-}
-
-// 🚚 [핵심 엔진] 과목 레벨과 '용어 평균 레벨'을 동시에 올려주는 투트랙 라우팅
-async function patchRewardToNotion(page, quizScore) {
-    try {
-        const targetProxy = typeof WORKER_PROXY_URL !== 'undefined' ? WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
-        
-        // 1. 배송지(과목) 분류기 작동
-        let subjectColumnName = currentSubject;
-        if (currentSubject === "받아쓰기") subjectColumnName = "국어";
-        else if (currentSubject === "탐구") subjectColumnName = "과학";
-        else if (!["국어", "수학", "사회", "과학", "영어"].includes(currentSubject)) subjectColumnName = "국어"; 
-
-        // 2. 인벤토리 최신 상태 조회
-        const response = await fetch(`${targetProxy}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-            method: "POST", headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify({ filter: { property: "이름", title: { equals: currentUserName === '아빠(관리자)' ? '민수' : currentUserName } } }) 
-        });
-        const data = await response.json();
-        const currentPage = data.results[0];
-        const props = currentPage.properties;
-
-        let earnedPoints = Math.floor(quizScore / 10); 
-        if (earnedPoints === 0) return null; 
-
-        // 3. 날짜 초기화 및 피로도 100개 제한 계산
-        const today = new Date();
-        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-        
-        let lastDateObj = props["최근 접속일"]?.date?.start;
-        let lastDate = lastDateObj ? lastDateObj.split('T')[0] : "";
-        let todaySubjectEarned = props[`오늘 획득_${subjectColumnName}`]?.number || 0;
-        let updateProps = {};
-
-        if (lastDate !== todayStr) {
-            todaySubjectEarned = 0; 
-            updateProps["오늘 획득_국어"] = { number: 0 };
-            updateProps["오늘 획득_수학"] = { number: 0 };
-            updateProps["오늘 획득_영어"] = { number: 0 };
-            updateProps["오늘 획득_사회"] = { number: 0 };
-            updateProps["오늘 획득_과학"] = { number: 0 };
-        }
-
-        const MAX_DAILY = 100;
-        let allowedCurrency = earnedPoints;
-        let isLimitReached = false;
-
-        if (todaySubjectEarned + earnedPoints > MAX_DAILY) {
-            allowedCurrency = Math.max(0, MAX_DAILY - todaySubjectEarned);
-            isLimitReached = true;
-        }
-
-        let diamond = props["다이아몬드 개수"]?.number || 0; 
-        let slime = props["슬라임 파츠 개수"]?.number || 0;
-        let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
-        let currentWealth = previousWealth + allowedCurrency; 
-
-        // ==========================================
-        // 🌟 트랙 A: 메인 과목 경험치 & 레벨 (기존)
-        // ==========================================
-        let currentExp = props[`${subjectColumnName} 경험치`]?.number || 0; 
-        let newExp = currentExp + earnedPoints; 
-        const prevLevelInfo = calculateLevelInfo(currentExp);
-        const currLevelInfo = calculateLevelInfo(newExp);
-
-        // ==========================================
-        // 🌟 트랙 B: 용어 경험치(5과목) & 평균 레벨 계산기
-        // ==========================================
-        // 1. 노션에 있는 5개 과목의 '용어 경험치'를 모조리 긁어옵니다.
-        let gExp_korean = props["용어 경험치_국어"]?.number || 0;
-        let gExp_math = props["용어 경험치_수학"]?.number || 0;
-        let gExp_english = props["용어 경험치_영어"]?.number || 0;
-        let gExp_society = props["용어 경험치_사회"]?.number || 0;
-        let gExp_science = props["용어 경험치_과학"]?.number || 0;
-
-        // 2. 방금 푼 과목에만 경험치를 추가로 더해줍니다!
-        let newGlossaryExp = 0;
-        if (subjectColumnName === "국어") { gExp_korean += earnedPoints; newGlossaryExp = gExp_korean; }
-        else if (subjectColumnName === "수학") { gExp_math += earnedPoints; newGlossaryExp = gExp_math; }
-        else if (subjectColumnName === "영어") { gExp_english += earnedPoints; newGlossaryExp = gExp_english; }
-        else if (subjectColumnName === "사회") { gExp_society += earnedPoints; newGlossaryExp = gExp_society; }
-        else if (subjectColumnName === "과학") { gExp_science += earnedPoints; newGlossaryExp = gExp_science; }
-
-        // 3. 5개 과목의 경험치를 각각 '단일 레벨'로 환산합니다.
-        let gLvl_korean = calculateLevelInfo(gExp_korean).level;
-        let gLvl_math = calculateLevelInfo(gExp_math).level;
-        let gLvl_english = calculateLevelInfo(gExp_english).level;
-        let gLvl_society = calculateLevelInfo(gExp_society).level;
-        let gLvl_science = calculateLevelInfo(gExp_science).level;
-
-        // 4. [핵심] 환산된 5개의 레벨을 모두 더하고 5로 나누어 '평균'을 구합니다. (소수점 버림)
-        let averageGlossaryLevel = Math.floor((gLvl_korean + gLvl_math + gLvl_english + gLvl_society + gLvl_science) / 5);
-
-        // ==========================================
-        // 📦 보따리 싸기 (최종 업데이트)
-        // ==========================================
-        updateProps["최근 접속일"] = { date: { start: todayStr } };
-        updateProps[`오늘 획득_${subjectColumnName}`] = { number: todaySubjectEarned + allowedCurrency };
-        
-        // 트랙 A 업데이트
-        updateProps[`${subjectColumnName} 경험치`] = { number: newExp };
-        updateProps[`${subjectColumnName} 레벨`] = { number: currLevelInfo.level };
-        
-        // 트랙 B 업데이트 (방금 푼 과목의 용어 경험치만 덮어쓰기)
-        updateProps[`용어 경험치_${subjectColumnName}`] = { number: newGlossaryExp };
-        
-        // 🎯 최종 산출된 통합 평균 레벨 덮어쓰기!
-        updateProps["용어 레벨"] = { number: averageGlossaryLevel };
-
-        if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
-        else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
-
-        await fetch(`${targetProxy}/v1/pages/${currentPage.id}`, {
-            method: "PATCH", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ properties: updateProps })
-        });
-
-        return { 
-            earned: allowedCurrency, 
-            originalEarned: earnedPoints, 
-            currentCount: currentWealth, 
-            level: currLevelInfo.level, 
-            isLevelUp: currLevelInfo.level > prevLevelInfo.level,
-            subject: subjectColumnName,
-            isLimitReached
-        };
-    } catch (err) {
-        console.error("라우팅 배송 실패:", err);
-        return null;
-    }
-}
-
-// 🏁 라우팅 결과를 화면에 예쁘게 띄워주는 게임 종료 함수
-async function finishGame() {
-  let finishMsg = "";
-  
-  if (currentUser === 'parent' || currentQuizType === 'study') {
-    if (currentQuizType === 'study') {
-      finishMsg = `오늘 단어 공부 세션을 완수했습니다!\n스스로 뜻을 고민해 본 모든 단어들이 큰 지식이 될 거예요!`;
-    } else {
-      finishMsg = `테스트용 퀴즈 세션이 끝났습니다.\n총 점수: <strong>${score}점</strong> (부모 모드이므로 노션에 점수가 기록되지 않습니다.)`;
-    }
-    
-    document.getElementById('resultEmoji').textContent = "🏆";
-    document.getElementById('resultTitle').textContent = "체험 완료!";
-    document.getElementById('resultMessage').innerHTML = finishMsg;
-    
-    const btn = document.querySelector('#resultModal button');
-    btn.textContent = "로비로 나가기 🌟";
-    btn.onclick = () => { exitRoom(); }; 
-    
-    document.getElementById('resultOverlay').style.display = 'flex';
-    document.getElementById('resultOverlay').classList.add('active');
-  } else {
-    if (document.getElementById('screen-minsu-quiz')) document.getElementById('screen-minsu-quiz').style.display = 'none';
-    if (document.getElementById('screen-minser-dictation')) document.getElementById('screen-minser-dictation').style.display = 'none';
-    
-    document.getElementById('loadingSubtitle').innerHTML = `🍏 과목 지식 창고로 경험치와 보상을 배송하고 있어요...`;
-    showScreen('screen-loading');
-    
-    let rewardResult = null;
-    if (userNotionPage) {
-      rewardResult = await patchRewardToNotion(userNotionPage, score);
-    }
-    
-    document.getElementById('resultEmoji').textContent = "🚚";
-    document.getElementById('resultTitle').textContent = "배송 완료!";
-    
-    if (rewardResult) {
-      const rewardIcon = currentTheme === '마인크래프트' ? '💎' : '💧';
-      let limitMsg = rewardResult.isLimitReached ? `<div style="background: rgba(255,152,0,0.1); border: 2px solid #ff9800; color: #ff9800; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; font-size: 0.9rem;">⚠️ 오늘 ${rewardResult.subject} 광산의 보상을 모두 캤습니다!<br>(경험치만 오릅니다!)</div>` : '';
-      
-      document.getElementById('resultMessage').innerHTML = `
-        ${limitMsg}
-        🎯 <strong>[${rewardResult.subject} 창고]</strong>로 배송 완료!<br><br>
-        획득 점수: <strong>${score}점</strong> (경험치 +${rewardResult.originalEarned})<br>
-        획득 보상: <strong>${rewardIcon} +${rewardResult.earned}개</strong><br>
-        현재 총 자산: <strong>${rewardResult.currentCount}개</strong><br>
-        ${rewardResult.subject} 레벨: <strong>Lv.${rewardResult.level}</strong> ${rewardResult.isLevelUp ? '🎉 레벨업!' : ''}
-      `;
-    } else {
-      document.getElementById('resultMessage').innerHTML = `획득 점수: <strong>${score}점</strong><br>기록 처리가 완료되었습니다.`;
-    }
-    
-    const btn = document.querySelector('#resultModal button');
-    btn.textContent = "공부방 종료하기";
-    btn.onclick = () => { exitRoom(); };
-    
-    showScreen('screen-loading');
-    document.getElementById('screen-loading').classList.remove('active');
-    
-    document.getElementById('resultOverlay').style.display = 'flex';
-    document.getElementById('resultOverlay').classList.add('active');
-  }
-}
-
-function toggleProfileManually() {
-  if (currentUser === 'son') {
-    currentUser = 'daughter';
-    currentUserName = '민서';
-    currentTheme = '슬라임';
-  } else if (currentUser === 'daughter') {
-    currentUser = 'parent';
-    currentUserName = '아빠(관리자)';
-    currentTheme = '부모';
-  } else {
-    currentUser = 'son';
-    currentUserName = '민수';
-    currentTheme = '마인크래프트';
-  }
-  localStorage.setItem('currentUser', currentUser);
-  localStorage.setItem('currentUserName', currentUserName);
-  localStorage.setItem('currentTheme', currentTheme);
-  location.reload(); 
-}
-
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    if (document.getElementById('resultOverlay').classList.contains('active')) {
-      nextQuestion();
-      return;
-    }
-    if (document.getElementById('screen-minsu-quiz').classList.contains('active')) {
-      submitAnswer();
-    } else if (document.getElementById('screen-minser-dictation').classList.contains('active')) {
-      submitDictation();
-    }
-  }
-});
-
-window.addEventListener('load', () => { 
-  createFloats();
-  applyTheme(); 
-  loadvocaWords(); 
-});
-
-
-// =================================================================
-// 📍 Step 4: 만능 블랙박스 템플릿 결합 (용어사전방 맞춤형 커스텀)
-// =================================================================
-
-// 🔒 중복 전송 방지용 자물쇠
-let isExiting = false; 
-
-// 🚀 최종 탈출 및 학습 일지 전송 함수
-async function exitRoom() {
-    if (isExiting) return; 
-    isExiting = true;      
-
-    const roomEndTime = new Date(); 
-    // 🚨 여기서도 우회한 vocaRoomStartTime을 사용하도록 수정 완료!
-    const timeDiff = roomEndTime - vocaRoomStartTime; 
-    let calculatedMinutes = Math.floor(timeDiff / 60000);
-    if (calculatedMinutes < 1) calculatedMinutes = 1; 
-
-    // 🎯 [수정 포인트 1] 실시간 누적된 오답 배열을 문자열로 결합
-    const currentErrorReport = wrongWordsList.length > 0 ? wrongWordsList.join(', ') : "오답 없음"; 
-
-    // 🎯 [수정 포인트 2] 용어사전방은 단어요정이 없으므로 0 고정
-    const currentWordFairy = 0; 
-
-    // ✨ 노션으로 데이터 발사!
-    const success = await sendStudyLogToNotion({
-        childName: currentUser === 'son' ? '민수' : (currentUser === 'daughter' ? '민서' : '부모관리자'), 
-        // 🎯 [수정 포인트 3] 노션 DB 과목 설계명 매칭
-        subject: "국어(용어사전)",                  
-        startTime: vocaRoomStartTime.toISOString(),  
-        endTime: roomEndTime.toISOString(),      
-        durationMinutes: calculatedMinutes,      
-        errorReport: currentErrorReport,         
-        wordFairyCount: currentWordFairy         
-    });
-
-// [수정 후] 
-if (success) {
-    console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료!`);
-    // 🎯 [수정 포인트 4] 탈출 후 돌아갈 상위 대시보드 로비 주소
-    location.href = '../../lobby.html'; // 👈 여기 점 개수를 늘렸습니다!
-} else {
-        alert("앗! 학습 일지 기록에 문제가 생겨서 나가지 못했습니다.");
-        isExiting = false; 
-    }
-}
-
-// 🚨 블랙박스 강제 종료 생존 로직
-window.addEventListener('pagehide', () => {
-    exitRoom();
-});
 </script>
 </body>
 </html>
