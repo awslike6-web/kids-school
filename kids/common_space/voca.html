@@ -106,39 +106,32 @@
   <p style="color:#666;" id="welcomeMsg">찾고 싶은 과목이나 학년을 선택해 보세요!</p>
 </div>
 
-<!-- 🔍 돋보기 검색 -->
 <div class="search-container">
   <input type="text" id="searchInput" class="search-input" placeholder="🔍 궁금한 단어를 직접 쳐보셔도 돼요!" oninput="handleSearch()">
 </div>
 
-<!-- 📂 과목별 책장 버튼 목록 -->
 <div class="section-title">과목별 보기</div>
 <div class="filter-group" id="subjectFilterArea"></div>
 
-<!-- 🎒 학년별 책장 버튼 목록 -->
 <div class="section-title">학년별 보기</div>
 <div class="filter-group" id="gradeFilterArea"></div>
 
 <hr style="max-width: 600px; margin: 30px auto; border: 1px dashed #ccc;">
 
-<!-- 🧚‍♀️ [신규] 화면에 상시 대기 중인 요정 선생님 방 -->
 <div class="fairy-sidebar" id="fairyRoom" style="display:none;">
   <div class="fairy-avatar">🧚‍♀️</div>
   <div style="font-size:1.2rem; font-weight:bold; margin-bottom:10px;">요정 코코의 실시간 지식 가이드</div>
   <div class="fairy-chatbox" id="fairyReplyBox">단어를 선택하고 팝업창에서 물어보거나, 궁금한 것을 검색해 보세요! 귀여운 요정이 친절하게 설명해 줄게요! ✨</div>
 </div>
 
-<!-- 📚 현재 상태 안내 대화창 -->
 <div class="status-msg" id="statusMsg">📚 카테고리를 선택하거나 단어를 검색해 주세요!</div>
 
 <div id="loadingArea" class="loading-spinner"></div>
 
-<!-- 🧱 [변경] 단원별 분리 구역이 들어갈 메인 그릇 -->
 <div id="librarySectionsContainer"></div>
 
 <div id="emptySearchMsg" style="display:none; text-align:center; padding: 40px; color:#888; font-size:1.2rem;">해당하는 단어가 아직 등록되지 않았어요! 😢</div>
 
-<!-- 📖 단어 상세 팝업 -->
 <div class="modal-overlay" id="wordModal" onclick="closeModal(event)">
   <div class="modal-content">
     <button class="close-modal" onclick="closeModal(event, true)">✖</button>
@@ -152,13 +145,11 @@
       <summary>상세설명 보기 (심화)</summary>
       <div class="details-content" id="modalDetailContext">상세설명 내용...</div>
     </details>
-<!-- 🧚‍♀️ 꼬리 질문을 위한 코코 요정 채팅 상자 (보수 완료) -->
-    <div style="margin-top: 15px; padding: 15px; border: 2px dashed #ff9a9e; border-radius: 12px; background-color: #fff0f5;">
+<div style="margin-top: 15px; padding: 15px; border: 2px dashed #ff9a9e; border-radius: 12px; background-color: #fff0f5;">
       <button class="ask-fairy-btn" id="askFairyBtn" onclick="toggleFairyBox()" style="width: 100%; padding: 10px; background-color: #ff9a9e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px;">
         🧚‍♀️ 요정 선생님께 자세히 물어보기 (열기/닫기)
       </button>
 
-      <!-- 처음에 숨겨져 있다가 버튼 누르면 열리는 대화창 -->
       <div id="fairyChatArea" style="display: none; margin-top: 12px;">
         <div style="display: flex; gap: 8px; margin-bottom: 10px;">
           <input type="text" id="fairyQuestion" placeholder="설명 중 모르는 단어를 물어보세요! (예: 관성이 뭐야?)" 
@@ -174,7 +165,7 @@
       </div>
     </div>
 
-  </div> <!-- 모달창을 닫는 디브 태그 -->
+  </div> </div>
 
 <script src="/kids-school/kids/config.js"></script>
 <script src="/kids-school/kids/core/notion-helper.js"></script>
@@ -347,25 +338,48 @@ function renderCatalogSections(wordsToRender) {
 function openModal(wordData) {
   document.getElementById('modalWordTitle').textContent = wordData.word;
   document.getElementById('modalMeaning').textContent = wordData.meaning;
+  
   const imgEl = document.getElementById('modalImage');
-  if (wordData.imageUrl) { imgEl.src = wordData.imageUrl; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
+  if (wordData.imageUrl) { 
+    imgEl.src = wordData.imageUrl; 
+    imgEl.style.display = 'block'; 
+  } else { 
+    imgEl.style.display = 'none'; 
+  }
+  
   const detailsGroup = document.getElementById('modalDetailsGroup');
   if (wordData.detailContext) {
     document.getElementById('modalDetailContext').innerHTML = wordData.detailContext.replace(/\n/g, '<br>');
-    detailsGroup.style.display = 'block'; detailsGroup.removeAttribute('open');
-  } else { detailsGroup.style.display = 'none'; }
+    detailsGroup.style.display = 'block'; 
+    detailsGroup.removeAttribute('open');
+  } else { 
+    detailsGroup.style.display = 'none'; 
+  }
+  
   document.getElementById('modalAudioBtn').onclick = () => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(wordData.word);
-      utterance.lang = 'ko-KR'; utterance.rate = 0.85; window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.cancel(); 
+      const utterance = new SpeechSynthesisUtterance(wordData.word);
+      utterance.lang = 'ko-KR'; 
+      utterance.rate = 0.85; 
+      window.speechSynthesis.speak(utterance);
     }
   };
-  document.getElementById('askFairyBtn').onclick = () => { askFairyTeacher(wordData.word, wordData.meaning); closeModal(null, true); };
-  const overlay = document.getElementById('wordModal'); overlay.style.display = 'flex';
+
+  // 💡 [수정 1] 팝업창이 열릴 때마다 요정 채팅창을 깔끔하게 초기화합니다.
+  document.getElementById('fairyChatArea').style.display = 'none';
+  document.getElementById('fairyQuestion').value = '';
+  document.getElementById('fairyAnswerBox').innerHTML = '<span style="color: #999;">궁금한 점을 적고 보내기 버튼을 눌러주렴! ✨</span>';
+
+  // 💡 [수정 2] 요정 자동 해설 실행 (이제 버튼 클릭을 덮어쓰지 않습니다)
+  askFairyTeacher(wordData.word, wordData.meaning);
+
+  const overlay = document.getElementById('wordModal'); 
+  overlay.style.display = 'flex';
   setTimeout(() => overlay.classList.add('active'), 10);
 }
 
-// 모달창 닫기 (중복 제거 완료)
+// 모달창 닫기
 function closeModal(event, force = false) {
   const overlay = document.getElementById('wordModal');
   if (force || event.target === overlay) { 
