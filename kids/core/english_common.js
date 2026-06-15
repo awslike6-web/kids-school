@@ -1,5 +1,5 @@
 // ==========================================================
-// ⚙️ 민민이네 영어 멀티버스 코어 운영 엔진 V1.1 (학년 다중선택 패치)
+// ⚙️ 민민이네 영어 멀티버스 코어 운영 엔진 V1.2 (단원/학년 속성 완벽 대응)
 // (Voca, Phonics, Reading, Grammar 공통 사용)
 // ==========================================================
 
@@ -60,12 +60,14 @@ async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
                 id: page.id,
                 word: p["단어"]?.title[0]?.plain_text || "",
                 meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "",
-                // 과목 다중 선택
                 subject: p["과목"]?.multi_select?.map(item => item.name) || [],
                 type: p["어휘유형"]?.select?.name || "",
-                level: p["단원"]?.number || p["단원"]?.select?.name || "기본",
-                // 💡 [수정 완료] 학년 속성이 '다중 선택(multi_select)'일 때 제일 첫 번째 태그(예: "5-2")를 가져옵니다!
-                grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || "공통"
+                
+                // 💡 [강력해진 필터 1] 단원이 숫자, 단일선택, 다중선택, 일반 텍스트 중 무엇이든 찾아옵니다!
+                level: p["단원"]?.number || p["단원"]?.select?.name || p["단원"]?.multi_select?.[0]?.name || p["단원"]?.rich_text?.[0]?.plain_text || "기본",
+                
+                // 💡 [강력해진 필터 2] 학년 역시 다중선택, 단일선택, 일반 텍스트 모두 대응합니다!
+                grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || p["학년"]?.rich_text?.[0]?.plain_text || "공통"
             };
         }).filter(w => w.word !== "" && (w.subject.includes(subjectFilter) || w.subject.includes("영단어")));
 
