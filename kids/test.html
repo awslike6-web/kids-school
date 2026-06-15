@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아이들 공부방 - 요정 대화 로컬 테스트</title>
+    <title>아이들 공부방 - 요정 대화 최신 테스트</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f4f8; margin: 0; }
         .chat-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 400px; }
@@ -19,7 +19,7 @@
 <body>
 
 <div class="chat-container">
-    <h2 style="color: #2d3748; margin-top: 0;">🧚 요정 고래랑 대화하기</h2>
+    <h2 style="color: #2d3748; margin-top: 0;">🧚 요정 고래랑 대화하기 (v2.5)</h2>
     
     <div class="key-input-box">
         <span class="label" style="color: #dd6b20;">🔑 Gemini API Key 설정</span>
@@ -35,7 +35,7 @@
     </div>
     
     <div>
-        <span class="label">요정의 대답 (Gemini + TTS 목소리)</span>
+        <span class="label">요정의 대답 (Gemini 2.5 + TTS 목소리)</span>
         <p id="fairy-reply" style="color: #2b6cb0; font-weight: bold;">대기 중...</p>
     </div>
 </div>
@@ -52,7 +52,7 @@ function saveApiKey() {
     const key = document.getElementById('api-key-input').value.trim();
     if (key) {
         localStorage.setItem('MY_GEMINI_KEY', key);
-        alert("키가 브라우저에 안전하게 저장되었습니다! 🎉");
+        alert("최신 API 키가 브라우저에 저장되었습니다! 🎉");
     } else {
         alert("키를 입력해 주세요.");
     }
@@ -72,7 +72,7 @@ const FAIRY_PROMPT = `
 function startVoiceChat() {
     const apiKey = localStorage.getItem('MY_GEMINI_KEY');
     if (!apiKey) {
-        alert("먼저 상단의 설정 창에 Gemini API 키를 입력하고 저장해 주세요!");
+        alert("설정 창에 Gemini API 키를 입력하고 저장해 주세요!");
         return;
     }
 
@@ -82,7 +82,7 @@ function startVoiceChat() {
 
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Recognition) {
-        alert("이 브라우저는 음성 인식을 지원하지 않습니다. 크롬(Chrome)을 사용해 주세요.");
+        alert("크롬(Chrome) 브라우저를 사용해 주세요.");
         resetButton();
         return;
     }
@@ -96,24 +96,25 @@ function startVoiceChat() {
         const rawText = event.results[0][0].transcript;
         document.getElementById('child-speech').innerText = rawText;
         
-        askGeminiDirect(rawText, apiKey);
+        askGeminiNextGen(rawText, apiKey);
     };
 
     recognition.onerror = function(event) {
         console.error("STT 에러:", event.error);
-        alert("마이크 인식을 실패했습니다. 권한 허용을 확인해 주세요.");
+        alert("마이크 인식을 실패했습니다. 권한을 확인해 주세요.");
         resetButton();
     };
 
     recognition.start();
 }
 
-// 🛠️ 구글 정식 v1 안정화 엔드포인트 및 호출 규격 수정
-async function askGeminiDirect(childText, apiKey) {
+// 🛠️ Gemini 2.x 세대 전용 초고속 엔드포인트 파이프라인
+async function askGeminiNextGen(childText, apiKey) {
     document.getElementById('fairy-reply').innerText = "요정 생각 중... 💭";
     
-    // 주소를 정식 v1 버전으로 교체하여 404 에러 원천 차단
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // 🌟 구글 최신 차세대 엔진 gemini-2.5-flash 지점 직접 타격
+    // 만약 계정 생성 시기에 따라 2.5 인식이 안 되면 아래 주소의 'gemini-2.5-flash'를 'gemini-2.0-flash'로만 바꿔주시면 됩니다!
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     try {
         const response = await fetch(url, {
@@ -129,21 +130,21 @@ async function askGeminiDirect(childText, apiKey) {
             })
         });
 
-        // 404 등 응답 에러가 날 경우 에러메시지 상세 출력하도록 보완
         if (!response.ok) {
             const errorData = await response.json();
-            console.error("구글 서버 에러 상세:", errorData);
-            throw new Error(`서버가 에러를 반환했습니다. 상태코드: ${response.status}`);
+            console.error("구글 2.x 서버 에러 상세:", errorData);
+            throw new Error(`서버 에러 코드: ${response.status}`);
         }
 
         const data = await response.json();
         
+        // 2.x 세대 응답 규격 파싱
         if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
             const fairyText = data.candidates[0].content.parts[0].text;
             document.getElementById('fairy-reply').innerText = fairyText;
             speakResponse(fairyText);
         } else {
-            throw new Error("API 응답 구조가 올바르지 않습니다.");
+            throw new Error("API 응답 구조 파싱 실패");
         }
 
     } catch (error) {
