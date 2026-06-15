@@ -64,6 +64,8 @@ async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
                 subject: p["과목"]?.multi_select?.map(item => item.name) || [],
                 type: p["어휘유형"]?.select?.name || "",
                 level: p["단원"]?.number || p["단원"]?.select?.name || "기본"
+              // 💡 [추가된 부분] 노션에서 '학년' 정보도 가져옵니다!
+                grade: p["학년"]?.rich_text[0]?.plain_text || p["학년"]?.select?.name || "공통"
             };
         }).filter(w => w.word !== "" && (w.subject.includes(subjectFilter) || w.subject.includes("영단어")));
 
