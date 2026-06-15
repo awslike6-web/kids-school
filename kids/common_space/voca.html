@@ -365,7 +365,7 @@ async function askFairyTeacher(word, meaning) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o-mini", 
+        model: "gemini-2.0-flash", 
         messages: [
           { role: "system", content: "너는 유치원생과 초등학교 저학년 아이들을 다정하게 가르치는 귀여운 요정 선생님 코코야. 사용자가 단어와 뜻을 주면, 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘. 말투는 '~했단다!', '~란다!' 처럼 구연동화 말투를 써줘." },
           { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
