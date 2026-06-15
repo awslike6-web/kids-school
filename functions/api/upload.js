@@ -1,46 +1,37 @@
-export async function onRequestPost(context) {
-  const { request, env } = context;
-  
-  try {
-    const body = await request.json();
-    const { fileName, fileContentBase64 } = body;
+async function uploadFile() {
+    if (!selectedFile || !fileBase64) return;
+    
+    uploadBtn.innerText = "🚀 우주로 전송 중...";
+    uploadBtn.disabled = true;
 
-    // 1. 디버깅용: 받은 데이터가 제대로 왔는지 확인
-    if (!fileContentBase64) {
-      return new Response(JSON.stringify({ success: false, error: "데이터가 비어있습니다." }), { status: 400 });
-    }
-
-    // 2. 깃허브 API 요청 전송
-    const response = await fetch(`https://api.github.com/repos/awslike6-web/kids-school/contents/uploads/${fileName}`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `token ${env.GITHUB_TOKEN}`,
-        "Content-Type": "application/json",
-        "User-Agent": "Cloudflare-Worker"
-      },
-      body: JSON.stringify({
-        message: "사진 업로드: " + fileName,
-        content: fileContentBase64
-      })
+    // 데이터를 미리 JSON으로 만듭니다.
+    const payload = JSON.stringify({
+      fileName: selectedFile.name,
+      fileContentBase64: fileBase64
     });
 
-    const result = await response.json();
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Content-Length": payload.length.toString() // 🚨 데이터 길이를 강제로 명시!
+        },
+        body: payload
+      });
 
-    if (response.ok) {
-      return new Response(JSON.stringify({ success: true, url: result.content.download_url }), {
-        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
-      });
-    } else {
-      // 🚨 여기서 깃허브가 거절한 이유를 상세히 띄워줍니다.
-      return new Response(JSON.stringify({ success: false, error: "깃허브 거절: " + JSON.stringify(result) }), { 
-        status: 500,
-        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
-      });
+      const data = await response.json();
+
+      if (data.success) {
+        document.getElementById('resultArea').style.display = 'block';
+        document.getElementById('resultUrl').innerText = data.url;
+        uploadBtn.innerText = "✅ 전송 완료!";
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      alert("앗! 에러가 발생했어요: " + error.message);
+      uploadBtn.innerText = "로켓 발사! (업로드)";
+      uploadBtn.disabled = false;
     }
-  } catch (err) {
-    return new Response(JSON.stringify({ success: false, error: "시스템 에러: " + err.message }), { 
-      status: 500,
-      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
-    });
   }
-}
