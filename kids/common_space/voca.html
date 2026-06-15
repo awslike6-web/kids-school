@@ -161,6 +161,9 @@
 <script src="/kids-school/kids/core/notion-helper.js"></script>
 
 <script>
+// ===================================================
+// ⚙️ 지식 도서관 통합 제어 엔진 (voca.html 전용)
+// ===================================================
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
 
@@ -178,6 +181,7 @@ window.addEventListener('load', () => {
   fetchLibraryData(); 
 });
 
+// [기존 유지] 노션 대용량 데이터 파싱 엔진
 async function fetchLibraryData() {
   try {
     let allResults = []; let hasMore = true; let nextCursor = undefined;
@@ -216,7 +220,7 @@ async function fetchLibraryData() {
 
     document.getElementById('loadingArea').style.display = 'none';
     buildFilterButtons();
-    renderCatalogSections([]); // 첫 진입 시 빈 상태
+    renderCatalogSections([]); 
 
   } catch (error) {
     console.error("데이터 로딩 실패:", error);
@@ -224,200 +228,144 @@ async function fetchLibraryData() {
   }
 }
 
+// [기존 유지] UI 카테고리 필터 및 렌더링 함수들
 function buildFilterButtons() {
   const subArea = document.getElementById('subjectFilterArea');
   const gradeArea = document.getElementById('gradeFilterArea');
-  
   const subjects = [...new Set(allDictionaryWords.flatMap(w => w.subject))];
   const grades = [...new Set(allDictionaryWords.flatMap(w => w.grades))].sort();
-
   subArea.innerHTML = "";
-  subjects.forEach(sub => {
-    subArea.innerHTML += `<button class="filter-btn" onclick="clickSubject('${sub}', this)">📘 ${sub}</button>`;
-  });
-
+  subjects.forEach(sub => { subArea.innerHTML += `<button class="filter-btn" onclick="clickSubject('${sub}', this)">📘 ${sub}</button>`; });
   gradeArea.innerHTML = "";
-  grades.forEach(g => {
-    gradeArea.innerHTML += `<button class="filter-btn" onclick="clickGrade('${g}', this)">🎒 ${g}</button>`;
-  });
+  grades.forEach(g => { gradeArea.innerHTML += `<button class="filter-btn" onclick="clickGrade('${g}', this)">🎒 ${g}</button>`; });
 }
 
 function clickSubject(subject, btnEl) {
-  document.getElementById('searchInput').value = "";
-  selectedGrade = null;
+  document.getElementById('searchInput').value = ""; selectedGrade = null;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  
   if (selectedSubject === subject) {
-    selectedSubject = null;
-    document.getElementById('statusMsg').textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
-    document.getElementById('fairyRoom').style.display = 'none';
-    renderCatalogSections([]);
+    selectedSubject = null; document.getElementById('statusMsg').textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
+    document.getElementById('fairyRoom').style.display = 'none'; renderCatalogSections([]);
   } else {
-    selectedSubject = subject;
-    btnEl.classList.add('active');
+    selectedSubject = subject; btnEl.classList.add('active');
     document.getElementById('statusMsg').textContent = `📂 [${subject}] 과목 단어장`;
-    document.getElementById('fairyRoom').style.display = 'block';
-    executeFilter();
+    document.getElementById('fairyRoom').style.display = 'block'; executeFilter();
   }
 }
 
 function clickGrade(grade, btnEl) {
-  document.getElementById('searchInput').value = "";
-  selectedSubject = null;
+  document.getElementById('searchInput').value = ""; selectedSubject = null;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  
   if (selectedGrade === grade) {
-    selectedGrade = null;
-    document.getElementById('statusMsg').textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
-    document.getElementById('fairyRoom').style.display = 'none';
-    renderCatalogSections([]);
+    selectedGrade = null; document.getElementById('statusMsg').textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
+    document.getElementById('fairyRoom').style.display = 'none'; renderCatalogSections([]);
   } else {
-    selectedGrade = grade;
-    btnEl.classList.add('active');
+    selectedGrade = grade; btnEl.classList.add('active');
     document.getElementById('statusMsg').textContent = `🎒 [${grade}] 학년 단어장`;
-    document.getElementById('fairyRoom').style.display = 'block';
-    executeFilter();
+    document.getElementById('fairyRoom').style.display = 'block'; executeFilter();
   }
 }
 
 function handleSearch() {
-  selectedSubject = null;
-  selectedGrade = null;
+  selectedSubject = null; selectedGrade = null;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  
   const searchText = document.getElementById('searchInput').value.trim();
   if (searchText === "") {
     document.getElementById('statusMsg').textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
-    document.getElementById('fairyRoom').style.display = 'none';
-    renderCatalogSections([]);
-    return;
+    document.getElementById('fairyRoom').style.display = 'none'; renderCatalogSections([]); return;
   }
-  
   document.getElementById('statusMsg').textContent = `🔍 "${searchText}" 검색 결과`;
-  document.getElementById('fairyRoom').style.display = 'block';
-  executeFilter();
+  document.getElementById('fairyRoom').style.display = 'block'; executeFilter();
 }
 
 function executeFilter() {
   const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
-  
   const filtered = allDictionaryWords.filter(w => {
-    if (searchText !== "") {
-      return w.word.toLowerCase().includes(searchText) || w.meaning.toLowerCase().includes(searchText);
-    }
+    if (searchText !== "") return w.word.toLowerCase().includes(searchText) || w.meaning.toLowerCase().includes(searchText);
     if (selectedSubject) return w.subject.includes(selectedSubject);
     if (selectedGrade) return w.grades.includes(selectedGrade);
     return false;
   });
-
   renderCatalogSections(filtered);
 }
 
-// 🧱 [핵심 변경] 단어들을 단원별로 그루핑하여 분리 진열하는 엔진
 function renderCatalogSections(wordsToRender) {
   const container = document.getElementById('librarySectionsContainer');
   const emptyMsg = document.getElementById('emptySearchMsg');
   container.innerHTML = "";
-  
   if (wordsToRender.length === 0) {
     const searchActive = selectedSubject || selectedGrade || document.getElementById('searchInput').value.trim() !== "";
-    emptyMsg.style.display = searchActive ? 'block' : 'none';
-    return;
+    emptyMsg.style.display = searchActive ? 'block' : 'none'; return;
   }
   emptyMsg.style.display = 'none';
-
-  // 1. 단원(stage)별로 묶기
   const sectionsMap = {};
   wordsToRender.forEach(w => {
     const stageName = w.stage || "기본 단원";
     if (!sectionsMap[stageName]) sectionsMap[stageName] = [];
     sectionsMap[stageName].push(w);
   });
-
-  // 2. 묶인 단원별로 섹션 HTML 생성
   Object.keys(sectionsMap).sort().forEach(stageName => {
     const sectionData = sectionsMap[stageName];
-    
-    const sectionDiv = document.createElement('div');
-    sectionDiv.className = 'stage-section';
-    
-    // 단원 타이틀 (숫자나 글자 자동 매핑)
-    const header = document.createElement('div');
-    header.className = 'stage-header';
+    const sectionDiv = document.createElement('div'); sectionDiv.className = 'stage-section';
+    const header = document.createElement('div'); header.className = 'stage-header';
     header.textContent = isNaN(stageName) ? stageName : `${stageName}단원`;
     sectionDiv.appendChild(header);
-    
-    // 해당 단원의 단어 그리드
-    const grid = document.createElement('div');
-    grid.className = 'catalog-grid';
-    
+    const grid = document.createElement('div'); grid.className = 'catalog-grid';
     sectionData.forEach(w => {
       let badgesHtml = '';
       if (w.grades.length > 0) badgesHtml += `<span class="badge grade">${w.grades[0]}</span>`;
       if (w.pos) badgesHtml += `<span class="badge pos">${w.pos}</span>`;
       const crownHtml = w.isAchieved ? `<div class="master-crown">👑</div>` : '';
       const masterClass = w.isAchieved ? 'mastered' : '';
-
-      const card = document.createElement('div');
-      card.className = `word-card ${masterClass}`;
+      const card = document.createElement('div'); card.className = `word-card ${masterClass}`;
       card.innerHTML = `${crownHtml}<div class="badge-area">${badgesHtml}</div><div class="word-title">${w.word}</div>`;
-      card.onclick = () => openModal(w);
-      grid.appendChild(card);
+      card.onclick = () => openModal(w); grid.appendChild(card);
     });
-    
-    sectionDiv.appendChild(grid);
-    container.appendChild(sectionDiv);
+    sectionDiv.appendChild(grid); container.appendChild(sectionDiv);
   });
 }
 
 function openModal(wordData) {
   document.getElementById('modalWordTitle').textContent = wordData.word;
   document.getElementById('modalMeaning').textContent = wordData.meaning;
-  
   const imgEl = document.getElementById('modalImage');
-  if (wordData.imageUrl) { imgEl.src = wordData.imageUrl; imgEl.style.display = 'block'; } 
-  else { imgEl.style.display = 'none'; }
-
+  if (wordData.imageUrl) { imgEl.src = wordData.imageUrl; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
   const detailsGroup = document.getElementById('modalDetailsGroup');
   if (wordData.detailContext) {
     document.getElementById('modalDetailContext').innerHTML = wordData.detailContext.replace(/\n/g, '<br>');
     detailsGroup.style.display = 'block'; detailsGroup.removeAttribute('open');
   } else { detailsGroup.style.display = 'none'; }
-
   document.getElementById('modalAudioBtn').onclick = () => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(wordData.word);
+      window.speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(wordData.word);
       utterance.lang = 'ko-KR'; utterance.rate = 0.85; window.speechSynthesis.speak(utterance);
     }
   };
-  
-  // 🧚‍♀️ 요정 API 연결 버튼 로직 활성화
-  document.getElementById('askFairyBtn').onclick = () => {
-    askFairyTeacher(wordData.word, wordData.meaning);
-    closeModal(null, true);
-  };
-  
-  const overlay = document.getElementById('wordModal');
-  overlay.style.display = 'flex';
+  document.getElementById('askFairyBtn').onclick = () => { askFairyTeacher(wordData.word, wordData.meaning); closeModal(null, true); };
+  const overlay = document.getElementById('wordModal'); overlay.style.display = 'flex';
   setTimeout(() => overlay.classList.add('active'), 10);
 }
 
-// 🧚‍♀️ 진짜 요정 연동 실시간 통신 엔진
+function closeModal(event, force = false) {
+  const overlay = document.getElementById('wordModal');
+  if (force || event.target === overlay) { overlay.classList.remove('active'); setTimeout(() => overlay.style.display = 'none', 300); }
+}
+
+// ===================================================
+// 🧚‍♀️ [핵심 정비] 요정 코코 실시간 가이드 API 구동 엔진
+// ===================================================
 async function askFairyTeacher(word, meaning) {
   const replyBox = document.getElementById('fairyReplyBox');
   replyBox.innerHTML = `⏳ 요정 코코가 <b>[${word}]</b>에 대해 생각하고 있어요. 조금만 기다려주세요...`;
-  
-  // 메인 화면 요정 방으로 스크롤 이동
   document.getElementById('fairyRoom').scrollIntoView({ behavior: 'smooth' });
 
   try {
-    // 기존에 구축해 둔 메인 Worker의 AI 통신 규격 활용
-    const response = await fetch(`${WORKER_PROXY_URL}/v1/chat/completions`, {
+    // 🛡️ 핵심 보안 처리: 메인 관제탑이 AI 주소를 구별할 수 있도록 주소 뒤에 '구분 꼬리표(?type=ai)'를 명시합니다.
+    const response = await fetch(`${WORKER_PROXY_URL}/v1/chat/completions?type=ai`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // 또는 사용하는 모델명
+        model: "gpt-4o-mini", 
         messages: [
           { role: "system", content: "너는 유치원생과 초등학교 저학년 아이들을 다정하게 가르치는 귀여운 요정 선생님 코코야. 사용자가 단어와 뜻을 주면, 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘. 말투는 '~했단다!', '~란다!' 처럼 구연동화 말투를 써줘." },
           { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
@@ -426,14 +374,18 @@ async function askFairyTeacher(word, meaning) {
     });
 
     const data = await response.json();
+    
+    // 만약 백엔드 관제탑에서 에러 메시지를 보냈다면 캐치
+    if (data.error) throw new Error(data.error);
+
     if (data.choices && data.choices[0]) {
       replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${data.choices[0].message.content.replace(/\n/g, '<br>')}`;
     } else {
-      throw new Error("요정의 응답 데이터 오류");
+      throw new Error("요정의 응답 데이터 구조가 올바르지 않습니다.");
     }
   } catch (error) {
     console.error("요정 호출 실패:", error);
-    replyBox.innerHTML = `😢 앗! 요정 나라에 소나기가 내려서 잠시 연결이 끊겼어요. 다시 한번 물어봐 줄래?`;
+    replyBox.innerHTML = `😢 앗! 요정 나라에 소나기가 내려서 잠시 연결이 끊겼어요. 다시 한번 물어봐 줄래?<br><small style="color:red;">(원인: ${error.message})</small>`;
   }
 }
 
