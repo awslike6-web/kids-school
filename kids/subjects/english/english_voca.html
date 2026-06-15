@@ -220,30 +220,37 @@
 <script src="/kids-school/kids/core/english_common.js"></script>
 
 <script>
+// 💡 노션 DB 아이디 세팅
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; // 🎁 잃어버렸던 인벤토리 DB 부활!
 
 let allEnglishWords = [];
-let availableGrades = []; // 학년 목록
-let currentSelectedGrade = ""; // 현재 선택된 학년
-let availableLessons = []; // 단원 목록
+let availableGrades = []; 
+let currentSelectedGrade = ""; 
+let availableLessons = []; 
 let wrongWords = [];
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
+// 💡 현재 프로필(민수/민서) 정보 가져오기 (보상 지급용)
+let currentProfile = localStorage.getItem('currentUser') || 'son';
+let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
+
+// 배경 애니메이션
 for(let i=0; i<15; i++){
   const el = document.createElement('div'); el.className = 'float-item'; el.textContent = ['A','B','C','✈️','☁️','✨'][Math.floor(Math.random()*6)];
   el.style.left = (Math.random()*90)+'%'; el.style.animationDuration = (10+Math.random()*12)+'s'; el.style.animationDelay = (-Math.random()*15)+'s';
   document.getElementById('bgFloats').appendChild(el);
 }
 
+// 🚀 메인 로딩 (스캐너 가동)
 window.onload = async () => {
   loadWrongWords();
   
+  // 공통 엔진으로 영어 단어 불러오기
   allEnglishWords = await fetchEnglishNotionData(voca_DB_ID, "영어");
-
   document.getElementById('loadingCard').style.display = 'none';
   
   if(allEnglishWords.length > 0) {
-    // 💡 1. 학년 데이터 추출
     const gradeSet = new Set(allEnglishWords.map(w => w.grade || '공통'));
     availableGrades = Array.from(gradeSet).sort();
     
@@ -253,7 +260,6 @@ window.onload = async () => {
     document.getElementById('modeCard').style.display = 'block';
     document.getElementById('toolCard').style.display = 'block';
     
-    // 학년이 하나밖에 없다면 자동으로 그 학년을 선택해줌
     if(availableGrades.length === 1) {
         selectGrade(availableGrades[0]);
     }
@@ -262,7 +268,9 @@ window.onload = async () => {
   }
 };
 
-// 💡 학년 선택 라디오 버튼 그리기
+// ==========================================
+// 학년 & 단원 필터링 로직
+// ==========================================
 function renderGradeButtons() {
   const grid = document.getElementById('gradeGrid');
   let html = '';
@@ -275,15 +283,11 @@ function renderGradeButtons() {
   grid.innerHTML = html;
 }
 
-// 💡 학년을 선택했을 때 해당 학년의 단원만 쏙 뽑아오기
 function selectGrade(grade) {
   currentSelectedGrade = grade;
   document.getElementById('selectedGradeLabel').textContent = grade;
   
-  // 선택한 학년에 속하는 단어들만 필터링
   const wordsInGrade = allEnglishWords.filter(w => (w.grade || '공통') === grade);
-  
-  // 그 단어들 안에서 단원 추출
   const lessonSet = new Set(wordsInGrade.map(w => w.level));
   availableLessons = Array.from(lessonSet).sort((a, b) => {
       const numA = parseInt(a); const numB = parseInt(b);
@@ -301,7 +305,7 @@ function renderLessonCheckboxes() {
   availableLessons.forEach((lesson, index) => {
     const displayLesson = lesson ? lesson : '기본';
     html += `
-      <input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked>
+      <input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked style="display:none;">
       <label for="lesson_${index}" class="book-label">${displayLesson}단원</label>
     `;
   });
@@ -312,15 +316,16 @@ function selectAllLessons(flag) {
   document.querySelectorAll('.lesson-cb').forEach(cb => cb.checked = flag);
 }
 
-// 💡 [수정] 퀴즈용 데이터: "현재 학년"과 "체크된 단원"을 동시에 만족하는 단어만 추출
 function getFilteredWords() {
   const checkedLessons = Array.from(document.querySelectorAll('.lesson-cb:checked')).map(cb => cb.value);
   return allEnglishWords.filter(w => 
-      (w.grade || '공통') === currentSelectedGrade && 
-      checkedLessons.includes(String(w.level))
+      (w.grade || '공통') === currentSelectedGrade && checkedLessons.includes(String(w.level))
   );
 }
 
+// ==========================================
+// 오답노트 (로컬 스토리지)
+// ==========================================
 function loadWrongWords() {
   const saved = localStorage.getItem('minmin_eng_wrong');
   wrongWords = saved ? JSON.parse(saved) : [];
@@ -341,6 +346,9 @@ function removeWrongWord(w) {
   }
 }
 
+// ==========================================
+// 퀴즈 진행 엔진
+// ==========================================
 function showScreen(id){ 
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
   document.getElementById(id).classList.add('active'); 
@@ -348,15 +356,10 @@ function showScreen(id){
 function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
 
 function startQuiz(mode) {
-  if (!currentSelectedGrade) {
-      return alert('먼저 공부할 학년/학기를 선택해 주세요!');
-  }
+  if (!currentSelectedGrade) return alert('먼저 공부할 학년/학기를 선택해 주세요!');
   
   const filteredWords = getFilteredWords();
-  
-  if (filteredWords.length === 0) {
-    return alert('공부할 단원을 하나 이상 선택해 주세요! (또는 해당 단원에 단어가 없어요)');
-  }
+  if (filteredWords.length === 0) return alert('공부할 단원을 하나 이상 선택해 주세요!');
 
   const shuffled = [...filteredWords].sort(() => Math.random() - 0.5).slice(0, 10);
   quizState = { mode: mode, pool: shuffled, current: 0, score: 0, isWrongMode: false };
@@ -394,17 +397,18 @@ function loadQuestion() {
 
   if (quizState.mode === 'copy') {
     qBox.textContent = qData.word; input.placeholder = "똑같이 적어봐!";
-    if(typeof speakEnglish === 'function') speakEnglish(qData.word);
   } else if (quizState.mode === 'toKorean') {
     qBox.textContent = qData.word; input.placeholder = "무슨 뜻일까요?";
-    if(typeof speakEnglish === 'function') speakEnglish(qData.word);
   } else if (quizState.mode === 'toEnglish') {
     qBox.textContent = qData.meaning; input.placeholder = "영단어로 적어봐!";
     hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';
   } else if (quizState.mode === 'listening') {
     qBox.innerHTML = "🎧 <span style='font-size:1.2rem;color:#888;'><br>(소리 듣고 적기)</span>";
     hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';
-    if(typeof speakEnglish === 'function') speakEnglish(qData.word);
+  }
+  
+  if (quizState.mode !== 'toEnglish') {
+     if(typeof speakEnglish === 'function') speakEnglish(qData.word);
   }
   setTimeout(() => input.focus(), 100);
 }
@@ -442,16 +446,72 @@ function submitAnswer() {
   }
 }
 
-function nextQuestion() {
+// 🎁 보상 지급 및 퀴즈 종료 로직 (예전 코드 부활!)
+async function nextQuestion() {
   document.getElementById('fairyOverlay').classList.remove('active');
   quizState.current++;
+  
   if (quizState.current >= quizState.pool.length) {
-    setTimeout(() => { alert(`탐험 완료! 총 ${quizState.score}점 획득!`); goSetup(); }, 300);
+    // 퀴즈 종료 시 보상 로직 가동!
+    const correctCount = quizState.score / 10;
+    document.getElementById('q-num').textContent = `완료!`;
+    
+    if (correctCount > 0) {
+       document.getElementById('questionText').innerHTML = `<span style="font-size:1.5rem; color:var(--purple);">⏳ 보상 저금통에 저축 중...</span>`;
+       await saveRewardToNotion(correctCount);
+    }
+    
+    alert(`탐험 완료! 총 ${quizState.score}점 획득!`); 
+    goSetup();
   } else {
     setTimeout(() => loadQuestion(), 300);
   }
 }
 
+// ==========================================
+// 🎁 노션 인벤토리 보상 저장 시스템 (부활!)
+// ==========================================
+async function saveRewardToNotion(earned) {
+  const userName = currentProfile === 'son' ? '민수' : '민서'; 
+  if (userName === '아빠' || userName === '엄마') return;
+
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
+      method: "POST", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
+    });
+    
+    if (!response.ok) throw new Error("데이터 조회 실패");
+    
+    const data = await response.json(); 
+    if (!data.results || data.results.length === 0) return;
+
+    const page = data.results[0]; 
+    const props = page.properties;
+
+    let diamond = props["다이아몬드 개수"]?.number || 0; 
+    let slime = props["슬라임 파츠 개수"]?.number || 0;
+
+    let updateProps = {};
+    if (currentTheme === '마인크래프트') { 
+        updateProps["다이아몬드 개수"] = { number: diamond + earned }; 
+    } else { 
+        updateProps["슬라임 파츠 개수"] = { number: slime + earned }; 
+    }
+
+    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
+      method: "PATCH", headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ properties: updateProps }) 
+    });
+    console.log(`✅ ${earned}개 보상 저장 완료!`);
+  } catch (err) {
+    console.error("보상 저장 실패:", err);
+  }
+}
+
+// ==========================================
+// 🖨️ 인쇄소 엔진
+// ==========================================
 function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
 
 function loadPrintList() {
