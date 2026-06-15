@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 영단어 퀴즈방</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<!-- 기존 공통 스타일과 스크립트 연결 -->
+<link rel="stylesheet" href="/kids-school/css/common.css">
+<style>
+  /* 영단어방 전용 깔끔한 스타일 */
+  body { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); font-family: 'Jua', sans-serif; text-align: center; }
+  .quiz-container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+  
+  /* 4가지 모드 선택 버튼 */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+  .mode-btn { padding: 20px; font-size: 1.2rem; border-radius: 15px; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Jua'; background: #f0f4f8; }
+  .mode-btn:hover { transform: translateY(-5px); background: #6EC6F5; color: white; }
+
+  /* 퀴즈 진행 영역 (처음엔 숨김) */
+  #quizArea { display: none; margin-top: 30px; }
+  .question-box { font-size: 2.5rem; color: #2D2D4E; margin-bottom: 20px; }
+  .hint-box { font-size: 1.5rem; color: #999; letter-spacing: 5px; margin-bottom: 20px; } /* a _ p _ e 힌트용 */
+  .answer-input { font-size: 1.5rem; padding: 15px; width: 80%; border: 3px solid #A78BFA; border-radius: 15px; text-align: center; font-family: 'Jua'; }
+
+  /* 요정 코코 등장 영역 (문제 풀 땐 숨김) */
+  #fairyRewardArea { display: none; margin-top: 20px; padding: 20px; background: #fffde7; border: 2px dashed #FFD93D; border-radius: 15px; }
+</style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <h1>🔤 민민이네 영단어 퀴즈방</h1>
+  
+  <!-- [1] 모드 선택 화면 -->
+  <div id="modeSelection">
+    <p>어떤 퀴즈에 도전해 볼까?</p>
+    <div class="mode-grid">
+      <button class="mode-btn" onclick="startQuiz('copy')">✏️ 보고 따라 적기</button>
+      <button class="mode-btn" onclick="startQuiz('toKorean')">🇰🇷 한글 뜻 적기</button>
+      <button class="mode-btn" onclick="startQuiz('toEnglish')">🇺🇸 영단어 적기</button>
+      <button class="mode-btn" onclick="startQuiz('listening')">🎧 소리 듣고 적기</button>
+    </div>
+  </div>
+
+  <!-- [2] 퀴즈 진행 화면 -->
+  <div id="quizArea">
+    <div id="questionText" class="question-box">Apple</div>
+    <div id="hintText" class="hint-box" style="display:none;">a _ p _ e</div>
+    <input type="text" id="answerInput" class="answer-input" placeholder="정답을 입력하세요!" onkeypress="checkEnter(event)">
+    <button onclick="checkAnswer()" style="margin-top: 15px; padding: 10px 20px; font-family: 'Jua';">정답 확인</button>
+  </div>
+
+  <!-- [3] 정답 확인 후 등장하는 요정 코코 -->
+  <div id="fairyRewardArea">
+    <div style="font-size: 3rem; animation: float 2s infinite;">🧚‍♀️</div>
+    <div id="fairyMessage" style="font-size: 1.2rem; color: #555; margin-top: 10px;">
+      정답이야! 참 잘했어! ✨<br>Apple은 '사과'라는 뜻이란다!
+    </div>
+    <button onclick="nextQuestion()" style="margin-top: 15px; background: #A78BFA; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">다음 문제 도전!</button>
+  </div>
+
+</div>
+
+<script src="/kids-school/js/common.js"></script>
+<script>
+  // 퀴즈 로직은 다음 번에 뼈대에 맞춰서 채워 넣을 예정입니다!
+  function startQuiz(mode) {
+    document.getElementById('modeSelection').style.display = 'none';
+    document.getElementById('quizArea').style.display = 'block';
+    // 여기에 선택한 모드별 문제 세팅 로직 추가 예정
+  }
+
+  function checkAnswer() {
+    // 정답이 맞으면 퀴즈 입력창은 잠시 비활성화하고 요정을 부릅니다.
+    document.getElementById('fairyRewardArea').style.display = 'block';
+    // 원어민 음성으로 정답 한 번 읽어주기 (common.js 기능)
+    speakEnglish("Apple"); 
+  }
+
+  function nextQuestion() {
+    // 요정은 다시 숨고 새로운 문제가 나옵니다.
+    document.getElementById('fairyRewardArea').style.display = 'none';
+    document.getElementById('answerInput').value = '';
+    // 다음 문제 로딩 로직 추가 예정
+  }
+</script>
+</body>
+</html>
