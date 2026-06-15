@@ -16,7 +16,6 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Jua', sans-serif; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); }
   
-  /* 예전 코드: 둥둥 떠다니는 배경 효과 */
   .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
   .float-item { position: absolute; font-size: 2.5rem; opacity: 0.15; animation: floatUp linear infinite; }
   @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.2; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
@@ -25,18 +24,15 @@
   .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: var(--dark); font-weight: bold; font-size: 0.9rem; transition: background 0.2s; }
   .exit-btn:hover { background: var(--pink); color: white; }
 
-  /* 화면 전환용 스크린 클래스 */
   .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 20px 16px 40px; min-height: 100vh; width: 100%; }
   .screen.active { display: flex; }
 
   .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 20px; color: var(--dark); }
   .main-title span { color: var(--purple); }
 
-  /* 예전 코드: 세련된 카드 디자인 */
   .card { background: var(--card); border-radius: 24px; padding: 25px; width: 100%; max-width: 550px; box-shadow: 0 8px 30px rgba(35, 52, 90, 0.15); margin-bottom: 20px; border: 1px solid var(--line); backdrop-filter: blur(12px); }
   .card-title { font-size: 1.2rem; color: var(--purple); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #eee; padding-bottom: 10px; }
 
-  /* 모드 선택 버튼 그리드 */
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .mode-btn { padding: 20px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #fff; transition: transform .18s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
   .mode-btn.copy { background: linear-gradient(135deg, #4facfe, #00f2fe); }
@@ -48,7 +44,6 @@
   .mode-btn.print-shop { background: linear-gradient(135deg, #FF6B6B, #FF9F43); grid-column: span 1; }
   .mode-btn:hover { transform: translateY(-5px); }
 
-  /* 퀴즈 진행 영역 */
   .game-header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; margin-bottom: 16px; }
   .game-stat-box { background: #fff; border-radius: 14px; padding: 8px 16px; font-size: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.07); color: var(--dark); font-weight: bold; border: 2px solid var(--sky); }
   
@@ -67,7 +62,6 @@
   .btn:hover { transform: scale(1.05); }
   .btn.ghost { background: #eee; color: var(--dark); box-shadow: none; }
 
-  /* 요정 코코 팝업 (오버레이) */
   .fairy-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
   .fairy-overlay.active { display: flex; opacity: 1; }
   .fairy-modal { background: #fffde7; border: 4px dashed var(--yellow); width: 90%; max-width: 400px; border-radius: 30px; padding: 40px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -75,11 +69,9 @@
   .fairy-icon { font-size: 5rem; animation: bounceObj 2s infinite; margin-bottom: 15px; display: inline-block; }
   @keyframes bounceObj { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-  /* 로딩 스피너 */
   .loading-spinner { border: 5px solid #fff; border-top: 5px solid var(--purple); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 30px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-  /* 인쇄소 스타일 (예전 코드 유지) */
   .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   input[type="radio"], input[type="checkbox"] { display: none; }
   .btn-label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; border: 2px solid #ddd; font-size: 1rem; cursor: pointer; transition: all .15s; background: #fff; color: var(--dark); }
@@ -105,7 +97,8 @@
 
 <div class="top-nav">
   <div style="font-size: 1.2rem; font-weight: bold; color: var(--dark);">✈️ 영단어 기지</div>
-  <a href="english_main.html" class="exit-btn">🚪 출국장으로</a>
+  <!-- 💡 중문 연결 경로 수정 -->
+  <a href="/kids-school/kids/subjects/english/english.html" class="exit-btn">🚪 출국장으로</a>
 </div>
 
 <div class="screen active" id="screen-setup">
@@ -200,11 +193,10 @@
   </div>
 </div>
 
-<script src="english_common.js"></script>
+<!-- 💡 공통 JS 파일 경로 수정 완료 -->
+<script src="/kids-school/kids/core/english_common.js"></script>
+
 <script>
-// ==========================================
-// 통신 및 상태 변수
-// ==========================================
 const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
 
@@ -212,16 +204,12 @@ let allEnglishWords = [];
 let wrongWords = [];
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
-// 배경 애니메이션 생성
 for(let i=0; i<15; i++){
   const el = document.createElement('div'); el.className = 'float-item'; el.textContent = ['A','B','C','✈️','☁️','✨'][Math.floor(Math.random()*6)];
   el.style.left = (Math.random()*90)+'%'; el.style.animationDuration = (10+Math.random()*12)+'s'; el.style.animationDelay = (-Math.random()*15)+'s';
   document.getElementById('bgFloats').appendChild(el);
 }
 
-// ==========================================
-// 1. 노션 데이터 로딩 및 오답노트 연동
-// ==========================================
 window.onload = async () => {
   loadWrongWords();
   try {
@@ -257,9 +245,6 @@ window.onload = async () => {
   }
 };
 
-// ==========================================
-// 2. 오답 노트 로직 (예전 코드 이식)
-// ==========================================
 function loadWrongWords() {
   const saved = localStorage.getItem('minmin_eng_wrong');
   wrongWords = saved ? JSON.parse(saved) : [];
@@ -278,9 +263,6 @@ function removeWrongWord(w) {
   }
 }
 
-// ==========================================
-// 3. 퀴즈 및 요정 엔진
-// ==========================================
 function showScreen(id){ 
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
   document.getElementById(id).classList.add('active'); 
@@ -382,9 +364,6 @@ function nextQuestion() {
   }
 }
 
-// ==========================================
-// 4. 인쇄소 로직 (예전 코드 이식)
-// ==========================================
 function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
 function loadPrintList() {
   const src = document.querySelector('input[name="printSource"]:checked').value; 
