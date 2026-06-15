@@ -1,5 +1,5 @@
 // ==========================================================
-// ⚙️ 민민이네 영어 멀티버스 코어 운영 엔진 V1
+// ⚙️ 민민이네 영어 멀티버스 코어 운영 엔진 V1.1 (학년 다중선택 패치)
 // (Voca, Phonics, Reading, Grammar 공통 사용)
 // ==========================================================
 
@@ -28,7 +28,6 @@ function speakEnglish(text) {
 // ==========================================
 // 📡 2. 노션 데이터베이스 고속 스캔 엔진
 // ==========================================
-// 앞으로 만들 파닉스방 등에서 이 함수 한 줄만 부르면 데이터를 다 가져옵니다!
 async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
     let allResults = []; 
     let hasMore = true; 
@@ -61,24 +60,24 @@ async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
                 id: page.id,
                 word: p["단어"]?.title[0]?.plain_text || "",
                 meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "",
+                // 과목 다중 선택
                 subject: p["과목"]?.multi_select?.map(item => item.name) || [],
                 type: p["어휘유형"]?.select?.name || "",
-                level: p["단원"]?.number || p["단원"]?.select?.name || "기본"
-              // 💡 [추가된 부분] 노션에서 '학년' 정보도 가져옵니다!
-                grade: p["학년"]?.rich_text[0]?.plain_text || p["학년"]?.select?.name || "공통"
+                level: p["단원"]?.number || p["단원"]?.select?.name || "기본",
+                // 💡 [수정 완료] 학년 속성이 '다중 선택(multi_select)'일 때 제일 첫 번째 태그(예: "5-2")를 가져옵니다!
+                grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || "공통"
             };
         }).filter(w => w.word !== "" && (w.subject.includes(subjectFilter) || w.subject.includes("영단어")));
 
     } catch (error) {
         console.error("영어 노션 엔진 스캔 실패:", error);
-        return []; // 에러 시 프로그램이 멈추지 않게 빈 상자 반환
+        return []; 
     }
 }
 
 // ==========================================
 // 🤖 3. 코코 요정 AI 두뇌 (독해방/문법방 대비용)
 // ==========================================
-// 나중에 영어 동화 독해방이나 문법방을 만들 때 사용할 AI 채팅 엔진입니다.
 async function askCocoFairyAI(systemPrompt, userText, history = []) {
     const conversation = [...history, { role: "user", parts: [{ text: userText }] }];
     
