@@ -193,6 +193,8 @@
   </div>
 </div>
 
+<!-- 1. 중앙 통제탑 연결 -->
+<script src="/kids-school/kids/core/notion-helper.js"></script>
 <!-- 💡 공통 JS 파일 경로 수정 완료 -->
 <script src="/kids-school/kids/core/english_common.js"></script>
 
@@ -204,47 +206,33 @@ let allEnglishWords = [];
 let wrongWords = [];
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
+// 배경 애니메이션 (그대로 유지)
 for(let i=0; i<15; i++){
   const el = document.createElement('div'); el.className = 'float-item'; el.textContent = ['A','B','C','✈️','☁️','✨'][Math.floor(Math.random()*6)];
   el.style.left = (Math.random()*90)+'%'; el.style.animationDuration = (10+Math.random()*12)+'s'; el.style.animationDelay = (-Math.random()*15)+'s';
   document.getElementById('bgFloats').appendChild(el);
 }
 
+// 🚀 새롭게 뼈대를 갈아끼운 초고속 스캔 엔진 적용!
 window.onload = async () => {
   loadWrongWords();
-  try {
-    let allResults = []; let hasMore = true; let nextCursor = undefined;
-    while (hasMore) {
-      const bodyData = { page_size: 100 };
-      if (nextCursor) bodyData.start_cursor = nextCursor;
-      const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyData)
-      }); 
-      const data = await response.json();
-      allResults = allResults.concat(data.results);
-      hasMore = data.has_more; nextCursor = data.next_cursor;
-    }
+  
+  // 💡 공통 엔진에 DB 아이디와 과목명("영어")만 던져주면 알아서 다 가져옵니다!
+  allEnglishWords = await fetchEnglishNotionData(voca_DB_ID, "영어");
 
-    allEnglishWords = allResults.map(page => {
-      const p = page.properties;
-      const word = p["단어"]?.title[0]?.plain_text || "";
-      const meaning = p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "";
-      const subject = p["과목"]?.multi_select?.map(item => item.name) || [];
-      return { word, meaning, subject };
-    }).filter(w => w.word !== "" && (w.subject.includes("영어") || w.subject.includes("영단어")));
-
-    document.getElementById('loadingCard').style.display = 'none';
-    if(allEnglishWords.length > 0) {
-      document.getElementById('modeCard').style.display = 'block';
-      document.getElementById('toolCard').style.display = 'block';
-    } else {
-      alert("노션에 '영어' 과목 단어가 없습니다.");
-    }
-  } catch (error) {
-    alert("데이터를 불러오는데 실패했습니다.");
+  document.getElementById('loadingCard').style.display = 'none';
+  
+  if(allEnglishWords.length > 0) {
+    document.getElementById('modeCard').style.display = 'block';
+    document.getElementById('toolCard').style.display = 'block';
+  } else {
+    alert("앗! 노션에서 '영어' 과목 단어를 불러오지 못했어요. 프록시 연결이나 데이터를 확인해 주세요.");
   }
 };
 
+// ==========================================
+// 👇 여기서부터는 기존 코드 그대로 두시면 됩니다!
+// ==========================================
 function loadWrongWords() {
   const saved = localStorage.getItem('minmin_eng_wrong');
   wrongWords = saved ? JSON.parse(saved) : [];
