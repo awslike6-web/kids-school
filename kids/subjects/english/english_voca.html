@@ -33,11 +33,14 @@
   .card { background: var(--card); border-radius: 24px; padding: 25px; width: 100%; max-width: 550px; box-shadow: 0 8px 30px rgba(35, 52, 90, 0.15); margin-bottom: 20px; border: 1px solid var(--line); backdrop-filter: blur(12px); }
   .card-title { font-size: 1.2rem; color: var(--purple); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #eee; padding-bottom: 10px; }
 
-  /* 💡 추가된 단원 선택 버튼 스타일 */
+  /* 💡 학년 & 단원 그리드 스타일 */
   .book-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
-  .book-label { font-size: 1.1rem; padding: 12px 5px; font-weight: bold; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--dark); user-select: none; }
+  .book-label { font-size: 1.1rem; padding: 12px 5px; font-weight: bold; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--dark); user-select: none; display: block; }
   .book-label:hover { border-color: var(--purple); transform: scale(1.02); }
-  input[type="checkbox"]:checked + .book-label { background: var(--purple); border-color: var(--purple); color: #fff; box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3); }
+  
+  /* 체크박스/라디오 선택 시 스타일 */
+  input[type="checkbox"]:checked + .book-label,
+  input[type="radio"]:checked + .book-label { background: var(--purple); border-color: var(--purple); color: #fff; box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3); }
 
   .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .mode-btn { padding: 20px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #fff; transition: transform .18s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -45,7 +48,6 @@
   .mode-btn.tokor { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: var(--dark); }
   .mode-btn.toeng { background: linear-gradient(135deg, var(--purple), var(--sky)); }
   .mode-btn.listen { background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); }
-  
   .mode-btn.wrong-note { background: linear-gradient(135deg, var(--dark), #5a5a8a); grid-column: span 1; }
   .mode-btn.print-shop { background: linear-gradient(135deg, #FF6B6B, #FF9F43); grid-column: span 1; }
   .mode-btn:hover { transform: translateY(-5px); }
@@ -115,9 +117,15 @@
     <p style="text-align: center; color: #666;">노션 데이터베이스에서 단어를 가져오고 있어요!</p>
   </div>
 
-  <!-- 💡 [추가됨] 단원 선택 카드 -->
+  <!-- 💡 [추가] 1단계: 학년/학기 선택 -->
+  <div class="card" id="gradeCard" style="display: none;">
+    <div class="card-title">🎒 1. 학년/학기 고르기</div>
+    <div class="book-grid" id="gradeGrid" style="grid-template-columns: repeat(3, 1fr);"></div>
+  </div>
+
+  <!-- 💡 [수정] 2단계: 단원 선택 (선택된 학년에 따라 변경됨) -->
   <div class="card" id="lessonCard" style="display: none;">
-    <div class="card-title">📖 1. 공부할 단원 고르기</div>
+    <div class="card-title">📖 2. 공부할 단원 고르기 (<span id="selectedGradeLabel" style="color:var(--pink);"></span>)</div>
     <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
       <button class="btn ghost" style="padding: 5px 15px; font-size: 0.9rem;" onclick="selectAllLessons(true)">전체 선택</button>
       <button class="btn ghost" style="padding: 5px 15px; font-size: 0.9rem;" onclick="selectAllLessons(false)">전체 해제</button>
@@ -126,7 +134,7 @@
   </div>
 
   <div class="card" id="modeCard" style="display: none;">
-    <div class="card-title">🎯 2. 퀴즈 모드 선택</div>
+    <div class="card-title">🎯 3. 퀴즈 모드 선택</div>
     <div class="mode-grid">
       <button class="mode-btn copy" onclick="startQuiz('copy')"><span style="font-size:2rem;">✏️</span>보고 따라 적기</button>
       <button class="mode-btn tokor" onclick="startQuiz('toKorean')"><span style="font-size:2rem;">🇰🇷</span>한글 뜻 적기</button>
@@ -136,7 +144,7 @@
   </div>
 
   <div class="card" id="toolCard" style="display: none;">
-    <div class="card-title">🛠️ 3. 도우미 도구</div>
+    <div class="card-title">🛠️ 4. 도우미 도구</div>
     <div class="mode-grid">
       <button class="mode-btn wrong-note" onclick="startWrongWords()"><span style="font-size:1.5rem;">🖍️</span>오답 복습 (<span id="wrongBadge">0</span>개)</button>
       <button class="mode-btn print-shop" onclick="openPrintShop()"><span style="font-size:1.5rem;">🖨️</span>학습지 인쇄소</button>
@@ -215,7 +223,9 @@
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
 
 let allEnglishWords = [];
-let availableLessons = []; // 💡 단원 목록을 담을 배열
+let availableGrades = []; // 학년 목록
+let currentSelectedGrade = ""; // 현재 선택된 학년
+let availableLessons = []; // 단원 목록
 let wrongWords = [];
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
@@ -233,48 +243,82 @@ window.onload = async () => {
   document.getElementById('loadingCard').style.display = 'none';
   
   if(allEnglishWords.length > 0) {
-    // 💡 1. 단원 추출 및 정렬 로직
-    const lessonSet = new Set(allEnglishWords.map(w => w.level));
-    availableLessons = Array.from(lessonSet).sort((a, b) => {
-        const numA = parseInt(a); const numB = parseInt(b);
-        if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
-        return String(a).localeCompare(String(b));
-    });
+    // 💡 1. 학년 데이터 추출
+    const gradeSet = new Set(allEnglishWords.map(w => w.grade || '공통'));
+    availableGrades = Array.from(gradeSet).sort();
     
-    // 💡 2. 추출한 단원으로 체크박스 생성
-    renderLessonCheckboxes();
+    renderGradeButtons();
 
-    document.getElementById('lessonCard').style.display = 'block';
+    document.getElementById('gradeCard').style.display = 'block';
     document.getElementById('modeCard').style.display = 'block';
     document.getElementById('toolCard').style.display = 'block';
+    
+    // 학년이 하나밖에 없다면 자동으로 그 학년을 선택해줌
+    if(availableGrades.length === 1) {
+        selectGrade(availableGrades[0]);
+    }
   } else {
-    alert("앗! 노션에서 '영어' 과목 단어를 불러오지 못했어요. 프록시 연결이나 데이터를 확인해 주세요.");
+    alert("앗! 노션에서 '영어' 과목 단어를 불러오지 못했어요.");
   }
 };
 
-// 💡 단원 체크박스 화면에 그리기
+// 💡 학년 선택 라디오 버튼 그리기
+function renderGradeButtons() {
+  const grid = document.getElementById('gradeGrid');
+  let html = '';
+  availableGrades.forEach((grade, index) => {
+    html += `
+      <input type="radio" name="gradeSelect" id="grade_${index}" value="${grade}" onchange="selectGrade('${grade}')">
+      <label for="grade_${index}" class="book-label">${grade}</label>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+// 💡 학년을 선택했을 때 해당 학년의 단원만 쏙 뽑아오기
+function selectGrade(grade) {
+  currentSelectedGrade = grade;
+  document.getElementById('selectedGradeLabel').textContent = grade;
+  
+  // 선택한 학년에 속하는 단어들만 필터링
+  const wordsInGrade = allEnglishWords.filter(w => (w.grade || '공통') === grade);
+  
+  // 그 단어들 안에서 단원 추출
+  const lessonSet = new Set(wordsInGrade.map(w => w.level));
+  availableLessons = Array.from(lessonSet).sort((a, b) => {
+      const numA = parseInt(a); const numB = parseInt(b);
+      if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return String(a).localeCompare(String(b));
+  });
+  
+  renderLessonCheckboxes();
+  document.getElementById('lessonCard').style.display = 'block';
+}
+
 function renderLessonCheckboxes() {
   const grid = document.getElementById('lessonGrid');
   let html = '';
   availableLessons.forEach((lesson, index) => {
     const displayLesson = lesson ? lesson : '기본';
     html += `
-      <input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked style="display:none;">
+      <input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked>
       <label for="lesson_${index}" class="book-label">${displayLesson}단원</label>
     `;
   });
   grid.innerHTML = html;
 }
 
-// 💡 단원 전체 선택/해제 기능
 function selectAllLessons(flag) {
   document.querySelectorAll('.lesson-cb').forEach(cb => cb.checked = flag);
 }
 
-// 💡 체크된 단원의 단어만 걸러내는 필터 엔진
+// 💡 [수정] 퀴즈용 데이터: "현재 학년"과 "체크된 단원"을 동시에 만족하는 단어만 추출
 function getFilteredWords() {
   const checkedLessons = Array.from(document.querySelectorAll('.lesson-cb:checked')).map(cb => cb.value);
-  return allEnglishWords.filter(w => checkedLessons.includes(String(w.level)));
+  return allEnglishWords.filter(w => 
+      (w.grade || '공통') === currentSelectedGrade && 
+      checkedLessons.includes(String(w.level))
+  );
 }
 
 function loadWrongWords() {
@@ -304,14 +348,16 @@ function showScreen(id){
 function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
 
 function startQuiz(mode) {
-  // 💡 선택한 단원 단어만 뽑아오기
+  if (!currentSelectedGrade) {
+      return alert('먼저 공부할 학년/학기를 선택해 주세요!');
+  }
+  
   const filteredWords = getFilteredWords();
   
   if (filteredWords.length === 0) {
     return alert('공부할 단원을 하나 이상 선택해 주세요! (또는 해당 단원에 단어가 없어요)');
   }
 
-  // 뽑아온 단어 섞기
   const shuffled = [...filteredWords].sort(() => Math.random() - 0.5).slice(0, 10);
   quizState = { mode: mode, pool: shuffled, current: 0, score: 0, isWrongMode: false };
   showScreen('screen-quiz'); loadQuestion();
@@ -410,7 +456,6 @@ function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
 
 function loadPrintList() {
   const src = document.querySelector('input[name="printSource"]:checked').value; 
-  // 💡 인쇄소에서도 선택한 단원만 출력되도록 필터 엔진 연결
   const list = src === 'selected' ? getFilteredWords() : wrongWords;
   const container = document.getElementById('print-word-list'); 
   document.getElementById('print-total-count').textContent = list.length;
