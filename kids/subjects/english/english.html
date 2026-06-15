@@ -16,7 +16,6 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   
-  /* 파란 하늘과 구름 배경 */
   body { 
     font-family: 'Jua', sans-serif; 
     background: linear-gradient(to bottom, var(--sky-blue) 0%, #00f2fe 100%); 
@@ -27,7 +26,6 @@
     overflow-x: hidden;
   }
 
-  /* 흘러가는 구름 장식 */
   .clouds {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -43,101 +41,29 @@
   .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); position: sticky; top: 0; z-index: 50; }
   .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: #333; font-weight: bold; font-size: 0.9rem; z-index: 51; }
 
-  /* 출국장 전광판 스타일 타이틀 */
-  .departure-board {
-    background: #1a1a1a;
-    color: #f1c40f;
-    text-align: center;
-    padding: 20px;
-    margin: 30px auto;
-    width: 90%;
-    max-width: 600px;
-    border-radius: 10px;
-    border: 4px solid #555;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-    position: relative;
-    z-index: 10;
-  }
+  .departure-board { background: #1a1a1a; color: #f1c40f; text-align: center; padding: 20px; margin: 30px auto; width: 90%; max-width: 600px; border-radius: 10px; border: 4px solid #555; box-shadow: 0 10px 20px rgba(0,0,0,0.3); position: relative; z-index: 10; }
   .main-title { font-family: 'Gaegu', cursive; font-size: 2.5rem; letter-spacing: 2px; }
   .sub-title { font-size: 1.2rem; color: #fff; margin-top: 5px; }
 
-  /* 승무원 코코 요정 */
-  .fairy-stewardess {
-    text-align: center;
-    margin: 20px auto;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 15px;
-    border-radius: 20px;
-    max-width: 500px;
-    border: 3px dashed var(--accent-orange);
-    position: relative;
-    z-index: 10;
-  }
+  .fairy-stewardess { text-align: center; margin: 20px auto; background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 20px; max-width: 500px; border: 3px dashed var(--accent-orange); position: relative; z-index: 10; }
   .fairy-icon { font-size: 3rem; animation: bounce 2s infinite; display: inline-block; }
   @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-  /* 탑승권 (티켓) 모양 메뉴 목록 */
-  .ticket-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 0 20px;
-    position: relative;
-    z-index: 10;
-  }
-
-  .boarding-pass {
-    background: var(--ticket-bg);
-    border-radius: 15px;
-    display: flex;
-    overflow: hidden;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-    text-decoration: none;
-    color: #333;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    border: 2px solid #ddd;
-  }
+  .ticket-container { display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
+  .boarding-pass { background: var(--ticket-bg); border-radius: 15px; display: flex; overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.1); text-decoration: none; color: #333; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid #ddd; }
   .boarding-pass:hover { transform: scale(1.02); box-shadow: 0 12px 25px rgba(0,0,0,0.2); }
-  
-  /* 절취선 효과 */
-  .boarding-pass::before {
-    content: '';
-    position: absolute;
-    top: 0; bottom: 0; left: 100px;
-    border-left: 2px dashed #ccc;
-  }
+  .boarding-pass::before { content: ''; position: absolute; top: 0; bottom: 0; left: 100px; border-left: 2px dashed #ccc; }
 
-  .ticket-left {
-    background: var(--accent-orange);
-    color: white;
-    width: 100px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-    padding: 10px;
-  }
+  .ticket-left { background: var(--accent-orange); color: white; width: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 1.2rem; padding: 10px; }
   .ticket-left .gate { font-size: 2rem; font-weight: bold; }
 
-  .ticket-right {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+  .ticket-right { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
   .ticket-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; color: var(--ticket-border); }
   .ticket-desc { font-size: 1.1rem; color: #666; }
 
-  /* 잠긴 탑승구 (준비 중) */
   .boarding-pass.locked { filter: grayscale(100%); opacity: 0.7; cursor: not-allowed; }
   .boarding-pass.locked:hover { transform: none; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
   .locked-badge { position: absolute; top: 10px; right: 10px; background: #555; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; }
-
 </style>
 </head>
 <body>
@@ -146,6 +72,7 @@
 
 <div class="top-nav">
   <div style="font-size: 1.2rem; font-weight: bold; color: #333;">✈️ 민민 공항 터미널</div>
+  <!-- 💡 로비 연결 경로 수정 -->
   <a href="/kids-school/lobby.html" class="exit-btn">🚪 전체 로비로</a>
 </div>
 
@@ -163,8 +90,8 @@
 
 <div class="ticket-container">
   
-  <!-- 1. 파닉스 방 탑승권 -->
-  <a href="english_phonics.html" class="boarding-pass">
+  <!-- 1. 파닉스 방 탑승권 (준비 중 경로) -->
+  <a href="/kids-school/kids/subjects/english/english_phonics.html" class="boarding-pass">
     <div class="ticket-left">
       <div>GATE</div>
       <div class="gate">A1</div>
@@ -175,8 +102,8 @@
     </div>
   </a>
 
-  <!-- 2. 영단어 퀴즈방 탑승권 -->
-  <a href="english_voca.html" class="boarding-pass">
+  <!-- 💡 2. 영단어 퀴즈방 탑승권 (경로 수정 완료) -->
+  <a href="/kids-school/kids/subjects/english/english_voca.html" class="boarding-pass">
     <div class="ticket-left">
       <div style="background:#4facfe; padding:20px; height:100%; width:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius: 13px 0 0 13px; margin: -10px;">
         <div>GATE</div>
@@ -189,30 +116,16 @@
     </div>
   </a>
 
-  <!-- 3. 독해 방 (준비 중) -->
   <a href="#" class="boarding-pass locked" onclick="event.preventDefault(); alert('탑승 준비 중인 게이트입니다! 뚝딱뚝딱 공사 중 🛠️');">
     <div class="locked-badge">공사 중</div>
-    <div class="ticket-left" style="background: #95a5a6;">
-      <div>GATE</div>
-      <div class="gate">C3</div>
-    </div>
-    <div class="ticket-right">
-      <div class="ticket-title">📖 영어 동화 마을</div>
-      <div class="ticket-desc">재밌는 영어 이야기를 읽어보는 곳이야!</div>
-    </div>
+    <div class="ticket-left" style="background: #95a5a6;"><div>GATE</div><div class="gate">C3</div></div>
+    <div class="ticket-right"><div class="ticket-title">📖 영어 동화 마을</div><div class="ticket-desc">재밌는 영어 이야기를 읽어보는 곳이야!</div></div>
   </a>
 
-  <!-- 4. 문법 방 (준비 중) -->
   <a href="#" class="boarding-pass locked" onclick="event.preventDefault(); alert('탑승 준비 중인 게이트입니다! 뚝딱뚝딱 공사 중 🛠️');">
     <div class="locked-badge">공사 중</div>
-    <div class="ticket-left" style="background: #95a5a6;">
-      <div>GATE</div>
-      <div class="gate">D4</div>
-    </div>
-    <div class="ticket-right">
-      <div class="ticket-title">🧩 영어 블록 공장</div>
-      <div class="ticket-desc">단어들을 조립해서 문장 기차를 만들어보자!</div>
-    </div>
+    <div class="ticket-left" style="background: #95a5a6;"><div>GATE</div><div class="gate">D4</div></div>
+    <div class="ticket-right"><div class="ticket-title">🧩 영어 블록 공장</div><div class="ticket-desc">단어들을 조립해서 문장 기차를 만들어보자!</div></div>
   </a>
 
 </div>
