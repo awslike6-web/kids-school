@@ -3,87 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민이네 영단어 퀴즈방</title>
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
-<!-- 기존 공통 스타일과 스크립트 연결 -->
-<link rel="stylesheet" href="/kids-school/css/common.css">
+<title>민민 공항 - 영어 출국장</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@700&display=swap" rel="stylesheet">
 <style>
-  /* 영단어방 전용 깔끔한 스타일 */
-  body { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); font-family: 'Jua', sans-serif; text-align: center; }
-  .quiz-container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+  :root {
+    --sky-blue: #4facfe;
+    --cloud-white: #fdfbfb;
+    --ticket-bg: #ffffff;
+    --ticket-border: #2c3e50;
+    --accent-orange: #ff9f43;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
   
-  /* 4가지 모드 선택 버튼 */
-  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-  .mode-btn { padding: 20px; font-size: 1.2rem; border-radius: 15px; border: none; cursor: pointer; transition: transform 0.2s; font-family: 'Jua'; background: #f0f4f8; }
-  .mode-btn:hover { transform: translateY(-5px); background: #6EC6F5; color: white; }
+  /* 파란 하늘과 구름 배경 */
+  body { 
+    font-family: 'Jua', sans-serif; 
+    background: linear-gradient(to bottom, var(--sky-blue) 0%, #00f2fe 100%); 
+    min-height: 100vh; 
+    color: #333; 
+    padding-bottom: 50px;
+    position: relative;
+    overflow-x: hidden;
+  }
 
-  /* 퀴즈 진행 영역 (처음엔 숨김) */
-  #quizArea { display: none; margin-top: 30px; }
-  .question-box { font-size: 2.5rem; color: #2D2D4E; margin-bottom: 20px; }
-  .hint-box { font-size: 1.5rem; color: #999; letter-spacing: 5px; margin-bottom: 20px; } /* a _ p _ e 힌트용 */
-  .answer-input { font-size: 1.5rem; padding: 15px; width: 80%; border: 3px solid #A78BFA; border-radius: 15px; text-align: center; font-family: 'Jua'; }
+  /* 흘러가는 구름 장식 */
+  .clouds {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://cdn.pixabay.com/photo/2013/04/01/09/22/clouds-98536_960_720.png') repeat-x;
+    background-size: contain;
+    opacity: 0.4;
+    animation: moveClouds 60s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+  @keyframes moveClouds { from { background-position: 0 0; } to { background-position: 1000px 0; } }
 
-  /* 요정 코코 등장 영역 (문제 풀 땐 숨김) */
-  #fairyRewardArea { display: none; margin-top: 20px; padding: 20px; background: #fffde7; border: 2px dashed #FFD93D; border-radius: 15px; }
+  .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); position: sticky; top: 0; z-index: 50; }
+  .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: #333; font-weight: bold; font-size: 0.9rem; z-index: 51; }
+
+  /* 출국장 전광판 스타일 타이틀 */
+  .departure-board {
+    background: #1a1a1a;
+    color: #f1c40f;
+    text-align: center;
+    padding: 20px;
+    margin: 30px auto;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 10px;
+    border: 4px solid #555;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 10;
+  }
+  .main-title { font-family: 'Gaegu', cursive; font-size: 2.5rem; letter-spacing: 2px; }
+  .sub-title { font-size: 1.2rem; color: #fff; margin-top: 5px; }
+
+  /* 승무원 코코 요정 */
+  .fairy-stewardess {
+    text-align: center;
+    margin: 20px auto;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 20px;
+    max-width: 500px;
+    border: 3px dashed var(--accent-orange);
+    position: relative;
+    z-index: 10;
+  }
+  .fairy-icon { font-size: 3rem; animation: bounce 2s infinite; display: inline-block; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  /* 탑승권 (티켓) 모양 메뉴 목록 */
+  .ticket-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .boarding-pass {
+    background: var(--ticket-bg);
+    border-radius: 15px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    border: 2px solid #ddd;
+  }
+  .boarding-pass:hover { transform: scale(1.02); box-shadow: 0 12px 25px rgba(0,0,0,0.2); }
+  
+  /* 절취선 효과 */
+  .boarding-pass::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 100px;
+    border-left: 2px dashed #ccc;
+  }
+
+  .ticket-left {
+    background: var(--accent-orange);
+    color: white;
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    padding: 10px;
+  }
+  .ticket-left .gate { font-size: 2rem; font-weight: bold; }
+
+  .ticket-right {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .ticket-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; color: var(--ticket-border); }
+  .ticket-desc { font-size: 1.1rem; color: #666; }
+
+  /* 잠긴 탑승구 (준비 중) */
+  .boarding-pass.locked { filter: grayscale(100%); opacity: 0.7; cursor: not-allowed; }
+  .boarding-pass.locked:hover { transform: none; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+  .locked-badge { position: absolute; top: 10px; right: 10px; background: #555; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; }
+
 </style>
 </head>
 <body>
 
-<div class="quiz-container">
-  <h1>🔤 민민이네 영단어 퀴즈방</h1>
+<div class="clouds"></div>
+
+<div class="top-nav">
+  <div style="font-size: 1.2rem; font-weight: bold; color: #333;">✈️ 민민 공항 터미널</div>
+  <a href="/kids-school/lobby.html" class="exit-btn">🚪 전체 로비로</a>
+</div>
+
+<div class="departure-board">
+  <div class="main-title">🛫 DEPARTURES</div>
+  <div class="sub-title">어느 영어 마을로 여행을 떠날까요?</div>
+</div>
+
+<div class="fairy-stewardess">
+  <div class="fairy-icon">👩‍✈️🧚‍♀️</div>
+  <div style="font-size: 1.2rem; margin-top: 5px;">
+    "민민 항공에 오신 것을 환영합니다!<br>원하는 목적지의 탑승권을 선택해 주세요!"
+  </div>
+</div>
+
+<div class="ticket-container">
   
-  <!-- [1] 모드 선택 화면 -->
-  <div id="modeSelection">
-    <p>어떤 퀴즈에 도전해 볼까?</p>
-    <div class="mode-grid">
-      <button class="mode-btn" onclick="startQuiz('copy')">✏️ 보고 따라 적기</button>
-      <button class="mode-btn" onclick="startQuiz('toKorean')">🇰🇷 한글 뜻 적기</button>
-      <button class="mode-btn" onclick="startQuiz('toEnglish')">🇺🇸 영단어 적기</button>
-      <button class="mode-btn" onclick="startQuiz('listening')">🎧 소리 듣고 적기</button>
+  <!-- 1. 파닉스 방 탑승권 -->
+  <a href="english_phonics.html" class="boarding-pass">
+    <div class="ticket-left">
+      <div>GATE</div>
+      <div class="gate">A1</div>
     </div>
-  </div>
-
-  <!-- [2] 퀴즈 진행 화면 -->
-  <div id="quizArea">
-    <div id="questionText" class="question-box">Apple</div>
-    <div id="hintText" class="hint-box" style="display:none;">a _ p _ e</div>
-    <input type="text" id="answerInput" class="answer-input" placeholder="정답을 입력하세요!" onkeypress="checkEnter(event)">
-    <button onclick="checkAnswer()" style="margin-top: 15px; padding: 10px 20px; font-family: 'Jua';">정답 확인</button>
-  </div>
-
-  <!-- [3] 정답 확인 후 등장하는 요정 코코 -->
-  <div id="fairyRewardArea">
-    <div style="font-size: 3rem; animation: float 2s infinite;">🧚‍♀️</div>
-    <div id="fairyMessage" style="font-size: 1.2rem; color: #555; margin-top: 10px;">
-      정답이야! 참 잘했어! ✨<br>Apple은 '사과'라는 뜻이란다!
+    <div class="ticket-right">
+      <div class="ticket-title">🔤 파닉스 마을</div>
+      <div class="ticket-desc">그림을 누르고 알파벳 소리를 들어보자!</div>
     </div>
-    <button onclick="nextQuestion()" style="margin-top: 15px; background: #A78BFA; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">다음 문제 도전!</button>
-  </div>
+  </a>
+
+  <!-- 2. 영단어 퀴즈방 탑승권 -->
+  <a href="english_voca.html" class="boarding-pass">
+    <div class="ticket-left">
+      <div style="background:#4facfe; padding:20px; height:100%; width:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius: 13px 0 0 13px; margin: -10px;">
+        <div>GATE</div>
+        <div class="gate">B2</div>
+      </div>
+    </div>
+    <div class="ticket-right">
+      <div class="ticket-title">📝 영단어 퀴즈 기지</div>
+      <div class="ticket-desc">따라 적고, 듣고 맞히는 신나는 단어 게임!</div>
+    </div>
+  </a>
+
+  <!-- 3. 독해 방 (준비 중) -->
+  <a href="#" class="boarding-pass locked" onclick="event.preventDefault(); alert('탑승 준비 중인 게이트입니다! 뚝딱뚝딱 공사 중 🛠️');">
+    <div class="locked-badge">공사 중</div>
+    <div class="ticket-left" style="background: #95a5a6;">
+      <div>GATE</div>
+      <div class="gate">C3</div>
+    </div>
+    <div class="ticket-right">
+      <div class="ticket-title">📖 영어 동화 마을</div>
+      <div class="ticket-desc">재밌는 영어 이야기를 읽어보는 곳이야!</div>
+    </div>
+  </a>
+
+  <!-- 4. 문법 방 (준비 중) -->
+  <a href="#" class="boarding-pass locked" onclick="event.preventDefault(); alert('탑승 준비 중인 게이트입니다! 뚝딱뚝딱 공사 중 🛠️');">
+    <div class="locked-badge">공사 중</div>
+    <div class="ticket-left" style="background: #95a5a6;">
+      <div>GATE</div>
+      <div class="gate">D4</div>
+    </div>
+    <div class="ticket-right">
+      <div class="ticket-title">🧩 영어 블록 공장</div>
+      <div class="ticket-desc">단어들을 조립해서 문장 기차를 만들어보자!</div>
+    </div>
+  </a>
 
 </div>
 
-<script src="/kids-school/js/common.js"></script>
-<script>
-  // 퀴즈 로직은 다음 번에 뼈대에 맞춰서 채워 넣을 예정입니다!
-  function startQuiz(mode) {
-    document.getElementById('modeSelection').style.display = 'none';
-    document.getElementById('quizArea').style.display = 'block';
-    // 여기에 선택한 모드별 문제 세팅 로직 추가 예정
-  }
-
-  function checkAnswer() {
-    // 정답이 맞으면 퀴즈 입력창은 잠시 비활성화하고 요정을 부릅니다.
-    document.getElementById('fairyRewardArea').style.display = 'block';
-    // 원어민 음성으로 정답 한 번 읽어주기 (common.js 기능)
-    speakEnglish("Apple"); 
-  }
-
-  function nextQuestion() {
-    // 요정은 다시 숨고 새로운 문제가 나옵니다.
-    document.getElementById('fairyRewardArea').style.display = 'none';
-    document.getElementById('answerInput').value = '';
-    // 다음 문제 로딩 로직 추가 예정
-  }
-</script>
 </body>
 </html>
