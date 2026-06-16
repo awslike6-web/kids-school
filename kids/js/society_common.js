@@ -3,8 +3,14 @@
 // ========================================================
 
 // 🧚‍♀️ 아나운서 요정 코코 TTS 엔진 안전 우회막 (초기 로딩 충돌 방지용)
-window.stopFairyTTS = window.stopFairyTTS || function() { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다."); };
-window.speakFairyTTS = window.speakFairyTTS || function(msg) { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다:", msg); };
+if (!window.stopFairyTTS) {
+    window.stopFairyTTS = function() { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다."); };
+    window.stopFairyTTS.isMock = true;
+}
+if (!window.speakFairyTTS) {
+    window.speakFairyTTS = function(msg) { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다:", msg); };
+    window.speakFairyTTS.isMock = true;
+}
 
 /**
  * 🔊 요정 음성(TTS) ON/OFF 제어 로직
@@ -139,10 +145,13 @@ function initializeSocietyRoom() {
     }
     document.getElementById('fairySpeakerText').textContent = customGreeting;
 
-    // 요정 요음 초기 낭독
+    // 요정 요음 초기 낭독 (요정 진짜 엔진 결합 완료 시 낭독 트리거)
     setTimeout(() => {
-        if (typeof speakFairyTTS === 'function') {
+        if (typeof speakFairyTTS === 'function' && !speakFairyTTS.isMock && !window.isFairyGreetingSpoken) {
             speakFairyTTS(customGreeting);
+            window.isFairyGreetingSpoken = true;
+        } else {
+            console.log("🔊 [TTS 대기 또는 완료] 요정 엔진 연합 전이거나 이미 환영 인사를 하였습니다.");
         }
     }, 1200);
 
