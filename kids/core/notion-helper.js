@@ -1,4 +1,4 @@
-// notion-helper.js (완벽 교정본)
+// notion-helper.js (관리자 프리패스 통합 교정본)
 
 const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 const STUDY_LOG_DB_ID = "37aa27115b688001b2ffe5e6c8f82ab2"; 
@@ -8,6 +8,13 @@ const STUDY_LOG_DB_ID = "37aa27115b688001b2ffe5e6c8f82ab2";
  */
 async function sendStudyLogToNotion({ childName, subject, startTime, endTime, durationMinutes, errorReport, wordFairyCount = 0 }) {
     console.log(`🚀 [학습일지 배달 시작] 학생: ${childName} | 과목: ${subject}`);
+
+    // 💡 [핵심 방어막] 현재 로그인한 사람이 아빠나 엄마인지 실시간 체크!
+    const savedName = localStorage.getItem('currentUserName');
+    if (savedName === '아빠' || savedName === '엄마') {
+        console.log(`🛠️ [관리자 시뮬레이터 가동] ${savedName} 모드이므로 노션 서버 전송을 건너뛰고 프리패스합니다!`);
+        return true; // 🔥 서버에 데이터를 보내지 않고 "성공했다"고 방들에게 속여서 부드럽게 화면을 넘깁니다!
+    }
 
     try {
         const payload = {
@@ -48,7 +55,6 @@ async function sendStudyLogToNotion({ childName, subject, startTime, endTime, du
             }
         };
 
-        // 🌟 keepalive 옵션과 중괄호 구조를 깔끔하게 정돈했습니다!
         const response = await fetch(`${PROXY_URL}/v1/pages`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
