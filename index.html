@@ -54,6 +54,14 @@
   .key-btn.del { background: transparent; color: var(--pink); font-size: 1.2rem; }
   .shake { animation: shake 0.4s; }
   @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+  /* 💡 부모님 전용 메뉴 모달 UI 추가 */
+  .admin-btn { width: 100%; padding: 16px; margin-bottom: 12px; border: none; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 6px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .admin-btn:hover { transform: translateY(-3px); }
+  .admin-btn.multi { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; }
+  .admin-btn.dash { background: linear-gradient(145deg, #FFD93D, #FF6B9D); color: white; }
+  .admin-btn.son-test { background: linear-gradient(145deg, #6EC6F5, #A78BFA); color: white; }
+  .admin-btn.dau-test { background: linear-gradient(145deg, #FF6B9D, #FF9F43); color: white; }
 </style>
 </head>
 <body>
@@ -65,7 +73,6 @@
   <p class="subtitle">누가 접속할까요?</p>
 
   <div class="profile-grid">
-    <!-- 💡 아이들 로그인 시에도 이름(currentUserName)을 로컬스토리지에 더 안전하게 저장 후 이동하도록 개선 -->
     <button class="profile-btn son" onclick="selectUser('son', '민수', 'lobby.html?user=minsu')">
       <div class="profile-avatar">👦</div><div>오빠</div><div class="profile-role">민수</div>
     </button>
@@ -73,11 +80,10 @@
       <div class="profile-avatar">👧</div><div>동생</div><div class="profile-role">민서</div>
     </button>
     
-    <!-- 💡 [기획 융합 완료] 비밀번호 통과 시 로비(lobby.html)로 똑같이 넘어가도록 대상 주소 매핑! -->
-    <button class="profile-btn dad" onclick="openPasswordModal('son', '아빠', 'lobby.html?user=minsu')">
+    <button class="profile-btn dad" onclick="openPasswordModal('아빠')">
       <div class="profile-avatar">👨</div><div>아빠</div>
     </button>
-    <button class="profile-btn mom" onclick="openPasswordModal('daughter', '엄마', 'lobby.html?user=minseo')">
+    <button class="profile-btn mom" onclick="openPasswordModal('엄마')">
       <div class="profile-avatar">👩</div><div>엄마</div>
     </button>
   </div>
@@ -96,6 +102,24 @@
   </div>
 </div>
 
+<div class="pw-overlay" id="adminOverlay" onclick="closeAdminModal(event)">
+  <div class="pw-modal" style="max-width: 360px;" onclick="event.stopPropagation()">
+    <div class="pw-title" id="adminWelcomeTitle" style="margin-bottom: 25px; color: var(--purple); font-weight: bold;">어디로 이동할까요?</div>
+    
+    <div style="display:flex; flex-direction:column;">
+      <button class="admin-btn multi" onclick="goAdminCustom('multiverse/index_friends.html')">🌌 멀티버스 (친구들)</button>
+      <button class="admin-btn dash" onclick="goAdminCustom('parent_dashboard.html')">🛠️ 대시보드 / 문제 등록</button>
+      
+      <div style="margin: 15px 0; border-top: 2px dashed #eee;"></div>
+      
+      <button class="admin-btn son-test" onclick="goAdminTestLobby('son', 'minsu')">👦 민수 환경 테스트 (로비)</button>
+      <button class="admin-btn dau-test" onclick="goAdminTestLobby('daughter', 'minseo')">👧 민서 환경 테스트 (로비)</button>
+    </div>
+    
+    <button class="key-btn del" style="margin-top:20px; font-size:1rem;" onclick="closeAdminModal()">← 취소하고 닫기</button>
+  </div>
+</div>
+
 <script>
 // 배경 애니메이션
 (function () {
@@ -106,7 +130,7 @@
   }
 })();
 
-// 아이들 기본 선택 전용 처리 장치
+// 아이들 기본 접속 (즉시 이동)
 function selectUser(key, name, targetUrl) {
     localStorage.setItem('currentUser', key);
     localStorage.setItem('currentUserName', name);
@@ -115,23 +139,26 @@ function selectUser(key, name, targetUrl) {
 
 // 부모님 비밀번호 로직
 const PARENT_PASSWORD = "0000"; 
-let pwBuffer = "", pendingParentKey = "", pendingParentName = "", pendingTargetUrl = "";
+let pwBuffer = ""; 
+let currentAdminName = ""; // '아빠' or '엄마'
 
-function openPasswordModal(key, name, targetUrl) {
-  pendingParentKey = key; pendingParentName = name; pendingTargetUrl = targetUrl; pwBuffer = ""; updateDots(); document.getElementById('pwOverlay').classList.add('active');
+function openPasswordModal(name) {
+  currentAdminName = name; 
+  pwBuffer = ""; updateDots(); 
+  document.getElementById('pwOverlay').classList.add('active');
 }
 function closePasswordModal(e) { if(e) e.stopPropagation(); document.getElementById('pwOverlay').classList.remove('active'); pwBuffer = ""; }
 function addNumber(n) { if (pwBuffer.length < 4) { pwBuffer += n; updateDots(); if (pwBuffer.length === 4) setTimeout(checkPassword, 100); } }
 function keyDel() { pwBuffer = pwBuffer.slice(0, -1); updateDots(); }
 function updateDots() { for (let i = 0; i < 4; i++) { const dot = document.getElementById('dot' + i); dot.classList.remove('filled', 'error'); if (i < pwBuffer.length) dot.classList.add('filled'); } }
 
+// 비밀번호 확인 및 관리자 모달 오픈
 function checkPassword() {
   if (pwBuffer === PARENT_PASSWORD) {
-    // 💡 아빠는 'son'(민수환경), 엄마는 'daughter'(민서환경)으로 ID를 연동하되, 이름은 '아빠/엄마'로 장착!
-    localStorage.setItem('currentUser', pendingParentKey); 
-    localStorage.setItem('currentUserName', pendingParentName);
     closePasswordModal(); 
-    location.href = pendingTargetUrl; // 대형 로비로 골인!
+    // 비밀번호 맞으면 부모님 전용 메뉴 오픈!
+    document.getElementById('adminWelcomeTitle').innerText = `${currentAdminName}, 어디로 이동할까요?`;
+    document.getElementById('adminOverlay').classList.add('active');
   } else {
     for (let i = 0; i < 4; i++) { document.getElementById('dot' + i).classList.replace('filled', 'error'); }
     const modal = document.getElementById('pwModal'); modal.classList.add('shake');
@@ -139,6 +166,29 @@ function checkPassword() {
     setTimeout(() => { pwBuffer = ''; updateDots(); }, 600);
   }
 }
+
+// 💡 부모님 메뉴 로직
+function closeAdminModal(e) {
+  if(e) e.stopPropagation();
+  document.getElementById('adminOverlay').classList.remove('active');
+}
+
+// 멀티버스 및 대시보드로 이동
+function goAdminCustom(url) {
+  // 관리자 권한을 들고 기존 시스템으로 진입
+  localStorage.setItem('currentUser', 'admin'); 
+  localStorage.setItem('currentUserName', currentAdminName);
+  location.href = url;
+}
+
+// 아이들 환경 검수 로비로 이동
+function goAdminTestLobby(childKey, childParam) {
+  // 아이들 테마 키(son/daughter)를 빌리되, 이름은 '아빠/엄마'로 장착!
+  localStorage.setItem('currentUser', childKey); 
+  localStorage.setItem('currentUserName', currentAdminName);
+  location.href = `lobby.html?user=${childParam}`;
+}
+
 document.addEventListener('keydown', function (e) {
   if (!document.getElementById('pwOverlay').classList.contains('active')) return;
   if (e.key >= '0' && e.key <= '9') addNumber(e.key);
