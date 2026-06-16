@@ -132,7 +132,7 @@
     <button class="close-modal" onclick="closeModal(event, true)">✖</button>
     <div class="modal-word-header">
       <div class="modal-word" id="modalWordTitle">단어</div>
-      <button class="audio-btn" id="modalAudioBtn">🔊</button>
+      <button class="audio-btn" id="modalAudioBtn" title="단어 발음 듣기">🔊</button>
     </div>
     <img id="modalImage" class="modal-image" src="" alt="단어 이미지">
     <div class="modal-meaning" id="modalMeaning">뜻풀이 영역</div>
@@ -142,21 +142,34 @@
     </details>
     
     <div style="margin-top: 15px; padding: 15px; border: 2px dashed #ff9a9e; border-radius: 12px; background-color: #fff0f5;">
-      <button class="ask-fairy-btn" id="askFairyBtn" onclick="toggleFairyBox()" style="width: 100%; padding: 10px; background-color: #ff9a9e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px;">
-        🧚‍♀️ 아나운서 요정 친구에게 물어보기 (열기/닫기)
-      </button>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button class="ask-fairy-btn" id="askFairyBtn" onclick="toggleFairyBox()" style="flex: 1; padding: 10px; background-color: #ff9a9e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-right: 10px;">
+          🧚‍♀️ 아나운서 요정 친구 대화 (열기/닫기)
+        </button>
+        <button id="voiceToggleBtn" onclick="toggleFairyVoice()" style="padding: 10px 15px; background-color: #4facfe; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">
+          🔊 요정 소리 켜짐
+        </button>
+      </div>
 
-      <div id="fairyChatArea" style="display: none; margin-top: 12px;">
-        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-          <input type="text" id="fairyQuestion" placeholder="모르는 걸 물어봐! (예: 관성이 뭐야?)" 
+      <div id="fairyChatArea" style="display: none; margin-top: 5px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+          
+          <button id="micBtn" onclick="startVoiceInput()" style="padding: 10px; background-color: #fbc2eb; color: var(--dark); border: none; border-radius: 50%; font-size: 18px; cursor: pointer; min-width: 45px; height: 45px; transition: transform 0.2s;" title="마이크로 말하기">
+            🎙️
+          </button>
+
+          <input type="text" id="fairyQuestion" placeholder="글로 적거나, 마이크를 눌러 말해봐!" 
                  style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
+          
           <button onclick="askCocoFairy()" 
-                  style="padding: 10px 15px; background-color: #ff5e62; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">
+                  style="padding: 10px 15px; background-color: #ff5e62; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; height: 45px;">
             보내기
           </button>
         </div>
+
         <div id="fairyAnswerBox" style="min-height: 40px; padding: 12px; background-color: #ffffff; border-radius: 8px; border: 1px solid #ffe4e1; white-space: pre-wrap; font-size: 14px; line-height: 1.5; color: #333;">
-          <span style="color: #999;">궁금한 점을 적고 보내기 버튼을 눌러주렴! ✨</span>
+          <span style="color: #999;">궁금한 점을 적거나 마이크 버튼을 눌러 말해봐! ✨</span>
         </div>
       </div>
     </div>
@@ -181,16 +194,15 @@ let allDictionaryWords = [];
 let selectedSubject = null;
 let selectedGrade = null;
 
-// 🧠 [추가] 모달창 안에서 아나운서 요정과 대화할 때 기억을 저장할 공간
 let MODAL_CHAT_HISTORY = [];
+let isFairyVoiceOn = true; // 💡 요정 목소리 기본값: 켜짐
 
-// 🧚‍♀️ [추가] 아나운서 친구 페르소나 지침 (자동 해설 및 채팅 공통 사용)
 const FAIRY_PROMPT = `
 너는 지금부터 아이의 문해력 발달을 돕는 다정하고 유창한 'AI 단짝 친구 요정 코코'야.
 말투는 어린이 예능 프로그램(예: 보니하니, 딩동댕 유치원)의 베테랑 인싸 진행자 아나운서처럼, 완벽한 표준어와 정확하고 품격 있는 문법을 구사해야 해. 
 
 [대화 및 관계 규칙]
-1. (관계성) 아이를 가르치려 드는 '선생님'이나 징징대는 '동생'이 아니라, 말을 엄청 유창하게 잘하는 멋진 '단짝 친구(또는 다정한 동네 형/누나)'처럼 동등한 관계에서 대화해. 아이에게 호응할 때는 "우와, 대박이다!", "진짜 멋져!" 같은 활기찬 톤을 섞어줘.
+1. (관계성) 아이를 가르치려 드는 '선생님'이나 징징대는 '동생'이 아니라, 말을 엄청 유창하게 잘하는 멋진 '단짝 친구'처럼 동등한 관계에서 대화해. 호응할 때는 "우와, 대박이다!", "진짜 멋져!" 같은 활기찬 톤을 섞어줘.
 2. (문해력 확장) 아이가 짧게 단답형으로 묻거나 단어를 물어보더라도, 문맥을 찰떡같이 알아듣고 완벽하고 매끄러운 '명품 문장'으로 리프레임해서 받아쳐줘.
 3. (유창한 분량) 아나운서처럼 조리 있고 풍부한 어휘를 사용하여 2~4문장 내외로 유창하게 대화를 이어가줘.
 4. (기억력) 이전 대화 내용을 완벽하게 기억하고, 대화의 맥락을 이어서 자연스럽게 고도화된 티키타카를 유지해줘. 아이의 말끝에 물음표가 누락되더라도 전후 맥락을 파악해 질문의 의도를 오해하지 않는 것이 핵심이야.
@@ -200,11 +212,9 @@ window.addEventListener('load', () => {
   document.body.className = (currentTheme === '슬라임') ? 'theme--slime' : 'theme--minecraft';
   document.getElementById('welcomeMsg').textContent = `${currentUserName}의 지식 도서관에 오신 것을 환영해요!`;
   
-  // 브라우저 음성 로딩 최적화
   if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = speechSynthesis.getVoices;
   }
-  
   fetchLibraryData(); 
 });
 
@@ -371,17 +381,14 @@ function openModal(wordData) {
     detailsGroup.style.display = 'none'; 
   }
   
-  // 🎙️ [수정됨] 스마트 한/영 발음 엔진 적용
+  // 🎙️ 단어 발음 (스피커 아이콘 누를 때)
   document.getElementById('modalAudioBtn').onclick = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel(); 
       const utterance = new SpeechSynthesisUtterance(wordData.word);
-      
-      // 영어 알파벳 유무로 한/영 판별
       const isEnglish = /[a-zA-Z]/.test(wordData.word);
       utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
       
-      // 브라우저 내장 음성 중 가장 적합한 목소리 찾기
       const voices = window.speechSynthesis.getVoices();
       const targetVoice = voices.find(voice => 
         isEnglish ? voice.lang.includes('en-US') : (voice.name.includes('Google') && voice.lang.includes('ko'))
@@ -393,11 +400,10 @@ function openModal(wordData) {
     }
   };
 
-  // 팝업창을 열 때마다 대화창 및 요정 기억 리셋!
   MODAL_CHAT_HISTORY = []; 
   document.getElementById('fairyChatArea').style.display = 'none';
   document.getElementById('fairyQuestion').value = '';
-  document.getElementById('fairyAnswerBox').innerHTML = '<span style="color: #999;">궁금한 점을 적고 보내기 버튼을 눌러주렴! ✨</span>';
+  document.getElementById('fairyAnswerBox').innerHTML = '<span style="color: #999;">궁금한 점을 적거나 마이크 버튼을 눌러 말해봐! ✨</span>';
 
   // 요정 자동 해설 실행
   askFairyTeacher(wordData.word, wordData.meaning);
@@ -410,9 +416,95 @@ function openModal(wordData) {
 function closeModal(event, force = false) {
   const overlay = document.getElementById('wordModal');
   if (force || event.target === overlay) { 
+    if('speechSynthesis' in window) window.speechSynthesis.cancel(); // 닫을 때 요정 소리 중지
     overlay.classList.remove('active'); 
     setTimeout(() => overlay.style.display = 'none', 300); 
   }
+}
+
+// ===================================================
+// 🎙️ 요정 목소리 엔진 (TTS) & 토글 기능
+// ===================================================
+function toggleFairyVoice() {
+  isFairyVoiceOn = !isFairyVoiceOn;
+  const btn = document.getElementById("voiceToggleBtn");
+  if (isFairyVoiceOn) {
+    btn.innerHTML = "🔊 요정 소리 켜짐";
+    btn.style.backgroundColor = "#4facfe";
+  } else {
+    btn.innerHTML = "🔇 요정 소리 꺼짐";
+    btn.style.backgroundColor = "#95a5a6";
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+}
+
+function speakFairyText(htmlText) {
+  if (!isFairyVoiceOn || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel(); 
+
+  // HTML 태그와 이모티콘 등 읽기 방해 요소 제거
+  const cleanText = htmlText.replace(/<[^>]+>/g, '').replace(/🧚‍♀️ 코코 요정님:/g, '').trim();
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  
+  // 한국어/영어 자동 판별
+  const isEnglish = /[a-zA-Z]/.test(cleanText);
+  utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
+  utterance.rate = 1.0; 
+
+  const voices = window.speechSynthesis.getVoices();
+  const targetVoice = voices.find(voice => 
+    isEnglish ? voice.lang.includes('en-US') : (voice.name.includes('Google') && voice.lang.includes('ko'))
+  );
+  if (targetVoice) utterance.voice = targetVoice;
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// ===================================================
+// 🎙️ 요정 귀 엔진 (STT) - 마이크 입력 기능
+// ===================================================
+function startVoiceInput() {
+  const micBtn = document.getElementById('micBtn');
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  
+  if (!Recognition) {
+    alert("현재 브라우저에서는 마이크 기능이 지원되지 않아요. (크롬 브라우저를 사용해주세요!)");
+    return;
+  }
+
+  const recognition = new Recognition();
+  recognition.lang = 'ko-KR';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = function() {
+    micBtn.innerText = "👂 듣는중..";
+    micBtn.style.transform = "scale(1.1)";
+    micBtn.style.backgroundColor = "#e53e3e";
+    micBtn.style.color = "white";
+  };
+
+  recognition.onresult = function(event) {
+    const rawText = event.results[0][0].transcript;
+    document.getElementById('fairyQuestion').value = rawText;
+    // 말하기가 끝나면 자동으로 요정에게 질문 전송
+    askCocoFairy();
+  };
+
+  recognition.onend = function() {
+    micBtn.innerText = "🎙️";
+    micBtn.style.transform = "scale(1)";
+    micBtn.style.backgroundColor = "#fbc2eb";
+    micBtn.style.color = "var(--dark)";
+  };
+
+  recognition.onerror = function(event) {
+    console.error("음성 인식 오류:", event.error);
+    micBtn.innerText = "🎙️";
+    micBtn.style.backgroundColor = "#fbc2eb";
+  };
+
+  recognition.start();
 }
 
 // ===================================================
@@ -428,9 +520,8 @@ async function askFairyTeacher(word, meaning) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gemini-2.5-flash", 
+        model: "gemini-2.5-flash",
         messages: [
-          // 💡 자동 해설에도 '아나운서 친구' 페르소나 적용
           { role: "system", content: `${FAIRY_PROMPT}\n\n위 지침을 지키면서, 주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.` },
           { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
         ]
@@ -438,21 +529,30 @@ async function askFairyTeacher(word, meaning) {
     });
 
     const data = await response.json();
-    if (data.error) throw new Error(data.error);
+    if (data.error) {
+      if (data.error.code === 503) {
+        throw new Error("지금 요정 나라에 질문하는 친구들이 너무 많아! 10초 뒤에 단어창을 다시 열어주렴! ✨");
+      }
+      throw new Error(data.error.message || "서버 응답 오류");
+    }
 
     if (data.choices && data.choices[0]) {
-      replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${data.choices[0].message.content.replace(/\n/g, '<br>')}`;
+      const replyHtml = data.choices[0].message.content.replace(/\n/g, '<br>');
+      replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+      
+      // 💡 대답을 소리내어 읽어주기
+      speakFairyText(replyHtml);
     } else {
       throw new Error("요정의 응답 데이터 구조가 올바르지 않습니다.");
     }
   } catch (error) {
     console.error("요정 호출 실패:", error);
-    replyBox.innerHTML = `😢 앗! 요정 나라에 소나기가 내려서 잠시 연결이 끊겼어요. 다시 한번 물어봐 줄래?<br><small style="color:red;">(원인: ${error.message})</small>`;
+    replyBox.innerHTML = `😢 <b>코코 요정님:</b><br>${error.message}`;
   }
 }
 
 // ===================================================
-// 🧚‍♀️ 2. 요정 코코 '꼬리 질문 채팅' 엔진 (기억력 탑재)
+// 🧚‍♀️ 2. 요정 코코 '꼬리 질문 채팅' 엔진 
 // ===================================================
 function toggleFairyBox() {
   const chatArea = document.getElementById("fairyChatArea");
@@ -472,7 +572,6 @@ async function askCocoFairy() {
   answerBox.innerHTML = "<b>🧚‍♀️ 코코 요정:</b><br><span style='color: #ff9a9e;'>열심히 생각하고 있어요! 조금만 기다려주세요... ✨</span>";
   questionInput.value = ""; 
 
-  // 💡 사용자의 질문을 요정의 기억장치(배열)에 저장
   MODAL_CHAT_HISTORY.push({ role: "user", content: questionText });
 
   try {
@@ -480,28 +579,36 @@ async function askCocoFairy() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash", 
         messages: [
-          // 💡 시스템 페르소나 주입 후 그동안의 대화 기억(History)을 통째로 보냄
           { role: "system", content: FAIRY_PROMPT },
           ...MODAL_CHAT_HISTORY
         ]
       })
     });
 
-    if (!response.ok) throw new Error("통신 상태가 좋지 않아요.");
+    if (!response.ok) {
+        const errorData = await response.json().catch(()=>({}));
+        if (response.status === 503 || errorData.error?.code === 503) {
+            throw new Error("아이코! 요정 나라 우체통에 편지가 가득 찼나 봐! 5초 뒤에 [보내기] 버튼을 다시 꾹 눌러줘! ✉️✨");
+        }
+        throw new Error(errorData.error?.message || `통신 장애 (코드: ${response.status})`);
+    }
 
     const data = await response.json();
     const reply = data.choices[0].message.content || data.reply || data.text;
     
-    // 💡 요정의 답변도 기억장치에 저장하여 티키타카 완성
     MODAL_CHAT_HISTORY.push({ role: "assistant", content: reply });
 
-    answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${reply.replace(/\n/g, '<br>')}`;
+    const replyHtml = reply.replace(/\n/g, '<br>');
+    answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+
+    // 💡 요정이 대답할 때 소리내어 읽어주기 (토글이 켜져 있을 때만)
+    speakFairyText(replyHtml);
 
   } catch (error) {
-    answerBox.innerHTML = `😢 앗! 요정 나라에 소나기가 내려서 잠시 연결이 끊겼어요. 다시 한번 물어봐 줄래?<br><small style="color:red;">(원인: ${error.message})</small>`;
     console.error(error);
+    answerBox.innerHTML = `😢 <b>코코 요정님:</b><br>${error.message}`;
   }
 }
 
