@@ -38,8 +38,8 @@
   body.theme--arcade .my-room-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,242,254,0.6); }
 
   /* ----------------------------------
-      🎠 민서 테마: 아기자기 동화 속 비밀 아지트
-      ---------------------------------- */
+     🎠 민서 테마: 아기자기 동화 속 비밀 아지트
+     ---------------------------------- */
   body.theme--hideout { background: linear-gradient(160deg, #fff0f3 0%, #ffe5ec 50%, #fffbe6 100%); color: #4a384f; }
   body.theme--hideout .main-title .accent2 { color: #a78bfa; }
   body.theme--hideout .main-title .accent { color: #ff6b9d; }
@@ -99,7 +99,8 @@
 <div class="bg-floats" id="bgFloats"></div>
 
 <div class="screen" id="screen-subjects" style="display: flex;">
-  <h1 class="main-title"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
+  <!-- 💡 [수정] 관리자용 타이틀 동적 노출용 태그 매핑 -->
+  <h1 class="main-title" id="mainLobbyTitle"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
   
   <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
 
@@ -107,10 +108,10 @@
       <div class="inventory-card" id="inventoryDisplay">
         <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
       </div>
-<a href="kids/common_space/my-room.html" class="my-room-btn">🛒 나만의 마이룸 & 상점 가기</a>
+      <a href="kids/common_space/my-room.html" class="my-room-btn">🛒 나만의 마이룸 & 상점 가기</a>
   </div>
 
-  <p class="subtitle">오늘 탐험하고 싶은 월드를 선택해봐!</p>
+  <p class="subtitle" id="lobbySubtitle">오늘 탐험하고 싶은 월드를 선택해봐!</p>
 
   <div class="world-grid" id="worldGrid"></div>
   
@@ -231,23 +232,25 @@ const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12";
 <script src="kids/config.js"></script>
 
 <script>
-// 3. 로비에서 필요한 코어 부품 목록
 const requiredCores = [
     "notion-helper.js",
     "fairy-config.js",
     "fairy-engine.js"
 ];
 
-// 4. ⚙️ 하이브리드 로더 가동 (루트에서 kids/core/ 안의 부품을 호출)
 loadCoreScripts("kids/core/", requiredCores, () => {
     console.log("🏰 대형 로비 메인 하이브리드 엔진 결합 완료!");
 
     // 유저 확인 파서
     const urlParams = new URLSearchParams(window.location.search);
     let userKey = urlParams.get('user');
+    
+    // 💡 [추가] 로컬 스토리지에 아빠/엄마 이름이 남아있는지 실시간 확인
+    const savedName = localStorage.getItem('currentUserName');
+    const isAdmin = (savedName === '아빠' || savedName === '엄마');
+
     if (!userKey || !USER_CONFIGS[userKey]) {
-      const savedName = localStorage.getItem('currentUserName');
-      userKey = (savedName === '민서') ? 'minseo' : 'minsu'; 
+      userKey = (savedName === '민서' || savedName === '엄마') ? 'minseo' : 'minsu'; 
     }
     const currentConfig = USER_CONFIGS[userKey];
 
@@ -256,13 +259,22 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     
     // APP_CONFIG 기반 동적 자녀 명칭 연동
     const finalRealName = currentConfig.key === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
-    const finalWelcomeText = currentConfig.key === 'son' 
-        ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
-        : `🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, ${finalRealName}!`;
-
-    document.getElementById('welcomeMessage').innerHTML = finalWelcomeText;
-    localStorage.setItem('currentUser', currentConfig.key); 
-    localStorage.setItem('currentUserName', finalRealName);
+    
+    // 💡 [수정] 아빠, 엄마가 입장했을 때 UI 타이틀 및 웰컴 문구 완전 고도화
+    if (isAdmin) {
+        document.getElementById('mainLobbyTitle').innerHTML = `<span class="accent2">🛠️ 관리자</span><br><span class="accent">시뮬레이터</span>`;
+        document.getElementById('welcomeMessage').innerHTML = `🚀 <b>[${savedName} 모드]</b> 데이터 오염 방지막 가동 중! (${finalRealName} 환경 검수)`;
+        document.getElementById('lobbySubtitle').textContent = "🔧 디자인 확인 및 구동 테스트를 진행할 월드를 골라주세요.";
+    } else {
+        const finalWelcomeText = currentConfig.key === 'son' 
+            ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
+            : `🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, ${finalRealName}!`;
+        document.getElementById('welcomeMessage').innerHTML = finalWelcomeText;
+        
+        // 아이들일 때만 로컬스토리지 동기화 수행
+        localStorage.setItem('currentUser', currentConfig.key); 
+        localStorage.setItem('currentUserName', finalRealName);
+    }
 
     // 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더
     (function buildCategorizedMenu() {
@@ -318,6 +330,19 @@ loadCoreScripts("kids/core/", requiredCores, () => {
       const container = document.getElementById('inventoryDisplay');
       const childName = finalRealName;
       
+      // 💡 [핵심 차단막] 아빠/엄마 관리자 모드일 때는 노션 데이터 조회를 완전히 패스하고 모킹데이터 주입!
+      if (isAdmin) {
+          const defaultTheme = currentConfig.key === 'son' ? '마인크래프트' : '슬라임';
+          localStorage.setItem('currentTheme', defaultTheme);
+          
+          container.innerHTML = `
+            <div class="reward-badge">🎟️ <span style="color:var(--mint);">무한 패스</span></div>
+            <div class="math-level" style="background:var(--purple); color:#fff;">🛠️ Lv. 999</div>
+          `;
+          container.className = "inventory-card " + (defaultTheme === '마인크래프트' ? 'theme--minecraft' : 'theme--slime');
+          return; // 🔥 노션 통신망 차단완료!
+      }
+      
       try {
         const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
           method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
@@ -349,7 +374,7 @@ loadCoreScripts("kids/core/", requiredCores, () => {
 
     fetchInventory();
 
-    // 🧚‍♀️ 안전하게 단어요정 시동
+    // 🧚‍♀️ 안전하게 단어요정 시동 (관리자 계정일 때는 세션 분리가 완료되어 자동 안전 구동)
     if (typeof initFairyChat === 'function') {
         initFairyChat('KOREAN'); 
     }
