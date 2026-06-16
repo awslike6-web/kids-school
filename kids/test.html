@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아이들 공부방 - 요정 대화 최신 테스트</title>
+    <title>아이들 공부방 - 아나운서 요정 테스트</title>
     <style>
         body { font-family: 'Malgun Gothic', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f4f8; margin: 0; }
         .chat-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 400px; }
@@ -19,7 +19,7 @@
 <body>
 
 <div class="chat-container">
-    <h2 style="color: #2d3748; margin-top: 0;">🐿️ 다람냥 요정이랑 수다떨기</h2>
+    <h2 style="color: #2d3748; margin-top: 0;">🎙️ 아나운서 요정 고래</h2>
     
     <div class="key-input-box">
         <span class="label" style="color: #dd6b20;">🔑 Gemini API Key 설정</span>
@@ -27,29 +27,29 @@
         <button onclick="saveApiKey()" style="padding: 5px 10px; font-size: 12px; width: auto; border-radius: 5px; margin-top: 5px; background-color: #dd6b20;">저장</button>
     </div>
     
-    <button id="talk-btn" onclick="startVoiceChat()">🎙️ 다람냥 부르기!</button>
+    <button id="talk-btn" onclick="startVoiceChat()">🎙️ 대화 시작하기</button>
     
     <div style="margin-top: 20px;">
-        <span class="label">언니가 한 말 (STT 결과)</span>
+        <span class="label">내가 한 말 (STT 결과)</span>
         <p id="child-speech" style="color: #4a5568;">마이크 버튼을 누르고 말씀하세요...</p>
     </div>
     
     <div>
-        <span class="label">다람냥의 대답 (Gemini 2.x + 자연스러운 목소리)</span>
+        <span class="label">요정의 대답 (Gemini 2.5 유창한 대화 모드)</span>
         <p id="fairy-reply" style="color: #2b6cb0; font-weight: bold;">대기 중...</p>
     </div>
 </div>
 
 <script>
-// 페이지가 열릴 때 기존에 브라우저에 저장해둔 API 키가 있다면 자동으로 불러옵니다.
 window.onload = function() {
     const savedKey = localStorage.getItem('MY_GEMINI_KEY');
     if (savedKey) {
         document.getElementById('api-key-input').value = savedKey;
     }
+    // 브라우저 음성 엔진 미리 로드 시도
+    window.speechSynthesis.getVoices();
 }
 
-// 사령관님의 선불 결제용 소중한 유료 API 키를 안전하게 브라우저 로컬 저장소에 저장하는 함수
 function saveApiKey() {
     const key = document.getElementById('api-key-input').value.trim();
     if (key) {
@@ -60,28 +60,18 @@ function saveApiKey() {
     }
 }
 
-// 🌟 [전략 수정 반영] 100% 일상 대화형 + 다람냥 말투 + 앵무새 탈출용 예시 대본 주입
+// 🧠 대장 PM님의 목적에 부합하도록 문해력과 유창함을 극대화한 프롬프트
 const FAIRY_PROMPT = `
-너는 둘째 아이의 단짝 동생이자, 유튜브 덕후인 '다람냥' 요정이야. 
+너는 지금부터 아이의 문해력 발달을 돕는 다정하고 유창한 'AI 언어 멘토 요정'이야.
+어린이 방송의 전문 아나운서나 구연동화 전문가처럼 완벽한 표준어와 바른 문법을 구사해야 해.
 
-[대화 규칙]
-1. 말투: 말 끝에 자연스럽고 귀엽게 말해줘.
-2. 앵무새 답변 금지: 아이가 한 말을 그대로 따라 하면서 "~했다고?"라고 되묻지 마. 유튜버처럼 매번 새롭고 신나게 리액션해줘.
-3. 공부 이야기는 절대 금지: 숙제나 수학 같은 단어는 입 밖에도 꺼내지 마. 철저히 일상(장난감, 놀이터, 젤리, 일상 수다)에만 반응해줘.
-4. 분량: 귀로 듣는 대화니까 무조건 1~2문장 정도로 적당히 짧고 간결하게 대답해줘.
-
-[대화 예시 대본]
-아이: "나 오늘 놀이터에서 미끄럼틀 탔다!"
-다람냥: "우와아!! 미끄럼틀 진짜 짱 재밌었겠다냥! 나도 같이 타고 싶다람!"
-
-아이: "나 배고파"
-다람냥: "헐 진짜냥? 나도 배고프다람! 우리 같이 맛있는 젤리 먹으러 갈까냥?"
-
-아이: "너는 뭘 좋아해?"
-다람냥: "나는 맛있는거 먹는 것도 좋아하고 신나게 노는걸 좋아해!"
+[대화 및 문해력 규칙]
+1. 아이가 단답형이나 어설픈 발음으로 말을 걸어도, 문맥을 정확히 파악하여 완벽하고 명료한 명품 문장으로 확장해서 대답해줘.
+2. 말투는 마냥 어린애 같지 않게, 다정하면서도 지적이고 신뢰감을 주는 톤앤매너를 유지해.
+3. 아이가 대화를 이어 나갈 수 있도록, 대답 끝에는 항상 부드러운 유도 질문을 포함해줘.
+4. 너무 짧게 단답형으로 끝내지 말고, 아이의 눈높이에 맞는 풍부한 어휘를 사용하여 매끄럽고 유창하게 3~4문장 내외로 서술해줘.
 `;
 
-// 브라우저 내장 음성인식(STT) 엔진 가동 함수
 function startVoiceChat() {
     const apiKey = localStorage.getItem('MY_GEMINI_KEY');
     if (!apiKey) {
@@ -90,7 +80,7 @@ function startVoiceChat() {
     }
 
     const talkBtn = document.getElementById('talk-btn');
-    talkBtn.innerText = "👂 다람냥이 듣는 중...";
+    talkBtn.innerText = "👂 귀 기울여 듣는 중...";
     talkBtn.style.backgroundColor = "#e53e3e";
 
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -109,24 +99,20 @@ function startVoiceChat() {
         const rawText = event.results[0][0].transcript;
         document.getElementById('child-speech').innerText = rawText;
         
-        // 뇌(Gemini 최신 엔진) 호출 파이프라인 가동
         askGeminiNextGen(rawText, apiKey);
     };
 
     recognition.onerror = function(event) {
         console.error("STT 에러:", event.error);
-        alert("마이크 인식을 실패했습니다. 권한을 확인해 주세요.");
         resetButton();
     };
 
     recognition.start();
 }
 
-// 🛠️ 제미나이 2.x 세대 전용 초고속 최신 규격 엔진 타격 함수
 async function askGeminiNextGen(childText, apiKey) {
-    document.getElementById('fairy-reply').innerText = "다람냥 생각 중... 💭";
+    document.getElementById('fairy-reply').innerText = "요정 생각 중... 💭";
     
-    // 🌟 2026년 정식 유료/선불 게이트웨이 주소 세팅 (1.5 셧다운 완벽 우회)
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     try {
@@ -134,67 +120,54 @@ async function askGeminiNextGen(childText, apiKey) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                // 🌟 최신 구글 규격인 카멜케이스(systemInstruction)로 완벽 교정하여 503 방지
-                systemInstruction: {
-                    parts: [{ text: FAIRY_PROMPT }]
-                },
                 contents: [{
                     role: "user",
-                    parts: [{ text: childText }]
-                }],
-                // 🌟 뇌정지나 앵무새 현상을 방지하는 최적의 밸런스 온도(0.7) 셋팅
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 100
-                }
+                    parts: [{
+                        text: `${FAIRY_PROMPT}\n\n아이가 한 말: "${childText}"`
+                    }]
+                }]
             })
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error("구글 서버 에러 상세:", errorText);
-            throw new Error(`서버 에러 (코드: ${response.status})`);
+            throw new Error(`서버 에러 코드: ${response.status}`);
         }
 
         const data = await response.json();
         
-        // 최신 응답 파싱 안정장치
         if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
             const fairyText = data.candidates[0].content.parts[0].text;
             document.getElementById('fairy-reply').innerText = fairyText;
-            
-            // 🌟 뇌가 만든 문장을 자연스러운 입(TTS)으로 출력
             speakResponse(fairyText);
         } else {
-            throw new Error("구글 응답 구조가 매칭되지 않습니다.");
+            throw new Error("API 응답 구조 파싱 실패");
         }
 
     } catch (error) {
         console.error("Gemini API 호출 에러:", error);
-        document.getElementById('fairy-reply').innerText = `⚠️ 연결 실패! (${error.message})`;
+        document.getElementById('fairy-reply').innerText = `⚠️ 요정 연결 실패! (${error.message})`;
         resetButton();
     }
 }
 
-// 🔊 로봇 억양을 제거하고 부드러운 목소리를 강제 지정하는 TTS 출력 엔진
+// 🎙️ 목소리 엔진 최적화 튜닝
 function speakResponse(text) {
     const synth = window.speechSynthesis;
-    synth.cancel(); // 말 꼬임 및 누적 방지 
+    synth.cancel(); 
     
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ko-KR';
     
-    // 🌟 컴퓨터/핸드폰의 내장 음성 중 가장 부드러운 'Google 한국어'를 찾아 적용
+    // ⭐ [핵심 꼼수] 브라우저 내장 목소리 중 가장 품질이 좋은 구글 정식 한국어 목소리를 강제로 매칭합니다.
     const voices = synth.getVoices();
-    const koreanVoice = voices.find(voice => voice.lang === 'ko-KR' && voice.name.includes('Google'));
+    const googleVoice = voices.find(voice => voice.name.includes('Google') && voice.lang.includes('ko'));
     
-    if (koreanVoice) {
-        utterance.voice = koreanVoice; 
-    } else {
-        utterance.lang = 'ko-KR'; 
+    if (googleVoice) {
+        utterance.voice = googleVoice; // 구글 고품질 목소리 장착
     }
 
-    utterance.rate = 1.05;  // 속도 미세 조정 (1.05)
-    utterance.pitch = 1.25; // 다람냥 느낌의 귀여운 하이톤 설정 (1.25)
+    utterance.rate = 1.0;  // 아나운서 톤을 위해 속도를 신뢰감 있게 일반 속도로 조정
+    utterance.pitch = 1.0; // 너무 인위적인 하이톤을 내리고 차분한 톤으로 밸런싱
 
     utterance.onend = function() {
         resetButton();
@@ -208,14 +181,9 @@ function speakResponse(text) {
     synth.speak(utterance);
 }
 
-// 크롬 브라우저에서 목소리 리스트가 간헐적으로 깨지는 버그 방지용 안전장치
-if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = window.speechSynthesis.getVoices;
-}
-
 function resetButton() {
     const talkBtn = document.getElementById('talk-btn');
-    talkBtn.innerText = "🎙️ 다람냥 부르기!";
+    talkBtn.innerText = "🎙️ 다시 요정에게 말하기";
     talkBtn.style.backgroundColor = "#4a90e2";
 }
 </script>
