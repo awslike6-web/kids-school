@@ -112,18 +112,23 @@ let activeQuizIdx = 0;
 let historyCollected = JSON.parse(localStorage.getItem('society_history_collectibles') || '[]');
 
 function initializeSocietyRoom() {
+    // 💡 안전 가드: config.js가 늦게 로드되어 APP_CONFIG가 없더라도 터지지 않게 백업 이름 지정
+    const firstName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) ? APP_CONFIG.CHILDREN.first.name : "민수";
+    const secondName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) ? APP_CONFIG.CHILDREN.second.name : "민서";
+
     // 💡 테마 동적 세팅
     if (currentProfile === 'son') {
         document.body.className = "theme--arcade";
-        document.getElementById('societyTitle').textContent = `${APP_CONFIG.CHILDREN.first.name}의 사회 탐험 대기실`;
-        document.getElementById('adminBadgeTag').textContent = `🎮 [${APP_CONFIG.CHILDREN.first.name}] 네온 관제`;
+        document.getElementById('societyTitle').textContent = `${firstName}의 사회 탐험 대기실`;
+        document.getElementById('adminBadgeTag').textContent = `🎮 [${firstName}] 네온 관제`;
     } else {
         document.body.className = "theme--slime";
-        document.getElementById('societyTitle').textContent = `${APP_CONFIG.CHILDREN.second.name}의 사회 탐험 대기실`;
+        document.getElementById('societyTitle').textContent = `${secondName}의 사회 탐험 대기실`;
         document.getElementById('adminBadgeTag').className = "admin-status-badge korean--fairy";
-        document.getElementById('adminBadgeTag').textContent = `🎠 [${APP_CONFIG.CHILDREN.second.name}] 동화 모드`;
+        document.getElementById('adminBadgeTag').textContent = `🎠 [${secondName}] 동화 모드`;
     }
-
+    
+    // ... (그 아래 관리자 진입 및 원래 코드는 그대로 두시면 됩니다!)
     // 관리자 진입 시 UI 변경
     if (isAdmin) {
         document.getElementById('societyTitle').innerHTML = `<span style="color:var(--orange);">🛠️ 사회 관리자 시뮬레이터</span>`;
