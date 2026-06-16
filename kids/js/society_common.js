@@ -112,23 +112,56 @@ let activeQuizIdx = 0;
 let historyCollected = JSON.parse(localStorage.getItem('society_history_collectibles') || '[]');
 
 function initializeSocietyRoom() {
-    // 💡 안전 가드: config.js가 늦게 로드되어 APP_CONFIG가 없더라도 터지지 않게 백업 이름 지정
-    const firstName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) ? APP_CONFIG.CHILDREN.first.name : "민수";
-    const secondName = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) ? APP_CONFIG.CHILDREN.second.name : "민서";
+    console.log("🛠️ 사회방 초기화 엔진 가동...");
 
-    // 💡 테마 동적 세팅
+    // 💡 [철벽 방어선 1] 현재 프로필 상태 안전하게 가져오기
+    // 로컬 스토리지에 데이터가 없으면 기본값으로 'son'(민수)을 할당합니다.
+    const currentProfile = localStorage.getItem('currentUser') || 'son';
+
+    // 💡 [철벽 방어선 2] undefined 에러가 발생하던 147번째 줄 타깃 방어
+    // 전역 객체가 비어있을 가능성을 대비해, 터지지 않도록 삼항연산자로 백업 이름을 심어줍니다.
+    let firstName = "민수";
+    let secondName = "민서";
+
+    try {
+        // 기존에 에러를 내던 구조(예: APP_CONFIG.CHILDREN.son 등)가 있다면 안전하게 검증하고 바인딩
+        if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) {
+            firstName = APP_CONFIG.CHILDREN.first?.name || APP_CONFIG.CHILDREN.son?.name || "민수";
+            secondName = APP_CONFIG.CHILDREN.second?.name || APP_CONFIG.CHILDREN.daughter?.name || "민서";
+        }
+    } catch (e) {
+        console.log("⚠️ 전역 설정 객체 로드 지연으로 기본 이름을 사용합니다.");
+    }
+
+    // 💡 [철벽 방어선 3] 프로필에 따른 테마 및 헤더 타이틀 강제 주입
     if (currentProfile === 'son') {
         document.body.className = "theme--arcade";
-        document.getElementById('societyTitle').textContent = `${firstName}의 사회 탐험 대기실`;
-        document.getElementById('adminBadgeTag').textContent = `🎮 [${firstName}] 네온 관제`;
+        const titleEl = document.getElementById('societyTitle');
+        if (titleEl) titleEl.textContent = `${firstName}의 사회 탐험 대기실`;
+        
+        const badgeEl = document.getElementById('adminBadgeTag');
+        if (badgeEl) {
+            badgeEl.className = "admin-status-badge";
+            badgeEl.textContent = `🎮 [${firstName}] 네온 관제`;
+        }
+        console.log(`⚡ [환경 동기화] ${firstName} 아케이드 테마 배선 완료`);
     } else {
         document.body.className = "theme--slime";
-        document.getElementById('societyTitle').textContent = `${secondName}의 사회 탐험 대기실`;
-        document.getElementById('adminBadgeTag').className = "admin-status-badge korean--fairy";
-        document.getElementById('adminBadgeTag').textContent = `🎠 [${secondName}] 동화 모드`;
+        const titleEl = document.getElementById('societyTitle');
+        if (titleEl) titleEl.textContent = `${secondName}의 사회 탐험 대기실`;
+        
+        const badgeEl = document.getElementById('adminBadgeTag');
+        if (badgeEl) {
+            badgeEl.className = "admin-status-badge korean--fairy";
+            badgeEl.textContent = `🎠 [${secondName}] 동화 모드`;
+        }
+        console.log(`⚡ [환경 동기화] ${secondName} 밀키스 테마 배선 완료`);
     }
-    
-    // ... (그 아래 관리자 진입 및 원래 코드는 그대로 두시면 됩니다!)
+
+    // --------------------------------------------------------
+    // ⚙️ 이 아래에 있는 기존 로직(관리자 배선, 오버레이 초기화 등)은 
+    // 절대 건드리지 말고 그대로 유지해 주세요!
+    // --------------------------------------------------------
     // 관리자 진입 시 UI 변경
     if (isAdmin) {
         document.getElementById('societyTitle').innerHTML = `<span style="color:var(--orange);">🛠️ 사회 관리자 시뮬레이터</span>`;
