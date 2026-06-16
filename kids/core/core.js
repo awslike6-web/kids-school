@@ -1,116 +1,159 @@
-// ==========================================
-// 💎 전역 만능 보상 지급 엔진 (일일 상한선 노션DB 연동 & 용어방 독립)
-// ==========================================
-// (calculateLevelInfo 함수는 그대로 두시면 됩니다)
+// ========================================================
+// 🏰 민민이네 공부방 공통 핵심 코어 엔진 (core.js)
+// ========================================================
 
-async function grantRewardAndShowUI(earned, isSilent = false, customExpType = null) {
-  const userName = localStorage.getItem('currentUser') === 'son' ? '민수' : '민서'; 
-  const currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
-  
-  if (userName === '아빠' || userName === '엄마' || userName === '어른') {
-      console.log(`🛠️ [보상 프리패스] ${earned}개 획득 처리 완료 (노션 전송 X)`);
-      return true;
-  }
+const requiredCores = [
+    "notion-helper.js",
+    "fairy-config.js",
+    "fairy-engine.js"
+];
 
-  // 💡 1. 대장님 노션 DB 칼럼명에 맞춘 완벽한 자동 라우팅
-  const subjectName = window.currentSubject || "사회"; 
-  let expPropName = `${subjectName} 경험치`;   // 기본: "사회 경험치"
-  let levelPropName = `${subjectName} 레벨`;   // 기본: "사회 레벨"
-  let dailyPropName = `오늘 획득_${subjectName}`; // 기본: "오늘 획득_사회"
+// 글로벌 헬퍼 상태 정의 (공통 사용)
+window.currentProfile = localStorage.getItem('currentUser') || 'son';
+window.currentUserName = localStorage.getItem('currentUserName') || '민수';
+window.currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
+window.savedName = localStorage.getItem('currentUserName');
+window.isAdmin = (window.savedName === '아빠' || window.savedName === '엄마');
 
-  // 용어방에서 호출했을 경우 덮어쓰기 (레벨 칼럼은 없으므로 null 처리)
-  if (customExpType === 'voca') {
-      expPropName = `용어 경험치_${subjectName}`; // "용어 경험치_사회"
-      levelPropName = null; // 대장님 기획대로 용어 레벨은 노션으로 전송하지 않음!
-  }
-
-  const DAILY_LIMIT = 100; // 하루 보상 획득 상한선 (필요시 수정)
-
-  try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-      method: "POST", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
-    });
+// 🏰 코어 및 테마 준비
+document.addEventListener("DOMContentLoaded", () => {
+    // 상대 경로: html 파일 기준](../../core/ 로드 경로
+    const corePath = "../../core/";
     
-    const data = await response.json(); 
-    if (!data.results || data.results.length === 0) throw new Error("학생 인벤토리 없음");
-    
-    const page = data.results[0]; 
-    const props = page.properties;
-
-    // 💡 2. 자정(12시) 초기화를 위한 스마트 날짜 체크 로직
-    const todayStr = new Date().toLocaleDateString();
-    const lastDateKey = `last_play_date_${userName}_${subjectName}`;
-    const lastPlayDate = localStorage.getItem(lastDateKey);
-    
-    // 노션에서 '오늘 획득_사회' 값 가져오기
-    let todayEarned = props[dailyPropName]?.number || 0;
-    
-    // 만약 접속한 날짜가 바뀌었다면? (새로운 날이면 오늘 획득량을 0으로 리셋)
-    if (lastPlayDate !== todayStr) {
-        todayEarned = 0;
-        localStorage.setItem(lastDateKey, todayStr);
-    }
-
-    // 💡 3. 일일 상한선 체크 브레이크
-    if (todayEarned + earned > DAILY_LIMIT) {
-        if (!isSilent) {
-            alert(`⏳ 오늘 [${subjectName}] 과목에서 얻을 수 있는 보상을 모두 모았어요!\n(일일 상한선 ${DAILY_LIMIT}개 도달)\n내일 다시 즐겁게 탐험해 봐요!`);
+    if (typeof loadCoreScripts === 'function') {
+        loadCoreScripts(corePath, requiredCores, () => {
+            console.log("🧚 [학습방 공통 코어 결합 완료] 코코 요정 탑재!");
+            if (typeof initializeRoom === 'function') {
+                initializeRoom();
+            }
+        });
+    } else {
+        console.warn("⚠️ loadCoreScripts 로드 실패, 비동기 폴백 직접 실행");
+        if (typeof initializeRoom === 'function') {
+            initializeRoom();
         }
-        console.log(`⚠️ 일일 보상 상한선 도달 (${todayEarned}/${DAILY_LIMIT})`);
-        return false; 
     }
+});
 
-    // 💡 4. 자산 및 경험치 계산
-    let diamond = props["다이아몬드 개수"]?.number || 0; 
-    let slime = props["슬라임 파츠 개수"]?.number || 0;
-    let tickets = props["소원권 개수"]?.number || 0;
-    let currentExp = props[expPropName]?.number || 0; 
+/**
+ * 🔊 요정 음성(TTS) ON/OFF 제어 로직
+ */
+function toggleFairyTtsSetting() {
+    const isCurrentlyEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+    const nextState = !isCurrentlyEnabled;
+    localStorage.setItem('fairy_tts_enabled', nextState ? 'true' : 'false');
     
-    let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
-    let currentWealth = previousWealth + earned;
-    let newExp = currentExp + earned; 
+    updateTtsToggleUi();
     
-    const prevLevelInfo = calculateLevelInfo(currentExp);
-    const currLevelInfo = calculateLevelInfo(newExp);
-
-    let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
-    let newTickets = tickets + earnedTickets;
-
-    // 📦 5. 노션 업데이트 보따리 (없는 칼럼은 빼고 전송!)
-    let updateProps = { 
-        "소원권 개수": { number: newTickets },
-        [expPropName]: { number: newExp },                   // 사회 경험치 OR 용어 경험치_사회
-        [dailyPropName]: { number: todayEarned + earned }    // 오늘 획득_사회 업데이트!
-    };
-    
-    // 레벨 칼럼 이름이 존재할 때만(일반 과목일 때만) 레벨 업데이트 추가
-    if (levelPropName) {
-        updateProps[levelPropName] = { number: currLevelInfo.level };
+    if (!nextState) {
+        if (typeof stopFairyTTS === 'function') stopFairyTTS();
+    } else {
+        setTimeout(() => {
+            if (typeof speakFairyTTS === 'function') {
+                speakFairyTTS("요정 코코의 나긋나긋한 낭독 서비스가 다시 켜졌습니다! 같이 떠나봐요! 🧚‍♀️");
+            }
+        }, 150);
     }
-    
-    if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
-    else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
-
-    // 노션으로 쏘기!
-    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
-      method: "PATCH", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ properties: updateProps }) 
-    });
-    
-    if (!isSilent) {
-        let alertMsg = `🎉 보상 획득 완료!\n+${earned}개 적립! (오늘 ${todayEarned + earned}/${DAILY_LIMIT})`;
-        if (levelPropName) {
-            alertMsg += `\n${subjectName} 레벨: Lv.${currLevelInfo.level}`;
-        } else {
-            alertMsg += `\n용어 경험치가 상승했습니다!`;
-        }
-        alert(alertMsg);
-    }
-
-    return true;
-  } catch (err) {
-    console.error("❌ 보상 저장 오류:", err);
-    return false;
-  }
 }
+
+function updateTtsToggleUi() {
+    const btn = document.getElementById('ttsToggleBtn');
+    if (!btn) return;
+    
+    const isEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+    const currentProfileLocal = localStorage.getItem('currentUser') || 'son';
+    
+    if (isEnabled) {
+        btn.innerHTML = "🔊 요정 음성 ON";
+        if (currentProfileLocal === 'son') {
+            btn.style.borderColor = "#00f2fe";
+            btn.style.color = "#00f2fe";
+            btn.style.background = "rgba(14, 10, 31, 0.6)";
+        } else {
+            btn.style.borderColor = "#ff6b9d";
+            btn.style.color = "#ff6b9d";
+            btn.style.background = "#ffffff";
+        }
+    } else {
+        btn.innerHTML = "🔇 요정 음성 OFF";
+        btn.style.borderColor = "#8b949e";
+        btn.style.color = "#8b949e";
+        if (currentProfileLocal === 'son') {
+            btn.style.background = "rgba(30,30,40,0.5)";
+        } else {
+            btn.style.background = "#fafafa";
+        }
+    }
+}
+
+/**
+ * ⏳ 로딩 스피너 전송 헬퍼 함수
+ */
+function showLoadingSpinner(container) {
+    if (!container) return;
+    container.innerHTML = `
+      <div class="spinner-wrapper">
+        <div class="spinner-circle"></div>
+        <p style="font-family:'Gaegu', cursive; font-size:1.3rem; font-weight:bold; color:inherit; text-align:center; opacity: 0.95;">
+           🧚‍♀️ 코코 요정이 노션 등대에서 자료를 가방에 챙겨오고 있어요...
+        </p>
+      </div>
+    `;
+}
+
+/**
+ * 한글 초성을 자동으로 자르는 초강력 헬퍼함수
+ */
+function getChosung(str) {
+    if (!str) return "";
+    const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+    let result = "";
+    for(let i=0; i<str.length; i++) {
+        const code = str.charCodeAt(i) - 44032;
+        if(code > -1 && code < 11172) {
+            result += cho[Math.floor(code / 588)];
+        } else {
+            result += str.charAt(i);
+        }
+    }
+    return result;
+}
+
+/**
+ * 보상 지급 연동 브릿지 공용 헬퍼
+ */
+async function triggerAwardDispense(amount) {
+    const isAdminUser = window.isAdmin || (localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마');
+    if (isAdminUser) {
+        console.log("🛠️ 아버님/어머님 검수 중이므로 노션 실제 크레딧 지급을 프리패스합니다.");
+        return true;
+    }
+
+    try {
+        if (typeof grantRewardAndShowUI === 'function') {
+            await grantRewardAndShowUI(amount, true); // 조용한 노티 전송 및 데이터 업데이트
+        }
+    } catch(err) {
+        console.warn("보상 지급 중 로컬 백엔드 연동 모듈 우회:", err);
+    }
+}
+
+/**
+ * 퇴장 시 일지 작성 자동 안전 배선 (동적 과목명 적용)
+ */
+window.addEventListener("beforeunload", () => {
+    const isAdminUser = window.isAdmin || (localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마');
+    if (!isAdminUser && typeof sendStudyLogToNotion === 'function') {
+        const profile = localStorage.getItem('currentUser') || 'son';
+        const userName = profile === 'son' ? '민수' : '민서';
+        const subjectName = window.currentSubject || "사회"; // 동적 과목명 참조
+        sendStudyLogToNotion({
+            childName: userName,
+            subject: subjectName,
+            startTime: new Date().toISOString(),
+            endTime: new Date().toISOString(),
+            durationMinutes: 5,
+            errorReport: `${subjectName} 섭렵 돋보기 완료`
+        });
+    }
+});
