@@ -5,58 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>민민이네 공부방 - 사회 역사 탐험방</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<!-- 🎨 사회 역사 탐험방 모듈별 스타일 분류 배선 -->
 <link rel="stylesheet" href="../../css/society.css">
 </head>
 <body>
 
 <div class="society-container">
   
-  <!-- 상단 액션 바 -->
   <div class="top-action-bar">
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
-      <!-- 🧚‍♀️ 요정 음성 ON/OFF 토글 버튼 -->
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
-      <!-- ⚙️ 관리자 대응 상태 태그 -->
       <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
     </div>
   </div>
 
-  <!-- 메인 헤더 카드 -->
   <div class="main-header-card">
     <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
     <h1 id="societyTitle">민수의 사회 탐험 대기실</h1>
     <p class="banner-goal-desc" id="societyGoalText">3단원. 우리 지역의 중심지를 깊게 알아볼까?</p>
   </div>
 
-  <!-- 4대 파트 카드 격리 그리드 -->
   <div class="society-grid">
     
-    <!-- 카드 1: 사회 용어방 -->
     <div class="society-grid-btn" onclick="openMissionView('voca')">
       <span class="society-btn-icon">📖</span>
       <div class="society-btn-title">사회 용어방</div>
       <p class="society-btn-desc">교과서 속 핵심 한자 용어들을 요정 코코의 나긋나긋한 낭독과 함께 초성 정복 챌린지!</p>
     </div>
 
-    <!-- 카드 2: 자료 분석실 -->
     <div class="society-grid-btn" onclick="openMissionView('chart')">
       <span class="society-btn-icon">📊</span>
       <div class="society-btn-title">차트 & 도표 자료실</div>
       <p class="society-btn-desc">그래프와 지도 정보를 면밀하게 해독하고 사회 탐구 퀴즈 문항들을 슬기롭게 파헤쳐라!</p>
     </div>
 
-    <!-- 카드 3: 랜선 지도 탐방 -->
     <div class="society-grid-btn" onclick="openMissionView('map')">
       <span class="society-btn-icon">🗺️</span>
       <div class="society-btn-title">랜선 지도 탐방실</div>
       <p class="society-btn-desc">한반도와 우리 지역의 지형 생태 사진을 감상하고, 마법의 목소리로 한 줄 탐방록 쓰기!</p>
     </div>
 
-    <!-- 카드 4: 역사 문화재 돋보기 -->
     <div class="society-grid-btn" onclick="openMissionView('history')">
       <span class="society-btn-icon">⏳</span>
       <div class="society-btn-title">역사 & 문화재 돋보기</div>
@@ -65,7 +55,6 @@
 
   </div>
 
-  <!-- 요정 코코 도킹 스테이션 -->
   <div class="fairy-live-dock">
     <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" style="width: 52px; height: 52px; object-fit: contain;">
     <div class="fairy-bubble">
@@ -76,7 +65,6 @@
 
 </div>
 
-<!-- 🎬 오버레이 미션 팝업박스 전용 -->
 <div class="society-overlay" id="missionOverlay">
   <div class="society-overlay-box">
     <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
@@ -87,14 +75,28 @@
     </div>
 
     <div class="overlay-body" id="overlayInnerBody">
-      <!-- 동적 미션 UI 템플릿 영역 -->
-    </div>
+      </div>
   </div>
 </div>
 
-<!-- 🔗 모듈 구조에 맞춘 상대 경로 스크립트 결합 링크선 -->
 <script src="../../config.js"></script>
-<script src="../../js/society_common.js"></script>
 <script src="../../core/core.js"></script>
+<script src="../../js/society_common.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 코어와 사회방 초기화 엔진 순차적 강제 구동 시뮬레이터
+    if (typeof initializeSocietyRoom === 'function') {
+        initializeSocietyRoom();
+    } else if (typeof initializeRoom === 'function') {
+        initializeRoom();
+    } else {
+        // 만약 두 함수 모두 로딩 지연이 발생할 경우를 대비한 2중 철벽 로컬 가드
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--arcade' : 'theme--slime';
+        console.log(`⚡ [엔진 우회 가드] 로컬 프로필(${localProfile})에 맞춰 테마를 강제 주입했습니다.`);
+    }
+  });
+</script>
 </body>
 </html>
