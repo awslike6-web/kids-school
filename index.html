@@ -64,17 +64,20 @@
   <h1 class="main-title"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
   <p class="subtitle">누가 접속할까요?</p>
 
-<div class="profile-grid">
-    <button class="profile-btn son" onclick="location.href='lobby.html?user=minsu'">
+  <div class="profile-grid">
+    <!-- 💡 아이들 로그인 시에도 이름(currentUserName)을 로컬스토리지에 더 안전하게 저장 후 이동하도록 개선 -->
+    <button class="profile-btn son" onclick="selectUser('son', '민수', 'lobby.html?user=minsu')">
       <div class="profile-avatar">👦</div><div>오빠</div><div class="profile-role">민수</div>
     </button>
-    <button class="profile-btn daughter" onclick="location.href='lobby.html?user=minseo'">
+    <button class="profile-btn daughter" onclick="selectUser('daughter', '민서', 'lobby.html?user=minseo')">
       <div class="profile-avatar">👧</div><div>동생</div><div class="profile-role">민서</div>
     </button>
-    <button class="profile-btn dad" onclick="openPasswordModal('dad', '아빠', 'multiverse/index_friends.html')">
+    
+    <!-- 💡 [기획 융합 완료] 비밀번호 통과 시 로비(lobby.html)로 똑같이 넘어가도록 대상 주소 매핑! -->
+    <button class="profile-btn dad" onclick="openPasswordModal('son', '아빠', 'lobby.html?user=minsu')">
       <div class="profile-avatar">👨</div><div>아빠</div>
     </button>
-    <button class="profile-btn mom" onclick="openPasswordModal('mom', '엄마', 'parent_dashboard.html')">
+    <button class="profile-btn mom" onclick="openPasswordModal('daughter', '엄마', 'lobby.html?user=minseo')">
       <div class="profile-avatar">👩</div><div>엄마</div>
     </button>
   </div>
@@ -103,6 +106,13 @@
   }
 })();
 
+// 아이들 기본 선택 전용 처리 장치
+function selectUser(key, name, targetUrl) {
+    localStorage.setItem('currentUser', key);
+    localStorage.setItem('currentUserName', name);
+    location.href = targetUrl;
+}
+
 // 부모님 비밀번호 로직
 const PARENT_PASSWORD = "0000"; 
 let pwBuffer = "", pendingParentKey = "", pendingParentName = "", pendingTargetUrl = "";
@@ -117,8 +127,11 @@ function updateDots() { for (let i = 0; i < 4; i++) { const dot = document.getEl
 
 function checkPassword() {
   if (pwBuffer === PARENT_PASSWORD) {
-    localStorage.setItem('currentUser', pendingParentKey); localStorage.setItem('currentUserName', pendingParentName);
-    closePasswordModal(); location.href = pendingTargetUrl;
+    // 💡 아빠는 'son'(민수환경), 엄마는 'daughter'(민서환경)으로 ID를 연동하되, 이름은 '아빠/엄마'로 장착!
+    localStorage.setItem('currentUser', pendingParentKey); 
+    localStorage.setItem('currentUserName', pendingParentName);
+    closePasswordModal(); 
+    location.href = pendingTargetUrl; // 대형 로비로 골인!
   } else {
     for (let i = 0; i < 4; i++) { document.getElementById('dot' + i).classList.replace('filled', 'error'); }
     const modal = document.getElementById('pwModal'); modal.classList.add('shake');
