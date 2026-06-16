@@ -23,13 +23,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof loadCoreScripts === 'function') {
         loadCoreScripts(corePath, requiredCores, () => {
             console.log("🧚 [학습방 공통 코어 결합 완료] 코코 요정 탑재!");
-            if (typeof initializeRoom === 'function') {
+            if (typeof initializeSocietyRoom === 'function') {
+                initializeSocietyRoom();
+            } else if (typeof initializeRoom === 'function') {
                 initializeRoom();
             }
         });
     } else {
         console.warn("⚠️ loadCoreScripts 로드 실패, 비동기 폴백 직접 실행");
-        if (typeof initializeRoom === 'function') {
+        if (typeof initializeSocietyRoom === 'function') {
+            initializeSocietyRoom();
+        } else if (typeof initializeRoom === 'function') {
             initializeRoom();
         }
     }
