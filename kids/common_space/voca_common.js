@@ -1,0 +1,420 @@
+// 📚 용어사전방(Voca) 독립 실행형 제어 엔진
+const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
+
+// 🚀 코어 관제탑(window)이 세탁해 둔 글로벌 상태를 그대로 이어받습니다!
+let currentUser = window.currentProfile || 'son';
+let currentUserName = window.currentUserName || '민수';
+let currentTheme = window.currentTheme || '마인크래프트';
+
+let allDictionaryWords = [];
+let selectedSubjects = []; 
+let selectedGrades = [];   
+let MODAL_CHAT_HISTORY = [];
+let isFairyVoiceOn = true; 
+
+const FAIRY_PROMPT = `
+너는 지금부터 아이의 문해력 발달을 돕는 다정하고 유창한 'AI 단짝 친구 요정 코코'야.
+말투는 어린이 예능 프로그램(예: 보니하니, 딩동댕 유치원)의 베테랑 인싸 진행자 아나운서처럼, 완벽한 표준어와 정확하고 품격 있는 문법을 구사해야 해. 
+
+[대화 및 관계 규칙]
+1. (관계성) 아이를 가르치려 드는 '선생님'이나 징징대는 '동생'이 아니라, 말을 엄청 유창하게 잘하는 멋진 '단짝 친구'처럼 동등한 관계에서 대화해. 호응할 때는 "우와, 대박이다!", "진짜 멋져!" 같은 활기찬 톤을 섞어줘.
+2. (문해력 확장) 아이가 짧게 묻더라도, 문맥을 찰떡같이 알아듣고 완벽하고 매끄러운 '명품 문장'으로 리프레임해서 받아쳐줘.
+3. (유창한 분량) 아나운서처럼 조리 있고 풍부한 어휘를 사용하여 2~4문장 내외로 유창하게 대화를 이어가줘.
+4. (기억력) 이전 대화 내용을 완벽하게 기억하고, 대화의 맥락을 이어서 자연스럽게 고도화된 티키타카를 유지해줘.
+`;
+
+// 🏰 엔진 시동 및 데이터 로딩 시작
+window.addEventListener('load', () => { 
+  document.body.className = (currentTheme === '슬라임' || currentTheme === 'theme--slime') ? 'theme--slime' : 'theme--minecraft';
+  document.getElementById('welcomeMsg').textContent = `${currentUserName}의 지식 도서관에 오신 것을 환영해요!`;
+  
+  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = speechSynthesis.getVoices;
+  }
+  fetchLibraryData(); 
+});
+
+async function fetchLibraryData() {
+  try {
+    let allResults = []; let hasMore = true; let nextCursor = undefined;
+    while (hasMore) {
+      const bodyData = { page_size: 100 };
+      if (nextCursor) bodyData.start_cursor = nextCursor;
+      const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyData)
+      }); 
+      const data = await response.json();
+      allResults = allResults.concat(data.results);
+      hasMore = data.has_more; nextCursor = data.next_cursor;
+    }
+
+    const cleanLoginName = currentUserName.trim();
+
+    allDictionaryWords = allResults.map(page => {
+      const p = page.properties;
+      const word = p["단어"]?.title[0]?.plain_text || "";
+      const meaning = p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "뜻풀이 없음";
+      const detailContext = p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "";
+      const imgProp = p["이미지파일"]?.files?.[0];
+      const imageUrl = imgProp?.file?.url || imgProp?.external?.url || null;
+      const pos = p["품사"]?.rich_text?.[0]?.plain_text || ""; 
+      const wordType = p["어휘유형"]?.select?.name || ""; 
+      const stage = p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number?.toString() || "기본 단원";
+      const grades = p["학년"]?.multi_select?.map(item => item.name) || []; 
+      const isAchieved = p["달성"]?.checkbox || false; 
+
+      return {
+        pageId: page.id, word, meaning, detailContext, imageUrl, pos, wordType, grades, isAchieved, stage,
+        subject: p["과목"]?.multi_select?.map(item => item.name) || ["미분류"],
+        target: p["학생"]?.multi_select?.map(item => item.name) || []
+      };
+    }).filter(w => w.word !== "" && w.target.some(t => t.trim() === cleanLoginName));
+
+    document.getElementById('loadingArea').style.display = 'none';
+    buildFilterButtons();
+    updateStatusAndFilter();
+
+  } catch (error) {
+    console.error("데이터 로딩 실패:", error);
+    document.getElementById('loadingArea').innerHTML = `❌ 로딩 실패. 새로고침 해주세요.`;
+  }
+}
+
+function buildFilterButtons() {
+  const subArea = document.getElementById('subjectFilterArea');
+  const gradeArea = document.getElementById('gradeFilterArea');
+  const subjects = [...new Set(allDictionaryWords.flatMap(w => w.subject))];
+  const grades = [...new Set(allDictionaryWords.flatMap(w => w.grades))].sort();
+  subArea.innerHTML = "";
+  subjects.forEach(sub => { subArea.innerHTML += `<button class="filter-btn" onclick="toggleSubject('${sub}', this)">📘 ${sub}</button>`; });
+  gradeArea.innerHTML = "";
+  grades.forEach(g => { gradeArea.innerHTML += `<button class="filter-btn" onclick="toggleGrade('${g}', this)">🎒 ${g}</button>`; });
+}
+
+function toggleSubject(subject, btnEl) {
+  btnEl.classList.toggle('active'); 
+  if (selectedSubjects.includes(subject)) {
+    selectedSubjects = selectedSubjects.filter(s => s !== subject);
+  } else {
+    selectedSubjects.push(subject);
+  }
+  updateStatusAndFilter();
+}
+
+function toggleGrade(grade, btnEl) {
+  btnEl.classList.toggle('active'); 
+  if (selectedGrades.includes(grade)) {
+    selectedGrades = selectedGrades.filter(g => g !== grade);
+  } else {
+    selectedGrades.push(grade);
+  }
+  updateStatusAndFilter();
+}
+
+function handleSearch() {
+  updateStatusAndFilter();
+}
+
+function updateStatusAndFilter() {
+  const searchText = document.getElementById('searchInput').value.trim();
+  let msgParts = [];
+  if (searchText) msgParts.push(`🔍 "${searchText}"`);
+  if (selectedSubjects.length > 0) msgParts.push(`📂 [${selectedSubjects.join(', ')}]`);
+  if (selectedGrades.length > 0) msgParts.push(`🎒 [${selectedGrades.join(', ')}]`);
+  
+  const statusMsg = document.getElementById('statusMsg');
+  if (msgParts.length === 0) {
+    statusMsg.textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
+    document.getElementById('fairyRoom').style.display = 'none';
+    renderCatalogSections([]); 
+    return;
+  } else {
+    statusMsg.textContent = msgParts.join(' + ') + " 결과";
+    document.getElementById('fairyRoom').style.display = 'block';
+  }
+
+  const filtered = allDictionaryWords.filter(w => {
+    const textMatch = searchText === "" || 
+                      w.word.toLowerCase().includes(searchText.toLowerCase()) || 
+                      w.meaning.toLowerCase().includes(searchText.toLowerCase());
+    const subjectMatch = selectedSubjects.length === 0 || 
+                         selectedSubjects.some(sub => w.subject.includes(sub));
+    const gradeMatch = selectedGrades.length === 0 || 
+                       selectedGrades.some(g => w.grades.includes(g));
+    return textMatch && subjectMatch && gradeMatch;
+  });
+  renderCatalogSections(filtered);
+}
+
+function renderCatalogSections(wordsToRender) {
+  const container = document.getElementById('librarySectionsContainer');
+  const emptyMsg = document.getElementById('emptySearchMsg');
+  container.innerHTML = "";
+  if (wordsToRender.length === 0) {
+    const searchActive = selectedSubjects.length > 0 || selectedGrades.length > 0 || document.getElementById('searchInput').value.trim() !== "";
+    emptyMsg.style.display = searchActive ? 'block' : 'none'; return;
+  }
+  emptyMsg.style.display = 'none';
+  const sectionsMap = {};
+  wordsToRender.forEach(w => {
+    const stageName = w.stage || "기본 단원";
+    if (!sectionsMap[stageName]) sectionsMap[stageName] = [];
+    sectionsMap[stageName].push(w);
+  });
+  Object.keys(sectionsMap).sort().forEach(stageName => {
+    const sectionData = sectionsMap[stageName];
+    const sectionDiv = document.createElement('div'); sectionDiv.className = 'stage-section';
+    const header = document.createElement('div'); header.className = 'stage-header';
+    header.textContent = isNaN(stageName) ? stageName : `${stageName}단원`;
+    sectionDiv.appendChild(header);
+    const grid = document.createElement('div'); grid.className = 'catalog-grid';
+    sectionData.forEach(w => {
+      let badgesHtml = '';
+      if (w.grades.length > 0) badgesHtml += `<span class="badge grade">${w.grades[0]}</span>`;
+      if (w.pos) badgesHtml += `<span class="badge pos">${w.pos}</span>`;
+      const crownHtml = w.isAchieved ? `<div class="master-crown">👑</div>` : '';
+      const masterClass = w.isAchieved ? 'mastered' : '';
+      const card = document.createElement('div'); card.className = `word-card ${masterClass}`;
+      card.innerHTML = `${crownHtml}<div class="badge-area">${badgesHtml}</div><div class="word-title">${w.word}</div>`;
+      card.onclick = () => openModal(w); grid.appendChild(card);
+    });
+    sectionDiv.appendChild(grid); container.appendChild(sectionDiv);
+  });
+}
+
+function openModal(wordData) {
+  document.getElementById('modalWordTitle').textContent = wordData.word;
+  document.getElementById('modalMeaning').textContent = wordData.meaning;
+  
+  const imgEl = document.getElementById('modalImage');
+  if (wordData.imageUrl) { 
+    imgEl.src = wordData.imageUrl; 
+    imgEl.style.display = 'block'; 
+  } else { 
+    imgEl.style.display = 'none'; 
+  }
+  
+  const detailsGroup = document.getElementById('modalDetailsGroup');
+  if (wordData.detailContext) {
+    document.getElementById('modalDetailContext').innerHTML = wordData.detailContext.replace(/\n/g, '<br>');
+    detailsGroup.style.display = 'block'; 
+    detailsGroup.removeAttribute('open');
+  } else { 
+    detailsGroup.style.display = 'none'; 
+  }
+  
+  document.getElementById('modalAudioBtn').onclick = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); 
+      const utterance = new SpeechSynthesisUtterance(wordData.word);
+      const isEnglish = /[a-zA-Z]/.test(wordData.word);
+      utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
+      
+      const voices = window.speechSynthesis.getVoices();
+      const targetVoice = voices.find(voice => 
+        isEnglish ? voice.lang.includes('en-US') : (voice.name.includes('Google') && voice.lang.includes('ko'))
+      );
+      if (targetVoice) utterance.voice = targetVoice;
+      utterance.rate = 0.85; 
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  MODAL_CHAT_HISTORY = []; 
+  document.getElementById('fairyChatArea').style.display = 'none';
+  document.getElementById('fairyQuestion').value = '';
+  document.getElementById('fairyAnswerBox').innerHTML = '<span style="color: #999;">궁금한 점을 적거나 마이크 버튼을 눌러 말해봐! ✨</span>';
+
+  askFairyTeacher(wordData.word, wordData.meaning);
+
+  const overlay = document.getElementById('wordModal'); 
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('active'), 10);
+}
+
+function closeModal(event, force = false) {
+  const overlay = document.getElementById('wordModal');
+  if (force || event.target === overlay) { 
+    if('speechSynthesis' in window) window.speechSynthesis.cancel(); 
+    overlay.classList.remove('active'); 
+    setTimeout(() => overlay.style.display = 'none', 300); 
+  }
+}
+
+function toggleFairyVoice() {
+  isFairyVoiceOn = !isFairyVoiceOn;
+  const btn = document.getElementById("voiceToggleBtn");
+  if (isFairyVoiceOn) {
+    btn.innerHTML = "🔊 요정 소리 켜짐";
+    btn.style.backgroundColor = "#4facfe";
+  } else {
+    btn.innerHTML = "🔇 요정 소리 꺼짐";
+    btn.style.backgroundColor = "#95a5a6";
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+}
+
+function speakFairyText(htmlText) {
+  if (!isFairyVoiceOn || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel(); 
+
+  const cleanText = htmlText.replace(/<[^>]+>/g, '').replace(/🧚‍♀️ 코코 요정님:/g, '').trim();
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  const isEnglish = /[a-zA-Z]/.test(cleanText);
+  utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
+  utterance.rate = 1.0; 
+
+  const voices = window.speechSynthesis.getVoices();
+  const targetVoice = voices.find(voice => 
+    isEnglish ? voice.lang.includes('en-US') : (voice.name.includes('Google') && voice.lang.includes('ko'))
+  );
+  if (targetVoice) utterance.voice = targetVoice;
+  window.speechSynthesis.speak(utterance);
+}
+
+function startVoiceInput() {
+  const micBtn = document.getElementById('micBtn');
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Recognition) {
+    alert("현재 브라우저에서는 마이크 기능이 지원되지 않아요. (크롬 브라우저를 사용해주세요!)");
+    return;
+  }
+
+  const recognition = new Recognition();
+  recognition.lang = 'ko-KR';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = function() {
+    micBtn.innerText = "👂 듣는중..";
+    micBtn.style.transform = "scale(1.1)";
+    micBtn.style.backgroundColor = "#e53e3e";
+    micBtn.style.color = "white";
+  };
+  recognition.onresult = function(event) {
+    const rawText = event.results[0][0].transcript;
+    document.getElementById('fairyQuestion').value = rawText;
+    askCocoFairy();
+  };
+  recognition.onend = function() {
+    micBtn.innerText = "🎙️";
+    micBtn.style.transform = "scale(1)";
+    micBtn.style.backgroundColor = "#fbc2eb";
+    micBtn.style.color = "var(--dark)";
+  };
+  recognition.onerror = function(event) {
+    console.error("음성 인식 오류:", event.error);
+    micBtn.innerText = "🎙️";
+    micBtn.style.backgroundColor = "#fbc2eb";
+  };
+  recognition.start();
+}
+
+async function askFairyTeacher(word, meaning) {
+  const replyBox = document.getElementById('fairyReplyBox');
+  replyBox.innerHTML = `⏳ 요정 코코가 <b>[${word}]</b>에 대해 생각하고 있어요. 조금만 기다려주세요...`;
+  document.getElementById('fairyRoom').scrollIntoView({ behavior: 'smooth' });
+
+  try {
+    const response = await fetch(`${WORKER_PROXY_URL}/v1/chat/completions?type=ai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gemini-2.5-flash",
+        messages: [
+          { role: "system", content: `${FAIRY_PROMPT}\n\n위 지침을 지키면서, 주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.` },
+          { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) {
+      if (data.error.code === 503) {
+        throw new Error("지금 요정 나라에 질문하는 친구들이 너무 많아! 10초 뒤에 단어창을 다시 열어주렴! ✨");
+      }
+      throw new Error(data.error.message || "서버 응답 오류");
+    }
+
+    if (data.choices && data.choices[0]) {
+      const replyHtml = data.choices[0].message.content.replace(/\n/g, '<br>');
+      replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+      speakFairyText(replyHtml);
+    } else {
+      throw new Error("요정의 응답 데이터 구조가 올바르지 않습니다.");
+    }
+  } catch (error) {
+    console.error("요정 호출 실패:", error);
+    replyBox.innerHTML = `😢 <b>코코 요정님:</b><br>${error.message}`;
+  }
+}
+
+function toggleFairyBox() {
+  const chatArea = document.getElementById("fairyChatArea");
+  chatArea.style.display = chatArea.style.display === "none" ? "block" : "none";
+}
+
+async function askCocoFairy() {
+  const questionInput = document.getElementById("fairyQuestion");
+  const answerBox = document.getElementById("fairyAnswerBox");
+  const questionText = questionInput.value.trim();
+
+  if (!questionText) {
+    alert("요정님에게 물어볼 질문을 적어주세요!");
+    return;
+  }
+
+  answerBox.innerHTML = "<b>🧚‍♀️ 코코 요정:</b><br><span style='color: #ff9a9e;'>열심히 생각하고 있어요! 조금만 기다려주세요... ✨</span>";
+  questionInput.value = ""; 
+
+  MODAL_CHAT_HISTORY.push({ role: "user", content: questionText });
+
+  try {
+    const response = await fetch(`${WORKER_PROXY_URL}/v1/chat/completions?type=ai`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gemini-2.5-flash", 
+        messages: [
+          { role: "system", content: FAIRY_PROMPT },
+          ...MODAL_CHAT_HISTORY
+        ]
+      })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(()=>({}));
+        if (response.status === 503 || errorData.error?.code === 503) {
+            throw new Error("아이코! 요정 나라 우체통에 편지가 가득 찼나 봐! 5초 뒤에 [보내기] 버튼을 다시 꾹 눌러줘! ✉️✨");
+        }
+        throw new Error(errorData.error?.message || `통신 장애 (코드: ${response.status})`);
+    }
+
+    const data = await response.json();
+    const reply = data.choices[0].message.content || data.reply || data.text;
+    
+    MODAL_CHAT_HISTORY.push({ role: "assistant", content: reply });
+
+    const replyHtml = reply.replace(/\n/g, '<br>');
+    answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+    speakFairyText(replyHtml);
+
+  } catch (error) {
+    console.error(error);
+    answerBox.innerHTML = `😢 <b>코코 요정님:</b><br>${error.message}`;
+  }
+}
+
+// 엔터키 리스너 바인딩
+setTimeout(() => {
+  const qInput = document.getElementById("fairyQuestion");
+  if(qInput) {
+    qInput.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        askCocoFairy();
+      }
+    });
+  }
+}, 500);
