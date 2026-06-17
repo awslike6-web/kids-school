@@ -12,7 +12,7 @@
 <div class="society-container">
   
   <div class="top-action-bar">
-    <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <a href="/lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
@@ -79,15 +79,14 @@
   </div>
 </div>
 
-<!-- 🔗 사회방 최종 마감 스크립트 배선선 (입과 뇌의 완벽한 결합) -->
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
-<script src="../../core/notion-helper.js"></script>  <!-- 💎 전역 만능 보상 엔진 -->
-<script src="../../core/fairy-engine.js"></script>    <!-- 🔊 입: 진짜 코코 목소리 오디오 엔진 -->
-<script src="../../core/fairy-chatbot.js"></script>   <!-- 💬 뇌: 요정 챗봇 UI + Gemini AI + 보상 카운트 (새로 추가!) -->
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
 <script src="../../js/society_common.js"></script>
 
-  
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     // 코어와 사회방 초기화 엔진 순차적 강제 구동 시뮬레이터
@@ -100,6 +99,11 @@
         const localProfile = localStorage.getItem('currentUser') || 'son';
         document.body.className = (localProfile === 'son') ? 'theme--arcade' : 'theme--slime';
         console.log(`⚡ [엔진 우회 가드] 로컬 프로필(${localProfile})에 맞춰 테마를 강제 주입했습니다.`);
+    }
+
+    // 🤖 인공지능 요정 챗봇 강제 구동 결합
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("SOCIETY");
     }
   });
 </script>
