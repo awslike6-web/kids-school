@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>국어 멀티버스 - 어휘력 단어장</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --sky: #6EC6F5; --pink: #FF6B9D; --purple: #A78BFA; --dark: #2D2D4E; --card: rgba(255,255,255,0.95); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); min-height: 100vh; color: var(--dark); padding-bottom: 50px; }
+  
+  .top-nav { display: flex; justify-content: space-between; padding: 15px 20px; background: rgba(255,255,255,0.8); position: sticky; top: 0; z-index: 50; }
+  .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: var(--dark); font-weight: bold; }
+  
+  .screen { display: none; flex-direction: column; align-items: center; padding: 20px; width: 100%; max-width: 600px; margin: 0 auto; }
+  .screen.active { display: flex; }
+  
+  .main-title { font-family: 'Gaegu', cursive; font-size: 3rem; margin-bottom: 20px; text-align: center; }
+  .card { background: var(--card); border-radius: 20px; padding: 25px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.1); margin-bottom: 20px; border: 2px solid #fff; }
+  .card-title { font-size: 1.3rem; color: var(--purple); margin-bottom: 15px; border-bottom: 2px dashed #eee; padding-bottom: 10px; }
+  
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mode-btn { padding: 15px 10px; border-radius: 15px; border: none; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; color: #fff; background: var(--purple); transition: transform 0.2s; }
+  .mode-btn:hover { transform: translateY(-3px); }
+  
+  .game-zone { width: 100%; background: #fff; border: 3px solid var(--sky); border-radius: 20px; padding: 40px 20px; text-align: center; }
+  .word-display { font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; color: var(--dark); word-break: keep-all;}
+  .main-input { width: 100%; padding: 15px; border-radius: 15px; border: 3px solid #ccc; font-size: 1.8rem; text-align: center; font-family: 'Jua'; margin-bottom: 20px; }
+  .main-input.correct { border-color: #6BCB77; background: #f0fff4; }
+  .main-input.wrong { border-color: #FF6B9D; background: #fff5f5; }
+  
+  .btn { padding: 12px 20px; border-radius: 12px; border: none; background: var(--sky); color: white; font-size: 1.2rem; font-family: 'Jua'; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div style="font-size: 1.2rem; font-weight: bold;">📚 국어 어휘력 단어장</div>
+  <a href="korean.html" class="exit-btn">🚪 국어 본부로</a>
+</div>
+
+<div class="screen active" id="screen-setup">
+  <h1 class="main-title">📚 국어 <span>어휘력 퀴즈</span></h1>
+  
+  <div class="card" id="loadingCard">
+    <div class="card-title">📡 도서관 스캔 중...</div>
+    <p>국어 단어들을 불러오고 있어요!</p>
+  </div>
+
+  <div class="card" id="modeCard" style="display: none;">
+    <div class="card-title">🎯 퀴즈 모드 선택</div>
+    <div class="mode-grid">
+      <button class="mode-btn" onclick="startQuiz('meaning')">🤔 뜻 보고 단어 맞히기</button>
+      <button class="mode-btn" style="background:var(--pink);" onclick="startQuiz('word')">👁️ 단어 보고 뜻 맞히기</button>
+      <button class="mode-btn" style="background:var(--sky); grid-column: span 2;" onclick="startQuiz('listen')">🎧 소리 듣고 받아적기</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-quiz">
+  <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:10px;">
+    <div style="font-size:1.2rem; font-weight:bold; color:var(--purple);">⭐ <span id="score">0</span>점</div>
+    <div style="font-size:1.2rem; font-weight:bold;">📝 <span id="q-num">1</span> / 10</div>
+  </div>
+  
+  <div class="game-zone">
+      <div id="questionText" class="word-display">로딩 중...</div>
+      <input id="answerInput" class="main-input" type="text" autocomplete="off" onkeypress="if(event.key === 'Enter') checkAnswer()">
+      <div style="display:flex; gap:10px; justify-content:center;">
+          <button class="btn" onclick="checkAnswer()">정답 확인</button>
+          <button class="btn" style="background:#ccc; color:#333;" onclick="speakWord()">🔊 듣기</button>
+      </div>
+  </div>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../js/korean_common.js"></script>
+
+<script>
+const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
+let wordList = [];
+let quizPool = [];
+let currentIdx = 0;
+let currentMode = '';
+let score = 0;
+
+window.onload = async () => {
+    // 💡 노션에서 '국어' 과목만 필터링해서 가져오기
+    const WORKER_PROXY_URL = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    try {
+        const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
+            method: "POST", headers: { "Content-Type": "application/json" }
+        });
+        const data = await response.json();
+        wordList = data.results.map(page => {
+            const p = page.properties;
+            return {
+                word: p["단어"]?.title[0]?.plain_text || "",
+                meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "",
+                subject: p["과목"]?.multi_select?.map(i => i.name) || []
+            };
+        }).filter(w => w.word && w.subject.includes("국어"));
+
+        document.getElementById('loadingCard').style.display = 'none';
+        if (wordList.length > 0) document.getElementById('modeCard').style.display = 'block';
+        else alert("노션에 '국어'로 등록된 단어가 없습니다!");
+    } catch (e) {
+        alert("데이터 로딩 실패!");
+    }
+};
+
+function startQuiz(mode) {
+    currentMode = mode;
+    score = 0; currentIdx = 0;
+    quizPool = [...wordList].sort(() => Math.random() - 0.5).slice(0, 10);
+    
+    document.getElementById('screen-setup').classList.remove('active');
+    document.getElementById('screen-quiz').classList.add('active');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const q = quizPool[currentIdx];
+    document.getElementById('q-num').textContent = currentIdx + 1;
+    document.getElementById('score').textContent = score;
+    const qBox = document.getElementById('questionText');
+    const input = document.getElementById('answerInput');
+    input.value = ''; input.className = 'main-input'; input.disabled = false;
+    
+    if (currentMode === 'meaning') { qBox.textContent = q.meaning; input.placeholder = "어떤 단어일까요?"; }
+    else if (currentMode === 'word') { qBox.textContent = q.word; input.placeholder = "무슨 뜻일까요?"; }
+    else if (currentMode === 'listen') { qBox.innerHTML = "🎧<br><span style='font-size:1rem'>잘 듣고 정확히 적어보세요!</span>"; input.placeholder = "받아적기"; speakWord(); }
+    
+    setTimeout(() => input.focus(), 100);
+}
+
+function speakWord() {
+    if(window.speakFairyTTS) window.speakFairyTTS(quizPool[currentIdx].word);
+}
+
+function checkAnswer() {
+    const q = quizPool[currentIdx];
+    const inputEl = document.getElementById('answerInput');
+    const val = inputEl.value.trim().replace(/ /g, '');
+    let correct = false;
+    
+    if (currentMode === 'meaning' || currentMode === 'listen') {
+        if (val === q.word.replace(/ /g, '')) correct = true;
+    } else {
+        if (q.meaning.replace(/ /g, '').includes(val) && val !== "") correct = true;
+    }
+
+    if (correct) {
+        inputEl.className = "main-input correct"; inputEl.disabled = true;
+        score += 10;
+        if(window.speakFairyTTS) window.speakFairyTTS("정답이야! 아주 잘했어!");
+        setTimeout(nextQuestion, 1200);
+    } else {
+        inputEl.className = "main-input wrong";
+        if(window.speakFairyTTS) window.speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+        setTimeout(() => { inputEl.className = "main-input"; inputEl.value = ''; }, 800);
+    }
+}
+
+async function nextQuestion() {
+    currentIdx++;
+    if (currentIdx >= quizPool.length) {
+        document.getElementById('questionText').innerHTML = "🎉 퀴즈 완료!<br><span style='font-size:1.5rem; color:#A78BFA;'>보상을 저장하고 있어요...</span>";
+        // 💡 국어 관제탑(korean_common.js)의 보상 시스템 호출!
+        if (score > 0 && typeof grantRewardAndShowUI === 'function') {
+            await grantRewardAndShowUI(score / 10);
+        }
+    } else {
+        loadQuestion();
+    }
+}
+</script>
+</body>
+</html>
