@@ -1,4 +1,4 @@
-// kids-school/kids/core/fairy-engine.js
+// kids-school/kids/core/fairy-chatbot.js
 // 🧚‍♀️ 아나운서 요정 코코의 음성 합성(TTS) 및 대화 제어 인공지능 엔진 (깃허브 배포 완벽 지원 + 모바일 언락 가드 탑재)
 
 let currentUtterance = null;
