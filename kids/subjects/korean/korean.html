@@ -39,8 +39,8 @@
     <h1 class="main-title">📚 국어 <span>본부</span></h1>
     <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
 
-    <button class="gate-btn sentence" onclick="location.href='korean.html?type=sentence'">⌨️ AI 문장 학습방</button>
-    <button class="gate-btn reading" onclick="location.href='korean.html?type=reading'">📖 정밀 독해 멀티버스방</button>
+    <button class="gate-btn sentence" onclick="location.href='korean-sentence.html'">⌨️ AI 문장 학습방</button>
+    <button class="gate-btn reading" onclick="location.href='korean-reading.html'">📖 정밀 독해 멀티버스방</button>
     <button class="gate-btn voca-btn" onclick="location.href='../../common_space/voca.html?subject=korean'">📚 국어 단어장</button>
     <button class="gate-btn dictation-btn" onclick="location.href='../../common_space/voca.html?subject=dictation'">✍️ 받아쓰기 훈련소</button>
     
@@ -48,61 +48,20 @@
 </div>
 
 <script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../js/korean_common.js"></script>
 
 <script>
-    // 2. 이 방에서 필요한 코어 부품들의 목록을 작성합니다.
-    const requiredCores = [
-        "notion-helper.js",
-        "korean_common.js",
-        "fairy-config.js",
-        "fairy-engine.js"
-    ];
-
-    // 3. 하이브리드 로더 가동
-    loadCoreScripts("../../core/", requiredCores, () => {
-        console.log("국어방 중문 하이브리드 엔진 시동 완료! 🚀");
+    window.addEventListener('load', () => {
+        console.log("국어방 관제탑 엔진 시동 완료! 🚀");
         
-        // 🔄 프로필 수동 전환 함수 전역화 및 문법 교정
-        window.toggleProfileManually = function() {
-            if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
-            else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
-            localStorage.setItem('currentUser', currentProfile); 
-            localStorage.setItem('currentTheme', currentTheme);
-            window.initProfile();
-        }
-
-        // 🎠 프로필 데이터 주입 및 UI 스위칭
-        window.initProfile = function() {
-            const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
-            const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
-            const themeClass = currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
-            document.body.className = themeClass;
-            
-            // APP_CONFIG 기반 동적 조카 이름 치환 바인딩
-            const userName = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
-            document.getElementById('currentUserBadge').innerHTML = `현재 사용자: ${currentProfile === 'son' ? '👦' : '👧'} ${userName} (${currentTheme} 모드)`;
-        }
-
-        // 🔀 라우팅 게이트웨이 제어 처리
-        window.handleRouting = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const type = urlParams.get('type');
-
-            if (type === 'sentence') {
-                location.href = 'korean-sentence.html';
-            } else if (type === 'reading') {
-                location.href = 'korean-reading.html';
-            }
-        }
-
-        // ⚙️ 비동기 엔진 조립 마감 후 즉시 기본 로직 가동
-        window.initProfile();
-        window.handleRouting();
-
-        // 🧚‍♀️ 단어요정 소환
-        if (typeof initFairyChat === 'function') {
-            initFairyChat('KOREAN');
-        }
+        const badge = document.getElementById('currentUserBadge');
+        const themeClass = window.currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
+        document.body.className = themeClass;
+        
+        badge.innerHTML = `현재 사용자: ${window.currentProfile === 'son' ? '👦' : '👧'} ${window.currentUserName} (${window.currentTheme} 모드)`;
     });
 </script>
 </body>
