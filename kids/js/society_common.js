@@ -102,19 +102,10 @@ const SOCIETY_MOCK_DATA = {
 
 // 🔒 로컬 속성 상태
 // 💡 [정비팀장 배선] 1. 먼저 로컬스토리지에서 현재 유저 프로필을 읽어옵니다.
+// 💡 [원상복구본] 전역 코어(core.js)가 부모 계정을 먼저 세탁해주므로, 여기선 오직 학생 데이터만 깔끔하게 읽어옵니다.
 let currentProfile = localStorage.getItem('currentUser') || 'son';
-
-// 🛠️ [엄마/아빠 검수 프리패스 범퍼] 
-// 부모 계정(mom, dad, parent)으로 들어왔다면, 검수용으로 'son'(민수)의 프로필과 데이터로 강제 리다이렉트합니다!
-if (currentProfile === 'mom' || currentProfile === 'dad' || currentProfile === 'parent' || localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마') {
-    console.log("🛠️ [검수 모드 관제] 아버님/어머님 검수용 진입 확인: 민수(son)의 데이터를 기본값으로 동기화합니다.");
-    currentProfile = 'son';
-    localStorage.setItem('currentUser', 'son'); // 안전하게 임시 동기화
-}
-
-// 💡 2. 변환된 프로필(또는 기존 프로필)을 바탕으로 이름과 테마를 세팅합니다.
-let currentUserName = (currentProfile === 'son') ? '민수' : (localStorage.getItem('currentUserName') || '민서');
-let currentTheme = (currentProfile === 'son') ? 'theme--arcade' : 'theme--slime';
+let currentUserName = localStorage.getItem('currentUserName') || '민수';
+let currentTheme = localStorage.getItem('currentTheme') || 'theme--arcade';
 
 const savedName = localStorage.getItem('currentUserName');
 const isAdmin = (savedName === '아빠' || savedName === '엄마');
