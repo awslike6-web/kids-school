@@ -1,12 +1,13 @@
-// kids/korean_common.js
-// 🔗 국어 멀티버스 공용 관제탑 엔진 V8 (문장방 단계별 밸런싱 패치 탑재)
+// kids/js/korean_common.js
+// 🔗 국어 멀티버스 공용 관제탑 엔진 V8 (문장방 단계별 밸런싱 패치 및 전역 코어 연동 탑재)
 
 const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 const MAX_DAILY_REWARD = 100; // 🛑 하루 최대 획득 가능한 총 다이아/파츠 개수
 
-let currentProfile = localStorage.getItem('currentUser') || 'son';
-let currentUserName = localStorage.getItem('currentUserName') || '민수';
-let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
+// 🚀 코어 관제탑(window)이 세탁해 둔 글로벌 상태를 그대로 이어받습니다!
+let currentProfile = window.currentProfile || 'son';
+let currentUserName = window.currentUserName || '민수';
+let currentTheme = window.currentTheme || '마인크래프트';
 
 const roomStartTime = new Date();
 window.wrongNotes = window.wrongNotes || []; 
@@ -46,6 +47,7 @@ function toggleProfileManually() {
     } else {
         currentProfile = 'son'; currentUserName = '민수'; currentTheme = '마인크래프트';
     }
+    // 💡 수동 전환 시에는 강제로 로컬스토리지 업데이트 (부모 우회 모드 중에도 변경 가능하도록)
     localStorage.setItem('currentUser', currentProfile);
     localStorage.setItem('currentUserName', currentUserName);
     localStorage.setItem('currentTheme', currentTheme);
@@ -85,7 +87,6 @@ async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
         const page = data.results[0]; 
         const props = page.properties;
 
-        // 📅 오늘 날짜 구하기 (YYYY-MM-DD 형식)
         const today = new Date();
         const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
@@ -103,7 +104,6 @@ async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
             updateProps["오늘 획득_과학"] = { number: 0 };
         }
 
-        // ⚖️ 피로도 제한 계산 (100개 까지만 재화 지급)
         let allowedCurrency = earnedPoints;
         let isLimitReached = false;
 
@@ -145,7 +145,6 @@ async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
             body: JSON.stringify({ properties: updateProps }) 
         });
         
-        // 💬 조용한 처리 모드가 아닐 때만 팝업을 띄웁니다.
         if (!isSilent) {
             let limitMessageHtml = "";
             if (isLimitReached) {
@@ -178,7 +177,6 @@ async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
     }
 }
 
-// 독해방 전용 퇴장 (기존 유지)
 async function exitRoom(subjectName) {
     if (isExiting) return;
     isExiting = true;
@@ -207,7 +205,6 @@ async function exitRoom(subjectName) {
 }
 
 function showRewardModal(message) {
-    // 중복 생성 방지
     if(document.getElementById('korean-reward-modal')) return;
     const modalHtml = `
         <div id="korean-reward-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:9999;">
