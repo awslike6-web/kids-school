@@ -213,16 +213,17 @@
 </div>
 
 <!-- 💡 관제탑 & 엔진 배선 완벽 재정비 완료 -->
+<!-- 💡 [정비팀장 마감 라인] 중복 스크립트 및 이중 선언 원천 차단 배선 -->
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
 <script src="../../core/notion-helper.js"></script>
-<script src="../../core/fairy-config.js"></script>
-<script src="../../core/fairy-engine.js"></script>
+<!-- 🚨 [수리 완료] core.js가 내부에서 요정들을 이미 깨우므로, 여기서는 config와 engine 스크립트 태그를 과감히 삭제했습니다! -->
 <script src="../../js/english_common.js"></script>
 
 <script>
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+// 🚨 [수리 완료] INVENTORY_DB_ID는 다른 파일에 이미 선언되어 있으므로 let/const 없이 주소값만 매핑합니다.
+INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 
 let allEnglishWords = [];
 let availableGrades = []; 
@@ -240,6 +241,9 @@ for(let i=0; i<15; i++){
   el.style.left = (Math.random()*90)+'%'; el.style.animationDuration = (10+Math.random()*12)+'s'; el.style.animationDelay = (-Math.random()*15)+'s';
   document.getElementById('bgFloats').appendChild(el);
 }
+
+// 이 아래 window.onload = async () => { ... } 부터 
+// 맨 끝 </html> 까지의 기존 스크립트 로직은 그대로 유지해 주시면 됩니다!
 
 window.onload = async () => {
   loadWrongWords();
