@@ -74,26 +74,26 @@
         <button class="send-btn" id="send-btn" onclick="processUserStatement()">전송</button>
     </div>
 
-    <!-- 🚪 먹튀 버그 해결: 무조건 보상 주는 exitRoom() 대신 순수 로비 이동 버튼으로 개조 -->
     <button class="back-btn" onclick="location.href='../../../lobby.html'">
         🚪 공부방 대문으로 돌아가기
     </button>
 </div>
+
 <script src="../../config.js"></script>
-
+<script src="../../core/core.js"></script>
 <script src="../../core/notion-helper.js"></script>
-<script src="../../core/korean_common.js"></script>
-   <script src="../../core/fairy-config.js?v=1"></script>
-<script src="../../core/fairy-engine.js?v=1"></script>
-
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../js/korean_common.js"></script>
 
 <script>
     const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
     const urlParams = new URLSearchParams(window.location.search);
     let currentMode = urlParams.get('mode') || 'base';
     let conversationHistory = [];
-let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담을 바구니입니다.
-    // 💰 아버님이 기획하신 정확한 단계별 보상 및 제한 룰 세팅
+    let wrongNotes = []; 
+    
+    let localProfile = window.currentProfile || 'son'; 
+
     const rewardRules = {
         easy: { reward: 2, limit: 2, name: "1단계 (민서 방)" },
         base: { reward: 5, limit: 2, name: "2단계 (민수 방)" },
@@ -107,7 +107,7 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
             placeholder: "아래 단어 버튼을 누르거나 직접 써보세요!",
             welcome: "안녕! 나는 너의 문장 수호신이야! 오늘 있었던 재미난 일을 단어 버튼을 누르거나 글자로 써서 나에게 들려줘! ✨",
             ttsWelcome: "민서 방 충전 완료! 재미있는 문장을 만들어줘!",
-            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬และ 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
+            systemPrompt: `너는 초등학교 저학년 아이의 문장 쓰기를 도와주는 친절하고 다정한 'AI 수호신'이다.\n[규칙]\n1. 아이를 절대 지적하거나 채점하지 마라. 무조건적인 폭풍 칭찬과 리액션을 쏟아내라.\n2. 아이가 다음에 글을 이어 나갈 수 있도록, 아주 쉬운 문장 앞부분 뼈대 가이드(예: '오늘 내가 먹은 것은 ____ 이다')를 답변 마지막 줄에 무조건 딱 1개만 제안하라.\n3. 문장은 항상 짧고 밝은 톤으로 작성해라.\n4. 정답 여부와 상관없이 항상 미션을 통과시켜라. 응답 마지막에 반드시 [SUCCESS] 상태를 포함하라.`
         },
         base: {
             title: "🤖 레벨 1: 첫째 민수 모드 (대충 쓰기 방어)", color: "var(--base-color)", pitch: 0.7,
@@ -159,7 +159,6 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
         conversationHistory = [];
         document.getElementById('chat-box').innerHTML = '';
         
-        // 📢 현재 방의 오늘 남은 도전 횟수를 환영 인사에 표시
         const todayKey = new Date().toLocaleDateString();
         const countKey = `count_${currentMode}_${todayKey}`;
         const currentCount = parseInt(localStorage.getItem(countKey) || "0");
@@ -281,7 +280,6 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
 
             const isSuccess = aiResponse.includes('[SUCCESS]');
             
-            // 🌟 미션 완수 시에만 밸런싱 보상 매커니즘 작동!
             if (isSuccess) {
                 await triggerBalancedSentenceReward();
             } else {
@@ -297,30 +295,25 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
         }
     }
 
-    // ⚖️ [완벽 밸런싱 패치] 단계별 차등 보상 + 일일 2회 참여 제한 추적기
     async function triggerBalancedSentenceReward() {
         const rule = rewardRules[currentMode];
         const todayKey = new Date().toLocaleDateString();
         const countKey = `count_${currentMode}_${todayKey}`;
         
-        // 1. 로컬 저장소에서 오늘 이 방을 몇 번 통과했는지 확인
         let currentCount = parseInt(localStorage.getItem(countKey) || "0");
-        const rewardIcon = currentProfile === 'son' ? '💎' : '💧';
+        const rewardIcon = localProfile === 'son' ? '💎' : '💧';
 
         if (currentCount >= rule.limit) {
-            // 🛑 오늘 2번 다 채운 상태면 보상 제한 차단
             const limitMsg = `⚠️ [보상 마감] 오늘 ${rule.name}의 미션 보상을 이미 2회 모두 획득했습니다!\n(돈은 쌓이지 않지만 공부 경험치는 계속 올라갑니다!)`;
             appendMessage('ai', limitMsg);
             speakTTS("오늘 보상이 마감되었습니다.", 1.0);
             
-            // 재화는 0개 주되, 국어 경험치는 공부한 만큼(rule.reward) 그대로 주어 성장 유도!
             if (typeof grantRewardAndShowUI === 'function') {
                 await grantRewardAndShowUI(rule.reward, true); 
             }
             return;
         }
 
-        // 2. 횟수가 남아있다면 카운트 1 올리고 노션 관제탑 호출!
         currentCount++;
         localStorage.setItem(countKey, currentCount);
 
@@ -328,7 +321,6 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
         appendMessage('ai', `✨ 검사관의 승인을 받았습니다! 안전 가방에 보상을 적립합니다...`);
 
         if (typeof grantRewardAndShowUI === 'function') {
-            // 관제탑 정식 루트 호출 (설정하신 단계별 보상 연동, 사운드는 조용히 처리)
             const result = await grantRewardAndShowUI(rule.reward, true);
             
             if (result) {
@@ -339,7 +331,6 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
         }
     }
 
-// 🧚‍♀️ 요정 및 TTS 안전 시동 (독해방과 동일한 load 방식 적용)
     window.addEventListener('load', () => {
         if(window.speechSynthesis) {
             window.speechSynthesis.getVoices();
@@ -348,7 +339,6 @@ let wrongNotes = []; // 👈 이 줄을 꼭 추가해 주세요! 오답을 담�
             }
         }
 
-        // 엔진이 로드될 시간을 살짝(0.3초) 확보한 후 요정 호출
         setTimeout(() => {
             if (typeof initFairyChat === 'function') {
                 initFairyChat('KOREAN');
