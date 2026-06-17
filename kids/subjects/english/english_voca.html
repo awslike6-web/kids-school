@@ -222,8 +222,9 @@
 
 <script>
 const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
-// 🚨 [수리 완료] INVENTORY_DB_ID는 다른 파일에 이미 선언되어 있으므로 let/const 없이 주소값만 매핑합니다.
-INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+
+// 💡 [핵심 배선] 전역 만능 헬퍼(notion-helper.js)에게 이 방이 '영어' 방임을 확실히 알려줍니다!
+window.currentSubject = "영어";
 
 let allEnglishWords = [];
 let availableGrades = []; 
@@ -232,7 +233,6 @@ let availableLessons = [];
 let wrongWords = [];
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
-// 💡 [코어 연동 완료] 부모 프리패스가 적용된 전역 변수로 세팅
 let currentProfile = window.currentProfile || 'son';
 let currentTheme = window.currentTheme || '마인크래프트';
 
@@ -242,30 +242,49 @@ for(let i=0; i<15; i++){
   document.getElementById('bgFloats').appendChild(el);
 }
 
-// 이 아래 window.onload = async () => { ... } 부터 
-// 맨 끝 </html> 까지의 기존 스크립트 로직은 그대로 유지해 주시면 됩니다!
-
 window.onload = async () => {
   loadWrongWords();
   
-  allEnglishWords = await fetchEnglishNotionData(voca_DB_ID, "영어");
-  document.getElementById('loadingCard').style.display = 'none';
+  // 💡 notion-helper.js 의 PROXY_URL을 안전하게 가져옵니다.
+  const targetProxy = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
   
-  if(allEnglishWords.length > 0) {
-    const gradeSet = new Set(allEnglishWords.map(w => w.grade || '공통'));
-    availableGrades = Array.from(gradeSet).sort();
-    
-    renderGradeButtons();
+  try {
+      const response = await fetch(`${targetProxy}/v1/databases/${voca_DB_ID}/query`, {
+          method: "POST", headers: { "Content-Type": "application/json" }
+      });
+      const data = await response.json();
+      allEnglishWords = data.results.map(page => {
+          const p = page.properties;
+          return {
+              word: p["단어"]?.title[0]?.plain_text || "",
+              meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "",
+              subject: p["과목"]?.multi_select?.map(item => item.name) || [],
+              level: p["단원"]?.number || p["단원"]?.select?.name || p["단원"]?.multi_select?.[0]?.name || p["단원"]?.rich_text?.[0]?.plain_text || "기본",
+              grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || p["학년"]?.rich_text?.[0]?.plain_text || "공통"
+          };
+      }).filter(w => w.word !== "" && (w.subject.includes("영어") || w.subject.includes("영단어")));
 
-    document.getElementById('gradeCard').style.display = 'block';
-    document.getElementById('modeCard').style.display = 'block';
-    document.getElementById('toolCard').style.display = 'block';
-    
-    if(availableGrades.length === 1) {
-        selectGrade(availableGrades[0]);
-    }
-  } else {
-    alert("앗! 노션에서 '영어' 과목 단어를 불러오지 못했어요.");
+      document.getElementById('loadingCard').style.display = 'none';
+      
+      if(allEnglishWords.length > 0) {
+        const gradeSet = new Set(allEnglishWords.map(w => w.grade || '공통'));
+        availableGrades = Array.from(gradeSet).sort();
+        
+        renderGradeButtons();
+
+        document.getElementById('gradeCard').style.display = 'block';
+        document.getElementById('modeCard').style.display = 'block';
+        document.getElementById('toolCard').style.display = 'block';
+        
+        if(availableGrades.length === 1) {
+            selectGrade(availableGrades[0]);
+        }
+      } else {
+        alert("앗! 노션에서 '영어' 과목 단어를 불러오지 못했어요.");
+      }
+  } catch (error) {
+      console.error("데이터 로딩 실패:", error);
+      alert("데이터 로딩에 실패했습니다. 새로고침 해주세요.");
   }
 };
 
@@ -273,10 +292,7 @@ function renderGradeButtons() {
   const grid = document.getElementById('gradeGrid');
   let html = '';
   availableGrades.forEach((grade, index) => {
-    html += `
-      <input type="radio" name="gradeSelect" id="grade_${index}" value="${grade}" onchange="selectGrade('${grade}')">
-      <label for="grade_${index}" class="book-label">${grade}</label>
-    `;
+    html += `<input type="radio" name="gradeSelect" id="grade_${index}" value="${grade}" onchange="selectGrade('${grade}')"><label for="grade_${index}" class="book-label">${grade}</label>`;
   });
   grid.innerHTML = html;
 }
@@ -302,10 +318,7 @@ function renderLessonCheckboxes() {
   let html = '';
   availableLessons.forEach((lesson, index) => {
     const displayLesson = lesson ? lesson : '기본';
-    html += `
-      <input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked style="display:none;">
-      <label for="lesson_${index}" class="book-label">${displayLesson}단원</label>
-    `;
+    html += `<input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked style="display:none;"><label for="lesson_${index}" class="book-label">${displayLesson}단원</label>`;
   });
   grid.innerHTML = html;
 }
@@ -316,9 +329,7 @@ function selectAllLessons(flag) {
 
 function getFilteredWords() {
   const checkedLessons = Array.from(document.querySelectorAll('.lesson-cb:checked')).map(cb => cb.value);
-  return allEnglishWords.filter(w => 
-      (w.grade || '공통') === currentSelectedGrade && checkedLessons.includes(String(w.level))
-  );
+  return allEnglishWords.filter(w => (w.grade || '공통') === currentSelectedGrade && checkedLessons.includes(String(w.level)));
 }
 
 function loadWrongWords() {
@@ -349,7 +360,6 @@ function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
 
 function startQuiz(mode) {
   if (!currentSelectedGrade) return alert('먼저 공부할 학년/학기를 선택해 주세요!');
-  
   const filteredWords = getFilteredWords();
   if (filteredWords.length === 0) return alert('공부할 단원을 하나 이상 선택해 주세요!');
 
@@ -399,8 +409,8 @@ function loadQuestion() {
     hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';
   }
   
-  if (quizState.mode !== 'toEnglish') {
-     if(typeof speakEnglish === 'function') speakEnglish(qData.word);
+  if (quizState.mode !== 'toEnglish' && typeof speakEnglish === 'function') {
+     speakEnglish(qData.word);
   }
   setTimeout(() => input.focus(), 100);
 }
@@ -438,6 +448,7 @@ function submitAnswer() {
   }
 }
 
+// 💡 1. 퀴즈 종료 시 만능 헬퍼(notion-helper.js)를 호출하도록 전면 개조!
 async function nextQuestion() {
   document.getElementById('fairyOverlay').classList.remove('active');
   quizState.current++;
@@ -447,55 +458,38 @@ async function nextQuestion() {
     document.getElementById('q-num').textContent = `완료!`;
     
     if (correctCount > 0) {
-       document.getElementById('questionText').innerHTML = `<span style="font-size:1.5rem; color:var(--purple);">⏳ 보상 저금통에 저축 중...</span>`;
-       await saveRewardToNotion(correctCount);
+       document.getElementById('questionText').innerHTML = `<span style="font-size:1.5rem; color:var(--purple);">⏳ 보상과 학습 일지를 기록 중...</span>`;
+       
+       // 📝 학습 일지 기록 헬퍼 호출
+       if (typeof sendStudyLogToNotion === 'function') {
+           const errorReport = wrongWords.length > 0 ? wrongWords.map(w => w.word).join(', ') : "오답 없음";
+           await sendStudyLogToNotion({
+               childName: window.currentProfile === 'son' ? '민수' : '민서', 
+               subject: '영어(영단어 퀴즈)', 
+               startTime: new Date(Date.now() - 3 * 60000).toISOString(),
+               endTime: new Date().toISOString(),
+               durationMinutes: 3, 
+               errorReport: errorReport, 
+               wordFairyCount: 0
+           });
+       }
+
+       // 💎 전역 만능 보상 지급 헬퍼 호출 (구형 saveRewardToNotion 완전 삭제)
+       if (typeof grantRewardAndShowUI === 'function') {
+           await grantRewardAndShowUI(correctCount, false, 'voca');
+       }
+    } else {
+       alert(`탐험 완료! 획득한 점수가 없습니다. 다음에 더 잘해봐요!`); 
+       goSetup();
     }
-    
-    alert(`탐험 완료! 총 ${quizState.score}점 획득!`); 
-    goSetup();
   } else {
     setTimeout(() => loadQuestion(), 300);
   }
 }
 
-async function saveRewardToNotion(earned) {
-  const userName = window.currentUserName || '민수'; 
-  if (userName === '아빠' || userName === '엄마') return;
-
-  try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
-      method: "POST", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
-    });
-    
-    if (!response.ok) throw new Error("데이터 조회 실패");
-    
-    const data = await response.json(); 
-    if (!data.results || data.results.length === 0) return;
-
-    const page = data.results[0]; 
-    const props = page.properties;
-
-    let diamond = props["다이아몬드 개수"]?.number || 0; 
-    let slime = props["슬라임 파츠 개수"]?.number || 0;
-
-    let updateProps = {};
-    if (currentTheme === '마인크래프트') { 
-        updateProps["다이아몬드 개수"] = { number: diamond + earned }; 
-    } else { 
-        updateProps["슬라임 파츠 개수"] = { number: slime + earned }; 
-    }
-
-    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
-      method: "PATCH", headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ properties: updateProps }) 
-    });
-    console.log(`✅ ${earned}개 보상 저장 완료!`);
-  } catch (err) {
-    console.error("보상 저장 실패:", err);
-  }
-}
-
+// ==========================================
+// 🖨️ 인쇄소 엔진 (그대로 유지)
+// ==========================================
 function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
 
 function loadPrintList() {
