@@ -105,7 +105,16 @@
     if (typeof initFairyChat === 'function') {
         initFairyChat("SOCIETY");
     }
+    
   });
+  // 기존에 있던 로직들은 그대로 두시고, 이 부분을 추가해 줍니다!
+    
+    window.addEventListener('load', () => {
+        // 🧚‍♀️ 오른쪽 아래 요정 챗봇 버튼 화면에 그리기 (전원 스위치 ON!)
+        if (typeof initFairyChat === 'function') {
+            initFairyChat('SOCIETY'); // 사회방 전용 페르소나로 소환
+        }
+      });
 </script>
 </body>
 </html>
