@@ -8,6 +8,23 @@ const requiredCores = [
     "fairy-engine.js"
 ];
 
+// 🌐 [전역 관제탑 - 엄마/아빠 검수 우회 마스터 가드]
+// 아래 window 상태를 정의하기 전에, 로컬스토리지 데이터부터 민수(son)로 미리 세탁합니다.
+(function() {
+    const checkProfile = localStorage.getItem('currentUser') || 'son';
+    const checkName = localStorage.getItem('currentUserName') || '';
+
+    if (checkProfile === 'mom' || checkProfile === 'dad' || checkProfile === 'parent' || checkName === '아빠' || checkName === '엄마') {
+        console.log("🚀 [전역 코어 관제] 검수자(부모) 진입 감지 ➔ 모든 스토리지를 민수(son) 환경으로 전격 동기화합니다.");
+        
+        // 1. 로컬 스토리지 원천 조작 (각 방의 common.js 방어용)
+        localStorage.setItem('currentUser', 'son');
+        localStorage.setItem('currentUserName', '민수');
+        localStorage.setItem('currentTheme', 'theme--arcade'); 
+    }
+})();
+
+// 🏰 글로벌 헬퍼 상태 정의 (이제 부모 계정으로 들어와도 무조건 민수 데이터로 꽂힙니다!)
 // 글로벌 헬퍼 상태 정의 (공통 사용)
 window.currentProfile = localStorage.getItem('currentUser') || 'son';
 window.currentUserName = localStorage.getItem('currentUserName') || '민수';
