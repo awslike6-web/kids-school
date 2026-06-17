@@ -53,7 +53,7 @@ async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
             nextCursor = data.next_cursor;
         }
 
-        // 영어 과목 데이터만 예쁘게 정제해서 반환
+// 영어 과목 데이터만 예쁘게 정제해서 반환
         return allResults.map(page => {
             const p = page.properties;
             return {
@@ -62,15 +62,20 @@ async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
                 meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "",
                 subject: p["과목"]?.multi_select?.map(item => item.name) || [],
                 type: p["어휘유형"]?.select?.name || "",
-                
-                // 💡 [강력해진 필터 1] 단원이 숫자, 단일선택, 다중선택, 일반 텍스트 중 무엇이든 찾아옵니다!
                 level: p["단원"]?.number || p["단원"]?.select?.name || p["단원"]?.multi_select?.[0]?.name || p["단원"]?.rich_text?.[0]?.plain_text || "기본",
+                grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || p["학년"]?.rich_text?.[0]?.plain_text || "공통",
                 
-                // 💡 [강력해진 필터 2] 학년 역시 다중선택, 단일선택, 일반 텍스트 모두 대응합니다!
-                grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || p["학년"]?.rich_text?.[0]?.plain_text || "공통"
+                // 💡 [필수 추가] 노션의 '학생' 속성 데이터를 안전하게 수집합니다.
+                target: p["학생"]?.multi_select?.map(item => item.name) || []
             };
-        }).filter(w => w.word !== "" && (w.subject.includes(subjectFilter) || w.subject.includes("영단어")));
-
+        }).filter(w => {
+            // 💡 [철벽 가드] 현재 방에 들어온 학생 이름(window.currentUserName)과 일치하는 단어만 정확하게 골라냅니다!
+            const cleanLoginName = (window.currentUserName || "민수").trim();
+            
+            return w.word !== "" && 
+                   (w.subject.includes(subjectFilter) || w.subject.includes("영단어")) &&
+                   w.target.some(t => t.trim() === cleanLoginName); // 🎯 이 라인이 민수/민서 데이터를 정확히 갈라줍니다!
+        });
     } catch (error) {
         console.error("영어 노션 엔진 스캔 실패:", error);
         return []; 
