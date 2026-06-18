@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 공부방 - 사회 역사 탐험방</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/society.css">
+</head>
+<body>
+
+<div class="society-container">
+  
+  <div class="top-action-bar">
+    <a href="/lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
+        🔊 요정 음성 ON
+      </button>
+      <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
+    </div>
+  </div>
+
+  <div class="main-header-card">
+    <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
+    <h1 id="societyTitle">민수의 사회 탐험 대기실</h1>
+    <p class="banner-goal-desc" id="societyGoalText">3단원. 우리 지역의 중심지를 깊게 알아볼까?</p>
+  </div>
+
+  <div class="society-grid">
+    
+    <div class="society-grid-btn" onclick="openMissionView('voca')">
+      <span class="society-btn-icon">📖</span>
+      <div class="society-btn-title">사회 용어방</div>
+      <p class="society-btn-desc">교과서 속 핵심 한자 용어들을 요정 코코의 나긋나긋한 낭독과 함께 초성 정복 챌린지!</p>
+    </div>
+
+    <div class="society-grid-btn" onclick="openMissionView('chart')">
+      <span class="society-btn-icon">📊</span>
+      <div class="society-btn-title">차트 & 도표 자료실</div>
+      <p class="society-btn-desc">그래프와 지도 정보를 면밀하게 해독하고 사회 탐구 퀴즈 문항들을 슬기롭게 파헤쳐라!</p>
+    </div>
+
+    <div class="society-grid-btn" onclick="openMissionView('map')">
+      <span class="society-btn-icon">🗺️</span>
+      <div class="society-btn-title">랜선 지도 탐방실</div>
+      <p class="society-btn-desc">한반도와 우리 지역의 지형 생태 사진을 감상하고, 마법의 목소리로 한 줄 탐방록 쓰기!</p>
+    </div>
+
+    <div class="society-grid-btn" onclick="openMissionView('history')">
+      <span class="society-btn-icon">⏳</span>
+      <div class="society-btn-title">역사 & 문화재 돋보기</div>
+      <p class="society-btn-desc">우리의 찬란한 옛날 유물 카드 짝을 매칭하고, 나만의 역사 유물 도감을 수집하자!</p>
+    </div>
+
+  </div>
+
+  <div class="fairy-live-dock">
+    <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" style="width: 52px; height: 52px; object-fit: contain;">
+    <div class="fairy-bubble">
+      <span id="fairySpeakerText">반가워! 사회방에 입장했구나, 오늘 코코랑 같이 국토 지리 여행을 떠날까? 🗺️ 마법의 목소리로 지적 경험을 완성해봐!</span>
+      <div class="fairy-speech" id="fairyVoiceStatus">🔊 음량 수려함 - WebSpeech API 결합</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="society-overlay" id="missionOverlay">
+  <div class="society-overlay-box">
+    <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
+    
+    <div class="overlay-header">
+      <span id="overlayHeaderIcon" style="font-size: 1.8rem;">📖</span>
+      <h2 class="overlay-heading" id="overlayHeaderTitle">미션 타이틀</h2>
+    </div>
+
+    <div class="overlay-body" id="overlayInnerBody">
+      </div>
+  </div>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
+<script src="../../js/society_common.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 코어와 사회방 초기화 엔진 순차적 강제 구동 시뮬레이터
+    if (typeof initializeSocietyRoom === 'function') {
+        initializeSocietyRoom();
+    } else if (typeof initializeRoom === 'function') {
+        initializeRoom();
+    } else {
+        // 만약 두 함수 모두 로딩 지연이 발생할 경우를 대비한 2중 철벽 로컬 가드
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--arcade' : 'theme--slime';
+        console.log(`⚡ [엔진 우회 가드] 로컬 프로필(${localProfile})에 맞춰 테마를 강제 주입했습니다.`);
+    }
+
+    // 🤖 인공지능 요정 챗봇 강제 구동 결합
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("SOCIETY");
+    }
+    
+  });
+  // 기존에 있던 로직들은 그대로 두시고, 이 부분을 추가해 줍니다!
+    
+    window.addEventListener('load', () => {
+        // 🧚‍♀️ 오른쪽 아래 요정 챗봇 버튼 화면에 그리기 (전원 스위치 ON!)
+        if (typeof initFairyChat === 'function') {
+            initFairyChat('SOCIETY'); // 사회방 전용 페르소나로 소환
+        }
+      });
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 공부방 - 프로필 선택</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* 기본 설정 및 테마 */
+  :root {
+    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
+    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
+    --white: #FFFEF7; --dark: #2D2D4E;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); }
+  
+  /* 배경 떠다니는 효과 */
+  .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .float-item { position: absolute; font-size: 1.8rem; opacity: 0.13; animation: floatUp linear infinite; font-family: 'Gaegu', cursive; font-weight: 700; color: var(--purple); }
+  @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.13; } 90% { opacity: 0.13; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
+
+  /* 화면 및 타이틀 */
+  .screen { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding: 36px 16px 60px; min-height: 100vh; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2.2rem, 9vw, 3.8rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 6px; filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.07)); }
+  .main-title .accent { color: var(--pink); }
+  .main-title .accent2 { color: var(--purple); }
+  .subtitle { font-family: 'Gaegu', cursive; font-size: 1.05rem; color: #999; margin-bottom: 32px; }
+
+  /* 프로필 버튼 */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 400px; }
+  .profile-btn { border: none; border-radius: 28px; padding: 28px 16px 22px; cursor: pointer; font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform .2s, box-shadow .2s; }
+  .profile-btn:hover { transform: translateY(-6px); }
+  .profile-btn:active { transform: scale(0.96); }
+  .profile-btn.son { background: linear-gradient(145deg, #6EC6F5, #A78BFA); box-shadow: 0 10px 28px rgba(110,198,245,0.35); }
+  .profile-btn.daughter { background: linear-gradient(145deg, #FF6B9D, #FF9F43); box-shadow: 0 10px 28px rgba(255,107,157,0.35); }
+  .profile-btn.dad { background: linear-gradient(145deg, #4ECDC4, #44A08D); box-shadow: 0 10px 28px rgba(78,205,196,0.35); }
+  .profile-btn.mom { background: linear-gradient(145deg, #FFD93D, #FF6B9D); box-shadow: 0 10px 28px rgba(255,217,61,0.35); }
+  .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; border: 3px solid rgba(255,255,255,0.5); font-size:1.8rem; }
+
+  /* 비밀번호 모달 UI */
+  .pw-overlay { position: fixed; inset: 0; background: rgba(35, 40, 60, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+  .pw-overlay.active { display: flex; opacity: 1; }
+  .pw-modal { background: #fff; width: 90%; max-width: 320px; border-radius: 30px; padding: 30px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+  .pw-title { font-size: 1.3rem; color: var(--dark); margin-bottom: 20px; }
+  .pw-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
+  .dot { width: 16px; height: 16px; border-radius: 50%; background: #e0e0e0; transition: all 0.2s; }
+  .dot.filled { background: var(--purple); transform: scale(1.2); }
+  .dot.error { background: var(--pink); }
+  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 240px; margin: 0 auto; }
+  .key-btn { background: #f5f5f5; border: none; border-radius: 20px; height: 60px; font-size: 1.5rem; font-family: 'Jua', sans-serif; color: var(--dark); cursor: pointer; }
+  .key-btn:active { background: #e0e0e0; transform: scale(0.95); }
+  .key-btn.del { background: transparent; color: var(--pink); font-size: 1.2rem; }
+  .shake { animation: shake 0.4s; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+  /* 💡 부모님 전용 메뉴 모달 UI 추가 */
+  .admin-btn { width: 100%; padding: 16px; margin-bottom: 12px; border: none; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 6px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .admin-btn:hover { transform: translateY(-3px); }
+  .admin-btn.multi { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; }
+  .admin-btn.dash { background: linear-gradient(145deg, #FFD93D, #FF6B9D); color: white; }
+  .admin-btn.son-test { background: linear-gradient(145deg, #6EC6F5, #A78BFA); color: white; }
+  .admin-btn.dau-test { background: linear-gradient(145deg, #FF6B9D, #FF9F43); color: white; }
+</style>
+</head>
+<body>
+
+<div class="bg-floats" id="bgFloats"></div>
+
+<div class="screen" id="screen-profile">
+  <h1 class="main-title"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
+  <p class="subtitle">누가 접속할까요?</p>
+
+  <div class="profile-grid">
+    <button class="profile-btn son" onclick="selectUser('son', '민수', 'lobby.html?user=minsu')">
+      <div class="profile-avatar">👦</div><div>오빠</div><div class="profile-role">민수</div>
+    </button>
+    <button class="profile-btn daughter" onclick="selectUser('daughter', '민서', 'lobby.html?user=minseo')">
+      <div class="profile-avatar">👧</div><div>동생</div><div class="profile-role">민서</div>
+    </button>
+    
+    <button class="profile-btn dad" onclick="openPasswordModal('아빠')">
+      <div class="profile-avatar">👨</div><div>아빠</div>
+    </button>
+    <button class="profile-btn mom" onclick="openPasswordModal('엄마')">
+      <div class="profile-avatar">👩</div><div>엄마</div>
+    </button>
+  </div>
+</div>
+
+<div class="pw-overlay" id="pwOverlay" onclick="closePasswordModal(event)">
+  <div class="pw-modal" id="pwModal" onclick="event.stopPropagation()">
+    <div class="pw-title">부모님 비밀번호 입력</div>
+    <div class="pw-dots"><div class="dot" id="dot0"></div><div class="dot" id="dot1"></div><div class="dot" id="dot2"></div><div class="dot" id="dot3"></div></div>
+    <div class="keypad">
+      <button class="key-btn" onclick="addNumber(1)">1</button><button class="key-btn" onclick="addNumber(2)">2</button><button class="key-btn" onclick="addNumber(3)">3</button>
+      <button class="key-btn" onclick="addNumber(4)">4</button><button class="key-btn" onclick="addNumber(5)">5</button><button class="key-btn" onclick="addNumber(6)">6</button>
+      <button class="key-btn" onclick="addNumber(7)">7</button><button class="key-btn" onclick="addNumber(8)">8</button><button class="key-btn" onclick="addNumber(9)">9</button>
+      <button class="key-btn del" onclick="closePasswordModal(event)">취소</button><button class="key-btn" onclick="addNumber(0)">0</button><button class="key-btn del" onclick="keyDel()">지움</button>
+    </div>
+  </div>
+</div>
+
+<div class="pw-overlay" id="adminOverlay" onclick="closeAdminModal(event)">
+  <div class="pw-modal" style="max-width: 360px;" onclick="event.stopPropagation()">
+    <div class="pw-title" id="adminWelcomeTitle" style="margin-bottom: 25px; color: var(--purple); font-weight: bold;">어디로 이동할까요?</div>
+    
+    <div style="display:flex; flex-direction:column;">
+      <button class="admin-btn multi" onclick="goAdminCustom('multiverse/index_friends.html')">🌌 멀티버스 (친구들)</button>
+      <button class="admin-btn dash" onclick="goAdminCustom('parent_dashboard.html')">🛠️ 대시보드 / 문제 등록</button>
+      
+      <div style="margin: 15px 0; border-top: 2px dashed #eee;"></div>
+      
+      <button class="admin-btn son-test" onclick="goAdminTestLobby('son', 'minsu')">👦 민수 환경 테스트 (로비)</button>
+      <button class="admin-btn dau-test" onclick="goAdminTestLobby('daughter', 'minseo')">👧 민서 환경 테스트 (로비)</button>
+    </div>
+    
+    <button class="key-btn del" style="margin-top:20px; font-size:1rem;" onclick="closeAdminModal()">← 취소하고 닫기</button>
+  </div>
+</div>
+
+<script>
+// 배경 애니메이션
+(function () {
+  const wrap = document.getElementById('bgFloats'); const symbols = ['2', '3', '+', 'A', 'B', '*', '7', 'x', '=', '?', '5', 'C'];
+  for (let i = 0; i < 18; i++) {
+    const el = document.createElement('div'); el.className = 'float-item'; el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    el.style.left = (Math.random() * 92) + '%'; el.style.animationDuration = (12 + Math.random() * 14) + 's'; el.style.animationDelay = (-Math.random() * 18) + 's'; wrap.appendChild(el);
+  }
+})();
+
+// 아이들 기본 접속 (즉시 이동)
+function selectUser(key, name, targetUrl) {
+    localStorage.setItem('currentUser', key);
+    localStorage.setItem('currentUserName', name);
+    location.href = targetUrl;
+}
+
+// 부모님 비밀번호 로직
+const PARENT_PASSWORD = "0000"; 
+let pwBuffer = ""; 
+let currentAdminName = ""; // '아빠' or '엄마'
+
+function openPasswordModal(name) {
+  currentAdminName = name; 
+  pwBuffer = ""; updateDots(); 
+  document.getElementById('pwOverlay').classList.add('active');
+}
+function closePasswordModal(e) { if(e) e.stopPropagation(); document.getElementById('pwOverlay').classList.remove('active'); pwBuffer = ""; }
+function addNumber(n) { if (pwBuffer.length < 4) { pwBuffer += n; updateDots(); if (pwBuffer.length === 4) setTimeout(checkPassword, 100); } }
+function keyDel() { pwBuffer = pwBuffer.slice(0, -1); updateDots(); }
+function updateDots() { for (let i = 0; i < 4; i++) { const dot = document.getElementById('dot' + i); dot.classList.remove('filled', 'error'); if (i < pwBuffer.length) dot.classList.add('filled'); } }
+
+// 비밀번호 확인 및 관리자 모달 오픈
+function checkPassword() {
+  if (pwBuffer === PARENT_PASSWORD) {
+    closePasswordModal(); 
+    // 비밀번호 맞으면 부모님 전용 메뉴 오픈!
+    document.getElementById('adminWelcomeTitle').innerText = `${currentAdminName}, 어디로 이동할까요?`;
+    document.getElementById('adminOverlay').classList.add('active');
+  } else {
+    for (let i = 0; i < 4; i++) { document.getElementById('dot' + i).classList.replace('filled', 'error'); }
+    const modal = document.getElementById('pwModal'); modal.classList.add('shake');
+    modal.addEventListener('animationend', function onEnd() { modal.classList.remove('shake'); modal.removeEventListener('animationend', onEnd); });
+    setTimeout(() => { pwBuffer = ''; updateDots(); }, 600);
+  }
+}
+
+// 💡 부모님 메뉴 로직
+function closeAdminModal(e) {
+  if(e) e.stopPropagation();
+  document.getElementById('adminOverlay').classList.remove('active');
+}
+
+// 멀티버스 및 대시보드로 이동
+function goAdminCustom(url) {
+  // 관리자 권한을 들고 기존 시스템으로 진입
+  localStorage.setItem('currentUser', 'admin'); 
+  localStorage.setItem('currentUserName', currentAdminName);
+  location.href = url;
+}
+
+// 아이들 환경 검수 로비로 이동
+function goAdminTestLobby(childKey, childParam) {
+  // 아이들 테마 키(son/daughter)를 빌리되, 이름은 '아빠/엄마'로 장착!
+  localStorage.setItem('currentUser', childKey); 
+  localStorage.setItem('currentUserName', currentAdminName);
+  location.href = `lobby.html?user=${childParam}`;
+}
+
+document.addEventListener('keydown', function (e) {
+  if (!document.getElementById('pwOverlay').classList.contains('active')) return;
+  if (e.key >= '0' && e.key <= '9') addNumber(e.key);
+  else if (e.key === 'Backspace') keyDel();
+  else if (e.key === 'Escape') closePasswordModal();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 자료 등록소</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Jua', sans-serif; background: #f4f7fb; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+  .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; }
+  h1 { color: #A78BFA; margin-bottom: 5px; }
+  p { color: #666; font-size: 1.1rem; margin-bottom: 25px; }
+  
+  .file-drop-area { border: 3px dashed #6EC6F5; border-radius: 15px; padding: 40px 20px; background: #f0f9ff; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
+  .file-drop-area:hover { background: #e0f2fe; }
+  .file-msg { font-size: 1.2rem; color: #0284c7; pointer-events: none; }
+  input[type="file"] { display: none; }
+  
+  .upload-btn { background: linear-gradient(135deg, #6EC6F5, #A78BFA); color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.3rem; width: 100%; cursor: pointer; font-family: 'Jua'; box-shadow: 0 4px 15px rgba(167,139,250,0.4); margin-bottom: 20px; transition: transform 0.2s; }
+  .upload-btn:hover { transform: translateY(-3px); }
+  .upload-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+  
+  .result-area { display: none; background: #e8f5e9; padding: 20px; border-radius: 15px; border: 2px solid #6BCB77; }
+  .result-url { word-break: break-all; font-family: monospace; font-size: 0.9rem; color: #2e7d32; margin-bottom: 15px; padding: 10px; background: white; border-radius: 8px; border: 1px solid #c8e6c9; }
+  .copy-btn { background: #6BCB77; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 1.1rem; cursor: pointer; font-family: 'Jua'; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>📸 단어 자료 등록소</h1>
+  <p>사진이나 음성 파일을 올려주세요!</p>
+
+  <div class="file-drop-area" id="dropArea" onclick="document.getElementById('fileInput').click()">
+    <div class="file-msg" id="fileMsg">📂 여기를 눌러 파일을 선택하세요<br><small>(사진, mp3 파일만 가능)</small></div>
+    <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,.gif,.mp3">
+  </div>
+
+  <button class="upload-btn" id="uploadBtn" disabled onclick="uploadFile()">로켓 발사! (업로드)</button>
+
+  <div class="result-area" id="resultArea">
+    <div style="font-size: 1.2rem; color: #2e7d32; margin-bottom: 10px; font-weight:bold;">🎉 업로드 완료!</div>
+    <div class="result-url" id="resultUrl"></div>
+    <button class="copy-btn" onclick="copyToClipboard()">🔗 이 주소 복사하기 (노션에 붙여넣기)</button>
+  </div>
+</div>
+
+<script>
+  // 🚨 여기에 방금 새로 만든 제2 관제탑 주소를 넣어주세요!
+  const UPLOAD_WORKER_URL = "https://upload-server.awslike6.workers.dev";
+  
+  let selectedFile = null;
+  let fileBase64 = null;
+
+  const fileInput = document.getElementById('fileInput');
+  const fileMsg = document.getElementById('fileMsg');
+  const uploadBtn = document.getElementById('uploadBtn');
+
+  // 파일 선택 시
+  fileInput.addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+      selectedFile = this.files[0];
+      fileMsg.innerHTML = `✅ 선택됨: <br><span style="color:#333; font-size:1rem;">${selectedFile.name}</span>`;
+      uploadBtn.disabled = false;
+      
+      // 파일을 깃허브가 좋아하는 Base64 텍스트 형태로 변환
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        // "data:image/png;base64,iVBORw0..." 형태에서 앞의 꼬리표를 떼어내고 순수 데이터만 추출
+        fileBase64 = event.target.result.split(',')[1];
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  });
+
+  // 업로드 버튼 클릭 시
+  async function uploadFile() {
+    if (!selectedFile || !fileBase64) return;
+    
+    uploadBtn.innerText = "🚀 우주로 전송 중...";
+    uploadBtn.disabled = true;
+
+    try {
+      const response = await fetch(UPLOAD_WORKER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          fileContentBase64: fileBase64
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        document.getElementById('resultArea').style.display = 'block';
+        document.getElementById('resultUrl').innerText = data.url;
+        uploadBtn.innerText = "✅ 전송 완료!";
+      } else {
+        throw new Error(data.error || "업로드 실패");
+      }
+    } catch (error) {
+      alert("앗! 에러가 발생했어요: " + error.message);
+      uploadBtn.innerText = "로켓 발사! (업로드)";
+      uploadBtn.disabled = false;
+    }
+  }
+
+  // 복사 버튼
+  function copyToClipboard() {
+    const urlText = document.getElementById('resultUrl').innerText;
+    navigator.clipboard.writeText(urlText).then(() => {
+      alert("복사 성공! 노션의 '이미지파일' 또는 '음성파일' 외부 링크 칸에 붙여넣으세요.");
+    });
+  }
+</script>
+</body>
+</html>
