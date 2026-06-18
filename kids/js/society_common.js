@@ -200,10 +200,26 @@ function initializeSocietyRoom() {
     updateTtsToggleUi();
 }
 
+// 💡 [정비팀장 긴급 추가] 현재 선택된 학년과 단원을 저장할 전역 메모리
+let selectedSocietyGrade = "5-2";
+let selectedSocietyUnit = "3단원";
+
 // ========================================================
 // 🚪 오버레이 미션 팝업 연동 총 제어
 // ========================================================
 function openMissionView(type) {
+    // 💡 용어방(voca)이나 자료실(chart)처럼 퀴즈성 미션일 때만 단원 선택창을 띄웁니다!
+    if (type === 'voca' || type === 'chart') {
+        const userGrade = prompt("🎒 학년을 입력해 주세요! (예시: 5-2, 5-1)", selectedSocietyGrade);
+        if (!userGrade) return; // 취소 누르면 중단
+        
+        const userUnit = prompt("📖 공부할 단원을 입력해 주세요!\n(예시: 1단원, 2단원, 3단원)", selectedSocietyUnit);
+        if (!userUnit) return; // 취소 누르면 중단
+        
+        selectedSocietyGrade = userGrade.trim();
+        selectedSocietyUnit = userUnit.trim();
+    }
+
     const overlay = document.getElementById('missionOverlay');
     const headerTitle = document.getElementById('overlayHeaderTitle');
     const headerIcon = document.getElementById('overlayHeaderIcon');
@@ -216,26 +232,27 @@ function openMissionView(type) {
     let targetTitle = "";
     let targetIcon = "";
 
-    // 🚨 [걸림돌 철거 완료!] 아빠/엄마 계정도 예시 데이터(Mock)를 무시하고 
-    // 무조건 노션 실데이터를 가져오도록 직결 배선했습니다.
     showLoadingSpinner(innerBody);
     fetchNotionSocietyData(type, innerBody);
 
+    // 💡 상단 헤더 타이틀에 현재 선택된 단원을 이쁘게 표시해 줍니다.
+    const unitBadge = (type === 'voca' || type === 'chart') ? ` [${selectedSocietyGrade} ${selectedSocietyUnit}]` : "";
+
     switch(type) {
         case 'voca':
-            targetTitle = "사회 용어방 (한자 초성 퀴즈)";
+            targetTitle = "사회 용어방 (한자 초성 퀴즈)" + unitBadge;
             targetIcon = "📖";
-            speakFairyTTS("사회 용어방에 온 걸 환영해! 초성을 보고, 낱말의 이름과 의미를 마법의 낭독과 함께 맞춰보자!");
+            speakFairyTTS(`${selectedSocietyUnit} 사회 용어방에 온 걸 환영해! 초성을 보고 낱말을 맞춰보자!`);
             break;
         case 'chart':
-            targetTitle = "차트 & 도표 자료 분석실";
+            targetTitle = "차트 & 도표 자료 분석실" + unitBadge;
             targetIcon = "📊";
-            speakFairyTTS("도표를 정확하게 분석해보고, 사회 지형지식 퀴즈를 당당하게 클리어해보자!");
+            speakFairyTTS(`${selectedSocietyUnit} 도표를 정확하게 분석하고 퀴즈를 풀어보자!`);
             break;
         case 'map':
             targetTitle = "랜선 국토 지도 탐방";
             targetIcon = "🗺️";
-            speakFairyTTS("우리 국토의 지리 지형 사진이야! 사진을 더블클릭하면 코코가 상세히 읽어줄게. 감상록을 꼭 적어줘!");
+            speakFairyTTS("우리 국토의 지리 지형 사진이야! 사진을 더블클릭하면 코코가 상세히 읽어줄게.");
             break;
         case 'history':
             targetTitle = "역사 문화재 돋보기";
