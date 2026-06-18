@@ -216,17 +216,10 @@ function openMissionView(type) {
     let targetTitle = "";
     let targetIcon = "";
 
-    // 🔒 데이터 가져오기 (Notion 혹은 Mock)
-    if (isAdmin) {
-        activeSectionData = SOCIETY_MOCK_DATA[type];
-        renderSectionUI(type, innerBody);
-    } else {
-        // 1. 화면 떨림(Layout Shift) 방지를 위해 우선 로딩 스피너 전용 프레임으로 대기실 구획을 비웁니다.
-        showLoadingSpinner(innerBody);
-        
-        // 2. 비동기 백그라운드로 노션 API 데이터를 로딩하며, 완전 조립 완료 시점에만 렌더링을 1회 호출해 꿀렁거림을 제거합니다.
-        fetchNotionSocietyData(type, innerBody);
-    }
+    // 🚨 [걸림돌 철거 완료!] 아빠/엄마 계정도 예시 데이터(Mock)를 무시하고 
+    // 무조건 노션 실데이터를 가져오도록 직결 배선했습니다.
+    showLoadingSpinner(innerBody);
+    fetchNotionSocietyData(type, innerBody);
 
     switch(type) {
         case 'voca':
@@ -288,11 +281,13 @@ async function fetchNotionSocietyData(type, innerBody) {
     const zoneTag = propertyMap[type];
 
     try {
+        // 💡 [배선 교정] 아빠(관리자)일 때는 학생 필터를 꺼서 모든 데이터가 보이게 하고,
+        // 아이들일 때는 자기 이름표가 달린 데이터만 정확히 가져옵니다!
         const records = await fetchVocaFromNotion({
             subject: "사회",
             areaZone: zoneTag,
             useServerFilter: true,
-            filterByStudent: false
+            filterByStudent: !isAdmin 
         });
 
         if (records.length > 0) {
