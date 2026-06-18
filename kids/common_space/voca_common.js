@@ -1,6 +1,5 @@
 // 📚 용어사전방(Voca) 독립 실행형 제어 엔진
-const WORKER_PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
+const WORKER_PROXY_URL = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
 
 // 🚀 코어 관제탑(window)이 세탁해 둔 글로벌 상태를 그대로 이어받습니다!
 let currentUser = window.currentProfile || 'son';
@@ -37,39 +36,15 @@ window.addEventListener('load', () => {
 
 async function fetchLibraryData() {
   try {
-    let allResults = []; let hasMore = true; let nextCursor = undefined;
-    while (hasMore) {
-      const bodyData = { page_size: 100 };
-      if (nextCursor) bodyData.start_cursor = nextCursor;
-      const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(bodyData)
-      }); 
-      const data = await response.json();
-      allResults = allResults.concat(data.results);
-      hasMore = data.has_more; nextCursor = data.next_cursor;
-    }
+    const records = await fetchVocaFromNotion({
+      studentName: currentUserName.trim()
+    });
 
-    const cleanLoginName = currentUserName.trim();
-
-    allDictionaryWords = allResults.map(page => {
-      const p = page.properties;
-      const word = p["단어"]?.title[0]?.plain_text || "";
-      const meaning = p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "뜻풀이 없음";
-      const detailContext = p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "";
-      const imgProp = p["이미지파일"]?.files?.[0];
-      const imageUrl = imgProp?.file?.url || imgProp?.external?.url || null;
-      const pos = p["품사"]?.rich_text?.[0]?.plain_text || ""; 
-      const wordType = p["어휘유형"]?.select?.name || ""; 
-      const stage = p["단원"]?.rich_text[0]?.plain_text || p["단계"]?.number?.toString() || "기본 단원";
-      const grades = p["학년"]?.multi_select?.map(item => item.name) || []; 
-      const isAchieved = p["달성"]?.checkbox || false; 
-
-      return {
-        pageId: page.id, word, meaning, detailContext, imageUrl, pos, wordType, grades, isAchieved, stage,
-        subject: p["과목"]?.multi_select?.map(item => item.name) || ["미분류"],
-        target: p["학생"]?.multi_select?.map(item => item.name) || []
-      };
-    }).filter(w => w.word !== "" && w.target.some(t => t.trim() === cleanLoginName));
+    allDictionaryWords = records.map(r => ({
+      ...r,
+      meaning: r.meaning || "뜻풀이 없음",
+      subject: r.subject.length ? r.subject : ["미분류"]
+    }));
 
     document.getElementById('loadingArea').style.display = 'none';
     buildFilterButtons();

@@ -286,47 +286,30 @@ async function fetchNotionSocietyData(type, innerBody) {
     };
 
     const zoneTag = propertyMap[type];
-    const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
-    
-    // 🔒 용어방 DB ID는 '375a27115b688038b686d3994ee12919'으로 엄격하게 고정 배선합니다.
-    const databaseId = "375a27115b688038b686d3994ee12919";
 
     try {
-        // 노션 API 쿼리 바인딩
-        const res = await fetch(`${proxyUrl}/v1/databases/${databaseId}/query`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                filter: {
-                    and: [
-                        { property: "과목", multi_select: { contains: "사회" } },
-                        { property: "영역 분류", select: { equals: zoneTag } }
-                    ]
-                }
-            })
+        const records = await fetchVocaFromNotion({
+            subject: "사회",
+            areaZone: zoneTag,
+            useServerFilter: true,
+            filterByStudent: false
         });
 
-        if (!res.ok) throw new Error("Notion API 통신 실패");
-        const json = await res.json();
+        if (records.length > 0) {
+            console.log(`🎉 [노션 실시간 결합 성공] 사회방 [${zoneTag}] 데이터 획득: ${records.length}건`);
 
-        if (json && json.results && json.results.length > 0) {
-            console.log(`🎉 [노션 실시간 결합 성공] 사회방 [${zoneTag}] 데이터 획득: ${json.results.length}건`);
-            
-            // 데이터를 우리 용도에 맞게 다이내믹 파싱
-            const parsed = json.results.map(page => {
-                const props = page.properties;
-                const titleStr = props["단어"]?.title?.[0]?.plain_text || props["이름"]?.title?.[0]?.plain_text || "미상";
-                const descStr = props["상세설명"]?.rich_text?.[0]?.plain_text || "해당 유적/지형 설명이 노션에 기재 대기 중입니다.";
-                const imgUrl = props["이미지파일"]?.url || props["이미지파일"]?.rich_text?.[0]?.plain_text || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
-                const hintStr = props["초성힌트"]?.rich_text?.[0]?.plain_text || getChosung(titleStr);
+            const parsed = records.map(record => {
+                const titleStr = record.word || "미상";
+                const descStr = record.detailContext || "해당 유적/지형 설명이 노션에 기재 대기 중입니다.";
+                const imgUrl = record.imageUrl || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
+                const hintStr = record.hint || getChosung(titleStr);
 
                 if (type === 'voca') {
                     return { word: titleStr, hint: hintStr, desc: descStr };
                 } else if (type === 'chart') {
-                    // 도표형 데이터 (퀴즈 초이스 파싱)
                     return {
                         title: titleStr, img: imgUrl, desc: descStr,
-                        quiz: props["퀴즈제시"]?.rich_text?.[0]?.plain_text || `${titleStr}의 퀴즈: 본 자료의 성격은 무엇일까요?`,
+                        quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격은 무엇일까요?`,
                         choices: ["1등급 유망 자료", "전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설"],
                         correctIdx: 1
                     };
@@ -346,7 +329,7 @@ async function fetchNotionSocietyData(type, innerBody) {
         console.warn("노션 실시간 통신 지연 또는 에러. 준비된 오프라인 견고 가상 데이터(Mock)로 무결성 구동합니다.", e);
         activeSectionData = SOCIETY_MOCK_DATA[type];
     } finally {
-        renderSectionUI(type, innerBody); // 실시간 갱신 적용 및 렌더링
+        renderSectionUI(type, innerBody);
     }
 }
 

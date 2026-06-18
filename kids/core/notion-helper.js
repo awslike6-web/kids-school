@@ -5,6 +5,141 @@
 var PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
 var STUDY_LOG_DB_ID = "37aa27115b68001b2ffe5e6c8f82ab2"; 
 var INVENTORY_DB_ID = "374a27115b680042bb61e6a102242e12"; // 기본 백업 인벤토리 DB ID
+var VOCA_DB_ID = "375a27115b688038b686d3994ee12919";      // 용어사전/단어·공부 데이터 DB ID
+
+/**
+ * 노션 VOCA DB 페이지 1건을 공통 객체로 변환
+ */
+function parseVocaPage(page) {
+    const p = page.properties;
+    const imgFile = p["이미지파일"]?.files?.[0];
+    const imageUrl = imgFile?.file?.url || imgFile?.external?.url
+        || p["이미지파일"]?.url
+        || p["이미지파일"]?.rich_text?.[0]?.plain_text
+        || null;
+    const unitRaw = p["단원"]?.rich_text?.[0]?.plain_text
+        ?? p["단원"]?.number
+        ?? p["단원"]?.select?.name
+        ?? p["단원"]?.multi_select?.[0]?.name
+        ?? p["단계"]?.number
+        ?? "기본 단원";
+    const grades = p["학년"]?.multi_select?.map(item => item.name)
+        || (p["학년"]?.select?.name ? [p["학년"].select.name] : [])
+        || (p["학년"]?.rich_text?.[0]?.plain_text ? [p["학년"].rich_text[0].plain_text] : []);
+
+    return {
+        pageId: page.id,
+        id: page.id,
+        word: p["단어"]?.title?.[0]?.plain_text || p["이름"]?.title?.[0]?.plain_text || "",
+        meaning: p["뜻풀이"]?.rich_text?.[0]?.plain_text || p["뜻"]?.rich_text?.[0]?.plain_text || "",
+        detailContext: p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "",
+        imageUrl,
+        pos: p["품사"]?.rich_text?.[0]?.plain_text || "",
+        wordType: p["어휘유형"]?.select?.name || "",
+        type: p["어휘유형"]?.select?.name || "",
+        stage: String(unitRaw),
+        level: unitRaw,
+        grades,
+        grade: grades[0] || "공통",
+        subject: p["과목"]?.multi_select?.map(item => item.name) || [],
+        target: p["학생"]?.multi_select?.map(item => item.name) || [],
+        isAchieved: p["달성"]?.checkbox || false,
+        areaZone: p["영역 분류"]?.select?.name || "",
+        hint: p["초성힌트"]?.rich_text?.[0]?.plain_text || "",
+        quiz: p["퀴즈제시"]?.rich_text?.[0]?.plain_text || ""
+    };
+}
+
+function _matchesVocaRecord(record, options) {
+    if (!record.word) return false;
+
+    if (options.filterByStudent !== false) {
+        const loginName = (options.studentName ?? window.currentUserName ?? "민수").trim();
+        if (record.target.length > 0 && !record.target.some(t => t.trim() === loginName)) {
+            return false;
+        }
+    }
+
+    if (options.subject) {
+        const allowed = [options.subject, ...(options.altSubjects || [])];
+        if (!record.subject.some(s => allowed.includes(s))) return false;
+    }
+
+    if (options.areaZone && record.areaZone !== options.areaZone) return false;
+
+    return true;
+}
+
+function _buildVocaQueryBody(options) {
+    const body = { page_size: 100 };
+
+    if (options.useServerFilter && options.subject && options.areaZone) {
+        body.filter = {
+            and: [
+                { property: "과목", multi_select: { contains: options.subject } },
+                { property: "영역 분류", select: { equals: options.areaZone } }
+            ]
+        };
+    }
+
+    return body;
+}
+
+/**
+ * 노션 VOCA DB에서 단어·공부 데이터를 가져오는 통합 fetch
+ *
+ * @param {Object} [options]
+ * @param {string} [options.subject] - "국어", "영어", "사회", "받아쓰기" 등. 생략 시 전 과목
+ * @param {string[]} [options.altSubjects] - 과목 별칭 (예: 영어 → ["영단어"])
+ * @param {string} [options.areaZone] - 사회방 "영역 분류" (용어방, 자료실, 지도탐방, 역사)
+ * @param {string} [options.studentName] - 학생 이름 필터 (기본: window.currentUserName)
+ * @param {boolean} [options.filterByStudent=true] - 학생 필터 적용 여부
+ * @param {boolean} [options.useServerFilter=false] - true면 과목+영역을 노션 API filter로 전송
+ * @param {string} [options.dbId] - DB ID override (기본: VOCA_DB_ID)
+ * @returns {Promise<Array>}
+ */
+async function fetchVocaFromNotion(options = {}) {
+    const dbId = options.dbId || VOCA_DB_ID;
+    const queryOptions = {
+        subject: options.subject || null,
+        altSubjects: options.altSubjects || [],
+        areaZone: options.areaZone || null,
+        studentName: options.studentName,
+        filterByStudent: options.filterByStudent !== false,
+        useServerFilter: options.useServerFilter === true
+    };
+
+    let allResults = [];
+    let hasMore = true;
+    let nextCursor = undefined;
+
+    try {
+        while (hasMore) {
+            const bodyData = _buildVocaQueryBody(queryOptions);
+            if (nextCursor) bodyData.start_cursor = nextCursor;
+
+            const response = await fetch(`${PROXY_URL}/v1/databases/${dbId}/query`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData)
+            });
+
+            if (!response.ok) throw new Error(`노션 VOCA DB 통신 오류 (상태: ${response.status})`);
+
+            const data = await response.json();
+            allResults = allResults.concat(data.results || []);
+            hasMore = data.has_more;
+            nextCursor = data.next_cursor;
+        }
+
+        return allResults
+            .map(parseVocaPage)
+            .filter(record => _matchesVocaRecord(record, queryOptions));
+    } catch (error) {
+        console.error(`[fetchVocaFromNotion] ${options.subject || "전체"} 데이터 로딩 실패:`, error);
+        return [];
+    }
+}
 
 /**
  * 아버님의 새로운 노션 DB 구조에 맞춰 학습 일지를 생성하는 함수

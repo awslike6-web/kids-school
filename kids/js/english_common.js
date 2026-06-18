@@ -26,64 +26,7 @@ function speakEnglish(text) {
 }
 
 // ==========================================
-// 📡 2. 노션 데이터베이스 고속 스캔 엔진
-// ==========================================
-async function fetchEnglishNotionData(dbId, subjectFilter = "영어") {
-    let allResults = []; 
-    let hasMore = true; 
-    let nextCursor = undefined;
-
-    try {
-        while (hasMore) {
-            const bodyData = { page_size: 100 };
-            if (nextCursor) bodyData.start_cursor = nextCursor;
-            
-            // 💡 notion-helper.js의 PROXY_URL을 공통으로 사용
-            const response = await fetch(`${PROXY_URL}/v1/databases/${dbId}/query`, {
-                method: "POST", 
-                headers: { "Content-Type": "application/json" }, 
-                body: JSON.stringify(bodyData)
-            }); 
-            
-            if (!response.ok) throw new Error(`서버 통신 붕괴 (코드: ${response.status})`);
-
-            const data = await response.json();
-            allResults = allResults.concat(data.results);
-            hasMore = data.has_more; 
-            nextCursor = data.next_cursor;
-        }
-
-// 영어 과목 데이터만 예쁘게 정제해서 반환
-        return allResults.map(page => {
-            const p = page.properties;
-            return {
-                id: page.id,
-                word: p["단어"]?.title[0]?.plain_text || "",
-                meaning: p["뜻풀이"]?.rich_text[0]?.plain_text || p["뜻"]?.rich_text[0]?.plain_text || "",
-                subject: p["과목"]?.multi_select?.map(item => item.name) || [],
-                type: p["어휘유형"]?.select?.name || "",
-                level: p["단원"]?.number || p["단원"]?.select?.name || p["단원"]?.multi_select?.[0]?.name || p["단원"]?.rich_text?.[0]?.plain_text || "기본",
-                grade: p["학년"]?.multi_select?.[0]?.name || p["학년"]?.select?.name || p["학년"]?.rich_text?.[0]?.plain_text || "공통",
-                
-                // 💡 [필수 추가] 노션의 '학생' 속성 데이터를 안전하게 수집합니다.
-                target: p["학생"]?.multi_select?.map(item => item.name) || []
-            };
-        }).filter(w => {
-            // 💡 [철벽 가드] 현재 방에 들어온 학생 이름(window.currentUserName)과 일치하는 단어만 정확하게 골라냅니다!
-            const cleanLoginName = (window.currentUserName || "민수").trim();
-            
-            return w.word !== "" && 
-                   (w.subject.includes(subjectFilter) || w.subject.includes("영단어")) &&
-                   w.target.some(t => t.trim() === cleanLoginName); // 🎯 이 라인이 민수/민서 데이터를 정확히 갈라줍니다!
-        });
-    } catch (error) {
-        console.error("영어 노션 엔진 스캔 실패:", error);
-        return []; 
-    }
-}
-
-// ==========================================
-// 🤖 3. 코코 요정 AI 두뇌 (독해방/문법방 대비용)
+// 🤖 2. 코코 요정 AI 두뇌 (독해방/문법방 대비용)
 // ==========================================
 async function askCocoFairyAI(systemPrompt, userText, history = []) {
     const conversation = [...history, { role: "user", parts: [{ text: userText }] }];

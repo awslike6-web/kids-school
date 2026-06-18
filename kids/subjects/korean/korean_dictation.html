@@ -78,27 +78,14 @@
 <script src="../../js/korean_common.js"></script>
 
 <script>
-const voca_DB_ID = "375a27115b688038b686d3994ee12919"; 
 let sentenceList = [];
 let quizPool = [];
 let currentIdx = 0;
 let score = 0;
 
 window.onload = async () => {
-    // 💡 노션에서 '받아쓰기' 과목만 필터링해서 가져오기
-    const WORKER_PROXY_URL = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     try {
-        const response = await fetch(`${WORKER_PROXY_URL}/v1/databases/${voca_DB_ID}/query`, {
-            method: "POST", headers: { "Content-Type": "application/json" }
-        });
-        const data = await response.json();
-        sentenceList = data.results.map(page => {
-            const p = page.properties;
-            return {
-                word: p["단어"]?.title[0]?.plain_text || "",
-                subject: p["과목"]?.multi_select?.map(i => i.name) || []
-            };
-        }).filter(w => w.word && w.subject.includes("받아쓰기"));
+        sentenceList = await fetchVocaFromNotion({ subject: "받아쓰기" });
 
         document.getElementById('loadingCard').style.display = 'none';
         if (sentenceList.length > 0) document.getElementById('startCard').style.display = 'block';
