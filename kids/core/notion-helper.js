@@ -269,10 +269,11 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
   }
 
   // 💡 1. 대장님 노션 DB 칼럼명에 맞춘 완벽한 자동 라우팅
+  // window.currentSubject가 없으면 "사회"로 폴백
   const subjectName = window.currentSubject || "사회"; 
-  let expPropName = `${subjectName} 경험치`;   // 기본: "사회 경험치"
-  let levelPropName = `${subjectName} 레벨`;   // 기본: "사회 레벨"
-  let dailyPropName = `오늘 획득_${subjectName}`; // 기본: "오늘 획득_사회"
+  let expPropName = `${subjectName} 경험치`;   // 기본: "수학 경험치" 등
+  let levelPropName = `${subjectName} 레벨`;   // 기본: "수학 레벨" 등
+  let dailyPropName = `오늘 획득_${subjectName}`; // 기본: "오늘 획득_수학" 등
 
   let vocaExpPropName = null;
   // 용어방에서 호출했을 경우, 메인 경험치와 용어 경험치 쌍끌이(동시 누적) 적용

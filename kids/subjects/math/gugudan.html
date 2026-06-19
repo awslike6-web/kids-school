@@ -315,6 +315,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 
 <script>
     // [트랙 1: 순수 변수 선언 공간] - 지붕 바깥(위쪽)에 그대로 유지합니다.
+    window.currentSubject = "수학"; // 🚨 핵심: 전역 과목명 명시 (경험치 쌍끌이, 보상 타겟용)
     let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
     let wrongNotes = []; 
     let gameState = {};

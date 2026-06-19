@@ -3,6 +3,8 @@
 // (Voca, Phonics, Reading, Grammar 공통 사용)
 // ==========================================================
 
+window.currentSubject = "영어"; // 전역 과목명 명시 (보상 및 학습일지 타겟용)
+
 // 🚨 관제탑과 오답 가방(수레) 완벽 공유 (학습 일지 전송용)
 window.engWrongNotes = window.engWrongNotes || []; 
 

@@ -2,6 +2,8 @@
 // 💎 사회방 공통 비즈니스 로직 및 통신 모듈 (society_common.js)
 // ========================================================
 
+window.currentSubject = "사회"; // 전역 과목명 명시 (보상 및 학습일지 타겟용)
+
 // 🧚‍♀️ 아나운서 요정 코코 TTS 엔진 안전 우회막 (초기 로딩 충돌 방지용)
 if (!window.stopFairyTTS) {
     window.stopFairyTTS = function() { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다."); };
