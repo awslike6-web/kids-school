@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>민민 우주 정거장 🚀 - 통합 세로셈 본부</title>
+<title>민민 우주 정거장 🚀 - 통합 세로셈 본부 (동적 그리드)</title>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -53,35 +53,88 @@
   .game-header { width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px; font-family: 'Jua', sans-serif; font-size: 1.2rem; }
   .game-stat-box { background: rgba(255,255,255,0.1); border-radius: 14px; padding: 6px 14px; border: 1px solid var(--border); }
   
-  /* 세로셈 보드 (우주테마에 맞게 조정) */
+  /* 동적 세로셈 보드 (CSS Grid) */
   .v-board-container { width: 100%; display: flex; justify-content: center; margin-bottom: 20px; flex: 1; align-items: center; }
-  .v-board, .div-board { background: #fff; padding: 20px 25px; border-radius: 24px; border: 4px solid var(--cyan); box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: flex-end; font-size: 2.2rem; color: var(--dark); min-width: 220px; position: relative; font-family: 'Jua', sans-serif; }
   
-  .v-memo-row { display: flex; justify-content: flex-end; width: 100%; gap: 8px; margin-bottom: 8px; }
-  .v-row { display: flex; width: 100%; justify-content: flex-end; align-items: center; gap: 12px; margin-bottom: 4px; letter-spacing: 4px; position: relative; }
-  .v-line { width: 100%; height: 4px; background: var(--dark); margin: 8px 0; border-radius: 2px; }
-  .v-symbol { position: absolute; left: 0; color: var(--pink); font-size: 2rem; }
-  
-  /* 입력 칸 공통 */
-  input { font-family: 'Jua', sans-serif; text-align: center; outline: none; transition: 0.2s; }
-  input:focus, input.focused { border-color: var(--cyan) !important; background: #e0f7fa !important; box-shadow: 0 0 0 3px rgba(0,212,255,0.3); }
-  
-  .v-input.tiny { font-size: 1rem; width: 36px; height: 32px; border: 2px dashed #b0b0b0; padding: 2px; color: #de4b7e; border-radius: 8px; background: #fffceb; }
-  .v-scratch-row { display: flex; justify-content: flex-end; gap: 8px; margin: 4px 0; width: 100%; }
-  .v-scratch-cell { width: 36px; height: 36px; border: 2px dashed #ccc; border-radius: 8px; background: #fff; font-size: 1.5rem; }
-  .v-input.ans { width: 140px; font-size: 2.2rem; letter-spacing: 4px; padding: 2px 10px; border: 3px solid #ccc; border-radius: 12px; background-color: #fff; text-align: right; }
-  
-  /* 나눗셈 보드 전용 */
-  .div-board { align-items: center; }
-  .div-main-row { display: flex; align-items: center; font-size: 2.4rem; font-weight: bold; color: var(--dark); border-bottom: 4px solid var(--dark); padding-bottom: 4px; margin-bottom: 10px; }
-  .div-bracket { margin: 0 10px; color: var(--pink); }
-  .div-divisor { color: var(--blue); }
-  .div-dividend { letter-spacing: 8px; }
-  .div-result-area { display: flex; flex-direction: column; gap: 8px; width: 100%; margin-top: 15px; border-top: 2px dashed #ccc; padding-top: 15px; }
-  .div-input-group { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-  .div-input-label { font-size: 1.3rem; color: #555; }
-  .div-input { width: 100px; font-size: 1.8rem; padding: 4px; border: 3px solid #ccc; border-radius: 12px; }
-  
+  .v-board { 
+    background: #fff; 
+    padding: 20px 25px; 
+    border-radius: 24px; 
+    border: 4px solid var(--cyan); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+    display: inline-block; 
+    font-family: 'Jua', sans-serif; 
+  }
+
+  .math-grid {
+    display: grid;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .grid-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--dark);
+    width: 45px;
+    height: 50px;
+  }
+
+  .grid-input {
+    width: 100%;
+    height: 100%;
+    min-height: 50px;
+    font-size: 2rem;
+    text-align: center;
+    border: 2px dashed #b0b0b0;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--dark);
+    cursor: pointer;
+    outline: none;
+    font-family: 'Jua', sans-serif;
+    transition: 0.2s;
+  }
+
+  .grid-input.cell-carry {
+    min-height: 35px;
+    height: 35px;
+    font-size: 1.3rem;
+    color: var(--pink);
+    background: #fffceb;
+    border-color: #f7d5e1;
+    align-self: end;
+  }
+
+  .grid-input.cell-ans {
+    border: 3px solid #ccc;
+    background: #f8f8f8;
+  }
+
+  .grid-input.focused {
+    border-color: var(--cyan) !important;
+    background: #e0f7fa !important;
+    border-style: solid !important;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+    transform: scale(1.05);
+    z-index: 10;
+  }
+
+  .grid-line {
+    background: var(--dark);
+    height: 4px;
+    border-radius: 2px;
+    margin: 4px 0;
+    align-self: center;
+  }
+
+  .cell-op {
+    color: var(--pink);
+  }
+
   .feedback-msg { font-family: 'Jua', sans-serif; font-size: 1.3rem; text-align: center; height: 2rem; margin-bottom: 10px; color: var(--yellow); }
 
   /* 📱 가상 키패드 */
@@ -112,20 +165,20 @@
   <!-- 설정(메인) 화면 -->
   <div class="screen active" id="screen-setup">
     <div class="logo-title">통합 세로셈 훈련소 📝</div>
-    <div style="color: var(--muted); text-align: center; margin-bottom: 30px;">원하는 연산을 선택하고 세로셈 마스터가 되어보세요!</div>
+    <div style="color: var(--muted); text-align: center; margin-bottom: 30px;">원하는 연산을 선택하면 난이도에 맞는 동적 그리드가 생성됩니다!</div>
     
     <div class="mission-grid">
       <div class="mission-card mc-add" onclick="startGame('add')">
-        <div style="font-size: 2.5rem;">➕</div>덧셈 기지
+        <div style="font-size: 2.5rem;">➕</div>덧셈 기지<br><span style="font-size:1rem;color:#ccc;">(3자리 + 3자리)</span>
       </div>
       <div class="mission-card mc-sub" onclick="startGame('sub')">
-        <div style="font-size: 2.5rem;">➖</div>뺄셈 기지
+        <div style="font-size: 2.5rem;">➖</div>뺄셈 기지<br><span style="font-size:1rem;color:#ccc;">(3자리 - 2자리)</span>
       </div>
       <div class="mission-card mc-mul" onclick="startGame('mul')">
-        <div style="font-size: 2.5rem;">✖️</div>곱셈 기지
+        <div style="font-size: 2.5rem;">✖️</div>곱셈 기지<br><span style="font-size:1rem;color:#ccc;">(3자리 x 2자리)</span>
       </div>
       <div class="mission-card mc-div" onclick="startGame('div')">
-        <div style="font-size: 2.5rem;">➗</div>나눗셈 기지
+        <div style="font-size: 2.5rem;">➗</div>나눗셈 기지<br><span style="font-size:1rem;color:#ccc;">(동적 나눗셈)</span>
       </div>
     </div>
   </div>
@@ -137,7 +190,10 @@
       <div class="game-stat-box" id="game-qnum">1/10</div>
     </div>
     
-    <div class="v-board-container" id="vertical-container"></div>
+    <div class="v-board-container">
+      <div class="v-board" id="vertical-container"></div>
+    </div>
+    
     <div class="feedback-msg" id="v-feedbackMsg"></div>
     
     <!-- 가상 키패드 -->
@@ -182,16 +238,14 @@
     const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
     document.getElementById('userName').textContent = `${name} 탐험대원`;
     document.getElementById('userIcon').textContent = icon;
-    
-    // 키패드와 포커스 연결
-    document.addEventListener('focusin', e => {
-      if (e.target.tagName === 'INPUT') {
-        focusedInput = e.target;
-        document.querySelectorAll('input').forEach(i => i.classList.remove('focused'));
-        e.target.classList.add('focused');
-      }
-    });
   });
+
+  function setFocus(el) {
+    if (!el) return;
+    document.querySelectorAll('.grid-input').forEach(i => i.classList.remove('focused'));
+    el.classList.add('focused');
+    focusedInput = el;
+  }
 
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -200,45 +254,56 @@
 
   function goSetup() { showScreen('screen-setup'); }
 
-  // 가상 키패드 로직
+  // 가상 키패드 로직 (자동 이동 기능 추가)
   function pressNum(num) {
     if (!focusedInput) return;
-    const max = parseInt(focusedInput.getAttribute('maxlength')) || 4;
-    if (focusedInput.value.length < max) {
-      focusedInput.value += num;
-    }
+    focusedInput.value = num; // 동적 그리드는 셀당 1글자만!
+    
+    // 왼쪽 칸으로 자동 이동 (세로셈은 오른쪽에서 왼쪽으로 푸는 게 자연스러우므로)
+    const row = parseInt(focusedInput.dataset.row);
+    const col = parseInt(focusedInput.dataset.col);
+    const nextInput = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col - 1}"]`);
+    if (nextInput) setFocus(nextInput);
   }
+  
   function pressBackspace() {
     if (!focusedInput) return;
-    focusedInput.value = focusedInput.value.slice(0, -1);
+    focusedInput.value = '';
+    
+    // 지울 때는 오른쪽 칸으로 역이동
+    const row = parseInt(focusedInput.dataset.row);
+    const col = parseInt(focusedInput.dataset.col);
+    const prevInput = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col + 1}"]`);
+    if (prevInput) setFocus(prevInput);
   }
+  
   function pressClear() {
     if (!focusedInput) return;
     focusedInput.value = '';
   }
 
-  // 문제 생성기 (기본 랜덤 2자리 연산)
+  // 문제 생성기 (동적 그리드를 뽐내기 위해 자릿수 강화)
   function generateQuestions(mode) {
     const qs = [];
     for(let i=0; i<10; i++) {
       let a, b, ans, rem = 0;
       if (mode === 'add') {
-        a = Math.floor(Math.random() * 80) + 11;
-        b = Math.floor(Math.random() * 80) + 11;
+        a = Math.floor(Math.random() * 800) + 111; // 3자리
+        b = Math.floor(Math.random() * 800) + 111; // 3자리
         ans = a + b;
       } else if (mode === 'sub') {
-        a = Math.floor(Math.random() * 80) + 20;
-        b = Math.floor(Math.random() * (a - 10)) + 10;
+        a = Math.floor(Math.random() * 800) + 200; // 3자리
+        b = Math.floor(Math.random() * (a - 100)) + 100; // 2~3자리
         ans = a - b;
       } else if (mode === 'mul') {
-        a = Math.floor(Math.random() * 80) + 11;
-        b = Math.floor(Math.random() * 8) + 2;
+        a = Math.floor(Math.random() * 800) + 111; // 3자리
+        b = Math.floor(Math.random() * 80) + 11;   // 2자리
         ans = a * b;
       } else if (mode === 'div') {
-        b = Math.floor(Math.random() * 8) + 2; // 2~9 나누는 수
-        ans = Math.floor(Math.random() * 20) + 5; // 몫
-        rem = Math.floor(Math.random() * b); // 나머지
-        a = (b * ans) + rem; // 피제수
+        b = Math.floor(Math.random() * 80) + 11; // 2자리 제수
+        ans = Math.floor(Math.random() * 8) + 2; // 1자리 몫
+        rem = Math.floor(Math.random() * b);     // 나머지
+        a = (b * ans) + rem;                     // 피제수 계산
       }
       qs.push({ numA: a, numB: b, answer: ans, rem });
     }
@@ -248,11 +313,161 @@
   function startGame(mode) {
     gameState = { mode, questions: generateQuestions(mode), current: 0, correctCount: 0 };
     
-    const titles = { add: '➕ 덧셈 기지', sub: '➖ 뺄셈 기지', mul: '✖️ 곱셈 기지', div: '➗ 나눗셈 기지' };
+    const titles = { add: '➕ 덧셈 기지 (3자리+3자리)', sub: '➖ 뺄셈 기지 (3자리-2자리)', mul: '✖️ 곱셈 기지 (3자리x2자리)', div: '➗ 나눗셈 기지 (동적 나눗셈)' };
     document.getElementById('game-title').textContent = titles[mode];
     
     showScreen('screen-game');
     nextQuestion();
+  }
+
+  // 🚀 핵심: 세로셈 동적 그리드 생성 함수
+  function renderDynamicGrid(mode, q) {
+    const aStr = String(q.numA);
+    const bStr = String(q.numB);
+    let W = 0;
+    let gridHTML = '';
+
+    const commonInp = `inputmode="none" readonly onclick="setFocus(this)"`;
+
+    if (mode === 'add' || mode === 'sub') {
+        W = Math.max(aStr.length, bStr.length) + 2; // 연산자 기호 칸 1개 + 올림수 여유 칸 1개
+        gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
+        
+        // 1행: 올림/내림수 메모 (cell-carry)
+        for(let c=1; c<=W; c++) {
+            gridHTML += `<input type="text" class="grid-input cell-carry" data-row="1" data-col="${c}" style="grid-area: 1 / ${c};" ${commonInp}>`;
+        }
+        
+        // 2행: 피연산자 A (오른쪽 정렬)
+        for(let i=0; i<aStr.length; i++) {
+            let c = W - aStr.length + 1 + i;
+            gridHTML += `<div class="grid-cell" style="grid-area: 2 / ${c};">${aStr[i]}</div>`;
+        }
+        
+        // 3행: 연산자 기호 & 피연산자 B (오른쪽 정렬)
+        const opSym = mode === 'add' ? '＋' : '－';
+        let opCol = W - Math.max(aStr.length, bStr.length);
+        gridHTML += `<div class="grid-cell cell-op" style="grid-area: 3 / ${opCol};">${opSym}</div>`;
+        
+        for(let i=0; i<bStr.length; i++) {
+            let c = W - bStr.length + 1 + i;
+            gridHTML += `<div class="grid-cell" style="grid-area: 3 / ${c};">${bStr[i]}</div>`;
+        }
+        
+        // 4행: 밑줄
+        gridHTML += `<div class="grid-line" style="grid-area: 4 / 1 / 4 / ${W + 1};"></div>`;
+        
+        // 5행: 최종 정답 (cell-ans)
+        for(let c=1; c<=W; c++) {
+            gridHTML += `<input type="text" class="grid-input cell-ans" data-type="ans" data-row="5" data-col="${c}" style="grid-area: 5 / ${c};" ${commonInp}>`;
+        }
+        gridHTML += `</div>`;
+    }
+    else if (mode === 'mul') {
+        W = aStr.length + bStr.length + 1; // 곱셈 결과 최대 길이 + 1
+        gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
+        
+        // 1행: 올림수
+        for(let c=1; c<=W; c++) {
+            gridHTML += `<input type="text" class="grid-input cell-carry" data-row="1" data-col="${c}" style="grid-area: 1 / ${c};" ${commonInp}>`;
+        }
+        
+        // 2행: 피연산자 A
+        for(let i=0; i<aStr.length; i++) {
+            let c = W - aStr.length + 1 + i;
+            gridHTML += `<div class="grid-cell" style="grid-area: 2 / ${c};">${aStr[i]}</div>`;
+        }
+        
+        // 3행: 연산자 & 피연산자 B
+        let opCol = W - Math.max(aStr.length, bStr.length);
+        gridHTML += `<div class="grid-cell cell-op" style="grid-area: 3 / ${opCol};">×</div>`;
+        for(let i=0; i<bStr.length; i++) {
+            let c = W - bStr.length + 1 + i;
+            gridHTML += `<div class="grid-cell" style="grid-area: 3 / ${c};">${bStr[i]}</div>`;
+        }
+        
+        // 4행: 첫 번째 밑줄
+        gridHTML += `<div class="grid-line" style="grid-area: 4 / 2 / 4 / ${W + 1};"></div>`;
+        
+        let row = 5;
+        // B가 2자리 이상일 때 중간 풀이과정 행 생성
+        if (bStr.length > 1) {
+            // 오른쪽 자릿수부터 한 줄씩 생성
+            for(let j=bStr.length-1; j>=0; j--) {
+                let shift = (bStr.length - 1) - j; // 왼쪽으로 이동할 칸 수
+                for(let k=0; k<=aStr.length+1; k++) {
+                    let c = W - shift - k;
+                    if(c > 0) {
+                        gridHTML += `<input type="text" class="grid-input cell-inter" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+                    }
+                }
+                row++;
+            }
+            // 덧셈 전 두 번째 밑줄
+            gridHTML += `<div class="grid-line" style="grid-area: ${row} / 1 / ${row} / ${W + 1};"></div>`;
+            row++;
+        }
+        
+        // 마지막 행: 최종 정답
+        for(let c=1; c<=W; c++) {
+            gridHTML += `<input type="text" class="grid-input cell-ans" data-type="ans" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
+        gridHTML += `</div>`;
+    }
+    else if (mode === 'div') {
+        W = aStr.length + bStr.length + 2; 
+        gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
+        
+        let row = 1;
+        // 1행: 몫 (Quotient)
+        for (let i = 0; i < aStr.length; i++) {
+            let c = bStr.length + 2 + i;
+            gridHTML += `<input type="text" class="grid-input cell-ans" data-type="q" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
+        row++;
+        
+        // 2행: 지붕 모양 가로선
+        gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${bStr.length + 2} / ${row} / ${W + 1};"></div>`;
+        row++;
+        
+        // 3행: 제수 ) 피제수
+        for (let i = 0; i < bStr.length; i++) {
+            gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${1 + i};">${bStr[i]}</div>`;
+        }
+        gridHTML += `<div class="grid-cell cell-op" style="grid-area: ${row} / ${bStr.length + 1};">)</div>`;
+        for (let i = 0; i < aStr.length; i++) {
+            let c = bStr.length + 2 + i;
+            gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${c};">${aStr[i]}</div>`;
+        }
+        row++;
+        
+        // 4행: 곱셈 결과 빼기 (Intermediate)
+        for (let i = 0; i < aStr.length; i++) {
+            let c = bStr.length + 2 + i;
+            gridHTML += `<input type="text" class="grid-input cell-inter" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
+        row++;
+        
+        // 5행: 밑줄
+        gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${bStr.length + 2} / ${row} / ${W + 1};"></div>`;
+        row++;
+        
+        // 6행: 나머지 (Remainder)
+        for (let i = 0; i < aStr.length; i++) {
+            let c = bStr.length + 2 + i;
+            gridHTML += `<input type="text" class="grid-input cell-ans" data-type="rem" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
+        gridHTML += `</div>`;
+    }
+
+    document.getElementById('vertical-container').innerHTML = gridHTML;
+
+    // 포커스 자동 지정 로직: 입력해야 할 칸 중 가장 오른쪽 칸을 찾아서 포커스
+    const ansCells = Array.from(document.querySelectorAll('.cell-ans, .cell-inter'));
+    if (ansCells.length > 0) {
+        // 배열의 맨 마지막 요소가 통상적으로 가장 아래쪽, 가장 오른쪽 칸임
+        setFocus(ansCells[ansCells.length - 1]);
+    }
   }
 
   function nextQuestion() {
@@ -260,120 +475,68 @@
       showResult();
       return;
     }
-    
     const q = gameState.questions[gameState.current];
     document.getElementById('game-qnum').textContent = `${gameState.current + 1} / ${gameState.questions.length}`;
     document.getElementById('v-feedbackMsg').textContent = '';
-    const container = document.getElementById('vertical-container');
-
-    const commonInputs = 'inputmode="none" readonly onclick="this.focus()"';
-
-    if (gameState.mode === 'add' || gameState.mode === 'sub') {
-      const sym = gameState.mode === 'add' ? '＋' : '－';
-      const memoTitle = gameState.mode === 'add' ? '올' : '내';
-      container.innerHTML = `
-        <div class="v-board">
-          <div class="v-memo-row">
-            <input type="text" class="v-input tiny" placeholder="${memoTitle}" ${commonInputs} maxlength="1">
-            <input type="text" class="v-input tiny" placeholder="${memoTitle}" ${commonInputs} maxlength="1">
-            <input type="text" class="v-input tiny" placeholder="${memoTitle}" ${commonInputs} maxlength="1">
-          </div>
-          <div class="v-row">${q.numA}</div>
-          <div class="v-row"><span class="v-symbol">${sym}</span>${q.numB}</div>
-          <div class="v-line"></div>
-          <div class="v-scratch-row">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-          </div>
-          <div class="v-row"><input type="text" class="v-input ans" id="v-ans" placeholder="정답" ${commonInputs} maxlength="4"></div>
-        </div>`;
-      setTimeout(()=> document.getElementById('v-ans')?.focus(), 100);
-    } 
-    else if (gameState.mode === 'mul') {
-      container.innerHTML = `
-        <div class="v-board">
-          <div class="v-row">${q.numA}</div>
-          <div class="v-row"><span class="v-symbol">×</span>${q.numB}</div>
-          <div class="v-line"></div>
-          <div class="v-scratch-row">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-          </div>
-          <div class="v-row"><input type="text" class="v-input ans" id="v-ans" placeholder="정답" ${commonInputs} maxlength="4"></div>
-        </div>`;
-      setTimeout(()=> document.getElementById('v-ans')?.focus(), 100);
-    } 
-    else if (gameState.mode === 'div') {
-      container.innerHTML = `
-        <div class="div-board">
-          <div class="div-main-row">
-            <span class="div-divisor">${q.numB}</span>
-            <span class="div-bracket">)</span>
-            <span class="div-dividend">${q.numA}</span>
-          </div>
-          <div class="v-scratch-row">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-            <input type="text" class="v-scratch-cell" ${commonInputs} maxlength="1">
-          </div>
-          <div class="div-result-area">
-            <div class="div-input-group">
-              <span class="div-input-label">몫</span>
-              <input type="text" class="div-input" id="v-ans" placeholder="?" ${commonInputs} maxlength="3">
-            </div>
-            <div class="div-input-group">
-              <span class="div-input-label">나머지</span>
-              <input type="text" class="div-input" id="v-rem" placeholder="${q.rem}" ${q.rem === 0 ? 'value="0"' : ''} ${commonInputs} maxlength="2">
-            </div>
-          </div>
-        </div>`;
-      setTimeout(()=> document.getElementById('v-ans')?.focus(), 100);
-    }
+    
+    // 동적 그리드 생성 호출
+    renderDynamicGrid(gameState.mode, q);
   }
 
   function submitAnswer() {
     const q = gameState.questions[gameState.current];
-    const ansInp = document.getElementById('v-ans');
-    if (!ansInp || ansInp.value === '') return;
-
     let isCorrect = false;
-    const userAns = parseInt(ansInp.value, 10);
 
     if (gameState.mode === 'div') {
-      const remInp = document.getElementById('v-rem');
-      const userRem = parseInt(remInp.value || 0, 10);
-      isCorrect = (userAns === q.answer && userRem === q.rem);
-      if (!isCorrect && remInp) remInp.style.borderColor = 'var(--pink)';
+        const qCells = Array.from(document.querySelectorAll('.cell-ans[data-type="q"]'));
+        const qStr = qCells.map(c => c.value || '0').join('');
+        const userQ = parseInt(qStr, 10);
+        
+        const remCells = Array.from(document.querySelectorAll('.cell-ans[data-type="rem"]'));
+        const remStr = remCells.map(c => c.value || '0').join('');
+        const userRem = parseInt(remStr, 10);
+
+        isCorrect = (userQ === q.answer && userRem === q.rem);
     } else {
-      isCorrect = (userAns === q.answer);
+        const ansCells = Array.from(document.querySelectorAll('.cell-ans[data-type="ans"]'));
+        const ansStr = ansCells.map(c => c.value || '').join('');
+        if (ansStr === '') return; // 아무것도 입력 안했을 때
+        const userAns = parseInt(ansStr, 10);
+        isCorrect = (userAns === q.answer);
     }
 
     const msgBox = document.getElementById('v-feedbackMsg');
     if (isCorrect) {
-      ansInp.style.borderColor = 'var(--green)';
-      ansInp.style.background = '#e8f5e9';
-      msgBox.style.color = 'var(--green)';
-      msgBox.textContent = "정답입니다! 🎉";
-      gameState.correctCount++;
-      gameState.current++;
-      setTimeout(nextQuestion, 1000);
+        document.querySelectorAll('.cell-ans').forEach(c => {
+            c.style.borderColor = 'var(--green)';
+            c.style.background = '#e8f5e9';
+        });
+        msgBox.style.color = 'var(--green)';
+        msgBox.textContent = "정답입니다! 🎉";
+        gameState.correctCount++;
+        gameState.current++;
+        setTimeout(nextQuestion, 1000);
     } else {
-      ansInp.style.borderColor = 'var(--pink)';
-      ansInp.style.background = '#ffebee';
-      msgBox.style.color = 'var(--pink)';
-      msgBox.textContent = "아쉽네요, 다시 한번 생각해보세요! 🤔";
-      
-      // Clear input after a short delay for retry
-      setTimeout(() => {
-        ansInp.value = '';
-        ansInp.style.borderColor = '';
-        ansInp.style.background = '';
-        msgBox.textContent = '';
-        ansInp.focus();
-      }, 1500);
+        document.querySelectorAll('.cell-ans').forEach(c => {
+            if(c.value !== '') {
+                c.style.borderColor = 'var(--pink)';
+                c.style.background = '#ffebee';
+            }
+        });
+        msgBox.style.color = 'var(--pink)';
+        msgBox.textContent = "아쉽네요, 다시 계산해볼까요? 🤔";
+        setTimeout(() => {
+            document.querySelectorAll('.cell-ans').forEach(c => {
+                c.style.borderColor = '';
+                c.style.background = '';
+                c.value = ''; // 재도전시 정답칸 초기화
+            });
+            msgBox.textContent = '';
+            
+            // 다시 포커스
+            const ansCells = Array.from(document.querySelectorAll('.cell-ans'));
+            if (ansCells.length > 0) setFocus(ansCells[ansCells.length - 1]);
+        }, 1500);
     }
   }
 
@@ -382,7 +545,7 @@
     document.getElementById('r-detail').textContent = `10문제 중 ${gameState.correctCount}개 성공!`;
     showScreen('screen-result');
 
-    // 노션 보상 연동 (코어 엔진 로딩 시)
+    // 노션 보상 연동
     if (gameState.correctCount > 0 && typeof loadCoreScripts !== 'undefined') {
         loadCoreScripts("../../core/", ["notion-helper.js"], async () => {
             if (typeof grantRewardAndShowUI === 'function') {
