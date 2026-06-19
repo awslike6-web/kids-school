@@ -256,3 +256,61 @@ body::before {
       padding-left: 20px;
   }
 }
+
+/* 📱 모바일 철벽 반응형 레이아웃 파괴 방지선 */
+@media (max-width: 680px) {
+  .app-container {
+    padding: 10px;
+  }
+  
+  .v-board-container {
+    padding: 0;
+  }
+
+  .v-board {
+    padding: 10px 12px;
+    border-width: 3px;
+    border-radius: 16px;
+    width: 100%;
+    overflow-x: auto; /* 터지는 현상 방어 */
+  }
+
+  .grid-cell {
+    font-size: 1.8rem;
+    width: 35px;
+    height: 40px;
+  }
+
+  .grid-input {
+    min-height: 40px;
+    font-size: 1.6rem;
+  }
+
+  .numpad-container {
+    padding: 10px;
+    gap: 8px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .numpad-btn {
+    padding: 12px;
+    font-size: 1.5rem;
+  }
+
+  .numpad-btn.submit {
+    font-size: 1.3rem;
+    padding: 14px;
+  }
+  
+  .game-header {
+    font-size: 1rem;
+  }
+  
+  .logo-title {
+    font-size: 2rem;
+  }
+  
+  .mission-grid {
+    grid-template-columns: 1fr; /* 모바일에서는 1열로 콤팩트하게 */
+  }
+}
