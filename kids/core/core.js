@@ -2,7 +2,7 @@
 // 🏰 민민이네 공부방 공통 핵심 코어 엔진 (core.js)
 // ========================================================
 
-const requiredCores = [
+var requiredCores = [
     "notion-helper.js",
     "fairy-config.js",
     "fairy-engine.js"

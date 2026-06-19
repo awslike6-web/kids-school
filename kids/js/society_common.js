@@ -64,7 +64,7 @@ function updateTtsToggleUi() {
 // ========================================================
 // 💎 핵심 아키텍처: 관리자 분기 및 대화/퀴즈 모킹 데이터
 // ========================================================
-const SOCIETY_MOCK_DATA = {
+var SOCIETY_MOCK_DATA = {
   voca: [
     { word: "중심지", hint: "ㅈㅅㅈ", desc: "사람들이 활동을 하거나 여러 가지 필요를 해결하기 위해 자주 모이는 핵심적이고 중심이 되는 장소입니다. 도청, 시청, 큰 시장 등이 발달한 곳이랍니다!" },
     { word: "공공기관", hint: "ㄱㄱㄱㄱ", desc: "개인의 이익이 아니라 우리 동네 전체의 생활 편의와 복지를 위해 설립된 공공 보증 기관입니다. 예: 경찰서, 소방서, 동주민센터 등이 속해요." },
@@ -181,10 +181,13 @@ function initializeSocietyRoom() {
         }
     }
 
-    // 요정 대화 다듬기
-    let customGreeting = (typeof FAIRY_CONFIG !== 'undefined' ? FAIRY_CONFIG.greetings[currentProfile] : null) || "안녕! 보상을 얻으러 사회 탐험을 출발해볼까?";
-    if (isAdmin && typeof FAIRY_CONFIG !== 'undefined') {
-        customGreeting = FAIRY_CONFIG.greetings.admin;
+    // 요정 대화 다듬기 (Optional Chaining 적용)
+    let customGreeting = "안녕! 보상을 얻으러 사회 탐험을 출발해볼까?";
+    if (typeof FAIRY_CONFIG !== 'undefined' && FAIRY_CONFIG.greetings) {
+        customGreeting = FAIRY_CONFIG.greetings[currentProfile] || customGreeting;
+        if (isAdmin && FAIRY_CONFIG.greetings.admin) {
+            customGreeting = FAIRY_CONFIG.greetings.admin;
+        }
     }
     document.getElementById('fairySpeakerText').textContent = customGreeting;
 

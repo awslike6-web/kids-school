@@ -1,6 +1,6 @@
 // 📄 kids/config.js (민민이네 공부방 가문별 환경변수 및 코어 엔진 통제소)
 
-const APP_CONFIG = {
+var APP_CONFIG = {
     // 🔄 [핵심] 순정/개조 하이브리드 제어 스위치
     // true: 아빠 PM의 최신 코어 엔진을 실시간으로 다운로드하여 구동합니다. (자동 업데이트 모드 - 코딩 초보자 권장)
     // false: 내 깃허브(로컬)에 있는 core 폴더의 파일을 직접 참조하여 구동합니다. (독립 커스텀 모드 - 얼리어답터 권장)
@@ -53,6 +53,15 @@ function loadCoreScripts(localBasePath, scripts, onComplete) {
     }
 
     scripts.forEach(scriptName => {
+        // 이미 로드된 스크립트 중복 추가 방지
+        const alreadyLoaded = Array.from(document.scripts).some(s => s.src.includes(scriptName));
+        if (alreadyLoaded) {
+            console.log(`[엔진 최적화] ${scriptName} 은(는) 이미 로드되어 건너뜁니다.`);
+            loadedCount++;
+            if (loadedCount === scripts.length && onComplete) onComplete();
+            return;
+        }
+
         const script = document.createElement('script');
         script.src = basePath + scriptName;
         script.async = false; // 부품이 순서대로 조립되도록 강제 보장 (매우 중요)
@@ -63,7 +72,12 @@ function loadCoreScripts(localBasePath, scripts, onComplete) {
                 onComplete(); // 부품 조립이 다 끝나면 실행할 함수
             }
         };
-        script.onerror = () => console.error(`[엔진 오류] ${scriptName} 로드 실패. 경로를 확인하세요: ${script.src}`);
+        script.onerror = () => {
+            console.error(`[엔진 오류] ${scriptName} 로드 실패. 경로를 확인하세요: ${script.src}`);
+            // 오류가 나도 다음 스크립트 로드나 완료 콜백이 막히지 않도록 처리
+            loadedCount++;
+            if (loadedCount === scripts.length && onComplete) onComplete();
+        };
         
         document.head.appendChild(script);
     });

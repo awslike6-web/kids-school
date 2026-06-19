@@ -20,13 +20,13 @@ function initFairyChat(subject) {
         if (FAIRY_CONFIG[subject]) {
             config = {
                 name: FAIRY_CONFIG[subject].name || "요정 코코",
-                greeting: FAIRY_CONFIG[subject].greeting || (localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu),
+                greeting: FAIRY_CONFIG[subject].greeting || (FAIRY_CONFIG.greetings ? (localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu) : "안녕!"),
                 systemPrompt: FAIRY_CONFIG[subject].systemPrompt || "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정"
             };
         } else if (FAIRY_CONFIG.name) {
             config = {
                 name: FAIRY_CONFIG.name,
-                greeting: localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu,
+                greeting: FAIRY_CONFIG.greetings ? (localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu) : "안녕!",
                 systemPrompt: "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정"
             };
         }

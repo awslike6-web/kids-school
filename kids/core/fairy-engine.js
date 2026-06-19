@@ -1,7 +1,7 @@
 // kids/core/fairy-engine.js
 // 🧚‍♀️ 아나운서 요정 코코의 음성 합성(TTS) 제어 인공지능 엔진 (모바일 언락 가드 완벽 탑재)
 
-let currentUtterance = null;
+var currentUtterance = null;
 let pendingSpeech = null; // 사용자의 첫 상호작용 전까지 낭독 요청을 대기시키는 포켓
 let isSpeechUnlocked = false; // 브라우저 음성 합성 채널 해제 여부
 
