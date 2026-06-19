@@ -167,7 +167,7 @@
     <div class="profile-badge">
       <span id="userIcon">👨‍🚀</span> <span id="userName">로딩중...</span>
     </div>
-    <button class="exit-btn" onclick="location.href='math.html'">🔙 수학 탐험 본부</button>
+    <button class="exit-btn" onclick="window.exitRoom()">🔙 수학 탐험 본부</button>
   </div>
 
   <!-- 설정(메인) 화면 -->
@@ -242,11 +242,46 @@
   let focusedInput = null;
   window.wrongNotes = JSON.parse(localStorage.getItem(`minmin_math_wrong_${currentProfile}`)) || [];
 
+  let roomStartTime = new Date();
+  let isExiting = false;
+  window.currentSubject = "수학"; // 전역 관제탑을 위한 기본 과목 설정
+
   document.addEventListener("DOMContentLoaded", () => {
+    // 🚀 노션 관제탑 파이프라인 탑재
+    if (typeof loadCoreScripts === 'function') {
+        loadCoreScripts("../../core/", ["notion-helper.js"], () => {
+            console.log("🚀 노션 관제탑(notion-helper) 파이프라인 연결 완료!");
+        });
+    }
+
     const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
     const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
     document.getElementById('userName').textContent = `${name} 탐험대원`;
     document.getElementById('userIcon').textContent = icon;
+  });
+
+  // 🚪 학습 종료(exitRoom) 배선 및 학습 일지 전송
+  window.exitRoom = async function() {
+    if (isExiting) return;
+    isExiting = true;
+
+    const opNames = { add: '수학(덧셈 세로셈)', sub: '수학(뺄셈 세로셈)', mul: '수학(곱셈 세로셈)', div: '수학(나눗셈 세로셈)' };
+    const currentOpName = gameState.mode ? opNames[gameState.mode] : '수학(세로셈 메인)';
+
+    if (typeof sendStudyLogToNotion === 'function') {
+        await sendStudyLogToNotion({ subject: currentOpName });
+    }
+    
+    location.href = 'math.html';
+  };
+
+  // 🚨 돌발 이탈 방지 (블랙박스 기록)
+  window.addEventListener('pagehide', () => {
+      if (!isExiting && typeof sendStudyLogToNotion === 'function') {
+          const opNames = { add: '덧셈', sub: '뺄셈', mul: '곱셈', div: '나눗셈' };
+          const modeName = gameState.mode ? opNames[gameState.mode] : '기초';
+          sendStudyLogToNotion({ subject: `수학(세로셈_${modeName}_중도이탈)` });
+      }
   });
 
   function setFocus(el) {
@@ -591,14 +626,11 @@
     document.getElementById('r-detail').textContent = `10문제 중 ${gameState.correctCount}개 성공!`;
     showScreen('screen-result');
 
-    // 노션 보상 연동
-    if (gameState.correctCount > 0 && typeof loadCoreScripts !== 'undefined') {
-        loadCoreScripts("../../core/", ["notion-helper.js"], async () => {
-            if (typeof grantRewardAndShowUI === 'function') {
-                window.currentSubject = "수학";
-                await grantRewardAndShowUI(gameState.correctCount, false);
-            }
-        });
+    // 노션 보상 연동: 1타 2피 쌍끌이 모드 & MAX 자동 제한 캡 탑재
+    if (gameState.correctCount > 0 && typeof grantRewardAndShowUI === 'function') {
+        window.currentSubject = "수학";
+        // 'voca' 커스텀 타입을 던져서 [오늘 획득_수학]과 [용어 경험치_수학]을 실시간 동시 누적!
+        await grantRewardAndShowUI(gameState.correctCount, false, 'voca');
     }
   }
 </script>
