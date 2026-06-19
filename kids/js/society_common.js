@@ -436,6 +436,20 @@ function getChosung(str) {
     return result;
 }
 
+window.societyToggleOrder = function() {
+    societyVocaOrderType = (societyVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+    activeQuizIdx = 0; // 모드 변경 시 처음부터 다시 시작
+    const innerBody = document.getElementById('overlayInnerBody');
+    if(innerBody && selectedSocietyUnit) {
+        // 원래 전체 데이터에서 해당 단원만 다시 필터링해서 재시작
+        const finalRecords = allFetchedRecords.filter(r => 
+            (r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)) &&
+            String(r.level).trim() === selectedSocietyUnit
+        );
+        startMissionWithFilteredData(finalRecords, innerBody);
+    }
+};
+
 // ========================================================
 // 🖌️ 각 세부 파트별 학습 UI 렌더링 팩토리
 // ========================================================
@@ -482,14 +496,12 @@ function renderSectionUI(type, container) {
     if (type === 'voca') {
         screenWrapper.className += " quiz-card";
         
+        // 라디오 버튼 대신 현재 상태를 보여주고 누르면 전환되는 버튼 형태로 변경
         const orderToggleHtml = `
-            <div style="display:flex; justify-content:center; align-items:center; gap: 15px; margin-bottom: 20px; font-family:'Jua', sans-serif; background:#f8f9fa; padding:10px; border-radius:12px;">
-                <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size:1.1rem; color:var(--dark);">
-                    <input type="radio" name="societyVocaOrder" value="shuffle" ${societyVocaOrderType === 'shuffle' ? 'checked' : ''} onchange="window.societySetOrder(this.value)"> 🎲 랜덤 섞기
-                </label>
-                <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size:1.1rem; color:var(--dark);">
-                    <input type="radio" name="societyVocaOrder" value="sequence" ${societyVocaOrderType === 'sequence' ? 'checked' : ''} onchange="window.societySetOrder(this.value)"> ➡️ 순서대로 풀기
-                </label>
+            <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
+                <button onclick="window.societyToggleOrder()" style="padding: 8px 16px; font-size: 1rem; border-radius: 20px; border: 2px solid var(--primary); background: white; color: var(--primary); font-family: 'Jua', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    ${societyVocaOrderType === 'shuffle' ? '🎲 랜덤 섞기 모드 (클릭하여 순서대로 풀기로 변경)' : '➡️ 순서대로 풀기 모드 (클릭하여 랜덤 섞기로 변경)'}
+                </button>
             </div>
         `;
 
