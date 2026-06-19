@@ -169,7 +169,7 @@ body::before {
   body::before { display: none; }
   
   /* 불필요한 UI 전체 숨김 */
-  .top-bar, .numpad-container, .screen, .feedback-msg { display: none !important; }
+  .top-bar, .numpad-container, .screen, .feedback-msg, #fairy-widget, .fairy-chat-panel { display: none !important; }
   
   #print-area { 
       display: grid !important; 
@@ -180,11 +180,18 @@ body::before {
       box-sizing: border-box;
       justify-items: center;
       align-items: center;
+      color: #000000 !important; /* 텍스트 진하게 강제 */
+  }
+  
+  #print-area * {
+      color: #000000 !important; /* 내부의 모든 텍스트도 강제 검은색 처리 */
+      box-shadow: none !important; /* 네온/그림자 효과 제거 */
   }
   
   .v-board, .div-board { 
       box-shadow: none !important; 
-      border: 2px solid #ccc !important; 
+      border: 1px solid #999 !important; 
+      background: transparent !important;
       break-inside: avoid; 
       padding: 10px 15px;
       margin: 0 auto;
@@ -196,8 +203,8 @@ body::before {
       background: transparent !important; 
       color: transparent !important; 
   }
-  .grid-input::placeholder { color: transparent; }
-  .cell-carry { border: 1px dashed #ccc !important; }
+  .grid-input::placeholder { color: transparent !important; }
+  .cell-carry { border: 1px dashed #999 !important; }
   
   .print-title { 
       grid-column: span 2; 
@@ -205,8 +212,9 @@ body::before {
       font-size: 2.5rem; 
       text-align: center; 
       margin-bottom: 20px; 
-      border-bottom: 2px solid #000; 
+      border-bottom: 2px solid #000 !important; 
       padding-bottom: 10px; 
+      color: #000000 !important; /* 메인 타이틀 강제 검은색 */
   }
   
   .print-item-wrapper { 

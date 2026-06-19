@@ -293,13 +293,20 @@ body.theme--slime .spinner-circle, body.theme--hideout .spinner-circle {
   body::before { display: none; }
   
   /* 불필요한 UI 전체 숨김 */
-  .top-action-bar, .main-header-card, .society-grid, .fairy-live-dock, .society-overlay, .fairy-overlay { display: none !important; }
+  .top-action-bar, .main-header-card, .society-grid, .fairy-live-dock, .society-overlay, .fairy-overlay, #fairy-widget, .fairy-chat-panel { display: none !important; }
   
   #print-area { 
       display: block !important; 
       width: 100%; 
       padding: 0px; 
       box-sizing: border-box;
+      color: #000000 !important;
+  }
+  
+  #print-area * {
+      color: #000000 !important; /* 모든 텍스트 강제 검은색 */
+      box-shadow: none !important; /* 그림자 효과 제거 */
+      text-shadow: none !important;
   }
   
   .print-title { 
@@ -307,8 +314,9 @@ body.theme--slime .spinner-circle, body.theme--hideout .spinner-circle {
       font-size: 2rem; 
       text-align: center; 
       margin-bottom: 20px; 
-      border-bottom: 2px solid #000; 
+      border-bottom: 2px solid #000 !important; 
       padding-bottom: 10px; 
+      color: #000000 !important;
   }
   
   .print-voca-list {
@@ -319,7 +327,8 @@ body.theme--slime .spinner-circle, body.theme--hideout .spinner-circle {
   }
 
   .print-voca-item {
-      border: 1.5px solid #ccc;
+      border: 1px solid #999 !important; /* 테두리를 조금 더 명확한 회색으로 변경 */
+      background: transparent !important; /* 배경 투명하게 (흰색) */
       border-radius: 10px;
       padding: 15px;
       page-break-inside: avoid;
