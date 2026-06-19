@@ -44,6 +44,7 @@ function parseVocaPage(page) {
         subject: p["과목"]?.multi_select?.map(item => item.name) || [],
         target: p["학생"]?.multi_select?.map(item => item.name) || [],
         isAchieved: p["달성"]?.checkbox || false,
+        isMastered: p["달성"]?.checkbox || false, // '달성' 필드 기반 마스터 여부 동기화
         areaZone: p["영역 분류"]?.select?.name || "",
         hint: p["초성힌트"]?.rich_text?.[0]?.plain_text || "",
         quiz: p["퀴즈제시"]?.rich_text?.[0]?.plain_text || ""
@@ -498,4 +499,35 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     }
     return false;
   }
+}
+
+/**
+ * 용어사전(VOCA DB)의 '달성(체크박스)' 필드 갱신 (마스터 연동용)
+ */
+async function updateVocaMasteryStatus(pageId, isMastered) {
+    if (!pageId) return false;
+    // 관리자 모드이거나 로컬 런타임이면 무시
+    const savedName = localStorage.getItem('currentUserName');
+    if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
+        console.log(`🛠️ [마스터 프리패스] 관리자 모드이므로 노션 마스터 체크 갱신을 생략합니다.`);
+        return true;
+    }
+    
+    try {
+        const res = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                properties: {
+                    "달성": { checkbox: isMastered }
+                }
+            })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        console.log(`✅ [마스터 연동 완료] 페이지(${pageId}) 달성 상태가 ${isMastered}로 갱신되었습니다.`);
+        return true;
+    } catch (e) {
+        console.error("❌ VOCA 달성 상태 업데이트 실패:", e);
+        return false;
+    }
 }

@@ -389,7 +389,7 @@ function startMissionWithFilteredData(records, innerBody) {
         const hintStr = record.hint || getChosung(titleStr);
 
         if (currentMissionType === 'voca') {
-            return { word: titleStr, hint: hintStr, desc: descStr };
+            return { word: titleStr, hint: hintStr, desc: descStr, pageId: record.pageId, isMastered: record.isMastered };
         } else if (currentMissionType === 'chart') {
             return {
                 title: titleStr, img: imgUrl, desc: descStr,
@@ -405,8 +405,13 @@ function startMissionWithFilteredData(records, innerBody) {
     if (currentMissionType === 'voca') {
         // 용어방 마스터 기록 로드
         societyVocaMasterCountMap = JSON.parse(localStorage.getItem(`society_voca_master_${currentUserName}`) || '{}');
-        // 마스터(3회 이상 정답)된 단어는 필터링
-        activeSectionData = parsed.filter(item => (societyVocaMasterCountMap[item.word] || 0) < 3);
+        
+        // 💡 마스터 필터링: 노션 DB에서 '달성' 체크된 단어(isMastered) + 로컬에서 방금 3번 맞춘 단어 동시 제외
+        activeSectionData = parsed.filter(item => {
+            const isNotionMastered = item.isMastered === true;
+            const isLocalMastered = (societyVocaMasterCountMap[item.word] || 0) >= 3;
+            return !isNotionMastered && !isLocalMastered;
+        });
         
         // 필터링 후 섞기 적용 (기본값)
         if (societyVocaOrderType === "shuffle") {
@@ -456,10 +461,30 @@ window.societyToggleOrder = function() {
 // ========================================================
 // 🖌️ 각 세부 파트별 학습 UI 렌더링 팩토리
 // ========================================================
-window.resetSocietyVocaMasterAndReload = function() {
-    if (confirm("정말로 모든 용어 마스터(3회 정답) 기록을 지우고 처음부터 다시 시작할까요?")) {
+window.resetSocietyVocaMasterAndReload = async function() {
+    if (confirm("정말로 이 단원의 모든 용어 마스터(3회 정답) 기록을 지우고 처음부터 다시 시작할까요?")) {
+        const innerBody = document.getElementById('overlayInnerBody');
+        if(innerBody) innerBody.innerHTML = "<div style='text-align:center; padding:40px;'>노션 데이터를 초기화 중입니다... ⏳</div>";
+        
+        // 1. 로컬 카운트 스토리지 초기화
         localStorage.removeItem(`society_voca_master_${currentUserName}`);
-        alert("학습 기록이 초기화되었습니다! 다시 신나게 풀어볼까요?");
+        
+        // 2. 현재 선택된 단원 내에서 노션 [달성]이 true로 되어있는 레코드 추출
+        const recordsToReset = allFetchedRecords.filter(r => 
+            (r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)) &&
+            String(r.level).trim() === selectedSocietyUnit &&
+            r.isMastered === true
+        );
+
+        // 3. 노션 일괄 PATCH 처리 (달성 해제)
+        if (typeof updateVocaMasteryStatus === 'function') {
+            for (const r of recordsToReset) {
+                await updateVocaMasteryStatus(r.pageId, false);
+                r.isMastered = false; // 동기화를 위해 메모리 상의 원본 데이터도 해제
+            }
+        }
+        
+        alert("학습 기록이 노션에서 완전히 초기화되었습니다! 다시 신나게 풀어볼까요?");
         closeMissionView();
         setTimeout(() => openMissionView('voca'), 300);
     }
@@ -662,8 +687,18 @@ function verifyVocaAnswer() {
         speakFairyTTS("정답이야! 아주 잘했어!");
         
         // 마스터 카운트 증가 로직
-        societyVocaMasterCountMap[activeSectionData[activeQuizIdx].word] = (societyVocaMasterCountMap[activeSectionData[activeQuizIdx].word] || 0) + 1;
+        const wordKey = activeSectionData[activeQuizIdx].word;
+        societyVocaMasterCountMap[wordKey] = (societyVocaMasterCountMap[wordKey] || 0) + 1;
         localStorage.setItem(`society_voca_master_${currentUserName}`, JSON.stringify(societyVocaMasterCountMap));
+
+        // 💡 3번 맞추면 노션 DB의 [달성] 체크박스 true 갱신
+        if (societyVocaMasterCountMap[wordKey] >= 3) {
+            const pageId = activeSectionData[activeQuizIdx].pageId;
+            if (typeof updateVocaMasteryStatus === 'function') {
+                updateVocaMasteryStatus(pageId, true);
+                activeSectionData[activeQuizIdx].isMastered = true; // 로컬 메모리도 달성 상태로 변경
+            }
+        }
 
         setTimeout(() => skipToNextQuiz('voca'), 1200);
     } else {
