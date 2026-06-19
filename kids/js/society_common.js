@@ -813,3 +813,54 @@ window.addEventListener("beforeunload", () => {
         sendStudyLogToNotion({ subject: "사회" });
     }
 });
+
+// ========================================================
+// 🖨️ 사회방 인쇄 로직 (printSocietySummary)
+// ========================================================
+window.printSocietySummary = async function() {
+    const printArea = document.getElementById('print-area');
+    if (!printArea) return;
+    
+    let printData = SOCIETY_MOCK_DATA.voca;
+    
+    // 만약 한 번이라도 데이터를 긁어온 기록(allFetchedRecords)이 있다면 그걸 활용
+    if (allFetchedRecords && allFetchedRecords.length > 0) {
+        // 사회 용어방에 해당하는 데이터만 추출 (단어와 설명이 있는 객체 형태)
+        const vocaRecords = allFetchedRecords.filter(r => r.word && r.desc);
+        if (vocaRecords.length > 0) {
+            printData = vocaRecords;
+        }
+    } else {
+        // 아직 긁어오지 않았다면 실시간으로 백그라운드 스캔 시도!
+        try {
+            const records = await fetchVocaFromNotion({
+                subject: "사회", 
+                areaZone: "용어방",
+                useServerFilter: true,
+                filterByStudent: !isAdmin 
+            });
+            if (records && records.length > 0) {
+                printData = records.filter(r => r.word && r.desc);
+            }
+        } catch (e) {
+            console.warn("인쇄용 노션 데이터 로드 실패, 기본 데이터 출력", e);
+        }
+    }
+    
+    let html = `<div class="print-title">민민 우주 정거장 🚀 - 오늘의 사회 핵심 요약집</div>`;
+    html += `<div class="print-voca-list">`;
+    
+    printData.forEach(item => {
+        html += `
+            <div class="print-voca-item">
+                <div class="print-voca-word">📖 ${item.word}</div>
+                <div class="print-voca-desc">${item.desc}</div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    
+    printArea.innerHTML = html;
+    window.print();
+};

@@ -276,3 +276,66 @@ body.theme--slime .spinner-circle, body.theme--hideout .spinner-circle {
     font-size: 0.75rem !important;
   }
 }
+
+/* =======================================
+   🖨️ 인쇄 모드 전용 레이아웃 (@media print)
+   ======================================= */
+#print-area { display: none; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  body { 
+      background: white !important; 
+      color: black; 
+      margin: 10mm 5mm 5mm 5mm !important; 
+      padding: 0 !important;
+  }
+  body::before { display: none; }
+  
+  /* 불필요한 UI 전체 숨김 */
+  .top-action-bar, .main-header-card, .society-grid, .fairy-live-dock, .society-overlay, .fairy-overlay { display: none !important; }
+  
+  #print-area { 
+      display: block !important; 
+      width: 100%; 
+      padding: 0px; 
+      box-sizing: border-box;
+  }
+  
+  .print-title { 
+      font-family: 'Jua', sans-serif; 
+      font-size: 2rem; 
+      text-align: center; 
+      margin-bottom: 20px; 
+      border-bottom: 2px solid #000; 
+      padding-bottom: 10px; 
+  }
+  
+  .print-voca-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%;
+  }
+
+  .print-voca-item {
+      border: 1.5px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      page-break-inside: avoid;
+  }
+
+  .print-voca-word {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 8px;
+  }
+
+  .print-voca-desc {
+      font-size: 1.1rem;
+      color: #333;
+      line-height: 1.5;
+      word-break: keep-all;
+  }
+}

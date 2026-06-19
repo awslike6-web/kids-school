@@ -17,6 +17,9 @@
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
+      <button class="back-to-lobby-btn" id="printSummaryBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="printSocietySummary()">
+        🖨️ 오늘의 사회 요약집 인쇄하기
+      </button>
       <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
     </div>
   </div>
@@ -78,6 +81,8 @@
       </div>
   </div>
 </div>
+
+<div id="print-area"></div>
 
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
