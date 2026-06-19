@@ -287,6 +287,12 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
       body: JSON.stringify({ filter: { property: "이름", title: { equals: userName } } }) 
     });
     
+    if (!response.ok) {
+        const queryErr = await response.text();
+        console.error("인벤토리 조회 쿼리 실패:", queryErr);
+        throw new Error(`인벤토리 조회 실패 (${response.status})`);
+    }
+
     const data = await response.json(); 
     if (!data.results || data.results.length === 0) throw new Error("학생 인벤토리 없음");
     
@@ -355,14 +361,23 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
         updateProps[levelPropName] = { number: currLevelInfo.level };
     }
     
-    if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth }; 
+    if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth };
     else updateProps["슬라임 파츠 개수"] = { number: currentWealth };
 
+    console.log(`[노션 보상 업데이트 시도] DB_ID: ${INVENTORY_DB_ID}, PAGE_ID: ${page.id}`);
+    console.log("업데이트할 데이터:", JSON.stringify(updateProps, null, 2));
+
     // 노션으로 쏘기!
-    await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
+    const patchRes = await fetch(`${PROXY_URL}/v1/pages/${page.id}`, { 
       method: "PATCH", headers: { "Content-Type": "application/json" }, 
       body: JSON.stringify({ properties: updateProps }) 
     });
+    
+    if (!patchRes.ok) {
+        const errText = await patchRes.text();
+        console.error("노션 PATCH 에러 응답:", errText);
+        throw new Error(`노션 업데이트 실패 (상태: ${patchRes.status}): ${errText}`);
+    }
     
     if (!isSilent) {
         let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
@@ -427,6 +442,29 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     return true;
   } catch (err) {
     console.error("❌ 보상 저장 오류:", err);
+    if (!isSilent) {
+        if (typeof updateRewardModal === 'function') {
+            updateRewardModal(`
+                <div style="color: #ff073a; font-weight: bold; font-size: 1.1rem; line-height: 1.5;">
+                ❌ 노션 보상 저장 실패!<br>
+                <span style="font-size:0.9rem; color:#555;">(노션 DB에 칼럼이 없거나 잘못되었을 확률이 높습니다)</span><br><br>
+                💡 아빠! 인벤토리 DB에 아래 이름의 <b>[숫자] 속성(칼럼)</b>들이<br>모두 띄어쓰기까지 정확하게 만들어져 있는지 확인해주세요!<br>
+                <div style="background:#fff; padding:10px; border-radius:8px; margin-top:10px; color:#333; font-size:0.95rem; text-align:left;">
+                    - ${expPropName}<br>
+                    - ${levelPropName ? levelPropName : '(레벨 칼럼은 안 씀)'}<br>
+                    - ${dailyPropName}<br>
+                    - 소원권 개수<br>
+                    - 다이아몬드 개수<br>
+                    - 슬라임 파츠 개수
+                </div><br>
+                자세한 에러 메시지는 개발자 도구(F12) 콘솔창에 빨간 글씨로 나옵니다.<br><br>
+                <button onclick="location.href=window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'">로비로 나가기</button>
+                </div>
+            `);
+        } else {
+            alert("❌ 보상 저장 실패! 노션 DB에 칼럼이 부족합니다. (F12 콘솔창 확인)");
+        }
+    }
     return false;
   }
 }

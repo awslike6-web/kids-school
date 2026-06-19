@@ -1,7 +1,7 @@
 // kids/js/korean_common.js
 // 🔗 국어 멀티버스 공용 관제탑 엔진 V8 (문장방 단계별 밸런싱 패치 및 전역 코어 연동 탑재)
 
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
+// const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
 const MAX_DAILY_REWARD = 100; // 🛑 하루 최대 획득 가능한 총 다이아/파츠 개수
 
 // 🚀 코어 관제탑(window)이 세탁해 둔 글로벌 상태를 그대로 이어받습니다!
