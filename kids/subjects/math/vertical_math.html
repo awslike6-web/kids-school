@@ -19,21 +19,32 @@
   <!-- 설정(메인) 화면 -->
   <div class="screen active" id="screen-setup">
     <div class="logo-title">통합 세로셈 훈련소 📝</div>
-    <div style="color: var(--muted); text-align: center; margin-bottom: 30px;">원하는 연산을 선택하면 난이도에 맞는 동적 그리드가 생성됩니다!</div>
+    <div style="color: var(--muted); text-align: center; margin-bottom: 30px;">원하는 연산을 선택하고 난이도를 골라보세요!</div>
     
     <div class="mission-grid">
-      <div class="mission-card mc-add" onclick="startGame('add')">
-        <div style="font-size: 2.5rem;">➕</div>덧셈 기지<br><span style="font-size:1rem;color:#ccc;">(3자리 + 3자리)</span>
+      <div class="mission-card mc-add" onclick="showDifficultyModal('add')">
+        <div style="font-size: 2.5rem;">➕</div>덧셈 기지<br><span style="font-size:1rem;color:#ccc;">난이도 선택</span>
       </div>
-      <div class="mission-card mc-sub" onclick="startGame('sub')">
-        <div style="font-size: 2.5rem;">➖</div>뺄셈 기지<br><span style="font-size:1rem;color:#ccc;">(3자리 - 2자리)</span>
+      <div class="mission-card mc-sub" onclick="showDifficultyModal('sub')">
+        <div style="font-size: 2.5rem;">➖</div>뺄셈 기지<br><span style="font-size:1rem;color:#ccc;">난이도 선택</span>
       </div>
-      <div class="mission-card mc-mul" onclick="startGame('mul')">
-        <div style="font-size: 2.5rem;">✖️</div>곱셈 기지<br><span style="font-size:1rem;color:#ccc;">(3자리 x 2자리)</span>
+      <div class="mission-card mc-mul" onclick="showDifficultyModal('mul')">
+        <div style="font-size: 2.5rem;">✖️</div>곱셈 기지<br><span style="font-size:1rem;color:#ccc;">난이도 선택</span>
       </div>
-      <div class="mission-card mc-div" onclick="startGame('div')">
-        <div style="font-size: 2.5rem;">➗</div>나눗셈 기지<br><span style="font-size:1rem;color:#ccc;">(동적 나눗셈)</span>
+      <div class="mission-card mc-div" onclick="showDifficultyModal('div')">
+        <div style="font-size: 2.5rem;">➗</div>나눗셈 기지<br><span style="font-size:1rem;color:#ccc;">난이도 선택</span>
       </div>
+    </div>
+  </div>
+
+  <!-- 난이도 선택 모달 -->
+  <div id="difficulty-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:var(--card); padding:30px; border-radius:20px; text-align:center; width:90%; max-width:400px; border:2px solid var(--border);">
+      <h2 id="diff-modal-title" style="font-family:'Jua'; font-size:2rem; margin-bottom:20px;">난이도 선택</h2>
+      <div id="diff-buttons" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+        <!-- 버튼들이 동적으로 들어갈 자리 -->
+      </div>
+      <button onclick="closeDifficultyModal()" style="padding:10px 20px; border-radius:10px; border:none; background:#8b949e; color:white; font-family:'Jua'; font-size:1.2rem; cursor:pointer;">취소</button>
     </div>
   </div>
 

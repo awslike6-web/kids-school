@@ -89,39 +89,122 @@ window.pressClear = function() {
   focusedInput.value = '';
 }
 
+const DIFFICULTY_LEVELS = {
+  add: [
+    { id: '1_1', label: '1자리 + 1자리', aLen: 1, bLen: 1 },
+    { id: '2_1', label: '2자리 + 1자리', aLen: 2, bLen: 1 },
+    { id: '2_2', label: '2자리 + 2자리', aLen: 2, bLen: 2 },
+    { id: '3_2', label: '3자리 + 2자리', aLen: 3, bLen: 2 },
+    { id: '3_3', label: '3자리 + 3자리', aLen: 3, bLen: 3 },
+  ],
+  sub: [
+    { id: '1_1', label: '1자리 - 1자리', aLen: 1, bLen: 1 },
+    { id: '2_1', label: '2자리 - 1자리', aLen: 2, bLen: 1 },
+    { id: '2_2', label: '2자리 - 2자리', aLen: 2, bLen: 2 },
+    { id: '3_2', label: '3자리 - 2자리', aLen: 3, bLen: 2 },
+    { id: '3_3', label: '3자리 - 3자리', aLen: 3, bLen: 3 },
+  ],
+  mul: [
+    { id: '1_1', label: '1자리 x 1자리', aLen: 1, bLen: 1 },
+    { id: '2_1', label: '2자리 x 1자리', aLen: 2, bLen: 1 },
+    { id: '2_2', label: '2자리 x 2자리', aLen: 2, bLen: 2 },
+    { id: '3_1', label: '3자리 x 1자리', aLen: 3, bLen: 1 },
+    { id: '3_2', label: '3자리 x 2자리', aLen: 3, bLen: 2 },
+  ],
+  div: [
+    { id: '2_1', label: '2자리 ÷ 1자리', aLen: 2, bLen: 1 },
+    { id: '3_1', label: '3자리 ÷ 1자리', aLen: 3, bLen: 1 },
+    { id: '3_2', label: '3자리 ÷ 2자리', aLen: 3, bLen: 2 },
+  ]
+};
+
+window.showDifficultyModal = function(mode) {
+  const modal = document.getElementById('difficulty-modal');
+  const btnContainer = document.getElementById('diff-buttons');
+  const title = document.getElementById('diff-modal-title');
+  
+  const titles = { add: '덧셈 기지', sub: '뺄셈 기지', mul: '곱셈 기지', div: '나눗셈 기지' };
+  title.textContent = titles[mode];
+  btnContainer.innerHTML = '';
+  
+  DIFFICULTY_LEVELS[mode].forEach(lvl => {
+    const btn = document.createElement('button');
+    btn.textContent = lvl.label;
+    btn.style.cssText = "padding:15px; border-radius:12px; border:2px solid var(--sky); background:white; font-family:'Jua'; font-size:1.4rem; cursor:pointer; color:var(--dark); transition:0.2s;";
+    btn.onmouseover = () => btn.style.background = '#e0f7fa';
+    btn.onmouseout = () => btn.style.background = 'white';
+    btn.onclick = () => {
+      closeDifficultyModal();
+      startGame(mode, lvl);
+    };
+    btnContainer.appendChild(btn);
+  });
+  
+  modal.style.display = 'flex';
+}
+
+window.closeDifficultyModal = function() {
+  document.getElementById('difficulty-modal').style.display = 'none';
+}
+
 // 문제 생성기 (동적 그리드를 뽐내기 위해 자릿수 강화)
-function generateQuestions(mode) {
+function generateQuestions(mode, lvl) {
   const qs = [];
   for(let i=0; i<10; i++) {
     let a, b, ans, rem = 0;
+    
+    const getNum = (len) => {
+        if (len === 1) return Math.floor(Math.random() * 9) + 1; // 1~9
+        if (len === 2) return Math.floor(Math.random() * 90) + 10; // 10~99
+        if (len === 3) return Math.floor(Math.random() * 900) + 100; // 100~999
+        return 1;
+    };
+
     if (mode === 'add') {
-      a = Math.floor(Math.random() * 800) + 111; // 3자리
-      b = Math.floor(Math.random() * 800) + 111; // 3자리
+      a = getNum(lvl.aLen);
+      b = getNum(lvl.bLen);
       ans = a + b;
     } else if (mode === 'sub') {
-      a = Math.floor(Math.random() * 800) + 200; // 3자리
-      b = Math.floor(Math.random() * (a - 100)) + 100; // 2~3자리
+      a = getNum(lvl.aLen);
+      b = getNum(lvl.bLen);
+      if (a < b) { let temp = a; a = b; b = temp; } // 항상 큰 수에서 작은 수를 빼도록
       ans = a - b;
     } else if (mode === 'mul') {
-      a = Math.floor(Math.random() * 800) + 111; // 3자리
-      b = Math.floor(Math.random() * 80) + 11;   // 2자리
+      a = getNum(lvl.aLen);
+      b = getNum(lvl.bLen);
       ans = a * b;
     } else if (mode === 'div') {
-      b = Math.floor(Math.random() * 80) + 11; // 2자리 제수
-      ans = Math.floor(Math.random() * 8) + 2; // 1자리 몫
-      rem = Math.floor(Math.random() * b);     // 나머지
-      a = (b * ans) + rem;                     // 피제수 계산
+      b = getNum(lvl.bLen);
+      if (b === 1 && Math.random() > 0.3) b = Math.floor(Math.random() * 8) + 2; // 1로 나누는 경우 줄임
+      const minA = Math.pow(10, lvl.aLen - 1);
+      const maxA = Math.pow(10, lvl.aLen) - 1;
+      
+      const maxQ = Math.floor(maxA / b);
+      const minQ = Math.ceil(minA / b);
+      
+      if (maxQ < minQ) {
+         a = getNum(lvl.aLen);
+         ans = Math.floor(a / b);
+         rem = a % b;
+      } else {
+         ans = Math.floor(Math.random() * (maxQ - minQ + 1)) + minQ;
+         rem = Math.floor(Math.random() * b);
+         a = (ans * b) + rem;
+         if (a > maxA) { a = ans * b; rem = 0; }
+      }
     }
     qs.push({ numA: a, numB: b, answer: ans, rem });
   }
   return qs;
 }
 
-window.startGame = function(mode) {
-  gameState = { mode, questions: generateQuestions(mode), current: 0, correctCount: 0 };
+window.startGame = function(mode, lvl) {
+  if (!lvl) lvl = DIFFICULTY_LEVELS[mode][DIFFICULTY_LEVELS[mode].length - 1]; // 기본값: 가장 어려운 난이도
+
+  gameState = { mode, lvl, questions: generateQuestions(mode, lvl), current: 0, correctCount: 0 };
   
-  const titles = { add: '➕ 덧셈 기지 (3자리+3자리)', sub: '➖ 뺄셈 기지 (3자리-2자리)', mul: '✖️ 곱셈 기지 (3자리x2자리)', div: '➗ 나눗셈 기지 (동적 나눗셈)' };
-  document.getElementById('game-title').textContent = titles[mode];
+  const titles = { add: '➕ 덧셈 기지', sub: '➖ 뺄셈 기지', mul: '✖️ 곱셈 기지', div: '➗ 나눗셈 기지' };
+  document.getElementById('game-title').innerHTML = `${titles[mode]} <span style="font-size:1rem;color:#ccc;font-weight:normal;">(${lvl.label})</span>`;
   
   showScreen('screen-game');
   nextQuestion();
@@ -401,8 +484,9 @@ window.printWorksheet = function() {
     const printArea = document.getElementById('print-area');
     const opNames = { add: '덧셈', sub: '뺄셈', mul: '곱셈', div: '나눗셈' };
     const currentOpName = gameState.mode ? opNames[gameState.mode] : '세로셈';
+    const lvlName = gameState.lvl ? `<span style="font-size: 1.5rem; color: #555;">(${gameState.lvl.label})</span>` : '';
 
-    let html = `<div class="print-title">민민 우주 정거장 🚀 - 오늘의 ${currentOpName} 훈련</div>`;
+    let html = `<div class="print-title">민민 우주 정거장 🚀 - 오늘의 ${currentOpName} 훈련 ${lvlName}</div>`;
     
     gameState.questions.forEach((q, idx) => {
         html += `<div class="print-item-wrapper">
