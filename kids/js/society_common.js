@@ -681,14 +681,6 @@ async function triggerAwardDispense(amount, type) {
 // 퇴장 시 일지 작성 자동 안전 배선
 window.addEventListener("beforeunload", () => {
     if (!isAdmin && typeof sendStudyLogToNotion === 'function') {
-        const userName = currentProfile === 'son' ? '민수' : '민서';
-        sendStudyLogToNotion({
-            childName: userName,
-            subject: "사회",
-            startTime: new Date().toISOString(),
-            endTime: new Date().toISOString(),
-            durationMinutes: 5,
-            errorReport: "사회 섭렵 돋보기 완료"
-        });
+        sendStudyLogToNotion({ subject: "사회" });
     }
 });

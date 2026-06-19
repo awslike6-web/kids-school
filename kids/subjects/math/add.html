@@ -512,7 +512,7 @@
             document.getElementById('r-detail').innerHTML = `10문제 중 ${gameState.correctCount}개 덧셈 퀘스트 성공!`;
             window.showScreen('screen-result');
             if (gameState.correctCount > 0) {
-                await saveRewardToNotion(gameState.correctCount);
+                await grantRewardAndShowUI(gameState.correctCount, false);
             }
         }
 
@@ -537,29 +537,10 @@
             const roomEndTime = new Date(); 
 
             const timeDiff = roomEndTime - roomStartTime; 
-            let calculatedMinutes = Math.floor(timeDiff / 60000);
-            if (calculatedMinutes < 1) calculatedMinutes = 1; 
-
-            const currentErrorReport = wrongNotes.length > 0 
-                ? wrongNotes.map(q => q.text).join(', ') 
-                : "오답 없음";
-
-            const currentWordFairy = 0;
-
-            const currentChildName = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
-
-            const success = await sendStudyLogToNotion({
-                childName: currentChildName, 
-                subject: "수학(덧셈)", 
-                startTime: roomStartTime.toISOString(),  
-                endTime: roomEndTime.toISOString(),      
-                durationMinutes: calculatedMinutes,      
-                errorReport: currentErrorReport,         
-                wordFairyCount: currentWordFairy
-            });
+            const success = await sendStudyLogToNotion({ subject: "수학(덧셈)" });
 
             if (success) {
-                console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료! 로비로 이동합니다.`);
+                console.log(`⏱️ 공부 완료! 로비로 이동합니다.`);
                 location.href = 'math.html'; 
             } else {
                 alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다.");

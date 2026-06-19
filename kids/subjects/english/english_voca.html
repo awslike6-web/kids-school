@@ -458,16 +458,7 @@ async function nextQuestion() {
        
        // 📝 학습 일지 기록 헬퍼 호출
        if (typeof sendStudyLogToNotion === 'function') {
-           const errorReport = wrongWords.length > 0 ? wrongWords.map(w => w.word).join(', ') : "오답 없음";
-           await sendStudyLogToNotion({
-               childName: window.currentProfile === 'son' ? '민수' : '민서', 
-               subject: '영어(영단어 퀴즈)', 
-               startTime: new Date(Date.now() - 3 * 60000).toISOString(),
-               endTime: new Date().toISOString(),
-               durationMinutes: 3, 
-               errorReport: errorReport, 
-               wordFairyCount: 0
-           });
+           await sendStudyLogToNotion({ subject: '영어(영단어 퀴즈)' });
        }
 
        // 💎 전역 만능 보상 지급 헬퍼 호출 (구형 saveRewardToNotion 완전 삭제)

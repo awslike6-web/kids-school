@@ -589,8 +589,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`; document.getElementById('r-detail').textContent = msg;
 
             if (correctCount > 0) {
-                if (typeof saveRewardToNotion === 'function') {
-                    await saveRewardToNotion(correctCount, 'r-detail');
+                if (typeof grantRewardAndShowUI === 'function') {
+                    await grantRewardAndShowUI(correctCount, false);
                 }
             }
         }
@@ -615,26 +615,13 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             const roomEndTime = new Date(); 
 
             const timeDiff = roomEndTime - roomStartTime; 
-            let calculatedMinutes = Math.floor(timeDiff / 60000);
-            if (calculatedMinutes < 1) calculatedMinutes = 1; 
-
-            const currentErrorReport = `구구단 퀴즈 ${qScore}점 달성`;
-            const currentWordFairy = 0;
-
-            const currentChildName = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
-
-            const success = await sendStudyLogToNotion({
-                childName: currentChildName, 
-                subject: "수학(구구단)", 
-                startTime: roomStartTime.toISOString(),  
-                endTime: roomEndTime.toISOString(),      
-                durationMinutes: calculatedMinutes,      
-                errorReport: currentErrorReport,         
-                wordFairyCount: currentWordFairy         
+            const success = await sendStudyLogToNotion({ 
+                subject: "수학(구구단)",
+                errorReport: `구구단 퀴즈 ${qScore}점 달성`
             });
 
             if (success) {
-                console.log(`⏱️ 총 ${calculatedMinutes}분 공부 완료! 로비로 이동합니다.`);
+                console.log(`⏱️ 공부 완료! 로비로 이동합니다.`);
                 location.href = 'math.html'; 
             } else {
                 alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다.");

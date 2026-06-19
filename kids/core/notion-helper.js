@@ -149,15 +149,42 @@ async function fetchVocaFromNotion(options = {}) {
     }
 }
 
+// 🕒 전역 학습 시작 시간 자동 기록
+window.roomStartTime = window.roomStartTime || new Date();
+
 /**
- * 아버님의 새로운 노션 DB 구조에 맞춰 학습 일지를 생성하는 함수
+ * 아버님의 새로운 노션 DB 구조에 맞춰 학습 일지를 생성하는 통합 함수
+ * 매개변수를 생략해도 현재 환경(window 객체)을 바탕으로 자동으로 채웁니다.
  */
-async function sendStudyLogToNotion({ childName, subject, startTime, endTime, durationMinutes, errorReport, wordFairyCount = 0 }) {
+async function sendStudyLogToNotion(options = {}) {
+    const childName = options.childName || (localStorage.getItem('currentUser') === 'son' ? '민수' : '민서');
+    const subject = options.subject || window.currentSubject || "미상 과목";
+    const startTime = options.startTime || window.roomStartTime.toISOString();
+    const endTime = options.endTime || new Date().toISOString();
+    
+    // 소요시간 자동 연산
+    let durationMinutes = options.durationMinutes;
+    if (durationMinutes === undefined) {
+        const timeDiff = new Date(endTime) - new Date(startTime);
+        durationMinutes = Math.floor(timeDiff / 60000);
+        if (durationMinutes < 1) durationMinutes = 1;
+    }
+    
+    // 오답 리포트 자동 수집
+    let errorReport = options.errorReport;
+    if (errorReport === undefined) {
+        // 영어(engWrongNotes) 또는 국어/수학(wrongNotes) 배열 호환
+        const targetNotes = window.engWrongNotes || window.wrongNotes || [];
+        errorReport = targetNotes.length > 0 ? targetNotes.map(q => q.word || q.text || q).join(', ') : "오답 없음";
+    }
+    
+    const wordFairyCount = options.wordFairyCount || 0;
+
     console.log(`🚀 [학습일지 배달 시작] 학생: ${childName} | 과목: ${subject}`);
 
     // 💡 [핵심 방어막] 현재 로그인한 사람이 아빠나 엄마인지 실시간 체크!
     const savedName = localStorage.getItem('currentUserName');
-    if (savedName === '아빠' || savedName === '엄마') {
+    if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
         console.log(`🛠️ [관리자 시뮬레이터 가동] ${savedName} 모드이므로 노션 서버 전송을 건너뛰고 프리패스합니다!`);
         return true; 
     }
@@ -277,12 +304,24 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
         localStorage.setItem(lastDateKey, todayStr);
     }
 
-    // 💡 3. 일일 상한선 체크 브레이크
+    // 💡 3. 일일 상한선 (부분 지급 지원)
+    let allowedCurrency = earned;
+    let isLimitReached = false;
     if (todayEarned + earned > DAILY_LIMIT) {
+        allowedCurrency = Math.max(0, DAILY_LIMIT - todayEarned);
+        isLimitReached = true;
+    }
+    
+    // 만약 이미 상한을 채워서 받을 수 있는 보상이 0개라면 조용히 넘어가거나 알림
+    if (allowedCurrency <= 0 && isLimitReached) {
         if (!isSilent) {
-            alert(`⏳ 오늘 [${subjectName}] 과목에서 얻을 수 있는 보상을 모두 모았어요!\n(일일 상한선 ${DAILY_LIMIT}개 도달)\n내일 다시 즐겁게 탐험해 봐요!`);
+            let msg = `⏳ 오늘 [${subjectName}] 과목에서 얻을 수 있는 보상을 모두 모았어요!\n(일일 상한선 ${DAILY_LIMIT}개 도달)\n내일 다시 즐겁게 탐험해 봐요!`;
+            if (typeof showRewardModal === 'function' && typeof updateRewardModal === 'function') {
+                showRewardModal(`<div style="color: #ff073a; font-weight: bold;">⚠️ 오늘 ${subjectName} 보상을 모두 캤습니다!<br><br><button onclick="location.href='../lobby.html'">로비로 나가기</button></div>`);
+            } else {
+                alert(msg);
+            }
         }
-        console.log(`⚠️ 일일 보상 상한선 도달 (${todayEarned}/${DAILY_LIMIT})`);
         return false; 
     }
 
@@ -293,8 +332,8 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     let currentExp = props[expPropName]?.number || 0; 
     
     let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
-    let currentWealth = previousWealth + earned;
-    let newExp = currentExp + earned; 
+    let currentWealth = previousWealth + allowedCurrency;
+    let newExp = currentExp + earned; // 경험치는 깎이지 않고 순수하게 모두 오르게 처리
     
     const prevLevelInfo = calculateLevelInfo(currentExp);
     const currLevelInfo = calculateLevelInfo(newExp);
@@ -305,11 +344,10 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     // 📦 5. 노션 업데이트 보따리 (없는 칼럼은 빼고 전송!)
     let updateProps = { 
         "소원권 개수": { number: newTickets },
-        [expPropName]: { number: newExp },                   // 사회 경험치 OR 용어 경험치_사회
-        [dailyPropName]: { number: todayEarned + earned }    // 오늘 획득_사회 업데이트!
+        [expPropName]: { number: newExp },
+        [dailyPropName]: { number: todayEarned + allowedCurrency }
     };
     
-    // 레벨 칼럼 이름이 존재할 때만(일반 과목일 때만) 레벨 업데이트 추가
     if (levelPropName) {
         updateProps[levelPropName] = { number: currLevelInfo.level };
     }
@@ -324,13 +362,63 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     });
     
     if (!isSilent) {
-        let alertMsg = `🎉 보상 획득 완료!\n+${earned}개 적립! (오늘 ${todayEarned + earned}/${DAILY_LIMIT})`;
-        if (levelPropName) {
-            alertMsg += `\n${subjectName} 레벨: Lv.${currLevelInfo.level}`;
-        } else {
-            alertMsg += `\n용어 경험치가 상승했습니다!`;
+        let rewardName = currentTheme === '마인크래프트' ? '💎 다이아몬드' : '💧 슬라임 파츠';
+        
+        // 1️⃣ 국어방 모달 UI가 있다면 활용
+        if (typeof showRewardModal === 'function' && typeof updateRewardModal === 'function') {
+            let limitMessageHtml = "";
+            if (isLimitReached) {
+                limitMessageHtml = `<div style="background: rgba(255,152,0,0.1); border: 2px solid #ff9800; padding: 10px; border-radius: 8px; color: #ff9800; font-weight: bold; margin-bottom: 15px;">⚠️ 일일 최대 보상(${DAILY_LIMIT}개) 도달!<br><span style="font-size:0.9rem;">(이번엔 ${allowedCurrency}개만 획득)</span></div>`;
+            }
+            updateRewardModal(`
+                ${limitMessageHtml}
+                <b style="color:#0288D1; font-size: 1.5rem;">${rewardName} ${allowedCurrency}개 획득!</b> <span style="color:#8b949e; font-size:0.9rem;">(경험치 +${earned})</span><br><br>
+                현재 총 자산: <b>${currentWealth}</b>개<br>
+                <span style="font-size:0.9rem; color:#666;">다음 ${subjectName} 레벨(Lv.${currLevelInfo.level + 1})까지 경험치 ${currLevelInfo.remainingForNext} 필요!</span>
+                ${currLevelInfo.level > prevLevelInfo.level ? `<br><br><span style="font-size:1.3rem; color:#FF6B9D; font-weight:bold;">🎉 ${subjectName} 레벨 업! Lv.${currLevelInfo.level} 🎉</span>` : ''}
+                ${earnedTickets > 0 ? `<br><br><span style="font-size:1.2rem; color:#FFD700; font-weight:bold;">🎫 소원권 ${earnedTickets}장 추가 획득!!</span>` : ''}
+                <br><br>
+                <button onclick="location.href='../lobby.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: #4CAF50; color: white; cursor: pointer; font-weight: bold;">대형 로비로 돌아가기</button>
+            `);
+        } 
+        // 2️⃣ 수학방 r-detail UI가 있다면 활용
+        else if (document.getElementById('r-detail')) {
+            let detailEl = document.getElementById('r-detail');
+            detailEl.innerHTML += `
+              <div style="background:rgba(255,255,255,0.8); border:2px dashed #6EC6F5; padding:16px; border-radius:12px; margin-top:10px; text-align: left;">
+                <div style="font-size: 1.15rem; margin-bottom: 8px;">
+                  <b style="color:#0288D1;">${rewardName} x ${allowedCurrency} 획득! (총 ${currentWealth}개)</b>
+                </div>
+                <div style="font-size: 0.95rem; color: #666; margin-bottom: 6px;">
+                  다음 ${subjectName} 레벨(Lv.${currLevelInfo.level + 1})까지 경험치 <b>${currLevelInfo.remainingForNext}</b> 필요!
+                </div>
+                ${currLevelInfo.level > prevLevelInfo.level ? `<div style="text-align:center; font-size:1.3rem; color:#FF6B9D; font-weight:bold; margin-top:10px;">🎉 ${subjectName} 레벨 업! Lv.${currLevelInfo.level} 🎉</div>` : ''}
+              </div>
+            `;
+        } 
+        // 3️⃣ 기본 알림
+        else {
+            let alertMsg = `🎉 보상 획득 완료!\n+${allowedCurrency}개 적립! (오늘 ${todayEarned + allowedCurrency}/${DAILY_LIMIT})`;
+            if (levelPropName) {
+                alertMsg += `\n${subjectName} 레벨: Lv.${currLevelInfo.level}`;
+            } else {
+                alertMsg += `\n용어 경험치가 상승했습니다!`;
+            }
+            alert(alertMsg);
         }
-        alert(alertMsg);
+    }
+
+    // 소원권 공통 알림(모달 오버레이)
+    if (earnedTickets > 0) {
+        setTimeout(() => {
+            const ticketDisplay = document.getElementById('wishTicketCountDisplay');
+            if(ticketDisplay) ticketDisplay.textContent = newTickets;
+            const overlay = document.getElementById('wishTicketOverlay');
+            if(overlay) {
+                overlay.classList.add('active'); 
+                overlay.style.display = 'flex';  
+            }
+        }, 1000);
     }
 
     return true;

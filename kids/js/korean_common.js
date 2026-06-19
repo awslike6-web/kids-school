@@ -182,21 +182,10 @@ async function exitRoom(subjectName) {
     if (isExiting) return;
     isExiting = true;
 
-    const roomEndTime = new Date();
-    const timeDiff = roomEndTime - roomStartTime;
-    let calculatedMinutes = Math.floor(timeDiff / 60000);
-    if (calculatedMinutes < 1) calculatedMinutes = 1; 
-
-    const targetNotes = window.wrongNotes || [];
-    const errorReport = targetNotes.length > 0 ? targetNotes.join(', ') : "오답 없음";
-
     try {
         if (typeof sendStudyLogToNotion === 'function') {
-            await sendStudyLogToNotion({
-                childName: currentProfile === 'son' ? '민수' : '민서', subject: subjectName, 
-                startTime: roomStartTime.toISOString(), endTime: roomEndTime.toISOString(),
-                durationMinutes: calculatedMinutes, errorReport: errorReport, wordFairyCount: 0
-            });
+            // 인자를 넘기지 않아도 notion-helper.js에서 자동 수집합니다.
+            await sendStudyLogToNotion({ subject: subjectName });
         }
     } catch(e) {
         console.error("학습일지 기록 중 일시적 오류:", e);
