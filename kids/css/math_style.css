@@ -164,7 +164,7 @@ body::before {
   body { 
       background: white !important; 
       color: black; 
-      margin: 15mm 20mm !important; 
+      margin: 10mm 5mm 5mm 5mm !important; 
   }
   body::before { display: none; }
   
