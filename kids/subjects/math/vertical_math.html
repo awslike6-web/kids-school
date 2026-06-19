@@ -150,6 +150,14 @@
   .result-score { font-size: 3.5rem; color: var(--yellow); margin-bottom: 20px; font-family: 'Jua'; }
   .btn-big { background: linear-gradient(135deg, var(--purple), var(--pink)); color: white; border: none; padding: 16px 30px; font-size: 1.4rem; font-family: 'Jua', sans-serif; border-radius: 20px; cursor: pointer; width: 100%; }
 
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-10px); }
+    80% { transform: translateX(10px); }
+    100% { transform: translateX(0); }
+  }
 </style>
 </head>
 <body>
@@ -232,6 +240,7 @@
   let currentProfile = localStorage.getItem('currentUser') || 'son';
   let gameState = { mode: '', questions: [], current: 0, correctCount: 0 };
   let focusedInput = null;
+  window.wrongNotes = JSON.parse(localStorage.getItem(`minmin_math_wrong_${currentProfile}`)) || [];
 
   document.addEventListener("DOMContentLoaded", () => {
     const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
@@ -486,6 +495,8 @@
   function submitAnswer() {
     const q = gameState.questions[gameState.current];
     let isCorrect = false;
+    let userAnsText = "";
+    let correctAnsText = "";
 
     if (gameState.mode === 'div') {
         const qCells = Array.from(document.querySelectorAll('.cell-ans[data-type="q"]'));
@@ -497,34 +508,69 @@
         const userRem = parseInt(remStr, 10);
 
         isCorrect = (userQ === q.answer && userRem === q.rem);
+        userAnsText = `몫 ${userQ} 나머지 ${userRem}`;
+        correctAnsText = `몫 ${q.answer} 나머지 ${q.rem}`;
     } else {
         const ansCells = Array.from(document.querySelectorAll('.cell-ans[data-type="ans"]'));
         const ansStr = ansCells.map(c => c.value || '').join('');
         if (ansStr === '') return; // 아무것도 입력 안했을 때
         const userAns = parseInt(ansStr, 10);
         isCorrect = (userAns === q.answer);
+        userAnsText = `${userAns}`;
+        correctAnsText = `${q.answer}`;
     }
 
     const msgBox = document.getElementById('v-feedbackMsg');
     if (isCorrect) {
+        // 🎵 딩동댕 연출
         document.querySelectorAll('.cell-ans').forEach(c => {
             c.style.borderColor = 'var(--green)';
             c.style.background = '#e8f5e9';
         });
         msgBox.style.color = 'var(--green)';
-        msgBox.textContent = "정답입니다! 🎉";
+        msgBox.textContent = "딩동댕! 정답입니다! 🎵🎉";
+        
         gameState.correctCount++;
         gameState.current++;
-        setTimeout(nextQuestion, 1000);
+        setTimeout(nextQuestion, 1200); // 1.2초 후 자동으로 다음 문제 그려짐
     } else {
+        // 💥 땡 연출
         document.querySelectorAll('.cell-ans').forEach(c => {
             if(c.value !== '') {
                 c.style.borderColor = 'var(--pink)';
                 c.style.background = '#ffebee';
             }
         });
+        document.querySelector('.v-board').style.animation = 'shake 0.4s';
+        setTimeout(() => document.querySelector('.v-board').style.animation = '', 400);
+
         msgBox.style.color = 'var(--pink)';
-        msgBox.textContent = "아쉽네요, 다시 계산해볼까요? 🤔";
+        msgBox.textContent = "땡! 아쉽네요. 다시 한번 계산해볼까요? 💥";
+
+        // 🎒 오답 가방(wrongNotes)에 저장 (해당 문제에서 처음 틀렸을 때 1회만)
+        if (!q.wrongLogged) {
+            let opSymbol = '';
+            if(gameState.mode === 'add') opSymbol = '+';
+            else if(gameState.mode === 'sub') opSymbol = '-';
+            else if(gameState.mode === 'mul') opSymbol = 'x';
+            else if(gameState.mode === 'div') opSymbol = '÷';
+
+            const note = {
+                text: `${q.numA} ${opSymbol} ${q.numB}`,
+                userAns: userAnsText,
+                answer: correctAnsText,
+                opType: gameState.mode,
+                timestamp: new Date().toISOString()
+            };
+            
+            window.wrongNotes.push(note);
+            localStorage.setItem(`minmin_math_wrong_${currentProfile}`, JSON.stringify(window.wrongNotes));
+            q.wrongLogged = true; // 중복 저장 방지 자물쇠
+            
+            console.log("🎒 오답 가방에 쏙 들어갔어요!", note);
+        }
+
+        // 틀린 문제 재도전 기회 (입력 칸 초기화)
         setTimeout(() => {
             document.querySelectorAll('.cell-ans').forEach(c => {
                 c.style.borderColor = '';
@@ -536,7 +582,7 @@
             // 다시 포커스
             const ansCells = Array.from(document.querySelectorAll('.cell-ans'));
             if (ansCells.length > 0) setFocus(ansCells[ansCells.length - 1]);
-        }, 1500);
+        }, 1800);
     }
   }
 
