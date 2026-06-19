@@ -661,6 +661,13 @@ function verifyVocaAnswer() {
         input.classList.add('wrong-shake');
         speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
         
+        // 오답 기록 추가
+        if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
+        window.wrongNotes.push({
+            word: activeSectionData[activeQuizIdx].word,
+            wrongInput: input.value
+        });
+        
         setTimeout(() => {
             input.classList.remove('wrong-shake');
             input.value = "";
