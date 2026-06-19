@@ -435,7 +435,18 @@
                 gameState.current++; setTimeout(nextFunc, 700);
             } else {
                 inpBox.classList.add('wrong'); fbBox.textContent = `오답😢 정답: 몫 ${q.answer}, 나머지 ${q.rem}`; fbBox.style.color = 'var(--pink)';
-                if(!gameState.isWrongMode && !wrongNotes.some(item => item.text === q.text)) { wrongNotes.push(q); localStorage.setItem(key, JSON.stringify(wrongNotes)); }
+                
+                // 오답 리포트에 아이가 적은 오답까지 기록
+                let studentWrongAnswer = inpBox.value;
+                const remInp = document.getElementById('remInput');
+                if(remInp && remInp.value) {
+                    studentWrongAnswer += ` (나머지: ${remInp.value})`;
+                }
+                if(!gameState.isWrongMode && !wrongNotes.some(item => item.text === q.text)) { 
+                    wrongNotes.push({ ...q, wrongInput: studentWrongAnswer }); 
+                    localStorage.setItem(key, JSON.stringify(wrongNotes)); 
+                }
+                
                 gameState.current++; setTimeout(nextFunc, 2000);
             }
         }

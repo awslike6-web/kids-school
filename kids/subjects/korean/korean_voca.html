@@ -149,6 +149,13 @@ function checkAnswer() {
     } else {
         inputEl.className = "main-input wrong";
         if(window.speakFairyTTS) window.speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+        
+        // 오답 리포트에 아이가 작성한 내용 기록
+        let studentWrongAnswer = inputEl.value.trim();
+        if (!window.wrongNotes.some(item => item.word === q.word)) { 
+            window.wrongNotes.push({ ...q, wrongInput: studentWrongAnswer }); 
+        }
+
         setTimeout(() => { inputEl.className = "main-input"; inputEl.value = ''; }, 800);
     }
 }

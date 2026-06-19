@@ -112,6 +112,8 @@ const isAdmin = (savedName === '아빠' || savedName === '엄마');
 
 let activeSectionData = []; // 현재 로드된 해당 국어 DB/모킹 데이터 세트
 let activeQuizIdx = 0; 
+let societyVocaOrderType = "shuffle"; // 'shuffle' or 'sequence'
+let societyVocaMasterCountMap = {}; // 마스터 횟수 기록용
 let historyCollected = JSON.parse(localStorage.getItem('society_history_collectibles') || '[]');
 
 function initializeSocietyRoom() {
@@ -397,7 +399,19 @@ function startMissionWithFilteredData(records, innerBody) {
         }
     });
 
-    activeSectionData = parsed;
+    if (currentMissionType === 'voca') {
+        // 용어방 마스터 기록 로드
+        societyVocaMasterCountMap = JSON.parse(localStorage.getItem(`society_voca_master_${currentUserName}`) || '{}');
+        // 마스터(3회 이상 정답)된 단어는 필터링
+        activeSectionData = parsed.filter(item => (societyVocaMasterCountMap[item.word] || 0) < 3);
+        
+        // 필터링 후 섞기 적용 (기본값)
+        if (societyVocaOrderType === "shuffle") {
+            activeSectionData.sort(() => Math.random() - 0.5);
+        }
+    } else {
+        activeSectionData = parsed;
+    }
     
     if (currentMissionType === 'voca' || currentMissionType === 'chart') {
         const badge = ` [${selectedSocietyGrade} ${selectedSocietyUnit}]`;
@@ -429,9 +443,35 @@ function renderSectionUI(type, container) {
     container.innerHTML = "";
     
     if (!activeSectionData || activeSectionData.length === 0) {
-        container.innerHTML = `<p style="text-align:center; padding: 20px;">가용할 수 있는 학습 데이터가 비어 있습니다.</p>`;
+        if (type === 'voca') {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px;">
+                    <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
+                    <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
+                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="resetSocietyVocaMasterAndReload()">🔄 처음부터 다시 풀기 (학습 리셋)</button>
+                </div>`;
+        } else {
+            container.innerHTML = `<p style="text-align:center; padding: 20px;">가용할 수 있는 학습 데이터가 비어 있습니다.</p>`;
+        }
         return;
     }
+
+    // 10문제 커트라인 체크 팝업 (용어방 전용)
+    if (type === 'voca' && activeQuizIdx > 0 && activeQuizIdx % 10 === 0 && !window.societyVocaContinueFlag) {
+        container.innerHTML = `
+            <div class="screen loaded quiz-card" style="text-align:center; padding: 40px 20px;">
+                <div style="font-size:3.5rem; margin-bottom:10px;">🏆</div>
+                <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 풀었어요!</h2>
+                <p style="font-size:1.2rem; color:#666; margin-bottom:30px;">여기서 멈추고 보상을 받을까요?<br>아니면 끝까지 계속 탐험할까요?</p>
+                <div style="display:flex; justify-content:center; gap:15px;">
+                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="triggerAwardDispense(${activeQuizIdx * 2}, 'voca'); closeMissionView();">🎁 여기서 보상 받기</button>
+                    <button class="back-to-lobby-btn" style="background:#6EC6F5; color:white;" onclick="window.societyVocaContinueFlag=true; renderSectionUI('${type}', document.getElementById('overlayInnerBody'));">🚀 계속 이어서 풀기</button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    window.societyVocaContinueFlag = false;
 
     const currentItem = activeSectionData[activeQuizIdx];
 
@@ -441,7 +481,20 @@ function renderSectionUI(type, container) {
 
     if (type === 'voca') {
         screenWrapper.className += " quiz-card";
+        
+        const orderToggleHtml = `
+            <div style="display:flex; justify-content:center; align-items:center; gap: 15px; margin-bottom: 20px; font-family:'Jua', sans-serif; background:#f8f9fa; padding:10px; border-radius:12px;">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size:1.1rem; color:var(--dark);">
+                    <input type="radio" name="societyVocaOrder" value="shuffle" ${societyVocaOrderType === 'shuffle' ? 'checked' : ''} onchange="window.societySetOrder(this.value)"> 🎲 랜덤 섞기
+                </label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-size:1.1rem; color:var(--dark);">
+                    <input type="radio" name="societyVocaOrder" value="sequence" ${societyVocaOrderType === 'sequence' ? 'checked' : ''} onchange="window.societySetOrder(this.value)"> ➡️ 순서대로 풀기
+                </label>
+            </div>
+        `;
+
         screenWrapper.innerHTML = `
+            ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
             <div class="quiz-descr">${currentItem.desc}</div>
@@ -452,6 +505,9 @@ function renderSectionUI(type, container) {
             <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
                 <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc}')">🔊 설명 한번 더 읽기</button>
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
+            </div>
+            <div style="text-align:center; margin-top:20px;">
+                <button class="back-to-lobby-btn" style="background:#ffdd57; color:#555; padding: 8px 16px; font-size: 0.9rem;" onclick="resetSocietyVocaMasterAndReload()">🔄 학습 리셋하기</button>
             </div>
         `;
         container.appendChild(screenWrapper);
@@ -572,25 +628,29 @@ function renderMuseumGridDock() {
 // ========================================================
 // ✏️ 문제 검증 및 포인트 보상 지급 모듈
 // ========================================================
-async function verifyVocaAnswer() {
-    const userInput = document.getElementById('vocaAnswerInput').value.trim();
-    const currentItem = activeSectionData[activeQuizIdx];
+function verifyVocaAnswer() {
+    const input = document.getElementById('vocaAnswerInput');
+    const answer = input.value.trim().replace(/\s/g, '');
+    const correctTarget = activeSectionData[activeQuizIdx].word.replace(/\s/g, '');
 
-    if (!userInput) {
-        alert("낱말 정답을 입력해주세요!");
-        return;
-    }
-
-    if (userInput === currentItem.word || userInput.replace(/\s/g, "") === currentItem.word) {
-        speakFairyTTS(`정답입니다! 참 지혜롭군요! ${currentItem.word}은 아주 명확한 사회 핵심 용어랍니다. 잘했습니다!`);
-        alert(`🎉 정답 발견! [${currentItem.word}] 맞습니다!\n경험치가 상승하고 보상이 차오릅니다!`);
+    if (answer === correctTarget) {
+        input.classList.add('correct-glow');
+        speakFairyTTS("정답이야! 아주 잘했어!");
         
-        // 보상 지급 브릿지 호출 (용어방 미션이므로 'voca' 플래그 전달)
-        await triggerAwardDispense(15, 'voca');
-        skipToNextQuiz('voca');
+        // 마스터 카운트 증가 로직
+        societyVocaMasterCountMap[activeSectionData[activeQuizIdx].word] = (societyVocaMasterCountMap[activeSectionData[activeQuizIdx].word] || 0) + 1;
+        localStorage.setItem(`society_voca_master_${currentUserName}`, JSON.stringify(societyVocaMasterCountMap));
+
+        setTimeout(() => skipToNextQuiz('voca'), 1200);
     } else {
-        speakFairyTTS(`아쉬워요, 정답을 다시 한번 곱씹어볼까요? 초성은 ${currentItem.hint}이에요.`);
-        alert("❌ 정답이 아직 완전하지 않아요! 초성 힌트를 보고 다시 정복해보세요!");
+        input.classList.add('wrong-shake');
+        speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+        
+        setTimeout(() => {
+            input.classList.remove('wrong-shake');
+            input.value = "";
+            input.focus();
+        }, 800);
     }
 }
 
@@ -646,7 +706,8 @@ async function collectArtifact(artName) {
 function skipToNextQuiz(type) {
     activeQuizIdx++;
     const innerBody = document.getElementById('overlayInnerBody');
-    if (activeQuizIdx >= activeSectionData.length) {
+    // voca 타입일 경우 renderSectionUI 내에서 10문제 커트라인, 전체 종료 체크를 모두 담당함
+    if (type !== 'voca' && activeQuizIdx >= activeSectionData.length) {
         speakFairyTTS("모든 미션 코스가 우수하게 완결되었습니다! 박수 드려요. 대합실로 복귀합니다.");
         alert("🏆 축하합니다! 이 구역의 모든 사회 탐구 단계를 완료하셨습니다!");
         closeMissionView();

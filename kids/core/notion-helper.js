@@ -175,7 +175,10 @@ async function sendStudyLogToNotion(options = {}) {
     if (errorReport === undefined) {
         // 영어(engWrongNotes) 또는 국어/수학(wrongNotes) 배열 호환
         const targetNotes = window.engWrongNotes || window.wrongNotes || [];
-        errorReport = targetNotes.length > 0 ? targetNotes.map(q => q.word || q.text || q).join(', ') : "오답 없음";
+        errorReport = targetNotes.length > 0 ? targetNotes.map(q => {
+            if (q.wrongInput) return `${q.word || q.text} (오답: ${q.wrongInput})`;
+            return q.word || q.text || q;
+        }).join(' / ') : "오답 없음";
     }
     
     const wordFairyCount = options.wordFairyCount || 0;
