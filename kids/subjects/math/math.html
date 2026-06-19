@@ -15,13 +15,37 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nanum Gothic', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
 
+  /* ----------------------------------
+     🎮 민수 아케이드 네온 테마 (theme--arcade)
+     ---------------------------------- */
+  body.theme--arcade {
+    --bg: #12121e; --surface: #1e1e32; --card: rgba(30, 30, 50, 0.85);
+    --border: #3a3a5a; --yellow: #FFD93D; --orange: #FF6B35;
+    --green: #6BCB77; --blue: #4D96FF; --pink: #FF6B9D;
+    --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --muted: #8888AA;
+  }
+
+  /* ----------------------------------
+     🎠 민서 동화 밀키스 테마 (theme--slime)
+     ---------------------------------- */
+  body.theme--slime {
+    --bg: #fff3f5; --surface: #ffe7ee; --card: rgba(255, 255, 255, 0.95);
+    --border: #ffb3c6; --yellow: #FFD93D; --orange: #FF6B35;
+    --green: #6BCB77; --blue: #ff6b9d; --pink: #ff6b9d;
+    --purple: #ff80ab; --cyan: #ff6b9d; --white: #4a3352; --muted: #8888AA;
+  }
+
   /* 다크 테마 백그라운드 (사회방/멀티버스 스타일) */
-  body::before {
+  body.theme--arcade::before {
     content: ''; position: fixed; inset: 0;
     background-image: 
       radial-gradient(circle at 15% 50%, rgba(77, 150, 255, 0.08), transparent 25%),
       radial-gradient(circle at 85% 30%, rgba(199, 125, 255, 0.08), transparent 25%);
     pointer-events: none; z-index: 0;
+  }
+  
+  body.theme--slime::before {
+    display: none;
   }
 
   .app-container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 1; }
@@ -139,6 +163,11 @@
     const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
     const icon = currentProfile === 'son' ? '👦' : (currentProfile === 'daughter' ? '👧' : '👨‍💻');
     
+    // 💡 사회방과 완벽하게 동일한 테마 시스템 전파 (theme--arcade / theme--slime)
+    const savedTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
+    const themeClass = savedTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
+    document.body.className = themeClass;
+
     document.getElementById('userName').textContent = `${name} 대원`;
     document.getElementById('userIcon').textContent = icon;
   });

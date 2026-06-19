@@ -19,6 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
   const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
+  
+  // 💡 사회방과 완벽하게 동일한 테마 시스템 전파 (theme--arcade / theme--slime)
+  const savedTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
+  const themeClass = savedTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
+  document.body.className = themeClass;
+
   document.getElementById('userName').textContent = `${name} 탐험대원`;
   document.getElementById('userIcon').textContent = icon;
 });

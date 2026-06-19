@@ -7,6 +7,31 @@
   --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --dark: #2D2D4E; --muted: #8888AA;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ----------------------------------
+   🎮 민수 아케이드 네온 테마 (theme--arcade)
+   ---------------------------------- */
+body.theme--arcade {
+  --bg: #0B0B1A; --surface: #16162C; --card: rgba(22, 22, 44, 0.85);
+  --border: #2A2A4A; --yellow: #FFD93D; --orange: #FF6B35;
+  --green: #6BCB77; --blue: #4D96FF; --pink: #FF6B9D;
+  --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --dark: #2D2D4E; --muted: #8888AA;
+}
+
+/* ----------------------------------
+   🎠 민서 동화 밀키스 테마 (theme--slime)
+   ---------------------------------- */
+body.theme--slime {
+  --bg: #fff3f5; --surface: #ffe7ee; --card: rgba(255, 255, 255, 0.95);
+  --border: #ffb3c6; --yellow: #FFD93D; --orange: #FF6B35;
+  --green: #6BCB77; --blue: #ff6b9d; --pink: #ff6b9d;
+  --purple: #ff80ab; --cyan: #ff6b9d; --white: #4a3352; --dark: #4a3352; --muted: #8888AA;
+}
+
+/* 민서 테마일 때 심우주 배경 숨기기 */
+body.theme--slime::before {
+  display: none;
+}
+
 body { font-family: 'Nanum Gothic', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
 
 /* 🌌 심우주 배경 */
