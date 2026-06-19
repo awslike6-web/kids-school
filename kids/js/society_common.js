@@ -200,26 +200,16 @@ function initializeSocietyRoom() {
     updateTtsToggleUi();
 }
 
-// 💡 [정비팀장 긴급 추가] 현재 선택된 학년과 단원을 저장할 전역 메모리
-let selectedSocietyGrade = "5-2";
-let selectedSocietyUnit = "3단원";
+// 💡 [정비팀장 동적 메모리] 노션 원본 데이터를 보관하고 학년/단원을 실시간 자동 추출합니다!
+let allFetchedRecords = []; 
+let selectedSocietyGrade = "";
+let selectedSocietyUnit = "";
+let currentMissionType = "";
 
 // ========================================================
 // 🚪 오버레이 미션 팝업 연동 총 제어
 // ========================================================
 function openMissionView(type) {
-    // 💡 용어방(voca)이나 자료실(chart)처럼 퀴즈성 미션일 때만 단원 선택창을 띄웁니다!
-    if (type === 'voca' || type === 'chart') {
-        const userGrade = prompt("🎒 학년을 입력해 주세요! (예시: 5-2, 5-1)", selectedSocietyGrade);
-        if (!userGrade) return; // 취소 누르면 중단
-        
-        const userUnit = prompt("📖 공부할 단원을 입력해 주세요!\n(예시: 1단원, 2단원, 3단원)", selectedSocietyUnit);
-        if (!userUnit) return; // 취소 누르면 중단
-        
-        selectedSocietyGrade = userGrade.trim();
-        selectedSocietyUnit = userUnit.trim();
-    }
-
     const overlay = document.getElementById('missionOverlay');
     const headerTitle = document.getElementById('overlayHeaderTitle');
     const headerIcon = document.getElementById('overlayHeaderIcon');
@@ -228,45 +218,31 @@ function openMissionView(type) {
     overlay.style.display = "flex";
     activeQuizIdx = 0;
     stopFairyTTS();
+    
+    currentMissionType = type;
+    selectedSocietyGrade = "";
+    selectedSocietyUnit = "";
 
     let targetTitle = "";
     let targetIcon = "";
 
-    showLoadingSpinner(innerBody);
-    fetchNotionSocietyData(type, innerBody);
-
-    // 💡 상단 헤더 타이틀에 현재 선택된 단원을 이쁘게 표시해 줍니다.
-    const unitBadge = (type === 'voca' || type === 'chart') ? ` [${selectedSocietyGrade} ${selectedSocietyUnit}]` : "";
-
     switch(type) {
-        case 'voca':
-            targetTitle = "사회 용어방 (한자 초성 퀴즈)" + unitBadge;
-            targetIcon = "📖";
-            speakFairyTTS(`${selectedSocietyUnit} 사회 용어방에 온 걸 환영해! 초성을 보고 낱말을 맞춰보자!`);
-            break;
-        case 'chart':
-            targetTitle = "차트 & 도표 자료 분석실" + unitBadge;
-            targetIcon = "📊";
-            speakFairyTTS(`${selectedSocietyUnit} 도표를 정확하게 분석하고 퀴즈를 풀어보자!`);
-            break;
-        case 'map':
-            targetTitle = "랜선 국토 지도 탐방";
-            targetIcon = "🗺️";
-            speakFairyTTS("우리 국토의 지리 지형 사진이야! 사진을 더블클릭하면 코코가 상세히 읽어줄게.");
-            break;
-        case 'history':
-            targetTitle = "역사 문화재 돋보기";
-            targetIcon = "⏳";
-            speakFairyTTS("옛날 역사적 보물들이야. 아름다운 카드를 짝 맞춰서 수집해보자!");
-            break;
+        case 'voca': targetTitle = "사회 용어방 (한자 초성 퀴즈)"; targetIcon = "📖"; break;
+        case 'chart': targetTitle = "차트 & 도표 자료 분석실"; targetIcon = "📊"; break;
+        case 'map': targetTitle = "랜선 국토 지도 탐방"; targetIcon = "🗺️"; break;
+        case 'history': targetTitle = "역사 문화재 돋보기"; targetIcon = "⏳"; break;
     }
 
     headerTitle.textContent = targetTitle;
     headerIcon.textContent = targetIcon;
+
+    // 💡 미션 창 켜자마자 스피너 돌리면서 노션에서 데이터를 통째로 긁어옵니다.
+    showLoadingSpinner(innerBody);
+    fetchAndBuildDynamicUI(type, innerBody);
 }
 
 /**
- * ⏳ 로딩 스피너 전송 헬퍼 함수
+ * ⏳ 로딩 스피너 전송 헬퍼 함수 (안전하게 보존 완료!)
  */
 function showLoadingSpinner(container) {
     container.innerHTML = `
@@ -285,64 +261,150 @@ function closeMissionView() {
 }
 
 // ========================================================
-// 📊 노션 사회 데이터를 연동하는 비동기 통계 모듈
+// 📊 노션 연동 및 동적(Dynamic) UI 생성 모듈
 // ========================================================
-async function fetchNotionSocietyData(type, innerBody) {
-    const propertyMap = {
-        voca: "용어방",
-        chart: "자료실",
-        map: "지도탐방",
-        history: "역사"
-    };
-
+async function fetchAndBuildDynamicUI(type, innerBody) {
+    const propertyMap = { voca: "용어방", chart: "자료실", map: "지도탐방", history: "역사" };
     const zoneTag = propertyMap[type];
 
     try {
-        // 💡 [배선 교정] 아빠(관리자)일 때는 학생 필터를 꺼서 모든 데이터가 보이게 하고,
-        // 아이들일 때는 자기 이름표가 달린 데이터만 정확히 가져옵니다!
         const records = await fetchVocaFromNotion({
-            subject: "사회",
+            subject: "사회", 
             areaZone: zoneTag,
             useServerFilter: true,
             filterByStudent: !isAdmin 
         });
 
-        if (records.length > 0) {
-            console.log(`🎉 [노션 실시간 결합 성공] 사회방 [${zoneTag}] 데이터 획득: ${records.length}건`);
+        if (records && records.length > 0) {
+            allFetchedRecords = records; 
 
-            const parsed = records.map(record => {
-                const titleStr = record.word || "미상";
-                const descStr = record.detailContext || "해당 유적/지형 설명이 노션에 기재 대기 중입니다.";
-                const imgUrl = record.imageUrl || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
-                const hintStr = record.hint || getChosung(titleStr);
+            // 지도탐방과 역사는 단원 구분이 필요 없으니 바로 미션 스타트!
+            if (type === 'map' || type === 'history') {
+                startMissionWithFilteredData(records, innerBody);
+                return;
+            }
 
-                if (type === 'voca') {
-                    return { word: titleStr, hint: hintStr, desc: descStr };
-                } else if (type === 'chart') {
-                    return {
-                        title: titleStr, img: imgUrl, desc: descStr,
-                        quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격은 무엇일까요?`,
-                        choices: ["1등급 유망 자료", "전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설"],
-                        correctIdx: 1
-                    };
-                } else if (type === 'map') {
-                    return { name: titleStr, img: imgUrl, desc: descStr };
-                } else {
-                    return { name: titleStr, img: imgUrl, desc: descStr };
-                }
-            });
+            // 💡 노션 DB에 적어놓은 '학년' 텍스트를 중복 없이 그대로 수집
+            const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
 
-            activeSectionData = parsed;
+            if (uniqueGrades.length === 0) {
+                startMissionWithFilteredData(records, innerBody);
+            } else {
+                renderDynamicGradeUI(uniqueGrades, innerBody);
+            }
         } else {
-            console.warn("⚠️ 노션 데이터 결과가 비어있습니다. 기본 가상 데이터로 우회 구동합니다.");
+            console.warn("⚠️ 노션 데이터 결과가 없습니다. 가상 데이터 구동");
             activeSectionData = SOCIETY_MOCK_DATA[type];
+            renderSectionUI(type, innerBody);
         }
     } catch(e) {
-        console.warn("노션 실시간 통신 지연 또는 에러. 준비된 오프라인 견고 가상 데이터(Mock)로 무결성 구동합니다.", e);
+        console.warn("통신 에러. 가상 데이터 구동", e);
         activeSectionData = SOCIETY_MOCK_DATA[type];
-    } finally {
         renderSectionUI(type, innerBody);
     }
+}
+
+/**
+ * 🎒 1단계: 노션 텍스트 그대로 학년 버튼 자동 생성
+ */
+function renderDynamicGradeUI(grades, container) {
+    speakFairyTTS("공부할 학년과 학기를 마우스로 골라보세요! 🧚‍♀️");
+    
+    const buttonsHtml = grades.map(g => 
+        `<button class="quiz-choice-btn" style="padding:15px; font-size:1.2rem;" onclick="selectDynamicGrade('${g}')">${g}</button>`
+    ).join('');
+
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px; font-family:'Jua'; width:100%; max-width:500px; margin:0 auto;">
+            <h3 style="margin-bottom:20px; color:var(--purple); font-size:1.6rem;">🎒 1. 학년/학기 고르기</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                ${buttonsHtml}
+            </div>
+        </div>
+    `;
+}
+
+function selectDynamicGrade(grade) {
+    selectedSocietyGrade = grade;
+    const innerBody = document.getElementById('overlayInnerBody');
+    
+    // 💡 선택한 학년에 들어있는 '단원' 글자들만 노션에서 쏙쏙 뽑아내기
+    const matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
+    const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level).trim()))].filter(u => u && u !== "기본 단원").sort();
+
+    if (uniqueUnits.length === 0) {
+        startMissionWithFilteredData(matchedRecords, innerBody);
+    } else {
+        renderDynamicUnitUI(uniqueUnits, innerBody);
+    }
+}
+
+/**
+ * 📖 2단계: 노션 텍스트 그대로 단원 버튼 자동 생성
+ */
+function renderDynamicUnitUI(units, container) {
+    speakFairyTTS("이어서 공부할 단원을 선택해 주세요!");
+    
+    const buttonsHtml = units.map(u => 
+        `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnit('${u}')">${u}</button>`
+    ).join('');
+
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px; font-family:'Jua'; width:100%; max-width:500px; margin:0 auto;">
+            <h3 style="margin-bottom:5px; color:var(--purple); font-size:1.6rem;">📖 2. 단원 고르기</h3>
+            <p style="color:var(--pink); margin-bottom:20px; font-size:1.1rem;">선택된 학기: ${selectedSocietyGrade}</p>
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:20px;">
+                ${buttonsHtml}
+            </div>
+            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
+        </div>
+    `;
+}
+
+function selectDynamicUnit(unit) {
+    selectedSocietyUnit = unit;
+    const innerBody = document.getElementById('overlayInnerBody');
+    
+    const finalRecords = allFetchedRecords.filter(r => 
+        (r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)) &&
+        String(r.level).trim() === unit
+    );
+    
+    startMissionWithFilteredData(finalRecords, innerBody);
+}
+
+/**
+ * 🚀 데이터 조립 및 최종 퀴즈 렌더링
+ */
+function startMissionWithFilteredData(records, innerBody) {
+    const parsed = records.map(record => {
+        const titleStr = record.word || "미상";
+        const descStr = record.detailContext || "해당 유적/지형 설명이 노션에 기재 대기 중입니다.";
+        const imgUrl = record.imageUrl || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
+        const hintStr = record.hint || getChosung(titleStr);
+
+        if (currentMissionType === 'voca') {
+            return { word: titleStr, hint: hintStr, desc: descStr };
+        } else if (currentMissionType === 'chart') {
+            return {
+                title: titleStr, img: imgUrl, desc: descStr,
+                quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격은 무엇일까요?`,
+                choices: ["1등급 유망 자료", "전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설"],
+                correctIdx: 1
+            };
+        } else {
+            return { name: titleStr, img: imgUrl, desc: descStr };
+        }
+    });
+
+    activeSectionData = parsed;
+    
+    if (currentMissionType === 'voca' || currentMissionType === 'chart') {
+        const badge = ` [${selectedSocietyGrade} ${selectedSocietyUnit}]`;
+        document.getElementById('overlayHeaderTitle').textContent = (currentMissionType === 'voca' ? "사회 용어방 (한자 초성 퀴즈)" : "차트 & 도표 자료 분석실") + badge;
+    }
+
+    renderSectionUI(currentMissionType, innerBody);
 }
 
 // 한글 초성을 자동으로 자르는 초강력 헬퍼함수
