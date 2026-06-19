@@ -54,7 +54,15 @@ function _matchesVocaRecord(record, options) {
     if (!record.word) return false;
 
     if (options.filterByStudent !== false) {
-        const loginName = (options.studentName ?? window.currentUserName ?? "민수").trim();
+        let loginName = (options.studentName ?? window.currentUserName ?? "민수").trim();
+        
+        // 💡 부모님 프로필(아빠/엄마/어른)로 로그인해서 테스트 중일 때는,
+        // 선택된 아이(son/daughter) 프로필을 기반으로 타겟팅을 스위칭해줍니다.
+        if (loginName === '아빠' || loginName === '엄마' || loginName === '어른') {
+            const profile = window.currentProfile || localStorage.getItem('currentUser') || 'son';
+            loginName = profile === 'daughter' ? '민서' : '민수';
+        }
+
         if (record.target.length > 0 && !record.target.some(t => t.trim() === loginName)) {
             return false;
         }
@@ -222,8 +230,10 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
   const userName = localStorage.getItem('currentUser') === 'son' ? '민수' : '민서'; 
   const currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
   
-  if (userName === '아빠' || userName === '엄마' || userName === '어른') {
-      console.log(`🛠️ [보상 프리패스] ${earned}개 획득 처리 완료 (노션 전송 X)`);
+  // 💡 [핵심 방어막] 현재 로그인한 사람이 아빠나 엄마인지 실시간 체크 (우회 모드 시 보상 전송 차단)
+  const savedName = localStorage.getItem('currentUserName');
+  if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
+      console.log(`🛠️ [보상 프리패스] ${savedName} 모드이므로 노션 서버 전송을 건너뛰고 프리패스합니다! (${earned}개 획득 처리)`);
       return true;
   }
 

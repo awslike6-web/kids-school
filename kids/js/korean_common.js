@@ -67,7 +67,8 @@ function calculateLevelInfo(totalRewards) {
 // 🎁 [엔진 업그레이드] 일일 보상 제한 + 단계별 보상 연동 로직
 async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
     const userName = currentProfile === 'son' ? '민수' : '민서'; 
-    if (userName === '아빠' || userName === '엄마' || userName === '어른') return true;
+    const savedName = localStorage.getItem('currentUserName');
+    if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') return true;
 
     if (!isSilent) {
         showRewardModal(`⏳ 우주선 통신 중...<br>학습 일지를 기록하고 보상을 싣고 있습니다!`);

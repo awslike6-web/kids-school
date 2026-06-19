@@ -48,7 +48,8 @@ function calculateLevelInfo(totalRewards) {
 // 4️⃣ 🎁 노션 보상 전송 로직 (수학 경험치 기반 독립 개조)
 async function saveRewardToNotion(earned, detailElementId = 'r-detail') {
   const userName = currentProfile === 'son' ? '민수' : '민서'; 
-  if (userName === '아빠' || userName === '엄마' || userName === '어른') return;
+  const savedName = localStorage.getItem('currentUserName');
+  if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') return;
   
   const detailEl = document.getElementById(detailElementId); 
   if(!detailEl) return;
