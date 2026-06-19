@@ -100,6 +100,21 @@
         let dragOffsetX = 0;
         let dragOffsetY = 0;
 
+        // 🛠️ 관리자(아빠/엄마) 검수 모드 판별
+        function isAdminUser() {
+            const savedName = localStorage.getItem('currentUserName');
+            return savedName === '아빠' || savedName === '엄마' || savedName === '어른';
+        }
+
+        // 관리자 모드일 때는 아이 데이터와 분리된 테스트용 저장소 사용
+        function getStorageKey(suffix) {
+            if (isAdminUser()) {
+                const adminName = localStorage.getItem('currentUserName') || 'admin';
+                return `admin_${adminName}_${currentProfile}_${suffix}`;
+            }
+            return `${currentProfile}_${suffix}`;
+        }
+
         // 📋 상점 아이템 데이터
         const MARKET_ITEMS = {
             son: [
@@ -122,19 +137,34 @@
         function initRoom() {
             const body = document.body;
             const badge = document.getElementById('user-badge');
+            const adminMode = isAdminUser();
+            const childLabel = currentProfile === 'son' ? '민수' : '민서';
 
             if (currentProfile === 'son') {
                 body.className = 'theme--minecraft';
-                badge.innerHTML = '👦 민수의 기지';
-                fetchNotionWealth('민수', '다이아몬드 개수');
+                badge.innerHTML = adminMode
+                    ? `🛠️ [${localStorage.getItem('currentUserName')}] ${childLabel} 상점 검수`
+                    : '👦 민수의 기지';
+                if (!adminMode) fetchNotionWealth('민수', '다이아몬드 개수');
+                else showAdminWealth('💎');
             } else {
                 body.className = 'theme--pink-pink';
-                badge.innerHTML = '👧 민서의 핑꾸 하우스';
-                fetchNotionWealth('민서', '슬라임 파츠 개수');
+                badge.innerHTML = adminMode
+                    ? `🛠️ [${localStorage.getItem('currentUserName')}] ${childLabel} 상점 검수`
+                    : '👧 민서의 핑꾸 하우스';
+                if (!adminMode) fetchNotionWealth('민서', '슬라임 파츠 개수');
+                else showAdminWealth('💧');
             }
             
             setupDragEvents();
             renderRoomFurniture();
+        }
+
+        // 🛠️ 관리자 검수 모드: 노션 조회/차감 없이 UI만 테스트
+        function showAdminWealth(icon) {
+            currentWealth = 9999;
+            document.getElementById('wealth-display').innerHTML = `${icon} 🛠️ 검수 모드 (실제 결제 차단)`;
+            renderDock();
         }
 
         // 📡 지갑 조회 (에러 추적 기능 대폭 강화!)
@@ -176,8 +206,8 @@
         function renderDock() {
             const dock = document.getElementById('dock-content');
             const items = MARKET_ITEMS[currentProfile];
-            const ownedItems = JSON.parse(localStorage.getItem(`${currentProfile}_owned_items`) || "[]");
-            const placedFurniture = JSON.parse(localStorage.getItem(`${currentProfile}_placed_furniture`) || "[]");
+            const ownedItems = JSON.parse(localStorage.getItem(getStorageKey('owned_items')) || "[]");
+            const placedFurniture = JSON.parse(localStorage.getItem(getStorageKey('placed_furniture')) || "[]");
             const icon = (currentProfile === 'son') ? '💎' : '💧';
 
             dock.innerHTML = "";
@@ -219,6 +249,21 @@
         // 💰 결제 로직
         async function buyItem(itemId, price) {
             if (currentWealth < price) return alert("다이아몬드(파츠)가 부족합니다! 문제를 더 풀고 오세요! 💪");
+
+            // 🛠️ 관리자 검수 모드: 노션 차감 없이 로컬 테스트만
+            if (isAdminUser()) {
+                if (!confirm(`[검수 모드] 이 가구를 테스트 구매하시겠습니까?\n\n⚠️ 실제 다이아/파츠는 차감되지 않습니다.`)) return;
+
+                let ownedItems = JSON.parse(localStorage.getItem(getStorageKey('owned_items')) || "[]");
+                if (ownedItems.includes(itemId)) return alert("이미 보유한 아이템입니다.");
+                ownedItems.push(itemId);
+                localStorage.setItem(getStorageKey('owned_items'), JSON.stringify(ownedItems));
+
+                alert("🛠️ 검수 모드 구매 완료! (노션 차감 없음)\n'보관함' 탭에서 배치를 테스트해 보세요.");
+                renderDock();
+                return;
+            }
+
             if (!confirm(`이 가구를 정말 구매하시겠습니까?\n내 지갑에서 ${price}개가 차감됩니다.`)) return;
 
             const userName = (currentProfile === 'son') ? '민수' : '민서';
@@ -241,9 +286,9 @@
                     body: JSON.stringify({ properties: updateProps }) 
                 });
 
-                let ownedItems = JSON.parse(localStorage.getItem(`${currentProfile}_owned_items`) || "[]");
+                let ownedItems = JSON.parse(localStorage.getItem(getStorageKey('owned_items')) || "[]");
                 ownedItems.push(itemId);
-                localStorage.setItem(`${currentProfile}_owned_items`, JSON.stringify(ownedItems));
+                localStorage.setItem(getStorageKey('owned_items'), JSON.stringify(ownedItems));
 
                 alert("🎉 구매 완료! '보관함' 탭에서 방에 꺼내보세요.");
                 initRoom();
@@ -255,11 +300,11 @@
 
         // 🏗️ 방에 가구 꺼내기 (초기 위치는 방 가운데)
         function spawnToRoom(itemId) {
-            let placedFurniture = JSON.parse(localStorage.getItem(`${currentProfile}_placed_furniture`) || "[]");
+            let placedFurniture = JSON.parse(localStorage.getItem(getStorageKey('placed_furniture')) || "[]");
             if(placedFurniture.some(f => f.id === itemId)) return;
 
             placedFurniture.push({ id: itemId, x: 300, y: 150 });
-            localStorage.setItem(`${currentProfile}_placed_furniture`, JSON.stringify(placedFurniture));
+            localStorage.setItem(getStorageKey('placed_furniture'), JSON.stringify(placedFurniture));
             
             renderRoomFurniture();
             renderDock(); 
@@ -269,7 +314,7 @@
         function renderRoomFurniture() {
             const room = document.getElementById('my-room');
             const emptyMsg = document.getElementById('empty-msg');
-            const placedFurniture = JSON.parse(localStorage.getItem(`${currentProfile}_placed_furniture`) || "[]");
+            const placedFurniture = JSON.parse(localStorage.getItem(getStorageKey('placed_furniture')) || "[]");
             const itemsData = MARKET_ITEMS[currentProfile];
 
             document.querySelectorAll('.furniture-item').forEach(el => el.remove());
@@ -347,12 +392,12 @@
             const finalX = parseInt(activeDragElement.style.left);
             const finalY = parseInt(activeDragElement.style.top);
 
-            let placedFurniture = JSON.parse(localStorage.getItem(`${currentProfile}_placed_furniture`) || "[]");
+            let placedFurniture = JSON.parse(localStorage.getItem(getStorageKey('placed_furniture')) || "[]");
             const target = placedFurniture.find(f => f.id === itemId);
             if (target) {
                 target.x = finalX;
                 target.y = finalY;
-                localStorage.setItem(`${currentProfile}_placed_furniture`, JSON.stringify(placedFurniture));
+                localStorage.setItem(getStorageKey('placed_furniture'), JSON.stringify(placedFurniture));
             }
 
             activeDragElement = null;
@@ -362,7 +407,7 @@ function clearRoom() {
     if (!confirm("방에 있는 모든 가구를 다시 보관함으로 집어넣을까요? (구매한 가구는 사라지지 않아요!)")) return;
     
     // 배치 정보만 가방에서 삭제
-    localStorage.removeItem(`${currentProfile}_placed_furniture`);
+    localStorage.removeItem(getStorageKey('placed_furniture'));
     
     // 화면 새로고침해서 깨끗한 방 보여주기
     renderRoomFurniture();
