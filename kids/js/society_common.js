@@ -456,6 +456,15 @@ window.societyToggleOrder = function() {
 // ========================================================
 // 🖌️ 각 세부 파트별 학습 UI 렌더링 팩토리
 // ========================================================
+window.resetSocietyVocaMasterAndReload = function() {
+    if (confirm("정말로 모든 용어 마스터(3회 정답) 기록을 지우고 처음부터 다시 시작할까요?")) {
+        localStorage.removeItem(`society_voca_master_${currentUserName}`);
+        alert("학습 기록이 초기화되었습니다! 다시 신나게 풀어볼까요?");
+        closeMissionView();
+        setTimeout(() => openMissionView('voca'), 300);
+    }
+};
+
 function renderSectionUI(type, container) {
     container.innerHTML = "";
     

@@ -273,10 +273,10 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
   let levelPropName = `${subjectName} 레벨`;   // 기본: "사회 레벨"
   let dailyPropName = `오늘 획득_${subjectName}`; // 기본: "오늘 획득_사회"
 
-  // 용어방에서 호출했을 경우 덮어쓰기 (레벨 칼럼은 없으므로 null 처리)
+  let vocaExpPropName = null;
+  // 용어방에서 호출했을 경우, 메인 경험치와 용어 경험치 쌍끌이(동시 누적) 적용
   if (customExpType === 'voca') {
-      expPropName = `용어 경험치_${subjectName}`; // "용어 경험치_사회"
-      levelPropName = null; // 대장님 기획대로 용어 레벨은 노션으로 전송하지 않음!
+      vocaExpPropName = `용어 경험치_${subjectName}`; // "용어 경험치_사회"
   }
 
   const DAILY_LIMIT = 100; // 하루 보상 획득 상한선 (필요시 수정)
@@ -342,7 +342,7 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     
     let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
     let currentWealth = previousWealth + allowedCurrency;
-    let newExp = currentExp + earned; // 경험치는 깎이지 않고 순수하게 모두 오르게 처리
+    let newExp = currentExp + earned; // 메인 경험치는 깎이지 않고 순수하게 모두 오르게 처리
     
     const prevLevelInfo = calculateLevelInfo(currentExp);
     const currLevelInfo = calculateLevelInfo(newExp);
@@ -350,7 +350,7 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
     let newTickets = tickets + earnedTickets;
 
-    // 📦 5. 노션 업데이트 보따리 (없는 칼럼은 빼고 전송!)
+    // 📦 5. 노션 업데이트 보따리 (기본 공통 칼럼)
     let updateProps = { 
         "소원권 개수": { number: newTickets },
         [expPropName]: { number: newExp },
@@ -359,6 +359,30 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     
     if (levelPropName) {
         updateProps[levelPropName] = { number: currLevelInfo.level };
+    }
+
+    // 💡 용어(보카)방 전용 쌍끌이 보상 및 용어레벨(평균) 계산 
+    if (vocaExpPropName) {
+        let currentVocaExp = props[vocaExpPropName]?.number || 0;
+        let newVocaExp = currentVocaExp + earned;
+        updateProps[vocaExpPropName] = { number: newVocaExp };
+        
+        // 전체 과목의 용어레벨 평균 계산
+        const subjects = ["국어", "수학", "영어", "사회", "과학"];
+        let totalVocaLevel = 0;
+        let subjectCount = 5; // 평균을 낼 대상 과목 수
+        
+        for (const sub of subjects) {
+            let exp = props[`용어 경험치_${sub}`]?.number || 0;
+            if (sub === subjectName) {
+                exp = newVocaExp; // 방금 얻은 최신 용어 경험치로 치환
+            }
+            const levelInfo = calculateLevelInfo(exp);
+            totalVocaLevel += levelInfo.level;
+        }
+        
+        const averageVocaLevel = Math.floor(totalVocaLevel / subjectCount);
+        updateProps["용어레벨"] = { number: averageVocaLevel }; // [용어레벨] 필드에 평균값 매핑
     }
     
     if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth };
