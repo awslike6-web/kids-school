@@ -6,9 +6,6 @@
 // 💡 전역 만능 헬퍼에게 이 방이 '수학' 방임을 알립니다.
 window.currentSubject = "수학";
 
-// 1️⃣ 노션 API 설정
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12"; 
-
 // 2️⃣ 사용자 프로필 & 테마 관리
 let currentProfile = localStorage.getItem('currentUser') || 'son'; 
 let currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';

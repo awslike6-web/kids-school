@@ -164,7 +164,7 @@ async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
                 ${isLevelUp ? `<br><br><span style="font-size:1.3rem; color:#FF6B9D; font-weight:bold;">🎉 국어 레벨 업! Lv.${currLevelInfo.level} 🎉</span>` : ''}
                 ${earnedTickets > 0 ? `<br><br><span style="font-size:1.2rem; color:#FFD700; font-weight:bold;">🎫 소원권 ${earnedTickets}장 추가 획득!!</span>` : ''}
                 <br><br>
-                <button onclick="location.href='../lobby.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: #4CAF50; color: white; cursor: pointer; font-weight: bold;">대형 로비로 돌아가기</button>
+                <button onclick="location.href=window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: #4CAF50; color: white; cursor: pointer; font-weight: bold;">대형 로비로 돌아가기</button>
             `);
         }
         return { allowedCurrency, currentWealth, currLevelInfo, isLevelUp };
@@ -172,7 +172,7 @@ async function grantRewardAndShowUI(earnedPoints, isSilent = false) {
     } catch (err) {
         console.error("보상 시스템 오류:", err);
         if (!isSilent) {
-            updateRewardModal(`❌ 보상 저장 실패. 아빠에게 알려주세요!<br><br><button onclick="location.href='../lobby.html'">그냥 나가기</button>`);
+            updateRewardModal(`❌ 보상 저장 실패. 아빠에게 알려주세요!<br><br><button onclick="location.href=window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'">그냥 나가기</button>`);
         }
         return false;
     }
