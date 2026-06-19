@@ -24,7 +24,7 @@ var FAIRY_CONFIG = {
         name: "공식요정 🧙‍♂️",
         greeting: "안녕! 나는 수학 공식요정이야! 어떤 문제가 널 괴롭히고 있니?",
         systemPrompt: "너는 수학 문제를 푸는 아이들에게 정답을 주지 않고, 관련된 공식을 힌트로 던져주는 친절한 공식요정이다."
-    }
+    },
     // SOCIETY, SCIENCE 등 무한 확장 가능!
     SOCIETY: {
         name: "탐험요정 코코 🧭",
