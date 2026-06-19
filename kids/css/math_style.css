@@ -160,7 +160,12 @@ body::before {
 
 /* 🖨️ 프린트 전용 레이아웃 */
 @media print {
-  body { background: white !important; color: black; }
+  @page { size: A4; margin: 0; }
+  body { 
+      background: white !important; 
+      color: black; 
+      margin: 15mm 20mm !important; 
+  }
   body::before { display: none; }
   
   /* 불필요한 UI 전체 숨김 */
