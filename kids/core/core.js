@@ -153,11 +153,7 @@ window.addEventListener("beforeunload", () => {
         const subjectName = window.currentSubject || "사회"; // 동적 과목명 참조
         sendStudyLogToNotion({
             childName: userName,
-            subject: subjectName,
-            startTime: new Date().toISOString(),
-            endTime: new Date().toISOString(),
-            durationMinutes: 5,
-            errorReport: `${subjectName} 섭렵 돋보기 완료`
+            subject: subjectName
         });
     }
 });
