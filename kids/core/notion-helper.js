@@ -398,6 +398,12 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
                 <br><br>
                 <button onclick="location.href=window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'" style="padding: 10px 20px; font-size: 1.1rem; border: none; border-radius: 8px; background-color: #4CAF50; color: white; cursor: pointer; font-weight: bold;">대형 로비로 돌아가기</button>
             `);
+            
+            // 여기서 화면에 띄우기 (만약 닫혀있었다면)
+            const modal = document.getElementById('rewardModal');
+            if (modal) {
+                modal.style.display = 'block';
+            }
         } 
         // 2️⃣ 수학방 r-detail UI가 있다면 활용
         else if (document.getElementById('r-detail')) {
@@ -443,7 +449,8 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
   } catch (err) {
     console.error("❌ 보상 저장 오류:", err);
     if (!isSilent) {
-        if (typeof updateRewardModal === 'function') {
+        if (typeof updateRewardModal === 'function' && typeof showRewardModal === 'function') {
+            showRewardModal(`<div id="rewardModalContent">보상 처리 중...</div>`);
             updateRewardModal(`
                 <div style="color: #ff073a; font-weight: bold; font-size: 1.1rem; line-height: 1.5;">
                 ❌ 노션 보상 저장 실패!<br>
@@ -462,7 +469,7 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
                 </div>
             `);
         } else {
-            alert("❌ 보상 저장 실패! 노션 DB에 칼럼이 부족합니다. (F12 콘솔창 확인)");
+            alert("❌ 보상 저장 실패! 노션 DB에 칼럼이 부족합니다. (F12 콘솔창 확인)\n에러 상세: " + err.message);
         }
     }
     return false;

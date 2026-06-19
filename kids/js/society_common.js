@@ -465,7 +465,7 @@ function renderSectionUI(type, container) {
                 <div style="text-align:center; padding: 40px 20px;">
                     <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                     <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
-                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="resetSocietyVocaMasterAndReload()">🔄 처음부터 다시 풀기 (학습 리셋)</button>
+                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="triggerAwardDispense(${activeQuizIdx > 0 ? activeQuizIdx * 2 : 10}, 'voca'); closeMissionView(); resetSocietyVocaMasterAndReload()">🎁 보상 받고 학습 리셋하기</button>
                 </div>`;
         } else {
             container.innerHTML = `<p style="text-align:center; padding: 20px;">가용할 수 있는 학습 데이터가 비어 있습니다.</p>`;
