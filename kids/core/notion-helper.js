@@ -384,7 +384,7 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
         }
         
         const averageVocaLevel = Math.floor(totalVocaLevel / subjectCount);
-        updateProps["용어레벨"] = { number: averageVocaLevel }; // [용어레벨] 필드에 평균값 매핑
+        updateProps["용어 레벨"] = { number: averageVocaLevel }; // [용어 레벨] 필드에 평균값 매핑
     }
     
     if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth };
