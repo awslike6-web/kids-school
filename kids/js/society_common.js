@@ -544,15 +544,64 @@ function renderSectionUI(type, container) {
             </div>
         `;
 
+        const answerWord = currentItem.word;
+        const wordLength = answerWord.replace(/\s/g, '').length;
+        
+        let interactiveHtml = '';
+        
+        if (wordLength >= 5) {
+            // 💡 1순위: 5글자 이상이면 무조건 [글자 자석 빈칸 채우기 UI]
+            const chars = answerWord.split('').filter(c => c.trim() !== '');
+            const scrambled = [...chars].sort(() => Math.random() - 0.5);
+            
+            window.currentMagnetAnswer = [];
+            window.magnetTargetWord = answerWord;
+            window.magnetScrambled = scrambled;
+            
+            interactiveHtml = `
+                <div id="magnet-blanks" style="font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; min-height: 40px; display: flex; justify-content: center; gap: 5px;">
+                    ${answerWord.split('').map(c => c.trim() === '' ? '<span style="width:15px;"></span>' : '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>').join('')}
+                </div>
+                <div id="magnet-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                    ${scrambled.map((l, i) => `<button id="magnet-btn-${i}" class="quiz-choice-btn" style="padding: 10px 20px; font-size: 1.5rem;" onclick="selectVocaMagnet('${l}', ${i})">${l}</button>`).join('')}
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="quiz-button" style="background:#ff9f43;" onclick="resetVocaMagnets()">다시 조합하기</button>
+                    <button class="quiz-button" onclick="verifyVocaMagnet()">정답 확인</button>
+                </div>
+            `;
+        } else if (wordLength >= 3) {
+            // 💡 2순위: 3글자나 4글자면 [객관식 삼지선다 UI]
+            const choices = [answerWord];
+            const otherWords = allFetchedRecords.filter(r => r.word !== answerWord).map(r => r.word);
+            otherWords.sort(() => Math.random() - 0.5);
+            choices.push(otherWords[0] || "오답1");
+            choices.push(otherWords[1] || "오답2");
+            choices.sort(() => Math.random() - 0.5);
+            
+            interactiveHtml = `
+                <div class="quiz-choices-container" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                    ${choices.map((choice, i) => `
+                         <button class="quiz-choice-btn" onclick="verifyVocaChoice('${choice}')">${choice}</button>
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            // 💡 3순위: 1~2글자 짧은 단어는 기존대로 [직접 주관식 타이핑 UI]
+            interactiveHtml = `
+                <div class="interactive-input-group">
+                    <input type="text" class="text-input-field" id="vocaAnswerInput" placeholder="정답 한글 낱말을 입력하세요!" onkeypress="if(event.key==='Enter') verifyVocaAnswer()">
+                    <button class="quiz-button" onclick="verifyVocaAnswer()">정답 확인</button>
+                </div>
+            `;
+        }
+
         screenWrapper.innerHTML = `
             ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
             <div class="quiz-descr">${currentItem.desc}</div>
-            <div class="interactive-input-group">
-                <input type="text" class="text-input-field" id="vocaAnswerInput" placeholder="정답 한글 낱말을 입력하세요!" onkeypress="if(event.key==='Enter') verifyVocaAnswer()">
-                <button class="quiz-button" onclick="verifyVocaAnswer()">정답 확인</button>
-            </div>
+            ${interactiveHtml}
             <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
                 <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc}')">🔊 설명 한번 더 읽기</button>
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
@@ -679,6 +728,31 @@ function renderMuseumGridDock() {
 // ========================================================
 // ✏️ 문제 검증 및 포인트 보상 지급 모듈
 // ========================================================
+window.handleVocaCorrect = function() {
+    const wordKey = activeSectionData[activeQuizIdx].word;
+    societyVocaMasterCountMap[wordKey] = (societyVocaMasterCountMap[wordKey] || 0) + 1;
+    localStorage.setItem(`society_voca_master_${currentUserName}`, JSON.stringify(societyVocaMasterCountMap));
+
+    // 💡 3번 맞추면 노션 DB의 [달성] 체크박스 true 갱신
+    if (societyVocaMasterCountMap[wordKey] >= 3) {
+        const pageId = activeSectionData[activeQuizIdx].pageId;
+        if (typeof updateVocaMasteryStatus === 'function') {
+            updateVocaMasteryStatus(pageId, true);
+            activeSectionData[activeQuizIdx].isMastered = true; // 로컬 메모리도 달성 상태로 변경
+        }
+    }
+
+    setTimeout(() => skipToNextQuiz('voca'), 1200);
+}
+
+window.handleVocaWrong = function(wrongInput) {
+    if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
+    window.wrongNotes.push({
+        word: activeSectionData[activeQuizIdx].word,
+        wrongInput: wrongInput
+    });
+}
+
 function verifyVocaAnswer() {
     const input = document.getElementById('vocaAnswerInput');
     const answer = input.value.trim().replace(/\s/g, '');
@@ -687,38 +761,84 @@ function verifyVocaAnswer() {
     if (answer === correctTarget) {
         input.classList.add('correct-glow');
         speakFairyTTS("정답이야! 아주 잘했어!");
-        
-        // 마스터 카운트 증가 로직
-        const wordKey = activeSectionData[activeQuizIdx].word;
-        societyVocaMasterCountMap[wordKey] = (societyVocaMasterCountMap[wordKey] || 0) + 1;
-        localStorage.setItem(`society_voca_master_${currentUserName}`, JSON.stringify(societyVocaMasterCountMap));
-
-        // 💡 3번 맞추면 노션 DB의 [달성] 체크박스 true 갱신
-        if (societyVocaMasterCountMap[wordKey] >= 3) {
-            const pageId = activeSectionData[activeQuizIdx].pageId;
-            if (typeof updateVocaMasteryStatus === 'function') {
-                updateVocaMasteryStatus(pageId, true);
-                activeSectionData[activeQuizIdx].isMastered = true; // 로컬 메모리도 달성 상태로 변경
-            }
-        }
-
-        setTimeout(() => skipToNextQuiz('voca'), 1200);
+        handleVocaCorrect();
     } else {
         input.classList.add('wrong-shake');
         speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-        
-        // 오답 기록 추가
-        if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
-        window.wrongNotes.push({
-            word: activeSectionData[activeQuizIdx].word,
-            wrongInput: input.value
-        });
+        handleVocaWrong(input.value);
         
         setTimeout(() => {
             input.classList.remove('wrong-shake');
             input.value = "";
             input.focus();
         }, 800);
+    }
+}
+
+window.verifyVocaChoice = function(selectedWord) {
+    const correctTarget = activeSectionData[activeQuizIdx].word;
+    if (selectedWord === correctTarget) {
+        speakFairyTTS("정답이야! 아주 잘했어!");
+        handleVocaCorrect();
+    } else {
+        speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+        handleVocaWrong(selectedWord);
+    }
+}
+
+window.selectVocaMagnet = function(letter, idx) {
+    const btn = document.getElementById(`magnet-btn-${idx}`);
+    if (btn.style.visibility === 'hidden') return;
+    btn.style.visibility = 'hidden';
+    window.currentMagnetAnswer.push({ letter, idx });
+    renderVocaMagnetBlanks();
+}
+
+window.renderVocaMagnetBlanks = function() {
+    const container = document.getElementById('magnet-blanks');
+    if (!container) return;
+    let html = '';
+    let answerIdx = 0;
+    for (let i = 0; i < window.magnetTargetWord.length; i++) {
+        const char = window.magnetTargetWord[i];
+        if (char.trim() === '') {
+            html += '<span style="width:15px;"></span>';
+        } else {
+            if (answerIdx < window.currentMagnetAnswer.length) {
+                html += `<span style="border-bottom:3px solid var(--primary); width:30px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold;">${window.currentMagnetAnswer[answerIdx].letter}</span>`;
+                answerIdx++;
+            } else {
+                html += '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>';
+            }
+        }
+    }
+    container.innerHTML = html;
+}
+
+window.resetVocaMagnets = function() {
+    window.currentMagnetAnswer.forEach(item => {
+        const btn = document.getElementById(`magnet-btn-${item.idx}`);
+        if (btn) btn.style.visibility = 'visible';
+    });
+    window.currentMagnetAnswer = [];
+    renderVocaMagnetBlanks();
+}
+
+window.verifyVocaMagnet = function() {
+    const answerStr = window.currentMagnetAnswer.map(item => item.letter).join('');
+    const correctTarget = window.magnetTargetWord.replace(/\s/g, '');
+    
+    if (answerStr === correctTarget) {
+        speakFairyTTS("정답이야! 아주 잘했어!");
+        handleVocaCorrect();
+    } else {
+        speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+        handleVocaWrong(answerStr);
+        const container = document.getElementById('magnet-blanks');
+        if (container) {
+            container.classList.add('wrong-shake');
+            setTimeout(() => container.classList.remove('wrong-shake'), 800);
+        }
     }
 }
 
