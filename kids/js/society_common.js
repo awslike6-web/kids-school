@@ -545,12 +545,15 @@ function renderSectionUI(type, container) {
         `;
 
         const answerWord = currentItem.word;
-        const wordLength = answerWord.replace(/\s/g, '').length;
+        const wordsArray = answerWord.trim().split(/\s+/);
+        const wordCount = wordsArray.length;
+        const totalLength = answerWord.replace(/\s/g, '').length; // 띄어쓰기를 제외한 순수 글자 수
         
         let interactiveHtml = '';
         
-        if (wordLength >= 5) {
-            // 💡 1순위: 5글자 이상이면 무조건 [글자 자석 빈칸 채우기 UI]
+        if (wordCount === 1 && totalLength >= 5) {
+            // 💡 조건 1: 띄어쓰기 없는 '1개 단어'인데 5글자 이상인 경우 (예: 조선왕국전도)
+            // ➔ 낱말 카드 툭툭 고르는 [빈칸 채우기 UI]
             const chars = answerWord.split('').filter(c => c.trim() !== '');
             const scrambled = [...chars].sort(() => Math.random() - 0.5);
             
@@ -570,8 +573,9 @@ function renderSectionUI(type, container) {
                     <button class="quiz-button" onclick="verifyVocaMagnet()">정답 확인</button>
                 </div>
             `;
-        } else if (wordLength >= 3) {
-            // 💡 2순위: 3글자나 4글자면 [객관식 삼지선다 UI]
+        } else if (wordCount >= 3) {
+            // 💡 조건 2: 띄어쓰기가 있는 답 중 '3단어 이상' 결합된 경우 (예: 장애물 없는 생활 환경 인증 제도)
+            // ➔ 보기에서 고르는 [객관식 문제 UI]
             const choices = [answerWord];
             const otherWords = allFetchedRecords.filter(r => r.word !== answerWord).map(r => r.word);
             otherWords.sort(() => Math.random() - 0.5);
@@ -587,7 +591,8 @@ function renderSectionUI(type, container) {
                 </div>
             `;
         } else {
-            // 💡 3순위: 1~2글자 짧은 단어는 기존대로 [직접 주관식 타이핑 UI]
+            // 💡 조건 3: 4글자 이하 단어이거나, 2단어 이하 결합인 경우 (기존 청정 규격)
+            // ➔ 얄짤없이 뇌를 자극하는 [기존 주관식 타이핑 UI]
             interactiveHtml = `
                 <div class="interactive-input-group">
                     <input type="text" class="text-input-field" id="vocaAnswerInput" placeholder="정답 한글 낱말을 입력하세요!" onkeypress="if(event.key==='Enter') verifyVocaAnswer()">
