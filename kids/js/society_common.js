@@ -501,7 +501,7 @@ function renderSectionUI(type, container) {
                 <div style="text-align:center; padding: 40px 20px;">
                     <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                     <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
-                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="triggerAwardDispense(${activeQuizIdx > 0 ? activeQuizIdx * 2 : 10}, 'voca'); closeMissionView(); resetSocietyVocaMasterAndReload()">🎁 보상 받고 학습 리셋하기</button>
+                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="triggerAwardDispense(${activeQuizIdx > 0 ? activeQuizIdx * 2 : 10}, 'voca'); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '사회' }); closeMissionView(); resetSocietyVocaMasterAndReload()">🎁 보상 받고 학습 리셋하기</button>
                 </div>`;
         } else {
             container.innerHTML = `<p style="text-align:center; padding: 20px;">가용할 수 있는 학습 데이터가 비어 있습니다.</p>`;
@@ -509,7 +509,7 @@ function renderSectionUI(type, container) {
         return;
     }
 
-    // 10문제 커트라인 체크 팝업 (용어방 전용)
+        // 10문제 커트라인 체크 팝업 (용어방 전용)
     if (type === 'voca' && activeQuizIdx > 0 && activeQuizIdx % 10 === 0 && !window.societyVocaContinueFlag) {
         container.innerHTML = `
             <div class="screen loaded quiz-card" style="text-align:center; padding: 40px 20px;">
@@ -517,7 +517,7 @@ function renderSectionUI(type, container) {
                 <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 풀었어요!</h2>
                 <p style="font-size:1.2rem; color:#666; margin-bottom:30px;">여기서 멈추고 보상을 받을까요?<br>아니면 끝까지 계속 탐험할까요?</p>
                 <div style="display:flex; justify-content:center; gap:15px;">
-                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="triggerAwardDispense(${activeQuizIdx * 2}, 'voca'); closeMissionView();">🎁 여기서 보상 받기</button>
+                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="triggerAwardDispense(${activeQuizIdx * 2}, 'voca'); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '사회' }); closeMissionView();">🎁 여기서 보상 받기</button>
                     <button class="back-to-lobby-btn" style="background:#6EC6F5; color:white;" onclick="window.societyVocaContinueFlag=true; renderSectionUI('${type}', document.getElementById('overlayInnerBody'));">🚀 계속 이어서 풀기</button>
                 </div>
             </div>
@@ -547,12 +547,12 @@ function renderSectionUI(type, container) {
         const answerWord = currentItem.word;
         const wordsArray = answerWord.trim().split(/\s+/);
         const wordCount = wordsArray.length;
-        const totalLength = answerWord.replace(/\s/g, '').length; // 띄어쓰기를 제외한 순수 글자 수
+        const totalLength = answerWord.length; // 띄어쓰기 포함 전체 글자 수
         
         let interactiveHtml = '';
         
-        if (wordCount === 1 && totalLength >= 5) {
-            // 💡 조건 1: 띄어쓰기 없는 '1개 단어'인데 5글자 이상인 경우 (예: 조선왕국전도)
+        if (wordCount === 1 && totalLength > 5) {
+            // 💡 조건 1: 띄어쓰기 없는 '1개 단어'인데 5글자가 넘는 경우 (예: 조선왕국전도)
             // ➔ 낱말 카드 툭툭 고르는 [빈칸 채우기 UI]
             const chars = answerWord.split('').filter(c => c.trim() !== '');
             const scrambled = [...chars].sort(() => Math.random() - 0.5);
@@ -903,6 +903,12 @@ function skipToNextQuiz(type) {
     if (type !== 'voca' && activeQuizIdx >= activeSectionData.length) {
         speakFairyTTS("모든 미션 코스가 우수하게 완결되었습니다! 박수 드려요. 대합실로 복귀합니다.");
         alert("🏆 축하합니다! 이 구역의 모든 사회 탐구 단계를 완료하셨습니다!");
+        
+        // 📝 학습 일지 기록 헬퍼 호출
+        if (typeof sendStudyLogToNotion === 'function') {
+            sendStudyLogToNotion({ subject: "사회" });
+        }
+        
         closeMissionView();
     } else {
         renderSectionUI(type, innerBody);
