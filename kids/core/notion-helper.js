@@ -182,7 +182,7 @@ async function sendStudyLogToNotion(options = {}) {
         }).join(' / ') : "오답 없음";
     }
     
-    const wordFairyCount = options.wordFairyCount || 0;
+    const wordFairyCount = options.wordFairyCount || window.wordFairyCount || (window.learningSession ? window.learningSession.fairyClickCount : 0) || 0;
 
     console.log(`🚀 [학습일지 배달 시작] 학생: ${childName} | 과목: ${subject}`);
 

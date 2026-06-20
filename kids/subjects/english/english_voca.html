@@ -361,6 +361,7 @@ function startQuiz(mode) {
 
   const shuffled = [...filteredWords].sort(() => Math.random() - 0.5).slice(0, 10);
   quizState = { mode: mode, pool: shuffled, current: 0, score: 0, isWrongMode: false };
+  window.engWrongNotes = []; // 학습일지 전송용 오답 초기화
   showScreen('screen-quiz'); loadQuestion();
 }
 
@@ -368,6 +369,7 @@ function startWrongWords() {
   if(wrongWords.length === 0) return alert('틀린 단어가 없어요! 🎉');
   const shuffled = [...wrongWords].sort(() => Math.random() - 0.5).slice(0, 10);
   quizState = { mode: 'toEnglish', pool: shuffled, current: 0, score: 0, isWrongMode: true };
+  window.engWrongNotes = []; // 학습일지 전송용 오답 초기화
   showScreen('screen-quiz'); loadQuestion();
 }
 
@@ -440,6 +442,14 @@ function submitAnswer() {
   } else {
     inputEl.className = "main-input wrong";
     saveWrongWord(qData);
+    
+    // 학습일지 전송을 위한 이번 세션 오답 기록
+    if (window.engWrongNotes) {
+        if (!window.engWrongNotes.some(item => item.word === qData.word)) {
+            window.engWrongNotes.push({ word: qData.word, wrongInput: inputVal });
+        }
+    }
+    
     setTimeout(() => { inputEl.className = "main-input"; inputEl.value = ''; }, 800);
   }
 }
