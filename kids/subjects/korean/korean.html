@@ -3,68 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민이네 국어방 본부 📚</title>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-<style>
-    :root {
-        --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
-        --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77; --white: #FFFEF7; --dark: #2D2D4E; --card: rgba(255,255,255,0.92);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--dark); transition: background 0.5s; }
-    
-    body.theme--slime { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); }
-    body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%); }
-    
-    .hub-card { position: relative; background: var(--card); border-radius: 24px; padding: 30px; width: 100%; max-width: 480px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); border: 2.5px solid rgba(255,255,255,0.8); text-align: center; z-index: 1; }
-    .main-title { font-family: 'Gaegu', cursive; font-size: 3rem; margin-bottom: 10px; }
-    .main-title span { color: var(--pink); }
-    .user-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: rgba(0,0,0,0.05); font-size: 0.95rem; margin-bottom: 25px; font-weight: bold; }
-    
-    .gate-btn { width: 100%; padding: 18px; border-radius: 16px; border: none; font-family: 'Jua'; font-size: 1.2rem; color: #fff; cursor: pointer; margin-bottom: 12px; transition: transform 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
-    .gate-btn.sentence { background: linear-gradient(135deg, var(--sky), var(--purple)); }
-    .gate-btn.reading { background: linear-gradient(135deg, var(--orange), var(--pink)); }
-    .gate-btn.voca-btn { background: linear-gradient(135deg, var(--mint), var(--sky)); }
-    .gate-btn.dictation-btn { background: linear-gradient(135deg, var(--purple), var(--pink)); }
-    .gate-btn:hover { transform: scale(1.03); }
-    .back-btn { background: #eee; color: #888; width: 100%; padding: 14px; border-radius: 16px; border: none; font-family: 'Jua'; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-    .profile-switch-btn { position: absolute; top: 15px; right: 15px; background: #fff; border: 2px solid var(--purple); padding: 6px 12px; border-radius: 12px; cursor: pointer; font-family: 'Jua'; font-size: 0.85rem; z-index: 10; }
-</style>
+<title>민민이네 공부방 - 국어 멀티버스</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/korean.css">
 </head>
 <body>
 
-<button class="profile-switch-btn" onclick="toggleProfileManually()">🔄 민수/민서 바꾸기</button>
+<div class="korean-container">
+  
+  <div class="top-action-bar">
+    <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
+        🔊 요정 음성 ON
+      </button>
+      <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
+    </div>
+  </div>
 
-<div class="hub-card">
-    <h1 class="main-title">📚 국어 <span>본부</span></h1>
-    <div class="user-badge" id="currentUserBadge">현재 사용자: 로딩 중...</div>
+  <div class="main-header-card">
+    <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
+    <h1 id="koreanTitle">민수의 국어 멀티버스 대기실</h1>
+    <p class="banner-goal-desc" id="koreanGoalText">국어의 달인이 되어보자!</p>
+  </div>
 
-    <button class="gate-btn sentence" onclick="location.href='korean-sentence.html'">⌨️ AI 문장 학습방</button>
-    <button class="gate-btn reading" onclick="location.href='korean-reading.html'">📖 정밀 독해 멀티버스방</button>
-   <!-- ✅ 이걸로 교체! (방금 만든 전용 퀴즈방으로 직통 연결) -->
-<button class="gate-btn voca-btn" onclick="location.href='korean_voca.html'">📚 국어 단어장</button>
-<button class="gate-btn dictation-btn" onclick="location.href='korean_dictation.html'">✍️ 받아쓰기 훈련소</button>
+  <div class="korean-grid">
     
-    <button class="back-btn" onclick="location.href='../../../lobby.html'">🚪 메인 로비로 나가기</button>
+    <div class="korean-grid-btn" onclick="openMissionView('sentence')">
+      <span class="korean-btn-icon">⌨️</span>
+      <div class="korean-btn-title">AI 문장 학습방</div>
+      <p class="korean-btn-desc">요정 코코와 함께 나만의 멋진 문장을 만들어보며 표현력을 길러요!</p>
+    </div>
+
+    <div class="korean-grid-btn" onclick="openMissionView('reading')">
+      <span class="korean-btn-icon">📖</span>
+      <div class="korean-btn-title">정밀 독해 멀티버스방</div>
+      <p class="korean-btn-desc">재미있는 글을 읽고 퀴즈를 풀며 문해력을 쑥쑥 키워보아요!</p>
+    </div>
+
+    <div class="korean-grid-btn" onclick="openMissionView('voca')">
+      <span class="korean-btn-icon">📚</span>
+      <div class="korean-btn-title">국어 용어방</div>
+      <p class="korean-btn-desc">교과서 속 핵심 국어 용어들의 뜻을 정확하게 알아맞혀 보세요!</p>
+    </div>
+
+    <div class="korean-grid-btn" onclick="openMissionView('dictation')">
+      <span class="korean-btn-icon">✍️</span>
+      <div class="korean-btn-title">받아쓰기 훈련소</div>
+      <p class="korean-btn-desc">코코가 불러주는 문장을 잘 듣고 정확하게 받아쓰는 연습을 해요!</p>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="korean-overlay" id="missionOverlay">
+  <div class="korean-overlay-box">
+    <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
+    
+    <div class="overlay-header">
+      <span id="overlayHeaderIcon" style="font-size: 1.8rem;">📖</span>
+      <h2 class="overlay-heading" id="overlayHeaderTitle">미션 타이틀</h2>
+    </div>
+
+    <div class="overlay-body" id="overlayInnerBody">
+      <!-- 동적 콘텐츠 렌더링 영역 -->
+    </div>
+  </div>
 </div>
 
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
 <script src="../../core/notion-helper.js"></script>
-<script src="../../core/fairy-chatbot.js"></script>  
+<script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
+<script src="../../data/korean-reading-data.js"></script>
 <script src="../../js/korean_common.js"></script>
 
 <script>
-    window.addEventListener('load', () => {
-        console.log("국어방 관제탑 엔진 시동 완료! 🚀");
-        
-        const badge = document.getElementById('currentUserBadge');
-        const themeClass = window.currentTheme === '슬라임' ? 'theme--slime' : 'theme--minecraft';
-        document.body.className = themeClass;
-        
-        badge.innerHTML = `현재 사용자: ${window.currentProfile === 'son' ? '👦' : '👧'} ${window.currentUserName} (${window.currentTheme} 모드)`;
-    });
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initializeKoreanRoom === 'function') {
+        initializeKoreanRoom();
+    } else {
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--minecraft' : 'theme--slime';
+    }
+
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("KOREAN");
+    }
+  });
 </script>
 </body>
 </html>

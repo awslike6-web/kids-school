@@ -150,6 +150,26 @@ async function fetchVocaFromNotion(options = {}) {
     }
 }
 
+async function fetchLibraryBooksFromNotion() {
+    const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee";
+    try {
+        const response = await fetch(`${PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filter: { property: "추천 여부", checkbox: { equals: true } },
+                page_size: 3
+            })
+        });
+        if (!response.ok) throw new Error(`노션 도서관 DB 통신 오류 (상태: ${response.status})`);
+        const data = await response.json();
+        return data.results || [];
+    } catch (error) {
+        console.error("[fetchLibraryBooksFromNotion] 로딩 실패:", error);
+        throw error;
+    }
+}
+
 // 🕒 전역 학습 시작 시간 자동 기록
 window.roomStartTime = window.roomStartTime || new Date();
 
