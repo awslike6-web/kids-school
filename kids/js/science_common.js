@@ -7,7 +7,7 @@ window.currentSubject = "과학"; // 전역 과목명 명시 (보상 및 학습�
 // ========================================================
 const SCIENCE_MOCK_DATA = {
     voca: [
-        { word: "뼈와 근육", hint: "ㅃㅇ ㄱㅇ", meaning: "우리 몸의 형태를 유지하고 움직이게 하는 기관입니다.", desc: "뼈는 몸을 지탱하고 내장을 보호하며, 근육은 뼈에 붙어 몸을 움직이게 합니다." },
+        { word: "뼈와 근육", hint: "ㅃㅇ ㄱㅇ", meaning: "우리 몸의 형태를 유지하고 움직이게 하는 기관입니다.", desc: "뼈는 몸을 지탱하고 내장을 보호하며, 근육은 뼈에 붙어 몸을 움직이게 합니다.", image: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=500&auto=format&fit=crop" },
         { word: "소화 기관", hint: "ㅅㅎ ㄱㄱ", meaning: "음식물을 잘게 쪼개어 영양소를 흡수하는 기관입니다.", desc: "입, 식도, 위, 작은창자, 큰창자, 항문 등이 소화 기관에 속합니다." },
         { word: "순환 기관", hint: "ㅅㅎ ㄱㄱ", meaning: "심장과 혈관을 통해 온몸으로 혈액을 이동시키는 기관입니다.", desc: "혈액은 영양소와 산소를 온몸으로 운반하고, 노폐물을 거두어옵니다." },
         { word: "호흡 기관", hint: "ㅎㅎ ㄱㄱ", meaning: "산소를 들이마시고 이산화 탄소를 내보내는 기관입니다.", desc: "코, 기관, 기관지, 폐가 호흡 기관에 속하며 생명 유지에 필수적입니다." },
@@ -106,6 +106,13 @@ function renderSectionUI() {
     const currentItem = activeSectionData[activeQuizIdx];
     const answerWord = currentItem.word;
     
+    const imageUrl = currentItem.imageUrl || currentItem.image || currentItem.img;
+    const imageHtml = imageUrl ? `
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+        </div>
+    ` : '';
+    
     // 💡 대장님의 [띄어쓰기 유무 및 단어 개수 기반 자동 퀴즈 UI 스위칭 알고리즘]
     const wordsArray = answerWord.trim().split(/\s+/);
     const wordCount = wordsArray.length; // 띄어쓰기로 구분된 단어 개수
@@ -168,6 +175,7 @@ function renderSectionUI() {
         <div class="quiz-card">
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">미션 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
+            ${imageHtml}
             <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold; color: var(--text-main);">${currentItem.meaning}</div>
             <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd;">
                 <summary style="cursor: pointer; font-weight: bold; color: var(--primary);">💡 상세설명 (힌트) 보기</summary>
