@@ -42,18 +42,22 @@ function initFairyChat(subject) {
                 🧚
             </button>
             
-            <div id="fairy-chat-panel" style="display: none; position: absolute; bottom: 70px; right: 0; width: 300px; height: 400px; background: #161b22; border: 2px solid #30363d; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; text-align: left;">
-                <div style="background: #ab47bc; padding: 10px; color: white; font-weight: bold; text-align: center; font-size: 1rem;">
-                    ${config.name}
+            <div id="fairy-chat-panel" style="display: none; position: absolute; bottom: 70px; right: 0; width: 320px; height: 450px; background: #161b22; border: 2px solid #30363d; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; text-align: left;">
+                <div style="background: #ab47bc; padding: 10px; color: white; font-weight: bold; text-align: center; font-size: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="flex:1; text-align:center;">${config.name}</span>
+                    <button onclick="toggleFairyWindow()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✖</button>
                 </div>
                 <div id="fairy-messages" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #0d1117;">
                     <div style="background: #21262d; border-left: 4px solid #ab47bc; color: #c9d1d9; padding: 8px; border-radius: 8px; font-size: 0.85rem; align-self: flex-start; max-width: 85%;">
                         ${config.greeting}
                     </div>
                 </div>
-                <div style="padding: 8px; background: #161b22; border-top: 1px solid #30363d; display: flex; gap: 6px;">
-                    <input type="text" id="fairy-input" placeholder="요정에게 말하기..." style="flex: 1; padding: 6px; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: #c9d1d9; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') sendToFairy()">
-                    <button onclick="sendToFairy()" style="background: #ab47bc; color: white; border: none; padding: 0 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">전송</button>
+                <div style="padding: 8px; background: #161b22; border-top: 1px solid #30363d; display: flex; gap: 6px; align-items: center;">
+                    <button id="fairy-mic-btn" onclick="startFairyVoiceInput()" style="background: #ab47bc; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: transform 0.2s;" title="마이크로 말하기">
+                        🎙️
+                    </button>
+                    <input type="text" id="fairy-input" placeholder="요정에게 말하기..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: #c9d1d9; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') sendToFairy()">
+                    <button onclick="sendToFairy()" style="background: #ab47bc; color: white; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">전송</button>
                 </div>
             </div>
         </div>
@@ -61,6 +65,52 @@ function initFairyChat(subject) {
     document.body.insertAdjacentHTML('beforeend', fairyUI);
 }
 window.initFairyChat = initFairyChat;
+
+function startFairyVoiceInput() {
+    const micBtn = document.getElementById('fairy-mic-btn');
+    const inputEl = document.getElementById('fairy-input');
+    
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) {
+        alert("현재 브라우저에서는 마이크 기능이 지원되지 않아요. (크롬 브라우저를 사용해주세요!)");
+        return;
+    }
+
+    const recognition = new Recognition();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function() {
+        micBtn.innerText = "👂";
+        micBtn.style.transform = "scale(1.1)";
+        micBtn.style.backgroundColor = "#e53e3e";
+        inputEl.placeholder = "듣고 있어요...";
+    };
+    
+    recognition.onresult = function(event) {
+        const rawText = event.results[0][0].transcript;
+        inputEl.value = rawText;
+        sendToFairy(); // 음성 인식 완료 시 자동 전송
+    };
+    
+    recognition.onend = function() {
+        micBtn.innerText = "🎙️";
+        micBtn.style.transform = "scale(1)";
+        micBtn.style.backgroundColor = "#ab47bc";
+        inputEl.placeholder = "요정에게 말하기...";
+    };
+    
+    recognition.onerror = function(event) {
+        console.error("음성 인식 오류:", event.error);
+        micBtn.innerText = "🎙️";
+        micBtn.style.backgroundColor = "#ab47bc";
+        inputEl.placeholder = "요정에게 말하기...";
+    };
+    
+    recognition.start();
+}
+window.startFairyVoiceInput = startFairyVoiceInput;
 
 function toggleFairyWindow() {
     const panel = document.getElementById('fairy-chat-panel');
