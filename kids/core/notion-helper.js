@@ -372,19 +372,27 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
         // 전체 과목의 용어레벨 평균 계산
         const subjects = ["국어", "수학", "영어", "사회", "과학"];
         let totalVocaLevel = 0;
-        let subjectCount = 5; // 평균을 낼 대상 과목 수
+        let subjectCount = 0; // 실제로 용어 경험치 칼럼이 존재하는 과목만 카운트
         
         for (const sub of subjects) {
-            let exp = props[`용어 경험치_${sub}`]?.number || 0;
-            if (sub === subjectName) {
-                exp = newVocaExp; // 방금 얻은 최신 용어 경험치로 치환
+            const propName = `용어 경험치_${sub}`;
+            // 노션 DB에 해당 과목의 용어 경험치 칼럼이 존재하는지 확인
+            if (props[propName] !== undefined || sub === subjectName) {
+                let exp = props[propName]?.number || 0;
+                if (sub === subjectName) {
+                    exp = newVocaExp; // 방금 얻은 최신 용어 경험치로 치환
+                }
+                const levelInfo = calculateLevelInfo(exp);
+                totalVocaLevel += levelInfo.level;
+                subjectCount++;
             }
-            const levelInfo = calculateLevelInfo(exp);
-            totalVocaLevel += levelInfo.level;
         }
         
-        const averageVocaLevel = Math.floor(totalVocaLevel / subjectCount);
-        updateProps["용어 레벨"] = { number: averageVocaLevel }; // [용어 레벨] 필드에 평균값 매핑
+        // 유효한 과목이 있을 때만 평균 계산 및 업데이트
+        if (subjectCount > 0) {
+            const averageVocaLevel = Math.floor(totalVocaLevel / subjectCount);
+            updateProps["용어 레벨"] = { number: averageVocaLevel }; // [용어 레벨] 필드에 평균값 매핑
+        }
     }
     
     if (currentTheme === '마인크래프트') updateProps["다이아몬드 개수"] = { number: currentWealth };
