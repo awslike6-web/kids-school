@@ -32,10 +32,12 @@ body.theme--arcade .society-overlay-box { background: rgba(14, 10, 31, 0.96); bo
 body.theme--arcade .quiz-choice-btn { background: rgba(30, 25, 60, 0.9); border: 1.5px solid rgba(0, 242, 254, 0.5); color: #00f2fe; font-weight: bold; text-shadow: 0 0 5px rgba(0, 242, 254, 0.3); }
 body.theme--arcade .quiz-choice-btn:hover { background: #00f2fe; color: #0e0a1f; text-shadow: none; }
 body.theme--arcade .text-input-field { background: #0e0a1f; border-color: #00f2fe; color: #00f2fe; }
-body.theme--arcade .quiz-descr { color: #f1f1fc; text-shadow: 0 0 8px rgba(0, 242, 254, 0.4); }
-body.theme--arcade details { background: rgba(30, 25, 60, 0.8); border: 1px solid rgba(0, 242, 254, 0.3); }
-body.theme--arcade summary { color: #00f2fe; }
-body.theme--arcade details div { color: #e0e0ff !important; }
+body.theme--arcade .quiz-descr { color: #f1f1fc; text-shadow: 0 0 8px rgba(0, 242, 254, 0.4); border-left-color: #00f2fe; background: rgba(0, 242, 254, 0.05); }
+body.theme--arcade details.hint-details { background: rgba(30, 25, 60, 0.8); border: 1px solid rgba(0, 242, 254, 0.3); }
+body.theme--arcade details.hint-details summary { color: #00f2fe; }
+body.theme--arcade details.hint-details div { color: #e0e0ff !important; }
+body.theme--arcade .order-toggle-btn { background: rgba(30, 25, 60, 0.9); border: 2px solid rgba(0, 242, 254, 0.5); color: #00f2fe; text-shadow: 0 0 5px rgba(0, 242, 254, 0.3); }
+body.theme--arcade .order-toggle-btn:hover { background: #00f2fe; color: #0e0a1f; text-shadow: none; }
 
 /* ----------------------------------
    🎠 민서 동화 밀키스 테마 (theme--hideout / slime)
@@ -52,10 +54,12 @@ body.theme--slime .society-overlay-box, body.theme--hideout .society-overlay-box
 body.theme--slime .quiz-choice-btn, body.theme--hideout .quiz-choice-btn { background: #fffcfd; border: 2px solid #ff6b9d; color: #ff6b9d; font-weight: bold; }
 body.theme--slime .quiz-choice-btn:hover, body.theme--hideout .quiz-choice-btn:hover { background: #ff6b9d; color: #fff; }
 body.theme--slime .text-input-field, body.theme--hideout .text-input-field { background: #ffffff; border-color: #ff80ab; color: #ff4081; }
-body.theme--slime .quiz-descr, body.theme--hideout .quiz-descr { color: #4a3352; }
-body.theme--slime details, body.theme--hideout details { background: #fff5f8; border: 1px solid #ffb6c1; }
-body.theme--slime summary, body.theme--hideout summary { color: #ff6b9d; }
-body.theme--slime details div, body.theme--hideout details div { color: #555 !important; }
+body.theme--slime .quiz-descr, body.theme--hideout .quiz-descr { color: #4a3352; border-left-color: #ff6b9d; background: rgba(255, 107, 157, 0.05); }
+body.theme--slime details.hint-details, body.theme--hideout details.hint-details { background: #fff5f8; border: 1px solid #ffb6c1; }
+body.theme--slime details.hint-details summary, body.theme--hideout details.hint-details summary { color: #ff6b9d; }
+body.theme--slime details.hint-details div, body.theme--hideout details.hint-details div { color: #555 !important; }
+body.theme--slime .order-toggle-btn, body.theme--hideout .order-toggle-btn { background: #fffcfd; border: 2px solid #ff6b9d; color: #ff6b9d; font-weight: bold; }
+body.theme--slime .order-toggle-btn:hover, body.theme--hideout .order-toggle-btn:hover { background: #ff6b9d; color: #fff; }
 
 /* 💎 공통 UI 컴포넌트 */
 .society-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 24px 16px; position: relative; z-index: 2; }

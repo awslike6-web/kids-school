@@ -539,7 +539,7 @@ function renderSectionUI(type, container) {
         // 라디오 버튼 대신 현재 상태를 보여주고 누르면 전환되는 버튼 형태로 변경
         const orderToggleHtml = `
             <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
-                <button onclick="window.societyToggleOrder()" style="padding: 8px 16px; font-size: 1rem; border-radius: 20px; border: 2px solid var(--primary); background: white; color: var(--primary); font-family: 'Jua', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <button class="order-toggle-btn" onclick="window.societyToggleOrder()" style="padding: 8px 16px; font-size: 1rem; border-radius: 20px; font-family: 'Jua', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     ${societyVocaOrderType === 'shuffle' ? '🎲 랜덤 섞기 모드 (클릭하여 순서대로 풀기로 변경)' : '➡️ 순서대로 풀기 모드 (클릭하여 랜덤 섞기로 변경)'}
                 </button>
             </div>
@@ -606,10 +606,10 @@ function renderSectionUI(type, container) {
             ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
-            <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold; color: var(--dark);">${currentItem.meaning}</div>
-            <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd;">
-                <summary style="cursor: pointer; font-weight: bold; color: var(--primary);">💡 상세설명 (힌트) 보기</summary>
-                <div style="margin-top: 10px; font-size: 1rem; color: #555; line-height: 1.5;">${currentItem.desc}</div>
+            <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold;">${currentItem.meaning}</div>
+            <details class="hint-details" style="margin-bottom: 20px; text-align: left; border-radius: 10px; padding: 10px;">
+                <summary style="cursor: pointer; font-weight: bold;">💡 상세설명 (힌트) 보기</summary>
+                <div style="margin-top: 10px; font-size: 1rem; line-height: 1.5;">${currentItem.desc}</div>
             </details>
             ${interactiveHtml}
             <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
