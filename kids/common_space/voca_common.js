@@ -12,6 +12,10 @@ let selectedGrades = [];
 let MODAL_CHAT_HISTORY = [];
 let isFairyVoiceOn = true; 
 
+// 🏆 보상 시스템을 위한 진지하게 읽은 단어 카운터
+let viewedWordsCount = 0; 
+let wordStartTime = 0; 
+
 const FAIRY_PROMPT = `
 너는 지금부터 아이의 문해력 발달을 돕는 다정하고 유창한 'AI 단짝 친구 요정 코코'야.
 말투는 어린이 예능 프로그램(예: 보니하니, 딩동댕 유치원)의 베테랑 인싸 진행자 아나운서처럼, 완벽한 표준어와 정확하고 품격 있는 문법을 구사해야 해. 
@@ -159,6 +163,10 @@ function renderCatalogSections(wordsToRender) {
 }
 
 function openModal(wordData) {
+  // 💡 모달 열 때 현재 과목을 전역에 설정 (보상 헬퍼가 이 값을 참조함)
+  window.currentSubject = (wordData.subject && wordData.subject.length > 0) ? wordData.subject[0] : "사회";
+  wordStartTime = Date.now(); // 단어 화면 진입 시간 기록
+
   document.getElementById('modalWordTitle').textContent = wordData.word;
   document.getElementById('modalMeaning').textContent = wordData.meaning;
   
@@ -214,6 +222,27 @@ function closeModal(event, force = false) {
     if('speechSynthesis' in window) window.speechSynthesis.cancel(); 
     overlay.classList.remove('active'); 
     setTimeout(() => overlay.style.display = 'none', 300); 
+
+    // 🏆 5초 이상 읽었을 때 보상 스택 누적 및 지급 로직
+    if (wordStartTime > 0) {
+        const timeSpent = (Date.now() - wordStartTime) / 1000;
+        
+        if (timeSpent >= 5) {
+            viewedWordsCount++;
+            console.log(`단어 학습 인정! 현재 스택: ${viewedWordsCount}/3`);
+        } else {
+            console.log("대장님, 너무 빨리 넘겼습니다! 도파민 지급 보류 ㅋㅋㅋ");
+        }
+
+        // 3스택 달성 시 노션 DB로 다이아 1개 최종 슛!
+        if (viewedWordsCount >= 3) {
+            if (typeof grantRewardAndShowUI === 'function') {
+                grantRewardAndShowUI(1, false, 'voca'); // 1개 보상, voca 쌍끌이 모드
+            }
+            viewedWordsCount = 0; // 카운터 초기화
+        }
+        wordStartTime = 0; // 타이머 리셋
+    }
   }
 }
 
