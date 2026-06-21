@@ -68,9 +68,9 @@ function updateTtsToggleUi() {
 // ========================================================
 var SOCIETY_MOCK_DATA = {
   voca: [
-    { word: "중심지", hint: "ㅈㅅㅈ", desc: "사람들이 활동을 하거나 여러 가지 필요를 해결하기 위해 자주 모이는 핵심적이고 중심이 되는 장소입니다. 도청, 시청, 큰 시장 등이 발달한 곳이랍니다!" },
-    { word: "공공기관", hint: "ㄱㄱㄱㄱ", desc: "개인의 이익이 아니라 우리 동네 전체의 생활 편의와 복지를 위해 설립된 공공 보증 기관입니다. 예: 경찰서, 소방서, 동주민센터 등이 속해요." },
-    { word: "공해", hint: "ㄱㅎ", desc: "공장이나 자동차 등에서 나오는 매연, 먼지, 폐수 등으로 인해 우리 자연환경이 오염되거나 주민들의 건강을 훼손시키는 심각한 환경 피해를 말합니다." }
+    { word: "중심지", hint: "ㅈㅅㅈ", desc: "사람들이 활동을 하거나 여러 가지 필요를 해결하기 위해 자주 모이는 핵심적이고 중심이 되는 장소입니다. 도청, 시청, 큰 시장 등이 발달한 곳이랍니다!", meaning: "사람들이 많이 모이는 곳", image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500&auto=format&fit=crop" },
+    { word: "공공기관", hint: "ㄱㄱㄱㄱ", desc: "개인의 이익이 아니라 우리 동네 전체의 생활 편의와 복지를 위해 설립된 공공 보증 기관입니다. 예: 경찰서, 소방서, 동주민센터 등이 속해요.", meaning: "모두를 위한 기관" },
+    { word: "공해", hint: "ㄱㅎ", desc: "공장이나 자동차 등에서 나오는 매연, 먼지, 폐수 등으로 인해 우리 자연환경이 오염되거나 주민들의 건강을 훼손시키는 심각한 환경 피해를 말합니다.", meaning: "환경 오염 피해" }
   ],
   chart: [
     { 
@@ -602,10 +602,18 @@ function renderSectionUI(type, container) {
             `;
         }
 
+        const imageUrl = currentItem.imageUrl || currentItem.image;
+        const imageHtml = imageUrl ? `
+            <div style="text-align:center; margin-bottom:15px;">
+                <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+            </div>
+        ` : '';
+
         screenWrapper.innerHTML = `
             ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
+            ${imageHtml}
             <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold;">${currentItem.meaning}</div>
             <details class="hint-details" style="margin-bottom: 20px; text-align: left; border-radius: 10px; padding: 10px;">
                 <summary style="cursor: pointer; font-weight: bold;">💡 상세설명 (힌트) 보기</summary>
