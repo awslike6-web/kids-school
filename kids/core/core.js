@@ -20,22 +20,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // 상대 경로: html 파일 기준](../../core/ 로드 경로
     const corePath = "../../core/";
     
+    const initRoom = () => {
+        const initFuncs = ['initializeRoom', 'initializeSocietyRoom', 'initializeKoreanRoom', 'initializeScienceRoom', 'initializeEnglishRoom', 'initializeMathRoom'];
+        for (const funcName of initFuncs) {
+            if (typeof window[funcName] === 'function') {
+                window[funcName]();
+                return;
+            }
+        }
+    };
+
     if (typeof loadCoreScripts === 'function') {
         loadCoreScripts(corePath, requiredCores, () => {
             console.log("🧚 [학습방 공통 코어 결합 완료] 코코 요정 탑재!");
-            if (typeof initializeSocietyRoom === 'function') {
-                initializeSocietyRoom();
-            } else if (typeof initializeRoom === 'function') {
-                initializeRoom();
-            }
+            initRoom();
         });
     } else {
         console.warn("⚠️ loadCoreScripts 로드 실패, 비동기 폴백 직접 실행");
-        if (typeof initializeSocietyRoom === 'function') {
-            initializeSocietyRoom();
-        } else if (typeof initializeRoom === 'function') {
-            initializeRoom();
-        }
+        initRoom();
     }
 });
 
@@ -150,7 +152,7 @@ window.addEventListener("beforeunload", () => {
     if (!isAdminUser && typeof sendStudyLogToNotion === 'function') {
         const profile = localStorage.getItem('currentUser') || 'son';
         const userName = profile === 'son' ? '민수' : '민서';
-        const subjectName = window.currentSubject || "사회"; // 동적 과목명 참조
+        const subjectName = window.currentSubject || "미상 과목"; // 동적 과목명 참조
         sendStudyLogToNotion({
             childName: userName,
             subject: subjectName
