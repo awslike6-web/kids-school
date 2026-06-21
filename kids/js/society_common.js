@@ -392,7 +392,7 @@ function startMissionWithFilteredData(records, innerBody) {
         const hintStr = record.hint || getChosung(titleStr);
 
         if (currentMissionType === 'voca') {
-            return { word: titleStr, meaning: meaningStr, hint: hintStr, desc: descStr, pageId: record.pageId, isMastered: record.isMastered };
+            return { word: titleStr, meaning: meaningStr, hint: hintStr, desc: descStr, image: record.imageUrl, pageId: record.pageId, isMastered: record.isMastered };
         } else if (currentMissionType === 'chart') {
             return {
                 title: titleStr, img: imgUrl, meaning: meaningStr, desc: descStr,
