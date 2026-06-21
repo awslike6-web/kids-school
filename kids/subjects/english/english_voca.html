@@ -392,7 +392,16 @@ function loadQuestion() {
   const hBox = document.getElementById('hintText');
   const input = document.getElementById('answerInput');
   
+  // 기존 힌트 박스 대신 상세설명 토글 렌더링을 위한 컨테이너 확인/생성
+  let detailBox = document.getElementById('detailBox');
+  if (!detailBox) {
+      detailBox = document.createElement('div');
+      detailBox.id = 'detailBox';
+      qBox.parentNode.insertBefore(detailBox, input);
+  }
+  
   hBox.style.display = 'none';
+  detailBox.innerHTML = ''; // 초기화
   input.value = ''; input.className = 'main-input'; input.disabled = false;
 
   if (quizState.mode === 'copy') {
@@ -402,6 +411,16 @@ function loadQuestion() {
   } else if (quizState.mode === 'toEnglish') {
     qBox.textContent = qData.meaning; input.placeholder = "영단어로 적어봐!";
     hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';
+    
+    // 상세설명 토글 추가
+    if (qData.detailContext && qData.detailContext.trim() !== '') {
+        detailBox.innerHTML = `
+            <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd; font-size: 1rem;">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--purple);">💡 상세설명 (힌트) 보기</summary>
+                <div style="margin-top: 10px; color: #555; line-height: 1.5;">${qData.detailContext.replace(/\n/g, '<br>')}</div>
+            </details>
+        `;
+    }
   } else if (quizState.mode === 'listening') {
     qBox.innerHTML = "🎧 <span style='font-size:1.2rem;color:#888;'><br>(소리 듣고 적기)</span>";
     hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';

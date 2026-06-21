@@ -386,21 +386,22 @@ function selectDynamicUnit(unit) {
 function startMissionWithFilteredData(records, innerBody) {
     const parsed = records.map(record => {
         const titleStr = record.word || "미상";
+        const meaningStr = record.meaning || "뜻풀이 없음";
         const descStr = record.detailContext || "해당 유적/지형 설명이 노션에 기재 대기 중입니다.";
         const imgUrl = record.imageUrl || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
         const hintStr = record.hint || getChosung(titleStr);
 
         if (currentMissionType === 'voca') {
-            return { word: titleStr, hint: hintStr, desc: descStr, pageId: record.pageId, isMastered: record.isMastered };
+            return { word: titleStr, meaning: meaningStr, hint: hintStr, desc: descStr, pageId: record.pageId, isMastered: record.isMastered };
         } else if (currentMissionType === 'chart') {
             return {
-                title: titleStr, img: imgUrl, desc: descStr,
+                title: titleStr, img: imgUrl, meaning: meaningStr, desc: descStr,
                 quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격은 무엇일까요?`,
                 choices: ["1등급 유망 자료", "전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설"],
                 correctIdx: 1
             };
         } else {
-            return { name: titleStr, img: imgUrl, desc: descStr };
+            return { name: titleStr, img: imgUrl, meaning: meaningStr, desc: descStr };
         }
     });
 
@@ -605,10 +606,14 @@ function renderSectionUI(type, container) {
             ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
-            <div class="quiz-descr">${currentItem.desc}</div>
+            <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold; color: var(--dark);">${currentItem.meaning}</div>
+            <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd;">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--primary);">💡 상세설명 (힌트) 보기</summary>
+                <div style="margin-top: 10px; font-size: 1rem; color: #555; line-height: 1.5;">${currentItem.desc}</div>
+            </details>
             ${interactiveHtml}
             <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc}')">🔊 설명 한번 더 읽기</button>
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning}')">🔊 문제 한번 더 듣기</button>
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
             </div>
             <div style="text-align:center; margin-top:20px;">
@@ -617,8 +622,8 @@ function renderSectionUI(type, container) {
         `;
         container.appendChild(screenWrapper);
         
-        // 해당 단어 설명 자동 낭독 탑재 (아나운서 감성)
-        speakFairyTTS(currentItem.desc);
+        // 해당 단어 뜻풀이 자동 낭독 탑재 (아나운서 감성)
+        speakFairyTTS(currentItem.meaning);
 
     } else if (type === 'chart') {
         screenWrapper.className += " quiz-card";

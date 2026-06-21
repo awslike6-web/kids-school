@@ -7,25 +7,25 @@ window.currentSubject = "과학"; // 전역 과목명 명시 (보상 및 학습�
 // ========================================================
 const SCIENCE_MOCK_DATA = {
     voca: [
-        { word: "뼈와 근육", hint: "ㅃㅇ ㄱㅇ", desc: "우리 몸의 형태를 유지하고 움직이게 하는 기관입니다." },
-        { word: "소화 기관", hint: "ㅅㅎ ㄱㄱ", desc: "음식물을 잘게 쪼개어 영양소를 흡수하는 기관입니다." },
-        { word: "순환 기관", hint: "ㅅㅎ ㄱㄱ", desc: "심장과 혈관을 통해 온몸으로 혈액을 이동시키는 기관입니다." },
-        { word: "호흡 기관", hint: "ㅎㅎ ㄱㄱ", desc: "산소를 들이마시고 이산화 탄소를 내보내는 기관입니다." },
-        { word: "배설 기관", hint: "ㅂㅅ ㄱㄱ", desc: "혈액 속의 노폐물을 걸러내어 몸 밖으로 내보내는 기관입니다." },
-        { word: "감각 기관", hint: "ㄱㄱ ㄱㄱ", desc: "눈, 귀, 코, 혀, 피부처럼 주변의 자극을 받아들이는 기관입니다." },
-        { word: "자극과 반응", hint: "ㅈㄱㄱ ㅂㅇ", desc: "주변 환경의 변화를 느끼고 그에 맞게 행동하는 과정입니다." }
+        { word: "뼈와 근육", hint: "ㅃㅇ ㄱㅇ", meaning: "우리 몸의 형태를 유지하고 움직이게 하는 기관입니다.", desc: "뼈는 몸을 지탱하고 내장을 보호하며, 근육은 뼈에 붙어 몸을 움직이게 합니다." },
+        { word: "소화 기관", hint: "ㅅㅎ ㄱㄱ", meaning: "음식물을 잘게 쪼개어 영양소를 흡수하는 기관입니다.", desc: "입, 식도, 위, 작은창자, 큰창자, 항문 등이 소화 기관에 속합니다." },
+        { word: "순환 기관", hint: "ㅅㅎ ㄱㄱ", meaning: "심장과 혈관을 통해 온몸으로 혈액을 이동시키는 기관입니다.", desc: "혈액은 영양소와 산소를 온몸으로 운반하고, 노폐물을 거두어옵니다." },
+        { word: "호흡 기관", hint: "ㅎㅎ ㄱㄱ", meaning: "산소를 들이마시고 이산화 탄소를 내보내는 기관입니다.", desc: "코, 기관, 기관지, 폐가 호흡 기관에 속하며 생명 유지에 필수적입니다." },
+        { word: "배설 기관", hint: "ㅂㅅ ㄱㄱ", meaning: "혈액 속의 노폐물을 걸러내어 몸 밖으로 내보내는 기관입니다.", desc: "콩팥은 혈액 속 노폐물을 걸러 오줌을 만들고, 방광은 오줌을 모아둡니다." },
+        { word: "감각 기관", hint: "ㄱㄱ ㄱㄱ", meaning: "눈, 귀, 코, 혀, 피부처럼 주변의 자극을 받아들이는 기관입니다.", desc: "시각, 청각, 후각, 미각, 촉각을 통해 위험을 피하고 환경에 적응합니다." },
+        { word: "자극과 반응", hint: "ㅈㄱㄱ ㅂㅇ", meaning: "주변 환경의 변화를 느끼고 그에 맞게 행동하는 과정입니다.", desc: "감각 기관이 자극을 느끼면 뇌가 판단하여 운동 기관에 명령을 내립니다." }
     ],
     experiment: [
-        { word: "소화 모형 실험", hint: "ㅅㅎ ㅁㅎ ㅅㅎ", desc: "비닐봉지와 스타킹을 이용해 위와 장의 역할을 알아보는 실험입니다." },
-        { word: "폐 모형 만들기", hint: "ㅍ ㅁㅎ ㅁㄷㄱ", desc: "페트병과 고무풍선을 이용해 호흡의 원리를 알아보는 실험입니다." }
+        { word: "소화 모형 실험", hint: "ㅅㅎ ㅁㅎ ㅅㅎ", meaning: "비닐봉지와 스타킹을 이용해 위와 장의 역할을 알아보는 실험입니다.", desc: "비닐봉지는 음식물을 섞는 위, 스타킹은 영양소를 흡수하는 장의 역할을 합니다." },
+        { word: "폐 모형 만들기", hint: "ㅍ ㅁㅎ ㅁㄷㄱ", meaning: "페트병과 고무풍선을 이용해 호흡의 원리를 알아보는 실험입니다.", desc: "고무막을 당기면 풍선(폐)이 부풀고, 밀어 넣으면 풍선이 쪼그라듭니다." }
     ],
     nature: [
-        { word: "심장장박동", hint: "ㅅㅈㅈㅂㄷ", desc: "가슴에 손을 얹었을 때 느껴지는 규칙적인 움직임입니다." },
-        { word: "땀 분비", hint: "ㄸ ㅂㅂ", desc: "더울 때 체온을 조절하기 위해 피부에서 물방울이 나오는 현상입니다." }
+        { word: "심장 박동", hint: "ㅅㅈ ㅂㄷ", meaning: "가슴에 손을 얹었을 때 느껴지는 규칙적인 움직임입니다.", desc: "심장이 수축과 이완을 반복하며 혈액을 온몸으로 뿜어내는 과정입니다." },
+        { word: "땀 분비", hint: "ㄸ ㅂㅂ", meaning: "더울 때 체온을 조절하기 위해 피부에서 물방울이 나오는 현상입니다.", desc: "땀이 증발하면서 몸의 열을 빼앗아 체온을 정상으로 유지해 줍니다." }
     ],
     inventor: [
-        { word: "청진기", hint: "ㅊㅈㄱ", desc: "몸속에서 나는 소리를 듣기 위해 의사 선생님들이 사용하는 도구입니다." },
-        { word: "현미경", hint: "ㅎㅁㄱ", desc: "눈에 보이지 않는 아주 작은 세포나 세균을 크게 확대해서 보는 도구입니다." }
+        { word: "청진기", hint: "ㅊㅈㄱ", meaning: "몸속에서 나는 소리를 듣기 위해 의사 선생님들이 사용하는 도구입니다.", desc: "심장 소리나 숨소리를 들어 우리 몸이 건강한지 진찰할 때 씁니다." },
+        { word: "현미경", hint: "ㅎㅁㄱ", meaning: "눈에 보이지 않는 아주 작은 세포나 세균을 크게 확대해서 보는 도구입니다.", desc: "렌즈를 여러 개 겹쳐서 물체를 수백 배에서 수천 배까지 크게 보여줍니다." }
     ]
 };
 
@@ -168,10 +168,14 @@ function renderSectionUI() {
         <div class="quiz-card">
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">미션 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
-            <div class="quiz-descr">${currentItem.desc}</div>
+            <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold; color: var(--text-main);">${currentItem.meaning}</div>
+            <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd;">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--primary);">💡 상세설명 (힌트) 보기</summary>
+                <div style="margin-top: 10px; font-size: 1rem; color: #555; line-height: 1.5;">${currentItem.desc}</div>
+            </details>
             ${interactiveHtml}
             <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc}')">🔊 설명 듣기</button>
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning}')">🔊 문제 듣기</button>
                 <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextQuiz()">건너뛰기 ⏩</button>
             </div>
         </div>
@@ -179,7 +183,7 @@ function renderSectionUI() {
     
     // 자동 낭독
     if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(currentItem.desc);
+        speakFairyTTS(currentItem.meaning);
     }
 }
 
