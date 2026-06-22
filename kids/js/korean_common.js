@@ -412,13 +412,14 @@ window.renderSentenceChat = function() {
         
         try {
             sentenceHistory.push({ role: "user", content: text });
+            const systemPrompt = activePassage.chatbotSystemPrompt || "너는 방금 읽은 지문 이야기를 바탕으로 아이와 다정하게 대화를 나누는 AI 요정 코코야. 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 지문에 대해 자신의 생각이나 느낀 점을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.";
             const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "gemini-2.5-flash",
                     messages: [
-                        { role: "system", content: activePassage.chatbotSystemPrompt + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + activePassage.fullText },
+                        { role: "system", content: systemPrompt + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + activePassage.fullText },
                         ...sentenceHistory
                     ]
                 })
@@ -499,6 +500,14 @@ window.startReadingMission = function(bookId) {
 
 window.renderReadingStage = function() {
     const container = document.getElementById('overlayInnerBody');
+    
+    // 단계 건너뛰기 자동 제어 (데이터가 없을 경우)
+    if (readingStage === 1 && (!activePassage.conjunctions || activePassage.conjunctions.length === 0)) {
+        readingStage = 2; // 접속사 퀴즈가 없으면 주제 찾기로 바로 패스!
+    }
+    if (readingStage === 2 && !activePassage.themeQuiz) {
+        readingStage = 3; // 주제 찾기 퀴즈가 없으면 완료 화면으로 바로 패스!
+    }
     
     if (readingStage === 0) {
         // 문단 순서 맞추기 (실시간 분할 로직 적용)
