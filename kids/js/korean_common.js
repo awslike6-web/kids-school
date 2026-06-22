@@ -400,6 +400,7 @@ window.startSentenceMission = function(bookId) {
 
 window.renderSentenceChat = function() {
     const container = document.getElementById('overlayInnerBody');
+    const passageText = activePassage.fullText || (activePassage.paragraphs ? activePassage.paragraphs.map(p => p.text).join('\n') : "");
     
     window.processSentenceInput = async function() {
         const inputEl = document.getElementById('sentenceInput');
@@ -419,7 +420,7 @@ window.renderSentenceChat = function() {
                 body: JSON.stringify({
                     model: "gemini-2.5-flash",
                     messages: [
-                        { role: "system", content: systemPrompt + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + activePassage.fullText },
+                        { role: "system", content: systemPrompt + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + passageText },
                         ...sentenceHistory
                     ]
                 })
@@ -454,7 +455,7 @@ window.renderSentenceChat = function() {
     container.innerHTML = `
         <div class="passage-box" style="font-size:0.95rem; max-height:150px; overflow-y:auto; margin-bottom:15px; border-left-color:var(--purple);">
             <strong>[${activePassage.title}]</strong><br>
-            ${activePassage.fullText.replace(/\n/g, '<br>')}
+            ${passageText.replace(/\n/g, '<br>')}
         </div>
         <div class="chat-box" id="sentenceChatBox" style="height:250px;"></div>
         <div class="interactive-input-group">
@@ -500,6 +501,7 @@ window.startReadingMission = function(bookId) {
 
 window.renderReadingStage = function() {
     const container = document.getElementById('overlayInnerBody');
+    const passageText = activePassage.fullText || (activePassage.paragraphs ? activePassage.paragraphs.map(p => p.text).join('\n') : "");
     
     // 단계 건너뛰기 자동 제어 (데이터가 없을 경우)
     if (readingStage === 1 && (!activePassage.conjunctions || activePassage.conjunctions.length === 0)) {
@@ -511,7 +513,7 @@ window.renderReadingStage = function() {
     
     if (readingStage === 0) {
         // 문단 순서 맞추기 (실시간 분할 로직 적용)
-        const rawParagraphs = activePassage.fullText.split('\n').filter(p => p.trim() !== '');
+        const rawParagraphs = passageText.split('\n').filter(p => p.trim() !== '');
         const paragraphs = rawParagraphs.map((text, idx) => ({ id: `p${idx+1}`, text: text }));
         const correctOrder = paragraphs.map(p => p.id);
         const shuffled = [...paragraphs].sort(() => Math.random() - 0.5);
