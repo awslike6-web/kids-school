@@ -595,11 +595,11 @@ function parseChatMemoryPage(page) {
     const p = page.properties;
     return {
         pageId: page.id,
-        sessionId: p["세션ID"]?.title?.[0]?.plain_text || "",
+        sessionId: (p["세션 ID"] || p["세션ID"])?.title?.[0]?.plain_text || "",
         childName: p["아이 이름"]?.select?.name || "",
         roomType: p["소속 방"]?.select?.name || "",
         conversationSummary: p["대화 요약"]?.rich_text?.map(t => t.plain_text).join("") || "",
-        isImportant: p["장기 기억 여부"]?.checkbox === true,
+        isImportant: (p["장기 기억"] || p["장기 기억 여부"])?.checkbox === true,
         createdTime: page.created_time,
         lastEditedTime: page.last_edited_time
     };
@@ -802,7 +802,7 @@ async function saveChatMemoryToNotion({ sessionId, childName, roomType, conversa
         const payload = {
             parent: { database_id: NOTION_CHAT_MEMORY_DB_ID },
             properties: {
-                "세션ID": {
+                "세션 ID": {
                     title: [{ text: { content: sessionId || generateChatSessionId() } }]
                 },
                 "아이 이름": {
@@ -814,7 +814,7 @@ async function saveChatMemoryToNotion({ sessionId, childName, roomType, conversa
                 "대화 요약": {
                     rich_text: [{ text: { content: (conversationSummary || '').slice(0, 1900) } }]
                 },
-                "장기 기억 여부": {
+                "장기 기억": {
                     checkbox: isImportant === true
                 }
             }
