@@ -115,7 +115,7 @@ function openMissionView(type) {
 
     let targetTitle = ""; let targetIcon = "";
     switch(type) {
-        case 'sentence': targetTitle = "AI 문장 학습방"; targetIcon = "⌨️"; break;
+        case 'sentence': targetTitle = "AI 지문 토론방"; targetIcon = "🗣️"; break;
         case 'reading': targetTitle = "정밀 독해 멀티버스방"; targetIcon = "📖"; break;
         case 'voca': targetTitle = "국어 용어방"; targetIcon = "📚"; break;
         case 'dictation': targetTitle = "받아쓰기 훈련소"; targetIcon = "✍️"; break;
@@ -148,9 +148,7 @@ function closeMissionView() {
 // ========================================================
 async function fetchAndBuildDynamicUI(type, innerBody) {
     try {
-        if (type === 'sentence') {
-            renderSentenceUI(innerBody);
-        } else if (type === 'reading') {
+        if (type === 'sentence' || type === 'reading') {
             if (typeof fetchLibraryBooksFromNotion === 'function') {
                 const records = await fetchLibraryBooksFromNotion();
                 if (records && records.length > 0) {
@@ -158,14 +156,23 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                         const barcode = res.properties["도서 키(ID)"]?.rich_text[0]?.plain_text;
                         return KOREAN_READING_DATABASE.find(book => book.id === barcode);
                     }).filter(book => book !== undefined);
-                    renderReadingLobby(innerBody);
+                    
+                    if (type === 'sentence') {
+                        renderSentenceUI(innerBody);
+                    } else {
+                        renderReadingLobby(innerBody);
+                    }
                 } else {
                     throw new Error("추천 지문 없음");
                 }
             } else {
                 // Fallback to mock
                 readingFetchedBooks = KOREAN_READING_DATABASE.slice(0, 2);
-                renderReadingLobby(innerBody);
+                if (type === 'sentence') {
+                    renderSentenceUI(innerBody);
+                } else {
+                    renderReadingLobby(innerBody);
+                }
             }
         } else if (type === 'voca' || type === 'dictation') {
             const subjectTag = type === 'voca' ? "국어" : "받아쓰기";
@@ -368,25 +375,32 @@ function renderDictationUI(container) {
 }
 
 // --------------------------------------------------------
-// 3. AI 문장 학습방
+// 3. AI 지문 토론방
 // --------------------------------------------------------
 function renderSentenceUI(container) {
-    const modes = [
-        { id: 'easy', name: "🍬 민서 방", desc: "문장 징검다리" },
-        { id: 'base', name: "🤖 민수 방", desc: "대충 쓰기 방어" },
-        { id: 'spell', name: "🔍 맞춤법", desc: "스스로 교정" },
-        { id: 'logic', name: "🧩 논리학", desc: "인과관계 인내" }
-    ];
+    let buttonsHtml = readingFetchedBooks.map(book => 
+        `<button class="quiz-choice-btn" style="margin-bottom: 10px; width: 100%; text-align: left;" onclick="startSentenceMission('${book.id}')">
+            🗣️ [${book.title}] 토론 시작하기
+        </button>`
+    ).join('');
 
-    window.changeSentenceMode = function(mode) {
-        sentenceMode = mode;
-        sentenceHistory = [];
-        renderSentenceUI(document.getElementById('overlayInnerBody'));
-        const welcomeMsg = `[${mode.toUpperCase()} 모드] 환영합니다! 멋진 문장을 만들어 볼까요?`;
-        appendSentenceMsg('ai', welcomeMsg);
-        speakFairyTTS("문장 학습방에 온 것을 환영해요!");
-    };
+    container.innerHTML = `
+        <div class="quiz-card">
+            <h3 style="color:var(--purple); margin-bottom:20px;">아빠가 준비한 오늘의 토론 지문입니다. 원하는 지문을 선택하세요!</h3>
+            ${buttonsHtml}
+        </div>
+    `;
+}
 
+window.startSentenceMission = function(bookId) {
+    activePassage = readingFetchedBooks.find(b => b.id === bookId);
+    sentenceHistory = [];
+    renderSentenceChat();
+};
+
+window.renderSentenceChat = function() {
+    const container = document.getElementById('overlayInnerBody');
+    
     window.processSentenceInput = async function() {
         const inputEl = document.getElementById('sentenceInput');
         const text = inputEl.value.trim();
@@ -404,7 +418,7 @@ function renderSentenceUI(container) {
                 body: JSON.stringify({
                     model: "gemini-2.5-flash",
                     messages: [
-                        { role: "system", content: "너는 친절한 국어 선생님 요정 코코야. 아이가 쓴 문장을 보고 다정하게 피드백해줘. 아이가 문장을 잘 썼다면 반드시 대답 끝에 [SUCCESS]를 붙여줘." },
+                        { role: "system", content: activePassage.chatbotSystemPrompt + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + activePassage.fullText },
                         ...sentenceHistory
                     ]
                 })
@@ -418,7 +432,6 @@ function renderSentenceUI(container) {
             
             if (reply.includes("[SUCCESS]")) {
                 setTimeout(() => {
-                    // 제미니 성공 시 보상 지급! (사회방 연동)
                     triggerAwardDispense(5, 'sentence');
                     if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '국어' });
                 }, 2000);
@@ -438,22 +451,25 @@ function renderSentenceUI(container) {
     };
 
     container.innerHTML = `
-        <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
-            ${modes.map(m => `<button class="quiz-choice-btn" style="padding:10px; ${sentenceMode === m.id ? 'background:var(--sky); color:white;' : ''}" onclick="changeSentenceMode('${m.id}')">${m.name}</button>`).join('')}
+        <div class="passage-box" style="font-size:0.95rem; max-height:150px; overflow-y:auto; margin-bottom:15px; border-left-color:var(--purple);">
+            <strong>[${activePassage.title}]</strong><br>
+            ${activePassage.fullText.replace(/\n/g, '<br>')}
         </div>
-        <div class="chat-box" id="sentenceChatBox"></div>
+        <div class="chat-box" id="sentenceChatBox" style="height:250px;"></div>
         <div class="interactive-input-group">
-            <input type="text" class="text-input-field" id="sentenceInput" placeholder="여기에 문장을 입력하세요!" onkeypress="if(event.key==='Enter') processSentenceInput()">
+            <input type="text" class="text-input-field" id="sentenceInput" placeholder="여기에 생각을 입력하세요!" onkeypress="if(event.key==='Enter') processSentenceInput()">
             <button class="quiz-button" onclick="processSentenceInput()">전송</button>
         </div>
     `;
     
     if (sentenceHistory.length === 0) {
-        appendSentenceMsg('ai', "안녕! 나는 너의 문장 수호신 코코야! 오늘 있었던 일을 나에게 들려줘! ✨");
+        const initialMsg = `안녕! 방금 읽은 <strong>[${activePassage.title}]</strong> 이야기에 대해 나랑 이야기해볼까? 어떤 생각이 들었어? ✨`;
+        appendSentenceMsg('ai', initialMsg);
+        speakFairyTTS(`안녕! 방금 읽은 ${activePassage.title} 이야기에 대해 나랑 이야기해볼까?`);
     } else {
         sentenceHistory.forEach(h => appendSentenceMsg(h.role === 'user' ? 'user' : 'ai', h.content.replace(/\n/g, '<br>')));
     }
-}
+};
 
 // --------------------------------------------------------
 // 4. 정밀 독해 멀티버스방
@@ -485,8 +501,12 @@ window.renderReadingStage = function() {
     const container = document.getElementById('overlayInnerBody');
     
     if (readingStage === 0) {
-        // 문단 순서 맞추기
-        const shuffled = [...activePassage.paragraphs].sort(() => Math.random() - 0.5);
+        // 문단 순서 맞추기 (실시간 분할 로직 적용)
+        const rawParagraphs = activePassage.fullText.split('\n').filter(p => p.trim() !== '');
+        const paragraphs = rawParagraphs.map((text, idx) => ({ id: `p${idx+1}`, text: text }));
+        const correctOrder = paragraphs.map(p => p.id);
+        const shuffled = [...paragraphs].sort(() => Math.random() - 0.5);
+
         window.selectReadingPuzzle = function(id, text, el) {
             if (el.classList.contains('selected')) return;
             el.classList.add('selected');
@@ -494,10 +514,10 @@ window.renderReadingStage = function() {
             document.getElementById('puzzle-slots').innerHTML += `<div style="margin-top:5px; color:var(--dark); font-weight:normal;">- ${text}</div>`;
         };
         window.verifyReadingOrder = function() {
-            if (userOrderTracking.length !== activePassage.correctOrder.length) {
+            if (userOrderTracking.length !== correctOrder.length) {
                 alert("모든 문단을 선택해주세요!"); return;
             }
-            if (JSON.stringify(userOrderTracking) === JSON.stringify(activePassage.correctOrder)) {
+            if (JSON.stringify(userOrderTracking) === JSON.stringify(correctOrder)) {
                 speakFairyTTS("정확해요! 문단 순서를 완벽하게 맞췄어요!");
                 readingStage++;
                 setTimeout(renderReadingStage, 1500);
@@ -512,7 +532,7 @@ window.renderReadingStage = function() {
             <div class="quiz-card">
                 <h3 style="color:var(--purple); margin-bottom:15px;">🧩 미션 1: 문단의 올바른 순서를 완성하라!</h3>
                 <div class="puzzle-pool">
-                    ${shuffled.map(p => `<div class="puzzle-block" onclick="selectReadingPuzzle('${p.id}', '${p.text}', this)">${p.text}</div>`).join('')}
+                    ${shuffled.map(p => `<div class="puzzle-block" onclick="selectReadingPuzzle('${p.id}', '${p.text.replace(/'/g, "\\'")}', this)">${p.text}</div>`).join('')}
                 </div>
                 <div id="puzzle-slots" class="puzzle-slots">선택한 순서: </div>
                 <button class="quiz-button" style="width:100%;" onclick="verifyReadingOrder()">문단 결합 검사하기</button>
