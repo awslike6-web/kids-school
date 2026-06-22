@@ -12,6 +12,8 @@ let activeSectionData = [];
 let activeQuizIdx = 0;
 let currentMissionType = "";
 let allFetchedRecords = [];
+let selectedEnglishGrade = "";
+let selectedEnglishUnit = "";
 
 // 독해방 상태
 let readingFetchedBooks = [];
@@ -152,10 +154,18 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             // 독해/토론방 로직 (국어방 구조 재활용)
             if (typeof fetchLibraryBooksFromNotion === 'function') {
                 const records = await fetchLibraryBooksFromNotion();
-                // 영어 독해용 데이터로 매핑 (임시 모킹 데이터 섞기)
-                readingFetchedBooks = records.length > 0 ? records : getMockEnglishReadingData();
+                // 영어 독해용 데이터로 매핑
+                readingFetchedBooks = (records && records.length > 0) 
+                    ? records.map(res => {
+                        const barcode = res.properties["도서 키(ID)"]?.rich_text[0]?.plain_text;
+                        return ENGLISH_READING_DATABASE.find(book => book.id === barcode);
+                    }).filter(book => book !== undefined)
+                    : ENGLISH_READING_DATABASE;
+                
+                // 만약 노션 추천 도서 중 영어 데이터가 없으면 로컬 DB 전체 사용
+                if (readingFetchedBooks.length === 0) readingFetchedBooks = ENGLISH_READING_DATABASE;
             } else {
-                readingFetchedBooks = getMockEnglishReadingData();
+                readingFetchedBooks = ENGLISH_READING_DATABASE;
             }
             
             if (type === 'stage6') {
@@ -170,22 +180,12 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             if (records && records.length > 0) {
                 allFetchedRecords = records;
                 
-                // 품사 필터링 분기
-                if (type === 'stage3') {
-                    // 3단계: 품사가 '문장'이 아닌 것
-                    activeSectionData = records.filter(r => r.pos !== '문장').sort(() => Math.random() - 0.5).slice(0, 10);
-                } else if (type === 'stage4') {
-                    // 4단계: 품사가 '문장'인 것
-                    activeSectionData = records.filter(r => r.pos === '문장').sort(() => Math.random() - 0.5).slice(0, 10);
-                } else if (type === 'stage1' || type === 'stage2') {
-                    // 1, 2단계 뼈대용 데이터
-                    activeSectionData = records.sort(() => Math.random() - 0.5).slice(0, 10);
-                }
-                
-                if (activeSectionData.length === 0) {
-                    innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
+                // 학년/단원 필터 UI (사회방 이식)
+                const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
+                if (uniqueGrades.length === 0) {
+                    startMissionWithFilteredData(records, innerBody);
                 } else {
-                    renderSectionUI();
+                    renderDynamicGradeUI(uniqueGrades, innerBody);
                 }
             } else {
                 innerBody.innerHTML = `<div style="text-align:center; padding:40px;">데이터가 없습니다.</div>`;
@@ -195,6 +195,75 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         console.error("통신 에러:", e);
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">오류가 발생했습니다: ${e.message}</div>`;
     }
+}
+
+// ========================================================
+// 🎒 학년/단원 필터 UI (사회방 이식)
+// ========================================================
+function renderDynamicGradeUI(grades, container) {
+    let html = `<div style="text-align:center; margin-bottom:20px;">
+        <h3 style="color:var(--primary); margin-bottom:15px;">🎒 도전할 학년을 선택하세요!</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">`;
+    grades.forEach(g => {
+        html += `<button class="quiz-choice-btn" style="padding:15px; font-size:1.2rem;" onclick="selectDynamicGrade('${g}')">${g}</button>`;
+    });
+    html += `</div></div>`;
+    container.innerHTML = html;
+}
+
+window.selectDynamicGrade = function(grade) {
+    selectedEnglishGrade = grade;
+    const innerBody = document.getElementById('overlayInnerBody');
+    const matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
+    const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level).trim()))].filter(u => u && u !== "undefined").sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+    
+    if (uniqueUnits.length === 0 || (uniqueUnits.length === 1 && uniqueUnits[0] === "기본 단원")) {
+        startMissionWithFilteredData(matchedRecords, innerBody);
+    } else {
+        renderDynamicUnitUI(uniqueUnits, innerBody);
+    }
+};
+
+function renderDynamicUnitUI(units, container) {
+    let html = `<div style="text-align:center; margin-bottom:20px;">
+        <h3 style="color:var(--mint); margin-bottom:15px;">📚 [${selectedEnglishGrade}] 도전할 단원을 선택하세요!</h3>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">`;
+    units.forEach(u => {
+        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnit('${u}')">${u}</button>`;
+    });
+    html += `</div>
+        <div style="margin-top:20px;">
+            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
+        </div>
+    </div>`;
+    container.innerHTML = html;
+}
+
+window.selectDynamicUnit = function(unit) {
+    selectedEnglishUnit = unit;
+    const innerBody = document.getElementById('overlayInnerBody');
+    const finalRecords = allFetchedRecords.filter(r => 
+        (r.grade === selectedEnglishGrade || r.grades.includes(selectedEnglishGrade)) &&
+        String(r.level).trim() === unit
+    );
+    startMissionWithFilteredData(finalRecords, innerBody);
+};
+
+function startMissionWithFilteredData(records, innerBody) {
+    // 품사 필터링 분기
+    if (currentMissionType === 'stage3') {
+        activeSectionData = records.filter(r => r.pos !== '문장').sort(() => Math.random() - 0.5).slice(0, 10);
+    } else if (currentMissionType === 'stage4') {
+        activeSectionData = records.filter(r => r.pos === '문장').sort(() => Math.random() - 0.5).slice(0, 10);
+    } else {
+        activeSectionData = records.sort(() => Math.random() - 0.5).slice(0, 10);
+    }
+
+    if (activeSectionData.length === 0) {
+        innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
+        return;
+    }
+    renderSectionUI();
 }
 
 // ========================================================
@@ -227,6 +296,13 @@ function renderStage1UI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
     const answerWord = currentItem.word.trim();
     
+    const imageUrl = currentItem.imageUrl || currentItem.image;
+    const imageHtml = imageUrl ? `
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+        </div>
+    ` : '';
+
     window.verifyStage1 = function() {
         speakEnglish(answerWord);
         speakFairyTTS("참 잘했어요!");
@@ -237,6 +313,7 @@ function renderStage1UI(container) {
     container.innerHTML = `
         <div class="quiz-card">
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">알파벳 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            ${imageHtml}
             <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${answerWord}</div>
             <div style="margin-bottom: 20px; color: #666;">이 단어를 소리 내어 읽고 아래 버튼을 눌러보세요!</div>
             
@@ -256,6 +333,13 @@ function renderStage2UI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
     const answerWord = currentItem.word.trim();
     
+    const imageUrl = currentItem.imageUrl || currentItem.image;
+    const imageHtml = imageUrl ? `
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+        </div>
+    ` : '';
+
     const choices = [answerWord];
     const otherWords = allFetchedRecords.filter(r => r.word !== answerWord).map(r => r.word);
     otherWords.sort(() => Math.random() - 0.5);
@@ -276,6 +360,7 @@ function renderStage2UI(container) {
     container.innerHTML = `
         <div class="quiz-card">
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">파닉스 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            ${imageHtml}
             <div style="font-size: 5rem; margin-bottom: 20px; cursor: pointer;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">🎧</div>
             <div style="margin-bottom: 20px; color: #666;">소리를 듣고 알맞은 단어를 고르세요!</div>
             
@@ -301,6 +386,13 @@ function renderStage3UI(container) {
     const wordsArray = answerWord.split(/\s+/);
     const wordCount = wordsArray.length;
     const totalLength = answerWord.length;
+
+    const imageUrl = currentItem.imageUrl || currentItem.image;
+    const imageHtml = imageUrl ? `
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+        </div>
+    ` : '';
 
     let interactiveHtml = '';
 
@@ -404,6 +496,7 @@ function renderStage3UI(container) {
     container.innerHTML = `
         <div class="quiz-card">
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">영단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            ${imageHtml}
             <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${currentItem.meaning}</div>
             <div style="margin-bottom: 20px; color: #666;">이 뜻에 맞는 영단어를 맞춰보세요!</div>
             ${interactiveHtml}
@@ -421,6 +514,13 @@ function renderStage4UI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
     const answerSentence = currentItem.word.trim();
     const wordsArray = answerSentence.split(/\s+/);
+
+    const imageUrl = currentItem.imageUrl || currentItem.image;
+    const imageHtml = imageUrl ? `
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+        </div>
+    ` : '';
     
     let interactiveHtml = '';
 
@@ -522,6 +622,7 @@ function renderStage4UI(container) {
     container.innerHTML = `
         <div class="quiz-card">
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">영어 문장 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            ${imageHtml}
             <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${currentItem.meaning}</div>
             <div style="margin-bottom: 20px; color: #666;">이 뜻에 맞는 영어 문장을 완성하세요!</div>
             ${interactiveHtml}
@@ -709,8 +810,18 @@ window.renderSentenceChat = function() {
         
         try {
             sentenceHistory.push({ role: "user", content: text });
-            // 영어 독해/토론용 멘토 요정 시스템 프롬프트 세팅
-            const systemPrompt = activePassage.chatbotSystemPrompt || "너는 방금 읽은 영어 지문을 바탕으로 아이와 다정하게 대화를 나누는 AI 영어 멘토 코코야. 아이가 영어로 대답하도록 유도하고, 문법이 틀려도 다정하게 교정해주며 칭찬해줘. 아이가 지문에 대해 자신의 생각을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.";
+            // 영어 독해/토론용 멘토 요정 시스템 프롬프트 세팅 (문장 구성, 주제, 지칭 대명사 등 설명 포함)
+            const systemPrompt = activePassage.chatbotSystemPrompt || `
+                너는 방금 읽은 영어 지문을 바탕으로 아이와 다정하게 대화를 나누는 AI 영어 멘토 코코야. 
+                단순히 대화만 나누는 것이 아니라, 다음 내용들을 아이와 함께 알아가거나 설명해줘야 해:
+                1. 문장의 구성 (주어, 동사 등 핵심 구조)
+                2. 글의 주제와 핵심 내용
+                3. 지칭 대명사(it, they, he, she 등)가 본문에서 무엇을 가리키는지 설명
+                
+                말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 영어로 대답하도록 유도해줘. 
+                문법이 틀려도 다정하게 교정해주며 칭찬해줘. 
+                아이가 지문에 대해 자신의 생각을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
+            `;
             
             const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
                 method: "POST",
@@ -800,28 +911,3 @@ window.triggerAwardDispense = async function(rewardAmount, type) {
         await grantRewardAndShowUI(actualReward, false, '영어');
     }
 };
-
-// 임시 모킹 데이터 (독해용)
-function getMockEnglishReadingData() {
-    return [
-        {
-            id: "eng_read_01",
-            title: "The Lion and the Mouse",
-            fullText: "A lion was sleeping in the forest.\nA little mouse ran over his nose.\nThe lion woke up and caught the mouse.\n\"Please let me go!\" said the mouse.\n\"I will help you someday.\"\nThe lion laughed and let him go.",
-            conjunctions: [
-                {
-                    sentenceBefore: "The lion woke up and caught the mouse.",
-                    sentenceAfter: "\"Please let me go!\" said the mouse.",
-                    options: ["And then", "However", "Because"],
-                    answer: "And then",
-                    commentary: "사자가 쥐를 잡았고, '그리고 나서' 쥐가 말했죠."
-                }
-            ],
-            themeQuiz: {
-                question: "이 이야기의 주제는 무엇일까요?",
-                options: ["작은 친구도 큰 도움을 줄 수 있다.", "사자는 쥐를 좋아한다.", "숲속에서는 조용히 해야 한다."],
-                answerIndex: 0
-            }
-        }
-    ];
-}
