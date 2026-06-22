@@ -17,6 +17,7 @@ var APP_CONFIG = {
     INVENTORY_DB_ID: "374a27115b688042bb61e6a102242e12", // 인벤토리(보상/경험치) 창고 ID
     STUDY_LOG_DB_ID: "37aa27115b688001b2ffe5e6c8f82ab2", // 학습현황(일지) DB ID
     VOCA_DB_ID: "375a27115b688038b686d3994ee12919",      // 용어사전/받아쓰기 데이터베이스 ID
+    NOTION_CHAT_MEMORY_DB_ID: "373a27115b6880ba82cdfeaa1c825547", // AI 대화 기억 보관소 DB ID
 
     // 👦👧 자녀 프로필 세팅 (조카들에게 분양 시 아이 이름과 나이에 맞게 수정하세요!)
     CHILDREN: {

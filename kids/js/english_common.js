@@ -81,6 +81,9 @@ function initializeEnglishRoom() {
         if (typeof startLearning === 'function') startLearning("초등 영어 멀티버스");
     }
     updateTtsToggleUi();
+    if (typeof initChatMemorySession === 'function') {
+        initChatMemorySession('공부방');
+    }
 }
 
 // ==========================================
@@ -141,6 +144,9 @@ function showLoadingSpinner(container) {
 }
 
 function closeMissionView() {
+    if (currentMissionType === 'stage6' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
+        saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
+    }
     document.getElementById('missionOverlay').style.display = "none";
     stopFairyTTS();
 }
@@ -810,8 +816,7 @@ window.renderSentenceChat = function() {
         
         try {
             sentenceHistory.push({ role: "user", content: text });
-            // 영어 독해/토론용 멘토 요정 시스템 프롬프트 세팅 (문장 구성, 주제, 지칭 대명사 등 설명 포함)
-            const systemPrompt = activePassage.chatbotSystemPrompt || `
+            const passageExtra = (activePassage.chatbotSystemPrompt || `
                 너는 방금 읽은 영어 지문을 바탕으로 아이와 다정하게 대화를 나누는 AI 영어 멘토 코코야. 
                 단순히 대화만 나누는 것이 아니라, 다음 내용들을 아이와 함께 알아가거나 설명해줘야 해:
                 1. 문장의 구성 (주어, 동사 등 핵심 구조)
@@ -821,7 +826,10 @@ window.renderSentenceChat = function() {
                 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 영어로 대답하도록 유도해줘. 
                 문법이 틀려도 다정하게 교정해주며 칭찬해줘. 
                 아이가 지문에 대해 자신의 생각을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
-            `;
+            `) + "\n\n다음은 아이가 읽은 영어 지문 원문이야:\n" + passageText;
+            const systemPrompt = typeof buildFullAISystemPrompt === 'function'
+                ? buildFullAISystemPrompt('공부방', passageExtra)
+                : passageExtra;
             
             const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
                 method: "POST",
@@ -829,7 +837,7 @@ window.renderSentenceChat = function() {
                 body: JSON.stringify({
                     model: "gemini-2.5-flash",
                     messages: [
-                        { role: "system", content: systemPrompt + "\n\n다음은 아이가 읽은 영어 지문 원문이야:\n" + passageText },
+                        { role: "system", content: systemPrompt },
                         ...sentenceHistory
                     ]
                 })

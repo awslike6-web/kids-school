@@ -102,6 +102,9 @@ function initializeKoreanRoom() {
         if (typeof startLearning === 'function') startLearning("초등 국어 멀티버스");
     }
     updateTtsToggleUi();
+    if (typeof initChatMemorySession === 'function') {
+        initChatMemorySession('공부방');
+    }
 }
 
 // ========================================================
@@ -147,6 +150,9 @@ function showLoadingSpinner(container) {
 }
 
 function closeMissionView() {
+    if (currentMissionType === 'sentence' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
+        saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
+    }
     document.getElementById('missionOverlay').style.display = "none";
     stopDictationAudio();
     stopFairyTTS();
@@ -674,14 +680,18 @@ window.renderSentenceChat = function() {
         
         try {
             sentenceHistory.push({ role: "user", content: text });
-            const systemPrompt = activePassage.chatbotSystemPrompt || "너는 방금 읽은 지문 이야기를 바탕으로 아이와 다정하게 대화를 나누는 AI 요정 코코야. 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 지문에 대해 자신의 생각이나 느낀 점을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.";
+            const passageExtra = (activePassage.chatbotSystemPrompt || "너는 방금 읽은 지문 이야기를 바탕으로 아이와 다정하게 대화를 나누는 AI 요정 코코야. 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 지문에 대해 자신의 생각이나 느낀 점을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.")
+                + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + passageText;
+            const systemPrompt = typeof buildFullAISystemPrompt === 'function'
+                ? buildFullAISystemPrompt('공부방', passageExtra)
+                : passageExtra;
             const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     model: "gemini-2.5-flash",
                     messages: [
-                        { role: "system", content: systemPrompt + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + passageText },
+                        { role: "system", content: systemPrompt },
                         ...sentenceHistory
                     ]
                 })

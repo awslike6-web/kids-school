@@ -16,26 +16,31 @@ let isFairyVoiceOn = true;
 let viewedWordsCount = 0; 
 let wordStartTime = 0; 
 
-const FAIRY_PROMPT = `
-너는 지금부터 아이의 문해력 발달을 돕는 다정하고 유창한 'AI 단짝 친구 요정 코코'야.
-말투는 어린이 예능 프로그램(예: 보니하니, 딩동댕 유치원)의 베테랑 인싸 진행자 아나운서처럼, 완벽한 표준어와 정확하고 품격 있는 문법을 구사해야 해. 
-
-[대화 및 관계 규칙]
-1. (관계성) 아이를 가르치려 드는 '선생님'이나 징징대는 '동생'이 아니라, 말을 엄청 유창하게 잘하는 멋진 '단짝 친구'처럼 동등한 관계에서 대화해. 호응할 때는 "우와, 대박이다!", "진짜 멋져!" 같은 활기찬 톤을 섞어줘.
-2. (문해력 확장) 아이가 짧게 묻더라도, 문맥을 찰떡같이 알아듣고 완벽하고 매끄러운 '명품 문장'으로 리프레임해서 받아쳐줘.
-3. (유창한 분량) 아나운서처럼 조리 있고 풍부한 어휘를 사용하여 2~4문장 내외로 유창하게 대화를 이어가줘.
-4. (기억력) 이전 대화 내용을 완벽하게 기억하고, 대화의 맥락을 이어서 자연스럽게 고도화된 티키타카를 유지해줘.
-`;
+function getVocaFairySystemPrompt(extraPrompt = '') {
+    if (typeof buildFullAISystemPrompt === 'function') {
+        return buildFullAISystemPrompt('용어방', extraPrompt);
+    }
+    return extraPrompt || "너는 용어사전방의 다정한 AI 도우미 코코야.";
+}
 
 // 🏰 엔진 시동 및 데이터 로딩 시작
-window.addEventListener('load', () => { 
+window.addEventListener('load', async () => { 
   document.body.className = (currentTheme === '슬라임' || currentTheme === 'theme--slime') ? 'theme--slime' : 'theme--minecraft';
   document.getElementById('welcomeMsg').textContent = `${currentUserName}의 지식 도서관에 오신 것을 환영해요!`;
   
   if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = speechSynthesis.getVoices;
   }
+  if (typeof initChatMemorySession === 'function') {
+    await initChatMemorySession('용어방');
+  }
   fetchLibraryData(); 
+});
+
+window.addEventListener('beforeunload', () => {
+  if (MODAL_CHAT_HISTORY.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
+    saveChatMemoryFromConversation({ roomType: '용어방', messages: MODAL_CHAT_HISTORY });
+  }
 });
 
 async function fetchLibraryData() {
@@ -327,7 +332,7 @@ async function askFairyTeacher(word, meaning) {
       body: JSON.stringify({
         model: "gemini-2.5-flash",
         messages: [
-          { role: "system", content: `${FAIRY_PROMPT}\n\n위 지침을 지키면서, 주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.` },
+          { role: "system", content: getVocaFairySystemPrompt(`주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.`) },
           { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
         ]
       })
@@ -381,7 +386,7 @@ async function askCocoFairy() {
       body: JSON.stringify({
         model: "gemini-2.5-flash", 
         messages: [
-          { role: "system", content: FAIRY_PROMPT },
+          { role: "system", content: getVocaFairySystemPrompt() },
           ...MODAL_CHAT_HISTORY
         ]
       })

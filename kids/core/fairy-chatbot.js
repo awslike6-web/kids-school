@@ -1,19 +1,25 @@
 // kids/core/fairy-chatbot.js
-// 🤖 요정 챗봇 코어 엔진 (전 과목 공용 UI 및 대화 처리)
+// 🤖 요정 챗봇 코어 엔진 (전 과목 공용 UI 및 대화 처리 + AI 기억 연동)
 
 if (typeof window.fairyHistory === 'undefined') {
     window.fairyHistory = [];
 }
 window.currentFairySubject = window.currentFairySubject || "KOREAN";
+window.currentFairyRoomType = window.currentFairyRoomType || "공부방";
 
-function initFairyChat(subject) {
+async function initFairyChat(subject, roomType = '공부방') {
     window.currentFairySubject = subject;
+    window.currentFairyRoomType = roomType;
+    window.fairyHistory = [];
+
+    if (typeof initChatMemorySession === 'function') {
+        await initChatMemorySession(roomType);
+    }
     
-    // 💡 혹시 CONFIG가 아예 구성 안 됐을 상황을 대비한 최상위 방어막
     let config = {
         name: "요정 코코",
         greeting: "반가워! 나랑 같이 재미있게 탐험하자! 🧚",
-        systemPrompt: "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정"
+        systemPrompt: ""
     };
 
     if (typeof FAIRY_CONFIG !== 'undefined') {
@@ -21,18 +27,17 @@ function initFairyChat(subject) {
             config = {
                 name: FAIRY_CONFIG[subject].name || "요정 코코",
                 greeting: FAIRY_CONFIG[subject].greeting || (FAIRY_CONFIG.greetings ? (localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu) : "안녕!"),
-                systemPrompt: FAIRY_CONFIG[subject].systemPrompt || "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정"
+                systemPrompt: FAIRY_CONFIG[subject].systemPrompt || ""
             };
         } else if (FAIRY_CONFIG.name) {
             config = {
                 name: FAIRY_CONFIG.name,
                 greeting: FAIRY_CONFIG.greetings ? (localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu) : "안녕!",
-                systemPrompt: "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정"
+                systemPrompt: ""
             };
         }
     }
 
-    // 1. 화면에 요정 챗봇 UI 강제 주입 (기존 위젯이 있으면 중복 제거)
     const existingWidget = document.getElementById('fairy-widget');
     if (existingWidget) existingWidget.remove();
 
@@ -91,7 +96,7 @@ function startFairyVoiceInput() {
     recognition.onresult = function(event) {
         const rawText = event.results[0][0].transcript;
         inputEl.value = rawText;
-        sendToFairy(); // 음성 인식 완료 시 자동 전송
+        sendToFairy();
     };
     
     recognition.onend = function() {
@@ -115,7 +120,11 @@ window.startFairyVoiceInput = startFairyVoiceInput;
 function toggleFairyWindow() {
     const panel = document.getElementById('fairy-chat-panel');
     if (!panel) return;
-    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'flex';
+    if (isOpen && typeof finalizeChatMemorySession === 'function') {
+        finalizeChatMemorySession();
+    }
 }
 window.toggleFairyWindow = toggleFairyWindow;
 
@@ -125,28 +134,30 @@ async function sendToFairy() {
     const text = inputEl.value.trim();
     if (!text) return;
 
-    // 📈 학습 세션 내 카운터 증가 (보상 연동)
     if (window.learningSession) {
         window.learningSession.fairyClickCount = (window.learningSession.fairyClickCount || 0) + 1;
     }
 
     appendFairyMsg('user', text);
     inputEl.value = '';
-    
-    let config = {
-        name: "요정 코코",
-        greeting: "반가워!",
-        systemPrompt: "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정"
-    };
 
-    if (typeof FAIRY_CONFIG !== 'undefined' && FAIRY_CONFIG[window.currentFairySubject]) {
-        config = FAIRY_CONFIG[window.currentFairySubject];
+    if (typeof trackChatMemoryUserMessage === 'function') {
+        trackChatMemoryUserMessage(text);
     }
+    
+    let extraPrompt = "";
+    if (typeof FAIRY_CONFIG !== 'undefined' && FAIRY_CONFIG[window.currentFairySubject]) {
+        extraPrompt = FAIRY_CONFIG[window.currentFairySubject].systemPrompt || "";
+    }
+
+    const fullSystemPrompt = typeof buildFullAISystemPrompt === 'function'
+        ? buildFullAISystemPrompt(window.currentFairyRoomType || '공부방', extraPrompt)
+        : (extraPrompt || "친절하고 다정한 초등 홈스쿨링 말동무 인공지능 요정");
 
     const WORKER_PROXY_URL = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
 
     if (window.fairyHistory.length === 0) {
-        window.fairyHistory.push({ role: "model", parts: [{ text: config.greeting || "안녕!" }] });
+        window.fairyHistory.push({ role: "model", parts: [{ text: "안녕!" }] });
     }
     window.fairyHistory.push({ role: "user", parts: [{ text: text }] });
 
@@ -155,7 +166,7 @@ async function sendToFairy() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                system_instruction: { parts: [{ text: config.systemPrompt || "친절하고 사랑스러운 아나운서 아동 가이딩 멘토 요정" }] },
+                system_instruction: { parts: [{ text: fullSystemPrompt }] },
                 contents: window.fairyHistory,
                 generationConfig: { temperature: 0.7 }
             })
@@ -165,9 +176,13 @@ async function sendToFairy() {
         const aiResponse = data.candidates[0].content.parts[0].text;
         
         window.fairyHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+
+        if (typeof trackChatMemoryAssistantMessage === 'function') {
+            trackChatMemoryAssistantMessage(aiResponse);
+        }
+
         appendFairyMsg('fairy', aiResponse);
         
-        // 🎙️ 진짜 코코 음성(TTS) 엔진과 결합 바인딩!
         if (typeof window.speakFairyTTS === 'function') {
             window.speakFairyTTS(aiResponse);
         }

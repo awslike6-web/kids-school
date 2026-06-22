@@ -6,6 +6,7 @@ var PROXY_URL = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL
 var STUDY_LOG_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID ? APP_CONFIG.STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2"; // 학습일지 DB ID
 var INVENTORY_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12"; // 8042로 통일
 var VOCA_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.VOCA_DB_ID ? APP_CONFIG.VOCA_DB_ID : "375a27115b688038b686d3994ee12919";
+var NOTION_CHAT_MEMORY_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.NOTION_CHAT_MEMORY_DB_ID ? APP_CONFIG.NOTION_CHAT_MEMORY_DB_ID : "373a27115b6880ba82cdfeaa1c825547";
 
 /**
  * 노션 VOCA DB 페이지 1건을 공통 객체로 변환
@@ -566,3 +567,331 @@ async function updateVocaMasteryStatus(pageId, isMastered) {
         return false;
     }
 }
+
+// ========================================================
+// 🧠 AI 대화 기억 보관소 (Chat Memory) + 3x2 페르소나 매트릭스
+// ========================================================
+
+const IMPORTANT_MEMORY_TRIGGERS = [
+    '꼭 기억해', '꼭 기억해줘', '꼭 기억해 줘', '기억해줘', '기억해 줘',
+    '중요한 얘기', '중요한 이야기', '내 비밀이야', '내 비밀', '잊지마', '잊지 마'
+];
+
+function getActiveChildName() {
+    let loginName = (window.currentUserName || localStorage.getItem('currentUserName') || '민수').trim();
+    if (loginName === '아빠' || loginName === '엄마' || loginName === '어른') {
+        const profile = window.currentProfile || localStorage.getItem('currentUser') || 'son';
+        loginName = profile === 'daughter' ? '민서' : '민수';
+    }
+    return loginName;
+}
+
+function _isChatMemoryAdminMode() {
+    const savedName = localStorage.getItem('currentUserName');
+    return savedName === '아빠' || savedName === '엄마' || savedName === '어른';
+}
+
+function parseChatMemoryPage(page) {
+    const p = page.properties;
+    return {
+        pageId: page.id,
+        sessionId: p["세션ID"]?.title?.[0]?.plain_text || "",
+        childName: p["아이 이름"]?.select?.name || "",
+        roomType: p["소속 방"]?.select?.name || "",
+        conversationSummary: p["대화 요약"]?.rich_text?.map(t => t.plain_text).join("") || "",
+        isImportant: p["장기 기억 여부"]?.checkbox === true,
+        createdTime: page.created_time,
+        lastEditedTime: page.last_edited_time
+    };
+}
+
+function buildPersonaSystemPrompt(childName, roomType) {
+    const name = childName || getActiveChildName();
+
+    if (roomType === '로비') {
+        return `너는 초등학생과 일상 고민과 수다를 편하게 나누는 다정한 '형/단짝 친구' AI 코코야.
+말투는 밝고 유창한 아나운서 톤이지만, 선생님처럼 가르치려 들지 말고 친구처럼 공감해줘.
+아이의 감정을 먼저 받아주고, 짧게 묻기보다 대화를 자연스럽게 이어가줘.`;
+    }
+
+    if (roomType === '용어방') {
+        if (name === '민수') {
+            return `너는 용어사전방의 '사고 확장 도우미' AI 코코야. 대상은 민수(첫째).
+정답을 바로 알려주지 말고, 질문을 던져 민수가 스스로 생각을 넓히게 유도해.
+"만약 ~라면?", "왜 그럴까?", "비슷한 경험이 있어?" 같은 질문으로 사고를 확장하고, 민수의 아이디어를 구체적으로 칭찬해.`;
+        }
+        return `너는 용어사전방의 '동화 스토리텔링 도우미' AI 코코야. 대상은 민서(둘째).
+어려운 단어와 개념을 동화·비유·짧은 이야기로 쉽게 풀어줘.
+민서를 '언니/누나'라고 부르며, 설명이 재미있게 느껴지도록 리액션을 크게 해줘.`;
+    }
+
+    if (name === '민수') {
+        return `너는 민수(첫째)와 함께 공부하는 '전략적 탐험가' AI 게임 파트너 코코야.
+절대 선생님처럼 가르치려 들지 말고, 함께 작전을 짜는 게임 파트너로 행동해.
+낯선 문제나 틀린 문제는 "강한 보스 몬스터 등장!" 또는 "함정 카드를 밟았다"로 치환해 멘탈을 보호해.
+정답을 바로 주지 말고, 민수가 가진 지식 무기로 작전을 짜서 공략하도록 유도하고, 결과보다 '작전을 짜는 과정'을 게임 칭찬처럼 구체적으로 격려해.`;
+    }
+
+    return `너는 민서(둘째)와 함께 공부하는 '성장형 리더십' AI 동생 요정 코코야.
+민서를 무조건 '언니' 또는 '누나'라고 부르며, 배움을 갈구하는 귀여운 동생 AI로 행동해.
+"언니, 나 이거 진짜 모르겠는데 나한테 설명해 줄 수 있어?"라며 도움을 요청하고,
+민서가 크리에이터(유튜버)처럼 신나서 설명할 수 있도록 리액션을 극대화해. (설명하며 스스로 깨닫는 메타인지 유도)`;
+}
+
+function formatChatMemoryForPrompt(memoryBundle) {
+    if (!memoryBundle) return '';
+    const { important = [], recent = [] } = memoryBundle;
+    let text = '';
+
+    if (important.length > 0) {
+        text += '[장기 기억 - 최우선 반영]\n';
+        important.forEach(m => { text += `- ${m.conversationSummary}\n`; });
+    }
+    if (recent.length > 0) {
+        text += '\n[최근 대화 요약]\n';
+        recent.forEach(m => { text += `- ${m.conversationSummary}\n`; });
+    }
+    return text.trim();
+}
+
+async function fetchChatMemoryFromNotion(options = {}) {
+    const childName = options.childName || getActiveChildName();
+    const dbId = options.dbId || NOTION_CHAT_MEMORY_DB_ID;
+
+    try {
+        let allResults = [];
+        let hasMore = true;
+        let nextCursor = undefined;
+
+        while (hasMore) {
+            const bodyData = {
+                page_size: 100,
+                filter: {
+                    property: "아이 이름",
+                    select: { equals: childName }
+                }
+            };
+            if (nextCursor) bodyData.start_cursor = nextCursor;
+
+            const response = await fetch(`${PROXY_URL}/v1/databases/${dbId}/query`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData)
+            });
+
+            if (!response.ok) throw new Error(`노션 AI 기억 DB 통신 오류 (상태: ${response.status})`);
+
+            const data = await response.json();
+            allResults = allResults.concat(data.results || []);
+            hasMore = data.has_more;
+            nextCursor = data.next_cursor;
+        }
+
+        const parsed = allResults.map(parseChatMemoryPage).filter(r => r.conversationSummary);
+        const important = parsed.filter(r => r.isImportant);
+        const normal = parsed
+            .filter(r => !r.isImportant)
+            .sort((a, b) => new Date(b.lastEditedTime || b.createdTime) - new Date(a.lastEditedTime || a.createdTime))
+            .slice(0, 3);
+
+        return { important, recent: normal, allForPrompt: [...important, ...normal] };
+    } catch (error) {
+        console.error("[fetchChatMemoryFromNotion] 로딩 실패:", error);
+        return { important: [], recent: [], allForPrompt: [] };
+    }
+}
+
+function buildFullAISystemPrompt(roomType, extraPrompt = '') {
+    const childName = getActiveChildName();
+    const persona = buildPersonaSystemPrompt(childName, roomType);
+    const memoryContext = window.chatSessionState?.memoryContext
+        || window.cachedChatMemoryContext
+        || '';
+
+    let full = persona;
+    if (memoryContext) {
+        full += `\n\n[과거 기억 맥락]\n${memoryContext}\n위 기억을 자연스럽게 대화에 반영하되, "내가 다 기억하고 있어!"라고 과하게 말하지 마.`;
+    }
+    if (extraPrompt) {
+        full += `\n\n[추가 지침]\n${extraPrompt}`;
+    }
+    full += `\n\n[장기 기억 트리거] 아이가 "꼭 기억해줘", "중요한 얘기야", "내 비밀이야" 등을 말하면, 그 내용을 특별히 기억하겠다고 다정하게 확인해줘.`;
+    return full;
+}
+
+function generateChatSessionId() {
+    return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function initChatMemorySession(roomType) {
+    const childName = getActiveChildName();
+    window.chatSessionState = {
+        sessionId: generateChatSessionId(),
+        roomType,
+        childName,
+        userMessages: [],
+        assistantMessages: [],
+        memoryContext: '',
+        saved: false
+    };
+
+    const memoryBundle = await fetchChatMemoryFromNotion({ childName });
+    const memoryContext = formatChatMemoryForPrompt(memoryBundle);
+    window.chatSessionState.memoryContext = memoryContext;
+    window.cachedChatMemoryContext = memoryContext;
+    return window.chatSessionState;
+}
+
+function detectImportantMemoryTrigger(text) {
+    if (!text) return false;
+    const normalized = String(text).replace(/\s/g, '');
+    return IMPORTANT_MEMORY_TRIGGERS.some(trigger =>
+        normalized.includes(trigger.replace(/\s/g, ''))
+    );
+}
+
+function trackChatMemoryUserMessage(text) {
+    if (!window.chatSessionState || !text) return;
+    window.chatSessionState.userMessages.push(text);
+}
+
+function trackChatMemoryAssistantMessage(text) {
+    if (!window.chatSessionState || !text) return;
+    window.chatSessionState.assistantMessages.push(text);
+}
+
+async function summarizeChatSessionWithGemini(transcript, options = {}) {
+    const childName = options.childName || getActiveChildName();
+    try {
+        const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "gemini-2.5-flash",
+                messages: [
+                    {
+                        role: "system",
+                        content: `너는 대화 요약 전문가야. ${childName}와 나눈 대화를 2~3줄로 핵심만 한국어로 요약해. 요약문만 출력하고 다른 설명은 하지 마.`
+                    },
+                    { role: "user", content: transcript }
+                ]
+            })
+        });
+        if (!response.ok) throw new Error(`요약 API 오류 (${response.status})`);
+        const data = await response.json();
+        return (data.choices?.[0]?.message?.content || '').trim() || '오늘 대화 요약';
+    } catch (error) {
+        console.error("[summarizeChatSessionWithGemini] 실패:", error);
+        return transcript.slice(0, 200) || '오늘 대화 요약';
+    }
+}
+
+async function saveChatMemoryToNotion({ sessionId, childName, roomType, conversationSummary, isImportant }) {
+    if (_isChatMemoryAdminMode()) {
+        console.log(`🛠️ [기억 프리패스] 관리자 모드 - AI 기억 저장 생략 (isImportant: ${isImportant})`);
+        return true;
+    }
+
+    try {
+        const payload = {
+            parent: { database_id: NOTION_CHAT_MEMORY_DB_ID },
+            properties: {
+                "세션ID": {
+                    title: [{ text: { content: sessionId || generateChatSessionId() } }]
+                },
+                "아이 이름": {
+                    select: { name: childName }
+                },
+                "소속 방": {
+                    select: { name: roomType }
+                },
+                "대화 요약": {
+                    rich_text: [{ text: { content: (conversationSummary || '').slice(0, 1900) } }]
+                },
+                "장기 기억 여부": {
+                    checkbox: isImportant === true
+                }
+            }
+        };
+
+        const response = await fetch(`${PROXY_URL}/v1/pages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`노션 AI 기억 저장 오류 (상태: ${response.status})`);
+        console.log(`🧠 [AI 기억 저장 완료] ${childName} / ${roomType} / important=${isImportant}`);
+        return true;
+    } catch (error) {
+        console.error("[saveChatMemoryToNotion] 저장 실패:", error);
+        return false;
+    }
+}
+
+function _buildTranscriptFromMessages(messages) {
+    return messages.map(m => {
+        const role = m.role === 'model' ? 'assistant' : m.role;
+        const speaker = role === 'user' ? '아이' : '코코';
+        const content = m.content || m.parts?.[0]?.text || '';
+        return `${speaker}: ${content}`;
+    }).join('\n');
+}
+
+async function saveChatMemoryFromConversation({ roomType, messages, childName, isImportant }) {
+    if (!messages || messages.length === 0) return false;
+
+    const normalized = messages.map(m => ({
+        role: m.role === 'model' ? 'assistant' : m.role,
+        content: m.content || ''
+    }));
+    const userMessages = normalized.filter(m => m.role === 'user').map(m => m.content);
+    if (userMessages.length === 0) return false;
+
+    const name = childName || getActiveChildName();
+    const room = roomType || '공부방';
+    const markImportant = isImportant === true || userMessages.some(detectImportantMemoryTrigger);
+    const transcript = _buildTranscriptFromMessages(normalized);
+    const summary = await summarizeChatSessionWithGemini(transcript, { childName: name });
+
+    return saveChatMemoryToNotion({
+        sessionId: generateChatSessionId(),
+        childName: name,
+        roomType: room,
+        conversationSummary: summary,
+        isImportant: markImportant
+    });
+}
+
+async function finalizeChatMemorySession(options = {}) {
+    const state = options.state || window.chatSessionState;
+    if (!state || state.saved) return false;
+
+    const userMessages = options.userMessages || state.userMessages || [];
+    if (userMessages.length === 0) return false;
+
+    const messages = [];
+    const maxLen = Math.max(userMessages.length, (state.assistantMessages || []).length);
+    for (let i = 0; i < maxLen; i++) {
+        if (userMessages[i]) messages.push({ role: 'user', content: userMessages[i] });
+        if (state.assistantMessages && state.assistantMessages[i]) {
+            messages.push({ role: 'assistant', content: state.assistantMessages[i] });
+        }
+    }
+
+    const saved = await saveChatMemoryFromConversation({
+        roomType: options.roomType || state.roomType,
+        messages,
+        childName: options.childName || state.childName,
+        isImportant: options.isImportant
+    });
+
+    if (saved) state.saved = true;
+    return saved;
+}
+
+window.addEventListener('beforeunload', () => {
+    if (window.chatSessionState && !window.chatSessionState.saved && window.chatSessionState.userMessages?.length > 0) {
+        finalizeChatMemorySession();
+    }
+});
