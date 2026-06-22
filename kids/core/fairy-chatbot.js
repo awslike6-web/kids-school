@@ -38,6 +38,16 @@ async function initFairyChat(subject, roomType = '공부방') {
         }
     }
 
+    if (roomType === '로비') {
+        const childName = typeof getActiveChildName === 'function'
+            ? getActiveChildName()
+            : (localStorage.getItem('currentUser') === 'daughter' ? '민서' : '민수');
+        if (childName === '민서') {
+            config.name = "동생 코코 🧚";
+            config.greeting = "언니! 나 코코야! 오늘 하루 어땠어? 나한테 재밌는 얘기 들려줘! ✨";
+        }
+    }
+
     const existingWidget = document.getElementById('fairy-widget');
     if (existingWidget) existingWidget.remove();
 
