@@ -312,39 +312,164 @@ function renderVocaUI(container) {
 
     if (koreanVocaMode === 'subjective') {
         // [✏️ 단어 맞추기 (주관식)]
-        // 노션 데이터의 '뜻풀이'가 문제 텍스트로 출제되고, 하단 UI는 주관식 타이핑(정답은 단어명)창
-        window.verifyKoreanVocaSubjective = function() {
-            const inputEl = document.getElementById('vocaSubjectiveInput');
-            if (!inputEl) return;
-            const inputVal = inputEl.value.trim();
-            const answerWord = currentItem.word.trim();
-            if (inputVal === answerWord) {
-                speakFairyTTS("정답이에요! 아주 훌륭해요!");
-                inputEl.classList.add('correct');
-                activeQuizIdx++;
-                setTimeout(renderSectionUI, 1000);
-            } else {
-                speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
-                inputEl.classList.add('wrong');
-                setTimeout(() => inputEl.classList.remove('wrong'), 1000);
-                if (!window.wrongNotes) window.wrongNotes = [];
-                window.wrongNotes.push({ word: currentItem.word, wrongInput: inputVal });
-            }
-        };
+        // 노션 데이터의 '뜻풀이'가 문제 텍스트로 출제되고, 하단 UI는 단어 구조에 따라 동적 변환
+        const answerWord = currentItem.word.trim();
+        const wordsArray = answerWord.split(/\s+/);
+        const wordCount = wordsArray.length;
+        const totalLength = answerWord.length;
+
+        let interactiveHtml = '';
+
+        if (wordCount === 1 && totalLength > 5) {
+            // 💡 조건 1: 띄어쓰기 없는 '1개 단어'인데 5글자가 넘는 경우 -> 자석 UI (빈칸 채우기)
+            const chars = answerWord.split('').filter(c => c.trim() !== '');
+            const scrambled = [...chars].sort(() => Math.random() - 0.5);
+
+            window.currentKoreanMagnetAnswer = [];
+            window.koreanMagnetTargetWord = answerWord;
+
+            window.selectKoreanVocaMagnet = function(letter, idx) {
+                const btn = document.getElementById(`korean-magnet-btn-${idx}`);
+                if (btn.style.visibility === 'hidden') return;
+                btn.style.visibility = 'hidden';
+                window.currentKoreanMagnetAnswer.push({ letter, idx });
+                window.renderKoreanVocaMagnetBlanks();
+            };
+
+            window.renderKoreanVocaMagnetBlanks = function() {
+                const container = document.getElementById('korean-magnet-blanks');
+                if (!container) return;
+                let html = '';
+                let answerIdx = 0;
+                for (let i = 0; i < window.koreanMagnetTargetWord.length; i++) {
+                    const char = window.koreanMagnetTargetWord[i];
+                    if (char.trim() === '') {
+                        html += '<span style="width:15px;"></span>';
+                    } else {
+                        if (answerIdx < window.currentKoreanMagnetAnswer.length) {
+                            html += `<span style="border-bottom:3px solid var(--purple); width:30px; display:inline-block; text-align:center; color:var(--purple); font-weight:bold;">${window.currentKoreanMagnetAnswer[answerIdx].letter}</span>`;
+                            answerIdx++;
+                        } else {
+                            html += '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>';
+                        }
+                    }
+                }
+                container.innerHTML = html;
+            };
+
+            window.resetKoreanVocaMagnets = function() {
+                window.currentKoreanMagnetAnswer.forEach(item => {
+                    const btn = document.getElementById(`korean-magnet-btn-${item.idx}`);
+                    if (btn) btn.style.visibility = 'visible';
+                });
+                window.currentKoreanMagnetAnswer = [];
+                window.renderKoreanVocaMagnetBlanks();
+            };
+
+            window.verifyKoreanVocaMagnet = function() {
+                const answerStr = window.currentKoreanMagnetAnswer.map(item => item.letter).join('');
+                const correctTarget = window.koreanMagnetTargetWord.replace(/\s/g, '');
+
+                if (answerStr === correctTarget) {
+                    speakFairyTTS("정답이에요! 아주 훌륭해요!");
+                    activeQuizIdx++;
+                    setTimeout(renderSectionUI, 1000);
+                } else {
+                    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+                    const container = document.getElementById('korean-magnet-blanks');
+                    if (container) {
+                        container.classList.add('wrong');
+                        setTimeout(() => container.classList.remove('wrong'), 800);
+                    }
+                    if (!window.wrongNotes) window.wrongNotes = [];
+                    window.wrongNotes.push({ word: currentItem.word, wrongInput: answerStr });
+                }
+            };
+
+            interactiveHtml = `
+                <div id="korean-magnet-blanks" style="font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; min-height: 40px; display: flex; justify-content: center; gap: 5px;">
+                    ${answerWord.split('').map(c => c.trim() === '' ? '<span style="width:15px;"></span>' : '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>').join('')}
+                </div>
+                <div id="korean-magnet-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
+                    ${scrambled.map((l, i) => `<button id="korean-magnet-btn-${i}" class="quiz-choice-btn" style="padding: 10px 20px; font-size: 1.5rem;" onclick="selectKoreanVocaMagnet('${l}', ${i})">${l}</button>`).join('')}
+                </div>
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                    <button class="quiz-button" style="background:#ff9f43;" onclick="resetKoreanVocaMagnets()">다시 조합하기</button>
+                    <button class="quiz-button" onclick="verifyKoreanVocaMagnet()">정답 확인</button>
+                    <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning.replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
+                    <button class="quiz-button" style="background:var(--pink);" onclick="activeQuizIdx++; renderSectionUI();">건너뛰기 ⏩</button>
+                </div>
+            `;
+        } else if (wordCount >= 3) {
+            // 💡 조건 2: 3단어 이상 결합된 경우 -> 객관식 문제 UI
+            const choices = [answerWord];
+            const otherWords = allFetchedRecords.filter(r => r.word !== answerWord).map(r => r.word);
+            otherWords.sort(() => Math.random() - 0.5);
+            choices.push(otherWords[0] || "오답 1");
+            choices.push(otherWords[1] || "오답 2");
+            choices.sort(() => Math.random() - 0.5);
+
+            window.verifyKoreanVocaSubjectiveChoice = function(selectedWord) {
+                if (selectedWord === answerWord) {
+                    speakFairyTTS("정답이에요! 아주 훌륭해요!");
+                    activeQuizIdx++;
+                    setTimeout(renderSectionUI, 1000);
+                } else {
+                    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+                    if (!window.wrongNotes) window.wrongNotes = [];
+                    window.wrongNotes.push({ word: currentItem.word, wrongInput: selectedWord });
+                }
+            };
+
+            interactiveHtml = `
+                <div class="quiz-choices-container" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+                    ${choices.map(choice => `
+                         <button class="quiz-choice-btn" style="text-align:left; line-height:1.4;" onclick="verifyKoreanVocaSubjectiveChoice('${choice.replace(/'/g, "\\'")}')">${choice}</button>
+                    `).join('')}
+                </div>
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                    <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning.replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
+                    <button class="quiz-button" style="background:var(--pink);" onclick="activeQuizIdx++; renderSectionUI();">건너뛰기 ⏩</button>
+                </div>
+            `;
+        } else {
+            // 💡 조건 3: 그 외의 경우 -> 기존 주관식 타이핑 UI
+            window.verifyKoreanVocaSubjective = function() {
+                const inputEl = document.getElementById('vocaSubjectiveInput');
+                if (!inputEl) return;
+                const inputVal = inputEl.value.trim().replace(/\s/g, '');
+                const correctTarget = answerWord.replace(/\s/g, '');
+                if (inputVal === correctTarget) {
+                    speakFairyTTS("정답이에요! 아주 훌륭해요!");
+                    inputEl.classList.add('correct');
+                    activeQuizIdx++;
+                    setTimeout(renderSectionUI, 1000);
+                } else {
+                    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+                    inputEl.classList.add('wrong');
+                    setTimeout(() => inputEl.classList.remove('wrong'), 1000);
+                    if (!window.wrongNotes) window.wrongNotes = [];
+                    window.wrongNotes.push({ word: currentItem.word, wrongInput: inputVal });
+                }
+            };
+
+            interactiveHtml = `
+                <div class="interactive-input-group" style="margin-bottom: 20px;">
+                    <input id="vocaSubjectiveInput" class="text-input-field" type="text" autocomplete="off" placeholder="정답 단어를 입력하세요!" onkeypress="if(event.key === 'Enter') verifyKoreanVocaSubjective()" style="width:100%;">
+                </div>
+                
+                <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                    <button class="quiz-button" onclick="verifyKoreanVocaSubjective()">정답 확인</button>
+                    <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning.replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
+                    <button class="quiz-button" style="background:var(--pink);" onclick="activeQuizIdx++; renderSectionUI();">건너뛰기 ⏩</button>
+                </div>
+            `;
+        }
 
         quizContentHtml = `
             <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--purple); margin-bottom: 20px;">${currentItem.meaning}</div>
             <div style="margin-bottom: 20px; color: #666;">이 뜻풀이에 알맞은 단어를 적어보세요!</div>
-            
-            <div class="interactive-input-group" style="margin-bottom: 20px;">
-                <input id="vocaSubjectiveInput" class="text-input-field" type="text" autocomplete="off" placeholder="정답 단어를 입력하세요!" onkeypress="if(event.key === 'Enter') verifyKoreanVocaSubjective()" style="width:100%;">
-            </div>
-            
-            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
-                <button class="quiz-button" onclick="verifyKoreanVocaSubjective()">정답 확인</button>
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning.replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
-                <button class="quiz-button" style="background:var(--pink);" onclick="activeQuizIdx++; renderSectionUI();">건너뛰기 ⏩</button>
-            </div>
+            ${interactiveHtml}
         `;
     } else {
         // [🧐 뜻 고르기 (객관식)]

@@ -3,150 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민 공항 - 영어 출국장</title>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --sky-blue: #4facfe;
-    --cloud-white: #fdfbfb;
-    --ticket-bg: #ffffff;
-    --ticket-border: #2c3e50;
-    --accent-orange: #ff9f43;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body { 
-    font-family: 'Jua', sans-serif; 
-    background: linear-gradient(to bottom, var(--sky-blue) 0%, #00f2fe 100%); 
-    min-height: 100vh; 
-    color: #333; 
-    padding-bottom: 50px;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  .clouds {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: url('https://cdn.pixabay.com/photo/2013/04/01/09/22/clouds-98536_960_720.png') repeat-x;
-    background-size: contain;
-    opacity: 0.4;
-    animation: moveClouds 60s linear infinite;
-    z-index: 0;
-    pointer-events: none;
-  }
-  @keyframes moveClouds { from { background-position: 0 0; } to { background-position: 1000px 0; } }
-
-  .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); position: sticky; top: 0; z-index: 50; }
-  .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: #333; font-weight: bold; font-size: 0.9rem; z-index: 51; }
-
-  .departure-board { background: #1a1a1a; color: #f1c40f; text-align: center; padding: 20px; margin: 30px auto; width: 90%; max-width: 600px; border-radius: 10px; border: 4px solid #555; box-shadow: 0 10px 20px rgba(0,0,0,0.3); position: relative; z-index: 10; }
-  .main-title { font-family: 'Gaegu', cursive; font-size: 2.5rem; letter-spacing: 2px; }
-  .sub-title { font-size: 1.2rem; color: #fff; margin-top: 5px; }
-
-  .fairy-stewardess { text-align: center; margin: 20px auto; background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 20px; max-width: 500px; border: 3px dashed var(--accent-orange); position: relative; z-index: 10; }
-  .fairy-icon { font-size: 3rem; animation: bounce 2s infinite; display: inline-block; }
-  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-  .ticket-container { display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 10; }
-  .boarding-pass { background: var(--ticket-bg); border-radius: 15px; display: flex; overflow: hidden; box-shadow: 0 8px 15px rgba(0,0,0,0.1); text-decoration: none; color: #333; transition: transform 0.2s, box-shadow 0.2s; position: relative; border: 2px solid #ddd; }
-  .boarding-pass:hover { transform: scale(1.02); box-shadow: 0 12px 25px rgba(0,0,0,0.2); }
-  .boarding-pass::before { content: ''; position: absolute; top: 0; bottom: 0; left: 100px; border-left: 2px dashed #ccc; }
-
-  .ticket-left { background: var(--accent-orange); color: white; width: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 1.2rem; padding: 10px; }
-  .ticket-left .gate { font-size: 2rem; font-weight: bold; }
-
-  .ticket-right { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-  .ticket-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 5px; color: var(--ticket-border); }
-  .ticket-desc { font-size: 1.1rem; color: #666; }
-
-  .boarding-pass.locked { filter: grayscale(100%); opacity: 0.7; cursor: not-allowed; }
-  .boarding-pass.locked:hover { transform: none; box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
-  .locked-badge { position: absolute; top: 10px; right: 10px; background: #555; color: white; padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; }
-</style>
+<title>민민이네 공부방 - 영어 멀티버스</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/english.css">
 </head>
 <body>
 
 <div class="clouds"></div>
 
-<div class="top-nav">
-  <div style="font-size: 1.2rem; font-weight: bold; color: #333;">✈️ 민민 공항 터미널</div>
-  <a href="../../../lobby.html" class="exit-btn">🚪 전체 로비로</a>
+<div class="english-container">
+  
+  <div class="top-action-bar">
+    <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
+        🔊 요정 음성 ON
+      </button>
+      <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
+    </div>
+  </div>
+
+  <div class="main-header-card">
+    <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
+    <h1 id="englishTitle">민수의 영어 멀티버스 대기실</h1>
+    <p class="banner-goal-desc" id="englishGoalText">영어의 달인이 되어보자! 6단계 파이프라인 가동!</p>
+  </div>
+
+  <div class="english-grid">
+    
+    <div class="english-grid-btn" onclick="openMissionView('stage1')">
+      <span class="english-btn-icon">🔤</span>
+      <div class="english-btn-title">1단계: 알파벳 터치방</div>
+      <p class="english-btn-desc">알파벳을 누르고 원어민 소리를 들어보며 친해져요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage2')">
+      <span class="english-btn-icon">🎧</span>
+      <div class="english-btn-title">2단계: 파닉스 듣기방</div>
+      <p class="english-btn-desc">코코 요정의 발음을 듣고 알맞은 단어를 골라보세요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage3')">
+      <span class="english-btn-icon">📝</span>
+      <div class="english-btn-title">3단계: 영단어/숙어방</div>
+      <p class="english-btn-desc">뜻을 보고 알맞은 영단어를 타이핑하거나 자석 카드로 조립해요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage4')">
+      <span class="english-btn-icon">💬</span>
+      <div class="english-btn-title">4단계: 영어 문장방</div>
+      <p class="english-btn-desc">단어 카드를 순서대로 배열해서 완벽한 영어 문장을 만들어요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage5')">
+      <span class="english-btn-icon">📖</span>
+      <div class="english-btn-title">5단계: 짧은 문단 독해</div>
+      <p class="english-btn-desc">영어 문단 순서를 맞추고 연결어를 찾으며 독해력을 키워요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage6')">
+      <span class="english-btn-icon">🗣️</span>
+      <div class="english-btn-title">6단계: 예비 중등 토론</div>
+      <p class="english-btn-desc">영어 지문을 읽고 코코 요정과 영어로 토론을 나누어 보아요!</p>
+    </div>
+
+  </div>
+
 </div>
 
-<div class="departure-board">
-  <div class="main-title">🛫 DEPARTURES</div>
-  <div class="sub-title">어느 영어 마을로 여행을 떠날까요?</div>
-</div>
+<div class="english-overlay" id="missionOverlay">
+  <div class="english-overlay-box">
+    <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
+    
+    <div class="overlay-header">
+      <span id="overlayHeaderIcon" style="font-size: 1.8rem;">📖</span>
+      <h2 class="overlay-heading" id="overlayHeaderTitle">미션 타이틀</h2>
+    </div>
 
-<div class="fairy-stewardess">
-  <div class="fairy-icon">👩‍✈️🧚‍♀️</div>
-  <div style="font-size: 1.2rem; margin-top: 5px;">
-    "민민 항공에 오신 것을 환영합니다!<br>원하는 목적지의 탑승권을 선택해 주세요!"
+    <div class="overlay-body" id="overlayInnerBody">
+      <!-- 동적 콘텐츠 렌더링 영역 -->
+    </div>
   </div>
 </div>
 
-<div class="ticket-container">
-  
-  <!-- 1. 파닉스 방 탑승권 -->
-  <a href="/kids-school/kids/subjects/english/english_phonics.html" class="boarding-pass">
-    <div class="ticket-left">
-      <div>GATE</div>
-      <div class="gate">A1</div>
-    </div>
-    <div class="ticket-right">
-      <div class="ticket-title">🔤 파닉스 마을</div>
-      <div class="ticket-desc">그림을 누르고 알파벳 소리를 들어보자!</div>
-    </div>
-  </a>
-
-  <!-- 2. 영단어 퀴즈방 탑승권 -->
-  <a href="/kids-school/kids/subjects/english/english_voca.html" class="boarding-pass">
-    <div class="ticket-left">
-      <div style="background:#4facfe; padding:20px; height:100%; width:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; border-radius: 13px 0 0 13px; margin: -10px;">
-        <div>GATE</div>
-        <div class="gate">B2</div>
-      </div>
-    </div>
-    <div class="ticket-right">
-      <div class="ticket-title">📝 영단어 퀴즈 기지</div>
-      <div class="ticket-desc">따라 적고, 듣고 맞히는 신나는 단어 게임!</div>
-    </div>
-  </a>
-
-  <a href="#" class="boarding-pass locked" onclick="event.preventDefault(); alert('탑승 준비 중인 게이트입니다! 뚝딱뚝딱 공사 중 🛠️');">
-    <div class="locked-badge">공사 중</div>
-    <div class="ticket-left" style="background: #95a5a6;"><div>GATE</div><div class="gate">C3</div></div>
-    <div class="ticket-right"><div class="ticket-title">📖 영어 동화 마을</div><div class="ticket-desc">재밌는 영어 이야기를 읽어보는 곳이야!</div></div>
-  </a>
-
-  <a href="#" class="boarding-pass locked" onclick="event.preventDefault(); alert('탑승 준비 중인 게이트입니다! 뚝딱뚝딱 공사 중 🛠️');">
-    <div class="locked-badge">공사 중</div>
-    <div class="ticket-left" style="background: #95a5a6;"><div>GATE</div><div class="gate">D4</div></div>
-    <div class="ticket-right"><div class="ticket-title">🧩 영어 블록 공장</div><div class="ticket-desc">단어들을 조립해서 문장 기차를 만들어보자!</div></div>
-  </a>
-
-</div>
-
-  <!-- 💡 [정비팀장 마감 라인] 영어 출국장 로비 코어 엔진 및 요정 배선 연결 -->
 <script src="../../config.js"></script>
-<script src="../../core/core.js"></script>          <!-- 🚀 부모 계정 완벽 세탁 가드 가동 -->
+<script src="../../core/core.js"></script>
 <script src="../../core/notion-helper.js"></script>
 <script src="../../core/fairy-config.js"></script>
-<script src="../../core/fairy-chatbot.js"></script>  
-<script src="../../core/fairy-engine.js"></script>   <!-- 🔊 요정 코코 목소리 시동 -->
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
 <script src="../../js/english_common.js"></script>
 
 <script>
-    window.addEventListener('load', () => {
-        console.log("🛫 영어 출국장 관제탑 동기화 완료!");
-        
-        // 🧚‍♀️ 아나운서 요정 코코 영어 모드로 대기실 장착
-        if (typeof initFairyChat === 'function') {
-            initFairyChat('MATH'); // 힌트 요정 스타일 또는 KOREAN 원하시는 페르소나로 연결 가능합니다.
-        }
-    });
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initializeEnglishRoom === 'function') {
+        initializeEnglishRoom();
+    } else {
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--minecraft' : 'theme--slime';
+    }
+
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("ENGLISH");
+    }
+  });
 </script>
 </body>
 </html>
