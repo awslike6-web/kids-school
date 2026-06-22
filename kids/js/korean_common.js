@@ -13,6 +13,12 @@ let currentMissionType = "";
 let allFetchedRecords = [];
 let selectedKoreanGrade = "";
 let selectedKoreanUnit = "";
+let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
+
+window.setKoreanVocaMode = function(mode) {
+    koreanVocaMode = mode;
+    renderSectionUI();
+};
 
 // AI 문장방 상태
 let sentenceMode = 'base';
@@ -281,9 +287,11 @@ function renderSectionUI() {
 // --------------------------------------------------------
 // 1. 국어 용어방 (단어 -> 뜻 맞추기 객관식 강제)
 // --------------------------------------------------------
+// --------------------------------------------------------
+// 1. 국어 용어방 (단어 -> 뜻 맞추기 객관식 / 뜻 -> 단어 맞추기 주관식 선택)
+// --------------------------------------------------------
 function renderVocaUI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
-    const answerMeaning = currentItem.meaning;
     
     const imageUrl = currentItem.imageUrl || currentItem.image;
     const imageHtml = imageUrl ? `
@@ -292,46 +300,107 @@ function renderVocaUI(container) {
         </div>
     ` : '';
 
-    // 무조건 객관식 3지선다 (오답 뜻 2개 추출)
-    const choices = [answerMeaning];
-    const otherMeanings = allFetchedRecords.filter(r => r.meaning && r.meaning !== answerMeaning).map(r => r.meaning);
-    otherMeanings.sort(() => Math.random() - 0.5);
-    choices.push(otherMeanings[0] || "전혀 관계없는 뜻입니다.");
-    choices.push(otherMeanings[1] || "다른 단어의 뜻입니다.");
-    choices.sort(() => Math.random() - 0.5);
+    // 상단 토글 탭 UI
+    const toggleHtml = `
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
+            <button class="quiz-button" style="background: ${koreanVocaMode === 'subjective' ? 'var(--purple)' : '#ccc'}; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.95rem;" onclick="setKoreanVocaMode('subjective')">✏️ 단어 맞추기 (주관식)</button>
+            <button class="quiz-button" style="background: ${koreanVocaMode === 'choice' ? 'var(--purple)' : '#ccc'}; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.95rem;" onclick="setKoreanVocaMode('choice')">🧐 뜻 고르기 (객관식)</button>
+        </div>
+    `;
 
-    window.verifyKoreanVocaChoice = function(selectedMeaning) {
-        if (selectedMeaning === answerMeaning) {
-            speakFairyTTS("정답이에요! 아주 훌륭해요!");
-            activeQuizIdx++;
-            setTimeout(renderSectionUI, 1000);
-        } else {
-            speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
-            if (!window.wrongNotes) window.wrongNotes = [];
-            window.wrongNotes.push({ word: currentItem.word, wrongInput: selectedMeaning });
-        }
-    };
+    let quizContentHtml = '';
 
-    container.innerHTML = `
-        <div class="quiz-card">
-            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            ${imageHtml}
-            <div class="quiz-descr" style="font-size: 2rem; font-weight: bold; color: var(--purple);">${currentItem.word}</div>
+    if (koreanVocaMode === 'subjective') {
+        // [✏️ 단어 맞추기 (주관식)]
+        // 노션 데이터의 '뜻풀이'가 문제 텍스트로 출제되고, 하단 UI는 주관식 타이핑(정답은 단어명)창
+        window.verifyKoreanVocaSubjective = function() {
+            const inputEl = document.getElementById('vocaSubjectiveInput');
+            if (!inputEl) return;
+            const inputVal = inputEl.value.trim();
+            const answerWord = currentItem.word.trim();
+            if (inputVal === answerWord) {
+                speakFairyTTS("정답이에요! 아주 훌륭해요!");
+                inputEl.classList.add('correct');
+                activeQuizIdx++;
+                setTimeout(renderSectionUI, 1000);
+            } else {
+                speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+                inputEl.classList.add('wrong');
+                setTimeout(() => inputEl.classList.remove('wrong'), 1000);
+                if (!window.wrongNotes) window.wrongNotes = [];
+                window.wrongNotes.push({ word: currentItem.word, wrongInput: inputVal });
+            }
+        };
+
+        quizContentHtml = `
+            <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--purple); margin-bottom: 20px;">${currentItem.meaning}</div>
+            <div style="margin-bottom: 20px; color: #666;">이 뜻풀이에 알맞은 단어를 적어보세요!</div>
+            
+            <div class="interactive-input-group" style="margin-bottom: 20px;">
+                <input id="vocaSubjectiveInput" class="text-input-field" type="text" autocomplete="off" placeholder="정답 단어를 입력하세요!" onkeypress="if(event.key === 'Enter') verifyKoreanVocaSubjective()" style="width:100%;">
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="quiz-button" onclick="verifyKoreanVocaSubjective()">정답 확인</button>
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning.replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
+                <button class="quiz-button" style="background:var(--pink);" onclick="activeQuizIdx++; renderSectionUI();">건너뛰기 ⏩</button>
+            </div>
+        `;
+    } else {
+        // [🧐 뜻 고르기 (객관식)]
+        // 노션 데이터의 '단어명'이 문제로 출제되고, 하단 UI는 기존에 만들어둔 객관식 3지선다(정답은 뜻풀이)
+        const answerMeaning = currentItem.meaning;
+        const choices = [answerMeaning];
+        const otherMeanings = allFetchedRecords.filter(r => r.meaning && r.meaning !== answerMeaning).map(r => r.meaning);
+        otherMeanings.sort(() => Math.random() - 0.5);
+        choices.push(otherMeanings[0] || "전혀 관계없는 뜻입니다.");
+        choices.push(otherMeanings[1] || "다른 단어의 뜻입니다.");
+        choices.sort(() => Math.random() - 0.5);
+
+        window.verifyKoreanVocaChoice = function(selectedMeaning) {
+            if (selectedMeaning === answerMeaning) {
+                speakFairyTTS("정답이에요! 아주 훌륭해요!");
+                activeQuizIdx++;
+                setTimeout(renderSectionUI, 1000);
+            } else {
+                speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+                if (!window.wrongNotes) window.wrongNotes = [];
+                window.wrongNotes.push({ word: currentItem.word, wrongInput: selectedMeaning });
+            }
+        };
+
+        quizContentHtml = `
+            <div class="quiz-descr" style="font-size: 2.2rem; font-weight: bold; color: var(--purple); margin-bottom: 20px;">${currentItem.word}</div>
             <div style="margin-bottom: 20px; color: #666;">이 단어의 올바른 뜻을 골라보세요!</div>
             
-            <div class="quiz-choices-container">
+            <div class="quiz-choices-container" style="margin-bottom: 20px;">
                 ${choices.map(choice => `
                      <button class="quiz-choice-btn" style="text-align:left; line-height:1.4;" onclick="verifyKoreanVocaChoice('${choice.replace(/'/g, "\\'")}')">${choice}</button>
                 `).join('')}
             </div>
             
-            <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.word}')">🔊 단어 듣기</button>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.word.replace(/'/g, "\\'")}')">🔊 단어 듣기</button>
                 <button class="quiz-button" style="background:var(--pink);" onclick="activeQuizIdx++; renderSectionUI();">건너뛰기 ⏩</button>
             </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="quiz-card">
+            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            ${toggleHtml}
+            ${imageHtml}
+            ${quizContentHtml}
         </div>
     `;
-    speakFairyTTS(currentItem.word);
+
+    // 자동 낭독
+    if (koreanVocaMode === 'subjective') {
+        speakFairyTTS(currentItem.meaning);
+    } else {
+        speakFairyTTS(currentItem.word);
+    }
 }
 
 // --------------------------------------------------------
