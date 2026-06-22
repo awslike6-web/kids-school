@@ -17,6 +17,11 @@ function parseVocaPage(page) {
         || p["이미지파일"]?.url
         || p["이미지파일"]?.rich_text?.[0]?.plain_text
         || null;
+    const audioFile = p["음성파일"]?.files?.[0];
+    const audioUrl = audioFile?.file?.url || audioFile?.external?.url
+        || p["음성파일"]?.url
+        || p["음성파일"]?.rich_text?.[0]?.plain_text
+        || null;
     const unitRaw = p["단원"]?.rich_text?.[0]?.plain_text
         ?? p["단원"]?.number
         ?? p["단원"]?.select?.name
@@ -34,6 +39,7 @@ function parseVocaPage(page) {
         meaning: p["뜻풀이"]?.rich_text?.[0]?.plain_text || p["뜻"]?.rich_text?.[0]?.plain_text || "",
         detailContext: p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "",
         imageUrl,
+        audioUrl,
         pos: p["품사"]?.rich_text?.[0]?.plain_text || "",
         wordType: p["어휘유형"]?.select?.name || "",
         type: p["어휘유형"]?.select?.name || "",

@@ -14,6 +14,8 @@ let allFetchedRecords = [];
 let selectedKoreanGrade = "";
 let selectedKoreanUnit = "";
 let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
+let koreanDictationOrderType = 'shuffle'; // 'shuffle' or 'sequence'
+let dictationAudioEl = null;
 
 window.setKoreanVocaMode = function(mode) {
     koreanVocaMode = mode;
@@ -146,8 +148,56 @@ function showLoadingSpinner(container) {
 
 function closeMissionView() {
     document.getElementById('missionOverlay').style.display = "none";
+    stopDictationAudio();
     stopFairyTTS();
 }
+
+function stopDictationAudio() {
+    if (dictationAudioEl) {
+        dictationAudioEl.pause();
+        dictationAudioEl.currentTime = 0;
+        dictationAudioEl.onended = null;
+        dictationAudioEl.onerror = null;
+        dictationAudioEl = null;
+    }
+}
+
+function playDictationAudio(item) {
+    if (!item) return;
+    stopDictationAudio();
+    const text = item.word.trim();
+    if (item.audioUrl) {
+        dictationAudioEl = new Audio(item.audioUrl);
+        dictationAudioEl.onerror = () => {
+            speakFairyTTS(text);
+        };
+        dictationAudioEl.play().catch(() => speakFairyTTS(text));
+    } else {
+        speakFairyTTS(text);
+    }
+}
+
+window.replayDictationAudio = function() {
+    playDictationAudio(activeSectionData[activeQuizIdx]);
+};
+
+window.koreanToggleDictationOrder = function() {
+    koreanDictationOrderType = (koreanDictationOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+    activeQuizIdx = 0;
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (!innerBody) return;
+
+    let matchedRecords = allFetchedRecords;
+    if (selectedKoreanGrade) {
+        matchedRecords = matchedRecords.filter(r =>
+            r.grade === selectedKoreanGrade || r.grades.includes(selectedKoreanGrade)
+        );
+    }
+    if (selectedKoreanUnit) {
+        matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedKoreanUnit);
+    }
+    startMissionWithFilteredData(matchedRecords, innerBody);
+};
 
 // ========================================================
 // 📊 데이터 페칭 및 동적 UI 생성
@@ -255,7 +305,13 @@ window.selectDynamicUnit = function(unit) {
 };
 
 function startMissionWithFilteredData(records, innerBody) {
-    activeSectionData = records.sort(() => Math.random() - 0.5).slice(0, 10); // 최대 10문제
+    let prepared = [...records];
+    if (currentMissionType === 'dictation' && koreanDictationOrderType === 'shuffle') {
+        prepared.sort(() => Math.random() - 0.5);
+    } else if (currentMissionType !== 'dictation') {
+        prepared.sort(() => Math.random() - 0.5);
+    }
+    activeSectionData = prepared.slice(0, 10); // 최대 10문제
     if (activeSectionData.length === 0) {
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
         return;
@@ -533,6 +589,15 @@ function renderVocaUI(container) {
 // --------------------------------------------------------
 function renderDictationUI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
+    const audioSourceLabel = currentItem.audioUrl ? '🎙️ 아빠/엄마 녹음' : '🧚‍♀️ 요정 TTS';
+
+    const orderToggleHtml = `
+        <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
+            <button class="quiz-button" onclick="window.koreanToggleDictationOrder()" style="padding: 8px 16px; font-size: 0.95rem; border-radius: 20px;">
+                ${koreanDictationOrderType === 'shuffle' ? '🎲 랜덤 섞기 (클릭하여 순서대로)' : '➡️ 순서대로 (클릭하여 랜덤 섞기)'}
+            </button>
+        </div>
+    `;
     
     window.verifyKoreanDictation = function() {
         const inputVal = document.getElementById('dictationInput').value.trim();
@@ -552,20 +617,22 @@ function renderDictationUI(container) {
 
     container.innerHTML = `
         <div class="quiz-card">
+            ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">받아쓰기 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <div style="font-size: 5rem; margin-bottom: 20px;">🎧</div>
+            <div style="font-size: 5rem; margin-bottom: 10px; cursor: pointer;" onclick="replayDictationAudio()">🎧</div>
+            <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">${audioSourceLabel}</div>
             <div id="dictationHint" style="font-size: 1.2rem; color: #888; margin-bottom: 20px; display: none;">${currentItem.word}</div>
             
             <input id="dictationInput" class="text-input-field" type="text" autocomplete="off" placeholder="여기에 받아 적으세요" onkeypress="if(event.key === 'Enter') verifyKoreanDictation()" style="width:100%; margin-bottom:20px;">
             
             <div style="display:flex; gap:10px; justify-content:center;">
                 <button class="quiz-button" onclick="verifyKoreanDictation()">정답 내기</button>
-                <button class="quiz-button" style="background:#ff9f43;" onclick="speakFairyTTS('${currentItem.word}')">🔊 다시 듣기</button>
+                <button class="quiz-button" style="background:#ff9f43;" onclick="replayDictationAudio()">🔊 다시 듣기</button>
             </div>
             <button style="margin-top: 20px; background: none; border: none; color: #ccc; text-decoration: underline; cursor: pointer;" onclick="document.getElementById('dictationHint').style.display='block'">모르겠어요 (정답 보기)</button>
         </div>
     `;
-    setTimeout(() => speakFairyTTS(currentItem.word), 500);
+    setTimeout(() => playDictationAudio(currentItem), 500);
 }
 
 // --------------------------------------------------------
