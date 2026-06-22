@@ -766,30 +766,91 @@ function trackChatMemoryAssistantMessage(text) {
     window.chatSessionState.assistantMessages.push(text);
 }
 
+function _sleepMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function _isAiErrorResponse(text) {
+    if (!text) return true;
+    const normalized = String(text).trim();
+    return normalized.startsWith('[기지국 에러]')
+        || normalized.includes('"status":"UNAVAILABLE"')
+        || normalized.includes('"code":503')
+        || normalized.includes('experiencing high demand');
+}
+
+function _buildFallbackChatSummary(transcript, childName) {
+    const userLines = String(transcript || '')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.startsWith('아이:'))
+        .map(line => line.replace(/^아이:\s*/, ''))
+        .filter(Boolean);
+
+    if (userLines.length === 0) {
+        return `${childName}와 코코가 대화를 나눔.`;
+    }
+
+    const snippet = userLines.slice(-3).join(' / ').slice(0, 180);
+    return `${childName}와의 대화: ${snippet}`;
+}
+
 async function summarizeChatSessionWithGemini(transcript, options = {}) {
     const childName = options.childName || getActiveChildName();
-    try {
-        const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: "gemini-2.5-flash",
-                messages: [
-                    {
-                        role: "system",
-                        content: `너는 대화 요약 전문가야. ${childName}와 나눈 대화를 2~3줄로 핵심만 한국어로 요약해. 요약문만 출력하고 다른 설명은 하지 마.`
-                    },
-                    { role: "user", content: transcript }
-                ]
-            })
-        });
-        if (!response.ok) throw new Error(`요약 API 오류 (${response.status})`);
-        const data = await response.json();
-        return (data.choices?.[0]?.message?.content || '').trim() || '오늘 대화 요약';
-    } catch (error) {
-        console.error("[summarizeChatSessionWithGemini] 실패:", error);
-        return transcript.slice(0, 200) || '오늘 대화 요약';
+    const fallbackSummary = _buildFallbackChatSummary(transcript, childName);
+    const maxRetries = 3;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "gemini-2.5-flash",
+                    messages: [
+                        {
+                            role: "system",
+                            content: `너는 대화 요약 전문가야. ${childName}와 나눈 대화를 2~3줄로 핵심만 한국어로 요약해. 요약문만 출력하고 다른 설명은 하지 마.`
+                        },
+                        { role: "user", content: transcript }
+                    ]
+                })
+            });
+
+            const data = await response.json().catch(() => ({}));
+            const apiError = data.error;
+            const content = (data.choices?.[0]?.message?.content || data.reply || '').trim();
+            const isRetryable = response.status === 503 || apiError?.code === 503;
+
+            if (!response.ok || apiError) {
+                if (isRetryable && attempt < maxRetries) {
+                    await _sleepMs(1000 * attempt);
+                    continue;
+                }
+                throw new Error(apiError?.message || `요약 API 오류 (${response.status})`);
+            }
+
+            if (_isAiErrorResponse(content)) {
+                if (attempt < maxRetries) {
+                    await _sleepMs(1000 * attempt);
+                    continue;
+                }
+                console.warn("[summarizeChatSessionWithGemini] AI 오류 응답 → 로컬 폴백 요약 사용");
+                return fallbackSummary;
+            }
+
+            return content || fallbackSummary;
+        } catch (error) {
+            if (attempt < maxRetries) {
+                await _sleepMs(1000 * attempt);
+                continue;
+            }
+            console.error("[summarizeChatSessionWithGemini] 실패:", error);
+            return fallbackSummary;
+        }
     }
+
+    return fallbackSummary;
 }
 
 async function saveChatMemoryToNotion({ sessionId, childName, roomType, conversationSummary, isImportant }) {
