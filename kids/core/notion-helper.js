@@ -158,7 +158,7 @@ async function fetchLibraryBooksFromNotion() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 filter: { property: "추천 여부", checkbox: { equals: true } },
-                page_size: 3
+                page_size: 10
             })
         });
         if (!response.ok) throw new Error(`노션 도서관 DB 통신 오류 (상태: ${response.status})`);

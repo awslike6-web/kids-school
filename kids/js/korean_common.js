@@ -173,7 +173,7 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                 }
             } else {
                 // Fallback to mock
-                readingFetchedBooks = KOREAN_READING_DATABASE.slice(0, 2);
+                readingFetchedBooks = KOREAN_READING_DATABASE.slice(0, 10);
                 if (type === 'sentence') {
                     renderSentenceUI(innerBody);
                 } else {
