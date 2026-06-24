@@ -47,6 +47,9 @@ function initializeScienceRoom() {
 function openMissionView(type) {
     currentMissionType = type;
     activeQuizIdx = 0;
+    if (typeof initQuizRewardSession === 'function') {
+        initQuizRewardSession(type);
+    }
     
     // 데이터 로드
     activeSectionData = SCIENCE_MOCK_DATA[type] || [];
@@ -83,6 +86,9 @@ function openMissionView(type) {
 }
 
 function closeMissionView() {
+    if (typeof finalizeQuizRewardSession === 'function') {
+        finalizeQuizRewardSession();
+    }
     document.getElementById('missionOverlay').style.display = 'none';
 }
 
@@ -98,7 +104,7 @@ function renderSectionUI() {
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--primary); margin-bottom:20px;">이 구역의 모든 미션을 완벽하게 마스터했습니다!</p>
-                <button class="back-to-lobby-btn" onclick="triggerAwardDispense(10, currentMissionType); closeMissionView();">🎁 보상 받기</button>
+                <button class="back-to-lobby-btn" onclick="closeMissionView();">✅ 나가기</button>
             </div>`;
         return;
     }
@@ -198,7 +204,7 @@ function renderSectionUI() {
 // ========================================================
 // ✏️ 문제 검증 및 정답 처리 로직
 // ========================================================
-function handleCorrectAnswer() {
+async function handleCorrectAnswer() {
     const currentUserName = localStorage.getItem('currentUserName') || '민수';
     const wordKey = activeSectionData[activeQuizIdx].word;
     
@@ -207,6 +213,9 @@ function handleCorrectAnswer() {
     localStorage.setItem(`science_voca_master_${currentUserName}`, JSON.stringify(scienceVocaMasterCountMap));
 
     if (typeof speakFairyTTS === 'function') speakFairyTTS("정답이야! 아주 훌륭해!");
+    if (typeof rewardQuizCorrect === 'function') {
+        await rewardQuizCorrect(activeQuizIdx);
+    }
     
     setTimeout(() => skipToNextQuiz(), 1200);
 }
@@ -315,12 +324,6 @@ function skipToNextQuiz() {
     if (activeQuizIdx >= activeSectionData.length) {
         if (typeof speakFairyTTS === 'function') speakFairyTTS("모든 미션을 완료했어! 훌륭해!");
         alert("🏆 축하합니다! 이 구역의 모든 과학 탐구 단계를 완료하셨습니다!");
-        
-        if (typeof sendStudyLogToNotion === 'function') {
-            sendStudyLogToNotion({ subject: "과학" });
-        }
-        
-        triggerAwardDispense(10, currentMissionType);
         closeMissionView();
     } else {
         renderSectionUI();

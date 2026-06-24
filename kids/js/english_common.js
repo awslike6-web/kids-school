@@ -115,6 +115,9 @@ function openMissionView(type) {
     stopFairyTTS();
     
     currentMissionType = type;
+    if (['stage1', 'stage2', 'stage3', 'stage4'].includes(type) && typeof initQuizRewardSession === 'function') {
+        initQuizRewardSession(type);
+    }
 
     let targetTitle = ""; let targetIcon = "";
     switch(type) {
@@ -148,6 +151,9 @@ function closeMissionView() {
         flushPendingMissionReward();
     } else if (typeof finalizeDiscussionSessionRewards === 'function') {
         finalizeDiscussionSessionRewards();
+    }
+    if (typeof finalizeQuizRewardSession === 'function') {
+        finalizeQuizRewardSession();
     }
     if (currentMissionType === 'stage6' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
         saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
@@ -277,6 +283,14 @@ function startMissionWithFilteredData(records, innerBody) {
     renderSectionUI();
 }
 
+async function advanceEnglishQuizAfterCorrect(delayMs = 1000) {
+    if (typeof rewardQuizCorrect === 'function') {
+        await rewardQuizCorrect(activeQuizIdx);
+    }
+    activeQuizIdx++;
+    setTimeout(renderSectionUI, delayMs);
+}
+
 // ========================================================
 // 🎯 각 모드별 UI 렌더링 및 로직
 // ========================================================
@@ -289,7 +303,7 @@ function renderSectionUI() {
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--primary); margin-bottom:20px;">모든 문제를 완료했습니다!</p>
-                <button class="quiz-button" style="background:var(--pink); color:white;" onclick="triggerAwardDispense(${activeQuizIdx * 2}, currentMissionType); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '영어' }); closeMissionView();">🎁 보상 받고 나가기</button>
+                <button class="quiz-button" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>
             </div>`;
         return;
     }
@@ -317,8 +331,7 @@ function renderStage1UI(container) {
     window.verifyStage1 = function() {
         speakEnglish(answerWord);
         speakFairyTTS("참 잘했어요!");
-        activeQuizIdx++;
-        setTimeout(renderSectionUI, 1500);
+        advanceEnglishQuizAfterCorrect(1500);
     };
 
     container.innerHTML = `
@@ -361,8 +374,7 @@ function renderStage2UI(container) {
     window.verifyStage2 = function(selectedWord) {
         if (selectedWord === answerWord) {
             speakFairyTTS("정답이에요! 귀가 아주 밝네요!");
-            activeQuizIdx++;
-            setTimeout(renderSectionUI, 1000);
+            advanceEnglishQuizAfterCorrect(1000);
         } else {
             speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 잘 들어볼까요?");
         }
@@ -452,8 +464,7 @@ function renderStage3UI(container) {
             const answerStr = window.currentEngMagnetAnswer.map(item => item.letter).join('');
             if (answerStr.toLowerCase() === window.engMagnetTargetWord.toLowerCase()) {
                 speakFairyTTS("정답이에요! 스펠링을 완벽하게 맞췄어요!");
-                activeQuizIdx++;
-                setTimeout(renderSectionUI, 1000);
+                advanceEnglishQuizAfterCorrect(1000);
             } else {
                 speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 조합해볼까요?");
                 const blankContainer = document.getElementById('eng-magnet-blanks');
@@ -485,8 +496,7 @@ function renderStage3UI(container) {
             if (inputVal === answerWord.toLowerCase()) {
                 speakFairyTTS("정답이에요! 아주 훌륭해요!");
                 inputEl.classList.add('correct');
-                activeQuizIdx++;
-                setTimeout(renderSectionUI, 1000);
+                advanceEnglishQuizAfterCorrect(1000);
             } else {
                 speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                 inputEl.classList.add('wrong');
@@ -577,8 +587,7 @@ function renderStage4UI(container) {
             if (answerStr === answerSentence) {
                 speakFairyTTS("정답이에요! 문장을 완벽하게 완성했어요!");
                 speakEnglish(answerSentence);
-                activeQuizIdx++;
-                setTimeout(renderSectionUI, 1500);
+                advanceEnglishQuizAfterCorrect(1500);
             } else {
                 speakFairyTTS("아쉽지만 틀렸어요. 문장 순서를 다시 생각해볼까요?");
                 const blankContainer = document.getElementById('sent-word-blanks');
@@ -614,8 +623,7 @@ function renderStage4UI(container) {
             if (selectedSentence === answerSentence) {
                 speakFairyTTS("정답이에요! 훌륭해요!");
                 speakEnglish(answerSentence);
-                activeQuizIdx++;
-                setTimeout(renderSectionUI, 1500);
+                advanceEnglishQuizAfterCorrect(1500);
             } else {
                 speakFairyTTS("아쉽지만 틀렸어요. 뜻을 다시 한번 읽어보세요.");
             }

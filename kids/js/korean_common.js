@@ -121,6 +121,9 @@ function openMissionView(type) {
     stopFairyTTS();
     
     currentMissionType = type;
+    if ((type === 'voca' || type === 'dictation') && typeof initQuizRewardSession === 'function') {
+        initQuizRewardSession(type);
+    }
     selectedKoreanGrade = "";
     selectedKoreanUnit = "";
 
@@ -154,6 +157,9 @@ function closeMissionView() {
         flushPendingMissionReward();
     } else if (typeof finalizeDiscussionSessionRewards === 'function') {
         finalizeDiscussionSessionRewards();
+    }
+    if (typeof finalizeQuizRewardSession === 'function') {
+        finalizeQuizRewardSession();
     }
     if (currentMissionType === 'sentence' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
         saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
@@ -330,6 +336,14 @@ function startMissionWithFilteredData(records, innerBody) {
     renderSectionUI();
 }
 
+async function advanceKoreanQuizAfterCorrect(delayMs = 1000) {
+    if (typeof rewardQuizCorrect === 'function') {
+        await rewardQuizCorrect(activeQuizIdx);
+    }
+    activeQuizIdx++;
+    setTimeout(renderSectionUI, delayMs);
+}
+
 // ========================================================
 // 🎯 각 모드별 UI 렌더링 및 로직
 // ========================================================
@@ -342,7 +356,7 @@ function renderSectionUI() {
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">모든 문제를 완료했습니다!</p>
-                <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="triggerAwardDispense(${activeQuizIdx * 2}, currentMissionType); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '국어' }); closeMissionView();">🎁 보상 받고 나가기</button>
+                <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>
             </div>`;
         return;
     }
@@ -439,8 +453,7 @@ function renderVocaUI(container) {
 
                 if (answerStr === correctTarget) {
                     speakFairyTTS("정답이에요! 아주 훌륭해요!");
-                    activeQuizIdx++;
-                    setTimeout(renderSectionUI, 1000);
+                    advanceKoreanQuizAfterCorrect(1000);
                 } else {
                     speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                     const container = document.getElementById('korean-magnet-blanks');
@@ -479,8 +492,7 @@ function renderVocaUI(container) {
             window.verifyKoreanVocaSubjectiveChoice = function(selectedWord) {
                 if (selectedWord === answerWord) {
                     speakFairyTTS("정답이에요! 아주 훌륭해요!");
-                    activeQuizIdx++;
-                    setTimeout(renderSectionUI, 1000);
+                    advanceKoreanQuizAfterCorrect(1000);
                 } else {
                     speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                     if (!window.wrongNotes) window.wrongNotes = [];
@@ -509,8 +521,7 @@ function renderVocaUI(container) {
                 if (inputVal === correctTarget) {
                     speakFairyTTS("정답이에요! 아주 훌륭해요!");
                     inputEl.classList.add('correct');
-                    activeQuizIdx++;
-                    setTimeout(renderSectionUI, 1000);
+                    advanceKoreanQuizAfterCorrect(1000);
                 } else {
                     speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                     inputEl.classList.add('wrong');
@@ -552,8 +563,7 @@ function renderVocaUI(container) {
         window.verifyKoreanVocaChoice = function(selectedMeaning) {
             if (selectedMeaning === answerMeaning) {
                 speakFairyTTS("정답이에요! 아주 훌륭해요!");
-                activeQuizIdx++;
-                setTimeout(renderSectionUI, 1000);
+                advanceKoreanQuizAfterCorrect(1000);
             } else {
                 speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                 if (!window.wrongNotes) window.wrongNotes = [];
@@ -615,8 +625,7 @@ function renderDictationUI(container) {
         if (inputVal === currentItem.word.trim()) {
             speakFairyTTS("완벽해요! 띄어쓰기까지 정확하게 맞췄어요!");
             document.getElementById('dictationInput').classList.add('correct');
-            activeQuizIdx++;
-            setTimeout(renderSectionUI, 1500);
+            advanceKoreanQuizAfterCorrect(1500);
         } else {
             speakFairyTTS("아쉽네요. 다시 한번 잘 듣고 적어보세요.");
             document.getElementById('dictationInput').classList.add('wrong');

@@ -227,6 +227,9 @@ function openMissionView(type) {
     stopFairyTTS();
     
     currentMissionType = type;
+    if (typeof initQuizRewardSession === 'function') {
+        initQuizRewardSession(type);
+    }
     selectedSocietyGrade = "";
     selectedSocietyUnit = "";
 
@@ -263,6 +266,9 @@ function showLoadingSpinner(container) {
 }
 
 function closeMissionView() {
+    if (typeof finalizeQuizRewardSession === 'function') {
+        finalizeQuizRewardSession();
+    }
     document.getElementById('missionOverlay').style.display = "none";
     stopFairyTTS();
 }
@@ -502,7 +508,7 @@ function renderSectionUI(type, container) {
                 <div style="text-align:center; padding: 40px 20px;">
                     <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                     <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
-                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="triggerAwardDispense(${activeQuizIdx > 0 ? activeQuizIdx * 2 : 10}, 'voca'); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '사회' }); closeMissionView(); resetSocietyVocaMasterAndReload()">🎁 보상 받고 학습 리셋하기</button>
+                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="closeMissionView(); resetSocietyVocaMasterAndReload()">✅ 나가기 (학습 리셋)</button>
                 </div>`;
         } else {
             container.innerHTML = `<p style="text-align:center; padding: 20px;">가용할 수 있는 학습 데이터가 비어 있습니다.</p>`;
@@ -516,9 +522,9 @@ function renderSectionUI(type, container) {
             <div class="screen loaded quiz-card" style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3.5rem; margin-bottom:10px;">🏆</div>
                 <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 풀었어요!</h2>
-                <p style="font-size:1.2rem; color:#666; margin-bottom:30px;">여기서 멈추고 보상을 받을까요?<br>아니면 끝까지 계속 탐험할까요?</p>
+                <p style="font-size:1.2rem; color:#666; margin-bottom:30px;">맞힌 문제마다 보상 1점씩 받았어요!<br>계속 탐험할까요?</p>
                 <div style="display:flex; justify-content:center; gap:15px;">
-                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="triggerAwardDispense(${activeQuizIdx * 2}, 'voca'); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '사회' }); closeMissionView();">🎁 여기서 보상 받기</button>
+                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="closeMissionView();">✅ 여기서 나가기</button>
                     <button class="back-to-lobby-btn" style="background:#6EC6F5; color:white;" onclick="window.societyVocaContinueFlag=true; renderSectionUI('${type}', document.getElementById('overlayInnerBody'));">🚀 계속 이어서 풀기</button>
                 </div>
             </div>
@@ -746,7 +752,7 @@ function renderMuseumGridDock() {
 // ========================================================
 // ✏️ 문제 검증 및 포인트 보상 지급 모듈
 // ========================================================
-window.handleVocaCorrect = function() {
+window.handleVocaCorrect = async function() {
     const wordKey = activeSectionData[activeQuizIdx].word;
     societyVocaMasterCountMap[wordKey] = (societyVocaMasterCountMap[wordKey] || 0) + 1;
     localStorage.setItem(`society_voca_master_${currentUserName}`, JSON.stringify(societyVocaMasterCountMap));
@@ -758,6 +764,10 @@ window.handleVocaCorrect = function() {
             updateVocaMasteryStatus(pageId, true);
             activeSectionData[activeQuizIdx].isMastered = true; // 로컬 메모리도 달성 상태로 변경
         }
+    }
+
+    if (typeof rewardQuizCorrect === 'function') {
+        await rewardQuizCorrect(activeQuizIdx);
     }
 
     setTimeout(() => skipToNextQuiz('voca'), 1200);
@@ -863,10 +873,10 @@ window.verifyVocaMagnet = function() {
 async function verifyChartChoice(selectedIdx, correctIdx) {
     if (selectedIdx === correctIdx) {
         speakFairyTTS("대단해요! 도표 통계 자료를 매서운 학술적 안목으로 정밀하게 해독해냈군요! 훌륭한 관점입니다!");
-        alert("🎉 명쾌한 지해력! 정답입니다!\n중심지 사회 도표 해독상으로 보상을 지급합니다!");
-        
-        // 일반 미션이므로 'chart' 플래그 전달
-        await triggerAwardDispense(20, 'chart');
+        alert("🎉 명쾌한 지해력! 정답입니다!");
+        if (typeof rewardQuizCorrect === 'function') {
+            await rewardQuizCorrect(activeQuizIdx);
+        }
         skipToNextQuiz('chart');
     } else {
         speakFairyTTS("조금 아쉽네요. 중심지나 통계 수치들을 한 번만 면밀히 자로 재보아요.");
@@ -882,9 +892,11 @@ async function submitMapJourney() {
     }
 
     speakFairyTTS("참 따뜻하고 사랑스러운 한 줄 탐방기네요. 조상과 우리 자연의 호흡이 완성되는 순간입니다!");
-    alert("📝 멋진 랜선 지리 탐방록 기록 완료!\n탐방 학술 일지가 정상 보존되며 보석이 쏟아집니다!");
+    alert("📝 멋진 랜선 지리 탐방록 기록 완료!");
 
-    await triggerAwardDispense(18, 'map');
+    if (typeof rewardQuizCorrect === 'function') {
+        await rewardQuizCorrect(activeQuizIdx);
+    }
     skipToNextQuiz('map');
 }
 
@@ -898,9 +910,11 @@ async function collectArtifact(artName) {
     localStorage.setItem('society_history_collectibles', JSON.stringify(historyCollected));
     
     speakFairyTTS(`축하해요! ${artName} 유물이 우리 박물관 돋보기 전시대에 완벽하게 진열 소장되었습니다!`);
-    alert(`🏆 유물 획득! [${artName}]을 소장하여 보상을 겟했습니다!`);
+    alert(`🏆 유물 획득! [${artName}]을 소장했습니다!`);
 
-    await triggerAwardDispense(25, 'history');
+    if (typeof rewardQuizCorrect === 'function') {
+        await rewardQuizCorrect(activeQuizIdx);
+    }
     renderMuseumGridDock();
     
     setTimeout(() => {
@@ -916,12 +930,6 @@ function skipToNextQuiz(type) {
     if (type !== 'voca' && activeQuizIdx >= activeSectionData.length) {
         speakFairyTTS("모든 미션 코스가 우수하게 완결되었습니다! 박수 드려요. 대합실로 복귀합니다.");
         alert("🏆 축하합니다! 이 구역의 모든 사회 탐구 단계를 완료하셨습니다!");
-        
-        // 📝 학습 일지 기록 헬퍼 호출
-        if (typeof sendStudyLogToNotion === 'function') {
-            sendStudyLogToNotion({ subject: "사회" });
-        }
-        
         closeMissionView();
     } else {
         renderSectionUI(type, innerBody);

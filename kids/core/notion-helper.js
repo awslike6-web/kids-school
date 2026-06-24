@@ -807,6 +807,47 @@ function dispatchReadingClearBonus(missionType, passageId) {
     });
 }
 
+window.__quizRewardSession = null;
+
+function initQuizRewardSession(missionType) {
+    window.__quizRewardSession = {
+        missionType: missionType || window.currentMissionType || 'quiz',
+        sessionId: String(Date.now()),
+        solvedCount: 0
+    };
+}
+
+async function rewardQuizCorrect(quizIndex) {
+    if (!window.__quizRewardSession) {
+        initQuizRewardSession(window.currentMissionType);
+    }
+    const session = window.__quizRewardSession;
+    const idx = typeof quizIndex === 'number' ? quizIndex : session.solvedCount;
+    const rewardKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_q${idx}`;
+    const result = await claimMissionRewardOnce(rewardKey, {
+        amount: 1,
+        missionType: session.missionType,
+        subject: window.currentSubject,
+        silent: false,
+        skipStudyLog: true
+    });
+    if (result) session.solvedCount = (session.solvedCount || 0) + 1;
+    return result;
+}
+
+async function finalizeQuizRewardSession() {
+    const session = window.__quizRewardSession;
+    if (!session || session.solvedCount <= 0) {
+        window.__quizRewardSession = null;
+        return false;
+    }
+    if (typeof sendStudyLogToNotion === 'function') {
+        await sendStudyLogToNotion({ subject: window.currentSubject || '국어' });
+    }
+    window.__quizRewardSession = null;
+    return true;
+}
+
 const DISCUSSION_STOP_WORDS = new Set([
     'the', 'and', 'that', 'this', 'with', 'will', 'have', 'from', 'they', 'what', 'about',
     'you', 'your', 'are', 'for', 'was', 'were', 'been', 'being', 'their', 'there', 'then',
