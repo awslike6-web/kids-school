@@ -680,10 +680,18 @@ window.renderReadingStage = function() {
     }
     
     if (readingStage === 0) {
-        // 문단 순서 맞추기
-        const rawParagraphs = passageText.split('\n').filter(p => p.trim() !== '');
-        const paragraphs = rawParagraphs.map((text, idx) => ({ id: `p${idx+1}`, text: text }));
-        const correctOrder = paragraphs.map(p => p.id);
+        // 문단 순서 맞추기 (paragraphs 배열 우선 → 없으면 fullText 줄바꿈 분할)
+        let paragraphs;
+        if (activePassage.paragraphs && activePassage.paragraphs.length > 0) {
+            paragraphs = activePassage.paragraphs.map((p, idx) => ({
+                id: p.id || `p${idx + 1}`,
+                text: p.text
+            }));
+        } else {
+            const rawParagraphs = passageText.split('\n').filter(p => p.trim() !== '');
+            paragraphs = rawParagraphs.map((text, idx) => ({ id: `p${idx + 1}`, text }));
+        }
+        const correctOrder = activePassage.correctOrder || paragraphs.map(p => p.id);
         const shuffled = [...paragraphs].sort(() => Math.random() - 0.5);
 
         window.selectReadingPuzzle = function(id, text, el) {

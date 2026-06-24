@@ -34,10 +34,33 @@ const ENGLISH_READING_DATABASE = [
         `
     },
     {
-    id: "eng_read_02",
-    title: "Exciting Summer Plans",
-    fullText: "Summer vacation is coming soon.\nToday, Minji and Tom are talking about their plans for this summer.\n\"What will you do this summer, Tom?\"\n\"I have a great plan! This weekend, I'll travel to Busan.\nI will go to the beach and ride a boat. I think I will feel fresh there. What about you?\"\n\"I'll visit my uncle tomorrow. I'll go hiking with him. We will go camping, too!\"\n\"That sounds great! Will you do anything else?\"\n\"Yes, I will take a piano class and learn Chinese.\nI worry a little bit, but I will try my best. I will also paint a picture.\"\n\"Don't worry. You will do great!\nBy the way, I will practice soccer and play with my friends.\nNext month, my family will visit my grandparents and go to an amusement park. Do you want to join us?\"\n\"Yes, I'd love to! After the amusement park, we can try cooking dinner together.\"\nBoth friends are very excited about this summer.",
-    conjunctions: [
+        id: "eng_read_02",
+        title: "Exciting Summer Plans",
+        fullText: "Summer vacation is coming soon. Today, Minji and Tom are talking about their plans for this summer. \"What will you do this summer, Tom?\"\n\"I have a great plan! This weekend, I'll travel to Busan. I will go to the beach and ride a boat. I think I will feel fresh there. What about you?\"\n\"I'll visit my uncle tomorrow. I'll go hiking with him. We will go camping, too!\" \"That sounds great! Will you do anything else?\" \"Yes, I will take a piano class and learn Chinese. I worry a little bit, but I will try my best. I will also paint a picture.\"\n\"Don't worry. You will do great! By the way, I will practice soccer and play with my friends. Next month, my family will visit my grandparents and go to an amusement park. Do you want to join us?\" \"Yes, I'd love to! After the amusement park, we can try cooking dinner together.\" Both friends are very excited about this summer.",
+        paragraphs: [
+            {
+                id: "p1",
+                label: "A",
+                text: "Summer vacation is coming soon. Today, Minji and Tom are talking about their plans for this summer. \"What will you do this summer, Tom?\""
+            },
+            {
+                id: "p2",
+                label: "B",
+                text: "\"I have a great plan! This weekend, I'll travel to Busan. I will go to the beach and ride a boat. I think I will feel fresh there. What about you?\""
+            },
+            {
+                id: "p3",
+                label: "C",
+                text: "\"I'll visit my uncle tomorrow. I'll go hiking with him. We will go camping, too!\" \"That sounds great! Will you do anything else?\" \"Yes, I will take a piano class and learn Chinese. I worry a little bit, but I will try my best. I will also paint a picture.\""
+            },
+            {
+                id: "p4",
+                label: "D",
+                text: "\"Don't worry. You will do great! By the way, I will practice soccer and play with my friends. Next month, my family will visit my grandparents and go to an amusement park. Do you want to join us?\" \"Yes, I'd love to! After the amusement park, we can try cooking dinner together.\" Both friends are very excited about this summer."
+            }
+        ],
+        correctOrder: ["p1", "p2", "p3", "p4"],
+       conjunctions: [
         {
             sentenceBefore: "I'll visit my uncle tomorrow. I'll go hiking with him.",
             sentenceAfter: "We will go camping, too!",
@@ -67,7 +90,5 @@ const ENGLISH_READING_DATABASE = [
         아이가 문법을 틀려도 자연스럽게 올바른 문장으로 다시 말해주며 폭풍 칭찬해줘.
         아이가 자신의 이번 여름 방학 계획(또는 지문에 대한 생각)을 한 문장 이상 영어로 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
     `
-}
-
-
+    }
 ];
