@@ -6,6 +6,7 @@ if (typeof window.fairyHistory === 'undefined') {
 }
 window.currentFairySubject = window.currentFairySubject || "KOREAN";
 window.currentFairyRoomType = window.currentFairyRoomType || "공부방";
+window.__fairySendLocked = false;
 
 async function initFairyChat(subject, roomType = '공부방') {
     window.currentFairySubject = subject;
@@ -84,7 +85,38 @@ window.initFairyChat = initFairyChat;
 function startFairyVoiceInput() {
     const micBtn = document.getElementById('fairy-mic-btn');
     const inputEl = document.getElementById('fairy-input');
-    
+    if (!inputEl) return;
+
+    if (typeof setupDebouncedSTT === 'function') {
+        setupDebouncedSTT({
+            inputEl,
+            debounceMs: 1500,
+            onStart: function() {
+                micBtn.innerText = "👂";
+                micBtn.style.transform = "scale(1.1)";
+                micBtn.style.backgroundColor = "#e53e3e";
+                inputEl.placeholder = "듣고 있어요...";
+            },
+            onEnd: function() {
+                micBtn.innerText = "🎙️";
+                micBtn.style.transform = "scale(1)";
+                micBtn.style.backgroundColor = "#ab47bc";
+                inputEl.placeholder = "요정에게 말하기...";
+            },
+            onError: function(event) {
+                console.error("음성 인식 오류:", event.error);
+                micBtn.innerText = "🎙️";
+                micBtn.style.backgroundColor = "#ab47bc";
+                inputEl.placeholder = "요정에게 말하기...";
+            },
+            onSend: function(text) {
+                inputEl.value = text;
+                sendToFairy();
+            }
+        });
+        return;
+    }
+
     const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Recognition) {
         alert("현재 브라우저에서는 마이크 기능이 지원되지 않아요. (크롬 브라우저를 사용해주세요!)");
@@ -140,9 +172,11 @@ window.toggleFairyWindow = toggleFairyWindow;
 
 async function sendToFairy() {
     const inputEl = document.getElementById('fairy-input');
-    if (!inputEl) return;
+    if (!inputEl || window.__fairySendLocked) return;
     const text = inputEl.value.trim();
     if (!text) return;
+
+    window.__fairySendLocked = true;
 
     if (window.learningSession) {
         window.learningSession.fairyClickCount = (window.learningSession.fairyClickCount || 0) + 1;
@@ -198,6 +232,8 @@ async function sendToFairy() {
         }
     } catch (error) {
         appendFairyMsg('fairy', "앗! 요정 세계와 통신이 끊어졌어! 다시 말해줄래?");
+    } finally {
+        window.__fairySendLocked = false;
     }
 }
 window.sendToFairy = sendToFairy;

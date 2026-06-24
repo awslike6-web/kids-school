@@ -144,6 +144,9 @@ function showLoadingSpinner(container) {
 }
 
 function closeMissionView() {
+    if (typeof flushPendingMissionReward === 'function') {
+        flushPendingMissionReward();
+    }
     if (currentMissionType === 'stage6' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
         saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
     }
@@ -718,8 +721,14 @@ window.renderReadingStage = function() {
         // 접속사 퀴즈
         const conj = activePassage.conjunctions[readingConjunctionIndex];
         window.verifyReadingConj = function(ans) {
-            if (ans === conj.answer) {
-                speakFairyTTS("정답이에요! " + conj.commentary);
+            const isCorrect = typeof gradeConjunctionAnswer === 'function'
+                ? gradeConjunctionAnswer(conj, ans)
+                : (ans === conj.answer);
+            if (isCorrect) {
+                const correctWord = typeof getConjunctionCorrectAnswer === 'function'
+                    ? getConjunctionCorrectAnswer(conj)
+                    : conj.answer;
+                speakFairyTTS("정답이에요! " + (conj.commentary || correctWord));
                 readingConjunctionIndex++;
                 if (readingConjunctionIndex >= activePassage.conjunctions.length) {
                     readingStage++;
@@ -766,12 +775,15 @@ window.renderReadingStage = function() {
             </div>
         `;
     } else {
+        if (typeof dispatchSuccessMissionReward === 'function') {
+            dispatchSuccessMissionReward('stage5', activePassage?.id, 10);
+        }
         // 완료 및 보상
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--mint); margin-bottom:20px;">독해 미션을 완벽하게 클리어했습니다!</p>
-                <button class="quiz-button" style="background:var(--sky-blue); color:white; border:none;" onclick="triggerAwardDispense(10, 'stage5'); if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '영어' }); closeMissionView();">🎁 보상 받고 나가기</button>
+                <button class="quiz-button" style="background:var(--sky-blue); color:white; border:none;" onclick="closeMissionView();">🎁 보상 확인하고 나가기</button>
             </div>
         `;
     }
@@ -826,7 +838,8 @@ window.renderSentenceChat = function() {
                 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 영어로 대답하도록 유도해줘. 
                 문법이 틀려도 다정하게 교정해주며 칭찬해줘. 
                 아이가 지문에 대해 자신의 생각을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
-            `) + "\n\n다음은 아이가 읽은 영어 지문 원문이야:\n" + passageText;
+            `) + (typeof CONJUNCTION_GRADING_GUARDRAIL !== 'undefined' ? `\n\n${CONJUNCTION_GRADING_GUARDRAIL}` : '')
+                + "\n\n다음은 아이가 읽은 영어 지문 원문이야:\n" + passageText;
             const systemPrompt = typeof buildFullAISystemPrompt === 'function'
                 ? buildFullAISystemPrompt('공부방', passageExtra)
                 : passageExtra;
@@ -850,10 +863,12 @@ window.renderSentenceChat = function() {
             speakFairyTTS(reply.replace(/\[SUCCESS\]/g, ''));
             
             if (reply.includes("[SUCCESS]")) {
-                setTimeout(() => {
+                if (typeof dispatchSuccessMissionReward === 'function') {
+                    dispatchSuccessMissionReward('stage6', activePassage?.id, 5);
+                } else {
                     triggerAwardDispense(5, 'stage6');
                     if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '영어' });
-                }, 2000);
+                }
             }
         } catch (e) {
             document.getElementById(loadingId).innerHTML = "😢 통신 오류가 발생했어요.";

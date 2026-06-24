@@ -569,6 +569,245 @@ async function updateVocaMasteryStatus(pageId, isMastered) {
 }
 
 // ========================================================
+// 🎙️ STT 디바운스 엔진 (interim 차단 + 1.5초 정적 후 1회 전송)
+// ========================================================
+
+window.__sttSession = null;
+
+function setupDebouncedSTT(options = {}) {
+    const {
+        inputEl,
+        onSend,
+        debounceMs = 1500,
+        lang = 'ko-KR',
+        onStart,
+        onEnd,
+        onError
+    } = options;
+
+    const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Recognition) {
+        alert("현재 브라우저에서는 마이크 기능이 지원되지 않아요. (크롬 브라우저를 사용해주세요!)");
+        return null;
+    }
+
+    if (window.__sttSession?.recognition) {
+        try { window.__sttSession.recognition.stop(); } catch (e) { /* noop */ }
+        clearTimeout(window.__sttSession.debounceTimer);
+    }
+
+    let accumulatedFinal = '';
+    let debounceTimer = null;
+    let hasSent = false;
+
+    const recognition = new Recognition();
+    recognition.lang = lang;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    function finishMicUI() {
+        if (onEnd) onEnd();
+    }
+
+    function flushAndSend(interimTail = '') {
+        clearTimeout(debounceTimer);
+        if (hasSent) return;
+        const text = (accumulatedFinal + interimTail).trim();
+        if (!text) {
+            finishMicUI();
+            return;
+        }
+        hasSent = true;
+        inputEl.value = text;
+        accumulatedFinal = '';
+        try { recognition.stop(); } catch (e) { /* noop */ }
+        finishMicUI();
+        onSend(text);
+    }
+
+    recognition.onstart = function() {
+        hasSent = false;
+        accumulatedFinal = '';
+        if (onStart) onStart();
+    };
+
+    recognition.onresult = function(event) {
+        if (hasSent) return;
+
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const piece = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                accumulatedFinal += piece;
+            } else {
+                interim += piece;
+            }
+        }
+
+        inputEl.value = (accumulatedFinal + interim).trim();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function() {
+            flushAndSend(interim);
+        }, debounceMs);
+    };
+
+    recognition.onend = function() {
+        clearTimeout(debounceTimer);
+        if (!hasSent && accumulatedFinal.trim()) {
+            flushAndSend('');
+        } else if (!hasSent) {
+            finishMicUI();
+        }
+    };
+
+    recognition.onerror = function(event) {
+        clearTimeout(debounceTimer);
+        if (!hasSent) finishMicUI();
+        if (onError) onError(event);
+    };
+
+    window.__sttSession = { recognition, debounceTimer: null };
+    recognition.start();
+    return recognition;
+}
+
+// ========================================================
+// 🔗 접속사 채점 가드레일 (원인-결과 vs 역접 분리)
+// ========================================================
+
+const CAUSE_EFFECT_CONJUNCTIONS = new Set(['따라서', '그러므로', '그래서', '그리하여', '그러니까', '왜냐하면']);
+const CONTRAST_CONJUNCTIONS = new Set(['하지만', '그러나', '그런데', '반면', '그렇지만']);
+
+const CONJUNCTION_GRADING_GUARDRAIL = `[접속사 채점 절대 규칙]
+- 앞 문장이 원인, 뒤 문장이 결과(결론) 관계이면 오직 '따라서', '그러므로', '그래서', '그리하여' 계열만 정답이다.
+- '하지만', '그러나', '그런데'는 앞뒤가 반대·대조·역접일 때만 쓴다.
+- 원인-결과 문맥에서 '하지만'을 정답으로 제시하거나 옹호하지 마라.`;
+
+function inferConjunctionRelation(conj) {
+    if (!conj) return 'exact';
+    if (conj.relationType === 'cause-effect' || conj.relationType === 'contrast') {
+        return conj.relationType;
+    }
+    if (CAUSE_EFFECT_CONJUNCTIONS.has(conj.answer)) return 'cause-effect';
+    if (CONTRAST_CONJUNCTIONS.has(conj.answer)) return 'contrast';
+    const commentary = conj.commentary || '';
+    if (/원인|결과|그래서|따라서|그러므로|이어|때문|근거/.test(commentary)) return 'cause-effect';
+    if (/반대|역접|대조|반면|하지만|그러나/.test(commentary)) return 'contrast';
+    return 'exact';
+}
+
+function gradeConjunctionAnswer(conj, userAnswer) {
+    const relation = inferConjunctionRelation(conj);
+    if (relation === 'cause-effect') {
+        return CAUSE_EFFECT_CONJUNCTIONS.has(userAnswer);
+    }
+    if (relation === 'contrast') {
+        return CONTRAST_CONJUNCTIONS.has(userAnswer);
+    }
+    return userAnswer === conj.answer;
+}
+
+function getConjunctionCorrectAnswer(conj) {
+    const relation = inferConjunctionRelation(conj);
+    if (relation === 'cause-effect') {
+        return CAUSE_EFFECT_CONJUNCTIONS.has(conj.answer) ? conj.answer : '따라서';
+    }
+    if (relation === 'contrast') {
+        return CONTRAST_CONJUNCTIONS.has(conj.answer) ? conj.answer : '하지만';
+    }
+    return conj.answer;
+}
+
+// ========================================================
+// 🎁 미션 보상 자동 지급 (SUCCESS 즉시 + 중복 방지 락)
+// ========================================================
+
+window.__missionRewardLocks = window.__missionRewardLocks || {};
+window.__pendingMissionReward = null;
+
+function buildMissionRewardKey(missionType, passageId) {
+    const user = typeof getActiveChildName === 'function'
+        ? getActiveChildName()
+        : (localStorage.getItem('currentUserName') || '민수');
+    return `${user}_${missionType}_${passageId || 'default'}`;
+}
+
+async function claimMissionRewardOnce(rewardKey, options = {}) {
+    const {
+        amount = 5,
+        missionType = '',
+        subject = null,
+        silent = true,
+        customExpType = null
+    } = options;
+
+    if (window.__missionRewardLocks[rewardKey] === 'done') {
+        return true;
+    }
+    if (window.__missionRewardLocks[rewardKey] === 'processing') {
+        return window.__pendingMissionRewardPromise || true;
+    }
+
+    window.__missionRewardLocks[rewardKey] = 'processing';
+    const subj = subject || window.currentSubject || '국어';
+    const expType = customExpType !== null
+        ? customExpType
+        : (subj === '영어' ? '영어' : subj === '국어' ? '국어' : null);
+
+    const task = (async () => {
+        try {
+            if (typeof grantRewardAndShowUI === 'function') {
+                await grantRewardAndShowUI(amount, silent, expType);
+            } else if (typeof window.triggerAwardDispense === 'function') {
+                await window.triggerAwardDispense(amount, missionType);
+            }
+            if (typeof sendStudyLogToNotion === 'function') {
+                await sendStudyLogToNotion({ subject: subj });
+            }
+            window.__missionRewardLocks[rewardKey] = 'done';
+            window.__pendingMissionReward = null;
+            console.log(`🎁 [보상 자동 지급 완료] ${rewardKey} / ${amount}개`);
+            return true;
+        } catch (err) {
+            console.error('🎁 [보상 자동 지급 실패]', err);
+            delete window.__missionRewardLocks[rewardKey];
+            return false;
+        }
+    })();
+
+    window.__pendingMissionRewardPromise = task;
+    return task;
+}
+
+function dispatchSuccessMissionReward(missionType, passageId, amount = 5) {
+    const rewardKey = buildMissionRewardKey(missionType, passageId);
+    window.__pendingMissionReward = {
+        rewardKey,
+        amount,
+        missionType,
+        subject: window.currentSubject
+    };
+    claimMissionRewardOnce(rewardKey, {
+        amount,
+        missionType,
+        subject: window.currentSubject,
+        silent: true
+    });
+}
+
+async function flushPendingMissionReward() {
+    if (!window.__pendingMissionReward) return false;
+    const { rewardKey, amount, missionType, subject } = window.__pendingMissionReward;
+    if (window.__missionRewardLocks[rewardKey] === 'done') return true;
+    return claimMissionRewardOnce(rewardKey, {
+        amount,
+        missionType,
+        subject,
+        silent: true
+    });
+}
+
+// ========================================================
 // 🧠 AI 대화 기억 보관소 (Chat Memory) + 3x2 페르소나 매트릭스
 // ========================================================
 
@@ -720,6 +959,9 @@ function buildFullAISystemPrompt(roomType, extraPrompt = '') {
     }
     if (extraPrompt) {
         full += `\n\n[추가 지침]\n${extraPrompt}`;
+    }
+    if (roomType === '공부방') {
+        full += `\n\n${CONJUNCTION_GRADING_GUARDRAIL}`;
     }
     full += `\n\n[장기 기억 트리거] 아이가 "꼭 기억해줘", "중요한 얘기야", "내 비밀이야" 등을 말하면, 그 내용을 특별히 기억하겠다고 다정하게 확인해줘.`;
     return full;

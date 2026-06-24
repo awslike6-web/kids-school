@@ -284,6 +284,38 @@ function speakFairyText(htmlText) {
 
 function startVoiceInput() {
   const micBtn = document.getElementById('micBtn');
+  const questionInput = document.getElementById('fairyQuestion');
+  if (!questionInput) return;
+
+  if (typeof setupDebouncedSTT === 'function') {
+    setupDebouncedSTT({
+      inputEl: questionInput,
+      debounceMs: 1500,
+      onStart: function() {
+        micBtn.innerText = "👂 듣는중..";
+        micBtn.style.transform = "scale(1.1)";
+        micBtn.style.backgroundColor = "#e53e3e";
+        micBtn.style.color = "white";
+      },
+      onEnd: function() {
+        micBtn.innerText = "🎙️";
+        micBtn.style.transform = "scale(1)";
+        micBtn.style.backgroundColor = "#fbc2eb";
+        micBtn.style.color = "var(--dark)";
+      },
+      onError: function(event) {
+        console.error("음성 인식 오류:", event.error);
+        micBtn.innerText = "🎙️";
+        micBtn.style.backgroundColor = "#fbc2eb";
+      },
+      onSend: function(text) {
+        questionInput.value = text;
+        askCocoFairy();
+      }
+    });
+    return;
+  }
+
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!Recognition) {
     alert("현재 브라우저에서는 마이크 기능이 지원되지 않아요. (크롬 브라우저를 사용해주세요!)");
