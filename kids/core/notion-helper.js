@@ -738,7 +738,8 @@ async function claimMissionRewardOnce(rewardKey, options = {}) {
         missionType = '',
         subject = null,
         silent = true,
-        customExpType = null
+        customExpType = null,
+        skipStudyLog = false
     } = options;
 
     if (window.__missionRewardLocks[rewardKey] === 'done') {
@@ -761,11 +762,10 @@ async function claimMissionRewardOnce(rewardKey, options = {}) {
             } else if (typeof window.triggerAwardDispense === 'function') {
                 await window.triggerAwardDispense(amount, missionType);
             }
-            if (typeof sendStudyLogToNotion === 'function') {
+            if (!skipStudyLog && typeof sendStudyLogToNotion === 'function') {
                 await sendStudyLogToNotion({ subject: subj });
             }
             window.__missionRewardLocks[rewardKey] = 'done';
-            window.__pendingMissionReward = null;
             console.log(`🎁 [보상 자동 지급 완료] ${rewardKey} / ${amount}개`);
             return true;
         } catch (err) {
@@ -779,7 +779,166 @@ async function claimMissionRewardOnce(rewardKey, options = {}) {
     return task;
 }
 
+function dispatchReadingStageReward(missionType, passageId, stageNumber) {
+    const rewardKey = `${buildMissionRewardKey(missionType, passageId)}_stage${stageNumber}`;
+    return claimMissionRewardOnce(rewardKey, {
+        amount: 5,
+        missionType,
+        subject: window.currentSubject,
+        silent: true,
+        skipStudyLog: true
+    });
+}
+
+function dispatchReadingClearBonus(missionType, passageId) {
+    const rewardKey = `${buildMissionRewardKey(missionType, passageId)}_clear`;
+    window.__pendingMissionReward = {
+        rewardKey,
+        amount: 15,
+        missionType,
+        subject: window.currentSubject
+    };
+    return claimMissionRewardOnce(rewardKey, {
+        amount: 15,
+        missionType,
+        subject: window.currentSubject,
+        silent: true,
+        skipStudyLog: false
+    });
+}
+
+const DISCUSSION_STOP_WORDS = new Set([
+    'the', 'and', 'that', 'this', 'with', 'will', 'have', 'from', 'they', 'what', 'about',
+    'you', 'your', 'are', 'for', 'was', 'were', 'been', 'being', 'their', 'there', 'then',
+    'when', 'where', 'which', 'while', 'would', 'could', 'should', 'into', 'after', 'before',
+    'both', 'also', 'just', 'very', 'much', 'more', 'some', 'such', 'only', 'over', 'under',
+    '그리고', '하지만', '그래서', '있다', '없다', '한다', '된다', '이다', '에서', '으로', '에게'
+]);
+
+function extractPassageKeywords(passage) {
+    if (passage?.keywords && Array.isArray(passage.keywords)) {
+        return passage.keywords.map(k => String(k).trim()).filter(Boolean);
+    }
+    const raw = `${passage?.title || ''} ${passage?.fullText || ''}`;
+    const scored = new Map();
+
+    (raw.match(/[a-zA-Z]{4,}/g) || []).forEach(word => {
+        const key = word.toLowerCase();
+        if (DISCUSSION_STOP_WORDS.has(key)) return;
+        scored.set(key, (scored.get(key) || 0) + 1);
+    });
+    (raw.match(/[가-힣]{2,}/g) || []).forEach(word => {
+        if (DISCUSSION_STOP_WORDS.has(word)) return;
+        scored.set(word, (scored.get(word) || 0) + 1);
+    });
+
+    return [...scored.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 12)
+        .map(([word]) => word);
+}
+
+function messageContainsPassageKeyword(text, keywords) {
+    if (!text || !keywords?.length) return false;
+    const lower = text.toLowerCase();
+    return keywords.some(keyword => {
+        if (/^[a-z]/i.test(keyword)) return lower.includes(keyword.toLowerCase());
+        return text.includes(keyword);
+    });
+}
+
+function initDiscussionRewardSession(missionType, passage) {
+    window.__discussionRewardState = {
+        missionType,
+        passageId: passage?.id || 'default',
+        startedAt: Date.now(),
+        longMsgPoints: 0,
+        timeMinutesGranted: 0,
+        keywordBonusGranted: false,
+        successJackpotGranted: false,
+        keywords: extractPassageKeywords(passage)
+    };
+}
+
+async function grantDiscussionTimeRewards() {
+    const state = window.__discussionRewardState;
+    if (!state) return;
+
+    const elapsedMinutes = Math.floor((Date.now() - state.startedAt) / 60000);
+    while (state.timeMinutesGranted < elapsedMinutes && state.timeMinutesGranted < 3) {
+        state.timeMinutesGranted += 1;
+        const rewardKey = `${buildMissionRewardKey(state.missionType, state.passageId)}_time${state.timeMinutesGranted}`;
+        await claimMissionRewardOnce(rewardKey, {
+            amount: 2,
+            missionType: state.missionType,
+            subject: window.currentSubject,
+            silent: true,
+            skipStudyLog: true
+        });
+    }
+}
+
+async function processDiscussionMessageRewards(text) {
+    const state = window.__discussionRewardState;
+    if (!state) return;
+
+    await grantDiscussionTimeRewards();
+
+    const compactLen = String(text || '').replace(/\s/g, '').length;
+    if (compactLen >= 5 && state.longMsgPoints < 5) {
+        state.longMsgPoints += 1;
+        const rewardKey = `${buildMissionRewardKey(state.missionType, state.passageId)}_msg${state.longMsgPoints}`;
+        await claimMissionRewardOnce(rewardKey, {
+            amount: 1,
+            missionType: state.missionType,
+            subject: window.currentSubject,
+            silent: true,
+            skipStudyLog: true
+        });
+    }
+
+    if (!state.keywordBonusGranted && messageContainsPassageKeyword(text, state.keywords)) {
+        state.keywordBonusGranted = true;
+        const rewardKey = `${buildMissionRewardKey(state.missionType, state.passageId)}_keyword`;
+        await claimMissionRewardOnce(rewardKey, {
+            amount: 5,
+            missionType: state.missionType,
+            subject: window.currentSubject,
+            silent: true,
+            skipStudyLog: true
+        });
+    }
+}
+
+function dispatchDiscussionSuccessJackpot(missionType, passageId) {
+    const state = window.__discussionRewardState;
+    if (state?.successJackpotGranted) return false;
+    if (state) state.successJackpotGranted = true;
+
+    const rewardKey = `${buildMissionRewardKey(missionType, passageId)}_success`;
+    window.__pendingMissionReward = {
+        rewardKey,
+        amount: 10,
+        missionType,
+        subject: window.currentSubject
+    };
+    return claimMissionRewardOnce(rewardKey, {
+        amount: 10,
+        missionType,
+        subject: window.currentSubject,
+        silent: true,
+        skipStudyLog: false
+    });
+}
+
+async function finalizeDiscussionSessionRewards() {
+    await grantDiscussionTimeRewards();
+}
+
 function dispatchSuccessMissionReward(missionType, passageId, amount = 5) {
+    if (amount >= 10) {
+        return dispatchDiscussionSuccessJackpot(missionType, passageId);
+    }
     const rewardKey = buildMissionRewardKey(missionType, passageId);
     window.__pendingMissionReward = {
         rewardKey,
@@ -787,15 +946,17 @@ function dispatchSuccessMissionReward(missionType, passageId, amount = 5) {
         missionType,
         subject: window.currentSubject
     };
-    claimMissionRewardOnce(rewardKey, {
+    return claimMissionRewardOnce(rewardKey, {
         amount,
         missionType,
         subject: window.currentSubject,
-        silent: true
+        silent: true,
+        skipStudyLog: false
     });
 }
 
 async function flushPendingMissionReward() {
+    await finalizeDiscussionSessionRewards();
     if (!window.__pendingMissionReward) return false;
     const { rewardKey, amount, missionType, subject } = window.__pendingMissionReward;
     if (window.__missionRewardLocks[rewardKey] === 'done') return true;
@@ -803,7 +964,8 @@ async function flushPendingMissionReward() {
         amount,
         missionType,
         subject,
-        silent: true
+        silent: true,
+        skipStudyLog: false
     });
 }
 

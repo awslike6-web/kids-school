@@ -152,6 +152,8 @@ function showLoadingSpinner(container) {
 function closeMissionView() {
     if (typeof flushPendingMissionReward === 'function') {
         flushPendingMissionReward();
+    } else if (typeof finalizeDiscussionSessionRewards === 'function') {
+        finalizeDiscussionSessionRewards();
     }
     if (currentMissionType === 'sentence' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
         saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
@@ -665,6 +667,9 @@ function renderSentenceUI(container) {
 window.startSentenceMission = function(bookId) {
     activePassage = readingFetchedBooks.find(b => b.id === bookId);
     sentenceHistory = [];
+    if (typeof initDiscussionRewardSession === 'function') {
+        initDiscussionRewardSession('sentence', activePassage);
+    }
     renderSentenceChat();
 };
 
@@ -682,6 +687,9 @@ window.renderSentenceChat = function() {
         const loadingId = appendSentenceMsg('ai', "⏳ 코코가 생각 중이에요...");
         
         try {
+            if (typeof processDiscussionMessageRewards === 'function') {
+                await processDiscussionMessageRewards(text);
+            }
             sentenceHistory.push({ role: "user", content: text });
             const passageExtra = (activePassage.chatbotSystemPrompt || "너는 방금 읽은 지문 이야기를 바탕으로 아이와 다정하게 대화를 나누는 AI 요정 코코야. 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 지문에 대해 자신의 생각이나 느낀 점을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.")
                 + (typeof CONJUNCTION_GRADING_GUARDRAIL !== 'undefined' ? `\n\n${CONJUNCTION_GRADING_GUARDRAIL}` : '')
@@ -708,10 +716,12 @@ window.renderSentenceChat = function() {
             speakFairyTTS(reply.replace(/\[SUCCESS\]/g, ''));
             
             if (reply.includes("[SUCCESS]")) {
-                if (typeof dispatchSuccessMissionReward === 'function') {
-                    dispatchSuccessMissionReward('sentence', activePassage?.id, 5);
+                if (typeof dispatchDiscussionSuccessJackpot === 'function') {
+                    dispatchDiscussionSuccessJackpot('sentence', activePassage?.id);
+                } else if (typeof dispatchSuccessMissionReward === 'function') {
+                    dispatchSuccessMissionReward('sentence', activePassage?.id, 10);
                 } else {
-                    triggerAwardDispense(5, 'sentence');
+                    triggerAwardDispense(10, 'sentence');
                     if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '국어' });
                 }
             }
@@ -782,10 +792,16 @@ window.renderReadingStage = function() {
     
     // 단계 건너뛰기 자동 제어 (데이터가 없을 경우)
     if (readingStage === 1 && (!activePassage.conjunctions || activePassage.conjunctions.length === 0)) {
-        readingStage = 2; // 접속사 퀴즈가 없으면 주제 찾기로 바로 패스!
+        if (typeof dispatchReadingStageReward === 'function') {
+            dispatchReadingStageReward('reading', activePassage?.id, 2);
+        }
+        readingStage = 2;
     }
     if (readingStage === 2 && !activePassage.themeQuiz) {
-        readingStage = 3; // 주제 찾기 퀴즈가 없으면 완료 화면으로 바로 패스!
+        if (typeof dispatchReadingStageReward === 'function') {
+            dispatchReadingStageReward('reading', activePassage?.id, 3);
+        }
+        readingStage = 3;
     }
     
     if (readingStage === 0) {
@@ -807,6 +823,9 @@ window.renderReadingStage = function() {
             }
             if (JSON.stringify(userOrderTracking) === JSON.stringify(correctOrder)) {
                 speakFairyTTS("정확해요! 문단 순서를 완벽하게 맞췄어요!");
+                if (typeof dispatchReadingStageReward === 'function') {
+                    dispatchReadingStageReward('reading', activePassage?.id, 1);
+                }
                 readingStage++;
                 setTimeout(renderReadingStage, 1500);
             } else {
@@ -840,6 +859,9 @@ window.renderReadingStage = function() {
                 speakFairyTTS("정답이에요! " + (conj.commentary || correctWord));
                 readingConjunctionIndex++;
                 if (readingConjunctionIndex >= activePassage.conjunctions.length) {
+                    if (typeof dispatchReadingStageReward === 'function') {
+                        dispatchReadingStageReward('reading', activePassage?.id, 2);
+                    }
                     readingStage++;
                 }
                 setTimeout(renderReadingStage, 2000);
@@ -867,6 +889,9 @@ window.renderReadingStage = function() {
         window.verifyReadingTheme = function(idx) {
             if (idx === quiz.answerIndex) {
                 speakFairyTTS("정답이에요! 핵심을 정확히 짚어냈네요!");
+                if (typeof dispatchReadingStageReward === 'function') {
+                    dispatchReadingStageReward('reading', activePassage?.id, 3);
+                }
                 readingStage++;
                 setTimeout(renderReadingStage, 2000);
             } else {
@@ -884,14 +909,15 @@ window.renderReadingStage = function() {
             </div>
         `;
     } else {
-        if (typeof dispatchSuccessMissionReward === 'function') {
-            dispatchSuccessMissionReward('reading', activePassage?.id, 10);
+        if (typeof dispatchReadingClearBonus === 'function') {
+            dispatchReadingClearBonus('reading', activePassage?.id);
         }
         // 완료 및 보상
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                <p style="font-size:1.4rem; color:var(--mint); margin-bottom:20px;">독해 미션을 완벽하게 클리어했습니다!</p>
+                <p style="font-size:1.4rem; color:var(--mint); margin-bottom:10px;">독해 미션을 완벽하게 클리어했습니다!</p>
+                <p style="font-size:1rem; color:#666; margin-bottom:20px;">단계별 5점 × 3 + 클리어 보너스 15점 = 총 30점!</p>
                 <button class="back-to-lobby-btn" style="background:var(--sky); color:white; border:none;" onclick="closeMissionView();">🎁 보상 확인하고 나가기</button>
             </div>
         `;
