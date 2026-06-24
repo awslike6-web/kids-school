@@ -153,20 +153,35 @@ function showLoadingSpinner(container) {
 }
 
 function closeMissionView() {
-    if (typeof flushPendingMissionReward === 'function') {
-        flushPendingMissionReward();
-    } else if (typeof finalizeDiscussionSessionRewards === 'function') {
-        finalizeDiscussionSessionRewards();
-    }
-    if (typeof finalizeQuizRewardSession === 'function') {
-        finalizeQuizRewardSession();
-    }
-    if (currentMissionType === 'sentence' && sentenceHistory.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
-        saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
-    }
-    document.getElementById('missionOverlay').style.display = "none";
-    stopDictationAudio();
-    stopFairyTTS();
+    const overlay = document.getElementById('missionOverlay');
+    const finalizeDiscussion = async () => {
+        if (currentMissionType === 'sentence' && sentenceHistory.length > 0) {
+            if (typeof finalizeSentenceDiscussionSession === 'function') {
+                await finalizeSentenceDiscussionSession({
+                    messages: sentenceHistory,
+                    roomType: '공부방',
+                    missionType: 'sentence'
+                });
+            } else if (typeof saveChatMemoryFromConversation === 'function') {
+                await saveChatMemoryFromConversation({ roomType: '공부방', messages: sentenceHistory });
+            }
+            return;
+        }
+        if (typeof flushPendingMissionReward === 'function') {
+            await flushPendingMissionReward();
+        } else if (typeof finalizeDiscussionSessionRewards === 'function') {
+            await finalizeDiscussionSessionRewards();
+        }
+        if (typeof finalizeQuizRewardSession === 'function') {
+            await finalizeQuizRewardSession();
+        }
+    };
+
+    finalizeDiscussion().finally(() => {
+        overlay.style.display = "none";
+        stopDictationAudio();
+        stopFairyTTS();
+    });
 }
 
 function stopDictationAudio() {
@@ -676,6 +691,7 @@ function renderSentenceUI(container) {
 window.startSentenceMission = function(bookId) {
     activePassage = readingFetchedBooks.find(b => b.id === bookId);
     sentenceHistory = [];
+    window.__sentenceDiscussionMemorySaved = false;
     if (typeof initDiscussionRewardSession === 'function') {
         initDiscussionRewardSession('sentence', activePassage);
     }
@@ -723,36 +739,44 @@ window.renderSentenceChat = function() {
                 {
                     maxRetries: 3,
                     baseDelayMs: 1000,
-                    ui: { elementId: loadingId }
+                    ui: { elementId: loadingId, chatBoxId: 'sentenceChatBox' }
                 }
             );
             sentenceHistory.push({ role: "assistant", content: reply });
-            
-            applyGeminiResponseToWaitUI(reply.replace(/\n/g, '<br>'), { elementId: loadingId });
-            speakFairyTTS(reply.replace(/\[SUCCESS\]/g, ''));
-            
-            if (reply.includes("[SUCCESS]")) {
-                if (typeof dispatchDiscussionSuccessJackpot === 'function') {
-                    dispatchDiscussionSuccessJackpot('sentence', activePassage?.id);
-                } else if (typeof dispatchSuccessMissionReward === 'function') {
-                    dispatchSuccessMissionReward('sentence', activePassage?.id, 10);
-                } else {
-                    triggerAwardDispense(10, 'sentence');
-                    if (typeof sendStudyLogToNotion === 'function') sendStudyLogToNotion({ subject: '국어' });
+
+            if (typeof processDiscussionAiReply === 'function') {
+                await processDiscussionAiReply(reply, {
+                    missionType: 'sentence',
+                    passageId: activePassage?.id,
+                    bubbleId: loadingId,
+                    chatBoxId: 'sentenceChatBox',
+                    subject: '국어'
+                });
+            } else {
+                applyGeminiResponseToWaitUI(reply.replace(/\n/g, '<br>'), {
+                    elementId: loadingId,
+                    chatBoxId: 'sentenceChatBox'
+                });
+                speakFairyTTS(reply.replace(/\[SUCCESS\]/g, ''));
+                if (reply.includes("[SUCCESS]") && typeof dispatchDiscussionSuccessJackpot === 'function') {
+                    await dispatchDiscussionSuccessJackpot('sentence', activePassage?.id);
                 }
             }
         } catch (e) {
             console.error('[processSentenceInput] Gemini 호출 실패:', e);
             popLastPendingUserTurn(sentenceHistory, 'role', ['user']);
             if (typeof showGeminiFinalFailUI === 'function') {
-                showGeminiFinalFailUI({ elementId: loadingId });
+                showGeminiFinalFailUI({ elementId: loadingId, chatBoxId: 'sentenceChatBox' });
             }
         }
     };
 
     window.appendSentenceMsg = function(sender, text) {
         const chatBox = document.getElementById('sentenceChatBox');
-        const msgId = 'msg_' + Date.now();
+        if (!chatBox) return null;
+        const msgId = typeof createChatBubbleId === 'function'
+            ? createChatBubbleId('msg')
+            : ('msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
         const msgHtml = `<div id="${msgId}" class="msg ${sender}">${text}</div>`;
         chatBox.insertAdjacentHTML('beforeend', msgHtml);
         chatBox.scrollTop = chatBox.scrollHeight;

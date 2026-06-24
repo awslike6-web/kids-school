@@ -1010,6 +1010,70 @@ async function flushPendingMissionReward() {
     });
 }
 
+async function processDiscussionAiReply(reply, options = {}) {
+    const {
+        missionType,
+        passageId,
+        bubbleId,
+        chatBoxId = 'sentenceChatBox',
+        subject = window.currentSubject || '국어'
+    } = options;
+
+    const replyText = String(reply || '');
+    const displayHtml = replyText.replace(/\n/g, '<br>');
+    setChatBubbleContent(bubbleId, displayHtml, { chatBoxId, asHtml: true });
+    window.__geminiRetryWaitRef = null;
+
+    const speechText = replyText.replace(/\[SUCCESS\]/g, '').trim();
+    if (speechText && typeof speakFairyTTS === 'function') {
+        speakFairyTTS(speechText);
+    }
+
+    if (!replyText.includes('[SUCCESS]')) return false;
+
+    if (typeof dispatchDiscussionSuccessJackpot === 'function') {
+        return dispatchDiscussionSuccessJackpot(missionType, passageId);
+    }
+    if (typeof dispatchSuccessMissionReward === 'function') {
+        return dispatchSuccessMissionReward(missionType, passageId, 10);
+    }
+    if (typeof window.triggerAwardDispense === 'function') {
+        await window.triggerAwardDispense(10, missionType);
+        if (typeof sendStudyLogToNotion === 'function') {
+            await sendStudyLogToNotion({ subject });
+        }
+    }
+    return true;
+}
+
+async function finalizeSentenceDiscussionSession(options = {}) {
+    const {
+        messages = [],
+        roomType = '공부방',
+        missionType = 'sentence'
+    } = options;
+
+    if (window.__sentenceDiscussionMemorySaved) return true;
+
+    const hasUserTurn = Array.isArray(messages) && messages.some(m => m.role === 'user' && m.content);
+    if (!hasUserTurn) return false;
+
+    if (typeof flushPendingMissionReward === 'function') {
+        await flushPendingMissionReward();
+    } else if (typeof finalizeDiscussionSessionRewards === 'function') {
+        await finalizeDiscussionSessionRewards();
+    }
+
+    if (typeof saveChatMemoryFromConversation !== 'function') return false;
+
+    const saved = await saveChatMemoryFromConversation({
+        roomType,
+        messages
+    });
+    if (saved) window.__sentenceDiscussionMemorySaved = true;
+    return saved;
+}
+
 // ========================================================
 // 🧠 AI 대화 기억 보관소 (Chat Memory) + 3x2 페르소나 매트릭스
 // ========================================================
@@ -1249,22 +1313,55 @@ function extractGeminiResponseText(data) {
     return '';
 }
 
+function _resolveChatBubbleElement(elementId, chatBoxId) {
+    if (!elementId) return null;
+    const el = document.getElementById(elementId);
+    if (!el) return null;
+    const tag = (el.tagName || '').toUpperCase();
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') {
+        return null;
+    }
+    if (chatBoxId) {
+        const box = document.getElementById(chatBoxId);
+        if (!box || !box.contains(el)) return null;
+    }
+    return el;
+}
+
+function createChatBubbleId(prefix = 'msg') {
+    window.__chatBubbleSeq = (window.__chatBubbleSeq || 0) + 1;
+    return `${prefix}_${Date.now()}_${window.__chatBubbleSeq}`;
+}
+
+function setChatBubbleContent(elementId, content, options = {}) {
+    const chatBoxId = options.chatBoxId || null;
+    const asHtml = options.asHtml !== false;
+    const el = _resolveChatBubbleElement(elementId, chatBoxId);
+    if (!el) {
+        console.warn('[setChatBubbleContent] invalid bubble target:', elementId, chatBoxId);
+        return false;
+    }
+    if (asHtml) el.innerHTML = content;
+    else el.textContent = content;
+    if (chatBoxId) {
+        const box = document.getElementById(chatBoxId);
+        if (box) box.scrollTop = box.scrollHeight;
+    }
+    return true;
+}
+
 function showGeminiRetryWaitUI(uiOptions = {}) {
     const message = GEMINI_RETRY_WAIT_MESSAGE;
     window.__geminiRetryWaitRef = null;
+    const chatBoxId = uiOptions.chatBoxId || null;
 
     if (uiOptions.elementId) {
-        const el = document.getElementById(uiOptions.elementId);
-        if (el) {
-            if (uiOptions.asHtml !== false) {
-                el.innerHTML = message;
-            } else {
-                el.innerText = message;
-            }
+        if (setChatBubbleContent(uiOptions.elementId, message, { chatBoxId, asHtml: false })) {
             window.__geminiRetryWaitRef = {
                 type: 'element',
                 id: uiOptions.elementId,
-                asHtml: uiOptions.asHtml !== false
+                chatBoxId,
+                asHtml: false
             };
         }
     } else if (uiOptions.appendFairyMessage) {
@@ -1306,13 +1403,13 @@ function applyGeminiResponseToWaitUI(content, options = {}) {
     const asHtml = options.asHtml !== false;
     const formatted = asHtml ? String(content).replace(/\n/g, '<br>') : String(content);
     const ref = window.__geminiRetryWaitRef;
+    const chatBoxId = options.chatBoxId || ref?.chatBoxId || null;
 
     if (ref?.type === 'element' && ref.id) {
-        const el = document.getElementById(ref.id);
-        if (el) {
-            if (ref.asHtml) el.innerHTML = formatted;
-            else el.innerText = formatted;
-        }
+        setChatBubbleContent(ref.id, formatted, {
+            chatBoxId: ref.chatBoxId || chatBoxId,
+            asHtml: ref.asHtml !== false
+        });
     } else if (ref?.type === 'fairy' && ref.id) {
         const el = document.getElementById(ref.id);
         if (el) {
@@ -1324,11 +1421,7 @@ function applyGeminiResponseToWaitUI(content, options = {}) {
     } else if (ref?.type === 'callback' && typeof ref.onApply === 'function') {
         ref.onApply(formatted, content);
     } else if (options.elementId) {
-        const el = document.getElementById(options.elementId);
-        if (el) {
-            if (asHtml) el.innerHTML = formatted;
-            else el.innerText = formatted;
-        }
+        setChatBubbleContent(options.elementId, formatted, { chatBoxId, asHtml });
     }
 
     window.__geminiRetryWaitRef = null;
@@ -1367,10 +1460,16 @@ function showGeminiFinalFailUI(uiOptions = {}) {
     const message = GEMINI_FINAL_FAIL_MESSAGE;
 
     if (uiOptions.elementId) {
-        const el = document.getElementById(uiOptions.elementId);
-        if (el) {
-            if (uiOptions.asHtml !== false) el.innerHTML = message;
-            else el.innerText = message;
+        if (setChatBubbleContent(uiOptions.elementId, message, {
+            chatBoxId: uiOptions.chatBoxId || null,
+            asHtml: false
+        })) {
+            window.__geminiRetryWaitRef = {
+                type: 'element',
+                id: uiOptions.elementId,
+                chatBoxId: uiOptions.chatBoxId || null,
+                asHtml: false
+            };
         }
     } else if (uiOptions.appendFairyMessage) {
         const msgDiv = document.createElement('div');
