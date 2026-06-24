@@ -1221,7 +1221,244 @@ function _isAiErrorResponse(text) {
     return normalized.startsWith('[기지국 에러]')
         || normalized.includes('"status":"UNAVAILABLE"')
         || normalized.includes('"code":503')
-        || normalized.includes('experiencing high demand');
+        || normalized.includes('"code":429')
+        || normalized.includes('experiencing high demand')
+        || normalized.includes('rate limit')
+        || normalized.includes('RESOURCE_EXHAUSTED');
+}
+
+const GEMINI_RETRY_WAIT_MESSAGE = '잠시만~ 코코가 생각 주머니 정리하고 다시 말해줄게! 잠시만 기다려줘~🧚‍♂️';
+
+function isGeminiRetryableResponse(response, data) {
+    if (!response) return false;
+    if (response.status === 503 || response.status === 429) return true;
+    const code = data?.error?.code;
+    if (code === 503 || code === 429) return true;
+    const statusStr = String(data?.error?.status || '');
+    return statusStr === 'UNAVAILABLE' || statusStr === 'RESOURCE_EXHAUSTED';
+}
+
+function extractGeminiResponseText(data) {
+    if (!data || typeof data !== 'object') return '';
+    if (data.choices?.[0]?.message?.content) return String(data.choices[0].message.content).trim();
+    if (data.reply) return String(data.reply).trim();
+    if (data.text) return String(data.text).trim();
+    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        return String(data.candidates[0].content.parts[0].text).trim();
+    }
+    return '';
+}
+
+function showGeminiRetryWaitUI(uiOptions = {}) {
+    const message = GEMINI_RETRY_WAIT_MESSAGE;
+    window.__geminiRetryWaitRef = null;
+
+    if (uiOptions.elementId) {
+        const el = document.getElementById(uiOptions.elementId);
+        if (el) {
+            if (uiOptions.asHtml !== false) {
+                el.innerHTML = message;
+            } else {
+                el.innerText = message;
+            }
+            window.__geminiRetryWaitRef = {
+                type: 'element',
+                id: uiOptions.elementId,
+                asHtml: uiOptions.asHtml !== false
+            };
+        }
+    } else if (uiOptions.appendFairyMessage) {
+        const msgDiv = document.createElement('div');
+        msgDiv.id = 'gemini-retry-wait-msg';
+        msgDiv.style.padding = '8px';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.fontSize = '0.85rem';
+        msgDiv.style.maxWidth = '85%';
+        msgDiv.style.lineHeight = '1.4';
+        msgDiv.style.wordBreak = 'break-all';
+        msgDiv.style.background = '#21262d';
+        msgDiv.style.borderLeft = '4px solid #ffb347';
+        msgDiv.style.color = '#ffd580';
+        msgDiv.style.alignSelf = 'flex-start';
+        msgDiv.innerText = message;
+        const box = document.getElementById('fairy-messages');
+        if (box) {
+            box.appendChild(msgDiv);
+            box.scrollTop = box.scrollHeight;
+            window.__geminiRetryWaitRef = { type: 'fairy', id: 'gemini-retry-wait-msg' };
+        }
+    } else if (typeof uiOptions.onShow === 'function') {
+        uiOptions.onShow(message);
+        window.__geminiRetryWaitRef = { type: 'callback', onApply: uiOptions.onApply };
+    }
+
+    if (uiOptions.speak === false) return;
+    if (typeof uiOptions.speakFn === 'function') {
+        uiOptions.speakFn(message);
+    } else if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS(message);
+    } else if (typeof window.speakFairyTTS === 'function') {
+        window.speakFairyTTS(message);
+    }
+}
+
+function applyGeminiResponseToWaitUI(content, options = {}) {
+    const asHtml = options.asHtml !== false;
+    const formatted = asHtml ? String(content).replace(/\n/g, '<br>') : String(content);
+    const ref = window.__geminiRetryWaitRef;
+
+    if (ref?.type === 'element' && ref.id) {
+        const el = document.getElementById(ref.id);
+        if (el) {
+            if (ref.asHtml) el.innerHTML = formatted;
+            else el.innerText = formatted;
+        }
+    } else if (ref?.type === 'fairy' && ref.id) {
+        const el = document.getElementById(ref.id);
+        if (el) {
+            el.innerText = String(content);
+            el.style.borderLeft = '4px solid #ab47bc';
+            el.style.color = '#c9d1d9';
+            el.removeAttribute('id');
+        }
+    } else if (ref?.type === 'callback' && typeof ref.onApply === 'function') {
+        ref.onApply(formatted, content);
+    } else if (options.elementId) {
+        const el = document.getElementById(options.elementId);
+        if (el) {
+            if (asHtml) el.innerHTML = formatted;
+            else el.innerText = formatted;
+        }
+    }
+
+    window.__geminiRetryWaitRef = null;
+}
+
+const GEMINI_FINAL_FAIL_MESSAGE = '미안해~ 코코가 방금 귀가 살짝 멍멍해서 잘 못 들었어! 다시 한 번만 얘기해줄래? 🧚‍♂️';
+window.GEMINI_FINAL_FAIL_MESSAGE = GEMINI_FINAL_FAIL_MESSAGE;
+
+function clearGeminiRetryUI() {
+    window.__geminiRetryWaitRef = null;
+    document.getElementById('gemini-retry-wait-msg')?.remove();
+    document.getElementById('gemini-final-fail-msg')?.remove();
+}
+
+function resetGeminiChatErrorState() {
+    clearGeminiRetryUI();
+    window.__geminiChatErrorActive = false;
+}
+
+function _speakGeminiMessage(message, uiOptions = {}) {
+    if (uiOptions.speak === false) return;
+    if (typeof uiOptions.speakFn === 'function') {
+        uiOptions.speakFn(message);
+    } else if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS(message);
+    } else if (typeof window.speakFairyTTS === 'function') {
+        window.speakFairyTTS(message);
+    } else if (typeof speakFairyText === 'function') {
+        speakFairyText(message);
+    }
+}
+
+function showGeminiFinalFailUI(uiOptions = {}) {
+    clearGeminiRetryUI();
+    window.__geminiChatErrorActive = true;
+    const message = GEMINI_FINAL_FAIL_MESSAGE;
+
+    if (uiOptions.elementId) {
+        const el = document.getElementById(uiOptions.elementId);
+        if (el) {
+            if (uiOptions.asHtml !== false) el.innerHTML = message;
+            else el.innerText = message;
+        }
+    } else if (uiOptions.appendFairyMessage) {
+        const msgDiv = document.createElement('div');
+        msgDiv.id = 'gemini-final-fail-msg';
+        msgDiv.style.padding = '8px';
+        msgDiv.style.borderRadius = '8px';
+        msgDiv.style.fontSize = '0.85rem';
+        msgDiv.style.maxWidth = '85%';
+        msgDiv.style.lineHeight = '1.4';
+        msgDiv.style.wordBreak = 'break-all';
+        msgDiv.style.background = '#21262d';
+        msgDiv.style.borderLeft = '4px solid #ab47bc';
+        msgDiv.style.color = '#c9d1d9';
+        msgDiv.style.alignSelf = 'flex-start';
+        msgDiv.innerText = message;
+        const box = document.getElementById('fairy-messages');
+        if (box) {
+            box.appendChild(msgDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+    } else if (typeof uiOptions.onShow === 'function') {
+        uiOptions.onShow(message);
+    }
+
+    _speakGeminiMessage(message, uiOptions);
+}
+
+function popLastPendingUserTurn(history, roleKey = 'role', userValues = ['user']) {
+    if (!Array.isArray(history) || history.length === 0) return;
+    const last = history[history.length - 1];
+    const role = last?.[roleKey];
+    if (userValues.includes(role)) history.pop();
+}
+
+async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
+    const maxRetries = retryOptions.maxRetries ?? 3;
+    const baseDelayMs = retryOptions.baseDelayMs ?? 1000;
+    const uiOptions = retryOptions.ui || null;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const response = await fetch(url, fetchOptions);
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.error) {
+                if (isGeminiRetryableResponse(response, data) && attempt < maxRetries) {
+                    if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
+                    await _sleepMs(baseDelayMs * attempt);
+                    continue;
+                }
+                throw new Error(data.error?.message || `API 오류 (${response.status})`);
+            }
+
+            const textContent = extractGeminiResponseText(data);
+            if (_isAiErrorResponse(textContent)) {
+                if (attempt < maxRetries) {
+                    if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
+                    await _sleepMs(baseDelayMs * attempt);
+                    continue;
+                }
+                throw new Error(textContent || 'AI 응답 오류');
+            }
+
+            if (url.includes('/v1/gemini') && !textContent) {
+                if (attempt < maxRetries) {
+                    if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
+                    await _sleepMs(baseDelayMs * attempt);
+                    continue;
+                }
+                throw new Error('API 응답 구조 파싱 실패');
+            }
+
+            return { response, data, text: textContent };
+        } catch (error) {
+            lastError = error;
+            const msg = String(error.message || '');
+            const retryableNetwork = error.name === 'TypeError' || msg.includes('Failed to fetch');
+            if (attempt < maxRetries && retryableNetwork) {
+                if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
+                await _sleepMs(baseDelayMs * attempt);
+                continue;
+            }
+            throw error;
+        }
+    }
+
+    throw lastError || new Error('Gemini API 호출 실패');
 }
 
 function _buildFallbackChatSummary(transcript, childName) {
@@ -1243,11 +1480,11 @@ function _buildFallbackChatSummary(transcript, childName) {
 async function summarizeChatSessionWithGemini(transcript, options = {}) {
     const childName = options.childName || getActiveChildName();
     const fallbackSummary = _buildFallbackChatSummary(transcript, childName);
-    const maxRetries = 3;
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-            const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
+    try {
+        const { text: content } = await fetchWithGeminiRetry(
+            `${PROXY_URL}/v1/chat/completions?type=ai`,
+            {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -1260,42 +1497,20 @@ async function summarizeChatSessionWithGemini(transcript, options = {}) {
                         { role: "user", content: transcript }
                     ]
                 })
-            });
+            },
+            { maxRetries: 3, baseDelayMs: 1000 }
+        );
 
-            const data = await response.json().catch(() => ({}));
-            const apiError = data.error;
-            const content = (data.choices?.[0]?.message?.content || data.reply || '').trim();
-            const isRetryable = response.status === 503 || apiError?.code === 503;
-
-            if (!response.ok || apiError) {
-                if (isRetryable && attempt < maxRetries) {
-                    await _sleepMs(1000 * attempt);
-                    continue;
-                }
-                throw new Error(apiError?.message || `요약 API 오류 (${response.status})`);
-            }
-
-            if (_isAiErrorResponse(content)) {
-                if (attempt < maxRetries) {
-                    await _sleepMs(1000 * attempt);
-                    continue;
-                }
-                console.warn("[summarizeChatSessionWithGemini] AI 오류 응답 → 로컬 폴백 요약 사용");
-                return fallbackSummary;
-            }
-
-            return content || fallbackSummary;
-        } catch (error) {
-            if (attempt < maxRetries) {
-                await _sleepMs(1000 * attempt);
-                continue;
-            }
-            console.error("[summarizeChatSessionWithGemini] 실패:", error);
+        if (_isAiErrorResponse(content)) {
+            console.warn("[summarizeChatSessionWithGemini] AI 오류 응답 → 로컬 폴백 요약 사용");
             return fallbackSummary;
         }
-    }
 
-    return fallbackSummary;
+        return content || fallbackSummary;
+    } catch (error) {
+        console.error("[summarizeChatSessionWithGemini] 실패:", error);
+        return fallbackSummary;
+    }
 }
 
 async function saveChatMemoryToNotion({ sessionId, childName, roomType, conversationSummary, isImportant }) {

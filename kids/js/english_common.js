@@ -858,6 +858,7 @@ window.renderSentenceChat = function() {
         const inputEl = document.getElementById('sentenceInput');
         const text = inputEl.value.trim();
         if (!text) return;
+        if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
         inputEl.value = '';
         appendSentenceMsg('user', text);
         
@@ -884,22 +885,28 @@ window.renderSentenceChat = function() {
                 ? buildFullAISystemPrompt('공부방', passageExtra)
                 : passageExtra;
             
-            const response = await fetch(`${PROXY_URL}/v1/chat/completions?type=ai`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    model: "gemini-2.5-flash",
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        ...sentenceHistory
-                    ]
-                })
-            });
-            const data = await response.json();
-            const reply = data.choices[0].message.content;
+            const { text: reply } = await fetchWithGeminiRetry(
+                `${PROXY_URL}/v1/chat/completions?type=ai`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "gemini-2.5-flash",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            ...sentenceHistory
+                        ]
+                    })
+                },
+                {
+                    maxRetries: 3,
+                    baseDelayMs: 1000,
+                    ui: { elementId: loadingId }
+                }
+            );
             sentenceHistory.push({ role: "assistant", content: reply });
             
-            document.getElementById(loadingId).innerHTML = reply.replace(/\n/g, '<br>');
+            applyGeminiResponseToWaitUI(reply.replace(/\n/g, '<br>'), { elementId: loadingId });
             speakFairyTTS(reply.replace(/\[SUCCESS\]/g, ''));
             
             if (reply.includes("[SUCCESS]")) {
@@ -913,7 +920,11 @@ window.renderSentenceChat = function() {
                 }
             }
         } catch (e) {
-            document.getElementById(loadingId).innerHTML = "😢 통신 오류가 발생했어요.";
+            console.error('[processSentenceInput] Gemini 호출 실패:', e);
+            popLastPendingUserTurn(sentenceHistory, 'role', ['user']);
+            if (typeof showGeminiFinalFailUI === 'function') {
+                showGeminiFinalFailUI({ elementId: loadingId });
+            }
         }
     };
 
@@ -933,7 +944,7 @@ window.renderSentenceChat = function() {
         </div>
         <div class="chat-box" id="sentenceChatBox" style="height:250px;"></div>
         <div class="interactive-input-group">
-            <input type="text" class="text-input-field" id="sentenceInput" placeholder="Type your thoughts here!" onkeypress="if(event.key==='Enter') processSentenceInput()">
+            <input type="text" class="text-input-field" id="sentenceInput" placeholder="Type your thoughts here!" onfocus="if(typeof resetGeminiChatErrorState==='function')resetGeminiChatErrorState()" onkeypress="if(event.key==='Enter') processSentenceInput()">
             <button class="quiz-button" onclick="processSentenceInput()">Send</button>
         </div>
     `;

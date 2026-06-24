@@ -72,7 +72,7 @@ async function initFairyChat(subject, roomType = '공부방') {
                     <button id="fairy-mic-btn" onclick="startFairyVoiceInput()" style="background: #ab47bc; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: transform 0.2s;" title="마이크로 말하기">
                         🎙️
                     </button>
-                    <input type="text" id="fairy-input" placeholder="요정에게 말하기..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: #c9d1d9; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') sendToFairy()">
+                    <input type="text" id="fairy-input" placeholder="요정에게 말하기..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #30363d; background: #0d1117; color: #c9d1d9; font-size: 0.85rem;" onfocus="if(typeof resetGeminiChatErrorState==='function')resetGeminiChatErrorState()" onkeypress="if(event.key === 'Enter') sendToFairy()">
                     <button onclick="sendToFairy()" style="background: #ab47bc; color: white; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">전송</button>
                 </div>
             </div>
@@ -83,6 +83,7 @@ async function initFairyChat(subject, roomType = '공부방') {
 window.initFairyChat = initFairyChat;
 
 function startFairyVoiceInput() {
+    if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
     const micBtn = document.getElementById('fairy-mic-btn');
     const inputEl = document.getElementById('fairy-input');
     if (!inputEl) return;
@@ -176,6 +177,8 @@ async function sendToFairy() {
     const text = inputEl.value.trim();
     if (!text) return;
 
+    if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
+
     window.__fairySendLocked = true;
 
     if (window.learningSession) {
@@ -206,18 +209,23 @@ async function sendToFairy() {
     window.fairyHistory.push({ role: "user", parts: [{ text: text }] });
 
     try {
-        const response = await fetch(`${WORKER_PROXY_URL}/v1/gemini`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                system_instruction: { parts: [{ text: fullSystemPrompt }] },
-                contents: window.fairyHistory,
-                generationConfig: { temperature: 0.7 }
-            })
-        });
-
-        const data = await response.json();
-        const aiResponse = data.candidates[0].content.parts[0].text;
+        const { text: aiResponse } = await fetchWithGeminiRetry(
+            `${WORKER_PROXY_URL}/v1/gemini`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    system_instruction: { parts: [{ text: fullSystemPrompt }] },
+                    contents: window.fairyHistory,
+                    generationConfig: { temperature: 0.7 }
+                })
+            },
+            {
+                maxRetries: 3,
+                baseDelayMs: 1000,
+                ui: { appendFairyMessage: true }
+            }
+        );
         
         window.fairyHistory.push({ role: "model", parts: [{ text: aiResponse }] });
 
@@ -225,13 +233,23 @@ async function sendToFairy() {
             trackChatMemoryAssistantMessage(aiResponse);
         }
 
-        appendFairyMsg('fairy', aiResponse);
+        if (window.__geminiRetryWaitRef) {
+            applyGeminiResponseToWaitUI(aiResponse, { asHtml: false });
+        } else {
+            appendFairyMsg('fairy', aiResponse);
+        }
         
         if (typeof window.speakFairyTTS === 'function') {
             window.speakFairyTTS(aiResponse);
         }
     } catch (error) {
-        appendFairyMsg('fairy', "앗! 요정 세계와 통신이 끊어졌어! 다시 말해줄래?");
+        console.error('[sendToFairy] Gemini 호출 실패:', error);
+        popLastPendingUserTurn(window.fairyHistory, 'role', ['user']);
+        if (typeof showGeminiFinalFailUI === 'function') {
+            showGeminiFinalFailUI({ appendFairyMessage: true });
+        } else {
+            appendFairyMsg('fairy', GEMINI_FINAL_FAIL_MESSAGE || '다시 한 번만 얘기해줄래?');
+        }
     } finally {
         window.__fairySendLocked = false;
     }

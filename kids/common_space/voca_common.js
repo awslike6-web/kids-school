@@ -283,6 +283,12 @@ function speakFairyText(htmlText) {
 }
 
 function startVoiceInput() {
+  const wasError = window.__geminiChatErrorActive;
+  if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
+  if (wasError) {
+    const answerBox = document.getElementById('fairyAnswerBox');
+    if (answerBox) answerBox.innerHTML = '';
+  }
   const micBtn = document.getElementById('micBtn');
   const questionInput = document.getElementById('fairyQuestion');
   if (!questionInput) return;
@@ -353,41 +359,59 @@ function startVoiceInput() {
 }
 
 async function askFairyTeacher(word, meaning) {
+  if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
   const replyBox = document.getElementById('fairyReplyBox');
   replyBox.innerHTML = `⏳ 요정 코코가 <b>[${word}]</b>에 대해 생각하고 있어요. 조금만 기다려주세요...`;
   document.getElementById('fairyRoom').scrollIntoView({ behavior: 'smooth' });
 
   try {
-    const response = await fetch(`${WORKER_PROXY_URL}/v1/chat/completions?type=ai`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gemini-2.5-flash",
-        messages: [
-          { role: "system", content: getVocaFairySystemPrompt(`주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.`) },
-          { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
-        ]
-      })
-    });
-
-    const data = await response.json();
-    if (data.error) {
-      if (data.error.code === 503) {
-        throw new Error("지금 요정 나라에 질문하는 친구들이 너무 많아! 10초 뒤에 단어창을 다시 열어주렴! ✨");
+    const { text: reply } = await fetchWithGeminiRetry(
+      `${WORKER_PROXY_URL}/v1/chat/completions?type=ai`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gemini-2.5-flash",
+          messages: [
+            { role: "system", content: getVocaFairySystemPrompt(`주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.`) },
+            { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
+          ]
+        })
+      },
+      {
+        maxRetries: 3,
+        baseDelayMs: 1000,
+        ui: {
+          onShow: (msg) => {
+            replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${msg}`;
+          },
+          onApply: (replyHtml) => {
+            replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+          },
+          speakFn: speakFairyText
+        }
       }
-      throw new Error(data.error.message || "서버 응답 오류");
-    }
+    );
 
-    if (data.choices && data.choices[0]) {
-      const replyHtml = data.choices[0].message.content.replace(/\n/g, '<br>');
-      replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
-      speakFairyText(replyHtml);
+    const replyHtml = reply.replace(/\n/g, '<br>');
+    if (window.__geminiRetryWaitRef) {
+      applyGeminiResponseToWaitUI(replyHtml);
     } else {
-      throw new Error("요정의 응답 데이터 구조가 올바르지 않습니다.");
+      replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
     }
+    speakFairyText(replyHtml);
   } catch (error) {
     console.error("요정 호출 실패:", error);
-    replyBox.innerHTML = `😢 <b>코코 요정님:</b><br>${error.message}`;
+    if (typeof showGeminiFinalFailUI === 'function') {
+      showGeminiFinalFailUI({
+        onShow: (msg) => {
+          replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${msg}`;
+        },
+        speakFn: speakFairyText
+      });
+    } else {
+      replyBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${window.GEMINI_FINAL_FAIL_MESSAGE || '다시 한 번만 얘기해줄래?'}`;
+    }
   }
 }
 
@@ -397,6 +421,7 @@ function toggleFairyBox() {
 }
 
 async function askCocoFairy() {
+  if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
   const questionInput = document.getElementById("fairyQuestion");
   const answerBox = document.getElementById("fairyAnswerBox");
   const questionText = questionInput.value.trim();
@@ -412,38 +437,57 @@ async function askCocoFairy() {
   MODAL_CHAT_HISTORY.push({ role: "user", content: questionText });
 
   try {
-    const response = await fetch(`${WORKER_PROXY_URL}/v1/chat/completions?type=ai`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "gemini-2.5-flash", 
-        messages: [
-          { role: "system", content: getVocaFairySystemPrompt() },
-          ...MODAL_CHAT_HISTORY
-        ]
-      })
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(()=>({}));
-        if (response.status === 503 || errorData.error?.code === 503) {
-            throw new Error("아이코! 요정 나라 우체통에 편지가 가득 찼나 봐! 5초 뒤에 [보내기] 버튼을 다시 꾹 눌러줘! ✉️✨");
+    const { text: reply } = await fetchWithGeminiRetry(
+      `${WORKER_PROXY_URL}/v1/chat/completions?type=ai`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "gemini-2.5-flash", 
+          messages: [
+            { role: "system", content: getVocaFairySystemPrompt() },
+            ...MODAL_CHAT_HISTORY
+          ]
+        })
+      },
+      {
+        maxRetries: 3,
+        baseDelayMs: 1000,
+        ui: {
+          onShow: (msg) => {
+            answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${msg}`;
+          },
+          onApply: (replyHtml) => {
+            answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+          },
+          speakFn: speakFairyText
         }
-        throw new Error(errorData.error?.message || `통신 장애 (코드: ${response.status})`);
-    }
-
-    const data = await response.json();
-    const reply = data.choices[0].message.content || data.reply || data.text;
+      }
+    );
     
     MODAL_CHAT_HISTORY.push({ role: "assistant", content: reply });
 
     const replyHtml = reply.replace(/\n/g, '<br>');
-    answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+    if (window.__geminiRetryWaitRef) {
+      applyGeminiResponseToWaitUI(replyHtml);
+    } else {
+      answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${replyHtml}`;
+    }
     speakFairyText(replyHtml);
 
   } catch (error) {
     console.error(error);
-    answerBox.innerHTML = `😢 <b>코코 요정님:</b><br>${error.message}`;
+    popLastPendingUserTurn(MODAL_CHAT_HISTORY, 'role', ['user']);
+    if (typeof showGeminiFinalFailUI === 'function') {
+      showGeminiFinalFailUI({
+        onShow: (msg) => {
+          answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${msg}`;
+        },
+        speakFn: speakFairyText
+      });
+    } else {
+      answerBox.innerHTML = `🧚‍♀️ <b>코코 요정님:</b><br>${window.GEMINI_FINAL_FAIL_MESSAGE || '다시 한 번만 얘기해줄래?'}`;
+    }
   }
 }
 
@@ -451,6 +495,14 @@ async function askCocoFairy() {
 setTimeout(() => {
   const qInput = document.getElementById("fairyQuestion");
   if(qInput) {
+    qInput.addEventListener('focus', function() {
+      const wasError = window.__geminiChatErrorActive;
+      if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
+      if (wasError) {
+        const answerBox = document.getElementById('fairyAnswerBox');
+        if (answerBox) answerBox.innerHTML = '';
+      }
+    });
     qInput.addEventListener("keypress", function(event) {
       if (event.key === "Enter") {
         event.preventDefault();
