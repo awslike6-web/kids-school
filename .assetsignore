@@ -1,0 +1,6 @@
+**/__pycache__
+**/*.py
+**/*.bat
+test_query.js
+test_db.js
+run_git.js
