@@ -27,7 +27,118 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById('userName').textContent = `${name} 탐험대원`;
   document.getElementById('userIcon').textContent = icon;
+
+  initMemoPad();
 });
+
+// 📝 계산 메모장 (글씨 / 그리기)
+let memoMode = 'text';
+let memoDrawing = false;
+let memoCanvasCtx = null;
+
+function initMemoPad() {
+  const canvas = document.getElementById('memo-canvas');
+  if (!canvas || canvas.dataset.ready === '1') return;
+
+  memoCanvasCtx = canvas.getContext('2d');
+  resizeMemoCanvas();
+  canvas.dataset.ready = '1';
+
+  const startDraw = (e) => {
+    if (memoMode !== 'draw') return;
+    memoDrawing = true;
+    const p = getMemoCanvasPoint(canvas, e);
+    memoCanvasCtx.beginPath();
+    memoCanvasCtx.moveTo(p.x, p.y);
+    e.preventDefault();
+  };
+
+  const moveDraw = (e) => {
+    if (!memoDrawing || memoMode !== 'draw') return;
+    const p = getMemoCanvasPoint(canvas, e);
+    memoCanvasCtx.lineTo(p.x, p.y);
+    memoCanvasCtx.stroke();
+    e.preventDefault();
+  };
+
+  const endDraw = () => { memoDrawing = false; };
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', moveDraw, { passive: false });
+  canvas.addEventListener('touchend', endDraw);
+
+  window.addEventListener('resize', resizeMemoCanvas);
+}
+
+function getMemoCanvasPoint(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches && e.touches[0];
+  const clientX = touch ? touch.clientX : e.clientX;
+  const clientY = touch ? touch.clientY : e.clientY;
+  return {
+    x: (clientX - rect.left) * (canvas.width / rect.width),
+    y: (clientY - rect.top) * (canvas.height / rect.height),
+  };
+}
+
+function resizeMemoCanvas() {
+  const canvas = document.getElementById('memo-canvas');
+  if (!canvas || !memoCanvasCtx) return;
+
+  const snapshot = document.createElement('canvas');
+  if (canvas.width > 0 && canvas.height > 0) {
+    snapshot.width = canvas.width;
+    snapshot.height = canvas.height;
+    snapshot.getContext('2d').drawImage(canvas, 0, 0);
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.max(200, Math.floor(rect.width) || 216);
+  canvas.height = Math.max(180, Math.floor(rect.height) || 220);
+
+  memoCanvasCtx.lineCap = 'round';
+  memoCanvasCtx.lineJoin = 'round';
+  memoCanvasCtx.lineWidth = 3;
+  memoCanvasCtx.strokeStyle = '#2D2D4E';
+  if (snapshot.width > 0) {
+    memoCanvasCtx.drawImage(snapshot, 0, 0, canvas.width, canvas.height);
+  }
+}
+
+window.switchMemoMode = function(mode) {
+  memoMode = mode;
+  document.querySelectorAll('.memo-tab').forEach((tab) => {
+    tab.classList.toggle('active', tab.dataset.mode === mode);
+  });
+
+  const textEl = document.getElementById('memo-text');
+  const drawWrap = document.getElementById('memo-draw-wrap');
+  if (!textEl || !drawWrap) return;
+
+  if (mode === 'text') {
+    textEl.hidden = false;
+    drawWrap.hidden = true;
+  } else {
+    textEl.hidden = true;
+    drawWrap.hidden = false;
+    initMemoPad();
+    resizeMemoCanvas();
+  }
+};
+
+window.clearMemoPad = function() {
+  const textEl = document.getElementById('memo-text');
+  if (textEl) textEl.value = '';
+
+  const canvas = document.getElementById('memo-canvas');
+  if (canvas && memoCanvasCtx) {
+    memoCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+};
 
 // 🚪 학습 종료(exitRoom) 배선 및 학습 일지 전송
 window.exitRoom = async function() {
@@ -339,11 +450,17 @@ function renderDynamicGrid(mode, q, isPrint = false) {
       }
       row++;
 
-      // 피제수 자릿수만큼 곱·빼기 중간 과정 행 (2자리→2줄, 3자리→3줄)
+      // 피제수 자릿수만큼 곱·빼기 중간 과정 (단계당: 곱한 수 → 빼기 결과 → 밑줄)
       for (let step = 0; step < stepCount; step++) {
           for (let i = 0; i < aStr.length; i++) {
               let c = dividendStartCol + i;
-              gridHTML += `<input type="text" class="grid-input cell-inter" data-row="${row}" data-col="${c}" data-step="${step + 1}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+              gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-mul" data-row="${row}" data-col="${c}" data-step="${step + 1}" data-part="mul" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+          }
+          row++;
+
+          for (let i = 0; i < aStr.length; i++) {
+              let c = dividendStartCol + i;
+              gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-sub" data-row="${row}" data-col="${c}" data-step="${step + 1}" data-part="sub" style="grid-area: ${row} / ${c};" ${commonInp}>`;
           }
           row++;
 
@@ -373,6 +490,8 @@ function nextQuestion() {
   
   // 동적 그리드 생성 호출
   document.getElementById('vertical-container').innerHTML = renderDynamicGrid(gameState.mode, q, false);
+  clearMemoPad();
+  switchMemoMode('text');
 
   // 포커스 자동 지정 로직: 입력해야 할 칸 중 가장 오른쪽 칸을 찾아서 포커스
   const ansCells = Array.from(document.querySelectorAll('.cell-ans, .cell-inter'));

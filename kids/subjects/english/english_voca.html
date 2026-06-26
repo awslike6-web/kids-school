@@ -131,6 +131,11 @@
 
   <div class="card" id="modeCard" style="display: none;">
     <div class="card-title">🎯 3. 퀴즈 모드 선택</div>
+    <div style="display:flex; justify-content:center; margin-bottom: 14px;">
+      <button type="button" class="btn ghost" id="vocaOrderToggleBtn" onclick="toggleVocaQuizOrder()" style="border-radius: 20px; font-size: 0.95rem;">
+        🎲 랜덤 섞기 (클릭하여 순서대로)
+      </button>
+    </div>
     <div class="mode-grid">
       <button class="mode-btn copy" onclick="startQuiz('copy')"><span style="font-size:2rem;">✏️</span>보고 따라 적기</button>
       <button class="mode-btn tokor" onclick="startQuiz('toKorean')"><span style="font-size:2rem;">🇰🇷</span>한글 뜻 적기</button>
@@ -152,6 +157,12 @@
   <div class="game-header">
     <div class="game-stat-box">⭐ 점수: <span id="q-score" style="color:var(--pink);">0</span></div>
     <div class="game-stat-box">📝 문제: <span id="q-num">1/10</span></div>
+  </div>
+
+  <div style="display:flex; justify-content:center; margin-bottom: 12px;">
+    <button type="button" class="btn ghost" id="vocaOrderToggleBtnQuiz" onclick="toggleVocaQuizOrder(true)" style="border-radius: 20px; font-size: 0.9rem;">
+      🎲 랜덤 섞기 (클릭하여 순서대로)
+    </button>
   </div>
   
   <div class="game-zone">
@@ -229,6 +240,7 @@ let availableGrades = [];
 let currentSelectedGrade = ""; 
 let availableLessons = []; 
 let wrongWords = [];
+let vocaQuizOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
 
 let currentProfile = window.currentProfile || 'son';
@@ -242,7 +254,7 @@ for(let i=0; i<15; i++){
 
 window.onload = async () => {
   loadWrongWords();
-  
+  updateVocaOrderToggleLabels();
   try {
       allEnglishWords = await fetchVocaFromNotion({
         subject: "영어",
@@ -348,28 +360,60 @@ function removeWrongWord(w) {
   }
 }
 
+function updateVocaOrderToggleLabels() {
+  const label = vocaQuizOrderType === 'shuffle'
+    ? '🎲 랜덤 섞기 (클릭하여 순서대로)'
+    : '➡️ 순서대로 (클릭하여 랜덤 섞기)';
+  ['vocaOrderToggleBtn', 'vocaOrderToggleBtnQuiz'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+}
+
+function prepareVocaQuizPool(words) {
+  const prepared = [...words];
+  if (vocaQuizOrderType === 'shuffle') {
+    prepared.sort(() => Math.random() - 0.5);
+  }
+  return prepared.slice(0, 10);
+}
+
+function toggleVocaQuizOrder(restartCurrentQuiz = false) {
+  vocaQuizOrderType = vocaQuizOrderType === 'shuffle' ? 'sequence' : 'shuffle';
+  updateVocaOrderToggleLabels();
+
+  if (restartCurrentQuiz && quizState.mode && document.getElementById('screen-quiz').classList.contains('active')) {
+    const source = quizState.isWrongMode ? wrongWords : getFilteredWords();
+    if (source.length === 0) return;
+    quizState.pool = prepareVocaQuizPool(source);
+    quizState.current = 0;
+    quizState.score = 0;
+    loadQuestion();
+  }
+}
+
 function showScreen(id){ 
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
   document.getElementById(id).classList.add('active'); 
 }
-function goSetup() { loadWrongWords(); showScreen('screen-setup'); }
+function goSetup() { loadWrongWords(); updateVocaOrderToggleLabels(); showScreen('screen-setup'); }
 
 function startQuiz(mode) {
   if (!currentSelectedGrade) return alert('먼저 공부할 학년/학기를 선택해 주세요!');
   const filteredWords = getFilteredWords();
   if (filteredWords.length === 0) return alert('공부할 단원을 하나 이상 선택해 주세요!');
 
-  const shuffled = [...filteredWords].sort(() => Math.random() - 0.5).slice(0, 10);
-  quizState = { mode: mode, pool: shuffled, current: 0, score: 0, isWrongMode: false };
-  window.engWrongNotes = []; // 학습일지 전송용 오답 초기화
+  quizState = { mode: mode, pool: prepareVocaQuizPool(filteredWords), current: 0, score: 0, isWrongMode: false };
+  window.engWrongNotes = [];
+  updateVocaOrderToggleLabels();
   showScreen('screen-quiz'); loadQuestion();
 }
 
 function startWrongWords() {
   if(wrongWords.length === 0) return alert('틀린 단어가 없어요! 🎉');
-  const shuffled = [...wrongWords].sort(() => Math.random() - 0.5).slice(0, 10);
-  quizState = { mode: 'toEnglish', pool: shuffled, current: 0, score: 0, isWrongMode: true };
-  window.engWrongNotes = []; // 학습일지 전송용 오답 초기화
+  quizState = { mode: 'toEnglish', pool: prepareVocaQuizPool(wrongWords), current: 0, score: 0, isWrongMode: true };
+  window.engWrongNotes = [];
+  updateVocaOrderToggleLabels();
   showScreen('screen-quiz'); loadQuestion();
 }
 

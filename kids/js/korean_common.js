@@ -14,6 +14,7 @@ let allFetchedRecords = [];
 let selectedKoreanGrade = "";
 let selectedKoreanUnit = "";
 let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
+let koreanVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let koreanDictationOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let dictationAudioEl = null;
 
@@ -213,12 +214,7 @@ window.replayDictationAudio = function() {
     playDictationAudio(activeSectionData[activeQuizIdx]);
 };
 
-window.koreanToggleDictationOrder = function() {
-    koreanDictationOrderType = (koreanDictationOrderType === 'shuffle') ? 'sequence' : 'shuffle';
-    activeQuizIdx = 0;
-    const innerBody = document.getElementById('overlayInnerBody');
-    if (!innerBody) return;
-
+function getKoreanFilteredRecords() {
     let matchedRecords = allFetchedRecords;
     if (selectedKoreanGrade) {
         matchedRecords = matchedRecords.filter(r =>
@@ -228,8 +224,32 @@ window.koreanToggleDictationOrder = function() {
     if (selectedKoreanUnit) {
         matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedKoreanUnit);
     }
-    startMissionWithFilteredData(matchedRecords, innerBody);
+    return matchedRecords;
+}
+
+function getKoreanOrderToggleHtml(orderType) {
+    return `
+        <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
+            <button class="quiz-button" onclick="window.koreanToggleQuizOrder()" style="padding: 8px 16px; font-size: 0.95rem; border-radius: 20px;">
+                ${orderType === 'shuffle' ? '🎲 랜덤 섞기 (클릭하여 순서대로)' : '➡️ 순서대로 (클릭하여 랜덤 섞기)'}
+            </button>
+        </div>
+    `;
+}
+
+window.koreanToggleQuizOrder = function() {
+    if (currentMissionType === 'dictation') {
+        koreanDictationOrderType = (koreanDictationOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+    } else if (currentMissionType === 'voca') {
+        koreanVocaOrderType = (koreanVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+    }
+    activeQuizIdx = 0;
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (!innerBody) return;
+    startMissionWithFilteredData(getKoreanFilteredRecords(), innerBody);
 };
+
+window.koreanToggleDictationOrder = window.koreanToggleQuizOrder;
 
 // ========================================================
 // 📊 데이터 페칭 및 동적 UI 생성
@@ -338,9 +358,10 @@ window.selectDynamicUnit = function(unit) {
 
 function startMissionWithFilteredData(records, innerBody) {
     let prepared = [...records];
-    if (currentMissionType === 'dictation' && koreanDictationOrderType === 'shuffle') {
-        prepared.sort(() => Math.random() - 0.5);
-    } else if (currentMissionType !== 'dictation') {
+    const orderType = currentMissionType === 'dictation'
+        ? koreanDictationOrderType
+        : (currentMissionType === 'voca' ? koreanVocaOrderType : 'shuffle');
+    if (orderType === 'shuffle') {
         prepared.sort(() => Math.random() - 0.5);
     }
     activeSectionData = prepared.slice(0, 10); // 최대 10문제
@@ -413,8 +434,11 @@ function renderVocaUI(container) {
         </div>
     ` : '';
 
+    const orderToggleHtml = getKoreanOrderToggleHtml(koreanVocaOrderType);
+
     // 상단 토글 탭 UI
     const toggleHtml = `
+        ${orderToggleHtml}
         <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
             <button class="quiz-button" style="background: ${koreanVocaMode === 'subjective' ? 'var(--purple)' : '#ccc'}; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.95rem;" onclick="setKoreanVocaMode('subjective')">✏️ 단어 맞추기 (주관식)</button>
             <button class="quiz-button" style="background: ${koreanVocaMode === 'choice' ? 'var(--purple)' : '#ccc'}; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.95rem;" onclick="setKoreanVocaMode('choice')">🧐 뜻 고르기 (객관식)</button>
@@ -651,13 +675,7 @@ function renderDictationUI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
     const audioSourceLabel = currentItem.audioUrl ? '🎙️ 아빠/엄마 녹음' : '🧚‍♀️ 요정 TTS';
 
-    const orderToggleHtml = `
-        <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
-            <button class="quiz-button" onclick="window.koreanToggleDictationOrder()" style="padding: 8px 16px; font-size: 0.95rem; border-radius: 20px;">
-                ${koreanDictationOrderType === 'shuffle' ? '🎲 랜덤 섞기 (클릭하여 순서대로)' : '➡️ 순서대로 (클릭하여 랜덤 섞기)'}
-            </button>
-        </div>
-    `;
+    const orderToggleHtml = getKoreanOrderToggleHtml(koreanDictationOrderType);
     
     window.verifyKoreanDictation = function() {
         const inputVal = document.getElementById('dictationInput').value.trim();

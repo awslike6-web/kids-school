@@ -283,3 +283,23 @@ body {
     75% { transform: translateX(-10px); }
     100% { transform: translateX(0); }
 }
+
+.spinner-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+    gap: 16px;
+}
+.spinner-circle {
+    width: 48px;
+    height: 48px;
+    border: 5px solid rgba(128,128,128,0.15);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

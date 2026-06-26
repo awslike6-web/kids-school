@@ -60,6 +60,20 @@
     
     <div class="v-board-container">
       <div class="v-board" id="vertical-container"></div>
+      <aside class="calc-memo-pad" id="calc-memo-pad" aria-label="계산 메모장">
+        <div class="memo-header">
+          <span class="memo-title">📝 계산 메모</span>
+          <div class="memo-tabs">
+            <button type="button" class="memo-tab active" data-mode="text" onclick="switchMemoMode('text')">✏️ 글씨</button>
+            <button type="button" class="memo-tab" data-mode="draw" onclick="switchMemoMode('draw')">🖊️ 그리기</button>
+          </div>
+        </div>
+        <textarea class="memo-text" id="memo-text" placeholder="숫자나 메모를 적어보세요"></textarea>
+        <div class="memo-draw-wrap" id="memo-draw-wrap" hidden>
+          <canvas id="memo-canvas"></canvas>
+        </div>
+        <button type="button" class="memo-clear-btn" onclick="clearMemoPad()">🗑️ 메모 지우기</button>
+      </aside>
     </div>
     
     <div class="feedback-msg" id="v-feedbackMsg"></div>

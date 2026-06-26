@@ -455,16 +455,20 @@ function getChosung(str) {
 
 window.societyToggleOrder = function() {
     societyVocaOrderType = (societyVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
-    activeQuizIdx = 0; // 모드 변경 시 처음부터 다시 시작
+    activeQuizIdx = 0;
     const innerBody = document.getElementById('overlayInnerBody');
-    if(innerBody && selectedSocietyUnit) {
-        // 원래 전체 데이터에서 해당 단원만 다시 필터링해서 재시작
-        const finalRecords = allFetchedRecords.filter(r => 
-            (r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)) &&
-            String(r.level).trim() === selectedSocietyUnit
+    if (!innerBody) return;
+
+    let matchedRecords = allFetchedRecords;
+    if (selectedSocietyGrade) {
+        matchedRecords = matchedRecords.filter(r =>
+            r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)
         );
-        startMissionWithFilteredData(finalRecords, innerBody);
     }
+    if (selectedSocietyUnit) {
+        matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedSocietyUnit);
+    }
+    startMissionWithFilteredData(matchedRecords, innerBody);
 };
 
 // ========================================================

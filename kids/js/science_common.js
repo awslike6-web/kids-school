@@ -1,10 +1,18 @@
 // kids/js/science_common.js
 
-window.currentSubject = "과학"; // 전역 과목명 명시 (보상 및 학습일지 타겟용)
+window.currentSubject = "과학";
 
-// ========================================================
-// 🧬 초등 과학 4단원 <우리 몸의 구조와 기능> 초기 데이터 셋
-// ========================================================
+const currentUserName = localStorage.getItem('currentUserName') || '민수';
+const isAdmin = (currentUserName === '아빠' || currentUserName === '엄마');
+
+const SCIENCE_ZONE_MAP = {
+    voca: "용어방",
+    experiment: "실험실",
+    nature: "자연탐험",
+    inventor: "발명가"
+};
+
+// 노션 데이터가 비어 있을 때 사용하는 폴백 셋
 const SCIENCE_MOCK_DATA = {
     voca: [
         { word: "뼈와 근육", hint: "ㅃㅇ ㄱㅇ", meaning: "우리 몸의 형태를 유지하고 움직이게 하는 기관입니다.", desc: "뼈는 몸을 지탱하고 내장을 보호하며, 근육은 뼈에 붙어 몸을 움직이게 합니다.", image: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=500&auto=format&fit=crop" },
@@ -29,60 +37,82 @@ const SCIENCE_MOCK_DATA = {
     ]
 };
 
+const SCIENCE_MISSION_META = {
+    voca: { title: "과학 용어방", icon: "🔬" },
+    experiment: { title: "가상 실험실", icon: "🧪" },
+    nature: { title: "자연 생태 탐험실", icon: "🌿" },
+    inventor: { title: "위대한 발명가 돋보기", icon: "💡" }
+};
+
+let allFetchedRecords = [];
+let selectedScienceGrade = "";
+let selectedScienceUnit = "";
 let currentMissionType = '';
 let activeSectionData = [];
 let activeQuizIdx = 0;
 let scienceVocaMasterCountMap = {};
+let scienceVocaOrderType = 'shuffle';
 
-// ========================================================
-// 🚀 초기화 및 UI 제어
-// ========================================================
+if (!window.stopFairyTTS) {
+    window.stopFairyTTS = function() {};
+}
+if (!window.speakFairyTTS) {
+    window.speakFairyTTS = function() {};
+}
+
+function getChosung(str) {
+    const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+    let result = "";
+    for (let i = 0; i < str.length; i++) {
+        const code = str.charCodeAt(i) - 44032;
+        if (code > -1 && code < 11172) {
+            result += cho[Math.floor(code / 588)];
+        } else {
+            result += str.charAt(i);
+        }
+    }
+    return result;
+}
+
 function initializeScienceRoom() {
     console.log("🧬 과학방 초기화 완료!");
-    // 로컬 스토리지에서 마스터 기록 불러오기
-    const currentUserName = localStorage.getItem('currentUserName') || '민수';
     scienceVocaMasterCountMap = JSON.parse(localStorage.getItem(`science_voca_master_${currentUserName}`) || '{}');
 }
 
-function openMissionView(type) {
-    currentMissionType = type;
-    activeQuizIdx = 0;
-    if (typeof initQuizRewardSession === 'function') {
-        initQuizRewardSession(type);
-    }
-    
-    // 데이터 로드
-    activeSectionData = SCIENCE_MOCK_DATA[type] || [];
-    
-    // 마스터한 단어 필터링 (용어방 전용)
-    if (type === 'voca') {
-        activeSectionData = activeSectionData.filter(item => {
-            return (scienceVocaMasterCountMap[item.word] || 0) < 3;
-        });
-        // 섞기
-        activeSectionData.sort(() => Math.random() - 0.5);
-    }
+function showLoadingSpinner(container) {
+    container.innerHTML = `
+      <div class="spinner-wrapper">
+        <div class="spinner-circle"></div>
+        <p style="font-family:'Gaegu', cursive; font-size:1.3rem; font-weight:bold; color:inherit; text-align:center; opacity: 0.95;">
+            Fairy_🧚‍♀️ 코코 요정이 노션 등대에서 자료를 챙겨오고 있어요...
+        </p>
+      </div>
+    `;
+}
 
+function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const titleEl = document.getElementById('overlayHeaderTitle');
     const iconEl = document.getElementById('overlayHeaderIcon');
-    
-    if (type === 'voca') {
-        titleEl.textContent = "과학 용어방";
-        iconEl.textContent = "🔬";
-    } else if (type === 'experiment') {
-        titleEl.textContent = "가상 실험실";
-        iconEl.textContent = "🧪";
-    } else if (type === 'nature') {
-        titleEl.textContent = "자연 생태 탐험실";
-        iconEl.textContent = "🌿";
-    } else if (type === 'inventor') {
-        titleEl.textContent = "위대한 발명가 돋보기";
-        iconEl.textContent = "💡";
-    }
+    const innerBody = document.getElementById('overlayInnerBody');
+    const meta = SCIENCE_MISSION_META[type] || { title: "과학 미션", icon: "🔬" };
 
     overlay.style.display = 'flex';
-    renderSectionUI();
+    activeQuizIdx = 0;
+    currentMissionType = type;
+    selectedScienceGrade = "";
+    selectedScienceUnit = "";
+    stopFairyTTS();
+
+    if (typeof initQuizRewardSession === 'function') {
+        initQuizRewardSession(type);
+    }
+
+    titleEl.textContent = meta.title;
+    iconEl.textContent = meta.icon;
+
+    showLoadingSpinner(innerBody);
+    fetchAndBuildDynamicUI(type, innerBody);
 }
 
 function closeMissionView() {
@@ -90,52 +120,263 @@ function closeMissionView() {
         finalizeQuizRewardSession();
     }
     document.getElementById('missionOverlay').style.display = 'none';
+    stopFairyTTS();
 }
 
-// ========================================================
-// 🖌️ 동적 UI 렌더링 및 스위칭 알고리즘
-// ========================================================
-function renderSectionUI() {
-    const container = document.getElementById('overlayInnerBody');
+async function fetchAndBuildDynamicUI(type, innerBody) {
+    const zoneTag = SCIENCE_ZONE_MAP[type];
+
+    try {
+        const records = await fetchVocaFromNotion({
+            subject: "과학",
+            areaZone: zoneTag,
+            useServerFilter: true,
+            filterByStudent: !isAdmin
+        });
+
+        if (records && records.length > 0) {
+            allFetchedRecords = records;
+            const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
+
+            if (uniqueGrades.length === 0) {
+                startMissionWithFilteredData(records, innerBody);
+            } else {
+                renderDynamicGradeUI(uniqueGrades, innerBody);
+            }
+        } else {
+            console.warn("⚠️ 과학 노션 데이터 없음. 로컬 폴백 사용:", type);
+            loadMockMissionData(type, innerBody);
+        }
+    } catch (e) {
+        console.warn("과학 노션 통신 실패. 로컬 폴백 사용", e);
+        loadMockMissionData(type, innerBody);
+    }
+}
+
+function renderDynamicGradeUI(grades, container) {
+    const buttonsHtml = grades.map(g =>
+        `<button class="quiz-choice-btn" style="padding:15px; font-size:1.2rem;" onclick="selectScienceGrade('${g}')">${g}</button>`
+    ).join('');
+
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px; font-family:'Jua'; width:100%; max-width:500px; margin:0 auto;">
+            <h3 style="margin-bottom:20px; color:var(--primary); font-size:1.6rem;">🎒 1. 학년/학기 고르기</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                ${buttonsHtml}
+            </div>
+        </div>
+    `;
+}
+
+window.selectScienceGrade = function(grade) {
+    selectedScienceGrade = grade;
+    const innerBody = document.getElementById('overlayInnerBody');
+    const matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades || []).includes(grade));
+    const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level).trim()))].filter(u => u && u !== "undefined" && u !== "기본 단원").sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+    if (uniqueUnits.length === 0) {
+        startMissionWithFilteredData(matchedRecords, innerBody);
+    } else {
+        renderDynamicUnitUI(uniqueUnits, innerBody);
+    }
+};
+
+function renderDynamicUnitUI(units, container) {
+    const buttonsHtml = units.map(u =>
+        `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectScienceUnit('${u}')">${u}</button>`
+    ).join('');
+
+    container.innerHTML = `
+        <div style="text-align:center; padding:20px; font-family:'Jua'; width:100%; max-width:500px; margin:0 auto;">
+            <h3 style="margin-bottom:5px; color:var(--primary); font-size:1.6rem;">📖 2. 단원 고르기</h3>
+            <p style="color:var(--accent); margin-bottom:20px; font-size:1.1rem;">선택된 학기: ${selectedScienceGrade}</p>
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:20px;">
+                ${buttonsHtml}
+            </div>
+            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
+        </div>
+    `;
+}
+
+window.selectScienceUnit = function(unit) {
+    selectedScienceUnit = unit;
+    const innerBody = document.getElementById('overlayInnerBody');
+    const finalRecords = allFetchedRecords.filter(r =>
+        (r.grade === selectedScienceGrade || (r.grades || []).includes(selectedScienceGrade)) &&
+        String(r.level).trim() === unit
+    );
+    startMissionWithFilteredData(finalRecords, innerBody);
+};
+
+function parseScienceRecords(records) {
+    return records.map(record => {
+        const titleStr = record.word || "미상";
+        return {
+            word: titleStr,
+            meaning: record.meaning || "뜻풀이 없음",
+            hint: record.hint || getChosung(titleStr),
+            desc: record.detailContext || record.meaning || "상세 설명이 노션에 기재 대기 중입니다.",
+            image: record.imageUrl,
+            imageUrl: record.imageUrl,
+            pageId: record.pageId,
+            isMastered: record.isMastered
+        };
+    });
+}
+
+function loadMockMissionData(type, innerBody) {
+    allFetchedRecords = [];
+    let data = [...(SCIENCE_MOCK_DATA[type] || [])];
+
+    if (type === 'voca') {
+        data = data.filter(item => (scienceVocaMasterCountMap[item.word] || 0) < 3);
+        if (scienceVocaOrderType === 'shuffle') {
+            data.sort(() => Math.random() - 0.5);
+        }
+    }
+
+    activeSectionData = data;
+    renderSectionUI(type, innerBody);
+}
+
+function startMissionWithFilteredData(records, innerBody) {
+    const parsed = parseScienceRecords(records);
+
+    if (currentMissionType === 'voca') {
+        scienceVocaMasterCountMap = JSON.parse(localStorage.getItem(`science_voca_master_${currentUserName}`) || '{}');
+        activeSectionData = parsed.filter(item => {
+            const isNotionMastered = item.isMastered === true;
+            const isLocalMastered = (scienceVocaMasterCountMap[item.word] || 0) >= 3;
+            return !isNotionMastered && !isLocalMastered;
+        });
+        if (scienceVocaOrderType === 'shuffle') {
+            activeSectionData.sort(() => Math.random() - 0.5);
+        }
+    } else {
+        activeSectionData = parsed;
+        if (scienceVocaOrderType === 'shuffle') {
+            activeSectionData.sort(() => Math.random() - 0.5);
+        }
+    }
+
+    if (selectedScienceGrade) {
+        const badge = ` [${selectedScienceGrade}${selectedScienceUnit ? ' ' + selectedScienceUnit : ''}]`;
+        document.getElementById('overlayHeaderTitle').textContent = SCIENCE_MISSION_META[currentMissionType].title + badge;
+    }
+
+    renderSectionUI(currentMissionType, innerBody);
+}
+
+function getScienceOrderToggleHtml() {
+    return `
+        <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
+            <button class="quiz-button" onclick="window.scienceToggleOrder()" style="padding: 8px 16px; font-size: 0.95rem; border-radius: 20px;">
+                ${scienceVocaOrderType === 'shuffle' ? '🎲 랜덤 섞기 (클릭하여 순서대로)' : '➡️ 순서대로 (클릭하여 랜덤 섞기)'}
+            </button>
+        </div>
+    `;
+}
+
+window.scienceToggleOrder = function() {
+    scienceVocaOrderType = (scienceVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+    activeQuizIdx = 0;
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (!innerBody) return;
+
+    if (allFetchedRecords.length > 0) {
+        let matchedRecords = allFetchedRecords;
+        if (selectedScienceGrade) {
+            matchedRecords = matchedRecords.filter(r =>
+                r.grade === selectedScienceGrade || (r.grades || []).includes(selectedScienceGrade)
+            );
+        }
+        if (selectedScienceUnit) {
+            matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedScienceUnit);
+        }
+        startMissionWithFilteredData(matchedRecords, innerBody);
+    } else {
+        loadMockMissionData(currentMissionType, innerBody);
+    }
+};
+
+window.resetScienceVocaMasterAndReload = async function() {
+    if (!confirm("정말로 이 단원의 모든 용어 마스터(3회 정답) 기록을 지우고 처음부터 다시 시작할까요?")) return;
+
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (innerBody) innerBody.innerHTML = "<div style='text-align:center; padding:40px;'>노션 데이터를 초기화 중입니다... ⏳</div>";
+
+    localStorage.removeItem(`science_voca_master_${currentUserName}`);
+
+    const recordsToReset = allFetchedRecords.filter(r =>
+        (!selectedScienceGrade || r.grade === selectedScienceGrade || (r.grades || []).includes(selectedScienceGrade)) &&
+        (!selectedScienceUnit || String(r.level).trim() === selectedScienceUnit) &&
+        r.isMastered === true
+    );
+
+    if (typeof updateVocaMasteryStatus === 'function') {
+        for (const r of recordsToReset) {
+            await updateVocaMasteryStatus(r.pageId, false);
+            r.isMastered = false;
+        }
+    }
+
+    alert("학습 기록이 초기화되었습니다! 다시 신나게 풀어볼까요?");
+    closeMissionView();
+    setTimeout(() => openMissionView('voca'), 300);
+};
+
+function getScienceWrongChoicePool(answerWord) {
+    const fromNotion = allFetchedRecords.map(r => r.word).filter(Boolean);
+    const fromMock = Object.values(SCIENCE_MOCK_DATA).flat().map(item => item.word);
+    const pool = fromNotion.length > 0 ? fromNotion : fromMock;
+    return pool.filter(w => w !== answerWord);
+}
+
+function renderSectionUI(type, container) {
+    if (typeof container === 'string') container = document.getElementById('overlayInnerBody');
     container.innerHTML = "";
-    
+
     if (!activeSectionData || activeSectionData.length === 0) {
-        container.innerHTML = `
-            <div style="text-align:center; padding: 40px 20px;">
-                <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                <p style="font-size:1.4rem; color:var(--primary); margin-bottom:20px;">이 구역의 모든 미션을 완벽하게 마스터했습니다!</p>
-                <button class="back-to-lobby-btn" onclick="closeMissionView();">✅ 나가기</button>
-            </div>`;
+        if (type === 'voca') {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px;">
+                    <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
+                    <p style="font-size:1.4rem; color:var(--primary); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
+                    <button class="back-to-lobby-btn" style="background:var(--accent);" onclick="closeMissionView(); resetScienceVocaMasterAndReload()">✅ 나가기 (학습 리셋)</button>
+                </div>`;
+        } else {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 40px 20px;">
+                    <div style="font-size:3rem; margin-bottom:15px;">📭</div>
+                    <p style="font-size:1.2rem; color:var(--primary); margin-bottom:20px;">노션에 아직 이 구역 데이터가 없어요.<br>준비되면 자동으로 불러올게요!</p>
+                    <button class="back-to-lobby-btn" onclick="closeMissionView();">✅ 나가기</button>
+                </div>`;
+        }
         return;
     }
 
     const currentItem = activeSectionData[activeQuizIdx];
     const answerWord = currentItem.word;
-    
     const imageUrl = currentItem.imageUrl || currentItem.image || currentItem.img;
     const imageHtml = imageUrl ? `
         <div style="text-align:center; margin-bottom:15px;">
             <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
         </div>
     ` : '';
-    
-    // 💡 대장님의 [띄어쓰기 유무 및 단어 개수 기반 자동 퀴즈 UI 스위칭 알고리즘]
+
     const wordsArray = answerWord.trim().split(/\s+/);
-    const wordCount = wordsArray.length; // 띄어쓰기로 구분된 단어 개수
-    const totalLength = answerWord.replace(/\s/g, '').length; // 띄어쓰기를 제외한 순수 글자 수
-    
+    const wordCount = wordsArray.length;
+    const totalLength = answerWord.replace(/\s/g, '').length;
     let interactiveHtml = '';
-    
+
     if (wordCount === 1 && totalLength >= 5) {
-        // 💡 조건 1: 띄어쓰기 없는 '1개 단어'인데 5글자 이상인 경우
-        // ➔ 낱말 카드 툭툭 고르는 [빈칸 채우기 UI]
         const chars = answerWord.split('').filter(c => c.trim() !== '');
         const scrambled = [...chars].sort(() => Math.random() - 0.5);
-        
+
         window.currentMagnetAnswer = [];
         window.magnetTargetWord = answerWord;
         window.magnetScrambled = scrambled;
-        
+
         interactiveHtml = `
             <div id="magnet-blanks" style="font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; min-height: 40px; display: flex; justify-content: center; gap: 5px;">
                 ${answerWord.split('').map(c => c.trim() === '' ? '<span style="width:15px;"></span>' : '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>').join('')}
@@ -149,26 +390,21 @@ function renderSectionUI() {
             </div>
         `;
     } else if (wordCount >= 3) {
-        // 💡 조건 2: 띄어쓰기가 있는 답 중 '3단어 이상' 결합된 경우
-        // ➔ 보기에서 고르는 [객관식 문제 UI]
         const choices = [answerWord];
-        // 오답 생성 (다른 단어들 중에서 랜덤 추출)
-        const allWords = Object.values(SCIENCE_MOCK_DATA).flat().map(item => item.word).filter(w => w !== answerWord);
-        allWords.sort(() => Math.random() - 0.5);
-        choices.push(allWords[0] || "오답1");
-        choices.push(allWords[1] || "오답2");
+        const otherWords = getScienceWrongChoicePool(answerWord);
+        otherWords.sort(() => Math.random() - 0.5);
+        choices.push(otherWords[0] || "오답1");
+        choices.push(otherWords[1] || "오답2");
         choices.sort(() => Math.random() - 0.5);
-        
+
         interactiveHtml = `
             <div class="quiz-choices-container" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
-                ${choices.map((choice, i) => `
-                     <button class="quiz-choice-btn" onclick="verifyScienceChoice('${choice}')">${choice}</button>
+                ${choices.map(choice => `
+                     <button class="quiz-choice-btn" onclick="verifyScienceChoice('${choice.replace(/'/g, "\\'")}')">${choice}</button>
                 `).join('')}
             </div>
         `;
     } else {
-        // 💡 조건 3: 4글자 이하 단어이거나, 2단어 이하 결합인 경우
-        // ➔ 기존 주관식 타이핑 UI
         interactiveHtml = `
             <div class="interactive-input-group">
                 <input type="text" class="text-input-field" id="scienceAnswerInput" placeholder="정답을 입력하세요!" onkeypress="if(event.key==='Enter') verifyScienceAnswer()">
@@ -177,8 +413,11 @@ function renderSectionUI() {
         `;
     }
 
+    const orderToggleHtml = type === 'voca' ? getScienceOrderToggleHtml() : '';
+
     container.innerHTML = `
         <div class="quiz-card">
+            ${orderToggleHtml}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">미션 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
             ${imageHtml}
@@ -189,34 +428,38 @@ function renderSectionUI() {
             </details>
             ${interactiveHtml}
             <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning}')">🔊 문제 듣기</button>
-                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextQuiz()">건너뛰기 ⏩</button>
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${(currentItem.meaning || '').replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
+                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextQuiz()">건너뛰기 ⏭️</button>
             </div>
         </div>
     `;
-    
-    // 자동 낭독
+
     if (typeof speakFairyTTS === 'function') {
         speakFairyTTS(currentItem.meaning);
     }
 }
 
-// ========================================================
-// ✏️ 문제 검증 및 정답 처리 로직
-// ========================================================
 async function handleCorrectAnswer() {
-    const currentUserName = localStorage.getItem('currentUserName') || '민수';
     const wordKey = activeSectionData[activeQuizIdx].word;
-    
-    // 마스터 카운트 증가
-    scienceVocaMasterCountMap[wordKey] = (scienceVocaMasterCountMap[wordKey] || 0) + 1;
-    localStorage.setItem(`science_voca_master_${currentUserName}`, JSON.stringify(scienceVocaMasterCountMap));
+
+    if (currentMissionType === 'voca') {
+        scienceVocaMasterCountMap[wordKey] = (scienceVocaMasterCountMap[wordKey] || 0) + 1;
+        localStorage.setItem(`science_voca_master_${currentUserName}`, JSON.stringify(scienceVocaMasterCountMap));
+
+        if (scienceVocaMasterCountMap[wordKey] >= 3) {
+            const pageId = activeSectionData[activeQuizIdx].pageId;
+            if (pageId && typeof updateVocaMasteryStatus === 'function') {
+                updateVocaMasteryStatus(pageId, true);
+                activeSectionData[activeQuizIdx].isMastered = true;
+            }
+        }
+    }
 
     if (typeof speakFairyTTS === 'function') speakFairyTTS("정답이야! 아주 훌륭해!");
     if (typeof rewardQuizCorrect === 'function') {
         await rewardQuizCorrect(activeQuizIdx);
     }
-    
+
     setTimeout(() => skipToNextQuiz(), 1200);
 }
 
@@ -239,7 +482,6 @@ function handleWrongAnswer(wrongInput, onRetryReset) {
     retry();
 }
 
-// 1. 주관식 타이핑 검증
 window.verifyScienceAnswer = function() {
     const input = document.getElementById('scienceAnswerInput');
     const answer = input.value.trim().replace(/\s/g, '');
@@ -256,9 +498,8 @@ window.verifyScienceAnswer = function() {
             input.focus();
         });
     }
-}
+};
 
-// 2. 객관식 선택 검증
 window.verifyScienceChoice = function(selectedWord) {
     const correctTarget = activeSectionData[activeQuizIdx].word;
     if (selectedWord === correctTarget) {
@@ -266,16 +507,15 @@ window.verifyScienceChoice = function(selectedWord) {
     } else {
         handleWrongAnswer(selectedWord, () => {});
     }
-}
+};
 
-// 3. 자석 빈칸 채우기 로직
 window.selectScienceMagnet = function(letter, idx) {
     const btn = document.getElementById(`magnet-btn-${idx}`);
     if (btn.style.visibility === 'hidden') return;
     btn.style.visibility = 'hidden';
     window.currentMagnetAnswer.push({ letter, idx });
     renderScienceMagnetBlanks();
-}
+};
 
 window.renderScienceMagnetBlanks = function() {
     const container = document.getElementById('magnet-blanks');
@@ -286,17 +526,15 @@ window.renderScienceMagnetBlanks = function() {
         const char = window.magnetTargetWord[i];
         if (char.trim() === '') {
             html += '<span style="width:15px;"></span>';
+        } else if (answerIdx < window.currentMagnetAnswer.length) {
+            html += `<span style="border-bottom:3px solid var(--primary); width:30px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold;">${window.currentMagnetAnswer[answerIdx].letter}</span>`;
+            answerIdx++;
         } else {
-            if (answerIdx < window.currentMagnetAnswer.length) {
-                html += `<span style="border-bottom:3px solid var(--primary); width:30px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold;">${window.currentMagnetAnswer[answerIdx].letter}</span>`;
-                answerIdx++;
-            } else {
-                html += '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>';
-            }
+            html += '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>';
         }
     }
     container.innerHTML = html;
-}
+};
 
 window.resetScienceMagnets = function() {
     window.currentMagnetAnswer.forEach(item => {
@@ -305,30 +543,25 @@ window.resetScienceMagnets = function() {
     });
     window.currentMagnetAnswer = [];
     renderScienceMagnetBlanks();
-}
+};
 
 window.verifyScienceMagnet = function() {
     const answerStr = window.currentMagnetAnswer.map(item => item.letter).join('');
     const correctTarget = window.magnetTargetWord.replace(/\s/g, '');
-    
+
     if (answerStr === correctTarget) {
         handleCorrectAnswer();
     } else {
         handleWrongAnswer(answerStr, () => {
-            if (typeof resetScienceMagnets === 'function') resetScienceMagnets();
+            resetScienceMagnets();
             const container = document.getElementById('magnet-blanks');
             if (container) container.classList.remove('wrong-shake');
         });
         const container = document.getElementById('magnet-blanks');
-        if (container) {
-            container.classList.add('wrong-shake');
-        }
+        if (container) container.classList.add('wrong-shake');
     }
-}
+};
 
-// ========================================================
-// ⏭️ 진행 및 보상
-// ========================================================
 function skipToNextQuiz() {
     activeQuizIdx++;
     if (activeQuizIdx >= activeSectionData.length) {
@@ -336,22 +569,10 @@ function skipToNextQuiz() {
         alert("🏆 축하합니다! 이 구역의 모든 과학 탐구 단계를 완료하셨습니다!");
         closeMissionView();
     } else {
-        renderSectionUI();
+        renderSectionUI(currentMissionType, document.getElementById('overlayInnerBody'));
     }
 }
 
-async function triggerAwardDispense(amount, type) {
-    let customExp = (type === 'voca') ? 'voca' : null;
-    try {
-        if (typeof grantRewardAndShowUI === 'function') {
-            await grantRewardAndShowUI(amount, false, customExp); 
-        }
-    } catch(err) {
-        console.warn("보상 지급 중 로컬 백엔드 연동 모듈 우회:", err);
-    }
-}
-
-// 퇴장 시 일지 작성
 window.addEventListener("beforeunload", () => {
     if (typeof sendStudyLogToNotion === 'function') {
         sendStudyLogToNotion({ subject: "과학" });

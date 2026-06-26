@@ -14,6 +14,7 @@ let currentMissionType = "";
 let allFetchedRecords = [];
 let selectedEnglishGrade = "";
 let selectedEnglishUnit = "";
+let englishVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let stage3QuizMode = null;
 
 const STAGE3_MODES = [
@@ -290,15 +291,51 @@ window.selectDynamicUnit = function(unit) {
     startMissionWithFilteredData(finalRecords, innerBody);
 };
 
-function startMissionWithFilteredData(records, innerBody) {
-    // 품사 필터링 분기
-    if (currentMissionType === 'stage3') {
-        activeSectionData = records.filter(r => r.pos !== '문장').sort(() => Math.random() - 0.5).slice(0, 10);
-    } else if (currentMissionType === 'stage4') {
-        activeSectionData = records.filter(r => r.pos === '문장').sort(() => Math.random() - 0.5).slice(0, 10);
-    } else {
-        activeSectionData = records.sort(() => Math.random() - 0.5).slice(0, 10);
+function getEnglishFilteredRecords() {
+    let matchedRecords = allFetchedRecords;
+    if (selectedEnglishGrade) {
+        matchedRecords = matchedRecords.filter(r => r.grade === selectedEnglishGrade || r.grades.includes(selectedEnglishGrade));
     }
+    if (selectedEnglishUnit) {
+        matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedEnglishUnit);
+    }
+    return matchedRecords;
+}
+
+function prepareEnglishVocaRecords(records) {
+    const prepared = [...records];
+    if (englishVocaOrderType === 'shuffle') {
+        prepared.sort(() => Math.random() - 0.5);
+    }
+    return prepared;
+}
+
+function getEnglishOrderToggleHtml() {
+    return `
+        <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
+            <button class="quiz-button" onclick="window.englishToggleOrder()" style="padding: 8px 16px; font-size: 0.95rem; border-radius: 20px;">
+                ${englishVocaOrderType === 'shuffle' ? '🎲 랜덤 섞기 (클릭하여 순서대로)' : '➡️ 순서대로 (클릭하여 랜덤 섞기)'}
+            </button>
+        </div>
+    `;
+}
+
+window.englishToggleOrder = function() {
+    englishVocaOrderType = (englishVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+    activeQuizIdx = 0;
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (!innerBody) return;
+    startMissionWithFilteredData(getEnglishFilteredRecords(), innerBody);
+};
+
+function startMissionWithFilteredData(records, innerBody) {
+    let filtered = records;
+    if (currentMissionType === 'stage3') {
+        filtered = records.filter(r => r.pos !== '문장');
+    } else if (currentMissionType === 'stage4') {
+        filtered = records.filter(r => r.pos === '문장');
+    }
+    activeSectionData = prepareEnglishVocaRecords(filtered).slice(0, 10);
 
     if (activeSectionData.length === 0) {
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
@@ -337,6 +374,7 @@ function renderStage3ModeSelectUI(container) {
 
     container.innerHTML = `
         <div style="text-align:center; padding:10px 0 20px;">
+            ${getEnglishOrderToggleHtml()}
             <h3 style="color:var(--primary); margin-bottom:8px;">🎯 연습 방식을 선택하세요!</h3>
             <p style="font-size:0.95rem; color:#666; margin-bottom:18px;">
                 ${selectedEnglishGrade || selectedEnglishUnit ? `[${[selectedEnglishGrade, selectedEnglishUnit].filter(Boolean).join(' · ')}] ` : ''}
@@ -443,6 +481,7 @@ function renderStage1UI(container) {
 
     container.innerHTML = `
         <div class="quiz-card">
+            ${getEnglishOrderToggleHtml()}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">알파벳 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
             <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${answerWord}</div>
@@ -489,6 +528,7 @@ function renderStage2UI(container) {
 
     container.innerHTML = `
         <div class="quiz-card">
+            ${getEnglishOrderToggleHtml()}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">파닉스 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
             <div style="font-size: 5rem; margin-bottom: 20px; cursor: pointer;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">🎧</div>
@@ -685,6 +725,7 @@ function renderStage3UI(container) {
 
     container.innerHTML = `
         <div class="quiz-card">
+            ${getEnglishOrderToggleHtml()}
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; opacity:0.8; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
                 <span>${getStage3ModeLabel(mode)} · ${activeQuizIdx + 1} / ${activeSectionData.length}</span>
                 <button class="quiz-choice-btn" style="padding:6px 12px; font-size:0.85rem;" onclick="showStage3ModeSelect()">🔄 방식 바꾸기</button>
@@ -817,6 +858,7 @@ function renderStage4UI(container) {
 
     container.innerHTML = `
         <div class="quiz-card">
+            ${getEnglishOrderToggleHtml()}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">영어 문장 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
             <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${currentItem.meaning}</div>
