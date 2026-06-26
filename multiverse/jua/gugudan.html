@@ -335,6 +335,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
   </div>
 </div>
 
+<script src="../../kids/core/notion-helper.js"></script>
 <script>
 // 🚀 주아 전용 노션 API 세팅 (새로운 DB ID를 넣어주세요)
 // const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
@@ -540,11 +541,32 @@ function checkQ(selected, q, btn) {
 
   if (selected === q.ans) {
     qScore += 10; btn.classList.add('correct'); fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)]; fb.className = 'q-feedback ok'; speakOut('정답!');
+    ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--pink)">${q.addExp}</span>`; ex.className = 'q-explain show';
+    document.getElementById('q-score').textContent = `${qScore}점`; document.getElementById('next-btn').className = 'next-btn show';
   } else {
     btn.classList.add('wrong'); fb.textContent = `😅 아쉬워요! 정답은 ${q.ans}`; fb.className = 'q-feedback no'; speakOut('아쉬워요!');
+    ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--pink)">${q.addExp}</span>`; ex.className = 'q-explain show';
+    document.getElementById('q-score').textContent = `${qScore}점`;
+
+    const retry = () => {
+      qAnswered = false;
+      document.querySelectorAll('.choice').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('correct', 'wrong');
+      });
+      fb.textContent = '';
+      fb.className = 'q-feedback';
+      ex.className = 'q-explain';
+      document.getElementById('next-btn').className = 'next-btn';
+    };
+    const skip = () => { nextQ(); };
+
+    if (typeof promptQuizRetryOrSkip === 'function') {
+      promptQuizRetryOrSkip({ hint: `정답은 ${q.ans}`, onRetry: retry, onSkip: skip });
+    } else {
+      document.getElementById('next-btn').className = 'next-btn show';
+    }
   }
-  ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--pink)">${q.addExp}</span>`; ex.className = 'q-explain show';
-  document.getElementById('q-score').textContent = `${qScore}점`; document.getElementById('next-btn').className = 'next-btn show';
 }
 
 function nextQ() { qIdx++; if (qIdx >= qList.length) showResult(); else renderQ(); }

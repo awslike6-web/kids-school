@@ -1721,3 +1721,72 @@ window.addEventListener('beforeunload', () => {
         finalizeChatMemorySession();
     }
 });
+
+// ========================================================
+// 💥 퀴즈 오답 — 다시 풀기 / 다음 문제로 (전 과목 공통)
+// ========================================================
+function ensureQuizWrongChoiceOverlay() {
+    if (document.getElementById('quizWrongChoiceOverlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'quizWrongChoiceOverlay';
+    overlay.style.cssText =
+        'display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;';
+
+    overlay.innerHTML = `
+        <div style="background:#fff; border-radius:24px; padding:28px 22px; max-width:380px; width:100%; text-align:center; box-shadow:0 16px 48px rgba(0,0,0,0.25); font-family:'Jua','Malgun Gothic',sans-serif;">
+            <div style="font-size:2.5rem; margin-bottom:12px;">💥</div>
+            <div id="quizWrongChoiceMessage" style="font-size:1.25rem; color:#333; margin-bottom:8px; line-height:1.45;">아쉽지만 틀렸어요!</div>
+            <div id="quizWrongChoiceSub" style="font-size:0.95rem; color:#666; margin-bottom:22px; line-height:1.5;">다시 풀어볼까요, 아니면 다음 문제로 넘어갈까요?</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button id="quizWrongChoiceRetryBtn" type="button" style="padding:14px; border:none; border-radius:16px; background:linear-gradient(135deg,#4facfe,#00f2fe); color:#fff; font-family:inherit; font-size:1.1rem; cursor:pointer;">🔄 다시 풀기</button>
+                <button id="quizWrongChoiceSkipBtn" type="button" style="padding:14px; border:none; border-radius:16px; background:#8b949e; color:#fff; font-family:inherit; font-size:1.1rem; cursor:pointer;">⏭️ 다음 문제로</button>
+            </div>
+        </div>
+    `;
+
+    overlay.querySelector('#quizWrongChoiceRetryBtn').addEventListener('click', () => {
+        overlay.style.display = 'none';
+        const fn = window.__quizWrongChoiceRetry;
+        window.__quizWrongChoiceRetry = null;
+        window.__quizWrongChoiceSkip = null;
+        if (typeof fn === 'function') fn();
+    });
+
+    overlay.querySelector('#quizWrongChoiceSkipBtn').addEventListener('click', () => {
+        overlay.style.display = 'none';
+        const fn = window.__quizWrongChoiceSkip;
+        window.__quizWrongChoiceRetry = null;
+        window.__quizWrongChoiceSkip = null;
+        if (typeof fn === 'function') fn();
+    });
+
+    document.body.appendChild(overlay);
+}
+
+window.promptQuizRetryOrSkip = function(options = {}) {
+    ensureQuizWrongChoiceOverlay();
+    const overlay = document.getElementById('quizWrongChoiceOverlay');
+    const msgEl = document.getElementById('quizWrongChoiceMessage');
+    const subEl = document.getElementById('quizWrongChoiceSub');
+
+    msgEl.textContent = options.message || '아쉽지만 틀렸어요!';
+    subEl.textContent =
+        options.subMessage || '다시 풀어볼까요, 아니면 다음 문제로 넘어갈까요?';
+    if (options.hint) {
+        subEl.textContent += `\n💡 ${options.hint}`;
+    }
+
+    window.__quizWrongChoiceRetry = options.onRetry || null;
+    window.__quizWrongChoiceSkip = options.onSkip || null;
+    overlay.style.display = 'flex';
+
+    if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS(options.message || '아쉽지만 틀렸어요!');
+    }
+};
+
+window.closeQuizWrongChoice = function() {
+    const overlay = document.getElementById('quizWrongChoiceOverlay');
+    if (overlay) overlay.style.display = 'none';
+};

@@ -359,6 +359,23 @@ async function advanceKoreanQuizAfterCorrect(delayMs = 1000) {
     setTimeout(renderSectionUI, delayMs);
 }
 
+function skipKoreanQuestion() {
+    activeQuizIdx++;
+    renderSectionUI();
+}
+
+function promptKoreanWrong(note, onRetry) {
+    if (!window.wrongNotes) window.wrongNotes = [];
+    window.wrongNotes.push(note);
+    const retry = typeof onRetry === 'function' ? onRetry : () => {};
+    if (typeof promptQuizRetryOrSkip === 'function') {
+        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skipKoreanQuestion });
+        return;
+    }
+    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+    retry();
+}
+
 // ========================================================
 // 🎯 각 모드별 UI 렌더링 및 로직
 // ========================================================
@@ -470,14 +487,15 @@ function renderVocaUI(container) {
                     speakFairyTTS("정답이에요! 아주 훌륭해요!");
                     advanceKoreanQuizAfterCorrect(1000);
                 } else {
-                    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                     const container = document.getElementById('korean-magnet-blanks');
-                    if (container) {
-                        container.classList.add('wrong');
-                        setTimeout(() => container.classList.remove('wrong'), 800);
-                    }
-                    if (!window.wrongNotes) window.wrongNotes = [];
-                    window.wrongNotes.push({ word: currentItem.word, wrongInput: answerStr });
+                    if (container) container.classList.add('wrong');
+                    promptKoreanWrong(
+                        { word: currentItem.word, wrongInput: answerStr },
+                        () => {
+                            if (container) container.classList.remove('wrong');
+                            if (typeof resetKoreanVocaMagnets === 'function') resetKoreanVocaMagnets();
+                        }
+                    );
                 }
             };
 
@@ -509,9 +527,10 @@ function renderVocaUI(container) {
                     speakFairyTTS("정답이에요! 아주 훌륭해요!");
                     advanceKoreanQuizAfterCorrect(1000);
                 } else {
-                    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
-                    if (!window.wrongNotes) window.wrongNotes = [];
-                    window.wrongNotes.push({ word: currentItem.word, wrongInput: selectedWord });
+                    promptKoreanWrong(
+                        { word: currentItem.word, wrongInput: selectedWord },
+                        () => {}
+                    );
                 }
             };
 
@@ -538,11 +557,15 @@ function renderVocaUI(container) {
                     inputEl.classList.add('correct');
                     advanceKoreanQuizAfterCorrect(1000);
                 } else {
-                    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                     inputEl.classList.add('wrong');
-                    setTimeout(() => inputEl.classList.remove('wrong'), 1000);
-                    if (!window.wrongNotes) window.wrongNotes = [];
-                    window.wrongNotes.push({ word: currentItem.word, wrongInput: inputVal });
+                    promptKoreanWrong(
+                        { word: currentItem.word, wrongInput: inputVal },
+                        () => {
+                            inputEl.classList.remove('wrong');
+                            inputEl.value = '';
+                            inputEl.focus();
+                        }
+                    );
                 }
             };
 
@@ -580,9 +603,10 @@ function renderVocaUI(container) {
                 speakFairyTTS("정답이에요! 아주 훌륭해요!");
                 advanceKoreanQuizAfterCorrect(1000);
             } else {
-                speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
-                if (!window.wrongNotes) window.wrongNotes = [];
-                window.wrongNotes.push({ word: currentItem.word, wrongInput: selectedMeaning });
+                promptKoreanWrong(
+                    { word: currentItem.word, wrongInput: selectedMeaning },
+                    () => {}
+                );
             }
         };
 
@@ -642,11 +666,16 @@ function renderDictationUI(container) {
             document.getElementById('dictationInput').classList.add('correct');
             advanceKoreanQuizAfterCorrect(1500);
         } else {
-            speakFairyTTS("아쉽네요. 다시 한번 잘 듣고 적어보세요.");
-            document.getElementById('dictationInput').classList.add('wrong');
-            setTimeout(() => document.getElementById('dictationInput').classList.remove('wrong'), 1000);
-            if (!window.wrongNotes) window.wrongNotes = [];
-            window.wrongNotes.push({ word: currentItem.word, wrongInput: inputVal });
+            const inputEl = document.getElementById('dictationInput');
+            inputEl.classList.add('wrong');
+            promptKoreanWrong(
+                { word: currentItem.word, wrongInput: inputVal },
+                () => {
+                    inputEl.classList.remove('wrong');
+                    inputEl.value = '';
+                    inputEl.focus();
+                }
+            );
         }
     };
 
@@ -873,9 +902,24 @@ window.renderReadingStage = function() {
                 readingStage++;
                 setTimeout(renderReadingStage, 1500);
             } else {
-                speakFairyTTS("순서가 틀렸어요. 다시 한번 잘 읽어보세요!");
-                userOrderTracking = [];
-                renderReadingStage();
+                if (typeof promptQuizRetryOrSkip === 'function') {
+                    promptQuizRetryOrSkip({
+                        message: '순서가 틀렸어요.',
+                        onRetry: () => {
+                            userOrderTracking = [];
+                            renderReadingStage();
+                        },
+                        onSkip: () => {
+                            readingStage++;
+                            userOrderTracking = [];
+                            renderReadingStage();
+                        },
+                    });
+                } else {
+                    speakFairyTTS("순서가 틀렸어요. 다시 한번 잘 읽어보세요!");
+                    userOrderTracking = [];
+                    renderReadingStage();
+                }
             }
         };
 
@@ -910,7 +954,21 @@ window.renderReadingStage = function() {
                 }
                 setTimeout(renderReadingStage, 2000);
             } else {
-                speakFairyTTS("틀렸어요. 앞뒤 문맥을 다시 한번 살펴보세요.");
+                if (typeof promptQuizRetryOrSkip === 'function') {
+                    promptQuizRetryOrSkip({
+                        onRetry: () => {},
+                        onSkip: () => {
+                            readingConjunctionIndex++;
+                            if (readingConjunctionIndex >= activePassage.conjunctions.length) {
+                                readingStage++;
+                                readingConjunctionIndex = 0;
+                            }
+                            renderReadingStage();
+                        },
+                    });
+                } else {
+                    speakFairyTTS("틀렸어요. 앞뒤 문맥을 다시 한번 살펴보세요.");
+                }
             }
         };
 
@@ -939,7 +997,17 @@ window.renderReadingStage = function() {
                 readingStage++;
                 setTimeout(renderReadingStage, 2000);
             } else {
-                speakFairyTTS("아니에요. 글쓴이가 진짜 하고 싶은 말이 무엇일지 다시 생각해보세요.");
+                if (typeof promptQuizRetryOrSkip === 'function') {
+                    promptQuizRetryOrSkip({
+                        onRetry: () => {},
+                        onSkip: () => {
+                            readingStage++;
+                            renderReadingStage();
+                        },
+                    });
+                } else {
+                    speakFairyTTS("아니에요. 글쓴이가 진짜 하고 싶은 말이 무엇일지 다시 생각해보세요.");
+                }
             }
         };
 

@@ -220,15 +220,23 @@ async function handleCorrectAnswer() {
     setTimeout(() => skipToNextQuiz(), 1200);
 }
 
-function handleWrongAnswer(wrongInput) {
-    if (typeof speakFairyTTS === 'function') speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-    
-    // 오답 기록
+function handleWrongAnswer(wrongInput, onRetryReset) {
     if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
     window.wrongNotes.push({
         word: activeSectionData[activeQuizIdx].word,
         wrongInput: wrongInput
     });
+
+    const retry = typeof onRetryReset === 'function' ? onRetryReset : () => {};
+    const skip = () => skipToNextQuiz();
+
+    if (typeof promptQuizRetryOrSkip === 'function') {
+        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
+        return;
+    }
+
+    if (typeof speakFairyTTS === 'function') speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+    retry();
 }
 
 // 1. 주관식 타이핑 검증
@@ -242,12 +250,11 @@ window.verifyScienceAnswer = function() {
         handleCorrectAnswer();
     } else {
         input.classList.add('wrong-shake');
-        handleWrongAnswer(input.value);
-        setTimeout(() => {
+        handleWrongAnswer(input.value, () => {
             input.classList.remove('wrong-shake');
-            input.value = "";
+            input.value = '';
             input.focus();
-        }, 800);
+        });
     }
 }
 
@@ -257,7 +264,7 @@ window.verifyScienceChoice = function(selectedWord) {
     if (selectedWord === correctTarget) {
         handleCorrectAnswer();
     } else {
-        handleWrongAnswer(selectedWord);
+        handleWrongAnswer(selectedWord, () => {});
     }
 }
 
@@ -307,11 +314,14 @@ window.verifyScienceMagnet = function() {
     if (answerStr === correctTarget) {
         handleCorrectAnswer();
     } else {
-        handleWrongAnswer(answerStr);
+        handleWrongAnswer(answerStr, () => {
+            if (typeof resetScienceMagnets === 'function') resetScienceMagnets();
+            const container = document.getElementById('magnet-blanks');
+            if (container) container.classList.remove('wrong-shake');
+        });
         const container = document.getElementById('magnet-blanks');
         if (container) {
             container.classList.add('wrong-shake');
-            setTimeout(() => container.classList.remove('wrong-shake'), 800);
         }
     }
 }
