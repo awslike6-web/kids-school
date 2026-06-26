@@ -14,6 +14,14 @@ let currentMissionType = "";
 let allFetchedRecords = [];
 let selectedEnglishGrade = "";
 let selectedEnglishUnit = "";
+let stage3QuizMode = null;
+
+const STAGE3_MODES = [
+    { id: 'copy', icon: '✏️', label: '보고 따라 적기', desc: '영어를 보고 똑같이 써요' },
+    { id: 'toEnglish', icon: '🇺🇸', label: '한글 → 영어', desc: '뜻을 보고 영단어를 써요' },
+    { id: 'toKorean', icon: '🇰🇷', label: '영어 → 한글', desc: '영어를 보고 한글 뜻을 써요' },
+    { id: 'listening', icon: '🎧', label: '듣고 적기', desc: '소리를 듣고 영단어를 써요' },
+];
 
 // 독해방 상태
 let readingFetchedBooks = [];
@@ -115,6 +123,7 @@ function openMissionView(type) {
     stopFairyTTS();
     
     currentMissionType = type;
+    if (type === 'stage3') stage3QuizMode = null;
     if (['stage1', 'stage2', 'stage3', 'stage4'].includes(type) && typeof initQuizRewardSession === 'function') {
         initQuizRewardSession(type);
     }
@@ -295,7 +304,71 @@ function startMissionWithFilteredData(records, innerBody) {
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
         return;
     }
+    if (currentMissionType === 'stage3') {
+        renderStage3ModeSelectUI(innerBody);
+        return;
+    }
     renderSectionUI();
+}
+
+function getStage3ModeLabel(mode) {
+    const found = STAGE3_MODES.find(m => m.id === mode);
+    return found ? found.label : '영단어 연습';
+}
+
+function generateStage3Hint(word) {
+    let hint = "";
+    for (let i = 0; i < word.length; i++) {
+        if (word[i] === " ") hint += "  ";
+        else if (i % 2 === 0) hint += word[i] + " ";
+        else hint += "_ ";
+    }
+    return hint.trim();
+}
+
+function renderStage3ModeSelectUI(container) {
+    const modeButtons = STAGE3_MODES.map(m => `
+        <button class="quiz-choice-btn" style="padding:18px 10px; display:flex; flex-direction:column; align-items:center; gap:6px; min-height:110px;" onclick="selectStage3Mode('${m.id}')">
+            <span style="font-size:2rem;">${m.icon}</span>
+            <span style="font-size:1.05rem; font-weight:bold;">${m.label}</span>
+            <span style="font-size:0.82rem; opacity:0.75; line-height:1.3;">${m.desc}</span>
+        </button>
+    `).join('');
+
+    container.innerHTML = `
+        <div style="text-align:center; padding:10px 0 20px;">
+            <h3 style="color:var(--primary); margin-bottom:8px;">🎯 연습 방식을 선택하세요!</h3>
+            <p style="font-size:0.95rem; color:#666; margin-bottom:18px;">
+                ${selectedEnglishGrade || selectedEnglishUnit ? `[${[selectedEnglishGrade, selectedEnglishUnit].filter(Boolean).join(' · ')}] ` : ''}
+                총 ${activeSectionData.length}문제
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+                ${modeButtons}
+            </div>
+            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView('stage3')">⬅️ 학년/단원 다시 고르기</button>
+        </div>
+    `;
+}
+
+window.selectStage3Mode = function(mode) {
+    stage3QuizMode = mode;
+    activeQuizIdx = 0;
+    renderSectionUI();
+};
+
+window.showStage3ModeSelect = function() {
+    stopFairyTTS();
+    renderStage3ModeSelectUI(document.getElementById('overlayInnerBody'));
+};
+
+function checkStage3Answer(inputVal, answerWord, currentItem) {
+    const normalized = inputVal.trim().toLowerCase();
+    if (stage3QuizMode === 'toKorean') {
+        const meaning = (currentItem.meaning || '').replace(/ /g, '');
+        const user = inputVal.replace(/ /g, '');
+        return meaning.includes(user) && user !== '';
+    }
+    return normalized === answerWord.toLowerCase().trim();
 }
 
 async function advanceEnglishQuizAfterCorrect(delayMs = 1000) {
@@ -304,6 +377,21 @@ async function advanceEnglishQuizAfterCorrect(delayMs = 1000) {
     }
     activeQuizIdx++;
     setTimeout(renderSectionUI, delayMs);
+}
+
+function skipEnglishQuestion() {
+    activeQuizIdx++;
+    renderSectionUI();
+}
+
+function promptEnglishWrong(onRetry) {
+    const retry = typeof onRetry === 'function' ? onRetry : () => {};
+    if (typeof promptQuizRetryOrSkip === 'function') {
+        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skipEnglishQuestion });
+        return;
+    }
+    speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
+    retry();
 }
 
 // ========================================================
@@ -317,8 +405,12 @@ function renderSectionUI() {
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                <p style="font-size:1.4rem; color:var(--primary); margin-bottom:20px;">모든 문제를 완료했습니다!</p>
-                <button class="quiz-button" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>
+                <p style="font-size:1.4rem; color:var(--primary); margin-bottom:10px;">모든 문제를 완료했습니다!</p>
+                <p style="font-size:1rem; color:#666; margin-bottom:20px;">${getStage3ModeLabel(stage3QuizMode)} 연습 완료</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    ${currentMissionType === 'stage3' ? `<button class="quiz-button" style="background:var(--sky-blue); color:white;" onclick="showStage3ModeSelect()">🔄 다른 방식으로 다시하기</button>` : ''}
+                    <button class="quiz-button" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>
+                </div>
             </div>`;
         return;
     }
@@ -391,7 +483,7 @@ function renderStage2UI(container) {
             speakFairyTTS("정답이에요! 귀가 아주 밝네요!");
             advanceEnglishQuizAfterCorrect(1000);
         } else {
-            speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 잘 들어볼까요?");
+            promptEnglishWrong(() => {});
         }
     };
 
@@ -416,14 +508,55 @@ function renderStage2UI(container) {
 }
 
 // --------------------------------------------------------
-// 3단계: 영단어/숙어방 (자동 스위칭 UI)
+// 3단계: 영단어/숙어방 (4가지 연습 방식 + 자동 스위칭 UI)
 // --------------------------------------------------------
 function renderStage3UI(container) {
+    if (!stage3QuizMode) {
+        renderStage3ModeSelectUI(container);
+        return;
+    }
+
     const currentItem = activeSectionData[activeQuizIdx];
     const answerWord = currentItem.word.trim();
     const wordsArray = answerWord.split(/\s+/);
     const wordCount = wordsArray.length;
     const totalLength = answerWord.length;
+    const mode = stage3QuizMode;
+    const expectsEnglish = mode !== 'toKorean';
+
+    const modeMeta = {
+        copy: {
+            display: answerWord,
+            sub: '영어 단어를 보고 똑같이 적어보세요!',
+            placeholder: '똑같이 적어봐!',
+            autoSpeak: true,
+        },
+        toEnglish: {
+            display: currentItem.meaning,
+            sub: '이 뜻에 맞는 영단어를 맞춰보세요!',
+            placeholder: '영어 단어를 입력하세요!',
+            autoSpeak: false,
+            showHint: true,
+        },
+        toKorean: {
+            display: answerWord,
+            sub: '영어 단어의 한글 뜻을 적어보세요!',
+            placeholder: '한글 뜻을 입력하세요!',
+            autoSpeak: true,
+        },
+        listening: {
+            display: '🎧',
+            sub: '소리를 듣고 영단어를 적어보세요!',
+            placeholder: '들은 단어를 입력하세요!',
+            autoSpeak: true,
+            showHint: true,
+            listening: true,
+        },
+    }[mode] || {
+        display: currentItem.meaning,
+        sub: '이 뜻에 맞는 영단어를 맞춰보세요!',
+        placeholder: '영어 단어를 입력하세요!',
+    };
 
     const imageUrl = currentItem.imageUrl || currentItem.image;
     const imageHtml = imageUrl ? `
@@ -432,10 +565,23 @@ function renderStage3UI(container) {
         </div>
     ` : '';
 
-    let interactiveHtml = '';
+    let hintHtml = '';
+    if (modeMeta.showHint) {
+        hintHtml = `<div style="font-size:1.1rem; color:var(--pink); letter-spacing:3px; margin-bottom:12px;">${generateStage3Hint(answerWord)}</div>`;
+    }
+    if (mode === 'toEnglish' && currentItem.detailContext && currentItem.detailContext.trim()) {
+        hintHtml += `
+            <details style="margin-bottom:16px; text-align:left; background:#f8f9fa; border-radius:10px; padding:10px; border:1px solid #ddd; font-size:0.95rem;">
+                <summary style="cursor:pointer; font-weight:bold; color:var(--purple);">💡 상세설명 (힌트) 보기</summary>
+                <div style="margin-top:10px; color:#555; line-height:1.5;">${currentItem.detailContext.replace(/\n/g, '<br>')}</div>
+            </details>
+        `;
+    }
 
-    if (wordCount === 1 && totalLength >= 7) {
-        // [자석 낱말 카드 조립 UI] 발동 (7글자 이상)
+    let interactiveHtml = '';
+    const useMagnet = expectsEnglish && wordCount === 1 && totalLength >= 7;
+
+    if (useMagnet) {
         const chars = answerWord.split('').filter(c => c.trim() !== '');
         const scrambled = [...chars].sort(() => Math.random() - 0.5);
 
@@ -479,14 +625,15 @@ function renderStage3UI(container) {
             const answerStr = window.currentEngMagnetAnswer.map(item => item.letter).join('');
             if (answerStr.toLowerCase() === window.engMagnetTargetWord.toLowerCase()) {
                 speakFairyTTS("정답이에요! 스펠링을 완벽하게 맞췄어요!");
+                if (typeof speakEnglish === 'function') speakEnglish(answerWord);
                 advanceEnglishQuizAfterCorrect(1000);
             } else {
-                speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 조합해볼까요?");
                 const blankContainer = document.getElementById('eng-magnet-blanks');
-                if (blankContainer) {
-                    blankContainer.classList.add('wrong');
-                    setTimeout(() => blankContainer.classList.remove('wrong'), 800);
-                }
+                if (blankContainer) blankContainer.classList.add('wrong');
+                promptEnglishWrong(() => {
+                    if (blankContainer) blankContainer.classList.remove('wrong');
+                    if (typeof resetEngMagnets === 'function') resetEngMagnets();
+                });
             }
         };
 
@@ -495,7 +642,7 @@ function renderStage3UI(container) {
                 ${answerWord.split('').map(() => '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>').join('')}
             </div>
             <div id="eng-magnet-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                ${scrambled.map((l, i) => `<button id="eng-magnet-btn-${i}" class="quiz-choice-btn" style="padding: 10px 20px; font-size: 1.5rem;" onclick="selectEngMagnet('${l}', ${i})">${l}</button>`).join('')}
+                ${scrambled.map((l, i) => `<button id="eng-magnet-btn-${i}" class="quiz-choice-btn" style="padding: 10px 20px; font-size: 1.5rem;" onclick="selectEngMagnet('${l.replace(/'/g, "\\'")}', ${i})">${l}</button>`).join('')}
             </div>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
                 <button class="quiz-button" style="background:#ff9f43;" onclick="resetEngMagnets()">다시 조합하기</button>
@@ -503,25 +650,28 @@ function renderStage3UI(container) {
             </div>
         `;
     } else {
-        // [주관식 타이핑 UI] (6글자 이하 또는 다단어 숙어)
         window.verifyStage3Typing = function() {
             const inputEl = document.getElementById('stage3Input');
             if (!inputEl) return;
-            const inputVal = inputEl.value.trim().toLowerCase();
-            if (inputVal === answerWord.toLowerCase()) {
+            const inputVal = inputEl.value.trim();
+            if (checkStage3Answer(inputVal, answerWord, currentItem)) {
                 speakFairyTTS("정답이에요! 아주 훌륭해요!");
+                if (mode !== 'toKorean' && typeof speakEnglish === 'function') speakEnglish(answerWord);
                 inputEl.classList.add('correct');
                 advanceEnglishQuizAfterCorrect(1000);
             } else {
-                speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");
                 inputEl.classList.add('wrong');
-                setTimeout(() => inputEl.classList.remove('wrong'), 1000);
+                promptEnglishWrong(() => {
+                    inputEl.classList.remove('wrong');
+                    inputEl.value = '';
+                    inputEl.focus();
+                });
             }
         };
 
         interactiveHtml = `
             <div class="interactive-input-group" style="margin-bottom: 20px;">
-                <input id="stage3Input" class="text-input-field" type="text" autocomplete="off" placeholder="영어 단어를 입력하세요!" onkeypress="if(event.key === 'Enter') verifyStage3Typing()" style="width:100%;">
+                <input id="stage3Input" class="text-input-field" type="text" autocomplete="off" placeholder="${modeMeta.placeholder}" onkeypress="if(event.key === 'Enter') verifyStage3Typing()" style="width:100%;">
             </div>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
                 <button class="quiz-button" onclick="verifyStage3Typing()">정답 확인</button>
@@ -529,18 +679,30 @@ function renderStage3UI(container) {
         `;
     }
 
+    const displayHtml = modeMeta.listening
+        ? `<div class="quiz-descr" style="font-size: 2.5rem; margin-bottom: 10px;">${modeMeta.display}</div>`
+        : `<div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${modeMeta.display}</div>`;
+
     container.innerHTML = `
         <div class="quiz-card">
-            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">영단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem; opacity:0.8; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
+                <span>${getStage3ModeLabel(mode)} · ${activeQuizIdx + 1} / ${activeSectionData.length}</span>
+                <button class="quiz-choice-btn" style="padding:6px 12px; font-size:0.85rem;" onclick="showStage3ModeSelect()">🔄 방식 바꾸기</button>
+            </div>
             ${imageHtml}
-            <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${currentItem.meaning}</div>
-            <div style="margin-bottom: 20px; color: #666;">이 뜻에 맞는 영단어를 맞춰보세요!</div>
+            ${displayHtml}
+            <div style="margin-bottom: 12px; color: #666;">${modeMeta.sub}</div>
+            ${hintHtml}
             ${interactiveHtml}
             <div style="margin-top:20px;">
                 <button class="quiz-button" style="background:#8b949e;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">🔊 원어민 발음 듣기</button>
             </div>
         </div>
     `;
+
+    if (modeMeta.autoSpeak && typeof speakEnglish === 'function') {
+        setTimeout(() => speakEnglish(answerWord), mode === 'listening' ? 300 : 500);
+    }
 }
 
 // --------------------------------------------------------
@@ -604,12 +766,12 @@ function renderStage4UI(container) {
                 speakEnglish(answerSentence);
                 advanceEnglishQuizAfterCorrect(1500);
             } else {
-                speakFairyTTS("아쉽지만 틀렸어요. 문장 순서를 다시 생각해볼까요?");
                 const blankContainer = document.getElementById('sent-word-blanks');
-                if (blankContainer) {
-                    blankContainer.classList.add('wrong');
-                    setTimeout(() => blankContainer.classList.remove('wrong'), 800);
-                }
+                if (blankContainer) blankContainer.classList.add('wrong');
+                promptEnglishWrong(() => {
+                    if (blankContainer) blankContainer.classList.remove('wrong');
+                    if (typeof resetSentenceWords === 'function') resetSentenceWords();
+                });
             }
         };
 
@@ -640,7 +802,7 @@ function renderStage4UI(container) {
                 speakEnglish(answerSentence);
                 advanceEnglishQuizAfterCorrect(1500);
             } else {
-                speakFairyTTS("아쉽지만 틀렸어요. 뜻을 다시 한번 읽어보세요.");
+                promptEnglishWrong(() => {});
             }
         };
 
@@ -743,9 +905,24 @@ window.renderReadingStage = function() {
                 readingStage++;
                 setTimeout(renderReadingStage, 1500);
             } else {
-                speakFairyTTS("순서가 틀렸어요. 다시 한번 잘 읽어보세요!");
-                userOrderTracking = [];
-                renderReadingStage();
+                if (typeof promptQuizRetryOrSkip === 'function') {
+                    promptQuizRetryOrSkip({
+                        message: '순서가 틀렸어요.',
+                        onRetry: () => {
+                            userOrderTracking = [];
+                            renderReadingStage();
+                        },
+                        onSkip: () => {
+                            readingStage++;
+                            userOrderTracking = [];
+                            renderReadingStage();
+                        },
+                    });
+                } else {
+                    speakFairyTTS("순서가 틀렸어요. 다시 한번 잘 읽어보세요!");
+                    userOrderTracking = [];
+                    renderReadingStage();
+                }
             }
         };
 
@@ -780,7 +957,21 @@ window.renderReadingStage = function() {
                 }
                 setTimeout(renderReadingStage, 2000);
             } else {
-                speakFairyTTS("틀렸어요. 앞뒤 문맥을 다시 한번 살펴보세요.");
+                if (typeof promptQuizRetryOrSkip === 'function') {
+                    promptQuizRetryOrSkip({
+                        onRetry: () => {},
+                        onSkip: () => {
+                            readingConjunctionIndex++;
+                            if (readingConjunctionIndex >= activePassage.conjunctions.length) {
+                                readingStage++;
+                                readingConjunctionIndex = 0;
+                            }
+                            renderReadingStage();
+                        },
+                    });
+                } else {
+                    speakFairyTTS("틀렸어요. 앞뒤 문맥을 다시 한번 살펴보세요.");
+                }
             }
         };
 
@@ -809,7 +1000,17 @@ window.renderReadingStage = function() {
                 readingStage++;
                 setTimeout(renderReadingStage, 2000);
             } else {
-                speakFairyTTS("아니에요. 글쓴이가 진짜 하고 싶은 말이 무엇일지 다시 생각해보세요.");
+                if (typeof promptQuizRetryOrSkip === 'function') {
+                    promptQuizRetryOrSkip({
+                        onRetry: () => {},
+                        onSkip: () => {
+                            readingStage++;
+                            renderReadingStage();
+                        },
+                    });
+                } else {
+                    speakFairyTTS("아니에요. 글쓴이가 진짜 하고 싶은 말이 무엇일지 다시 생각해보세요.");
+                }
             }
         };
 

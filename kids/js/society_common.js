@@ -773,12 +773,23 @@ window.handleVocaCorrect = async function() {
     setTimeout(() => skipToNextQuiz('voca'), 1200);
 }
 
-window.handleVocaWrong = function(wrongInput) {
+window.handleVocaWrong = function(wrongInput, onRetryReset) {
     if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
     window.wrongNotes.push({
         word: activeSectionData[activeQuizIdx].word,
         wrongInput: wrongInput
     });
+
+    const retry = typeof onRetryReset === 'function' ? onRetryReset : () => {};
+    const skip = () => skipToNextQuiz('voca');
+
+    if (typeof promptQuizRetryOrSkip === 'function') {
+        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
+        return;
+    }
+
+    speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
+    retry();
 }
 
 function verifyVocaAnswer() {
@@ -792,14 +803,11 @@ function verifyVocaAnswer() {
         handleVocaCorrect();
     } else {
         input.classList.add('wrong-shake');
-        speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-        handleVocaWrong(input.value);
-        
-        setTimeout(() => {
+        handleVocaWrong(input.value, () => {
             input.classList.remove('wrong-shake');
-            input.value = "";
+            input.value = '';
             input.focus();
-        }, 800);
+        });
     }
 }
 
@@ -809,8 +817,7 @@ window.verifyVocaChoice = function(selectedWord) {
         speakFairyTTS("정답이야! 아주 잘했어!");
         handleVocaCorrect();
     } else {
-        speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-        handleVocaWrong(selectedWord);
+        handleVocaWrong(selectedWord, () => {});
     }
 }
 
@@ -860,13 +867,13 @@ window.verifyVocaMagnet = function() {
         speakFairyTTS("정답이야! 아주 잘했어!");
         handleVocaCorrect();
     } else {
-        speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-        handleVocaWrong(answerStr);
+        handleVocaWrong(answerStr, () => {
+            if (typeof resetVocaMagnets === 'function') resetVocaMagnets();
+            const container = document.getElementById('magnet-blanks');
+            if (container) container.classList.remove('wrong-shake');
+        });
         const container = document.getElementById('magnet-blanks');
-        if (container) {
-            container.classList.add('wrong-shake');
-            setTimeout(() => container.classList.remove('wrong-shake'), 800);
-        }
+        if (container) container.classList.add('wrong-shake');
     }
 }
 
@@ -879,8 +886,16 @@ async function verifyChartChoice(selectedIdx, correctIdx) {
         }
         skipToNextQuiz('chart');
     } else {
-        speakFairyTTS("조금 아쉽네요. 중심지나 통계 수치들을 한 번만 면밀히 자로 재보아요.");
-        alert("❌ 분석에 조금의 오차가 있어요! 다른 보기를 선택해주세요!");
+        if (typeof promptQuizRetryOrSkip === 'function') {
+            promptQuizRetryOrSkip({
+                message: '분석에 조금의 오차가 있어요!',
+                onRetry: () => {},
+                onSkip: () => skipToNextQuiz('chart'),
+            });
+        } else {
+            speakFairyTTS("조금 아쉽네요. 중심지나 통계 수치들을 한 번만 면밀히 자로 재보아요.");
+            alert("❌ 분석에 조금의 오차가 있어요! 다른 보기를 선택해주세요!");
+        }
     }
 }
 

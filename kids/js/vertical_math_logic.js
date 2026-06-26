@@ -311,46 +311,49 @@ function renderDynamicGrid(mode, q, isPrint = false) {
       gridHTML += `</div>`;
   }
   else if (mode === 'div') {
-      W = aStr.length + bStr.length + 2; 
+      W = aStr.length + bStr.length + 2;
+      const dividendStartCol = bStr.length + 2;
+      const stepCount = aStr.length; // 2자리→2줄, 3자리→3줄 풀이과정
       gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
-      
+
       let row = 1;
       // 1행: 몫 (Quotient)
       for (let i = 0; i < aStr.length; i++) {
-          let c = bStr.length + 2 + i;
+          let c = dividendStartCol + i;
           gridHTML += `<input type="text" class="grid-input cell-ans" data-type="q" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
       }
       row++;
-      
+
       // 2행: 지붕 모양 가로선
-      gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${bStr.length + 2} / ${row} / ${W + 1};"></div>`;
+      gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${dividendStartCol} / ${row} / ${W + 1};"></div>`;
       row++;
-      
+
       // 3행: 제수 ) 피제수
       for (let i = 0; i < bStr.length; i++) {
           gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${1 + i};">${bStr[i]}</div>`;
       }
       gridHTML += `<div class="grid-cell cell-op" style="grid-area: ${row} / ${bStr.length + 1};">)</div>`;
       for (let i = 0; i < aStr.length; i++) {
-          let c = bStr.length + 2 + i;
+          let c = dividendStartCol + i;
           gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${c};">${aStr[i]}</div>`;
       }
       row++;
-      
-      // 4행: 곱셈 결과 빼기 (Intermediate)
-      for (let i = 0; i < aStr.length; i++) {
-          let c = bStr.length + 2 + i;
-          gridHTML += `<input type="text" class="grid-input cell-inter" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+
+      // 피제수 자릿수만큼 곱·빼기 중간 과정 행 (2자리→2줄, 3자리→3줄)
+      for (let step = 0; step < stepCount; step++) {
+          for (let i = 0; i < aStr.length; i++) {
+              let c = dividendStartCol + i;
+              gridHTML += `<input type="text" class="grid-input cell-inter" data-row="${row}" data-col="${c}" data-step="${step + 1}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+          }
+          row++;
+
+          gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${dividendStartCol} / ${row} / ${W + 1};"></div>`;
+          row++;
       }
-      row++;
-      
-      // 5행: 밑줄
-      gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${bStr.length + 2} / ${row} / ${W + 1};"></div>`;
-      row++;
-      
-      // 6행: 나머지 (Remainder)
+
+      // 마지막 행: 나머지 (Remainder)
       for (let i = 0; i < aStr.length; i++) {
-          let c = bStr.length + 2 + i;
+          let c = dividendStartCol + i;
           gridHTML += `<input type="text" class="grid-input cell-ans" data-type="rem" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
       }
       gridHTML += `</div>`;
@@ -431,7 +434,7 @@ window.submitAnswer = function() {
       setTimeout(() => document.querySelector('.v-board').style.animation = '', 400);
 
       msgBox.style.color = 'var(--pink)';
-      msgBox.textContent = "땡! 아쉽네요. 다시 한번 계산해볼까요? 💥";
+      msgBox.textContent = "땡! 아쉽네요. 💥";
 
       // 🎒 오답 가방(wrongNotes)에 저장 (해당 문제에서 처음 틀렸을 때 1회만)
       if (!q.wrongLogged) {
@@ -451,24 +454,42 @@ window.submitAnswer = function() {
           
           window.wrongNotes.push(note);
           localStorage.setItem(`minmin_math_wrong_${currentProfile}`, JSON.stringify(window.wrongNotes));
-          q.wrongLogged = true; // 중복 저장 방지 자물쇠
+          q.wrongLogged = true;
           
           console.log("🎒 오답 가방에 쏙 들어갔어요!", note);
       }
 
-      // 틀린 문제 재도전 기회 (입력 칸 초기화)
-      setTimeout(() => {
+      const resetInputs = () => {
           document.querySelectorAll('.cell-ans').forEach(c => {
               c.style.borderColor = '';
               c.style.background = '';
-              c.value = ''; // 재도전시 정답칸 초기화
+              c.value = '';
+          });
+          document.querySelectorAll('.cell-inter').forEach(c => {
+              c.value = '';
           });
           msgBox.textContent = '';
-          
-          // 다시 포커스
           const ansCells = Array.from(document.querySelectorAll('.cell-ans'));
           if (ansCells.length > 0) setFocus(ansCells[ansCells.length - 1]);
-      }, 1800);
+      };
+
+      const goNext = () => {
+          resetInputs();
+          gameState.current++;
+          nextQuestion();
+      };
+
+      if (typeof promptQuizRetryOrSkip === 'function') {
+          promptQuizRetryOrSkip({
+              message: '아쉽네요! 정답은 ' + correctAnsText,
+              hint: correctAnsText,
+              onRetry: resetInputs,
+              onSkip: goNext,
+          });
+      } else {
+          msgBox.textContent = "땡! 아쉽네요. 다시 한번 계산해볼까요? 💥";
+          setTimeout(resetInputs, 1800);
+      }
   }
 }
 

@@ -468,8 +468,24 @@ function submitAnswer() {
             window.engWrongNotes.push({ word: qData.word, wrongInput: inputVal });
         }
     }
-    
-    setTimeout(() => { inputEl.className = "main-input"; inputEl.value = ''; }, 800);
+
+    const retry = () => {
+        inputEl.className = "main-input";
+        inputEl.value = '';
+        inputEl.disabled = false;
+        inputEl.focus();
+    };
+    const skip = () => {
+        inputEl.className = "main-input";
+        inputEl.disabled = false;
+        nextQuestion();
+    };
+
+    if (typeof promptQuizRetryOrSkip === 'function') {
+        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
+    } else {
+        setTimeout(retry, 800);
+    }
   }
 }
 

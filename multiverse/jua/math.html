@@ -278,6 +278,7 @@
   </div>
 </div>
 
+<script src="../../kids/core/notion-helper.js"></script>
 <script>
 let fallingTimers=[], timerInterval=null, timeLeft=0, fallingBalls=[];
 
@@ -502,8 +503,29 @@ function handleAnswer(isCorrect, q, inpBox, fbBox, nextFunc) {
     inpBox.classList.add('wrong'); 
     let correctMsg = q.opType === 'div' ? `정답: 몫 ${q.answer}, 나머지 ${q.rem}` : `정답: ${q.answer}`;
     fbBox.textContent = `오답😢 ${correctMsg}`; fbBox.style.color = 'var(--pink)';
-    if(!gameState.isWrongMode && !wrongNotes.some(item => item.text === q.text)) { wrongNotes.push(q); localStorage.setItem('jua_math_wrong', JSON.stringify(wrongNotes)); }
-    gameState.current++; setTimeout(nextFunc, 2000);
+    if(!gameState.isWrongMode && !wrongNotes.some(item => item.text === q.text)) { wrongNotes.push(q); localStorage.setItem('jua_math_wrong', JSON.stringify(wrongNotes)); document.getElementById('wrongCountBadge').textContent = wrongNotes.length; }
+
+    const retry = () => {
+      inpBox.classList.remove('wrong');
+      if (q.opType === 'div') {
+        const remInp = document.getElementById('remInput');
+        if (remInp) { remInp.classList.remove('wrong'); remInp.value = ''; }
+      }
+      inpBox.value = '';
+      fbBox.textContent = '';
+      inpBox.focus();
+    };
+    const skip = () => {
+      inpBox.classList.remove('wrong');
+      gameState.current++;
+      nextFunc();
+    };
+
+    if (typeof promptQuizRetryOrSkip === 'function') {
+      promptQuizRetryOrSkip({ hint: correctMsg, onRetry: retry, onSkip: skip });
+    } else {
+      gameState.current++; setTimeout(nextFunc, 2000);
+    }
   }
 }
 
