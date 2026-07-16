@@ -477,76 +477,65 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* 📱 모바일 가속 스크롤 및 레이아웃 개선 */
+  /* 📱 모바일 가속 스크롤 */
   .panel-scroll {
     height: 100%;
     overflow: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(0,242,254,0.25) transparent;
     padding-right: 4px;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* 📱 모바일 공통 (900px 이하) - 억지 화면 고정 해제, 자연스러운 스크롤 */
+  /* 📱 모바일 완벽 대응 (가로/세로 불문하고 900px 이하는 무조건 이 룰을 따름) */
   @media (max-width: 900px) {
-    /* 5mm 찌그러짐의 주범: 100vh 강제 고정 해제! */
-    html, body {
-      overflow-x: hidden !important;
-      overflow-y: auto !important;
+    /* 1. 강제 고정 족쇄 해제: 폰에서는 무조건 화면 전체가 위아래로 자연스럽게 스크롤되게! */
+    html, body, .monitor {
       height: auto !important;
       min-height: 100vh !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important; /* 세로 스크롤 전면 허용 */
     }
     .monitor {
-      height: auto !important;
-      min-height: 100vh !important;
-      overflow: visible !important;
       padding: 14px 12px 18px !important;
+      display: block !important; /* 억지 화면 꽉 채우기 방지 */
     }
-    
-    /* 패널 내부 스크롤을 없애고 전체 화면 스크롤로 통일 (공지판 먹통 해결) */
-    .track-panel { min-height: 0; height: auto !important; overflow: visible !important; }
-    .panel-body { flex: none !important; height: auto !important; overflow: visible !important; }
-    .panel-scroll { height: auto !important; max-height: none !important; overflow: visible !important; }
-    .chalkboard { min-height: 180px; }
 
-    /* 시간표 목요일 짤림 방지: 확실한 최소 너비 부여 */
+    /* 2. 가로/세로 모드 찌그러짐 방지: 무조건 위아래 1단 배치로 널찍하게! */
+    .dual-track {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 16px !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* 3. 패널 내부 스크롤 먹통 해제 (전체 화면 스크롤에 온전히 맡김) */
+    .track-panel, .panel-body, .panel-scroll {
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+
+    /* 4. 시간표 표 (수요일 짤림) 완벽 해결: 널찍한 가로 스와이프 확보 */
     .grid-wrap {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch; /* 부드러운 스와이프 */
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      display: block !important;
     }
     .weekly-grid {
-      min-width: 620px; /* 월~금 넉넉하게 확보 */
+      min-width: 680px !important; /* 월~금 넉넉하게 늘려놓고 스와이프 유도 */
+      width: 100% !important;
     }
-  }
-
-  /* 📱 모바일 세로 모드 (폭이 좁을 때) - 위아래 1단 배치 */
-  @media (max-width: 900px) and (orientation: portrait) {
-    .dual-track {
-      grid-template-columns: 1fr !important;
-      overflow: visible;
-      flex: none;
-    }
+    
+    .chalkboard { min-height: 200px !important; }
     .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
     .clock-block { text-align: left; width: 100%; }
     .filter-tabs { flex-direction: column; }
     .filter-btn { min-width: 0; width: 100%; }
     .status-bar { flex-direction: column; align-items: flex-start; gap: 4px; }
-  }
-
-  /* 📱 모바일 가로 모드 (폭이 넓을 때) - 좌우 2단 배치 복원 */
-  @media (max-width: 900px) and (orientation: landscape) {
-    .top-bar { flex-direction: row; align-items: center; }
-    .clock-block { text-align: right; width: auto; }
-    .clock-date { display: none; } /* 높이 확보용 숨김 */
-    .filter-tabs { flex-direction: row; gap: 6px; }
-    .filter-btn { padding: 8px 12px; font-size: 0.95rem; }
-    
-    .dual-track {
-      grid-template-columns: 1.2fr 0.8fr !important;
-      overflow: visible;
-      flex: none;
-      gap: 12px;
-    }
   }
 </style>
 </head>
