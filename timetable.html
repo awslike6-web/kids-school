@@ -484,114 +484,69 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(0,242,254,0.25) transparent;
     padding-right: 4px;
-    -webkit-overflow-scrolling: touch;
   }
 
-  /* 세로 모드 대응 미디어 쿼리 (가로 모드가 아닐 때 900px 이하) */
+  /* 📱 모바일 공통 (900px 이하) - 억지 화면 고정 해제, 자연스러운 스크롤 */
   @media (max-width: 900px) {
+    /* 5mm 찌그러짐의 주범: 100vh 강제 고정 해제! */
+    html, body {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      height: auto !important;
+      min-height: 100vh !important;
+    }
+    .monitor {
+      height: auto !important;
+      min-height: 100vh !important;
+      overflow: visible !important;
+      padding: 14px 12px 18px !important;
+    }
+    
+    /* 패널 내부 스크롤을 없애고 전체 화면 스크롤로 통일 (공지판 먹통 해결) */
+    .track-panel { min-height: 0; height: auto !important; overflow: visible !important; }
+    .panel-body { flex: none !important; height: auto !important; overflow: visible !important; }
+    .panel-scroll { height: auto !important; max-height: none !important; overflow: visible !important; }
+    .chalkboard { min-height: 180px; }
+
+    /* 시간표 목요일 짤림 방지: 확실한 최소 너비 부여 */
+    .grid-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; /* 부드러운 스와이프 */
+    }
+    .weekly-grid {
+      min-width: 620px; /* 월~금 넉넉하게 확보 */
+    }
+  }
+
+  /* 📱 모바일 세로 모드 (폭이 좁을 때) - 위아래 1단 배치 */
+  @media (max-width: 900px) and (orientation: portrait) {
     .dual-track {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr !important;
       overflow: visible;
       flex: none;
     }
-    html, body {
-      overflow-x: hidden;
-      overflow-y: auto;
-      height: auto;
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
-    .monitor {
-      height: auto;
-      min-height: 100vh;
-      min-height: 100dvh;
-      overflow: visible;
-    }
-    .track-panel { min-height: 0; overflow: visible; }
-    .panel-body { flex: none; overflow: visible; }
-    .panel-scroll { height: auto; max-height: none; }
-    .chalkboard { min-height: 180px; }
-
-    /* 📱 시간표 격자 짤림 개선을 위한 가로 스와이프 활성화 */
-    .grid-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-  }
-
-  /* 📱 모바일 가로 모드 (Landscape) 고도화 대응 */
-  @media (max-width: 900px) and (orientation: landscape) {
-    html, body {
-      overflow: hidden !important; /* 내부 스크롤 활용 및 한 화면 꽉 채움 */
-      height: 100vh !important;
-      height: 100dvh !important;
-    }
-    .monitor {
-      height: 100vh !important;
-      height: 100dvh !important;
-      overflow: hidden !important;
-      padding: 10px 16px 8px !important;
-      gap: 10px !important;
-    }
-    .top-bar {
-      flex-direction: row !important; /* 수평 정렬 */
-      align-items: center !important;
-    }
-    .clock-block {
-      text-align: right !important;
-      width: auto !important;
-    }
-    .clock-time {
-      font-size: 2.2rem !important;
-    }
-    .clock-date {
-      display: none !important; /* 화면 가독성 및 공간 최적화 */
-    }
-    .filter-tabs {
-      flex-direction: row !important;
-      gap: 6px !important;
-    }
-    .filter-btn {
-      padding: 8px 12px !important;
-      font-size: 0.95rem !important;
-    }
-    .dual-track {
-      display: grid !important;
-      grid-template-columns: 1.2fr 0.8fr !important; /* 듀얼 트랙 복원 */
-      gap: 12px !important;
-      flex: 1 !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
-    }
-    .track-panel {
-      height: 100% !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
-    }
-    .panel-body {
-      flex: 1 !important;
-      overflow: hidden !important;
-    }
-    .panel-scroll {
-      height: 100% !important;
-      max-height: none !important;
-      overflow: auto !important;
-    }
-    .chalkboard {
-      min-height: 100% !important;
-    }
-  }
-
-  @media (max-width: 680px) {
-    .monitor { padding: 14px 12px 18px; gap: 12px; }
-    @media (orientation: portrait) {
-      .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .clock-block { text-align: left; width: 100%; }
-      .filter-tabs { flex-direction: column; }
-      .filter-btn { min-width: 0; width: 100%; }
-    }
-    .weekly-grid .period-col { width: 88px; padding: 8px 6px; }
+    .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .clock-block { text-align: left; width: 100%; }
+    .filter-tabs { flex-direction: column; }
+    .filter-btn { min-width: 0; width: 100%; }
     .status-bar { flex-direction: column; align-items: flex-start; gap: 4px; }
+  }
+
+  /* 📱 모바일 가로 모드 (폭이 넓을 때) - 좌우 2단 배치 복원 */
+  @media (max-width: 900px) and (orientation: landscape) {
+    .top-bar { flex-direction: row; align-items: center; }
+    .clock-block { text-align: right; width: auto; }
+    .clock-date { display: none; } /* 높이 확보용 숨김 */
+    .filter-tabs { flex-direction: row; gap: 6px; }
+    .filter-btn { padding: 8px 12px; font-size: 0.95rem; }
+    
+    .dual-track {
+      grid-template-columns: 1.2fr 0.8fr !important;
+      overflow: visible;
+      flex: none;
+      gap: 12px;
+    }
   }
 </style>
 </head>
