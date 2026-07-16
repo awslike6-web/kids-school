@@ -280,8 +280,73 @@ function parseTimetablePage(page) {
         alertAt: alertDate?.start || null,
         memo: (p["메모"]?.rich_text || []).map(t => t.plain_text).join("") || "",
         link: p["링크"]?.url || "",
-        createdAt: page.created_time || null
+        createdAt: page.created_time || null,
+        pageContent: ""
     };
+}
+
+/** 노션 블록 1개에서 plain text 추출 */
+function extractPlainTextFromNotionBlock(block) {
+    if (!block || !block.type) return "";
+    const data = block[block.type];
+    if (!data) return "";
+
+    if (Array.isArray(data.rich_text)) {
+        return data.rich_text.map(t => t.plain_text || "").join("");
+    }
+    if (block.type === "child_page" && data.title) return String(data.title);
+    if (block.type === "child_database" && data.title) return String(data.title);
+    return "";
+}
+
+/**
+ * 노션 페이지 본문(blocks)을 plain text로 수집 — 공지 본문(페이지 내용)용
+ */
+async function fetchNotionPageBlocksPlainText(pageId) {
+    if (!pageId) return "";
+    let chunks = [];
+    let hasMore = true;
+    let nextCursor = undefined;
+
+    try {
+        while (hasMore) {
+            const qs = new URLSearchParams({ page_size: "100" });
+            if (nextCursor) qs.set("start_cursor", nextCursor);
+
+            const response = await fetch(`${PROXY_URL}/v1/blocks/${pageId}/children?${qs.toString()}`);
+            if (!response.ok) break;
+
+            const data = await response.json();
+            for (const block of data.results || []) {
+                const text = extractPlainTextFromNotionBlock(block);
+                if (text.trim()) chunks.push(text.trim());
+            }
+            hasMore = !!data.has_more;
+            nextCursor = data.next_cursor;
+        }
+    } catch (error) {
+        console.warn("[fetchNotionPageBlocksPlainText] 본문 로드 실패:", pageId, error);
+    }
+
+    return chunks.join("\n\n");
+}
+
+function isTimetableNoticeCandidate(row) {
+    const hasPeriod = !!(row.periodNum || row.periodSlot?.num);
+    if (hasPeriod) return false;
+    return !!(row.title || row.memo || row.alertAt || row.subject);
+}
+
+async function enrichTimetableRowsWithPageContent(rows) {
+    const targets = rows.filter(isTimetableNoticeCandidate);
+    if (!targets.length) return rows;
+
+    await Promise.all(targets.map(async (row) => {
+        const body = await fetchNotionPageBlocksPlainText(row.id);
+        if (body) row.pageContent = body;
+    }));
+
+    return rows;
 }
 
 /**
@@ -313,12 +378,23 @@ async function fetchTimetableFromNotion(options = {}) {
             nextCursor = data.next_cursor;
         }
 
-        return allResults.map(parseTimetablePage).filter(row => row.title || row.subject || row.dayOfWeek || row.memo);
+        const rows = allResults
+            .map(parseTimetablePage)
+            .filter(row => row.title || row.subject || row.dayOfWeek || row.memo || row.alertAt);
+
+        if (options.fetchPageContent !== false) {
+            await enrichTimetableRowsWithPageContent(rows);
+        }
+
+        return rows;
     } catch (error) {
         console.error("[fetchTimetableFromNotion] 로딩 실패:", error);
         return [];
     }
 }
+
+window.fetchTimetableFromNotion = fetchTimetableFromNotion;
+window.parseTimetablePage = parseTimetablePage;
 
 // 🕒 전역 학습 시작 시간 자동 기록
 window.roomStartTime = window.roomStartTime || new Date();

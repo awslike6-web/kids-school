@@ -17,27 +17,42 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
     font-family: 'Jua', sans-serif;
     background: linear-gradient(160deg, #09070f 0%, #110e1c 45%, #1a152e 100%);
     color: var(--text-main);
-    touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
   }
 
   .monitor {
-    height: 100vh;
-    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     padding: 18px 22px 16px;
     padding: max(18px, env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
     gap: 14px;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     z-index: 1;
+  }
+
+  /* 로비 모니터(넓은 화면): 뷰포트 고정 + 패널 내부 스크롤 */
+  @media (min-width: 901px) and (min-height: 501px) {
+    html, body {
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .monitor {
+      height: 100vh;
+      height: 100dvh;
+      min-height: 0;
+      overflow: hidden;
+    }
   }
 
   .top-bar {
@@ -98,12 +113,16 @@
   .filter-btn.active.daughter { border-color: var(--pink); box-shadow: 0 0 20px rgba(255,107,157,0.25); }
 
   .dual-track {
-    flex: 1;
+    flex: 1 1 auto;
     display: grid;
     grid-template-columns: 1.2fr 0.8fr;
     gap: 16px;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
+  }
+
+  @media (min-width: 901px) and (min-height: 501px) {
+    .dual-track { overflow: hidden; }
   }
 
   .track-panel {
@@ -113,8 +132,12 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  }
+
+  @media (min-width: 901px) and (min-height: 501px) {
+    .track-panel { overflow: hidden; }
   }
   .panel-header {
     padding: 14px 18px 10px;
@@ -132,31 +155,50 @@
   .panel-header p { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; font-family: 'Gaegu', cursive; }
 
   .panel-body {
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     padding: 12px 14px 14px;
   }
+
+  @media (min-width: 901px) and (min-height: 501px) {
+    .panel-body { overflow: hidden; }
+  }
+
   .panel-scroll {
-    height: 100%;
-    overflow: auto;
+    height: auto;
+    overflow: visible;
     scrollbar-width: thin;
     scrollbar-color: rgba(0,242,254,0.25) transparent;
     padding-right: 4px;
     -webkit-overflow-scrolling: touch;
   }
+
+  @media (min-width: 901px) and (min-height: 501px) {
+    .panel-scroll {
+      height: 100%;
+      overflow: auto;
+    }
+  }
+
   .panel-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
   .panel-scroll::-webkit-scrollbar-thumb { background: rgba(0,242,254,0.25); border-radius: 999px; }
 
-  /* ── 주간 격자 ── */
+  /* ── 주간 격자: 가로 스크롤은 grid-wrap 한 곳에서만 ── */
   .grid-wrap {
-    min-width: 520px;
+    width: 100%;
+    max-width: 100%;
     border-radius: 14px;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    overscroll-behavior-x: contain;
     border: 2px solid rgba(255,255,255,0.08);
     background: rgba(8, 6, 18, 0.6);
   }
   .weekly-grid {
+    min-width: 680px;
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
@@ -277,6 +319,7 @@
     border-left: 4px solid var(--yellow);
     border-radius: 0 12px 12px 0;
     padding: 12px 14px;
+    position: relative;
   }
   .notice-card.admin-notice {
     border-left-color: #FF5757;
@@ -298,8 +341,18 @@
     color: rgba(255,255,255,0.75);
     line-height: 1.45;
     white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .notice-card .notice-child { font-size: 0.78rem; color: var(--text-dim); margin-top: 6px; }
+  .notice-card .notice-more-hint {
+    font-size: 0.78rem;
+    color: var(--yellow);
+    margin-top: 6px;
+    opacity: 0.85;
+  }
 
   .empty-state, .loading-state {
     text-align: center;
@@ -430,15 +483,16 @@
     opacity: 1;
   }
 
-  /* 🔔 공지 툴팁 전용 디자인 (가독성 향상 및 웅장한 네온 노랑 테두리) */
+  /* 🔔 공지 툴팁 (본문 전체) */
   .notice-card.has-tooltip {
-    position: relative;
-    cursor: pointer;
+    cursor: help;
   }
   .notice-tooltip {
     visibility: hidden;
-    width: 280px;
-    max-width: calc(100vw - 40px);
+    width: min(320px, calc(100vw - 48px));
+    max-height: min(60vh, 420px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background-color: rgba(18, 14, 32, 0.98);
     color: #fff;
     text-align: left;
@@ -446,17 +500,17 @@
     border-radius: 12px;
     padding: 12px 14px;
     position: absolute;
-    z-index: 101;
-    bottom: 110%;
+    z-index: 200;
+    bottom: calc(100% + 10px);
     left: 50%;
-    transform: translateX(-50%) translateY(10px);
+    transform: translateX(-50%) translateY(8px);
     opacity: 0;
-    transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+    transition: opacity 0.25s, transform 0.25s, visibility 0.25s;
     font-family: 'Gaegu', cursive;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     line-height: 1.5;
     white-space: pre-wrap;
-    word-break: break-all;
+    word-break: break-word;
     box-shadow: 0 8px 32px rgba(255, 217, 61, 0.4);
     pointer-events: none;
   }
@@ -468,74 +522,72 @@
     margin-left: -8px;
     border-width: 8px;
     border-style: solid;
-    border-color: rgba(18, 14, 32, 0.98) transparent transparent transparent;
+    border-color: var(--yellow) transparent transparent transparent;
   }
-  .notice-card.has-tooltip:hover .notice-tooltip,
+  @media (hover: hover) and (pointer: fine) {
+    .notice-card.has-tooltip:hover .notice-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+  }
   .notice-card.has-tooltip.active .notice-tooltip {
     visibility: visible;
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
   }
 
-  /* 📱 모바일 가속 스크롤 */
-  .panel-scroll {
-    height: 100%;
-    overflow: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0,242,254,0.25) transparent;
-    padding-right: 4px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* 📱 모바일 완벽 대응 (가로/세로 불문하고 900px 이하는 무조건 이 룰을 따름) */
-  @media (max-width: 900px) {
-    /* 1. 강제 고정 족쇄 해제: 폰에서는 무조건 화면 전체가 위아래로 자연스럽게 스크롤되게! */
-    html, body, .monitor {
+  /* 📱 모바일·가로모드: 세로 자연 스크롤 + grid-wrap 가로 스와이프 */
+  @media (max-width: 900px), (max-height: 500px) {
+    html, body {
       height: auto !important;
       min-height: 100vh !important;
+      min-height: 100dvh !important;
       overflow-x: hidden !important;
-      overflow-y: auto !important; /* 세로 스크롤 전면 허용 */
+      overflow-y: auto !important;
     }
     .monitor {
+      height: auto !important;
+      min-height: 100vh !important;
+      min-height: 100dvh !important;
+      overflow: visible !important;
       padding: 14px 12px 18px !important;
-      display: block !important; /* 억지 화면 꽉 채우기 방지 */
     }
-
-    /* 2. 가로/세로 모드 찌그러짐 방지: 무조건 위아래 1단 배치로 널찍하게! */
     .dual-track {
       display: flex !important;
       flex-direction: column !important;
       gap: 16px !important;
+      flex: none !important;
       height: auto !important;
       overflow: visible !important;
     }
-
-    /* 3. 패널 내부 스크롤 먹통 해제 (전체 화면 스크롤에 온전히 맡김) */
     .track-panel, .panel-body, .panel-scroll {
       height: auto !important;
       min-height: 0 !important;
       max-height: none !important;
       overflow: visible !important;
+      flex: none !important;
     }
-
-    /* 4. 시간표 표 (수요일 짤림) 완벽 해결: 널찍한 가로 스와이프 확보 */
     .grid-wrap {
       width: 100% !important;
+      max-width: 100% !important;
       overflow-x: auto !important;
+      overflow-y: visible !important;
       -webkit-overflow-scrolling: touch !important;
-      display: block !important;
+      touch-action: pan-x pan-y !important;
     }
     .weekly-grid {
-      min-width: 680px !important; /* 월~금 넉넉하게 늘려놓고 스와이프 유도 */
-      width: 100% !important;
+      min-width: 680px !important;
     }
-    
     .chalkboard { min-height: 200px !important; }
     .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
     .clock-block { text-align: left; width: 100%; }
     .filter-tabs { flex-direction: column; }
-    .filter-btn { min-width: 0; width: 100%; }
+    .filter-btn { min-width: 0; width: 100%; touch-action: manipulation; }
     .status-bar { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .notice-card.has-tooltip { cursor: pointer; touch-action: manipulation; }
   }
 </style>
 </head>
@@ -770,6 +822,36 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/** 카드 본문(메모) vs 툴팁(본문 전체) 분리 */
+function getNoticeBodyText(row) {
+  const pageContent = (row.pageContent || row.body || '').trim();
+  const memo = row.memo ? String(row.memo).trim() : '';
+  if (pageContent) {
+    if (memo && pageContent !== memo && !pageContent.includes(memo)) {
+      return `${memo}\n\n${pageContent}`;
+    }
+    return pageContent;
+  }
+  return memo;
+}
+
+function shouldShowNoticeTooltip(row, bodyText) {
+  if (!bodyText) return false;
+  const memo = row.memo ? String(row.memo).trim() : '';
+  const pageContent = (row.pageContent || row.body || '').trim();
+  if (pageContent && pageContent !== memo) return true;
+  if (!memo && pageContent) return true;
+  return memo.length > 100;
+}
+
+function renderNoticeTooltipHtml(label, bodyText) {
+  return `
+    <div class="notice-tooltip" role="tooltip">
+      <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">${label}</div>
+      <div>${escapeHtml(bodyText)}</div>
+    </div>`;
+}
+
 function getPeriodDefinitions() {
   const map = new Map(DEFAULT_PERIODS.map(p => [p.num, { ...p }]));
 
@@ -989,18 +1071,17 @@ function renderNotices() {
       const memo = String(row.memo).trim();
       const toneClass = getMemoToneClass(row.dayOfWeek);
       const title = buildClassMemoTitle(row);
-      const hasTooltip = memo.length > 0;
+      const bodyText = getNoticeBodyText(row);
+      const hasTooltip = shouldShowNoticeTooltip(row, bodyText);
 
       return `
-        <div class="notice-card memo-from-class ${toneClass} ${hasTooltip ? 'has-tooltip' : ''}" 
-             ${hasTooltip ? `onclick="toggleNoticeTooltip(event, this)"` : ''}>
+        <div class="notice-card memo-from-class ${toneClass}${hasTooltip ? ' has-tooltip' : ''}"
+             ${hasTooltip ? ' tabindex="0" data-notice-tooltip' : ''}>
           <div class="notice-title">📝 ${escapeHtml(title)}</div>
+          ${memo ? `<div class="notice-memo">${escapeHtml(memo)}</div>` : ''}
           ${row.child ? `<div class="notice-child">👤 ${escapeHtml(row.child)}</div>` : ''}
-          ${hasTooltip ? `
-            <div class="notice-tooltip">
-              <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">💬 수업 메모</div>
-              <div>${escapeHtml(memo)}</div>
-            </div>` : ''}
+          ${hasTooltip ? `<div class="notice-more-hint">터치/클릭하면 전체 본문 보기</div>` : ''}
+          ${hasTooltip ? renderNoticeTooltipHtml('💬 수업 메모 · 본문', bodyText) : ''}
         </div>`;
     }
 
@@ -1009,22 +1090,42 @@ function renderNotices() {
       : '';
     const title = row.title || (row.subject === '기타' ? '행정 안내' : row.subject);
     const memo = row.memo ? String(row.memo).trim() : '';
-    const noticeIcon = getNoticeIcon(title, memo);
-    const hasTooltip = memo.length > 0;
+    const bodyText = getNoticeBodyText(row);
+    const noticeIcon = getNoticeIcon(title, memo || bodyText);
+    const hasTooltip = shouldShowNoticeTooltip(row, bodyText);
 
     return `
-      <div class="notice-card admin-notice ${hasTooltip ? 'has-tooltip' : ''}" 
-           ${hasTooltip ? `onclick="toggleNoticeTooltip(event, this)"` : ''}>
+      <div class="notice-card admin-notice${hasTooltip ? ' has-tooltip' : ''}"
+           ${hasTooltip ? ' tabindex="0" data-notice-tooltip' : ''}>
         <div class="notice-title">${noticeIcon} ${escapeHtml(title)}</div>
         ${alertHtml}
+        ${memo ? `<div class="notice-memo">${escapeHtml(memo)}</div>` : ''}
         ${row.child ? `<div class="notice-child">👤 ${escapeHtml(row.child)}</div>` : ''}
-        ${hasTooltip ? `
-          <div class="notice-tooltip">
-            <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">📌 공지 상세 내용</div>
-            <div>${escapeHtml(memo)}</div>
-          </div>` : ''}
+        ${hasTooltip ? `<div class="notice-more-hint">터치/클릭하면 전체 본문 보기</div>` : ''}
+        ${hasTooltip ? renderNoticeTooltipHtml('📌 공지 본문', bodyText) : ''}
       </div>`;
   }).join('');
+
+  bindNoticeTooltipEvents(container);
+}
+
+function bindNoticeTooltipEvents(container) {
+  container.querySelectorAll('[data-notice-tooltip]').forEach(card => {
+    card.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isActive = card.classList.contains('active');
+      container.querySelectorAll('.notice-card.has-tooltip.active').forEach(other => {
+        if (other !== card) other.classList.remove('active');
+      });
+      card.classList.toggle('active', !isActive);
+    });
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        card.click();
+      }
+    });
+  });
 }
 
 function renderAll() {
@@ -1056,21 +1157,14 @@ window.toggleLessonTooltip = function(event, element) {
   }
 };
 
-// 공지사항 툴팁 토글 제어용
+// 공지사항 툴팁은 bindNoticeTooltipEvents에서 처리 (레거시 onclick 호환)
 window.toggleNoticeTooltip = function(event, cardEl) {
-  event.stopPropagation();
+  if (event) event.stopPropagation();
   const isActive = cardEl.classList.contains('active');
-  
-  // 다른 활성화된 공지사항 툴팁 정리
   document.querySelectorAll('.notice-card.has-tooltip.active').forEach(card => {
     if (card !== cardEl) card.classList.remove('active');
   });
-  
-  if (!isActive) {
-    cardEl.classList.add('active');
-  } else {
-    cardEl.classList.remove('active');
-  }
+  cardEl.classList.toggle('active', !isActive);
 };
 
 async function loadTimetableData() {
