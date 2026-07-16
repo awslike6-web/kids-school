@@ -300,6 +300,53 @@ function extractPlainTextFromNotionBlock(block) {
 }
 
 /**
+ * 노션 블록의 자식 블록을 재귀적으로 plain text로 수집
+ * (toggle, heading, list item, callout, column 등 has_children 블록용)
+ */
+async function fetchNotionBlockChildrenPlainText(blockId) {
+    if (!blockId) return "";
+    let chunks = [];
+    let hasMore = true;
+    let nextCursor = undefined;
+
+    try {
+        while (hasMore) {
+            const qs = new URLSearchParams({ page_size: "100" });
+            if (nextCursor) qs.set("start_cursor", nextCursor);
+
+            const response = await fetch(`${PROXY_URL}/v1/blocks/${blockId}/children?${qs.toString()}`);
+            if (!response.ok) break;
+
+            const data = await response.json();
+            for (const block of data.results || []) {
+                const text = await collectPlainTextFromNotionBlock(block);
+                if (text.trim()) chunks.push(text.trim());
+            }
+            hasMore = !!data.has_more;
+            nextCursor = data.next_cursor;
+        }
+    } catch (error) {
+        console.warn("[fetchNotionBlockChildrenPlainText] 자식 블록 로드 실패:", blockId, error);
+    }
+
+    return chunks.join("\n\n");
+}
+
+/** 블록 자체 텍스트 + has_children이면 중첩 자식까지 plain text 수집 */
+async function collectPlainTextFromNotionBlock(block) {
+    const parts = [];
+    const ownText = extractPlainTextFromNotionBlock(block);
+    if (ownText.trim()) parts.push(ownText.trim());
+
+    if (block.has_children && block.id) {
+        const childText = await fetchNotionBlockChildrenPlainText(block.id);
+        if (childText.trim()) parts.push(childText.trim());
+    }
+
+    return parts.join("\n\n");
+}
+
+/**
  * 노션 페이지 본문(blocks)을 plain text로 수집 — 공지 본문(페이지 내용)용
  */
 async function fetchNotionPageBlocksPlainText(pageId) {
@@ -318,7 +365,7 @@ async function fetchNotionPageBlocksPlainText(pageId) {
 
             const data = await response.json();
             for (const block of data.results || []) {
-                const text = extractPlainTextFromNotionBlock(block);
+                const text = await collectPlainTextFromNotionBlock(block);
                 if (text.trim()) chunks.push(text.trim());
             }
             hasMore = !!data.has_more;
