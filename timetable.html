@@ -143,6 +143,7 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(0,242,254,0.25) transparent;
     padding-right: 4px;
+    -webkit-overflow-scrolling: touch;
   }
   .panel-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
   .panel-scroll::-webkit-scrollbar-thumb { background: rgba(0,242,254,0.25); border-radius: 999px; }
@@ -374,40 +375,6 @@
   body.mode-personal .back-lobby-btn { display: inline-flex; align-items: center; gap: 6px; }
   body.mode-personal .viewer-badge { display: block; }
 
-  @media (max-width: 900px) {
-    .dual-track {
-      grid-template-columns: 1fr;
-      overflow: visible;
-      flex: none;
-    }
-    html, body {
-      overflow-x: hidden;
-      overflow-y: auto;
-      height: auto;
-      min-height: 100vh;
-      min-height: 100dvh;
-    }
-    .monitor {
-      height: auto;
-      min-height: 100vh;
-      min-height: 100dvh;
-      overflow: visible;
-    }
-    .track-panel { min-height: 0; overflow: visible; }
-    .panel-body { flex: none; overflow: visible; }
-    .panel-scroll { height: auto; max-height: none; }
-    .chalkboard { min-height: 180px; }
-  }
-
-  @media (max-width: 680px) {
-    .monitor { padding: 14px 12px 18px; gap: 12px; }
-    .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .clock-block { text-align: left; width: 100%; }
-    .filter-tabs { flex-direction: column; }
-    .filter-btn { min-width: 0; width: 100%; }
-    .weekly-grid .period-col { width: 88px; padding: 8px 6px; }
-    .status-bar { flex-direction: column; align-items: flex-start; gap: 4px; }
-  }
   /* ✉️ 메모 아이콘 및 툴팁 스타일 */
   .lesson-memo-container {
     position: relative;
@@ -461,6 +428,170 @@
   .lesson-memo-container.active .lesson-tooltip {
     visibility: visible;
     opacity: 1;
+  }
+
+  /* 🔔 공지 툴팁 전용 디자인 (가독성 향상 및 웅장한 네온 노랑 테두리) */
+  .notice-card.has-tooltip {
+    position: relative;
+    cursor: pointer;
+  }
+  .notice-tooltip {
+    visibility: hidden;
+    width: 280px;
+    max-width: calc(100vw - 40px);
+    background-color: rgba(18, 14, 32, 0.98);
+    color: #fff;
+    text-align: left;
+    border: 2px solid var(--yellow);
+    border-radius: 12px;
+    padding: 12px 14px;
+    position: absolute;
+    z-index: 101;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s, visibility 0.3s;
+    font-family: 'Gaegu', cursive;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    box-shadow: 0 8px 32px rgba(255, 217, 61, 0.4);
+    pointer-events: none;
+  }
+  .notice-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: rgba(18, 14, 32, 0.98) transparent transparent transparent;
+  }
+  .notice-card.has-tooltip:hover .notice-tooltip,
+  .notice-card.has-tooltip.active .notice-tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* 📱 모바일 가속 스크롤 및 레이아웃 개선 */
+  .panel-scroll {
+    height: 100%;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,242,254,0.25) transparent;
+    padding-right: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 세로 모드 대응 미디어 쿼리 (가로 모드가 아닐 때 900px 이하) */
+  @media (max-width: 900px) {
+    .dual-track {
+      grid-template-columns: 1fr;
+      overflow: visible;
+      flex: none;
+    }
+    html, body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: auto;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    .monitor {
+      height: auto;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: visible;
+    }
+    .track-panel { min-height: 0; overflow: visible; }
+    .panel-body { flex: none; overflow: visible; }
+    .panel-scroll { height: auto; max-height: none; }
+    .chalkboard { min-height: 180px; }
+
+    /* 📱 시간표 격자 짤림 개선을 위한 가로 스와이프 활성화 */
+    .grid-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* 📱 모바일 가로 모드 (Landscape) 고도화 대응 */
+  @media (max-width: 900px) and (orientation: landscape) {
+    html, body {
+      overflow: hidden !important; /* 내부 스크롤 활용 및 한 화면 꽉 채움 */
+      height: 100vh !important;
+      height: 100dvh !important;
+    }
+    .monitor {
+      height: 100vh !important;
+      height: 100dvh !important;
+      overflow: hidden !important;
+      padding: 10px 16px 8px !important;
+      gap: 10px !important;
+    }
+    .top-bar {
+      flex-direction: row !important; /* 수평 정렬 */
+      align-items: center !important;
+    }
+    .clock-block {
+      text-align: right !important;
+      width: auto !important;
+    }
+    .clock-time {
+      font-size: 2.2rem !important;
+    }
+    .clock-date {
+      display: none !important; /* 화면 가독성 및 공간 최적화 */
+    }
+    .filter-tabs {
+      flex-direction: row !important;
+      gap: 6px !important;
+    }
+    .filter-btn {
+      padding: 8px 12px !important;
+      font-size: 0.95rem !important;
+    }
+    .dual-track {
+      display: grid !important;
+      grid-template-columns: 1.2fr 0.8fr !important; /* 듀얼 트랙 복원 */
+      gap: 12px !important;
+      flex: 1 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+    .track-panel {
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+    .panel-body {
+      flex: 1 !important;
+      overflow: hidden !important;
+    }
+    .panel-scroll {
+      height: 100% !important;
+      max-height: none !important;
+      overflow: auto !important;
+    }
+    .chalkboard {
+      min-height: 100% !important;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .monitor { padding: 14px 12px 18px; gap: 12px; }
+    @media (orientation: portrait) {
+      .top-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .clock-block { text-align: left; width: 100%; }
+      .filter-tabs { flex-direction: column; }
+      .filter-btn { min-width: 0; width: 100%; }
+    }
+    .weekly-grid .period-col { width: 88px; padding: 8px 6px; }
+    .status-bar { flex-direction: column; align-items: flex-start; gap: 4px; }
   }
 </style>
 </head>
@@ -751,7 +882,7 @@ function renderLessonCell(rows) {
     const hasMemo = row.memo && String(row.memo).trim();
 
     const memoHtml = hasMemo ? `
-      <span class="lesson-memo-container" onclick="event.stopPropagation(); this.classList.toggle('active');">
+      <span class="lesson-memo-container" onclick="event.stopPropagation(); toggleLessonTooltip(event, this);">
         <span class="lesson-memo-icon">✉️</span>
         <span class="lesson-tooltip">${escapeHtml(row.memo)}</span>
       </span>
@@ -913,10 +1044,19 @@ function renderNotices() {
     if (item.kind === 'classMemo') {
       const memo = String(row.memo).trim();
       const toneClass = getMemoToneClass(row.dayOfWeek);
+      const title = buildClassMemoTitle(row);
+      const hasTooltip = memo.length > 0;
+
       return `
-        <div class="notice-card memo-from-class ${toneClass}">
-          <div class="notice-title">${escapeHtml(buildClassMemoTitle(row))} - ${escapeHtml(memo)}</div>
+        <div class="notice-card memo-from-class ${toneClass} ${hasTooltip ? 'has-tooltip' : ''}" 
+             ${hasTooltip ? `onclick="toggleNoticeTooltip(event, this)"` : ''}>
+          <div class="notice-title">📝 ${escapeHtml(title)}</div>
           ${row.child ? `<div class="notice-child">👤 ${escapeHtml(row.child)}</div>` : ''}
+          ${hasTooltip ? `
+            <div class="notice-tooltip">
+              <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">💬 수업 메모</div>
+              <div>${escapeHtml(memo)}</div>
+            </div>` : ''}
         </div>`;
     }
 
@@ -926,13 +1066,19 @@ function renderNotices() {
     const title = row.title || (row.subject === '기타' ? '행정 안내' : row.subject);
     const memo = row.memo ? String(row.memo).trim() : '';
     const noticeIcon = getNoticeIcon(title, memo);
+    const hasTooltip = memo.length > 0;
 
     return `
-      <div class="notice-card admin-notice">
+      <div class="notice-card admin-notice ${hasTooltip ? 'has-tooltip' : ''}" 
+           ${hasTooltip ? `onclick="toggleNoticeTooltip(event, this)"` : ''}>
         <div class="notice-title">${noticeIcon} ${escapeHtml(title)}</div>
         ${alertHtml}
-        ${memo ? `<div class="notice-memo">${escapeHtml(memo)}</div>` : ''}
         ${row.child ? `<div class="notice-child">👤 ${escapeHtml(row.child)}</div>` : ''}
+        ${hasTooltip ? `
+          <div class="notice-tooltip">
+            <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">📌 공지 상세 내용</div>
+            <div>${escapeHtml(memo)}</div>
+          </div>` : ''}
       </div>`;
   }).join('');
 }
@@ -947,6 +1093,40 @@ window.setChildFilter = function(childKey, btnEl) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btnEl.classList.add('active');
   renderAll();
+};
+
+// 시간표 격자 내 개별 메모 툴팁 제어용
+window.toggleLessonTooltip = function(event, element) {
+  event.stopPropagation();
+  const isActive = element.classList.contains('active');
+  
+  // 다른 활성화된 수업 툴팁 일시 정리
+  document.querySelectorAll('.lesson-memo-container.active').forEach(container => {
+    if (container !== element) container.classList.remove('active');
+  });
+  
+  if (!isActive) {
+    element.classList.add('active');
+  } else {
+    element.classList.remove('active');
+  }
+};
+
+// 공지사항 툴팁 토글 제어용
+window.toggleNoticeTooltip = function(event, cardEl) {
+  event.stopPropagation();
+  const isActive = cardEl.classList.contains('active');
+  
+  // 다른 활성화된 공지사항 툴팁 정리
+  document.querySelectorAll('.notice-card.has-tooltip.active').forEach(card => {
+    if (card !== cardEl) card.classList.remove('active');
+  });
+  
+  if (!isActive) {
+    cardEl.classList.add('active');
+  } else {
+    cardEl.classList.remove('active');
+  }
 };
 
 async function loadTimetableData() {
@@ -981,10 +1161,14 @@ window.addEventListener('DOMContentLoaded', () => {
   applyViewerUi();
   loadTimetableData();
   setInterval(loadTimetableData, 5 * 60 * 1000);
-  // 바깥 영역 클릭/터치 시 활성화된 수업 카드 툴팁 닫기
+
+  // 바깥 영역 클릭/터치 시 모든 활성화된 툴팁(수업 메모 & 공지사항) 일괄 닫기
   document.addEventListener('click', () => {
     document.querySelectorAll('.lesson-memo-container.active').forEach(container => {
       container.classList.remove('active');
+    });
+    document.querySelectorAll('.notice-card.has-tooltip.active').forEach(card => {
+      card.classList.remove('active');
     });
   });
 });
