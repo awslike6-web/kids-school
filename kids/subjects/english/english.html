@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 공부방 - 영어 멀티버스</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/english.css">
+<!-- 📏 4선지 통합 규격 (용어사전 4선 공책 인쇄 모듈이 사용) -->
+<link rel="stylesheet" href="../../css/four_line_print.css">
+</head>
+<body>
+
+<div class="clouds"></div>
+
+<div class="english-container">
+  
+  <div class="top-action-bar">
+    <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
+        🔊 요정 음성 ON
+      </button>
+      <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
+    </div>
+  </div>
+
+  <div class="main-header-card">
+    <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
+    <h1 id="englishTitle">민수의 영어 멀티버스 대기실</h1>
+    <p class="banner-goal-desc" id="englishGoalText">영어의 달인이 되어보자! 6단계 파이프라인 가동!</p>
+  </div>
+
+  <div class="english-grid">
+    
+    <div class="english-grid-btn" onclick="openMissionView('stage1')">
+      <span class="english-btn-icon">🔤</span>
+      <div class="english-btn-title">1단계: 알파벳 터치방</div>
+      <p class="english-btn-desc">알파벳을 누르고 원어민 소리를 들어보며 친해져요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage2')">
+      <span class="english-btn-icon">🎧</span>
+      <div class="english-btn-title">2단계: 파닉스 듣기방</div>
+      <p class="english-btn-desc">코코 요정의 발음을 듣고 알맞은 단어를 골라보세요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage3')">
+      <span class="english-btn-icon">📝</span>
+      <div class="english-btn-title">3단계: 영단어/숙어방</div>
+      <p class="english-btn-desc">4가지 방식(따라쓰기·한영·영한·듣기) 중 골라 단어/숙어를 연습해요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage4')">
+      <span class="english-btn-icon">💬</span>
+      <div class="english-btn-title">4단계: 영어 문장방</div>
+      <p class="english-btn-desc">단어 카드를 순서대로 배열해서 완벽한 영어 문장을 만들어요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage5')">
+      <span class="english-btn-icon">📖</span>
+      <div class="english-btn-title">5단계: 짧은 문단 독해</div>
+      <p class="english-btn-desc">영어 문단 순서를 맞추고 연결어를 찾으며 독해력을 키워요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="openMissionView('stage6')">
+      <span class="english-btn-icon">🗣️</span>
+      <div class="english-btn-title">6단계: 예비 중등 토론</div>
+      <p class="english-btn-desc">영어 지문을 읽고 코코 요정과 영어로 토론을 나누어 보아요!</p>
+    </div>
+
+    <div class="english-grid-btn" onclick="location.href='print_english.html'">
+      <span class="english-btn-icon">🖨️</span>
+      <div class="english-btn-title">특별: 영어 공책 인쇄방</div>
+      <p class="english-btn-desc">노션 영단어를 4선 공책에 맞춰 인쇄하고 직접 써봐요!</p>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="english-overlay" id="missionOverlay">
+  <div class="english-overlay-box">
+    <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
+    
+    <div class="overlay-header">
+      <span id="overlayHeaderIcon" style="font-size: 1.8rem;">📖</span>
+      <h2 class="overlay-heading" id="overlayHeaderTitle">미션 타이틀</h2>
+    </div>
+
+    <div class="overlay-body" id="overlayInnerBody">
+      <!-- 동적 콘텐츠 렌더링 영역 -->
+    </div>
+  </div>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
+<script src="../../data/english-reading-data.js"></script>
+<script src="../../js/four_line_print.js"></script>
+<script src="../../js/english_common.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initializeEnglishRoom === 'function') {
+        initializeEnglishRoom();
+    } else {
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--minecraft' : 'theme--slime';
+    }
+
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("ENGLISH");
+    }
+  });
+</script>
+</body>
+</html>

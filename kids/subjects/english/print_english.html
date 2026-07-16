@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영어 공책 인쇄방 🖨️</title>
+<!-- 📏 4선지 통합 규격 (선·글자·교정값의 유일한 원본) -->
+<link rel="stylesheet" href="../../css/four_line_print.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+    :root {
+        --blue-line: #a0c4ff;
+        --red-line: #ff8a8a;
+        --text-trace: #c0c0c0;
+        --text-korean: #333333;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nanum Gothic', sans-serif; background: #f0f2f5; color: #333; }
+    
+    .header-bar { 
+        display: flex; justify-content: space-between; padding: 15px 30px; 
+        background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        align-items: center; position: relative; z-index: 100;
+    }
+    .header-title { font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #4a3352; }
+    .btn-print { 
+        padding: 10px 24px; background: linear-gradient(135deg, #4D96FF, #00D4FF); 
+        color: white; border: none; border-radius: 12px; 
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; cursor: pointer; 
+        box-shadow: 0 4px 10px rgba(77, 150, 255, 0.3); transition: transform 0.2s;
+    }
+    .btn-print:hover { transform: scale(1.05); }
+    .btn-back {
+        padding: 10px 20px; background: #e0e0e0; color: #555; border: none; border-radius: 12px;
+        font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; text-decoration: none;
+    }
+
+    .filter-panel {
+        display: flex; justify-content: center; gap: 20px; padding: 15px 30px;
+        background: #fff; margin: 0 auto 20px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        max-width: 800px; border-radius: 0 0 16px 16px; align-items: center; flex-wrap: wrap;
+    }
+    .filter-group { display: flex; align-items: center; gap: 10px; font-family: 'Jua', sans-serif; font-size: 1.1rem; }
+    .filter-group select {
+        padding: 8px 12px; border-radius: 8px; border: 2px solid #a0c4ff;
+        font-family: 'Nanum Gothic', sans-serif; font-size: 1rem; outline: none; cursor: pointer;
+    }
+    .word-count { background: #ff8a8a; color: white; padding: 6px 14px; border-radius: 20px; font-size: 1rem; }
+
+    .picker-panel {
+        max-width: 900px; margin: 0 auto 20px auto; padding: 16px 20px;
+        background: #fff; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+    .picker-panel h3 { font-family: 'Jua', sans-serif; color: #4D96FF; margin-bottom: 12px; font-size: 1.1rem; }
+    .picker-flex { display: flex; gap: 20px; flex-wrap: wrap; }
+    .word-pool { flex: 1; min-width: 260px; max-height: 220px; overflow-y: auto;
+                 border: 2px solid #eee; border-radius: 10px; padding: 8px; background: #fafafa; }
+    .word-pool label { display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+                       font-family: 'Nanum Gothic', sans-serif; font-size: 0.95rem; cursor: pointer; border-radius: 6px; }
+    .word-pool label:hover { background: #f2f7ff; }
+    .word-order { flex: 1; min-width: 260px; }
+    .word-order strong { font-size: 0.9rem; color: #888; }
+    #orderList { list-style: none; margin-top: 8px; max-height: 220px; overflow-y: auto; }
+    #orderList li {
+        display: flex; align-items: center; gap: 8px; padding: 6px 10px; margin-bottom: 5px;
+        background: #f8faff; border: 1px solid #d7e6ff; border-radius: 8px;
+        font-family: 'Nanum Gothic', sans-serif; font-size: 0.95rem; cursor: grab;
+    }
+    #orderList li.dragging { opacity: .4; }
+    #orderList li .w { flex: 1; }
+    #orderList li button {
+        width: 28px; height: 26px; font-size: 0.8rem; border: none; border-radius: 6px;
+        background: #e0e0e0; cursor: pointer; font-family: 'Jua', sans-serif;
+    }
+
+    #print-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .a4-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto 20px auto;
+        background: white;
+        padding: 15mm;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        page-break-after: always;
+        position: relative;
+    }
+    .a4-page:last-child {
+        page-break-after: auto;
+    }
+
+    .page-title { 
+        text-align: center; font-family: 'Jua', sans-serif; font-size: 2rem; 
+        margin-bottom: 25px; color: #4a3352; border-bottom: 3px dashed var(--blue-line); padding-bottom: 10px;
+    }
+
+    /* 📏 4선지 배경·따라쓰기·행 레이아웃 스타일은 four_line_print.css 통합 규격 사용 */
+
+    .loading {
+        text-align: center; padding: 50px; font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #4D96FF;
+    }
+
+    @media print {
+        body { background: white; margin: 0; padding: 0; }
+        .no-print { display: none !important; }
+        #print-container { display: block; }
+        .a4-page { 
+            margin: 0; 
+            box-shadow: none; 
+            padding: 15mm; 
+            width: 210mm; 
+            height: 297mm; 
+            page-break-after: always;
+        }
+        .a4-page:last-child {
+            page-break-after: auto;
+        }
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="no-print header-bar">
+    <a href="english.html" class="btn-back">🔙 영어 던전으로</a>
+    <div class="header-title">영어 공책 인쇄방 🖨️</div>
+    <button class="btn-print" onclick="handlePrint()">인쇄하기</button>
+</div>
+
+<div class="no-print filter-panel">
+    <div class="filter-group">
+        <label>학년 선택:</label>
+        <select id="gradeSelect" onchange="onFilterChange()">
+            <option value="all">모든 학년</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>단원 선택:</label>
+        <select id="stageSelect" onchange="onFilterChange()">
+            <option value="all">모든 단원</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <span id="wordCountBadge" class="word-count">선택 0 / 필터 0</span>
+    </div>
+</div>
+
+<div class="no-print picker-panel" id="pickerPanel" style="display:none;">
+    <h3>📋 인쇄 단어 선택 &amp; 순서 (체크한 순서대로 인쇄 · 드래그 또는 ▲▼로 조정)</h3>
+    <div class="picker-flex">
+        <div class="word-pool" id="wordPool"></div>
+        <div class="word-order">
+            <strong>인쇄 순서 ↓</strong>
+            <ul id="orderList"></ul>
+        </div>
+    </div>
+</div>
+
+<div id="print-container">
+    <div class="loading" id="loading">노션에서 영단어를 불러오는 중입니다... ⏳</div>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../js/four_line_print.js"></script>
+<script>
+    const requiredCores = ["notion-helper.js"];
+    let allWords = [];
+    let selectedPrintOrder = [];  // { key, word, meaning }
+
+    function loadCoreScripts(basePath, scripts, callback) {
+        let loadedCount = 0;
+        scripts.forEach(script => {
+            const s = document.createElement('script');
+            s.src = basePath + script;
+            s.onload = () => {
+                loadedCount++;
+                if (loadedCount === scripts.length && callback) callback();
+            };
+            document.body.appendChild(s);
+        });
+    }
+
+    loadCoreScripts("../../core/", requiredCores, async () => {
+        try {
+            allWords = await fetchVocaFromNotion({ subject: '영어' });
+            
+            const container = document.getElementById('print-container');
+            
+            if (!allWords || allWords.length === 0) {
+                container.innerHTML = '<div class="loading">등록된 영단어가 없습니다. 노션 DB를 확인해주세요!</div>';
+                return;
+            }
+
+            const grades = [...new Set(allWords.map(w => w.grade).filter(Boolean))].sort();
+            const gradeSelect = document.getElementById('gradeSelect');
+            grades.forEach(g => gradeSelect.add(new Option(g, g)));
+            
+            const stages = [...new Set(allWords.map(w => w.stage).filter(Boolean))].sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+            const stageSelect = document.getElementById('stageSelect');
+            stages.forEach(s => stageSelect.add(new Option(s, s)));
+
+            window.onFilterChange();
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('print-container').innerHTML = '<div class="loading" style="color:red;">데이터를 불러오는데 실패했습니다.</div>';
+        }
+    });
+
+    function getFilteredWords() {
+        const selectedGrade = document.getElementById('gradeSelect').value;
+        const selectedStage = document.getElementById('stageSelect').value;
+        let filtered = allWords;
+        if (selectedGrade !== 'all') filtered = filtered.filter(w => w.grade === selectedGrade);
+        if (selectedStage !== 'all') filtered = filtered.filter(w => w.stage === selectedStage);
+        return filtered.map((item, idx) => ({
+            key: item.id || `w_${idx}_${item.word}`,
+            word: item.word || '',
+            meaning: item.meaning || ''
+        }));
+    }
+
+    window.onFilterChange = function() {
+        const filtered = getFilteredWords();
+        const keys = new Set(filtered.map(w => w.key));
+        selectedPrintOrder = selectedPrintOrder.filter(w => keys.has(w.key));
+        rebuildWordPool(filtered);
+        if (filtered.length === 0) {
+            document.getElementById('pickerPanel').style.display = 'none';
+            document.getElementById('print-container').innerHTML =
+                '<div class="loading">조건에 맞는 단어가 없습니다.</div>';
+            document.getElementById('wordCountBadge').textContent = '선택 0 / 필터 0';
+            return;
+        }
+        renderPages();
+    };
+
+    function rebuildWordPool(filtered) {
+        const panel = document.getElementById('pickerPanel');
+        const pool = document.getElementById('wordPool');
+        panel.style.display = filtered.length ? 'block' : 'none';
+        pool.innerHTML = '';
+        filtered.forEach(item => {
+            const label = document.createElement('label');
+            const checked = selectedPrintOrder.some(w => w.key === item.key);
+            label.innerHTML = `<input type="checkbox" data-key="${item.key}" ${checked ? 'checked' : ''}>
+                <span><b>${item.word}</b> : ${item.meaning}</span>`;
+            label.querySelector('input').onchange = e => {
+                if (e.target.checked) addToPrintOrder(item);
+                else removeFromPrintOrder(item.key);
+            };
+            pool.appendChild(label);
+        });
+        syncOrderListUI();
+    }
+
+    function syncOrderListUI() {
+        const orderList = document.getElementById('orderList');
+        orderList.innerHTML = '';
+        selectedPrintOrder.forEach(item => {
+            const li = document.createElement('li');
+            li.draggable = true;
+            li.dataset.key = item.key;
+            li.innerHTML = `<span class="w"><b>${item.word}</b> : ${item.meaning}</span>
+                <button type="button" onclick="movePrintItem(this,-1)">▲</button>
+                <button type="button" onclick="movePrintItem(this,1)">▼</button>`;
+            li.addEventListener('dragstart', () => li.classList.add('dragging'));
+            li.addEventListener('dragend', () => {
+                li.classList.remove('dragging');
+                selectedPrintOrder = [...orderList.querySelectorAll('li')].map(el => {
+                    const key = el.dataset.key;
+                    return selectedPrintOrder.find(w => w.key === key);
+                }).filter(Boolean);
+                renderPages();
+            });
+            orderList.appendChild(li);
+        });
+        if (!orderList.dataset.bound) {
+            orderList.dataset.bound = '1';
+            orderList.addEventListener('dragover', e => {
+                e.preventDefault();
+                const dragging = orderList.querySelector('.dragging');
+                if (!dragging) return;
+                const siblings = [...orderList.querySelectorAll('li:not(.dragging)')];
+                const next = siblings.find(s => e.clientY < s.getBoundingClientRect().top + s.offsetHeight / 2);
+                orderList.insertBefore(dragging, next || null);
+                selectedPrintOrder = [...orderList.querySelectorAll('li')].map(li => {
+                    const key = li.dataset.key;
+                    return selectedPrintOrder.find(w => w.key === key);
+                }).filter(Boolean);
+            });
+        }
+    }
+
+    function addToPrintOrder(item) {
+        if (!selectedPrintOrder.some(w => w.key === item.key)) {
+            selectedPrintOrder.push(item);
+            syncOrderListUI();
+            renderPages();
+        }
+    }
+
+    function removeFromPrintOrder(key) {
+        selectedPrintOrder = selectedPrintOrder.filter(w => w.key !== key);
+        const cb = document.querySelector(`#wordPool input[data-key="${CSS.escape(key)}"]`);
+        if (cb) cb.checked = false;
+        syncOrderListUI();
+        renderPages();
+    }
+
+    window.movePrintItem = function(btn, dir) {
+        const li = btn.closest('li');
+        const key = li.dataset.key;
+        const idx = selectedPrintOrder.findIndex(w => w.key === key);
+        if (idx < 0) return;
+        const swapIdx = idx + dir;
+        if (swapIdx < 0 || swapIdx >= selectedPrintOrder.length) return;
+        [selectedPrintOrder[idx], selectedPrintOrder[swapIdx]] =
+            [selectedPrintOrder[swapIdx], selectedPrintOrder[idx]];
+        syncOrderListUI();
+        renderPages();
+    };
+
+    window.handlePrint = function() {
+        if (selectedPrintOrder.length === 0) {
+            alert('인쇄할 단어를 먼저 체크해주세요!');
+            return;
+        }
+        printWhenFontsReady();
+    };
+
+    window.renderPages = function() {
+        const filtered = getFilteredWords();
+        document.getElementById('wordCountBadge').textContent =
+            `선택 ${selectedPrintOrder.length} / 필터 ${filtered.length}`;
+
+        const container = document.getElementById('print-container');
+        container.innerHTML = '';
+
+        if (selectedPrintOrder.length === 0) {
+            container.innerHTML = '<div class="loading">위에서 인쇄할 단어를 체크하고 순서를 정해주세요! 📋</div>';
+            return;
+        }
+
+        const selectedGrade = document.getElementById('gradeSelect').value;
+        const selectedStage = document.getElementById('stageSelect').value;
+
+        let pages = [];
+        let currentPage = [];
+        let currentHeight = 0;
+        const MAX_HEIGHT = 850;
+
+        selectedPrintOrder.forEach(item => {
+            const wordText = item.word;
+            const meaningText = item.meaning;
+            const traceCount = getTraceCount(wordText);
+            const traceRowsHtml = buildTraceRowsHtml(wordText, traceCount);
+            const estimatedLines = estimateTraceLineCount(wordText, traceCount);
+            const rowHeight = (estimatedLines * 48) * 2 + 15;
+
+            if (currentHeight + rowHeight > MAX_HEIGHT && currentPage.length > 0) {
+                pages.push(currentPage);
+                currentPage = [];
+                currentHeight = 0;
+            }
+            currentPage.push({ meaningText, traceRowsHtml, estimatedLines });
+            currentHeight += rowHeight;
+        });
+
+        if (currentPage.length > 0) pages.push(currentPage);
+
+        pages.forEach((pageWords, p) => {
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'a4-page';
+
+            const title = document.createElement('div');
+            title.className = 'page-title';
+            let titleText = '📝 영어 단어 쓰기 연습';
+            if (selectedGrade !== 'all') titleText += ` [${selectedGrade}]`;
+            if (selectedStage !== 'all') titleText += ` - ${selectedStage}`;
+            titleText += ` (${p + 1}/${pages.length})`;
+            title.textContent = titleText;
+            pageDiv.appendChild(title);
+
+            pageWords.forEach(data => {
+                const row = document.createElement('div');
+                row.className = 'word-row';
+                row.innerHTML = `
+                    <div class="meaning-wrap">${data.meaningText}</div>
+                    <div class="practice-area">
+                        <div class="trace-rows">${data.traceRowsHtml}</div>
+                        <div class="trace-rows empty-row-dynamic">${data.traceRowsHtml}</div>
+                    </div>
+                `;
+                pageDiv.appendChild(row);
+            });
+
+            container.appendChild(pageDiv);
+        });
+    }
+</script>
+</body>
+</html>

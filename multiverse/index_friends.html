@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>멀티버스 마스터 허브</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4; --purple: #A78BFA; --dark: #2D2D4E; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #fff; }
+  
+  .main-title { font-family: 'Gaegu', cursive; font-size: 3rem; margin-bottom: 30px; text-align: center; }
+  .hub-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 450px; }
+  
+  .hub-btn { background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 26px 20px; cursor: pointer; color: #fff; text-align: center; font-family: 'Jua', sans-serif; transition: all 0.2s; backdrop-filter: blur(10px); }
+  .hub-btn:hover { transform: translateY(-5px); background: rgba(255,255,255,0.15); border-color: var(--sky); }
+  .hub-btn .icon { font-size: 3rem; margin-bottom: 8px; }
+  .hub-btn .label { font-size: 1.35rem; }
+  
+  .hub-btn.dashboard { background: linear-gradient(135deg, var(--purple), var(--sky)); border: none; padding: 32px 20px; }
+  .hub-btn.dashboard:hover { box-shadow: 0 10px 30px rgba(167,139,250,0.4); }
+
+  .back-btn { margin-top: 40px; padding: 12px 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #aaa; font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+  .back-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+</style>
+</head>
+<body>
+
+  <h1 class="main-title">🌌 멀티버스 마스터 허브</h1>
+
+  <div class="hub-grid">
+    <button class="hub-btn dashboard" onclick="location.href='../parent_dashboard.html'">
+      <div class="icon">📊</div><div class="label">가족 학습 대시보드 진입</div>
+    </button>
+    <button class="hub-btn" onclick="location.href='multiverse.html'">
+      <div class="icon">👥</div><div class="label">지인/친구 공부방 목록 관리</div>
+    </button>
+  </div>
+
+  <button class="back-btn" onclick="location.href='../index.html'">← 대문으로 돌아가기</button>
+
+</body>
+</html>

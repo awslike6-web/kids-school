@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지식 도서관 - 민민이네 용어사전</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
+    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
+    --dark: #2D2D4E; --card: rgba(255,255,255,0.95);
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); padding-bottom: 50px; }
+  
+  body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%); }
+  body.theme--slime { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); }
+
+  .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.8); box-shadow: 0 2px 10px rgba(0,0,0,0.05); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50; }
+  .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: var(--dark); font-weight: bold; font-size: 0.9rem; }
+  
+  .header-area { text-align: center; padding: 40px 20px 20px; position: relative; }
+  .main-title { font-family: 'Gaegu', cursive; font-size: 3rem; font-weight: 700; margin-bottom: 15px; }
+  .main-title .accent { color: var(--pink); }
+  .main-title .accent2 { color: var(--purple); }
+
+  .search-container { max-width: 600px; margin: 0 auto 30px; display: flex; gap: 10px; padding: 0 20px; }
+  .search-input { flex: 1; padding: 18px 25px; border-radius: 30px; border: 3px solid var(--sky); font-family: 'Jua'; font-size: 1.3rem; outline: none; box-shadow: 0 6px 20px rgba(0,0,0,0.05); transition: all 0.3s; text-align: center; }
+  .search-input:focus { border-color: var(--purple); transform: translateY(-2px); }
+  
+  .section-title { text-align: center; margin: 20px 0 10px; font-size: 1.4rem; color: #555; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .section-title::before, .section-title::after { content: ''; display: inline-block; width: 40px; height: 2px; background: #ccc; }
+
+  .filter-group { max-width: 700px; margin: 0 auto 25px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 0 20px; }
+  .filter-btn { padding: 10px 20px; border-radius: 25px; background: #fff; border: 2px solid #ddd; font-family: 'Jua'; font-size: 1.1rem; cursor: pointer; color: #555; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.03); }
+  .filter-btn:hover { transform: translateY(-2px); border-color: var(--sky); }
+  .filter-btn.active { background: var(--purple); color: #fff; border-color: var(--purple); box-shadow: 0 4px 12px rgba(167, 139, 250, 0.4); }
+
+  .status-msg { text-align: center; font-size: 1.3rem; color: #666; margin: 30px 0 10px; font-weight: bold; min-height: 30px; }
+
+  .stage-section { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+  .stage-header { font-size: 1.5rem; color: var(--purple); border-bottom: 3px dashed var(--purple); padding-bottom: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+  .stage-header::before { content: '🔖'; }
+
+  .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; }
+  
+  .word-card { background: var(--card); border-radius: 20px; padding: 20px 15px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.06); cursor: pointer; border: 2px solid transparent; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; justify-content: center; min-height: 140px; position: relative; animation: popUp 0.3s ease forwards; }
+  @keyframes popUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .word-card:hover { transform: translateY(-5px); border-color: var(--sky); box-shadow: 0 12px 25px rgba(110, 198, 245, 0.2); }
+  .word-card.mastered { opacity: 0.8; border: 2px dashed var(--green); } 
+
+  .badge-area { position: absolute; top: 10px; left: 0; width: 100%; display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; padding: 0 10px; pointer-events: none; }
+  .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: #eee; color: #555; }
+  .badge.grade { background: #ffe4b5; color: #d2691e; }
+  .badge.pos { background: #e6e6fa; color: #8a2be2; }
+  
+  .word-title { font-size: 1.6rem; font-weight: bold; color: var(--dark); margin-top: 15px; word-break: keep-all; }
+  .master-crown { position: absolute; top: -10px; right: -10px; font-size: 1.5rem; }
+
+  .fairy-sidebar { text-align: center; max-width: 600px; margin: 40px auto 10px; padding: 20px; background: white; border-radius: 24px; box-shadow: 0 8px 25px rgba(0,0,0,0.05); border: 3px solid var(--yellow); }
+  .fairy-avatar { font-size: 3rem; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .fairy-chatbox { background: #fffde7; padding: 15px; border-radius: 15px; border: 1px dashed var(--orange); margin-bottom: 15px; min-height: 50px; font-family: 'Malgun Gothic', sans-serif; font-size: 1rem; line-height: 1.6; text-align: left; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; padding: 20px; }
+  .modal-overlay.active { display: flex; opacity: 1; }
+  .modal-content { background: #fff; border-radius: 24px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; padding: 30px 25px; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s; }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  
+  .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #999; border: none; background: none; }
+  .modal-word-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px dashed #eee; padding-bottom: 15px; }
+  .modal-word { font-size: 2.2rem; font-weight: bold; color: var(--dark); }
+  .audio-btn { font-size: 1.5rem; cursor: pointer; background: var(--sky); border: none; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; color: white; transition: transform 0.2s; }
+  .audio-btn:hover { transform: scale(1.1); }
+
+  .modal-image { width: 100%; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: none; object-fit: cover; max-height: 250px; }
+  .modal-meaning { font-size: 1.2rem; line-height: 1.5; margin-bottom: 20px; color: var(--dark); background: #f8f9fa; padding: 15px; border-radius: 15px; border-left: 5px solid var(--purple); }
+  
+  details { background: #fff5f8; border: 2px solid #ffb6c1; border-radius: 15px; padding: 5px 15px; margin-bottom: 20px; }
+  summary { font-size: 1.1rem; font-weight: bold; color: var(--pink); cursor: pointer; padding: 10px 0; outline: none; list-style: none; }
+  summary::before { content: '▶ '; font-size: 0.9rem; display: inline-block; }
+  details[open] summary::before { transform: rotate(90deg); }
+  .details-content { padding-bottom: 15px; font-family: 'Malgun Gothic', sans-serif; font-size: 1rem; color: #444; line-height: 1.6; word-break: keep-all; }
+
+  .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--purple); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div style="font-size: 1.2rem; font-weight: bold;">📚 지식 도서관</div>
+  <a href="../../lobby.html" class="exit-btn">🚪 로비로 나가기</a>
+</div>
+
+<div class="header-area">
+  <h1 class="main-title"><span class="accent2">민민이네</span> <span class="accent">용어사전</span></h1>
+  <p style="color:#666;" id="welcomeMsg">찾고 싶은 과목이나 학년을 선택해 보세요!</p>
+</div>
+
+<div class="search-container">
+  <input type="text" id="searchInput" class="search-input" placeholder="🔍 궁금한 단어를 직접 쳐보셔도 돼요!" oninput="handleSearch()">
+</div>
+
+<div class="section-title">과목별 보기</div>
+<div class="filter-group" id="subjectFilterArea"></div>
+
+<div class="section-title">학년별 보기</div>
+<div class="filter-group" id="gradeFilterArea"></div>
+
+<hr style="max-width: 600px; margin: 30px auto; border: 1px dashed #ccc;">
+
+<div class="fairy-sidebar" id="fairyRoom" style="display:none;">
+  <div class="fairy-avatar">🧚‍♀️</div>
+  <div style="font-size:1.2rem; font-weight:bold; margin-bottom:10px;">요정 코코의 실시간 지식 가이드</div>
+  <div class="fairy-chatbox" id="fairyReplyBox">단어를 선택하고 팝업창에서 물어보거나, 궁금한 것을 검색해 보세요! 귀여운 요정이 친절하게 설명해 줄게요! ✨</div>
+</div>
+
+<div class="status-msg" id="statusMsg">📚 카테고리를 선택하거나 단어를 검색해 주세요!</div>
+
+<div id="loadingArea" class="loading-spinner"></div>
+
+<div id="librarySectionsContainer"></div>
+
+<div id="emptySearchMsg" style="display:none; text-align:center; padding: 40px; color:#888; font-size:1.2rem;">해당하는 단어가 아직 등록되지 않았어요! 😢</div>
+
+<div class="modal-overlay" id="wordModal" onclick="closeModal(event)">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal(event, true)">✖</button>
+    <div class="modal-word-header">
+      <div class="modal-word" id="modalWordTitle">단어</div>
+      <button class="audio-btn" id="modalAudioBtn" title="단어 발음 듣기">🔊</button>
+    </div>
+    <img id="modalImage" class="modal-image" src="" alt="단어 이미지">
+    <div class="modal-meaning" id="modalMeaning">뜻풀이 영역</div>
+    <details id="modalDetailsGroup">
+      <summary>상세설명 보기 (심화)</summary>
+      <div class="details-content" id="modalDetailContext">상세설명 내용...</div>
+    </details>
+    
+    <div style="margin-top: 15px; padding: 15px; border: 2px dashed #ff9a9e; border-radius: 12px; background-color: #fff0f5;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button class="ask-fairy-btn" id="askFairyBtn" onclick="toggleFairyBox()" style="flex: 1; padding: 10px; background-color: #ff9a9e; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-right: 10px;">
+          🧚‍♀️ 아나운서 요정 친구 대화 (열기/닫기)
+        </button>
+        <button id="voiceToggleBtn" onclick="toggleFairyVoice()" style="padding: 10px 15px; background-color: #4facfe; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">
+          🔊 요정 소리 켜짐
+        </button>
+      </div>
+
+      <div id="fairyChatArea" style="display: none; margin-top: 5px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center;">
+          
+          <button id="micBtn" onclick="startVoiceInput()" style="padding: 10px; background-color: #fbc2eb; color: var(--dark); border: none; border-radius: 50%; font-size: 18px; cursor: pointer; min-width: 45px; height: 45px; transition: transform 0.2s;" title="마이크로 말하기">
+            🎙️
+          </button>
+
+          <input type="text" id="fairyQuestion" placeholder="글로 적거나, 마이크를 눌러 말해봐!" 
+                 style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
+          
+          <button onclick="askCocoFairy()" 
+                  style="padding: 10px 15px; background-color: #ff5e62; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; height: 45px;">
+            보내기
+          </button>
+        </div>
+
+        <div id="fairyAnswerBox" style="min-height: 40px; padding: 12px; background-color: #ffffff; border-radius: 8px; border: 1px solid #ffe4e1; white-space: pre-wrap; font-size: 14px; line-height: 1.5; color: #333;">
+          <span style="color: #999;">궁금한 점을 적거나 마이크 버튼을 눌러 말해봐! ✨</span>
+        </div>
+      </div>
+    </div>
+  </div> 
+</div>
+
+<!-- 🔗 용어사전방 최종 마감 스크립트 배선선 (코어 엔진 관제탑 탑재) -->
+<script src="/kids-school/kids/config.js"></script>
+<script src="/kids-school/kids/core/core.js"></script>         <!-- 🚀 여기서 엄마/아빠 계정을 '민수'로 미리 세탁해 줍니다! -->
+<script src="/kids-school/kids/core/notion-helper.js"></script>
+<script src="./voca_common.js"></script>                       <!-- 📚 이 방 고유의 사전 기능만 전담 -->
+

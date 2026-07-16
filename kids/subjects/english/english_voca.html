@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민 공항 - 영단어 퀴즈방</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
+    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
+    --dark: #2D2D4E; --card: rgba(255,255,255,0.92);
+    --line: rgba(98, 84, 255, 0.16);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Jua', sans-serif; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); }
+  
+  .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .float-item { position: absolute; font-size: 2.5rem; opacity: 0.15; animation: floatUp linear infinite; }
+  @keyframes floatUp { 0% { transform: translateY(110vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.2; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
+
+  .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(255,255,255,0.8); box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px); }
+  .exit-btn { padding: 8px 16px; background: #eee; border-radius: 15px; text-decoration: none; color: var(--dark); font-weight: bold; font-size: 0.9rem; transition: background 0.2s; }
+  .exit-btn:hover { background: var(--pink); color: white; }
+
+  .screen { position: relative; z-index: 1; display: none; flex-direction: column; align-items: center; padding: 20px 16px 40px; min-height: 100vh; width: 100%; }
+  .screen.active { display: flex; }
+
+  .main-title { font-family: 'Gaegu', cursive; font-size: clamp(2rem, 8vw, 3.6rem); font-weight: 700; text-align: center; line-height: 1.2; margin-bottom: 20px; color: var(--dark); }
+  .main-title span { color: var(--purple); }
+
+  .card { background: var(--card); border-radius: 24px; padding: 25px; width: 100%; max-width: 550px; box-shadow: 0 8px 30px rgba(35, 52, 90, 0.15); margin-bottom: 20px; border: 1px solid var(--line); backdrop-filter: blur(12px); }
+  .card-title { font-size: 1.2rem; color: var(--purple); margin-bottom: 15px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #eee; padding-bottom: 10px; }
+
+  .book-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+  .book-label { font-size: 1.1rem; padding: 12px 5px; font-weight: bold; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: center; color: var(--dark); user-select: none; display: block; }
+  .book-label:hover { border-color: var(--purple); transform: scale(1.02); }
+  
+  input[type="checkbox"]:checked + .book-label,
+  input[type="radio"]:checked + .book-label { background: var(--purple); border-color: var(--purple); color: #fff; box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3); }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mode-btn { padding: 20px 10px; border-radius: 18px; border: none; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #fff; transition: transform .18s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .mode-btn.copy { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+  .mode-btn.tokor { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: var(--dark); }
+  .mode-btn.toeng { background: linear-gradient(135deg, var(--purple), var(--sky)); }
+  .mode-btn.listen { background: linear-gradient(135deg, var(--yellow), var(--orange)); color: var(--dark); }
+  .mode-btn.wrong-note { background: linear-gradient(135deg, var(--dark), #5a5a8a); grid-column: span 1; }
+  .mode-btn.print-shop { background: linear-gradient(135deg, #FF6B6B, #FF9F43); grid-column: span 1; }
+  .mode-btn:hover { transform: translateY(-5px); }
+
+  .game-header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .game-stat-box { background: #fff; border-radius: 14px; padding: 8px 16px; font-size: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.07); color: var(--dark); font-weight: bold; border: 2px solid var(--sky); }
+  
+  .game-zone { width: 100%; max-width: 550px; background: var(--card); border: 2px solid var(--purple); border-radius: 28px; box-shadow: 0 20px 50px rgba(35, 52, 90, 0.2); padding: 40px 25px; text-align: center; }
+  .word-display { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; word-break: keep-all; color: var(--dark); margin-bottom: 10px; }
+  .hint-box { font-size: 2rem; color: #aaa; letter-spacing: 8px; margin-bottom: 25px; font-family: monospace; font-weight: bold; display: none; }
+  
+  .main-input { width: 100%; padding: 20px; border-radius: 20px; border: 4px solid var(--line); font-size: 2rem; text-align: center; font-family: 'Jua'; outline: none; background: white; color: var(--dark); transition: all 0.3s; margin-bottom: 20px; }
+  .main-input:focus { border-color: var(--pink); box-shadow: 0 0 15px rgba(255, 107, 157, 0.3); }
+  .main-input.correct { border-color: var(--green); background: #f0fff4; }
+  .main-input.wrong { border-color: var(--pink); background: #fff5f5; transform: translateX(-10px); animation: shake 0.3s; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+  .button-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; }
+  .btn { border: 0; border-radius: 16px; padding: 15px 25px; cursor: pointer; color: white; background: var(--purple); font-size: 1.2rem; font-family: 'Jua'; box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3); transition: transform 0.2s; }
+  .btn:hover { transform: scale(1.05); }
+  .btn.ghost { background: #eee; color: var(--dark); box-shadow: none; }
+
+  .fairy-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+  .fairy-overlay.active { display: flex; opacity: 1; }
+  .fairy-modal { background: #fffde7; border: 4px dashed var(--yellow); width: 90%; max-width: 400px; border-radius: 30px; padding: 40px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  .fairy-overlay.active .fairy-modal { transform: scale(1); }
+  .fairy-icon { font-size: 5rem; animation: bounceObj 2s infinite; margin-bottom: 15px; display: inline-block; }
+  @keyframes bounceObj { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+  .loading-spinner { border: 5px solid #fff; border-top: 5px solid var(--purple); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 30px auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  input[type="radio"], input[type="checkbox"] { display: none; }
+  .btn-label { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px 10px; border-radius: 15px; border: 2px solid #ddd; font-size: 1rem; cursor: pointer; transition: all .15s; background: #fff; color: var(--dark); }
+  input[name="printSource"]:checked + .btn-label { background: var(--orange); border-color: var(--orange); color: #fff; transform: scale(1.02); }
+  input[name="printStyle"]:checked + .btn-label { background: var(--sky); border-color: var(--sky); color: #fff; transform: scale(1.02); }
+
+  @media print {
+    body * { visibility: hidden !important; }
+    #print-area, #print-area * { visibility: visible !important; }
+    #print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; color: #000; background: #fff; }
+    .print-title { text-align: center; font-size: 26pt; margin-bottom: 40px; border-bottom: 3px double #000; padding-bottom: 10px; font-family: 'Jua', sans-serif; }
+    .print-table { width: 100%; border-collapse: collapse; font-size: 14pt; }
+    .print-table th, .print-table td { border: 1px solid #333; padding: 15px 10px; text-align: left; }
+    .print-table th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .trace-line { border-bottom: 1px dashed #aaa; width: 100%; height: 30px; display: inline-block; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-floats" id="bgFloats"></div>
+<div id="print-area" style="display:none;"></div>
+
+<div class="top-nav">
+  <div style="font-size: 1.2rem; font-weight: bold; color: var(--dark);">✈️ 영단어 기지</div>
+  <a href="/kids-school/kids/subjects/english/english.html" class="exit-btn">🚪 출국장으로</a>
+</div>
+
+<div class="screen active" id="screen-setup">
+  <h1 class="main-title">🔤 영단어 <span>퀴즈 기지</span></h1>
+  
+  <div class="card" id="loadingCard">
+    <div class="card-title">📡 관제탑과 통신 중...</div>
+    <div class="loading-spinner"></div>
+    <p style="text-align: center; color: #666;">노션 데이터베이스에서 단어를 가져오고 있어요!</p>
+  </div>
+
+  <div class="card" id="gradeCard" style="display: none;">
+    <div class="card-title">🎒 1. 학년/학기 고르기</div>
+    <div class="book-grid" id="gradeGrid" style="grid-template-columns: repeat(3, 1fr);"></div>
+  </div>
+
+  <div class="card" id="lessonCard" style="display: none;">
+    <div class="card-title">📖 2. 공부할 단원 고르기 (<span id="selectedGradeLabel" style="color:var(--pink);"></span>)</div>
+    <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 10px;">
+      <button class="btn ghost" style="padding: 5px 15px; font-size: 0.9rem;" onclick="selectAllLessons(true)">전체 선택</button>
+      <button class="btn ghost" style="padding: 5px 15px; font-size: 0.9rem;" onclick="selectAllLessons(false)">전체 해제</button>
+    </div>
+    <div class="book-grid" id="lessonGrid"></div>
+  </div>
+
+  <div class="card" id="modeCard" style="display: none;">
+    <div class="card-title">🎯 3. 퀴즈 모드 선택</div>
+    <div style="display:flex; justify-content:center; margin-bottom: 14px;">
+      <button type="button" class="btn ghost" id="vocaOrderToggleBtn" onclick="toggleVocaQuizOrder()" style="border-radius: 20px; font-size: 0.95rem;">
+        🎲 랜덤 섞기 (클릭하여 순서대로)
+      </button>
+    </div>
+    <div class="mode-grid">
+      <button class="mode-btn copy" onclick="startQuiz('copy')"><span style="font-size:2rem;">✏️</span>보고 따라 적기</button>
+      <button class="mode-btn tokor" onclick="startQuiz('toKorean')"><span style="font-size:2rem;">🇰🇷</span>한글 뜻 적기</button>
+      <button class="mode-btn toeng" onclick="startQuiz('toEnglish')"><span style="font-size:2rem;">🇺🇸</span>영단어 적기</button>
+      <button class="mode-btn listen" onclick="startQuiz('listening')"><span style="font-size:2rem;">🎧</span>소리 듣고 적기</button>
+    </div>
+  </div>
+
+  <div class="card" id="toolCard" style="display: none;">
+    <div class="card-title">🛠️ 4. 도우미 도구</div>
+    <div class="mode-grid">
+      <button class="mode-btn wrong-note" onclick="startWrongWords()"><span style="font-size:1.5rem;">🖍️</span>오답 복습 (<span id="wrongBadge">0</span>개)</button>
+      <button class="mode-btn print-shop" onclick="openPrintShop()"><span style="font-size:1.5rem;">🖨️</span>학습지 인쇄소</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-quiz">
+  <div class="game-header">
+    <div class="game-stat-box">⭐ 점수: <span id="q-score" style="color:var(--pink);">0</span></div>
+    <div class="game-stat-box">📝 문제: <span id="q-num">1/10</span></div>
+  </div>
+
+  <div style="display:flex; justify-content:center; margin-bottom: 12px;">
+    <button type="button" class="btn ghost" id="vocaOrderToggleBtnQuiz" onclick="toggleVocaQuizOrder(true)" style="border-radius: 20px; font-size: 0.9rem;">
+      🎲 랜덤 섞기 (클릭하여 순서대로)
+    </button>
+  </div>
+  
+  <div class="game-zone">
+      <div id="questionText" class="word-display">단어 로딩 중...</div>
+      <div id="hintText" class="hint-box">a _ p _ e</div>
+      
+      <input id="answerInput" class="main-input" type="text" autocomplete="off" placeholder="여기에 답을 적어봐!" onkeypress="if(event.key === 'Enter') submitAnswer()">
+      
+      <div class="button-row">
+          <button class="btn" onclick="submitAnswer()">정답 확인</button>
+          <button class="btn ghost" onclick="speakCurrentWord()">🔊 듣기</button>
+          <button class="btn ghost" onclick="goSetup()">🔙 나가기</button>
+      </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-print">
+  <h1 class="main-title">🖨️ 영어 <span>인쇄소</span></h1>
+  
+  <div class="card">
+    <div class="card-title">📂 1. 출력할 단어 데이터</div>
+    <div class="grid-2">
+      <input type="radio" name="printSource" id="ps-selected" value="selected" checked onchange="loadPrintList()">
+      <label for="ps-selected" class="btn-label">내가 선택한 단원들</label>
+      <input type="radio" name="printSource" id="ps-wrong" value="wrong" onchange="loadPrintList()">
+      <label for="ps-wrong" class="btn-label">내 오답노트 모음</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📄 2. 인쇄 학습지 스타일</div>
+    <div class="grid-2">
+      <input type="radio" name="printStyle" id="pst-book" value="book" checked>
+      <label for="pst-book" class="btn-label">📘 따라쓰기 노트</label>
+      <input type="radio" name="printStyle" id="pst-test" value="test">
+      <label for="pst-test" class="btn-label">📝 빈칸 시험지</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">✅ 3. 출력할 단어 목록 (<span id="print-total-count">0</span>개)</div>
+    <div id="print-word-list" style="max-height:200px; overflow-y:auto; background:#fafafa; border:2px solid #eee; border-radius:12px; padding:10px;"></div>
+  </div>
+
+  <button class="btn" style="width:100%; max-width:550px; font-size:1.5rem; padding:20px; margin-bottom:10px; background:var(--orange);" onclick="executePrint()">🖨️ A4 용지 인쇄하기</button>
+  <button class="btn ghost" style="width:100%; max-width:550px; font-size:1.2rem;" onclick="goSetup()">← 뒤로 가기</button>
+</div>
+
+<div class="fairy-overlay" id="fairyOverlay">
+  <div class="fairy-modal">
+    <div class="fairy-icon">🧚‍♀️</div>
+    <div style="font-size: 1.5rem; color: var(--dark); line-height: 1.5; margin-bottom: 20px;" id="fairyMsg">
+      우와, 정답이야! 참 잘했어! ✨<br>
+      <b style="color:var(--pink); font-size:2rem;">Apple</b>은(는)<br>
+      <b style="color:var(--sky); font-size:1.8rem;">사과</b>라는 뜻이지!
+    </div>
+    <button class="btn" style="width:100%; background:var(--pink); font-size:1.3rem;" onclick="nextQuestion()">다음 문제 고고! 🚀</button>
+  </div>
+</div>
+
+<!-- 💡 관제탑 & 엔진 배선 완벽 재정비 완료 -->
+<!-- 💡 [정비팀장 마감 라인] 중복 스크립트 및 이중 선언 원천 차단 배선 -->
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>  <script src="../../core/fairy-engine.js"></script>   <script src="../../js/english_common.js"></script>  
+  
+  <script>
+// 💡 전역 만능 헬퍼에게 이 방이 '영어' 방임을 알립니다.
+window.currentSubject = "영어";
+
+let allEnglishWords = [];
+let availableGrades = []; 
+let currentSelectedGrade = ""; 
+let availableLessons = []; 
+let wrongWords = [];
+let vocaQuizOrderType = 'shuffle'; // 'shuffle' or 'sequence'
+let quizState = { mode: '', pool: [], current: 0, score: 0, isWrongMode: false };
+
+let currentProfile = window.currentProfile || 'son';
+let currentTheme = window.currentTheme || '마인크래프트';
+
+for(let i=0; i<15; i++){
+  const el = document.createElement('div'); el.className = 'float-item'; el.textContent = ['A','B','C','✈️','☁️','✨'][Math.floor(Math.random()*6)];
+  el.style.left = (Math.random()*90)+'%'; el.style.animationDuration = (10+Math.random()*12)+'s'; el.style.animationDelay = (-Math.random()*15)+'s';
+  document.getElementById('bgFloats').appendChild(el);
+}
+
+window.onload = async () => {
+  loadWrongWords();
+  updateVocaOrderToggleLabels();
+  try {
+      allEnglishWords = await fetchVocaFromNotion({
+        subject: "영어",
+        altSubjects: ["영단어"]
+      });
+
+      document.getElementById('loadingCard').style.display = 'none';
+      
+      // 스캔된 단어가 하나라도 있다면?
+      if(allEnglishWords && allEnglishWords.length > 0) {
+        const gradeSet = new Set(allEnglishWords.map(w => w.grade || '공통'));
+        availableGrades = Array.from(gradeSet).sort();
+        
+        renderGradeButtons();
+
+        document.getElementById('gradeCard').style.display = 'block';
+        document.getElementById('modeCard').style.display = 'block';
+        document.getElementById('toolCard').style.display = 'block';
+        
+        if(availableGrades.length === 1) {
+            selectGrade(availableGrades[0]);
+        }
+      } else {
+        alert("앗! 노션에서 '영어' 단어를 못 불렀어요.\n(혹은 지금 로그인한 아이 이름이 체크된 단어가 없습니다!)");
+      }
+  } catch (error) {
+      console.error("데이터 로딩 실패:", error);
+      alert("데이터 로딩에 실패했습니다. 새로고침 해주세요.");
+  }
+
+  // 🧚‍♀️ 오른쪽 아래 요정 챗봇 버튼 띄우기!
+  if (typeof initFairyChat === 'function') {
+      initFairyChat('ENGLISH'); 
+  }
+};
+
+// ===============================================
+// 이 아래에 있는 renderGradeButtons() 부터 맨 끝 </html> 까지의 
+// 나머지 퀴즈 및 보상(nextQuestion) 함수들은 손대지 않고 그대로 두시면 됩니다!
+// ===============================================
+
+function renderGradeButtons() {
+  const grid = document.getElementById('gradeGrid');
+  let html = '';
+  availableGrades.forEach((grade, index) => {
+    html += `<input type="radio" name="gradeSelect" id="grade_${index}" value="${grade}" onchange="selectGrade('${grade}')"><label for="grade_${index}" class="book-label">${grade}</label>`;
+  });
+  grid.innerHTML = html;
+}
+
+function selectGrade(grade) {
+  currentSelectedGrade = grade;
+  document.getElementById('selectedGradeLabel').textContent = grade;
+  
+  const wordsInGrade = allEnglishWords.filter(w => (w.grade || '공통') === grade);
+  const lessonSet = new Set(wordsInGrade.map(w => w.level));
+  availableLessons = Array.from(lessonSet).sort((a, b) => {
+      const numA = parseInt(a); const numB = parseInt(b);
+      if(!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return String(a).localeCompare(String(b));
+  });
+  
+  renderLessonCheckboxes();
+  document.getElementById('lessonCard').style.display = 'block';
+}
+
+function renderLessonCheckboxes() {
+  const grid = document.getElementById('lessonGrid');
+  let html = '';
+  availableLessons.forEach((lesson, index) => {
+    const displayLesson = lesson ? lesson : '기본';
+    html += `<input type="checkbox" id="lesson_${index}" class="lesson-cb" value="${lesson}" checked style="display:none;"><label for="lesson_${index}" class="book-label">${displayLesson}단원</label>`;
+  });
+  grid.innerHTML = html;
+}
+
+function selectAllLessons(flag) {
+  document.querySelectorAll('.lesson-cb').forEach(cb => cb.checked = flag);
+}
+
+function getFilteredWords() {
+  const checkedLessons = Array.from(document.querySelectorAll('.lesson-cb:checked')).map(cb => cb.value);
+  return allEnglishWords.filter(w => (w.grade || '공통') === currentSelectedGrade && checkedLessons.includes(String(w.level)));
+}
+
+function loadWrongWords() {
+  const saved = localStorage.getItem('minmin_eng_wrong');
+  wrongWords = saved ? JSON.parse(saved) : [];
+  document.getElementById('wrongBadge').textContent = wrongWords.length;
+}
+
+function saveWrongWord(w) {
+  if(!quizState.isWrongMode && !wrongWords.some(item => item.word === w.word)) {
+    wrongWords.push(w); localStorage.setItem('minmin_eng_wrong', JSON.stringify(wrongWords));
+    document.getElementById('wrongBadge').textContent = wrongWords.length;
+  }
+}
+
+function removeWrongWord(w) {
+  if(quizState.isWrongMode) {
+    wrongWords = wrongWords.filter(item => item.word !== w.word);
+    localStorage.setItem('minmin_eng_wrong', JSON.stringify(wrongWords));
+  }
+}
+
+function updateVocaOrderToggleLabels() {
+  const label = vocaQuizOrderType === 'shuffle'
+    ? '🎲 랜덤 섞기 (클릭하여 순서대로)'
+    : '➡️ 순서대로 (클릭하여 랜덤 섞기)';
+  ['vocaOrderToggleBtn', 'vocaOrderToggleBtnQuiz'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+}
+
+function prepareVocaQuizPool(words) {
+  const prepared = [...words];
+  if (vocaQuizOrderType === 'shuffle') {
+    prepared.sort(() => Math.random() - 0.5);
+  }
+  return prepared.slice(0, 10);
+}
+
+function toggleVocaQuizOrder(restartCurrentQuiz = false) {
+  vocaQuizOrderType = vocaQuizOrderType === 'shuffle' ? 'sequence' : 'shuffle';
+  updateVocaOrderToggleLabels();
+
+  if (restartCurrentQuiz && quizState.mode && document.getElementById('screen-quiz').classList.contains('active')) {
+    const source = quizState.isWrongMode ? wrongWords : getFilteredWords();
+    if (source.length === 0) return;
+    quizState.pool = prepareVocaQuizPool(source);
+    quizState.current = 0;
+    quizState.score = 0;
+    loadQuestion();
+  }
+}
+
+function showScreen(id){ 
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
+  document.getElementById(id).classList.add('active'); 
+}
+function goSetup() { loadWrongWords(); updateVocaOrderToggleLabels(); showScreen('screen-setup'); }
+
+function startQuiz(mode) {
+  if (!currentSelectedGrade) return alert('먼저 공부할 학년/학기를 선택해 주세요!');
+  const filteredWords = getFilteredWords();
+  if (filteredWords.length === 0) return alert('공부할 단원을 하나 이상 선택해 주세요!');
+
+  quizState = { mode: mode, pool: prepareVocaQuizPool(filteredWords), current: 0, score: 0, isWrongMode: false };
+  window.engWrongNotes = [];
+  updateVocaOrderToggleLabels();
+  showScreen('screen-quiz'); loadQuestion();
+}
+
+function startWrongWords() {
+  if(wrongWords.length === 0) return alert('틀린 단어가 없어요! 🎉');
+  quizState = { mode: 'toEnglish', pool: prepareVocaQuizPool(wrongWords), current: 0, score: 0, isWrongMode: true };
+  window.engWrongNotes = [];
+  updateVocaOrderToggleLabels();
+  showScreen('screen-quiz'); loadQuestion();
+}
+
+function generateHint(word) {
+  let hint = "";
+  for(let i = 0; i < word.length; i++) {
+    if(word[i] === " ") { hint += "  "; }
+    else if(i % 2 === 0) { hint += word[i] + " "; }
+    else { hint += "_ "; }
+  }
+  return hint.trim();
+}
+
+function loadQuestion() {
+  const qData = quizState.pool[quizState.current];
+  document.getElementById('q-num').textContent = `${quizState.current + 1} / ${quizState.pool.length}`;
+  document.getElementById('q-score').textContent = quizState.score;
+  
+  const qBox = document.getElementById('questionText');
+  const hBox = document.getElementById('hintText');
+  const input = document.getElementById('answerInput');
+  
+  // 기존 힌트 박스 대신 상세설명 토글 렌더링을 위한 컨테이너 확인/생성
+  let detailBox = document.getElementById('detailBox');
+  if (!detailBox) {
+      detailBox = document.createElement('div');
+      detailBox.id = 'detailBox';
+      qBox.parentNode.insertBefore(detailBox, input);
+  }
+  
+  hBox.style.display = 'none';
+  detailBox.innerHTML = ''; // 초기화
+  input.value = ''; input.className = 'main-input'; input.disabled = false;
+
+  if (quizState.mode === 'copy') {
+    qBox.textContent = qData.word; input.placeholder = "똑같이 적어봐!";
+  } else if (quizState.mode === 'toKorean') {
+    qBox.textContent = qData.word; input.placeholder = "무슨 뜻일까요?";
+  } else if (quizState.mode === 'toEnglish') {
+    qBox.textContent = qData.meaning; input.placeholder = "영단어로 적어봐!";
+    hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';
+    
+    // 상세설명 토글 추가
+    if (qData.detailContext && qData.detailContext.trim() !== '') {
+        detailBox.innerHTML = `
+            <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd; font-size: 1rem;">
+                <summary style="cursor: pointer; font-weight: bold; color: var(--purple);">💡 상세설명 (힌트) 보기</summary>
+                <div style="margin-top: 10px; color: #555; line-height: 1.5;">${qData.detailContext.replace(/\n/g, '<br>')}</div>
+            </details>
+        `;
+    }
+  } else if (quizState.mode === 'listening') {
+    qBox.innerHTML = "🎧 <span style='font-size:1.2rem;color:#888;'><br>(소리 듣고 적기)</span>";
+    hBox.textContent = generateHint(qData.word); hBox.style.display = 'block';
+  }
+  
+  if (quizState.mode !== 'toEnglish' && typeof speakEnglish === 'function') {
+     speakEnglish(qData.word);
+  }
+  setTimeout(() => input.focus(), 100);
+}
+
+function speakCurrentWord() {
+  if(typeof speakEnglish === 'function') speakEnglish(quizState.pool[quizState.current].word);
+}
+
+function submitAnswer() {
+  const qData = quizState.pool[quizState.current];
+  const inputEl = document.getElementById('answerInput');
+  const inputVal = inputEl.value.trim().toLowerCase();
+  
+  let isCorrect = false;
+  if (quizState.mode === 'copy' || quizState.mode === 'toEnglish' || quizState.mode === 'listening') {
+    if (inputVal === qData.word.toLowerCase().trim()) isCorrect = true;
+  } else if (quizState.mode === 'toKorean') {
+    if (qData.meaning.replace(/ /g, '').includes(inputVal.replace(/ /g, '')) && inputVal !== "") isCorrect = true;
+  }
+
+  if (isCorrect) {
+    inputEl.className = "main-input correct";
+    inputEl.disabled = true;
+    quizState.score += 10;
+    removeWrongWord(qData);
+    
+    if(typeof speakEnglish === 'function') speakEnglish(qData.word);
+    
+    document.getElementById('fairyMsg').innerHTML = `우와, 정답이야! 참 잘했어! ✨<br><b style="color:var(--pink); font-size:2rem;">${qData.word}</b>은(는)<br><b style="color:var(--sky); font-size:1.8rem;">${qData.meaning}</b>라는 뜻이지!`;
+    document.getElementById('fairyOverlay').classList.add('active');
+  } else {
+    inputEl.className = "main-input wrong";
+    saveWrongWord(qData);
+    
+    // 학습일지 전송을 위한 이번 세션 오답 기록
+    if (window.engWrongNotes) {
+        if (!window.engWrongNotes.some(item => item.word === qData.word)) {
+            window.engWrongNotes.push({ word: qData.word, wrongInput: inputVal });
+        }
+    }
+
+    const retry = () => {
+        inputEl.className = "main-input";
+        inputEl.value = '';
+        inputEl.disabled = false;
+        inputEl.focus();
+    };
+    const skip = () => {
+        inputEl.className = "main-input";
+        inputEl.disabled = false;
+        nextQuestion();
+    };
+
+    if (typeof promptQuizRetryOrSkip === 'function') {
+        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
+    } else {
+        setTimeout(retry, 800);
+    }
+  }
+}
+
+// 💡 1. 퀴즈 종료 시 만능 헬퍼(notion-helper.js)를 호출하도록 전면 개조!
+async function nextQuestion() {
+  document.getElementById('fairyOverlay').classList.remove('active');
+  quizState.current++;
+  
+  if (quizState.current >= quizState.pool.length) {
+    const correctCount = quizState.score / 10;
+    document.getElementById('q-num').textContent = `완료!`;
+    
+    if (correctCount > 0) {
+       document.getElementById('questionText').innerHTML = `<span style="font-size:1.5rem; color:var(--purple);">⏳ 보상과 학습 일지를 기록 중...</span>`;
+       
+       // 📝 학습 일지 기록 헬퍼 호출
+       if (typeof sendStudyLogToNotion === 'function') {
+           await sendStudyLogToNotion({ subject: '영어(영단어 퀴즈)' });
+       }
+
+       // 💎 전역 만능 보상 지급 헬퍼 호출 (구형 saveRewardToNotion 완전 삭제)
+       if (typeof grantRewardAndShowUI === 'function') {
+           await grantRewardAndShowUI(correctCount, false, 'voca');
+       }
+    } else {
+       alert(`탐험 완료! 획득한 점수가 없습니다. 다음에 더 잘해봐요!`); 
+       goSetup();
+    }
+  } else {
+    setTimeout(() => loadQuestion(), 300);
+  }
+}
+
+// ==========================================
+// 🖨️ 인쇄소 엔진 (그대로 유지)
+// ==========================================
+function openPrintShop() { showScreen('screen-print'); loadPrintList(); }
+
+function loadPrintList() {
+  const src = document.querySelector('input[name="printSource"]:checked').value; 
+  const list = src === 'selected' ? getFilteredWords() : wrongWords;
+  const container = document.getElementById('print-word-list'); 
+  document.getElementById('print-total-count').textContent = list.length;
+  
+  if(list.length === 0) { container.innerHTML = `<div style="text-align:center; padding:20px; color:#999;">단어가 없습니다.</div>`; return; }
+  
+  let html = ''; 
+  list.forEach((w, i) => { 
+    html += `<label style="display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid #eee; cursor:pointer;"><input type="checkbox" class="p-eng-cb" value="${i}" checked style="transform:scale(1.2);"><span><b>${w.word}</b> : ${w.meaning}</span></label>`; 
+  }); 
+  container.innerHTML = html;
+}
+
+function executePrint() {
+  const checkedBoxes = [...document.querySelectorAll('.p-eng-cb:checked')]; 
+  if(checkedBoxes.length === 0) return alert('단어를 선택해 주세요!'); 
+  
+  const src = document.querySelector('input[name="printSource"]:checked').value; 
+  const list = src === 'selected' ? getFilteredWords() : wrongWords;
+  const selectedWords = checkedBoxes.map(cb => list[parseInt(cb.value)]); 
+  const style = document.querySelector('input[name="printStyle"]:checked').value;
+  
+  const printArea = document.getElementById('print-area');
+  let title = style === 'test' ? '📝 영어 단어 테스트' : '📘 영어 따라쓰기 노트';
+  
+  let html = `<div class="print-title">${title}</div><table class="print-table">`;
+  if(style === 'book') {
+    html += `<thead><tr><th width="10%">번호</th><th width="35%">뜻</th><th width="55%">따라쓰기 연습</th></tr></thead><tbody>`;
+    selectedWords.forEach((w, i) => { html += `<tr><td>${i+1}</td><td><b>${w.meaning}</b></td><td><span style="font-size:16pt; color:#ccc; letter-spacing:3px;">${w.word}</span><div class="trace-line"></div><div class="trace-line"></div></td></tr>`; });
+  } else {
+    html += `<thead><tr><th width="12%">시험번호</th><th width="48%">뜻을 보고 영단을 적으세요.</th><th width="40%">정답란</th></tr></thead><tbody>`;
+    selectedWords.forEach((w, i) => { html += `<tr><td>💡 문제 ${i+1}</td><td><span style="font-size:15pt;"><b>${w.meaning}</b></span></td><td><div style="border-bottom:2px solid #000; width:90%; height:35px;"></div></td></tr>`; });
+  }
+  html += `</tbody></table><div style="margin-top:40px; font-size:10pt;"><strong>🔑 [정답 해설지]</strong><br><table style="width:100%;"><tr>`;
+  selectedWords.forEach((w, i) => { html += `<td style="width:25%; padding:5px;">${i+1}번: <b>${w.word}</b></td>`; if((i+1)%4 === 0) html += '</tr><tr>'; });
+  printArea.innerHTML = html + `</tr></table></div>`; 
+  
+  printArea.style.display = 'block'; window.print(); 
+  setTimeout(() => { printArea.style.display = 'none'; }, 1000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>민민 수학 멀티버스 🚀 - 관제탑</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12121e; --surface: #1e1e32; --card: rgba(30, 30, 50, 0.85);
+    --border: #3a3a5a; --yellow: #FFD93D; --orange: #FF6B35;
+    --green: #6BCB77; --blue: #4D96FF; --pink: #FF6B9D;
+    --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --muted: #8888AA;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nanum Gothic', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
+
+  /* ----------------------------------
+     🎮 민수 아케이드 네온 테마 (theme--arcade)
+     ---------------------------------- */
+  body.theme--arcade {
+    --bg: #12121e; --surface: #1e1e32; --card: rgba(30, 30, 50, 0.85);
+    --border: #3a3a5a; --yellow: #FFD93D; --orange: #FF6B35;
+    --green: #6BCB77; --blue: #4D96FF; --pink: #FF6B9D;
+    --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --muted: #8888AA;
+  }
+
+  /* ----------------------------------
+     🎠 민서 동화 밀키스 테마 (theme--slime)
+     ---------------------------------- */
+  body.theme--slime {
+    --bg: #fff3f5; --surface: #ffe7ee; --card: rgba(255, 255, 255, 0.95);
+    --border: #ffb3c6; --yellow: #FFD93D; --orange: #FF6B35;
+    --green: #6BCB77; --blue: #ff6b9d; --pink: #ff6b9d;
+    --purple: #ff80ab; --cyan: #ff6b9d; --white: #4a3352; --muted: #8888AA;
+  }
+
+  /* 다크 테마 백그라운드 (사회방/멀티버스 스타일) */
+  body.theme--arcade::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(77, 150, 255, 0.08), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(199, 125, 255, 0.08), transparent 25%);
+    pointer-events: none; z-index: 0;
+  }
+  
+  body.theme--slime::before {
+    display: none;
+  }
+
+  .app-container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 1; }
+
+  /* 🛠️ 상단 UI */
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+  .profile-badge { background: rgba(0,212,255,0.1); border: 2px solid var(--cyan); color: var(--cyan); padding: 8px 18px; border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 1.2rem; }
+  .exit-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--muted); color: var(--white); padding: 8px 18px; border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+  .exit-btn:hover { background: rgba(255,107,53,0.2); border-color: var(--orange); color: var(--orange); }
+
+  /* 헤더 */
+  header { text-align: center; margin-bottom: 50px; }
+  .logo-title { font-family: 'Jua', sans-serif; font-size: 3rem; background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+  .sub-title { color: var(--muted); font-size: 1.1rem; }
+
+  /* 섹션 타이틀 */
+  .sector-title { font-family: 'Jua', sans-serif; font-size: 1.6rem; margin-bottom: 16px; border-bottom: 2px dashed var(--border); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .sector-title.active-sector { color: var(--green); }
+  .sector-title.locked-sector { color: var(--muted); margin-top: 50px; }
+
+  /* 그리드 & 카드 */
+  .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .mission-card { background: var(--card); border: 2px solid var(--border); border-radius: 20px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
+  
+  /* 활성화 카드 호버 */
+  .mission-card:not(.disabled):hover { transform: translateY(-5px) scale(1.02); }
+  .mc-1:not(.disabled):hover { border-color: var(--cyan); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2); }
+  .mc-2:not(.disabled):hover { border-color: var(--yellow); box-shadow: 0 10px 30px rgba(255, 217, 61, 0.2); }
+
+  .mission-icon { font-size: 3.5rem; margin-bottom: 15px; }
+  .mission-name { font-family: 'Jua', sans-serif; font-size: 1.6rem; color: var(--white); margin-bottom: 8px; }
+  .mission-desc { font-size: 1rem; color: var(--muted); line-height: 1.4; }
+
+  /* 비활성화(잠김) 카드 */
+  .mission-card.disabled { opacity: 0.5; cursor: not-allowed; border-style: dashed; filter: grayscale(80%); }
+  .lock-badge { margin-top: 12px; background: var(--border); color: var(--muted); font-size: 0.85rem; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👨‍🚀</span> <span id="userName">로딩중...</span>
+    </div>
+    <button class="exit-btn" id="goLobbyBtn">🔙 메인 대문으로</button>
+  </div>
+
+  <header>
+    <div class="logo-title">민민 수학 멀티버스 🚀</div>
+    <div class="sub-title">수학 관제탑에 오신 것을 환영합니다! 훈련할 미션을 선택하세요.</div>
+  </header>
+
+  <div class="sector-title active-sector">🟢 활성화된 미션 구역</div>
+  <div class="mission-grid">
+    <a href="gugudan.html" class="mission-card mc-1">
+      <div class="mission-icon">🚀</div>
+      <div class="mission-name">미션 1: 구구단 탐험대</div>
+      <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>심층 탐사선에 탑승하세요!</div>
+    </a>
+    
+    <a href="vertical_math.html" class="mission-card mc-2">
+      <div class="mission-icon">🧱</div>
+      <div class="mission-name">미션 2: 실전 격자 세로셈방</div>
+      <div class="mission-desc">사칙연산을 완벽하게 훈련하는<br>동적 그리드 세로셈 훈련소!</div>
+    </a>
+
+  </div>
+
+  <div class="sector-title locked-sector">🔒 미개척 구역 (접근 불가)</div>
+  <div class="mission-grid">
+    <div class="mission-card disabled">
+      <div class="mission-icon">🍕</div>
+      <div class="mission-name">미션 3: 분수와 소수 개념방</div>
+      <div class="mission-desc">하나를 여럿으로 나누는<br>신비한 세계가 열립니다.</div>
+      <div class="lock-badge">탐사 준비 중...</div>
+    </div>
+    
+    <div class="mission-card disabled">
+      <div class="mission-icon">⚡</div>
+      <div class="mission-name">미션 4: 분수 사칙연산 보스전</div>
+      <div class="mission-desc">분수와 소수의 연산을 마스터하는<br>고난이도 전투 구역!</div>
+      <div class="lock-badge">탐사 준비 중...</div>
+    </div>
+
+    <div class="mission-card disabled">
+      <div class="mission-icon">📦</div>
+      <div class="mission-name">미션 5: 3D 부피와 넓이 아카데미</div>
+      <div class="mission-desc">입체적인 시각으로<br>수학의 공간을 창조합니다.</div>
+      <div class="lock-badge">탐사 준비 중...</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="../../config.js"></script>
+<script>
+  // 대문 이동 로직
+  document.getElementById('goLobbyBtn').addEventListener('click', () => {
+      const lobbyPath = window.location.pathname.includes('/kids-school/') 
+          ? '/kids-school/lobby.html' 
+          : '/lobby.html';
+      location.href = lobbyPath;
+  });
+
+  // 프로필 세팅
+  document.addEventListener("DOMContentLoaded", () => {
+    let currentProfile = localStorage.getItem('currentUser') || 'son';
+    const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
+    const icon = currentProfile === 'son' ? '👦' : (currentProfile === 'daughter' ? '👧' : '👨‍💻');
+    
+    // 💡 사회방과 완벽하게 동일한 테마 시스템 전파 (theme--arcade / theme--slime)
+    const savedTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
+    const themeClass = savedTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
+    document.body.className = themeClass;
+
+    document.getElementById('userName').textContent = `${name} 대원`;
+    document.getElementById('userIcon').textContent = icon;
+  });
+</script>
+</body>
+</html>

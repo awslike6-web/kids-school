@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 공부방 - 과학 탐구방</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/science.css">
+</head>
+<body>
+
+<div class="science-container">
+  
+  <div class="top-action-bar">
+    <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
+        🔊 요정 음성 ON
+      </button>
+      <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
+    </div>
+  </div>
+
+  <div class="main-header-card">
+    <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
+    <h1 id="scienceTitle">민수의 과학 탐구 대기실</h1>
+    <p class="banner-goal-desc" id="scienceGoalText">4단원. 우리 몸의 구조와 기능</p>
+  </div>
+
+  <div class="science-grid">
+    
+    <div class="science-grid-btn" onclick="openMissionView('voca')">
+      <span class="science-btn-icon">🔬</span>
+      <div class="science-btn-title">과학 용어방</div>
+      <p class="science-btn-desc">교과서 속 핵심 과학 용어들을 요정 코코의 나긋나긋한 낭독과 함께 퀴즈로 정복하자!</p>
+    </div>
+
+    <div class="science-grid-btn" onclick="openMissionView('experiment')">
+      <span class="science-btn-icon">🧪</span>
+      <div class="science-btn-title">가상 실험실</div>
+      <p class="science-btn-desc">실험 도구와 관찰 결과를 분석하고 과학적 원리를 슬기롭게 파헤쳐라!</p>
+    </div>
+
+    <div class="science-grid-btn" onclick="openMissionView('nature')">
+      <span class="science-btn-icon">🌿</span>
+      <div class="science-btn-title">자연 생태 탐험실</div>
+      <p class="science-btn-desc">동식물의 생태 사진을 감상하고, 마법의 목소리로 한 줄 관찰록 쓰기!</p>
+    </div>
+
+    <div class="science-grid-btn" onclick="openMissionView('inventor')">
+      <span class="science-btn-icon">💡</span>
+      <div class="science-btn-title">위대한 발명가 돋보기</div>
+      <p class="science-btn-desc">세상을 바꾼 위대한 발명품 카드 짝을 매칭하고, 나만의 과학 도감을 수집하자!</p>
+    </div>
+
+  </div>
+
+  <div class="fairy-live-dock">
+    <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" style="width: 52px; height: 52px; object-fit: contain;">
+    <div class="fairy-bubble">
+      <span id="fairySpeakerText">반가워! 과학방에 입장했구나, 오늘 코코랑 같이 신비한 과학 여행을 떠날까? 🔬 마법의 목소리로 지적 경험을 완성해봐!</span>
+      <div class="fairy-speech" id="fairyVoiceStatus">🔊 음량 수려함 - WebSpeech API 결합</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="science-overlay" id="missionOverlay">
+  <div class="science-overlay-box">
+    <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
+    
+    <div class="overlay-header">
+      <span id="overlayHeaderIcon" style="font-size: 1.8rem;">🔬</span>
+      <h2 class="overlay-heading" id="overlayHeaderTitle">미션 타이틀</h2>
+    </div>
+
+    <div class="overlay-body" id="overlayInnerBody">
+      </div>
+  </div>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
+<script src="../../js/science_common.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initializeScienceRoom === 'function') {
+        initializeScienceRoom();
+    } else if (typeof initializeRoom === 'function') {
+        initializeRoom();
+    } else {
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--arcade' : 'theme--slime';
+    }
+
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("SCIENCE");
+    }
+  });
+</script>
+</body>
+</html>

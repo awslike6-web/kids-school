@@ -1,0 +1,3 @@
+git add kids/core/notion-helper.js kids/js/korean-reading-logic.js kids/js/korean_common.js kids/subjects/korean/korean-reading.html kids/subjects/korean/korean-sentence.html kids/subjects/korean/korean.html kids/subjects/korean/korean_dictation.html kids/subjects/korean/korean_voca.html kids/css/korean.css
+git commit -m "Refactor: Integrate Korean room into single HTML popup architecture"
+git push origin main

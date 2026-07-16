@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>평행사변형 넓이 공식 유도 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #fdfbf7;
+        --surface: #ffffff;
+        --mint: #B5EAEA;
+        --mint-border: #78C4C4;
+        --orange: #FFB7B2;
+        --orange-border: #FF8A8A;
+        --text-main: #4a3352;
+        --cyan: #00D4FF;
+        --pink: #FF6B9D;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.5rem;
+        color: var(--pink);
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 3px solid #ffe7ee;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        max-width: 700px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto 20px auto;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px dashed #e0e0e0;
+        overflow: hidden;
+    }
+
+    svg {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* 애니메이션 트랜지션 설정 */
+    #left-triangle {
+        transition: transform 1.5s ease-in-out, filter 0.3s ease;
+        transform-origin: center;
+    }
+
+    #left-triangle.moving {
+        filter: drop-shadow(5px 15px 10px rgba(0,0,0,0.2));
+    }
+
+    #base-group {
+        transition: transform 1.5s ease-in-out;
+    }
+
+    .guide-box {
+        background: #f8f9fa;
+        border-left: 5px solid var(--cyan);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: #333;
+        transition: all 0.3s ease;
+    }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 20px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+    }
+
+    .btn:active {
+        transform: translateY(2px) scale(0.95);
+    }
+
+    .btn-start {
+        background: linear-gradient(135deg, var(--cyan), #009ffd);
+        color: white;
+    }
+
+    .btn-reset {
+        background: #e0e0e0;
+        color: #555;
+        display: none;
+    }
+
+    .highlight-orange { color: #FF6B35; }
+    .highlight-blue { color: #4D96FF; }
+
+    /* 모눈종이 패턴 */
+    .grid-pattern {
+        fill: url(#grid);
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">평행사변형 넓이 구하기 ✂️</div>
+    <div class="subtitle">도형을 잘라서 우리가 아는 모양으로 만들어봐요!</div>
+</div>
+
+<div class="card">
+    <div class="canvas-container">
+        <svg viewBox="-60 -40 420 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <!-- 배경 모눈종이 패턴 -->
+                <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                    <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+                </pattern>
+            </defs>
+
+            <!-- 배경 -->
+            <rect x="-60" y="-40" width="420" height="280" class="grid-pattern" />
+
+            <!-- 평행사변형 본체 (가운데 + 오른쪽 부분) -->
+            <!-- 전체 평행사변형: (50,0) -> (250,0) -> (200,150) -> (0,150) -->
+            <!-- 왼쪽 직각삼각형을 제외한 본체: (50,0) -> (250,0) -> (200,150) -> (50,150) -->
+            <polygon points="50,0 250,0 200,150 50,150" fill="var(--mint)" stroke="var(--mint-border)" stroke-width="4" stroke-linejoin="round" />
+
+            <!-- 점선 (자르는 선) -->
+            <line x1="50" y1="0" x2="50" y2="150" stroke="var(--mint-border)" stroke-width="4" stroke-dasharray="8,8" stroke-linecap="round" />
+
+            <!-- 분리되는 왼쪽 직각삼각형 -->
+            <!-- 좌표: (50,0) -> (0,150) -> (50,150) -->
+            <polygon id="left-triangle" points="50,0 0,150 50,150" fill="var(--orange)" stroke="var(--orange-border)" stroke-width="4" stroke-linejoin="round" />
+
+            <!-- 치수선 및 라벨 (밑변) -->
+            <g id="base-group">
+                <line x1="0" y1="170" x2="200" y2="170" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+                <line x1="0" y1="165" x2="0" y2="175" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+                <line x1="200" y1="165" x2="200" y2="175" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+                <text x="100" y="200" text-anchor="middle" font-family="Jua" font-size="20" fill="#FF6B35" id="base-label">밑변</text>
+            </g>
+
+            <!-- 치수선 및 라벨 (높이) -->
+            <g id="height-group">
+                <line x1="30" y1="0" x2="30" y2="150" stroke="#4D96FF" stroke-width="3" stroke-dasharray="5,5" stroke-linecap="round" />
+                <text x="20" y="80" text-anchor="end" font-family="Jua" font-size="20" fill="#4D96FF" id="height-label">높이</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="guide-box" id="guide-text">
+        평행사변형의 넓이를 어떻게 구할까요?<br>
+        '공식 유도 시작' 버튼을 눌러보세요!
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-start" id="start-btn">✨ 공식 유도 시작</button>
+        <button class="btn btn-reset" id="reset-btn">🔄 다시 보기</button>
+    </div>
+</div>
+
+<script>
+    const triangle = document.getElementById('left-triangle');
+    const guideText = document.getElementById('guide-text');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const baseGroup = document.getElementById('base-group');
+    const baseLabel = document.getElementById('base-label');
+    const heightLabel = document.getElementById('height-label');
+
+    let animationTimeouts = [];
+
+    startBtn.addEventListener('click', () => {
+        startBtn.style.display = 'none';
+        
+        // 그림자 효과 추가
+        triangle.classList.add('moving');
+
+        // 1단계: 분리 (위로 살짝, 왼쪽으로 살짝)
+        triangle.style.transform = 'translate(-15px, -15px)';
+        guideText.innerHTML = "1. 왼쪽의 튀어나온 <span class='highlight-orange'>직각삼각형</span>을 칼로 자르듯 분리해요 ✂️";
+
+        // 2단계: 오른쪽으로 이동
+        animationTimeouts.push(setTimeout(() => {
+            triangle.style.transform = 'translate(215px, -15px)';
+            guideText.innerHTML = "2. 분리된 삼각형을 오른쪽 끝으로 미끄러지듯 이동시켜요 슝~ 💨";
+        }, 2000));
+
+        // 3단계: 결합 및 직사각형 완성
+        animationTimeouts.push(setTimeout(() => {
+            triangle.classList.remove('moving');
+            triangle.style.transform = 'translate(200px, 0px)';
+            
+            // 밑변 치수선도 직사각형 가로 위치로 이동
+            baseGroup.style.transform = 'translateX(50px)';
+            
+            guideText.innerHTML = `
+                3. 오른쪽 경사면에 완벽하게 결합하여 <b>직사각형</b>으로 변신! 🎉<br><br>
+                <span class='highlight-orange'>(평행사변형의 밑변)</span> = <span class='highlight-blue'>(직사각형의 가로)</span><br>
+                <span class='highlight-orange'>(평행사변형의 높이)</span> = <span class='highlight-blue'>(직사각형의 세로)</span><br>
+                따라서 넓이 공식은 <b>(밑변) × (높이)</b> 로 같습니다!
+            `;
+            
+            baseLabel.textContent = "가로 (밑변)";
+            heightLabel.textContent = "세로 (높이)";
+            
+            resetBtn.style.display = 'inline-block';
+        }, 4500));
+    });
+
+    resetBtn.addEventListener('click', () => {
+        // 모든 타이머 초기화
+        animationTimeouts.forEach(clearTimeout);
+        animationTimeouts = [];
+
+        // 초기 상태로 복구
+        triangle.classList.remove('moving');
+        triangle.style.transform = 'translate(0px, 0px)';
+        baseGroup.style.transform = 'translateX(0px)';
+        
+        guideText.innerHTML = "평행사변형의 넓이를 어떻게 구할까요?<br>'공식 유도 시작' 버튼을 눌러보세요!";
+        
+        baseLabel.textContent = "밑변";
+        heightLabel.textContent = "높이";
+        
+        resetBtn.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+    });
+</script>
+
+</body>
+</html>

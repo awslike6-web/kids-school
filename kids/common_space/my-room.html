@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 마이룸 & 상점</title>
+    <style>
+        /* 🎨 공통 기본 스타일 */
+        body { margin: 0; padding: 0; font-family: 'Malgun Gothic', sans-serif; transition: background 0.3s; overflow-x: hidden; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: rgba(255,255,255,0.9); box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .nav-left { font-size: 1.2rem; font-weight: bold; }
+        .nav-right { display: flex; gap: 15px; align-items: center; }
+        .wealth-badge { font-size: 1.2rem; font-weight: bold; padding: 5px 15px; background: #f0f0f0; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
+        .reward-currency-img { width: 26px; height: 26px; object-fit: contain; }
+        .home-btn { padding: 8px 20px; font-size: 1rem; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+        
+        .main-container { display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        /* 🔲 방 영역 (가구 배치 캔버스) */
+        .room-area {
+            width: 90%;
+            max-width: 900px;
+            height: clamp(320px, 52vh, 480px);
+            position: relative;
+            margin-top: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+            border-radius: 16px;
+            background-color: rgba(0,0,0,0.15);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .empty-msg { position: absolute; width: 100%; text-align: center; top: 40%; font-size: 1.2rem; color: rgba(255,255,255,0.85); font-weight: bold; pointer-events: none; text-shadow: 0 2px 8px rgba(0,0,0,0.45); }
+
+        /* ✨ 드래그 가능한 가구 스티커 */
+        .furniture-item {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 88px;
+            height: 88px;
+            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.45));
+            z-index: 10;
+            touch-action: none;
+        }
+        .furniture-visual {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center center;
+            transition: transform 0.12s ease;
+        }
+        .furniture-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        .furniture-item.is-dragging { cursor: grabbing; z-index: 100; }
+        .furniture-item.is-selected {
+            z-index: 80;
+            outline: 2px dashed rgba(255,255,255,0.92);
+            outline-offset: 3px;
+            border-radius: 10px;
+        }
+        .furniture-controls {
+            position: absolute;
+            top: -36px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 5px;
+            z-index: 120;
+            pointer-events: auto;
+        }
+        .furniture-item.is-selected .furniture-controls { display: flex; }
+        .furn-ctrl-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.96);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.28);
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            touch-action: manipulation;
+            color: #333;
+            font-weight: bold;
+        }
+        .furn-ctrl-btn:active { transform: scale(0.92); }
+        .room-edit-hint {
+            width: 90%;
+            max-width: 900px;
+            margin-top: 8px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.92);
+            text-shadow: 0 1px 4px rgba(0,0,0,0.45);
+            font-weight: bold;
+        }
+        body.theme--pink-pink .room-edit-hint { color: #AD1457; text-shadow: none; }
+
+        /* 🛒 하단 탭 메뉴 */
+        .tab-container { width: 90%; max-width: 800px; margin-top: 25px; }
+        .tab-buttons { display: flex; gap: 5px; }
+        .tab-btn { padding: 10px 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer; border: none; }
+        .tab-btn.active { background: #fff; }
+        
+        .dock-area { border: 3px solid #ccc; padding: 15px; min-height: 120px; display: flex; gap: 15px; flex-wrap: wrap; background: white; }
+        .item-card { width: 118px; padding: 8px; border: 2px solid #ddd; text-align: center; background: #fafafa; border-radius: 8px; box-sizing: border-box; }
+        .item-img { width: 72px; height: 72px; object-fit: contain; margin: 0 auto 6px; display: block; }
+        .item-name { font-size: 0.82rem; font-weight: bold; margin-bottom: 6px; line-height: 1.2; min-height: 2.2em; }
+        .buy-btn, .place-btn { width: 100%; padding: 6px 0; font-size: 0.8rem; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; }
+        .place-btn { background: #4CAF50; color: white; }
+        .free-btn { background: #26A69A; color: white; }
+        .map-card { width: 140px; }
+        .map-preview {
+            width: 100%;
+            height: 72px;
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 6px;
+            position: relative;
+            border: 2px solid #ddd;
+        }
+        .map-preview.is-active { border-color: #4CAF50; box-shadow: 0 0 0 2px rgba(76,175,80,0.35); }
+        .map-preview.is-locked { filter: grayscale(0.85) brightness(0.72); }
+        .map-lock {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            background: rgba(0,0,0,0.35);
+            border-radius: 4px;
+        }
+        .map-hint { font-size: 0.68rem; color: #888; line-height: 1.25; min-height: 2.4em; margin-bottom: 4px; }
+        .map-btn, .unlock-btn { width: 100%; padding: 6px 0; font-size: 0.78rem; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; margin-top: 4px; }
+        .map-btn { background: #2196F3; color: white; }
+        .unlock-btn { background: #78909C; color: white; }
+        .furniture-item.character-item img { width: 72px; height: 88px; }
+        .furniture-item.effect-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+        .item-img.is-gif { image-rendering: auto; }
+        .item-img.item-emoji {
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            margin: 0 auto 6px;
+        }
+        .item-card.is-effect { border-color: #FFD54F; background: #FFFDE7; }
+        .item-card.is-character { border-color: #CE93D8; background: #FCE4EC; }
+        .item-type-badge {
+            display: inline-block;
+            font-size: 0.62rem;
+            padding: 1px 6px;
+            border-radius: 999px;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        .item-type-badge.type-effect { background: #FFF176; color: #6D4C00; }
+        .item-type-badge.type-character { background: #F8BBD0; color: #880E4F; }
+        .shop-section-title {
+            width: 100%;
+            font-size: 0.92rem;
+            font-weight: bold;
+            color: #555;
+            margin: 4px 0 2px;
+            padding-bottom: 4px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        /* 🟩 마인크래프트 테마 (민수) */
+        body.theme--minecraft { background-color: #87CEEB; }
+        body.theme--minecraft .top-nav { border-bottom: 4px solid #4CAF50; }
+        body.theme--minecraft .room-area { border: 8px solid #5D4037; }
+        body.theme--minecraft .tab-btn { background: #9E9E9E; color: white; border: 3px solid #616161; border-bottom: none; }
+        body.theme--minecraft .tab-btn.active { background: #E0E0E0; color: black; border-bottom: 3px solid #E0E0E0; }
+        body.theme--minecraft .dock-area { background-color: #E0E0E0; border: 4px solid #9E9E9E; }
+        body.theme--minecraft .home-btn { background: #4CAF50; color: white; border: 3px solid #388E3C; }
+        body.theme--minecraft .buy-btn { background: #FF9800; color: white; }
+
+        /* 🌸 티니핑 & 커비 테마 (민서) */
+        body.theme--pink-pink { background-color: #FFF0F5; } 
+        body.theme--pink-pink .top-nav { border-bottom: 4px dashed #FFB6C1; border-radius: 0 0 15px 15px; }
+        body.theme--pink-pink .room-area { border: 6px solid #FFC0CB; border-radius: 20px; }
+        body.theme--pink-pink .tab-btn { background: #FFE4E1; color: #DB7093; border: 2px solid #FFC0CB; border-bottom: none; border-radius: 10px 10px 0 0; }
+        body.theme--pink-pink .tab-btn.active { background: white; border-bottom: 2px solid white; font-weight: 900; }
+        body.theme--pink-pink .dock-area { background-color: white; border: 3px solid #FFC0CB; border-radius: 0 15px 15px 15px; }
+        body.theme--pink-pink .home-btn { background: #FF69B4; color: white; border: none; border-radius: 20px; box-shadow: 0 4px 0 #C71585; }
+        body.theme--pink-pink .buy-btn { background: #FF69B4; color: white; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <div class="nav-left" id="user-badge">👦 마이룸</div>
+        <div class="nav-right">
+            <div class="wealth-badge" id="wealth-display">⏳ 지갑 확인 중...</div>
+            
+            <!-- 🚪 동선 수정: 한 칸 위(../)에 있는 로비 파일로 연결! -->
+            <!-- ⚠️ 주의: 대형 로비 파일 이름이 lobby.html이 아니라면 파일명에 맞게 변경해주세요! -->
+            <button onclick="clearRoom()" class="home-btn" style="background:#E57373; color:white; border:none; border-radius:20px; margin-right:5px;">🧹 방 청소하기</button>
+<a href="../../lobby.html" class="home-btn" id="exit-btn">🚪 대형 로비로 나가기</a>
+            
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- 🏠 캔버스: 가구가 배치되는 방 -->
+        <div class="room-area" id="my-room">
+            <div class="empty-msg" id="empty-msg">보관함에서 가구를 꺼내 방을 꾸며보세요!</div>
+        </div>
+        <p class="room-edit-hint">💡 방 안 아이템을 누르면 <b>↻ 회전</b> · <b>↔ 좌우반전</b> · 드래그로 위치 이동</p>
+
+        <!-- 🛒 컨트롤러 -->
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="tab-shop-btn" onclick="switchTab('shop')">🛒 상점 (구매)</button>
+                <button class="tab-btn" id="tab-inv-btn" onclick="switchTab('inventory')">📦 보관함 (배치)</button>
+                <button class="tab-btn" id="tab-map-btn" onclick="switchTab('maps')">🗺️ 맵 (배경)</button>
+            </div>
+            <div class="dock-area" id="dock-content"></div>
+        </div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script>
+        // ⚠️ INVENTORY_DB_ID / PROXY_URL 은 notion-helper.js 전역과 이름이 같아
+        // 여기서 const 로 선언하면 notion-helper 로드가 SyntaxError 로 깨지고 요정 AI가 멈춥니다.
+        function getRoomProxyUrl() {
+            if (typeof PROXY_URL !== 'undefined') return PROXY_URL;
+            if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) return APP_CONFIG.WORKER_PROXY_URL;
+            return "https://minmin-notion.awslike6.workers.dev";
+        }
+        function getRoomInventoryDbId() {
+            if (typeof INVENTORY_DB_ID !== 'undefined') return INVENTORY_DB_ID;
+            if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID) return APP_CONFIG.INVENTORY_DB_ID;
+            return "374a27115b688042bb61e6a102242e12";
+        }
+        const IMG_BASE = '../../assets/images/';
+        let currentProfile = localStorage.getItem('currentUser') || 'son';
+        let currentWealth = 0;
+        let currentTicketCount = 0;
+        let currentTab = 'shop'; 
+        let isDragging = false;
+        let activeDragElement = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let dragDidMove = false;
+        let selectedFurnitureId = null;
+        let fairyChatReady = false;
+        let inventoryPageId = null;
+        let inventoryPageProps = null;
+        let ownedItems = [];
+        let placedFurniture = [];
+        let unlockedMaps = [];
+        let selectedMapId = '';
+
+        // 🗺️ 맵 카탈로그 (defaultUnlocked=true 는 기본 무료)
+        // unlockCondition: 조건 충족 시 자동 해금 | 노션 '해금 맵 (텍스트)'에 id 수동 추가도 가능
+        const ROOM_MAPS = {
+            son: [
+                { id: 'map_mchouse', name: '비밀 기지', image: `${IMG_BASE}minsu-bg-mchouse.jpeg`, defaultUnlocked: true },
+                { id: 'map_mcforest', name: '숲속 야영지', image: `${IMG_BASE}minsu-bg-mcforest.jpeg`, defaultUnlocked: false, unlockHint: '💎 300개 모으면 자동 해금 (또는 노션에서 수동 해금)', unlockCondition: { type: 'wealth', value: 300 } },
+                { id: 'map_mcnight', name: '밤하늘 기지', image: `${IMG_BASE}minsu-bg-mcnight.jpeg`, defaultUnlocked: false, unlockHint: '🎫 소원권 1장 이상이면 자동 해금 (또는 노션에서 수동 해금)', unlockCondition: { type: 'tickets', value: 1 } }
+            ],
+            daughter: [
+                { id: 'map_fruitshop', name: '과일 가게', image: `${IMG_BASE}minseo-bg-fruitshop.jpeg`, defaultUnlocked: true },
+                { id: 'map_playground', name: '놀이터', image: `${IMG_BASE}minseo-bg-playground.jpeg`, defaultUnlocked: false, unlockHint: '🎫 소원권 5장 모으면 해금', unlockCondition: { type: 'tickets', value: 5 } },
+                { id: 'map_themepark', name: '놀이동산', image: `${IMG_BASE}minseo-bg-themepark.jpeg`, defaultUnlocked: false, unlockHint: '📖 용어사전방 Lv.3 달성 시 해금', unlockCondition: { type: 'vocaLevel', value: 3 } },
+                { id: 'map_clawmachine', name: '인형뽑기', image: `${IMG_BASE}minseo-bg-clawmachine.jpeg`, defaultUnlocked: false, unlockHint: '🔒 특별 미션 · 노션에서 수동 해금 가능', unlockCondition: null }
+            ]
+        };
+
+        const NOTION_ROOM_PROPS = {
+            OWNED_ITEMS: '보유 아이템 (텍스트)',
+            PLACEMENT: '배치 정보 (텍스트)',
+            UNLOCKED_MAPS: '해금 맵 (텍스트)',
+            SELECTED_MAP: '현재 맵 (텍스트)'
+        };
+
+        // 🛠️ 관리자(아빠/엄마) 검수 모드 판별
+        function isAdminUser() {
+            const savedName = localStorage.getItem('currentUserName');
+            return savedName === '아빠' || savedName === '엄마' || savedName === '어른';
+        }
+
+        // 관리자 모드일 때는 아이 데이터와 분리된 테스트용 저장소 사용
+        function getStorageKey(suffix) {
+            if (isAdminUser()) {
+                const adminName = localStorage.getItem('currentUserName') || 'admin';
+                return `admin_${adminName}_${currentProfile}_${suffix}`;
+            }
+            return `${currentProfile}_${suffix}`;
+        }
+
+        // 📋 상점 아이템 (type: normal | character | effect, icon: 이모지 또는 assets/images 파일명)
+        const MARKET_ITEMS = {
+            son: [
+                { id: "char_minsu", name: "탐험가 민수", icon: "minsu-char1.png", type: "character", price: 0, free: true },
+                { id: "mc_redbed", name: "네모 빨간 침대", icon: "mc-redbed.png", type: "normal", price: 50 },
+                { id: "mc_tree1", name: "블록 나무", icon: "mc-tree1.png", type: "normal", price: 30 },
+                { id: "mc_chest", name: "보물 상자", icon: "mc-chest.png", type: "normal", price: 35 },
+                { id: "mc_chicken", name: "닭", icon: "mc-chicken.png", type: "normal", price: 20 },
+                { id: "mc_sheep", name: "양", icon: "mc-sheep.png", type: "normal", price: 25 },
+                { id: "weapon_diamond_sword", name: "다이아몬드 검", icon: "weapon-mc-diamond-sword.png", type: "normal", price: 120 },
+                { id: "weapon_bow", name: "활", icon: "weapon-bow.jpeg", type: "normal", price: 80 },
+                { id: "weapon_gun1", name: "레이저 건", icon: "weapon-gun1.png", type: "normal", price: 100 },
+                { id: "weapon_gun3", name: "플라즈마 소총", icon: "weapon-gun3.png", type: "normal", price: 110 },
+                { id: "weapon_roblox_sword1", name: "로블록스 검", icon: "weapon-roblox-sword1.png", type: "normal", price: 90 },
+                { id: "item_radio", name: "휴대 라디오", icon: "item-radio.png", type: "normal", price: 40 },
+                { id: "item_hoverboard", name: "호버보드", icon: "item-hoverboard.png", type: "normal", price: 150 },
+                { id: "effect_torch", name: "이글이글 횃불", icon: "Effect-Items5.gif", type: "effect", price: 45 },
+                { id: "effect_spark1", name: "반짝 파티클", icon: "Effect-Items1.gif", type: "effect", price: 40 },
+                { id: "effect_spark2", name: "마법 반짝임", icon: "Effect-Items2.gif", type: "effect", price: 42 }
+            ],
+            daughter: [
+                { id: "char_minseo", name: "핑꾸 민서", icon: "minseo-char1.png", type: "character", price: 0, free: true },
+                { id: "fruit_strawberry", name: "딸기 바구니", icon: "fruit-strawberry-basket.png", type: "normal", price: 30 },
+                { id: "fruit_watermelon", name: "수박", icon: "fruit-watermelon.png", type: "normal", price: 25 },
+                { id: "fruit_grape", name: "포도", icon: "fruit-grape.png", type: "normal", price: 20 },
+                { id: "fruit_orange", name: "오렌지", icon: "fruit-orange.png", type: "normal", price: 18 },
+                { id: "fruit_apple", name: "사과", icon: "fruit-apple.png", type: "normal", price: 15 },
+                { id: "toy_sheep", name: "인형 양", icon: "toy-sheep.png", type: "normal", price: 40 },
+                { id: "toy_rabbit", name: "토끼 인형", icon: "toy-rabbit2.png", type: "normal", price: 35 },
+                { id: "toy_mymelody", name: "마이멜로디", icon: "toy-mymelody1.png", type: "normal", price: 45 },
+                { id: "toy_cinamoroll", name: "시나모롤", icon: "toy-cinamoroll2.png", type: "normal", price: 45 },
+                { id: "toy_pompom", name: "폼폼푸린", icon: "toy-pompompurin1.png", type: "normal", price: 50 },
+                { id: "toy_bear", name: "곰돌이", icon: "toy-bear1.png", type: "normal", price: 38 },
+                { id: "item_haribo", name: "하리보 젤리", icon: "haribo-pink.png", type: "normal", price: 15 },
+                { id: "item_slime", name: "슬라임", icon: "item-slime.png", type: "normal", price: 25 },
+                { id: "effect_sparkle1", name: "핑크 반짝이", icon: "Effect-Items1.gif", type: "effect", price: 35 },
+                { id: "effect_sparkle2", name: "무지개 스파클", icon: "Effect-Items2.gif", type: "effect", price: 38 },
+                { id: "effect_sparkle3", name: "별똥별 효과", icon: "Effect-Items3.gif", type: "effect", price: 40 }
+            ]
+        };
+
+        function getWealthIconHtml() {
+            if (currentProfile === 'son') return '💎';
+            return `<img src="${IMG_BASE}haribo-pink.png" alt="하리보 젤리" class="reward-currency-img">`;
+        }
+
+        function getDaughterWealthPropertyName(props) {
+            if (typeof getDaughterRewardPropertyName === 'function') {
+                return getDaughterRewardPropertyName(props);
+            }
+            return '슬라임 파츠 개수';
+        }
+
+        function readWealthFromProps(props) {
+            if (currentProfile === 'son') {
+                return props['다이아몬드 개수']?.number || 0;
+            }
+            return typeof getDaughterRewardCount === 'function'
+                ? getDaughterRewardCount(props)
+                : (props['슬라임 파츠 개수']?.number || 0);
+        }
+
+        function resolveItemIcon(item) {
+            const raw = item?.icon || item?.image || '';
+            if (!raw) return { kind: 'emoji', value: '📦' };
+            if (/\.(gif|jpe?g|png|webp)$/i.test(raw) || raw.includes('/')) {
+                const url = raw.includes('/') ? raw : `${IMG_BASE}${raw}`;
+                return { kind: 'image', url, isGif: /\.gif$/i.test(raw) };
+            }
+            return { kind: 'emoji', value: raw };
+        }
+
+        function getItemAssetUrl(item) {
+            const resolved = resolveItemIcon(item);
+            return resolved.kind === 'image' ? resolved.url : '';
+        }
+
+        function isGifItem(item) {
+            const resolved = resolveItemIcon(item);
+            return resolved.kind === 'image' && resolved.isGif;
+        }
+
+        function getItemImageHtml(item, options = {}) {
+            const resolved = resolveItemIcon(item);
+            const alt = item.name.replace(/"/g, '');
+            if (resolved.kind === 'emoji') {
+                return `<div class="item-img item-emoji" aria-label="${alt}">${resolved.value}</div>`;
+            }
+            const gifClass = resolved.isGif ? ' is-gif' : '';
+            const loading = resolved.isGif ? 'eager' : 'lazy';
+            const decode = resolved.isGif ? 'sync' : 'async';
+            return `<img class="item-img${gifClass}" src="${resolved.url}" data-gif-src="${resolved.url}" alt="${alt}" loading="${loading}" decoding="${decode}">`;
+        }
+
+        function getItemCardClass(item) {
+            if (item.type === 'effect') return 'item-card is-effect';
+            if (item.type === 'character') return 'item-card is-character';
+            return 'item-card';
+        }
+
+        function getItemTypeBadge(item) {
+            if (item.type === 'effect') return '<span class="item-type-badge type-effect">✨ GIF</span>';
+            if (item.type === 'character') return '<span class="item-type-badge type-character">⭐ 캐릭터</span>';
+            return '';
+        }
+
+        function refreshAnimatedGifs(root = document) {
+            root.querySelectorAll('img[data-gif-src]').forEach(img => {
+                const src = img.getAttribute('data-gif-src');
+                if (!src) return;
+                if (img.src === src) {
+                    img.src = '';
+                }
+                img.src = src;
+            });
+        }
+
+        function readNotionRichText(prop) {
+            if (!prop?.rich_text) return '';
+            return prop.rich_text.map(t => t.plain_text || '').join('');
+        }
+
+        function buildNotionRichTextPayload(text) {
+            const content = String(text);
+            if (content.length <= 2000) {
+                return { rich_text: [{ text: { content } }] };
+            }
+            const rich_text = [];
+            for (let i = 0; i < content.length; i += 2000) {
+                rich_text.push({ text: { content: content.slice(i, i + 2000) } });
+            }
+            return { rich_text };
+        }
+
+        function parseJsonArray(text, fallback = []) {
+            if (!text || !String(text).trim()) return fallback;
+            try {
+                const parsed = JSON.parse(text);
+                return Array.isArray(parsed) ? parsed : fallback;
+            } catch (err) {
+                console.warn('[my-room] JSON 파싱 실패:', err);
+                return fallback;
+            }
+        }
+
+        function normalizePlacedEntry(entry) {
+            if (!entry || !entry.id) return null;
+            let rotation = Number(entry.rotation);
+            if (!Number.isFinite(rotation)) rotation = 0;
+            rotation = ((rotation % 360) + 360) % 360;
+            return {
+                id: entry.id,
+                x: Number.isFinite(Number(entry.x)) ? Number(entry.x) : 0,
+                y: Number.isFinite(Number(entry.y)) ? Number(entry.y) : 0,
+                rotation,
+                flipX: Boolean(entry.flipX)
+            };
+        }
+
+        function normalizePlacedFurnitureList(list) {
+            return (Array.isArray(list) ? list : []).map(normalizePlacedEntry).filter(Boolean);
+        }
+
+        function applyFurnitureVisualTransform(visualEl, entry, dragging = false) {
+            if (!visualEl || !entry) return;
+            const rot = Number(entry.rotation) || 0;
+            const flip = entry.flipX ? -1 : 1;
+            const scale = dragging ? 1.08 : 1;
+            visualEl.style.transform = `rotate(${rot}deg) scaleX(${flip}) scale(${scale})`;
+        }
+
+        function setSelectedFurniture(itemId) {
+            selectedFurnitureId = itemId || null;
+            document.querySelectorAll('.furniture-item').forEach(el => {
+                el.classList.toggle('is-selected', itemId && el.id === `furn_${itemId}`);
+            });
+        }
+
+        function updateFurnitureVisual(itemId, dragging = false) {
+            const entry = placedFurniture.find(f => f.id === itemId);
+            const el = document.getElementById(`furn_${itemId}`);
+            if (!entry || !el) return;
+            const visual = el.querySelector('.furniture-visual');
+            applyFurnitureVisualTransform(visual, entry, dragging || el.classList.contains('is-dragging'));
+        }
+
+        async function rotatePlacedItem(itemId, deltaDeg = 45) {
+            const target = placedFurniture.find(f => f.id === itemId);
+            if (!target) return;
+            target.rotation = ((Number(target.rotation) || 0) + deltaDeg) % 360;
+            updateFurnitureVisual(itemId);
+            try {
+                if (isAdminUser()) saveAdminRoomStateToLocal();
+                else await syncRoomDataToNotion();
+            } catch (err) {
+                console.error('[rotatePlacedItem]', err);
+                alert('⚠️ 회전 저장에 실패했어요. 다시 시도해 주세요!');
+            }
+        }
+
+        async function flipPlacedItem(itemId) {
+            const target = placedFurniture.find(f => f.id === itemId);
+            if (!target) return;
+            target.flipX = !target.flipX;
+            updateFurnitureVisual(itemId);
+            try {
+                if (isAdminUser()) saveAdminRoomStateToLocal();
+                else await syncRoomDataToNotion();
+            } catch (err) {
+                console.error('[flipPlacedItem]', err);
+                alert('⚠️ 반전 저장에 실패했어요. 다시 시도해 주세요!');
+            }
+        }
+
+        function getDefaultUnlockedMapIds(profile) {
+            return (ROOM_MAPS[profile] || []).filter(m => m.defaultUnlocked).map(m => m.id);
+        }
+
+        function getMapById(mapId) {
+            return (ROOM_MAPS[currentProfile] || []).find(m => m.id === mapId);
+        }
+
+        function getCatalogItems(profile) {
+            return MARKET_ITEMS[profile] || [];
+        }
+
+        function getItemById(itemId) {
+            return getCatalogItems(currentProfile).find(i => i.id === itemId);
+        }
+
+        function mergeDefaultUnlockedMaps() {
+            getDefaultUnlockedMapIds(currentProfile).forEach(id => {
+                if (!unlockedMaps.includes(id)) unlockedMaps.push(id);
+            });
+        }
+
+        function isMapUnlocked(mapId) {
+            const map = getMapById(mapId);
+            if (!map) return false;
+            if (map.defaultUnlocked) return true;
+            return unlockedMaps.includes(mapId);
+        }
+
+        function evaluateMapUnlockCondition(map, props) {
+            if (!map?.unlockCondition) return false;
+            const cond = map.unlockCondition;
+            if (cond.type === 'wealth') {
+                return readWealthFromProps(props) >= cond.value;
+            }
+            if (cond.type === 'tickets') {
+                return (props['소원권 개수']?.number || 0) >= cond.value;
+            }
+            if (cond.type === 'vocaLevel') {
+                return (props['용어 레벨']?.number || 0) >= cond.value;
+            }
+            return false;
+        }
+
+        function processAutoMapUnlocks(props) {
+            let changed = false;
+            (ROOM_MAPS[currentProfile] || []).forEach(map => {
+                if (map.defaultUnlocked || unlockedMaps.includes(map.id)) return;
+                if (evaluateMapUnlockCondition(map, props)) {
+                    unlockedMaps.push(map.id);
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
+        function ensureFreeStarterItems() {
+            let changed = false;
+            getCatalogItems(currentProfile).filter(item => item.free).forEach(item => {
+                if (!ownedItems.includes(item.id)) {
+                    ownedItems.push(item.id);
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
+        function resolveSelectedMapId() {
+            const fallback = getDefaultUnlockedMapIds(currentProfile)[0] || '';
+            if (selectedMapId && isMapUnlocked(selectedMapId)) return selectedMapId;
+            return fallback;
+        }
+
+        function applyRoomBackground() {
+            selectedMapId = resolveSelectedMapId();
+            const map = getMapById(selectedMapId);
+            const room = document.getElementById('my-room');
+            if (!map || !room) return;
+            room.style.backgroundImage = `url('${map.image}')`;
+            room.style.backgroundSize = 'cover';
+            room.style.backgroundPosition = 'center';
+        }
+
+        function loadAdminRoomStateFromLocal() {
+            ownedItems = parseJsonArray(localStorage.getItem(getStorageKey('owned_items')));
+            placedFurniture = normalizePlacedFurnitureList(parseJsonArray(localStorage.getItem(getStorageKey('placed_furniture'))));
+            unlockedMaps = parseJsonArray(localStorage.getItem(getStorageKey('unlocked_maps')));
+            selectedMapId = localStorage.getItem(getStorageKey('selected_map')) || '';
+            mergeDefaultUnlockedMaps();
+            ensureFreeStarterItems();
+            selectedMapId = resolveSelectedMapId();
+        }
+
+        function saveAdminRoomStateToLocal() {
+            localStorage.setItem(getStorageKey('owned_items'), JSON.stringify(ownedItems));
+            localStorage.setItem(getStorageKey('placed_furniture'), JSON.stringify(placedFurniture));
+            localStorage.setItem(getStorageKey('unlocked_maps'), JSON.stringify(unlockedMaps));
+            localStorage.setItem(getStorageKey('selected_map'), selectedMapId);
+        }
+
+        function notionPropExists(propName) {
+            return !!(inventoryPageProps && Object.prototype.hasOwnProperty.call(inventoryPageProps, propName));
+        }
+
+        function saveMapStateToLocalFallback() {
+            if (isAdminUser()) return;
+            if (!notionPropExists(NOTION_ROOM_PROPS.UNLOCKED_MAPS)) {
+                localStorage.setItem(`${currentProfile}_unlocked_maps`, JSON.stringify(unlockedMaps));
+            }
+            if (!notionPropExists(NOTION_ROOM_PROPS.SELECTED_MAP)) {
+                localStorage.setItem(`${currentProfile}_selected_map`, selectedMapId || resolveSelectedMapId());
+            }
+        }
+
+        function loadMapStateFromLocalFallback() {
+            if (isAdminUser()) return;
+            if (!notionPropExists(NOTION_ROOM_PROPS.UNLOCKED_MAPS)) {
+                parseJsonArray(localStorage.getItem(`${currentProfile}_unlocked_maps`)).forEach(id => {
+                    if (id && !unlockedMaps.includes(id)) unlockedMaps.push(id);
+                });
+            }
+            if (!notionPropExists(NOTION_ROOM_PROPS.SELECTED_MAP)) {
+                const savedMap = localStorage.getItem(`${currentProfile}_selected_map`);
+                if (savedMap) selectedMapId = savedMap;
+            }
+            mergeDefaultUnlockedMaps();
+        }
+
+        function buildRoomSyncProperties(extraProps = {}) {
+            const updateProps = { ...extraProps };
+
+            if (notionPropExists(NOTION_ROOM_PROPS.OWNED_ITEMS)) {
+                updateProps[NOTION_ROOM_PROPS.OWNED_ITEMS] = buildNotionRichTextPayload(JSON.stringify(ownedItems));
+            }
+            if (notionPropExists(NOTION_ROOM_PROPS.PLACEMENT)) {
+                updateProps[NOTION_ROOM_PROPS.PLACEMENT] = buildNotionRichTextPayload(JSON.stringify(placedFurniture));
+            }
+            if (notionPropExists(NOTION_ROOM_PROPS.UNLOCKED_MAPS)) {
+                updateProps[NOTION_ROOM_PROPS.UNLOCKED_MAPS] = buildNotionRichTextPayload(JSON.stringify(unlockedMaps));
+            }
+            if (notionPropExists(NOTION_ROOM_PROPS.SELECTED_MAP)) {
+                updateProps[NOTION_ROOM_PROPS.SELECTED_MAP] = buildNotionRichTextPayload(selectedMapId || resolveSelectedMapId());
+            }
+
+            return updateProps;
+        }
+
+        function applyInventoryFromProps(props) {
+            inventoryPageProps = props;
+            currentWealth = readWealthFromProps(props);
+            currentTicketCount = props['소원권 개수']?.number || 0;
+            ownedItems = parseJsonArray(readNotionRichText(props[NOTION_ROOM_PROPS.OWNED_ITEMS]));
+            placedFurniture = normalizePlacedFurnitureList(parseJsonArray(readNotionRichText(props[NOTION_ROOM_PROPS.PLACEMENT])));
+            unlockedMaps = parseJsonArray(readNotionRichText(props[NOTION_ROOM_PROPS.UNLOCKED_MAPS]));
+            selectedMapId = readNotionRichText(props[NOTION_ROOM_PROPS.SELECTED_MAP]) || '';
+            loadMapStateFromLocalFallback();
+        }
+
+        async function finalizeRoomStateAfterLoad(props) {
+            reconcileOwnedWithPlaced();
+            const freeChanged = ensureFreeStarterItems();
+            const mapChanged = processAutoMapUnlocks(props);
+            selectedMapId = resolveSelectedMapId();
+            applyRoomBackground();
+            if ((freeChanged || mapChanged) && !isAdminUser()) {
+                await syncRoomDataToNotion();
+            }
+        }
+
+        async function queryInventoryPage(userName) {
+            const response = await fetch(`${getRoomProxyUrl()}/v1/databases/${getRoomInventoryDbId()}/query`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filter: { property: '이름', title: { equals: userName } } })
+            });
+            if (!response.ok) throw new Error(`서버 응답 오류 (상태코드: ${response.status})`);
+            const data = await response.json();
+            if (!data.results || !data.results.length) {
+                throw new Error('데이터베이스에서 이름(민수/민서)을 찾을 수 없습니다.');
+            }
+            return data.results[0];
+        }
+
+        async function syncRoomDataToNotion(extraProps = {}) {
+            if (isAdminUser()) {
+                saveAdminRoomStateToLocal();
+                return;
+            }
+            if (!inventoryPageId) return;
+
+            const updateProps = buildRoomSyncProperties(extraProps);
+            if (Object.keys(updateProps).length === 0) {
+                saveMapStateToLocalFallback();
+                return;
+            }
+
+            const response = await fetch(`${getRoomProxyUrl()}/v1/pages/${inventoryPageId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ properties: updateProps })
+            });
+            if (!response.ok) {
+                const errText = await response.text().catch(() => '');
+                console.error('[my-room] 노션 PATCH 실패:', response.status, errText);
+                throw new Error(`노션 동기화 실패 (상태: ${response.status})`);
+            }
+            saveMapStateToLocalFallback();
+        }
+
+        function reconcileOwnedWithPlaced() {
+            let changed = false;
+            placedFurniture.forEach(f => {
+                if (f?.id && !ownedItems.includes(f.id)) {
+                    ownedItems.push(f.id);
+                    changed = true;
+                }
+            });
+            return changed;
+        }
+
+        async function migrateLegacyLocalRoomDataIfNeeded() {
+            if (isAdminUser()) return false;
+            let changed = false;
+
+            const legacyOwned = localStorage.getItem(`${currentProfile}_owned_items`);
+            const legacyPlaced = localStorage.getItem(`${currentProfile}_placed_furniture`);
+
+            if (legacyOwned) {
+                parseJsonArray(legacyOwned).forEach(id => {
+                    if (id && !ownedItems.includes(id)) {
+                        ownedItems.push(id);
+                        changed = true;
+                    }
+                });
+            }
+            if (legacyPlaced) {
+                parseJsonArray(legacyPlaced).forEach(p => {
+                    const normalized = normalizePlacedEntry(p);
+                    if (normalized?.id && !placedFurniture.some(f => f.id === normalized.id)) {
+                        placedFurniture.push(normalized);
+                        changed = true;
+                    }
+                });
+            }
+
+            if (reconcileOwnedWithPlaced()) changed = true;
+
+            if (changed) {
+                await syncRoomDataToNotion();
+                if (legacyOwned) localStorage.removeItem(`${currentProfile}_owned_items`);
+                if (legacyPlaced) localStorage.removeItem(`${currentProfile}_placed_furniture`);
+            }
+            return changed;
+        }
+
+        // ⚙️ 초기 기동
+        function initRoom() {
+            const body = document.body;
+            const badge = document.getElementById('user-badge');
+            const adminMode = isAdminUser();
+            const childLabel = currentProfile === 'son' ? '민수' : '민서';
+
+            const room = document.getElementById('my-room');
+            applyRoomBackground();
+
+            if (currentProfile === 'son') {
+                body.className = 'theme--minecraft';
+                badge.innerHTML = adminMode
+                    ? `🛠️ [${localStorage.getItem('currentUserName')}] ${childLabel} 상점 검수`
+                    : '👦 민수의 기지';
+            } else {
+                body.className = 'theme--pink-pink';
+                badge.innerHTML = adminMode
+                    ? `🛠️ [${localStorage.getItem('currentUserName')}] ${childLabel} 상점 검수`
+                    : '👧 민서의 핑꾸 하우스';
+            }
+
+            setupDragEvents();
+
+            if (adminMode) {
+                loadAdminRoomStateFromLocal();
+                showAdminWealth();
+                applyRoomBackground();
+                renderRoomFurniture();
+            } else {
+                fetchInventoryFromNotion(currentProfile === 'son' ? '민수' : '민서');
+            }
+
+            if (!fairyChatReady && typeof initFairyChat === 'function') {
+                initFairyChat('MY_ROOM', '마이룸');
+                fairyChatReady = true;
+            }
+        }
+
+        // 🛠️ 관리자 검수 모드: 노션 조회/차감 없이 UI만 테스트
+        function showAdminWealth() {
+            currentWealth = 9999;
+            document.getElementById('wealth-display').innerHTML = `${getWealthIconHtml()} 🛠️ 검수 모드 (실제 결제 차단)`;
+            renderDock();
+        }
+
+        async function fetchInventoryFromNotion(userName) {
+            const wealthEl = document.getElementById('wealth-display');
+            wealthEl.innerHTML = `${getWealthIconHtml()} ⏳ 동기화 중...`;
+
+            try {
+                const page = await queryInventoryPage(userName);
+                inventoryPageId = page.id;
+                applyInventoryFromProps(page.properties);
+
+                try {
+                    await migrateLegacyLocalRoomDataIfNeeded();
+                    await finalizeRoomStateAfterLoad(page.properties);
+                } catch (syncErr) {
+                    console.warn('[my-room] 노션 저장 단계 실패 (화면 데이터는 불러옴):', syncErr);
+                    applyRoomBackground();
+                    saveMapStateToLocalFallback();
+                }
+
+                wealthEl.innerHTML = `${getWealthIconHtml()} 보유량: ${currentWealth}개`;
+                renderRoomFurniture();
+                renderDock();
+            } catch (err) {
+                console.error('🚨 마이룸 노션 동기화 에러:', err);
+                wealthEl.innerHTML = '❌ 지갑/가구 동기화 실패 (콘솔 확인)';
+            }
+        }
+
+        // 🔄 탭 전환
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.getElementById('tab-shop-btn').classList.toggle('active', tabName === 'shop');
+            document.getElementById('tab-inv-btn').classList.toggle('active', tabName === 'inventory');
+            document.getElementById('tab-map-btn').classList.toggle('active', tabName === 'maps');
+            renderDock();
+        }
+
+        function renderMapsDock(dock) {
+            const maps = ROOM_MAPS[currentProfile] || [];
+            const adminMode = isAdminUser();
+
+            if (maps.length === 0) {
+                dock.innerHTML = "<p style='color:#666; font-size:0.9rem; margin:auto;'>등록된 맵이 없어요.</p>";
+                return;
+            }
+
+            maps.forEach(map => {
+                const unlocked = isMapUnlocked(map.id);
+                const isActive = selectedMapId === map.id;
+                const previewClass = `map-preview${isActive ? ' is-active' : ''}${unlocked ? '' : ' is-locked'}`;
+                let actionHtml = '';
+
+                if (unlocked) {
+                    actionHtml = `<button class="map-btn" ${isActive ? 'disabled style="background:#81C784;"' : ''} onclick="selectRoomMap('${map.id}')">${isActive ? '✓ 적용 중' : '이 맵 적용'}</button>`;
+                } else {
+                    actionHtml = `<button class="map-btn" disabled style="background:#bbb;">🔒 잠김</button>`;
+                    if (adminMode) {
+                        actionHtml += `<button class="unlock-btn" onclick="adminUnlockMap('${map.id}')">🔓 검수 해금</button>`;
+                    }
+                }
+
+                dock.innerHTML += `
+                    <div class="item-card map-card">
+                        <div class="${previewClass}" style="background-image:url('${map.image}')">
+                            ${unlocked ? '' : '<span class="map-lock">🔒</span>'}
+                        </div>
+                        <div class="item-name">${map.name}</div>
+                        <div class="map-hint">${unlocked ? (isActive ? '현재 방 배경' : '터치해서 배경 변경') : (map.unlockHint || '나중에 해금됩니다')}</div>
+                        ${actionHtml}
+                    </div>
+                `;
+            });
+        }
+
+        // 🛒 도크 렌더링
+        function renderDock() {
+            const dock = document.getElementById('dock-content');
+            const items = getCatalogItems(currentProfile);
+            const icon = getWealthIconHtml();
+
+            dock.innerHTML = "";
+
+            if (currentTab === 'maps') {
+                renderMapsDock(dock);
+                return;
+            }
+
+            if (currentTab === 'shop') {
+                const sections = [
+                    { key: 'character', title: '⭐ 캐릭터' },
+                    { key: 'normal', title: '🛋️ 가구 · 소품' },
+                    { key: 'effect', title: '✨ 이펙트 (GIF)' }
+                ];
+
+                sections.forEach(section => {
+                    const sectionItems = items.filter(item => (item.type || 'normal') === section.key);
+                    if (sectionItems.length === 0) return;
+                    dock.innerHTML += `<div class="shop-section-title">${section.title}</div>`;
+                    sectionItems.forEach(item => {
+                        const isBought = ownedItems.includes(item.id);
+                        const isFree = item.free || item.price === 0;
+                        let btnLabel = isBought ? '보유함' : `${icon} ${item.price}`;
+                        if (isFree && !isBought) btnLabel = '🎁 무료';
+                        dock.innerHTML += `
+                            <div class="${getItemCardClass(item)}">
+                                ${getItemTypeBadge(item)}
+                                ${getItemImageHtml(item)}
+                                <div class="item-name">${item.name}</div>
+                                <button class="${isFree ? 'free-btn' : 'buy-btn'}" ${isBought ? 'disabled style="background:#bbb;"' : ''} onclick="buyItem('${item.id}', ${item.price})">
+                                    ${isBought ? '보유함' : btnLabel}
+                                </button>
+                            </div>
+                        `;
+                    });
+                });
+                refreshAnimatedGifs(dock);
+            } else {
+                const myOwnedList = items.filter(item => ownedItems.includes(item.id));
+                if (myOwnedList.length === 0) {
+                    dock.innerHTML = "<p style='color:#666; font-size:0.9rem; margin:auto;'>아직 산 가구가 없어요. 상점에서 가구를 쇼핑해 보세요!</p>";
+                    return;
+                }
+                myOwnedList.forEach(item => {
+                    const isPlaced = placedFurniture.some(f => f.id === item.id);
+                    dock.innerHTML += `
+                        <div class="${getItemCardClass(item)}">
+                            ${getItemTypeBadge(item)}
+                            ${getItemImageHtml(item)}
+                            <div class="item-name">${item.name}</div>
+                            <button class="place-btn" ${isPlaced ? 'disabled style="background:#aaa;"' : ''} onclick="spawnToRoom('${item.id}')">
+                                ${isPlaced ? '방에 있음' : '방에 꺼내기'}
+                            </button>
+                        </div>
+                    `;
+                });
+                refreshAnimatedGifs(dock);
+            }
+        }
+
+        // 💰 결제 로직
+        async function buyItem(itemId, price) {
+            const item = getItemById(itemId);
+            const isFree = item?.free || price === 0;
+
+            if (!isFree && currentWealth < price) {
+                const lackMsg = currentProfile === 'son'
+                    ? '다이아몬드가 부족합니다! 문제를 더 풀고 오세요! 💪'
+                    : '하리보 젤리가 부족해요! 문제를 더 풀고 오세요! 💪';
+                return alert(lackMsg);
+            }
+
+            // 🛠️ 관리자 검수 모드: 노션 차감 없이 로컬 테스트만
+            if (isAdminUser()) {
+                if (!confirm(`[검수 모드] 이 가구를 테스트 구매하시겠습니까?\n\n⚠️ 실제 다이아/하리보 젤리는 차감되지 않습니다.`)) return;
+                if (ownedItems.includes(itemId)) return alert('이미 보유한 아이템입니다.');
+                ownedItems.push(itemId);
+                saveAdminRoomStateToLocal();
+                alert("🛠️ 검수 모드 구매 완료! (노션 차감 없음)\n'보관함' 탭에서 배치를 테스트해 보세요.");
+                renderDock();
+                return;
+            }
+
+            if (!isFree && !confirm(`이 가구를 정말 구매하시겠습니까?\n내 지갑에서 ${price}개가 차감됩니다.`)) return;
+
+            const userName = (currentProfile === 'son') ? '민수' : '민서';
+
+            try {
+                if (isFree) {
+                    if (ownedItems.includes(itemId)) return alert('이미 보유한 아이템입니다.');
+                    ownedItems.push(itemId);
+                    await syncRoomDataToNotion();
+                    alert("🎁 무료 아이템을 받았어요! '보관함' 탭에서 방에 꺼내보세요.");
+                    renderDock();
+                    return;
+                }
+
+                document.getElementById('wealth-display').innerText = "⚡ 금고 결제 중...";
+
+                const page = await queryInventoryPage(userName);
+                inventoryPageId = page.id;
+                const props = page.properties;
+
+                const propertyName = currentProfile === 'son'
+                    ? '다이아몬드 개수'
+                    : getDaughterWealthPropertyName(props);
+                currentWealth -= price;
+                ownedItems.push(itemId);
+
+                await syncRoomDataToNotion({
+                    [propertyName]: { number: currentWealth }
+                });
+
+                alert("🎉 구매 완료! '보관함' 탭에서 방에 꺼내보세요.");
+                document.getElementById('wealth-display').innerHTML = `${getWealthIconHtml()} 보유량: ${currentWealth}개`;
+                renderDock();
+            } catch (err) {
+                console.error('[buyItem]', err);
+                alert('❌ 결제 실패. 아빠에게 삐삐를 쳐주세요!');
+                fetchInventoryFromNotion(userName);
+            }
+        }
+
+        async function selectRoomMap(mapId) {
+            if (!isMapUnlocked(mapId)) {
+                return alert('🔒 아직 잠긴 맵이에요! 조건을 충족하거나 아빠/엄마가 해금해 주세요.');
+            }
+            selectedMapId = mapId;
+            applyRoomBackground();
+            try {
+                await syncRoomDataToNotion();
+                renderDock();
+            } catch (err) {
+                console.error('[selectRoomMap]', err);
+                alert('❌ 맵 저장에 실패했어요. 다시 시도해 주세요!');
+            }
+        }
+
+        async function adminUnlockMap(mapId) {
+            if (!isAdminUser()) return;
+            const map = getMapById(mapId);
+            if (!map) return;
+            if (isMapUnlocked(mapId)) return alert('이미 해금된 맵입니다.');
+            unlockedMaps.push(mapId);
+            saveAdminRoomStateToLocal();
+            alert(`🛠️ [검수] "${map.name}" 맵을 해금했습니다.`);
+            renderDock();
+        }
+
+        async function spawnToRoom(itemId) {
+            if (placedFurniture.some(f => f.id === itemId)) return;
+
+            placedFurniture.push({ id: itemId, x: 300, y: 150, rotation: 0, flipX: false });
+
+            try {
+                await syncRoomDataToNotion();
+                renderRoomFurniture();
+                renderDock();
+            } catch (err) {
+                console.error('[spawnToRoom]', err);
+                placedFurniture = placedFurniture.filter(f => f.id !== itemId);
+                alert('❌ 가구 배치 저장에 실패했어요. 다시 시도해 주세요!');
+            }
+        }
+
+        // 🛋️ 방에 있는 가구들 화면에 그리기
+        function renderRoomFurniture() {
+            const room = document.getElementById('my-room');
+            const emptyMsg = document.getElementById('empty-msg');
+            const placed = placedFurniture;
+            const itemsData = getCatalogItems(currentProfile);
+            const keepSelection = selectedFurnitureId;
+
+            document.querySelectorAll('.furniture-item').forEach(el => el.remove());
+
+            if (placed.length > 0) {
+                emptyMsg.style.display = 'none';
+            } else {
+                emptyMsg.style.display = 'block';
+                selectedFurnitureId = null;
+            }
+
+            placed.forEach(f => {
+                const itemInfo = itemsData.find(i => i.id === f.id);
+                if(!itemInfo) return;
+
+                const div = document.createElement('div');
+                const typeClass = itemInfo.type === 'character'
+                    ? 'character-item'
+                    : (itemInfo.type === 'effect' ? 'effect-item' : '');
+                div.className = typeClass ? `furniture-item ${typeClass}` : 'furniture-item';
+                div.id = `furn_${f.id}`;
+                const assetUrl = getItemAssetUrl(itemInfo);
+                const gifAttrs = isGifItem(itemInfo)
+                    ? ' loading="eager" decoding="sync" data-gif-src="' + assetUrl + '"'
+                    : ' loading="eager"';
+
+                div.innerHTML = `
+                    <div class="furniture-controls">
+                        <button type="button" class="furn-ctrl-btn rotate-btn" title="45° 회전" aria-label="회전">↻</button>
+                        <button type="button" class="furn-ctrl-btn flip-btn" title="좌우 반전" aria-label="좌우 반전">↔</button>
+                    </div>
+                    <div class="furniture-visual">
+                        <img src="${assetUrl}" alt="${itemInfo.name}"${gifAttrs}>
+                    </div>
+                `;
+                div.style.left = `${f.x}px`;
+                div.style.top = `${f.y}px`;
+
+                applyFurnitureVisualTransform(div.querySelector('.furniture-visual'), f, false);
+
+                div.querySelector('.rotate-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    rotatePlacedItem(f.id);
+                });
+                div.querySelector('.flip-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    flipPlacedItem(f.id);
+                });
+                div.querySelectorAll('.furn-ctrl-btn').forEach(btn => {
+                    ['mousedown', 'touchstart', 'click'].forEach(evt => {
+                        btn.addEventListener(evt, (e) => e.stopPropagation());
+                    });
+                });
+
+                div.addEventListener('mousedown', dragStart);
+                div.addEventListener('touchstart', dragStart, {passive: false});
+
+                room.appendChild(div);
+            });
+            refreshAnimatedGifs(room);
+            if (keepSelection && placed.some(f => f.id === keepSelection)) {
+                setSelectedFurniture(keepSelection);
+            }
+        }
+
+        // 🖐️ 드래그 앤 드롭 엔진
+        function setupDragEvents() {
+            const room = document.getElementById('my-room');
+            room.addEventListener('mousedown', (e) => {
+                if (e.target === room || e.target.id === 'empty-msg') setSelectedFurniture(null);
+            });
+            room.addEventListener('touchstart', (e) => {
+                if (e.target === room || e.target.id === 'empty-msg') setSelectedFurniture(null);
+            }, { passive: true });
+
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('touchmove', dragMove, {passive: false});
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
+        }
+
+        function dragStart(e) {
+            if (e.target.closest('.furniture-controls')) return;
+            if (e.type === "touchstart") e.preventDefault();
+            activeDragElement = e.currentTarget.closest('.furniture-item');
+            if (!activeDragElement) return;
+
+            isDragging = true;
+            dragDidMove = false;
+            activeDragElement.classList.add('is-dragging');
+            const itemId = activeDragElement.id.replace('furn_', '');
+            updateFurnitureVisual(itemId, true);
+
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            
+            const rect = activeDragElement.getBoundingClientRect();
+            dragOffsetX = clientX - rect.left;
+            dragOffsetY = clientY - rect.top;
+        }
+
+        function dragMove(e) {
+            if (!isDragging || !activeDragElement) return;
+            if (e.type === "touchmove") e.preventDefault();
+            dragDidMove = true;
+
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            const roomRect = document.getElementById('my-room').getBoundingClientRect();
+            
+            let newX = clientX - roomRect.left - dragOffsetX;
+            let newY = clientY - roomRect.top - dragOffsetY;
+
+            newX = Math.max(0, Math.min(newX, roomRect.width - 88)); 
+            newY = Math.max(0, Math.min(newY, roomRect.height - 88));
+
+            activeDragElement.style.left = `${newX}px`;
+            activeDragElement.style.top = `${newY}px`;
+        }
+
+        async function dragEnd() {
+            if (!isDragging || !activeDragElement) return;
+            isDragging = false;
+
+            const itemId = activeDragElement.id.replace('furn_', '');
+            activeDragElement.classList.remove('is-dragging');
+            updateFurnitureVisual(itemId, false);
+
+            const finalX = parseInt(activeDragElement.style.left, 10);
+            const finalY = parseInt(activeDragElement.style.top, 10);
+
+            const target = placedFurniture.find(f => f.id === itemId);
+            if (target) {
+                if (!dragDidMove) {
+                    setSelectedFurniture(itemId);
+                } else {
+                    target.x = finalX;
+                    target.y = finalY;
+                    setSelectedFurniture(itemId);
+                    try {
+                        if (isAdminUser()) saveAdminRoomStateToLocal();
+                        else await syncRoomDataToNotion();
+                    } catch (err) {
+                        console.error('[dragEnd]', err);
+                        alert('⚠️ 가구 위치 저장에 실패했어요. 새로고침 후 다시 배치해 주세요.');
+                    }
+                }
+            }
+
+            activeDragElement = null;
+            dragDidMove = false;
+        }
+
+        async function clearRoom() {
+            if (!confirm('방에 있는 모든 가구를 다시 보관함으로 집어넣을까요? (구매한 가구는 사라지지 않아요!)')) return;
+
+            selectedFurnitureId = null;
+            placedFurniture = [];
+
+            try {
+                await syncRoomDataToNotion();
+                renderRoomFurniture();
+                renderDock();
+            } catch (err) {
+                console.error('[clearRoom]', err);
+                alert('❌ 방 청소 저장에 실패했어요. 다시 시도해 주세요!');
+            }
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            const requiredCores = [
+                'notion-helper.js',
+                'fairy-config.js',
+                'fairy-engine.js',
+                'fairy-chatbot.js'
+            ];
+
+            if (typeof loadCoreScripts === 'function') {
+                loadCoreScripts('../core/', requiredCores, () => {
+                    console.log('🧚 마이룸 하이브리드 엔진 결합 완료!');
+                    initRoom();
+                });
+            } else {
+                console.warn('loadCoreScripts 미로드 — initRoom만 실행');
+                initRoom();
+            }
+        });
+    </script>
+</body>
+</html>

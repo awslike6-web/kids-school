@@ -1,0 +1,123 @@
+/* ========================================================
+   📏 4선지 인쇄 통합 규격 (Four-Line Print Standard) v1
+   --------------------------------------------------------
+   - 영어 4선지 인쇄의 "유일한 원본 규격" 파일입니다.
+   - 소비처: print_english.html (영어 공책 인쇄방)
+             english_common.js printDictionary() (용어사전 인쇄 모듈)
+             kids/pages/sandbox_4line_tuning.html (정밀교정 샌드박스)
+   - 규격을 바꿀 땐 반드시 샌드박스에서 52자 재검수 후 반영하세요.
+   ======================================================== */
+@font-face {
+  font-family: 'And Baseline';
+  src: url('../fonts/AndBasR.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  /* ※ 4선 색상은 아래 SVG 배경에 하드코딩되어 있음 (여긴 참조용) */
+  --fl-blue:  #a0c4ff;                 /* 1·2·4번 실선 */
+  --fl-red:   #ff8a8a;                 /* 3번 베이스라인 점선 */
+  --fl-ink:   #c0c0c0;                 /* 따라쓰기 회색 글자 */
+  --fl-unit:  48px;                    /* 4선지 한 칸 전체 높이 */
+  --fl-font:  'And Baseline', sans-serif; /* 교육용 기본선체 (교정값은 이 폰트 기준) */
+  --fl-size:  29px;                    /* 알파벳 크기 (교정값은 이 크기 기준) */
+  --fl-shift: 1px;                     /* 단어 전체 베이스라인 안착 오프셋 */
+}
+
+/* ── 4선지 배경 (12 / 24 / 36빨강점선 / 48px) ── */
+.four-line-bg {
+  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='48' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='0' y1='12' x2='100%25' y2='12' stroke='%23a0c4ff' stroke-width='1'/%3E%3Cline x1='0' y1='24' x2='100%25' y2='24' stroke='%23a0c4ff' stroke-width='1'/%3E%3Cline x1='0' y1='36' x2='100%25' y2='36' stroke='%23ff8a8a' stroke-width='1' stroke-dasharray='4,4'/%3E%3Cline x1='0' y1='48' x2='100%25' y2='48' stroke='%23a0c4ff' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 100% var(--fl-unit);
+  line-height: var(--fl-unit);
+  min-height: var(--fl-unit);
+  text-align: left;
+  padding: 0 10px;
+}
+
+/* ── 따라쓰기 줄 묶음 (긴 표현이 내려갈 때도 48px 그리드 1줄 = 1칸) ── */
+.trace-rows {
+  display: flex;
+  flex-direction: column;
+}
+.trace-rows > .four-line-bg {
+  height: var(--fl-unit);
+  min-height: var(--fl-unit);
+  overflow: hidden;
+  flex-shrink: 0;
+  font-size: 0; /* inline-block 사이 미세 간격 제거 */
+}
+
+/* ── 따라쓰기 단어 ──
+   inline-block + nowrap: 긴 표현(amusement park)도 한 덩어리로 다음 4선 칸에 내려가며
+   줄마다 48px 그리드와 베이스라인이 동일하게 맞춰짐 */
+.trace-word {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: top;
+  font-family: var(--fl-font);
+  font-size: var(--fl-size);
+  line-height: var(--fl-unit);
+  height: var(--fl-unit);
+  color: var(--fl-ink);
+  margin-right: 25px;
+  margin-bottom: 0;
+  position: relative;
+  top: var(--fl-shift);
+  letter-spacing: 1px;
+}
+
+/* 빈 연습 줄: 글자를 투명 처리해 동일한 높이/줄바꿈 유지 */
+.empty-row-dynamic .trace-word { color: transparent; }
+
+/* ── 단어 행 레이아웃 (왼쪽 한글 뜻 + 오른쪽 연습 칸) ── */
+.word-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.meaning-wrap {
+  width: 180px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #333;
+  text-align: left;
+  padding: 12px 15px 0 0;
+  word-break: keep-all;
+}
+.practice-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-left: 2px solid #e0e0e0;
+  border-right: 2px solid #e0e0e0;
+}
+
+/* ── 낱글자 핀포인트 교정 배관 ──
+   알파벳은 wrapFourLineChars()로 <span class="ch char-X"> 래핑됨.
+   --dy = 상하 이동(px, 양수=아래), --sc = 크기 배율 */
+.ch {
+  display: inline-block;
+  position: relative;
+  top: var(--dy, 0px);
+  font-size: calc(1em * var(--sc, 1));
+  vertical-align: baseline;
+}
+
+/* ── [미세조정 출하 구역] ──────────────────────────────────
+   kids/pages/sandbox_4line_tuning.html 튜너가 출하한 값을 이 아래에 타설.
+   예) .char-g { --dy: 2px; }
+       .char-p { --dy: 1px; --sc: 0.98; }
+   ⚠️ 검수 조건(--fl-font / --fl-size)이 위 :root와 다르면 무효!
+   ──────────────────────────────────────────────────────── */
+
+
+/* ── 인쇄 마감 (선·회색 글자가 인쇄에서 증발하지 않도록) ── */
+@media print {
+  .four-line-bg, .trace-word, .ch, .word-row {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

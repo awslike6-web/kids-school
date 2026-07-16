@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 대시보드 👨‍👩‍👧‍👦 (V2 - 국어 레벨 분리 고도화)</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
+    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
+    --white: #FFFEF7; --dark: #2D2D4E; 
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    font-family: 'Jua', sans-serif; 
+    background: linear-gradient(160deg, #f0f8ff 0%, #fff0f5 50%, #fffbe6 100%); \r
+    min-height: 100vh; 
+    overflow-x: hidden; 
+    color: var(--dark); 
+  }
+  
+  .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .float-item { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; filter: blur(4px); animation: floatUp 12s infinite linear; }
+
+  @keyframes floatUp {
+    0% { transform: translateY(105vh) translateX(0) scale(0.8); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-10vh) translateX(50px) scale(1.2); opacity: 0; }
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 25px 15px; }
+  header { text-align: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.6); padding: 15px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); border: 2px solid #fff; }
+  header h1 { font-size: 2.3rem; color: #4A4A77; text-shadow: 2px 2px 0px #fff; margin-bottom: 5px; }
+  header p { font-family: 'Gaegu', sans-serif; font-size: 1.2rem; color: #7A7A9A; font-weight: bold; }
+
+  .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 25px; }
+  .child-card { background: rgba(255,255,255,0.85); border-radius: 30px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); border: 4px solid #fff; display: flex; flex-direction: column; gap: 20px; position: relative; transition: transform 0.3s ease; }
+  .child-card:hover { transform: translateY(-5px); }
+  
+  .child-card.minsu { border-color: var(--sky); }
+  .child-card.minseo { border-color: var(--pink); }
+
+  .badge { position: absolute; top: -15px; right: 25px; padding: 6px 16px; border-radius: 20px; color: white; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .minsu .badge { background: var(--sky); }
+  .minseo .badge { background: var(--pink); }
+
+  .profile-section { display: flex; align-items: center; gap: 15px; }
+  .avatar { font-size: 3rem; background: #fff; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+  .profile-info h2 { font-size: 1.6rem; color: #333; margin-bottom: 2px; }
+  .profile-info p { font-size: 0.95rem; color: #888; }
+
+  .status-block { background: #fff; border-radius: 20px; padding: 15px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.03); }
+  .status-title { font-size: 1.05rem; color: #555; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #f0f0f0; padding-bottom: 5px; }
+  
+  .level-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .level-item { background: #fdfdfd; border: 1px solid #f1f1f1; padding: 8px 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 2px; }
+  .level-item span:first-child { font-size: 0.85rem; color: #999; }
+  .level-item span:last-child { font-size: 1.1rem; color: #444; font-weight: bold; }
+
+  /* 🆕 국어 분리 튜닝으로 균형을 맞추기 위한 전용 변형 구조 */
+  .level-row.kor-split { grid-template-columns: 1fr; gap: 6px; margin-top: 5px; }
+  .level-row.kor-split .level-item { flex-direction: row; justify-content: space-between; align-items: center; padding: 6px 12px; }
+
+  .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .inv-item { background: #fff; border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+  .inv-icon { font-size: 1.8rem; }
+  .inv-icon img { width: 34px; height: 34px; object-fit: contain; display: block; }
+  .inv-details { display: flex; flex-direction: column; }
+  .inv-label { font-size: 0.85rem; color: #888; }
+  .inv-val { font-size: 1.15rem; color: #333; font-weight: bold; }
+
+  .action-zone { margin-top: auto; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.03); }
+  .action-title { font-size: 1rem; color: #555; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  
+  .btn-pay { width: 100%; padding: 14px; border: none; border-radius: 15px; color: white; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transition: all 0.2s ease; }
+  .minsu .btn-pay { background: linear-gradient(135deg, #6EC6F5, #4A90E2); }
+  .minseo .btn-pay { background: linear-gradient(135deg, #FF6B9D, #E84393); }
+  .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); filter: brightness(1.03); }
+  .btn-pay:active { transform: translateY(0); }
+  .btn-pay:disabled { background: #ccc !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  .loading-shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; color: transparent !important; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<div class="bg-floats" id="bgFloats"></div>
+
+<div class="wrapper">
+  <header>
+    <h1>민민이네 실시간 대시보드 👨‍👩‍👧‍👦</h1>
+    <p>우리 아이들의 성장과 인벤토리를 실시간으로 모니터링하고 정비합니다.</p>
+  </header>
+
+  <div class="grid-container">
+    
+    <div class="child-card minsu">
+      <div class="badge">첫째</div>
+      <div class="profile-section">
+        <div class="avatar">👦</div>
+        <div class="profile-info">
+          <h2>민수 (Minsu)</h2>
+          <p>초공간 지포스 격리 훈련 중</p>
+        </div>
+      </div>
+
+      <div class="status-block">
+        <div class="status-title">📊 과목별 성장 마스터</div>
+        <div class="level-row">
+          <div class="level-item">
+            <span>수학 레벨</span>
+            <span id="ms-math" class="loading-shimmer">Lv.--</span>
+          </div>
+          <div class="level-item">
+            <span>영어 레벨</span>
+            <span id="ms-eng" class="loading-shimmer">Lv.--</span>
+          </div>
+        </div>
+        <div class="level-row kor-split">
+          <div class="level-item">
+            <span>📙 용어사전 레벨</span>
+            <span id="ms-kor" class="loading-shimmer">Lv.--</span>
+          </div>
+          <div class="level-item">
+            <span>⚔️ 국어실력 레벨</span>
+            <span id="ms-kor-real" class="loading-shimmer">Lv.--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="inventory-grid">
+        <div class="inv-item">
+          <div class="inv-icon">💎</div>
+          <div class="inv-details">
+            <span class="inv-label">다이아몬드</span>
+            <span class="inv-val" id="ms-dia" class="loading-shimmer">--개</span>
+          </div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-icon">💧</div>
+          <div class="inv-details">
+            <span class="inv-label">슬라임 파츠</span>
+            <span class="inv-val" id="ms-slime" class="loading-shimmer">--개</span>
+          </div>
+        </div>
+        <div class="inv-item" style="grid-column: span 2;">
+          <div class="inv-icon">🎫</div>
+          <div class="inv-details">
+            <span class="inv-label">보유 소원권</span>
+            <span class="inv-val" id="ms-ticket" style="color: var(--sky);">--장</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-zone">
+        <div class="action-title">⚙️ 실시간 인프라 제어</div>
+        <button class="btn-pay" id="btn-pay-minsu" onclick="consumeWishTicket('민수')">
+          <span>🎫 소원권 1장 사용 승인</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="child-card minseo">
+      <div class="badge">둘째</div>
+      <div class="profile-section">
+        <div class="avatar">👧</div>
+        <div class="profile-info">
+          <h2>민서 (Minseo)</h2>
+          <p>하리보 젤리 수집 & 핑꾸 하우스 꾸미기 중</p>
+        </div>
+      </div>
+
+      <div class="status-block">
+        <div class="status-title">📊 과목별 성장 마스터</div>
+        <div class="level-row">
+          <div class="level-item">
+            <span>수학 레벨</span>
+            <span id="ds-math" class="loading-shimmer">Lv.--</span>
+          </div>
+          <div class="level-item">
+            <span>영어 레벨</span>
+            <span id="ds-eng" class="loading-shimmer">Lv.--</span>
+          </div>
+        </div>
+        <div class="level-row kor-split">
+          <div class="level-item">
+            <span>📙 용어사전 레벨</span>
+            <span id="ds-kor" class="loading-shimmer">Lv.--</span>
+          </div>
+          <div class="level-item">
+            <span>🍬 국어실력 레벨</span>
+            <span id="ds-kor-real" class="loading-shimmer">Lv.--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="inventory-grid">
+        <div class="inv-item">
+          <div class="inv-icon">💎</div>
+          <div class="inv-details">
+            <span class="inv-label">다이아몬드</span>
+            <span class="inv-val" id="ds-dia" class="loading-shimmer">--개</span>
+          </div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-icon"><img src="assets/images/haribo-pink.jpeg" alt="하리보 젤리"></div>
+          <div class="inv-details">
+            <span class="inv-label">하리보 젤리</span>
+            <span class="inv-val" id="ds-slime" class="loading-shimmer">--개</span>
+          </div>
+        </div>
+        <div class="inv-item" style="grid-column: span 2;">
+          <div class="inv-icon">🎫</div>
+          <div class="inv-details">
+            <span class="inv-label">보유 소원권</span>
+            <span class="inv-val" id="ds-ticket" style="color: var(--pink);">--장</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-zone">
+        <div class="action-title">⚙️ 실시간 인프라 제어</div>
+        <button class="btn-pay" id="btn-pay-minseo" onclick="consumeWishTicket('민서')">
+          <span>🎫 소원권 1장 사용 승인</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="kids/config.js"></script>
+<script>
+const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
+const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12";
+
+// 로컬 동시성 통제용 임시 상태 저장소
+const memoryState = {
+  "민수": { pageId: null, ticketCount: 0 },
+  "민서": { pageId: null, ticketCount: 0 }
+};
+
+// 배경 버블 생성기
+function makeBgFloats() {
+  const container = document.getElementById('bgFloats');
+  const count = 15;
+  for(let i=0; i<count; i++){
+    const item = document.createElement('div');
+    item.className = 'float-item';
+    const size = Math.random() * 60 + 20;
+    item.style.width = size + 'px';
+    item.style.height = size + 'px';
+    item.style.left = Math.random() * 100 + 'vw';
+    item.style.animationDelay = Math.random() * 8 + 's';
+    item.style.animationDuration = Math.random() * 6 + 10 + 's';
+    container.appendChild(item);
+  }
+}
+
+// 소원권 차감 자동화 엔진 (동시성 보호 프록시 전사)
+async function consumeWishTicket(childName) {
+  const targetBtn = childName === '민수' ? document.getElementById('btn-pay-minsu') : document.getElementById('btn-pay-minseo');
+  const displayEl = childName === '민수' ? document.getElementById('ms-ticket') : document.getElementById('ds-ticket');
+  const childData = memoryState[childName];
+
+  if (!childData.pageId) {
+    alert("❌ 아직 노션 백엔드 인프라가 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.");
+    return;
+  }
+
+  const originalTicketCount = childData.ticketCount;
+  if (originalTicketCount <= 0) {
+    alert(`❌ 보유한 소원권이 없습니다! 미션을 완료하여 소원권을 획득하세요.`);
+    return;
+  }
+
+  if (!confirm(`🔥 정말로 ${childName}의 소원권 1장을 사용 승인하시겠습니까?\n(노션 DB 값이 즉시 -1 차감됩니다.)`)) {
+    return;
+  }
+
+  // [Pro Point 1] 낙관적 UI 업데이트 적용 (서버 응답 전에 UI 선반영)
+  const newCount = originalTicketCount - 1;
+  childData.ticketCount = newCount;
+  displayEl.textContent = newCount + "장";
+
+  // [Pro Point 2] 버튼 잠금 및 스피너 로딩 시각화
+  const originalHtml = targetBtn.innerHTML;
+  targetBtn.disabled = true;
+  targetBtn.innerHTML = `<span>⏳ 노션 인프라 동기화 중...</span>`;
+
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/pages/${childData.pageId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        properties: {
+          "소원권 개수": { number: newCount }
+        }
+      })
+    });
+
+    if (!response.ok) throw new Error("노션 서버 통신 에러 발생");
+    
+    setTimeout(() => {
+      alert(`🎉 [${childName}] 소원권 결제가 정상 처리되었습니다! 아이와 행복한 시간 보내세요! ❤️`);
+    }, 50);
+
+  } catch (error) {
+    console.error(error);
+    
+    // [Pro Point 3] 롤백 처리: 통신 장애 시 화면 데이터를 안전하게 원상복구
+    alert("❌ 소원권 결제 통신 중 에러가 발생했습니다.\n데이터 동시성 보호를 위해 이전 상태로 롤백합니다.");
+    childData.ticketCount = originalTicketCount;
+    displayEl.textContent = originalTicketCount + "장";
+
+  } finally {
+    targetBtn.innerHTML = originalHtml;
+    targetBtn.disabled = false;
+  }
+}
+
+// 노션에서 실시간 통합 인벤토리 로드
+async function loadInventoryData() {
+  try {
+    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ page_size: 10 }) 
+    });
+    
+    if (!response.ok) throw new Error("네트워크 응답 오류");
+    
+    const data = await response.json();
+    
+    if (data.results && data.results.length > 0) {
+      data.results.forEach(page => {
+        const props = page.properties;
+        const name = props["이름"]?.title[0]?.plain_text;
+        
+        if (name === "민수" || name === "민서") {
+          const prefix = name === "민수" ? "ms" : "ds";
+          
+          // 로컬 동시성 제어기 저장
+          memoryState[name].pageId = page.id;
+          memoryState[name].ticketCount = props["소원권 개수"]?.number || 0;
+
+          // HTML 요소 바인딩 및 쉬머 제거
+          const mathEl = document.getElementById(`${prefix}-math`);
+          const engEl = document.getElementById(`${prefix}-eng`);
+          const korEl = document.getElementById(`${prefix}-kor`);
+          const korRealEl = document.getElementById(`${prefix}-kor-real`); // 🆕 국어 실력 요소
+          const diaEl = document.getElementById(`${prefix}-dia`);
+          const slimeEl = document.getElementById(`${prefix}-slime`);
+          const ticketEl = document.getElementById(`${prefix}-ticket`);
+
+          // 값 주입 및 시머 이펙트 완벽 해제
+          mathEl.textContent = "Lv." + (props["수학 레벨"]?.number || 1);
+          mathEl.classList.remove("loading-shimmer");
+
+          engEl.textContent = "Lv." + (props["영어 레벨"]?.number || 1);
+          engEl.classList.remove("loading-shimmer");
+
+          korEl.textContent = "Lv." + (props["용어 레벨"]?.number || 1);
+          korEl.classList.remove("loading-shimmer");
+
+          // 🆕 노션의 '국어 레벨' 컬럼 데이터 바인딩 및 안전 방어
+          korRealEl.textContent = "Lv." + (props["국어 레벨"]?.number || 1);
+          korRealEl.classList.remove("loading-shimmer");
+
+          diaEl.textContent = (props["다이아몬드 개수"]?.number || 0) + "개";
+          diaEl.classList.remove("loading-shimmer");
+
+          slimeEl.textContent = (typeof getDaughterRewardCount === 'function'
+            ? getDaughterRewardCount(props)
+            : (props["슬라임 파츠 개수"]?.number || 0)) + "개";
+          slimeEl.classList.remove("loading-shimmer");
+
+          ticketEl.textContent = memoryState[name].ticketCount + "장";
+          ticketEl.classList.remove("loading-shimmer");
+        }
+      });
+    }
+  } catch (error) {
+    console.error("데이터 로드 에러:", error);
+    // 통신 실패 시 오류 안내 문구로 전환
+    document.querySelectorAll(".loading-shimmer").forEach(el => {
+      el.textContent = "연결실패";
+      el.style.color = "#ff6b6b";
+      el.classList.remove("loading-shimmer");
+    });
+  }
+}
+
+// 기동 처리
+window.addEventListener('DOMContentLoaded', () => {
+  makeBgFloats();
+  loadInventoryData();
+});
+</script>
+</body>
+</html>

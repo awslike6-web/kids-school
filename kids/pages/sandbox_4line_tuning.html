@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4선지 정밀교정 샌드박스 🔬</title>
+<!-- 📏 4선지 통합 규격 원본을 직결 — 여기서 보는 것이 곧 실제 인쇄 규격 -->
+<link rel="stylesheet" href="../css/four_line_print.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@700&display=swap');
+
+    /* 교육용 따라쓰기 로컬 폰트 (kids/fonts/) */
+    @font-face {
+        font-family: 'KG Primary Penmanship';
+        src: url('../fonts/KGPrimaryPenmanship.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    @font-face {
+        font-family: 'And Baseline';
+        src: url('../fonts/AndBasR.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    /* ═══ [A. 샌드박스 전용 오버라이드] ═══
+       4선지·글자 규격은 four_line_print.css(통합 규격 원본)를 그대로 사용.
+       검수 편의를 위해 따라쓰기 색만 살짝 진하게. */
+    .trace-word { color: #8a8a8a; }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Jua', sans-serif; background: #f0f2f5; color: #333; padding-bottom: 40px; }
+
+    /* ═══ [D. 검수대 UI (인쇄 시 전부 숨김)] ═══ */
+    .header-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 24px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .header-bar h1 { font-size: 1.3rem; color: #4a3352; }
+    .btn { padding: 8px 18px; border: none; border-radius: 10px; font-family: 'Jua', sans-serif;
+           font-size: 1rem; cursor: pointer; }
+    .btn-print { background: linear-gradient(135deg,#4D96FF,#00D4FF); color: #fff; }
+    .btn-gray  { background: #e0e0e0; color: #555; }
+
+    .panel { background: #fff; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,.07);
+             max-width: 860px; margin: 18px auto; padding: 16px 20px; }
+    .panel h2 { font-size: 1.05rem; color: #4D96FF; margin-bottom: 10px; }
+
+    /* 52자 검수 그리드 */
+    .tune-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+    .cell {
+        width: 56px; text-align: center; cursor: pointer;
+        border: 2px solid transparent; border-radius: 6px;
+    }
+    .cell:hover { border-color: #cde1ff; }
+    .cell.active { border-color: #4D96FF; background: #eef5ff; }
+    .cell .cap { display: block; font-family: sans-serif; font-size: 10px; color: #999; }
+
+    /* 라이브 튜너 콘솔 */
+    .tuner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tuner .target { font-size: 1.4rem; color: #ff8a8a; min-width: 90px; }
+    .tuner button { width: 42px; height: 36px; font-size: 1.1rem; }
+    #cssOut { width: 100%; height: 90px; margin-top: 10px; font-family: monospace;
+              font-size: 12px; border: 2px dashed #a0c4ff; border-radius: 8px; padding: 8px; }
+
+    /* ═══ [E. 인쇄 원고 (A4)] ═══ */
+    .a4-page {
+        width: 210mm; min-height: 297mm; margin: 20px auto; background: #fff;
+        padding: 15mm; box-shadow: 0 5px 15px rgba(0,0,0,.2);
+        page-break-after: always; position: relative;
+    }
+    .a4-page:last-child { page-break-after: auto; }
+    .page-title {
+        text-align: center; font-size: 1.6rem; color: #4a3352;
+        border-bottom: 3px dashed var(--fl-blue); padding-bottom: 8px; margin-bottom: 20px;
+    }
+    .word-block { margin-bottom: 14px; page-break-inside: avoid; break-inside: avoid; }
+
+    /* ═══ [F. A4 인쇄 마감재] ═══ */
+    @media print {
+        body { background: #fff; padding: 0; }
+        .no-print { display: none !important; }
+        .a4-page {
+            margin: 0; box-shadow: none; width: 210mm; height: 297mm; padding: 15mm;
+        }
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        @page { size: A4 portrait; margin: 0; }
+    }
+</style>
+</head>
+<body>
+
+<div class="no-print header-bar">
+    <h1>🔬 4선지 정밀교정 샌드박스 <small style="font-size:.7em;color:#999;">(통합 규격 four_line_print.css 직결 · 조정은 화면에서만 적용)</small></h1>
+    <div>
+        <button class="btn btn-gray" onclick="location.href='../subjects/english/print_english.html'">🔙 본 인쇄방</button>
+        <button class="btn btn-print" onclick="printWhenFontsReady()">🖨️ 미리보기 인쇄</button>
+    </div>
+</div>
+
+<!-- ── 0구역: 전역 치수 콘솔 (폰트·크기 교차검증) ── -->
+<div class="no-print panel">
+    <h2>⓪ 전역 치수 콘솔 — 폰트/크기를 바꾸면 모든 조정값을 다시 검수해야 합니다</h2>
+    <div class="tuner" style="gap:18px;">
+        <label>서체:
+            <select id="fontSelect" onchange="setGlobal()">
+                <option value="'And Baseline', sans-serif" selected>And Baseline (기본선체 · 권장)</option>
+                <option value="'KG Primary Penmanship', cursive">KG 초등필기 (교육용)</option>
+                <option value="'Short Stack', cursive">Short Stack (구 인쇄방)</option>
+                <option value="'Comic Sans MS', 'Chalkboard SE', sans-serif">Comic Sans MS (폴백 시뮬레이션)</option>
+                <option value="'Gaegu', cursive">Gaegu (공부방 손글씨체)</option>
+                <option value="'Jua', sans-serif">Jua (공부방 UI체)</option>
+                <option value="Arial, sans-serif">Arial (폰트 로딩 실패 시 폴백)</option>
+            </select>
+        </label>
+        <label>글자 크기:
+            <input type="range" id="sizeRange" min="20" max="40" value="29" oninput="setGlobal()">
+            <span id="sizeLabel" style="font-family:monospace;color:#4D96FF;">29px</span>
+        </label>
+        <label>베이스라인 오프셋:
+            <input type="range" id="shiftRange" min="0" max="14" value="6" oninput="setGlobal()">
+            <span id="shiftLabel" style="font-family:monospace;color:#4D96FF;">6px</span>
+        </label>
+    </div>
+    <p style="font-size:.85rem;color:#999;margin-top:8px;">
+        ⚠️ --dy 조정값은 <strong>특정 폰트·특정 크기 조합에서만 유효</strong>합니다.
+        아래 출하 CSS에 검수 당시의 폰트/크기가 주석으로 함께 기록됩니다.
+    </p>
+</div>
+
+<!-- ── 1구역: 52자 검수 그리드 ── -->
+<div class="no-print panel">
+    <h2>① 알파벳 52자 검수대 — 글자를 클릭하면 아래 튜너에 물립니다</h2>
+    <div class="tune-grid" id="tuneGrid"></div>
+</div>
+
+<!-- ── 2구역: 라이브 1px 튜너 ── -->
+<div class="no-print panel">
+    <h2>② 1px 라이브 튜너 — 조정값은 아래 CSS로 자동 출하됩니다</h2>
+    <div class="tuner">
+        <span class="target" id="targetLabel">글자 미선택</span>
+        <span style="font-size:.85rem;color:#888;">위치</span>
+        <button class="btn btn-gray" onclick="nudge(-1)">▲ -1px</button>
+        <button class="btn btn-gray" onclick="nudge(1)">▼ +1px</button>
+        <span style="font-size:.85rem;color:#888;margin-left:8px;">크기</span>
+        <button class="btn btn-gray" onclick="scale(-2)">－2%</button>
+        <button class="btn btn-gray" onclick="scale(2)">＋2%</button>
+        <button class="btn btn-gray" onclick="resetChar()">↺ 리셋</button>
+        <span id="dyLabel" style="font-family:monospace;color:#4D96FF;"></span>
+    </div>
+    <textarea id="cssOut" readonly
+        placeholder="/* 조정한 값이 여기 쌓입니다. 완성되면 통째로 복사해 css/four_line_print.css의 [미세조정 출하 구역]에 타설하세요 */"></textarea>
+</div>
+
+<!-- ── 3구역: 긴 표현 줄바꿈 검수 안내 ── -->
+<div class="no-print panel">
+    <h2>③ 줄바꿈 검수 — 긴 표현(amusement park 등)은 아래 미리보기에서 확인</h2>
+    <p style="font-size:.9rem;color:#666;line-height:1.5;">
+        단어 선택·순서 조정은 <a href="../subjects/english/print_english.html">영어 공책 인쇄방</a>에서 하세요.
+        이 샌드박스는 52자 교정·폰트 검수 전용입니다.
+    </p>
+</div>
+
+<!-- ── 4구역: 인쇄 원고 (미리보기 겸용, 이 영역만 인쇄됨) ── -->
+<div id="printArea"></div>
+
+<script src="../js/four_line_print.js"></script>
+<script>
+/* ═══ [G. 검수용 단어 풀] — 하강/상승 문자가 골고루 섞인 테스트 셋 ═══ */
+const TEST_WORDS = [
+    'Apple', 'banana', 'queen', 'yellow', 'jump', 'giraffe',
+    'puppy', 'quick', 'flying', 'kitten', 'light', 'tiger',
+    'happy', 'Zebra', 'grumpy', 'jelly', 'amusement park'
+];
+
+const LETTERS = [
+    ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    ...'abcdefghijklmnopqrstuvwxyz'
+];
+
+/* 낱글자 래핑은 통합 규격 헬퍼(four_line_print.js)의 wrapFourLineChars 사용 */
+
+/* ═══ ① 52자 검수 그리드 조립 ═══ */
+const grid = document.getElementById('tuneGrid');
+LETTERS.forEach(ch => {
+    const cell = document.createElement('div');
+    cell.className = 'cell four-line-bg';
+    cell.dataset.ch = ch;
+    cell.innerHTML = `<span class="trace-word" style="margin-right:0;">${wrapFourLineChars(ch)}</span>`
+                   + `<span class="cap">${ch === ch.toUpperCase() ? '대문자 ' : ''}${ch}</span>`;
+    cell.onclick = () => selectChar(ch, cell);
+    grid.appendChild(cell);
+});
+
+/* ═══ ⓪ 전역 치수 콘솔 배선 (통합 규격의 --fl-* 변수를 직접 조작) ═══ */
+function setGlobal() {
+    const font  = document.getElementById('fontSelect').value;
+    const size  = document.getElementById('sizeRange').value;
+    const shift = document.getElementById('shiftRange').value;
+    const root = document.documentElement.style;
+    root.setProperty('--fl-font', font);
+    root.setProperty('--fl-size', size + 'px');
+    root.setProperty('--fl-shift', shift + 'px');
+    document.getElementById('sizeLabel').textContent  = size + 'px';
+    document.getElementById('shiftLabel').textContent = shift + 'px';
+    applyTune();   // 출하 CSS 헤더에 현재 폰트/크기 조합 반영
+}
+
+/* ═══ ② 라이브 튜너 배선 ═══ */
+const tuneMap = {};          // { 'g': {dy:2, sc:0}, ... }  dy=px, sc=% 증감
+let currentChar = null;
+
+const tuneSheet = document.createElement('style');  // 라이브 오버라이드 전용 시트
+document.head.appendChild(tuneSheet);
+
+function selectChar(ch, cell) {
+    currentChar = ch;
+    document.querySelectorAll('.cell.active').forEach(c => c.classList.remove('active'));
+    cell.classList.add('active');
+    document.getElementById('targetLabel').textContent = `.char-${ch}`;
+    refreshTuner();
+}
+
+function getTune(ch) {
+    if (!tuneMap[ch]) tuneMap[ch] = { dy: 0, sc: 0 };
+    return tuneMap[ch];
+}
+
+function pruneTune(ch) {
+    if (tuneMap[ch] && tuneMap[ch].dy === 0 && tuneMap[ch].sc === 0) delete tuneMap[ch];
+}
+
+function nudge(delta) {
+    if (!currentChar) { alert('먼저 검수대에서 글자를 클릭하세요!'); return; }
+    getTune(currentChar).dy += delta;
+    pruneTune(currentChar);
+    applyTune(); refreshTuner();
+}
+
+function scale(deltaPct) {
+    if (!currentChar) { alert('먼저 검수대에서 글자를 클릭하세요!'); return; }
+    getTune(currentChar).sc += deltaPct;
+    pruneTune(currentChar);
+    applyTune(); refreshTuner();
+}
+
+function resetChar() {
+    if (!currentChar) return;
+    delete tuneMap[currentChar];
+    applyTune(); refreshTuner();
+}
+
+function applyTune() {
+    const rules = Object.entries(tuneMap).map(([ch, t]) => {
+        const parts = [];
+        if (t.dy !== 0) parts.push(`--dy: ${t.dy}px;`);
+        if (t.sc !== 0) parts.push(`--sc: ${(1 + t.sc / 100).toFixed(2)};`);
+        return `.char-${ch} { ${parts.join(' ')} }`;
+    });
+    tuneSheet.textContent = rules.join('\n');
+
+    const font = document.getElementById('fontSelect').value;
+    const size = document.getElementById('sizeRange').value;
+    document.getElementById('cssOut').value = rules.length
+        ? `/* ── 4선지 미세조정 출하값 (${new Date().toLocaleDateString()})\n`
+        + `   검수 조건: font-family: ${font} / font-size: ${size}px\n`
+        + `   ⚠️ 메인의 .trace-word가 위 조건과 다르면 이 값은 무효! ── */\n`
+        + rules.join('\n')
+        : '';
+}
+
+function refreshTuner() {
+    if (!currentChar) { document.getElementById('dyLabel').textContent = ''; return; }
+    const t = tuneMap[currentChar] || { dy: 0, sc: 0 };
+    document.getElementById('dyLabel').textContent =
+        `--dy: ${t.dy}px  /  크기: ${t.sc >= 0 ? '+' : ''}${t.sc}%`;
+}
+
+/* ═══ ④ 인쇄 원고 렌더링 (검수용 고정 단어 목록) ═══ */
+const WORDS_PER_PAGE = 7;
+
+function renderPrint() {
+    const words = TEST_WORDS;
+    const area = document.getElementById('printArea');
+    area.innerHTML = '';
+
+    for (let p = 0; p < words.length; p += WORDS_PER_PAGE) {
+        const chunk = words.slice(p, p + WORDS_PER_PAGE);
+        const page = document.createElement('div');
+        page.className = 'a4-page';
+        page.innerHTML = `<div class="page-title">📝 4선지 검수 미리보기
+            (${Math.floor(p / WORDS_PER_PAGE) + 1}/${Math.ceil(words.length / WORDS_PER_PAGE)})</div>`;
+
+        chunk.forEach(w => {
+            const traceRows = buildTraceRowsHtml(w, getTraceCount(w));
+            const block = document.createElement('div');
+            block.className = 'word-block';
+            block.innerHTML = `
+                <div class="trace-rows">${traceRows}</div>
+                <div class="trace-rows empty-row-dynamic">${traceRows}</div>`;
+            page.appendChild(block);
+        });
+        area.appendChild(page);
+    }
+}
+
+setGlobal();
+renderPrint();
+</script>
+</body>
+</html>

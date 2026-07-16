@@ -1,0 +1,1 @@
+4선지 기본 폰트 And Baseline 적용 및 미세조정값 :root 동기화

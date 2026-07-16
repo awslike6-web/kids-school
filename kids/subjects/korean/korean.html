@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>민민이네 공부방 - 국어 멀티버스</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/korean.css">
+</head>
+<body>
+
+<div class="korean-container">
+  
+  <div class="top-action-bar">
+    <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
+        🔊 요정 음성 ON
+      </button>
+      <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
+    </div>
+  </div>
+
+  <div class="main-header-card">
+    <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
+    <h1 id="koreanTitle">민수의 국어 멀티버스 대기실</h1>
+    <p class="banner-goal-desc" id="koreanGoalText">국어의 달인이 되어보자!</p>
+  </div>
+
+  <div class="korean-grid">
+    
+    <div class="korean-grid-btn" onclick="openMissionView('sentence')">
+      <span class="korean-btn-icon">🗣️</span>
+      <div class="korean-btn-title">AI 지문 토론방</div>
+      <p class="korean-btn-desc">요정 코코와 함께 방금 읽은 지문에 대해 깊이 있는 토론을 나누어 보아요!</p>
+    </div>
+
+    <div class="korean-grid-btn" onclick="openMissionView('reading')">
+      <span class="korean-btn-icon">📖</span>
+      <div class="korean-btn-title">정밀 독해 멀티버스방</div>
+      <p class="korean-btn-desc">재미있는 글을 읽고 퀴즈를 풀며 문해력을 쑥쑥 키워보아요!</p>
+    </div>
+
+    <div class="korean-grid-btn" onclick="openMissionView('voca')">
+      <span class="korean-btn-icon">📚</span>
+      <div class="korean-btn-title">국어 용어방</div>
+      <p class="korean-btn-desc">교과서 속 핵심 국어 용어들의 뜻을 정확하게 알아맞혀 보세요!</p>
+    </div>
+
+    <div class="korean-grid-btn" onclick="openMissionView('dictation')">
+      <span class="korean-btn-icon">✍️</span>
+      <div class="korean-btn-title">받아쓰기 훈련소</div>
+      <p class="korean-btn-desc">코코가 불러주는 문장을 잘 듣고 정확하게 받아쓰는 연습을 해요!</p>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="korean-overlay" id="missionOverlay">
+  <div class="korean-overlay-box">
+    <button class="overlay-close-btn" onclick="closeMissionView()">✖</button>
+    
+    <div class="overlay-header">
+      <span id="overlayHeaderIcon" style="font-size: 1.8rem;">📖</span>
+      <h2 class="overlay-heading" id="overlayHeaderTitle">미션 타이틀</h2>
+    </div>
+
+    <div class="overlay-body" id="overlayInnerBody">
+      <!-- 동적 콘텐츠 렌더링 영역 -->
+    </div>
+  </div>
+</div>
+
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
+<script src="../../data/korean-reading-data.js"></script>
+<script src="../../js/korean_common.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof initializeKoreanRoom === 'function') {
+        initializeKoreanRoom();
+    } else {
+        const localProfile = localStorage.getItem('currentUser') || 'son';
+        document.body.className = (localProfile === 'son') ? 'theme--minecraft' : 'theme--slime';
+    }
+
+    if (typeof initFairyChat === 'function') {
+        initFairyChat("KOREAN");
+    }
+  });
+</script>
+</body>
+</html>
