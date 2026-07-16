@@ -524,6 +524,16 @@
     border-style: solid;
     border-color: var(--yellow) transparent transparent transparent;
   }
+  .notice-card.has-tooltip.tooltip-below .notice-tooltip {
+    bottom: auto;
+    top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(-8px);
+  }
+  .notice-card.has-tooltip.tooltip-below .notice-tooltip::after {
+    top: auto;
+    bottom: 100%;
+    border-color: transparent transparent var(--yellow) transparent;
+  }
   @media (hover: hover) and (pointer: fine) {
     .notice-card.has-tooltip:hover .notice-tooltip {
       visibility: visible;
@@ -1064,8 +1074,9 @@ function renderNotices() {
   }
 
   container.className = 'notice-list';
-  container.innerHTML = items.map(item => {
+  container.innerHTML = items.map((item, index) => {
     const row = item.row;
+    const tooltipBelowClass = index < 2 ? ' tooltip-below' : '';
 
     if (item.kind === 'classMemo') {
       const memo = String(row.memo).trim();
@@ -1075,7 +1086,7 @@ function renderNotices() {
       const hasTooltip = shouldShowNoticeTooltip(row, bodyText);
 
       return `
-        <div class="notice-card memo-from-class ${toneClass}${hasTooltip ? ' has-tooltip' : ''}"
+        <div class="notice-card memo-from-class ${toneClass}${hasTooltip ? ' has-tooltip' : ''}${hasTooltip ? tooltipBelowClass : ''}"
              ${hasTooltip ? ' tabindex="0" data-notice-tooltip' : ''}>
           <div class="notice-title">📝 ${escapeHtml(title)}</div>
           ${memo ? `<div class="notice-memo">${escapeHtml(memo)}</div>` : ''}
@@ -1095,7 +1106,7 @@ function renderNotices() {
     const hasTooltip = shouldShowNoticeTooltip(row, bodyText);
 
     return `
-      <div class="notice-card admin-notice${hasTooltip ? ' has-tooltip' : ''}"
+      <div class="notice-card admin-notice${hasTooltip ? ' has-tooltip' : ''}${hasTooltip ? tooltipBelowClass : ''}"
            ${hasTooltip ? ' tabindex="0" data-notice-tooltip' : ''}>
         <div class="notice-title">${noticeIcon} ${escapeHtml(title)}</div>
         ${alertHtml}
