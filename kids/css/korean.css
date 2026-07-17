@@ -7,7 +7,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Jua', 'Gaegu', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); transition: background 0.5s; }
+body { font-family: 'Nanum Gothic', sans-serif; background: linear-gradient(160deg, #c8f0ff 0%, #ffe8f5 50%, #fffbe6 100%); min-height: 100vh; overflow-x: hidden; color: var(--dark); transition: background 0.5s; }
 
 body.theme--slime { background: linear-gradient(160deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%); }
 body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%); }
@@ -43,10 +43,10 @@ body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 
 .quiz-hint-box { display: inline-block; padding: 5px 15px; background: #fff3cd; color: #856404; border-radius: 20px; font-size: 0.9rem; font-weight: bold; margin-bottom: 15px; border: 1px solid #ffeeba; }
 .quiz-descr { font-size: 1.4rem; font-weight: bold; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; word-break: keep-all; }
 .quiz-choices-container { display: flex; flex-direction: column; gap: 10px; }
-.quiz-choice-btn { padding: 15px; background: #fff; border: 2px solid var(--sky); border-radius: 12px; font-size: 1.1rem; font-family: 'Jua'; cursor: pointer; transition: 0.2s; color: var(--dark); }
+.quiz-choice-btn { padding: 15px; background: #fff; border: 2px solid var(--sky); border-radius: 12px; font-size: 1.1rem; font-family: 'Nanum Gothic', sans-serif; cursor: pointer; transition: 0.2s; color: var(--dark); }
 .quiz-choice-btn:hover { background: var(--sky); color: white; }
 .interactive-input-group { display: flex; gap: 10px; justify-content: center; }
-.text-input-field { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #ccc; font-size: 1.2rem; font-family: 'Jua'; text-align: center; }
+.text-input-field { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #ccc; font-size: 1.2rem; font-family: 'Nanum Gothic', sans-serif; text-align: center; }
 .quiz-button { padding: 12px 20px; border-radius: 12px; border: none; background: var(--sky); color: white; font-size: 1.1rem; font-family: 'Jua'; cursor: pointer; transition: 0.2s; }
 .quiz-button:hover { filter: brightness(0.9); }
 
@@ -59,7 +59,7 @@ body.theme--minecraft { background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 
 .msg.ai { background-color: #f1f3f5; align-self: flex-start; border-left: 4px solid var(--purple); }
 .msg.user { background-color: var(--sky); color: #ffffff; align-self: flex-end; }
 .hint-area { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 12px; border: 1px solid #eee; }
-.word-btn { background-color: #fff; color: var(--dark); border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-family: 'Jua'; }
+.word-btn { background-color: #fff; color: var(--dark); border: 1px solid #ccc; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; font-family: 'Nanum Gothic', sans-serif; }
 .word-btn:hover { background-color: var(--sky); color: #fff; border-color: var(--sky); }
 
 /* 독해방 UI */

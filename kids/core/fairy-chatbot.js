@@ -66,7 +66,7 @@ async function initFairyChat(subject, roomType = '공부방') {
     if (existingWidget) existingWidget.remove();
 
     const fairyUI = `
-        <div id="fairy-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; font-family: 'Malgun Gothic', Arial, sans-serif;">
+        <div id="fairy-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; font-family: 'Nanum Gothic', 'Malgun Gothic', Arial, sans-serif;">
             <button id="fairy-toggle-btn" onclick="toggleFairyWindow()" style="width: 55px; height: 55px; border-radius: 50%; background: #ab47bc; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;">
                 🧚
             </button>

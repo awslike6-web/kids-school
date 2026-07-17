@@ -7,7 +7,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body { 
-  font-family: 'Jua', sans-serif; 
+  font-family: 'Nanum Gothic', sans-serif; 
   min-height: 100vh; 
   padding-bottom: 60px; /* 💡 하단 요소 버퍼 마진 확보 */
 
@@ -131,9 +131,9 @@ body.theme--slime .fairy-live-dock, body.theme--hideout .fairy-live-dock { backg
 /* 📖 용어방 퀴즈 UI */
 .quiz-card { display: flex; flex-direction: column; gap: 14px; text-align: center; width: 100%; }
 .quiz-hint-box { font-size: 1.4rem; letter-spacing: 3px; font-weight: 700; padding: 12px; background: rgba(128,128,128,0.1); border-radius: 14px; }
-.quiz-descr { font-size: 1.1rem; line-height: 1.5; font-family: 'Gaegu', cursive; text-align: left; padding: 12px; border-left: 5px solid var(--sky); background: rgba(128,128,128,0.05); border-radius: 0 10px 10px 0; }
+.quiz-descr { font-size: 1.1rem; line-height: 1.5; font-family: 'Nanum Gothic', sans-serif; text-align: left; padding: 12px; border-left: 5px solid var(--sky); background: rgba(128,128,128,0.05); border-radius: 0 10px 10px 0; }
 .interactive-input-group { display: flex; gap: 10px; width: 100%; margin-top: 8px; }
-.text-input-field { flex: 1; padding: 12px 16px; border-radius: 14px; border: 2.5px solid; font-family: 'Jua', sans-serif; font-size: 1.05rem; outline: none; }
+.text-input-field { flex: 1; padding: 12px 16px; border-radius: 14px; border: 2.5px solid; font-family: 'Nanum Gothic', sans-serif; font-size: 1.05rem; outline: none; }
 .quiz-button { padding: 11px 22px; border-radius: 14px; background: var(--sky); border: none; font-family: 'Jua', sans-serif; font-size: 1.05rem; color: white; cursor: pointer; transition: all 0.2s; font-weight: bold; }
 .quiz-button:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
@@ -142,7 +142,7 @@ body.theme--slime .fairy-live-dock, body.theme--hideout .fairy-live-dock { backg
 .chart-img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .quiz-choices-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
 @media (max-width: 600px) { .quiz-choices-container { grid-template-columns: 1fr; } }
-.quiz-choice-btn { padding: 12px; border-radius: 14px; font-size: 0.95rem; font-family: 'Jua', sans-serif; text-align: left; cursor: pointer; transition: all 0.2s; }
+.quiz-choice-btn { padding: 12px; border-radius: 14px; font-size: 0.95rem; font-family: 'Nanum Gothic', sans-serif; text-align: left; cursor: pointer; transition: all 0.2s; }
 
 /* 🗺️ 랜선 지도 탐방실 UI (이것도 콤팩트하게 130px로 축소!) */
 .map-photo-card { text-align: center; display: flex; flex-direction: column; gap: 12px; }
@@ -160,7 +160,7 @@ body.theme--slime .fairy-live-dock, body.theme--hideout .fairy-live-dock { backg
 .artifact-img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .artifact-name { font-size: 1.1rem; font-weight: bold; color: #333; margin-top: 5px; }
 .artifact-card-right { flex: 1.2; background: rgba(255,215,0,0.06); border: 2.5px solid var(--gold); border-radius: 20px; padding: 14px; display: flex; flex-direction: column; justify-content: center; }
-.history-summary-text { font-family: 'Gaegu', cursive; font-size: 1.1rem; line-height: 1.5; }
+.history-summary-text { font-family: 'Nanum Gothic', sans-serif; font-size: 1.1rem; line-height: 1.5; }
 
 /* 🏆 요정의 칭호 박물관 컴포넌트 */
 .museum-showcase { background: rgba(255, 255, 255, 0.04); border: 2px dashed rgba(255,255,255,0.1); border-radius: 22px; padding: 18px; text-align: center; margin-top: 14px; }
