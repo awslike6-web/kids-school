@@ -90,6 +90,13 @@ function showLoadingSpinner(container) {
     `;
 }
 
+function isScienceMissionInProgress() {
+    const overlay = document.getElementById('missionOverlay');
+    if (!overlay || overlay.style.display !== 'flex') return false;
+    return Array.isArray(activeSectionData) && activeSectionData.length > 0
+        && activeQuizIdx < activeSectionData.length;
+}
+
 function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const titleEl = document.getElementById('overlayHeaderTitle');
@@ -111,15 +118,30 @@ function openMissionView(type) {
     titleEl.textContent = meta.title;
     iconEl.textContent = meta.icon;
 
+    if (typeof armQuizLeaveGuard === 'function') {
+        armQuizLeaveGuard({
+            isActive: isScienceMissionInProgress,
+            onLeave: () => closeMissionView(true)
+        });
+    }
+
     showLoadingSpinner(innerBody);
     fetchAndBuildDynamicUI(type, innerBody);
 }
 
-function closeMissionView() {
+function closeMissionView(force) {
+    if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
+        return;
+    }
+    if (typeof disarmQuizLeaveGuard === 'function') {
+        disarmQuizLeaveGuard();
+    }
     if (typeof finalizeQuizRewardSession === 'function') {
         finalizeQuizRewardSession();
     }
     document.getElementById('missionOverlay').style.display = 'none';
+    activeSectionData = [];
+    activeQuizIdx = 0;
     stopFairyTTS();
 }
 

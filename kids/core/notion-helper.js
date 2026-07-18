@@ -2109,3 +2109,100 @@ window.closeQuizWrongChoice = function() {
     const overlay = document.getElementById('quizWrongChoiceOverlay');
     if (overlay) overlay.style.display = 'none';
 };
+
+// ========================================================
+// 🚪 퀴즈/미션 진행 중 이탈 확인 (브라우저 뒤로 · 나가기 공통)
+// ========================================================
+window.LEAVE_SESSION_MSG = '나가시겠어요?\n풀던 문제가 사라질 수 있어요.';
+
+window.__quizLeaveGuard = {
+    armed: false,
+    checking: false,
+    isActive: null,
+    onLeave: null
+};
+
+window.isQuizLeaveGuardActive = function() {
+    const g = window.__quizLeaveGuard;
+    if (!g || !g.armed || typeof g.isActive !== 'function') return false;
+    try {
+        return !!g.isActive();
+    } catch (_) {
+        return false;
+    }
+};
+
+window.confirmLeaveActiveSession = function(message) {
+    if (!window.isQuizLeaveGuardActive()) return true;
+    return window.confirm(message || window.LEAVE_SESSION_MSG);
+};
+
+function __onQuizLeaveLobbyClick(e) {
+    const link = e.target && e.target.closest
+        ? e.target.closest('a.back-to-lobby-btn, a.exit-btn, a[href*="lobby.html"]')
+        : null;
+    if (!link) return;
+    if (!window.isQuizLeaveGuardActive()) return;
+    if (!window.confirm(window.LEAVE_SESSION_MSG)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
+    window.disarmQuizLeaveGuard();
+}
+
+window.armQuizLeaveGuard = function(options = {}) {
+    const g = window.__quizLeaveGuard;
+    g.isActive = typeof options.isActive === 'function' ? options.isActive : null;
+    g.onLeave = typeof options.onLeave === 'function' ? options.onLeave : null;
+    if (g.armed) return;
+    g.armed = true;
+    document.addEventListener('click', __onQuizLeaveLobbyClick, true);
+    try {
+        history.pushState({ kidsQuizGuard: 1 }, '');
+    } catch (_) {}
+};
+
+window.disarmQuizLeaveGuard = function() {
+    const g = window.__quizLeaveGuard;
+    if (!g) return;
+    if (g.armed) {
+        document.removeEventListener('click', __onQuizLeaveLobbyClick, true);
+    }
+    g.armed = false;
+    g.checking = false;
+    g.isActive = null;
+    g.onLeave = null;
+};
+
+window.addEventListener('popstate', () => {
+    const g = window.__quizLeaveGuard;
+    if (!g || !g.armed || g.checking) return;
+
+    // 퀴즈 진행 중이면 확인 후 이탈, 학년/단원 선택 화면이면 확인 없이 오버레이만 닫기
+    if (window.isQuizLeaveGuardActive()) {
+        g.checking = true;
+        const ok = window.confirm(window.LEAVE_SESSION_MSG);
+        if (ok) {
+            const leaveFn = g.onLeave;
+            window.disarmQuizLeaveGuard();
+            if (typeof leaveFn === 'function') leaveFn();
+        } else {
+            try {
+                history.pushState({ kidsQuizGuard: 1 }, '');
+            } catch (_) {}
+        }
+        g.checking = false;
+        return;
+    }
+
+    const leaveFn = g.onLeave;
+    window.disarmQuizLeaveGuard();
+    if (typeof leaveFn === 'function') leaveFn();
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (!window.isQuizLeaveGuardActive()) return;
+    e.preventDefault();
+    e.returnValue = '';
+});

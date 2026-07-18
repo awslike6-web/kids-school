@@ -169,6 +169,13 @@ let currentMissionType = "";
 // ========================================================
 // 🚪 오버레이 미션 팝업 연동 총 제어
 // ========================================================
+function isSocietyMissionInProgress() {
+    const overlay = document.getElementById('missionOverlay');
+    if (!overlay || overlay.style.display !== 'flex') return false;
+    return Array.isArray(activeSectionData) && activeSectionData.length > 0
+        && activeQuizIdx < activeSectionData.length;
+}
+
 function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const headerTitle = document.getElementById('overlayHeaderTitle');
@@ -199,6 +206,13 @@ function openMissionView(type) {
     headerTitle.textContent = targetTitle;
     headerIcon.textContent = targetIcon;
 
+    if (typeof armQuizLeaveGuard === 'function') {
+        armQuizLeaveGuard({
+            isActive: isSocietyMissionInProgress,
+            onLeave: () => closeMissionView(true)
+        });
+    }
+
     // 💡 미션 창 켜자마자 스피너 돌리면서 노션에서 데이터를 통째로 긁어옵니다.
     showLoadingSpinner(innerBody);
     fetchAndBuildDynamicUI(type, innerBody);
@@ -218,11 +232,19 @@ function showLoadingSpinner(container) {
     `;
 }
 
-function closeMissionView() {
+function closeMissionView(force) {
+    if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
+        return;
+    }
+    if (typeof disarmQuizLeaveGuard === 'function') {
+        disarmQuizLeaveGuard();
+    }
     if (typeof finalizeQuizRewardSession === 'function') {
         finalizeQuizRewardSession();
     }
     document.getElementById('missionOverlay').style.display = "none";
+    activeSectionData = [];
+    activeQuizIdx = 0;
     stopFairyTTS();
 }
 
@@ -481,7 +503,7 @@ function renderSectionUI(type, container) {
                 <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 풀었어요!</h2>
                 <p style="font-size:1.2rem; color:#666; margin-bottom:30px;">맞힌 문제마다 보상 1점씩 받았어요!<br>계속 탐험할까요?</p>
                 <div style="display:flex; justify-content:center; gap:15px;">
-                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="closeMissionView();">✅ 여기서 나가기</button>
+                    <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="closeMissionView(true);">✅ 여기서 나가기</button>
                     <button class="back-to-lobby-btn" style="background:#6EC6F5; color:white;" onclick="window.societyVocaContinueFlag=true; renderSectionUI('${type}', document.getElementById('overlayInnerBody'));">🚀 계속 이어서 풀기</button>
                 </div>
             </div>

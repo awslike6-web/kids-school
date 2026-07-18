@@ -396,7 +396,34 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); 
   document.getElementById(id).classList.add('active'); 
 }
-function goSetup() { loadWrongWords(); updateVocaOrderToggleLabels(); showScreen('screen-setup'); }
+
+function isEnglishVocaQuizInProgress() {
+  const quizScreen = document.getElementById('screen-quiz');
+  return !!(quizScreen && quizScreen.classList.contains('active')
+    && quizState && quizState.pool && quizState.pool.length > 0
+    && quizState.current < quizState.pool.length);
+}
+
+function armEnglishVocaLeaveGuard() {
+  if (typeof armQuizLeaveGuard !== 'function') return;
+  armQuizLeaveGuard({
+    isActive: isEnglishVocaQuizInProgress,
+    onLeave: () => {
+      if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
+      loadWrongWords();
+      updateVocaOrderToggleLabels();
+      showScreen('screen-setup');
+    }
+  });
+}
+
+function goSetup() {
+  if (typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) return;
+  if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
+  loadWrongWords();
+  updateVocaOrderToggleLabels();
+  showScreen('screen-setup');
+}
 
 function startQuiz(mode) {
   if (!currentSelectedGrade) return alert('먼저 공부할 학년/학기를 선택해 주세요!');
@@ -407,6 +434,7 @@ function startQuiz(mode) {
   window.engWrongNotes = [];
   updateVocaOrderToggleLabels();
   showScreen('screen-quiz'); loadQuestion();
+  armEnglishVocaLeaveGuard();
 }
 
 function startWrongWords() {
@@ -415,6 +443,7 @@ function startWrongWords() {
   window.engWrongNotes = [];
   updateVocaOrderToggleLabels();
   showScreen('screen-quiz'); loadQuestion();
+  armEnglishVocaLeaveGuard();
 }
 
 function generateHint(word) {
@@ -539,6 +568,7 @@ async function nextQuestion() {
   quizState.current++;
   
   if (quizState.current >= quizState.pool.length) {
+    if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
     const correctCount = quizState.score / 10;
     document.getElementById('q-num').textContent = `완료!`;
     
@@ -556,7 +586,9 @@ async function nextQuestion() {
        }
     } else {
        alert(`탐험 완료! 획득한 점수가 없습니다. 다음에 더 잘해봐요!`); 
-       goSetup();
+       loadWrongWords();
+       updateVocaOrderToggleLabels();
+       showScreen('screen-setup');
     }
   } else {
     setTimeout(() => loadQuestion(), 300);

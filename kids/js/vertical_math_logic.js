@@ -140,9 +140,20 @@ window.clearMemoPad = function() {
   }
 };
 
+function isVerticalMathInProgress() {
+  const gameScreen = document.getElementById('screen-game');
+  return !!(gameScreen && gameScreen.classList.contains('active')
+    && gameState && Array.isArray(gameState.questions) && gameState.questions.length > 0
+    && gameState.current < gameState.questions.length);
+}
+
 // 🚪 학습 종료(exitRoom) 배선 및 학습 일지 전송
-window.exitRoom = async function() {
+window.exitRoom = async function(force) {
   if (isExiting) return;
+  if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
+    return;
+  }
+  if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
   isExiting = true;
 
   const opNames = { add: '수학(덧셈 세로셈)', sub: '수학(뺄셈 세로셈)', mul: '수학(곱셈 세로셈)', div: '수학(나눗셈 세로셈)' };
@@ -325,6 +336,12 @@ window.startGame = function(mode, lvl) {
   
   showScreen('screen-game');
   nextQuestion();
+  if (typeof armQuizLeaveGuard === 'function') {
+    armQuizLeaveGuard({
+      isActive: isVerticalMathInProgress,
+      onLeave: () => window.exitRoom(true)
+    });
+  }
 }
 
 // 🚀 핵심: 세로셈 동적 그리드 생성 함수 (isPrint 매개변수 추가)

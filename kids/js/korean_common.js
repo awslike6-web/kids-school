@@ -89,6 +89,22 @@ function initializeKoreanRoom() {
 // ========================================================
 // 🚪 오버레이 미션 팝업 연동 총 제어
 // ========================================================
+function isKoreanMissionInProgress() {
+    const overlay = document.getElementById('missionOverlay');
+    if (!overlay || overlay.style.display !== 'flex') return false;
+    if (currentMissionType === 'voca' || currentMissionType === 'dictation') {
+        return Array.isArray(activeSectionData) && activeSectionData.length > 0
+            && activeQuizIdx < activeSectionData.length;
+    }
+    if (currentMissionType === 'reading') {
+        return !!activePassage && readingStage < 3;
+    }
+    if (currentMissionType === 'sentence') {
+        return !!activePassage;
+    }
+    return false;
+}
+
 function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const headerTitle = document.getElementById('overlayHeaderTitle');
@@ -97,6 +113,7 @@ function openMissionView(type) {
     
     overlay.style.display = "flex";
     activeQuizIdx = 0;
+    activePassage = null;
     stopFairyTTS();
     
     currentMissionType = type;
@@ -116,6 +133,13 @@ function openMissionView(type) {
     headerTitle.textContent = targetTitle;
     headerIcon.textContent = targetIcon;
 
+    if (typeof armQuizLeaveGuard === 'function') {
+        armQuizLeaveGuard({
+            isActive: isKoreanMissionInProgress,
+            onLeave: () => closeMissionView(true)
+        });
+    }
+
     showLoadingSpinner(innerBody);
     fetchAndBuildDynamicUI(type, innerBody);
 }
@@ -131,7 +155,14 @@ function showLoadingSpinner(container) {
     `;
 }
 
-function closeMissionView() {
+function closeMissionView(force) {
+    if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
+        return;
+    }
+    if (typeof disarmQuizLeaveGuard === 'function') {
+        disarmQuizLeaveGuard();
+    }
+
     const overlay = document.getElementById('missionOverlay');
     const finalizeDiscussion = async () => {
         if (currentMissionType === 'sentence' && sentenceHistory.length > 0) {
@@ -158,6 +189,9 @@ function closeMissionView() {
 
     finalizeDiscussion().finally(() => {
         overlay.style.display = "none";
+        activeSectionData = [];
+        activeQuizIdx = 0;
+        activePassage = null;
         stopDictationAudio();
         stopFairyTTS();
     });

@@ -548,12 +548,26 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             }
         }
 
+        function isGugudanQuizInProgress() {
+            const play = document.getElementById('quiz-play');
+            const result = document.getElementById('result-wrap');
+            return !!(play && play.style.display !== 'none'
+                && result && !result.classList.contains('show')
+                && Array.isArray(qList) && qList.length > 0 && qIdx < qList.length);
+        }
+
         window.initQuiz = function() {
             qList = [...ALL_QUESTIONS].sort(()=>Math.random()-0.5).slice(0,10);
             qIdx=0; qScore=0; qAnswered=false;
             document.getElementById('quiz-play').style.display='block';
             document.getElementById('result-wrap').classList.remove('show');
             window.renderQ();
+            if (typeof armQuizLeaveGuard === 'function') {
+                armQuizLeaveGuard({
+                    isActive: isGugudanQuizInProgress,
+                    onLeave: () => window.exitRoom(true)
+                });
+            }
         }
 
         window.renderQ = function() {
@@ -654,8 +668,12 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
         let isExiting = false; 
 
         // 🚀 구구단방 최종 탈출 및 학습 일지 전송 함수
-        window.exitRoom = async function() {
-            if (isExiting) return; 
+        window.exitRoom = async function(force) {
+            if (isExiting) return;
+            if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
+                return;
+            }
+            if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
             isExiting = true;      
 
             const roomEndTime = new Date(); 
@@ -677,7 +695,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 
         // 🚨 블랙박스 강제 종료 생존 로직
         window.addEventListener('pagehide', () => {
-            if (typeof window.exitRoom === 'function') window.exitRoom();
+            if (typeof window.exitRoom === 'function') window.exitRoom(true);
         });
 
     }); // 👈 하이브리드 엔진 마감 괄호 완벽 체결

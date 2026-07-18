@@ -134,10 +134,13 @@ function updateStatusAndFilter() {
 function renderCatalogSections(wordsToRender) {
   const container = document.getElementById('librarySectionsContainer');
   const emptyMsg = document.getElementById('emptySearchMsg');
+  const savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
   container.innerHTML = "";
   if (wordsToRender.length === 0) {
     const searchActive = selectedSubjects.length > 0 || selectedGrades.length > 0 || document.getElementById('searchInput').value.trim() !== "";
-    emptyMsg.style.display = searchActive ? 'block' : 'none'; return;
+    emptyMsg.style.display = searchActive ? 'block' : 'none';
+    requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
+    return;
   }
   emptyMsg.style.display = 'none';
   const sectionsMap = {};
@@ -165,6 +168,7 @@ function renderCatalogSections(wordsToRender) {
     });
     sectionDiv.appendChild(grid); container.appendChild(sectionDiv);
   });
+  requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
 }
 
 function openModal(wordData) {
@@ -362,7 +366,7 @@ async function askFairyTeacher(word, meaning) {
   if (typeof resetGeminiChatErrorState === 'function') resetGeminiChatErrorState();
   const replyBox = document.getElementById('fairyReplyBox');
   replyBox.innerHTML = `⏳ 요정 코코가 <b>[${word}]</b>에 대해 생각하고 있어요. 조금만 기다려주세요...`;
-  document.getElementById('fairyRoom').scrollIntoView({ behavior: 'smooth' });
+  // 단어 카드 위치 유지: fairyRoom으로 스크롤하면 목록이 맨 위로 튀어 올라감
 
   try {
     const { text: reply } = await fetchWithGeminiRetry(

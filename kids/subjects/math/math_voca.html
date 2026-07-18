@@ -163,6 +163,14 @@
             }
         }
 
+        function isMathVocaQuizInProgress() {
+            const play = document.getElementById('quiz-play');
+            const result = document.getElementById('result-wrap');
+            return !!(play && play.style.display !== 'none'
+                && result && result.style.display !== 'block'
+                && Array.isArray(qList) && qList.length > 0 && qIdx < qList.length);
+        }
+
         window.initQuiz = function() {
             // 10문제 랜덤 추출
             const shuffled = [...dbData].sort(() => Math.random() - 0.5);
@@ -179,6 +187,12 @@
             document.getElementById('result-wrap').style.display = 'none';
             
             renderQ();
+            if (typeof armQuizLeaveGuard === 'function') {
+                armQuizLeaveGuard({
+                    isActive: isMathVocaQuizInProgress,
+                    onLeave: () => window.exitRoom(true)
+                });
+            }
         }
 
         function generateQuestion(item) {
@@ -379,8 +393,12 @@
             }
         }
 
-        window.exitRoom = async function() {
-            if (isExiting) return; 
+        window.exitRoom = async function(force) {
+            if (isExiting) return;
+            if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
+                return;
+            }
+            if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
             isExiting = true;      
 
             const roomEndTime = new Date(); 
@@ -403,7 +421,7 @@
         }
 
         window.addEventListener('pagehide', () => {
-            if (typeof window.exitRoom === 'function') window.exitRoom();
+            if (typeof window.exitRoom === 'function') window.exitRoom(true);
         });
 
         // 시작!
