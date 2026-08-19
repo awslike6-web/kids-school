@@ -699,7 +699,7 @@ function renderSectionUI(type, container) {
             <div class="chart-image-frame" onclick="openImageZoomModal('${currentItem.img}')" title="클릭하여 교과서 돋보기 확대">
                 <img src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.parentElement.style.display='none';">
                 <div class="zoom-hint-badge">🔍 탭하여 확대/이동</div>
-                <button class="zoom-newtab-quick-btn" onclick="event.stopPropagation(); window.open('${currentItem.img}', '_blank');" title="새 탭에서 원본 사진 크게 보기">🔗 새 탭</button>
+                <button class="zoom-popup-quick-btn" onclick="event.stopPropagation(); openImageInNewWindow('${currentItem.img}');" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
             </div>
         ` : `
             <div style="text-align:center; margin-bottom:12px;">
@@ -1168,11 +1168,19 @@ function updateZoomTransform() {
     }
 }
 
-function openImageInNewTab() {
+function openImageInNewWindow(imgSrc) {
     const targetImg = document.getElementById("zoom-target-image");
-    if (targetImg && targetImg.src) {
-        window.open(targetImg.src, "_blank");
-    }
+    const url = imgSrc || (targetImg ? targetImg.src : "");
+    if (!url) return;
+    const w = Math.min(1050, window.screen.availWidth - 80);
+    const h = Math.min(900, window.screen.availHeight - 80);
+    const left = Math.max(0, Math.floor((window.screen.availWidth - w) / 2));
+    const top = Math.max(0, Math.floor((window.screen.availHeight - h) / 2));
+    window.open(
+        url,
+        "TextbookViewer_" + Date.now(),
+        `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`
+    );
 }
 
 function adjustZoomLevel(delta) {
@@ -1192,13 +1200,16 @@ function initZoomPanListeners() {
     if (isZoomEventsInitialized) return;
     isZoomEventsInitialized = true;
 
+    const modal = document.getElementById("image-zoom-modal");
     const viewport = document.getElementById("zoom-viewport");
+    const targetImg = document.getElementById("zoom-target-image");
     if (!viewport) return;
 
-    // 1. [PC] 마우스 드래그 이동 (브라우저 기본 고스트 드래그 방지 e.preventDefault)
+    // 1. [PC] 마우스 드래그 이동 (좌클릭 시 브라우저 기본 동작 차단)
     viewport.addEventListener("mousedown", (e) => {
-        if (e.button !== 0) return; // 좌클릭만
+        if (e.button !== 0) return;
         e.preventDefault();
+        e.stopPropagation();
         isZoomDragging = true;
         viewport.classList.add("is-dragging");
         startZoomDragX = e.clientX - currentZoomX;
@@ -1220,23 +1231,32 @@ function initZoomPanListeners() {
         }
     });
 
-    // 2. [PC] 마우스 휠 부드러운 줌
-    viewport.addEventListener("wheel", (e) => {
+    // 2. [PC] 마우스 휠 스크롤 줌 (배경 스크롤 전면 차단 및 줌 실행)
+    const handleWheelZoom = (e) => {
         e.preventDefault();
-        const delta = e.deltaY < 0 ? 0.3 : -0.3;
+        e.stopPropagation();
+        const delta = e.deltaY < 0 ? 0.35 : -0.35;
         adjustZoomLevel(delta);
-    }, { passive: false });
+    };
 
-    // 3. [PC] 더블클릭 시 1.8배 빠른 토글 확대/원복
-    viewport.addEventListener("dblclick", (e) => {
+    viewport.addEventListener("wheel", handleWheelZoom, { passive: false });
+    if (modal) {
+        modal.addEventListener("wheel", handleWheelZoom, { passive: false });
+    }
+
+    // 3. [PC] 더블클릭 토글 줌 (2.2배 확대 <-> 1배 원본)
+    const handleDblClick = (e) => {
         e.preventDefault();
-        if (currentZoomScale > 1.3) {
+        e.stopPropagation();
+        if (currentZoomScale > 1.25) {
             resetZoomLevel();
         } else {
-            currentZoomScale = 2.2;
+            currentZoomScale = 2.4;
             updateZoomTransform();
         }
-    });
+    };
+    viewport.addEventListener("dblclick", handleDblClick);
+    if (targetImg) targetImg.addEventListener("dblclick", handleDblClick);
 
     // 4. [모바일] 터치 드래그 및 핀치 줌
     viewport.addEventListener("touchstart", (e) => {

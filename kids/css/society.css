@@ -441,25 +441,28 @@ body.theme--slime .passage-summary-box, body.theme--hideout .passage-summary-box
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
-.zoom-newtab-quick-btn {
+.zoom-newtab-quick-btn, .zoom-popup-quick-btn {
   position: absolute;
   bottom: 8px;
   right: 10px;
   background: #0284c7;
   color: #ffffff;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: 16px;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-family: 'Jua', sans-serif;
   border: none;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   transition: all 0.15s ease;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-.zoom-newtab-quick-btn:hover {
+.zoom-newtab-quick-btn:hover, .zoom-popup-quick-btn:hover {
   background: #0369a1;
-  transform: scale(1.05);
+  transform: translateY(-1px) scale(1.05);
 }
 
 .image-zoom-modal {
