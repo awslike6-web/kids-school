@@ -137,9 +137,9 @@ body.theme--slime .fairy-live-dock, body.theme--hideout .fairy-live-dock { backg
 .quiz-button { padding: 11px 22px; border-radius: 14px; background: var(--sky); border: none; font-family: 'Jua', sans-serif; font-size: 1.05rem; color: white; cursor: pointer; transition: all 0.2s; font-weight: bold; }
 .quiz-button:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-/* 📊 자료실 UI (원래 200px 이었던 것을 140px로 콤팩트 축소!) */
-.chart-image-frame { width: 100%; height: 140px; background: #eef1f6; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(0,0,0,0.05); margin: 0 auto; max-width: 450px; }
-.chart-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+/* 📊 자료실 UI (실제 교과서 사진 고화질 뷰) */
+.chart-image-frame { width: 100%; max-height: 260px; min-height: 140px; background: #ffffff; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; border: 2px solid rgba(110, 198, 245, 0.3); margin: 8px auto 14px auto; max-width: 480px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.chart-img { max-width: 100%; max-height: 250px; object-fit: contain; border-radius: 10px; }
 .quiz-choices-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
 @media (max-width: 600px) { .quiz-choices-container { grid-template-columns: 1fr; } }
 .quiz-choice-btn { padding: 12px; border-radius: 14px; font-size: 0.95rem; font-family: 'Nanum Gothic', sans-serif; text-align: left; cursor: pointer; transition: all 0.2s; }
