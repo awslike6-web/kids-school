@@ -696,10 +696,19 @@ function renderSectionUI(type, container) {
         screenWrapper.className += " quiz-card";
         
         const chartMediaHtml = currentItem.img ? `
-            <div class="chart-image-frame" onclick="openImageZoomModal('${currentItem.img}')" title="클릭하여 교과서 돋보기 확대">
-                <img src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.parentElement.style.display='none';">
-                <div class="zoom-hint-badge">🔍 탭하여 확대/이동</div>
-                <button class="zoom-popup-quick-btn" onclick="event.stopPropagation(); openImageInNewWindow('${currentItem.img}');" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
+            <div class="chart-container-box">
+                <div class="chart-ctrl-toolbar">
+                    <div class="chart-ctrl-group">
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
+                    </div>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
+                </div>
+                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
+                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.closest('.chart-container-box').style.display='none';">
+                </div>
+                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🪟 새창 열기</div>
             </div>
         ` : `
             <div style="text-align:center; margin-bottom:12px;">
@@ -726,6 +735,9 @@ function renderSectionUI(type, container) {
             </div>
         `;
         container.appendChild(screenWrapper);
+        if (currentItem.img) {
+            initCardZoomListeners();
+        }
         speakFairyTTS(currentItem.desc + ". 퀴즈!" + currentItem.quiz);
 
     } else if (type === 'map') {
@@ -1135,42 +1147,39 @@ window.printSocietySummary = async function() {
 let currentZoomScale = 1.0;
 let currentZoomX = 0;
 let currentZoomY = 0;
-let isZoomDragging = false;
-let startZoomDragX = 0;
-let startZoomDragY = 0;
-let lastTouchDistance = 0;
+// ========================================================
+// 🔍 퀴즈 카드 일체형 교과서 사진 줌/팬 & 새창 엔진
+// ========================================================
+let cardZoomScale = 1.0;
+let cardZoomX = 0;
+let cardZoomY = 0;
+let isCardZoomDragging = false;
+let startCardDragX = 0;
+let startCardDragY = 0;
+let cardLastTouchDist = 0;
 
-function openImageZoomModal(imgSrc) {
-    if (!imgSrc) return;
-    const modal = document.getElementById("image-zoom-modal");
-    const targetImg = document.getElementById("zoom-target-image");
-    if (!modal || !targetImg) return;
-
-    targetImg.src = imgSrc;
-    modal.style.display = "flex";
-    document.body.style.overflow = "hidden";
-    resetZoomLevel();
-    initZoomPanListeners();
-}
-
-function closeImageZoomModal() {
-    const modal = document.getElementById("image-zoom-modal");
-    if (modal) {
-        modal.style.display = "none";
-        document.body.style.overflow = "";
+function updateCardZoomTransform() {
+    const img = document.getElementById("cardZoomImg");
+    if (img) {
+        img.style.transform = `translate(${cardZoomX}px, ${cardZoomY}px) scale(${cardZoomScale})`;
     }
 }
 
-function updateZoomTransform() {
-    const targetImg = document.getElementById("zoom-target-image");
-    if (targetImg) {
-        targetImg.style.transform = `translate(${currentZoomX}px, ${currentZoomY}px) scale(${currentZoomScale})`;
-    }
+function adjustCardZoom(delta) {
+    cardZoomScale = Math.min(Math.max(0.6, cardZoomScale + delta), 4.5);
+    updateCardZoomTransform();
+}
+
+function resetCardZoom() {
+    cardZoomScale = 1.0;
+    cardZoomX = 0;
+    cardZoomY = 0;
+    updateCardZoomTransform();
 }
 
 function openImageInNewWindow(imgSrc) {
-    const targetImg = document.getElementById("zoom-target-image");
-    const url = imgSrc || (targetImg ? targetImg.src : "");
+    const img = document.getElementById("cardZoomImg");
+    const url = imgSrc || (img ? img.src : "");
     if (!url) return;
     const w = Math.min(1050, window.screen.availWidth - 80);
     const h = Math.min(900, window.screen.availHeight - 80);
@@ -1183,124 +1192,92 @@ function openImageInNewWindow(imgSrc) {
     );
 }
 
-function adjustZoomLevel(delta) {
-    currentZoomScale = Math.min(Math.max(0.6, currentZoomScale + delta), 5.0);
-    updateZoomTransform();
-}
-
-function resetZoomLevel() {
-    currentZoomScale = 1.0;
-    currentZoomX = 0;
-    currentZoomY = 0;
-    updateZoomTransform();
-}
-
-let isZoomEventsInitialized = false;
-function initZoomPanListeners() {
-    if (isZoomEventsInitialized) return;
-    isZoomEventsInitialized = true;
-
-    const modal = document.getElementById("image-zoom-modal");
-    const viewport = document.getElementById("zoom-viewport");
-    const targetImg = document.getElementById("zoom-target-image");
+function initCardZoomListeners() {
+    resetCardZoom();
+    const viewport = document.getElementById("cardZoomViewport");
     if (!viewport) return;
 
-    // 1. [PC] 마우스 드래그 이동 (좌클릭 시 브라우저 기본 동작 차단)
-    viewport.addEventListener("mousedown", (e) => {
+    // 1. 마우스 드래그 이동 (PC)
+    viewport.onmousedown = (e) => {
         if (e.button !== 0) return;
         e.preventDefault();
-        e.stopPropagation();
-        isZoomDragging = true;
+        isCardZoomDragging = true;
         viewport.classList.add("is-dragging");
-        startZoomDragX = e.clientX - currentZoomX;
-        startZoomDragY = e.clientY - currentZoomY;
-    });
+        startCardDragX = e.clientX - cardZoomX;
+        startCardDragY = e.clientY - cardZoomY;
+    };
 
-    window.addEventListener("mousemove", (e) => {
-        if (!isZoomDragging) return;
+    window.onmousemove = (e) => {
+        if (!isCardZoomDragging) return;
         e.preventDefault();
-        currentZoomX = e.clientX - startZoomDragX;
-        currentZoomY = e.clientY - startZoomDragY;
-        updateZoomTransform();
-    });
+        cardZoomX = e.clientX - startCardDragX;
+        cardZoomY = e.clientY - startCardDragY;
+        updateCardZoomTransform();
+    };
 
-    window.addEventListener("mouseup", () => {
-        if (isZoomDragging) {
-            isZoomDragging = false;
+    window.onmouseup = () => {
+        if (isCardZoomDragging) {
+            isCardZoomDragging = false;
             if (viewport) viewport.classList.remove("is-dragging");
         }
-    });
+    };
 
-    // 2. [PC] 마우스 휠 스크롤 줌 (배경 스크롤 전면 차단 및 줌 실행)
-    const handleWheelZoom = (e) => {
+    // 2. 휠 스크롤 줌 (PC: 휠로 확대/축소)
+    viewport.onwheel = (e) => {
         e.preventDefault();
         e.stopPropagation();
         const delta = e.deltaY < 0 ? 0.35 : -0.35;
-        adjustZoomLevel(delta);
+        adjustCardZoom(delta);
     };
 
-    viewport.addEventListener("wheel", handleWheelZoom, { passive: false });
-    if (modal) {
-        modal.addEventListener("wheel", handleWheelZoom, { passive: false });
-    }
-
-    // 3. [PC] 더블클릭 토글 줌 (2.2배 확대 <-> 1배 원본)
-    const handleDblClick = (e) => {
+    // 3. 더블클릭 토글 (PC: 더블클릭 시 2.4배 확대 / 원복)
+    viewport.ondblclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (currentZoomScale > 1.25) {
-            resetZoomLevel();
+        if (cardZoomScale > 1.25) {
+            resetCardZoom();
         } else {
-            currentZoomScale = 2.4;
-            updateZoomTransform();
+            cardZoomScale = 2.4;
+            updateCardZoomTransform();
         }
     };
-    viewport.addEventListener("dblclick", handleDblClick);
-    if (targetImg) targetImg.addEventListener("dblclick", handleDblClick);
 
-    // 4. [모바일] 터치 드래그 및 핀치 줌
-    viewport.addEventListener("touchstart", (e) => {
+    // 4. 모바일 터치 드래그 및 핀치 줌
+    viewport.ontouchstart = (e) => {
         if (e.touches.length === 1) {
-            isZoomDragging = true;
-            startZoomDragX = e.touches[0].clientX - currentZoomX;
-            startZoomDragY = e.touches[0].clientY - currentZoomY;
+            isCardZoomDragging = true;
+            startCardDragX = e.touches[0].clientX - cardZoomX;
+            startCardDragY = e.touches[0].clientY - cardZoomY;
         } else if (e.touches.length === 2) {
-            isZoomDragging = false;
-            lastTouchDistance = Math.hypot(
+            isCardZoomDragging = false;
+            cardLastTouchDist = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
                 e.touches[0].clientY - e.touches[1].clientY
             );
         }
-    }, { passive: true });
+    };
 
-    viewport.addEventListener("touchmove", (e) => {
-        if (e.touches.length === 1 && isZoomDragging) {
-            currentZoomX = e.touches[0].clientX - startZoomDragX;
-            currentZoomY = e.touches[0].clientY - startZoomDragY;
-            updateZoomTransform();
+    viewport.ontouchmove = (e) => {
+        if (e.touches.length === 1 && isCardZoomDragging) {
+            cardZoomX = e.touches[0].clientX - startCardDragX;
+            cardZoomY = e.touches[0].clientY - startCardDragY;
+            updateCardZoomTransform();
         } else if (e.touches.length === 2) {
             const dist = Math.hypot(
                 e.touches[0].clientX - e.touches[1].clientX,
                 e.touches[0].clientY - e.touches[1].clientY
             );
-            if (lastTouchDistance > 0) {
-                const diff = (dist - lastTouchDistance) * 0.008;
-                adjustZoomLevel(diff);
+            if (cardLastTouchDist > 0) {
+                const diff = (dist - cardLastTouchDist) * 0.008;
+                adjustCardZoom(diff);
             }
-            lastTouchDistance = dist;
+            cardLastTouchDist = dist;
         }
-    }, { passive: true });
+    };
 
-    viewport.addEventListener("touchend", () => {
-        isZoomDragging = false;
-        lastTouchDistance = 0;
-    });
-
-    // 5. ESC 키로 닫기
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-            closeImageZoomModal();
-        }
-    });
+    viewport.ontouchend = () => {
+        isCardZoomDragging = false;
+        cardLastTouchDist = 0;
+    };
 }
 
