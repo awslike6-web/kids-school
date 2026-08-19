@@ -409,7 +409,7 @@ function startMissionWithFilteredData(records, innerBody) {
         const titleStr = record.word || record.title || record.name || "미상";
         const meaningStr = record.meaning || "뜻풀이 없음";
         const descStr = record.detailContext || record.desc || "해당 유적/지형 설명이 준비되어 있습니다.";
-        const imgUrl = record.imageUrl || record.img || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
+        const imgUrl = record.imageUrl || record.img || "";
         const hintStr = record.hint || getChosung(titleStr);
         const summaryPassage = record.summaryPassage || "";
 
@@ -419,7 +419,7 @@ function startMissionWithFilteredData(records, innerBody) {
                 meaning: meaningStr, 
                 hint: hintStr, 
                 desc: descStr, 
-                image: record.imageUrl || record.image, 
+                image: imgUrl, 
                 pageId: record.pageId, 
                 isMastered: record.isMastered,
                 summaryPassage: summaryPassage
@@ -694,21 +694,32 @@ function renderSectionUI(type, container) {
 
     } else if (type === 'chart') {
         screenWrapper.className += " quiz-card";
+        
+        const chartMediaHtml = currentItem.img ? `
+            <div class="chart-image-frame" style="margin-bottom:12px;">
+                <img src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.parentElement.style.display='none';">
+            </div>
+        ` : `
+            <div style="text-align:center; margin-bottom:12px;">
+                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(110, 198, 245, 0.12); border:1.5px dashed var(--sky); border-radius:14px; padding:8px 18px; font-family:'Jua', sans-serif; color:var(--sky); font-size:1.05rem;">
+                    <span>📊 교과서 핵심 탐구 자료 분석</span>
+                </div>
+            </div>
+        `;
+
         screenWrapper.innerHTML = `
             ${passageHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">자료분석 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <h3>${currentItem.title}</h3>
-            <div class="chart-image-frame">
-                <img src="${currentItem.img}" class="chart-img" alt="사회 도표" onerror="this.src='https://raw.githubusercontent.com/awslike6/images/main/chart1.png'">
-            </div>
-            <div class="quiz-descr">${currentItem.desc}</div>
-            <p style="font-weight: bold; font-size:1.1rem; text-align: left; margin-top:10px;">❓ ${currentItem.quiz}</p>
+            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title}</h3>
+            ${chartMediaHtml}
+            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem;">${currentItem.desc}</div>
+            <p style="font-weight: bold; font-size:1.15rem; text-align: left; margin-top:14px;">❓ ${currentItem.quiz}</p>
             <div class="quiz-choices-container">
                 ${currentItem.choices.map((choice, i) => `
                      <button class="quiz-choice-btn" onclick="verifyChartChoice(${i}, ${currentItem.correctIdx})">${i+1}. ${choice}</button>
                 `).join('')}
             </div>
-            <div style="margin-top: 10px; display:flex; justify-content:center;">
+            <div style="margin-top: 14px; display:flex; justify-content:center;">
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
             </div>
         `;
@@ -717,13 +728,24 @@ function renderSectionUI(type, container) {
 
     } else if (type === 'map') {
         screenWrapper.className += " map-photo-card";
+
+        const mapMediaHtml = currentItem.img ? `
+            <div class="map-img-frame" ondblclick="speakFairyTTS('${currentItem.desc.replace(/'/g, "\\'")}')">
+                <img src="${currentItem.img}" class="map-photo-img" alt="${currentItem.name}" onerror="this.parentElement.style.display='none';">
+                <div class="double-click-badge">💡 더블클릭: 코코 해설 청취</div>
+            </div>
+        ` : `
+            <div style="text-align:center; margin-bottom:12px;">
+                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(78, 205, 196, 0.12); border:1.5px dashed var(--mint); border-radius:14px; padding:8px 18px; font-family:'Jua', sans-serif; color:var(--mint); font-size:1.05rem;">
+                    <span>🗺️ 랜선 국토 지리 탐방</span>
+                </div>
+            </div>
+        `;
+
         screenWrapper.innerHTML = `
             <div style="font-size: 0.95rem; opacity:0.7;">국토 명소 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <h3>🏕️ ${currentItem.name}</h3>
-            <div class="map-img-frame" ondblclick="speakFairyTTS('${currentItem.desc}')">
-                <img src="${currentItem.img}" class="map-photo-img" alt="${currentItem.name}" onerror="this.src='https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=700&auto=format&fit=crop'">
-                <div class="double-click-badge">💡 더블클릭: 코코 해설 청취</div>
-            </div>
+            ${mapMediaHtml}
             <div class="quiz-descr">${currentItem.desc}</div>
             
             <div class="interactive-input-group" style="flex-direction:column; gap:5px;">
@@ -734,7 +756,7 @@ function renderSectionUI(type, container) {
                 </div>
             </div>
             <div style="display:flex; justify-content:center; gap:8px;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc}')">🔊 해설 전체 듣기</button>
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc.replace(/'/g, "\\'")}')">🔊 해설 전체 듣기</button>
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">다음 장소 탐방 ⏩</button>
             </div>
         `;
