@@ -89,16 +89,17 @@
     <div class="zoom-toolbar">
       <span class="zoom-toolbar-title">🔍 교과서 사진 돋보기 뷰어</span>
       <div class="zoom-btn-group">
-        <button class="zoom-ctrl-btn" onclick="adjustZoomLevel(0.3)" title="확대">➕ 확대</button>
-        <button class="zoom-ctrl-btn" onclick="adjustZoomLevel(-0.3)" title="축소">➖ 축소</button>
-        <button class="zoom-ctrl-btn" onclick="resetZoomLevel()" title="원래대로">🔄 원래대로</button>
+        <button class="zoom-ctrl-btn" onclick="adjustZoomLevel(0.4)" title="확대">➕ 확대</button>
+        <button class="zoom-ctrl-btn" onclick="adjustZoomLevel(-0.4)" title="축소">➖ 축소</button>
+        <button class="zoom-ctrl-btn" onclick="resetZoomLevel()" title="원래대로">🔄 원본</button>
+        <button class="zoom-ctrl-btn" onclick="openImageInNewTab()" title="새 탭에서 원본 사진 크게 보기" style="background:#0284c7;">🔗 새 탭</button>
         <button class="zoom-ctrl-btn zoom-close-btn" onclick="closeImageZoomModal()" title="닫기">✖ 닫기</button>
       </div>
     </div>
-    <div class="zoom-viewport" id="zoom-viewport">
-      <img id="zoom-target-image" src="" alt="교과서 상세 사진">
+    <div class="zoom-viewport" id="zoom-viewport" ondragstart="return false;">
+      <img id="zoom-target-image" src="" alt="교과서 상세 사진" draggable="false">
     </div>
-    <div class="zoom-guide-bar">💡 마우스 드래그 / 터치로 화면을 이동하고, 휠이나 버튼으로 확대/축소하세요!</div>
+    <div class="zoom-guide-bar">💡 [PC] 마우스 드래그로 이동 & 휠 스크롤로 확대 / [모바일] 두 손가락으로 확대 & 드래그 이동!</div>
   </div>
 </div>
 

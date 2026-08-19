@@ -699,6 +699,7 @@ function renderSectionUI(type, container) {
             <div class="chart-image-frame" onclick="openImageZoomModal('${currentItem.img}')" title="클릭하여 교과서 돋보기 확대">
                 <img src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.parentElement.style.display='none';">
                 <div class="zoom-hint-badge">🔍 탭하여 확대/이동</div>
+                <button class="zoom-newtab-quick-btn" onclick="event.stopPropagation(); window.open('${currentItem.img}', '_blank');" title="새 탭에서 원본 사진 크게 보기">🔗 새 탭</button>
             </div>
         ` : `
             <div style="text-align:center; margin-bottom:12px;">
@@ -1167,8 +1168,15 @@ function updateZoomTransform() {
     }
 }
 
+function openImageInNewTab() {
+    const targetImg = document.getElementById("zoom-target-image");
+    if (targetImg && targetImg.src) {
+        window.open(targetImg.src, "_blank");
+    }
+}
+
 function adjustZoomLevel(delta) {
-    currentZoomScale = Math.min(Math.max(0.8, currentZoomScale + delta), 4.5);
+    currentZoomScale = Math.min(Math.max(0.6, currentZoomScale + delta), 5.0);
     updateZoomTransform();
 }
 
@@ -1187,8 +1195,10 @@ function initZoomPanListeners() {
     const viewport = document.getElementById("zoom-viewport");
     if (!viewport) return;
 
-    // 1. 마우스 드래그 이동
+    // 1. [PC] 마우스 드래그 이동 (브라우저 기본 고스트 드래그 방지 e.preventDefault)
     viewport.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return; // 좌클릭만
+        e.preventDefault();
         isZoomDragging = true;
         viewport.classList.add("is-dragging");
         startZoomDragX = e.clientX - currentZoomX;
@@ -1197,24 +1207,38 @@ function initZoomPanListeners() {
 
     window.addEventListener("mousemove", (e) => {
         if (!isZoomDragging) return;
+        e.preventDefault();
         currentZoomX = e.clientX - startZoomDragX;
         currentZoomY = e.clientY - startZoomDragY;
         updateZoomTransform();
     });
 
     window.addEventListener("mouseup", () => {
-        isZoomDragging = false;
-        if (viewport) viewport.classList.remove("is-dragging");
+        if (isZoomDragging) {
+            isZoomDragging = false;
+            if (viewport) viewport.classList.remove("is-dragging");
+        }
     });
 
-    // 2. 마우스 휠 줌
+    // 2. [PC] 마우스 휠 부드러운 줌
     viewport.addEventListener("wheel", (e) => {
         e.preventDefault();
-        const delta = e.deltaY < 0 ? 0.25 : -0.25;
+        const delta = e.deltaY < 0 ? 0.3 : -0.3;
         adjustZoomLevel(delta);
     }, { passive: false });
 
-    // 3. 모바일 터치 드래그 및 핀치 줌
+    // 3. [PC] 더블클릭 시 1.8배 빠른 토글 확대/원복
+    viewport.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        if (currentZoomScale > 1.3) {
+            resetZoomLevel();
+        } else {
+            currentZoomScale = 2.2;
+            updateZoomTransform();
+        }
+    });
+
+    // 4. [모바일] 터치 드래그 및 핀치 줌
     viewport.addEventListener("touchstart", (e) => {
         if (e.touches.length === 1) {
             isZoomDragging = true;
@@ -1252,7 +1276,7 @@ function initZoomPanListeners() {
         lastTouchDistance = 0;
     });
 
-    // 4. ESC 키로 닫기
+    // 5. ESC 키로 닫기
     window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             closeImageZoomModal();
