@@ -288,6 +288,35 @@ body.theme--slime .spinner-circle, body.theme--hideout .spinner-circle {
     padding: 4px 8px !important;
     font-size: 0.75rem !important;
   }
+/* 📖 교과서 지문 요약 돋보기 카드 */
+.passage-summary-box {
+  background: rgba(110, 198, 245, 0.1);
+  border: 2px dashed var(--sky);
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  text-align: left;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+body.theme--arcade .passage-summary-box {
+  background: rgba(0, 242, 254, 0.08);
+  border-color: #00f2fe;
+  color: #e0e0ff;
+}
+body.theme--slime .passage-summary-box, body.theme--hideout .passage-summary-box {
+  background: rgba(255, 107, 157, 0.08);
+  border-color: #ff6b9d;
+  color: #4a3352;
+}
+.passage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.1rem;
 }
 
 /* =======================================

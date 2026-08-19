@@ -249,30 +249,70 @@ function closeMissionView(force) {
 }
 
 // ========================================================
-// 📊 노션 연동 및 동적(Dynamic) UI 생성 모듈
+// 📊 노션 연동 및 표준 교과서 데이터셋 하이브리드 로더
 // ========================================================
+function getCurriculumRecords(type) {
+    if (typeof SOCIETY_CURRICULUM_DATA === 'undefined') return [];
+    const list = [];
+    for (const [grade, units] of Object.entries(SOCIETY_CURRICULUM_DATA)) {
+        for (const [unitName, unitObj] of Object.entries(units)) {
+            const items = unitObj[type] || [];
+            items.forEach(item => {
+                const titleStr = item.word || item.title || item.name || "";
+                list.push({
+                    word: titleStr,
+                    hint: item.hint || getChosung(titleStr),
+                    detailContext: item.desc || item.explanation || "",
+                    meaning: item.meaning || item.desc || "",
+                    imageUrl: item.image || item.img || "",
+                    grade: grade,
+                    grades: [grade],
+                    level: unitName,
+                    summaryPassage: unitObj.summaryPassage || "",
+                    quiz: item.quiz || "",
+                    choices: item.choices || [],
+                    correctIdx: (typeof item.correctIdx === 'number') ? item.correctIdx : 0,
+                    explanation: item.explanation || item.desc || ""
+                });
+            });
+        }
+    }
+    return list;
+}
+
 async function fetchAndBuildDynamicUI(type, innerBody) {
     const propertyMap = { voca: "용어방", chart: "자료실", map: "지도탐방", history: "역사" };
     const zoneTag = propertyMap[type];
 
+    const curriculumRecords = getCurriculumRecords(type);
+
     try {
-        const records = await fetchVocaFromNotion({
-            subject: "사회", 
-            areaZone: zoneTag,
-            useServerFilter: true,
-            filterByStudent: !isAdmin 
-        });
+        let records = [];
+        try {
+            if (typeof fetchVocaFromNotion === 'function') {
+                records = await fetchVocaFromNotion({
+                    subject: "사회", 
+                    areaZone: zoneTag,
+                    useServerFilter: true,
+                    filterByStudent: !isAdmin 
+                });
+            }
+        } catch (netErr) {
+            console.warn("ℹ️ 노션 통신 대기 -> 표준 교과서 데이터셋으로 전환합니다.", netErr);
+        }
+
+        if (!records || records.length === 0) {
+            records = curriculumRecords;
+        } else if (curriculumRecords.length > 0) {
+            const existingWords = new Set(records.map(r => r.word));
+            const extra = curriculumRecords.filter(r => !existingWords.has(r.word));
+            records = [...records, ...extra];
+        }
 
         if (records && records.length > 0) {
             allFetchedRecords = records; 
 
-            // 지도탐방과 역사는 단원 구분이 필요 없으니 바로 미션 스타트!
-            if (type === 'map' || type === 'history') {
-                startMissionWithFilteredData(records, innerBody);
-                return;
-            }
-
-            // 💡 노션 DB에 적어놓은 '학년' 텍스트를 중복 없이 그대로 수집
+            // 💡 노션 DB 및 교과서 데이터셋에 적혀있는 '학년' 텍스트를 중복 없이 그대로 수집
             const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
 
             if (uniqueGrades.length === 0) {
@@ -281,13 +321,13 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                 renderDynamicGradeUI(uniqueGrades, innerBody);
             }
         } else {
-            console.warn("⚠️ 노션 데이터 결과가 없습니다. 가상 데이터 구동");
+            console.warn("⚠️ 데이터 결과가 없습니다. 가상 데이터 구동");
             activeSectionData = SOCIETY_MOCK_DATA[type];
             renderSectionUI(type, innerBody);
         }
     } catch(e) {
-        console.warn("통신 에러. 가상 데이터 구동", e);
-        activeSectionData = SOCIETY_MOCK_DATA[type];
+        console.warn("통신 에러. 교과서/가상 데이터 구동", e);
+        activeSectionData = (curriculumRecords && curriculumRecords.length > 0) ? curriculumRecords : SOCIETY_MOCK_DATA[type];
         renderSectionUI(type, innerBody);
     }
 }
@@ -366,23 +406,44 @@ function selectDynamicUnit(unit) {
  */
 function startMissionWithFilteredData(records, innerBody) {
     const parsed = records.map(record => {
-        const titleStr = record.word || "미상";
+        const titleStr = record.word || record.title || record.name || "미상";
         const meaningStr = record.meaning || "뜻풀이 없음";
-        const descStr = record.detailContext || "해당 유적/지형 설명이 노션에 기재 대기 중입니다.";
-        const imgUrl = record.imageUrl || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
+        const descStr = record.detailContext || record.desc || "해당 유적/지형 설명이 준비되어 있습니다.";
+        const imgUrl = record.imageUrl || record.img || "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop";
         const hintStr = record.hint || getChosung(titleStr);
+        const summaryPassage = record.summaryPassage || "";
 
         if (currentMissionType === 'voca') {
-            return { word: titleStr, meaning: meaningStr, hint: hintStr, desc: descStr, image: record.imageUrl, pageId: record.pageId, isMastered: record.isMastered };
+            return { 
+                word: titleStr, 
+                meaning: meaningStr, 
+                hint: hintStr, 
+                desc: descStr, 
+                image: record.imageUrl || record.image, 
+                pageId: record.pageId, 
+                isMastered: record.isMastered,
+                summaryPassage: summaryPassage
+            };
         } else if (currentMissionType === 'chart') {
             return {
-                title: titleStr, img: imgUrl, meaning: meaningStr, desc: descStr,
-                quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격은 무엇일까요?`,
-                choices: ["1등급 유망 자료", "전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설"],
-                correctIdx: 1
+                title: titleStr, 
+                img: imgUrl, 
+                meaning: meaningStr, 
+                desc: descStr,
+                quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격으로 가장 알맞은 것은?`,
+                choices: (record.choices && record.choices.length > 0) ? record.choices : ["전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설", "1등급 유망 자료"],
+                correctIdx: (typeof record.correctIdx === 'number') ? record.correctIdx : 0,
+                explanation: record.explanation || descStr,
+                summaryPassage: summaryPassage
             };
         } else {
-            return { name: titleStr, img: imgUrl, meaning: meaningStr, desc: descStr };
+            return { 
+                name: titleStr, 
+                img: imgUrl, 
+                meaning: meaningStr, 
+                desc: descStr,
+                summaryPassage: summaryPassage
+            };
         }
     });
 
@@ -514,6 +575,18 @@ function renderSectionUI(type, container) {
 
     const currentItem = activeSectionData[activeQuizIdx];
 
+    // 📖 교과서 핵심 지문 요약 카드 HTML 생성
+    const safePassageText = (currentItem.summaryPassage || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    const passageHtml = currentItem.summaryPassage ? `
+        <div class="passage-summary-box">
+            <div class="passage-header">
+                <span>📖 교과서 핵심 지문 돋보기</span>
+                <button class="quiz-button" style="padding:4px 10px; font-size:0.85rem; background:var(--purple);" onclick="speakFairyTTS('${safePassageText}')">🔊 지문 듣기</button>
+            </div>
+            <p style="font-size:0.95rem; line-height:1.5; color:inherit;">${currentItem.summaryPassage}</p>
+        </div>
+    ` : '';
+
     // 🎬 .screen loaded 옷을 입힌 랩퍼를 생성하여 화면 떨림(Layout Shift) 방지 및 부드러운 페이드인 실현
     const screenWrapper = document.createElement('div');
     screenWrapper.className = "screen loaded";
@@ -596,6 +669,7 @@ function renderSectionUI(type, container) {
 
         screenWrapper.innerHTML = `
             ${orderToggleHtml}
+            ${passageHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
             ${imageHtml}
@@ -621,6 +695,7 @@ function renderSectionUI(type, container) {
     } else if (type === 'chart') {
         screenWrapper.className += " quiz-card";
         screenWrapper.innerHTML = `
+            ${passageHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">자료분석 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <h3>${currentItem.title}</h3>
             <div class="chart-image-frame">
@@ -857,9 +932,12 @@ window.verifyVocaMagnet = function() {
 }
 
 async function verifyChartChoice(selectedIdx, correctIdx) {
+    const currentItem = activeSectionData[activeQuizIdx] || {};
+    const explanationText = currentItem.explanation ? `\n\n💡 [교과서 해설]\n${currentItem.explanation}` : "";
+
     if (selectedIdx === correctIdx) {
-        speakFairyTTS("대단해요! 도표 통계 자료를 매서운 학술적 안목으로 정밀하게 해독해냈군요! 훌륭한 관점입니다!");
-        alert("🎉 명쾌한 지해력! 정답입니다!");
+        speakFairyTTS("대단해요! 도표 통계 자료를 매서운 안목으로 정밀하게 해독해냈군요! 훌륭합니다!");
+        alert(`🎉 명쾌한 이해력! 정답입니다!${explanationText}`);
         if (typeof rewardQuizCorrect === 'function') {
             await rewardQuizCorrect(activeQuizIdx);
         }
