@@ -82,6 +82,26 @@
   </div>
 </div>
 
+<!-- 🔍 교과서 사진 고화질 돋보기 확대/이동 모달 -->
+<div id="image-zoom-modal" class="image-zoom-modal" style="display:none;">
+  <div class="zoom-modal-backdrop" onclick="closeImageZoomModal()"></div>
+  <div class="zoom-modal-content">
+    <div class="zoom-toolbar">
+      <span class="zoom-toolbar-title">🔍 교과서 사진 돋보기 뷰어</span>
+      <div class="zoom-btn-group">
+        <button class="zoom-ctrl-btn" onclick="adjustZoomLevel(0.3)" title="확대">➕ 확대</button>
+        <button class="zoom-ctrl-btn" onclick="adjustZoomLevel(-0.3)" title="축소">➖ 축소</button>
+        <button class="zoom-ctrl-btn" onclick="resetZoomLevel()" title="원래대로">🔄 원래대로</button>
+        <button class="zoom-ctrl-btn zoom-close-btn" onclick="closeImageZoomModal()" title="닫기">✖ 닫기</button>
+      </div>
+    </div>
+    <div class="zoom-viewport" id="zoom-viewport">
+      <img id="zoom-target-image" src="" alt="교과서 상세 사진">
+    </div>
+    <div class="zoom-guide-bar">💡 마우스 드래그 / 터치로 화면을 이동하고, 휠이나 버튼으로 확대/축소하세요!</div>
+  </div>
+</div>
+
 <div id="print-area"></div>
 
 <script src="../../config.js"></script>

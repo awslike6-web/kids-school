@@ -696,8 +696,9 @@ function renderSectionUI(type, container) {
         screenWrapper.className += " quiz-card";
         
         const chartMediaHtml = currentItem.img ? `
-            <div class="chart-image-frame" style="margin-bottom:12px;">
+            <div class="chart-image-frame" onclick="openImageZoomModal('${currentItem.img}')" title="클릭하여 교과서 돋보기 확대">
                 <img src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.parentElement.style.display='none';">
+                <div class="zoom-hint-badge">🔍 탭하여 확대/이동</div>
             </div>
         ` : `
             <div style="text-align:center; margin-bottom:12px;">
@@ -1126,3 +1127,136 @@ window.printSocietySummary = async function() {
     printArea.innerHTML = html;
     window.print();
 };
+
+// ========================================================
+// 🔍 교과서 고화질 돋보기 확대/축소/이동 (Zoom & Pan) 엔진
+// ========================================================
+let currentZoomScale = 1.0;
+let currentZoomX = 0;
+let currentZoomY = 0;
+let isZoomDragging = false;
+let startZoomDragX = 0;
+let startZoomDragY = 0;
+let lastTouchDistance = 0;
+
+function openImageZoomModal(imgSrc) {
+    if (!imgSrc) return;
+    const modal = document.getElementById("image-zoom-modal");
+    const targetImg = document.getElementById("zoom-target-image");
+    if (!modal || !targetImg) return;
+
+    targetImg.src = imgSrc;
+    modal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+    resetZoomLevel();
+    initZoomPanListeners();
+}
+
+function closeImageZoomModal() {
+    const modal = document.getElementById("image-zoom-modal");
+    if (modal) {
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+    }
+}
+
+function updateZoomTransform() {
+    const targetImg = document.getElementById("zoom-target-image");
+    if (targetImg) {
+        targetImg.style.transform = `translate(${currentZoomX}px, ${currentZoomY}px) scale(${currentZoomScale})`;
+    }
+}
+
+function adjustZoomLevel(delta) {
+    currentZoomScale = Math.min(Math.max(0.8, currentZoomScale + delta), 4.5);
+    updateZoomTransform();
+}
+
+function resetZoomLevel() {
+    currentZoomScale = 1.0;
+    currentZoomX = 0;
+    currentZoomY = 0;
+    updateZoomTransform();
+}
+
+let isZoomEventsInitialized = false;
+function initZoomPanListeners() {
+    if (isZoomEventsInitialized) return;
+    isZoomEventsInitialized = true;
+
+    const viewport = document.getElementById("zoom-viewport");
+    if (!viewport) return;
+
+    // 1. 마우스 드래그 이동
+    viewport.addEventListener("mousedown", (e) => {
+        isZoomDragging = true;
+        viewport.classList.add("is-dragging");
+        startZoomDragX = e.clientX - currentZoomX;
+        startZoomDragY = e.clientY - currentZoomY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+        if (!isZoomDragging) return;
+        currentZoomX = e.clientX - startZoomDragX;
+        currentZoomY = e.clientY - startZoomDragY;
+        updateZoomTransform();
+    });
+
+    window.addEventListener("mouseup", () => {
+        isZoomDragging = false;
+        if (viewport) viewport.classList.remove("is-dragging");
+    });
+
+    // 2. 마우스 휠 줌
+    viewport.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.25 : -0.25;
+        adjustZoomLevel(delta);
+    }, { passive: false });
+
+    // 3. 모바일 터치 드래그 및 핀치 줌
+    viewport.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 1) {
+            isZoomDragging = true;
+            startZoomDragX = e.touches[0].clientX - currentZoomX;
+            startZoomDragY = e.touches[0].clientY - currentZoomY;
+        } else if (e.touches.length === 2) {
+            isZoomDragging = false;
+            lastTouchDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    }, { passive: true });
+
+    viewport.addEventListener("touchmove", (e) => {
+        if (e.touches.length === 1 && isZoomDragging) {
+            currentZoomX = e.touches[0].clientX - startZoomDragX;
+            currentZoomY = e.touches[0].clientY - startZoomDragY;
+            updateZoomTransform();
+        } else if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            if (lastTouchDistance > 0) {
+                const diff = (dist - lastTouchDistance) * 0.008;
+                adjustZoomLevel(diff);
+            }
+            lastTouchDistance = dist;
+        }
+    }, { passive: true });
+
+    viewport.addEventListener("touchend", () => {
+        isZoomDragging = false;
+        lastTouchDistance = 0;
+    });
+
+    // 4. ESC 키로 닫기
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeImageZoomModal();
+        }
+    });
+}
+

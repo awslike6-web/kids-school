@@ -410,3 +410,181 @@ body.theme--slime .passage-summary-box, body.theme--hideout .passage-summary-box
       word-break: keep-all;
   }
 }
+
+/* ========================================================
+   🔍 교과서 고화질 돋보기 확대/축소/이동(Zoom & Pan) 모달
+   ======================================================== */
+.chart-image-frame {
+  position: relative;
+  cursor: zoom-in;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.chart-image-frame:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(110, 198, 245, 0.3);
+}
+.zoom-hint-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-family: 'Jua', sans-serif;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.image-zoom-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.zoom-modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 15, 29, 0.88);
+  backdrop-filter: blur(8px);
+}
+.zoom-modal-content {
+  position: relative;
+  width: 94vw;
+  max-width: 900px;
+  height: 88vh;
+  background: #1e293b;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  animation: zoomModalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes zoomModalPop {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.zoom-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: #0f172a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.zoom-toolbar-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.15rem;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.zoom-btn-group {
+  display: flex;
+  gap: 8px;
+}
+.zoom-ctrl-btn {
+  background: #334155;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.zoom-ctrl-btn:hover {
+  background: #475569;
+  transform: translateY(-1px);
+}
+.zoom-close-btn {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: white;
+}
+.zoom-close-btn:hover {
+  background: #dc2626;
+}
+
+.zoom-viewport {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+}
+.zoom-viewport.is-dragging {
+  cursor: grabbing;
+}
+.zoom-viewport img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  transform-origin: center center;
+  transition: transform 0.08s ease-out;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.zoom-guide-bar {
+  padding: 8px 14px;
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.85rem;
+  color: #94a3b8;
+  text-align: center;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+@media (max-width: 600px) {
+  .zoom-modal-content {
+    width: 98vw;
+    height: 94vh;
+    border-radius: 14px;
+  }
+  .zoom-toolbar {
+    padding: 8px 12px;
+  }
+  .zoom-toolbar-title {
+    font-size: 0.95rem;
+  }
+  .zoom-ctrl-btn {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+  }
+  .zoom-guide-bar {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+}
