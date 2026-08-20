@@ -397,3 +397,180 @@ body {
       word-break: keep-all;
   }
 }
+
+/* ========================================================
+   📖 단원별 교과서 핵심 탐구 지문 요약 상자
+   ======================================================== */
+.passage-summary-box {
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.12), rgba(69, 183, 209, 0.08));
+  border: 2px solid rgba(78, 205, 196, 0.35);
+  border-radius: 18px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.08);
+}
+.passage-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed rgba(78, 205, 196, 0.3);
+  padding-bottom: 6px;
+}
+.passage-title-tag {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  color: #0d9488;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.passage-tts-btn {
+  background: #0d9488;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.passage-tts-btn:hover {
+  background: #0f766e;
+  transform: scale(1.04);
+}
+.passage-summary-body {
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: #1e293b;
+  word-break: keep-all;
+}
+
+/* ========================================================
+   🔍 퀴즈 카드 일체형 교과서 사진 줌/팬 & 새창 뷰어 UI
+   ======================================================== */
+.chart-container-box {
+  width: 100%;
+  max-width: 540px;
+  margin: 10px auto 14px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chart-ctrl-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.06);
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+.chart-ctrl-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.card-zoom-btn {
+  background: #ffffff;
+  color: #334155;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.card-zoom-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+.card-popup-btn {
+  background: #0d9488;
+  color: #ffffff;
+  border-color: #0d9488;
+}
+.card-popup-btn:hover {
+  background: #0f766e;
+  border-color: #0f766e;
+}
+.chart-image-viewport {
+  width: 100%;
+  height: 280px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 2px solid rgba(78, 205, 196, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.chart-image-viewport.is-dragging {
+  cursor: grabbing;
+}
+.chart-image-viewport img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  border-radius: 10px;
+  transform-origin: center center;
+  transition: transform 0.08s ease-out;
+  pointer-events: none;
+}
+.chart-zoom-guide {
+  font-size: 0.78rem;
+  color: #64748b;
+  text-align: center;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+/* 퀴즈 선택지 버튼 스타일 */
+.quiz-choices-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+@media (max-width: 550px) {
+  .quiz-choices-container {
+    grid-template-columns: 1fr;
+  }
+}
+.quiz-choice-btn {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 0.95rem;
+  color: #1e293b;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  word-break: keep-all;
+}
+.quiz-choice-btn:hover {
+  border-color: #0d9488;
+  background: #f0fdfa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+}

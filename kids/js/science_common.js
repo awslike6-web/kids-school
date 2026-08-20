@@ -1,4 +1,4 @@
-// kids/js/science_common.js
+// kids/js/science_common.js - 🔬 5학년 1학기 과학 탐구방 통합 제어 엔진
 
 window.currentSubject = "과학";
 
@@ -12,31 +12,6 @@ const SCIENCE_ZONE_MAP = {
     inventor: "발명가"
 };
 
-// 노션 데이터가 비어 있을 때 사용하는 폴백 셋
-const SCIENCE_MOCK_DATA = {
-    voca: [
-        { word: "뼈와 근육", hint: "ㅃㅇ ㄱㅇ", meaning: "우리 몸의 형태를 유지하고 움직이게 하는 기관입니다.", desc: "뼈는 몸을 지탱하고 내장을 보호하며, 근육은 뼈에 붙어 몸을 움직이게 합니다.", image: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=500&auto=format&fit=crop" },
-        { word: "소화 기관", hint: "ㅅㅎ ㄱㄱ", meaning: "음식물을 잘게 쪼개어 영양소를 흡수하는 기관입니다.", desc: "입, 식도, 위, 작은창자, 큰창자, 항문 등이 소화 기관에 속합니다." },
-        { word: "순환 기관", hint: "ㅅㅎ ㄱㄱ", meaning: "심장과 혈관을 통해 온몸으로 혈액을 이동시키는 기관입니다.", desc: "혈액은 영양소와 산소를 온몸으로 운반하고, 노폐물을 거두어옵니다." },
-        { word: "호흡 기관", hint: "ㅎㅎ ㄱㄱ", meaning: "산소를 들이마시고 이산화 탄소를 내보내는 기관입니다.", desc: "코, 기관, 기관지, 폐가 호흡 기관에 속하며 생명 유지에 필수적입니다." },
-        { word: "배설 기관", hint: "ㅂㅅ ㄱㄱ", meaning: "혈액 속의 노폐물을 걸러내어 몸 밖으로 내보내는 기관입니다.", desc: "콩팥은 혈액 속 노폐물을 걸러 오줌을 만들고, 방광은 오줌을 모아둡니다." },
-        { word: "감각 기관", hint: "ㄱㄱ ㄱㄱ", meaning: "눈, 귀, 코, 혀, 피부처럼 주변의 자극을 받아들이는 기관입니다.", desc: "시각, 청각, 후각, 미각, 촉각을 통해 위험을 피하고 환경에 적응합니다." },
-        { word: "자극과 반응", hint: "ㅈㄱㄱ ㅂㅇ", meaning: "주변 환경의 변화를 느끼고 그에 맞게 행동하는 과정입니다.", desc: "감각 기관이 자극을 느끼면 뇌가 판단하여 운동 기관에 명령을 내립니다." }
-    ],
-    experiment: [
-        { word: "소화 모형 실험", hint: "ㅅㅎ ㅁㅎ ㅅㅎ", meaning: "비닐봉지와 스타킹을 이용해 위와 장의 역할을 알아보는 실험입니다.", desc: "비닐봉지는 음식물을 섞는 위, 스타킹은 영양소를 흡수하는 장의 역할을 합니다." },
-        { word: "폐 모형 만들기", hint: "ㅍ ㅁㅎ ㅁㄷㄱ", meaning: "페트병과 고무풍선을 이용해 호흡의 원리를 알아보는 실험입니다.", desc: "고무막을 당기면 풍선(폐)이 부풀고, 밀어 넣으면 풍선이 쪼그라듭니다." }
-    ],
-    nature: [
-        { word: "심장 박동", hint: "ㅅㅈ ㅂㄷ", meaning: "가슴에 손을 얹었을 때 느껴지는 규칙적인 움직임입니다.", desc: "심장이 수축과 이완을 반복하며 혈액을 온몸으로 뿜어내는 과정입니다." },
-        { word: "땀 분비", hint: "ㄸ ㅂㅂ", meaning: "더울 때 체온을 조절하기 위해 피부에서 물방울이 나오는 현상입니다.", desc: "땀이 증발하면서 몸의 열을 빼앗아 체온을 정상으로 유지해 줍니다." }
-    ],
-    inventor: [
-        { word: "청진기", hint: "ㅊㅈㄱ", meaning: "몸속에서 나는 소리를 듣기 위해 의사 선생님들이 사용하는 도구입니다.", desc: "심장 소리나 숨소리를 들어 우리 몸이 건강한지 진찰할 때 씁니다." },
-        { word: "현미경", hint: "ㅎㅁㄱ", meaning: "눈에 보이지 않는 아주 작은 세포나 세균을 크게 확대해서 보는 도구입니다.", desc: "렌즈를 여러 개 겹쳐서 물체를 수백 배에서 수천 배까지 크게 보여줍니다." }
-    ]
-};
-
 const SCIENCE_MISSION_META = {
     voca: { title: "과학 용어방", icon: "🔬" },
     experiment: { title: "가상 실험실", icon: "🧪" },
@@ -45,7 +20,7 @@ const SCIENCE_MISSION_META = {
 };
 
 let allFetchedRecords = [];
-let selectedScienceGrade = "";
+let selectedScienceGrade = "5학년 1학기";
 let selectedScienceUnit = "";
 let currentMissionType = '';
 let activeSectionData = [];
@@ -79,17 +54,6 @@ function initializeScienceRoom() {
     scienceVocaMasterCountMap = JSON.parse(localStorage.getItem(`science_voca_master_${currentUserName}`) || '{}');
 }
 
-function showLoadingSpinner(container) {
-    container.innerHTML = `
-      <div class="spinner-wrapper">
-        <div class="spinner-circle"></div>
-        <p style="font-family:'Gaegu', cursive; font-size:1.3rem; font-weight:bold; color:inherit; text-align:center; opacity: 0.95;">
-            Fairy_🧚‍♀️ 코코 요정이 노션 등대에서 자료를 챙겨오고 있어요...
-        </p>
-      </div>
-    `;
-}
-
 function isScienceMissionInProgress() {
     const overlay = document.getElementById('missionOverlay');
     if (!overlay || overlay.style.display !== 'flex') return false;
@@ -107,7 +71,7 @@ function openMissionView(type) {
     overlay.style.display = 'flex';
     activeQuizIdx = 0;
     currentMissionType = type;
-    selectedScienceGrade = "";
+    selectedScienceGrade = "5학년 1학기";
     selectedScienceUnit = "";
     stopFairyTTS();
 
@@ -125,8 +89,7 @@ function openMissionView(type) {
         });
     }
 
-    showLoadingSpinner(innerBody);
-    fetchAndBuildDynamicUI(type, innerBody);
+    renderScienceUnitSelectionUI(type, innerBody);
 }
 
 function closeMissionView(force) {
@@ -145,531 +108,429 @@ function closeMissionView(force) {
     stopFairyTTS();
 }
 
-async function fetchAndBuildDynamicUI(type, innerBody) {
-    const zoneTag = SCIENCE_ZONE_MAP[type];
-
-    try {
-        const records = await fetchVocaFromNotion({
-            subject: "과학",
-            areaZone: zoneTag,
-            useServerFilter: true,
-            filterByStudent: !isAdmin
-        });
-
-        if (records && records.length > 0) {
-            allFetchedRecords = records;
-            const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
-
-            if (uniqueGrades.length === 0) {
-                startMissionWithFilteredData(records, innerBody);
-            } else {
-                renderDynamicGradeUI(uniqueGrades, innerBody);
-            }
-        } else {
-            console.warn("⚠️ 과학 노션 데이터 없음. 로컬 폴백 사용:", type);
-            loadMockMissionData(type, innerBody);
-        }
-    } catch (e) {
-        console.warn("과학 노션 통신 실패. 로컬 폴백 사용", e);
-        loadMockMissionData(type, innerBody);
+function getCurriculumUnits() {
+    if (window.SCIENCE_CURRICULUM_DATA && Array.isArray(window.SCIENCE_CURRICULUM_DATA)) {
+        return window.SCIENCE_CURRICULUM_DATA;
     }
+    return [];
 }
 
-function renderDynamicGradeUI(grades, container) {
-    const buttonsHtml = grades.map(g =>
-        `<button class="quiz-choice-btn" style="padding:15px; font-size:1.2rem;" onclick="selectScienceGrade('${g}')">${g}</button>`
-    ).join('');
+function renderScienceUnitSelectionUI(type, container) {
+    const curriculum = getCurriculumUnits();
+    
+    // Group by major unit: 3단원 vs 4단원
+    const unit3List = curriculum.filter(u => u.code.startsWith("3-"));
+    const unit4List = curriculum.filter(u => u.code.startsWith("4-"));
 
     container.innerHTML = `
-        <div style="text-align:center; padding:20px; font-family:'Jua'; width:100%; max-width:500px; margin:0 auto;">
-            <h3 style="margin-bottom:20px; color:var(--primary); font-size:1.6rem;">🎒 1. 학년/학기 고르기</h3>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                ${buttonsHtml}
+        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:620px; margin:0 auto;">
+            <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.55rem;">🎒 5학년 1학기 과학 단원 고르기</h3>
+            <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.95rem;">실제 교과서 사진 자료와 퀴즈를 풀 소단원을 선택해 보세요!</p>
+            
+            <div style="text-align:left; margin-bottom:14px;">
+                <div style="font-size:1.15rem; color:#0d9488; font-weight:bold; margin-bottom:8px;">💧 3. 용해와 용액</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    ${unit3List.map(u => `
+                        <button class="quiz-choice-btn" style="padding:10px 12px; font-size:0.92rem; justify-content:flex-start;" onclick="startScienceUnitMission('${u.code}')">
+                            ${u.title}
+                        </button>
+                    `).join('')}
+                </div>
             </div>
-        </div>
-    `;
-}
 
-window.selectScienceGrade = function(grade) {
-    selectedScienceGrade = grade;
-    const innerBody = document.getElementById('overlayInnerBody');
-    const matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades || []).includes(grade));
-    const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level).trim()))].filter(u => u && u !== "undefined" && u !== "기본 단원").sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-
-    if (uniqueUnits.length === 0) {
-        startMissionWithFilteredData(matchedRecords, innerBody);
-    } else {
-        renderDynamicUnitUI(uniqueUnits, innerBody);
-    }
-};
-
-function renderDynamicUnitUI(units, container) {
-    const buttonsHtml = units.map(u =>
-        `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectScienceUnit('${u}')">${u}</button>`
-    ).join('');
-
-    container.innerHTML = `
-        <div style="text-align:center; padding:20px; font-family:'Jua'; width:100%; max-width:500px; margin:0 auto;">
-            <h3 style="margin-bottom:5px; color:var(--primary); font-size:1.6rem;">📖 2. 단원 고르기</h3>
-            <p style="color:var(--accent); margin-bottom:20px; font-size:1.1rem;">선택된 학기: ${selectedScienceGrade}</p>
-            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:20px;">
-                ${buttonsHtml}
+            <div style="text-align:left; margin-bottom:16px;">
+                <div style="font-size:1.15rem; color:#e11d48; font-weight:bold; margin-bottom:8px;">🫀 4. 우리 몸의 구조와 기능</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    ${unit4List.map(u => `
+                        <button class="quiz-choice-btn" style="padding:10px 12px; font-size:0.92rem; justify-content:flex-start;" onclick="startScienceUnitMission('${u.code}')">
+                            ${u.title}
+                        </button>
+                    `).join('')}
+                </div>
             </div>
-            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
-        </div>
-    `;
-}
 
-window.selectScienceUnit = function(unit) {
-    selectedScienceUnit = unit;
-    const innerBody = document.getElementById('overlayInnerBody');
-    const finalRecords = allFetchedRecords.filter(r =>
-        (r.grade === selectedScienceGrade || (r.grades || []).includes(selectedScienceGrade)) &&
-        String(r.level).trim() === unit
-    );
-    startMissionWithFilteredData(finalRecords, innerBody);
-};
-
-function parseScienceRecords(records) {
-    return records.map(record => {
-        const titleStr = record.word || "미상";
-        return {
-            word: titleStr,
-            meaning: record.meaning || "뜻풀이 없음",
-            hint: record.hint || getChosung(titleStr),
-            desc: record.detailContext || record.meaning || "상세 설명이 노션에 기재 대기 중입니다.",
-            image: record.imageUrl,
-            imageUrl: record.imageUrl,
-            pageId: record.pageId,
-            isMastered: record.isMastered
-        };
-    });
-}
-
-function loadMockMissionData(type, innerBody) {
-    allFetchedRecords = [];
-    let data = [...(SCIENCE_MOCK_DATA[type] || [])];
-
-    if (type === 'voca') {
-        data = data.filter(item => (scienceVocaMasterCountMap[item.word] || 0) < 3);
-        if (scienceVocaOrderType === 'shuffle') {
-            data.sort(() => Math.random() - 0.5);
-        }
-    }
-
-    activeSectionData = data;
-    renderSectionUI(type, innerBody);
-}
-
-function startMissionWithFilteredData(records, innerBody) {
-    const parsed = parseScienceRecords(records);
-
-    if (currentMissionType === 'voca') {
-        scienceVocaMasterCountMap = JSON.parse(localStorage.getItem(`science_voca_master_${currentUserName}`) || '{}');
-        activeSectionData = parsed.filter(item => {
-            const isNotionMastered = item.isMastered === true;
-            const isLocalMastered = (scienceVocaMasterCountMap[item.word] || 0) >= 3;
-            return !isNotionMastered && !isLocalMastered;
-        });
-        if (scienceVocaOrderType === 'shuffle') {
-            activeSectionData.sort(() => Math.random() - 0.5);
-        }
-    } else {
-        activeSectionData = parsed;
-        if (scienceVocaOrderType === 'shuffle') {
-            activeSectionData.sort(() => Math.random() - 0.5);
-        }
-    }
-
-    if (selectedScienceGrade) {
-        const badge = ` [${selectedScienceGrade}${selectedScienceUnit ? ' ' + selectedScienceUnit : ''}]`;
-        document.getElementById('overlayHeaderTitle').textContent = SCIENCE_MISSION_META[currentMissionType].title + badge;
-    }
-
-    renderSectionUI(currentMissionType, innerBody);
-}
-
-function getScienceOrderToggleHtml() {
-    return `
-        <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
-            <button class="quiz-button" onclick="window.scienceToggleOrder()" style="padding: 8px 16px; font-size: 0.95rem; border-radius: 20px;">
-                ${scienceVocaOrderType === 'shuffle' ? '🎲 랜덤 섞기 (클릭하여 순서대로)' : '➡️ 순서대로 (클릭하여 랜덤 섞기)'}
+            <button class="quiz-choice-btn" style="background:#f1f5f9; width:100%; text-align:center; justify-content:center; padding:12px; font-size:1.05rem;" onclick="startScienceUnitMission('ALL')">
+                🌟 전체 소단원 종합 탐구 (모아보기)
             </button>
         </div>
     `;
 }
 
-window.scienceToggleOrder = function() {
-    scienceVocaOrderType = (scienceVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
-    activeQuizIdx = 0;
-    const innerBody = document.getElementById('overlayInnerBody');
-    if (!innerBody) return;
+window.startScienceUnitMission = function(unitCode) {
+    selectedScienceUnit = unitCode;
+    const curriculum = getCurriculumUnits();
+    let targetUnits = [];
 
-    if (allFetchedRecords.length > 0) {
-        let matchedRecords = allFetchedRecords;
-        if (selectedScienceGrade) {
-            matchedRecords = matchedRecords.filter(r =>
-                r.grade === selectedScienceGrade || (r.grades || []).includes(selectedScienceGrade)
-            );
-        }
-        if (selectedScienceUnit) {
-            matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedScienceUnit);
-        }
-        startMissionWithFilteredData(matchedRecords, innerBody);
+    if (unitCode === 'ALL') {
+        targetUnits = curriculum;
     } else {
-        loadMockMissionData(currentMissionType, innerBody);
-    }
-};
-
-window.resetScienceVocaMasterAndReload = async function() {
-    if (!confirm("정말로 이 단원의 모든 용어 마스터(3회 정답) 기록을 지우고 처음부터 다시 시작할까요?")) return;
-
-    const innerBody = document.getElementById('overlayInnerBody');
-    if (innerBody) innerBody.innerHTML = "<div style='text-align:center; padding:40px;'>노션 데이터를 초기화 중입니다... ⏳</div>";
-
-    localStorage.removeItem(`science_voca_master_${currentUserName}`);
-
-    const recordsToReset = allFetchedRecords.filter(r =>
-        (!selectedScienceGrade || r.grade === selectedScienceGrade || (r.grades || []).includes(selectedScienceGrade)) &&
-        (!selectedScienceUnit || String(r.level).trim() === selectedScienceUnit) &&
-        r.isMastered === true
-    );
-
-    if (typeof updateVocaMasteryStatus === 'function') {
-        for (const r of recordsToReset) {
-            await updateVocaMasteryStatus(r.pageId, false);
-            r.isMastered = false;
-        }
+        targetUnits = curriculum.filter(u => u.code === unitCode);
     }
 
-    alert("학습 기록이 초기화되었습니다! 다시 신나게 풀어볼까요?");
-    closeMissionView();
-    setTimeout(() => openMissionView('voca'), 300);
+    let items = [];
+    if (currentMissionType === 'voca') {
+        items = targetUnits.flatMap(u => u.voca || []);
+    } else if (currentMissionType === 'experiment') {
+        items = targetUnits.flatMap(u => (u.experiment && u.experiment.length > 0) ? u.experiment : (u.voca || []));
+    } else if (currentMissionType === 'nature') {
+        items = targetUnits.flatMap(u => (u.nature && u.nature.length > 0) ? u.nature : (u.experiment || u.voca || []));
+    } else if (currentMissionType === 'inventor') {
+        items = targetUnits.flatMap(u => (u.inventor && u.inventor.length > 0) ? u.inventor : (u.voca || []));
+    }
+
+    if (scienceVocaOrderType === 'shuffle') {
+        items.sort(() => Math.random() - 0.5);
+    }
+
+    activeSectionData = items;
+    activeQuizIdx = 0;
+
+    const unitObj = curriculum.find(u => u.code === unitCode);
+    const unitTitle = unitObj ? unitObj.title : (unitCode === 'ALL' ? '전체 종합' : unitCode);
+    document.getElementById('overlayHeaderTitle').textContent = `${SCIENCE_MISSION_META[currentMissionType].title} [${unitTitle}]`;
+
+    renderSectionUI(currentMissionType, document.getElementById('overlayInnerBody'), unitObj);
 };
 
-function getScienceWrongChoicePool(answerWord) {
-    const fromNotion = allFetchedRecords.map(r => r.word).filter(Boolean);
-    const fromMock = Object.values(SCIENCE_MOCK_DATA).flat().map(item => item.word);
-    const pool = fromNotion.length > 0 ? fromNotion : fromMock;
-    return pool.filter(w => w !== answerWord);
-}
-
-function renderSectionUI(type, container) {
+function renderSectionUI(type, container, unitObj) {
     if (typeof container === 'string') container = document.getElementById('overlayInnerBody');
     container.innerHTML = "";
 
     if (!activeSectionData || activeSectionData.length === 0) {
-        if (type === 'voca') {
-            container.innerHTML = `
-                <div style="text-align:center; padding: 40px 20px;">
-                    <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                    <p style="font-size:1.4rem; color:var(--primary); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
-                    <button class="back-to-lobby-btn" style="background:var(--accent);" onclick="closeMissionView(); resetScienceVocaMasterAndReload()">✅ 나가기 (학습 리셋)</button>
-                </div>`;
-        } else {
-            container.innerHTML = `
-                <div style="text-align:center; padding: 40px 20px;">
-                    <div style="font-size:3rem; margin-bottom:15px;">📭</div>
-                    <p style="font-size:1.2rem; color:var(--primary); margin-bottom:20px;">노션에 아직 이 구역 데이터가 없어요.<br>준비되면 자동으로 불러올게요!</p>
-                    <button class="back-to-lobby-btn" onclick="closeMissionView();">✅ 나가기</button>
-                </div>`;
-        }
+        container.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px;">
+                <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
+                <p style="font-size:1.3rem; color:var(--primary); margin-bottom:20px;">이 단원의 모든 학습 내용을 멋지게 탐구했습니다!</p>
+                <button class="back-to-lobby-btn" onclick="openMissionView(currentMissionType)">단원 다시 선택하기</button>
+            </div>`;
         return;
     }
 
     const currentItem = activeSectionData[activeQuizIdx];
-    const answerWord = currentItem.word;
-    const imageUrl = currentItem.imageUrl || currentItem.image || currentItem.img;
-    const imageHtml = imageUrl ? `
-        <div style="text-align:center; margin-bottom:15px;">
-            <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+    const screenWrapper = document.createElement("div");
+
+    // 본문 지문 요약 박스
+    const passageText = (unitObj && unitObj.summary) ? unitObj.summary : (currentItem.desc || "");
+    const passageHtml = (activeQuizIdx === 0 && passageText) ? `
+        <div class="passage-summary-box">
+            <div class="passage-summary-header">
+                <span class="passage-title-tag">📖 교과서 핵심 탐구 요약</span>
+                <button class="passage-tts-btn" onclick="speakFairyTTS('${passageText.replace(/'/g, "\\'")}')">🔊 요정 낭독</button>
+            </div>
+            <div class="passage-summary-body">${passageText}</div>
         </div>
     ` : '';
 
-    const wordsArray = answerWord.trim().split(/\s+/);
-    const wordCount = wordsArray.length;
-    const totalLength = answerWord.replace(/\s/g, '').length;
-    let interactiveHtml = '';
-
-    if (wordCount === 1 && totalLength >= 5) {
-        const chars = answerWord.split('').filter(c => c.trim() !== '');
-        const scrambled = [...chars].sort(() => Math.random() - 0.5);
-
-        window.currentMagnetAnswer = [];
-        window.magnetTargetWord = answerWord;
-        window.magnetScrambled = scrambled;
-
-        interactiveHtml = `
-            <div id="magnet-blanks" style="font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; min-height: 40px; display: flex; justify-content: center; gap: 5px;">
-                ${answerWord.split('').map(c => c.trim() === '' ? '<span style="width:15px;"></span>' : '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>').join('')}
+    if (type === 'experiment') {
+        screenWrapper.className = "quiz-card";
+        
+        const chartMediaHtml = currentItem.img ? `
+            <div class="chart-container-box">
+                <div class="chart-ctrl-toolbar">
+                    <div class="chart-ctrl-group">
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
+                    </div>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
+                </div>
+                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
+                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="과학 교과서 탐구 자료" onerror="this.closest('.chart-container-box').style.display='none';">
+                </div>
+                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🪟 새창 열기</div>
             </div>
-            <div id="magnet-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                ${scrambled.map((l, i) => `<button id="magnet-btn-${i}" class="quiz-choice-btn" style="padding: 10px 20px; font-size: 1.5rem;" onclick="selectScienceMagnet('${l}', ${i})">${l}</button>`).join('')}
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="quiz-button" style="background:#ff9f43;" onclick="resetScienceMagnets()">다시 조합하기</button>
-                <button class="quiz-button" onclick="verifyScienceMagnet()">정답 확인</button>
-            </div>
-        `;
-    } else if (wordCount >= 3) {
-        const choices = [answerWord];
-        const otherWords = getScienceWrongChoicePool(answerWord);
-        otherWords.sort(() => Math.random() - 0.5);
-        choices.push(otherWords[0] || "오답1");
-        choices.push(otherWords[1] || "오답2");
-        choices.sort(() => Math.random() - 0.5);
-
-        interactiveHtml = `
-            <div class="quiz-choices-container" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
-                ${choices.map(choice => `
-                     <button class="quiz-choice-btn" onclick="verifyScienceChoice('${choice.replace(/'/g, "\\'")}')">${choice}</button>
-                `).join('')}
-            </div>
-        `;
-    } else {
-        interactiveHtml = `
-            <div class="interactive-input-group">
-                <input type="text" class="text-input-field" id="scienceAnswerInput" placeholder="정답을 입력하세요!" onkeypress="if(event.key==='Enter') verifyScienceAnswer()">
-                <button class="quiz-button" onclick="verifyScienceAnswer()">정답 확인</button>
-            </div>
-        `;
-    }
-
-    const orderToggleHtml = type === 'voca' ? getScienceOrderToggleHtml() : '';
-
-    container.innerHTML = `
-        <div class="quiz-card">
-            ${orderToggleHtml}
-            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">미션 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
-            ${imageHtml}
-            <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold; color: var(--text-main);">${currentItem.meaning}</div>
-            <details style="margin-bottom: 20px; text-align: left; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px solid #ddd;">
-                <summary style="cursor: pointer; font-weight: bold; color: var(--primary);">💡 상세설명 (힌트) 보기</summary>
-                <div style="margin-top: 10px; font-size: 1rem; color: #555; line-height: 1.5;">${currentItem.desc}</div>
-            </details>
-            ${interactiveHtml}
-            <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${(currentItem.meaning || '').replace(/'/g, "\\'")}')">🔊 문제 듣기</button>
-                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextQuiz()">건너뛰기 ⏭️</button>
-            </div>
-        </div>
-    `;
-
-    if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(currentItem.meaning);
-    }
-}
-
-async function handleCorrectAnswer() {
-    const wordKey = activeSectionData[activeQuizIdx].word;
-
-    if (currentMissionType === 'voca') {
-        scienceVocaMasterCountMap[wordKey] = (scienceVocaMasterCountMap[wordKey] || 0) + 1;
-        localStorage.setItem(`science_voca_master_${currentUserName}`, JSON.stringify(scienceVocaMasterCountMap));
-
-        if (scienceVocaMasterCountMap[wordKey] >= 3) {
-            const pageId = activeSectionData[activeQuizIdx].pageId;
-            if (pageId && typeof updateVocaMasteryStatus === 'function') {
-                updateVocaMasteryStatus(pageId, true);
-                activeSectionData[activeQuizIdx].isMastered = true;
-            }
-        }
-    }
-
-    if (typeof speakFairyTTS === 'function') speakFairyTTS("정답이야! 아주 훌륭해!");
-    if (typeof rewardQuizCorrect === 'function') {
-        await rewardQuizCorrect(activeQuizIdx);
-    }
-
-    setTimeout(() => skipToNextQuiz(), 1200);
-}
-
-function handleWrongAnswer(wrongInput, onRetryReset) {
-    if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
-    window.wrongNotes.push({
-        word: activeSectionData[activeQuizIdx].word,
-        wrongInput: wrongInput
-    });
-
-    const retry = typeof onRetryReset === 'function' ? onRetryReset : () => {};
-    const skip = () => skipToNextQuiz();
-
-    if (typeof promptQuizRetryOrSkip === 'function') {
-        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
-        return;
-    }
-
-    if (typeof speakFairyTTS === 'function') speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-    retry();
-}
-
-window.verifyScienceAnswer = function() {
-    const input = document.getElementById('scienceAnswerInput');
-    const answer = input.value.trim().replace(/\s/g, '');
-    const correctTarget = activeSectionData[activeQuizIdx].word.replace(/\s/g, '');
-
-    if (answer === correctTarget) {
-        input.classList.add('correct-glow');
-        handleCorrectAnswer();
-    } else {
-        input.classList.add('wrong-shake');
-        handleWrongAnswer(input.value, () => {
-            input.classList.remove('wrong-shake');
-            input.value = '';
-            input.focus();
-        });
-    }
-};
-
-window.verifyScienceChoice = function(selectedWord) {
-    const correctTarget = activeSectionData[activeQuizIdx].word;
-    if (selectedWord === correctTarget) {
-        handleCorrectAnswer();
-    } else {
-        handleWrongAnswer(selectedWord, () => {});
-    }
-};
-
-window.selectScienceMagnet = function(letter, idx) {
-    const btn = document.getElementById(`magnet-btn-${idx}`);
-    if (btn.style.visibility === 'hidden') return;
-    btn.style.visibility = 'hidden';
-    window.currentMagnetAnswer.push({ letter, idx });
-    renderScienceMagnetBlanks();
-};
-
-window.renderScienceMagnetBlanks = function() {
-    const container = document.getElementById('magnet-blanks');
-    if (!container) return;
-    let html = '';
-    let answerIdx = 0;
-    for (let i = 0; i < window.magnetTargetWord.length; i++) {
-        const char = window.magnetTargetWord[i];
-        if (char.trim() === '') {
-            html += '<span style="width:15px;"></span>';
-        } else if (answerIdx < window.currentMagnetAnswer.length) {
-            html += `<span style="border-bottom:3px solid var(--primary); width:30px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold;">${window.currentMagnetAnswer[answerIdx].letter}</span>`;
-            answerIdx++;
-        } else {
-            html += '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>';
-        }
-    }
-    container.innerHTML = html;
-};
-
-window.resetScienceMagnets = function() {
-    window.currentMagnetAnswer.forEach(item => {
-        const btn = document.getElementById(`magnet-btn-${item.idx}`);
-        if (btn) btn.style.visibility = 'visible';
-    });
-    window.currentMagnetAnswer = [];
-    renderScienceMagnetBlanks();
-};
-
-window.verifyScienceMagnet = function() {
-    const answerStr = window.currentMagnetAnswer.map(item => item.letter).join('');
-    const correctTarget = window.magnetTargetWord.replace(/\s/g, '');
-
-    if (answerStr === correctTarget) {
-        handleCorrectAnswer();
-    } else {
-        handleWrongAnswer(answerStr, () => {
-            resetScienceMagnets();
-            const container = document.getElementById('magnet-blanks');
-            if (container) container.classList.remove('wrong-shake');
-        });
-        const container = document.getElementById('magnet-blanks');
-        if (container) container.classList.add('wrong-shake');
-    }
-};
-
-function skipToNextQuiz() {
-    activeQuizIdx++;
-    if (activeQuizIdx >= activeSectionData.length) {
-        if (typeof speakFairyTTS === 'function') speakFairyTTS("모든 미션을 완료했어! 훌륭해!");
-        alert("🏆 축하합니다! 이 구역의 모든 과학 탐구 단계를 완료하셨습니다!");
-        closeMissionView();
-    } else {
-        renderSectionUI(currentMissionType, document.getElementById('overlayInnerBody'));
-    }
-}
-
-window.addEventListener("beforeunload", () => {
-    if (typeof sendStudyLogToNotion === 'function') {
-        sendStudyLogToNotion({ subject: "과학" });
-    }
-});
-
-// ========================================================
-// 🖨️ 과학방 인쇄 로직 (printScienceSummary)
-// ========================================================
-window.printScienceSummary = async function() {
-    let printArea = document.getElementById('print-area');
-    if (!printArea) {
-        // print-area가 없으면 동적으로 생성
-        printArea = document.createElement('div');
-        printArea.id = 'print-area';
-        document.body.appendChild(printArea);
-    }
-    
-    let printData = SCIENCE_MOCK_DATA.voca;
-    
-    // 노션 원본 데이터를 인쇄용 포맷으로 매핑 (이미지 포함)
-    const mapNotionToPrintData = (records) => {
-        return records
-            .filter(r => r.word && (r.desc || r.detailContext || r.meaning))
-            .map(r => ({
-                word: r.word,
-                desc: r.desc || r.detailContext || r.meaning,
-                img: r.imageUrl || r.image || null
-            }));
-    };
-
-    // 이미 불러온 데이터(allFetchedRecords)가 있다면 그것을 활용
-    if (allFetchedRecords && allFetchedRecords.length > 0) {
-        const vocaRecords = mapNotionToPrintData(allFetchedRecords);
-        if (vocaRecords.length > 0) {
-            printData = vocaRecords;
-        }
-    } else {
-        // 데이터가 없으면 즉시 백그라운드 스캔 시도
-        try {
-            const records = await fetchVocaFromNotion({
-                subject: "과학", 
-                areaZone: "용어방",
-                useServerFilter: true,
-                filterByStudent: !isAdmin 
-            });
-            if (records && records.length > 0) {
-                const vocaRecords = mapNotionToPrintData(records);
-                if (vocaRecords.length > 0) {
-                    printData = vocaRecords;
-                }
-            }
-        } catch (e) {
-            console.warn("인쇄용 노션 데이터 로드 실패, 기본 가상 데이터 출력", e);
-        }
-    }
-    
-    let html = `<div class="print-title">민민 우주 정거장 🚀 - 오늘의 과학 핵심 요약집</div>`;
-    html += `<div class="print-voca-list">`;
-    
-    printData.forEach(item => {
-        html += `
-            <div class="print-voca-item">
-                ${item.img ? `<div class="print-voca-img-wrapper"><img src="${item.img}" alt="${item.word}" class="print-voca-img"></div>` : ''}
-                <div class="print-voca-text-content">
-                    <div class="print-voca-word">📖 ${item.word}</div>
-                    <div class="print-voca-desc">${item.desc}</div>
+        ` : `
+            <div style="text-align:center; margin-bottom:12px;">
+                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(78, 205, 196, 0.12); border:1.5px dashed var(--primary); border-radius:14px; padding:8px 18px; font-family:'Jua', sans-serif; color:#0d9488; font-size:1.05rem;">
+                    <span>🧪 교과서 핵심 탐구 실험 분석</span>
                 </div>
             </div>
         `;
-    });
-    
-    html += `</div>`;
-    
-    printArea.innerHTML = html;
-    window.print();
+
+        const choices = currentItem.choices || ["선택지 1", "선택지 2", "선택지 3", "선택지 4"];
+        const correctIdx = currentItem.correctIdx !== undefined ? currentItem.correctIdx : 0;
+        const quizQuestion = currentItem.quiz || `${currentItem.title}에서 알 수 있는 사실은 무엇일까요?`;
+
+        screenWrapper.innerHTML = `
+            ${passageHtml}
+            <div style="font-size: 0.95rem; opacity:0.7;">탐구 실험 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title || "가상 실험실"}</h3>
+            ${chartMediaHtml}
+            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem;">${currentItem.desc || ""}</div>
+            <p style="font-weight: bold; font-size:1.15rem; text-align: left; margin-top:14px;">❓ ${quizQuestion}</p>
+            <div class="quiz-choices-container">
+                ${choices.map((choice, i) => `
+                     <button class="quiz-choice-btn" onclick="verifyExperimentChoice(${i}, ${correctIdx})">${i+1}. ${choice}</button>
+                `).join('')}
+            </div>
+            <div style="margin-top: 14px; display:flex; justify-content:center;">
+                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextScienceQuiz()">건너뛰기 ⏩</button>
+            </div>
+        `;
+        container.appendChild(screenWrapper);
+        if (currentItem.img) {
+            initCardZoomListeners();
+        }
+        speakFairyTTS((currentItem.desc || "") + ". 퀴즈!" + quizQuestion);
+
+    } else if (type === 'voca') {
+        screenWrapper.className = "quiz-card";
+
+        const imageHtml = currentItem.img ? `
+            <div class="chart-container-box">
+                <div class="chart-ctrl-toolbar">
+                    <div class="chart-ctrl-group">
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)">➕ 확대</button>
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="resetCardZoom()">🔄 원본</button>
+                    </div>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')">🪟 새창 열기</button>
+                </div>
+                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
+                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.word}" onerror="this.closest('.chart-container-box').style.display='none';">
+                </div>
+            </div>
+        ` : '';
+
+        screenWrapper.innerHTML = `
+            ${passageHtml}
+            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 8px;">용어 퀴즈 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            <div class="quiz-hint-box" style="font-size:1.3rem; margin-bottom:12px;">초성 힌트: <strong style="color:var(--accent);">${currentItem.hint || getChosung(currentItem.word)}</strong></div>
+            ${imageHtml}
+            <div class="quiz-descr" style="font-size: 1.25rem; font-weight: bold; color: var(--text-main); margin-bottom:12px;">${currentItem.meaning || currentItem.desc}</div>
+            <div class="interactive-input-group">
+                <input type="text" class="text-input-field" id="scienceAnswerInput" placeholder="정답 용어를 입력하세요!" onkeypress="if(event.key==='Enter') verifyScienceVocaAnswer()">
+                <button class="quiz-button" onclick="verifyScienceVocaAnswer()">정답 확인</button>
+            </div>
+            <div style="margin-top: 14px; display:flex; justify-content:center;">
+                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextScienceQuiz()">건너뛰기 ⏩</button>
+            </div>
+        `;
+        container.appendChild(screenWrapper);
+        if (currentItem.img) {
+            initCardZoomListeners();
+        }
+        setTimeout(() => {
+            const input = document.getElementById("scienceAnswerInput");
+            if (input) input.focus();
+        }, 100);
+        speakFairyTTS(currentItem.meaning || currentItem.desc);
+
+    } else {
+        // nature / inventor
+        screenWrapper.className = "quiz-card";
+        const mediaHtml = currentItem.img ? `
+            <div class="chart-container-box">
+                <div class="chart-ctrl-toolbar">
+                    <div class="chart-ctrl-group">
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)">➕ 확대</button>
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="resetCardZoom()">🔄 원본</button>
+                    </div>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')">🪟 새창 열기</button>
+                </div>
+                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
+                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.title || '탐구 자료'}" onerror="this.closest('.chart-container-box').style.display='none';">
+                </div>
+            </div>
+        ` : '';
+
+        screenWrapper.innerHTML = `
+            ${passageHtml}
+            <div style="font-size: 0.95rem; opacity:0.7;">탐구 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title || "과학 탐구"}</h3>
+            ${mediaHtml}
+            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem; margin-bottom:14px;">${currentItem.desc || ""}</div>
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
+                <button class="quiz-button" onclick="skipToNextScienceQuiz()">다음 탐구 보기 ⏩</button>
+            </div>
+        `;
+        container.appendChild(screenWrapper);
+        if (currentItem.img) {
+            initCardZoomListeners();
+        }
+        speakFairyTTS(currentItem.desc || currentItem.title);
+    }
+}
+
+window.verifyExperimentChoice = function(choiceIdx, correctIdx) {
+    if (choiceIdx === correctIdx) {
+        if (typeof playSoundEffect === 'function') playSoundEffect('correct');
+        speakFairyTTS("정답이야! 과학적 원리를 아주 정확하게 파악했어!");
+        alert("🎉 딩동댕! 정답입니다!");
+        skipToNextScienceQuiz();
+    } else {
+        if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
+        speakFairyTTS("다시 한번 교과서 사진과 실험 내용을 자세히 관찰해 봐!");
+        alert("앗, 다시 한 번 생각해 볼까요? 교과서 사진을 확대해서 살펴보세요!");
+    }
 };
 
+window.verifyScienceVocaAnswer = function() {
+    const input = document.getElementById("scienceAnswerInput");
+    if (!input) return;
+    const userVal = input.value.trim().replace(/\s+/g, '');
+    const currentItem = activeSectionData[activeQuizIdx];
+    const answer = currentItem.word.trim().replace(/\s+/g, '');
+
+    if (userVal === answer) {
+        if (typeof playSoundEffect === 'function') playSoundEffect('correct');
+        speakFairyTTS("정답이야! 과학 용어를 완벽하게 마스터했어!");
+        alert(`🎉 정답! [${currentItem.word}] 맞습니다!`);
+        skipToNextScienceQuiz();
+    } else {
+        if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
+        speakFairyTTS("초성 힌트를 잘 보고 다시 맞춰봐!");
+        alert("아쉬워요! 초성 힌트를 다시 확인해 보세요!");
+        input.value = "";
+        input.focus();
+    }
+};
+
+window.skipToNextScienceQuiz = function() {
+    activeQuizIdx++;
+    if (activeQuizIdx < activeSectionData.length) {
+        const curriculum = getCurriculumUnits();
+        const unitObj = curriculum.find(u => u.code === selectedScienceUnit);
+        renderSectionUI(currentMissionType, document.getElementById('overlayInnerBody'), unitObj);
+    } else {
+        if (typeof showRewardPopup === 'function') {
+            showRewardPopup("과학 탐구 정복 완료!", "5학년 1학기 과학 단원 탐구를 완벽하게 마쳤습니다! 🌟");
+        }
+        openMissionView(currentMissionType);
+    }
+};
+
+// ========================================================
+// 🔍 퀴즈 카드 일체형 교과서 사진 줌/팬 & 새창 엔진
+// ========================================================
+let cardZoomScale = 1.0;
+let cardZoomX = 0;
+let cardZoomY = 0;
+let isCardZoomDragging = false;
+let startCardDragX = 0;
+let startCardDragY = 0;
+let cardLastTouchDist = 0;
+
+function updateCardZoomTransform() {
+    const img = document.getElementById("cardZoomImg");
+    if (img) {
+        img.style.transform = `translate(${cardZoomX}px, ${cardZoomY}px) scale(${cardZoomScale})`;
+    }
+}
+
+function adjustCardZoom(delta) {
+    cardZoomScale = Math.min(Math.max(0.6, cardZoomScale + delta), 4.5);
+    updateCardZoomTransform();
+}
+
+function resetCardZoom() {
+    cardZoomScale = 1.0;
+    cardZoomX = 0;
+    cardZoomY = 0;
+    updateCardZoomTransform();
+}
+
+function openImageInNewWindow(imgSrc) {
+    const img = document.getElementById("cardZoomImg");
+    const url = imgSrc || (img ? img.src : "");
+    if (!url) return;
+    const w = Math.min(1050, window.screen.availWidth - 80);
+    const h = Math.min(900, window.screen.availHeight - 80);
+    const left = Math.max(0, Math.floor((window.screen.availWidth - w) / 2));
+    const top = Math.max(0, Math.floor((window.screen.availHeight - h) / 2));
+    window.open(
+        url,
+        "ScienceViewer_" + Date.now(),
+        `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`
+    );
+}
+
+function initCardZoomListeners() {
+    resetCardZoom();
+    const viewport = document.getElementById("cardZoomViewport");
+    if (!viewport) return;
+
+    // 1. 마우스 드래그 이동 (PC)
+    viewport.onmousedown = (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        isCardZoomDragging = true;
+        viewport.classList.add("is-dragging");
+        startCardDragX = e.clientX - cardZoomX;
+        startCardDragY = e.clientY - cardZoomY;
+    };
+
+    window.onmousemove = (e) => {
+        if (!isCardZoomDragging) return;
+        e.preventDefault();
+        cardZoomX = e.clientX - startCardDragX;
+        cardZoomY = e.clientY - startCardDragY;
+        updateCardZoomTransform();
+    };
+
+    window.onmouseup = () => {
+        if (isCardZoomDragging) {
+            isCardZoomDragging = false;
+            if (viewport) viewport.classList.remove("is-dragging");
+        }
+    };
+
+    // 2. 휠 스크롤 줌 (PC)
+    viewport.onwheel = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const delta = e.deltaY < 0 ? 0.35 : -0.35;
+        adjustCardZoom(delta);
+    };
+
+    // 3. 더블클릭 토글 (PC)
+    viewport.ondblclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (cardZoomScale > 1.25) {
+            resetCardZoom();
+        } else {
+            cardZoomScale = 2.4;
+            updateCardZoomTransform();
+        }
+    };
+
+    // 4. 모바일 터치 드래그 및 핀치 줌
+    viewport.ontouchstart = (e) => {
+        if (e.touches.length === 1) {
+            isCardZoomDragging = true;
+            startCardDragX = e.touches[0].clientX - cardZoomX;
+            startCardDragY = e.touches[0].clientY - cardZoomY;
+        } else if (e.touches.length === 2) {
+            isCardZoomDragging = false;
+            cardLastTouchDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    };
+
+    viewport.ontouchmove = (e) => {
+        if (e.touches.length === 1 && isCardZoomDragging) {
+            cardZoomX = e.touches[0].clientX - startCardDragX;
+            cardZoomY = e.touches[0].clientY - startCardDragY;
+            updateCardZoomTransform();
+        } else if (e.touches.length === 2) {
+            const dist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            if (cardLastTouchDist > 0) {
+                const diff = (dist - cardLastTouchDist) * 0.008;
+                adjustCardZoom(diff);
+            }
+            cardLastTouchDist = dist;
+        }
+    };
+
+    viewport.ontouchend = () => {
+        isCardZoomDragging = false;
+        cardLastTouchDist = 0;
+    };
+}
