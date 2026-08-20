@@ -230,6 +230,7 @@ function renderSectionUI(type, container, unitObj) {
                     <div class="chart-ctrl-group">
                         <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
                         <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
                         <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
                     </div>
                     <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
@@ -237,7 +238,7 @@ function renderSectionUI(type, container, unitObj) {
                 <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
                     <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="과학 교과서 탐구 자료" onerror="this.closest('.chart-container-box').style.display='none';">
                 </div>
-                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🪟 새창 열기</div>
+                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🔄 90° 회전 / 🪟 새창 열기</div>
             </div>
         ` : `
             <div style="text-align:center; margin-bottom:12px;">
@@ -407,6 +408,7 @@ window.skipToNextScienceQuiz = function() {
 let cardZoomScale = 1.0;
 let cardZoomX = 0;
 let cardZoomY = 0;
+let cardRotationDeg = 0;
 let isCardZoomDragging = false;
 let startCardDragX = 0;
 let startCardDragY = 0;
@@ -415,8 +417,13 @@ let cardLastTouchDist = 0;
 function updateCardZoomTransform() {
     const img = document.getElementById("cardZoomImg");
     if (img) {
-        img.style.transform = `translate(${cardZoomX}px, ${cardZoomY}px) scale(${cardZoomScale})`;
+        img.style.transform = `translate(${cardZoomX}px, ${cardZoomY}px) rotate(${cardRotationDeg}deg) scale(${cardZoomScale})`;
     }
+}
+
+function rotateCardImage() {
+    cardRotationDeg = (cardRotationDeg + 90) % 360;
+    updateCardZoomTransform();
 }
 
 function adjustCardZoom(delta) {
@@ -428,6 +435,7 @@ function resetCardZoom() {
     cardZoomScale = 1.0;
     cardZoomX = 0;
     cardZoomY = 0;
+    cardRotationDeg = 0;
     updateCardZoomTransform();
 }
 
