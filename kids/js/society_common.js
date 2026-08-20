@@ -662,8 +662,19 @@ function renderSectionUI(type, container) {
 
         const imageUrl = currentItem.imageUrl || currentItem.image;
         const imageHtml = imageUrl ? `
-            <div style="text-align:center; margin-bottom:15px;">
-                <img src="${imageUrl}" style="max-width:100%; max-height:200px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.2); object-fit:contain;" alt="${currentItem.word}">
+            <div class="chart-container-box">
+                <div class="chart-ctrl-toolbar">
+                    <div class="chart-ctrl-group">
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
+                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
+                    </div>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${imageUrl}')" title="새 창으로 띄워서 보기">🪟 새창 열기</button>
+                </div>
+                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
+                    <img id="cardZoomImg" src="${imageUrl}" class="chart-img" alt="${currentItem.word}" onerror="this.closest('.chart-container-box').style.display='none';">
+                </div>
             </div>
         ` : '';
 
@@ -688,6 +699,9 @@ function renderSectionUI(type, container) {
             </div>
         `;
         container.appendChild(screenWrapper);
+        if (imageUrl) {
+            initCardZoomListeners();
+        }
         
         // 해당 단어 뜻풀이 자동 낭독 탑재 (아나운서 감성)
         speakFairyTTS(currentItem.meaning);
@@ -742,12 +756,23 @@ function renderSectionUI(type, container) {
         speakFairyTTS(currentItem.desc + ". 퀴즈!" + currentItem.quiz);
 
     } else if (type === 'map') {
-        screenWrapper.className += " map-photo-card";
+        screenWrapper.className += " quiz-card";
 
         const mapMediaHtml = currentItem.img ? `
-            <div class="map-img-frame" ondblclick="speakFairyTTS('${currentItem.desc.replace(/'/g, "\\'")}')">
-                <img src="${currentItem.img}" class="map-photo-img" alt="${currentItem.name}" onerror="this.parentElement.style.display='none';">
-                <div class="double-click-badge">💡 더블클릭: 코코 해설 청취</div>
+            <div class="chart-container-box">
+                <div class="chart-ctrl-toolbar">
+                    <div class="chart-ctrl-group">
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
+                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
+                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
+                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
+                    </div>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 보기">🪟 새창 열기</button>
+                </div>
+                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
+                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.name}" onerror="this.closest('.chart-container-box').style.display='none';">
+                </div>
+                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🔄 90° 회전 / 🪟 새창 열기</div>
             </div>
         ` : `
             <div style="text-align:center; margin-bottom:12px;">
@@ -758,12 +783,13 @@ function renderSectionUI(type, container) {
         `;
 
         screenWrapper.innerHTML = `
+            ${passageHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">국토 명소 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <h3>🏕️ ${currentItem.name}</h3>
+            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">🏕️ ${currentItem.name}</h3>
             ${mapMediaHtml}
-            <div class="quiz-descr">${currentItem.desc}</div>
+            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem; margin-bottom:14px;">${currentItem.desc}</div>
             
-            <div class="interactive-input-group" style="flex-direction:column; gap:5px;">
+            <div class="interactive-input-group" style="flex-direction:column; gap:5px; margin-bottom:12px;">
                 <label style="text-align:left; font-size: 0.9rem; font-weight:bold;">✍️ 요정 코코의 해설을 듣고 한 줄 탐방기를 남겨주세요!</label>
                 <div style="display:flex; gap:10px; width:100%;">
                     <input type="text" class="text-input-field" id="mapJourneyInput" placeholder="이 아름다운 명소에 대해 느낀 생각을 자유롭게 남겨봐!">
@@ -776,7 +802,10 @@ function renderSectionUI(type, container) {
             </div>
         `;
         container.appendChild(screenWrapper);
-        speakFairyTTS(currentItem.name + " 탐방을 환영해요!. 더블클릭하면 상세한 이야기를 들려줄게요!");
+        if (currentItem.img) {
+            initCardZoomListeners();
+        }
+        speakFairyTTS(currentItem.name + " 탐방입니다. " + currentItem.desc);
 
     } else if (type === 'history') {
         // 유물 카드 맞추기 / 역사박물관 모으기 복합 수집 UI
