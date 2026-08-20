@@ -109,8 +109,11 @@ function closeMissionView(force) {
 }
 
 function getCurriculumUnits() {
-    if (window.SCIENCE_CURRICULUM_DATA && Array.isArray(window.SCIENCE_CURRICULUM_DATA)) {
+    if (typeof window !== 'undefined' && window.SCIENCE_CURRICULUM_DATA && Array.isArray(window.SCIENCE_CURRICULUM_DATA)) {
         return window.SCIENCE_CURRICULUM_DATA;
+    }
+    if (typeof SCIENCE_CURRICULUM_DATA !== 'undefined' && Array.isArray(SCIENCE_CURRICULUM_DATA)) {
+        return SCIENCE_CURRICULUM_DATA;
     }
     return [];
 }

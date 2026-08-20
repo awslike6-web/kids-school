@@ -1,7 +1,4 @@
-// kids/data/science-data.js
-// 🔬 초등학교 5학년 1학기 과학 교과서 실제 목차 및 1:1 사진 기반 퀴즈 DB (목차 페이지 제외 정제 완료)
-
-const SCIENCE_CURRICULUM_DATA = [
+window.SCIENCE_CURRICULUM_DATA = [
   {
     "code": "3-1",
     "title": "1. 물에 녹을까, 녹지 않을까?",
@@ -2775,6 +2772,9 @@ const SCIENCE_CURRICULUM_DATA = [
   }
 ];
 
+if (typeof window !== 'undefined') {
+    window.SCIENCE_CURRICULUM_DATA = window.SCIENCE_CURRICULUM_DATA;
+}
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { SCIENCE_CURRICULUM_DATA };
+    module.exports = { SCIENCE_CURRICULUM_DATA: window.SCIENCE_CURRICULUM_DATA };
 }
