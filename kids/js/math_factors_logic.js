@@ -4,8 +4,14 @@
  * 1. 사탕 분배 시뮬레이터 (약수 시각화 & 비약수 나머지 검출)
  * 2. 구구단 짝꿍 찾기 게임 (두 수의 곱 매칭)
  * 3. 모눈종이 세로셈 보드 (엑셀형 격자 나눗셈 자릿수 완벽 정렬)
+ * 4. 💎 민수(다이아) & 🍬 민서(하리보) 노션 보상/오답노트/학습일지 연동
  * ========================================================
  */
+
+// 전역 과목 및 오답노트 버퍼 초기화
+window.currentSubject = "수학";
+window.wrongNotes = window.wrongNotes || [];
+window.roomStartTime = window.roomStartTime || new Date();
 
 // 사운드 시스템
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -46,6 +52,28 @@ function speak(text) {
   utter.lang = 'ko-KR';
   utter.rate = 0.95;
   window.speechSynthesis.speak(utter);
+}
+
+/* ========================================================
+   보상 지급 및 자산 UI 헬퍼 연동
+   ======================================================== */
+async function giveMathReward(amount = 1, isSilent = false) {
+  if (typeof grantRewardAndShowUI === 'function') {
+    try {
+      await grantRewardAndShowUI(amount, isSilent);
+    } catch (e) {
+      console.warn("보상 지급 연동 실패(오프라인 모드):", e);
+    }
+  }
+}
+
+function recordMathWrongAnswer(problemText, wrongInputText) {
+  window.wrongNotes.push({
+    text: problemText,
+    wrongInput: wrongInputText,
+    time: new Date().toLocaleTimeString()
+  });
+  console.log(`📝 [오답노트 기록] ${problemText} -> ${wrongInputText}`);
 }
 
 /* ========================================================
@@ -177,7 +205,7 @@ function distributeCandies(divisor) {
     grid.appendChild(plate);
   }
 
-  // 바구니 비우기 & 애니메이션으로 접시에 담기
+  // 바구니 비우기 & 접시에 담기
   const tray = document.getElementById('candies-tray');
   tray.innerHTML = '';
   document.getElementById('basket-count-display').textContent = '0개 (분배 완료)';
@@ -212,16 +240,18 @@ function distributeCandies(divisor) {
     leftoverBox.style.display = 'none';
   }
 
-  // 결과 피드백 배너
+  // 결과 피드백 & 보상/오답노트 연동
   const banner = document.getElementById('candy-feedback-banner');
   if (isFactor) {
     soundSuccess();
     triggerConfetti();
+    giveMathReward(1, true); // 💎/🍬 +1 보상 지급
     banner.className = 'candy-feedback-banner success';
     banner.innerHTML = `🎉 <strong>완벽한 약수!</strong> ${candyTargetNum}개를 ${divisor}명에게 <strong>${quotient}개씩</strong> 똑같이 나누어 주었어요! (나머지: 0)`;
     speak(`대단해요! ${candyTargetNum}은 ${divisor}로 딱 나누어떨어지므로, ${divisor}는 ${candyTargetNum}의 약수입니다!`);
   } else {
     soundWrong();
+    recordMathWrongAnswer(`사탕 분배: ${candyTargetNum}개 ÷ ${divisor}명`, `나머지 ${remainder}개 발생 (약수 아님)`);
     banner.className = 'candy-feedback-banner danger';
     banner.innerHTML = `⚠️ <strong>나머지 ${remainder}개 발생!</strong> ${divisor}명에게 ${quotient}개씩 나누었지만 <strong>${remainder}개가 남아서</strong> 약수가 아니에요!`;
     speak(`앗! 나머지가 ${remainder}개 생겼어요. 따라서 ${divisor}는 ${candyTargetNum}의 약수가 아닙니다!`);
@@ -241,7 +271,7 @@ const matchGamesData = [
 
 let currentMatchGameIdx = 0;
 let currentMatchGame = matchGamesData[0];
-let selectedCards = []; // [{ element, value }]
+let selectedCards = [];
 let foundPairsCount = 0;
 let totalPairsTarget = 4;
 
@@ -251,14 +281,12 @@ function initMatchGame(gameIdx = 0) {
   selectedCards = [];
   foundPairsCount = 0;
 
-  // 고유 짝꿍 수 계산
-  const factorSet = new Set(currentMatchGame.factors);
   totalPairsTarget = Math.floor(currentMatchGame.factors.length / 2);
 
   document.getElementById('gem-target-num').textContent = currentMatchGame.target;
   document.getElementById('found-pairs-list').innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">아직 찾은 짝꿍이 없어요</span>';
 
-  // 카드 셔플 렌더링 (약수 + 함정 숫자)
+  // 카드 셔플 렌더링
   const allCards = [...currentMatchGame.factors, ...currentMatchGame.decoys].sort(() => Math.random() - 0.5);
   const grid = document.getElementById('number-cards-grid');
   grid.innerHTML = '';
@@ -290,6 +318,7 @@ function handleCardClick(cardEl, val) {
     if (prod === currentMatchGame.target) {
       // 정답 짝꿍!
       soundSuccess();
+      giveMathReward(1, true); // 💎/🍬 +1 보상
       c1.element.classList.remove('selected');
       c2.element.classList.remove('selected');
       c1.element.classList.add('matched-glow');
@@ -309,6 +338,7 @@ function handleCardClick(cardEl, val) {
 
       if (foundPairsCount >= totalPairsTarget) {
         triggerConfetti();
+        giveMathReward(3, false); // 모든 짝꿍 완료 시 축하 보상 3개!
         speak(`와아! ${currentMatchGame.target}의 모든 곱셈 짝꿍을 다 찾았어요! 정말 최고예요!`);
       } else {
         speak(`딩동댕! ${c1.value} 곱하기 ${c2.value}은 ${currentMatchGame.target} 짝꿍 맞아요!`);
@@ -316,6 +346,7 @@ function handleCardClick(cardEl, val) {
     } else {
       // 오답!
       soundWrong();
+      recordMathWrongAnswer(`짝꿍 찾기 (타겟 ${currentMatchGame.target})`, `${c1.value} × ${c2.value} = ${prod}`);
       c1.element.classList.add('shake-wrong');
       c2.element.classList.add('shake-wrong');
 
@@ -396,7 +427,6 @@ function renderDivisionGrid(prob) {
   const is3Digit = prob.dividend >= 100;
   const divStr = String(prob.dividend);
 
-  // 6x6 그리드 구축 (열: 0=기호/부호, 1=백, 2=십, 3=일, 4, 5)
   let html = `
     <div class="division-vertical-grid">
       <!-- 1행: 몫 (Quotient) -->
@@ -473,7 +503,6 @@ function setupGridAutoTab() {
   const inputs = Array.from(document.querySelectorAll('.grid-input-step'));
   inputs.forEach((input, idx) => {
     input.addEventListener('input', (e) => {
-      // 숫자만 허용
       input.value = input.value.replace(/[^0-9]/g, '');
       if (input.value.length === 1 && idx < inputs.length - 1) {
         inputs[idx + 1].focus();
@@ -494,11 +523,6 @@ function checkGridDivisionAnswer() {
   const qOnes = document.getElementById('q-ones')?.value;
   const userQuotient = parseInt((qTens || '') + (qOnes || ''));
 
-  const p1Tens = document.getElementById('step1-prod-tens')?.value;
-  const s2Tens = document.getElementById('step2-sub-tens')?.value;
-  const s2Ones = document.getElementById('step2-bring-ones')?.value;
-  const p3Tens = document.getElementById('step3-prod-tens')?.value;
-  const p3Ones = document.getElementById('step3-prod-ones')?.value;
   const rem = document.getElementById('step4-rem')?.value;
 
   const isQuotientRight = (userQuotient === prob.quotient);
@@ -507,6 +531,7 @@ function checkGridDivisionAnswer() {
   if (isQuotientRight && isRemRight) {
     soundSuccess();
     triggerConfetti();
+    giveMathReward(2, false); // 💎/🍬 +2 보상
     document.querySelectorAll('.grid-input-step').forEach(el => el.classList.add('correct'));
     document.getElementById('place-value-guide-box').innerHTML = `
       🎉 <strong>완벽한 정답입니다!</strong> ${prob.dividend} ÷ ${prob.divisor} = <strong>${prob.quotient}</strong> (나머지: 0) 자릿수가 위아래로 완벽히 정렬되었어요!
@@ -514,6 +539,7 @@ function checkGridDivisionAnswer() {
     speak(`정답입니다! 몫은 ${prob.quotient}이고 나머지는 0입니다! 자릿수를 아주 잘 맞추었어요!`);
   } else {
     soundWrong();
+    recordMathWrongAnswer(`나눗셈 세로셈: ${prob.dividend} ÷ ${prob.divisor}`, `입력 몫: ${userQuotient || '미입력'}`);
     document.querySelectorAll('.grid-input-step').forEach(el => {
       if (!el.value) el.classList.add('wrong');
     });
@@ -575,6 +601,41 @@ function autoSolveDivisionGrid() {
 function resetDivisionGrid() {
   loadDivisionProblem(currentDivProbIdx);
 }
+
+/* ========================================================
+   방 나가기 및 노션 학습일지/오답노트 최종 전송
+   ======================================================== */
+let isExiting = false;
+
+window.exitRoom = async function(force = false) {
+  if (isExiting) return;
+  isExiting = true;
+
+  const childName = localStorage.getItem('currentUser') === 'son' ? '민수' : '민서';
+  const errorReportText = window.wrongNotes.length > 0
+    ? window.wrongNotes.map(n => `${n.text} (${n.wrongInput})`).join(' / ')
+    : "오답 없음 (완벽 달성!)";
+
+  if (typeof sendStudyLogToNotion === 'function') {
+    try {
+      await sendStudyLogToNotion({
+        childName: childName,
+        subject: "수학(약수와 나눗셈)",
+        errorReport: errorReportText
+      });
+    } catch (e) {
+      console.error("학습일지 전송 실패:", e);
+    }
+  }
+
+  location.href = 'math.html';
+};
+
+window.addEventListener('pagehide', () => {
+  if (!isExiting && typeof window.exitRoom === 'function') {
+    window.exitRoom(true);
+  }
+});
 
 /* ========================================================
    초기화

@@ -929,7 +929,7 @@
     <div class="profile-badge">
       <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
     </div>
-    <button class="exit-btn" onclick="location.href='math.html'">🔙 수학 탐험 본부</button>
+    <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
   </div>
 
   <header>
@@ -1186,11 +1186,22 @@
       window.speechSynthesis.speak(utter);
     }
 
+    window.currentSubject = "수학";
+    window.wrongNotes = window.wrongNotes || [];
+    window.roomStartTime = window.roomStartTime || new Date();
+
     let stars = 0;
-    function addStar() {
-      stars++;
+    async function addStar(amount = 1, isSilent = true) {
+      stars += amount;
       document.getElementById('star-count').textContent = stars;
       triggerConfetti();
+      if (typeof grantRewardAndShowUI === 'function') {
+        try {
+          await grantRewardAndShowUI(amount, isSilent);
+        } catch (e) {
+          console.warn("보상 지급 연동 실패:", e);
+        }
+      }
     }
 
     /* =========================================================================
@@ -1479,11 +1490,15 @@
 
       if (isTensCorrect && isOnesCorrect && isTotalCorrect) {
         soundSuccess();
-        addStar();
+        addStar(1, false);
         const names = getNumberNames(p.tens * 10 + p.ones);
         speak(`참 잘했어요! 10개씩 ${p.tens}묶음과 낱개 ${p.ones}개는 ${p.tens * 10 + p.ones}입니다!`);
       } else {
         soundWrong();
+        window.wrongNotes.push({
+          text: `50까지의 수 표 채우기 (10개씩 ${p.tens}묶음, 낱개 ${p.ones}개)`,
+          wrongInput: `${userTens || '?'}묶음 ${userOnes || '?'}개 (전체: ${userTotal || '?'})`
+        });
         speak('다시 세어보세요. 움직이는 풀이과정을 참고해보세요!');
       }
     }
@@ -1966,7 +1981,7 @@
 
       if (chosenNum === targetCorrect) {
         soundSuccess();
-        addStar();
+        addStar(1, false);
         compStreak++;
         document.getElementById('comp-streak-count').textContent = compStreak;
         clickedBtn.classList.add('correct');
@@ -1977,12 +1992,48 @@
         }, 1100);
       } else {
         soundWrong();
+        window.wrongNotes.push({
+          text: `크기 비교 (${compNum1} vs ${compNum2}, ${compQuizType === 'greater' ? '더 큰 수 찾기' : '더 작은 수 찾기'})`,
+          wrongInput: `선택: ${chosenNum}`
+        });
         compStreak = 0;
         document.getElementById('comp-streak-count').textContent = compStreak;
         clickedBtn.classList.add('wrong');
         fb.innerHTML = `<span style="color:#EF4444;">앗! 다시 생각해볼까요? 십의 자리와 일의 자리를 비교해보세요!</span>`;
       }
     }
+
+    /* 방 나가기 및 학습일지/오답노트 전송 */
+    let isExiting = false;
+    window.exitRoom = async function(force = false) {
+      if (isExiting) return;
+      isExiting = true;
+
+      const childName = localStorage.getItem('currentUser') === 'son' ? '민수' : '민서';
+      const errorReportText = window.wrongNotes.length > 0
+        ? window.wrongNotes.map(n => `${n.text} (${n.wrongInput})`).join(' / ')
+        : "오답 없음 (완벽 달성!)";
+
+      if (typeof sendStudyLogToNotion === 'function') {
+        try {
+          await sendStudyLogToNotion({
+            childName: childName,
+            subject: "수학(50까지의 수)",
+            errorReport: errorReportText
+          });
+        } catch (e) {
+          console.error("학습일지 전송 실패:", e);
+        }
+      }
+
+      location.href = 'math.html';
+    };
+
+    window.addEventListener('pagehide', () => {
+      if (!isExiting && typeof window.exitRoom === 'function') {
+        window.exitRoom(true);
+      }
+    });
 
     /* 초기화 & 프로필 로드 */
     document.addEventListener("DOMContentLoaded", () => {
