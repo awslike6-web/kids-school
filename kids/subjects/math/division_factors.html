@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🍬 민수의 약수 & 나눗셈 자릿수 마스터 훈련소 (수학방 특별관)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- 상단 네비게이션 -->
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👦</span> <span id="userName">민수 대원</span>
+    </div>
+    <button class="exit-btn" onclick="location.href='math.html'">🔙 수학 탐험 본부</button>
+  </div>
+
+  <div class="math-room-container">
+
+    <!-- 히어로 헤더 -->
+    <header class="math-header-hero">
+      <h1 class="hero-title">🍬 약수 & 나눗셈 자릿수 마스터 훈련소 🚀</h1>
+      <p class="hero-subtitle">사탕을 똑같이 나누어 약수를 발견하고, 모눈종이에 나눗셈 자릿수를 완벽하게 맞춰봐요!</p>
+    </header>
+
+    <!-- ========================================================
+         1. [사탕 분배 시뮬레이터 (시각화 영역)]
+         ======================================================== -->
+    <section class="math-section-card" id="section-candy-simulator">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 시각화 영역</span>
+          <h2 class="section-title">🍬 사탕 분배 시뮬레이터 (약수 원리 발견)</h2>
+          <p class="section-desc">사탕을 접시에 똑같이 나누어 담아보세요! 나머지가 0이면 완벽한 약수예요.</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('사탕을 선택하고 몇 명에게 똑같이 나누어줄지 버튼을 눌러보세요!')">🔊</button>
+      </div>
+
+      <!-- 타겟 숫자 선택 버튼 -->
+      <div class="target-selector-row">
+        <span class="selector-label">🎯 나눌 사탕 개수 선택:</span>
+        <button class="candy-num-btn active" data-num="12" onclick="setCandyTarget(12)">🍬 12개</button>
+        <button class="candy-num-btn" data-num="18" onclick="setCandyTarget(18)">🍭 18개</button>
+        <button class="candy-num-btn" data-num="24" onclick="setCandyTarget(24)">🍫 24개</button>
+      </div>
+
+      <!-- 사탕 바구니 -->
+      <div class="candy-basket-tray">
+        <div class="basket-label">
+          <span>🧺 중앙 사탕 바구니</span>
+          <span id="basket-count-display" style="font-weight:800; color:#BE185D;">12개</span>
+        </div>
+        <div class="candies-container" id="candies-tray"></div>
+      </div>
+
+      <!-- 분배 버튼 모음 -->
+      <div class="divide-actions-row">
+        <button class="divide-btn" onclick="distributeCandies(2)">👥 2명에게 나누기</button>
+        <button class="divide-btn" onclick="distributeCandies(3)">👨‍👩‍👦 3명에게 나누기</button>
+        <button class="divide-btn" onclick="distributeCandies(4)">🍀 4명에게 나누기</button>
+        <button class="divide-btn" onclick="distributeCandies(5)" style="background:#8B5CF6;">🖐️ 5명에게 나누기</button>
+        <button class="divide-btn" onclick="distributeCandies(6)">🎲 6명에게 나누기</button>
+      </div>
+
+      <!-- 접시 분배 그리드 -->
+      <div class="plates-grid" id="plates-grid">
+        <div style="color:var(--text-muted); font-weight:700; text-align:center; width:100%; padding:20px;">
+          위의 [나누기] 버튼을 눌러 접시에 사탕을 배달해보세요!
+        </div>
+      </div>
+
+      <!-- 남은 사탕 상자 -->
+      <div class="leftover-box" id="leftover-box" style="display:none;">
+        <span style="font-family:'Jua', sans-serif; font-size:1.05rem; color:#B91C1C;">⚠️ 나누어 담지 못하고 남은 사탕:</span>
+        <div class="candies-container" id="leftover-candies-slot"></div>
+      </div>
+
+      <!-- 결과 피드백 배너 -->
+      <div class="candy-feedback-banner" id="candy-feedback-banner"></div>
+    </section>
+
+    <!-- ========================================================
+         2. [구구단 짝꿍 찾기 게임 (놀이 영역)]
+         ======================================================== -->
+    <section class="math-section-card" id="section-match-game">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-match">섹션 2 : 놀이 영역</span>
+          <h2 class="section-title">🎯 구구단 짝꿍 찾기 게임 (두 수의 곱 매칭)</h2>
+          <p class="section-desc">두 수를 곱해서 가운데 타겟 숫자가 되는 '약수 짝꿍 카드 2장'을 찾아 클릭하세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('두 수를 곱해서 타겟 숫자가 되는 짝꿍 카드 두 장을 찾아보세요!')">🔊</button>
+      </div>
+
+      <div class="match-game-board">
+        <!-- 중앙 타겟 보석 배지 -->
+        <div class="target-gem-card">
+          <div class="gem-target-label">✨ 타겟 곱 (TARGET PRODUCT)</div>
+          <div class="gem-target-num" id="gem-target-num">24</div>
+        </div>
+
+        <!-- 완성된 짝꿍 수집판 -->
+        <div class="found-pairs-bar">
+          <span class="pairs-title">🏆 찾은 짝꿍 목록:</span>
+          <div id="found-pairs-list" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <span style="color:var(--text-muted); font-size:0.9rem;">아직 찾은 짝꿍이 없어요</span>
+          </div>
+        </div>
+
+        <!-- 흩어진 숫자 카드 그리드 -->
+        <div class="number-cards-grid" id="number-cards-grid"></div>
+
+        <!-- 새 문제 버튼 -->
+        <div style="display:flex; justify-content:center; gap:10px; width:100%;">
+          <button class="divide-btn" style="background:#F59E0B;" onclick="nextMatchGame()">🔀 다른 타겟 숫자로 바꾸기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         3. [모눈종이 세로셈 보드 (연산 영역)]
+         ======================================================== -->
+    <section class="math-section-card" id="section-grid-division">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 3 : 연산 영역</span>
+          <h2 class="section-title">📝 모눈종이 세로셈 보드 (나눗셈 자릿수 완벽 정렬)</h2>
+          <p class="section-desc">엑셀처럼 정렬된 격자에 몫과 계산 과정을 한 칸에 한 글자씩 채워보세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('모눈종이 격자에 나눗셈 자릿수를 맞추어 입력해보세요!')">🔊</button>
+      </div>
+
+      <div class="grid-math-wrapper">
+        <!-- 문제 선택 버튼 -->
+        <div class="math-problem-picker-row">
+          <span class="selector-label">📋 연습 문제:</span>
+          <button class="picker-btn active" onclick="loadDivisionProblem(0)">72 ÷ 3</button>
+          <button class="picker-btn" onclick="loadDivisionProblem(1)">96 ÷ 4</button>
+          <button class="picker-btn" onclick="loadDivisionProblem(2)">84 ÷ 6</button>
+          <button class="picker-btn" onclick="loadDivisionProblem(3)">144 ÷ 6</button>
+        </div>
+
+        <!-- 자릿수 가이드 설명 박스 -->
+        <div class="place-value-guide-box" id="place-value-guide-box">
+          💡 <strong>[72 ÷ 3] 세로셈:</strong> 7 안에 3이 몇 번 들어갈까요? 2번 들어가므로 몫의 십의 자리에 2를 씁니다!
+        </div>
+
+        <!-- 모눈종이 캔버스/보드 -->
+        <div class="grid-notebook-board">
+          <div id="division-grid-container"></div>
+        </div>
+
+        <!-- 모눈종이 컨트롤 버튼 -->
+        <div class="grid-control-btns">
+          <button class="divide-btn" style="background:#10B981;" onclick="checkGridDivisionAnswer()">✨ 정답 확인하기</button>
+          <button class="divide-btn" style="background:#8B5CF6;" onclick="autoSolveDivisionGrid()">🎬 움직이는 풀이 시연</button>
+          <button class="divide-btn" style="background:#64748B;" onclick="resetDivisionGrid()">🔄 다시 풀기</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../js/math_factors_logic.js"></script>
+</body>
+</html>

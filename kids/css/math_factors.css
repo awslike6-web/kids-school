@@ -1,0 +1,686 @@
+/* ========================================================
+   🍬 수학방 3대 인터랙티브 학습실 스타일시트 (math_factors.css)
+   1. 사탕 분배 시뮬레이터 (약수 시각화)
+   2. 구구단 짝꿍 찾기 게임 (곱셈 & 약수 매칭)
+   3. 모눈종이 세로셈 보드 (나눗셈 자릿수 완벽 정렬)
+   ======================================================== */
+
+:root {
+  --primary-color: #6366F1;
+  --primary-hover: #4F46E5;
+  --secondary-color: #EC4899;
+  --accent-color: #F59E0B;
+  --success-color: #10B981;
+  --danger-color: #EF4444;
+  --bg-gradient: linear-gradient(135deg, #F0F9FF 0%, #FFF1F2 50%, #F5F3FF 100%);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --border-color: #E2E8F0;
+  --text-main: #1E293B;
+  --text-muted: #64748B;
+  --grid-line-color: #CBD5E1;
+  --grid-highlight: #FEF08A;
+}
+
+body.theme--arcade {
+  --primary-color: #00D4FF;
+  --primary-hover: #00B4D8;
+  --secondary-color: #FF6B9D;
+  --accent-color: #FFD93D;
+  --success-color: #6BCB77;
+  --danger-color: #FF6B6B;
+  --bg-gradient: linear-gradient(135deg, #12121E 0%, #1E1E38 50%, #1A102F 100%);
+  --card-bg: rgba(30, 30, 50, 0.95);
+  --border-color: #3A3A5A;
+  --text-main: #F5F5F5;
+  --text-muted: #94A3B8;
+  --grid-line-color: #475569;
+  --grid-highlight: #3B82F6;
+}
+
+body.theme--slime {
+  --primary-color: #FF6B9D;
+  --primary-hover: #FF4D6D;
+  --secondary-color: #A78BFA;
+  --accent-color: #FBBF24;
+  --success-color: #10B981;
+  --danger-color: #F43F5E;
+  --bg-gradient: linear-gradient(135deg, #FFF0F5 0%, #FFF5F7 50%, #F5F3FF 100%);
+  --card-bg: rgba(255, 255, 255, 0.98);
+  --border-color: #FFCCD5;
+  --text-main: #4A3352;
+  --text-muted: #8E7090;
+  --grid-line-color: #FBCFE8;
+  --grid-highlight: #FEF08A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: 'Nanum Gothic', 'Noto Sans KR', sans-serif;
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  color: var(--text-main);
+  padding: 16px;
+  position: relative;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+/* 상단바 */
+.top-bar {
+  max-width: 1000px;
+  margin: 0 auto 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.profile-badge {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.exit-btn {
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.exit-btn:hover {
+  background: #FFE4E6;
+  border-color: #FDA4AF;
+  transform: translateY(-2px);
+}
+
+/* 메인 컨테이너 */
+.math-room-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* 대시보드 헤더 */
+.math-header-hero {
+  background: var(--card-bg);
+  border-radius: 28px;
+  padding: 24px 32px;
+  border: 3px solid var(--border-color);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.08);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.hero-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 2.2rem;
+  background: linear-gradient(135deg, #6366F1, #EC4899, #F59E0B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-subtitle {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* ========================================================
+   섹션 공통 카드 레이아웃
+   ======================================================== */
+.math-section-card {
+  background: var(--card-bg);
+  border-radius: 28px;
+  padding: 28px;
+  border: 3px solid var(--border-color);
+  box-shadow: 0 15px 35px -5px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+.section-header-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px dashed var(--border-color);
+  padding-bottom: 16px;
+}
+.section-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  font-family: 'Jua', sans-serif;
+  margin-bottom: 6px;
+}
+.badge-candy { background: #FDF2F8; color: #DB2777; border: 1.5px solid #FBCFE8; }
+.badge-match { background: #FEF3C7; color: #D97706; border: 1.5px solid #FDE68A; }
+.badge-grid { background: #EEF2FF; color: #4F46E5; border: 1.5px solid #C7D2FE; }
+
+.section-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.6rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.speaker-btn {
+  background: #FEF3C7;
+  border: 2px solid #FDE68A;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.speaker-btn:hover {
+  transform: scale(1.1);
+  background: #FDE68A;
+}
+
+/* ========================================================
+   1. 사탕 분배 시뮬레이터
+   ======================================================== */
+.target-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.selector-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+.candy-num-btn {
+  padding: 8px 18px;
+  border-radius: 16px;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  font-family: 'Jua', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.candy-num-btn.active {
+  background: linear-gradient(135deg, #EC4899, #F43F5E);
+  color: white;
+  border-color: #E11D48;
+  box-shadow: 0 6px 14px rgba(236, 72, 153, 0.35);
+  transform: translateY(-2px);
+}
+
+/* 사탕 바구니 대기소 */
+.candy-basket-tray {
+  background: rgba(236, 72, 153, 0.05);
+  border: 2.5px dashed #F472B6;
+  border-radius: 20px;
+  padding: 18px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+.basket-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: #DB2777;
+  display: flex;
+  justify-content: space-between;
+}
+.candies-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+.candy-item {
+  width: 38px;
+  height: 38px;
+  background: white;
+  border: 2px solid #FBCFE8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 나누기 버튼 그룹 */
+.divide-actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.divide-btn {
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.divide-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* 접시 분배 그리드 */
+.plates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+.plate-box {
+  background: var(--card-bg);
+  border: 2.5px solid #93C5FD;
+  border-radius: 20px;
+  padding: 14px 10px;
+  text-align: center;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  position: relative;
+}
+.plate-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: #2563EB;
+  margin-bottom: 8px;
+}
+.plate-candy-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* 남은 사탕 상자 */
+.leftover-box {
+  background: #FEF2F2;
+  border: 2px dashed #F87171;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+/* 분배 결과 피드백 배너 */
+.candy-feedback-banner {
+  padding: 16px 20px;
+  border-radius: 18px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.25rem;
+  text-align: center;
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+.candy-feedback-banner.success {
+  display: block;
+  background: #ECFDF5;
+  border: 2.5px solid #10B981;
+  color: #065F46;
+}
+.candy-feedback-banner.danger {
+  display: block;
+  background: #FEF2F2;
+  border: 2.5px solid #EF4444;
+  color: #B91C1C;
+}
+
+/* ========================================================
+   2. 구구단 짝꿍 찾기 게임
+   ======================================================== */
+.match-game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* 중앙 타겟 보석 배지 */
+.target-gem-card {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  border-radius: 24px;
+  padding: 16px 36px;
+  text-align: center;
+  border: 4px solid #FEF3C7;
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+  animation: pulse 2.5s infinite;
+}
+.gem-target-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  opacity: 0.9;
+  letter-spacing: 1px;
+}
+.gem-target-num {
+  font-family: 'Jua', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* 완성된 짝꿍 목록 수집판 */
+.found-pairs-bar {
+  width: 100%;
+  background: rgba(16, 185, 129, 0.08);
+  border: 2px dashed #34D399;
+  border-radius: 18px;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.pairs-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: #059669;
+}
+.pair-pill {
+  background: white;
+  border: 2px solid #10B981;
+  color: #065F46;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 흩어진 숫자 카드 그리드 */
+.number-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+.num-card-item {
+  height: 80px;
+  background: var(--card-bg);
+  border: 3px solid var(--border-color);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.9rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+.num-card-item:hover {
+  transform: translateY(-4px) scale(1.05);
+  border-color: var(--primary-color);
+}
+.num-card-item.selected {
+  background: #EEF2FF;
+  border-color: #6366F1;
+  color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  transform: scale(1.06);
+}
+.num-card-item.matched-glow {
+  background: #ECFDF5;
+  border-color: #10B981;
+  color: #065F46;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+  pointer-events: none;
+  opacity: 0.85;
+}
+.num-card-item.shake-wrong {
+  animation: shake 0.4s;
+  border-color: #EF4444;
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+/* ========================================================
+   3. 모눈종이 세로셈 보드 (Excel-style Division Grid)
+   ======================================================== */
+.grid-math-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.math-problem-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.picker-btn {
+  padding: 8px 16px;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.picker-btn.active {
+  background: #4F46E5;
+  color: white;
+  border-color: #4338CA;
+}
+
+/* 모눈종이 캔버스/보드 */
+.grid-notebook-board {
+  background: #FFFFFF;
+  background-image: 
+    linear-gradient(to right, rgba(203, 213, 225, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 213, 225, 0.45) 1px, transparent 1px);
+  background-size: 52px 52px;
+  border: 3px solid #94A3B8;
+  border-radius: 20px;
+  padding: 28px 36px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.05), 0 8px 20px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+}
+body.theme--arcade .grid-notebook-board {
+  background-color: #1E1E32;
+  background-image: 
+    linear-gradient(to right, rgba(71, 85, 105, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(71, 85, 105, 0.5) 1px, transparent 1px);
+  border-color: #475569;
+}
+
+/* 나눗셈 세로셈 그리드 구조 */
+.division-vertical-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 52px);
+  grid-auto-rows: 52px;
+  gap: 0px;
+  align-items: center;
+  justify-items: center;
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.grid-cell {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* 나눗셈 기호 (갈고리선) */
+.cell-div-symbol {
+  border-top: 3.5px solid var(--text-main);
+  border-left: 3.5px solid var(--text-main);
+  border-top-left-radius: 12px;
+}
+.cell-div-line-top {
+  border-top: 3.5px solid var(--text-main);
+}
+.cell-sub-line {
+  border-bottom: 3px solid var(--text-main);
+}
+
+/* 격자 입력 필드 (maxlength=1 강제) */
+.grid-digit-input {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #64748B;
+  border-radius: 10px;
+  background: #F8FAFC;
+  text-align: center;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #1E293B;
+  outline: none;
+  transition: all 0.2s;
+}
+.grid-digit-input:focus {
+  border-color: #6366F1;
+  background: #FEF08A;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  transform: scale(1.08);
+}
+.grid-digit-input.correct {
+  border-color: #10B981;
+  background: #ECFDF5;
+  color: #065F46;
+}
+.grid-digit-input.wrong {
+  border-color: #EF4444;
+  background: #FEF2F2;
+  animation: shake 0.3s;
+}
+
+/* 자릿수 가이드 설명창 */
+.place-value-guide-box {
+  background: #EFF6FF;
+  border: 2px solid #93C5FD;
+  border-radius: 16px;
+  padding: 14px 20px;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1E40AF;
+  line-height: 1.5;
+  text-align: center;
+}
+body.theme--arcade .place-value-guide-box {
+  background: #1E293B;
+  border-color: #3B82F6;
+  color: #93C5FD;
+}
+
+/* 모눈종이 버튼 모음 */
+.grid-control-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Confetti 캔버스 */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* 애니메이션 정의 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
