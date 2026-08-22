@@ -72,6 +72,7 @@
   
   /* 활성화 카드 호버 */
   .mission-card:not(.disabled):hover { transform: translateY(-5px) scale(1.02); }
+  .mc-0:not(.disabled):hover { border-color: var(--pink); box-shadow: 0 10px 30px rgba(255, 107, 157, 0.25); }
   .mc-1:not(.disabled):hover { border-color: var(--cyan); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2); }
   .mc-2:not(.disabled):hover { border-color: var(--yellow); box-shadow: 0 10px 30px rgba(255, 217, 61, 0.2); }
 
@@ -101,15 +102,21 @@
 
   <div class="sector-title active-sector">🟢 활성화된 미션 구역</div>
   <div class="mission-grid">
+    <a href="number50.html" class="mission-card mc-0">
+      <div class="mission-icon">🐰</div>
+      <div class="mission-name">미션 1: 50까지의 수 놀이터</div>
+      <div class="mission-desc">10 만들기 · 묶음과 낱개 · 크기비교<br>1학년 수학의 튼튼한 기초를 다져요!</div>
+    </a>
+
     <a href="gugudan.html" class="mission-card mc-1">
       <div class="mission-icon">🚀</div>
-      <div class="mission-name">미션 1: 구구단 탐험대</div>
+      <div class="mission-name">미션 2: 구구단 탐험대</div>
       <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>심층 탐사선에 탑승하세요!</div>
     </a>
     
     <a href="vertical_math.html" class="mission-card mc-2">
       <div class="mission-icon">🧱</div>
-      <div class="mission-name">미션 2: 실전 격자 세로셈방</div>
+      <div class="mission-name">미션 3: 실전 격자 세로셈방</div>
       <div class="mission-desc">사칙연산을 완벽하게 훈련하는<br>동적 그리드 세로셈 훈련소!</div>
     </a>
 
@@ -119,21 +126,21 @@
   <div class="mission-grid">
     <div class="mission-card disabled">
       <div class="mission-icon">🍕</div>
-      <div class="mission-name">미션 3: 분수와 소수 개념방</div>
+      <div class="mission-name">미션 4: 분수와 소수 개념방</div>
       <div class="mission-desc">하나를 여럿으로 나누는<br>신비한 세계가 열립니다.</div>
       <div class="lock-badge">탐사 준비 중...</div>
     </div>
     
     <div class="mission-card disabled">
       <div class="mission-icon">⚡</div>
-      <div class="mission-name">미션 4: 분수 사칙연산 보스전</div>
+      <div class="mission-name">미션 5: 분수 사칙연산 보스전</div>
       <div class="mission-desc">분수와 소수의 연산을 마스터하는<br>고난이도 전투 구역!</div>
       <div class="lock-badge">탐사 준비 중...</div>
     </div>
 
     <div class="mission-card disabled">
       <div class="mission-icon">📦</div>
-      <div class="mission-name">미션 5: 3D 부피와 넓이 아카데미</div>
+      <div class="mission-name">미션 6: 3D 부피와 넓이 아카데미</div>
       <div class="mission-desc">입체적인 시각으로<br>수학의 공간을 창조합니다.</div>
       <div class="lock-badge">탐사 준비 중...</div>
     </div>

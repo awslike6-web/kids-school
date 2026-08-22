@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🐰 민서의 1학년 수학 놀이터 (50까지의 수 무한 챌린지)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-light: #EEF2FF;
+      --secondary: #F59E0B;
+      --success: #10B981;
+      --danger: #EF4444;
+      --bg-color: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --header-border: #FEF3C7;
+    }
+
+    /* 🎠 민서 슬라임/동화 테마 (theme--slime) */
+    body.theme--slime {
+      --primary: #FF6B9D;
+      --primary-light: #FFF0F5;
+      --secondary: #FFB3C6;
+      --success: #10B981;
+      --danger: #FF4D6D;
+      --bg-color: #FFF3F5;
+      --card-bg: #FFFFFF;
+      --text-main: #4A3352;
+      --text-muted: #8E7090;
+      --border-color: #FFCCD5;
+      --header-border: #FFB3C6;
+    }
+
+    /* 🎮 민수 아케이드 테마 (theme--arcade) */
+    body.theme--arcade {
+      --primary: #00D4FF;
+      --primary-light: #1E1E38;
+      --secondary: #FFD93D;
+      --success: #6BCB77;
+      --danger: #FF6B6B;
+      --bg-color: #12121E;
+      --card-bg: #1E1E32;
+      --text-main: #F5F5F5;
+      --text-muted: #8888AA;
+      --border-color: #3A3A5A;
+      --header-border: #3A3A5A;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background: var(--bg-color);
+      min-height: 100vh;
+      color: var(--text-main);
+      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+
+    body:not(.theme--arcade) {
+      background: linear-gradient(135deg, #FFF7ED 0%, #EFF6FF 50%, #F0FDF4 100%);
+    }
+    body.theme--slime {
+      background: linear-gradient(135deg, #FFF0F5 0%, #FFF5F7 50%, #F0FDF4 100%);
+    }
+
+    /* 최상단 네비게이션 */
+    .top-bar {
+      max-width: 1000px;
+      margin: 0 auto 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile-badge {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .exit-btn {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .exit-btn:hover {
+      background: #FFE4E6;
+      border-color: #FDA4AF;
+      transform: translateY(-2px);
+    }
+
+    /* 상단 헤더 */
+    header {
+      max-width: 1000px;
+      margin: 0 auto 16px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      padding: 12px 24px;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      border: 2px solid var(--header-border);
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      font-size: 2.2rem;
+      animation: bounce 2s infinite ease-in-out;
+    }
+
+    .brand-title {
+      font-family: 'Jua', cursive;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #EA580C;
+      line-height: 1.1;
+    }
+    body.theme--slime .brand-title { color: #FF4D6D; }
+    body.theme--arcade .brand-title { color: #00D4FF; }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .score-board {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #FEF3C7;
+      padding: 8px 16px;
+      border-radius: 50px;
+      border: 2px solid #FDE68A;
+      font-weight: 700;
+      color: #92400E;
+      font-family: 'Jua', sans-serif;
+    }
+    body.theme--arcade .score-board {
+      background: #2A2A44;
+      border-color: #FFD93D;
+      color: #FFD93D;
+    }
+
+    .star-badge {
+      font-size: 1.3rem;
+      animation: spin-slow 10s linear infinite;
+    }
+
+    /* 탭 네비게이션 */
+    .nav-tabs {
+      max-width: 1000px;
+      margin: 0 auto 16px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 170px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: 'Jua', sans-serif;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-2px);
+      border-color: #CBD5E1;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%);
+      color: #FFFFFF;
+      border-color: #4338CA;
+      box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.3);
+      transform: translateY(-2px);
+    }
+    body.theme--slime .tab-btn.active {
+      background: linear-gradient(135deg, #FF6B9D 0%, #FF80AB 100%);
+      border-color: #FF4D6D;
+      box-shadow: 0 8px 15px -3px rgba(255, 107, 157, 0.4);
+    }
+
+    /* 메인 영역 */
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .stage-card {
+      display: none;
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.06);
+      border: 3px solid var(--border-color);
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .stage-card.active {
+      display: block;
+    }
+
+    .stage-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      border-bottom: 2px dashed var(--border-color);
+      padding-bottom: 14px;
+      gap: 12px;
+    }
+
+    .stage-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 800;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .stage-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      font-family: 'Jua', sans-serif;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stage-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    .speaker-btn {
+      background: #FEF3C7;
+      border: 2px solid #FDE68A;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .speaker-btn:hover {
+      transform: scale(1.1);
+      background: #FDE68A;
+    }
+
+    /* 공통 버튼 */
+    .btn-action {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 14px;
+      font-weight: 700;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.98rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4F46E5, #6366F1);
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    body.theme--slime .btn-primary {
+      background: linear-gradient(135deg, #FF6B9D, #FF80AB);
+      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    .btn-success:hover { transform: translateY(-2px); }
+
+    .btn-explain {
+      background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+      color: white;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+    .btn-explain:hover { transform: translateY(-2px); }
+
+    .btn-outline {
+      background: var(--card-bg);
+      color: var(--text-main);
+      border: 2px solid var(--border-color);
+    }
+    .btn-outline:hover { background: rgba(128,128,128,0.1); }
+
+    .btn-group-center {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* === STAGE 1: 10 만들기 다양화 === */
+    .stage1-mode-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .mode-chip {
+      padding: 8px 16px;
+      border-radius: 50px;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      color: var(--text-muted);
+      font-weight: 700;
+      font-family: 'Jua', sans-serif;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .mode-chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .combine-zone {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .combine-zone { grid-template-columns: 1fr; }
+    }
+
+    .sandbox-panel {
+      background: rgba(128,128,128,0.04);
+      border-radius: 20px;
+      padding: 18px;
+      border: 2px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sandbox-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      font-family: 'Jua', sans-serif;
+      margin-bottom: 14px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .cube-tray {
+      width: 100%;
+      min-height: 180px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 2px dashed var(--border-color);
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .single-cube {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(145deg, #FB923C, #EA580C);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 1.05rem;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    body.theme--slime .single-cube {
+      background: linear-gradient(145deg, #FF80AB, #FF4D6D);
+      box-shadow: 0 4px 6px -1px rgba(255, 77, 109, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    }
+
+    .ten-rod {
+      display: flex;
+      background: linear-gradient(to right, #2563EB, #3B82F6);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+      box-shadow: 0 6px 12px -2px rgba(37, 99, 235, 0.4);
+      animation: combineTransform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    body.theme--slime .ten-rod {
+      background: linear-gradient(to right, #8B5CF6, #A78BFA);
+      box-shadow: 0 6px 12px -2px rgba(139, 92, 246, 0.4);
+    }
+
+    .rod-unit {
+      width: 18px;
+      height: 34px;
+      background: #60A5FA;
+      border-radius: 3px;
+      border: 1px solid #1D4ED8;
+    }
+    body.theme--slime .rod-unit {
+      background: #C4B5FD;
+      border-color: #7C3AED;
+    }
+
+    .speech-bubble {
+      background: #FEF9C3;
+      border: 2px solid #FDE047;
+      border-radius: 18px;
+      padding: 14px 18px;
+      width: 100%;
+      font-weight: 600;
+      color: #713F12;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      margin-top: 16px;
+    }
+    body.theme--arcade .speech-bubble {
+      background: #252538;
+      border-color: #FDE047;
+      color: #FDE047;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .preset-btn {
+      padding: 7px 4px;
+      background: var(--primary-light);
+      border: 1.5px solid var(--border-color);
+      color: var(--primary);
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+    }
+    .preset-btn:hover { filter: brightness(0.95); }
+
+    /* === STAGE 2: 그리드 빈칸 채우기 === */
+    .problem-box {
+      background: rgba(128,128,128,0.03);
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 20px;
+    }
+
+    .model-display-area {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 24px;
+      border: 2px solid var(--border-color);
+      min-height: 140px;
+      margin-bottom: 20px;
+    }
+
+    .rod-group, .cube-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 16px;
+      border-radius: 14px;
+      transition: all 0.3s;
+    }
+
+    .rod-group { background: rgba(59, 130, 246, 0.08); border: 2px dashed #93C5FD; }
+    .cube-group { background: rgba(249, 115, 22, 0.08); border: 2px dashed #FDBA74; }
+
+    .math-grid-table {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto 20px;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--border-color);
+    }
+
+    .math-grid-table th {
+      background: rgba(128,128,128,0.08);
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Jua', sans-serif;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .math-grid-table td {
+      padding: 16px 12px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .num-input {
+      width: 65px;
+      height: 48px;
+      border: 3px solid var(--border-color);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-main);
+      outline: none;
+      background: var(--card-bg);
+    }
+
+    .num-input:focus {
+      border-color: var(--primary);
+    }
+
+    .num-input.correct {
+      border-color: #10B981;
+      background: #ECFDF5;
+      color: #065F46;
+    }
+
+    .num-input.wrong {
+      border-color: #EF4444;
+      background: #FEF2F2;
+      animation: shake 0.4s;
+    }
+
+    /* === STAGE 3: 무작위 선 잇기 === */
+    .matching-board-wrapper {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 18px;
+      border: 2px solid var(--border-color);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .matching-cols {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    @media (max-width: 680px) {
+      .matching-cols { gap: 6px; }
+      .match-item { font-size: 0.92rem !important; min-height: 65px !important; padding: 4px !important; }
+      .match-col-header { font-size: 0.8rem !important; }
+    }
+
+    .match-col-header {
+      text-align: center;
+      font-weight: 800;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 14px;
+    }
+
+    .match-col {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .match-item {
+      background: rgba(128,128,128,0.04);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      min-height: 75px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 8px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      font-family: 'Jua', sans-serif;
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+
+    .match-item.matched {
+      border-color: #10B981;
+      background: #ECFDF5;
+      color: #065F46;
+    }
+
+    .match-dot {
+      width: 18px;
+      height: 18px;
+      background: #6366F1;
+      border: 3px solid #FFFFFF;
+      box-shadow: 0 0 0 2px #6366F1;
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s;
+      z-index: 5;
+      touch-action: none;
+    }
+    body.theme--slime .match-dot {
+      background: #FF6B9D;
+      box-shadow: 0 0 0 2px #FF6B9D;
+    }
+
+    .match-dot:hover {
+      transform: scale(1.4);
+    }
+
+    .dot-right { right: -9px; }
+    .dot-left { left: -9px; }
+
+    #match-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* === STAGE 4: 무작위 기차 순서 & 무한 크기 비교 === */
+    .train-container {
+      background: rgba(16, 185, 129, 0.08);
+      border: 2px solid #A7F3D0;
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .train-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+
+    .car-box {
+      background: var(--card-bg);
+      border: 3px solid #10B981;
+      border-radius: 16px;
+      width: 65px;
+      height: 75px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      animation: popIn 0.3s;
+    }
+
+    .car-icon { font-size: 1.1rem; }
+    .car-num { font-size: 1.3rem; font-weight: 800; color: #065F46; font-family: 'Jua', sans-serif; }
+
+    .car-input {
+      width: 48px;
+      height: 36px;
+      border: 2px dashed #059669;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #047857;
+      outline: none;
+      background: #ECFDF5;
+    }
+
+    .comp-infinite-box {
+      background: rgba(128,128,128,0.03);
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .comp-quiz-banner {
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-family: 'Jua', sans-serif;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .comp-badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .comp-choice-card {
+      background: var(--card-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 20px;
+      padding: 16px 32px;
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: 'Jua', sans-serif;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+      min-width: 100px;
+    }
+
+    .comp-choice-card:hover {
+      transform: translateY(-4px) scale(1.05);
+      border-color: var(--primary);
+    }
+
+    .comp-choice-card.correct {
+      border-color: #10B981;
+      background: #ECFDF5;
+      color: #065F46;
+      animation: bounce 0.6s;
+    }
+
+    .comp-choice-card.wrong {
+      border-color: #EF4444;
+      background: #FEF2F2;
+      animation: shake 0.4s;
+    }
+
+    .comp-streak {
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'Jua', sans-serif;
+      color: #D97706;
+      margin-top: 12px;
+    }
+
+    /* 풀이 모달 */
+    .explain-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .explain-modal.show { display: flex; animation: fadeIn 0.3s; }
+
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 28px;
+      max-width: 650px;
+      width: 100%;
+      padding: 24px;
+      border: 3px solid #8B5CF6;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .modal-title { font-size: 1.3rem; font-weight: 800; font-family: 'Jua', sans-serif; color: #6D28D9; }
+
+    .btn-close-modal {
+      background: rgba(128,128,128,0.1);
+      border: none;
+      font-size: 1.3rem;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+
+    .explain-anim-stage {
+      width: 100%;
+      height: 130px;
+      background: rgba(139, 92, 246, 0.06);
+      border: 2px dashed #D8B4FE;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .explain-text { font-size: 1.05rem; font-weight: 700; color: var(--text-main); line-height: 1.6; text-align: center; }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes combineTransform { 0% { transform: scale(0.6); opacity: 0; } 50% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    @keyframes spin-slow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <button class="exit-btn" onclick="location.href='math.html'">🔙 수학 탐험 본부</button>
+  </div>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🐰</div>
+      <div>
+        <div class="brand-title">토끼쌤과 함께하는 1학년 수학 놀이터</div>
+        <div class="brand-subtitle">5단원: 50까지의 수 (10 만들기 · 묶음과 낱개 · 크기 비교)</div>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="score-board">
+        <span class="star-badge">⭐</span>
+        <span>모은 별: <strong id="star-count" style="font-size:1.2rem;">0</strong>개</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab(1)"><span>✨</span> 1. 10 만들기 다양화</button>
+    <button class="tab-btn" onclick="switchTab(2)"><span>📊</span> 2. 묶음과 낱개 그리드</button>
+    <button class="tab-btn" onclick="switchTab(3)"><span>✏️</span> 3. 랜덤 셔플 선 잇기</button>
+    <button class="tab-btn" onclick="switchTab(4)"><span>🚂</span> 4. 순서 & 무한 크기비교</button>
+  </nav>
+
+  <main>
+    <!-- ==================== STAGE 1: 다양해진 10 만들기 ==================== -->
+    <section id="stage-1" class="stage-card active">
+      <div class="stage-header">
+        <div>
+          <span class="stage-badge">다양한 10 만들기 모드</span>
+          <h2 class="stage-title">낱개 10개가 모여 묶음 막대로 변신!</h2>
+          <p class="stage-desc">다양한 짝꿍수(1~9)와 퀴즈 모드로 10 만들기를 재미있게 연습해요.</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('다양한 방법으로 10을 만들어보세요!')">🔊</button>
+      </div>
+
+      <!-- 모드 선택 -->
+      <div class="stage1-mode-selector">
+        <button class="mode-chip active" id="chip-free" onclick="setStage1Mode('free')">자유 만들기 모드</button>
+        <button class="mode-chip" id="chip-quiz" onclick="setStage1Mode('quiz')">🎯 몇 개 더 필요할까? 퀴즈</button>
+        <button class="mode-chip" id="chip-double" onclick="setStage1Mode('double')">🌟 20(2묶음) 만들기 도전</button>
+      </div>
+
+      <div class="combine-zone">
+        <div class="sandbox-panel">
+          <div class="sandbox-title">
+            <span>📦 낱개 모으기 (현재: <strong id="cube-count" style="color:#EA580C; font-size:1.3rem;">0</strong>개)</span>
+            <span id="stage1-target-indicator" style="font-size:0.85rem; color:var(--primary); font-weight:700;">목표: 10개</span>
+          </div>
+          <div class="cube-tray" id="cube-tray"></div>
+          <div style="display:flex; gap:10px; width:100%; margin-top:14px;">
+            <button class="btn-action btn-success" style="flex:1;" onclick="addSingleCube()">➕ 낱개 1개 넣기</button>
+            <button class="btn-action btn-outline" onclick="resetStage1()">🔄 다시하기</button>
+          </div>
+
+          <div style="width:100%; margin-top:14px;">
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-muted); margin-bottom:6px;">⚡ 10 만들기 짝꿍수 바로가기:</div>
+            <div class="preset-grid">
+              <button class="preset-btn" onclick="loadPresetStage1(9, 1)">9 + 1 = 10</button>
+              <button class="preset-btn" onclick="loadPresetStage1(8, 2)">8 + 2 = 10</button>
+              <button class="preset-btn" onclick="loadPresetStage1(7, 3)">7 + 3 = 10</button>
+              <button class="preset-btn" onclick="loadPresetStage1(6, 4)">6 + 4 = 10</button>
+              <button class="preset-btn" onclick="loadPresetStage1(5, 5)">5 + 5 = 10</button>
+              <button class="preset-btn" onclick="loadPresetStage1(4, 6)">4 + 6 = 10</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sandbox-panel" style="justify-content: space-between;">
+          <div class="sandbox-title">
+            <span>✨ 완성된 10개 묶음 막대</span>
+          </div>
+          <div id="combine-result-tray" style="width:100%; min-height:160px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+            <span id="combine-placeholder" style="color:var(--text-muted); font-weight:600;">낱개가 10개가 되면 막대로 변신합니다!</span>
+          </div>
+          <div class="speech-bubble" id="stage1-bubble">
+            💡 <strong>토끼쌤:</strong> 낱개 10개는 <strong>10개씩 1묶음</strong>과 같아요. 10은 <strong>십</strong> 또는 <strong>열</strong>이라고 읽어요!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== STAGE 2: 그리드 문제 ==================== -->
+    <section id="stage-2" class="stage-card">
+      <div class="stage-header">
+        <div>
+          <span class="stage-badge">그리드 답안 입력</span>
+          <h2 class="stage-title">그림을 보고 표(그리드)의 빈칸에 알맞은 수를 쓰세요</h2>
+          <p class="stage-desc">10개씩 묶음과 낱개를 세어 표 안의 빈칸을 채워보세요.</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('그림을 보고 10개씩 묶음과 낱개의 수를 세어 표의 빈칸에 넣어보세요.')">🔊</button>
+      </div>
+
+      <div class="problem-box">
+        <div class="model-display-area" id="stage2-model-area"></div>
+
+        <table class="math-grid-table">
+          <thead>
+            <tr>
+              <th>10개씩 묶음</th>
+              <th>낱개</th>
+              <th>전체 수 (쓰기)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <input type="number" id="input-tens" class="num-input" placeholder="?"> 묶음
+              </td>
+              <td>
+                <input type="number" id="input-ones" class="num-input" placeholder="?"> 개
+              </td>
+              <td>
+                <input type="number" id="input-total" class="num-input" placeholder="?">
+                <div id="korean-read-hint" style="font-size:0.9rem; color:var(--text-muted); margin-top:6px;">(읽기: - , -)</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="btn-group-center">
+          <button class="btn-action btn-explain" onclick="showExplanationStage2()">🎬 움직이는 풀이과정</button>
+          <button class="btn-action btn-success" onclick="checkAnswerStage2()">✨ 정답 확인하기</button>
+          <button class="btn-action btn-outline" onclick="nextProblemStage2()">➡️ 새로운 문제</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== STAGE 3: 무작위 셔플 선 잇기 ==================== -->
+    <section id="stage-3" class="stage-card">
+      <div class="stage-header">
+        <div>
+          <span class="stage-badge">랜덤 무한 셔플</span>
+          <h2 class="stage-title">관계 있는 것끼리 줄로 이으시오 (매번 새로운 배치!)</h2>
+          <p class="stage-desc">매 판마다 숫자가 랜덤으로 바뀌고 순서가 섞입니다. 마우스나 터치로 점을 드래그해 연결하세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('관계 있는 것끼리 마우스나 손가락으로 줄을 이어보세요.')">🔊</button>
+      </div>
+
+      <div class="matching-board-wrapper" id="match-board-wrapper">
+        <canvas id="match-canvas"></canvas>
+
+        <div class="matching-cols">
+          <div class="match-col" id="col-models"><div class="match-col-header">수 모형</div></div>
+          <div class="match-col" id="col-sino"><div class="match-col-header">읽기 (한자어)</div></div>
+          <div class="match-col" id="col-digits"><div class="match-col-header">숫자</div></div>
+          <div class="match-col" id="col-native"><div class="match-col-header">읽기 (우리말)</div></div>
+        </div>
+      </div>
+
+      <div class="btn-group-center" style="margin-top:20px;">
+        <button class="btn-action btn-explain" onclick="autoSolveMatching()">🎬 정답 자동 풀이 시연</button>
+        <button class="btn-action btn-primary" onclick="generateNewRandomMatching()">🔀 새로운 문제 섞기 (랜덤 생성)</button>
+        <button class="btn-action btn-outline" onclick="resetCurrentMatchingLines()">🔄 다시 긋기</button>
+      </div>
+    </section>
+
+    <!-- ==================== STAGE 4: 기차 순서 & 무한 크기비교 ==================== -->
+    <section id="stage-4" class="stage-card">
+      <div class="stage-header">
+        <div>
+          <span class="stage-badge">1~50 무한 챌린지</span>
+          <h2 class="stage-title">기차 수 채우기 & 무한 크기 비교 퀴즈</h2>
+          <p class="stage-desc">맞출 때마다 새로운 문제가 계속 출제됩니다!</p>
+        </div>
+        <button class="speaker-btn" onclick="speak('기차의 빈칸을 채우고 크기를 비교해보세요!')">🔊</button>
+      </div>
+
+      <!-- 기차 수 순서 문제 -->
+      <div class="train-container">
+        <div style="font-size:1.15rem; font-weight:800; font-family:'Jua', sans-serif; color:#065F46;">🚂 1부터 50까지 수의 순서 맞추기</div>
+        <p style="font-size:0.9rem; color:#047857; margin-top:4px;">빈칸에 들어갈 알맞은 숫자를 입력하고 출발 버튼을 누르세요!</p>
+        <div class="train-track" id="train-track"></div>
+        <button class="btn-action btn-success" onclick="checkTrainTrack()">🚂 기차 출발 (정답 확인)</button>
+      </div>
+
+      <!-- 무한 크기 비교 퀴즈 -->
+      <div class="comp-infinite-box">
+        <div class="comp-quiz-banner" id="comp-quiz-question">
+          🚩 [문제] 더 큰 수를 찾아 터치하세요!
+        </div>
+        <div class="comp-badge-row">
+          <div class="comp-choice-card" id="comp-btn-left" onclick="handleCompChoice('left')">?</div>
+          <div style="font-size:1.8rem; font-weight:800; color:var(--text-muted);">VS</div>
+          <div class="comp-choice-card" id="comp-btn-right" onclick="handleCompChoice('right')">?</div>
+        </div>
+        <div id="comp-feedback-msg" style="font-size:1.1rem; font-weight:700; min-height:28px;"></div>
+        <div class="comp-streak">🔥 연속 정답: <strong id="comp-streak-count" style="font-size:1.2rem;">0</strong>문제 성공!</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 풀이과정 모달 -->
+  <div class="explain-modal" id="explain-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">🎬 토끼쌤의 움직이는 풀이과정</div>
+        <button class="btn-close-modal" onclick="closeExplanationModal()">✕</button>
+      </div>
+      <div class="explain-anim-stage" id="modal-anim-stage"></div>
+      <div class="explain-text" id="modal-explain-text"></div>
+      <div style="display:flex; justify-content:space-between; margin-top:24px;">
+        <button class="btn-action btn-outline" onclick="prevExplainStep()">◀ 이전 단계</button>
+        <span id="modal-step-counter" style="font-weight:800; color:#8B5CF6; align-self:center;">1 / 3 단계</span>
+        <button class="btn-action btn-explain" onclick="nextExplainStep()">다음 단계 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script>
+    /* =========================================================================
+       1. 사운드 및 오디오
+       ========================================================================= */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.2) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function soundPop() { playTone(587.33, 'triangle', 0.1, 0.3); }
+    function soundSuccess() {
+      [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+        setTimeout(() => playTone(f, 'sine', 0.2, 0.25), i * 80);
+      });
+    }
+    function soundCombine() {
+      [440, 554.37, 659.25, 880, 1108.73, 1318.51].forEach((f, i) => {
+        setTimeout(() => playTone(f, 'triangle', 0.15, 0.2), i * 50);
+      });
+    }
+    function soundWrong() { playTone(220, 'sawtooth', 0.25, 0.25); }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'ko-KR';
+      utter.rate = 0.95;
+      window.speechSynthesis.speak(utter);
+    }
+
+    let stars = 0;
+    function addStar() {
+      stars++;
+      document.getElementById('star-count').textContent = stars;
+      triggerConfetti();
+    }
+
+    /* =========================================================================
+       2. Confetti 폭죽
+       ========================================================================= */
+    const confCanvas = document.getElementById('confetti-canvas');
+    const confCtx = confCanvas.getContext('2d');
+    let confettiParticles = [];
+
+    function resizeConfetti() {
+      confCanvas.width = window.innerWidth;
+      confCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function triggerConfetti() {
+      const colors = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
+      for (let i = 0; i < 60; i++) {
+        confettiParticles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - 0.5) * 18,
+          vy: (Math.random() - 0.7) * 18,
+          size: Math.random() * 8 + 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 10,
+          life: 100
+        });
+      }
+    }
+
+    function updateConfetti() {
+      confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+      for (let i = confettiParticles.length - 1; i >= 0; i--) {
+        const p = confettiParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.4;
+        p.rotation += p.rotSpeed;
+        p.life -= 1.5;
+
+        confCtx.save();
+        confCtx.translate(p.x, p.y);
+        confCtx.rotate((p.rotation * Math.PI) / 180);
+        confCtx.fillStyle = p.color;
+        confCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        confCtx.restore();
+
+        if (p.life <= 0 || p.y > window.innerHeight) {
+          confettiParticles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(updateConfetti);
+    }
+    updateConfetti();
+
+    /* =========================================================================
+       3. 탭 전환
+       ========================================================================= */
+    function switchTab(stageNum) {
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === stageNum - 1);
+      });
+      document.querySelectorAll('.stage-card').forEach((card, idx) => {
+        card.classList.toggle('active', idx === stageNum - 1);
+      });
+
+      if (stageNum === 3) {
+        setTimeout(() => {
+          resizeMatchCanvas();
+          drawMatchCanvas();
+        }, 100);
+      }
+    }
+
+    /* =========================================================================
+       4. STAGE 1: 10 만들기 다양화 로직
+       ========================================================================= */
+    let stage1Cubes = 0;
+    let stage1Target = 10;
+    let stage1Mode = 'free'; // 'free', 'quiz', 'double'
+    let quizTargetMissing = 0;
+
+    function setStage1Mode(mode) {
+      stage1Mode = mode;
+      document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
+      if (mode === 'free') document.getElementById('chip-free').classList.add('active');
+      if (mode === 'quiz') document.getElementById('chip-quiz').classList.add('active');
+      if (mode === 'double') document.getElementById('chip-double').classList.add('active');
+
+      resetStage1();
+
+      if (mode === 'quiz') {
+        const initial = Math.floor(Math.random() * 8) + 1; // 1~8
+        quizTargetMissing = 10 - initial;
+        stage1Cubes = initial;
+        renderStage1();
+        document.getElementById('stage1-target-indicator').textContent = `목표: 10개 맞추기`;
+        document.getElementById('stage1-bubble').innerHTML = `
+          🎯 <strong>퀴즈 미션:</strong> 상자에 낱개가 <strong>${initial}개</strong> 있어요.<br>
+          10을 만들려면 <strong>몇 개를 더 넣어야</strong> 할까요? (정답: <strong>${quizTargetMissing}개</strong> 더 넣기!)
+        `;
+        speak(`상자에 ${initial}개가 있어요. 10을 만들려면 몇 개를 더 넣어야 할까요?`);
+      } else if (mode === 'double') {
+        stage1Target = 20;
+        document.getElementById('stage1-target-indicator').textContent = `목표: 20개 (2묶음)`;
+        document.getElementById('stage1-bubble').innerHTML = `
+          🌟 <strong>20 만들기 도전!</strong> 낱개를 20개 모아서 <strong>10개 묶음 막대 2개</strong>를 완성해 보세요! (20 = 이십 = 스물)
+        `;
+        speak('낱개 20개를 모아 10개 묶음 막대 2개를 만들어보세요!');
+      } else {
+        stage1Target = 10;
+        document.getElementById('stage1-target-indicator').textContent = `목표: 10개`;
+        document.getElementById('stage1-bubble').innerHTML = `
+          💡 <strong>토끼쌤:</strong> 낱개 10개는 <strong>10개씩 1묶음</strong>과 같아요. 10은 <strong>십</strong> 또는 <strong>열</strong>이라고 읽어요!
+        `;
+      }
+    }
+
+    function addSingleCube() {
+      if (stage1Cubes >= stage1Target) return;
+      stage1Cubes++;
+      soundPop();
+      renderStage1();
+
+      if (stage1Cubes === 10 && stage1Target === 10) {
+        setTimeout(triggerStage1Combine, 300);
+      } else if (stage1Cubes === 20 && stage1Target === 20) {
+        setTimeout(triggerStage1CombineDouble, 300);
+      }
+    }
+
+    function renderStage1() {
+      const tray = document.getElementById('cube-tray');
+      const countEl = document.getElementById('cube-count');
+      countEl.textContent = stage1Cubes;
+
+      tray.innerHTML = '';
+      for (let i = 0; i < stage1Cubes; i++) {
+        const cube = document.createElement('div');
+        cube.className = 'single-cube';
+        cube.textContent = (i % 10) + 1;
+        tray.appendChild(cube);
+      }
+    }
+
+    function triggerStage1Combine() {
+      soundCombine();
+      addStar();
+
+      document.getElementById('cube-tray').innerHTML = '<span style="color:#10B981; font-weight:800; font-size:1.2rem;">🌟 10개 완성! 묶음 막대로 합체!</span>';
+      document.getElementById('combine-result-tray').innerHTML = `
+        <div class="ten-rod">
+          ${Array(10).fill('<div class="rod-unit"></div>').join('')}
+        </div>
+        <div style="font-weight:800; font-size:1.2rem; color:#2563EB; margin-top:8px;">
+          ✨ 10개 묶음 막대 1개 (수: 10, 십, 열)
+        </div>
+      `;
+      speak('축하합니다! 낱개 10개가 10개 묶음 막대 1개로 합체했어요!');
+    }
+
+    function triggerStage1CombineDouble() {
+      soundCombine();
+      addStar();
+
+      document.getElementById('cube-tray').innerHTML = '<span style="color:#10B981; font-weight:800; font-size:1.2rem;">🌟 20개 완성! 2묶음 합체!</span>';
+      document.getElementById('combine-result-tray').innerHTML = `
+        <div style="display:flex; gap:12px;">
+          <div class="ten-rod">${Array(10).fill('<div class="rod-unit"></div>').join('')}</div>
+          <div class="ten-rod">${Array(10).fill('<div class="rod-unit"></div>').join('')}</div>
+        </div>
+        <div style="font-weight:800; font-size:1.2rem; color:#2563EB; margin-top:8px;">
+          ✨ 10개 묶음 막대 2개 (수: 20, 이십, 스물)
+        </div>
+      `;
+      speak('대단해요! 낱개 20개가 모여 10개 묶음 막대 2개가 되었어요!');
+    }
+
+    function resetStage1() {
+      stage1Cubes = 0;
+      stage1Target = stage1Mode === 'double' ? 20 : 10;
+      renderStage1();
+      document.getElementById('combine-result-tray').innerHTML = `
+        <span id="combine-placeholder" style="color:var(--text-muted); font-weight:600;">낱개가 10개가 되면 막대로 변신합니다!</span>
+      `;
+    }
+
+    function loadPresetStage1(initial, add) {
+      setStage1Mode('free');
+      stage1Cubes = initial;
+      renderStage1();
+      speak(`${initial}에 ${add}을 더해 10을 완성해보세요!`);
+      document.getElementById('stage1-bubble').innerHTML = `
+        🎯 <strong>짝꿍수 미션:</strong> <strong>${initial}</strong>에 낱개 <strong>${add}개</strong>를 더 넣으면 10이 완성됩니다!
+      `;
+    }
+
+    /* =========================================================================
+       5. STAGE 2: 그리드 문제
+       ========================================================================= */
+    const sinoDigit = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+    const sinoTens = ['', '십', '이십', '삼십', '사십', '오십'];
+    const nativeTens = ['', '열', '스물', '서른', '마흔', '쉰'];
+    const nativeDigit = ['', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉'];
+
+    function getNumberNames(num) {
+      const t = Math.floor(num / 10);
+      const o = num % 10;
+      let sino = '';
+      let native = '';
+
+      if (num === 10) { sino = '십'; native = '열'; }
+      else if (num === 20) { sino = '이십'; native = '스물'; }
+      else if (num === 30) { sino = '삼십'; native = '서른'; }
+      else if (num === 40) { sino = '사십'; native = '마흔'; }
+      else if (num === 50) { sino = '오십'; native = '쉰'; }
+      else {
+        sino = (t === 1 ? '십' : sinoTens[t]) + sinoDigit[o];
+        native = nativeTens[t] + nativeDigit[o];
+      }
+      return { sino, native };
+    }
+
+    let currentProblem = { tens: 2, ones: 4 };
+
+    function generateRandomGridProblem() {
+      const t = Math.floor(Math.random() * 4) + 1; // 1~4
+      const o = Math.floor(Math.random() * 9) + 1; // 1~9
+      currentProblem = { tens: t, ones: o };
+      renderStage2Problem();
+    }
+
+    function renderStage2Problem() {
+      const p = currentProblem;
+      const modelArea = document.getElementById('stage2-model-area');
+      modelArea.innerHTML = '';
+
+      const rodGroup = document.createElement('div');
+      rodGroup.className = 'rod-group';
+      for (let i = 0; i < p.tens; i++) {
+        const rod = document.createElement('div');
+        rod.className = 'ten-rod';
+        rod.innerHTML = Array(10).fill('<div class="rod-unit"></div>').join('');
+        rodGroup.appendChild(rod);
+      }
+      modelArea.appendChild(rodGroup);
+
+      if (p.ones > 0) {
+        const cubeGroup = document.createElement('div');
+        cubeGroup.className = 'cube-group';
+        for (let i = 0; i < p.ones; i++) {
+          const cube = document.createElement('div');
+          cube.className = 'single-cube';
+          cube.textContent = i + 1;
+          cubeGroup.appendChild(cube);
+        }
+        modelArea.appendChild(cubeGroup);
+      }
+
+      ['input-tens', 'input-ones', 'input-total'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.className = 'num-input';
+      });
+
+      const names = getNumberNames(p.tens * 10 + p.ones);
+      document.getElementById('korean-read-hint').textContent = `(읽기: ${names.sino}, ${names.native})`;
+    }
+
+    function checkAnswerStage2() {
+      const p = currentProblem;
+      const userTens = parseInt(document.getElementById('input-tens').value);
+      const userOnes = parseInt(document.getElementById('input-ones').value);
+      const userTotal = parseInt(document.getElementById('input-total').value);
+
+      const isTensCorrect = userTens === p.tens;
+      const isOnesCorrect = userOnes === p.ones;
+      const isTotalCorrect = userTotal === (p.tens * 10 + p.ones);
+
+      document.getElementById('input-tens').className = `num-input ${isTensCorrect ? 'correct' : 'wrong'}`;
+      document.getElementById('input-ones').className = `num-input ${isOnesCorrect ? 'correct' : 'wrong'}`;
+      document.getElementById('input-total').className = `num-input ${isTotalCorrect ? 'correct' : 'wrong'}`;
+
+      if (isTensCorrect && isOnesCorrect && isTotalCorrect) {
+        soundSuccess();
+        addStar();
+        const names = getNumberNames(p.tens * 10 + p.ones);
+        speak(`참 잘했어요! 10개씩 ${p.tens}묶음과 낱개 ${p.ones}개는 ${p.tens * 10 + p.ones}입니다!`);
+      } else {
+        soundWrong();
+        speak('다시 세어보세요. 움직이는 풀이과정을 참고해보세요!');
+      }
+    }
+
+    function nextProblemStage2() {
+      generateRandomGridProblem();
+    }
+
+    /* 풀이 모달 */
+    let explainStep = 1;
+    function showExplanationStage2() {
+      document.getElementById('explain-modal').classList.add('show');
+      explainStep = 1;
+      updateExplainStepView();
+    }
+
+    function closeExplanationModal() {
+      document.getElementById('explain-modal').classList.remove('show');
+    }
+
+    function updateExplainStepView() {
+      const p = currentProblem;
+      const stage = document.getElementById('modal-anim-stage');
+      const text = document.getElementById('modal-explain-text');
+      const counter = document.getElementById('modal-step-counter');
+      const names = getNumberNames(p.tens * 10 + p.ones);
+
+      counter.textContent = `${explainStep} / 3 단계`;
+
+      if (explainStep === 1) {
+        stage.innerHTML = `
+          <div class="rod-group" style="background:#FEF3C7; border-color:#F59E0B;">
+            ${Array(p.tens).fill(`<div class="ten-rod">${Array(10).fill('<div class="rod-unit"></div>').join('')}</div>`).join('')}
+          </div>
+        `;
+        text.innerHTML = `1️⃣ <strong>10개씩 묶음 막대</strong>가 <span style="color:#2563EB; font-size:1.3rem;">${p.tens}개</span> 있으므로 <strong>10개씩 ${p.tens}묶음</strong>입니다.`;
+        speak(`1단계: 10개씩 묶음 막대가 ${p.tens}개 있습니다.`);
+      } else if (explainStep === 2) {
+        stage.innerHTML = `
+          <div class="cube-group" style="background:#FEF3C7; border-color:#F59E0B;">
+            ${Array(p.ones).fill(0).map((_, i) => `<div class="single-cube">${i + 1}</div>`).join('')}
+          </div>
+        `;
+        text.innerHTML = `2️⃣ <strong>낱개 큐브</strong>가 <span style="color:#EA580C; font-size:1.3rem;">${p.ones}개</span> 있습니다.`;
+        speak(`2단계: 낱개 큐브는 ${p.ones}개 있습니다.`);
+      } else if (explainStep === 3) {
+        const total = p.tens * 10 + p.ones;
+        stage.innerHTML = `
+          <div style="font-size:2.2rem; font-weight:800; color:#4F46E5;">
+            ${p.tens * 10} + ${p.ones} = <span style="color:#10B981;">${total}</span>
+          </div>
+        `;
+        text.innerHTML = `3️⃣ 합치면 <strong>${total}</strong>이 되고, <strong>${names.sino}</strong> 또는 <strong>${names.native}</strong>(이)라고 읽습니다! ✨`;
+        speak(`3단계: 합치면 ${total}이 됩니다!`);
+      }
+    }
+
+    function nextExplainStep() {
+      if (explainStep < 3) { explainStep++; updateExplainStepView(); }
+      else { closeExplanationModal(); }
+    }
+    function prevExplainStep() {
+      if (explainStep > 1) { explainStep--; updateExplainStepView(); }
+    }
+
+    /* =========================================================================
+       6. STAGE 3: 무작위 셔플 선 잇기 (랜덤 생성 & 배치)
+       ========================================================================= */
+    let currentMatchItems = [];
+    let matchLines = [];
+    let activeDrag = null;
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function generateNewRandomMatching() {
+      matchLines = [];
+
+      // 10~50 사이에서 4개의 서로 다른 수를 무작위 선택
+      const allPossible = [10, 20, 30, 40, 50, 12, 23, 34, 45, 16, 27, 38, 49, 15, 25, 35, 42];
+      const selected = shuffleArray(allPossible).slice(0, 4);
+
+      currentMatchItems = selected.map(val => {
+        const t = Math.floor(val / 10);
+        const o = val % 10;
+        const names = getNumberNames(val);
+        return {
+          val: val,
+          tens: t,
+          ones: o,
+          sino: names.sino,
+          native: names.native
+        };
+      });
+
+      renderMatchingBoard();
+    }
+
+    function renderMatchingBoard() {
+      const colModels = document.getElementById('col-models');
+      const colSino = document.getElementById('col-sino');
+      const colDigits = document.getElementById('col-digits');
+      const colNative = document.getElementById('col-native');
+
+      colModels.innerHTML = '<div class="match-col-header">수 모형</div>';
+      colSino.innerHTML = '<div class="match-col-header">읽기 (한자어)</div>';
+      colDigits.innerHTML = '<div class="match-col-header">숫자</div>';
+      colNative.innerHTML = '<div class="match-col-header">읽기 (우리말)</div>';
+
+      // 각 열마다 무작위로 셔플!
+      const modelsShuffled = shuffleArray(currentMatchItems);
+      const sinoShuffled = shuffleArray(currentMatchItems);
+      const digitsShuffled = shuffleArray(currentMatchItems);
+      const nativeShuffled = shuffleArray(currentMatchItems);
+
+      // 1열 모형
+      modelsShuffled.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'match-item';
+        item.dataset.val = d.val;
+        item.innerHTML = `
+          <div style="display:flex; gap:4px; align-items:center;">
+            ${Array(d.tens).fill('<div style="width:8px; height:42px; background:#3B82F6; border-radius:2px;"></div>').join('')}
+            ${d.ones > 0 ? `<div style="display:flex; flex-direction:column; gap:2px;">${Array(d.ones).fill('<div style="width:6px; height:6px; background:#F97316; border-radius:1px;"></div>').join('')}</div>` : ''}
+          </div>
+          <div class="match-dot dot-right" data-col="0" data-val="${d.val}"></div>
+        `;
+        colModels.appendChild(item);
+      });
+
+      // 2열 한자어
+      sinoShuffled.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'match-item';
+        item.dataset.val = d.val;
+        item.innerHTML = `
+          <div class="match-dot dot-left" data-col="1" data-side="left" data-val="${d.val}"></div>
+          <span>${d.sino}</span>
+          <div class="match-dot dot-right" data-col="1" data-side="right" data-val="${d.val}"></div>
+        `;
+        colSino.appendChild(item);
+      });
+
+      // 3열 숫자
+      digitsShuffled.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'match-item';
+        item.dataset.val = d.val;
+        item.innerHTML = `
+          <div class="match-dot dot-left" data-col="2" data-side="left" data-val="${d.val}"></div>
+          <span>${d.val}</span>
+          <div class="match-dot dot-right" data-col="2" data-side="right" data-val="${d.val}"></div>
+        `;
+        colDigits.appendChild(item);
+      });
+
+      // 4열 우리말
+      nativeShuffled.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'match-item';
+        item.dataset.val = d.val;
+        item.innerHTML = `
+          <div class="match-dot dot-left" data-col="3" data-val="${d.val}"></div>
+          <span>${d.native}</span>
+        `;
+        colNative.appendChild(item);
+      });
+
+      setupMatchEvents();
+      resizeMatchCanvas();
+      drawMatchCanvas();
+    }
+
+    function setupMatchEvents() {
+      const wrapper = document.getElementById('match-board-wrapper');
+
+      wrapper.onmousedown = wrapper.ontouchstart = function(e) {
+        const dot = e.target.closest('.match-dot');
+        if (!dot) return;
+
+        const rect = wrapper.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        activeDrag = {
+          startDot: dot,
+          currentX: clientX - rect.left,
+          currentY: clientY - rect.top
+        };
+        soundPop();
+      };
+
+      window.onmousemove = window.ontouchmove = function(e) {
+        if (!activeDrag) return;
+        const wrapper = document.getElementById('match-board-wrapper');
+        const rect = wrapper.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+        activeDrag.currentX = clientX - rect.left;
+        activeDrag.currentY = clientY - rect.top;
+        drawMatchCanvas();
+      };
+
+      window.onmouseup = window.ontouchend = function(e) {
+        if (!activeDrag) return;
+        const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+        const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+
+        const targetEl = document.elementFromPoint(clientX, clientY);
+        const targetDot = targetEl ? targetEl.closest('.match-dot') : null;
+
+        if (targetDot && targetDot !== activeDrag.startDot) {
+          handleConnectDots(activeDrag.startDot, targetDot);
+        }
+
+        activeDrag = null;
+        drawMatchCanvas();
+      };
+    }
+
+    function handleConnectDots(dot1, dot2) {
+      const col1 = parseInt(dot1.dataset.col);
+      const col2 = parseInt(dot2.dataset.col);
+      const val1 = parseInt(dot1.dataset.val);
+      const val2 = parseInt(dot2.dataset.val);
+
+      if (Math.abs(col1 - col2) === 1) {
+        if (val1 === val2) {
+          // 이미 연결되었는지 확인
+          const exists = matchLines.some(l => 
+            (l.from === dot1 && l.to === dot2) || (l.from === dot2 && l.to === dot1)
+          );
+          if (!exists) {
+            soundSuccess();
+            matchLines.push({
+              from: col1 < col2 ? dot1 : dot2,
+              to: col1 < col2 ? dot2 : dot1,
+              val: val1
+            });
+            addStar();
+            checkAllMatchingDone();
+          }
+        } else {
+          soundWrong();
+        }
+      }
+    }
+
+    function resizeMatchCanvas() {
+      const wrapper = document.getElementById('match-board-wrapper');
+      const canvas = document.getElementById('match-canvas');
+      if (!wrapper || !canvas) return;
+      canvas.width = wrapper.clientWidth;
+      canvas.height = wrapper.clientHeight;
+    }
+    window.addEventListener('resize', () => {
+      resizeMatchCanvas();
+      drawMatchCanvas();
+    });
+
+    function drawMatchCanvas() {
+      const canvas = document.getElementById('match-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const wrapper = document.getElementById('match-board-wrapper');
+      const wrapRect = wrapper.getBoundingClientRect();
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      matchLines.forEach(line => {
+        const r1 = line.from.getBoundingClientRect();
+        const r2 = line.to.getBoundingClientRect();
+        const x1 = r1.left + r1.width / 2 - wrapRect.left;
+        const y1 = r1.top + r1.height / 2 - wrapRect.top;
+        const x2 = r2.left + r2.width / 2 - wrapRect.left;
+        const y2 = r2.top + r2.height / 2 - wrapRect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = '#10B981';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      });
+
+      if (activeDrag) {
+        const r1 = activeDrag.startDot.getBoundingClientRect();
+        const x1 = r1.left + r1.width / 2 - wrapRect.left;
+        const y1 = r1.top + r1.height / 2 - wrapRect.top;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(activeDrag.currentX, activeDrag.currentY);
+        ctx.strokeStyle = '#6366F1';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    function checkAllMatchingDone() {
+      if (matchLines.length >= 12) {
+        soundSuccess();
+        speak('우와! 모든 줄을 완벽하게 다 이었어요! 새로운 문제에 도전해보세요!');
+        setTimeout(() => {
+          if (confirm('🎉 완벽해요! 새로운 랜덤 문제로 또 풀어볼까요?')) {
+            generateNewRandomMatching();
+          }
+        }, 600);
+      }
+    }
+
+    function resetCurrentMatchingLines() {
+      matchLines = [];
+      drawMatchCanvas();
+    }
+
+    function autoSolveMatching() {
+      matchLines = [];
+      speak('정답 풀이 과정을 보여줄게요!');
+      
+      const dots = Array.from(document.querySelectorAll('.match-dot'));
+      let delay = 0;
+
+      currentMatchItems.forEach(item => {
+        const val = item.val;
+        const dot0 = dots.find(d => d.dataset.col === '0' && parseInt(d.dataset.val) === val);
+        const dot1Left = dots.find(d => d.dataset.col === '1' && d.dataset.side === 'left' && parseInt(d.dataset.val) === val);
+        const dot1Right = dots.find(d => d.dataset.col === '1' && d.dataset.side === 'right' && parseInt(d.dataset.val) === val);
+        const dot2Left = dots.find(d => d.dataset.col === '2' && d.dataset.side === 'left' && parseInt(d.dataset.val) === val);
+        const dot2Right = dots.find(d => d.dataset.col === '2' && d.dataset.side === 'right' && parseInt(d.dataset.val) === val);
+        const dot3 = dots.find(d => d.dataset.col === '3' && parseInt(d.dataset.val) === val);
+
+        setTimeout(() => {
+          if (dot0 && dot1Left) matchLines.push({ from: dot0, to: dot1Left, val });
+          soundPop();
+          drawMatchCanvas();
+        }, delay += 300);
+
+        setTimeout(() => {
+          if (dot1Right && dot2Left) matchLines.push({ from: dot1Right, to: dot2Left, val });
+          soundPop();
+          drawMatchCanvas();
+        }, delay += 300);
+
+        setTimeout(() => {
+          if (dot2Right && dot3) matchLines.push({ from: dot2Right, to: dot3, val });
+          soundSuccess();
+          drawMatchCanvas();
+        }, delay += 300);
+      });
+    }
+
+    /* =========================================================================
+       7. STAGE 4: 기차 수 순서 & 무한 크기 비교 로직
+       ========================================================================= */
+    let currentTrainData = [];
+
+    function generateRandomTrainTrack() {
+      const start = Math.floor(Math.random() * 41) + 1; // 1~41 시작
+      const length = 7;
+      currentTrainData = [];
+
+      // 7개 연속 수 중 무작위 2~3개 위치를 빈칸으로 지정
+      const blankIndices = new Set();
+      while (blankIndices.size < 3) {
+        blankIndices.add(Math.floor(Math.random() * length));
+      }
+
+      for (let i = 0; i < length; i++) {
+        currentTrainData.push({
+          num: start + i,
+          isBlank: blankIndices.has(i)
+        });
+      }
+
+      renderTrainTrack();
+    }
+
+    function renderTrainTrack() {
+      const track = document.getElementById('train-track');
+      track.innerHTML = '';
+
+      currentTrainData.forEach((item, idx) => {
+        const car = document.createElement('div');
+        car.className = 'car-box';
+
+        if (!item.isBlank) {
+          car.innerHTML = `
+            <div class="car-icon">🚃</div>
+            <div class="car-num">${item.num}</div>
+          `;
+        } else {
+          car.innerHTML = `
+            <div class="car-icon">❓</div>
+            <input type="number" class="car-input" id="train-in-${idx}" placeholder="?">
+          `;
+        }
+        track.appendChild(car);
+      });
+    }
+
+    function checkTrainTrack() {
+      let allCorrect = true;
+
+      currentTrainData.forEach((item, idx) => {
+        if (item.isBlank) {
+          const inputEl = document.getElementById(`train-in-${idx}`);
+          const val = parseInt(inputEl.value);
+          if (val === item.num) {
+            inputEl.style.borderColor = '#10B981';
+            inputEl.style.backgroundColor = '#ECFDF5';
+          } else {
+            allCorrect = false;
+            inputEl.style.borderColor = '#EF4444';
+            inputEl.style.backgroundColor = '#FEF2F2';
+          }
+        }
+      });
+
+      if (allCorrect) {
+        soundSuccess();
+        addStar();
+        speak('정답입니다! 칙칙폭폭 기차가 출발합니다!');
+        setTimeout(() => {
+          generateRandomTrainTrack(); // 맞추면 즉시 다음 새로운 랜덤 기차 생성!
+        }, 1200);
+      } else {
+        soundWrong();
+        speak('빈칸의 숫자를 다시 확인해보세요!');
+      }
+    }
+
+    /* === 무한 크기 비교 퀴즈 로직 === */
+    let compQuizType = 'greater';
+    let compNum1 = 0;
+    let compNum2 = 0;
+    let compStreak = 0;
+
+    function generateNextCompQuiz() {
+      compQuizType = Math.random() > 0.5 ? 'greater' : 'smaller';
+      compNum1 = Math.floor(Math.random() * 50) + 1;
+      compNum2 = Math.floor(Math.random() * 50) + 1;
+      while (compNum1 === compNum2) {
+        compNum2 = Math.floor(Math.random() * 50) + 1;
+      }
+
+      const qEl = document.getElementById('comp-quiz-question');
+      if (compQuizType === 'greater') {
+        qEl.innerHTML = `🚩 [문제] 두 수 중 <span style="color:#EF4444; text-decoration:underline;">더 큰 수</span>를 터치하세요!`;
+        speak(`두 수 중 더 큰 수는 어느 것일까요?`);
+      } else {
+        qEl.innerHTML = `🚩 [문제] 두 수 중 <span style="color:#3B82F6; text-decoration:underline;">더 작은 수</span>를 터치하세요!`;
+        speak(`두 수 중 더 작은 수는 어느 것일까요?`);
+      }
+
+      const btnL = document.getElementById('comp-btn-left');
+      const btnR = document.getElementById('comp-btn-right');
+      btnL.textContent = compNum1;
+      btnR.textContent = compNum2;
+      btnL.className = 'comp-choice-card';
+      btnR.className = 'comp-choice-card';
+      document.getElementById('comp-feedback-msg').textContent = '';
+    }
+
+    function handleCompChoice(side) {
+      const chosenNum = side === 'left' ? compNum1 : compNum2;
+      const targetCorrect = compQuizType === 'greater' ? Math.max(compNum1, compNum2) : Math.min(compNum1, compNum2);
+      const clickedBtn = side === 'left' ? document.getElementById('comp-btn-left') : document.getElementById('comp-btn-right');
+      const fb = document.getElementById('comp-feedback-msg');
+
+      if (chosenNum === targetCorrect) {
+        soundSuccess();
+        addStar();
+        compStreak++;
+        document.getElementById('comp-streak-count').textContent = compStreak;
+        clickedBtn.classList.add('correct');
+        fb.innerHTML = `<span style="color:#10B981;">🎉 딩동댕! 정답입니다! (${compNum1}과 ${compNum2} 중 ${targetCorrect}이(가) 맞아요)</span>`;
+        
+        setTimeout(() => {
+          generateNextCompQuiz();
+        }, 1100);
+      } else {
+        soundWrong();
+        compStreak = 0;
+        document.getElementById('comp-streak-count').textContent = compStreak;
+        clickedBtn.classList.add('wrong');
+        fb.innerHTML = `<span style="color:#EF4444;">앗! 다시 생각해볼까요? 십의 자리와 일의 자리를 비교해보세요!</span>`;
+      }
+    }
+
+    /* 초기화 & 프로필 로드 */
+    document.addEventListener("DOMContentLoaded", () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
+      const icon = currentProfile === 'son' ? '👦' : (currentProfile === 'daughter' ? '👧' : '👨‍💻');
+      
+      const savedTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
+      const themeClass = savedTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderStage1();
+      generateRandomGridProblem();
+      generateNewRandomMatching();
+      generateRandomTrainTrack();
+      generateNextCompQuiz();
+    });
+  </script>
+</body>
+</html>
