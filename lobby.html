@@ -87,6 +87,11 @@
   body.theme--hideout .timetable-btn { background: linear-gradient(90deg, #a78bfa, #ffd93d); color: #4a384f; border: 2px solid #ff6b9d; box-shadow: 0 4px 15px rgba(167,139,250,0.35); }
   body.theme--hideout .timetable-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(167,139,250,0.45); }
 
+  body.theme--arcade .dashboard-btn { background: linear-gradient(90deg, #6EC6F5, #3b82f6); color: #fff; border: 2px solid rgba(110, 198, 245, 0.4); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35); }
+  body.theme--arcade .dashboard-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.55); }
+  body.theme--hideout .dashboard-btn { background: linear-gradient(90deg, #FF6B9D, #ec4899); color: #fff; border: 2px solid rgba(255, 107, 157, 0.4); box-shadow: 0 4px 15px rgba(255, 107, 157, 0.35); }
+  body.theme--hideout .dashboard-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 107, 157, 0.5); }
+
   .tower-btn { background: linear-gradient(90deg, #1a2332, #4fc3f7) !important; color: #fff !important; border: 2px solid rgba(79,195,247,0.5) !important; box-shadow: 0 4px 15px rgba(79,195,247,0.35); }
   .tower-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(79,195,247,0.5); }
 
@@ -123,6 +128,7 @@
       <div class="inventory-card" id="inventoryDisplay">
         <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
       </div>
+      <a href="parent_dashboard.html" class="my-room-btn dashboard-btn" id="dashboardLink">📊 나의 성장 대시보드</a>
       <a href="timetable.html" class="my-room-btn timetable-btn" id="timetableLink">📅 내 시간표 보기</a>
       <a href="#" class="my-room-btn tower-btn" id="towerLink" style="display:none" target="_blank" rel="noopener">🏰 Master Tower 관제탑</a>
       <button type="button" class="tts-toggle-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
@@ -289,6 +295,13 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         document.getElementById('lobbySubtitle').textContent = "🔧 디자인 확인 및 구동 테스트를 진행할 월드를 골라주세요.";
         document.getElementById('timetableLink').textContent = '📺 전체 시간표 모니터';
         document.getElementById('timetableLink').href = 'timetable.html?view=monitor';
+        
+        const dashboardLink = document.getElementById('dashboardLink');
+        if (dashboardLink) {
+            dashboardLink.textContent = '📊 실시간 통합 성장 대시보드';
+            dashboardLink.href = 'parent_dashboard.html?role=parent';
+        }
+
         if (savedName === '아빠' && typeof APP_CONFIG !== 'undefined' && APP_CONFIG.MASTER_TOWER_URL) {
             const towerLink = document.getElementById('towerLink');
             towerLink.href = APP_CONFIG.MASTER_TOWER_URL;
@@ -304,6 +317,12 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         localStorage.setItem('currentUser', currentConfig.key); 
         localStorage.setItem('currentUserName', finalRealName);
         document.getElementById('timetableLink').textContent = `📅 ${finalRealName}의 시간표 보기`;
+
+        const dashboardLink = document.getElementById('dashboardLink');
+        if (dashboardLink) {
+            dashboardLink.textContent = `📊 ${finalRealName}의 성장 퀘스트 대시보드`;
+            dashboardLink.href = `parent_dashboard.html?user=${userKey}`;
+        }
     }
 
     // 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더

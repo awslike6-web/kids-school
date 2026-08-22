@@ -3,26 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>민민이네 대시보드 👨‍👩‍👧‍👦 (V2 - 국어 레벨 분리 고도화)</title>
+<title>민민이네 성장 대시보드 📊 (5대 과목 & 동기부여 퀘스트)</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<!-- Chart.js CDN for Radar Charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
-    --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
-    --purple: #A78BFA; --orange: #FF9F43; --green: #6BCB77;
+    --sky: #6EC6F5; --sky-dark: #3b82f6;
+    --yellow: #FFD93D; --yellow-dark: #f59e0b;
+    --pink: #FF6B9D; --pink-dark: #ec4899;
+    --mint: #4ECDC4; --mint-dark: #10b981;
+    --purple: #A78BFA; --purple-dark: #8b5cf6;
+    --orange: #FF9F43; --green: #6BCB77;
     --white: #FFFEF7; --dark: #2D2D4E; 
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --border-light: rgba(0, 0, 0, 0.05);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { 
     font-family: 'Nanum Gothic', sans-serif; 
-    background: linear-gradient(160deg, #f0f8ff 0%, #fff0f5 50%, #fffbe6 100%); \r
+    background: linear-gradient(160deg, #f0f8ff 0%, #fff0f5 50%, #fffbe6 100%); 
     min-height: 100vh; 
     overflow-x: hidden; 
     color: var(--dark); 
+    padding-bottom: 40px;
   }
   
   .bg-floats { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-  .float-item { position: absolute; background: rgba(255,255,255,0.4); border-radius: 50%; filter: blur(4px); animation: floatUp 12s infinite linear; }
+  .float-item { position: absolute; background: rgba(255,255,255,0.45); border-radius: 50%; filter: blur(4px); animation: floatUp 12s infinite linear; }
 
   @keyframes floatUp {
     0% { transform: translateY(105vh) translateX(0) scale(0.8); opacity: 0; }
@@ -31,58 +40,427 @@
     100% { transform: translateY(-10vh) translateX(50px) scale(1.2); opacity: 0; }
   }
 
-  .wrapper { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 25px 15px; }
-  header { text-align: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.6); padding: 15px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.04); border: 2px solid #fff; }
-  header h1 { font-family: 'Jua', sans-serif; font-size: 2.3rem; color: #4A4A77; text-shadow: 2px 2px 0px #fff; margin-bottom: 5px; }
-  header p { font-family: 'Gaegu', sans-serif; font-size: 1.2rem; color: #7A7A9A; font-weight: bold; }
-
-  .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 25px; }
-  .child-card { background: rgba(255,255,255,0.85); border-radius: 30px; padding: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); border: 4px solid #fff; display: flex; flex-direction: column; gap: 20px; position: relative; transition: transform 0.3s ease; }
-  .child-card:hover { transform: translateY(-5px); }
+  .wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 20px 15px; }
   
-  .child-card.minsu { border-color: var(--sky); }
-  .child-card.minseo { border-color: var(--pink); }
+  /* 헤더 스타일 */
+  header { 
+    text-align: center; 
+    margin-bottom: 20px; 
+    background: rgba(255, 255, 255, 0.75); 
+    backdrop-filter: blur(10px);
+    padding: 20px 15px; 
+    border-radius: 24px; 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04); 
+    border: 2px solid #fff; 
+  }
+  header h1 { 
+    font-family: 'Jua', sans-serif; 
+    font-size: clamp(1.8rem, 5vw, 2.4rem); 
+    color: #4A4A77; 
+    text-shadow: 2px 2px 0px #fff; 
+    margin-bottom: 6px; 
+  }
+  header p { 
+    font-family: 'Gaegu', sans-serif; 
+    font-size: 1.25rem; 
+    color: #6A6A8A; 
+    font-weight: bold; 
+  }
 
-  .badge { position: absolute; top: -15px; right: 25px; padding: 6px 16px; border-radius: 20px; color: white; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-  .minsu .badge { background: var(--sky); }
-  .minseo .badge { background: var(--pink); }
+  .nav-bar-zone {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1.5px dashed #eaeaea;
+  }
 
-  .profile-section { display: flex; align-items: center; gap: 15px; }
-  .avatar { font-size: 3rem; background: #fff; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-  .profile-info h2 { font-size: 1.6rem; color: #333; margin-bottom: 2px; }
-  .profile-info p { font-size: 0.95rem; color: #888; }
+  .view-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 8px 18px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.9);
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .tab-btn:hover { transform: translateY(-2px); }
+  .tab-btn.active {
+    background: #4A4A77;
+    color: white;
+    box-shadow: 0 4px 12px rgba(74, 74, 119, 0.25);
+  }
+  .tab-btn.tab-minsu.active { background: linear-gradient(135deg, #6EC6F5, #3b82f6); }
+  .tab-btn.tab-minseo.active { background: linear-gradient(135deg, #FF6B9D, #ec4899); }
 
-  .status-block { background: #fff; border-radius: 20px; padding: 15px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.03); }
-  .status-title { font-size: 1.05rem; color: #555; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; border-bottom: 2px dashed #f0f0f0; padding-bottom: 5px; }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .lobby-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 14px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    color: #475569;
+    text-decoration: none;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  .lobby-link-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+  }
+
+  /* 메인 그리드 */
+  .grid-container { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
+    gap: 24px; 
+  }
+  @media (max-width: 768px) {
+    .grid-container { grid-template-columns: 1fr; }
+  }
+
+  .child-card { 
+    background: var(--card-bg); 
+    border-radius: 28px; 
+    padding: 24px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06); 
+    border: 4px solid #fff; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 18px; 
+    position: relative; 
+    transition: transform 0.3s ease; 
+    backdrop-filter: blur(8px);
+  }
+  .child-card:hover { transform: translateY(-4px); }
   
-  .level-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .level-item { background: #fdfdfd; border: 1px solid #f1f1f1; padding: 8px 12px; border-radius: 12px; display: flex; flex-direction: column; gap: 2px; }
-  .level-item span:first-child { font-size: 0.85rem; color: #999; }
-  .level-item span:last-child { font-size: 1.1rem; color: #444; font-weight: bold; }
+  .child-card.minsu { border-color: #bee3f8; }
+  .child-card.minseo { border-color: #fed7e2; }
 
-  /* 🆕 국어 분리 튜닝으로 균형을 맞추기 위한 전용 변형 구조 */
-  .level-row.kor-split { grid-template-columns: 1fr; gap: 6px; margin-top: 5px; }
-  .level-row.kor-split .level-item { flex-direction: row; justify-content: space-between; align-items: center; padding: 6px 12px; }
+  .badge { 
+    position: absolute; 
+    top: -14px; 
+    right: 22px; 
+    padding: 6px 16px; 
+    border-radius: 20px; 
+    color: white; 
+    font-family: 'Jua', sans-serif; 
+    font-size: 0.95rem; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12); 
+  }
+  .minsu .badge { background: linear-gradient(135deg, var(--sky), #3b82f6); }
+  .minseo .badge { background: linear-gradient(135deg, var(--pink), #ec4899); }
 
-  .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .inv-item { background: #fff; border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-  .inv-icon { font-size: 1.8rem; }
-  .inv-icon img { width: 34px; height: 34px; object-fit: contain; display: block; }
-  .inv-details { display: flex; flex-direction: column; }
-  .inv-label { font-size: 0.85rem; color: #888; }
-  .inv-val { font-size: 1.15rem; color: #333; font-weight: bold; }
-
-  .action-zone { margin-top: auto; background: #fff; padding: 15px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.03); }
-  .action-title { font-size: 1rem; color: #555; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+  /* 프로필 섹션 */
+  .profile-section { display: flex; align-items: center; gap: 14px; }
+  .avatar { 
+    font-size: 2.8rem; 
+    background: #fff; 
+    width: 68px; 
+    height: 68px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 50%; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); 
+    border: 2px solid #fff;
+    flex-shrink: 0;
+  }
+  .profile-info { flex: 1; min-width: 0; }
+  .profile-info h2 { 
+    font-family: 'Jua', sans-serif; 
+    font-size: 1.5rem; 
+    color: #333; 
+    margin-bottom: 3px; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .profile-info p { font-size: 0.9rem; color: #777; }
   
-  .btn-pay { width: 100%; padding: 14px; border: none; border-radius: 15px; color: white; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); transition: all 0.2s ease; }
-  .minsu .btn-pay { background: linear-gradient(135deg, #6EC6F5, #4A90E2); }
-  .minseo .btn-pay { background: linear-gradient(135deg, #FF6B9D, #E84393); }
+  .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffe0b2;
+    font-family: 'Nanum Gothic', sans-serif;
+    font-weight: bold;
+  }
+
+  /* 공통 블록 스타일 */
+  .status-block { 
+    background: #fff; 
+    border-radius: 20px; 
+    padding: 16px; 
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.02); 
+    border: 1px solid var(--border-light); 
+  }
+  .status-title { 
+    font-family: 'Jua', sans-serif; 
+    font-size: 1.1rem; 
+    color: #4A4A77; 
+    margin-bottom: 12px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    border-bottom: 2px dashed #f0f0f0; 
+    padding-bottom: 6px; 
+  }
+  .status-title-sub {
+    font-family: 'Gaegu', sans-serif;
+    font-size: 0.95rem;
+    color: #888;
+    font-weight: normal;
+  }
+  
+  /* 과목 레벨 6개 그리드 */
+  .subject-level-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; 
+  }
+  @media (max-width: 480px) {
+    .subject-level-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  .sub-level-item { 
+    background: #fcfcfc; 
+    border: 1px solid #f0f0f0; 
+    padding: 8px 10px; 
+    border-radius: 14px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 3px; 
+    transition: all 0.2s;
+  }
+  .sub-level-item:hover {
+    background: #fff;
+    border-color: #e2e8f0;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+  }
+  .sub-level-item .sub-name { 
+    font-size: 0.8rem; 
+    color: #888; 
+    display: flex; 
+    align-items: center; 
+    gap: 4px; 
+  }
+  .sub-level-item .sub-val { 
+    font-family: 'Jua', sans-serif; 
+    font-size: 1.15rem; 
+    color: #333; 
+    font-weight: bold; 
+  }
+
+  /* 인벤토리 그리드 */
+  .inventory-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px; 
+  }
+  .inv-item { 
+    background: #fff; 
+    border-radius: 16px; 
+    padding: 10px 12px; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    border: 1px solid var(--border-light); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02); 
+  }
+  .inv-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .inv-icon img { width: 30px; height: 30px; object-fit: contain; display: block; }
+  .inv-details { display: flex; flex-direction: column; min-width: 0; }
+  .inv-label { font-size: 0.8rem; color: #888; }
+  .inv-val { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: #333; }
+
+  /* 🏆 나의 성장 기록 (완공률 & Streak) */
+  .growth-meter-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .growth-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .growth-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: bold;
+  }
+  .growth-track {
+    height: 12px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  .growth-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .minsu .growth-fill.completion { background: linear-gradient(90deg, #6EC6F5, #3b82f6); }
+  .minseo .growth-fill.completion { background: linear-gradient(90deg, #FF6B9D, #ec4899); }
+  .growth-fill.streak { background: linear-gradient(90deg, #ff9f43, #ff5722); }
+
+  /* 📊 레이더 차트 컨테이너 */
+  .radar-wrap {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px 0;
+  }
+
+  /* 🚦 망각곡선 복습 신호등 */
+  .traffic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .traffic-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #edf2f7;
+    font-size: 0.85rem;
+    gap: 8px;
+  }
+  .traffic-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+  .traffic-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .traffic-dot.red { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.5); }
+  .traffic-dot.yellow { background: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+  .traffic-dot.green { background: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
+  .traffic-name {
+    color: #334155;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .traffic-badge {
+    font-size: 0.78rem;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .traffic-badge.red { background: #fee2e2; color: #b91c1c; }
+  .traffic-badge.yellow { background: #fef3c7; color: #b45309; }
+  .traffic-badge.green { background: #d1fae5; color: #047857; }
+
+  /* ⚙️ 소원권 관리 및 제어 */
+  .action-zone { 
+    margin-top: auto; 
+    background: #fff; 
+    padding: 16px; 
+    border-radius: 20px; 
+    border: 1px solid var(--border-light); 
+  }
+  .action-title { 
+    font-family: 'Jua', sans-serif; 
+    font-size: 1rem; 
+    color: #555; 
+    margin-bottom: 8px; 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+  }
+  
+  .btn-pay { 
+    width: 100%; 
+    padding: 13px; 
+    border: none; 
+    border-radius: 14px; 
+    color: white; 
+    font-family: 'Jua', sans-serif; 
+    font-size: 1.1rem; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 8px; 
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08); 
+    transition: all 0.2s ease; 
+    touch-action: manipulation;
+  }
+  .minsu .btn-pay { background: linear-gradient(135deg, #6EC6F5, #3b82f6); }
+  .minseo .btn-pay { background: linear-gradient(135deg, #FF6B9D, #ec4899); }
   .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); filter: brightness(1.03); }
   .btn-pay:active { transform: translateY(0); }
   .btn-pay:disabled { background: #ccc !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-  .loading-shimmer { background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; color: transparent !important; }
+  .child-wish-info {
+    background: #fdf8f6;
+    border: 1.5px dashed #fed7aa;
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+    font-size: 0.92rem;
+    color: #9a3412;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* 로딩 쉬머 효과 */
+  .loading-shimmer { 
+    background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%); 
+    background-size: 200% 100%; 
+    animation: shimmer 1.5s infinite; 
+    border-radius: 4px; 
+    color: transparent !important; 
+  }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 </style>
 </head>
@@ -92,46 +470,130 @@
 
 <div class="wrapper">
   <header>
-    <h1>민민이네 실시간 대시보드 👨‍👩‍👧‍👦</h1>
-    <p>우리 아이들의 성장과 인벤토리를 실시간으로 모니터링하고 정비합니다.</p>
+    <h1 id="pageTitle">민민이네 성장 대시보드 📊</h1>
+    <p id="pageSubtitle">우리 아이들의 5대 과목 성장과 실시간 퀘스트를 점검합니다.</p>
+    
+    <div class="nav-bar-zone">
+      <div class="view-tabs" id="viewTabs">
+        <button class="tab-btn active" id="tab-all" onclick="switchView('all')">👨‍👩‍👧‍👦 전체 보기</button>
+        <button class="tab-btn tab-minsu" id="tab-minsu" onclick="switchView('minsu')">👦 민수 대시보드</button>
+        <button class="tab-btn tab-minseo" id="tab-minseo" onclick="switchView('minseo')">👧 민서 대시보드</button>
+      </div>
+
+      <div class="header-actions">
+        <a href="lobby.html" class="lobby-link-btn" id="btnBackLobby">🏠 공부방 로비로</a>
+      </div>
+    </div>
   </header>
 
-  <div class="grid-container">
+  <div class="grid-container" id="cardsGrid">
     
-    <div class="child-card minsu">
-      <div class="badge">첫째</div>
+    <!-- 👦 민수 카드 -->
+    <div class="child-card minsu" id="card-minsu">
+      <div class="badge">첫째 · 5학년</div>
+      
       <div class="profile-section">
         <div class="avatar">👦</div>
         <div class="profile-info">
-          <h2>민수 (Minsu)</h2>
-          <p>초공간 지포스 격리 훈련 중</p>
+          <h2>
+            민수 (Minsu)
+            <span class="streak-badge" id="ms-streak-badge">🔥 <span id="ms-streak-val">--</span>일 연속 열공</span>
+          </h2>
+          <p>사이버 아케이드 퀘스트 & 코어 마스터 훈련 중</p>
         </div>
       </div>
 
+      <!-- 📊 과목별 성장 마스터 (6대 영역) -->
       <div class="status-block">
-        <div class="status-title">📊 과목별 성장 마스터</div>
-        <div class="level-row">
-          <div class="level-item">
-            <span>수학 레벨</span>
-            <span id="ms-math" class="loading-shimmer">Lv.--</span>
-          </div>
-          <div class="level-item">
-            <span>영어 레벨</span>
-            <span id="ms-eng" class="loading-shimmer">Lv.--</span>
-          </div>
+        <div class="status-title">
+          <span>📚 과목별 성장 마스터</span>
+          <span class="status-title-sub">5대 교과 + 용어</span>
         </div>
-        <div class="level-row kor-split">
-          <div class="level-item">
-            <span>📙 용어사전 레벨</span>
-            <span id="ms-kor" class="loading-shimmer">Lv.--</span>
+        <div class="subject-level-grid">
+          <div class="sub-level-item">
+            <span class="sub-name">🧮 수학</span>
+            <span id="ms-math" class="sub-val loading-shimmer">Lv.--</span>
           </div>
-          <div class="level-item">
-            <span>⚔️ 국어실력 레벨</span>
-            <span id="ms-kor-real" class="loading-shimmer">Lv.--</span>
+          <div class="sub-level-item">
+            <span class="sub-name">🔤 영어</span>
+            <span id="ms-eng" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">✍️ 국어</span>
+            <span id="ms-kor-real" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">🧪 과학</span>
+            <span id="ms-sci" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">🏛️ 사회</span>
+            <span id="ms-soc" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">🦖 용어사전</span>
+            <span id="ms-kor" class="sub-val loading-shimmer">Lv.--</span>
           </div>
         </div>
       </div>
 
+      <!-- 🏆 나의 성장 기록 (관제탑 연동 완공률 & 스트릭) -->
+      <div class="status-block">
+        <div class="status-title">
+          <span>🏆 나의 성장 기록</span>
+          <span class="status-title-sub" id="ms-growth-sub">누적 달성률</span>
+        </div>
+        <div class="growth-meter-wrap">
+          <div class="growth-row">
+            <div class="growth-header">
+              <span>어휘·개념 완공률</span>
+              <span id="ms-completion-num">--%</span>
+            </div>
+            <div class="growth-track">
+              <div class="growth-fill completion" id="ms-completion-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="growth-row">
+            <div class="growth-header">
+              <span>연속 학습 Streak (목표: 7일)</span>
+              <span id="ms-streak-progress-num">-- / 7일</span>
+            </div>
+            <div class="growth-track">
+              <div class="growth-fill streak" id="ms-streak-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📊 과목별 취약점 & 밸런스 레이더 차트 -->
+      <div class="status-block">
+        <div class="status-title">
+          <span>📊 5대 과목 성장 레이더</span>
+          <span class="status-title-sub">능력치 밸런스</span>
+        </div>
+        <div class="radar-wrap">
+          <canvas id="ms-radar-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- 🚦 망각곡선 복습 알림 신호등 -->
+      <div class="status-block">
+        <div class="status-title">
+          <span>🚦 망각곡선 복습 알림</span>
+          <span class="status-title-sub">오늘의 퀘스트</span>
+        </div>
+        <div class="traffic-list" id="ms-traffic-list">
+          <div class="traffic-item">
+            <div class="traffic-left">
+              <div class="traffic-dot yellow"></div>
+              <span class="traffic-name">데이터 로딩 중...</span>
+            </div>
+            <span class="traffic-badge yellow">확인 중</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 💎 보상 인벤토리 -->
       <div class="inventory-grid">
         <div class="inv-item">
           <div class="inv-icon">💎</div>
@@ -151,53 +613,131 @@
           <div class="inv-icon">🎫</div>
           <div class="inv-details">
             <span class="inv-label">보유 소원권</span>
-            <span class="inv-val" id="ms-ticket" style="color: var(--sky);">--장</span>
+            <span class="inv-val" id="ms-ticket" style="color: var(--sky-dark);">--장</span>
           </div>
         </div>
       </div>
 
-      <div class="action-zone">
-        <div class="action-title">⚙️ 실시간 인프라 제어</div>
-        <button class="btn-pay" id="btn-pay-minsu" onclick="consumeWishTicket('민수')">
-          <span>🎫 소원권 1장 사용 승인</span>
-        </button>
+      <!-- ⚙️ 실시간 인프라 제어 (부모 승인 전용 / 아이 모드 안내) -->
+      <div class="action-zone" id="ms-action-zone">
+        <div id="ms-parent-actions" style="display: none;">
+          <div class="action-title">⚙️ 부모님 전용 제어</div>
+          <button class="btn-pay" id="btn-pay-minsu" onclick="consumeWishTicket('민수')">
+            <span>🎫 소원권 1장 사용 승인</span>
+          </button>
+        </div>
+        <div id="ms-child-actions" class="child-wish-info">
+          <span>🎁 소원권을 사용할 때는 부모님께 말씀드려 승인받으세요!</span>
+        </div>
       </div>
     </div>
 
-    <div class="child-card minseo">
-      <div class="badge">둘째</div>
+    <!-- 👧 민서 카드 -->
+    <div class="child-card minseo" id="card-minseo">
+      <div class="badge">둘째 · 1학년</div>
+      
       <div class="profile-section">
         <div class="avatar">👧</div>
         <div class="profile-info">
-          <h2>민서 (Minseo)</h2>
-          <p>하리보 젤리 수집 & 핑꾸 하우스 꾸미기 중</p>
+          <h2>
+            민서 (Minseo)
+            <span class="streak-badge" id="ds-streak-badge">🔥 <span id="ds-streak-val">--</span>일 연속 열공</span>
+          </h2>
+          <p>하리보 젤리 수집 & 핑꾸 하우스 꾸미기 모험 중</p>
         </div>
       </div>
 
+      <!-- 📊 과목별 성장 마스터 (6대 영역) -->
       <div class="status-block">
-        <div class="status-title">📊 과목별 성장 마스터</div>
-        <div class="level-row">
-          <div class="level-item">
-            <span>수학 레벨</span>
-            <span id="ds-math" class="loading-shimmer">Lv.--</span>
-          </div>
-          <div class="level-item">
-            <span>영어 레벨</span>
-            <span id="ds-eng" class="loading-shimmer">Lv.--</span>
-          </div>
+        <div class="status-title">
+          <span>📚 과목별 성장 마스터</span>
+          <span class="status-title-sub">5대 교과 + 용어</span>
         </div>
-        <div class="level-row kor-split">
-          <div class="level-item">
-            <span>📙 용어사전 레벨</span>
-            <span id="ds-kor" class="loading-shimmer">Lv.--</span>
+        <div class="subject-level-grid">
+          <div class="sub-level-item">
+            <span class="sub-name">🧮 수학</span>
+            <span id="ds-math" class="sub-val loading-shimmer">Lv.--</span>
           </div>
-          <div class="level-item">
-            <span>🍬 국어실력 레벨</span>
-            <span id="ds-kor-real" class="loading-shimmer">Lv.--</span>
+          <div class="sub-level-item">
+            <span class="sub-name">🔤 영어</span>
+            <span id="ds-eng" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">✍️ 국어</span>
+            <span id="ds-kor-real" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">🧪 과학</span>
+            <span id="ds-sci" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">🏛️ 사회</span>
+            <span id="ds-soc" class="sub-val loading-shimmer">Lv.--</span>
+          </div>
+          <div class="sub-level-item">
+            <span class="sub-name">🦖 용어사전</span>
+            <span id="ds-kor" class="sub-val loading-shimmer">Lv.--</span>
           </div>
         </div>
       </div>
 
+      <!-- 🏆 나의 성장 기록 (관제탑 연동 완공률 & 스트릭) -->
+      <div class="status-block">
+        <div class="status-title">
+          <span>🏆 나의 성장 기록</span>
+          <span class="status-title-sub" id="ds-growth-sub">누적 달성률</span>
+        </div>
+        <div class="growth-meter-wrap">
+          <div class="growth-row">
+            <div class="growth-header">
+              <span>어휘·개념 완공률</span>
+              <span id="ds-completion-num">--%</span>
+            </div>
+            <div class="growth-track">
+              <div class="growth-fill completion" id="ds-completion-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="growth-row">
+            <div class="growth-header">
+              <span>연속 학습 Streak (목표: 7일)</span>
+              <span id="ds-streak-progress-num">-- / 7일</span>
+            </div>
+            <div class="growth-track">
+              <div class="growth-fill streak" id="ds-streak-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📊 과목별 취약점 & 밸런스 레이더 차트 -->
+      <div class="status-block">
+        <div class="status-title">
+          <span>📊 5대 과목 성장 레이더</span>
+          <span class="status-title-sub">능력치 밸런스</span>
+        </div>
+        <div class="radar-wrap">
+          <canvas id="ds-radar-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- 🚦 망각곡선 복습 알림 신호등 -->
+      <div class="status-block">
+        <div class="status-title">
+          <span>🚦 망각곡선 복습 알림</span>
+          <span class="status-title-sub">오늘의 퀘스트</span>
+        </div>
+        <div class="traffic-list" id="ds-traffic-list">
+          <div class="traffic-item">
+            <div class="traffic-left">
+              <div class="traffic-dot yellow"></div>
+              <span class="traffic-name">데이터 로딩 중...</span>
+            </div>
+            <span class="traffic-badge yellow">확인 중</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 💎 보상 인벤토리 -->
       <div class="inventory-grid">
         <div class="inv-item">
           <div class="inv-icon">💎</div>
@@ -217,16 +757,22 @@
           <div class="inv-icon">🎫</div>
           <div class="inv-details">
             <span class="inv-label">보유 소원권</span>
-            <span class="inv-val" id="ds-ticket" style="color: var(--pink);">--장</span>
+            <span class="inv-val" id="ds-ticket" style="color: var(--pink-dark);">--장</span>
           </div>
         </div>
       </div>
 
-      <div class="action-zone">
-        <div class="action-title">⚙️ 실시간 인프라 제어</div>
-        <button class="btn-pay" id="btn-pay-minseo" onclick="consumeWishTicket('민서')">
-          <span>🎫 소원권 1장 사용 승인</span>
-        </button>
+      <!-- ⚙️ 실시간 인프라 제어 (부모 승인 전용 / 아이 모드 안내) -->
+      <div class="action-zone" id="ds-action-zone">
+        <div id="ds-parent-actions" style="display: none;">
+          <div class="action-title">⚙️ 부모님 전용 제어</div>
+          <button class="btn-pay" id="btn-pay-minseo" onclick="consumeWishTicket('민서')">
+            <span>🎫 소원권 1장 사용 승인</span>
+          </button>
+        </div>
+        <div id="ds-child-actions" class="child-wish-info">
+          <span>🎁 소원권을 사용할 때는 부모님께 말씀드려 승인받으세요!</span>
+        </div>
       </div>
     </div>
 
@@ -235,8 +781,12 @@
 
 <script src="kids/config.js"></script>
 <script>
-const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
-const INVENTORY_DB_ID = "374a27115b688042bb61e6a102242e12";
+const PROXY_URL = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+const INVENTORY_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12";
+const STUDY_LOG_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID ? APP_CONFIG.STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+const VOCA_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.VOCA_DB_ID ? APP_CONFIG.VOCA_DB_ID : "375a27115b688038b686d3994ee12919";
+
+const SUBJECTS_5 = ['국어', '수학', '영어', '과학', '사회'];
 
 // 로컬 동시성 통제용 임시 상태 저장소
 const memoryState = {
@@ -244,9 +794,15 @@ const memoryState = {
   "민서": { pageId: null, ticketCount: 0 }
 };
 
+let radarCharts = {
+  minsu: null,
+  minseo: null
+};
+
 // 배경 버블 생성기
 function makeBgFloats() {
   const container = document.getElementById('bgFloats');
+  if (!container) return;
   const count = 15;
   for(let i=0; i<count; i++){
     const item = document.createElement('div');
@@ -261,8 +817,105 @@ function makeBgFloats() {
   }
 }
 
+// 사용자 권한 확인 및 뷰 설정
+function getUserAuth() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const userParam = urlParams.get('user'); // 'minsu', 'minseo', 'admin'
+  const savedName = localStorage.getItem('currentUserName') || '';
+  const savedUser = localStorage.getItem('currentUser') || '';
+
+  const isAdmin = (savedName === '아빠' || savedName === '엄마' || savedUser === 'admin' || userParam === 'admin');
+  
+  let targetChild = null;
+  if (userParam === 'minsu' || savedName === '민수' || savedUser === 'son') {
+    targetChild = 'minsu';
+  } else if (userParam === 'minseo' || savedName === '민서' || savedUser === 'daughter') {
+    targetChild = 'minseo';
+  }
+
+  return { isAdmin, targetChild, userParam };
+}
+
+// 뷰 스위칭 (전체 / 민수 / 민서)
+function switchView(viewName) {
+  const cardMinsu = document.getElementById('card-minsu');
+  const cardMinseo = document.getElementById('card-minseo');
+  const tabAll = document.getElementById('tab-all');
+  const tabMinsu = document.getElementById('tab-minsu');
+  const tabMinseo = document.getElementById('tab-minseo');
+
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  if (viewName === 'minsu') {
+    cardMinsu.style.display = 'flex';
+    cardMinseo.style.display = 'none';
+    if (tabMinsu) tabMinsu.classList.add('active');
+    document.getElementById('cardsGrid').style.gridTemplateColumns = '1fr';
+  } else if (viewName === 'minseo') {
+    cardMinsu.style.display = 'none';
+    cardMinseo.style.display = 'flex';
+    if (tabMinseo) tabMinseo.classList.add('active');
+    document.getElementById('cardsGrid').style.gridTemplateColumns = '1fr';
+  } else {
+    cardMinsu.style.display = 'flex';
+    cardMinseo.style.display = 'flex';
+    if (tabAll) tabAll.classList.add('active');
+    document.getElementById('cardsGrid').style.gridTemplateColumns = '';
+  }
+}
+
+// 권한에 따른 소원권 버튼 노출 처리
+function setupAuthUI() {
+  const { isAdmin, targetChild } = getUserAuth();
+  
+  const msParent = document.getElementById('ms-parent-actions');
+  const msChild = document.getElementById('ms-child-actions');
+  const dsParent = document.getElementById('ds-parent-actions');
+  const dsChild = document.getElementById('ds-child-actions');
+
+  if (isAdmin) {
+    if (msParent) msParent.style.display = 'block';
+    if (msChild) msChild.style.display = 'none';
+    if (dsParent) dsParent.style.display = 'block';
+    if (dsChild) dsChild.style.display = 'none';
+    document.getElementById('pageTitle').textContent = '민민이네 실시간 대시보드 👨‍👩‍👧‍👦 (부모 관제)';
+    document.getElementById('pageSubtitle').textContent = '우리 아이들의 성장과 인벤토리를 실시간으로 모니터링하고 정비합니다.';
+    switchView('all');
+  } else {
+    // 아이 접속 시: 소원권 결제 버튼 숨김 & 아이 뷰에 최적화
+    if (msParent) msParent.style.display = 'none';
+    if (msChild) msChild.style.display = 'flex';
+    if (dsParent) dsParent.style.display = 'none';
+    if (dsChild) dsChild.style.display = 'flex';
+
+    if (targetChild === 'minsu') {
+      document.getElementById('pageTitle').textContent = '👦 민수의 성장 퀘스트 대시보드 ✨';
+      document.getElementById('pageSubtitle').textContent = '오늘의 퀘스트와 과목 능력치 밸런스를 확인하고 레벨업하자!';
+      switchView('minsu');
+    } else if (targetChild === 'minseo') {
+      document.getElementById('pageTitle').textContent = '👧 민서의 성장 퀘스트 대시보드 🌸';
+      document.getElementById('pageSubtitle').textContent = '오늘의 퀘스트와 과목 능력치 밸런스를 확인하고 레벨업하자!';
+      switchView('minseo');
+    } else {
+      switchView('all');
+    }
+  }
+
+  // 로비 이동 링크 파라미터 세팅
+  const lobbyBtn = document.getElementById('btnBackLobby');
+  if (lobbyBtn && targetChild) {
+    lobbyBtn.href = "lobby.html?user=" + targetChild;
+  }
+}
+
 // 소원권 차감 자동화 엔진 (동시성 보호 프록시 전사)
 async function consumeWishTicket(childName) {
+  const { isAdmin } = getUserAuth();
+  if (!isAdmin) {
+    alert("🔒 소원권 사용 승인은 부모님만 처리할 수 있습니다.");
+    return;
+  }
+
   const targetBtn = childName === '민수' ? document.getElementById('btn-pay-minsu') : document.getElementById('btn-pay-minseo');
   const displayEl = childName === '민수' ? document.getElementById('ms-ticket') : document.getElementById('ds-ticket');
   const childData = memoryState[childName];
@@ -274,26 +927,25 @@ async function consumeWishTicket(childName) {
 
   const originalTicketCount = childData.ticketCount;
   if (originalTicketCount <= 0) {
-    alert(`❌ 보유한 소원권이 없습니다! 미션을 완료하여 소원권을 획득하세요.`);
+    alert("❌ 보유한 소원권이 없습니다! 미션을 완료하여 소원권을 획득하세요.");
     return;
   }
 
-  if (!confirm(`🔥 정말로 ${childName}의 소원권 1장을 사용 승인하시겠습니까?\n(노션 DB 값이 즉시 -1 차감됩니다.)`)) {
+  if (!confirm("🔥 정말로 " + childName + "의 소원권 1장을 사용 승인하시겠습니까?\n(노션 DB 값이 즉시 -1 차감됩니다.)")) {
     return;
   }
 
-  // [Pro Point 1] 낙관적 UI 업데이트 적용 (서버 응답 전에 UI 선반영)
+  // 낙관적 UI 업데이트 적용
   const newCount = originalTicketCount - 1;
   childData.ticketCount = newCount;
   displayEl.textContent = newCount + "장";
 
-  // [Pro Point 2] 버튼 잠금 및 스피너 로딩 시각화
   const originalHtml = targetBtn.innerHTML;
   targetBtn.disabled = true;
-  targetBtn.innerHTML = `<span>⏳ 노션 인프라 동기화 중...</span>`;
+  targetBtn.innerHTML = "<span>⏳ 노션 인프라 동기화 중...</span>";
 
   try {
-    const response = await fetch(`${PROXY_URL}/v1/pages/${childData.pageId}`, {
+    const response = await fetch(PROXY_URL + "/v1/pages/" + childData.pageId, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -306,87 +958,328 @@ async function consumeWishTicket(childName) {
     if (!response.ok) throw new Error("노션 서버 통신 에러 발생");
     
     setTimeout(() => {
-      alert(`🎉 [${childName}] 소원권 결제가 정상 처리되었습니다! 아이와 행복한 시간 보내세요! ❤️`);
+      alert("🎉 [" + childName + "] 소원권 결제가 정상 처리되었습니다! 아이와 행복한 시간 보내세요! ❤️");
     }, 50);
 
   } catch (error) {
     console.error(error);
-    
-    // [Pro Point 3] 롤백 처리: 통신 장애 시 화면 데이터를 안전하게 원상복구
     alert("❌ 소원권 결제 통신 중 에러가 발생했습니다.\n데이터 동시성 보호를 위해 이전 상태로 롤백합니다.");
     childData.ticketCount = originalTicketCount;
     displayEl.textContent = originalTicketCount + "장";
-
   } finally {
     targetBtn.innerHTML = originalHtml;
     targetBtn.disabled = false;
   }
 }
 
-// 노션에서 실시간 통합 인벤토리 로드
-async function loadInventoryData() {
+// ── 통계 계산 헬퍼 함수들 (관제탑 엔진 연동) ──
+
+function localDateStr(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + "-" + m + "-" + day;
+}
+
+function calcStreak(logPages, childName) {
+  const dates = logPages
+    .filter(p => p.properties['학생']?.select?.name === childName || p.properties['학생']?.multi_select?.some(s => s.name === childName))
+    .map(p => p.properties['입장']?.date?.start || p.properties['날짜']?.date?.start || p.created_time)
+    .filter(Boolean)
+    .map(d => d.split('T')[0]);
+
+  const unique = [...new Set(dates)].sort().reverse();
+  if (!unique.length) return 0;
+
+  const today = localDateStr();
+  const yesterday = localDateStr(new Date(Date.now() - 86400000));
+  if (unique[0] !== today && unique[0] !== yesterday) return 0;
+
+  let streak = 1;
+  let cursor = new Date(unique[0] + 'T12:00:00');
+  for (let i = 1; i < unique.length; i++) {
+    cursor.setDate(cursor.getDate() - 1);
+    if (unique[i] === localDateStr(cursor)) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function parseVocaPage(page) {
+  const p = page.properties;
+  const subjects = p['과목']?.multi_select?.map(s => s.name) || (p['과목']?.select?.name ? [p['과목'].select.name] : []);
+  const targets = p['학생']?.multi_select?.map(s => s.name) || (p['학생']?.select?.name ? [p['학생'].select.name] : []);
+  const word = p['단어']?.title?.[0]?.plain_text || p['이름']?.title?.[0]?.plain_text || '어휘';
+  const unit = p['단원']?.rich_text?.[0]?.plain_text || p['단원']?.select?.name || '';
+  
+  return {
+    word,
+    unit,
+    subjects,
+    targets,
+    achieved: p['달성']?.checkbox || false,
+    examScope: p['시험범위']?.checkbox || false,
+    lastEdited: page.last_edited_time,
+  };
+}
+
+function calcCompletion(vocaList, childName) {
+  const items = vocaList.filter(v => v.targets.length === 0 || v.targets.includes(childName));
+  if (!items.length) return 0;
+  const achievedCount = items.filter(v => v.achieved).length;
+  return Math.round((achievedCount / items.length) * 100);
+}
+
+function subjectAchievement(vocaList, childName, subjectKeyword) {
+  const items = vocaList.filter(v =>
+    (v.targets.length === 0 || v.targets.includes(childName)) &&
+    v.subjects.some(s => s.includes(subjectKeyword))
+  );
+  if (!items.length) return null;
+  const achieved = items.filter(v => v.achieved).length;
+  return Math.round((achieved / items.length) * 100);
+}
+
+function levelToScore(level) {
+  return Math.min(Math.round((level || 1) * 10), 100);
+}
+
+function buildRadarScores(props, vocaList, childName) {
+  const korLevel = props["국어 레벨"]?.number || 1;
+  const mathLevel = props["수학 레벨"]?.number || 1;
+  const engLevel = props["영어 레벨"]?.number || 1;
+  const sciLevel = props["과학 레벨"]?.number || 1;
+  const socLevel = props["사회 레벨"]?.number || 1;
+
+  const sciVoca = subjectAchievement(vocaList, childName, '과학');
+  const socVoca = subjectAchievement(vocaList, childName, '사회');
+  const korVoca = subjectAchievement(vocaList, childName, '국어');
+  const mathVoca = subjectAchievement(vocaList, childName, '수학');
+  const engVoca = subjectAchievement(vocaList, childName, '영어');
+
+  // 레벨 점수와 VOCA 달성률의 조화 평균/가중 계산
+  return [
+    korVoca !== null ? Math.round((levelToScore(korLevel) + korVoca) / 2) : levelToScore(korLevel),
+    mathVoca !== null ? Math.round((levelToScore(mathLevel) + mathVoca) / 2) : levelToScore(mathLevel),
+    engVoca !== null ? Math.round((levelToScore(engLevel) + engVoca) / 2) : levelToScore(engLevel),
+    sciVoca !== null ? Math.round((levelToScore(sciLevel) + sciVoca) / 2) : (sciLevel > 1 ? levelToScore(sciLevel) : (engVoca ?? 60)),
+    socVoca !== null ? Math.round((levelToScore(socLevel) + socVoca) / 2) : (socLevel > 1 ? levelToScore(socLevel) : (korVoca ?? 60)),
+  ];
+}
+
+function buildTrafficLights(vocaList, childName) {
+  const now = Date.now();
+  const items = vocaList
+    .filter(v => v.targets.length === 0 || v.targets.includes(childName))
+    .map(v => {
+      const days = v.lastEdited
+        ? Math.floor((now - new Date(v.lastEdited).getTime()) / 86400000)
+        : 99;
+      let status, daysLabel;
+      if (!v.achieved) {
+        status = 'red';
+        daysLabel = '미달성 · 학습 필요';
+      } else if (days <= 3) {
+        status = 'green';
+        daysLabel = 'D+' + days + ' 복습 완료';
+      } else if (days <= 7) {
+        status = 'yellow';
+        daysLabel = 'D+' + days + ' 복습 필요';
+      } else {
+        status = 'red';
+        daysLabel = 'D+' + days + ' 긴급 복습!';
+      }
+      const subject = v.subjects[0] || '어휘';
+      const label = v.unit ? subject + " [" + v.unit + "] " + v.word : subject + " " + v.word;
+      return { subject: label, status, days: daysLabel, priority: status === 'red' ? 0 : status === 'yellow' ? 1 : 2, daysNum: days };
+    })
+    .sort((a, b) => a.priority - b.priority || b.daysNum - a.daysNum)
+    .slice(0, 5);
+
+  return items.length ? items : [{ subject: '복습 항목 없음', status: 'green', days: '오늘 퀘스트 완료!' }];
+}
+
+function renderTrafficUI(listElId, trafficItems) {
+  const el = document.getElementById(listElId);
+  if (!el) return;
+  el.innerHTML = '';
+  trafficItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'traffic-item';
+    div.innerHTML = '<div class="traffic-left"><div class="traffic-dot ' + item.status + '"></div><span class="traffic-name" title="' + item.subject + '">' + item.subject + '</span></div><span class="traffic-badge ' + item.status + '">' + item.days + '</span>';
+    el.appendChild(div);
+  });
+}
+
+function renderRadarChart(canvasId, label, scores, isPink) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+
+  const colorPrimary = isPink ? 'rgba(255, 107, 157, 0.85)' : 'rgba(110, 198, 245, 0.85)';
+  const colorBg = isPink ? 'rgba(255, 107, 157, 0.22)' : 'rgba(110, 198, 245, 0.22)';
+  const colorBorder = isPink ? '#FF6B9D' : '#6EC6F5';
+
+  const chartKey = isPink ? 'minseo' : 'minsu';
+  if (radarCharts[chartKey]) {
+    radarCharts[chartKey].destroy();
+  }
+
+  radarCharts[chartKey] = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: SUBJECTS_5,
+      datasets: [{
+        label: label,
+        data: scores,
+        backgroundColor: colorBg,
+        borderColor: colorBorder,
+        borderWidth: 2.5,
+        pointBackgroundColor: colorPrimary,
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: colorPrimary,
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0,
+          max: 100,
+          ticks: { stepSize: 25, display: false },
+          pointLabels: {
+            font: { family: "'Jua', sans-serif", size: 12 },
+            color: '#4A4A77'
+          },
+          grid: { color: 'rgba(0, 0, 0, 0.06)' },
+          angleLines: { color: 'rgba(0, 0, 0, 0.08)' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => context.label + ": " + context.raw + "점"
+          }
+        }
+      }
+    }
+  });
+}
+
+// 노션에서 실시간 통합 인벤토리 & 학습일지 & VOCA 데이터 로드
+async function loadDashboardData() {
   try {
-    const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ page_size: 10 }) 
-    });
-    
-    if (!response.ok) throw new Error("네트워크 응답 오류");
-    
-    const data = await response.json();
-    
-    if (data.results && data.results.length > 0) {
-      data.results.forEach(page => {
+    // 3대 노션 DB 병렬 쿼리
+    const [invRes, logsRes, vocaRes] = await Promise.all([
+      fetch(PROXY_URL + "/v1/databases/" + INVENTORY_DB_ID + "/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page_size: 10 })
+      }),
+      fetch(PROXY_URL + "/v1/databases/" + STUDY_LOG_DB_ID + "/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page_size: 50, sorts: [{ property: "입장", direction: "descending" }] })
+      }).catch(() => null),
+      fetch(PROXY_URL + "/v1/databases/" + VOCA_DB_ID + "/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ page_size: 100 })
+      }).catch(() => null)
+    ]);
+
+    if (!invRes.ok) throw new Error("인벤토리 DB 네트워크 응답 오류");
+    const invData = await invRes.json();
+    const logsData = logsRes && logsRes.ok ? await logsRes.json() : { results: [] };
+    const vocaData = vocaRes && vocaRes.ok ? await vocaRes.json() : { results: [] };
+
+    const studyLogs = logsData.results || [];
+    const vocaList = (vocaData.results || []).map(parseVocaPage);
+
+    if (invData.results && invData.results.length > 0) {
+      invData.results.forEach(page => {
         const props = page.properties;
         const name = props["이름"]?.title[0]?.plain_text;
         
         if (name === "민수" || name === "민서") {
           const prefix = name === "민수" ? "ms" : "ds";
+          const isMinseo = name === "민서";
           
-          // 로컬 동시성 제어기 저장
+          // 로컬 상태 보존
           memoryState[name].pageId = page.id;
           memoryState[name].ticketCount = props["소원권 개수"]?.number || 0;
 
-          // HTML 요소 바인딩 및 쉬머 제거
-          const mathEl = document.getElementById(`${prefix}-math`);
-          const engEl = document.getElementById(`${prefix}-eng`);
-          const korEl = document.getElementById(`${prefix}-kor`);
-          const korRealEl = document.getElementById(`${prefix}-kor-real`); // 🆕 국어 실력 요소
-          const diaEl = document.getElementById(`${prefix}-dia`);
-          const slimeEl = document.getElementById(`${prefix}-slime`);
-          const ticketEl = document.getElementById(`${prefix}-ticket`);
+          // 1. 6대 과목 레벨 요소 바인딩
+          const mathEl = document.getElementById(prefix + "-math");
+          const engEl = document.getElementById(prefix + "-eng");
+          const korEl = document.getElementById(prefix + "-kor");
+          const korRealEl = document.getElementById(prefix + "-kor-real");
+          const sciEl = document.getElementById(prefix + "-sci");
+          const socEl = document.getElementById(prefix + "-soc");
 
-          // 값 주입 및 시머 이펙트 완벽 해제
-          mathEl.textContent = "Lv." + (props["수학 레벨"]?.number || 1);
-          mathEl.classList.remove("loading-shimmer");
+          const diaEl = document.getElementById(prefix + "-dia");
+          const slimeEl = document.getElementById(prefix + "-slime");
+          const ticketEl = document.getElementById(prefix + "-ticket");
 
-          engEl.textContent = "Lv." + (props["영어 레벨"]?.number || 1);
-          engEl.classList.remove("loading-shimmer");
+          // 레벨 주입
+          const mathLv = props["수학 레벨"]?.number || 1;
+          const engLv = props["영어 레벨"]?.number || 1;
+          const korVocaLv = props["용어 레벨"]?.number || 1;
+          const korRealLv = props["국어 레벨"]?.number || 1;
+          const sciLv = props["과학 레벨"]?.number || 1;
+          const socLv = props["사회 레벨"]?.number || 1;
 
-          korEl.textContent = "Lv." + (props["용어 레벨"]?.number || 1);
-          korEl.classList.remove("loading-shimmer");
+          mathEl.textContent = "Lv." + mathLv; mathEl.classList.remove("loading-shimmer");
+          engEl.textContent = "Lv." + engLv; engEl.classList.remove("loading-shimmer");
+          korEl.textContent = "Lv." + korVocaLv; korEl.classList.remove("loading-shimmer");
+          korRealEl.textContent = "Lv." + korRealLv; korRealEl.classList.remove("loading-shimmer");
+          sciEl.textContent = "Lv." + sciLv; sciEl.classList.remove("loading-shimmer");
+          socEl.textContent = "Lv." + socLv; socEl.classList.remove("loading-shimmer");
 
-          // 🆕 노션의 '국어 레벨' 컬럼 데이터 바인딩 및 안전 방어
-          korRealEl.textContent = "Lv." + (props["국어 레벨"]?.number || 1);
-          korRealEl.classList.remove("loading-shimmer");
-
+          // 인벤토리 주입
           diaEl.textContent = (props["다이아몬드 개수"]?.number || 0) + "개";
           diaEl.classList.remove("loading-shimmer");
 
           slimeEl.textContent = (typeof getDaughterRewardCount === 'function'
             ? getDaughterRewardCount(props)
-            : (props["슬라임 파츠 개수"]?.number || 0)) + "개";
+            : (props["하리보 젤리 개수"]?.number || props["슬라임 파츠 개수"]?.number || 0)) + "개";
           slimeEl.classList.remove("loading-shimmer");
 
           ticketEl.textContent = memoryState[name].ticketCount + "장";
           ticketEl.classList.remove("loading-shimmer");
+
+          // 2. 연속 학습 Streak 계산 & UI 주입
+          const streak = calcStreak(studyLogs, name);
+          const streakValEl = document.getElementById(prefix + "-streak-val");
+          if (streakValEl) streakValEl.textContent = streak;
+          
+          const streakProgEl = document.getElementById(prefix + "-streak-progress-num");
+          if (streakProgEl) streakProgEl.textContent = streak + " / 7일";
+          const streakFillEl = document.getElementById(prefix + "-streak-fill");
+          if (streakFillEl) streakFillEl.style.width = Math.min(Math.round((streak / 7) * 100), 100) + "%";
+
+          // 3. 완공률 계산 & UI 주입
+          const completion = calcCompletion(vocaList, name);
+          const compNumEl = document.getElementById(prefix + "-completion-num");
+          if (compNumEl) compNumEl.textContent = completion + "%";
+          const compFillEl = document.getElementById(prefix + "-completion-fill");
+          if (compFillEl) compFillEl.style.width = completion + "%";
+
+          // 4. 망각곡선 신호등 렌더링
+          const trafficItems = buildTrafficLights(vocaList, name);
+          renderTrafficUI(prefix + "-traffic-list", trafficItems);
+
+          // 5. 5대 과목 레이더 차트 렌더링
+          const radarScores = buildRadarScores(props, vocaList, name);
+          renderRadarChart(prefix + "-radar-chart", name + " 과목 밸런스", radarScores, isMinseo);
         }
       });
     }
   } catch (error) {
     console.error("데이터 로드 에러:", error);
-    // 통신 실패 시 오류 안내 문구로 전환
     document.querySelectorAll(".loading-shimmer").forEach(el => {
       el.textContent = "연결실패";
       el.style.color = "#ff6b6b";
@@ -398,7 +1291,8 @@ async function loadInventoryData() {
 // 기동 처리
 window.addEventListener('DOMContentLoaded', () => {
   makeBgFloats();
-  loadInventoryData();
+  setupAuthUI();
+  loadDashboardData();
 });
 </script>
 </body>
