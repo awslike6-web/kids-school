@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -202,7 +202,7 @@
         : `긴바늘이 6을 가리키고, 짧은바늘이 ${hour}와 ${hour+1} 사이에 있으면 ➔ [${hour}시 30분]`;
       document.getElementById('clock-rule-desc').textContent = desc;
 
-      if (typeof fairySpeak === 'function') {
+      if (btn && typeof fairySpeak === 'function') {
         fairySpeak(minute === 0 ? `${hour}시 정각입니다!` : `${hour}시 30분입니다!`);
       }
     }

@@ -18,12 +18,6 @@ function initFairyAudio() {
                 window.speechSynthesis.speak(silentUtterance);
                 isSpeechUnlocked = true;
                 console.log("🔊 [요정 코코] 브라우저 음성 채널 잠금해제(Unlocked) 성공!");
-                
-                if (pendingSpeech) {
-                    const { text, onEndCallback } = pendingSpeech;
-                    pendingSpeech = null;
-                    speakFairyTTS(text, onEndCallback);
-                }
             } catch (err) {
                 console.log("⚠️ [요정 코코] 음성 엔진 언락 실행 중 조율 지연:", err);
             }
@@ -48,11 +42,6 @@ function unlockFairySpeechEngine() {
         window.speechSynthesis.speak(silentUtterance);
         isSpeechUnlocked = true;
         console.log('🔊 [요정 코코] 음성 채널 수동 잠금해제!');
-        if (pendingSpeech) {
-            const queued = pendingSpeech;
-            pendingSpeech = null;
-            speakFairyTTS(queued.text, queued.onEndCallback);
-        }
         return true;
     } catch (err) {
         console.warn('⚠️ [요정 코코] 음성 잠금해제 실패:', err);

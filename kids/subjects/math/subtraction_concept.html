@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -167,7 +167,9 @@
 
       document.getElementById('sub-frame-formula').textContent = `10 - ${subCount} = ${remCount}`;
       document.getElementById('sub-frame-sub-formula').textContent = `10개에서 ${subCount}개를 빼면 ${remCount}개가 남아요!`;
-      if (typeof fairySpeak === 'function') fairySpeak(`10에서 ${subCount}을 빼면 ${remCount}이 남습니다!`);
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(`10에서 ${subCount}을 빼면 ${remCount}이 남습니다!`);
+      }
     }
 
     let currentSubA = 13, currentSubB = 5;

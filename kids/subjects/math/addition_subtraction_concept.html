@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -323,7 +323,9 @@
 
       document.getElementById('add-frame-formula').textContent = `${redCount} + ${blueCount} = 10`;
       document.getElementById('add-frame-sub-formula').textContent = `${redCount}과 ${blueCount}를 모으면 10이 돼요!`;
-      if (typeof fairySpeak === 'function') fairySpeak(`${redCount}의 10 만들기 짝꿍은 ${blueCount}입니다!`);
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(`${redCount}의 10 만들기 짝꿍은 ${blueCount}입니다!`);
+      }
     }
 
     // 1-B. 10을 이용한 덧셈 (받아올림)
@@ -413,7 +415,9 @@
 
       document.getElementById('sub-frame-formula').textContent = `10 - ${subCount} = ${remCount}`;
       document.getElementById('sub-frame-sub-formula').textContent = `10개에서 ${subCount}개를 빼면 ${remCount}개가 남아요!`;
-      if (typeof fairySpeak === 'function') fairySpeak(`10에서 ${subCount}을 빼면 ${remCount}이 남습니다!`);
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(`10에서 ${subCount}을 빼면 ${remCount}이 남습니다!`);
+      }
     }
 
     // 2-B. 10을 이용한 뺄셈 (받아내림)

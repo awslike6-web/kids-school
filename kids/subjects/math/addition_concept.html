@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -167,7 +167,9 @@
 
       document.getElementById('add-frame-formula').textContent = `${redCount} + ${blueCount} = 10`;
       document.getElementById('add-frame-sub-formula').textContent = `${redCount}과 ${blueCount}를 모으면 10이 돼요!`;
-      if (typeof fairySpeak === 'function') fairySpeak(`${redCount}의 10 만들기 짝꿍은 ${blueCount}입니다!`);
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(`${redCount}의 10 만들기 짝꿍은 ${blueCount}입니다!`);
+      }
     }
 
     let currentMake10A = 8, currentMake10B = 5;
