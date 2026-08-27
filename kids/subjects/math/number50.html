@@ -1185,12 +1185,15 @@
     function soundWrong() { playTone(220, 'sawtooth', 0.25, 0.25); }
 
     function speak(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'ko-KR';
-      utter.rate = 0.95;
-      window.speechSynthesis.speak(utter);
+      if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS(text);
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        utter.rate = 0.95;
+        window.speechSynthesis.speak(utter);
+      }
     }
 
     window.currentSubject = "수학";

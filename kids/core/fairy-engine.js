@@ -97,39 +97,35 @@ function speakFairyTTS(text, onEndCallback = null) {
         return;
     }
 
-    if (!isSpeechUnlocked) {
-        console.log("⏳ [TTS 대기] 사용자 제스처 잠금해제 전 — 낭독을 대기 큐에 보관합니다.");
-        pendingSpeech = { text, onEndCallback };
+    // 💡 사용자가 버튼을 클릭하거나 직접 호출했을 때는 즉시 언락 처리
+    isSpeechUnlocked = true;
+
+    try {
+        if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+        }
+        window.speechSynthesis.cancel();
+    } catch (e) {}
+
+    const { text: cleanText, isQuestion } = cleanTextForTTS(text);
+    if (!cleanText) {
+        if (onEndCallback) onEndCallback();
         return;
     }
 
-    window.speechSynthesis.cancel();
-
     const runSpeak = () => {
         try {
-            const { text: cleanText, isQuestion } = cleanTextForTTS(text);
-            if (!cleanText) {
-                if (onEndCallback) onEndCallback();
-                return;
-            }
-
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'ko-KR';
-            utterance.rate = isQuestion ? 1.02 : 1.05;
-            // 🎵 물음표 기호를 읽는 대신 끝음을 자연스럽게 살짝 올려주는 피치 제어
+            utterance.rate = isQuestion ? 1.0 : 1.05;
             utterance.pitch = isQuestion ? 1.22 : 1.06;
 
-            const selectVoice = () => {
-                const voices = window.speechSynthesis.getVoices();
-                let subVoice = voices.find(v => v.lang.includes('ko') && (v.name.includes('Heami') || v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Yuna')));
-                if (!subVoice) subVoice = voices.find(v => v.lang.includes('ko'));
-                if (subVoice) utterance.voice = subVoice;
-            };
-
-            selectVoice();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = selectVoice;
+            const voices = window.speechSynthesis.getVoices() || [];
+            let subVoice = voices.find(v => (v.lang === 'ko-KR' || v.lang === 'ko_KR' || v.lang.includes('ko')) && (v.name.includes('Heami') || v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Yuna') || v.name.includes('SunHi')));
+            if (!subVoice) {
+                subVoice = voices.find(v => v.lang.includes('ko') || v.lang.includes('KO'));
             }
+            if (subVoice) utterance.voice = subVoice;
 
             utterance.onend = () => {
                 currentUtterance = null;
@@ -150,24 +146,23 @@ function speakFairyTTS(text, onEndCallback = null) {
         }
     };
 
-    setTimeout(() => {
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length === 0) {
-            const onVoices = () => {
-                window.speechSynthesis.onvoiceschanged = null;
-                runSpeak();
-            };
-            window.speechSynthesis.onvoiceschanged = onVoices;
-            setTimeout(runSpeak, 350);
-            return;
-        }
-        runSpeak();
-    }, 120);
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.onvoiceschanged = null;
+            runSpeak();
+        };
+        setTimeout(runSpeak, 100);
+    } else {
+        setTimeout(runSpeak, 30);
+    }
 }
 
 function stopFairyTTS() {
     if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+        try {
+            window.speechSynthesis.cancel();
+        } catch (e) {}
         currentUtterance = null;
         pendingSpeech = null;
         console.log("🧚 코코가 잠시 목소리를 쉬고 있어요.");
@@ -186,8 +181,8 @@ function toggleFairyTtsSetting() {
     } else {
         unlockFairySpeechEngine();
         setTimeout(() => {
-            speakFairyTTS('요정 코코의 나긋나긋한 낭독 서비스가 다시 켜졌습니다.');
-        }, 150);
+            speakFairyTTS('요정 코코의 나긋나긋한 음성 서비스가 켜졌습니다.');
+        }, 100);
     }
 }
 
@@ -230,8 +225,11 @@ function updateTtsToggleUi() {
     }
 }
 
-// 🌐 브라우저 전역 소켓 결합 바인딩
+// 🌐 브라우저 전역 소켓 결합 바인딩 (모든 수학방 및 교과방 호환)
 window.speakFairyTTS = speakFairyTTS;
+window.fairySpeak = speakFairyTTS;
+window.speak = speakFairyTTS;
+window.speakFairy = speakFairyTTS;
 window.stopFairyTTS = stopFairyTTS;
 window.unlockFairySpeechEngine = unlockFairySpeechEngine;
 window.toggleFairyTtsSetting = toggleFairyTtsSetting;
