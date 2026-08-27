@@ -1,0 +1,305 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>➖ 뺄셈 개념 탐험대 🚀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    .ten-frame {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 6px;
+      max-width: 340px;
+      margin: 15px auto;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 14px;
+      border: 3px solid #cbd5e1;
+    }
+    .frame-slot {
+      aspect-ratio: 1;
+      background: #fff;
+      border: 2px dashed #94a3b8;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+    .candy-chip-blue { width: 36px; height: 36px; border-radius: 50%; background: #0284c7; border: 2px solid #0369a1; animation: popIn 0.2s ease; }
+    .candy-chip-gone { width: 36px; height: 36px; border-radius: 50%; background: #e2e8f0; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 1.1rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">➖ 뺄셈(빼기) 개념 탐험대 🚀</h1>
+      <p class="hero-subtitle">10에서 빼기 가르기와 10을 이용한 받아내림 뺄셈으로 빼기의 원리를 마스터해요!</p>
+    </header>
+
+    <!-- 1. 10에서 빼기 텐프레임 -->
+    <section class="math-section-card">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 1 : 10에서 빼기</span>
+          <h2 class="section-title">🔵 10개에서 쏙 빼기 (10 가르기)</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">빼고 싶은 개수를 누르면 10칸 상자에서 사탕이 빠지고 남은 수가 보여요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('10에서 몇 개를 빼면 몇 개가 남는지 확인해보세요!')">🔊</button>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+        <button class="candy-num-btn active" onclick="setSubTenFrame(1, this)">10 - 1 = 9</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(2, this)">10 - 2 = 8</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(3, this)">10 - 3 = 7</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(4, this)">10 - 4 = 6</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(5, this)">10 - 5 = 5</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(6, this)">10 - 6 = 4</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(7, this)">10 - 7 = 3</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(8, this)">10 - 8 = 2</button>
+        <button class="candy-num-btn" onclick="setSubTenFrame(9, this)">10 - 9 = 1</button>
+      </div>
+
+      <div class="ten-frame" id="sub-ten-frame"></div>
+
+      <div style="background:#fff; border-radius:16px; padding:15px; text-align:center; border:2px solid #e2e8f0; font-family:'Jua',sans-serif; margin-top:10px;">
+        <div style="font-size:1.7rem; color:#0284c7;" id="sub-frame-formula">10 - 1 = 9</div>
+        <div style="font-size:1.05rem; color:#475569; margin-top:4px;" id="sub-frame-sub-formula">10개에서 1개를 빼면 9개가 남아요!</div>
+      </div>
+    </section>
+
+    <!-- 2. 10을 이용해 빼기 (받아내림 기초) -->
+    <section class="math-section-card">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#0284c7; color:#fff;">섹션 2 : 10을 이용해 빼기</span>
+          <h2 class="section-title">✨ 받아내림 뺄셈의 원리 탐험</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">십몇을 10과 낱개로 가른 뒤, 10에서 먼저 빼고 남은 낱개와 합쳐요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentSub10()">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="sub10-preset-buttons">
+        <button class="candy-num-btn active" onclick="selectSub10(13, 5, this)">13 - 5</button>
+        <button class="candy-num-btn" onclick="selectSub10(14, 6, this)">14 - 6</button>
+        <button class="candy-num-btn" onclick="selectSub10(12, 7, this)">12 - 7</button>
+        <button class="candy-num-btn" onclick="selectSub10(15, 8, this)">15 - 8</button>
+        <button class="candy-num-btn" onclick="selectSub10(11, 4, this)">11 - 4</button>
+        <button class="candy-num-btn" onclick="selectSub10(16, 9, this)">16 - 9</button>
+        <button class="candy-num-btn" onclick="selectSub10(13, 8, this)">13 - 8</button>
+        <button class="candy-num-btn" style="background:#0284c7; color:#fff; font-weight:800;" onclick="randomSub10()">🎲 랜덤 뺄셈식</button>
+      </div>
+
+      <div style="max-width:560px; margin:0 auto; background:#fff; border-radius:20px; padding:22px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 6px 16px rgba(0,0,0,0.04);">
+        <div style="display:flex; justify-content:center; align-items:center; gap:12px; font-family:'Jua'; font-size:2.2rem; color:#0284c7; margin-bottom:15px; flex-wrap:wrap;" id="sub10-equation-view"></div>
+        <div style="background:#f0f9ff; border:2px dashed #38bdf8; border-radius:16px; padding:16px; font-family:'Jua'; font-size:1.25rem; color:#1e293b; line-height:1.8; text-align:left;" id="sub10-step-guide"></div>
+      </div>
+    </section>
+
+    <!-- 3. 뺄셈 번개 퀴즈 -->
+    <section class="math-section-card">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 3 : 뺄셈 실전 퀴즈</span>
+          <h2 class="section-title">🎯 뺄셈 개념 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">빈칸에 들어갈 알맞은 숫자를 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('빈칸에 들어갈 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:2.4rem; color:#0284c7; margin-bottom:20px;" id="quiz-question">10 - 4 = ?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#0284c7; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    function setSubTenFrame(subCount, btn) {
+      document.querySelectorAll('.candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const frame = document.getElementById('sub-ten-frame');
+      frame.innerHTML = '';
+      const remCount = 10 - subCount;
+
+      for (let i = 0; i < 10; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'frame-slot';
+        if (i < remCount) {
+          slot.innerHTML = '<div class="candy-chip-blue"></div>';
+        } else {
+          slot.innerHTML = '<div class="candy-chip-gone">❌</div>';
+        }
+        frame.appendChild(slot);
+      }
+
+      document.getElementById('sub-frame-formula').textContent = `10 - ${subCount} = ${remCount}`;
+      document.getElementById('sub-frame-sub-formula').textContent = `10개에서 ${subCount}개를 빼면 ${remCount}개가 남아요!`;
+      if (typeof fairySpeak === 'function') fairySpeak(`10에서 ${subCount}을 빼면 ${remCount}이 남습니다!`);
+    }
+
+    let currentSubA = 13, currentSubB = 5;
+
+    function selectSub10(a, b, btn) {
+      currentSubA = a;
+      currentSubB = b;
+      document.querySelectorAll('#sub10-preset-buttons .candy-num-btn').forEach(el => el.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderSub10Visuals(true);
+    }
+
+    function randomSub10() {
+      const list = [
+        [11, 2], [11, 3], [11, 4], [11, 5], [11, 6], [11, 7], [11, 8], [11, 9],
+        [12, 3], [12, 4], [12, 5], [12, 6], [12, 7], [12, 8], [12, 9],
+        [13, 4], [13, 5], [13, 6], [13, 7], [13, 8], [13, 9],
+        [14, 5], [14, 6], [14, 7], [14, 8], [14, 9],
+        [15, 6], [15, 7], [15, 8], [15, 9],
+        [16, 7], [16, 8], [16, 9]
+      ];
+      const pair = list[Math.floor(Math.random() * list.length)];
+      selectSub10(pair[0], pair[1], null);
+    }
+
+    function renderSub10Visuals(shouldSpeak = false) {
+      const a = currentSubA;
+      const b = currentSubB;
+      const ones = a - 10;
+      const tenMinusB = 10 - b;
+      const ans = a - b;
+
+      const eqView = document.getElementById('sub10-equation-view');
+      if (eqView) {
+        eqView.innerHTML = `
+          <div style="background:#e0f2fe; padding:8px 16px; border-radius:12px; color:#0369a1; font-size:1.8rem; font-weight:bold;">${a} <span style="font-size:1.1rem; color:#0284c7; font-weight:normal;">(10과 ${ones}로 가르기)</span></div>
+          <div style="font-size:1.8rem; color:#64748b;">-</div>
+          <div style="background:#fee2e2; padding:8px 16px; border-radius:12px; color:#b91c1c; font-size:1.8rem; font-weight:bold;">${b}</div>
+          <div style="font-size:1.8rem; color:#64748b;">=</div>
+          <div style="background:#dcfce7; padding:8px 16px; border-radius:12px; color:#15803d; font-size:1.8rem; font-weight:bold;">${ans}</div>
+        `;
+      }
+
+      const guide = document.getElementById('sub10-step-guide');
+      if (guide) {
+        guide.innerHTML = `
+          <div style="margin-bottom:8px;">1단계: <strong>${a}</strong>을 <span style="color:#0369a1; background:#e0f2fe; padding:3px 10px; border-radius:10px; font-weight:bold;">[10]</span>과 <span style="color:#b91c1c; background:#fee2e2; padding:3px 10px; border-radius:10px; font-weight:bold;">[낱개 ${ones}]</span>(으)로 갈라요.</div>
+          <div style="margin-bottom:8px;">2단계: <strong>10</strong>에서 <strong>${b}</strong>을 먼저 빼서 <span style="color:#15803d; background:#dcfce7; padding:3px 10px; border-radius:10px; font-weight:bold;">[${tenMinusB}]</span>을 남겨요! (10 - ${b} = ${tenMinusB})</div>
+          <div>3단계: 남은 <strong>${tenMinusB}</strong>에 낱개 <strong>${ones}</strong>을 더하면 ➔ <strong style="color:#0284c7; font-size:1.5rem; text-decoration:underline;">${ans}</strong> 완성! 🎉 (${tenMinusB} + ${ones} = ${ans})</div>
+        `;
+      }
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(`${a} 빼기 ${b}는, 10에서 ${b}를 먼저 빼 5를 만들고 낱개 3을 더해 ${ans}이 됩니다!`);
+      }
+    }
+
+    function speakCurrentSub10() {
+      const a = currentSubA;
+      const b = currentSubB;
+      const ones = a - 10;
+      const tenMinusB = 10 - b;
+      const ans = a - b;
+      if (typeof fairySpeak === 'function') {
+        fairySpeak(`${a} 빼기 ${b}는, 10에서 ${b}를 먼저 빼서 ${tenMinusB}을 만들고 낱개 ${ones}을 더하면 ${ans}이 됩니다!`);
+      }
+    }
+
+    const QUIZ_LIST = [
+      { q: "10 - 4 = ?", ans: 6, choices: [5, 6, 7, 8] },
+      { q: "10 - 7 = ?", ans: 3, choices: [2, 3, 4, 5] },
+      { q: "13 - 5 = 10 - 5 + ?", ans: 3, choices: [2, 3, 4, 5] },
+      { q: "14 - 6 = (10 - 6) + ? = ?", ans: 8, choices: [6, 7, 8, 9] },
+      { q: "10에서 빼기: 10 - 8 = ?", ans: 2, choices: [1, 2, 3, 4] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.4rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 참 잘했어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 ${correct} 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      setSubTenFrame(1, null);
+      renderSub10Visuals(false);
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "뺄셈개념");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
