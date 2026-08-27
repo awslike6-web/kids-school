@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -115,23 +115,31 @@
       <div class="section-header-wrap">
         <div>
           <span class="section-badge badge-pairs">섹션 2 : 10을 이용해 더하기</span>
-          <h2 class="section-title">✨ 8 + 5 는 어떻게 13이 될까요?</h2>
-          <p class="section-desc">8에게 2를 빌려주어 10을 먼저 만들고, 남은 3과 합치면 13이 돼요!</p>
+          <h2 class="section-title">✨ 10을 만들어 더하는 원리 탐험</h2>
+          <p class="section-desc">앞의 수를 10으로 만들기 위해 뒤의 수를 갈라서 10을 먼저 채우고 더해요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('8에게 2를 주어 10을 만들고 3을 더하면 13이 됩니다!')">🔊</button>
+        <button class="speaker-btn" onclick="speakCurrentMake10()">🔊</button>
       </div>
 
-      <div style="max-width:550px; margin:0 auto; background:#fff; border-radius:20px; padding:20px; text-align:center; border:2px solid #e2e8f0;">
-        <div style="display:flex; justify-content:center; align-items:center; gap:15px; font-family:'Jua'; font-size:2.2rem; color:#0284c7; margin-bottom:15px;">
-          <div style="background:#fee2e2; padding:8px 18px; border-radius:12px; color:#b91c1c;">8 (2 필요)</div>
-          <div>+</div>
-          <div style="background:#e0f2fe; padding:8px 18px; border-radius:12px; color:#0369a1;">5 (2와 3으로 가르기)</div>
+      <!-- 프리셋 버튼들 + 랜덤 생성 버튼 -->
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="make10-preset-buttons">
+        <button class="candy-num-btn active" onclick="selectMake10(8, 5, this)">8 + 5</button>
+        <button class="candy-num-btn" onclick="selectMake10(9, 4, this)">9 + 4</button>
+        <button class="candy-num-btn" onclick="selectMake10(7, 6, this)">7 + 6</button>
+        <button class="candy-num-btn" onclick="selectMake10(8, 7, this)">8 + 7</button>
+        <button class="candy-num-btn" onclick="selectMake10(9, 6, this)">9 + 6</button>
+        <button class="candy-num-btn" onclick="selectMake10(6, 7, this)">6 + 7</button>
+        <button class="candy-num-btn" onclick="selectMake10(7, 5, this)">7 + 5</button>
+        <button class="candy-num-btn" style="background:#f472b6; color:#fff; font-weight:800;" onclick="randomMake10()">🎲 랜덤 식 뽑기</button>
+      </div>
+
+      <div style="max-width:560px; margin:0 auto; background:#fff; border-radius:20px; padding:22px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 6px 16px rgba(0,0,0,0.04);">
+        <div style="display:flex; justify-content:center; align-items:center; gap:12px; font-family:'Jua'; font-size:2.2rem; color:#0284c7; margin-bottom:15px; flex-wrap:wrap;" id="make10-equation-view">
+          <!-- 동적 렌더링 -->
         </div>
 
-        <div style="background:#fdfbf7; border:2px dashed #f472b6; border-radius:16px; padding:15px; font-family:'Jua'; font-size:1.3rem; color:#334155; line-height:1.8;">
-          1단계: 5를 <span style="color:#b91c1c;">[2]</span>와 <span style="color:#0369a1;">[3]</span>으로 갈라요.<br>
-          2단계: 8에 2를 더해 먼저 <span style="color:#10b981;">[10]</span>을 만들어요!<br>
-          3단계: 10에 남은 3을 더하면 ➔ <strong style="color:#e11d48; font-size:1.6rem;">13</strong> 완성! 🎉
+        <div style="background:#fdfbf7; border:2px dashed #f472b6; border-radius:16px; padding:16px; font-family:'Jua'; font-size:1.25rem; color:#334155; line-height:1.8; text-align:left;" id="make10-step-guide">
+          <!-- 동적 3단계 설명 렌더링 -->
         </div>
       </div>
     </section>
@@ -191,6 +199,71 @@
       if (typeof fairySpeak === 'function') fairySpeak(`${redCount}의 짝꿍수는 ${blueCount}입니다!`);
     }
 
+    // 2. 10을 이용한 덧셈 원리 (동적 가르기 & 모으기)
+    let currentMake10A = 8, currentMake10B = 5;
+
+    function selectMake10(a, b, btn) {
+      currentMake10A = a;
+      currentMake10B = b;
+      document.querySelectorAll('#make10-preset-buttons .candy-num-btn').forEach(el => el.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderMake10Visuals(true);
+    }
+
+    function randomMake10() {
+      const list = [
+        [9, 2], [9, 3], [9, 4], [9, 5], [9, 6], [9, 7], [9, 8], [9, 9],
+        [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9],
+        [7, 4], [7, 5], [7, 6], [7, 7], [7, 8], [7, 9],
+        [6, 5], [6, 6], [6, 7], [6, 8], [6, 9]
+      ];
+      const pair = list[Math.floor(Math.random() * list.length)];
+      selectMake10(pair[0], pair[1], null);
+    }
+
+    function renderMake10Visuals(shouldSpeak = false) {
+      const a = currentMake10A;
+      const b = currentMake10B;
+      const need = 10 - a;
+      const rem = b - need;
+      const sum = a + b;
+
+      const eqView = document.getElementById('make10-equation-view');
+      if (eqView) {
+        eqView.innerHTML = `
+          <div style="background:#fee2e2; padding:8px 16px; border-radius:12px; color:#b91c1c; font-size:1.8rem; font-weight:bold;">${a} <span style="font-size:1.1rem; color:#ef4444; font-weight:normal;">(${need} 필요)</span></div>
+          <div style="font-size:1.8rem; color:#64748b;">+</div>
+          <div style="background:#e0f2fe; padding:8px 16px; border-radius:12px; color:#0369a1; font-size:1.8rem; font-weight:bold;">${b} <span style="font-size:1.1rem; color:#0284c7; font-weight:normal;">(${need}와 ${rem}로 가르기)</span></div>
+          <div style="font-size:1.8rem; color:#64748b;">=</div>
+          <div style="background:#dcfce7; padding:8px 16px; border-radius:12px; color:#15803d; font-size:1.8rem; font-weight:bold;">${sum}</div>
+        `;
+      }
+
+      const guide = document.getElementById('make10-step-guide');
+      if (guide) {
+        guide.innerHTML = `
+          <div style="margin-bottom:8px;">1단계: <strong>${b}</strong>를 <span style="color:#b91c1c; background:#fee2e2; padding:3px 10px; border-radius:10px; font-weight:bold;">[${need}]</span>와 <span style="color:#0369a1; background:#e0f2fe; padding:3px 10px; border-radius:10px; font-weight:bold;">[${rem}]</span>(으)로 갈라요.</div>
+          <div style="margin-bottom:8px;">2단계: <strong>${a}</strong>에 <strong>${need}</strong>을 더해 먼저 <span style="color:#15803d; background:#dcfce7; padding:3px 10px; border-radius:10px; font-weight:bold;">[10]</span>을 만들어요! (${a} + ${need} = 10)</div>
+          <div>3단계: 10에 남은 <strong>${rem}</strong>을 더하면 ➔ <strong style="color:#e11d48; font-size:1.5rem; text-decoration:underline;">${sum}</strong> 완성! 🎉 (10 + ${rem} = ${sum})</div>
+        `;
+      }
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(`${a} 더하기 ${b}는, ${a}에 ${need}을 더해 10을 만들고 남은 ${rem}을 더해 ${sum}이 됩니다!`);
+      }
+    }
+
+    function speakCurrentMake10() {
+      const a = currentMake10A;
+      const b = currentMake10B;
+      const need = 10 - a;
+      const rem = b - need;
+      const sum = a + b;
+      if (typeof fairySpeak === 'function') {
+        fairySpeak(`${a} 더하기 ${b}는, ${b}를 ${need}과 ${rem}으로 갈라 10을 먼저 만들고 ${rem}을 더하면 ${sum}이 됩니다!`);
+      }
+    }
+
     const QUIZ_LIST = [
       { q: "7 + ? = 10", ans: 3, choices: [2, 3, 4, 5] },
       { q: "10 - 4 = ?", ans: 6, choices: [5, 6, 7, 8] },
@@ -248,6 +321,7 @@
       document.getElementById('userIcon').textContent = icon;
 
       setTenFrame(1, null);
+      renderMake10Visuals(false);
       renderQuiz();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();

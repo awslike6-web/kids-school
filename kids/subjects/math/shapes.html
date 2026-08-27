@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -117,21 +117,25 @@
       <div class="shape-card-grid">
         <div class="shape-feature-card" onclick="explain2D('circle')">
           <div class="shape-icon-big" style="color:#f43f5e;">🔴</div>
-          <h3 style="font-family:'Jua'; font-size:1.5rem;">동그라미 (○)</h3>
-          <p style="font-size:0.9rem; color:#666; margin-top:5px;">굽은 선 1개 · 뾰족한 곳 0개</p>
+          <h3 style="font-family:'Jua'; font-size:1.6rem; color:#e11d48;">동그라미 <span style="color:#be123c;">(○)</span></h3>
+          <p style="font-size:0.95rem; font-weight:700; color:#9f1239; background:#ffe4e6; padding:6px 12px; border-radius:12px; margin-top:8px;">굽은 선 1개 · 뾰족한 곳 0개</p>
         </div>
 
         <div class="shape-feature-card" onclick="explain2D('triangle')">
           <div class="shape-icon-big" style="color:#0284c7;">🔺</div>
-          <h3 style="font-family:'Jua'; font-size:1.5rem;">세모 (△)</h3>
-          <p style="font-size:0.9rem; color:#666; margin-top:5px;">곧은 선 3개 · 뾰족한 곳 3개</p>
+          <h3 style="font-family:'Jua'; font-size:1.6rem; color:#0284c7;">세모 <span style="color:#0369a1;">(△)</span></h3>
+          <p style="font-size:0.95rem; font-weight:700; color:#075985; background:#e0f2fe; padding:6px 12px; border-radius:12px; margin-top:8px;">곧은 선 3개 · 뾰족한 곳 3개</p>
         </div>
 
         <div class="shape-feature-card" onclick="explain2D('rectangle')">
           <div class="shape-icon-big" style="color:#16a34a;">🟩</div>
-          <h3 style="font-family:'Jua'; font-size:1.5rem;">네모 (□)</h3>
-          <p style="font-size:0.9rem; color:#666; margin-top:5px;">곧은 선 4개 · 뾰족한 곳 4개</p>
+          <h3 style="font-family:'Jua'; font-size:1.6rem; color:#15803d;">네모 <span style="color:#166534;">(□)</span></h3>
+          <p style="font-size:0.95rem; font-weight:700; color:#14532d; background:#dcfce7; padding:6px 12px; border-radius:12px; margin-top:8px;">곧은 선 4개 · 뾰족한 곳 4개</p>
         </div>
+      </div>
+
+      <div id="shape2d-explain-box" style="background:#fdfbf7; border:2px dashed #0284c7; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.2rem; color:#1e293b; margin-top:10px;">
+        평면 모양 카드를 터치해 보세요! 👆
       </div>
     </section>
 
@@ -182,11 +186,15 @@
     }
 
     function explain2D(type) {
+      const box = document.getElementById('shape2d-explain-box');
       if (type === 'circle') {
+        if (box) box.innerHTML = "🔴 <strong>동그라미 (○):</strong> 둥근 선(굽은 선) 1개로 둘러싸여 있고, 뾰족한 꼭짓점이 0개예요!";
         if (typeof fairySpeak === 'function') fairySpeak('동그라미는 굽은 선 1개로 되어 있고 뾰족한 곳이 없어요!');
       } else if (type === 'triangle') {
+        if (box) box.innerHTML = "🔺 <strong>세모 (△):</strong> 곧은 선(변)이 3개이고, 뾰족한 꼭짓점도 3개예요!";
         if (typeof fairySpeak === 'function') fairySpeak('세모는 곧은 선 3개와 뾰족한 꼭짓점 3개로 되어 있어요!');
       } else if (type === 'rectangle') {
+        if (box) box.innerHTML = "🟩 <strong>네모 (□):</strong> 곧은 선(변)이 4개이고, 뾰족한 꼭짓점도 4개예요!";
         if (typeof fairySpeak === 'function') fairySpeak('네모는 곧은 선 4개와 뾰족한 꼭짓점 4개로 되어 있어요!');
       }
     }
