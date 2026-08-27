@@ -39,7 +39,6 @@
       radial-gradient(circle at 85% 30%, rgba(199, 125, 255, 0.08), transparent 25%);
     pointer-events: none; z-index: 0;
   }
-  
   body.theme--slime::before { display: none; }
 
   .app-container { max-width: 1080px; margin: 0 auto; padding: 25px 16px; position: relative; z-index: 1; }
@@ -55,40 +54,105 @@
   .logo-title { font-family: 'Jua', sans-serif; font-size: 2.8rem; background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
   .sub-title { color: var(--muted); font-size: 1.05rem; }
 
-  /* 🚀 2대 메인 모드 탭 (학년 개념관 vs 문제 트레이닝 센터) */
-  .main-tab-bar {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
+  /* 🚪 수학 메인 2대 대문 포털 카드 (Gateway Cards) */
+  .gateway-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin: 30px 0;
   }
-  .main-tab-btn {
-    font-family: 'Jua', sans-serif;
-    font-size: 1.35rem;
-    padding: 12px 28px;
-    border-radius: 30px;
-    border: 2px solid var(--border);
-    background: var(--surface);
-    color: var(--muted);
+  .gateway-card {
+    background: var(--card);
+    border: 3px solid var(--border);
+    border-radius: 28px;
+    padding: 36px 24px;
+    text-align: center;
     cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
   }
-  .main-tab-btn:hover {
-    transform: translateY(-2px);
-    color: var(--white);
+  .gateway-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+  }
+  .gw-concepts::before { background: linear-gradient(90deg, #6BCB77, #00D4FF); }
+  .gw-workout::before { background: linear-gradient(90deg, #FF6B35, #FF6B9D); }
+
+  .gateway-card:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+  .gw-concepts:hover {
     border-color: var(--cyan);
+    box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
   }
-  .main-tab-btn.active {
-    background: linear-gradient(135deg, var(--cyan), var(--purple));
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
-    transform: translateY(-3px);
+  .gw-workout:hover {
+    border-color: var(--orange);
+    box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
   }
 
-  /* 서브 필터 버튼 (학년 선택) */
+  .gateway-icon { font-size: 4.8rem; margin-bottom: 16px; }
+  .gateway-title { font-family: 'Jua', sans-serif; font-size: 2rem; color: var(--white); margin-bottom: 12px; }
+  .gateway-desc { font-size: 1.05rem; color: var(--muted); line-height: 1.6; word-break: keep-all; margin-bottom: 20px; }
+  
+  .gateway-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .gateway-badge {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    padding: 6px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    color: var(--yellow);
+    border: 1px solid var(--border);
+  }
+
+  /* 🧭 하위 뷰 내비게이션 바 */
+  .subview-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: var(--surface);
+    padding: 12px 20px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+  }
+  .subview-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .back-gate-btn {
+    background: rgba(0, 212, 255, 0.15);
+    border: 2px solid var(--cyan);
+    color: var(--cyan);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .back-gate-btn:hover {
+    background: var(--cyan);
+    color: #000;
+  }
+
+  /* 학년 서브 필터 버튼 */
   .grade-filter-bar {
     display: flex;
     justify-content: center;
@@ -98,8 +162,8 @@
   }
   .grade-pill-btn {
     font-family: 'Jua', sans-serif;
-    font-size: 1.05rem;
-    padding: 8px 18px;
+    font-size: 1.1rem;
+    padding: 8px 20px;
     border-radius: 20px;
     border: 1.5px solid var(--border);
     background: rgba(255,255,255,0.05);
@@ -153,19 +217,28 @@
 
   /* 뷰 컨테이너 */
   .view-container { display: none; }
-  .view-container.active { display: block; }
+  .view-container.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   @media (max-width: 540px) {
+    .gateway-container { grid-template-columns: 1fr; gap: 16px; }
+    .gateway-card { padding: 26px 18px; }
+    .gateway-icon { font-size: 3.8rem; }
+    .gateway-title { font-size: 1.65rem; }
     .mission-grid { grid-template-columns: 1fr; gap: 12px; }
     .mission-card { min-height: auto; padding: 18px 14px; }
     .logo-title { font-size: 2.2rem; }
-    .main-tab-btn { font-size: 1.15rem; padding: 10px 18px; width: 100%; }
   }
 </style>
 </head>
 <body>
 
 <div class="app-container">
+  
   <div class="top-bar">
     <div class="profile-badge">
       <span id="userIcon">👨‍🚀</span> <span id="userName">로딩중...</span>
@@ -178,23 +251,60 @@
 
   <header>
     <div class="logo-title">민민 수학 멀티버스 🚀</div>
-    <div class="sub-title">개념을 배우는 [개념 탐험관]과 문제를 정복하는 [문제 트레이닝 센터]를 선택하세요!</div>
+    <div class="sub-title">어떤 방식으로 수학을 탐험할까요? 원하는 관문을 선택하세요!</div>
   </header>
 
-  <!-- 🚀 2대 메인 모드 전환 탭 -->
-  <div class="main-tab-bar">
-    <button class="main-tab-btn active" id="tabBtnConcepts" onclick="switchMainView('concepts')">🏫 1. 학년별 개념 탐험관</button>
-    <button class="main-tab-btn" id="tabBtnWorkout" onclick="switchMainView('workout')">⚔️ 2. 실전 문제 트레이닝 센터</button>
+  <!-- ======================================================== -->
+  <!-- 🚪 0. 수학 메인 관문 (Gateway View)                        -->
+  <!-- ======================================================== -->
+  <div class="view-container active" id="viewGateway">
+    <div class="gateway-container">
+      
+      <!-- 관문 1: 학년별 개념 탐험관 -->
+      <div class="gateway-card gw-concepts" onclick="openMathSection('concepts')">
+        <div class="gateway-icon">🏫</div>
+        <div class="gateway-title">1. 학년별 개념 탐험관</div>
+        <div class="gateway-desc">
+          1~2학년 기초부터 3~4학년 핵심, 5~6학년 심화까지<br>교과서 수학 개념을 시각적 인터랙티브로 체계적으로 마스터해요!
+        </div>
+        <div class="gateway-badges">
+          <span class="gateway-badge">🟢 1~2학년 기초관</span>
+          <span class="gateway-badge">🚀 3~4학년 핵심관</span>
+          <span class="gateway-badge">👑 5~6학년 심화관</span>
+        </div>
+      </div>
+
+      <!-- 관문 2: 실전 문제 트레이닝 센터 -->
+      <div class="gateway-card gw-workout" onclick="openMathSection('workout')">
+        <div class="gateway-icon">⚔️</div>
+        <div class="gateway-title">2. 실전 문제 트레이닝 센터</div>
+        <div class="gateway-desc">
+          세로셈 무한 연산, 공식 퀴즈 배틀, 분수·소수·도형 등<br>손으로 직접 풀며 실전 연산 감각과 점수를 끌어올려요!
+        </div>
+        <div class="gateway-badges">
+          <span class="gateway-badge" style="color:#f43f5e;">🧱 실전 세로셈</span>
+          <span class="gateway-badge" style="color:#f43f5e;">✨ 공식 퀴즈</span>
+          <span class="gateway-badge" style="color:#f43f5e;">🍰 분수·소수 문제</span>
+          <span class="gateway-badge" style="color:#f43f5e;">⏱️ 스톱워치 타임어택</span>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- ======================================================== -->
   <!-- 🏫 1. 학년별 개념 탐험관 (Concept Hall)                   -->
   <!-- ======================================================== -->
-  <div class="view-container active" id="viewConcepts">
+  <div class="view-container" id="viewConcepts">
     
+    <div class="subview-nav">
+      <div class="subview-title" style="color:var(--cyan);">🏫 학년별 개념 탐험관</div>
+      <button class="back-gate-btn" onclick="openMathSection('gateway')">🔙 수학 대문으로</button>
+    </div>
+
     <!-- 학년 서브 필터 -->
     <div class="grade-filter-bar">
-      <button class="grade-pill-btn active" onclick="filterGradeSector('all', this)">🌟 전체 보기</button>
+      <button class="grade-pill-btn active" onclick="filterGradeSector('all', this)">🌟 전체 학년</button>
       <button class="grade-pill-btn" onclick="filterGradeSector('12', this)">🟢 1~2학년 기초관 (7)</button>
       <button class="grade-pill-btn" onclick="filterGradeSector('34', this)">🚀 3~4학년 핵심관 (4)</button>
       <button class="grade-pill-btn" onclick="filterGradeSector('56', this)">👑 5~6학년 심화관 (1)</button>
@@ -296,7 +406,12 @@
   <!-- ⚔️ 2. 실전 문제 트레이닝 센터 (Problem Workout Arena)      -->
   <!-- ======================================================== -->
   <div class="view-container" id="viewWorkout">
-    <div class="sector-title active-sector-workout">⚔️ 실전 문제 트레이닝 센터 (무한 연산 & 퀴즈)</div>
+    
+    <div class="subview-nav">
+      <div class="subview-title" style="color:#f43f5e;">⚔️ 실전 문제 트레이닝 센터</div>
+      <button class="back-gate-btn" onclick="openMathSection('gateway')">🔙 수학 대문으로</button>
+    </div>
+
     <div class="mission-grid">
       
       <!-- 세로셈 훈련소 -->
@@ -346,24 +461,27 @@
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/fairy-chatbot.js"></script>
 <script>
-  // 🚀 2대 메인 모드 뷰 전환 (개념관 vs 문제 트레이닝 센터)
-  function switchMainView(mode) {
-    const tabConcepts = document.getElementById('tabBtnConcepts');
-    const tabWorkout = document.getElementById('tabBtnWorkout');
-    const viewConcepts = document.getElementById('viewConcepts');
-    const viewWorkout = document.getElementById('viewWorkout');
+  // 🚪 수학 섹션 뷰 열기/닫기 (대문 <-> 개념관 <-> 트레이닝 센터)
+  function openMathSection(section) {
+    const vGateway = document.getElementById('viewGateway');
+    const vConcepts = document.getElementById('viewConcepts');
+    const vWorkout = document.getElementById('viewWorkout');
 
-    if (mode === 'concepts') {
-      tabConcepts.classList.add('active');
-      tabWorkout.classList.remove('active');
-      viewConcepts.classList.add('active');
-      viewWorkout.classList.remove('active');
+    vGateway.classList.remove('active');
+    vConcepts.classList.remove('active');
+    vWorkout.classList.remove('active');
+
+    if (section === 'concepts') {
+      vConcepts.classList.add('active');
+      window.location.hash = 'concepts';
+    } else if (section === 'workout') {
+      vWorkout.classList.add('active');
+      window.location.hash = 'workout';
     } else {
-      tabConcepts.classList.remove('active');
-      tabWorkout.classList.add('active');
-      viewConcepts.classList.remove('active');
-      viewWorkout.classList.add('active');
+      vGateway.classList.add('active');
+      window.location.hash = '';
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   // 🎯 학년 서브 필터링
@@ -402,7 +520,7 @@
       location.href = lobbyPath;
   });
 
-  // 프로필 세팅 & 요정 초기화
+  // 초기 로드 시 해시 상태 또는 기본 대문 렌더링
   document.addEventListener("DOMContentLoaded", () => {
     let currentProfile = localStorage.getItem('currentUser') || 'son';
     const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
@@ -414,6 +532,16 @@
 
     document.getElementById('userName').textContent = `${name} 대원`;
     document.getElementById('userIcon').textContent = icon;
+
+    // URL 해시 확인
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'concepts') {
+      openMathSection('concepts');
+    } else if (hash === 'workout') {
+      openMathSection('workout');
+    } else {
+      openMathSection('gateway');
+    }
 
     if (typeof initFairyAudio === 'function') initFairyAudio();
     if (typeof initFairyChat === 'function') initFairyChat("MATH", "수학관제탑");
