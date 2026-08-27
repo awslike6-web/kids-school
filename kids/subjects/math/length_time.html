@@ -99,33 +99,95 @@
     .planet-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
     .planet-dist-tag { font-size: 0.82rem; color: #7c3aed; font-weight: 700; }
 
-    /* 스톱워치 시계 뷰 */
-    .stopwatch-box {
-      background: #fff;
-      border: 3px solid #cbd5e1;
-      border-radius: 20px;
-      padding: 20px;
+    /* ⏱️ 실전 스톱워치 챌린지 상자 */
+    .stopwatch-challenge-box {
+      background: #ffffff;
+      border: 3px solid #f43f5e;
+      border-radius: 24px;
+      padding: 22px;
       margin: 15px auto;
-      max-width: 540px;
+      max-width: 560px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.15);
+      position: relative;
     }
-    .digital-timer-display {
+    .stopwatch-digital-clock {
       font-family: 'Jua', sans-serif;
-      font-size: 2.8rem;
+      font-size: 3.2rem;
       color: #e11d48;
-      background: #fee2e2;
-      border-radius: 16px;
-      padding: 10px 20px;
+      background: #fff1f2;
+      border: 2px solid #fecdd3;
+      border-radius: 20px;
+      padding: 12px 24px;
       display: inline-block;
-      margin: 10px 0;
+      margin: 12px 0;
       letter-spacing: 2px;
+      min-width: 260px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .stopwatch-btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    .stopwatch-action-btn {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .stopwatch-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .btn-timer-start { background: linear-gradient(135deg, #10b981, #059669); }
+    .btn-timer-stop { background: linear-gradient(135deg, #f43f5e, #be123c); }
+    .btn-timer-reset { background: linear-gradient(135deg, #64748b, #475569); }
+
+    /* ⏱️ 플로팅 미니 타이머 캡슐 */
+    .floating-timer-capsule {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 2px solid #f43f5e;
+      color: #fff;
+      border-radius: 40px;
+      padding: 10px 20px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      z-index: 999;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      animation: pulseGlow 1.5s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
+      to { box-shadow: 0 0 25px rgba(244, 63, 94, 0.8); }
     }
   </style>
 </head>
 <body>
 
   <canvas id="confetti-canvas"></canvas>
+
+  <!-- 플로팅 타이머 캡슐 -->
+  <div class="floating-timer-capsule" id="floatingTimerCapsule" onclick="scrollToStopwatch()">
+    <span>⏱️ 챌린지 진행 중!</span>
+    <span id="floatingTimerText" style="color:#fecdd3; font-size:1.3rem;">00.0s</span>
+    <span style="font-size:0.85rem; color:#94a3b8;">(터치 시 이동)</span>
+  </div>
 
   <div class="top-bar">
     <div class="profile-badge">
@@ -141,7 +203,7 @@
 
     <header class="math-header-hero">
       <h1 class="hero-title">📏 길이와 시간 측정소 ⏱️</h1>
-      <p class="hero-subtitle">1mm와 1km의 단위 변환을 마스터하고, 태양계 행성 거리 탐사와 시간 연산을 정복해요!</p>
+      <p class="hero-subtitle">1mm와 1km의 단위 변환을 마스터하고, 태양계 행성 거리와 실전 스톱워치 챌린지를 정복해요!</p>
     </header>
 
     <!-- 1. 1mm와 1cm 돋보기 자 눈금 측정기 -->
@@ -262,32 +324,47 @@
       </div>
     </section>
 
-    <!-- 4. 1초와 60초 시간 탐험 (시·분·초 덧셈/뺄셈) -->
-    <section class="math-section-card" id="section-time">
+    <!-- 4. ⏱️ 실전 스톱워치 타임 어택 챌린지 미니게임 (오차 ±1초 보상 연동) -->
+    <section class="math-section-card" id="section-stopwatch-game">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-grid">섹션 4 : 초(s)와 시간 연산</span>
-          <h2 class="section-title">⏱️ 1분 = 60초 & 시간의 덧셈·뺄셈</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">초 단위 변환과 60초가 모여 1분이 되는 원리를 배워요!</p>
+          <span class="section-badge badge-candy" style="background:#f43f5e; color:#fff;">섹션 4 : 실전 스톱워치 타임 어택</span>
+          <h2 class="section-title">⏱️ 시간 감각 챌린지 (±1초 미션)</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">목표 시간을 정하고 타이머를 켠 뒤, 다른 문제를 풀다가 돌아와 딱 맞춰 멈춰보세요! (±1초 이내 성공 시 보상 획득! 💎)</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('60초는 1분과 같습니다! 시간 계산을 해보세요!')">🔊</button>
+        <button class="speaker-btn" onclick="fairySpeak('목표 시간을 정하고 시작을 누른 뒤, 다른 문제를 풀다가 시간에 맞춰 정지 버튼을 눌러보세요!')">🔊</button>
       </div>
 
-      <div class="stopwatch-box">
-        <div style="font-family:'Jua'; font-size:1.4rem; color:#475569;">스톱워치 초 단위 변환기</div>
-        <div class="digital-timer-display" id="time-clock-display">1분 25초</div>
-        
-        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="time-preset-buttons">
-          <button class="candy-num-btn active" onclick="selectTimeSec(85, this)">85초 (1분 25초)</button>
-          <button class="candy-num-btn" onclick="selectTimeSec(130, this)">130초 (2분 10초)</button>
-          <button class="candy-num-btn" onclick="selectTimeSec(200, this)">200초 (3분 20초)</button>
-          <button class="candy-num-btn" onclick="selectTimeSec(60, this)">60초 (딱 1분!)</button>
+      <div class="stopwatch-challenge-box">
+        <!-- 목표 시간 선택 프리셋 -->
+        <div style="font-family:'Jua'; font-size:1.25rem; color:#475569; margin-bottom:10px;">🎯 목표 시간 선택하기:</div>
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="timer-target-presets">
+          <button class="candy-num-btn active" onclick="setTimerTarget(10, this)">10초</button>
+          <button class="candy-num-btn" onclick="setTimerTarget(15, this)">15초</button>
+          <button class="candy-num-btn" onclick="setTimerTarget(30, this)">30초</button>
+          <button class="candy-num-btn" onclick="setTimerTarget(60, this)">60초 (1분)</button>
+          <button class="candy-num-btn" onclick="setTimerTarget(75, this)">75초 (1분 15초)</button>
+          <button class="candy-num-btn" onclick="setRandomTimerTarget(this)">🎲 랜덤 초</button>
         </div>
 
-        <div class="unit-exchange-card" id="time-guide-box">
-          <div>⏱️ <strong>85초</strong>를 분과 초로 가르기:</div>
-          <div>• 85초에서 <strong>60초</strong>를 묶으면 <strong>1분</strong>이 되고, 남은 초는 <strong>25초</strong>예요!</div>
-          <div>➔ 따라서 <strong>1분 25초</strong>가 됩니다! 🎉</div>
+        <!-- 스톱워치 디지털 시계 -->
+        <div class="stopwatch-digital-clock" id="stopwatchDisplay">00 : 00 . 00</div>
+        
+        <div style="font-family:'Jua'; font-size:1.3rem; color:#1e293b; margin:6px 0;" id="stopwatchTargetDesc">
+          🎯 목표 시간 : <strong>10초</strong> 에 멈추기!
+        </div>
+
+        <!-- 제어 버튼 그룹 -->
+        <div class="stopwatch-btn-group">
+          <button class="stopwatch-action-btn btn-timer-start" id="btnTimerStart" onclick="startStopwatchChallenge()">🚀 타이머 시작!</button>
+          <button class="stopwatch-action-btn btn-timer-stop" id="btnTimerStop" style="display:none;" onclick="stopStopwatchChallenge()">🛑 지금 멈춤 (STOP)!</button>
+          <button class="stopwatch-action-btn btn-timer-reset" id="btnTimerReset" onclick="resetStopwatchChallenge()">🔄 다시 세팅</button>
+        </div>
+
+        <!-- 결과 피드백 안내창 -->
+        <div class="unit-exchange-card" style="margin-top:16px; min-height:80px; text-align:center;" id="stopwatchResultBox">
+          <div>💡 <strong>게임 룰:</strong> [시작]을 누르면 시간이 흐릅니다. 다른 섹션의 자 측정이나 퀴즈를 풀다가 목표 시간에 돌아와 [정지]를 누르세요!</div>
+          <div style="color:#0284c7; margin-top:4px;">오차범위 <strong>±1초 안에 안착</strong>하면 노션 학습 기록 및 보상 다이아가 지급됩니다! 🎁</div>
         </div>
       </div>
     </section>
@@ -650,25 +727,139 @@
       }
     }
 
-    // 4. 시간 (초 단위)
-    function selectTimeSec(seconds, btn) {
-      document.querySelectorAll('#time-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+    // 4. ⏱️ 실전 스톱워치 타임 어택 챌린지 미니게임
+    let timerTargetSeconds = 10;
+    let timerStartTime = 0;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    function setTimerTarget(sec, btn) {
+      if (isTimerRunning) return;
+      timerTargetSeconds = sec;
+      document.querySelectorAll('#timer-target-presets .candy-num-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
 
-      const min = Math.floor(seconds / 60);
-      const sec = seconds % 60;
-      const str = min > 0 ? (sec > 0 ? `${min}분 ${sec}초` : `${min}분 정각`) : `${sec}초`;
+      const min = Math.floor(sec / 60);
+      const remSec = sec % 60;
+      const desc = min > 0 ? (remSec > 0 ? `${min}분 ${remSec}초 (${sec}초)` : `${min}분 (${sec}초)`) : `${sec}초`;
       
-      document.getElementById('time-clock-display').textContent = str;
-      document.getElementById('time-guide-box').innerHTML = `
-        <div>⏱️ <strong>${seconds}초</strong>를 분과 초로 가르기:</div>
-        <div>• ${seconds}초에서 <strong>60초</strong>를 ${min}번 묶으면 <strong>${min}분</strong>이 되고, 남은 초는 <strong>${sec}초</strong>예요!</div>
-        <div>➔ 따라서 <strong>${str}</strong>가 됩니다! 🎉</div>
+      document.getElementById('stopwatchTargetDesc').innerHTML = `🎯 목표 시간 : <strong>${desc}</strong> 에 정확히 멈추기!`;
+      document.getElementById('stopwatchDisplay').textContent = "00 : 00 . 00";
+      document.getElementById('stopwatchResultBox').innerHTML = `
+        <div>🎯 목표 시간이 <strong>${desc}</strong>(으)로 설정되었습니다!</div>
+        <div style="color:#475569; margin-top:4px;">[타이머 시작]을 누르고 다른 문제를 풀다가 시간에 맞춰 멈춰보세요!</div>
+      `;
+    }
+
+    function setRandomTimerTarget(btn) {
+      if (isTimerRunning) return;
+      const targets = [8, 12, 18, 25, 35, 45, 50, 70];
+      const randSec = targets[Math.floor(Math.random() * targets.length)];
+      setTimerTarget(randSec, btn);
+    }
+
+    function startStopwatchChallenge() {
+      if (isTimerRunning) return;
+      isTimerRunning = true;
+      timerStartTime = Date.now();
+
+      document.getElementById('btnTimerStart').style.display = 'none';
+      document.getElementById('btnTimerStop').style.display = 'inline-block';
+      document.getElementById('floatingTimerCapsule').style.display = 'flex';
+
+      document.getElementById('stopwatchResultBox').innerHTML = `
+        <div style="color:#0284c7; font-size:1.3rem;">⏳ <strong>스톱워치 출발!</strong> 시간이 흐르고 있어요!</div>
+        <div style="color:#475569; margin-top:4px;">다른 섹션의 문제를 풀거나 자를 측정하다가 목표 <strong>${timerTargetSeconds}초</strong>에 돌아와서 [멈춤]을 누르세요!</div>
       `;
 
-      if (btn && typeof fairySpeak === 'function') {
-        fairySpeak(`${seconds}초는 ${str}입니다!`);
+      if (typeof fairySpeak === 'function') {
+        fairySpeak(`스톱워치 출발! 목표 시간 ${timerTargetSeconds}초에 맞춰 멈춰보세요!`);
       }
+
+      timerInterval = setInterval(() => {
+        const elapsedMs = Date.now() - timerStartTime;
+        const totalSec = elapsedMs / 1000;
+        const m = Math.floor(totalSec / 60);
+        const s = Math.floor(totalSec % 60);
+        const ms = Math.floor((elapsedMs % 1000) / 10);
+
+        const mStr = String(m).padStart(2, '0');
+        const sStr = String(s).padStart(2, '0');
+        const msStr = String(ms).padStart(2, '0');
+        
+        document.getElementById('stopwatchDisplay').textContent = `${mStr} : ${sStr} . ${msStr}`;
+        document.getElementById('floatingTimerText').textContent = `${totalSec.toFixed(1)}s`;
+      }, 30);
+    }
+
+    function stopStopwatchChallenge() {
+      if (!isTimerRunning) return;
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+
+      const elapsedMs = Date.now() - timerStartTime;
+      const elapsedSec = elapsedMs / 1000;
+      const diff = elapsedSec - timerTargetSeconds;
+      const absDiff = Math.abs(diff);
+
+      document.getElementById('btnTimerStart').style.display = 'inline-block';
+      document.getElementById('btnTimerStop').style.display = 'none';
+      document.getElementById('floatingTimerCapsule').style.display = 'none';
+
+      const resBox = document.getElementById('stopwatchResultBox');
+      const stoppedStr = `${elapsedSec.toFixed(2)}초`;
+      const diffStr = diff >= 0 ? `+${diff.toFixed(2)}초` : `${diff.toFixed(2)}초`;
+
+      if (absDiff <= 1.0) {
+        // 🌟 성공! (오차 1초 이내)
+        const isPerfect = absDiff <= 0.3;
+        const badge = isPerfect ? '🌟 [완벽한 신의 손!]' : '🎉 [미션 대성공!]';
+        resBox.innerHTML = `
+          <div style="color:#10b981; font-size:1.4rem;">${badge} <strong>${stoppedStr}</strong> 에 멈춤! (오차: ${diffStr})</div>
+          <div style="color:#047857; margin-top:6px; font-size:1.15rem;">
+            오차범위 ±1초 안에 정확히 안착했습니다! <strong>보상 다이아 획득 & 노션 기록 완료!</strong> 💎✨
+          </div>
+        `;
+
+        if (typeof fairySpeak === 'function') {
+          fairySpeak(`대단해요! ${stoppedStr}에 멈춰서 오차범위 1초 안에 성공했어요!`);
+        }
+        if (typeof grantRewardAndShowUI === 'function') {
+          grantRewardAndShowUI(1, false, 'math');
+        }
+      } else {
+        // 😅 실패 (오차 1초 초과)
+        resBox.innerHTML = `
+          <div style="color:#ef4444; font-size:1.3rem;">😅 아쉬워요! <strong>${stoppedStr}</strong> 에 멈췄어요. (오차: ${diffStr})</div>
+          <div style="color:#475569; margin-top:6px;">
+            목표 시간(${timerTargetSeconds}초)과 <strong>${absDiff.toFixed(2)}초</strong> 차이가 났어요. 다시 도전해 보세요! 💪
+          </div>
+        `;
+
+        if (typeof fairySpeak === 'function') {
+          fairySpeak(`아쉬워요! ${stoppedStr}에 멈췄습니다. 오차가 ${absDiff.toFixed(1)}초예요. 다시 도전해 보세요!`);
+        }
+      }
+    }
+
+    function resetStopwatchChallenge() {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+      }
+      document.getElementById('btnTimerStart').style.display = 'inline-block';
+      document.getElementById('btnTimerStop').style.display = 'none';
+      document.getElementById('floatingTimerCapsule').style.display = 'none';
+      document.getElementById('stopwatchDisplay').textContent = "00 : 00 . 00";
+      document.getElementById('stopwatchResultBox').innerHTML = `
+        <div>💡 <strong>게임 룰:</strong> [시작]을 누르면 시간이 흐릅니다. 다른 섹션의 자 측정이나 퀴즈를 풀다가 목표 시간에 돌아와 [정지]를 누르세요!</div>
+        <div style="color:#0284c7; margin-top:4px;">오차범위 <strong>±1초 안에 안착</strong>하면 노션 학습 기록 및 보상 다이아가 지급됩니다! 🎁</div>
+      `;
+    }
+
+    function scrollToStopwatch() {
+      const el = document.getElementById('section-stopwatch-game');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
 
     // 5. 퀴즈
