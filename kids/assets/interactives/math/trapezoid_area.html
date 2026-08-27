@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사다리꼴 넓이 공식 유도 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #fdfbf7;
+        --surface: #ffffff;
+        --mint: #B5EAEA;
+        --mint-border: #78C4C4;
+        --orange: #FFB7B2;
+        --orange-border: #FF8A8A;
+        --text-main: #4a3352;
+        --cyan: #00D4FF;
+        --pink: #FF6B9D;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.5rem;
+        color: var(--pink);
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 3px solid #ffe7ee;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        max-width: 700px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 550px;
+        margin: 0 auto 20px auto;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px dashed #e0e0e0;
+        overflow: hidden;
+    }
+
+    svg {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* 회전 및 이동 애니메이션 트랜지션 */
+    #copy-trapezoid {
+        transition: transform 1.8s ease-in-out, filter 0.3s ease;
+        transform-origin: 100px 75px; /* 사다리꼴의 중심축 */
+    }
+
+    #copy-trapezoid.moving {
+        filter: drop-shadow(5px 15px 10px rgba(0,0,0,0.2));
+    }
+
+    .guide-box {
+        background: #f8f9fa;
+        border-left: 5px solid var(--cyan);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: #333;
+        transition: all 0.3s ease;
+    }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 20px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    .btn:hover { transform: translateY(-3px) scale(1.05); }
+    .btn:active { transform: translateY(2px) scale(0.95); }
+
+    .btn-start { background: linear-gradient(135deg, var(--cyan), #009ffd); color: white; }
+    .btn-reset { background: #e0e0e0; color: #555; display: none; }
+
+    .highlight-orange { color: #FF6B35; }
+    .highlight-blue { color: #4D96FF; }
+    .highlight-pink { color: var(--pink); }
+
+    .grid-pattern { fill: url(#grid); }
+    
+    /* 윗변, 아랫변 합치기 애니메이션용 그룹 */
+    #total-base-group {
+        opacity: 0;
+        transition: opacity 1s ease 0.5s;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">사다리꼴 넓이 구하기 🪵</div>
+    <div class="subtitle">똑같은 사다리꼴 2개를 합쳐서 커다란 평행사변형을 만들어요!</div>
+</div>
+
+<div class="card">
+    <div class="canvas-container">
+        <!-- 평행사변형이 길어지므로 viewBox를 넉넉하게 확장 -->
+        <svg viewBox="-40 -50 480 290" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                    <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+                </pattern>
+            </defs>
+
+            <rect x="-40" y="-50" width="480" height="290" class="grid-pattern" />
+
+            <!-- 원본 사다리꼴 (민트색) -->
+            <polygon points="0,150 200,150 150,0 50,0" fill="var(--mint)" stroke="var(--mint-border)" stroke-width="4" stroke-linejoin="round" />
+
+            <!-- 복사본 사다리꼴 (주황색) - 원본과 완벽히 겹쳐서 시작 -->
+            <polygon id="copy-trapezoid" points="0,150 200,150 150,0 50,0" fill="var(--orange)" stroke="var(--orange-border)" stroke-width="4" stroke-linejoin="round" opacity="0.9" />
+
+            <!-- 윗변 치수선 (원본) -->
+            <g id="top-base-group">
+                <line x1="50" y1="-15" x2="150" y2="-15" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+                <line x1="50" y1="-20" x2="50" y2="-10" stroke="#FF6B35" stroke-width="3" />
+                <line x1="150" y1="-20" x2="150" y2="-10" stroke="#FF6B35" stroke-width="3" />
+                <text x="100" y="-25" text-anchor="middle" font-family="Jua" font-size="18" fill="#FF6B35">윗변</text>
+            </g>
+
+            <!-- 아랫변 치수선 (원본) -->
+            <g id="bottom-base-group">
+                <line x1="0" y1="165" x2="200" y2="165" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+                <line x1="0" y1="160" x2="0" y2="170" stroke="#FF6B35" stroke-width="3" />
+                <line x1="200" y1="160" x2="200" y2="170" stroke="#FF6B35" stroke-width="3" />
+                <text x="100" y="195" text-anchor="middle" font-family="Jua" font-size="18" fill="#FF6B35">아랫변</text>
+            </g>
+
+            <!-- 높이 치수선 -->
+            <g id="height-group">
+                <line x1="-15" y1="0" x2="-15" y2="150" stroke="#4D96FF" stroke-width="3" stroke-dasharray="5,5" stroke-linecap="round" />
+                <line x1="-20" y1="0" x2="-10" y2="0" stroke="#4D96FF" stroke-width="3" />
+                <line x1="-20" y1="150" x2="-10" y2="150" stroke="#4D96FF" stroke-width="3" />
+                <text x="-25" y="80" text-anchor="end" font-family="Jua" font-size="18" fill="#4D96FF">높이</text>
+            </g>
+
+            <!-- 결합 완료 후 나타날 커다란 밑변 치수선 -->
+            <g id="total-base-group">
+                <line x1="0" y1="210" x2="300" y2="210" stroke="#FF6B35" stroke-width="4" stroke-linecap="round" />
+                <line x1="0" y1="200" x2="0" y2="220" stroke="#FF6B35" stroke-width="4" />
+                <line x1="300" y1="200" x2="300" y2="220" stroke="#FF6B35" stroke-width="4" />
+                <text x="150" y="240" text-anchor="middle" font-family="Jua" font-size="20" fill="#FF6B35">(윗변 + 아랫변)</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="guide-box" id="guide-text">
+        사다리꼴의 넓이를 어떻게 구할까요?<br>
+        '공식 유도 시작' 버튼을 눌러보세요!
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-start" id="start-btn">✨ 공식 유도 시작</button>
+        <button class="btn btn-reset" id="reset-btn">🔄 다시 보기</button>
+    </div>
+</div>
+
+<script>
+    const copyTrapezoid = document.getElementById('copy-trapezoid');
+    const guideText = document.getElementById('guide-text');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const totalBaseGroup = document.getElementById('total-base-group');
+
+    let animationTimeouts = [];
+
+    startBtn.addEventListener('click', () => {
+        startBtn.style.display = 'none';
+        
+        // 그림자 효과 추가
+        copyTrapezoid.classList.add('moving');
+
+        // 1단계: 복사본 분리
+        copyTrapezoid.style.transform = 'translate(-15px, -20px)';
+        guideText.innerHTML = "1. 원본과 완전히 똑같은 <span class='highlight-orange'>쌍둥이 사다리꼴</span>을 하나 복사해요!";
+
+        // 2단계: 180도 회전
+        animationTimeouts.push(setTimeout(() => {
+            copyTrapezoid.style.transform = 'translate(-15px, -20px) rotate(180deg)';
+            guideText.innerHTML = "2. 쌍둥이 사다리꼴을 180도 빙글~ 거꾸로 뒤집어줍니다! 💫";
+        }, 2000));
+
+        // 3단계: 오른쪽 옆구리에 결합
+        animationTimeouts.push(setTimeout(() => {
+            copyTrapezoid.classList.remove('moving');
+            
+            // X축으로 150px 이동하면 원본의 오른쪽 빗변과 완벽하게 맞물림
+            copyTrapezoid.style.transform = 'translate(150px, 0px) rotate(180deg)';
+            
+            // 커다란 (윗변+아랫변) 밑변 치수선 등장
+            totalBaseGroup.style.opacity = '1';
+            
+            guideText.innerHTML = `
+                3. 딱 붙였더니 거대한 <b>평행사변형</b> 완성! 🎉<br><br>
+                커다란 평행사변형의 밑변은 <span class='highlight-orange'>(윗변 + 아랫변)</span>이 되었어요.<br>
+                (전체 넓이) = <span class='highlight-orange'>(윗변 + 아랫변)</span> × <span class='highlight-blue'>(높이)</span><br>
+                우리가 구할 사다리꼴은 딱 절반이므로 <br>
+                <b>(윗변 + 아랫변) × (높이) <span class='highlight-pink'>÷ 2</span></b>
+            `;
+            
+            resetBtn.style.display = 'inline-block';
+        }, 4200));
+    });
+
+    resetBtn.addEventListener('click', () => {
+        animationTimeouts.forEach(clearTimeout);
+        animationTimeouts = [];
+
+        copyTrapezoid.classList.remove('moving');
+        copyTrapezoid.style.transform = 'translate(0px, 0px) rotate(0deg)';
+        totalBaseGroup.style.opacity = '0';
+        
+        guideText.innerHTML = "사다리꼴의 넓이를 어떻게 구할까요?<br>'공식 유도 시작' 버튼을 눌러보세요!";
+        
+        resetBtn.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+    });
+</script>
+
+</body>
+</html>

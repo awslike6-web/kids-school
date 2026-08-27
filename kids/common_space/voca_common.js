@@ -186,6 +186,19 @@ function openModal(wordData) {
   } else { 
     imgEl.style.display = 'none'; 
   }
+
+  const interContainer = document.getElementById('modalInteractiveContainer');
+  const interFrame = document.getElementById('modalInteractiveFrame');
+  const interLink = document.getElementById('modalInteractiveExternalLink');
+
+  if (wordData.interactiveUrl) {
+    if (interFrame) interFrame.src = wordData.interactiveUrl;
+    if (interLink) interLink.href = wordData.interactiveUrl;
+    if (interContainer) interContainer.style.display = 'block';
+  } else {
+    if (interFrame) interFrame.src = 'about:blank';
+    if (interContainer) interContainer.style.display = 'none';
+  }
   
   const detailsGroup = document.getElementById('modalDetailsGroup');
   if (wordData.detailContext) {
@@ -229,6 +242,8 @@ function closeModal(event, force = false) {
   const overlay = document.getElementById('wordModal');
   if (force || event.target === overlay) { 
     if('speechSynthesis' in window) window.speechSynthesis.cancel(); 
+    const interFrame = document.getElementById('modalInteractiveFrame');
+    if (interFrame) interFrame.src = 'about:blank';
     overlay.classList.remove('active'); 
     setTimeout(() => overlay.style.display = 'none', 300); 
 

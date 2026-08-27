@@ -42,7 +42,7 @@ function parseVocaPage(page) {
         detailContext: p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "",
         imageUrl,
         audioUrl,
-        interactiveUrl: p["인터렉티브 링크"]?.url || p["인터렉티브 링크"]?.rich_text?.[0]?.plain_text || null,
+        interactiveUrl: p["인터렉티브 링크"]?.url || p["인터렉티브 링크"]?.rich_text?.[0]?.plain_text || p["인터랙티브 링크"]?.url || p["인터랙티브 링크"]?.rich_text?.[0]?.plain_text || null,
         pos: p["품사"]?.rich_text?.[0]?.plain_text || "",
         wordType: p["어휘유형"]?.select?.name || "",
         type: p["어휘유형"]?.select?.name || "",

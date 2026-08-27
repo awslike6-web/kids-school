@@ -135,6 +135,13 @@
       <button class="audio-btn" id="modalAudioBtn" title="단어 발음 듣기">🔊</button>
     </div>
     <img id="modalImage" class="modal-image" src="" alt="단어 이미지">
+    <div id="modalInteractiveContainer" style="display: none; margin-bottom: 20px; width: 100%;">
+      <div style="font-weight: bold; color: var(--purple); margin-bottom: 8px; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
+        <span>🎮 동적 인터랙티브 시뮬레이터</span>
+        <a id="modalInteractiveExternalLink" href="#" target="_blank" style="font-size: 0.85rem; color: var(--sky); text-decoration: underline;">새 창에서 크게 보기 ↗</a>
+      </div>
+      <iframe id="modalInteractiveFrame" src="" style="width: 100%; height: 380px; border: 2px solid var(--purple); border-radius: 16px; background: #fff;" loading="lazy"></iframe>
+    </div>
     <div class="modal-meaning" id="modalMeaning">뜻풀이 영역</div>
     <details id="modalDetailsGroup">
       <summary>상세설명 보기 (심화)</summary>
