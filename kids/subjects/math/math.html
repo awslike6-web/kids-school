@@ -534,14 +534,18 @@
     document.getElementById('userIcon').textContent = icon;
 
     // URL 해시 확인
-    const hash = window.location.hash.replace('#', '');
-    if (hash === 'concepts') {
-      openMathSection('concepts');
-    } else if (hash === 'workout') {
-      openMathSection('workout');
-    } else {
-      openMathSection('gateway');
+    function checkHashAndSwitch() {
+      const hash = window.location.hash.replace('#', '');
+      if (hash === 'concepts') {
+        openMathSection('concepts');
+      } else if (hash === 'workout') {
+        openMathSection('workout');
+      } else {
+        openMathSection('gateway');
+      }
     }
+    checkHashAndSwitch();
+    window.addEventListener('hashchange', checkHashAndSwitch);
 
     if (typeof initFairyAudio === 'function') initFairyAudio();
     if (typeof initFairyChat === 'function') initFairyChat("MATH", "수학관제탑");
