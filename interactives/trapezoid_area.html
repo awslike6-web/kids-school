@@ -93,21 +93,73 @@
     }
 
     .guide-box {
-        background: #f8f9fa;
-        border-left: 5px solid var(--cyan);
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 25px;
-        min-height: 120px;
+        background: #fdfbf7;
+        border: 2px solid #e2e8f0;
+        border-left: 6px solid var(--pink, #FF6B9D);
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        min-height: 90px;
+        font-family: 'Nanum Gothic', sans-serif;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #2d3748;
+        word-break: keep-all;
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: all 0.3s ease;
+    }
+    .step-desc {
+        font-size: 1.05rem;
+        color: #334155;
+        margin-bottom: 8px;
+        line-height: 1.6;
+        word-break: keep-all;
+        font-weight: 600;
+    }
+    .formula-box {
+        background: linear-gradient(135deg, #fff5f7 0%, #f0f9ff 100%);
+        border: 2px dashed #f472b6;
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .formula-row {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Jua', sans-serif;
-        font-size: 1.3rem;
-        line-height: 1.6;
-        color: #333;
-        transition: all 0.3s ease;
+        gap: 8px;
+        font-size: 0.95rem;
+        color: #475569;
+        flex-wrap: wrap;
     }
+    .formula-final {
+        margin-top: 4px;
+        padding-top: 6px;
+        border-top: 1px solid rgba(244, 114, 182, 0.3);
+        font-family: 'Jua', sans-serif;
+        font-size: 1.35rem;
+        color: #e11d48;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .badge-pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+    .badge-orange { background: #ffedd5; color: #c2410c; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
+    .badge-pink { background: #ffe4e6; color: #e11d48; }
 
     .controls {
         display: flex;
@@ -250,11 +302,16 @@
             totalBaseGroup.style.opacity = '1';
             
             guideText.innerHTML = `
-                3. 딱 붙였더니 거대한 <b>평행사변형</b> 완성! 🎉<br><br>
-                커다란 평행사변형의 밑변은 <span class='highlight-orange'>(윗변 + 아랫변)</span>이 되었어요.<br>
-                (전체 넓이) = <span class='highlight-orange'>(윗변 + 아랫변)</span> × <span class='highlight-blue'>(높이)</span><br>
-                우리가 구할 사다리꼴은 딱 절반이므로 <br>
-                <b>(윗변 + 아랫변) × (높이) <span class='highlight-pink'>÷ 2</span></b>
+                <div class="step-desc">3. 똑같은 사다리꼴을 뒤집어 붙여 거대한 <strong>평행사변형</strong>을 만들었어요! 🎉</div>
+                <div class="formula-box">
+                    <div class="formula-row">
+                        (평행사변형 밑변) = <span class="badge-pill badge-orange">윗변 + 아랫변</span>
+                        <span style="color:#94a3b8;">|</span>
+                        (전체 넓이) = (윗변 + 아랫변) × (높이)
+                    </div>
+                    <div class="formula-row" style="color:#64748b; font-size:0.88rem;">사다리꼴 1개는 전체 평행사변형의 딱 절반(÷ 2)이에요!</div>
+                    <div class="formula-final">✨ 사다리꼴 넓이 = (윗변 + 아랫변) × (높이) ÷ 2</div>
+                </div>
             `;
             
             resetBtn.style.display = 'inline-block';

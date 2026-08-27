@@ -97,21 +97,73 @@
     }
 
     .guide-box {
-        background: #f8f9fa;
-        border-left: 5px solid var(--cyan);
-        padding: 20px;
-        border-radius: 15px;
-        margin-bottom: 25px;
-        min-height: 120px;
+        background: #fdfbf7;
+        border: 2px solid #e2e8f0;
+        border-left: 6px solid var(--pink, #FF6B9D);
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        min-height: 90px;
+        font-family: 'Nanum Gothic', sans-serif;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #2d3748;
+        word-break: keep-all;
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: all 0.3s ease;
+    }
+    .step-desc {
+        font-size: 1.05rem;
+        color: #334155;
+        margin-bottom: 8px;
+        line-height: 1.6;
+        word-break: keep-all;
+        font-weight: 600;
+    }
+    .formula-box {
+        background: linear-gradient(135deg, #fff5f7 0%, #f0f9ff 100%);
+        border: 2px dashed #f472b6;
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .formula-row {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-family: 'Jua', sans-serif;
-        font-size: 1.3rem;
-        line-height: 1.6;
-        color: #333;
-        transition: all 0.3s ease;
+        gap: 8px;
+        font-size: 0.95rem;
+        color: #475569;
+        flex-wrap: wrap;
     }
+    .formula-final {
+        margin-top: 4px;
+        padding-top: 6px;
+        border-top: 1px solid rgba(244, 114, 182, 0.3);
+        font-family: 'Jua', sans-serif;
+        font-size: 1.35rem;
+        color: #e11d48;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .badge-pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.88rem;
+        font-weight: 700;
+    }
+    .badge-orange { background: #ffedd5; color: #c2410c; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; }
+    .badge-pink { background: #ffe4e6; color: #e11d48; }
 
     .controls {
         display: flex;
@@ -253,10 +305,15 @@
             baseGroup.style.transform = 'translateX(50px)';
             
             guideText.innerHTML = `
-                3. 오른쪽 경사면에 완벽하게 결합하여 <b>직사각형</b>으로 변신! 🎉<br><br>
-                <span class='highlight-orange'>(평행사변형의 밑변)</span> = <span class='highlight-blue'>(직사각형의 가로)</span><br>
-                <span class='highlight-orange'>(평행사변형의 높이)</span> = <span class='highlight-blue'>(직사각형의 세로)</span><br>
-                따라서 넓이 공식은 <b>(밑변) × (높이)</b> 로 같습니다!
+                <div class="step-desc">3. 잘라낸 삼각형을 오른쪽에 붙여 완벽한 <strong>직사각형</strong>으로 변신했어요! 🎉</div>
+                <div class="formula-box">
+                    <div class="formula-row">
+                        <span class="badge-pill badge-orange">평행사변형 밑변</span> = <span class="badge-pill badge-blue">직사각형 가로</span>
+                        <span style="color:#94a3b8;">|</span>
+                        <span class="badge-pill badge-orange">평행사변형 높이</span> = <span class="badge-pill badge-blue">직사각형 세로</span>
+                    </div>
+                    <div class="formula-final">✨ 평행사변형 넓이 = (밑변) × (높이)</div>
+                </div>
             `;
             
             baseLabel.textContent = "가로 (밑변)";
