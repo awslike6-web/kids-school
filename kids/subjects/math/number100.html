@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🌟 100까지의 수 우주 탐험대 🚀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    .grid-100 {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      max-width: 500px;
+      margin: 15px auto;
+      background: rgba(0,0,0,0.1);
+      padding: 10px;
+      border-radius: 16px;
+    }
+    .cell-100 {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .cell-100:hover { transform: scale(1.15); background: #e0f2fe; color: #0284c7; z-index: 2; }
+    .cell-100.highlight-step { background: #fef08a; color: #854d0e; font-weight: 800; transform: scale(1.05); }
+    .cell-100.highlight-even { background: #dcfce7; color: #15803d; }
+    .cell-100.highlight-odd { background: #fee2e2; color: #b91c1c; }
+
+    .bundle-tray {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 18px;
+      border: 2px dashed #f472b6;
+      margin: 15px 0;
+      min-height: 100px;
+    }
+    .ten-bundle {
+      background: linear-gradient(135deg, #fbcfe8, #f472b6);
+      border: 2px solid #db2777;
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ten-bundle .title { font-size: 0.8rem; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+    .ten-bundle .dots { display: grid; grid-template-columns: repeat(5, 8px); gap: 3px; }
+    .ten-bundle .dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+
+    .single-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      padding: 10px;
+    }
+    .single-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 2px solid #0284c7;
+      animation: popIn 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">🌟 100까지의 수 우주 탐험대 🚀</h1>
+      <p class="hero-subtitle">10개씩 묶음과 낱개로 큰 수를 만들고, 100 수 배열판에서 규칙을 찾아봐요!</p>
+    </header>
+
+    <!-- 1. 10개씩 묶음과 낱개 시뮬레이터 -->
+    <section class="math-section-card" id="section-bundles">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 묶음과 낱개 시각화</span>
+          <h2 class="section-title">📦 10개씩 묶음 상자와 낱개 구슬</h2>
+          <p class="section-desc">10개 묶음 상자와 낱개를 조작하며 몇십과 몇십몇의 원리를 배워요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('10개 묶음 상자와 낱개 구슬을 더해보세요!')">🔊</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+        <button class="divide-btn" style="background:#ec4899;" onclick="addBundle(1)">➕ 10개 묶음 추가 (+10)</button>
+        <button class="divide-btn" style="background:#f43f5e;" onclick="addBundle(-1)">➖ 10개 묶음 빼기 (-10)</button>
+        <button class="divide-btn" style="background:#0284c7;" onclick="addSingle(1)">🍬 낱개 추가 (+1)</button>
+        <button class="divide-btn" style="background:#64748b;" onclick="addSingle(-1)">🍬 낱개 빼기 (-1)</button>
+        <button class="divide-btn" style="background:#94a3b8;" onclick="resetBundle()">🔄 초기화</button>
+      </div>
+
+      <div class="bundle-tray" id="bundle-tray">
+        <div id="bundles-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        <div class="single-dots" id="singles-container"></div>
+      </div>
+
+      <div style="background:#fff; border-radius:16px; padding:15px; text-align:center; border:2px solid #e2e8f0; font-family:'Jua',sans-serif;">
+        <div style="font-size:1.6rem; color:#db2777;" id="bundle-number-display">0</div>
+        <div style="font-size:1.1rem; color:#475569; margin-top:4px;" id="bundle-read-display">10개씩 0묶음과 낱개 0개 (영)</div>
+      </div>
+    </section>
+
+    <!-- 2. 100 수 배열판 탐험 -->
+    <section class="math-section-card" id="section-grid100">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs">섹션 2 : 1~100 수 배열판</span>
+          <h2 class="section-title">🗺️ 100 수 배열판과 뛰어세기 규칙</h2>
+          <p class="section-desc">2씩, 5씩, 10씩 뛰어세기를 누르면 수 배열판에 불이 들어와요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('수 배열판에서 뛰어세기 규칙을 관찰해보세요!')">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="candy-num-btn active" onclick="highlightSkip(1, this)">1씩 세기</button>
+        <button class="candy-num-btn" onclick="highlightSkip(2, this)">2씩 뛰어세기</button>
+        <button class="candy-num-btn" onclick="highlightSkip(5, this)">5씩 뛰어세기</button>
+        <button class="candy-num-btn" onclick="highlightSkip(10, this)">10씩 뛰어세기</button>
+        <button class="candy-num-btn" onclick="highlightEvenOdd('even', this)">짝수 (2,4,6..)</button>
+        <button class="candy-num-btn" onclick="highlightEvenOdd('odd', this)">홀수 (1,3,5..)</button>
+      </div>
+
+      <div class="grid-100" id="grid100"></div>
+    </section>
+
+    <!-- 3. 두 수의 크기 비교 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 3 : 크기 비교 & 순서 퀴즈</span>
+          <h2 class="section-title">🐊 어느 쪽이 더 클까요? (크기 비교 악어)</h2>
+          <p class="section-desc">더 큰 수 쪽으로 악어 입(&gt;, &lt;)을 벌려주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('두 수의 크기를 비교하고 알맞은 부등호를 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:500px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 8px 20px rgba(0,0,0,0.05);">
+        <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:20px;">
+          <div style="font-family:'Jua'; font-size:3rem; color:#0284c7;" id="num-a">45</div>
+          <div style="font-family:'Jua'; font-size:2.5rem; color:#ec4899; min-width:60px;" id="compare-sign">?</div>
+          <div style="font-family:'Jua'; font-size:3rem; color:#0284c7;" id="num-b">52</div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; margin-bottom:15px;">
+          <button class="divide-btn" style="font-size:1.8rem; padding:10px 24px;" onclick="chooseCompare('<')">&lt;</button>
+          <button class="divide-btn" style="font-size:1.8rem; padding:10px 24px; background:#10b981;" onclick="chooseCompare('=')">=</button>
+          <button class="divide-btn" style="font-size:1.8rem; padding:10px 24px;" onclick="chooseCompare('>')">&gt;</button>
+        </div>
+
+        <div id="compare-feedback" style="font-family:'Jua'; font-size:1.2rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px;" onclick="nextCompareQ()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    let bundleCount = 3;
+    let singleCount = 4;
+    const KOREAN_TENS = { 1:'열', 2:'스물', 3:'서른', 4:'마흔', 5:'쉰', 6:'예순', 7:'일흔', 8:'여든', 9:'아흔', 10:'백' };
+    const SINO_TENS = { 1:'십', 2:'이십', 3:'삼십', 4:'사십', 5:'오십', 6:'육십', 7:'칠십', 8:'팔십', 9:'구십', 10:'백' };
+    const KOREAN_ONES = { 1:'하나', 2:'둘', 3:'셋', 4:'넷', 5:'다섯', 6:'여섯', 7:'일곱', 8:'여덟', 9:'아홉' };
+    const SINO_ONES = { 1:'일', 2:'이', 3:'삼', 4:'사', 5:'오', 6:'육', 7:'칠', 8:'팔', 9:'구' };
+
+    function renderBundles() {
+      const bContainer = document.getElementById('bundles-container');
+      const sContainer = document.getElementById('singles-container');
+      bContainer.innerHTML = '';
+      sContainer.innerHTML = '';
+
+      for (let i = 0; i < bundleCount; i++) {
+        const bundle = document.createElement('div');
+        bundle.className = 'ten-bundle';
+        bundle.innerHTML = `
+          <div class="title">10개 묶음</div>
+          <div class="dots">${'<div class="dot"></div>'.repeat(10)}</div>
+        `;
+        bContainer.appendChild(bundle);
+      }
+
+      for (let i = 0; i < singleCount; i++) {
+        const single = document.createElement('div');
+        single.className = 'single-dot';
+        sContainer.appendChild(single);
+      }
+
+      const total = bundleCount * 10 + singleCount;
+      document.getElementById('bundle-number-display').textContent = total;
+
+      let readStr = `10개씩 ${bundleCount}묶음과 낱개 ${singleCount}개`;
+      if (total === 0) {
+        readStr += ' (영)';
+      } else if (total === 100) {
+        readStr += ' (백 / 일백)';
+      } else {
+        const sino = (bundleCount > 0 ? SINO_TENS[bundleCount] : '') + (singleCount > 0 ? SINO_ONES[singleCount] : '');
+        const pure = (bundleCount > 0 ? KOREAN_TENS[bundleCount] : '') + (singleCount > 0 ? (bundleCount > 0 ? ' ' : '') + KOREAN_ONES[singleCount] : '');
+        readStr += ` (${sino} / ${pure})`;
+      }
+      document.getElementById('bundle-read-display').textContent = readStr;
+    }
+
+    function addBundle(delta) {
+      bundleCount = Math.max(0, Math.min(10, bundleCount + delta));
+      if (bundleCount === 10) singleCount = 0;
+      renderBundles();
+    }
+
+    function addSingle(delta) {
+      if (bundleCount === 10) return;
+      singleCount = Math.max(0, Math.min(9, singleCount + delta));
+      renderBundles();
+    }
+
+    function resetBundle() {
+      bundleCount = 0;
+      singleCount = 0;
+      renderBundles();
+    }
+
+    // 100 수 배열판 생성
+    function initGrid100() {
+      const grid = document.getElementById('grid100');
+      grid.innerHTML = '';
+      for (let i = 1; i <= 100; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell-100';
+        cell.textContent = i;
+        cell.onclick = () => {
+          if (typeof fairySpeak === 'function') fairySpeak(`${i}!`);
+        };
+        grid.appendChild(cell);
+      }
+    }
+
+    function highlightSkip(step, btn) {
+      document.querySelectorAll('.candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const cells = document.querySelectorAll('.cell-100');
+      cells.forEach((c, idx) => {
+        c.className = 'cell-100';
+        const num = idx + 1;
+        if (num % step === 0) {
+          c.classList.add('highlight-step');
+        }
+      });
+      if (typeof fairySpeak === 'function') fairySpeak(`${step}씩 뛰어세기를 살펴봐요!`);
+    }
+
+    function highlightEvenOdd(type, btn) {
+      document.querySelectorAll('.candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const cells = document.querySelectorAll('.cell-100');
+      cells.forEach((c, idx) => {
+        c.className = 'cell-100';
+        const num = idx + 1;
+        if (type === 'even' && num % 2 === 0) {
+          c.classList.add('highlight-even');
+        } else if (type === 'odd' && num % 2 !== 0) {
+          c.classList.add('highlight-odd');
+        }
+      });
+      if (typeof fairySpeak === 'function') fairySpeak(type === 'even' ? '짝수에 초록 불이 들어왔어요!' : '홀수에 빨간 불이 들어왔어요!');
+    }
+
+    // 3. 크기비교 퀴즈
+    let curA = 45, curB = 52;
+    function nextCompareQ() {
+      curA = Math.floor(Math.random() * 90) + 10;
+      curB = Math.floor(Math.random() * 90) + 10;
+      document.getElementById('num-a').textContent = curA;
+      document.getElementById('num-b').textContent = curB;
+      document.getElementById('compare-sign').textContent = '?';
+      document.getElementById('compare-feedback').textContent = '';
+    }
+
+    function chooseCompare(sign) {
+      let correctSign = curA > curB ? '>' : (curA < curB ? '<' : '=');
+      const fb = document.getElementById('compare-feedback');
+      document.getElementById('compare-sign').textContent = sign;
+      if (sign === correctSign) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! ${curA} ${sign} ${curB} 참 잘했어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`정답이에요! ${curA}가 ${curB}보다 ${sign === '>' ? '큽니다' : (sign === '<' ? '작습니다' : '같습니다')}`);
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 다시 생각해보세요! 정답은 ${curA} ${correctSign} ${curB} 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 올바른 부등호는 ${correctSign} 입니다.`);
+      }
+    }
+
+    function exitRoom() {
+      location.href = 'math.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderBundles();
+      initGrid100();
+      nextCompareQ();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "100까지의수");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>

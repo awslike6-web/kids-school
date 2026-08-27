@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>⏰ 시계 보기와 규칙 찾기 탐험대 🔍</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    .clock-canvas {
+      width: 240px;
+      height: 240px;
+      margin: 15px auto;
+      background: #fff;
+      border: 6px solid #f43f5e;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .clock-center-pin {
+      width: 14px;
+      height: 14px;
+      background: #be123c;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+    .clock-hand-hour {
+      width: 6px;
+      height: 60px;
+      background: #0284c7;
+      border-radius: 4px;
+      position: absolute;
+      bottom: 50%;
+      left: calc(50% - 3px);
+      transform-origin: bottom center;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 5;
+    }
+    .clock-hand-minute {
+      width: 4px;
+      height: 85px;
+      background: #f43f5e;
+      border-radius: 4px;
+      position: absolute;
+      bottom: 50%;
+      left: calc(50% - 2px);
+      transform-origin: bottom center;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 6;
+    }
+    .clock-num {
+      position: absolute;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.2rem;
+      color: #334155;
+      font-weight: bold;
+      transform: translate(-50%, -50%);
+    }
+
+    .pattern-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 18px;
+      border: 2px dashed #f472b6;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .pattern-item {
+      font-size: 2.5rem;
+      animation: popIn 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">⏰ 시계 보기와 규칙 찾기 🔍</h1>
+      <p class="hero-subtitle">짧은바늘과 긴바늘로 몇 시, 몇 시 30분을 읽고, 알록달록 무늬 규칙을 찾아봐요!</p>
+    </header>
+
+    <!-- 1. 아날로그 시계 조작 시뮬레이터 -->
+    <section class="math-section-card" id="section-clock">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 시계 조작기</span>
+          <h2 class="section-title">🕒 몇 시와 몇 시 30분 읽기</h2>
+          <p class="section-desc">버튼을 눌러 시간을 바꾸면 시계 바늘이 회전해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('시계 바늘을 움직여 몇 시와 몇 시 30분을 확인해보세요!')">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;">
+        <button class="candy-num-btn active" onclick="setClockTime(3, 0, this)">3시 정각</button>
+        <button class="candy-num-btn" onclick="setClockTime(7, 0, this)">7시 정각</button>
+        <button class="candy-num-btn" onclick="setClockTime(4, 30, this)">4시 30분</button>
+        <button class="candy-num-btn" onclick="setClockTime(9, 30, this)">9시 30분</button>
+        <button class="candy-num-btn" onclick="setClockTime(12, 0, this)">12시 정각</button>
+      </div>
+
+      <div class="clock-canvas" id="clock-face">
+        <div class="clock-center-pin"></div>
+        <div class="clock-hand-hour" id="hand-hour"></div>
+        <div class="clock-hand-minute" id="hand-minute"></div>
+      </div>
+
+      <div style="background:#fff; border-radius:16px; padding:15px; text-align:center; border:2px solid #e2e8f0; font-family:'Jua',sans-serif;">
+        <div style="font-size:1.8rem; color:#f43f5e;" id="clock-digital-display">3시 00분</div>
+        <div style="font-size:1.05rem; color:#475569; margin-top:4px;" id="clock-rule-desc">긴바늘(빨강)이 12를 가리키면 ➔ [3시 정각]</div>
+      </div>
+    </section>
+
+    <!-- 2. 패턴 & 무늬 규칙 찾기 -->
+    <section class="math-section-card" id="section-patterns">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs">섹션 2 : 무늬와 수의 규칙</span>
+          <h2 class="section-title">🔍 다음에 올 것은 무엇일까요?</h2>
+          <p class="section-desc">반복되는 패턴을 발견하고 빈칸에 알맞은 답을 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('반복되는 규칙을 찾아보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:520px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0;">
+        <div class="pattern-row" id="pattern-display"></div>
+
+        <div id="pattern-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="pattern-feedback" style="font-family:'Jua'; font-size:1.2rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px;" onclick="nextPattern()">다음 규칙 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    // 시계 숫자 1~12 배치
+    function initClockNumbers() {
+      const face = document.getElementById('clock-face');
+      const radius = 95;
+      const center = 120;
+      for (let num = 1; num <= 12; num++) {
+        const angle = (num * 30 - 90) * (Math.PI / 180);
+        const x = center + radius * Math.cos(angle);
+        const y = center + radius * Math.sin(angle);
+        const el = document.createElement('div');
+        el.className = 'clock-num';
+        el.textContent = num;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        face.appendChild(el);
+      }
+    }
+
+    function setClockTime(hour, minute, btn) {
+      if (btn) {
+        document.querySelectorAll('.candy-num-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      const mDeg = minute * 6; // 360 / 60
+      const hDeg = (hour % 12) * 30 + (minute / 60) * 30;
+
+      document.getElementById('hand-minute').style.transform = `rotate(${mDeg}deg)`;
+      document.getElementById('hand-hour').style.transform = `rotate(${hDeg}deg)`;
+
+      const minStr = minute === 0 ? '00' : `${minute}`;
+      document.getElementById('clock-digital-display').textContent = `${hour}시 ${minStr}분`;
+
+      const desc = minute === 0 
+        ? `긴바늘(빨강)이 12를 가리키면 ➔ [${hour}시 정각]`
+        : `긴바늘이 6을 가리키고, 짧은바늘이 ${hour}와 ${hour+1} 사이에 있으면 ➔ [${hour}시 30분]`;
+      document.getElementById('clock-rule-desc').textContent = desc;
+
+      if (typeof fairySpeak === 'function') {
+        fairySpeak(minute === 0 ? `${hour}시 정각입니다!` : `${hour}시 30분입니다!`);
+      }
+    }
+
+    // 2. 규칙 찾기 퀴즈
+    const PATTERNS = [
+      { items: ["🔴", "🔵", "🔴", "🔵", "🔴", "❓"], ans: "🔵", choices: ["🔴", "🔵", "🟡", "🟢"] },
+      { items: ["⭐", "🌙", "⭐", "🌙", "⭐", "❓"], ans: "🌙", choices: ["⭐", "🌙", "☀️", "☁️"] },
+      { items: ["2", "4", "6", "8", "❓"], ans: "10", choices: ["9", "10", "11", "12"] },
+      { items: ["5", "10", "15", "20", "❓"], ans: "25", choices: ["22", "24", "25", "30"] },
+      { items: ["🍎", "🍌", "🍎", "🍌", "🍎", "❓"], ans: "🍌", choices: ["🍎", "🍌", "🍇", "🍓"] },
+      { items: ["△", "□", "○", "△", "□", "❓"], ans: "○", choices: ["△", "□", "○", "⭐"] }
+    ];
+    let patIdx = 0;
+
+    function renderPattern() {
+      const p = PATTERNS[patIdx % PATTERNS.length];
+      const pBox = document.getElementById('pattern-display');
+      pBox.innerHTML = '';
+      p.items.forEach(it => {
+        const span = document.createElement('span');
+        span.className = 'pattern-item';
+        span.textContent = it;
+        if (it === '❓') span.style.color = '#ec4899';
+        pBox.appendChild(span);
+      });
+
+      const cBox = document.getElementById('pattern-choices');
+      cBox.innerHTML = '';
+      document.getElementById('pattern-feedback').textContent = '';
+
+      p.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.4rem';
+        btn.textContent = c;
+        btn.onclick = () => checkPatternAns(c, p.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkPatternAns(selected, correct) {
+      const fb = document.getElementById('pattern-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 완벽한 규칙을 찾았어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 규칙을 아주 잘 찾았어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 알맞은 규칙은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 알맞은 답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextPattern() {
+      patIdx++;
+      renderPattern();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      initClockNumbers();
+      setClockTime(3, 0, null);
+      renderPattern();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "시계와규칙");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
