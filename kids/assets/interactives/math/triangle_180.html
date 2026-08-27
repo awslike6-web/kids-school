@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼각형 세 각의 합은 180도! 🔺</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #fdfbf7;
+        --surface: #ffffff;
+        --mint: #B5EAEA;
+        --mint-border: #78C4C4;
+        --orange: #FF8A80;
+        --orange-border: #FF5252;
+        --blue: #82B1FF;
+        --blue-border: #448AFF;
+        --green: #B9F6CA;
+        --green-border: #69F0AE;
+        --text-main: #4a3352;
+        --cyan: #00D4FF;
+        --pink: #FF6B9D;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.5rem;
+        color: var(--pink);
+        margin-bottom: 10px;
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        color: #666;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 3px solid #ffe7ee;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        max-width: 720px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 540px;
+        margin: 0 auto 20px auto;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px dashed #e0e0e0;
+        overflow: hidden;
+    }
+
+    svg {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* 각 조각 애니메이션 트랜지션 */
+    .sector-group {
+        transition: transform 1.6s cubic-bezier(0.34, 1.25, 0.64, 1), opacity 0.3s ease;
+    }
+
+    .sector-group.moving {
+        filter: drop-shadow(0px 6px 12px rgba(0,0,0,0.2));
+    }
+
+    .guide-box {
+        background: #fdfbf7;
+        border: 2px solid #e2e8f0;
+        border-left: 6px solid var(--pink, #FF6B9D);
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+        min-height: 90px;
+        font-family: 'Nanum Gothic', sans-serif;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #2d3748;
+        word-break: keep-all;
+        text-align: left;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: all 0.3s ease;
+    }
+
+    .step-desc {
+        font-size: 1.05rem;
+        color: #334155;
+        margin-bottom: 8px;
+        line-height: 1.6;
+        word-break: keep-all;
+        font-weight: 600;
+    }
+
+    .formula-box {
+        background: linear-gradient(135deg, #fff5f7 0%, #f0f9ff 100%);
+        border: 2px dashed #f472b6;
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .formula-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 1.05rem;
+        color: #475569;
+        flex-wrap: wrap;
+        font-weight: 700;
+    }
+
+    .formula-final {
+        margin-top: 4px;
+        padding-top: 6px;
+        border-top: 1px solid rgba(244, 114, 182, 0.3);
+        font-family: 'Jua', sans-serif;
+        font-size: 1.45rem;
+        color: #e11d48;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+    .badge-orange { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    .badge-blue { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+    .badge-green { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .badge-pink { background: #ffe4e6; color: #e11d48; border: 1px solid #fecdd3; }
+
+    .controls {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 20px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.15rem;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    .btn:hover { transform: translateY(-3px) scale(1.04); }
+    .btn:active { transform: translateY(2px) scale(0.96); }
+    
+    .btn-start { background: linear-gradient(135deg, var(--cyan), #009ffd); color: white; }
+    .btn-reset { background: #e0e0e0; color: #555; display: none; }
+
+    .shape-selector {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .shape-btn {
+        padding: 6px 14px;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .shape-btn.active {
+        background: #4F46E5;
+        color: white;
+        border-color: #4338CA;
+    }
+
+    .grid-pattern { fill: url(#grid); }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">삼각형 세 각의 합은 180° 🔺</div>
+    <div class="subtitle">세 꼭짓점을 잘라서 모으면 일직선(평각)이 돼요!</div>
+</div>
+
+<div class="card">
+    <div class="shape-selector">
+        <button class="shape-btn active" onclick="setTriangleType('acute')">일반 예각삼각형</button>
+        <button class="shape-btn" onclick="setTriangleType('right')">직각삼각형</button>
+        <button class="shape-btn" onclick="setTriangleType('obtuse')">둔각삼각형</button>
+    </div>
+
+    <div class="canvas-container">
+        <svg id="main-svg" viewBox="-20 -20 440 330" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f4f4f4" stroke-width="1"/>
+                </pattern>
+            </defs>
+
+            <!-- 배경 그리드 -->
+            <rect x="-20" y="-20" width="440" height="330" class="grid-pattern" />
+
+            <!-- 원본 삼각형 몸통 -->
+            <polygon id="tri-polygon" points="" fill="var(--mint)" stroke="var(--mint-border)" stroke-width="3" stroke-linejoin="round" />
+
+            <!-- 삼각형 자르는 점선 호(가이드) -->
+            <g id="cut-lines" stroke="#ff4757" stroke-width="2" stroke-dasharray="4,4" fill="none" opacity="0.6"></g>
+
+            <!-- 아래쪽 일직선(평각 기준선) 가이드 -->
+            <g id="baseline-group" opacity="0.4">
+                <line x1="60" y1="270" x2="340" y2="270" stroke="#475569" stroke-width="3" stroke-dasharray="6,6" stroke-linecap="round" />
+                <circle cx="200" cy="270" r="4" fill="#475569" />
+                <text x="200" y="300" text-anchor="middle" font-family="Jua" font-size="15" fill="#64748B">일직선 (평각 = 180°)</text>
+            </g>
+
+            <!-- 180도 완성 무지개 아크 -->
+            <path id="rainbow-arc" d="" fill="none" stroke="#e11d48" stroke-width="3" stroke-dasharray="5,5" opacity="0" />
+
+            <!-- 세 각의 조각 그룹 (부채꼴 + 텍스트 라벨) -->
+            <!-- 각 A (주황/빨강) -->
+            <g id="group-a" class="sector-group">
+                <path id="sector-a" d="" fill="#FF8A80" stroke="#FF5252" stroke-width="2" opacity="0.95" />
+                <text id="label-a" font-family="Jua" font-size="16" fill="#B71C1C" text-anchor="middle">㉠</text>
+            </g>
+
+            <!-- 각 B (파랑) -->
+            <g id="group-b" class="sector-group">
+                <path id="sector-b" d="" fill="#82B1FF" stroke="#448AFF" stroke-width="2" opacity="0.95" />
+                <text id="label-b" font-family="Jua" font-size="16" fill="#0D47A1" text-anchor="middle">㉡</text>
+            </g>
+
+            <!-- 각 C (초록) -->
+            <g id="group-c" class="sector-group">
+                <path id="sector-c" d="" fill="#B9F6CA" stroke="#69F0AE" stroke-width="2" opacity="0.95" />
+                <text id="label-c" font-family="Jua" font-size="16" fill="#1B5E20" text-anchor="middle">㉢</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="guide-box" id="guide-text">
+        삼각형의 세 각을 모두 더하면 몇 도가 될까요?<br>
+        '공식 유도 시작' 버튼을 눌러 확인해보세요! ✨
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-start" id="start-btn">✨ 공식 유도 시작</button>
+        <button class="btn btn-reset" id="reset-btn">🔄 다시 보기</button>
+    </div>
+</div>
+
+<script>
+    const TRIANGLES = {
+        acute: { A: {x: 180, y: 35}, B: {x: 70, y: 175}, C: {x: 330, y: 175} },
+        right: { A: {x: 90, y: 35},  B: {x: 90, y: 175}, C: {x: 330, y: 175} },
+        obtuse: { A: {x: 90, y: 55}, B: {x: 150, y: 175}, C: {x: 340, y: 175} }
+    };
+
+    let currentType = 'acute';
+    const R = 48;
+
+    const triPoly = document.getElementById('tri-polygon');
+    const cutLines = document.getElementById('cut-lines');
+
+    const groupA = document.getElementById('group-a');
+    const groupB = document.getElementById('group-b');
+    const groupC = document.getElementById('group-c');
+
+    const sectorA = document.getElementById('sector-a');
+    const sectorB = document.getElementById('sector-b');
+    const sectorC = document.getElementById('sector-c');
+
+    const labelA = document.getElementById('label-a');
+    const labelB = document.getElementById('label-b');
+    const labelC = document.getElementById('label-c');
+
+    const baselineGroup = document.getElementById('baseline-group');
+    const rainbowArc = document.getElementById('rainbow-arc');
+    const guideText = document.getElementById('guide-text');
+    const startBtn = document.getElementById('start-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    let animationTimeouts = [];
+
+    // SVG 부채꼴 Path 생성 함수
+    function createSectorPath(center, startAngleDeg, sweepAngleDeg, radius = R) {
+        const rad = Math.PI / 180;
+        const sRad = startAngleDeg * rad;
+        const eRad = (startAngleDeg + sweepAngleDeg) * rad;
+
+        const x1 = center.x + radius * Math.cos(sRad);
+        const y1 = center.y + radius * Math.sin(sRad);
+        const x2 = center.x + radius * Math.cos(eRad);
+        const y2 = center.y + radius * Math.sin(eRad);
+
+        const largeArc = sweepAngleDeg > 180 ? 1 : 0;
+        return `M ${center.x} ${center.y} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+    }
+
+    // 꼭짓점에서 항상 180도 이하의 내각(Inner angle)을 정확히 계산하는 함수
+    function getVertexInnerAngle(V, P1, P2) {
+        const ang1 = (Math.atan2(P1.y - V.y, P1.x - V.x) * 180 / Math.PI + 360) % 360;
+        const ang2 = (Math.atan2(P2.y - V.y, P2.x - V.x) * 180 / Math.PI + 360) % 360;
+
+        const delta = (ang2 - ang1 + 360) % 360;
+        if (delta <= 180) {
+            return { start: ang1, sweep: delta };
+        } else {
+            return { start: ang2, sweep: 360 - delta };
+        }
+    }
+
+    function getTriangleAngles(pts) {
+        const { A, B, C } = pts;
+        return {
+            A: getVertexInnerAngle(A, B, C),
+            B: getVertexInnerAngle(B, C, A),
+            C: getVertexInnerAngle(C, A, B)
+        };
+    }
+
+    function renderTriangle() {
+        const pts = TRIANGLES[currentType];
+        const { A, B, C } = pts;
+        const angles = getTriangleAngles(pts);
+
+        triPoly.setAttribute('points', `${B.x},${B.y} ${C.x},${C.y} ${A.x},${A.y}`);
+
+        // 각 조각 부채꼴 Path 렌더링
+        sectorA.setAttribute('d', createSectorPath(A, angles.A.start, angles.A.sweep));
+        sectorB.setAttribute('d', createSectorPath(B, angles.B.start, angles.B.sweep));
+        sectorC.setAttribute('d', createSectorPath(C, angles.C.start, angles.C.sweep));
+
+        // 자르는 점선 가이드
+        cutLines.innerHTML = `
+            <path d="${createSectorPath(A, angles.A.start, angles.A.sweep, R + 3)}" />
+            <path d="${createSectorPath(B, angles.B.start, angles.B.sweep, R + 3)}" />
+            <path d="${createSectorPath(C, angles.C.start, angles.C.sweep, R + 3)}" />
+        `;
+
+        // 라벨 위치 (부채꼴의 중앙각 방향)
+        const rad = Math.PI / 180;
+        const midA = (angles.A.start + angles.A.sweep / 2) * rad;
+        const midB = (angles.B.start + angles.B.sweep / 2) * rad;
+        const midC = (angles.C.start + angles.C.sweep / 2) * rad;
+
+        labelA.setAttribute('x', A.x + (R * 0.58) * Math.cos(midA));
+        labelA.setAttribute('y', A.y + (R * 0.58) * Math.sin(midA) + 5);
+
+        labelB.setAttribute('x', B.x + (R * 0.58) * Math.cos(midB));
+        labelB.setAttribute('y', B.y + (R * 0.58) * Math.sin(midB) + 5);
+
+        labelC.setAttribute('x', C.x + (R * 0.58) * Math.cos(midC));
+        labelC.setAttribute('y', C.y + (R * 0.58) * Math.sin(midC) + 5);
+
+        // 초기 위치 리셋
+        [groupA, groupB, groupC].forEach(g => {
+            g.style.transform = 'translate(0px, 0px) rotate(0deg)';
+            g.classList.remove('moving');
+        });
+        rainbowArc.setAttribute('opacity', '0');
+        baselineGroup.setAttribute('opacity', '0.4');
+    }
+
+    function setTriangleType(type) {
+        currentType = type;
+        document.querySelectorAll('.shape-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.includes(type === 'acute' ? '예각' : type === 'right' ? '직각' : '둔각'));
+        });
+        resetAnimation();
+    }
+
+    // 애니메이션 실행
+    startBtn.addEventListener('click', () => {
+        startBtn.style.display = 'none';
+        const pts = TRIANGLES[currentType];
+        const angles = getTriangleAngles(pts);
+        const target = { x: 200, y: 270 }; // 기준선 모이는 중심점
+
+        // 1단계: 세 각 조각 분리
+        [groupA, groupB, groupC].forEach(g => g.classList.add('moving'));
+        guideText.innerHTML = "1. 삼각형의 세 모퉁이 각 <span class='badge-pill badge-orange'>각 ㉠</span>, <span class='badge-pill badge-blue'>각 ㉡</span>, <span class='badge-pill badge-green'>각 ㉢</span>을 가위로 싹둑 잘라내요! ✂️";
+        baselineGroup.setAttribute('opacity', '1');
+
+        // 세 조각이 아래 기준선(180도 ~ 360도 반원)에 피자 조각처럼 완벽하게 나란히 맞물리도록 회전각 계산
+        // 1) 각 B (파랑): [180도 ~ 180 + sweepB]
+        const rotB = 180 - angles.B.start;
+        const dxB = target.x - pts.B.x;
+        const dyB = target.y - pts.B.y;
+
+        // 2) 각 A (빨강): [180 + sweepB ~ 180 + sweepB + sweepA]
+        const rotA = (180 + angles.B.sweep) - angles.A.start;
+        const dxA = target.x - pts.A.x;
+        const dyA = target.y - pts.A.y;
+
+        // 3) 각 C (초록): [180 + sweepB + sweepA ~ 360]
+        const rotC = (180 + angles.B.sweep + angles.A.sweep) - angles.C.start;
+        const dxC = target.x - pts.C.x;
+        const dyC = target.y - pts.C.y;
+
+        // 2단계: 아래 일직선으로 스르륵 날아가 한 점에 결합
+        animationTimeouts.push(setTimeout(() => {
+            guideText.innerHTML = "2. 세 각 조각을 한 점에 모아서 겹침 없이 나란히 이어 붙여줍니다! 💫";
+
+            groupB.style.transformOrigin = `${pts.B.x}px ${pts.B.y}px`;
+            groupB.style.transform = `translate(${dxB}px, ${dyB}px) rotate(${rotB}deg)`;
+
+            groupA.style.transformOrigin = `${pts.A.x}px ${pts.A.y}px`;
+            groupA.style.transform = `translate(${dxA}px, ${dyA}px) rotate(${rotA}deg)`;
+
+            groupC.style.transformOrigin = `${pts.C.x}px ${pts.C.y}px`;
+            groupC.style.transform = `translate(${dxC}px, ${dyC}px) rotate(${rotC}deg)`;
+        }, 1200));
+
+        // 3단계: 일직선(180도) 완성 및 결론
+        animationTimeouts.push(setTimeout(() => {
+            [groupA, groupB, groupC].forEach(g => g.classList.remove('moving'));
+
+            // 180도 반원 호
+            rainbowArc.setAttribute('d', `M ${target.x - R - 8} ${target.y} A ${R + 8} ${R + 8} 0 0 1 ${target.x + R + 8} ${target.y}`);
+            rainbowArc.setAttribute('opacity', '1');
+
+            guideText.innerHTML = `
+                <div class="step-desc">3. 세 각을 모았더니 겹침 없이 완벽한 <strong>일직선(평각 = 180°)</strong>이 되었어요! 🎉</div>
+                <div class="formula-box">
+                    <div class="formula-row">
+                        <span class="badge-pill badge-orange">각 ㉠</span> + 
+                        <span class="badge-pill badge-blue">각 ㉡</span> + 
+                        <span class="badge-pill badge-green">각 ㉢</span> = 일직선(평각)
+                    </div>
+                    <div class="formula-final">✨ 삼각형 세 각의 합 = 180°</div>
+                </div>
+            `;
+
+            resetBtn.style.display = 'inline-block';
+        }, 3000));
+    });
+
+    function resetAnimation() {
+        animationTimeouts.forEach(clearTimeout);
+        animationTimeouts = [];
+        renderTriangle();
+        guideText.innerHTML = "삼각형의 세 각을 모두 더하면 몇 도가 될까요?<br>'공식 유도 시작' 버튼을 눌러 확인해보세요! ✨";
+        resetBtn.style.display = 'none';
+        startBtn.style.display = 'inline-block';
+    }
+
+    resetBtn.addEventListener('click', resetAnimation);
+
+    // 초기화
+    renderTriangle();
+</script>
+
+</body>
+</html>
