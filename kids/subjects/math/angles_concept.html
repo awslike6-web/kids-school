@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>📐 4학년 각도 탐험대 (반원 각도기 & 180° 삼각형의 비밀) ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 반원 각도기 SVG 캔버스 */
+    .protractor-canvas-box {
+      background: #ffffff;
+      border: 3px solid #0284c7;
+      border-radius: 24px;
+      padding: 20px 14px;
+      margin: 15px auto;
+      max-width: 580px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.15);
+      text-align: center;
+    }
+    .protractor-svg-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .protractor-svg-wrap svg {
+      width: 100%;
+      max-width: 440px;
+      height: auto;
+    }
+
+    /* 각도 슬라이더 컨트롤러 */
+    .angle-slider-wrap {
+      margin: 15px auto;
+      max-width: 400px;
+      padding: 0 10px;
+    }
+    .angle-slider {
+      width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+    .angle-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #0284c7;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    /* 각도 판정 뱃지 */
+    .angle-badge-result {
+      font-family: 'Jua', sans-serif;
+      font-size: 2.2rem;
+      color: #0284c7;
+      display: inline-block;
+      margin: 8px 0;
+    }
+    .angle-type-tag {
+      font-size: 1.15rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .tag-acute { background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; }
+    .tag-right { background: #e0f2fe; color: #0369a1; border: 1.5px solid #7dd3fc; }
+    .tag-obtuse { background: #fef3c7; color: #b45309; border: 1.5px solid #fde68a; }
+    .tag-straight { background: #fce7f3; color: #be185d; border: 1.5px solid #fbcfe8; }
+
+    /* 카드 그리드 */
+    .angle-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .angle-btn-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .angle-btn-card:hover, .angle-btn-card.active {
+      transform: translateY(-3px);
+      border-color: #0284c7;
+      background: #f0f9ff;
+      box-shadow: 0 8px 16px rgba(2, 132, 199, 0.2);
+    }
+    .angle-card-icon { font-size: 2.2rem; margin-bottom: 4px; }
+    .angle-card-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
+    .angle-card-range { font-size: 0.82rem; color: #0284c7; font-weight: 700; }
+
+    /* 삼각형 & 사각형 각의 합 시각화 */
+    .polygon-sum-box {
+      background: #fff;
+      border: 3px solid #ec4899;
+      border-radius: 24px;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 580px;
+      text-align: center;
+    }
+
+    /* 단위 환산 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">📐 4학년 각도 탐험대 ✨</h1>
+      <p class="hero-subtitle">반원 각도기를 직접 돌려보고, 예각·직각·둔각과 삼각형 세 각의 합 180°의 비밀을 밝혀요!</p>
+    </header>
+
+    <!-- 1. 📐 반원 각도기 시뮬레이터 (각의 크기 & 눈금 읽기) -->
+    <section class="math-section-card" id="section-protractor">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 각의 크기와 각도기</span>
+          <h2 class="section-title">📐 반원 각도기 실시간 조작기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">슬라이더를 움직이거나 프리셋 각도를 눌러 각도의 변화를 관찰하세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentAngle()">🔊</button>
+      </div>
+
+      <!-- 각도 프리셋 버튼 -->
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="angle-preset-buttons">
+        <button class="candy-num-btn" onclick="setAngleValue(30, this)">30° (예각)</button>
+        <button class="candy-num-btn" onclick="setAngleValue(60, this)">60° (예각)</button>
+        <button class="candy-num-btn active" onclick="setAngleValue(90, this)">90° (직각)</button>
+        <button class="candy-num-btn" onclick="setAngleValue(120, this)">120° (둔각)</button>
+        <button class="candy-num-btn" onclick="setAngleValue(150, this)">150° (둔각)</button>
+        <button class="candy-num-btn" onclick="setAngleValue(180, this)">180° (평각)</button>
+      </div>
+
+      <div class="protractor-canvas-box">
+        <div class="protractor-svg-wrap" id="protractor-svg-wrap"></div>
+
+        <!-- 슬라이더 -->
+        <div class="angle-slider-wrap">
+          <input type="range" min="0" max="180" value="90" class="angle-slider" id="angleSlider" oninput="onSliderAngleChange(this.value)">
+        </div>
+
+        <div class="angle-badge-result" id="angleResultText">
+          90° <span class="angle-type-tag tag-right">직각 (정확히 90도)</span>
+        </div>
+
+        <div class="unit-exchange-card" id="protractorDescBox">
+          <div>💡 <strong>각도기 읽는 방법:</strong></div>
+          <div>• 각도기의 <strong>중심</strong>을 각의 꼭짓점에 맞추고, <strong>밑금</strong>을 한 변에 맞춥니다.</div>
+          <div>• 밑금이 닿은 0° 눈금선(안쪽/바깥쪽)을 따라 다른 변이 가리키는 숫자를 읽으면 각도가 됩니다!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ✨ 예각 · 직각 · 둔각 · 평각 4총사 카드 -->
+    <section class="math-section-card" id="section-angle-types">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid" style="background:#0284c7; color:#fff;">섹션 2 : 각의 4대 분류</span>
+          <h2 class="section-title">✨ 예각 · 직각 · 둔각 · 평각 4총사</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">직각(90°)을 기준으로 뾰족한 각과 펑퍼짐한 각을 구분해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('직각인 90도를 기준으로 예각, 둔각, 평각을 구분할 수 있습니다!')">🔊</button>
+      </div>
+
+      <div class="angle-card-grid">
+        <div class="angle-btn-card" onclick="selectAngleType('acute', this)">
+          <div class="angle-card-icon">⚡</div>
+          <div class="angle-card-name">예각</div>
+          <div class="angle-card-range">0° 초과 ~ 90° 미만</div>
+        </div>
+        <div class="angle-btn-card active" onclick="selectAngleType('right', this)">
+          <div class="angle-card-icon">📐</div>
+          <div class="angle-card-name">직각</div>
+          <div class="angle-card-range">정확히 90°</div>
+        </div>
+        <div class="angle-btn-card" onclick="selectAngleType('obtuse', this)">
+          <div class="angle-card-icon">🪭</div>
+          <div class="angle-card-name">둔각</div>
+          <div class="angle-card-range">90° 초과 ~ 180° 미만</div>
+        </div>
+        <div class="angle-btn-card" onclick="selectAngleType('straight', this)">
+          <div class="angle-card-icon">📏</div>
+          <div class="angle-card-name">평각</div>
+          <div class="angle-card-range">일직선 180°</div>
+        </div>
+      </div>
+
+      <div class="unit-exchange-card" id="angleTypeDetailBox" style="border-color:#0284c7; background:#f0f9ff;">
+        <div>📐 <strong>직각(Right Angle) :</strong> 정확히 <strong>90°</strong>인 각</div>
+        <div>• 삼각자의 직각 모서리, 교과서 모서리, 시계 3시 정각의 바늘 모양이에요!</div>
+      </div>
+    </section>
+
+    <!-- 3. 🔺 삼각형 세 각의 합 180° & 사각형 네 각의 합 360° -->
+    <section class="math-section-card" id="section-polygon-sum">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs" style="background:#ec4899; color:#fff;">섹션 3 : 다각형 각의 합 공식</span>
+          <h2 class="section-title">🔺 삼각형 180° & 사각형 360° 마법</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">세 모퉁이를 모으면 일직선(180°)이 되는 신기한 원리를 확인해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('삼각형의 세 각의 합은 항상 180도이고, 사각형의 네 각의 합은 360도입니다!')">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="candy-num-btn active" onclick="switchPolygonSum('triangle', this)">🔺 삼각형 세 각의 합 (180°)</button>
+        <button class="candy-num-btn" onclick="switchPolygonSum('quad', this)">🔷 사각형 네 각의 합 (360°)</button>
+      </div>
+
+      <div class="polygon-sum-box" id="polygonSumBox">
+        <div id="polygonSvgWrap" style="display:flex; justify-content:center; margin:10px 0;"></div>
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#be185d;" id="polygonFormulaText">
+          60° + 70° + 50° = 180° (삼각형의 합은 항상 180도!)
+        </div>
+        <div class="unit-exchange-card" style="border-color:#f472b6;" id="polygonDescText">
+          <div>💡 <strong>삼각형 모퉁이 모으기 원리:</strong></div>
+          <div>• 어떤 모양의 삼각형이든 세 꼭짓점을 잘라서 한 점에 모으면 ➔ 완벽한 <strong>일직선 평각(180°)</strong>이 됩니다!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 🎲 실전 미지의 각 찾기 도전 -->
+    <section class="math-section-card" id="section-missing-angle">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid" style="background:#0284c7; color:#fff;">섹션 4 : 실전 미지의 각 도전</span>
+          <h2 class="section-title">🎲 숨겨진 미지의 각 (?°) 찾기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">삼각형에서 두 각이 주어졌을 때, 나머지 한 각을 계산해 보세요!</p>
+        </div>
+        <button class="divide-btn" style="background:#0284c7; font-size:1.05rem;" onclick="generateMissingAngleProblem(true)">🎲 새로운 문제 소환</button>
+      </div>
+
+      <div style="max-width:520px; margin:0 auto; background:#fff; border-radius:20px; padding:22px; text-align:center; border:2px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <div id="missingAngleSvgWrap" style="display:flex; justify-content:center; margin-bottom:12px;"></div>
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:15px;" id="missingAngleQuestionText">
+          삼각형의 세 각 중 ? 에 들어갈 각도는 몇 도일까요?
+        </div>
+
+        <div id="missingAngleChoices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;"></div>
+
+        <div id="missingAngleFeedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+      </div>
+    </section>
+
+    <!-- 5. 🎯 실전 각도 번개 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 5 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 4학년 각도 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 각의 종류와 계산된 각도를 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:20px;" id="quiz-question">0°보다 크고 90°보다 작은 각을 무엇이라고 할까요?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    // 1. 반원 각도기 시뮬레이터
+    let currentAngle = 90;
+
+    function setAngleValue(deg, btn) {
+      currentAngle = parseInt(deg);
+      document.getElementById('angleSlider').value = currentAngle;
+      document.querySelectorAll('#angle-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderProtractorVisuals(btn !== null);
+    }
+
+    function onSliderAngleChange(val) {
+      currentAngle = parseInt(val);
+      document.querySelectorAll('#angle-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      renderProtractorVisuals(false);
+    }
+
+    function renderProtractorVisuals(shouldSpeak = false) {
+      const deg = currentAngle;
+      const wrap = document.getElementById('protractor-svg-wrap');
+      const cx = 200, cy = 180, r = 150;
+
+      // 각도 회전 끝점 (0도는 오른쪽 수평 x=cx+r, y=cy)
+      const rad = (deg * Math.PI) / 180;
+      const x2 = cx + r * Math.cos(rad);
+      const y2 = cy - r * Math.sin(rad);
+
+      // 각도 부채꼴 호
+      const arcR = 50;
+      const arcX = cx + arcR * Math.cos(rad);
+      const arcY = cy - arcR * Math.sin(rad);
+      const largeArc = deg > 180 ? 1 : 0;
+
+      wrap.innerHTML = `
+        <svg viewBox="0 0 400 220">
+          <defs>
+            <linearGradient id="protractorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.85"/>
+              <stop offset="100%" stop-color="#7dd3fc" stop-opacity="0.95"/>
+            </linearGradient>
+          </defs>
+
+          <!-- 반원 각도기 본체 -->
+          <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} Z" fill="url(#protractorGrad)" stroke="#0284c7" stroke-width="3"/>
+          <path d="M ${cx - 35} ${cy} A 35 35 0 0 1 ${cx + 35} ${cy} Z" fill="#fff" stroke="#0284c7" stroke-width="2"/>
+
+          <!-- 각도기 눈금 (10도 단위) -->
+          ${Array.from({length: 19}).map((_, i) => {
+            const a = i * 10;
+            const aRad = (a * Math.PI) / 180;
+            const xInner = cx + (r - (a % 30 === 0 ? 20 : 10)) * Math.cos(aRad);
+            const yInner = cy - (r - (a % 30 === 0 ? 20 : 10)) * Math.sin(aRad);
+            const xOuter = cx + r * Math.cos(aRad);
+            const yOuter = cy - r * Math.sin(aRad);
+            let textTag = '';
+            if (a % 30 === 0 && a > 0 && a < 180) {
+              const xText = cx + (r - 30) * Math.cos(aRad);
+              const yText = cy - (r - 30) * Math.sin(aRad) + 4;
+              textTag = `<text x="${xText}" y="${yText}" font-family="Jua" font-size="11" fill="#0369a1" text-anchor="middle">${a}°</text>`;
+            }
+            return `<line x1="${xInner}" y1="${yInner}" x2="${xOuter}" y2="${yOuter}" stroke="#0369a1" stroke-width="${a % 30 === 0 ? 2 : 1}"/>${textTag}`;
+          }).join('')}
+
+          <!-- 밑금 (기준선 0도) -->
+          <line x1="${cx - r}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#0f172a" stroke-width="3"/>
+          <circle cx="${cx}" cy="${cy}" r="4" fill="#e11d48"/>
+
+          <!-- 회전하는 각 변 (빨간 레이저 선) -->
+          <line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="#e11d48" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- 각도 부채꼴 영역 -->
+          ${deg > 0 ? `<path d="M ${cx} ${cy} L ${cx + arcR} ${cy} A ${arcR} ${arcR} 0 ${largeArc} 0 ${arcX} ${arcY} Z" fill="#f43f5e" opacity="0.35"/>` : ''}
+
+          <!-- 꼭짓점 텍스트 -->
+          <text x="${cx}" y="${cy + 22}" font-family="Jua" font-size="13" fill="#64748b" text-anchor="middle">각도기 중심 (꼭짓점)</text>
+        </svg>
+      `;
+
+      let typeHtml = '';
+      let typeVoice = '';
+      if (deg === 90) {
+        typeHtml = '<span class="angle-type-tag tag-right">📐 직각 (정확히 90°)</span>';
+        typeVoice = '정확히 90도인 직각입니다!';
+      } else if (deg > 0 && deg < 90) {
+        typeHtml = '<span class="angle-type-tag tag-acute">⚡ 예각 (0° 초과 ~ 90° 미만)</span>';
+        typeVoice = `${deg}도로, 직각보다 작은 예각입니다!`;
+      } else if (deg > 90 && deg < 180) {
+        typeHtml = '<span class="angle-type-tag tag-obtuse">🪭 둔각 (90° 초과 ~ 180° 미만)</span>';
+        typeVoice = `${deg}도로, 직각보다 큰 둔각입니다!`;
+      } else if (deg === 180) {
+        typeHtml = '<span class="angle-type-tag tag-straight">📏 평각 (일직선 180°)</span>';
+        typeVoice = '180도 일직선인 평각입니다!';
+      } else {
+        typeHtml = '<span class="angle-type-tag" style="background:#e2e8f0;">0° (벌어지지 않음)</span>';
+        typeVoice = '0도입니다.';
+      }
+
+      document.getElementById('angleResultText').innerHTML = `${deg}° ${typeHtml}`;
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(`현재 각도는 ${deg}도이며, ${typeVoice}`);
+      }
+    }
+
+    function speakCurrentAngle() {
+      renderProtractorVisuals(true);
+    }
+
+    // 2. 각의 4대 분류 카드
+    const ANGLE_TYPES = {
+      acute: {
+        deg: 45,
+        title: '⚡ 예각 (Acute Angle) : 0°보다 크고 90°보다 작은 뾰족한 각',
+        desc: '<div>• 가위를 살짝 벌렸을 때의 날카로운 모서리 각도예요! (예: 30°, 45°, 60°, 80°)</div>',
+        voice: '예각은 0도보다 크고 90도보다 작은 뾰족한 각입니다!'
+      },
+      right: {
+        deg: 90,
+        title: '📐 직각 (Right Angle) : 정확히 90°인 각',
+        desc: '<div>• 삼각자의 직각 모서리, 교과서 모서리, 시계 3시 정각의 바늘 모양이에요!</div>',
+        voice: '직각은 정확히 90도인 각입니다!'
+      },
+      obtuse: {
+        deg: 135,
+        title: '🪭 둔각 (Obtuse Angle) : 90°보다 크고 180°보다 작은 펑퍼짐한 각',
+        desc: '<div>• 부채를 넓게 펼쳤을 때나 미끄럼틀 계단의 완만한 경사 각도예요! (예: 100°, 120°, 150°)</div>',
+        voice: '둔각은 90도보다 크고 180도보다 작은 넓은 각입니다!'
+      },
+      straight: {
+        deg: 180,
+        title: '📏 평각 (Straight Angle) : 일직선으로 쫙 펴진 180°',
+        desc: '<div>• 시계 6시 정각의 바늘처럼 일직선으로 곧게 펴진 각이에요! (직각 2개가 모인 크기)</div>',
+        voice: '평각은 일직선으로 펼쳐진 180도인 각입니다!'
+      }
+    };
+
+    function selectAngleType(key, btn) {
+      document.querySelectorAll('#section-angle-types .angle-btn-card').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const t = ANGLE_TYPES[key];
+      document.getElementById('angleTypeDetailBox').innerHTML = `
+        <div><strong>${t.title}</strong></div>
+        ${t.desc}
+      `;
+      setAngleValue(t.deg, null);
+
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(t.voice);
+      }
+    }
+
+    // 3. 다각형 각의 합 (삼각형 180° vs 사각형 360°)
+    let curPolygonSumType = 'triangle';
+
+    function switchPolygonSum(type, btn) {
+      curPolygonSumType = type;
+      document.querySelectorAll('#section-polygon-sum .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const sWrap = document.getElementById('polygonSvgWrap');
+      const fText = document.getElementById('polygonFormulaText');
+      const dText = document.getElementById('polygonDescText');
+
+      if (type === 'triangle') {
+        sWrap.innerHTML = `
+          <svg viewBox="0 0 320 160" style="max-width:320px;">
+            <polygon points="50,130 270,130 160,30" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
+            <text x="160" y="55" font-family="Jua" font-size="16" fill="#be185d" text-anchor="middle">50°</text>
+            <text x="80" y="122" font-family="Jua" font-size="16" fill="#be185d">60°</text>
+            <text x="240" y="122" font-family="Jua" font-size="16" fill="#be185d" text-anchor="end">70°</text>
+          </svg>
+        `;
+        fText.textContent = "60° + 70° + 50° = 180° (삼각형의 합은 항상 180도!)";
+        dText.innerHTML = `
+          <div>💡 <strong>삼각형 모퉁이 모으기 원리:</strong></div>
+          <div>• 어떤 모양의 삼각형이든 세 꼭짓점을 찢어서 한 점에 모으면 ➔ 완벽한 <strong>일직선 평각(180°)</strong>이 됩니다!</div>
+        `;
+        if (btn && typeof fairySpeak === 'function') fairySpeak('삼각형의 세 각의 합은 항상 180도입니다!');
+      } else {
+        sWrap.innerHTML = `
+          <svg viewBox="0 0 320 160" style="max-width:320px;">
+            <polygon points="50,130 270,130 230,40 90,40" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+            <line x1="50" y1="130" x2="230" y2="40" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
+            <text x="160" y="90" font-family="Jua" font-size="14" fill="#1d4ed8" text-anchor="middle">삼각형 2개로 분할!</text>
+          </svg>
+        `;
+        fText.textContent = "180° × 2 = 360° (사각형의 네 각의 합은 360도!)";
+        dText.innerHTML = `
+          <div>💡 <strong>사각형 대각선 분할의 비밀:</strong></div>
+          <div>• 사각형은 대각선 하나를 그으면 <strong>삼각형 2개</strong>로 쪼개집니다.</div>
+          <div>➔ 따라서 <strong>180° + 180° = 360°</strong>가 됩니다! 🎉</div>
+        `;
+        if (btn && typeof fairySpeak === 'function') fairySpeak('사각형은 삼각형 2개로 나뉘므로 네 각의 합이 360도입니다!');
+      }
+    }
+
+    // 4. 🎲 실전 미지의 각 찾기 도전
+    let currentMissingAngleProblem = { a: 60, b: 70, ans: 50 };
+
+    function generateMissingAngleProblem(speak = false) {
+      const a = (Math.floor(Math.random() * 8) + 3) * 10; // 30 ~ 100
+      const b = (Math.floor(Math.random() * 6) + 3) * 10; // 30 ~ 80
+      const remain = 180 - (a + b);
+      if (remain <= 10) return generateMissingAngleProblem(speak);
+
+      currentMissingAngleProblem = { a, b, ans: remain };
+
+      const wrap = document.getElementById('missingAngleSvgWrap');
+      wrap.innerHTML = `
+        <svg viewBox="0 0 280 140" style="max-width:260px;">
+          <polygon points="40,120 240,120 140,25" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
+          <text x="140" y="48" font-family="Jua" font-size="18" fill="#e11d48" font-weight="bold" text-anchor="middle">?°</text>
+          <text x="65" y="112" font-family="Jua" font-size="15" fill="#be185d">${a}°</text>
+          <text x="215" y="112" font-family="Jua" font-size="15" fill="#be185d" text-anchor="end">${b}°</text>
+        </svg>
+      `;
+
+      document.getElementById('missingAngleQuestionText').textContent = `삼각형의 두 각이 ${a}°, ${b}° 일 때, ? 의 각도는?`;
+
+      const correctStr = `${remain}°`;
+      const choicesSet = new Set([correctStr]);
+
+      while (choicesSet.size < 4) {
+        const fakeDiff = (Math.floor(Math.random() * 5) - 2) * 10;
+        const fakeVal = Math.max(15, remain + (fakeDiff === 0 ? 20 : fakeDiff));
+        choicesSet.add(`${fakeVal}°`);
+      }
+
+      const choicesArr = Array.from(choicesSet).sort(() => Math.random() - 0.5);
+      const cBox = document.getElementById('missingAngleChoices');
+      cBox.innerHTML = '';
+      document.getElementById('missingAngleFeedback').innerHTML = '';
+
+      choicesArr.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'candy-num-btn';
+        btn.style.fontSize = '1.25rem';
+        btn.style.width = '100%';
+        btn.textContent = c;
+        btn.onclick = () => checkMissingAngleAnswer(c, correctStr);
+        cBox.appendChild(btn);
+      });
+
+      if (speak && typeof fairySpeak === 'function') {
+        fairySpeak(`삼각형의 두 각이 ${a}도와 ${b}도입니다. 나머지 한 각을 계산해 보세요!`);
+      }
+    }
+
+    function checkMissingAngleAnswer(selected, correct) {
+      const fb = document.getElementById('missingAngleFeedback');
+      const p = currentMissingAngleProblem;
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 대단해요! 180° - (${p.a}° + ${p.b}°) = <strong>${p.ans}°</strong> 정답!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`정답이에요! 180도에서 두 각을 빼면 ${p.ans}도입니다!`);
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    // 5. 퀴즈
+    const QUIZ_LIST = [
+      { q: "0°보다 크고 90°보다 작은 각을 무엇이라고 할까요?", ans: "예각", choices: ["예각", "직각", "둔각", "평각"] },
+      { q: "정확히 90°인 각을 무엇이라고 부를까요?", ans: "직각", choices: ["직각", "예각", "둔각", "평각"] },
+      { q: "90°보다 크고 180°보다 작은 각은?", ans: "둔각", choices: ["둔각", "직각", "예각", "평각"] },
+      { q: "삼각형의 세 각의 크기의 합은 항상 몇 도일까요?", ans: "180°", choices: ["180°", "360°", "90°", "270°"] },
+      { q: "사각형의 네 각의 크기의 합은 항상 몇 도일까요?", ans: "360°", choices: ["360°", "180°", "270°", "400°"] },
+      { q: "삼각형의 두 각이 40°, 60°일 때, 나머지 한 각은?", ans: "80°", choices: ["80°", "90°", "70°", "100°"] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.2rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 각도 마스터 박사님이시네요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html#concepts';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderProtractorVisuals(false); // 초기 로딩 시 무발화
+      switchPolygonSum('triangle', null);
+      generateMissingAngleProblem(false);
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "각도");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
