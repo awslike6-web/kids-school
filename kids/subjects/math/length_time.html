@@ -29,7 +29,7 @@
     }
     .ruler-svg-wrap svg {
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       height: auto;
     }
 
@@ -46,6 +46,33 @@
       line-height: 1.8;
       text-align: left;
     }
+
+    /* 태양계 우주 탐사선 카드 그리드 */
+    .space-planet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .planet-btn-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .planet-btn-card:hover, .planet-btn-card.active {
+      transform: translateY(-3px);
+      border-color: #8b5cf6;
+      background: #f5f3ff;
+      box-shadow: 0 8px 16px rgba(139, 92, 246, 0.2);
+    }
+    .planet-icon { font-size: 2.2rem; margin-bottom: 4px; }
+    .planet-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
+    .planet-dist-tag { font-size: 0.82rem; color: #7c3aed; font-weight: 700; }
 
     /* 스톱워치 시계 뷰 */
     .stopwatch-box {
@@ -89,7 +116,7 @@
 
     <header class="math-header-hero">
       <h1 class="hero-title">📏 길이와 시간 측정소 ⏱️</h1>
-      <p class="hero-subtitle">1mm와 1km의 단위 변환을 마스터하고, 1초 단위 시간 덧셈·뺄셈을 정복해요!</p>
+      <p class="hero-subtitle">1mm와 1km의 단위 변환을 마스터하고, 태양계 행성 거리 탐사와 시간 연산을 정복해요!</p>
     </header>
 
     <!-- 1. 1mm와 1cm 돋보기 자 눈금 측정기 -->
@@ -111,9 +138,7 @@
       </div>
 
       <div class="ruler-container">
-        <div class="ruler-svg-wrap" id="ruler-svg-wrap">
-          <!-- 동적 SVG 자 렌더링 -->
-        </div>
+        <div class="ruler-svg-wrap" id="ruler-svg-wrap"></div>
         <div style="font-family:'Jua',sans-serif; font-size:1.8rem; color:#0284c7; margin-top:12px;" id="ruler-length-display">2cm 4mm = 24mm</div>
         <div class="unit-exchange-card" id="ruler-desc-display">
           <div>💡 <strong>1cm = 10mm</strong> 예요!</div>
@@ -122,40 +147,96 @@
       </div>
     </section>
 
-    <!-- 2. 1km와 1000m 우주 도로 거리 환산기 -->
-    <section class="math-section-card" id="section-km">
+    <!-- 2. 🎲 자 위 랜덤 막대 길이 측정 실전 훈련 -->
+    <section class="math-section-card" id="section-random-ruler">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-pairs">섹션 2 : 킬로미터(km)와 미터(m)</span>
-          <h2 class="section-title">🚗 1km = 1000m 우주 도로 환산기</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">아주 먼 거리를 나타내는 1km 단위를 미터(m)로 변환해 봐요!</p>
+          <span class="section-badge badge-grid" style="background:#0284c7; color:#fff;">섹션 2 : 실전 길이 측정 도전</span>
+          <h2 class="section-title">🎲 자 위의 랜덤 막대 길이 재기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">자 위에 불쑥 놓인 막대의 시작과 끝 눈금을 보고 정확한 길이를 맞춰보세요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('1000미터는 1킬로미터와 같습니다!')">🔊</button>
-      </div>
-
-      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="km-preset-buttons">
-        <button class="candy-num-btn active" onclick="selectKmItem(1, 300, this)">1km 300m</button>
-        <button class="candy-num-btn" onclick="selectKmItem(2, 500, this)">2km 500m</button>
-        <button class="candy-num-btn" onclick="selectKmItem(3, 80, this)">3km 80m</button>
-        <button class="candy-num-btn" onclick="selectKmItem(4, 0, this)">4km (4000m)</button>
+        <button class="divide-btn" style="background:#0284c7; font-size:1.05rem;" onclick="generateRandomRulerBar(true)">🎲 새로운 막대 소환</button>
       </div>
 
       <div class="ruler-container">
-        <div style="display:flex; justify-content:center; align-items:center; gap:12px; font-family:'Jua'; font-size:2rem; color:#15803d;" id="km-math-view">
-          1km 300m = 1300m
+        <div class="ruler-svg-wrap" id="random-ruler-svg-wrap"></div>
+        
+        <div style="font-family:'Jua',sans-serif; font-size:1.5rem; color:#1e293b; margin:15px 0 10px;" id="random-bar-question">
+          이 막대의 길이는 몇 cm 몇 mm 일까요?
         </div>
-        <div class="unit-exchange-card" id="km-step-guide">
-          <div>🚀 <strong>1km = 1000m</strong> 의 비밀!</div>
-          <div>• <strong>1km</strong>를 <strong>1000m</strong>로 바꾸고, 남은 <strong>300m</strong>를 합치면 ➔ <strong style="color:#e11d48;">1300m</strong> 완성!</div>
+
+        <div id="random-bar-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:440px; margin:0 auto 12px;"></div>
+
+        <div id="random-bar-feedback" style="font-family:'Jua'; font-size:1.2rem; min-height:28px;"></div>
+      </div>
+    </section>
+
+    <!-- 3. 🪐 태양계 행성 실측 우주 거리 탐사소 (킬로미터 km & 과학 천문 연계) -->
+    <section class="math-section-card" id="section-space">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs" style="background:#7c3aed; color:#fff;">섹션 3 : 킬로미터(km) & 과학 천문 연계</span>
+          <h2 class="section-title">🪐 태양계 행성 실측 우주 거리 탐사소</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">1km = 1000m 단위를 배우며, 태양과 행성 간의 거대한 우주 거리를 탐험해 봐요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentPlanet()">🔊</button>
+      </div>
+
+      <div class="space-planet-grid" id="planet-buttons">
+        <div class="planet-btn-card active" onclick="selectPlanet('moon', this)">
+          <div class="planet-icon">🌕</div>
+          <div class="planet-name">지구 ↔ 달</div>
+          <div class="planet-dist-tag">384,400 km</div>
+        </div>
+        <div class="planet-btn-card" onclick="selectPlanet('mercury', this)">
+          <div class="planet-icon">☿️</div>
+          <div class="planet-name">수성</div>
+          <div class="planet-dist-tag">5,800만 km</div>
+        </div>
+        <div class="planet-btn-card" onclick="selectPlanet('venus', this)">
+          <div class="planet-icon">♀️</div>
+          <div class="planet-name">금성</div>
+          <div class="planet-dist-tag">1억 800만 km</div>
+        </div>
+        <div class="planet-btn-card" onclick="selectPlanet('earth', this)">
+          <div class="planet-icon">🌍</div>
+          <div class="planet-name">지구</div>
+          <div class="planet-dist-tag">1억 5,000만 km</div>
+        </div>
+        <div class="planet-btn-card" onclick="selectPlanet('mars', this)">
+          <div class="planet-icon">♂️</div>
+          <div class="planet-name">화성</div>
+          <div class="planet-dist-tag">2억 2,800만 km</div>
+        </div>
+        <div class="planet-btn-card" onclick="selectPlanet('jupiter', this)">
+          <div class="planet-icon">♃</div>
+          <div class="planet-name">목성</div>
+          <div class="planet-dist-tag">7억 7,800만 km</div>
+        </div>
+        <div class="planet-btn-card" onclick="selectPlanet('saturn', this)">
+          <div class="planet-icon">♄</div>
+          <div class="planet-name">토성</div>
+          <div class="planet-dist-tag">14억 3,000만 km</div>
+        </div>
+      </div>
+
+      <div class="ruler-container" style="background:#faf5ff; border-color:#d8b4fe;">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#6b21a8; margin-bottom:8px;" id="planet-title-display">
+          🌕 지구에서 달까지의 거리 : 384,400 km
+        </div>
+        <div class="unit-exchange-card" style="border-color:#a855f7; background:#fff;" id="planet-desc-display">
+          <div>🚀 <strong>1km = 1000m</strong> 환산:</div>
+          <div>• <strong>384,400 km</strong> = <strong>384,400,000 m</strong> (3억 8440만 미터!)</div>
+          <div style="margin-top:6px; color:#7c3aed;">🔭 <strong>천문 과학 상식:</strong> 아폴로 11호 우주선이 지구에서 달까지 가는 데 약 3일이 걸렸어요! 빛의 속도로는 1.3초 만에 닿는답니다.</div>
         </div>
       </div>
     </section>
 
-    <!-- 3. 1초와 60초 시간 탐험 (시·분·초 덧셈/뺄셈) -->
+    <!-- 4. 1초와 60초 시간 탐험 (시·분·초 덧셈/뺄셈) -->
     <section class="math-section-card" id="section-time">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-grid">섹션 3 : 초(s)와 시간 연산</span>
+          <span class="section-badge badge-grid">섹션 4 : 초(s)와 시간 연산</span>
           <h2 class="section-title">⏱️ 1분 = 60초 & 시간의 덧셈·뺄셈</h2>
           <p class="section-desc" style="color:#334155; font-weight:600;">초 단위 변환과 60초가 모여 1분이 되는 원리를 배워요!</p>
         </div>
@@ -181,11 +262,11 @@
       </div>
     </section>
 
-    <!-- 4. 실전 번개 퀴즈 -->
+    <!-- 5. 실전 번개 퀴즈 -->
     <section class="math-section-card" id="section-quiz">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 5 : 실전 개념 퀴즈</span>
           <h2 class="section-title">🎯 3학년 길이와 시간 번개 퀴즈</h2>
           <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 단위나 변환된 값을 골라주세요!</p>
         </div>
@@ -231,17 +312,17 @@
     function renderRulerVisuals(shouldSpeak = false) {
       const item = RULER_ITEMS[currentItemKey];
       const wrap = document.getElementById('ruler-svg-wrap');
-      const pxPerMm = 6.5;
+      const pxPerMm = 6.8;
       const barWidth = item.totalMm * pxPerMm;
 
       wrap.innerHTML = `
-        <svg viewBox="0 0 520 140">
+        <svg viewBox="0 0 540 140">
           <!-- 측정 물건 -->
           <rect x="20" y="20" width="${barWidth}" height="35" rx="8" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/>
           <text x="${20 + barWidth/2}" y="45" font-family="Jua" font-size="18" fill="#fff" text-anchor="middle">${item.emoji} ${item.name} (${item.cm}cm ${item.mm}mm)</text>
           
           <!-- 자 본체 -->
-          <rect x="20" y="70" width="480" height="50" fill="#fef08a" stroke="#ca8a04" stroke-width="3" rx="6"/>
+          <rect x="20" y="70" width="500" height="50" fill="#fef08a" stroke="#ca8a04" stroke-width="3" rx="6"/>
           
           <!-- 눈금 그리기 (0 ~ 7cm) -->
           ${Array.from({length: 71}).map((_, i) => {
@@ -279,24 +360,186 @@
       renderRulerVisuals(true);
     }
 
-    // 2. km ↔ m
-    function selectKmItem(km, m, btn) {
-      document.querySelectorAll('#km-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
+    // 2. 🎲 자 위 랜덤 막대 실전 측정기
+    let currentRandomBar = { startMm: 0, lengthMm: 34, ansCm: 3, ansMm: 4 };
 
-      const totalM = km * 1000 + m;
-      document.getElementById('km-math-view').textContent = m > 0 ? `${km}km ${m}m = ${totalM}m` : `${km}km = ${totalM}m`;
-      document.getElementById('km-step-guide').innerHTML = `
-        <div>🚀 <strong>1km = 1000m</strong> 의 비밀!</div>
-        <div>• <strong>${km}km</strong>를 <strong>${km * 1000}m</strong>로 바꾸고, 남은 <strong>${m}m</strong>를 합치면 ➔ <strong style="color:#e11d48;">${totalM}m</strong> 완성!</div>
+    function generateRandomRulerBar(speak = false) {
+      // 0부터 시작하거나, 1cm(10mm)~2cm(20mm) 지점에서 시작
+      const starts = [0, 0, 0, 10, 15, 20];
+      const startMm = starts[Math.floor(Math.random() * starts.length)];
+      // 길이는 15mm ~ 48mm
+      const lengthMm = Math.floor(Math.random() * 34) + 15;
+      const endMm = startMm + lengthMm;
+
+      const ansCm = Math.floor(lengthMm / 10);
+      const ansMm = lengthMm % 10;
+      currentRandomBar = { startMm, lengthMm, endMm, ansCm, ansMm };
+
+      const wrap = document.getElementById('random-ruler-svg-wrap');
+      const pxPerMm = 6.8;
+      const startX = 20 + startMm * pxPerMm;
+      const barW = lengthMm * pxPerMm;
+      const endX = startX + barW;
+
+      wrap.innerHTML = `
+        <svg viewBox="0 0 540 140">
+          <!-- 측정 랜덤 막대 -->
+          <rect x="${startX}" y="22" width="${barW}" height="32" rx="6" fill="#f43f5e" stroke="#be123c" stroke-width="3"/>
+          <text x="${startX + barW/2}" y="44" font-family="Jua" font-size="16" fill="#fff" text-anchor="middle">📏 측정할 막대 (?)</text>
+
+          <!-- 자 본체 -->
+          <rect x="20" y="70" width="500" height="50" fill="#fef08a" stroke="#ca8a04" stroke-width="3" rx="6"/>
+          
+          <!-- 눈금 그리기 (0 ~ 7cm) -->
+          ${Array.from({length: 71}).map((_, i) => {
+            const x = 20 + i * pxPerMm;
+            const isCm = (i % 10 === 0);
+            const isHalf = (i % 5 === 0 && !isCm);
+            const h = isCm ? 25 : (isHalf ? 16 : 9);
+            const strokeColor = isCm ? '#854d0e' : '#a16207';
+            const strokeWidth = isCm ? 2.5 : 1.5;
+            let textTag = '';
+            if (isCm) {
+              textTag = `<text x="${x}" y="112" font-family="Jua" font-size="14" fill="#854d0e" text-anchor="middle">${i/10}</text>`;
+            }
+            return `<line x1="${x}" y1="70" x2="${x}" y2="${70 + h}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>${textTag}`;
+          }).join('')}
+
+          <!-- 시작선 / 끝선 점선 -->
+          <line x1="${startX}" y1="18" x2="${startX}" y2="70" stroke="#0284c7" stroke-width="2" stroke-dasharray="3"/>
+          <circle cx="${startX}" cy="70" r="4" fill="#0284c7"/>
+          <line x1="${endX}" y1="18" x2="${endX}" y2="70" stroke="#e11d48" stroke-width="2" stroke-dasharray="3"/>
+          <circle cx="${endX}" cy="70" r="4" fill="#e11d48"/>
+        </svg>
       `;
 
-      if (btn && typeof fairySpeak === 'function') {
-        fairySpeak(m > 0 ? `${km}킬로미터 ${m}미터는 ${totalM}미터입니다!` : `${km}킬로미터는 ${totalM}미터입니다!`);
+      // 선택지 4개 생성 (정답 1개 + 오답 3개)
+      const correctStr = `${ansCm}cm ${ansMm}mm (${lengthMm}mm)`;
+      const choicesSet = new Set([correctStr]);
+      while (choicesSet.size < 4) {
+        const fakeDiff = (Math.floor(Math.random() * 5) - 2) * 10 + (Math.floor(Math.random() * 7) - 3);
+        const fakeTotal = Math.max(12, lengthMm + (fakeDiff === 0 ? 3 : fakeDiff));
+        const fakeCm = Math.floor(fakeTotal / 10);
+        const fakeMm = fakeTotal % 10;
+        choicesSet.add(`${fakeCm}cm ${fakeMm}mm (${fakeTotal}mm)`);
+      }
+      const choicesArr = Array.from(choicesSet).sort(() => Math.random() - 0.5);
+
+      const cBox = document.getElementById('random-bar-choices');
+      cBox.innerHTML = '';
+      document.getElementById('random-bar-feedback').innerHTML = '';
+
+      choicesArr.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'candy-num-btn';
+        btn.style.fontSize = '1.05rem';
+        btn.style.width = '100%';
+        btn.textContent = c;
+        btn.onclick = () => checkRandomBarAnswer(c, correctStr);
+        cBox.appendChild(btn);
+      });
+
+      if (speak && typeof fairySpeak === 'function') {
+        fairySpeak('새로운 막대가 놓였습니다! 시작 눈금과 끝 눈금을 보고 길이를 맞춰보세요!');
       }
     }
 
-    // 3. 시간 (초 단위)
+    function checkRandomBarAnswer(selected, correct) {
+      const fb = document.getElementById('random-bar-feedback');
+      const b = currentRandomBar;
+      if (selected === correct) {
+        let calcMsg = b.startMm === 0 
+          ? `0부터 시작하여 <strong>${b.ansCm}cm ${b.ansMm}mm</strong> 지점에 닿았으므로 정답!`
+          : `시작 눈금(${Math.floor(b.startMm/10)}cm ${b.startMm%10}mm)부터 끝 눈금(${Math.floor(b.endMm/10)}cm ${b.endMm%10}mm)까지 차이를 빼서 정확히 맞췄어요!`;
+        fb.innerHTML = `<span style="color:#10b981;">🎉 대단해요! ${calcMsg} (${b.lengthMm}mm)</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 눈금을 아주 정확하게 읽으셨네요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    // 3. 🪐 태양계 행성 우주 거리 (km ↔ m & 과학 천문 연계)
+    const PLANETS_DATA = {
+      moon: {
+        title: '🌕 지구에서 달까지의 거리',
+        kmStr: '384,400 km',
+        totalM: '384,400,000 m',
+        desc: '아폴로 11호 우주선이 지구에서 달까지 가는 데 약 3일이 걸렸어요! 빛의 속도로는 약 1.3초 만에 닿는 거리랍니다.',
+        voice: '지구에서 달까지는 38만 4400 킬로미터이며, 미터로는 3억 8440만 미터입니다!'
+      },
+      mercury: {
+        title: '☿️ 태양에서 수성까지의 거리',
+        kmStr: '5,800만 km (58,000,000 km)',
+        totalM: '58,000,000,000 m',
+        desc: '태양계에서 태양과 가장 가까운 행성이에요! 낮에는 섭씨 430도까지 뜨거워져요.',
+        voice: '태양에서 수성까지는 약 5800만 킬로미터입니다!'
+      },
+      venus: {
+        title: '♀️ 태양에서 금성까지의 거리',
+        kmStr: '1억 800만 km (108,000,000 km)',
+        totalM: '108,000,000,000 m',
+        desc: '두꺼운 이산화탄소 대기 때문에 태양계에서 가장 뜨거운 행성(약 470도)이에요!',
+        voice: '태양에서 금성까지는 약 1억 800만 킬로미터입니다!'
+      },
+      earth: {
+        title: '🌍 태양에서 지구까지의 거리 (1 AU)',
+        kmStr: '1억 5,000만 km (150,000,000 km)',
+        totalM: '150,000,000,000 m',
+        desc: '우리가 살고 있는 푸른 별 지구예요! 태양에서 쏜 빛이 지구에 도착하는 데 8분 20초가 걸려요.',
+        voice: '태양에서 지구까지는 1억 5000만 킬로미터이며, 천문학에서는 1 천문단위라고 부릅니다!'
+      },
+      mars: {
+        title: '♂️ 태양에서 화성까지의 거리',
+        kmStr: '2억 2,800만 km (228,000,000 km)',
+        totalM: '228,000,000,000 m',
+        desc: '붉은 산화철 모래로 덮여 있어 붉게 보이는 행성이에요! 탐사 로버들이 활동하고 있어요.',
+        voice: '태양에서 화성까지는 약 2억 2800만 킬로미터입니다!'
+      },
+      jupiter: {
+        title: '♃ 태양에서 목성까지의 거리',
+        kmStr: '7억 7,800만 km (778,000,000 km)',
+        totalM: '778,000,000,000 m',
+        desc: '태양계에서 가장 거대한 가스 행성으로, 지구보다 부피가 1300배나 더 커요!',
+        voice: '태양에서 목성까지는 약 7억 7800만 킬로미터입니다!'
+      },
+      saturn: {
+        title: '♄ 태양에서 토성까지의 거리',
+        kmStr: '14억 3,000만 km (1,430,000,000 km)',
+        totalM: '1,430,000,000,000 m',
+        desc: '얼음과 암석 알갱이로 이루어진 거대하고 아름다운 고리를 가지고 있어요!',
+        voice: '태양에서 토성까지는 약 14억 3000만 킬로미터입니다!'
+      }
+    };
+    let currentPlanetKey = 'moon';
+
+    function selectPlanet(key, btn) {
+      currentPlanetKey = key;
+      document.querySelectorAll('#planet-buttons .planet-btn-card').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const p = PLANETS_DATA[key];
+      document.getElementById('planet-title-display').textContent = `${p.title} : ${p.kmStr}`;
+      document.getElementById('planet-desc-display').innerHTML = `
+        <div>🚀 <strong>1km = 1000m</strong> 환산:</div>
+        <div>• <strong>${p.kmStr}</strong> = <strong style="color:#e11d48;">${p.totalM}</strong></div>
+        <div style="margin-top:6px; color:#7c3aed;">🔭 <strong>천문 과학 상식:</strong> ${p.desc}</div>
+      `;
+
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(p.voice);
+      }
+    }
+
+    function speakCurrentPlanet() {
+      const p = PLANETS_DATA[currentPlanetKey];
+      if (typeof fairySpeak === 'function') {
+        fairySpeak(p.voice);
+      }
+    }
+
+    // 4. 시간 (초 단위)
     function selectTimeSec(seconds, btn) {
       document.querySelectorAll('#time-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
@@ -317,14 +560,14 @@
       }
     }
 
-    // 4. 퀴즈
+    // 5. 퀴즈
     const QUIZ_LIST = [
       { q: "3cm 5mm는 몇 mm일까요?", ans: "35mm", choices: ["35mm", "305mm", "350mm", "8mm"] },
       { q: "52mm를 cm와 mm로 바르게 나타낸 것은?", ans: "5cm 2mm", choices: ["5cm 2mm", "52cm", "5cm 20mm", "2cm 5mm"] },
-      { q: "2km 400m는 몇 m일까요?", ans: "2400m", choices: ["2400m", "2040m", "600m", "240m"] },
+      { q: "1km는 몇 m와 같을까요?", ans: "1000m", choices: ["1000m", "100m", "10m", "10000m"] },
+      { q: "지구에서 달까지의 거리는 약 384,400 km입니다. 몇 m일까요?", ans: "384,400,000m", choices: ["384,400,000m", "38,440,000m", "3,844,000m", "384,400m"] },
       { q: "1분 30초는 모두 몇 초일까요?", ans: "90초", choices: ["90초", "130초", "60초", "30초"] },
-      { q: "100초를 분과 초로 바르게 나타낸 것은?", ans: "1분 40초", choices: ["1분 40초", "1분 00초", "10분", "2분 20초"] },
-      { q: "1km는 몇 m와 같을까요?", ans: "1000m", choices: ["1000m", "100m", "10m", "10000m"] }
+      { q: "100초를 분과 초로 바르게 나타낸 것은?", ans: "1분 40초", choices: ["1분 40초", "1분 00초", "10분", "2분 20초"] }
     ];
     let qIdx = 0;
 
@@ -376,6 +619,7 @@
       document.getElementById('userIcon').textContent = icon;
 
       renderRulerVisuals(false); // 초기 로딩 시 무발화
+      generateRandomRulerBar(false); // 초기 랜덤 막대 생성 (무발화)
       renderQuiz();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
