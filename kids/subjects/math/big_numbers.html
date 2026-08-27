@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🌌 4학년 큰 수 탐험대 (만·억·조 & 자릿값 마법) 🚀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 자릿값 4자리 끊어읽기 표 뷰 */
+    .place-value-table-wrap {
+      overflow-x: auto;
+      padding: 10px 0;
+      margin: 15px 0;
+    }
+    .place-value-table {
+      width: 100%;
+      min-width: 500px;
+      border-collapse: collapse;
+      font-family: 'Jua', sans-serif;
+      text-align: center;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .place-value-table th {
+      padding: 10px;
+      font-size: 1.15rem;
+      border: 1px solid #cbd5e1;
+    }
+    .th-unit-jo { background: #fdf2f8; color: #be185d; }
+    .th-unit-eok { background: #f5f3ff; color: #6d28d9; }
+    .th-unit-man { background: #e0f2fe; color: #0369a1; }
+    .th-unit-il { background: #fefce8; color: #854d0e; }
+
+    .place-value-table td {
+      padding: 12px 6px;
+      font-size: 1.4rem;
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+    }
+    .td-highlight {
+      background: #fee2e2;
+      color: #e11d48;
+      font-weight: bold;
+      animation: pulseCell 1.2s infinite alternate;
+    }
+    @keyframes pulseCell {
+      from { background: #fee2e2; }
+      to { background: #fecdd3; }
+    }
+
+    /* 10배씩 커지는 거대 스케일 뷰 */
+    .scale-multiplier-box {
+      background: linear-gradient(135deg, #090d16 0%, #1e1b4b 60%, #0f172a 100%);
+      border: 3px solid #6366f1;
+      border-radius: 24px;
+      padding: 22px;
+      color: #fff;
+      margin: 15px auto;
+      max-width: 580px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+    }
+    .big-number-display {
+      font-family: 'Jua', sans-serif;
+      font-size: 2.6rem;
+      color: #fde047;
+      margin: 10px 0;
+      letter-spacing: 2px;
+      word-break: break-all;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.5);
+    }
+
+    /* 뛰어세기 징검다리 뷰 */
+    .skip-counting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 8px;
+      margin: 15px 0;
+    }
+    .skip-card {
+      background: #ffffff;
+      border: 2px solid #0284c7;
+      border-radius: 16px;
+      padding: 12px 6px;
+      text-align: center;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      color: #0369a1;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+    }
+    .skip-card.active {
+      background: #0284c7;
+      color: #fff;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(2, 132, 199, 0.3);
+    }
+
+    /* 단위 환산 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">🌌 4학년 큰 수 탐험대 🚀</h1>
+      <p class="hero-subtitle">만(10⁴) · 억(10⁸) · 조(10¹²) 단위와 4자리 끊어읽기 마법으로 거대한 우주 숫자를 정복해요!</p>
+    </header>
+
+    <!-- 1. 🌌 10배씩 커지는 거대 스케일 & 자릿값 계수기 -->
+    <section class="math-section-card" id="section-place-value">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 만 · 억 · 조 자릿값 원리</span>
+          <h2 class="section-title">🌌 10배씩 커지는 거대 숫자 계수기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">버튼을 눌러 10배씩 커지는 수의 자릿수와 우주 스케일을 체감해 보세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentBigNumber()">🔊</button>
+      </div>
+
+      <!-- 단위 선택 버튼 -->
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="unit-preset-buttons">
+        <button class="candy-num-btn" onclick="selectBigUnit('chun', this)">1,000 (천)</button>
+        <button class="candy-num-btn active" onclick="selectBigUnit('man', this)">10,000 (1만)</button>
+        <button class="candy-num-btn" onclick="selectBigUnit('cheolman', this)">10,000,000 (1천만)</button>
+        <button class="candy-num-btn" onclick="selectBigUnit('eok', this)">100,000,000 (1억)</button>
+        <button class="candy-num-btn" onclick="selectBigUnit('cheol-eok', this)">100,000,000,000 (1천억)</button>
+        <button class="candy-num-btn" onclick="selectBigUnit('jo', this)">1,000,000,000,000 (1조)</button>
+      </div>
+
+      <div class="scale-multiplier-box">
+        <div style="font-family:'Jua'; font-size:1.3rem; color:#93c5fd;" id="scaleUnitSubtitle">1000이 10개 모이면 = 1만!</div>
+        <div class="big-number-display" id="bigNumberDigitDisplay">10,000</div>
+        <div style="font-family:'Jua'; font-size:1.6rem; color:#fbcfe8;" id="bigNumberKoreanDisplay">일만 (1만)</div>
+        
+        <div style="margin-top:10px; font-size:1.05rem; color:#cbd5e1; line-height:1.6;" id="scaleRealWorldDesc">
+          🌍 <strong>실제 비유:</strong> 큰 종합 경기장에 꽉 찬 관중의 수 정도예요! (0이 4개)
+        </div>
+      </div>
+
+      <!-- 💡 4자리 끊어읽기 마법표 -->
+      <div style="margin-top:20px;">
+        <div style="font-family:'Jua'; font-size:1.35rem; color:#0284c7; margin-bottom:8px;">💡 4자리씩 끊어 읽기 마법표 (조 · 억 · 만 · 일)</div>
+        <div class="place-value-table-wrap">
+          <table class="place-value-table">
+            <thead>
+              <tr>
+                <th colspan="4" class="th-unit-jo">👑 조 (兆) 단위</th>
+                <th colspan="4" class="th-unit-eok">🌟 억 (億) 단위</th>
+                <th colspan="4" class="th-unit-man">🚀 만 (萬) 단위</th>
+                <th colspan="4" class="th-unit-il">🟢 일 (一) 단위</th>
+              </tr>
+              <tr style="font-size:0.95rem; color:#64748b;">
+                <td>천조</td><td>백조</td><td>십조</td><td>1조</td>
+                <td>천억</td><td>백억</td><td>십억</td><td>1억</td>
+                <td>천만</td><td>백만</td><td>십만</td><td>1만</td>
+                <td>천</td><td>백</td><td>십</td><td>일</td>
+              </tr>
+            </thead>
+            <tbody id="placeValueTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 📈 뛰어세기 로켓 발사대 (어느 자릿수가 바뀌는지 관찰!) -->
+    <section class="math-section-card" id="section-skip-counting">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid" style="background:#0284c7; color:#fff;">섹션 2 : 뛰어세기 로켓</span>
+          <h2 class="section-title">📈 자릿값 뛰어세기 시뮬레이터</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">얼마씩 뛰어세느냐에 따라 바뀌는 자릿수를 눈으로 관찰해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('얼마씩 뛰어세는지에 따라 해당 자릿수의 숫자가 1씩 커집니다!')">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="skip-step-buttons">
+        <button class="candy-num-btn active" onclick="setSkipStep(1000, this)">1,000씩 뛰기</button>
+        <button class="candy-num-btn" onclick="setSkipStep(10000, this)">10,000(1만)씩 뛰기</button>
+        <button class="candy-num-btn" onclick="setSkipStep(1000000, this)">100만씩 뛰기</button>
+        <button class="candy-num-btn" onclick="setSkipStep(100000000, this)">1억씩 뛰기</button>
+      </div>
+
+      <div style="background:#fff; border:3px solid #e2e8f0; border-radius:20px; padding:20px; text-align:center;">
+        <div style="font-family:'Jua'; font-size:1.4rem; color:#475569;" id="skipStepTitle">
+          34,000부터 1,000씩 5번 뛰어세기:
+        </div>
+
+        <div class="skip-counting-grid" id="skipCardsContainer"></div>
+
+        <div class="unit-exchange-card" id="skipStepGuideBox">
+          <div>💡 <strong>뛰어세기의 핵심 비밀:</strong></div>
+          <div>• <strong>1,000씩</strong> 뛰어세면 ➔ <strong style="color:#e11d48;">천의 자리</strong> 숫자가 1씩 커져요!</div>
+          <div>• 나머지 자리(만의 자리, 백의 자리 등)는 그대로 유지됩니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ⚖️ 거대 큰 수 크기 비교 배틀 -->
+    <section class="math-section-card" id="section-compare">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs" style="background:#ec4899; color:#fff;">섹션 3 : 큰 수의 크기 비교</span>
+          <h2 class="section-title">⚖️ 거대 큰 수 크기 비교 배틀</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">1단계(자릿수 비교) ➔ 2단계(가장 높은 자리부터 비교) 원리를 배워요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('자릿수가 더 많은 수가 더 크며, 자릿수가 같으면 가장 높은 자리부터 숫자를 비교합니다!')">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;">
+        <button class="candy-num-btn active" onclick="setCompareCase(1, this)">배틀 1 : 5자리 vs 6자리</button>
+        <button class="candy-num-btn" onclick="setCompareCase(2, this)">배틀 2 : 억 단위 비교 (같은 자릿수)</button>
+        <button class="candy-num-btn" onclick="setCompareCase(3, this)">배틀 3 : 조 단위 비교</button>
+      </div>
+
+      <div style="background:#fff; border:3px solid #e2e8f0; border-radius:20px; padding:22px; text-align:center;">
+        <div style="display:flex; justify-content:center; align-items:center; gap:16px; flex-wrap:wrap; margin:10px 0;">
+          <div style="background:#f0fdf4; border:2px solid #16a34a; border-radius:18px; padding:15px 22px;">
+            <div style="font-size:0.9rem; color:#15803d; font-weight:bold;">A 진영</div>
+            <div style="font-family:'Jua'; font-size:1.8rem; color:#166534;" id="compareA">85,000 (8만 5천)</div>
+          </div>
+
+          <div style="font-family:'Jua'; font-size:2.6rem; color:#e11d48;" id="compareSign">&lt;</div>
+
+          <div style="background:#eff6ff; border:2px solid #2563eb; border-radius:18px; padding:15px 22px;">
+            <div style="font-size:0.9rem; color:#1d4ed8; font-weight:bold;">B 진영</div>
+            <div style="font-family:'Jua'; font-size:1.8rem; color:#1e40af;" id="compareB">120,000 (12만)</div>
+          </div>
+        </div>
+
+        <div class="unit-exchange-card" id="compareGuideBox">
+          <div>💡 <strong>1단계 판정: 자릿수 비교</strong></div>
+          <div>• A는 <strong>5자리 수</strong>이고, B는 <strong>6자리 수</strong>입니다.</div>
+          <div>➔ 자릿수가 더 많은 B(120,000)가 무조건 더 큽니다! (<span style="color:#e11d48;">85,000 &lt; 120,000</span>)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 🎯 실전 큰 수 번개 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 4학년 큰 수 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 큰 수의 자릿수, 읽기, 크기를 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:20px;" id="quiz-question">1000이 10개 모인 수는 얼마일까요?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    // 1. 큰 수 단위 계수기
+    const BIG_UNITS = {
+      chun: {
+        numStr: '1,000',
+        korStr: '일천 (1천)',
+        sub: '100이 10개 모이면 = 1천!',
+        desc: '🏫 <strong>실제 비유:</strong> 큰 초등학교의 전체 학생 수 정도예요! (0이 3개)',
+        tableDigits: ['','','','', '','','','', '','','','', '1','0','0','0'],
+        voice: '천은 0이 세 개이며, 백이 열 개 모인 수입니다!'
+      },
+      man: {
+        numStr: '10,000',
+        korStr: '일만 (1만)',
+        sub: '1,000이 10개 모이면 = 1만!',
+        desc: '🏟️ <strong>실제 비유:</strong> 큰 종합 경기장에 가득 찬 관중 수 정도예요! (0이 4개)',
+        tableDigits: ['','','','', '','','','', '','','','1', '0','0','0','0'],
+        voice: '일만은 천이 열 개 모인 수이며, 0이 네 개입니다!'
+      },
+      cheolman: {
+        numStr: '10,000,000',
+        korStr: '일천만 (1천만)',
+        sub: '1만이 1,000개 모이면 = 1천만!',
+        desc: '🏙️ <strong>실제 비유:</strong> 서울특별시에 사는 모든 사람의 인구수와 비슷해요! (0이 7개)',
+        tableDigits: ['','','','', '','','','', '1','0','0','0', '0','0','0','0'],
+        voice: '일천만은 서울시 전체 인구수와 비슷한 거대한 수입니다!'
+      },
+      eok: {
+        numStr: '100,000,000',
+        korStr: '일억 (1억)',
+        sub: '1천만이 10개 모이면 = 1억 (10,000만이 1억)!',
+        desc: '🇰🇷 <strong>실제 비유:</strong> 대한민국 전체 인구(5천만)의 두 배가 넘는 큰 수예요! (0이 8개)',
+        tableDigits: ['','','','', '','','','1', '0','0','0','0', '0','0','0','0'],
+        voice: '일억은 천만이 열 개 모인 수이며, 0이 여덟 개입니다!'
+      },
+      'cheol-eok': {
+        numStr: '100,000,000,000',
+        korStr: '일천억 (1천억)',
+        sub: '1억이 1,000개 모이면 = 1천억!',
+        desc: '🚀 <strong>실제 비유:</strong> 첨단 우주 탐사선을 만들고 발사하는 거대한 예산 규모예요! (0이 11개)',
+        tableDigits: ['','','','', '1','0','0','0', '0','0','0','0', '0','0','0','0'],
+        voice: '일천억은 억이 천 개 모인 수입니다!'
+      },
+      jo: {
+        numStr: '1,000,000,000,000',
+        korStr: '일조 (1조)',
+        sub: '1천억이 10개 모이면 = 1조 (10,000억이 1조)!',
+        desc: '🌌 <strong>실제 비유:</strong> 밤하늘 은하계에 반짝이는 수많은 별들의 개수에 필적해요! (0이 12개)',
+        tableDigits: ['','','','1', '0','0','0','0', '0','0','0','0', '0','0','0','0'],
+        voice: '일조는 천억이 열 개 모인 거대한 우주 단위의 수이며, 0이 열두 개입니다!'
+      }
+    };
+    let currentUnitKey = 'man';
+
+    function selectBigUnit(key, btn) {
+      currentUnitKey = key;
+      document.querySelectorAll('#unit-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderBigNumberVisuals(btn !== null);
+    }
+
+    function renderBigNumberVisuals(shouldSpeak = false) {
+      const u = BIG_UNITS[currentUnitKey];
+      document.getElementById('scaleUnitSubtitle').textContent = u.sub;
+      document.getElementById('bigNumberDigitDisplay').textContent = u.numStr;
+      document.getElementById('bigNumberKoreanDisplay').textContent = u.korStr;
+      document.getElementById('scaleRealWorldDesc').innerHTML = u.desc;
+
+      const tb = document.getElementById('placeValueTableBody');
+      tb.innerHTML = `
+        <tr>
+          ${u.tableDigits.map(d => `<td class="${d !== '' ? 'td-highlight' : ''}">${d || '-'}</td>`).join('')}
+        </tr>
+      `;
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(u.voice);
+      }
+    }
+
+    function speakCurrentBigNumber() {
+      renderBigNumberVisuals(true);
+    }
+
+    // 2. 뛰어세기 시뮬레이터
+    let currentSkipStep = 1000;
+
+    function setSkipStep(step, btn) {
+      currentSkipStep = step;
+      document.querySelectorAll('#skip-step-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const start = (step === 1000) ? 34000 : (step === 10000 ? 520000 : (step === 1000000 ? 43000000 : 500000000));
+      const stepName = (step === 1000) ? '1,000씩' : (step === 10000 ? '10,000(1만)씩' : (step === 1000000 ? '100만씩' : '1억씩'));
+      const targetPlace = (step === 1000) ? '천의 자리' : (step === 10000 ? '만의 자리' : (step === 1000000 ? '백만의 자리' : '억의 자리'));
+
+      document.getElementById('skipStepTitle').textContent = `${start.toLocaleString()}부터 ${stepName} 5번 뛰어세기:`;
+
+      const container = document.getElementById('skipCardsContainer');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 5; i++) {
+        const val = start + (step * i);
+        const card = document.createElement('div');
+        card.className = `skip-card ${i === 0 ? 'active' : ''}`;
+        card.innerHTML = `
+          <div style="font-size:0.8rem; opacity:0.8;">Step ${i+1}</div>
+          <div style="font-size:1.15rem; margin-top:2px;">${val.toLocaleString()}</div>
+        `;
+        container.appendChild(card);
+      }
+
+      document.getElementById('skipStepGuideBox').innerHTML = `
+        <div>💡 <strong>뛰어세기의 핵심 비밀:</strong></div>
+        <div>• <strong>${stepName}</strong> 뛰어세면 ➔ <strong style="color:#e11d48; font-size:1.3rem;">${targetPlace}</strong> 숫자가 1씩 커져요!</div>
+        <div>• 다른 자릿수의 숫자는 그대로 유지됩니다.</div>
+      `;
+
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(`${stepName} 뛰어세면 ${targetPlace}의 숫자가 1씩 늘어납니다!`);
+      }
+    }
+
+    // 3. 수의 크기 비교 배틀
+    function setCompareCase(caseNum, btn) {
+      document.querySelectorAll('#section-compare .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const elA = document.getElementById('compareA');
+      const elB = document.getElementById('compareB');
+      const elSign = document.getElementById('compareSign');
+      const elGuide = document.getElementById('compareGuideBox');
+
+      if (caseNum === 1) {
+        elA.textContent = '85,000 (8만 5천)';
+        elB.textContent = '120,000 (12만)';
+        elSign.textContent = '<';
+        elGuide.innerHTML = `
+          <div>💡 <strong>1단계 판정: 자릿수 비교</strong></div>
+          <div>• A는 <strong>5자리 수</strong>이고, B는 <strong>6자리 수</strong>입니다.</div>
+          <div>➔ 자릿수가 더 많은 B(120,000)가 무조건 더 큽니다! (<span style="color:#e11d48; font-weight:bold;">85,000 &lt; 120,000</span>)</div>
+        `;
+      } else if (caseNum === 2) {
+        elA.textContent = '5억 4,000만 (540,000,000)';
+        elB.textContent = '5억 2,000만 (520,000,000)';
+        elSign.textContent = '>';
+        elGuide.innerHTML = `
+          <div>💡 <strong>2단계 판정: 높은 자릿수부터 비교</strong></div>
+          <div>• 두 수 모두 9자리 수로 자릿수가 같습니다.</div>
+          <div>• 가장 높은 <strong>억의 자리(5억)</strong>가 같으므로, 그 다음 <strong>천만의 자리</strong>를 비교합니다: <strong>4천만 &gt; 2천만</strong>!</div>
+          <div>➔ 따라서 A가 더 큽니다! (<span style="color:#e11d48; font-weight:bold;">5억 4,000만 &gt; 5억 2,000만</span>)</div>
+        `;
+      } else {
+        elA.textContent = '2조 3,000억';
+        elB.textContent = '2조 7,000억';
+        elSign.textContent = '<';
+        elGuide.innerHTML = `
+          <div>💡 <strong>조 단위 크기 비교:</strong></div>
+          <div>• 조의 자리(2조)가 같을 때는 다음 <strong>천억의 자리</strong>를 비교합니다: <strong>3천억 &lt; 7천억</strong>!</div>
+          <div>➔ 따라서 B가 더 큽니다! (<span style="color:#e11d48; font-weight:bold;">2조 3,000억 &lt; 2조 7,000억</span>)</div>
+        `;
+      }
+
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak('자릿수를 먼저 세고, 자릿수가 같으면 가장 높은 자리부터 차례대로 비교합니다!');
+      }
+    }
+
+    // 4. 퀴즈
+    const QUIZ_LIST = [
+      { q: "1000이 10개 모인 수는 얼마일까요?", ans: "10,000 (1만)", choices: ["10,000 (1만)", "100,000 (10만)", "100 (백)", "1,000,000 (100만)"] },
+      { q: "10,000만이 모이면 어떤 단위가 될까요?", ans: "1억", choices: ["1억", "1조", "1천만", "10억"] },
+      { q: "10,000억이 모이면 어떤 단위가 될까요?", ans: "1조", choices: ["1조", "100억", "1000억", "10조"] },
+      { q: "54,200에서 1,000씩 뛰어세면 다음에 올 수는?", ans: "55,200", choices: ["55,200", "64,200", "54,300", "54,210"] },
+      { q: "다음 중 가장 큰 수는 무엇일까요?", ans: "3억 1천만", choices: ["3억 1천만", "2억 9천만", "9,800만", "3,500만"] },
+      { q: "숫자 '1조'에는 0이 모두 몇 개 붙을까요?", ans: "12개", choices: ["12개", "8개", "4개", "16개"] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.2rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 큰 수 마스터 박사님이시네요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html#concepts';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderBigNumberVisuals(false); // 초기 로딩 시 무발화
+      setSkipStep(1000, null);
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "큰 수");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>

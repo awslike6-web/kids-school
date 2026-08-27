@@ -152,18 +152,45 @@
     color: #000;
   }
 
-  /* 학년 서브 필터 버튼 */
-  .grade-filter-bar {
+  /* 듀얼 보기 모드 스위처 (학년별 vs 영역별) */
+  .view-mode-switcher {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .mode-switch-btn {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.2rem;
+    padding: 10px 24px;
+    border-radius: 24px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .mode-switch-btn:hover { color: var(--white); border-color: var(--yellow); }
+  .mode-switch-btn.active {
+    background: linear-gradient(135deg, var(--yellow), var(--orange));
+    color: #12121e;
+    border-color: transparent;
+    font-weight: bold;
+    box-shadow: 0 6px 18px rgba(255, 217, 61, 0.3);
+  }
+
+  /* 서브 필터 버튼 */
+  .filter-pill-bar {
     display: flex;
     justify-content: center;
     gap: 8px;
     margin-bottom: 25px;
     flex-wrap: wrap;
   }
-  .grade-pill-btn {
+  .filter-pill-btn {
     font-family: 'Jua', sans-serif;
-    font-size: 1.1rem;
-    padding: 8px 20px;
+    font-size: 1.05rem;
+    padding: 8px 18px;
     border-radius: 20px;
     border: 1.5px solid var(--border);
     background: rgba(255,255,255,0.05);
@@ -171,10 +198,10 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  .grade-pill-btn:hover, .grade-pill-btn.active {
-    border-color: var(--yellow);
-    background: rgba(255, 217, 61, 0.15);
-    color: var(--yellow);
+  .filter-pill-btn:hover, .filter-pill-btn.active {
+    border-color: var(--cyan);
+    background: rgba(0, 212, 255, 0.15);
+    color: var(--cyan);
   }
 
   /* 섹션 타이틀 */
@@ -182,6 +209,11 @@
   .sector-title.active-sector-12 { color: var(--green); }
   .sector-title.active-sector-34 { color: var(--cyan); margin-top: 35px; }
   .sector-title.active-sector-56 { color: #f59e0b; margin-top: 35px; }
+  
+  .sector-title.topic-nat { color: var(--green); }
+  .sector-title.topic-frac { color: #ec4899; margin-top: 35px; }
+  .sector-title.topic-shape { color: var(--cyan); margin-top: 35px; }
+  .sector-title.topic-measure { color: var(--yellow); margin-top: 35px; }
   .sector-title.active-sector-workout { color: #f43f5e; }
 
   /* 그리드 & 카드 */
@@ -232,6 +264,7 @@
     .mission-grid { grid-template-columns: 1fr; gap: 12px; }
     .mission-card { min-height: auto; padding: 18px 14px; }
     .logo-title { font-size: 2.2rem; }
+    .mode-switch-btn { font-size: 1.05rem; padding: 8px 16px; }
   }
 </style>
 </head>
@@ -263,14 +296,14 @@
       <!-- 관문 1: 학년별 개념 탐험관 -->
       <div class="gateway-card gw-concepts" onclick="openMathSection('concepts')">
         <div class="gateway-icon">🏫</div>
-        <div class="gateway-title">1. 학년별 개념 탐험관</div>
+        <div class="gateway-title">1. 개념 탐험관</div>
         <div class="gateway-desc">
           1~2학년 기초부터 3~4학년 핵심, 5~6학년 심화까지<br>교과서 수학 개념을 시각적 인터랙티브로 체계적으로 마스터해요!
         </div>
         <div class="gateway-badges">
-          <span class="gateway-badge">🟢 1~2학년 기초관</span>
-          <span class="gateway-badge">🚀 3~4학년 핵심관</span>
-          <span class="gateway-badge">👑 5~6학년 심화관</span>
+          <span class="gateway-badge">🎒 학년별 보기</span>
+          <span class="gateway-badge">🧩 영역·주제별 보기</span>
+          <span class="gateway-badge">🌌 4학년 큰 수 신규!</span>
         </div>
       </div>
 
@@ -279,13 +312,11 @@
         <div class="gateway-icon">⚔️</div>
         <div class="gateway-title">2. 실전 문제 트레이닝 센터</div>
         <div class="gateway-desc">
-          세로셈 무한 연산, 공식 퀴즈 배틀, 분수·소수·도형 등<br>손으로 직접 풀며 실전 연산 감각과 점수를 끌어올려요!
+          사칙연산 세로셈 무한 훈련, 수학 공식 & 개념 퀴즈 배틀 등<br>손으로 직접 풀며 실전 연산 감각과 점수를 끌어올려요!
         </div>
         <div class="gateway-badges">
-          <span class="gateway-badge" style="color:#f43f5e;">🧱 실전 세로셈</span>
-          <span class="gateway-badge" style="color:#f43f5e;">✨ 공식 퀴즈</span>
-          <span class="gateway-badge" style="color:#f43f5e;">🍰 분수·소수 문제</span>
-          <span class="gateway-badge" style="color:#f43f5e;">⏱️ 스톱워치 타임어택</span>
+          <span class="gateway-badge" style="color:#f43f5e;">✨ 공식 정의 퀴즈</span>
+          <span class="gateway-badge" style="color:#f43f5e;">🧱 사칙연산 세로셈</span>
         </div>
       </div>
 
@@ -293,111 +324,240 @@
   </div>
 
   <!-- ======================================================== -->
-  <!-- 🏫 1. 학년별 개념 탐험관 (Concept Hall)                   -->
+  <!-- 🏫 1. 개념 탐험관 (Concept Hall)                          -->
   <!-- ======================================================== -->
   <div class="view-container" id="viewConcepts">
     
     <div class="subview-nav">
-      <div class="subview-title" style="color:var(--cyan);">🏫 학년별 개념 탐험관</div>
+      <div class="subview-title" style="color:var(--cyan);">🏫 수학 개념 탐험관</div>
       <button class="back-gate-btn" onclick="openMathSection('gateway')">🔙 수학 대문으로</button>
     </div>
 
-    <!-- 학년 서브 필터 -->
-    <div class="grade-filter-bar">
-      <button class="grade-pill-btn active" onclick="filterGradeSector('all', this)">🌟 전체 학년</button>
-      <button class="grade-pill-btn" onclick="filterGradeSector('12', this)">🟢 1~2학년 기초관 (7)</button>
-      <button class="grade-pill-btn" onclick="filterGradeSector('34', this)">🚀 3~4학년 핵심관 (4)</button>
-      <button class="grade-pill-btn" onclick="filterGradeSector('56', this)">👑 5~6학년 심화관 (1)</button>
+    <!-- 듀얼 보기 모드 스위처 (학년별 vs 영역별) -->
+    <div class="view-mode-switcher">
+      <button class="mode-switch-btn active" id="btnModeGrade" onclick="switchConceptMode('grade')">🎒 학년별로 보기</button>
+      <button class="mode-switch-btn" id="btnModeTopic" onclick="switchConceptMode('topic')">🧩 영역·주제별로 보기</button>
     </div>
 
-    <!-- 🟢 1~2학년 기초 개념관 -->
-    <div class="grade-sector-block" id="sector-block-12">
-      <div class="sector-title active-sector-12">🟢 1~2학년 기초 개념관</div>
-      <div class="mission-grid">
-        <a href="number50.html" class="mission-card mc-0">
-          <div class="mission-icon">🐰</div>
-          <div class="mission-name">50까지의 수 놀이터</div>
-          <div class="mission-desc">10 만들기 · 묶음과 낱개 · 크기비교<br>1학년 수학의 튼튼한 기초를 다져요!</div>
-        </a>
-
-        <a href="number100.html" class="mission-card mc-0">
-          <div class="mission-icon">🌟</div>
-          <div class="mission-name">100까지의 수 우주 탐험</div>
-          <div class="mission-desc">10개 묶음 상자 · 100 수 배열판 · 뛰어세기<br>두 수의 크기를 비교하고 큰 수를 정복해요!</div>
-        </a>
-
-        <a href="addition_concept.html" class="mission-card mc-0">
-          <div class="mission-icon">➕</div>
-          <div class="mission-name">덧셈 (더하기) 탐험대</div>
-          <div class="mission-desc">10 만들기 짝꿍수 · 가르기와 모으기<br>10을 이용한 받아올림 덧셈 원리를 배워요!</div>
-        </a>
-
-        <a href="subtraction_concept.html" class="mission-card mc-0">
-          <div class="mission-icon">➖</div>
-          <div class="mission-name">뺄셈 (빼기) 탐험대</div>
-          <div class="mission-desc">10에서 빼기 텐프레임 · 10 가르기<br>10을 이용한 받아내림 뺄셈 원리를 정복해요!</div>
-        </a>
-
-        <a href="shapes.html" class="mission-card mc-0">
-          <div class="mission-icon">🔷</div>
-          <div class="mission-name">여러 가지 모양 탐험</div>
-          <div class="mission-desc">상자 · 둥근기둥 · 공 모양 입체 3총사<br>동그라미, 세모, 네모의 비밀을 밝혀요!</div>
-        </a>
-
-        <a href="clock_rules.html" class="mission-card mc-0">
-          <div class="mission-icon">⏰</div>
-          <div class="mission-name">시계 보기와 규칙 찾기</div>
-          <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기<br>알록달록 무늬와 수의 규칙을 척척 찾아요!</div>
-        </a>
-
-        <a href="gugudan.html" class="mission-card mc-1">
-          <div class="mission-icon">🚀</div>
-          <div class="mission-name">구구단 탐험대</div>
-          <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>2학년 2학기 심층 구구단 탐사선 탑승!</div>
-        </a>
+    <!-- ---------------------------------------------------- -->
+    <!-- 🎒 Mode A: 학년별 뷰                                  -->
+    <!-- ---------------------------------------------------- -->
+    <div id="conceptModeGrade">
+      
+      <!-- 학년 서브 필터 -->
+      <div class="filter-pill-bar">
+        <button class="filter-pill-btn active" onclick="filterGradeSector('all', this)">🌟 전체 학년</button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('12', this)">🟢 1~2학년 기초관 (7)</button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('34', this)">🚀 3~4학년 핵심관 (5)</button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('56', this)">👑 5~6학년 심화관 (1)</button>
       </div>
+
+      <!-- 🟢 1~2학년 기초 개념관 -->
+      <div class="grade-sector-block" id="sector-block-12">
+        <div class="sector-title active-sector-12">🟢 1~2학년 기초 개념관</div>
+        <div class="mission-grid">
+          <a href="number50.html" class="mission-card mc-0">
+            <div class="mission-icon">🐰</div>
+            <div class="mission-name">50까지의 수 놀이터</div>
+            <div class="mission-desc">10 만들기 · 묶음과 낱개 · 크기비교<br>1학년 수학의 튼튼한 기초를 다져요!</div>
+          </a>
+
+          <a href="number100.html" class="mission-card mc-0">
+            <div class="mission-icon">🌟</div>
+            <div class="mission-name">100까지의 수 우주 탐험</div>
+            <div class="mission-desc">10개 묶음 상자 · 100 수 배열판 · 뛰어세기<br>두 수의 크기를 비교하고 큰 수를 정복해요!</div>
+          </a>
+
+          <a href="addition_concept.html" class="mission-card mc-0">
+            <div class="mission-icon">➕</div>
+            <div class="mission-name">덧셈 (더하기) 탐험대</div>
+            <div class="mission-desc">10 만들기 짝꿍수 · 가르기와 모으기<br>10을 이용한 받아올림 덧셈 원리를 배워요!</div>
+          </a>
+
+          <a href="subtraction_concept.html" class="mission-card mc-0">
+            <div class="mission-icon">➖</div>
+            <div class="mission-name">뺄셈 (빼기) 탐험대</div>
+            <div class="mission-desc">10에서 빼기 텐프레임 · 10 가르기<br>10을 이용한 받아내림 뺄셈 원리를 정복해요!</div>
+          </a>
+
+          <a href="shapes.html" class="mission-card mc-0">
+            <div class="mission-icon">🔷</div>
+            <div class="mission-name">여러 가지 모양 탐험</div>
+            <div class="mission-desc">상자 · 둥근기둥 · 공 모양 입체 3총사<br>동그라미, 세모, 네모의 비밀을 밝혀요!</div>
+          </a>
+
+          <a href="clock_rules.html" class="mission-card mc-0">
+            <div class="mission-icon">⏰</div>
+            <div class="mission-name">시계 보기와 규칙 찾기</div>
+            <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기<br>알록달록 무늬와 수의 규칙을 척척 찾아요!</div>
+          </a>
+
+          <a href="gugudan.html" class="mission-card mc-1">
+            <div class="mission-icon">🚀</div>
+            <div class="mission-name">구구단 탐험대</div>
+            <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>2학년 2학기 심층 구구단 탐사선 탑승!</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 🚀 3~4학년 핵심 개념관 -->
+      <div class="grade-sector-block" id="sector-block-34">
+        <div class="sector-title active-sector-34">🚀 3~4학년 핵심 개념관</div>
+        <div class="mission-grid">
+          <!-- 4학년 1단원 큰 수 -->
+          <a href="big_numbers.html" class="mission-card mc-2">
+            <div class="mission-icon">🌌</div>
+            <div class="mission-name">4학년 큰 수 탐험대</div>
+            <div class="mission-desc">만 · 억 · 조 자릿값 4자리 끊어읽기<br>10배씩 뛰기와 거대 큰 수 크기 비교!</div>
+          </a>
+
+          <a href="planar_shapes.html" class="mission-card mc-1">
+            <div class="mission-icon">📐</div>
+            <div class="mission-name">평면도형 탐험대</div>
+            <div class="mission-desc">선분 · 반직선 · 직선의 비밀<br>직각삼각형, 직사각형, 정사각형 완전 정복!</div>
+          </a>
+
+          <a href="length_time.html" class="mission-card mc-2">
+            <div class="mission-icon">📏</div>
+            <div class="mission-name">길이와 시간 측정소</div>
+            <div class="mission-desc">1mm 돋보기 자 · 태양계 소축적 우주 거리<br>초 단위 변환과 시간의 덧셈·뺄셈!</div>
+          </a>
+
+          <a href="fractions_decimals.html" class="mission-card mc-0">
+            <div class="mission-icon">🍰</div>
+            <div class="mission-name">분수와 소수 첫걸음</div>
+            <div class="mission-desc">피자 쪼개기 · 정품 수직 분수 · 단위/진/가/대분수<br>0.1 수직선으로 소수의 비밀을 밝혀요!</div>
+          </a>
+
+          <a href="division_concept.html" class="mission-card mc-3">
+            <div class="mission-icon">➗</div>
+            <div class="mission-name">3학년 나눗셈 탐험대</div>
+            <div class="mission-desc">쿠키 접시 똑같이 나누기 · 곱셈 짝꿍 구구단<br>남는 사탕과 나머지의 철칙 & 검산 공식!</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 👑 5~6학년 심화 개념관 -->
+      <div class="grade-sector-block" id="sector-block-56">
+        <div class="sector-title active-sector-56">👑 5~6학년 심화 개념관</div>
+        <div class="mission-grid">
+          <a href="division_factors.html" class="mission-card mc-3">
+            <div class="mission-icon">🍬</div>
+            <div class="mission-name">약수 & 나눗셈 자릿수방</div>
+            <div class="mission-desc">사탕 분배기 · 짝꿍 찾기 · 모눈종이<br>5학년 공약수와 나눗셈 자릿수 완전 정복!</div>
+          </a>
+        </div>
+      </div>
+
     </div>
 
-    <!-- 🚀 3~4학년 핵심 개념관 -->
-    <div class="grade-sector-block" id="sector-block-34">
-      <div class="sector-title active-sector-34">🚀 3~4학년 핵심 개념관</div>
-      <div class="mission-grid">
-        <a href="planar_shapes.html" class="mission-card mc-1">
-          <div class="mission-icon">📐</div>
-          <div class="mission-name">평면도형 탐험대</div>
-          <div class="mission-desc">선분 · 반직선 · 직선의 비밀<br>직각삼각형, 직사각형, 정사각형 완전 정복!</div>
-        </a>
-
-        <a href="length_time.html" class="mission-card mc-2">
-          <div class="mission-icon">📏</div>
-          <div class="mission-name">길이와 시간 측정소</div>
-          <div class="mission-desc">1mm 돋보기 자 · 태양계 소축적 우주 거리<br>초 단위 변환과 시간의 덧셈·뺄셈!</div>
-        </a>
-
-        <a href="fractions_decimals.html" class="mission-card mc-0">
-          <div class="mission-icon">🍰</div>
-          <div class="mission-name">분수와 소수 첫걸음</div>
-          <div class="mission-desc">피자 쪼개기 · 정품 수직 분수 · 단위/진/가/대분수<br>0.1 수직선으로 소수의 비밀을 밝혀요!</div>
-        </a>
-
-        <a href="division_concept.html" class="mission-card mc-3">
-          <div class="mission-icon">➗</div>
-          <div class="mission-name">3학년 나눗셈 탐험대</div>
-          <div class="mission-desc">쿠키 접시 똑같이 나누기 · 곱셈 짝꿍 구구단<br>남는 사탕과 나머지의 철칙 & 검산 공식!</div>
-        </a>
+    <!-- ---------------------------------------------------- -->
+    <!-- 🧩 Mode B: 영역·주제별 뷰                             -->
+    <!-- ---------------------------------------------------- -->
+    <div id="conceptModeTopic" style="display:none;">
+      
+      <!-- 영역 서브 필터 -->
+      <div class="filter-pill-bar">
+        <button class="filter-pill-btn active" onclick="filterTopicSector('all', this)">🌟 전체 영역</button>
+        <button class="filter-pill-btn" onclick="filterTopicSector('nat', this)">🔢 자연수와 연산</button>
+        <button class="filter-pill-btn" onclick="filterTopicSector('frac', this)">🍰 분수와 소수</button>
+        <button class="filter-pill-btn" onclick="filterTopicSector('shape', this)">📐 도형과 공간</button>
+        <button class="filter-pill-btn" onclick="filterTopicSector('measure', this)">📏 측정과 시간</button>
       </div>
-    </div>
 
-    <!-- 👑 5~6학년 심화 개념관 -->
-    <div class="grade-sector-block" id="sector-block-56">
-      <div class="sector-title active-sector-56">👑 5~6학년 심화 개념관</div>
-      <div class="mission-grid">
-        <a href="division_factors.html" class="mission-card mc-3">
-          <div class="mission-icon">🍬</div>
-          <div class="mission-name">약수 & 나눗셈 자릿수방</div>
-          <div class="mission-desc">사탕 분배기 · 짝꿍 찾기 · 모눈종이<br>5학년 공약수와 나눗셈 자릿수 완전 정복!</div>
-        </a>
+      <!-- 1. 🔢 수와 연산 : 자연수 -->
+      <div class="topic-sector-block" id="topic-block-nat">
+        <div class="sector-title topic-nat">🔢 자연수와 사칙연산 (초등 1~5학년)</div>
+        <div class="mission-grid">
+          <a href="number50.html" class="mission-card mc-0">
+            <div class="mission-icon">🐰</div>
+            <div class="mission-name">1학년: 50까지의 수 놀이터</div>
+            <div class="mission-desc">10 만들기 · 묶음과 낱개 · 크기비교</div>
+          </a>
+          <a href="number100.html" class="mission-card mc-0">
+            <div class="mission-icon">🌟</div>
+            <div class="mission-name">1학년: 100까지의 수 우주 탐험</div>
+            <div class="mission-desc">10개 묶음 상자 · 100 수 배열판 · 뛰어세기</div>
+          </a>
+          <a href="big_numbers.html" class="mission-card mc-2">
+            <div class="mission-icon">🌌</div>
+            <div class="mission-name">4학년: 큰 수 탐험대</div>
+            <div class="mission-desc">만 · 억 · 조 자릿값과 10배씩 커지는 거대 수!</div>
+          </a>
+          <a href="addition_concept.html" class="mission-card mc-0">
+            <div class="mission-icon">➕</div>
+            <div class="mission-name">1~2학년: 덧셈 탐험대</div>
+            <div class="mission-desc">10 짝꿍수와 받아올림 덧셈 원리</div>
+          </a>
+          <a href="subtraction_concept.html" class="mission-card mc-0">
+            <div class="mission-icon">➖</div>
+            <div class="mission-name">1~2학년: 뺄셈 탐험대</div>
+            <div class="mission-desc">10에서 빼기 텐프레임과 받아내림 원리</div>
+          </a>
+          <a href="gugudan.html" class="mission-card mc-1">
+            <div class="mission-icon">🚀</div>
+            <div class="mission-name">2학년: 구구단 탐험대</div>
+            <div class="mission-desc">곱셈의 기본 원리와 구구단 짝꿍 탐험</div>
+          </a>
+          <a href="division_concept.html" class="mission-card mc-3">
+            <div class="mission-icon">➗</div>
+            <div class="mission-name">3학년: 나눗셈 탐험대</div>
+            <div class="mission-desc">똑같이 나누기 · 몫과 나머지 · 검산 공식</div>
+          </a>
+          <a href="division_factors.html" class="mission-card mc-3">
+            <div class="mission-icon">🍬</div>
+            <div class="mission-name">5학년: 약수 & 나눗셈 자릿수</div>
+            <div class="mission-desc">사탕 분배기 · 공약수와 나눗셈 자릿수 정복</div>
+          </a>
+        </div>
       </div>
+
+      <!-- 2. 🍰 수와 연산 : 분수와 소수 -->
+      <div class="topic-sector-block" id="topic-block-frac">
+        <div class="sector-title topic-frac">🍰 분수와 소수 (초등 3~6학년)</div>
+        <div class="mission-grid">
+          <a href="fractions_decimals.html" class="mission-card mc-0">
+            <div class="mission-icon">🍰</div>
+            <div class="mission-name">3학년: 분수와 소수 첫걸음</div>
+            <div class="mission-desc">피자 쪼개기 · 정품 수직 분수 · 단위/진/가/대분수 · 0.1 수직선 소수</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. 📐 도형과 공간 -->
+      <div class="topic-sector-block" id="topic-block-shape">
+        <div class="sector-title topic-shape">📐 도형과 공간 (초등 1~6학년)</div>
+        <div class="mission-grid">
+          <a href="shapes.html" class="mission-card mc-0">
+            <div class="mission-icon">🔷</div>
+            <div class="mission-name">1~2학년: 여러 가지 모양 탐험</div>
+            <div class="mission-desc">상자 · 둥근기둥 · 공 모양 입체 3총사</div>
+          </a>
+          <a href="planar_shapes.html" class="mission-card mc-1">
+            <div class="mission-icon">📐</div>
+            <div class="mission-name">3학년: 평면도형 탐험대</div>
+            <div class="mission-desc">선분 · 반직선 · 직선 · 직각삼각형 · 직사각형 · 정사각형</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 4. 📏 측정과 시간 -->
+      <div class="topic-sector-block" id="topic-block-measure">
+        <div class="sector-title topic-measure">📏 측정과 시간 (초등 1~6학년)</div>
+        <div class="mission-grid">
+          <a href="clock_rules.html" class="mission-card mc-0">
+            <div class="mission-icon">⏰</div>
+            <div class="mission-name">1~2학년: 시계 보기와 규칙 찾기</div>
+            <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기</div>
+          </a>
+          <a href="length_time.html" class="mission-card mc-2">
+            <div class="mission-icon">📏</div>
+            <div class="mission-name">3학년: 길이와 시간 측정소</div>
+            <div class="mission-desc">1mm 돋보기 자 · 태양계 소축적 우주 거리 · 초 단위 변환</div>
+          </a>
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -463,9 +623,29 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // 🔄 개념관 듀얼 뷰 스위치 (학년별 vs 영역별)
+  function switchConceptMode(mode) {
+    const btnG = document.getElementById('btnModeGrade');
+    const btnT = document.getElementById('btnModeTopic');
+    const viewG = document.getElementById('conceptModeGrade');
+    const viewT = document.getElementById('conceptModeTopic');
+
+    if (mode === 'grade') {
+      btnG.classList.add('active');
+      btnT.classList.remove('active');
+      viewG.style.display = 'block';
+      viewT.style.display = 'none';
+    } else {
+      btnG.classList.remove('active');
+      btnT.classList.add('active');
+      viewG.style.display = 'none';
+      viewT.style.display = 'block';
+    }
+  }
+
   // 🎯 학년 서브 필터링
   function filterGradeSector(grade, btn) {
-    document.querySelectorAll('.grade-pill-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#conceptModeGrade .filter-pill-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
     const s12 = document.getElementById('sector-block-12');
@@ -489,6 +669,22 @@
       s34.style.display = 'none';
       s56.style.display = 'block';
     }
+  }
+
+  // 🎯 영역 서브 필터링
+  function filterTopicSector(topic, btn) {
+    document.querySelectorAll('#conceptModeTopic .filter-pill-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const tNat = document.getElementById('topic-block-nat');
+    const tFrac = document.getElementById('topic-block-frac');
+    const tShape = document.getElementById('topic-block-shape');
+    const tMeasure = document.getElementById('topic-block-measure');
+
+    tNat.style.display = (topic === 'all' || topic === 'nat') ? 'block' : 'none';
+    tFrac.style.display = (topic === 'all' || topic === 'frac') ? 'block' : 'none';
+    tShape.style.display = (topic === 'all' || topic === 'shape') ? 'block' : 'none';
+    tMeasure.style.display = (topic === 'all' || topic === 'measure') ? 'block' : 'none';
   }
 
   // 대문 이동 로직
