@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>평면도형의 3대 공간이동 마법 🔄</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #fdfbf7;
+        --surface: #ffffff;
+        --indigo: #4f46e5;
+        --indigo-light: #e0e7ff;
+        --pink: #ec4899;
+        --orange: #f97316;
+        --emerald: #10b981;
+        --text-main: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 16px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.3rem;
+        color: var(--indigo);
+        margin-bottom: 6px;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 3px solid var(--indigo-light);
+        border-radius: 28px;
+        padding: 24px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        max-width: 720px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .mode-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+    .mode-tab {
+        flex: 1;
+        min-width: 150px;
+        padding: 12px 16px;
+        background: #f1f5f9;
+        border: 2px solid #cbd5e1;
+        border-radius: 16px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.05rem;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .mode-tab:hover { transform: translateY(-2px); border-color: #94a3b8; }
+    .mode-tab.active {
+        background: linear-gradient(135deg, var(--indigo), #6366f1);
+        color: white;
+        border-color: #4338ca;
+        box-shadow: 0 8px 16px -2px rgba(79, 70, 229, 0.3);
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto 16px auto;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px dashed #cbd5e1;
+        overflow: hidden;
+    }
+
+    svg { width: 100%; height: auto; display: block; }
+
+    .shape-piece {
+        transition: transform 0.6s cubic-bezier(0.34, 1.25, 0.64, 1);
+    }
+
+    .ctrl-bar {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+
+    .ctrl-btn {
+        padding: 10px 18px;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 14px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1rem;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .ctrl-btn:hover { transform: translateY(-2px); border-color: var(--indigo); color: var(--indigo); }
+    .ctrl-btn.active {
+        background: var(--indigo);
+        color: white;
+        border-color: #4338ca;
+    }
+
+    .guide-box {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-left: 6px solid var(--indigo);
+        padding: 14px 18px;
+        border-radius: 16px;
+        font-size: 1rem;
+        line-height: 1.6;
+        text-align: left;
+        color: #334155;
+    }
+
+    .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: var(--indigo-light);
+        color: var(--indigo);
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">평면도형의 3대 공간이동 마법 🔄</div>
+    <div class="subtitle">밀기(위치이동) · 뒤집기(거울반전) · 돌리기(회전)를 관찰해요!</div>
+</div>
+
+<div class="card">
+    <div class="mode-tabs">
+        <button class="mode-tab active" id="tabSlide" onclick="setMode('slide')">➡️ 1. 밀기 (위치 이동)</button>
+        <button class="mode-tab" id="tabFlip" onclick="setMode('flip')">🪞 2. 뒤집기 (거울 반전)</button>
+        <button class="mode-tab" id="tabRotate" onclick="setMode('rotate')">🔄 3. 돌리기 (회전 이동)</button>
+    </div>
+
+    <!-- 컨트롤 버튼 바 -->
+    <div class="ctrl-bar" id="ctrlBar"></div>
+
+    <div class="canvas-container">
+        <svg id="gridSvg" viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="gridPattern" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#f1f5f9" stroke-width="1.5"/>
+                </pattern>
+            </defs>
+
+            <!-- 배경 격자 -->
+            <rect width="360" height="260" fill="url(#gridPattern)" />
+
+            <!-- 시작 위치 잔상 가이드 -->
+            <g opacity="0.3">
+                <polygon points="120,70 200,70 200,110 160,110 160,190 120,190" fill="#cbd5e1" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" />
+                <text x="140" y="140" font-family="Jua" font-size="14" fill="#64748b" text-anchor="middle">처음 위치</text>
+            </g>
+
+            <!-- 움직이는 'ㄱ'자 블록 도형 (중심: cx=160, cy=130) -->
+            <g id="shapeGroup" class="shape-piece" style="transform-origin: 160px 130px;">
+                <polygon points="120,70 200,70 200,110 160,110 160,190 120,190" fill="#4f46e5" stroke="#3730a3" stroke-width="3" />
+                <circle cx="140" cy="90" r="5" fill="#facc15" />
+                <circle cx="180" cy="90" r="5" fill="#facc15" />
+                <text x="140" y="155" font-family="Jua" font-size="16" fill="#fff" text-anchor="middle">ㄱ</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="guide-box" id="guideBox"></div>
+</div>
+
+<script>
+    let curMode = 'slide';
+    let slideDir = 'center'; // 'center' | 'right' | 'left' | 'up' | 'down'
+    let flipState = 'none';   // 'none' | 'horiz' | 'vert'
+    let rotDeg = 0;           // 0, 90, 180, 270, 360
+
+    const shapeGroup = document.getElementById('shapeGroup');
+    const ctrlBar = document.getElementById('ctrlBar');
+    const guideBox = document.getElementById('guideBox');
+
+    function setMode(mode) {
+        curMode = mode;
+        document.getElementById('tabSlide').classList.toggle('active', mode === 'slide');
+        document.getElementById('tabFlip').classList.toggle('active', mode === 'flip');
+        document.getElementById('tabRotate').classList.toggle('active', mode === 'rotate');
+        
+        slideDir = 'center';
+        flipState = 'none';
+        rotDeg = 0;
+
+        renderControls();
+        updateTransform();
+    }
+
+    function renderControls() {
+        if (curMode === 'slide') {
+            ctrlBar.innerHTML = `
+                <button class="ctrl-btn ${slideDir==='center'?'active':''}" onclick="setSlide('center')">🏠 가운데 (원위치)</button>
+                <button class="ctrl-btn ${slideDir==='right'?'active':''}" onclick="setSlide('right')">➡️ 오른쪽으로 밀기</button>
+                <button class="ctrl-btn ${slideDir==='left'?'active':''}" onclick="setSlide('left')">⬅️ 왼쪽으로 밀기</button>
+                <button class="ctrl-btn ${slideDir==='up'?'active':''}" onclick="setSlide('up')">⬆️ 위쪽으로 밀기</button>
+                <button class="ctrl-btn ${slideDir==='down'?'active':''}" onclick="setSlide('down')">⬇️ 아래쪽으로 밀기</button>
+            `;
+        } else if (curMode === 'flip') {
+            ctrlBar.innerHTML = `
+                <button class="ctrl-btn ${flipState==='none'?'active':''}" onclick="setFlip('none')">🔄 원본 상태</button>
+                <button class="ctrl-btn ${flipState==='horiz'?'active':''}" onclick="setFlip('horiz')">🪞 좌우 뒤집기 (오른쪽/왼쪽)</button>
+                <button class="ctrl-btn ${flipState==='vert'?'active':''}" onclick="setFlip('vert')">🪞 상하 뒤집기 (위/아래)</button>
+            `;
+        } else {
+            ctrlBar.innerHTML = `
+                <button class="ctrl-btn ${rotDeg===0?'active':''}" onclick="setRotate(0)">0° (처음)</button>
+                <button class="ctrl-btn ${rotDeg===90?'active':''}" onclick="setRotate(90)">90° (시계방향 1/4 바퀴)</button>
+                <button class="ctrl-btn ${rotDeg===180?'active':''}" onclick="setRotate(180)">180° (반 바퀴: 상하좌우 반대)</button>
+                <button class="ctrl-btn ${rotDeg===270?'active':''}" onclick="setRotate(270)">270° (3/4 바퀴)</button>
+                <button class="ctrl-btn ${rotDeg===360?'active':''}" onclick="setRotate(360)">360° (한 바퀴 제자리)</button>
+            `;
+        }
+    }
+
+    function setSlide(dir) { slideDir = dir; renderControls(); updateTransform(); }
+    function setFlip(f) { flipState = f; renderControls(); updateTransform(); }
+    function setRotate(deg) { rotDeg = deg; renderControls(); updateTransform(); }
+
+    function updateTransform() {
+        if (curMode === 'slide') {
+            let tx = 0, ty = 0;
+            if (slideDir === 'right') tx = 75;
+            if (slideDir === 'left') tx = -75;
+            if (slideDir === 'up') ty = -45;
+            if (slideDir === 'down') ty = 45;
+
+            shapeGroup.style.transform = `translate(${tx}px, ${ty}px)`;
+            guideBox.innerHTML = `
+                <div>💡 <span class="badge-pill">밀기 (Slide)</span> : 도형의 <strong>모양과 방향, 크기는 변하지 않고</strong>, 위치만 상하좌우로 이동합니다!</div>
+            `;
+        } else if (curMode === 'flip') {
+            let sx = 1, sy = 1;
+            if (flipState === 'horiz') sx = -1;
+            if (flipState === 'vert') sy = -1;
+
+            shapeGroup.style.transform = `scale(${sx}, ${sy})`;
+            if (flipState === 'horiz') {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">좌우 뒤집기</span> : 도형의 <strong>왼쪽과 오른쪽이 거울처럼 반대</strong>로 바뀝니다! (위아래는 그대로)</div>
+                `;
+            } else if (flipState === 'vert') {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">상하 뒤집기</span> : 도형의 <strong>위쪽과 아래쪽이 거울처럼 반대</strong>로 바뀝니다! (좌우는 그대로)</div>
+                `;
+            } else {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">뒤집기 (Flip)</span> : 거울에 비친 것처럼 방향이 반대로 반전됩니다.</div>
+                `;
+            }
+        } else {
+            shapeGroup.style.transform = `rotate(${rotDeg}deg)`;
+            if (rotDeg === 90) {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">90° 돌리기</span> : 시계 방향으로 1/4바퀴 돌아 위쪽이 오른쪽으로 이동합니다!</div>
+                `;
+            } else if (rotDeg === 180) {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">180° 돌리기</span> : 반 바퀴 회전하여 <strong>위아래와 좌우가 모두 반대</strong>가 됩니다!</div>
+                `;
+            } else if (rotDeg === 360) {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">360° 돌리기</span> : 한 바퀴를 완전히 돌아 <strong>처음 모양과 똑같이</strong> 돌아옵니다!</div>
+                `;
+            } else {
+                guideBox.innerHTML = `
+                    <div>💡 <span class="badge-pill">돌리기 (Rotate)</span> : 중심점을 기준으로 시계 방향으로 회전하며 방향이 바뀝니다.</div>
+                `;
+            }
+        }
+    }
+
+    setMode('slide');
+</script>
+
+</body>
+</html>

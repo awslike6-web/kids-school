@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>큰 수 4자리 끊어읽기 마법표 🌌</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --cyan: #38bdf8;
+        --purple: #c084fc;
+        --gold: #facc15;
+        --rose: #fb7185;
+        --emerald: #34d399;
+        --text-main: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.3rem;
+        color: var(--gold);
+        margin-bottom: 6px;
+        text-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        color: #94a3b8;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 2px solid #334155;
+        border-radius: 28px;
+        padding: 24px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+        max-width: 760px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .display-screen {
+        background: #020617;
+        border: 2px solid #38bdf8;
+        border-radius: 20px;
+        padding: 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+    }
+
+    .display-num {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.2rem;
+        color: var(--gold);
+        letter-spacing: 2px;
+        word-break: break-all;
+    }
+
+    .display-korean {
+        font-size: 1.15rem;
+        color: var(--cyan);
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: 20px;
+        border-radius: 16px;
+        border: 2px solid #475569;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Jua', sans-serif;
+        text-align: center;
+    }
+
+    th, td {
+        padding: 10px 4px;
+        border: 1px solid #334155;
+    }
+
+    .th-unit-jo { background: #581c87; color: #f3e8ff; font-size: 1.1rem; }
+    .th-unit-uk { background: #1e3a8a; color: #dbeafe; font-size: 1.1rem; }
+    .th-unit-man { background: #065f46; color: #d1fae5; font-size: 1.1rem; }
+    .th-unit-il { background: #831843; color: #fce7f3; font-size: 1.1rem; }
+
+    .th-sub-btn {
+        background: transparent;
+        border: none;
+        color: #cbd5e1;
+        font-family: 'Jua', sans-serif;
+        font-size: 0.95rem;
+        width: 100%;
+        cursor: pointer;
+        padding: 6px 0;
+        transition: all 0.2s;
+        border-radius: 8px;
+    }
+    .th-sub-btn:hover { background: rgba(255,255,255,0.15); color: #fff; transform: scale(1.05); }
+    .th-sub-btn.active {
+        background: var(--gold);
+        color: #0f172a;
+        font-weight: 900;
+        box-shadow: 0 0 12px rgba(250, 204, 21, 0.6);
+    }
+
+    .td-val {
+        font-size: 1.3rem;
+        background: #090d16;
+        height: 48px;
+    }
+    .td-val.active-one { color: var(--gold); font-size: 1.5rem; animation: pulse 1s infinite alternate; }
+    .td-val.active-zero { color: var(--cyan); }
+    .td-val.empty { color: #475569; }
+
+    @keyframes pulse {
+        from { transform: scale(1); filter: drop-shadow(0 0 4px #facc15); }
+        to { transform: scale(1.15); filter: drop-shadow(0 0 10px #facc15); }
+    }
+
+    .guide-box {
+        background: #0f172a;
+        border: 2px solid #334155;
+        border-left: 6px solid var(--gold);
+        padding: 16px 20px;
+        border-radius: 16px;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        text-align: left;
+        color: #e2e8f0;
+    }
+
+    .btn-preset-bar {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .preset-btn {
+        padding: 8px 14px;
+        background: #1e293b;
+        border: 1px solid #475569;
+        border-radius: 12px;
+        font-family: 'Jua', sans-serif;
+        font-size: 0.95rem;
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .preset-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .preset-btn.active { background: var(--cyan); color: #0f172a; border-color: #38bdf8; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">큰 수 4자리 끊어읽기 마법표 🌌</div>
+    <div class="subtitle">우리나라는 4자리(만·억·조)마다 이름이 바뀌어요! 칸을 눌러보세요!</div>
+</div>
+
+<div class="card">
+    <div class="display-screen">
+        <div class="display-num" id="dispNum">100,000</div>
+        <div class="display-korean" id="dispKor">십만 (10만) - 0이 5개</div>
+    </div>
+
+    <div class="btn-preset-bar">
+        <button class="preset-btn" onclick="selectCol(11)">1만 (10,000)</button>
+        <button class="preset-btn active" onclick="selectCol(10)">십만 (100,000)</button>
+        <button class="preset-btn" onclick="selectCol(8)">천만 (10,000,000)</button>
+        <button class="preset-btn" onclick="selectCol(7)">1억 (100,000,000)</button>
+        <button class="preset-btn" onclick="selectCol(3)">1조 (1,000,000,000,000)</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="4" class="th-unit-jo">👑 조 (兆) 단위</th>
+                    <th colspan="4" class="th-unit-uk">🌟 억 (億) 단위</th>
+                    <th colspan="4" class="th-unit-man">🚀 만 (萬) 단위</th>
+                    <th colspan="4" class="th-unit-il">🟢 일 (一) 단위</th>
+                </tr>
+                <tr id="subHeaderRow"></tr>
+            </thead>
+            <tbody>
+                <tr id="valRow"></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="guide-box" id="guideBox">
+        💡 <strong>십만 (100,000) :</strong> 1만이 10개 모인 수 (0이 5개)<br>
+        • 한 개 구(區)나 군 단위에 거주하는 주민 수 규모의 거대한 수예요!
+    </div>
+</div>
+
+<script>
+    const PLACE_DATA = [
+        { name: "천조", zeros: 15, unit: "조", val: "1,000,000,000,000,000", kor: "천조 (1000조)", desc: "1조가 1000개 모인 수 (0이 15개!)" },
+        { name: "백조", zeros: 14, unit: "조", val: "100,000,000,000,000", kor: "백조 (100조)", desc: "1조가 100개 모인 수 (0이 14개!)" },
+        { name: "십조", zeros: 13, unit: "조", val: "10,000,000,000,000", kor: "십조 (10조)", desc: "1조가 10개 모인 수 (0이 13개!)" },
+        { name: "1조", zeros: 12, unit: "조", val: "1,000,000,000,000", kor: "일조 (1조)", desc: "1억이 10,000개(10,000억) 모인 수! (0이 12개!)" },
+
+        { name: "천억", zeros: 11, unit: "억", val: "100,000,000,000", kor: "천억 (1000억)", desc: "1억이 1000개 모인 수 (0이 11개!)" },
+        { name: "백억", zeros: 10, unit: "억", val: "10,000,000,000", kor: "백억 (100억)", desc: "1억이 100개 모인 수 (0이 10개!)" },
+        { name: "십억", zeros: 9,  unit: "억", val: "1,000,000,000", kor: "십억 (10억)", desc: "1억이 10개 모인 수 (0이 9개!)" },
+        { name: "1억", zeros: 8,  unit: "억", val: "100,000,000", kor: "일억 (1억)", desc: "1만이 10,000개(10,000만) 모인 수! (0이 8개!)" },
+
+        { name: "천만", zeros: 7, unit: "만", val: "10,000,000", kor: "천만 (1000만)", desc: "1만이 1000개 모인 수 (0이 7개!) 서울시 전체 인구 규모" },
+        { name: "백만", zeros: 6, unit: "만", val: "1,000,000", kor: "백만 (100만)", desc: "1만이 100개 모인 수 (0이 6개!) 대도시 인구 규모" },
+        { name: "십만", zeros: 5, unit: "만", val: "100,000", kor: "십만 (10만)", desc: "1만이 10개 모인 수 (0이 5개!) 일반 구/군 단위 주민 수" },
+        { name: "1만", zeros: 4, unit: "만", val: "10,000", kor: "일만 (1만)", desc: "1000이 10개 모인 수! (0이 4개!) 대형 축구장 관중 수" },
+
+        { name: "천", zeros: 3, unit: "일", val: "1,000", kor: "천 (1000)", desc: "100이 10개 모인 수 (0이 3개)" },
+        { name: "백", zeros: 2, unit: "일", val: "100", kor: "백 (100)", desc: "10이 10개 모인 수 (0이 2개)" },
+        { name: "십", zeros: 1, unit: "일", val: "10", kor: "십 (10)", desc: "1이 10개 모인 수 (0이 1개)" },
+        { name: "일", zeros: 0, unit: "일", val: "1", kor: "일 (1)", desc: "가장 기본이 되는 낱개의 수" }
+    ];
+
+    let selectedIndex = 10; // 기본값 십만
+
+    function renderTable() {
+        const subRow = document.getElementById('subHeaderRow');
+        const valRow = document.getElementById('valRow');
+        subRow.innerHTML = '';
+        valRow.innerHTML = '';
+
+        PLACE_DATA.forEach((col, idx) => {
+            const th = document.createElement('th');
+            const btn = document.createElement('button');
+            btn.className = `th-sub-btn ${idx === selectedIndex ? 'active' : ''}`;
+            btn.textContent = col.name;
+            btn.onclick = () => selectCol(idx);
+            th.appendChild(btn);
+            subRow.appendChild(th);
+
+            const td = document.createElement('td');
+            td.className = 'td-val';
+            if (idx === selectedIndex) {
+                td.className += ' active-one';
+                td.textContent = '1';
+            } else if (idx > selectedIndex) {
+                td.className += ' active-zero';
+                td.textContent = '0';
+            } else {
+                td.className += ' empty';
+                td.textContent = '-';
+            }
+            valRow.appendChild(td);
+        });
+
+        // 상단 계수기 및 가이드 업데이트
+        const cur = PLACE_DATA[selectedIndex];
+        document.getElementById('dispNum').textContent = cur.val;
+        document.getElementById('dispKor').textContent = `${cur.kor} - 0이 ${cur.zeros}개`;
+        document.getElementById('guideBox').innerHTML = `
+            💡 <strong>${cur.name} (${cur.val}) :</strong> ${cur.desc}
+        `;
+
+        document.querySelectorAll('.preset-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.includes(cur.name));
+        });
+    }
+
+    function selectCol(idx) {
+        selectedIndex = idx;
+        renderTable();
+    }
+
+    renderTable();
+</script>
+
+</body>
+</html>

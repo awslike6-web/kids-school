@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>각도기와 4총사 각도 탐험대 📐</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #fdfbf7;
+        --surface: #ffffff;
+        --cyan: #0284c7;
+        --cyan-light: #e0f2fe;
+        --pink: #ec4899;
+        --orange: #f97316;
+        --green: #10b981;
+        --purple: #8b5cf6;
+        --text-main: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.3rem;
+        color: var(--cyan);
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 3px solid #e0f2fe;
+        border-radius: 28px;
+        padding: 26px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        max-width: 720px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .preset-bar {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 15px;
+    }
+
+    .preset-btn {
+        padding: 8px 14px;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 14px;
+        font-family: 'Jua', sans-serif;
+        font-size: 0.95rem;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .preset-btn:hover { transform: translateY(-2px); border-color: var(--cyan); color: var(--cyan); }
+    .preset-btn.active {
+        background: var(--cyan);
+        color: white;
+        border-color: #0369a1;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 520px;
+        margin: 0 auto 16px auto;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px dashed #cbd5e1;
+        overflow: hidden;
+    }
+
+    svg { width: 100%; height: auto; display: block; }
+
+    .slider-wrap {
+        margin: 15px auto;
+        max-width: 460px;
+    }
+
+    .angle-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 12px;
+        border-radius: 6px;
+        background: #e2e8f0;
+        outline: none;
+    }
+    .angle-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--cyan);
+        cursor: pointer;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: transform 0.1s;
+    }
+    .angle-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    .result-badge {
+        font-family: 'Jua', sans-serif;
+        font-size: 1.8rem;
+        color: var(--cyan);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .type-tag {
+        font-size: 1rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+    }
+    .tag-acute { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .tag-right { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .tag-obtuse { background: #fae8ff; color: #86198f; border: 1px solid #f5d0fe; }
+    .tag-straight { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
+    .guide-box {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-left: 6px solid var(--cyan);
+        padding: 16px 20px;
+        border-radius: 16px;
+        font-size: 1.02rem;
+        line-height: 1.6;
+        text-align: left;
+        color: #334155;
+    }
+
+    .grid-pattern { fill: url(#grid); }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">각도기와 4총사 각도 탐험대 📐</div>
+    <div class="subtitle">각도기를 돌려보며 예각·직각·둔각·평각의 기준을 익혀요!</div>
+</div>
+
+<div class="card">
+    <div class="preset-bar">
+        <button class="preset-btn" onclick="setAngle(30)">30° (예각)</button>
+        <button class="preset-btn" onclick="setAngle(45)">45° (예각)</button>
+        <button class="preset-btn active" onclick="setAngle(90)">90° (직각)</button>
+        <button class="preset-btn" onclick="setAngle(120)">120° (둔각)</button>
+        <button class="preset-btn" onclick="setAngle(150)">150° (둔각)</button>
+        <button class="preset-btn" onclick="setAngle(180)">180° (평각)</button>
+    </div>
+
+    <div class="canvas-container">
+        <svg id="protractorSvg" viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f4f4f4" stroke-width="1"/>
+                </pattern>
+            </defs>
+
+            <rect width="360" height="220" class="grid-pattern" />
+
+            <!-- 반원 각도기 본체 (cx=180, cy=180, r=130) -->
+            <path d="M 50 180 A 130 130 0 0 1 310 180 Z" fill="#e0f2fe" fill-opacity="0.35" stroke="#0284c7" stroke-width="2" />
+            <path d="M 90 180 A 90 90 0 0 1 270 180 Z" fill="#fff" fill-opacity="0.5" stroke="#93c5fd" stroke-width="1" stroke-dasharray="2,2"/>
+
+            <!-- 각도기 중심 눈금선 -->
+            <g stroke="#94a3b8" stroke-width="1">
+                <!-- 10도 단위 눈금선들 -->
+                <g id="ticksGroup"></g>
+            </g>
+
+            <!-- 부채꼴 각도 영역 (색칠) -->
+            <path id="angleSector" d="" fill="#38bdf8" fill-opacity="0.35" stroke="#0284c7" stroke-width="2" />
+
+            <!-- 기준 밑금 (수평 오른쪽 0도 선) -->
+            <line x1="180" y1="180" x2="310" y2="180" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" />
+
+            <!-- 움직이는 각도 변 -->
+            <line id="angleRay" x1="180" y1="180" x2="180" y2="50" stroke="#e11d48" stroke-width="3.5" stroke-linecap="round" />
+
+            <!-- 각도기 중심점 -->
+            <circle cx="180" cy="180" r="5" fill="#e11d48" />
+            <text x="180" y="202" font-family="Jua" font-size="13" fill="#64748b" text-anchor="middle">꼭짓점 (중심)</text>
+        </svg>
+    </div>
+
+    <!-- 슬라이더 -->
+    <div class="slider-wrap">
+        <input type="range" min="0" max="180" value="90" class="angle-slider" id="angleSlider" oninput="onSlider(this.value)">
+    </div>
+
+    <div class="result-badge" id="resultText">
+        <span id="degNumber">90°</span>
+        <span class="type-tag tag-right" id="typeTag">직각 (정확히 90도)</span>
+    </div>
+
+    <div class="guide-box" id="descBox">
+        💡 <strong>직각(Right Angle) :</strong> 정확히 90°인 각입니다.<br>
+        • 교과서 모서리, 삼각자의 직각 부분, 시계 3시 정각의 바늘 모양이에요!
+    </div>
+</div>
+
+<script>
+    const cx = 180, cy = 180, r = 130;
+
+    // 각도기 눈금 생성
+    const ticksGroup = document.getElementById('ticksGroup');
+    for (let a = 0; a <= 180; a += 10) {
+        const rad = (180 - a) * Math.PI / 180;
+        const x1 = cx + (r - 8) * Math.cos(rad);
+        const y1 = cy - (r - 8) * Math.sin(rad);
+        const x2 = cx + r * Math.cos(rad);
+        const y2 = cy - r * Math.sin(rad);
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+        line.setAttribute("stroke", a % 30 === 0 ? "#0284c7" : "#94a3b8");
+        line.setAttribute("stroke-width", a % 30 === 0 ? "2" : "1");
+        ticksGroup.appendChild(line);
+
+        // 숫자 텍스트
+        if (a % 30 === 0) {
+            const tx = cx + (r - 18) * Math.cos(rad);
+            const ty = cy - (r - 18) * Math.sin(rad) + 4;
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", tx);
+            text.setAttribute("y", ty);
+            text.setAttribute("font-family", "Jua");
+            text.setAttribute("font-size", "10");
+            text.setAttribute("fill", "#0369a1");
+            text.setAttribute("text-anchor", "middle");
+            text.textContent = a;
+            ticksGroup.appendChild(text);
+        }
+    }
+
+    function updateAngleUI(deg) {
+        deg = parseInt(deg);
+        document.getElementById('degNumber').textContent = `${deg}°`;
+        document.getElementById('angleSlider').value = deg;
+
+        // 변 끝점 좌표 계산 (수평 오른쪽 0도 기준, 시계반대방향)
+        const rad = deg * Math.PI / 180;
+        const rayX = cx + r * Math.cos(rad);
+        const rayY = cy - r * Math.sin(rad);
+
+        document.getElementById('angleRay').setAttribute('x2', rayX);
+        document.getElementById('angleRay').setAttribute('y2', rayY);
+
+        // 부채꼴 Path
+        const largeArc = deg > 180 ? 1 : 0;
+        const sectorD = `M ${cx} ${cy} L ${cx + r} ${cy} A ${r} ${r} 0 ${largeArc} 0 ${rayX} ${rayY} Z`;
+        document.getElementById('angleSector').setAttribute('d', sectorD);
+
+        // 각의 분류 및 설명
+        const tag = document.getElementById('typeTag');
+        const desc = document.getElementById('descBox');
+
+        if (deg === 0) {
+            tag.className = 'type-tag tag-acute';
+            tag.textContent = '0° (벌어지지 않음)';
+            desc.innerHTML = '💡 <strong>0도 :</strong> 두 변이 겹쳐져 벌어지지 않은 상태입니다.';
+        } else if (deg < 90) {
+            tag.className = 'type-tag tag-acute';
+            tag.textContent = '예각 (0° 초과 ~ 90° 미만)';
+            desc.innerHTML = '💡 <strong>예각(Acute Angle) :</strong> 0°보다 크고 90°(직각)보다 작은 뾰족한 각입니다.<br>• 가위를 살짝 벌렸을 때의 날카로운 각도예요!';
+        } else if (deg === 90) {
+            tag.className = 'type-tag tag-right';
+            tag.textContent = '직각 (정확히 90°)';
+            desc.innerHTML = '💡 <strong>직각(Right Angle) :</strong> 정확히 90°인 각입니다.<br>• 교과서 모서리, 삼각자의 직각 부분, 시계 3시 정각의 바늘 모양이에요!';
+        } else if (deg < 180) {
+            tag.className = 'type-tag tag-obtuse';
+            tag.textContent = '둔각 (90° 초과 ~ 180° 미만)';
+            desc.innerHTML = '💡 <strong>둔각(Obtuse Angle) :</strong> 90°(직각)보다 크고 180°보다 작은 펑퍼짐하고 넓은 각입니다.<br>• 부채를 넓게 펼쳤을 때나 미끄럼틀의 완만한 경사 각도예요!';
+        } else {
+            tag.className = 'type-tag tag-straight';
+            tag.textContent = '평각 (일직선 180°)';
+            desc.innerHTML = '💡 <strong>평각(Straight Angle) :</strong> 두 변이 일직선으로 곧게 펴진 180°인 각입니다.<br>• 직각 2개가 모인 크기이며, 시계 6시 정각의 바늘 모양이에요!';
+        }
+
+        // 프리셋 버튼 활성화 상태
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.startsWith(`${deg}°`));
+        });
+    }
+
+    function setAngle(deg) { updateAngleUI(deg); }
+    function onSlider(val) { updateAngleUI(val); }
+
+    // 초기화 (90도)
+    updateAngleUI(90);
+</script>
+
+</body>
+</html>

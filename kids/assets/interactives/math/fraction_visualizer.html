@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>분수와 소수 피자 & 막대 모델 🍰</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #fdfbf7;
+        --surface: #ffffff;
+        --rose: #e11d48;
+        --rose-light: #ffe4e6;
+        --blue: #0284c7;
+        --orange: #f97316;
+        --text-main: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+        font-family: 'Nanum Gothic', sans-serif; 
+        background: var(--bg); 
+        color: var(--text-main); 
+        min-height: 100vh; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 16px;
+        animation: fadeDown 0.6s ease both;
+    }
+
+    @keyframes fadeDown { 
+        from { opacity:0; transform:translateY(-20px); } 
+        to { opacity:1; transform:translateY(0); } 
+    }
+
+    .title {
+        font-family: 'Jua', sans-serif;
+        font-size: 2.3rem;
+        color: var(--rose);
+        margin-bottom: 6px;
+    }
+
+    .subtitle {
+        font-size: 1.05rem;
+        color: #64748b;
+        font-weight: 700;
+    }
+
+    .card {
+        background: var(--surface);
+        border: 3px solid var(--rose-light);
+        border-radius: 28px;
+        padding: 24px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        max-width: 720px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .model-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .model-tab {
+        flex: 1;
+        max-width: 220px;
+        padding: 10px 16px;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 14px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.05rem;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .model-tab.active {
+        background: var(--rose);
+        color: white;
+        border-color: #be123c;
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+    }
+
+    .canvas-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto 16px auto;
+        background: #fff;
+        border-radius: 20px;
+        border: 2px dashed #cbd5e1;
+        overflow: hidden;
+    }
+
+    svg { width: 100%; height: auto; display: block; }
+
+    .fraction-display {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        background: #fff1f2;
+        border: 2px solid #fecdd3;
+        border-radius: 20px;
+        padding: 10px 24px;
+        margin-bottom: 16px;
+    }
+
+    .frac-box {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.8rem;
+        color: var(--rose);
+        line-height: 1;
+    }
+    .frac-box .bar {
+        width: 100%;
+        height: 3px;
+        background: var(--rose);
+        margin: 4px 0;
+    }
+
+    .slider-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 460px;
+        margin: 0 auto 16px auto;
+        text-align: left;
+    }
+
+    .slider-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.05rem;
+        color: #334155;
+    }
+
+    input[type=range] {
+        flex: 1;
+        margin-left: 12px;
+        -webkit-appearance: none;
+        height: 10px;
+        border-radius: 5px;
+        background: #e2e8f0;
+        outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--rose);
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .guide-box {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-left: 6px solid var(--rose);
+        padding: 14px 18px;
+        border-radius: 16px;
+        font-size: 1.02rem;
+        line-height: 1.6;
+        text-align: left;
+        color: #334155;
+    }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">분수와 소수 피자 & 막대 모델 🍰</div>
+    <div class="subtitle">전체(1)를 똑같이 나누고 선택한 양을 시각적으로 체득해요!</div>
+</div>
+
+<div class="card">
+    <div class="model-tabs">
+        <button class="model-tab active" id="tabPizza" onclick="setModel('pizza')">🍕 원형 피자 모델</button>
+        <button class="model-tab" id="tabBar" onclick="setModel('bar')">📏 직사각형 막대 모델</button>
+    </div>
+
+    <div class="fraction-display">
+        <div class="frac-box">
+            <span id="dispNumer">3</span>
+            <div class="bar"></div>
+            <span id="dispDenom">4</span>
+        </div>
+        <div style="font-family:'Jua'; font-size:1.6rem; color:#475569;" id="dispDecimal">
+            = 0.75
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <svg id="fracSvg" viewBox="0 0 360 220" xmlns="http://www.w3.org/2000/svg">
+            <g id="fracStage"></g>
+        </svg>
+    </div>
+
+    <!-- 슬라이더 -->
+    <div class="slider-group">
+        <div class="slider-row">
+            <span>전체 등분(분모): <b id="lblDenom" style="color:var(--rose);">4</b></span>
+            <input type="range" min="2" max="10" value="4" id="rangeDenom" oninput="onDenomChange(this.value)">
+        </div>
+        <div class="slider-row">
+            <span>선택 조각(분자): <b id="lblNumer" style="color:var(--rose);">3</b></span>
+            <input type="range" min="1" max="4" value="3" id="rangeNumer" oninput="onNumerChange(this.value)">
+        </div>
+    </div>
+
+    <div class="guide-box" id="guideBox"></div>
+</div>
+
+<script>
+    let curModel = 'pizza';
+    let denom = 4;
+    let numer = 3;
+
+    const stage = document.getElementById('fracStage');
+    const guideBox = document.getElementById('guideBox');
+
+    function setModel(m) {
+        curModel = m;
+        document.getElementById('tabPizza').classList.toggle('active', m === 'pizza');
+        document.getElementById('tabBar').classList.toggle('active', m === 'bar');
+        render();
+    }
+
+    function onDenomChange(v) {
+        denom = parseInt(v);
+        document.getElementById('rangeNumer').max = denom;
+        if (numer > denom) numer = denom;
+        document.getElementById('rangeNumer').value = numer;
+        render();
+    }
+
+    function onNumerChange(v) {
+        numer = parseInt(v);
+        render();
+    }
+
+    function render() {
+        document.getElementById('dispDenom').textContent = denom;
+        document.getElementById('dispNumer').textContent = numer;
+        document.getElementById('lblDenom').textContent = denom;
+        document.getElementById('lblNumer').textContent = numer;
+
+        const decVal = (numer / denom).toFixed(2);
+        document.getElementById('dispDecimal').textContent = `= ${decVal} (소수)`;
+
+        if (curModel === 'pizza') {
+            // 원형 피자 모델 (cx=180, cy=110, r=85)
+            const cx = 180, cy = 110, r = 85;
+            let svgContent = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>`;
+
+            const anglePerPiece = 360 / denom;
+            for (let i = 0; i < denom; i++) {
+                const startA = (i * anglePerPiece - 90) * Math.PI / 180;
+                const endA = ((i + 1) * anglePerPiece - 90) * Math.PI / 180;
+                const x1 = cx + r * Math.cos(startA);
+                const y1 = cy + r * Math.sin(startA);
+                const x2 = cx + r * Math.cos(endA);
+                const y2 = cy + r * Math.sin(endA);
+
+                const isColored = i < numer;
+                const fill = isColored ? "#fb7185" : "#fff";
+                const stroke = isColored ? "#e11d48" : "#cbd5e1";
+                const largeArc = anglePerPiece > 180 ? 1 : 0;
+
+                svgContent += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+            }
+            stage.innerHTML = svgContent;
+        } else {
+            // 직사각형 막대 모델
+            const bx = 40, by = 65, bw = 280, bh = 80;
+            let svgContent = `<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2" rx="10"/>`;
+
+            const pieceW = bw / denom;
+            for (let i = 0; i < denom; i++) {
+                const px = bx + i * pieceW;
+                const isColored = i < numer;
+                const fill = isColored ? "#38bdf8" : "#fff";
+                const stroke = isColored ? "#0284c7" : "#cbd5e1";
+
+                svgContent += `<rect x="${px}" y="${by}" width="${pieceW}" height="${bh}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+                svgContent += `<text x="${px + pieceW/2}" y="${by + bh/2 + 6}" font-family="Jua" font-size="15" fill="${isColored?'#0369a1':'#94a3b8'}" text-anchor="middle">1/${denom}</text>`;
+            }
+            stage.innerHTML = svgContent;
+        }
+
+        guideBox.innerHTML = `
+            <div>💡 <strong>분수의 의미 :</strong> 전체 1을 똑같이 <strong>${denom}조각(분모)</strong>으로 나눈 것 중 <strong>${numer}조각(분자)</strong>입니다.</div>
+            <div>• 분수 읽기: <strong>${denom}분의 ${numer}</strong> (\${numer}/\${denom})</div>
+        `;
+    }
+
+    render();
+</script>
+
+</body>
+</html>
