@@ -50,7 +50,10 @@
 <div class="app-container">
   <div class="top-bar">
     <div class="profile-badge" id="profileBadge">접속중: 👨‍🚀 <b>로딩중...</b></div>
-    <button class="exit-btn" onclick="exitRoom()">🚪 로비로 돌아가기</button>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🚪 로비로 돌아가기</button>
+    </div>
   </div>
 
   <header>
@@ -117,11 +120,18 @@
 
 <script>
     const requiredCores = [
-        "notion-helper.js"
+        "notion-helper.js",
+        "fairy-config.js",
+        "fairy-engine.js",
+        "fairy-chatbot.js"
     ];
 
     loadCoreScripts("../../core/", requiredCores, () => {
         console.log("🚀 수학 공식/개념 퀴즈 하이브리드 엔진 조립 완료!");
+
+        // 🧚 수학요정 코코 시동
+        if (typeof initFairyAudio === 'function') initFairyAudio();
+        if (typeof initFairyChat === 'function') initFairyChat("MATH", "수학공식개념방");
 
         window.initProfile = function() {
             const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
@@ -331,10 +341,12 @@
                 fb.className = 'q-feedback ok'; 
                 document.getElementById('q-score').textContent = `${qScore}점`; 
                 document.getElementById('next-btn').className = 'next-btn show';
+                if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
             } else {
                 btn.classList.add('wrong'); 
                 fb.textContent = `😅 아쉬워요! 정답은 [ ${q.ans} ]`; 
                 fb.className = 'q-feedback no';
+                if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${q.ans} 이에요.`);
                 
                 // 오답 노트 기록
                 wrongNotes.push(q.item.word);
