@@ -42,15 +42,46 @@
       border: 1px solid #cbd5e1;
       color: #1e293b;
     }
-    .td-highlight {
-      background: #fee2e2;
-      color: #e11d48;
+    /* 16개 자릿값 클릭 버튼 스타일 */
+    .unit-th-btn {
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
       font-weight: bold;
-      animation: pulseCell 1.2s infinite alternate;
     }
-    @keyframes pulseCell {
-      from { background: #fee2e2; }
-      to { background: #fecdd3; }
+    .unit-th-btn:hover {
+      background: #bae6fd !important;
+      color: #0369a1 !important;
+      transform: scale(1.08);
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+    .unit-th-btn.active-unit-th {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.6);
+      transform: scale(1.05);
+    }
+
+    .td-one {
+      background: #fee2e2 !important;
+      color: #e11d48 !important;
+      font-weight: 900 !important;
+      font-size: 1.6rem !important;
+      animation: pulseOne 1s infinite alternate;
+    }
+    @keyframes pulseOne {
+      from { transform: scale(1); background: #fee2e2; }
+      to { transform: scale(1.12); background: #fecdd3; }
+    }
+    .td-zero {
+      background: #f0fdf4;
+      color: #16a34a;
+      font-weight: bold;
+    }
+    .td-empty {
+      background: #f8fafc;
+      color: #cbd5e1;
     }
 
     /* 10배씩 커지는 거대 스케일 뷰 */
@@ -150,27 +181,33 @@
 
       <!-- 단위 선택 버튼 -->
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="unit-preset-buttons">
-        <button class="candy-num-btn" onclick="selectBigUnit('chun', this)">1,000 (천)</button>
-        <button class="candy-num-btn active" onclick="selectBigUnit('man', this)">10,000 (1만)</button>
-        <button class="candy-num-btn" onclick="selectBigUnit('cheolman', this)">10,000,000 (1천만)</button>
-        <button class="candy-num-btn" onclick="selectBigUnit('eok', this)">100,000,000 (1억)</button>
-        <button class="candy-num-btn" onclick="selectBigUnit('cheol-eok', this)">100,000,000,000 (1천억)</button>
-        <button class="candy-num-btn" onclick="selectBigUnit('jo', this)">1,000,000,000,000 (1조)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('chun')">1,000 (천)</button>
+        <button class="candy-num-btn active" onclick="selectBigUnitByKey('man')">10,000 (1만)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('sipman')">100,000 (10만)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('baekman')">1,000,000 (100만)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('chunman')">10,000,000 (1천만)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('eok')">100,000,000 (1억)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('chuneok')">100,000,000,000 (1천억)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('jo')">1,000,000,000,000 (1조)</button>
+        <button class="candy-num-btn" onclick="selectBigUnitByKey('chunjo')">1,000,000,000,000,000 (1천조)</button>
       </div>
 
       <div class="scale-multiplier-box">
-        <div style="font-family:'Jua'; font-size:1.3rem; color:#93c5fd;" id="scaleUnitSubtitle">1000이 10개 모이면 = 1만!</div>
+        <div style="font-family:'Jua'; font-size:1.3rem; color:#93c5fd;" id="scaleUnitSubtitle">1,000이 10개 모이면 = 1만!</div>
         <div class="big-number-display" id="bigNumberDigitDisplay">10,000</div>
         <div style="font-family:'Jua'; font-size:1.6rem; color:#fbcfe8;" id="bigNumberKoreanDisplay">일만 (1만)</div>
         
         <div style="margin-top:10px; font-size:1.05rem; color:#cbd5e1; line-height:1.6;" id="scaleRealWorldDesc">
-          🌍 <strong>실제 비유:</strong> 큰 종합 경기장에 꽉 찬 관중의 수 정도예요! (0이 4개)
+          🏟️ <strong>실제 비유:</strong> 큰 종합 경기장에 꽉 찬 관중의 수 정도예요! (0이 4개)
         </div>
       </div>
 
       <!-- 💡 4자리 끊어읽기 마법표 -->
       <div style="margin-top:20px;">
-        <div style="font-family:'Jua'; font-size:1.35rem; color:#0284c7; margin-bottom:8px;">💡 4자리씩 끊어 읽기 마법표 (조 · 억 · 만 · 일)</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+          <div style="font-family:'Jua'; font-size:1.35rem; color:#0284c7;">💡 4자리씩 끊어 읽기 마법표 (조 · 억 · 만 · 일)</div>
+          <div style="font-family:'Jua'; font-size:1.05rem; color:#f43f5e;">👇 원하는 자릿값 칸을 클릭하면 숫자가 표기돼요!</div>
+        </div>
         <div class="place-value-table-wrap">
           <table class="place-value-table">
             <thead>
@@ -180,11 +217,8 @@
                 <th colspan="4" class="th-unit-man">🚀 만 (萬) 단위</th>
                 <th colspan="4" class="th-unit-il">🟢 일 (一) 단위</th>
               </tr>
-              <tr style="font-size:0.95rem; color:#64748b;">
-                <td>천조</td><td>백조</td><td>십조</td><td>1조</td>
-                <td>천억</td><td>백억</td><td>십억</td><td>1억</td>
-                <td>천만</td><td>백만</td><td>십만</td><td>1만</td>
-                <td>천</td><td>백</td><td>십</td><td>일</td>
+              <tr style="font-size:0.95rem; color:#64748b;" id="placeValueHeaderRow">
+                <!-- JavaScript로 16개 클릭 버튼 자동 렌더링 -->
               </tr>
             </thead>
             <tbody id="placeValueTableBody"></tbody>
@@ -297,79 +331,88 @@
   <script src="../../core/fairy-chatbot.js"></script>
 
   <script>
-    // 1. 큰 수 단위 계수기
-    const BIG_UNITS = {
-      chun: {
-        numStr: '1,000',
-        korStr: '일천 (1천)',
-        sub: '100이 10개 모이면 = 1천!',
-        desc: '🏫 <strong>실제 비유:</strong> 큰 초등학교의 전체 학생 수 정도예요! (0이 3개)',
-        tableDigits: ['','','','', '','','','', '','','','', '1','0','0','0'],
-        voice: '천은 0이 세 개이며, 백이 열 개 모인 수입니다!'
-      },
-      man: {
-        numStr: '10,000',
-        korStr: '일만 (1만)',
-        sub: '1,000이 10개 모이면 = 1만!',
-        desc: '🏟️ <strong>실제 비유:</strong> 큰 종합 경기장에 가득 찬 관중 수 정도예요! (0이 4개)',
-        tableDigits: ['','','','', '','','','', '','','','1', '0','0','0','0'],
-        voice: '일만은 천이 열 개 모인 수이며, 0이 네 개입니다!'
-      },
-      cheolman: {
-        numStr: '10,000,000',
-        korStr: '일천만 (1천만)',
-        sub: '1만이 1,000개 모이면 = 1천만!',
-        desc: '🏙️ <strong>실제 비유:</strong> 서울특별시에 사는 모든 사람의 인구수와 비슷해요! (0이 7개)',
-        tableDigits: ['','','','', '','','','', '1','0','0','0', '0','0','0','0'],
-        voice: '일천만은 서울시 전체 인구수와 비슷한 거대한 수입니다!'
-      },
-      eok: {
-        numStr: '100,000,000',
-        korStr: '일억 (1억)',
-        sub: '1천만이 10개 모이면 = 1억 (10,000만이 1억)!',
-        desc: '🇰🇷 <strong>실제 비유:</strong> 대한민국 전체 인구(5천만)의 두 배가 넘는 큰 수예요! (0이 8개)',
-        tableDigits: ['','','','', '','','','1', '0','0','0','0', '0','0','0','0'],
-        voice: '일억은 천만이 열 개 모인 수이며, 0이 여덟 개입니다!'
-      },
-      'cheol-eok': {
-        numStr: '100,000,000,000',
-        korStr: '일천억 (1천억)',
-        sub: '1억이 1,000개 모이면 = 1천억!',
-        desc: '🚀 <strong>실제 비유:</strong> 첨단 우주 탐사선을 만들고 발사하는 거대한 예산 규모예요! (0이 11개)',
-        tableDigits: ['','','','', '1','0','0','0', '0','0','0','0', '0','0','0','0'],
-        voice: '일천억은 억이 천 개 모인 수입니다!'
-      },
-      jo: {
-        numStr: '1,000,000,000,000',
-        korStr: '일조 (1조)',
-        sub: '1천억이 10개 모이면 = 1조 (10,000억이 1조)!',
-        desc: '🌌 <strong>실제 비유:</strong> 밤하늘 은하계에 반짝이는 수많은 별들의 개수에 필적해요! (0이 12개)',
-        tableDigits: ['','','','1', '0','0','0','0', '0','0','0','0', '0','0','0','0'],
-        voice: '일조는 천억이 열 개 모인 거대한 우주 단위의 수이며, 0이 열두 개입니다!'
-      }
-    };
-    let currentUnitKey = 'man';
+    // 1. 16개 자릿값 마스터 데이터 (조 · 억 · 만 · 일)
+    const PLACE_UNITS_16 = [
+      { key: 'chunjo', name: '천조', exp: 15, numStr: '1,000,000,000,000,000', korStr: '천조 (1천조)', sub: '100조가 10개 모인 수 (0이 15개!)', desc: '🌌 미국의 연간 GDP에 필적하는 상상 초월의 우주적 수예요!', voice: '천조는 0이 열다섯 개이며, 백조가 열 개 모인 수입니다!' },
+      { key: 'baekjo', name: '백조', exp: 14, numStr: '100,000,000,000,000', korStr: '백조 (100조)', sub: '10조가 10개 모인 수 (0이 14개!)', desc: '🏢 글로벌 빅테크 초대형 기업들의 시가총액 규모예요!', voice: '백조는 0이 열네 개이며, 십조가 열 개 모인 수입니다!' },
+      { key: 'sipjo', name: '십조', exp: 13, numStr: '10,000,000,000,000', korStr: '십조 (10조)', sub: '1조가 10개 모인 수 (0이 13개!)', desc: '💰 대도시 1년 전체 예산이나 대규모 국가 프로젝트 규모예요!', voice: '십조는 0이 열세 개이며, 일조가 열 개 모인 수입니다!' },
+      { key: 'jo', name: '1조', exp: 12, numStr: '1,000,000,000,000', korStr: '일조 (1조)', sub: '1천억이 10개(10,000억) 모인 수 (0이 12개!)', desc: '🌌 밤하늘 은하계의 모든 별들의 개수에 필적해요!', voice: '일조는 0이 열두 개이며, 천억이 열 개 모인 수입니다!' },
 
-    function selectBigUnit(key, btn) {
-      currentUnitKey = key;
-      document.querySelectorAll('#unit-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      renderBigNumberVisuals(btn !== null);
+      { key: 'chuneok', name: '천억', exp: 11, numStr: '100,000,000,000', korStr: '천억 (1천억)', sub: '100억이 10개 모인 수 (0이 11개!)', desc: '🚀 우주 정거장이나 첨단 탐사선을 만드는 거대 예산 규모예요!', voice: '천억은 0이 열한 개이며, 백억이 열 개 모인 수입니다!' },
+      { key: 'baekeok', name: '백억', exp: 10, numStr: '10,000,000,000', korStr: '백억 (100억)', sub: '10억이 10개 모인 수 (0이 10개!)', desc: '🌍 지구 전체 인구(약 80억 명)보다 더 많은 수예요!', voice: '백억은 0이 열 개이며, 십억이 열 개 모인 수입니다!' },
+      { key: 'sipeok', name: '십억', exp: 9, numStr: '1,000,000,000', korStr: '십억 (10억)', sub: '1억이 10개 모인 수 (0이 9개!)', desc: '🌐 아프리카 대륙 전체 인구수와 비슷한 큰 수예요!', voice: '십억은 0이 아홉 개이며, 일억이 열 개 모인 수입니다!' },
+      { key: 'eok', name: '1억', exp: 8, numStr: '100,000,000', korStr: '일억 (1억)', sub: '1천만이 10개(10,000만) 모인 수 (0이 8개!)', desc: '🇰🇷 대한민국 전체 인구(5천만)의 두 배가 넘는 큰 수예요!', voice: '일억은 0이 여덟 개이며, 천만이 열 개 모인 수입니다!' },
+
+      { key: 'chunman', name: '천만', exp: 7, numStr: '10,000,000', korStr: '천만 (1천만)', sub: '100만이 10개 모인 수 (0이 7개!)', desc: '🏙️ 대한민국 수도 서울특별시에 사는 전체 인구수와 비슷해요!', voice: '천만은 0이 일곱 개이며, 백만이 열 개 모인 수입니다!' },
+      { key: 'baekman', name: '백만', exp: 6, numStr: '1,000,000', korStr: '백만 (100만)', sub: '10만이 10개 모인 수 (0이 6개!)', desc: '🏟️ 광역시(수원, 창원 등)의 전체 시민 인구수 규모예요!', voice: '백만은 0이 여섯 개이며, 십만이 열 개 모인 수입니다!' },
+      { key: 'sipman', name: '십만', exp: 5, numStr: '100,000', korStr: '십만 (10만)', sub: '1만이 10개 모인 수 (0이 5개!)', desc: '🏘️ 한 개 구(區)나 군 단위에 사는 주민 수 규모예요!', voice: '십만은 0이 다섯 개이며, 일만이 열 개 모인 100,000 입니다!' },
+      { key: 'man', name: '1만', exp: 4, numStr: '10,000', korStr: '일만 (1만)', sub: '1,000이 10개 모인 수 (0이 4개!)', desc: '🏟️ 종합 경기장을 꽉 채운 관중의 수 정도예요!', voice: '일만은 0이 네 개이며, 천이 열 개 모인 10,000 입니다!' },
+
+      { key: 'chun', name: '천', exp: 3, numStr: '1,000', korStr: '일천 (1천)', sub: '100이 10개 모인 수 (0이 3개!)', desc: '🏫 큰 초등학교의 전체 학생 수 정도예요!', voice: '일천은 0이 세 개이며, 백이 열 개 모인 1,000 입니다!' },
+      { key: 'baek', name: '백', exp: 2, numStr: '100', korStr: '일백 (100)', sub: '10이 10개 모인 수 (0이 2개!)', desc: '💯 100점 만점 시험 점수나 100원짜리 동전 크기예요!', voice: '일백은 0이 두 개이며, 십이 열 개 모인 100 입니다!' },
+      { key: 'sip', name: '십', exp: 1, numStr: '10', korStr: '십 (10)', sub: '1이 10개 모인 수 (0이 1개!)', desc: '🖐️ 우리 양손 손가락 10개의 개수예요!', voice: '십은 0이 한 개이며, 일이 열 개 모인 10 입니다!' },
+      { key: 'il', name: '일', exp: 0, numStr: '1', korStr: '일 (1)', sub: '가장 기본이 되는 낱개 1개 (0이 0개)', desc: '🍎 맛있는 사과 낱개 1개의 개수예요!', voice: '일은 낱개 한 개입니다!' }
+    ];
+
+    let currentUnitIndex = 11; // 기본값 1만 (index 11)
+
+    function selectBigUnitByIndex(idx, shouldSpeak = true) {
+      currentUnitIndex = idx;
+      renderPlaceValueTableAndDisplay(shouldSpeak);
     }
 
-    function renderBigNumberVisuals(shouldSpeak = false) {
-      const u = BIG_UNITS[currentUnitKey];
+    function selectBigUnitByKey(key) {
+      const idx = PLACE_UNITS_16.findIndex(u => u.key === key);
+      if (idx !== -1) {
+        selectBigUnitByIndex(idx, true);
+      }
+    }
+
+    function renderPlaceValueTableAndDisplay(shouldSpeak = false) {
+      const u = PLACE_UNITS_16[currentUnitIndex];
+
+      // 상단 프리셋 버튼 활성화 상태 동기화
+      document.querySelectorAll('#unit-preset-buttons .candy-num-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${u.key}'`)) {
+          btn.classList.add('active');
+        }
+      });
+
+      // 대형 스케일 박스 업데이트
       document.getElementById('scaleUnitSubtitle').textContent = u.sub;
       document.getElementById('bigNumberDigitDisplay').textContent = u.numStr;
       document.getElementById('bigNumberKoreanDisplay').textContent = u.korStr;
       document.getElementById('scaleRealWorldDesc').innerHTML = u.desc;
 
+      // 16개 자릿값 헤더 렌더링
+      const hRow = document.getElementById('placeValueHeaderRow');
+      if (hRow) {
+        hRow.innerHTML = PLACE_UNITS_16.map((unit, idx) => `
+          <td class="unit-th-btn ${idx === currentUnitIndex ? 'active-unit-th' : ''}" 
+              onclick="selectBigUnitByIndex(${idx}, true)" 
+              title="${unit.name} 선택하기">
+            ${unit.name}
+          </td>
+        `).join('');
+      }
+
+      // 16개 자릿수 값 렌더링 (선택한 자리에는 1, 그 뒤에는 0, 앞에는 -)
       const tb = document.getElementById('placeValueTableBody');
-      tb.innerHTML = `
-        <tr>
-          ${u.tableDigits.map(d => `<td class="${d !== '' ? 'td-highlight' : ''}">${d || '-'}</td>`).join('')}
-        </tr>
-      `;
+      if (tb) {
+        let rowCells = '';
+        for (let i = 0; i < 16; i++) {
+          if (i < currentUnitIndex) {
+            rowCells += `<td class="td-empty">-</td>`;
+          } else if (i === currentUnitIndex) {
+            rowCells += `<td class="td-one">1</td>`;
+          } else {
+            rowCells += `<td class="td-zero">0</td>`;
+          }
+        }
+        tb.innerHTML = `<tr>${rowCells}</tr>`;
+      }
 
       if (shouldSpeak && typeof fairySpeak === 'function') {
         fairySpeak(u.voice);
@@ -377,7 +420,7 @@
     }
 
     function speakCurrentBigNumber() {
-      renderBigNumberVisuals(true);
+      renderPlaceValueTableAndDisplay(true);
     }
 
     // 2. 뛰어세기 시뮬레이터
@@ -522,7 +565,7 @@
       document.getElementById('userName').textContent = `${name} 대원`;
       document.getElementById('userIcon').textContent = icon;
 
-      renderBigNumberVisuals(false); // 초기 로딩 시 무발화
+      renderPlaceValueTableAndDisplay(false); // 초기 로딩 시 무발화
       setSkipStep(1000, null);
       renderQuiz();
 
