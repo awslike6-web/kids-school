@@ -48,27 +48,45 @@
     display: none;
   }
 
-  .app-container { max-width: 800px; margin: 0 auto; padding: 30px 20px; position: relative; z-index: 1; }
+  .app-container { max-width: 1040px; margin: 0 auto; padding: 25px 16px; position: relative; z-index: 1; }
 
   /* 🛠️ 상단 UI */
-  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
   .profile-badge { background: rgba(0,212,255,0.1); border: 2px solid var(--cyan); color: var(--cyan); padding: 8px 18px; border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 1.2rem; }
   .exit-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--muted); color: var(--white); padding: 8px 18px; border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
   .exit-btn:hover { background: rgba(255,107,53,0.2); border-color: var(--orange); color: var(--orange); }
 
   /* 헤더 */
-  header { text-align: center; margin-bottom: 50px; }
-  .logo-title { font-family: 'Jua', sans-serif; font-size: 3rem; background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
-  .sub-title { color: var(--muted); font-size: 1.1rem; }
+  header { text-align: center; margin-bottom: 40px; }
+  .logo-title { font-family: 'Jua', sans-serif; font-size: 2.8rem; background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+  .sub-title { color: var(--muted); font-size: 1.05rem; }
 
   /* 섹션 타이틀 */
-  .sector-title { font-family: 'Jua', sans-serif; font-size: 1.6rem; margin-bottom: 16px; border-bottom: 2px dashed var(--border); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-  .sector-title.active-sector { color: var(--green); }
+  .sector-title { font-family: 'Jua', sans-serif; font-size: 1.5rem; margin-bottom: 16px; border-bottom: 2px dashed var(--border); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .sector-title.active-sector-12 { color: var(--green); }
+  .sector-title.active-sector-34 { color: var(--cyan); margin-top: 40px; }
+  .sector-title.active-sector-56 { color: #f59e0b; margin-top: 40px; }
   .sector-title.locked-sector { color: var(--muted); margin-top: 50px; }
 
-  /* 그리드 & 카드 */
-  .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-  .mission-card { background: var(--card); border: 2px solid var(--border); border-radius: 20px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
+  /* 그리드 & 카드 모바일 가로/세로 최적화 */
+  .mission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .mission-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 22px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 180px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    backdrop-filter: blur(10px);
+  }
   
   /* 활성화 카드 호버 */
   .mission-card:not(.disabled):hover { transform: translateY(-5px) scale(1.02); }
@@ -77,13 +95,15 @@
   .mc-1:not(.disabled):hover { border-color: var(--cyan); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2); }
   .mc-2:not(.disabled):hover { border-color: var(--yellow); box-shadow: 0 10px 30px rgba(255, 217, 61, 0.2); }
 
-  .mission-icon { font-size: 3.5rem; margin-bottom: 15px; }
-  .mission-name { font-family: 'Jua', sans-serif; font-size: 1.6rem; color: var(--white); margin-bottom: 8px; }
-  .mission-desc { font-size: 1rem; color: var(--muted); line-height: 1.4; }
+  .mission-icon { font-size: 3.2rem; margin-bottom: 12px; }
+  .mission-name { font-family: 'Jua', sans-serif; font-size: 1.45rem; color: var(--white); margin-bottom: 8px; }
+  .mission-desc { font-size: 0.95rem; color: var(--muted); line-height: 1.45; word-break: keep-all; }
 
-  /* 비활성화(잠김) 카드 */
-  .mission-card.disabled { opacity: 0.5; cursor: not-allowed; border-style: dashed; filter: grayscale(80%); }
-  .lock-badge { margin-top: 12px; background: var(--border); color: var(--muted); font-size: 0.85rem; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+  @media (max-width: 540px) {
+    .mission-grid { grid-template-columns: 1fr; gap: 12px; }
+    .mission-card { min-height: auto; padding: 18px 14px; }
+    .logo-title { font-size: 2.2rem; }
+  }
 </style>
 </head>
 <body>
@@ -101,10 +121,11 @@
 
   <header>
     <div class="logo-title">민민 수학 멀티버스 🚀</div>
-    <div class="sub-title">수학 관제탑에 오신 것을 환영합니다! 훈련할 미션을 선택하세요.</div>
+    <div class="sub-title">수학 관제탑에 오신 것을 환영합니다! 학년별 맞춤 미션을 선택하세요.</div>
   </header>
 
-  <div class="sector-title active-sector">🟢 1~2학년 기초 탐험 구역</div>
+  <!-- 1. 🟢 1~2학년 기초 탐험 구역 -->
+  <div class="sector-title active-sector-12">🟢 1~2학년 기초 탐험 구역</div>
   <div class="mission-grid">
     <a href="number50.html" class="mission-card mc-0">
       <div class="mission-icon">🐰</div>
@@ -141,34 +162,39 @@
       <div class="mission-name">미션 6: 시계 보기와 규칙 찾기</div>
       <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기<br>알록달록 무늬와 수의 규칙을 척척 찾아요!</div>
     </a>
-  </div>
-
-  <div class="sector-title active-sector" style="margin-top: 40px; color: var(--cyan);">🚀 3~5학년 심화 마스터 구역</div>
-  <div class="mission-grid">
-    <a href="planar_shapes.html" class="mission-card mc-1">
-      <div class="mission-icon">📐</div>
-      <div class="mission-name">미션 7: 평면도형 탐험대</div>
-      <div class="mission-desc">선분 · 반직선 · 직선의 비밀<br>직각삼각형, 직사각형, 정사각형 완전 정복!</div>
-    </a>
 
     <a href="gugudan.html" class="mission-card mc-1">
       <div class="mission-icon">🚀</div>
-      <div class="mission-name">미션 8: 구구단 탐험대</div>
-      <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>심층 구구단 탐사선에 탑승하세요!</div>
+      <div class="mission-name">미션 7: 구구단 탐험대</div>
+      <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>2학년 2학기 심층 구구단 탐사선 탑승!</div>
+    </a>
+  </div>
+
+  <!-- 2. 🚀 3~4학년 핵심 탐험 구역 -->
+  <div class="sector-title active-sector-34">🚀 3~4학년 핵심 탐험 구역</div>
+  <div class="mission-grid">
+    <a href="planar_shapes.html" class="mission-card mc-1">
+      <div class="mission-icon">📐</div>
+      <div class="mission-name">미션 8: 평면도형 탐험대</div>
+      <div class="mission-desc">선분 · 반직선 · 직선의 비밀<br>직각삼각형, 직사각형, 정사각형 완전 정복!</div>
     </a>
 
+    <a href="vertical_math.html" class="mission-card mc-2">
+      <div class="mission-icon">🧱</div>
+      <div class="mission-name">미션 9: 실전 격자 세로셈방</div>
+      <div class="mission-desc">세 자리 수 사칙연산을 훈련하는<br>동적 그리드 세로셈 연산 훈련소!</div>
+    </a>
+  </div>
+
+  <!-- 3. 👑 5~6학년 심화 마스터 구역 -->
+  <div class="sector-title active-sector-56">👑 5~6학년 심화 마스터 구역</div>
+  <div class="mission-grid">
     <a href="division_factors.html" class="mission-card mc-3">
       <div class="mission-icon">🍬</div>
-      <div class="mission-name">미션 9: 약수 & 나눗셈 자릿수방</div>
+      <div class="mission-name">미션 10: 약수 & 나눗셈 자릿수방</div>
       <div class="mission-desc">사탕 분배기 · 짝꿍 찾기 · 모눈종이<br>5학년 공약수와 나눗셈 자릿수 완전 정복!</div>
     </a>
     
-    <a href="vertical_math.html" class="mission-card mc-2">
-      <div class="mission-icon">🧱</div>
-      <div class="mission-name">미션 10: 실전 격자 세로셈방</div>
-      <div class="mission-desc">사칙연산을 완벽하게 훈련하는<br>동적 그리드 세로셈 훈련소!</div>
-    </a>
-
     <a href="math_voca.html" class="mission-card mc-1">
       <div class="mission-icon">✨</div>
       <div class="mission-name">미션 11: 수학 공식 & 개념 퀴즈</div>

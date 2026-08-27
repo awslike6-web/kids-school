@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -252,7 +252,7 @@
 
       if (currentLineType === 'segment') {
         wrap.innerHTML = `
-          <svg width="340" height="80" viewBox="0 0 340 80">
+          <svg width="100%" style="max-width:340px; height:auto;" viewBox="0 0 340 80">
             <line x1="60" y1="40" x2="280" y2="40" stroke="#0284c7" stroke-width="6" stroke-linecap="round"/>
             <circle cx="60" cy="40" r="8" fill="#e11d48"/>
             <circle cx="280" cy="40" r="8" fill="#e11d48"/>
@@ -267,7 +267,7 @@
         }
       } else if (currentLineType === 'ray_ab') {
         wrap.innerHTML = `
-          <svg width="340" height="80" viewBox="0 0 340 80">
+          <svg width="100%" style="max-width:340px; height:auto;" viewBox="0 0 340 80">
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="#0284c7"/>
@@ -287,7 +287,7 @@
         }
       } else if (currentLineType === 'ray_ba') {
         wrap.innerHTML = `
-          <svg width="340" height="80" viewBox="0 0 340 80">
+          <svg width="100%" style="max-width:340px; height:auto;" viewBox="0 0 340 80">
             <defs>
               <marker id="arrow-left" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                 <path d="M 10 0 L 0 5 L 10 10 z" fill="#0284c7"/>
@@ -307,7 +307,7 @@
         }
       } else if (currentLineType === 'line') {
         wrap.innerHTML = `
-          <svg width="340" height="80" viewBox="0 0 340 80">
+          <svg width="100%" style="max-width:340px; height:auto;" viewBox="0 0 340 80">
             <defs>
               <marker id="arrow-bi-l" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
                 <path d="M 10 0 L 0 5 L 10 10 z" fill="#0284c7"/>
