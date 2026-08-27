@@ -1141,7 +1141,11 @@
   </div>
 
   <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
   <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
   <script>
     /* =========================================================================
        1. 사운드 및 오디오
@@ -2053,6 +2057,10 @@
       generateNewRandomMatching();
       generateRandomTrainTrack();
       generateNextCompQuiz();
+
+      // 🧚 수학요정 코코 시동
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "50까지의수");
     });
   </script>
 </body>

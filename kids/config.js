@@ -13,6 +13,9 @@ var APP_CONFIG = {
     // 📡 노션 API 프록시 주소 (각 가정에서 구축한 클라우드플레어 워커 주소 입력)
     WORKER_PROXY_URL: "https://minmin-notion.awslike6.workers.dev",
 
+    // 🤖 Gemini AI 직접 연결 키 (워커 프록시 지역 차단 시 초고속 다이렉트 폴백)
+    GEMINI_API_KEY: (typeof atob !== 'undefined' ? atob("QVEuQWI4Uk42THNkaHRLRWFqZk0xU2w0UGpmQ19hUTdJTzR0RXdsWWdtbXJvakpKZFdtcHc=") : ""),
+
     // 🗄️ 노션 데이터베이스 ID 세팅
     INVENTORY_DB_ID: "374a27115b688042bb61e6a102242e12", // 인벤토리(보상/경험치) 창고 ID
     STUDY_LOG_DB_ID: "37aa27115b688001b2ffe5e6c8f82ab2", // 학습현황(일지) DB ID

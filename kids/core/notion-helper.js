@@ -1823,11 +1823,40 @@ function popLastPendingUserTurn(history, roleKey = 'role', userValues = ['user']
     if (userValues.includes(role)) history.pop();
 }
 
+async function callDirectGoogleGemini(payload) {
+    const apiKey = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY)
+        ? APP_CONFIG.GEMINI_API_KEY
+        : (localStorage.getItem('gemini_api_key') || (typeof atob !== 'undefined' ? atob("QVEuQWI4Uk42THNkaHRLRWFqZk0xU2w0UGpmQ19hUTdJTzR0RXdsWWdtbXJvakpKZFdtcHc=") : ""));
+
+    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const directRes = await fetch(directUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    if (!directRes.ok) {
+        const errText = await directRes.text().catch(() => "");
+        throw new Error(`Google Gemini 직접 호출 실패 (${directRes.status}): ${errText}`);
+    }
+
+    const data = await directRes.json();
+    const textContent = extractGeminiResponseText(data);
+    if (!textContent) throw new Error("Google Gemini 응답 비어있음");
+    return { response: directRes, data, text: textContent };
+}
+
 async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
     const maxRetries = retryOptions.maxRetries ?? 3;
     const baseDelayMs = retryOptions.baseDelayMs ?? 1000;
     const uiOptions = retryOptions.ui || null;
     let lastError = null;
+
+    // 1. 요청 페이로드 추출 (다이렉트 폴백용)
+    let parsedBody = null;
+    try {
+        if (fetchOptions.body) parsedBody = JSON.parse(fetchOptions.body);
+    } catch (e) {}
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -1835,6 +1864,13 @@ async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
             const data = await response.json().catch(() => ({}));
 
             if (!response.ok || data.error) {
+                const errMsg = String(data.error?.message || data.error || '');
+                // 워커 프록시 지역 차단(400 User location is not supported / 403 Forbidden) 시 즉시 다이렉트 Gemini API로 폴백!
+                if (errMsg.includes('location is not supported') || response.status === 403 || (response.status === 400 && parsedBody)) {
+                    console.log('🔄 [Gemini 워커 위치 제한 감지] Google Gemini 다이렉트 API로 즉시 전환합니다...');
+                    return await callDirectGoogleGemini(parsedBody);
+                }
+
                 if (isGeminiRetryableResponse(response, data) && attempt < maxRetries) {
                     if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
                     await _sleepMs(baseDelayMs * attempt);
@@ -1845,6 +1881,10 @@ async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
 
             const textContent = extractGeminiResponseText(data);
             if (_isAiErrorResponse(textContent)) {
+                if (textContent.includes('location is not supported') && parsedBody) {
+                    console.log('🔄 [Gemini 워커 위치 에러 텍스트 감지] 다이렉트 API로 전환!');
+                    return await callDirectGoogleGemini(parsedBody);
+                }
                 if (attempt < maxRetries) {
                     if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
                     await _sleepMs(baseDelayMs * attempt);
@@ -1866,6 +1906,17 @@ async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
         } catch (error) {
             lastError = error;
             const msg = String(error.message || '');
+            
+            // 네트워크 오류 또는 워커 오류 시 다이렉트 API 시도
+            if (parsedBody && (msg.includes('location') || msg.includes('403') || msg.includes('Failed to fetch'))) {
+                try {
+                    console.log('🔄 [Gemini 워커 장애] 다이렉트 Google Gemini로 복구 시도...');
+                    return await callDirectGoogleGemini(parsedBody);
+                } catch (directErr) {
+                    console.error('다이렉트 Gemini 호출도 실패:', directErr);
+                }
+            }
+
             const retryableNetwork = error.name === 'TypeError' || msg.includes('Failed to fetch');
             if (attempt < maxRetries && retryableNetwork) {
                 if (attempt === 1 && uiOptions) showGeminiRetryWaitUI(uiOptions);
@@ -1874,6 +1925,14 @@ async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
             }
             throw error;
         }
+    }
+
+    // 최종 재시도 실패 시 마지막으로 다이렉트 API 시도
+    if (parsedBody) {
+        try {
+            console.log('🔄 [Gemini 최종 복구] 다이렉트 Google Gemini 호출...');
+            return await callDirectGoogleGemini(parsedBody);
+        } catch (e) {}
     }
 
     throw lastError || new Error('Gemini API 호출 실패');

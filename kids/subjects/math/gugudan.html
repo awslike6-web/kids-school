@@ -357,12 +357,19 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 
 <script>
     const requiredCores = [
-        "notion-helper.js"
+        "notion-helper.js",
+        "fairy-config.js",
+        "fairy-engine.js",
+        "fairy-chatbot.js"
     ];
 
     // ⚙️ 하이브리드 로더 시동!
     loadCoreScripts("../../core/", requiredCores, () => {
         console.log("🚀 구구단 탐험대 하이브리드 엔진 조립 완료!");
+
+        // 🧚 수학요정 코코 시동
+        if (typeof initFairyAudio === 'function') initFairyAudio();
+        if (typeof initFairyChat === 'function') initFairyChat("MATH", "구구단탐험대");
 
         // =======================================================
         // [트랙 3: 엔진 품 안으로 이사 온 실무 함수들]

@@ -29,6 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('userIcon').textContent = icon;
 
   initMemoPad();
+
+  // 🧚 수학요정 코코 시동
+  if (typeof initFairyAudio === 'function') initFairyAudio();
+  if (typeof initFairyChat === 'function') initFairyChat("MATH", "세로셈방");
 });
 
 // 📝 계산 메모장 (글씨 / 그리기)

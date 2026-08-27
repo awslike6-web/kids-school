@@ -149,6 +149,11 @@
 </div>
 
 <script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
 <script>
   // 대문 이동 로직
   document.getElementById('goLobbyBtn').addEventListener('click', () => {
@@ -158,7 +163,7 @@
       location.href = lobbyPath;
   });
 
-  // 프로필 세팅
+  // 프로필 세팅 & 요정 초기화
   document.addEventListener("DOMContentLoaded", () => {
     let currentProfile = localStorage.getItem('currentUser') || 'son';
     const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
@@ -171,6 +176,9 @@
 
     document.getElementById('userName').textContent = `${name} 대원`;
     document.getElementById('userIcon').textContent = icon;
+
+    if (typeof initFairyAudio === 'function') initFairyAudio();
+    if (typeof initFairyChat === 'function') initFairyChat("MATH", "수학관제탑");
   });
 </script>
 </body>

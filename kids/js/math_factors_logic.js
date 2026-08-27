@@ -663,4 +663,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 섹션 3: 모눈종이 세로셈 초기화 (72 / 3)
   loadDivisionProblem(0);
+
+  // 🧚 수학요정 코코 시동
+  if (typeof initFairyAudio === 'function') initFairyAudio();
+  if (typeof initFairyChat === 'function') initFairyChat("MATH", "약수나눗셈방");
 });

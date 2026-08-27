@@ -34,8 +34,10 @@ async function initFairyChat(subject, roomType = '공부방') {
                     ? (localStorage.getItem('currentUser') === 'daughter' ? FAIRY_CONFIG.greetings.minseo : FAIRY_CONFIG.greetings.minsu)
                     : "안녕!");
 
-            if (subject === 'MY_ROOM' && subjectConfig.greetings) {
-                greeting = childName === '민서' ? subjectConfig.greetings.minseo : subjectConfig.greetings.minsu;
+            if (subjectConfig.greetings) {
+                greeting = childName === '민서'
+                    ? (subjectConfig.greetings.minseo || subjectConfig.greeting)
+                    : (subjectConfig.greetings.minsu || subjectConfig.greeting);
             }
 
             config = {
@@ -240,23 +242,40 @@ async function sendToFairy(presetText) {
             : "https://minmin-notion.awslike6.workers.dev");
 
     try {
-        const { text: aiResponse } = await geminiFetch(
-            `${proxyBase}/v1/gemini`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    system_instruction: { parts: [{ text: fullSystemPrompt }] },
-                    contents: window.fairyHistory,
-                    generationConfig: { temperature: 0.7 }
-                })
-            },
-            {
-                maxRetries: 3,
-                baseDelayMs: 1000,
-                ui: { appendFairyMessage: true }
+        const geminiPayload = {
+            system_instruction: { parts: [{ text: fullSystemPrompt }] },
+            contents: window.fairyHistory,
+            generationConfig: { temperature: 0.7 }
+        };
+
+        let aiResponse = "";
+
+        // APP_CONFIG에 GEMINI_API_KEY가 있으면 초고속 다이렉트 호출 우선 실행
+        if (typeof callDirectGoogleGemini === 'function' && typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY) {
+            try {
+                const directResult = await callDirectGoogleGemini(geminiPayload);
+                aiResponse = directResult.text;
+            } catch (e) {
+                console.warn('다이렉트 Gemini 실패, 프록시로 폴백:', e);
             }
-        );
+        }
+
+        if (!aiResponse) {
+            const { text } = await geminiFetch(
+                `${proxyBase}/v1/gemini`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(geminiPayload)
+                },
+                {
+                    maxRetries: 3,
+                    baseDelayMs: 1000,
+                    ui: { appendFairyMessage: true }
+                }
+            );
+            aiResponse = text;
+        }
         
         window.fairyHistory.push({ role: "model", parts: [{ text: aiResponse }] });
 
