@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 🧚 수학요정 코코 시동
   if (typeof initFairyAudio === 'function') initFairyAudio();
   if (typeof initFairyChat === 'function') initFairyChat("MATH", "세로셈방");
+  if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
 });
 
 // 📝 계산 메모장 (글씨 / 그리기)

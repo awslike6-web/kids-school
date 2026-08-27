@@ -13,7 +13,10 @@
     <div class="profile-badge">
       <span id="userIcon">👨‍🚀</span> <span id="userName">로딩중...</span>
     </div>
-    <button class="exit-btn" onclick="window.exitRoom()">🔙 수학 탐험 본부</button>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="window.exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
   </div>
 
   <!-- 설정(메인) 화면 -->

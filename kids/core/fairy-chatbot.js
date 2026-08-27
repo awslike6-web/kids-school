@@ -74,9 +74,12 @@ async function initFairyChat(subject, roomType = '공부방') {
             </button>
             
             <div id="fairy-chat-panel" style="display: none; position: absolute; bottom: 70px; right: 0; width: 320px; height: 450px; background: #161b22; border: 2px solid #30363d; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; text-align: left;">
-                <div style="background: #ab47bc; padding: 10px; color: white; font-weight: bold; text-align: center; font-size: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: #ab47bc; padding: 8px 12px; color: white; font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+                    <button id="fairy-panel-tts-btn" onclick="toggleFairyTtsSetting()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); border-radius: 12px; color: white; font-size: 0.75rem; padding: 3px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="요정 목소리 켜기/끄기">
+                        ${localStorage.getItem('fairy_tts_enabled') !== 'false' ? '🔊 음성 ON' : '🔇 음성 OFF'}
+                    </button>
                     <span style="flex:1; text-align:center;">${config.name}</span>
-                    <button onclick="toggleFairyWindow()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✖</button>
+                    <button onclick="toggleFairyWindow()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; padding: 0 4px;" title="창 닫기">✖</button>
                 </div>
                 <div id="fairy-messages" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #0d1117;">
                     <div style="background: #21262d; border-left: 4px solid #ab47bc; color: #c9d1d9; padding: 8px; border-radius: 8px; font-size: 0.85rem; align-self: flex-start; max-width: 85%;">

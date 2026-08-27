@@ -60,6 +60,29 @@ function unlockFairySpeechEngine() {
     }
 }
 
+
+function cleanTextForTTS(rawText) {
+    const original = String(rawText || '');
+    
+    // 1. 의문문 판별 (물음표 기호가 있거나 한국어 의문 종결어미인 경우)
+    const isQuestion = original.includes('?') || /(까|니|나|죠|어|요|체|니\?|까\?|나\?|죠\?|요\?)\s*$/g.test(original.trim());
+
+    let cleaned = original
+        // 마크다운 및 불필요한 태그 제거
+        .replace(/[\*#_`]/g, '')
+        // 광범위 유니코드 이모지 전수 제거
+        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}\u{200D}\u{FE0F}]/gu, '')
+        // 뿅, 짜잔, 뾰로롱, 두둥 등 불필요한 의성어/추임새 제거
+        .replace(/(뿅|뾰로롱|짜잔|두둥|얍|슝|쿵)[!\?~^]*\s*/g, '')
+        // 특수기호가 "물음표", "느낌표", "별표" 등으로 낭독되는 현상 방지: 특수문자 전면 제거
+        .replace(/[\?!~\^@#\$%\&\*\(\)\[\]\{\}<>_\+=/\\|'";:·…•\-\—]/g, ' ')
+        // 연속 공백 및 쉼표 정돈
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return { text: cleaned, isQuestion };
+}
+
 function speakFairyTTS(text, onEndCallback = null) {
     const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
     if (!isTtsEnabled) {
@@ -84,11 +107,7 @@ function speakFairyTTS(text, onEndCallback = null) {
 
     const runSpeak = () => {
         try {
-            const cleanText = String(text || '')
-                .replace(/[\*#_`]/g, '')
-                .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
-                .replace(/\s+/g, ' ')
-                .trim();
+            const { text: cleanText, isQuestion } = cleanTextForTTS(text);
             if (!cleanText) {
                 if (onEndCallback) onEndCallback();
                 return;
@@ -96,8 +115,9 @@ function speakFairyTTS(text, onEndCallback = null) {
 
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'ko-KR';
-            utterance.rate = 1.05;
-            utterance.pitch = 1.12;
+            utterance.rate = isQuestion ? 1.02 : 1.05;
+            // 🎵 물음표 기호를 읽는 대신 끝음을 자연스럽게 살짝 올려주는 피치 제어
+            utterance.pitch = isQuestion ? 1.22 : 1.06;
 
             const selectVoice = () => {
                 const voices = window.speechSynthesis.getVoices();
@@ -166,38 +186,47 @@ function toggleFairyTtsSetting() {
     } else {
         unlockFairySpeechEngine();
         setTimeout(() => {
-            speakFairyTTS('요정 코코의 나긋나긋한 낭독 서비스가 다시 켜졌습니다! 같이 떠나봐요!');
+            speakFairyTTS('요정 코코의 나긋나긋한 낭독 서비스가 다시 켜졌습니다.');
         }, 150);
     }
 }
 
 function updateTtsToggleUi() {
-    const btn = document.getElementById('ttsToggleBtn');
-    if (!btn) return;
-
     const isEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
     const currentProfileLocal = localStorage.getItem('currentUser') || 'son';
 
-    if (isEnabled) {
-        btn.innerHTML = '🔊 요정 음성 ON';
-        if (currentProfileLocal === 'son') {
-            btn.style.borderColor = '#00f2fe';
-            btn.style.color = '#00f2fe';
-            btn.style.background = 'rgba(14, 10, 31, 0.6)';
+    // 1. 상단 바 버튼(#ttsToggleBtn) 동기화
+    const btn = document.getElementById('ttsToggleBtn');
+    if (btn) {
+        if (isEnabled) {
+            btn.innerHTML = '🔊 요정 음성 ON';
+            if (currentProfileLocal === 'son') {
+                btn.style.borderColor = '#00f2fe';
+                btn.style.color = '#00f2fe';
+                btn.style.background = 'rgba(14, 10, 31, 0.6)';
+            } else {
+                btn.style.borderColor = '#ff6b9d';
+                btn.style.color = '#ff6b9d';
+                btn.style.background = '#ffffff';
+            }
         } else {
-            btn.style.borderColor = '#ff6b9d';
-            btn.style.color = '#ff6b9d';
-            btn.style.background = '#ffffff';
+            btn.innerHTML = '🔇 요정 음성 OFF';
+            btn.style.borderColor = '#8b949e';
+            btn.style.color = '#8b949e';
+            if (currentProfileLocal === 'son') {
+                btn.style.background = 'rgba(30,30,40,0.5)';
+            } else {
+                btn.style.background = '#fafafa';
+            }
         }
-    } else {
-        btn.innerHTML = '🔇 요정 음성 OFF';
-        btn.style.borderColor = '#8b949e';
-        btn.style.color = '#8b949e';
-        if (currentProfileLocal === 'son') {
-            btn.style.background = 'rgba(30,30,40,0.5)';
-        } else {
-            btn.style.background = '#fafafa';
-        }
+    }
+
+    // 2. 요정 대화창 내부 헤더 버튼(#fairy-panel-tts-btn) 동기화
+    const panelTtsBtn = document.getElementById('fairy-panel-tts-btn');
+    if (panelTtsBtn) {
+        panelTtsBtn.innerHTML = isEnabled ? '🔊 음성 ON' : '🔇 음성 OFF';
+        panelTtsBtn.style.background = isEnabled ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.3)';
+        panelTtsBtn.style.color = isEnabled ? '#ffffff' : '#aaaaaa';
     }
 }
 

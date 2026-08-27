@@ -929,7 +929,10 @@
     <div class="profile-badge">
       <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
     </div>
-    <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
   </div>
 
   <header>
@@ -2061,6 +2064,7 @@
       // 🧚 수학요정 코코 시동
       if (typeof initFairyAudio === 'function') initFairyAudio();
       if (typeof initFairyChat === 'function') initFairyChat("MATH", "50까지의수");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
     });
   </script>
 </body>

@@ -667,4 +667,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // 🧚 수학요정 코코 시동
   if (typeof initFairyAudio === 'function') initFairyAudio();
   if (typeof initFairyChat === 'function') initFairyChat("MATH", "약수나눗셈방");
+  if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
 });
