@@ -234,31 +234,44 @@
       </div>
     </section>
 
-    <!-- 3. 🔺 삼각형 세 각의 합 180° & 사각형 네 각의 합 360° -->
+    <!-- 3. 🔺 삼각형 세 각의 합 180° & 사각형 네 각의 합 360° (동적 인터랙티브) -->
     <section class="math-section-card" id="section-polygon-sum">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-pairs" style="background:#ec4899; color:#fff;">섹션 3 : 다각형 각의 합 공식</span>
+          <span class="section-badge badge-pairs" style="background:#ec4899; color:#fff;">섹션 3 : 다각형 각의 합 인터랙티브</span>
           <h2 class="section-title">🔺 삼각형 180° & 사각형 360° 마법</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">세 모퉁이를 모으면 일직선(180°)이 되는 신기한 원리를 확인해요!</p>
+          <p class="section-desc" style="color:#334155; font-weight:600;">모퉁이를 직접 잘라 모아보고, 대각선으로 쪼개며 각의 합 원리를 증명해요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('삼각형의 세 각의 합은 항상 180도이고, 사각형의 네 각의 합은 360도입니다!')">🔊</button>
+        <button class="speaker-btn" onclick="fairySpeak('삼각형 세 모퉁이를 모으면 180도 일직선이 되고, 사각형 네 모퉁이를 모으면 360도 원이 됩니다!')">🔊</button>
       </div>
 
+      <!-- 상단 다각형 선택 탭 -->
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;">
-        <button class="candy-num-btn active" onclick="switchPolygonSum('triangle', this)">🔺 삼각형 세 각의 합 (180°)</button>
-        <button class="candy-num-btn" onclick="switchPolygonSum('quad', this)">🔷 사각형 네 각의 합 (360°)</button>
+        <button class="candy-num-btn active" id="btnPolyTri" onclick="switchPolygonSum('triangle')">🔺 1. 삼각형 세 각의 합 (180°)</button>
+        <button class="candy-num-btn" id="btnPolyQuad" onclick="switchPolygonSum('quad')">🔷 2. 사각형 네 각의 합 (360°)</button>
+      </div>
+
+      <!-- 사각형일 때 2가지 방법 선택 서브 탭 -->
+      <div id="quadMethodSubBar" style="display:none; justify-content:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        <button class="candy-num-btn active" id="btnQuadM1" style="font-size:0.95rem;" onclick="setQuadMethod('corners')">🧩 방법 1: 4개 모퉁이 모아 360° 원 만들기</button>
+        <button class="candy-num-btn" id="btnQuadM2" style="font-size:0.95rem;" onclick="setQuadMethod('diagonal')">✂️ 방법 2: 대각선으로 삼각형 2개 만들기 (180°+180°)</button>
       </div>
 
       <div class="polygon-sum-box" id="polygonSumBox">
-        <div id="polygonSvgWrap" style="display:flex; justify-content:center; margin:10px 0;"></div>
-        <div style="font-family:'Jua'; font-size:1.8rem; color:#be185d;" id="polygonFormulaText">
-          60° + 70° + 50° = 180° (삼각형의 합은 항상 180도!)
+        
+        <!-- 컨트롤 조작 버튼 바 -->
+        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;" id="polygonControlButtons"></div>
+
+        <!-- 인터랙티브 SVG 캔버스 -->
+        <div id="polygonSvgWrap" style="display:flex; justify-content:center; align-items:center; min-height:220px;"></div>
+
+        <!-- 실시간 공식 텍스트 -->
+        <div style="font-family:'Jua'; font-size:1.75rem; color:#be185d; margin-top:12px;" id="polygonFormulaText">
+          60° + 50° + 70° = 180° (삼각형의 세 각의 합은 항상 180°!)
         </div>
-        <div class="unit-exchange-card" style="border-color:#f472b6;" id="polygonDescText">
-          <div>💡 <strong>삼각형 모퉁이 모으기 원리:</strong></div>
-          <div>• 어떤 모양의 삼각형이든 세 꼭짓점을 잘라서 한 점에 모으면 ➔ 완벽한 <strong>일직선 평각(180°)</strong>이 됩니다!</div>
-        </div>
+
+        <!-- 설명 박스 -->
+        <div class="unit-exchange-card" style="border-color:#ec4899;" id="polygonDescText"></div>
       </div>
     </section>
 
@@ -468,48 +481,238 @@
       }
     }
 
-    // 3. 다각형 각의 합 (삼각형 180° vs 사각형 360°)
-    let curPolygonSumType = 'triangle';
+    // 3. 다각형 각의 합 동적 인터랙티브 (삼각형 180° & 사각형 360°)
+    let curPolygonType = 'triangle'; // 'triangle' | 'quad'
+    let curQuadMethod = 'corners';   // 'corners' | 'diagonal'
+    let triCutState = 'original';    // 'original' | 'merged'
+    let quadCutState = 'original';   // 'original' | 'merged'
+    let quadSplitState = false;      // false | true
 
-    function switchPolygonSum(type, btn) {
-      curPolygonSumType = type;
-      document.querySelectorAll('#section-polygon-sum .candy-num-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
+    function switchPolygonSum(type) {
+      curPolygonType = type;
+      document.getElementById('btnPolyTri').classList.toggle('active', type === 'triangle');
+      document.getElementById('btnPolyQuad').classList.toggle('active', type === 'quad');
+      document.getElementById('quadMethodSubBar').style.display = type === 'quad' ? 'flex' : 'none';
 
+      renderPolygonInteractive(true);
+    }
+
+    function setQuadMethod(method) {
+      curQuadMethod = method;
+      document.getElementById('btnQuadM1').classList.toggle('active', method === 'corners');
+      document.getElementById('btnQuadM2').classList.toggle('active', method === 'diagonal');
+
+      renderPolygonInteractive(true);
+    }
+
+    function setTriCutState(state) {
+      triCutState = state;
+      renderPolygonInteractive(true);
+    }
+
+    function setQuadCutState(state) {
+      quadCutState = state;
+      renderPolygonInteractive(true);
+    }
+
+    function setQuadSplit(split) {
+      quadSplitState = split;
+      renderPolygonInteractive(true);
+    }
+
+    function renderPolygonInteractive(shouldVoice = false) {
       const sWrap = document.getElementById('polygonSvgWrap');
+      const cBtns = document.getElementById('polygonControlButtons');
       const fText = document.getElementById('polygonFormulaText');
       const dText = document.getElementById('polygonDescText');
 
-      if (type === 'triangle') {
-        sWrap.innerHTML = `
-          <svg viewBox="0 0 320 160" style="max-width:320px;">
-            <polygon points="50,130 270,130 160,30" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
-            <text x="160" y="55" font-family="Jua" font-size="16" fill="#be185d" text-anchor="middle">50°</text>
-            <text x="80" y="122" font-family="Jua" font-size="16" fill="#be185d">60°</text>
-            <text x="240" y="122" font-family="Jua" font-size="16" fill="#be185d" text-anchor="end">70°</text>
-          </svg>
+      if (curPolygonType === 'triangle') {
+        // ------------------ 🔺 삼각형 세 각의 합 (180°) ------------------
+        cBtns.innerHTML = `
+          <button class="ctrl-btn ${triCutState === 'merged' ? 'active' : ''}" onclick="setTriCutState('merged')">✂️ 세 모퉁이 잘라서 모으기 (180° 일직선 마법)</button>
+          <button class="ctrl-btn ${triCutState === 'original' ? 'active' : ''}" onclick="setTriCutState('original')">🔄 원래 삼각형으로</button>
         `;
-        fText.textContent = "60° + 70° + 50° = 180° (삼각형의 합은 항상 180도!)";
-        dText.innerHTML = `
-          <div>💡 <strong>삼각형 모퉁이 모으기 원리:</strong></div>
-          <div>• 어떤 모양의 삼각형이든 세 꼭짓점을 찢어서 한 점에 모으면 ➔ 완벽한 <strong>일직선 평각(180°)</strong>이 됩니다!</div>
-        `;
-        if (btn && typeof fairySpeak === 'function') fairySpeak('삼각형의 세 각의 합은 항상 180도입니다!');
+
+        if (triCutState === 'original') {
+          sWrap.innerHTML = `
+            <svg viewBox="0 0 320 200" style="max-width:340px;">
+              <!-- 삼각형 본체 -->
+              <polygon points="160,30 50,165 270,165" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
+              
+              <!-- 3개 모퉁이 부채꼴 각 -->
+              <!-- 꼭짓점 A (위 50도 - 핑크) -->
+              <path d="M 160 30 L 140 70 A 45 45 0 0 0 180 70 Z" fill="#ec4899" opacity="0.8"/>
+              <text x="160" y="58" font-family="Jua" font-size="14" fill="#fff" text-anchor="middle">50°</text>
+
+              <!-- 꼭짓점 B (왼쪽 60도 - 주황) -->
+              <path d="M 50 165 L 95 165 A 45 45 0 0 0 72 125 Z" fill="#f97316" opacity="0.85"/>
+              <text x="68" y="155" font-family="Jua" font-size="14" fill="#fff">60°</text>
+
+              <!-- 꼭짓점 C (오른쪽 70도 - 파랑) -->
+              <path d="M 270 165 L 248 125 A 45 45 0 0 0 225 165 Z" fill="#0284c7" opacity="0.85"/>
+              <text x="250" y="155" font-family="Jua" font-size="14" fill="#fff" text-anchor="end">70°</text>
+            </svg>
+          `;
+          fText.textContent = "60° + 50° + 70° = 180° (삼각형의 합은 항상 180°!)";
+          dText.innerHTML = `
+            <div>💡 <strong>삼각형 모퉁이 관찰:</strong></div>
+            <div>• 세 각의 크기가 각각 <strong>60°, 50°, 70°</strong>인 삼각형입니다.</div>
+            <div>• 상단의 [✂️ 세 모퉁이 잘라서 모으기] 버튼을 눌러 일직선(180°)이 되는 마법을 확인하세요!</div>
+          `;
+          if (shouldVoice && typeof fairySpeak === 'function') fairySpeak('삼각형의 세 모퉁이를 잘라서 모아보세요!');
+        } else {
+          // 세 모퉁이 모인 180도 반원 상태
+          sWrap.innerHTML = `
+            <svg viewBox="0 0 320 200" style="max-width:340px;">
+              <!-- 일직선 수평 기준선 (180도 평각) -->
+              <line x1="20" y1="160" x2="300" y2="160" stroke="#0f172a" stroke-width="3"/>
+              
+              <!-- 모퉁이 조각 3개가 모여 완벽한 반원 형성 (cx=160, cy=160, r=85) -->
+              <!-- 조각 1: 70도 (파랑: 110도 ~ 180도 - 왼쪽) -->
+              <path d="M 160 160 L 75 160 A 85 85 0 0 1 131 80 Z" fill="#0284c7" stroke="#fff" stroke-width="2"/>
+              <text x="110" y="135" font-family="Jua" font-size="16" fill="#fff" text-anchor="middle">70°</text>
+
+              <!-- 조각 2: 50도 (핑크: 60도 ~ 110도 - 중앙) -->
+              <path d="M 160 160 L 131 80 A 85 85 0 0 1 202 86 Z" fill="#ec4899" stroke="#fff" stroke-width="2"/>
+              <text x="160" y="115" font-family="Jua" font-size="16" fill="#fff" text-anchor="middle">50°</text>
+
+              <!-- 조각 3: 60도 (주황: 0도 ~ 60도 - 오른쪽) -->
+              <path d="M 160 160 L 202 86 A 85 85 0 0 1 245 160 Z" fill="#f97316" stroke="#fff" stroke-width="2"/>
+              <text x="205" y="135" font-family="Jua" font-size="16" fill="#fff" text-anchor="middle">60°</text>
+
+              <!-- 중심점 -->
+              <circle cx="160" cy="160" r="5" fill="#e11d48"/>
+              <text x="160" y="185" font-family="Jua" font-size="14" fill="#0369a1" text-anchor="middle">✨ 세 모퉁이가 모여 완벽한 일직선 평각 (180°)!</text>
+            </svg>
+          `;
+          fText.innerHTML = `<span style="color:#059669;">🎉 60° + 50° + 70° = 180° (완벽한 일직선 평각 180° 완성!)</span>`;
+          dText.innerHTML = `
+            <div>💡 <strong>180° 일직선 증명 성공!</strong></div>
+            <div>• 세 꼭짓점을 잘라 한 점에 모았더니 빈틈없이 완벽한 <strong>일직선 평각(180°)</strong>이 되었습니다!</div>
+            <div>• 세상의 모든 삼각형은 모양과 상관없이 세 각의 합이 항상 <strong>180°</strong>입니다.</div>
+          `;
+          if (shouldVoice && typeof fairySpeak === 'function') fairySpeak('와! 세 모퉁이가 모여 완벽한 180도 일직선이 되었습니다!');
+        }
+
       } else {
-        sWrap.innerHTML = `
-          <svg viewBox="0 0 320 160" style="max-width:320px;">
-            <polygon points="50,130 270,130 230,40 90,40" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
-            <line x1="50" y1="130" x2="230" y2="40" stroke="#93c5fd" stroke-width="2" stroke-dasharray="4"/>
-            <text x="160" y="90" font-family="Jua" font-size="14" fill="#1d4ed8" text-anchor="middle">삼각형 2개로 분할!</text>
-          </svg>
-        `;
-        fText.textContent = "180° × 2 = 360° (사각형의 네 각의 합은 360도!)";
-        dText.innerHTML = `
-          <div>💡 <strong>사각형 대각선 분할의 비밀:</strong></div>
-          <div>• 사각형은 대각선 하나를 그으면 <strong>삼각형 2개</strong>로 쪼개집니다.</div>
-          <div>➔ 따라서 <strong>180° + 180° = 360°</strong>가 됩니다! 🎉</div>
-        `;
-        if (btn && typeof fairySpeak === 'function') fairySpeak('사각형은 삼각형 2개로 나뉘므로 네 각의 합이 360도입니다!');
+        // ------------------ 🔷 사각형 네 각의 합 (360°) ------------------
+        if (curQuadMethod === 'corners') {
+          // 방법 1: 4개 모퉁이 모아 360도 원 만들기
+          cBtns.innerHTML = `
+            <button class="ctrl-btn ${quadCutState === 'merged' ? 'active' : ''}" onclick="setQuadCutState('merged')">✂️ 4개 모퉁이 모으기 (360° 원 마법)</button>
+            <button class="ctrl-btn ${quadCutState === 'original' ? 'active' : ''}" onclick="setQuadCutState('original')">🔄 원래 사각형으로</button>
+          `;
+
+          if (quadCutState === 'original') {
+            sWrap.innerHTML = `
+              <svg viewBox="0 0 320 200" style="max-width:340px;">
+                <!-- 사각형 본체 -->
+                <polygon points="60,165 260,165 225,45 85,45" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+                
+                <!-- 4개 모퉁이 부채꼴 (85°, 95°, 100°, 80°) -->
+                <!-- A (좌상 95° - 핑크) -->
+                <path d="M 85 45 L 125 45 A 40 40 0 0 1 75 80 Z" fill="#ec4899" opacity="0.85"/>
+                <text x="96" y="65" font-family="Jua" font-size="12" fill="#fff">95°</text>
+
+                <!-- B (우상 85° - 파랑) -->
+                <path d="M 225 45 L 235 80 A 40 40 0 0 1 185 45 Z" fill="#0284c7" opacity="0.85"/>
+                <text x="212" y="65" font-family="Jua" font-size="12" fill="#fff">85°</text>
+
+                <!-- C (우하 100° - 주황) -->
+                <path d="M 260 165 L 220 165 A 40 40 0 0 1 250 130 Z" fill="#f97316" opacity="0.85"/>
+                <text x="240" y="155" font-family="Jua" font-size="12" fill="#fff">100°</text>
+
+                <!-- D (좌하 80° - 초록) -->
+                <path d="M 60 165 L 70 130 A 40 40 0 0 1 100 165 Z" fill="#10b981" opacity="0.85"/>
+                <text x="75" y="155" font-family="Jua" font-size="12" fill="#fff">80°</text>
+              </svg>
+            `;
+            fText.textContent = "95° + 85° + 100° + 80° = 360° (네 각의 합은 360°!)";
+            dText.innerHTML = `
+              <div>💡 <strong>방법 1 : 4개 모퉁이 모으기 원리</strong></div>
+              <div>• 사각형의 네 모퉁이를 잘라서 한 점에 둥글게 모으면 ➔ <strong>완벽한 360° 원</strong>이 됩니다!</div>
+              <div>• 상단의 [✂️ 4개 모퉁이 모으기] 버튼을 눌러 원이 완성되는 마법을 확인하세요!</div>
+            `;
+            if (shouldVoice && typeof fairySpeak === 'function') fairySpeak('사각형의 네 모퉁이를 모으면 360도 원이 됩니다!');
+          } else {
+            // 4개 모퉁이가 모여 완벽한 360도 원 형성
+            sWrap.innerHTML = `
+              <svg viewBox="0 0 320 200" style="max-width:340px;">
+                <!-- 4개 부채꼴이 모인 원 (cx=160, cy=100, r=70) -->
+                <!-- 조각 1: 95도 핑크 (0 ~ 95) -->
+                <path d="M 160 100 L 230 100 A 70 70 0 0 1 154 170 Z" fill="#ec4899" stroke="#fff" stroke-width="2"/>
+                <text x="185" y="135" font-family="Jua" font-size="15" fill="#fff">95°</text>
+
+                <!-- 조각 2: 85도 파랑 (95 ~ 180) -->
+                <path d="M 160 100 L 154 170 A 70 70 0 0 1 90 100 Z" fill="#0284c7" stroke="#fff" stroke-width="2"/>
+                <text x="130" y="135" font-family="Jua" font-size="15" fill="#fff">85°</text>
+
+                <!-- 조각 3: 100도 주황 (180 ~ 280) -->
+                <path d="M 160 100 L 90 100 A 70 70 0 0 1 172 31 Z" fill="#f97316" stroke="#fff" stroke-width="2"/>
+                <text x="130" y="70" font-family="Jua" font-size="15" fill="#fff">100°</text>
+
+                <!-- 조각 4: 80도 초록 (280 ~ 360) -->
+                <path d="M 160 100 L 172 31 A 70 70 0 0 1 230 100 Z" fill="#10b981" stroke="#fff" stroke-width="2"/>
+                <text x="185" y="70" font-family="Jua" font-size="15" fill="#fff">80°</text>
+
+                <!-- 중심점 -->
+                <circle cx="160" cy="100" r="5" fill="#1e1b4b"/>
+                <text x="160" y="190" font-family="Jua" font-size="14" fill="#1d4ed8" text-anchor="middle">✨ 네 모퉁이가 모여 완벽한 360° 원 완성!</text>
+              </svg>
+            `;
+            fText.innerHTML = `<span style="color:#2563eb;">🎉 95° + 85° + 100° + 80° = 360° (한 바퀴 360° 원 완성!)</span>`;
+            dText.innerHTML = `
+              <div>💡 <strong>360° 원 증명 성공!</strong></div>
+              <div>• 사각형의 네 꼭짓점을 잘라 한 점에 모았더니 빈틈없이 완벽한 <strong>360° 원(한 바퀴)</strong>이 되었습니다!</div>
+            `;
+            if (shouldVoice && typeof fairySpeak === 'function') fairySpeak('와! 네 모퉁이가 모여 완벽한 360도 원이 되었습니다!');
+          }
+
+        } else {
+          // 방법 2: 대각선으로 삼각형 2개 쪼개기 (180° + 180°)
+          cBtns.innerHTML = `
+            <button class="ctrl-btn ${quadSplitState ? 'active' : ''}" onclick="setQuadSplit(true)">✂️ 대각선으로 삼각형 2개 쪼개기 (분리!)</button>
+            <button class="ctrl-btn ${!quadSplitState ? 'active' : ''}" onclick="setQuadSplit(false)">🔄 사각형으로 합치기</button>
+          `;
+
+          if (!quadSplitState) {
+            sWrap.innerHTML = `
+              <svg viewBox="0 0 320 200" style="max-width:340px;">
+                <polygon points="60,160 260,160 225,45 85,45" fill="#eff6ff" stroke="#2563eb" stroke-width="3"/>
+                <!-- 대각선 점선 -->
+                <line x1="85" y1="45" x2="260" y2="160" stroke="#e11d48" stroke-width="3" stroke-dasharray="5"/>
+                <text x="160" y="115" font-family="Jua" font-size="15" fill="#e11d48" text-anchor="middle">대각선</text>
+              </svg>
+            `;
+            fText.textContent = "180° × 2 = 360° (대각선을 그으면 삼각형 2개!)";
+            dText.innerHTML = `
+              <div>💡 <strong>방법 2 : 대각선 분할의 원리</strong></div>
+              <div>• 사각형의 마주보는 꼭짓점을 잇는 <strong>대각선</strong>을 1개 그으면 ➔ <strong>삼각형 2개</strong>로 쪼개집니다.</div>
+              <div>• [✂️ 대각선으로 삼각형 2개 쪼개기] 버튼을 눌러 두 삼각형이 분리되는 모습을 확인하세요!</div>
+            `;
+            if (shouldVoice && typeof fairySpeak === 'function') fairySpeak('대각선으로 쪼개면 삼각형 2개가 됩니다!');
+          } else {
+            // 두 삼각형이 살짝 분리된 모습
+            sWrap.innerHTML = `
+              <svg viewBox="0 0 320 200" style="max-width:340px;">
+                <!-- 위쪽 삼각형 (핑크) -->
+                <polygon points="85,35 225,35 255,145" fill="#fdf2f8" stroke="#ec4899" stroke-width="3"/>
+                <text x="165" y="75" font-family="Jua" font-size="15" fill="#be185d" text-anchor="middle">삼각형 ① (180°)</text>
+
+                <!-- 아래쪽 삼각형 (하늘) -->
+                <polygon points="60,170 260,170 90,60" fill="#eff6ff" stroke="#0284c7" stroke-width="3"/>
+                <text x="155" y="145" font-family="Jua" font-size="15" fill="#0369a1" text-anchor="middle">삼각형 ② (180°)</text>
+              </svg>
+            `;
+            fText.innerHTML = `<span style="color:#0284c7;">🎉 180°(삼각형①) + 180°(삼각형②) = 360°!</span>`;
+            dText.innerHTML = `
+              <div>💡 <strong>삼각형 2개 분할 증명 완료!</strong></div>
+              <div>• 사각형은 항상 <strong>삼각형 2개</strong>로 쪼개집니다.</div>
+              <div>• 삼각형 1개의 세 각의 합이 <strong>180°</strong>이므로, <strong>180° × 2 = 360°</strong>가 됩니다!</div>
+            `;
+            if (shouldVoice && typeof fairySpeak === 'function') fairySpeak('삼각형 두 개의 합인 180도 더하기 180도는 360도입니다!');
+          }
+        }
       }
     }
 
