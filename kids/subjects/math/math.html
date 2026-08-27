@@ -15,9 +15,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Nanum Gothic', sans-serif; background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; touch-action: manipulation; }
 
-  /* ----------------------------------
-     🎮 민수 아케이드 네온 테마 (theme--arcade)
-     ---------------------------------- */
+  /* 🎮 민수 아케이드 네온 테마 (theme--arcade) */
   body.theme--arcade {
     --bg: #12121e; --surface: #1e1e32; --card: rgba(30, 30, 50, 0.85);
     --border: #3a3a5a; --yellow: #FFD93D; --orange: #FF6B35;
@@ -25,9 +23,7 @@
     --purple: #C77DFF; --cyan: #00D4FF; --white: #F5F5F5; --muted: #8888AA;
   }
 
-  /* ----------------------------------
-     🎠 민서 동화 밀키스 테마 (theme--slime)
-     ---------------------------------- */
+  /* 🎠 민서 동화 밀키스 테마 (theme--slime) */
   body.theme--slime {
     --bg: #fff3f5; --surface: #ffe7ee; --card: rgba(255, 255, 255, 0.95);
     --border: #ffb3c6; --yellow: #FFD93D; --orange: #FF6B35;
@@ -35,7 +31,7 @@
     --purple: #ff80ab; --cyan: #ff6b9d; --white: #4a3352; --muted: #8888AA;
   }
 
-  /* 다크 테마 백그라운드 (사회방/멀티버스 스타일) */
+  /* 다크 테마 백그라운드 */
   body.theme--arcade::before {
     content: ''; position: fixed; inset: 0;
     background-image: 
@@ -44,31 +40,87 @@
     pointer-events: none; z-index: 0;
   }
   
-  body.theme--slime::before {
-    display: none;
-  }
+  body.theme--slime::before { display: none; }
 
-  .app-container { max-width: 1040px; margin: 0 auto; padding: 25px 16px; position: relative; z-index: 1; }
+  .app-container { max-width: 1080px; margin: 0 auto; padding: 25px 16px; position: relative; z-index: 1; }
 
   /* 🛠️ 상단 UI */
-  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
   .profile-badge { background: rgba(0,212,255,0.1); border: 2px solid var(--cyan); color: var(--cyan); padding: 8px 18px; border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 1.2rem; }
   .exit-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--muted); color: var(--white); padding: 8px 18px; border-radius: 30px; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
   .exit-btn:hover { background: rgba(255,107,53,0.2); border-color: var(--orange); color: var(--orange); }
 
   /* 헤더 */
-  header { text-align: center; margin-bottom: 40px; }
-  .logo-title { font-family: 'Jua', sans-serif; font-size: 2.8rem; background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+  header { text-align: center; margin-bottom: 30px; }
+  .logo-title { font-family: 'Jua', sans-serif; font-size: 2.8rem; background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
   .sub-title { color: var(--muted); font-size: 1.05rem; }
+
+  /* 🚀 2대 메인 모드 탭 (학년 개념관 vs 문제 트레이닝 센터) */
+  .main-tab-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+  .main-tab-btn {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.35rem;
+    padding: 12px 28px;
+    border-radius: 30px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .main-tab-btn:hover {
+    transform: translateY(-2px);
+    color: var(--white);
+    border-color: var(--cyan);
+  }
+  .main-tab-btn.active {
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+    transform: translateY(-3px);
+  }
+
+  /* 서브 필터 버튼 (학년 선택) */
+  .grade-filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+  .grade-pill-btn {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .grade-pill-btn:hover, .grade-pill-btn.active {
+    border-color: var(--yellow);
+    background: rgba(255, 217, 61, 0.15);
+    color: var(--yellow);
+  }
 
   /* 섹션 타이틀 */
   .sector-title { font-family: 'Jua', sans-serif; font-size: 1.5rem; margin-bottom: 16px; border-bottom: 2px dashed var(--border); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
   .sector-title.active-sector-12 { color: var(--green); }
-  .sector-title.active-sector-34 { color: var(--cyan); margin-top: 40px; }
-  .sector-title.active-sector-56 { color: #f59e0b; margin-top: 40px; }
-  .sector-title.locked-sector { color: var(--muted); margin-top: 50px; }
+  .sector-title.active-sector-34 { color: var(--cyan); margin-top: 35px; }
+  .sector-title.active-sector-56 { color: #f59e0b; margin-top: 35px; }
+  .sector-title.active-sector-workout { color: #f43f5e; }
 
-  /* 그리드 & 카드 모바일 가로/세로 최적화 */
+  /* 그리드 & 카드 */
   .mission-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
   .mission-card {
     background: var(--card);
@@ -88,21 +140,26 @@
     backdrop-filter: blur(10px);
   }
   
-  /* 활성화 카드 호버 */
   .mission-card:not(.disabled):hover { transform: translateY(-5px) scale(1.02); }
   .mc-0:not(.disabled):hover { border-color: var(--pink); box-shadow: 0 10px 30px rgba(255, 107, 157, 0.25); }
-  .mc-3:not(.disabled):hover { border-color: #EC4899; box-shadow: 0 10px 30px rgba(236, 72, 153, 0.25); }
   .mc-1:not(.disabled):hover { border-color: var(--cyan); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2); }
   .mc-2:not(.disabled):hover { border-color: var(--yellow); box-shadow: 0 10px 30px rgba(255, 217, 61, 0.2); }
+  .mc-3:not(.disabled):hover { border-color: #EC4899; box-shadow: 0 10px 30px rgba(236, 72, 153, 0.25); }
+  .mc-workout:not(.disabled):hover { border-color: #f43f5e; box-shadow: 0 10px 30px rgba(244, 63, 94, 0.3); }
 
   .mission-icon { font-size: 3.2rem; margin-bottom: 12px; }
   .mission-name { font-family: 'Jua', sans-serif; font-size: 1.45rem; color: var(--white); margin-bottom: 8px; }
   .mission-desc { font-size: 0.95rem; color: var(--muted); line-height: 1.45; word-break: keep-all; }
 
+  /* 뷰 컨테이너 */
+  .view-container { display: none; }
+  .view-container.active { display: block; }
+
   @media (max-width: 540px) {
     .mission-grid { grid-template-columns: 1fr; gap: 12px; }
     .mission-card { min-height: auto; padding: 18px 14px; }
     .logo-title { font-size: 2.2rem; }
+    .main-tab-btn { font-size: 1.15rem; padding: 10px 18px; width: 100%; }
   }
 </style>
 </head>
@@ -121,103 +178,163 @@
 
   <header>
     <div class="logo-title">민민 수학 멀티버스 🚀</div>
-    <div class="sub-title">수학 관제탑에 오신 것을 환영합니다! 학년별 맞춤 미션을 선택하세요.</div>
+    <div class="sub-title">개념을 배우는 [개념 탐험관]과 문제를 정복하는 [문제 트레이닝 센터]를 선택하세요!</div>
   </header>
 
-  <!-- 1. 🟢 1~2학년 기초 탐험 구역 -->
-  <div class="sector-title active-sector-12">🟢 1~2학년 기초 탐험 구역</div>
-  <div class="mission-grid">
-    <a href="number50.html" class="mission-card mc-0">
-      <div class="mission-icon">🐰</div>
-      <div class="mission-name">미션 1: 50까지의 수 놀이터</div>
-      <div class="mission-desc">10 만들기 · 묶음과 낱개 · 크기비교<br>1학년 수학의 튼튼한 기초를 다져요!</div>
-    </a>
-
-    <a href="number100.html" class="mission-card mc-0">
-      <div class="mission-icon">🌟</div>
-      <div class="mission-name">미션 2: 100까지의 수 우주 탐험</div>
-      <div class="mission-desc">10개 묶음 상자 · 100 수 배열판 · 뛰어세기<br>두 수의 크기를 비교하고 큰 수를 정복해요!</div>
-    </a>
-
-    <a href="addition_concept.html" class="mission-card mc-0">
-      <div class="mission-icon">➕</div>
-      <div class="mission-name">미션 3: 덧셈 (더하기) 탐험대</div>
-      <div class="mission-desc">10 만들기 짝꿍수 · 가르기와 모으기<br>10을 이용한 받아올림 덧셈 원리를 배워요!</div>
-    </a>
-
-    <a href="subtraction_concept.html" class="mission-card mc-0">
-      <div class="mission-icon">➖</div>
-      <div class="mission-name">미션 4: 뺄셈 (빼기) 탐험대</div>
-      <div class="mission-desc">10에서 빼기 텐프레임 · 10 가르기<br>10을 이용한 받아내림 뺄셈 원리를 정복해요!</div>
-    </a>
-
-    <a href="shapes.html" class="mission-card mc-0">
-      <div class="mission-icon">🔷</div>
-      <div class="mission-name">미션 5: 여러 가지 모양 탐험</div>
-      <div class="mission-desc">상자 · 둥근기둥 · 공 모양 입체 3총사<br>동그라미, 세모, 네모의 비밀을 밝혀요!</div>
-    </a>
-
-    <a href="clock_rules.html" class="mission-card mc-0">
-      <div class="mission-icon">⏰</div>
-      <div class="mission-name">미션 6: 시계 보기와 규칙 찾기</div>
-      <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기<br>알록달록 무늬와 수의 규칙을 척척 찾아요!</div>
-    </a>
-
-    <a href="gugudan.html" class="mission-card mc-1">
-      <div class="mission-icon">🚀</div>
-      <div class="mission-name">미션 7: 구구단 탐험대</div>
-      <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>2학년 2학기 심층 구구단 탐사선 탑승!</div>
-    </a>
+  <!-- 🚀 2대 메인 모드 전환 탭 -->
+  <div class="main-tab-bar">
+    <button class="main-tab-btn active" id="tabBtnConcepts" onclick="switchMainView('concepts')">🏫 1. 학년별 개념 탐험관</button>
+    <button class="main-tab-btn" id="tabBtnWorkout" onclick="switchMainView('workout')">⚔️ 2. 실전 문제 트레이닝 센터</button>
   </div>
 
-  <!-- 2. 🚀 3~4학년 핵심 탐험 구역 -->
-  <div class="sector-title active-sector-34">🚀 3~4학년 핵심 탐험 구역</div>
-  <div class="mission-grid">
-    <a href="planar_shapes.html" class="mission-card mc-1">
-      <div class="mission-icon">📐</div>
-      <div class="mission-name">미션 8: 평면도형 탐험대</div>
-      <div class="mission-desc">선분 · 반직선 · 직선의 비밀<br>직각삼각형, 직사각형, 정사각형 완전 정복!</div>
-    </a>
-
-    <a href="length_time.html" class="mission-card mc-2">
-      <div class="mission-icon">📏</div>
-      <div class="mission-name">미션 9: 길이와 시간 측정소</div>
-      <div class="mission-desc">1mm 돋보기 자 · 태양계 우주 거리<br>실전 스톱워치 타임 어택 챌린지!</div>
-    </a>
-
-    <a href="fractions_decimals.html" class="mission-card mc-0">
-      <div class="mission-icon">🍰</div>
-      <div class="mission-name">미션 10: 분수와 소수 첫걸음</div>
-      <div class="mission-desc">피자 조각 쪼개기 · 단위/진/가/대분수<br>0.1 수직선으로 소수의 비밀을 밝혀요!</div>
-    </a>
-
-    <a href="division_concept.html" class="mission-card mc-3">
-      <div class="mission-icon">➗</div>
-      <div class="mission-name">미션 11: 3학년 나눗셈 탐험대</div>
-      <div class="mission-desc">쿠키 똑같이 나누기 · 곱셈 짝꿍 구구단<br>남는 사탕과 나머지의 철칙 & 검산 공식!</div>
-    </a>
-
-    <a href="vertical_math.html" class="mission-card mc-2">
-      <div class="mission-icon">🧱</div>
-      <div class="mission-name">미션 12: 실전 격자 세로셈방</div>
-      <div class="mission-desc">세 자리 수 사칙연산을 훈련하는<br>동적 그리드 세로셈 연산 훈련소!</div>
-    </a>
-  </div>
-
-  <!-- 3. 👑 5~6학년 심화 마스터 구역 -->
-  <div class="sector-title active-sector-56">👑 5~6학년 심화 마스터 구역</div>
-  <div class="mission-grid">
-    <a href="division_factors.html" class="mission-card mc-3">
-      <div class="mission-icon">🍬</div>
-      <div class="mission-name">미션 13: 약수 & 나눗셈 자릿수방</div>
-      <div class="mission-desc">사탕 분배기 · 짝꿍 찾기 · 모눈종이<br>5학년 공약수와 나눗셈 자릿수 완전 정복!</div>
-    </a>
+  <!-- ======================================================== -->
+  <!-- 🏫 1. 학년별 개념 탐험관 (Concept Hall)                   -->
+  <!-- ======================================================== -->
+  <div class="view-container active" id="viewConcepts">
     
-    <a href="math_voca.html" class="mission-card mc-1">
-      <div class="mission-icon">✨</div>
-      <div class="mission-name">미션 14: 수학 공식 & 개념 퀴즈</div>
-      <div class="mission-desc">도형 넓이 유도 시뮬레이터 · 개념 퀴즈<br>AI 요정 코코와 함께 수학 공식을 마스터해요!</div>
-    </a>
+    <!-- 학년 서브 필터 -->
+    <div class="grade-filter-bar">
+      <button class="grade-pill-btn active" onclick="filterGradeSector('all', this)">🌟 전체 보기</button>
+      <button class="grade-pill-btn" onclick="filterGradeSector('12', this)">🟢 1~2학년 기초관 (7)</button>
+      <button class="grade-pill-btn" onclick="filterGradeSector('34', this)">🚀 3~4학년 핵심관 (4)</button>
+      <button class="grade-pill-btn" onclick="filterGradeSector('56', this)">👑 5~6학년 심화관 (1)</button>
+    </div>
+
+    <!-- 🟢 1~2학년 기초 개념관 -->
+    <div class="grade-sector-block" id="sector-block-12">
+      <div class="sector-title active-sector-12">🟢 1~2학년 기초 개념관</div>
+      <div class="mission-grid">
+        <a href="number50.html" class="mission-card mc-0">
+          <div class="mission-icon">🐰</div>
+          <div class="mission-name">50까지의 수 놀이터</div>
+          <div class="mission-desc">10 만들기 · 묶음과 낱개 · 크기비교<br>1학년 수학의 튼튼한 기초를 다져요!</div>
+        </a>
+
+        <a href="number100.html" class="mission-card mc-0">
+          <div class="mission-icon">🌟</div>
+          <div class="mission-name">100까지의 수 우주 탐험</div>
+          <div class="mission-desc">10개 묶음 상자 · 100 수 배열판 · 뛰어세기<br>두 수의 크기를 비교하고 큰 수를 정복해요!</div>
+        </a>
+
+        <a href="addition_concept.html" class="mission-card mc-0">
+          <div class="mission-icon">➕</div>
+          <div class="mission-name">덧셈 (더하기) 탐험대</div>
+          <div class="mission-desc">10 만들기 짝꿍수 · 가르기와 모으기<br>10을 이용한 받아올림 덧셈 원리를 배워요!</div>
+        </a>
+
+        <a href="subtraction_concept.html" class="mission-card mc-0">
+          <div class="mission-icon">➖</div>
+          <div class="mission-name">뺄셈 (빼기) 탐험대</div>
+          <div class="mission-desc">10에서 빼기 텐프레임 · 10 가르기<br>10을 이용한 받아내림 뺄셈 원리를 정복해요!</div>
+        </a>
+
+        <a href="shapes.html" class="mission-card mc-0">
+          <div class="mission-icon">🔷</div>
+          <div class="mission-name">여러 가지 모양 탐험</div>
+          <div class="mission-desc">상자 · 둥근기둥 · 공 모양 입체 3총사<br>동그라미, 세모, 네모의 비밀을 밝혀요!</div>
+        </a>
+
+        <a href="clock_rules.html" class="mission-card mc-0">
+          <div class="mission-icon">⏰</div>
+          <div class="mission-name">시계 보기와 규칙 찾기</div>
+          <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기<br>알록달록 무늬와 수의 규칙을 척척 찾아요!</div>
+        </a>
+
+        <a href="gugudan.html" class="mission-card mc-1">
+          <div class="mission-icon">🚀</div>
+          <div class="mission-name">구구단 탐험대</div>
+          <div class="mission-desc">곱셈의 기본 원리를 깨우치는<br>2학년 2학기 심층 구구단 탐사선 탑승!</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 🚀 3~4학년 핵심 개념관 -->
+    <div class="grade-sector-block" id="sector-block-34">
+      <div class="sector-title active-sector-34">🚀 3~4학년 핵심 개념관</div>
+      <div class="mission-grid">
+        <a href="planar_shapes.html" class="mission-card mc-1">
+          <div class="mission-icon">📐</div>
+          <div class="mission-name">평면도형 탐험대</div>
+          <div class="mission-desc">선분 · 반직선 · 직선의 비밀<br>직각삼각형, 직사각형, 정사각형 완전 정복!</div>
+        </a>
+
+        <a href="length_time.html" class="mission-card mc-2">
+          <div class="mission-icon">📏</div>
+          <div class="mission-name">길이와 시간 측정소</div>
+          <div class="mission-desc">1mm 돋보기 자 · 태양계 소축적 우주 거리<br>초 단위 변환과 시간의 덧셈·뺄셈!</div>
+        </a>
+
+        <a href="fractions_decimals.html" class="mission-card mc-0">
+          <div class="mission-icon">🍰</div>
+          <div class="mission-name">분수와 소수 첫걸음</div>
+          <div class="mission-desc">피자 쪼개기 · 정품 수직 분수 · 단위/진/가/대분수<br>0.1 수직선으로 소수의 비밀을 밝혀요!</div>
+        </a>
+
+        <a href="division_concept.html" class="mission-card mc-3">
+          <div class="mission-icon">➗</div>
+          <div class="mission-name">3학년 나눗셈 탐험대</div>
+          <div class="mission-desc">쿠키 접시 똑같이 나누기 · 곱셈 짝꿍 구구단<br>남는 사탕과 나머지의 철칙 & 검산 공식!</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- 👑 5~6학년 심화 개념관 -->
+    <div class="grade-sector-block" id="sector-block-56">
+      <div class="sector-title active-sector-56">👑 5~6학년 심화 개념관</div>
+      <div class="mission-grid">
+        <a href="division_factors.html" class="mission-card mc-3">
+          <div class="mission-icon">🍬</div>
+          <div class="mission-name">약수 & 나눗셈 자릿수방</div>
+          <div class="mission-desc">사탕 분배기 · 짝꿍 찾기 · 모눈종이<br>5학년 공약수와 나눗셈 자릿수 완전 정복!</div>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- ⚔️ 2. 실전 문제 트레이닝 센터 (Problem Workout Arena)      -->
+  <!-- ======================================================== -->
+  <div class="view-container" id="viewWorkout">
+    <div class="sector-title active-sector-workout">⚔️ 실전 문제 트레이닝 센터 (무한 연산 & 퀴즈)</div>
+    <div class="mission-grid">
+      
+      <!-- 세로셈 훈련소 -->
+      <a href="vertical_math.html" class="mission-card mc-workout">
+        <div class="mission-icon">🧱</div>
+        <div class="mission-name">실전 격자 세로셈 훈련소</div>
+        <div class="mission-desc">세 자리 수 사칙연산을 직접 손으로 푸는<br>동적 그리드 무한 세로셈 연산 훈련소!</div>
+      </a>
+
+      <!-- 공식 및 개념 퀴즈 배틀 -->
+      <a href="math_voca.html" class="mission-card mc-workout">
+        <div class="mission-icon">✨</div>
+        <div class="mission-name">수학 공식 & 개념 퀴즈 배틀</div>
+        <div class="mission-desc">도형 넓이 유도 시뮬레이터 · 공식 어휘 퀴즈<br>AI 요정 코코와 함께 수학 개념을 마스터해요!</div>
+      </a>
+
+      <!-- 분수 & 소수 실전 훈련 -->
+      <a href="fractions_decimals.html#section-quiz" class="mission-card mc-workout">
+        <div class="mission-icon">🍰</div>
+        <div class="mission-name">분수 & 소수 실전 문제 훈련</div>
+        <div class="mission-desc">수직 분수 읽기 · 0.1 수직선 소수 변환<br>단위분수 크기 비교 실전 번개 퀴즈!</div>
+      </a>
+
+      <!-- 길이 & 시간 스톱워치 타임 어택 -->
+      <a href="length_time.html#section-stopwatch-game" class="mission-card mc-workout">
+        <div class="mission-icon">⏱️</div>
+        <div class="mission-name">길이 & 시간 스톱워치 타임 어택</div>
+        <div class="mission-desc">목표 시간에 맞춰 정지하는 ±1초 챌린지!<br>자 위 랜덤 막대 실전 눈금 측정 훈련!</div>
+      </a>
+
+      <!-- 나눗셈 몫과 나머지 실전 도전 -->
+      <a href="division_concept.html#section-random-division" class="mission-card mc-workout">
+        <div class="mission-icon">🎲</div>
+        <div class="mission-name">몫과 나머지 & 검산식 실전 도전</div>
+        <div class="mission-desc">랜덤 나눗셈 문제의 몫과 나머지를 구하고<br>검산 공식으로 정답을 증명하는 실전 훈련!</div>
+      </a>
+
+    </div>
   </div>
 
 </div>
@@ -229,6 +346,54 @@
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/fairy-chatbot.js"></script>
 <script>
+  // 🚀 2대 메인 모드 뷰 전환 (개념관 vs 문제 트레이닝 센터)
+  function switchMainView(mode) {
+    const tabConcepts = document.getElementById('tabBtnConcepts');
+    const tabWorkout = document.getElementById('tabBtnWorkout');
+    const viewConcepts = document.getElementById('viewConcepts');
+    const viewWorkout = document.getElementById('viewWorkout');
+
+    if (mode === 'concepts') {
+      tabConcepts.classList.add('active');
+      tabWorkout.classList.remove('active');
+      viewConcepts.classList.add('active');
+      viewWorkout.classList.remove('active');
+    } else {
+      tabConcepts.classList.remove('active');
+      tabWorkout.classList.add('active');
+      viewConcepts.classList.remove('active');
+      viewWorkout.classList.add('active');
+    }
+  }
+
+  // 🎯 학년 서브 필터링
+  function filterGradeSector(grade, btn) {
+    document.querySelectorAll('.grade-pill-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const s12 = document.getElementById('sector-block-12');
+    const s34 = document.getElementById('sector-block-34');
+    const s56 = document.getElementById('sector-block-56');
+
+    if (grade === 'all') {
+      s12.style.display = 'block';
+      s34.style.display = 'block';
+      s56.style.display = 'block';
+    } else if (grade === '12') {
+      s12.style.display = 'block';
+      s34.style.display = 'none';
+      s56.style.display = 'none';
+    } else if (grade === '34') {
+      s12.style.display = 'none';
+      s34.style.display = 'block';
+      s56.style.display = 'none';
+    } else if (grade === '56') {
+      s12.style.display = 'none';
+      s34.style.display = 'none';
+      s56.style.display = 'block';
+    }
+  }
+
   // 대문 이동 로직
   document.getElementById('goLobbyBtn').addEventListener('click', () => {
       const lobbyPath = window.location.pathname.includes('/kids-school/') 
@@ -243,7 +408,6 @@
     const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
     const icon = currentProfile === 'son' ? '👦' : (currentProfile === 'daughter' ? '👧' : '👨‍💻');
     
-    // 💡 사회방과 완벽하게 동일한 테마 시스템 전파 (theme--arcade / theme--slime)
     const savedTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
     const themeClass = savedTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
     document.body.className = themeClass;
