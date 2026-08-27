@@ -1,0 +1,417 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>📐 3학년 평면도형 탐험대 (선분·직선·직각) 🚀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 선분/반직선/직선 캔버스 뷰 */
+    .line-canvas-box {
+      background: #ffffff;
+      border: 3px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 25px 20px;
+      margin: 15px auto;
+      max-width: 560px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .line-svg-wrap {
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* 카드 그리드 */
+    .shape-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .shape-feature-card {
+      background: #ffffff !important;
+      border: 3px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 22px 18px;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .shape-feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+    .shape-icon-big {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+    }
+    .shape-card-title {
+      font-family: 'Jua', sans-serif !important;
+      font-size: 1.6rem !important;
+      margin-bottom: 8px !important;
+      font-weight: 800 !important;
+    }
+
+    /* 직각 삼각자 실험실 */
+    .set-square-box {
+      background: #fdfbf7;
+      border: 2px dashed #f59e0b;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 560px;
+      text-align: center;
+    }
+    .right-angle-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #b45309;
+      border: 2px solid #f59e0b;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">📐 3학년 평면도형 탐험대 🚀</h1>
+      <p class="hero-subtitle">선분·반직선·직선의 차이를 밝히고, 직각삼각형과 직사각형·정사각형의 비밀을 풀어요!</p>
+    </header>
+
+    <!-- 1. 선분 vs 반직선 vs 직선 인터랙티브 비교 -->
+    <section class="math-section-card" id="section-lines">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 선의 3총사</span>
+          <h2 class="section-title">📏 선분, 반직선, 직선의 비밀</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">버튼을 누르면 선이 뻗어나가는 방향과 특징을 눈으로 관찰할 수 있어요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentLine()">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="line-preset-buttons">
+        <button class="candy-num-btn active" onclick="selectLineType('segment', this)">1. 선분 ㄱㄴ</button>
+        <button class="candy-num-btn" onclick="selectLineType('ray_ab', this)">2. 반직선 ㄱㄴ</button>
+        <button class="candy-num-btn" onclick="selectLineType('ray_ba', this)">3. 반직선 ㄴㄱ</button>
+        <button class="candy-num-btn" onclick="selectLineType('line', this)">4. 직선 ㄱㄴ</button>
+      </div>
+
+      <div class="line-canvas-box">
+        <div class="line-svg-wrap" id="line-svg-wrap">
+          <!-- 동적 SVG 렌더링 -->
+        </div>
+        <div style="font-family:'Jua',sans-serif; font-size:1.6rem; color:#0284c7; margin-top:10px;" id="line-title-display">선분 ㄱㄴ (또는 선분 ㄴㄱ)</div>
+        <div style="background:#fdfbf7; border:2px dashed #38bdf8; border-radius:14px; padding:12px; font-family:'Jua',sans-serif; font-size:1.15rem; color:#334155; margin-top:10px; line-height:1.6;" id="line-desc-display">
+          두 점 ㄱ과 ㄴ을 <strong>곧게 이은 선</strong>이에요.<br>
+          양쪽 끝이 막혀 있어 자로 <strong>길이를 잴 수 있어요!</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 각과 직각 & 직각 삼각자 실험실 -->
+    <section class="math-section-card" id="section-angles">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs">섹션 2 : 각과 직각</span>
+          <h2 class="section-title">📐 각과 직각(90°) 알아보기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">한 점에서 그은 두 반직선이 만드는 '각'과 반듯하게 접힌 '직각'을 배워요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('한 점에서 그은 두 반직선으로 이루어진 도형을 각이라고 해요!')">🔊</button>
+      </div>
+
+      <div class="set-square-box">
+        <div style="display:flex; justify-content:center; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:15px;">
+          <svg width="180" height="120" viewBox="0 0 180 120">
+            <!-- 직각 표시 -->
+            <path d="M 40 20 L 40 100 L 160 100" stroke="#0284c7" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <rect x="40" y="80" width="20" height="20" stroke="#e11d48" stroke-width="3" fill="#ffe4e6"/>
+            <circle cx="40" cy="100" r="5" fill="#e11d48"/>
+            <text x="25" y="115" font-family="Jua" font-size="16" fill="#333">꼭짓점 ㄴ</text>
+            <text x="25" y="20" font-family="Jua" font-size="16" fill="#333">ㄱ</text>
+            <text x="160" y="115" font-family="Jua" font-size="16" fill="#333">ㄷ</text>
+          </svg>
+
+          <div style="text-align:left; font-family:'Jua',sans-serif; color:#334155; line-height:1.8;">
+            <div style="font-size:1.3rem; color:#e11d48;">📌 직각 (각 ㄱㄴㄷ)</div>
+            <div>• <strong>꼭짓점</strong>: 점 ㄴ (한 점)</div>
+            <div>• <strong>변</strong>: 반직선 ㄴㄱ, 반직선 ㄴㄷ</div>
+            <div>• <strong>직각 표시</strong>: 모서리에 붉은 네모(ㄴ) 기호!</div>
+          </div>
+        </div>
+        <div class="right-angle-badge">📐 종이를 반듯하게 두 번 접었을 때 생기는 각이 바로 '직각'이에요!</div>
+      </div>
+    </section>
+
+    <!-- 3. 직각삼각형 vs 직사각형 vs 정사각형 -->
+    <section class="math-section-card" id="section-polygons">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 3 : 평면도형 3총사</span>
+          <h2 class="section-title">🔺 직각삼각형 · 직사각형 · 정사각형</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">도형을 터치하면 직각 개수와 변의 길이 비밀을 요정이 설명해 줘요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('도형 카드를 눌러 직각과 변의 특징을 살펴보세요!')">🔊</button>
+      </div>
+
+      <div class="shape-card-grid">
+        <div class="shape-feature-card" style="border-color:#fecdd3;" onclick="explainPolygon('rt_tri')">
+          <div class="shape-icon-big">📐</div>
+          <h3 class="shape-card-title" style="color:#e11d48 !important;">직각삼각형</h3>
+          <p style="font-size:0.95rem; font-weight:800; color:#9f1239; background:#ffe4e6; padding:6px 12px; border-radius:12px;">직각이 딱 1개 있는 삼각형</p>
+        </div>
+
+        <div class="shape-feature-card" style="border-color:#bae6fd;" onclick="explainPolygon('rect')">
+          <div class="shape-icon-big">🚪</div>
+          <h3 class="shape-card-title" style="color:#0284c7 !important;">직사각형</h3>
+          <p style="font-size:0.95rem; font-weight:800; color:#075985; background:#e0f2fe; padding:6px 12px; border-radius:12px;">네 각이 모두 직각인 사각형</p>
+        </div>
+
+        <div class="shape-feature-card" style="border-color:#bbf7d0;" onclick="explainPolygon('square')">
+          <div class="shape-icon-big">🔲</div>
+          <h3 class="shape-card-title" style="color:#15803d !important;">정사각형</h3>
+          <p style="font-size:0.95rem; font-weight:800; color:#14532d; background:#dcfce7; padding:6px 12px; border-radius:12px;">네 각이 직각 + 네 변 길이 같음</p>
+        </div>
+      </div>
+
+      <div id="polygon-explain-box" style="background:#fdfbf7; border:2px dashed #0284c7; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.2rem; color:#1e293b; margin-top:10px;">
+        도형 카드를 터치해 보세요! 👆
+      </div>
+    </section>
+
+    <!-- 4. 실전 평면도형 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 3학년 평면도형 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 도형의 이름이나 성질을 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:20px;" id="quiz-question">점 ㄴ에서 시작하여 점 ㄱ 쪽으로 끝없이 늘인 곧은 선은?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    let currentLineType = 'segment';
+
+    function selectLineType(type, btn) {
+      currentLineType = type;
+      document.querySelectorAll('#line-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderLineVisuals(btn !== null);
+    }
+
+    function renderLineVisuals(shouldSpeak = false) {
+      const wrap = document.getElementById('line-svg-wrap');
+      const title = document.getElementById('line-title-display');
+      const desc = document.getElementById('line-desc-display');
+
+      if (currentLineType === 'segment') {
+        wrap.innerHTML = `
+          <svg width="340" height="80" viewBox="0 0 340 80">
+            <line x1="60" y1="40" x2="280" y2="40" stroke="#0284c7" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="60" cy="40" r="8" fill="#e11d48"/>
+            <circle cx="280" cy="40" r="8" fill="#e11d48"/>
+            <text x="50" y="70" font-family="Jua" font-size="20" fill="#333">점 ㄱ</text>
+            <text x="270" y="70" font-family="Jua" font-size="20" fill="#333">점 ㄴ</text>
+          </svg>
+        `;
+        title.textContent = "선분 ㄱㄴ (또는 선분 ㄴㄱ)";
+        desc.innerHTML = "두 점 ㄱ과 ㄴ을 <strong>곧게 이은 선</strong>이에요.<br>양쪽 끝이 점으로 막혀 있어 자로 <strong>길이를 잴 수 있어요!</strong>";
+        if (shouldSpeak && typeof fairySpeak === 'function') {
+          fairySpeak('선분 ㄱㄴ은 두 점을 곧게 이은 선으로, 길이를 잴 수 있습니다!');
+        }
+      } else if (currentLineType === 'ray_ab') {
+        wrap.innerHTML = `
+          <svg width="340" height="80" viewBox="0 0 340 80">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0284c7"/>
+              </marker>
+            </defs>
+            <line x1="60" y1="40" x2="320" y2="40" stroke="#0284c7" stroke-width="6" marker-end="url(#arrow)"/>
+            <circle cx="60" cy="40" r="8" fill="#e11d48"/>
+            <circle cx="220" cy="40" r="6" fill="#3b82f6"/>
+            <text x="50" y="70" font-family="Jua" font-size="20" fill="#e11d48">시작 점 ㄱ</text>
+            <text x="210" y="70" font-family="Jua" font-size="20" fill="#333">점 ㄴ</text>
+          </svg>
+        `;
+        title.textContent = "반직선 ㄱㄴ (시작점이 점 ㄱ)";
+        desc.innerHTML = "<strong>점 ㄱ에서 시작</strong>하여 <strong>점 ㄴ 쪽으로 끝없이</strong> 늘인 곧은 선이에요!<br>⚠️ 반직선은 시작점이 중요해서 <strong>반직선 ㄴㄱ과 서로 달라요!</strong>";
+        if (shouldSpeak && typeof fairySpeak === 'function') {
+          fairySpeak('반직선 ㄱㄴ은 점 ㄱ에서 시작하여 점 ㄴ 쪽으로 끝없이 늘인 선입니다!');
+        }
+      } else if (currentLineType === 'ray_ba') {
+        wrap.innerHTML = `
+          <svg width="340" height="80" viewBox="0 0 340 80">
+            <defs>
+              <marker id="arrow-left" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 10 0 L 0 5 L 10 10 z" fill="#0284c7"/>
+              </marker>
+            </defs>
+            <line x1="20" y1="40" x2="280" y2="40" stroke="#0284c7" stroke-width="6" marker-start="url(#arrow-left)"/>
+            <circle cx="120" cy="40" r="6" fill="#3b82f6"/>
+            <circle cx="280" cy="40" r="8" fill="#e11d48"/>
+            <text x="110" y="70" font-family="Jua" font-size="20" fill="#333">점 ㄱ</text>
+            <text x="260" y="70" font-family="Jua" font-size="20" fill="#e11d48">시작 점 ㄴ</text>
+          </svg>
+        `;
+        title.textContent = "반직선 ㄴㄱ (시작점이 점 ㄴ)";
+        desc.innerHTML = "<strong>점 ㄴ에서 시작</strong>하여 <strong>점 ㄱ 쪽으로 끝없이</strong> 늘인 곧은 선이에요!<br>반직선 ㄱㄴ과 방향이 반대예요.";
+        if (shouldSpeak && typeof fairySpeak === 'function') {
+          fairySpeak('반직선 ㄴㄱ은 점 ㄴ에서 시작하여 점 ㄱ 쪽으로 끝없이 늘인 선입니다!');
+        }
+      } else if (currentLineType === 'line') {
+        wrap.innerHTML = `
+          <svg width="340" height="80" viewBox="0 0 340 80">
+            <defs>
+              <marker id="arrow-bi-l" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 10 0 L 0 5 L 10 10 z" fill="#0284c7"/>
+              </marker>
+              <marker id="arrow-bi-r" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="#0284c7"/>
+              </marker>
+            </defs>
+            <line x1="20" y1="40" x2="320" y2="40" stroke="#0284c7" stroke-width="6" marker-start="url(#arrow-bi-l)" marker-end="url(#arrow-bi-r)"/>
+            <circle cx="100" cy="40" r="6" fill="#3b82f6"/>
+            <circle cx="240" cy="40" r="6" fill="#3b82f6"/>
+            <text x="90" y="70" font-family="Jua" font-size="20" fill="#333">점 ㄱ</text>
+            <text x="230" y="70" font-family="Jua" font-size="20" fill="#333">점 ㄴ</text>
+          </svg>
+        `;
+        title.textContent = "직선 ㄱㄴ (또는 직선 ㄴㄱ)";
+        desc.innerHTML = "선분을 <strong>양쪽으로 끝없이 늘인 곧은 선</strong>이에요!<br>양쪽 모두 무한히 뻗어나가므로 길이를 잴 수 없어요.";
+        if (shouldSpeak && typeof fairySpeak === 'function') {
+          fairySpeak('직선 ㄱㄴ은 선분을 양쪽으로 끝없이 늘인 곧은 선입니다!');
+        }
+      }
+    }
+
+    function speakCurrentLine() {
+      renderLineVisuals(true);
+    }
+
+    function explainPolygon(type) {
+      const box = document.getElementById('polygon-explain-box');
+      if (type === 'rt_tri') {
+        box.innerHTML = "📐 <strong>직각삼각형:</strong> 한 각이 직각(90°)인 삼각형이에요! 나머지 두 각은 직각보다 작아요.";
+        if (typeof fairySpeak === 'function') fairySpeak('직각삼각형은 한 각이 직각인 삼각형입니다!');
+      } else if (type === 'rect') {
+        box.innerHTML = "🚪 <strong>직사각형:</strong> 네 각이 모두 직각인 사각형이에요! 마주 보는 두 변의 길이가 서로 같아요.";
+        if (typeof fairySpeak === 'function') fairySpeak('직사각형은 네 각이 모두 직각인 사각형입니다!');
+      } else if (type === 'square') {
+        box.innerHTML = "🔲 <strong>정사각형:</strong> 네 각이 모두 직각이고, <strong>네 변의 길이가 모두 똑같은</strong> 완벽한 사각형이에요!";
+        if (typeof fairySpeak === 'function') fairySpeak('정사각형은 네 각이 모두 직각이고 네 변의 길이가 모두 같은 사각형입니다!');
+      }
+    }
+
+    const QUIZ_LIST = [
+      { q: "점 ㄴ에서 시작하여 점 ㄱ 쪽으로 끝없이 늘인 선은?", ans: "반직선 ㄴㄱ", choices: ["선분 ㄴㄱ", "반직선 ㄴㄱ", "반직선 ㄱㄴ", "직선 ㄴㄱ"] },
+      { q: "두 점을 곧게 이어서 길이를 잴 수 있는 선은?", ans: "선분", choices: ["선분", "반직선", "직선", "곡선"] },
+      { q: "한 각이 직각인 삼각형의 이름은 무엇일까요?", ans: "직각삼각형", choices: ["직각삼각형", "정삼각형", "직사각형", "이등변삼각형"] },
+      { q: "네 각이 모두 직각이고 네 변의 길이가 모두 같은 사각형은?", ans: "정사각형", choices: ["직사각형", "정사각형", "사다리꼴", "평행사변형"] },
+      { q: "선분을 양쪽으로 끝없이 늘인 곧은 선은?", ans: "직선", choices: ["선분", "반직선", "직선", "직각"] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.2rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 도형 박사님이시네요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderLineVisuals(false); // 초기 로딩 시 무발화
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "평면도형");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
