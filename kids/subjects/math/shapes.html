@@ -16,28 +16,34 @@
       margin: 20px 0;
     }
     .shape-feature-card {
-      background: #fff;
+      background: #ffffff !important;
       border: 3px solid #e2e8f0;
       border-radius: 20px;
-      padding: 20px;
+      padding: 22px 18px;
       text-align: center;
       transition: all 0.2s ease;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
     .shape-feature-card:hover {
       transform: translateY(-5px);
-      border-color: #ec4899;
-      box-shadow: 0 10px 20px rgba(236,72,153,0.15);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
     }
     .shape-icon-big {
-      font-size: 3.5rem;
+      font-size: 3.8rem;
       margin-bottom: 10px;
+    }
+    .shape-card-title {
+      font-family: 'Jua', sans-serif !important;
+      font-size: 1.65rem !important;
+      margin-bottom: 8px !important;
+      font-weight: 800 !important;
     }
     .shape-tag {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 5px 12px;
       border-radius: 20px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       font-weight: 800;
       margin-top: 5px;
     }
@@ -70,36 +76,36 @@
         <div>
           <span class="section-badge badge-candy">섹션 1 : 입체 모양 3총사</span>
           <h2 class="section-title">📦 상자, 둥근기둥, 공 모양의 특징</h2>
-          <p class="section-desc">카드를 누르면 모양의 쌓기/굴리기 비밀을 요정이 알려줘요!</p>
+          <p class="section-desc" style="color: #334155 !important; font-weight: 600;">카드를 누르면 모양의 쌓기/굴리기 비밀을 요정이 알려줘요!</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('입체 모양 3총사의 특징을 눌러보세요!')">🔊</button>
       </div>
 
       <div class="shape-card-grid">
-        <div class="shape-feature-card" onclick="explainShape('box')">
+        <div class="shape-feature-card" style="border-color: #fbcfe8;" onclick="explainShape('box')">
           <div class="shape-icon-big">📦</div>
-          <h3 style="font-family:'Jua'; font-size:1.5rem; color:#db2777;">상자 모양</h3>
+          <h3 class="shape-card-title" style="color: #db2777 !important;">상자 모양</h3>
           <div class="shape-tag" style="background:#fce7f3; color:#db2777;">🧱 잘 쌓여요</div>
           <div class="shape-tag" style="background:#fee2e2; color:#b91c1c;">🛑 안 굴러가요</div>
         </div>
 
-        <div class="shape-feature-card" onclick="explainShape('cylinder')">
+        <div class="shape-feature-card" style="border-color: #bae6fd;" onclick="explainShape('cylinder')">
           <div class="shape-icon-big">🥫</div>
-          <h3 style="font-family:'Jua'; font-size:1.5rem; color:#0284c7;">둥근기둥 모양</h3>
+          <h3 class="shape-card-title" style="color: #0284c7 !important;">둥근기둥 모양</h3>
           <div class="shape-tag" style="background:#e0f2fe; color:#0284c7;">🧱 세우면 쌓여요</div>
           <div class="shape-tag" style="background:#dcfce7; color:#15803d;">🌀 눕히면 굴러가요</div>
         </div>
 
-        <div class="shape-feature-card" onclick="explainShape('sphere')">
+        <div class="shape-feature-card" style="border-color: #bbf7d0;" onclick="explainShape('sphere')">
           <div class="shape-icon-big">⚽</div>
-          <h3 style="font-family:'Jua'; font-size:1.5rem; color:#16a34a;">공 모양</h3>
+          <h3 class="shape-card-title" style="color: #16a34a !important;">공 모양</h3>
           <div class="shape-tag" style="background:#fee2e2; color:#b91c1c;">❌ 못 쌓아요</div>
           <div class="shape-tag" style="background:#dcfce7; color:#15803d;">⚡ 어디로든 굴러가요</div>
         </div>
       </div>
 
-      <div id="shape-explain-box" style="background:#fdfbf7; border:2px dashed #f472b6; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.2rem; color:#334155;">
-        모양 카드를 터치해 보세요! 👆
+      <div id="shape-explain-box" style="background:#fdfbf7; border:2px dashed #f472b6; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b; margin-top:10px;">
+        입체 모양 카드를 터치해 보세요! 👆
       </div>
     </section>
 
@@ -109,32 +115,32 @@
         <div>
           <span class="section-badge badge-pairs">섹션 2 : 평면 모양 3총사</span>
           <h2 class="section-title">🔺 동그라미(○), 세모(△), 네모(□)</h2>
-          <p class="section-desc">꼭짓점과 곧은 선(변)의 개수를 관찰해 봐요!</p>
+          <p class="section-desc" style="color: #334155 !important; font-weight: 600;">꼭짓점과 곧은 선(변)의 개수를 관찰해 봐요!</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('동그라미, 세모, 네모의 변과 꼭짓점을 세어보세요!')">🔊</button>
       </div>
 
       <div class="shape-card-grid">
-        <div class="shape-feature-card" onclick="explain2D('circle')">
-          <div class="shape-icon-big" style="color:#f43f5e;">🔴</div>
-          <h3 style="font-family:'Jua'; font-size:1.6rem; color:#e11d48;">동그라미 <span style="color:#be123c;">(○)</span></h3>
-          <p style="font-size:0.95rem; font-weight:700; color:#9f1239; background:#ffe4e6; padding:6px 12px; border-radius:12px; margin-top:8px;">굽은 선 1개 · 뾰족한 곳 0개</p>
+        <div class="shape-feature-card" style="border-color: #fecdd3;" onclick="explain2D('circle')">
+          <div class="shape-icon-big">🔴</div>
+          <h3 class="shape-card-title" style="color: #e11d48 !important;">동그라미 <span style="color: #be123c !important;">(○)</span></h3>
+          <p style="font-size:1rem; font-weight:800; color:#9f1239 !important; background:#ffe4e6; padding:8px 12px; border-radius:14px; margin-top:8px;">굽은 선 1개 · 뾰족한 곳 0개</p>
         </div>
 
-        <div class="shape-feature-card" onclick="explain2D('triangle')">
-          <div class="shape-icon-big" style="color:#0284c7;">🔺</div>
-          <h3 style="font-family:'Jua'; font-size:1.6rem; color:#0284c7;">세모 <span style="color:#0369a1;">(△)</span></h3>
-          <p style="font-size:0.95rem; font-weight:700; color:#075985; background:#e0f2fe; padding:6px 12px; border-radius:12px; margin-top:8px;">곧은 선 3개 · 뾰족한 곳 3개</p>
+        <div class="shape-feature-card" style="border-color: #bae6fd;" onclick="explain2D('triangle')">
+          <div class="shape-icon-big">🔺</div>
+          <h3 class="shape-card-title" style="color: #0284c7 !important;">세모 <span style="color: #0369a1 !important;">(△)</span></h3>
+          <p style="font-size:1rem; font-weight:800; color:#075985 !important; background:#e0f2fe; padding:8px 12px; border-radius:14px; margin-top:8px;">곧은 선 3개 · 뾰족한 곳 3개</p>
         </div>
 
-        <div class="shape-feature-card" onclick="explain2D('rectangle')">
-          <div class="shape-icon-big" style="color:#16a34a;">🟩</div>
-          <h3 style="font-family:'Jua'; font-size:1.6rem; color:#15803d;">네모 <span style="color:#166534;">(□)</span></h3>
-          <p style="font-size:0.95rem; font-weight:700; color:#14532d; background:#dcfce7; padding:6px 12px; border-radius:12px; margin-top:8px;">곧은 선 4개 · 뾰족한 곳 4개</p>
+        <div class="shape-feature-card" style="border-color: #bbf7d0;" onclick="explain2D('rectangle')">
+          <div class="shape-icon-big">🟩</div>
+          <h3 class="shape-card-title" style="color: #15803d !important;">네모 <span style="color: #166534 !important;">(□)</span></h3>
+          <p style="font-size:1rem; font-weight:800; color:#14532d !important; background:#dcfce7; padding:8px 12px; border-radius:14px; margin-top:8px;">곧은 선 4개 · 뾰족한 곳 4개</p>
         </div>
       </div>
 
-      <div id="shape2d-explain-box" style="background:#fdfbf7; border:2px dashed #0284c7; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.2rem; color:#1e293b; margin-top:10px;">
+      <div id="shape2d-explain-box" style="background:#fdfbf7; border:2px dashed #0284c7; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b; margin-top:10px;">
         평면 모양 카드를 터치해 보세요! 👆
       </div>
     </section>
