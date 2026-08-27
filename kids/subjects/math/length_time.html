@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>📏 3학년 길이와 시간 측정소 (mm·km & 시·분·초) ⏱️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 돋보기 자(Ruler) 측정 뷰 */
+    .ruler-container {
+      background: #ffffff;
+      border: 3px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 22px 18px;
+      margin: 15px auto;
+      max-width: 580px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .ruler-svg-wrap {
+      width: 100%;
+      overflow-x: auto;
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .ruler-svg-wrap svg {
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+    }
+
+    /* 단위 환산 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+
+    /* 스톱워치 시계 뷰 */
+    .stopwatch-box {
+      background: #fff;
+      border: 3px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 540px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .digital-timer-display {
+      font-family: 'Jua', sans-serif;
+      font-size: 2.8rem;
+      color: #e11d48;
+      background: #fee2e2;
+      border-radius: 16px;
+      padding: 10px 20px;
+      display: inline-block;
+      margin: 10px 0;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">📏 길이와 시간 측정소 ⏱️</h1>
+      <p class="hero-subtitle">1mm와 1km의 단위 변환을 마스터하고, 1초 단위 시간 덧셈·뺄셈을 정복해요!</p>
+    </header>
+
+    <!-- 1. 1mm와 1cm 돋보기 자 눈금 측정기 -->
+    <section class="math-section-card" id="section-ruler">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 밀리미터(mm)와 센티미터(cm)</span>
+          <h2 class="section-title">🔬 1mm 돋보기 자 눈금 측정기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">물건을 선택하여 1cm를 10칸으로 나눈 1mm 눈금을 읽어보세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentRuler()">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="item-preset-buttons">
+        <button class="candy-num-btn active" onclick="selectRulerItem('clip', this)">📎 클립 (2cm 4mm)</button>
+        <button class="candy-num-btn" onclick="selectRulerItem('eraser', this)">🧼 지우개 (3cm 8mm)</button>
+        <button class="candy-num-btn" onclick="selectRulerItem('pencil', this)">✏️ 연필 (6cm 5mm)</button>
+        <button class="candy-num-btn" onclick="selectRulerItem('candy', this)">🍬 사탕 (1cm 7mm)</button>
+      </div>
+
+      <div class="ruler-container">
+        <div class="ruler-svg-wrap" id="ruler-svg-wrap">
+          <!-- 동적 SVG 자 렌더링 -->
+        </div>
+        <div style="font-family:'Jua',sans-serif; font-size:1.8rem; color:#0284c7; margin-top:12px;" id="ruler-length-display">2cm 4mm = 24mm</div>
+        <div class="unit-exchange-card" id="ruler-desc-display">
+          <div>💡 <strong>1cm = 10mm</strong> 예요!</div>
+          <div>• <strong>2cm</strong>는 <strong>20mm</strong>이고, 작은 눈금 <strong>4mm</strong>를 더하면 ➔ <span style="color:#e11d48; font-weight:bold;">24mm</span>가 됩니다!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 1km와 1000m 우주 도로 거리 환산기 -->
+    <section class="math-section-card" id="section-km">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs">섹션 2 : 킬로미터(km)와 미터(m)</span>
+          <h2 class="section-title">🚗 1km = 1000m 우주 도로 환산기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">아주 먼 거리를 나타내는 1km 단위를 미터(m)로 변환해 봐요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('1000미터는 1킬로미터와 같습니다!')">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="km-preset-buttons">
+        <button class="candy-num-btn active" onclick="selectKmItem(1, 300, this)">1km 300m</button>
+        <button class="candy-num-btn" onclick="selectKmItem(2, 500, this)">2km 500m</button>
+        <button class="candy-num-btn" onclick="selectKmItem(3, 80, this)">3km 80m</button>
+        <button class="candy-num-btn" onclick="selectKmItem(4, 0, this)">4km (4000m)</button>
+      </div>
+
+      <div class="ruler-container">
+        <div style="display:flex; justify-content:center; align-items:center; gap:12px; font-family:'Jua'; font-size:2rem; color:#15803d;" id="km-math-view">
+          1km 300m = 1300m
+        </div>
+        <div class="unit-exchange-card" id="km-step-guide">
+          <div>🚀 <strong>1km = 1000m</strong> 의 비밀!</div>
+          <div>• <strong>1km</strong>를 <strong>1000m</strong>로 바꾸고, 남은 <strong>300m</strong>를 합치면 ➔ <strong style="color:#e11d48;">1300m</strong> 완성!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 1초와 60초 시간 탐험 (시·분·초 덧셈/뺄셈) -->
+    <section class="math-section-card" id="section-time">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 3 : 초(s)와 시간 연산</span>
+          <h2 class="section-title">⏱️ 1분 = 60초 & 시간의 덧셈·뺄셈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">초 단위 변환과 60초가 모여 1분이 되는 원리를 배워요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('60초는 1분과 같습니다! 시간 계산을 해보세요!')">🔊</button>
+      </div>
+
+      <div class="stopwatch-box">
+        <div style="font-family:'Jua'; font-size:1.4rem; color:#475569;">스톱워치 초 단위 변환기</div>
+        <div class="digital-timer-display" id="time-clock-display">1분 25초</div>
+        
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="time-preset-buttons">
+          <button class="candy-num-btn active" onclick="selectTimeSec(85, this)">85초 (1분 25초)</button>
+          <button class="candy-num-btn" onclick="selectTimeSec(130, this)">130초 (2분 10초)</button>
+          <button class="candy-num-btn" onclick="selectTimeSec(200, this)">200초 (3분 20초)</button>
+          <button class="candy-num-btn" onclick="selectTimeSec(60, this)">60초 (딱 1분!)</button>
+        </div>
+
+        <div class="unit-exchange-card" id="time-guide-box">
+          <div>⏱️ <strong>85초</strong>를 분과 초로 가르기:</div>
+          <div>• 85초에서 <strong>60초</strong>를 묶으면 <strong>1분</strong>이 되고, 남은 초는 <strong>25초</strong>예요!</div>
+          <div>➔ 따라서 <strong>1분 25초</strong>가 됩니다! 🎉</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 실전 번개 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 3학년 길이와 시간 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 단위나 변환된 값을 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:20px;" id="quiz-question">3cm 5mm는 몇 mm일까요?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    // 1. 돋보기 자
+    const RULER_ITEMS = {
+      clip: { name: '클립', cm: 2, mm: 4, totalMm: 24, emoji: '📎' },
+      eraser: { name: '지우개', cm: 3, mm: 8, totalMm: 38, emoji: '🧼' },
+      pencil: { name: '연필', cm: 6, mm: 5, totalMm: 65, emoji: '✏️' },
+      candy: { name: '사탕', cm: 1, mm: 7, totalMm: 17, emoji: '🍬' }
+    };
+    let currentItemKey = 'clip';
+
+    function selectRulerItem(key, btn) {
+      currentItemKey = key;
+      document.querySelectorAll('#item-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderRulerVisuals(btn !== null);
+    }
+
+    function renderRulerVisuals(shouldSpeak = false) {
+      const item = RULER_ITEMS[currentItemKey];
+      const wrap = document.getElementById('ruler-svg-wrap');
+      const pxPerMm = 6.5;
+      const barWidth = item.totalMm * pxPerMm;
+
+      wrap.innerHTML = `
+        <svg viewBox="0 0 520 140">
+          <!-- 측정 물건 -->
+          <rect x="20" y="20" width="${barWidth}" height="35" rx="8" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/>
+          <text x="${20 + barWidth/2}" y="45" font-family="Jua" font-size="18" fill="#fff" text-anchor="middle">${item.emoji} ${item.name} (${item.cm}cm ${item.mm}mm)</text>
+          
+          <!-- 자 본체 -->
+          <rect x="20" y="70" width="480" height="50" fill="#fef08a" stroke="#ca8a04" stroke-width="3" rx="6"/>
+          
+          <!-- 눈금 그리기 (0 ~ 7cm) -->
+          ${Array.from({length: 71}).map((_, i) => {
+            const x = 20 + i * pxPerMm;
+            const isCm = (i % 10 === 0);
+            const isHalf = (i % 5 === 0 && !isCm);
+            const h = isCm ? 25 : (isHalf ? 16 : 9);
+            const strokeColor = isCm ? '#854d0e' : '#a16207';
+            const strokeWidth = isCm ? 2.5 : 1.5;
+            let textTag = '';
+            if (isCm) {
+              textTag = `<text x="${x}" y="112" font-family="Jua" font-size="14" fill="#854d0e" text-anchor="middle">${i/10}</text>`;
+            }
+            return `<line x1="${x}" y1="70" x2="${x}" y2="${70 + h}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>${textTag}`;
+          }).join('')}
+
+          <!-- 측정 화살표 끝선 -->
+          <line x1="${20 + barWidth}" y1="15" x2="${20 + barWidth}" y2="70" stroke="#e11d48" stroke-width="2" stroke-dasharray="4"/>
+          <circle cx="${20 + barWidth}" cy="70" r="4" fill="#e11d48"/>
+        </svg>
+      `;
+
+      document.getElementById('ruler-length-display').textContent = `${item.cm}cm ${item.mm}mm = ${item.totalMm}mm`;
+      document.getElementById('ruler-desc-display').innerHTML = `
+        <div>💡 <strong>1cm = 10mm</strong> 예요!</div>
+        <div>• <strong>${item.cm}cm</strong>는 <strong>${item.cm * 10}mm</strong>이고, 작은 눈금 <strong>${item.mm}mm</strong>를 더하면 ➔ <span style="color:#e11d48; font-weight:bold;">${item.totalMm}mm</span>가 됩니다!</div>
+      `;
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(`${item.name}의 길이는 ${item.cm}센티미터 ${item.mm}밀리미터이며, ${item.totalMm}밀리미터입니다!`);
+      }
+    }
+
+    function speakCurrentRuler() {
+      renderRulerVisuals(true);
+    }
+
+    // 2. km ↔ m
+    function selectKmItem(km, m, btn) {
+      document.querySelectorAll('#km-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const totalM = km * 1000 + m;
+      document.getElementById('km-math-view').textContent = m > 0 ? `${km}km ${m}m = ${totalM}m` : `${km}km = ${totalM}m`;
+      document.getElementById('km-step-guide').innerHTML = `
+        <div>🚀 <strong>1km = 1000m</strong> 의 비밀!</div>
+        <div>• <strong>${km}km</strong>를 <strong>${km * 1000}m</strong>로 바꾸고, 남은 <strong>${m}m</strong>를 합치면 ➔ <strong style="color:#e11d48;">${totalM}m</strong> 완성!</div>
+      `;
+
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(m > 0 ? `${km}킬로미터 ${m}미터는 ${totalM}미터입니다!` : `${km}킬로미터는 ${totalM}미터입니다!`);
+      }
+    }
+
+    // 3. 시간 (초 단위)
+    function selectTimeSec(seconds, btn) {
+      document.querySelectorAll('#time-preset-buttons .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      const str = min > 0 ? (sec > 0 ? `${min}분 ${sec}초` : `${min}분 정각`) : `${sec}초`;
+      
+      document.getElementById('time-clock-display').textContent = str;
+      document.getElementById('time-guide-box').innerHTML = `
+        <div>⏱️ <strong>${seconds}초</strong>를 분과 초로 가르기:</div>
+        <div>• ${seconds}초에서 <strong>60초</strong>를 ${min}번 묶으면 <strong>${min}분</strong>이 되고, 남은 초는 <strong>${sec}초</strong>예요!</div>
+        <div>➔ 따라서 <strong>${str}</strong>가 됩니다! 🎉</div>
+      `;
+
+      if (btn && typeof fairySpeak === 'function') {
+        fairySpeak(`${seconds}초는 ${str}입니다!`);
+      }
+    }
+
+    // 4. 퀴즈
+    const QUIZ_LIST = [
+      { q: "3cm 5mm는 몇 mm일까요?", ans: "35mm", choices: ["35mm", "305mm", "350mm", "8mm"] },
+      { q: "52mm를 cm와 mm로 바르게 나타낸 것은?", ans: "5cm 2mm", choices: ["5cm 2mm", "52cm", "5cm 20mm", "2cm 5mm"] },
+      { q: "2km 400m는 몇 m일까요?", ans: "2400m", choices: ["2400m", "2040m", "600m", "240m"] },
+      { q: "1분 30초는 모두 몇 초일까요?", ans: "90초", choices: ["90초", "130초", "60초", "30초"] },
+      { q: "100초를 분과 초로 바르게 나타낸 것은?", ans: "1분 40초", choices: ["1분 40초", "1분 00초", "10분", "2분 20초"] },
+      { q: "1km는 몇 m와 같을까요?", ans: "1000m", choices: ["1000m", "100m", "10m", "10000m"] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.2rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 측정 박사님이시네요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderRulerVisuals(false); // 초기 로딩 시 무발화
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "길이와 시간");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
