@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -171,13 +171,13 @@
       </div>
     </section>
 
-    <!-- 3. 🪐 태양계 행성 실측 우주 거리 탐사소 (킬로미터 km & 과학 천문 연계) -->
+    <!-- 3. 🪐 태양계 행성 소축적 우주 지도 (km ↔ m & 과학 천문 연계) -->
     <section class="math-section-card" id="section-space">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-pairs" style="background:#7c3aed; color:#fff;">섹션 3 : 킬로미터(km) & 과학 천문 연계</span>
-          <h2 class="section-title">🪐 태양계 행성 실측 우주 거리 탐사소</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">1km = 1000m 단위를 배우며, 태양과 행성 간의 거대한 우주 거리를 탐험해 봐요!</p>
+          <span class="section-badge badge-pairs" style="background:#7c3aed; color:#fff;">섹션 3 : 소축적 우주 지도 (km ↔ m)</span>
+          <h2 class="section-title">🪐 태양계 소축적 우주 지도 탐사소</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">광활한 우주 거리를 <strong>축척 지도</strong>로 줄여서, 3학년 km와 m 단위로 탐험해 봐요!</p>
         </div>
         <button class="speaker-btn" onclick="speakCurrentPlanet()">🔊</button>
       </div>
@@ -186,48 +186,48 @@
         <div class="planet-btn-card active" onclick="selectPlanet('moon', this)">
           <div class="planet-icon">🌕</div>
           <div class="planet-name">지구 ↔ 달</div>
-          <div class="planet-dist-tag">384,400 km</div>
+          <div class="planet-dist-tag">3km 844m</div>
         </div>
         <div class="planet-btn-card" onclick="selectPlanet('mercury', this)">
           <div class="planet-icon">☿️</div>
           <div class="planet-name">수성</div>
-          <div class="planet-dist-tag">5,800만 km</div>
+          <div class="planet-dist-tag">580m</div>
         </div>
         <div class="planet-btn-card" onclick="selectPlanet('venus', this)">
           <div class="planet-icon">♀️</div>
           <div class="planet-name">금성</div>
-          <div class="planet-dist-tag">1억 800만 km</div>
+          <div class="planet-dist-tag">1km 80m</div>
         </div>
         <div class="planet-btn-card" onclick="selectPlanet('earth', this)">
           <div class="planet-icon">🌍</div>
-          <div class="planet-name">지구</div>
-          <div class="planet-dist-tag">1억 5,000만 km</div>
+          <div class="planet-name">지구 (1 AU)</div>
+          <div class="planet-dist-tag">1km 500m</div>
         </div>
         <div class="planet-btn-card" onclick="selectPlanet('mars', this)">
           <div class="planet-icon">♂️</div>
           <div class="planet-name">화성</div>
-          <div class="planet-dist-tag">2억 2,800만 km</div>
+          <div class="planet-dist-tag">2km 280m</div>
         </div>
         <div class="planet-btn-card" onclick="selectPlanet('jupiter', this)">
           <div class="planet-icon">♃</div>
           <div class="planet-name">목성</div>
-          <div class="planet-dist-tag">7억 7,800만 km</div>
+          <div class="planet-dist-tag">7km 780m</div>
         </div>
         <div class="planet-btn-card" onclick="selectPlanet('saturn', this)">
           <div class="planet-icon">♄</div>
           <div class="planet-name">토성</div>
-          <div class="planet-dist-tag">14억 3,000만 km</div>
+          <div class="planet-dist-tag">14km 300m</div>
         </div>
       </div>
 
       <div class="ruler-container" style="background:#faf5ff; border-color:#d8b4fe;">
         <div style="font-family:'Jua'; font-size:1.8rem; color:#6b21a8; margin-bottom:8px;" id="planet-title-display">
-          🌕 지구에서 달까지의 거리 : 384,400 km
+          🌕 지구에서 달까지의 축척 거리 : 3km 844m = 3844m
         </div>
         <div class="unit-exchange-card" style="border-color:#a855f7; background:#fff;" id="planet-desc-display">
-          <div>🚀 <strong>1km = 1000m</strong> 환산:</div>
-          <div>• <strong>384,400 km</strong> = <strong>384,400,000 m</strong> (3억 8440만 미터!)</div>
-          <div style="margin-top:6px; color:#7c3aed;">🔭 <strong>천문 과학 상식:</strong> 아폴로 11호 우주선이 지구에서 달까지 가는 데 약 3일이 걸렸어요! 빛의 속도로는 1.3초 만에 닿는답니다.</div>
+          <div>🚀 <strong>1km = 1000m</strong> 단위 환산:</div>
+          <div>• <strong>3km 844m</strong> = <strong>3000m + 844m = 3844m</strong></div>
+          <div style="margin-top:6px; color:#475569;">📏 <strong>실제 거리와 축척:</strong> 실제 우주 거리 384,400 km를 <strong>10만분의 1 축척 지도</strong>로 줄인 값이에요! 집에서 이웃 동네까지 자전거 타는 거리와 비슷해요.</div>
         </div>
       </div>
     </section>
@@ -460,56 +460,56 @@
       }
     }
 
-    // 3. 🪐 태양계 행성 우주 거리 (km ↔ m & 과학 천문 연계)
+    // 3. 🪐 태양계 행성 소축적 우주 지도 (km ↔ m & 과학 천문 연계)
     const PLANETS_DATA = {
       moon: {
-        title: '🌕 지구에서 달까지의 거리',
-        kmStr: '384,400 km',
-        totalM: '384,400,000 m',
-        desc: '아폴로 11호 우주선이 지구에서 달까지 가는 데 약 3일이 걸렸어요! 빛의 속도로는 약 1.3초 만에 닿는 거리랍니다.',
-        voice: '지구에서 달까지는 38만 4400 킬로미터이며, 미터로는 3억 8440만 미터입니다!'
+        title: '🌕 지구에서 달까지의 축척 거리',
+        kmStr: '3km 844m',
+        totalM: '3,844 m (3844m)',
+        desc: '실제 거리(384,400km)를 10만분의 1 축척 지도로 줄인 값이에요! 집에서 이웃 동네까지 자전거 타는 거리(약 3.8km)와 비슷해요.',
+        voice: '지구에서 달까지의 축척 거리는 3킬로미터 844미터이며, 3844미터입니다!'
       },
       mercury: {
-        title: '☿️ 태양에서 수성까지의 거리',
-        kmStr: '5,800만 km (58,000,000 km)',
-        totalM: '58,000,000,000 m',
-        desc: '태양계에서 태양과 가장 가까운 행성이에요! 낮에는 섭씨 430도까지 뜨거워져요.',
-        voice: '태양에서 수성까지는 약 5800만 킬로미터입니다!'
+        title: '☿️ 태양에서 수성까지의 축척 거리',
+        kmStr: '580m',
+        totalM: '580 m',
+        desc: '학교 운동장 3바퀴 정도 걷는 거리예요! 태양계에서 태양과 가장 가까운 행성이랍니다.',
+        voice: '태양에서 수성까지의 축척 거리는 580미터입니다!'
       },
       venus: {
-        title: '♀️ 태양에서 금성까지의 거리',
-        kmStr: '1억 800만 km (108,000,000 km)',
-        totalM: '108,000,000,000 m',
-        desc: '두꺼운 이산화탄소 대기 때문에 태양계에서 가장 뜨거운 행성(약 470도)이에요!',
-        voice: '태양에서 금성까지는 약 1억 800만 킬로미터입니다!'
+        title: '♀️ 태양에서 금성까지의 축척 거리',
+        kmStr: '1km 80m',
+        totalM: '1,080 m (1080m)',
+        desc: '지하철 한 정거장 정도의 거리예요! 1km 80m는 1080m와 같아요.',
+        voice: '태양에서 금성까지의 축척 거리는 1킬로미터 80미터이며, 1080미터입니다!'
       },
       earth: {
-        title: '🌍 태양에서 지구까지의 거리 (1 AU)',
-        kmStr: '1억 5,000만 km (150,000,000 km)',
-        totalM: '150,000,000,000 m',
-        desc: '우리가 살고 있는 푸른 별 지구예요! 태양에서 쏜 빛이 지구에 도착하는 데 8분 20초가 걸려요.',
-        voice: '태양에서 지구까지는 1억 5000만 킬로미터이며, 천문학에서는 1 천문단위라고 부릅니다!'
+        title: '🌍 태양에서 지구까지의 축척 거리 (1 AU)',
+        kmStr: '1km 500m',
+        totalM: '1,500 m (1500m)',
+        desc: '천문학에서 1 천문단위(1 AU)라고 불러요! 걸어서 약 20분 정도 걸리는 친근한 거리예요.',
+        voice: '태양에서 지구까지의 축척 거리는 1킬로미터 500미터이며, 1500미터입니다!'
       },
       mars: {
-        title: '♂️ 태양에서 화성까지의 거리',
-        kmStr: '2억 2,800만 km (228,000,000 km)',
-        totalM: '228,000,000,000 m',
-        desc: '붉은 산화철 모래로 덮여 있어 붉게 보이는 행성이에요! 탐사 로버들이 활동하고 있어요.',
-        voice: '태양에서 화성까지는 약 2억 2800만 킬로미터입니다!'
+        title: '♂️ 태양에서 화성까지의 축척 거리',
+        kmStr: '2km 280m',
+        totalM: '2,280 m (2280m)',
+        desc: '2km 280m는 2280m와 같아요! 붉은 모래로 덮인 화성까지 탐험을 떠나요.',
+        voice: '태양에서 화성까지의 축척 거리는 2킬로미터 280미터이며, 2280미터입니다!'
       },
       jupiter: {
-        title: '♃ 태양에서 목성까지의 거리',
-        kmStr: '7억 7,800만 km (778,000,000 km)',
-        totalM: '778,000,000,000 m',
-        desc: '태양계에서 가장 거대한 가스 행성으로, 지구보다 부피가 1300배나 더 커요!',
-        voice: '태양에서 목성까지는 약 7억 7800만 킬로미터입니다!'
+        title: '♃ 태양에서 목성까지의 축척 거리',
+        kmStr: '7km 780m',
+        totalM: '7,780 m (7780m)',
+        desc: '옆 도시 입구까지 가는 긴 드라이브 거리예요! 7km 780m는 7780m가 됩니다.',
+        voice: '태양에서 목성까지의 축척 거리는 7킬로미터 780미터이며, 7780미터입니다!'
       },
       saturn: {
-        title: '♄ 태양에서 토성까지의 거리',
-        kmStr: '14억 3,000만 km (1,430,000,000 km)',
-        totalM: '1,430,000,000,000 m',
-        desc: '얼음과 암석 알갱이로 이루어진 거대하고 아름다운 고리를 가지고 있어요!',
-        voice: '태양에서 토성까지는 약 14억 3000만 킬로미터입니다!'
+        title: '♄ 태양에서 토성까지의 축척 거리',
+        kmStr: '14km 300m',
+        totalM: '14,300 m (14300m)',
+        desc: '아름다운 거대 고리가 있는 토성까지의 대원정이에요! 14km 300m는 14300m와 같습니다.',
+        voice: '태양에서 토성까지의 축척 거리는 14킬로미터 300미터이며, 14300미터입니다!'
       }
     };
     let currentPlanetKey = 'moon';
