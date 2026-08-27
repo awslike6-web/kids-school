@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>➗ 3학년 나눗셈 탐험대 (똑같이 나누기 & 나머지 마스터) 🍪</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 쿠키 나누기 접시 뷰 */
+    .plate-grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin: 15px 0;
+      justify-content: center;
+    }
+    .plate-box {
+      background: #fff;
+      border: 3px solid #f59e0b;
+      border-radius: 20px;
+      padding: 12px 8px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.15);
+      position: relative;
+    }
+    .plate-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+      color: #b45309;
+      margin-bottom: 6px;
+    }
+    .plate-cookies {
+      font-size: 1.8rem;
+      line-height: 1.3;
+      min-height: 50px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 나머지 상자 */
+    .remainder-box {
+      background: #fee2e2;
+      border: 2px dashed #ef4444;
+      border-radius: 16px;
+      padding: 12px;
+      margin-top: 10px;
+      text-align: center;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #991b1b;
+    }
+
+    /* 세로셈 단계별 스텝 뷰 */
+    .long-div-table {
+      margin: 15px auto;
+      font-family: 'Courier New', monospace, 'Jua';
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1e293b;
+      line-height: 1.3;
+      border-collapse: collapse;
+    }
+    .long-div-table td {
+      padding: 2px 8px;
+      text-align: center;
+    }
+
+    /* 단위 환산/설명 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">➗ 3학년 나눗셈 탐험대 🍪</h1>
+      <p class="hero-subtitle">쿠키를 똑같이 나누고, 구구단 짝꿍과 나머지의 비밀을 정복해요!</p>
+    </header>
+
+    <!-- 1. 🍪 쿠키 똑같이 나누기 시뮬레이터 (등분제 & 구구단 짝꿍) -->
+    <section class="math-section-card" id="section-cookie">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 1 : 나눗셈의 기초 (똑같이 나누기)</span>
+          <h2 class="section-title">🍪 쿠키 접시 분배기 (곱셈과 나눗셈)</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">쿠키를 몇 개의 접시에 똑같이 나눌지 골라보세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentCookie()">🔊</button>
+      </div>
+
+      <!-- 쿠키 개수와 접시 수 프리셋 -->
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="cookie-presets">
+        <button class="candy-num-btn active" onclick="setCookieDivision(12, 3, this)">🍪 12개를 3접시에</button>
+        <button class="candy-num-btn" onclick="setCookieDivision(12, 4, this)">🍪 12개를 4접시에</button>
+        <button class="candy-num-btn" onclick="setCookieDivision(18, 3, this)">🍪 18개를 3접시에</button>
+        <button class="candy-num-btn" onclick="setCookieDivision(20, 5, this)">🍪 20개를 5접시에</button>
+        <button class="candy-num-btn" onclick="setCookieDivision(24, 6, this)">🍪 24개를 6접시에</button>
+      </div>
+
+      <div style="background:#fff; border:3px solid #e2e8f0; border-radius:20px; padding:20px; text-align:center;">
+        <div class="plate-grid-container" id="plateContainer"></div>
+
+        <div style="font-family:'Jua'; font-size:2rem; color:#0284c7; margin:12px 0;" id="cookieFormulaText">
+          12 ÷ 3 = 4 (한 접시에 4개씩)
+        </div>
+
+        <div class="unit-exchange-card" id="cookieGuideBox">
+          <div>💡 <strong>곱셈과 나눗셈의 짝꿍 관계:</strong></div>
+          <div>• <strong>3 × 4 = 12</strong> (3개씩 4접시는 12개) ➔ <strong style="color:#e11d48;">12 ÷ 3 = 4</strong></div>
+          <div>• 곱셈구구 <strong>3단(3×4=12)</strong>을 거꾸로 생각하면 나눗셈의 몫(4)을 바로 찾을 수 있어요!</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 🍬 나머지가 있는 나눗셈 & 검산 공식 -->
+    <section class="math-section-card" id="section-remainder">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid" style="background:#f43f5e; color:#fff;">섹션 2 : 몫과 나머지</span>
+          <h2 class="section-title">🍬 남는 사탕은 몇 개? (나머지와 검산식)</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">똑같이 나누고 남은 사탕(나머지)과 검산 공식을 확인해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakCurrentRemainder()">🔊</button>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="remainder-presets">
+        <button class="candy-num-btn active" onclick="setRemainderDivision(17, 5, this)">🍬 17개를 5명에게</button>
+        <button class="candy-num-btn" onclick="setRemainderDivision(23, 4, this)">🍬 23개를 4명에게</button>
+        <button class="candy-num-btn" onclick="setRemainderDivision(35, 8, this)">🍬 35개를 8명에게</button>
+        <button class="candy-num-btn" onclick="setRemainderDivision(29, 6, this)">🍬 29개를 6명에게</button>
+      </div>
+
+      <div style="background:#fff; border:3px solid #e2e8f0; border-radius:20px; padding:20px; text-align:center;">
+        <div class="plate-grid-container" id="remainderPlateContainer"></div>
+        <div class="remainder-box" id="remainderBox">남은 사탕 (나머지) : 🍬 2개</div>
+
+        <div style="font-family:'Jua'; font-size:2rem; color:#e11d48; margin:14px 0;" id="remainderFormulaText">
+          17 ÷ 5 = 3 ... 2 (몫: 3, 나머지: 2)
+        </div>
+
+        <div class="unit-exchange-card" style="border-color:#f43f5e;" id="remainderCheckGuide">
+          <div>🛡️ <strong>나머지의 철칙:</strong> <strong>나머지(2)</strong>는 항상 <strong>나누는 수(5)</strong>보다 작아야 해요!</div>
+          <div style="margin-top:6px; color:#047857;">🔍 <strong>검산 공식 (확인식):</strong></div>
+          <div>• (나누는 수 × 몫) + 나머지 = <span style="color:#e11d48; font-weight:bold;">(5 × 3) + 2 = 17</span> (나누어지는 수와 딱 일치!) 🎉</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 🎲 실전 몫과 나머지 맞추기 도전 -->
+    <section class="math-section-card" id="section-random-division">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs" style="background:#0284c7; color:#fff;">섹션 3 : 실전 몫과 나머지 도전</span>
+          <h2 class="section-title">🎲 랜덤 나눗셈 몫과 나머지 구하기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">나눗셈식을 보고 올바른 몫과 나머지를 골라보세요!</p>
+        </div>
+        <button class="divide-btn" style="background:#0284c7; font-size:1.05rem;" onclick="generateRandomDivisionQuestion(true)">🎲 새로운 문제 소환</button>
+      </div>
+
+      <div style="max-width:520px; margin:0 auto; background:#fff; border-radius:20px; padding:22px; text-align:center; border:2px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:2.2rem; color:#1e293b; margin-bottom:15px;" id="randomDivQuestionText">
+          27 ÷ 4 = ?
+        </div>
+
+        <div id="randomDivChoices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;"></div>
+
+        <div id="randomDivFeedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+      </div>
+    </section>
+
+    <!-- 4. 🎯 3학년 나눗셈 번개 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 3학년 나눗셈 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 몫, 나머지, 검산식을 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:20px;" id="quiz-question">18 ÷ 3의 몫은 얼마일까요?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    // 1. 쿠키 똑같이 나누기 시뮬레이터
+    let curCookieTotal = 12;
+    let curCookiePlates = 3;
+
+    function setCookieDivision(total, plates, btn) {
+      curCookieTotal = total;
+      curCookiePlates = plates;
+      document.querySelectorAll('#cookie-presets .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderCookieVisuals(btn !== null);
+    }
+
+    function renderCookieVisuals(shouldSpeak = false) {
+      const total = curCookieTotal;
+      const plates = curCookiePlates;
+      const quotient = Math.floor(total / plates);
+      const container = document.getElementById('plateContainer');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= plates; i++) {
+        const p = document.createElement('div');
+        p.className = 'plate-box';
+        p.innerHTML = `
+          <div class="plate-title">접시 ${i}</div>
+          <div class="plate-cookies">${'🍪'.repeat(quotient)}</div>
+          <div style="font-family:'Jua'; font-size:0.95rem; color:#b45309; margin-top:4px;">${quotient}개</div>
+        `;
+        container.appendChild(p);
+      }
+
+      document.getElementById('cookieFormulaText').textContent = `${total} ÷ ${plates} = ${quotient} (한 접시에 ${quotient}개씩)`;
+      document.getElementById('cookieGuideBox').innerHTML = `
+        <div>💡 <strong>곱셈과 나눗셈의 짝꿍 관계:</strong></div>
+        <div>• <strong>${plates} × ${quotient} = ${total}</strong> (${plates}개씩 ${quotient}접시는 ${total}개) ➔ <strong style="color:#e11d48;">${total} ÷ ${plates} = ${quotient}</strong></div>
+        <div>• 곱셈구구 <strong>${plates}단(${plates}×${quotient}=${total})</strong>을 거꾸로 생각하면 나눗셈의 몫(${quotient})을 바로 찾을 수 있어요!</div>
+      `;
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(`${total} 나누기 ${plates}는 ${quotient}입니다. 곱셈구구 ${plates}단을 이용해 보세요!`);
+      }
+    }
+
+    function speakCurrentCookie() {
+      renderCookieVisuals(true);
+    }
+
+    // 2. 나머지가 있는 사탕 나누기
+    let curRemTotal = 17;
+    let curRemDivisor = 5;
+
+    function setRemainderDivision(total, divisor, btn) {
+      curRemTotal = total;
+      curRemDivisor = divisor;
+      document.querySelectorAll('#remainder-presets .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderRemainderVisuals(btn !== null);
+    }
+
+    function renderRemainderVisuals(shouldSpeak = false) {
+      const total = curRemTotal;
+      const divisor = curRemDivisor;
+      const q = Math.floor(total / divisor);
+      const rem = total % divisor;
+
+      const container = document.getElementById('remainderPlateContainer');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= divisor; i++) {
+        const p = document.createElement('div');
+        p.className = 'plate-box';
+        p.style.borderColor = '#ec4899';
+        p.innerHTML = `
+          <div class="plate-title" style="color:#be185d;">대원 ${i}</div>
+          <div class="plate-cookies">${'🍬'.repeat(q)}</div>
+          <div style="font-family:'Jua'; font-size:0.95rem; color:#be185d; margin-top:4px;">${q}개씩</div>
+        `;
+        container.appendChild(p);
+      }
+
+      const remBox = document.getElementById('remainderBox');
+      remBox.innerHTML = `남은 사탕 (나머지) : ${'🍬'.repeat(rem)} <strong>${rem}개</strong>`;
+
+      document.getElementById('remainderFormulaText').textContent = `${total} ÷ ${divisor} = ${q} ... ${rem} (몫: ${q}, 나머지: ${rem})`;
+      document.getElementById('remainderCheckGuide').innerHTML = `
+        <div>🛡️ <strong>나머지의 철칙:</strong> <strong>나머지(${rem})</strong>는 항상 <strong>나누는 수(${divisor})</strong>보다 작아야 해요!</div>
+        <div style="margin-top:6px; color:#047857;">🔍 <strong>검산 공식 (확인식):</strong></div>
+        <div>• (나누는 수 × 몫) + 나머지 = <span style="color:#e11d48; font-weight:bold;">(${divisor} × ${q}) + ${rem} = ${total}</span> (나누어지는 수와 딱 일치!) 🎉</div>
+      `;
+
+      if (shouldSpeak && typeof fairySpeak === 'function') {
+        fairySpeak(`${total} 나누기 ${divisor}는 몫이 ${q}이고, 나머지가 ${rem}입니다!`);
+      }
+    }
+
+    function speakCurrentRemainder() {
+      renderRemainderVisuals(true);
+    }
+
+    // 3. 🎲 실전 랜덤 나눗셈 몫과 나머지 도전
+    let currentRandomDivProblem = { dividend: 27, divisor: 4, quotient: 6, remainder: 3 };
+
+    function generateRandomDivisionQuestion(speak = false) {
+      const divisors = [3, 4, 5, 6, 7, 8];
+      const divisor = divisors[Math.floor(Math.random() * divisors.length)];
+      const quotient = Math.floor(Math.random() * 7) + 2; // 2 ~ 8
+      const remainder = Math.floor(Math.random() * divisor); // 0 ~ divisor-1
+      const dividend = divisor * quotient + remainder;
+
+      currentRandomDivProblem = { dividend, divisor, quotient, remainder };
+
+      document.getElementById('randomDivQuestionText').textContent = `${dividend} ÷ ${divisor} = ?`;
+
+      const correctStr = remainder === 0 ? `몫: ${quotient} (딱 떨어짐)` : `몫: ${quotient}, 나머지: ${remainder}`;
+      const choicesSet = new Set([correctStr]);
+
+      while (choicesSet.size < 4) {
+        const fakeQ = Math.max(1, quotient + (Math.floor(Math.random() * 5) - 2));
+        const fakeRem = Math.floor(Math.random() * divisor);
+        const fakeStr = fakeRem === 0 ? `몫: ${fakeQ} (딱 떨어짐)` : `몫: ${fakeQ}, 나머지: ${fakeRem}`;
+        choicesSet.add(fakeStr);
+      }
+
+      const choicesArr = Array.from(choicesSet).sort(() => Math.random() - 0.5);
+      const cBox = document.getElementById('randomDivChoices');
+      cBox.innerHTML = '';
+      document.getElementById('randomDivFeedback').innerHTML = '';
+
+      choicesArr.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'candy-num-btn';
+        btn.style.fontSize = '1.1rem';
+        btn.style.width = '100%';
+        btn.textContent = c;
+        btn.onclick = () => checkRandomDivAnswer(c, correctStr);
+        cBox.appendChild(btn);
+      });
+
+      if (speak && typeof fairySpeak === 'function') {
+        fairySpeak('새로운 나눗셈 문제입니다! 몫과 나머지를 정확히 맞춰보세요!');
+      }
+    }
+
+    function checkRandomDivAnswer(selected, correct) {
+      const fb = document.getElementById('randomDivFeedback');
+      const p = currentRandomDivProblem;
+      if (selected === correct) {
+        const checkStr = `(${p.divisor} × ${p.quotient}) + ${p.remainder} = ${p.dividend}`;
+        fb.innerHTML = `<span style="color:#10b981;">🎉 대단해요! [${correct}] 검산: ${checkStr}</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`정답이에요! 몫은 ${p.quotient}, 나머지는 ${p.remainder}입니다!`);
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 몫 ${p.quotient}, 나머지 ${p.remainder}입니다.`);
+      }
+    }
+
+    // 4. 퀴즈
+    const QUIZ_LIST = [
+      { q: "18 ÷ 3의 몫은 얼마일까요?", ans: "6", choices: ["6", "5", "7", "4"] },
+      { q: "20 ÷ 4 = 5 를 곱셈식으로 바르게 나타낸 것은?", ans: "4 × 5 = 20", choices: ["4 × 5 = 20", "20 × 4 = 80", "5 + 4 = 9", "20 - 4 = 16"] },
+      { q: "19 ÷ 5 의 몫과 나머지는?", ans: "몫: 3, 나머지: 4", choices: ["몫: 3, 나머지: 4", "몫: 4, 나머지: 1", "몫: 3, 나머지: 5", "몫: 2, 나머지: 9"] },
+      { q: "어떤 수를 6으로 나눌 때, 나올 수 없는 나머지는?", ans: "6", choices: ["6", "0", "3", "5"] },
+      { q: "(나누는 수 7 × 몫 4) + 나머지 3 = ? (나누어지는 수는?)", ans: "31", choices: ["31", "28", "30", "35"] },
+      { q: "48 ÷ 2 의 몫은 얼마일까요?", ans: "24", choices: ["24", "22", "42", "14"] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.2rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 나눗셈 마스터 박사님이시네요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      renderCookieVisuals(false); // 초기 로딩 시 무발화
+      renderRemainderVisuals(false); // 초기 로딩 시 무발화
+      generateRandomDivisionQuestion(false); // 초기 랜덤 문제 생성 (무발화)
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "나눗셈");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
