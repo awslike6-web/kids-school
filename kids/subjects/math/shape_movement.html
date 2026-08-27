@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🔄 4학년 평면도형의 이동 (밀기 · 뒤집기 · 돌리기 마법) ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 도형 이동 캔버스 격자판 */
+    .shape-stage-box {
+      background: #ffffff;
+      border: 3px solid #6366f1;
+      border-radius: 24px;
+      padding: 20px 14px;
+      margin: 15px auto;
+      max-width: 580px;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+      text-align: center;
+    }
+    .grid-stage-wrap {
+      width: 100%;
+      height: 240px;
+      background: #f8fafc;
+      background-image: 
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 24px 24px;
+      border: 2px solid #cbd5e1;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 조작 대상 도형 */
+    .transform-shape {
+      width: 100px;
+      height: 100px;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* 컨트롤 버튼 바 */
+    .ctrl-button-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    .ctrl-btn {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      padding: 8px 16px;
+      border-radius: 18px;
+      border: 2px solid #6366f1;
+      background: #eef2ff;
+      color: #4338ca;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ctrl-btn:hover, .ctrl-btn.active {
+      background: #6366f1;
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    /* 무늬 꾸미기 타일 그리드 */
+    .pattern-grid-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      max-width: 320px;
+      margin: 15px auto;
+      background: #e2e8f0;
+      padding: 10px;
+      border-radius: 16px;
+    }
+    .pattern-tile {
+      aspect-ratio: 1 / 1;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      border: 1px dashed #94a3b8;
+    }
+
+    /* 단위 환산 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #6366f1;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <header class="math-header-hero">
+      <h1 class="hero-title">🔄 4학년 평면도형의 이동 ✨</h1>
+      <p class="hero-subtitle">도형을 밀고, 뒤집고, 돌리며 변화하는 모양과 방향의 비밀을 밝혀요!</p>
+    </header>
+
+    <!-- 1. ✋ 섹션 1: 도형 밀기 (Translation) -->
+    <section class="math-section-card" id="section-slide">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#0284c7; color:#fff;">섹션 1 : 도형 밀기</span>
+          <h2 class="section-title">✋ 방향대로 스르륵 도형 밀기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">도형을 위, 아래, 왼쪽, 오른쪽으로 밀었을 때의 변화를 관찰하세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('도형을 밀면 모양과 크기는 그대로이고 위치만 바뀝니다!')">🔊</button>
+      </div>
+
+      <div class="shape-stage-box">
+        <div class="grid-stage-wrap">
+          <div class="transform-shape" id="slideShape">
+            <!-- 깃발/화살표 비대칭 도형 -->
+            <svg viewBox="0 0 100 100" width="90" height="90">
+              <polygon points="20,10 80,45 20,45" fill="#f43f5e"/>
+              <rect x="15" y="10" width="8" height="80" fill="#475569" rx="4"/>
+              <text x="30" y="38" font-family="Jua" font-size="16" fill="#fff">깃발</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ctrl-button-bar">
+          <button class="ctrl-btn" onclick="slideShape('up')">⬆️ 위로 밀기</button>
+          <button class="ctrl-btn" onclick="slideShape('down')">⬇️ 아래로 밀기</button>
+          <button class="ctrl-btn" onclick="slideShape('left')">⬅️ 왼쪽으로 밀기</button>
+          <button class="ctrl-btn" onclick="slideShape('right')">➡️ 오른쪽으로 밀기</button>
+          <button class="ctrl-btn" style="background:#fee2e2; border-color:#f43f5e; color:#e11d48;" onclick="resetSlide()">🔄 제자리로</button>
+        </div>
+
+        <div class="unit-exchange-card" id="slideDescBox">
+          <div>💡 <strong>도형 밀기의 핵심 비밀:</strong></div>
+          <div>• 도형을 어느 방향으로 밀어도 ➔ <strong>모양과 크기는 변하지 않아요!</strong></div>
+          <div>• 오직 도형이 놓인 <strong>위치</strong>만 이동합니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 🪞 섹션 2: 도형 뒤집기 (Reflection) -->
+    <section class="math-section-card" id="section-flip">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid" style="background:#ec4899; color:#fff;">섹션 2 : 도형 뒤집기</span>
+          <h2 class="section-title">🪞 거울처럼 펄럭 도형 뒤집기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">오른쪽/왼쪽, 위/아래로 뒤집었을 때 무엇이 바뀌는지 확인하세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('오른쪽이나 왼쪽으로 뒤집으면 좌우가 바뀌고, 위나 아래로 뒤집으면 위아래가 바뀝니다!')">🔊</button>
+      </div>
+
+      <div class="shape-stage-box" style="border-color:#ec4899;">
+        <div class="grid-stage-wrap">
+          <div class="transform-shape" id="flipShape">
+            <!-- 물고기 모양 도형 (명확한 방향성) -->
+            <svg viewBox="0 0 100 100" width="95" height="95">
+              <ellipse cx="45" cy="50" rx="35" ry="22" fill="#ec4899"/>
+              <polygon points="75,50 95,30 95,70" fill="#f472b6"/>
+              <circle cx="28" cy="44" r="5" fill="#fff"/>
+              <circle cx="27" cy="44" r="2.5" fill="#0f172a"/>
+              <text x="45" y="55" font-family="Jua" font-size="14" fill="#fff" text-anchor="middle">헤엄 🐟</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ctrl-button-bar">
+          <button class="ctrl-btn" onclick="flipShape('lr')">↔️ 오른쪽/왼쪽 뒤집기 (좌우 반전)</button>
+          <button class="ctrl-btn" onclick="flipShape('tb')">↕️ 위/아래 뒤집기 (상하 반전)</button>
+          <button class="ctrl-btn" style="background:#fee2e2; border-color:#f43f5e; color:#e11d48;" onclick="resetFlip()">🔄 처음 모양</button>
+        </div>
+
+        <div class="unit-exchange-card" id="flipDescBox" style="border-color:#ec4899;">
+          <div>💡 <strong>도형 뒤집기의 핵심 비밀:</strong></div>
+          <div>• <strong>오른쪽이나 왼쪽으로 뒤집으면</strong> ➔ <strong style="color:#e11d48;">왼쪽과 오른쪽</strong>이 서로 바뀝니다! (거울에 비친 모습)</div>
+          <div>• <strong>위쪽이나 아래쪽으로 뒤집으면</strong> ➔ <strong style="color:#e11d48;">위쪽과 아래쪽</strong>이 서로 바뀝니다! (물에 비친 모습)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 🔄 섹션 3: 도형 돌리기 (Rotation) -->
+    <section class="math-section-card" id="section-rotate">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs" style="background:#8b5cf6; color:#fff;">섹션 3 : 도형 돌리기</span>
+          <h2 class="section-title">🔄 시계 방향으로 뱅글 돌리기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">90°, 180°, 270°, 360° 돌렸을 때 도형의 방향을 관찰하세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('시계 방향으로 90도, 180도, 270도, 360도 돌릴 때마다 방향이 회전합니다!')">🔊</button>
+      </div>
+
+      <div class="shape-stage-box" style="border-color:#8b5cf6;">
+        <div class="grid-stage-wrap">
+          <div class="transform-shape" id="rotateShape">
+            <!-- 'ㄱ' 자 모양 블록 -->
+            <svg viewBox="0 0 100 100" width="95" height="95">
+              <polygon points="15,15 85,15 85,45 45,45 45,85 15,85" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2"/>
+              <text x="30" y="35" font-family="Jua" font-size="16" fill="#fff">TOP</text>
+              <circle cx="70" cy="30" r="6" fill="#fde047"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="ctrl-button-bar">
+          <button class="ctrl-btn active" onclick="rotateShape(0, this)">0° (처음)</button>
+          <button class="ctrl-btn" onclick="rotateShape(90, this)">↻ 90° (1/4 바퀴)</button>
+          <button class="ctrl-btn" onclick="rotateShape(180, this)">↻ 180° (반 바퀴)</button>
+          <button class="ctrl-btn" onclick="rotateShape(270, this)">↻ 270° (3/4 바퀴)</button>
+          <button class="ctrl-btn" onclick="rotateShape(360, this)">↻ 360° (한 바퀴 제자리)</button>
+        </div>
+
+        <div class="unit-exchange-card" id="rotateDescBox" style="border-color:#8b5cf6;">
+          <div>💡 <strong>도형 돌리기의 핵심 비밀:</strong></div>
+          <div>• <strong>90° 돌리기</strong> : 오른쪽으로 1/4 바퀴 회전해요.</div>
+          <div>• <strong>180° 돌리기</strong> : <strong style="color:#8b5cf6;">위아래와 좌우가 모두 반대</strong>로 바뀝니다!</div>
+          <div>• <strong>360° 돌리기</strong> : 한 바퀴를 완전히 돌아 <strong>처음 모양과 똑같아져요!</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 🎨 섹션 4: 밀기·뒤집기·돌리기로 타일 무늬 꾸미기 -->
+    <section class="math-section-card" id="section-pattern">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#10b981; color:#fff;">섹션 4 : 아름다운 무늬 꾸미기</span>
+          <h2 class="section-title">🎨 타일 무늬 꾸미기 놀이터</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">타일을 클릭하여 회전/뒤집기로 멋진 벽지 무늬를 완성해 보세요!</p>
+        </div>
+        <button class="divide-btn" style="background:#10b981; font-size:1.05rem;" onclick="resetPatternTiles()">🔄 무늬 초기화</button>
+      </div>
+
+      <div style="text-align:center;">
+        <div class="pattern-grid-box" id="patternGrid"></div>
+        <div style="font-family:'Jua'; font-size:1.2rem; color:#047857;">👆 각 타일을 누를 때마다 90°씩 뱅글 돌아갑니다!</div>
+      </div>
+    </section>
+
+    <!-- 5. 🎯 실전 도형 이동 번개 퀴즈 -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#f43f5e; color:#fff;">섹션 5 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 4학년 도형의 이동 번개 퀴즈</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">도형을 밀거나 뒤집거나 돌렸을 때의 모양을 골라주세요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#1e293b; margin-bottom:20px;" id="quiz-question">도형을 오른쪽으로 밀었을 때 변하지 않는 것은?</div>
+        
+        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+
+        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
+        <button class="divide-btn" style="background:#f43f5e; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    // 1. 도형 밀기
+    let slideX = 0, slideY = 0;
+
+    function slideShape(dir) {
+      const step = 45;
+      if (dir === 'up') slideY = Math.max(-60, slideY - step);
+      if (dir === 'down') slideY = Math.min(60, slideY + step);
+      if (dir === 'left') slideX = Math.max(-120, slideX - step);
+      if (dir === 'right') slideX = Math.min(120, slideX + step);
+
+      const el = document.getElementById('slideShape');
+      el.style.transform = `translate(${slideX}px, ${slideY}px)`;
+
+      const korDir = dir === 'up' ? '위쪽' : (dir === 'down' ? '아래쪽' : (dir === 'left' ? '왼쪽' : '오른쪽'));
+      if (typeof fairySpeak === 'function') fairySpeak(`도형을 ${korDir}으로 밀었습니다. 모양은 그대로 유지됩니다!`);
+    }
+
+    function resetSlide() {
+      slideX = 0; slideY = 0;
+      document.getElementById('slideShape').style.transform = `translate(0px, 0px)`;
+    }
+
+    // 2. 도형 뒤집기
+    let flipScaleX = 1, flipScaleY = 1;
+
+    function flipShape(type) {
+      if (type === 'lr') flipScaleX *= -1;
+      if (type === 'tb') flipScaleY *= -1;
+
+      const el = document.getElementById('flipShape');
+      el.style.transform = `scale(${flipScaleX}, ${flipScaleY})`;
+
+      const desc = document.getElementById('flipDescBox');
+      if (type === 'lr') {
+        desc.innerHTML = `
+          <div>💡 <strong>오른쪽/왼쪽 뒤집기 결과:</strong></div>
+          <div>• 물고기 머리가 <strong>${flipScaleX === -1 ? '오른쪽' : '왼쪽'}</strong>을 향하도록 좌우가 반전되었습니다!</div>
+        `;
+        if (typeof fairySpeak === 'function') fairySpeak('오른쪽이나 왼쪽으로 뒤집으면 좌우 방향이 반대로 바뀝니다!');
+      } else {
+        desc.innerHTML = `
+          <div>💡 <strong>위/아래 뒤집기 결과:</strong></div>
+          <div>• 물고기 배와 등이 <strong>${flipScaleY === -1 ? '거꾸로' : '똑바로'}</strong> 위아래가 반전되었습니다!</div>
+        `;
+        if (typeof fairySpeak === 'function') fairySpeak('위쪽이나 아래쪽으로 뒤집으면 위아래가 반대로 바뀝니다!');
+      }
+    }
+
+    function resetFlip() {
+      flipScaleX = 1; flipScaleY = 1;
+      document.getElementById('flipShape').style.transform = `scale(1, 1)`;
+    }
+
+    // 3. 도형 돌리기
+    function rotateShape(deg, btn) {
+      document.querySelectorAll('#section-rotate .ctrl-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const el = document.getElementById('rotateShape');
+      el.style.transform = `rotate(${deg}deg)`;
+
+      const desc = document.getElementById('rotateDescBox');
+      if (deg === 90) {
+        desc.innerHTML = `<div>💡 <strong>시계 방향 90° 회전:</strong> 오른쪽으로 1/4 바퀴 회전했습니다!</div>`;
+        if (typeof fairySpeak === 'function') fairySpeak('시계 방향으로 90도 회전했습니다.');
+      } else if (deg === 180) {
+        desc.innerHTML = `<div>💡 <strong>시계 방향 180° 회전:</strong> 반 바퀴를 돌아 위아래와 좌우가 모두 반대로 뒤집혔습니다!</div>`;
+        if (typeof fairySpeak === 'function') fairySpeak('180도 돌리면 위아래와 좌우가 모두 반대로 바뀝니다.');
+      } else if (deg === 270) {
+        desc.innerHTML = `<div>💡 <strong>시계 방향 270° 회전:</strong> 3/4 바퀴 회전하여 반시계 90도 회전과 같은 모양이 되었습니다!</div>`;
+        if (typeof fairySpeak === 'function') fairySpeak('시계 방향 270도는 반시계 방향 90도와 같습니다.');
+      } else if (deg === 360) {
+        desc.innerHTML = `<div>💡 <strong>시계 방향 360° 회전:</strong> 한 바퀴를 완전히 돌아 처음 원래 모양과 완벽히 일치합니다!</div>`;
+        if (typeof fairySpeak === 'function') fairySpeak('360도를 돌리면 원래 자리로 돌아옵니다.');
+      } else {
+        desc.innerHTML = `<div>💡 <strong>0° (처음 상태):</strong> 기본 원래 모양입니다.</div>`;
+      }
+    }
+
+    // 4. 타일 무늬 꾸미기
+    function initPatternTiles() {
+      const pGrid = document.getElementById('patternGrid');
+      pGrid.innerHTML = '';
+      for (let i = 0; i < 16; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'pattern-tile';
+        tile.dataset.rot = '0';
+        tile.innerHTML = `
+          <svg viewBox="0 0 50 50" width="36" height="36">
+            <polygon points="5,5 45,5 5,45" fill="#10b981"/>
+            <circle cx="15" cy="15" r="4" fill="#fde047"/>
+          </svg>
+        `;
+        tile.onclick = function() {
+          let r = (parseInt(this.dataset.rot) + 90) % 360;
+          this.dataset.rot = r;
+          this.querySelector('svg').style.transform = `rotate(${r}deg)`;
+        };
+        pGrid.appendChild(tile);
+      }
+    }
+
+    function resetPatternTiles() {
+      initPatternTiles();
+      if (typeof fairySpeak === 'function') fairySpeak('타일 무늬를 초기화했습니다. 마음껏 회전시켜 보세요!');
+    }
+
+    // 5. 퀴즈
+    const QUIZ_LIST = [
+      { q: "도형을 오른쪽으로 밀었을 때 변하지 않는 것은?", ans: "모양과 크기", choices: ["모양과 크기", "위치", "방향", "넓이의 2배"] },
+      { q: "도형을 오른쪽으로 뒤집으면 무엇이 바뀔까요?", ans: "왼쪽과 오른쪽", choices: ["왼쪽과 오른쪽", "위쪽과 아래쪽", "크기", "색깔"] },
+      { q: "도형을 시계 방향으로 180° 돌리면 어떤 변화가 생길까요?", ans: "위아래와 좌우가 모두 반대", choices: ["위아래와 좌우가 모두 반대", "변화 없음", "크기가 2배 커짐", "위치만 이동"] },
+      { q: "시계 방향으로 360° 돌렸을 때의 모양은?", ans: "처음 모양과 같다", choices: ["처음 모양과 같다", "거꾸로 뒤집힌다", "90도 돌아간다", "모양이 작아진다"] },
+      { q: "위쪽으로 뒤집었을 때 바뀌는 방향은?", ans: "위쪽과 아래쪽", choices: ["위쪽과 아래쪽", "왼쪽과 오른쪽", "도형의 각도", "변의 길이"] }
+    ];
+    let qIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
+      document.getElementById('quiz-question').textContent = q.q;
+      const cBox = document.getElementById('quiz-choices');
+      cBox.innerHTML = '';
+      document.getElementById('quiz-feedback').textContent = '';
+
+      q.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'divide-btn';
+        btn.style.fontSize = '1.2rem';
+        btn.textContent = c;
+        btn.onclick = () => checkAnswer(c, q.ans);
+        cBox.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      const fb = document.getElementById('quiz-feedback');
+      if (selected === correct) {
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 공간지각 마스터 박사님이시네요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      }
+    }
+
+    function nextQuiz() {
+      qIdx++;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html#concepts';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      initPatternTiles();
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "도형의 이동");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
