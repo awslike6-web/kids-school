@@ -9,6 +9,40 @@
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/math_factors.css">
   <style>
+    /* 🌟 교과서 정품 수직 분수 렌더링 스타일 */
+    .v-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 1.05;
+      margin: 0 4px;
+      font-family: 'Jua', sans-serif;
+      color: inherit;
+    }
+    .v-num {
+      display: block;
+      border-bottom: 2px solid currentColor;
+      padding: 0 3px 1px;
+      font-size: 0.92em;
+    }
+    .v-den {
+      display: block;
+      padding: 1px 3px 0;
+      font-size: 0.92em;
+    }
+    .v-mixed {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      font-family: 'Jua', sans-serif;
+      gap: 3px;
+    }
+    .v-whole {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
     /* 피자 쪼개기 캔버스 */
     .fraction-pizza-box {
       background: #ffffff;
@@ -33,22 +67,23 @@
       height: auto;
     }
 
-    /* 분수 표기 뱃지 */
+    /* 분수 표기 뱃지 (거대 하이라이트) */
     .fraction-math-badge {
       display: inline-flex;
       flex-direction: column;
       align-items: center;
       vertical-align: middle;
       font-family: 'Jua', sans-serif;
-      font-size: 1.8rem;
+      font-size: 2rem;
       color: #e11d48;
       background: #fff1f2;
-      padding: 6px 14px;
-      border-radius: 14px;
+      padding: 6px 18px;
+      border-radius: 16px;
       border: 2px solid #fecdd3;
-      margin: 0 4px;
+      margin: 0 6px;
+      line-height: 1.1;
     }
-    .fraction-math-badge .num { border-bottom: 2px solid #e11d48; width: 100%; text-align: center; padding-bottom: 2px; }
+    .fraction-math-badge .num { border-bottom: 2.5px solid #e11d48; width: 100%; text-align: center; padding-bottom: 2px; }
     .fraction-math-badge .den { width: 100%; text-align: center; padding-top: 2px; }
 
     /* 소수 10칸 모눈 수직선 뷰 */
@@ -113,7 +148,7 @@
     }
     .type-icon { font-size: 2.2rem; margin-bottom: 4px; }
     .type-title { font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #1e293b; font-weight: bold; }
-    .type-tag { font-size: 0.88rem; color: #db2777; font-weight: 700; }
+    .type-tag { font-size: 0.95rem; color: #db2777; font-weight: 700; display: flex; justify-content: center; align-items: center; }
   </style>
 </head>
 <body>
@@ -148,13 +183,13 @@
         <button class="speaker-btn" onclick="speakCurrentPizza()">🔊</button>
       </div>
 
-      <!-- 등분 선택 버튼 -->
+      <!-- 등분 선택 버튼 (정품 수직 분수 적용) -->
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:12px;" id="denom-buttons">
-        <button class="candy-num-btn" onclick="setPizzaDenom(2, this)">2등분 (1/2)</button>
-        <button class="candy-num-btn" onclick="setPizzaDenom(3, this)">3등분 (1/3)</button>
-        <button class="candy-num-btn active" onclick="setPizzaDenom(4, this)">4등분 (1/4)</button>
-        <button class="candy-num-btn" onclick="setPizzaDenom(6, this)">6등분 (1/6)</button>
-        <button class="candy-num-btn" onclick="setPizzaDenom(8, this)">8등분 (1/8)</button>
+        <button class="candy-num-btn" onclick="setPizzaDenom(2, this)">2등분 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">2</span></span>)</button>
+        <button class="candy-num-btn" onclick="setPizzaDenom(3, this)">3등분 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">3</span></span>)</button>
+        <button class="candy-num-btn active" onclick="setPizzaDenom(4, this)">4등분 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">4</span></span>)</button>
+        <button class="candy-num-btn" onclick="setPizzaDenom(6, this)">6등분 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">6</span></span>)</button>
+        <button class="candy-num-btn" onclick="setPizzaDenom(8, this)">8등분 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">8</span></span>)</button>
       </div>
 
       <div class="fraction-pizza-box">
@@ -196,22 +231,22 @@
         <div class="type-btn-card active" onclick="selectFractionType('unit', this)">
           <div class="type-icon">1️⃣</div>
           <div class="type-title">단위분수</div>
-          <div class="type-tag">분자가 1 (1/4)</div>
+          <div class="type-tag">분자가 1 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">4</span></span>)</div>
         </div>
         <div class="type-btn-card" onclick="selectFractionType('proper', this)">
           <div class="type-icon">🍎</div>
           <div class="type-title">진분수</div>
-          <div class="type-tag">분자 &lt; 분모 (3/4)</div>
+          <div class="type-tag">분자 &lt; 분모 (<span class="v-frac"><span class="v-num">3</span><span class="v-den">4</span></span>)</div>
         </div>
         <div class="type-btn-card" onclick="selectFractionType('improper', this)">
           <div class="type-icon">🎩</div>
           <div class="type-title">가분수</div>
-          <div class="type-tag">분자 &ge; 분모 (5/4)</div>
+          <div class="type-tag">분자 &ge; 분모 (<span class="v-frac"><span class="v-num">5</span><span class="v-den">4</span></span>)</div>
         </div>
         <div class="type-btn-card" onclick="selectFractionType('mixed', this)">
           <div class="type-icon">👑</div>
           <div class="type-title">대분수</div>
-          <div class="type-tag">자연수 + 진분수 (1과 1/4)</div>
+          <div class="type-tag">자연수+진분수 (<span class="v-mixed"><span class="v-whole">1</span><span class="v-frac"><span class="v-num">1</span><span class="v-den">4</span></span></span>)</div>
         </div>
       </div>
 
@@ -220,8 +255,8 @@
           1️⃣ 단위분수 : 분자가 1인 분수
         </div>
         <div class="unit-exchange-card" style="border-color:#f472b6; background:#fff;" id="type-desc-display">
-          <div>• 예시: <strong style="color:#be185d;">1/2, 1/3, 1/4, 1/8</strong></div>
-          <div>• 💡 <strong>단위분수 크기 비밀:</strong> 분모가 <strong>작을수록</strong> 조각이 더 커요! (1/2 &gt; 1/4)</div>
+          <div>• 예시: <span class="v-frac"><span class="v-num">1</span><span class="v-den">2</span></span>, <span class="v-frac"><span class="v-num">1</span><span class="v-den">3</span></span>, <span class="v-frac"><span class="v-num">1</span><span class="v-den">4</span></span>, <span class="v-frac"><span class="v-num">1</span><span class="v-den">8</span></span></div>
+          <div style="margin-top:6px;">• 💡 <strong>단위분수 크기 비밀:</strong> 분모가 <strong>작을수록</strong> 조각이 더 커요! (<span class="v-frac"><span class="v-num">1</span><span class="v-den">2</span></span> &gt; <span class="v-frac"><span class="v-num">1</span><span class="v-den">4</span></span>)</div>
         </div>
       </div>
     </section>
@@ -231,7 +266,7 @@
       <div class="section-header-wrap">
         <div>
           <span class="section-badge badge-pairs" style="background:#0284c7; color:#fff;">섹션 3 : 소수의 첫걸음 (0.1)</span>
-          <h2 class="section-title">📏 1/10은 0.1! 소수 수직선 탐험</h2>
+          <h2 class="section-title">📏 <span class="v-frac"><span class="v-num">1</span><span class="v-den">10</span></span>은 0.1! 소수 수직선 탐험</h2>
           <p class="section-desc" style="color:#334155; font-weight:600;">1을 10칸으로 똑같이 나눈 한 칸을 소수 '0.1 (영 점 일)'이라고 해요!</p>
         </div>
         <button class="speaker-btn" onclick="speakCurrentDecimal()">🔊</button>
@@ -239,10 +274,10 @@
 
       <!-- 소수 선택 버튼 -->
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="decimal-preset-buttons">
-        <button class="candy-num-btn" onclick="selectDecimal(1, this)">0.1 (1/10)</button>
-        <button class="candy-num-btn" onclick="selectDecimal(3, this)">0.3 (3/10)</button>
-        <button class="candy-num-btn active" onclick="selectDecimal(5, this)">0.5 (5/10)</button>
-        <button class="candy-num-btn" onclick="selectDecimal(8, this)">0.8 (8/10)</button>
+        <button class="candy-num-btn" onclick="selectDecimal(1, this)">0.1 (<span class="v-frac"><span class="v-num">1</span><span class="v-den">10</span></span>)</button>
+        <button class="candy-num-btn" onclick="selectDecimal(3, this)">0.3 (<span class="v-frac"><span class="v-num">3</span><span class="v-den">10</span></span>)</button>
+        <button class="candy-num-btn active" onclick="selectDecimal(5, this)">0.5 (<span class="v-frac"><span class="v-num">5</span><span class="v-den">10</span></span>)</button>
+        <button class="candy-num-btn" onclick="selectDecimal(8, this)">0.8 (<span class="v-frac"><span class="v-num">8</span><span class="v-den">10</span></span>)</button>
         <button class="candy-num-btn" onclick="selectDecimal(10, this)">1.0 (딱 1!)</button>
         <button class="candy-num-btn" onclick="selectDecimal(14, this)">1.4 (1과 0.4)</button>
       </div>
@@ -251,21 +286,45 @@
         <div class="decimal-svg-wrap" id="decimal-svg-wrap"></div>
         
         <div style="font-family:'Jua'; font-size:2rem; color:#0284c7; margin-top:12px;" id="decimal-math-display">
-          5칸 색칠 = <span style="color:#e11d48;">0.5</span> (5/10)
+          5칸 색칠 = <span style="color:#e11d48;">0.5</span> (<span class="v-frac"><span class="v-num">5</span><span class="v-den">10</span></span>)
         </div>
 
         <div class="unit-exchange-card" id="decimal-desc-display">
           <div>💡 <strong>소수(Decimal)의 탄생:</strong></div>
-          <div>• 분수 <strong>5/10</strong>을 소수로 쓰면 점(.)을 찍어 <strong style="color:#e11d48; font-size:1.4rem;">0.5</strong> 라고 쓰고, <strong>'영 점 오'</strong>라고 읽어요!</div>
+          <div>• 분수 <span class="v-frac"><span class="v-num">5</span><span class="v-den">10</span></span>을 소수로 쓰면 점(.)을 찍어 <strong style="color:#e11d48; font-size:1.4rem;">0.5</strong> 라고 쓰고, <strong>'영 점 오'</strong>라고 읽어요!</div>
         </div>
       </div>
     </section>
 
-    <!-- 4. 🎯 실전 분수와 소수 번개 퀴즈 -->
+    <!-- 4. 🎲 실전 랜덤 소수 막대 눈금 측정기 (새로 추가된 실전 훈련기!) -->
+    <section class="math-section-card" id="section-random-decimal">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid" style="background:#0284c7; color:#fff;">섹션 4 : 실전 소수 눈금 도전</span>
+          <h2 class="section-title">🎲 수직선 위 랜덤 소수 막대 길이 맞추기</h2>
+          <p class="section-desc" style="color:#334155; font-weight:600;">수직선 위에 놓인 막대의 칸 수를 세어 소수와 분수를 맞춰보세요!</p>
+        </div>
+        <button class="divide-btn" style="background:#0284c7; font-size:1.05rem;" onclick="generateRandomDecimalBar(true)">🎲 새로운 소수 막대 소환</button>
+      </div>
+
+      <div class="decimal-bar-box">
+        <div class="decimal-svg-wrap" id="random-decimal-svg-wrap"></div>
+        
+        <div style="font-family:'Jua',sans-serif; font-size:1.5rem; color:#1e293b; margin:15px 0 10px;" id="random-decimal-question">
+          이 막대의 길이는 소수와 분수로 얼마일까요?
+        </div>
+
+        <div id="random-decimal-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:460px; margin:0 auto 12px;"></div>
+
+        <div id="random-decimal-feedback" style="font-family:'Jua'; font-size:1.2rem; min-height:30px;"></div>
+      </div>
+    </section>
+
+    <!-- 5. 🎯 실전 분수와 소수 번개 퀴즈 -->
     <section class="math-section-card" id="section-quiz">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 5 : 실전 개념 퀴즈</span>
           <h2 class="section-title">🎯 3학년 분수 & 소수 번개 퀴즈</h2>
           <p class="section-desc" style="color:#334155; font-weight:600;">알맞은 분수나 소수 값을 골라주세요!</p>
         </div>
@@ -292,6 +351,15 @@
   <script src="../../core/fairy-chatbot.js"></script>
 
   <script>
+    // 🌟 교과서 정품 수직 분수 HTML 생성 헬퍼
+    function formatVFrac(num, den) {
+      return `<span class="v-frac"><span class="v-num">${num}</span><span class="v-den">${den}</span></span>`;
+    }
+
+    function formatVMixed(whole, num, den) {
+      return `<span class="v-mixed"><span class="v-whole">${whole}</span><span class="v-frac"><span class="v-num">${num}</span><span class="v-den">${den}</span></span></span>`;
+    }
+
     // 1. 피자 분수 시뮬레이터
     let currentDenom = 4;
     let currentNum = 3;
@@ -369,22 +437,22 @@
     const FRACTION_TYPES = {
       unit: {
         title: '1️⃣ 단위분수 : 분자가 1인 분수',
-        desc: '<div>• 예시: <strong style="color:#be185d;">1/2, 1/3, 1/4, 1/8</strong></div><div>• 💡 <strong>단위분수 크기 비밀:</strong> 분모가 <strong>작을수록</strong> 조각이 더 커요! (1/2 &gt; 1/4)</div>',
+        desc: `<div>• 예시: ${formatVFrac(1, 2)}, ${formatVFrac(1, 3)}, ${formatVFrac(1, 4)}, ${formatVFrac(1, 8)}</div><div style="margin-top:6px;">• 💡 <strong>단위분수 크기 비밀:</strong> 분모가 <strong>작을수록</strong> 조각이 더 커요! (${formatVFrac(1, 2)} &gt; ${formatVFrac(1, 4)})</div>`,
         voice: '단위분수는 분자가 1인 분수이며, 분모가 작을수록 크기가 더 큽니다!'
       },
       proper: {
         title: '🍎 진분수 : 진짜 분수 (분자가 분모보다 작음)',
-        desc: '<div>• 예시: <strong style="color:#be185d;">1/4, 2/5, 3/7, 5/8</strong></div><div>• 💡 1보다 작은 가장 자연스러운 분수 형태예요! (0보다 크고 1보다 작음)</div>',
+        desc: `<div>• 예시: ${formatVFrac(1, 4)}, ${formatVFrac(2, 5)}, ${formatVFrac(3, 7)}, ${formatVFrac(5, 8)}</div><div style="margin-top:6px;">• 💡 1보다 작은 가장 자연스러운 분수 형태예요! (0보다 크고 1보다 작음)</div>`,
         voice: '진분수는 분자가 분모보다 작은 분수로, 1보다 작습니다!'
       },
       improper: {
         title: '🎩 가분수 : 분자가 분모와 같거나 큰 분수',
-        desc: '<div>• 예시: <strong style="color:#be185d;">4/4, 5/4, 7/3, 8/5</strong></div><div>• 💡 분자가 분모보다 머리가 큰 형태이며, 크기가 <strong>1 이상</strong>이에요!</div>',
+        desc: `<div>• 예시: ${formatVFrac(4, 4)}, ${formatVFrac(5, 4)}, ${formatVFrac(7, 3)}, ${formatVFrac(8, 5)}</div><div style="margin-top:6px;">• 💡 분자가 분모보다 머리가 큰 형태이며, 크기가 <strong>1 이상</strong>이에요!</div>`,
         voice: '가분수는 분자가 분모와 같거나 큰 분수입니다!'
       },
       mixed: {
         title: '👑 대분수 : 자연수와 진분수가 합체된 분수',
-        desc: '<div>• 예시: <strong style="color:#be185d;">1과 1/4 (1¼ = 5/4), 2와 1/3</strong></div><div>• 💡 온전한 자연수 덩어리와 남은 진분수를 함께 적은 모양이에요!</div>',
+        desc: `<div>• 예시: ${formatVMixed(1, 1, 4)} (1과 4분의 1 = ${formatVFrac(5, 4)}), ${formatVMixed(2, 1, 3)}</div><div style="margin-top:6px;">• 💡 온전한 자연수 덩어리와 남은 진분수를 함께 적은 모양이에요!</div>`,
         voice: '대분수는 자연수와 진분수가 합쳐진 분수입니다!'
       }
     };
@@ -448,17 +516,17 @@
         </svg>
       `;
 
-      let fracStr = tenths <= 10 ? `${tenths}/10` : `1과 ${tenths%10}/10 (${tenths}/10)`;
+      let fracHtml = tenths <= 10 ? formatVFrac(tenths, 10) : `${formatVMixed(1, tenths%10, 10)} (${formatVFrac(tenths, 10)})`;
       document.getElementById('decimal-math-display').innerHTML = `
-        ${tenths}칸 = <span style="color:#e11d48;">${decVal}</span> (분수로 ${fracStr})
+        ${tenths}칸 = <span style="color:#e11d48;">${decVal}</span> (분수로 ${fracHtml})
       `;
       document.getElementById('decimal-desc-display').innerHTML = `
         <div>💡 <strong>소수(Decimal)와 분수의 짝꿍:</strong></div>
-        <div>• <strong>${tenths}칸</strong>은 분수로 <strong>${fracStr}</strong>이고, 소수로 쓰면 <strong style="color:#e11d48; font-size:1.4rem;">${decVal}</strong> ('${decVal}') 라고 읽어요!</div>
+        <div>• <strong>${tenths}칸</strong>은 분수로 <strong>${fracHtml}</strong>이고, 소수로 쓰면 <strong style="color:#e11d48; font-size:1.4rem;">${decVal}</strong> ('${decVal}') 라고 읽어요!</div>
       `;
 
       if (shouldSpeak && typeof fairySpeak === 'function') {
-        fairySpeak(`${tenths}칸은 소수로 ${decVal}이며, 분수로 ${fracStr}입니다!`);
+        fairySpeak(`${tenths}칸은 소수로 ${decVal}이며, 분수로 10분의 ${tenths}입니다!`);
       }
     }
 
@@ -466,20 +534,177 @@
       renderDecimalVisuals(true);
     }
 
-    // 4. 퀴즈
+    // 4. 🎲 실전 랜덤 소수 막대 눈금 측정기
+    let currentRandomDecBar = { startTenths: 0, lengthTenths: 7, decVal: "0.7" };
+
+    function generateRandomDecimalBar(speak = false) {
+      const starts = [0, 0, 0, 2, 4];
+      const startTenths = starts[Math.floor(Math.random() * starts.length)];
+      const lengthTenths = Math.floor(Math.random() * 11) + 2; // 2 ~ 12 tenths (0.2 ~ 1.2)
+      const endTenths = startTenths + lengthTenths;
+      const decVal = (lengthTenths / 10).toFixed(1);
+
+      currentRandomDecBar = { startTenths, lengthTenths, endTenths, decVal };
+
+      const wrap = document.getElementById('random-decimal-svg-wrap');
+      const pxPerTenth = 22;
+      const startX = 30 + startTenths * pxPerTenth;
+      const barW = lengthTenths * pxPerTenth;
+      const endX = startX + barW;
+
+      wrap.innerHTML = `
+        <svg viewBox="0 0 520 130">
+          <!-- 랜덤 소수 막대 -->
+          <rect x="${startX}" y="20" width="${barW}" height="32" rx="6" fill="#f43f5e" stroke="#be123c" stroke-width="2.5"/>
+          <text x="${startX + barW/2}" y="42" font-family="Jua" font-size="15" fill="#fff" text-anchor="middle">📏 측정할 막대 (?)</text>
+
+          <!-- 수직선 베이스 -->
+          <line x1="30" y1="75" x2="470" y2="75" stroke="#334155" stroke-width="3"/>
+
+          <!-- 눈금 그리기 (0 ~ 20 tenths) -->
+          ${Array.from({length: 21}).map((_, i) => {
+            const x = 30 + i * pxPerTenth;
+            const isInt = (i % 10 === 0);
+            const h = isInt ? 22 : 12;
+            const strokeColor = isInt ? '#e11d48' : '#64748b';
+            const strokeWidth = isInt ? 2.5 : 1.5;
+            let textTag = '';
+            if (isInt) {
+              textTag = `<text x="${x}" y="112" font-family="Jua" font-size="16" fill="#e11d48" text-anchor="middle">${i/10}</text>`;
+            }
+            return `<line x1="${x}" y1="75" x2="${x}" y2="${75 + h}" stroke="${strokeColor}" stroke-width="${strokeWidth}"/>${textTag}`;
+          }).join('')}
+
+          <!-- 시작/끝 점선 가이드 -->
+          <line x1="${startX}" y1="18" x2="${startX}" y2="75" stroke="#0284c7" stroke-width="2" stroke-dasharray="3"/>
+          <circle cx="${startX}" cy="75" r="4" fill="#0284c7"/>
+          <line x1="${endX}" y1="18" x2="${endX}" y2="75" stroke="#e11d48" stroke-width="2" stroke-dasharray="3"/>
+          <circle cx="${endX}" cy="75" r="4" fill="#e11d48"/>
+        </svg>
+      `;
+
+      // 선택지 생성 (소수 및 수직 분수 병기)
+      const correctHtml = `${decVal} (${formatVFrac(lengthTenths, 10)})`;
+      const correctKey = `${decVal}`;
+      
+      const choicesSet = new Map();
+      choicesSet.set(correctKey, correctHtml);
+
+      while (choicesSet.size < 4) {
+        const fakeDiff = Math.floor(Math.random() * 7) - 3;
+        const fakeTenths = Math.max(1, lengthTenths + (fakeDiff === 0 ? 2 : fakeDiff));
+        const fakeDec = (fakeTenths / 10).toFixed(1);
+        choicesSet.set(fakeDec, `${fakeDec} (${formatVFrac(fakeTenths, 10)})`);
+      }
+
+      const choicesArr = Array.from(choicesSet.entries()).sort(() => Math.random() - 0.5);
+
+      const cBox = document.getElementById('random-decimal-choices');
+      cBox.innerHTML = '';
+      document.getElementById('random-decimal-feedback').innerHTML = '';
+
+      choicesArr.forEach(([key, html]) => {
+        const btn = document.createElement('button');
+        btn.className = 'candy-num-btn';
+        btn.style.fontSize = '1.15rem';
+        btn.style.width = '100%';
+        btn.style.display = 'inline-flex';
+        btn.style.justifyContent = 'center';
+        btn.style.alignItems = 'center';
+        btn.innerHTML = html;
+        btn.onclick = () => checkRandomDecimalAnswer(key, correctKey);
+        cBox.appendChild(btn);
+      });
+
+      if (speak && typeof fairySpeak === 'function') {
+        fairySpeak('새로운 소수 막대가 놓였습니다! 칸 수를 세어 소수와 분수를 맞춰보세요!');
+      }
+    }
+
+    function checkRandomDecimalAnswer(selected, correct) {
+      const fb = document.getElementById('random-decimal-feedback');
+      const b = currentRandomDecBar;
+      if (selected === correct) {
+        let calcMsg = b.startTenths === 0
+          ? `0부터 시작하여 <strong>${b.lengthTenths}칸</strong>이므로 정답!`
+          : `시작(${ (b.startTenths/10).toFixed(1) })부터 끝(${ (b.endTenths/10).toFixed(1) })까지의 차이 <strong>${b.lengthTenths}칸</strong>을 정확히 계산했어요!`;
+        fb.innerHTML = `<span style="color:#10b981;">🎉 대단해요! ${calcMsg} ➔ <strong>${b.decVal}</strong> (${formatVFrac(b.lengthTenths, 10)})</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`정답이에요! ${b.lengthTenths}칸이므로 ${b.decVal}입니다!`);
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 <strong>${b.decVal}</strong> (${formatVFrac(b.lengthTenths, 10)}) 이에요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${b.decVal} 입니다.`);
+      }
+    }
+
+    // 5. 퀴즈
     const QUIZ_LIST = [
-      { q: "전체 5조각 중 2조각을 분수로 나타내면?", ans: "2/5", choices: ["2/5", "5/2", "3/5", "1/5"] },
-      { q: "분수 7/10을 소수로 바르게 나타낸 것은?", ans: "0.7", choices: ["0.7", "7.0", "0.07", "1.7"] },
-      { q: "소수 0.4를 분수로 바르게 나타낸 것은?", ans: "4/10", choices: ["4/10", "1/4", "4/100", "40/10"] },
-      { q: "분자가 1인 분수(예: 1/3, 1/4)를 무엇이라고 부를까요?", ans: "단위분수", choices: ["단위분수", "진분수", "가분수", "대분수"] },
-      { q: "다음 중 1보다 큰 가분수는 무엇일까요?", ans: "5/4", choices: ["5/4", "3/4", "2/4", "1/4"] },
-      { q: "단위분수 1/2과 1/4 중 더 큰 분수는?", ans: "1/2", choices: ["1/2", "1/4", "같다", "알 수 없다"] }
+      {
+        q: "전체 5조각 중 2조각을 분수로 나타내면?",
+        ansKey: "2/5",
+        choices: [
+          { key: "2/5", html: formatVFrac(2, 5) },
+          { key: "5/2", html: formatVFrac(5, 2) },
+          { key: "3/5", html: formatVFrac(3, 5) },
+          { key: "1/5", html: formatVFrac(1, 5) }
+        ]
+      },
+      {
+        q: `분수 ${formatVFrac(7, 10)}을 소수로 바르게 나타낸 것은?`,
+        ansKey: "0.7",
+        choices: [
+          { key: "0.7", html: "0.7" },
+          { key: "7.0", html: "7.0" },
+          { key: "0.07", html: "0.07" },
+          { key: "1.7", html: "1.7" }
+        ]
+      },
+      {
+        q: "소수 0.4를 분수로 바르게 나타낸 것은?",
+        ansKey: "4/10",
+        choices: [
+          { key: "4/10", html: formatVFrac(4, 10) },
+          { key: "1/4", html: formatVFrac(1, 4) },
+          { key: "4/100", html: formatVFrac(4, 100) },
+          { key: "40/10", html: formatVFrac(40, 10) }
+        ]
+      },
+      {
+        q: `분자가 1인 분수(예: ${formatVFrac(1, 3)}, ${formatVFrac(1, 4)})를 무엇이라고 부를까요?`,
+        ansKey: "단위분수",
+        choices: [
+          { key: "단위분수", html: "단위분수" },
+          { key: "진분수", html: "진분수" },
+          { key: "가분수", html: "가분수" },
+          { key: "대분수", html: "대분수" }
+        ]
+      },
+      {
+        q: "다음 중 1보다 큰 가분수는 무엇일까요?",
+        ansKey: "5/4",
+        choices: [
+          { key: "5/4", html: formatVFrac(5, 4) },
+          { key: "3/4", html: formatVFrac(3, 4) },
+          { key: "2/4", html: formatVFrac(2, 4) },
+          { key: "1/4", html: formatVFrac(1, 4) }
+        ]
+      },
+      {
+        q: `단위분수 ${formatVFrac(1, 2)}과 ${formatVFrac(1, 4)} 중 더 큰 분수는?`,
+        ansKey: "1/2",
+        choices: [
+          { key: "1/2", html: formatVFrac(1, 2) },
+          { key: "1/4", html: formatVFrac(1, 4) },
+          { key: "같다", html: "같다" },
+          { key: "알 수 없다", html: "알 수 없다" }
+        ]
+      }
     ];
     let qIdx = 0;
 
     function renderQuiz() {
       const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
-      document.getElementById('quiz-question').textContent = q.q;
+      document.getElementById('quiz-question').innerHTML = q.q;
       const cBox = document.getElementById('quiz-choices');
       cBox.innerHTML = '';
       document.getElementById('quiz-feedback').textContent = '';
@@ -487,9 +712,12 @@
       q.choices.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'divide-btn';
-        btn.style.fontSize = '1.2rem';
-        btn.textContent = c;
-        btn.onclick = () => checkAnswer(c, q.ans);
+        btn.style.fontSize = '1.3rem';
+        btn.style.display = 'inline-flex';
+        btn.style.justifyContent = 'center';
+        btn.style.alignItems = 'center';
+        btn.innerHTML = c.html;
+        btn.onclick = () => checkAnswer(c.key, q.ansKey);
         cBox.appendChild(btn);
       });
     }
@@ -501,8 +729,8 @@
         if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
         if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
       } else {
-        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 다시 한번 생각해보세요.</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 다시 도전해 보세요!`);
       }
     }
 
@@ -526,6 +754,7 @@
 
       renderPizzaVisuals(false); // 초기 로딩 시 무발화
       renderDecimalVisuals(false); // 초기 로딩 시 무발화
+      generateRandomDecimalBar(false); // 초기 랜덤 소수 막대 생성 (무발화)
       renderQuiz();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
