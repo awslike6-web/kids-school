@@ -1925,22 +1925,39 @@ async function callDirectGoogleGemini(payload) {
         }
     }
 
-    const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const directRes = await fetch(directUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(geminiPayload)
-    });
+    // 🚀 구글 서버 일시적 과부하(503/429) 대비 초안정 다중 모델 순차 폴백 (2.0-flash ➔ 1.5-flash ➔ 2.5-flash)
+    const modelCandidates = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+    let lastErr = null;
 
-    if (!directRes.ok) {
-        const errText = await directRes.text().catch(() => "");
-        throw new Error(`Google Gemini 직접 호출 실패 (${directRes.status}): ${errText}`);
+    for (const modelName of modelCandidates) {
+        try {
+            const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const directRes = await fetch(directUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(geminiPayload)
+            });
+
+            if (!directRes.ok) {
+                const errText = await directRes.text().catch(() => "");
+                console.warn(`[Direct Gemini] ${modelName} 호출 실패 (${directRes.status}): ${errText}`);
+                lastErr = new Error(`Google Gemini (${modelName}) 직접 호출 실패 (${directRes.status}): ${errText}`);
+                continue; // 503 등 과부하 시 다음 안정 모델로 즉시 전환!
+            }
+
+            const data = await directRes.json();
+            const textContent = extractGeminiResponseText(data);
+            if (!textContent) {
+                lastErr = new Error(`Google Gemini (${modelName}) 응답 비어있음`);
+                continue;
+            }
+            return { response: directRes, data, text: textContent };
+        } catch (e) {
+            lastErr = e;
+        }
     }
 
-    const data = await directRes.json();
-    const textContent = extractGeminiResponseText(data);
-    if (!textContent) throw new Error("Google Gemini 응답 비어있음");
-    return { response: directRes, data, text: textContent };
+    throw lastErr || new Error("Google Gemini 모든 모델 호출 실패");
 }
 
 async function fetchWithGeminiRetry(url, fetchOptions = {}, retryOptions = {}) {
@@ -2062,7 +2079,7 @@ async function summarizeChatSessionWithGemini(transcript, options = {}) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "gemini-2.5-flash",
+                    model: "gemini-2.0-flash",
                     messages: [
                         {
                             role: "system",
