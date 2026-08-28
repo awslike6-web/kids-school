@@ -415,7 +415,7 @@ async function askFairyTeacher(word, meaning) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "gemini-2.0-flash",
+          model: "gemini-2.5-flash",
           messages: [
             { role: "system", content: getVocaFairySystemPrompt(`주어진 단어와 뜻풀이를 아이들의 눈높이에 맞게 아주 쉽고, 흥미로운 비유를 들어서 3줄 이내로 다정하게 설명해 줘.`) },
             { role: "user", content: `단어: ${word}, 뜻풀이: ${meaning}. 이 단어에 대해 친절하게 설명해 줘!` }
@@ -490,7 +490,7 @@ async function askCocoFairy() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "gemini-2.0-flash", 
+          model: "gemini-2.5-flash", 
           messages: [
             { role: "system", content: fairyPrompt },
             ...MODAL_CHAT_HISTORY

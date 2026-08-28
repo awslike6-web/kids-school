@@ -1942,35 +1942,44 @@ async function callDirectGoogleGemini(payload) {
         }
     }
 
-    // 🚀 구글 서버 일시적 과부하(503/429) 대비 초안정 다중 모델 순차 폴백 (2.0-flash ➔ 1.5-flash ➔ 2.5-flash)
-    const modelCandidates = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+    // 🚀 구글 공식 최신 모델 (gemini-2.5-flash ➔ gemini-2.5-pro) 및 503 과부하 자동 재시도
+    const modelCandidates = ["gemini-2.5-flash", "gemini-2.5-pro"];
     let lastErr = null;
 
     for (const modelName of modelCandidates) {
-        try {
-            const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            const directRes = await fetch(directUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(geminiPayload)
-            });
+        for (let retry = 0; retry < 3; retry++) {
+            try {
+                if (retry > 0) {
+                    await new Promise(r => setTimeout(r, 800 * retry));
+                }
+                const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                const directRes = await fetch(directUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(geminiPayload)
+                });
 
-            if (!directRes.ok) {
-                const errText = await directRes.text().catch(() => "");
-                console.warn(`[Direct Gemini] ${modelName} 호출 실패 (${directRes.status}): ${errText}`);
-                lastErr = new Error(`Google Gemini (${modelName}) 직접 호출 실패 (${directRes.status}): ${errText}`);
-                continue; // 503 등 과부하 시 다음 안정 모델로 즉시 전환!
-            }
+                if (!directRes.ok) {
+                    const errText = await directRes.text().catch(() => "");
+                    console.warn(`[Direct Gemini] ${modelName} (시도 ${retry + 1}) 응답 (${directRes.status}): ${errText}`);
+                    lastErr = new Error(`Google Gemini (${modelName}) 직접 호출 실패 (${directRes.status}): ${errText}`);
+                    // 503 일시 과부하 시 잠시 후 같은 모델 재시도, 404/400 등은 다음 모델로 넘김
+                    if (directRes.status === 503 && retry < 2) {
+                        continue;
+                    }
+                    break; // 다음 모델 후보로 이동
+                }
 
-            const data = await directRes.json();
-            const textContent = extractGeminiResponseText(data);
-            if (!textContent) {
-                lastErr = new Error(`Google Gemini (${modelName}) 응답 비어있음`);
-                continue;
+                const data = await directRes.json();
+                const textContent = extractGeminiResponseText(data);
+                if (!textContent) {
+                    lastErr = new Error(`Google Gemini (${modelName}) 응답 비어있음`);
+                    continue;
+                }
+                return { response: directRes, data, text: textContent };
+            } catch (e) {
+                lastErr = e;
             }
-            return { response: directRes, data, text: textContent };
-        } catch (e) {
-            lastErr = e;
         }
     }
 
