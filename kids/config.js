@@ -144,7 +144,8 @@ function loadCoreScripts(localBasePath, scripts, onComplete) {
         }
 
         const script = document.createElement('script');
-        script.src = basePath + scriptName;
+        const cacheBuster = `?v=20260828_${Date.now()}`;
+        script.src = basePath + scriptName + cacheBuster;
         script.async = false; // 부품이 순서대로 조립되도록 강제 보장 (매우 중요)
         
         script.onload = () => {

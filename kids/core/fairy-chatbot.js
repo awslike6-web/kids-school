@@ -125,7 +125,8 @@ function startFairyVoiceInput() {
                 inputEl.placeholder = "요정에게 말하기...";
             },
             onError: function(event) {
-                console.error("음성 인식 오류:", event.error);
+                if (event && event.error === 'aborted') return;
+                console.error("음성 인식 오류:", event?.error || event);
                 micBtn.innerText = "🎙️";
                 micBtn.style.backgroundColor = "#ab47bc";
                 inputEl.placeholder = "요정에게 말하기...";
