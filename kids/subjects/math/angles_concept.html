@@ -488,13 +488,13 @@
     let quadCutState = 'original';   // 'original' | 'merged'
     let quadSplitState = false;      // false | true
 
-    function switchPolygonSum(type) {
+    function switchPolygonSum(type, shouldVoice = true) {
       curPolygonType = type;
       document.getElementById('btnPolyTri').classList.toggle('active', type === 'triangle');
       document.getElementById('btnPolyQuad').classList.toggle('active', type === 'quad');
       document.getElementById('quadMethodSubBar').style.display = type === 'quad' ? 'flex' : 'none';
 
-      renderPolygonInteractive(true);
+      renderPolygonInteractive(shouldVoice);
     }
 
     function setQuadMethod(method) {
@@ -840,8 +840,8 @@
       document.getElementById('userIcon').textContent = icon;
 
       renderProtractorVisuals(false); // 초기 로딩 시 무발화
-      switchPolygonSum('triangle', null);
-      generateMissingAngleProblem(false);
+      switchPolygonSum('triangle', false); // 초기 로딩 시 무발화
+      generateMissingAngleProblem(false); // 초기 로딩 시 무발화
       renderQuiz();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
