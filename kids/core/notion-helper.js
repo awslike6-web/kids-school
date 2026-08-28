@@ -1828,11 +1828,33 @@ async function callDirectGoogleGemini(payload) {
         ? APP_CONFIG.GEMINI_API_KEY
         : (localStorage.getItem('gemini_api_key') || (typeof atob !== 'undefined' ? atob("QVEuQWI4Uk42THNkaHRLRWFqZk0xU2w0UGpmQ19hUTdJTzR0RXdsWWdtbXJvakpKZFdtcHc=") : ""));
 
+    let geminiPayload = payload || {};
+    if (payload && Array.isArray(payload.messages)) {
+        const contents = [];
+        let systemText = "";
+        for (const m of payload.messages) {
+            if (m.role === 'system') {
+                systemText += (systemText ? "\n" : "") + (m.content || "");
+            } else {
+                contents.push({
+                    role: m.role === 'assistant' ? 'model' : 'user',
+                    parts: [{ text: String(m.content || "") }]
+                });
+            }
+        }
+        geminiPayload = {
+            contents: contents.length > 0 ? contents : [{ role: 'user', parts: [{ text: '안녕' }] }]
+        };
+        if (systemText) {
+            geminiPayload.systemInstruction = { parts: [{ text: systemText }] };
+        }
+    }
+
     const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     const directRes = await fetch(directUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(geminiPayload)
     });
 
     if (!directRes.ok) {

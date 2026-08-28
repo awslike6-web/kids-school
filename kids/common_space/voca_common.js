@@ -175,7 +175,10 @@ function renderCatalogSections(wordsToRender) {
   requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
 }
 
+let currentActiveWord = null;
+
 function openModal(wordData) {
+  currentActiveWord = wordData;
   // 💡 모달 열 때 현재 과목을 전역에 설정 (보상 헬퍼가 이 값을 참조함)
   window.currentSubject = (wordData.subject && wordData.subject.length > 0) ? wordData.subject[0] : "사회";
   wordStartTime = Date.now(); // 단어 화면 진입 시간 기록
@@ -234,8 +237,6 @@ function openModal(wordData) {
   document.getElementById('fairyChatArea').style.display = 'none';
   document.getElementById('fairyQuestion').value = '';
   document.getElementById('fairyAnswerBox').innerHTML = '<span style="color: #999;">궁금한 점을 적거나 마이크 버튼을 눌러 말해봐! ✨</span>';
-
-  askFairyTeacher(wordData.word, wordData.meaning);
 
   const overlay = document.getElementById('wordModal'); 
   overlay.style.display = 'flex';
@@ -319,7 +320,7 @@ function startVoiceInput() {
   if (typeof setupDebouncedSTT === 'function') {
     setupDebouncedSTT({
       inputEl: questionInput,
-      debounceMs: 1500,
+      debounceMs: 2500,
       onStart: function() {
         micBtn.innerText = "👂 듣는중..";
         micBtn.style.transform = "scale(1.1)";
@@ -459,6 +460,9 @@ async function askCocoFairy() {
 
   MODAL_CHAT_HISTORY.push({ role: "user", content: questionText });
 
+  const wordContext = currentActiveWord ? `현재 아이가 공부 중인 단어: [${currentActiveWord.word}], 뜻풀이: [${currentActiveWord.meaning}]` : '';
+  const fairyPrompt = getVocaFairySystemPrompt(wordContext ? `${wordContext}. 아이의 질문에 아주 친절하고 알기 쉽게 3줄 이내로 다정하게 설명해줘.` : '');
+
   try {
     const { text: reply } = await fetchWithGeminiRetry(
       `${WORKER_PROXY_URL}/v1/chat/completions?type=ai`,
@@ -468,7 +472,7 @@ async function askCocoFairy() {
         body: JSON.stringify({
           model: "gemini-2.5-flash", 
           messages: [
-            { role: "system", content: getVocaFairySystemPrompt() },
+            { role: "system", content: fairyPrompt },
             ...MODAL_CHAT_HISTORY
           ]
         })
