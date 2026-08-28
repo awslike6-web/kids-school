@@ -876,9 +876,14 @@ function setupDebouncedSTT(options = {}) {
         return null;
     }
 
-    // 기존 세션 정리
+    // 기존 세션 정리 (이전 인스턴스의 이벤트 핸들러를 먼저 제거하여 aborted 전파 차단)
     if (window.__sttSession?.recognition) {
-        try { window.__sttSession.recognition.abort(); } catch (e) { /* noop */ }
+        const oldRec = window.__sttSession.recognition;
+        oldRec.onstart = null;
+        oldRec.onend = null;
+        oldRec.onerror = null;
+        oldRec.onresult = null;
+        try { oldRec.abort(); } catch (e) { /* noop */ }
         clearTimeout(window.__sttSession.debounceTimer);
     }
 
@@ -894,7 +899,7 @@ function setupDebouncedSTT(options = {}) {
 
     const recognition = new Recognition();
     recognition.lang = lang;
-    recognition.continuous = true;
+    recognition.continuous = false; // 크롬 데스크톱에서 가장 안정적인 단일 턴 모드
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
@@ -968,6 +973,11 @@ function setupDebouncedSTT(options = {}) {
 
     recognition.onerror = function(event) {
         clearTimeout(debounceTimer);
+        const errType = String(event.error || '');
+        // aborted는 사용자의 재클릭 또는 정상 리셋 동작이므로 오류로 취급하지 않음
+        if (errType === 'aborted') {
+            return;
+        }
         console.warn('[STT 오류]', event.error);
         if (!hasSent) finishMicUI();
         if (onError) onError(event);
