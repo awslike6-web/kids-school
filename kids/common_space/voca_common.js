@@ -346,8 +346,12 @@ function startVoiceInput() {
         micBtn.style.color = "var(--dark)";
         questionInput.placeholder = "글로 적거나, 마이크를 눌러 말해봐!";
 
-        let errMsg = "마이크 소리가 감지되지 않았어요. 마이크 가까이에서 다시 말씀해 주세요!";
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        const micName = window.__activeMicDeviceLabel || '기본 마이크';
+        const isVirtual = /droidcam|virtual|stereo mix|스테레오 믹스/i.test(micName);
+        let errMsg = `마이크 소리가 감지되지 않았어요. (현재 감지 장치: <b>${micName}</b>)<br>마이크 가까이에서 다시 말씀해 주세요!`;
+        if (isVirtual) {
+          errMsg = `⚠️ <b>가상 마이크("${micName}")가 선택되어 있습니다.</b><br>실제 마이크(Realtek 등)로 소리를 전달하려면 브라우저 주소창 좌측 🔒 자물쇠(사이트 설정) ➔ <b>[마이크]</b>를 실제 마이크로 변경해 주세요!`;
+        } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           errMsg = "⚠️ <b>마이크 사용 권한이 차단되어 있습니다.</b><br>브라우저 주소창 좌측의 🔒 자물쇠(또는 사이트 설정) 아이콘을 눌러 <b>[마이크 허용]</b>으로 변경해 주세요!";
         } else if (event.error === 'network') {
           errMsg = "⚠️ 음성 인식 네트워크 연결이 원활하지 않습니다. 글자로 질문을 입력해 보세요!";

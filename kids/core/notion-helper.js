@@ -893,15 +893,32 @@ function setupDebouncedSTT(options = {}) {
     }
 
     // 🎤 데스크톱 크롬/웨일 마이크 하드웨어 스트림 깨우기 및 연결 장치 확인
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && !window.__micStreamWoken) {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
             window.__micStreamWoken = true;
             const track = stream.getAudioTracks()[0];
-            console.log(`%c[STT 마이크 진단] 🎤 활성 마이크 장치: "${track?.label || '기본 마이크'}"`, 'color: #10b981; font-weight: bold;');
+            const micLabel = track?.label || '기본 마이크';
+            window.__activeMicDeviceLabel = micLabel;
+            
+            const isVirtual = /droidcam|virtual|stereo mix|스테레오 믹스/i.test(micLabel);
+            if (isVirtual) {
+                console.warn(`%c[STT 마이크 경고] ⚠️ 현재 브라우저가 가상 마이크("${micLabel}")를 바라보고 있습니다! 실제 마이크(Realtek 등)로 소리를 전달하려면 브라우저 주소창 좌측 🔒 자물쇠 > 마이크 설정(또는 chrome://settings/content/microphone)에서 실제 마이크로 변경해 주세요.`, 'color: #f59e0b; font-weight: bold;');
+            } else {
+                console.log(`%c[STT 마이크 진단] 🎤 활성 마이크 장치: "${micLabel}"`, 'color: #10b981; font-weight: bold;');
+            }
             stream.getTracks().forEach(t => t.stop());
         }).catch(err => {
             console.warn('[STT 마이크 진단] getUserMedia 접근 실패 (권한 또는 장치 비활성화):', err);
         });
+
+        if (navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                const mics = devices.filter(d => d.kind === 'audioinput').map(d => d.label || '이름 없음');
+                if (mics.length > 0) {
+                    console.log(`%c[STT 마이크 목록] 🎧 PC에 연결된 전체 마이크 (${mics.length}개):`, 'color: #6366f1; font-weight: bold;', mics);
+                }
+            }).catch(() => {});
+        }
     }
 
     let accumulatedFinal = '';
