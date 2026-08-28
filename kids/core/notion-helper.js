@@ -892,6 +892,18 @@ function setupDebouncedSTT(options = {}) {
         window.speechSynthesis.cancel();
     }
 
+    // 🎤 데스크톱 크롬/웨일 마이크 하드웨어 스트림 깨우기 및 연결 장치 확인
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && !window.__micStreamWoken) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            window.__micStreamWoken = true;
+            const track = stream.getAudioTracks()[0];
+            console.log(`%c[STT 마이크 진단] 🎤 활성 마이크 장치: "${track?.label || '기본 마이크'}"`, 'color: #10b981; font-weight: bold;');
+            stream.getTracks().forEach(t => t.stop());
+        }).catch(err => {
+            console.warn('[STT 마이크 진단] getUserMedia 접근 실패 (권한 또는 장치 비활성화):', err);
+        });
+    }
+
     let accumulatedFinal = '';
     let debounceTimer = null;
     let hasSent = false;
@@ -902,6 +914,20 @@ function setupDebouncedSTT(options = {}) {
     recognition.continuous = false; // 크롬 데스크톱에서 가장 안정적인 단일 턴 모드
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
+
+    // 💡 상세 오디오 상태 진단 이벤트
+    recognition.onaudiostart = function() {
+        console.log('%c[STT 진단] 🎙️ 오디오 스트림 수신 시작 (브라우저가 마이크 소리를 듣고 있습니다)', 'color: #0284c7;');
+    };
+    recognition.onspeechstart = function() {
+        console.log('%c[STT 진단] 🗣️ 사람 목소리(발화) 감지됨!', 'color: #ec4899; font-weight: bold;');
+    };
+    recognition.onspeechend = function() {
+        console.log('%c[STT 진단] 🤫 발화 종료 감지됨', 'color: #8b5cf6;');
+    };
+    recognition.onaudioend = function() {
+        console.log('%c[STT 진단] ⏹️ 오디오 수신 종료', 'color: #64748b;');
+    };
 
     function finishMicUI() {
         isListening = false;
