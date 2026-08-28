@@ -69,7 +69,11 @@ function buildFilterButtons() {
   const subArea = document.getElementById('subjectFilterArea');
   const gradeArea = document.getElementById('gradeFilterArea');
   const subjects = [...new Set(allDictionaryWords.flatMap(w => w.subject))];
-  const grades = [...new Set(allDictionaryWords.flatMap(w => w.grades))].sort();
+  const grades = [...new Set(allDictionaryWords.flatMap(w => w.grades))].sort((a, b) => {
+    const numA = parseInt(String(a).replace(/[^0-9]/g, '')) || 0;
+    const numB = parseInt(String(b).replace(/[^0-9]/g, '')) || 0;
+    return numA - numB;
+  });
   subArea.innerHTML = "";
   subjects.forEach(sub => { subArea.innerHTML += `<button class="filter-btn" onclick="toggleSubject('${sub}', this)">📘 ${sub}</button>`; });
   gradeArea.innerHTML = "";
