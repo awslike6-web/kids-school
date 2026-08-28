@@ -110,7 +110,7 @@ function startFairyVoiceInput() {
     if (typeof setupDebouncedSTT === 'function') {
         setupDebouncedSTT({
             inputEl,
-            debounceMs: 1500,
+            debounceMs: 2500,
             onStart: function() {
                 micBtn.innerText = "👂";
                 micBtn.style.transform = "scale(1.1)";

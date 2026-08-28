@@ -315,6 +315,7 @@ function startVoiceInput() {
   }
   const micBtn = document.getElementById('micBtn');
   const questionInput = document.getElementById('fairyQuestion');
+  const answerBox = document.getElementById('fairyAnswerBox');
   if (!questionInput) return;
 
   if (typeof setupDebouncedSTT === 'function') {
@@ -322,21 +323,36 @@ function startVoiceInput() {
       inputEl: questionInput,
       debounceMs: 2500,
       onStart: function() {
-        micBtn.innerText = "👂 듣는중..";
-        micBtn.style.transform = "scale(1.1)";
+        micBtn.innerText = "⏹️ 전송";
+        micBtn.style.transform = "scale(1.05)";
         micBtn.style.backgroundColor = "#e53e3e";
         micBtn.style.color = "white";
+        questionInput.placeholder = "듣고 있어요... 편하게 말씀해 보세요!";
+        if (answerBox) {
+          answerBox.innerHTML = '<span style="color: #4facfe;">🎙️ <b>요정이 귀 기울여 듣고 있어요...</b><br>말씀을 마치시면 자동으로 전송되며, [전송] 버튼을 눌러 바로 보낼 수도 있어요! ✨</span>';
+        }
       },
       onEnd: function() {
         micBtn.innerText = "🎙️";
         micBtn.style.transform = "scale(1)";
         micBtn.style.backgroundColor = "#fbc2eb";
         micBtn.style.color = "var(--dark)";
+        questionInput.placeholder = "글로 적거나, 마이크를 눌러 말해봐!";
       },
       onError: function(event) {
         console.error("음성 인식 오류:", event.error);
         micBtn.innerText = "🎙️";
         micBtn.style.backgroundColor = "#fbc2eb";
+        micBtn.style.color = "var(--dark)";
+        questionInput.placeholder = "글로 적거나, 마이크를 눌러 말해봐!";
+
+        let errMsg = "마이크 소리가 감지되지 않았어요. 마이크 가까이에서 다시 말씀해 주세요!";
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          errMsg = "⚠️ <b>마이크 사용 권한이 차단되어 있습니다.</b><br>브라우저 주소창 좌측의 🔒 자물쇠(또는 사이트 설정) 아이콘을 눌러 <b>[마이크 허용]</b>으로 변경해 주세요!";
+        } else if (event.error === 'network') {
+          errMsg = "⚠️ 음성 인식 네트워크 연결이 원활하지 않습니다. 글자로 질문을 입력해 보세요!";
+        }
+        if (answerBox) answerBox.innerHTML = `<span style="color: #e53e3e;">${errMsg}</span>`;
       },
       onSend: function(text) {
         questionInput.value = text;

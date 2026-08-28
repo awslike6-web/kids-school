@@ -854,7 +854,7 @@ function setupDebouncedSTT(options = {}) {
     const {
         inputEl,
         onSend,
-        debounceMs = 1500,
+        debounceMs = 2500,
         lang = 'ko-KR',
         onStart,
         onEnd,
@@ -867,21 +867,40 @@ function setupDebouncedSTT(options = {}) {
         return null;
     }
 
+    // 💡 이미 듣고 있는 상태에서 마이크 버튼을 다시 누르면 즉시 마무리 및 전송 (토글 기능)
+    if (window.__sttSession && window.__sttSession.isListening) {
+        console.log('[STT] 마이크 재클릭으로 즉시 마무리 및 전송');
+        if (typeof window.__sttSession.flushAndSend === 'function') {
+            window.__sttSession.flushAndSend();
+        }
+        return null;
+    }
+
+    // 기존 세션 정리
     if (window.__sttSession?.recognition) {
-        try { window.__sttSession.recognition.stop(); } catch (e) { /* noop */ }
+        try { window.__sttSession.recognition.abort(); } catch (e) { /* noop */ }
         clearTimeout(window.__sttSession.debounceTimer);
+    }
+
+    // 마이크 시작 전 TTS 즉시 중지 (마이크 하울링/간섭 방지)
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
     }
 
     let accumulatedFinal = '';
     let debounceTimer = null;
     let hasSent = false;
+    let isListening = false;
 
     const recognition = new Recognition();
     recognition.lang = lang;
     recognition.continuous = true;
     recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
 
     function finishMicUI() {
+        isListening = false;
+        if (window.__sttSession) window.__sttSession.isListening = false;
         if (onEnd) onEnd();
     }
 
@@ -903,30 +922,36 @@ function setupDebouncedSTT(options = {}) {
 
     recognition.onstart = function() {
         hasSent = false;
+        isListening = true;
         accumulatedFinal = '';
         inputEl.value = '';
+        if (window.__sttSession) window.__sttSession.isListening = true;
         if (onStart) onStart();
     };
 
     recognition.onresult = function(event) {
         if (hasSent) return;
 
-        let finalText = '';
-        let interim = '';
-        for (let i = 0; i < event.results.length; i++) {
-            const piece = event.results[i][0].transcript;
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-                finalText += piece;
-            }
-        }
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            if (!event.results[i].isFinal) {
-                interim += event.results[i][0].transcript;
+                finalTranscript += transcript;
+            } else {
+                interimTranscript += transcript;
             }
         }
 
-        accumulatedFinal = finalText;
-        inputEl.value = (finalText + interim).trim();
+        if (finalTranscript) {
+            accumulatedFinal = (accumulatedFinal ? accumulatedFinal + ' ' : '') + finalTranscript.trim();
+        }
+
+        const fullText = (accumulatedFinal + (interimTranscript ? (accumulatedFinal ? ' ' : '') + interimTranscript.trim() : '')).trim();
+        if (fullText) {
+            inputEl.value = fullText;
+        }
 
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(flushAndSend, debounceMs);
@@ -943,12 +968,26 @@ function setupDebouncedSTT(options = {}) {
 
     recognition.onerror = function(event) {
         clearTimeout(debounceTimer);
+        console.warn('[STT 오류]', event.error);
         if (!hasSent) finishMicUI();
         if (onError) onError(event);
     };
 
-    window.__sttSession = { recognition, debounceTimer: null };
-    recognition.start();
+    window.__sttSession = {
+        recognition,
+        debounceTimer: null,
+        isListening: false,
+        flushAndSend
+    };
+
+    try {
+        recognition.start();
+    } catch (e) {
+        console.error('[STT 시작 실패]', e);
+        finishMicUI();
+        if (onError) onError({ error: e.message || 'start_failed' });
+    }
+
     return recognition;
 }
 
