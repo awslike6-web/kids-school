@@ -1048,50 +1048,32 @@ function setupDebouncedSTT(options = {}) {
 // 🔗 접속사 채점 가드레일 (원인-결과 vs 역접 분리)
 // ========================================================
 
-const CAUSE_EFFECT_CONJUNCTIONS = new Set(['따라서', '그러므로', '그래서', '그리하여', '그러니까', '왜냐하면']);
-const CONTRAST_CONJUNCTIONS = new Set(['하지만', '그러나', '그런데', '반면', '그렇지만']);
-
 const CONJUNCTION_GRADING_GUARDRAIL = `[접속사 채점 절대 규칙]
 - 앞 문장이 원인, 뒤 문장이 결과(결론) 관계이면 오직 '따라서', '그러므로', '그래서', '그리하여' 계열만 정답이다.
+- 앞 문장이 결과, 뒤 문장이 이유/원인 설명이면 오직 '왜냐하면 (~때문이다)'만 정답이다. '그래서'나 '따라서'와 절대 혼동하거나 호환 처리하지 마라.
 - '하지만', '그러나', '그런데'는 앞뒤가 반대·대조·역접일 때만 쓴다.
-- 원인-결과 문맥에서 '하지만'을 정답으로 제시하거나 옹호하지 마라.`;
+- 원인-결과 문맥에서 '하지만'이나 '왜냐하면'을 정답으로 제시하거나 옹호하지 마라.`;
 
 function inferConjunctionRelation(conj) {
     if (!conj) return 'exact';
     if (conj.relationType === 'cause-effect' || conj.relationType === 'contrast') {
         return conj.relationType;
     }
-    if (CAUSE_EFFECT_CONJUNCTIONS.has(conj.answer)) return 'cause-effect';
-    if (CONTRAST_CONJUNCTIONS.has(conj.answer)) return 'contrast';
     const commentary = conj.commentary || '';
-    if (/원인|결과|그래서|따라서|그러므로|이어|때문|근거/.test(commentary)) return 'cause-effect';
+    if (/원인|결과|그래서|따라서|그러므로/.test(commentary)) return 'cause-effect';
+    if (/이유|까닭|때문|왜냐하면/.test(commentary)) return 'reason';
     if (/반대|역접|대조|반면|하지만|그러나/.test(commentary)) return 'contrast';
     return 'exact';
 }
 
 function gradeConjunctionAnswer(conj, userAnswer) {
-    if (conj.answer && String(userAnswer).toLowerCase() === String(conj.answer).toLowerCase()) {
-        return true;
-    }
-    const relation = inferConjunctionRelation(conj);
-    if (relation === 'cause-effect') {
-        return CAUSE_EFFECT_CONJUNCTIONS.has(userAnswer);
-    }
-    if (relation === 'contrast') {
-        return CONTRAST_CONJUNCTIONS.has(userAnswer);
-    }
-    return userAnswer === conj.answer;
+    if (!conj || !conj.answer || userAnswer == null) return false;
+    // 🎯 객관식 접속사 문제는 지정된 고유 정답과 정확히 일치해야 함 (왜냐하면 vs 그래서 오답 판정 철저)
+    return String(userAnswer).trim().toLowerCase() === String(conj.answer).trim().toLowerCase();
 }
 
 function getConjunctionCorrectAnswer(conj) {
-    const relation = inferConjunctionRelation(conj);
-    if (relation === 'cause-effect') {
-        return CAUSE_EFFECT_CONJUNCTIONS.has(conj.answer) ? conj.answer : '따라서';
-    }
-    if (relation === 'contrast') {
-        return CONTRAST_CONJUNCTIONS.has(conj.answer) ? conj.answer : '하지만';
-    }
-    return conj.answer;
+    return conj?.answer || '';
 }
 
 // ========================================================
