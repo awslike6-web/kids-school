@@ -1,7 +1,3 @@
-// kids/data/society-data.js
-// 🌍 [민민이네 공부방] 초등 5학년 1학기 사회 교과서 단원별 퀴즈 및 지문 데이터베이스
-// 차례 및 찾아보기(색인) 페이지 제외 정제 완료
-
 const SOCIETY_CURRICULUM_DATA = {
   "5학년 1학기": {
     "1-1. 우리나라의 지형": {
@@ -1707,9 +1703,9 @@ const SOCIETY_CURRICULUM_DATA = {
   }
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;
 }
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = { SOCIETY_CURRICULUM_DATA };
 }
