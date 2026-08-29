@@ -977,7 +977,7 @@ window.renderReadingStage = function() {
                 const correctWord = typeof getConjunctionCorrectAnswer === 'function'
                     ? getConjunctionCorrectAnswer(conj)
                     : conj.answer;
-                speakFairyTTS("정답이에요! " + (conj.commentary || correctWord));
+                speakFairyTTS("정답이에요! 아주 잘했어요!");
                 readingConjunctionIndex++;
                 if (readingConjunctionIndex >= activePassage.conjunctions.length) {
                     if (typeof dispatchReadingStageReward === 'function') {
@@ -1000,7 +1000,7 @@ window.renderReadingStage = function() {
                         },
                     });
                 } else {
-                    speakFairyTTS("틀렸어요. 앞뒤 문맥을 다시 한번 살펴보세요.");
+                    speakFairyTTS("틀렸어요. 다시 한번 찾아볼까요?");
                 }
             }
         };
@@ -1023,7 +1023,7 @@ window.renderReadingStage = function() {
         const quiz = activePassage.themeQuiz;
         window.verifyReadingTheme = function(idx) {
             if (idx === quiz.answerIndex) {
-                speakFairyTTS("정답이에요! 핵심을 정확히 짚어냈네요!");
+                speakFairyTTS("정답이에요! 참 잘했어요!");
                 if (typeof dispatchReadingStageReward === 'function') {
                     dispatchReadingStageReward('reading', activePassage?.id, 3);
                 }
@@ -1039,7 +1039,7 @@ window.renderReadingStage = function() {
                         },
                     });
                 } else {
-                    speakFairyTTS("아니에요. 글쓴이가 진짜 하고 싶은 말이 무엇일지 다시 생각해보세요.");
+                    speakFairyTTS("아니에요. 다시 한번 생각해볼까요?");
                 }
             }
         };

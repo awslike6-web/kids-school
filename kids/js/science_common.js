@@ -360,12 +360,12 @@ function renderSectionUI(type, container, unitObj) {
 window.verifyExperimentChoice = function(choiceIdx, correctIdx) {
     if (choiceIdx === correctIdx) {
         if (typeof playSoundEffect === 'function') playSoundEffect('correct');
-        speakFairyTTS("정답이야! 과학적 원리를 아주 정확하게 파악했어!");
-        alert("🎉 딩동댕! 정답입니다!");
+        speakFairyTTS("정답이야! 아주 잘했어!");
+        alert("🎉 정답입니다!");
         skipToNextScienceQuiz();
     } else {
         if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
-        speakFairyTTS("다시 한번 교과서 사진과 실험 내용을 자세히 관찰해 봐!");
+        speakFairyTTS("다시 한번 관찰해 봐!");
         alert("앗, 다시 한 번 생각해 볼까요? 교과서 사진을 확대해서 살펴보세요!");
     }
 };
@@ -379,12 +379,12 @@ window.verifyScienceVocaAnswer = function() {
 
     if (userVal === answer) {
         if (typeof playSoundEffect === 'function') playSoundEffect('correct');
-        speakFairyTTS("정답이야! 과학 용어를 완벽하게 마스터했어!");
+        speakFairyTTS("정답이야! 잘했어!");
         alert(`🎉 정답! [${currentItem.word}] 맞습니다!`);
         skipToNextScienceQuiz();
     } else {
         if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
-        speakFairyTTS("초성 힌트를 잘 보고 다시 맞춰봐!");
+        speakFairyTTS("힌트를 보고 다시 맞춰봐!");
         alert("아쉬워요! 초성 힌트를 다시 확인해 보세요!");
         input.value = "";
         input.focus();

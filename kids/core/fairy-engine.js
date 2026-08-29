@@ -69,6 +69,17 @@ function cleanTextForTTS(rawText) {
         .replace(/\s+/g, ' ')
         .trim();
 
+    // ⚡ [맞춤/틀림/피드백 발화 간결화 가드: 최대 1~2문장, 60자 이내로 콤팩트 유지]
+    if (cleaned.length > 55 && (cleaned.includes('정답') || cleaned.includes('틀렸') || cleaned.includes('아쉽') || cleaned.includes('잘했') || cleaned.includes('훌륭') || cleaned.includes('맞췄'))) {
+        const sentences = cleaned.split(/(?<=[.!?])\s+/);
+        if (sentences.length > 1) {
+            cleaned = sentences[0];
+        }
+        if (cleaned.length > 55) {
+            cleaned = cleaned.slice(0, 52) + '...';
+        }
+    }
+
     return { text: cleaned, isQuestion };
 }
 

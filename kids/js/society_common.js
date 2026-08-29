@@ -993,8 +993,8 @@ async function verifyChartChoice(selectedIdx, correctIdx) {
     const explanationText = currentItem.explanation ? `\n\n💡 [교과서 해설]\n${currentItem.explanation}` : "";
 
     if (selectedIdx === correctIdx) {
-        speakFairyTTS("대단해요! 도표 통계 자료를 매서운 안목으로 정밀하게 해독해냈군요! 훌륭합니다!");
-        alert(`🎉 명쾌한 이해력! 정답입니다!${explanationText}`);
+        speakFairyTTS("정답이에요! 아주 잘했어요!");
+        alert(`🎉 정답입니다!${explanationText}`);
         if (typeof rewardQuizCorrect === 'function') {
             await rewardQuizCorrect(activeQuizIdx);
         }
@@ -1002,13 +1002,13 @@ async function verifyChartChoice(selectedIdx, correctIdx) {
     } else {
         if (typeof promptQuizRetryOrSkip === 'function') {
             promptQuizRetryOrSkip({
-                message: '분석에 조금의 오차가 있어요!',
+                message: '아쉽지만 틀렸어요!',
                 onRetry: () => {},
                 onSkip: () => skipToNextQuiz('chart'),
             });
         } else {
-            speakFairyTTS("조금 아쉽네요. 중심지나 통계 수치들을 한 번만 면밀히 자로 재보아요.");
-            alert("❌ 분석에 조금의 오차가 있어요! 다른 보기를 선택해주세요!");
+            speakFairyTTS("아쉬워요. 다시 한번 확인해볼까요?");
+            alert("❌ 아쉽지만 틀렸어요! 다른 보기를 선택해주세요!");
         }
     }
 }
@@ -1016,11 +1016,11 @@ async function verifyChartChoice(selectedIdx, correctIdx) {
 async function submitMapJourney() {
     const text = document.getElementById('mapJourneyInput').value.trim();
     if (text.length < 5) {
-        alert("한 줄 탐방기의 깊이를 보강해주세요! (최소 5글자 이상 작성)");
+        alert("한 줄 탐방기를 작성해주세요! (최소 5글자 이상)");
         return;
     }
 
-    speakFairyTTS("참 따뜻하고 사랑스러운 한 줄 탐방기네요. 조상과 우리 자연의 호흡이 완성되는 순간입니다!");
+    speakFairyTTS("멋진 탐방기네요! 참 잘했어요!");
     alert("📝 멋진 랜선 지리 탐방록 기록 완료!");
 
     if (typeof rewardQuizCorrect === 'function') {
@@ -1038,7 +1038,7 @@ async function collectArtifact(artName) {
     historyCollected.push(artName);
     localStorage.setItem('society_history_collectibles', JSON.stringify(historyCollected));
     
-    speakFairyTTS(`축하해요! ${artName} 유물이 우리 박물관 돋보기 전시대에 완벽하게 진열 소장되었습니다!`);
+    speakFairyTTS(`축하해요! 유물 획득 완료!`);
     alert(`🏆 유물 획득! [${artName}]을 소장했습니다!`);
 
     if (typeof rewardQuizCorrect === 'function') {
@@ -1057,8 +1057,8 @@ function skipToNextQuiz(type) {
     const innerBody = document.getElementById('overlayInnerBody');
     // voca 타입일 경우 renderSectionUI 내에서 10문제 커트라인, 전체 종료 체크를 모두 담당함
     if (type !== 'voca' && activeQuizIdx >= activeSectionData.length) {
-        speakFairyTTS("모든 미션 코스가 우수하게 완결되었습니다! 박수 드려요. 대합실로 복귀합니다.");
-        alert("🏆 축하합니다! 이 구역의 모든 사회 탐구 단계를 완료하셨습니다!");
+        speakFairyTTS("모든 미션을 완료했어요! 참 잘했어요!");
+        alert("🏆 축하합니다! 모든 사회 탐구 단계를 완료하셨습니다!");
         closeMissionView();
     } else {
         renderSectionUI(type, innerBody);
