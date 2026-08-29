@@ -136,7 +136,7 @@ function initializeSocietyRoom() {
         }
     }
 
-    // 요정 대화 다듬기 (Optional Chaining 적용)
+    // 요정 대화 다듬기 (화면 텍스트 표시만 유지하고 자동 음성 낭독은 제거)
     let customGreeting = "안녕! 보상을 얻으러 사회 탐험을 출발해볼까?";
     if (typeof FAIRY_CONFIG !== 'undefined' && FAIRY_CONFIG.greetings) {
         customGreeting = FAIRY_CONFIG.greetings[currentProfile] || customGreeting;
@@ -144,20 +144,11 @@ function initializeSocietyRoom() {
             customGreeting = FAIRY_CONFIG.greetings.admin;
         }
     }
-    document.getElementById('fairySpeakerText').textContent = customGreeting;
-
-    // 요정 요음 초기 낭독 (요정 진짜 엔진 결합 완료 시 낭독 트리거)
-    setTimeout(() => {
-        if (typeof speakFairyTTS === 'function' && !speakFairyTTS.isMock && !window.isFairyGreetingSpoken) {
-            speakFairyTTS(customGreeting);
-            window.isFairyGreetingSpoken = true;
-        } else {
-            console.log("🔊 [TTS 대기 또는 완료] 요정 엔진 연합 전이거나 이미 환영 인사를 하였습니다.");
-        }
-    }, 1200);
+    const speakerEl = document.getElementById('fairySpeakerText');
+    if (speakerEl) speakerEl.textContent = customGreeting;
 
     // 🔊 요정 음성 버튼 UI 초기 적용 
-    updateTtsToggleUi();
+    if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
 }
 
 // 💡 [정비팀장 동적 메모리] 노션 원본 데이터를 보관하고 학년/단원을 실시간 자동 추출합니다!

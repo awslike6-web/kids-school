@@ -227,15 +227,5 @@ window.updateTtsToggleUi = updateTtsToggleUi;
 // 엔진 구동 시점에 자동 시동
 initFairyAudio();
 
-// 💡 [엔진 로드 완료 브릿지] 대기실 말상자 글귀 자동 스캔 기능
-setTimeout(() => {
-    const speakerTextEl = document.getElementById('fairySpeakerText');
-    if (speakerTextEl && !window.isFairyGreetingSpoken) {
-        const textToSpeak = speakerTextEl.textContent || speakerTextEl.innerText;
-        if (textToSpeak && textToSpeak.length > 0) {
-            console.log("🧚 [엔진 결합 브릿지] 대기실 글귀 자동 스캔 낭독을 시작합니다!");
-            speakFairyTTS(textToSpeak);
-            window.isFairyGreetingSpoken = true;
-        }
-    }
-}, 350);
+// 💡 [엔진 로드 완료] 입장 시 자동 낭독은 비활성화 (사용자 요청: 조용한 입장 환경 보장)
+// 필요 시 사용자가 직접 버튼을 누르거나 챗봇과 대화할 때만 speakFairyTTS가 동작합니다.
