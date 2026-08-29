@@ -528,7 +528,7 @@
             '</div>' +
             '<input type="file" id="fileInput_' + itemIdx + '" style="display:none" accept="image/*" onchange="handleFileSelect(event, ' + itemIdx + ')">' +
             '<div class="card-img-form">' +
-              '<input type="text" class="card-img-input" id="imgInput_' + itemIdx + '" value="' + cleanImgPath + '" placeholder="./images/파일명.jpg">' +
+              '<input type="text" class="card-img-input" id="imgInput_' + itemIdx + '" value="' + cleanImgPath + '" placeholder="./images/파일명.jpg" onkeydown="if(event.key===\'Enter\') applyImagePath(' + itemIdx + ')">' +
               '<button type="button" class="btn-apply-img" onclick="applyImagePath(' + itemIdx + ')">적용</button>' +
             '</div>' +
           '</div>';
