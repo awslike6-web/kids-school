@@ -25,7 +25,7 @@
       padding: 1.5rem;
       min-height: 100vh;
     }
-    .admin-container { max-width: 1200px; margin: 0 auto; }
+    .admin-container { max-width: 1240px; margin: 0 auto; }
     .admin-header {
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 1rem; padding-bottom: 1.25rem;
@@ -41,6 +41,7 @@
       background: #21262d; border: 1px solid var(--card-border); color: var(--text);
       padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700;
       cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+      text-decoration: none;
     }
     .btn-action:hover { background: #30363d; border-color: var(--accent); }
     .btn-action.btn-save {
@@ -57,7 +58,7 @@
     .filter-group label { font-size: 0.78rem; color: var(--text-sub); font-weight: 700; }
     .filter-group select {
       background: #0d1117; border: 1px solid var(--card-border); color: var(--text);
-      padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.9rem; outline: none; min-width: 180px;
+      padding: 0.55rem 0.75rem; border-radius: 8px; font-size: 0.9rem; outline: none; min-width: 220px;
     }
     .filter-group select:focus { border-color: var(--accent); }
     .stats-chip {
@@ -75,7 +76,7 @@
     .question-card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .question-card.modified { border-color: var(--orange); box-shadow: 0 0 12px rgba(240, 136, 62, 0.2); }
     .card-top {
-      padding: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
     }
     .card-idx-badge {
@@ -84,7 +85,10 @@
     }
     .card-type-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
     .tag-chart { background: rgba(63, 185, 80, 0.2); color: #7ee787; }
-    .tag-vocab { background: rgba(163, 113, 247, 0.2); color: #d2a8ff; }
+    .tag-voca { background: rgba(163, 113, 247, 0.2); color: #d2a8ff; }
+    .tag-map { background: rgba(88, 166, 255, 0.2); color: #79c0ff; }
+    .tag-history { background: rgba(240, 136, 62, 0.2); color: #ffa657; }
+    .tag-book { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
     .card-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
     .card-title { font-size: 1rem; font-weight: 800; color: #fff; line-height: 1.4; }
     .card-quiz {
@@ -92,18 +96,18 @@
       padding: 0.5rem 0.75rem; border-radius: 6px; border-left: 3px solid var(--accent);
     }
     .img-preview-box {
-      width: 100%; height: 200px; background: #090d13; border: 1px dashed var(--card-border);
+      width: 100%; height: 210px; background: #090d13; border: 1px dashed var(--card-border);
       border-radius: 8px; overflow: hidden; position: relative; display: flex;
       justify-content: center; align-items: center; cursor: pointer;
     }
     .img-preview-box img { width: 100%; height: 100%; object-fit: contain; }
     .img-preview-box.no-img {
       color: var(--text-sub); font-size: 0.85rem; display: flex;
-      flex-direction: column; gap: 6px; align-items: center;
+      flex-direction: column; gap: 6px; align-items: center; text-align: center; padding: 1rem;
     }
     .img-drop-overlay {
       position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(88, 166, 255, 0.8); color: #fff; display: none;
+      background: rgba(88, 166, 255, 0.85); color: #fff; display: none;
       justify-content: center; align-items: center; font-weight: 800; font-size: 1.1rem;
     }
     .img-preview-box.dragover .img-drop-overlay { display: flex; }
@@ -127,9 +131,14 @@
 </head>
 <body>
   <div class="admin-container">
+    <header class="admin-header">
+      <div class="header-title">
+        <h1>🖼️ 교재 문제 이미지 퀵 체인저</h1>
+        <p>사회 / 과학 / 국어 교재 문제의 연결 이미지를 눈으로 보면서 원터치로 교체하고 저장합니다.</p>
+      </div>
       <div class="header-actions">
-        <a href="parent_dashboard.html" class="btn-action" style="text-decoration:none; color:var(--text);">📊 대시보드로</a>
-        <a href="lobby.html" class="btn-action" style="text-decoration:none; color:var(--text);">🏠 로비로</a>
+        <a href="parent_dashboard.html" class="btn-action">📊 대시보드로</a>
+        <a href="lobby.html" class="btn-action">🏠 로비로</a>
         <button type="button" class="btn-action" onclick="copyModifiedCode()">📋 수정된 코드 복사</button>
         <button type="button" class="btn-action btn-save" onclick="downloadModifiedFile()">💾 data.js 다운로드</button>
       </div>
@@ -155,7 +164,9 @@
         <select id="typeSelect" onchange="renderQuestions()">
           <option value="all" selected>전체 보기</option>
           <option value="chart">📊 차트 & 도표 (chart)</option>
-          <option value="vocab">🔍 낱말 돋보기 (vocabulary)</option>
+          <option value="voca">🔍 낱말 돋보기 (voca)</option>
+          <option value="map">🗺️ 지도 탐구 (map)</option>
+          <option value="history">📜 역사/배경 (history)</option>
         </select>
       </div>
 
@@ -180,36 +191,67 @@
       onSubjectChange();
     });
 
+    function getSubjectData(subject) {
+      if (subject === 'society') {
+        if (typeof window !== 'undefined' && window.SOCIETY_CURRICULUM_DATA) return window.SOCIETY_CURRICULUM_DATA;
+        if (typeof SOCIETY_CURRICULUM_DATA !== 'undefined') return SOCIETY_CURRICULUM_DATA;
+      } else if (subject === 'science') {
+        if (typeof window !== 'undefined' && window.SCIENCE_CURRICULUM_DATA) return window.SCIENCE_CURRICULUM_DATA;
+        if (typeof SCIENCE_CURRICULUM_DATA !== 'undefined') return SCIENCE_CURRICULUM_DATA;
+      } else if (subject === 'korean') {
+        if (typeof window !== 'undefined' && window.KOREAN_READING_DATABASE) return window.KOREAN_READING_DATABASE;
+        if (typeof KOREAN_READING_DATABASE !== 'undefined') return KOREAN_READING_DATABASE;
+      }
+      return null;
+    }
+
     function onSubjectChange() {
       currentSubject = document.getElementById('subjectSelect').value;
-      if (currentSubject === 'society') {
-        currentData = window.SOCIETY_DATA || {};
-      } else if (currentSubject === 'science') {
-        currentData = window.SCIENCE_DATA || {};
-      } else if (currentSubject === 'korean') {
-        currentData = window.KOREAN_READING_DATA || {};
-      }
+      currentData = getSubjectData(currentSubject);
 
       const unitSelect = document.getElementById('unitSelect');
       unitSelect.innerHTML = '';
 
-      if (Array.isArray(currentData)) {
-        currentData.forEach((book, idx) => {
+      if (!currentData) {
+        unitSelect.innerHTML = '<option value="">데이터 없음</option>';
+        renderQuestions();
+        return;
+      }
+
+      if (currentSubject === 'society') {
+        // 사회: { "5학년 1학기": { "1-1...": {...}, "2-1...": {...} } }
+        let optCount = 0;
+        Object.keys(currentData).forEach(grade => {
+          const gradeUnits = currentData[grade];
+          if (gradeUnits && typeof gradeUnits === 'object') {
+            Object.keys(gradeUnits).forEach(unitTitle => {
+              const opt = document.createElement('option');
+              opt.value = grade + '|||' + unitTitle;
+              opt.textContent = '[' + grade + '] ' + unitTitle;
+              if (unitTitle.includes('우리나라의 기후') || (optCount === 0)) {
+                opt.selected = true;
+              }
+              unitSelect.appendChild(opt);
+              optCount++;
+            });
+          }
+        });
+      } else if (currentSubject === 'science') {
+        // 과학: [ { code, title, unit, grade, voca, chart }, ... ]
+        currentData.forEach((item, idx) => {
           const opt = document.createElement('option');
-          opt.value = idx;
-          opt.textContent = `${book.id || 'book_' + (idx + 1)}: ${book.title || '지문 ' + (idx + 1)}`;
+          opt.value = String(idx);
+          opt.textContent = '[' + (item.grade || '5-1') + '] ' + (item.unit || '') + ' - ' + (item.title || '');
           if (idx === 0) opt.selected = true;
           unitSelect.appendChild(opt);
         });
-      } else {
-        const unitKeys = Object.keys(currentData);
-        unitKeys.forEach((key, idx) => {
+      } else if (currentSubject === 'korean') {
+        // 국어: [ { id: 'book_01', title: '토끼와 거북이', ... }, ... ]
+        currentData.forEach((book, idx) => {
           const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = key;
-          if (key.includes('우리나라의 기후') || idx === 0) {
-            opt.selected = true;
-          }
+          opt.value = String(idx);
+          opt.textContent = '[' + (book.id || '지문 ' + (idx + 1)) + '] ' + (book.title || '도서 ' + (idx + 1));
+          if (idx === 0) opt.selected = true;
           unitSelect.appendChild(opt);
         });
       }
@@ -219,37 +261,32 @@
 
     function renderQuestions() {
       const grid = document.getElementById('questionGrid');
-      const unitKey = document.getElementById('unitSelect').value;
+      const unitVal = document.getElementById('unitSelect').value;
       const typeFilter = document.getElementById('typeSelect').value;
       const statsChip = document.getElementById('statsChip');
 
-      if (!grid || unitKey === '' || !currentData) {
-        if (grid) grid.innerHTML = '<div style="color:#8b949e;">데이터를 불러오는 중입니다...</div>';
-        return;
-      }
-
-      const unitData = Array.isArray(currentData) ? currentData[Number(unitKey)] : currentData[unitKey];
-      if (!unitData) {
-        if (grid) grid.innerHTML = '<div style="color:#8b949e;">해당 단원의 데이터가 없습니다.</div>';
+      if (!grid || !unitVal || !currentData) {
+        if (grid) grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">데이터를 불러오는 중입니다...</div>';
+        if (statsChip) statsChip.textContent = '문제 수: 0개';
         return;
       }
 
       const items = [];
+      const subjectBasePath = currentSubject === 'society' ? 'kids/subjects/society/' : (currentSubject === 'science' ? 'kids/subjects/science/' : 'kids/subjects/korean/');
 
-      if (Array.isArray(currentData)) {
-        // 국어 독해 도서 데이터
-        items.push({
-          type: 'book',
-          typeLabel: '독해 지문',
-          idx: Number(unitKey) + 1,
-          title: unitData.title || '지문 제목',
-          quiz: (unitData.fullText || '').slice(0, 100) + '...',
-          img: unitData.coverImage || unitData.illustration || unitData.img || '',
-          rawObj: unitData,
-          fieldKey: unitData.coverImage !== undefined ? 'coverImage' : (unitData.illustration !== undefined ? 'illustration' : 'img')
-        });
-      } else {
-        // 사회 / 과학 단원 데이터
+      if (currentSubject === 'society') {
+        const parts = unitVal.split('|||');
+        const grade = parts[0];
+        const unitTitle = parts[1];
+        const unitData = (currentData[grade] && currentData[grade][unitTitle]) ? currentData[grade][unitTitle] : null;
+
+        if (!unitData) {
+          grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">해당 단원의 데이터가 없습니다.</div>';
+          statsChip.textContent = '문제 수: 0개';
+          return;
+        }
+
+        // 1. 차트/도표
         if (unitData.chart && (typeFilter === 'all' || typeFilter === 'chart')) {
           unitData.chart.forEach((c, idx) => {
             items.push({
@@ -265,13 +302,14 @@
           });
         }
 
-        if (unitData.vocabulary && (typeFilter === 'all' || typeFilter === 'vocab')) {
-          unitData.vocabulary.forEach((v, idx) => {
+        // 2. 낱말 (voca)
+        if (unitData.voca && (typeFilter === 'all' || typeFilter === 'voca')) {
+          unitData.voca.forEach((v, idx) => {
             items.push({
-              type: 'vocab',
+              type: 'voca',
               typeLabel: '낱말',
               idx: idx + 1,
-              title: v.word + ' (' + (v.hint || '') + ')',
+              title: v.word + (v.hint ? ' (' + v.hint + ')' : ''),
               quiz: v.meaning || v.desc || '',
               img: v.imageUrl || v.img || '',
               rawObj: v,
@@ -279,6 +317,101 @@
             });
           });
         }
+
+        // 3. 지도 (map)
+        if (unitData.map && (typeFilter === 'all' || typeFilter === 'map')) {
+          unitData.map.forEach((m, idx) => {
+            items.push({
+              type: 'map',
+              typeLabel: '지도 탐구',
+              idx: idx + 1,
+              title: m.title || '지도 탐구 자료',
+              quiz: m.quiz || m.desc || '',
+              img: m.img || '',
+              rawObj: m,
+              fieldKey: 'img'
+            });
+          });
+        }
+
+        // 4. 역사 (history)
+        if (unitData.history && (typeFilter === 'all' || typeFilter === 'history')) {
+          unitData.history.forEach((h, idx) => {
+            items.push({
+              type: 'history',
+              typeLabel: '역사/배경',
+              idx: idx + 1,
+              title: h.title || '역사 탐구 자료',
+              quiz: h.quiz || h.desc || '',
+              img: h.img || '',
+              rawObj: h,
+              fieldKey: 'img'
+            });
+          });
+        }
+
+      } else if (currentSubject === 'science') {
+        const itemIdx = Number(unitVal);
+        const unitData = currentData[itemIdx];
+
+        if (!unitData) {
+          grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">해당 단원의 데이터가 없습니다.</div>';
+          statsChip.textContent = '문제 수: 0개';
+          return;
+        }
+
+        // 1. 낱말 (voca)
+        if (unitData.voca && (typeFilter === 'all' || typeFilter === 'voca')) {
+          unitData.voca.forEach((v, idx) => {
+            items.push({
+              type: 'voca',
+              typeLabel: '과학 낱말',
+              idx: idx + 1,
+              title: v.word + (v.hint ? ' (' + v.hint + ')' : ''),
+              quiz: v.meaning || v.desc || '',
+              img: v.imageUrl || v.img || '',
+              rawObj: v,
+              fieldKey: v.imageUrl !== undefined ? 'imageUrl' : 'img'
+            });
+          });
+        }
+
+        // 2. 도표/탐구
+        if (unitData.chart && (typeFilter === 'all' || typeFilter === 'chart')) {
+          unitData.chart.forEach((c, idx) => {
+            items.push({
+              type: 'chart',
+              typeLabel: '실험/탐구 도표',
+              idx: idx + 1,
+              title: c.title || '실험/도표 문제',
+              quiz: c.quiz || c.desc || '',
+              img: c.img || '',
+              rawObj: c,
+              fieldKey: 'img'
+            });
+          });
+        }
+
+      } else if (currentSubject === 'korean') {
+        const bookIdx = Number(unitVal);
+        const book = currentData[bookIdx];
+
+        if (!book) {
+          grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">해당 지문 데이터가 없습니다.</div>';
+          statsChip.textContent = '문제 수: 0개';
+          return;
+        }
+
+        items.push({
+          type: 'book',
+          typeLabel: '지문 삽화',
+          idx: 1,
+          title: book.title || '지문 제목',
+          quiz: (book.fullText || '').slice(0, 120) + '...',
+          img: book.coverImage || book.illustration || book.img || '',
+          rawObj: book,
+          fieldKey: book.coverImage !== undefined ? 'coverImage' : (book.illustration !== undefined ? 'illustration' : 'img')
+        });
       }
 
       statsChip.textContent = '문제 수: ' + items.length + '개';
@@ -288,8 +421,6 @@
         grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">선택된 조건에 해당하는 문제가 없습니다.</div>';
         return;
       }
-
-      const subjectBasePath = currentSubject === 'society' ? 'kids/subjects/society/' : (currentSubject === 'science' ? 'kids/subjects/science/' : 'kids/subjects/korean_reading/');
 
       items.forEach((item, itemIdx) => {
         const card = document.createElement('div');
@@ -303,7 +434,11 @@
           displayImgUrl = subjectBasePath + cleanImgPath;
         }
 
-        const tagClass = item.type === 'chart' ? 'tag-chart' : 'tag-vocab';
+        let tagClass = 'tag-chart';
+        if (item.type === 'voca') tagClass = 'tag-voca';
+        else if (item.type === 'map') tagClass = 'tag-map';
+        else if (item.type === 'history') tagClass = 'tag-history';
+        else if (item.type === 'book') tagClass = 'tag-book';
 
         card.innerHTML = 
           '<div class="card-top">' +
@@ -389,18 +524,35 @@
     }
 
     function copyModifiedCode() {
-      let varName = currentSubject === 'society' ? 'SOCIETY_DATA' : (currentSubject === 'science' ? 'SCIENCE_DATA' : 'KOREAN_READING_DATA');
-      const fullCode = 'window.' + varName + ' = ' + JSON.stringify(currentData, null, 2) + ';\n';
+      let fullCode = '';
+      if (currentSubject === 'society') {
+        fullCode = 'const SOCIETY_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
+      } else if (currentSubject === 'science') {
+        fullCode = 'window.SCIENCE_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n';
+      } else if (currentSubject === 'korean') {
+        fullCode = 'const KOREAN_READING_DATABASE = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
+      }
+
       navigator.clipboard.writeText(fullCode).then(() => {
         showToast('📋 전체 수정된 JS 코드가 클립보드에 복사되었습니다!');
       });
     }
 
     function downloadModifiedFile() {
-      let fileName = currentSubject === 'society' ? 'society-data.js' : (currentSubject === 'science' ? 'science-data.js' : 'korean-reading-data.js');
-      let varName = currentSubject === 'society' ? 'SOCIETY_DATA' : (currentSubject === 'science' ? 'SCIENCE_DATA' : 'KOREAN_READING_DATA');
+      let fileName = 'society-data.js';
+      let fullCode = '';
 
-      const fullCode = 'window.' + varName + ' = ' + JSON.stringify(currentData, null, 2) + ';\n';
+      if (currentSubject === 'society') {
+        fileName = 'society-data.js';
+        fullCode = 'const SOCIETY_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
+      } else if (currentSubject === 'science') {
+        fileName = 'science-data.js';
+        fullCode = 'window.SCIENCE_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n';
+      } else if (currentSubject === 'korean') {
+        fileName = 'korean-reading-data.js';
+        fullCode = 'const KOREAN_READING_DATABASE = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
+      }
+
       const blob = new Blob([fullCode], { type: 'application/javascript;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

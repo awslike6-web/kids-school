@@ -662,3 +662,9 @@ const KOREAN_READING_DATABASE = [
     }
 ];
 
+if (typeof window !== 'undefined') {
+    window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { KOREAN_READING_DATABASE };
+}
