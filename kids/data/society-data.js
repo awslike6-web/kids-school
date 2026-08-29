@@ -332,7 +332,7 @@ const SOCIETY_CURRICULUM_DATA = {
           ],
           "correctIdx": 0,
           "explanation": "이 활동표는 학생들이 일상생활에서 직접 기후 행동을 실천하고 기록함으로써, 기후변화 문제 해결에 동참하는 습관을 기르도록 독려하는 것을 목적으로 합니다.",
-          "img": "./images/20260612_103943.jpg"
+          "img": "./images/20260612_103943_1.jpg"
         },
         {
           "title": "기후 변화와 자연재해 확인하기",

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🖼️ 민민이네 교재 이미지 퀵 체인저 (Admin Tool)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Jua&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text: #f0f6fc;
+      --text-sub: #8b949e;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #f0883e;
+      --purple: #a371f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .admin-container { max-width: 1200px; margin: 0 auto; }
+    .admin-header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem; padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--card-border); margin-bottom: 1.5rem;
+    }
+    .header-title h1 {
+      font-family: 'Jua', sans-serif; font-size: 1.6rem; color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .header-title p { font-size: 0.88rem; color: var(--text-sub); margin-top: 4px; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-action {
+      background: #21262d; border: 1px solid var(--card-border); color: var(--text);
+      padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
+    }
+    .btn-action:hover { background: #30363d; border-color: var(--accent); }
+    .btn-action.btn-save {
+      background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+      color: #fff; border: none;
+    }
+    .btn-action.btn-save:hover { background: linear-gradient(135deg, #2ea043 0%, #3fb950 100%); }
+    .filter-bar {
+      display: flex; gap: 1rem; flex-wrap: wrap; background: var(--card-bg);
+      border: 1px solid var(--card-border); padding: 1rem; border-radius: 12px;
+      margin-bottom: 1.5rem; align-items: center;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-group label { font-size: 0.78rem; color: var(--text-sub); font-weight: 700; }
+    .filter-group select {
+      background: #0d1117; border: 1px solid var(--card-border); color: var(--text);
+      padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.9rem; outline: none; min-width: 180px;
+    }
+    .filter-group select:focus { border-color: var(--accent); }
+    .stats-chip {
+      margin-left: auto; background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.3); color: var(--accent);
+      padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
+    }
+    .question-list-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.25rem;
+    }
+    .question-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+      overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s;
+    }
+    .question-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .question-card.modified { border-color: var(--orange); box-shadow: 0 0 12px rgba(240, 136, 62, 0.2); }
+    .card-top {
+      padding: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    }
+    .card-idx-badge {
+      background: #21262d; color: var(--accent); font-size: 0.75rem; font-weight: 800;
+      padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+    .card-type-tag { font-size: 0.75rem; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+    .tag-chart { background: rgba(63, 185, 80, 0.2); color: #7ee787; }
+    .tag-vocab { background: rgba(163, 113, 247, 0.2); color: #d2a8ff; }
+    .card-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
+    .card-title { font-size: 1rem; font-weight: 800; color: #fff; line-height: 1.4; }
+    .card-quiz {
+      font-size: 0.85rem; color: var(--text-sub); background: rgba(0, 0, 0, 0.25);
+      padding: 0.5rem 0.75rem; border-radius: 6px; border-left: 3px solid var(--accent);
+    }
+    .img-preview-box {
+      width: 100%; height: 200px; background: #090d13; border: 1px dashed var(--card-border);
+      border-radius: 8px; overflow: hidden; position: relative; display: flex;
+      justify-content: center; align-items: center; cursor: pointer;
+    }
+    .img-preview-box img { width: 100%; height: 100%; object-fit: contain; }
+    .img-preview-box.no-img {
+      color: var(--text-sub); font-size: 0.85rem; display: flex;
+      flex-direction: column; gap: 6px; align-items: center;
+    }
+    .img-drop-overlay {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(88, 166, 255, 0.8); color: #fff; display: none;
+      justify-content: center; align-items: center; font-weight: 800; font-size: 1.1rem;
+    }
+    .img-preview-box.dragover .img-drop-overlay { display: flex; }
+    .card-img-form { display: flex; gap: 6px; }
+    .card-img-input {
+      flex: 1; background: #0d1117; border: 1px solid var(--card-border); color: var(--text);
+      padding: 0.45rem 0.6rem; border-radius: 6px; font-size: 0.82rem; font-family: monospace; outline: none;
+    }
+    .card-img-input:focus { border-color: var(--accent); }
+    .btn-apply-img {
+      background: #238636; color: #fff; border: none; padding: 0.45rem 0.75rem;
+      border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-apply-img:hover { background: #2ea043; }
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; background: #238636; color: #fff;
+      padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 700;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); display: none; z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <header class="admin-header">
+      <div class="header-title">
+        <h1>🖼️ 교재 문제 이미지 퀵 체인저</h1>
+        <p>사회 / 과학 / 국어 교재 문제의 연결 이미지를 눈으로 보면서 원터치로 교체하고 저장합니다.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn-action" onclick="copyModifiedCode()">📋 수정된 코드 복사</button>
+        <button type="button" class="btn-action btn-save" onclick="downloadModifiedFile()">💾 data.js 다운로드</button>
+      </div>
+    </header>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>📚 과목 선택</label>
+        <select id="subjectSelect" onchange="onSubjectChange()">
+          <option value="society" selected>🏛️ 사회 (Society)</option>
+          <option value="science">🧪 과학 (Science)</option>
+          <option value="korean">📖 국어 독해 (Korean)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>📑 단원 선택</label>
+        <select id="unitSelect" onchange="renderQuestions()"></select>
+      </div>
+
+      <div class="filter-group">
+        <label>🎯 문제 유형</label>
+        <select id="typeSelect" onchange="renderQuestions()">
+          <option value="all" selected>전체 보기</option>
+          <option value="chart">📊 차트 & 도표 (chart)</option>
+          <option value="vocab">🔍 낱말 돋보기 (vocabulary)</option>
+        </select>
+      </div>
+
+      <div class="stats-chip" id="statsChip">문제 수: 0개</div>
+    </div>
+
+    <div class="question-list-grid" id="questionGrid"></div>
+  </div>
+
+  <div class="toast" id="toastMsg">✅ 적용 완료!</div>
+
+  <script src="kids/data/society-data.js"></script>
+  <script src="kids/data/science-data.js"></script>
+  <script src="kids/data/korean-reading-data.js"></script>
+
+  <script>
+    let currentSubject = 'society';
+    let currentData = null;
+    let modifiedCount = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      onSubjectChange();
+    });
+
+    function onSubjectChange() {
+      currentSubject = document.getElementById('subjectSelect').value;
+      if (currentSubject === 'society') {
+        currentData = window.SOCIETY_DATA || {};
+      } else if (currentSubject === 'science') {
+        currentData = window.SCIENCE_DATA || {};
+      } else if (currentSubject === 'korean') {
+        currentData = window.KOREAN_READING_DATA || {};
+      }
+
+      const unitSelect = document.getElementById('unitSelect');
+      unitSelect.innerHTML = '';
+
+      const unitKeys = Object.keys(currentData);
+      unitKeys.forEach((key, idx) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = key;
+        if (key.includes('우리나라의 기후') || idx === 0) {
+          opt.selected = true;
+        }
+        unitSelect.appendChild(opt);
+      });
+
+      renderQuestions();
+    }
+
+    function renderQuestions() {
+      const grid = document.getElementById('questionGrid');
+      const unitKey = document.getElementById('unitSelect').value;
+      const typeFilter = document.getElementById('typeSelect').value;
+      const statsChip = document.getElementById('statsChip');
+
+      if (!grid || !unitKey || !currentData || !currentData[unitKey]) {
+        if (grid) grid.innerHTML = '<div style="color:#8b949e;">해당 단원의 데이터가 없습니다.</div>';
+        return;
+      }
+
+      const unitData = currentData[unitKey];
+      const items = [];
+
+      if (unitData.chart && (typeFilter === 'all' || typeFilter === 'chart')) {
+        unitData.chart.forEach((c, idx) => {
+          items.push({
+            type: 'chart',
+            typeLabel: '차트/도표',
+            idx: idx + 1,
+            title: c.title || '도표 문제',
+            quiz: c.quiz || c.desc || '',
+            img: c.img || '',
+            rawObj: c,
+            fieldKey: 'img'
+          });
+        });
+      }
+
+      if (unitData.vocabulary && (typeFilter === 'all' || typeFilter === 'vocab')) {
+        unitData.vocabulary.forEach((v, idx) => {
+          items.push({
+            type: 'vocab',
+            typeLabel: '낱말',
+            idx: idx + 1,
+            title: v.word + ' (' + (v.hint || '') + ')',
+            quiz: v.meaning || v.desc || '',
+            img: v.imageUrl || v.img || '',
+            rawObj: v,
+            fieldKey: v.imageUrl !== undefined ? 'imageUrl' : 'img'
+          });
+        });
+      }
+
+      statsChip.textContent = '문제 수: ' + items.length + '개';
+      grid.innerHTML = '';
+
+      if (items.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">선택된 조건에 해당하는 문제가 없습니다.</div>';
+        return;
+      }
+
+      const subjectBasePath = currentSubject === 'society' ? 'kids/subjects/society/' : (currentSubject === 'science' ? 'kids/subjects/science/' : 'kids/subjects/korean_reading/');
+
+      items.forEach((item, itemIdx) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+
+        let cleanImgPath = item.img || '';
+        let displayImgUrl = cleanImgPath;
+        if (cleanImgPath.startsWith('./images/')) {
+          displayImgUrl = subjectBasePath + cleanImgPath.replace('./', '');
+        } else if (cleanImgPath.startsWith('images/')) {
+          displayImgUrl = subjectBasePath + cleanImgPath;
+        }
+
+        const tagClass = item.type === 'chart' ? 'tag-chart' : 'tag-vocab';
+
+        card.innerHTML = 
+          '<div class="card-top">' +
+            '<span class="card-idx-badge">#' + item.type.toUpperCase() + ' ' + item.idx + '</span>' +
+            '<span class="card-type-tag ' + tagClass + '">' + item.typeLabel + '</span>' +
+          '</div>' +
+          '<div class="card-body">' +
+            '<div class="card-title">' + item.title + '</div>' +
+            (item.quiz ? '<div class="card-quiz">❓ ' + item.quiz + '</div>' : '') +
+            '<div class="img-preview-box ' + (!item.img ? 'no-img' : '') + '" id="previewBox_' + itemIdx + '" onclick="document.getElementById(\'fileInput_' + itemIdx + '\').click()">' +
+              (item.img ? '<img src="' + displayImgUrl + '" alt="' + item.title + '" onerror="this.parentElement.classList.add(\'no-img\'); this.parentElement.innerHTML=\'⚠️ 이미지 파일 없음<br><small>' + cleanImgPath + '</small>\'">' : '<span>📷 이미지 없음 (클릭하여 추가)</span>') +
+              '<div class="img-drop-overlay">📥 여기에 이미지를 놓으세요!</div>' +
+            '</div>' +
+            '<input type="file" id="fileInput_' + itemIdx + '" style="display:none" accept="image/*" onchange="handleFileSelect(event, ' + itemIdx + ')">' +
+            '<div class="card-img-form">' +
+              '<input type="text" class="card-img-input" id="imgInput_' + itemIdx + '" value="' + cleanImgPath + '" placeholder="./images/파일명.jpg">' +
+              '<button type="button" class="btn-apply-img" onclick="applyImagePath(' + itemIdx + ')">적용</button>' +
+            '</div>' +
+          '</div>';
+
+        const pBox = card.querySelector('#previewBox_' + itemIdx);
+        pBox.addEventListener('dragover', (e) => { e.preventDefault(); pBox.classList.add('dragover'); });
+        pBox.addEventListener('dragleave', () => { pBox.classList.remove('dragover'); });
+        pBox.addEventListener('drop', (e) => {
+          e.preventDefault();
+          pBox.classList.remove('dragover');
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            processNewImageFile(e.dataTransfer.files[0], itemIdx);
+          }
+        });
+
+        card._item = item;
+        grid.appendChild(card);
+      });
+    }
+
+    function applyImagePath(itemIdx) {
+      const card = document.getElementById('questionGrid').children[itemIdx];
+      if (!card || !card._item) return;
+
+      const input = document.getElementById('imgInput_' + itemIdx);
+      const newPath = input.value.trim();
+      const item = card._item;
+
+      item.rawObj[item.fieldKey] = newPath;
+      card.classList.add('modified');
+      modifiedCount++;
+
+      renderQuestions();
+      showToast("'" + item.title + "' 이미지 경로가 적용되었습니다!");
+    }
+
+    function handleFileSelect(e, itemIdx) {
+      if (e.target.files && e.target.files[0]) {
+        processNewImageFile(e.target.files[0], itemIdx);
+      }
+    }
+
+    function processNewImageFile(file, itemIdx) {
+      const card = document.getElementById('questionGrid').children[itemIdx];
+      if (!card || !card._item) return;
+
+      const fileName = file.name;
+      const autoPath = './images/' + fileName;
+      const input = document.getElementById('imgInput_' + itemIdx);
+      input.value = autoPath;
+
+      const item = card._item;
+      item.rawObj[item.fieldKey] = autoPath;
+      card.classList.add('modified');
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const pBox = document.getElementById('previewBox_' + itemIdx);
+        pBox.classList.remove('no-img');
+      reader.readAsDataURL(file);
+
+      showToast('✅ [' + fileName + '] 이미지로 변경되었습니다! (저장 필요)');
+    }
+
+    function copyModifiedCode() {
+      let varName = currentSubject === 'society' ? 'SOCIETY_DATA' : (currentSubject === 'science' ? 'SCIENCE_DATA' : 'KOREAN_READING_DATA');
+      const fullCode = 'window.' + varName + ' = ' + JSON.stringify(currentData, null, 2) + ';\n';
+      navigator.clipboard.writeText(fullCode).then(() => {
+        showToast('📋 전체 수정된 JS 코드가 클립보드에 복사되었습니다!');
+      });
+    }
+
+    function downloadModifiedFile() {
+      let fileName = currentSubject === 'society' ? 'society-data.js' : (currentSubject === 'science' ? 'science-data.js' : 'korean-reading-data.js');
+      let varName = currentSubject === 'society' ? 'SOCIETY_DATA' : (currentSubject === 'science' ? 'SCIENCE_DATA' : 'KOREAN_READING_DATA');
+
+      const fullCode = 'window.' + varName + ' = ' + JSON.stringify(currentData, null, 2) + ';\n';
+      const blob = new Blob([fullCode], { type: 'application/javascript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('💾 [' + fileName + '] 다운로드가 시작되었습니다!');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toastMsg');
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2500);
+    }
+  </script>
+</body>
+</html>
