@@ -25,7 +25,7 @@
       padding: 1.5rem;
       min-height: 100vh;
     }
-    .admin-container { max-width: 1240px; margin: 0 auto; }
+    .admin-container { max-width: 1280px; margin: 0 auto; }
     .admin-header {
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 1rem; padding-bottom: 1.25rem;
@@ -36,7 +36,7 @@
       display: flex; align-items: center; gap: 8px;
     }
     .header-title p { font-size: 0.88rem; color: var(--text-sub); margin-top: 4px; }
-    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .btn-action {
       background: #21262d; border: 1px solid var(--card-border); color: var(--text);
       padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700;
@@ -49,6 +49,14 @@
       color: #fff; border: none;
     }
     .btn-action.btn-save:hover { background: linear-gradient(135deg, #2ea043 0%, #3fb950 100%); }
+    .btn-action.btn-github {
+      background: linear-gradient(135deg, #8957e5 0%, #58a6ff 100%);
+      color: #fff; border: none; box-shadow: 0 4px 12px rgba(137, 87, 229, 0.3);
+    }
+    .btn-action.btn-github:hover {
+      background: linear-gradient(135deg, #9a67ea 0%, #79c0ff 100%);
+      transform: translateY(-1px);
+    }
     .filter-bar {
       display: flex; gap: 1rem; flex-wrap: wrap; background: var(--card-bg);
       border: 1px solid var(--card-border); padding: 1rem; border-radius: 12px;
@@ -74,10 +82,10 @@
       overflow: hidden; display: flex; flex-direction: column; transition: transform 0.2s, border-color 0.2s;
     }
     .question-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .question-card.modified { border-color: var(--orange); box-shadow: 0 0 12px rgba(240, 136, 62, 0.2); }
+    .question-card.modified { border-color: var(--orange); box-shadow: 0 0 12px rgba(240, 136, 62, 0.25); }
     .card-top {
       padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
     .card-idx-badge {
       background: #21262d; color: var(--accent); font-size: 0.75rem; font-weight: 800;
@@ -122,10 +130,34 @@
       border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
     }
     .btn-apply-img:hover { background: #2ea043; }
+    
+    /* 모달 스타일 */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px);
+      display: none; justify-content: center; align-items: center; z-index: 2000; padding: 1rem;
+    }
+    .modal-box {
+      background: #161b22; border: 1px solid var(--card-border); border-radius: 16px;
+      max-width: 520px; width: 100%; padding: 1.75rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    .modal-title { font-family: 'Jua', sans-serif; font-size: 1.3rem; color: var(--accent); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px; }
+    .modal-desc { font-size: 0.88rem; color: var(--text-sub); line-height: 1.5; margin-bottom: 1.25rem; }
+    .modal-input {
+      width: 100%; background: #0d1117; border: 1px solid var(--card-border); color: #fff;
+      padding: 0.65rem 0.8rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; outline: none;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem; }
+    .log-box {
+      background: #090d13; border: 1px solid var(--card-border); border-radius: 8px;
+      padding: 0.75rem; font-family: monospace; font-size: 0.82rem; color: #7ee787;
+      max-height: 180px; overflow-y: auto; margin-top: 1rem; line-height: 1.4;
+    }
+
     .toast {
       position: fixed; bottom: 2rem; right: 2rem; background: #238636; color: #fff;
       padding: 0.8rem 1.5rem; border-radius: 10px; font-weight: 700;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); display: none; z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); display: none; z-index: 3000;
     }
   </style>
 </head>
@@ -134,12 +166,14 @@
     <header class="admin-header">
       <div class="header-title">
         <h1>🖼️ 교재 문제 이미지 퀵 체인저</h1>
-        <p>사회 / 과학 / 국어 교재 문제의 연결 이미지를 눈으로 보면서 원터치로 교체하고 저장합니다.</p>
+        <p>사회 / 과학 / 국어 문제를 눈으로 보며 이미지를 교체하고, GitHub에 즉시 원클릭 배포합니다.</p>
       </div>
       <div class="header-actions">
         <a href="parent_dashboard.html" class="btn-action">📊 대시보드로</a>
         <a href="lobby.html" class="btn-action">🏠 로비로</a>
-        <button type="button" class="btn-action" onclick="copyModifiedCode()">📋 수정된 코드 복사</button>
+        <button type="button" class="btn-action" onclick="openTokenModal()">🔑 토큰 설정</button>
+        <button type="button" class="btn-action btn-github" onclick="startGithubPush()">🚀 깃허브 원클릭 배포</button>
+        <button type="button" class="btn-action" onclick="copyModifiedCode()">📋 코드 복사</button>
         <button type="button" class="btn-action btn-save" onclick="downloadModifiedFile()">💾 data.js 다운로드</button>
       </div>
     </header>
@@ -176,6 +210,36 @@
     <div class="question-list-grid" id="questionGrid"></div>
   </div>
 
+  <!-- 🔑 GitHub 토큰 설정 모달 -->
+  <div class="modal-overlay" id="tokenModal">
+    <div class="modal-box">
+      <div class="modal-title">🔑 GitHub Personal Access Token 설정</div>
+      <div class="modal-desc">
+        GitHub에 브라우저에서 직접 커밋 & 푸시하기 위해 토큰이 필요합니다.<br>
+        (토큰은 사용자의 브라우저 로컬 저장소에만 안전하게 저장됩니다)
+      </div>
+      <input type="password" class="modal-input" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <div class="modal-actions">
+        <button type="button" class="btn-action" onclick="closeTokenModal()">닫기</button>
+        <button type="button" class="btn-action btn-save" onclick="saveGithubToken()">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🚀 GitHub 원클릭 배포 진행 모달 -->
+  <div class="modal-overlay" id="pushModal">
+    <div class="modal-box">
+      <div class="modal-title" id="pushModalTitle">🚀 GitHub 원클릭 즉시 배포 진행 중...</div>
+      <div class="modal-desc" id="pushModalDesc">
+        수정된 이미지 파일과 data.js를 GitHub 저장소(awslike6-web/kids-school)로 직접 커밋합니다.
+      </div>
+      <div class="log-box" id="pushLogBox">준비 중...</div>
+      <div class="modal-actions" id="pushModalActions" style="display:none;">
+        <button type="button" class="btn-action btn-save" onclick="closePushModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toastMsg">✅ 적용 완료!</div>
 
   <script src="kids/data/society-data.js"></script>
@@ -186,6 +250,8 @@
     let currentSubject = 'society';
     let currentData = null;
     let modifiedCount = 0;
+    const GITHUB_REPO = 'awslike6-web/kids-school';
+    const GITHUB_BRANCH = 'main';
 
     window.addEventListener('DOMContentLoaded', () => {
       onSubjectChange();
@@ -219,7 +285,6 @@
       }
 
       if (currentSubject === 'society') {
-        // 사회: { "5학년 1학기": { "1-1...": {...}, "2-1...": {...} } }
         let optCount = 0;
         Object.keys(currentData).forEach(grade => {
           const gradeUnits = currentData[grade];
@@ -237,7 +302,6 @@
           }
         });
       } else if (currentSubject === 'science') {
-        // 과학: [ { code, title, unit, grade, voca, chart }, ... ]
         currentData.forEach((item, idx) => {
           const opt = document.createElement('option');
           opt.value = String(idx);
@@ -246,7 +310,6 @@
           unitSelect.appendChild(opt);
         });
       } else if (currentSubject === 'korean') {
-        // 국어: [ { id: 'book_01', title: '토끼와 거북이', ... }, ... ]
         currentData.forEach((book, idx) => {
           const opt = document.createElement('option');
           opt.value = String(idx);
@@ -360,7 +423,6 @@
           return;
         }
 
-        // 1. 낱말 (voca)
         if (unitData.voca && (typeFilter === 'all' || typeFilter === 'voca')) {
           unitData.voca.forEach((v, idx) => {
             items.push({
@@ -376,7 +438,6 @@
           });
         }
 
-        // 2. 도표/탐구
         if (unitData.chart && (typeFilter === 'all' || typeFilter === 'chart')) {
           unitData.chart.forEach((c, idx) => {
             items.push({
@@ -490,7 +551,6 @@
       const newPath = input.value.trim();
       const item = card._item;
 
-      // 만약 경로를 직접 텍스트로 수정했다면 기존 프리뷰 URL 리셋
       if (item.rawObj[item.fieldKey] !== newPath && !item.rawObj._previewUrl) {
         delete item.rawObj._previewUrl;
       }
@@ -537,7 +597,7 @@
       };
       reader.readAsDataURL(file);
 
-      showToast('✅ [' + fileName + '] 이미지가 적용되었습니다! (우측 상단 data.js 다운로드)');
+      showToast('✅ [' + fileName + '] 이미지가 적용되었습니다! (상단 🚀 깃허브 배포 클릭)');
     }
 
     function getCleanJson(data) {
@@ -588,6 +648,186 @@
       a.click();
       URL.revokeObjectURL(url);
       showToast('💾 [' + fileName + '] 다운로드가 시작되었습니다!');
+    }
+
+    // =========================================================
+    // 🚀 GitHub REST API 기반 원클릭 즉시 배포 엔진
+    // =========================================================
+    function openTokenModal() {
+      const savedToken = localStorage.getItem('kids_github_token') || '';
+      document.getElementById('githubTokenInput').value = savedToken;
+      document.getElementById('tokenModal').style.display = 'flex';
+    }
+
+    function closeTokenModal() {
+      document.getElementById('tokenModal').style.display = 'none';
+    }
+
+    function saveGithubToken() {
+      const token = document.getElementById('githubTokenInput').value.trim();
+      if (!token) {
+        alert('GitHub 토큰을 입력해주세요.');
+        return;
+      }
+      localStorage.setItem('kids_github_token', token);
+      closeTokenModal();
+      showToast('🔑 GitHub 토큰이 안전하게 저장되었습니다!');
+    }
+
+    function openPushModal() {
+      const modal = document.getElementById('pushModal');
+      document.getElementById('pushModalTitle').textContent = '🚀 GitHub 원클릭 즉시 배포 진행 중...';
+      document.getElementById('pushModalDesc').textContent = '수정된 이미지 파일과 data.js를 GitHub 저장소로 직접 커밋합니다.';
+      document.getElementById('pushLogBox').innerHTML = '▶️ 배포 프로세스 시작...';
+      document.getElementById('pushModalActions').style.display = 'none';
+      modal.style.display = 'flex';
+    }
+
+    function logPush(msg, isError = false) {
+      const box = document.getElementById('pushLogBox');
+      const p = document.createElement('div');
+      p.style.color = isError ? '#ff7b72' : '#7ee787';
+      p.textContent = msg;
+      box.appendChild(p);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function closePushModal() {
+      document.getElementById('pushModal').style.display = 'none';
+    }
+
+    async function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function getFileSha(path, token) {
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}?ref=${GITHUB_BRANCH}`;
+      const res = await fetch(url, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      if (res.status === 200) {
+        const data = await res.json();
+        return data.sha;
+      }
+      return null;
+    }
+
+    async function putFileToGithub(path, contentBase64, message, token) {
+      const sha = await getFileSha(path, token);
+      const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`;
+      const body = {
+        message: message,
+        content: contentBase64,
+        branch: GITHUB_BRANCH
+      };
+      if (sha) body.sha = sha;
+
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json();
+        throw new Error(errJson.message || `HTTP ${res.status}`);
+      }
+      return await res.json();
+    }
+
+    async function startGithubPush() {
+      const token = localStorage.getItem('kids_github_token');
+      if (!token) {
+        openTokenModal();
+        return;
+      }
+
+      openPushModal();
+
+      try {
+        logPush(`📡 GitHub 저장소 (${GITHUB_REPO}) 연결 확인...`);
+
+        // 1. 새로 추가/교체된 로컬 이미지 파일 업로드
+        const subjectImgDir = currentSubject === 'society' ? 'kids/subjects/society/images' : (currentSubject === 'science' ? 'kids/subjects/science/images' : 'kids/subjects/korean/images');
+        
+        // 탐색하여 _localFile이 있는 항목 수집
+        const localFilesToUpload = [];
+        function scanModifiedObjects(obj) {
+          if (!obj || typeof obj !== 'object') return;
+          if (obj._localFile && obj._localFile instanceof File) {
+            localFilesToUpload.push(obj);
+          }
+          Object.keys(obj).forEach(k => {
+            if (!k.startsWith('_') && typeof obj[k] === 'object') {
+              scanModifiedObjects(obj[k]);
+            }
+          });
+        }
+        scanModifiedObjects(currentData);
+
+        if (localFilesToUpload.length > 0) {
+          logPush(`🖼️ 총 ${localFilesToUpload.length}개의 새 이미지 파일 업로드 시작...`);
+          for (let i = 0; i < localFilesToUpload.length; i++) {
+            const item = localFilesToUpload[i];
+            const file = item._localFile;
+            const targetPath = `${subjectImgDir}/${file.name}`;
+            logPush(`  [${i + 1}/${localFilesToUpload.length}] 업로드 중: ${targetPath}...`);
+            const b64 = await fileToBase64(file);
+            await putFileToGithub(targetPath, b64, `feat(image): 교재 이미지 업로드 (${file.name})`, token);
+            logPush(`  ✅ 업로드 완료: ${file.name}`);
+          }
+        } else {
+          logPush('ℹ️ 업로드할 새 이미지 바이너리 없음 (데이터 파일 업데이트 진행)');
+        }
+
+        // 2. data.js 파일 업데이트
+        const dataFileName = currentSubject === 'society' ? 'society-data.js' : (currentSubject === 'science' ? 'science-data.js' : 'korean-reading-data.js');
+        const dataFilePath = `kids/data/${dataFileName}`;
+        logPush(`📄 ${dataFilePath} 파일 커밋 준비 중...`);
+
+        const cleanDataJson = getCleanJson(currentData);
+        let fullJsCode = '';
+        if (currentSubject === 'society') {
+          fullJsCode = 'const SOCIETY_CURRICULUM_DATA = ' + cleanDataJson + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
+        } else if (currentSubject === 'science') {
+          fullJsCode = 'window.SCIENCE_CURRICULUM_DATA = ' + cleanDataJson + ';\n';
+        } else if (currentSubject === 'korean') {
+          fullJsCode = 'const KOREAN_READING_DATABASE = ' + cleanDataJson + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
+        }
+
+        // UTF-8 문자열을 Base64로 안전하게 변환
+        const utf8Bytes = new TextEncoder().encode(fullJsCode);
+        let binaryStr = '';
+        utf8Bytes.forEach(b => binaryStr += String.fromCharCode(b));
+        const jsBase64 = btoa(binaryStr);
+
+        await putFileToGithub(dataFilePath, jsBase64, `fix(${currentSubject}): 교재 이미지 및 데이터 퀵 체인저 자동 배포`, token);
+        logPush(`✅ ${dataFilePath} 깃 커밋 및 푸시 성공!`);
+
+        logPush('🎉 [배포 완료] 1~2분 후 GitHub Pages에 자동 반영됩니다!');
+        document.getElementById('pushModalTitle').textContent = '🎉 GitHub 원클릭 배포 성공!';
+        document.getElementById('pushModalActions').style.display = 'flex';
+        showToast('🚀 GitHub 원클릭 배포가 성공적으로 완료되었습니다!');
+      } catch (err) {
+        logPush(`❌ 배포 실패: ${err.message}`, true);
+        if (err.message.includes('Bad credentials') || err.message.includes('401')) {
+          logPush('⚠️ GitHub 토큰이 유효하지 않거나 권한(repo scope)이 없습니다. 상단 [🔑 토큰 설정]을 확인하세요.', true);
+        }
+        document.getElementById('pushModalTitle').textContent = '⚠️ GitHub 배포 중 오류 발생';
+        document.getElementById('pushModalActions').style.display = 'flex';
+      }
     }
 
     function showToast(msg) {
