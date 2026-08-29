@@ -534,12 +534,23 @@
           '</div>';
 
         const pBox = card.querySelector('#previewBox_' + itemIdx);
-        pBox.addEventListener('dragover', (e) => { e.preventDefault(); pBox.classList.add('dragover'); });
-        pBox.addEventListener('dragleave', () => { pBox.classList.remove('dragover'); });
-        pBox.addEventListener('drop', (e) => {
+
+        // 카드 전체 및 미리보기 박스 모두 드롭 이벤트 감지
+        card.addEventListener('dragover', (e) => {
           e.preventDefault();
+          e.stopPropagation();
+          pBox.classList.add('dragover');
+        });
+        card.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           pBox.classList.remove('dragover');
-          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        });
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          pBox.classList.remove('dragover');
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
             processNewImageFile(e.dataTransfer.files[0], itemIdx);
           }
         });
@@ -548,6 +559,14 @@
         grid.appendChild(card);
       });
     }
+
+    // 🛡️ 브라우저 전역에서 파일 드래그 시 새 탭으로 열리는 현상 원천 차단
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    }, false);
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+    }, false);
 
     function applyImagePath(itemIdx) {
       const card = document.getElementById('questionGrid').children[itemIdx];
