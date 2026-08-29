@@ -127,12 +127,9 @@
 </head>
 <body>
   <div class="admin-container">
-    <header class="admin-header">
-      <div class="header-title">
-        <h1>🖼️ 교재 문제 이미지 퀵 체인저</h1>
-        <p>사회 / 과학 / 국어 교재 문제의 연결 이미지를 눈으로 보면서 원터치로 교체하고 저장합니다.</p>
-      </div>
       <div class="header-actions">
+        <a href="parent_dashboard.html" class="btn-action" style="text-decoration:none; color:var(--text);">📊 대시보드로</a>
+        <a href="lobby.html" class="btn-action" style="text-decoration:none; color:var(--text);">🏠 로비로</a>
         <button type="button" class="btn-action" onclick="copyModifiedCode()">📋 수정된 코드 복사</button>
         <button type="button" class="btn-action btn-save" onclick="downloadModifiedFile()">💾 data.js 다운로드</button>
       </div>
@@ -196,16 +193,26 @@
       const unitSelect = document.getElementById('unitSelect');
       unitSelect.innerHTML = '';
 
-      const unitKeys = Object.keys(currentData);
-      unitKeys.forEach((key, idx) => {
-        const opt = document.createElement('option');
-        opt.value = key;
-        opt.textContent = key;
-        if (key.includes('우리나라의 기후') || idx === 0) {
-          opt.selected = true;
-        }
-        unitSelect.appendChild(opt);
-      });
+      if (Array.isArray(currentData)) {
+        currentData.forEach((book, idx) => {
+          const opt = document.createElement('option');
+          opt.value = idx;
+          opt.textContent = `${book.id || 'book_' + (idx + 1)}: ${book.title || '지문 ' + (idx + 1)}`;
+          if (idx === 0) opt.selected = true;
+          unitSelect.appendChild(opt);
+        });
+      } else {
+        const unitKeys = Object.keys(currentData);
+        unitKeys.forEach((key, idx) => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = key;
+          if (key.includes('우리나라의 기후') || idx === 0) {
+            opt.selected = true;
+          }
+          unitSelect.appendChild(opt);
+        });
+      }
 
       renderQuestions();
     }
@@ -216,42 +223,62 @@
       const typeFilter = document.getElementById('typeSelect').value;
       const statsChip = document.getElementById('statsChip');
 
-      if (!grid || !unitKey || !currentData || !currentData[unitKey]) {
+      if (!grid || unitKey === '' || !currentData) {
+        if (grid) grid.innerHTML = '<div style="color:#8b949e;">데이터를 불러오는 중입니다...</div>';
+        return;
+      }
+
+      const unitData = Array.isArray(currentData) ? currentData[Number(unitKey)] : currentData[unitKey];
+      if (!unitData) {
         if (grid) grid.innerHTML = '<div style="color:#8b949e;">해당 단원의 데이터가 없습니다.</div>';
         return;
       }
 
-      const unitData = currentData[unitKey];
       const items = [];
 
-      if (unitData.chart && (typeFilter === 'all' || typeFilter === 'chart')) {
-        unitData.chart.forEach((c, idx) => {
-          items.push({
-            type: 'chart',
-            typeLabel: '차트/도표',
-            idx: idx + 1,
-            title: c.title || '도표 문제',
-            quiz: c.quiz || c.desc || '',
-            img: c.img || '',
-            rawObj: c,
-            fieldKey: 'img'
-          });
+      if (Array.isArray(currentData)) {
+        // 국어 독해 도서 데이터
+        items.push({
+          type: 'book',
+          typeLabel: '독해 지문',
+          idx: Number(unitKey) + 1,
+          title: unitData.title || '지문 제목',
+          quiz: (unitData.fullText || '').slice(0, 100) + '...',
+          img: unitData.coverImage || unitData.illustration || unitData.img || '',
+          rawObj: unitData,
+          fieldKey: unitData.coverImage !== undefined ? 'coverImage' : (unitData.illustration !== undefined ? 'illustration' : 'img')
         });
-      }
+      } else {
+        // 사회 / 과학 단원 데이터
+        if (unitData.chart && (typeFilter === 'all' || typeFilter === 'chart')) {
+          unitData.chart.forEach((c, idx) => {
+            items.push({
+              type: 'chart',
+              typeLabel: '차트/도표',
+              idx: idx + 1,
+              title: c.title || '도표 문제',
+              quiz: c.quiz || c.desc || '',
+              img: c.img || '',
+              rawObj: c,
+              fieldKey: 'img'
+            });
+          });
+        }
 
-      if (unitData.vocabulary && (typeFilter === 'all' || typeFilter === 'vocab')) {
-        unitData.vocabulary.forEach((v, idx) => {
-          items.push({
-            type: 'vocab',
-            typeLabel: '낱말',
-            idx: idx + 1,
-            title: v.word + ' (' + (v.hint || '') + ')',
-            quiz: v.meaning || v.desc || '',
-            img: v.imageUrl || v.img || '',
-            rawObj: v,
-            fieldKey: v.imageUrl !== undefined ? 'imageUrl' : 'img'
+        if (unitData.vocabulary && (typeFilter === 'all' || typeFilter === 'vocab')) {
+          unitData.vocabulary.forEach((v, idx) => {
+            items.push({
+              type: 'vocab',
+              typeLabel: '낱말',
+              idx: idx + 1,
+              title: v.word + ' (' + (v.hint || '') + ')',
+              quiz: v.meaning || v.desc || '',
+              img: v.imageUrl || v.img || '',
+              rawObj: v,
+              fieldKey: v.imageUrl !== undefined ? 'imageUrl' : 'img'
+            });
           });
-        });
+        }
       }
 
       statsChip.textContent = '문제 수: ' + items.length + '개';
@@ -351,7 +378,11 @@
       const reader = new FileReader();
       reader.onload = (event) => {
         const pBox = document.getElementById('previewBox_' + itemIdx);
-        pBox.classList.remove('no-img');
+        if (pBox) {
+          pBox.classList.remove('no-img');
+          pBox.innerHTML = '<img src="' + event.target.result + '" alt="' + fileName + '"><div class="img-drop-overlay">📥 여기에 이미지를 놓으세요!</div>';
+        }
+      };
       reader.readAsDataURL(file);
 
       showToast('✅ [' + fileName + '] 이미지로 변경되었습니다! (저장 필요)');
