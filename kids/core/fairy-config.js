@@ -59,6 +59,6 @@ var FAIRY_CONFIG = {
     greetings: {
         minsu: "안녕 민수야! 멋진 모험을 떠나볼까?",
         minseo: "안녕 민서야! 반짝이는 하루를 만들어보자!",
-        admin: "아빠(엄마), 오늘도 고생 많으세요! 든든하게 대기 중입니다!"
+        admin: ""
     }
 };
