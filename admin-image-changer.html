@@ -424,14 +424,18 @@
 
       items.forEach((item, itemIdx) => {
         const card = document.createElement('div');
-        card.className = 'question-card';
+        card.className = 'question-card' + (item.rawObj._isModified ? ' modified' : '');
 
         let cleanImgPath = item.img || '';
-        let displayImgUrl = cleanImgPath;
-        if (cleanImgPath.startsWith('./images/')) {
-          displayImgUrl = subjectBasePath + cleanImgPath.replace('./', '');
-        } else if (cleanImgPath.startsWith('images/')) {
-          displayImgUrl = subjectBasePath + cleanImgPath;
+        let displayImgUrl = item.rawObj._previewUrl || '';
+        if (!displayImgUrl) {
+          if (cleanImgPath.startsWith('./images/')) {
+            displayImgUrl = subjectBasePath + cleanImgPath.replace('./', '');
+          } else if (cleanImgPath.startsWith('images/')) {
+            displayImgUrl = subjectBasePath + cleanImgPath;
+          } else if (cleanImgPath) {
+            displayImgUrl = cleanImgPath;
+          }
         }
 
         let tagClass = 'tag-chart';
@@ -440,16 +444,19 @@
         else if (item.type === 'history') tagClass = 'tag-history';
         else if (item.type === 'book') tagClass = 'tag-book';
 
+        const isModified = !!item.rawObj._isModified;
+
         card.innerHTML = 
           '<div class="card-top">' +
             '<span class="card-idx-badge">#' + item.type.toUpperCase() + ' ' + item.idx + '</span>' +
             '<span class="card-type-tag ' + tagClass + '">' + item.typeLabel + '</span>' +
+            (isModified ? '<span style="font-size:0.75rem; color:#f0883e; font-weight:bold; margin-left:auto;">✏️ 수정됨</span>' : '') +
           '</div>' +
           '<div class="card-body">' +
             '<div class="card-title">' + item.title + '</div>' +
             (item.quiz ? '<div class="card-quiz">❓ ' + item.quiz + '</div>' : '') +
-            '<div class="img-preview-box ' + (!item.img ? 'no-img' : '') + '" id="previewBox_' + itemIdx + '" onclick="document.getElementById(\'fileInput_' + itemIdx + '\').click()">' +
-              (item.img ? '<img src="' + displayImgUrl + '" alt="' + item.title + '" onerror="this.parentElement.classList.add(\'no-img\'); this.parentElement.innerHTML=\'⚠️ 이미지 파일 없음<br><small>' + cleanImgPath + '</small>\'">' : '<span>📷 이미지 없음 (클릭하여 추가)</span>') +
+            '<div class="img-preview-box ' + (!displayImgUrl ? 'no-img' : '') + '" id="previewBox_' + itemIdx + '" onclick="document.getElementById(\'fileInput_' + itemIdx + '\').click()">' +
+              (displayImgUrl ? '<img src="' + displayImgUrl + '" alt="' + item.title + '" onerror="this.parentElement.classList.add(\'no-img\'); this.parentElement.innerHTML=\'⚠️ 아직 저장소 폴더에 파일 없음<br><small>' + cleanImgPath + '</small><br><span style=\\\'font-size:0.72rem; color:#8b949e;\\\'>클릭하여 새 이미지를 선택/드롭하세요</span>\'">' : '<span>📷 이미지 없음 (클릭하여 추가)</span>') +
               '<div class="img-drop-overlay">📥 여기에 이미지를 놓으세요!</div>' +
             '</div>' +
             '<input type="file" id="fileInput_' + itemIdx + '" style="display:none" accept="image/*" onchange="handleFileSelect(event, ' + itemIdx + ')">' +
@@ -483,8 +490,13 @@
       const newPath = input.value.trim();
       const item = card._item;
 
+      // 만약 경로를 직접 텍스트로 수정했다면 기존 프리뷰 URL 리셋
+      if (item.rawObj[item.fieldKey] !== newPath && !item.rawObj._previewUrl) {
+        delete item.rawObj._previewUrl;
+      }
+
       item.rawObj[item.fieldKey] = newPath;
-      card.classList.add('modified');
+      item.rawObj._isModified = true;
       modifiedCount++;
 
       renderQuestions();
@@ -508,29 +520,43 @@
 
       const item = card._item;
       item.rawObj[item.fieldKey] = autoPath;
-      card.classList.add('modified');
+      item.rawObj._isModified = true;
+      item.rawObj._localFile = file;
 
       const reader = new FileReader();
       reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        item.rawObj._previewUrl = dataUrl;
+        
         const pBox = document.getElementById('previewBox_' + itemIdx);
         if (pBox) {
           pBox.classList.remove('no-img');
-          pBox.innerHTML = '<img src="' + event.target.result + '" alt="' + fileName + '"><div class="img-drop-overlay">📥 여기에 이미지를 놓으세요!</div>';
+          pBox.innerHTML = '<img src="' + dataUrl + '" alt="' + fileName + '"><div class="img-drop-overlay">📥 여기에 이미지를 놓으세요!</div>';
         }
+        card.classList.add('modified');
       };
       reader.readAsDataURL(file);
 
-      showToast('✅ [' + fileName + '] 이미지로 변경되었습니다! (저장 필요)');
+      showToast('✅ [' + fileName + '] 이미지가 적용되었습니다! (우측 상단 data.js 다운로드)');
+    }
+
+    function getCleanJson(data) {
+      return JSON.stringify(data, (key, value) => {
+        if (key.startsWith('_')) return undefined;
+        return value;
+      }, 2);
     }
 
     function copyModifiedCode() {
       let fullCode = '';
+      const cleanDataJson = getCleanJson(currentData);
+
       if (currentSubject === 'society') {
-        fullCode = 'const SOCIETY_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
+        fullCode = 'const SOCIETY_CURRICULUM_DATA = ' + cleanDataJson + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
       } else if (currentSubject === 'science') {
-        fullCode = 'window.SCIENCE_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n';
+        fullCode = 'window.SCIENCE_CURRICULUM_DATA = ' + cleanDataJson + ';\n';
       } else if (currentSubject === 'korean') {
-        fullCode = 'const KOREAN_READING_DATABASE = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
+        fullCode = 'const KOREAN_READING_DATABASE = ' + cleanDataJson + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
       }
 
       navigator.clipboard.writeText(fullCode).then(() => {
@@ -541,16 +567,17 @@
     function downloadModifiedFile() {
       let fileName = 'society-data.js';
       let fullCode = '';
+      const cleanDataJson = getCleanJson(currentData);
 
       if (currentSubject === 'society') {
         fileName = 'society-data.js';
-        fullCode = 'const SOCIETY_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
+        fullCode = 'const SOCIETY_CURRICULUM_DATA = ' + cleanDataJson + ';\n\nif (typeof window !== "undefined") {\n  window.SOCIETY_CURRICULUM_DATA = SOCIETY_CURRICULUM_DATA;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { SOCIETY_CURRICULUM_DATA };\n}\n';
       } else if (currentSubject === 'science') {
         fileName = 'science-data.js';
-        fullCode = 'window.SCIENCE_CURRICULUM_DATA = ' + JSON.stringify(currentData, null, 2) + ';\n';
+        fullCode = 'window.SCIENCE_CURRICULUM_DATA = ' + cleanDataJson + ';\n';
       } else if (currentSubject === 'korean') {
         fileName = 'korean-reading-data.js';
-        fullCode = 'const KOREAN_READING_DATABASE = ' + JSON.stringify(currentData, null, 2) + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
+        fullCode = 'const KOREAN_READING_DATABASE = ' + cleanDataJson + ';\n\nif (typeof window !== "undefined") {\n  window.KOREAN_READING_DATABASE = KOREAN_READING_DATABASE;\n}\nif (typeof module !== "undefined" && module.exports) {\n  module.exports = { KOREAN_READING_DATABASE };\n}\n';
       }
 
       const blob = new Blob([fullCode], { type: 'application/javascript;charset=utf-8' });
