@@ -237,13 +237,25 @@
     }
 
     const QUIZ_LIST = [
-      { q: "7 + ? = 10", ans: 3, choices: [2, 3, 4, 5] },
-      { q: "9 + 4 = 9 + 1 + ?", ans: 3, choices: [2, 3, 4, 5] },
-      { q: "10 만들기 짝꿍수: 6의 짝꿍은?", ans: 4, choices: [3, 4, 5, 6] },
-      { q: "8 + 6 = 10 + ?", ans: 4, choices: [3, 4, 5, 6] },
-      { q: "8 + 5 = 10 + ?", ans: 3, choices: [2, 3, 4, 5] }
+      { q: "7 + □ = 10", ans: 3, choices: [2, 3, 4, 5] },
+      { q: "9 + 4 = 9 + 1 + □", ans: 3, choices: [2, 3, 4, 5] },
+      { q: "10 만들기: 6의 짝꿍수는?", ans: 4, choices: [2, 3, 4, 5] },
+      { q: "8 + 6 = 10 + □", ans: 4, choices: [3, 4, 5, 6] },
+      { q: "8 + 5 = 10 + □", ans: 3, choices: [1, 2, 3, 4] },
+      { q: "10 만들기: 3의 짝꿍수는?", ans: 7, choices: [5, 6, 7, 8] },
+      { q: "7 + 5 = 10 + □", ans: 2, choices: [1, 2, 3, 4] },
+      { q: "6 + 8 = 10 + □", ans: 4, choices: [3, 4, 5, 6] }
     ];
     let qIdx = 0;
+
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
 
     function renderQuiz() {
       const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
@@ -252,7 +264,10 @@
       cBox.innerHTML = '';
       document.getElementById('quiz-feedback').textContent = '';
 
-      q.choices.forEach(c => {
+      // 보기 무작위 셔플
+      const shuffled = shuffleArray(q.choices);
+
+      shuffled.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'divide-btn';
         btn.style.fontSize = '1.4rem';

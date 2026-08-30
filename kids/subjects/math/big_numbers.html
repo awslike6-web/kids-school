@@ -518,6 +518,15 @@
     ];
     let qIdx = 0;
 
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
     function renderQuiz() {
       const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
       document.getElementById('quiz-question').textContent = q.q;
@@ -525,7 +534,9 @@
       cBox.innerHTML = '';
       document.getElementById('quiz-feedback').textContent = '';
 
-      q.choices.forEach(c => {
+      const shuffled = shuffleArray(q.choices);
+
+      shuffled.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'divide-btn';
         btn.style.fontSize = '1.2rem';

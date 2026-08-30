@@ -218,6 +218,15 @@
     ];
     let patIdx = 0;
 
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
     function renderPattern() {
       const p = PATTERNS[patIdx % PATTERNS.length];
       const pBox = document.getElementById('pattern-display');
@@ -234,7 +243,9 @@
       cBox.innerHTML = '';
       document.getElementById('pattern-feedback').textContent = '';
 
-      p.choices.forEach(c => {
+      const shuffled = shuffleArray(p.choices);
+
+      shuffled.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'divide-btn';
         btn.style.fontSize = '1.4rem';
