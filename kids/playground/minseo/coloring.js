@@ -446,7 +446,22 @@
     window.print();
   }
 
-  function completeAndClaimReward() {
+  async function completeAndClaimReward() {
+    const isSon = localStorage.getItem('currentUser') === 'son';
+    const rewardName = isSon ? '💎 다이아몬드 +2개' : '🍬 하리보 젤리 +2개';
+
+    // 1. 노션 인벤토리 DB 연동 호출
+    if (typeof window.grantRewardAndShowUI === 'function') {
+      try {
+        await window.grantRewardAndShowUI(2, false, 'art');
+      } catch (err) {
+        console.warn('노션 보상 통신 우회:', err);
+      }
+    } else if (typeof window.triggerAwardDispense === 'function') {
+      await window.triggerAwardDispense(2);
+    }
+
+    // 2. 스타드롭 및 트로피 로드 보상 추가
     if (window.StarrDropEngine) {
       window.StarrDropEngine.addTrophies(50);
       window.StarrDropEngine.addDrop(1);
@@ -455,7 +470,7 @@
         window.StarrDropEngine.AudioEngine.playFanfare(3);
       }
 
-      alert('🎉 와아! 멋진 작품을 완성했어!\n🏆 트로피 +50점과 🎁 스타 드롭 1개를 획득했어!');
+      alert(`🎉 와아! 멋진 작품을 완성했어!\n\n노션 보상: ${rewardName} 획득!\n🏆 트로피 +50점과 🎁 스타 드롭 1개를 획득했어!`);
       window.location.href = '../minsu/starr_drop.html';
     }
   }

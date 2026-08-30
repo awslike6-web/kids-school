@@ -435,15 +435,27 @@
     document.getElementById('quizResultMsg').textContent = '';
   }
 
-  function checkQuizAnswer() {
+  async function checkQuizAnswer() {
     const inputVal = parseInt(document.getElementById('quizAnswerInput').value, 10);
     const q = MATH_QUIZZES[currentQuizIdx];
     const msg = document.getElementById('quizResultMsg');
 
     if (inputVal === q.answer) {
-      msg.innerHTML = '🎉 <b>정답입니다!</b> 트로피 +30개와 스타 드롭 충전 완료!';
+      msg.innerHTML = '🎉 <b>정답입니다!</b> 💎 다이아 +2개(노션), 트로피 +30개, 스타 드롭 충전 완료!';
       msg.style.color = '#4ade80';
 
+      // 1. 노션 인벤토리 DB 연동 호출
+      if (typeof window.grantRewardAndShowUI === 'function') {
+        try {
+          await window.grantRewardAndShowUI(2, false, 'math');
+        } catch (err) {
+          console.warn('노션 보상 통신 우회:', err);
+        }
+      } else if (typeof window.triggerAwardDispense === 'function') {
+        await window.triggerAwardDispense(2);
+      }
+
+      // 2. 스타드롭 및 트로피 추가
       if (window.StarrDropEngine) {
         window.StarrDropEngine.addTrophies(30);
         window.StarrDropEngine.addDrop(1);

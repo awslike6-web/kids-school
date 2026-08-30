@@ -281,7 +281,9 @@
             if (chosenReward.type === 'trophy') {
               StarrDropEngine.addTrophies(chosenReward.value);
             } else if (chosenReward.type === 'credit') {
-              if (typeof window.triggerAwardDispense === 'function') {
+              if (typeof window.grantRewardAndShowUI === 'function') {
+                window.grantRewardAndShowUI(chosenReward.value, true, 'starr_drop');
+              } else if (typeof window.triggerAwardDispense === 'function') {
                 window.triggerAwardDispense(chosenReward.value);
               }
             }
