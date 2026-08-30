@@ -19,11 +19,20 @@
     body { font-family: 'Nanum Gothic', sans-serif; background: #f0f2f5; color: #333; }
     
     .header-bar { 
-        display: flex; justify-content: space-between; padding: 15px 30px; 
+        display: flex; justify-content: space-between; padding: 12px 30px; 
         background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
         align-items: center; position: relative; z-index: 100;
     }
+    .header-left { display: flex; align-items: center; gap: 15px; }
     .header-title { font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #4a3352; }
+    .nav-tabs { display: flex; gap: 8px; margin-left: 20px; }
+    .nav-tab-btn {
+        padding: 6px 14px; border-radius: 8px; text-decoration: none;
+        font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+    }
+    .nav-tab-btn.active { background: #4D96FF; color: white; }
+    .nav-tab-btn.inactive { background: #eef2f7; color: #666; }
+    .nav-tab-btn.inactive:hover { background: #dfe7f2; color: #333; }
     .btn-print { 
         padding: 10px 24px; background: linear-gradient(135deg, #4D96FF, #00D4FF); 
         color: white; border: none; border-radius: 12px; 
@@ -32,8 +41,8 @@
     }
     .btn-print:hover { transform: scale(1.05); }
     .btn-back {
-        padding: 10px 20px; background: #e0e0e0; color: #555; border: none; border-radius: 12px;
-        font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; text-decoration: none;
+        padding: 8px 16px; background: #e0e0e0; color: #555; border: none; border-radius: 10px;
+        font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; text-decoration: none;
     }
 
     .filter-panel {
@@ -134,8 +143,14 @@
 <body>
 
 <div class="no-print header-bar">
-    <a href="english.html" class="btn-back">🔙 영어 던전으로</a>
-    <div class="header-title">영어 공책 인쇄방 🖨️</div>
+    <div class="header-left">
+        <a href="english.html" class="btn-back">🔙 영어 던전으로</a>
+        <div class="header-title">영어 공책 인쇄방 🖨️</div>
+        <div class="nav-tabs">
+            <a href="print_english.html" class="nav-tab-btn active">📝 4선 공책 인쇄방</a>
+            <a href="print_cards.html" class="nav-tab-btn inactive">🎴 플래시카드 공작소</a>
+        </div>
+    </div>
     <button class="btn-print" onclick="handlePrint()">인쇄하기</button>
 </div>
 
