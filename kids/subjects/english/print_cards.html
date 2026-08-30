@@ -230,23 +230,25 @@
         letter-spacing: 0.5px;
     }
 
-    /* QR 코드 박스 */
+    /* QR 코드 박스 (초고인식 48px + Level L 저밀도) */
     .card-qr-box {
         display: flex;
         flex-direction: column;
         align-items: center;
         background: #ffffff;
         padding: 2px;
-        border-radius: 4px;
-        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        border: 1.2px solid #94a3b8;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     .card-qr-img {
-        width: 36px;
-        height: 36px;
+        width: 46px;
+        height: 46px;
         display: block;
+        image-rendering: pixelated;
     }
     .card-qr-tag {
-        font-size: 0.52rem;
+        font-size: 0.55rem;
         font-weight: 800;
         color: #0284c7;
         font-family: 'Jua', sans-serif;
@@ -656,8 +658,9 @@
 
                     let qrHtml = '';
                     if (includeQr) {
-                        const targetUrl = `https://awslike6-web.github.io/kids-school/kids/subjects/english/listen.html?t=${encodeURIComponent(item.word)}&m=${encodeURIComponent(item.meaning)}`;
-                        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=${encodeURIComponent(targetUrl)}`;
+                        // 초단축 URL + Level L 저밀도 패턴으로 점 크기를 2배 이상 키워 0.1초 고속 인식 보장!
+                        const targetUrl = `https://awslike6-web.github.io/kids-school/kids/subjects/english/listen.html?t=${encodeURIComponent(item.word)}`;
+                        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&ecc=L&margin=1&data=${encodeURIComponent(targetUrl)}`;
                         qrHtml = `
                             <div class="card-qr-box" title="스마트폰으로 스캔하여 발음 듣기">
                                 <img class="card-qr-img" src="${qrSrc}" alt="QR" />

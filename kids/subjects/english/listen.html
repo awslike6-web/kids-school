@@ -187,21 +187,37 @@
     <div class="bottom-info">💡 소리가 안 나면 스마트폰 무음(진동) 모드를 해제해주세요!</div>
 </div>
 
+<script src="../../config.js"></script>
+<script src="../../core/notion-helper.js"></script>
 <script>
     // URL 파라미터 파싱
     const params = new URLSearchParams(window.location.search);
     const eng = params.get('t') || 'Hello!';
-    const kor = params.get('m') || '안녕하세요!';
+    let kor = params.get('m') || '';
 
     document.getElementById('engText').textContent = eng;
-    document.getElementById('korText').textContent = kor;
+    if (kor) {
+        document.getElementById('korText').textContent = kor;
+    }
+
+    // URL에 한글 뜻이 없을 경우 노션 DB에서 실시간 단어 검색 매칭
+    if (!kor && typeof fetchVocaFromNotion === 'function') {
+        fetchVocaFromNotion({ subject: '영어' }).then(words => {
+            if (words && words.length) {
+                const cleanEng = eng.trim().toLowerCase();
+                const matched = words.find(w => (w.word || '').trim().toLowerCase() === cleanEng);
+                if (matched && matched.meaning) {
+                    document.getElementById('korText').textContent = matched.meaning;
+                }
+            }
+        }).catch(err => console.log('Voca fetch background err:', err));
+    }
 
     let isSpeaking = false;
 
     function getEnVoice() {
         if (!('speechSynthesis' in window)) return null;
         const voices = window.speechSynthesis.getVoices();
-        // 미국식 자연스러운 영어 음성 우선 선택
         return voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('US')))
             || voices.find(v => v.lang.startsWith('en')) || null;
     }
@@ -212,12 +228,12 @@
             return;
         }
 
-        window.speechSynthesis.cancel(); // 이전 재생 중단
+        window.speechSynthesis.cancel();
 
         const utter = new SpeechSynthesisUtterance(eng);
         utter.lang = 'en-US';
         utter.rate = rate;
-        utter.pitch = 1.05; // 어린이 친화적 살짝 높은 톤
+        utter.pitch = 1.05;
 
         const voice = getEnVoice();
         if (voice) utter.voice = voice;
@@ -258,7 +274,7 @@
                 document.getElementById('playLabel').textContent = `반복 듣기 (${count}/${times}) 🎶`;
                 setTimeout(() => {
                     speakText(0.9, () => {
-                        setTimeout(playNext, 600); // 단어 사이 0.6초 간격
+                        setTimeout(playNext, 600);
                     });
                 }, 100);
             }
@@ -266,12 +282,10 @@
         playNext();
     }
 
-    // 음성 목록 미리 로드 (모바일 브라우저 대응)
     if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => getEnVoice();
     }
 
-    // 페이지 진입 시 자동 1회 재생 시도 (브라우저 정책 허용 시)
     window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             speakText(1.0);
