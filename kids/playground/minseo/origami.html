@@ -3,66 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>📐 3-Way 종이접기 비교 연구소 - 민민 놀이터</title>
+  <title>💖 마법의 3D 종이접기 스튜디오 - 민민 놀이터</title>
   <link rel="stylesheet" href="../playground.css">
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
-  
-  <!-- 🌐 Three.js & OrbitControls 라이브러리 (3D WebGL 모드용) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
   <style>
-    /* 🎛️ 상단 3-Way 모드 스위처 탭 바 */
-    .mode-tab-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 18px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    @media (max-width: 650px) {
-      .mode-tab-bar {
-        grid-template-columns: 1fr;
-      }
-    }
-    .origami-tab-btn {
-      padding: 13px 14px;
-      border-radius: 18px;
-      border: 2px solid var(--border-light);
-      background: #ffffff;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.05rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    body.theme--arcade .origami-tab-btn {
-      background: #1a1333;
-      border-color: #3b2e66;
-      color: #e2e8f0;
-    }
-    .origami-tab-btn.active {
-      background: linear-gradient(135deg, #ff758c, #ff7eb3);
-      color: #ffffff;
-      border-color: transparent;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(255, 107, 157, 0.4);
-    }
-    body.theme--arcade .origami-tab-btn.active {
-      background: linear-gradient(135deg, #00f2fe, #4facfe);
-      color: #0c0818;
-      box-shadow: 0 6px 18px rgba(0, 242, 254, 0.4);
-    }
-
     .origami-layout {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      margin-top: 12px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -109,7 +58,7 @@
       gap: 8px;
     }
     .origami-model-btn {
-      padding: 11px 14px;
+      padding: 12px 14px;
       border-radius: 16px;
       border: 1.5px solid rgba(0,0,0,0.08);
       background: #ffffff;
@@ -119,8 +68,8 @@
       text-align: left;
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
+      justify-content: space-between;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     body.theme--arcade .origami-model-btn {
       background: #1f183b;
@@ -132,40 +81,25 @@
       background: #ffe4ec;
       color: #ff4081;
       transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+      box-shadow: 0 4px 14px rgba(255, 107, 157, 0.35);
     }
     body.theme--arcade .origami-model-btn.active {
       border-color: var(--cyan-neon);
       background: rgba(0, 242, 254, 0.2);
       color: var(--cyan-neon);
-      box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+      box-shadow: 0 4px 14px rgba(0, 242, 254, 0.35);
+    }
+    .video-tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ff4081, #ff7eb3);
+      color: #fff;
+      font-weight: bold;
     }
 
-    /* 색상 선택 팔레트 */
-    .origami-colors-row {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
-    }
-    .origami-color-chip {
-      width: 100%;
-      aspect-ratio: 1;
-      border-radius: 10px;
-      border: 2px solid rgba(0,0,0,0.15);
-      cursor: pointer;
-      transition: transform 0.15s;
-    }
-    .origami-color-chip:hover {
-      transform: scale(1.15);
-    }
-    .origami-color-chip.active {
-      transform: scale(1.2);
-      border-color: #222;
-      box-shadow: 0 0 0 2px #fff, 0 4px 8px rgba(0,0,0,0.3);
-    }
-
-    /* 🖼️ 인터랙티브 뷰포트 스테이지 공통 카드 */
-    .origami-stage-card {
+    /* 🎬 메인 비디오 스테이지 카드 */
+    .origami-main-stage {
       background: #ffffff;
       border: 3px solid #ffb3c6;
       border-radius: 24px;
@@ -179,101 +113,182 @@
       box-sizing: border-box;
       min-width: 0;
     }
-    body.theme--arcade .origami-stage-card {
+    body.theme--arcade .origami-main-stage {
       border-color: var(--cyan-neon);
       background: #181330;
     }
 
-    /* 캔버스 및 3D 뷰어 공통 */
-    #origamiCanvas {
+    /* 📹 3D 비디오 뷰포트 */
+    .video-viewport-wrapper {
       width: 100%;
-      max-width: 580px;
-      height: auto;
-      aspect-ratio: 600 / 460;
-      border-radius: 18px;
-      border: 2px solid rgba(0,0,0,0.06);
+      max-width: 620px;
+      aspect-ratio: 16 / 9;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #000000;
+      position: relative;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    }
+    .main-origami-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      box-sizing: border-box;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* 🧭 모드 1 컨트롤러 */
-    .step-controller {
+    /* 비디오 프로그레스 바 */
+    .video-progress-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .video-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff4081, #ff7eb3);
+      transition: width 0.1s linear;
+    }
+    body.theme--arcade .video-progress-bar {
+      background: linear-gradient(90deg, #00f2fe, #4facfe);
+    }
+
+    /* 🎛️ 비디오 하단 컨트롤러 */
+    .video-controls-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      max-width: 580px;
-      margin-top: 14px;
-      gap: 8px;
+      max-width: 620px;
+      margin-top: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .step-nav-btn {
-      padding: 11px 22px;
-      border-radius: 16px;
+    .btn-video-control {
+      padding: 10px 18px;
+      border-radius: 14px;
       font-family: 'Jua', sans-serif;
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       border: none;
-      background: linear-gradient(135deg, #ff758c, #ff7eb3);
-      color: #fff;
+      background: linear-gradient(135deg, #ffd166, #ff9f43);
+      color: #1a1a1a;
       cursor: pointer;
-      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: transform 0.1s;
     }
-    body.theme--arcade .step-nav-btn {
-      background: linear-gradient(135deg, #00f2fe, #4facfe);
+    .btn-video-control:active {
+      transform: scale(0.96);
+    }
+
+    .speed-buttons-group {
+      display: flex;
+      gap: 6px;
+      background: rgba(0,0,0,0.05);
+      padding: 4px;
+      border-radius: 12px;
+    }
+    body.theme--arcade .speed-buttons-group {
+      background: rgba(255,255,255,0.08);
+    }
+    .speed-pill-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: inherit;
+    }
+    .speed-pill-btn.active {
+      background: #ff4081;
+      color: #fff;
+    }
+    body.theme--arcade .speed-pill-btn.active {
+      background: var(--cyan-neon);
       color: #0c0818;
     }
-    .step-nav-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      transform: none !important;
-    }
 
-    .step-indicator-badge {
-      font-family: 'Jua', sans-serif;
-      font-size: 1.25rem;
-      padding: 6px 16px;
-      border-radius: 14px;
-      background: rgba(0,0,0,0.05);
-    }
-    body.theme--arcade .step-indicator-badge {
-      background: rgba(255,255,255,0.1);
-      color: var(--cyan-neon);
-    }
-
-    .step-desc-box {
+    /* 🧭 단계별 스텝 알약 버튼 바 */
+    .step-pills-bar {
+      display: flex;
+      gap: 8px;
       width: 100%;
-      max-width: 580px;
+      max-width: 620px;
+      overflow-x: auto;
+      padding: 8px 2px;
+      margin-top: 14px;
+      box-sizing: border-box;
+      -webkit-overflow-scrolling: touch;
+    }
+    .step-pill-btn {
+      flex: 1;
+      min-width: 95px;
+      padding: 10px 8px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      background: #ffffff;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    body.theme--arcade .step-pill-btn {
+      background: #1f183b;
+      border-color: #3b2e66;
+      color: #e2e8f0;
+    }
+    .step-pill-btn.active {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: #ffffff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.35);
+    }
+    body.theme--arcade .step-pill-btn.active {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #0c0818;
+      box-shadow: 0 4px 12px rgba(0, 242, 254, 0.35);
+    }
+
+    /* 📝 단계별 텍스트 카드 */
+    .step-info-card {
+      width: 100%;
+      max-width: 620px;
       background: #fff8f9;
       border: 2px dashed #ffb3c6;
-      border-radius: 18px;
+      border-radius: 20px;
       padding: 16px 20px;
       margin-top: 14px;
       text-align: center;
       box-sizing: border-box;
     }
-    body.theme--arcade .step-desc-box {
+    body.theme--arcade .step-info-card {
       background: rgba(0, 242, 254, 0.08);
       border-color: var(--cyan-neon);
     }
-    .step-title-text {
+    .step-title-badge {
       font-family: 'Jua', sans-serif;
       font-size: 1.35rem;
       color: #ff4081;
       margin-bottom: 6px;
     }
-    body.theme--arcade .step-title-text {
+    body.theme--arcade .step-title-badge {
       color: var(--cyan-neon);
     }
     .step-desc-text {
       font-size: 1.05rem;
       line-height: 1.6;
-      opacity: 0.9;
       margin-bottom: 8px;
     }
     .step-tip-badge {
       display: inline-block;
-      padding: 4px 12px;
-      border-radius: 10px;
+      padding: 5px 14px;
+      border-radius: 12px;
       background: #ffe4ec;
       color: #ff007f;
       font-size: 0.95rem;
@@ -284,168 +299,67 @@
       color: #00f2fe;
     }
 
-    .origami-complete-box {
-      display: none;
+    /* 🧭 이전/다음 스텝 내비게이터 */
+    .step-nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       width: 100%;
-      max-width: 580px;
+      max-width: 620px;
       margin-top: 14px;
-    }
-    .complete-action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
-    @media (max-width: 520px) {
-      .complete-action-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .btn-test {
-      padding: 13px;
+    .step-btn-nav {
+      padding: 12px 24px;
       border-radius: 16px;
       font-family: 'Jua', sans-serif;
       font-size: 1.15rem;
       border: none;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: #fff;
       cursor: pointer;
-      background: linear-gradient(135deg, #ffd166, #ff9f43);
-      color: #1a1a1a;
-      box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3);
+      transition: all 0.2s;
     }
-    .btn-reward-claim {
-      padding: 13px;
-      border-radius: 16px;
+    body.theme--arcade .step-btn-nav {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #0c0818;
+    }
+    .step-btn-nav:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* 🎉 완성 보상 카드 */
+    .complete-reward-box {
+      display: none;
+      width: 100%;
+      max-width: 620px;
+      margin-top: 16px;
+    }
+    .btn-reward-jackpot {
+      width: 100%;
+      padding: 16px;
+      border-radius: 18px;
       font-family: 'Jua', sans-serif;
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       border: none;
       cursor: pointer;
       background: linear-gradient(135deg, #ff6b9d, #ff8da1);
       color: #fff;
-      box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+      box-shadow: 0 6px 20px rgba(255, 107, 157, 0.45);
+      animation: pulseGlow 1.5s infinite alternate;
     }
-
-    /* 🎚️ 공통 접기 애니메이션 슬라이더 바 */
-    .fold-slider-panel {
-      width: 100%;
-      max-width: 580px;
-      background: rgba(0,0,0,0.03);
-      border: 1.5px solid rgba(0,0,0,0.08);
-      border-radius: 16px;
-      padding: 12px 16px;
-      margin-top: 14px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    body.theme--arcade .fold-slider-panel {
-      background: rgba(255,255,255,0.04);
-      border-color: rgba(255,255,255,0.1);
-    }
-    .slider-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .slider-input {
-      flex: 1;
-      height: 8px;
-      border-radius: 4px;
-      accent-color: #ff4081;
-      cursor: pointer;
-    }
-    body.theme--arcade .slider-input {
-      accent-color: #00f2fe;
-    }
-    .btn-anim-play {
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1rem;
-      border: none;
-      background: linear-gradient(135deg, #ffd166, #ff9f43);
-      color: #1a1a1a;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      transition: transform 0.1s;
-    }
-    .btn-anim-play:active {
-      transform: scale(0.96);
-    }
-
-    /* 🐰 모드 2: Rabbit Ear 분할 뷰 */
-    .rabbit-split-view {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      width: 100%;
-      max-width: 580px;
-      box-sizing: border-box;
-    }
-    @media (max-width: 560px) {
-      .rabbit-split-view {
-        grid-template-columns: 1fr;
-      }
-    }
-    .rabbit-box-card {
-      background: rgba(0,0,0,0.02);
-      border: 1.5px solid rgba(0,0,0,0.08);
-      border-radius: 16px;
-      padding: 12px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    body.theme--arcade .rabbit-box-card {
-      background: rgba(255,255,255,0.04);
-      border-color: rgba(255,255,255,0.1);
-    }
-    .rabbit-svg-box {
-      width: 100%;
-      aspect-ratio: 1;
-      margin-top: 8px;
-    }
-
-    /* 🌐 모드 3: 리얼 3D Three.js WebGL 뷰어 */
-    #threeCanvasContainer {
-      width: 100%;
-      max-width: 580px;
-      height: 380px;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 2px solid rgba(0,0,0,0.1);
-      background: #110e24;
-      cursor: grab;
-      position: relative;
-    }
-    #threeCanvasContainer:active {
-      cursor: grabbing;
-    }
-    .three-overlay-tip {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.65);
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      pointer-events: none;
+    @keyframes pulseGlow {
+      from { transform: scale(1); box-shadow: 0 6px 20px rgba(255, 107, 157, 0.4); }
+      to { transform: scale(1.02); box-shadow: 0 8px 30px rgba(255, 64, 129, 0.65); }
     }
 
     /* 🖨️ 인쇄 스타일 */
     @media print {
       body * { visibility: hidden; }
-      #origamiCanvas, #origamiCanvas * { visibility: visible; }
-      #origamiCanvas {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-        border: none;
-      }
-      .origami-sidebar, .step-controller, .pg-top-nav, .origami-complete-box, .mode-tab-bar, .fold-slider-panel { display: none !important; }
+      .video-viewport-wrapper, .video-viewport-wrapper * { visibility: visible; }
+      .origami-sidebar, .video-controls-row, .step-pills-bar, .step-nav-row, .pg-top-nav, .complete-reward-box { display: none !important; }
     }
   </style>
 </head>
@@ -456,67 +370,42 @@
     <div class="pg-top-nav">
       <a href="../index.html" class="pg-back-btn">⬅️ 놀이터 허브로</a>
       <div class="pg-trophy-bar">
-        <span>📐 3-Way 종이접기 비교 연구소</span>
+        <span>💖 마법 3D 종이접기 스튜디오</span>
       </div>
     </div>
 
     <!-- 🌟 타이틀 -->
     <div class="pg-header" style="margin-bottom: 12px;">
       <h1 class="pg-title">
-        <span class="neon-text">📐 3-Way 종이접기</span> <span class="accent-text">비교 연구소</span>
+        <span class="neon-text">✨ 마법 3D 영상</span> <span class="accent-text">종이접기</span>
       </h1>
-      <p class="pg-subtitle">3가지 방식(단계별 그림 교재 / Rabbit Ear 벡터 전개도 / 3D 물리 시뮬레이터)을 직접 조작하며 비교해보세요!</p>
-    </div>
-
-    <!-- 🎛️ 상단 3-Way 비교 탭 -->
-    <div class="mode-tab-bar">
-      <button type="button" class="origami-tab-btn active" data-mode="illustrated">
-        <span>📖 1. 단계별 그림 교재 모드</span>
-      </button>
-      <button type="button" class="origami-tab-btn" data-mode="rabbitear">
-        <span>🐰 2. Rabbit Ear 벡터 전개도 모드</span>
-      </button>
-      <button type="button" class="origami-tab-btn" data-mode="3dsim">
-        <span>🌐 3. 3D 리얼타임 WebGL 시뮬레이터</span>
-      </button>
+      <p class="pg-subtitle" id="currentOrigamiTagline">구글 플로우 3D 비디오로 배우는 반짝이는 입체 종이접기!</p>
     </div>
 
     <!-- 🛠️ 2열 메인 레이아웃 -->
     <div class="origami-layout">
 
-      <!-- 좌측: 종이접기 모델 및 색상 선택 -->
+      <!-- 좌측: 종이접기 모델 선택 -->
       <div class="origami-sidebar">
         <div>
           <div class="origami-group-title"> origami 인기 종이접기</div>
           <div class="model-btn-list">
-            <button type="button" class="origami-model-btn active" data-model="frog">
+            <button type="button" class="origami-model-btn active" data-model="heart">
+              <span>💖 마법의 사랑 하트</span>
+              <span class="video-tag">✨ 3D 비디오</span>
+            </button>
+            <button type="button" class="origami-model-btn" data-model="frog">
               <span>🐸 폴짝 점핑 개구리</span>
+              <span style="font-size: 0.8rem; opacity: 0.7;">도안 교재</span>
             </button>
             <button type="button" class="origami-model-btn" data-model="airplane">
               <span>🚀 슈퍼 제트 비행기</span>
+              <span style="font-size: 0.8rem; opacity: 0.7;">도안 교재</span>
             </button>
             <button type="button" class="origami-model-btn" data-model="crane">
-              <span>🕊️ 전통 종이학 (Crane)</span>
+              <span>🕊️ 전통 종이학</span>
+              <span style="font-size: 0.8rem; opacity: 0.7;">도안 교재</span>
             </button>
-            <button type="button" class="origami-model-btn" data-model="fortune">
-              <span>👑 동서남북 마법 상자</span>
-            </button>
-            <button type="button" class="origami-model-btn" data-model="heart">
-              <span>💖 반짝 사랑 하트</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 색종이 색상 -->
-        <div>
-          <div class="origami-group-title">🎨 색종이 색상</div>
-          <div class="origami-colors-row">
-            <div class="origami-color-chip active" style="background:#22c55e;" data-color="#22c55e"></div>
-            <div class="origami-color-chip" style="background:#0ea5e9;" data-color="#0ea5e9"></div>
-            <div class="origami-color-chip" style="background:#ec4899;" data-color="#ec4899"></div>
-            <div class="origami-color-chip" style="background:#eab308;" data-color="#eab308"></div>
-            <div class="origami-color-chip" style="background:#f97316;" data-color="#f97316"></div>
-            <div class="origami-color-chip" style="background:#a855f7;" data-color="#a855f7"></div>
           </div>
         </div>
 
@@ -526,106 +415,73 @@
         </button>
       </div>
 
-      <!-- 우측: 3가지 모드 뷰포트 영역 -->
-      <div class="origami-stage-card">
+      <!-- 우측: 인터랙티브 스텝 비디오 뷰포트 -->
+      <div class="origami-main-stage">
 
-        <!-- ================= [모드 1] 단계별 그림 교재 모드 ================= -->
-        <div id="viewModeIllustrated" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-          <canvas id="origamiCanvas"></canvas>
-
-          <div class="step-controller">
-            <button type="button" id="prevStepBtn" class="step-nav-btn">◀️ 이전 단계</button>
-            <div class="step-indicator-badge" id="stepIndicator">1 / 5 단계</div>
-            <button type="button" id="nextStepBtn" class="step-nav-btn">다음 단계 ▶️</button>
+        <!-- 1. 비디오 플레이어 섹션 -->
+        <div id="videoPlayerSection" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+          
+          <div class="video-viewport-wrapper">
+            <video id="origamiMainVideo" class="main-origami-video" playsinline preload="auto" poster="">
+              <source src="../assets/videos/heart_origami.mp4" type="video/mp4">
+              <source src="../../../uploads/ex/origami/Origami_paper_folding_into_heart_202608310525.mp4" type="video/mp4">
+              동영상을 지원하지 않는 브라우저입니다.
+            </video>
           </div>
 
-          <div class="step-desc-box">
-            <div class="step-title-text" id="stepTitle">1단계: 반으로 접어 십자(+) 기준선 만들기</div>
-            <div class="step-desc-text" id="stepDesc">색종이의 색깔이 아래로 가도록 둔 뒤, 네모 모양으로 가로와 세로를 반씩 접었다 펼쳐요.</div>
-            <div class="step-tip-badge" id="stepTip">💡 모서리를 꼭짓점에 정확히 맞추고 손톱으로 꾹꾹 눌러 다려주세요!</div>
+          <!-- 비디오 프로그레스 바 -->
+          <div class="video-progress-container">
+            <div id="videoProgressBar" class="video-progress-bar"></div>
           </div>
 
-          <div class="origami-complete-box" id="origamiCompleteArea">
-            <div class="complete-action-grid">
-              <button type="button" id="testActionBtn" class="btn-test">
-                ✨ 화면에서 날리기/점프 테스트!
+          <!-- 비디오 컨트롤러 바 -->
+          <div class="video-controls-row">
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="playPauseVideoBtn" class="btn-video-control">
+                <span>▶️ 재생하기</span>
               </button>
-              <button type="button" id="claimOrigamiRewardBtn" class="btn-reward-claim">
-                🎉 종이접기 완성! (💎 보상 받기)
+              <button type="button" id="replayVideoBtn" class="btn-video-control" style="background: rgba(0,0,0,0.06); color: inherit;">
+                <span>🔄 처음부터</span>
               </button>
             </div>
+
+            <!-- 재생 속도 조절 -->
+            <div class="speed-buttons-group">
+              <button type="button" class="speed-pill-btn" data-speed="0.75">0.75x (느리게)</button>
+              <button type="button" class="speed-pill-btn active" data-speed="1.0">1.0x</button>
+              <button type="button" class="speed-pill-btn" data-speed="1.25">1.25x</button>
+            </div>
           </div>
+
         </div>
 
-        <!-- ================= [모드 2] Rabbit Ear 벡터 전개도 & 애니메이션 모드 ================= -->
-        <div id="viewModeRabbitEar" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 8px; color: var(--pink-soft);">
-            🐰 Rabbit Ear 전개도 & 실시간 벡터 접힘 시뮬레이터
-          </div>
-          
-          <div class="rabbit-split-view">
-            <!-- 좌측: 전개도 (Crease Pattern) -->
-            <div class="rabbit-box-card">
-              <div style="font-family: 'Jua'; font-size: 1.1rem; color: #ef4444;">
-                📐 전개도 (Crease Pattern)
-              </div>
-              <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">
-                🔴 산접기(M) / 🔵 골접기(V)
-              </div>
-              <div class="rabbit-svg-box" id="rabbitCpContainer"></div>
-            </div>
-
-            <!-- 우측: 접힌 상태 벡터 (Folded State) -->
-            <div class="rabbit-box-card">
-              <div style="font-family: 'Jua'; font-size: 1.1rem; color: #3b82f6;">
-                ✨ 실시간 접힘 벡터 (Folded State)
-              </div>
-              <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">
-                슬라이더에 따라 플랩이 실시간으로 접혀요!
-              </div>
-              <div class="rabbit-svg-box" id="rabbitFoldedContainer"></div>
-            </div>
-          </div>
-
-          <!-- 실시간 0~100% 접힘 컨트롤러 -->
-          <div class="fold-slider-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-family: 'Jua'; font-size: 1.05rem;">🎚️ 접힘 진행도: <b id="rabbitFoldPercentText" style="color: #ff4081;">0%</b></span>
-              <button type="button" id="rabbitPlayBtn" class="btn-anim-play">▶️ 자동 접기 재생</button>
-            </div>
-            <div class="slider-row">
-              <span>펼침(0%)</span>
-              <input type="range" id="rabbitFoldSlider" class="slider-input" min="0" max="100" value="0">
-              <span>완전 접힘(100%)</span>
-            </div>
-          </div>
+        <!-- 2. 비디오가 없는 모델용 일러스트 캔버스 (대체용) -->
+        <div id="illustrationSection" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+          <canvas id="illustrationCanvas" style="width: 100%; max-width: 560px; height: auto; border-radius: 18px;"></canvas>
         </div>
 
-        <!-- ================= [모드 3] 리얼 3D WebGL Three.js 물리 시뮬레이터 ================= -->
-        <div id="viewMode3DSim" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 8px; color: #0284c7;">
-            🌐 리얼 3D WebGL 입체 종이접기 시뮬레이터 (Three.js)
-          </div>
-          
-          <!-- 3D Three.js 캔버스 뷰포트 -->
-          <div id="threeCanvasContainer">
-            <div class="three-overlay-tip">🖱️ 마우스 드래그: 360도 회전 / 휠: 줌인·줌아웃</div>
-          </div>
+        <!-- 3. 단계별 스텝 알약 버튼 바 (동적 생성) -->
+        <div class="step-pills-bar" id="stepButtonsContainer"></div>
 
-          <!-- 3D 실시간 접힘 컨트롤러 -->
-          <div class="fold-slider-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-family: 'Jua'; font-size: 1.05rem;">🎚️ 3D 입체 접힘도: <b id="threeFoldPercentText" style="color: #0284c7;">0%</b></span>
-              <button type="button" id="threePlayBtn" class="btn-anim-play" style="background: linear-gradient(135deg, #00f2fe, #4facfe); color: #0c0818;">
-                ▶️ 3D 연속 접기 재생
-              </button>
-            </div>
-            <div class="slider-row">
-              <span>펼친 색종이(0%)</span>
-              <input type="range" id="threeFoldSlider" class="slider-input" min="0" max="100" value="0" style="accent-color: #0284c7;">
-              <span>3D 입체 완성(100%)</span>
-            </div>
-          </div>
+        <!-- 4. 단계별 설명 & 꿀팁 카드 -->
+        <div class="step-info-card">
+          <div class="step-title-badge" id="stepTitleBadge">1단계: 가운데 중심선 만들기</div>
+          <div class="step-desc-text" id="stepDescText">색종이를 반으로 접었다가 펼쳐서 가운데 기준선을 만들어요.</div>
+          <div class="step-tip-badge" id="stepTipText">💡 손톱으로 꾹꾹 눌러주면 다음 단계가 훨씬 쉬워져요!</div>
+        </div>
+
+        <!-- 5. 이전/다음 스텝 내비게이터 -->
+        <div class="step-nav-row">
+          <button type="button" id="prevStepBtn" class="step-btn-nav">◀️ 이전 단계</button>
+          <div class="step-indicator-badge" id="stepProgressIndicator">1 / 5 단계</div>
+          <button type="button" id="nextStepBtn" class="step-btn-nav">다음 단계 ▶️</button>
+        </div>
+
+        <!-- 6. 🎉 5단계 마법 피날레 완성 보상 -->
+        <div class="complete-reward-box" id="origamiCompleteArea">
+          <button type="button" id="claimOrigamiRewardBtn" class="btn-reward-jackpot">
+            💖 마법 하트 접기 성공! (💎 노션 보상 받기)
+          </button>
         </div>
 
       </div>
