@@ -1,13 +1,13 @@
 // 📐 3-Way 종이접기 비교 연구소 코어 엔진 (origami.js)
-// 1) 📖 단계별 그림 교재 모드
-// 2) 🐰 Rabbit Ear 전개도 & 실시간 벡터 접힘 애니메이션
-// 3) 🌐 리얼 3D WebGL 물리 접기 시뮬레이터 (Three.js)
+// 1) 📖 단계별 그림 교재 모드 (1~5단계 순서도 & A4 인쇄)
+// 2) 🐰 Rabbit Ear 전개도 & 모델별 고유 실시간 벡터 접힘 애니메이션
+// 3) 🌐 리얼 3D WebGL 물리 시뮬레이터 (5종 모델별 고유 3D 지오메트리 & 힌지 리깅)
 
 (function () {
   'use strict';
 
   // -------------------------------------------------------------
-  // 1. 종이접기 5종 데이터 정의
+  // 1. 종이접기 5종 데이터 정의 (모델별 고유 CP 및 메타데이터)
   // -------------------------------------------------------------
   const ORIGAMI_MODELS = {
     frog: {
@@ -19,16 +19,16 @@
       totalSteps: 5,
       rabbitFoldData: {
         title: 'Jumping Frog Crease Pattern',
-        vertices: [[0,0], [1,0], [1,1], [0,1], [0.5,0.5], [0.5,0], [0.5,1], [0,0.5], [1,0.5]],
         edges: [
           { from: [0,0], to: [1,0], assignment: 'B' },
           { from: [1,0], to: [1,1], assignment: 'B' },
           { from: [1,1], to: [0,1], assignment: 'B' },
           { from: [0,1], to: [0,0], assignment: 'B' },
-          { from: [0,0], to: [1,1], assignment: 'M' },
-          { from: [1,0], to: [0,1], assignment: 'M' },
-          { from: [0.5,0], to: [0.5,1], assignment: 'V' },
-          { from: [0,0.5], to: [1,0.5], assignment: 'V' }
+          { from: [0,0], to: [1,0.5], assignment: 'M' },
+          { from: [1,0], to: [0,0.5], assignment: 'M' },
+          { from: [0,0.5], to: [1,0.5], assignment: 'V' },
+          { from: [0,0.75], to: [1,0.75], assignment: 'M' },
+          { from: [0,0.88], to: [1,0.88], assignment: 'V' }
         ]
       },
       steps: [
@@ -78,15 +78,17 @@
       totalSteps: 5,
       rabbitFoldData: {
         title: 'Jet Airplane Crease Pattern',
-        vertices: [[0,0], [1,0], [1,1], [0,1], [0.5,0], [0.5,1], [0,0.5], [1,0.5]],
         edges: [
           { from: [0,0], to: [1,0], assignment: 'B' },
           { from: [1,0], to: [1,1], assignment: 'B' },
           { from: [1,1], to: [0,1], assignment: 'B' },
           { from: [0,1], to: [0,0], assignment: 'B' },
           { from: [0.5,0], to: [0.5,1], assignment: 'V' },
-          { from: [0,0], to: [0.5,0.5], assignment: 'M' },
-          { from: [1,0], to: [0.5,0.5], assignment: 'M' }
+          { from: [0,0], to: [0.5,0.4], assignment: 'M' },
+          { from: [1,0], to: [0.5,0.4], assignment: 'M' },
+          { from: [0,0.4], to: [1,0.4], assignment: 'V' },
+          { from: [0.25,0.4], to: [0.25,1], assignment: 'V' },
+          { from: [0.75,0.4], to: [0.75,1], assignment: 'V' }
         ]
       },
       steps: [
@@ -136,7 +138,6 @@
       totalSteps: 5,
       rabbitFoldData: {
         title: 'Traditional Crane Crease Pattern',
-        vertices: [[0,0], [1,0], [1,1], [0,1], [0.5,0.5], [0.5,0], [0.5,1], [0,0.5], [1,0.5]],
         edges: [
           { from: [0,0], to: [1,0], assignment: 'B' },
           { from: [1,0], to: [1,1], assignment: 'B' },
@@ -145,7 +146,9 @@
           { from: [0,0], to: [1,1], assignment: 'M' },
           { from: [1,0], to: [0,1], assignment: 'M' },
           { from: [0.5,0], to: [0.5,1], assignment: 'V' },
-          { from: [0,0.5], to: [1,0.5], assignment: 'V' }
+          { from: [0,0.5], to: [1,0.5], assignment: 'V' },
+          { from: [0.25,0.25], to: [0.75,0.75], assignment: 'M' },
+          { from: [0.75,0.25], to: [0.25,0.75], assignment: 'M' }
         ]
       },
       steps: [
@@ -193,6 +196,21 @@
       defaultColor: '#eab308',
       interactiveType: 'fortune',
       totalSteps: 4,
+      rabbitFoldData: {
+        title: 'Fortune Teller Crease Pattern',
+        edges: [
+          { from: [0,0], to: [1,0], assignment: 'B' },
+          { from: [1,0], to: [1,1], assignment: 'B' },
+          { from: [1,1], to: [0,1], assignment: 'B' },
+          { from: [0,1], to: [0,0], assignment: 'B' },
+          { from: [0,0], to: [1,1], assignment: 'M' },
+          { from: [1,0], to: [0,1], assignment: 'M' },
+          { from: [0.5,0], to: [0,0.5], assignment: 'V' },
+          { from: [0,0.5], to: [0.5,1], assignment: 'V' },
+          { from: [0.5,1], to: [1,0.5], assignment: 'V' },
+          { from: [1,0.5], to: [0.5,0], assignment: 'V' }
+        ]
+      },
       steps: [
         {
           step: 1,
@@ -231,6 +249,19 @@
       defaultColor: '#ec4899',
       interactiveType: 'heart_beat',
       totalSteps: 4,
+      rabbitFoldData: {
+        title: 'Love Heart Crease Pattern',
+        edges: [
+          { from: [0,0], to: [1,0], assignment: 'B' },
+          { from: [1,0], to: [1,1], assignment: 'B' },
+          { from: [1,1], to: [0,1], assignment: 'B' },
+          { from: [0,1], to: [0,0], assignment: 'B' },
+          { from: [0,0], to: [1,1], assignment: 'V' },
+          { from: [0.5,0], to: [0.5,1], assignment: 'M' },
+          { from: [0,0.5], to: [0.5,1], assignment: 'M' },
+          { from: [1,0.5], to: [0.5,1], assignment: 'M' }
+        ]
+      },
       steps: [
         {
           step: 1,
@@ -288,6 +319,7 @@
       updateRabbitEarFold(parseFloat(document.getElementById('rabbitFoldSlider').value));
     } else if (mode === '3dsim') {
       initThree3DScene();
+      build3DPaperModel();
       updateThreeFold(parseFloat(document.getElementById('threeFoldSlider').value));
     }
   }
@@ -395,6 +427,7 @@
       ctx.restore();
     }
 
+    // [1] 개구리 단계별 도안
     if (drawType === 'frog_step1') {
       setShadow();
       ctx.fillStyle = frontColor;
@@ -498,7 +531,6 @@
       ctx.lineWidth = 3.5;
       ctx.stroke();
 
-      // 눈 스티커
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(cx - size / 4.5, cy - size / 3.2, 16, 0, Math.PI * 2);
@@ -512,7 +544,6 @@
       ctx.arc(cx + size / 4.5, cy - size / 3.2, 7, 0, Math.PI * 2);
       ctx.fill();
 
-      // 볼터치
       ctx.fillStyle = '#ff80ab';
       ctx.beginPath();
       ctx.arc(cx - size / 3.5, cy - size / 6, 9, 0, Math.PI * 2);
@@ -567,7 +598,7 @@
   }
 
   // -------------------------------------------------------------
-  // 4. 모드 2: Rabbit Ear 실시간 벡터 접힘 애니메이션 엔진
+  // 4. 모드 2: Rabbit Ear 모델별 고유 실시간 벡터 접힘 엔진
   // -------------------------------------------------------------
   let rabbitPlayInterval = null;
 
@@ -581,17 +612,17 @@
     const data = model.rabbitFoldData || ORIGAMI_MODELS.frog.rabbitFoldData;
 
     // 1. Crease Pattern (전개도) SVG
-    let cpSvg = `<svg viewBox="-0.1 -0.1 1.2 1.2" style="width: 100%; height: 100%; background: #ffffff; border-radius: 14px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">`;
+    let cpSvg = `<svg viewBox="-0.05 -0.05 1.1 1.1" style="width: 100%; height: 100%; background: #ffffff; border-radius: 14px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">`;
     cpSvg += `<rect x="0" y="0" width="1" height="1" fill="${currentColor}15" stroke="#1e293b" stroke-width="0.015"/>`;
 
     data.edges.forEach(e => {
       let color = '#1e293b';
       let dash = '';
       if (e.assignment === 'M') {
-        color = '#ef4444';
+        color = '#ef4444'; // 산접기 (Mountain)
         dash = 'stroke-dasharray="0.03 0.02"';
       } else if (e.assignment === 'V') {
-        color = '#3b82f6';
+        color = '#3b82f6'; // 골접기 (Valley)
         dash = 'stroke-dasharray="0.015 0.015"';
       }
       cpSvg += `<line x1="${e.from[0]}" y1="${e.from[1]}" x2="${e.to[0]}" y2="${e.to[1]}" stroke="${color}" stroke-width="0.018" ${dash} stroke-linecap="round"/>`;
@@ -599,33 +630,51 @@
     cpSvg += `</svg>`;
     cpContainer.innerHTML = cpSvg;
 
-    // 2. Folded State SVG (진행도 percent 0~100에 따른 플랩 회전 및 변형)
+    // 2. 모델별 고유 Folded State SVG
     const t = percent / 100; // 0.0 ~ 1.0
-    const flapScaleX = 1 - t * 0.55;
-    const flapScaleY = 1 - t * 0.45;
-    const flapAngle = t * 75; // 회전 각도
-
-    let foldSvg = `<svg viewBox="-80 -80 160 160" style="width: 100%; height: 100%; background: #fafafa; border-radius: 14px;">`;
+    let foldSvg = `<svg viewBox="-90 -90 180 180" style="width: 100%; height: 100%; background: #fafafa; border-radius: 14px;">`;
     foldSvg += `<defs><filter id="rfDrop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="${3 + t*5}" stdDeviation="${3 + t*4}" flood-color="rgba(0,0,0,0.25)"/></filter></defs>`;
-    
     foldSvg += `<g filter="url(#rfDrop)">`;
-    // 베이스 종이 몸체
-    foldSvg += `<polygon points="-50,-50 50,-50 50,50 -50,50" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round" transform="scale(${1 - t * 0.2})"/>`;
-    
-    // 접히는 왼쪽 날개 플랩 (흰색 뒷면 노출)
-    foldSvg += `<g transform="translate(-${50 * (1-t*0.2)}, 0) rotate(${flapAngle}) scale(${flapScaleX}, 1)">`;
-    foldSvg += `<polygon points="0,-50 50,0 0,50" fill="#ffffff" stroke="#1e293b" stroke-width="2" opacity="0.95"/>`;
-    foldSvg += `</g>`;
 
-    // 접히는 오른쪽 날개 플랩
-    foldSvg += `<g transform="translate(${50 * (1-t*0.2)}, 0) rotate(-${flapAngle}) scale(${flapScaleX}, 1)">`;
-    foldSvg += `<polygon points="0,-50 -50,0 0,50" fill="#ffffff" stroke="#1e293b" stroke-width="2" opacity="0.95"/>`;
-    foldSvg += `</g>`;
-
-    // 접히는 상단 삼각 머리
-    if (t > 0.3) {
-      const topT = (t - 0.3) / 0.7;
-      foldSvg += `<polygon points="0,-${50 * (1-topT)} -35,0 35,0" fill="${currentColor}" stroke="#1e293b" stroke-width="2" opacity="0.9"/>`;
+    if (currentModelKey === 'airplane') {
+      // 🚀 비행기: 세로 날개 접힘 및 노즈콘 뾰족해짐
+      const wingFold = t * 65;
+      const noseDrop = t * 30;
+      foldSvg += `<polygon points="0,-60 -${50 - t*30},${40 + noseDrop} 0,${30 + noseDrop} ${50 - t*30},${40 + noseDrop}" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>`;
+      foldSvg += `<polygon points="0,-60 -${30 * (1-t*0.5)},0 0,20" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" opacity="0.9"/>`;
+      foldSvg += `<polygon points="0,-60 ${30 * (1-t*0.5)},0 0,20" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" opacity="0.9"/>`;
+    }
+    else if (currentModelKey === 'crane') {
+      // 🕊️ 전통 학: 마름모에서 목과 꼬리가 길게 올라오고 날개 전개
+      const flapY = Math.sin(t * Math.PI) * 25;
+      foldSvg += `<polygon points="0,-${20 + t*45} -${50 - t*10},${flapY} 0,${20 + t*10} ${50 - t*10},${flapY}" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>`;
+      if (t > 0.4) {
+        // 목과 머리
+        foldSvg += `<line x1="0" y1="0" x2="-${t * 35}" y2="-${t * 55}" stroke="${currentColor}" stroke-width="6" stroke-linecap="round"/>`;
+        // 꼬리
+        foldSvg += `<line x1="0" y1="0" x2="${t * 35}" y2="-${t * 45}" stroke="${currentColor}" stroke-width="5" stroke-linecap="round"/>`;
+      }
+    }
+    else if (currentModelKey === 'heart') {
+      // 💖 사랑 하트: 아래 꼭짓점 모이고 상단 2개 엽 라운딩
+      foldSvg += `<path d="M 0,${40 - t*15} C -${45 * t},${10 - t*20} -${50 * t},-${40 * t} 0,-${15 * t} C ${50 * t},-${40 * t} ${45 * t},${10 - t*20} 0,${40 - t*15} Z" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5"/>`;
+    }
+    else if (currentModelKey === 'fortune') {
+      // 👑 동서남북: 4개 삼각 모서리가 중심으로 모임
+      const blintz = 45 * (1 - t * 0.6);
+      foldSvg += `<polygon points="-${blintz},-${blintz} ${blintz},-${blintz} ${blintz},${blintz} -${blintz},${blintz}" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5"/>`;
+      foldSvg += `<line x1="-${blintz}" y1="-${blintz}" x2="${blintz}" y2="${blintz}" stroke="#ffffff" stroke-width="2"/>`;
+      foldSvg += `<line x1="${blintz}" y1="-${blintz}" x2="-${blintz}" y2="${blintz}" stroke="#ffffff" stroke-width="2"/>`;
+    }
+    else {
+      // 🐸 개구리: 삼각 머리와 Z자 스프링 다리 압축
+      const springCompress = t * 25;
+      foldSvg += `<polygon points="0,-50 -40,-10 40,-10" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5"/>`;
+      foldSvg += `<rect x="-25" y="-10" width="50" height="${35 - springCompress}" fill="${currentColor}" stroke="#1e293b" stroke-width="2"/>`;
+      foldSvg += `<line x1="-25" y1="${10 - springCompress*0.5}" x2="25" y2="${10 - springCompress*0.5}" stroke="#ffffff" stroke-width="2.5"/>`;
+      // 눈
+      foldSvg += `<circle cx="-15" cy="-35" r="5" fill="#fff" stroke="#000" stroke-width="1.5"/><circle cx="-15" cy="-35" r="2" fill="#000"/>`;
+      foldSvg += `<circle cx="15" cy="-35" r="5" fill="#fff" stroke="#000" stroke-width="1.5"/><circle cx="15" cy="-35" r="2" fill="#000"/>`;
     }
 
     foldSvg += `</g>`;
@@ -659,10 +708,11 @@
   }
 
   // -------------------------------------------------------------
-  // 5. 모드 3: 리얼 3D WebGL 물리 시뮬레이터 (Three.js)
+  // 5. 모드 3: 리얼 3D WebGL 물리 시뮬레이터 (Three.js 모델별 고유 리깅)
   // -------------------------------------------------------------
   let threeScene, threeCamera, threeRenderer, threeControls;
-  let paperBaseMesh, leftWingGroup, rightWingGroup, topFlapGroup;
+  let paperRootGroup;
+  let modelSpecificParts = {}; // 3D 부품 힌지 그룹들 저장
   let threePlayInterval = null;
   let isThreeInitialized = false;
 
@@ -679,7 +729,7 @@
 
     // 2. Camera
     threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    threeCamera.position.set(0, 7, 12);
+    threeCamera.position.set(0, 6.5, 11);
 
     // 3. Renderer
     threeRenderer = new THREE.WebGLRenderer({ antialias: true });
@@ -692,23 +742,25 @@
     if (typeof THREE.OrbitControls === 'function') {
       threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
       threeControls.enableDamping = true;
-      threeControls.dampingFactor = 0.05;
-      threeControls.maxPolarAngle = Math.PI / 2 + 0.3;
+      threeControls.dampingFactor = 0.06;
+      threeControls.maxPolarAngle = Math.PI / 2 + 0.35;
     }
 
     // 5. 조명
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     threeScene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(5, 12, 8);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(6, 12, 8);
     dirLight.castShadow = true;
     threeScene.add(dirLight);
 
-    // 6. 3D 종이 메쉬 생성
-    build3DPaperModel();
+    // 바닥 격자 그리드
+    const grid = new THREE.GridHelper(16, 16, 0x00f2fe, 0x22194d);
+    grid.position.y = -2.2;
+    threeScene.add(grid);
 
-    // 7. 렌더 루프
+    // 6. 렌더 루프
     const animate = () => {
       requestAnimationFrame(animate);
       if (threeControls) threeControls.update();
@@ -718,7 +770,6 @@
 
     isThreeInitialized = true;
 
-    // 리사이즈 처리
     window.addEventListener('resize', () => {
       if (!container || !threeCamera || !threeRenderer) return;
       const nw = container.clientWidth;
@@ -729,100 +780,375 @@
     });
   }
 
+  // -------------------------------------------------------------
+  // 5-1. 모델별 고유 3D 지오메트리 빌더
+  // -------------------------------------------------------------
   function build3DPaperModel() {
-    // 기존 객체 정리
+    if (!threeScene) return;
+
     const existing = threeScene.getObjectByName('OrigamiPaperRoot');
     if (existing) threeScene.remove(existing);
 
-    const rootGroup = new THREE.Group();
-    rootGroup.name = 'OrigamiPaperRoot';
+    paperRootGroup = new THREE.Group();
+    paperRootGroup.name = 'OrigamiPaperRoot';
+    modelSpecificParts = {};
 
-    // 양면 종이 재질 (앞면 = currentColor 유색, 뒷면 = 깔끔한 흰색)
     const frontMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(currentColor),
-      roughness: 0.4,
-      metalness: 0.1,
+      roughness: 0.35,
+      metalness: 0.05,
       side: THREE.FrontSide
     });
     const backMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(0xffffff),
-      roughness: 0.3,
+      roughness: 0.25,
       side: THREE.BackSide
     });
 
-    // 중앙 몸통 베이스
-    const centerGeom = new THREE.PlaneGeometry(3, 4);
-    const centerFront = new THREE.Mesh(centerGeom, frontMat);
-    const centerBack = new THREE.Mesh(centerGeom, backMat);
-    centerFront.rotation.x = -Math.PI / 2;
-    centerBack.rotation.x = -Math.PI / 2;
-    rootGroup.add(centerFront);
-    rootGroup.add(centerBack);
+    // 헬퍼: 양면 메쉬 생성기
+    function createDoubleSidedMesh(geometry) {
+      const g = new THREE.Group();
+      const f = new THREE.Mesh(geometry, frontMat);
+      const b = new THREE.Mesh(geometry, backMat);
+      f.castShadow = true;
+      b.castShadow = true;
+      g.add(f);
+      g.add(b);
+      return g;
+    }
 
-    // 좌측 날개 힌지 그룹
-    leftWingGroup = new THREE.Group();
-    leftWingGroup.position.set(-1.5, 0, 0);
-    const wingGeom = new THREE.BufferGeometry();
-    const wingVertices = new Float32Array([
-      0, 0, -2,
-      -2.5, 0, 0,
-      0, 0, 2
-    ]);
-    wingGeom.setAttribute('position', new THREE.BufferAttribute(wingVertices, 3));
-    wingGeom.computeVertexNormals();
-    const wingFront = new THREE.Mesh(wingGeom, frontMat);
-    const wingBack = new THREE.Mesh(wingGeom, backMat);
-    leftWingGroup.add(wingFront);
-    leftWingGroup.add(wingBack);
-    rootGroup.add(leftWingGroup);
+    // ==========================================
+    // [1] 🚀 슈퍼 제트 비행기 고유 3D 지오메트리
+    // ==========================================
+    if (currentModelKey === 'airplane') {
+      // 중앙 척추 동체
+      const bodyGeom = new THREE.PlaneGeometry(1.2, 5.0);
+      const body = createDoubleSidedMesh(bodyGeom);
+      body.rotation.x = -Math.PI / 2;
+      paperRootGroup.add(body);
 
-    // 우측 날개 힌지 그룹
-    rightWingGroup = new THREE.Group();
-    rightWingGroup.position.set(1.5, 0, 0);
-    const rWingGeom = new THREE.BufferGeometry();
-    const rWingVertices = new Float32Array([
-      0, 0, -2,
-      2.5, 0, 0,
-      0, 0, 2
-    ]);
-    rWingGeom.setAttribute('position', new THREE.BufferAttribute(rWingVertices, 3));
-    rWingGeom.computeVertexNormals();
-    const rWingFront = new THREE.Mesh(rWingGeom, frontMat);
-    const rWingBack = new THREE.Mesh(rWingGeom, backMat);
-    rightWingGroup.add(rWingFront);
-    rightWingGroup.add(rWingBack);
-    rootGroup.add(rightWingGroup);
+      // 좌측 제트 날개 (힌지: -0.6)
+      const lWingGroup = new THREE.Group();
+      lWingGroup.position.set(-0.6, 0, 0);
+      const lWingGeom = new THREE.BufferGeometry();
+      lWingGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0, -2.5,
+        -3.5, 0, 1.8,
+        0, 0, 2.5
+      ]), 3));
+      lWingGeom.computeVertexNormals();
+      lWingGroup.add(createDoubleSidedMesh(lWingGeom));
+      paperRootGroup.add(lWingGroup);
+      modelSpecificParts.leftWing = lWingGroup;
 
-    // 상단 머리 힌지 그룹
-    topFlapGroup = new THREE.Group();
-    topFlapGroup.position.set(0, 0, -2);
-    const topGeom = new THREE.BufferGeometry();
-    const topVertices = new Float32Array([
-      -1.5, 0, 0,
-      0, 0, -2,
-      1.5, 0, 0
-    ]);
-    topGeom.setAttribute('position', new THREE.BufferAttribute(topVertices, 3));
-    topGeom.computeVertexNormals();
-    const topFront = new THREE.Mesh(topGeom, frontMat);
-    const topBack = new THREE.Mesh(topGeom, backMat);
-    topFlapGroup.add(topFront);
-    topFlapGroup.add(topBack);
-    rootGroup.add(topFlapGroup);
+      // 우측 제트 날개 (힌지: +0.6)
+      const rWingGroup = new THREE.Group();
+      rWingGroup.position.set(0.6, 0, 0);
+      const rWingGeom = new THREE.BufferGeometry();
+      rWingGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0, -2.5,
+        3.5, 0, 1.8,
+        0, 0, 2.5
+      ]), 3));
+      rWingGeom.computeVertexNormals();
+      rWingGroup.add(createDoubleSidedMesh(rWingGeom));
+      paperRootGroup.add(rWingGroup);
+      modelSpecificParts.rightWing = rWingGroup;
 
-    threeScene.add(rootGroup);
+      // 뾰족한 앞 노즈콘
+      const noseGroup = new THREE.Group();
+      noseGroup.position.set(0, 0, -2.5);
+      const noseGeom = new THREE.BufferGeometry();
+      noseGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        -0.6, 0, 0,
+        0, 0, -1.8,
+        0.6, 0, 0
+      ]), 3));
+      noseGeom.computeVertexNormals();
+      noseGroup.add(createDoubleSidedMesh(noseGeom));
+      paperRootGroup.add(noseGroup);
+      modelSpecificParts.nose = noseGroup;
+    }
+
+    // ==========================================
+    // [2] 🐸 점핑 개구리 고유 3D 지오메트리
+    // ==========================================
+    else if (currentModelKey === 'frog') {
+      // 머리 삼각 주머니
+      const headGeom = new THREE.BufferGeometry();
+      headGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        -2.2, 0, 0,
+        0, 0, -2.5,
+        2.2, 0, 0
+      ]), 3));
+      headGeom.computeVertexNormals();
+      paperRootGroup.add(createDoubleSidedMesh(headGeom));
+
+      // 입체 눈 2개
+      const eyeGeom = new THREE.SphereGeometry(0.35, 16, 16);
+      const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+      const pupilMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+      const eyeL = new THREE.Mesh(eyeGeom, eyeMat);
+      eyeL.position.set(-0.9, 0.35, -1.2);
+      const pupilL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), pupilMat);
+      pupilL.position.set(0, 0.15, -0.25);
+      eyeL.add(pupilL);
+      paperRootGroup.add(eyeL);
+
+      const eyeR = new THREE.Mesh(eyeGeom, eyeMat);
+      eyeR.position.set(0.9, 0.35, -1.2);
+      const pupilR = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), pupilMat);
+      pupilR.position.set(0, 0.15, -0.25);
+      eyeR.add(pupilR);
+      paperRootGroup.add(eyeR);
+
+      // 앞다리 2개
+      const legL = new THREE.Group();
+      legL.position.set(-2.0, 0, 0);
+      const legLGeom = new THREE.BufferGeometry();
+      legLGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0, 0, -1.5, 0, -1.2, 0, 0, 1.2
+      ]), 3));
+      legLGeom.computeVertexNormals();
+      legL.add(createDoubleSidedMesh(legLGeom));
+      paperRootGroup.add(legL);
+      modelSpecificParts.frontLegL = legL;
+
+      const legR = new THREE.Group();
+      legR.position.set(2.0, 0, 0);
+      const legRGeom = new THREE.BufferGeometry();
+      legRGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0, 0, 1.5, 0, -1.2, 0, 0, 1.2
+      ]), 3));
+      legRGeom.computeVertexNormals();
+      legR.add(createDoubleSidedMesh(legRGeom));
+      paperRootGroup.add(legR);
+      modelSpecificParts.frontLegR = legR;
+
+      // 중앙 몸통
+      const bodyGeom = new THREE.PlaneGeometry(3.2, 2.0);
+      const body = createDoubleSidedMesh(bodyGeom);
+      body.rotation.x = -Math.PI / 2;
+      body.position.set(0, 0, 1.0);
+      paperRootGroup.add(body);
+
+      // 뒷다리 Z자 아코디언 스프링 계단 (1단 & 2단)
+      const spring1 = new THREE.Group();
+      spring1.position.set(0, 0, 2.0);
+      const s1Geom = new THREE.PlaneGeometry(3.0, 1.2);
+      const s1 = createDoubleSidedMesh(s1Geom);
+      s1.rotation.x = -Math.PI / 2;
+      spring1.add(s1);
+
+      const spring2 = new THREE.Group();
+      spring2.position.set(0, 0, 1.2);
+      const s2Geom = new THREE.PlaneGeometry(2.8, 1.2);
+      const s2 = createDoubleSidedMesh(s2Geom);
+      s2.rotation.x = -Math.PI / 2;
+      spring2.add(s2);
+      spring1.add(spring2);
+
+      paperRootGroup.add(spring1);
+      modelSpecificParts.spring1 = spring1;
+      modelSpecificParts.spring2 = spring2;
+    }
+
+    // ==========================================
+    // [3] 🕊️ 전통 종이학 고유 3D 지오메트리
+    // ==========================================
+    else if (currentModelKey === 'crane') {
+      // 마름모 중앙 다이아몬드 코어
+      const coreGeom = new THREE.BufferGeometry();
+      coreGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0.4, -1.2,
+        -1.4, 0, 0,
+        0, -0.4, 0,
+        1.4, 0, 0,
+        0, 0.4, 1.2
+      ]), 3));
+      coreGeom.setIndex([0,1,2, 0,2,3, 4,2,1, 4,3,2]);
+      coreGeom.computeVertexNormals();
+      paperRootGroup.add(createDoubleSidedMesh(coreGeom));
+
+      // 긴 목 & 머리 힌지
+      const neckGroup = new THREE.Group();
+      neckGroup.position.set(0, 0, -1.2);
+      const neckGeom = new THREE.CylinderGeometry(0.12, 0.25, 3.2, 8);
+      const neck = new THREE.Mesh(neckGeom, frontMat);
+      neck.rotation.x = Math.PI / 3;
+      neck.position.set(0, 1.2, -0.8);
+      neckGroup.add(neck);
+
+      // 머리 부리
+      const beak = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.8, 6), frontMat);
+      beak.rotation.x = -Math.PI / 2;
+      beak.position.set(0, 2.5, -1.8);
+      neckGroup.add(beak);
+      paperRootGroup.add(neckGroup);
+      modelSpecificParts.neck = neckGroup;
+
+      // 꼬리 힌지
+      const tailGroup = new THREE.Group();
+      tailGroup.position.set(0, 0, 1.2);
+      const tailGeom = new THREE.ConeGeometry(0.25, 3.0, 6);
+      const tail = new THREE.Mesh(tailGeom, frontMat);
+      tail.rotation.x = -Math.PI / 3;
+      tail.position.set(0, 1.0, 1.0);
+      tailGroup.add(tail);
+      paperRootGroup.add(tailGroup);
+      modelSpecificParts.tail = tailGroup;
+
+      // 좌측 커다란 학 날개
+      const lWing = new THREE.Group();
+      lWing.position.set(-1.4, 0, 0);
+      const lWingGeom = new THREE.BufferGeometry();
+      lWingGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0, -1.2,
+        -4.2, 0, 0,
+        0, 0, 1.2
+      ]), 3));
+      lWingGeom.computeVertexNormals();
+      lWing.add(createDoubleSidedMesh(lWingGeom));
+      paperRootGroup.add(lWing);
+      modelSpecificParts.craneWingL = lWing;
+
+      // 우측 커다란 학 날개
+      const rWing = new THREE.Group();
+      rWing.position.set(1.4, 0, 0);
+      const rWingGeom = new THREE.BufferGeometry();
+      rWingGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        0, 0, -1.2,
+        4.2, 0, 0,
+        0, 0, 1.2
+      ]), 3));
+      rWingGeom.computeVertexNormals();
+      rWing.add(createDoubleSidedMesh(rWingGeom));
+      paperRootGroup.add(rWing);
+      modelSpecificParts.craneWingR = rWing;
+    }
+
+    // ==========================================
+    // [4] 💖 반짝 사랑 하트 고유 3D 지오메트리
+    // ==========================================
+    else if (currentModelKey === 'heart') {
+      // 하단 뾰족한 밑변
+      const baseGeom = new THREE.BufferGeometry();
+      baseGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array([
+        -1.8, 0, 0,
+        0, 0, 2.8,
+        1.8, 0, 0
+      ]), 3));
+      baseGeom.computeVertexNormals();
+      paperRootGroup.add(createDoubleSidedMesh(baseGeom));
+
+      // 좌측 둥근 하트 엽
+      const lobeL = new THREE.Group();
+      lobeL.position.set(-1.0, 0, 0);
+      const lobeLGeom = new THREE.CylinderGeometry(1.2, 1.2, 0.1, 24, 1, false, 0, Math.PI);
+      const lobeLMesh = new THREE.Mesh(lobeLGeom, frontMat);
+      lobeLMesh.rotation.x = -Math.PI / 2;
+      lobeLMesh.position.set(-0.6, 0, -1.2);
+      lobeL.add(lobeLMesh);
+      paperRootGroup.add(lobeL);
+      modelSpecificParts.heartLobeL = lobeL;
+
+      // 우측 둥근 하트 엽
+      const lobeR = new THREE.Group();
+      lobeR.position.set(1.0, 0, 0);
+      const lobeRGeom = new THREE.CylinderGeometry(1.2, 1.2, 0.1, 24, 1, false, 0, Math.PI);
+      const lobeRMesh = new THREE.Mesh(lobeRGeom, frontMat);
+      lobeRMesh.rotation.x = -Math.PI / 2;
+      lobeRMesh.position.set(0.6, 0, -1.2);
+      lobeR.add(lobeRMesh);
+      paperRootGroup.add(lobeR);
+      modelSpecificParts.heartLobeR = lobeR;
+    }
+
+    // ==========================================
+    // [5] 👑 동서남북 마법 상자 고유 3D 지오메트리
+    // ==========================================
+    else {
+      // 4개의 사각뿔 피라미드 포켓 (북, 남, 서, 동)
+      const pNorth = new THREE.Group();
+      pNorth.position.set(0, 0, -1.0);
+      const pNorthGeom = new THREE.ConeGeometry(1.5, 2.2, 4);
+      const mNorth = new THREE.Mesh(pNorthGeom, frontMat);
+      mNorth.rotation.x = Math.PI / 4;
+      pNorth.add(mNorth);
+      paperRootGroup.add(pNorth);
+      modelSpecificParts.fortuneNorth = pNorth;
+
+      const pSouth = new THREE.Group();
+      pSouth.position.set(0, 0, 1.0);
+      const mSouth = new THREE.Mesh(pNorthGeom, frontMat);
+      mSouth.rotation.x = -Math.PI / 4;
+      pSouth.add(mSouth);
+      paperRootGroup.add(pSouth);
+      modelSpecificParts.fortuneSouth = pSouth;
+
+      const pWest = new THREE.Group();
+      pWest.position.set(-1.0, 0, 0);
+      const mWest = new THREE.Mesh(pNorthGeom, frontMat);
+      mWest.rotation.z = -Math.PI / 4;
+      pWest.add(mWest);
+      paperRootGroup.add(pWest);
+      modelSpecificParts.fortuneWest = pWest;
+
+      const pEast = new THREE.Group();
+      pEast.position.set(1.0, 0, 0);
+      const mEast = new THREE.Mesh(pNorthGeom, frontMat);
+      mEast.rotation.z = Math.PI / 4;
+      pEast.add(mEast);
+      paperRootGroup.add(pEast);
+      modelSpecificParts.fortuneEast = pEast;
+    }
+
+    threeScene.add(paperRootGroup);
   }
 
+  // -------------------------------------------------------------
+  // 5-2. 0% ~ 100% 진행도에 따른 모델별 고유 3D 물리 힌지 연산
+  // -------------------------------------------------------------
   function updateThreeFold(percent) {
     document.getElementById('threeFoldPercentText').textContent = `${Math.round(percent)}%`;
-    if (!leftWingGroup || !rightWingGroup || !topFlapGroup) return;
+    if (!paperRootGroup) return;
 
     const t = percent / 100; // 0.0 ~ 1.0
 
-    // 3D 힌지 회전 연산
-    leftWingGroup.rotation.z = -t * Math.PI * 0.85; // 좌측 날개가 위로 접힘
-    rightWingGroup.rotation.z = t * Math.PI * 0.85; // 우측 날개가 위로 접힘
-    topFlapGroup.rotation.x = t * Math.PI * 0.9;   // 머리가 안쪽으로 숙여짐
+    if (currentModelKey === 'airplane') {
+      // 🚀 비행기: 날개 힌지 회전 (0%는 평면, 100%는 활공 각도)
+      if (modelSpecificParts.leftWing) modelSpecificParts.leftWing.rotation.z = -t * Math.PI * 0.75;
+      if (modelSpecificParts.rightWing) modelSpecificParts.rightWing.rotation.z = t * Math.PI * 0.75;
+      if (modelSpecificParts.nose) modelSpecificParts.nose.rotation.x = t * Math.PI * 0.5;
+    }
+    else if (currentModelKey === 'frog') {
+      // 🐸 개구리: 뒷다리 Z자 계단 스프링 압축 및 앞다리 세움
+      if (modelSpecificParts.spring1) modelSpecificParts.spring1.rotation.x = -t * Math.PI * 0.65;
+      if (modelSpecificParts.spring2) modelSpecificParts.spring2.rotation.x = t * Math.PI * 1.35;
+      if (modelSpecificParts.frontLegL) modelSpecificParts.frontLegL.rotation.y = t * Math.PI * 0.35;
+      if (modelSpecificParts.frontLegR) modelSpecificParts.frontLegR.rotation.y = -t * Math.PI * 0.35;
+    }
+    else if (currentModelKey === 'crane') {
+      // 🕊️ 전통 학: 목과 꼬리 솟아오름 & 날개 상하 펄럭임
+      if (modelSpecificParts.neck) modelSpecificParts.neck.rotation.x = -t * Math.PI * 0.45;
+      if (modelSpecificParts.tail) modelSpecificParts.tail.rotation.x = t * Math.PI * 0.45;
+      if (modelSpecificParts.craneWingL) modelSpecificParts.craneWingL.rotation.z = Math.sin(t * Math.PI) * 0.85;
+      if (modelSpecificParts.craneWingR) modelSpecificParts.craneWingR.rotation.z = -Math.sin(t * Math.PI) * 0.85;
+    }
+    else if (currentModelKey === 'heart') {
+      // 💖 하트: 둥근 양 엽이 안쪽으로 모이며 입체 볼륨 형성
+      if (modelSpecificParts.heartLobeL) modelSpecificParts.heartLobeL.rotation.y = -t * Math.PI * 0.35;
+      if (modelSpecificParts.heartLobeR) modelSpecificParts.heartLobeR.rotation.y = t * Math.PI * 0.35;
+    }
+    else {
+      // 👑 동서남북: 4개 피라미드 포켓이 오므려졌다 벌어지는 팝업
+      const spread = (1 - t) * 0.8;
+      if (modelSpecificParts.fortuneNorth) modelSpecificParts.fortuneNorth.position.z = -1.0 - spread;
+      if (modelSpecificParts.fortuneSouth) modelSpecificParts.fortuneSouth.position.z = 1.0 + spread;
+      if (modelSpecificParts.fortuneWest) modelSpecificParts.fortuneWest.position.x = -1.0 - spread;
+      if (modelSpecificParts.fortuneEast) modelSpecificParts.fortuneEast.position.x = 1.0 + spread;
+    }
   }
 
   function toggleThreeAutoPlay() {
@@ -932,7 +1258,10 @@
         currentColor = ORIGAMI_MODELS[currentModelKey].defaultColor || '#22c55e';
         currentStepIndex = 0;
         
-        if (isThreeInitialized) build3DPaperModel();
+        // 3D 모델 및 Rabbit Ear 데이터 즉시 재빌드
+        if (isThreeInitialized) {
+          build3DPaperModel();
+        }
         switchMode(activeMode);
       });
     });
