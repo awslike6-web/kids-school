@@ -27,10 +27,10 @@
         flex-direction: column;
     }
 
-    /* 상단 고정 네비게이션 헤더 */
+    /* 상단 헤더 바 */
     .top-bar {
         display: flex; justify-content: space-between; align-items: center;
-        padding: 10px 20px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
+        padding: 10px 18px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
         box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
         border-bottom: 1px solid #334155;
     }
@@ -42,11 +42,11 @@
     }
     .btn-back:hover { background: #475569; color: #fff; }
     .story-title {
-        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #34d399;
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #34d399;
         display: flex; align-items: center; gap: 8px;
     }
 
-    /* 뷰 모드 전환 스위처 (책 넘김 vs 웹툰 스크롤) */
+    /* 뷰 모드 전환 탭 */
     .view-mode-tabs {
         display: flex; background: #1e293b; padding: 4px; border-radius: 14px;
         border: 1px solid #475569;
@@ -60,28 +60,24 @@
         background: #10b981; color: white; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
     }
 
-    /* ========================================================
-       1. 📖 책 넘김 모드 (E-Book Mode)
-       ======================================================== */
+    /* ==========================================
+       1. 📖 책 넘김 모드 (E-Book Spread Mode)
+       ========================================== */
     .ebook-container {
-        flex: 1; max-width: 1100px; width: 100%; margin: 10px auto; padding: 0 15px;
+        flex: 1; max-width: 1080px; width: 100%; margin: 10px auto; padding: 0 12px;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
     }
-
     .book-frame {
         position: relative; width: 100%; max-width: 960px;
-        background: #1e293b; border-radius: 16px; padding: 12px;
+        background: #1e293b; border-radius: 16px; padding: 10px;
         box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 2px #334155;
         display: flex; justify-content: center; align-items: center;
     }
-
     .book-spread-img {
         width: 100%; height: auto; max-height: 75vh; object-fit: contain;
         border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-        display: block; transition: opacity 0.25s ease;
+        display: block;
     }
-
-    /* 책 넘김 하단 컨트롤 바 */
     .ebook-controls {
         width: 100%; max-width: 960px; margin-top: 14px;
         display: flex; justify-content: space-between; align-items: center; gap: 12px;
@@ -98,14 +94,11 @@
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
     }
-    .btn-next:hover:not(:disabled) { transform: translateY(-2px); }
     .btn-page-nav:disabled { opacity: 0.3; cursor: not-allowed; }
-
     .page-indicator {
         font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #34d399;
         background: #1e293b; padding: 6px 16px; border-radius: 20px; border: 1px solid #334155;
     }
-
     .audio-control-bar {
         display: flex; align-items: center; gap: 10px; background: #1e293b;
         padding: 8px 16px; border-radius: 16px; border: 1px solid #334155;
@@ -113,11 +106,9 @@
     .btn-play {
         padding: 8px 16px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
         font-size: 1rem; color: white; background: #10b981; cursor: pointer;
-        display: inline-flex; align-items: center; gap: 6px; transition: transform 0.15s;
+        display: inline-flex; align-items: center; gap: 6px;
     }
-    .btn-play:active { transform: scale(0.96); }
     .btn-play.playing { background: #f59e0b; }
-
     .auto-read-label {
         display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem;
         font-family: 'Jua', sans-serif; color: #cbd5e1; cursor: pointer;
@@ -125,35 +116,34 @@
     .auto-read-label input { width: 16px; height: 16px; accent-color: #10b981; cursor: pointer; }
 
     /* ========================================================
-       2. 📜 웹툰 스크롤 모드 (Webtoon Scroll Mode)
+       2. 📜 웹툰 스크롤 모드 (대형 그림 + 아래 큼직한 글밥 분리 뷰)
        ======================================================== */
     .webtoon-container {
-        display: none; max-width: 800px; width: 100%; margin: 15px auto;
-        padding: 0 10px 40px 10px; flex-direction: column; gap: 30px;
+        display: none; max-width: 680px; width: 100%; margin: 15px auto;
+        padding: 0 10px 40px 10px; flex-direction: column; gap: 35px;
     }
-
-    /* 상단 전체 연속 재생 플로팅 바 */
     .webtoon-sticky-bar {
         position: sticky; top: 60px; z-index: 90;
-        background: rgba(30, 41, 59, 0.92); backdrop-filter: blur(10px);
-        padding: 10px 18px; border-radius: 16px; border: 1.5px solid #10b981;
+        background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
+        padding: 10px 16px; border-radius: 16px; border: 1.5px solid #10b981;
         display: flex; justify-content: space-between; align-items: center;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6);
     }
     .continuous-btn {
-        padding: 8px 18px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
-        font-size: 1rem; color: white; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 8px 16px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; color: white; background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
     }
     .continuous-btn.playing { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
 
-    /* 웹툰 각 페이지 카드 */
+    /* 웹툰 각 단원 카드 */
     .webtoon-card {
         background: #1e293b; border-radius: 20px; overflow: hidden;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.5); border: 1.5px solid #334155;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #334155;
+        display: flex; flex-direction: column;
     }
     .webtoon-header {
-        padding: 12px 18px; background: #0f172a; display: flex;
+        padding: 12px 16px; background: #0f172a; display: flex;
         justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;
     }
     .webtoon-tag {
@@ -168,32 +158,43 @@
     .btn-card-audio:hover { background: #475569; }
     .btn-card-audio.playing { background: #f59e0b; }
 
-    .webtoon-img {
-        width: 100%; height: auto; display: block;
+    /* 🖼️ 상단 대형 삽화 */
+    .webtoon-ill-wrap {
+        width: 100%; background: #0f172a; overflow: hidden;
+    }
+    .webtoon-ill-img {
+        width: 100%; height: auto; display: block; object-fit: contain;
     }
 
-    /* 반응형 스타일 */
+    /* 📝 하단 큼직한 글밥 카드 */
+    .webtoon-txt-wrap {
+        background: #f8fafc; padding: 12px; display: flex;
+        justify-content: center; align-items: center; border-top: 3px solid #10b981;
+    }
+    .webtoon-txt-img {
+        width: 100%; height: auto; display: block; object-fit: contain;
+        border-radius: 8px;
+    }
+
     @media (max-width: 768px) {
-        .top-bar { padding: 8px 12px; }
-        .story-title { font-size: 1.05rem; }
-        .tab-btn { padding: 5px 10px; font-size: 0.85rem; }
-        .btn-page-nav { padding: 8px 14px; font-size: 0.95rem; }
-        .page-indicator { font-size: 1rem; padding: 4px 12px; }
-        .book-frame { padding: 6px; border-radius: 12px; }
-        .audio-control-bar { width: 100%; justify-content: space-between; margin-top: 8px; }
+        .top-bar { padding: 8px 10px; }
+        .story-title { font-size: 1rem; }
+        .tab-btn { padding: 4px 8px; font-size: 0.85rem; }
+        .btn-page-nav { padding: 8px 12px; font-size: 0.95rem; }
+        .page-indicator { font-size: 0.95rem; padding: 4px 10px; }
+        .book-frame { padding: 4px; }
+        .audio-control-bar { width: 100%; justify-content: space-between; margin-top: 6px; }
     }
 </style>
 </head>
 <body>
 
-<!-- 상단 헤더 바 -->
 <div class="top-bar">
     <div class="top-left">
         <a href="society.html" class="btn-back">🔙 사회 탐험관</a>
         <div class="story-title">📖 기후 수업 대모험</div>
     </div>
 
-    <!-- 뷰어 모드 전환 탭 -->
     <div class="view-mode-tabs">
         <button class="tab-btn active" id="tabEbook" onclick="setViewerMode('ebook')">📖 책장 넘김</button>
         <button class="tab-btn" id="tabWebtoon" onclick="setViewerMode('webtoon')">📜 웹툰 스크롤</button>
@@ -208,7 +209,6 @@
         <img src="../../subjects/society/images/storybook/climate/climate_story_p1.png" alt="동화책 페이지" class="book-spread-img" id="ebookImg">
     </div>
 
-    <!-- 하단 컨트롤 -->
     <div class="ebook-controls">
         <button class="btn-page-nav btn-prev" id="prevBtn" onclick="changePage(-1)">◀ 이전 장</button>
         <div class="page-indicator" id="pageIndicator">1 / 10 쪽</div>
@@ -227,12 +227,11 @@
 </div>
 
 <!-- ============================================================
-     2. 📜 웹툰 스크롤 뷰어 (Webtoon Scroll View)
+     2. 📜 웹툰 스크롤 뷰어 (상단 대형 그림 + 하단 큼직한 글밥 분리 뷰)
      ============================================================ -->
 <div class="webtoon-container" id="webtoonView">
-    <!-- 전체 연속 듣기 플로팅 바 -->
     <div class="webtoon-sticky-bar">
-        <div style="font-family:'Jua', sans-serif; font-size:1.05rem; color:#34d399;">
+        <div style="font-family:'Jua', sans-serif; font-size:1rem; color:#34d399;">
             🎧 전체 1~10장 연속 구연동화 듣기
         </div>
         <button class="continuous-btn" id="continuousBtn" onclick="toggleContinuousPlay()">
@@ -240,11 +239,9 @@
         </button>
     </div>
 
-    <!-- 1장 ~ 10장 카드 렌더링 영역 -->
-    <div id="webtoonCardList" style="display:flex; flex-direction:column; gap:25px;"></div>
+    <div id="webtoonCardList" style="display:flex; flex-direction:column; gap:35px;"></div>
 </div>
 
-<!-- 오디오 태그 -->
 <audio id="mainAudio" preload="auto"></audio>
 
 <script>
@@ -252,71 +249,90 @@
         {
             page: 1,
             tag: "🌟 표지 : 민수와 친구들의 지구 지키기",
-            image: "climate_story_p1.png",
+            spreadImg: "climate_story_p1.png",
+            illImg: "climate_ill_p1.png",
+            txtImg: null,
             audio: "../../assets/audio/storybook/climate/climate_story_p1.mp3"
         },
         {
             page: 2,
             tag: "🌤️ 1장 : 날씨와 기후의 차이점 (61쪽)",
-            image: "climate_story_p2.png",
+            spreadImg: "climate_story_p2.png",
+            illImg: "climate_ill_p2.png",
+            txtImg: "climate_txt_p2.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p2.mp3"
         },
         {
             page: 3,
             tag: "🌬️ 2장 : 계절마다 부는 바람의 성질 (63쪽)",
-            image: "climate_story_p3.png",
+            spreadImg: "climate_story_p3.png",
+            illImg: "climate_ill_p3.png",
+            txtImg: "climate_txt_p3.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p3.mp3"
         },
         {
             page: 4,
             tag: "🌡️ 3장 : 남북의 기온 차이와 위도 (64~65쪽)",
-            image: "climate_story_p4.png",
+            spreadImg: "climate_story_p4.png",
+            illImg: "climate_ill_p4.png",
+            txtImg: "climate_txt_p4.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p4.mp3"
         },
         {
             page: 5,
             tag: "🌧️ 4장 : 강수량 특징과 지역별 차이 (66~67쪽)",
-            image: "climate_story_p5.png",
+            spreadImg: "climate_story_p5.png",
+            illImg: "climate_ill_p5.png",
+            txtImg: "climate_txt_p5.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p5.mp3"
         },
         {
             page: 6,
             tag: "⚡ 5장 : 계절별 자연재해의 이해 (68~69쪽)",
-            image: "climate_story_p6.png",
+            spreadImg: "climate_story_p6.png",
+            illImg: "climate_ill_p6.png",
+            txtImg: "climate_txt_p6.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p6.mp3"
         },
         {
             page: 7,
             tag: "🛡️ 6장 : 재난 안전 행동 요령 (70쪽)",
-            image: "climate_story_p7.png",
+            spreadImg: "climate_story_p7.png",
+            illImg: "climate_ill_p7.png",
+            txtImg: "climate_txt_p7.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p7.mp3"
         },
         {
             page: 8,
             tag: "🌍 7장 : 지구 온난화의 심각성 (73쪽)",
-            image: "climate_story_p8.png",
+            spreadImg: "climate_story_p8.png",
+            illImg: "climate_ill_p8.png",
+            txtImg: "climate_txt_p8.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p8.mp3"
         },
         {
             page: 9,
             tag: "⚠️ 8장 : 심해지는 이상 기후와 피해 (74~75쪽)",
-            image: "climate_story_p9.png",
+            spreadImg: "climate_story_p9.png",
+            illImg: "climate_ill_p9.png",
+            txtImg: "climate_txt_p9.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p9.mp3"
         },
         {
             page: 10,
             tag: "🌱 9장 : 우리가 실천할 기후 행동 (78쪽)",
-            image: "climate_story_p10.png",
+            spreadImg: "climate_story_p10.png",
+            illImg: "climate_ill_p10.png",
+            txtImg: "climate_txt_p10.png",
             audio: "../../assets/audio/storybook/climate/climate_story_p10.mp3"
         }
     ];
 
-    let currentMode = 'ebook'; // 'ebook' or 'webtoon'
+    let currentMode = 'ebook';
     let currentPageIndex = 0;
     let isContinuousPlaying = false;
     const audio = document.getElementById('mainAudio');
 
-    // 뷰어 모드 전환 (책 넘김 vs 웹툰 스크롤)
     function setViewerMode(mode) {
         currentMode = mode;
         audio.pause();
@@ -339,13 +355,10 @@
         }
     }
 
-    // ==========================================
-    // 📖 책 넘김 뷰어 로직
-    // ==========================================
     function renderEbook() {
         const item = STORY_DATA[currentPageIndex];
         const img = document.getElementById('ebookImg');
-        img.src = `../../subjects/society/images/storybook/climate/${item.image}?v=20260831_1`;
+        img.src = `../../subjects/society/images/storybook/climate/${item.spreadImg}?v=20260831_2`;
         document.getElementById('pageIndicator').textContent = `${item.page} / ${STORY_DATA.length} 쪽`;
 
         document.getElementById('prevBtn').disabled = (currentPageIndex === 0);
@@ -402,9 +415,6 @@
         }
     }
 
-    // ==========================================
-    // 📜 웹툰 스크롤 뷰어 로직
-    // ==========================================
     function renderWebtoonList() {
         const list = document.getElementById('webtoonCardList');
         list.innerHTML = '';
@@ -414,6 +424,15 @@
             card.className = 'webtoon-card';
             card.id = `webtoonCard_${idx}`;
 
+            let txtHtml = '';
+            if (item.txtImg) {
+                txtHtml = `
+                    <div class="webtoon-txt-wrap">
+                        <img src="../../subjects/society/images/storybook/climate/${item.txtImg}?v=20260831_2" alt="동화 글밥" class="webtoon-txt-img" loading="lazy">
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
                 <div class="webtoon-header">
                     <div class="webtoon-tag">${item.tag}</div>
@@ -421,7 +440,10 @@
                         ▶️ ${item.page}장 듣기
                     </button>
                 </div>
-                <img src="../../subjects/society/images/storybook/climate/${item.image}?v=20260831_1" alt="${item.tag}" class="webtoon-img" loading="lazy">
+                <div class="webtoon-ill-wrap">
+                    <img src="../../subjects/society/images/storybook/climate/${item.illImg}?v=20260831_2" alt="동화 삽화" class="webtoon-ill-img" loading="lazy">
+                </div>
+                ${txtHtml}
             `;
             list.appendChild(card);
         });
@@ -439,7 +461,6 @@
             return;
         }
 
-        // 다른 모든 버튼 리셋
         document.querySelectorAll('.btn-card-audio').forEach((b, i) => {
             b.classList.remove('playing');
             b.innerHTML = `▶️ ${STORY_DATA[i].page}장 듣기`;
@@ -477,13 +498,11 @@
         currentPageIndex = idx;
         audio.src = STORY_DATA[idx].audio;
 
-        // 해당 카드로 스크롤 이동
         const targetCard = document.getElementById(`webtoonCard_${idx}`);
         if (targetCard) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        // 버튼 하이라이트
         resetAllWebtoonCardButtons();
         const activeBtn = document.getElementById(`cardAudioBtn_${idx}`);
         if (activeBtn) {
@@ -516,7 +535,6 @@
         });
     }
 
-    // 오디오 종료 이벤트 핸들러
     audio.onended = () => {
         if (currentMode === 'ebook') {
             updateEbookAudioUI(false);
@@ -529,7 +547,6 @@
         }
     };
 
-    // 키보드 방향키 지원 (책 넘김 모드)
     window.addEventListener('keydown', (e) => {
         if (currentMode === 'ebook') {
             if (e.key === 'ArrowLeft') changePage(-1);
