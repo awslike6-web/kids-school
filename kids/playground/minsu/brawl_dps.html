@@ -8,14 +8,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     .lab-layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 24px;
-      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin-top: 16px;
     }
-    @media (max-width: 900px) {
+    @media (min-width: 900px) {
       .lab-layout {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
       }
     }
 
@@ -24,14 +29,17 @@
       background: var(--card-dark);
       border: 2px solid var(--border-dark);
       border-radius: 24px;
-      padding: 22px;
+      padding: 18px 14px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
     }
     .panel-title {
       font-family: 'Jua', sans-serif;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       color: var(--cyan-neon);
       margin-bottom: 8px;
       display: flex;
@@ -43,26 +51,31 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 8px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .brawler-select-btn {
-      padding: 10px 8px;
+      padding: 10px 6px;
       border-radius: 14px;
       border: 1.5px solid #352a63;
       background: #1e1738;
       color: #fff;
       font-family: 'Jua', sans-serif;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      gap: 6px;
       transition: all 0.2s;
+      box-sizing: border-box;
+      min-width: 0;
     }
     .brawler-select-btn.active {
       border-color: var(--cyan-neon);
       background: rgba(0, 242, 254, 0.2);
       box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
-      transform: scale(1.03);
+      transform: scale(1.02);
     }
 
     /* 스위치 토글 */
@@ -70,44 +83,61 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      box-sizing: border-box;
     }
     .switch-label {
       font-family: 'Jua', sans-serif;
-      font-size: 1.05rem;
+      font-size: 0.95rem;
     }
 
     /* 📊 스탯 대시보드 */
     .stat-dashboard {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
     }
     .stat-cards-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (min-width: 600px) {
+      .stat-cards-row {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
     .stat-card {
       background: var(--card-dark);
       border: 2px solid var(--border-dark);
-      border-radius: 20px;
-      padding: 18px;
+      border-radius: 18px;
+      padding: 14px 8px;
       text-align: center;
+      box-sizing: border-box;
+      min-width: 0;
     }
     .stat-card-title {
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       opacity: 0.8;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .stat-card-value {
       font-family: 'Jua', sans-serif;
-      font-size: 1.9rem;
+      font-size: clamp(1.2rem, 4.5vw, 1.7rem);
       color: var(--yellow-brawl);
       text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+      word-break: break-all;
     }
 
     /* 📐 수학 공식 풀이 상자 */
@@ -115,10 +145,13 @@
       background: rgba(0, 242, 254, 0.08);
       border: 2px dashed var(--cyan-neon);
       border-radius: 20px;
-      padding: 18px 22px;
+      padding: 14px 16px;
       font-family: 'Nanum Gothic', sans-serif;
-      font-size: 1.05rem;
-      line-height: 1.7;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      box-sizing: border-box;
     }
 
     /* ⚔️ 배틀 시뮬레이터 캔버스 */
@@ -126,34 +159,42 @@
       background: var(--card-dark);
       border: 2px solid var(--border-dark);
       border-radius: 24px;
-      padding: 20px;
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     #battleCanvas {
       width: 100%;
-      max-width: 720px;
-      height: 240px;
-      border-radius: 16px;
+      max-width: 100%;
+      height: auto;
+      aspect-ratio: 720 / 240;
+      border-radius: 14px;
       border: 2px solid #352a63;
       background: #16122c;
+      display: block;
+      box-sizing: border-box;
     }
     .sim-btn {
-      padding: 12px 32px;
+      width: 100%;
+      max-width: 320px;
+      padding: 12px 20px;
       border-radius: 18px;
       background: linear-gradient(135deg, #ff007f, #ff5e62);
       color: #fff;
       font-family: 'Jua', sans-serif;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       border: none;
       cursor: pointer;
       box-shadow: 0 4px 20px rgba(255, 0, 127, 0.4);
       transition: all 0.2s;
     }
     .sim-btn:hover {
-      transform: translateY(-2px) scale(1.03);
+      transform: translateY(-2px) scale(1.02);
       box-shadow: 0 8px 25px rgba(255, 0, 127, 0.6);
     }
 
@@ -162,26 +203,38 @@
       background: linear-gradient(135deg, rgba(255, 204, 0, 0.12), rgba(157, 78, 221, 0.15));
       border: 2px solid var(--yellow-brawl);
       border-radius: 24px;
-      padding: 22px;
+      padding: 16px 14px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .quiz-q {
       font-family: 'Jua', sans-serif;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
       margin-bottom: 12px;
+      line-height: 1.4;
     }
     .quiz-input-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 520px) {
+      .quiz-input-row {
+        flex-direction: column;
+      }
     }
     .quiz-input {
       flex: 1;
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: 14px;
       border: 2px solid var(--border-dark);
       background: #120e24;
       color: #fff;
       font-family: 'Jua', sans-serif;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
+      box-sizing: border-box;
+      min-width: 0;
     }
   </style>
 </head>

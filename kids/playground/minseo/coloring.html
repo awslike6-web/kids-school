@@ -8,14 +8,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     .studio-layout {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
       margin-top: 16px;
+      width: 100%;
+      box-sizing: border-box;
     }
-    @media (max-width: 860px) {
+    @media (min-width: 860px) {
       .studio-layout {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 20px;
       }
     }
 
@@ -24,11 +28,14 @@
       background: var(--card-light);
       border: 2px solid var(--border-light);
       border-radius: 24px;
-      padding: 20px;
+      padding: 16px 14px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
       box-shadow: 0 8px 25px rgba(255, 107, 157, 0.15);
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
     }
     body.theme--arcade .toolbox {
       background: var(--card-dark);
@@ -38,7 +45,7 @@
 
     .tool-group-title {
       font-family: 'Jua', sans-serif;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -48,21 +55,25 @@
     .tool-btn-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .tool-btn {
-      padding: 10px 6px;
+      padding: 10px 4px;
       border-radius: 14px;
       border: 2px solid rgba(0,0,0,0.1);
       background: #ffffff;
       font-family: 'Jua', sans-serif;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 4px;
       transition: all 0.2s;
+      box-sizing: border-box;
+      min-width: 0;
     }
     body.theme--arcade .tool-btn {
       background: #231b40;
@@ -73,7 +84,7 @@
       border-color: var(--pink-soft);
       background: #ffe4ec;
       color: #ff4081;
-      transform: scale(1.05);
+      transform: scale(1.03);
       box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
     }
     body.theme--arcade .tool-btn.active {
@@ -87,7 +98,9 @@
     .color-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .color-chip {
       width: 100%;
@@ -96,12 +109,13 @@
       border: 2px solid rgba(0,0,0,0.15);
       cursor: pointer;
       transition: transform 0.15s ease;
+      box-sizing: border-box;
     }
     .color-chip:hover {
-      transform: scale(1.15);
+      transform: scale(1.1);
     }
     .color-chip.active {
-      transform: scale(1.2);
+      transform: scale(1.15);
       border-color: #222;
       box-shadow: 0 0 0 2px #fff, 0 4px 8px rgba(0,0,0,0.3);
     }
@@ -111,14 +125,16 @@
       background: #ffffff;
       border: 3px solid #ffb3c6;
       border-radius: 24px;
-      padding: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      min-height: 520px;
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
     }
     body.theme--arcade .canvas-viewport {
       border-color: var(--cyan-neon);
@@ -133,6 +149,7 @@
       overflow: hidden;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       background: #fff;
+      box-sizing: border-box;
     }
     .canvas-stack-wrapper canvas {
       position: absolute;
@@ -154,16 +171,16 @@
     /* 프리셋 칩 */
     .preset-list {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .preset-btn {
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 12px;
       border: 1.5px solid #ffb3c6;
       background: #fff;
       font-family: 'Jua', sans-serif;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
     }
     body.theme--arcade .preset-btn {
@@ -175,9 +192,16 @@
     /* 액션 버튼 */
     .action-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       width: 100%;
-      margin-top: 14px;
+      margin-top: 12px;
+      box-sizing: border-box;
+    }
+    @media (max-width: 520px) {
+      .action-row {
+        flex-direction: column;
+      }
+    }
     }
     .act-btn {
       flex: 1;
