@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎡 민민 창의 & 게이밍 놀이터 - Playground</title>
+  <link rel="stylesheet" href="playground.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(255, 0, 127, 0.15));
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      padding: 24px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    .hero-info h2 {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 6px;
+    }
+    .hero-info p {
+      font-family: 'Gaegu', cursive;
+      font-size: 1.25rem;
+      opacity: 0.9;
+    }
+    .hero-btn {
+      padding: 14px 28px;
+      border-radius: 20px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ffcc00, #ff9900);
+      color: #1a1a1a;
+      box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    .hero-btn:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 10px 25px rgba(255, 204, 0, 0.6);
+    }
+    @media (max-width: 640px) {
+      .hero-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 18px;
+      }
+    }
+  </style>
+</head>
+<body class="theme--arcade">
+
+  <div class="pg-container">
+    <!-- 🧭 상단 바 -->
+    <div class="pg-top-nav">
+      <a href="../../lobby.html" class="pg-back-btn">⬅️ 공부방 메인 로비로</a>
+      
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div class="pg-trophy-bar">
+          <span>🏆</span>
+          <span id="headerTrophyCount">0</span>
+        </div>
+        <a href="minsu/starr_drop.html" class="pg-back-btn" style="border-color: #ffd166; color: #ffd166;">
+          <span>🎁 스타드롭</span>
+          <b id="headerDropCount">0</b>
+        </a>
+      </div>
+    </div>
+
+    <!-- 🌟 타이틀 -->
+    <div class="pg-header">
+      <h1 class="pg-title">
+        <span class="neon-text">🎡 창의 & 게이밍</span> <span class="accent-text">놀이터</span>
+      </h1>
+      <p class="pg-subtitle" id="welcomeSubtitle">상상력을 펼치는 만들기 & 신나는 게임 데이터 연구실!</p>
+    </div>
+
+    <!-- 🎁 스타 드롭 퀵 배너 -->
+    <div class="hero-banner">
+      <div class="hero-info">
+        <h2>🎁 브롤스타즈 스타 드롭 개봉실</h2>
+        <p>오늘의 놀이와 공부를 완료하고 스타 드롭을 톡톡 터치해 전설 보상을 뽑아보세요!</p>
+      </div>
+      <a href="minsu/starr_drop.html" class="hero-btn">
+        <span>✨ 지금 개봉하기</span>
+      </a>
+    </div>
+
+    <!-- 🗂️ 놀이 카드 그리드 -->
+    <div class="pg-grid">
+
+      <!-- 1. 민서: 매직 컬러링 & 밑그림 공방 -->
+      <a href="minseo/coloring.html" class="pg-card">
+        <div class="pg-card-badge">초등 1~2학년 강추 🎨</div>
+        <div class="pg-card-icon">🎨</div>
+        <h2 class="pg-card-title">매직 컬러링 스튜디오</h2>
+        <p class="pg-card-desc">
+          좋아하는 사진이나 만화 캐릭터를 넣으면 <b>깨끗한 흑백 밑그림</b>으로 변신! 웹에서 바로 색칠하고 A4 도안으로 인쇄해요.
+        </p>
+        <div class="pg-card-btn">스튜디오 입장하기 🖌️</div>
+      </a>
+
+      <!-- 2. 민수: 브롤 DPS & 밸런스 연구소 -->
+      <a href="minsu/brawl_dps.html" class="pg-card">
+        <div class="pg-card-badge">초등 5학년 수학 연계 ⚔️</div>
+        <div class="pg-card-icon">⚔️</div>
+        <h2 class="pg-card-title">브롤 DPS & 밸런스 연구소</h2>
+        <p class="pg-card-desc">
+          브롤러의 공격력, 장전속도, 하이퍼차지 배율을 분석하고 5학년 수학(분수/소수 곱셈)으로 <b>가상 1:1 대전 시뮬레이션</b>을 돌려보자!
+        </p>
+        <div class="pg-card-btn">배틀 랩 입장하기 🎮</div>
+      </a>
+
+      <!-- 3. 스타 드롭 & 보관함 -->
+      <a href="minsu/starr_drop.html" class="pg-card">
+        <div class="pg-card-badge">보상 룸 🏆</div>
+        <div class="pg-card-icon">🎁</div>
+        <h2 class="pg-card-title">스타 드롭 & 트로피 보관함</h2>
+        <p class="pg-card-desc">
+          톡톡 탭해서 [희귀 ➡️ 신화 ➡️ 전설] 등급으로 업그레이드! 내가 획득한 보상 카드와 쿠폰을 확인하세요.
+        </p>
+        <div class="pg-card-btn">보관함 열기 🔓</div>
+      </a>
+
+    </div>
+  </div>
+
+  <script src="starr_drop_engine.js"></script>
+  <script>
+    // 프로필 감지 및 테마 적용
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('currentUser') || 'son';
+      const savedName = localStorage.getItem('currentUserName') || (savedUser === 'son' ? '민수' : '민서');
+
+      if (savedUser === 'daughter' || savedName === '민서' || savedName === '엄마') {
+        document.body.className = 'theme--hideout';
+        document.getElementById('welcomeSubtitle').textContent = `반짝반짝 동화 속 창의 공방에 온 걸 환영해, ${savedName}! 🌸`;
+      } else {
+        document.body.className = 'theme--arcade';
+        document.getElementById('welcomeSubtitle').textContent = `아케이드 가동! 상상력과 데이터를 지배하라, ${savedName}! ⚡`;
+      }
+
+      function updateStats() {
+        if (window.StarrDropEngine) {
+          document.getElementById('headerTrophyCount').textContent = window.StarrDropEngine.getTrophies().toLocaleString();
+          document.getElementById('headerDropCount').textContent = window.StarrDropEngine.getDropCount();
+        }
+      }
+
+      updateStats();
+      window.addEventListener('starr-drop-updated', updateStats);
+    });
+  </script>
+</body>
+</html>

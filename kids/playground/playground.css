@@ -1,0 +1,262 @@
+/* 🎡 창의 & 게이밍 놀이터 공통 스타일시트 (playground.css) */
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+:root {
+  --bg-dark: #0d0a1a;
+  --surface-dark: #17132b;
+  --card-dark: rgba(27, 21, 51, 0.92);
+  --border-dark: #352a63;
+  --text-dark: #f0f4f8;
+  --cyan-neon: #00f2fe;
+  --pink-neon: #ff007f;
+  --yellow-brawl: #ffcc00;
+  --purple-neon: #9d4edd;
+  
+  --bg-light: #fff5f7;
+  --surface-light: #ffe8ee;
+  --card-light: rgba(255, 255, 255, 0.94);
+  --border-light: #ffb3c6;
+  --text-light: #4a3352;
+  --pink-soft: #ff6b9d;
+  --mint-soft: #4ecdc4;
+  --yellow-soft: #ffd166;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nanum Gothic', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  touch-action: manipulation;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* 🎮 민수 테마: 아케이드 네온 */
+body.theme--arcade {
+  background: radial-gradient(circle at 50% 20%, #1c1538 0%, #0c0818 100%);
+  color: var(--text-dark);
+}
+body.theme--arcade .pg-card {
+  background: var(--card-dark);
+  border: 2px solid var(--border-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+body.theme--arcade .pg-card:hover {
+  border-color: var(--cyan-neon);
+  box-shadow: 0 12px 35px rgba(0, 242, 254, 0.3);
+}
+body.theme--arcade .neon-text {
+  color: var(--cyan-neon);
+  text-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
+}
+body.theme--arcade .accent-text {
+  color: var(--pink-neon);
+  text-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
+}
+
+/* 🎠 민서 테마: 아기자기 동화 */
+body.theme--hideout, body.theme--slime {
+  background: linear-gradient(160deg, #fff2f5 0%, #ffe5ec 50%, #fffbe6 100%);
+  color: var(--text-light);
+}
+body.theme--hideout .pg-card, body.theme--slime .pg-card {
+  background: var(--card-light);
+  border: 2.5px solid var(--border-light);
+  box-shadow: 0 8px 25px rgba(255, 107, 157, 0.15);
+}
+body.theme--hideout .pg-card:hover, body.theme--slime .pg-card:hover {
+  border-color: var(--pink-soft);
+  box-shadow: 0 12px 30px rgba(255, 107, 157, 0.3);
+}
+body.theme--hideout .neon-text, body.theme--slime .neon-text {
+  color: var(--pink-soft);
+}
+body.theme--hideout .accent-text, body.theme--slime .accent-text {
+  color: #ff9f43;
+}
+
+/* 🧭 상단 내비게이션 */
+.pg-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.pg-top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.pg-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.1rem;
+  text-decoration: none;
+  border: 2px solid;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+body.theme--arcade .pg-back-btn {
+  background: rgba(30, 25, 50, 0.85);
+  border-color: var(--cyan-neon);
+  color: var(--cyan-neon);
+}
+body.theme--arcade .pg-back-btn:hover {
+  background: var(--cyan-neon);
+  color: #0c0818;
+  transform: translateY(-2px);
+}
+body.theme--hideout .pg-back-btn, body.theme--slime .pg-back-btn {
+  background: #ffffff;
+  border-color: var(--pink-soft);
+  color: var(--pink-soft);
+}
+body.theme--hideout .pg-back-btn:hover, body.theme--slime .pg-back-btn:hover {
+  background: var(--pink-soft);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.pg-trophy-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.25rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid var(--yellow-brawl);
+  color: var(--yellow-brawl);
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+}
+
+/* 🌟 타이틀 섹션 */
+.pg-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.pg-title {
+  font-family: 'Jua', sans-serif;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.pg-subtitle {
+  font-family: 'Gaegu', cursive;
+  font-size: 1.3rem;
+  opacity: 0.85;
+}
+
+/* 🗂️ 카드 그리드 */
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.pg-card {
+  border-radius: 26px;
+  padding: 30px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+.pg-card:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+.pg-card-badge {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  font-family: 'Jua', sans-serif;
+}
+body.theme--arcade .pg-card-badge {
+  background: rgba(0, 242, 254, 0.2);
+  color: var(--cyan-neon);
+  border: 1px solid var(--cyan-neon);
+}
+body.theme--hideout .pg-card-badge, body.theme--slime .pg-card-badge {
+  background: #ffe4ec;
+  color: var(--pink-soft);
+  border: 1px solid var(--pink-soft);
+}
+
+.pg-card-icon {
+  font-size: 4.5rem;
+  margin-bottom: 16px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  transition: transform 0.3s ease;
+}
+.pg-card:hover .pg-card-icon {
+  transform: scale(1.12) rotate(4deg);
+}
+
+.pg-card-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+.pg-card-desc {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.8;
+  margin-bottom: 18px;
+  word-break: keep-all;
+}
+
+.pg-card-btn {
+  margin-top: auto;
+  padding: 10px 24px;
+  border-radius: 16px;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+body.theme--arcade .pg-card-btn {
+  background: linear-gradient(135deg, #00f2fe, #4facfe);
+  color: #0c0818;
+}
+body.theme--hideout .pg-card-btn, body.theme--slime .pg-card-btn {
+  background: linear-gradient(135deg, #ff758c, #ff7eb3);
+  color: #ffffff;
+}
+
+/* 🎁 스타 드롭 공통 배너 */
+.starr-drop-banner {
+  background: linear-gradient(135deg, rgba(255, 204, 0, 0.15), rgba(157, 78, 221, 0.25));
+  border: 2.5px dashed var(--yellow-brawl);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+@media (max-width: 640px) {
+  .starr-drop-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+}

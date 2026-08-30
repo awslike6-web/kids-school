@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎁 스타 드롭 개봉실 - 민민 놀이터</title>
+  <link rel="stylesheet" href="../playground.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    .drop-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 480px;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    /* 🌟 스타 드롭 엠블럼 */
+    .starr-drop-box {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, box-shadow 0.3s ease, background 0.3s ease;
+      position: relative;
+      animation: floatPulsing 2.5s ease-in-out infinite;
+    }
+    @keyframes floatPulsing {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.04); }
+    }
+    .starr-drop-box.tap-shake {
+      animation: tapShake 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    @keyframes tapShake {
+      10%, 90% { transform: translate3d(-4px, 0, 0) scale(1.1); }
+      20%, 80% { transform: translate3d(6px, 0, 0) scale(1.1); }
+      30%, 50%, 70% { transform: translate3d(-8px, 0, 0) scale(1.1); }
+      40%, 60% { transform: translate3d(8px, 0, 0) scale(1.1); }
+    }
+
+    .drop-star-icon {
+      font-size: 6rem;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+    }
+    .drop-tier-label {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.4rem;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      margin-top: 4px;
+    }
+
+    .tap-guide-text {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.5rem;
+      margin-top: 24px;
+      text-align: center;
+      animation: pulseText 1.5s infinite;
+    }
+    @keyframes pulseText {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* 🎴 보상 개봉 카드 (Flip Card) */
+    .reward-card-container {
+      display: none;
+      width: 300px;
+      height: 380px;
+      border-radius: 28px;
+      padding: 28px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes cardPop {
+      0% { transform: scale(0.4) rotateY(180deg); opacity: 0; }
+      100% { transform: scale(1) rotateY(0deg); opacity: 1; }
+    }
+
+    .reward-icon { font-size: 5.5rem; margin-bottom: 12px; }
+    .reward-title { font-family: 'Jua', sans-serif; font-size: 2rem; margin-bottom: 8px; }
+    .reward-desc { font-family: 'Gaegu', cursive; font-size: 1.3rem; opacity: 0.9; margin-bottom: 20px; }
+
+    /* 🗃️ 인벤토리 서랍 */
+    .inventory-section {
+      margin-top: 40px;
+      background: var(--card-dark);
+      border: 2px solid var(--border-dark);
+      border-radius: 26px;
+      padding: 24px;
+    }
+    body.theme--hideout .inventory-section {
+      background: var(--card-light);
+      border-color: var(--border-light);
+    }
+    .inv-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .inv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .inv-item-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Jua', sans-serif;
+    }
+    body.theme--hideout .inv-item-card {
+      background: #ffffff;
+      border-color: #ffb3c6;
+      color: #4a384f;
+    }
+  </style>
+</head>
+<body class="theme--arcade">
+
+  <div class="pg-container">
+    <!-- 🧭 상단 바 -->
+    <div class="pg-top-nav">
+      <a href="../index.html" class="pg-back-btn">⬅️ 놀이터 허브로</a>
+      <div style="display: flex; gap: 12px;">
+        <div class="pg-trophy-bar">
+          <span>🏆</span>
+          <span id="starrTrophyCount">0</span>
+        </div>
+        <div class="pg-trophy-bar" style="border-color: #ffcc00; color: #ffcc00;">
+          <span>🎁</span>
+          <span id="starrDropCount">0</span>개 남음
+        </div>
+      </div>
+    </div>
+
+    <!-- 🌟 타이틀 -->
+    <div class="pg-header" style="margin-bottom: 10px;">
+      <h1 class="pg-title">
+        <span class="neon-text">🎁 스타 드롭</span> <span class="accent-text">개봉실</span>
+      </h1>
+      <p class="pg-subtitle">화면 중앙의 스타 드롭을 톡톡 터치하여 전설 등급으로 승급시키세요!</p>
+    </div>
+
+    <!-- 🎯 개봉 스테이지 -->
+    <div class="drop-stage">
+      
+      <!-- 1. 인터랙티브 스타드롭 박스 -->
+      <div id="dropBox" class="starr-drop-box" style="background: radial-gradient(circle, #38bdf8, #0284c7); box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);">
+        <span class="drop-star-icon">⭐</span>
+        <span id="tierLabel" class="drop-tier-label">희귀 (Rare)</span>
+      </div>
+
+      <!-- 안내 텍스트 -->
+      <div id="tapGuide" class="tap-guide-text">
+        👆 <b>톡! 터치해서 업그레이드</b> (남은 탭: <span id="tapsLeft">4</span>)
+      </div>
+
+      <!-- 2. 개봉 완료 보상 카드 -->
+      <div id="rewardCard" class="reward-card-container">
+        <div id="cardIcon" class="reward-icon">🏆</div>
+        <div id="cardTitle" class="reward-title">보상 이름</div>
+        <div id="cardDesc" class="reward-desc">보상 획득 완료!</div>
+        <button type="button" id="againBtn" class="pg-card-btn" style="cursor: pointer; width: 100%;">
+          ✨ 한 번 더 개봉하기
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 🗃️ 획득한 보상 & 쿠폰 보관함 -->
+    <div class="inventory-section">
+      <div class="inv-title">
+        <span>🎒 내가 획득한 보상 & 쿠폰 보관함</span>
+      </div>
+      <div class="inv-grid" id="inventoryGrid">
+        <div style="opacity: 0.6; font-size: 0.95rem;">아직 개봉한 보상이 없어요. 스타 드롭을 열어보세요!</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../starr_drop_engine.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 테마 설정
+      const savedUser = localStorage.getItem('currentUser') || 'son';
+      if (savedUser === 'daughter') {
+        document.body.className = 'theme--hideout';
+      } else {
+        document.body.className = 'theme--arcade';
+      }
+
+      const dropBox = document.getElementById('dropBox');
+      const tierLabel = document.getElementById('tierLabel');
+      const tapGuide = document.getElementById('tapGuide');
+      const tapsLeftSpan = document.getElementById('tapsLeft');
+      const rewardCard = document.getElementById('rewardCard');
+      const cardIcon = document.getElementById('cardIcon');
+      const cardTitle = document.getElementById('cardTitle');
+      const cardDesc = document.getElementById('cardDesc');
+      const againBtn = document.getElementById('againBtn');
+
+      let session = null;
+
+      function updateHeader() {
+        if (window.StarrDropEngine) {
+          document.getElementById('starrTrophyCount').textContent = window.StarrDropEngine.getTrophies().toLocaleString();
+          document.getElementById('starrDropCount').textContent = window.StarrDropEngine.getDropCount();
+        }
+      }
+
+      function renderInventory() {
+        const grid = document.getElementById('inventoryGrid');
+        if (!window.StarrDropEngine) return;
+        const items = window.StarrDropEngine.getInventory();
+        if (!items || items.length === 0) {
+          grid.innerHTML = '<div style="opacity: 0.6; font-size: 0.95rem;">아직 획득한 보상이 없어요. 스타 드롭을 열어보세요!</div>';
+          return;
+        }
+        grid.innerHTML = items.map(item => `
+          <div class="inv-item-card">
+            <span style="font-size: 1.8rem;">${item.icon || '🎁'}</span>
+            <div>
+              <div style="font-size: 1.05rem;">${item.name}</div>
+              <div style="font-size: 0.75rem; opacity: 0.7;">보관 중</div>
+            </div>
+          </div>
+        `).reverse().join('');
+      }
+
+      function startNewSession() {
+        if (window.StarrDropEngine.getDropCount() <= 0) {
+          dropBox.style.display = 'none';
+          tapGuide.innerHTML = '⚠️ 남은 스타 드롭이 없어요! <b>매직 컬러링</b>이나 <b>수학 문제/놀이</b>를 완료하고 드롭을 충전하세요!';
+          rewardCard.style.display = 'none';
+          return;
+        }
+
+        session = window.StarrDropEngine.createDropSession();
+        updateHeader();
+
+        dropBox.style.display = 'flex';
+        tapGuide.style.display = 'block';
+        rewardCard.style.display = 'none';
+
+        const tier = session.getTier();
+        dropBox.style.background = `radial-gradient(circle, ${tier.color}, #111)`;
+        dropBox.style.boxShadow = `0 0 35px ${tier.glow}`;
+        tierLabel.textContent = tier.name;
+        tapsLeftSpan.textContent = session.getTapsRemaining();
+      }
+
+      dropBox.addEventListener('click', () => {
+        if (!session || session.isOpened()) return;
+
+        dropBox.classList.remove('tap-shake');
+        void dropBox.offsetWidth; // 트리거 리플로우
+        dropBox.classList.add('tap-shake');
+
+        const result = session.tap();
+        const tier = result.tier;
+
+        dropBox.style.background = `radial-gradient(circle, ${tier.color}, #111)`;
+        dropBox.style.boxShadow = `0 0 45px ${tier.glow}`;
+        tierLabel.textContent = tier.name;
+        tapsLeftSpan.textContent = session.getTapsRemaining();
+
+        if (result.isOpened) {
+          setTimeout(() => {
+            dropBox.style.display = 'none';
+            tapGuide.style.display = 'none';
+
+            rewardCard.style.display = 'flex';
+            rewardCard.style.background = `linear-gradient(135deg, ${tier.color}44, #1a1a2e)`;
+            rewardCard.style.border = `3px solid ${tier.color}`;
+
+            cardIcon.textContent = result.reward.icon || '🎁';
+            cardTitle.textContent = result.reward.name;
+            cardDesc.textContent = `축하합니다! ${tier.name} 등급 보상을 획득했습니다!`;
+
+            updateHeader();
+            renderInventory();
+          }, 400);
+        }
+      });
+
+      againBtn.addEventListener('click', startNewSession);
+
+      updateHeader();
+      renderInventory();
+      startNewSession();
+    });
+  </script>
+</body>
+</html>

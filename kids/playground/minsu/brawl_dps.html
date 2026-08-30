@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>⚔️ 브롤 DPS & 밸런스 연구소 - 민민 놀이터</title>
+  <link rel="stylesheet" href="../playground.css">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    .lab-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    @media (max-width: 900px) {
+      .lab-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 🎮 컨트롤 패널 */
+    .control-panel {
+      background: var(--card-dark);
+      border: 2px solid var(--border-dark);
+      border-radius: 24px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .panel-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: var(--cyan-neon);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brawler-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .brawler-select-btn {
+      padding: 10px 8px;
+      border-radius: 14px;
+      border: 1.5px solid #352a63;
+      background: #1e1738;
+      color: #fff;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .brawler-select-btn.active {
+      border-color: var(--cyan-neon);
+      background: rgba(0, 242, 254, 0.2);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+      transform: scale(1.03);
+    }
+
+    /* 스위치 토글 */
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .switch-label {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+    }
+
+    /* 📊 스탯 대시보드 */
+    .stat-dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .stat-cards-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .stat-card {
+      background: var(--card-dark);
+      border: 2px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 18px;
+      text-align: center;
+    }
+    .stat-card-title {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 6px;
+    }
+    .stat-card-value {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.9rem;
+      color: var(--yellow-brawl);
+      text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+    }
+
+    /* 📐 수학 공식 풀이 상자 */
+    .math-box {
+      background: rgba(0, 242, 254, 0.08);
+      border: 2px dashed var(--cyan-neon);
+      border-radius: 20px;
+      padding: 18px 22px;
+      font-family: 'Nanum Gothic', sans-serif;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    /* ⚔️ 배틀 시뮬레이터 캔버스 */
+    .battle-wrapper {
+      background: var(--card-dark);
+      border: 2px solid var(--border-dark);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    #battleCanvas {
+      width: 100%;
+      max-width: 720px;
+      height: 240px;
+      border-radius: 16px;
+      border: 2px solid #352a63;
+      background: #16122c;
+    }
+    .sim-btn {
+      padding: 12px 32px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #ff007f, #ff5e62);
+      color: #fff;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255, 0, 127, 0.4);
+      transition: all 0.2s;
+    }
+    .sim-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(255, 0, 127, 0.6);
+    }
+
+    /* 🎯 수학 미션 퀴즈 */
+    .quiz-box {
+      background: linear-gradient(135deg, rgba(255, 204, 0, 0.12), rgba(157, 78, 221, 0.15));
+      border: 2px solid var(--yellow-brawl);
+      border-radius: 24px;
+      padding: 22px;
+    }
+    .quiz-q {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+    .quiz-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .quiz-input {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: 14px;
+      border: 2px solid var(--border-dark);
+      background: #120e24;
+      color: #fff;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body class="theme--arcade">
+
+  <div class="pg-container">
+    <!-- 🧭 상단 바 -->
+    <div class="pg-top-nav">
+      <a href="../index.html" class="pg-back-btn">⬅️ 놀이터 허브로</a>
+      <div class="pg-trophy-bar">
+        <span>⚔️ 브롤 DPS & 밸런스 연구소</span>
+      </div>
+    </div>
+
+    <!-- 🌟 타이틀 -->
+    <div class="pg-header" style="margin-bottom: 16px;">
+      <h1 class="pg-title">
+        <span class="neon-text">⚔️ 브롤스타즈</span> <span class="accent-text">수학 & DPS 랩</span>
+      </h1>
+      <p class="pg-subtitle">5학년 수학(분수/소수의 곱셈 & 비율)으로 브롤러 데미지를 분석하고 1:1 배틀을 시뮬레이션하자!</p>
+    </div>
+
+    <!-- 🛠️ 2열 레이아웃 -->
+    <div class="lab-layout">
+
+      <!-- 좌측: 브롤러 선택 & 버프 컨트롤러 -->
+      <div class="control-panel">
+        <div>
+          <div class="panel-title">🤠 브롤러 선택</div>
+          <div class="brawler-grid">
+            <button type="button" class="brawler-select-btn active" data-brawler="colt">
+              <span style="font-size: 1.4rem;">🤠</span> 콜트
+            </button>
+            <button type="button" class="brawler-select-btn" data-brawler="shelly">
+              <span style="font-size: 1.4rem;">💥</span> 쉘리
+            </button>
+            <button type="button" class="brawler-select-btn" data-brawler="frank">
+              <span style="font-size: 1.4rem;">🔨</span> 프랭크
+            </button>
+            <button type="button" class="brawler-select-btn" data-brawler="spike">
+              <span style="font-size: 1.4rem;">🌵</span> 스파이크
+            </button>
+            <button type="button" class="brawler-select-btn" data-brawler="edgar">
+              <span style="font-size: 1.4rem;">🧣</span> 에드가
+            </button>
+            <button type="button" class="brawler-select-btn" data-brawler="custom">
+              <span style="font-size: 1.4rem;">🤖</span> 커스텀
+            </button>
+          </div>
+        </div>
+
+        <!-- 커스텀 슬라이더 (커스텀 선택 시 표시) -->
+        <div id="customBrawlerPanel" style="display: none; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 14px;">
+          <div style="font-size: 0.9rem; margin-bottom: 6px;">체력 (HP): <span id="customHpVal">6000</span></div>
+          <input type="range" id="customHp" min="3000" max="16000" step="500" value="6000" style="width: 100%;">
+          
+          <div style="font-size: 0.9rem; margin: 6px 0;">탄환당 데미지: <span id="customDmgVal">800</span></div>
+          <input type="range" id="customDmg" min="300" max="3000" step="50" value="800" style="width: 100%;">
+
+          <div style="font-size: 0.9rem; margin: 6px 0;">탄환 수 (발): <span id="customBulletsVal">3</span></div>
+          <input type="range" id="customBullets" min="1" max="10" step="1" value="3" style="width: 100%;">
+
+          <div style="font-size: 0.9rem; margin: 6px 0;">장전 시간 (초): <span id="customReloadVal">1.5</span>초</div>
+          <input type="range" id="customReload" min="0.5" max="3.0" step="0.1" value="1.5" style="width: 100%;">
+        </div>
+
+        <!-- 버프 & 기어 스위치 -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div class="panel-title">⚡ 버프 & 기어 배율</div>
+          <div class="switch-row">
+            <span class="switch-label">⚡ 하이퍼차지 (× 1.25)</span>
+            <input type="checkbox" id="hyperchargeToggle" style="transform: scale(1.4);">
+          </div>
+          <div class="switch-row">
+            <span class="switch-label">🛡️ 상대 방어 기어 (× 0.8)</span>
+            <input type="checkbox" id="shieldGearToggle" style="transform: scale(1.4);">
+          </div>
+        </div>
+
+        <!-- 타겟 샌드백 체력 -->
+        <div>
+          <div class="panel-title">🎯 타겟 체력 설정</div>
+          <input type="number" id="targetHpInput" value="10000" step="1000" style="width: 100%; padding: 10px; border-radius: 12px; background: #120e24; border: 1.5px solid #352a63; color: #fff; font-family: 'Jua'; font-size: 1.1rem;">
+        </div>
+      </div>
+
+      <!-- 우측: 스탯 대시보드 & 배틀 시뮬레이터 -->
+      <div class="stat-dashboard">
+
+        <!-- 1. 핵심 스탯 카드 -->
+        <div class="stat-cards-row">
+          <div class="stat-card">
+            <div class="stat-card-title">1회 공격 데미지</div>
+            <div class="stat-card-value" id="statSingleDmg">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">3탄창 순간 폭딜</div>
+            <div class="stat-card-value" id="statBurstDmg">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">초당 지속 딜량 (DPS)</div>
+            <div class="stat-card-value" id="statDps">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">목표 처치 시간 (TTK)</div>
+            <div class="stat-card-value" id="statTtk">0초</div>
+          </div>
+        </div>
+
+        <!-- 2. 수학 공식 풀이 박스 -->
+        <div class="math-box" id="mathFormulaExplanation">
+          수학 연산 공식을 계산하는 중...
+        </div>
+
+        <!-- 3. 가상 1:1 배틀 시뮬레이터 -->
+        <div class="battle-wrapper">
+          <div style="font-family: 'Jua'; font-size: 1.3rem; color: #00f2fe;">
+            ⚔️ 실시간 1:1 가상 교전 시뮬레이터
+          </div>
+          <canvas id="battleCanvas"></canvas>
+          <button type="button" id="startSimBtn" class="sim-btn">
+            💥 교전 시뮬레이션 시작!
+          </button>
+        </div>
+
+        <!-- 4. 5학년 수학 미션 퀴즈 -->
+        <div class="quiz-box">
+          <div style="font-family: 'Jua'; font-size: 1.4rem; color: #ffcc00; margin-bottom: 8px;">
+            🎯 5학년 수학 밸런스 퀴즈 챌린지 (🎁 스타드롭 충전)
+          </div>
+          <div class="quiz-q" id="quizQuestion">문제를 불러오는 중...</div>
+          <div class="quiz-input-row">
+            <input type="number" id="quizAnswerInput" class="quiz-input" placeholder="정답 숫자를 입력하세요">
+            <button type="button" id="submitQuizBtn" class="pg-card-btn" style="cursor: pointer; border: none;">
+              제출하기 ✏️
+            </button>
+          </div>
+          <div id="quizResultMsg" style="margin-top: 10px; font-weight: bold; font-family: 'Jua';"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../starr_drop_engine.js"></script>
+  <script src="brawl_dps.js"></script>
+</body>
+</html>
