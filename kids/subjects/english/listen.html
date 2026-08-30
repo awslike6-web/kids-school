@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>원어민 발음 듣기 🧚‍♂️ | 민민이네 공부방</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: linear-gradient(135deg, #e0f2fe 0%, #ede9fe 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: #1e293b;
+    }
+
+    .listen-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 420px;
+        border-radius: 28px;
+        box-shadow: 0 15px 35px rgba(99, 102, 241, 0.18);
+        padding: 30px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid #c7d2fe;
+    }
+
+    .top-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0fdf4;
+        color: #166534;
+        border: 2px solid #bbf7d0;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .fairy-avatar {
+        font-size: 3.5rem;
+        margin-bottom: 10px;
+        animation: float 3s ease-in-out infinite;
+        display: inline-block;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    .english-box {
+        background: #f8fafc;
+        border: 2px dashed #94a3b8;
+        border-radius: 20px;
+        padding: 20px 16px;
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    .english-text {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #1e1b4b;
+        line-height: 1.35;
+        word-break: keep-all;
+        margin-bottom: 6px;
+    }
+
+    .korean-text {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #64748b;
+        line-height: 1.35;
+        word-break: keep-all;
+    }
+
+    /* 메인 발음 재생 버튼 */
+    .btn-main-play {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1.35rem;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .btn-main-play:active {
+        transform: scale(0.97);
+    }
+    .btn-main-play.speaking {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+
+    /* 서브 컨트롤 버튼들 */
+    .sub-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .btn-sub {
+        padding: 12px;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        font-family: 'Jua', sans-serif;
+        font-size: 0.95rem;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-sub:hover, .btn-sub:active {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+    }
+
+    .btn-repeat {
+        width: 100%;
+        padding: 12px;
+        background: #fffbeb;
+        border: 2px solid #fde68a;
+        border-radius: 14px;
+        font-family: 'Jua', sans-serif;
+        font-size: 1rem;
+        color: #92400e;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+
+    .bottom-info {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+
+<div class="listen-card">
+    <div class="top-badge">✨ 코코 요정의 스마트 발음기</div>
+    <div class="fairy-avatar" id="fairyIcon">🧚‍♂️</div>
+
+    <div class="english-box">
+        <div class="english-text" id="engText">Loading...</div>
+        <div class="korean-text" id="korText"></div>
+    </div>
+
+    <button class="btn-main-play" id="playBtn" onclick="speakText(1.0)">
+        <span id="playIcon">🔊</span> <span id="playLabel">원어민 발음 듣기</span>
+    </button>
+
+    <div class="sub-controls">
+        <button class="btn-sub" onclick="speakText(0.75)">🐢 천천히 듣기 (0.75x)</button>
+        <button class="btn-sub" onclick="speakText(1.1)">🐇 조금 빠르게 (1.1x)</button>
+    </div>
+
+    <button class="btn-repeat" onclick="speakRepeat(3)">🔁 3번 연속 반복 듣기</button>
+
+    <div class="bottom-info">💡 소리가 안 나면 스마트폰 무음(진동) 모드를 해제해주세요!</div>
+</div>
+
+<script>
+    // URL 파라미터 파싱
+    const params = new URLSearchParams(window.location.search);
+    const eng = params.get('t') || 'Hello!';
+    const kor = params.get('m') || '안녕하세요!';
+
+    document.getElementById('engText').textContent = eng;
+    document.getElementById('korText').textContent = kor;
+
+    let isSpeaking = false;
+
+    function getEnVoice() {
+        if (!('speechSynthesis' in window)) return null;
+        const voices = window.speechSynthesis.getVoices();
+        // 미국식 자연스러운 영어 음성 우선 선택
+        return voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('US')))
+            || voices.find(v => v.lang.startsWith('en')) || null;
+    }
+
+    function speakText(rate = 1.0, onEndCallback = null) {
+        if (!('speechSynthesis' in window)) {
+            alert('이 브라우저는 음성 재생을 지원하지 않습니다.');
+            return;
+        }
+
+        window.speechSynthesis.cancel(); // 이전 재생 중단
+
+        const utter = new SpeechSynthesisUtterance(eng);
+        utter.lang = 'en-US';
+        utter.rate = rate;
+        utter.pitch = 1.05; // 어린이 친화적 살짝 높은 톤
+
+        const voice = getEnVoice();
+        if (voice) utter.voice = voice;
+
+        const playBtn = document.getElementById('playBtn');
+        const fairyIcon = document.getElementById('fairyIcon');
+
+        utter.onstart = () => {
+            isSpeaking = true;
+            playBtn.classList.add('speaking');
+            document.getElementById('playLabel').textContent = '말하는 중... 🎶';
+            fairyIcon.textContent = '🗣️';
+        };
+
+        utter.onend = () => {
+            isSpeaking = false;
+            playBtn.classList.remove('speaking');
+            document.getElementById('playLabel').textContent = '원어민 발음 듣기';
+            fairyIcon.textContent = '🧚‍♂️';
+            if (onEndCallback) onEndCallback();
+        };
+
+        utter.onerror = () => {
+            isSpeaking = false;
+            playBtn.classList.remove('speaking');
+            document.getElementById('playLabel').textContent = '원어민 발음 듣기';
+            fairyIcon.textContent = '🧚‍♂️';
+        };
+
+        window.speechSynthesis.speak(utter);
+    }
+
+    function speakRepeat(times = 3) {
+        let count = 0;
+        function playNext() {
+            if (count < times) {
+                count++;
+                document.getElementById('playLabel').textContent = `반복 듣기 (${count}/${times}) 🎶`;
+                setTimeout(() => {
+                    speakText(0.9, () => {
+                        setTimeout(playNext, 600); // 단어 사이 0.6초 간격
+                    });
+                }, 100);
+            }
+        }
+        playNext();
+    }
+
+    // 음성 목록 미리 로드 (모바일 브라우저 대응)
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => getEnVoice();
+    }
+
+    // 페이지 진입 시 자동 1회 재생 시도 (브라우저 정책 허용 시)
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            speakText(1.0);
+        }, 500);
+    });
+</script>
+
+</body>
+</html>

@@ -50,9 +50,9 @@
 
     /* 필터 및 컨트롤 패널 */
     .filter-panel {
-        display: flex; justify-content: center; gap: 15px; padding: 15px 30px;
+        display: flex; justify-content: center; gap: 12px; padding: 15px 25px;
         background: #fff; margin: 0 auto 15px auto; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        max-width: 960px; border-radius: 0 0 16px 16px; align-items: center; flex-wrap: wrap;
+        max-width: 1000px; border-radius: 0 0 16px 16px; align-items: center; flex-wrap: wrap;
     }
     .filter-group { display: flex; align-items: center; gap: 8px; font-family: 'Jua', sans-serif; font-size: 1rem; }
     .filter-group select {
@@ -65,11 +65,19 @@
         border: 2px solid #ffd166; padding: 5px 12px; border-radius: 10px; color: #8a5300;
     }
     .bonus-toggle-label input { cursor: pointer; width: 16px; height: 16px; accent-color: #ff9f43; }
+
+    .qr-toggle-label {
+        display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+        font-family: 'Jua', sans-serif; font-size: 0.95rem; background: #e0f2fe;
+        border: 2px solid #7dd3fc; padding: 5px 12px; border-radius: 10px; color: #0369a1;
+    }
+    .qr-toggle-label input { cursor: pointer; width: 16px; height: 16px; accent-color: #0284c7; }
+
     .word-count { background: #ff7675; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.95rem; font-family: 'Jua', sans-serif; }
 
     /* 단어 선택기 패널 */
     .picker-panel {
-        max-width: 960px; margin: 0 auto 20px auto; padding: 14px 20px;
+        max-width: 1000px; margin: 0 auto 20px auto; padding: 14px 20px;
         background: #fff; border-radius: 14px; box-shadow: 0 3px 12px rgba(0,0,0,.06);
     }
     .picker-header {
@@ -134,7 +142,7 @@
     /* 페이지 상단 안내 바 */
     .page-header-info {
         display: flex; justify-content: space-between; align-items: flex-end;
-        border-bottom: 2px solid #222; padding-bottom: 4px; margin-bottom: 5mm;
+        border-bottom: 2px solid #222; padding-bottom: 4px; margin-bottom: 4mm;
     }
     .page-title {
         font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #222;
@@ -169,9 +177,9 @@
         width: 50%;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        padding: 10px 8px;
+        padding: 8px 8px 6px 8px;
         position: relative;
         text-align: center;
     }
@@ -206,13 +214,44 @@
     .card-text.text-sm { font-size: 0.92rem; }
     .card-text.text-xs { font-size: 0.82rem; }
 
-    /* 하단 라벨 */
+    /* 하단 라벨 및 QR 바 */
+    .card-bottom-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        width: 100%;
+        margin-top: 2px;
+    }
+
     .side-label {
         font-size: 0.68rem;
         color: #777;
         font-weight: 700;
-        margin-top: 4px;
         letter-spacing: 0.5px;
+    }
+
+    /* QR 코드 박스 */
+    .card-qr-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #ffffff;
+        padding: 2px;
+        border-radius: 4px;
+        border: 1px solid #cbd5e1;
+    }
+    .card-qr-img {
+        width: 36px;
+        height: 36px;
+        display: block;
+    }
+    .card-qr-tag {
+        font-size: 0.52rem;
+        font-weight: 800;
+        color: #0284c7;
+        font-family: 'Jua', sans-serif;
+        line-height: 1;
+        margin-top: 1px;
     }
 
     /* 보너스 카드 스타일 */
@@ -292,6 +331,12 @@
             <option value="word">단어 / 숙어만</option>
             <option value="sentence">문장만</option>
         </select>
+    </div>
+    <div class="filter-group">
+        <label class="qr-toggle-label">
+            <input type="checkbox" id="qrToggle" checked onchange="renderPages()">
+            📱 발음 듣기 QR코드 포함
+        </label>
     </div>
     <div class="filter-group">
         <label class="bonus-toggle-label">
@@ -539,6 +584,7 @@
         const selectedGrade = document.getElementById('gradeSelect').value;
         const selectedStage = document.getElementById('stageSelect').value;
         const includeBonus = document.getElementById('bonusCardToggle').checked;
+        const includeQr = document.getElementById('qrToggle').checked;
 
         const CARDS_PER_PAGE = 6;
         let cardItems = [...selectedPrintOrder];
@@ -588,7 +634,9 @@
                                 나만의 단어 / 문장<br>
                                 <span style="font-size:0.75rem; font-weight:normal; color:#888;">(직접 써보세요!)</span>
                             </div>
-                            <div class="side-label">ENGLISH (영어)</div>
+                            <div class="card-bottom-bar" style="justify-content:center;">
+                                <div class="side-label">ENGLISH (영어)</div>
+                            </div>
                         </div>
                         <div class="fold-divider"></div>
                         <div class="card-side korean-side">
@@ -596,22 +644,42 @@
                                 My Word / Sentence<br>
                                 <span style="font-size:0.75rem; font-weight:normal; color:#888;">(Write here!)</span>
                             </div>
-                            <div class="side-label">KOREAN (뜻)</div>
+                            <div class="card-bottom-bar" style="justify-content:center;">
+                                <div class="side-label">KOREAN (뜻)</div>
+                            </div>
                         </div>
                     `;
                 } else {
                     card.className = 'flash-card';
                     const engSize = getTextSizeClass(item.word);
                     const korSize = getTextSizeClass(item.meaning);
+
+                    let qrHtml = '';
+                    if (includeQr) {
+                        const targetUrl = `https://awslike6-web.github.io/kids-school/kids/subjects/english/listen.html?t=${encodeURIComponent(item.word)}&m=${encodeURIComponent(item.meaning)}`;
+                        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=${encodeURIComponent(targetUrl)}`;
+                        qrHtml = `
+                            <div class="card-qr-box" title="스마트폰으로 스캔하여 발음 듣기">
+                                <img class="card-qr-img" src="${qrSrc}" alt="QR" />
+                                <span class="card-qr-tag">📱발음</span>
+                            </div>
+                        `;
+                    }
+
                     card.innerHTML = `
                         <div class="card-side english-side">
                             <div class="card-text ${engSize}">${item.word}</div>
-                            <div class="side-label">ENGLISH (영어)</div>
+                            <div class="card-bottom-bar">
+                                <div class="side-label">ENGLISH (영어)</div>
+                                ${qrHtml}
+                            </div>
                         </div>
                         <div class="fold-divider"></div>
                         <div class="card-side korean-side">
                             <div class="card-text ${korSize}">${item.meaning}</div>
-                            <div class="side-label">KOREAN (뜻)</div>
+                            <div class="card-bottom-bar" style="justify-content:center;">
+                                <div class="side-label">KOREAN (뜻)</div>
+                            </div>
                         </div>
                     `;
                 }
