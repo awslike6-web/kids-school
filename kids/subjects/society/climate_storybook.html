@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>민수와 친구들의 지구 지키기: 기후 수업 대모험 📖 | 민민이네 공부방</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --primary: #10b981;
+        --primary-dark: #059669;
+        --accent: #f59e0b;
+        --bg-color: #f0fdf4;
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: linear-gradient(135deg, #ecfdf5 0%, #e0f2fe 100%);
+        min-height: 100vh;
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 상단 네비게이션 헤더 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 24px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100;
+    }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+        background: #e2e8f0; color: #475569; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 1rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #cbd5e1; }
+    .story-title {
+        font-family: 'Jua', sans-serif; font-size: 1.35rem; color: #065f46;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .page-counter {
+        font-family: 'Jua', sans-serif; font-size: 1.1rem; background: #dcfce7;
+        color: #166534; padding: 6px 14px; border-radius: 20px; border: 1.5px solid #86efac;
+    }
+
+    /* 메인 뷰어 컨테이너 */
+    .storybook-container {
+        flex: 1; max-width: 1080px; width: 100%; margin: 15px auto; padding: 0 15px;
+        display: flex; flex-direction: column; justify-content: center;
+    }
+
+    /* 책 레이아웃 */
+    .book-card {
+        background: var(--card-bg); border-radius: 24px;
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.15);
+        border: 3px solid #a7f3d0; overflow: hidden;
+        display: grid; grid-template-columns: 1.1fr 1fr;
+        min-height: 520px; position: relative;
+    }
+
+    /* 좌측 삽화 영역 */
+    .book-illustration {
+        background: #f8fafc; display: flex; align-items: center; justify-content: center;
+        padding: 15px; position: relative; overflow: hidden; border-right: 2px dashed #e2e8f0;
+    }
+    .book-img {
+        max-width: 100%; max-height: 480px; object-fit: contain;
+        border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+
+    /* 우측 텍스트 & 오디오 영역 */
+    .book-content {
+        padding: 30px 28px; display: flex; flex-direction: column;
+        justify-content: space-between; position: relative;
+    }
+
+    .chapter-tag {
+        display: inline-flex; align-items: center; gap: 6px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; background: #fef3c7; color: #92400e; padding: 4px 12px;
+        border-radius: 12px; width: fit-content; margin-bottom: 12px; border: 1px solid #fde68a;
+    }
+
+    .story-text {
+        font-size: 1.35rem; line-height: 1.75; font-weight: 700; color: #1f2937;
+        word-break: keep-all; flex: 1; display: flex; align-items: center;
+        font-family: 'Nanum Gothic', sans-serif;
+    }
+
+    .curriculum-ref {
+        margin-top: 15px; padding: 8px 12px; background: #f0fdf4; border-radius: 10px;
+        font-size: 0.88rem; color: #166534; font-weight: bold; border-left: 4px solid #10b981;
+    }
+
+    /* 오디오 플레이어 바 */
+    .audio-bar {
+        margin-top: 20px; padding: 14px 18px; background: #f8fafc;
+        border-radius: 18px; border: 2px solid #e2e8f0;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .btn-audio-play {
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white; border: none; border-radius: 14px; font-family: 'Jua', sans-serif;
+        font-size: 1.15rem; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: transform 0.15s;
+    }
+    .btn-audio-play:active { transform: scale(0.96); }
+    .btn-audio-play.playing {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .auto-toggle {
+        display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem;
+        font-family: 'Jua', sans-serif; color: #475569; cursor: pointer;
+    }
+    .auto-toggle input { cursor: pointer; width: 16px; height: 16px; accent-color: #10b981; }
+
+    /* 하단 페이지 컨트롤 바 */
+    .control-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 15px; padding-bottom: 20px;
+    }
+    .btn-nav {
+        padding: 12px 24px; border-radius: 16px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1.15rem; cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-prev { background: #e2e8f0; color: #334155; }
+    .btn-prev:hover { background: #cbd5e1; }
+    .btn-next {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    .btn-next:hover { transform: translateY(-2px); }
+    .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+
+    .dots-container { display: flex; gap: 6px; align-items: center; }
+    .dot {
+        width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1;
+        cursor: pointer; transition: all 0.2s;
+    }
+    .dot.active { width: 24px; border-radius: 10px; background: #10b981; }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+        .book-card { grid-template-columns: 1fr; }
+        .book-illustration { border-right: none; border-bottom: 2px dashed #e2e8f0; padding: 12px; }
+        .book-img { max-height: 280px; }
+        .story-text { font-size: 1.15rem; line-height: 1.65; }
+        .book-content { padding: 20px 16px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="society.html" class="btn-back">🔙 사회 탐험관</a>
+    <div class="story-title">📖 [사회 5-1] 민수와 친구들의 기후 대모험</div>
+    <div class="page-counter" id="pageCounter">1 / 10</div>
+</div>
+
+<div class="storybook-container">
+    <div class="book-card" id="bookCard">
+        <!-- 좌측 삽화 -->
+        <div class="book-illustration">
+            <img src="../../subjects/society/images/storybook/climate/climate_story_p1.png" alt="동화 삽화" class="book-img" id="pageImg">
+        </div>
+
+        <!-- 우측 동화 본문 및 오디오 -->
+        <div class="book-content">
+            <div>
+                <div class="chapter-tag" id="chapterTag">🌟 표지</div>
+                <div class="story-text" id="storyText">
+                    민수와 친구들의 지구 지키기: 기후 수업 대모험<br><br>
+                    <span style="font-size:1.1rem; color:#64748b; font-weight:normal;">글쓴이: 언제나처럼</span>
+                </div>
+            </div>
+
+            <div>
+                <div class="curriculum-ref" id="curriculumRef" style="display:none;"></div>
+
+                <div class="audio-bar">
+                    <button class="btn-audio-play" id="audioBtn" onclick="toggleAudio()">
+                        <span id="audioIcon">▶️</span> <span id="audioLabel">동화 구연 듣기</span>
+                    </button>
+                    <label class="auto-toggle">
+                        <input type="checkbox" id="autoPlayToggle" checked>
+                        🔊 페이지 넘길 때 자동 읽기
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 하단 네비게이션 컨트롤 -->
+    <div class="control-bar">
+        <button class="btn-nav btn-prev" id="prevBtn" onclick="changePage(-1)">◀ 이전 장</button>
+        <div class="dots-container" id="dotsContainer"></div>
+        <button class="btn-nav btn-next" id="nextBtn" onclick="changePage(1)">다음 장 ▶</button>
+    </div>
+</div>
+
+<!-- 숨겨진 오디오 태그 -->
+<audio id="storyAudio" preload="auto"></audio>
+
+<script>
+    const STORY_PAGES = [
+        {
+            page: 1,
+            tag: "🌟 표지",
+            image: "climate_story_p1.png",
+            text: "민수와 친구들의 지구 지키기: 기후 수업 대모험<br><br><span style='font-size:1.15rem; color:#64748b; font-weight:normal;'>글쓴이: 언제나처럼</span>",
+            ref: "",
+            audio: "../../assets/audio/storybook/climate/climate_story_p1.mp3"
+        },
+        {
+            page: 2,
+            tag: "🌤️ 1장: 날씨와 기후의 차이",
+            image: "climate_story_p2.png",
+            text: "햇살이 따스한 교실, 민수가 손을 번쩍 들고 물었어요.<br><br>"선생님, 오늘 날씨가 좋다는 말과 기후가 좋다는 말은 같은 건가요?"<br><br>가을 선생님은 미소를 지으며 옷장 그림이 그려진 자료를 보여주셨어요.<br><br>날씨는 짧은 시간의 기분 같은 것이고, 기후는 오랜 시간 동안 나타나는 그 지역의 성격 같은 것이라고 설명해 주셨죠.",
+            ref: "📖 교과서 핵심: 기후와 날씨의 정의 및 차이점 (61쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p2.mp3"
+        },
+        {
+            page: 3,
+            tag: "🌬️ 2장: 계절마다 부는 바람",
+            image: "climate_story_p3.png",
+            text: ""그럼 우리나라 바람은 왜 계절마다 다를까요?" 이번에는 동원이가 궁금해했어요.<br><br>선생님은 바람의 방향이 표시된 지도를 가리키며 말씀하셨어요.<br><br>여름에는 바다에서 덥고 습한 바람이 오고, 겨울에는 육지에서 차갑고 건조한 바람이 불어와 우리 삶에 큰 영향을 준다는 사실을요.",
+            ref: "📖 교과서 핵심: 계절별 계절풍의 특징과 성질 (63쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p3.mp3"
+        },
+        {
+            page: 4,
+            tag: "🌡️ 3장: 남북의 기온 차이",
+            image: "climate_story_p4.png",
+            text: "승아는 북쪽 끝 중강진과 남쪽 끝 서귀포의 기온이 왜 그렇게 다른지 물었어요.<br><br>선생님은 남북으로 길게 뻗은 우리나라의 지형을 보여주셨죠.<br><br>위도에 따라 태양 에너지를 받는 양이 달라 남쪽으로 갈수록 따뜻하고 북쪽으로 갈수록 추워진다는 원리를 함께 탐구했답니다.",
+            ref: "📖 교과서 핵심: 우리나라의 남북 기온 차이와 위도 (64~65쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p4.mp3"
+        },
+        {
+            page: 5,
+            tag: "🌧️ 4장: 강수량의 비밀",
+            image: "climate_story_p5.png",
+            text: "비와 눈에 관심이 많은 민준이는 지역별 강수량 지도를 유심히 살폈어요.<br><br>우리나라는 여름철에 비가 집중되고, 지형의 영향으로 강릉이나 제주도처럼 비가 유독 많이 오는 곳이 있다는 것을 알게 되었죠.<br><br>민준이는 복잡한 막대 그래프 속에서 우리나라 강수량의 비밀을 찾아냈어요.",
+            ref: "📖 교과서 핵심: 강수량의 특징과 지형에 따른 지역별 차이 (66~67쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p5.mp3"
+        },
+        {
+            page: 6,
+            tag: "⚡ 5장: 계절별 자연재해",
+            image: "climate_story_p6.png",
+            text: "래호는 계절마다 찾아오는 황사, 폭염, 태풍, 폭설 사진을 보고 조금 겁이 났어요.<br><br>가을 선생님은 래호의 어깨를 토닥이며, 이런 자연재해가 왜 발생하는지 이해하면 피해를 줄일 수 있다고 용기를 주셨어요.<br><br>자연의 힘은 무섭지만, 우리가 잘 대비한다면 이겨낼 수 있는 문제니까요.",
+            ref: "📖 교과서 핵심: 계절별 자연재해 종류와 대비 (68~69쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p6.mp3"
+        },
+        {
+            page: 7,
+            tag: "🛡️ 6장: 안전 행동 요령",
+            image: "climate_story_p7.png",
+            text: ""우리가 재해로부터 안전해지려면 어떻게 해야 할까요?" 민수가 다시 씩씩하게 질문했어요.<br><br>선생님은 재난 안전 포털에 접속해 상황별 행동 요령을 익히는 것이 얼마나 중요한지 강조하셨어요.<br><br>기상 특보에 귀를 기울이고 미리 준비하는 마음가짐이 우리를 지켜준다는 것을요.",
+            ref: "📖 교과서 핵심: 자연재해 대비 노력과 국민 행동 요령 (70쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p7.mp3"
+        },
+        {
+            page: 8,
+            tag: "🌍 7장: 지구 온난화의 신호",
+            image: "climate_story_p8.png",
+            text: "세윤이는 점점 뜨거워지는 지구 온난화 그래프를 보고 깜짝 놀랐어요.<br><br>예전보다 여름은 길어지고 겨울은 짧아지는 변화가 우리 주변에서 실제로 일어나고 있었거든요.<br><br>선생님은 이 모든 변화가 지구가 우리에게 보내는 간절한 신호라고 말씀해 주셨어요.",
+            ref: "📖 교과서 핵심: 기후 변화와 지구 온난화의 심각성 (73쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p8.mp3"
+        },
+        {
+            page: 9,
+            tag: "⚠️ 8장: 이상 기후의 위험",
+            image: "climate_story_p9.png",
+            text: "민준이는 뉴스 기사를 통해 기후 변화가 가져온 무서운 결과를 확인했어요.<br><br>기록적인 폭염으로 농작물이 마르고, 갑작스러운 호우로 도로가 잠기는 이상 기후 사례들이 많았죠.<br><br>선생님은 기후 변화가 우리 일상을 어떻게 위협하는지 차근차근 설명하며 경각심을 일깨워 주셨어요.",
+            ref: "📖 교과서 핵심: 심해지는 이상 기후와 피해 사례 (74~75쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p9.mp3"
+        },
+        {
+            page: 10,
+            tag: "🌱 9장: 우리의 기후 행동과 꿈",
+            image: "climate_story_p10.png",
+            text: "마지막으로 민수는 학교에서 실천할 수 있는 기후 행동 리스트를 작성했어요.<br><br>채식 급식을 맛있게 먹고, 빈 교실의 전등을 끄는 작은 행동이 지구를 살리는 큰 힘이 된다는 것을 깨달았죠.<br><br>나중에 기상을 정확히 읽어내는 예보 분석관이 되어 지구를 지키고 싶다는 민수의 꿈을 선생님은 환한 미소로 응원해 주셨답니다.",
+            ref: "📖 교과서 핵심: 우리가 실천할 수 있는 기후 행동과 관련 직업 (78쪽)",
+            audio: "../../assets/audio/storybook/climate/climate_story_p10.mp3"
+        }
+    ];
+
+    let currentPage = 0;
+    const audioElement = document.getElementById('storyAudio');
+
+    function renderStory() {
+        const item = STORY_PAGES[currentPage];
+
+        // 텍스트 & 삽화 업데이트
+        document.getElementById('chapterTag').textContent = item.tag;
+        document.getElementById('storyText').innerHTML = item.text;
+        document.getElementById('pageImg').src = `../../subjects/society/images/storybook/climate/${item.image}`;
+        document.getElementById('pageCounter').textContent = `${item.page} / ${STORY_PAGES.length}`;
+
+        // 교과서 연계 박스
+        const refBox = document.getElementById('curriculumRef');
+        if (item.ref) {
+            refBox.style.display = 'block';
+            refBox.textContent = item.ref;
+        } else {
+            refBox.style.display = 'none';
+        }
+
+        // 버튼 상태
+        document.getElementById('prevBtn').disabled = (currentPage === 0);
+        document.getElementById('nextBtn').textContent = (currentPage === STORY_PAGES.length - 1) ? '🎉 처음으로' : '다음 장 ▶';
+
+        // 도트 인디케이터
+        renderDots();
+
+        // 오디오 로드 및 자동 재생
+        audioElement.src = item.audio;
+        audioElement.pause();
+        updateAudioButton(false);
+
+        const autoPlay = document.getElementById('autoPlayToggle').checked;
+        if (autoPlay) {
+            setTimeout(() => {
+                audioElement.play().then(() => {
+                    updateAudioButton(true);
+                }).catch(e => {
+                    console.log('Autoplay blocked:', e);
+                    updateAudioButton(false);
+                });
+            }, 200);
+        }
+    }
+
+    function renderDots() {
+        const container = document.getElementById('dotsContainer');
+        container.innerHTML = '';
+        STORY_PAGES.forEach((_, idx) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${idx === currentPage ? 'active' : ''}`;
+            dot.onclick = () => {
+                currentPage = idx;
+                renderStory();
+            };
+            container.appendChild(dot);
+        });
+    }
+
+    function changePage(dir) {
+        audioElement.pause();
+        if (currentPage === STORY_PAGES.length - 1 && dir === 1) {
+            currentPage = 0;
+        } else {
+            currentPage = Math.max(0, Math.min(STORY_PAGES.length - 1, currentPage + dir));
+        }
+        renderStory();
+    }
+
+    function toggleAudio() {
+        if (audioElement.paused) {
+            audioElement.play();
+            updateAudioButton(true);
+        } else {
+            audioElement.pause();
+            updateAudioButton(false);
+        }
+    }
+
+    function updateAudioButton(isPlaying) {
+        const btn = document.getElementById('audioBtn');
+        const icon = document.getElementById('audioIcon');
+        const label = document.getElementById('audioLabel');
+        if (isPlaying) {
+            btn.classList.add('playing');
+            icon.textContent = '⏸️';
+            label.textContent = '일시 정지';
+        } else {
+            btn.classList.remove('playing');
+            icon.textContent = '▶️';
+            label.textContent = '동화 구연 듣기';
+        }
+    }
+
+    audioElement.onended = () => {
+        updateAudioButton(false);
+    };
+
+    // 키보드 좌우 화살표 지원
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') changePage(-1);
+        if (e.key === 'ArrowRight') changePage(1);
+        if (e.key === ' ') {
+            e.preventDefault();
+            toggleAudio();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderStory();
+    });
+</script>
+</body>
+</html>
