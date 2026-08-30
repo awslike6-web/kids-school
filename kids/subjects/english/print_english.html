@@ -85,7 +85,7 @@
         min-height: 297mm;
         margin: 0 auto 20px auto;
         background: white;
-        padding: 15mm;
+        padding: 8mm 12mm;
         box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         page-break-after: always;
         position: relative;
@@ -95,8 +95,8 @@
     }
 
     .page-title { 
-        text-align: center; font-family: 'Jua', sans-serif; font-size: 2rem; 
-        margin-bottom: 25px; color: #4a3352; border-bottom: 3px dashed var(--blue-line); padding-bottom: 10px;
+        text-align: center; font-family: 'Jua', sans-serif; font-size: 1.1rem; 
+        margin-bottom: 8px; color: #4a3352; border-bottom: 1.5px dashed var(--blue-line); padding-bottom: 4px;
     }
 
     /* 📏 4선지 배경·따라쓰기·행 레이아웃 스타일은 four_line_print.css 통합 규격 사용 */
@@ -112,7 +112,7 @@
         .a4-page { 
             margin: 0; 
             box-shadow: none; 
-            padding: 15mm; 
+            padding: 8mm 12mm; 
             width: 210mm; 
             height: 297mm; 
             page-break-after: always;
@@ -360,7 +360,7 @@
         let pages = [];
         let currentPage = [];
         let currentHeight = 0;
-        const MAX_HEIGHT = 850;
+        const MAX_HEIGHT = 1000;
 
         selectedPrintOrder.forEach(item => {
             const wordText = item.word;
@@ -368,7 +368,7 @@
             const traceCount = getTraceCount(wordText);
             const traceRowsHtml = buildTraceRowsHtml(wordText, traceCount);
             const estimatedLines = estimateTraceLineCount(wordText, traceCount);
-            const rowHeight = (estimatedLines * 48) * 2 + 15;
+            const rowHeight = (estimatedLines * 48) * 2 + 8;
 
             if (currentHeight + rowHeight > MAX_HEIGHT && currentPage.length > 0) {
                 pages.push(currentPage);

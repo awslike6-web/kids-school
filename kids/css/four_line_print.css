@@ -74,17 +74,18 @@
 .word-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 15px;
+  margin-bottom: 8px;
   page-break-inside: avoid;
   break-inside: avoid;
 }
 .meaning-wrap {
-  width: 180px;
-  font-size: 1.25rem;
-  font-weight: 800;
+  width: 160px;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: #333;
   text-align: left;
-  padding: 12px 15px 0 0;
+  padding: 6px 12px 0 0;
+  line-height: 1.35;
   word-break: keep-all;
 }
 .practice-area {

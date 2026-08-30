@@ -12,49 +12,47 @@ window.wrapFourLineChars = function (word) {
     ).join('');
 };
 
-/** 단어 길이에 따른 따라쓰기 반복 횟수 (규격 공통 기준) */
+/** 단어/문장 길이에 상관없이 따라쓰기 1회로 통일 */
 window.getTraceCount = function (word) {
-    const len = String(word).length;
-    if (len < 6) return 4;
-    if (len < 10) return 3;
-    if (len < 15) return 2;
     return 1;
 };
 
-/** A4 인쇄방 practice-area 실제 가용 너비 (meaning-wrap 180px 제외 후 여유) */
-window.FOUR_LINE_PRACTICE_WIDTH = 380;
+/** A4 인쇄방 practice-area 실제 가용 너비 (meaning-wrap 160px 제외 후 여유) */
+window.FOUR_LINE_PRACTICE_WIDTH = 520;
 
-/** 따라쓰기 칸 안에서 trace-word가 몇 줄(48px 칸)을 차지할지 예측 */
-window.layoutTraceWordRows = function (word, traceCount, lineWidth = FOUR_LINE_PRACTICE_WIDTH) {
+/** 문장/단어가 가용 너비를 초과할 경우 4선지 칸 단위(48px)로 줄바꿈 분할 */
+window.layoutTraceWordRows = function (word, traceCount = 1, lineWidth = FOUR_LINE_PRACTICE_WIDTH) {
     const charW = 14;
-    const margin = 25;
-    const unitW = (String(word).length * charW) + margin;
-    const rows = [];
-    let currentRow = [];
-    let rowW = 0;
-    for (let i = 0; i < traceCount; i++) {
-        if (rowW > 0 && rowW + unitW > lineWidth) {
-            rows.push(currentRow);
-            currentRow = [i];
-            rowW = unitW;
+    const spaceW = 10;
+    const tokens = String(word).trim().split(/\s+/);
+    const lines = [];
+    let currentLine = [];
+    let currentW = 0;
+
+    tokens.forEach(tok => {
+        const tokW = tok.length * charW;
+        if (currentW > 0 && currentW + spaceW + tokW > lineWidth) {
+            lines.push(currentLine.join(' '));
+            currentLine = [tok];
+            currentW = tokW;
         } else {
-            currentRow.push(i);
-            rowW += unitW;
+            currentLine.push(tok);
+            currentW += (currentW > 0 ? spaceW : 0) + tokW;
         }
-    }
-    if (currentRow.length) rows.push(currentRow);
-    return rows;
+    });
+    if (currentLine.length) lines.push(currentLine.join(' '));
+    return lines.length ? lines : [word];
 };
 
-window.estimateTraceLineCount = function (word, traceCount, lineWidth = FOUR_LINE_PRACTICE_WIDTH) {
+window.estimateTraceLineCount = function (word, traceCount = 1, lineWidth = FOUR_LINE_PRACTICE_WIDTH) {
     return layoutTraceWordRows(word, traceCount, lineWidth).length;
 };
 
-/** 따라쓰기 반복을 48px 행 단위 four-line-bg로 분할 (2줄째 베이스라인 정렬 보장) */
-window.buildTraceRowsHtml = function (word, traceCount, lineWidth = FOUR_LINE_PRACTICE_WIDTH) {
-    const span = `<span class="trace-word">${wrapFourLineChars(word)}</span>`;
-    return layoutTraceWordRows(word, traceCount, lineWidth)
-        .map(indices => `<div class="four-line-bg">${indices.map(() => span).join('')}</div>`)
+/** 따라쓰기 1회를 48px 행 단위 four-line-bg로 생성 (2줄째 베이스라인 정렬 보장) */
+window.buildTraceRowsHtml = function (word, traceCount = 1, lineWidth = FOUR_LINE_PRACTICE_WIDTH) {
+    const lines = layoutTraceWordRows(word, traceCount, lineWidth);
+    return lines
+        .map(lineText => `<div class="four-line-bg"><span class="trace-word">${wrapFourLineChars(lineText)}</span></div>`)
         .join('');
 };
 
