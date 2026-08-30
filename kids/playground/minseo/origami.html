@@ -6,24 +6,29 @@
   <title>📐 3-Way 종이접기 비교 연구소 - 민민 놀이터</title>
   <link rel="stylesheet" href="../playground.css">
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  
+  <!-- 🌐 Three.js & OrbitControls 라이브러리 (3D WebGL 모드용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
   <style>
     /* 🎛️ 상단 3-Way 모드 스위처 탭 바 */
     .mode-tab-bar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 18px;
       width: 100%;
       box-sizing: border-box;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       .mode-tab-bar {
         grid-template-columns: 1fr;
       }
     }
     .origami-tab-btn {
-      padding: 12px 14px;
-      border-radius: 16px;
+      padding: 13px 14px;
+      border-radius: 18px;
       border: 2px solid var(--border-light);
       background: #ffffff;
       font-family: 'Jua', sans-serif;
@@ -159,7 +164,7 @@
       box-shadow: 0 0 0 2px #fff, 0 4px 8px rgba(0,0,0,0.3);
     }
 
-    /* 🖼️ 인터랙티브 종이 뷰포트 공통 카드 */
+    /* 🖼️ 인터랙티브 뷰포트 스테이지 공통 카드 */
     .origami-stage-card {
       background: #ffffff;
       border: 3px solid #ffb3c6;
@@ -179,6 +184,7 @@
       background: #181330;
     }
 
+    /* 캔버스 및 3D 뷰어 공통 */
     #origamiCanvas {
       width: 100%;
       max-width: 580px;
@@ -191,7 +197,7 @@
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* 🧭 모드 1: 단계 컨트롤러 바 */
+    /* 🧭 모드 1 컨트롤러 */
     .step-controller {
       display: flex;
       justify-content: space-between;
@@ -220,9 +226,6 @@
       opacity: 0.35;
       cursor: not-allowed;
       transform: none !important;
-    }
-    .step-nav-btn:not(:disabled):hover {
-      transform: translateY(-2px);
     }
 
     .step-indicator-badge {
@@ -320,13 +323,62 @@
       box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
     }
 
+    /* 🎚️ 공통 접기 애니메이션 슬라이더 바 */
+    .fold-slider-panel {
+      width: 100%;
+      max-width: 580px;
+      background: rgba(0,0,0,0.03);
+      border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    body.theme--arcade .fold-slider-panel {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slider-input {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+      accent-color: #ff4081;
+      cursor: pointer;
+    }
+    body.theme--arcade .slider-input {
+      accent-color: #00f2fe;
+    }
+    .btn-anim-play {
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      border: none;
+      background: linear-gradient(135deg, #ffd166, #ff9f43);
+      color: #1a1a1a;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: transform 0.1s;
+    }
+    .btn-anim-play:active {
+      transform: scale(0.96);
+    }
+
     /* 🐰 모드 2: Rabbit Ear 분할 뷰 */
     .rabbit-split-view {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
       width: 100%;
-      max-width: 600px;
+      max-width: 580px;
       box-sizing: border-box;
     }
     @media (max-width: 560px) {
@@ -335,7 +387,7 @@
       }
     }
     .rabbit-box-card {
-      background: rgba(0,0,0,0.03);
+      background: rgba(0,0,0,0.02);
       border: 1.5px solid rgba(0,0,0,0.08);
       border-radius: 16px;
       padding: 12px;
@@ -345,7 +397,7 @@
       align-items: center;
     }
     body.theme--arcade .rabbit-box-card {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
       border-color: rgba(255,255,255,0.1);
     }
     .rabbit-svg-box {
@@ -354,19 +406,31 @@
       margin-top: 8px;
     }
 
-    /* 🌐 모드 3: 3D WebGL 시뮬레이터 컨테이너 */
-    .sim-3d-wrapper {
+    /* 🌐 모드 3: 리얼 3D Three.js WebGL 뷰어 */
+    #threeCanvasContainer {
       width: 100%;
-      height: 480px;
+      max-width: 580px;
+      height: 380px;
       border-radius: 18px;
       overflow: hidden;
       border: 2px solid rgba(0,0,0,0.1);
-      background: #000;
+      background: #110e24;
+      cursor: grab;
+      position: relative;
     }
-    .sim-3d-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    #threeCanvasContainer:active {
+      cursor: grabbing;
+    }
+    .three-overlay-tip {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.65);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      pointer-events: none;
     }
 
     /* 🖨️ 인쇄 스타일 */
@@ -381,7 +445,7 @@
         height: 100vh;
         border: none;
       }
-      .origami-sidebar, .step-controller, .pg-top-nav, .origami-complete-box, .mode-tab-bar { display: none !important; }
+      .origami-sidebar, .step-controller, .pg-top-nav, .origami-complete-box, .mode-tab-bar, .fold-slider-panel { display: none !important; }
     }
   </style>
 </head>
@@ -392,7 +456,7 @@
     <div class="pg-top-nav">
       <a href="../index.html" class="pg-back-btn">⬅️ 놀이터 허브로</a>
       <div class="pg-trophy-bar">
-        <span>📐 종이접기 비교 연구소</span>
+        <span>📐 3-Way 종이접기 비교 연구소</span>
       </div>
     </div>
 
@@ -401,7 +465,7 @@
       <h1 class="pg-title">
         <span class="neon-text">📐 3-Way 종이접기</span> <span class="accent-text">비교 연구소</span>
       </h1>
-      <p class="pg-subtitle">3가지 구현 방식(단계별 그림 교재 / Rabbit Ear 벡터 전개도 / 3D 물리 시뮬레이터)을 직접 비교해보세요!</p>
+      <p class="pg-subtitle">3가지 방식(단계별 그림 교재 / Rabbit Ear 벡터 전개도 / 3D 물리 시뮬레이터)을 직접 조작하며 비교해보세요!</p>
     </div>
 
     <!-- 🎛️ 상단 3-Way 비교 탭 -->
@@ -410,10 +474,10 @@
         <span>📖 1. 단계별 그림 교재 모드</span>
       </button>
       <button type="button" class="origami-tab-btn" data-mode="rabbitear">
-        <span>🐰 2. Rabbit Ear 전개도 모드</span>
+        <span>🐰 2. Rabbit Ear 벡터 전개도 모드</span>
       </button>
       <button type="button" class="origami-tab-btn" data-mode="3dsim">
-        <span>🌐 3. 3D 물리 시뮬레이터 모드</span>
+        <span>🌐 3. 3D 리얼타임 WebGL 시뮬레이터</span>
       </button>
     </div>
 
@@ -493,11 +557,12 @@
           </div>
         </div>
 
-        <!-- ================= [모드 2] Rabbit Ear 전개도 & 벡터 엔진 모드 ================= -->
+        <!-- ================= [모드 2] Rabbit Ear 벡터 전개도 & 애니메이션 모드 ================= -->
         <div id="viewModeRabbitEar" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 12px; color: var(--pink-soft);">
-            🐰 Rabbit Ear (rabbitear.org) 수학적 전개도 & 접힘 엔진
+          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 8px; color: var(--pink-soft);">
+            🐰 Rabbit Ear 전개도 & 실시간 벡터 접힘 시뮬레이터
           </div>
+          
           <div class="rabbit-split-view">
             <!-- 좌측: 전개도 (Crease Pattern) -->
             <div class="rabbit-box-card">
@@ -505,7 +570,7 @@
                 📐 전개도 (Crease Pattern)
               </div>
               <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">
-                🔴 산접기(M) / 🔵 골접기(V) / ⚫ 경계선(B)
+                🔴 산접기(M) / 🔵 골접기(V)
               </div>
               <div class="rabbit-svg-box" id="rabbitCpContainer"></div>
             </div>
@@ -513,26 +578,53 @@
             <!-- 우측: 접힌 상태 벡터 (Folded State) -->
             <div class="rabbit-box-card">
               <div style="font-family: 'Jua'; font-size: 1.1rem; color: #3b82f6;">
-                ✨ 접힌 상태 (Folded State)
+                ✨ 실시간 접힘 벡터 (Folded State)
               </div>
               <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">
-                수학적 평면 다각형 레이어 시뮬레이션
+                슬라이더에 따라 플랩이 실시간으로 접혀요!
               </div>
               <div class="rabbit-svg-box" id="rabbitFoldedContainer"></div>
             </div>
           </div>
+
+          <!-- 실시간 0~100% 접힘 컨트롤러 -->
+          <div class="fold-slider-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-family: 'Jua'; font-size: 1.05rem;">🎚️ 접힘 진행도: <b id="rabbitFoldPercentText" style="color: #ff4081;">0%</b></span>
+              <button type="button" id="rabbitPlayBtn" class="btn-anim-play">▶️ 자동 접기 재생</button>
+            </div>
+            <div class="slider-row">
+              <span>펼침(0%)</span>
+              <input type="range" id="rabbitFoldSlider" class="slider-input" min="0" max="100" value="0">
+              <span>완전 접힘(100%)</span>
+            </div>
+          </div>
         </div>
 
-        <!-- ================= [모드 3] 3D 리얼타임 물리 시뮬레이터 모드 ================= -->
+        <!-- ================= [모드 3] 리얼 3D WebGL Three.js 물리 시뮬레이터 ================= -->
         <div id="viewMode3DSim" style="width: 100%; display: none; flex-direction: column; align-items: center;">
-          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 12px; color: #0284c7;">
-            🌐 3D 리얼타임 WebGL 물리 시뮬레이터 (Origami Simulator)
+          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 8px; color: #0284c7;">
+            🌐 리얼 3D WebGL 입체 종이접기 시뮬레이터 (Three.js)
           </div>
-          <div style="font-size: 0.95rem; opacity: 0.85; margin-bottom: 12px; text-align: center;">
-            🖱️ 마우스로 360도 회전 및 줌인이 가능하며, 상단 슬라이더로 0% ➡️ 100% 접히는 과정을 실시간 관찰할 수 있습니다!
+          
+          <!-- 3D Three.js 캔버스 뷰포트 -->
+          <div id="threeCanvasContainer">
+            <div class="three-overlay-tip">🖱️ 마우스 드래그: 360도 회전 / 휠: 줌인·줌아웃</div>
           </div>
-          <div class="sim-3d-wrapper">
-            <iframe id="origami3DSimIframe" class="sim-3d-iframe" src="" allowfullscreen></iframe>
+
+          <!-- 3D 실시간 접힘 컨트롤러 -->
+          <div class="fold-slider-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-family: 'Jua'; font-size: 1.05rem;">🎚️ 3D 입체 접힘도: <b id="threeFoldPercentText" style="color: #0284c7;">0%</b></span>
+              <button type="button" id="threePlayBtn" class="btn-anim-play" style="background: linear-gradient(135deg, #00f2fe, #4facfe); color: #0c0818;">
+                ▶️ 3D 연속 접기 재생
+              </button>
+            </div>
+            <div class="slider-row">
+              <span>펼친 색종이(0%)</span>
+              <input type="range" id="threeFoldSlider" class="slider-input" min="0" max="100" value="0" style="accent-color: #0284c7;">
+              <span>3D 입체 완성(100%)</span>
+            </div>
           </div>
         </div>
 

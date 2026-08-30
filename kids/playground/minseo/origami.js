@@ -1,13 +1,13 @@
 // 📐 3-Way 종이접기 비교 연구소 코어 엔진 (origami.js)
 // 1) 📖 단계별 그림 교재 모드
-// 2) 🐰 Rabbit Ear 전개도 & 벡터 엔진 모드
-// 3) 🌐 3D 리얼타임 물리 시뮬레이터 모드
+// 2) 🐰 Rabbit Ear 전개도 & 실시간 벡터 접힘 애니메이션
+// 3) 🌐 리얼 3D WebGL 물리 접기 시뮬레이터 (Three.js)
 
 (function () {
   'use strict';
 
   // -------------------------------------------------------------
-  // 1. 고화질 종이접기 5종 단계별 정밀 다이어그램 데이터 (모드 1)
+  // 1. 종이접기 5종 데이터 정의
   // -------------------------------------------------------------
   const ORIGAMI_MODELS = {
     frog: {
@@ -16,7 +16,6 @@
       tagline: '엉덩이를 톡! 누르면 연잎으로 폴짝 뛰어오르는 개구리',
       defaultColor: '#22c55e',
       interactiveType: 'jump',
-      simModelId: 'frog',
       totalSteps: 5,
       rabbitFoldData: {
         title: 'Jumping Frog Crease Pattern',
@@ -76,7 +75,6 @@
       tagline: '바람을 가르고 가장 멀리 날아가는 초고속 제트기',
       defaultColor: '#0ea5e9',
       interactiveType: 'flight',
-      simModelId: 'traditional-crane',
       totalSteps: 5,
       rabbitFoldData: {
         title: 'Jet Airplane Crease Pattern',
@@ -135,7 +133,6 @@
       tagline: '종이접기의 정석! 3D 시뮬레이션으로 가장 화려한 모델',
       defaultColor: '#ec4899',
       interactiveType: 'heart_beat',
-      simModelId: 'traditional-crane',
       totalSteps: 5,
       rabbitFoldData: {
         title: 'Traditional Crane Crease Pattern',
@@ -148,8 +145,7 @@
           { from: [0,0], to: [1,1], assignment: 'M' },
           { from: [1,0], to: [0,1], assignment: 'M' },
           { from: [0.5,0], to: [0.5,1], assignment: 'V' },
-          { from: [0,0.5], to: [1,0.5], assignment: 'V' },
-          { from: [0.25,0.25], to: [0.75,0.75], assignment: 'M' }
+          { from: [0,0.5], to: [1,0.5], assignment: 'V' }
         ]
       },
       steps: [
@@ -196,7 +192,6 @@
       tagline: '동서남북 몇 번! 비밀 퀴즈와 소원을 담아 노는 마법 상자',
       defaultColor: '#eab308',
       interactiveType: 'fortune',
-      simModelId: 'box',
       totalSteps: 4,
       steps: [
         {
@@ -235,7 +230,6 @@
       tagline: '마음을 담아 친구와 부모님께 선물하는 예쁜 하트',
       defaultColor: '#ec4899',
       interactiveType: 'heart_beat',
-      simModelId: 'heart',
       totalSteps: 4,
       steps: [
         {
@@ -276,7 +270,7 @@
   let currentColor = '#22c55e';
 
   // -------------------------------------------------------------
-  // 2. 탭 모드 전환 제어
+  // 2. 탭 모드 전환
   // -------------------------------------------------------------
   function switchMode(mode) {
     activeMode = mode;
@@ -284,16 +278,17 @@
       b.classList.toggle('active', b.dataset.mode === mode);
     });
 
-    document.getElementById('viewModeIllustrated').style.display = (mode === 'illustrated') ? 'block' : 'none';
-    document.getElementById('viewModeRabbitEar').style.display = (mode === 'rabbitear') ? 'block' : 'none';
-    document.getElementById('viewMode3DSim').style.display = (mode === '3dsim') ? 'block' : 'none';
+    document.getElementById('viewModeIllustrated').style.display = (mode === 'illustrated') ? 'flex' : 'none';
+    document.getElementById('viewModeRabbitEar').style.display = (mode === 'rabbitear') ? 'flex' : 'none';
+    document.getElementById('viewMode3DSim').style.display = (mode === '3dsim') ? 'flex' : 'none';
 
     if (mode === 'illustrated') {
       renderOrigamiStep();
     } else if (mode === 'rabbitear') {
-      renderRabbitEarView();
+      updateRabbitEarFold(parseFloat(document.getElementById('rabbitFoldSlider').value));
     } else if (mode === '3dsim') {
-      render3DSimView();
+      initThree3DScene();
+      updateThreeFold(parseFloat(document.getElementById('threeFoldSlider').value));
     }
   }
 
@@ -503,7 +498,7 @@
       ctx.lineWidth = 3.5;
       ctx.stroke();
 
-      // 큰 눈 스티커
+      // 눈 스티커
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.arc(cx - size / 4.5, cy - size / 3.2, 16, 0, Math.PI * 2);
@@ -528,7 +523,6 @@
       ctx.font = 'bold 22px Jua';
       ctx.fillText('👇 엉덩이를 톡! 누르면 점프!', cx - 110, cy + size / 2);
     }
-    // [학 및 비행기 등 기타 도안]
     else if (drawType.startsWith('plane_')) {
       setShadow();
       ctx.fillStyle = frontColor;
@@ -573,9 +567,12 @@
   }
 
   // -------------------------------------------------------------
-  // 4. 모드 2: Rabbit Ear (rabbitear.org) 전개도 & 벡터 엔진 렌더러
+  // 4. 모드 2: Rabbit Ear 실시간 벡터 접힘 애니메이션 엔진
   // -------------------------------------------------------------
-  function renderRabbitEarView() {
+  let rabbitPlayInterval = null;
+
+  function updateRabbitEarFold(percent) {
+    document.getElementById('rabbitFoldPercentText').textContent = `${Math.round(percent)}%`;
     const cpContainer = document.getElementById('rabbitCpContainer');
     const foldContainer = document.getElementById('rabbitFoldedContainer');
     if (!cpContainer || !foldContainer) return;
@@ -583,55 +580,273 @@
     const model = ORIGAMI_MODELS[currentModelKey];
     const data = model.rabbitFoldData || ORIGAMI_MODELS.frog.rabbitFoldData;
 
-    // 1. Crease Pattern (전개도) SVG 렌더
+    // 1. Crease Pattern (전개도) SVG
     let cpSvg = `<svg viewBox="-0.1 -0.1 1.2 1.2" style="width: 100%; height: 100%; background: #ffffff; border-radius: 14px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">`;
-    // 배경 사각
     cpSvg += `<rect x="0" y="0" width="1" height="1" fill="${currentColor}15" stroke="#1e293b" stroke-width="0.015"/>`;
 
-    // 에지들 (M=산접기 빨강, V=골접기 파랑, B=외곽선 검정)
     data.edges.forEach(e => {
       let color = '#1e293b';
       let dash = '';
       if (e.assignment === 'M') {
-        color = '#ef4444'; // 산접기 (Mountain) 빨간색
+        color = '#ef4444';
         dash = 'stroke-dasharray="0.03 0.02"';
       } else if (e.assignment === 'V') {
-        color = '#3b82f6'; // 골접기 (Valley) 파란색
+        color = '#3b82f6';
         dash = 'stroke-dasharray="0.015 0.015"';
       }
       cpSvg += `<line x1="${e.from[0]}" y1="${e.from[1]}" x2="${e.to[0]}" y2="${e.to[1]}" stroke="${color}" stroke-width="0.018" ${dash} stroke-linecap="round"/>`;
     });
-
     cpSvg += `</svg>`;
     cpContainer.innerHTML = cpSvg;
 
-    // 2. Folded State (접힌 상태 시뮬레이션 벡터)
-    let foldSvg = `<svg viewBox="-60 -60 120 120" style="width: 100%; height: 100%; background: #fafafa; border-radius: 14px;">`;
-    // 그림자
-    foldSvg += `<defs><filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="rgba(0,0,0,0.2)"/></filter></defs>`;
+    // 2. Folded State SVG (진행도 percent 0~100에 따른 플랩 회전 및 변형)
+    const t = percent / 100; // 0.0 ~ 1.0
+    const flapScaleX = 1 - t * 0.55;
+    const flapScaleY = 1 - t * 0.45;
+    const flapAngle = t * 75; // 회전 각도
+
+    let foldSvg = `<svg viewBox="-80 -80 160 160" style="width: 100%; height: 100%; background: #fafafa; border-radius: 14px;">`;
+    foldSvg += `<defs><filter id="rfDrop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="${3 + t*5}" stdDeviation="${3 + t*4}" flood-color="rgba(0,0,0,0.25)"/></filter></defs>`;
     
-    // 접힌 다각형들
-    foldSvg += `<g filter="url(#dropShadow)">`;
-    foldSvg += `<polygon points="0,-45 40,-15 25,35 -25,35 -40,-15" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>`;
-    foldSvg += `<polygon points="0,-45 40,-15 0,0" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" opacity="0.95"/>`;
-    foldSvg += `<polygon points="0,-45 -40,-15 0,0" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" opacity="0.95"/>`;
+    foldSvg += `<g filter="url(#rfDrop)">`;
+    // 베이스 종이 몸체
+    foldSvg += `<polygon points="-50,-50 50,-50 50,50 -50,50" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round" transform="scale(${1 - t * 0.2})"/>`;
+    
+    // 접히는 왼쪽 날개 플랩 (흰색 뒷면 노출)
+    foldSvg += `<g transform="translate(-${50 * (1-t*0.2)}, 0) rotate(${flapAngle}) scale(${flapScaleX}, 1)">`;
+    foldSvg += `<polygon points="0,-50 50,0 0,50" fill="#ffffff" stroke="#1e293b" stroke-width="2" opacity="0.95"/>`;
+    foldSvg += `</g>`;
+
+    // 접히는 오른쪽 날개 플랩
+    foldSvg += `<g transform="translate(${50 * (1-t*0.2)}, 0) rotate(-${flapAngle}) scale(${flapScaleX}, 1)">`;
+    foldSvg += `<polygon points="0,-50 -50,0 0,50" fill="#ffffff" stroke="#1e293b" stroke-width="2" opacity="0.95"/>`;
+    foldSvg += `</g>`;
+
+    // 접히는 상단 삼각 머리
+    if (t > 0.3) {
+      const topT = (t - 0.3) / 0.7;
+      foldSvg += `<polygon points="0,-${50 * (1-topT)} -35,0 35,0" fill="${currentColor}" stroke="#1e293b" stroke-width="2" opacity="0.9"/>`;
+    }
+
     foldSvg += `</g>`;
     foldSvg += `</svg>`;
     foldContainer.innerHTML = foldSvg;
   }
 
-  // -------------------------------------------------------------
-  // 5. 모드 3: 3D 리얼타임 WebGL 물리 시뮬레이터 (Origami Simulator)
-  // -------------------------------------------------------------
-  function render3DSimView() {
-    const iframe = document.getElementById('origami3DSimIframe');
-    const model = ORIGAMI_MODELS[currentModelKey];
-    const simId = model.simModelId || 'crane';
+  function toggleRabbitAutoPlay() {
+    const btn = document.getElementById('rabbitPlayBtn');
+    const slider = document.getElementById('rabbitFoldSlider');
+    if (rabbitPlayInterval) {
+      clearInterval(rabbitPlayInterval);
+      rabbitPlayInterval = null;
+      btn.textContent = '▶️ 자동 접기 재생';
+    } else {
+      btn.textContent = '⏸️ 일시 정지';
+      let direction = 1;
+      rabbitPlayInterval = setInterval(() => {
+        let val = parseFloat(slider.value) + (direction * 2);
+        if (val >= 100) {
+          val = 100;
+          direction = -1;
+        } else if (val <= 0) {
+          val = 0;
+          direction = 1;
+        }
+        slider.value = val;
+        updateRabbitEarFold(val);
+      }, 40);
+    }
+  }
 
-    // MIT/Amanda Ghassaei Origami Simulator URL
-    const targetUrl = `https://origamisimulator.org/?model=${simId}`;
-    if (iframe && iframe.src !== targetUrl) {
-      iframe.src = targetUrl;
+  // -------------------------------------------------------------
+  // 5. 모드 3: 리얼 3D WebGL 물리 시뮬레이터 (Three.js)
+  // -------------------------------------------------------------
+  let threeScene, threeCamera, threeRenderer, threeControls;
+  let paperBaseMesh, leftWingGroup, rightWingGroup, topFlapGroup;
+  let threePlayInterval = null;
+  let isThreeInitialized = false;
+
+  function initThree3DScene() {
+    const container = document.getElementById('threeCanvasContainer');
+    if (!container || isThreeInitialized) return;
+
+    const width = container.clientWidth || 540;
+    const height = container.clientHeight || 380;
+
+    // 1. Scene
+    threeScene = new THREE.Scene();
+    threeScene.background = new THREE.Color(0x0f0b21);
+
+    // 2. Camera
+    threeCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    threeCamera.position.set(0, 7, 12);
+
+    // 3. Renderer
+    threeRenderer = new THREE.WebGLRenderer({ antialias: true });
+    threeRenderer.setSize(width, height);
+    threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    threeRenderer.shadowMap.enabled = true;
+    container.appendChild(threeRenderer.domElement);
+
+    // 4. OrbitControls
+    if (typeof THREE.OrbitControls === 'function') {
+      threeControls = new THREE.OrbitControls(threeCamera, threeRenderer.domElement);
+      threeControls.enableDamping = true;
+      threeControls.dampingFactor = 0.05;
+      threeControls.maxPolarAngle = Math.PI / 2 + 0.3;
+    }
+
+    // 5. 조명
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    threeScene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 12, 8);
+    dirLight.castShadow = true;
+    threeScene.add(dirLight);
+
+    // 6. 3D 종이 메쉬 생성
+    build3DPaperModel();
+
+    // 7. 렌더 루프
+    const animate = () => {
+      requestAnimationFrame(animate);
+      if (threeControls) threeControls.update();
+      threeRenderer.render(threeScene, threeCamera);
+    };
+    animate();
+
+    isThreeInitialized = true;
+
+    // 리사이즈 처리
+    window.addEventListener('resize', () => {
+      if (!container || !threeCamera || !threeRenderer) return;
+      const nw = container.clientWidth;
+      const nh = container.clientHeight;
+      threeCamera.aspect = nw / nh;
+      threeCamera.updateProjectionMatrix();
+      threeRenderer.setSize(nw, nh);
+    });
+  }
+
+  function build3DPaperModel() {
+    // 기존 객체 정리
+    const existing = threeScene.getObjectByName('OrigamiPaperRoot');
+    if (existing) threeScene.remove(existing);
+
+    const rootGroup = new THREE.Group();
+    rootGroup.name = 'OrigamiPaperRoot';
+
+    // 양면 종이 재질 (앞면 = currentColor 유색, 뒷면 = 깔끔한 흰색)
+    const frontMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(currentColor),
+      roughness: 0.4,
+      metalness: 0.1,
+      side: THREE.FrontSide
+    });
+    const backMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(0xffffff),
+      roughness: 0.3,
+      side: THREE.BackSide
+    });
+
+    // 중앙 몸통 베이스
+    const centerGeom = new THREE.PlaneGeometry(3, 4);
+    const centerFront = new THREE.Mesh(centerGeom, frontMat);
+    const centerBack = new THREE.Mesh(centerGeom, backMat);
+    centerFront.rotation.x = -Math.PI / 2;
+    centerBack.rotation.x = -Math.PI / 2;
+    rootGroup.add(centerFront);
+    rootGroup.add(centerBack);
+
+    // 좌측 날개 힌지 그룹
+    leftWingGroup = new THREE.Group();
+    leftWingGroup.position.set(-1.5, 0, 0);
+    const wingGeom = new THREE.BufferGeometry();
+    const wingVertices = new Float32Array([
+      0, 0, -2,
+      -2.5, 0, 0,
+      0, 0, 2
+    ]);
+    wingGeom.setAttribute('position', new THREE.BufferAttribute(wingVertices, 3));
+    wingGeom.computeVertexNormals();
+    const wingFront = new THREE.Mesh(wingGeom, frontMat);
+    const wingBack = new THREE.Mesh(wingGeom, backMat);
+    leftWingGroup.add(wingFront);
+    leftWingGroup.add(wingBack);
+    rootGroup.add(leftWingGroup);
+
+    // 우측 날개 힌지 그룹
+    rightWingGroup = new THREE.Group();
+    rightWingGroup.position.set(1.5, 0, 0);
+    const rWingGeom = new THREE.BufferGeometry();
+    const rWingVertices = new Float32Array([
+      0, 0, -2,
+      2.5, 0, 0,
+      0, 0, 2
+    ]);
+    rWingGeom.setAttribute('position', new THREE.BufferAttribute(rWingVertices, 3));
+    rWingGeom.computeVertexNormals();
+    const rWingFront = new THREE.Mesh(rWingGeom, frontMat);
+    const rWingBack = new THREE.Mesh(rWingGeom, backMat);
+    rightWingGroup.add(rWingFront);
+    rightWingGroup.add(rWingBack);
+    rootGroup.add(rightWingGroup);
+
+    // 상단 머리 힌지 그룹
+    topFlapGroup = new THREE.Group();
+    topFlapGroup.position.set(0, 0, -2);
+    const topGeom = new THREE.BufferGeometry();
+    const topVertices = new Float32Array([
+      -1.5, 0, 0,
+      0, 0, -2,
+      1.5, 0, 0
+    ]);
+    topGeom.setAttribute('position', new THREE.BufferAttribute(topVertices, 3));
+    topGeom.computeVertexNormals();
+    const topFront = new THREE.Mesh(topGeom, frontMat);
+    const topBack = new THREE.Mesh(topGeom, backMat);
+    topFlapGroup.add(topFront);
+    topFlapGroup.add(topBack);
+    rootGroup.add(topFlapGroup);
+
+    threeScene.add(rootGroup);
+  }
+
+  function updateThreeFold(percent) {
+    document.getElementById('threeFoldPercentText').textContent = `${Math.round(percent)}%`;
+    if (!leftWingGroup || !rightWingGroup || !topFlapGroup) return;
+
+    const t = percent / 100; // 0.0 ~ 1.0
+
+    // 3D 힌지 회전 연산
+    leftWingGroup.rotation.z = -t * Math.PI * 0.85; // 좌측 날개가 위로 접힘
+    rightWingGroup.rotation.z = t * Math.PI * 0.85; // 우측 날개가 위로 접힘
+    topFlapGroup.rotation.x = t * Math.PI * 0.9;   // 머리가 안쪽으로 숙여짐
+  }
+
+  function toggleThreeAutoPlay() {
+    const btn = document.getElementById('threePlayBtn');
+    const slider = document.getElementById('threeFoldSlider');
+    if (threePlayInterval) {
+      clearInterval(threePlayInterval);
+      threePlayInterval = null;
+      btn.textContent = '▶️ 3D 연속 접기 재생';
+    } else {
+      btn.textContent = '⏸️ 3D 일시 정지';
+      let direction = 1;
+      threePlayInterval = setInterval(() => {
+        let val = parseFloat(slider.value) + (direction * 1.5);
+        if (val >= 100) {
+          val = 100;
+          direction = -1;
+        } else if (val <= 0) {
+          val = 0;
+          direction = 1;
+        }
+        slider.value = val;
+        updateThreeFold(val);
+      }, 35);
     }
   }
 
@@ -716,6 +931,8 @@
         currentModelKey = e.currentTarget.dataset.model;
         currentColor = ORIGAMI_MODELS[currentModelKey].defaultColor || '#22c55e';
         currentStepIndex = 0;
+        
+        if (isThreeInitialized) build3DPaperModel();
         switchMode(activeMode);
       });
     });
@@ -726,12 +943,17 @@
         document.querySelectorAll('.origami-color-chip').forEach(c => c.classList.remove('active'));
         e.currentTarget.classList.add('active');
         currentColor = e.currentTarget.dataset.color;
+        
         if (activeMode === 'illustrated') renderOrigamiStep();
-        else if (activeMode === 'rabbitear') renderRabbitEarView();
+        else if (activeMode === 'rabbitear') updateRabbitEarFold(parseFloat(document.getElementById('rabbitFoldSlider').value));
+        else if (activeMode === '3dsim') {
+          build3DPaperModel();
+          updateThreeFold(parseFloat(document.getElementById('threeFoldSlider').value));
+        }
       });
     });
 
-    // 이전/다음 단계 버튼
+    // [모드 1] 이전/다음 단계 버튼
     document.getElementById('prevStepBtn')?.addEventListener('click', () => {
       if (currentStepIndex > 0) {
         currentStepIndex--;
@@ -753,6 +975,19 @@
       }
     });
 
+    // [모드 2] Rabbit Ear 슬라이더 & 재생 버튼
+    document.getElementById('rabbitFoldSlider')?.addEventListener('input', (e) => {
+      updateRabbitEarFold(parseFloat(e.target.value));
+    });
+    document.getElementById('rabbitPlayBtn')?.addEventListener('click', toggleRabbitAutoPlay);
+
+    // [모드 3] 3D Three.js 슬라이더 & 재생 버튼
+    document.getElementById('threeFoldSlider')?.addEventListener('input', (e) => {
+      updateThreeFold(parseFloat(e.target.value));
+    });
+    document.getElementById('threePlayBtn')?.addEventListener('click', toggleThreeAutoPlay);
+
+    // 인쇄 & 보상
     document.getElementById('printPatternBtn')?.addEventListener('click', () => window.print());
     document.getElementById('claimOrigamiRewardBtn')?.addEventListener('click', completeOrigamiAndReward);
     document.getElementById('testActionBtn')?.addEventListener('click', triggerMiniGame);
