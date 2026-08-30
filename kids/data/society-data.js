@@ -32,7 +32,7 @@ const SOCIETY_CURRICULUM_DATA = {
           "hint": "ㄱㅎㅂㅎ",
           "desc": "지구 전체 또는 지역의 장기적인 날씨 패턴 변화. 특히 지구 온도가 점점 높아지는 현상을 말합니다.",
           "meaning": "지구의 날씨가 오랜 기간에 걸쳐 변하는 것",
-          "imageUrl": "./images/20260612_103943.jpg"
+          "imageUrl": "./images/20260612_103943_2.jpg"
         },
         {
           "word": "자연재해",
