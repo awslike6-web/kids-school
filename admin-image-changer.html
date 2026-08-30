@@ -594,12 +594,36 @@
       }
     }
 
+    function getAutoSubfolderPath() {
+      const unitVal = document.getElementById('unitSelect').value || '';
+      let subfolder = '';
+      if (unitVal.includes('5학년 2학기') || unitVal.includes('5-2')) {
+        const matchUnit = unitVal.match(/(\d+(?:-\d+)?)/);
+        const unitNum = matchUnit ? matchUnit[1] : '1';
+        subfolder = 'minsu/5-2/' + unitNum + '/';
+      } else if (unitVal.includes('1학년 2학기') || unitVal.includes('1-2')) {
+        const matchUnit = unitVal.match(/(\d+(?:-\d+)?)/);
+        const unitNum = matchUnit ? matchUnit[1] : '1';
+        subfolder = 'minseo/1-2/' + unitNum + '/';
+      } else if (unitVal.includes('6학년') || unitVal.includes('6-1') || unitVal.includes('6-2')) {
+        const matchUnit = unitVal.match(/(\d+(?:-\d+)?)/);
+        const unitNum = matchUnit ? matchUnit[1] : '1';
+        subfolder = 'minsu/6-1/' + unitNum + '/';
+      } else if (unitVal.includes('2학년') || (unitVal.includes('2-1') && !unitVal.includes('우리나라의 기후'))) {
+        const matchUnit = unitVal.match(/(\d+(?:-\d+)?)/);
+        const unitNum = matchUnit ? matchUnit[1] : '1';
+        subfolder = 'minseo/2-1/' + unitNum + '/';
+      }
+      return subfolder;
+    }
+
     function processNewImageFile(file, itemIdx) {
       const card = document.getElementById('questionGrid').children[itemIdx];
       if (!card || !card._item) return;
 
       const fileName = file.name;
-      const autoPath = './images/' + fileName;
+      const subfolder = getAutoSubfolderPath();
+      const autoPath = './images/' + subfolder + fileName;
       const input = document.getElementById('imgInput_' + itemIdx);
       input.value = autoPath;
 
@@ -622,7 +646,7 @@
       };
       reader.readAsDataURL(file);
 
-      showToast('✅ [' + fileName + '] 이미지가 적용되었습니다! (상단 🚀 깃허브 배포 클릭)');
+      showToast('✅ [' + fileName + '] 이미지가 적용되었습니다! (' + autoPath + ')');
     }
 
     function getCleanJson(data) {
@@ -812,11 +836,17 @@
           for (let i = 0; i < localFilesToUpload.length; i++) {
             const item = localFilesToUpload[i];
             const file = item._localFile;
-            const targetPath = `${subjectImgDir}/${file.name}`;
+            let relPath = item.imageUrl || item.img || item.coverImage || item.illustration || ('./images/' + file.name);
+            if (relPath.startsWith('./images/')) {
+              relPath = relPath.replace('./images/', '');
+            } else if (relPath.startsWith('images/')) {
+              relPath = relPath.replace('images/', '');
+            }
+            const targetPath = `${subjectImgDir}/${relPath}`;
             logPush(`  [${i + 1}/${localFilesToUpload.length}] 업로드 중: ${targetPath}...`);
             const b64 = await fileToBase64(file);
-            await putFileToGithub(targetPath, b64, `feat(image): 교재 이미지 업로드 (${file.name})`, token);
-            logPush(`  ✅ 업로드 완료: ${file.name}`);
+            await putFileToGithub(targetPath, b64, `feat(image): 교재 이미지 업로드 (${relPath})`, token);
+            logPush(`  ✅ 업로드 완료: ${relPath}`);
           }
         } else {
           logPush('ℹ️ 업로드할 새 이미지 바이너리 없음 (데이터 파일 업데이트 진행)');
