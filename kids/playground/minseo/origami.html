@@ -3,22 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>📐 고화질 인터랙티브 종이접기 연구소 - 민민 놀이터</title>
+  <title>📐 3-Way 종이접기 비교 연구소 - 민민 놀이터</title>
   <link rel="stylesheet" href="../playground.css">
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
+    /* 🎛️ 상단 3-Way 모드 스위처 탭 바 */
+    .mode-tab-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    @media (max-width: 600px) {
+      .mode-tab-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+    .origami-tab-btn {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 2px solid var(--border-light);
+      background: #ffffff;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    body.theme--arcade .origami-tab-btn {
+      background: #1a1333;
+      border-color: #3b2e66;
+      color: #e2e8f0;
+    }
+    .origami-tab-btn.active {
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      color: #ffffff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 107, 157, 0.4);
+    }
+    body.theme--arcade .origami-tab-btn.active {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      color: #0c0818;
+      box-shadow: 0 6px 18px rgba(0, 242, 254, 0.4);
+    }
+
     .origami-layout {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-top: 16px;
       width: 100%;
       box-sizing: border-box;
     }
     @media (min-width: 880px) {
       .origami-layout {
         display: grid;
-        grid-template-columns: 290px 1fr;
+        grid-template-columns: 280px 1fr;
         gap: 20px;
       }
     }
@@ -113,7 +159,7 @@
       box-shadow: 0 0 0 2px #fff, 0 4px 8px rgba(0,0,0,0.3);
     }
 
-    /* 🖼️ 인터랙티브 종이 뷰포트 */
+    /* 🖼️ 인터랙티브 종이 뷰포트 공통 카드 */
     .origami-stage-card {
       background: #ffffff;
       border: 3px solid #ffb3c6;
@@ -145,7 +191,7 @@
       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* 🧭 단계 컨트롤러 바 */
+    /* 🧭 모드 1: 단계 컨트롤러 바 */
     .step-controller {
       display: flex;
       justify-content: space-between;
@@ -191,7 +237,6 @@
       color: var(--cyan-neon);
     }
 
-    /* 📝 단계별 설명 & 꿀팁 박스 */
     .step-desc-box {
       width: 100%;
       max-width: 580px;
@@ -236,7 +281,6 @@
       color: #00f2fe;
     }
 
-    /* 🎉 완성 후 액션 버튼 */
     .origami-complete-box {
       display: none;
       width: 100%;
@@ -276,7 +320,56 @@
       box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
     }
 
-    /* 🖨️ A4 출판용 워크시트 인쇄 스타일 */
+    /* 🐰 모드 2: Rabbit Ear 분할 뷰 */
+    .rabbit-split-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+    }
+    @media (max-width: 560px) {
+      .rabbit-split-view {
+        grid-template-columns: 1fr;
+      }
+    }
+    .rabbit-box-card {
+      background: rgba(0,0,0,0.03);
+      border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    body.theme--arcade .rabbit-box-card {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .rabbit-svg-box {
+      width: 100%;
+      aspect-ratio: 1;
+      margin-top: 8px;
+    }
+
+    /* 🌐 모드 3: 3D WebGL 시뮬레이터 컨테이너 */
+    .sim-3d-wrapper {
+      width: 100%;
+      height: 480px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 2px solid rgba(0,0,0,0.1);
+      background: #000;
+    }
+    .sim-3d-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* 🖨️ 인쇄 스타일 */
     @media print {
       body * { visibility: hidden; }
       #origamiCanvas, #origamiCanvas * { visibility: visible; }
@@ -288,7 +381,7 @@
         height: 100vh;
         border: none;
       }
-      .origami-sidebar, .step-controller, .pg-top-nav, .origami-complete-box { display: none !important; }
+      .origami-sidebar, .step-controller, .pg-top-nav, .origami-complete-box, .mode-tab-bar { display: none !important; }
     }
   </style>
 </head>
@@ -299,19 +392,32 @@
     <div class="pg-top-nav">
       <a href="../index.html" class="pg-back-btn">⬅️ 놀이터 허브로</a>
       <div class="pg-trophy-bar">
-        <span>📐 고화질 일러스트 종이접기</span>
+        <span>📐 종이접기 비교 연구소</span>
       </div>
     </div>
 
     <!-- 🌟 타이틀 -->
-    <div class="pg-header" style="margin-bottom: 16px;">
+    <div class="pg-header" style="margin-bottom: 12px;">
       <h1 class="pg-title">
-        <span class="neon-text">📐 고화질 일러스트</span> <span class="accent-text">종이접기</span>
+        <span class="neon-text">📐 3-Way 종이접기</span> <span class="accent-text">비교 연구소</span>
       </h1>
-      <p class="pg-subtitle">앞뒷면 색상 대비와 빨간 점선·화살표를 보며 쉽게 따라 접고, A4 전용 도안으로 인쇄해요! 🖨️</p>
+      <p class="pg-subtitle">3가지 구현 방식(단계별 그림 교재 / Rabbit Ear 벡터 전개도 / 3D 물리 시뮬레이터)을 직접 비교해보세요!</p>
     </div>
 
-    <!-- 🛠️ 2열 레이아웃 -->
+    <!-- 🎛️ 상단 3-Way 비교 탭 -->
+    <div class="mode-tab-bar">
+      <button type="button" class="origami-tab-btn active" data-mode="illustrated">
+        <span>📖 1. 단계별 그림 교재 모드</span>
+      </button>
+      <button type="button" class="origami-tab-btn" data-mode="rabbitear">
+        <span>🐰 2. Rabbit Ear 전개도 모드</span>
+      </button>
+      <button type="button" class="origami-tab-btn" data-mode="3dsim">
+        <span>🌐 3. 3D 물리 시뮬레이터 모드</span>
+      </button>
+    </div>
+
+    <!-- 🛠️ 2열 메인 레이아웃 -->
     <div class="origami-layout">
 
       <!-- 좌측: 종이접기 모델 및 색상 선택 -->
@@ -325,14 +431,14 @@
             <button type="button" class="origami-model-btn" data-model="airplane">
               <span>🚀 슈퍼 제트 비행기</span>
             </button>
+            <button type="button" class="origami-model-btn" data-model="crane">
+              <span>🕊️ 전통 종이학 (Crane)</span>
+            </button>
             <button type="button" class="origami-model-btn" data-model="fortune">
               <span>👑 동서남북 마법 상자</span>
             </button>
             <button type="button" class="origami-model-btn" data-model="heart">
               <span>💖 반짝 사랑 하트</span>
-            </button>
-            <button type="button" class="origami-model-btn" data-model="ttakji">
-              <span>🪓 천하무적 딱지</span>
             </button>
           </div>
         </div>
@@ -356,35 +462,77 @@
         </button>
       </div>
 
-      <!-- 우측: 인터랙티브 종이 뷰포트 -->
+      <!-- 우측: 3가지 모드 뷰포트 영역 -->
       <div class="origami-stage-card">
-        
-        <!-- 2D/3D 고화질 종이접기 캔버스 -->
-        <canvas id="origamiCanvas"></canvas>
 
-        <!-- 🧭 이전/다음 단계 컨트롤러 -->
-        <div class="step-controller">
-          <button type="button" id="prevStepBtn" class="step-nav-btn">◀️ 이전 단계</button>
-          <div class="step-indicator-badge" id="stepIndicator">1 / 5 단계</div>
-          <button type="button" id="nextStepBtn" class="step-nav-btn">다음 단계 ▶️</button>
+        <!-- ================= [모드 1] 단계별 그림 교재 모드 ================= -->
+        <div id="viewModeIllustrated" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+          <canvas id="origamiCanvas"></canvas>
+
+          <div class="step-controller">
+            <button type="button" id="prevStepBtn" class="step-nav-btn">◀️ 이전 단계</button>
+            <div class="step-indicator-badge" id="stepIndicator">1 / 5 단계</div>
+            <button type="button" id="nextStepBtn" class="step-nav-btn">다음 단계 ▶️</button>
+          </div>
+
+          <div class="step-desc-box">
+            <div class="step-title-text" id="stepTitle">1단계: 반으로 접어 십자(+) 기준선 만들기</div>
+            <div class="step-desc-text" id="stepDesc">색종이의 색깔이 아래로 가도록 둔 뒤, 네모 모양으로 가로와 세로를 반씩 접었다 펼쳐요.</div>
+            <div class="step-tip-badge" id="stepTip">💡 모서리를 꼭짓점에 정확히 맞추고 손톱으로 꾹꾹 눌러 다려주세요!</div>
+          </div>
+
+          <div class="origami-complete-box" id="origamiCompleteArea">
+            <div class="complete-action-grid">
+              <button type="button" id="testActionBtn" class="btn-test">
+                ✨ 화면에서 날리기/점프 테스트!
+              </button>
+              <button type="button" id="claimOrigamiRewardBtn" class="btn-reward-claim">
+                🎉 종이접기 완성! (💎 보상 받기)
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- 📝 단계별 설명 및 꿀팁 박스 -->
-        <div class="step-desc-box">
-          <div class="step-title-text" id="stepTitle">1단계: 반으로 접어 십자(+) 기준선 만들기</div>
-          <div class="step-desc-text" id="stepDesc">색종이의 색깔이 아래로 가도록 둔 뒤, 네모 모양으로 가로와 세로를 반씩 접었다 펼쳐요.</div>
-          <div class="step-tip-badge" id="stepTip">💡 모서리를 꼭짓점에 정확히 맞추고 손톱으로 꾹꾹 눌러 다려주세요!</div>
+        <!-- ================= [모드 2] Rabbit Ear 전개도 & 벡터 엔진 모드 ================= -->
+        <div id="viewModeRabbitEar" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 12px; color: var(--pink-soft);">
+            🐰 Rabbit Ear (rabbitear.org) 수학적 전개도 & 접힘 엔진
+          </div>
+          <div class="rabbit-split-view">
+            <!-- 좌측: 전개도 (Crease Pattern) -->
+            <div class="rabbit-box-card">
+              <div style="font-family: 'Jua'; font-size: 1.1rem; color: #ef4444;">
+                📐 전개도 (Crease Pattern)
+              </div>
+              <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">
+                🔴 산접기(M) / 🔵 골접기(V) / ⚫ 경계선(B)
+              </div>
+              <div class="rabbit-svg-box" id="rabbitCpContainer"></div>
+            </div>
+
+            <!-- 우측: 접힌 상태 벡터 (Folded State) -->
+            <div class="rabbit-box-card">
+              <div style="font-family: 'Jua'; font-size: 1.1rem; color: #3b82f6;">
+                ✨ 접힌 상태 (Folded State)
+              </div>
+              <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;">
+                수학적 평면 다각형 레이어 시뮬레이션
+              </div>
+              <div class="rabbit-svg-box" id="rabbitFoldedContainer"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- 🎉 완성 시 액션 영역 -->
-        <div class="origami-complete-box" id="origamiCompleteArea">
-          <div class="complete-action-grid">
-            <button type="button" id="testActionBtn" class="btn-test">
-              ✨ 화면에서 날리기/점프 테스트!
-            </button>
-            <button type="button" id="claimOrigamiRewardBtn" class="btn-reward-claim">
-              🎉 종이접기 완성! (💎 보상 받기)
-            </button>
+        <!-- ================= [모드 3] 3D 리얼타임 물리 시뮬레이터 모드 ================= -->
+        <div id="viewMode3DSim" style="width: 100%; display: none; flex-direction: column; align-items: center;">
+          <div style="font-family: 'Jua'; font-size: 1.25rem; margin-bottom: 12px; color: #0284c7;">
+            🌐 3D 리얼타임 WebGL 물리 시뮬레이터 (Origami Simulator)
+          </div>
+          <div style="font-size: 0.95rem; opacity: 0.85; margin-bottom: 12px; text-align: center;">
+            🖱️ 마우스로 360도 회전 및 줌인이 가능하며, 상단 슬라이더로 0% ➡️ 100% 접히는 과정을 실시간 관찰할 수 있습니다!
+          </div>
+          <div class="sim-3d-wrapper">
+            <iframe id="origami3DSimIframe" class="sim-3d-iframe" src="" allowfullscreen></iframe>
           </div>
         </div>
 

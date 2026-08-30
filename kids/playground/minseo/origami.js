@@ -1,10 +1,13 @@
-// 📐 고화질 일러스트 종이접기 연구소 코어 엔진 (origami.js)
+// 📐 3-Way 종이접기 비교 연구소 코어 엔진 (origami.js)
+// 1) 📖 단계별 그림 교재 모드
+// 2) 🐰 Rabbit Ear 전개도 & 벡터 엔진 모드
+// 3) 🌐 3D 리얼타임 물리 시뮬레이터 모드
 
 (function () {
   'use strict';
 
   // -------------------------------------------------------------
-  // 1. 고화질 종이접기 5종 단계별 정밀 다이어그램 데이터
+  // 1. 고화질 종이접기 5종 단계별 정밀 다이어그램 데이터 (모드 1)
   // -------------------------------------------------------------
   const ORIGAMI_MODELS = {
     frog: {
@@ -13,7 +16,22 @@
       tagline: '엉덩이를 톡! 누르면 연잎으로 폴짝 뛰어오르는 개구리',
       defaultColor: '#22c55e',
       interactiveType: 'jump',
+      simModelId: 'frog',
       totalSteps: 5,
+      rabbitFoldData: {
+        title: 'Jumping Frog Crease Pattern',
+        vertices: [[0,0], [1,0], [1,1], [0,1], [0.5,0.5], [0.5,0], [0.5,1], [0,0.5], [1,0.5]],
+        edges: [
+          { from: [0,0], to: [1,0], assignment: 'B' },
+          { from: [1,0], to: [1,1], assignment: 'B' },
+          { from: [1,1], to: [0,1], assignment: 'B' },
+          { from: [0,1], to: [0,0], assignment: 'B' },
+          { from: [0,0], to: [1,1], assignment: 'M' },
+          { from: [1,0], to: [0,1], assignment: 'M' },
+          { from: [0.5,0], to: [0.5,1], assignment: 'V' },
+          { from: [0,0.5], to: [1,0.5], assignment: 'V' }
+        ]
+      },
       steps: [
         {
           step: 1,
@@ -58,7 +76,21 @@
       tagline: '바람을 가르고 가장 멀리 날아가는 초고속 제트기',
       defaultColor: '#0ea5e9',
       interactiveType: 'flight',
+      simModelId: 'traditional-crane',
       totalSteps: 5,
+      rabbitFoldData: {
+        title: 'Jet Airplane Crease Pattern',
+        vertices: [[0,0], [1,0], [1,1], [0,1], [0.5,0], [0.5,1], [0,0.5], [1,0.5]],
+        edges: [
+          { from: [0,0], to: [1,0], assignment: 'B' },
+          { from: [1,0], to: [1,1], assignment: 'B' },
+          { from: [1,1], to: [0,1], assignment: 'B' },
+          { from: [0,1], to: [0,0], assignment: 'B' },
+          { from: [0.5,0], to: [0.5,1], assignment: 'V' },
+          { from: [0,0], to: [0.5,0.5], assignment: 'M' },
+          { from: [1,0], to: [0.5,0.5], assignment: 'M' }
+        ]
+      },
       steps: [
         {
           step: 1,
@@ -97,12 +129,74 @@
         }
       ]
     },
+    crane: {
+      id: 'crane',
+      name: '🕊️ 전통 종이학 (Crane)',
+      tagline: '종이접기의 정석! 3D 시뮬레이션으로 가장 화려한 모델',
+      defaultColor: '#ec4899',
+      interactiveType: 'heart_beat',
+      simModelId: 'traditional-crane',
+      totalSteps: 5,
+      rabbitFoldData: {
+        title: 'Traditional Crane Crease Pattern',
+        vertices: [[0,0], [1,0], [1,1], [0,1], [0.5,0.5], [0.5,0], [0.5,1], [0,0.5], [1,0.5]],
+        edges: [
+          { from: [0,0], to: [1,0], assignment: 'B' },
+          { from: [1,0], to: [1,1], assignment: 'B' },
+          { from: [1,1], to: [0,1], assignment: 'B' },
+          { from: [0,1], to: [0,0], assignment: 'B' },
+          { from: [0,0], to: [1,1], assignment: 'M' },
+          { from: [1,0], to: [0,1], assignment: 'M' },
+          { from: [0.5,0], to: [0.5,1], assignment: 'V' },
+          { from: [0,0.5], to: [1,0.5], assignment: 'V' },
+          { from: [0.25,0.25], to: [0.75,0.75], assignment: 'M' }
+        ]
+      },
+      steps: [
+        {
+          step: 1,
+          title: '사각 주머니 기본 접기',
+          tip: '💡 가로 세로 대각선을 꼼꼼하게 다린 후 안으로 모아요.',
+          desc: '색종이를 십자(+)와 X자로 접은 뒤 네 모서리를 모아 마름모 사각 주머니를 만들어요.',
+          drawType: 'crane_step1'
+        },
+        {
+          step: 2,
+          title: '아이스크림 접기 후 위로 벌리기',
+          tip: '💡 양 날개를 가운데 선에 맞춘 뒤 위로 길게 펴 올려요.',
+          desc: '양 모서리를 중심선으로 접고 윗 뚜껑을 들어 올려 길쭉한 학 날개 틀을 만들어요.',
+          drawType: 'crane_step2'
+        },
+        {
+          step: 3,
+          title: '뒤집어서 반대쪽도 똑같이 올리기',
+          tip: '💡 앞뒷면이 똑같은 다이아몬드 모양이 되도록 접어요.',
+          desc: '종이를 뒤집어 뒤쪽도 똑같이 아이스크림 모양으로 접어 올려요.',
+          drawType: 'crane_step3'
+        },
+        {
+          step: 4,
+          title: '머리와 꼬리를 안쪽으로 올려 접기',
+          tip: '💡 안쪽 접기(안으로 접어 꺾기)로 목과 꼬리를 세워요.',
+          desc: '양쪽 얇은 다리를 몸통 안쪽으로 꺾어 올려 머리와 꼬리를 만들어요.',
+          drawType: 'crane_step4'
+        },
+        {
+          step: 5,
+          title: '머리 부리를 꺾고 양 날개 펼치기!',
+          desc: '한쪽 끝을 살짝 아래로 꺾어 부리를 만들고, 양 날개를 부드럽게 당겨 몸통을 부풀리면 완성!',
+          tip: '💡 날개 아래쪽을 살살 당기면 학이 입체로 부풀어 올라요!',
+          drawType: 'crane_step5'
+        }
+      ]
+    },
     fortune: {
       id: 'fortune',
       name: '👑 동서남북 마법 상자',
       tagline: '동서남북 몇 번! 비밀 퀴즈와 소원을 담아 노는 마법 상자',
       defaultColor: '#eab308',
       interactiveType: 'fortune',
+      simModelId: 'box',
       totalSteps: 4,
       steps: [
         {
@@ -137,10 +231,11 @@
     },
     heart: {
       id: 'heart',
-      name: '💖 반짝 입체 사랑 하트',
+      name: '💖 반짝 사랑 하트',
       tagline: '마음을 담아 친구와 부모님께 선물하는 예쁜 하트',
       defaultColor: '#ec4899',
       interactiveType: 'heart_beat',
+      simModelId: 'heart',
       totalSteps: 4,
       steps: [
         {
@@ -172,53 +267,38 @@
           drawType: 'heart_step4'
         }
       ]
-    },
-    ttakji: {
-      id: 'ttakji',
-      name: '🪓 천하무적 파워 딱지',
-      tagline: '두 장의 색종이가 크로스 합체! 단단한 배틀 딱지',
-      defaultColor: '#f97316',
-      interactiveType: 'slam',
-      totalSteps: 4,
-      steps: [
-        {
-          step: 1,
-          title: '색종이 2장을 각각 3등분으로 길게 접기',
-          tip: '💡 3등분으로 얇고 단단하게 접을수록 파워가 센 딱지가 돼요.',
-          desc: '서로 다른 색상의 색종이 2장을 준비하여 각각 가로로 3등분해 긴 직사각형 2개를 만들어요.',
-          drawType: 'ttakji_step1'
-        },
-        {
-          step: 2,
-          title: '양쪽 끝을 45도 반대 방향으로 꺾기',
-          tip: '💡 바람개비 날개처럼 서로 엇갈리는 방향으로 세모를 접어요.',
-          desc: '직사각형 종이의 양쪽 끝을 서로 반대 방향으로 45도 삼각형 모양으로 꺾어 접어요.',
-          drawType: 'ttakji_step2'
-        },
-        {
-          step: 3,
-          title: '두 종이를 십자(+)로 교차하여 겹치기',
-          tip: '💡 직각으로 똑바르게 포개어야 네 날개가 딱 맞물려요.',
-          desc: '두 종이의 가운데 부분을 십자(+) 모양으로 직각으로 겹쳐 올려놓아요.',
-          drawType: 'ttakji_step3'
-        },
-        {
-          step: 4,
-          title: '시계 방향으로 날개를 차례로 끼워 잠그기!',
-          desc: '아래 ➡️ 오른쪽 ➡️ 위 ➡️ 왼쪽 날개를 순서대로 덮고, 마지막 날개를 첫 번째 틈새에 쏙 끼워 완성!',
-          tip: '💡 틈새에 꽉 끼워 넣으면 절대 풀리지 않는 무적 딱지가 돼요!',
-          drawType: 'ttakji_step4'
-        }
-      ]
     }
   };
 
+  let activeMode = 'illustrated'; // 'illustrated' | 'rabbitear' | '3dsim'
   let currentModelKey = 'frog';
   let currentStepIndex = 0;
-  let currentColor = '#22c55e'; // 앞면 색상
+  let currentColor = '#22c55e';
 
   // -------------------------------------------------------------
-  // 2. 고화질 정밀 다이어그램 렌더링 엔진 (Canvas Vector)
+  // 2. 탭 모드 전환 제어
+  // -------------------------------------------------------------
+  function switchMode(mode) {
+    activeMode = mode;
+    document.querySelectorAll('.origami-tab-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+
+    document.getElementById('viewModeIllustrated').style.display = (mode === 'illustrated') ? 'block' : 'none';
+    document.getElementById('viewModeRabbitEar').style.display = (mode === 'rabbitear') ? 'block' : 'none';
+    document.getElementById('viewMode3DSim').style.display = (mode === '3dsim') ? 'block' : 'none';
+
+    if (mode === 'illustrated') {
+      renderOrigamiStep();
+    } else if (mode === 'rabbitear') {
+      renderRabbitEarView();
+    } else if (mode === '3dsim') {
+      render3DSimView();
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 3. 모드 1: 고화질 일러스트 다이어그램 렌더러
   // -------------------------------------------------------------
   const origamiCanvas = document.getElementById('origamiCanvas');
   const oCtx = origamiCanvas?.getContext('2d');
@@ -233,24 +313,19 @@
     const h = origamiCanvas.height = 460;
 
     oCtx.clearRect(0, 0, w, h);
-
-    // 1. 고화질 배경 격자 & 종이 그림자 렌더
     drawCleanStudioBackground(oCtx, w, h);
 
     const cx = w / 2;
     const cy = h / 2 - 10;
     const size = 200;
 
-    // 2. 앞뒷면 색상 대비가 적용된 정밀 도안 렌더링
     drawIllustratedDiagram(oCtx, cx, cy, size, stepInfo.drawType, currentColor);
 
-    // 3. UI 텍스트 동기화
     document.getElementById('stepTitle').textContent = `${stepInfo.step}단계: ${stepInfo.title}`;
     document.getElementById('stepDesc').textContent = stepInfo.desc;
     document.getElementById('stepTip').innerHTML = stepInfo.tip;
     document.getElementById('stepIndicator').textContent = `${stepInfo.step} / ${total} 단계`;
 
-    // 4. 이전/다음 버튼 제어
     const prevBtn = document.getElementById('prevStepBtn');
     const nextBtn = document.getElementById('nextStepBtn');
     const completeArea = document.getElementById('origamiCompleteArea');
@@ -266,10 +341,8 @@
   }
 
   function drawCleanStudioBackground(ctx, w, h) {
-    // 화사한 작업 매트 배경
     ctx.fillStyle = '#fafafa';
     ctx.fillRect(0, 0, w, h);
-
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.035)';
     ctx.lineWidth = 1;
     for (let x = 0; x < w; x += 25) {
@@ -280,19 +353,15 @@
     }
   }
 
-  // -------------------------------------------------------------
-  // 3. 앞뒷면 색상 대비 & 정밀 점선 일러스트 드로잉
-  // -------------------------------------------------------------
   function drawIllustratedDiagram(ctx, cx, cy, size, drawType, frontColor) {
-    const whiteBack = '#ffffff'; // 종이 뒷면 (깨끗한 흰색)
-    const creaseColor = '#e11d48'; // 접는 선 (선명한 빨간색 점선)
-    const outlineColor = '#1e293b'; // 종이 테두리선 (세련된 슬레이트 블랙)
+    const whiteBack = '#ffffff';
+    const creaseColor = '#e11d48';
+    const outlineColor = '#1e293b';
 
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    // 3D 드롭 섀도우
     function setShadow() {
       ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
       ctx.shadowBlur = 16;
@@ -302,7 +371,6 @@
       ctx.shadowColor = 'transparent';
     }
 
-    // 기본 점선 그리기 헬퍼
     function drawDashedLine(x1, y1, x2, y2) {
       ctx.save();
       ctx.strokeStyle = creaseColor;
@@ -315,8 +383,7 @@
       ctx.restore();
     }
 
-    // 곡선 화살표 헬퍼
-    function drawCurveArrow(startX, startY, endX, endY, label = '접기') {
+    function drawCurveArrow(startX, startY, endX, endY) {
       ctx.save();
       ctx.strokeStyle = '#e11d48';
       ctx.fillStyle = '#e11d48';
@@ -327,15 +394,12 @@
       ctx.moveTo(startX, startY);
       ctx.quadraticCurveTo(midX, midY, endX, endY);
       ctx.stroke();
-
-      // 화살촉
       ctx.beginPath();
       ctx.arc(endX, endY, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
 
-    // [1] 개구리 단계별 도안
     if (drawType === 'frog_step1') {
       setShadow();
       ctx.fillStyle = frontColor;
@@ -344,19 +408,14 @@
       ctx.strokeStyle = outlineColor;
       ctx.lineWidth = 3;
       ctx.strokeRect(cx - size / 2, cy - size / 2, size, size);
-
-      // 가로 세로 십자 점선
       drawDashedLine(cx - size / 2, cy, cx + size / 2, cy);
       drawDashedLine(cx, cy - size / 2, cx, cy + size / 2);
       drawCurveArrow(cx - size / 3, cy - size / 3, cx + size / 4, cy - size / 3);
     } 
     else if (drawType === 'frog_step2') {
-      // 위쪽 삼각 주머니 + 아래 네모
       setShadow();
-      // 아래 네모 (앞면 유색)
       ctx.fillStyle = frontColor;
       ctx.fillRect(cx - size / 2, cy, size, size / 2);
-      // 위쪽 삼각 주머니 (앞면 유색)
       ctx.beginPath();
       ctx.moveTo(cx, cy - size / 2);
       ctx.lineTo(cx + size / 2, cy);
@@ -375,19 +434,15 @@
       ctx.closePath();
       ctx.stroke();
 
-      // 삼각 날개 올리는 점선
       drawDashedLine(cx, cy - size / 2, cx + size / 4, cy);
       drawDashedLine(cx, cy - size / 2, cx - size / 4, cy);
       drawCurveArrow(cx - size / 2.5, cy - 10, cx - size / 4, cy - size / 3);
       drawCurveArrow(cx + size / 2.5, cy - 10, cx + size / 4, cy - size / 3);
     }
     else if (drawType === 'frog_step3') {
-      // 앞다리 꺾인 삼각형 + 올라온 몸통
       setShadow();
       ctx.fillStyle = frontColor;
-      // 몸통
       ctx.fillRect(cx - size / 2.5, cy - size / 8, size / 1.25, size / 2.2);
-      // 앞다리 2개
       ctx.beginPath();
       ctx.moveTo(cx, cy - size / 2.2);
       ctx.lineTo(cx + size / 2, cy - size / 3);
@@ -403,12 +458,10 @@
       ctx.stroke();
       ctx.strokeRect(cx - size / 2.5, cy - size / 8, size / 1.25, size / 2.2);
 
-      // 뒷다리 계단 점선
       drawDashedLine(cx - size / 2.5, cy + size / 4, cx + size / 2.5, cy + size / 4);
       drawCurveArrow(cx, cy + size / 2.5, cx, cy + size / 8);
     }
     else if (drawType === 'frog_step4') {
-      // 뒷다리 계단 완성형
       setShadow();
       ctx.fillStyle = frontColor;
       ctx.beginPath();
@@ -420,7 +473,6 @@
       ctx.closePath();
       ctx.fill();
 
-      // 계단 스프링 플랩 (흰색 뒷면 살짝 노출로 입체감)
       ctx.fillStyle = whiteBack;
       ctx.fillRect(cx - size / 3.5, cy + size / 6, size / 1.75, size / 6);
       clearShadow();
@@ -430,13 +482,11 @@
       ctx.stroke();
       ctx.strokeRect(cx - size / 3.5, cy + size / 6, size / 1.75, size / 6);
 
-      // 뒤집기 안내
       ctx.fillStyle = '#e11d48';
       ctx.font = 'bold 20px Jua';
       ctx.fillText('🔄 뒤집어주세요!', cx - 60, cy - size / 1.8);
     }
     else if (drawType === 'frog_step5') {
-      // 🐸 완성된 고화질 개구리!
       setShadow();
       ctx.fillStyle = frontColor;
       ctx.beginPath();
@@ -474,121 +524,35 @@
       ctx.arc(cx + size / 3.5, cy - size / 6, 9, 0, Math.PI * 2);
       ctx.fill();
 
-      // 점프 터치 안내 핑거
       ctx.fillStyle = '#f59e0b';
       ctx.font = 'bold 22px Jua';
       ctx.fillText('👇 엉덩이를 톡! 누르면 점프!', cx - 110, cy + size / 2);
     }
-
-    // [2] 슈퍼 제트 비행기 단계별 도안
-    else if (drawType === 'plane_step1') {
-      setShadow();
-      ctx.fillStyle = frontColor;
-      ctx.fillRect(cx - size / 2.5, cy - size / 1.8, size / 1.25, size * 1.1);
-      clearShadow();
-      ctx.strokeStyle = outlineColor;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(cx - size / 2.5, cy - size / 1.8, size / 1.25, size * 1.1);
-      drawDashedLine(cx, cy - size / 1.8, cx, cy + size / 1.8);
-      drawCurveArrow(cx - size / 3, cy, cx + size / 4, cy);
-    }
-    else if (drawType === 'plane_step2') {
-      setShadow();
-      ctx.fillStyle = frontColor;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - size / 1.8);
-      ctx.lineTo(cx + size / 2.5, cy - size / 6);
-      ctx.lineTo(cx + size / 2.5, cy + size / 1.8);
-      ctx.lineTo(cx - size / 2.5, cy + size / 1.8);
-      ctx.lineTo(cx - size / 2.5, cy - size / 6);
-      ctx.closePath();
-      ctx.fill();
-
-      // 접힌 삼각 날개 뒷면 (흰색)
-      ctx.fillStyle = whiteBack;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - size / 1.8);
-      ctx.lineTo(cx + size / 2.5, cy - size / 6);
-      ctx.lineTo(cx, cy - size / 6);
-      ctx.closePath();
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - size / 1.8);
-      ctx.lineTo(cx - size / 2.5, cy - size / 6);
-      ctx.lineTo(cx, cy - size / 6);
-      ctx.closePath();
-      ctx.fill();
-      clearShadow();
-
-      ctx.strokeStyle = outlineColor;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      drawDashedLine(cx - size / 2.5, cy - size / 6, cx + size / 2.5, cy - size / 6);
-      drawCurveArrow(cx, cy - size / 3, cx, cy + size / 4);
-    }
-    else if (drawType === 'plane_step3' || drawType === 'plane_step4') {
-      setShadow();
-      ctx.fillStyle = frontColor;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - size / 1.8);
-      ctx.lineTo(cx + size / 2.4, cy + size / 2.2);
-      ctx.lineTo(cx - size / 2.4, cy + size / 2.2);
-      ctx.closePath();
-      ctx.fill();
-      clearShadow();
-
-      ctx.strokeStyle = outlineColor;
-      ctx.lineWidth = 3;
-      ctx.stroke();
-
-      drawDashedLine(cx - size / 4, cy - size / 4, cx - size / 4, cy + size / 2.2);
-      drawDashedLine(cx + size / 4, cy - size / 4, cx + size / 4, cy + size / 2.2);
-      drawCurveArrow(cx - size / 3, cy, cx - size / 8, cy);
-      drawCurveArrow(cx + size / 3, cy, cx + size / 8, cy);
-    }
-    else if (drawType === 'plane_step5') {
-      // 🚀 완성된 제트기 날개
+    // [학 및 비행기 등 기타 도안]
+    else if (drawType.startsWith('plane_')) {
       setShadow();
       ctx.fillStyle = frontColor;
       ctx.beginPath();
       ctx.moveTo(cx, cy - size / 1.6);
       ctx.lineTo(cx + size / 1.7, cy + size / 2.2);
-      ctx.lineTo(cx + size / 6, cy + size / 2.8);
-      ctx.lineTo(cx, cy + size / 2.2);
-      ctx.lineTo(cx - size / 6, cy + size / 2.8);
+      ctx.lineTo(cx, cy + size / 2.5);
       ctx.lineTo(cx - size / 1.7, cy + size / 2.2);
       ctx.closePath();
       ctx.fill();
       clearShadow();
-
       ctx.strokeStyle = outlineColor;
       ctx.lineWidth = 3.5;
       ctx.stroke();
-
-      // 콕핏 캐노피 창문
-      ctx.fillStyle = '#38bdf8';
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - size / 2.5);
-      ctx.lineTo(cx + size / 12, cy - size / 8);
-      ctx.lineTo(cx - size / 12, cy - size / 8);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#0284c7';
-      ctx.font = 'bold 22px Jua';
-      ctx.fillText('💨 바람을 타고 슝 날아갈 준비 완료!', cx - 130, cy + size / 1.6);
     }
-
-    // [3] 하트 및 동서남북/딱지 공통 실루엣
-    else if (drawType.startsWith('heart_')) {
+    else if (drawType.startsWith('crane_')) {
       setShadow();
       ctx.fillStyle = frontColor;
       ctx.beginPath();
-      ctx.moveTo(cx, cy + size / 2.2);
-      ctx.bezierCurveTo(cx - size / 1.4, cy, cx - size / 1.4, cy - size / 1.8, cx, cy - size / 3.5);
-      ctx.bezierCurveTo(cx + size / 1.4, cy - size / 1.8, cx + size / 1.4, cy, cx, cy + size / 2.2);
+      ctx.moveTo(cx, cy - size / 1.8);
+      ctx.lineTo(cx + size / 1.5, cy - size / 4);
+      ctx.lineTo(cx, cy + size / 2);
+      ctx.lineTo(cx - size / 1.5, cy - size / 4);
+      ctx.closePath();
       ctx.fill();
       clearShadow();
       ctx.strokeStyle = outlineColor;
@@ -596,7 +560,6 @@
       ctx.stroke();
     }
     else {
-      // 방석/딱지 사각형 다이어그램
       setShadow();
       ctx.fillStyle = frontColor;
       ctx.fillRect(cx - size / 2.2, cy - size / 2.2, size / 1.1, size / 1.1);
@@ -604,15 +567,76 @@
       ctx.strokeStyle = outlineColor;
       ctx.lineWidth = 3;
       ctx.strokeRect(cx - size / 2.2, cy - size / 2.2, size / 1.1, size / 1.1);
-      drawDashedLine(cx - size / 2.2, cy, cx + size / 2.2, cy);
-      drawDashedLine(cx, cy - size / 2.2, cx, cy + size / 2.2);
     }
 
     ctx.restore();
   }
 
   // -------------------------------------------------------------
-  // 4. 완성 후 인터랙티브 시뮬레이터 (개구리 점프 & 비행기 활공)
+  // 4. 모드 2: Rabbit Ear (rabbitear.org) 전개도 & 벡터 엔진 렌더러
+  // -------------------------------------------------------------
+  function renderRabbitEarView() {
+    const cpContainer = document.getElementById('rabbitCpContainer');
+    const foldContainer = document.getElementById('rabbitFoldedContainer');
+    if (!cpContainer || !foldContainer) return;
+
+    const model = ORIGAMI_MODELS[currentModelKey];
+    const data = model.rabbitFoldData || ORIGAMI_MODELS.frog.rabbitFoldData;
+
+    // 1. Crease Pattern (전개도) SVG 렌더
+    let cpSvg = `<svg viewBox="-0.1 -0.1 1.2 1.2" style="width: 100%; height: 100%; background: #ffffff; border-radius: 14px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05);">`;
+    // 배경 사각
+    cpSvg += `<rect x="0" y="0" width="1" height="1" fill="${currentColor}15" stroke="#1e293b" stroke-width="0.015"/>`;
+
+    // 에지들 (M=산접기 빨강, V=골접기 파랑, B=외곽선 검정)
+    data.edges.forEach(e => {
+      let color = '#1e293b';
+      let dash = '';
+      if (e.assignment === 'M') {
+        color = '#ef4444'; // 산접기 (Mountain) 빨간색
+        dash = 'stroke-dasharray="0.03 0.02"';
+      } else if (e.assignment === 'V') {
+        color = '#3b82f6'; // 골접기 (Valley) 파란색
+        dash = 'stroke-dasharray="0.015 0.015"';
+      }
+      cpSvg += `<line x1="${e.from[0]}" y1="${e.from[1]}" x2="${e.to[0]}" y2="${e.to[1]}" stroke="${color}" stroke-width="0.018" ${dash} stroke-linecap="round"/>`;
+    });
+
+    cpSvg += `</svg>`;
+    cpContainer.innerHTML = cpSvg;
+
+    // 2. Folded State (접힌 상태 시뮬레이션 벡터)
+    let foldSvg = `<svg viewBox="-60 -60 120 120" style="width: 100%; height: 100%; background: #fafafa; border-radius: 14px;">`;
+    // 그림자
+    foldSvg += `<defs><filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="rgba(0,0,0,0.2)"/></filter></defs>`;
+    
+    // 접힌 다각형들
+    foldSvg += `<g filter="url(#dropShadow)">`;
+    foldSvg += `<polygon points="0,-45 40,-15 25,35 -25,35 -40,-15" fill="${currentColor}" stroke="#1e293b" stroke-width="2.5" stroke-linejoin="round"/>`;
+    foldSvg += `<polygon points="0,-45 40,-15 0,0" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" opacity="0.95"/>`;
+    foldSvg += `<polygon points="0,-45 -40,-15 0,0" fill="#ffffff" stroke="#1e293b" stroke-width="1.8" opacity="0.95"/>`;
+    foldSvg += `</g>`;
+    foldSvg += `</svg>`;
+    foldContainer.innerHTML = foldSvg;
+  }
+
+  // -------------------------------------------------------------
+  // 5. 모드 3: 3D 리얼타임 WebGL 물리 시뮬레이터 (Origami Simulator)
+  // -------------------------------------------------------------
+  function render3DSimView() {
+    const iframe = document.getElementById('origami3DSimIframe');
+    const model = ORIGAMI_MODELS[currentModelKey];
+    const simId = model.simModelId || 'crane';
+
+    // MIT/Amanda Ghassaei Origami Simulator URL
+    const targetUrl = `https://origamisimulator.org/?model=${simId}`;
+    if (iframe && iframe.src !== targetUrl) {
+      iframe.src = targetUrl;
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 6. 점프 / 비행 미니게임 & 노션 보상
   // -------------------------------------------------------------
   function triggerMiniGame() {
     const model = ORIGAMI_MODELS[currentModelKey];
@@ -646,25 +670,20 @@
     }
   }
 
-  // -------------------------------------------------------------
-  // 5. 노션 인벤토리 보상 실시간 연동 (다이아/하리보 +2개)
-  // -------------------------------------------------------------
   async function completeOrigamiAndReward() {
     const isSon = localStorage.getItem('currentUser') === 'son';
     const rewardName = isSon ? '💎 다이아몬드 +2개' : '🍬 하리보 젤리 +2개';
 
-    // 1. 노션 인벤토리 DB 연동 호출
     if (typeof window.grantRewardAndShowUI === 'function') {
       try {
         await window.grantRewardAndShowUI(2, false, 'origami');
       } catch (err) {
-        console.warn('노션 보상 통신 우회:', err);
+        console.warn('노션 보상 우회:', err);
       }
     } else if (typeof window.triggerAwardDispense === 'function') {
       await window.triggerAwardDispense(2);
     }
 
-    // 2. 스타드롭 및 트로피 로드 보상 추가
     if (window.StarrDropEngine) {
       window.StarrDropEngine.addTrophies(50);
       window.StarrDropEngine.addDrop(1);
@@ -679,16 +698,16 @@
   }
 
   // -------------------------------------------------------------
-  // 6. 실제 출판용 A4 전용 색종이 활동지 인쇄
-  // -------------------------------------------------------------
-  function printOrigamiPattern() {
-    window.print();
-  }
-
-  // -------------------------------------------------------------
-  // 7. 이벤트 리스너 바인딩
+  // 7. 이벤트 바인딩
   // -------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', () => {
+    // 3-Way 탭 전환 버튼
+    document.querySelectorAll('.origami-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        switchMode(e.currentTarget.dataset.mode);
+      });
+    });
+
     // 모델 선택 버튼
     document.querySelectorAll('.origami-model-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -697,7 +716,7 @@
         currentModelKey = e.currentTarget.dataset.model;
         currentColor = ORIGAMI_MODELS[currentModelKey].defaultColor || '#22c55e';
         currentStepIndex = 0;
-        renderOrigamiStep();
+        switchMode(activeMode);
       });
     });
 
@@ -707,7 +726,8 @@
         document.querySelectorAll('.origami-color-chip').forEach(c => c.classList.remove('active'));
         e.currentTarget.classList.add('active');
         currentColor = e.currentTarget.dataset.color;
-        renderOrigamiStep();
+        if (activeMode === 'illustrated') renderOrigamiStep();
+        else if (activeMode === 'rabbitear') renderRabbitEarView();
       });
     });
 
@@ -733,12 +753,11 @@
       }
     });
 
-    // 도안 인쇄 및 완료 보상 버튼
-    document.getElementById('printPatternBtn')?.addEventListener('click', printOrigamiPattern);
+    document.getElementById('printPatternBtn')?.addEventListener('click', () => window.print());
     document.getElementById('claimOrigamiRewardBtn')?.addEventListener('click', completeOrigamiAndReward);
     document.getElementById('testActionBtn')?.addEventListener('click', triggerMiniGame);
 
-    renderOrigamiStep();
+    switchMode('illustrated');
   });
 
 })();
