@@ -405,7 +405,7 @@ const SOCIETY_CURRICULUM_DATA = {
           ],
           "correctIdx": 2,
           "explanation": "생각 그물에 제시된 자연재해의 종류에는 황사, 폭염, 호우와 홍수, 태풍, 한파, 폭설, 가뭄 등이 있습니다. '지진'은 여기에 제시되어 있지 않습니다.",
-          "img": "./images/20260612_104123.jpg"
+          "img": "./images/20260612_104123_1.jpg"
         },
         {
           "title": "나와 친구가 기억하는 자연재해",
