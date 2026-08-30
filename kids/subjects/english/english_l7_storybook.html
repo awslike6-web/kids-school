@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Minsu and Junwoo's Weekend (영어 L7 스토리북) 📖 | 민민이네 공부방</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&family=Nunito:wght@600;700;800&display=swap');
+
+    :root {
+        --primary: #3b82f6;
+        --primary-dark: #2563eb;
+        --accent: #f59e0b;
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --text-light: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', 'Nunito', sans-serif;
+        background: #0f172a;
+        min-height: 100vh;
+        color: var(--text-light);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 상단 헤더 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 18px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
+        border-bottom: 1px solid #334155;
+    }
+    .top-left { display: flex; align-items: center; gap: 12px; }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: #334155; color: #e2e8f0; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #475569; color: #fff; }
+    .story-title {
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #60a5fa;
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    .top-controls { display: flex; align-items: center; gap: 10px; }
+
+    /* 뷰 모드 전환 탭 (책 넘김 vs 웹툰 스크롤) */
+    .view-mode-tabs {
+        display: flex; background: #1e293b; padding: 3px; border-radius: 12px;
+        border: 1px solid #475569;
+    }
+    .tab-btn {
+        padding: 5px 12px; border-radius: 9px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.9rem; color: #94a3b8; background: transparent; cursor: pointer;
+        transition: all 0.2s;
+    }
+    .tab-btn.active {
+        background: #3b82f6; color: white; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    /* 한/영 전환 토글 버튼 */
+    .lang-toggle-btn {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white;
+        border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.95rem;
+        border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    }
+    .lang-toggle-btn:hover { transform: translateY(-1px); }
+
+    /* ==========================================
+       1. 📖 책 넘김 모드 (E-Book Spread View)
+       ========================================== */
+    .ebook-container {
+        flex: 1; max-width: 1080px; width: 100%; margin: 10px auto; padding: 0 12px;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .book-frame {
+        position: relative; width: 100%; max-width: 960px;
+        background: #1e293b; border-radius: 16px; padding: 10px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 2px #334155;
+        display: flex; justify-content: center; align-items: center;
+    }
+    .book-spread-img {
+        width: 100%; height: auto; max-height: 75vh; object-fit: contain;
+        border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        display: block;
+    }
+    .ebook-controls {
+        width: 100%; max-width: 960px; margin-top: 14px;
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        flex-wrap: wrap;
+    }
+    .btn-page-nav {
+        padding: 10px 20px; border-radius: 14px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1.1rem; cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .btn-prev { background: #334155; color: #f1f5f9; }
+    .btn-prev:hover:not(:disabled) { background: #475569; }
+    .btn-next {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    }
+    .btn-page-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+    .page-indicator {
+        font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #60a5fa;
+        background: #1e293b; padding: 6px 16px; border-radius: 20px; border: 1px solid #334155;
+    }
+    .audio-control-bar {
+        display: flex; align-items: center; gap: 10px; background: #1e293b;
+        padding: 8px 16px; border-radius: 16px; border: 1px solid #334155;
+    }
+    .btn-play {
+        padding: 8px 16px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1rem; color: white; background: #3b82f6; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-play.playing { background: #f59e0b; }
+    .auto-read-label {
+        display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem;
+        font-family: 'Jua', sans-serif; color: #cbd5e1; cursor: pointer;
+    }
+    .auto-read-label input { width: 16px; height: 16px; accent-color: #3b82f6; cursor: pointer; }
+
+    /* ========================================================
+       2. 📜 웹툰 스크롤 모드 (대형 그림 + 한/영 대조 반응형 카드)
+       ======================================================== */
+    .webtoon-container {
+        display: none; max-width: 650px; width: 100%; margin: 15px auto;
+        padding: 0 10px 40px 10px; flex-direction: column; gap: 32px;
+    }
+    .webtoon-sticky-bar {
+        position: sticky; top: 60px; z-index: 90;
+        background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
+        padding: 10px 16px; border-radius: 16px; border: 1.5px solid #3b82f6;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    }
+    .continuous-btn {
+        padding: 8px 16px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; color: white; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .continuous-btn.playing { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+    .webtoon-card {
+        background: #1e293b; border-radius: 20px; overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #334155;
+        display: flex; flex-direction: column;
+    }
+    .webtoon-header {
+        padding: 10px 16px; background: #0f172a; display: flex;
+        justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;
+    }
+    .webtoon-tag {
+        font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #60a5fa;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .audio-group { display: flex; gap: 6px; }
+    .btn-audio-mini {
+        padding: 5px 10px; border-radius: 9px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.85rem; color: white; background: #334155; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;
+    }
+    .btn-audio-mini:hover { background: #475569; }
+    .btn-audio-mini.playing { background: #f59e0b; }
+
+    /* 🖼️ 상단 대형 삽화 */
+    .webtoon-ill-wrap { width: 100%; background: #0f172a; overflow: hidden; }
+    .webtoon-ill-img { width: 100%; height: auto; display: block; object-fit: contain; }
+
+    /* 📝 하단 한/영 대조 반응형 카드 */
+    .webtoon-bilingual-box {
+        background: #f8fafc; color: #1e293b; padding: 14px 16px;
+        display: flex; flex-direction: column; gap: 10px; border-top: 3px solid #3b82f6;
+    }
+    .eng-section {
+        border-left: 4px solid #2563eb; padding-left: 10px;
+    }
+    .eng-passage {
+        font-family: 'Nunito', sans-serif; font-size: 1.05rem; line-height: 1.6;
+        color: #1e293b; font-weight: 600; word-break: keep-all; word-wrap: break-word;
+    }
+    .kor-section {
+        border-left: 4px solid #10b981; padding-left: 10px; background: #f0fdf4;
+        padding: 8px 10px; border-radius: 0 8px 8px 0;
+    }
+    .kor-passage {
+        font-family: 'Nanum Gothic', sans-serif; font-size: 0.95rem; line-height: 1.6;
+        color: #334155; word-break: keep-all; word-wrap: break-word;
+    }
+
+    /* 7단원 핵심 포인트 하이라이트 스타일 */
+    .highlight-eng {
+        color: #1d4ed8; font-weight: 800; text-decoration: underline; text-decoration-color: #93c5fd;
+        text-underline-offset: 3px;
+    }
+    .highlight-kor {
+        color: #047857; font-weight: 700;
+    }
+
+    .voca-note-box {
+        font-size: 0.85rem; color: #475569; background: #f1f5f9;
+        padding: 6px 10px; border-radius: 8px; font-weight: 600;
+    }
+
+    .lesson-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: #eff6ff; color: #1d4ed8; padding: 4px 10px;
+        border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+        border: 1px solid #bfdbfe; width: fit-content;
+    }
+
+    @media (max-width: 768px) {
+        .top-bar { padding: 8px 10px; }
+        .story-title { font-size: 1rem; }
+        .tab-btn { padding: 4px 8px; font-size: 0.82rem; }
+        .lang-toggle-btn { padding: 4px 10px; font-size: 0.85rem; }
+        .btn-page-nav { padding: 8px 12px; font-size: 0.95rem; }
+        .page-indicator { font-size: 0.95rem; padding: 4px 10px; }
+        .book-frame { padding: 4px; }
+        .audio-control-bar { width: 100%; justify-content: space-between; margin-top: 6px; }
+        .eng-passage { font-size: 0.98rem; }
+        .kor-passage { font-size: 0.90rem; }
+    }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="top-left">
+        <a href="english.html" class="btn-back">🔙 영어 탐험관</a>
+        <div class="story-title">📖 Minsu & Junwoo (L7)</div>
+    </div>
+
+    <div class="top-controls">
+        <!-- 책 넘김 시 한/영 전환 토글 -->
+        <button class="lang-toggle-btn" id="langToggleBtn" onclick="toggleBookLanguage()">
+            <span id="langToggleIcon">🇺🇸</span> <span id="langToggleLabel">영어 책 보기</span>
+        </button>
+
+        <div class="view-mode-tabs">
+            <button class="tab-btn active" id="tabEbook" onclick="setViewerMode('ebook')">📖 책장 넘김</button>
+            <button class="tab-btn" id="tabWebtoon" onclick="setViewerMode('webtoon')">📜 웹툰 스크롤</button>
+        </div>
+    </div>
+</div>
+
+<!-- 1. 📖 책 넘김 뷰어 -->
+<div class="ebook-container" id="ebookView">
+    <div class="book-frame">
+        <img src="../../subjects/english/images/storybook/l7/eng_l7_spread_p1.png" alt="동화책 페이지" class="book-spread-img" id="ebookImg">
+    </div>
+
+    <div class="ebook-controls">
+        <button class="btn-page-nav btn-prev" id="prevBtn" onclick="changePage(-1)">◀ 이전 장</button>
+        <div class="page-indicator" id="pageIndicator">1 / 5 장 (영어 원문)</div>
+        <button class="btn-page-nav btn-next" id="nextBtn" onclick="changePage(1)">다음 장 ▶</button>
+
+        <div class="audio-control-bar">
+            <button class="btn-play" id="ebookPlayBtn" onclick="toggleEbookAudio()">
+                <span id="ebookPlayIcon">▶️</span> <span id="ebookPlayLabel">원어민 발음 듣기</span>
+            </button>
+            <label class="auto-read-label">
+                <input type="checkbox" id="autoPlayCheckbox" checked>
+                🔊 넘길 때 자동 읽기
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 📜 웹툰 스크롤 뷰어 -->
+<div class="webtoon-container" id="webtoonView">
+    <div class="webtoon-sticky-bar">
+        <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#60a5fa;">
+            🎧 전체 1~5장 원어민 영어 연속 듣기
+        </div>
+        <button class="continuous-btn" id="continuousBtn" onclick="toggleContinuousPlay()">
+            <span id="continuousIcon">▶️</span> <span id="continuousLabel">1장부터 연속 재생</span>
+        </button>
+    </div>
+
+    <div id="webtoonCardList" style="display:flex; flex-direction:column; gap:32px;"></div>
+</div>
+
+<audio id="mainAudio" preload="auto"></audio>
+
+<script>
+    const CHAPTERS = [
+        {
+            chapter: 0,
+            title: "🌟 표지 : 민수와 준우의 주말 이야기",
+            illImg: "eng_l7_ill_p1_cover.png",
+            engSpread: "raw_page_1.png",
+            korSpread: "raw_page_1.png",
+            engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
+            korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p1.mp3",
+            isCover: true
+        },
+        {
+            chapter: 1,
+            title: "1장 : 월요일 아침 학교에서 (What did you do last weekend?)",
+            illImg: "eng_l7_ill_p1.png",
+            engSpread: "eng_l7_spread_p1.png",
+            korSpread: "kor_l7_spread_p1.png",
+            engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
+            korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p1.mp3",
+            engHtml: 'Junwoo saw Minsu at school on Monday morning. "Hi, Minsu! <b class="highlight-eng">What did you do last weekend?</b>" Junwoo asked. He was curious about his friend\'s weekend.',
+            korHtml: '월요일 아침, 준우가 학교에서 민수를 만났어요. "안녕, 민수야! <b class="highlight-kor">지난 주말에 뭐 했니?</b>" 준우가 친구에게 다정하게 물어보았어요.',
+            badge: "L7 핵심 : 주말에 한 일 묻기 (What did you do last weekend?)",
+            note: "• What did you do ~?: 너는 ~에 무엇을 했니?"
+        },
+        {
+            chapter: 2,
+            title: "2장 : 할아버지와 숲속 캠핑 (I went camping)",
+            illImg: "eng_l7_ill_p2.png",
+            engSpread: "eng_l7_spread_p2.png",
+            korSpread: "kor_l7_spread_p2.png",
+            engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p2.mp3",
+            korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p2.mp3",
+            engHtml: 'Minsu shared his news. "Hi, Junwoo! <b class="highlight-eng">I went camping with my grandpa</b>," Minsu said. He was happy to talk about their trip to the woods.',
+            korHtml: '민수가 웃으며 대답했어요. "안녕, 준우야! <b class="highlight-kor">나는 우리 할아버지와 캠핑을 갔어.</b>" 민수는 숲속에서 보낸 시간이 정말 좋았답니다.',
+            badge: "L7 핵심 : 과거 행동 말하기 (went camping)",
+            note: "• went camping: 캠핑을 갔다 (go의 과거형 went)"
+        },
+        {
+            chapter: 3,
+            title: "3장 : 즐거웠던 소감과 사진 찍기 (How was it? / It was fun)",
+            illImg: "eng_l7_ill_p3.png",
+            engSpread: "eng_l7_spread_p3.png",
+            korSpread: "kor_l7_spread_p3.png",
+            engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p3.mp3",
+            korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p3.mp3",
+            engHtml: 'Junwoo asked, "Oh, really? <b class="highlight-eng">How was it?</b>" Minsu answered, "<b class="highlight-eng">It was fun. I took many pictures</b> there." Minsu enjoyed using his camera during the trip.',
+            korHtml: '준우가 "오, 정말? <b class="highlight-kor">어땠어?</b>"라고 묻자 민수가 말했어요. "<b class="highlight-kor">재미있었어. 거기서 사진을 아주 많이 찍었거든.</b>" 민수는 찍은 사진들을 떠올렸어요.',
+            badge: "L7 핵심 : 소감 및 사진 촬영 (How was it? / It was fun. / took pictures)",
+            note: "• How was it?: 어땠어? / took pictures: 사진을 찍었다"
+        },
+        {
+            chapter: 4,
+            title: "4장 : 맛있는 치킨 먹기 (What did you eat? / I ate chicken)",
+            illImg: "eng_l7_ill_p4.png",
+            engSpread: "eng_l7_spread_p4.png",
+            korSpread: "kor_l7_spread_p4.png",
+            engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p4.mp3",
+            korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p4.mp3",
+            engHtml: 'Junwoo asked, "Wow, that sounds great. <b class="highlight-eng">What did you eat?</b>" Minsu replied, "<b class="highlight-eng">I ate chicken. It was delicious!</b>" It was Minsu\'s favorite part of the camping trip.',
+            korHtml: '준우가 물었어요. "와, 정말 좋았겠다. <b class="highlight-kor">거기서 뭐 먹었어?</b>" 민수가 대답했어요. "<b class="highlight-kor">치킨을 먹었어. 정말 맛있었어!</b>" 할아버지와 맛있는 음식을 먹은 것은 이번 캠핑에서 민수가 가장 좋아한 순간이었답니다.',
+            badge: "L7 핵심 : 먹은 음식 묻고 답하기 (What did you eat? / I ate ~ / delicious)",
+            note: "• What did you eat?: 뭐 먹었어? / ate: 먹었다 (eat의 과거형)"
+        },
+        {
+            chapter: 5,
+            title: "5장 : 준우의 주말 활동과 약속 (made a toy car / played baseball)",
+            illImg: "eng_l7_ill_p5.png",
+            engSpread: "eng_l7_spread_p5.png",
+            korSpread: "kor_l7_spread_p5.png",
+            engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p5.mp3",
+            korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p5.mp3",
+            engHtml: 'Minsu asked, "<b class="highlight-eng">What did you do yesterday?</b>" Junwoo answered, "<b class="highlight-eng">I made a toy car</b> at home. And <b class="highlight-eng">I played baseball with my dad.</b>" Minsu said, "<b class="highlight-eng">Excellent! Let\'s play baseball together next time.</b>"',
+            korHtml: '민수가 "<b class="highlight-kor">너는 어제 뭐 했어?</b>"라고 물었어요. 준우는 "<b class="highlight-kor">집에서 장난감 차를 만들었어. 그리고 아빠와 야구를 했지.</b>"라고 말했어요. 민수는 "<b class="highlight-kor">멋지다! 다음에 같이 야구 하자.</b>"라며 약속했어요.',
+            badge: "L7 핵심 : 만들기 및 운동 활동 (made a toy car / played baseball)",
+            note: "• made: 만들었다 / played baseball: 야구를 했다 / Excellent!: 멋져!"
+        }
+    ];
+
+    let currentMode = 'ebook';
+    let currentBookLang = 'eng';
+    let currentPageIndex = 0;
+    let isContinuousPlaying = false;
+    const audio = document.getElementById('mainAudio');
+
+    function toggleBookLanguage() {
+        currentBookLang = (currentBookLang === 'eng') ? 'kor' : 'eng';
+        const btnIcon = document.getElementById('langToggleIcon');
+        const btnLabel = document.getElementById('langToggleLabel');
+        const playLabel = document.getElementById('ebookPlayLabel');
+
+        if (currentBookLang === 'eng') {
+            btnIcon.textContent = '🇺🇸';
+            btnLabel.textContent = '영어 책 보기';
+            playLabel.textContent = '원어민 발음 듣기';
+        } else {
+            btnIcon.textContent = '🇰🇷';
+            btnLabel.textContent = '한국어 번역 보기';
+            playLabel.textContent = '한국어 구연 듣기';
+        }
+
+        renderEbook();
+    }
+
+    function setViewerMode(mode) {
+        currentMode = mode;
+        audio.pause();
+        updateEbookAudioUI(false);
+        updateContinuousUI(false);
+        isContinuousPlaying = false;
+
+        if (mode === 'ebook') {
+            document.getElementById('tabEbook').classList.add('active');
+            document.getElementById('tabWebtoon').classList.remove('active');
+            document.getElementById('ebookView').style.display = 'flex';
+            document.getElementById('webtoonView').style.display = 'none';
+            document.getElementById('langToggleBtn').style.display = 'inline-flex';
+            renderEbook();
+        } else {
+            document.getElementById('tabWebtoon').classList.add('active');
+            document.getElementById('tabEbook').classList.remove('active');
+            document.getElementById('ebookView').style.display = 'none';
+            document.getElementById('webtoonView').style.display = 'flex';
+            document.getElementById('langToggleBtn').style.display = 'none';
+            renderWebtoonList();
+        }
+    }
+
+    function renderEbook() {
+        const item = CHAPTERS[currentPageIndex];
+        const img = document.getElementById('ebookImg');
+        const imgName = (currentBookLang === 'eng') ? item.engSpread : item.korSpread;
+        img.src = `../../subjects/english/images/storybook/l7/${imgName}?v=20260831_1`;
+
+        const langTitle = (currentBookLang === 'eng') ? '영어 원문' : '한국어 번역';
+        if (currentPageIndex === 0) {
+            document.getElementById('pageIndicator').textContent = `🌟 표지`;
+        } else {
+            document.getElementById('pageIndicator').textContent = `${currentPageIndex} / 5 장 (${langTitle})`;
+        }
+
+        document.getElementById('prevBtn').disabled = (currentPageIndex === 0);
+        document.getElementById('nextBtn').textContent = (currentPageIndex === CHAPTERS.length - 1) ? '🎉 처음으로' : '다음 장 ▶';
+
+        audio.src = (currentBookLang === 'eng') ? item.engAudio : item.korAudio;
+        audio.pause();
+        updateEbookAudioUI(false);
+
+        const autoPlay = document.getElementById('autoPlayCheckbox').checked;
+        if (autoPlay && currentPageIndex > 0) {
+            setTimeout(() => {
+                audio.play().then(() => updateEbookAudioUI(true)).catch(() => updateEbookAudioUI(false));
+            }, 200);
+        }
+    }
+
+    function changePage(dir) {
+        audio.pause();
+        if (currentPageIndex === CHAPTERS.length - 1 && dir === 1) {
+            currentPageIndex = 0;
+        } else {
+            currentPageIndex = Math.max(0, Math.min(CHAPTERS.length - 1, currentPageIndex + dir));
+        }
+        renderEbook();
+    }
+
+    function toggleEbookAudio() {
+        if (audio.paused) {
+            audio.play();
+            updateEbookAudioUI(true);
+        } else {
+            audio.pause();
+            updateEbookAudioUI(false);
+        }
+    }
+
+    function updateEbookAudioUI(isPlaying) {
+        const btn = document.getElementById('ebookPlayBtn');
+        const icon = document.getElementById('ebookPlayIcon');
+        const label = document.getElementById('ebookPlayLabel');
+        const playText = (currentBookLang === 'eng') ? '원어민 발음 듣기' : '한국어 구연 듣기';
+        if (isPlaying) {
+            btn.classList.add('playing');
+            icon.textContent = '⏸️';
+            label.textContent = '일시 정지';
+        } else {
+            btn.classList.remove('playing');
+            icon.textContent = '▶️';
+            label.textContent = playText;
+        }
+    }
+
+    function renderWebtoonList() {
+        const list = document.getElementById('webtoonCardList');
+        list.innerHTML = '';
+
+        CHAPTERS.forEach((item, idx) => {
+            if (idx === 0) return;
+
+            const card = document.createElement('div');
+            card.className = 'webtoon-card';
+            card.id = `webtoonCard_${idx}`;
+
+            card.innerHTML = `
+                <div class="webtoon-header">
+                    <div class="webtoon-tag">${item.title}</div>
+                    <div class="audio-group">
+                        <button class="btn-audio-mini" id="btnEngAudio_${idx}" onclick="playWebtoonAudio(${idx}, 'eng')">
+                            🇺🇸 영어 듣기
+                        </button>
+                        <button class="btn-audio-mini" id="btnKorAudio_${idx}" onclick="playWebtoonAudio(${idx}, 'kor')">
+                            🇰🇷 한국어
+                        </button>
+                    </div>
+                </div>
+                <div class="webtoon-ill-wrap">
+                    <img src="../../subjects/english/images/storybook/l7/${item.illImg}?v=20260831_1" alt="${item.title}" class="webtoon-ill-img" loading="lazy">
+                </div>
+                <div class="webtoon-bilingual-box">
+                    <div class="eng-section">
+                        <div class="eng-passage">${item.engHtml}</div>
+                    </div>
+                    <div class="kor-section">
+                        <div class="kor-passage">${item.korHtml}</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
+                        <div class="lesson-badge">📌 ${item.badge}</div>
+                        <div class="voca-note-box">${item.note}</div>
+                    </div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    function playWebtoonAudio(idx, lang) {
+        isContinuousPlaying = false;
+        updateContinuousUI(false);
+
+        const currentBtn = document.getElementById(lang === 'eng' ? `btnEngAudio_${idx}` : `btnKorAudio_${idx}`);
+        const audioSrc = lang === 'eng' ? CHAPTERS[idx].engAudio : CHAPTERS[idx].korAudio;
+
+        if (!audio.paused && audio.src.includes(audioSrc)) {
+            audio.pause();
+            resetAllWebtoonAudioButtons();
+            return;
+        }
+
+        resetAllWebtoonAudioButtons();
+        currentPageIndex = idx;
+        audio.src = audioSrc;
+        audio.play().then(() => {
+            currentBtn.classList.add('playing');
+            currentBtn.innerHTML = `⏸️ 멈춤`;
+        }).catch(e => console.log(e));
+    }
+
+    function toggleContinuousPlay() {
+        if (isContinuousPlaying) {
+            audio.pause();
+            isContinuousPlaying = false;
+            updateContinuousUI(false);
+            resetAllWebtoonAudioButtons();
+        } else {
+            isContinuousPlaying = true;
+            updateContinuousUI(true);
+            playContinuousFrom(1);
+        }
+    }
+
+    function playContinuousFrom(idx) {
+        if (idx >= CHAPTERS.length) {
+            isContinuousPlaying = false;
+            updateContinuousUI(false);
+            resetAllWebtoonAudioButtons();
+            return;
+        }
+
+        currentPageIndex = idx;
+        audio.src = CHAPTERS[idx].engAudio;
+
+        const targetCard = document.getElementById(`webtoonCard_${idx}`);
+        if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        resetAllWebtoonAudioButtons();
+        const activeBtn = document.getElementById(`btnEngAudio_${idx}`);
+        if (activeBtn) {
+            activeBtn.classList.add('playing');
+            activeBtn.innerHTML = `🔊 영어 재생 중`;
+        }
+
+        audio.play().catch(e => console.log(e));
+    }
+
+    function updateContinuousUI(isPlaying) {
+        const btn = document.getElementById('continuousBtn');
+        const icon = document.getElementById('continuousIcon');
+        const label = document.getElementById('continuousLabel');
+        if (isPlaying) {
+            btn.classList.add('playing');
+            icon.textContent = '⏸️';
+            label.textContent = '연속 재생 멈춤';
+        } else {
+            btn.classList.remove('playing');
+            icon.textContent = '▶️';
+            label.textContent = '1장부터 연속 재생';
+        }
+    }
+
+    function resetAllWebtoonAudioButtons() {
+        CHAPTERS.forEach((item, idx) => {
+            if (idx === 0) return;
+            const bEng = document.getElementById(`btnEngAudio_${idx}`);
+            const bKor = document.getElementById(`btnKorAudio_${idx}`);
+            if (bEng) { bEng.classList.remove('playing'); bEng.innerHTML = `🇺🇸 영어 듣기`; }
+            if (bKor) { bKor.classList.remove('playing'); bKor.innerHTML = `🇰🇷 한국어`; }
+        });
+    }
+
+    audio.onended = () => {
+        if (currentMode === 'ebook') {
+            updateEbookAudioUI(false);
+        } else {
+            if (isContinuousPlaying) {
+                playContinuousFrom(currentPageIndex + 1);
+            } else {
+                resetAllWebtoonAudioButtons();
+            }
+        }
+    };
+
+    window.addEventListener('keydown', (e) => {
+        if (currentMode === 'ebook') {
+            if (e.key === 'ArrowLeft') changePage(-1);
+            if (e.key === 'ArrowRight') changePage(1);
+            if (e.key === ' ') {
+                e.preventDefault();
+                toggleEbookAudio();
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderEbook();
+    });
+</script>
+</body>
+</html>
