@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>📐 3D 인터랙티브 종이접기 연구소 - 민민 놀이터</title>
+  <title>📐 고화질 인터랙티브 종이접기 연구소 - 민민 놀이터</title>
   <link rel="stylesheet" href="../playground.css">
   <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
@@ -15,10 +15,10 @@
       width: 100%;
       box-sizing: border-box;
     }
-    @media (min-width: 860px) {
+    @media (min-width: 880px) {
       .origami-layout {
         display: grid;
-        grid-template-columns: 280px 1fr;
+        grid-template-columns: 290px 1fr;
         gap: 20px;
       }
     }
@@ -58,12 +58,12 @@
       gap: 8px;
     }
     .origami-model-btn {
-      padding: 10px 14px;
+      padding: 11px 14px;
       border-radius: 16px;
       border: 1.5px solid rgba(0,0,0,0.08);
       background: #ffffff;
       font-family: 'Jua', sans-serif;
-      font-size: 1rem;
+      font-size: 1.05rem;
       cursor: pointer;
       text-align: left;
       display: flex;
@@ -135,10 +135,10 @@
 
     #origamiCanvas {
       width: 100%;
-      max-width: 540px;
+      max-width: 580px;
       height: auto;
-      aspect-ratio: 540 / 420;
-      border-radius: 16px;
+      aspect-ratio: 600 / 460;
+      border-radius: 18px;
       border: 2px solid rgba(0,0,0,0.06);
       display: block;
       box-sizing: border-box;
@@ -151,15 +151,15 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      max-width: 540px;
+      max-width: 580px;
       margin-top: 14px;
       gap: 8px;
     }
     .step-nav-btn {
-      padding: 10px 20px;
+      padding: 11px 22px;
       border-radius: 16px;
       font-family: 'Jua', sans-serif;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       border: none;
       background: linear-gradient(135deg, #ff758c, #ff7eb3);
       color: #fff;
@@ -171,7 +171,7 @@
       color: #0c0818;
     }
     .step-nav-btn:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
       transform: none !important;
     }
@@ -181,8 +181,8 @@
 
     .step-indicator-badge {
       font-family: 'Jua', sans-serif;
-      font-size: 1.2rem;
-      padding: 6px 14px;
+      font-size: 1.25rem;
+      padding: 6px 16px;
       border-radius: 14px;
       background: rgba(0,0,0,0.05);
     }
@@ -191,14 +191,14 @@
       color: var(--cyan-neon);
     }
 
-    /* 📝 단계별 설명 박스 */
+    /* 📝 단계별 설명 & 꿀팁 박스 */
     .step-desc-box {
       width: 100%;
-      max-width: 540px;
-      background: #fff5f7;
+      max-width: 580px;
+      background: #fff8f9;
       border: 2px dashed #ffb3c6;
       border-radius: 18px;
-      padding: 14px 18px;
+      padding: 16px 20px;
       margin-top: 14px;
       text-align: center;
       box-sizing: border-box;
@@ -209,24 +209,38 @@
     }
     .step-title-text {
       font-family: 'Jua', sans-serif;
-      font-size: 1.3rem;
+      font-size: 1.35rem;
       color: #ff4081;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
     body.theme--arcade .step-title-text {
       color: var(--cyan-neon);
     }
     .step-desc-text {
-      font-size: 1rem;
-      line-height: 1.5;
+      font-size: 1.05rem;
+      line-height: 1.6;
       opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    .step-tip-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 10px;
+      background: #ffe4ec;
+      color: #ff007f;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+    body.theme--arcade .step-tip-badge {
+      background: rgba(0, 242, 254, 0.15);
+      color: #00f2fe;
     }
 
     /* 🎉 완성 후 액션 버튼 */
     .origami-complete-box {
       display: none;
       width: 100%;
-      max-width: 540px;
+      max-width: 580px;
       margin-top: 14px;
     }
     .complete-action-grid {
@@ -240,10 +254,10 @@
       }
     }
     .btn-test {
-      padding: 12px;
+      padding: 13px;
       border-radius: 16px;
       font-family: 'Jua', sans-serif;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       border: none;
       cursor: pointer;
       background: linear-gradient(135deg, #ffd166, #ff9f43);
@@ -251,10 +265,10 @@
       box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3);
     }
     .btn-reward-claim {
-      padding: 12px;
+      padding: 13px;
       border-radius: 16px;
       font-family: 'Jua', sans-serif;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       border: none;
       cursor: pointer;
       background: linear-gradient(135deg, #ff6b9d, #ff8da1);
@@ -262,7 +276,7 @@
       box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
     }
 
-    /* 🖨️ A4 색종이 도안 인쇄 전용 스타일 */
+    /* 🖨️ A4 출판용 워크시트 인쇄 스타일 */
     @media print {
       body * { visibility: hidden; }
       #origamiCanvas, #origamiCanvas * { visibility: visible; }
@@ -285,22 +299,22 @@
     <div class="pg-top-nav">
       <a href="../index.html" class="pg-back-btn">⬅️ 놀이터 허브로</a>
       <div class="pg-trophy-bar">
-        <span>📐 인터랙티브 종이접기 연구소</span>
+        <span>📐 고화질 일러스트 종이접기</span>
       </div>
     </div>
 
     <!-- 🌟 타이틀 -->
     <div class="pg-header" style="margin-bottom: 16px;">
       <h1 class="pg-title">
-        <span class="neon-text">📐 3D 동적 인터랙티브</span> <span class="accent-text">종이접기</span>
+        <span class="neon-text">📐 고화질 일러스트</span> <span class="accent-text">종이접기</span>
       </h1>
-      <p class="pg-subtitle">단계별로 따라 접고, 나만의 색종이 도안을 A4로 인쇄해서 직접 만들어보세요! 🖨️</p>
+      <p class="pg-subtitle">앞뒷면 색상 대비와 빨간 점선·화살표를 보며 쉽게 따라 접고, A4 전용 도안으로 인쇄해요! 🖨️</p>
     </div>
 
     <!-- 🛠️ 2열 레이아웃 -->
     <div class="origami-layout">
 
-      <!-- 좌측: 종이접기 모델 및 패턴 선택 -->
+      <!-- 좌측: 종이접기 모델 및 색상 선택 -->
       <div class="origami-sidebar">
         <div>
           <div class="origami-group-title"> origami 인기 종이접기</div>
@@ -327,12 +341,12 @@
         <div>
           <div class="origami-group-title">🎨 색종이 색상</div>
           <div class="origami-colors-row">
-            <div class="origami-color-chip active" style="background:#4ade80;" data-color="#4ade80"></div>
-            <div class="origami-color-chip" style="background:#ff6b9d;" data-color="#ff6b9d"></div>
-            <div class="origami-color-chip" style="background:#38bdf8;" data-color="#38bdf8"></div>
-            <div class="origami-color-chip" style="background:#ffd93d;" data-color="#ffd93d"></div>
-            <div class="origami-color-chip" style="background:#fb923c;" data-color="#fb923c"></div>
-            <div class="origami-color-chip" style="background:#c084fc;" data-color="#c084fc"></div>
+            <div class="origami-color-chip active" style="background:#22c55e;" data-color="#22c55e"></div>
+            <div class="origami-color-chip" style="background:#0ea5e9;" data-color="#0ea5e9"></div>
+            <div class="origami-color-chip" style="background:#ec4899;" data-color="#ec4899"></div>
+            <div class="origami-color-chip" style="background:#eab308;" data-color="#eab308"></div>
+            <div class="origami-color-chip" style="background:#f97316;" data-color="#f97316"></div>
+            <div class="origami-color-chip" style="background:#a855f7;" data-color="#a855f7"></div>
           </div>
         </div>
 
@@ -345,7 +359,7 @@
       <!-- 우측: 인터랙티브 종이 뷰포트 -->
       <div class="origami-stage-card">
         
-        <!-- 2D/3D 종이접기 캔버스 -->
+        <!-- 2D/3D 고화질 종이접기 캔버스 -->
         <canvas id="origamiCanvas"></canvas>
 
         <!-- 🧭 이전/다음 단계 컨트롤러 -->
@@ -355,10 +369,11 @@
           <button type="button" id="nextStepBtn" class="step-nav-btn">다음 단계 ▶️</button>
         </div>
 
-        <!-- 📝 단계별 설명 -->
+        <!-- 📝 단계별 설명 및 꿀팁 박스 -->
         <div class="step-desc-box">
-          <div class="step-title-text" id="stepTitle">1단계: 가운데 중심선 만들기</div>
-          <div class="step-desc-text" id="stepDesc">색종이를 세로로 길게 반으로 접었다가 펼쳐서 가운데 기준선을 만들어요.</div>
+          <div class="step-title-text" id="stepTitle">1단계: 반으로 접어 십자(+) 기준선 만들기</div>
+          <div class="step-desc-text" id="stepDesc">색종이의 색깔이 아래로 가도록 둔 뒤, 네모 모양으로 가로와 세로를 반씩 접었다 펼쳐요.</div>
+          <div class="step-tip-badge" id="stepTip">💡 모서리를 꼭짓점에 정확히 맞추고 손톱으로 꾹꾹 눌러 다려주세요!</div>
         </div>
 
         <!-- 🎉 완성 시 액션 영역 -->

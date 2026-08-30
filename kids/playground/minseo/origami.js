@@ -1,220 +1,224 @@
-// 📐 3D/동적 인터랙티브 종이접기 연구소 코어 엔진 (origami.js)
+// 📐 고화질 일러스트 종이접기 연구소 코어 엔진 (origami.js)
 
 (function () {
   'use strict';
 
   // -------------------------------------------------------------
-  // 1. 5종 인기 종이접기 단계별 데이터 정의
+  // 1. 고화질 종이접기 5종 단계별 정밀 다이어그램 데이터
   // -------------------------------------------------------------
   const ORIGAMI_MODELS = {
-    airplane: {
-      id: 'airplane',
-      name: '🚀 슈퍼 제트 비행기',
-      desc: '가장 멀리 날아가는 날렵한 제트기! 날개를 꼼꼼하게 접어보세요.',
-      interactiveType: 'flight', // 완성 후 비행 시뮬레이터
-      totalSteps: 5,
-      steps: [
-        {
-          step: 1,
-          title: '가운데 중심선 만들기',
-          desc: '색종이를 세로로 길게 반으로 접었다가 펼쳐서 가운데 기준선을 만들어요.',
-          foldLine: 'center-vertical',
-          arrow: 'fold-right-to-left'
-        },
-        {
-          step: 2,
-          title: '위쪽 양쪽 모서리 삼각 접기',
-          desc: '위쪽의 양 모서리를 가운데 중심선에 맞춰 세모 모양으로 가지런히 접어요.',
-          foldLine: 'top-corners',
-          arrow: 'fold-inward'
-        },
-        {
-          step: 3,
-          title: '삼각형 뾰족한 머리 아래로 내리기',
-          desc: '접힌 위쪽 삼각형을 아래쪽으로 덮듯이 푹 숙여서 편지 봉투 모양으로 접어요.',
-          foldLine: 'horizontal-crease',
-          arrow: 'fold-down'
-        },
-        {
-          step: 4,
-          title: '다시 양쪽 모서리를 중심선으로 접기',
-          desc: '위쪽 양쪽 모서리를 가운데 기준선으로 다시 모아 접고, 아래 튀어나온 작은 삼각 탭을 위로 올려 잠궈요.',
-          foldLine: 'inner-corners',
-          arrow: 'fold-inward-lock'
-        },
-        {
-          step: 5,
-          title: '반으로 뒤집어 접고 양 날개 펼치기!',
-          desc: '몸통을 반으로 바깥쪽으로 접은 뒤, 양쪽 날개를 좌우로 반듯하게 꺾어 펼치면 완성!',
-          foldLine: 'wings',
-          arrow: 'fold-wings'
-        }
-      ]
-    },
     frog: {
       id: 'frog',
       name: '🐸 폴짝 점핑 개구리',
-      desc: '엉덩이를 톡 누르면 진짜로 폴짝 뛰어오르는 마법의 개구리!',
-      interactiveType: 'jump', // 완성 후 점프 미니게임
+      tagline: '엉덩이를 톡! 누르면 연잎으로 폴짝 뛰어오르는 개구리',
+      defaultColor: '#22c55e',
+      interactiveType: 'jump',
       totalSteps: 5,
       steps: [
         {
           step: 1,
-          title: '가로 세로 반 접기',
-          desc: '네모 모양으로 가로와 세로를 반씩 접었다 펼쳐 십자(+) 기준선을 만들어요.',
-          foldLine: 'cross',
-          arrow: 'fold-cross'
+          title: '반으로 접어 십자(+) 기준선 만들기',
+          tip: '💡 모서리를 꼭짓점에 정확히 맞추고 손톱으로 꾹꾹 눌러 다려주세요!',
+          desc: '색종이의 색깔이 아래로 가도록 둔 뒤, 네모 모양으로 가로와 세로를 반씩 접었다 펼쳐요.',
+          drawType: 'frog_step1'
         },
         {
           step: 2,
-          title: '위쪽 삼각 주머니 접기',
-          desc: '위쪽 절반의 대각선을 접어 양쪽을 쏙 집어넣어 삼각 지붕 주머니를 만들어요.',
-          foldLine: 'triangle-pocket',
-          arrow: 'fold-pocket'
+          title: '위쪽을 세모 모양 주머니로 모으기',
+          tip: '💡 양쪽 대각선을 쏙 집어넣으면 삼각 지붕 주머니가 짠 생겨요.',
+          desc: '위쪽 절반의 양옆을 안으로 오므려 넣어서 커다란 삼각형 지붕 모양을 만들어요.',
+          drawType: 'frog_step2'
         },
         {
           step: 3,
-          title: '앞다리와 몸통 모으기',
-          desc: '삼각형의 양쪽 날개를 위로 꺾어 앞다리를 만들고, 아래쪽 몸통을 반으로 올려 접어요.',
-          foldLine: 'front-legs',
-          arrow: 'fold-legs'
+          title: '앞다리 올리고 몸통 반 접기',
+          tip: '💡 앞다리를 비스듬히 위로 꺾어주면 개구리가 힘차게 서 있어요!',
+          desc: '삼각형의 양 날개를 위로 꺾어 앞다리를 만들고, 아래쪽 남은 종이를 위로 반 접어 올려요.',
+          drawType: 'frog_step3'
         },
         {
           step: 4,
-          title: '뒷다리 계단 접기 (스프링 만들기)',
-          desc: '아래쪽 다리를 위로 반 접었다가, 다시 아래로 지그재그(계단 모양)로 접어 점프 스프링을 만들어요.',
-          foldLine: 'spring-fold',
-          arrow: 'fold-accordion'
+          title: '뒷다리 계단(스프링) 접기',
+          desc: '아래쪽 다리를 위로 반 접었다가, 다시 아래로 지그재그 계단 모양으로 꺾어 점프 스프링을 만들어요.',
+          tip: '💡 이 계단 접기가 개구리 점프력의 비밀 스프링이에요!',
+          drawType: 'frog_step4'
         },
         {
           step: 5,
           title: '뒤집어서 눈 스티커 붙이면 완성!',
-          desc: '뒤집으면 귀여운 개구리 완성! 엉덩이 스프링 부분을 손가락으로 누르면 폴짝 뛰어올라요!',
-          foldLine: 'finish',
-          arrow: 'none'
+          desc: '개구리를 뒤집으면 귀여운 개구리 완성! 엉덩이 스프링을 톡 누르면 높이 점프해요!',
+          tip: '💡 완성된 개구리의 등을 살짝 누르며 손을 떼면 폴짝 뛰어올라요!',
+          drawType: 'frog_step5'
+        }
+      ]
+    },
+    airplane: {
+      id: 'airplane',
+      name: '🚀 슈퍼 제트 비행기',
+      tagline: '바람을 가르고 가장 멀리 날아가는 초고속 제트기',
+      defaultColor: '#0ea5e9',
+      interactiveType: 'flight',
+      totalSteps: 5,
+      steps: [
+        {
+          step: 1,
+          title: '세로 중심 기준선 만들기',
+          tip: '💡 긴 세로선이 똑바를수록 비행기가 흔들리지 않고 곧게 날아가요.',
+          desc: '색종이를 세로로 길게 반 접었다 펼쳐서 가운데 중심 기준선을 선명하게 만들어요.',
+          drawType: 'plane_step1'
+        },
+        {
+          step: 2,
+          title: '위쪽 양쪽 모서리 삼각 접기',
+          tip: '💡 꼭짓점이 가운데 선에 딱 닿도록 반듯하게 접어주세요.',
+          desc: '위쪽 양 모서리를 가운데 기준선에 딱 맞춰 세모 모양으로 가지런히 접어요.',
+          drawType: 'plane_step2'
+        },
+        {
+          step: 3,
+          title: '삼각형 머리를 아래로 푹 숙이기',
+          tip: '💡 편지 봉투처럼 접힌 머리가 비행기의 무게중심을 잡아줘요.',
+          desc: '접힌 위쪽 삼각형을 아래로 덮듯이 푹 숙여서 편지 봉투 모양으로 만들어요.',
+          drawType: 'plane_step3'
+        },
+        {
+          step: 4,
+          title: '다시 양 모서리를 모으고 삼각 탭 잠그기',
+          tip: '💡 아래 작은 세모 탭을 위로 꺾어 올리면 날개가 풀리지 않아요.',
+          desc: '위쪽 모서리를 다시 중심선으로 모아 접은 뒤, 아래 튀어나온 삼각 탭을 위로 올려 잠궈요.',
+          drawType: 'plane_step4'
+        },
+        {
+          step: 5,
+          title: '반으로 접어 양 날개 쫙 펼치기!',
+          desc: '몸통을 반으로 바깥쪽으로 접은 뒤, 양쪽 날개를 좌우로 수평하게 꺾어 펼치면 완성!',
+          tip: '💡 날개 끝을 살짝 위로 올려주면 훨씬 멀리 활공해요!',
+          drawType: 'plane_step5'
         }
       ]
     },
     fortune: {
       id: 'fortune',
       name: '👑 동서남북 마법 상자',
-      desc: '손가락에 끼워 동서남북 몇 번! 비밀 퀴즈와 소원을 담아 놀아요.',
+      tagline: '동서남북 몇 번! 비밀 퀴즈와 소원을 담아 노는 마법 상자',
+      defaultColor: '#eab308',
       interactiveType: 'fortune',
       totalSteps: 4,
       steps: [
         {
           step: 1,
-          title: '대각선 X자 기준선 만들기',
+          title: '대각선 X자 중심점 만들기',
+          tip: '💡 두 대각선이 만나는 정중앙 점을 꾹 눌러 표시해두세요.',
           desc: '색종이를 세모 모양으로 양쪽 대각선을 접었다 펼쳐서 가운데 중심점(X)을 찾아요.',
-          foldLine: 'diagonal-x',
-          arrow: 'fold-diagonal'
+          drawType: 'fortune_step1'
         },
         {
           step: 2,
-          title: '네 모서리를 가운데로 모아 방석 접기',
-          desc: '색종이의 네 모서리 끝을 모두 가운데 중심점으로 딱 맞추어 접어요 (방석 접기).',
-          foldLine: 'cushion-front',
-          arrow: 'fold-4corners'
+          title: '네 모서리를 모으는 방석 접기',
+          tip: '💡 네 꼭짓점이 한 점에 딱 모이도록 네모 방석을 만들어요.',
+          desc: '색종이의 네 꼭짓점을 모두 가운데 중심점으로 딱 맞추어 모아 접어요.',
+          drawType: 'fortune_step2'
         },
         {
           step: 3,
-          title: '뒤집어서 다시 네 모서리를 가운데로!',
-          desc: '종이를 뒤집은 다음, 다시 한번 네 모서리를 가운데 중심점으로 가지런히 모아 접어요.',
-          foldLine: 'cushion-back',
-          arrow: 'fold-4corners-back'
+          title: '뒤집어서 다시 네 모서리 모으기',
+          tip: '💡 종이를 뒤집은 상태에서 한 번 더 가운데로 모아줘요.',
+          desc: '종이를 뒤로 뒤집은 다음, 다시 한번 네 모서리를 가운데 중심점으로 접어 모아요.',
+          drawType: 'fortune_step3'
         },
         {
           step: 4,
-          title: '반으로 접어 입체 주머니 손가락 끼우기',
-          desc: '네모 모양으로 반 접은 뒤 네 군데 주머니 속에 양손 엄지와 검지를 쏙 집어넣어 벌리면 완성!',
-          foldLine: 'finish-pocket',
-          arrow: 'pop-open'
+          title: '반 접어 네 주머니에 손가락 쏙 넣기!',
+          desc: '가로 세로로 반씩 접어 길을 낸 뒤, 네 모서리 주머니 속에 양손 엄지와 검지를 넣고 벌리면 완성!',
+          tip: '💡 안쪽에 비밀 벌칙이나 소원을 적어두면 더 재미있어요!',
+          drawType: 'fortune_step4'
         }
       ]
     },
     heart: {
       id: 'heart',
       name: '💖 반짝 입체 사랑 하트',
-      desc: '마음을 전하는 귀여운 하트! 편지를 써서 친구나 부모님께 선물해요.',
+      tagline: '마음을 담아 친구와 부모님께 선물하는 예쁜 하트',
+      defaultColor: '#ec4899',
       interactiveType: 'heart_beat',
       totalSteps: 4,
       steps: [
         {
           step: 1,
-          title: '삼각형으로 대각선 접기',
-          desc: '색종이를 반으로 접어 커다란 세모 모양을 만든 뒤 가운데 중심선을 만들어요.',
-          foldLine: 'triangle-center',
-          arrow: 'fold-diagonal'
+          title: '세모 대각선 기준선 만들기',
+          tip: '💡 반듯한 세모를 접어 중심축을 만들어요.',
+          desc: '색종이를 세모 모양으로 반 접었다 펼쳐서 가운데 기준선을 만들어요.',
+          drawType: 'heart_step1'
         },
         {
           step: 2,
-          title: '위쪽 꼭짓점과 아래 꼭짓점 모으기',
-          desc: '위쪽 한 겹은 아래 밑변으로 내리고, 아래쪽 꼭짓점은 위쪽 끝으로 덮어 올려요.',
-          foldLine: 'top-down-bottom-up',
-          arrow: 'fold-vertical'
+          title: '위 꼭짓점 내리고 아래 꼭짓점 올리기',
+          tip: '💡 위쪽 한 겹만 아래로 내리고, 아래 꼭짓점은 위 끝선에 맞춰 올려요.',
+          desc: '위쪽 한 겹은 아래 밑변으로 내리고, 아래쪽 꼭짓점은 위쪽 꼭대기 선으로 덮어 올려요.',
+          drawType: 'heart_step2'
         },
         {
           step: 3,
-          title: '양 날개를 위로 꺾어 올리기',
-          desc: '아래쪽 양 날개를 가운데 중심선에 맞춰 비스듬히 위쪽으로 꺾어 올려 하트 틀을 잡아요.',
-          foldLine: 'wing-up',
-          arrow: 'fold-wings-up'
+          title: '양 날개를 위로 꺾어 하트 골격 잡기',
+          tip: '💡 양 날개가 가운데 중심선에 대칭으로 딱 맞닿게 올려주세요.',
+          desc: '아래쪽 양 날개를 가운데 중심선에 맞춰 비스듬히 위쪽으로 꺾어 올려 하트 모양을 만들어요.',
+          drawType: 'heart_step3'
         },
         {
           step: 4,
-          title: '모서리 둥글게 다듬기',
-          desc: '위쪽과 양옆의 뾰족한 모서리를 뒤로 살짝 접어 부드러운 하트 곡선을 만들면 완성!',
-          foldLine: 'round-corners',
-          arrow: 'fold-tuck'
+          title: '모서리를 뒤로 살짝 접어 하트 완성!',
+          desc: '위쪽과 양옆의 뾰족한 모서리들을 뒤쪽으로 살짝씩 접어 넘기면 부드러운 사랑 하트 완성!',
+          tip: '💡 하트 뒷면 주머니에 작은 쪽지 편지를 쏙 넣을 수 있어요!',
+          drawType: 'heart_step4'
         }
       ]
     },
     ttakji: {
       id: 'ttakji',
-      name: '🪓 천하무적 딱지',
-      desc: '두 장의 색종이가 합체! 단단하고 묵직한 딱지 배틀의 최강자.',
+      name: '🪓 천하무적 파워 딱지',
+      tagline: '두 장의 색종이가 크로스 합체! 단단한 배틀 딱지',
+      defaultColor: '#f97316',
       interactiveType: 'slam',
       totalSteps: 4,
       steps: [
         {
           step: 1,
-          title: '색종이 2장을 3등분으로 길게 접기',
-          desc: '서로 다른 색깔의 색종이 2장을 각각 가로로 3등분하여 길쭉한 직사각형 2개를 만들어요.',
-          foldLine: 'tri-fold',
-          arrow: 'fold-3lines'
+          title: '색종이 2장을 각각 3등분으로 길게 접기',
+          tip: '💡 3등분으로 얇고 단단하게 접을수록 파워가 센 딱지가 돼요.',
+          desc: '서로 다른 색상의 색종이 2장을 준비하여 각각 가로로 3등분해 긴 직사각형 2개를 만들어요.',
+          drawType: 'ttakji_step1'
         },
         {
           step: 2,
-          title: '양 끝을 45도 삼각형으로 꺾기',
-          desc: '길쭉한 종이의 양쪽 끝 모서리를 서로 반대 방향으로 45도 꺾어 바람개비 날개처럼 만들어요.',
-          foldLine: 'wings-45',
-          arrow: 'fold-angles'
+          title: '양쪽 끝을 45도 반대 방향으로 꺾기',
+          tip: '💡 바람개비 날개처럼 서로 엇갈리는 방향으로 세모를 접어요.',
+          desc: '직사각형 종이의 양쪽 끝을 서로 반대 방향으로 45도 삼각형 모양으로 꺾어 접어요.',
+          drawType: 'ttakji_step2'
         },
         {
           step: 3,
-          title: '두 종이를 십자(+)로 교차해 겹치기',
-          desc: '두 종이를 가운데에 십자 모양으로 직각으로 포개어 올려놓아요.',
-          foldLine: 'cross-overlap',
-          arrow: 'overlay'
+          title: '두 종이를 십자(+)로 교차하여 겹치기',
+          tip: '💡 직각으로 똑바르게 포개어야 네 날개가 딱 맞물려요.',
+          desc: '두 종이의 가운데 부분을 십자(+) 모양으로 직각으로 겹쳐 올려놓아요.',
+          drawType: 'ttakji_step3'
         },
         {
           step: 4,
-          title: '시계 방향으로 네 날개를 차례로 끼워 넣기',
-          desc: '아래, 오른쪽, 위, 왼쪽 날개를 시계 방향으로 순서대로 접어 마지막 틈새에 쏙 끼우면 단단한 딱지 완성!',
-          foldLine: 'wind-lock',
-          arrow: 'tuck-in'
+          title: '시계 방향으로 날개를 차례로 끼워 잠그기!',
+          desc: '아래 ➡️ 오른쪽 ➡️ 위 ➡️ 왼쪽 날개를 순서대로 덮고, 마지막 날개를 첫 번째 틈새에 쏙 끼워 완성!',
+          tip: '💡 틈새에 꽉 끼워 넣으면 절대 풀리지 않는 무적 딱지가 돼요!',
+          drawType: 'ttakji_step4'
         }
       ]
     }
   };
 
   let currentModelKey = 'frog';
-  let currentStepIndex = 0; // 0-based
-  let currentColor = '#4ade80'; // 기본 초록 (개구리)
-  let currentPattern = 'solid'; // 'solid' | 'dots' | 'stripes' | 'stars'
+  let currentStepIndex = 0;
+  let currentColor = '#22c55e'; // 앞면 색상
 
   // -------------------------------------------------------------
-  // 2. 단계별 2D/3D 종이접기 Canvas 렌더러
+  // 2. 고화질 정밀 다이어그램 렌더링 엔진 (Canvas Vector)
   // -------------------------------------------------------------
   const origamiCanvas = document.getElementById('origamiCanvas');
   const oCtx = origamiCanvas?.getContext('2d');
@@ -225,33 +229,28 @@
     const stepInfo = model.steps[currentStepIndex];
     const total = model.totalSteps;
 
-    const w = origamiCanvas.width = 540;
-    const h = origamiCanvas.height = 420;
+    const w = origamiCanvas.width = 600;
+    const h = origamiCanvas.height = 460;
 
     oCtx.clearRect(0, 0, w, h);
 
-    // 배경 부드러운 방 모눈종이
-    oCtx.fillStyle = '#ffffff';
-    oCtx.fillRect(0, 0, w, h);
-    drawGridBackground(oCtx, w, h);
+    // 1. 고화질 배경 격자 & 종이 그림자 렌더
+    drawCleanStudioBackground(oCtx, w, h);
 
-    // 종이 중심점
     const cx = w / 2;
-    const cy = h / 2;
-    const size = 180;
+    const cy = h / 2 - 10;
+    const size = 200;
 
-    // 단계별 종이 형상 렌더링
-    drawPaperShape(oCtx, cx, cy, size, currentModelKey, currentStepIndex, currentColor, currentPattern);
+    // 2. 앞뒷면 색상 대비가 적용된 정밀 도안 렌더링
+    drawIllustratedDiagram(oCtx, cx, cy, size, stepInfo.drawType, currentColor);
 
-    // 접는 점선 및 화살표 가이드 렌더링
-    drawFoldGuides(oCtx, cx, cy, size, stepInfo);
-
-    // UI 텍스트 동기화
+    // 3. UI 텍스트 동기화
     document.getElementById('stepTitle').textContent = `${stepInfo.step}단계: ${stepInfo.title}`;
     document.getElementById('stepDesc').textContent = stepInfo.desc;
+    document.getElementById('stepTip').innerHTML = stepInfo.tip;
     document.getElementById('stepIndicator').textContent = `${stepInfo.step} / ${total} 단계`;
 
-    // 이전/다음 버튼 제어
+    // 4. 이전/다음 버튼 제어
     const prevBtn = document.getElementById('prevStepBtn');
     const nextBtn = document.getElementById('nextStepBtn');
     const completeArea = document.getElementById('origamiCompleteArea');
@@ -266,173 +265,354 @@
     }
   }
 
-  function drawGridBackground(ctx, w, h) {
-    ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  function drawCleanStudioBackground(ctx, w, h) {
+    // 화사한 작업 매트 배경
+    ctx.fillStyle = '#fafafa';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.035)';
     ctx.lineWidth = 1;
-    for (let x = 0; x < w; x += 30) {
+    for (let x = 0; x < w; x += 25) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
     }
-    for (let y = 0; y < h; y += 30) {
+    for (let y = 0; y < h; y += 25) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     }
   }
 
   // -------------------------------------------------------------
-  // 3. 종이 형상 그리기 (패턴 및 음영)
+  // 3. 앞뒷면 색상 대비 & 정밀 점선 일러스트 드로잉
   // -------------------------------------------------------------
-  function drawPaperShape(ctx, cx, cy, size, modelKey, stepIdx, color, pattern) {
+  function drawIllustratedDiagram(ctx, cx, cy, size, drawType, frontColor) {
+    const whiteBack = '#ffffff'; // 종이 뒷면 (깨끗한 흰색)
+    const creaseColor = '#e11d48'; // 접는 선 (선명한 빨간색 점선)
+    const outlineColor = '#1e293b'; // 종이 테두리선 (세련된 슬레이트 블랙)
+
     ctx.save();
-    ctx.fillStyle = color;
-    ctx.strokeStyle = '#2d3748';
-    ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    // 그림자
-    ctx.shadowColor = 'rgba(0,0,0,0.12)';
-    ctx.shadowBlur = 15;
-    ctx.shadowOffsetY = 8;
-
-    if (stepIdx === 0) {
-      // 1단계: 기본 펼쳐진 정사각형
-      ctx.beginPath();
-      ctx.rect(cx - size / 2, cy - size / 2, size, size);
-      ctx.fill();
+    // 3D 드롭 섀도우
+    function setShadow() {
+      ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 8;
+    }
+    function clearShadow() {
       ctx.shadowColor = 'transparent';
-      ctx.stroke();
-    } else if (stepIdx === 1) {
-      // 2단계
-      if (modelKey === 'airplane' || modelKey === 'frog') {
-        ctx.beginPath();
-        ctx.moveTo(cx - size / 2, cy + size / 2);
-        ctx.lineTo(cx + size / 2, cy + size / 2);
-        ctx.lineTo(cx + size / 2, cy);
-        ctx.lineTo(cx, cy - size / 2);
-        ctx.lineTo(cx - size / 2, cy);
-        ctx.closePath();
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - size / 2);
-        ctx.lineTo(cx + size / 2, cy);
-        ctx.lineTo(cx, cy + size / 2);
-        ctx.lineTo(cx - size / 2, cy);
-        ctx.closePath();
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.stroke();
-      }
-    } else if (stepIdx === 2) {
-      // 3단계
-      ctx.beginPath();
-      ctx.moveTo(cx - size / 2, cy + size / 2);
-      ctx.lineTo(cx + size / 2, cy + size / 2);
-      ctx.lineTo(cx + size / 3, cy - size / 4);
-      ctx.lineTo(cx, cy - size / 3);
-      ctx.lineTo(cx - size / 3, cy - size / 4);
-      ctx.closePath();
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.stroke();
-    } else if (stepIdx >= 3) {
-      // 완성 단계에 가까운 완성형 실루엣
-      if (modelKey === 'airplane') {
-        // 비행기 삼각 날개 실루엣
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - size / 1.5);
-        ctx.lineTo(cx + size / 1.8, cy + size / 2);
-        ctx.lineTo(cx + size / 8, cy + size / 2.5);
-        ctx.lineTo(cx, cy + size / 2);
-        ctx.lineTo(cx - size / 8, cy + size / 2.5);
-        ctx.lineTo(cx - size / 1.8, cy + size / 2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.stroke();
-      } else if (modelKey === 'frog') {
-        // 개구리 실루엣 + 눈
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - size / 2);
-        ctx.lineTo(cx + size / 2.2, cy);
-        ctx.lineTo(cx + size / 3, cy + size / 2.2);
-        ctx.lineTo(cx - size / 3, cy + size / 2.2);
-        ctx.lineTo(cx - size / 2.2, cy);
-        ctx.closePath();
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.stroke();
-
-        // 개구리 눈 스티커
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(cx - size / 4, cy - size / 3, 14, 0, Math.PI * 2);
-        ctx.arc(cx + size / 4, cy - size / 3, 14, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.arc(cx - size / 4, cy - size / 3, 6, 0, Math.PI * 2);
-        ctx.arc(cx + size / 4, cy - size / 3, 6, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (modelKey === 'heart') {
-        // 하트 실루엣
-        ctx.beginPath();
-        ctx.moveTo(cx, cy + size / 2.2);
-        ctx.bezierCurveTo(cx - size / 1.5, cy, cx - size / 1.5, cy - size / 2, cx, cy - size / 4);
-        ctx.bezierCurveTo(cx + size / 1.5, cy - size / 2, cx + size / 1.5, cy, cx, cy + size / 2.2);
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.stroke();
-      } else {
-        // 딱지/동서남북
-        ctx.beginPath();
-        ctx.rect(cx - size / 2.5, cy - size / 2.5, size / 1.25, size / 1.25);
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.stroke();
-      }
     }
 
-    ctx.restore();
-  }
+    // 기본 점선 그리기 헬퍼
+    function drawDashedLine(x1, y1, x2, y2) {
+      ctx.save();
+      ctx.strokeStyle = creaseColor;
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([7, 5]);
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-  // -------------------------------------------------------------
-  // 4. 가이드 점선 및 접는 화살표 그리기
-  // -------------------------------------------------------------
-  function drawFoldGuides(ctx, cx, cy, size, stepInfo) {
-    ctx.save();
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 2.5;
-    ctx.setLineDash([8, 6]);
+    // 곡선 화살표 헬퍼
+    function drawCurveArrow(startX, startY, endX, endY, label = '접기') {
+      ctx.save();
+      ctx.strokeStyle = '#e11d48';
+      ctx.fillStyle = '#e11d48';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      const midX = (startX + endX) / 2 + 25;
+      const midY = (startY + endY) / 2 - 25;
+      ctx.moveTo(startX, startY);
+      ctx.quadraticCurveTo(midX, midY, endX, endY);
+      ctx.stroke();
 
-    // 기준 접는 점선
-    if (stepInfo.foldLine === 'center-vertical') {
+      // 화살촉
+      ctx.beginPath();
+      ctx.arc(endX, endY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // [1] 개구리 단계별 도안
+    if (drawType === 'frog_step1') {
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
+      clearShadow();
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cx - size / 2, cy - size / 2, size, size);
+
+      // 가로 세로 십자 점선
+      drawDashedLine(cx - size / 2, cy, cx + size / 2, cy);
+      drawDashedLine(cx, cy - size / 2, cx, cy + size / 2);
+      drawCurveArrow(cx - size / 3, cy - size / 3, cx + size / 4, cy - size / 3);
+    } 
+    else if (drawType === 'frog_step2') {
+      // 위쪽 삼각 주머니 + 아래 네모
+      setShadow();
+      // 아래 네모 (앞면 유색)
+      ctx.fillStyle = frontColor;
+      ctx.fillRect(cx - size / 2, cy, size, size / 2);
+      // 위쪽 삼각 주머니 (앞면 유색)
       ctx.beginPath();
       ctx.moveTo(cx, cy - size / 2);
-      ctx.lineTo(cx, cy + size / 2);
-      ctx.stroke();
-    } else if (stepInfo.foldLine === 'top-corners') {
+      ctx.lineTo(cx + size / 2, cy);
+      ctx.lineTo(cx - size / 2, cy);
+      ctx.closePath();
+      ctx.fill();
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cx - size / 2, cy, size, size / 2);
       ctx.beginPath();
-      ctx.moveTo(cx - size / 2, cy - size / 2);
-      ctx.lineTo(cx, cy);
-      ctx.lineTo(cx + size / 2, cy - size / 2);
+      ctx.moveTo(cx, cy - size / 2);
+      ctx.lineTo(cx + size / 2, cy);
+      ctx.lineTo(cx - size / 2, cy);
+      ctx.closePath();
       ctx.stroke();
+
+      // 삼각 날개 올리는 점선
+      drawDashedLine(cx, cy - size / 2, cx + size / 4, cy);
+      drawDashedLine(cx, cy - size / 2, cx - size / 4, cy);
+      drawCurveArrow(cx - size / 2.5, cy - 10, cx - size / 4, cy - size / 3);
+      drawCurveArrow(cx + size / 2.5, cy - 10, cx + size / 4, cy - size / 3);
+    }
+    else if (drawType === 'frog_step3') {
+      // 앞다리 꺾인 삼각형 + 올라온 몸통
+      setShadow();
+      ctx.fillStyle = frontColor;
+      // 몸통
+      ctx.fillRect(cx - size / 2.5, cy - size / 8, size / 1.25, size / 2.2);
+      // 앞다리 2개
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 2.2);
+      ctx.lineTo(cx + size / 2, cy - size / 3);
+      ctx.lineTo(cx + size / 4, cy);
+      ctx.lineTo(cx - size / 4, cy);
+      ctx.lineTo(cx - size / 2, cy - size / 3);
+      ctx.closePath();
+      ctx.fill();
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.strokeRect(cx - size / 2.5, cy - size / 8, size / 1.25, size / 2.2);
+
+      // 뒷다리 계단 점선
+      drawDashedLine(cx - size / 2.5, cy + size / 4, cx + size / 2.5, cy + size / 4);
+      drawCurveArrow(cx, cy + size / 2.5, cx, cy + size / 8);
+    }
+    else if (drawType === 'frog_step4') {
+      // 뒷다리 계단 완성형
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 2);
+      ctx.lineTo(cx + size / 2.2, cy - size / 4);
+      ctx.lineTo(cx + size / 3, cy + size / 3);
+      ctx.lineTo(cx - size / 3, cy + size / 3);
+      ctx.lineTo(cx - size / 2.2, cy - size / 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // 계단 스프링 플랩 (흰색 뒷면 살짝 노출로 입체감)
+      ctx.fillStyle = whiteBack;
+      ctx.fillRect(cx - size / 3.5, cy + size / 6, size / 1.75, size / 6);
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.strokeRect(cx - size / 3.5, cy + size / 6, size / 1.75, size / 6);
+
+      // 뒤집기 안내
+      ctx.fillStyle = '#e11d48';
+      ctx.font = 'bold 20px Jua';
+      ctx.fillText('🔄 뒤집어주세요!', cx - 60, cy - size / 1.8);
+    }
+    else if (drawType === 'frog_step5') {
+      // 🐸 완성된 고화질 개구리!
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 1.8);
+      ctx.lineTo(cx + size / 2.2, cy - size / 4);
+      ctx.lineTo(cx + size / 2.8, cy + size / 3.5);
+      ctx.lineTo(cx - size / 2.8, cy + size / 3.5);
+      ctx.lineTo(cx - size / 2.2, cy - size / 4);
+      ctx.closePath();
+      ctx.fill();
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // 큰 눈 스티커
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - size / 4.5, cy - size / 3.2, 16, 0, Math.PI * 2);
+      ctx.arc(cx + size / 4.5, cy - size / 3.2, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(cx - size / 4.5, cy - size / 3.2, 7, 0, Math.PI * 2);
+      ctx.arc(cx + size / 4.5, cy - size / 3.2, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 볼터치
+      ctx.fillStyle = '#ff80ab';
+      ctx.beginPath();
+      ctx.arc(cx - size / 3.5, cy - size / 6, 9, 0, Math.PI * 2);
+      ctx.arc(cx + size / 3.5, cy - size / 6, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 점프 터치 안내 핑거
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 22px Jua';
+      ctx.fillText('👇 엉덩이를 톡! 누르면 점프!', cx - 110, cy + size / 2);
     }
 
-    ctx.setLineDash([]);
+    // [2] 슈퍼 제트 비행기 단계별 도안
+    else if (drawType === 'plane_step1') {
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.fillRect(cx - size / 2.5, cy - size / 1.8, size / 1.25, size * 1.1);
+      clearShadow();
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cx - size / 2.5, cy - size / 1.8, size / 1.25, size * 1.1);
+      drawDashedLine(cx, cy - size / 1.8, cx, cy + size / 1.8);
+      drawCurveArrow(cx - size / 3, cy, cx + size / 4, cy);
+    }
+    else if (drawType === 'plane_step2') {
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 1.8);
+      ctx.lineTo(cx + size / 2.5, cy - size / 6);
+      ctx.lineTo(cx + size / 2.5, cy + size / 1.8);
+      ctx.lineTo(cx - size / 2.5, cy + size / 1.8);
+      ctx.lineTo(cx - size / 2.5, cy - size / 6);
+      ctx.closePath();
+      ctx.fill();
 
-    // 접는 방향 안내 화살표
-    ctx.fillStyle = '#ff3838';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillText('↪️', cx + 20, cy);
+      // 접힌 삼각 날개 뒷면 (흰색)
+      ctx.fillStyle = whiteBack;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 1.8);
+      ctx.lineTo(cx + size / 2.5, cy - size / 6);
+      ctx.lineTo(cx, cy - size / 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 1.8);
+      ctx.lineTo(cx - size / 2.5, cy - size / 6);
+      ctx.lineTo(cx, cy - size / 6);
+      ctx.closePath();
+      ctx.fill();
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      drawDashedLine(cx - size / 2.5, cy - size / 6, cx + size / 2.5, cy - size / 6);
+      drawCurveArrow(cx, cy - size / 3, cx, cy + size / 4);
+    }
+    else if (drawType === 'plane_step3' || drawType === 'plane_step4') {
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 1.8);
+      ctx.lineTo(cx + size / 2.4, cy + size / 2.2);
+      ctx.lineTo(cx - size / 2.4, cy + size / 2.2);
+      ctx.closePath();
+      ctx.fill();
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      drawDashedLine(cx - size / 4, cy - size / 4, cx - size / 4, cy + size / 2.2);
+      drawDashedLine(cx + size / 4, cy - size / 4, cx + size / 4, cy + size / 2.2);
+      drawCurveArrow(cx - size / 3, cy, cx - size / 8, cy);
+      drawCurveArrow(cx + size / 3, cy, cx + size / 8, cy);
+    }
+    else if (drawType === 'plane_step5') {
+      // 🚀 완성된 제트기 날개
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 1.6);
+      ctx.lineTo(cx + size / 1.7, cy + size / 2.2);
+      ctx.lineTo(cx + size / 6, cy + size / 2.8);
+      ctx.lineTo(cx, cy + size / 2.2);
+      ctx.lineTo(cx - size / 6, cy + size / 2.8);
+      ctx.lineTo(cx - size / 1.7, cy + size / 2.2);
+      ctx.closePath();
+      ctx.fill();
+      clearShadow();
+
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // 콕핏 캐노피 창문
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - size / 2.5);
+      ctx.lineTo(cx + size / 12, cy - size / 8);
+      ctx.lineTo(cx - size / 12, cy - size / 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#0284c7';
+      ctx.font = 'bold 22px Jua';
+      ctx.fillText('💨 바람을 타고 슝 날아갈 준비 완료!', cx - 130, cy + size / 1.6);
+    }
+
+    // [3] 하트 및 동서남북/딱지 공통 실루엣
+    else if (drawType.startsWith('heart_')) {
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + size / 2.2);
+      ctx.bezierCurveTo(cx - size / 1.4, cy, cx - size / 1.4, cy - size / 1.8, cx, cy - size / 3.5);
+      ctx.bezierCurveTo(cx + size / 1.4, cy - size / 1.8, cx + size / 1.4, cy, cx, cy + size / 2.2);
+      ctx.fill();
+      clearShadow();
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+    }
+    else {
+      // 방석/딱지 사각형 다이어그램
+      setShadow();
+      ctx.fillStyle = frontColor;
+      ctx.fillRect(cx - size / 2.2, cy - size / 2.2, size / 1.1, size / 1.1);
+      clearShadow();
+      ctx.strokeStyle = outlineColor;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(cx - size / 2.2, cy - size / 2.2, size / 1.1, size / 1.1);
+      drawDashedLine(cx - size / 2.2, cy, cx + size / 2.2, cy);
+      drawDashedLine(cx, cy - size / 2.2, cx, cy + size / 2.2);
+    }
 
     ctx.restore();
   }
 
   // -------------------------------------------------------------
-  // 5. 완성 후 미니 인터랙티브 시뮬레이터 (개구리 점프 / 비행기 날리기)
+  // 4. 완성 후 인터랙티브 시뮬레이터 (개구리 점프 & 비행기 활공)
   // -------------------------------------------------------------
   function triggerMiniGame() {
     const model = ORIGAMI_MODELS[currentModelKey];
@@ -441,12 +621,11 @@
     }
 
     if (model.interactiveType === 'jump') {
-      // 개구리 점프 애니메이션
       let jumpY = 0;
-      let jumpVelocity = -14;
+      let jumpVelocity = -16;
       const jumpAnim = () => {
         jumpY += jumpVelocity;
-        jumpVelocity += 0.8;
+        jumpVelocity += 0.9;
         if (jumpY < 0) {
           origamiCanvas.style.transform = `translateY(${jumpY}px) scale(${1 - jumpY * 0.002})`;
           requestAnimationFrame(jumpAnim);
@@ -459,23 +638,22 @@
       };
       jumpAnim();
     } else if (model.interactiveType === 'flight') {
-      // 비행기 날리기 애니메이션
-      origamiCanvas.style.transition = 'transform 1s cubic-bezier(0.25, 1, 0.5, 1)';
-      origamiCanvas.style.transform = 'translate(180px, -120px) rotate(15deg) scale(0.6)';
+      origamiCanvas.style.transition = 'transform 1.1s cubic-bezier(0.25, 1, 0.5, 1)';
+      origamiCanvas.style.transform = 'translate(220px, -140px) rotate(18deg) scale(0.6)';
       setTimeout(() => {
         origamiCanvas.style.transform = 'translate(0, 0) rotate(0deg) scale(1)';
-      }, 1200);
+      }, 1300);
     }
   }
 
   // -------------------------------------------------------------
-  // 6. 노션 보상 지급 연동 브릿지 (다이아몬드/하리보 +2개)
+  // 5. 노션 인벤토리 보상 실시간 연동 (다이아/하리보 +2개)
   // -------------------------------------------------------------
   async function completeOrigamiAndReward() {
     const isSon = localStorage.getItem('currentUser') === 'son';
     const rewardName = isSon ? '💎 다이아몬드 +2개' : '🍬 하리보 젤리 +2개';
 
-    // 1. 노션 인벤토리 DB 연동 호출 (core.js / notion-helper.js 브릿지)
+    // 1. 노션 인벤토리 DB 연동 호출
     if (typeof window.grantRewardAndShowUI === 'function') {
       try {
         await window.grantRewardAndShowUI(2, false, 'origami');
@@ -501,14 +679,14 @@
   }
 
   // -------------------------------------------------------------
-  // 7. A4 전용 색종이 도안 출력 (Print Template)
+  // 6. 실제 출판용 A4 전용 색종이 활동지 인쇄
   // -------------------------------------------------------------
   function printOrigamiPattern() {
     window.print();
   }
 
   // -------------------------------------------------------------
-  // 8. 전역 초기화 및 이벤트 리스너
+  // 7. 이벤트 리스너 바인딩
   // -------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', () => {
     // 모델 선택 버튼
@@ -517,6 +695,7 @@
         document.querySelectorAll('.origami-model-btn').forEach(b => b.classList.remove('active'));
         e.currentTarget.classList.add('active');
         currentModelKey = e.currentTarget.dataset.model;
+        currentColor = ORIGAMI_MODELS[currentModelKey].defaultColor || '#22c55e';
         currentStepIndex = 0;
         renderOrigamiStep();
       });
