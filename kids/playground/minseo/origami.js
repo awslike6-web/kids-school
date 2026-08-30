@@ -315,26 +315,32 @@
         document.getElementById('videoProgressBar').style.width = `${pct}%`;
       }
 
-      // 2. 단계별 자동 일시정지 (Step-by-Step Stop)
-      if (targetStepEndTime !== null && curTime >= targetStepEndTime) {
+      // 2. 단계별 자동 일시정지 (Step-by-Step Stop & Boundary Clamp)
+      if (targetStepEndTime !== null && curTime >= targetStepEndTime - 0.05) {
         videoElem.pause();
+        videoElem.currentTime = Math.max(0, targetStepEndTime - 0.02); // 경계선 안쪽에 안전하게 고정
         targetStepEndTime = null;
         updatePlayPauseBtn(false);
+        updateStepActiveBtn(currentStepIdx);
+        updateStepText(currentStepIdx);
+        return;
       }
 
-      // 3. 현재 시간에 따른 활성 스텝 버튼 자동 동기화
-      model.steps.forEach((st, idx) => {
-        if (curTime >= st.startTime && curTime < st.endTime) {
-          if (currentStepIdx !== idx && targetStepEndTime === null) {
-            currentStepIdx = idx;
-            updateStepActiveBtn(idx);
-            updateStepText(idx);
+      // 3. 자유 연속 재생 중에만 현재 시간에 맞춰 활성 스텝 업데이트
+      if (targetStepEndTime === null && !videoElem.paused) {
+        model.steps.forEach((st, idx) => {
+          if (curTime >= st.startTime && curTime < st.endTime) {
+            if (currentStepIdx !== idx) {
+              currentStepIdx = idx;
+              updateStepActiveBtn(idx);
+              updateStepText(idx);
+            }
           }
-        }
-      });
+        });
+      }
 
-      // 4. 마법 피날레 (7.0초 이후 마법 하트 등장 시 효과음 & 보상 활성화)
-      if (curTime >= 7.0 && !hasAwardedForCurrentRun) {
+      // 4. 마법 피날레 (6.8초 이후 마법 하트 등장 시 효과음 & 보상 활성화)
+      if (curTime >= 6.8 && !hasAwardedForCurrentRun) {
         hasAwardedForCurrentRun = true;
         if (window.StarrDropEngine && window.StarrDropEngine.AudioEngine) {
           window.StarrDropEngine.AudioEngine.playFanfare(4);
