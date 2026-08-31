@@ -43,10 +43,24 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
-async function fetchLibraryData() {
+async function fetchLibraryData(forceRefresh = false) {
+  const loadingEl = document.getElementById('loadingArea');
+  const syncBtn = document.getElementById('vocaSyncBtn');
   try {
+    if (forceRefresh) {
+      if (loadingEl) {
+        loadingEl.style.display = 'block';
+        loadingEl.innerHTML = '';
+      }
+      if (syncBtn) {
+        syncBtn.disabled = true;
+        syncBtn.innerHTML = '⏳ 동기화 중...';
+      }
+    }
+
     const records = await fetchVocaFromNotion({
-      studentName: currentUserName.trim()
+      studentName: currentUserName.trim(),
+      forceRefresh: forceRefresh
     });
 
     allDictionaryWords = records.map(r => ({
@@ -55,15 +69,30 @@ async function fetchLibraryData() {
       subject: r.subject.length ? r.subject : ["미분류"]
     }));
 
-    document.getElementById('loadingArea').style.display = 'none';
+    if (loadingEl) loadingEl.style.display = 'none';
     buildFilterButtons();
     updateStatusAndFilter();
 
+    if (forceRefresh && syncBtn) {
+      syncBtn.disabled = false;
+      syncBtn.innerHTML = '✅ 동기화 완료!';
+      setTimeout(() => { syncBtn.innerHTML = '🔄 최신 동기화'; }, 2000);
+    }
+
   } catch (error) {
     console.error("데이터 로딩 실패:", error);
-    document.getElementById('loadingArea').innerHTML = `❌ 로딩 실패. 새로고침 해주세요.`;
+    if (loadingEl) loadingEl.innerHTML = `❌ 로딩 실패. 새로고침 해주세요.`;
+    if (syncBtn) {
+      syncBtn.disabled = false;
+      syncBtn.innerHTML = '🔄 재시도';
+    }
   }
 }
+
+async function manualSyncVocaData() {
+  await fetchLibraryData(true);
+}
+window.manualSyncVocaData = manualSyncVocaData;
 
 function buildFilterButtons() {
   const subArea = document.getElementById('subjectFilterArea');

@@ -458,6 +458,11 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     if (typeof initFairyChat === 'function') {
         initFairyChat('KOREAN', '로비'); 
     }
+
+    // 🚀 [고속 캐싱] 백그라운드에서 조용히 오늘 공부할 단어 데이터를 사전 다운로드
+    if (typeof prefetchVocaData === 'function') {
+        prefetchVocaData(finalRealName);
+    }
 });
 </script>
 </body>

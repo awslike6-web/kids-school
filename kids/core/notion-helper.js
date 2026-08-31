@@ -88,23 +88,102 @@ function _matchesVocaRecord(record, options) {
     return true;
 }
 
+// ========================================================
+// ⚡ VOCA DB 당일(하루) 캐시 매니저 & 프리패치 엔진
+// ========================================================
+const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_";
+
+function _getVocaCacheKey(studentName, dbId) {
+    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const name = (studentName || 'ALL').trim();
+    return `${VOCA_CACHE_PREFIX}${dbId}_${name}_${todayStr}`;
+}
+
+function _loadVocaFromCache(studentName, dbId) {
+    try {
+        const key = _getVocaCacheKey(studentName, dbId);
+        const cachedStr = localStorage.getItem(key);
+        if (!cachedStr) return null;
+        const parsed = JSON.parse(cachedStr);
+        if (parsed && Array.isArray(parsed.records) && parsed.records.length > 0) {
+            return parsed.records;
+        }
+    } catch (e) {
+        console.warn("[VOCA Cache] 캐시 로드 오류:", e);
+    }
+    return null;
+}
+
+function _saveVocaToCache(studentName, dbId, records) {
+    try {
+        if (!Array.isArray(records) || records.length === 0) return;
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const key = _getVocaCacheKey(studentName, dbId);
+        
+        // 이전 날짜 캐시 정리
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(VOCA_CACHE_PREFIX) && !k.endsWith(todayStr)) {
+                localStorage.removeItem(k);
+            }
+        }
+        
+        localStorage.setItem(key, JSON.stringify({
+            date: todayStr,
+            timestamp: Date.now(),
+            records
+        }));
+    } catch (e) {
+        console.warn("[VOCA Cache] 캐시 저장 실패:", e);
+    }
+}
+
+function clearVocaCache(studentName = null) {
+    try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(VOCA_CACHE_PREFIX)) {
+                if (!studentName || k.includes(`_${studentName.trim()}_`)) {
+                    localStorage.removeItem(k);
+                }
+            }
+        }
+        console.log("⚡ [VOCA Cache] 단어 캐시가 성공적으로 초기화되었습니다.");
+    } catch (e) {
+        console.warn("[VOCA Cache] 캐시 초기화 실패:", e);
+    }
+}
+
 function _buildVocaQueryBody(options) {
     const body = { page_size: 100 };
 
+    const filters = [];
+
+    // 1. 학생별 서버 필터 (1000건 -> 해당 학생 300~500건으로 3배 압축)
+    if (options.filterByStudent && options.studentName) {
+        filters.push({
+            property: "학생",
+            multi_select: { contains: options.studentName }
+        });
+    }
+
+    // 2. 과목 및 영역 분류 서버 필터 (지정된 경우)
     if (options.useServerFilter && options.subject && options.areaZone) {
-        body.filter = {
-            and: [
-                { property: "과목", multi_select: { contains: options.subject } },
-                { property: "영역 분류", select: { equals: options.areaZone } }
-            ]
-        };
+        filters.push({ property: "과목", multi_select: { contains: options.subject } });
+        filters.push({ property: "영역 분류", select: { equals: options.areaZone } });
+    }
+
+    if (filters.length === 1) {
+        body.filter = filters[0];
+    } else if (filters.length > 1) {
+        body.filter = { and: filters };
     }
 
     return body;
 }
 
 /**
- * 노션 VOCA DB에서 단어·공부 데이터를 가져오는 통합 fetch
+ * 노션 VOCA DB에서 단어·공부 데이터를 가져오는 통합 fetch (당일 캐시 탑재)
  *
  * @param {Object} [options]
  * @param {string} [options.subject] - "국어", "영어", "사회", "받아쓰기" 등. 생략 시 전 과목
@@ -113,20 +192,38 @@ function _buildVocaQueryBody(options) {
  * @param {string} [options.studentName] - 학생 이름 필터 (기본: window.currentUserName)
  * @param {boolean} [options.filterByStudent=true] - 학생 필터 적용 여부
  * @param {boolean} [options.useServerFilter=false] - true면 과목+영역을 노션 API filter로 전송
+ * @param {boolean} [options.forceRefresh=false] - true면 캐시 무시하고 노션 서버에서 강제 최신화
  * @param {string} [options.dbId] - DB ID override (기본: VOCA_DB_ID)
  * @returns {Promise<Array>}
  */
 async function fetchVocaFromNotion(options = {}) {
     const dbId = options.dbId || VOCA_DB_ID;
+    const forceRefresh = options.forceRefresh === true;
+
+    let studentTarget = (options.studentName ?? window.currentUserName ?? "민수").trim();
+    if (studentTarget === '아빠' || studentTarget === '엄마' || studentTarget === '어른' || studentTarget === 'admin') {
+        const profile = window.currentProfile || localStorage.getItem('currentUser') || 'son';
+        studentTarget = profile === 'daughter' ? '민서' : '민수';
+    }
+
     const queryOptions = {
         subject: options.subject || null,
         altSubjects: options.altSubjects || [],
         areaZone: options.areaZone || null,
-        studentName: options.studentName,
+        studentName: studentTarget,
         filterByStudent: options.filterByStudent !== false,
         useServerFilter: options.useServerFilter === true
     };
 
+    // 1. ⚡ 캐시 확인 (강제 새로고침이 아닐 때)
+    if (!forceRefresh) {
+        const cachedRecords = _loadVocaFromCache(queryOptions.studentName, dbId);
+        if (cachedRecords && cachedRecords.length > 0) {
+            return cachedRecords.filter(record => _matchesVocaRecord(record, queryOptions));
+        }
+    }
+
+    // 2. 🌐 노션 API 통신 (캐시 없거나 강제 새로고침 시)
     let allResults = [];
     let hasMore = true;
     let nextCursor = undefined;
@@ -150,12 +247,46 @@ async function fetchVocaFromNotion(options = {}) {
             nextCursor = data.next_cursor;
         }
 
-        return allResults
-            .map(parseVocaPage)
-            .filter(record => _matchesVocaRecord(record, queryOptions));
+        const parsedRecords = allResults.map(parseVocaPage);
+
+        // ⚡ 당일 캐시 저장
+        _saveVocaToCache(queryOptions.studentName, dbId, parsedRecords);
+
+        return parsedRecords.filter(record => _matchesVocaRecord(record, queryOptions));
     } catch (error) {
         console.error(`[fetchVocaFromNotion] ${options.subject || "전체"} 데이터 로딩 실패:`, error);
+        // 에러 시 기존 캐시로 안전 폴백
+        const fallback = _loadVocaFromCache(queryOptions.studentName, dbId);
+        if (fallback && fallback.length > 0) {
+            return fallback.filter(record => _matchesVocaRecord(record, queryOptions));
+        }
         return [];
+    }
+}
+
+/**
+ * 🚀 로비 진입 시 백그라운드에서 조용히 VOCA 데이터를 사전 다운로드 및 캐싱하는 헬퍼 (논블로킹)
+ */
+async function prefetchVocaData(studentName = null) {
+    try {
+        let target = (studentName || window.currentUserName || '민수').trim();
+        if (target === '아빠' || target === '엄마' || target === '어른' || target === 'admin') {
+            const profile = window.currentProfile || localStorage.getItem('currentUser') || 'son';
+            target = profile === 'daughter' ? '민서' : '민수';
+        }
+
+        // 캐시가 이미 존재하면 추가 쿼리 없이 완료
+        const existing = _loadVocaFromCache(target, VOCA_DB_ID);
+        if (existing && existing.length > 0) {
+            console.log(`⚡ [VOCA Prefetch] ${target}의 단어 캐시가 이미 준비되어 있습니다 (${existing.length}건).`);
+            return;
+        }
+
+        console.log(`🚀 [VOCA Prefetch] ${target}의 단어 데이터를 백그라운드에서 사전 동기화합니다...`);
+        await fetchVocaFromNotion({ studentName: target, forceRefresh: false });
+        console.log(`✅ [VOCA Prefetch] ${target} 백그라운드 프리패치 완료!`);
+    } catch (e) {
+        console.warn(`⚠️ [VOCA Prefetch] 사전 동기화 지연:`, e);
     }
 }
 

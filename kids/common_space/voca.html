@@ -92,7 +92,12 @@
 <body>
 
 <div class="top-nav">
-  <div style="font-size: 1.2rem; font-weight: bold;">📚 지식 도서관</div>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <div style="font-size: 1.2rem; font-weight: bold;">📚 지식 도서관</div>
+    <button id="vocaSyncBtn" onclick="manualSyncVocaData()" style="background: rgba(167, 139, 250, 0.2); border: 1px solid var(--purple); color: var(--purple); padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-weight: bold; transition: all 0.2s;" title="노션 최신 데이터 강제 동기화">
+      🔄 최신 동기화
+    </button>
+  </div>
   <a href="../../lobby.html" class="exit-btn">🚪 로비로 나가기</a>
 </div>
 
