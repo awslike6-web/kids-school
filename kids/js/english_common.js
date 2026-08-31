@@ -1258,7 +1258,26 @@ window.renderSentenceChat = function() {
                 ${activePassage.translation.replace(/\n/g, '<br>')}
             </div>` : '';
 
+    const isParent = (typeof isParentProfile === 'function' && isParentProfile()) || (isAdmin ?? false);
+    let parentBadgeHtml = '';
+    if (isParent && typeof getFairyPersonaSummary === 'function') {
+        const summary = getFairyPersonaSummary('ENGLISH', '공부방');
+        parentBadgeHtml = `
+            <div style="background:linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(59, 130, 246, 0.18)); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; font-size: 0.8rem; text-align: left;">
+                <div style="font-weight:bold; color:#d97706; margin-bottom:3px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>👨‍👩‍👧 [부모 검수 모드] ${summary.icon} ${summary.title}</span>
+                    <span style="background:rgba(217, 119, 6, 0.15); padding:1px 6px; border-radius:6px; font-size:0.72rem;">대상: ${summary.childName}</span>
+                </div>
+                <div style="color:#4b5563; font-size:0.78rem; line-height:1.4;">
+                    🎭 <strong>역할</strong>: ${summary.role}<br>
+                    💡 <strong>코칭 전략</strong>: ${summary.description}
+                </div>
+            </div>
+        `;
+    }
+
     container.innerHTML = `
+        ${parentBadgeHtml}
         <div class="passage-box" style="font-size:0.95rem; max-height:150px; overflow-y:auto; margin-bottom:15px; border-left-color:var(--purple);">
             <strong>[${activePassage.title}]</strong><br>
             ${passageText.replace(/\n/g, '<br>')}

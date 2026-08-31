@@ -67,13 +67,40 @@ async function initFairyChat(subject, roomType = '공부방') {
     const existingWidget = document.getElementById('fairy-widget');
     if (existingWidget) existingWidget.remove();
 
+    const isParent = (typeof isParentProfile === 'function' && isParentProfile())
+        || (typeof _isChatMemoryAdminMode === 'function' && _isChatMemoryAdminMode())
+        || ['아빠', '엄마', '어른', 'admin'].includes(localStorage.getItem('currentUserName'));
+
+    let parentPersonaBadgeHtml = '';
+    if (isParent && typeof getFairyPersonaSummary === 'function') {
+        const summary = getFairyPersonaSummary(subject, roomType);
+        parentPersonaBadgeHtml = `
+            <div id="fairy-parent-persona-box" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(171, 71, 188, 0.2)); border-bottom: 1px solid rgba(255, 215, 0, 0.35); padding: 8px 12px; font-size: 0.78rem; color: #f0e68c; line-height: 1.4;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                    <span style="font-weight:bold; color:#ffd700; display:flex; align-items:center; gap:4px;">
+                        👨‍👩‍👧 [부모 검수] ${summary.icon} ${summary.title}
+                    </span>
+                    <span style="background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:8px; font-size:0.7rem; color:#fff;">
+                        대상: ${summary.childName}
+                    </span>
+                </div>
+                <div style="color:#e2e8f0; font-size:0.75rem; margin-bottom:2px;">
+                    🎭 <strong>역할</strong>: ${summary.role}
+                </div>
+                <div style="color:#cbd5e1; font-size:0.72rem; opacity:0.9;">
+                    💡 <strong>코칭 전략</strong>: ${summary.description}
+                </div>
+            </div>
+        `;
+    }
+
     const fairyUI = `
         <div id="fairy-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 10000; font-family: 'Nanum Gothic', 'Malgun Gothic', Arial, sans-serif;">
             <button id="fairy-toggle-btn" onclick="toggleFairyWindow()" style="width: 55px; height: 55px; border-radius: 50%; background: #ab47bc; border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;">
                 🧚
             </button>
             
-            <div id="fairy-chat-panel" style="display: none; position: absolute; bottom: 70px; right: 0; width: 320px; height: 450px; background: #161b22; border: 2px solid #30363d; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; text-align: left;">
+            <div id="fairy-chat-panel" style="display: none; position: absolute; bottom: 70px; right: 0; width: 330px; height: 470px; background: #161b22; border: 2px solid #30363d; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; text-align: left;">
                 <div style="background: #ab47bc; padding: 8px 12px; color: white; font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
                     <button id="fairy-panel-tts-btn" onclick="toggleFairyTtsSetting()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); border-radius: 12px; color: white; font-size: 0.75rem; padding: 3px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="요정 목소리 켜기/끄기">
                         ${localStorage.getItem('fairy_tts_enabled') !== 'false' ? '🔊 음성 ON' : '🔇 음성 OFF'}
@@ -81,6 +108,7 @@ async function initFairyChat(subject, roomType = '공부방') {
                     <span style="flex:1; text-align:center;">${config.name}</span>
                     <button onclick="toggleFairyWindow()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; padding: 0 4px;" title="창 닫기">✖</button>
                 </div>
+                ${parentPersonaBadgeHtml}
                 <div id="fairy-messages" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #0d1117;">
                     <div style="background: #21262d; border-left: 4px solid #ab47bc; color: #c9d1d9; padding: 8px; border-radius: 8px; font-size: 0.85rem; align-self: flex-start; max-width: 85%;">
                         ${config.greeting}

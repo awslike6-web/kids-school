@@ -1689,6 +1689,95 @@ function buildDiscussionAISystemPrompt(subject, passage, extraPrompt = '') {
     return prompt;
 }
 
+/**
+ * 👨‍👩‍👧 부모(관리자) 프로필 여부 판별 헬퍼
+ */
+function isParentProfile() {
+    const savedName = (window.currentUserName || localStorage.getItem('currentUserName') || '').trim();
+    return savedName === '아빠' || savedName === '엄마' || savedName === '어른' || savedName === 'admin';
+}
+
+/**
+ * 🎭 구역 및 자녀별 요정 페르소나 요약 정보 추출기 (부모 검수 모드용)
+ */
+function getFairyPersonaSummary(subject = '', roomType = '공부방', targetChild = null) {
+    const childName = targetChild || getActiveChildName();
+    let title = "";
+    let role = "";
+    let description = "";
+    let icon = "🧚";
+
+    const subj = String(subject || '').toUpperCase();
+
+    if (subj === 'ENGLISH' || subj === '영어' || subj === 'STAGE6') {
+        icon = "🗣️";
+        title = "영어 회화 & 독해 멘토 코코";
+        role = `스토리 기반 영어 티키타카 멘토 (${childName} 맞춤)`;
+        description = "쉬운 영어 표현과 친절한 한글 해설을 병행하며 스토리 몰입 및 영어 발화 유도";
+    } else if (subj === 'KOREAN_DISCUSSION' || subj === 'SENTENCE' || subj === '국어_토론') {
+        icon = "📖";
+        title = "국어 독서 토론 멘토 코코";
+        role = `깊이 있는 독서 탐구 멘토 (${childName} 맞춤)`;
+        description = "안티-반복 엔진 탑재, 지문 속 인물 심리와 사건 원인 탐구 및 일상 경험 연결";
+    } else if (roomType === '로비') {
+        icon = "🏡";
+        if (childName === '민서') {
+            title = "애교 만점 여동생 코코";
+            role = "귀여운 여동생 페르소나 (민서를 '언니'로 호칭)";
+            description = "선생님처럼 굴지 않고 언니의 하루 일상과 학교 이야기를 신나게 경청하고 공감";
+        } else {
+            title = "단짝 친구 / 형 코코";
+            role = "다정한 친구 페르소나 (민수 눈높이 맞춤)";
+            description = "일상 고민과 관심사 수다를 편하게 나누며 든든하게 공감해 주는 친구";
+        }
+    } else if (roomType === '마이룸') {
+        icon = "🎁";
+        if (childName === '민서') {
+            title = "과일가게 & 젤리 상점 파트너";
+            role = "역할놀이(소꿉놀이) 파트너 페르소나";
+            description = "수박·딸기·포도·하리보 젤리를 손님/사장님 번갈아가며 거래하는 귀여운 역할놀이";
+        } else {
+            title = "비밀기지 무기 상인 & 작전 참모";
+            role = "마인크래프트 게임 참모 NPC 페르소나";
+            description = "구매한 무기/장비 성능을 멋지게 설명하고 다음 전투를 위한 무기를 추천하는 게임 참모";
+        }
+    } else if (roomType === '용어방') {
+        icon = "📚";
+        if (childName === '민수') {
+            title = "사고 확장 질문 도우미";
+            role = "메타인지 유도형 탐험 파트너";
+            description = "정답 대신 '만약 ~라면?', '왜 그럴까?' 질문으로 민수가 스스로 생각을 넓히게 유도";
+        } else {
+            title = "동화 스토리텔링 도우미";
+            role = "쉬운 비유 & 큰 리액션 요정";
+            description = "어려운 단어와 개념을 귀여운 동화와 일상 비유로 쉽게 풀어서 설명";
+        }
+    } else if (subj === 'KOREAN' || subj === '국어') {
+        icon = "🔤";
+        title = "단어요정 🧚‍♀️";
+        role = "4단계 글쓰기 수호신";
+        description = "상황 감정 이끌어내기 ➔ 감정 단어 추천 ➔ 마법 맞춤법 교정 ➔ 인과관계 완성";
+    } else if (subj === 'MATH' || subj === '수학') {
+        icon = "🔢";
+        title = "수학요정 코코 🧙‍♂️";
+        role = childName === '민서' ? "1학년 숫자요정 (묶음과 낱개, 10 만들기 비유)" : "5학년 수학 탐험요정 (약수/배수/나눗셈 원리 지도)";
+        description = "정답을 직접 주지 않고 단계별 힌트와 일상 속 직관적 비유로 수학적 사고력 자극";
+    } else {
+        icon = "🎮";
+        if (childName === '민수') {
+            title = "전략적 탐험가 (게임 파트너)";
+            role = "게임 NPC 작전 참모 페르소나";
+            description = "틀린 문제는 '보스 몬스터/함정'으로 치환하여 멘탈을 보호하고 작전 공략을 격려";
+        } else {
+            title = "성장형 리더십 AI 동생";
+            role = "배움을 갈구하는 동생 페르소나";
+            description = "'언니 나한테 설명해줘!'를 통해 민서가 크리에이터처럼 신나서 설명하며 메타인지 발휘";
+        }
+    }
+
+    return { title, role, description, childName, icon };
+}
+
 function generateChatSessionId() {
     return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
