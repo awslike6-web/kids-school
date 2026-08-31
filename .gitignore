@@ -11,5 +11,8 @@ __pycache__/
 .env*
 !.env.example
 
-# Uploads temp directory
+# Uploads directory (all reference materials, textbook photos, etc.)
 uploads/
+/uploads/
+uploads/**
+**/uploads/**
