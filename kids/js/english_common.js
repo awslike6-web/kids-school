@@ -237,10 +237,18 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             if (records && records.length > 0) {
                 allFetchedRecords = records;
                 
+                // 3단계(영단어/숙어)와 4단계(영어 문장) 데이터 목적별 분리
+                let candidateRecords = records;
+                if (type === 'stage3') {
+                    candidateRecords = records.filter(isVocaOrIdiomRecord);
+                } else if (type === 'stage4') {
+                    candidateRecords = records.filter(isSentenceRecord);
+                }
+                
                 // 학년/단원 필터 UI (사회방 이식)
-                const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
+                const uniqueGrades = [...new Set(candidateRecords.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
                 if (uniqueGrades.length === 0) {
-                    startMissionWithFilteredData(records, innerBody);
+                    startMissionWithFilteredData(candidateRecords, innerBody);
                 } else {
                     renderDynamicGradeUI(uniqueGrades, innerBody);
                 }
@@ -252,6 +260,22 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         console.error("통신 에러:", e);
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">오류가 발생했습니다: ${e.message}</div>`;
     }
+}
+
+// ========================================================
+// 🔍 영단어/숙어 vs 문장 판별 헬퍼 (노션 어휘유형 및 품사 속성 동기화)
+// ========================================================
+function isSentenceRecord(r) {
+    if (!r) return false;
+    const type = String(r.wordType || r.type || r.pos || '').trim();
+    return type === '문장';
+}
+
+function isVocaOrIdiomRecord(r) {
+    if (!r) return false;
+    const type = String(r.wordType || r.type || r.pos || '').trim();
+    if (type === '문장') return false;
+    return true; // '단어', '숙어' 및 기본 어휘 항목
 }
 
 // ========================================================
@@ -271,7 +295,12 @@ function renderDynamicGradeUI(grades, container) {
 window.selectDynamicGrade = function(grade) {
     selectedEnglishGrade = grade;
     const innerBody = document.getElementById('overlayInnerBody');
-    const matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
+    let matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
+    if (currentMissionType === 'stage3') {
+        matchedRecords = matchedRecords.filter(isVocaOrIdiomRecord);
+    } else if (currentMissionType === 'stage4') {
+        matchedRecords = matchedRecords.filter(isSentenceRecord);
+    }
     const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level).trim()))].filter(u => u && u !== "undefined").sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
     
     if (uniqueUnits.length === 0 || (uniqueUnits.length === 1 && uniqueUnits[0] === "기본 단원")) {
@@ -299,15 +328,25 @@ function renderDynamicUnitUI(units, container) {
 window.selectDynamicUnit = function(unit) {
     selectedEnglishUnit = unit;
     const innerBody = document.getElementById('overlayInnerBody');
-    const finalRecords = allFetchedRecords.filter(r => 
+    let finalRecords = allFetchedRecords.filter(r => 
         (r.grade === selectedEnglishGrade || r.grades.includes(selectedEnglishGrade)) &&
         String(r.level).trim() === unit
     );
+    if (currentMissionType === 'stage3') {
+        finalRecords = finalRecords.filter(isVocaOrIdiomRecord);
+    } else if (currentMissionType === 'stage4') {
+        finalRecords = finalRecords.filter(isSentenceRecord);
+    }
     startMissionWithFilteredData(finalRecords, innerBody);
 };
 
 function getEnglishFilteredRecords() {
     let matchedRecords = allFetchedRecords;
+    if (currentMissionType === 'stage3') {
+        matchedRecords = matchedRecords.filter(isVocaOrIdiomRecord);
+    } else if (currentMissionType === 'stage4') {
+        matchedRecords = matchedRecords.filter(isSentenceRecord);
+    }
     if (selectedEnglishGrade) {
         matchedRecords = matchedRecords.filter(r => r.grade === selectedEnglishGrade || r.grades.includes(selectedEnglishGrade));
     }
@@ -346,9 +385,9 @@ window.englishToggleOrder = function() {
 function startMissionWithFilteredData(records, innerBody) {
     let filtered = records;
     if (currentMissionType === 'stage3') {
-        filtered = records.filter(r => r.pos !== '문장');
+        filtered = records.filter(isVocaOrIdiomRecord);
     } else if (currentMissionType === 'stage4') {
-        filtered = records.filter(r => r.pos === '문장');
+        filtered = records.filter(isSentenceRecord);
     }
     activeSectionData = prepareEnglishVocaRecords(filtered).slice(0, 10);
 
@@ -846,7 +885,7 @@ function renderStage4UI(container) {
     } else {
         // [빈칸 뚫기 객관식 3지선다 UI] (짧은 문장)
         const choices = [answerSentence];
-        const otherSentences = allFetchedRecords.filter(r => r.pos === '문장' && r.word !== answerSentence).map(r => r.word);
+        const otherSentences = allFetchedRecords.filter(r => isSentenceRecord(r) && r.word !== answerSentence).map(r => r.word);
         otherSentences.sort(() => Math.random() - 0.5);
         choices.push(otherSentences[0] || "I am a boy.");
         choices.push(otherSentences[1] || "You are a girl.");
@@ -1143,21 +1182,9 @@ window.renderSentenceChat = function() {
                 await processDiscussionMessageRewards(text);
             }
             sentenceHistory.push({ role: "user", content: text });
-            const passageExtra = (activePassage.chatbotSystemPrompt || `
-                너는 방금 읽은 영어 지문을 바탕으로 아이와 다정하게 대화를 나누는 AI 영어 멘토 코코야. 
-                단순히 대화만 나누는 것이 아니라, 다음 내용들을 아이와 함께 알아가거나 설명해줘야 해:
-                1. 문장의 구성 (주어, 동사 등 핵심 구조)
-                2. 글의 주제와 핵심 내용
-                3. 지칭 대명사(it, they, he, she 등)가 본문에서 무엇을 가리키는지 설명
-                
-                말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 영어로 대답하도록 유도해줘. 
-                문법이 틀려도 다정하게 교정해주며 칭찬해줘. 
-                아이가 지문에 대해 자신의 생각을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
-            `) + (typeof CONJUNCTION_GRADING_GUARDRAIL !== 'undefined' ? `\n\n${CONJUNCTION_GRADING_GUARDRAIL}` : '')
-                + "\n\n다음은 아이가 읽은 영어 지문 원문이야:\n" + passageText;
-            const systemPrompt = typeof buildFullAISystemPrompt === 'function'
-                ? buildFullAISystemPrompt('공부방', passageExtra)
-                : passageExtra;
+            const systemPrompt = typeof buildDiscussionAISystemPrompt === 'function'
+                ? buildDiscussionAISystemPrompt('영어', activePassage)
+                : (typeof buildFullAISystemPrompt === 'function' ? buildFullAISystemPrompt('공부방', passageText) : passageText);
             
             const { text: reply } = await fetchWithGeminiRetry(
                 `${PROXY_URL}/v1/chat/completions?type=ai`,
@@ -1165,7 +1192,7 @@ window.renderSentenceChat = function() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "gemini-3.6-flash",
+                        model: "gemini-2.5-flash",
                         messages: [
                             { role: "system", content: systemPrompt },
                             ...sentenceHistory
@@ -1246,8 +1273,10 @@ window.renderSentenceChat = function() {
     `;
     
     if (sentenceHistory.length === 0) {
-        const initialMsg = `Hello! 방금 읽은 <strong>[${activePassage.title}]</strong> 잘 읽어봤어? 첫 번째 질문! ✨<br>Did you like this story? Type 'Yes' or 'No'! (이야기가 마음에 들었어? Yes나 No로 대답해봐!)`;
-        appendSentenceMsg('ai', initialMsg);
+        const initialMsgHtml = `Hello! 방금 읽은 <strong>[${activePassage.title}]</strong> 잘 읽어봤어? 첫 번째 질문! ✨<br>Did you like this story? Type 'Yes' or 'No'! (이야기가 마음에 들었어? Yes나 No로 대답해봐!)`;
+        const initialMsgText = `Hello! Did you like the story [${activePassage.title}]? Type Yes or No!`;
+        appendSentenceMsg('ai', initialMsgHtml);
+        sentenceHistory.push({ role: "assistant", content: initialMsgText });
         speakFairyTTS(`Did you like this story? Type Yes or No!`);
     } else {
         sentenceHistory.forEach(h => appendSentenceMsg(h.role === 'user' ? 'user' : 'ai', h.content.replace(/\n/g, '<br>')));

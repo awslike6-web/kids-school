@@ -43,9 +43,9 @@ function parseVocaPage(page) {
         imageUrl,
         audioUrl,
         interactiveUrl: p["인터렉티브 링크"]?.url || p["인터렉티브 링크"]?.rich_text?.[0]?.plain_text || p["인터랙티브 링크"]?.url || p["인터랙티브 링크"]?.rich_text?.[0]?.plain_text || null,
-        pos: p["품사"]?.rich_text?.[0]?.plain_text || "",
-        wordType: p["어휘유형"]?.select?.name || "",
-        type: p["어휘유형"]?.select?.name || "",
+        pos: p["품사"]?.select?.name || p["품사"]?.rich_text?.[0]?.plain_text || "",
+        wordType: p["어휘유형"]?.select?.name || p["어휘유형"]?.multi_select?.[0]?.name || p["어휘유형"]?.rich_text?.[0]?.plain_text || "",
+        type: p["어휘유형"]?.select?.name || p["어휘유형"]?.multi_select?.[0]?.name || p["어휘유형"]?.rich_text?.[0]?.plain_text || "",
         stage: String(unitRaw),
         level: unitRaw,
         grades,
@@ -1635,6 +1635,60 @@ function buildFullAISystemPrompt(roomType, extraPrompt = '') {
     return full;
 }
 
+/**
+ * 🗣️ 국어 및 영어 지문 토론방 전용 지능형 시스템 프롬프트 빌더
+ * - 안티-반복(Anti-Repetition) 절대 규칙 탑재
+ * - 아이 발화 키워드 구체적 호응 및 공감
+ * - 역질문 성실 응답 & 지문 기반 생각 확장
+ * - 단계별 대화 심화 (1턴: 감상/경청 -> 2턴: 인물 심리/원인 파헤치기 -> 3턴+: 상상/일상 연결)
+ */
+function buildDiscussionAISystemPrompt(subject, passage, extraPrompt = '') {
+    const childName = getActiveChildName();
+    const passageTitle = passage?.title || '오늘의 지문';
+    const passageText = passage?.fullText || (passage?.paragraphs ? passage.paragraphs.map(p => p.text).join('\n') : '');
+    const isEnglish = (subject === '영어' || subject === 'ENGLISH' || subject === 'stage6');
+
+    let prompt = "";
+    if (isEnglish) {
+        prompt = `You are "Coco (코코 요정)", a friendly, cheerful, and encouraging AI English mentor having a natural conversation with ${childName} about the English story "${passageTitle}".
+
+[Conversation Flow & Anti-Repetition Rules - CRITICAL]
+1. 🚫 NEVER repeat the exact same greeting, question, or phrasing from previous turns.
+2. 🎯 Directly acknowledge what ${childName} just said by echoing or praising key words/ideas from their message.
+3. 🙋 If ${childName} asks you a question (e.g. "Why did they do that?", "What do you think?"), FIRST answer kindly based on the story, THEN ask a fresh thought-provoking question to keep the conversation flowing.
+4. 🚀 Deepen the discussion step by step:
+   - Turn 1: Celebrate their first reaction and praise their effort.
+   - Turn 2: Explore the characters' feelings, reasons behind actions, or surprising plot points.
+   - Turn 3+: Ask "What would you do if you were the main character?" or relate the theme to ${childName}'s own life and interests.
+5. ⚡ Length & Tone: Keep your reply concise (1-2 clear English sentences, optionally accompanied by a warm, short Korean cheer). Total under 50-80 words so it sounds natural in TTS.
+6. 💎 Reward Rule: If ${childName} expresses their own thought or answer well in English for the first time, append [SUCCESS] at the very end. In subsequent turns, do NOT keep repeating [SUCCESS]; focus on engaging story conversation.`;
+    } else {
+        prompt = `너는 ${childName}와 함께 읽은 지문 [${passageTitle}]에 대해 신나고 깊이 있는 대화를 나누는 다정하고 지혜로운 AI 요정 코코야.
+
+[지문 토론 진행 및 안티-반복 절대 규칙 - 필독]
+1. 🚫 이전 대화에서 이미 했던 말, 인사, 질문을 절대로 반복하지 마라.
+2. 🎯 아이가 방금 한 말의 핵심 단어나 생각을 반드시 구체적으로 짚어주며 맞장구치고 공감해줘.
+3. 🙋 아이가 요정에게 질문을 던졌을 때("~는 왜 그런 거야?", "너는 어떻게 생각해?"):
+   - 지문 속 사건과 인물의 심리를 바탕으로 요정의 생각과 이유를 친절하게 먼저 설명해 준 뒤, 다음 생각거리 질문을 던져라.
+4. 🚀 대화를 단계적으로 확장하며 깊이를 더해라:
+   - (1턴) 지문에 대한 아이의 첫 느낌과 생각 경청 & 구체적 칭찬
+   - (2턴) 지문 속 인물의 숨은 마음, 행동의 이유, 갈등의 원인을 함께 파헤치기
+   - (3턴 이상) "만약 네가 주인공이었다면?", "너에게도 이런 비슷한 경험이 있었어?"처럼 상상력과 일상 경험으로 연결
+5. ⚡ 답변 호흡: 1~2문장 (최대 100자 내외)으로 산뜻하고 리듬감 있게 말해라. 한 번에 혼자 긴 설명을 늘어놓지 말고 아이가 편하게 말할 수 있도록 티키타카를 해라.
+6. 💎 보상 규칙: 아이가 지문에 대해 자신의 생각이나 느낌을 처음으로 1문장 이상 잘 표현했을 때 답변 끝에 [SUCCESS]를 붙여라. 이미 칭찬을 마친 이후 턴에서는 불필요하게 칭찬만 맴돌지 말고 실제 지문 이야기 몰입에 집중해라.`;
+    }
+
+    if (passage?.chatbotSystemPrompt) {
+        prompt += `\n\n[지문 맞춤 가이드]\n${passage.chatbotSystemPrompt}`;
+    }
+    if (extraPrompt) {
+        prompt += `\n\n[추가 가이드]\n${extraPrompt}`;
+    }
+    prompt += `\n\n[지문 원문: ${passageTitle}]\n${passageText}`;
+
+    return prompt;
+}
+
 function generateChatSessionId() {
     return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -1932,8 +1986,8 @@ async function callDirectGoogleGemini(payload) {
         }
     }
 
-    // 🚀 구글 최신 플래그십 모델 (gemini-3.6-flash ➔ gemini-2.5-flash ➔ gemini-2.5-pro) 및 503 자동 재시도
-    const modelCandidates = ["gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.5-pro"];
+    // 🚀 구글 최신 플래그십 모델 (gemini-2.5-flash ➔ gemini-2.5-pro ➔ gemini-1.5-flash) 및 503 자동 재시도
+    const modelCandidates = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"];
     let lastErr = null;
 
     for (const modelName of modelCandidates) {

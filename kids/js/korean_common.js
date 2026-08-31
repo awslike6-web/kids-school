@@ -774,19 +774,16 @@ window.renderSentenceChat = function() {
                 await processDiscussionMessageRewards(text);
             }
             sentenceHistory.push({ role: "user", content: text });
-            const passageExtra = (activePassage.chatbotSystemPrompt || "너는 방금 읽은 지문 이야기를 바탕으로 아이와 다정하게 대화를 나누는 AI 요정 코코야. 말투는 어린이 진행자처럼 다정하고 유창하게 하고, 아이가 지문에 대해 자신의 생각이나 느낀 점을 한 문장 이상 잘 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.")
-                + (typeof CONJUNCTION_GRADING_GUARDRAIL !== 'undefined' ? `\n\n${CONJUNCTION_GRADING_GUARDRAIL}` : '')
-                + "\n\n다음은 아이가 읽은 지문 원문이야:\n" + passageText;
-            const systemPrompt = typeof buildFullAISystemPrompt === 'function'
-                ? buildFullAISystemPrompt('공부방', passageExtra)
-                : passageExtra;
+            const systemPrompt = typeof buildDiscussionAISystemPrompt === 'function'
+                ? buildDiscussionAISystemPrompt('국어', activePassage)
+                : (typeof buildFullAISystemPrompt === 'function' ? buildFullAISystemPrompt('공부방', passageText) : passageText);
             const { text: reply } = await fetchWithGeminiRetry(
                 `${PROXY_URL}/v1/chat/completions?type=ai`,
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: "gemini-3.6-flash",
+                        model: "gemini-2.5-flash",
                         messages: [
                             { role: "system", content: systemPrompt },
                             ...sentenceHistory
@@ -853,8 +850,10 @@ window.renderSentenceChat = function() {
     `;
     
     if (sentenceHistory.length === 0) {
-        const initialMsg = `안녕! 방금 읽은 <strong>[${activePassage.title}]</strong> 이야기에 대해 나랑 이야기해볼까? 어떤 생각이 들었어? ✨`;
-        appendSentenceMsg('ai', initialMsg);
+        const initialMsgHtml = `안녕! 방금 읽은 <strong>[${activePassage.title}]</strong> 이야기에 대해 나랑 이야기해볼까? 어떤 생각이 들었어? ✨`;
+        const initialMsgText = `안녕! 방금 읽은 [${activePassage.title}] 이야기에 대해 나랑 이야기해볼까? 어떤 생각이 들었어?`;
+        appendSentenceMsg('ai', initialMsgHtml);
+        sentenceHistory.push({ role: "assistant", content: initialMsgText });
         speakFairyTTS(`안녕! 방금 읽은 ${activePassage.title} 이야기에 대해 나랑 이야기해볼까?`);
     } else {
         sentenceHistory.forEach(h => appendSentenceMsg(h.role === 'user' ? 'user' : 'ai', h.content.replace(/\n/g, '<br>')));
