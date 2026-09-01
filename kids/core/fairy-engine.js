@@ -487,9 +487,12 @@ function openTtsVoiceSettingsModal() {
                 </div>
 
                 <div>
-                    <label style="font-size:0.9rem; font-weight:bold; color:#58a6ff; display:block; margin-bottom:6px;">🔑 OpenAI API Key</label>
-                    <input type="password" id="ttsOpenAiKeyInput" value="${currentKey}" placeholder="sk-..." style="width:100%; box-sizing:border-box; padding:10px 14px; border-radius:10px; border:1px solid #30363d; background:#0d1117; color:#fff; font-size:0.95rem;">
-                    <p style="font-size:0.8rem; color:#8b949e; margin:6px 0 0 0;">입력하신 키는 브라우저 로컬스토리지에 안전하게 보관됩니다.</p>
+                    <label style="font-size:0.9rem; font-weight:bold; color:#58a6ff; display:block; margin-bottom:6px;">🔑 OpenAI API Key (sk-...)</label>
+                    <input type="password" id="ttsOpenAiKeyInput" value="${currentKey}" placeholder="sk-proj-..." style="width:100%; box-sizing:border-box; padding:10px 14px; border-radius:10px; border:1px solid #30363d; background:#0d1117; color:#fff; font-size:0.95rem;">
+                    <p style="font-size:0.8rem; color:#8b949e; margin:6px 0 0 0; line-height:1.4;">
+                        ※ <strong>OpenAI(ChatGPT) 전용 키</strong>를 입력해 주세요. (발급: <a href="https://platform.openai.com/api-keys" target="_blank" style="color:#58a6ff;">platform.openai.com/api-keys</a>)<br>
+                        <span style="color:#e3b341;">(⚠️ AQ... 로 시작하는 구글 제미나이 키는 사용하실 수 없습니다.)</span>
+                    </p>
                 </div>
 
                 <div>
@@ -531,6 +534,18 @@ async function testCurrentTtsVoice() {
         alert("API 키를 먼저 입력해 주세요!");
         return;
     }
+
+    // Google Gemini 키 입력 감지 시 친절한 안내
+    if (key.startsWith('AQ.') || key.startsWith('AIza')) {
+        alert("⚠️ 입력하신 키는 Google Gemini API 키입니다!\n\nOpenAI 음성(Nova/Shimmer)을 사용하시려면 OpenAI 플랫폼(https://platform.openai.com/api-keys)에서 발급받은 'sk-'로 시작하는 OpenAI API 키를 입력해 주세요.");
+        return;
+    }
+
+    if (!key.startsWith('sk-')) {
+        alert("⚠️ 올바른 OpenAI API 키 형식이 아닙니다.\nOpenAI 키는 보통 'sk-' 또는 'sk-proj-'로 시작합니다.");
+        return;
+    }
+
     const sampleText = "안녕! 나는 공부방의 귀여운 인공지능 요정 코코야! 오늘 공부도 신나게 시작해볼까?";
     try {
         const audioUrl = await fetchOpenAiTtsAudio(sampleText, {
@@ -548,6 +563,10 @@ async function testCurrentTtsVoice() {
 
 function saveTtsVoiceSettings() {
     const key = document.getElementById('ttsOpenAiKeyInput').value.trim();
+    if (key && (key.startsWith('AQ.') || key.startsWith('AIza'))) {
+        alert("⚠️ 입력하신 키는 Google Gemini 키입니다. 'sk-'로 시작하는 OpenAI 키를 입력해 주세요.");
+        return;
+    }
     localStorage.setItem('OPENAI_API_KEY', key);
     localStorage.setItem('OPENAI_TTS_VOICE', selectedVoiceTemp || 'nova');
     if (typeof APP_CONFIG !== 'undefined') {
