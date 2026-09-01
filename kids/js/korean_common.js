@@ -299,6 +299,22 @@ const KOREAN_STORYBOOK_LIBRARY = [
         border: "#3b82f6",
         link: "korean_1_2_1_storybook_2.html",
         coverImg: "images/minseo/1-2/1/storybook_2/korean_story_p1.png"
+    },
+    {
+        id: "1_2_1_3",
+        grade: "1학년 2학기",
+        gradeCode: "1-2",
+        unit: "1단원",
+        bookNum: "3권",
+        title: "슬찬이의 필통 소동",
+        subtitle: "교실에서 실천한 나-전달법 마법 주문",
+        desc: "와장창 쏟아진 필통과 그림에 그어진 까만 선! 화내지 않고 나-전달법으로 슬기롭게 해결해요.",
+        icon: "✏️",
+        color: "#10b981",
+        bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#10b981",
+        link: "korean_1_2_1_storybook_3.html",
+        coverImg: "images/minseo/1-2/1/storybook_3/korean_story_p1.png"
     }
 ];
 
