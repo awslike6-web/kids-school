@@ -1,81 +1,194 @@
-// kids/core/fairy-engine.js
-// 🧚‍♀️ 아나운서 요정 코코의 음성 제어 인공지능 엔진 (초고음질 Neural MP3 프리셋 + 프리미엄 WebSpeech 보이스 가드 탑재)
+// 📄 kids/core/fairy-engine.js (초고음질 OpenAI TTS & 요정 코코 오디오 통합 엔진)
 
-var currentUtterance = null;
-let pendingSpeech = null; // 사용자의 첫 상호작용 전까지 낭독 요청을 대기시키는 포켓
-let isSpeechUnlocked = false; // 브라우저 음성 합성 채널 해제 여부
-let fairyPresetAudio = null; // 초고음질 Neural AI 성우 MP3 전용 플레이어
+// 🎶 실시간 오디오 및 음성 엔진 전역 상태
+let currentUtterance = null;
+let isSpeechUnlocked = false;
+let pendingSpeech = null;
+let fairyPresetAudio = null;
 
-// 🎵 초고음질 Neural AI 성우 MP3 프리셋 매핑 테이블
+// 🎙️ OpenAI TTS 재생 상태 & 오디오 캐시
+let currentOpenAiAudio = null;
+let currentTtsQueue = [];
+let isPlayingTtsQueue = false;
+const ttsAudioBlobCache = new Map(); // 짧은 칭찬 멘트 메모리 캐시
+
+// 🎧 Neural AI 성우 MP3 프리셋 데이터베이스
 const FAIRY_PRESET_AUDIOS = {
-    // 웰컴 인사
-    "welcome_korean": "welcome_korean.mp3",
-    "welcome_math_minsu": "welcome_math_minsu.mp3",
-    "welcome_math_minseo": "welcome_math_minseo.mp3",
-    "welcome_society": "welcome_society.mp3",
-    "welcome_science": "welcome_science.mp3",
-    "welcome_english": "welcome_english.mp3",
-
-    // 칭찬 & 정답
-    "정답이에요! 아주 훌륭해요!": "praise_correct_1.mp3",
-    "정답이에요! 아주 훌륭해요": "praise_correct_1.mp3",
-    "정답이에요! 훌륭해요!": "praise_correct_1.mp3",
-    "정답이에요! 훌륭해요": "praise_correct_1.mp3",
-    "우와, 정말 완벽하게 맞췄어요! 최고예요!": "praise_correct_2.mp3",
-    "우와, 정말 완벽하게 맞췄어요!": "praise_correct_2.mp3",
-    "참 잘했어요!": "praise_correct_3.mp3",
-    "참 잘했어요": "praise_correct_3.mp3",
-
-    // 오답 & 격려
-    "아쉽지만 틀렸어요. 다시 한번 생각해볼까요?": "cheer_incorrect_1.mp3",
-    "아쉽지만 틀렸어요. 다시 한번 생각해볼까요": "cheer_incorrect_1.mp3",
-    "아쉽지만 틀렸어요!": "cheer_incorrect_1.mp3",
-    "아쉽지만 틀렸어요": "cheer_incorrect_1.mp3",
-    "괜찮아요! 다시 한번 차근차근 도전해봐요!": "cheer_incorrect_2.mp3",
-    "다시 한번 생각해봐요.": "cheer_incorrect_1.mp3",
-    "다시 한번 생각해봐요": "cheer_incorrect_1.mp3",
-    "아니에요. 다시 한번 읽어볼까요?": "cheer_incorrect_1.mp3",
-    "아니에요. 다시 한번 읽어볼까요": "cheer_incorrect_1.mp3",
-
-    // TTS 켜짐 알림
-    "요정 코코의 나긋나긋한 음성 서비스가 켜졌습니다.": "tts_enabled.mp3"
+    "welcome_korean": "assets/sounds/welcome_korean.mp3",
+    "welcome_math_minsu": "assets/sounds/welcome_math_minsu.mp3",
+    "welcome_math_minseo": "assets/sounds/welcome_math_minseo.mp3",
+    "welcome_lobby": "assets/sounds/welcome_lobby.mp3",
+    "quest_complete": "assets/sounds/quest_complete.mp3"
 };
 
-function getFairyAudioBasePath() {
-    const path = window.location.pathname;
-    if (path.includes('/subjects/')) {
-        return '../../assets/audio/fairy/';
-    } else if (path.includes('/kids/')) {
-        return './assets/audio/fairy/';
+/**
+ * 🔑 OpenAI TTS 설정 조회 (APP_CONFIG 및 LocalStorage 동기화)
+ */
+function getOpenAITtsConfig() {
+    let apiKey = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.OPENAI_API_KEY) || '';
+    if (!apiKey && typeof localStorage !== 'undefined') {
+        apiKey = localStorage.getItem('OPENAI_API_KEY') || '';
     }
-    return '../../assets/audio/fairy/';
-}
+    
+    let voice = 'nova';
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_TTS_VOICE')) {
+        voice = localStorage.getItem('OPENAI_TTS_VOICE');
+    } else if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.OPENAI_TTS_VOICE) {
+        voice = APP_CONFIG.OPENAI_TTS_VOICE;
+    }
 
-function playFairyPresetAudio(mp3FileName, onEndCallback = null) {
-    if (!fairyPresetAudio) {
-        fairyPresetAudio = new Audio();
+    let speed = 1.06;
+    if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.OPENAI_TTS_SPEED) {
+        speed = APP_CONFIG.OPENAI_TTS_SPEED;
     }
-    try {
-        fairyPresetAudio.pause();
-        fairyPresetAudio.src = getFairyAudioBasePath() + mp3FileName;
-        fairyPresetAudio.onended = () => {
-            if (onEndCallback) onEndCallback();
-        };
-        fairyPresetAudio.onerror = () => {
-            if (onEndCallback) onEndCallback();
-        };
-        fairyPresetAudio.play().catch(err => {
-            console.warn("요정 프리셋 MP3 재생 실패, TTS 폴백:", err);
-            if (onEndCallback) onEndCallback();
-        });
-    } catch (e) {
-        console.warn("오디오 플레이어 예외:", e);
-        if (onEndCallback) onEndCallback();
-    }
+
+    return {
+        apiKey: apiKey.trim(),
+        voice: voice,
+        model: (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.OPENAI_TTS_MODEL) || 'tts-1',
+        speed: speed
+    };
 }
 
 /**
- * 🎙️ 브라우저 내 최고 음질 한국어 보이스 우선순위 탐색기
+ * ✂️ 긴 답변을 실시간 스트리밍 재생을 위해 문장 단위로 분할
+ */
+function splitTextIntoSentences(text) {
+    if (!text) return [];
+    // 마침표, 느낌표, 물음표, 줄바꿈 기준으로 분할하되 문장부호 유지
+    const rawChunks = text.split(/(?<=[.!?\n])\s+/);
+    const sentences = [];
+
+    for (let chunk of rawChunks) {
+        const trimmed = chunk.trim();
+        if (!trimmed) continue;
+        // 너무 짧은 감탄사나 마침표만 있는 경우 앞 문장에 병합
+        if (sentences.length > 0 && trimmed.length <= 2) {
+            sentences[sentences.length - 1] += ' ' + trimmed;
+        } else if (trimmed.length > 120) {
+            // 한 문장이 너무 길면 쉼표나 접속사 단위로 2차 분할
+            const subChunks = trimmed.split(/(?<=[,])\s+/);
+            sentences.push(...subChunks.filter(s => s.trim().length > 0));
+        } else {
+            sentences.push(trimmed);
+        }
+    }
+    return sentences.length > 0 ? sentences : [text.trim()];
+}
+
+/**
+ * ⚡ OpenAI TTS API 단일 문장 오디오 가져오기 (Blob URL 반환)
+ */
+async function fetchOpenAiTtsAudio(sentence, config) {
+    const trimmed = sentence.trim();
+    if (!trimmed) return null;
+
+    // 캐시 확인
+    const cacheKey = `${config.voice}_${config.speed}_${trimmed}`;
+    if (ttsAudioBlobCache.has(cacheKey)) {
+        return ttsAudioBlobCache.get(cacheKey);
+    }
+
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${config.apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: config.model || 'tts-1',
+            input: trimmed,
+            voice: config.voice || 'nova',
+            speed: config.speed || 1.06
+        })
+    });
+
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenAI TTS API Error (${response.status}): ${errText}`);
+    }
+
+    const blob = await response.blob();
+    const audioUrl = URL.createObjectURL(blob);
+
+    // 짧은 문장(50자 이하)은 재사용을 위해 캐싱
+    if (trimmed.length <= 50) {
+        ttsAudioBlobCache.set(cacheKey, audioUrl);
+    }
+
+    return audioUrl;
+}
+
+/**
+ * 🚀 OpenAI TTS 문장 큐잉 & 연속 스트리밍 재생기
+ */
+async function playOpenAiTtsStream(fullText, onEndCallback = null) {
+    const config = getOpenAITtsConfig();
+    if (!config.apiKey) {
+        throw new Error("OPENAI_API_KEY_NOT_FOUND");
+    }
+
+    stopFairyTTS(); // 이전 재생 중단
+
+    const sentences = splitTextIntoSentences(fullText);
+    if (sentences.length === 0) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    console.log(`🎙️ [OpenAI TTS] 총 ${sentences.length}개 문장 스트리밍 큐 시동 (보이스: ${config.voice})`);
+    isPlayingTtsQueue = true;
+
+    // 문장별 오디오 프로미스 프리페치 맵
+    const audioPromises = sentences.map(s => fetchOpenAiTtsAudio(s, config));
+
+    let currentIndex = 0;
+
+    const playNext = async () => {
+        if (!isPlayingTtsQueue || currentIndex >= sentences.length) {
+            isPlayingTtsQueue = false;
+            currentOpenAiAudio = null;
+            if (onEndCallback) onEndCallback();
+            return;
+        }
+
+        try {
+            // 현재 순서의 오디오 URL 대기
+            const audioUrl = await audioPromises[currentIndex];
+            if (!isPlayingTtsQueue || !audioUrl) {
+                currentIndex++;
+                playNext();
+                return;
+            }
+
+            const audio = new Audio(audioUrl);
+            currentOpenAiAudio = audio;
+
+            audio.onended = () => {
+                currentIndex++;
+                playNext();
+            };
+
+            audio.onerror = (e) => {
+                console.warn(`[OpenAI TTS] ${currentIndex + 1}번째 문장 재생 오류, 다음 문장으로 진행:`, e);
+                currentIndex++;
+                playNext();
+            };
+
+            await audio.play();
+        } catch (err) {
+            console.error(`[OpenAI TTS] 문장 스트리밍 도중 오류 발생:`, err);
+            currentIndex++;
+            playNext();
+        }
+    };
+
+    // 1번째 문장 즉시 재생 시동
+    playNext();
+}
+
+/**
+ * 🎙️ 브라우저 내 최고 음질 한국어 보이스 우선순위 탐색기 (폴백용)
  */
 function getBestKoreanVoice() {
     if (!window.speechSynthesis) return null;
@@ -84,24 +197,20 @@ function getBestKoreanVoice() {
     
     if (koVoices.length === 0) return null;
 
-    // 1순위: Microsoft Edge / Windows 고품질 온라인 자연스러운 음성 (SunHi, InJoon, Natural, Online, Neural)
     let best = koVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('SunHi') || v.name.includes('Neural') || v.name.includes('InJoon')) && !v.name.includes('Heami'));
     if (best) return best;
 
-    // 2순위: Google Chrome 프리미엄 한국어 음성
     best = koVoices.find(v => v.name.includes('Google') || v.name.includes('한국어') || v.name.includes('Korean'));
     if (best) return best;
 
-    // 3순위: 모바일/삼성/애플 고품질 음성 (Yuna, Sora, Seoyeon, Apple)
     best = koVoices.find(v => v.name.includes('Yuna') || v.name.includes('Sora') || v.name.includes('Seoyeon'));
     if (best) return best;
 
-    // 4순위: 기타 한국어 음성 (Heami 등 기본 레거시 음성)
     return koVoices[0];
 }
 
 function initFairyAudio() {
-    console.log(`🧚‍♀️ [요정 엔진] 초고음질 음성 가드 및 오디오 시스템 시동 완료!`);
+    console.log(`🧚‍♀️ [요정 엔진] 초고음질 OpenAI TTS & WebSpeech 하이브리드 오디오 시스템 시동 완료!`);
     
     const unlockSpeechEngine = () => {
         if (isSpeechUnlocked) return;
@@ -112,10 +221,7 @@ function initFairyAudio() {
                 silentUtterance.volume = 0;
                 window.speechSynthesis.speak(silentUtterance);
                 isSpeechUnlocked = true;
-                console.log("🔊 [요정 코코] 브라우저 음성 채널 잠금해제(Unlocked) 성공!");
-            } catch (err) {
-                console.log("⚠️ [요정 코코] 음성 엔진 언락 실행 중 조율 지연:", err);
-            }
+            } catch (err) {}
         }
         
         document.removeEventListener('click', unlockSpeechEngine);
@@ -136,75 +242,80 @@ function unlockFairySpeechEngine() {
         silentUtterance.volume = 0;
         window.speechSynthesis.speak(silentUtterance);
         isSpeechUnlocked = true;
-        console.log('🔊 [요정 코코] 음성 채널 수동 잠금해제!');
         return true;
     } catch (err) {
-        console.warn('⚠️ [요정 코코] 음성 잠금해제 실패:', err);
         return false;
     }
 }
 
 function cleanTextForTTS(rawText) {
     const original = String(rawText || '');
+    const isQuestion = original.includes('?') || /(까|니|나요|가요|게요|죠|을까|ㄹ까)\s*$/g.test(original.trim());
     
-    // 1. 의문문 판별 (물음표 기호가 있거나 한국어 의문 종결어미인 경우)
-    const isQuestion = original.includes('?') || /(까|니|나|죠|어|요|체|니\?|까\?|나\?|죠\?|요\?)\s*$/g.test(original.trim());
-
     let cleaned = original
-        // 마크다운 및 불필요한 태그 제거
-        .replace(/[\*#_`]/g, '')
-        // 광범위 유니코드 이모지 전수 제거
-        .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B50}\u{200D}\u{FE0F}]/gu, '')
-        // 뿅, 짜잔, 뾰로롱, 두둥 등 불필요한 의성어/추임새 제거
-        .replace(/(뿅|뾰로롱|짜잔|두둥|얍|슝|쿵)[!\?~^]*\s*/g, '')
-        // 특수기호가 "물음표", "느낌표", "별표" 등으로 낭독되는 현상 방지: 특수문자 전면 제거
-        .replace(/[\?!~\^@#\$%\&\*\(\)\[\]\{\}<>_\+=/\\|'";:·…•\-\—]/g, ' ')
-        // 연속 공백 및 쉼표 정돈
+        .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, '')
+        .replace(/[\*\#\`\~\_\>\[\]\(\)\{\}\=\+\-\|\\]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-
-    // ⚡ [맞춤/틀림/피드백 발화 간결화 가드: 최대 1~2문장, 60자 이내로 콤팩트 유지]
-    if (cleaned.length > 55 && (cleaned.includes('정답') || cleaned.includes('틀렸') || cleaned.includes('아쉽') || cleaned.includes('잘했') || cleaned.includes('훌륭') || cleaned.includes('맞췄'))) {
-        const sentences = cleaned.split(/(?<=[.!?])\s+/);
-        if (sentences.length > 1) {
-            cleaned = sentences[0];
-        }
-        if (cleaned.length > 55) {
-            cleaned = cleaned.slice(0, 52) + '...';
-        }
-    }
 
     return { text: cleaned, isQuestion };
 }
 
-function speakFairyTTS(text, onEndCallback = null) {
+/**
+ * 📢 요정 음성 메인 출력 함수 (1순위: OpenAI TTS ➔ 2순위: WebSpeech 폴백)
+ */
+async function speakFairyTTS(text, onEndCallback = null) {
     const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
     if (!isTtsEnabled) {
-        console.log("🔊 [TTS 우회] 코코 음성 설정이 OFF 상태이므로 낭독을 생략합니다.");
         if (onEndCallback) onEndCallback();
         return;
     }
 
-    // 1. 🎵 초고음질 Neural AI 성우 MP3 프리셋 매칭 확인
     const trimmed = String(text || '').trim();
+    if (!trimmed) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    // 1. 🎵 사전 녹음된 MP3 프리셋 확인
     if (FAIRY_PRESET_AUDIOS[trimmed]) {
-        console.log(`🎙️ [요정 엔진] 초고음질 Neural 성우 MP3 프리셋 재생: ${FAIRY_PRESET_AUDIOS[trimmed]}`);
         playFairyPresetAudio(FAIRY_PRESET_AUDIOS[trimmed], onEndCallback);
         return;
     }
 
-    // 웰컴 프리셋 키 매칭 (ex: "welcome_korean", "welcome_math_minsu")
     for (const [key, filename] of Object.entries(FAIRY_PRESET_AUDIOS)) {
         if (trimmed === key || trimmed.startsWith(key)) {
-            console.log(`🎙️ [요정 엔진] 웰컴 성우 MP3 프리셋 재생: ${filename}`);
             playFairyPresetAudio(filename, onEndCallback);
             return;
         }
     }
 
-    // 2. 🗣️ 실시간 동적 텍스트는 최고 품질 WebSpeech 보이스로 낭독
+    const { text: cleanText, isQuestion } = cleanTextForTTS(text);
+    if (!cleanText) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    // 2. 🌟 1순위: OpenAI TTS (스튜디오급 성우 음성)
+    const openAiConfig = getOpenAITtsConfig();
+    if (openAiConfig.apiKey) {
+        try {
+            await playOpenAiTtsStream(cleanText, onEndCallback);
+            return;
+        } catch (openAiError) {
+            console.warn("⚠️ [OpenAI TTS 실패] 브라우저 기본 TTS로 안전하게 자동 폴백합니다:", openAiError);
+        }
+    }
+
+    // 3. 🗣️ 2순위 (폴백): 브라우저 WebSpeech API 최고 품질 낭독
+    speakWebSpeechFallback(cleanText, isQuestion, onEndCallback);
+}
+
+/**
+ * 🛡️ WebSpeech API 폴백 낭독기
+ */
+function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
     if (!window.speechSynthesis) {
-        console.warn("이 브라우저는 음성 합성을 지원하지 않아요.");
         if (onEndCallback) onEndCallback();
         return;
     }
@@ -212,17 +323,9 @@ function speakFairyTTS(text, onEndCallback = null) {
     isSpeechUnlocked = true;
 
     try {
-        if (window.speechSynthesis.paused) {
-            window.speechSynthesis.resume();
-        }
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
         window.speechSynthesis.cancel();
     } catch (e) {}
-
-    const { text: cleanText, isQuestion } = cleanTextForTTS(text);
-    if (!cleanText) {
-        if (onEndCallback) onEndCallback();
-        return;
-    }
 
     const runSpeak = () => {
         try {
@@ -232,9 +335,7 @@ function speakFairyTTS(text, onEndCallback = null) {
             utterance.pitch = isQuestion ? 1.22 : 1.06;
 
             const bestVoice = getBestKoreanVoice();
-            if (bestVoice) {
-                utterance.voice = bestVoice;
-            }
+            if (bestVoice) utterance.voice = bestVoice;
 
             utterance.onend = () => {
                 currentUtterance = null;
@@ -242,7 +343,7 @@ function speakFairyTTS(text, onEndCallback = null) {
             };
 
             utterance.onerror = (e) => {
-                if (e.error !== 'interrupted') console.error('TTS 에러:', e);
+                if (e.error !== 'interrupted') console.error('WebSpeech TTS 에러:', e);
                 currentUtterance = null;
                 if (onEndCallback) onEndCallback();
             };
@@ -250,7 +351,7 @@ function speakFairyTTS(text, onEndCallback = null) {
             currentUtterance = utterance;
             window.speechSynthesis.speak(utterance);
         } catch (err) {
-            console.error('🚀 [TTS 엔진 에러]:', err);
+            console.error('🚀 [WebSpeech TTS 에러]:', err);
             if (onEndCallback) onEndCallback();
         }
     };
@@ -267,15 +368,49 @@ function speakFairyTTS(text, onEndCallback = null) {
     }
 }
 
+/**
+ * 🛑 모든 음성 즉시 정지
+ */
 function stopFairyTTS() {
+    isPlayingTtsQueue = false;
+    
+    if (currentOpenAiAudio) {
+        try {
+            currentOpenAiAudio.pause();
+            currentOpenAiAudio.currentTime = 0;
+        } catch (e) {}
+        currentOpenAiAudio = null;
+    }
+
     if (fairyPresetAudio) {
         try { fairyPresetAudio.pause(); } catch (e) {}
     }
+
     if (window.speechSynthesis) {
         try { window.speechSynthesis.cancel(); } catch (e) {}
         currentUtterance = null;
         pendingSpeech = null;
-        console.log("🧚 코코가 잠시 목소리를 쉬고 있어요.");
+    }
+}
+
+function playFairyPresetAudio(src, onEndCallback = null) {
+    stopFairyTTS();
+    try {
+        fairyPresetAudio = new Audio(src);
+        fairyPresetAudio.volume = 1.0;
+        fairyPresetAudio.onended = () => {
+            if (onEndCallback) onEndCallback();
+        };
+        fairyPresetAudio.onerror = (e) => {
+            console.warn(`프리셋 오디오(${src}) 로드 실패, 동적 음성으로 대체합니다:`, e);
+            if (onEndCallback) onEndCallback();
+        };
+        fairyPresetAudio.play().catch(err => {
+            console.warn("오디오 자동재생 제한:", err);
+            if (onEndCallback) onEndCallback();
+        });
+    } catch (err) {
+        if (onEndCallback) onEndCallback();
     }
 }
 
@@ -300,7 +435,6 @@ function updateTtsToggleUi() {
     const isEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
     const currentProfileLocal = localStorage.getItem('currentUser') || 'son';
 
-    // 1. 상단 바 버튼(#ttsToggleBtn) 동기화
     const btn = document.getElementById('ttsToggleBtn');
     if (btn) {
         if (isEnabled) {
@@ -326,7 +460,6 @@ function updateTtsToggleUi() {
         }
     }
 
-    // 2. 요정 대화창 내부 헤더 버튼(#fairy-panel-tts-btn) 동기화
     const panelTtsBtn = document.getElementById('fairy-panel-tts-btn');
     if (panelTtsBtn) {
         panelTtsBtn.innerHTML = isEnabled ? '🔊 음성 ON' : '🔇 음성 OFF';
@@ -335,7 +468,98 @@ function updateTtsToggleUi() {
     }
 }
 
-// 🌐 브라우저 전역 소켓 결합 바인딩 (모든 수학방 및 교과방 호환)
+/**
+ * ⚙️ OpenAI TTS 키 설정 모달 열기
+ */
+function openTtsVoiceSettingsModal() {
+    let existingModal = document.getElementById('ttsSettingsModal');
+    if (existingModal) existingModal.remove();
+
+    const currentKey = (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_API_KEY')) || '';
+    const currentVoice = (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_TTS_VOICE')) || 'nova';
+
+    const modalHtml = `
+        <div id="ttsSettingsModal" style="position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); display:flex; justify-content:center; align-items:center; z-index:999999; padding:20px;">
+            <div style="background:#161b22; border:1px solid #30363d; border-radius:18px; width:100%; max-width:480px; padding:24px; color:#f0f6fc; box-shadow:0 20px 50px rgba(0,0,0,0.7); display:flex; flex-direction:column; gap:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #30363d; padding-bottom:12px;">
+                    <h3 style="margin:0; font-size:1.2rem; display:flex; align-items:center; gap:8px;">🎙️ 요정 고음질 음성 설정 (OpenAI TTS)</h3>
+                    <button onclick="document.getElementById('ttsSettingsModal').remove()" style="background:transparent; border:none; color:#8b949e; font-size:1.4rem; cursor:pointer;">✕</button>
+                </div>
+
+                <div>
+                    <label style="font-size:0.9rem; font-weight:bold; color:#58a6ff; display:block; margin-bottom:6px;">🔑 OpenAI API Key</label>
+                    <input type="password" id="ttsOpenAiKeyInput" value="${currentKey}" placeholder="sk-..." style="width:100%; box-sizing:border-box; padding:10px 14px; border-radius:10px; border:1px solid #30363d; background:#0d1117; color:#fff; font-size:0.95rem;">
+                    <p style="font-size:0.8rem; color:#8b949e; margin:6px 0 0 0;">입력하신 키는 브라우저 로컬스토리지에 안전하게 보관됩니다.</p>
+                </div>
+
+                <div>
+                    <label style="font-size:0.9rem; font-weight:bold; color:#58a6ff; display:block; margin-bottom:6px;">🎭 요정 목소리 캐릭터 선택</label>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <button type="button" class="voice-opt-btn ${currentVoice === 'nova' ? 'active' : ''}" onclick="selectTtsVoiceOpt('nova', this)" style="padding:12px; border-radius:12px; border:2px solid ${currentVoice === 'nova' ? '#ab47bc' : '#30363d'}; background:#21262d; color:#fff; cursor:pointer; text-align:left;">
+                            <div style="font-weight:bold; font-size:0.95rem;">🌟 Nova (노바)</div>
+                            <div style="font-size:0.8rem; color:#8b949e;">밝고 발랄한 요정 톤 (추천)</div>
+                        </button>
+                        <button type="button" class="voice-opt-btn ${currentVoice === 'shimmer' ? 'active' : ''}" onclick="selectTtsVoiceOpt('shimmer', this)" style="padding:12px; border-radius:12px; border:2px solid ${currentVoice === 'shimmer' ? '#ab47bc' : '#30363d'}; background:#21262d; color:#fff; cursor:pointer; text-align:left;">
+                            <div style="font-weight:bold; font-size:0.95rem;">🌸 Shimmer (쉬머)</div>
+                            <div style="font-size:0.8rem; color:#8b949e;">맑고 차분하며 다정한 톤</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                    <button onclick="testCurrentTtsVoice()" style="flex:1; padding:12px; border-radius:10px; background:#21262d; border:1px solid #30363d; color:#fff; font-weight:bold; cursor:pointer;">▶️ 목소리 미리듣기</button>
+                    <button onclick="saveTtsVoiceSettings()" style="flex:1; padding:12px; border-radius:10px; background:linear-gradient(135deg, #8a2be2, #ab47bc); border:none; color:#fff; font-weight:bold; cursor:pointer;">💾 저장하기</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+let selectedVoiceTemp = 'nova';
+function selectTtsVoiceOpt(voice, btnEl) {
+    selectedVoiceTemp = voice;
+    document.querySelectorAll('.voice-opt-btn').forEach(b => {
+        b.style.borderColor = '#30363d';
+    });
+    if (btnEl) btnEl.style.borderColor = '#ab47bc';
+}
+
+async function testCurrentTtsVoice() {
+    const key = document.getElementById('ttsOpenAiKeyInput').value.trim();
+    if (!key) {
+        alert("API 키를 먼저 입력해 주세요!");
+        return;
+    }
+    const sampleText = "안녕! 나는 공부방의 귀여운 인공지능 요정 코코야! 오늘 공부도 신나게 시작해볼까?";
+    try {
+        const audioUrl = await fetchOpenAiTtsAudio(sampleText, {
+            apiKey: key,
+            voice: selectedVoiceTemp || 'nova',
+            model: 'tts-1',
+            speed: 1.06
+        });
+        const audio = new Audio(audioUrl);
+        audio.play();
+    } catch (e) {
+        alert("목소리 테스트 실패: " + e.message);
+    }
+}
+
+function saveTtsVoiceSettings() {
+    const key = document.getElementById('ttsOpenAiKeyInput').value.trim();
+    localStorage.setItem('OPENAI_API_KEY', key);
+    localStorage.setItem('OPENAI_TTS_VOICE', selectedVoiceTemp || 'nova');
+    if (typeof APP_CONFIG !== 'undefined') {
+        APP_CONFIG.OPENAI_API_KEY = key;
+        APP_CONFIG.OPENAI_TTS_VOICE = selectedVoiceTemp || 'nova';
+    }
+    alert("요정 고음질 음성 설정이 저장되었습니다! ✨");
+    const modal = document.getElementById('ttsSettingsModal');
+    if (modal) modal.remove();
+}
+
+// 🌐 브라우저 전역 소켓 바인딩
 window.speakFairyTTS = speakFairyTTS;
 window.fairySpeak = speakFairyTTS;
 window.speak = speakFairyTTS;
@@ -346,6 +570,16 @@ window.stopFairyTTS = stopFairyTTS;
 window.unlockFairySpeechEngine = unlockFairySpeechEngine;
 window.toggleFairyTtsSetting = toggleFairyTtsSetting;
 window.updateTtsToggleUi = updateTtsToggleUi;
+window.openTtsVoiceSettingsModal = openTtsVoiceSettingsModal;
+window.selectTtsVoiceOpt = selectTtsVoiceOpt;
+window.testCurrentTtsVoice = testCurrentTtsVoice;
+window.saveTtsVoiceSettings = saveTtsVoiceSettings;
+window.getOpenAITtsConfig = getOpenAITtsConfig;
 
-// 엔진 구동 시점에 자동 시동
-initFairyAudio();
+// 초기화
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', () => {
+        initFairyAudio();
+        updateTtsToggleUi();
+    });
+}

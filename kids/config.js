@@ -16,6 +16,12 @@ var APP_CONFIG = {
     // 🤖 Gemini AI 직접 연결 키 (워커 프록시 지역 차단 시 초고속 다이렉트 폴백)
     GEMINI_API_KEY: (typeof atob !== 'undefined' ? atob("QVEuQWI4Uk42THNkaHRLRWFqZk0xU2w0UGpmQ19hUTdJTzR0RXdsWWdtbXJvakpKZFdtcHc=") : ""),
 
+    // 🎙️ [초고음질 요정 보이스] OpenAI TTS 세팅 (스튜디오 성우급 더빙)
+    OPENAI_API_KEY: (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_API_KEY')) || "",
+    OPENAI_TTS_VOICE: (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_TTS_VOICE')) || "nova", // nova(발랄함) | shimmer(맑고 다정함) | alloy | echo | fable | onyx
+    OPENAI_TTS_MODEL: "tts-1", // 실시간 초저지연 모델 (tts-1)
+    OPENAI_TTS_SPEED: 1.06,    // 아이들이 듣기 편안한 요정 낭독 속도
+
     // 🗄️ 노션 데이터베이스 ID 세팅
     INVENTORY_DB_ID: "374a27115b688042bb61e6a102242e12", // 인벤토리(보상/경험치) 창고 ID
     STUDY_LOG_DB_ID: "37aa27115b688001b2ffe5e6c8f82ab2", // 학습현황(일지) DB ID
