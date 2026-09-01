@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>꿈나무 작품 갤러리 - 민민이네 공부방</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4facfe;
+            --accent: #ff6b9d;
+            --gold: #f6d365;
+            --bg-grad: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-main: #2d3748;
+            --text-sub: #718096;
+            --frame-border: #e2e8f0;
+            --shadow-lg: 0 14px 28px rgba(0,0,0,0.12), 0 10px 10px rgba(0,0,0,0.08);
+            --radius-card: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            min-height: 100vh;
+            background: var(--bg-grad);
+            color: var(--text-main);
+            padding-bottom: 60px;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* 🎮 민수 테마 (네온 아케이드 갤러리) */
+        body.theme--arcade, body.theme--minecraft {
+            --bg-grad: linear-gradient(160deg, #09070f 0%, #15102a 50%, #1b1535 100%);
+            --card-bg: rgba(26, 20, 48, 0.88);
+            --text-main: #f7fafc;
+            --text-sub: #cbd5e0;
+            --frame-border: #3b2d6b;
+            --primary: #00f2fe;
+            --accent: #ff007f;
+        }
+        body.theme--arcade .gallery-card, body.theme--minecraft .gallery-card {
+            border: 2px solid rgba(0, 242, 254, 0.25);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        body.theme--arcade .gallery-card:hover, body.theme--minecraft .gallery-card:hover {
+            border-color: #00f2fe;
+            box-shadow: 0 12px 30px rgba(0, 242, 254, 0.35);
+        }
+
+        /* 🎠 민서 테마 (동화 핑크 아틀리에) */
+        body.theme--hideout, body.theme--slime {
+            --bg-grad: linear-gradient(160deg, #fff0f5 0%, #ffe4ec 50%, #fff8eb 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #4a384f;
+            --text-sub: #7d6582;
+            --frame-border: #ffd1dc;
+            --primary: #ff6b9d;
+            --accent: #fda085;
+        }
+        body.theme--hideout .gallery-card, body.theme--slime .gallery-card {
+            border: 2px solid rgba(255, 107, 157, 0.25);
+            box-shadow: 0 8px 24px rgba(255, 182, 193, 0.25);
+        }
+        body.theme--hideout .gallery-card:hover, body.theme--slime .gallery-card:hover {
+            border-color: #ff6b9d;
+            box-shadow: 0 14px 30px rgba(255, 107, 157, 0.35);
+        }
+
+        /* 🧭 상단 내비게이션 바 */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--frame-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-logo {
+            font-family: 'Jua', sans-serif;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.06);
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--frame-border);
+        }
+        .profile-pill:hover {
+            transform: scale(1.03);
+        }
+        .home-btn {
+            padding: 8px 18px;
+            border-radius: 14px;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Jua', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .home-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* 🏰 메인 컨테이너 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        /* 🌟 히어로 헤더 */
+        .hero-banner {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            padding: 28px 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--frame-border);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+        .hero-title-box h1 {
+            font-family: 'Gaegu', cursive;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+        .hero-title-box p {
+            font-family: 'Gaegu', cursive;
+            font-size: 1.25rem;
+            color: var(--text-sub);
+        }
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .add-art-btn {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-family: 'Jua', sans-serif;
+            font-size: 1.15rem;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255, 117, 140, 0.4);
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            touch-action: manipulation;
+        }
+        .add-art-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(255, 117, 140, 0.55);
+        }
+
+        /* 🎯 통계 대시보드 미니 바 */
+        .stats-mini-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-badge {
+            background: var(--card-bg);
+            border: 1px solid var(--frame-border);
+            padding: 8px 16px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .stat-badge span { color: var(--primary); font-size: 1.1rem; }
+
+        /* 🎛️ 필터 탭 & 툴바 */
+        .filter-section {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .author-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .author-tab-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--frame-border);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 18px;
+            font-family: 'Jua', sans-serif;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .author-tab-btn:hover {
+            transform: translateY(-2px);
+        }
+        .author-tab-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 14px rgba(79, 172, 254, 0.35);
+        }
+
+        .category-pills {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .category-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--frame-border);
+            color: var(--text-sub);
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .category-pill.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* 🖼️ 작품 전시 그리드 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        /* 🎨 작품 카드 */
+        .gallery-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            position: relative;
+        }
+        .gallery-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .card-img-wrap {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+            background: #2d3748;
+        }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .gallery-card:hover .card-img {
+            transform: scale(1.06);
+        }
+
+        .card-tag-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 8px;
+            z-index: 2;
+        }
+        .card-author-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 999px;
+            z-index: 2;
+        }
+        .badge--minsu {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #fff;
+        }
+        .badge--minseo {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            color: #fff;
+        }
+
+        .card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+        .card-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 1.25rem;
+            line-height: 1.3;
+            color: var(--text-main);
+        }
+        .card-note-preview {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            font-family: 'Gaegu', cursive;
+            font-size: 1.05rem;
+        }
+        .card-footer {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px dashed var(--frame-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+        .card-date { display: flex; align-items: center; gap: 4px; }
+        .card-like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #ff6b9d;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .card-like-btn:hover {
+            transform: scale(1.15);
+        }
+
+        /* 🪟 상세 보기 모달 (라이트박스) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 16px;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            width: 100%;
+            max-width: 840px;
+            max-height: 92vh;
+            overflow-y: auto;
+            border: 2px solid var(--frame-border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .modal-close-btn:hover { background: #ff4757; transform: rotate(90deg); }
+
+        .modal-img-container {
+            width: 100%;
+            max-height: 480px;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .modal-img {
+            max-width: 100%;
+            max-height: 480px;
+            object-fit: contain;
+        }
+        .modal-zoom-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-content {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .modal-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .modal-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 1.6rem;
+            color: var(--text-main);
+        }
+        .modal-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+
+        /* 🗣️ 작가의 한마디 박스 */
+        .artist-quote-box {
+            background: rgba(0, 0, 0, 0.04);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 14px 14px 0;
+            padding: 14px 18px;
+        }
+        .artist-quote-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 1.05rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .artist-quote-text {
+            font-family: 'Gaegu', cursive;
+            font-size: 1.25rem;
+            line-height: 1.4;
+            color: var(--text-main);
+        }
+
+        /* 💖 칭찬 스티커 바 */
+        .praise-sticker-section {
+            background: var(--card-bg);
+            border: 1px solid var(--frame-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .praise-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sticker-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .sticker-btn {
+            background: rgba(0,0,0,0.05);
+            border: 1.5px solid var(--frame-border);
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-family: 'Jua', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            color: var(--text-main);
+            touch-action: manipulation;
+        }
+        .sticker-btn:hover {
+            transform: scale(1.08);
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .sticker-count {
+            background: rgba(0,0,0,0.15);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+        }
+
+        /* 💬 가족 칭찬 방명록 */
+        .comments-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .comment-item {
+            background: rgba(0,0,0,0.03);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .comment-author {
+            font-weight: bold;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .comment-text {
+            font-family: 'Gaegu', cursive;
+            font-size: 1.15rem;
+            flex-grow: 1;
+        }
+        .comment-date {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            white-space: nowrap;
+        }
+
+        .comment-input-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .comment-author-select {
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--frame-border);
+            font-family: 'Jua', sans-serif;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+        .comment-input {
+            flex-grow: 1;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--frame-border);
+            font-size: 0.95rem;
+            font-family: 'Nanum Gothic', sans-serif;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+        .comment-submit-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-family: 'Jua', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* 📝 새 작품 등록 모달 */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .form-label {
+            font-family: 'Jua', sans-serif;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+        .form-control {
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--frame-border);
+            font-size: 0.95rem;
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-family: 'Nanum Gothic', sans-serif;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+        .img-preview-box {
+            width: 100%;
+            height: 180px;
+            border: 2px dashed var(--frame-border);
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: rgba(0,0,0,0.03);
+            margin-top: 6px;
+        }
+        .img-preview-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* 텅 빈 상태 */
+        .empty-gallery {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            border: 1px dashed var(--frame-border);
+        }
+        .empty-gallery h3 { font-family: 'Jua', sans-serif; font-size: 1.5rem; margin-bottom: 8px; color: var(--primary); }
+        .empty-gallery p { font-family: 'Gaegu', cursive; font-size: 1.2rem; color: var(--text-sub); }
+    </style>
+</head>
+<body class="theme--arcade">
+
+    <!-- 🧭 상단 내비게이션 바 -->
+    <nav class="nav-bar">
+        <div class="nav-left">
+            <a href="../../lobby.html" class="nav-logo">
+                <span>🖼️</span> <span>꿈나무 작품 갤러리</span>
+            </a>
+        </div>
+        <div class="nav-right">
+            <div class="profile-pill" id="profileSwitchBtn" onclick="toggleProfileManually()" title="프로필 변경">
+                <span id="userAvatar">👦</span>
+                <span id="userNameTag">민수</span>
+            </div>
+            <a href="../../lobby.html" class="home-btn">🏠 로비로</a>
+        </div>
+    </nav>
+
+    <!-- 🏰 메인 컨테이너 -->
+    <div class="container">
+        
+        <!-- 🌟 히어로 헤더 -->
+        <header class="hero-banner">
+            <div class="hero-title-box">
+                <h1 id="heroTitle">🎨 민민이네 꿈나무 갤러리</h1>
+                <p id="heroSubtitle">학교와 집에서 정성껏 만든 소중한 작품들을 감상하고 칭찬해 주세요!</p>
+            </div>
+            <div class="hero-actions">
+                <button class="add-art-btn" onclick="openUploadModal()">
+                    <span>✨</span> <span>새 작품 전시하기</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 🎯 통계 미니 바 -->
+        <div class="stats-mini-bar">
+            <div class="stat-badge">🖼️ 총 전시 작품 <span id="statTotalCount">0</span>점</div>
+            <div class="stat-badge">💖 받은 칭찬 하트 <span id="statTotalLikes">0</span>개</div>
+            <div class="stat-badge">💬 가족 칭찬 메모 <span id="statTotalComments">0</span>개</div>
+        </div>
+
+        <!-- 🎛️ 필터 탭 & 툴바 -->
+        <section class="filter-section">
+            <div class="author-tabs" id="authorTabs">
+                <button class="author-tab-btn active" onclick="setAuthorFilter('all', this)">🌟 전체 작품</button>
+                <button class="author-tab-btn" onclick="setAuthorFilter('민수', this)">👦 민수의 갤러리</button>
+                <button class="author-tab-btn" onclick="setAuthorFilter('민서', this)">👧 민서의 아틀리에</button>
+            </div>
+            <div class="category-pills" id="categoryPills">
+                <button class="category-pill active" onclick="setCategoryFilter('all', this)">전체 카테고리</button>
+                <button class="category-pill" onclick="setCategoryFilter('그림/미술', this)">🎨 그림/미술</button>
+                <button class="category-pill" onclick="setCategoryFilter('만들기/공예', this)">✂️ 만들기/공예</button>
+                <button class="category-pill" onclick="setCategoryFilter('상장/기념', this)">🏆 상장/기념</button>
+                <button class="category-pill" onclick="setCategoryFilter('학교 과제', this)">🏫 학교 과제</button>
+                <button class="category-pill" onclick="setCategoryFilter('종이접기/컬러링', this)">📐 종이접기/컬러링</button>
+            </div>
+        </section>
+
+        <!-- 🖼️ 작품 갤러리 그리드 -->
+        <main class="gallery-grid" id="galleryGrid"></main>
+    </div>
+
+    <!-- 🪟 작품 상세 보기 모달 -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeDetailModal()">✕</button>
+            <div class="modal-img-container">
+                <img src="" alt="작품 확대 이미지" id="modalImg" class="modal-img">
+                <button class="modal-zoom-btn" onclick="openOriginalImage()">🪟 새 창에서 원본 보기</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-header-info">
+                    <div>
+                        <h2 class="modal-title" id="modalTitle">작품 제목</h2>
+                        <div class="modal-meta">
+                            <span id="modalAuthorTag" class="card-author-badge badge--minsu">민수</span>
+                            <span id="modalCategoryTag">🎨 그림/미술</span>
+                            <span id="modalDateTag">📅 2026-05-18</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🗣️ 작가의 한마디 -->
+                <div class="artist-quote-box">
+                    <div class="artist-quote-title">🗣️ 작가의 한마디</div>
+                    <div class="artist-quote-text" id="modalArtistNote">작품에 대한 설명이 들어갑니다.</div>
+                </div>
+
+                <!-- 💖 칭찬 스티커 반응 -->
+                <div class="praise-sticker-section">
+                    <div class="praise-title">💖 가족 칭찬 스티커를 콕 눌러주세요!</div>
+                    <div class="sticker-btns">
+                        <button class="sticker-btn" onclick="addStickerReaction('heart')">
+                            <span>❤️ 사랑해</span> <span class="sticker-count" id="stickerCount_heart">0</span>
+                        </button>
+                        <button class="sticker-btn" onclick="addStickerReaction('thumb')">
+                            <span>👍 최고야</span> <span class="sticker-count" id="stickerCount_thumb">0</span>
+                        </button>
+                        <button class="sticker-btn" onclick="addStickerReaction('star')">
+                            <span>✨ 눈부셔</span> <span class="sticker-count" id="stickerCount_star">0</span>
+                        </button>
+                        <button class="sticker-btn" onclick="addStickerReaction('trophy')">
+                            <span>🏆 대단해</span> <span class="sticker-count" id="stickerCount_trophy">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 💬 가족 칭찬 방명록 -->
+                <div class="comments-section">
+                    <div class="praise-title">💬 가족 칭찬 한마디</div>
+                    <div class="comments-list" id="modalCommentsList"></div>
+                    <div class="comment-input-box">
+                        <select id="commentAuthorSelect" class="comment-author-select">
+                            <option value="아빠">👨 아빠</option>
+                            <option value="엄마">👩 엄마</option>
+                            <option value="민수">👦 민수</option>
+                            <option value="민서">👧 민서</option>
+                        </select>
+                        <input type="text" id="commentTextInput" class="comment-input" placeholder="따뜻한 응원과 칭찬 한마디를 남겨주세요!" onkeydown="if(event.key==='Enter') submitComment()">
+                        <button class="comment-submit-btn" onclick="submitComment()">남기기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📝 새 작품 등록 모달 -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal-card" style="max-width: 600px;">
+            <button class="modal-close-btn" onclick="closeUploadModal()">✕</button>
+            <div class="modal-content">
+                <h2 class="modal-title" style="color: var(--primary);">✨ 새 작품 전시하기</h2>
+                <p style="font-size: 0.95rem; color: var(--text-sub); margin-top:-6px;">
+                    아이들의 미술 그림, 만들기, 상장 사진을 갤러리에 추가해 보세요.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">작품 작가</label>
+                        <select id="newArtAuthor" class="form-control" onchange="autoFillAuthorTheme()">
+                            <option value="민수">👦 민수 (5학년)</option>
+                            <option value="민서">👧 민서 (1학년)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">카테고리</label>
+                        <select id="newArtCategory" class="form-control">
+                            <option value="그림/미술">🎨 그림/미술</option>
+                            <option value="만들기/공예">✂️ 만들기/공예</option>
+                            <option value="상장/기념">🏆 상장/기념</option>
+                            <option value="학교 과제">🏫 학교 과제</option>
+                            <option value="종이접기/컬러링">📐 종이접기/컬러링</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">작품 제목</label>
+                        <input type="text" id="newArtTitle" class="form-control" placeholder="예: 우주를 누비는 로봇 드래곤">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">만든 날짜</label>
+                        <input type="date" id="newArtDate" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">작품 사진 선택 (파일 또는 이미지 URL)</label>
+                    <input type="file" id="newArtFileInput" class="form-control" accept="image/*" onchange="handleImageFileSelect(event)">
+                    <input type="text" id="newArtUrlInput" class="form-control" style="margin-top: 6px;" placeholder="또는 웹 이미지 URL 붙여넣기" oninput="handleImageUrlInput(this.value)">
+                    <div class="img-preview-box" id="imgPreviewBox">
+                        <span style="color: #aaa; font-size: 0.9rem;">사진 미리보기가 여기에 표시됩니다.</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">작가의 한마디 (작품 소개 및 자랑)</label>
+                    <textarea id="newArtNote" class="form-control" rows="3" placeholder="어떤 마음으로 만들었는지, 무엇을 표현했는지 적어주세요!"></textarea>
+                </div>
+
+                <button class="add-art-btn" style="width: 100%; justify-content: center; margin-top: 8px;" onclick="saveNewArtwork()">
+                    <span>🎨</span> <span>갤러리에 전시 완료!</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📚 갤러리 기본 데이터 로드 -->
+    <script src="../data/gallery-data.js"></script>
+
+    <script>
+        // ========================================================
+        // 🏛️ 갤러리 상태 및 데이터 관리
+        // ========================================================
+        const STORAGE_KEY = 'MY_STUDY_ROOM_GALLERY_DATA';
+        let galleryData = [];
+        let currentAuthorFilter = 'all';
+        let currentCategoryFilter = 'all';
+        let activeArtId = null;
+        let selectedUploadedImageBase64 = '';
+
+        // 유저 프로필 및 테마 초기화
+        let currentUser = localStorage.getItem('currentUser') || 'son';
+        let currentUserName = localStorage.getItem('currentUserName') || '민수';
+
+        function applyUserTheme() {
+            if (currentUser === 'son' || currentUserName === '민수') {
+                document.body.className = 'theme--arcade';
+                document.getElementById('userNameTag').textContent = '민수';
+                document.getElementById('userAvatar').textContent = '👦';
+            } else {
+                document.body.className = 'theme--hideout';
+                document.getElementById('userNameTag').textContent = '민서';
+                document.getElementById('userAvatar').textContent = '👧';
+            }
+        }
+
+        function toggleProfileManually() {
+            if (currentUser === 'son') {
+                currentUser = 'daughter';
+                currentUserName = '민서';
+            } else {
+                currentUser = 'son';
+                currentUserName = '민수';
+            }
+            localStorage.setItem('currentUser', currentUser);
+            localStorage.setItem('currentUserName', currentUserName);
+            applyUserTheme();
+        }
+
+        // 📦 갤러리 데이터 로드 (LocalStorage + 기본 샘플 병합)
+        function loadGalleryData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    galleryData = JSON.parse(saved);
+                } catch (e) {
+                    console.error("갤러리 데이터 파싱 오류:", e);
+                    galleryData = [...DEFAULT_GALLERY_DATA];
+                }
+            } else {
+                galleryData = [...DEFAULT_GALLERY_DATA];
+                saveGalleryData();
+            }
+            renderGallery();
+            updateStats();
+        }
+
+        function saveGalleryData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(galleryData));
+        }
+
+        // 📊 통계 업데이트
+        function updateStats() {
+            document.getElementById('statTotalCount').textContent = galleryData.length;
+            const totalLikes = galleryData.reduce((sum, item) => sum + (item.likes || 0), 0);
+            document.getElementById('statTotalLikes').textContent = totalLikes;
+            const totalComments = galleryData.reduce((sum, item) => sum + ((item.comments && item.comments.length) || 0), 0);
+            document.getElementById('statTotalComments').textContent = totalComments;
+        }
+
+        // 🔍 필터 핸들러
+        function setAuthorFilter(author, btnEl) {
+            currentAuthorFilter = author;
+            document.querySelectorAll('#authorTabs .author-tab-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            renderGallery();
+        }
+
+        function setCategoryFilter(category, btnEl) {
+            currentCategoryFilter = category;
+            document.querySelectorAll('#categoryPills .category-pill').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+            renderGallery();
+        }
+
+        // 🖼️ 갤러리 카드 렌더링
+        function renderGallery() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+
+            let filtered = galleryData.filter(item => {
+                const matchAuthor = (currentAuthorFilter === 'all') || (item.author === currentAuthorFilter);
+                const matchCategory = (currentCategoryFilter === 'all') || (item.category === currentCategoryFilter);
+                return matchAuthor && matchCategory;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-gallery">
+                        <h3>🎨 아직 등록된 작품이 없어요!</h3>
+                        <p>우측 상단의 '+ 새 작품 전시하기' 버튼을 눌러 첫 번째 멋진 작품을 자랑해 보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(art => {
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+                card.onclick = () => openDetailModal(art.id);
+
+                const authorBadgeClass = art.author === '민수' ? 'badge--minsu' : 'badge--minseo';
+                const commentsCount = (art.comments && art.comments.length) || 0;
+
+                card.innerHTML = `
+                    <div class="card-img-wrap">
+                        <span class="card-tag-badge">${art.categoryIcon || '🎨'} ${art.category}</span>
+                        <span class="card-author-badge ${authorBadgeClass}">${art.author}</span>
+                        <img src="${art.imageUrl}" alt="${art.title}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80'">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">${art.title}</h3>
+                        <p class="card-note-preview">"${art.artistNote || '소중하게 완성한 멋진 작품입니다.'}"</p>
+                        <div class="card-footer">
+                            <span class="card-date">📅 ${art.date}</span>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <button class="card-like-btn" onclick="event.stopPropagation(); quickLike('${art.id}')">
+                                    ❤️ <span>${art.likes || 0}</span>
+                                </button>
+                                <span style="font-size:0.85rem;">💬 ${commentsCount}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ❤️ 빠른 좋아요
+        function quickLike(artId) {
+            const item = galleryData.find(a => a.id === artId);
+            if (!item) return;
+            item.likes = (item.likes || 0) + 1;
+            saveGalleryData();
+            renderGallery();
+            updateStats();
+        }
+
+        // ========================================================
+        // 🪟 상세 모달 제어
+        // ========================================================
+        function openDetailModal(artId) {
+            const art = galleryData.find(a => a.id === artId);
+            if (!art) return;
+            activeArtId = artId;
+
+            document.getElementById('modalImg').src = art.imageUrl;
+            document.getElementById('modalTitle').textContent = art.title;
+            
+            const authorTag = document.getElementById('modalAuthorTag');
+            authorTag.textContent = art.author;
+            authorTag.className = `card-author-badge ${art.author === '민수' ? 'badge--minsu' : 'badge--minseo'}`;
+            
+            document.getElementById('modalCategoryTag').textContent = `${art.categoryIcon || '🎨'} ${art.category}`;
+            document.getElementById('modalDateTag').textContent = `📅 ${art.date}`;
+            document.getElementById('modalArtistNote').textContent = art.artistNote || "작품에 담긴 이야기와 열정을 느껴보세요!";
+
+            // 스티커 반응 카운트
+            const stickers = art.stickers || { heart: 0, thumb: 0, star: 0, trophy: 0 };
+            document.getElementById('stickerCount_heart').textContent = stickers.heart || 0;
+            document.getElementById('stickerCount_thumb').textContent = stickers.thumb || 0;
+            document.getElementById('stickerCount_star').textContent = stickers.star || 0;
+            document.getElementById('stickerCount_trophy').textContent = stickers.trophy || 0;
+
+            // 댓글 리스트
+            renderModalComments(art.comments || []);
+
+            // 현재 접속자에 맞게 기본 댓글 작성자 선택
+            document.getElementById('commentAuthorSelect').value = currentUserName || '아빠';
+
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+            activeArtId = null;
+        }
+
+        function openOriginalImage() {
+            if (!activeArtId) return;
+            const art = galleryData.find(a => a.id === activeArtId);
+            if (art && art.imageUrl) {
+                window.open(art.imageUrl, '_blank');
+            }
+        }
+
+        function renderModalComments(comments) {
+            const list = document.getElementById('modalCommentsList');
+            list.innerHTML = '';
+            if (!comments || comments.length === 0) {
+                list.innerHTML = '<div style="color:var(--text-sub); font-size:0.9rem; padding:8px 0;">아직 남겨진 칭찬이 없어요. 첫 칭찬을 남겨보세요!</div>';
+                return;
+            }
+            comments.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'comment-item';
+                item.innerHTML = `
+                    <span class="comment-author">${c.author}:</span>
+                    <span class="comment-text">${c.text}</span>
+                    <span class="comment-date">${c.date || ''}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // 스티커 누르기
+        function addStickerReaction(type) {
+            if (!activeArtId) return;
+            const art = galleryData.find(a => a.id === activeArtId);
+            if (!art) return;
+
+            if (!art.stickers) art.stickers = { heart: 0, thumb: 0, star: 0, trophy: 0 };
+            art.stickers[type] = (art.stickers[type] || 0) + 1;
+            art.likes = (art.likes || 0) + 1;
+
+            document.getElementById(`stickerCount_${type}`).textContent = art.stickers[type];
+            saveGalleryData();
+            renderGallery();
+            updateStats();
+        }
+
+        // 칭찬 댓글 등록
+        function submitComment() {
+            if (!activeArtId) return;
+            const textInput = document.getElementById('commentTextInput');
+            const text = textInput.value.trim();
+            if (!text) return;
+
+            const author = document.getElementById('commentAuthorSelect').value;
+            const art = galleryData.find(a => a.id === activeArtId);
+            if (!art) return;
+
+            if (!art.comments) art.comments = [];
+            const todayStr = new Date().toISOString().split('T')[0];
+            art.comments.push({ author, text, date: todayStr });
+
+            textInput.value = '';
+            renderModalComments(art.comments);
+            saveGalleryData();
+            renderGallery();
+            updateStats();
+        }
+
+        // ========================================================
+        // 📝 새 작품 업로드 모달 제어
+        // ========================================================
+        function openUploadModal() {
+            document.getElementById('newArtDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('newArtTitle').value = '';
+            document.getElementById('newArtNote').value = '';
+            document.getElementById('newArtUrlInput').value = '';
+            document.getElementById('newArtFileInput').value = '';
+            selectedUploadedImageBase64 = '';
+            document.getElementById('imgPreviewBox').innerHTML = '<span style="color: #aaa; font-size: 0.9rem;">사진 미리보기가 여기에 표시됩니다.</span>';
+            
+            // 현재 로그인 프로필 기준 작가 자동 세팅
+            document.getElementById('newArtAuthor').value = (currentUserName === '민서') ? '민서' : '민수';
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        function handleImageFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedUploadedImageBase64 = e.target.result;
+                document.getElementById('imgPreviewBox').innerHTML = `<img src="${selectedUploadedImageBase64}" alt="미리보기">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleImageUrlInput(url) {
+            if (!url.trim()) return;
+            selectedUploadedImageBase64 = url.trim();
+            document.getElementById('imgPreviewBox').innerHTML = `<img src="${selectedUploadedImageBase64}" alt="미리보기" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800'">`;
+        }
+
+        function saveNewArtwork() {
+            const author = document.getElementById('newArtAuthor').value;
+            const category = document.getElementById('newArtCategory').value;
+            const title = document.getElementById('newArtTitle').value.trim();
+            const date = document.getElementById('newArtDate').value || new Date().toISOString().split('T')[0];
+            const note = document.getElementById('newArtNote').value.trim();
+
+            if (!title) {
+                alert("작품 제목을 입력해 주세요! ✨");
+                return;
+            }
+
+            const imgUrl = selectedUploadedImageBase64 || "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80";
+
+            const categoryIconMap = {
+                "그림/미술": "🎨",
+                "만들기/공예": "✂️",
+                "상장/기념": "🏆",
+                "학교 과제": "🏫",
+                "종이접기/컬러링": "📐"
+            };
+
+            const newArt = {
+                id: `art_custom_${Date.now()}`,
+                author: author,
+                authorKey: author === '민수' ? 'son' : 'daughter',
+                title: title,
+                category: category,
+                categoryIcon: categoryIconMap[category] || "🎨",
+                date: date,
+                grade: author === '민수' ? '5학년' : '1학년',
+                imageUrl: imgUrl,
+                artistNote: note || "정성스럽게 완성한 멋진 작품입니다!",
+                likes: 1,
+                stickers: { heart: 1, thumb: 0, star: 0, trophy: 0 },
+                comments: []
+            };
+
+            galleryData.unshift(newArt);
+            saveGalleryData();
+            closeUploadModal();
+            renderGallery();
+            updateStats();
+            alert("🎉 새로운 작품이 갤러리에 멋지게 전시되었습니다!");
+        }
+
+        // 🚀 초기 구동
+        window.addEventListener('load', () => {
+            applyUserTheme();
+            loadGalleryData();
+        });
+    </script>
+</body>
+</html>

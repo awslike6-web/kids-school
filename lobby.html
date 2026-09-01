@@ -134,6 +134,7 @@
       <a href="#" class="my-room-btn tower-btn" id="towerLink" style="display:none" target="_blank" rel="noopener">🏰 Master Tower 관제탑</a>
       <button type="button" class="tts-toggle-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
       <a href="kids/common_space/my-room.html" class="my-room-btn">🛒 나만의 마이룸 & 상점 가기</a>
+      <a href="kids/common_space/gallery.html" class="my-room-btn" style="background: linear-gradient(90deg, #ff758c, #ff7eb3); color: #fff; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(255,117,140,0.4);">🖼️ 꿈나무 작품 갤러리 가기</a>
   </div>
 
   <p class="subtitle" id="lobbySubtitle">오늘 탐험하고 싶은 월드를 선택해봐!</p>
@@ -156,7 +157,8 @@ const USER_CONFIGS = {
         title: '🏠 나만의 공간',
         rooms: [
           { name: '📅 내 시간표', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' },
-          { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' }
+          { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' },
+          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교에서 만들고 그려온 멋진 미술·공예 작품을 전시하고 자랑해보자!' }
         ]
       },
       {
@@ -193,6 +195,7 @@ const USER_CONFIGS = {
       {
         title: '🎡 창의 & 게이밍 놀이터',
         rooms: [
+          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교와 집에서 완성한 미술·만들기 작품 전시관!' },
           { name: '⚔️ 브롤 DPS & 밸런스 연구소', href: 'kids/playground/minsu/brawl_dps.html', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 대전 시뮬레이션' },
           { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
         ]
@@ -213,7 +216,8 @@ const USER_CONFIGS = {
         title: '🏠 나만의 공간',
         rooms: [
           { name: '📅 내 시간표', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' },
-          { name: '👧 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '하리보 젤리로 예쁜 가구를 사고 나만의 핑꾸 하우스를 꾸며보자!' }
+          { name: '👧 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '하리보 젤리로 예쁜 가구를 사고 나만의 핑꾸 하우스를 꾸며보자!' },
+          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '예쁘게 그린 그림과 정성껏 만든 공예품을 전시하는 아틀리에!' }
         ]
       },
       {
@@ -250,6 +254,7 @@ const USER_CONFIGS = {
       {
         title: '🎡 창의 & 게이밍 놀이터',
         rooms: [
+          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '내가 그린 그림과 종이접기 작품을 뽐내는 비밀 전시관!' },
           { name: '🎨 매직 컬러링 스튜디오', href: 'kids/playground/minseo/coloring.html', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력' },
           { name: '📐 인터랙티브 종이접기', href: 'kids/playground/minseo/origami.html', desc: '비행기, 개구리, 동서남북 3D 단계별 접기 & 전용 도안 인쇄' },
           { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
