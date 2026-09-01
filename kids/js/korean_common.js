@@ -315,6 +315,22 @@ const KOREAN_STORYBOOK_LIBRARY = [
         border: "#10b981",
         link: "korean_1_2_1_storybook_3.html",
         coverImg: "images/minseo/1-2/1/storybook_3/korean_story_p1.png"
+    },
+    {
+        id: "1_2_1_4",
+        grade: "1학년 2학기",
+        gradeCode: "1-2",
+        unit: "1단원",
+        bookNum: "4권",
+        title: "가슴이 얼음처럼 꽁꽁 긴장돼요!",
+        subtitle: "발표 불안을 녹이는 솔직한 고백과 친구들의 응원",
+        desc: "친구들 앞 발표에 가슴이 쿵쾅쿵쾅! 솔직하게 내 마음을 털어놓고 친구들의 따뜻한 응원으로 용기를 얻어요.",
+        icon: "🧊",
+        color: "#8b5cf6",
+        bgGrad: "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#8b5cf6",
+        link: "korean_1_2_1_storybook_4.html",
+        coverImg: "images/minseo/1-2/1/storybook_4/korean_story_p1.png"
     }
 ];
 
