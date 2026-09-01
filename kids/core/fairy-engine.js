@@ -1,12 +1,107 @@
 // kids/core/fairy-engine.js
-// 🧚‍♀️ 아나운서 요정 코코의 음성 합성(TTS) 제어 인공지능 엔진 (모바일 언락 가드 완벽 탑재)
+// 🧚‍♀️ 아나운서 요정 코코의 음성 제어 인공지능 엔진 (초고음질 Neural MP3 프리셋 + 프리미엄 WebSpeech 보이스 가드 탑재)
 
 var currentUtterance = null;
 let pendingSpeech = null; // 사용자의 첫 상호작용 전까지 낭독 요청을 대기시키는 포켓
 let isSpeechUnlocked = false; // 브라우저 음성 합성 채널 해제 여부
+let fairyPresetAudio = null; // 초고음질 Neural AI 성우 MP3 전용 플레이어
+
+// 🎵 초고음질 Neural AI 성우 MP3 프리셋 매핑 테이블
+const FAIRY_PRESET_AUDIOS = {
+    // 웰컴 인사
+    "welcome_korean": "welcome_korean.mp3",
+    "welcome_math_minsu": "welcome_math_minsu.mp3",
+    "welcome_math_minseo": "welcome_math_minseo.mp3",
+    "welcome_society": "welcome_society.mp3",
+    "welcome_science": "welcome_science.mp3",
+    "welcome_english": "welcome_english.mp3",
+
+    // 칭찬 & 정답
+    "정답이에요! 아주 훌륭해요!": "praise_correct_1.mp3",
+    "정답이에요! 아주 훌륭해요": "praise_correct_1.mp3",
+    "정답이에요! 훌륭해요!": "praise_correct_1.mp3",
+    "정답이에요! 훌륭해요": "praise_correct_1.mp3",
+    "우와, 정말 완벽하게 맞췄어요! 최고예요!": "praise_correct_2.mp3",
+    "우와, 정말 완벽하게 맞췄어요!": "praise_correct_2.mp3",
+    "참 잘했어요!": "praise_correct_3.mp3",
+    "참 잘했어요": "praise_correct_3.mp3",
+
+    // 오답 & 격려
+    "아쉽지만 틀렸어요. 다시 한번 생각해볼까요?": "cheer_incorrect_1.mp3",
+    "아쉽지만 틀렸어요. 다시 한번 생각해볼까요": "cheer_incorrect_1.mp3",
+    "아쉽지만 틀렸어요!": "cheer_incorrect_1.mp3",
+    "아쉽지만 틀렸어요": "cheer_incorrect_1.mp3",
+    "괜찮아요! 다시 한번 차근차근 도전해봐요!": "cheer_incorrect_2.mp3",
+    "다시 한번 생각해봐요.": "cheer_incorrect_1.mp3",
+    "다시 한번 생각해봐요": "cheer_incorrect_1.mp3",
+    "아니에요. 다시 한번 읽어볼까요?": "cheer_incorrect_1.mp3",
+    "아니에요. 다시 한번 읽어볼까요": "cheer_incorrect_1.mp3",
+
+    // TTS 켜짐 알림
+    "요정 코코의 나긋나긋한 음성 서비스가 켜졌습니다.": "tts_enabled.mp3"
+};
+
+function getFairyAudioBasePath() {
+    const path = window.location.pathname;
+    if (path.includes('/subjects/')) {
+        return '../../assets/audio/fairy/';
+    } else if (path.includes('/kids/')) {
+        return './assets/audio/fairy/';
+    }
+    return '../../assets/audio/fairy/';
+}
+
+function playFairyPresetAudio(mp3FileName, onEndCallback = null) {
+    if (!fairyPresetAudio) {
+        fairyPresetAudio = new Audio();
+    }
+    try {
+        fairyPresetAudio.pause();
+        fairyPresetAudio.src = getFairyAudioBasePath() + mp3FileName;
+        fairyPresetAudio.onended = () => {
+            if (onEndCallback) onEndCallback();
+        };
+        fairyPresetAudio.onerror = () => {
+            if (onEndCallback) onEndCallback();
+        };
+        fairyPresetAudio.play().catch(err => {
+            console.warn("요정 프리셋 MP3 재생 실패, TTS 폴백:", err);
+            if (onEndCallback) onEndCallback();
+        });
+    } catch (e) {
+        console.warn("오디오 플레이어 예외:", e);
+        if (onEndCallback) onEndCallback();
+    }
+}
+
+/**
+ * 🎙️ 브라우저 내 최고 음질 한국어 보이스 우선순위 탐색기
+ */
+function getBestKoreanVoice() {
+    if (!window.speechSynthesis) return null;
+    const voices = window.speechSynthesis.getVoices() || [];
+    const koVoices = voices.filter(v => v.lang && (v.lang === 'ko-KR' || v.lang === 'ko_KR' || v.lang.startsWith('ko') || v.lang.includes('KO')));
+    
+    if (koVoices.length === 0) return null;
+
+    // 1순위: Microsoft Edge / Windows 고품질 온라인 자연스러운 음성 (SunHi, InJoon, Natural, Online, Neural)
+    let best = koVoices.find(v => (v.name.includes('Natural') || v.name.includes('Online') || v.name.includes('SunHi') || v.name.includes('Neural') || v.name.includes('InJoon')) && !v.name.includes('Heami'));
+    if (best) return best;
+
+    // 2순위: Google Chrome 프리미엄 한국어 음성
+    best = koVoices.find(v => v.name.includes('Google') || v.name.includes('한국어') || v.name.includes('Korean'));
+    if (best) return best;
+
+    // 3순위: 모바일/삼성/애플 고품질 음성 (Yuna, Sora, Seoyeon, Apple)
+    best = koVoices.find(v => v.name.includes('Yuna') || v.name.includes('Sora') || v.name.includes('Seoyeon'));
+    if (best) return best;
+
+    // 4순위: 기타 한국어 음성 (Heami 등 기본 레거시 음성)
+    return koVoices[0];
+}
 
 function initFairyAudio() {
-    console.log(`🧚‍♀️ [요정 엔진] 음성 가드 및 오디오 잠금장치 시동 완료!`);
+    console.log(`🧚‍♀️ [요정 엔진] 초고음질 음성 가드 및 오디오 시스템 시동 완료!`);
     
     const unlockSpeechEngine = () => {
         if (isSpeechUnlocked) return;
@@ -49,7 +144,6 @@ function unlockFairySpeechEngine() {
     }
 }
 
-
 function cleanTextForTTS(rawText) {
     const original = String(rawText || '');
     
@@ -91,13 +185,30 @@ function speakFairyTTS(text, onEndCallback = null) {
         return;
     }
 
+    // 1. 🎵 초고음질 Neural AI 성우 MP3 프리셋 매칭 확인
+    const trimmed = String(text || '').trim();
+    if (FAIRY_PRESET_AUDIOS[trimmed]) {
+        console.log(`🎙️ [요정 엔진] 초고음질 Neural 성우 MP3 프리셋 재생: ${FAIRY_PRESET_AUDIOS[trimmed]}`);
+        playFairyPresetAudio(FAIRY_PRESET_AUDIOS[trimmed], onEndCallback);
+        return;
+    }
+
+    // 웰컴 프리셋 키 매칭 (ex: "welcome_korean", "welcome_math_minsu")
+    for (const [key, filename] of Object.entries(FAIRY_PRESET_AUDIOS)) {
+        if (trimmed === key || trimmed.startsWith(key)) {
+            console.log(`🎙️ [요정 엔진] 웰컴 성우 MP3 프리셋 재생: ${filename}`);
+            playFairyPresetAudio(filename, onEndCallback);
+            return;
+        }
+    }
+
+    // 2. 🗣️ 실시간 동적 텍스트는 최고 품질 WebSpeech 보이스로 낭독
     if (!window.speechSynthesis) {
         console.warn("이 브라우저는 음성 합성을 지원하지 않아요.");
         if (onEndCallback) onEndCallback();
         return;
     }
 
-    // 💡 사용자가 버튼을 클릭하거나 직접 호출했을 때는 즉시 언락 처리
     isSpeechUnlocked = true;
 
     try {
@@ -120,12 +231,10 @@ function speakFairyTTS(text, onEndCallback = null) {
             utterance.rate = isQuestion ? 1.0 : 1.05;
             utterance.pitch = isQuestion ? 1.22 : 1.06;
 
-            const voices = window.speechSynthesis.getVoices() || [];
-            let subVoice = voices.find(v => (v.lang === 'ko-KR' || v.lang === 'ko_KR' || v.lang.includes('ko')) && (v.name.includes('Heami') || v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Yuna') || v.name.includes('SunHi')));
-            if (!subVoice) {
-                subVoice = voices.find(v => v.lang.includes('ko') || v.lang.includes('KO'));
+            const bestVoice = getBestKoreanVoice();
+            if (bestVoice) {
+                utterance.voice = bestVoice;
             }
-            if (subVoice) utterance.voice = subVoice;
 
             utterance.onend = () => {
                 currentUtterance = null;
@@ -159,10 +268,11 @@ function speakFairyTTS(text, onEndCallback = null) {
 }
 
 function stopFairyTTS() {
+    if (fairyPresetAudio) {
+        try { fairyPresetAudio.pause(); } catch (e) {}
+    }
     if (window.speechSynthesis) {
-        try {
-            window.speechSynthesis.cancel();
-        } catch (e) {}
+        try { window.speechSynthesis.cancel(); } catch (e) {}
         currentUtterance = null;
         pendingSpeech = null;
         console.log("🧚 코코가 잠시 목소리를 쉬고 있어요.");
@@ -230,6 +340,8 @@ window.speakFairyTTS = speakFairyTTS;
 window.fairySpeak = speakFairyTTS;
 window.speak = speakFairyTTS;
 window.speakFairy = speakFairyTTS;
+window.playFairyPresetAudio = playFairyPresetAudio;
+window.getBestKoreanVoice = getBestKoreanVoice;
 window.stopFairyTTS = stopFairyTTS;
 window.unlockFairySpeechEngine = unlockFairySpeechEngine;
 window.toggleFairyTtsSetting = toggleFairyTtsSetting;
@@ -237,6 +349,3 @@ window.updateTtsToggleUi = updateTtsToggleUi;
 
 // 엔진 구동 시점에 자동 시동
 initFairyAudio();
-
-// 💡 [엔진 로드 완료] 입장 시 자동 낭독은 비활성화 (사용자 요청: 조용한 입장 환경 보장)
-// 필요 시 사용자가 직접 버튼을 누르거나 챗봇과 대화할 때만 speakFairyTTS가 동작합니다.
