@@ -939,20 +939,42 @@
             applyUserTheme();
         }
 
-        // 📦 갤러리 데이터 로드 (LocalStorage + 기본 샘플 병합)
+        // 📦 갤러리 데이터 로드 (마스터 DB + 사용자 등록 커스텀 작품 스마트 병합)
         function loadGalleryData() {
             const saved = localStorage.getItem(STORAGE_KEY);
+            let customItems = [];
+            let savedLikesMap = {};
+            let savedStickersMap = {};
+            let savedCommentsMap = {};
+
             if (saved) {
                 try {
-                    galleryData = JSON.parse(saved);
+                    const parsed = JSON.parse(saved);
+                    parsed.forEach(it => {
+                        if (it.id && it.id.startsWith('art_custom_')) {
+                            customItems.push(it);
+                        } else if (it.id) {
+                            if (it.likes) savedLikesMap[it.id] = it.likes;
+                            if (it.stickers) savedStickersMap[it.id] = it.stickers;
+                            if (it.comments) savedCommentsMap[it.id] = it.comments;
+                        }
+                    });
                 } catch (e) {
                     console.error("갤러리 데이터 파싱 오류:", e);
-                    galleryData = [...DEFAULT_GALLERY_DATA];
                 }
-            } else {
-                galleryData = [...DEFAULT_GALLERY_DATA];
-                saveGalleryData();
             }
+
+            // 마스터 데이터 복제 후 로컬에서 저장된 좋아요/댓글/스티커 병합
+            const masterList = (typeof DEFAULT_GALLERY_DATA !== 'undefined' ? DEFAULT_GALLERY_DATA : []).map(item => {
+                const copy = { ...item };
+                if (savedLikesMap[item.id]) copy.likes = savedLikesMap[item.id];
+                if (savedStickersMap[item.id]) copy.stickers = savedStickersMap[item.id];
+                if (savedCommentsMap[item.id]) copy.comments = savedCommentsMap[item.id];
+                return copy;
+            });
+
+            galleryData = [...masterList, ...customItems];
+            saveGalleryData();
             renderGallery();
             updateStats();
         }

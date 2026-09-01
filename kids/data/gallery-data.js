@@ -2,46 +2,47 @@
 
 const DEFAULT_GALLERY_DATA = [
   {
-    id: "art_ms_01",
+    id: "art_ms_real_01",
     author: "민수",
     authorKey: "son",
-    title: "우주를 누비는 사이버 드래곤",
+    title: "다채로운 감정의 입체파 인물화",
     category: "그림/미술",
     categoryIcon: "🎨",
-    date: "2026-05-18",
+    date: "2026-09-02",
     grade: "5학년 1학기",
-    imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80",
-    artistNote: "학교 미술 시간에 상상 속의 미래 우주 생물을 그렸어요. 네온 날개로 어두운 우주를 밝히며 날아가는 드래곤입니다!",
-    likes: 12,
-    stickers: { heart: 5, thumb: 4, star: 3, trophy: 2 },
+    imageUrl: "../assets/images/gallery/minsu_cubism_art_20260902.jpg",
+    artistNote: "피카소의 입체파(큐비즘) 기법을 활용하여 얼굴의 옆모습과 앞모습을 한 화면에 담았어요. 따뜻한 노랑과 시원한 하늘색, 무지개 배경으로 다양한 마음의 색깔을 표현했습니다!",
+    likes: 24,
+    stickers: { heart: 12, thumb: 8, star: 6, trophy: 5 },
     comments: [
-      { author: "아빠", text: "색감이 정말 웅장하고 멋지다! 우주선 조종석에 걸어두고 싶네 👍", date: "2026-05-18" },
-      { author: "엄마", text: "드래곤의 눈빛이 살아있어! 우리 민수 상상력 최고 ❤️", date: "2026-05-19" }
+      { author: "아빠", text: "색감과 형태의 대비가 정말 수준 높은 명작이다! 루브르 박물관에 걸어도 손색없겠어 👍", date: "2026-09-02" },
+      { author: "엄마", text: "표정과 색채에 민수의 창의성이 가득 담겨있네! 너무 멋지다 우리 아들 ❤️", date: "2026-09-02" }
     ]
   },
   {
-    id: "art_ms_02",
+    id: "art_ms_real_02",
     author: "민서",
     authorKey: "daughter",
-    title: "무지개 숲속의 요정 하우스",
+    title: "아기자기 미니 온실 정원",
     category: "만들기/공예",
     categoryIcon: "✂️",
-    date: "2026-06-02",
+    date: "2026-09-02",
     grade: "1학년 1학기",
-    imageUrl: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80",
-    artistNote: "점토와 반짝이 가루, 재활용 상자로 요정들이 사는 분홍빛 성을 만들었어요. 지붕에는 꽃잎도 붙였답니다!",
-    likes: 15,
-    stickers: { heart: 8, thumb: 3, star: 6, trophy: 1 },
+    imageUrl: "../assets/images/gallery/minseo_mini_garden_20260902.jpg",
+    artistNote: "투명한 아크릴 온실 집에 알록달록 클레이로 빚은 핑크빛 지붕 꽃과 앙증맞은 선인장, 보라색 꽃 화분을 만들었어요. 미니 조루와 디딤돌도 놓아주었답니다!",
+    likes: 28,
+    stickers: { heart: 15, thumb: 6, star: 10, trophy: 4 },
     comments: [
-      { author: "엄마", text: "디테일이 정말 사랑스럽다! 요정 코코가 당장 이사 오겠는걸? 🧚‍♀️", date: "2026-06-02" },
-      { author: "민수", text: "지붕 색깔 예쁘네 인정!", date: "2026-06-03" }
+      { author: "엄마", text: "손끝이 얼마나 야무진지 디테일이 살아있네! 요정들이 쉬어가는 예쁜 정원이야 🌸", date: "2026-09-02" },
+      { author: "아빠", text: "조루랑 선인장 화분까지 정성이 듬뿍 들어갔네! 민서 솜씨 최고야 ❤️", date: "2026-09-02" },
+      { author: "민수", text: "선인장 화분 귀엽다 ㅋㅋ", date: "2026-09-02" }
     ]
   },
   {
     id: "art_ms_03",
     author: "민수",
     authorKey: "son",
-    title: "과학 탐구 토론 우수상",
+    title: "교내 과학 탐구 토론 우수상",
     category: "상장/기념",
     categoryIcon: "🏆",
     date: "2026-06-25",
@@ -86,23 +87,6 @@ const DEFAULT_GALLERY_DATA = [
     stickers: { heart: 4, thumb: 5, star: 3, trophy: 1 },
     comments: [
       { author: "엄마", text: "헤드라인도 멋지고 진짜 기자처럼 잘 썼네!", date: "2026-07-19" }
-    ]
-  },
-  {
-    id: "art_ms_06",
-    author: "민서",
-    authorKey: "daughter",
-    title: "봄날의 나비 가족 소풍",
-    category: "그림/미술",
-    categoryIcon: "🎨",
-    date: "2026-04-15",
-    grade: "1학년 1학기",
-    imageUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80",
-    artistNote: "크레파스와 물감으로 꽃밭에 놀러 온 나비 가족을 그렸어요. 아빠 나비, 엄마 나비, 아기 나비예요!",
-    likes: 18,
-    stickers: { heart: 11, thumb: 4, star: 7, trophy: 0 },
-    comments: [
-      { author: "엄마", text: "봄 향기가 물씬 풍기는 따뜻한 그림이야 🌸", date: "2026-04-15" }
     ]
   }
 ];
