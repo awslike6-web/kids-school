@@ -533,12 +533,19 @@ function renderStage1UI(container) {
         advanceEnglishQuizAfterCorrect(1500);
     };
 
+    const meaningHtml = currentItem.meaning ? `
+        <div style="font-size: 1.25rem; font-weight: bold; color: #e11d48; margin-bottom: 15px; background: rgba(255,255,255,0.8); display: inline-block; padding: 4px 14px; border-radius: 15px;">
+            🇰🇷 ${currentItem.meaning}
+        </div>
+    ` : '';
+
     container.innerHTML = `
         <div class="quiz-card">
             ${getEnglishOrderToggleHtml()}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">알파벳 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
-            <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${answerWord}</div>
+            <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;">${answerWord}</div>
+            ${meaningHtml}
             <div style="margin-bottom: 20px; color: #666;">이 단어를 소리 내어 읽고 아래 버튼을 눌러보세요!</div>
             
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
@@ -621,7 +628,7 @@ function renderStage3UI(container) {
     const modeMeta = {
         copy: {
             display: answerWord,
-            sub: '영어 단어를 보고 똑같이 적어보세요!',
+            sub: '영어 단어를 보고 똑같이 적으며 한글 뜻도 익혀보세요!',
             placeholder: '똑같이 적어봐!',
             autoSpeak: true,
         },
@@ -773,9 +780,21 @@ function renderStage3UI(container) {
         `;
     }
 
-    const displayHtml = modeMeta.listening
-        ? `<div class="quiz-descr" style="font-size: 2.5rem; margin-bottom: 10px;">${modeMeta.display}</div>`
-        : `<div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${modeMeta.display}</div>`;
+    let displayHtml = '';
+    if (mode === 'copy') {
+        displayHtml = `
+            <div style="background: linear-gradient(135deg, rgba(167, 139, 250, 0.12), rgba(110, 198, 245, 0.15)); border: 2px dashed var(--purple); border-radius: 16px; padding: 15px; margin-bottom: 15px;">
+                <div class="quiz-descr" style="font-size: 2.2rem; font-weight: bold; color: var(--primary); margin-bottom: 6px;">${answerWord}</div>
+                <div style="font-size: 1.25rem; font-weight: bold; color: #e11d48; background: #fff; display: inline-block; padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+                    🇰🇷 ${currentItem.meaning || '뜻풀이'}
+                </div>
+            </div>
+        `;
+    } else if (modeMeta.listening) {
+        displayHtml = `<div class="quiz-descr" style="font-size: 2.5rem; margin-bottom: 10px;">${modeMeta.display}</div>`;
+    } else {
+        displayHtml = `<div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${modeMeta.display}</div>`;
+    }
 
     container.innerHTML = `
         <div class="quiz-card">

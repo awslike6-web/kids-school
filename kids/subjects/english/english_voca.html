@@ -478,7 +478,13 @@ function loadQuestion() {
   input.value = ''; input.className = 'main-input'; input.disabled = false;
 
   if (quizState.mode === 'copy') {
-    qBox.textContent = qData.word; input.placeholder = "똑같이 적어봐!";
+    qBox.innerHTML = `
+        <div style="font-size: 2.6rem; font-weight: bold; color: var(--dark); margin-bottom: 8px;">${qData.word}</div>
+        <div style="font-size: 1.25rem; font-weight: bold; color: #e11d48; background: rgba(255,255,255,0.9); display: inline-block; padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+            🇰🇷 ${qData.meaning || ''}
+        </div>
+    `;
+    input.placeholder = "똑같이 적어봐!";
   } else if (quizState.mode === 'toKorean') {
     qBox.textContent = qData.word; input.placeholder = "무슨 뜻일까요?";
   } else if (quizState.mode === 'toEnglish') {
