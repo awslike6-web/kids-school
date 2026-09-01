@@ -125,6 +125,7 @@ function openMissionView(type) {
 
     let targetTitle = ""; let targetIcon = "";
     switch(type) {
+        case 'storybook': targetTitle = "단원 동화 도서관 (Storybook Library)"; targetIcon = "📚"; break;
         case 'sentence': targetTitle = "AI 지문 토론방"; targetIcon = "🗣️"; break;
         case 'reading': targetTitle = "정밀 독해 멀티버스방"; targetIcon = "📖"; break;
         case 'voca': targetTitle = "국어 용어방"; targetIcon = "📚"; break;
@@ -264,10 +265,99 @@ window.koreanToggleQuizOrder = function() {
 window.koreanToggleDictationOrder = window.koreanToggleQuizOrder;
 
 // ========================================================
+// 📚 국어 단원별 스토리북 도서관 데이터베이스
+// ========================================================
+const KOREAN_STORYBOOK_LIBRARY = [
+    {
+        id: "1_2_1_1",
+        grade: "1학년 2학기",
+        gradeCode: "1-2",
+        unit: "1단원",
+        bookNum: "1권",
+        title: "마음 똑똑! 감정 라디오 교실",
+        subtitle: "감정의 날씨와 화해 이야기",
+        desc: "마음속에 찾아오는 날씨와 다양한 감정들! 실수로 그림이 찢어졌을 때 민서와 서율이는 어떻게 화해했을까요?",
+        icon: "📻",
+        color: "#ec4899",
+        bgGrad: "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#ec4899",
+        link: "korean_1_2_1_storybook.html",
+        coverImg: "images/minseo/1-2/1/storybook/korean_story_p1.png"
+    },
+    {
+        id: "1_2_1_2",
+        grade: "1학년 2학기",
+        gradeCode: "1-2",
+        unit: "1단원",
+        bookNum: "2권",
+        title: "소곤소곤 나-전달법",
+        subtitle: "우유 쏟은 민수 오빠와 마법 주문",
+        desc: "상황-감정-바라는 점 3단계 마법 주문! 화내지 않고 소곤소곤 예쁘게 내 마음을 전하는 법을 배워요.",
+        icon: "💬",
+        color: "#3b82f6",
+        bgGrad: "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#3b82f6",
+        link: "korean_1_2_1_storybook_2.html",
+        coverImg: "images/minseo/1-2/1/storybook_2/korean_story_p1.png"
+    }
+];
+
+function renderStorybookLibrary(innerBody) {
+    innerBody.innerHTML = `
+        <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h3 style="font-family: 'Jua', sans-serif; font-size: 1.4rem; color: #f472b6; margin-bottom: 6px;">
+                    📖 국어 단원 동화 도서관
+                </h3>
+                <p style="font-size: 0.95rem; color: #94a3b8;">
+                    교과서 내용이 쏙쏙 이해되는 재미있는 동화와 구연동화 음성을 만나보세요!
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                ${KOREAN_STORYBOOK_LIBRARY.map(book => `
+                    <div style="background: ${book.bgGrad}; border: 2px solid ${book.border}; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 25px rgba(0,0,0,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="background: ${book.color}; color: white; padding: 3px 10px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.85rem;">
+                                    [${book.gradeCode} ${book.unit}] ${book.bookNum}
+                                </span>
+                                <span style="font-size: 1.3rem;">${book.icon}</span>
+                            </div>
+                            
+                            <img src="${book.coverImg}?v=20260902_1" alt="${book.title}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            
+                            <h4 style="font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">
+                                ${book.title}
+                            </h4>
+                            <p style="font-size: 0.88rem; color: #f472b6; font-weight: bold; margin-bottom: 8px;">
+                                ${book.subtitle}
+                            </p>
+                            <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 14px;">
+                                ${book.desc}
+                            </p>
+                        </div>
+
+                        <a href="${book.link}" style="display: block; width: 100%; padding: 10px 0; background: ${book.color}; color: white; text-align: center; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 1rem; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                            📖 동화책 읽기 (구연동화)
+                        </a>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// ========================================================
 // 📊 데이터 페칭 및 동적 UI 생성
 // ========================================================
 async function fetchAndBuildDynamicUI(type, innerBody) {
     try {
+        if (type === 'storybook') {
+            renderStorybookLibrary(innerBody);
+            return;
+        }
+
         if (type === 'sentence' || type === 'reading') {
             let libraryRecords = [];
             if (typeof fetchLibraryBooksFromNotion === 'function') {

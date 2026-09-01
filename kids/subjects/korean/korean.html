@@ -14,9 +14,9 @@
   <div class="top-action-bar">
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
-      <a href="korean_1_2_1_storybook.html" class="back-to-lobby-btn" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;">
-        📚 [1-2] 1단원 감정 스토리북 (동화)
-      </a>
+      <button class="back-to-lobby-btn" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;" onclick="openMissionView('storybook')">
+        📚 [1-2] 단원 동화 도서관 (스토리북)
+      </button>
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
@@ -32,11 +32,11 @@
 
   <div class="korean-grid">
     
-    <a href="korean_1_2_1_storybook.html" class="korean-grid-btn" style="text-decoration: none; color: inherit; border: 2.5px solid #ec4899; background: linear-gradient(180deg, #ffffff 0%, #fdf2f8 100%);">
-      <span class="korean-btn-icon">📻</span>
+    <div class="korean-grid-btn" onclick="openMissionView('storybook')" style="border: 2.5px solid #ec4899; background: linear-gradient(180deg, #ffffff 0%, #fdf2f8 100%);">
+      <span class="korean-btn-icon">📚</span>
       <div class="korean-btn-title" style="color: #be185d;">단원 동화 스토리북</div>
-      <p class="korean-btn-desc"><strong>[1-2 국어 1단원]</strong> 마음 똑똑! 감정 라디오 교실 - 민서와 서율이의 마음 날씨 이야기 (초등 1학년 2학기)</p>
-    </a>
+      <p class="korean-btn-desc"><strong>[1-2 국어 1단원 1·2권]</strong> 감정 라디오 교실 & 소곤소곤 나-전달법! 삽화와 구연동화로 교과서 완전 정복!</p>
+    </div>
     
     <div class="korean-grid-btn" onclick="openMissionView('sentence')">
       <span class="korean-btn-icon">🗣️</span>
