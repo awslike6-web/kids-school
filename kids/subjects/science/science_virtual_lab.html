@@ -192,17 +192,45 @@
         display: flex; justify-content: center; align-items: center; font-family: 'Jua'; font-size: 0.85rem; color: #713f12;
     }
 
-    /* 실험 3: 거름 & 증발 */
+    /* 실험 3: 거름 & 증발 장치 */
     .funnel-wrap {
-        position: absolute; top: 40px; width: 180px; display: flex; flex-direction: column; align-items: center;
+        position: absolute; top: 25px; width: 180px; display: flex; flex-direction: column; align-items: center; z-index: 10;
     }
-    .filter-paper {
-        width: 140px; height: 70px; border-bottom: 70px solid #f1f5f9;
-        border-left: 70px solid transparent; border-right: 70px solid transparent;
+    /* 유리 깔때기 몸통 (위가 넓고 아래가 좁은 역원뿔 🔻) */
+    .funnel-body {
+        width: 150px; height: 75px; background: rgba(255, 255, 255, 0.15);
+        border: 3px solid rgba(255, 255, 255, 0.6); border-bottom: none;
+        clip-path: polygon(0% 0%, 100% 0%, 58% 100%, 42% 100%);
+        position: relative; display: flex; justify-content: center; align-items: flex-start;
+        box-shadow: 0 4px 15px rgba(255,255,255,0.05);
+    }
+    /* 깔때기 안에 쏙 들어간 거름종이 (하얀색 콘 🔻) */
+    .filter-paper-cone {
+        width: 130px; height: 65px; background: #f8fafc;
+        clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+        position: relative; display: flex; justify-content: center; align-items: center;
+        border-top: 2px solid #e2e8f0;
+    }
+    /* 깔때기 줄기 (아래로 뻗은 유리관) */
+    .funnel-stem {
+        width: 16px; height: 60px; background: rgba(255, 255, 255, 0.25);
+        border-left: 3px solid rgba(255, 255, 255, 0.6); border-right: 3px solid rgba(255, 255, 255, 0.6);
         position: relative;
     }
+    /* 깔때기에서 떨어지는 물방울 */
+    .drip-drop {
+        position: absolute; bottom: -15px; left: 2px; width: 10px; height: 12px;
+        background: #38bdf8; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        display: none; animation: dripFall 0.8s infinite linear;
+    }
+    @keyframes dripFall {
+        0% { transform: translateY(0) scale(0.8); opacity: 1; }
+        80% { transform: translateY(55px) scale(1.1); opacity: 1; }
+        100% { transform: translateY(60px) scale(0.4); opacity: 0; }
+    }
+
     .heater-plate {
-        position: absolute; bottom: 30px; width: 220px; height: 40px; background: #334155;
+        position: absolute; bottom: 25px; width: 220px; height: 40px; background: #334155;
         border-radius: 10px; border: 2px solid #475569; display: flex; justify-content: center; align-items: center;
     }
     .heater-plate.on {
@@ -210,14 +238,16 @@
         box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
     }
     .evap-dish {
-        position: absolute; bottom: 70px; width: 170px; height: 60px;
+        position: absolute; bottom: 65px; width: 170px; height: 60px;
         border: 3px solid rgba(255,255,255,0.6); border-top: none; border-radius: 0 0 90px 90px;
         background: rgba(255,255,255,0.1); overflow: hidden; display: flex; justify-content: center; align-items: flex-end;
     }
     .dish-solution {
-        width: 100%; height: 45px; background: rgba(56, 189, 248, 0.6); transition: height 2s linear;
+        width: 100%; height: 0px; background: rgba(56, 189, 248, 0.7); transition: height 1.5s ease;
     }
     .salt-crystals {
+        position: absolute; bottom: 6px; display: none; gap: 6px;
+    }
         position: absolute; bottom: 4px; display: none; gap: 4px;
     }
     .salt-dot { width: 8px; height: 8px; background: white; border-radius: 2px; box-shadow: 0 0 4px #fff; }
@@ -361,15 +391,24 @@
         </div>
 
         <div class="sim-viewport" id="viewport3">
+            <!-- 깔때기 & 거름종이 장치 (역원뿔 🔻) -->
             <div class="funnel-wrap" id="funnel3">
-                <div class="filter-paper">
-                    <span id="sandOnFilter" style="position:absolute; top:25px; left:45px; font-family:'Jua'; color:#78350f; font-size:0.85rem; display:none;">
-                        🏜️ 모래 걸러짐
-                    </span>
+                <span style="font-family:'Jua'; color:#38bdf8; font-size:0.9rem; margin-bottom:4px;">
+                    🔻 깔때기 & 거름종이
+                </span>
+                <div class="funnel-body">
+                    <div class="filter-paper-cone">
+                        <span id="sandOnFilter" style="font-family:'Jua'; color:#92400e; font-size:0.85rem; display:none; text-shadow:0 0 2px #fff;">
+                            🏜️ 모래 걸러짐
+                        </span>
+                    </div>
                 </div>
-                <span style="font-family:'Jua'; color:#cbd5e1; font-size:0.85rem; margin-top:4px;">깔때기 & 거름종이</span>
+                <div class="funnel-stem">
+                    <div class="drip-drop" id="dripDrop"></div>
+                </div>
             </div>
 
+            <!-- 아래 증발 접시 -->
             <div class="evap-dish" id="evapDish">
                 <div class="dish-solution" id="dishSolution"></div>
                 <div class="salt-crystals" id="saltCrystals">
@@ -552,6 +591,7 @@
         exp3Step = 1;
         document.getElementById('sandOnFilter').style.display = 'none';
         document.getElementById('dishSolution').style.height = '0px';
+        document.getElementById('dripDrop').style.display = 'none';
         document.getElementById('heaterPlate').classList.remove('on');
         document.getElementById('heaterLabel').textContent = '가열 장치 (OFF)';
         document.getElementById('steamWrap').style.display = 'none';
@@ -566,15 +606,21 @@
         const btn = document.getElementById('btnExp3Action');
         if (exp3Step === 1) {
             btn.disabled = true;
-            btn.textContent = '⏳ 거르는 중...';
+            btn.textContent = '⏳ 거르는 중 (소금물 뚝뚝)...';
+            document.getElementById('dripDrop').style.display = 'block';
+
             setTimeout(() => {
                 document.getElementById('sandOnFilter').style.display = 'block';
                 document.getElementById('dishSolution').style.height = '45px';
+            }, 800);
+
+            setTimeout(() => {
+                document.getElementById('dripDrop').style.display = 'none';
                 exp3Step = 2;
                 btn.disabled = false;
                 btn.textContent = '🔥 2단계 : 가열하여 물 증발시키기';
                 document.getElementById('exp3Guide').innerHTML = "👉 <b>2단계</b>: '가열하여 물 증발시키기' 버튼을 눌러 맑은 소금물에서 소금을 얻으세요!";
-            }, 1000);
+            }, 2000);
         } else if (exp3Step === 2) {
             btn.disabled = true;
             btn.textContent = '🔥 가열 중 (물 증발 중)...';
@@ -585,7 +631,7 @@
             // 물 증발
             setTimeout(() => {
                 document.getElementById('dishSolution').style.height = '0px';
-            }, 500);
+            }, 600);
 
             setTimeout(() => {
                 document.getElementById('steamWrap').style.display = 'none';
