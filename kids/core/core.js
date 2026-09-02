@@ -5,7 +5,8 @@
 var requiredCores = [
     "notion-helper.js",
     "fairy-config.js",
-    "fairy-engine.js"
+    "fairy-engine.js",
+    "daily-diary.js"
 ];
 
 // 글로벌 헬퍼 상태 정의 (공통 사용)

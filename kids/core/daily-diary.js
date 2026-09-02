@@ -1,0 +1,604 @@
+// kids/core/daily-diary.js
+// 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 성장기록 맞춤형 통합 엔진)
+
+// 1. 일기장 저장 및 조회 헬퍼
+function getStoredDiaries() {
+    try {
+        const data = localStorage.getItem('mimi_daily_diaries');
+        return data ? JSON.parse(data) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveDiaryEntry(entry) {
+    const list = getStoredDiaries();
+    // 동일 날짜/학생 일기가 있으면 덮어쓰기 또는 추가
+    const existingIndex = list.findIndex(item => item.date === entry.date && item.childName === entry.childName);
+    if (existingIndex > -1) {
+        list[existingIndex] = entry;
+    } else {
+        list.unshift(entry);
+    }
+    localStorage.setItem('mimi_daily_diaries', JSON.stringify(list));
+}
+
+function hasTodayDiary(childName) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const list = getStoredDiaries();
+    return list.some(item => item.date === todayStr && item.childName === childName);
+}
+
+// 2. 음성 인식 (STT) 헬퍼
+let diarySpeechRecog = null;
+function startDiaryVoiceInput(targetInputId, btnElement) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("이 브라우저는 음성 입력을 지원하지 않아요. 직접 글을 써주세요! ✏️");
+        return;
+    }
+
+    if (diarySpeechRecog) {
+        diarySpeechRecog.abort();
+        diarySpeechRecog = null;
+    }
+
+    diarySpeechRecog = new SpeechRecognition();
+    diarySpeechRecog.lang = 'ko-KR';
+    diarySpeechRecog.interimResults = false;
+    diarySpeechRecog.maxAlternatives = 1;
+
+    btnElement.innerHTML = '🔴 듣고 있어요... (말씀하세요!)';
+    btnElement.style.background = '#ef4444';
+    btnElement.style.color = '#ffffff';
+
+    diarySpeechRecog.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const targetInput = document.getElementById(targetInputId);
+        if (targetInput) {
+            targetInput.value = targetInput.value ? (targetInput.value + ' ' + transcript) : transcript;
+        }
+    };
+
+    diarySpeechRecog.onerror = (e) => {
+        console.warn('음성 인식 오류:', e);
+        resetVoiceBtn(btnElement);
+    };
+
+    diarySpeechRecog.onend = () => {
+        resetVoiceBtn(btnElement);
+    };
+
+    diarySpeechRecog.start();
+}
+
+function resetVoiceBtn(btnElement) {
+    btnElement.innerHTML = '🎙️ 말로 하기 (음성 입력)';
+    btnElement.style.background = '#e0e7ff';
+    btnElement.style.color = '#4338ca';
+}
+
+// 3. 일기장 모달 열기
+function openDailyDiaryModal(initialTab = 'write') {
+    const currentProfile = localStorage.getItem('currentUser') || 'son';
+    const childName = currentProfile === 'son' ? '민수' : '민서';
+    const isMinsu = (currentProfile === 'son');
+
+    // 기존 모달 제거
+    const existing = document.getElementById('dailyDiaryModalWrapper');
+    if (existing) existing.remove();
+
+    const today = new Date();
+    const dateFormatted = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+    const todayYMD = today.toISOString().split('T')[0];
+
+    const modalWrapper = document.createElement('div');
+    modalWrapper.id = 'dailyDiaryModalWrapper';
+    modalWrapper.style.cssText = `
+        position: fixed; inset: 0; z-index: 10000;
+        background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+        display: flex; justify-content: center; align-items: center; padding: 14px;
+        animation: diaryFadeIn 0.3s ease;
+    `;
+
+    modalWrapper.innerHTML = `
+        <style>
+            @keyframes diaryFadeIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+            @keyframes stampDrop { 0% { opacity: 0; transform: scale(3) rotate(-25deg); } 60% { opacity: 1; transform: scale(0.9) rotate(8deg); } 100% { transform: scale(1) rotate(-8deg); } }
+            
+            .diary-box {
+                background: ${isMinsu ? '#1e1b4b' : '#fff5f7'};
+                color: ${isMinsu ? '#f8fafc' : '#4a384f'};
+                border: 3px solid ${isMinsu ? '#6366f1' : '#ff6b9d'};
+                border-radius: 28px; width: 100%; max-width: 680px; max-height: 90vh;
+                display: flex; flex-direction: column; overflow: hidden;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            }
+            .diary-header {
+                padding: 16px 20px; background: ${isMinsu ? 'linear-gradient(135deg, #312e81, #1e1b4b)' : 'linear-gradient(135deg, #ffe4e6, #fff1f2)'};
+                border-bottom: 2px solid ${isMinsu ? '#4338ca' : '#fecdd3'};
+                display: flex; justify-content: space-between; align-items: center;
+            }
+            .diary-tabs {
+                display: flex; gap: 8px;
+            }
+            .diary-tab-btn {
+                padding: 6px 14px; border-radius: 12px; border: 1.5px solid; font-family: 'Jua', sans-serif;
+                font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+            }
+            .diary-tab-btn.active {
+                background: ${isMinsu ? '#6366f1' : '#ff6b9d'}; color: #fff; border-color: ${isMinsu ? '#818cf8' : '#ff85a2'};
+            }
+            .diary-tab-btn:not(.active) {
+                background: transparent; color: ${isMinsu ? '#94a3b8' : '#8d6e63'}; border-color: ${isMinsu ? '#475569' : '#e2e8f0'};
+            }
+            .diary-body {
+                padding: 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 20px;
+            }
+            .diary-sec-title {
+                font-family: 'Jua', sans-serif; font-size: 1.15rem; margin-bottom: 8px;
+                color: ${isMinsu ? '#818cf8' : '#e11d48'}; display: flex; align-items: center; gap: 6px;
+            }
+            .weather-grid, .energy-grid {
+                display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px;
+            }
+            .choice-card {
+                padding: 10px 8px; border-radius: 16px; border: 2px solid ${isMinsu ? '#4338ca' : '#ffd1dc'};
+                background: ${isMinsu ? '#2e2a72' : '#ffffff'}; cursor: pointer; text-align: center;
+                transition: all 0.2s; font-family: 'Nanum Gothic', sans-serif;
+            }
+            .choice-card:hover { transform: translateY(-2px); }
+            .choice-card.selected {
+                border-color: ${isMinsu ? '#38bdf8' : '#ff4081'};
+                background: ${isMinsu ? 'linear-gradient(135deg, #4f46e5, #4338ca)' : 'linear-gradient(135deg, #ffe4e6, #fecdd3)'};
+                box-shadow: 0 4px 12px ${isMinsu ? 'rgba(56, 189, 248, 0.4)' : 'rgba(255, 64, 129, 0.3)'};
+            }
+            .balloon-tags {
+                display: flex; flex-wrap: wrap; gap: 8px;
+            }
+            .balloon-tag {
+                padding: 6px 14px; border-radius: 20px; border: 1.5px solid ${isMinsu ? '#4f46e5' : '#ffccd5'};
+                background: ${isMinsu ? '#2e2a72' : '#ffffff'}; cursor: pointer; font-family: 'Jua', sans-serif;
+                font-size: 0.95rem; transition: all 0.2s;
+            }
+            .balloon-tag.selected {
+                background: ${isMinsu ? '#6366f1' : '#ff4081'}; color: #fff;
+                border-color: ${isMinsu ? '#818cf8' : '#ff4081'};
+            }
+            .diary-input {
+                width: 100%; padding: 12px 14px; border-radius: 16px; border: 2px solid ${isMinsu ? '#4338ca' : '#ffd1dc'};
+                background: ${isMinsu ? '#1e1b4b' : '#ffffff'}; color: inherit; font-size: 1rem;
+                font-family: 'Nanum Gothic', sans-serif; outline: none; transition: border-color 0.2s;
+            }
+            .diary-input:focus { border-color: ${isMinsu ? '#818cf8' : '#ff6b9d'}; }
+            .btn-voice {
+                display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 12px;
+                border: none; font-family: 'Jua', sans-serif; font-size: 0.88rem; cursor: pointer;
+                background: #e0e7ff; color: #4338ca; transition: all 0.2s;
+            }
+            .btn-submit-diary {
+                width: 100%; padding: 14px; border-radius: 20px; border: none; font-family: 'Jua', sans-serif;
+                font-size: 1.25rem; color: #fff; cursor: pointer; transition: all 0.25s;
+                background: ${isMinsu ? 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)' : 'linear-gradient(135deg, #ff6b9d 0%, #e11d48 100%)'};
+                box-shadow: 0 6px 20px ${isMinsu ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 107, 157, 0.4)'};
+                display: flex; justify-content: center; align-items: center; gap: 8px;
+            }
+            .btn-submit-diary:hover { transform: translateY(-2px); }
+            
+            /* 스탬프 애니메이션 박스 */
+            .stamp-badge {
+                display: inline-block; padding: 8px 16px; border-radius: 12px; border: 3px dashed #e11d48;
+                color: #e11d48; font-family: 'Jua', sans-serif; font-size: 1.4rem; font-weight: bold;
+                animation: stampDrop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
+            }
+        </style>
+
+        <div class="diary-box">
+            <div class="diary-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.6rem;">${isMinsu ? '🚀' : '🐰'}</span>
+                    <div>
+                        <h3 style="font-family: 'Jua', sans-serif; font-size: 1.2rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
+                            ${isMinsu ? '민수의 하루 성장 일기' : '민서의 마음 날씨 일기장'}
+                        </h3>
+                        <span style="font-size: 0.85rem; opacity: 0.8;">📅 ${dateFormatted}</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="diary-tabs">
+                        <button id="tabDiaryWrite" class="diary-tab-btn ${initialTab === 'write' ? 'active' : ''}" onclick="switchDiaryTab('write')">✏️ 일기 쓰기</button>
+                        <button id="tabDiaryHistory" class="diary-tab-btn ${initialTab === 'history' ? 'active' : ''}" onclick="switchDiaryTab('history')">📚 지난 일기</button>
+                    </div>
+                    <button onclick="closeDailyDiaryModal()" style="background:transparent; border:none; color:inherit; font-size:1.4rem; cursor:pointer; padding:4px 8px;">✕</button>
+                </div>
+            </div>
+
+            <!-- 1. 일기 작성 폼 -->
+            <div class="diary-body" id="diaryWriteSection" style="display: ${initialTab === 'write' ? 'flex' : 'none'};">
+                ${isMinsu ? renderMinsuDiaryForm(todayYMD) : renderMinseoDiaryForm(todayYMD)}
+            </div>
+
+            <!-- 2. 지난 일기 히스토리 뷰 -->
+            <div class="diary-body" id="diaryHistorySection" style="display: ${initialTab === 'history' ? 'flex' : 'none'};">
+                ${renderDiaryHistoryList(childName, isMinsu)}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modalWrapper);
+}
+
+function closeDailyDiaryModal() {
+    const modal = document.getElementById('dailyDiaryModalWrapper');
+    if (modal) modal.remove();
+}
+
+function switchDiaryTab(tab) {
+    const writeSec = document.getElementById('diaryWriteSection');
+    const histSec = document.getElementById('diaryHistorySection');
+    const tabWrite = document.getElementById('tabDiaryWrite');
+    const tabHist = document.getElementById('tabDiaryHistory');
+
+    if (tab === 'write') {
+        writeSec.style.display = 'flex';
+        histSec.style.display = 'none';
+        tabWrite.classList.add('active');
+        tabHist.classList.remove('active');
+    } else {
+        writeSec.style.display = 'none';
+        histSec.style.display = 'flex';
+        tabWrite.classList.remove('active');
+        tabHist.classList.add('active');
+    }
+}
+
+// 🐰 민서 (1학년) 일기 폼 렌더러
+function renderMinseoDiaryForm(todayYMD) {
+    return `
+        <!-- 1. 마음 날씨 -->
+        <div>
+            <div class="diary-sec-title">
+                <span>🌤️ 1. 오늘 나의 마음 날씨는 어떤가요?</span>
+            </div>
+            <div class="weather-grid" id="minseoWeatherGrid">
+                <div class="choice-card selected" onclick="selectChoiceCard(this, 'minseoWeather')" data-val="☀️ 맑음">
+                    <div style="font-size: 1.6rem;">☀️</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">맑고 따뜻</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">기분 좋아요</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minseoWeather')" data-val="💎 보석 반짝">
+                    <div style="font-size: 1.6rem;">💎</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">보석 반짝</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">뿌듯·자랑</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minseoWeather')" data-val="⚡ 번개 찌지직">
+                    <div style="font-size: 1.6rem;">⚡</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">번개 찌지직</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">깜짝 놀람</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minseoWeather')" data-val="🥶 얼음 꽁꽁">
+                    <div style="font-size: 1.6rem;">🥶</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">얼음 꽁꽁</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">긴장·무서움</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minseoWeather')" data-val="🌋 화산 우르릉">
+                    <div style="font-size: 1.6rem;">🌋</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">화산 우르릉</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">화나고 속상</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 기분 풍선 -->
+        <div>
+            <div class="diary-sec-title">
+                <span>🎈 2. 내 마음속 기분 풍선을 골라보세요! (여러 개 가능)</span>
+            </div>
+            <div class="balloon-tags" id="minseoBalloonGrid">
+                <span class="balloon-tag selected" onclick="toggleBalloonTag(this)">🎈 신나요</span>
+                <span class="balloon-tag selected" onclick="toggleBalloonTag(this)">🎈 뿌듯해요</span>
+                <span class="balloon-tag" onclick="toggleBalloonTag(this)">🎈 행복해요</span>
+                <span class="balloon-tag" onclick="toggleBalloonTag(this)">🎈 사랑해요</span>
+                <span class="balloon-tag" onclick="toggleBalloonTag(this)">🎈 고마워요</span>
+                <span class="balloon-tag" onclick="toggleBalloonTag(this)">🎈 설레어요</span>
+                <span class="balloon-tag" onclick="toggleBalloonTag(this)">🎈 속상해요</span>
+                <span class="balloon-tag" onclick="toggleBalloonTag(this)">🎈 답답해요</span>
+            </div>
+        </div>
+
+        <!-- 3. 오늘 있었던 일 -->
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div class="diary-sec-title" style="margin-bottom:0;">
+                    <span>📝 3. 오늘 어떤 일이 있었나요?</span>
+                </div>
+                <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minseoEventInput', this)">
+                    🎙️ 말로 하기 (음성 입력)
+                </button>
+            </div>
+            <textarea id="minseoEventInput" class="diary-input" rows="2" placeholder="예: 친구랑 블록 놀이를 재미있게 했어요!"></textarea>
+        </div>
+
+        <!-- 4. 나-전달법 마법 주문 한 줄 -->
+        <div>
+            <div class="diary-sec-title">
+                <span>🪄 4. 소곤소곤 '나-전달법' 마법 한 문장</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.8); border:1.5px dashed #ff85a2; padding:12px; border-radius:16px; display:flex; flex-direction:column; gap:8px; font-size:0.95rem;">
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span>👉 내가</span>
+                    <input type="text" id="minseoIMessageSit" class="diary-input" style="flex:1; min-width:140px; padding:6px 10px;" placeholder="상황 (예: 발표를 잘 끝냈)">
+                    <span>을 때,</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span>👉 내 기분은</span>
+                    <input type="text" id="minseoIMessageFeel" class="diary-input" style="flex:1; min-width:140px; padding:6px 10px;" placeholder="감정 (예: 보석처럼 반짝반짝 뿌듯)">
+                    <span>했어.</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <span>👉 앞으로는</span>
+                    <input type="text" id="minseoIMessageWish" class="diary-input" style="flex:1; min-width:140px; padding:6px 10px;" placeholder="바라는 점 (예: 계속 씩씩하게 도전할 거야)">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-submit-diary" onclick="submitMinseoDiary('${todayYMD}')">
+            <span>🌟 일기 완성하고 별 도장 받기! (+5💎)</span>
+        </button>
+    `;
+}
+
+// 🚀 민수 (5학년) 일기 폼 렌더러
+function renderMinsuDiaryForm(todayYMD) {
+    return `
+        <!-- 1. 오늘 컨디션 & 에너지 -->
+        <div>
+            <div class="diary-sec-title">
+                <span>⚡ 1. 오늘의 몰입 에너지 & 컨디션</span>
+            </div>
+            <div class="energy-grid" id="minsuEnergyGrid">
+                <div class="choice-card selected" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🔥 불꽃 열정">
+                    <div style="font-size: 1.6rem;">🔥</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">불꽃 열정</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">에너지 100%</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="⚡ 초집중 몰입">
+                    <div style="font-size: 1.6rem;">⚡</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">초집중 몰입</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">목표 달성</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🌿 편안한 여유">
+                    <div style="font-size: 1.6rem;">🌿</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">편안한 여유</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">안정적인 하루</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🥱 충전 필요">
+                    <div style="font-size: 1.6rem;">🥱</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">충전 필요</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">수고한 하루</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 오늘 가장 몰입하고 뿌듯했던 일 -->
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div class="diary-sec-title" style="margin-bottom:0;">
+                    <span>🎯 2. 오늘 내가 가장 몰입했거나 뿌듯했던 일</span>
+                </div>
+                <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minsuAccomplishInput', this)">
+                    🎙️ 말로 하기
+                </button>
+            </div>
+            <textarea id="minsuAccomplishInput" class="diary-input" rows="3" placeholder="예: 5학년 분수 나눗셈과 사회 역사를 집중해서 끝냈다! 코딩 퀘스트도 재미있었다."></textarea>
+        </div>
+
+        <!-- 3. 오늘 배운 점 & 내일의 다짐 -->
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div class="diary-sec-title" style="margin-bottom:0;">
+                    <span>💡 3. 오늘 배운 점 & 내일을 위한 나만의 다짐</span>
+                </div>
+                <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minsuGoalInput', this)">
+                    🎙️ 말로 하기
+                </button>
+            </div>
+            <textarea id="minsuGoalInput" class="diary-input" rows="2" placeholder="예: 어려운 문제도 차근차근 풀면 풀린다는 걸 배웠다. 내일도 일찍 일어나서 계획대로 해보자!"></textarea>
+        </div>
+
+        <button class="btn-submit-diary" onclick="submitMinsuDiary('${todayYMD}')">
+            <span>🚀 성장 일기 기록 완료! (+5💎)</span>
+        </button>
+    `;
+}
+
+// 4. 인터랙티브 컴포넌트 헬퍼
+function selectChoiceCard(card, groupName) {
+    const parent = card.parentElement;
+    parent.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+}
+
+function toggleBalloonTag(tag) {
+    tag.classList.toggle('selected');
+}
+
+// 5. 민서 일기 제출
+async function submitMinseoDiary(dateYMD) {
+    const weatherCard = document.querySelector('#minseoWeatherGrid .choice-card.selected');
+    const weather = weatherCard ? weatherCard.dataset.val : '☀️ 맑음';
+
+    const selectedBalloons = Array.from(document.querySelectorAll('#minseoBalloonGrid .balloon-tag.selected')).map(t => t.innerText);
+    const eventText = document.getElementById('minseoEventInput')?.value.trim() || '오늘 하루도 즐겁고 보람차게 보냈어요!';
+
+    const sit = document.getElementById('minseoIMessageSit')?.value.trim();
+    const feel = document.getElementById('minseoIMessageFeel')?.value.trim();
+    const wish = document.getElementById('minseoIMessageWish')?.value.trim();
+    const iMessage = (sit || feel || wish) ? `내가 ${sit || '하루를 보냈'}을 때, 내 기분은 ${feel || '뿌듯'}했어. 앞으로는 ${wish || '더 씩씩하게 할 거야'}.` : '';
+
+    const entry = {
+        childName: '민서',
+        date: dateYMD,
+        weather: weather,
+        moods: selectedBalloons,
+        content: eventText,
+        iMessage: iMessage,
+        createdAt: new Date().toISOString()
+    };
+
+    saveDiaryEntry(entry);
+    await triggerAwardDispense(5);
+
+    // 노션 학습일지 DB로도 다이어리 기록 전송
+    if (typeof sendStudyLogToNotion === 'function') {
+        sendStudyLogToNotion({
+            childName: '민서',
+            subject: `마음일기 (${weather})`,
+            errorReport: `[감정: ${selectedBalloons.join(', ')}] ${eventText} ${iMessage ? ' / 나-전달법: ' + iMessage : ''}`
+        });
+    }
+
+    // 성공 화면 렌더링
+    showDiarySuccessModal('민서', weather, '참 잘했어요! 1일차 별 도장 획득! 🌟');
+}
+
+// 6. 민수 일기 제출
+async function submitMinsuDiary(dateYMD) {
+    const energyCard = document.querySelector('#minsuEnergyGrid .choice-card.selected');
+    const energy = energyCard ? energyCard.dataset.val : '🔥 불꽃 열정';
+
+    const accomplish = document.getElementById('minsuAccomplishInput')?.value.trim() || '오늘 계획한 학습과 과제를 성실하게 완료했다.';
+    const goal = document.getElementById('minsuGoalInput')?.value.trim() || '내일도 흔들리지 않고 목표를 향해 달려가자!';
+
+    const entry = {
+        childName: '민수',
+        date: dateYMD,
+        energy: energy,
+        accomplish: accomplish,
+        goal: goal,
+        createdAt: new Date().toISOString()
+    };
+
+    saveDiaryEntry(entry);
+    await triggerAwardDispense(5);
+
+    // 노션 학습일지 DB로도 다이어리 기록 전송
+    if (typeof sendStudyLogToNotion === 'function') {
+        sendStudyLogToNotion({
+            childName: '민수',
+            subject: `성장일기 (${energy})`,
+            errorReport: `[몰입: ${accomplish}] [다짐: ${goal}]`
+        });
+    }
+
+    // 성공 화면 렌더링
+    showDiarySuccessModal('민수', energy, '오늘의 성장 일기 기록 완료! 🚀');
+}
+
+// 7. 완료 팝업 & 도장 연출
+function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
+    // 칭찬 성우 음성 재생
+    if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS("참 잘했어요!");
+    }
+
+    const writeSec = document.getElementById('diaryWriteSection');
+    if (!writeSec) return;
+
+    writeSec.innerHTML = `
+        <div style="text-align: center; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+            <div style="font-size: 3.5rem;">🎉</div>
+            <h2 style="font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #10b981;">
+                ${childName}의 오늘 일기가 멋지게 저장되었어요!
+            </h2>
+            <p style="font-size: 1rem; opacity: 0.85;">
+                오늘 하루를 소중하게 기록한 ${childName}에게 <b>+5 크레딧 보상</b>이 지급되었습니다! 💎
+            </p>
+
+            <div style="margin: 20px 0;">
+                <div class="stamp-badge">
+                    ${stampMsg}
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:10px;">
+                <button class="diary-tab-btn active" style="padding:10px 24px; font-size:1.05rem;" onclick="switchDiaryTab('history')">
+                    📚 지난 일기 모아보기
+                </button>
+                <button class="diary-tab-btn" style="padding:10px 24px; font-size:1.05rem;" onclick="closeDailyDiaryModal()">
+                    🚪 닫기
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// 8. 지난 일기 히스토리 뷰 렌더러
+function renderDiaryHistoryList(childName, isMinsu) {
+    const list = getStoredDiaries().filter(item => item.childName === childName);
+
+    if (list.length === 0) {
+        return `
+            <div style="text-align:center; padding:50px 10px; opacity:0.7;">
+                <div style="font-size:3rem; margin-bottom:12px;">📝</div>
+                <p style="font-family:'Jua', sans-serif; font-size:1.2rem;">아직 작성된 일기가 없어요.</p>
+                <p style="font-size:0.9rem;">오늘의 첫 마음 일기를 작성해 볼까요?</p>
+            </div>
+        `;
+    }
+
+    return `
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="font-size: 0.95rem; opacity: 0.8; font-weight: bold;">
+                총 ${list.length}편의 소중한 기록이 보관되어 있어요 📚
+            </div>
+            ${list.map(entry => `
+                <div style="background:${isMinsu ? '#2e2a72' : '#ffffff'}; border:2px solid ${isMinsu ? '#4f46e5' : '#ffd1dc'}; border-radius:18px; padding:16px; box-shadow:0 4px 14px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed ${isMinsu ? '#4338ca' : '#fecdd3'}; padding-bottom:8px;">
+                        <span style="font-family:'Jua', sans-serif; font-size:1.1rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
+                            📅 ${entry.date}
+                        </span>
+                        <span style="font-size:1rem; font-weight:bold; background:${isMinsu ? 'rgba(99,102,241,0.2)' : '#ffe4e6'}; padding:4px 10px; border-radius:12px;">
+                            ${entry.weather || entry.energy || '✨ 맑음'}
+                        </span>
+                    </div>
+
+                    ${entry.moods && entry.moods.length > 0 ? `
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            ${entry.moods.map(m => `<span style="font-size:0.82rem; background:${isMinsu ? '#4338ca' : '#fff1f2'}; border:1px solid ${isMinsu ? '#6366f1' : '#fecdd3'}; padding:2px 8px; border-radius:10px;">${m}</span>`).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div style="font-size:0.95rem; line-height:1.6; margin-top:4px;">
+                        ${entry.content ? `<b>📝 오늘 이야기:</b> ${entry.content}` : ''}
+                        ${entry.accomplish ? `<b>🎯 오늘의 몰입:</b> ${entry.accomplish}` : ''}
+                    </div>
+
+                    ${entry.iMessage ? `
+                        <div style="background:${isMinsu ? 'rgba(99,102,241,0.15)' : '#fff5f7'}; border-left:3px solid ${isMinsu ? '#818cf8' : '#ff4081'}; padding:8px 12px; border-radius:0 10px 10px 0; font-size:0.9rem; font-style:italic;">
+                            🪄 <b>나-전달법:</b> ${entry.iMessage}
+                        </div>
+                    ` : ''}
+
+                    ${entry.goal ? `
+                        <div style="background:rgba(99,102,241,0.15); border-left:3px solid #818cf8; padding:8px 12px; border-radius:0 10px 10px 0; font-size:0.9rem;">
+                            💡 <b>내일의 다짐:</b> ${entry.goal}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// 전역 바인딩
+window.openDailyDiaryModal = openDailyDiaryModal;
+window.closeDailyDiaryModal = closeDailyDiaryModal;
+window.switchDiaryTab = switchDiaryTab;
+window.selectChoiceCard = selectChoiceCard;
+window.toggleBalloonTag = toggleBalloonTag;
+window.submitMinseoDiary = submitMinseoDiary;
+window.submitMinsuDiary = submitMinsuDiary;
+window.startDiaryVoiceInput = startDiaryVoiceInput;
