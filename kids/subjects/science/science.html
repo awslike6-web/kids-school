@@ -14,9 +14,9 @@
   <div class="top-action-bar">
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
-      <a href="science_storybook.html" class="back-to-lobby-btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;">
-        📚 과학 교과서 탐험대 (스토리북)
-      </a>
+      <button class="back-to-lobby-btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;" onclick="openMissionView('storybook')">
+        📚 [5학년] 과학 동화 도서관 (스토리북)
+      </button>
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
@@ -32,11 +32,11 @@
 
   <div class="science-grid">
     
-    <a href="science_storybook.html" class="science-grid-btn" style="text-decoration: none; color: inherit; border: 2.5px solid #0284c7; background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);">
-      <span class="science-btn-icon">🧚‍♂️</span>
-      <div class="science-btn-title" style="color: #0369a1;">단원 동화 스토리북</div>
-      <p class="science-btn-desc"><strong>[5학년 과학 완벽 공부법]</strong> 민우·서연·지훈이의 '과학 교과서 탐험대'! '단원 열기'부터 '체험 더하기'까지 교과서 완전 정복!</p>
-    </a>
+    <div class="science-grid-btn" onclick="openMissionView('storybook')" style="border: 2.5px solid #0284c7; background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%); cursor: pointer;">
+      <span class="science-btn-icon">📚</span>
+      <div class="science-btn-title" style="color: #0369a1;">단원 동화 도서관 (스토리북)</div>
+      <p class="science-btn-desc"><strong>[5학년 과학 1·2권]</strong> '과학 교과서 완벽 공부법' & '안전을 지키는 꼬마 과학자 탐험대'! 고화질 삽화와 성우 구연동화로 교과서 완전 정복!</p>
+    </div>
     
     <div class="science-grid-btn" onclick="openMissionView('voca')">
       <span class="science-btn-icon">🔬</span>

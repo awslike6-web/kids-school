@@ -13,11 +13,130 @@ const SCIENCE_ZONE_MAP = {
 };
 
 const SCIENCE_MISSION_META = {
+    storybook: { title: "과학 단원 동화 도서관", icon: "📚" },
     voca: { title: "과학 용어방", icon: "🔬" },
     experiment: { title: "가상 실험실", icon: "🧪" },
     nature: { title: "자연 생태 탐험실", icon: "🌿" },
     inventor: { title: "위대한 발명가 돋보기", icon: "💡" }
 };
+
+const SCIENCE_STORYBOOK_LIBRARY = [
+    {
+        id: "5_1_0_1",
+        grade: "5학년 1학기",
+        unit: "0단원",
+        bookNum: "1권",
+        title: "과학 교과서 탐험대: 완벽 공부법",
+        subtitle: "교과서 7단계 순서 정복과 완벽 공부 비법",
+        desc: "민우, 서연, 지훈이와 함께 떠나는 과학 교과서 탐험! '단원 열기'부터 '체험 더하기'까지 7단계로 과학 왕이 되어보자!",
+        icon: "🔍",
+        color: "#0284c7",
+        bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#0284c7",
+        link: "science_storybook.html",
+        coverImg: "images/minsu/5-1/0/storybook/science_story_p1.png"
+    },
+    {
+        id: "5_1_0_2",
+        grade: "5학년 1학기",
+        unit: "0단원",
+        bookNum: "2권",
+        title: "안전을 지키는 꼬마 과학자 탐험대",
+        subtitle: "실험실 & 야외 탐구 안전 수칙 완벽 마스터",
+        desc: "유진, 수현, 지아와 함께 배우는 필수 안전 수칙! 실험 복장부터 비상 대피, 야외 탐구 안전까지 완벽 대비해요.",
+        icon: "🛡️",
+        color: "#059669",
+        bgGrad: "linear-gradient(135deg, rgba(5, 150, 105, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#059669",
+        link: "science_safety_storybook.html",
+        coverImg: "images/minsu/5-1/0/safety_storybook/science_safety_story_p1.png"
+    }
+];
+
+function renderScienceStorybookLibrary(innerBody) {
+    innerBody.innerHTML = `
+        <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h3 style="font-family: 'Jua', sans-serif; font-size: 1.4rem; color: #38bdf8; margin-bottom: 6px;">
+                    📚 5학년 과학 단원 동화 도서관
+                </h3>
+                <p style="font-size: 0.95rem; color: #94a3b8;">
+                    교과서 내용이 쏙쏙 이해되는 재미있는 동화와 성우 구연동화 음성을 만나보세요!
+                </p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+                ${SCIENCE_STORYBOOK_LIBRARY.map(book => `
+                    <div style="
+                        background: ${book.bgGrad};
+                        border: 2px solid ${book.border};
+                        border-radius: 16px;
+                        padding: 16px;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                        gap: 12px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                        transition: transform 0.2s, box-shadow 0.2s;
+                    ">
+                        <div style="display: flex; gap: 14px; align-items: flex-start;">
+                            <img src="${book.coverImg}?v=20260902_1" alt="${book.title}" style="
+                                width: 90px;
+                                height: 120px;
+                                object-fit: cover;
+                                border-radius: 8px;
+                                border: 1px solid rgba(255,255,255,0.2);
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                                flex-shrink: 0;
+                            ">
+                            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <span style="
+                                        background: ${book.color};
+                                        color: white;
+                                        padding: 2px 8px;
+                                        border-radius: 6px;
+                                        font-size: 0.75rem;
+                                        font-family: 'Jua', sans-serif;
+                                    ">${book.bookNum}</span>
+                                    <span style="font-size: 0.8rem; color: #94a3b8;">${book.grade}</span>
+                                </div>
+                                <h4 style="font-family: 'Jua', sans-serif; font-size: 1.15rem; color: white; margin: 2px 0;">
+                                    ${book.title}
+                                </h4>
+                                <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; margin: 0;">
+                                    ${book.subtitle}
+                                </p>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 0.83rem; color: #94a3b8; line-height: 1.45; margin: 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                            ${book.desc}
+                        </p>
+
+                        <a href="${book.link}" style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            background: ${book.color};
+                            color: white;
+                            text-decoration: none;
+                            padding: 10px;
+                            border-radius: 10px;
+                            font-family: 'Jua', sans-serif;
+                            font-size: 1rem;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                            transition: filter 0.2s;
+                        ">
+                            📖 동화책 읽기 (구연동화)
+                        </a>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
 
 let allFetchedRecords = [];
 let selectedScienceGrade = "5학년 1학기";
@@ -62,10 +181,6 @@ function isScienceMissionInProgress() {
 }
 
 function openMissionView(type) {
-    if (type === 'storybook') {
-        location.href = 'science_storybook.html';
-        return;
-    }
     const overlay = document.getElementById('missionOverlay');
     const titleEl = document.getElementById('overlayHeaderTitle');
     const iconEl = document.getElementById('overlayHeaderIcon');
@@ -79,12 +194,17 @@ function openMissionView(type) {
     selectedScienceUnit = "";
     stopFairyTTS();
 
+    titleEl.textContent = meta.title;
+    iconEl.textContent = meta.icon;
+
+    if (type === 'storybook') {
+        renderScienceStorybookLibrary(innerBody);
+        return;
+    }
+
     if (typeof initQuizRewardSession === 'function') {
         initQuizRewardSession(type);
     }
-
-    titleEl.textContent = meta.title;
-    iconEl.textContent = meta.icon;
 
     if (typeof armQuizLeaveGuard === 'function') {
         armQuizLeaveGuard({
