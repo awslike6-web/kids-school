@@ -446,7 +446,7 @@
     function renderEbook() {
         const item = STORY_DATA[currentPageIndex];
         const img = document.getElementById('ebookImg');
-        img.src = `${item.img}?v=20260902_audio`;
+        img.src = `${item.img}?v=20260902_volcano`;
         document.getElementById('pageIndicator').textContent = `${item.page} / ${STORY_DATA.length} 쪽`;
 
         document.getElementById('prevBtn').disabled = (currentPageIndex === 0);
@@ -520,7 +520,7 @@
                         🔊 이 장면 듣기
                     </button>
                 </div>
-                <img class="webtoon-img" src="${item.img}?v=20260902_audio" alt="${item.tag}">
+                <img class="webtoon-img" src="${item.img}?v=20260902_volcano" alt="${item.tag}">
                 <div class="webtoon-body">
                     ${item.textHtml}
                 </div>
