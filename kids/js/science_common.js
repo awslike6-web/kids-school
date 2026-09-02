@@ -402,108 +402,310 @@ function renderGoldLicenseCard(container) {
 }
 
 // ==========================================
-// 📝 2. 『실험관찰』 디지털 탐구 보고서
+// 📝 2. 『실험관찰』 디지털 탐구 보고서 (2단계: 요약 노트 + 실전 퀴즈)
 // ==========================================
-function renderLabReportUI(container) {
+let currentReportTab = 'doc'; // 'doc' | 'quiz'
+let currentReportQuizIdx = 0;
+let userBlankAnswers = {};
+
+function renderLabReportUI(container, tabName) {
+    if (tabName) currentReportTab = tabName;
     const data = window.SCIENCE_LAB_REPORT_DATA;
     if (!data) return;
 
     container.innerHTML = `
-        <div style="max-width: 740px; margin: 0 auto; padding: 10px; font-family: 'Jua', sans-serif;">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h3 style="color: #0284c7; font-size: 1.45rem; margin-bottom: 4px;">
-                    📝 ${data.title}
-                </h3>
-                <p style="color: #64748b; font-size: 0.92rem;">
-                    교과서 『실험관찰』의 탐구 기록을 디지털 일지로 정리하고 메타인지 셀프 평가를 해보세요!
-                </p>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                
-                <!-- 탐구 1 -->
-                <div style="background: white; border-radius: 16px; padding: 18px; border: 2px solid #bae6fd; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h4 style="color: #0369a1; font-size: 1.15rem; margin: 0;">${data.sections[0].title}</h4>
-                        <span style="font-size: 0.8rem; background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px;">${data.sections[0].bookRef}</span>
-                    </div>
-                    <p style="color: #334155; font-size: 0.95rem; margin-bottom: 12px;">${data.sections[0].problem}</p>
-                    <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border-left: 4px solid #0284c7; font-size: 0.92rem; line-height: 1.6; color: #1e293b;">
-                        • 체 위에 남는 물질 : <b style="color: #0369a1;">콩과 팥</b><br>
-                        • 체 아래로 빠지는 물질 : <b style="color: #d97706;">조</b><br>
-                        • 이용한 성질 : <b style="color: #059669;">알갱이의 크기 차이</b>
-                    </div>
-                </div>
-
-                <!-- 탐구 2 -->
-                <div style="background: white; border-radius: 16px; padding: 18px; border: 2px solid #bae6fd; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h4 style="color: #0369a1; font-size: 1.15rem; margin: 0;">${data.sections[1].title}</h4>
-                        <span style="font-size: 0.8rem; background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px;">${data.sections[1].bookRef}</span>
-                    </div>
-                    <p style="color: #334155; font-size: 0.95rem; margin-bottom: 12px;">${data.sections[1].problem}</p>
-                    <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border-left: 4px solid #0284c7; font-size: 0.92rem; line-height: 1.6; color: #1e293b;">
-                        • 관찰 결과 : <b style="color: #0369a1;">기름이 물 위에 떠서 두 층으로 나뉜다</b><br>
-                        • 분리 도구 : <b style="color: #d97706;">스포이트</b><br>
-                        • 이용한 성질 : <b style="color: #059669;">서로 섞이지 않고 밀도가 다른 성질</b>
-                    </div>
-                </div>
-
-                <!-- 탐구 3 (복합 분리 순서) -->
-                <div style="background: white; border-radius: 16px; padding: 18px; border: 2px solid #bae6fd; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h4 style="color: #0369a1; font-size: 1.15rem; margin: 0;">${data.sections[2].title}</h4>
-                        <span style="font-size: 0.8rem; background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px;">${data.sections[2].bookRef}</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        ${data.sections[2].steps.map(s => `
-                            <div style="background: #f0f9ff; padding: 10px 14px; border-radius: 8px; font-size: 0.92rem; color: #0369a1;">
-                                ${s}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <!-- 탐구 4 (실생활 시나리오) -->
-                <div style="background: white; border-radius: 16px; padding: 18px; border: 2px solid #fcd34d; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h4 style="color: #b45309; font-size: 1.15rem; margin: 0;">${data.sections[3].title}</h4>
-                        <span style="font-size: 0.8rem; background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 6px;">${data.sections[3].bookRef}</span>
-                    </div>
-                    <p style="color: #334155; font-size: 0.95rem; line-height: 1.5; margin-bottom: 12px;">${data.sections[3].scenario}</p>
-                    <div style="background: #fffbeb; padding: 12px; border-radius: 10px; border-left: 4px solid #f59e0b; font-size: 0.92rem; line-height: 1.6; color: #78350f;">
-                        💡 <b>정답 및 해결책</b> : <b>물약병(스포이트 원리)으로 물 위에 뜬 기름만 조심스럽게 빨아들인다!</b><br>
-                        기름이 물 위에 뜨고 서로 섞이지 않는 성질을 이용한 창의적인 문제 해결입니다.
-                    </div>
-                </div>
-
-                <!-- 탐구 5 (셀프 평가 ⭐) -->
-                <div style="background: white; border-radius: 16px; padding: 18px; border: 2px solid #86efac; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h4 style="color: #15803d; font-size: 1.15rem; margin: 0;">${data.sections[4].title}</h4>
-                        <span style="font-size: 0.8rem; background: #dcfce7; color: #16a34a; padding: 3px 8px; border-radius: 6px;">자가진단</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        ${data.sections[4].checklist.map((item, idx) => `
-                            <div style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; padding: 10px 14px; border-radius: 10px;">
-                                <span style="font-size: 0.92rem; color: #166534;">${idx + 1}. ${item}</span>
-                                <div style="display: flex; gap: 4px; font-size: 1.2rem; cursor: pointer;">
-                                    <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
-                                    <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
-                                    <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-
-            </div>
-
-            <div style="text-align: center; margin-top: 24px;">
-                <button class="back-to-lobby-btn" style="background: #059669; color: white; padding: 12px 30px; font-size: 1.05rem;" onclick="closeMissionView(true)">
-                    🎉 탐구 보고서 작성 완료!
+        <div style="max-width: 780px; margin: 0 auto; padding: 6px 12px; font-family: 'Jua', sans-serif;">
+            
+            <!-- 상단 2단계 모드 전환 탭 -->
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #e0f2fe; padding: 6px; border-radius: 14px;">
+                <button onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'doc')" style="
+                    flex: 1; padding: 10px 14px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.05rem; cursor: pointer;
+                    background: ${currentReportTab === 'doc' ? '#0284c7' : 'transparent'};
+                    color: ${currentReportTab === 'doc' ? 'white' : '#0369a1'};
+                    box-shadow: ${currentReportTab === 'doc' ? '0 2px 8px rgba(2, 132, 199, 0.3)' : 'none'};
+                    transition: all 0.2s;
+                ">
+                    📑 1. 탐구 요약 노트 (읽기 & 복습)
+                </button>
+                <button onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')" style="
+                    flex: 1; padding: 10px 14px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.05rem; cursor: pointer;
+                    background: ${currentReportTab === 'quiz' ? '#0284c7' : 'transparent'};
+                    color: ${currentReportTab === 'quiz' ? 'white' : '#0369a1'};
+                    box-shadow: ${currentReportTab === 'quiz' ? '0 2px 8px rgba(2, 132, 199, 0.3)' : 'none'};
+                    transition: all 0.2s;
+                ">
+                    ✍️ 2. 실전 탐구 퀴즈 (참여형 문제 풀기)
                 </button>
             </div>
+
+            <div id="reportTabContent"></div>
+        </div>
+    `;
+
+    const tabContent = document.getElementById('reportTabContent');
+    if (currentReportTab === 'doc') {
+        renderLabReportDoc(tabContent);
+    } else {
+        currentReportQuizIdx = 0;
+        userBlankAnswers = {};
+        renderLabReportQuiz(tabContent, 0);
+    }
+}
+
+// 📑 [탭 1] 완벽 요약 노트
+function renderLabReportDoc(container) {
+    const data = window.SCIENCE_LAB_REPORT_DATA;
+    container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <span style="font-size: 0.92rem; color: #64748b;">교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!</span>
+            <button class="back-to-lobby-btn" style="background: #0284c7; color: white; padding: 6px 14px; font-size: 0.9rem;" onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')">
+                ✍️ 퀴즈 풀러 가기 ➔
+            </button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px; max-height: 520px; overflow-y: auto; padding-right: 4px;">
+            ${data.summaryDoc.map((item, idx) => `
+                <div style="background: white; border-radius: 16px; padding: 16px; border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="color: #0369a1; font-size: 1.15rem; margin: 0;">${item.title}</h4>
+                        <span style="font-size: 0.8rem; background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 6px;">${item.page}</span>
+                    </div>
+                    
+                    <div style="font-size: 0.9rem; line-height: 1.55; color: #334155; margin-bottom: 8px;">
+                        <b>[탐구 과정]</b><br>
+                        ${item.process}
+                    </div>
+
+                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border-left: 4px solid #0284c7; font-size: 0.88rem; line-height: 1.55; color: #1e293b; margin-bottom: 8px;">
+                        <b>[관찰 결과]</b><br>
+                        ${item.result}
+                    </div>
+
+                    <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; color: #166534; line-height: 1.5; margin-bottom: 6px;">
+                        🎯 <b>결론</b> : ${item.conclusion}
+                    </div>
+
+                    <div style="font-size: 0.85rem; color: #d97706; padding-left: 4px;">
+                        💡 <b>생각해 볼까요?</b> : ${item.think}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// ✍️ [탭 2] 인터랙티브 참여형 실전 퀴즈
+function renderLabReportQuiz(container, qIdx) {
+    const data = window.SCIENCE_LAB_REPORT_DATA;
+    const q = data.quizItems[qIdx];
+    currentReportQuizIdx = qIdx;
+
+    let quizBodyHtml = "";
+
+    // 1) 빈칸 채우기 (q1)
+    if (q.type === 'blank') {
+        quizBodyHtml = `
+            <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 1rem; line-height: 1.8; color: #1e293b;">
+                콩, 팥, 조가 섞인 혼합물을 눈이 큰 체에 넣고 흔들었을 때, 체 위에 남는 물질은 
+                <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
+                    ${userBlankAnswers['b1'] || '❓ 선택'}
+                </span>이고, 아래로 빠져나간 물질은 
+                <span id="blank_2" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
+                    ${userBlankAnswers['b2'] || '❓ 선택'}
+                </span>입니다. 이 분리 방법은 물질의 
+                <span id="blank_3" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
+                    ${userBlankAnswers['b3'] || '❓ 선택'}
+                </span> 차이를 이용한 것입니다.
+            </div>
+
+            <div style="margin-bottom: 12px;">
+                <span style="font-size: 0.88rem; color: #64748b;">👇 알맞은 단어 카드를 순서대로 터치하세요:</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                    ${q.options.map(opt => `
+                        <button class="quiz-choice-btn" style="padding: 8px 14px; font-size: 0.95rem;" onclick="selectBlankWord('${opt}')">
+                            🏷️ ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+                <button class="btn-reset" onclick="resetBlankAnswers()">🔄 다시 채우기</button>
+                <button class="btn-action-primary" onclick="checkBlankAnswer(${qIdx})">
+                    ✅ 정답 확인하기
+                </button>
+            </div>
+        `;
+    } 
+    // 2) 객관식 4지선다 (q2, q4)
+    else if (q.type === 'choice') {
+        quizBodyHtml = `
+            <div style="color: #1e293b; font-size: 1.15rem; line-height: 1.5; margin-bottom: 16px;">
+                ${q.questionText}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                ${q.choices.map((choice, idx) => `
+                    <button class="quiz-choice-btn" style="padding: 12px 16px; font-size: 0.98rem; text-align: left; justify-content: flex-start; line-height: 1.4;" onclick="submitChoiceQuiz(${qIdx}, ${idx})">
+                        <span style="font-weight: bold; color: #0284c7; margin-right: 8px;">${idx + 1}.</span> ${choice}
+                    </button>
+                `).join('')}
+            </div>
+        `;
+    }
+    // 3) 순서 맞추기 (q3)
+    else if (q.type === 'order') {
+        quizBodyHtml = `
+            <div style="color: #1e293b; font-size: 1.1rem; line-height: 1.5; margin-bottom: 14px;">
+                ${q.questionText}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                ${q.steps.map(s => `
+                    <div style="background: #f0f9ff; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #bae6fd; font-size: 0.95rem; color: #0369a1; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.2rem;">🔹</span> ${s.text}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn-action-primary" onclick="passOrderQuiz(${qIdx})">
+                    ✅ 순서 확인 완료! 다음 문제로 ➔
+                </button>
+            </div>
+        `;
+    }
+    // 4) 스스로 평가하기 (q5)
+    else if (q.type === 'self_check') {
+        quizBodyHtml = `
+            <div style="color: #1e293b; font-size: 1.1rem; line-height: 1.5; margin-bottom: 14px;">
+                ${q.questionText}
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                ${q.checklist.map((item, idx) => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #bbf7d0;">
+                        <span style="font-size: 0.95rem; color: #166534;">${idx + 1}. ${item}</span>
+                        <div style="display: flex; gap: 6px; font-size: 1.4rem; cursor: pointer;">
+                            <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
+                            <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
+                            <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="text-align: center;">
+                <button class="btn-action-primary" style="background: #059669; font-size: 1.1rem; padding: 12px 30px;" onclick="finishAllReportQuiz()">
+                    🎉 탐구 보고서 마스터 완료! (+5💎)
+                </button>
+            </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <div style="background: white; border-radius: 18px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); border: 2px solid #bae6fd;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                <div style="color: #0369a1; font-size: 1.15rem; font-weight: bold;">
+                    ${q.title}
+                </div>
+                <span style="background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem;">
+                    문제 ${qIdx + 1} / ${data.quizItems.length}
+                </span>
+            </div>
+
+            ${quizBodyHtml}
+        </div>
+    `;
+}
+
+function selectBlankWord(word) {
+    if (!userBlankAnswers['b1']) {
+        userBlankAnswers['b1'] = word;
+    } else if (!userBlankAnswers['b2']) {
+        userBlankAnswers['b2'] = word;
+    } else if (!userBlankAnswers['b3']) {
+        userBlankAnswers['b3'] = word;
+    }
+    const tabContent = document.getElementById('reportTabContent');
+    renderLabReportQuiz(tabContent, 0);
+}
+
+function resetBlankAnswers() {
+    userBlankAnswers = {};
+    const tabContent = document.getElementById('reportTabContent');
+    renderLabReportQuiz(tabContent, 0);
+}
+
+function checkBlankAnswer(qIdx) {
+    const isCorrect = (userBlankAnswers['b1'] === "콩과 팥" && userBlankAnswers['b2'] === "조" && userBlankAnswers['b3'] === "알갱이의 크기");
+    const container = document.getElementById('reportTabContent');
+
+    if (isCorrect) {
+        showQuizFeedback(container, true, "정답입니다! 👏 알갱이 크기 차이로 콩과 팥은 체 위에 남고 조는 빠져나갑니다.", () => {
+            renderLabReportQuiz(container, qIdx + 1);
+        });
+    } else {
+        showQuizFeedback(container, false, "앗! 다시 한번 생각해 볼까요? 체 위에 남는 것은 큰 알갱이, 빠져나가는 것은 작은 알갱이입니다.", () => {
+            resetBlankAnswers();
+        });
+    }
+}
+
+function submitChoiceQuiz(qIdx, selectedIdx) {
+    const data = window.SCIENCE_LAB_REPORT_DATA;
+    const q = data.quizItems[qIdx];
+    const isCorrect = (selectedIdx === q.answer);
+    const container = document.getElementById('reportTabContent');
+
+    if (isCorrect) {
+        showQuizFeedback(container, true, `정답입니다! 🎉 ${q.explanation}`, () => {
+            renderLabReportQuiz(container, qIdx + 1);
+        });
+    } else {
+        showQuizFeedback(container, false, `오답입니다! 💡 ${q.explanation}`, () => {
+            renderLabReportQuiz(container, qIdx);
+        });
+    }
+}
+
+function passOrderQuiz(qIdx) {
+    const container = document.getElementById('reportTabContent');
+    renderLabReportQuiz(container, qIdx + 1);
+}
+
+function showQuizFeedback(container, isSuccess, message, nextCallback) {
+    container.innerHTML = `
+        <div style="text-align: center; padding: 24px; background: white; border-radius: 18px; border: 3px solid ${isSuccess ? '#10b981' : '#f87171'};">
+            <div style="font-size: 3rem; margin-bottom: 8px;">${isSuccess ? '🎉' : '💡'}</div>
+            <h3 style="color: ${isSuccess ? '#059669' : '#dc2626'}; font-size: 1.35rem; margin-bottom: 10px;">
+                ${isSuccess ? '훌륭해요! 정답입니다!' : '힌트를 확인해 보세요!'}
+            </h3>
+            <p style="color: #334155; font-size: 0.98rem; line-height: 1.6; margin-bottom: 18px;">
+                ${message}
+            </p>
+            <button class="btn-action-primary" style="background: ${isSuccess ? '#059669' : '#0284c7'};" onclick="(${nextCallback.toString()})()">
+                ${isSuccess ? '다음 문제로 ➔' : '🔄 다시 풀기'}
+            </button>
+        </div>
+    `;
+}
+
+function finishAllReportQuiz() {
+    if (typeof grantRewardGem === 'function') {
+        grantRewardGem(5, '실험관찰 탐구 보고서 완벽 마스터');
+    }
+    const container = document.getElementById('overlayInnerBody');
+    container.innerHTML = `
+        <div style="text-align: center; padding: 30px; font-family: 'Jua';">
+            <div style="font-size: 3.5rem; margin-bottom: 10px;">🌟 📝 💎</div>
+            <h2 style="color: #059669; font-size: 1.55rem; margin-bottom: 8px;">『실험관찰』 디지털 탐구 보고서 마스터 완료!</h2>
+            <p style="color: #475569; font-size: 1.05rem; margin-bottom: 20px;">
+                1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)
+            </p>
+            <button class="back-to-lobby-btn" style="background: #0284c7; color: white;" onclick="closeMissionView(true)">
+                과학 대기실로 돌아가기
+            </button>
         </div>
     `;
 }
