@@ -244,7 +244,9 @@ function openMissionView(type) {
         });
     }
 
-    renderScienceUnitSelectionUI(type, innerBody);
+    // 💡 용어방 등 미션 진입 시 노션 및 교과서 데이터셋을 동적으로 불러와 2단계(학년 ➔ 단원) 선택 UI 제공
+    showLoadingSpinner(innerBody);
+    fetchAndBuildScienceUI(type, innerBody);
 }
 
 // ==========================================
@@ -726,79 +728,200 @@ function closeMissionView(force) {
     stopFairyTTS();
 }
 
+function showLoadingSpinner(container) {
+    container.innerHTML = `
+      <div style="text-align:center; padding:50px 20px; font-family:'Jua', sans-serif;">
+        <div style="width:45px; height:45px; border:4px solid #bae6fd; border-top:4px solid #0284c7; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 15px auto;"></div>
+        <p style="font-size:1.15rem; color:#0369a1;">
+            🧚‍♀️ 코코 요정이 노션 등대에서 과학 용어들을 챙겨오고 있어요...
+        </p>
+      </div>
+      <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    `;
+}
+
 function getCurriculumUnits() {
     if (typeof window !== 'undefined' && window.SCIENCE_CURRICULUM_DATA && Array.isArray(window.SCIENCE_CURRICULUM_DATA)) {
         return window.SCIENCE_CURRICULUM_DATA;
     }
-    if (typeof SCIENCE_CURRICULUM_DATA !== 'undefined' && Array.isArray(SCIENCE_CURRICULUM_DATA)) {
-        return SCIENCE_CURRICULUM_DATA;
-    }
     return [];
 }
 
-function renderScienceUnitSelectionUI(type, container) {
+function getCurriculumRecords(type) {
     const curriculum = getCurriculumUnits();
+    const list = [];
+    curriculum.forEach(unit => {
+        const items = unit[type] || unit.voca || [];
+        items.forEach(item => {
+            list.push({
+                word: item.word || item.title || "",
+                hint: item.hint || getChosung(item.word || item.title || ""),
+                detailContext: item.desc || item.meaning || "",
+                meaning: item.meaning || item.desc || "",
+                imageUrl: item.img || item.image || "",
+                grade: unit.grade || "5학년 1학기",
+                grades: [unit.grade || "5학년 1학기"],
+                level: unit.unit || unit.title,
+                summaryPassage: unit.summary || "",
+                quiz: item.quiz || "",
+                choices: item.choices || [],
+                explanation: item.desc || item.meaning || ""
+            });
+        });
+    });
+    return list;
+}
+
+async function fetchAndBuildScienceUI(type, innerBody) {
+    const curriculumRecords = getCurriculumRecords(type);
+    try {
+        let records = [];
+        try {
+            if (typeof fetchVocaFromNotion === 'function') {
+                records = await fetchVocaFromNotion({
+                    subject: "과학",
+                    areaZone: "용어방",
+                    useServerFilter: true,
+                    filterByStudent: !isAdmin
+                });
+            }
+        } catch (netErr) {
+            console.warn("ℹ️ 노션 통신 대기 -> 표준 과학 데이터셋으로 전환합니다.", netErr);
+        }
+
+        if (!records || records.length === 0) {
+            records = curriculumRecords;
+        } else if (curriculumRecords.length > 0) {
+            const existingWords = new Set(records.map(r => r.word));
+            const extra = curriculumRecords.filter(r => !existingWords.has(r.word));
+            records = [...records, ...extra];
+        }
+
+        allFetchedRecords = records;
+        
+        // 학년/학기 목록 추출 (예: ["5학년 1학기", "5학년 2학기"])
+        const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
+
+        if (uniqueGrades.length === 0) {
+            startScienceMissionWithFilteredData(records, innerBody, "과학 탐구");
+        } else {
+            renderScienceGradeUI(uniqueGrades, innerBody);
+        }
+    } catch(e) {
+        console.warn("데이터 로딩 예외 -> 교과서 데이터셋 구동", e);
+        allFetchedRecords = curriculumRecords;
+        const uniqueGrades = [...new Set(curriculumRecords.map(r => r.grade))].filter(Boolean).sort();
+        renderScienceGradeUI(uniqueGrades, innerBody);
+    }
+}
+
+function renderScienceGradeUI(grades, container) {
+    speakFairyTTS("공부할 학년과 학기를 골라보세요! 🧚‍♀️");
     
-    // Group by major unit: 3단원 vs 4단원
-    const unit3List = curriculum.filter(u => u.code.startsWith("3-"));
-    const unit4List = curriculum.filter(u => u.code.startsWith("4-"));
-
     container.innerHTML = `
-        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:620px; margin:0 auto;">
-            <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.55rem;">🎒 5학년 1학기 과학 단원 고르기</h3>
-            <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.95rem;">실제 교과서 사진 자료와 퀴즈를 풀 소단원을 선택해 보세요!</p>
-            
-            <div style="text-align:left; margin-bottom:14px;">
-                <div style="font-size:1.15rem; color:#0d9488; font-weight:bold; margin-bottom:8px;">💧 3. 용해와 용액</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    ${unit3List.map(u => `
-                        <button class="quiz-choice-btn" style="padding:10px 12px; font-size:0.92rem; justify-content:flex-start;" onclick="startScienceUnitMission('${u.code}')">
-                            ${u.title}
-                        </button>
-                    `).join('')}
-                </div>
+        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:540px; margin:0 auto;">
+            <div style="font-size:2.5rem; margin-bottom:6px;">🎒</div>
+            <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.6rem;">1. 학년 & 학기 고르기</h3>
+            <p style="color:var(--text-muted); margin-bottom:20px; font-size:0.95rem;">탐구하고 싶은 교과서 학기와 단원을 선택해 보세요!</p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+                ${grades.map(g => `
+                    <button class="quiz-choice-btn" style="
+                        padding:18px 14px; font-size:1.2rem; text-align:center; justify-content:center;
+                        border-radius:14px; background:linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+                        border:2px solid #38bdf8;
+                    " onclick="selectScienceGrade('${g}')">
+                        📖 ${g}
+                    </button>
+                `).join('')}
             </div>
 
-            <div style="text-align:left; margin-bottom:16px;">
-                <div style="font-size:1.15rem; color:#e11d48; font-weight:bold; margin-bottom:8px;">🫀 4. 우리 몸의 구조와 기능</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                    ${unit4List.map(u => `
-                        <button class="quiz-choice-btn" style="padding:10px 12px; font-size:0.92rem; justify-content:flex-start;" onclick="startScienceUnitMission('${u.code}')">
-                            ${u.title}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
-
-            <button class="quiz-choice-btn" style="background:#f1f5f9; width:100%; text-align:center; justify-content:center; padding:12px; font-size:1.05rem;" onclick="startScienceUnitMission('ALL')">
-                🌟 전체 소단원 종합 탐구 (모아보기)
+            <button class="quiz-choice-btn" style="
+                background:#f1f5f9; width:100%; text-align:center; justify-content:center;
+                padding:12px; font-size:1.05rem; border-radius:12px;
+            " onclick="selectScienceGrade('ALL')">
+                🌟 전체 학년·학기 종합 탐구 (모아보기)
             </button>
         </div>
     `;
 }
 
-window.startScienceUnitMission = function(unitCode) {
-    selectedScienceUnit = unitCode;
-    const curriculum = getCurriculumUnits();
-    let targetUnits = [];
+function selectScienceGrade(grade) {
+    selectedScienceGrade = grade;
+    const innerBody = document.getElementById('overlayInnerBody');
 
-    if (unitCode === 'ALL') {
-        targetUnits = curriculum;
+    let matchedRecords = [];
+    if (grade === 'ALL') {
+        matchedRecords = allFetchedRecords;
     } else {
-        targetUnits = curriculum.filter(u => u.code === unitCode);
+        matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades && r.grades.includes(grade)));
     }
 
-    let items = [];
-    if (currentMissionType === 'voca') {
-        items = targetUnits.flatMap(u => u.voca || []);
-    } else if (currentMissionType === 'experiment') {
-        items = targetUnits.flatMap(u => (u.experiment && u.experiment.length > 0) ? u.experiment : (u.voca || []));
-    } else if (currentMissionType === 'nature') {
-        items = targetUnits.flatMap(u => (u.nature && u.nature.length > 0) ? u.nature : (u.experiment || u.voca || []));
-    } else if (currentMissionType === 'inventor') {
-        items = targetUnits.flatMap(u => (u.inventor && u.inventor.length > 0) ? u.inventor : (u.voca || []));
+    const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level || r.stage || '').trim()))].filter(u => u && u !== "기본 단원").sort();
+
+    if (uniqueUnits.length <= 1) {
+        startScienceMissionWithFilteredData(matchedRecords, innerBody, grade);
+    } else {
+        renderScienceUnitUI(uniqueUnits, innerBody, matchedRecords, grade);
+    }
+}
+
+function renderScienceUnitUI(units, container, matchedRecords, grade) {
+    speakFairyTTS("공부할 과학 단원을 골라보세요!");
+    
+    container.innerHTML = `
+        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:600px; margin:0 auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="back-to-lobby-btn" style="padding:6px 12px; font-size:0.9rem;" onclick="renderScienceGradeUI(['5학년 1학기', '5학년 2학기'], document.getElementById('overlayInnerBody'))">
+                    🔙 학년 다시 고르기
+                </button>
+                <span style="font-size:1rem; color:#0284c7; font-weight:bold;">[${grade}]</span>
+            </div>
+
+            <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.55rem;">📚 2. 탐구할 단원 고르기</h3>
+            <p style="color:var(--text-muted); margin-bottom:18px; font-size:0.95rem;">원하는 단원을 선택해 교과서 핵심 용어를 정복해 보세요!</p>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                ${units.map(u => `
+                    <button class="quiz-choice-btn" style="
+                        padding:14px 18px; font-size:1.1rem; text-align:left; justify-content:flex-start;
+                        border-radius:12px; border:2px solid #bae6fd;
+                    " onclick="selectScienceUnit('${u}', '${grade}')">
+                        🔬 ${u}
+                    </button>
+                `).join('')}
+            </div>
+
+            <button class="quiz-choice-btn" style="
+                background:#f1f5f9; width:100%; text-align:center; justify-content:center;
+                padding:12px; font-size:1.05rem; border-radius:12px;
+            " onclick="selectScienceUnit('ALL', '${grade}')">
+                🌟 [${grade}] 전체 단원 모아보기
+            </button>
+        </div>
+    `;
+}
+
+function selectScienceUnit(unitName, grade) {
+    selectedScienceUnit = unitName;
+    const innerBody = document.getElementById('overlayInnerBody');
+
+    let matchedRecords = [];
+    if (grade === 'ALL') {
+        matchedRecords = allFetchedRecords;
+    } else {
+        matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades && r.grades.includes(grade)));
     }
 
+    if (unitName !== 'ALL') {
+        matchedRecords = matchedRecords.filter(r => String(r.level || r.stage || '').trim() === unitName);
+    }
+
+    startScienceMissionWithFilteredData(matchedRecords, innerBody, `${grade} - ${unitName === 'ALL' ? '전체 종합' : unitName}`);
+}
+
+function startScienceMissionWithFilteredData(records, container, titleStr) {
+    let items = [...records];
     if (scienceVocaOrderType === 'shuffle') {
         items.sort(() => Math.random() - 0.5);
     }
@@ -806,12 +929,12 @@ window.startScienceUnitMission = function(unitCode) {
     activeSectionData = items;
     activeQuizIdx = 0;
 
-    const unitObj = curriculum.find(u => u.code === unitCode);
-    const unitTitle = unitObj ? unitObj.title : (unitCode === 'ALL' ? '전체 종합' : unitCode);
-    document.getElementById('overlayHeaderTitle').textContent = `${SCIENCE_MISSION_META[currentMissionType].title} [${unitTitle}]`;
+    if (titleStr) {
+        document.getElementById('overlayHeaderTitle').textContent = `${SCIENCE_MISSION_META[currentMissionType].title} [${titleStr}]`;
+    }
 
-    renderSectionUI(currentMissionType, document.getElementById('overlayInnerBody'), unitObj);
-};
+    renderSectionUI(currentMissionType, container);
+}
 
 function renderSectionUI(type, container, unitObj) {
     if (typeof container === 'string') container = document.getElementById('overlayInnerBody');
