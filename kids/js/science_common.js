@@ -73,7 +73,7 @@ function renderScienceStorybookLibrary(innerBody) {
         <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
             <div style="text-align: center; margin-bottom: 24px;">
                 <h3 style="font-family: 'Jua', sans-serif; font-size: 1.4rem; color: #38bdf8; margin-bottom: 6px;">
-                    📚 5학년 과학 단원 동화 도서관
+                    📚 과학 단원 동화 도서관
                 </h3>
                 <p style="font-size: 0.95rem; color: #94a3b8;">
                     교과서 내용이 쏙쏙 이해되는 재미있는 동화와 성우 구연동화 음성을 만나보세요!
