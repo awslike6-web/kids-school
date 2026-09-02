@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>가상 실험실 (Virtual Lab) 🧪 | 민민이네 공부방</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --primary: #0284c7;
+        --primary-dark: #0369a1;
+        --accent: #f59e0b;
+        --bg-color: #0c192c;
+        --card-bg: #15294b;
+        --text-light: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: var(--bg-color);
+        min-height: 100vh;
+        color: var(--text-light);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 상단 헤더 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 18px; background: rgba(12, 25, 44, 0.95); backdrop-filter: blur(12px);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
+        border-bottom: 1px solid #1e3a66;
+    }
+    .top-left { display: flex; align-items: center; gap: 12px; }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: #15294b; color: #e2e8f0; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; text-decoration: none; border: 1px solid #1e3a66; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #1e3a66; color: #fff; }
+    .lab-title {
+        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #38bdf8;
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    /* 실험 선택 탭 */
+    .lab-tabs {
+        display: flex; gap: 8px; padding: 12px 18px; max-width: 900px; margin: 0 auto;
+        width: 100%; overflow-x: auto;
+    }
+    .tab-item {
+        flex: 1; min-width: 180px; padding: 10px 14px; border-radius: 14px;
+        background: #15294b; border: 1.5px solid #1e3a66; color: #94a3b8;
+        font-family: 'Jua', sans-serif; font-size: 0.98rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        transition: all 0.2s; text-align: center;
+    }
+    .tab-item.active {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: white; border-color: #38bdf8;
+        box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+
+    /* 메인 실험 캔버스 영역 */
+    .lab-main-container {
+        flex: 1; max-width: 900px; width: 100%; margin: 0 auto 30px auto; padding: 0 16px;
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .lab-card {
+        background: #15294b; border-radius: 20px; border: 2px solid #1e3a66;
+        padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .lab-card-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid #1e3a66; padding-bottom: 12px;
+    }
+    .lab-stage-tag {
+        font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #38bdf8;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .lab-principle-badge {
+        background: #0369a1; color: #e0f2fe; padding: 4px 12px; border-radius: 8px;
+        font-size: 0.85rem; font-family: 'Jua', sans-serif;
+    }
+
+    /* 실험 인터랙티브 스테이지 뷰 */
+    .sim-viewport {
+        width: 100%; height: 380px; background: linear-gradient(180deg, #0a1322 0%, #111f38 100%);
+        border-radius: 16px; border: 1.5px solid #224275; position: relative;
+        overflow: hidden; display: flex; justify-content: center; align-items: center;
+    }
+
+    /* 컨트롤 바 */
+    .sim-controls {
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        flex-wrap: wrap; background: #0c192c; padding: 12px 16px; border-radius: 14px;
+        border: 1px solid #1e3a66;
+    }
+    .sim-guide-text {
+        font-size: 0.95rem; color: #cbd5e1; font-weight: 500;
+    }
+    .sim-guide-text b { color: #38bdf8; }
+    .btn-action-primary {
+        padding: 10px 22px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1.05rem; color: white; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); transition: transform 0.15s;
+    }
+    .btn-action-primary:hover { transform: scale(1.03); }
+    .btn-action-primary:active { transform: scale(0.98); }
+
+    .btn-reset {
+        padding: 8px 16px; border-radius: 10px; border: 1px solid #475569; font-family: 'Jua', sans-serif;
+        font-size: 0.9rem; color: #94a3b8; background: transparent; cursor: pointer;
+    }
+    .btn-reset:hover { background: #1e293b; color: #fff; }
+
+    /* 결과 요약 박스 */
+    .result-box {
+        background: #f8fafc; color: #1e293b; border-radius: 14px; padding: 14px 18px;
+        border-left: 5px solid #0284c7; display: flex; flex-direction: column; gap: 6px;
+    }
+    .result-box-title {
+        font-family: 'Jua', sans-serif; font-size: 1.05rem; color: #0369a1;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .result-box-desc { font-size: 0.92rem; line-height: 1.5; color: #334155; }
+
+    /* =======================================================
+       실험별 전용 그래픽 & 애니메이션
+       ======================================================= */
+    /* 실험 1: 체 시뮬레이션 */
+    .sieve-box {
+        position: absolute; top: 70px; width: 280px; height: 110px;
+        border: 4px solid #78350f; border-bottom: 4px dashed #92400e; border-radius: 8px;
+        background: rgba(217, 119, 6, 0.15); display: flex; justify-content: center; align-items: center;
+        transition: transform 0.1s;
+    }
+    .sieve-box.shaking {
+        animation: sieveShake 0.15s infinite alternate;
+    }
+    @keyframes sieveShake {
+        0% { transform: translateX(-15px) rotate(-2deg); }
+        100% { transform: translateX(15px) rotate(2deg); }
+    }
+    .bottom-bowl {
+        position: absolute; bottom: 30px; width: 340px; height: 100px;
+        border: 4px solid #334155; border-top: none; border-radius: 0 0 100px 100px;
+        background: rgba(30, 41, 59, 0.6); display: flex; justify-content: center; align-items: center;
+    }
+    .grain {
+        position: absolute; border-radius: 50%; display: inline-block;
+    }
+    .grain-bean { width: 16px; height: 16px; background: #5c3a21; } /* 콩 */
+    .grain-redbean { width: 14px; height: 14px; background: #881337; } /* 팥 */
+    .grain-millet { width: 6px; height: 6px; background: #fbbf24; } /* 조 */
+
+    /* 실험 2: 물과 기름 */
+    .beaker-2 {
+        position: absolute; bottom: 40px; width: 220px; height: 260px;
+        border: 4px solid rgba(255,255,255,0.4); border-top: none; border-radius: 0 0 20px 20px;
+        overflow: hidden; display: flex; flex-direction: column-reverse; background: rgba(255,255,255,0.03);
+    }
+    .water-layer {
+        width: 100%; height: 130px; background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+        display: flex; justify-content: center; align-items: center; font-family: 'Jua'; color: white;
+    }
+    .oil-layer {
+        width: 100%; height: 90px; background: linear-gradient(180deg, #fef08a 0%, #eab308 100%);
+        display: flex; justify-content: center; align-items: center; font-family: 'Jua'; color: #713f12;
+        transition: height 0.5s ease;
+    }
+    .dropper-tube {
+        position: absolute; top: 20px; width: 24px; height: 160px; background: rgba(255,255,255,0.7);
+        border: 2px solid #fff; border-radius: 4px; transition: top 0.4s ease, height 0.4s;
+    }
+    .dropper-bulb {
+        position: absolute; top: -30px; left: -8px; width: 40px; height: 35px;
+        background: #ef4444; border-radius: 20px 20px 8px 8px; cursor: pointer;
+    }
+    .collect-tube {
+        position: absolute; bottom: 40px; right: 80px; width: 70px; height: 200px;
+        border: 3px solid rgba(255,255,255,0.4); border-top: none; border-radius: 0 0 16px 16px;
+        overflow: hidden; display: flex; flex-direction: column-reverse;
+    }
+    .collected-oil {
+        width: 100%; height: 0; background: #eab308; transition: height 0.5s ease;
+        display: flex; justify-content: center; align-items: center; font-family: 'Jua'; font-size: 0.85rem; color: #713f12;
+    }
+
+    /* 실험 3: 거름 & 증발 */
+    .funnel-wrap {
+        position: absolute; top: 40px; width: 180px; display: flex; flex-direction: column; align-items: center;
+    }
+    .filter-paper {
+        width: 140px; height: 70px; border-bottom: 70px solid #f1f5f9;
+        border-left: 70px solid transparent; border-right: 70px solid transparent;
+        position: relative;
+    }
+    .heater-plate {
+        position: absolute; bottom: 30px; width: 220px; height: 40px; background: #334155;
+        border-radius: 10px; border: 2px solid #475569; display: flex; justify-content: center; align-items: center;
+    }
+    .heater-plate.on {
+        background: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+    }
+    .evap-dish {
+        position: absolute; bottom: 70px; width: 170px; height: 60px;
+        border: 3px solid rgba(255,255,255,0.6); border-top: none; border-radius: 0 0 90px 90px;
+        background: rgba(255,255,255,0.1); overflow: hidden; display: flex; justify-content: center; align-items: flex-end;
+    }
+    .dish-solution {
+        width: 100%; height: 45px; background: rgba(56, 189, 248, 0.6); transition: height 2s linear;
+    }
+    .salt-crystals {
+        position: absolute; bottom: 4px; display: none; gap: 4px;
+    }
+    .salt-dot { width: 8px; height: 8px; background: white; border-radius: 2px; box-shadow: 0 0 4px #fff; }
+    .steam-wrap {
+        position: absolute; bottom: 130px; display: none; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .steam { width: 8px; height: 25px; background: rgba(255,255,255,0.5); border-radius: 10px; animation: steamRise 1s infinite; }
+    @keyframes steamRise { 0% { transform: translateY(0); opacity: 0.8; } 100% { transform: translateY(-40px); opacity: 0; } }
+
+    @media (max-width: 768px) {
+        .top-bar { padding: 8px 12px; }
+        .lab-tabs { padding: 8px 12px; }
+        .tab-item { min-width: 140px; font-size: 0.88rem; padding: 8px 10px; }
+        .sim-viewport { height: 320px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="top-left">
+        <a href="science.html" class="btn-back">🔙 과학 탐구실</a>
+        <div class="lab-title">🧪 가상 실험실 (Virtual Lab)</div>
+    </div>
+</div>
+
+<div class="lab-tabs">
+    <button class="tab-item active" id="tab1" onclick="switchExperiment(1)">
+        🌾 1. 체로 고체 분리
+    </button>
+    <button class="tab-item" id="tab2" onclick="switchExperiment(2)">
+        💧 2. 물과 기름 분리
+    </button>
+    <button class="tab-item" id="tab3" onclick="switchExperiment(3)">
+        🧂 3. 거름과 증발
+    </button>
+</div>
+
+<div class="lab-main-container">
+    
+    <!-- 실험 1 카드 -->
+    <div class="lab-card" id="expCard1">
+        <div class="lab-card-header">
+            <div class="lab-stage-tag">🌾 실험 1 : 알갱이 크기로 콩·팥·조 분리하기</div>
+            <div class="lab-principle-badge">분리 원리 : 알갱이 크기 차이</div>
+        </div>
+
+        <div class="sim-viewport" id="viewport1">
+            <div class="sieve-box" id="sieve1">
+                <span id="sieveLabel" style="position:absolute; top:-24px; font-family:'Jua'; color:#f59e0b; font-size:0.9rem;">
+                    🧺 알맞은 크기의 체
+                </span>
+                <div id="sieveGrainsWrap" style="position:relative; width:100%; height:100%;"></div>
+            </div>
+
+            <div class="bottom-bowl" id="bowl1">
+                <span style="position:absolute; bottom:-24px; font-family:'Jua'; color:#94a3b8; font-size:0.85rem;">
+                    🥣 아래 받침 그릇
+                </span>
+                <div id="bowlGrainsWrap" style="position:relative; width:100%; height:100%;"></div>
+            </div>
+        </div>
+
+        <div class="sim-controls">
+            <div class="sim-guide-text">
+                👉 <b>'체 흔들기'</b> 버튼을 눌러 알갱이 크기에 따라 분리되는 모습을 관찰하세요!
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-action-primary" id="btnShake1" onclick="shakeSieve()">
+                    🖐️ 체 흔들기 시작!
+                </button>
+                <button class="btn-reset" onclick="initExp1()">🔄 다시하기</button>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <div class="result-box-title">📖 『실험관찰』 핵심 탐구 결론</div>
+            <div class="result-box-desc">
+                • <b>체 위에 남는 물질</b> : 알갱이가 큰 <b>콩</b>과 <b>팥</b><br>
+                • <b>아래로 빠져나간 물질</b> : 알갱이가 아주 작은 <b>조</b><br>
+                • <b>핵심 정리</b> : 알갱이의 크기가 다른 고체 혼합물은 <b>알맞은 크기의 체</b>를 이용해 쉽게 분리할 수 있습니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- 실험 2 카드 -->
+    <div class="lab-card" id="expCard2" style="display:none;">
+        <div class="lab-card-header">
+            <div class="lab-stage-tag">💧 실험 2 : 물과 기름의 층 분리와 스포이트</div>
+            <div class="lab-principle-badge">분리 원리 : 밀도 차이 & 서로 섞이지 않음</div>
+        </div>
+
+        <div class="sim-viewport" id="viewport2">
+            <!-- 혼합 비커 -->
+            <div class="beaker-2">
+                <div class="water-layer">물 (Water)</div>
+                <div class="oil-layer" id="beakerOil">식용유 (Oil)</div>
+            </div>
+
+            <!-- 스포이트 -->
+            <div class="dropper-tube" id="dropper" style="left: calc(50% - 80px);">
+                <div class="dropper-bulb" onclick="useDropper()" title="스포이트 고무 펌프 터치!"></div>
+            </div>
+
+            <!-- 분리된 기름 수집 시험관 -->
+            <div class="collect-tube">
+                <div class="collected-oil" id="collectedOil">기름 수집</div>
+            </div>
+            <span style="position:absolute; bottom:14px; right:75px; font-family:'Jua'; color:#eab308; font-size:0.85rem;">
+                🧪 분리 시험관
+            </span>
+        </div>
+
+        <div class="sim-controls">
+            <div class="sim-guide-text">
+                👉 <b>'스포이트로 기름 걷어내기'</b> 버튼을 눌러 위에 뜬 기름만 추출해 보세요!
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-action-primary" id="btnDropper" onclick="useDropper()">
+                    🧪 스포이트로 기름 걷어내기
+                </button>
+                <button class="btn-reset" onclick="initExp2()">🔄 다시하기</button>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <div class="result-box-title">📖 『실험관찰』 핵심 탐구 결론</div>
+            <div class="result-box-desc">
+                • <b>현상</b> : 물과 기름은 서로 섞이지 않고, <b>밀도가 작은 기름이 물 위에 뜹니다.</b><br>
+                • <b>분리 도구</b> : 위에 뜬 기름층을 <b>스포이트</b>(또는 흡착포)로 걷어냅니다.<br>
+                • <b>실생활 예시</b> : 국물 위의 기름 걷어내기, 바다의 유출 기름 방제 작업.
+            </div>
+        </div>
+    </div>
+
+    <!-- 실험 3 카드 -->
+    <div class="lab-card" id="expCard3" style="display:none;">
+        <div class="lab-card-header">
+            <div class="lab-stage-tag">🧂 실험 3 : 소금과 모래의 복합 분리 (거름 & 증발)</div>
+            <div class="lab-principle-badge">분리 원리 : 용해도 차이(거름) & 증발</div>
+        </div>
+
+        <div class="sim-viewport" id="viewport3">
+            <div class="funnel-wrap" id="funnel3">
+                <div class="filter-paper">
+                    <span id="sandOnFilter" style="position:absolute; top:25px; left:45px; font-family:'Jua'; color:#78350f; font-size:0.85rem; display:none;">
+                        🏜️ 모래 걸러짐
+                    </span>
+                </div>
+                <span style="font-family:'Jua'; color:#cbd5e1; font-size:0.85rem; margin-top:4px;">깔때기 & 거름종이</span>
+            </div>
+
+            <div class="evap-dish" id="evapDish">
+                <div class="dish-solution" id="dishSolution"></div>
+                <div class="salt-crystals" id="saltCrystals">
+                    <div class="salt-dot"></div><div class="salt-dot"></div><div class="salt-dot"></div><div class="salt-dot"></div><div class="salt-dot"></div>
+                </div>
+            </div>
+
+            <div class="steam-wrap" id="steamWrap">
+                <div class="steam"></div><div class="steam" style="animation-delay:0.3s"></div><div class="steam" style="animation-delay:0.6s"></div>
+            </div>
+
+            <div class="heater-plate" id="heaterPlate">
+                <span id="heaterLabel" style="font-family:'Jua'; font-size:0.9rem; color:#cbd5e1;">가열 장치 (OFF)</span>
+            </div>
+        </div>
+
+        <div class="sim-controls">
+            <div class="sim-guide-text" id="exp3Guide">
+                👉 <b>1단계</b>: '거름종이로 거르기' 버튼을 눌러 물에 안 녹는 모래를 걸러내세요!
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-action-primary" id="btnExp3Action" onclick="stepExp3()">
+                    🧫 1단계 : 거름종이로 거르기
+                </button>
+                <button class="btn-reset" onclick="initExp3()">🔄 다시하기</button>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <div class="result-box-title">📖 『실험관찰』 핵심 탐구 결론</div>
+            <div class="result-box-desc">
+                • <b>1단계 (거름)</b> : 소금은 물에 녹아 거름종이를 통과하지만, <b>물에 녹지 않는 모래는 거름종이 위에 남습니다.</b><br>
+                • <b>2단계 (증발)</b> : 걸러진 소금물을 가열하면 <b>물은 증발하고 하얀 소금 결정만 남습니다.</b>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentExp = 1;
+
+    function switchExperiment(num) {
+        currentExp = num;
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById(`tab${i}`).classList.remove('active');
+            document.getElementById(`expCard${i}`).style.display = 'none';
+        }
+        document.getElementById(`tab${num}`).classList.add('active');
+        document.getElementById(`expCard${num}`).style.display = 'flex';
+
+        if (num === 1) initExp1();
+        if (num === 2) initExp2();
+        if (num === 3) initExp3();
+    }
+
+    // ==========================================
+    // 🌾 실험 1 : 체 시뮬레이션
+    // ==========================================
+    let isShaking = false;
+    function initExp1() {
+        isShaking = false;
+        const sieveGrains = document.getElementById('sieveGrainsWrap');
+        const bowlGrains = document.getElementById('bowlGrainsWrap');
+        sieveGrains.innerHTML = '';
+        bowlGrains.innerHTML = '';
+
+        // 콩 (8개), 팥 (8개), 조 (25개) 생성
+        for (let i = 0; i < 8; i++) {
+            const b = document.createElement('div');
+            b.className = 'grain grain-bean';
+            b.style.top = `${15 + Math.random()*50}px`;
+            b.style.left = `${20 + Math.random()*230}px`;
+            sieveGrains.appendChild(b);
+        }
+        for (let i = 0; i < 8; i++) {
+            const r = document.createElement('div');
+            r.className = 'grain grain-redbean';
+            r.style.top = `${15 + Math.random()*50}px`;
+            r.style.left = `${20 + Math.random()*230}px`;
+            sieveGrains.appendChild(r);
+        }
+        for (let i = 0; i < 25; i++) {
+            const m = document.createElement('div');
+            m.className = 'grain grain-millet';
+            m.id = `millet_${i}`;
+            m.style.top = `${20 + Math.random()*60}px`;
+            m.style.left = `${20 + Math.random()*230}px`;
+            sieveGrains.appendChild(m);
+        }
+
+        document.getElementById('sieve1').classList.remove('shaking');
+        document.getElementById('btnShake1').disabled = false;
+        document.getElementById('btnShake1').textContent = '🖐️ 체 흔들기 시작!';
+    }
+
+    function shakeSieve() {
+        if (isShaking) return;
+        isShaking = true;
+        const sieve = document.getElementById('sieve1');
+        sieve.classList.add('shaking');
+        document.getElementById('btnShake1').disabled = true;
+        document.getElementById('btnShake1').textContent = '🌪️ 분리 중...';
+
+        const bowlGrains = document.getElementById('bowlGrainsWrap');
+
+        // 작은 조 알갱이들이 아래 그릇으로 하나씩 쏙쏙 떨어지는 연출
+        for (let i = 0; i < 25; i++) {
+            setTimeout(() => {
+                const m = document.getElementById(`millet_${i}`);
+                if (m) m.remove();
+                const fallen = document.createElement('div');
+                fallen.className = 'grain grain-millet';
+                fallen.style.top = `${20 + Math.random()*50}px`;
+                fallen.style.left = `${40 + Math.random()*250}px`;
+                bowlGrains.appendChild(fallen);
+            }, i * 80);
+        }
+
+        setTimeout(() => {
+            sieve.classList.remove('shaking');
+            document.getElementById('btnShake1').textContent = '🎉 분리 완료!';
+        }, 2200);
+    }
+
+    // ==========================================
+    // 💧 실험 2 : 물과 기름 스포이트
+    // ==========================================
+    let isDropperUsed = false;
+    function initExp2() {
+        isDropperUsed = false;
+        document.getElementById('beakerOil').style.height = '90px';
+        document.getElementById('collectedOil').style.height = '0px';
+        document.getElementById('collectedOil').textContent = '';
+        document.getElementById('dropper').style.top = '20px';
+        document.getElementById('btnDropper').disabled = false;
+        document.getElementById('btnDropper').textContent = '🧪 스포이트로 기름 걷어내기';
+    }
+
+    function useDropper() {
+        if (isDropperUsed) return;
+        isDropperUsed = true;
+        const dropper = document.getElementById('dropper');
+        const beakerOil = document.getElementById('beakerOil');
+        const collectedOil = document.getElementById('collectedOil');
+        const btn = document.getElementById('btnDropper');
+
+        btn.disabled = true;
+        btn.textContent = '⏳ 기름 빨아들이는 중...';
+
+        // 1. 스포이트 내려오기
+        dropper.style.top = '80px';
+
+        setTimeout(() => {
+            // 2. 기름이 줄어들고 스포이트로 들어감
+            beakerOil.style.height = '10px';
+            dropper.style.background = 'linear-gradient(180deg, #fef08a 0%, #eab308 100%)';
+
+            setTimeout(() => {
+                // 3. 스포이트 올라가서 시험관으로 이동
+                dropper.style.top = '20px';
+                dropper.style.left = 'calc(50% + 140px)';
+
+                setTimeout(() => {
+                    // 4. 시험관에 기름 붓기
+                    dropper.style.background = 'rgba(255,255,255,0.7)';
+                    collectedOil.style.height = '80px';
+                    collectedOil.textContent = '기름 분리 완료!';
+                    btn.textContent = '🎉 기름 분리 성공!';
+                }, 600);
+            }, 800);
+        }, 600);
+    }
+
+    // ==========================================
+    // 🧂 실험 3 : 거름 & 증발
+    // ==========================================
+    let exp3Step = 1;
+    function initExp3() {
+        exp3Step = 1;
+        document.getElementById('sandOnFilter').style.display = 'none';
+        document.getElementById('dishSolution').style.height = '0px';
+        document.getElementById('heaterPlate').classList.remove('on');
+        document.getElementById('heaterLabel').textContent = '가열 장치 (OFF)';
+        document.getElementById('steamWrap').style.display = 'none';
+        document.getElementById('saltCrystals').style.display = 'none';
+        document.getElementById('exp3Guide').innerHTML = "👉 <b>1단계</b>: '거름종이로 거르기' 버튼을 눌러 물에 안 녹는 모래를 걸러내세요!";
+        const btn = document.getElementById('btnExp3Action');
+        btn.disabled = false;
+        btn.textContent = '🧫 1단계 : 거름종이로 거르기';
+    }
+
+    function stepExp3() {
+        const btn = document.getElementById('btnExp3Action');
+        if (exp3Step === 1) {
+            btn.disabled = true;
+            btn.textContent = '⏳ 거르는 중...';
+            setTimeout(() => {
+                document.getElementById('sandOnFilter').style.display = 'block';
+                document.getElementById('dishSolution').style.height = '45px';
+                exp3Step = 2;
+                btn.disabled = false;
+                btn.textContent = '🔥 2단계 : 가열하여 물 증발시키기';
+                document.getElementById('exp3Guide').innerHTML = "👉 <b>2단계</b>: '가열하여 물 증발시키기' 버튼을 눌러 맑은 소금물에서 소금을 얻으세요!";
+            }, 1000);
+        } else if (exp3Step === 2) {
+            btn.disabled = true;
+            btn.textContent = '🔥 가열 중 (물 증발 중)...';
+            document.getElementById('heaterPlate').classList.add('on');
+            document.getElementById('heaterLabel').textContent = '가열 장치 (ON 🔥)';
+            document.getElementById('steamWrap').style.display = 'flex';
+
+            // 물 증발
+            setTimeout(() => {
+                document.getElementById('dishSolution').style.height = '0px';
+            }, 500);
+
+            setTimeout(() => {
+                document.getElementById('steamWrap').style.display = 'none';
+                document.getElementById('heaterPlate').classList.remove('on');
+                document.getElementById('heaterLabel').textContent = '가열 완료 (OFF)';
+                document.getElementById('saltCrystals').style.display = 'flex';
+                btn.textContent = '🎉 하얀 소금 결정 분리 성공!';
+                document.getElementById('exp3Guide').innerHTML = "🌟 <b>대성공!</b> 모래와 소금이 완벽하게 순수한 물질로 분리되었습니다!";
+            }, 2500);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initExp1();
+    });
+</script>
+</body>
+</html>

@@ -38,28 +38,28 @@
       <p class="science-btn-desc"><strong>[5학년 과학 1~3권 완비]</strong> '완벽 공부법'·'안전 수칙'·'혼합물 분리 대모험'! 고화질 삽화와 성우 구연동화로 교과서 완전 정복!</p>
     </div>
     
-    <div class="science-grid-btn" onclick="openMissionView('voca')">
+    <div class="science-grid-btn" onclick="openMissionView('voca')" style="border: 2.5px solid #10b981; background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%); cursor: pointer;">
       <span class="science-btn-icon">🔬</span>
-      <div class="science-btn-title">과학 용어방</div>
-      <p class="science-btn-desc">교과서 속 핵심 과학 용어들을 요정 코코의 나긋나긋한 낭독과 함께 퀴즈로 정복하자!</p>
+      <div class="science-btn-title" style="color: #047857;">과학 핵심 용어방</div>
+      <p class="science-btn-desc">교과서 속 핵심 과학 용어들을 요정 코코의 나긋나긋한 낭독과 함께 초성 퀴즈로 정복하자!</p>
     </div>
 
-    <div class="science-grid-btn" onclick="openMissionView('experiment')">
+    <div class="science-grid-btn" onclick="openMissionView('safety')" style="border: 2.5px solid #d97706; background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%); cursor: pointer;">
+      <span class="science-btn-icon">🥽</span>
+      <div class="science-btn-title" style="color: #b45309;">실험실 안전 라이선스 시험</div>
+      <p class="science-btn-desc"><strong>[스페셜 스테이지]</strong> 복장 점검과 비상 대처 퀴즈를 모두 맞히고 '공인 꼬마 과학자 연구원증'을 발급받자! (+10💎)</p>
+    </div>
+
+    <a href="science_virtual_lab.html" class="science-grid-btn" style="text-decoration: none; color: inherit; border: 2.5px solid #2563eb; background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%); cursor: pointer;">
       <span class="science-btn-icon">🧪</span>
-      <div class="science-btn-title">가상 실험실</div>
-      <p class="science-btn-desc">실험 도구와 관찰 결과를 분석하고 과학적 원리를 슬기롭게 파헤쳐라!</p>
-    </div>
+      <div class="science-btn-title" style="color: #1d4ed8;">가상 실험실 (Virtual Lab)</div>
+      <p class="science-btn-desc"><strong>[인터랙티브 시뮬레이션]</strong> 체 흔들기, 물과 기름 스포이트 분리, 거름&증발로 소금 얻기 직접 조작!</p>
+    </a>
 
-    <div class="science-grid-btn" onclick="openMissionView('nature')">
-      <span class="science-btn-icon">🌿</span>
-      <div class="science-btn-title">자연 생태 탐험실</div>
-      <p class="science-btn-desc">동식물의 생태 사진을 감상하고, 마법의 목소리로 한 줄 관찰록 쓰기!</p>
-    </div>
-
-    <div class="science-grid-btn" onclick="openMissionView('inventor')">
-      <span class="science-btn-icon">💡</span>
-      <div class="science-btn-title">위대한 발명가 돋보기</div>
-      <p class="science-btn-desc">세상을 바꾼 위대한 발명품 카드 짝을 매칭하고, 나만의 과학 도감을 수집하자!</p>
+    <div class="science-grid-btn" onclick="openMissionView('report')" style="border: 2.5px solid #8b5cf6; background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%); cursor: pointer;">
+      <span class="science-btn-icon">📝</span>
+      <div class="science-btn-title" style="color: #6d28d9;">『실험관찰』 디지털 탐구 보고서</div>
+      <p class="science-btn-desc"><strong>[교과서 일지]</strong> 실험관찰 책 기록 정리, 실생활 문제 해결(캠핑장 기름 사고), 메타인지 셀프 평가(⭐)!</p>
     </div>
 
   </div>
@@ -95,7 +95,8 @@
 <script src="../../core/fairy-engine.js?v=20260830_no_intro"></script>
 <script src="../../core/fairy-chatbot.js?v=20260830_no_intro"></script>
 <script src="../../data/science-data.js?v=20260830_no_intro"></script>
-<script src="../../js/science_common.js?v=20260830_no_intro"></script>
+<script src="../../data/science_lab_data.js?v=20260902_1"></script>
+<script src="../../js/science_common.js?v=20260902_1"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
