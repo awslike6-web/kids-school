@@ -431,6 +431,250 @@
   body.mode-personal .back-lobby-btn { display: inline-flex; align-items: center; gap: 6px; }
   body.mode-personal .viewer-badge { display: block; }
 
+  /* 🌟 [이벤트 오버레이] ① 상단 공지 띠배너 스타일 */
+  .top-notice-banner-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+  .top-notice-banner {
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.22) 0%, rgba(255, 217, 61, 0.18) 100%);
+    border: 1.5px solid rgba(255, 217, 61, 0.55);
+    border-radius: 14px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 18px rgba(255, 217, 61, 0.12);
+  }
+  .top-notice-banner:hover {
+    transform: translateY(-2px);
+    border-color: var(--yellow);
+    box-shadow: 0 6px 22px rgba(255, 217, 61, 0.28);
+  }
+  .banner-tag {
+    background: var(--yellow);
+    color: #0d0a1a;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  .banner-msg {
+    flex: 1;
+    font-family: 'Nanum Gothic', sans-serif;
+    font-size: 0.95rem;
+    color: #fff;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .banner-arrow {
+    font-size: 0.85rem;
+    color: var(--yellow);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+
+  /* 🌟 [이벤트 오버레이] ② 요일 헤더 뱃지 (일일 전체 일정) */
+  .day-header-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .day-name-label {
+    font-size: clamp(0.95rem, 1.8vw, 1.25rem);
+    font-weight: bold;
+  }
+  .day-event-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #ff4757, #ff6b81);
+    color: #ffffff;
+    font-family: 'Nanum Gothic', sans-serif;
+    font-size: 0.73rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.35);
+    transition: transform 0.18s, filter 0.18s;
+    max-width: 96%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .day-event-badge:hover {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+  }
+  .day-event-badge.completed {
+    background: linear-gradient(135deg, #44A08D, #6BCB77);
+    text-decoration: line-through;
+    opacity: 0.85;
+  }
+
+  /* 🌟 [이벤트 오버레이] ③ 과목 블록 내부 인디케이터 (과목별 준비물/숙제) */
+  .lesson-overlay-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 217, 61, 0.18);
+    border: 1px solid rgba(255, 217, 61, 0.5);
+    color: #ffe066;
+    font-family: 'Nanum Gothic', sans-serif;
+    font-size: 0.74rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 3px;
+    max-width: 100%;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    text-align: left;
+    word-break: keep-all;
+    line-height: 1.25;
+  }
+  .lesson-overlay-badge:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 217, 61, 0.28);
+    border-color: var(--yellow);
+    box-shadow: 0 2px 10px rgba(255, 217, 61, 0.3);
+  }
+  .lesson-overlay-badge.completed {
+    background: rgba(107, 203, 119, 0.16);
+    border-color: rgba(107, 203, 119, 0.4);
+    color: #a3e635;
+    text-decoration: line-through;
+    opacity: 0.82;
+  }
+
+  /* 🌟 [이벤트 오버레이 모달 팝업] */
+  .overlay-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(9, 7, 15, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 99999;
+    animation: fadeInModal 0.2s ease-out;
+  }
+  @keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .overlay-modal-card {
+    background: #161226;
+    border: 2px solid rgba(0, 242, 254, 0.4);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(0, 242, 254, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #f1f5f9;
+  }
+  .overlay-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+  }
+  .overlay-modal-badge {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(0, 242, 254, 0.15);
+    color: var(--neon-cyan);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+  }
+  .overlay-modal-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 6px;
+    transition: color 0.15s;
+  }
+  .overlay-modal-close:hover { color: #fff; }
+  .overlay-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+  .overlay-modal-title {
+    font-size: 1.28rem;
+    font-weight: bold;
+    color: #fff;
+    line-height: 1.35;
+    word-break: keep-all;
+  }
+  .overlay-modal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+  .overlay-modal-content {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .overlay-modal-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid rgba(255, 217, 61, 0.5);
+    background: rgba(255, 217, 61, 0.12);
+    color: #ffd93d;
+    margin-top: 4px;
+  }
+  .overlay-modal-toggle-btn:hover {
+    background: rgba(255, 217, 61, 0.22);
+    border-color: #ffd93d;
+  }
+  .overlay-modal-toggle-btn.is-completed {
+    border-color: rgba(107, 203, 119, 0.6);
+    background: rgba(107, 203, 119, 0.15);
+    color: #a3e635;
+  }
+
   /* ✉️ 메모 아이콘 및 툴팁 스타일 */
   .lesson-memo-container {
     position: relative;
@@ -629,6 +873,9 @@
     <button class="filter-btn daughter" data-filter="민서" onclick="setChildFilter('민서', this)">👧 민서 시간표</button>
   </div>
 
+  <!-- 🌟 [이벤트 오버레이 ①] 상단 긴급/전체 공지 띠배너 영역 -->
+  <div id="topNoticeBannerArea" class="top-notice-banner-area" style="display:none;"></div>
+
   <div class="dual-track">
     <section class="track-panel">
       <div class="panel-header">
@@ -696,6 +943,75 @@ const SUBJECT_COLORS = {
   '국어': '#FF6B9D', '수학': '#6EC6F5', '영어': '#A78BFA', '과학': '#6BCB77',
   '사회': '#FFD93D', '기타': '#8b949e', '도덕': '#4ECDC4', '음악': '#FF9F43',
   '체육': '#44A08D', '미술': '#ff758c', '실과': '#c084fc'
+};
+
+// 🏛️ [기본 정적 시간표 (베이스)] - 학기 중 매주 반복되는 고정 시간표
+const DEFAULT_BASE_TIMETABLE = {
+  '민수': [
+    { dayOfWeek: '월요일', periodNum: 1, subject: '국어', title: '국어' },
+    { dayOfWeek: '월요일', periodNum: 2, subject: '수학', title: '수학' },
+    { dayOfWeek: '월요일', periodNum: 3, subject: '사회', title: '사회' },
+    { dayOfWeek: '월요일', periodNum: 4, subject: '과학', title: '과학' },
+    { dayOfWeek: '월요일', periodNum: 5, subject: '영어', title: '영어' },
+    { dayOfWeek: '월요일', periodNum: 6, subject: '체육', title: '체육' },
+
+    { dayOfWeek: '화요일', periodNum: 1, subject: '수학', title: '수학' },
+    { dayOfWeek: '화요일', periodNum: 2, subject: '국어', title: '국어' },
+    { dayOfWeek: '화요일', periodNum: 3, subject: '음악', title: '음악' },
+    { dayOfWeek: '화요일', periodNum: 4, subject: '미술', title: '미술' },
+    { dayOfWeek: '화요일', periodNum: 5, subject: '미술', title: '미술' },
+    { dayOfWeek: '화요일', periodNum: 6, subject: '도덕', title: '도덕' },
+
+    { dayOfWeek: '수요일', periodNum: 1, subject: '사회', title: '사회' },
+    { dayOfWeek: '수요일', periodNum: 2, subject: '과학', title: '과학' },
+    { dayOfWeek: '수요일', periodNum: 3, subject: '국어', title: '국어' },
+    { dayOfWeek: '수요일', periodNum: 4, subject: '실과', title: '실과' },
+    { dayOfWeek: '수요일', periodNum: 5, subject: '실과', title: '실과' },
+
+    { dayOfWeek: '목요일', periodNum: 1, subject: '영어', title: '영어' },
+    { dayOfWeek: '목요일', periodNum: 2, subject: '체육', title: '체육' },
+    { dayOfWeek: '목요일', periodNum: 3, subject: '수학', title: '수학' },
+    { dayOfWeek: '목요일', periodNum: 4, subject: '사회', title: '사회' },
+    { dayOfWeek: '목요일', periodNum: 5, subject: '국어', title: '국어' },
+    { dayOfWeek: '목요일', periodNum: 6, subject: '기타', title: '창체' },
+
+    { dayOfWeek: '금요일', periodNum: 1, subject: '국어', title: '국어' },
+    { dayOfWeek: '금요일', periodNum: 2, subject: '수학', title: '수학' },
+    { dayOfWeek: '금요일', periodNum: 3, subject: '과학', title: '과학' },
+    { dayOfWeek: '금요일', periodNum: 4, subject: '체육', title: '체육' },
+    { dayOfWeek: '금요일', periodNum: 5, subject: '음악', title: '음악' },
+    { dayOfWeek: '금요일', periodNum: 6, subject: '기타', title: '창체' }
+  ],
+  '민서': [
+    { dayOfWeek: '월요일', periodNum: 1, subject: '국어', title: '국어' },
+    { dayOfWeek: '월요일', periodNum: 2, subject: '국어', title: '국어' },
+    { dayOfWeek: '월요일', periodNum: 3, subject: '수학', title: '수학' },
+    { dayOfWeek: '월요일', periodNum: 4, subject: '기타', title: '통합(가을)' },
+    { dayOfWeek: '월요일', periodNum: 5, subject: '도덕', title: '안전한생활' },
+
+    { dayOfWeek: '화요일', periodNum: 1, subject: '수학', title: '수학' },
+    { dayOfWeek: '화요일', periodNum: 2, subject: '수학', title: '수학' },
+    { dayOfWeek: '화요일', periodNum: 3, subject: '국어', title: '국어' },
+    { dayOfWeek: '화요일', periodNum: 4, subject: '기타', title: '통합(가을)' },
+    { dayOfWeek: '화요일', periodNum: 5, subject: '기타', title: '창체' },
+
+    { dayOfWeek: '수요일', periodNum: 1, subject: '국어', title: '국어' },
+    { dayOfWeek: '수요일', periodNum: 2, subject: '국어', title: '국어' },
+    { dayOfWeek: '수요일', periodNum: 3, subject: '기타', title: '통합(가을)' },
+    { dayOfWeek: '수요일', periodNum: 4, subject: '수학', title: '수학' },
+
+    { dayOfWeek: '목요일', periodNum: 1, subject: '수학', title: '수학' },
+    { dayOfWeek: '목요일', periodNum: 2, subject: '국어', title: '국어' },
+    { dayOfWeek: '목요일', periodNum: 3, subject: '기타', title: '통합(가을)' },
+    { dayOfWeek: '목요일', periodNum: 4, subject: '기타', title: '통합(가을)' },
+    { dayOfWeek: '목요일', periodNum: 5, subject: '체육', title: '체육' },
+
+    { dayOfWeek: '금요일', periodNum: 1, subject: '국어', title: '국어' },
+    { dayOfWeek: '금요일', periodNum: 2, subject: '수학', title: '수학' },
+    { dayOfWeek: '금요일', periodNum: 3, subject: '기타', title: '통합(가을)' },
+    { dayOfWeek: '금요일', periodNum: 4, subject: '도덕', title: '안전한생활' },
+    { dayOfWeek: '금요일', periodNum: 5, subject: '기타', title: '자율' }
+  ]
 };
 
 let allTimetableRows = [];
@@ -805,7 +1121,7 @@ function updateClock() {
 
 function matchesChildFilter(row) {
   if (activeChildFilter === 'all') return true;
-  return row.child === activeChildFilter || !row.child || row.child.trim() === '';
+  return row.child === activeChildFilter || row.child === '공통' || !row.child || row.child.trim() === '';
 }
 
 function isClassRow(row) {
@@ -828,41 +1144,62 @@ function getClassDisplayName(row) {
 }
 
 function escapeHtml(str) {
-  return String(str)
+  return String(str || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
 
-/** 카드 본문(메모) vs 툴팁(본문 전체) 분리 */
-function getNoticeBodyText(row) {
-  const pageContent = (row.pageContent || row.body || '').trim();
-  const memo = row.memo ? String(row.memo).trim() : '';
-  if (pageContent) {
-    if (memo && pageContent !== memo && !pageContent.includes(memo)) {
-      return `${memo}\n\n${pageContent}`;
-    }
-    return pageContent;
+/** 날짜에서 요일명 추출 헬퍼 */
+function getRowDayOfWeek(row) {
+  if (row.targetDate) {
+    const d = new Date(row.targetDate);
+    if (!isNaN(d.getTime())) return KOREAN_DAYS[d.getDay()];
   }
-  return memo;
+  return row.dayOfWeek || '';
 }
 
-function shouldShowNoticeTooltip(row, bodyText) {
-  if (!bodyText) return false;
-  const memo = row.memo ? String(row.memo).trim() : '';
-  const pageContent = (row.pageContent || row.body || '').trim();
-  if (pageContent && pageContent !== memo) return true;
-  if (!memo && pageContent) return true;
-  return memo.length > 100;
+/** 🌟 [이벤트 오버레이 ①] 상단 배너 대상 여부 확인 */
+function isTopBannerNotice(row) {
+  if (!matchesChildFilter(row)) return false;
+  if (row.scope === '전체 공지') return true;
+  // 교시 없고 요일도 없이 전체 알림/공지인 레거시 항목 호환
+  if (!row.periodNum && !row.dayOfWeek && !row.subject && (row.title || row.memo)) {
+    return true;
+  }
+  return false;
 }
 
-function renderNoticeTooltipHtml(label, bodyText) {
-  return `
-    <div class="notice-tooltip" role="tooltip">
-      <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">${label}</div>
-      <div>${escapeHtml(bodyText)}</div>
-    </div>`;
+/** 🌟 [이벤트 오버레이 ②] 요일 헤더 일일 전체 일정 여부 확인 */
+function isDayEventNotice(row, dayName) {
+  if (!matchesChildFilter(row)) return false;
+  const dow = getRowDayOfWeek(row);
+  if (row.scope === '일일 전체') {
+    return dow === dayName || dow === '매일' || (!dow && !row.subject);
+  }
+  if (!row.periodNum && !row.subject && dow === dayName) {
+    return true;
+  }
+  return false;
+}
+
+/** 🌟 [이벤트 오버레이 ③] 과목별 준비물/숙제 항목 수집 */
+function getSubjectOverlayItems(dayName, subjectName, childName) {
+  return allTimetableRows.filter(row => {
+    if (!matchesChildFilter(row)) return false;
+    if (childName && row.child && row.child !== childName && row.child !== '공통') return false;
+
+    const isSubjectScope = row.scope === '과목별' || (row.subject && !row.periodNum);
+    if (!isSubjectScope) return false;
+
+    if (row.subject !== subjectName) return false;
+
+    const dow = getRowDayOfWeek(row);
+    if (dow && dow !== dayName && dow !== '매일') return false;
+
+    return true;
+  });
 }
 
 function getPeriodDefinitions() {
@@ -888,28 +1225,67 @@ function getPeriodDefinitions() {
   return [...map.values()].sort((a, b) => a.num - b.num);
 }
 
+/**
+ * 🗺️ [하이브리드 격자 매핑] 기본 정적 베이스 + 노션 수업 오버라이드 + 과목별 준비물 오버레이 바인딩
+ */
 function buildGridMap() {
   const map = new Map();
+  const childrenToInclude = activeChildFilter === 'all' ? ['민수', '민서'] : [activeChildFilter];
 
+  // 1. 기본 정적 시간표(베이스) 탑재
+  childrenToInclude.forEach(child => {
+    const baseList = DEFAULT_BASE_TIMETABLE[child] || [];
+    baseList.forEach(item => {
+      const key = `${item.dayOfWeek}:${item.periodNum}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push({
+        id: `base_${child}_${item.dayOfWeek}_${item.periodNum}`,
+        child: child,
+        dayOfWeek: item.dayOfWeek,
+        periodNum: item.periodNum,
+        subject: item.subject,
+        title: item.title,
+        memo: '',
+        overlays: []
+      });
+    });
+  });
+
+  // 2. 노션 DB에 등록된 정규 수업(교시 지정) 반영 및 덮어쓰기
   for (const row of allTimetableRows) {
     if (!isClassRow(row) || !matchesChildFilter(row)) continue;
     if (!WEEKDAYS.includes(row.dayOfWeek)) continue;
-
     const periodNum = row.periodNum || row.periodSlot?.num;
     if (!periodNum) continue;
 
     const key = `${row.dayOfWeek}:${periodNum}`;
     if (!map.has(key)) map.set(key, []);
-    map.get(key).push(row);
+    const existingList = map.get(key);
+
+    const existingIndex = existingList.findIndex(e => e.child === row.child);
+    const rowObj = { ...row, overlays: [] };
+    if (existingIndex >= 0) {
+      existingList[existingIndex] = rowObj;
+    } else {
+      existingList.push(rowObj);
+    }
   }
 
-  for (const [, rows] of map) {
+  // 3. 🌟 [이벤트 오버레이 ③] 과목별 준비물/숙제를 해당 요일/과목 셀에 결합
+  for (const [key, rows] of map) {
+    const [dayName] = key.split(':');
+    rows.forEach(lesson => {
+      lesson.overlays = getSubjectOverlayItems(dayName, lesson.subject, lesson.child);
+    });
     rows.sort((a, b) => String(a.child).localeCompare(String(b.child), 'ko'));
   }
 
   return map;
 }
 
+/**
+ * 📦 개별 수업 칸 렌더링 (과목명 + 🎒 준비물 인디케이터 뱃지)
+ */
 function renderLessonCell(rows) {
   if (!rows.length) return '<span class="cell-empty">—</span>';
 
@@ -927,16 +1303,34 @@ function renderLessonCell(rows) {
       </span>
     ` : '';
 
+    // 🌟 [이벤트 오버레이 ③] 과목 칸 내부 준비물/숙제 뱃지
+    const overlaysHtml = (row.overlays || []).map(overlay => {
+      const isDone = overlay.isCompleted;
+      const icon = isDone ? '✅' : '🎒';
+      return `
+        <div class="lesson-overlay-badge ${isDone ? 'completed' : ''}" 
+             onclick="event.stopPropagation(); window.openOverlayItemModal('${overlay.id}')"
+             title="터치하여 상세 보기 및 완료 체크">
+          <span>${icon}</span>
+          <span>${escapeHtml(overlay.title)}</span>
+        </div>
+      `;
+    }).join('');
+
     return `
       <div class="cell-lesson">
         <div class="lesson-name" style="color:${color}">
           ${escapeHtml(className)}${memoHtml}
         </div>
         ${showChild ? `<span class="lesson-child ${childClass}">${escapeHtml(row.child)}</span>` : ''}
+        ${overlaysHtml}
       </div>`;
   }).join('');
 }
 
+/**
+ * 📅 주간 시간표 전체 격자 렌더링 (요일 헤더 뱃지 포함)
+ */
 function renderWeeklyGrid() {
   const container = document.getElementById('gridContent');
   const subtitle = document.getElementById('gridSubtitle');
@@ -947,12 +1341,33 @@ function renderWeeklyGrid() {
   const filterLabel = activeChildFilter === 'all' ? '민수 · 민서' : activeChildFilter;
   const filledCount = [...gridMap.values()].reduce((n, rows) => n + rows.length, 0);
 
-  subtitle.textContent = `${filterLabel} · ${filledCount}칸 수업 등록`;
+  subtitle.textContent = `${filterLabel} · 기본 정적 베이스 + 알림장 오버레이 가동 중`;
 
+  // 🌟 [이벤트 오버레이 ②] 요일 헤더 일일 전체 일정(🔴 단축수업/현장학습 등) 뱃지 바인딩
   const headDays = WEEKDAYS.map(day => {
     const dayClass = getDayCssClass(day);
     const isToday = isWeekdayToday && day === todayDay;
-    return `<th class="${dayClass}${isToday ? ' today-col' : ''}">${shortDay(day)}</th>`;
+
+    const dayEvents = allTimetableRows.filter(r => isDayEventNotice(r, day));
+    const dayEventsHtml = dayEvents.map(e => {
+      const icon = e.isCompleted ? '✅' : '🚩';
+      return `
+        <span class="day-event-badge ${e.isCompleted ? 'completed' : ''}" 
+              onclick="event.stopPropagation(); window.openOverlayItemModal('${e.id}')"
+              title="${escapeHtml(e.title)} (터치하여 보기)">
+          <span>${icon}</span>
+          <span>${escapeHtml(e.title)}</span>
+        </span>
+      `;
+    }).join('');
+
+    return `
+      <th class="${dayClass}${isToday ? ' today-col' : ''}">
+        <div class="day-header-wrap">
+          <span class="day-name-label">${shortDay(day)}</span>
+          ${dayEventsHtml}
+        </div>
+      </th>`;
   }).join('');
 
   const bodyRows = periods.map(period => {
@@ -987,6 +1402,107 @@ function renderWeeklyGrid() {
       </table>
     </div>`;
 }
+
+/**
+ * 🌟 [이벤트 오버레이 ①] 상단 긴급/전체 공지 띠배너 렌더링
+ */
+function renderTopNoticeBanner() {
+  const bannerArea = document.getElementById('topNoticeBannerArea');
+  if (!bannerArea) return;
+
+  const topNotices = allTimetableRows.filter(isTopBannerNotice);
+  if (topNotices.length === 0) {
+    bannerArea.style.display = 'none';
+    bannerArea.innerHTML = '';
+    return;
+  }
+
+  bannerArea.style.display = 'flex';
+  bannerArea.innerHTML = topNotices.slice(0, 2).map(notice => {
+    const childBadge = notice.child && notice.child !== '공통' ? `[${notice.child}] ` : '';
+    const dateBadge = notice.targetDate ? ` (${notice.targetDate})` : '';
+    return `
+      <div class="top-notice-banner" onclick="window.openOverlayItemModal('${notice.id}')" title="터치하여 공지 전문 보기">
+        <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+          <span class="banner-tag">📢 전체 공지</span>
+          <span class="banner-msg">${childBadge}${escapeHtml(notice.title)}${dateBadge}</span>
+        </div>
+        <span class="banner-arrow">자세히 보기 ›</span>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * 💬 [이벤트 오버레이 모달 팝업] 열기
+ */
+window.openOverlayItemModal = function(itemId) {
+  const item = allTimetableRows.find(r => r.id === itemId);
+  if (!item) return;
+
+  const portal = document.getElementById('overlayModalPortal');
+  if (!portal) return;
+
+  const scopeTag = item.scope === '과목별' ? '🎒 과목별 준비물' : (item.scope === '일일 전체' ? '🚩 학교 행사 · 일정' : '📢 전체 학사 공지');
+  const childTag = item.child || '전체(공통)';
+  const dateStr = item.targetDate ? (item.targetDateEnd ? `${item.targetDate} ~ ${item.targetDateEnd}` : item.targetDate) : (item.dayOfWeek || '상시');
+  const bodyContent = (item.memo || item.pageContent || item.title || '상세 내용이 없습니다.').trim();
+  const isCompleted = item.isCompleted;
+
+  portal.innerHTML = `
+    <div class="overlay-modal-backdrop" onclick="window.closeOverlayModal(event)">
+      <div class="overlay-modal-card" onclick="event.stopPropagation()">
+        <div class="overlay-modal-header">
+          <span class="overlay-modal-badge">${scopeTag}</span>
+          <button class="overlay-modal-close" onclick="window.closeOverlayModal()">✕</button>
+        </div>
+        <div class="overlay-modal-body">
+          <div class="overlay-modal-title">${escapeHtml(item.title)}</div>
+          <div class="overlay-modal-meta">
+            <span>📅 ${escapeHtml(dateStr)}</span>
+            <span>👤 ${escapeHtml(childTag)}</span>
+            ${item.subject ? `<span>📚 ${escapeHtml(item.subject)}</span>` : ''}
+          </div>
+          <div class="overlay-modal-content">${escapeHtml(bodyContent)}</div>
+          <button class="overlay-modal-toggle-btn ${isCompleted ? 'is-completed' : ''}" 
+                  onclick="window.toggleOverlayItemComplete('${item.id}')">
+            <span style="font-size:1.2rem;">${isCompleted ? '✅' : '⬜'}</span>
+            <span>${isCompleted ? '챙겼어요! (준비 완료됨 · 다시 누르면 취소)' : '챙겼어요! (완료 체크하기)'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.closeOverlayModal = function(e) {
+  if (e && e.target && !e.target.classList.contains('overlay-modal-backdrop') && !e.target.classList.contains('overlay-modal-close')) {
+    return;
+  }
+  const portal = document.getElementById('overlayModalPortal');
+  if (portal) portal.innerHTML = '';
+};
+
+/**
+ * ✅ 준비물 완료 체크박스 실시간 토글 (즉시 반응 + 노션 DB 동기화)
+ */
+window.toggleOverlayItemComplete = async function(itemId) {
+  const item = allTimetableRows.find(r => r.id === itemId);
+  if (!item) return;
+
+  const nextState = !item.isCompleted;
+  item.isCompleted = nextState;
+
+  // 1. 화면 즉시 갱신 (0초 반응)
+  renderAll();
+  window.openOverlayItemModal(itemId);
+
+  // 2. 노션 DB 비동기 반영
+  if (typeof updateTimetableItemComplete === 'function') {
+    const success = await updateTimetableItemComplete(itemId, nextState);
+    if (!success) console.warn("[오버레이] 노션 완료 상태 동기화 지연");
+  }
+};
 
 function getTodayWeekday() {
   const today = KOREAN_DAYS[new Date().getDay()];
@@ -1143,6 +1659,7 @@ function bindNoticeTooltipEvents(container) {
 }
 
 function renderAll() {
+  renderTopNoticeBanner();
   renderWeeklyGrid();
   renderNotices();
 }
@@ -1225,5 +1742,6 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<div id="overlayModalPortal"></div>
 </body>
 </html>

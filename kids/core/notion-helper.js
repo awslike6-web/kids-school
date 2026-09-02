@@ -391,6 +391,7 @@ function parseTimetablePage(page) {
     const periodSlot = parseTimetablePeriodSlot(periodRaw);
     const periodDate = periodProp?.date || null;
     const alertDate = p["알림"]?.date || null;
+    const customDate = p["날짜"]?.date || null;
     let periodNum = periodSlot.num;
     if (!periodNum && periodDate?.start) {
         periodNum = inferPeriodNumFromDate(periodDate);
@@ -409,12 +410,39 @@ function parseTimetablePage(page) {
         periodStart: periodDate?.start || null,
         periodEnd: periodDate?.end || null,
         alertAt: alertDate?.start || null,
+        targetDate: customDate?.start || alertDate?.start || null,
+        targetDateEnd: customDate?.end || alertDate?.end || null,
+        scope: p["적용 범위"]?.select?.name || "",
+        isCompleted: p["완료"]?.checkbox || false,
         memo: (p["메모"]?.rich_text || []).map(t => t.plain_text).join("") || "",
         link: p["링크"]?.url || "",
         createdAt: page.created_time || null,
         pageContent: ""
     };
 }
+
+/**
+ * 📝 노션 시간표 아이템의 완료 체크박스 상태 업데이트 (준비물 챙김 여부 등)
+ */
+async function updateTimetableItemComplete(pageId, isCompleted) {
+    if (!pageId) return false;
+    try {
+        const response = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                properties: {
+                    "완료": { checkbox: !!isCompleted }
+                }
+            })
+        });
+        return response.ok;
+    } catch (e) {
+        console.error("[updateTimetableItemComplete] 완료 상태 업데이트 실패:", e);
+        return false;
+    }
+}
+window.updateTimetableItemComplete = updateTimetableItemComplete;
 
 /** 노션 블록 1개에서 plain text 추출 */
 function extractPlainTextFromNotionBlock(block) {
