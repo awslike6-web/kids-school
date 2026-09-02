@@ -62,6 +62,10 @@ function isScienceMissionInProgress() {
 }
 
 function openMissionView(type) {
+    if (type === 'storybook') {
+        location.href = 'science_storybook.html';
+        return;
+    }
     const overlay = document.getElementById('missionOverlay');
     const titleEl = document.getElementById('overlayHeaderTitle');
     const iconEl = document.getElementById('overlayHeaderIcon');
