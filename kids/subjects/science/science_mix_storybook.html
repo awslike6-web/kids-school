@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>섞여 있어도 괜찮아! 혼합물 분리 대모험 🧪 | 민민이네 공부방</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --accent: #f59e0b;
+        --bg-color: #0b1528;
+        --card-bg: #15243d;
+        --text-light: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: #0b1528;
+        min-height: 100vh;
+        color: var(--text-light);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 상단 헤더 바 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 18px; background: rgba(11, 21, 40, 0.95); backdrop-filter: blur(12px);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
+        border-bottom: 1px solid #1e3a66;
+    }
+    .top-left { display: flex; align-items: center; gap: 12px; }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: #15243d; color: #e2e8f0; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; text-decoration: none; border: 1px solid #1e3a66; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #1e3a66; color: #fff; }
+    .story-title {
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #60a5fa;
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    /* 뷰 모드 전환 탭 */
+    .view-mode-tabs {
+        display: flex; background: #15243d; padding: 4px; border-radius: 14px;
+        border: 1px solid #1e3a66;
+    }
+    .tab-btn {
+        padding: 6px 14px; border-radius: 10px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; color: #94a3b8; background: transparent; cursor: pointer;
+        transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    /* ==========================================
+       1. 📖 책 넘김 모드 (E-Book Spread Mode)
+       ========================================== */
+    .ebook-container {
+        flex: 1; max-width: 1080px; width: 100%; margin: 10px auto; padding: 0 12px;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .book-frame {
+        position: relative; width: 100%; max-width: 960px;
+        background: #15243d; border-radius: 16px; padding: 10px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 2px #1e3a66;
+        display: flex; justify-content: center; align-items: center;
+    }
+    .book-spread-img {
+        width: 100%; height: auto; max-height: 75vh; object-fit: contain;
+        border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        display: block;
+    }
+    .ebook-controls {
+        width: 100%; max-width: 960px; margin-top: 14px;
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        flex-wrap: wrap;
+    }
+    .btn-page-nav {
+        padding: 10px 20px; border-radius: 14px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1.1rem; cursor: pointer; transition: all 0.2s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .btn-prev { background: #1e3a66; color: #f1f5f9; }
+    .btn-prev:hover:not(:disabled) { background: #2d5696; }
+    .btn-next {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: white; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+    .btn-page-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+    .page-indicator {
+        font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #60a5fa;
+        background: #15243d; padding: 6px 16px; border-radius: 20px; border: 1px solid #1e3a66;
+    }
+    .audio-control-bar {
+        display: flex; align-items: center; gap: 10px; background: #15243d;
+        padding: 8px 16px; border-radius: 16px; border: 1px solid #1e3a66;
+    }
+    .btn-play {
+        padding: 8px 16px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1rem; color: white; background: #2563eb; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-play.playing { background: #f59e0b; }
+    .auto-read-label {
+        display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem;
+        font-family: 'Jua', sans-serif; color: #cbd5e1; cursor: pointer;
+    }
+    .auto-read-label input { width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; }
+
+    /* ========================================================
+       2. 📜 웹툰 스크롤 모드 (대형 그림 + 반응형 HTML 글밥 카드)
+       ======================================================== */
+    .webtoon-container {
+        display: none; max-width: 680px; width: 100%; margin: 15px auto;
+        padding: 0 12px 50px 12px; flex-direction: column; gap: 32px;
+    }
+    .webtoon-sticky-bar {
+        position: sticky; top: 60px; z-index: 90;
+        background: rgba(11, 21, 40, 0.95); backdrop-filter: blur(10px);
+        padding: 10px 16px; border-radius: 16px; border: 1.5px solid #2563eb;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    }
+    .continuous-btn {
+        padding: 8px 16px; border-radius: 12px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; color: white; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .continuous-btn.playing { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+    .webtoon-card {
+        background: #15243d; border-radius: 20px; overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #1e3a66;
+        display: flex; flex-direction: column; transition: border-color 0.3s;
+    }
+    .webtoon-header {
+        padding: 10px 16px; background: #0c182c; display: flex;
+        justify-content: space-between; align-items: center; border-bottom: 1px solid #1e3a66;
+    }
+    .webtoon-tag {
+        font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #60a5fa;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .btn-card-audio {
+        padding: 5px 12px; border-radius: 10px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 0.88rem; color: white; background: #1e3a66; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-card-audio:hover { background: #2d5696; }
+    .btn-card-audio.playing { background: #f59e0b; }
+
+    /* 🖼️ 상단 대형 삽화 */
+    .webtoon-ill-wrap {
+        width: 100%; background: #0b1528; overflow: hidden; display: flex; justify-content: center;
+    }
+    .webtoon-ill-img {
+        width: 100%; height: auto; display: block; object-fit: contain; max-height: 520px;
+    }
+
+    /* 📝 하단 반응형 HTML 글밥 카드 */
+    .webtoon-story-box {
+        background: #f8fafc; color: #1e293b; padding: 16px 18px;
+        border-top: 3px solid #2563eb; border-left: 6px solid #2563eb;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .webtoon-passage {
+        font-size: 1.05rem; line-height: 1.7; color: #1e293b;
+        font-weight: 500; word-break: keep-all; word-wrap: break-word;
+    }
+    .webtoon-passage b { color: #1d4ed8; font-weight: 700; }
+    .webtoon-passage .highlight {
+        background: #dbeafe; padding: 1px 4px; border-radius: 4px; color: #1d4ed8; font-weight: 700;
+    }
+    .webtoon-ref-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: #eff6ff; color: #1d4ed8; padding: 5px 12px;
+        border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+        border: 1px solid #bfdbfe; margin-top: 4px; width: fit-content;
+        font-family: 'Jua', sans-serif;
+    }
+
+    /* 다시 시작 버튼 카드 */
+    .restart-card-box {
+        text-align: center; padding: 20px; background: #15243d; border-radius: 16px;
+        border: 2px dashed #60a5fa; display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .btn-restart-large {
+        padding: 12px 28px; border-radius: 14px; border: none; font-family: 'Jua', sans-serif;
+        font-size: 1.15rem; color: white; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transition: transform 0.2s;
+    }
+    .btn-restart-large:hover { transform: scale(1.05); }
+
+    @media (max-width: 768px) {
+        .top-bar { padding: 8px 10px; }
+        .story-title { font-size: 1rem; }
+        .tab-btn { padding: 4px 8px; font-size: 0.85rem; }
+        .btn-page-nav { padding: 8px 12px; font-size: 0.95rem; }
+        .page-indicator { font-size: 0.95rem; padding: 4px 10px; }
+        .book-frame { padding: 4px; }
+        .audio-control-bar { width: 100%; justify-content: space-between; margin-top: 6px; }
+        .webtoon-passage { font-size: 0.98rem; line-height: 1.6; }
+    }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="top-left">
+        <a href="science.html" class="btn-back">🔙 과학 탐구실</a>
+        <div class="story-title">🧪 섞여 있어도 괜찮아! 혼합물 분리 대모험</div>
+    </div>
+
+    <div class="view-mode-tabs">
+        <button class="tab-btn active" id="tabEbook" onclick="setViewerMode('ebook')">📖 책장 넘김</button>
+        <button class="tab-btn" id="tabWebtoon" onclick="setViewerMode('webtoon')">📜 웹툰 스크롤</button>
+    </div>
+</div>
+
+<!-- 1. 📖 책 넘김 뷰어 -->
+<div class="ebook-container" id="ebookView">
+    <div class="book-frame">
+        <img src="images/minsu/5-1/1/storybook/science_mix_story_p1.png?v=20260902_1" alt="동화책 페이지" class="book-spread-img" id="ebookImg">
+    </div>
+
+    <div class="ebook-controls">
+        <button class="btn-page-nav btn-prev" id="prevBtn" onclick="changePage(-1)">◀ 이전 장</button>
+        <div class="page-indicator" id="pageIndicator">1 / 13 쪽</div>
+        <button class="btn-page-nav btn-next" id="nextBtn" onclick="changePage(1)">다음 장 ▶</button>
+
+        <div class="audio-control-bar">
+            <button class="btn-play" id="ebookPlayBtn" onclick="toggleEbookAudio()">
+                <span id="ebookPlayIcon">▶️</span> <span id="ebookPlayLabel">구연동화 듣기</span>
+            </button>
+            <label class="auto-read-label">
+                <input type="checkbox" id="autoPlayCheckbox" checked>
+                🔊 넘길 때 자동 읽기
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- 2. 📜 웹툰 스크롤 뷰어 -->
+<div class="webtoon-container" id="webtoonView">
+    <div class="webtoon-sticky-bar">
+        <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#60a5fa;">
+            🎧 전체 1~13장 연속 구연동화 듣기
+        </div>
+        <button class="continuous-btn" id="continuousBtn" onclick="toggleContinuousPlay()">
+            <span id="continuousIcon">▶️</span> <span id="continuousLabel">1장부터 연속 재생</span>
+        </button>
+    </div>
+
+    <div id="webtoonCardList" style="display:flex; flex-direction:column; gap:32px;"></div>
+</div>
+
+<audio id="mainAudio" preload="auto"></audio>
+
+<script>
+    const STORY_DATA = [
+        {
+            page: 1,
+            tag: "🌟 표지 : 섞여 있어도 괜찮아! 혼합물 분리 대모험",
+            spreadImg: "science_mix_story_p1.png",
+            illImg: "science_mix_ill_p1.png",
+            textHtml: `
+                <div class="webtoon-passage" style="text-align: center; padding: 10px 0;">
+                    <h2 style="font-family: 'Jua', sans-serif; font-size: 1.4rem; color: #2563eb; margin-bottom: 8px;">섞여 있어도 괜찮아! 혼합물 분리 대모험</h2>
+                    <p style="color: #64748b; font-size: 0.95rem; font-family: 'Jua', sans-serif;">글쓴이: –언제나처럼</p>
+                    <p style="margin-top: 14px; font-size: 1.05rem; line-height: 1.6;">
+                        "두 가지 이상의 물질이 섞이면 어떻게 될까? 다시 나눌 수는 없을까?"<br>
+                        <b>민재, 하은이, 수아</b>와 함께 신기하고 재미있는 혼합물 분리 대모험을 떠나볼까요?
+                    </p>
+                </div>
+                <div class="webtoon-ref-badge">✨ 5학년 1학기 과학 1단원 : 혼합물의 분리 완벽 정복!</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p1.mp3"
+        },
+        {
+            page: 2,
+            tag: "🥣 1장 : 혼합물이란 무엇일까?",
+            spreadImg: "science_mix_story_p2.png",
+            illImg: "science_mix_ill_p2.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    "여러분, 우리가 지난 시간에 배운 <b>혼합물</b>에 대해 복습해 볼까요?" <b>가람 선생님</b>의 질문에 <b>민재</b>가 손을 번쩍 들었어요.<br>
+                    "선생님, <span class="highlight">혼합물은 두 가지 이상의 물질이 성질을 유지한 채 섞여 있는 것</span>을 말해요!"<br>
+                    선생님은 환하게 웃으며 민재의 대답을 칭찬해 주셨어요. 실험대 위에는 콩과 팥, 조가 잔뜩 섞인 그릇이 놓여 있었답니다.
+                </div>
+                <div class="webtoon-ref-badge">💡 핵심 개념 1 : 혼합물 = 물질들이 고유한 성질을 유지한 채 섞인 것!</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p2.mp3"
+        },
+        {
+            page: 3,
+            tag: "🫘 2장 : 섞여 있어도 성질은 그대로!",
+            spreadImg: "science_mix_story_p3.png",
+            illImg: "science_mix_ill_p3.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    <b>하은이</b>가 그릇 속에 섞인 곡물들을 자세히 살피며 말했어요.<br>
+                    "정말 민재 말대로네! <b>콩이랑 팥이 같이 섞여 있어도 콩은 여전히 동그랗고 팥은 여전히 붉은색을 띠고 있어.</b>"<br>
+                    옆에 있던 <b>수아</b>도 고개를 끄덕였어요.<br>
+                    "맞아, <span class="highlight">각자의 성질이 변하지 않고 그대로 남아 있는 게</span> 바로 혼합물의 특징이지."
+                </div>
+                <div class="webtoon-ref-badge">💡 핵심 개념 2 : 혼합물 속 각 물질은 성질이 변하지 않아요!</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p3.mp3"
+        },
+        {
+            page: 4,
+            tag: "🧂 3장 : 혼합물을 왜 굳이 분리해야 할까?",
+            spreadImg: "science_mix_story_p4.png",
+            illImg: "science_mix_ill_p4.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    <b>수아</b>가 선생님께 궁금한 점을 여쭤봤어요.<br>
+                    "그런데 선생님, 섞여 있는 것들을 왜 굳이 다시 분리해야 하나요?"<br>
+                    선생님은 부드럽게 설명해 주셨어요.<br>
+                    "우리가 생활 속에서 <span class="highlight">필요한 순수한 물질을 얻기 위해서</span>란다. 예를 들어, <b>바닷물에서 소금만 얻어야 요리를 할 수 있는 것처럼</b> 말이야."
+                </div>
+                <div class="webtoon-ref-badge">💡 핵심 개념 3 : 우리 생활에 필요한 순수한 물질을 얻기 위해 분리해요!</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p4.mp3"
+        },
+        {
+            page: 5,
+            tag: "🧺 4장 : 알갱이 크기 차이로 분리하는 '체'",
+            spreadImg: "science_mix_story_p5.png",
+            illImg: "science_mix_ill_p5.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    "그럼 알갱이 크기가 다른 것들은 어떻게 분리할까요?" <b>민재</b>의 물음에 <b>하은이</b>가 체를 가져왔어요.<br>
+                    "이 <span class="highlight">'체'를 이용</span>하면 돼! <b>체를 흔들면 알갱이가 작은 조는 아래로 빠지고, 커다란 콩과 팥은 위에 남거든.</b>"<br>
+                    민재는 신기한 듯 체가 흔들리는 모습을 지켜보았어요.
+                </div>
+                <div class="webtoon-ref-badge">💡 분리 원리 1 : 체를 이용한 분리 (알갱이의 크기 차이 이용)</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p5.mp3"
+        },
+        {
+            page: 6,
+            tag: "💧 5장 : 물과 기름의 층 분리와 스포이트",
+            spreadImg: "science_mix_story_p6.png",
+            illImg: "science_mix_ill_p6.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    이번에는 물과 기름이 섞인 비커가 등장했어요. 선생님이 <b>수아</b>에게 물으셨어요.<br>
+                    "수아야, 물 위에 떠 있는 기름을 어떻게 분리하면 좋을까?"<br>
+                    수아는 비커를 유심히 보더니 대답했어요.<br>
+                    "<span class="highlight">물과 기름은 서로 섞이지 않고 밀도가 달라서 층이 생겨요.</span> <b>스포이트로 위에 뜬 기름만 걷어내면</b> 될 것 같아요!"
+                </div>
+                <div class="webtoon-ref-badge">💡 분리 원리 2 : 서로 섞이지 않고 밀도가 다른 액체는 스포이트로 분리!</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p6.mp3"
+        },
+        {
+            page: 7,
+            tag: "🧫 6장 : 소금과 모래 분리 (거름종이와 깔때기)",
+            spreadImg: "science_mix_story_p7.png",
+            illImg: "science_mix_ill_p7.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    "소금과 모래가 섞여 있으면 어떻게 하죠?" <b>하은이</b>가 묻자 <b>민재</b>가 직접 실험을 시작했어요.<br>
+                    "먼저 물에 녹여야 해. <span class="highlight">소금은 물에 녹지만 모래는 녹지 않거든.</span>"<br>
+                    하은이는 <b>거름종이를 깔고 깔때기에 소금물을 부었어요.</b><br>
+                    "이렇게 <b>거르면 모래만 거름종이 위에 남게 돼!</b>"
+                </div>
+                <div class="webtoon-ref-badge">💡 분리 원리 3 : 거름 (물에 녹는 물질과 녹지 않는 물질의 성질 차이)</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p7.mp3"
+        },
+        {
+            page: 8,
+            tag: "🔥 7장 : 맑은 소금물에서 소금 결정 얻기 (증발)",
+            spreadImg: "science_mix_story_p8.png",
+            illImg: "science_mix_ill_p8.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    <b>수아</b>가 걸러진 맑은 소금물을 가열 장치 위에 올렸어요. <b>가람 선생님</b>이 옆에서 안전하게 도와주셨지요.<br>
+                    "이제 물을 증발시키면 어떻게 될까?" 선생님의 말씀에 수아가 대답했어요.<br>
+                    "<span class="highlight">물이 모두 증발하고 나면 비커 바닥에 하얀 소금 결정만</span> 남게 돼요!"
+                </div>
+                <div class="webtoon-ref-badge">💡 분리 원리 4 : 증발 (물을 날려 보내고 녹아 있던 물질을 분리)</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p8.mp3"
+        },
+        {
+            page: 9,
+            tag: "🏺 8장 : 우리 조상님들의 지혜 (메주와 염전)",
+            spreadImg: "science_mix_story_p9.png",
+            illImg: "science_mix_ill_p9.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    "우리 조상님들도 이런 원리를 이용하셨단다." <b>민재와 하은이</b>는 선생님이 보여주신 사진을 보았어요.<br>
+                    민재가 외쳤어요. "어! 저건 <span class="highlight">메주로 간장을 만드는 모습</span>이에요!"<br>
+                    하은이도 맞장구를 쳤어요.<br>
+                    "<b>염전에서 바닷물을 가둬 소금을 만드는 것도 증발을 이용한 분리 방법</b>이죠?"
+                </div>
+                <div class="webtoon-ref-badge">💡 조상들의 지혜 : 장 담그기(거름) & 염전 소금 생산(증발)</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p9.mp3"
+        },
+        {
+            page: 10,
+            tag: "🏭 9장 : 생활 속 혼합물 분리 (하수 처리 & 해수 담수화)",
+            spreadImg: "science_mix_story_p10.png",
+            illImg: "science_mix_ill_p10.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    <b>수아</b>는 과학 잡지에서 본 내용을 발표했어요.<br>
+                    "우리가 쓴 물을 깨끗하게 만드는 <span class="highlight">하수 처리장</span>이나, <b>바닷물에서 먹는 물을 얻는 해수 담수화 시설</b>도 혼합물의 분리 원리를 이용한대요!"<br>
+                    선생님은 수아의 해박한 지식에 고개를 끄덕이며 미소를 지으셨어요.
+                </div>
+                <div class="webtoon-ref-badge">💡 생활 속 분리 : 맑은 물을 만드는 하수 처리장 & 해수 담수화 시설</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p10.mp3"
+        },
+        {
+            page: 11,
+            tag: "🤖 10장 : 첨단 AI 로봇의 재활용품 자동 선별",
+            spreadImg: "science_mix_story_p11.png",
+            illImg: "science_mix_ill_p11.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    "요즘은 <span class="highlight">인공지능 로봇도 분리를 도와준대요!</span>" <b>민재</b>가 태블릿 PC를 보여주며 말했어요.<br>
+                    <b>수아</b>는 화면 속 <b>AI 폐기물 선별 로봇</b>을 보며 눈을 반짝였어요.<br>
+                    "와, <b>로봇이 재활용품을 종류별로 척척 나눠주니까 환경 보호에 정말 큰 도움</b>이 되겠다!"
+                </div>
+                <div class="webtoon-ref-badge">💡 첨단 기술 : AI와 센서를 활용한 스마트 재활용품 선별 로봇</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p11.mp3"
+        },
+        {
+            page: 12,
+            tag: "♻️ 11장 : 버려진 현수막의 변신, 새활용(Upcycling) 필통",
+            spreadImg: "science_mix_story_p12.png",
+            illImg: "science_mix_ill_p12.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    <b>하은이</b>가 가방에서 예쁜 필통을 꺼냈어요.<br>
+                    "선생님, 이건 <span class="highlight">버려진 현수막을 분리해서 만든 새활용(Upcycling) 필통</span>이에요!"<br>
+                    선생님은 하은이의 필통을 만져보며 말씀하셨어요.<br>
+                    "<b>분리배출을 잘하는 것만으로도 자원을 아끼고 지구를 지키는 멋진 과학자가 될 수 있단다.</b>"
+                </div>
+                <div class="webtoon-ref-badge">💡 자원 순환 : 새활용(업사이클링)과 올바른 분리배출 실천!</div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p12.mp3"
+        },
+        {
+            page: 13,
+            tag: "🌍 12장 : 지구를 사랑하는 꼬마 과학자의 약속!",
+            spreadImg: "science_mix_story_p13.png",
+            illImg: "science_mix_ill_p13.png",
+            textHtml: `
+                <div class="webtoon-passage">
+                    수업이 끝나고 세 친구는 서로 약속했어요.<br>
+                    "<b>앞으로 분리배출도 꼼꼼히 하고, 혼합물의 원리를 생활 속에서 찾아보자!</b>"<br>
+                    <b>민재와 하은이</b>는 쓰레기통 앞에서 <span class="highlight">플라스틱과 종이를 정성껏 나누어</span> 담았어요.<br>
+                    세 친구의 마음속에는 <b>환경을 사랑하는 작은 과학자의 꿈이 쑥쑥</b> 자라났답니다. 🌟
+                </div>
+                <div class="webtoon-ref-badge">🏆 혼합물 마스터 : 우리는 환경과 과학을 사랑하는 멋진 탐험대!</div>
+                <div class="restart-card-box" style="margin-top: 15px;">
+                    <p style="font-family: 'Jua', sans-serif; color: #cbd5e1; font-size: 1.05rem;">혼합물 분리 대모험을 마쳤어요! 다시 처음부터 복습해 볼까요?</p>
+                    <button class="btn-restart-large" onclick="restartStorybook()">🔄 처음부터 다시 시작</button>
+                </div>
+            `,
+            audio: "../../assets/audio/storybook/science_mix/science_mix_story_p13.mp3"
+        }
+    ];
+
+    let currentMode = 'ebook';
+    let currentPageIndex = 0;
+    let isContinuousPlaying = false;
+    let continuousIndex = 0;
+    const audio = document.getElementById('mainAudio');
+
+    function setViewerMode(mode) {
+        currentMode = mode;
+        audio.pause();
+        updateEbookAudioUI(false);
+        updateContinuousUI(false);
+        isContinuousPlaying = false;
+        resetAllWebtoonCardButtons();
+
+        if (mode === 'ebook') {
+            document.getElementById('tabEbook').classList.add('active');
+            document.getElementById('tabWebtoon').classList.remove('active');
+            document.getElementById('ebookView').style.display = 'flex';
+            document.getElementById('webtoonView').style.display = 'none';
+            renderEbook();
+        } else {
+            document.getElementById('tabWebtoon').classList.add('active');
+            document.getElementById('tabEbook').classList.remove('active');
+            document.getElementById('ebookView').style.display = 'none';
+            document.getElementById('webtoonView').style.display = 'flex';
+            renderWebtoonList();
+        }
+    }
+
+    function renderEbook() {
+        const item = STORY_DATA[currentPageIndex];
+        const img = document.getElementById('ebookImg');
+        img.src = `images/minsu/5-1/1/storybook/${item.spreadImg}?v=20260902_1`;
+        document.getElementById('pageIndicator').textContent = `${item.page} / ${STORY_DATA.length} 쪽`;
+
+        document.getElementById('prevBtn').disabled = (currentPageIndex === 0);
+        document.getElementById('nextBtn').textContent = (currentPageIndex === STORY_DATA.length - 1) ? '🎉 처음으로' : '다음 장 ▶';
+
+        audio.src = item.audio;
+        audio.pause();
+        updateEbookAudioUI(false);
+
+        const autoPlay = document.getElementById('autoPlayCheckbox').checked;
+        if (autoPlay) {
+            setTimeout(() => {
+                audio.play().then(() => {
+                    updateEbookAudioUI(true);
+                }).catch(() => {
+                    updateEbookAudioUI(false);
+                });
+            }, 200);
+        }
+    }
+
+    function changePage(dir) {
+        audio.pause();
+        if (currentPageIndex === STORY_DATA.length - 1 && dir === 1) {
+            currentPageIndex = 0;
+        } else {
+            currentPageIndex = Math.max(0, Math.min(STORY_DATA.length - 1, currentPageIndex + dir));
+        }
+        renderEbook();
+    }
+
+    function toggleEbookAudio() {
+        if (audio.paused) {
+            audio.play().then(() => {
+                updateEbookAudioUI(true);
+            }).catch(() => {
+                updateEbookAudioUI(false);
+            });
+        } else {
+            audio.pause();
+            updateEbookAudioUI(false);
+        }
+    }
+
+    function updateEbookAudioUI(isPlaying) {
+        const btn = document.getElementById('ebookPlayBtn');
+        const icon = document.getElementById('ebookPlayIcon');
+        const label = document.getElementById('ebookPlayLabel');
+        if (!btn) return;
+        if (isPlaying) {
+            btn.classList.add('playing');
+            icon.textContent = '⏸️';
+            label.textContent = '일시 정지';
+        } else {
+            btn.classList.remove('playing');
+            icon.textContent = '▶️';
+            label.textContent = '구연동화 듣기';
+        }
+    }
+
+    // ==========================================
+    // 📜 웹툰 모드 렌더링
+    // ==========================================
+    function renderWebtoonList() {
+        const container = document.getElementById('webtoonCardList');
+        container.innerHTML = STORY_DATA.map((item, idx) => `
+            <div class="webtoon-card" id="webtoonCard_${idx}">
+                <div class="webtoon-header">
+                    <div class="webtoon-tag">${item.tag}</div>
+                    <button class="btn-card-audio" id="cardAudioBtn_${idx}" onclick="playSingleCardAudio(${idx})">
+                        ▶️ ${item.page}장 듣기
+                    </button>
+                </div>
+                <div class="webtoon-ill-wrap">
+                    <img class="webtoon-ill-img" src="images/minsu/5-1/1/storybook/${item.illImg}?v=20260902_1" alt="${item.tag}">
+                </div>
+                <div class="webtoon-story-box">
+                    ${item.textHtml}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function playSingleCardAudio(idx) {
+        isContinuousPlaying = false;
+        updateContinuousUI(false);
+
+        const currentBtn = document.getElementById(`cardAudioBtn_${idx}`);
+        if (!audio.paused && continuousIndex === idx) {
+            audio.pause();
+            currentBtn.classList.remove('playing');
+            currentBtn.innerHTML = `▶️ ${STORY_DATA[idx].page}장 듣기`;
+            return;
+        }
+
+        resetAllWebtoonCardButtons();
+
+        continuousIndex = idx;
+        audio.src = STORY_DATA[idx].audio;
+        audio.play().then(() => {
+            currentBtn.classList.add('playing');
+            currentBtn.innerHTML = `⏸️ ${STORY_DATA[idx].page}장 멈춤`;
+        }).catch(e => console.log(e));
+    }
+
+    function toggleContinuousPlay() {
+        if (isContinuousPlaying) {
+            audio.pause();
+            isContinuousPlaying = false;
+            updateContinuousUI(false);
+            resetAllWebtoonCardButtons();
+        } else {
+            isContinuousPlaying = true;
+            updateContinuousUI(true);
+            playContinuousFrom(0);
+        }
+    }
+
+    function playContinuousFrom(idx) {
+        if (idx >= STORY_DATA.length) {
+            isContinuousPlaying = false;
+            updateContinuousUI(false);
+            resetAllWebtoonCardButtons();
+            return;
+        }
+
+        continuousIndex = idx;
+        audio.src = STORY_DATA[idx].audio;
+
+        const targetCard = document.getElementById(`webtoonCard_${idx}`);
+        if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetCard.style.borderColor = '#2563eb';
+        }
+
+        resetAllWebtoonCardButtons();
+        const activeBtn = document.getElementById(`cardAudioBtn_${idx}`);
+        if (activeBtn) {
+            activeBtn.classList.add('playing');
+            activeBtn.innerHTML = `🔊 ${STORY_DATA[idx].page}장 재생 중`;
+        }
+
+        audio.play().catch(e => console.log(e));
+    }
+
+    function updateContinuousUI(isPlaying) {
+        const btn = document.getElementById('continuousBtn');
+        const icon = document.getElementById('continuousIcon');
+        const label = document.getElementById('continuousLabel');
+        if (!btn) return;
+        if (isPlaying) {
+            btn.classList.add('playing');
+            icon.textContent = '⏸️';
+            label.textContent = '연속 재생 멈춤';
+        } else {
+            btn.classList.remove('playing');
+            icon.textContent = '▶️';
+            label.textContent = '1장부터 연속 재생';
+        }
+    }
+
+    function resetAllWebtoonCardButtons() {
+        document.querySelectorAll('.btn-card-audio').forEach((b, i) => {
+            b.classList.remove('playing');
+            b.innerHTML = `▶️ ${STORY_DATA[i].page}장 듣기`;
+        });
+        document.querySelectorAll('.webtoon-card').forEach(c => {
+            c.style.borderColor = '#1e3a66';
+        });
+    }
+
+    audio.onended = () => {
+        if (currentMode === 'ebook') {
+            updateEbookAudioUI(false);
+        } else {
+            if (isContinuousPlaying) {
+                playContinuousFrom(continuousIndex + 1);
+            } else {
+                resetAllWebtoonCardButtons();
+            }
+        }
+    };
+
+    audio.onerror = () => {
+        updateEbookAudioUI(false);
+        updateContinuousUI(false);
+        resetAllWebtoonCardButtons();
+    };
+
+    function restartStorybook() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (currentMode === 'ebook') {
+            currentPageIndex = 0;
+            renderEbook();
+        } else {
+            setViewerMode('ebook');
+            currentPageIndex = 0;
+            renderEbook();
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (currentMode === 'ebook') {
+            if (e.key === 'ArrowLeft') changePage(-1);
+            if (e.key === 'ArrowRight') changePage(1);
+            if (e.key === ' ') {
+                e.preventDefault();
+                toggleEbookAudio();
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderEbook();
+    });
+</script>
+</body>
+</html>

@@ -50,6 +50,21 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         border: "#059669",
         link: "science_safety_storybook.html",
         coverImg: "images/minsu/5-1/0/safety_storybook/science_safety_story_p1.png"
+    },
+    {
+        id: "5_1_1_1",
+        grade: "5학년 1학기",
+        unit: "1단원",
+        bookNum: "3권",
+        title: "섞여 있어도 괜찮아! 혼합물 분리 대모험",
+        subtitle: "1단원 혼합물의 분리 원리와 생활 속 분리배출",
+        desc: "민재, 하은, 수아와 함께하는 신나는 과학 탐구! 콩·팥 분리, 거름, 증발, AI 선별 로봇부터 새활용 필통까지!",
+        icon: "🧪",
+        color: "#2563eb",
+        bgGrad: "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#2563eb",
+        link: "science_mix_storybook.html",
+        coverImg: "images/minsu/5-1/1/storybook/science_mix_story_p1.png"
     }
 ];
 
