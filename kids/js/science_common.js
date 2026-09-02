@@ -857,25 +857,31 @@ function selectScienceGrade(grade) {
         matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades && r.grades.includes(grade)));
     }
 
+    // 💡 단원 목록 추출
     const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level || r.stage || '').trim()))].filter(u => u && u !== "기본 단원").sort();
 
-    if (uniqueUnits.length <= 1) {
-        startScienceMissionWithFilteredData(matchedRecords, innerBody, grade);
-    } else {
-        renderScienceUnitUI(uniqueUnits, innerBody, matchedRecords, grade);
-    }
+    // 단원이 1개이든 여러 개이든 무조건 2단계 단원 선택 UI를 거치도록 보장!
+    renderScienceUnitUI(uniqueUnits, innerBody, matchedRecords, grade);
 }
 
 function renderScienceUnitUI(units, container, matchedRecords, grade) {
     speakFairyTTS("공부할 과학 단원을 골라보세요!");
     
+    // 각 단원별 단어 개수 계산
+    const unitCountMap = {};
+    units.forEach(u => {
+        unitCountMap[u] = matchedRecords.filter(r => String(r.level || r.stage || '').trim() === u).length;
+    });
+
     container.innerHTML = `
-        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:600px; margin:0 auto;">
+        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:620px; margin:0 auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <button class="back-to-lobby-btn" style="padding:6px 12px; font-size:0.9rem;" onclick="renderScienceGradeUI(['5학년 1학기', '5학년 2학기'], document.getElementById('overlayInnerBody'))">
+                <button class="back-to-lobby-btn" style="padding:6px 14px; font-size:0.9rem;" onclick="renderScienceGradeUI(['5학년 1학기', '5학년 2학기'], document.getElementById('overlayInnerBody'))">
                     🔙 학년 다시 고르기
                 </button>
-                <span style="font-size:1rem; color:#0284c7; font-weight:bold;">[${grade}]</span>
+                <span style="font-size:1.05rem; color:#0284c7; font-weight:bold; background:#e0f2fe; padding:4px 12px; border-radius:8px;">
+                    📖 ${grade === 'ALL' ? '전체 학년·학기' : grade}
+                </span>
             </div>
 
             <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.55rem;">📚 2. 탐구할 단원 고르기</h3>
@@ -884,10 +890,15 @@ function renderScienceUnitUI(units, container, matchedRecords, grade) {
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
                 ${units.map(u => `
                     <button class="quiz-choice-btn" style="
-                        padding:14px 18px; font-size:1.1rem; text-align:left; justify-content:flex-start;
-                        border-radius:12px; border:2px solid #bae6fd;
+                        padding:14px 18px; font-size:1.1rem; text-align:left; justify-content:space-between;
+                        border-radius:14px; border:2px solid #bae6fd; background:linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
                     " onclick="selectScienceUnit('${u}', '${grade}')">
-                        🔬 ${u}
+                        <span style="display:flex; align-items:center; gap:8px;">
+                            🔬 <b>${u}</b>
+                        </span>
+                        <span style="font-size:0.85rem; background:#0284c7; color:white; padding:3px 10px; border-radius:10px; font-weight:normal;">
+                            ${unitCountMap[u] || 0}개 용어
+                        </span>
                     </button>
                 `).join('')}
             </div>
@@ -896,7 +907,7 @@ function renderScienceUnitUI(units, container, matchedRecords, grade) {
                 background:#f1f5f9; width:100%; text-align:center; justify-content:center;
                 padding:12px; font-size:1.05rem; border-radius:12px;
             " onclick="selectScienceUnit('ALL', '${grade}')">
-                🌟 [${grade}] 전체 단원 모아보기
+                🌟 [${grade === 'ALL' ? '전체' : grade}] 모든 단원 모아보기 (${matchedRecords.length}개 용어)
             </button>
         </div>
     `;
