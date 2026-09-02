@@ -1,5 +1,5 @@
 // kids/core/daily-diary.js
-// 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 가벼운 일상·기분로그 맞춤형 통합 엔진)
+// 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 일상로그 / 하루 다회 타임라인 누적 엔진)
 
 // 1. 일기장 저장 및 조회 헬퍼
 function getStoredDiaries() {
@@ -13,20 +13,36 @@ function getStoredDiaries() {
 
 function saveDiaryEntry(entry) {
     const list = getStoredDiaries();
-    // 동일 날짜/학생 일기가 있으면 덮어쓰기 또는 추가
-    const existingIndex = list.findIndex(item => item.date === entry.date && item.childName === entry.childName);
-    if (existingIndex > -1) {
-        list[existingIndex] = entry;
-    } else {
-        list.unshift(entry);
+    // 고유 ID 및 시간대 필드 보장
+    if (!entry.id) {
+        entry.id = 'diary_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
     }
+    if (!entry.timeStr) {
+        entry.timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    }
+    // 타임라인 최신순으로 맨 앞에 누적 추가 (하루 다회 작성 지원)
+    list.unshift(entry);
     localStorage.setItem('mimi_daily_diaries', JSON.stringify(list));
+
+    // 로비 화면 버튼 문구 실시간 갱신
+    updateLobbyDiaryButton(entry.childName);
 }
 
-function hasTodayDiary(childName) {
+function getTodayDiaryCount(childName) {
     const todayStr = new Date().toISOString().split('T')[0];
     const list = getStoredDiaries();
-    return list.some(item => item.date === todayStr && item.childName === childName);
+    return list.filter(item => item.date === todayStr && item.childName === childName).length;
+}
+
+function updateLobbyDiaryButton(childName) {
+    const diaryBtn = document.getElementById('lobbyDiaryBtn');
+    if (!diaryBtn) return;
+    const count = getTodayDiaryCount(childName);
+    if (count > 0) {
+        diaryBtn.innerHTML = `📝 ${childName}의 새 일기 쓰기 (오늘 ${count}편 기록됨 🌟)`;
+    } else {
+        diaryBtn.innerHTML = `📝 ${childName}의 오늘 마음 일기 쓰기 (+5💎)`;
+    }
 }
 
 // 2. 음성 인식 (STT) 헬퍼
@@ -98,6 +114,7 @@ function openDailyDiaryModal(initialTab = 'write') {
     const today = new Date();
     const dateFormatted = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
     const todayYMD = today.toISOString().split('T')[0];
+    const todayCount = getTodayDiaryCount(childName);
 
     const modalWrapper = document.createElement('div');
     modalWrapper.id = 'dailyDiaryModalWrapper';
@@ -215,7 +232,7 @@ function openDailyDiaryModal(initialTab = 'write') {
                         <h3 style="font-family: 'Jua', sans-serif; font-size: 1.2rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
                             ${isMinsu ? '민수의 하루 일상 & 마음 로그' : '민서의 마음 날씨 일기장'}
                         </h3>
-                        <span style="font-size: 0.85rem; opacity: 0.8;">📅 ${dateFormatted}</span>
+                        <span style="font-size: 0.85rem; opacity: 0.8;">📅 ${dateFormatted} ${todayCount > 0 ? `(오늘 ${todayCount}편 작성됨)` : ''}</span>
                     </div>
                 </div>
 
@@ -260,6 +277,10 @@ function switchDiaryTab(tab) {
         tabWrite.classList.add('active');
         tabHist.classList.remove('active');
     } else {
+        const currentProfile = localStorage.getItem('currentUser') || 'son';
+        const childName = currentProfile === 'son' ? '민수' : '민서';
+        const isMinsu = (currentProfile === 'son');
+        histSec.innerHTML = renderDiaryHistoryList(childName, isMinsu);
         writeSec.style.display = 'none';
         histSec.style.display = 'flex';
         tabWrite.classList.remove('active');
@@ -273,7 +294,7 @@ function renderMinseoDiaryForm(todayYMD) {
         <!-- 1. 마음 날씨 -->
         <div>
             <div class="diary-sec-title">
-                <span>🌤️ 1. 오늘 나의 마음 날씨는 어떤가요?</span>
+                <span>🌤️ 1. 지금 나의 마음 날씨는 어떤가요?</span>
             </div>
             <div class="weather-grid" id="minseoWeatherGrid">
                 <div class="choice-card selected" onclick="selectChoiceCard(this, 'minseoWeather')" data-val="☀️ 맑음">
@@ -325,7 +346,7 @@ function renderMinseoDiaryForm(todayYMD) {
         <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div class="diary-sec-title" style="margin-bottom:0;">
-                    <span>📝 3. 오늘 어떤 일이 있었나요?</span>
+                    <span>📝 3. 어떤 일이 있었나요?</span>
                 </div>
                 <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minseoEventInput', this)">
                     🎙️ 말로 하기 (음성 입력)
@@ -369,7 +390,7 @@ function renderMinsuDiaryForm(todayYMD) {
         <!-- 1. 오늘의 바이브 / 기분 -->
         <div>
             <div class="diary-sec-title">
-                <span>😎 1. 오늘 나의 기분 & 바이브는?</span>
+                <span>😎 1. 지금 나의 기분 & 바이브는?</span>
             </div>
             <div class="energy-grid" id="minsuEnergyGrid">
                 <div class="choice-card selected" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="😎 꿀잼·대만족">
@@ -404,7 +425,7 @@ function renderMinsuDiaryForm(todayYMD) {
         <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div class="diary-sec-title" style="margin-bottom:0;">
-                    <span>🍕 2. 오늘 기억에 남거나 재밌었던 일 (일상/친구/놀이)</span>
+                    <span>🍕 2. 기억에 남거나 재밌었던 일 (일상/친구/놀이)</span>
                 </div>
                 <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minsuAccomplishInput', this)">
                     🎙️ 말로 하기
@@ -417,7 +438,7 @@ function renderMinsuDiaryForm(todayYMD) {
         <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div class="diary-sec-title" style="margin-bottom:0;">
-                    <span>💬 3. 오늘 나에게 던지는 가벼운 한 줄 톡!</span>
+                    <span>💬 3. 나에게 던지는 가벼운 한 줄 톡!</span>
                 </div>
                 <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minsuGoalInput', this)">
                     🎙️ 말로 하기
@@ -433,7 +454,7 @@ function renderMinsuDiaryForm(todayYMD) {
         </div>
 
         <button class="btn-submit-diary" onclick="submitMinsuDiary('${todayYMD}')">
-            <span>🚀 오늘 하루 기록 끝! (+5💎)</span>
+            <span>🚀 오늘 기록 남기기! (+5💎)</span>
         </button>
     `;
 }
@@ -455,16 +476,20 @@ async function submitMinseoDiary(dateYMD) {
     const weather = weatherCard ? weatherCard.dataset.val : '☀️ 맑음';
 
     const selectedBalloons = Array.from(document.querySelectorAll('#minseoBalloonGrid .balloon-tag.selected')).map(t => t.innerText);
-    const eventText = document.getElementById('minseoEventInput')?.value.trim() || '오늘 하루도 즐겁고 보람차게 보냈어요!';
+    const eventText = document.getElementById('minseoEventInput')?.value.trim() || '즐겁고 보람차게 시간을 보냈어요!';
 
     const sit = document.getElementById('minseoIMessageSit')?.value.trim();
     const feel = document.getElementById('minseoIMessageFeel')?.value.trim();
     const wish = document.getElementById('minseoIMessageWish')?.value.trim();
     const iMessage = (sit || feel || wish) ? `내가 ${sit || '하루를 보냈'}을 때, 내 기분은 ${feel || '뿌듯'}했어. 앞으로는 ${wish || '더 씩씩하게 할 거야'}.` : '';
 
+    const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
     const entry = {
+        id: 'diary_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         childName: '민서',
         date: dateYMD,
+        timeStr: timeStr,
         weather: weather,
         moods: selectedBalloons,
         content: eventText,
@@ -475,17 +500,18 @@ async function submitMinseoDiary(dateYMD) {
     saveDiaryEntry(entry);
     await triggerAwardDispense(5);
 
-    // 노션 학습일지 DB로도 다이어리 기록 전송
+    // 노션 학습일지 DB로도 다이어리 기록 전송 (시간대 포함)
     if (typeof sendStudyLogToNotion === 'function') {
         sendStudyLogToNotion({
             childName: '민서',
-            subject: `마음일기 (${weather})`,
+            subject: `마음일기 (${weather}) [${timeStr}]`,
             errorReport: `[감정: ${selectedBalloons.join(', ')}] ${eventText} ${iMessage ? ' / 나-전달법: ' + iMessage : ''}`
         });
     }
 
+    const todayCount = getTodayDiaryCount('민서');
     // 성공 화면 렌더링
-    showDiarySuccessModal('민서', weather, '참 잘했어요! 1일차 별 도장 획득! 🌟');
+    showDiarySuccessModal('민서', weather, `참 잘했어요! 오늘 ${todayCount}번째 별 도장 획득! 🌟`);
 }
 
 // 6. 민수 일기 제출
@@ -493,12 +519,16 @@ async function submitMinsuDiary(dateYMD) {
     const energyCard = document.querySelector('#minsuEnergyGrid .choice-card.selected');
     const energy = energyCard ? energyCard.dataset.val : '😎 꿀잼·대만족';
 
-    const accomplish = document.getElementById('minsuAccomplishInput')?.value.trim() || '오늘 하루도 재미있게 잘 보냈다.';
+    const accomplish = document.getElementById('minsuAccomplishInput')?.value.trim() || '재미있게 시간을 잘 보냈다.';
     const goal = document.getElementById('minsuGoalInput')?.value.trim() || '오늘 하루도 수고 많았다! 푹 쉬자!';
 
+    const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
     const entry = {
+        id: 'diary_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         childName: '민수',
         date: dateYMD,
+        timeStr: timeStr,
         energy: energy,
         accomplish: accomplish,
         goal: goal,
@@ -508,17 +538,18 @@ async function submitMinsuDiary(dateYMD) {
     saveDiaryEntry(entry);
     await triggerAwardDispense(5);
 
-    // 노션 학습일지 DB로도 다이어리 기록 전송
+    // 노션 학습일지 DB로도 다이어리 기록 전송 (시간대 포함)
     if (typeof sendStudyLogToNotion === 'function') {
         sendStudyLogToNotion({
             childName: '민수',
-            subject: `일상로그 (${energy})`,
-            errorReport: `[오늘 이야기: ${accomplish}] [나에게 한마디: ${goal}]`
+            subject: `일상로그 (${energy}) [${timeStr}]`,
+            errorReport: `[이야기: ${accomplish}] [나에게 한마디: ${goal}]`
         });
     }
 
+    const todayCount = getTodayDiaryCount('민수');
     // 성공 화면 렌더링
-    showDiarySuccessModal('민수', energy, '오늘 하루 기록 완료! 🎮');
+    showDiarySuccessModal('민수', energy, `오늘 ${todayCount}번째 일상 기록 완료! 🎮`);
 }
 
 // 7. 완료 팝업 & 도장 연출
@@ -535,10 +566,10 @@ function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
         <div style="text-align: center; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
             <div style="font-size: 3.5rem;">🎉</div>
             <h2 style="font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #10b981;">
-                ${childName}의 오늘 일기가 멋지게 저장되었어요!
+                ${childName}의 기록이 멋지게 저장되었어요!
             </h2>
             <p style="font-size: 1rem; opacity: 0.85;">
-                오늘 하루를 소중하게 기록한 ${childName}에게 <b>+5 크레딧 보상</b>이 지급되었습니다! 💎
+                소중한 하루를 기록한 ${childName}에게 <b>+5 크레딧 보상</b>이 지급되었습니다! 💎
             </p>
 
             <div style="margin: 20px 0;">
@@ -547,11 +578,14 @@ function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
                 </div>
             </div>
 
-            <div style="display:flex; gap:12px; margin-top:10px;">
-                <button class="diary-tab-btn active" style="padding:10px 24px; font-size:1.05rem;" onclick="switchDiaryTab('history')">
+            <div style="display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; justify-content:center;">
+                <button class="diary-tab-btn" style="padding:10px 20px; font-size:1rem;" onclick="openDailyDiaryModal('write')">
+                    ✏️ 새 일기 또 쓰기
+                </button>
+                <button class="diary-tab-btn active" style="padding:10px 20px; font-size:1rem;" onclick="switchDiaryTab('history')">
                     📚 지난 일기 모아보기
                 </button>
-                <button class="diary-tab-btn" style="padding:10px 24px; font-size:1.05rem;" onclick="closeDailyDiaryModal()">
+                <button class="diary-tab-btn" style="padding:10px 20px; font-size:1rem;" onclick="closeDailyDiaryModal()">
                     🚪 닫기
                 </button>
             </div>
@@ -559,7 +593,7 @@ function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
     `;
 }
 
-// 8. 지난 일기 히스토리 뷰 렌더러
+// 8. 지난 일기 히스토리 뷰 렌더러 (타임라인 시간대 렌더링)
 function renderDiaryHistoryList(childName, isMinsu) {
     const list = getStoredDiaries().filter(item => item.childName === childName);
 
@@ -568,23 +602,24 @@ function renderDiaryHistoryList(childName, isMinsu) {
             <div style="text-align:center; padding:50px 10px; opacity:0.7;">
                 <div style="font-size:3rem; margin-bottom:12px;">📝</div>
                 <p style="font-family:'Jua', sans-serif; font-size:1.2rem;">아직 작성된 일기가 없어요.</p>
-                <p style="font-size:0.9rem;">오늘의 첫 마음 일기를 작성해 볼까요?</p>
+                <p style="font-size:0.9rem;">오늘의 첫 일기를 가볍게 끄적여 볼까요?</p>
             </div>
         `;
     }
 
     return `
         <div style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="font-size: 0.95rem; opacity: 0.8; font-weight: bold;">
-                총 ${list.length}편의 소중한 기록이 보관되어 있어요 📚
+            <div style="font-size: 0.95rem; opacity: 0.8; font-weight: bold; display:flex; justify-content:space-between; align-items:center;">
+                <span>총 ${list.length}편의 기록이 타임라인으로 보관되어 있어요 📚</span>
+                <button class="diary-tab-btn" style="padding:4px 10px; font-size:0.85rem;" onclick="openDailyDiaryModal('write')">➕ 새 일기 쓰기</button>
             </div>
             ${list.map(entry => `
                 <div style="background:${isMinsu ? '#2e2a72' : '#ffffff'}; border:2px solid ${isMinsu ? '#4f46e5' : '#ffd1dc'}; border-radius:18px; padding:16px; box-shadow:0 4px 14px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed ${isMinsu ? '#4338ca' : '#fecdd3'}; padding-bottom:8px;">
-                        <span style="font-family:'Jua', sans-serif; font-size:1.1rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
-                            📅 ${entry.date}
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed ${isMinsu ? '#4338ca' : '#fecdd3'}; padding-bottom:8px; flex-wrap:wrap; gap:6px;">
+                        <span style="font-family:'Jua', sans-serif; font-size:1.05rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
+                            📅 ${entry.date} <span style="font-size:0.85rem; opacity:0.8; font-weight:normal;">(${entry.timeStr || '기록'})</span>
                         </span>
-                        <span style="font-size:1rem; font-weight:bold; background:${isMinsu ? 'rgba(99,102,241,0.2)' : '#ffe4e6'}; padding:4px 10px; border-radius:12px;">
+                        <span style="font-size:0.95rem; font-weight:bold; background:${isMinsu ? 'rgba(99,102,241,0.2)' : '#ffe4e6'}; padding:4px 10px; border-radius:12px;">
                             ${entry.weather || entry.energy || '✨ 맑음'}
                         </span>
                     </div>
@@ -596,8 +631,8 @@ function renderDiaryHistoryList(childName, isMinsu) {
                     ` : ''}
 
                     <div style="font-size:0.95rem; line-height:1.6; margin-top:4px;">
-                        ${entry.content ? `<b>📝 오늘 이야기:</b> ${entry.content}` : ''}
-                        ${entry.accomplish ? `<b>🍕 오늘 기억:</b> ${entry.accomplish}` : ''}
+                        ${entry.content ? `<b>📝 이야기:</b> ${entry.content}` : ''}
+                        ${entry.accomplish ? `<b>🍕 이야기:</b> ${entry.accomplish}` : ''}
                     </div>
 
                     ${entry.iMessage ? `
@@ -627,3 +662,5 @@ window.insertQuickTag = insertQuickTag;
 window.submitMinseoDiary = submitMinseoDiary;
 window.submitMinsuDiary = submitMinsuDiary;
 window.startDiaryVoiceInput = startDiaryVoiceInput;
+window.getTodayDiaryCount = getTodayDiaryCount;
+window.updateLobbyDiaryButton = updateLobbyDiaryButton;

@@ -309,10 +309,8 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     const currentConfig = USER_CONFIGS[userKey];
 
     // 일기장 버튼 상태 실시간 반영
-    const diaryBtn = document.getElementById('lobbyDiaryBtn');
-    if (diaryBtn && typeof hasTodayDiary === 'function') {
-        const hasWritten = hasTodayDiary(currentConfig.name);
-        diaryBtn.innerHTML = hasWritten ? `✅ 오늘 마음 일기 완료 (지난 일기 보기)` : `📝 ${currentConfig.name}의 오늘 마음 일기 쓰기 (+5💎)`;
+    if (typeof updateLobbyDiaryButton === 'function') {
+        updateLobbyDiaryButton(currentConfig.name);
     }
 
     // 테마 실시간 동적 치환 
