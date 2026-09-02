@@ -1,5 +1,5 @@
 // kids/core/daily-diary.js
-// 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 성장기록 맞춤형 통합 엔진)
+// 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 가벼운 일상·기분로그 맞춤형 통합 엔진)
 
 // 1. 일기장 저장 및 조회 헬퍼
 function getStoredDiaries() {
@@ -76,6 +76,13 @@ function resetVoiceBtn(btnElement) {
     btnElement.innerHTML = '🎙️ 말로 하기 (음성 입력)';
     btnElement.style.background = '#e0e7ff';
     btnElement.style.color = '#4338ca';
+}
+
+function insertQuickTag(targetInputId, text) {
+    const target = document.getElementById(targetInputId);
+    if (!target) return;
+    target.value = text;
+    target.focus();
 }
 
 // 3. 일기장 모달 열기
@@ -176,6 +183,12 @@ function openDailyDiaryModal(initialTab = 'write') {
                 border: none; font-family: 'Jua', sans-serif; font-size: 0.88rem; cursor: pointer;
                 background: #e0e7ff; color: #4338ca; transition: all 0.2s;
             }
+            .quick-tag-btn {
+                padding: 4px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+                background: rgba(99,102,241,0.25); color: #cbd5e1; font-size: 0.82rem; cursor: pointer;
+                transition: all 0.2s;
+            }
+            .quick-tag-btn:hover { background: #6366f1; color: #fff; }
             .btn-submit-diary {
                 width: 100%; padding: 14px; border-radius: 20px; border: none; font-family: 'Jua', sans-serif;
                 font-size: 1.25rem; color: #fff; cursor: pointer; transition: all 0.25s;
@@ -197,10 +210,10 @@ function openDailyDiaryModal(initialTab = 'write') {
         <div class="diary-box">
             <div class="diary-header">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 1.6rem;">${isMinsu ? '🚀' : '🐰'}</span>
+                    <span style="font-size: 1.6rem;">${isMinsu ? '🎮' : '🐰'}</span>
                     <div>
                         <h3 style="font-family: 'Jua', sans-serif; font-size: 1.2rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
-                            ${isMinsu ? '민수의 하루 성장 일기' : '민서의 마음 날씨 일기장'}
+                            ${isMinsu ? '민수의 하루 일상 & 마음 로그' : '민서의 마음 날씨 일기장'}
                         </h3>
                         <span style="font-size: 0.85rem; opacity: 0.8;">📅 ${dateFormatted}</span>
                     </div>
@@ -350,66 +363,77 @@ function renderMinseoDiaryForm(todayYMD) {
     `;
 }
 
-// 🚀 민수 (5학년) 일기 폼 렌더러
+// 🎮 민수 (5학년) 가볍고 편안한 일상 & 마음 로그 폼 렌더러
 function renderMinsuDiaryForm(todayYMD) {
     return `
-        <!-- 1. 오늘 컨디션 & 에너지 -->
+        <!-- 1. 오늘의 바이브 / 기분 -->
         <div>
             <div class="diary-sec-title">
-                <span>⚡ 1. 오늘의 몰입 에너지 & 컨디션</span>
+                <span>😎 1. 오늘 나의 기분 & 바이브는?</span>
             </div>
             <div class="energy-grid" id="minsuEnergyGrid">
-                <div class="choice-card selected" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🔥 불꽃 열정">
-                    <div style="font-size: 1.6rem;">🔥</div>
-                    <div style="font-weight:bold; font-size:0.9rem;">불꽃 열정</div>
-                    <div style="font-size:0.75rem; opacity:0.8;">에너지 100%</div>
+                <div class="choice-card selected" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="😎 꿀잼·대만족">
+                    <div style="font-size: 1.6rem;">😎</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">꿀잼·대만족</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">기분 최고!</div>
                 </div>
-                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="⚡ 초집중 몰입">
-                    <div style="font-size: 1.6rem;">⚡</div>
-                    <div style="font-weight:bold; font-size:0.9rem;">초집중 몰입</div>
-                    <div style="font-size:0.75rem; opacity:0.8;">목표 달성</div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🎮 신남·재밌음">
+                    <div style="font-size: 1.6rem;">🎮</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">신남·재밌음</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">취미/친구랑 놂</div>
                 </div>
-                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🌿 편안한 여유">
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🌿 무난·평화">
                     <div style="font-size: 1.6rem;">🌿</div>
-                    <div style="font-weight:bold; font-size:0.9rem;">편안한 여유</div>
-                    <div style="font-size:0.75rem; opacity:0.8;">안정적인 하루</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">무난·평화</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">편안했던 하루</div>
                 </div>
-                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🥱 충전 필요">
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="🥱 피곤·휴식">
                     <div style="font-size: 1.6rem;">🥱</div>
-                    <div style="font-weight:bold; font-size:0.9rem;">충전 필요</div>
-                    <div style="font-size:0.75rem; opacity:0.8;">수고한 하루</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">피곤·휴식</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">뒹굴거리고 싶음</div>
+                </div>
+                <div class="choice-card" onclick="selectChoiceCard(this, 'minsuEnergy')" data-val="😤 조금 킹받음">
+                    <div style="font-size: 1.6rem;">😤</div>
+                    <div style="font-weight:bold; font-size:0.9rem;">조금 킹받음</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">맘대로 안 됨</div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. 오늘 가장 몰입하고 뿌듯했던 일 -->
+        <!-- 2. 오늘 가장 기억에 남거나 재밌었던 일 -->
         <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div class="diary-sec-title" style="margin-bottom:0;">
-                    <span>🎯 2. 오늘 내가 가장 몰입했거나 뿌듯했던 일</span>
+                    <span>🍕 2. 오늘 기억에 남거나 재밌었던 일 (일상/친구/놀이)</span>
                 </div>
                 <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minsuAccomplishInput', this)">
                     🎙️ 말로 하기
                 </button>
             </div>
-            <textarea id="minsuAccomplishInput" class="diary-input" rows="3" placeholder="예: 5학년 분수 나눗셈과 사회 역사를 집중해서 끝냈다! 코딩 퀘스트도 재미있었다."></textarea>
+            <textarea id="minsuAccomplishInput" class="diary-input" rows="3" placeholder="예: 친구들이랑 축구하다가 웃긴 일이 있었음 / 맛있는 떡볶이를 먹음 / 숙제 빨리 끝내고 게임 편하게 함"></textarea>
         </div>
 
-        <!-- 3. 오늘 배운 점 & 내일의 다짐 -->
+        <!-- 3. 오늘 나에게 던지는 가벼운 한 줄 톡 -->
         <div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <div class="diary-sec-title" style="margin-bottom:0;">
-                    <span>💡 3. 오늘 배운 점 & 내일을 위한 나만의 다짐</span>
+                    <span>💬 3. 오늘 나에게 던지는 가벼운 한 줄 톡!</span>
                 </div>
                 <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('minsuGoalInput', this)">
                     🎙️ 말로 하기
                 </button>
             </div>
-            <textarea id="minsuGoalInput" class="diary-input" rows="2" placeholder="예: 어려운 문제도 차근차근 풀면 풀린다는 걸 배웠다. 내일도 일찍 일어나서 계획대로 해보자!"></textarea>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+                <button type="button" class="quick-tag-btn" onclick="insertQuickTag('minsuGoalInput', '오늘 하루도 수고 많았다! 푹 쉬자!')">💬 오늘 하루 수고 많았다!</button>
+                <button type="button" class="quick-tag-btn" onclick="insertQuickTag('minsuGoalInput', '오늘 꽤 알차게 보낸 것 같아 뿌듯함.')">💬 꽤 알차게 보냈음!</button>
+                <button type="button" class="quick-tag-btn" onclick="insertQuickTag('minsuGoalInput', '내일은 더 재밌게 놀고 공부도 끝내야지~')">💬 내일 더 재밌게 놀아야지~</button>
+                <button type="button" class="quick-tag-btn" onclick="insertQuickTag('minsuGoalInput', '맛있는 거 먹고 푹 자면 기분 풀릴 듯!')">💬 푹 자고 충전하자!</button>
+            </div>
+            <textarea id="minsuGoalInput" class="diary-input" rows="2" placeholder="직접 적거나 위의 버튼을 눌러보세요! (예: 오늘도 잘 놀고 공부도 잘 버텼다!)"></textarea>
         </div>
 
         <button class="btn-submit-diary" onclick="submitMinsuDiary('${todayYMD}')">
-            <span>🚀 성장 일기 기록 완료! (+5💎)</span>
+            <span>🚀 오늘 하루 기록 끝! (+5💎)</span>
         </button>
     `;
 }
@@ -467,10 +491,10 @@ async function submitMinseoDiary(dateYMD) {
 // 6. 민수 일기 제출
 async function submitMinsuDiary(dateYMD) {
     const energyCard = document.querySelector('#minsuEnergyGrid .choice-card.selected');
-    const energy = energyCard ? energyCard.dataset.val : '🔥 불꽃 열정';
+    const energy = energyCard ? energyCard.dataset.val : '😎 꿀잼·대만족';
 
-    const accomplish = document.getElementById('minsuAccomplishInput')?.value.trim() || '오늘 계획한 학습과 과제를 성실하게 완료했다.';
-    const goal = document.getElementById('minsuGoalInput')?.value.trim() || '내일도 흔들리지 않고 목표를 향해 달려가자!';
+    const accomplish = document.getElementById('minsuAccomplishInput')?.value.trim() || '오늘 하루도 재미있게 잘 보냈다.';
+    const goal = document.getElementById('minsuGoalInput')?.value.trim() || '오늘 하루도 수고 많았다! 푹 쉬자!';
 
     const entry = {
         childName: '민수',
@@ -488,13 +512,13 @@ async function submitMinsuDiary(dateYMD) {
     if (typeof sendStudyLogToNotion === 'function') {
         sendStudyLogToNotion({
             childName: '민수',
-            subject: `성장일기 (${energy})`,
-            errorReport: `[몰입: ${accomplish}] [다짐: ${goal}]`
+            subject: `일상로그 (${energy})`,
+            errorReport: `[오늘 이야기: ${accomplish}] [나에게 한마디: ${goal}]`
         });
     }
 
     // 성공 화면 렌더링
-    showDiarySuccessModal('민수', energy, '오늘의 성장 일기 기록 완료! 🚀');
+    showDiarySuccessModal('민수', energy, '오늘 하루 기록 완료! 🎮');
 }
 
 // 7. 완료 팝업 & 도장 연출
@@ -573,7 +597,7 @@ function renderDiaryHistoryList(childName, isMinsu) {
 
                     <div style="font-size:0.95rem; line-height:1.6; margin-top:4px;">
                         ${entry.content ? `<b>📝 오늘 이야기:</b> ${entry.content}` : ''}
-                        ${entry.accomplish ? `<b>🎯 오늘의 몰입:</b> ${entry.accomplish}` : ''}
+                        ${entry.accomplish ? `<b>🍕 오늘 기억:</b> ${entry.accomplish}` : ''}
                     </div>
 
                     ${entry.iMessage ? `
@@ -584,7 +608,7 @@ function renderDiaryHistoryList(childName, isMinsu) {
 
                     ${entry.goal ? `
                         <div style="background:rgba(99,102,241,0.15); border-left:3px solid #818cf8; padding:8px 12px; border-radius:0 10px 10px 0; font-size:0.9rem;">
-                            💡 <b>내일의 다짐:</b> ${entry.goal}
+                            💬 <b>나에게 한마디:</b> ${entry.goal}
                         </div>
                     ` : ''}
                 </div>
@@ -599,6 +623,7 @@ window.closeDailyDiaryModal = closeDailyDiaryModal;
 window.switchDiaryTab = switchDiaryTab;
 window.selectChoiceCard = selectChoiceCard;
 window.toggleBalloonTag = toggleBalloonTag;
+window.insertQuickTag = insertQuickTag;
 window.submitMinseoDiary = submitMinseoDiary;
 window.submitMinsuDiary = submitMinsuDiary;
 window.startDiaryVoiceInput = startDiaryVoiceInput;
