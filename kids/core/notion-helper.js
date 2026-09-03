@@ -600,6 +600,42 @@ async function fetchTimetableFromNotion(options = {}) {
 }
 
 /**
+ * 💾 시간표 캐싱 (SWR: Stale-While-Revalidate 초고속 로딩 지원)
+ */
+const TIMETABLE_CACHE_KEY = "MINMIN_TIMETABLE_CACHE_V2";
+
+function loadTimetableFromCache() {
+    try {
+        const str = localStorage.getItem(TIMETABLE_CACHE_KEY);
+        if (!str) return null;
+        return JSON.parse(str);
+    } catch (e) {
+        console.warn("[Timetable Cache] 로드 오류:", e);
+        return null;
+    }
+}
+
+function saveTimetableToCache(data) {
+    try {
+        localStorage.setItem(TIMETABLE_CACHE_KEY, JSON.stringify({
+            staticRows: data.staticRows || [],
+            overlayRows: data.overlayRows || [],
+            allRows: data.allRows || [],
+            cachedAt: Date.now()
+        }));
+    } catch (e) {
+        console.warn("[Timetable Cache] 저장 실패:", e);
+    }
+}
+
+function clearTimetableCache() {
+    try {
+        localStorage.removeItem(TIMETABLE_CACHE_KEY);
+        console.log("⚡ [Timetable Cache] 시간표 캐시가 초기화되었습니다.");
+    } catch (e) {}
+}
+
+/**
  * 🏛️ 고정 시간표 DB + 📢 학사일정 및 알림장 DB를 동시에 듀얼 수집하는 통합 함수
  */
 async function fetchDualTimetableFromNotion() {
@@ -612,13 +648,22 @@ async function fetchDualTimetableFromNotion() {
             fetchTimetableFromNotion({ dbId: overlayDbId, fetchPageContent: true })
         ]);
 
-        return {
+        const result = {
             staticRows: staticRows || [],
             overlayRows: overlayRows || [],
             allRows: [...(staticRows || []), ...(overlayRows || [])]
         };
+
+        saveTimetableToCache(result);
+        return result;
     } catch (e) {
         console.error("[fetchDualTimetableFromNotion] 로딩 실패:", e);
+        // 네트워크 실패 시 캐시 반환
+        const cached = loadTimetableFromCache();
+        if (cached) {
+            console.log("⚡ [Timetable Cache] 네트워크 실패로 캐시 데이터 사용");
+            return cached;
+        }
         const fallback = await fetchTimetableFromNotion();
         return { staticRows: [], overlayRows: fallback, allRows: fallback };
     }
@@ -626,6 +671,9 @@ async function fetchDualTimetableFromNotion() {
 
 window.fetchTimetableFromNotion = fetchTimetableFromNotion;
 window.fetchDualTimetableFromNotion = fetchDualTimetableFromNotion;
+window.loadTimetableFromCache = loadTimetableFromCache;
+window.saveTimetableToCache = saveTimetableToCache;
+window.clearTimetableCache = clearTimetableCache;
 window.parseTimetablePage = parseTimetablePage;
 
 // 🕒 전역 학습 시작 시간 자동 기록
