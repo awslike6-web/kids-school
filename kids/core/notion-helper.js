@@ -607,7 +607,7 @@ async function fetchTimetableFromNotion(options = {}) {
 /**
  * 💾 시간표 캐싱 (SWR: Stale-While-Revalidate 초고속 로딩 지원)
  */
-const TIMETABLE_CACHE_KEY = "MINMIN_TIMETABLE_CACHE_V2";
+const TIMETABLE_CACHE_KEY = "MINMIN_TIMETABLE_CACHE_V3";
 
 function loadTimetableFromCache() {
     try {
