@@ -1155,6 +1155,36 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/** 카드 본문(메모) vs 툴팁(본문 전체) 분리 */
+function getNoticeBodyText(row) {
+  const pageContent = (row.pageContent || row.body || '').trim();
+  const memo = row.memo ? String(row.memo).trim() : '';
+  if (pageContent) {
+    if (memo && pageContent !== memo && !pageContent.includes(memo)) {
+      return `${memo}\n\n${pageContent}`;
+    }
+    return pageContent;
+  }
+  return memo;
+}
+
+function shouldShowNoticeTooltip(row, bodyText) {
+  if (!bodyText) return false;
+  const memo = row.memo ? String(row.memo).trim() : '';
+  const pageContent = (row.pageContent || row.body || '').trim();
+  if (pageContent && pageContent !== memo) return true;
+  if (!memo && pageContent) return true;
+  return memo.length > 100;
+}
+
+function renderNoticeTooltipHtml(label, bodyText) {
+  return `
+    <div class="notice-tooltip" role="tooltip">
+      <div style="font-weight: bold; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 4px;">${label}</div>
+      <div>${escapeHtml(bodyText)}</div>
+    </div>`;
+}
+
 /** 날짜에서 요일명 추출 헬퍼 */
 function getRowDayOfWeek(row) {
   if (row.targetDate) {
