@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎯 5학년 수의 범위와 어림하기 탐험대 (이상·이하·초과·미만 & 반올림 마법) 🚀</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    /* 5-2 1단원: 수의 범위와 어림하기 커스텀 스타일 */
+    .numberline-box {
+      background: #ffffff;
+      border: 3px solid #0284c7;
+      border-radius: 24px;
+      padding: 20px 14px;
+      margin: 15px auto;
+      max-width: 720px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.15);
+      text-align: center;
+    }
+    body.theme--arcade .numberline-box {
+      background: #1e1e38;
+      border-color: #00d4ff;
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+    }
+    .numberline-svg-wrap {
+      width: 100%;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+    .numberline-svg-wrap svg {
+      width: 100%;
+      min-width: 520px;
+      height: 140px;
+    }
+
+    .range-preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .range-preset-btn {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      color: #1e293b;
+    }
+    body.theme--arcade .range-preset-btn {
+      background: #252542;
+      border-color: #3a3a5a;
+      color: #f5f5f5;
+    }
+    .range-preset-btn:hover, .range-preset-btn.active {
+      transform: translateY(-3px);
+      border-color: #0284c7;
+      background: #f0f9ff;
+      color: #0369a1;
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
+    }
+    body.theme--arcade .range-preset-btn:hover,
+    body.theme--arcade .range-preset-btn.active {
+      background: #1a2744;
+      color: #00d4ff;
+      border-color: #00d4ff;
+    }
+
+    .range-explanation-banner {
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      border: 2px solid #38bdf8;
+      border-radius: 18px;
+      padding: 14px 20px;
+      margin-top: 15px;
+      text-align: left;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #0f172a;
+    }
+    body.theme--arcade .range-explanation-banner {
+      background: linear-gradient(135deg, #13271f 0%, #102a45 100%);
+      border-color: #00d4ff;
+      color: #e2e8f0;
+    }
+
+    .test-drop-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 15px 0 5px;
+    }
+    .test-num-card {
+      background: #f1f5f9;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #334155;
+    }
+    body.theme--arcade .test-num-card {
+      background: #2a2a48;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    .test-num-card:hover {
+      transform: scale(1.1);
+      border-color: #f59e0b;
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    /* 2. 미끄럼틀 언덕 반올림 시뮬레이터 */
+    .hill-simulator-box {
+      background: #ffffff;
+      border: 3px solid #ec4899;
+      border-radius: 24px;
+      padding: 22px 14px;
+      margin: 15px auto;
+      max-width: 720px;
+      box-shadow: 0 8px 24px rgba(236, 72, 153, 0.15);
+      text-align: center;
+    }
+    body.theme--arcade .hill-simulator-box {
+      background: #1e1e38;
+      border-color: #ff6b9d;
+      box-shadow: 0 8px 24px rgba(255, 107, 157, 0.2);
+    }
+    .hill-svg-wrap {
+      width: 100%;
+      height: 180px;
+      position: relative;
+    }
+    .hill-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .digits-select-bar {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .digit-ball-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      color: #1e293b;
+    }
+    body.theme--arcade .digit-ball-btn {
+      background: #2b2b4d;
+      border-color: #475569;
+      color: #f8fafc;
+    }
+    .digit-ball-btn.down-digit {
+      border-color: #3b82f6;
+      color: #2563eb;
+    }
+    .digit-ball-btn.up-digit {
+      border-color: #ef4444;
+      color: #dc2626;
+    }
+    .digit-ball-btn:hover, .digit-ball-btn.active {
+      transform: scale(1.18);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    .digit-ball-btn.down-digit.active {
+      background: #3b82f6;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+    .digit-ball-btn.up-digit.active {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+
+    .magnifier-lens-box {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 20px;
+      padding: 16px;
+      margin: 15px 0;
+      text-align: center;
+    }
+    body.theme--arcade .magnifier-lens-box {
+      background: linear-gradient(135deg, #2a2215 0%, #3d2f16 100%);
+      border-color: #ffd93d;
+      color: #fef08a;
+    }
+
+    /* 3. 실생활 롤플레잉 공작소 */
+    .roleplay-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 15px 0;
+    }
+    .roleplay-card {
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    body.theme--arcade .roleplay-card {
+      background: #20203a;
+      border-color: #3e3e60;
+      color: #f1f5f9;
+    }
+    .roleplay-input {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #94a3b8;
+      text-align: center;
+      width: 120px;
+      margin: 8px auto;
+      outline: none;
+    }
+    body.theme--arcade .roleplay-input {
+      background: #121224;
+      border-color: #555577;
+      color: #ffd93d;
+    }
+    .roleplay-result-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      line-height: 1.5;
+    }
+    body.theme--arcade .roleplay-result-box {
+      background: #19192f;
+      border-color: #475569;
+    }
+
+    /* 4. 코코 탐정 퀴즈 */
+    .quiz-card-box {
+      max-width: 580px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      border: 3px solid #8b5cf6;
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+    }
+    body.theme--arcade .quiz-card-box {
+      background: #1e1e38;
+      border-color: #c77dff;
+      box-shadow: 0 8px 25px rgba(199, 125, 255, 0.2);
+    }
+
+    /* 5. 교과서 원본 e-Book 모달 */
+    .textbook-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .textbook-modal-backdrop.active {
+      display: flex;
+    }
+    .textbook-modal-content {
+      background: #1e1e32;
+      border: 3px solid #38bdf8;
+      border-radius: 24px;
+      max-width: 860px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .textbook-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: #121224;
+      border-bottom: 2px solid #3a3a5a;
+    }
+    .textbook-modal-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background: #0f172a;
+    }
+    .textbook-img-frame {
+      max-width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    .textbook-modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #121224;
+      border-top: 2px solid #3a3a5a;
+    }
+
+    @media (max-width: 600px) {
+      .hero-title { font-size: 1.7rem; }
+      .section-title { font-size: 1.35rem; }
+      .range-preset-grid { grid-template-columns: 1fr 1fr; }
+      .numberline-box, .hill-simulator-box { padding: 14px 8px; }
+      .roleplay-card-grid { grid-template-columns: 1fr; }
+      .textbook-modal-content { max-height: 95vh; }
+      .textbook-img-frame { max-height: 50vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 프로필 & 네비게이션 -->
+  <div class="top-bar">
+    <div class="profile-badge">
+      <span id="userIcon">👨‍🚀</span> <span id="userName">민수 대원</span>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <button class="exit-btn" onclick="openTextbookModal()" style="background: rgba(56, 189, 248, 0.25); border-color: #38bdf8; color: var(--text-main);">📖 교과서 원본 보기</button>
+      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: var(--text-main);">🔊 요정 음성 ON</button>
+      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험관으로</button>
+    </div>
+  </div>
+
+  <div class="math-room-container">
+
+    <!-- 히어로 헤더 -->
+    <header class="math-header-hero">
+      <div class="hero-title">🎯 5학년: 수의 범위와 어림하기 🚀</div>
+      <div class="hero-subtitle">이상·이하·초과·미만의 비밀 수직선과 올림·버림·반올림 실생활 완벽 마스터!</div>
+    </header>
+
+    <!-- ======================================================== -->
+    <!-- 1. 📏 섹션 1: 수의 범위 수직선 공작소                       -->
+    <!-- ======================================================== -->
+    <section class="math-section-card" id="section-range">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-grid">섹션 1 : 수의 범위 4형제</span>
+          <h2 class="section-title">📏 수직선 경계값 공작소 (이상 · 이하 · 초과 · 미만)</h2>
+          <p class="section-desc">나(경계값)를 파티에 초대하는지(●), 아니면 쏙 빠지는지(○) 수직선으로 직접 확인해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('이상과 이하는 채운 점으로 나를 포함하고, 초과와 미만은 뚫린 점으로 나는 쏙 빠집니다!')">🔊</button>
+      </div>
+
+      <!-- 교과서 프리셋 버튼 -->
+      <div class="range-preset-grid" id="rangePresets">
+        <button class="range-preset-btn active" onclick="selectRangePreset('iseong')">🏃 20세 이상<br><small style="color:#0284c7;">20 포함 (● 채운 점)</small></button>
+        <button class="range-preset-btn" onclick="selectRangePreset('iha')">🧳 10kg 이하<br><small style="color:#0284c7;">10 포함 (● 채운 점)</small></button>
+        <button class="range-preset-btn" onclick="selectRangePreset('chogwa')">🛷 38kg 초과<br><small style="color:#e11d48;">38 제외 (○ 뚫린 점)</small></button>
+        <button class="range-preset-btn" onclick="selectRangePreset('miman')">❄️ 30℃ 미만<br><small style="color:#e11d48;">30 제외 (○ 뚫린 점)</small></button>
+        <button class="range-preset-btn" onclick="selectRangePreset('combine1')">👕 125 이상 135 미만<br><small style="color:#8b5cf6;">[125● ~ 135○)</small></button>
+        <button class="range-preset-btn" onclick="selectRangePreset('combine2')">🏋️ 60 초과 70 이하<br><small style="color:#10b981;">(60○ ~ 70●]</small></button>
+      </div>
+
+      <!-- 인터랙티브 수직선 렌더링 박스 -->
+      <div class="numberline-box">
+        <div style="font-family:'Jua'; font-size:1.4rem; margin-bottom:8px;" id="rangeDisplayTitle">
+          🏃 <span style="color:#0284c7;">20 이상인 수</span> (20과 같거나 큰 수)
+        </div>
+
+        <div class="numberline-svg-wrap">
+          <svg id="numberLineSvg" viewBox="0 0 600 120"></svg>
+        </div>
+
+        <!-- 설명 배너 -->
+        <div class="range-explanation-banner" id="rangeExplainText">
+          💡 <strong>핵심 공식:</strong> <strong>20 이상</strong>은 <strong>20을 포함</strong>하며 20보다 큰 모든 수입니다.<br>
+          수직선에서 20 위치에 <strong style="color:#0284c7;">● (속이 찬 동그라미)</strong>를 그리고 오른쪽으로 선을 긋습니다.
+        </div>
+
+        <!-- 숫자 카드 테스트기 -->
+        <div style="margin-top:16px;">
+          <div style="font-family:'Jua'; font-size:1.1rem; color:var(--text-main);">👇 숫자를 톡 눌러서 범위에 들어가는지 검사해보세요!</div>
+          <div class="test-drop-row" id="testNumberButtons"></div>
+          <div id="testResultFeedback" style="font-family:'Jua'; font-size:1.2rem; min-height:28px; margin-top:6px;"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- 2. 🛝 섹션 2: 미끄럼틀 언덕 반올림 시뮬레이터                -->
+    <!-- ======================================================== -->
+    <section class="math-section-card" id="section-rounding">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 2 : 어림하기 원리</span>
+          <h2 class="section-title">🛝 미끄럼틀 언덕 반올림 시뮬레이터</h2>
+          <p class="section-desc">언덕 꼭대기 5를 기준으로, 0~4는 왼쪽으로 미끄러져 버림! 5~9는 오른쪽 마을로 쓩 올림!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('반올림은 구하려는 자리 바로 아랫자리가 0부터 4이면 버리고, 5부터 9이면 올립니다!')">🔊</button>
+      </div>
+
+      <!-- 자릿수 돋보기 선택기 -->
+      <div class="target-selector-row" style="justify-content: center;">
+        <span class="selector-label">🔍 어디까지 반올림할까요?</span>
+        <button class="candy-num-btn active" onclick="setRoundingScope('tens', this)">십의 자리까지 (일의 자리 관찰)</button>
+        <button class="candy-num-btn" onclick="setRoundingScope('hundreds', this)">백의 자리까지 (십의 자리 관찰)</button>
+        <button class="candy-num-btn" onclick="setRoundingScope('thousands', this)">천의 자리까지 (백의 자리 관찰)</button>
+        <button class="candy-num-btn" onclick="setRoundingScope('decimal1', this)">소수 첫째 자리까지 (소수 둘째 관찰)</button>
+      </div>
+
+      <div class="hill-simulator-box">
+        <!-- 돋보기 설명 창 -->
+        <div class="magnifier-lens-box" id="magnifierInfo">
+          <div style="font-family:'Jua'; font-size:1.35rem; color:#b45309;" id="magnifierTitle">
+            🔍 예시 수: <strong>22<span style="color:#ef4444; text-decoration:underline;">8</span></strong> (관찰할 일의 자리 숫자: <strong>8</strong>)
+          </div>
+          <div style="font-size:1rem; margin-top:4px;" id="magnifierSub">
+            구하려는 자리가 <strong>십의 자리</strong>이므로, 바로 아래 <strong>일의 자리 숫자</strong>를 보고 판단해요!
+          </div>
+        </div>
+
+        <!-- 언덕 SVG 시각화 -->
+        <div class="hill-svg-wrap">
+          <svg viewBox="0 0 600 160" id="hillSvg">
+            <!-- 언덕 곡선 -->
+            <path d="M 50 140 Q 300 20 550 140" fill="none" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 50 140 Q 180 50 300 35" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round"/>
+            <path d="M 300 35 Q 420 50 550 140" fill="none" stroke="#ef4444" stroke-width="8" stroke-linecap="round"/>
+            
+            <!-- 왼쪽 버림 마을 -->
+            <rect x="20" y="100" width="80" height="50" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+            <text x="60" y="130" text-anchor="middle" font-family="Jua" font-size="16" fill="#1d4ed8">0 (버림 ⬇️)</text>
+
+            <!-- 꼭대기 5 깃발 -->
+            <circle cx="300" cy="35" r="14" fill="#f59e0b"/>
+            <text x="300" y="40" text-anchor="middle" font-family="Jua" font-size="14" fill="#ffffff" font-weight="bold">5</text>
+            <text x="300" y="15" text-anchor="middle" font-family="Jua" font-size="13" fill="#b45309">분수령 (기준)</text>
+
+            <!-- 오른쪽 올림 마을 -->
+            <rect x="500" y="100" width="80" height="50" rx="12" fill="#fef2f2" stroke="#ef4444" stroke-width="2"/>
+            <text x="540" y="130" text-anchor="middle" font-family="Jua" font-size="16" fill="#b91c1c">+1 (올림 ⬆️)</text>
+
+            <!-- 움직이는 구슬 -->
+            <g id="rollingBallGroup" transform="translate(300, 35)">
+              <circle cx="0" cy="0" r="16" fill="#10b981" stroke="#ffffff" stroke-width="3" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.3))"/>
+              <text id="ballDigitText" x="0" y="6" text-anchor="middle" font-family="Jua" font-size="16" fill="#ffffff">8</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 0~9 숫자 구슬 버튼들 -->
+        <div style="font-family:'Jua'; font-size:1.1rem; margin-top:10px;">👇 아랫자리 숫자를 직접 골라 구슬을 굴려보세요!</div>
+        <div class="digits-select-bar">
+          <button class="digit-ball-btn down-digit" onclick="rollDigit(0, this)">0</button>
+          <button class="digit-ball-btn down-digit" onclick="rollDigit(1, this)">1</button>
+          <button class="digit-ball-btn down-digit" onclick="rollDigit(2, this)">2</button>
+          <button class="digit-ball-btn down-digit" onclick="rollDigit(3, this)">3</button>
+          <button class="digit-ball-btn down-digit" onclick="rollDigit(4, this)">4</button>
+          <button class="digit-ball-btn up-digit" onclick="rollDigit(5, this)">5</button>
+          <button class="digit-ball-btn up-digit" onclick="rollDigit(6, this)">6</button>
+          <button class="digit-ball-btn up-digit" onclick="rollDigit(7, this)">7</button>
+          <button class="digit-ball-btn up-digit active" onclick="rollDigit(8, this)">8</button>
+          <button class="digit-ball-btn up-digit" onclick="rollDigit(9, this)">9</button>
+        </div>
+
+        <!-- 반올림 판정 결과 -->
+        <div id="roundingVerdictBox" style="font-family:'Jua'; font-size:1.35rem; color:#dc2626; margin-top:10px;">
+          🎉 숫자 8은 5 이상이므로 <strong>올림(+1)</strong>! ➔ <strong>228 ➔ 약 230</strong>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- 3. 📦 섹션 3: 실생활 롤플레잉 공작소                        -->
+    <!-- ======================================================== -->
+    <section class="math-section-card" id="section-roleplay">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-match">섹션 3 : 실생활 3총사</span>
+          <h2 class="section-title">📦 올림·버림·반올림 실생활 롤플레잉 공작소</h2>
+          <p class="section-desc">배지 포장, 지폐 환전, 야구장 관중 수 등 실생활에서 언제 올림/버림/반올림을 쓰는지 체험해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('남는 물건을 다 담아야 할 때는 올림, 지폐로 바꿀 수 없는 동전은 버림을 사용합니다!')">🔊</button>
+      </div>
+
+      <div class="roleplay-card-grid">
+        
+        <!-- 1. 올림 롤플레잉 (기념 배지 상자) -->
+        <div class="roleplay-card" style="border-color:#f59e0b;">
+          <div>
+            <div style="font-size:2.4rem;">🏅</div>
+            <h3 style="font-family:'Jua'; font-size:1.3rem; color:#b45309; margin:6px 0;">1. 올림 (배지 상자 포장)</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted);">배지를 남김없이 상자에 전부 담으려면?</p>
+            
+            <div style="margin:12px 0;">
+              <label style="font-size:0.95rem; font-weight:bold;">배지 총 개수:</label><br>
+              <input type="number" id="badgeTotalInput" class="roleplay-input" value="352" min="1" max="9999" onchange="calcBadgePacking()"> 개
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:6px;">
+              <button class="candy-num-btn active" id="btnPack10" onclick="setPackBoxSize(10)">10개입 상자</button>
+              <button class="candy-num-btn" id="btnPack100" onclick="setPackBoxSize(100)">100개입 상자</button>
+            </div>
+          </div>
+
+          <div class="roleplay-result-box" id="badgePackResult" style="color:#b45309;">
+            📦 <strong>36상자 필요! (올림)</strong><br>
+            <span style="font-size:0.9rem; color:#475569;">(35상자 꽉 참 + 2개 담을 1상자 추가!)</span>
+          </div>
+        </div>
+
+        <!-- 2. 버림 롤플레잉 (동전 지폐 환전) -->
+        <div class="roleplay-card" style="border-color:#10b981;">
+          <div>
+            <div style="font-size:2.4rem;">💰</div>
+            <h3 style="font-family:'Jua'; font-size:1.3rem; color:#047857; margin:6px 0;">2. 버림 (알뜰 은행 환전소)</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted);">모은 동전을 1,000원 지폐로 바꿀 때</p>
+
+            <div style="margin:12px 0;">
+              <label style="font-size:0.95rem; font-weight:bold;">저금통 동전 금액:</label><br>
+              <input type="number" id="coinTotalInput" class="roleplay-input" value="18450" step="10" min="10" max="999999" onchange="calcCoinExchange()"> 원
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:6px;">
+              <button class="candy-num-btn active" id="btnBill1000" onclick="setExchangeUnit(1000)">1,000원 지폐</button>
+              <button class="candy-num-btn" id="btnBill10000" onclick="setExchangeUnit(10000)">10,000원 지폐</button>
+            </div>
+          </div>
+
+          <div class="roleplay-result-box" id="coinExchangeResult" style="color:#047857;">
+            💵 <strong>18,000원 (18장) 교환! (버림)</strong><br>
+            <span style="font-size:0.9rem; color:#475569;">(바꿀 수 없는 450원은 그대로 남김!)</span>
+          </div>
+        </div>
+
+        <!-- 3. 반올림 롤플레잉 (스타디움 관중 통계) -->
+        <div class="roleplay-card" style="border-color:#8b5cf6;">
+          <div>
+            <div style="font-size:2.4rem;">🏟️</div>
+            <h3 style="font-family:'Jua'; font-size:1.3rem; color:#6d28d9; margin:6px 0;">3. 반올림 (관중 수 신문 기사)</h3>
+            <p style="font-size:0.9rem; color:var(--text-muted);">입장객 수를 뉴스에 알기 쉽게 어림하기</p>
+
+            <div style="margin:12px 0;">
+              <label style="font-size:0.95rem; font-weight:bold;">실제 관중 수:</label><br>
+              <input type="number" id="stadiumAudienceInput" class="roleplay-input" value="24682" min="100" max="999999" onchange="calcStadiumAudience()"> 명
+            </div>
+
+            <div style="display:flex; justify-content:center; gap:6px;">
+              <button class="candy-num-btn active" id="btnAudience1000" onclick="setAudiencePlace(1000)">천의 자리까지</button>
+              <button class="candy-num-btn" id="btnAudience100" onclick="setAudiencePlace(100)">백의 자리까지</button>
+            </div>
+          </div>
+
+          <div class="roleplay-result-box" id="stadiumResult" style="color:#6d28d9;">
+            📰 <strong>"오늘 약 25,000명 입장!"</strong><br>
+            <span style="font-size:0.9rem; color:#475569;">(백의 자리 6 ≥ 5 이므로 올림 처리!)</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ======================================================== -->
+    <!-- 4. 🎯 섹션 4: AI 코코 탐정의 단서 추리 퀴즈                 -->
+    <!-- ======================================================== -->
+    <section class="math-section-card" id="section-quiz">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy" style="background:#8b5cf6; color:#fff;">섹션 4 : 실전 개념 퀴즈</span>
+          <h2 class="section-title">🎯 AI 코코 탐정의 단서 추리 퀴즈 배틀</h2>
+          <p class="section-desc">교과서 핵심 문제와 역발상 수의 범위 추리 퀴즈를 풀고 다이아몬드 보상을 획득해요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('문제를 꼼꼼히 읽고 알맞은 답을 골라보세요!')">🔊</button>
+      </div>
+
+      <div class="quiz-card-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-family:'Jua'; font-size:1.1rem; color:#8b5cf6;" id="quizProgressText">문제 1 / 10</span>
+          <span style="font-size:1.4rem;">💎</span>
+        </div>
+
+        <div style="font-family:'Jua'; font-size:1.6rem; color:var(--text-main); margin-bottom:20px; line-height:1.4;" id="quizQuestion">
+          20 이상인 수에는 20이 포함될까요?
+        </div>
+
+        <div id="quizChoices" style="display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:18px;"></div>
+
+        <div id="quizFeedback" style="font-family:'Jua'; font-size:1.25rem; min-height:36px; line-height:1.4;"></div>
+
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:12px; font-size:1.2rem;" onclick="nextQuizQuestion()">다음 문제로 ➡️</button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 교과서 원본 보기 모달 -->
+  <div class="textbook-modal-backdrop" id="textbookModal">
+    <div class="textbook-modal-content">
+      <div class="textbook-modal-header">
+        <div style="font-family:'Jua'; font-size:1.3rem; color:#38bdf8; display:flex; align-items:center; gap:8px;">
+          📖 5-2 수학 1단원 교과서 원본 (<span id="modalPageTitle">1. 단원 도입</span>)
+        </div>
+        <button class="exit-btn" onclick="closeTextbookModal()" style="padding:4px 12px; font-size:0.95rem;">✖ 닫기</button>
+      </div>
+      <div class="textbook-modal-body">
+        <img id="textbookModalImg" class="textbook-img-frame" src="images/minsu/5-2/1/1000032806.jpg" alt="교과서 원본">
+      </div>
+      <div class="textbook-modal-footer">
+        <button class="candy-num-btn" id="btnPrevPage" onclick="changeTextbookPage(-1)">◀ 이전 쪽</button>
+        <span style="font-family:'Jua'; font-size:1.15rem; color:#38bdf8;" id="modalPageCounter">1 / 13</span>
+        <button class="candy-num-btn" id="btnNextPage" onclick="changeTextbookPage(1)">다음 쪽 ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 코어 스크립트 로드 -->
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/fairy-chatbot.js"></script>
+
+  <script>
+    /* ========================================================
+       0. 교과서 원본 e-Book 뷰어 로직
+       ======================================================== */
+    const TEXTBOOK_PAGES = [
+      { file: '1000032806.jpg', title: '1단원 시작 (올림픽 자원봉사자)' },
+      { file: '1000032807.jpg', title: 'p.10~11 이상과 이하 (● 채운 점)' },
+      { file: '1000032808.jpg', title: 'p.12~13 초과와 미만 (○ 뚫린 점)' },
+      { file: '1000032809.jpg', title: 'p.14~15 수의 범위 활용 (체급 & 티셔츠)' },
+      { file: '1000032810.jpg', title: 'p.16~17 올림 (배지 포장 & 최소 지불)' },
+      { file: '1000032811.jpg', title: 'p.18~19 버림 (동전 지폐 환전)' },
+      { file: '1000032812.jpg', title: 'p.20~21 반올림 (관중 수 어림하기)' },
+      { file: '1000032813.jpg', title: 'p.22~23 올림·버림·반올림 실생활 활용' },
+      { file: '1000032814.jpg', title: 'p.24~25 탐구 수학 (환경과 현명한 선택)' },
+      { file: '1000032815.jpg', title: 'p.26 얼마나 알고 있나요 ①' },
+      { file: '1000032816.jpg', title: 'p.27 얼마나 알고 있나요 ②' },
+      { file: '1000032817.jpg', title: 'p.28 얼마나 알고 있나요 ③' },
+      { file: '1000032818.jpg', title: 'p.29 단원 마무리 & 수학 놀이터' }
+    ];
+    let currentTbIdx = 0;
+
+    function openTextbookModal() {
+      document.getElementById('textbookModal').classList.add('active');
+      renderTextbookPage();
+    }
+    function closeTextbookModal() {
+      document.getElementById('textbookModal').classList.remove('active');
+    }
+    function changeTextbookPage(delta) {
+      currentTbIdx += delta;
+      if (currentTbIdx < 0) currentTbIdx = 0;
+      if (currentTbIdx >= TEXTBOOK_PAGES.length) currentTbIdx = TEXTBOOK_PAGES.length - 1;
+      renderTextbookPage();
+    }
+    function renderTextbookPage() {
+      const p = TEXTBOOK_PAGES[currentTbIdx];
+      document.getElementById('textbookModalImg').src = `images/minsu/5-2/1/${p.file}`;
+      document.getElementById('modalPageTitle').textContent = p.title;
+      document.getElementById('modalPageCounter').textContent = `${currentTbIdx + 1} / ${TEXTBOOK_PAGES.length}`;
+      document.getElementById('btnPrevPage').disabled = currentTbIdx === 0;
+      document.getElementById('btnNextPage').disabled = currentTbIdx === TEXTBOOK_PAGES.length - 1;
+    }
+
+    /* ========================================================
+       1. 수직선 공작소 로직
+       ======================================================== */
+    const RANGE_PRESETS = {
+      iseong: {
+        title: '🏃 20세 이상인 수 (올림픽 자원봉사자 모집)',
+        minVal: 20, maxVal: null,
+        minType: 'closed',
+        scaleMin: 15, scaleMax: 25,
+        explain: '💡 <strong>20 이상</strong>은 <strong>20을 포함</strong>하며 20과 같거나 큰 모든 수입니다.<br>수직선 20 위치에 <strong style="color:#0284c7;">● (채운 점)</strong>을 찍고 오른쪽으로 쭉 화살표를 긋습니다.',
+        testCards: [18, 19, 20, 21, 24],
+        voice: '20 이상은 20을 포함하며 20과 같거나 큰 수입니다. 20에 채운 동그라미를 그립니다!'
+      },
+      iha: {
+        title: '🧳 10kg 이하인 수 (비행기 기내 수하물 규정)',
+        minVal: null, maxVal: 10,
+        maxType: 'closed',
+        scaleMin: 5, scaleMax: 15,
+        explain: '💡 <strong>10 이하</strong>는 <strong>10을 포함</strong>하며 10과 같거나 작은 모든 수입니다.<br>수직선 10 위치에 <strong style="color:#0284c7;">● (채운 점)</strong>을 찍고 왼쪽으로 쭉 화살표를 긋습니다.',
+        testCards: [8, 9, 10, 11, 13],
+        voice: '10 이하는 10을 포함하며 10과 같거나 작은 수입니다. 10에 채운 점을 그립니다!'
+      },
+      chogwa: {
+        title: '🛷 38kg 초과인 수 (봅슬레이 경기 썰매 무게)',
+        minVal: 38, maxVal: null,
+        minType: 'open',
+        scaleMin: 34, scaleMax: 44,
+        explain: '💡 <strong>38 초과</strong>는 <strong>38은 쏙 빠지고</strong> 38보다 큰 모든 수입니다.<br>수직선 38 위치에 <strong style="color:#e11d48;">○ (속이 빈 동그라미)</strong>를 찍고 오른쪽으로 화살표를 긋습니다.',
+        testCards: [36, 37, 38, 39, 41],
+        voice: '38 초과는 38은 빠지고 38보다 큰 수입니다. 38에 속이 빈 동그라미를 그립니다!'
+      },
+      miman: {
+        title: '❄️ 30℃ 미만인 수 (시원한 권장 기온)',
+        minVal: null, maxVal: 30,
+        maxType: 'open',
+        scaleMin: 25, scaleMax: 35,
+        explain: '💡 <strong>30 미만</strong>은 <strong>30은 쏙 빠지고</strong> 30보다 작은 모든 수입니다.<br>수직선 30 위치에 <strong style="color:#e11d48;">○ (속이 빈 동그라미)</strong>를 찍고 왼쪽으로 화살표를 긋습니다.',
+        testCards: [27, 29, 30, 31, 33],
+        voice: '30 미만은 30은 빠지고 30보다 작은 수입니다. 30에 속이 빈 동그라미를 그립니다!'
+      },
+      combine1: {
+        title: '👕 125 이상 135 미만 (민수의 티셔츠 권장 치수)',
+        minVal: 125, maxVal: 135,
+        minType: 'closed', maxType: 'open',
+        scaleMin: 120, scaleMax: 140,
+        explain: '💡 <strong>125 이상 135 미만</strong>: 125는 포함되므로 <strong style="color:#0284c7;">● (채운 점)</strong>, 135는 제외되므로 <strong style="color:#e11d48;">○ (빈 점)</strong>으로 표시하고 두 점 사이를 색칠합니다!',
+        testCards: [124, 125, 130, 134, 135, 136],
+        voice: '125 이상 135 미만은 125에는 채운 점, 135에는 빈 점을 그리고 사이를 연결합니다!'
+      },
+      combine2: {
+        title: '🏋️ 60 초과 70 이하 (역도 체급 경기 범위)',
+        minVal: 60, maxVal: 70,
+        minType: 'open', maxType: 'closed',
+        scaleMin: 55, scaleMax: 75,
+        explain: '💡 <strong>60 초과 70 이하</strong>: 60은 제외되므로 <strong style="color:#e11d48;">○ (빈 점)</strong>, 70은 포함되므로 <strong style="color:#0284c7;">● (채운 점)</strong>으로 표시하고 두 점 사이를 색칠합니다!',
+        testCards: [58, 60, 65, 70, 71],
+        voice: '60 초과 70 이하는 60에는 빈 점, 70에는 채운 점을 그리고 사이를 연결합니다!'
+      }
+    };
+
+    let currentRangeKey = 'iseong';
+
+    function selectRangePreset(key) {
+      currentRangeKey = key;
+      document.querySelectorAll('#rangePresets .range-preset-btn').forEach(b => b.classList.remove('active'));
+      const found = document.querySelector(`#rangePresets button[onclick*="'${key}'"]`);
+      if (found) found.classList.add('active');
+
+      const data = RANGE_PRESETS[key];
+      document.getElementById('rangeDisplayTitle').innerHTML = data.title;
+      document.getElementById('rangeExplainText').innerHTML = data.explain;
+      document.getElementById('testResultFeedback').innerHTML = '';
+
+      renderNumberLineSvg(data);
+      renderTestCards(data);
+
+      if (typeof fairySpeak === 'function') {
+        fairySpeak(data.voice);
+      }
+    }
+
+    function renderNumberLineSvg(data) {
+      const svg = document.getElementById('numberLineSvg');
+      const sMin = data.scaleMin;
+      const sMax = data.scaleMax;
+      const width = 600;
+      const leftPad = 50;
+      const rightPad = 550;
+      const usableW = rightPad - leftPad;
+      const yLine = 60;
+
+      const valToX = (v) => leftPad + ((v - sMin) / (sMax - sMin)) * usableW;
+
+      let svgHtml = `
+        <line x1="${leftPad - 20}" y1="${yLine}" x2="${rightPad + 20}" y2="${yLine}" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+        <polygon points="${leftPad - 25},${yLine} ${leftPad - 15},${yLine - 6} ${leftPad - 15},${yLine + 6}" fill="#64748b"/>
+        <polygon points="${rightPad + 25},${yLine} ${rightPad + 15},${yLine - 6} ${rightPad + 15},${yLine + 6}" fill="#64748b"/>
+      `;
+
+      for (let v = sMin; v <= sMax; v++) {
+        const x = valToX(v);
+        svgHtml += `
+          <line x1="${x}" y1="${yLine - 8}" x2="${x}" y2="${yLine + 8}" stroke="#94a3b8" stroke-width="2"/>
+          <text x="${x}" y="${yLine + 26}" text-anchor="middle" font-family="Jua" font-size="14" fill="#64748b">${v}</text>
+        `;
+      }
+
+      if (data.minVal !== null && data.maxVal !== null) {
+        const x1 = valToX(data.minVal);
+        const x2 = valToX(data.maxVal);
+        svgHtml += `<line x1="${x1}" y1="${yLine}" x2="${x2}" y2="${yLine}" stroke="#0284c7" stroke-width="8" opacity="0.8"/>`;
+      } else if (data.minVal !== null) {
+        const x1 = valToX(data.minVal);
+        svgHtml += `
+          <line x1="${x1}" y1="${yLine}" x2="${rightPad + 15}" y2="${yLine}" stroke="#0284c7" stroke-width="8" opacity="0.8"/>
+          <polygon points="${rightPad + 22},${yLine} ${rightPad + 10},${yLine - 8} ${rightPad + 10},${yLine + 8}" fill="#0284c7"/>
+        `;
+      } else if (data.maxVal !== null) {
+        const x2 = valToX(data.maxVal);
+        svgHtml += `
+          <line x1="${x2}" y1="${yLine}" x2="${leftPad - 15}" y2="${yLine}" stroke="#0284c7" stroke-width="8" opacity="0.8"/>
+          <polygon points="${leftPad - 22},${yLine} ${leftPad - 10},${yLine - 8} ${leftPad - 10},${yLine + 8}" fill="#0284c7"/>
+        `;
+      }
+
+      if (data.minVal !== null) {
+        const x = valToX(data.minVal);
+        const isClosed = data.minType === 'closed';
+        svgHtml += `
+          <circle cx="${x}" cy="${yLine}" r="9" fill="${isClosed ? '#0284c7' : '#ffffff'}" stroke="#0284c7" stroke-width="3.5" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
+          <text x="${x}" y="${yLine - 14}" text-anchor="middle" font-family="Jua" font-size="13" fill="${isClosed ? '#0284c7' : '#e11d48'}" font-weight="bold">
+            ${data.minVal} (${isClosed ? '●포함' : '○제외'})
+          </text>
+        `;
+      }
+
+      if (data.maxVal !== null) {
+        const x = valToX(data.maxVal);
+        const isClosed = data.maxType === 'closed';
+        svgHtml += `
+          <circle cx="${x}" cy="${yLine}" r="9" fill="${isClosed ? '#0284c7' : '#ffffff'}" stroke="#0284c7" stroke-width="3.5" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"/>
+          <text x="${x}" y="${yLine - 14}" text-anchor="middle" font-family="Jua" font-size="13" fill="${isClosed ? '#0284c7' : '#e11d48'}" font-weight="bold">
+            ${data.maxVal} (${isClosed ? '●포함' : '○제외'})
+          </text>
+        `;
+      }
+
+      svg.innerHTML = svgHtml;
+    }
+
+    function renderTestCards(data) {
+      const container = document.getElementById('testNumberButtons');
+      container.innerHTML = '';
+      data.testCards.forEach(num => {
+        const btn = document.createElement('button');
+        btn.className = 'test-num-card';
+        btn.textContent = `숫자 ${num}`;
+        btn.onclick = () => testNumberInclusion(num, data);
+        container.appendChild(btn);
+      });
+    }
+
+    function testNumberInclusion(num, data) {
+      let isIncluded = false;
+      let reason = '';
+
+      if (data.minVal !== null && data.maxVal !== null) {
+        const minOk = data.minType === 'closed' ? num >= data.minVal : num > data.minVal;
+        const maxOk = data.maxType === 'closed' ? num <= data.maxVal : num < data.maxVal;
+        isIncluded = minOk && maxOk;
+        reason = isIncluded 
+          ? `🎉 숫자 ${num}은(는) [${data.minVal} ~ ${data.maxVal}] 범위 안에 쏙 들어갑니다! (O)`
+          : `❌ 숫자 ${num}은(는) 범위를 벗어납니다. (X)`;
+      } else if (data.minVal !== null) {
+        isIncluded = data.minType === 'closed' ? num >= data.minVal : num > data.minVal;
+        if (num === data.minVal) {
+          reason = data.minType === 'closed'
+            ? `🎉 <strong>${num}</strong>은(는) <strong>'이상'</strong>이므로 <strong>포함됩니다! (O)</strong>`
+            : `❌ <strong>${num}</strong>은(는) <strong>'초과'</strong>이므로 <strong>제외됩니다! (X)</strong>`;
+        } else {
+          reason = isIncluded ? `🎉 숫자 ${num}은(는) 범위에 포함됩니다! (O)` : `❌ 숫자 ${num}은(는) 범위에 포함되지 않습니다! (X)`;
+        }
+      } else if (data.maxVal !== null) {
+        isIncluded = data.maxType === 'closed' ? num <= data.maxVal : num < data.maxVal;
+        if (num === data.maxVal) {
+          reason = data.maxType === 'closed'
+            ? `🎉 <strong>${num}</strong>은(는) <strong>'이하'</strong>이므로 <strong>포함됩니다! (O)</strong>`
+            : `❌ <strong>${num}</strong>은(는) <strong>'미만'</strong>이므로 <strong>제외됩니다! (X)</strong>`;
+        } else {
+          reason = isIncluded ? `🎉 숫자 ${num}은(는) 범위에 포함됩니다! (O)` : `❌ 숫자 ${num}은(는) 범위에 포함되지 않습니다! (X)`;
+        }
+      }
+
+      const fb = document.getElementById('testResultFeedback');
+      fb.innerHTML = `<span style="color:${isIncluded ? '#10b981' : '#ef4444'};">${reason}</span>`;
+
+      if (typeof fairySpeak === 'function') {
+        const cleanText = reason.replace(/<[^>]*>?/gm, '');
+        fairySpeak(cleanText);
+      }
+    }
+
+    /* ========================================================
+       2. 미끄럼틀 언덕 반올림 시뮬레이터 로직
+       ======================================================== */
+    let currentScope = 'tens';
+    let currentSelectedDigit = 8;
+
+    const SCOPE_CONFIG = {
+      tens: {
+        title: '🔍 예시 수: <strong>22<span style="color:#ef4444; text-decoration:underline;">8</span></strong> (관찰할 일의 자리)',
+        sub: '구하려는 자리가 <strong>십의 자리</strong>이므로, 바로 아래 <strong>일의 자리 숫자</strong>를 관찰해요!',
+        baseVal: 220,
+        factor: 10
+      },
+      hundreds: {
+        title: '🔍 예시 수: <strong>2<span style="color:#ef4444; text-decoration:underline;">2</span>8</strong> (관찰할 십의 자리)',
+        sub: '구하려는 자리가 <strong>백의 자리</strong>이므로, 바로 아래 <strong>십의 자리 숫자</strong>를 관찰해요!',
+        baseVal: 200,
+        factor: 100
+      },
+      thousands: {
+        title: '🔍 예시 수: <strong>24,<span style="color:#ef4444; text-decoration:underline;">6</span>82</strong> (관찰할 백의 자리)',
+        sub: '구하려는 자리가 <strong>천의 자리</strong>이므로, 바로 아래 <strong>백의 자리 숫자</strong>를 관찰해요!',
+        baseVal: 24000,
+        factor: 1000
+      },
+      decimal1: {
+        title: '🔍 예시 수: <strong>3.7<span style="color:#ef4444; text-decoration:underline;">4</span></strong> (관찰할 소수 둘째 자리)',
+        sub: '구하려는 자리가 <strong>소수 첫째 자리</strong>이므로, 바로 아래 <strong>소수 둘째 자리</strong>를 관찰해요!',
+        baseVal: 3.7,
+        factor: 0.1
+      }
+    };
+
+    function setRoundingScope(scopeKey, btn) {
+      currentScope = scopeKey;
+      document.querySelectorAll('#section-rounding .candy-num-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const cfg = SCOPE_CONFIG[scopeKey];
+      document.getElementById('magnifierTitle').innerHTML = cfg.title;
+      document.getElementById('magnifierSub').innerHTML = cfg.sub;
+
+      rollDigit(currentSelectedDigit, null);
+    }
+
+    function rollDigit(digit, btn) {
+      currentSelectedDigit = digit;
+      document.querySelectorAll('.digit-ball-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const ballGroup = document.getElementById('rollingBallGroup');
+      const ballText = document.getElementById('ballDigitText');
+      ballText.textContent = digit;
+
+      const isRoundUp = digit >= 5;
+
+      ballGroup.style.transition = 'none';
+      ballGroup.setAttribute('transform', 'translate(300, 35)');
+
+      setTimeout(() => {
+        ballGroup.style.transition = 'all 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+        if (isRoundUp) {
+          ballGroup.setAttribute('transform', 'translate(540, 100)');
+        } else {
+          ballGroup.setAttribute('transform', 'translate(60, 100)');
+        }
+      }, 50);
+
+      const vBox = document.getElementById('roundingVerdictBox');
+      if (isRoundUp) {
+        vBox.innerHTML = `<span style="color:#dc2626;">🚀 숫자 <strong>${digit}</strong>은(는) 5 이상이므로 <strong>올림(+1)</strong>! ➔ 윗자리 숫자를 1 올려줍니다!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 5 이상이므로 올림하여 윗자리 숫자가 1 커집니다!`);
+      } else {
+        vBox.innerHTML = `<span style="color:#2563eb;">🛝 숫자 <strong>${digit}</strong>은(는) 4 이하이므로 <strong>버림(0)</strong>! ➔ 아랫자리 숫자를 모두 0으로 만듭니다!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 4 이하이므로 버림하여 0으로 만듭니다!`);
+      }
+    }
+
+    /* ========================================================
+       3. 실생활 롤플레잉 공작소 로직
+       ======================================================== */
+    let packSize = 10;
+    function setPackBoxSize(size) {
+      packSize = size;
+      document.getElementById('btnPack10').classList.toggle('active', size === 10);
+      document.getElementById('btnPack100').classList.toggle('active', size === 100);
+      calcBadgePacking();
+    }
+    function calcBadgePacking() {
+      const total = parseInt(document.getElementById('badgeTotalInput').value) || 0;
+      const fullBoxes = Math.floor(total / packSize);
+      const remainder = total % packSize;
+      const neededBoxes = remainder > 0 ? fullBoxes + 1 : fullBoxes;
+
+      document.getElementById('badgePackResult').innerHTML = `
+        📦 <strong>${neededBoxes}상자 필요! (올림)</strong><br>
+        <span style="font-size:0.9rem; color:#475569;">
+          (${fullBoxes}상자 꽉 참 + ${remainder > 0 ? remainder + '개 담을 1상자 추가!' : '남는 배지 없음!'})
+        </span>
+      `;
+    }
+
+    let exchangeUnit = 1000;
+    function setExchangeUnit(unit) {
+      exchangeUnit = unit;
+      document.getElementById('btnBill1000').classList.toggle('active', unit === 1000);
+      document.getElementById('btnBill10000').classList.toggle('active', unit === 10000);
+      calcCoinExchange();
+    }
+    function calcCoinExchange() {
+      const total = parseInt(document.getElementById('coinTotalInput').value) || 0;
+      const bills = Math.floor(total / exchangeUnit);
+      const exchangedMoney = bills * exchangeUnit;
+      const leftCoins = total % exchangeUnit;
+
+      document.getElementById('coinExchangeResult').innerHTML = `
+        💵 <strong>${exchangedMoney.toLocaleString()}원 (${bills}장) 교환! (버림)</strong><br>
+        <span style="font-size:0.9rem; color:#475569;">
+          (바꿀 수 없는 ${leftCoins.toLocaleString()}원은 동전으로 남김!)
+        </span>
+      `;
+    }
+
+    let audiencePlace = 1000;
+    function setAudiencePlace(place) {
+      audiencePlace = place;
+      document.getElementById('btnAudience1000').classList.toggle('active', place === 1000);
+      document.getElementById('btnAudience100').classList.toggle('active', place === 100);
+      calcStadiumAudience();
+    }
+    function calcStadiumAudience() {
+      const total = parseInt(document.getElementById('stadiumAudienceInput').value) || 0;
+      let rounded = 0;
+      let desc = '';
+
+      if (audiencePlace === 1000) {
+        const hundredsDigit = Math.floor((total % 1000) / 100);
+        rounded = Math.round(total / 1000) * 1000;
+        desc = `(백의 자리 ${hundredsDigit} ${hundredsDigit >= 5 ? '≥ 5 이므로 올림' : '< 5 이므로 버림'}!)`;
+      } else {
+        const tensDigit = Math.floor((total % 100) / 10);
+        rounded = Math.round(total / 100) * 100;
+        desc = `(십의 자리 ${tensDigit} ${tensDigit >= 5 ? '≥ 5 이므로 올림' : '< 5 이므로 버림'}!)`;
+      }
+
+      document.getElementById('stadiumResult').innerHTML = `
+        📰 <strong>"오늘 약 ${rounded.toLocaleString()}명 입장!"</strong><br>
+        <span style="font-size:0.9rem; color:#475569;">${desc}</span>
+      `;
+    }
+
+    /* ========================================================
+       4. AI 코코 탐정 퀴즈 로직
+       ======================================================== */
+    const QUIZ_LIST = [
+      {
+        q: "20 이상인 수에는 20이 포함될까요?",
+        ans: "포함된다 (20과 같거나 큰 수)",
+        choices: [
+          "포함된다 (20과 같거나 큰 수)",
+          "포함되지 않는다 (20보다 큰 수)",
+          "때에 따라 다르다",
+          "자연수일 때만 포함된다"
+        ],
+        explain: "💡 '이상'과 '이하'는 그 수를 포함하므로 20이 들어갑니다!"
+      },
+      {
+        q: "수직선에서 15 미만을 나타낼 때, 15 위치에 표시해야 하는 동그라미는?",
+        ans: "○ (속이 빈 동그라미 - 15 제외)",
+        choices: [
+          "○ (속이 빈 동그라미 - 15 제외)",
+          "● (속이 찬 동그라미 - 15 포함)",
+          "▲ (세모 기호)",
+          "동그라미를 그리지 않는다"
+        ],
+        explain: "💡 '초과'와 '미만'은 기준 수를 포함하지 않으므로 속이 빈 동그라미(○)를 그립니다!"
+      },
+      {
+        q: "어떤 놀이기구 탑승 조건이 '키 130cm 초과 150cm 이하'일 때 탑승 가능한 어린이는?",
+        ans: "140cm",
+        choices: ["130cm", "140cm", "155cm", "125cm"],
+        explain: "💡 130 초과이므로 130은 탑승 불가! 150 이하이므로 140cm 친구만 탈 수 있어요!"
+      },
+      {
+        q: "공책 246권을 10권씩 묶음으로 포장하려고 합니다. 남는 공책 없이 모두 포장하려면 최소 몇 묶음 상자가 필요할까요? (올림)",
+        ans: "25묶음",
+        choices: ["25묶음", "24묶음", "20묶음", "30묶음"],
+        explain: "💡 24상자를 채우고 6권이 남으므로, 1상자가 더 필요합니다! (246 올림 ➔ 250권 분량 = 25상자)"
+      },
+      {
+        q: "저금통에 35,780원이 있습니다. 이 돈을 10,000원 지폐로만 바꾼다면 최대 얼마까지 바꿀 수 있을까요? (버림)",
+        ans: "30,000원",
+        choices: ["30,000원", "40,000원", "35,000원", "36,000원"],
+        explain: "💡 만 원 미만의 5,780원은 지폐로 바꿀 수 없으므로 버림하여 30,000원(3장)만 바꿉니다!"
+      },
+      {
+        q: "수 4,785를 백의 자리까지 반올림하면 얼마가 될까요?",
+        ans: "4,800",
+        choices: ["4,800", "4,700", "5,000", "4,780"],
+        explain: "💡 백의 자리까지 구하므로 바로 아래 십의 자리(8)를 봅니다. 8 ≥ 5 이므로 올림하여 4,800이 됩니다!"
+      },
+      {
+        q: "어떤 수를 반올림하여 십의 자리까지 나타내었더니 70이 되었습니다. 이 수가 될 수 있는 자연수의 범위는?",
+        ans: "65 이상 75 미만",
+        choices: [
+          "65 이상 75 미만",
+          "60 이상 70 이하",
+          "70 이상 80 미만",
+          "65 초과 75 이하"
+        ],
+        explain: "💡 일의 자리가 5, 6, 7, 8, 9이면 올림(65~69 ➔ 70), 0, 1, 2, 3, 4이면 버림(70~74 ➔ 70)이므로 [65 이상 75 미만]입니다!"
+      },
+      {
+        q: "어떤 수의 범위를 수직선에 그렸을 때, 12에는 속이 찬 점(●), 18에는 속이 빈 점(○)이 찍혀 있습니다. 올바른 표현은?",
+        ans: "12 이상 18 미만",
+        choices: [
+          "12 이상 18 미만",
+          "12 초과 18 이하",
+          "12 이상 18 이하",
+          "12 초과 18 미만"
+        ],
+        explain: "💡 속이 찬 점(●)은 이상, 속이 빈 점(○)은 미만을 뜻합니다!"
+      },
+      {
+        q: "소수 8.46을 소수 첫째 자리까지 올림하여 나타내면 얼마일까요?",
+        ans: "8.5",
+        choices: ["8.5", "8.4", "9.0", "8.40"],
+        explain: "💡 소수 둘째 자리 6이 0보다 크므로 소수 첫째 자리를 1 올려서 8.5가 됩니다!"
+      },
+      {
+        q: "어린이 박물관 입장료가 7,300원일 때, 1,000원짜리 지폐로만 지불하려면 최소 몇 장을 내야 할까요? (올림)",
+        ans: "8장 (8,000원)",
+        choices: ["8장 (8,000원)", "7장 (7,000원)", "73장", "10장"],
+        explain: "💡 7장(7,000원)만 내면 300원이 부족하므로 무조건 8장(8,000원)을 내야 합니다!"
+      }
+    ];
+
+    let quizIdx = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_LIST[quizIdx % QUIZ_LIST.length];
+      document.getElementById('quizProgressText').textContent = `문제 ${quizIdx + 1} / ${QUIZ_LIST.length}`;
+      document.getElementById('quizQuestion').textContent = q.q;
+
+      const choicesBox = document.getElementById('quizChoices');
+      choicesBox.innerHTML = '';
+      document.getElementById('quizFeedback').innerHTML = '';
+
+      const shuffled = [...q.choices].sort(() => Math.random() - 0.5);
+
+      shuffled.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'candy-num-btn';
+        btn.style.width = '100%';
+        btn.style.fontSize = '1.15rem';
+        btn.style.padding = '12px';
+        btn.textContent = choice;
+        btn.onclick = () => checkQuizAnswer(choice, q);
+        choicesBox.appendChild(btn);
+      });
+    }
+
+    function checkQuizAnswer(selected, q) {
+      const fb = document.getElementById('quizFeedback');
+      if (selected === q.ans) {
+        fb.innerHTML = `
+          <div style="color:#10b981; margin-bottom:4px;">🎉 완벽한 정답입니다! 다이아몬드 1개 획득! 💎</div>
+          <div style="font-size:0.95rem; color:#475569;">${q.explain}</div>
+        `;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+      } else {
+        fb.innerHTML = `
+          <div style="color:#ef4444; margin-bottom:4px;">😅 아쉬워요! 정답은 [${q.ans}] 입니다.</div>
+          <div style="font-size:0.95rem; color:#475569;">${q.explain}</div>
+        `;
+        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${q.ans} 입니다.`);
+      }
+    }
+
+    function nextQuizQuestion() {
+      quizIdx = (quizIdx + 1) % QUIZ_LIST.length;
+      renderQuiz();
+    }
+
+    function exitRoom() {
+      location.href = 'math.html#concepts';
+    }
+
+    /* 초기화 */
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
+      const name = currentProfile === 'son' ? '민수' : '민서';
+      const icon = currentProfile === 'son' ? '👦' : '👧';
+      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
+      document.body.className = themeClass;
+      document.getElementById('userName').textContent = `${name} 대원`;
+      document.getElementById('userIcon').textContent = icon;
+
+      selectRangePreset('iseong');
+      rollDigit(8, null);
+      calcBadgePacking();
+      calcCoinExchange();
+      calcStadiumAudience();
+      renderQuiz();
+
+      if (typeof initFairyAudio === 'function') initFairyAudio();
+      if (typeof initFairyChat === 'function') initFairyChat("MATH", "수의 범위와 어림하기");
+      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+    });
+  </script>
+</body>
+</html>
