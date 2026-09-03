@@ -27,7 +27,9 @@ var APP_CONFIG = {
     STUDY_LOG_DB_ID: "37aa27115b688001b2ffe5e6c8f82ab2", // 학습현황(일지) DB ID
     VOCA_DB_ID: "375a27115b688038b686d3994ee12919",      // 용어사전/받아쓰기 데이터베이스 ID
     NOTION_CHAT_MEMORY_DB_ID: "373a27115b6880ba82cdfeaa1c825547", // AI 대화 기억 보관소 DB ID
-    TIMETABLE_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",          // 로비 모니터 시간표 DB ID
+    STATIC_TIMETABLE_DB_ID: "32ba27115b68828bbda201a1bdce12fc", // 🏛️ 아이들 고정 시간표 DB (학기 1회 입력)
+    EVENT_OVERLAY_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",    // 📢 학사일정 및 알림장 DB (동적 이벤트 오버레이)
+    TIMETABLE_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",        // 레거시 호환 ID
 
     // 🏰 Master Tower 종합 관제탑 (아빠 프로필 전용)
     MASTER_TOWER_URL: "https://awslike6-web.github.io/master-tower/",

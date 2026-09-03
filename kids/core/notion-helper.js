@@ -599,7 +599,33 @@ async function fetchTimetableFromNotion(options = {}) {
     }
 }
 
+/**
+ * 🏛️ 고정 시간표 DB + 📢 학사일정 및 알림장 DB를 동시에 듀얼 수집하는 통합 함수
+ */
+async function fetchDualTimetableFromNotion() {
+    const staticDbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STATIC_TIMETABLE_DB_ID) || "32ba27115b68828bbda201a1bdce12fc";
+    const overlayDbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.EVENT_OVERLAY_DB_ID) || (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TIMETABLE_DB_ID) || "e3f9b3917c2b48bfa3d47db4bd0545fd";
+
+    try {
+        const [staticRows, overlayRows] = await Promise.all([
+            fetchTimetableFromNotion({ dbId: staticDbId, fetchPageContent: false }),
+            fetchTimetableFromNotion({ dbId: overlayDbId, fetchPageContent: true })
+        ]);
+
+        return {
+            staticRows: staticRows || [],
+            overlayRows: overlayRows || [],
+            allRows: [...(staticRows || []), ...(overlayRows || [])]
+        };
+    } catch (e) {
+        console.error("[fetchDualTimetableFromNotion] 로딩 실패:", e);
+        const fallback = await fetchTimetableFromNotion();
+        return { staticRows: [], overlayRows: fallback, allRows: fallback };
+    }
+}
+
 window.fetchTimetableFromNotion = fetchTimetableFromNotion;
+window.fetchDualTimetableFromNotion = fetchDualTimetableFromNotion;
 window.parseTimetablePage = parseTimetablePage;
 
 // 🕒 전역 학습 시작 시간 자동 기록

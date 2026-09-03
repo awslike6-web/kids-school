@@ -1015,6 +1015,8 @@ const DEFAULT_BASE_TIMETABLE = {
 };
 
 let allTimetableRows = [];
+let staticTimetableRows = [];
+let overlayTimetableRows = [];
 let activeChildFilter = 'all';
 let viewerContext = { mode: 'monitor', childFilter: 'all', childName: null, lobbyUser: 'minsu' };
 
@@ -1285,8 +1287,9 @@ function buildGridMap() {
     });
   });
 
-  // 2. 노션 DB에 등록된 정규 수업(교시 지정) 반영 및 덮어쓰기
-  for (const row of allTimetableRows) {
+  // 2. 노션 고정 시간표 DB(또는 전체 DB)에 등록된 정규 수업 반영 및 덮어쓰기
+  const classCandidateRows = staticTimetableRows.length > 0 ? staticTimetableRows : allTimetableRows;
+  for (const row of classCandidateRows) {
     if (!isClassRow(row) || !matchesChildFilter(row)) continue;
     if (!WEEKDAYS.includes(row.dayOfWeek)) continue;
     const periodNum = row.periodNum || row.periodSlot?.num;
@@ -1734,17 +1737,28 @@ window.toggleNoticeTooltip = function(event, cardEl) {
 
 async function loadTimetableData() {
   const statusEl = document.getElementById('syncStatus');
-  statusEl.textContent = '⏳ 노션 동기화 중...';
+  statusEl.textContent = '⏳ 노션 듀얼 DB 동기화 중...';
   statusEl.className = '';
 
   try {
-    if (typeof fetchTimetableFromNotion !== 'function') {
+    if (typeof fetchDualTimetableFromNotion === 'function') {
+      const dualResult = await fetchDualTimetableFromNotion();
+      staticTimetableRows = dualResult.staticRows || [];
+      overlayTimetableRows = dualResult.overlayRows || [];
+      allTimetableRows = dualResult.allRows || [];
+    } else if (typeof fetchTimetableFromNotion === 'function') {
+      allTimetableRows = await fetchTimetableFromNotion();
+      staticTimetableRows = allTimetableRows.filter(isClassRow);
+      overlayTimetableRows = allTimetableRows.filter(r => !isClassRow(r));
+    } else {
       throw new Error('fetchTimetableFromNotion 미로드');
     }
-    allTimetableRows = await fetchTimetableFromNotion();
+
     renderAll();
     const now = new Date();
-    statusEl.textContent = `✅ ${pad2(now.getHours())}:${pad2(now.getMinutes())} 동기화 완료 (${allTimetableRows.length}건)`;
+    const staticCount = staticTimetableRows.length;
+    const overlayCount = overlayTimetableRows.length;
+    statusEl.textContent = `✅ ${pad2(now.getHours())}:${pad2(now.getMinutes())} 듀얼 동기화 완료 (고정 ${staticCount}건 · 알림장 ${overlayCount}건)`;
     statusEl.className = 'sync-ok';
   } catch (err) {
     console.error('[timetable]', err);
