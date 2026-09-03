@@ -242,6 +242,20 @@
     margin-top: 3px;
     line-height: 1.2;
   }
+  .weekly-grid tr.period-row-0 {
+    background: rgba(255, 159, 67, 0.05);
+  }
+  .weekly-grid tr.period-row-0 .period-col {
+    background: rgba(45, 30, 40, 0.95);
+    border-left: 3px solid #ff9f43;
+  }
+  .weekly-grid tr.period-row-8 {
+    background: rgba(0, 242, 254, 0.04);
+  }
+  .weekly-grid tr.period-row-8 .period-col {
+    background: rgba(20, 35, 55, 0.95);
+    border-left: 3px solid #00f2fe;
+  }
   .weekly-grid tbody td:not(.period-col) {
     background: rgba(18, 14, 32, 0.75);
     min-height: 56px;
@@ -953,10 +967,17 @@ const DEFAULT_PERIODS = [
   { num: 6, display: '6교시(15:00~15:40)', label: '6교시', timeRange: '15:00~15:40' }
 ];
 
+const ALL_SPECIAL_PERIODS = {
+  0: { num: 0, display: '🌅 0교시(아침)', label: '0교시(아침)', timeRange: '08:20~08:50' },
+  7: { num: 7, display: '🎒 방과후', label: '방과후', timeRange: '14:40~15:30' },
+  8: { num: 8, display: '🚗 하교 후', label: '하교 후', timeRange: '15:30~' }
+};
+
 const SUBJECT_COLORS = {
   '국어': '#FF6B9D', '수학': '#6EC6F5', '영어': '#A78BFA', '과학': '#6BCB77',
   '사회': '#FFD93D', '기타': '#8b949e', '도덕': '#4ECDC4', '음악': '#FF9F43',
-  '체육': '#44A08D', '미술': '#ff758c', '실과': '#c084fc'
+  '체육': '#44A08D', '미술': '#ff758c', '실과': '#c084fc',
+  '수영장': '#00f2fe', '수영': '#00f2fe', '센터': '#f39c12', '피구': '#ff7675'
 };
 
 // 🏛️ [기본 정적 시간표 (베이스)] - 학기 중 매주 반복되는 고정 시간표
@@ -970,25 +991,32 @@ const DEFAULT_BASE_TIMETABLE = {
     { dayOfWeek: '월요일', periodNum: 5, subject: '수학', title: '수학' },
     { dayOfWeek: '월요일', periodNum: 6, subject: '국어', title: '국어' },
 
+    { dayOfWeek: '수요일', periodNum: 0, subject: '체육', title: '피구(아침활동)' },
     { dayOfWeek: '수요일', periodNum: 1, subject: '사회', title: '사회' },
     { dayOfWeek: '수요일', periodNum: 2, subject: '영어', title: '영어' },
     { dayOfWeek: '수요일', periodNum: 3, subject: '체육', title: '창체(체육)' },
     { dayOfWeek: '수요일', periodNum: 4, subject: '국어', title: '국어' },
     { dayOfWeek: '수요일', periodNum: 5, subject: '수학', title: '수학' },
+    { dayOfWeek: '수요일', periodNum: 8, subject: '센터', title: '센터' },
 
+    { dayOfWeek: '금요일', periodNum: 0, subject: '체육', title: '피구(아침활동)' },
     { dayOfWeek: '금요일', periodNum: 1, subject: '실과', title: '실과' },
     { dayOfWeek: '금요일', periodNum: 2, subject: '실과', title: '실과' },
     { dayOfWeek: '금요일', periodNum: 3, subject: '국어', title: '국어' },
     { dayOfWeek: '금요일', periodNum: 4, subject: '국어', title: '국어' },
     { dayOfWeek: '금요일', periodNum: 5, subject: '체육', title: '체육' },
-    { dayOfWeek: '금요일', periodNum: 6, subject: '기타', title: '창체' }
+    { dayOfWeek: '금요일', periodNum: 6, subject: '기타', title: '창체' },
+    { dayOfWeek: '금요일', periodNum: 8, subject: '센터', title: '센터' }
   ],
   '민서': [
     // 👧 1학년 2학기 확정 시간표
+    { dayOfWeek: '목요일', periodNum: 8, subject: '수영장', title: '수영장' },
+
     { dayOfWeek: '금요일', periodNum: 1, subject: '체육', title: '체육' },
     { dayOfWeek: '금요일', periodNum: 2, subject: '체육', title: '체육' },
     { dayOfWeek: '금요일', periodNum: 3, subject: '수학', title: '수학' },
-    { dayOfWeek: '금요일', periodNum: 4, subject: '기타', title: '하루' }
+    { dayOfWeek: '금요일', periodNum: 4, subject: '기타', title: '하루' },
+    { dayOfWeek: '금요일', periodNum: 8, subject: '수영장', title: '수영장' }
   ]
 };
 
@@ -1105,7 +1133,8 @@ function matchesChildFilter(row) {
 }
 
 function isClassRow(row) {
-  return !!(row.periodNum || row.periodSlot?.num);
+  const num = typeof row.periodNum === 'number' ? row.periodNum : (typeof row.periodSlot?.num === 'number' ? row.periodSlot.num : null);
+  return num !== null && !isNaN(num) && num >= 0;
 }
 
 function isNoticeRow(row) {
@@ -1248,20 +1277,22 @@ function getSubjectOverlayItems(dayName, subjectName, childName) {
   });
 }
 
-function getPeriodDefinitions() {
+function getPeriodDefinitions(gridMap) {
   const map = new Map(DEFAULT_PERIODS.map(p => [p.num, { ...p }]));
 
-  for (const row of allTimetableRows) {
+  const sourceRows = gridMap ? [...gridMap.values()].flat() : allTimetableRows;
+  for (const row of sourceRows) {
     if (!isClassRow(row)) continue;
     const slot = row.periodSlot || {};
-    const num = row.periodNum || slot.num;
-    if (!num) continue;
+    const num = typeof row.periodNum === 'number' ? row.periodNum : (typeof slot.num === 'number' ? slot.num : null);
+    if (num === null || isNaN(num) || num < 0) continue;
     if (!map.has(num)) {
+      const spec = ALL_SPECIAL_PERIODS[num] || {};
       map.set(num, {
         num,
-        label: slot.label || `${num}교시`,
-        timeRange: slot.timeRange || '',
-        display: slot.display || `${num}교시`
+        label: slot.label || spec.label || `${num}교시`,
+        timeRange: slot.timeRange || spec.timeRange || '',
+        display: slot.display || spec.display || `${num}교시`
       });
     } else if (slot.display && slot.timeRange) {
       map.set(num, { num, label: slot.label || `${num}교시`, timeRange: slot.timeRange, display: slot.display });
@@ -1302,8 +1333,8 @@ function buildGridMap() {
   for (const row of classCandidateRows) {
     if (!isClassRow(row) || !matchesChildFilter(row)) continue;
     if (!WEEKDAYS.includes(row.dayOfWeek)) continue;
-    const periodNum = row.periodNum || row.periodSlot?.num;
-    if (!periodNum) continue;
+    const periodNum = typeof row.periodNum === 'number' ? row.periodNum : (typeof row.periodSlot?.num === 'number' ? row.periodSlot.num : null);
+    if (periodNum === null || isNaN(periodNum) || periodNum < 0) continue;
 
     const key = `${row.dayOfWeek}:${periodNum}`;
     if (!map.has(key)) map.set(key, []);
@@ -1381,8 +1412,8 @@ function renderLessonCell(rows) {
 function renderWeeklyGrid() {
   const container = document.getElementById('gridContent');
   const subtitle = document.getElementById('gridSubtitle');
-  const periods = getPeriodDefinitions();
   const gridMap = buildGridMap();
+  const periods = getPeriodDefinitions(gridMap);
   const todayDay = KOREAN_DAYS[new Date().getDay()];
   const isWeekdayToday = WEEKDAYS.includes(todayDay);
   const filterLabel = activeChildFilter === 'all' ? '민수 · 민서' : activeChildFilter;
@@ -1426,9 +1457,9 @@ function renderWeeklyGrid() {
     }).join('');
 
     return `
-      <tr>
+      <tr class="period-row-${period.num}">
         <td class="period-col">
-          <div class="period-name">${period.num}교시</div>
+          <div class="period-name">${escapeHtml(period.label || `${period.num}교시`)}</div>
           ${period.timeRange ? `<div class="period-time">${period.timeRange}</div>` : ''}
         </td>
         ${cells}

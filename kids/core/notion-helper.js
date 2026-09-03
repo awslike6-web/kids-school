@@ -353,27 +353,38 @@ window.resolveReadingPassageList = resolveReadingPassageList;
 window.MAX_READING_PASSAGES = MAX_READING_PASSAGES;
 
 /**
- * "1교시(09:00~09:40)" 형태의 교시 문자열 파싱
+ * "1교시(09:00~09:40)", "0교시", "방과후", "하교 후" 형태의 교시 문자열 파싱
  */
 function parseTimetablePeriodSlot(raw) {
-    if (!raw) return { num: 0, label: "", timeRange: "", display: "" };
+    if (!raw) return { num: null, label: "", timeRange: "", display: "" };
     const text = String(raw).trim();
+    if (text.includes("0교시") || text.includes("아침") || text === "0") {
+        return { num: 0, label: "0교시", timeRange: "08:20~08:50", display: "0교시(아침)" };
+    }
+    if (text.includes("방과후")) {
+        return { num: 7, label: "방과후", timeRange: "14:40~15:30", display: "방과후" };
+    }
+    if (text.includes("하교") || text.includes("학원") || text.includes("센터") || text.includes("수영") || text.includes("외부")) {
+        return { num: 8, label: "하교 후", timeRange: "15:30~", display: "하교 후" };
+    }
     const match = text.match(/(\d)\s*교시(?:\s*\(([^)]+)\))?/);
-    if (!match) return { num: 0, label: text, timeRange: "", display: text };
-    const num = parseInt(match[1], 10);
-    const timeRange = (match[2] || "").trim();
-    const label = `${num}교시`;
-    const display = timeRange ? `${label}(${timeRange})` : label;
-    return { num, label, timeRange, display };
+    if (match) {
+        const num = parseInt(match[1], 10);
+        const timeRange = (match[2] || "").trim();
+        const label = `${num}교시`;
+        const display = timeRange ? `${label}(${timeRange})` : label;
+        return { num, label, timeRange, display };
+    }
+    return { num: null, label: text, timeRange: "", display: text };
 }
 
 function inferPeriodNumFromDate(periodDate) {
-    if (!periodDate?.start) return 0;
+    if (!periodDate?.start) return null;
     const d = new Date(periodDate.start);
-    if (isNaN(d.getTime())) return 0;
+    if (isNaN(d.getTime())) return null;
     const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-    const map = { "09:00": 1, "10:00": 2, "11:00": 3, "13:00": 4, "14:00": 5, "15:00": 6 };
-    return map[time] || 0;
+    const map = { "08:20": 0, "09:00": 1, "10:00": 2, "11:00": 3, "13:00": 4, "14:00": 5, "15:00": 6, "15:30": 8 };
+    return map[time] !== undefined ? map[time] : null;
 }
 
 /**
@@ -392,15 +403,22 @@ function parseTimetablePage(page) {
     const periodDate = periodProp?.date || null;
     const alertDate = p["알림"]?.date || null;
     const customDate = p["날짜"]?.date || null;
-    let periodNum = periodSlot.num;
-    if (!periodNum && periodDate?.start) {
+    let periodNum = typeof periodSlot.num === 'number' ? periodSlot.num : null;
+    if (periodNum === null && periodDate?.start) {
         periodNum = inferPeriodNumFromDate(periodDate);
     }
     const pageTitle = p["제목"]?.title?.[0]?.plain_text || p["수업"]?.title?.[0]?.plain_text || "";
-    if (!periodNum && pageTitle) {
-        const titleMatch = pageTitle.match(/(\d)\s*교시/);
-        if (titleMatch) periodNum = parseInt(titleMatch[1], 10);
+    if (periodNum === null && pageTitle) {
+        if (pageTitle.includes("0교시") || pageTitle.includes("아침")) periodNum = 0;
+        else if (pageTitle.includes("방과후")) periodNum = 7;
+        else if (pageTitle.includes("하교") || pageTitle.includes("학원") || pageTitle.includes("센터") || pageTitle.includes("수영")) periodNum = 8;
+        else {
+            const titleMatch = pageTitle.match(/(\d)\s*교시/);
+            if (titleMatch) periodNum = parseInt(titleMatch[1], 10);
+        }
     }
+
+    const defaultLabel = periodNum === 0 ? "0교시" : (periodNum === 7 ? "방과후" : (periodNum === 8 ? "하교 후" : `${periodNum}교시`));
 
     return {
         id: page.id,
@@ -409,9 +427,9 @@ function parseTimetablePage(page) {
         subject: p["과목"]?.select?.name || "",
         dayOfWeek: p["요일"]?.select?.name || "",
         periodNum,
-        periodSlot: periodNum && !periodSlot.num
-            ? { num: periodNum, label: `${periodNum}교시`, timeRange: "", display: `${periodNum}교시` }
-            : periodSlot,
+        periodSlot: periodSlot.num !== null
+            ? periodSlot
+            : (periodNum !== null ? { num: periodNum, label: defaultLabel, timeRange: "", display: defaultLabel } : { num: null, label: "", timeRange: "", display: "" }),
         periodStart: periodDate?.start || null,
         periodEnd: periodDate?.end || null,
         alertAt: alertDate?.start || null,
@@ -607,7 +625,7 @@ async function fetchTimetableFromNotion(options = {}) {
 /**
  * 💾 시간표 캐싱 (SWR: Stale-While-Revalidate 초고속 로딩 지원)
  */
-const TIMETABLE_CACHE_KEY = "MINMIN_TIMETABLE_CACHE_V5";
+const TIMETABLE_CACHE_KEY = "MINMIN_TIMETABLE_CACHE_V6";
 
 function loadTimetableFromCache() {
     try {
