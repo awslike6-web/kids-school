@@ -396,10 +396,15 @@ function parseTimetablePage(page) {
     if (!periodNum && periodDate?.start) {
         periodNum = inferPeriodNumFromDate(periodDate);
     }
+    const pageTitle = p["제목"]?.title?.[0]?.plain_text || p["수업"]?.title?.[0]?.plain_text || "";
+    if (!periodNum && pageTitle) {
+        const titleMatch = pageTitle.match(/(\d)\s*교시/);
+        if (titleMatch) periodNum = parseInt(titleMatch[1], 10);
+    }
 
     return {
         id: page.id,
-        title: p["제목"]?.title?.[0]?.plain_text || p["수업"]?.title?.[0]?.plain_text || "",
+        title: pageTitle,
         child: p["아이"]?.select?.name || "",
         subject: p["과목"]?.select?.name || "",
         dayOfWeek: p["요일"]?.select?.name || "",
