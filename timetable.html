@@ -557,6 +557,20 @@
     text-decoration: line-through;
     opacity: 0.82;
   }
+  .notice-card.is-completed,
+  .notice-card.completed {
+    opacity: 0.65;
+  }
+  .notice-card.is-completed .notice-title,
+  .notice-card.completed .notice-title {
+    text-decoration: line-through;
+  }
+  .top-notice-banner.completed {
+    opacity: 0.75;
+  }
+  .top-notice-banner.completed .banner-msg {
+    text-decoration: line-through;
+  }
 
   /* 🌟 [이벤트 오버레이 모달 팝업] */
   .overlay-modal-backdrop {
@@ -1160,9 +1174,39 @@ function getRowDayOfWeek(row) {
   return row.dayOfWeek || '';
 }
 
+/**
+ * 🕒 [스마트 알림장/이벤트 만료 필터]
+ * 1. 종료일(또는 지정 날짜)이 적힌 항목:
+ *    - 종료일(targetDateEnd || targetDate)이 오늘보다 이전이면 자동 숨김
+ *    - 종료일이 아직 남아있다면 등록일이 한 달을 넘었더라도 계속 유지
+ * 2. 종료일/날짜가 없는 상시 알림:
+ *    - 등록일(createdAt) 기준 30일(한 달)이 지나면 자동 숨김
+ */
+function isNoticeRowExpired(row) {
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const effectiveEndDate = row.targetDateEnd || row.targetDate;
+  if (effectiveEndDate) {
+    const datePart = String(effectiveEndDate).split('T')[0];
+    return datePart < todayStr;
+  }
+
+  if (row.createdAt) {
+    const createdTime = new Date(row.createdAt).getTime();
+    if (!isNaN(createdTime)) {
+      const diffDays = (now.getTime() - createdTime) / (1000 * 60 * 60 * 24);
+      return diffDays > 30;
+    }
+  }
+
+  return false;
+}
+
 /** 🌟 [이벤트 오버레이 ①] 상단 배너 대상 여부 확인 */
 function isTopBannerNotice(row) {
   if (!matchesChildFilter(row)) return false;
+  if (isNoticeRowExpired(row)) return false;
   if (row.scope === '전체 공지') return true;
   // 교시 없고 요일도 없이 전체 알림/공지인 레거시 항목 호환
   if (!row.periodNum && !row.dayOfWeek && !row.subject && (row.title || row.memo)) {
@@ -1174,6 +1218,7 @@ function isTopBannerNotice(row) {
 /** 🌟 [이벤트 오버레이 ②] 요일 헤더 일일 전체 일정 여부 확인 */
 function isDayEventNotice(row, dayName) {
   if (!matchesChildFilter(row)) return false;
+  if (isNoticeRowExpired(row)) return false;
   const dow = getRowDayOfWeek(row);
   if (row.scope === '일일 전체') {
     return dow === dayName || dow === '매일' || (!dow && !row.subject);
@@ -1188,6 +1233,7 @@ function isDayEventNotice(row, dayName) {
 function getSubjectOverlayItems(dayName, subjectName, childName) {
   return allTimetableRows.filter(row => {
     if (!matchesChildFilter(row)) return false;
+    if (isNoticeRowExpired(row)) return false;
     if (childName && row.child && row.child !== childName && row.child !== '공통') return false;
 
     const isSubjectScope = row.scope === '과목별' || (row.subject && !row.periodNum);
@@ -1422,10 +1468,12 @@ function renderTopNoticeBanner() {
   bannerArea.innerHTML = topNotices.slice(0, 2).map(notice => {
     const childBadge = notice.child && notice.child !== '공통' ? `[${notice.child}] ` : '';
     const dateBadge = notice.targetDate ? ` (${notice.targetDate})` : '';
+    const completedClass = notice.isCompleted ? ' completed' : '';
+    const tagText = notice.isCompleted ? '✅ 완료' : '📢 전체 공지';
     return `
-      <div class="top-notice-banner" onclick="window.openOverlayItemModal('${notice.id}')" title="터치하여 공지 전문 보기">
+      <div class="top-notice-banner${completedClass}" onclick="window.openOverlayItemModal('${notice.id}')" title="터치하여 공지 전문 보기">
         <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
-          <span class="banner-tag">📢 전체 공지</span>
+          <span class="banner-tag">${tagText}</span>
           <span class="banner-msg">${childBadge}${escapeHtml(notice.title)}${dateBadge}</span>
         </div>
         <span class="banner-arrow">자세히 보기 ›</span>
@@ -1549,7 +1597,7 @@ function collectNoticeItems() {
   const anchorDay = getNoticeAnchorDay();
 
   const adminNotices = allTimetableRows
-    .filter(row => isNoticeRow(row) && matchesChildFilter(row))
+    .filter(row => isNoticeRow(row) && matchesChildFilter(row) && !isNoticeRowExpired(row))
     .map(row => ({
       kind: 'admin',
       tier: 0,
@@ -1635,9 +1683,9 @@ function renderNotices() {
     const hasTooltip = shouldShowNoticeTooltip(row, bodyText);
 
     return `
-      <div class="notice-card admin-notice${hasTooltip ? ' has-tooltip' : ''}${hasTooltip ? tooltipBelowClass : ''}"
+      <div class="notice-card admin-notice${row.isCompleted ? ' is-completed completed' : ''}${hasTooltip ? ' has-tooltip' : ''}${hasTooltip ? tooltipBelowClass : ''}"
            ${hasTooltip ? ' tabindex="0" data-notice-tooltip' : ''}>
-        <div class="notice-title">${noticeIcon} ${escapeHtml(title)}</div>
+        <div class="notice-title" style="${row.isCompleted ? 'text-decoration: line-through; opacity: 0.75;' : ''}">${row.isCompleted ? '✅' : noticeIcon} ${escapeHtml(title)}</div>
         ${alertHtml}
         ${memo ? `<div class="notice-memo">${escapeHtml(memo)}</div>` : ''}
         ${row.child ? `<div class="notice-child">👤 ${escapeHtml(row.child)}</div>` : ''}
