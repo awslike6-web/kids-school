@@ -399,7 +399,7 @@ function parseTimetablePage(page) {
 
     return {
         id: page.id,
-        title: p["수업"]?.title?.[0]?.plain_text || "",
+        title: p["제목"]?.title?.[0]?.plain_text || p["수업"]?.title?.[0]?.plain_text || "",
         child: p["아이"]?.select?.name || "",
         subject: p["과목"]?.select?.name || "",
         dayOfWeek: p["요일"]?.select?.name || "",

@@ -1140,6 +1140,10 @@ function getDayCssClass(dayName) {
 }
 
 function getClassDisplayName(row) {
+  // 🎒 초등학생 시간표이므로 무조건 직관적이고 큼직한 [과목명] (국어, 수학, 체육 등)을 대표로 표시
+  if (row.subject && String(row.subject).trim()) {
+    return String(row.subject).trim();
+  }
   return (row.title && String(row.title).trim()) || '수업';
 }
 
