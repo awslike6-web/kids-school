@@ -1237,8 +1237,9 @@ function isTopBannerNotice(row) {
   if (!matchesChildFilter(row)) return false;
   if (isNoticeRowExpired(row)) return false;
   if (row.scope === '전체 공지') return true;
+  const hasValidPeriod = typeof row.periodNum === 'number' && row.periodNum >= 0;
   // 교시 없고 요일도 없이 전체 알림/공지인 레거시 항목 호환
-  if (!row.periodNum && !row.dayOfWeek && !row.subject && (row.title || row.memo)) {
+  if (!hasValidPeriod && !row.dayOfWeek && !row.subject && (row.title || row.memo)) {
     return true;
   }
   return false;
@@ -1252,7 +1253,8 @@ function isDayEventNotice(row, dayName) {
   if (row.scope === '일일 전체') {
     return dow === dayName || dow === '매일' || (!dow && !row.subject);
   }
-  if (!row.periodNum && !row.subject && dow === dayName) {
+  const hasValidPeriod = typeof row.periodNum === 'number' && row.periodNum >= 0;
+  if (!hasValidPeriod && !row.subject && dow === dayName) {
     return true;
   }
   return false;
@@ -1265,7 +1267,8 @@ function getSubjectOverlayItems(dayName, subjectName, childName) {
     if (isNoticeRowExpired(row)) return false;
     if (childName && row.child && row.child !== childName && row.child !== '공통') return false;
 
-    const isSubjectScope = row.scope === '과목별' || (row.subject && !row.periodNum);
+    const hasValidPeriod = typeof row.periodNum === 'number' && row.periodNum >= 0;
+    const isSubjectScope = row.scope === '과목별' || (row.subject && !hasValidPeriod);
     if (!isSubjectScope) return false;
 
     if (row.subject !== subjectName) return false;
