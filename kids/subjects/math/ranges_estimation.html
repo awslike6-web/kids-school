@@ -386,7 +386,7 @@
           <h2 class="section-title">📏 수직선 경계값 공작소 (이상 · 이하 · 초과 · 미만)</h2>
           <p class="section-desc">나(경계값)를 파티에 초대하는지(●), 아니면 쏙 빠지는지(○) 수직선으로 직접 확인해요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('이상과 이하는 채운 점으로 나를 포함하고, 초과와 미만은 뚫린 점으로 나는 쏙 빠집니다!')">🔊</button>
+        <button class="speaker-btn" onclick="playUnitAudio('sec1_header', '이상과 이하는 채운 점으로 나를 포함하고, 초과와 미만은 뚫린 점으로 나는 쏙 빠집니다!')">🔊</button>
       </div>
 
       <!-- 교과서 프리셋 버튼 -->
@@ -435,7 +435,7 @@
           <h2 class="section-title">🛝 미끄럼틀 언덕 반올림 시뮬레이터</h2>
           <p class="section-desc">언덕 꼭대기 5를 기준으로, 0~4는 왼쪽으로 미끄러져 버림! 5~9는 오른쪽 마을로 쓩 올림!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('반올림은 구하려는 자리 바로 아랫자리가 0부터 4이면 버리고, 5부터 9이면 올립니다!')">🔊</button>
+        <button class="speaker-btn" onclick="playUnitAudio('sec2_header', '반올림은 구하려는 자리 바로 아랫자리가 0부터 4이면 버리고, 5부터 9이면 올립니다!')">🔊</button>
       </div>
 
       <!-- 자릿수 돋보기 선택기 -->
@@ -520,7 +520,7 @@
           <h2 class="section-title">📦 올림·버림·반올림 실생활 롤플레잉 공작소</h2>
           <p class="section-desc">배지 포장, 지폐 환전, 야구장 관중 수 등 실생활에서 언제 올림/버림/반올림을 쓰는지 체험해요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('남는 물건을 다 담아야 할 때는 올림, 지폐로 바꿀 수 없는 동전은 버림을 사용합니다!')">🔊</button>
+        <button class="speaker-btn" onclick="playUnitAudio('sec3_header', '남는 물건을 다 담아야 할 때는 올림, 지폐로 바꿀 수 없는 동전은 버림을 사용합니다!')">🔊</button>
       </div>
 
       <div class="roleplay-card-grid">
@@ -611,7 +611,7 @@
           <h2 class="section-title">🎯 AI 코코 탐정의 단서 추리 퀴즈 배틀</h2>
           <p class="section-desc">교과서 핵심 문제와 역발상 수의 범위 추리 퀴즈를 풀고 다이아몬드 보상을 획득해요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('문제를 꼼꼼히 읽고 알맞은 답을 골라보세요!')">🔊</button>
+        <button class="speaker-btn" onclick="playUnitAudio('sec4_header', '문제를 꼼꼼히 읽고 알맞은 답을 골라보세요!')">🔊</button>
       </div>
 
       <div class="quiz-card-box">
@@ -663,6 +663,47 @@
   <script src="../../core/fairy-chatbot.js"></script>
 
   <script>
+    /* ========================================================
+       🎧 고음질 MP3 전용 플레이어 (스토리북급 오디오 시스템)
+       ======================================================== */
+    let currentUnitAudio = null;
+
+    function playUnitAudio(key, fallbackText = '') {
+      const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+      if (!isTtsEnabled) return;
+
+      // 이전 재생 즉시 정지
+      if (currentUnitAudio) {
+        try {
+          currentUnitAudio.pause();
+          currentUnitAudio.currentTime = 0;
+        } catch (e) {}
+        currentUnitAudio = null;
+      }
+      if (typeof stopFairyTTS === 'function') {
+        stopFairyTTS();
+      }
+
+      const audioSrc = `audio/minsu/5-2/1/${key}.mp3`;
+      const audio = new Audio(audioSrc);
+      currentUnitAudio = audio;
+
+      audio.onerror = () => {
+        console.warn(`[Audio Fallback] ${audioSrc} 로드 실패, TTS로 폴백합니다.`);
+        currentUnitAudio = null;
+        if (fallbackText && typeof fairySpeak === 'function') {
+          fairySpeak(fallbackText);
+        }
+      };
+
+      audio.play().catch(err => {
+        console.warn(`[Audio Play Error] ${err}`);
+        if (fallbackText && typeof fairySpeak === 'function') {
+          fairySpeak(fallbackText);
+        }
+      });
+    }
+
     /* ========================================================
        0. 교과서 원본 e-Book 뷰어 로직
        ======================================================== */
@@ -716,6 +757,7 @@
         scaleMin: 15, scaleMax: 25,
         explain: '💡 <strong>20 이상</strong>은 <strong>20을 포함</strong>하며 20과 같거나 큰 모든 수입니다.<br>수직선 20 위치에 <strong style="color:#0284c7;">● (채운 점)</strong>을 찍고 오른쪽으로 쭉 화살표를 긋습니다.',
         testCards: [18, 19, 20, 21, 24],
+        audioKey: 'range_iseong',
         voice: '20 이상은 20을 포함하며 20과 같거나 큰 수입니다. 20에 채운 동그라미를 그립니다!'
       },
       iha: {
@@ -725,6 +767,7 @@
         scaleMin: 5, scaleMax: 15,
         explain: '💡 <strong>10 이하</strong>는 <strong>10을 포함</strong>하며 10과 같거나 작은 모든 수입니다.<br>수직선 10 위치에 <strong style="color:#0284c7;">● (채운 점)</strong>을 찍고 왼쪽으로 쭉 화살표를 긋습니다.',
         testCards: [8, 9, 10, 11, 13],
+        audioKey: 'range_iha',
         voice: '10 이하는 10을 포함하며 10과 같거나 작은 수입니다. 10에 채운 점을 그립니다!'
       },
       chogwa: {
@@ -734,6 +777,7 @@
         scaleMin: 34, scaleMax: 44,
         explain: '💡 <strong>38 초과</strong>는 <strong>38은 쏙 빠지고</strong> 38보다 큰 모든 수입니다.<br>수직선 38 위치에 <strong style="color:#e11d48;">○ (속이 빈 동그라미)</strong>를 찍고 오른쪽으로 화살표를 긋습니다.',
         testCards: [36, 37, 38, 39, 41],
+        audioKey: 'range_chogwa',
         voice: '38 초과는 38은 빠지고 38보다 큰 수입니다. 38에 속이 빈 동그라미를 그립니다!'
       },
       miman: {
@@ -743,6 +787,7 @@
         scaleMin: 25, scaleMax: 35,
         explain: '💡 <strong>30 미만</strong>은 <strong>30은 쏙 빠지고</strong> 30보다 작은 모든 수입니다.<br>수직선 30 위치에 <strong style="color:#e11d48;">○ (속이 빈 동그라미)</strong>를 찍고 왼쪽으로 화살표를 긋습니다.',
         testCards: [27, 29, 30, 31, 33],
+        audioKey: 'range_miman',
         voice: '30 미만은 30은 빠지고 30보다 작은 수입니다. 30에 속이 빈 동그라미를 그립니다!'
       },
       combine1: {
@@ -752,6 +797,7 @@
         scaleMin: 120, scaleMax: 140,
         explain: '💡 <strong>125 이상 135 미만</strong>: 125는 포함되므로 <strong style="color:#0284c7;">● (채운 점)</strong>, 135는 제외되므로 <strong style="color:#e11d48;">○ (빈 점)</strong>으로 표시하고 두 점 사이를 색칠합니다!',
         testCards: [124, 125, 130, 134, 135, 136],
+        audioKey: 'range_combine1',
         voice: '125 이상 135 미만은 125에는 채운 점, 135에는 빈 점을 그리고 사이를 연결합니다!'
       },
       combine2: {
@@ -761,6 +807,7 @@
         scaleMin: 55, scaleMax: 75,
         explain: '💡 <strong>60 초과 70 이하</strong>: 60은 제외되므로 <strong style="color:#e11d48;">○ (빈 점)</strong>, 70은 포함되므로 <strong style="color:#0284c7;">● (채운 점)</strong>으로 표시하고 두 점 사이를 색칠합니다!',
         testCards: [58, 60, 65, 70, 71],
+        audioKey: 'range_combine2',
         voice: '60 초과 70 이하는 60에는 빈 점, 70에는 채운 점을 그리고 사이를 연결합니다!'
       }
     };
@@ -781,8 +828,8 @@
       renderNumberLineSvg(data);
       renderTestCards(data);
 
-      if (shouldSpeak && typeof fairySpeak === 'function') {
-        fairySpeak(data.voice);
+      if (shouldSpeak) {
+        playUnitAudio(data.audioKey, data.voice);
       }
     }
 
@@ -901,10 +948,7 @@
       const fb = document.getElementById('testResultFeedback');
       fb.innerHTML = `<span style="color:${isIncluded ? '#10b981' : '#ef4444'};">${reason}</span>`;
 
-      if (typeof fairySpeak === 'function') {
-        const cleanText = reason.replace(/<[^>]*>?/gm, '');
-        fairySpeak(cleanText);
-      }
+      playUnitAudio(isIncluded ? 'test_in' : 'test_out', isIncluded ? '축하합니다! 범위 안에 쏙 들어갑니다!' : '아쉬워요! 범위를 벗어납니다!');
     }
 
     /* ========================================================
@@ -978,10 +1022,10 @@
       const vBox = document.getElementById('roundingVerdictBox');
       if (isRoundUp) {
         vBox.innerHTML = `<span style="color:#dc2626;">🚀 숫자 <strong>${digit}</strong>은(는) 5 이상이므로 <strong>올림(+1)</strong>! ➔ 윗자리 숫자를 1 올려줍니다!</span>`;
-        if (shouldSpeak && typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 5 이상이므로 올림하여 윗자리 숫자가 1 커집니다!`);
+        if (shouldSpeak) playUnitAudio('round_up', `숫자 ${digit}은 5 이상이므로 올림하여 윗자리 숫자가 1 커집니다!`);
       } else {
         vBox.innerHTML = `<span style="color:#2563eb;">🛝 숫자 <strong>${digit}</strong>은(는) 4 이하이므로 <strong>버림(0)</strong>! ➔ 아랫자리 숫자를 모두 0으로 만듭니다!</span>`;
-        if (shouldSpeak && typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 4 이하이므로 버림하여 0으로 만듭니다!`);
+        if (shouldSpeak) playUnitAudio('round_down', `숫자 ${digit}은 4 이하이므로 버림하여 0으로 만듭니다!`);
       }
     }
 
@@ -1171,19 +1215,22 @@
 
     function checkQuizAnswer(selected, q) {
       const fb = document.getElementById('quizFeedback');
-      if (selected === q.ans) {
+      const qNum = (quizIdx % QUIZ_LIST.length) + 1;
+      const isCorrect = selected === q.ans;
+
+      if (isCorrect) {
         fb.innerHTML = `
           <div style="color:#10b981; margin-bottom:4px;">🎉 완벽한 정답입니다! 다이아몬드 1개 획득! 💎</div>
           <div style="font-size:0.95rem; color:#475569;">${q.explain}</div>
         `;
-        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
+        playUnitAudio(`q${qNum}_correct`, '정답이에요! 참 잘했어요!');
         if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
       } else {
         fb.innerHTML = `
           <div style="color:#ef4444; margin-bottom:4px;">😅 아쉬워요! 정답은 [${q.ans}] 입니다.</div>
           <div style="font-size:0.95rem; color:#475569;">${q.explain}</div>
         `;
-        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${q.ans} 입니다.`);
+        playUnitAudio(`q${qNum}_incorrect`, `아쉬워요! 정답은 ${q.ans} 입니다.`);
       }
     }
 
