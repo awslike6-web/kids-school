@@ -8,8 +8,8 @@ window.STORY_BOOK = {
   icon: "🚀",
   themeColor: "#0284c7",
   themeColorDark: "#0369a1",
-  backUrl: "ranges_estimation.html",
-  backLabel: "🔙 수의 범위와 어림하기",
+  backUrl: "math_storybook_library.html",
+  backLabel: "🔙 수학 동화 도서관",
   imgBase: "images/minsu/5-2/1/multiverse_storybook/",
   version: "20260904_multiverse",
   pages: [

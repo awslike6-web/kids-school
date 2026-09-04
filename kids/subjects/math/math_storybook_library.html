@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>수학 단원 동화 도서관 📚 | 민민 수학 멀티버스</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+  :root {
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.85);
+    --border-color: #334155;
+    --primary: #0284c7;
+    --primary-glow: rgba(2, 132, 199, 0.35);
+    --accent: #f59e0b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  body {
+    font-family: 'Nanum Gothic', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* 🎮 민수 네온 아케이드 테마 */
+  body.theme--arcade {
+    background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #0f172a 100%);
+  }
+
+  /* 🎠 민서 밀키스 동화 테마 */
+  body.theme--slime {
+    background: radial-gradient(circle at 20% 20%, #fdf2f8 0%, #fff1f2 100%);
+    color: #334155;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --border-color: #fbcfe8;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+  }
+
+  .library-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* 상단 액션바 */
+  .top-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .nav-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 9999px;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    backdrop-filter: blur(8px);
+  }
+  .action-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+    box-shadow: 0 4px 14px var(--primary-glow);
+  }
+
+  /* 메인 헤더 배너 */
+  .hero-banner {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 24px;
+    padding: 36px 20px;
+    margin-bottom: 32px;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: linear-gradient(90deg, #0284c7, #8b5cf6);
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+  .hero-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 2.3rem;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.theme--slime .hero-title {
+    background: linear-gradient(135deg, #0284c7 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-desc {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+
+  /* 필터 탭 */
+  .filter-tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 10px 20px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover {
+    color: var(--text-main);
+    border-color: var(--primary);
+  }
+  .filter-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 4px 16px var(--primary-glow);
+  }
+
+  /* 책 서가 그리드 */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 26px;
+  }
+
+  /* 책 카드 */
+  .book-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+  .book-card:hover {
+    transform: translateY(-6px);
+    border-color: #38bdf8;
+    box-shadow: 0 16px 36px var(--primary-glow);
+  }
+  .book-card.is-ready {
+    border-color: rgba(2, 132, 199, 0.6);
+  }
+  .book-card.is-preparing {
+    opacity: 0.65;
+    filter: grayscale(0.2);
+  }
+
+  /* 카드 헤더 배지 */
+  .card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .unit-tag {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: #0284c7;
+    color: #fff;
+  }
+  .status-badge {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 10px;
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  }
+  .status-badge.preparing {
+    background: rgba(148, 163, 184, 0.15);
+    color: #94a3b8;
+    border-color: #64748b;
+  }
+
+  /* 3D 커버 이미지 */
+  .cover-box {
+    position: relative;
+    width: 100%;
+    height: 190px;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .book-card:hover .cover-img {
+    transform: scale(1.04);
+  }
+
+  .book-meta {
+    flex-grow: 1;
+    margin-bottom: 18px;
+  }
+  .book-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.3rem;
+    margin: 0 0 6px;
+    color: var(--text-main);
+    line-height: 1.3;
+  }
+  .book-subtitle {
+    font-size: 0.9rem;
+    color: #38bdf8;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  body.theme--slime .book-subtitle {
+    color: #0284c7;
+  }
+  .book-desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0;
+    word-break: keep-all;
+  }
+
+  /* 읽기 액션 버튼 그룹 */
+  .card-action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .read-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .btn-read {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 12px;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-ebook {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+  }
+  .btn-ebook:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+  }
+  .btn-webtoon {
+    background: rgba(147, 51, 234, 0.15);
+    color: #c084fc;
+    border: 1.5px solid rgba(147, 51, 234, 0.4);
+  }
+  .btn-webtoon:hover {
+    background: #8b5cf6;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .btn-common-viewer {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    padding: 7px;
+    border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    transition: 0.2s;
+  }
+  .btn-common-viewer:hover {
+    color: var(--text-main);
+    border-color: #38bdf8;
+  }
+
+  .btn-disabled {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    grid-column: span 2;
+    padding: 12px;
+    border: 1px dashed var(--border-color);
+  }
+
+  @media (max-width: 640px) {
+    .hero-title { font-size: 1.8rem; }
+    .books-grid { grid-template-columns: 1fr; }
+    .read-row { grid-template-columns: 1fr; }
+    .top-action-bar { flex-direction: column; align-items: stretch; }
+    .nav-group { justify-content: space-between; }
+  }
+</style>
+</head>
+<body>
+
+<div class="library-container">
+  
+  <!-- 상단 내비게이션 바 -->
+  <div class="top-action-bar">
+    <div class="nav-group">
+      <a href="math.html" class="action-btn">🔙 수학 탐험관</a>
+      <a href="../../../lobby.html" class="action-btn" id="lobbyBtn">🏡 대형 로비</a>
+    </div>
+    <div class="nav-group">
+      <button class="action-btn" id="ttsVoiceBtn" onclick="toggleTtsVoice()">🔊 요정 음성 ON</button>
+      <div class="action-btn" id="userProfileTag" style="border-color: var(--primary); color: #38bdf8;">🚀 [민수] 5학년 모드</div>
+    </div>
+  </div>
+
+  <!-- 메인 히어로 배너 -->
+  <div class="hero-banner">
+    <span class="hero-badge">📚 교과서 단원 연계 스토리북 도서관</span>
+    <h1 class="hero-title">수학 단원 동화 도서관</h1>
+    <p class="hero-desc">
+      고화질 삽화와 성우 구연동화가 함께하는 멀티버스 수학 이야기!<br>
+      이상·이하·초과·미만부터 분수, 도형까지 수학 개념을 판타지 모험으로 완전 정복해요.
+    </p>
+  </div>
+
+  <!-- 학년 필터 탭 -->
+  <div class="filter-tabs-container" id="filterTabs">
+    <button class="filter-btn active" onclick="filterBooks('all', this)">🌟 전체 보기</button>
+    <button class="filter-btn" onclick="filterBooks('1-2', this)">🎒 1~2학년 기초 (민서)</button>
+    <button class="filter-btn" onclick="filterBooks('3-4', this)">🚀 3~4학년 핵심</button>
+    <button class="filter-btn" onclick="filterBooks('5-6', this)">👑 5~6학년 심화 (민수)</button>
+  </div>
+
+  <!-- 서가 책 그리드 -->
+  <div class="books-grid" id="booksGrid"></div>
+
+</div>
+
+<script>
+// ========================================================
+// 📚 수학 단원 스토리북 도서관 데이터 정의
+// ========================================================
+const MATH_STORYBOOK_LIBRARY = [
+  {
+    id: "math_multiverse",
+    gradeTier: "5-6",
+    gradeLabel: "5학년 2학기",
+    unitBadge: "[5-2 1단원] 1권",
+    title: "민수와 민서의 수학 멀티버스 대모험",
+    subtitle: "수의 범위(이상·이하·초과·미만)와 어림하기(올림·버림·반올림)",
+    desc: "오래된 책 속 포털에서 나타난 요정 코코! 수의 범위 성문과 놀이공원 롤러코스터, 황금 포션 제작소에서 펼쳐지는 흥미진진 수학 판타지.",
+    coverImg: "images/minsu/5-2/1/multiverse_storybook/math_multiverse_ill_p1.jpg",
+    ebookLink: "math_multiverse_storybook.html",
+    webtoonLink: "math_multiverse_storybook.html?mode=webtoon",
+    commonViewerLink: "../common/storybook_viewer.html?subject=math&book=story_math_multiverse",
+    isReady: true,
+    tag: "완결 11쪽 · 성우 낭독"
+  },
+  {
+    id: "math_fraction_mult",
+    gradeTier: "5-6",
+    gradeLabel: "5학년 2학기",
+    unitBadge: "[5-2 2단원] 2권",
+    title: "분수의 곱셈 대모험 : 차원의 피자 나누기",
+    subtitle: "진분수·대분수의 곱셈과 단위 분수 원리",
+    desc: "차원 분할 마법으로 거대 우주 피자를 똑같이 나누어라! 곱하면 왜 작아질까? 신비한 단위 분수 세계의 비밀.",
+    coverImg: "https://images.unsplash.com/photo-1596495578065-6e0763fa1178?w=600&auto=format&fit=crop&q=80",
+    ebookLink: "#",
+    webtoonLink: "#",
+    commonViewerLink: "#",
+    isReady: false,
+    tag: "제작 준비 중"
+  },
+  {
+    id: "math_symmetry",
+    gradeTier: "5-6",
+    gradeLabel: "5학년 2학기",
+    unitBadge: "[5-2 3단원] 3권",
+    title: "합동과 대칭 : 데칼코마니 거울 미로",
+    subtitle: "선대칭도형과 점대칭도형의 성질",
+    desc: "거울 쌍둥이 요정들이 지키는 대칭의 성전! 대응점과 대칭축을 찾아 미로의 비밀 문을 열어라.",
+    coverImg: "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=600&auto=format&fit=crop&q=80",
+    ebookLink: "#",
+    webtoonLink: "#",
+    commonViewerLink: "#",
+    isReady: false,
+    tag: "제작 준비 중"
+  },
+  {
+    id: "math_100_numbers",
+    gradeTier: "1-2",
+    gradeLabel: "1학년 2학기",
+    unitBadge: "[1-2 1단원] 1권",
+    title: "도토리 100개 세기 축제",
+    subtitle: "100까지의 수와 묶어 세기",
+    desc: "다람쥐 마을의 풍년 축제! 10개씩 묶어 세며 50, 60, 70... 100까지의 수를 신나게 익혀봐요.",
+    coverImg: "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?w=600&auto=format&fit=crop&q=80",
+    ebookLink: "#",
+    webtoonLink: "#",
+    commonViewerLink: "#",
+    isReady: false,
+    tag: "제작 준비 중"
+  },
+  {
+    id: "math_add_sub_1",
+    gradeTier: "1-2",
+    gradeLabel: "1학년 2학기",
+    unitBadge: "[1-2 2단원] 2권",
+    title: "동물 친구들의 마법 버스 여행",
+    subtitle: "덧셈과 뺄셈(1) - 세 수의 계산",
+    desc: "정류장마다 동물 친구들이 타고 내려요! 더하고 빼며 목적지 무지개 언덕까지 무사히 도착할 수 있을까요?",
+    coverImg: "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?w=600&auto=format&fit=crop&q=80",
+    ebookLink: "#",
+    webtoonLink: "#",
+    commonViewerLink: "#",
+    isReady: false,
+    tag: "제작 준비 중"
+  },
+  {
+    id: "math_mult_3_2",
+    gradeTier: "3-4",
+    gradeLabel: "3학년 2학기",
+    unitBadge: "[3-2 1단원] 1권",
+    title: "마법 정원의 황금 사과 상자",
+    subtitle: "(두 자리 수) × (한 자리 수) 곱셈",
+    desc: "마법 나무 한 그루마다 황금 사과가 주렁주렁! 상자에 담긴 사과의 총 개수를 마법 곱셈 주문으로 척척 맞혀요.",
+    coverImg: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80",
+    ebookLink: "#",
+    webtoonLink: "#",
+    commonViewerLink: "#",
+    isReady: false,
+    tag: "제작 준비 중"
+  }
+];
+
+// 테마 및 프로필 자동 초기화
+let currentProfile = localStorage.getItem('currentUser') || 'son';
+function applyTheme() {
+  document.body.className = (currentProfile === 'son') ? 'theme--arcade' : 'theme--slime';
+  const tag = document.getElementById('userProfileTag');
+  if (tag) {
+    tag.textContent = (currentProfile === 'son') ? '🚀 [민수] 5학년 모드' : '🎠 [민서] 1학년 모드';
+    tag.style.borderColor = (currentProfile === 'son') ? '#0284c7' : '#ec4899';
+    tag.style.color = (currentProfile === 'son') ? '#38bdf8' : '#ec4899';
+  }
+}
+
+// 도서 목록 렌더링
+function renderBooks(filterTier = 'all') {
+  const container = document.getElementById('booksGrid');
+  if (!container) return;
+
+  const filtered = (filterTier === 'all') 
+    ? MATH_STORYBOOK_LIBRARY 
+    : MATH_STORYBOOK_LIBRARY.filter(b => b.gradeTier === filterTier);
+
+  container.innerHTML = filtered.map(book => {
+    if (book.isReady) {
+      return `
+        <div class="book-card is-ready">
+          <div class="card-top-row">
+            <span class="unit-tag">${book.unitBadge}</span>
+            <span class="status-badge">✨ 열람 가능</span>
+          </div>
+          
+          <div class="cover-box">
+            <img class="cover-img" src="${book.coverImg}" alt="${book.title}" loading="lazy">
+          </div>
+
+          <div class="book-meta">
+            <h3 class="book-title">${book.title}</h3>
+            <div class="book-subtitle">${book.subtitle}</div>
+            <p class="book-desc">${book.desc}</p>
+          </div>
+
+          <div class="card-action-group">
+            <div class="read-row">
+              <a href="${book.ebookLink}" class="btn-read btn-ebook">📖 E-Book 읽기</a>
+              <a href="${book.webtoonLink}" class="btn-read btn-webtoon">📜 웹툰 스크롤</a>
+            </div>
+            <a href="${book.commonViewerLink}" class="btn-common-viewer">🌐 공용 뷰어 엔진으로 열기</a>
+          </div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="book-card is-preparing">
+          <div class="card-top-row">
+            <span class="unit-tag" style="background:#64748b;">${book.unitBadge}</span>
+            <span class="status-badge preparing">⏳ 준비 중</span>
+          </div>
+
+          <div class="cover-box">
+            <img class="cover-img" src="${book.coverImg}" alt="${book.title}" loading="lazy">
+          </div>
+
+          <div class="book-meta">
+            <h3 class="book-title" style="color:#94a3b8;">${book.title}</h3>
+            <div class="book-subtitle" style="color:#64748b;">${book.subtitle}</div>
+            <p class="book-desc">${book.desc}</p>
+          </div>
+
+          <div class="card-action-group">
+            <button class="btn-read btn-disabled" disabled>🛠️ 다음 단원 준비 중입니다</button>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+// 필터 버튼 클릭
+function filterBooks(tier, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderBooks(tier);
+}
+
+// 요정 음성 토글 (더미 시각효과)
+let isTtsOn = true;
+function toggleTtsVoice() {
+  isTtsOn = !isTtsOn;
+  const btn = document.getElementById('ttsVoiceBtn');
+  if (btn) {
+    btn.textContent = isTtsOn ? '🔊 요정 음성 ON' : '🔈 요정 음성 OFF';
+    btn.style.opacity = isTtsOn ? '1' : '0.6';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  renderBooks('all');
+});
+</script>
+
+</body>
+</html>

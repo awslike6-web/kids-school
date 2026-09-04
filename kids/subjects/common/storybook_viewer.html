@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -81,6 +81,13 @@
     dataScript.src = `../${subject}/data/${book}.js`;
     dataScript.onload = () => {
       if (window.STORY_BOOK) {
+        // 공용 뷰어 위치(common/) 기준 상대 경로 보정
+        if (window.STORY_BOOK.imgBase && window.STORY_BOOK.imgBase.startsWith('./')) {
+          window.STORY_BOOK.imgBase = `../${subject}/${window.STORY_BOOK.imgBase.slice(2)}`;
+        }
+        if (window.STORY_BOOK.backUrl && !window.STORY_BOOK.backUrl.startsWith('../') && !window.STORY_BOOK.backUrl.startsWith('http')) {
+          window.STORY_BOOK.backUrl = `../${subject}/${window.STORY_BOOK.backUrl}`;
+        }
         initStorybook(window.STORY_BOOK);
       }
     };

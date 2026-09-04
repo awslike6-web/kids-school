@@ -85,6 +85,7 @@
   }
   .gw-concepts::before { background: linear-gradient(90deg, #6BCB77, #00D4FF); }
   .gw-workout::before { background: linear-gradient(90deg, #FF6B35, #FF6B9D); }
+  .gw-storybook::before { background: linear-gradient(90deg, #0284c7, #c084fc); }
 
   .gateway-card:hover {
     transform: translateY(-8px) scale(1.02);
@@ -96,6 +97,10 @@
   .gw-workout:hover {
     border-color: var(--orange);
     box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
+  }
+  .gw-storybook:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 15px 40px rgba(2, 132, 199, 0.4);
   }
 
   .gateway-icon { font-size: 4.8rem; margin-bottom: 16px; }
@@ -277,6 +282,7 @@
       <span id="userIcon">👨‍🚀</span> <span id="userName">로딩중...</span>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
+      <a href="math_storybook_library.html" class="exit-btn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border-color: #38bdf8; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">📚 단원 동화 도서관</a>
       <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
       <button class="exit-btn" id="goLobbyBtn">🔙 메인 대문으로</button>
     </div>
@@ -319,6 +325,20 @@
           <span class="gateway-badge" style="color:#f43f5e;">🧱 사칙연산 세로셈</span>
         </div>
       </div>
+
+      <!-- 관문 3: 단원 동화 도서관 (스토리북) -->
+      <a href="math_storybook_library.html" class="gateway-card gw-storybook" style="text-decoration: none; color: inherit;">
+        <div class="gateway-icon">📚</div>
+        <div class="gateway-title" style="color: #38bdf8;">3. 단원 동화 도서관</div>
+        <div class="gateway-desc">
+          <strong>[5-2 1단원 신작 완비]</strong> '수학 멀티버스 대모험'!<br>고화질 삽화와 성우 구연동화로 교과서 수학 개념을 환상적인 판타지 이야기로 정복해요!
+        </div>
+        <div class="gateway-badges">
+          <span class="gateway-badge" style="color: #38bdf8; border-color: #0284c7;">🚀 5-2 수의 범위·어림</span>
+          <span class="gateway-badge" style="color: #c084fc; border-color: #8b5cf6;">🎧 성우 오디오북</span>
+          <span class="gateway-badge" style="color: #4ade80; border-color: #10b981;">📜 E-Book & 웹툰</span>
+        </div>
+      </a>
 
     </div>
   </div>
