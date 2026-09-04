@@ -1002,17 +1002,19 @@ window.renderReadingStage = function() {
         const correctOrder = activePassage.correctOrder || paragraphs.map(p => p.id);
         const shuffled = [...paragraphs].sort(() => Math.random() - 0.5);
 
-        window.selectReadingPuzzle = function(id, text, el) {
+        window.selectReadingPuzzle = function(id, el) {
             if (el.classList.contains('selected')) return;
             el.classList.add('selected');
             userOrderTracking.push(id);
+            const text = el.textContent;
             document.getElementById('puzzle-slots').innerHTML += `<div style="margin-top:5px; color:var(--dark); font-weight:normal;">- ${text}</div>`;
         };
         window.verifyReadingOrder = function() {
             if (userOrderTracking.length !== correctOrder.length) {
                 alert("모든 문단을 선택해주세요!"); return;
             }
-            if (JSON.stringify(userOrderTracking) === JSON.stringify(correctOrder)) {
+            const isCorrect = userOrderTracking.every((id, index) => id === correctOrder[index]);
+            if (isCorrect) {
                 speakFairyTTS("Perfect! 순서를 완벽하게 맞췄어요!");
                 if (typeof dispatchReadingStageReward === 'function') {
                     dispatchReadingStageReward('stage5', activePassage?.id, 1);
@@ -1025,7 +1027,9 @@ window.renderReadingStage = function() {
                         message: '순서가 틀렸어요.',
                         onRetry: () => {
                             userOrderTracking = [];
-                            renderReadingStage();
+                            const puzzleBlocks = document.querySelectorAll('.puzzle-block');
+                            puzzleBlocks.forEach(b => b.classList.remove('selected'));
+                            document.getElementById('puzzle-slots').innerHTML = "선택한 순서: ";
                         },
                         onSkip: () => {
                             readingStage++;
@@ -1036,7 +1040,9 @@ window.renderReadingStage = function() {
                 } else {
                     speakFairyTTS("순서가 틀렸어요. 다시 한번 잘 읽어보세요!");
                     userOrderTracking = [];
-                    renderReadingStage();
+                    const puzzleBlocks = document.querySelectorAll('.puzzle-block');
+                    puzzleBlocks.forEach(b => b.classList.remove('selected'));
+                    document.getElementById('puzzle-slots').innerHTML = "선택한 순서: ";
                 }
             }
         };
@@ -1045,7 +1051,7 @@ window.renderReadingStage = function() {
             <div class="quiz-card">
                 <h3 style="color:var(--purple); margin-bottom:15px;">🧩 Mission 1: 문단의 올바른 순서를 완성하라!</h3>
                 <div class="puzzle-pool">
-                    ${shuffled.map(p => `<div class="puzzle-block" onclick="selectReadingPuzzle('${p.id}', '${p.text.replace(/'/g, "\\'")}', this)">${p.text}</div>`).join('')}
+                    ${shuffled.map(p => `<div class="puzzle-block" data-id="${p.id}" onclick="selectReadingPuzzle('${p.id}', this)">${p.text}</div>`).join('')}
                 </div>
                 <div id="puzzle-slots" class="puzzle-slots">선택한 순서: </div>
                 <button class="quiz-button" style="width:100%;" onclick="verifyReadingOrder()">문단 결합 검사하기</button>
@@ -1054,7 +1060,8 @@ window.renderReadingStage = function() {
     } else if (readingStage === 1) {
         // 접속사 퀴즈
         const conj = activePassage.conjunctions[readingConjunctionIndex];
-        window.verifyReadingConj = function(ans) {
+        window.verifyReadingConj = function(optIdx) {
+            const ans = conj.options[optIdx];
             const isCorrect = typeof gradeConjunctionAnswer === 'function'
                 ? gradeConjunctionAnswer(conj, ans)
                 : (ans === conj.answer);
@@ -1099,7 +1106,7 @@ window.renderReadingStage = function() {
                     ${conj.sentenceAfter}
                 </div>
                 <div style="display:flex; flex-direction:column; gap:10px;">
-                    ${conj.options.map(opt => `<button class="quiz-choice-btn" onclick="verifyReadingConj('${opt}')">${opt}</button>`).join('')}
+                    ${conj.options.map((opt, idx) => `<button class="quiz-choice-btn" onclick="verifyReadingConj(${idx})">${opt}</button>`).join('')}
                 </div>
             </div>
         `;
