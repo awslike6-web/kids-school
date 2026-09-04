@@ -16,3 +16,11 @@ uploads/
 /uploads/
 uploads/**
 **/uploads/**
+
+# Temporary deployment batches & test scripts
+run_git_push*.bat
+run_git.js
+git
+.git_commit_msg.txt
+test_*.js
+*.tmp
