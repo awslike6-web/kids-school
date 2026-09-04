@@ -191,9 +191,32 @@ function splitTextIntoSentences(text) {
 }
 
 /**
- * ⚡ Cloudflare Worker Edge TTS 설정 조회
+ * 🌐 텍스트의 주 언어가 영어인지 감지 (스마트 바이링구얼 엔진)
  */
-function getCloudflareEdgeTtsConfig() {
+function isEnglishText(text) {
+    if (!text) return false;
+    const str = String(text).trim();
+    const hasKorean = /[\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F]/.test(str);
+    const englishMatch = str.match(/[a-zA-Z]/g);
+    const englishLetters = englishMatch ? englishMatch.length : 0;
+    
+    // 한글이 없고 영문 알파벳이 포함되어 있으면 영어
+    if (!hasKorean && englishLetters > 0) return true;
+    
+    // 한글과 영어가 혼합된 경우, 영문 비중이 70% 이상이면 영어
+    const koreanMatch = str.match(/[\uAC00-\uD7AF]/g);
+    const koreanLetters = koreanMatch ? koreanMatch.length : 0;
+    if (englishLetters > 0 && englishLetters >= koreanLetters * 2.5) {
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * ⚡ Cloudflare Worker Edge TTS 설정 조회 (언어별 성우 자동 전환)
+ */
+function getCloudflareEdgeTtsConfig(text = '') {
     let workerUrl = '';
     if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TTS_WORKER_URL) {
         workerUrl = APP_CONFIG.TTS_WORKER_URL;
@@ -205,18 +228,29 @@ function getCloudflareEdgeTtsConfig() {
         workerUrl = `${baseProxy.replace(/\/$/, '')}/api/tts`;
     }
 
-    let voice = 'ko-KR-SunHiNeural';
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('EDGE_TTS_VOICE')) {
-        voice = localStorage.getItem('EDGE_TTS_VOICE');
-    } else if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.EDGE_TTS_VOICE) {
-        voice = APP_CONFIG.EDGE_TTS_VOICE;
+    const isEng = isEnglishText(text);
+
+    let voice = isEng ? 'en-US-JennyNeural' : 'ko-KR-SunHiNeural';
+    if (isEng) {
+        if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DEFAULT_ENGLISH_VOICE) {
+            voice = APP_CONFIG.DEFAULT_ENGLISH_VOICE;
+        } else if (typeof localStorage !== 'undefined' && localStorage.getItem('EDGE_TTS_VOICE_EN')) {
+            voice = localStorage.getItem('EDGE_TTS_VOICE_EN');
+        }
+    } else {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('EDGE_TTS_VOICE')) {
+            voice = localStorage.getItem('EDGE_TTS_VOICE');
+        } else if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.EDGE_TTS_VOICE) {
+            voice = APP_CONFIG.EDGE_TTS_VOICE;
+        }
     }
 
     return {
         workerUrl: workerUrl,
         voice: voice,
-        rate: '+6%',
-        pitch: '+4Hz'
+        rate: isEng ? '+0%' : '+6%',     // 영어는 자연스러운 원어민 속도(+0%), 한국어는 발랄한 요정 속도(+6%)
+        pitch: isEng ? '+0Hz' : '+4Hz',  // 영어는 자연스러운 피치, 한국어는 귀여운 요정 피치
+        isEnglish: isEng
     };
 }
 
@@ -274,8 +308,16 @@ async function fetchCloudflareEdgeTtsAudio(sentence, config) {
 /**
  * 🚀 Cloudflare Edge-TTS 문장 큐잉 & 실시간 연속 스트리밍 재생기
  */
-async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null) {
-    const config = getCloudflareEdgeTtsConfig();
+async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, forceVoice = null) {
+    const config = getCloudflareEdgeTtsConfig(fullText);
+    if (forceVoice) {
+        config.voice = forceVoice;
+        if (forceVoice.includes('Jenny') || forceVoice.includes('en-')) {
+            config.rate = '+0%';
+            config.pitch = '+0Hz';
+            config.isEnglish = true;
+        }
+    }
     if (!config.workerUrl) {
         throw new Error("TTS_WORKER_URL_NOT_FOUND");
     }
@@ -289,7 +331,8 @@ async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null) {
         return;
     }
 
-    console.log(`🎙️ [Edge-TTS Stream] (세션 #${sessionId}) 총 ${sentences.length}개 문장 선희 Neural AI 스트리밍 시작`);
+    const voiceLabel = config.isEnglish ? 'Jenny (미국 원어민)' : 'SunHi (한국어 요정)';
+    console.log(`🎙️ [Edge-TTS Stream] (세션 #${sessionId}) 총 ${sentences.length}개 문장 [${voiceLabel}] 스트리밍 시작`);
     isPlayingTtsQueue = true;
 
     const audioPromises = sentences.map(s => fetchCloudflareEdgeTtsAudio(s, config));
@@ -336,6 +379,40 @@ async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null) {
     };
 
     await playNext();
+}
+
+/**
+ * 🇺🇸 미국 원어민(Jenny) 전용 발화 헬퍼 (영어방 전용)
+ */
+async function speakEnglish(text, onEndCallback = null) {
+    const trimmed = String(text || '').trim();
+    if (!trimmed) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+    if (!isTtsEnabled) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    try {
+        const enVoice = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DEFAULT_ENGLISH_VOICE) || 'en-US-JennyNeural';
+        await playCloudflareEdgeTtsStream(trimmed, onEndCallback, enVoice);
+    } catch (err) {
+        console.warn("⚠️ [원어민 TTS 폴백] WebSpeech 영어 음성으로 전환합니다:", err);
+        if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+            const utterance = new SpeechSynthesisUtterance(trimmed);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.88;
+            if (onEndCallback) utterance.onend = onEndCallback;
+            window.speechSynthesis.speak(utterance);
+        } else if (onEndCallback) {
+            onEndCallback();
+        }
+    }
 }
 
 /**
@@ -956,6 +1033,8 @@ window.getOpenAITtsConfig = getOpenAITtsConfig;
 window.getCloudflareEdgeTtsConfig = getCloudflareEdgeTtsConfig;
 window.fetchCloudflareEdgeTtsAudio = fetchCloudflareEdgeTtsAudio;
 window.playCloudflareEdgeTtsStream = playCloudflareEdgeTtsStream;
+window.isEnglishText = isEnglishText;
+window.speakEnglish = speakEnglish;
 
 // 초기화
 if (typeof window !== 'undefined') {

@@ -74,17 +74,36 @@ function initializeEnglishRoom() {
 }
 
 // ==========================================
-// 🗣️ 원어민 음성 출력 엔진 (TTS)
+// 🗣️ 원어민 음성 출력 엔진 (TTS - 미국 원어민 Jenny Neural 연동)
 // ==========================================
-function speakEnglish(text) {
+function speakEnglish(text, onEndCallback = null) {
+  // 1. 요정 엔진의 초고음질 미국 원어민(Jenny) 스트리밍 우선 호출
+  if (typeof window.speakEnglish === 'function' && window.speakEnglish !== speakEnglish) {
+    window.speakEnglish(text, onEndCallback);
+    return;
+  }
+  if (typeof window.playCloudflareEdgeTtsStream === 'function') {
+    window.playCloudflareEdgeTtsStream(text, onEndCallback, 'en-US-JennyNeural').catch(() => {
+      fallbackWebSpeech(text, onEndCallback);
+    });
+    return;
+  }
+
+  // 2. 오프라인 또는 요정 엔진 로드 전 폴백
+  fallbackWebSpeech(text, onEndCallback);
+}
+
+function fallbackWebSpeech(text, onEndCallback = null) {
   if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel(); 
+    try { window.speechSynthesis.cancel(); } catch (e) {}
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US'; 
-    utterance.rate = 0.85; 
+    utterance.rate = 0.88; 
+    if (onEndCallback) utterance.onend = onEndCallback;
     window.speechSynthesis.speak(utterance);
   } else {
     console.warn("이 기기에서는 음성 지원(TTS)이 되지 않습니다.");
+    if (onEndCallback) onEndCallback();
   }
 }
 
