@@ -1,0 +1,37 @@
+﻿/* ==========================================
+   🏰 민민이네 공부방 공통 디자인 시스템 (design-system.css)
+   ========================================== */
+
+:root {
+  /* 🎨 메인 액센트 컬러 */
+  --sky: #6EC6F5;
+  --yellow: #FFD93D;
+  --pink: #FF6B9D;
+  --mint: #4ECDC4;
+  --purple: #A78BFA;
+  --orange: #FF9F43;
+  --green: #6BCB77;
+  --dark: #2D2D4E;
+  --white: #FFFEF7;
+
+  /* 🌌 다크 / 스토리북 테마 토큰 */
+  --primary: #8b5cf6;
+  --primary-dark: #7c3aed;
+  --accent: #f59e0b;
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-light: #f8fafc;
+
+  /* 📏 공통 곡률 및 그림자 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-md: 0 6px 18px rgba(0,0,0,0.1);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.16);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
