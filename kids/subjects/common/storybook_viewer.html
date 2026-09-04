@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>가슴이 얼음처럼 꽁꽁 긴장돼요! (국어 1-2 1단원 4권) 📖 | 민민이네 공부방</title>
+<title>단원 스토리북 📖 | 민민이네 공부방</title>
 <link rel="stylesheet" href="../../css/design-system.css">
 <link rel="stylesheet" href="../../css/storybook_viewer.css">
 </head>
@@ -13,10 +13,10 @@
 
 <div class="top-bar">
   <div class="top-left">
-    <a id="storyBackBtn" href="korean.html" class="btn-back">🚪 국어방 대기실</a>
+    <a id="storyBackBtn" href="../lobby.html" class="btn-back">🔙 대기실로</a>
     <div class="story-title">
-      <span id="storyTitleIcon">❄️</span>
-      <span id="storyTitleText">가슴이 얼음처럼 꽁꽁 긴장돼요! (국어 1-2 1단원 4권)</span>
+      <span id="storyTitleIcon">📖</span>
+      <span id="storyTitleText">동화책 불러오는 중...</span>
     </div>
   </div>
   
@@ -36,7 +36,7 @@
     <button id="prevBtn" class="btn-page-nav btn-prev" onclick="changePage(-1)">◀ 이전 장</button>
     
     <div style="display:flex; align-items:center; gap:10px;">
-      <span id="pageIndicator" class="page-indicator">로딩 중...</span>
+      <span id="pageIndicator" class="page-indicator">- / - 쪽</span>
       
       <div class="audio-control-bar">
         <button id="playBtn" class="btn-play" onclick="toggleEbookAudio()">
@@ -58,7 +58,7 @@
 <div class="webtoon-container" id="webtoonView">
   <div class="webtoon-sticky-bar">
     <div id="webtoonStickyTitle" style="font-family:'Jua', sans-serif; font-size:1.05rem; color:var(--primary);">
-      ❄️ 가슴이 얼음처럼 꽁꽁 긴장돼요! (국어 1-2 1단원 4권)
+      📖 동화 읽기
     </div>
     <button id="continuousPlayBtn" class="continuous-btn" onclick="toggleContinuousPlay()">
       <span id="continuousIcon">▶</span>
@@ -69,7 +69,26 @@
   <div id="webtoonCardsList" style="display:flex; flex-direction:column; gap:28px;"></div>
 </div>
 
-<script src="./data/story_1_2_1_b4.js"></script>
 <script src="../../js/storybook_engine.js"></script>
+<script>
+  // URL 파라미터 기반 동적 데이터 로드 지원 (예: ?subject=korean&book=story_1_2_1_b1)
+  const urlParams = new URLSearchParams(window.location.search);
+  const subject = urlParams.get('subject');
+  const book = urlParams.get('book');
+
+  if (subject && book) {
+    const dataScript = document.createElement('script');
+    dataScript.src = `../${subject}/data/${book}.js`;
+    dataScript.onload = () => {
+      if (window.STORY_BOOK) {
+        initStorybook(window.STORY_BOOK);
+      }
+    };
+    dataScript.onerror = () => {
+      document.getElementById('storyTitleText').textContent = '도서 데이터를 찾을 수 없습니다.';
+    };
+    document.body.appendChild(dataScript);
+  }
+</script>
 </body>
 </html>
