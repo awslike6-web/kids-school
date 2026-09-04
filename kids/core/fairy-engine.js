@@ -191,6 +191,154 @@ function splitTextIntoSentences(text) {
 }
 
 /**
+ * ⚡ Cloudflare Worker Edge TTS 설정 조회
+ */
+function getCloudflareEdgeTtsConfig() {
+    let workerUrl = '';
+    if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TTS_WORKER_URL) {
+        workerUrl = APP_CONFIG.TTS_WORKER_URL;
+    } else if (typeof localStorage !== 'undefined' && localStorage.getItem('TTS_WORKER_URL')) {
+        workerUrl = localStorage.getItem('TTS_WORKER_URL');
+    } else {
+        const baseProxy = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) 
+            || (typeof PROXY_URL !== 'undefined' ? PROXY_URL : 'https://minmin-notion.awslike6.workers.dev');
+        workerUrl = `${baseProxy.replace(/\/$/, '')}/api/tts`;
+    }
+
+    let voice = 'ko-KR-SunHiNeural';
+    if (typeof localStorage !== 'undefined' && localStorage.getItem('EDGE_TTS_VOICE')) {
+        voice = localStorage.getItem('EDGE_TTS_VOICE');
+    } else if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.EDGE_TTS_VOICE) {
+        voice = APP_CONFIG.EDGE_TTS_VOICE;
+    }
+
+    return {
+        workerUrl: workerUrl,
+        voice: voice,
+        rate: '+6%',
+        pitch: '+4Hz'
+    };
+}
+
+/**
+ * ⚡ Cloudflare Edge-TTS API 단일 문장 오디오 가져오기 (Blob URL 반환)
+ */
+async function fetchCloudflareEdgeTtsAudio(sentence, config) {
+    const trimmed = sentence.trim();
+    if (!trimmed) return null;
+
+    const cacheKey = `edge_${config.voice}_${config.rate}_${trimmed}`;
+    if (ttsAudioBlobCache.has(cacheKey)) {
+        return ttsAudioBlobCache.get(cacheKey);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000); // 6초 타임아웃
+
+    try {
+        const response = await fetch(config.workerUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: trimmed,
+                voice: config.voice || 'ko-KR-SunHiNeural',
+                rate: config.rate || '+6%',
+                pitch: config.pitch || '+4Hz'
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`Edge-TTS Worker HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        if (blob.size === 0) throw new Error("Empty audio response");
+
+        const audioUrl = URL.createObjectURL(blob);
+
+        if (trimmed.length <= 60) {
+            ttsAudioBlobCache.set(cacheKey, audioUrl);
+        }
+
+        return audioUrl;
+    } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
+    }
+}
+
+/**
+ * 🚀 Cloudflare Edge-TTS 문장 큐잉 & 실시간 연속 스트리밍 재생기
+ */
+async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null) {
+    const config = getCloudflareEdgeTtsConfig();
+    if (!config.workerUrl) {
+        throw new Error("TTS_WORKER_URL_NOT_FOUND");
+    }
+
+    stopFairyTTS();
+    const sessionId = ++currentTtsSessionId;
+
+    const sentences = splitTextIntoSentences(fullText);
+    if (sentences.length === 0) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    console.log(`🎙️ [Edge-TTS Stream] (세션 #${sessionId}) 총 ${sentences.length}개 문장 선희 Neural AI 스트리밍 시작`);
+    isPlayingTtsQueue = true;
+
+    const audioPromises = sentences.map(s => fetchCloudflareEdgeTtsAudio(s, config));
+
+    let currentIndex = 0;
+
+    const playNext = async () => {
+        if (sessionId !== currentTtsSessionId || !isPlayingTtsQueue || currentIndex >= sentences.length) {
+            if (sessionId === currentTtsSessionId) {
+                isPlayingTtsQueue = false;
+                currentOpenAiAudio = null;
+                if (onEndCallback) onEndCallback();
+            }
+            return;
+        }
+
+        try {
+            const audioUrl = await audioPromises[currentIndex];
+            if (sessionId !== currentTtsSessionId || !isPlayingTtsQueue || !audioUrl) {
+                return;
+            }
+
+            const audio = new Audio(audioUrl);
+            currentOpenAiAudio = audio;
+
+            audio.onended = () => {
+                if (sessionId !== currentTtsSessionId) return;
+                currentIndex++;
+                playNext();
+            };
+
+            audio.onerror = (e) => {
+                if (sessionId !== currentTtsSessionId) return;
+                console.warn(`[Edge-TTS] ${currentIndex + 1}번째 문장 재생 오류, 다음으로 진행:`, e);
+                currentIndex++;
+                playNext();
+            };
+
+            await audio.play();
+        } catch (err) {
+            if (sessionId !== currentTtsSessionId) return;
+            throw err;
+        }
+    };
+
+    await playNext();
+}
+
+/**
  * ⚡ OpenAI TTS API 단일 문장 오디오 가져오기 (Blob URL 반환)
  */
 async function fetchOpenAiTtsAudio(sentence, config) {
@@ -410,7 +558,15 @@ async function speakFairyTTS(text, onEndCallback = null) {
         return;
     }
 
-    // 2. 🌟 1순위: OpenAI TTS (스튜디오급 성우 음성)
+    // 2. 🌟 1순위: Cloudflare Worker Edge Neural AI TTS (선희 성우 초고음질 실시간 스트리밍)
+    try {
+        await playCloudflareEdgeTtsStream(cleanText, onEndCallback);
+        return;
+    } catch (edgeError) {
+        console.warn("ℹ️ [Cloudflare Edge-TTS 미응답/폴백] OpenAI TTS 또는 WebSpeech로 자동 전환합니다:", edgeError.message || edgeError);
+    }
+
+    // 3. 🌟 2순위: OpenAI TTS (스튜디오급 성우 음성)
     const openAiConfig = getOpenAITtsConfig();
     if (openAiConfig.apiKey) {
         try {
@@ -421,7 +577,7 @@ async function speakFairyTTS(text, onEndCallback = null) {
         }
     }
 
-    // 3. 🗣️ 2순위 (폴백): 브라우저 WebSpeech API 최고 품질 낭독
+    // 4. 🗣️ 3순위 (폴백): 브라우저 WebSpeech API 최고 품질 낭독
     speakWebSpeechFallback(cleanText, isQuestion, onEndCallback);
 }
 
@@ -797,6 +953,9 @@ window.selectTtsVoiceOpt = selectTtsVoiceOpt;
 window.testCurrentTtsVoice = testCurrentTtsVoice;
 window.saveTtsVoiceSettings = saveTtsVoiceSettings;
 window.getOpenAITtsConfig = getOpenAITtsConfig;
+window.getCloudflareEdgeTtsConfig = getCloudflareEdgeTtsConfig;
+window.fetchCloudflareEdgeTtsAudio = fetchCloudflareEdgeTtsAudio;
+window.playCloudflareEdgeTtsStream = playCloudflareEdgeTtsStream;
 
 // 초기화
 if (typeof window !== 'undefined') {
