@@ -10,6 +10,7 @@ let fairyPresetAudio = null;
 let currentOpenAiAudio = null;
 let currentTtsQueue = [];
 let isPlayingTtsQueue = false;
+let currentTtsSessionId = 0;
 const ttsAudioBlobCache = new Map(); // 짧은 칭찬 멘트 메모리 캐시
 
 // 🎧 Neural AI 성우 MP3 프리셋 데이터베이스
@@ -128,7 +129,8 @@ async function playOpenAiTtsStream(fullText, onEndCallback = null) {
         throw new Error("OPENAI_API_KEY_NOT_FOUND");
     }
 
-    stopFairyTTS(); // 이전 재생 중단
+    stopFairyTTS(); // 이전 재생 즉시 중단
+    const sessionId = ++currentTtsSessionId;
 
     const sentences = splitTextIntoSentences(fullText);
     if (sentences.length === 0) {
@@ -136,7 +138,7 @@ async function playOpenAiTtsStream(fullText, onEndCallback = null) {
         return;
     }
 
-    console.log(`🎙️ [OpenAI TTS] 총 ${sentences.length}개 문장 스트리밍 큐 시동 (보이스: ${config.voice})`);
+    console.log(`🎙️ [OpenAI TTS] (세션 #${sessionId}) 총 ${sentences.length}개 문장 스트리밍 큐 시동 (보이스: ${config.voice})`);
     isPlayingTtsQueue = true;
 
     // 문장별 오디오 프로미스 프리페치 맵
@@ -145,19 +147,19 @@ async function playOpenAiTtsStream(fullText, onEndCallback = null) {
     let currentIndex = 0;
 
     const playNext = async () => {
-        if (!isPlayingTtsQueue || currentIndex >= sentences.length) {
-            isPlayingTtsQueue = false;
-            currentOpenAiAudio = null;
-            if (onEndCallback) onEndCallback();
+        if (sessionId !== currentTtsSessionId || !isPlayingTtsQueue || currentIndex >= sentences.length) {
+            if (sessionId === currentTtsSessionId) {
+                isPlayingTtsQueue = false;
+                currentOpenAiAudio = null;
+                if (onEndCallback) onEndCallback();
+            }
             return;
         }
 
         try {
             // 현재 순서의 오디오 URL 대기
             const audioUrl = await audioPromises[currentIndex];
-            if (!isPlayingTtsQueue || !audioUrl) {
-                currentIndex++;
-                playNext();
+            if (sessionId !== currentTtsSessionId || !isPlayingTtsQueue || !audioUrl) {
                 return;
             }
 
@@ -165,11 +167,13 @@ async function playOpenAiTtsStream(fullText, onEndCallback = null) {
             currentOpenAiAudio = audio;
 
             audio.onended = () => {
+                if (sessionId !== currentTtsSessionId) return;
                 currentIndex++;
                 playNext();
             };
 
             audio.onerror = (e) => {
+                if (sessionId !== currentTtsSessionId) return;
                 console.warn(`[OpenAI TTS] ${currentIndex + 1}번째 문장 재생 오류, 다음 문장으로 진행:`, e);
                 currentIndex++;
                 playNext();
@@ -177,6 +181,7 @@ async function playOpenAiTtsStream(fullText, onEndCallback = null) {
 
             await audio.play();
         } catch (err) {
+            if (sessionId !== currentTtsSessionId) return;
             console.error(`[OpenAI TTS] 문장 스트리밍 도중 오류 발생:`, err);
             currentIndex++;
             playNext();
@@ -265,6 +270,8 @@ function cleanTextForTTS(rawText) {
  * 📢 요정 음성 메인 출력 함수 (1순위: OpenAI TTS ➔ 2순위: WebSpeech 폴백)
  */
 async function speakFairyTTS(text, onEndCallback = null) {
+    stopFairyTTS(); // 새 발화 요청 시 이전 오디오/TTS 즉시 중단
+
     const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
     if (!isTtsEnabled) {
         if (onEndCallback) onEndCallback();
@@ -321,6 +328,7 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
     }
 
     isSpeechUnlocked = true;
+    const sessionId = ++currentTtsSessionId;
 
     try {
         if (window.speechSynthesis.paused) window.speechSynthesis.resume();
@@ -328,6 +336,8 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
     } catch (e) {}
 
     const runSpeak = () => {
+        if (sessionId !== currentTtsSessionId) return; // 최신 세션이 아니면 취소
+
         try {
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'ko-KR';
@@ -338,11 +348,13 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
             if (bestVoice) utterance.voice = bestVoice;
 
             utterance.onend = () => {
+                if (sessionId !== currentTtsSessionId) return;
                 currentUtterance = null;
                 if (onEndCallback) onEndCallback();
             };
 
             utterance.onerror = (e) => {
+                if (sessionId !== currentTtsSessionId) return;
                 if (e.error !== 'interrupted') console.error('WebSpeech TTS 에러:', e);
                 currentUtterance = null;
                 if (onEndCallback) onEndCallback();
@@ -351,6 +363,7 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
             currentUtterance = utterance;
             window.speechSynthesis.speak(utterance);
         } catch (err) {
+            if (sessionId !== currentTtsSessionId) return;
             console.error('🚀 [WebSpeech TTS 에러]:', err);
             if (onEndCallback) onEndCallback();
         }
@@ -360,11 +373,15 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
     if (!voices || voices.length === 0) {
         window.speechSynthesis.onvoiceschanged = () => {
             window.speechSynthesis.onvoiceschanged = null;
-            runSpeak();
+            if (sessionId === currentTtsSessionId) runSpeak();
         };
-        setTimeout(runSpeak, 100);
+        setTimeout(() => {
+            if (sessionId === currentTtsSessionId) runSpeak();
+        }, 100);
     } else {
-        setTimeout(runSpeak, 30);
+        setTimeout(() => {
+            if (sessionId === currentTtsSessionId) runSpeak();
+        }, 30);
     }
 }
 
@@ -372,6 +389,7 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
  * 🛑 모든 음성 즉시 정지
  */
 function stopFairyTTS() {
+    currentTtsSessionId++;
     isPlayingTtsQueue = false;
     
     if (currentOpenAiAudio) {
@@ -383,7 +401,11 @@ function stopFairyTTS() {
     }
 
     if (fairyPresetAudio) {
-        try { fairyPresetAudio.pause(); } catch (e) {}
+        try { 
+            fairyPresetAudio.pause(); 
+            fairyPresetAudio.currentTime = 0;
+        } catch (e) {}
+        fairyPresetAudio = null;
     }
 
     if (window.speechSynthesis) {

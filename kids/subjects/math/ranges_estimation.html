@@ -767,7 +767,7 @@
 
     let currentRangeKey = 'iseong';
 
-    function selectRangePreset(key) {
+    function selectRangePreset(key, shouldSpeak = true) {
       currentRangeKey = key;
       document.querySelectorAll('#rangePresets .range-preset-btn').forEach(b => b.classList.remove('active'));
       const found = document.querySelector(`#rangePresets button[onclick*="'${key}'"]`);
@@ -781,7 +781,7 @@
       renderNumberLineSvg(data);
       renderTestCards(data);
 
-      if (typeof fairySpeak === 'function') {
+      if (shouldSpeak && typeof fairySpeak === 'function') {
         fairySpeak(data.voice);
       }
     }
@@ -952,7 +952,7 @@
       rollDigit(currentSelectedDigit, null);
     }
 
-    function rollDigit(digit, btn) {
+    function rollDigit(digit, btn, shouldSpeak = true) {
       currentSelectedDigit = digit;
       document.querySelectorAll('.digit-ball-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
@@ -978,10 +978,10 @@
       const vBox = document.getElementById('roundingVerdictBox');
       if (isRoundUp) {
         vBox.innerHTML = `<span style="color:#dc2626;">🚀 숫자 <strong>${digit}</strong>은(는) 5 이상이므로 <strong>올림(+1)</strong>! ➔ 윗자리 숫자를 1 올려줍니다!</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 5 이상이므로 올림하여 윗자리 숫자가 1 커집니다!`);
+        if (shouldSpeak && typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 5 이상이므로 올림하여 윗자리 숫자가 1 커집니다!`);
       } else {
         vBox.innerHTML = `<span style="color:#2563eb;">🛝 숫자 <strong>${digit}</strong>은(는) 4 이하이므로 <strong>버림(0)</strong>! ➔ 아랫자리 숫자를 모두 0으로 만듭니다!</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 4 이하이므로 버림하여 0으로 만듭니다!`);
+        if (shouldSpeak && typeof fairySpeak === 'function') fairySpeak(`숫자 ${digit}은 4 이하이므로 버림하여 0으로 만듭니다!`);
       }
     }
 
@@ -1206,8 +1206,8 @@
       document.getElementById('userName').textContent = `${name} 대원`;
       document.getElementById('userIcon').textContent = icon;
 
-      selectRangePreset('iseong');
-      rollDigit(8, null);
+      selectRangePreset('iseong', false); // 초기 로딩 시 무발화
+      rollDigit(8, null, false);          // 초기 로딩 시 무발화
       calcBadgePacking();
       calcCoinExchange();
       calcStadiumAudience();
