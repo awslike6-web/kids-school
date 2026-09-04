@@ -13,14 +13,127 @@ let isPlayingTtsQueue = false;
 let currentTtsSessionId = 0;
 const ttsAudioBlobCache = new Map(); // 짧은 칭찬 멘트 메모리 캐시
 
-// 🎧 Neural AI 성우 MP3 프리셋 데이터베이스
-const FAIRY_PRESET_AUDIOS = {
-    "welcome_korean": "assets/sounds/welcome_korean.mp3",
-    "welcome_math_minsu": "assets/sounds/welcome_math_minsu.mp3",
-    "welcome_math_minseo": "assets/sounds/welcome_math_minseo.mp3",
-    "welcome_lobby": "assets/sounds/welcome_lobby.mp3",
-    "quest_complete": "assets/sounds/quest_complete.mp3"
+// 🎧 Neural AI(선희) 요정 코코 MP3 프리셋 데이터베이스
+const FAIRY_AUDIO_PRESETS = {
+    // 1. 환영 인사 & 과목 입장 (8종)
+    welcome_lobby: "fairy_welcome_lobby.mp3",
+    welcome_minsu: "fairy_welcome_minsu.mp3",
+    welcome_minseo: "fairy_welcome_minseo.mp3",
+    welcome_math: "fairy_welcome_math.mp3",
+    welcome_korean: "fairy_welcome_korean.mp3",
+    welcome_society: "fairy_welcome_society.mp3",
+    welcome_science: "fairy_welcome_science.mp3",
+    welcome_english: "fairy_welcome_english.mp3",
+
+    // 2. 정답 & 칭찬 풀 (10종)
+    praises: [
+        "fairy_praise_1.mp3", "fairy_praise_2.mp3", "fairy_praise_3.mp3", "fairy_praise_4.mp3", "fairy_praise_5.mp3",
+        "fairy_praise_6.mp3", "fairy_praise_7.mp3", "fairy_praise_8.mp3", "fairy_praise_9.mp3", "fairy_praise_10.mp3"
+    ],
+
+    // 3. 오답 & 응원/힌트 풀 (8종)
+    encourages: [
+        "fairy_encourage_1.mp3", "fairy_encourage_2.mp3", "fairy_encourage_3.mp3", "fairy_encourage_4.mp3",
+        "fairy_encourage_5.mp3", "fairy_encourage_6.mp3", "fairy_encourage_7.mp3", "fairy_encourage_8.mp3"
+    ],
+
+    // 4. 퀘스트 완료 & 레벨업 & 보상 (6종)
+    quest_complete: "fairy_quest_complete.mp3",
+    level_up: "fairy_level_up.mp3",
+    reward_diamond: "fairy_reward_diamond.mp3",
+    reward_star: "fairy_reward_star.mp3",
+    study_finish: "fairy_study_finish.mp3",
+    streak_bonus: "fairy_streak_bonus.mp3",
+
+    // 5. 시작 & 집중 (4종)
+    focus_start: "fairy_focus_start.mp3",
+    ready_go: "fairy_ready_go.mp3",
+    think_careful: "fairy_think_careful.mp3",
+    hint_open: "fairy_hint_open.mp3"
 };
+
+// 레거시 호환용 매핑
+const FAIRY_PRESET_AUDIOS = {
+    "welcome_korean": "fairy_welcome_korean.mp3",
+    "welcome_math_minsu": "fairy_welcome_minsu.mp3",
+    "welcome_math_minseo": "fairy_welcome_minseo.mp3",
+    "welcome_lobby": "fairy_welcome_lobby.mp3",
+    "quest_complete": "fairy_quest_complete.mp3"
+};
+
+/**
+ * 🔍 페이지 위치(루트/하위 과목 폴더)에 관계없이 요정 음성 에셋 기본 경로 반환
+ */
+function getFairyAssetBaseUrl() {
+    if (typeof document !== 'undefined') {
+        const scripts = document.getElementsByTagName('script');
+        for (let s of scripts) {
+            if (s.src && s.src.includes('fairy-engine.js')) {
+                const coreUrl = s.src.substring(0, s.src.lastIndexOf('/')); // .../kids/core
+                const kidsUrl = coreUrl.substring(0, coreUrl.lastIndexOf('/')); // .../kids
+                return kidsUrl + '/assets/sounds/fairy/';
+            }
+        }
+    }
+    return 'assets/sounds/fairy/';
+}
+
+/**
+ * 🎯 입력 텍스트/의도에 따른 고음질 선희 Neural 프리셋 음성 매칭 라우터
+ */
+function resolveFairyPresetAudio(text) {
+    if (!text) return null;
+    const trimmed = String(text).trim();
+    const baseUrl = getFairyAssetBaseUrl();
+
+    // 1) 직접 프리셋 키 매핑
+    if (FAIRY_AUDIO_PRESETS[trimmed] && typeof FAIRY_AUDIO_PRESETS[trimmed] === 'string') {
+        return baseUrl + FAIRY_AUDIO_PRESETS[trimmed];
+    }
+    if (FAIRY_PRESET_AUDIOS[trimmed]) {
+        return baseUrl + FAIRY_PRESET_AUDIOS[trimmed];
+    }
+
+    // 2) 퀘스트 완료 / 보상 / 레벨업 키워드 매칭
+    if (/퀘스트.*완료|미션.*완료|퀘스트를.*완료/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.quest_complete;
+    if (/레벨업|레벨.*올랐/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.level_up;
+    if (/다이아|보석/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.reward_diamond;
+    if (/별조각|황금.*별/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.reward_star;
+    if (/공부.*끝|오늘.*학습.*완료|오늘.*공부.*완료/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.study_finish;
+    if (/연속.*학습|스트릭/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.streak_bonus;
+
+    // 3) 환영 인사 키워드 매칭
+    if (/민민이네.*공부방|공부방에.*온.*걸|로비/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_lobby;
+    if (/민수야.*안녕|민수.*퀘스트/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_minsu;
+    if (/민서야.*반가워|민서.*별/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_minseo;
+    if (/수학.*탐험|수학.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_math;
+    if (/국어.*배움|국어.*탐험/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_korean;
+    if (/사회.*탐험|사회.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_society;
+    if (/과학.*실험|과학.*탐험/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_science;
+    if (/영어.*모험|영어.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_english;
+
+    // 4) 정답 & 칭찬 키워드 매칭 (10종 중 무작위 선택)
+    if (/정답|완벽|대단|천재|멋져|딩동댕|최고|잘했|맞혔|맞았/i.test(trimmed)) {
+        const praises = FAIRY_AUDIO_PRESETS.praises;
+        const chosen = praises[Math.floor(Math.random() * praises.length)];
+        return baseUrl + chosen;
+    }
+
+    // 5) 오답 & 응원/힌트 키워드 매칭 (8종 중 무작위 선택)
+    if (/아쉬워|틀렸|다시.*생각|다시.*한번|힌트|힘내|포기하지|괜찮아|도전/i.test(trimmed)) {
+        const encourages = FAIRY_AUDIO_PRESETS.encourages;
+        const chosen = encourages[Math.floor(Math.random() * encourages.length)];
+        return baseUrl + chosen;
+    }
+
+    // 6) 시작 & 집중 키워드 매칭
+    if (/집중|시작해|출발/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.focus_start;
+    if (/준비.*완료|신나는.*퀴즈/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.ready_go;
+    if (/차근차근.*읽어/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.think_careful;
+    if (/비밀.*힌트|힌트를.*열어/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.hint_open;
+
+    return null;
+}
 
 /**
  * 🔑 OpenAI TTS 설정 조회 (APP_CONFIG 및 LocalStorage 동기화)
@@ -284,17 +397,11 @@ async function speakFairyTTS(text, onEndCallback = null) {
         return;
     }
 
-    // 1. 🎵 사전 녹음된 MP3 프리셋 확인
-    if (FAIRY_PRESET_AUDIOS[trimmed]) {
-        playFairyPresetAudio(FAIRY_PRESET_AUDIOS[trimmed], onEndCallback);
+    // 1. 🎵 사전 녹음된 Neural AI(선희) MP3 프리셋 및 스마트 키워드 매칭
+    const matchedPresetAudio = resolveFairyPresetAudio(trimmed);
+    if (matchedPresetAudio) {
+        playFairyPresetAudio(matchedPresetAudio, onEndCallback);
         return;
-    }
-
-    for (const [key, filename] of Object.entries(FAIRY_PRESET_AUDIOS)) {
-        if (trimmed === key || trimmed.startsWith(key)) {
-            playFairyPresetAudio(filename, onEndCallback);
-            return;
-        }
     }
 
     const { text: cleanText, isQuestion } = cleanTextForTTS(text);
@@ -417,14 +524,26 @@ function stopFairyTTS() {
 
 function playFairyPresetAudio(src, onEndCallback = null) {
     stopFairyTTS();
+    const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+    if (!isTtsEnabled) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
     try {
-        fairyPresetAudio = new Audio(src);
+        let fullSrc = src;
+        if (!src.includes('/') && !src.includes('\\')) {
+            fullSrc = getFairyAssetBaseUrl() + src;
+        }
+        fairyPresetAudio = new Audio(fullSrc);
         fairyPresetAudio.volume = 1.0;
         fairyPresetAudio.onended = () => {
+            fairyPresetAudio = null;
             if (onEndCallback) onEndCallback();
         };
         fairyPresetAudio.onerror = (e) => {
-            console.warn(`프리셋 오디오(${src}) 로드 실패, 동적 음성으로 대체합니다:`, e);
+            console.warn(`프리셋 오디오(${fullSrc}) 로드 실패:`, e);
+            fairyPresetAudio = null;
             if (onEndCallback) onEndCallback();
         };
         fairyPresetAudio.play().catch(err => {
@@ -434,6 +553,60 @@ function playFairyPresetAudio(src, onEndCallback = null) {
     } catch (err) {
         if (onEndCallback) onEndCallback();
     }
+}
+
+/**
+ * 🌟 정답/극찬 전용 헬퍼 (10개 선희 고음질 음성 중 무작위 재생)
+ */
+function fairyPraise(onEndCallback = null) {
+    const praises = FAIRY_AUDIO_PRESETS.praises;
+    const chosen = praises[Math.floor(Math.random() * praises.length)];
+    playFairyPresetAudio(getFairyAssetBaseUrl() + chosen, onEndCallback);
+}
+
+/**
+ * 🌸 오답/응원 전용 헬퍼 (8개 선희 고음질 음성 중 무작위 재생)
+ */
+function fairyEncourage(onEndCallback = null) {
+    const encourages = FAIRY_AUDIO_PRESETS.encourages;
+    const chosen = encourages[Math.floor(Math.random() * encourages.length)];
+    playFairyPresetAudio(getFairyAssetBaseUrl() + chosen, onEndCallback);
+}
+
+/**
+ * 🎁 퀘스트/레벨업/보상 전용 헬퍼
+ */
+function fairyReward(type = 'quest', onEndCallback = null) {
+    const baseUrl = getFairyAssetBaseUrl();
+    const map = {
+        quest: FAIRY_AUDIO_PRESETS.quest_complete,
+        level: FAIRY_AUDIO_PRESETS.level_up,
+        diamond: FAIRY_AUDIO_PRESETS.reward_diamond,
+        star: FAIRY_AUDIO_PRESETS.reward_star,
+        finish: FAIRY_AUDIO_PRESETS.study_finish,
+        streak: FAIRY_AUDIO_PRESETS.streak_bonus
+    };
+    const file = map[type] || FAIRY_AUDIO_PRESETS.quest_complete;
+    playFairyPresetAudio(baseUrl + file, onEndCallback);
+}
+
+/**
+ * 🏰 환영/과목 입장 전용 헬퍼
+ */
+function fairyGreet(target = 'lobby', onEndCallback = null) {
+    const baseUrl = getFairyAssetBaseUrl();
+    const map = {
+        lobby: FAIRY_AUDIO_PRESETS.welcome_lobby,
+        minsu: FAIRY_AUDIO_PRESETS.welcome_minsu,
+        minseo: FAIRY_AUDIO_PRESETS.welcome_minseo,
+        math: FAIRY_AUDIO_PRESETS.welcome_math,
+        korean: FAIRY_AUDIO_PRESETS.welcome_korean,
+        society: FAIRY_AUDIO_PRESETS.welcome_society,
+        science: FAIRY_AUDIO_PRESETS.welcome_science,
+        english: FAIRY_AUDIO_PRESETS.welcome_english
+    };
+    const file = map[target] || FAIRY_AUDIO_PRESETS.welcome_lobby;
+    playFairyPresetAudio(baseUrl + file, onEndCallback);
 }
 
 function toggleFairyTtsSetting() {
@@ -606,6 +779,14 @@ window.fairySpeak = speakFairyTTS;
 window.speak = speakFairyTTS;
 window.speakFairy = speakFairyTTS;
 window.playFairyPresetAudio = playFairyPresetAudio;
+window.playFairyPreset = playFairyPresetAudio;
+window.fairyPraise = fairyPraise;
+window.fairyEncourage = fairyEncourage;
+window.fairyReward = fairyReward;
+window.fairyGreet = fairyGreet;
+window.resolveFairyPresetAudio = resolveFairyPresetAudio;
+window.getFairyAssetBaseUrl = getFairyAssetBaseUrl;
+window.FAIRY_AUDIO_PRESETS = FAIRY_AUDIO_PRESETS;
 window.getBestKoreanVoice = getBestKoreanVoice;
 window.stopFairyTTS = stopFairyTTS;
 window.unlockFairySpeechEngine = unlockFairySpeechEngine;
