@@ -14,76 +14,59 @@
 <div class="monitor">
   <div class="top-bar">
     <div class="brand-block">
-      <h1>🏰 민민이네 공부방</h1>
-      <span class="badge">LIVE 시간표</span>
-      <span class="badge badge-accent">실시간 동기화</span>
+      <h1><span class="accent2">민민이네</span> <span class="accent">공부방</span></h1>
+      <p id="brandSubtitle">📺 로비 모니터 · 주간 학교 시간표</p>
     </div>
-    <div id="topNoticeArea"></div>
     <div class="clock-block">
-      <div class="clock-time" id="clockTime">--:--:--</div>
-      <div class="clock-date" id="clockDate">----년 --월 --일 (-)</div>
+      <div class="clock-time" id="clockTime">--:--</div>
+      <div class="clock-date" id="clockDate">로딩 중...</div>
     </div>
   </div>
 
-  <div class="filter-panel">
-    <div class="filter-tabs">
-      <button class="filter-btn active" data-filter="all" onclick="setChildFilter('all')">
-        <span class="filter-btn-icon">👥</span>
-        <span>민수 · 민서 전체</span>
-        <span class="filter-badge" id="badgeAll">-</span>
-      </button>
-      <button class="filter-btn" data-filter="민수" onclick="setChildFilter('민수')">
-        <span class="filter-btn-icon">👦</span>
-        <span>민수 (5-2)</span>
-        <span class="filter-badge" id="badgeMinsu">-</span>
-      </button>
-      <button class="filter-btn" data-filter="민서" onclick="setChildFilter('민서')">
-        <span class="filter-btn-icon">👧</span>
-        <span>민서 (1-2)</span>
-        <span class="filter-badge" id="badgeMinseo">-</span>
-      </button>
-    </div>
+  <a id="backToLobby" class="back-lobby-btn" href="lobby.html">← 로비로 돌아가기</a>
+  <div id="viewerBadge" class="viewer-badge"></div>
+
+  <div class="filter-tabs" id="filterTabs">
+    <button class="filter-btn active" data-filter="all" onclick="setChildFilter('all', this)">📋 전체보기</button>
+    <button class="filter-btn son" data-filter="민수" onclick="setChildFilter('민수', this)">👦 민수 시간표</button>
+    <button class="filter-btn daughter" data-filter="민서" onclick="setChildFilter('민서', this)">👧 민서 시간표</button>
   </div>
 
-  <div class="board-grid">
-    <div class="panel">
-      <div class="panel-header">
-        <span class="panel-title">📅 주간 정규 시간표</span>
-        <span class="panel-subtitle" id="gridSubtitle">기본 시간표</span>
-      </div>
-      <div class="panel-body">
-        <div class="table-wrap">
-          <table class="weekly-grid">
-            <thead>
-              <tr id="gridHeadRow">
-                <th class="period-col">교시</th>
-                <th class="day-mon">월</th>
-                <th class="day-tue">화</th>
-                <th class="day-wed">수</th>
-                <th class="day-thu">목</th>
-                <th class="day-fri">금</th>
-              </tr>
-            </thead>
-            <tbody id="gridBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  <!-- 🌟 [이벤트 오버레이 ①] 상단 긴급/전체 공지 띠배너 영역 -->
+  <div id="topNoticeBannerArea" class="top-notice-banner-area" style="display:none;"></div>
 
-    <div class="panel">
+  <div class="dual-track">
+    <section class="track-panel">
       <div class="panel-header">
-        <span class="panel-title">📌 알림장 · 학사 일정</span>
-        <span class="panel-subtitle" id="noticeSubtitle">이번 주 전체</span>
+        <h2>📅 <span id="gridTitle">주간 시간표</span></h2>
+        <p id="gridSubtitle">월~금 · 1~6교시 고정 격자</p>
       </div>
       <div class="panel-body">
-        <div class="notice-list" id="noticeList">
-          <div class="empty-state">
-            <div class="empty-icon">⏳</div>
-            <div class="empty-text">알림장 불러오는 중...</div>
+        <div class="panel-scroll">
+          <div id="gridContent" class="loading-state">
+            <div class="spinner"></div>
+            노션 시간표 데이터 연결 중...
           </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="track-panel notice-board">
+      <div class="panel-header">
+        <h2>📢 <span id="noticeTitle">전체 행정 공지판</span></h2>
+        <p id="noticeSubtitle">결석계 · 행사 · 준비물 · 수업 메모</p>
+      </div>
+      <div class="panel-body">
+        <div class="panel-scroll">
+          <div class="chalkboard">
+            <div id="noticeContent" class="loading-state">
+              <div class="spinner"></div>
+              공지 불러오는 중...
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <div class="status-bar">
