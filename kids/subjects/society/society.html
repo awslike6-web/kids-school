@@ -13,9 +13,12 @@
   
   <div class="top-action-bar">
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
-    <div style="display: flex; gap: 10px; align-items: center;">
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <a href="history_time_travel_storybook.html" class="back-to-lobby-btn" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;">
+        ⏳ 시간 여행 스토리북 (1단원)
+      </a>
       <a href="climate_storybook.html" class="back-to-lobby-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;">
-        📚 기후 스토리북 (구연동화)
+        📚 기후 스토리북 (2단원)
       </a>
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
@@ -30,14 +33,20 @@
   <div class="main-header-card">
     <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
     <h1 id="societyTitle">민수의 사회 탐험 대기실</h1>
-    <p class="banner-goal-desc" id="societyGoalText">3단원. 우리 지역의 중심지를 깊게 알아볼까?</p>
+    <p class="banner-goal-desc" id="societyGoalText">1단원. 옛사람들의 삶과 문화 (구석기·신석기·청동기·고조선)</p>
   </div>
 
   <div class="society-grid">
     
+    <a href="history_time_travel_storybook.html" class="society-grid-btn" style="text-decoration: none; color: inherit; border: 2.5px solid #d97706; background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);">
+      <span class="society-btn-icon">⏳</span>
+      <div class="society-btn-title" style="color: #92400e;">1단원 역사 시간 여행</div>
+      <p class="society-btn-desc"><strong>[5-1 구석기·고조선]</strong> 민수와 친구들의 교과서 시간 여행! 주먹도끼부터 비파형 동검까지 교과서 완전 정복!</p>
+    </a>
+
     <a href="climate_storybook.html" class="society-grid-btn" style="text-decoration: none; color: inherit; border: 2.5px solid #10b981; background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);">
       <span class="society-btn-icon">🧚‍♂️</span>
-      <div class="society-btn-title" style="color: #065f46;">단원 동화 스토리북</div>
+      <div class="society-btn-title" style="color: #065f46;">2단원 기후 대모험</div>
       <p class="society-btn-desc"><strong>[5-1 기후 대모험]</strong> 민수와 친구들의 지구 지키기! 고화질 삽화와 성우 구연동화로 교과서 완전 정복!</p>
     </a>
     
