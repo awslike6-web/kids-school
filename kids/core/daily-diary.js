@@ -28,15 +28,36 @@ function saveDiaryEntry(entry) {
     updateLobbyDiaryButton(entry.childName);
 }
 
+// 1-1. 현재 대상 학생 및 부모 모드 판별 헬퍼
+function getCurrentDiaryTarget() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userParam = urlParams.get('user');
+    const currentProfile = localStorage.getItem('currentUser') || 'son';
+    const savedName = localStorage.getItem('currentUserName') || '';
+
+    let isMinsu = true;
+    if (userParam === 'daughter' || userParam === 'minseo') {
+        isMinsu = false;
+    } else if (userParam === 'son' || userParam === 'minsu') {
+        isMinsu = true;
+    } else if (currentProfile === 'daughter') {
+        isMinsu = false;
+    } else if (savedName === '민서') {
+        isMinsu = false;
+    }
+    const childName = isMinsu ? '민수' : '민서';
+    const isParentMode = (savedName === '아빠' || savedName === '엄마' || savedName === '어른' || savedName === 'admin' || currentProfile === 'admin');
+
+    return { childName, isMinsu, isParentMode, savedName };
+}
+
 function deleteDiaryEntry(id) {
     if (!confirm("이 일기를 정말 삭제할까요? 🗑️")) return;
     
     const list = getStoredDiaries().filter(item => item.id !== id);
     localStorage.setItem('mimi_daily_diaries', JSON.stringify(list));
 
-    const currentProfile = localStorage.getItem('currentUser') || 'son';
-    const childName = currentProfile === 'son' ? '민수' : '민서';
-    const isMinsu = (currentProfile === 'son');
+    const { childName, isMinsu } = getCurrentDiaryTarget();
 
     // 지난 일기 히스토리 뷰 실시간 새로고침
     const histSec = document.getElementById('diaryHistorySection');
@@ -57,11 +78,23 @@ function getTodayDiaryCount(childName) {
 function updateLobbyDiaryButton(childName) {
     const diaryBtn = document.getElementById('lobbyDiaryBtn');
     if (!diaryBtn) return;
-    const count = getTodayDiaryCount(childName);
-    if (count > 0) {
-        diaryBtn.innerHTML = `📝 ${childName}의 새 일기 쓰기 (오늘 ${count}편 기록됨 🌟)`;
+    const { isParentMode, childName: targetChild } = getCurrentDiaryTarget();
+    const finalChild = childName || targetChild;
+    const count = getTodayDiaryCount(finalChild);
+    
+    if (isParentMode) {
+        if (count > 0) {
+            diaryBtn.innerHTML = `📝 [부모검수] ${finalChild} 일기 (오늘 ${count}편 기록됨)`;
+        } else {
+            diaryBtn.innerHTML = `📝 [부모검수] ${finalChild} 마음 일기 쓰기 (기록용)`;
+        }
     } else {
-        diaryBtn.innerHTML = `📝 ${childName}의 오늘 마음 일기 쓰기 (+5💎)`;
+        const rewardBadge = finalChild === '민서' ? ' (+5🍬)' : ' (+5💎)';
+        if (count > 0) {
+            diaryBtn.innerHTML = `📝 ${finalChild}의 새 일기 쓰기 (오늘 ${count}편 기록됨 🌟)`;
+        } else {
+            diaryBtn.innerHTML = `📝 ${finalChild}의 오늘 마음 일기 쓰기${rewardBadge}`;
+        }
     }
 }
 
@@ -123,9 +156,7 @@ function insertQuickTag(targetInputId, text) {
 
 // 3. 일기장 모달 열기
 function openDailyDiaryModal(initialTab = 'write') {
-    const currentProfile = localStorage.getItem('currentUser') || 'son';
-    const childName = currentProfile === 'son' ? '민수' : '민서';
-    const isMinsu = (currentProfile === 'son');
+    const { childName, isMinsu, isParentMode } = getCurrentDiaryTarget();
 
     // 기존 모달 제거
     const existing = document.getElementById('dailyDiaryModalWrapper');
@@ -250,6 +281,7 @@ function openDailyDiaryModal(initialTab = 'write') {
                     <span style="font-size: 1.6rem;">${isMinsu ? '🎮' : '🐰'}</span>
                     <div>
                         <h3 style="font-family: 'Jua', sans-serif; font-size: 1.2rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
+                            ${isParentMode ? '<span style="font-size:0.8rem; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #f87171; padding:2px 8px; border-radius:8px; margin-right:4px;">🛠️ 부모검수</span>' : ''}
                             ${isMinsu ? '민수의 하루 일상 & 마음 로그' : '민서의 마음 날씨 일기장'}
                         </h3>
                         <span style="font-size: 0.85rem; opacity: 0.8;">📅 ${dateFormatted} ${todayCount > 0 ? `(오늘 ${todayCount}편 작성됨)` : ''}</span>
@@ -297,9 +329,7 @@ function switchDiaryTab(tab) {
         tabWrite.classList.add('active');
         tabHist.classList.remove('active');
     } else {
-        const currentProfile = localStorage.getItem('currentUser') || 'son';
-        const childName = currentProfile === 'son' ? '민수' : '민서';
-        const isMinsu = (currentProfile === 'son');
+        const { childName, isMinsu } = getCurrentDiaryTarget();
         histSec.innerHTML = renderDiaryHistoryList(childName, isMinsu);
         writeSec.style.display = 'none';
         histSec.style.display = 'flex';
@@ -310,6 +340,7 @@ function switchDiaryTab(tab) {
 
 // 🐰 민서 (1학년) 일기 폼 렌더러
 function renderMinseoDiaryForm(todayYMD) {
+    const { isParentMode } = getCurrentDiaryTarget();
     return `
         <!-- 1. 마음 날씨 -->
         <div>
@@ -399,13 +430,14 @@ function renderMinseoDiaryForm(todayYMD) {
         </div>
 
         <button class="btn-submit-diary" onclick="submitMinseoDiary('${todayYMD}')">
-            <span>🌟 일기 완성하고 별 도장 받기! (+5💎)</span>
+            <span>${isParentMode ? '🌟 일기 완성하고 기록하기 (부모 검수)' : '🌟 일기 완성하고 별 도장 받기! (+5🍬)'}</span>
         </button>
     `;
 }
 
 // 🎮 민수 (5학년) 가볍고 편안한 일상 & 마음 로그 폼 렌더러
 function renderMinsuDiaryForm(todayYMD) {
+    const { isParentMode } = getCurrentDiaryTarget();
     return `
         <!-- 1. 오늘의 바이브 / 기분 -->
         <div>
@@ -474,7 +506,7 @@ function renderMinsuDiaryForm(todayYMD) {
         </div>
 
         <button class="btn-submit-diary" onclick="submitMinsuDiary('${todayYMD}')">
-            <span>🚀 오늘 기록 남기기! (+5💎)</span>
+            <span>${isParentMode ? '🚀 오늘 기록 남기기 (부모 검수)' : '🚀 오늘 기록 남기기! (+5💎)'}</span>
         </button>
     `;
 }
@@ -495,6 +527,12 @@ async function sendDiaryLogToNotionDirect(entry) {
     const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
 
+    const { isParentMode } = getCurrentDiaryTarget();
+    const studentName = isParentMode ? '부모관리자' : entry.childName;
+    const titleText = isParentMode 
+        ? `부모관리자_${entry.date} (${entry.childName === '민서' ? '민서 마음일기' : '민수 일상로그'})`
+        : `${entry.childName}_${entry.date} (${entry.childName === '민서' ? '마음일기' : '일상로그'})`;
+
     const subjectText = entry.childName === '민서' 
         ? `마음일기 (${entry.weather || '☀️ 맑음'}) [${entry.timeStr}]`
         : `일상로그 (${entry.energy || '😎 꿀잼'}) [${entry.timeStr}]`;
@@ -505,15 +543,18 @@ async function sendDiaryLogToNotionDirect(entry) {
     } else {
         reportText = `[이야기: ${entry.accomplish || ''}] [나에게 한마디: ${entry.goal || ''}]`;
     }
+    if (isParentMode) {
+        reportText = `[부모관리자 검수 기록] ` + reportText;
+    }
 
     const payload = {
         parent: { database_id: dbId },
         properties: {
             "ID": {
-                title: [{ text: { content: `${entry.childName}_${entry.date} (${entry.childName === '민서' ? '마음일기' : '일상로그'})` } }]
+                title: [{ text: { content: titleText } }]
             },
             "학생": {
-                select: { name: entry.childName }
+                select: { name: studentName }
             },
             "과목": {
                 rich_text: [{ text: { content: subjectText } }]
@@ -531,7 +572,7 @@ async function sendDiaryLogToNotionDirect(entry) {
                 rich_text: [{ text: { content: reportText.trim() || "기록 완료" } }]
             },
             "단어요정": {
-                number: 1
+                number: isParentMode ? 0 : 1
             }
         }
     };
@@ -544,7 +585,7 @@ async function sendDiaryLogToNotionDirect(entry) {
         });
         if (resp.ok) {
             const data = await resp.json();
-            console.log(`🎉 [노션 직통] ${entry.childName} 일기 학습일지 등록 성공! Page ID: ${data.id}`);
+            console.log(`🎉 [노션 직통] 일기 학습일지 등록 성공! (학생: ${studentName}) Page ID: ${data.id}`);
             return true;
         } else {
             const errText = await resp.text();
@@ -558,6 +599,12 @@ async function sendDiaryLogToNotionDirect(entry) {
 
 // 4-2. 노션 인벤토리 DB 직통 보상 지급 헬퍼
 async function dispenseDiaryRewardDirect(childName, amount = 5) {
+    const { isParentMode } = getCurrentDiaryTarget();
+    if (isParentMode) {
+        console.log(`🛠️ [부모관리자 모드] 부모 프로필이므로 노션 인벤토리 보상 지급을 건너뜁니다.`);
+        return false;
+    }
+
     const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const invDbId = typeof INVENTORY_DB_ID !== 'undefined' ? INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12";
 
@@ -578,11 +625,11 @@ async function dispenseDiaryRewardDirect(childName, amount = 5) {
 
         const patchProps = {};
         if (childName === '민서') {
+            // 민서는 오직 하리보 젤리만 받음!
             const curHaribo = props["하리보 젤리 개수"]?.number || 0;
-            const curDia = props["다이아몬드 개수"]?.number || 0;
             patchProps["하리보 젤리 개수"] = { number: curHaribo + amount };
-            patchProps["다이아몬드 개수"] = { number: curDia + amount };
         } else {
+            // 민수는 오직 다이아몬드만 받음!
             const curDia = props["다이아몬드 개수"]?.number || 0;
             patchProps["다이아몬드 개수"] = { number: curDia + amount };
         }
@@ -595,7 +642,8 @@ async function dispenseDiaryRewardDirect(childName, amount = 5) {
         });
 
         if (pResp.ok) {
-            console.log(`💎 [노션 인벤토리] ${childName}에게 +${amount} 크레딧 보상 지급 성공!`);
+            const rewardName = childName === '민서' ? `하리보 젤리 +${amount}개 🍬` : `다이아몬드 +${amount}개 💎`;
+            console.log(`💎 [노션 인벤토리] ${childName}에게 ${rewardName} 지급 성공!`);
             // 화면에 인벤토리 컴포넌트가 있다면 새로고침
             if (typeof fetchInventory === 'function') {
                 fetchInventory();
@@ -610,7 +658,12 @@ async function dispenseDiaryRewardDirect(childName, amount = 5) {
 
 // 5. 민서 일기 제출
 async function submitMinseoDiary(dateYMD) {
-    if (!confirm("민서의 오늘 마음 일기를 이대로 완성하고 저장할까요? 🌟")) {
+    const { isParentMode } = getCurrentDiaryTarget();
+    const promptMsg = isParentMode
+        ? "민서의 오늘 마음 일기를 '부모관리자' 명의로 노션에 기록할까요? (보상 없음)"
+        : "민서의 오늘 마음 일기를 이대로 완성하고 저장할까요? 🌟 (+5🍬)";
+
+    if (!confirm(promptMsg)) {
         return;
     }
 
@@ -643,15 +696,15 @@ async function submitMinseoDiary(dateYMD) {
         // 1) 로컬스토리지 저장
         saveDiaryEntry(entry);
 
-        // 2) 노션 인벤토리 DB에 보상 직접 지급 (+5)
+        // 2) 노션 인벤토리 DB에 보상 지급 (부모 모드일 때는 함수 내부에서 자동 건너뜀)
         dispenseDiaryRewardDirect('민서', 5);
 
-        // 3) 노션 학습일지 DB에 일기 내용 직접 기록
+        // 3) 노션 학습일지 DB에 일기 내용 직접 기록 (부모 모드일 때는 학생: '부모관리자')
         sendDiaryLogToNotionDirect(entry);
 
         const todayCount = getTodayDiaryCount('민서');
         // 4) 성공 화면 렌더링
-        showDiarySuccessModal('민서', weather, `참 잘했어요! 오늘 ${todayCount}번째 별 도장 획득! 🌟`);
+        showDiarySuccessModal('민서', weather, isParentMode ? `부모관리자 검수 기록 완료! 🛡️` : `참 잘했어요! 오늘 ${todayCount}번째 별 도장 획득! 🌟`);
     } catch (globalErr) {
         console.error("민서 일기 저장 중 오류 발생:", globalErr);
         showDiarySuccessModal('민서', '☀️ 맑음', '일기가 저장되었어요! 🌟');
@@ -660,7 +713,12 @@ async function submitMinseoDiary(dateYMD) {
 
 // 6. 민수 일기 제출
 async function submitMinsuDiary(dateYMD) {
-    if (!confirm("민수의 오늘 일기를 이대로 완성하고 저장할까요? 🚀")) {
+    const { isParentMode } = getCurrentDiaryTarget();
+    const promptMsg = isParentMode
+        ? "민수의 오늘 일기를 '부모관리자' 명의로 노션에 기록할까요? (보상 없음)"
+        : "민수의 오늘 일기를 이대로 완성하고 저장할까요? 🚀 (+5💎)";
+
+    if (!confirm(promptMsg)) {
         return;
     }
 
@@ -687,15 +745,15 @@ async function submitMinsuDiary(dateYMD) {
         // 1) 로컬스토리지 저장
         saveDiaryEntry(entry);
 
-        // 2) 노션 인벤토리 DB에 보상 직접 지급 (+5)
+        // 2) 노션 인벤토리 DB에 보상 지급 (부모 모드일 때는 함수 내부에서 자동 건너뜀)
         dispenseDiaryRewardDirect('민수', 5);
 
-        // 3) 노션 학습일지 DB에 일기 내용 직접 기록
+        // 3) 노션 학습일지 DB에 일기 내용 직접 기록 (부모 모드일 때는 학생: '부모관리자')
         sendDiaryLogToNotionDirect(entry);
 
         const todayCount = getTodayDiaryCount('민수');
         // 4) 성공 화면 렌더링
-        showDiarySuccessModal('민수', energy, `오늘 ${todayCount}번째 일상 기록 완료! 🎮`);
+        showDiarySuccessModal('민수', energy, isParentMode ? `부모관리자 검수 기록 완료! 🛡️` : `오늘 ${todayCount}번째 일상 기록 완료! 🎮`);
     } catch (globalErr) {
         console.error("민수 일기 저장 중 오류 발생:", globalErr);
         showDiarySuccessModal('민수', '😎 꿀잼', '일기가 저장되었어요! 🎮');
@@ -704,22 +762,33 @@ async function submitMinsuDiary(dateYMD) {
 
 // 7. 완료 팝업 & 도장 연출
 function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
+    const { isParentMode } = getCurrentDiaryTarget();
+
     // 칭찬 성우 음성 재생
     if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS("참 잘했어요!");
+        speakFairyTTS(isParentMode ? "기록이 저장되었습니다." : "참 잘했어요!");
     }
 
     const writeSec = document.getElementById('diaryWriteSection');
     if (!writeSec) return;
 
+    let rewardDesc = "";
+    if (isParentMode) {
+        rewardDesc = `<span style="color:#ef4444; font-weight:bold;">🛠️ [부모관리자 검수 모드]</span> 노션 학습일지에 <b>'부모관리자'</b>로 등록되었으며, 아이들 인벤토리 보상은 안전하게 건너뛰었습니다.`;
+    } else if (childName === '민서') {
+        rewardDesc = `소중한 하루 마음을 기록한 민서에게 <b>하리보 젤리 5개 🍬</b>가 지급되었습니다!`;
+    } else {
+        rewardDesc = `소중한 하루 일상을 기록한 민수에게 <b>다이아몬드 5개 💎</b>가 지급되었습니다!`;
+    }
+
     writeSec.innerHTML = `
         <div style="text-align: center; padding: 30px 10px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
             <div style="font-size: 3.5rem;">🎉</div>
             <h2 style="font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #10b981;">
-                ${childName}의 기록이 멋지게 저장되었어요!
+                ${isParentMode ? '[부모관리자] ' : ''}${childName}의 기록이 멋지게 저장되었어요!
             </h2>
-            <p style="font-size: 1rem; opacity: 0.85;">
-                소중한 하루를 기록한 ${childName}에게 <b>+5 크레딧 보상</b>이 지급되었습니다! 💎
+            <p style="font-size: 1rem; opacity: 0.85; max-width: 480px; line-height: 1.5;">
+                ${rewardDesc}
             </p>
 
             <div style="margin: 20px 0;">
