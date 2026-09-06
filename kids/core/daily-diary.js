@@ -51,11 +51,68 @@ function getCurrentDiaryTarget() {
     return { childName, isMinsu, isParentMode, savedName };
 }
 
-function deleteDiaryEntry(id) {
-    if (!confirm("이 일기를 정말 삭제할까요? 🗑️")) return;
+// 1-2. 삭제된 일기 ID 영구 추적 (재동기화 시 부활 방지)
+function getDeletedDiaryIds() {
+    try {
+        const d = localStorage.getItem('mimi_deleted_diary_ids');
+        return d ? JSON.parse(d) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function markDiaryAsDeleted(id) {
+    if (!id) return;
+    const deleted = getDeletedDiaryIds();
+    if (!deleted.includes(id)) {
+        deleted.push(id);
+        localStorage.setItem('mimi_deleted_diary_ids', JSON.stringify(deleted.slice(-100)));
+    }
+}
+
+function bindNotionPageIdToEntry(localId, notionPageId) {
+    const list = getStoredDiaries();
+    const target = list.find(item => item.id === localId);
+    if (target) {
+        target.notionPageId = notionPageId;
+        target.isNotionSynced = true;
+        localStorage.setItem('mimi_daily_diaries', JSON.stringify(list));
+    }
+}
+
+async function archiveNotionPageDirect(pageId) {
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    try {
+        const resp = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify({ archived: true })
+        });
+        if (resp.ok) {
+            console.log(`🗑️ [노션 원격 삭제] 페이지 ${pageId} 아카이브 완료`);
+            return true;
+        }
+    } catch (e) {
+        console.warn("노션 페이지 아카이브 통신 오류:", e);
+    }
+    return false;
+}
+
+async function deleteDiaryEntry(id) {
+    if (!confirm("이 일기를 정말 삭제할까요? 🗑️\n(노션 클라우드에서도 함께 삭제됩니다)")) return;
     
-    const list = getStoredDiaries().filter(item => item.id !== id);
-    localStorage.setItem('mimi_daily_diaries', JSON.stringify(list));
+    const list = getStoredDiaries();
+    const target = list.find(item => item.id === id || item.notionPageId === id);
+
+    // 삭제된 ID 블랙리스트 등록 (재동기화 시 부활 방지)
+    markDiaryAsDeleted(id);
+    if (target && target.notionPageId) {
+        markDiaryAsDeleted(target.notionPageId);
+    }
+
+    // 로컬 스토리지 삭제
+    const updated = list.filter(item => item.id !== id && item.notionPageId !== id);
+    localStorage.setItem('mimi_daily_diaries', JSON.stringify(updated));
 
     const { childName, isMinsu } = getCurrentDiaryTarget();
 
@@ -67,6 +124,12 @@ function deleteDiaryEntry(id) {
 
     // 로비 화면 버튼 문구 실시간 갱신
     updateLobbyDiaryButton(childName);
+
+    // 노션 원격 아카이브 (삭제) 실행
+    const notionId = target?.notionPageId || (id && id.length > 20 ? id : null);
+    if (notionId) {
+        archiveNotionPageDirect(notionId);
+    }
 }
 
 function getTodayDiaryCount(childName) {
@@ -310,6 +373,9 @@ function openDailyDiaryModal(initialTab = 'write') {
     `;
 
     document.body.appendChild(modalWrapper);
+
+    // 백그라운드 노션 클라우드 실시간 동기화 트리거
+    syncDiariesFromNotion(childName);
 }
 
 function closeDailyDiaryModal() {
@@ -335,6 +401,8 @@ function switchDiaryTab(tab) {
         histSec.style.display = 'flex';
         tabWrite.classList.remove('active');
         tabHist.classList.add('active');
+        // 지난 일기 탭 진입 시 실시간 노션 동기화
+        syncDiariesFromNotion(childName);
     }
 }
 
@@ -522,29 +590,36 @@ function toggleBalloonTag(tag) {
     tag.classList.toggle('selected');
 }
 
-// 4-1. 노션 학습일지 DB 직통 일기 저장 헬퍼
+// 4-1. 노션 학습일지 DB 직통 일기 저장 헬퍼 (과목 및 속성 깔끔 분리)
 async function sendDiaryLogToNotionDirect(entry) {
     const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
 
     const { isParentMode } = getCurrentDiaryTarget();
     const studentName = isParentMode ? '부모관리자' : entry.childName;
+    const subjectName = entry.childName === '민서' ? '마음일기' : '일기';
+
     const titleText = isParentMode 
-        ? `부모관리자_${entry.date} (${entry.childName === '민서' ? '민서 마음일기' : '민수 일상로그'})`
-        : `${entry.childName}_${entry.date} (${entry.childName === '민서' ? '마음일기' : '일상로그'})`;
+        ? `부모관리자_${entry.date} (${entry.childName} ${subjectName})`
+        : `${entry.childName}_${entry.date} (${entry.timeStr || ''})`;
 
-    const subjectText = entry.childName === '민서' 
-        ? `마음일기 (${entry.weather || '☀️ 맑음'}) [${entry.timeStr}]`
-        : `일상로그 (${entry.energy || '😎 꿀잼'}) [${entry.timeStr}]`;
+    let weatherAndMood = "";
+    let pureContent = "";
+    let iMessageText = "";
 
-    let reportText = "";
     if (entry.childName === '민서') {
-        reportText = `[감정: ${(entry.moods || []).join(', ')}] ${entry.content || ''} ${entry.iMessage ? ' / 나-전달법: ' + entry.iMessage : ''}`;
+        const moodList = (entry.moods || []).join(', ');
+        weatherAndMood = entry.weather ? (entry.weather + (moodList ? ` [${moodList}]` : '')) : moodList;
+        pureContent = entry.content || '';
+        iMessageText = entry.iMessage || '';
     } else {
-        reportText = `[이야기: ${entry.accomplish || ''}] [나에게 한마디: ${entry.goal || ''}]`;
+        weatherAndMood = entry.energy || '😎 꿀잼·대만족';
+        pureContent = entry.accomplish || '';
+        iMessageText = entry.goal || '';
     }
+
     if (isParentMode) {
-        reportText = `[부모관리자 검수 기록] ` + reportText;
+        pureContent = `[부모관리자 검수] ` + pureContent;
     }
 
     const payload = {
@@ -557,19 +632,25 @@ async function sendDiaryLogToNotionDirect(entry) {
                 select: { name: studentName }
             },
             "과목": {
-                rich_text: [{ text: { content: subjectText } }]
+                rich_text: [{ text: { content: subjectName } }]
+            },
+            "감정날씨": {
+                rich_text: [{ text: { content: weatherAndMood.trim() } }]
+            },
+            "오답리포트": {
+                rich_text: [{ text: { content: pureContent.trim() || "기록 완료" } }]
+            },
+            "나-전달법": {
+                rich_text: [{ text: { content: iMessageText.trim() } }]
             },
             "입장": {
-                date: { start: entry.createdAt }
+                date: { start: entry.createdAt || new Date().toISOString() }
             },
             "퇴장": {
                 date: { start: new Date().toISOString() }
             },
             "소요시간": {
                 number: 5
-            },
-            "오답리포트": {
-                rich_text: [{ text: { content: reportText.trim() || "기록 완료" } }]
             },
             "단어요정": {
                 number: isParentMode ? 0 : 1
@@ -585,8 +666,11 @@ async function sendDiaryLogToNotionDirect(entry) {
         });
         if (resp.ok) {
             const data = await resp.json();
-            console.log(`🎉 [노션 직통] 일기 학습일지 등록 성공! (학생: ${studentName}) Page ID: ${data.id}`);
-            return true;
+            console.log(`🎉 [노션 직통] 일기 학습일지 등록 성공! (과목: ${subjectName}, 학생: ${studentName}) Page ID: ${data.id}`);
+            if (entry.id) {
+                bindNotionPageIdToEntry(entry.id, data.id);
+            }
+            return data.id;
         } else {
             const errText = await resp.text();
             console.warn("노션 학습일지 직통 전송 실패:", errText);
@@ -594,7 +678,7 @@ async function sendDiaryLogToNotionDirect(entry) {
     } catch (e) {
         console.warn("노션 학습일지 통신 오류:", e);
     }
-    return false;
+    return null;
 }
 
 // 4-2. 노션 인벤토리 DB 직통 보상 지급 헬퍼
@@ -656,7 +740,229 @@ async function dispenseDiaryRewardDirect(childName, amount = 5) {
     return false;
 }
 
-// 5. 민서 일기 제출
+// 4-3. 노션 일기 페이지 -> 앱 일기 객체 역변환 파서 (신구 규격 100% 호환)
+function parseNotionDiaryPage(page, targetChild) {
+    if (!page || !page.properties) return null;
+    const props = page.properties;
+    const student = props["학생"]?.select?.name || '';
+    const title = props["ID"]?.title?.[0]?.text?.content || '';
+
+    let matchedChild = student;
+    if (student === '부모관리자') {
+        if (title.includes('민서')) matchedChild = '민서';
+        else if (title.includes('민수')) matchedChild = '민수';
+        else matchedChild = targetChild;
+    }
+
+    if (matchedChild !== targetChild && student !== targetChild) {
+        return null;
+    }
+
+    // 날짜 및 시간 파싱
+    let dateStr = "";
+    let timeStr = "";
+    const entryDate = props["입장"]?.date?.start;
+    if (entryDate) {
+        const d = new Date(entryDate);
+        dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    } else {
+        const match = title.match(/(\d{4}[-.\s]+\d{1,2}[-.\s]+\d{1,2})/);
+        dateStr = match ? match[1].replace(/\s+/g, '').replace(/\./g, '-') : new Date().toISOString().split('T')[0];
+        timeStr = '기록';
+    }
+
+    const moodProp = props["감정날씨"]?.rich_text?.[0]?.text?.content || "";
+    const reportProp = props["오답리포트"]?.rich_text?.[0]?.text?.content || "";
+    const iMessageProp = props["나-전달법"]?.rich_text?.[0]?.text?.content || "";
+
+    let weatherOrEnergy = "";
+    let moods = [];
+    let content = "";
+    let accomplish = "";
+    let iMessage = iMessageProp;
+    let goal = (matchedChild === '민수') ? iMessageProp : "";
+
+    if (moodProp) {
+        // 1) 신규 분리 속성에서 추출
+        weatherOrEnergy = moodProp;
+        if (moodProp.includes('[') && moodProp.includes(']')) {
+            const bMatch = moodProp.match(/\[([^\]]+)\]/);
+            if (bMatch) {
+                moods = bMatch[1].split(',').map(m => m.trim());
+                weatherOrEnergy = moodProp.replace(/\[[^\]]+\]/, '').trim();
+            }
+        }
+        if (matchedChild === '민서') {
+            content = reportProp;
+        } else {
+            accomplish = reportProp;
+        }
+    } else {
+        // 2) 레거시 복합 텍스트에서 안전하게 역추출
+        if (reportProp.includes('[감정:')) {
+            const moodMatch = reportProp.match(/\[감정:\s*([^\]]+)\]/);
+            if (moodMatch) {
+                moods = moodMatch[1].split(',').map(s => s.trim());
+            }
+        }
+        if (reportProp.includes('/ 나-전달법:')) {
+            const parts = reportProp.split('/ 나-전달법:');
+            iMessage = parts[1]?.trim() || '';
+            content = parts[0]?.replace(/\[감정:[^\]]+\]/, '').trim();
+        } else if (reportProp.includes('[이야기:') && reportProp.includes('[나에게 한마디:')) {
+            const m1 = reportProp.match(/\[이야기:\s*([^\]]+)\]/);
+            const m2 = reportProp.match(/\[나에게 한마디:\s*([^\]]+)\]/);
+            accomplish = m1 ? m1[1] : '';
+            goal = m2 ? m2[1] : '';
+        } else {
+            content = reportProp.replace(/\[감정:[^\]]+\]/, '').trim();
+        }
+
+        const subj = props["과목"]?.rich_text?.[0]?.text?.content || '';
+        const weatherMatch = subj.match(/\(([^)]+)\)/);
+        if (weatherMatch) {
+            weatherOrEnergy = weatherMatch[1];
+        }
+    }
+
+    return {
+        id: page.id,
+        notionPageId: page.id,
+        childName: matchedChild,
+        isParentEntry: (student === '부모관리자'),
+        date: dateStr,
+        timeStr: timeStr,
+        weather: (matchedChild === '민서') ? (weatherOrEnergy || '☀️ 맑음') : undefined,
+        energy: (matchedChild === '민수') ? (weatherOrEnergy || '😎 꿀잼·대만족') : undefined,
+        moods: moods,
+        content: content,
+        accomplish: accomplish,
+        iMessage: iMessage,
+        goal: goal,
+        createdAt: entryDate || new Date().toISOString(),
+        isNotionSynced: true
+    };
+}
+
+// 4-4. 노션 학습일지 DB에서 해당 학생 일기 원격 조회
+async function fetchNotionDiaries(childName) {
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+
+    const queryBody = {
+        filter: {
+            and: [
+                {
+                    or: [
+                        { property: "과목", rich_text: { contains: "일기" } },
+                        { property: "과목", rich_text: { contains: "마음일기" } }
+                    ]
+                },
+                {
+                    or: [
+                        { property: "학생", select: { equals: childName } },
+                        { property: "학생", select: { equals: "부모관리자" } }
+                    ]
+                }
+            ]
+        },
+        sorts: [
+            { property: "입장", direction: "descending" }
+        ],
+        page_size: 50
+    };
+
+    try {
+        const resp = await fetch(`${proxyUrl}/v1/databases/${dbId}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify(queryBody)
+        });
+        if (!resp.ok) return [];
+        const data = await resp.json();
+        const pages = data.results || [];
+        return pages.map(p => parseNotionDiaryPage(p, childName)).filter(Boolean);
+    } catch (e) {
+        console.warn("노션 일기 목록 조회 통신 오류:", e);
+        return [];
+    }
+}
+
+// 4-5. 노션 원격 데이터와 로컬 스토리지 지능형 병합 (Merge)
+function mergeNotionDiariesIntoLocal(remoteEntries) {
+    if (!remoteEntries || remoteEntries.length === 0) return getStoredDiaries();
+
+    const localList = getStoredDiaries();
+    const deletedIds = getDeletedDiaryIds();
+    const merged = [...localList];
+
+    for (const remote of remoteEntries) {
+        if (deletedIds.includes(remote.id) || deletedIds.includes(remote.notionPageId)) {
+            continue;
+        }
+
+        const existingIdx = merged.findIndex(loc => 
+            loc.id === remote.id || 
+            loc.notionPageId === remote.id ||
+            (loc.childName === remote.childName && loc.date === remote.date && loc.content === remote.content) ||
+            (loc.childName === remote.childName && loc.date === remote.date && loc.accomplish === remote.accomplish)
+        );
+
+        if (existingIdx >= 0) {
+            merged[existingIdx] = { 
+                ...merged[existingIdx], 
+                ...remote, 
+                notionPageId: remote.id, 
+                isNotionSynced: true 
+            };
+        } else {
+            merged.push(remote);
+        }
+    }
+
+    // 최신순 정렬
+    merged.sort((a, b) => new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime());
+
+    localStorage.setItem('mimi_daily_diaries', JSON.stringify(merged));
+    return merged;
+}
+
+// 4-6. 노션 실시간 동기화 트리거
+let isDiarySyncing = false;
+async function syncDiariesFromNotion(childName) {
+    if (isDiarySyncing) return;
+    isDiarySyncing = true;
+
+    const indicator = document.getElementById('diarySyncStatusIndicator');
+    if (indicator) {
+        indicator.innerHTML = `🔄 노션 동기화 중...`;
+        indicator.style.display = 'inline';
+    }
+
+    try {
+        const remotes = await fetchNotionDiaries(childName);
+        if (remotes && remotes.length > 0) {
+            mergeNotionDiariesIntoLocal(remotes);
+            // 화면 갱신
+            const histSec = document.getElementById('diaryHistorySection');
+            const { childName: activeChild, isMinsu } = getCurrentDiaryTarget();
+            if (histSec && histSec.style.display !== 'none') {
+                histSec.innerHTML = renderDiaryHistoryList(activeChild, isMinsu);
+            }
+            updateLobbyDiaryButton(activeChild);
+        }
+        if (indicator) {
+            indicator.innerHTML = `☁️ 동기화 완료`;
+            setTimeout(() => { if (indicator) indicator.style.display = 'none'; }, 3000);
+        }
+    } catch (e) {
+        console.warn("노션 실시간 동기화 오류:", e);
+        if (indicator) indicator.style.display = 'none';
+    } finally {
+        isDiarySyncing = false;
+    }
+}
 async function submitMinseoDiary(dateYMD) {
     const { isParentMode } = getCurrentDiaryTarget();
     const promptMsg = isParentMode
@@ -812,31 +1118,36 @@ function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
     `;
 }
 
-// 8. 지난 일기 히스토리 뷰 렌더러 (타임라인 시간대 렌더링)
+// 8. 지난 일기 히스토리 뷰 렌더러 (타임라인 시간대 및 노션 클라우드 동기화 렌더링)
 function renderDiaryHistoryList(childName, isMinsu) {
     const list = getStoredDiaries().filter(item => item.childName === childName);
 
-    if (list.length === 0) {
-        return `
-            <div style="text-align:center; padding:50px 10px; opacity:0.7;">
-                <div style="font-size:3rem; margin-bottom:12px;">📝</div>
-                <p style="font-family:'Jua', sans-serif; font-size:1.2rem;">아직 작성된 일기가 없어요.</p>
-                <p style="font-size:0.9rem;">오늘의 첫 일기를 가볍게 끄적여 볼까요?</p>
-            </div>
-        `;
-    }
-
     return `
         <div style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="font-size: 0.95rem; opacity: 0.8; font-weight: bold; display:flex; justify-content:space-between; align-items:center;">
-                <span>총 ${list.length}편의 기록이 타임라인으로 보관되어 있어요 📚</span>
-                <button class="diary-tab-btn" style="padding:4px 10px; font-size:0.85rem;" onclick="openDailyDiaryModal('write')">➕ 새 일기 쓰기</button>
+            <div style="font-size: 0.92rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-weight:bold;">총 ${list.length}편의 기록 📚</span>
+                    <span id="diarySyncStatusIndicator" style="font-size:0.8rem; color:#10b981; display:none;">🔄 노션 동기화 중...</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button class="diary-tab-btn" style="padding:4px 10px; font-size:0.82rem;" onclick="syncDiariesFromNotion('${childName}')" title="아이폰/태블릿 등 다른 기기에서 쓴 일기 불러오기">🔄 노션 동기화</button>
+                    <button class="diary-tab-btn" style="padding:4px 10px; font-size:0.82rem;" onclick="openDailyDiaryModal('write')">➕ 새 일기 쓰기</button>
+                </div>
             </div>
-            ${list.map(entry => `
+
+            ${list.length === 0 ? `
+                <div style="text-align:center; padding:50px 10px; opacity:0.7;">
+                    <div style="font-size:3rem; margin-bottom:12px;">📝</div>
+                    <p style="font-family:'Jua', sans-serif; font-size:1.2rem;">아직 작성된 일기가 없거나 동기화 중이에요.</p>
+                    <p style="font-size:0.9rem;">상단의 [🔄 노션 동기화]를 누르거나 첫 일기를 써볼까요?</p>
+                </div>
+            ` : list.map(entry => `
                 <div style="background:${isMinsu ? '#2e2a72' : '#ffffff'}; border:2px solid ${isMinsu ? '#4f46e5' : '#ffd1dc'}; border-radius:18px; padding:16px; box-shadow:0 4px 14px rgba(0,0,0,0.06); display:flex; flex-direction:column; gap:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed ${isMinsu ? '#4338ca' : '#fecdd3'}; padding-bottom:8px; flex-wrap:wrap; gap:6px;">
-                        <span style="font-family:'Jua', sans-serif; font-size:1.05rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
+                        <span style="font-family:'Jua', sans-serif; font-size:1.05rem; color:${isMinsu ? '#818cf8' : '#e11d48'}; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                             📅 ${entry.date} <span style="font-size:0.85rem; opacity:0.8; font-weight:normal;">(${entry.timeStr || '기록'})</span>
+                            ${entry.isParentEntry ? '<span style="font-size:0.75rem; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #f87171; padding:1px 6px; border-radius:6px;">🛠️ 부모검수</span>' : ''}
+                            ${entry.isNotionSynced || entry.notionPageId ? '<span style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid #34d399; padding:1px 6px; border-radius:6px;" title="노션 클라우드에 영구 저장됨">☁️ 노션 연동</span>' : ''}
                         </span>
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:0.95rem; font-weight:bold; background:${isMinsu ? 'rgba(99,102,241,0.2)' : '#ffe4e6'}; padding:4px 10px; border-radius:12px;">
@@ -887,3 +1198,6 @@ window.deleteDiaryEntry = deleteDiaryEntry;
 window.startDiaryVoiceInput = startDiaryVoiceInput;
 window.getTodayDiaryCount = getTodayDiaryCount;
 window.updateLobbyDiaryButton = updateLobbyDiaryButton;
+window.syncDiariesFromNotion = syncDiariesFromNotion;
+window.fetchNotionDiaries = fetchNotionDiaries;
+
