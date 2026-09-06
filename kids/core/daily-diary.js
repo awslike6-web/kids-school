@@ -28,6 +28,26 @@ function saveDiaryEntry(entry) {
     updateLobbyDiaryButton(entry.childName);
 }
 
+function deleteDiaryEntry(id) {
+    if (!confirm("이 일기를 정말 삭제할까요? 🗑️")) return;
+    
+    const list = getStoredDiaries().filter(item => item.id !== id);
+    localStorage.setItem('mimi_daily_diaries', JSON.stringify(list));
+
+    const currentProfile = localStorage.getItem('currentUser') || 'son';
+    const childName = currentProfile === 'son' ? '민수' : '민서';
+    const isMinsu = (currentProfile === 'son');
+
+    // 지난 일기 히스토리 뷰 실시간 새로고침
+    const histSec = document.getElementById('diaryHistorySection');
+    if (histSec) {
+        histSec.innerHTML = renderDiaryHistoryList(childName, isMinsu);
+    }
+
+    // 로비 화면 버튼 문구 실시간 갱신
+    updateLobbyDiaryButton(childName);
+}
+
 function getTodayDiaryCount(childName) {
     const todayStr = new Date().toISOString().split('T')[0];
     const list = getStoredDiaries();
@@ -497,6 +517,10 @@ async function dispenseDiaryReward(amount = 5) {
 
 // 5. 민서 일기 제출
 async function submitMinseoDiary(dateYMD) {
+    if (!confirm("민서의 오늘 마음 일기를 이대로 완성하고 저장할까요? 🌟")) {
+        return;
+    }
+
     try {
         const weatherCard = document.querySelector('#minseoWeatherGrid .choice-card.selected');
         const weather = weatherCard ? weatherCard.dataset.val : '☀️ 맑음';
@@ -554,6 +578,10 @@ async function submitMinseoDiary(dateYMD) {
 
 // 6. 민수 일기 제출
 async function submitMinsuDiary(dateYMD) {
+    if (!confirm("민수의 오늘 일기를 이대로 완성하고 저장할까요? 🚀")) {
+        return;
+    }
+
     try {
         const energyCard = document.querySelector('#minsuEnergyGrid .choice-card.selected');
         const energy = energyCard ? energyCard.dataset.val : '😎 꿀잼·대만족';
@@ -669,9 +697,12 @@ function renderDiaryHistoryList(childName, isMinsu) {
                         <span style="font-family:'Jua', sans-serif; font-size:1.05rem; color:${isMinsu ? '#818cf8' : '#e11d48'};">
                             📅 ${entry.date} <span style="font-size:0.85rem; opacity:0.8; font-weight:normal;">(${entry.timeStr || '기록'})</span>
                         </span>
-                        <span style="font-size:0.95rem; font-weight:bold; background:${isMinsu ? 'rgba(99,102,241,0.2)' : '#ffe4e6'}; padding:4px 10px; border-radius:12px;">
-                            ${entry.weather || entry.energy || '✨ 맑음'}
-                        </span>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:0.95rem; font-weight:bold; background:${isMinsu ? 'rgba(99,102,241,0.2)' : '#ffe4e6'}; padding:4px 10px; border-radius:12px;">
+                                ${entry.weather || entry.energy || '✨ 맑음'}
+                            </span>
+                            <button type="button" onclick="deleteDiaryEntry('${entry.id}')" style="background:transparent; border:1px solid ${isMinsu ? '#f87171' : '#fda4af'}; color:${isMinsu ? '#f87171' : '#e11d48'}; font-family:'Jua', sans-serif; font-size:0.8rem; cursor:pointer; padding:3px 8px; border-radius:8px; transition:all 0.2s;" title="이 일기 삭제하기">🗑️ 삭제</button>
+                        </div>
                     </div>
 
                     ${entry.moods && entry.moods.length > 0 ? `
@@ -711,6 +742,7 @@ window.toggleBalloonTag = toggleBalloonTag;
 window.insertQuickTag = insertQuickTag;
 window.submitMinseoDiary = submitMinseoDiary;
 window.submitMinsuDiary = submitMinsuDiary;
+window.deleteDiaryEntry = deleteDiaryEntry;
 window.startDiaryVoiceInput = startDiaryVoiceInput;
 window.getTodayDiaryCount = getTodayDiaryCount;
 window.updateLobbyDiaryButton = updateLobbyDiaryButton;
