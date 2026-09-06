@@ -1,4 +1,5 @@
 *.py
+!scripts/*.py
 __pycache__/
 
 # Google Drive sync temp files

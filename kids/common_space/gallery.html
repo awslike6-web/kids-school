@@ -312,6 +312,11 @@
         .gallery-card:hover .card-img {
             transform: scale(1.06);
         }
+        .card-img.is-cutout {
+            object-fit: contain;
+            padding: 10px;
+            filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
+        }
 
         .card-tag-badge {
             position: absolute;
@@ -343,6 +348,11 @@
         .badge--minseo {
             background: linear-gradient(135deg, #ff758c, #ff7eb3);
             color: #fff;
+        }
+        .badge--together {
+            background: linear-gradient(135deg, #10b981, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
         }
 
         .card-body {
@@ -756,6 +766,7 @@
                 <button class="author-tab-btn active" onclick="setAuthorFilter('all', this)">🌟 전체 작품</button>
                 <button class="author-tab-btn" onclick="setAuthorFilter('민수', this)">👦 민수의 갤러리</button>
                 <button class="author-tab-btn" onclick="setAuthorFilter('민서', this)">👧 민서의 아틀리에</button>
+                <button class="author-tab-btn" onclick="setAuthorFilter('공동', this)">🤝 함께 만든 작품</button>
             </div>
             <div class="category-pills" id="categoryPills">
                 <button class="category-pill active" onclick="setCategoryFilter('all', this)">전체 카테고리</button>
@@ -1041,14 +1052,16 @@
                 card.className = 'gallery-card';
                 card.onclick = () => openDetailModal(art.id);
 
-                const authorBadgeClass = art.author === '민수' ? 'badge--minsu' : 'badge--minseo';
+                const authorBadgeClass = art.author === '민수' ? 'badge--minsu' : (art.author === '민서' ? 'badge--minseo' : 'badge--together');
+                const authorDisplay = art.author === '공동' ? '🤝 공동' : art.author;
+                const isCutoutClass = (art.hasCutout || (art.imageUrl && art.imageUrl.endsWith('.png'))) ? 'is-cutout' : '';
                 const commentsCount = (art.comments && art.comments.length) || 0;
 
                 card.innerHTML = `
                     <div class="card-img-wrap">
                         <span class="card-tag-badge">${art.categoryIcon || '🎨'} ${art.category}</span>
-                        <span class="card-author-badge ${authorBadgeClass}">${art.author}</span>
-                        <img src="${art.imageUrl}" alt="${art.title}" class="card-img" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80'">
+                        <span class="card-author-badge ${authorBadgeClass}">${authorDisplay}</span>
+                        <img src="${art.imageUrl}" alt="${art.title}" class="card-img ${isCutoutClass}" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80'">
                     </div>
                     <div class="card-body">
                         <h3 class="card-title">${art.title}</h3>
@@ -1090,8 +1103,8 @@
             document.getElementById('modalTitle').textContent = art.title;
             
             const authorTag = document.getElementById('modalAuthorTag');
-            authorTag.textContent = art.author;
-            authorTag.className = `card-author-badge ${art.author === '민수' ? 'badge--minsu' : 'badge--minseo'}`;
+            authorTag.textContent = art.author === '공동' ? '🤝 민수 & 민서 (공동)' : art.author;
+            authorTag.className = `card-author-badge ${art.author === '민수' ? 'badge--minsu' : (art.author === '민서' ? 'badge--minseo' : 'badge--together')}`;
             
             document.getElementById('modalCategoryTag').textContent = `${art.categoryIcon || '🎨'} ${art.category}`;
             document.getElementById('modalDateTag').textContent = `📅 ${art.date}`;
