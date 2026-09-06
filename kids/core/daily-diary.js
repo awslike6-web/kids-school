@@ -532,20 +532,18 @@ function renderMinseoDiaryForm(todayYMD) {
             <div class="diary-sec-title">
                 <span>🪄 4. 소곤소곤 '나-전달법' 마법 한 문장</span>
             </div>
-            <div style="background:rgba(255,255,255,0.8); border:1.5px dashed #ff85a2; padding:12px; border-radius:16px; display:flex; flex-direction:column; gap:8px; font-size:0.95rem;">
-                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <span>👉 내가</span>
-                    <input type="text" id="minseoIMessageSit" class="diary-input" style="flex:1; min-width:140px; padding:6px 10px;" placeholder="상황 (예: 발표를 잘 끝냈)">
-                    <span>을 때,</span>
+            <div style="background:rgba(255,255,255,0.8); border:1.5px dashed #ff85a2; padding:14px; border-radius:16px; display:flex; flex-direction:column; gap:10px; font-size:0.95rem;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span style="font-weight:bold; color:#be185d; min-width:82px;">👉 그때 상황:</span>
+                    <input type="text" id="minseoIMessageSit" class="diary-input" style="flex:1; min-width:160px; padding:8px 12px;" placeholder="어떤 상황이었나요? (예: 발표를 잘 끝마쳤을 때 / 친구랑 놀았어요)">
                 </div>
-                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <span>👉 내 기분은</span>
-                    <input type="text" id="minseoIMessageFeel" class="diary-input" style="flex:1; min-width:140px; padding:6px 10px;" placeholder="감정 (예: 보석처럼 반짝반짝 뿌듯)">
-                    <span>했어.</span>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span style="font-weight:bold; color:#be185d; min-width:82px;">👉 내 마음은:</span>
+                    <input type="text" id="minseoIMessageFeel" class="diary-input" style="flex:1; min-width:160px; padding:8px 12px;" placeholder="어떤 마음이 들었나요? (예: 보석처럼 반짝반짝 뿌듯했어요 / 신났어요)">
                 </div>
-                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                    <span>👉 앞으로는</span>
-                    <input type="text" id="minseoIMessageWish" class="diary-input" style="flex:1; min-width:140px; padding:6px 10px;" placeholder="바라는 점 (예: 계속 씩씩하게 도전할 거야)">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span style="font-weight:bold; color:#be185d; min-width:82px;">👉 앞으로는:</span>
+                    <input type="text" id="minseoIMessageWish" class="diary-input" style="flex:1; min-width:160px; padding:8px 12px;" placeholder="나에게 해주는 말 (예: 계속 씩씩하게 도전할 거야 / 사이좋게 지내자)">
                 </div>
             </div>
         </div>
@@ -1036,7 +1034,15 @@ async function submitMinseoDiary(dateYMD) {
         const sit = document.getElementById('minseoIMessageSit')?.value.trim();
         const feel = document.getElementById('minseoIMessageFeel')?.value.trim();
         const wish = document.getElementById('minseoIMessageWish')?.value.trim();
-        const iMessage = (sit || feel || wish) ? `내가 ${sit || '하루를 보냈'}을 때, 내 기분은 ${feel || '뿌듯'}했어. 앞으로는 ${wish || '더 씩씩하게 할 거야'}.` : '';
+
+        let iMessage = '';
+        const msgList = [];
+        if (sit) msgList.push(sit);
+        if (feel) msgList.push(feel);
+        if (wish) msgList.push(wish);
+        if (msgList.length > 0) {
+            iMessage = msgList.join(' ');
+        }
 
         const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
