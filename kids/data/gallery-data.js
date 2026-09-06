@@ -794,26 +794,31 @@ const DEFAULT_GALLERY_DATA = [
     "id": "art_minseo_20260906_204832",
     "author": "민서",
     "authorKey": "daughter",
-    "title": "민서의 창의 예술 작품 (4832)",
-    "category": "만들기/공예",
-    "categoryIcon": "✂️",
+    "title": "킹콩블럭 과학창의력대회 영광의 금메달",
+    "category": "상장/기념",
+    "categoryIcon": "🏆",
     "date": "2026-09-06",
-    "grade": "1학년",
+    "grade": "유치원",
     "imageUrl": "../assets/images/gallery/minseo/minseo_20260906_204832.png",
     "hasCutout": true,
-    "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
-    "likes": 15,
+    "artistNote": "유치원 다닐 때 킹콩블럭으로 멋진 상상력을 펼치는 과학창의력대회에 나가서 자랑스럽게 받은 영광의 금메달이에요! 🥇✨",
+    "likes": 30,
     "stickers": {
-      "heart": 8,
-      "thumb": 5,
-      "star": 4,
-      "trophy": 2
+      "heart": 15,
+      "thumb": 10,
+      "star": 8,
+      "trophy": 12
     },
     "comments": [
       {
         "author": "아빠",
-        "text": "정말 정성이 가득 담긴 멋진 작품이다! 최고야 ❤️",
-        "date": "2026-09-06"
+        "text": "유치원 때부터 킹콩블럭으로 뚝딱뚝딱 잘 만들더니 금메달까지 받았었지! 민서 최고야 🏆",
+        "date": "2026-09-07"
+      },
+      {
+        "author": "엄마",
+        "text": "고사리 같은 손으로 창의력 대회에 나가서 받은 소중한 메달, 볼 때마다 대견해 ❤️",
+        "date": "2026-09-07"
       }
     ]
   },
