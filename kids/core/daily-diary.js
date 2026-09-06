@@ -163,51 +163,104 @@ function updateLobbyDiaryButton(childName) {
 
 // 2. 음성 인식 (STT) 헬퍼
 let diarySpeechRecog = null;
+let diaryCurrentActiveBtn = null;
+
 function startDiaryVoiceInput(targetInputId, btnElement) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("이 브라우저는 음성 입력을 지원하지 않아요. 직접 글을 써주세요! ✏️");
+        alert("이 브라우저는 음성 입력을 지원하지 않아요. 크롬(Chrome) 브라우저를 이용하거나 직접 글을 써주세요! ✏️");
         return;
     }
 
+    // 이미 녹음 중인 상태에서 버튼을 다시 눌렀다면 중지 (토글 기능)
+    if (diarySpeechRecog && diarySpeechRecog._isListening) {
+        diarySpeechRecog.stop();
+        return;
+    }
+
+    // 이전 세션 정리
     if (diarySpeechRecog) {
-        diarySpeechRecog.abort();
+        try { diarySpeechRecog.abort(); } catch (e) {}
         diarySpeechRecog = null;
     }
 
-    diarySpeechRecog = new SpeechRecognition();
-    diarySpeechRecog.lang = 'ko-KR';
-    diarySpeechRecog.interimResults = false;
-    diarySpeechRecog.maxAlternatives = 1;
+    const targetInput = document.getElementById(targetInputId);
+    if (!targetInput) return;
 
-    btnElement.innerHTML = '🔴 듣고 있어요... (말씀하세요!)';
-    btnElement.style.background = '#ef4444';
-    btnElement.style.color = '#ffffff';
+    // 녹음 시작 전 기존 텍스트 및 시작점 보존
+    const initialText = targetInput.value ? targetInput.value.trim() : '';
+    const prefix = initialText ? initialText + ' ' : '';
 
-    diarySpeechRecog.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        const targetInput = document.getElementById(targetInputId);
-        if (targetInput) {
-            targetInput.value = targetInput.value ? (targetInput.value + ' ' + transcript) : transcript;
+    try {
+        diarySpeechRecog = new SpeechRecognition();
+        diarySpeechRecog.lang = 'ko-KR';
+        diarySpeechRecog.interimResults = true; // 실시간 변환 지원
+        diarySpeechRecog.continuous = false;   // 문장이 끝나면 자동 완료
+        diarySpeechRecog.maxAlternatives = 1;
+        diarySpeechRecog._isListening = false;
+
+        diaryCurrentActiveBtn = btnElement;
+        if (btnElement) {
+            btnElement.innerHTML = '🔴 듣는 중... (한 번 더 누르면 멈춤)';
+            btnElement.style.background = '#ef4444';
+            btnElement.style.color = '#ffffff';
+            btnElement.style.borderColor = '#dc2626';
         }
-    };
 
-    diarySpeechRecog.onerror = (e) => {
-        console.warn('음성 인식 오류:', e);
+        diarySpeechRecog.onstart = () => {
+            if (diarySpeechRecog) diarySpeechRecog._isListening = true;
+        };
+
+        let finalTranscriptAccum = '';
+
+        diarySpeechRecog.onresult = (event) => {
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscriptAccum += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            const currentVoiceResult = (finalTranscriptAccum + ' ' + interimTranscript).trim();
+            if (currentVoiceResult) {
+                targetInput.value = prefix + currentVoiceResult;
+            }
+        };
+
+        diarySpeechRecog.onerror = (e) => {
+            console.warn('음성 인식 오류:', e);
+            if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                alert('🎙️ 마이크 권한이 차단되어 있어 음성을 들을 수 없어요!\n\n브라우저 주소창 왼쪽의 자물쇠(또는 설정) 아이콘을 눌러 "마이크 허용"으로 변경해주세요.');
+            } else if (e.error === 'network') {
+                alert('음성 인식 네트워크 연결 상태를 확인해주세요.');
+            }
+            resetVoiceBtn(btnElement);
+        };
+
+        diarySpeechRecog.onend = () => {
+            if (diarySpeechRecog) diarySpeechRecog._isListening = false;
+            resetVoiceBtn(btnElement);
+            diarySpeechRecog = null;
+            diaryCurrentActiveBtn = null;
+        };
+
+        diarySpeechRecog.start();
+    } catch (startErr) {
+        console.error("음성 인식 시작 실패:", startErr);
+        alert('음성 입력을 시작하지 못했습니다. 마이크 연결 또는 브라우저 권한을 확인해주세요.');
         resetVoiceBtn(btnElement);
-    };
-
-    diarySpeechRecog.onend = () => {
-        resetVoiceBtn(btnElement);
-    };
-
-    diarySpeechRecog.start();
+        diarySpeechRecog = null;
+    }
 }
 
 function resetVoiceBtn(btnElement) {
-    btnElement.innerHTML = '🎙️ 말로 하기 (음성 입력)';
-    btnElement.style.background = '#e0e7ff';
-    btnElement.style.color = '#4338ca';
+    const el = btnElement || diaryCurrentActiveBtn;
+    if (!el) return;
+    el.innerHTML = '🎙️ 말로 하기';
+    el.style.background = '';
+    el.style.color = '';
+    el.style.borderColor = '';
 }
 
 function insertQuickTag(targetInputId, text) {
@@ -1070,9 +1123,17 @@ async function submitMinsuDiary(dateYMD) {
 function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
     const { isParentMode } = getCurrentDiaryTarget();
 
-    // 칭찬 성우 음성 재생
+    // 일기 저장 완료 안내 음성 재생 (퀴즈 정답 프리셋 사운드와 분리)
     if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(isParentMode ? "기록이 저장되었습니다." : "참 잘했어요!");
+        let completionVoiceMsg = "";
+        if (isParentMode) {
+            completionVoiceMsg = "부모 관리자 일기가 등록되었습니다.";
+        } else if (childName === '민서') {
+            completionVoiceMsg = "민서의 오늘 마음 일기가 소중하게 등록되었어요.";
+        } else {
+            completionVoiceMsg = "오늘 하루 일기 기록 완료! 푹 쉬고 내일 또 만나요.";
+        }
+        speakFairyTTS(completionVoiceMsg);
     }
 
     const writeSec = document.getElementById('diaryWriteSection');
