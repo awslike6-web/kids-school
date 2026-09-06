@@ -490,29 +490,122 @@ function toggleBalloonTag(tag) {
     tag.classList.toggle('selected');
 }
 
-// 4-1. 안전한 보상 지급 브릿지 헬퍼
-async function dispenseDiaryReward(amount = 5) {
-    const isAdminUser = window.isAdmin || (localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마');
-    if (isAdminUser) {
-        console.log("🛠️ 관리자 모드: 일기 보상 지급 시뮬레이션 프리패스");
-        return true;
+// 4-1. 노션 학습일지 DB 직통 일기 저장 헬퍼
+async function sendDiaryLogToNotionDirect(entry) {
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+
+    const subjectText = entry.childName === '민서' 
+        ? `마음일기 (${entry.weather || '☀️ 맑음'}) [${entry.timeStr}]`
+        : `일상로그 (${entry.energy || '😎 꿀잼'}) [${entry.timeStr}]`;
+
+    let reportText = "";
+    if (entry.childName === '민서') {
+        reportText = `[감정: ${(entry.moods || []).join(', ')}] ${entry.content || ''} ${entry.iMessage ? ' / 나-전달법: ' + entry.iMessage : ''}`;
+    } else {
+        reportText = `[이야기: ${entry.accomplish || ''}] [나에게 한마디: ${entry.goal || ''}]`;
     }
 
-    try {
-        if (typeof window.triggerAwardDispense === 'function') {
-            await window.triggerAwardDispense(amount);
-        } else if (typeof triggerAwardDispense === 'function') {
-            await triggerAwardDispense(amount);
-        } else if (typeof grantRewardAndShowUI === 'function') {
-            await grantRewardAndShowUI(amount, true);
-        } else if (typeof window.grantRewardAndShowUI === 'function') {
-            await window.grantRewardAndShowUI(amount, true);
-        } else {
-            console.log(`[다이어리] 보상 ${amount} 크레딧 로컬 적립 완료`);
+    const payload = {
+        parent: { database_id: dbId },
+        properties: {
+            "ID": {
+                title: [{ text: { content: `${entry.childName}_${entry.date} (${entry.childName === '민서' ? '마음일기' : '일상로그'})` } }]
+            },
+            "학생": {
+                select: { name: entry.childName }
+            },
+            "과목": {
+                rich_text: [{ text: { content: subjectText } }]
+            },
+            "입장": {
+                date: { start: entry.createdAt }
+            },
+            "퇴장": {
+                date: { start: new Date().toISOString() }
+            },
+            "소요시간": {
+                number: 5
+            },
+            "오답리포트": {
+                rich_text: [{ text: { content: reportText.trim() || "기록 완료" } }]
+            },
+            "단어요정": {
+                number: 1
+            }
         }
-    } catch (err) {
-        console.warn("[다이어리 보상 지급 예외 처리]", err);
+    };
+
+    try {
+        const resp = await fetch(`${proxyUrl}/v1/pages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            console.log(`🎉 [노션 직통] ${entry.childName} 일기 학습일지 등록 성공! Page ID: ${data.id}`);
+            return true;
+        } else {
+            const errText = await resp.text();
+            console.warn("노션 학습일지 직통 전송 실패:", errText);
+        }
+    } catch (e) {
+        console.warn("노션 학습일지 통신 오류:", e);
     }
+    return false;
+}
+
+// 4-2. 노션 인벤토리 DB 직통 보상 지급 헬퍼
+async function dispenseDiaryRewardDirect(childName, amount = 5) {
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const invDbId = typeof INVENTORY_DB_ID !== 'undefined' ? INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12";
+
+    try {
+        // 1. 해당 학생 페이지 쿼리
+        const qResp = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+        });
+        if (!qResp.ok) return false;
+        const qData = await qResp.json();
+        if (!qData.results || qData.results.length === 0) return false;
+
+        const page = qData.results[0];
+        const pageId = page.id;
+        const props = page.properties;
+
+        const patchProps = {};
+        if (childName === '민서') {
+            const curHaribo = props["하리보 젤리 개수"]?.number || 0;
+            const curDia = props["다이아몬드 개수"]?.number || 0;
+            patchProps["하리보 젤리 개수"] = { number: curHaribo + amount };
+            patchProps["다이아몬드 개수"] = { number: curDia + amount };
+        } else {
+            const curDia = props["다이아몬드 개수"]?.number || 0;
+            patchProps["다이아몬드 개수"] = { number: curDia + amount };
+        }
+
+        // 2. 패치 전송
+        const pResp = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify({ properties: patchProps })
+        });
+
+        if (pResp.ok) {
+            console.log(`💎 [노션 인벤토리] ${childName}에게 +${amount} 크레딧 보상 지급 성공!`);
+            // 화면에 인벤토리 컴포넌트가 있다면 새로고침
+            if (typeof fetchInventory === 'function') {
+                fetchInventory();
+            }
+            return true;
+        }
+    } catch (e) {
+        console.warn("노션 인벤토리 보상 직통 지급 오류:", e);
+    }
+    return false;
 }
 
 // 5. 민서 일기 제출
@@ -550,28 +643,17 @@ async function submitMinseoDiary(dateYMD) {
         // 1) 로컬스토리지 저장
         saveDiaryEntry(entry);
 
-        // 2) 보상 지급 (오류 방어)
-        await dispenseDiaryReward(5);
+        // 2) 노션 인벤토리 DB에 보상 직접 지급 (+5)
+        dispenseDiaryRewardDirect('민서', 5);
 
-        // 3) 노션 학습일지 DB로도 다이어리 기록 전송 (시간대 포함)
-        try {
-            if (typeof sendStudyLogToNotion === 'function') {
-                sendStudyLogToNotion({
-                    childName: '민서',
-                    subject: `마음일기 (${weather}) [${timeStr}]`,
-                    errorReport: `[감정: ${selectedBalloons.join(', ')}] ${eventText} ${iMessage ? ' / 나-전달법: ' + iMessage : ''}`
-                });
-            }
-        } catch (notionErr) {
-            console.warn("[다이어리 노션 전송 우회]", notionErr);
-        }
+        // 3) 노션 학습일지 DB에 일기 내용 직접 기록
+        sendDiaryLogToNotionDirect(entry);
 
         const todayCount = getTodayDiaryCount('민서');
         // 4) 성공 화면 렌더링
         showDiarySuccessModal('민서', weather, `참 잘했어요! 오늘 ${todayCount}번째 별 도장 획득! 🌟`);
     } catch (globalErr) {
         console.error("민서 일기 저장 중 오류 발생:", globalErr);
-        // 오류가 발생해도 모달 전환은 보장
         showDiarySuccessModal('민서', '☀️ 맑음', '일기가 저장되었어요! 🌟');
     }
 }
@@ -605,21 +687,11 @@ async function submitMinsuDiary(dateYMD) {
         // 1) 로컬스토리지 저장
         saveDiaryEntry(entry);
 
-        // 2) 보상 지급 (오류 방어)
-        await dispenseDiaryReward(5);
+        // 2) 노션 인벤토리 DB에 보상 직접 지급 (+5)
+        dispenseDiaryRewardDirect('민수', 5);
 
-        // 3) 노션 학습일지 DB로도 다이어리 기록 전송 (시간대 포함)
-        try {
-            if (typeof sendStudyLogToNotion === 'function') {
-                sendStudyLogToNotion({
-                    childName: '민수',
-                    subject: `일상로그 (${energy}) [${timeStr}]`,
-                    errorReport: `[이야기: ${accomplish}] [나에게 한마디: ${goal}]`
-                });
-            }
-        } catch (notionErr) {
-            console.warn("[다이어리 노션 전송 우회]", notionErr);
-        }
+        // 3) 노션 학습일지 DB에 일기 내용 직접 기록
+        sendDiaryLogToNotionDirect(entry);
 
         const todayCount = getTodayDiaryCount('민수');
         // 4) 성공 화면 렌더링
