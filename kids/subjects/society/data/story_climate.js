@@ -4,13 +4,15 @@
 window.STORY_BOOK = {
   id: "society_climate",
   title: "민수와 친구들의 지구 지키기: 기후 수업 대모험",
+  grade: "5학년 1학기",
+  unit: "2. 우리 국토의 기후",
   icon: "🌍",
   themeColor: "#10b981",
   themeColorDark: "#059669",
   backUrl: "society.html",
   backLabel: "🔙 사회 탐구실",
   imgBase: "images/storybook/climate/",
-  version: "20260902_climate",
+  version: "20260906_climate_v2",
   pages: [
         {
             page: 1,
