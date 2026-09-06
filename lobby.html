@@ -72,49 +72,65 @@
   .subtitle { font-family: 'Gaegu', cursive; font-size: 1.1rem; margin-bottom: 16px; }
   .user-welcome { display: inline-block; padding: 8px 22px; border-radius: 999px; font-size: 1.25rem; margin-bottom: 14px; backdrop-filter: blur(8px); font-weight: bold; }
 
-  /* 📦 인벤토리 및 마이룸 래퍼 */
-  .status-wrapper { width: 100%; max-width: 440px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 10px; }
-  .inventory-card { border-radius: 22px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
-  .reward-badge { display: flex; align-items: center; gap: 8px; font-size: 1.4rem; font-weight: bold; }
+  /* 📦 3대 히어로 칩 바 & 인벤토리 */
+  .status-hero-bar { width: 100%; max-width: 860px; display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 768px) { .status-hero-bar { grid-template-columns: 1fr; max-width: 440px; } }
+
+  .inventory-card { border-radius: 20px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; }
+  .reward-badge { display: flex; align-items: center; gap: 8px; font-size: 1.3rem; font-weight: bold; }
   .reward-currency-img { width: 28px; height: 28px; object-fit: contain; }
-  .math-level { font-size: 1.1rem; padding: 4px 14px; border-radius: 12px; font-weight: bold; }
+  .math-level { font-size: 1rem; padding: 4px 12px; border-radius: 12px; font-weight: bold; }
 
-  /* 🚪 마이룸 버튼 공통 뼈대 */
-  .my-room-btn { width: 100%; padding: 14px; border-radius: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; text-decoration: none; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Jua', sans-serif; touch-action: manipulation; }
+  .hero-chip-btn { width: 100%; padding: 14px 18px; border-radius: 20px; text-align: center; font-size: 1.05rem; font-weight: bold; text-decoration: none; transition: all 0.25s ease; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Jua', sans-serif; touch-action: manipulation; box-shadow: 0 4px 12px rgba(0,0,0,0.06); cursor: pointer; border: 2px solid transparent; box-sizing: border-box; }
+  .hero-chip-btn:hover { transform: translateY(-3px); }
 
-  body.theme--arcade .timetable-btn { background: linear-gradient(90deg, #00f2fe, #4facfe); color: #fff; border: 2px solid rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,242,254,0.35); }
-  body.theme--arcade .timetable-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,242,254,0.5); }
-  body.theme--hideout .timetable-btn { background: linear-gradient(90deg, #a78bfa, #ffd93d); color: #4a384f; border: 2px solid #ff6b9d; box-shadow: 0 4px 15px rgba(167,139,250,0.35); }
-  body.theme--hideout .timetable-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(167,139,250,0.45); }
+  body.theme--arcade .timetable-chip-btn { background: linear-gradient(90deg, #0284c7, #2563eb); color: #fff; border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 15px rgba(2,132,199,0.35); }
+  body.theme--arcade .timetable-chip-btn:hover { box-shadow: 0 6px 20px rgba(37,99,235,0.5); }
+  body.theme--hideout .timetable-chip-btn { background: linear-gradient(90deg, #a78bfa, #818cf8); color: #fff; border-color: #c7d2fe; box-shadow: 0 4px 15px rgba(167,139,250,0.35); }
+  body.theme--hideout .timetable-chip-btn:hover { box-shadow: 0 6px 20px rgba(167,139,250,0.5); }
 
-  body.theme--arcade .dashboard-btn { background: linear-gradient(90deg, #6EC6F5, #3b82f6); color: #fff; border: 2px solid rgba(110, 198, 245, 0.4); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35); }
-  body.theme--arcade .dashboard-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.55); }
-  body.theme--hideout .dashboard-btn { background: linear-gradient(90deg, #FF6B9D, #ec4899); color: #fff; border: 2px solid rgba(255, 107, 157, 0.4); box-shadow: 0 4px 15px rgba(255, 107, 157, 0.35); }
-  body.theme--hideout .dashboard-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 107, 157, 0.5); }
+  body.theme--arcade .diary-chip-btn { background: linear-gradient(90deg, #6366f1, #8b5cf6); color: #fff; border-color: #a78bfa; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+  body.theme--arcade .diary-chip-btn:hover { box-shadow: 0 6px 20px rgba(167,139,250,0.6); }
+  body.theme--hideout .diary-chip-btn { background: linear-gradient(90deg, #f43f5e, #fb7185); color: #fff; border-color: #fda4af; box-shadow: 0 4px 15px rgba(244,63,94,0.35); }
+  body.theme--hideout .diary-chip-btn:hover { box-shadow: 0 6px 20px rgba(244,63,94,0.5); }
 
-  body.theme--arcade .diary-lobby-btn { background: linear-gradient(90deg, #6366f1, #8b5cf6); color: #fff; border: 2px solid #a78bfa; box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
-  body.theme--arcade .diary-lobby-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(167,139,250,0.6); }
-  body.theme--hideout .diary-lobby-btn { background: linear-gradient(90deg, #f43f5e, #fb7185); color: #fff; border: 2px solid #fda4af; box-shadow: 0 4px 15px rgba(244,63,94,0.35); }
-  body.theme--hideout .diary-lobby-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(244,63,94,0.5); }
+  /* 🛠️ 상단 고정 유틸리티 바 (뒤로가기, 관리자 스위처, 구석 TTS) */
+  .lobby-top-bar { width: 100%; max-width: 860px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 10; gap: 10px; }
+  .top-back-btn { padding: 8px 16px; border-radius: 20px; font-family: 'Jua', sans-serif; font-size: 0.95rem; text-decoration: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  body.theme--arcade .top-back-btn { background: rgba(30, 41, 59, 0.85); color: #94a3b8; border: 1.5px solid #334155; }
+  body.theme--arcade .top-back-btn:hover { color: #fff; border-color: #64748b; transform: scale(1.03); }
+  body.theme--hideout .top-back-btn { background: rgba(255, 255, 255, 0.9); color: #8d6e63; border: 1.5px solid #fecdd3; }
+  body.theme--hideout .top-back-btn:hover { color: #be185d; border-color: #fda4af; transform: scale(1.03); }
 
-  .tower-btn { background: linear-gradient(90deg, #1a2332, #4fc3f7) !important; color: #fff !important; border: 2px solid rgba(79,195,247,0.5) !important; box-shadow: 0 4px 15px rgba(79,195,247,0.35); }
-  .tower-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(79,195,247,0.5); }
-
-  .tts-toggle-btn { width: 100%; padding: 12px 16px; border-radius: 18px; border: 2px solid; font-family: 'Jua', sans-serif; font-size: 1.05rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; touch-action: manipulation; }
-  body.theme--arcade .tts-toggle-btn { background: rgba(14, 10, 31, 0.6); border-color: #00f2fe; color: #00f2fe; }
-  body.theme--arcade .tts-toggle-btn:hover { box-shadow: 0 4px 15px rgba(0,242,254,0.35); transform: translateY(-2px); }
-  body.theme--hideout .tts-toggle-btn { background: #ffffff; border-color: #ff6b9d; color: #ff6b9d; }
-  body.theme--hideout .tts-toggle-btn:hover { box-shadow: 0 4px 15px rgba(255,107,157,0.3); transform: translateY(-2px); }
+  .compact-tts-btn { padding: 8px 16px; border-radius: 20px; font-family: 'Jua', sans-serif; font-size: 0.95rem; font-weight: bold; cursor: pointer; border: 2px solid; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; touch-action: manipulation; }
+  body.theme--arcade .compact-tts-btn { background: rgba(14, 10, 31, 0.85); border-color: #00f2fe; color: #00f2fe; }
+  body.theme--arcade .compact-tts-btn:hover { box-shadow: 0 4px 12px rgba(0,242,254,0.4); transform: scale(1.04); }
+  body.theme--hideout .compact-tts-btn { background: #ffffff; border-color: #ff6b9d; color: #ff6b9d; }
+  body.theme--hideout .compact-tts-btn:hover { box-shadow: 0 4px 12px rgba(255,107,157,0.35); transform: scale(1.04); }
 
   /* 🛠️ 관리자 자녀 퀵 스위처 바 */
-  .admin-child-switcher { display: none; justify-content: center; gap: 12px; margin: 12px 0 6px 0; width: 100%; max-width: 480px; z-index: 10; }
-  .admin-child-btn { flex: 1; padding: 10px 16px; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 1rem; font-weight: bold; cursor: pointer; border: 2px solid transparent; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.12); touch-action: manipulation; }
+  .admin-child-switcher { display: none; justify-content: center; gap: 8px; z-index: 10; flex: 1; max-width: 380px; }
+  .admin-child-btn { flex: 1; padding: 7px 12px; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.12); touch-action: manipulation; white-space: nowrap; }
   .admin-child-btn.minsu { background: rgba(30, 41, 59, 0.85); color: #6EC6F5; border-color: #3b82f6; }
-  .admin-child-btn.minsu:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4); }
-  .admin-child-btn.minsu.active { background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; border-color: #60a5fa; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5); transform: scale(1.03); }
+  .admin-child-btn.minsu:hover { transform: translateY(-2px); }
+  .admin-child-btn.minsu.active { background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; border-color: #60a5fa; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.45); }
   .admin-child-btn.minseo { background: rgba(255, 255, 255, 0.9); color: #ec4899; border-color: #f472b6; }
-  .admin-child-btn.minseo:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35); }
-  .admin-child-btn.minseo.active { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; border-color: #fda4af; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.5); transform: scale(1.03); }
+  .admin-child-btn.minseo:hover { transform: translateY(-2px); }
+  .admin-child-btn.minseo.active { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; border-color: #fda4af; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.45); }
+
+  /* 🗂️ 2대 메인 탭 바 */
+  .lobby-tab-bar { display: flex; justify-content: center; gap: 10px; width: 100%; max-width: 620px; margin: 8px 0 16px 0; padding: 6px; border-radius: 26px; }
+  body.theme--arcade .lobby-tab-bar { background: rgba(30, 41, 59, 0.7); border: 1.5px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  body.theme--hideout .lobby-tab-bar { background: rgba(255, 255, 255, 0.75); border: 1.5px solid rgba(255, 107, 157, 0.25); box-shadow: 0 4px 20px rgba(255,182,193,0.3); }
+
+  .lobby-tab-btn { flex: 1; padding: 12px 18px; border-radius: 20px; font-family: 'Jua', sans-serif; font-size: 1.15rem; font-weight: bold; cursor: pointer; border: none; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); color: #94a3b8; background: transparent; display: flex; align-items: center; justify-content: center; gap: 8px; touch-action: manipulation; }
+  body.theme--arcade .lobby-tab-btn.active { background: linear-gradient(135deg, #0284c7, #3b82f6); color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.45); transform: scale(1.02); }
+  body.theme--hideout .lobby-tab-btn.active { background: linear-gradient(135deg, #ec4899, #ff758c); color: #fff; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); transform: scale(1.02); }
+
+  /* 🛠️ 관리자 퀵 툴바 */
+  .admin-quick-toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 12px; width: 100%; max-width: 860px; }
+  .admin-tool-chip { padding: 7px 14px; border-radius: 14px; font-size: 0.88rem; font-family: 'Jua', sans-serif; text-decoration: none; background: rgba(30, 41, 59, 0.85); color: #38bdf8; border: 1.5px solid #0284c7; transition: all 0.2s; }
+  .admin-tool-chip:hover { transform: translateY(-2px); color: #fff; background: #0284c7; }
 
   /* 💎 과목 카드 격리 그리드 */
   .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 860px; margin-top: 10px; }
@@ -134,29 +150,40 @@
 <div class="bg-floats" id="bgFloats"></div>
 
 <div class="screen" id="screen-subjects" style="display: flex;">
-  <!-- 💡 [수정] 관리자용 타이틀 동적 노출용 태그 매핑 -->
-  <h1 class="main-title" id="mainLobbyTitle"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
-  
-  <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
-
-  <!-- 🛠️ 관리자 전용 자녀 전환 퀵 바 -->
-  <div class="admin-child-switcher" id="adminChildSwitcher"></div>
-
-  <div class="status-wrapper">
-      <div class="inventory-card" id="inventoryDisplay">
-        <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
-      </div>
-      <button type="button" class="my-room-btn diary-lobby-btn" id="lobbyDiaryBtn" onclick="openDailyDiaryModal()">📝 하루 마음 일기장 쓰기 (+5💎)</button>
-      <a href="parent_dashboard.html" class="my-room-btn dashboard-btn" id="dashboardLink">📊 나의 성장 대시보드</a>
-      <a href="admin-image-changer.html" class="my-room-btn image-changer-btn" id="imageChangerLink" style="display:none; background: linear-gradient(135deg, #0284c7, #38bdf8); color: #fff; font-weight: bold;">🖼️ 교재 이미지 체인저</a>
-      <a href="timetable.html" class="my-room-btn timetable-btn" id="timetableLink">📅 내 시간표 보기</a>
-      <a href="#" class="my-room-btn tower-btn" id="towerLink" style="display:none" target="_blank" rel="noopener">🏰 Master Tower 관제탑</a>
-      <button type="button" class="tts-toggle-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
-      <a href="kids/common_space/my-room.html" class="my-room-btn">🛒 나만의 마이룸 & 상점 가기</a>
-      <a href="kids/common_space/gallery.html" class="my-room-btn" style="background: linear-gradient(90deg, #ff758c, #ff7eb3); color: #fff; border: 2px solid #fff; box-shadow: 0 4px 15px rgba(255,117,140,0.4);">🖼️ 꿈나무 작품 갤러리 가기</a>
+  <!-- 🛠️ 상단 고정 유틸리티 바 (뒤로가기, 관리자 스위처, 구석 TTS) -->
+  <div class="lobby-top-bar">
+    <a href="index.html" class="top-back-btn">← 프로필</a>
+    <div class="admin-child-switcher" id="adminChildSwitcher"></div>
+    <button type="button" class="compact-tts-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
   </div>
 
-  <p class="subtitle" id="lobbySubtitle">오늘 탐험하고 싶은 월드를 선택해봐!</p>
+  <!-- 💡 메인 타이틀 & 환영 인사 -->
+  <h1 class="main-title" id="mainLobbyTitle"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
+  <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
+
+  <!-- 📦 3대 상단 핵심 히어로 바 (인벤토리 보상 + 데일리 마음일기 + 시간표) -->
+  <div class="status-hero-bar">
+    <div class="inventory-card" id="inventoryDisplay">
+      <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
+    </div>
+    <button type="button" class="hero-chip-btn diary-chip-btn" id="lobbyDiaryBtn" onclick="openDailyDiaryModal()">📝 마음일기 (+5💎)</button>
+    <a href="timetable.html" class="hero-chip-btn timetable-chip-btn" id="timetableLink">📅 오늘 시간표</a>
+  </div>
+
+  <!-- 🛠️ 관리자 / 보조 퀵 툴바 (성장 대시보드, 교재 이미지 체인저, 관제탑) -->
+  <div class="admin-quick-toolbar" id="quickToolbar">
+    <a href="parent_dashboard.html" class="admin-tool-chip dashboard-btn" id="dashboardLink">📊 나의 성장 대시보드</a>
+    <a href="admin-image-changer.html" class="admin-tool-chip image-changer-btn" id="imageChangerLink" style="display:none; background: linear-gradient(135deg, #0284c7, #38bdf8); color: #fff; font-weight: bold;">🖼️ 교재 이미지 체인저</a>
+    <a href="#" class="admin-tool-chip tower-btn" id="towerLink" style="display:none;" target="_blank" rel="noopener">🏰 Master Tower 관제탑</a>
+  </div>
+
+  <!-- 🗂️ 2대 메인 탭 허브 (공부방 월드 vs 나만의 아지트 & 놀이터) -->
+  <div class="lobby-tab-bar">
+    <button type="button" class="lobby-tab-btn active" id="tabStudy" onclick="switchLobbyTab('study')">🎓 공부방 월드</button>
+    <button type="button" class="lobby-tab-btn" id="tabHideout" onclick="switchLobbyTab('hideout')">🏠 나만의 아지트 & 놀이터</button>
+  </div>
+
+  <p class="subtitle" id="lobbySubtitle">오늘 탐험하고 싶은 공부방 월드를 선택해봐!</p>
 
   <div class="world-grid" id="worldGrid"></div>
   
@@ -165,23 +192,16 @@
 
 <script>
 // =========================================================
-// 💎 데이터 구조 정의 (브라우저가 가장 먼저 파싱해야 함)
+// 💎 데이터 구조 정의 (공부방 월드 vs 나만의 아지트 탭 분리)
 // =========================================================
 const USER_CONFIGS = {
   minsu: {
     name: '민수', key: 'son', themeClass: 'theme--arcade',
     bgSymbols: ['🛸', '🚀', '👾', '🕹️', '⚡', '+', '✖️', '=', '🤖', '🔋'],
-    worlds: [
-      {
-        title: '🏠 나만의 공간',
-        rooms: [
-          { name: '📅 내 시간표', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' },
-          { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' },
-          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교에서 만들고 그려온 멋진 미술·공예 작품을 전시하고 자랑해보자!' }
-        ]
-      },
+    studyWorlds: [
       {
         title: '🧮 수학 월드',
+        color: '#3b82f6',
         rooms: [
           { name: '🏫 학년별 개념 탐험관', href: 'kids/subjects/math/math.html#concepts', desc: '1~2학년 기초부터 3~4학년 핵심, 5~6학년 심화까지 교과 개념 탐험!' },
           { name: '⚔️ 실전 문제 트레이닝 센터', href: 'kids/subjects/math/math.html#workout', desc: '세로셈 무한 연산, 공식 퀴즈, 분수·소수·도형 실전 문제 훈련!' },
@@ -190,40 +210,56 @@ const USER_CONFIGS = {
       },
       {
         title: '✍️ 국어 월드',
+        color: '#10b981',
         rooms: [
-          { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '논리 회로 분석 모드! 문장력과 대화 논리를 완성하라' }
+          { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '단원 동화부터 받아쓰기, 어휘, 정밀독해, AI토론까지!' }
         ]
       },
       {
         title: '🔤 영어 던전',
+        color: '#6366f1',
         rooms: [
-          { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자 트레이닝' }
+          { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '스토리북 도서관부터 사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자' }
         ]
       },
       {
         title: '🧪 과학 실험실',
+        color: '#06b6d4',
         rooms: [
           { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '자연과 우주 생태계의 비밀 법칙을 파헤치는 코어 실험실' }
         ]
       },
       {
         title: '🏛️ 사회 연대기',
+        color: '#f59e0b',
         rooms: [
           { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '지리 공간과 옛날 인물 이야기 역사를 추적하는 타임머신' }
         ]
       },
       {
-        title: '🎡 창의 & 게이밍 놀이터',
+        title: '🦖 탐구 사전관',
+        color: '#8b5cf6',
         rooms: [
-          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교와 집에서 완성한 미술·만들기 작품 전시관!' },
-          { name: '⚔️ 브롤 DPS & 밸런스 연구소', href: 'kids/playground/minsu/brawl_dps.html', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 대전 시뮬레이션' },
-          { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
+          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '모든 교과서 낱말 총집합! 마스터 데이터베이스 지식 열람' }
+        ]
+      }
+    ],
+    hideoutWorlds: [
+      {
+        title: '🏠 나만의 비밀 아지트',
+        color: '#0ea5e9',
+        rooms: [
+          { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' },
+          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교에서 만들고 그려온 멋진 미술·공예 작품을 전시하고 자랑해보자!' },
+          { name: '📅 상세 시간표 & 수업 안내', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' }
         ]
       },
       {
-        title: '🦖 탐구 사전관',
+        title: '🎡 창의 & 게이밍 놀이터',
+        color: '#f97316',
         rooms: [
-          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '모든 교과서 낱말 총집합! 마스터 데이터베이스 지식 열람' }
+          { name: '⚔️ 브롤 DPS & 밸런스 연구소', href: 'kids/playground/minsu/brawl_dps.html', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 대전 시뮬레이션' },
+          { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
         ]
       }
     ]
@@ -231,17 +267,10 @@ const USER_CONFIGS = {
   minseo: {
     name: '민서', key: 'daughter', themeClass: 'theme--hideout',
     bgSymbols: ['🎈', '🧸', '🏰', '✨', '🍭', '🌸', '🧚', '🦄', '🎀', '🍓'],
-    worlds: [
-      {
-        title: '🏠 나만의 공간',
-        rooms: [
-          { name: '📅 내 시간표', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' },
-          { name: '👧 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '하리보 젤리로 예쁜 가구를 사고 나만의 핑꾸 하우스를 꾸며보자!' },
-          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '예쁘게 그린 그림과 정성껏 만든 공예품을 전시하는 아틀리에!' }
-        ]
-      },
+    studyWorlds: [
       {
         title: '🧮 수학 월드',
+        color: '#3b82f6',
         rooms: [
           { name: '🏫 학년별 개념 탐험관', href: 'kids/subjects/math/math.html#concepts', desc: '1~2학년 기초부터 3~4학년 핵심, 5~6학년 심화까지 재미있는 개념 놀이터!' },
           { name: '⚔️ 실전 문제 트레이닝 센터', href: 'kids/subjects/math/math.html#workout', desc: '세로셈 무한 연산, 공식 퀴즈, 분수·소수·도형 실전 문제 집중 훈련!' },
@@ -250,46 +279,67 @@ const USER_CONFIGS = {
       },
       {
         title: '✍️ 국어 월드',
+        color: '#10b981',
         rooms: [
           { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '1-2 1단원 감정 스토리북과 비밀 요정들과 나누는 상상력 가득 논리 대화방' }
         ]
       },
       {
         title: '🔤 영어 던전',
+        color: '#6366f1',
         rooms: [
           { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
         ]
       },
       {
         title: '🧪 과학 실험실',
+        color: '#06b6d4',
         rooms: [
           { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 신기한 과학방' }
         ]
       },
       {
         title: '🏛️ 사회 연대기',
+        color: '#f59e0b',
         rooms: [
           { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
         ]
       },
       {
-        title: '🎡 창의 & 게이밍 놀이터',
+        title: '🦖 탐구 사전관',
+        color: '#8b5cf6',
         rooms: [
-          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '내가 그린 그림과 종이접기 작품을 뽐내는 비밀 전시관!' },
-          { name: '🎨 매직 컬러링 스튜디오', href: 'kids/playground/minseo/coloring.html', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력' },
-          { name: '📐 인터랙티브 종이접기', href: 'kids/playground/minseo/origami.html', desc: '비행기, 개구리, 동서남북 3D 단계별 접기 & 전용 도안 인쇄' },
-          { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
+          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
+        ]
+      }
+    ],
+    hideoutWorlds: [
+      {
+        title: '🏠 나만의 비밀 아지트',
+        color: '#ec4899',
+        rooms: [
+          { name: '👧 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '하리보 젤리로 예쁜 가구를 사고 나만의 핑꾸 하우스를 꾸며보자!' },
+          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '예쁘게 그린 그림과 정성껏 만든 공예품을 전시하는 아틀리에!' },
+          { name: '📅 상세 시간표 & 수업 안내', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' }
         ]
       },
       {
-        title: '🦖 탐구 사전관',
+        title: '🎡 창의 & 게이밍 놀이터',
+        color: '#a855f7',
         rooms: [
-          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
+          { name: '🎨 매직 컬러링 스튜디오', href: 'kids/playground/minseo/coloring.html', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력' },
+          { name: '📐 인터랙티브 종이접기', href: 'kids/playground/minseo/origami.html', desc: '비행기, 개구리, 동서남북 3D 단계별 접기 & 전용 도안 인쇄' },
+          { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
         ]
       }
     ]
   }
 };
+
+// 기존 worlds 참조 코드와의 완벽한 하위 호환성 유지
+Object.values(USER_CONFIGS).forEach(cfg => {
+  cfg.worlds = [...(cfg.studyWorlds || []), ...(cfg.hideoutWorlds || [])];
+});
 
 // (노션 헬퍼에 통합되었으므로 중복 선언 삭제)
 // const PROXY_URL = "https://minmin-notion.awslike6.workers.dev";
@@ -415,14 +465,25 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         location.href = `lobby.html?user=${targetChild}`;
     };
 
-    // 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더
-    (function buildCategorizedMenu() {
-      const grid = document.getElementById('worldGrid');
-      grid.innerHTML = '';
+    // 🛠️ 2대 메인 탭 전환 및 월드 그리드 렌더러
+    let currentLobbyTab = 'study';
+    const initialTabParam = urlParams.get('tab');
+    if (initialTabParam === 'hideout' || window.location.hash === '#hideout') {
+      currentLobbyTab = 'hideout';
+    }
 
-      currentConfig.worlds.forEach(world => {
+    function renderWorldGrid(tab) {
+      const grid = document.getElementById('worldGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const worlds = tab === 'hideout' ? currentConfig.hideoutWorlds : currentConfig.studyWorlds;
+
+      (worlds || []).forEach(world => {
         const card = document.createElement('div');
         card.className = 'world-card';
+        if (world.color) {
+          card.style.borderTop = `4px solid ${world.color}`;
+        }
 
         const title = document.createElement('div');
         title.className = 'world-title';
@@ -446,7 +507,28 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         card.appendChild(roomList);
         grid.appendChild(card);
       });
-    })();
+    }
+
+    window.switchLobbyTab = function(tab) {
+      currentLobbyTab = tab;
+      const tabStudy = document.getElementById('tabStudy');
+      const tabHideout = document.getElementById('tabHideout');
+      const subtitle = document.getElementById('lobbySubtitle');
+
+      if (tab === 'study') {
+        if (tabStudy) tabStudy.classList.add('active');
+        if (tabHideout) tabHideout.classList.remove('active');
+        if (subtitle) subtitle.textContent = "오늘 탐험하고 싶은 공부방 월드를 선택해봐!";
+      } else {
+        if (tabStudy) tabStudy.classList.remove('active');
+        if (tabHideout) tabHideout.classList.add('active');
+        if (subtitle) subtitle.textContent = "나만의 아지트에서 방을 꾸미고 놀이터에서 놀아보자!";
+      }
+      renderWorldGrid(tab);
+    };
+
+    // 초기 탭 활성화 실행
+    switchLobbyTab(currentLobbyTab);
 
     // 배경 부유물 애니메이션 모듈
     (function createFloatingParticles() {

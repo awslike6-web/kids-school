@@ -79,6 +79,8 @@
         const autoPlay = autoPlayEl ? autoPlayEl.checked : false;
         if (autoPlay && currentPageIndex < STORY_DATA.length - 1) {
           setTimeout(() => changePage(1), 1000);
+        } else if (autoPlay && currentPageIndex === STORY_DATA.length - 1) {
+          setTimeout(() => showCompletionModal(), 1200);
         }
       } else {
         if (isContinuousPlaying) {
@@ -91,6 +93,7 @@
           } else {
             updateContinuousUI(false);
             isContinuousPlaying = false;
+            setTimeout(() => showCompletionModal(), 1000);
           }
         }
       }
@@ -164,7 +167,7 @@
 
     const nextBtn = document.getElementById('nextBtn');
     if (nextBtn) {
-      nextBtn.textContent = (currentPageIndex === STORY_DATA.length - 1) ? '🎉 처음으로' : '다음 장 ▶';
+      nextBtn.textContent = (currentPageIndex === STORY_DATA.length - 1) ? '🎉 완독 축하 & 보상!' : '다음 장 ▶';
     }
 
     if (audio) {
@@ -187,7 +190,8 @@
   function changePage(dir) {
     if (audio) audio.pause();
     if (currentPageIndex === STORY_DATA.length - 1 && dir === 1) {
-      currentPageIndex = 0;
+      showCompletionModal();
+      return;
     } else {
       currentPageIndex = Math.max(0, Math.min(STORY_DATA.length - 1, currentPageIndex + dir));
     }
@@ -225,7 +229,7 @@
     if (!container) return;
     const version = STORY_BOOK.version || '20260904';
 
-    container.innerHTML = STORY_DATA.map((item, idx) => {
+    const cardsHtml = STORY_DATA.map((item, idx) => {
       const imgSrc = resolveImagePath(item, true);
       return `
         <div class="webtoon-card" id="webtoonCard_${idx}">
@@ -244,6 +248,19 @@
         </div>
       `;
     }).join('');
+
+    const finishCardHtml = `
+      <div class="webtoon-finish-card">
+        <div style="font-size: 3rem;">🎉</div>
+        <h3>모든 이야기를 재미있게 읽었나요?</h3>
+        <p>단원 동화를 끝까지 탐험한 친구에게 완독 축하 보상을 드려요!</p>
+        <button type="button" class="btn-claim-reward" onclick="window.showCompletionModal()">
+          🎁 완독 축하 보상 받기 (+3💎/🍬 &amp; +10 EXP)
+        </button>
+      </div>
+    `;
+
+    container.innerHTML = cardsHtml + finishCardHtml;
   }
 
 
@@ -297,6 +314,177 @@
     }
   }
 
+  // ========================================================
+  // 🎁 스토리북 완독 보상 및 축하 모달 엔진
+  // ========================================================
+  function getCurrentReaderInfo() {
+    const savedName = localStorage.getItem('currentUserName') || '';
+    const userParam = new URLSearchParams(window.location.search).get('user');
+    const currentChild = localStorage.getItem('currentChild') || '';
+    const currentUser = localStorage.getItem('currentUser') || '';
+
+    let isMinsu = true;
+    if (userParam === 'daughter' || userParam === 'minseo' || currentChild === 'minseo' || currentUser === 'daughter' || savedName === '민서') {
+      isMinsu = false;
+    } else if (userParam === 'son' || userParam === 'minsu' || currentChild === 'minsu' || currentUser === 'son' || savedName === '민수') {
+      isMinsu = true;
+    }
+
+    const childName = isMinsu ? '민수' : '민서';
+    const isAdmin = (savedName === '아빠' || savedName === '엄마' || savedName === '어른' || savedName === 'admin');
+
+    let subject = (STORY_BOOK && STORY_BOOK.subject) || '';
+    if (!subject) {
+      const path = window.location.pathname.toLowerCase();
+      if (path.includes('korean')) subject = '국어';
+      else if (path.includes('math')) subject = '수학';
+      else if (path.includes('english')) subject = '영어';
+      else if (path.includes('science')) subject = '과학';
+      else if (path.includes('society')) subject = '사회';
+      else subject = '공부';
+    }
+
+    return { childName, isMinsu, isAdmin, subject };
+  }
+
+  async function dispenseStorybookReward(childName, subject, currencyAmount = 3, expAmount = 10) {
+    const PROXY_URL = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) || "https://minmin-notion.awslike6.workers.dev";
+    const INVENTORY_DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID) || "374a27115b688042bb61e6a102242e12";
+
+    try {
+      const qResp = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+        body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+      });
+      if (!qResp.ok) return false;
+      const qData = await qResp.json();
+      if (!qData.results || qData.results.length === 0) return false;
+
+      const page = qData.results[0];
+      const pageId = page.id;
+      const props = page.properties;
+
+      const patchProps = {};
+      // 1. 재화 지급 (+3)
+      if (childName === '민서') {
+        const curHaribo = props["하리보 젤리 개수"]?.number || props["슬라임 파츠 개수"]?.number || 0;
+        patchProps["하리보 젤리 개수"] = { number: curHaribo + currencyAmount };
+      } else {
+        const curDia = props["다이아몬드 개수"]?.number || 0;
+        patchProps["다이아몬드 개수"] = { number: curDia + currencyAmount };
+      }
+
+      // 2. 과목 경험치 지급 (+10)
+      const expPropName = `${subject} 경험치`;
+      if (props[expPropName] !== undefined) {
+        const curExp = props[expPropName]?.number || 0;
+        patchProps[expPropName] = { number: curExp + expAmount };
+      }
+
+      // 3. 일일 과목 획득 누적
+      const dailyPropName = `오늘 획득_${subject}`;
+      if (props[dailyPropName] !== undefined) {
+        const curDaily = props[dailyPropName]?.number || 0;
+        patchProps[dailyPropName] = { number: curDaily + currencyAmount };
+      }
+
+      const pResp = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+        body: JSON.stringify({ properties: patchProps })
+      });
+
+      return pResp.ok;
+    } catch (err) {
+      console.warn("[Storybook Reward Error]", err);
+      return false;
+    }
+  }
+
+  function showCompletionModal() {
+    const { childName, isMinsu, isAdmin, subject } = getCurrentReaderInfo();
+    const bookId = (STORY_BOOK && STORY_BOOK.id) || window.location.pathname.split('/').pop().replace('.html', '');
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const rewardKey = `mimi_storybook_reward_${bookId}_${childName}_${todayStr}`;
+    const alreadyClaimed = localStorage.getItem(rewardKey) === 'true';
+
+    let modal = document.getElementById('storybookCompletionModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'storybookCompletionModal';
+      modal.className = 'storybook-completion-overlay';
+      document.body.appendChild(modal);
+    }
+
+    const currencyUnit = isMinsu ? '💎 다이아몬드 +3개' : '🍬 하리보 젤리 +3개';
+    const expUnit = `⭐ ${subject} 경험치 +10 EXP`;
+
+    let bodyHtml = '';
+    if (isAdmin) {
+      bodyHtml = `
+        <div class="completion-modal-icon">🛠️</div>
+        <div class="completion-modal-title">완독 시뮬레이션 완료!</div>
+        <div class="completion-modal-desc">
+          <strong>[관리자 모드]</strong> 데이터 오염 방지막이 가동 중입니다.<br>
+          정상 환경에서는 아이에게 <strong>${currencyUnit}</strong> 및 <strong>${expUnit}</strong>가 자동 적립됩니다.
+        </div>
+        <div class="reward-highlight-badge">🎟️ 무한 패스 검수 완료</div>
+      `;
+    } else if (alreadyClaimed) {
+      bodyHtml = `
+        <div class="completion-modal-icon">🌟</div>
+        <div class="completion-modal-title">또 한 번 멋지게 완독했어요!</div>
+        <div class="completion-modal-desc">
+          이야기를 다시 읽으며 지식을 쑥쑥 다졌네요!<br>
+          오늘의 완독 보상은 이미 받았지만, 반복해서 탐구하는 ${childName}의 모습이 최고예요! 👍
+        </div>
+        <div class="reward-highlight-badge">✨ 오늘도 완독 마스터!</div>
+      `;
+    } else {
+      bodyHtml = `
+        <div class="completion-modal-icon">🎉</div>
+        <div class="completion-modal-title">축하합니다! 완독 달성!</div>
+        <div class="completion-modal-desc">
+          동화를 끝까지 훌륭하게 읽었어요!<br>
+          멋진 탐험가 ${childName}에게 완독 보상을 지급합니다.
+        </div>
+        <div class="reward-highlight-badge">${currencyUnit} &amp; ${expUnit}</div>
+      `;
+      localStorage.setItem(rewardKey, 'true');
+      dispenseStorybookReward(childName, subject, 3, 10).then(success => {
+        console.log(`[스토리북 보상 결과] ${childName} 완독 보상 지급:`, success);
+      });
+    }
+
+    const backUrl = (STORY_BOOK && STORY_BOOK.backUrl) || 'javascript:history.back()';
+    const backLabel = (STORY_BOOK && STORY_BOOK.backLabel) || '과목방으로 돌아가기';
+
+    modal.innerHTML = `
+      <div class="completion-modal-box">
+        ${bodyHtml}
+        <div class="completion-btn-row">
+          <button type="button" class="btn-re-read" onclick="window.closeCompletionModal(true)">🔄 다시 읽기</button>
+          <a href="${backUrl}" class="btn-back-room">🚪 ${backLabel}</a>
+        </div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  }
+
+  function closeCompletionModal(reRead = false) {
+    const modal = document.getElementById('storybookCompletionModal');
+    if (modal) modal.style.display = 'none';
+    if (reRead) {
+      currentPageIndex = 0;
+      if (currentMode === 'ebook') {
+        renderEbook();
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }
+
   // 전역 노출 바인딩
   window.initStorybook = initStorybook;
   window.setViewerMode = setViewerMode;
@@ -304,6 +492,9 @@
   window.toggleEbookAudio = toggleEbookAudio;
   window.toggleContinuousPlay = toggleContinuousPlay;
   window.playWebtoonCardAudio = playWebtoonCardAudio;
+  window.showCompletionModal = showCompletionModal;
+  window.closeCompletionModal = closeCompletionModal;
+  window.dispenseStorybookReward = dispenseStorybookReward;
 
   window.addEventListener('DOMContentLoaded', () => {
     if (window.STORY_BOOK) {

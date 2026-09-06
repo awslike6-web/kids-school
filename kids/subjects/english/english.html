@@ -18,6 +18,9 @@
   <div class="top-action-bar">
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
+      <a href="english_l7_storybook.html" class="back-to-lobby-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif; text-decoration: none;">
+        📚 단원 동화 도서관
+      </a>
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
@@ -33,6 +36,13 @@
 
   <div class="english-grid">
     
+    <!-- 📚 관문: 단원 동화 도서관 (스토리북) -->
+    <div class="english-grid-btn" onclick="location.href='english_l7_storybook.html'" style="border: 2.5px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%);">
+      <span class="english-btn-icon">📚</span>
+      <div class="english-btn-title" style="color: #60a5fa;">[입문] 단원 동화 도서관</div>
+      <p class="english-btn-desc"><strong>[L7 스토리북]</strong> 원어민 발음과 한/영 대조로 읽는 민수와 준우의 주말 이야기! 재미있게 먼저 읽어요.</p>
+    </div>
+
     <div class="english-grid-btn" onclick="openMissionView('stage1')">
       <span class="english-btn-icon">🔤</span>
       <div class="english-btn-title">1단계: 알파벳 터치방</div>
@@ -67,12 +77,6 @@
       <span class="english-btn-icon">🗣️</span>
       <div class="english-btn-title">6단계: 예비 중등 토론</div>
       <p class="english-btn-desc">영어 지문을 읽고 코코 요정과 영어로 토론을 나누어 보아요!</p>
-    </div>
-
-    <div class="english-grid-btn" onclick="location.href='english_l7_storybook.html'" style="border: 2px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%);">
-      <span class="english-btn-icon">📚</span>
-      <div class="english-btn-title" style="color: #60a5fa;">특별: 영어 L7 스토리북</div>
-      <p class="english-btn-desc">원어민 발음과 한/영 대조로 읽는 민수와 준우의 주말 이야기!</p>
     </div>
 
     <div class="english-grid-btn" onclick="location.href='print_english.html'">

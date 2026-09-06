@@ -15,7 +15,7 @@
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
       <button class="back-to-lobby-btn" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;" onclick="openMissionView('storybook')">
-        📚 [1-2] 단원 동화 도서관 (스토리북)
+        📚 단원 동화 도서관
       </button>
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
@@ -32,40 +32,39 @@
 
   <div class="korean-grid">
     
+    <!-- 1단계: 교과서 친숙해지기 (단원 동화) -->
     <div class="korean-grid-btn" onclick="openMissionView('storybook')" style="border: 2.5px solid #ec4899; background: linear-gradient(180deg, #ffffff 0%, #fdf2f8 100%);">
       <span class="korean-btn-icon">📚</span>
-      <div class="korean-btn-title" style="color: #be185d;">단원 동화 스토리북</div>
-      <p class="korean-btn-desc"><strong>[1-2 국어 1단원 1·2·3·4권]</strong> 감정 라디오·나-전달법·필통 소동·발표 응원! 고화질 삽화와 성우 구연동화로 교과서 완전 정복!</p>
+      <div class="korean-btn-title" style="color: #be185d;">[1단계] 단원 동화 도서관</div>
+      <p class="korean-btn-desc"><strong>[교과서 미리보기]</strong> 감정 라디오·나-전달법·필통 소동·발표 응원! 고화질 삽화와 성우 구연동화로 교과서 완전 정복!</p>
     </div>
 
-    <div class="korean-grid-btn" onclick="openDailyDiaryModal()" style="border: 2.5px solid #8b5cf6; background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%);">
-      <span class="korean-btn-icon">📝</span>
-      <div class="korean-btn-title" style="color: #6d28d9;">하루 마음 일기장</div>
-      <p class="korean-btn-desc"><strong>[민서·민수 맞춤]</strong> 오늘 나의 마음 날씨를 들여다보고, 예쁜 나-전달법과 성장 일기를 기록해요! (+5💎)</p>
-    </div>
-    
-    <div class="korean-grid-btn" onclick="openMissionView('sentence')">
-      <span class="korean-btn-icon">🗣️</span>
-      <div class="korean-btn-title">AI 지문 토론방</div>
-      <p class="korean-btn-desc">요정 코코와 함께 방금 읽은 지문에 대해 깊이 있는 토론을 나누어 보아요!</p>
+    <!-- 2단계: 낱말/문장 쓰기 기초 (받아쓰기) -->
+    <div class="korean-grid-btn" onclick="openMissionView('dictation')">
+      <span class="korean-btn-icon">✍️</span>
+      <div class="korean-btn-title">[2단계] 받아쓰기 훈련소</div>
+      <p class="korean-btn-desc">코코가 불러주는 문장을 잘 듣고 정확하게 받아쓰는 연습을 해요!</p>
     </div>
 
-    <div class="korean-grid-btn" onclick="openMissionView('reading')">
-      <span class="korean-btn-icon">📖</span>
-      <div class="korean-btn-title">정밀 독해 멀티버스방</div>
-      <p class="korean-btn-desc">재미있는 글을 읽고 퀴즈를 풀며 문해력을 쑥쑥 키워보아요!</p>
-    </div>
-
+    <!-- 3단계: 핵심 어휘력 (국어 용어) -->
     <div class="korean-grid-btn" onclick="openMissionView('voca')">
-      <span class="korean-btn-icon">📚</span>
-      <div class="korean-btn-title">국어 용어방</div>
+      <span class="korean-btn-icon">💡</span>
+      <div class="korean-btn-title">[3단계] 국어 핵심 용어방</div>
       <p class="korean-btn-desc">교과서 속 핵심 국어 용어들의 뜻을 정확하게 알아맞혀 보세요!</p>
     </div>
 
-    <div class="korean-grid-btn" onclick="openMissionView('dictation')">
-      <span class="korean-btn-icon">✍️</span>
-      <div class="korean-btn-title">받아쓰기 훈련소</div>
-      <p class="korean-btn-desc">코코가 불러주는 문장을 잘 듣고 정확하게 받아쓰는 연습을 해요!</p>
+    <!-- 4단계: 문맥 문해력 (정밀 독해) -->
+    <div class="korean-grid-btn" onclick="openMissionView('reading')">
+      <span class="korean-btn-icon">📖</span>
+      <div class="korean-btn-title">[4단계] 정밀 독해 트레이닝</div>
+      <p class="korean-btn-desc">재미있는 글을 읽고 퀴즈를 풀며 문해력을 쑥쑥 키워보아요!</p>
+    </div>
+
+    <!-- 5단계: 심화 사고력 (AI 지문 토론) -->
+    <div class="korean-grid-btn" onclick="openMissionView('sentence')">
+      <span class="korean-btn-icon">🗣️</span>
+      <div class="korean-btn-title">[5단계] AI 지문 토론방</div>
+      <p class="korean-btn-desc">요정 코코와 함께 방금 읽은 지문에 대해 깊이 있는 토론을 나누어 보아요!</p>
     </div>
 
   </div>
