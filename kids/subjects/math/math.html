@@ -758,19 +758,19 @@
 
   // 대문 이동 로직
   document.getElementById('goLobbyBtn').addEventListener('click', () => {
-      const lobbyPath = window.location.pathname.includes('/kids-school/') 
-          ? '/kids-school/lobby.html' 
-          : '/lobby.html';
-      location.href = lobbyPath;
+      const activeChild = localStorage.getItem('currentChild') || (localStorage.getItem('currentUser') === 'daughter' ? 'minseo' : 'minsu');
+      location.href = `../../../lobby.html?user=${activeChild}`;
   });
 
   // 초기 로드 시 해시 상태 또는 기본 대문 렌더링
   document.addEventListener("DOMContentLoaded", () => {
     let currentProfile = localStorage.getItem('currentUser') || 'son';
-    const name = currentProfile === 'son' ? '민수' : (currentProfile === 'daughter' ? '민서' : '어른');
-    const icon = currentProfile === 'son' ? '👦' : (currentProfile === 'daughter' ? '👧' : '👨‍💻');
+    let currentChild = localStorage.getItem('currentChild') || (currentProfile === 'daughter' ? 'minseo' : 'minsu');
+    const isDaughter = currentProfile === 'daughter' || currentChild === 'minseo';
+    const name = isDaughter ? '민서' : (currentProfile === 'son' ? '민수' : '어른');
+    const icon = isDaughter ? '👧' : (currentProfile === 'son' ? '👦' : '👨‍💻');
     
-    const savedTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
+    const savedTheme = localStorage.getItem('currentTheme') || (isDaughter ? '슬라임' : '마인크래프트');
     const themeClass = savedTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
     document.body.className = themeClass;
 

@@ -40,13 +40,14 @@ function getUserAuth() {
   const userParam = urlParams.get('user'); // 'minsu', 'minseo', 'admin'
   const savedName = localStorage.getItem('currentUserName') || '';
   const savedUser = localStorage.getItem('currentUser') || '';
+  const savedChild = localStorage.getItem('currentChild') || '';
 
   const isAdmin = (savedName === '아빠' || savedName === '엄마' || savedUser === 'admin' || userParam === 'admin');
   
   let targetChild = null;
-  if (userParam === 'minsu' || savedName === '민수' || savedUser === 'son') {
+  if (userParam === 'minsu' || savedChild === 'minsu' || savedName === '민수' || savedUser === 'son') {
     targetChild = 'minsu';
-  } else if (userParam === 'minseo' || savedName === '민서' || savedUser === 'daughter') {
+  } else if (userParam === 'minseo' || savedChild === 'minseo' || savedName === '민서' || savedUser === 'daughter') {
     targetChild = 'minseo';
   }
 
@@ -60,6 +61,7 @@ function switchView(viewName) {
   const tabAll = document.getElementById('tab-all');
   const tabMinsu = document.getElementById('tab-minsu');
   const tabMinseo = document.getElementById('tab-minseo');
+  const lobbyBtn = document.getElementById('btnBackLobby');
 
   document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -68,16 +70,24 @@ function switchView(viewName) {
     cardMinseo.style.display = 'none';
     if (tabMinsu) tabMinsu.classList.add('active');
     document.getElementById('cardsGrid').style.gridTemplateColumns = '1fr';
+    if (lobbyBtn) lobbyBtn.href = "lobby.html?user=minsu";
+    localStorage.setItem('currentChild', 'minsu');
+    localStorage.setItem('currentUser', 'son');
   } else if (viewName === 'minseo') {
     cardMinsu.style.display = 'none';
     cardMinseo.style.display = 'flex';
     if (tabMinseo) tabMinseo.classList.add('active');
     document.getElementById('cardsGrid').style.gridTemplateColumns = '1fr';
+    if (lobbyBtn) lobbyBtn.href = "lobby.html?user=minseo";
+    localStorage.setItem('currentChild', 'minseo');
+    localStorage.setItem('currentUser', 'daughter');
   } else {
     cardMinsu.style.display = 'flex';
     cardMinseo.style.display = 'flex';
     if (tabAll) tabAll.classList.add('active');
     document.getElementById('cardsGrid').style.gridTemplateColumns = '';
+    const activeChild = localStorage.getItem('currentChild') || (localStorage.getItem('currentUser') === 'daughter' ? 'minseo' : 'minsu');
+    if (lobbyBtn) lobbyBtn.href = "lobby.html?user=" + activeChild;
   }
 }
 
@@ -120,8 +130,9 @@ function setupAuthUI() {
 
   // 로비 이동 링크 파라미터 세팅
   const lobbyBtn = document.getElementById('btnBackLobby');
-  if (lobbyBtn && targetChild) {
-    lobbyBtn.href = "lobby.html?user=" + targetChild;
+  if (lobbyBtn) {
+    const activeChild = targetChild || localStorage.getItem('currentChild') || (localStorage.getItem('currentUser') === 'daughter' ? 'minseo' : 'minsu');
+    lobbyBtn.href = "lobby.html?user=" + activeChild;
   }
 }
 

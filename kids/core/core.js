@@ -12,7 +12,8 @@ var requiredCores = [
 // 글로벌 헬퍼 상태 정의 (공통 사용)
 window.currentProfile = localStorage.getItem('currentUser') || 'son';
 window.currentUserName = localStorage.getItem('currentUserName') || '민수';
-window.currentTheme = localStorage.getItem('currentTheme') || '마인크래프트';
+window.currentChild = localStorage.getItem('currentChild') || (window.currentProfile === 'daughter' ? 'minseo' : 'minsu');
+window.currentTheme = localStorage.getItem('currentTheme') || (window.currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
 window.savedName = localStorage.getItem('currentUserName');
 window.isAdmin = (window.savedName === '아빠' || window.savedName === '엄마');
 
@@ -21,6 +22,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // 상대 경로: html 파일 기준](../../core/ 로드 경로
     const corePath = "../../core/";
     
+    // 💡 모든 로비 복귀 링크에 현재 활성 자녀 파라미터 자동 동기화
+    const syncLobbyReturnLinks = () => {
+        const activeChild = window.currentChild || (window.currentProfile === 'daughter' ? 'minseo' : 'minsu');
+        document.querySelectorAll('a[href*="lobby.html"]').forEach(link => {
+            try {
+                const href = link.getAttribute('href');
+                if (href && !href.includes('user=')) {
+                    const [base, hash] = href.split('#');
+                    const separator = base.includes('?') ? '&' : '?';
+                    link.setAttribute('href', `${base}${separator}user=${activeChild}${hash ? '#' + hash : ''}`);
+                }
+            } catch (e) {}
+        });
+    };
+    syncLobbyReturnLinks();
+
     const initRoom = () => {
         const initFuncs = ['initializeRoom', 'initializeSocietyRoom', 'initializeKoreanRoom', 'initializeScienceRoom', 'initializeEnglishRoom', 'initializeMathRoom'];
         for (const funcName of initFuncs) {

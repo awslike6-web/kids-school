@@ -806,6 +806,8 @@
             }
 
             setupDragEvents();
+            const exitBtn = document.getElementById('exit-btn');
+            if (exitBtn) exitBtn.href = `../../lobby.html?user=${currentProfile === 'daughter' ? 'minseo' : 'minsu'}`;
 
             if (adminMode) {
                 loadAdminRoomStateFromLocal();

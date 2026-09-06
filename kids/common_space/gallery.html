@@ -916,7 +916,9 @@
         let currentUserName = localStorage.getItem('currentUserName') || '민수';
 
         function applyUserTheme() {
-            if (currentUser === 'son' || currentUserName === '민수') {
+            const isDaughter = currentUser === 'daughter' || localStorage.getItem('currentChild') === 'minseo';
+            const childKey = isDaughter ? 'minseo' : 'minsu';
+            if (!isDaughter && (currentUser === 'son' || currentUserName === '민수')) {
                 document.body.className = 'theme--arcade';
                 document.getElementById('userNameTag').textContent = '민수';
                 document.getElementById('userAvatar').textContent = '👦';
@@ -925,15 +927,20 @@
                 document.getElementById('userNameTag').textContent = '민서';
                 document.getElementById('userAvatar').textContent = '👧';
             }
+            document.querySelectorAll('a[href*="lobby.html"]').forEach(a => {
+                a.href = `../../lobby.html?user=${childKey}`;
+            });
         }
 
         function toggleProfileManually() {
             if (currentUser === 'son') {
                 currentUser = 'daughter';
                 currentUserName = '민서';
+                localStorage.setItem('currentChild', 'minseo');
             } else {
                 currentUser = 'son';
                 currentUserName = '민수';
+                localStorage.setItem('currentChild', 'minsu');
             }
             localStorage.setItem('currentUser', currentUser);
             localStorage.setItem('currentUserName', currentUserName);

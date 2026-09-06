@@ -106,6 +106,16 @@
   body.theme--hideout .tts-toggle-btn { background: #ffffff; border-color: #ff6b9d; color: #ff6b9d; }
   body.theme--hideout .tts-toggle-btn:hover { box-shadow: 0 4px 15px rgba(255,107,157,0.3); transform: translateY(-2px); }
 
+  /* 🛠️ 관리자 자녀 퀵 스위처 바 */
+  .admin-child-switcher { display: none; justify-content: center; gap: 12px; margin: 12px 0 6px 0; width: 100%; max-width: 480px; z-index: 10; }
+  .admin-child-btn { flex: 1; padding: 10px 16px; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 1rem; font-weight: bold; cursor: pointer; border: 2px solid transparent; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.12); touch-action: manipulation; }
+  .admin-child-btn.minsu { background: rgba(30, 41, 59, 0.85); color: #6EC6F5; border-color: #3b82f6; }
+  .admin-child-btn.minsu:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4); }
+  .admin-child-btn.minsu.active { background: linear-gradient(135deg, #0284c7, #2563eb); color: #fff; border-color: #60a5fa; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5); transform: scale(1.03); }
+  .admin-child-btn.minseo { background: rgba(255, 255, 255, 0.9); color: #ec4899; border-color: #f472b6; }
+  .admin-child-btn.minseo:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35); }
+  .admin-child-btn.minseo.active { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; border-color: #fda4af; box-shadow: 0 4px 15px rgba(236, 72, 153, 0.5); transform: scale(1.03); }
+
   /* 💎 과목 카드 격리 그리드 */
   .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 860px; margin-top: 10px; }
   @media (max-width: 768px) { .world-grid { grid-template-columns: 1fr; max-width: 440px; } }
@@ -128,6 +138,9 @@
   <h1 class="main-title" id="mainLobbyTitle"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
   
   <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
+
+  <!-- 🛠️ 관리자 전용 자녀 전환 퀵 바 -->
+  <div class="admin-child-switcher" id="adminChildSwitcher"></div>
 
   <div class="status-wrapper">
       <div class="inventory-card" id="inventoryDisplay">
@@ -307,9 +320,27 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     const isAdmin = (savedName === '아빠' || savedName === '엄마');
 
     if (!userKey || !USER_CONFIGS[userKey]) {
-      userKey = (savedName === '민서' || savedName === '엄마') ? 'minseo' : 'minsu'; 
+      const savedChild = localStorage.getItem('currentChild');
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedChild && USER_CONFIGS[savedChild]) {
+        userKey = savedChild;
+      } else if (savedUser === 'daughter') {
+        userKey = 'minseo';
+      } else if (savedUser === 'son') {
+        userKey = 'minsu';
+      } else if (savedName === '민서') {
+        userKey = 'minseo';
+      } else if (savedName === '민수') {
+        userKey = 'minsu';
+      } else {
+        userKey = 'minsu';
+      }
     }
     const currentConfig = USER_CONFIGS[userKey];
+
+    // 💡 활성 자녀 상태 영구 보존 (관리자/아이 공통: 어떤 방을 다녀와도 테마 유지)
+    localStorage.setItem('currentChild', userKey);
+    localStorage.setItem('currentUser', currentConfig.key);
 
     // 일기장 버튼 상태 실시간 반영
     if (typeof updateLobbyDiaryButton === 'function') {
@@ -329,6 +360,16 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         document.getElementById('lobbySubtitle').textContent = "🔧 디자인 확인 및 구동 테스트를 진행할 월드를 골라주세요.";
         document.getElementById('timetableLink').textContent = '📺 전체 시간표 모니터';
         document.getElementById('timetableLink').href = 'timetable.html?view=monitor';
+
+        // 🛠️ 관리자용 자녀 공부방 퀵 스위처 렌더링
+        const switcher = document.getElementById('adminChildSwitcher');
+        if (switcher) {
+            switcher.style.display = 'flex';
+            switcher.innerHTML = `
+                <button type="button" class="admin-child-btn minsu ${userKey === 'minsu' ? 'active' : ''}" onclick="switchAdminLobbyChild('minsu')">👦 민수 공부방 검수</button>
+                <button type="button" class="admin-child-btn minseo ${userKey === 'minseo' ? 'active' : ''}" onclick="switchAdminLobbyChild('minseo')">👧 민서 공부방 검수</button>
+            `;
+        }
         
         const dashboardLink = document.getElementById('dashboardLink');
         if (dashboardLink) {
@@ -347,6 +388,9 @@ loadCoreScripts("kids/core/", requiredCores, () => {
             towerLink.style.display = 'flex';
         }
     } else {
+        const switcher = document.getElementById('adminChildSwitcher');
+        if (switcher) switcher.style.display = 'none';
+
         const finalWelcomeText = currentConfig.key === 'son' 
             ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
             : `🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, ${finalRealName}!`;
@@ -363,6 +407,13 @@ loadCoreScripts("kids/core/", requiredCores, () => {
             dashboardLink.href = `parent_dashboard.html?user=${userKey}`;
         }
     }
+
+    window.switchAdminLobbyChild = function(targetChild) {
+        const targetKey = targetChild === 'minseo' ? 'daughter' : 'son';
+        localStorage.setItem('currentChild', targetChild);
+        localStorage.setItem('currentUser', targetKey);
+        location.href = `lobby.html?user=${targetChild}`;
+    };
 
     // 🛠️ 대형 카드 및 내부 메뉴 자동 조립 빌더
     (function buildCategorizedMenu() {

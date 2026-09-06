@@ -138,6 +138,7 @@
 function selectUser(key, name, targetUrl) {
     localStorage.setItem('currentUser', key);
     localStorage.setItem('currentUserName', name);
+    localStorage.setItem('currentChild', key === 'daughter' ? 'minseo' : 'minsu');
     location.href = targetUrl;
 }
 
@@ -196,6 +197,7 @@ function goMasterTower() {
 function goAdminTestLobby(childKey, childParam) {
   // 아이들 테마 키(son/daughter)를 빌리되, 이름은 '아빠/엄마'로 장착!
   localStorage.setItem('currentUser', childKey); 
+  localStorage.setItem('currentChild', childParam);
   localStorage.setItem('currentUserName', currentAdminName);
   location.href = `lobby.html?user=${childParam}`;
 }
