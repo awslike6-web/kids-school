@@ -152,11 +152,9 @@ def run():
                 "imageUrl": rel_url,
                 "hasCutout": has_cutout,
                 "artistNote": meta.get("artistNote", f"{author_name}가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다."),
-                "likes": meta.get("likes", 15),
-                "stickers": meta.get("stickers", { "heart": 8, "thumb": 5, "star": 4, "trophy": 2 }),
-                "comments": meta.get("comments", [
-                    { "author": "아빠", "text": "정말 정성이 가득 담긴 멋진 작품이다! 최고야 ❤️", "date": date_str }
-                ])
+                "likes": meta.get("likes", 0),
+                "stickers": meta.get("stickers", { "heart": 0, "thumb": 0, "star": 0, "trophy": 0 }),
+                "comments": meta.get("comments", [])
             })
             
     # 정렬: 공동 작품 최우선 -> 날짜 최신순
