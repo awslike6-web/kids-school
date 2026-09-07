@@ -309,10 +309,10 @@
             korSpread: "kor_l7_spread_p1.png",
             engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
             korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p1.mp3",
-            engHtml: 'Junwoo saw Minsu at school on Monday morning. "Hi, Minsu! <b class="highlight-eng">What did you do last weekend?</b>" Junwoo asked. He was curious about his friend\'s weekend.',
-            korHtml: '월요일 아침, 준우가 학교에서 민수를 만났어요. "안녕, 민수야! <b class="highlight-kor">지난 주말에 뭐 했니?</b>" 준우가 친구에게 다정하게 물어보았어요.',
+            engHtml: 'Junwoo saw Minsu at school on Monday morning.<br>"Hi, Minsu! <b class="highlight-eng">What did you do last weekend?</b>" Junwoo asked.<br>He was curious about his friend\'s weekend.',
+            korHtml: '월요일 아침, 준우는 학교에서 민수를 보았어요.<br>"안녕, 민수야! <b class="highlight-kor">지난 주말에 뭐 했니?</b>" 준우가 물어보았어요.<br>그는 친구의 주말이 궁금했어요.',
             badge: "L7 핵심 : 주말에 한 일 묻기 (What did you do last weekend?)",
-            note: "• What did you do ~?: 너는 ~에 무엇을 했니?"
+            note: "<b>[핵심 단어 & 문장 구조 매칭]</b><br>• <b>saw</b> (see의 과거형): 보았다 / 만났다<br>• <b>asked</b> (ask의 과거형): 물어보았다<br>• <b>curious</b>: 궁금한 (was curious: 궁금했다)<br>• <b>last weekend</b>: 지난 주말"
         },
         {
             chapter: 2,
@@ -514,9 +514,9 @@
                     <div class="kor-section">
                         <div class="kor-passage">${item.korHtml}</div>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:4px;">
+                    <div style="display:flex; flex-direction:column; align-items:flex-start; gap:8px; margin-top:6px;">
                         <div class="lesson-badge">📌 ${item.badge}</div>
-                        <div class="voca-note-box">${item.note}</div>
+                        <div class="voca-note-box" style="width:100%; line-height:1.6;">${item.note}</div>
                     </div>
                 </div>
             `;
