@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>부모 일기장 | 민민이네 공부방</title>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./kids/css/design-system.css">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --dad-color: #0284c7;
+      --mom-color: #db2777;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      background: radial-gradient(circle at top right, #1e1b4b, #0f172a 60%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* 상단 네비게이션 바 */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 12px 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .brand-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title span { color: #f472b6; }
+    .nav-links {
+      display: flex;
+      gap: 8px;
+    }
+    .nav-btn {
+      text-decoration: none;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #fff;
+    }
+
+    /* 메인 카드 박스 */
+    .diary-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(14px);
+      border: 2px solid var(--card-border);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* 작성자 선택기 (아빠 / 엄마 토글) */
+    .author-selector {
+      display: flex;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .author-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 14px;
+      border: none;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.25s;
+    }
+    .author-btn.active.dad {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    }
+    .author-btn.active.mom {
+      background: linear-gradient(135deg, #db2777, #be185d);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(219, 39, 119, 0.4);
+    }
+
+    /* 탭 헤더 */
+    .tab-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 14px;
+    }
+    .tab-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #4f46e5;
+      border-color: #818cf8;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    }
+
+    /* 폼 섹션 타이틀 */
+    .form-sec-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 기분/에너지 카드 그리드 */
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+      gap: 10px;
+    }
+    .mood-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .mood-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+    }
+    .mood-card.selected {
+      border-color: #ec4899;
+      background: rgba(236, 72, 153, 0.18);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+    }
+
+    /* 텍스트 인풋 */
+    .parent-textarea {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 14px;
+      color: #f8fafc;
+      font-family: 'Nanum Gothic', sans-serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .parent-textarea:focus {
+      border-color: #818cf8;
+    }
+
+    /* 음성 인식 버튼 */
+    .btn-voice {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-family: 'Jua', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: rgba(99, 102, 241, 0.2);
+      color: #c7d2fe;
+      transition: all 0.2s;
+    }
+    .btn-voice:hover {
+      background: #4f46e5;
+      color: #fff;
+    }
+
+    /* 퀵 태그 버튼 */
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .quick-tag-btn {
+      padding: 4px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quick-tag-btn:hover {
+      background: #4f46e5;
+      color: #fff;
+    }
+
+    /* 저장 버튼 */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border-radius: 18px;
+      border: none;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.35);
+      transition: all 0.25s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(236, 72, 153, 0.45);
+    }
+
+    /* 지난 일기 타임라인 */
+    .history-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .history-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .history-meta {
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 8px;
+      border: 1px solid;
+    }
+    .badge-relation {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: #059669;
+    }
+    .badge-parent {
+      background: rgba(236, 72, 153, 0.15);
+      color: #f472b6;
+      border-color: #db2777;
+    }
+
+    /* 저장 성공 모달 */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px);
+      display: flex; justify-content: center; align-items: center; padding: 16px;
+    }
+    .modal-box {
+      background: #1e1b4b;
+      border: 2px solid #818cf8;
+      border-radius: 24px;
+      width: 100%; max-width: 480px;
+      padding: 30px 20px;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 1. 상단 네비게이션 -->
+    <header class="top-nav">
+      <div class="brand-title">
+        <span>📖</span> 엄마·아빠의 일상 & 마음 일기장
+      </div>
+      <nav class="nav-links">
+        <a href="./index.html" class="nav-btn">🏠 홈</a>
+        <a href="./parent_dashboard.html" class="nav-btn">📊 대시보드</a>
+        <a href="https://awslike6-web.github.io/master-tower/" target="_blank" class="nav-btn">🏰 관제탑</a>
+      </nav>
+    </header>
+
+    <!-- 2. 메인 일기장 패널 -->
+    <main class="diary-panel">
+      <!-- 1) 작성자 선택기 -->
+      <div class="author-selector">
+        <button type="button" class="author-btn active dad" id="btnAuthorDad" onclick="selectAuthor('아빠')">
+          <span>👨</span> 아빠의 하루 일기
+        </button>
+        <button type="button" class="author-btn mom" id="btnAuthorMom" onclick="selectAuthor('엄마')">
+          <span>👩</span> 엄마의 하루 일기
+        </button>
+      </div>
+
+      <!-- 2) 탭 헤더 -->
+      <div class="tab-header">
+        <div class="tab-btn-group">
+          <button type="button" class="tab-btn active" id="tabWrite" onclick="switchTab('write')">✏️ 일기 쓰기</button>
+          <button type="button" class="tab-btn" id="tabHistory" onclick="switchTab('history')">📚 지난 일기 모아보기</button>
+        </div>
+        <div style="font-size: 0.85rem; color: #94a3b8;" id="todayDateDisplay">
+          📅 2026년 9월 7일
+        </div>
+      </div>
+
+      <!-- 3) 작성 섹션 -->
+      <section id="writeSection" style="display: flex; flex-direction: column; gap: 18px;">
+        <!-- 오늘의 기분 / 에너지 -->
+        <div>
+          <div class="form-sec-title">
+            <span>☕ 1. 오늘 나의 하루 기분 & 에너지</span>
+          </div>
+          <div class="mood-grid" id="parentMoodGrid">
+            <div class="mood-card selected" onclick="selectMood(this)" data-val="☕ 평온·차분">
+              <span style="font-size:1.6rem;">☕</span>
+              <span style="font-weight:bold; font-size:0.9rem;">평온·차분</span>
+              <span style="font-size:0.75rem; opacity:0.8;">편안한 하루</span>
+            </div>
+            <div class="mood-card" onclick="selectMood(this)" data-val="☀️ 상쾌·활기">
+              <span style="font-size:1.6rem;">☀️</span>
+              <span style="font-weight:bold; font-size:0.9rem;">상쾌·활기</span>
+              <span style="font-size:0.75rem; opacity:0.8;">에너지 충만</span>
+            </div>
+            <div class="mood-card" onclick="selectMood(this)" data-val="🌿 보람·뿌듯">
+              <span style="font-size:1.6rem;">🌿</span>
+              <span style="font-weight:bold; font-size:0.9rem;">보람·뿌듯</span>
+              <span style="font-size:0.75rem; opacity:0.8;">의미있는 성취</span>
+            </div>
+            <div class="mood-card" onclick="selectMood(this)" data-val="🏃 바쁨·열정">
+              <span style="font-size:1.6rem;">🏃</span>
+              <span style="font-weight:bold; font-size:0.9rem;">바쁨·열정</span>
+              <span style="font-size:0.75rem; opacity:0.8;">열심히 달림</span>
+            </div>
+            <div class="mood-card" onclick="selectMood(this)" data-val="🥱 피곤·휴식필요">
+              <span style="font-size:1.6rem;">🥱</span>
+              <span style="font-weight:bold; font-size:0.9rem;">피곤·휴식</span>
+              <span style="font-size:0.75rem; opacity:0.8;">충전이 필요해</span>
+            </div>
+            <div class="mood-card" onclick="selectMood(this)" data-val="💡 영감·생각">
+              <span style="font-size:1.6rem;">💡</span>
+              <span style="font-weight:bold; font-size:0.9rem;">영감·생각</span>
+              <span style="font-size:0.75rem; opacity:0.8;">새로운 아이디어</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 오늘 있었던 일상 & 가족 이야기 -->
+        <div>
+          <div class="form-sec-title">
+            <span>📝 2. 오늘 하루 일상 & 가족 이야기</span>
+            <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('parentContentInput', this)">
+              🎙️ 말로 하기
+            </button>
+          </div>
+          <textarea id="parentContentInput" class="parent-textarea" rows="4" placeholder="오늘 가족들과 있었던 일이나 인상 깊었던 생각, 하루의 조각을 자유롭게 적어보세요. (예: 오늘 저녁 온 가족이 둘러앉아 맛있는 음식을 먹으며 이야기를 나누었다...)"></textarea>
+        </div>
+
+        <!-- 나에게 / 가족에게 전하는 한 줄 생각 -->
+        <div>
+          <div class="form-sec-title">
+            <span>💬 3. 나에게 & 가족에게 건네는 한 줄 생각</span>
+            <button type="button" class="btn-voice" onclick="startDiaryVoiceInput('parentThoughtInput', this)">
+              🎙️ 말로 하기
+            </button>
+          </div>
+          <div class="quick-tags">
+            <button type="button" class="quick-tag-btn" onclick="insertQuickTag('parentThoughtInput', '오늘 하루도 우리 가족 모두 수고 많았어요! 푹 쉬자!')">💬 가족 모두 수고 많았어!</button>
+            <button type="button" class="quick-tag-btn" onclick="insertQuickTag('parentThoughtInput', '소소한 일상 속에서 작은 행복을 느낀 소중한 하루.')">💬 소소한 일상 감사</button>
+            <button type="button" class="quick-tag-btn" onclick="insertQuickTag('parentThoughtInput', '아이들이 씩씩하게 자라는 모습을 보며 큰 힘을 얻는다.')">💬 아이들의 성장에 감사</button>
+            <button type="button" class="quick-tag-btn" onclick="insertQuickTag('parentThoughtInput', '내일은 조금 더 여유를 갖고 차분하게 하루를 보내자.')">💬 내일의 다짐과 여유</button>
+          </div>
+          <textarea id="parentThoughtInput" class="parent-textarea" rows="2" placeholder="직접 작성하거나 위의 버튼을 눌러보세요!"></textarea>
+        </div>
+
+        <!-- 노션 연동 안내 및 저장 버튼 -->
+        <div style="font-size:0.82rem; color:#10b981; display:flex; align-items:center; gap:6px;">
+          <span>🔗</span>
+          <span>저장 시 노션 <b>학습일지 DB</b> 및 당일자 <b>AI 대화록 및 일상 기록 DB</b>에 관계형으로 자동 연결됩니다.</span>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="handleSaveParentDiary()">
+          <span>🌟 오늘 일기 저장하기 (노션 동기화)</span>
+        </button>
+      </section>
+
+      <!-- 4) 지난 일기 섹션 -->
+      <section id="historySection" style="display: none; flex-direction: column; gap: 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div style="font-family:'Jua', sans-serif; font-size:1.05rem; color:#e2e8f0;" id="historyCountTitle">
+            총 0편의 부모 일기
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="nav-btn" onclick="refreshParentDiaries()" id="btnSyncHistory">🔄 노션 동기화</button>
+            <button type="button" class="nav-btn" onclick="switchTab('write')">➕ 새 일기 쓰기</button>
+          </div>
+        </div>
+
+        <div id="historyListContainer" style="display:flex; flex-direction:column; gap:12px;">
+          <!-- 동적 카드 렌더링 -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 저장 완료 축하 모달 -->
+  <div class="modal-overlay" id="saveSuccessModal" style="display:none;" onclick="closeSuccessModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="font-size: 3.5rem;">🎉</div>
+      <h2 style="font-family:'Jua', sans-serif; font-size:1.5rem; color:#34d399;" id="modalAuthorTitle">
+        아빠의 일기가 멋지게 저장되었어요!
+      </h2>
+      <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.5;" id="modalDesc">
+        노션 <b>'학습일지 DB'</b>에 부모관리자로 등록되었으며, 당일 <b>'AI 대화록 및 일상 기록 DB'</b>와 자동으로 연결되었습니다.
+      </p>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button type="button" class="nav-btn" style="padding:10px 18px; font-size:1rem;" onclick="switchTab('history'); closeSuccessModal();">
+          📚 지난 일기 모아보기
+        </button>
+        <button type="button" class="nav-btn" style="padding:10px 18px; font-size:1rem; background:#4f46e5; color:#fff;" onclick="closeSuccessModal()">
+          확인
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 의존성 스크립트 로드 (상대 경로 준수) -->
+  <script src="./kids/config.js"></script>
+  <script src="./kids/core/core.js"></script>
+  <script src="./kids/core/notion-helper.js"></script>
+  <script src="./kids/core/daily-diary.js"></script>
+
+  <script>
+    let currentAuthor = '아빠';
+
+    // 1. 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+      // 로컬 스토리지 확인하여 기본 작성자 설정
+      const savedAdmin = localStorage.getItem('currentUserName');
+      if (savedAdmin === '엄마') {
+        selectAuthor('엄마');
+      } else {
+        selectAuthor('아빠');
+      }
+
+      // 오늘 날짜 표시
+      const today = new Date();
+      document.getElementById('todayDateDisplay').innerText = `📅 ${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
+
+      // 노션 원격 일기 백그라운드 동기화
+      if (typeof syncDiariesFromNotion === 'function') {
+        syncDiariesFromNotion(currentAuthor);
+      }
+    });
+
+    // 2. 작성자 선택기 (아빠 / 엄마)
+    function selectAuthor(name) {
+      currentAuthor = name;
+      const btnDad = document.getElementById('btnAuthorDad');
+      const btnMom = document.getElementById('btnAuthorMom');
+
+      if (name === '엄마') {
+        btnDad.classList.remove('active');
+        btnMom.classList.add('active');
+        document.getElementById('modalAuthorTitle').innerText = '엄마의 일기가 멋지게 저장되었어요!';
+      } else {
+        btnMom.classList.remove('active');
+        btnDad.classList.add('active');
+        document.getElementById('modalAuthorTitle').innerText = '아빠의 일기가 멋지게 저장되었어요!';
+      }
+
+      // 작성자가 바뀌면 지난 일기 목록도 해당 작성자 기준으로 재렌더링
+      renderHistoryList();
+    }
+
+    // 3. 기분 카드 선택
+    function selectMood(el) {
+      document.querySelectorAll('#parentMoodGrid .mood-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    // 4. 탭 전환
+    function switchTab(tab) {
+      const writeSec = document.getElementById('writeSection');
+      const histSec = document.getElementById('historySection');
+      const tabWrite = document.getElementById('tabWrite');
+      const tabHist = document.getElementById('tabHistory');
+
+      if (tab === 'write') {
+        writeSec.style.display = 'flex';
+        histSec.style.display = 'none';
+        tabWrite.classList.add('active');
+        tabHist.classList.remove('active');
+      } else {
+        writeSec.style.display = 'none';
+        histSec.style.display = 'flex';
+        tabWrite.classList.remove('active');
+        tabHist.classList.add('active');
+        renderHistoryList();
+        refreshParentDiaries();
+      }
+    }
+
+    // 5. 일기 저장 핸들러
+    async function handleSaveParentDiary() {
+      const content = document.getElementById('parentContentInput')?.value.trim();
+      if (!content) {
+        alert("오늘 하루의 일상이나 가족 이야기를 적어주세요! ✏️");
+        document.getElementById('parentContentInput')?.focus();
+        return;
+      }
+
+      const moodCard = document.querySelector('#parentMoodGrid .mood-card.selected');
+      const moodVal = moodCard ? moodCard.dataset.val : '☕ 평온·차분';
+      const thoughtVal = document.getElementById('parentThoughtInput')?.value.trim() || '';
+
+      const submitBtn = document.querySelector('.btn-submit');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ 노션 및 AI 대화록 연결 저장 중...';
+      }
+
+      try {
+        const ok = await submitParentDiary(currentAuthor, moodVal, content, thoughtVal);
+        if (ok) {
+          // 인풋 초기화
+          document.getElementById('parentContentInput').value = '';
+          document.getElementById('parentThoughtInput').value = '';
+
+          // 성공 모달 오픈
+          document.getElementById('saveSuccessModal').style.display = 'flex';
+        } else {
+          alert("일기 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
+      } catch (err) {
+        console.error("일기 저장 예외:", err);
+        alert("저장 중 통신 오류가 발생했습니다: " + err.message);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '🌟 오늘 일기 저장하기 (노션 동기화)';
+        }
+      }
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('saveSuccessModal').style.display = 'none';
+    }
+
+    // 6. 지난 일기 목록 렌더링
+    function renderHistoryList() {
+      const container = document.getElementById('historyListContainer');
+      if (!container) return;
+
+      const all = (typeof getStoredDiaries === 'function') ? getStoredDiaries() : [];
+      // 현재 작성자(아빠 or 엄마)의 기록 필터링
+      const list = all.filter(item => item.childName === currentAuthor || (item.isParentEntry && (item.content || '').includes(`[${currentAuthor}]`)));
+
+      document.getElementById('historyCountTitle').innerText = `총 ${list.length}편의 ${currentAuthor} 일기 📚`;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:40px 10px; opacity:0.7;">
+            <div style="font-size:2.5rem; margin-bottom:10px;">📝</div>
+            <p style="font-family:'Jua', sans-serif; font-size:1.1rem;">아직 작성된 ${currentAuthor}의 일기가 없어요.</p>
+            <p style="font-size:0.85rem; color:#94a3b8; margin-top:4px;">상단의 [새 일기 쓰기]를 눌러 첫 일상을 기록해보세요!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(entry => `
+        <article class="history-card">
+          <div class="history-header">
+            <div class="history-meta">
+              <span style="color:#f472b6;">📅 ${entry.date}</span>
+              <span style="font-size:0.85rem; color:#94a3b8; font-weight:normal;">(${entry.timeStr || '기록'})</span>
+              <span class="badge badge-parent">👨‍👩‍👧‍👦 ${currentAuthor}</span>
+              <span class="badge badge-relation" title="노션 당일 AI 대화록 및 일상 기록 DB와 자동 연결됨">🔗 AI 대화록 연동</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:0.9rem; font-weight:bold; background:rgba(255,255,255,0.08); padding:3px 8px; border-radius:10px;">
+                ${entry.weather || entry.energy || '☕ 평온'}
+              </span>
+              <button type="button" onclick="handleDeleteDiary('${entry.id}')" style="background:transparent; border:1px solid #f87171; color:#f87171; font-family:'Jua', sans-serif; font-size:0.75rem; cursor:pointer; padding:2px 6px; border-radius:6px;">🗑️ 삭제</button>
+            </div>
+          </div>
+
+          <div style="font-size:0.95rem; line-height:1.6; color:#f1f5f9;">
+            ${entry.content ? `<b>📝 일상:</b> ${entry.content}` : ''}
+          </div>
+
+          ${(entry.iMessage || entry.goal) ? `
+            <div style="background:rgba(255,255,255,0.04); border-left:3px solid #f472b6; padding:8px 12px; border-radius:0 10px 10px 0; font-size:0.88rem; color:#e2e8f0;">
+              💬 <b>한 줄 생각:</b> ${entry.iMessage || entry.goal}
+            </div>
+          ` : ''}
+        </article>
+      `).join('');
+    }
+
+    // 7. 노션 실시간 동기화
+    async function refreshParentDiaries() {
+      const syncBtn = document.getElementById('btnSyncHistory');
+      if (syncBtn) syncBtn.innerText = '🔄 동기화 중...';
+
+      if (typeof syncDiariesFromNotion === 'function') {
+        await syncDiariesFromNotion(currentAuthor);
+      }
+      renderHistoryList();
+
+      if (syncBtn) {
+        syncBtn.innerText = '✅ 동기화 완료';
+        setTimeout(() => { syncBtn.innerText = '🔄 노션 동기화'; }, 2000);
+      }
+    }
+
+    // 8. 삭제 핸들러
+    function handleDeleteDiary(id) {
+      if (typeof deleteDiaryEntry === 'function') {
+        deleteDiaryEntry(id);
+        renderHistoryList();
+      }
+    }
+  </script>
+</body>
+</html>

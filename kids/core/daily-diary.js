@@ -641,18 +641,100 @@ function toggleBalloonTag(tag) {
     tag.classList.toggle('selected');
 }
 
-// 4-1. 노션 학습일지 DB 직통 일기 저장 헬퍼 (과목 및 속성 깔끔 분리)
+// 4-0. AI 대화록 및 일상 기록 DB 관계형 자동 연동 헬퍼
+const AI_LOG_DB_ID = "392a27115b6880dba5eede7ff33a22b9";
+
+async function getOrCreateAiDailyLog(dateStr) {
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const targetDate = dateStr || new Date().toISOString().split('T')[0];
+
+    try {
+        // 1. 해당 생성일 레코드 검색
+        const qResp = await fetch(`${proxyUrl}/v1/databases/${AI_LOG_DB_ID}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify({
+                filter: {
+                    property: "생성일",
+                    date: {
+                        equals: targetDate
+                    }
+                },
+                page_size: 1
+            })
+        });
+
+        if (qResp.ok) {
+            const qData = await qResp.json();
+            if (qData.results && qData.results.length > 0) {
+                console.log(`🔗 [AI 대화록 DB] 당일(${targetDate}) 기존 레코드 발견: ${qData.results[0].id}`);
+                return qData.results[0].id;
+            }
+        }
+
+        // 2. 해당 일자 레코드가 없으면 신규 생성
+        console.log(`✨ [AI 대화록 DB] 당일(${targetDate}) 레코드가 없어 자동 생성합니다.`);
+        const createResp = await fetch(`${proxyUrl}/v1/pages`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify({
+                parent: { database_id: AI_LOG_DB_ID },
+                properties: {
+                    "이름": {
+                        title: [{ text: { content: `${targetDate} 일상 기록` } }]
+                    },
+                    "생성일": {
+                        date: { start: targetDate }
+                    },
+                    "카테고리": {
+                        multi_select: [{ name: "일상/가족" }]
+                    }
+                }
+            })
+        });
+
+        if (createResp.ok) {
+            const newPage = await createResp.json();
+            console.log(`🎉 [AI 대화록 DB] 신규 당일 카드 자동 생성 성공! Page ID: ${newPage.id}`);
+            return newPage.id;
+        } else {
+            const errText = await createResp.text();
+            console.warn("AI 대화록 신규 카드 생성 실패:", errText);
+        }
+    } catch (e) {
+        console.warn("AI 대화록 DB 연동 중 오류:", e);
+    }
+    return null;
+}
+
+// 4-1. 노션 학습일지 DB 직통 일기 저장 헬퍼 (과목, 속성 및 AI 대화록 관계형 연동)
 async function sendDiaryLogToNotionDirect(entry) {
     const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
 
     const { isParentMode } = getCurrentDiaryTarget();
-    const studentName = isParentMode ? '부모관리자' : entry.childName;
-    const subjectName = entry.childName === '민서' ? '마음일기' : '일기';
+    const isParentSelf = (entry.childName === '아빠' || entry.childName === '엄마' || entry.isParentSelfDiary);
 
-    const titleText = isParentMode 
-        ? `부모관리자_${entry.date} (${entry.childName} ${subjectName})`
-        : `${entry.childName}_${entry.date} (${entry.timeStr || ''})`;
+    let studentName = '부모관리자';
+    if (!isParentMode && !isParentSelf) {
+        studentName = entry.childName;
+    }
+
+    let subjectName = '일기';
+    if (entry.childName === '민서') {
+        subjectName = '마음일기';
+    } else if (isParentSelf) {
+        subjectName = '일기';
+    }
+
+    let titleText = "";
+    if (isParentSelf) {
+        titleText = `${entry.childName}_${entry.date} (${entry.timeStr || ''})`;
+    } else if (isParentMode) {
+        titleText = `부모관리자_${entry.date} (${entry.childName} ${subjectName})`;
+    } else {
+        titleText = `${entry.childName}_${entry.date} (${entry.timeStr || ''})`;
+    }
 
     let weatherAndMood = "";
     let pureContent = "";
@@ -663,15 +745,22 @@ async function sendDiaryLogToNotionDirect(entry) {
         weatherAndMood = entry.weather ? (entry.weather + (moodList ? ` [${moodList}]` : '')) : moodList;
         pureContent = entry.content || '';
         iMessageText = entry.iMessage || '';
+    } else if (isParentSelf) {
+        weatherAndMood = entry.weather || entry.energy || '☕ 평온·차분';
+        pureContent = entry.content || '';
+        iMessageText = entry.iMessage || entry.goal || '';
     } else {
         weatherAndMood = entry.energy || '😎 꿀잼·대만족';
         pureContent = entry.accomplish || '';
         iMessageText = entry.goal || '';
     }
 
-    if (isParentMode) {
+    if (isParentMode && !isParentSelf) {
         pureContent = `[부모관리자 검수] ` + pureContent;
     }
+
+    // 💡 AI 대화록 및 일상 기록 DB 관계형 자동 연동 ID 조회/생성
+    const aiLogPageId = await getOrCreateAiDailyLog(entry.date);
 
     const payload = {
         parent: { database_id: dbId },
@@ -704,10 +793,17 @@ async function sendDiaryLogToNotionDirect(entry) {
                 number: 5
             },
             "단어요정": {
-                number: isParentMode ? 0 : 1
+                number: 0
             }
         }
     };
+
+    // AI 대화록 관계형 속성 주입
+    if (aiLogPageId) {
+        payload.properties["AI 대화록 및 일상 기록 DB"] = {
+            relation: [{ id: aiLogPageId }]
+        };
+    }
 
     try {
         const resp = await fetch(`${proxyUrl}/v1/pages`, {
@@ -717,7 +813,7 @@ async function sendDiaryLogToNotionDirect(entry) {
         });
         if (resp.ok) {
             const data = await resp.json();
-            console.log(`🎉 [노션 직통] 일기 학습일지 등록 성공! (과목: ${subjectName}, 학생: ${studentName}) Page ID: ${data.id}`);
+            console.log(`🎉 [노션 직통] 일기 학습일지 등록 성공! (과목: ${subjectName}, 학생: ${studentName}, AI연동: ${aiLogPageId ? '성공' : '없음'}) Page ID: ${data.id}`);
             if (entry.id) {
                 bindNotionPageIdToEntry(entry.id, data.id);
             }
@@ -800,7 +896,9 @@ function parseNotionDiaryPage(page, targetChild) {
 
     let matchedChild = student;
     if (student === '부모관리자') {
-        if (title.includes('민서')) matchedChild = '민서';
+        if (title.includes('아빠')) matchedChild = '아빠';
+        else if (title.includes('엄마')) matchedChild = '엄마';
+        else if (title.includes('민서')) matchedChild = '민서';
         else if (title.includes('민수')) matchedChild = '민수';
         else matchedChild = targetChild;
     }
@@ -844,7 +942,7 @@ function parseNotionDiaryPage(page, targetChild) {
                 weatherOrEnergy = moodProp.replace(/\[[^\]]+\]/, '').trim();
             }
         }
-        if (matchedChild === '민서') {
+        if (matchedChild === '민서' || matchedChild === '아빠' || matchedChild === '엄마') {
             content = reportProp;
         } else {
             accomplish = reportProp;
@@ -1252,6 +1350,46 @@ function renderDiaryHistoryList(childName, isMinsu) {
     `;
 }
 
+// 9. 👨‍👩‍👧‍👦 부모 전용 일기 제출 헬퍼
+async function submitParentDiary(parentName, moodVal, contentVal, thoughtVal, dateYMD) {
+    if (!contentVal || !contentVal.trim()) {
+        alert("오늘 하루의 일상이나 가족 이야기를 적어주세요! ✏️");
+        return false;
+    }
+
+    const todayYMD = dateYMD || new Date().toISOString().split('T')[0];
+    const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    const author = (parentName === '엄마') ? '엄마' : '아빠';
+
+    const entry = {
+        id: 'diary_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        childName: author,
+        date: todayYMD,
+        timeStr: timeStr,
+        weather: moodVal || '☕ 평온·차분',
+        energy: moodVal || '☕ 평온·차분',
+        content: contentVal.trim(),
+        iMessage: (thoughtVal || '').trim(),
+        goal: (thoughtVal || '').trim(),
+        isParentEntry: true,
+        isParentSelfDiary: true,
+        createdAt: new Date().toISOString()
+    };
+
+    try {
+        // 1) 로컬 스토리지 저장
+        saveDiaryEntry(entry);
+
+        // 2) 노션 학습일지 DB 및 AI 대화록 및 일상 기록 DB 관계형 자동 연동
+        await sendDiaryLogToNotionDirect(entry);
+
+        return true;
+    } catch (e) {
+        console.error("부모 일기 저장 오류:", e);
+        return false;
+    }
+}
+
 // 전역 바인딩
 window.openDailyDiaryModal = openDailyDiaryModal;
 window.closeDailyDiaryModal = closeDailyDiaryModal;
@@ -1261,10 +1399,13 @@ window.toggleBalloonTag = toggleBalloonTag;
 window.insertQuickTag = insertQuickTag;
 window.submitMinseoDiary = submitMinseoDiary;
 window.submitMinsuDiary = submitMinsuDiary;
+window.submitParentDiary = submitParentDiary;
+window.getOrCreateAiDailyLog = getOrCreateAiDailyLog;
 window.deleteDiaryEntry = deleteDiaryEntry;
 window.startDiaryVoiceInput = startDiaryVoiceInput;
 window.getTodayDiaryCount = getTodayDiaryCount;
 window.updateLobbyDiaryButton = updateLobbyDiaryButton;
 window.syncDiariesFromNotion = syncDiariesFromNotion;
 window.fetchNotionDiaries = fetchNotionDiaries;
+window.getStoredDiaries = getStoredDiaries;
 

@@ -63,6 +63,7 @@
   .admin-btn.son-test { background: linear-gradient(145deg, #6EC6F5, #A78BFA); color: white; }
   .admin-btn.dau-test { background: linear-gradient(145deg, #FF6B9D, #FF9F43); color: white; }
   .admin-btn.tower { background: linear-gradient(145deg, #1a2332, #4fc3f7); color: white; }
+  .admin-btn.diary { background: linear-gradient(145deg, #ec4899, #8b5cf6); color: white; }
 </style>
 </head>
 <body>
@@ -108,6 +109,7 @@
     <div class="pw-title" id="adminWelcomeTitle" style="margin-bottom: 25px; color: var(--purple); font-weight: bold;">어디로 이동할까요?</div>
     
     <div style="display:flex; flex-direction:column;">
+      <button class="admin-btn diary" onclick="goAdminCustom('parent_diary.html')">📝 엄마·아빠 일기장 (일상 & 생각)</button>
       <button class="admin-btn multi" onclick="goAdminCustom('multiverse/index_friends.html')">🌌 멀티버스 (친구들)</button>
       <button class="admin-btn dash" onclick="goAdminCustom('parent_dashboard.html')">🛠️ 대시보드 / 문제 등록</button>
       <button class="admin-btn dash" style="border: 2px solid #58a6ff; color: #0284c7; font-weight: bold;" onclick="goAdminCustom('admin-image-changer.html')">🖼️ 교재 이미지 퀵 체인저</button>
