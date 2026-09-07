@@ -5,6 +5,7 @@ const WORKER_PROXY_URL = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https:/
 let currentUser = window.currentProfile || 'son';
 let currentUserName = window.currentUserName || '민수';
 let currentTheme = window.currentTheme || '마인크래프트';
+window.currentSubject = "용어사전"; // 🚨 기본 전역 과목명 명시 (학습일지 및 통계용)
 
 let allDictionaryWords = [];
 let selectedSubjects = []; 

@@ -669,6 +669,8 @@
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/fairy-chatbot.js"></script>
 <script>
+  window.currentSubject = "수학"; // 🚨 핵심: 전역 과목명 명시 (학습일지 및 보상 관제탑 연동)
+
   // 🚪 수학 섹션 뷰 열기/닫기 (대문 <-> 개념관 <-> 트레이닝 센터)
   function openMathSection(section) {
     const vGateway = document.getElementById('viewGateway');

@@ -279,6 +279,7 @@
   <script src="../../core/fairy-chatbot.js"></script>
 
   <script>
+  window.currentSubject = "수학"; // 🚨 전역 과목명 명시
     // 탭 전환
     function switchTab(mode) {
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));

@@ -114,14 +114,73 @@ async function triggerAwardDispense(amount) {
 }
 
 /**
- * 퇴장 시 일지 작성 자동 안전 배선 (동적 과목명 적용)
+ * 🧭 화면 및 URL 기반 지능형 교과목 감지 엔진
+ * window.currentSubject가 정의되어 있으면 우선 채택하고,
+ * 누락된 경우 URL 경로를 분석하여 과목명을 자동 추론합니다.
+ * 로비, 놀이터, 마이룸 등 비교과 공간은 null을 반환합니다.
+ */
+function detectSubjectFromContext() {
+    if (window.currentSubject && window.currentSubject !== "미상 과목") {
+        return window.currentSubject;
+    }
+
+    const path = (window.location.pathname || "").toLowerCase().replace(/\\/g, '/');
+    const href = (window.location.href || "").toLowerCase().replace(/\\/g, '/');
+    const targetUrl = path || href;
+
+    // 1. 비학습/놀이터/생활 공간은 과목 없음(null)으로 명확히 배제
+    if (
+        targetUrl.includes('lobby.html') ||
+        targetUrl.includes('/playground/') ||
+        targetUrl.includes('my-room.html') ||
+        targetUrl.includes('gallery.html') ||
+        targetUrl.includes('timetable.html') ||
+        targetUrl.includes('parent_') ||
+        targetUrl.includes('admin')
+    ) {
+        return null;
+    }
+
+    // 2. 교과목 경로 기반 자동 매핑
+    if (targetUrl.includes('/subjects/math/') || targetUrl.includes('math_') || targetUrl.includes('/math/')) {
+        return "수학";
+    }
+    if (targetUrl.includes('/subjects/korean/') || targetUrl.includes('/korean/')) {
+        return "국어";
+    }
+    if (targetUrl.includes('/subjects/english/') || targetUrl.includes('/english/')) {
+        return "영어";
+    }
+    if (targetUrl.includes('/subjects/science/') || targetUrl.includes('/science/')) {
+        return "과학";
+    }
+    if (targetUrl.includes('/subjects/society/') || targetUrl.includes('/society/')) {
+        return "사회";
+    }
+    if (targetUrl.includes('/common_space/voca')) {
+        return "용어사전";
+    }
+
+    return null;
+}
+window.detectSubjectFromContext = detectSubjectFromContext;
+
+/**
+ * 퇴장 시 일지 작성 자동 안전 배선 (동적 과목명 적용 및 비학습 화면 차단)
  */
 window.addEventListener("beforeunload", () => {
     const isAdminUser = window.isAdmin || (localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마');
-    if (!isAdminUser && typeof sendStudyLogToNotion === 'function') {
+    if (isAdminUser) return;
+
+    if (typeof sendStudyLogToNotion === 'function') {
+        const subjectName = detectSubjectFromContext();
+        // 🚨 유효한 교과목이 아니거나 비학습 공간(null)이면 노션 학습일지 전송 완전 차단
+        if (!subjectName || subjectName === "미상 과목") {
+            return;
+        }
+
         const profile = localStorage.getItem('currentUser') || 'son';
         const userName = profile === 'son' ? '민수' : '민서';
-        const subjectName = window.currentSubject || "미상 과목"; // 동적 과목명 참조
         sendStudyLogToNotion({
             childName: userName,
             subject: subjectName

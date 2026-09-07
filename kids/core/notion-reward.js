@@ -15,7 +15,17 @@ window.roomStartTime = window.roomStartTime || new Date();
  */
 async function sendStudyLogToNotion(options = {}) {
     const childName = options.childName || (localStorage.getItem('currentUser') === 'son' ? '민수' : '민서');
-    const subject = options.subject || window.currentSubject || "미상 과목";
+    let subject = options.subject || window.currentSubject;
+    if (!subject && typeof detectSubjectFromContext === 'function') {
+        subject = detectSubjectFromContext();
+    }
+
+    // 🚨 [원천 방어막] 유효한 과목명이 없거나 "미상 과목"인 경우 노션 DB 오염 방지를 위해 전송 차단
+    if (!subject || subject === "미상 과목") {
+        console.warn(`⚠️ [학습일지 방어막] 유효한 교과목명이 없어 노션 전송을 안전하게 차단합니다. (감지된 과목: ${subject})`);
+        return false;
+    }
+
     const startTime = options.startTime || window.roomStartTime.toISOString();
     const endTime = options.endTime || new Date().toISOString();
     
