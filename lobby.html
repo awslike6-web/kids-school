@@ -171,8 +171,8 @@
   </div>
 
   <!-- 🛠️ 관리자 / 보조 퀵 툴바 (성장 대시보드, 교재 이미지 체인저, 관제탑) -->
-  <div class="admin-quick-toolbar" id="quickToolbar">
-    <a href="parent_dashboard.html" class="admin-tool-chip dashboard-btn" id="dashboardLink">📊 나의 성장 대시보드</a>
+  <div class="admin-quick-toolbar" id="quickToolbar" style="display: none;">
+    <a href="parent_dashboard.html" class="admin-tool-chip dashboard-btn" id="dashboardLink">📊 실시간 통합 성장 대시보드</a>
     <a href="admin-image-changer.html" class="admin-tool-chip image-changer-btn" id="imageChangerLink" style="display:none; background: linear-gradient(135deg, #0284c7, #38bdf8); color: #fff; font-weight: bold;">🖼️ 교재 이미지 체인저</a>
     <a href="#" class="admin-tool-chip tower-btn" id="towerLink" style="display:none;" target="_blank" rel="noopener">🏰 Master Tower 관제탑</a>
   </div>
@@ -201,37 +201,35 @@ const USER_CONFIGS = {
     studyWorlds: [
       {
         title: '🧮 수학 월드',
-        color: '#3b82f6',
+        color: '#f59e0b',
         rooms: [
-          { name: '🏫 학년별 개념 탐험관', href: 'kids/subjects/math/math.html#concepts', desc: '1~2학년 기초부터 3~4학년 핵심, 5~6학년 심화까지 교과 개념 탐험!' },
-          { name: '⚔️ 실전 문제 트레이닝 센터', href: 'kids/subjects/math/math.html#workout', desc: '세로셈 무한 연산, 공식 퀴즈, 분수·소수·도형 실전 문제 훈련!' },
-          { name: '📚 수학 단원 동화 도서관', href: 'kids/subjects/math/math_storybook_library.html', desc: '고화질 삽화와 성우 구연동화로 교과서 수학 개념을 재미있게 정복!' }
+          { name: '수학 멀티버스 대모험', href: 'kids/subjects/math/math.html', desc: '단원 동화 도서관부터 시각적 개념 탐험관, 세로셈 무한 실전 연산 트레이닝까지!' }
         ]
       },
       {
         title: '✍️ 국어 월드',
-        color: '#10b981',
+        color: '#ec4899',
         rooms: [
           { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '단원 동화부터 받아쓰기, 어휘, 정밀독해, AI토론까지!' }
         ]
       },
       {
         title: '🔤 영어 던전',
-        color: '#6366f1',
+        color: '#0284c7',
         rooms: [
           { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '스토리북 도서관부터 사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자' }
         ]
       },
       {
         title: '🧪 과학 실험실',
-        color: '#06b6d4',
+        color: '#10b981',
         rooms: [
           { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '자연과 우주 생태계의 비밀 법칙을 파헤치는 코어 실험실' }
         ]
       },
       {
         title: '🏛️ 사회 연대기',
-        color: '#f59e0b',
+        color: '#d97706',
         rooms: [
           { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '지리 공간과 옛날 인물 이야기 역사를 추적하는 타임머신' }
         ]
@@ -251,6 +249,7 @@ const USER_CONFIGS = {
         rooms: [
           { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' },
           { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교에서 만들고 그려온 멋진 미술·공예 작품을 전시하고 자랑해보자!' },
+          { name: '📊 나의 성장 대시보드', href: 'parent_dashboard.html?user=minsu', desc: '5대 교과 학습 밸런스 방사형 차트와 실시간 퀘스트 달성도 점검!' },
           { name: '📅 상세 시간표 & 수업 안내', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' }
         ]
       },
@@ -270,37 +269,35 @@ const USER_CONFIGS = {
     studyWorlds: [
       {
         title: '🧮 수학 월드',
-        color: '#3b82f6',
+        color: '#f59e0b',
         rooms: [
-          { name: '🏫 학년별 개념 탐험관', href: 'kids/subjects/math/math.html#concepts', desc: '1~2학년 기초부터 3~4학년 핵심, 5~6학년 심화까지 재미있는 개념 놀이터!' },
-          { name: '⚔️ 실전 문제 트레이닝 센터', href: 'kids/subjects/math/math.html#workout', desc: '세로셈 무한 연산, 공식 퀴즈, 분수·소수·도형 실전 문제 집중 훈련!' },
-          { name: '📚 수학 단원 동화 도서관', href: 'kids/subjects/math/math_storybook_library.html', desc: '고화질 삽화와 성우 구연동화로 교과서 수학 개념을 재미있게 정복!' }
+          { name: '수학 놀이터 대모험', href: 'kids/subjects/math/math.html', desc: '단원 동화 도서관부터 아기자기 개념 탐험관, 세로셈 실전 연산 트레이닝까지!' }
         ]
       },
       {
         title: '✍️ 국어 월드',
-        color: '#10b981',
+        color: '#ec4899',
         rooms: [
           { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '1-2 1단원 감정 스토리북과 비밀 요정들과 나누는 상상력 가득 논리 대화방' }
         ]
       },
       {
         title: '🔤 영어 던전',
-        color: '#6366f1',
+        color: '#0284c7',
         rooms: [
           { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
         ]
       },
       {
         title: '🧪 과학 실험실',
-        color: '#06b6d4',
+        color: '#10b981',
         rooms: [
           { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 신기한 과학방' }
         ]
       },
       {
         title: '🏛️ 사회 연대기',
-        color: '#f59e0b',
+        color: '#d97706',
         rooms: [
           { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
         ]
@@ -320,6 +317,7 @@ const USER_CONFIGS = {
         rooms: [
           { name: '👧 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '하리보 젤리로 예쁜 가구를 사고 나만의 핑꾸 하우스를 꾸며보자!' },
           { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '예쁘게 그린 그림과 정성껏 만든 공예품을 전시하는 아틀리에!' },
+          { name: '📊 나의 성장 대시보드', href: 'parent_dashboard.html?user=minseo', desc: '5대 교과 학습 밸런스 방사형 차트와 실시간 퀘스트 달성도 점검!' },
           { name: '📅 상세 시간표 & 수업 안내', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' }
         ]
       },
@@ -420,6 +418,9 @@ loadCoreScripts("kids/core/", requiredCores, () => {
                 <button type="button" class="admin-child-btn minseo ${userKey === 'minseo' ? 'active' : ''}" onclick="switchAdminLobbyChild('minseo')">👧 민서 공부방 검수</button>
             `;
         }
+
+        const quickToolbar = document.getElementById('quickToolbar');
+        if (quickToolbar) quickToolbar.style.display = 'flex';
         
         const dashboardLink = document.getElementById('dashboardLink');
         if (dashboardLink) {
@@ -441,6 +442,9 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         const switcher = document.getElementById('adminChildSwitcher');
         if (switcher) switcher.style.display = 'none';
 
+        const quickToolbar = document.getElementById('quickToolbar');
+        if (quickToolbar) quickToolbar.style.display = 'none';
+
         const finalWelcomeText = currentConfig.key === 'son' 
             ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
             : `🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, ${finalRealName}!`;
@@ -450,12 +454,6 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         localStorage.setItem('currentUser', currentConfig.key); 
         localStorage.setItem('currentUserName', finalRealName);
         document.getElementById('timetableLink').textContent = `📅 ${finalRealName}의 시간표 보기`;
-
-        const dashboardLink = document.getElementById('dashboardLink');
-        if (dashboardLink) {
-            dashboardLink.textContent = `📊 ${finalRealName}의 성장 퀘스트 대시보드`;
-            dashboardLink.href = `parent_dashboard.html?user=${userKey}`;
-        }
     }
 
     window.switchAdminLobbyChild = function(targetChild) {
