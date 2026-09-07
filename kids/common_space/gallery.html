@@ -916,6 +916,8 @@
         // 🏛️ 갤러리 상태 및 데이터 관리
         // ========================================================
         const STORAGE_KEY = 'MY_STUDY_ROOM_GALLERY_DATA';
+        const STORAGE_VERSION_KEY = 'MY_STUDY_ROOM_GALLERY_VER';
+        const CURRENT_STORAGE_VER = 'v20260907_clean';
         let galleryData = [];
         let currentAuthorFilter = 'all';
         let currentCategoryFilter = 'all';
@@ -960,6 +962,13 @@
 
         // 📦 갤러리 데이터 로드 (마스터 DB + 사용자 등록 커스텀 작품 스마트 병합)
         function loadGalleryData() {
+            // 🛡️ 구버전 더미 댓글/반응 캐시 자동 정화 (Purge)
+            const savedVer = localStorage.getItem(STORAGE_VERSION_KEY);
+            if (savedVer !== CURRENT_STORAGE_VER) {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_STORAGE_VER);
+            }
+
             const saved = localStorage.getItem(STORAGE_KEY);
             let customItems = [];
             let savedLikesMap = {};
