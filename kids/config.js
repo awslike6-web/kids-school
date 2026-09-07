@@ -35,7 +35,7 @@ var APP_CONFIG = {
     TIMETABLE_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",        // 레거시 호환 ID
 
     // 🏰 Master Tower 종합 관제탑 (아빠 프로필 전용)
-    MASTER_TOWER_URL: "https://awslike6-web.github.io/master-tower/",
+    MASTER_TOWER_URL: "https://master-tower.awslike6.workers.dev/",
 
     // 👦👧 자녀 프로필 세팅 (조카들에게 분양 시 아이 이름과 나이에 맞게 수정하세요!)
     CHILDREN: {
