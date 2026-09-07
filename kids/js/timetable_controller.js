@@ -29,7 +29,7 @@ const SUBJECT_COLORS = {
   '사회': '#FFD93D', '기타': '#8b949e', '도덕': '#4ECDC4', '음악': '#FF9F43',
   '체육': '#44A08D', '미술': '#ff758c', '실과': '#c084fc',
   '수영장': '#00f2fe', '수영': '#00f2fe', '센터': '#f39c12', '피구': '#ff7675',
-  '난타': '#ff9f43', '하루': '#2ed573'
+  '난타': '#ff9f43', '하루': '#2ed573', '도서관': '#10ac84'
 };
 
 // 🏛️ [기본 정적 시간표 (베이스)] - 학기 중 매주 반복되는 고정 시간표
@@ -69,6 +69,11 @@ const DEFAULT_BASE_TIMETABLE = {
   ],
   '민서': [
     // 👧 1학년 2학기 확정 시간표
+    { dayOfWeek: '월요일', periodNum: 1, subject: '난타', title: '난타' },
+    { dayOfWeek: '월요일', periodNum: 2, subject: '도서관', title: '도서관' },
+    { dayOfWeek: '월요일', periodNum: 3, subject: '국어', title: '국어' },
+    { dayOfWeek: '월요일', periodNum: 4, subject: '수학', title: '수학' },
+    { dayOfWeek: '월요일', periodNum: 5, subject: '하루', title: '하루' },
     { dayOfWeek: '월요일', periodNum: 8, subject: '수영장', title: '수영장' },
 
     { dayOfWeek: '수요일', periodNum: 1, subject: '체육', title: '체육' },
