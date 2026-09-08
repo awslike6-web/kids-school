@@ -427,6 +427,9 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                 const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
                 if (uniqueGrades.length === 0) {
                     startMissionWithFilteredData(records, innerBody);
+                } else if (uniqueGrades.length === 1) {
+                    // 💡 학년이 1개뿐인 경우 불필요한 학년 선택 뎁스를 건너뛰고 곧바로 단원 선택 화면으로 직행
+                    selectDynamicGrade(uniqueGrades[0]);
                 } else {
                     renderDynamicGradeUI(uniqueGrades, innerBody);
                 }
