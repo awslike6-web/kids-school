@@ -3,6 +3,50 @@
 
 const ENGLISH_READING_DATABASE = [
     {
+        id: "eng_read_10",
+        title: "Minsu and Junwoo's Weekend (7단원)",
+        fullText: "On Monday morning, Junwoo met Minsu at school. Junwoo asked, \"Hi, Minsu! What did you do last weekend?\" Minsu smiled brightly and answered, \"I went camping with my family! We set up a tent and made a warm campfire. In the evening, we ate delicious roasted chicken. And then, we looked up at the twinkling stars together. It was a wonderful night!\"\nJunwoo said, \"That sounds so fun! What else did you do?\" Minsu replied, \"I played baseball with my dad and took many pictures. What about you, Junwoo? Did you have a good time?\"\nJunwoo smiled and said, \"Yes! I visited my grandparents with my little brother. We played with toy cars and ate sweet fruits. My grandma baked cookies for us. We had a great weekend, too!\"\nBoth boys shared happy memories of their weekend. Talking with a good friend made Monday morning even brighter.",
+        translation: "월요일 아침, 준우는 학교에서 민수를 만났습니다. 준우가 물었습니다. \"안녕, 민수야! 지난 주말에 뭐 했니?\" 민수는 환하게 웃으며 대답했습니다. \"가족과 함께 캠핑을 갔어! 텐트를 치고 따뜻한 모닥불을 피웠지. 저녁에는 맛있는 구운 치킨을 먹었어. 그리고 나서 우리는 반짝이는 별들을 함께 올려다보았단다. 정말 멋진 밤이었어!\"\n준우가 말했습니다. \"정말 재미있었겠다! 또 다른 건 뭐 했어?\" 민수가 답했습니다. \"아빠와 야구를 하고 사진도 많이 찍었어. 준우 너는 어땠어? 좋은 시간 보냈니?\"\n준우가 미소를 지으며 말했습니다. \"응! 남동생과 함께 할머니, 할아버지 댁을 방문했어. 우리는 장난감 자동차를 가지고 놀고 달콤한 과일을 먹었어. 할머니께서 우리를 위해 쿠키도 구워주셨어. 우리도 아주 멋진 주말을 보냈지!\"\n두 소년은 주말의 행복한 추억을 함께 나누었습니다. 좋은 친구와 이야기를 나누니 월요일 아침이 더욱 밝아졌습니다.",
+        paragraphs: [
+            { id: "p1", label: "A", text: "On Monday morning, Junwoo met Minsu at school. Junwoo asked, \"Hi, Minsu! What did you do last weekend?\"" },
+            { id: "p2", label: "B", text: "Minsu smiled brightly and answered, \"I went camping with my family! We set up a tent and made a warm campfire. In the evening, we ate delicious roasted chicken. And then, we looked up at the twinkling stars together. It was a wonderful night!\"" },
+            { id: "p3", label: "C", text: "Junwoo said, \"That sounds so fun! What else did you do?\" Minsu replied, \"I played baseball with my dad and took many pictures. What about you, Junwoo?\"" },
+            { id: "p4", label: "D", text: "Junwoo smiled and said, \"I visited my grandparents with my little brother. We played with toy cars and ate sweet fruits. My grandma baked cookies for us. We had a great weekend, too!\"" }
+        ],
+        correctOrder: ["p1", "p2", "p3", "p4"],
+        conjunctions: [
+            {
+                sentenceBefore: "In the evening, we ate delicious roasted chicken.",
+                sentenceAfter: "We looked up at the twinkling stars together.",
+                options: ["And then", "However", "Because"],
+                answer: "And then",
+                commentary: "저녁에 맛있는 치킨을 먹고 '그리고 나서(And then)' 별들을 함께 올려다보았다는 시간 순서의 자연스러운 연결이에요."
+            }
+        ],
+        themeQuiz: {
+            question: "What is the main topic of this story?",
+            options: [
+                "Minsu and Junwoo sharing their fun weekend activities.",
+                "How to bake delicious cookies at grandma's house.",
+                "Why Monday morning is always boring at school."
+            ],
+            answerIndex: 0,
+            commentary: "이 글은 민수와 준우가 월요일 학교에서 만나 지난 주말에 각자 무엇을 하고 놀았는지 즐거운 추억을 나누는 이야기입니다."
+        },
+        chatbotSystemPrompt: `
+            너는 'Minsu and Junwoo's Weekend' 이야기를 함께 읽고 아이와 대화하는 다정한 AI 영어 요정 코코야.
+            민수는 느린 학습자(약한 경계선 지능)의 사랑스러운 아이이므로, 어려운 문법 용어를 쓰지 말고 아주 쉽고 따뜻하게 격려해줘.
+            
+            다음 내용들을 아이와 함께 자연스럽게 알아가거나 칭찬해줘:
+            1. 과거에 한 일을 나타내는 친숙한 단어들 (went camping, made, ate, played, took pictures, visited)
+            2. "What did you do last weekend?" 질문에 대해 아이가 "I went ~" 또는 "I played ~" 처럼 쉬운 단어로 대답할 수 있게 이끌어주기
+            3. 아이가 지난 주말에 무엇을 했는지 다정하게 물어보고 폭풍 칭찬해주기 (예: "Did you play games or eat delicious food?")
+            
+            말투는 언제나 상냥한 동화나라 요정처럼 말하고, 문법이 조금 서툴러도 "와! 정말 멋진 주말이었네요!"라며 먼저 칭찬하고 올바른 표현을 부드럽게 들려줘.
+            아이가 자신의 주말이나 마음에 대해 짧은 영어 한마디라도 표현했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
+        `
+    },
+    {
         id: "eng_read_01",
         title: "The Lion and the Mouse",
         fullText: "A lion was sleeping in the forest.\nA little mouse ran over his nose.\nThe lion woke up and caught the mouse.\n\"Please let me go!\" said the mouse.\n\"I will help you someday.\"\nThe lion laughed and let him go.",

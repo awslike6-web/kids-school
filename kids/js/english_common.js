@@ -147,12 +147,12 @@ function openMissionView(type) {
     let targetTitle = ""; let targetIcon = "";
     switch(type) {
         case 'voca_pool': targetTitle = "[2단계] 단어 퐁당 (핵심 영단어)"; targetIcon = "🔤"; break;
-        case 'stage1': targetTitle = "1단계: 알파벳 터치방"; targetIcon = "🔤"; break;
-        case 'stage2': targetTitle = "2단계: 파닉스 듣기방"; targetIcon = "🎧"; break;
+        case 'stage1': targetTitle = "[1단계] 알파벳 터치방"; targetIcon = "🔤"; break;
+        case 'stage2': targetTitle = "[3단계] 소리 귀 뚫기 (파닉스/듣기)"; targetIcon = "🎧"; break;
         case 'stage3': targetTitle = "3단계: 영단어/숙어방"; targetIcon = "📝"; break;
-        case 'stage4': targetTitle = "4단계: 영어 문장방"; targetIcon = "💬"; break;
-        case 'stage5': targetTitle = "5단계: 짧은 문단 독해"; targetIcon = "📖"; break;
-        case 'stage6': targetTitle = "6단계: 예비 중등 토론"; targetIcon = "🗣️"; break;
+        case 'stage4': targetTitle = "[4단계] 문장 조각 맞추기 (블록 놀이)"; targetIcon = "🧩"; break;
+        case 'stage5': targetTitle = "[5단계] 동화 장면 퀴즈 (짧은 독해)"; targetIcon = "📖"; break;
+        case 'stage6': targetTitle = "[6단계] 코코와 한 줄 인사 (다정한 대화)"; targetIcon = "🧚‍♀️"; break;
     }
     headerTitle.textContent = targetTitle;
     headerIcon.textContent = targetIcon;
@@ -257,9 +257,9 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             if (records && records.length > 0) {
                 allFetchedRecords = records;
                 
-                // 2단계(단어 퐁당), 3단계(영단어/숙어), 4단계(영어 문장) 데이터 목적별 분리
+                // 2단계(단어 퐁당), 3단계(파닉스/듣기/어휘), 4단계(영어 문장) 데이터 목적별 분리
                 let candidateRecords = records;
-                if (type === 'stage3' || type === 'voca_pool') {
+                if (type === 'stage2' || type === 'stage3' || type === 'voca_pool') {
                     candidateRecords = records.filter(isVocaOrIdiomRecord);
                 } else if (type === 'stage4') {
                     candidateRecords = records.filter(isSentenceRecord);
@@ -319,7 +319,7 @@ window.selectDynamicGrade = function(grade) {
     selectedEnglishGrade = grade;
     const innerBody = document.getElementById('overlayInnerBody');
     let matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
-    if (currentMissionType === 'stage3' || currentMissionType === 'voca_pool') {
+    if (currentMissionType === 'stage2' || currentMissionType === 'stage3' || currentMissionType === 'voca_pool') {
         matchedRecords = matchedRecords.filter(isVocaOrIdiomRecord);
     } else if (currentMissionType === 'stage4') {
         matchedRecords = matchedRecords.filter(isSentenceRecord);
@@ -328,17 +328,22 @@ window.selectDynamicGrade = function(grade) {
     
     if (uniqueUnits.length === 0 || (uniqueUnits.length === 1 && uniqueUnits[0] === "기본 단원")) {
         startMissionWithFilteredData(matchedRecords, innerBody);
+    } else if (uniqueUnits.length === 1) {
+        // 단원이 1개만 있으면 번거로운 단원 선택 없이 바로 직행!
+        selectDynamicUnit(uniqueUnits[0]);
     } else {
         renderDynamicUnitUI(uniqueUnits, innerBody);
     }
 };
 
+window._currentDynamicUnits = [];
 function renderDynamicUnitUI(units, container) {
+    window._currentDynamicUnits = units;
     let html = `<div style="text-align:center; margin-bottom:20px;">
         <h3 style="color:var(--mint); margin-bottom:15px;">📚 [${selectedEnglishGrade}] 도전할 단원을 선택하세요!</h3>
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">`;
-    units.forEach(u => {
-        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnit('${u}')">${u}</button>`;
+    units.forEach((u, idx) => {
+        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnitByIndex(${idx})">${u}</button>`;
     });
     html += `</div>
         <div style="margin-top:20px;">
@@ -348,6 +353,12 @@ function renderDynamicUnitUI(units, container) {
     container.innerHTML = html;
 }
 
+window.selectDynamicUnitByIndex = function(idx) {
+    if (window._currentDynamicUnits && window._currentDynamicUnits[idx]) {
+        selectDynamicUnit(window._currentDynamicUnits[idx]);
+    }
+};
+
 window.selectDynamicUnit = function(unit) {
     selectedEnglishUnit = unit;
     const innerBody = document.getElementById('overlayInnerBody');
@@ -355,7 +366,7 @@ window.selectDynamicUnit = function(unit) {
         (r.grade === selectedEnglishGrade || r.grades.includes(selectedEnglishGrade)) &&
         String(r.level).trim() === unit
     );
-    if (currentMissionType === 'stage3') {
+    if (currentMissionType === 'stage2' || currentMissionType === 'stage3' || currentMissionType === 'voca_pool') {
         finalRecords = finalRecords.filter(isVocaOrIdiomRecord);
     } else if (currentMissionType === 'stage4') {
         finalRecords = finalRecords.filter(isSentenceRecord);
@@ -365,7 +376,7 @@ window.selectDynamicUnit = function(unit) {
 
 function getEnglishFilteredRecords() {
     let matchedRecords = allFetchedRecords;
-    if (currentMissionType === 'stage3') {
+    if (currentMissionType === 'stage2' || currentMissionType === 'stage3' || currentMissionType === 'voca_pool') {
         matchedRecords = matchedRecords.filter(isVocaOrIdiomRecord);
     } else if (currentMissionType === 'stage4') {
         matchedRecords = matchedRecords.filter(isSentenceRecord);
@@ -407,7 +418,7 @@ window.englishToggleOrder = function() {
 
 function startMissionWithFilteredData(records, innerBody) {
     let filtered = records;
-    if (currentMissionType === 'stage3') {
+    if (currentMissionType === 'stage2' || currentMissionType === 'stage3' || currentMissionType === 'voca_pool') {
         filtered = records.filter(isVocaOrIdiomRecord);
     } else if (currentMissionType === 'stage4') {
         filtered = records.filter(isSentenceRecord);

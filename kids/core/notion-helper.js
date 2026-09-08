@@ -92,7 +92,7 @@ function _matchesVocaRecord(record, options) {
 // ========================================================
 // ⚡ VOCA DB 당일(하루) 캐시 매니저 & 프리패치 엔진
 // ========================================================
-const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V3_";
+const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V5_";
 
 function _getVocaCacheKey(studentName, dbId) {
     const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
