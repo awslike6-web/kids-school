@@ -113,7 +113,7 @@ function fallbackWebSpeech(text, onEndCallback = null) {
 function isEnglishMissionInProgress() {
     const overlay = document.getElementById('missionOverlay');
     if (!overlay || overlay.style.display !== 'flex') return false;
-    if (['stage1', 'stage2', 'stage3', 'stage4'].includes(currentMissionType)) {
+    if (['voca_pool', 'stage1', 'stage2', 'stage3', 'stage4'].includes(currentMissionType)) {
         if (currentMissionType === 'stage3' && !stage3QuizMode) return false;
         return Array.isArray(activeSectionData) && activeSectionData.length > 0
             && activeQuizIdx < activeSectionData.length;
@@ -140,12 +140,13 @@ function openMissionView(type) {
     
     currentMissionType = type;
     if (type === 'stage3') stage3QuizMode = null;
-    if (['stage1', 'stage2', 'stage3', 'stage4'].includes(type) && typeof initQuizRewardSession === 'function') {
+    if (['voca_pool', 'stage1', 'stage2', 'stage3', 'stage4'].includes(type) && typeof initQuizRewardSession === 'function') {
         initQuizRewardSession(type);
     }
 
     let targetTitle = ""; let targetIcon = "";
     switch(type) {
+        case 'voca_pool': targetTitle = "[2단계] 단어 퐁당 (핵심 영단어)"; targetIcon = "🔤"; break;
         case 'stage1': targetTitle = "1단계: 알파벳 터치방"; targetIcon = "🔤"; break;
         case 'stage2': targetTitle = "2단계: 파닉스 듣기방"; targetIcon = "🎧"; break;
         case 'stage3': targetTitle = "3단계: 영단어/숙어방"; targetIcon = "📝"; break;
@@ -256,18 +257,21 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             if (records && records.length > 0) {
                 allFetchedRecords = records;
                 
-                // 3단계(영단어/숙어)와 4단계(영어 문장) 데이터 목적별 분리
+                // 2단계(단어 퐁당), 3단계(영단어/숙어), 4단계(영어 문장) 데이터 목적별 분리
                 let candidateRecords = records;
-                if (type === 'stage3') {
+                if (type === 'stage3' || type === 'voca_pool') {
                     candidateRecords = records.filter(isVocaOrIdiomRecord);
                 } else if (type === 'stage4') {
                     candidateRecords = records.filter(isSentenceRecord);
                 }
                 
-                // 학년/단원 필터 UI (사회방 이식)
+                // 학년/단원 필터 UI
                 const uniqueGrades = [...new Set(candidateRecords.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
                 if (uniqueGrades.length === 0) {
                     startMissionWithFilteredData(candidateRecords, innerBody);
+                } else if (uniqueGrades.length === 1) {
+                    // 💡 학년이 1개뿐인 경우 불필요한 학년 선택 과정을 건너뛰고 바로 단원 선택으로 직행
+                    selectDynamicGrade(uniqueGrades[0]);
                 } else {
                     renderDynamicGradeUI(uniqueGrades, innerBody);
                 }
@@ -315,7 +319,7 @@ window.selectDynamicGrade = function(grade) {
     selectedEnglishGrade = grade;
     const innerBody = document.getElementById('overlayInnerBody');
     let matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
-    if (currentMissionType === 'stage3') {
+    if (currentMissionType === 'stage3' || currentMissionType === 'voca_pool') {
         matchedRecords = matchedRecords.filter(isVocaOrIdiomRecord);
     } else if (currentMissionType === 'stage4') {
         matchedRecords = matchedRecords.filter(isSentenceRecord);
@@ -526,10 +530,159 @@ function renderSectionUI() {
         return;
     }
 
-    if (currentMissionType === 'stage1') renderStage1UI(container);
+    if (currentMissionType === 'voca_pool') renderVocaPoolUI(container);
+    else if (currentMissionType === 'stage1') renderStage1UI(container);
     else if (currentMissionType === 'stage2') renderStage2UI(container);
     else if (currentMissionType === 'stage3') renderStage3UI(container);
     else if (currentMissionType === 'stage4') renderStage4UI(container);
+}
+
+// ========================================================
+// 🔤 2단계: 단어 퐁당 (느린 학습자 민수 맞춤형 3지선다 콕 터치 & 소리 듣기)
+// ========================================================
+let vocaPoolQuizMode = 'meaning'; // 'meaning' (단어 보고 뜻 고르기) or 'listening' (소리 듣고 뜻 고르기)
+
+window.setVocaPoolMode = function(mode) {
+    vocaPoolQuizMode = mode;
+    renderSectionUI();
+};
+
+function renderVocaPoolUI(container) {
+    const currentItem = activeSectionData[activeQuizIdx];
+    const answerWord = currentItem.word.trim();
+    const answerMeaning = (currentItem.meaning || '').trim();
+
+    const imageUrl = currentItem.imageUrl || currentItem.image;
+    const imageHtml = imageUrl ? `
+        <div style="text-align:center; margin-bottom:15px;">
+            <img src="${imageUrl}" style="max-width:100%; max-height:180px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.15); object-fit:contain;" alt="${answerWord}">
+        </div>
+    ` : '';
+
+    // 3지선다 객관식 보기 생성 (정답 1개 + 오답 2개)
+    const choices = [answerMeaning];
+    const otherMeanings = allFetchedRecords
+        .filter(r => r.meaning && r.meaning.trim() !== answerMeaning)
+        .map(r => r.meaning.trim());
+    otherMeanings.sort(() => Math.random() - 0.5);
+    choices.push(otherMeanings[0] || "신나는 놀이");
+    choices.push(otherMeanings[1] || "맛있는 간식");
+    choices.sort(() => Math.random() - 0.5);
+
+    window.verifyVocaPoolChoice = function(selectedMeaning) {
+        if (selectedMeaning === answerMeaning) {
+            speakFairyTTS("정답이에요! 아주 잘 맞혔어요!");
+            if (typeof speakEnglish === 'function') speakEnglish(answerWord);
+            advanceEnglishQuizAfterCorrect(1000);
+        } else {
+            promptEnglishWrong(() => {});
+        }
+    };
+
+    // 상단 모드 전환 탭 (뜻 맞추기 vs 소리 듣고 맞추기)
+    const toggleHtml = `
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:16px;">
+            <button class="quiz-button" style="background:${vocaPoolQuizMode === 'meaning' ? 'var(--primary)' : '#e2e8f0'}; color:${vocaPoolQuizMode === 'meaning' ? '#fff' : '#475569'}; padding:7px 16px; border-radius:20px; font-size:0.9rem; font-family:'Jua',sans-serif;" onclick="setVocaPoolMode('meaning')">
+                🧐 뜻 맞추기 (단어 보기)
+            </button>
+            <button class="quiz-button" style="background:${vocaPoolQuizMode === 'listening' ? 'var(--primary)' : '#e2e8f0'}; color:${vocaPoolQuizMode === 'listening' ? '#fff' : '#475569'}; padding:7px 16px; border-radius:20px; font-size:0.9rem; font-family:'Jua',sans-serif;" onclick="setVocaPoolMode('listening')">
+                🎧 소리 듣고 맞추기 (귀 쫑긋)
+            </button>
+        </div>
+    `;
+
+    // 문제 본문 (meaning 모드: 큼직한 영단어 / listening 모드: 🎧 아이콘)
+    let displayContentHtml = '';
+    if (vocaPoolQuizMode === 'listening') {
+        displayContentHtml = `
+            <div style="font-size: 4.5rem; margin: 10px 0; cursor: pointer; animation: bounceObj 2s infinite;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">
+                🎧
+            </div>
+            <div style="font-size: 1.05rem; color: #64748b; margin-bottom: 20px;">
+                원어민 소리를 잘 듣고, 알맞은 뜻을 골라보세요!
+            </div>
+        `;
+    } else {
+        displayContentHtml = `
+            <div class="quiz-descr" style="font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 8px 0 14px;">
+                ${answerWord}
+            </div>
+            <div style="font-size: 1.05rem; color: #64748b; margin-bottom: 20px;">
+                이 단어의 알맞은 우리말 뜻을 골라보세요!
+            </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="quiz-card">
+            ${getEnglishOrderToggleHtml()}
+            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 12px;">단어 퐁당 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            ${toggleHtml}
+            ${imageHtml}
+            ${displayContentHtml}
+            
+            <div class="quiz-choices-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                ${choices.map(choice => `
+                     <button class="quiz-choice-btn" style="padding: 16px 20px; font-size: 1.2rem; text-align: center; border-radius: 16px; line-height: 1.4; transition: all 0.2s;" onclick="verifyVocaPoolChoice('${choice.replace(/'/g, "\\'")}')">
+                        ${choice}
+                     </button>
+                `).join('')}
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+                <button class="quiz-button" style="background:#64748b; color:white;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">
+                    🔊 원어민 소리 다시 듣기
+                </button>
+                <button class="quiz-button" style="background:var(--pink); color:white;" onclick="activeQuizIdx++; renderSectionUI();">
+                    건너뛰기 ⏩
+                </button>
+            </div>
+        </div>
+    `;
+
+    // 문제 진입 시 원어민 음성 자동 재생 (천천히 0.85배속)
+    setTimeout(() => {
+        if (typeof speakEnglish === 'function') speakEnglish(answerWord);
+    }, 400);
+}
+
+function getStage3ModeLabel(mode) {
+    const labels = {
+        copy: '따라 쓰기',
+        toEnglish: '영단어 맞추기',
+        toKorean: '한글 뜻 맞추기',
+        listening: '듣고 쓰기'
+    };
+    return labels[mode] || '단어 학습';
+}
+
+function showStage3ModeSelect() {
+    stage3QuizMode = null;
+    renderSectionUI();
+}
+
+function renderStage3ModeSelectUI(container) {
+    container.innerHTML = `
+        <div class="quiz-card">
+            <h3 style="color:var(--primary); margin-bottom:15px; font-family:'Jua',sans-serif; font-size:1.3rem;">
+                📝 학습 방식을 선택하세요!
+            </h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+                <button class="quiz-choice-btn" style="padding:15px;" onclick="stage3QuizMode='copy'; renderSectionUI();">
+                    ✏️ 따라 쓰기
+                </button>
+                <button class="quiz-choice-btn" style="padding:15px;" onclick="stage3QuizMode='toKorean'; renderSectionUI();">
+                    🇰🇷 한글 뜻 맞추기
+                </button>
+                <button class="quiz-choice-btn" style="padding:15px;" onclick="stage3QuizMode='toEnglish'; renderSectionUI();">
+                    🇺🇸 영단어 맞추기
+                </button>
+                <button class="quiz-choice-btn" style="padding:15px;" onclick="stage3QuizMode='listening'; renderSectionUI();">
+                    🎧 듣고 맞추기
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 // --------------------------------------------------------

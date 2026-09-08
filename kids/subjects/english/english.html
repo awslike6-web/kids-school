@@ -31,52 +31,51 @@
   <div class="main-header-card">
     <span class="banner-badge" id="goalWeekBadge">이번 주 학습 미션</span>
     <h1 id="englishTitle">민수의 영어 멀티버스 대기실</h1>
-    <p class="banner-goal-desc" id="englishGoalText">영어의 달인이 되어보자! 6단계 파이프라인 가동!</p>
+    <p class="banner-goal-desc" id="englishGoalText">영어의 달인이 되어보자! 느린 걸음 6단계 안심 사다리 가동!</p>
   </div>
 
   <div class="english-grid">
     
-    <!-- 📚 관문: 단원 동화 도서관 (스토리북) -->
+    <!-- 📚 1단계: 단원 동화 도서관 (스토리북) -->
     <div class="english-grid-btn" onclick="location.href='english_l7_storybook.html'" style="border: 2.5px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%);">
       <span class="english-btn-icon">📚</span>
       <div class="english-btn-title" style="color: #60a5fa;">[1단계] 단원 동화 도서관</div>
       <p class="english-btn-desc"><strong>[L7 그림 동화]</strong> 민수와 준우의 즐거운 주말 이야기! 원어민 발음과 쉬운 우리말 해석으로 편안하게 먼저 만나요.</p>
     </div>
 
-    <div class="english-grid-btn" onclick="openMissionView('stage1')">
+    <!-- 🔤 2단계: 단어 퐁당 (핵심 영단어) -->
+    <div class="english-grid-btn" onclick="openMissionView('voca_pool')" style="border: 2px solid #60a5fa;">
       <span class="english-btn-icon">🔤</span>
-      <div class="english-btn-title">1단계: 알파벳 터치방</div>
-      <p class="english-btn-desc">알파벳을 누르고 원어민 소리를 들어보며 친해져요!</p>
+      <div class="english-btn-title">[2단계] 단어 퐁당 (핵심 영단어)</div>
+      <p class="english-btn-desc">7단원 핵심 단어들을 큼직한 소리와 그림으로 즐겁게 콕 찍어 맞혀요!</p>
     </div>
 
+    <!-- 🎧 3단계: 소리 귀 뚫기 (리듬 쉐도잉) -->
     <div class="english-grid-btn" onclick="openMissionView('stage2')">
       <span class="english-btn-icon">🎧</span>
-      <div class="english-btn-title">2단계: 파닉스 듣기방</div>
-      <p class="english-btn-desc">코코 요정의 발음을 듣고 알맞은 단어를 골라보세요!</p>
+      <div class="english-btn-title">[3단계] 소리 귀 뚫기 (파닉스/듣기)</div>
+      <p class="english-btn-desc">원어민 발음을 잘 듣고 리듬감 있게 단어를 콕 찍어 귀를 틔워요!</p>
     </div>
 
-    <div class="english-grid-btn" onclick="openMissionView('stage3')">
-      <span class="english-btn-icon">📝</span>
-      <div class="english-btn-title">3단계: 영단어/숙어방</div>
-      <p class="english-btn-desc">4가지 방식(따라쓰기·한영·영한·듣기) 중 골라 단어/숙어를 연습해요!</p>
-    </div>
-
+    <!-- 🧩 4단계: 문장 조각 맞추기 (블록 놀이) -->
     <div class="english-grid-btn" onclick="openMissionView('stage4')">
-      <span class="english-btn-icon">💬</span>
-      <div class="english-btn-title">4단계: 영어 문장방</div>
-      <p class="english-btn-desc">단어 카드를 순서대로 배열해서 완벽한 영어 문장을 만들어요!</p>
+      <span class="english-btn-icon">🧩</span>
+      <div class="english-btn-title">[4단계] 문장 조각 맞추기 (블록 놀이)</div>
+      <p class="english-btn-desc">단어 블록 카드를 순서대로 터치해서 멋진 영어 문장을 완성해요!</p>
     </div>
 
+    <!-- 📖 5단계: 동화 장면 퀴즈 (짧은 독해) -->
     <div class="english-grid-btn" onclick="openMissionView('stage5')">
       <span class="english-btn-icon">📖</span>
-      <div class="english-btn-title">5단계: 짧은 문단 독해</div>
-      <p class="english-btn-desc">영어 문단 순서를 맞추고 연결어를 찾으며 독해력을 키워요!</p>
+      <div class="english-btn-title">[5단계] 동화 장면 퀴즈 (짧은 독해)</div>
+      <p class="english-btn-desc">재미있게 읽은 이야기 속 장면들을 떠올리며 가볍게 퀴즈를 풀어요!</p>
     </div>
 
+    <!-- 🗣️ 6단계: 코코와 한 줄 인사 (AI 토론) -->
     <div class="english-grid-btn" onclick="openMissionView('stage6')">
-      <span class="english-btn-icon">🗣️</span>
-      <div class="english-btn-title">6단계: 예비 중등 토론</div>
-      <p class="english-btn-desc">영어 지문을 읽고 코코 요정과 영어로 토론을 나누어 보아요!</p>
+      <span class="english-btn-icon">🧚‍♀️</span>
+      <div class="english-btn-title">[6단계] 코코와 한 줄 인사 (다정한 대화)</div>
+      <p class="english-btn-desc">오늘 배운 쉬운 영어 한마디로 요정 코코와 다정하게 이야기 나눠요!</p>
     </div>
 
     <div class="english-grid-btn" onclick="location.href='print_english.html'">
@@ -112,13 +111,13 @@
 
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
-<script src="../../core/notion-helper.js"></script>
+<script src="../../core/notion-helper.js?v=20260909_0625"></script>
 <script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/fairy-chatbot.js"></script>
 <script src="../../data/english-reading-data.js"></script>
 <script src="../../js/four_line_print.js"></script>
-<script src="../../js/english_common.js"></script>
+<script src="../../js/english_common.js?v=20260909_0625"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
