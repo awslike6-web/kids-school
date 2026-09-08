@@ -51,13 +51,42 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof loadCoreScripts === 'function') {
         loadCoreScripts(corePath, requiredCores, () => {
             console.log("🧚 [학습방 공통 코어 결합 완료] 코코 요정 탑재!");
+            if (typeof initRuntimeGeminiKey === 'function') initRuntimeGeminiKey();
             initRoom();
         });
     } else {
         console.warn("⚠️ loadCoreScripts 로드 실패, 비동기 폴백 직접 실행");
+        if (typeof initRuntimeGeminiKey === 'function') initRuntimeGeminiKey();
         initRoom();
     }
 });
+
+/**
+ * 🔑 런타임 Gemini API 키 안전 수령 엔진 (시크릿 디스펜서 패턴)
+ * 깃허브 공개 코드에 키를 노출하지 않고, 브라우저가 실행될 때 워커의 비공개 Secret에서 메모리(RAM)로만 키를 내려받습니다.
+ */
+async function initRuntimeGeminiKey() {
+    if (window.__RUNTIME_GEMINI_KEY) return window.__RUNTIME_GEMINI_KEY;
+    try {
+        const proxyUrl = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+        const res = await fetch(`${proxyUrl}/api/gemini-key`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.key) {
+                window.__RUNTIME_GEMINI_KEY = data.key;
+                if (typeof APP_CONFIG !== 'undefined') {
+                    APP_CONFIG.GEMINI_API_KEY = data.key;
+                }
+                console.log("🔑 [Gemini 런타임 보안 키 활성화] 한국 로컬 통신 준비 완료!");
+                return data.key;
+            }
+        }
+    } catch (e) {
+        console.warn("[RuntimeKey] 워커에서 런타임 키 수령 우회:", e);
+    }
+    return null;
+}
+window.initRuntimeGeminiKey = initRuntimeGeminiKey;
 
 // toggleFairyTtsSetting / updateTtsToggleUi → fairy-engine.js
 

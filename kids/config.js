@@ -16,8 +16,8 @@ var APP_CONFIG = {
     EDGE_TTS_VOICE: "ko-KR-SunHiNeural", // 선희(기본) | 인준(ko-KR-InJoonNeural)
     DEFAULT_ENGLISH_VOICE: "en-US-JennyNeural", // 🇺🇸 미국 원어민 선생님 톤 (Jenny)
 
-    // 🤖 Gemini AI 직접 연결 키 (워커 프록시 지역 차단 시 초고속 다이렉트 폴백)
-    GEMINI_API_KEY: (typeof atob !== 'undefined' ? atob("QVEuQWI4Uk42THNkaHRLRWFqZk0xU2w0UGpmQ19hUTdJTzR0RXdsWWdtbXJvakpKZFdtcHc=") : ""),
+    // 🤖 Gemini AI 프록시 보안 (클라우드플레어 워커 시크릿으로만 안전 관리, 브라우저 하드코딩 금지)
+    GEMINI_API_KEY: "",
 
     // 🎙️ [초고음질 요정 보이스] OpenAI TTS 세팅 (스튜디오 성우급 더빙)
     OPENAI_API_KEY: (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_API_KEY')) || "",

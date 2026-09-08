@@ -590,9 +590,13 @@ function popLastPendingUserTurn(history, roleKey = 'role', userValues = ['user']
 }
 
 async function callDirectGoogleGemini(payload) {
-    const apiKey = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY)
-        ? APP_CONFIG.GEMINI_API_KEY
-        : (localStorage.getItem('gemini_api_key') || (typeof atob !== 'undefined' ? atob("QVEuQWI4Uk42THNkaHRLRWFqZk0xU2w0UGpmQ19hUTdJTzR0RXdsWWdtbXJvakpKZFdtcHc=") : ""));
+    if (!window.__RUNTIME_GEMINI_KEY && typeof initRuntimeGeminiKey === 'function') {
+        await initRuntimeGeminiKey();
+    }
+    const apiKey = window.__RUNTIME_GEMINI_KEY
+        || (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY)
+        || localStorage.getItem('gemini_api_key')
+        || "";
 
     let geminiPayload = payload || {};
     if (payload && Array.isArray(payload.messages)) {
@@ -616,8 +620,8 @@ async function callDirectGoogleGemini(payload) {
         }
     }
 
-    // 🚀 구글 최신 플래그십 모델 (gemini-2.5-flash ➔ gemini-2.5-pro ➔ gemini-1.5-flash) 및 503 자동 재시도
-    const modelCandidates = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash"];
+    // 🚀 구글 최신 플래그십 모델 (gemini-3.8-flash ➔ gemini-3.6-flash ➔ gemini-2.0-flash) 및 503 자동 재시도
+    const modelCandidates = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-2.0-flash"];
     let lastErr = null;
 
     for (const modelName of modelCandidates) {
