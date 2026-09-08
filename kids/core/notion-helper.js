@@ -2203,9 +2203,9 @@ function showGeminiRetryWaitUI(uiOptions = {}) {
     if (typeof uiOptions.speakFn === 'function') {
         uiOptions.speakFn(message);
     } else if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(message);
+        speakFairyTTS(message, null, { skipPreset: true });
     } else if (typeof window.speakFairyTTS === 'function') {
-        window.speakFairyTTS(message);
+        window.speakFairyTTS(message, null, { skipPreset: true });
     }
 }
 

@@ -287,11 +287,16 @@ async function sendToFairy(presetText) {
 
         let aiResponse = "";
 
-        // APP_CONFIG에 GEMINI_API_KEY가 있으면 초고속 다이렉트 호출 우선 실행
-        if (typeof callDirectGoogleGemini === 'function' && typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY) {
+        // 런타임 키 수령 확인 및 초고속 다이렉트 호출 우선 실행 (한국 IP 통신)
+        if (typeof callDirectGoogleGemini === 'function') {
             try {
+                if (!window.__RUNTIME_GEMINI_KEY && typeof initRuntimeGeminiKey === 'function') {
+                    await initRuntimeGeminiKey();
+                }
                 const directResult = await callDirectGoogleGemini(geminiPayload);
-                aiResponse = directResult.text;
+                if (directResult && directResult.text) {
+                    aiResponse = directResult.text;
+                }
             } catch (e) {
                 console.warn('다이렉트 Gemini 실패, 프록시로 폴백:', e);
             }
@@ -328,7 +333,7 @@ async function sendToFairy(presetText) {
 
         const speakReply = () => {
             if (typeof window.speakFairyTTS === 'function') {
-                window.speakFairyTTS(aiResponse);
+                window.speakFairyTTS(aiResponse, null, { skipPreset: true });
             }
         };
         speakReply();
@@ -341,7 +346,7 @@ async function sendToFairy(presetText) {
             appendFairyMsg('fairy', GEMINI_FINAL_FAIL_MESSAGE || '다시 한 번만 얘기해줄래?');
         }
         if (typeof window.speakFairyTTS === 'function') {
-            window.speakFairyTTS(GEMINI_FINAL_FAIL_MESSAGE || '다시 한 번만 얘기해줄래?');
+            window.speakFairyTTS(GEMINI_FINAL_FAIL_MESSAGE || '다시 한 번만 얘기해줄래?', null, { skipPreset: true });
         }
     } finally {
         window.__fairySendLocked = false;

@@ -84,6 +84,8 @@ function getFairyAssetBaseUrl() {
 function resolveFairyPresetAudio(text) {
     if (!text) return null;
     const trimmed = String(text).trim();
+    // 💡 문장이 길거나(25자 초과) 줄바꿈이 포함된 AI 생성 문단은 프리셋 가로채기 방지 (실시간 TTS 낭독)
+    if (trimmed.length > 25 || trimmed.includes('\n')) return null;
     const baseUrl = getFairyAssetBaseUrl();
 
     // 1) 직접 프리셋 키 매핑
@@ -607,7 +609,7 @@ function cleanTextForTTS(rawText) {
 /**
  * 📢 요정 음성 메인 출력 함수 (1순위: OpenAI TTS ➔ 2순위: WebSpeech 폴백)
  */
-async function speakFairyTTS(text, onEndCallback = null) {
+async function speakFairyTTS(text, onEndCallback = null, options = {}) {
     stopFairyTTS(); // 새 발화 요청 시 이전 오디오/TTS 즉시 중단
 
     const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
@@ -622,11 +624,14 @@ async function speakFairyTTS(text, onEndCallback = null) {
         return;
     }
 
-    // 1. 🎵 사전 녹음된 Neural AI(선희) MP3 프리셋 및 스마트 키워드 매칭
-    const matchedPresetAudio = resolveFairyPresetAudio(trimmed);
-    if (matchedPresetAudio) {
-        playFairyPresetAudio(matchedPresetAudio, onEndCallback);
-        return;
+    // 1. 🎵 사전 녹음된 Neural AI(선희) MP3 프리셋 및 스마트 키워드 매칭 (챗봇/자유대화 skipPreset 우선 검사)
+    const isSkipPreset = (options && options.skipPreset) || trimmed.length > 25 || trimmed.includes('\n');
+    if (!isSkipPreset) {
+        const matchedPresetAudio = resolveFairyPresetAudio(trimmed);
+        if (matchedPresetAudio) {
+            playFairyPresetAudio(matchedPresetAudio, onEndCallback);
+            return;
+        }
     }
 
     const { text: cleanText, isQuestion } = cleanTextForTTS(text);
