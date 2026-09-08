@@ -415,6 +415,7 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                 renderReadingLobby(innerBody);
             }
         } else if (type === 'voca' || type === 'dictation') {
+            const subjectTag = type === 'voca' ? "국어" : "받아쓰기";
             let records = await fetchVocaFromNotion({ subject: subjectTag, filterByStudent: !isAdmin });
             if (type === 'voca' && records) {
                 // 국어 용어방: 순수 국어 어휘/단어만 학습 (받아쓰기 문장 제외)
