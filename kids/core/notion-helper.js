@@ -37,6 +37,7 @@ function parseVocaPage(page) {
     return {
         pageId: page.id,
         id: page.id,
+        createdTime: page.created_time || null,
         word: p["단어"]?.title?.[0]?.plain_text || p["이름"]?.title?.[0]?.plain_text || "",
         meaning: p["뜻풀이"]?.rich_text?.[0]?.plain_text || p["뜻"]?.rich_text?.[0]?.plain_text || "",
         detailContext: p["상세설명"]?.rich_text?.map(t => t.plain_text).join("") || "",
@@ -91,7 +92,7 @@ function _matchesVocaRecord(record, options) {
 // ========================================================
 // ⚡ VOCA DB 당일(하루) 캐시 매니저 & 프리패치 엔진
 // ========================================================
-const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_";
+const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V2_";
 
 function _getVocaCacheKey(studentName, dbId) {
     const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD

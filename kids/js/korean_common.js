@@ -15,7 +15,7 @@ let selectedKoreanGrade = "";
 let selectedKoreanUnit = "";
 let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
 let koreanVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
-let koreanDictationOrderType = 'shuffle'; // 'shuffle' or 'sequence'
+let koreanDictationOrderType = 'sequence'; // 'sequence'(1번~10번 교재순서 기본) or 'shuffle'
 let dictationAudioEl = null;
 
 window.setKoreanVocaMode = function(mode) {
@@ -495,6 +495,12 @@ function startMissionWithFilteredData(records, innerBody) {
         : (currentMissionType === 'voca' ? koreanVocaOrderType : 'shuffle');
     if (orderType === 'shuffle') {
         prepared.sort(() => Math.random() - 0.5);
+    } else {
+        // ➡️ 순서대로: 등록된 시간순(1번 -> 10번 교재 순서) 오름차순 정렬
+        prepared.sort((a, b) => {
+            if (a.createdTime && b.createdTime) return a.createdTime.localeCompare(b.createdTime);
+            return 0;
+        });
     }
     activeSectionData = prepared.slice(0, 10); // 최대 10문제
     if (activeSectionData.length === 0) {
