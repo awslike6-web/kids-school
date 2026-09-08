@@ -328,9 +328,6 @@ window.selectDynamicGrade = function(grade) {
     
     if (uniqueUnits.length === 0 || (uniqueUnits.length === 1 && uniqueUnits[0] === "기본 단원")) {
         startMissionWithFilteredData(matchedRecords, innerBody);
-    } else if (uniqueUnits.length === 1) {
-        // 단원이 1개만 있으면 번거로운 단원 선택 없이 바로 직행!
-        selectDynamicUnit(uniqueUnits[0]);
     } else {
         renderDynamicUnitUI(uniqueUnits, innerBody);
     }
@@ -343,7 +340,12 @@ function renderDynamicUnitUI(units, container) {
         <h3 style="color:var(--mint); margin-bottom:15px;">📚 [${selectedEnglishGrade}] 도전할 단원을 선택하세요!</h3>
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">`;
     units.forEach((u, idx) => {
-        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnitByIndex(${idx})">${u}</button>`;
+        let displayLabel = u;
+        if (/^L\d+$/i.test(u)) {
+            const num = u.replace(/\D/g, '');
+            displayLabel = `${u} (${num}단원)`;
+        }
+        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.15rem; font-weight:bold;" onclick="selectDynamicUnitByIndex(${idx})">${displayLabel}</button>`;
     });
     html += `</div>
         <div style="margin-top:20px;">
