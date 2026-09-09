@@ -79,27 +79,56 @@ function toggleProfileManually() {
     localStorage.setItem('currentUser', currentProfile);
     localStorage.setItem('currentUserName', currentUserName);
     localStorage.setItem('currentTheme', currentTheme);
+    localStorage.setItem('currentChild', currentProfile === 'daughter' ? 'minseo' : 'minsu');
     location.reload();
 }
 
 function initializeKoreanRoom() {
     console.log("🛠️ 국어방 초기화 엔진 가동...");
+    window.roomStartTime = window.roomStartTime || new Date(); // ⏱️ 학습 시작 시간 확정
+
+    // 💡 URL 파라미터(?user=minseo 등) 기반 활성 자녀 우선 동기화
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userParam = urlParams.get('user');
+        if (userParam === 'minseo' || userParam === 'daughter') {
+            currentProfile = 'daughter'; currentUserName = '민서'; currentTheme = 'theme--slime';
+            localStorage.setItem('currentUser', 'daughter');
+            localStorage.setItem('currentUserName', '민서');
+            localStorage.setItem('currentTheme', 'theme--slime');
+            localStorage.setItem('currentChild', 'minseo');
+        } else if (userParam === 'minsu' || userParam === 'son') {
+            currentProfile = 'son'; currentUserName = '민수'; currentTheme = 'theme--minecraft';
+            localStorage.setItem('currentUser', 'son');
+            localStorage.setItem('currentUserName', '민수');
+            localStorage.setItem('currentTheme', 'theme--minecraft');
+            localStorage.setItem('currentChild', 'minsu');
+        }
+    } catch (e) {
+        console.warn("URL 파라미터 파싱 오류:", e);
+    }
+
     const titleEl = document.getElementById('koreanTitle');
     const badgeEl = document.getElementById('adminBadgeTag');
     
     if (currentProfile === 'son') {
         document.body.className = "theme--minecraft";
         if (titleEl) titleEl.textContent = `${currentUserName}의 국어 멀티버스 대기실`;
-        if (badgeEl) { badgeEl.className = "admin-status-badge"; badgeEl.textContent = `🎮 [${currentUserName}] 네온 관제`; }
+        if (badgeEl) { badgeEl.className = "admin-status-badge"; badgeEl.textContent = `🎮 [${currentUserName}] 네온 관제 (클릭 시 전환)`; }
     } else {
         document.body.className = "theme--slime";
         if (titleEl) titleEl.textContent = `${currentUserName}의 국어 멀티버스 대기실`;
-        if (badgeEl) { badgeEl.className = "admin-status-badge korean--fairy"; badgeEl.textContent = `🎠 [${currentUserName}] 동화 모드`; }
+        if (badgeEl) { badgeEl.className = "admin-status-badge korean--fairy"; badgeEl.textContent = `🎠 [${currentUserName}] 동화 모드 (클릭 시 전환)`; }
+    }
+
+    if (badgeEl) {
+        badgeEl.style.cursor = "pointer";
+        badgeEl.title = "클릭하면 민수 ↔ 민서 프로필이 바로 전환됩니다!";
+        badgeEl.onclick = toggleProfileManually;
     }
 
     if (isAdmin) {
-        if (titleEl) titleEl.innerHTML = `<span style="color:var(--orange);">🛠️ 국어 관리자 시뮬레이터</span>`;
-        if (badgeEl) badgeEl.textContent = `🛠️ [${currentUserName} 검수용] 프리패스 가동`;
+        if (titleEl) titleEl.innerHTML = `<span style="color:var(--orange);">🛠️ [${currentUserName}] 국어방 (${currentProfile === 'daughter' ? '민서' : '민수'} 학습)</span>`;
     } else {
         if (typeof startLearning === 'function') startLearning("초등 국어 멀티버스");
     }
@@ -208,6 +237,9 @@ function closeMissionView(force) {
         }
         if (typeof finalizeQuizRewardSession === 'function') {
             await finalizeQuizRewardSession();
+        }
+        if ((currentMissionType === 'dictation' || currentMissionType === 'voca') && !isCurrentMissionLogged && activeQuizIdx > 0) {
+            await finalizeKoreanMissionImmediately();
         }
     };
 
@@ -746,12 +778,47 @@ function startMissionWithFilteredData(records, innerBody) {
             return 0;
         });
     }
+    isCurrentMissionLogged = false;
     activeSectionData = prepared.slice(0, 10); // 최대 10문제
     if (activeSectionData.length === 0) {
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
         return;
     }
     renderSectionUI();
+}
+
+let isCurrentMissionLogged = false;
+
+async function finalizeKoreanMissionImmediately() {
+    if (isCurrentMissionLogged) return;
+    isCurrentMissionLogged = true;
+
+    try {
+        const student = (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+        let subj = '국어';
+        if (currentMissionType === 'dictation') {
+            subj = selectedKoreanUnit ? `국어(받아쓰기_${selectedKoreanUnit})` : '국어(받아쓰기)';
+        } else if (currentMissionType === 'voca') {
+            subj = selectedKoreanUnit ? `국어(용어_${selectedKoreanUnit})` : '국어(용어방)';
+        }
+
+        const targetNotes = window.wrongNotes || [];
+        const errorReport = targetNotes.length > 0 ? targetNotes.map(q => {
+            if (q.wrongInput) return `${q.word || q.text} (오답: ${q.wrongInput})`;
+            return q.word || q.text || q;
+        }).join(' / ') : "오답 없음";
+
+        if (typeof sendStudyLogToNotion === 'function') {
+            await sendStudyLogToNotion({
+                childName: student,
+                subject: subj,
+                errorReport: errorReport
+            });
+            console.log(`🎉 [국어 미션 완수] 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
+        }
+    } catch (e) {
+        console.error("국어 미션 완수 일지 전송 오류:", e);
+    }
 }
 
 async function advanceKoreanQuizAfterCorrect(delayMs = 1000) {
@@ -787,11 +854,14 @@ function renderSectionUI() {
     container.innerHTML = "";
     
     if (activeQuizIdx >= activeSectionData.length) {
+        // ⚡ 10문제 완료 즉각 학습일지 자동 전송
+        finalizeKoreanMissionImmediately();
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
-                <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">모든 문제를 완료했습니다!</p>
-                <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>
+                <div style="font-size:3.2rem; margin-bottom:12px;">🎉</div>
+                <p style="font-size:1.5rem; font-weight:bold; color:var(--purple); margin-bottom:8px;">모든 문제를 멋지게 완료했습니다!</p>
+                <p style="font-size:1.05rem; color:#10b981; font-weight:bold; margin-bottom:24px;">✨ 학습일지에 안전하게 기록되었어요!</p>
+                <button class="back-to-lobby-btn" style="background:var(--pink); color:white; padding:12px 28px; font-size:1.1rem; cursor:pointer;" onclick="closeMissionView();">✅ 나가기</button>
             </div>`;
         return;
     }

@@ -710,7 +710,17 @@ window.roomStartTime = window.roomStartTime || new Date();
  * 매개변수를 생략해도 현재 환경(window 객체)을 바탕으로 자동으로 채웁니다.
  */
 async function sendStudyLogToNotion(options = {}) {
-    const childName = options.childName || (localStorage.getItem('currentUser') === 'son' ? '민수' : '민서');
+    let childName = options.childName;
+    if (!childName) {
+        const curUser = localStorage.getItem('currentUser');
+        const curChild = localStorage.getItem('currentChild');
+        const curUserName = localStorage.getItem('currentUserName');
+        if (curUser === 'daughter' || curChild === 'minseo' || curUserName === '민서' || (typeof currentProfile !== 'undefined' && currentProfile === 'daughter') || (window.currentProfile === 'daughter')) {
+            childName = '민서';
+        } else {
+            childName = '민수';
+        }
+    }
     let subject = options.subject || window.currentSubject;
     if (!subject && typeof detectSubjectFromContext === 'function') {
         subject = detectSubjectFromContext();
@@ -722,7 +732,7 @@ async function sendStudyLogToNotion(options = {}) {
         return false;
     }
 
-    const startTime = options.startTime || window.roomStartTime.toISOString();
+    const startTime = options.startTime || (window.roomStartTime ? window.roomStartTime.toISOString() : new Date().toISOString());
     const endTime = options.endTime || new Date().toISOString();
     
     // 소요시간 자동 연산
@@ -748,11 +758,14 @@ async function sendStudyLogToNotion(options = {}) {
 
     console.log(`🚀 [학습일지 배달 시작] 학생: ${childName} | 과목: ${subject}`);
 
-    // 💡 [핵심 방어막] 현재 로그인한 사람이 아빠나 엄마인지 실시간 체크!
-    const savedName = localStorage.getItem('currentUserName');
-    if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
-        console.log(`🛠️ [관리자 시뮬레이터 가동] ${savedName} 모드이므로 노션 서버 전송을 건너뛰고 프리패스합니다!`);
-        return true; 
+    // 💡 관리자(아빠/엄마) 계정으로 시뮬레이션 중이라도, 자녀 학습 완수 시에는 지정된 학생 이름으로 정상 전송합니다!
+    // (단, options.skipIfAdmin === true를 명시적으로 요청한 경우에만 스킵)
+    if (options.skipIfAdmin === true) {
+        const savedName = localStorage.getItem('currentUserName');
+        if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
+            console.log(`🛠️ [관리자 시뮬레이터 가동] ${savedName} 모드이므로 노션 서버 전송을 건너뜁니다.`);
+            return true; 
+        }
     }
 
     try {
