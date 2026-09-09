@@ -3,6 +3,50 @@
 
 const ENGLISH_READING_DATABASE = [
     {
+        id: "eng_read_11",
+        title: "Minsu Explores the Village (8단원)",
+        fullText: "Minsu arrived at a new village. He wanted to read magic books, but he did not know the way. Minsu met Junwoo and asked, \"Excuse me. Where is the library?\"\nJunwoo smiled kindly and pointed down the street. Junwoo said, \"Go straight and turn right at the corner. It is next to the sweet bakery!\"\nMinsu walked straight and turned right. And then, he saw a big wooden library on his left. He was so happy to find it!\nInside the library, Minsu opened a shiny book and found a blue diamond in the treasure box. He was proud of exploring the village by himself.",
+        translation: "민수는 새로운 마을에 도착했습니다. 신기한 마법 책을 읽고 싶었지만 길을 알지 못했습니다. 민수는 준우를 만나 물었습니다. \"실례지만, 도서관이 어디에 있니?\"\n준우는 다정하게 미소 지으며 길을 가리켰습니다. 준우가 말했습니다. \"앞으로 곧장 가서 코너에서 오른쪽으로 돌아. 달콤한 빵집 바로 옆에 있단다!\"\n민수는 똑바로 걸어가서 오른쪽으로 돌았습니다. 그리고 나서, 민수는 왼쪽에 있는 커다란 나무 도서관을 발견했습니다. 도서관을 찾아서 정말 기뻤습니다!\n도서관 안에서 민수는 반짝이는 책을 펼쳤고 보물 상자 안에서 파란 다이아몬드를 발견했습니다. 민수는 스스로 마을을 탐험해 낸 자신이 정말 자랑스러웠습니다.",
+        paragraphs: [
+            { id: "p1", label: "A", text: "Minsu arrived at a new village. He met Junwoo and asked, \"Excuse me. Where is the library?\"" },
+            { id: "p2", label: "B", text: "Junwoo smiled and said, \"Go straight and turn right at the corner. It is next to the bakery!\"" },
+            { id: "p3", label: "C", text: "Minsu walked straight and turned right. And then, he saw the library on his left." },
+            { id: "p4", label: "D", text: "Inside the library, Minsu opened a book and found a shiny blue diamond in the treasure box!" }
+        ],
+        correctOrder: ["p1", "p2", "p3", "p4"],
+        conjunctions: [
+            {
+                sentenceBefore: "Minsu walked straight and turned right.",
+                sentenceAfter: "He saw the library on his left.",
+                options: ["And then", "However", "Because"],
+                answer: "And then",
+                commentary: "앞으로 똑바로 가서 오른쪽으로 돈 뒤, '그리고 나서(And then)' 도서관을 보았다는 자연스러운 순서의 연결이에요."
+            }
+        ],
+        themeQuiz: {
+            question: "What is the main topic of this story?",
+            options: [
+                "Minsu asking for directions and finding the village library.",
+                "How to bake sweet bread in the village bakery.",
+                "Why playing games alone is always boring."
+            ],
+            answerIndex: 0,
+            commentary: "이 글은 민수가 준우에게 도서관 가는 길을 물어보고, 친절한 길 안내를 받아 도서관을 찾아가는 이야기입니다."
+        },
+        chatbotSystemPrompt: `
+            너는 'Minsu Explores the Village' 이야기를 함께 읽고 아이와 대화하는 다정한 AI 영어 요정 코코야.
+            민수는 느린 학습자(약한 경계선 지능)의 사랑스러운 아이이므로, 어려운 문법 용어를 쓰지 말고 아주 쉽고 따뜻하게 격려해줘.
+            
+            다음 내용들을 아이와 함께 자연스럽게 알아가거나 칭찬해줘:
+            1. 위치와 길 안내를 나타내는 친숙한 표현들 (Where is the library?, Go straight, Turn right, next to the bakery)
+            2. "Where do you want to go in the village?" 질문에 대해 아이가 "Library!" 또는 "Bakery!"처럼 아주 쉬운 한 단어로 대답할 수 있게 이끌어주기
+            3. 민수가 찾은 보물(blue diamond)에 대해 함께 기뻐해주기 (예: "와! 반짝이는 다이아몬드를 찾았네요! 최고예요!")
+            
+            말투는 언제나 상냥한 동화나라 요정처럼 말하고, 문법이 서툴러도 무조건 먼저 칭찬하고 올바른 표현을 부드럽게 들려줘.
+            아이가 단어 하나라도 영어로 말하거나 대화에 참여했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
+        `
+    },
+    {
         id: "eng_read_10",
         title: "Minsu and Junwoo's Weekend (7단원)",
         fullText: "On Monday morning, Junwoo met Minsu at school. Junwoo asked, \"Hi, Minsu! What did you do last weekend?\" Minsu smiled brightly and answered, \"I went camping with my family! We set up a tent and made a warm campfire. In the evening, we ate delicious roasted chicken. And then, we looked up at the twinkling stars together. It was a wonderful night!\"\nJunwoo said, \"That sounds so fun! What else did you do?\" Minsu replied, \"I played baseball with my dad and took many pictures. What about you, Junwoo? Did you have a good time?\"\nJunwoo smiled and said, \"Yes! I visited my grandparents with my little brother. We played with toy cars and ate sweet fruits. My grandma baked cookies for us. We had a great weekend, too!\"\nBoth boys shared happy memories of their weekend. Talking with a good friend made Monday morning even brighter.",

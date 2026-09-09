@@ -127,6 +127,80 @@ function isEnglishMissionInProgress() {
     return false;
 }
 
+// ========================================================
+// 📚 [1단계] 단원 동화 도서관 서가 모달 (L7 & L8 동화 선택)
+// ========================================================
+window.openEnglishLibraryModal = function() {
+    const overlay = document.getElementById('missionOverlay');
+    const headerTitle = document.getElementById('overlayHeaderTitle');
+    const headerIcon = document.getElementById('overlayHeaderIcon');
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (!overlay || !innerBody) return;
+
+    overlay.style.display = "flex";
+    currentMissionType = "library_modal";
+    stopFairyTTS();
+
+    if (headerTitle) headerTitle.textContent = "📚 단원 동화 도서관 서가";
+    if (headerIcon) headerIcon.textContent = "📚";
+
+    const isMinecraft = (currentProfile === 'son');
+    const books = [
+        {
+            id: "l8",
+            badge: "🧭 8단원 최신 동화",
+            title: "Minsu Explores the Village",
+            koreanTitle: "민수의 신나는 마을 탐험",
+            desc: "초등 영어 5-2 8단원 (위치 묻고 길 안내하기)",
+            keyExpr: "Where is the library? / Go straight and turn right.",
+            url: "english_l8_storybook.html",
+            color: "#10b981",
+            themeTag: isMinecraft ? "🟩 마인크래프트 마을" : "🟢 슬라임 파크"
+        },
+        {
+            id: "l7",
+            badge: "⛺ 7단원 그림 동화",
+            title: "Minsu and Junwoo's Weekend",
+            koreanTitle: "민수와 준우의 즐거운 주말",
+            desc: "초등 영어 5-2 7단원 (지난 일 묻고 답하기)",
+            keyExpr: "What did you do last weekend? / I went camping.",
+            url: "english_l7_storybook.html",
+            color: "#3b82f6",
+            themeTag: isMinecraft ? "🏕️ 캠핑과 별빛 밤" : "✨ 주말 나들이"
+        }
+    ];
+
+    innerBody.innerHTML = `
+        <div style="text-align:center; padding:10px 0 20px;">
+            <h3 style="color:var(--primary); margin-bottom:8px; font-family:'Jua', sans-serif; font-size:1.35rem;">
+                📖 읽고 싶은 단원 동화를 선택하세요!
+            </h3>
+            <p style="font-size:0.95rem; color:#666; margin-bottom:20px;">
+                0.85배속의 편안한 원어민 음성과 쉬운 우리말 해설로 재미있게 읽어요.
+            </p>
+            <div style="display:grid; grid-template-columns:1fr; gap:16px; max-width:540px; margin:0 auto;">
+                ${books.map(b => `
+                    <div onclick="location.href='${b.url}'" style="background:#fff; border:2.5px solid ${b.color}; border-radius:16px; padding:18px 20px; cursor:pointer; text-align:left; box-shadow:0 4px 12px rgba(0,0,0,0.06); transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="background:${b.color}; color:#fff; font-size:0.82rem; font-weight:bold; padding:4px 10px; border-radius:12px;">${b.badge}</span>
+                            <span style="font-size:0.82rem; color:#888; font-weight:bold;">${b.themeTag}</span>
+                        </div>
+                        <div style="font-size:1.2rem; font-weight:bold; color:#1e293b; margin-bottom:4px; font-family:'Jua', sans-serif;">
+                            ${b.title}
+                        </div>
+                        <div style="font-size:0.95rem; color:#475569; margin-bottom:10px;">
+                            "${b.koreanTitle}" · <span style="color:#64748b; font-size:0.88rem;">${b.desc}</span>
+                        </div>
+                        <div style="background:#f8fafc; border-left:3px solid ${b.color}; padding:6px 12px; font-size:0.85rem; color:#334155; border-radius:0 8px 8px 0;">
+                            🎯 <b>핵심 표현:</b> ${b.keyExpr}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+};
+
 function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const headerTitle = document.getElementById('overlayHeaderTitle');
@@ -1335,12 +1409,20 @@ window.renderReadingStage = function() {
             dispatchReadingClearBonus('stage5', activePassage?.id, activePassage?.title);
         }
         // 완료 및 보상
+        const rewardCurrencyLabel = (currentProfile === 'son') ? '💎 다이아몬드 +30개' : '🍬 하리보 젤리 +30개';
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
-                <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                <p style="font-size:1.4rem; color:var(--mint); margin-bottom:10px;">독해 미션을 완벽하게 클리어했습니다!</p>
-                <p style="font-size:1rem; color:#666; margin-bottom:20px;">Stage rewards 5+5+5 + clear bonus 15 = 30 points total!</p>
-                <button class="quiz-button" style="background:var(--sky-blue); color:white; border:none;" onclick="closeMissionView();">🎁 보상 확인하고 나가기</button>
+                <div style="font-size:3.5rem; margin-bottom:15px;">🎉</div>
+                <p style="font-size:1.45rem; color:var(--mint); font-weight:bold; margin-bottom:10px;">독해 미션을 완벽하게 클리어했습니다!</p>
+                <div style="background: rgba(255,255,255,0.9); border-radius: 16px; padding: 15px 24px; display: inline-block; margin-bottom: 22px; border: 2px solid var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                    <div style="font-size:1.4rem; font-weight:bold; color:var(--primary); margin-bottom:4px; font-family:'Jua', sans-serif;">
+                        ${rewardCurrencyLabel} 획득!
+                    </div>
+                    <div style="font-size:0.95rem; color:#64748b;">
+                        (스테이지 보상 15 + 클리어 보너스 15 = 총 30)
+                    </div>
+                </div><br>
+                <button class="quiz-button" style="background:var(--sky-blue); color:white; border:none; padding:12px 28px; font-size:1.1rem; border-radius:12px; font-family:'Jua', sans-serif; cursor:pointer;" onclick="closeMissionView();">🎁 보상 챙기고 나가기</button>
             </div>
         `;
     }

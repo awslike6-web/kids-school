@@ -18,9 +18,9 @@
   <div class="top-action-bar">
     <a href="../../../lobby.html" class="back-to-lobby-btn" id="exitLobbyBtn">🏡 대형 로비로 돌아가기</a>
     <div style="display: flex; gap: 10px; align-items: center;">
-      <a href="english_l7_storybook.html" class="back-to-lobby-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif; text-decoration: none;">
+      <button class="back-to-lobby-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-size: 0.95rem; font-family:'Jua', sans-serif;" onclick="openEnglishLibraryModal()">
         📚 단원 동화 도서관
-      </a>
+      </button>
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
@@ -37,17 +37,17 @@
   <div class="english-grid">
     
     <!-- 📚 1단계: 단원 동화 도서관 (스토리북) -->
-    <div class="english-grid-btn" onclick="location.href='english_l7_storybook.html'" style="border: 2.5px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%);">
+    <div class="english-grid-btn" onclick="openEnglishLibraryModal()" style="border: 2.5px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%); cursor: pointer;">
       <span class="english-btn-icon">📚</span>
       <div class="english-btn-title" style="color: #60a5fa;">[1단계] 단원 동화 도서관</div>
-      <p class="english-btn-desc"><strong>[L7 그림 동화]</strong> 민수와 준우의 즐거운 주말 이야기! 원어민 발음과 쉬운 우리말 해석으로 편안하게 먼저 만나요.</p>
+      <p class="english-btn-desc"><strong>[L7 & L8 그림 동화]</strong> 민수의 주말 이야기와 마을 탐험! 원어민 발음과 쉬운 우리말 해석으로 편안하게 먼저 만나요.</p>
     </div>
 
     <!-- 🔤 2단계: 단어 퐁당 (핵심 영단어) -->
     <div class="english-grid-btn" onclick="openMissionView('voca_pool')" style="border: 2px solid #60a5fa;">
       <span class="english-btn-icon">🔤</span>
       <div class="english-btn-title">[2단계] 단어 퐁당 (핵심 영단어)</div>
-      <p class="english-btn-desc">7단원 핵심 단어들을 큼직한 소리와 그림으로 즐겁게 콕 찍어 맞혀요!</p>
+      <p class="english-btn-desc">단원별 핵심 단어들을 큼직한 소리와 그림으로 즐겁게 콕 찍어 맞혀요!</p>
     </div>
 
     <!-- 🎧 3단계: 소리 귀 뚫기 (리듬 쉐도잉) -->
