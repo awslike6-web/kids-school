@@ -55,6 +55,31 @@ body {
   background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
+/* 🌐 이중 언어 선택 토글 (영어 듣기 / 한국어 듣기) */
+.lang-toggle-group {
+  display: inline-flex; background: #1e293b; padding: 3px; border-radius: 12px;
+  border: 1px solid #475569; gap: 2px; align-items: center;
+}
+.lang-toggle-btn {
+  padding: 5px 12px; border-radius: 9px; border: none; font-family: 'Jua', sans-serif;
+  font-size: 0.88rem; color: #94a3b8; background: transparent; cursor: pointer;
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px;
+}
+.lang-toggle-btn.active {
+  background: var(--primary); color: white; font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.lang-btn-mini {
+  padding: 5px 12px; border-radius: 10px; border: 1px solid #475569;
+  font-family: 'Jua', sans-serif; font-size: 0.82rem; background: #1e293b;
+  color: #cbd5e1; cursor: pointer; transition: all 0.2s; display: inline-flex;
+  align-items: center; gap: 4px;
+}
+.lang-btn-mini:hover, .lang-btn-mini.playing {
+  background: var(--primary); color: white; border-color: var(--primary);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
 /* ========================================================
    1. 📖 책 넘김 모드 (E-Book Spread Mode)
    ======================================================== */

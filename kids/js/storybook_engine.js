@@ -9,6 +9,12 @@
   let isContinuousPlaying = false;
   let webtoonPlayIdx = 0;
   let audio = null;
+  let currentLang = 'eng'; // 'eng' or 'kor'
+
+  function isBilingualBook() {
+    if (STORY_BOOK && (STORY_BOOK.bilingual || STORY_BOOK.isBilingual)) return true;
+    return STORY_DATA.some(p => !!p.korAudio);
+  }
 
   function initStorybook(bookData) {
     if (!bookData) {
@@ -54,9 +60,57 @@
       document.body.appendChild(audio);
     }
 
+    // 5. 이중 언어 선택 UI 초기화 (영어 도서 지원)
+    initLanguageToggleUi();
+
     bindAudioEvents();
     renderEbook();
   }
+
+  function initLanguageToggleUi() {
+    const existing = document.getElementById('langToggleGroup');
+    if (existing) existing.remove();
+
+    if (!isBilingualBook()) return;
+
+    const topBar = document.querySelector('.top-bar');
+    const viewTabs = document.querySelector('.view-mode-tabs');
+    if (!topBar || !viewTabs) return;
+
+    const langGroup = document.createElement('div');
+    langGroup.id = 'langToggleGroup';
+    langGroup.className = 'lang-toggle-group';
+    langGroup.innerHTML = `
+      <button id="btnLangEng" class="lang-toggle-btn ${currentLang === 'eng' ? 'active' : ''}" onclick="window.setBookLang('eng')">
+        🇺🇸 영어로 듣기
+      </button>
+      <button id="btnLangKor" class="lang-toggle-btn ${currentLang === 'kor' ? 'active' : ''}" onclick="window.setBookLang('kor')">
+        🇰🇷 한국어로 듣기
+      </button>
+    `;
+    topBar.insertBefore(langGroup, viewTabs);
+  }
+
+  window.setBookLang = function(lang) {
+    currentLang = lang;
+    if (audio) audio.pause();
+
+    const btnEng = document.getElementById('btnLangEng');
+    const btnKor = document.getElementById('btnLangKor');
+    if (btnEng && btnKor) {
+      if (lang === 'eng') {
+        btnEng.classList.add('active');
+        btnKor.classList.remove('active');
+      } else {
+        btnKor.classList.add('active');
+        btnEng.classList.remove('active');
+      }
+    }
+
+    if (currentMode === 'ebook') {
+      renderEbook();
+    }
+  };
 
   function adjustColorBrightness(hex, percent) {
     let num = parseInt(hex.replace('#', ''), 16);
@@ -132,10 +186,21 @@
     }
   }
 
+  function resolveAudioPath(item, lang) {
+    const l = lang || currentLang;
+    if (l === 'kor') {
+      return item.korAudio || item.audio || '';
+    }
+    return item.engAudio || item.audio || '';
+  }
+
   function resolveImagePath(item, isWebtoon) {
     const base = (STORY_BOOK && STORY_BOOK.imgBase) || '';
     if (isWebtoon && item.illImg) {
       return `${base}${item.illImg}`;
+    }
+    if (!isWebtoon && currentLang === 'kor' && item.korSpreadImg) {
+      return `${base}${item.korSpreadImg}`;
     }
     if (item.spreadImg) {
       return `${base}${item.spreadImg}`;
@@ -159,7 +224,8 @@
 
     const indicator = document.getElementById('pageIndicator');
     if (indicator) {
-      indicator.textContent = `${item.page} / ${STORY_DATA.length} 쪽`;
+      const langNotice = isBilingualBook() ? (currentLang === 'eng' ? ' [🇺🇸 영어]' : ' [🇰🇷 한국어]') : '';
+      indicator.textContent = `${item.page} / ${STORY_DATA.length} 쪽${langNotice}`;
     }
 
     const prevBtn = document.getElementById('prevBtn');
@@ -170,15 +236,16 @@
       nextBtn.textContent = (currentPageIndex === STORY_DATA.length - 1) ? '🎉 완독 축하 & 보상!' : '다음 장 ▶';
     }
 
+    const currentAudioSrc = resolveAudioPath(item);
     if (audio) {
-      audio.src = item.audio || '';
+      audio.src = currentAudioSrc || '';
       audio.pause();
     }
     updateEbookAudioUI(false);
 
     const autoPlayEl = document.getElementById('autoPlayCheckbox');
     const autoPlay = autoPlayEl ? autoPlayEl.checked : false;
-    if (autoPlay && item.audio) {
+    if (autoPlay && currentAudioSrc) {
       setTimeout(() => {
         if (audio && currentMode === 'ebook') {
           audio.play().then(() => updateEbookAudioUI(true)).catch(() => updateEbookAudioUI(false));
@@ -213,6 +280,7 @@
     const icon = document.getElementById('playIcon');
     const text = document.getElementById('playText');
     if (!btn) return;
+    const defaultPlayLabel = (isBilingualBook() && currentLang === 'kor') ? '한국어 구연 듣기' : '동화 듣기';
     if (isPlaying) {
       btn.classList.add('playing');
       if (icon) icon.textContent = '⏸️';
@@ -220,7 +288,7 @@
     } else {
       btn.classList.remove('playing');
       if (icon) icon.textContent = '🔊';
-      if (text) text.textContent = '동화 듣기';
+      if (text) text.textContent = defaultPlayLabel;
     }
   }
 
@@ -228,18 +296,35 @@
     const container = document.getElementById('webtoonCardsList');
     if (!container) return;
     const version = STORY_BOOK.version || '20260904';
+    const isBilingual = isBilingualBook();
 
     const cardsHtml = STORY_DATA.map((item, idx) => {
       const imgSrc = resolveImagePath(item, true);
+      let audioBtnsHtml = '';
+      if (isBilingual) {
+        audioBtnsHtml = `
+          <div style="display:flex; gap:6px;">
+            <button class="lang-btn-mini" id="btnWebtoonEng_${idx}" onclick="window.playWebtoonCardAudio(${idx}, 'eng')">
+              🇺🇸 영어 듣기
+            </button>
+            <button class="lang-btn-mini" id="btnWebtoonKor_${idx}" onclick="window.playWebtoonCardAudio(${idx}, 'kor')">
+              🇰🇷 한국어
+            </button>
+          </div>
+        `;
+      } else if (item.audio) {
+        audioBtnsHtml = `
+          <button class="btn-card-read" onclick="window.playWebtoonCardAudio(${idx})">
+            🔊 이 장면 듣기
+          </button>
+        `;
+      }
+
       return `
         <div class="webtoon-card" id="webtoonCard_${idx}">
           <div class="webtoon-header">
             <div class="webtoon-tag">${item.tag || `${item.page}장`}</div>
-            ${item.audio ? `
-              <button class="btn-card-read" onclick="window.playWebtoonCardAudio(${idx})">
-                🔊 이 장면 듣기
-              </button>
-            ` : ''}
+            ${audioBtnsHtml}
           </div>
           ${imgSrc ? `<img class="webtoon-img" src="${imgSrc}?v=${version}" alt="${item.tag || ''}" loading="lazy">` : ''}
           <div class="webtoon-body">
@@ -263,14 +348,13 @@
     container.innerHTML = cardsHtml + finishCardHtml;
   }
 
-
-  function playWebtoonCardAudio(idx) {
+  window.playWebtoonCardAudio = function(idx, lang) {
     isContinuousPlaying = false;
     updateContinuousUI(false);
-    playWebtoonIndex(idx);
-  }
+    playWebtoonIndex(idx, lang);
+  };
 
-  function playWebtoonIndex(idx) {
+  function playWebtoonIndex(idx, lang) {
     webtoonPlayIdx = idx;
     const item = STORY_DATA[idx];
     if (!item) return;
@@ -281,10 +365,25 @@
       card.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#ec4899';
     }
 
-    if (audio && item.audio) {
-      audio.src = item.audio;
+    resetAllWebtoonCardAudioButtons();
+    const playLang = lang || currentLang;
+    const targetBtn = document.getElementById(playLang === 'kor' ? `btnWebtoonKor_${idx}` : `btnWebtoonEng_${idx}`);
+    if (targetBtn) targetBtn.classList.add('playing');
+
+    const audioSrc = resolveAudioPath(item, playLang);
+    if (audio && audioSrc) {
+      audio.src = audioSrc;
       audio.play().catch(e => console.log('[Storybook Audio error]', e));
     }
+  }
+
+  function resetAllWebtoonCardAudioButtons() {
+    STORY_DATA.forEach((_, idx) => {
+      const bEng = document.getElementById(`btnWebtoonEng_${idx}`);
+      const bKor = document.getElementById(`btnWebtoonKor_${idx}`);
+      if (bEng) bEng.classList.remove('playing');
+      if (bKor) bKor.classList.remove('playing');
+    });
   }
 
   function toggleContinuousPlay() {

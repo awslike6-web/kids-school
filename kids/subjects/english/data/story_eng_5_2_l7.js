@@ -9,14 +9,18 @@ window.STORY_BOOK = {
   themeColorDark: "#2563eb",
   backUrl: "english.html",
   backLabel: "🚪 영어방 대기실",
-  version: "20260909_l7",
+  version: "20260909_l7_v2",
+  bilingual: true,
   imgBase: "images/storybook/l7/",
   pages: [
     {
       page: 1,
       tag: "🌟 표지 : 민수와 준우의 주말 이야기",
       spreadImg: "raw_page_1.png",
+      korSpreadImg: "raw_page_1.png",
       illImg: "eng_l7_ill_p1_cover.png",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p1.mp3",
       audio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8; text-align: center; padding: 10px 0;">
@@ -38,7 +42,10 @@ window.STORY_BOOK = {
       page: 2,
       tag: "🏫 1장 : 월요일 아침 학교에서",
       spreadImg: "eng_l7_spread_p1.png",
+      korSpreadImg: "kor_l7_spread_p1.png",
       illImg: "eng_l7_ill_p1.png",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p1.mp3",
       audio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
@@ -79,7 +86,10 @@ window.STORY_BOOK = {
       page: 3,
       tag: "🏕️ 2장 : 할아버지와 숲속 캠핑",
       spreadImg: "eng_l7_spread_p2.png",
+      korSpreadImg: "kor_l7_spread_p2.png",
       illImg: "eng_l7_ill_p2.png",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p2.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p2.mp3",
       audio: "../../assets/audio/storybook/english_l7/eng_l7_p2.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
@@ -120,7 +130,10 @@ window.STORY_BOOK = {
       page: 4,
       tag: "📸 3장 : 신나는 사진 찍기",
       spreadImg: "eng_l7_spread_p3.png",
+      korSpreadImg: "kor_l7_spread_p3.png",
       illImg: "eng_l7_ill_p3.png",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p3.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p3.mp3",
       audio: "../../assets/audio/storybook/english_l7/eng_l7_p3.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
@@ -161,7 +174,10 @@ window.STORY_BOOK = {
       page: 5,
       tag: "🍗 4장 : 맛있는 치킨 먹기",
       spreadImg: "eng_l7_spread_p4.png",
+      korSpreadImg: "kor_l7_spread_p4.png",
       illImg: "eng_l7_ill_p4.png",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p4.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p4.mp3",
       audio: "../../assets/audio/storybook/english_l7/eng_l7_p4.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
@@ -202,7 +218,10 @@ window.STORY_BOOK = {
       page: 6,
       tag: "⚾ 5장 : 장난감 차와 야구 놀이",
       spreadImg: "eng_l7_spread_p5.png",
+      korSpreadImg: "kor_l7_spread_p5.png",
       illImg: "eng_l7_ill_p5.png",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p5.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p5.mp3",
       audio: "../../assets/audio/storybook/english_l7/eng_l7_p5.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">

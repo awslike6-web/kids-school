@@ -9,27 +9,41 @@ window.STORY_BOOK = {
   themeColorDark: "#059669",
   backUrl: "english.html",
   backLabel: "🚪 영어방 대기실",
-  version: "20260909_l8",
+  version: "20260909_l8_v2",
+  bilingual: true,
   imgBase: "images/storybook/l8/",
   pages: [
     {
       page: 1,
       tag: "🌟 표지 : 민수의 신나는 마을 탐험",
       spreadImg: "raw_page_1.png",
+      korSpreadImg: "kor_l8_spread_p1.png",
       illImg: "eng_l8_ill_p1_cover.png",
+      engAudio: "../../assets/audio/storybook/english_l8/eng_l8_p1.mp3",
+      korAudio: "../../assets/audio/storybook/english_l8/kor_l8_p1.mp3",
       audio: "../../assets/audio/storybook/english_l8/eng_l8_p1.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8; text-align: center; padding: 10px 0;">
-          <div style="font-size: 1.4rem; font-weight: bold; color: #059669; margin-bottom: 8px;">
+          <div style="font-size: 1.45rem; font-weight: bold; color: #059669; margin-bottom: 6px;">
             Minsu Explores the Village
           </div>
-          <div style="font-size: 1.15rem; font-weight: bold; color: #1e293b; margin-bottom: 12px;">
+          <div style="font-size: 1.15rem; font-weight: bold; color: #1e293b; margin-bottom: 14px;">
             "민수의 신나는 마인크래프트 마을 탐험"
           </div>
-          <p style="font-size: 1rem; color: #475569; word-break: keep-all; margin: 0 auto; max-width: 480px;">
-            초등학교 5학년 2학기 영어 8단원 동화에 온 것을 환영해요! 🧭✨<br>
-            민수가 새로운 마인크래프트 마을에 도착했어요. 멋진 마법 책이 있는 도서관을 찾고 있답니다. 민수와 함께 길을 찾아 마을을 탐험해 볼까요? 🎧
-          </p>
+          <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 14px; text-align: left; border: 1px solid #e2e8f0;">
+            <div style="font-size: 1.1rem; font-weight: bold; color: #059669; margin-bottom: 4px;">
+              Welcome to Lesson 8 storybook!
+            </div>
+            <div style="font-size: 0.98rem; color: #475569; margin-bottom: 10px;">
+              초등학교 5학년 2학기 영어 8단원 동화에 온 것을 환영해요!
+            </div>
+            <div style="font-size: 1.1rem; font-weight: bold; color: #059669; margin-bottom: 4px;">
+              Let's explore the village and find the library together!
+            </div>
+            <div style="font-size: 0.98rem; color: #475569;">
+              민수와 함께 길을 찾아 마을을 신나게 탐험해 볼까요?
+            </div>
+          </div>
         </div>
         <div class="webtoon-ref-badge">📖 교과서 연계 : 초등 영어 5학년 2학기 8단원 (위치 묻고 길 안내하기)</div>
       `
@@ -38,8 +52,11 @@ window.STORY_BOOK = {
       page: 2,
       tag: "🏫 1장 : 준우에게 길을 물어봐요",
       spreadImg: "eng_l8_spread_p1.png",
+      korSpreadImg: "kor_l8_spread_p2.png",
       illImg: "eng_l8_ill_p1.png",
-      audio: "../../assets/audio/storybook/english_l8/eng_l8_p1.mp3",
+      engAudio: "../../assets/audio/storybook/english_l8/eng_l8_p2.mp3",
+      korAudio: "../../assets/audio/storybook/english_l8/kor_l8_p2.mp3",
+      audio: "../../assets/audio/storybook/english_l8/eng_l8_p2.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #1e293b; margin-bottom: 4px;">
@@ -79,11 +96,14 @@ window.STORY_BOOK = {
       page: 3,
       tag: "🍞 2장 : 준우의 친절한 길 안내",
       spreadImg: "eng_l8_spread_p2.png",
+      korSpreadImg: "kor_l8_spread_p3.png",
       illImg: "eng_l8_ill_p2.png",
-      audio: "../../assets/audio/storybook/english_l8/eng_l8_p2.mp3",
+      engAudio: "../../assets/audio/storybook/english_l8/eng_l8_p3.mp3",
+      korAudio: "../../assets/audio/storybook/english_l8/kor_l8_p3.mp3",
+      audio: "../../assets/audio/storybook/english_l8/eng_l8_p3.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
-          <div style="font-size: 1.25rem; font-weight: bold; color: #059669; margin-bottom: 4px;">
+          <div style="font-size: 1.25rem; font-weight: bold; color: #1e293b; margin-bottom: 4px;">
             Junwoo smiled and pointed with his finger.
           </div>
           <div style="font-size: 1.05rem; color: #475569; margin-bottom: 16px;">
@@ -121,8 +141,11 @@ window.STORY_BOOK = {
       page: 4,
       tag: "📚 3장 : 도서관을 찾았어요!",
       spreadImg: "eng_l8_spread_p3.png",
+      korSpreadImg: "kor_l8_spread_p4.png",
       illImg: "eng_l8_ill_p3.png",
-      audio: "../../assets/audio/storybook/english_l8/eng_l8_p3.mp3",
+      engAudio: "../../assets/audio/storybook/english_l8/eng_l8_p4.mp3",
+      korAudio: "../../assets/audio/storybook/english_l8/kor_l8_p4.mp3",
+      audio: "../../assets/audio/storybook/english_l8/eng_l8_p4.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #1e293b; margin-bottom: 4px;">
@@ -162,8 +185,11 @@ window.STORY_BOOK = {
       page: 5,
       tag: "💎 4장 : 마법 책과 다이아몬드 발견",
       spreadImg: "eng_l8_spread_p4.png",
+      korSpreadImg: "kor_l8_spread_p5.png",
       illImg: "eng_l8_ill_p4.png",
-      audio: "../../assets/audio/storybook/english_l8/eng_l8_p4.mp3",
+      engAudio: "../../assets/audio/storybook/english_l8/eng_l8_p5.mp3",
+      korAudio: "../../assets/audio/storybook/english_l8/kor_l8_p5.mp3",
+      audio: "../../assets/audio/storybook/english_l8/eng_l8_p5.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #1e293b; margin-bottom: 4px;">
