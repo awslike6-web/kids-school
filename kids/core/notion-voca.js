@@ -209,9 +209,11 @@ async function fetchVocaFromNotion(options = {}) {
         useServerFilter: options.useServerFilter === true
     };
 
+    const cacheTarget = queryOptions.filterByStudent ? queryOptions.studentName : 'ALL';
+
     // 1. ⚡ 캐시 확인 (강제 새로고침이 아닐 때)
     if (!forceRefresh) {
-        const cachedRecords = _loadVocaFromCache(queryOptions.studentName, dbId);
+        const cachedRecords = _loadVocaFromCache(cacheTarget, dbId);
         if (cachedRecords && cachedRecords.length > 0) {
             return cachedRecords.filter(record => _matchesVocaRecord(record, queryOptions));
         }
@@ -244,13 +246,13 @@ async function fetchVocaFromNotion(options = {}) {
         const parsedRecords = allResults.map(parseVocaPage);
 
         // ⚡ 당일 캐시 저장
-        _saveVocaToCache(queryOptions.studentName, dbId, parsedRecords);
+        _saveVocaToCache(cacheTarget, dbId, parsedRecords);
 
         return parsedRecords.filter(record => _matchesVocaRecord(record, queryOptions));
     } catch (error) {
         console.error(`[fetchVocaFromNotion] ${options.subject || "전체"} 데이터 로딩 실패:`, error);
         // 에러 시 기존 캐시로 안전 폴백
-        const fallback = _loadVocaFromCache(queryOptions.studentName, dbId);
+        const fallback = _loadVocaFromCache(cacheTarget, dbId);
         if (fallback && fallback.length > 0) {
             return fallback.filter(record => _matchesVocaRecord(record, queryOptions));
         }

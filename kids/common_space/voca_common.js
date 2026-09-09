@@ -8,6 +8,7 @@ let currentTheme = window.currentTheme || '마인크래프트';
 window.currentSubject = "용어사전"; // 🚨 기본 전역 과목명 명시 (학습일지 및 통계용)
 
 let allDictionaryWords = [];
+let selectedStudents = []; 
 let selectedSubjects = []; 
 let selectedGrades = [];   
 let MODAL_CHAT_HISTORY = [];
@@ -59,15 +60,18 @@ async function fetchLibraryData(forceRefresh = false) {
       }
     }
 
+    // 💡 용어사전방은 전교생/가족 통합 도서관이므로 filterByStudent: false 로 전체 로드
     const records = await fetchVocaFromNotion({
       studentName: currentUserName.trim(),
+      filterByStudent: false,
       forceRefresh: forceRefresh
     });
 
     allDictionaryWords = records.map(r => ({
       ...r,
       meaning: r.meaning || "뜻풀이 없음",
-      subject: r.subject.length ? r.subject : ["미분류"]
+      subject: (r.subject && r.subject.length) ? r.subject : ["미분류"],
+      target: (r.target && r.target.length) ? r.target : ["공통"]
     }));
 
     if (loadingEl) loadingEl.style.display = 'none';
@@ -96,18 +100,70 @@ async function manualSyncVocaData() {
 window.manualSyncVocaData = manualSyncVocaData;
 
 function buildFilterButtons() {
+  const stuArea = document.getElementById('studentFilterArea');
   const subArea = document.getElementById('subjectFilterArea');
   const gradeArea = document.getElementById('gradeFilterArea');
-  const subjects = [...new Set(allDictionaryWords.flatMap(w => w.subject))];
-  const grades = [...new Set(allDictionaryWords.flatMap(w => w.grades))].sort((a, b) => {
-    const numA = parseInt(String(a).replace(/[^0-9]/g, '')) || 0;
-    const numB = parseInt(String(b).replace(/[^0-9]/g, '')) || 0;
-    return numA - numB;
-  });
-  subArea.innerHTML = "";
-  subjects.forEach(sub => { subArea.innerHTML += `<button class="filter-btn" onclick="toggleSubject('${sub}', this)">📘 ${sub}</button>`; });
-  gradeArea.innerHTML = "";
-  grades.forEach(g => { gradeArea.innerHTML += `<button class="filter-btn" onclick="toggleGrade('${g}', this)">🎒 ${g}</button>`; });
+
+  // 1. 학생 필터 빌드
+  if (stuArea) {
+    const students = [...new Set(allDictionaryWords.flatMap(w => w.target).filter(t => t && t !== '공통' && t !== '미분류'))];
+    let stuHtml = `<button class="filter-btn ${selectedStudents.length === 0 ? 'active' : ''}" onclick="selectStudentAll(this)">🌟 전체 학생</button>`;
+    students.forEach(stu => {
+      const isAct = selectedStudents.includes(stu) ? 'active' : '';
+      const icon = stu.includes('민수') ? '👦' : (stu.includes('민서') ? '👧' : '👤');
+      stuHtml += `<button class="filter-btn ${isAct}" onclick="toggleStudent('${stu}', this)">${icon} ${stu}</button>`;
+    });
+    stuArea.innerHTML = stuHtml;
+  }
+
+  // 2. 과목 필터 빌드
+  if (subArea) {
+    const subjects = [...new Set(allDictionaryWords.flatMap(w => w.subject))];
+    subArea.innerHTML = "";
+    subjects.forEach(sub => { 
+      const isAct = selectedSubjects.includes(sub) ? 'active' : '';
+      subArea.innerHTML += `<button class="filter-btn ${isAct}" onclick="toggleSubject('${sub}', this)">📘 ${sub}</button>`; 
+    });
+  }
+
+  // 3. 학년 필터 빌드
+  if (gradeArea) {
+    const grades = [...new Set(allDictionaryWords.flatMap(w => w.grades))].sort((a, b) => {
+      const numA = parseInt(String(a).replace(/[^0-9]/g, '')) || 0;
+      const numB = parseInt(String(b).replace(/[^0-9]/g, '')) || 0;
+      return numA - numB;
+    });
+    gradeArea.innerHTML = "";
+    grades.forEach(g => { 
+      const isAct = selectedGrades.includes(g) ? 'active' : '';
+      gradeArea.innerHTML += `<button class="filter-btn ${isAct}" onclick="toggleGrade('${g}', this)">🎒 ${g}</button>`; 
+    });
+  }
+}
+
+function selectStudentAll(btnEl) {
+  selectedStudents = [];
+  if (document.getElementById('studentFilterArea')) {
+    document.querySelectorAll('#studentFilterArea .filter-btn').forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  updateStatusAndFilter();
+}
+
+function toggleStudent(student, btnEl) {
+  const allBtn = document.querySelector('#studentFilterArea .filter-btn:first-child');
+  if (allBtn) allBtn.classList.remove('active');
+  
+  btnEl.classList.toggle('active'); 
+  if (selectedStudents.includes(student)) {
+    selectedStudents = selectedStudents.filter(s => s !== student);
+  } else {
+    selectedStudents.push(student);
+  }
+  if (selectedStudents.length === 0 && allBtn) {
+    allBtn.classList.add('active');
+  }
+  updateStatusAndFilter();
 }
 
 function toggleSubject(subject, btnEl) {
@@ -137,31 +193,35 @@ function handleSearch() {
 function updateStatusAndFilter() {
   const searchText = document.getElementById('searchInput').value.trim();
   let msgParts = [];
-  if (searchText) msgParts.push(`🔍 "${searchText}"`);
-  if (selectedSubjects.length > 0) msgParts.push(`📂 [${selectedSubjects.join(', ')}]`);
+  if (selectedStudents.length > 0) msgParts.push(`👤 [${selectedStudents.join(', ')}]`);
+  if (selectedSubjects.length > 0) msgParts.push(`📘 [${selectedSubjects.join(', ')}]`);
   if (selectedGrades.length > 0) msgParts.push(`🎒 [${selectedGrades.join(', ')}]`);
+  if (searchText) msgParts.push(`🔍 "${searchText}"`);
   
   const statusMsg = document.getElementById('statusMsg');
-  if (msgParts.length === 0) {
-    statusMsg.textContent = "📚 카테고리를 선택하거나 단어를 검색해 주세요!";
-    document.getElementById('fairyRoom').style.display = 'none';
-    renderCatalogSections([]); 
-    return;
-  } else {
-    statusMsg.textContent = msgParts.join(' + ') + " 결과";
-    document.getElementById('fairyRoom').style.display = 'block';
-  }
+  const fairyRoom = document.getElementById('fairyRoom');
 
   const filtered = allDictionaryWords.filter(w => {
     const textMatch = searchText === "" || 
-                      w.word.toLowerCase().includes(searchText.toLowerCase()) || 
-                      w.meaning.toLowerCase().includes(searchText.toLowerCase());
+                      (w.word && w.word.toLowerCase().includes(searchText.toLowerCase())) || 
+                      (w.meaning && w.meaning.toLowerCase().includes(searchText.toLowerCase()));
     const subjectMatch = selectedSubjects.length === 0 || 
-                         selectedSubjects.some(sub => w.subject.includes(sub));
+                         selectedSubjects.some(sub => (w.subject || []).includes(sub));
     const gradeMatch = selectedGrades.length === 0 || 
-                       selectedGrades.some(g => w.grades.includes(g));
-    return textMatch && subjectMatch && gradeMatch;
+                       selectedGrades.some(g => (w.grades || []).includes(g));
+    const studentMatch = selectedStudents.length === 0 || 
+                         selectedStudents.some(stu => (w.target || []).includes(stu) || (w.target || []).includes("공통"));
+    return textMatch && subjectMatch && gradeMatch && studentMatch;
   });
+
+  if (fairyRoom) fairyRoom.style.display = 'block';
+
+  if (msgParts.length === 0) {
+    statusMsg.textContent = `📚 민민이네 전체 지식 도서관 (총 ${filtered.length}개 단어·문장)`;
+  } else {
+    statusMsg.textContent = `${msgParts.join(' + ')} 검색 결과 (총 ${filtered.length}개)`;
+  }
+
   renderCatalogSections(filtered);
 }
 
@@ -171,8 +231,7 @@ function renderCatalogSections(wordsToRender) {
   const savedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
   container.innerHTML = "";
   if (wordsToRender.length === 0) {
-    const searchActive = selectedSubjects.length > 0 || selectedGrades.length > 0 || document.getElementById('searchInput').value.trim() !== "";
-    emptyMsg.style.display = searchActive ? 'block' : 'none';
+    emptyMsg.style.display = 'block';
     requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
     return;
   }
@@ -183,8 +242,27 @@ function renderCatalogSections(wordsToRender) {
     if (!sectionsMap[stageName]) sectionsMap[stageName] = [];
     sectionsMap[stageName].push(w);
   });
-  Object.keys(sectionsMap).sort().forEach(stageName => {
+  // ➡️ 단원명 자연수 정렬 (1단원 -> 2단원 -> 10단원, 1회 -> 2회 -> 10회)
+  Object.keys(sectionsMap).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })).forEach(stageName => {
     const sectionData = sectionsMap[stageName];
+    // ➡️ 각 단원 내에서도 문항 번호(1번 -> 10번) 오름차순 정렬
+    sectionData.sort((a, b) => {
+      const getNum = (item) => {
+        if (!item) return 9999;
+        const m1 = String(item.meaning || '').match(/(\d+)\s*번/);
+        if (m1) return parseInt(m1[1], 10);
+        const m2 = String(item.word || '').match(/^(\d+)[\.\s]/);
+        if (m2) return parseInt(m2[1], 10);
+        return 9999;
+      };
+      const numA = getNum(a);
+      const numB = getNum(b);
+      if (numA !== 9999 || numB !== 9999) {
+        if (numA !== numB) return numA - numB;
+      }
+      return (a.word || '').localeCompare(b.word || '', 'ko');
+    });
+
     const sectionDiv = document.createElement('div'); sectionDiv.className = 'stage-section';
     const header = document.createElement('div'); header.className = 'stage-header';
     header.textContent = isNaN(stageName) ? stageName : `${stageName}단원`;

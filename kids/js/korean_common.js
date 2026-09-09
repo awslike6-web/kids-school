@@ -708,6 +708,25 @@ window.selectDynamicUnit = function(unit) {
     startMissionWithFilteredData(finalRecords, innerBody);
 };
 
+function extractKoreanItemNumber(r) {
+    if (!r) return null;
+    if (r.meaning) {
+        const m = String(r.meaning).match(/(\d+)\s*번/);
+        if (m) return parseInt(m[1], 10);
+    }
+    if (r.word) {
+        const m = String(r.word).match(/^(\d+)[\.\s]/);
+        if (m) return parseInt(m[1], 10);
+        const m2 = String(r.word).match(/(\d+)\s*번/);
+        if (m2) return parseInt(m2[1], 10);
+    }
+    if (r.quiz) {
+        const m = String(r.quiz).match(/(\d+)\s*번/);
+        if (m) return parseInt(m[1], 10);
+    }
+    return null;
+}
+
 function startMissionWithFilteredData(records, innerBody) {
     let prepared = [...records];
     const orderType = currentMissionType === 'dictation'
@@ -716,8 +735,13 @@ function startMissionWithFilteredData(records, innerBody) {
     if (orderType === 'shuffle') {
         prepared.sort(() => Math.random() - 0.5);
     } else {
-        // ➡️ 순서대로: 등록된 시간순(1번 -> 10번 교재 순서) 오름차순 정렬
+        // ➡️ 순서대로: 1번 -> 10번 문항 번호 자연수 오름차순 정렬 (미식별 시 생성일시순)
         prepared.sort((a, b) => {
+            const numA = extractKoreanItemNumber(a);
+            const numB = extractKoreanItemNumber(b);
+            if (numA !== null && numB !== null) return numA - numB;
+            if (numA !== null) return -1;
+            if (numB !== null) return 1;
             if (a.createdTime && b.createdTime) return a.createdTime.localeCompare(b.createdTime);
             return 0;
         });
