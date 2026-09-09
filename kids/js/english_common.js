@@ -98,7 +98,8 @@ function fallbackWebSpeech(text, onEndCallback = null) {
     try { window.speechSynthesis.cancel(); } catch (e) {}
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US'; 
-    utterance.rate = 0.88; 
+    const speechRate = (typeof window.getEnglishSpeechRate === 'function') ? window.getEnglishSpeechRate() : 0.85;
+    utterance.rate = speechRate; 
     if (onEndCallback) utterance.onend = onEndCallback;
     window.speechSynthesis.speak(utterance);
   } else {
@@ -106,6 +107,51 @@ function fallbackWebSpeech(text, onEndCallback = null) {
     if (onEndCallback) onEndCallback();
   }
 }
+
+// ==========================================
+// 🎛️ 원어민 발음 속도 조절 칩 컴포넌트 (0.5x ~ 1.0x)
+// ==========================================
+function getEnglishSpeechRateChipsHtml() {
+  const currentRate = (typeof window.getEnglishSpeechRate === 'function') ? window.getEnglishSpeechRate() : 0.85;
+  const rates = [
+    { rate: 0.5, label: '🐢 0.5x 아주 느리게' },
+    { rate: 0.75, label: '🌱 0.75x 느리게' },
+    { rate: 0.85, label: '🟩 0.85x 민수 안심' },
+    { rate: 1.0, label: '⚡ 1.0x 보통' }
+  ];
+  return `
+    <div class="speech-rate-control-box">
+      <div class="speech-rate-title">
+        🎧 원어민 발음 속도 선택
+      </div>
+      <div class="speech-rate-chip-group">
+        ${rates.map(r => `
+          <button type="button" 
+                  class="speech-rate-chip ${Math.abs(currentRate - r.rate) < 0.03 ? 'active' : ''}" 
+                  onclick="window.changeEnglishSpeechRate(${r.rate})" 
+                  title="${r.label}">
+            ${r.label}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+window.changeEnglishSpeechRate = function(rate) {
+  if (typeof window.setEnglishSpeechRate === 'function') {
+    window.setEnglishSpeechRate(rate);
+  }
+  const chips = document.querySelectorAll('.speech-rate-chip');
+  chips.forEach(chip => {
+    const text = chip.textContent || '';
+    if (text.includes(`${rate}x`)) {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+};
 
 // ========================================================
 // 🚪 오버레이 미션 팝업 연동 총 제어
@@ -685,6 +731,7 @@ function renderVocaPoolUI(container) {
             <div style="font-size: 4.5rem; margin: 10px 0; cursor: pointer; animation: bounceObj 2s infinite;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">
                 🎧
             </div>
+            ${getEnglishSpeechRateChipsHtml()}
             <div style="font-size: 1.05rem; color: #64748b; margin-bottom: 20px;">
                 원어민 소리를 잘 듣고, 알맞은 뜻을 골라보세요!
             </div>
@@ -1067,7 +1114,8 @@ function renderStage3UI(container) {
             <div style="margin-bottom: 12px; color: #666;">${modeMeta.sub}</div>
             ${hintHtml}
             ${interactiveHtml}
-            <div style="margin-top:20px;">
+            <div style="margin-top:16px;">
+                ${getEnglishSpeechRateChipsHtml()}
                 <button class="quiz-button" style="background:#8b949e;" onclick="speakEnglish('${answerWord.replace(/'/g, "\\'")}')">🔊 원어민 발음 듣기</button>
             </div>
         </div>
@@ -1137,7 +1185,10 @@ function renderStage4UI(container) {
             if (answerStr === answerSentence) {
                 speakFairyTTS("정답이에요! 문장을 완벽하게 완성했어요!");
                 speakEnglish(answerSentence);
-                advanceEnglishQuizAfterCorrect(1500);
+                if (typeof rewardQuizCorrect === 'function') {
+                    rewardQuizCorrect(activeQuizIdx);
+                }
+                renderStage4SuccessCard(container, answerSentence, currentItem.meaning);
             } else {
                 const blankContainer = document.getElementById('sent-word-blanks');
                 if (blankContainer) blankContainer.classList.add('wrong');
@@ -1173,7 +1224,10 @@ function renderStage4UI(container) {
             if (selectedSentence === answerSentence) {
                 speakFairyTTS("정답이에요! 훌륭해요!");
                 speakEnglish(answerSentence);
-                advanceEnglishQuizAfterCorrect(1500);
+                if (typeof rewardQuizCorrect === 'function') {
+                    rewardQuizCorrect(activeQuizIdx);
+                }
+                renderStage4SuccessCard(container, answerSentence, currentItem.meaning);
             } else {
                 promptEnglishWrong(() => {});
             }
@@ -1191,17 +1245,77 @@ function renderStage4UI(container) {
     container.innerHTML = `
         <div class="quiz-card">
             ${getEnglishOrderToggleHtml()}
-            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">영어 문장 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
+            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 12px;">영어 문장 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
-            <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 20px;">${currentItem.meaning}</div>
-            <div style="margin-bottom: 20px; color: #666;">이 뜻에 맞는 영어 문장을 완성하세요!</div>
+            <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 14px;">${currentItem.meaning}</div>
+            <div style="margin-bottom: 14px; color: #64748b; font-size: 0.98rem;">이 뜻에 맞는 영어 문장을 완성하세요!</div>
+            
+            ${getEnglishSpeechRateChipsHtml()}
+
             ${interactiveHtml}
+
             <div style="margin-top:20px;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakEnglish('${answerSentence.replace(/'/g, "\\'")}')">🔊 원어민 발음 힌트</button>
+                <button class="quiz-button" style="background:#8b949e;" onclick="speakEnglish('${answerSentence.replace(/'/g, "\\'")}')">🔊 원어민 발음 힌트 듣기</button>
             </div>
         </div>
     `;
 }
+
+// --------------------------------------------------------
+// 🌟 4단계 정답 성공 확인 카드 (완성된 문장을 눈으로 충분히 읽고 수동 넘김)
+// --------------------------------------------------------
+function renderStage4SuccessCard(container, sentence, meaning) {
+    if (window._sentenceAutoAdvanceTimer) {
+        clearTimeout(window._sentenceAutoAdvanceTimer);
+    }
+
+    container.innerHTML = `
+        <div class="quiz-card" style="border: 2.5px solid #10b981; background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);">
+            <div style="text-align:center; padding: 10px 5px 20px;">
+                <div style="font-size: 3.5rem; margin-bottom: 6px; animation: bounceObj 1.2s infinite;">🎉</div>
+                <div style="font-family:'Jua', sans-serif; font-size: 1.5rem; color: #059669; margin-bottom: 16px;">
+                    참 잘했어요! 멋진 영어 문장 완성!
+                </div>
+
+                <!-- 완성된 문장 하이라이트 박스 -->
+                <div style="background: rgba(16, 185, 129, 0.12); border: 2px solid #10b981; border-radius: 18px; padding: 22px 16px; margin-bottom: 18px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);">
+                    <div style="font-size: 1.7rem; font-weight: 800; color: #065f46; margin-bottom: 10px; line-height: 1.45; word-break: keep-all;">
+                        ${sentence}
+                    </div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #1e293b; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 6px 18px; border-radius: 25px; border: 1.5px solid #a7f3d0;">
+                        🇰🇷 ${meaning}
+                    </div>
+                </div>
+
+                <!-- 배속 조절 칩 -->
+                ${getEnglishSpeechRateChipsHtml()}
+
+                <!-- 버튼 그룹 (다시 듣기 & 다음 문제 수동 넘김) -->
+                <div style="display:flex; flex-direction:column; gap:12px; max-width:340px; margin: 20px auto 0;">
+                    <button class="quiz-button" style="background:#0284c7; color:white; font-size:1.05rem; padding:12px 20px; border-radius:14px;" onclick="speakEnglish('${sentence.replace(/'/g, "\\'")}')">
+                        🔊 원어민 발음 다시 듣기
+                    </button>
+                    <button class="quiz-button" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; font-size:1.3rem; font-weight:bold; padding:16px 24px; border-radius:18px; box-shadow:0 8px 25px rgba(16, 185, 129, 0.4); cursor:pointer;" onclick="window.proceedToNextSentenceQuiz()">
+                        👉 다음 문제 풀기 ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 느긋하게 눈으로 확인할 수 있도록 15초 안전 자동 진행 타이머
+    window._sentenceAutoAdvanceTimer = setTimeout(() => {
+        window.proceedToNextSentenceQuiz();
+    }, 15000);
+}
+
+window.proceedToNextSentenceQuiz = function() {
+    if (window._sentenceAutoAdvanceTimer) {
+        clearTimeout(window._sentenceAutoAdvanceTimer);
+    }
+    activeQuizIdx++;
+    renderSectionUI();
+};
 
 // --------------------------------------------------------
 // 5단계: 짧은 문단 독해 (국어 정밀독해방 구조 100% 재활용)

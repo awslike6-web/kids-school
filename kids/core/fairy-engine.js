@@ -358,6 +358,10 @@ async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, force
             }
 
             const audio = new Audio(audioUrl);
+            if (config.isEnglish || (config.voice && config.voice.includes('en-'))) {
+                const speechRate = (typeof window.getEnglishSpeechRate === 'function') ? window.getEnglishSpeechRate() : 0.85;
+                audio.playbackRate = speechRate;
+            }
             currentOpenAiAudio = audio;
 
             audio.onended = () => {
@@ -408,7 +412,8 @@ async function speakEnglish(text, onEndCallback = null) {
             try { window.speechSynthesis.cancel(); } catch (e) {}
             const utterance = new SpeechSynthesisUtterance(trimmed);
             utterance.lang = 'en-US';
-            utterance.rate = 0.88;
+            const speechRate = (typeof window.getEnglishSpeechRate === 'function') ? window.getEnglishSpeechRate() : 0.85;
+            utterance.rate = speechRate;
             if (onEndCallback) utterance.onend = onEndCallback;
             window.speechSynthesis.speak(utterance);
         } else if (onEndCallback) {
@@ -1040,6 +1045,32 @@ window.fetchCloudflareEdgeTtsAudio = fetchCloudflareEdgeTtsAudio;
 window.playCloudflareEdgeTtsStream = playCloudflareEdgeTtsStream;
 window.isEnglishText = isEnglishText;
 window.speakEnglish = speakEnglish;
+
+function getEnglishSpeechRate() {
+    try {
+        const saved = localStorage.getItem('english_speech_rate');
+        const rate = parseFloat(saved);
+        if (!isNaN(rate) && rate >= 0.4 && rate <= 2.0) {
+            return rate;
+        }
+    } catch (e) {}
+    return 0.85; // 느린 학습자 민수 안심 기본 배속
+}
+
+function setEnglishSpeechRate(rate) {
+    try {
+        const num = parseFloat(rate);
+        if (!isNaN(num) && num >= 0.4 && num <= 2.0) {
+            localStorage.setItem('english_speech_rate', num);
+        }
+    } catch (e) {}
+    if (typeof window.updateSpeechRateUi === 'function') {
+        window.updateSpeechRateUi();
+    }
+}
+
+window.getEnglishSpeechRate = getEnglishSpeechRate;
+window.setEnglishSpeechRate = setEnglishSpeechRate;
 
 // 초기화
 if (typeof window !== 'undefined') {

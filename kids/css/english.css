@@ -469,3 +469,91 @@ body.theme--minecraft .puzzle-slots { background: #222; }
     margin: 1.5cm;
   }
 }
+
+/* ========================================================
+   🎛️ 원어민 발음 속도 조절 칩 및 정답 문장 성공 카드 스타일
+   ======================================================== */
+.speech-rate-control-box {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 12px auto 16px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+body.theme--minecraft .speech-rate-control-box {
+  background: rgba(30, 30, 42, 0.9);
+  border-color: #475569;
+}
+
+.speech-rate-title {
+  font-size: 0.88rem;
+  font-weight: bold;
+  color: var(--primary);
+  font-family: 'Jua', sans-serif;
+  letter-spacing: -0.2px;
+}
+
+.speech-rate-chip-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.speech-rate-chip {
+  padding: 7px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.speech-rate-chip:hover {
+  background: #f1f5f9;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.speech-rate-chip.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-color: transparent;
+  color: #ffffff;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+  transform: scale(1.05);
+}
+
+body.theme--minecraft .speech-rate-chip {
+  background: #2a2a38;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+body.theme--minecraft .speech-rate-chip.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes bounceObj {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulseScale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
