@@ -292,6 +292,22 @@ window.koreanToggleDictationOrder = window.koreanToggleQuizOrder;
 // ========================================================
 const KOREAN_STORYBOOK_LIBRARY = [
     {
+        id: "5_2_1_1",
+        grade: "5학년 2학기",
+        gradeCode: "5-2",
+        unit: "1단원",
+        bookNum: "1권",
+        title: "민수의 따뜻한 말 한마디",
+        subtitle: "공감의 힘 · 친구의 마음을 알아주는 마법",
+        desc: "체육 시간 달리기에서 넘어진 슬찬이에게 민수는 어떤 말을 건넸을까요? 상대방의 처지를 생각하며 마음을 전하는 공감의 대화법을 배워봐요.",
+        icon: "💬",
+        color: "#10b981",
+        bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#10b981",
+        link: "korean_5_2_1_storybook.html",
+        coverImg: "images/minsu/5-2/1/storybook/korean_story_p1.png"
+    },
+    {
         id: "1_2_1_1",
         grade: "1학년 2학기",
         gradeCode: "1-2",
@@ -358,6 +374,14 @@ const KOREAN_STORYBOOK_LIBRARY = [
 ];
 
 function renderStorybookLibrary(innerBody) {
+    let books = [...KOREAN_STORYBOOK_LIBRARY];
+    const isMinsu = (currentProfile === 'son' || currentUserName === '민수');
+    if (isMinsu) {
+        books.sort((a, b) => (b.gradeCode === '5-2' ? 1 : 0) - (a.gradeCode === '5-2' ? 1 : 0));
+    } else {
+        books.sort((a, b) => (b.gradeCode === '1-2' ? 1 : 0) - (a.gradeCode === '1-2' ? 1 : 0));
+    }
+
     innerBody.innerHTML = `
         <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
             <div style="text-align: center; margin-bottom: 24px;">
@@ -370,7 +394,7 @@ function renderStorybookLibrary(innerBody) {
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                ${KOREAN_STORYBOOK_LIBRARY.map(book => `
+                ${books.map(book => `
                     <div style="background: ${book.bgGrad}; border: 2px solid ${book.border}; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 8px 25px rgba(0,0,0,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='none'">
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -380,12 +404,12 @@ function renderStorybookLibrary(innerBody) {
                                 <span style="font-size: 1.3rem;">${book.icon}</span>
                             </div>
                             
-                            <img src="${book.coverImg}?v=20260902_1" alt="${book.title}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <img src="${book.coverImg}?v=20260909_1" alt="${book.title}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
                             
                             <h4 style="font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">
                                 ${book.title}
                             </h4>
-                            <p style="font-size: 0.88rem; color: #f472b6; font-weight: bold; margin-bottom: 8px;">
+                            <p style="font-size: 0.88rem; color: ${book.color}; font-weight: bold; margin-bottom: 8px;">
                                 ${book.subtitle}
                             </p>
                             <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 14px;">
