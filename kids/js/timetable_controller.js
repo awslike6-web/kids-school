@@ -43,6 +43,13 @@ const DEFAULT_BASE_TIMETABLE = {
     { dayOfWeek: '월요일', periodNum: 5, subject: '수학', title: '수학' },
     { dayOfWeek: '월요일', periodNum: 6, subject: '국어', title: '국어' },
 
+    { dayOfWeek: '화요일', periodNum: 1, subject: '과학', title: '과학' },
+    { dayOfWeek: '화요일', periodNum: 2, subject: '과학', title: '과학' },
+    { dayOfWeek: '화요일', periodNum: 3, subject: '사회', title: '사회' },
+    { dayOfWeek: '화요일', periodNum: 4, subject: '국어', title: '국어' },
+    { dayOfWeek: '화요일', periodNum: 5, subject: '미술', title: '미술' },
+    { dayOfWeek: '화요일', periodNum: 6, subject: '미술', title: '미술' },
+
     { dayOfWeek: '수요일', periodNum: 0, subject: '체육', title: '피구(아침활동)' },
     { dayOfWeek: '수요일', periodNum: 1, subject: '사회', title: '사회' },
     { dayOfWeek: '수요일', periodNum: 2, subject: '영어', title: '영어' },
