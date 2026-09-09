@@ -194,6 +194,42 @@ body {
   color: var(--primary); background: rgba(255, 255, 255, 0.08); padding: 4px 10px;
   border-radius: 8px; align-self: flex-start; margin-top: 4px; font-weight: bold;
 }
+
+/* 🌟 웹툰 모드 다크 테마 글자색 가독성 완벽 가드 (배경색과 겹쳐 안 보이는 현상 차단) */
+.webtoon-passage [style*="#1e293b"],
+.webtoon-passage [style*="rgb(30, 41, 59)"] {
+  color: #f8fafc !important; /* 배경과 동일한 어두운 슬레이트(#1e293b)를 선명한 흰색(#f8fafc)으로 오버라이드 */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.webtoon-passage [style*="#475569"],
+.webtoon-passage [style*="rgb(71, 85, 105)"] {
+  color: #cbd5e1 !important; /* 칙칙한 회색을 부드럽고 잘 보이는 라이트 슬레이트로 오버라이드 */
+}
+.webtoon-passage [style*="#059669"] {
+  color: #34d399 !important; /* 어두운 녹색을 눈에 띄는 화사한 민트 에메랄드로 오버라이드 */
+  text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);
+}
+.webtoon-passage [style*="#2563eb"] {
+  color: #60a5fa !important; /* 어두운 파랑을 산뜻한 스카이블루로 오버라이드 */
+  text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+}
+.webtoon-passage [style*="#166534"],
+.webtoon-passage [style*="#14532d"] {
+  color: #86efac !important; /* 단어 박스 내부 녹색 글씨 가독성 확보 */
+}
+.webtoon-passage [style*="#1d4ed8"],
+.webtoon-passage [style*="#1e40af"] {
+  color: #93c5fd !important; /* 단어 박스 내부 파란 글씨 가독성 확보 */
+}
+.webtoon-passage [style*="background: #f0fdf4"],
+.webtoon-passage [style*="background: #eff6ff"],
+.webtoon-passage [style*="background: #f8fafc"],
+.webtoon-passage [style*="background:#f0fdf4"],
+.webtoon-passage [style*="background:#eff6ff"],
+.webtoon-passage [style*="background:#f8fafc"] {
+  background: rgba(15, 23, 42, 0.75) !important; /* 단어 박스를 다크 테마에 어울리는 반투명 네이비로 전환 */
+  border-color: #334155 !important;
+}
 .webtoon-footer {
   padding: 12px 20px; background: #0f172a; display: flex;
   justify-content: flex-end; align-items: center; border-top: 1px solid #334155;
