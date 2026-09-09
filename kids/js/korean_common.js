@@ -17,6 +17,29 @@ let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
 let koreanVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let koreanDictationOrderType = 'sequence'; // 'sequence'(1번~10번 교재순서 기본) or 'shuffle'
 let dictationAudioEl = null;
+let dictationInputMode = 'magnet'; // 'magnet'(슬라임 음절 자석판 기본) or 'typing'(직접 쓰기)
+let dictationUserSlots = []; // 자석판에 올린 음절 토큰 배열
+let dictationHintLevel = 0; // 0: 숨김, 1: 초성 힌트, 2: 전체 정답
+
+function getHangulChosung(text) {
+    const CHOSUNG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+    let res = '';
+    for (let i = 0; i < text.length; i++) {
+        const code = text.charCodeAt(i) - 44032;
+        if (code >= 0 && code <= 11171) {
+            const chosungIndex = Math.floor(code / 588);
+            res += CHOSUNG[chosungIndex];
+        } else {
+            res += text[i];
+        }
+    }
+    return res;
+}
+
+window.setDictationInputMode = function(mode) {
+    dictationInputMode = mode;
+    renderSectionUI();
+};
 
 window.setKoreanVocaMode = function(mode) {
     koreanVocaMode = mode;
@@ -471,6 +494,32 @@ window.selectDynamicGrade = function(grade) {
 };
 
 function renderDynamicUnitUI(units, container) {
+    if (currentMissionType === 'dictation') {
+        let html = `<div style="text-align:center; margin-bottom:20px;">
+            <div style="font-family:'Jua', sans-serif; font-size:1.4rem; color:#db2777; margin-bottom:6px;">✍️ [${selectedKoreanGrade}] 오늘 숙제할 단원을 선택하세요!</div>
+            <p style="font-size:0.9rem; color:#888; margin-bottom:18px;">하루 1단원씩 자석 놀이하며 100문장 완전 정복! 🍬</p>
+            <div class="dictation-unit-grid">`;
+        units.forEach(u => {
+            const num = parseInt(u.replace(/[^0-9]/g, '')) || 1;
+            const startNo = (num - 1) * 10 + 1;
+            const endNo = num * 10;
+            html += `
+                <div class="dictation-unit-card" onclick="selectDynamicUnit('${u}')">
+                    <div style="font-size:1.6rem; margin-bottom:4px;">🍬</div>
+                    <div class="dictation-unit-num">${u}</div>
+                    <div class="dictation-unit-range">${startNo}번 ~ ${endNo}번</div>
+                </div>
+            `;
+        });
+        html += `</div>
+            <div style="margin-top:15px;">
+                <button class="quiz-button" style="background:#8b949e; width:100%; border-radius:14px;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
+            </div>
+        </div>`;
+        container.innerHTML = html;
+        return;
+    }
+
     let html = `<div style="text-align:center; margin-bottom:20px;">
         <h3 style="color:var(--sky); margin-bottom:15px;">📚 [${selectedKoreanGrade}] 도전할 단원을 선택하세요!</h3>
         <div class="grade-grid">`;
@@ -814,51 +863,217 @@ function renderVocaUI(container) {
 }
 
 // --------------------------------------------------------
-// 2. 받아쓰기 훈련소
+// 2. 받아쓰기 훈련소 (슬라임 음절 자석판 + 직접 쓰기 하이브리드)
 // --------------------------------------------------------
 function renderDictationUI(container) {
     const currentItem = activeSectionData[activeQuizIdx];
+    const targetSentence = currentItem.word.trim();
     const audioSourceLabel = currentItem.audioUrl ? '🎙️ 아빠/엄마 녹음' : '🧚‍♀️ 요정 TTS';
-
     const orderToggleHtml = getKoreanOrderToggleHtml(koreanDictationOrderType);
-    
-    window.verifyKoreanDictation = function() {
-        const inputVal = document.getElementById('dictationInput').value.trim();
-        if (inputVal === currentItem.word.trim()) {
-            speakFairyTTS("완벽해요! 띄어쓰기까지 정확하게 맞췄어요!");
-            document.getElementById('dictationInput').classList.add('correct');
-            advanceKoreanQuizAfterCorrect(1500);
+
+    // 문제 전환 시 자석 슬롯 및 힌트 레벨 초기화
+    dictationUserSlots = [];
+    dictationHintLevel = 0;
+
+    // 정답 문장을 음절 칩 목록으로 분해 (공백 제외한 글자들)
+    let chipIndex = 0;
+    const rawChips = [];
+    for (let i = 0; i < targetSentence.length; i++) {
+        const ch = targetSentence[i];
+        if (ch !== ' ') {
+            rawChips.push({ chipId: chipIndex++, char: ch, used: false });
+        }
+    }
+    // 셔플된 자석 칩
+    const shuffledChips = [...rawChips].sort(() => Math.random() - 0.5);
+
+    // 상단 모드 전환 토글 탭
+    const modeToggleHtml = `
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+            <button class="quiz-button" style="background: ${dictationInputMode === 'magnet' ? 'var(--pink)' : '#ccc'}; color: white; padding: 7px 16px; border-radius: 20px; font-size: 0.95rem;" onclick="setDictationInputMode('magnet')">🧲 슬라임 자석판</button>
+            <button class="quiz-button" style="background: ${dictationInputMode === 'typing' ? 'var(--purple)' : '#ccc'}; color: white; padding: 7px 16px; border-radius: 20px; font-size: 0.95rem;" onclick="setDictationInputMode('typing')">⌨️ 직접 쓰기 (공책)</button>
+        </div>
+    `;
+
+    // 칠판에 올린 글자 렌더링 헬퍼
+    window.renderDictationSlots = function() {
+        const boardEl = document.getElementById('dictationBoard');
+        if (!boardEl) return;
+        if (dictationUserSlots.length === 0) {
+            boardEl.innerHTML = `<span style="color:#f472b6; opacity:0.7; font-size:1.05rem; font-family:'Gaegu', cursive;">아래 자석을 눌러 문장을 완성해봐요! ✨</span>`;
+            return;
+        }
+        let html = '';
+        dictationUserSlots.forEach((slot) => {
+            if (slot.isSpace) {
+                html += `<div class="dictation-slot-space" title="띄어쓰기"></div>`;
+            } else {
+                html += `<div class="dictation-slot-chip">${slot.char}</div>`;
+            }
+        });
+        boardEl.innerHTML = html;
+    };
+
+    // 칩 터치 이벤트
+    window.tapDictationChip = function(chipId, char) {
+        dictationUserSlots.push({ chipId, char, isSpace: false });
+        const chipBtn = document.getElementById(`dictChip_${chipId}`);
+        if (chipBtn) chipBtn.classList.add('used');
+        renderDictationSlots();
+    };
+
+    // 띄어쓰기 칩 터치 이벤트
+    window.tapDictationSpace = function() {
+        if (dictationUserSlots.length === 0) return;
+        if (dictationUserSlots[dictationUserSlots.length - 1].isSpace) return;
+        dictationUserSlots.push({ chipId: -1, char: ' ', isSpace: true });
+        renderDictationSlots();
+    };
+
+    // 한 글자 지우기 (Undo)
+    window.backspaceDictation = function() {
+        if (dictationUserSlots.length === 0) return;
+        const last = dictationUserSlots.pop();
+        if (!last.isSpace && last.chipId >= 0) {
+            const chipBtn = document.getElementById(`dictChip_${last.chipId}`);
+            if (chipBtn) chipBtn.classList.remove('used');
+        }
+        renderDictationSlots();
+    };
+
+    // 전체 지우기 (Reset)
+    window.resetDictationBoard = function() {
+        dictationUserSlots = [];
+        document.querySelectorAll('.syllable-chip').forEach(el => el.classList.remove('used'));
+        renderDictationSlots();
+    };
+
+    // 단계적 스마트 힌트 토글
+    window.stepDictationHint = function() {
+        dictationHintLevel = (dictationHintLevel + 1) % 3;
+        const hintEl = document.getElementById('dictationHint');
+        const hintBtn = document.getElementById('dictationHintBtn');
+        if (!hintEl || !hintBtn) return;
+
+        if (dictationHintLevel === 1) {
+            const chosung = getHangulChosung(targetSentence);
+            hintEl.style.display = 'block';
+            hintEl.innerHTML = `<span style="background:#fef08a; padding:4px 12px; border-radius:12px; color:#713f12; font-weight:bold; font-size:1.15rem;">초성 힌트: ${chosung}</span>`;
+            hintBtn.textContent = "정답 전체 보기 👀";
+        } else if (dictationHintLevel === 2) {
+            hintEl.style.display = 'block';
+            hintEl.innerHTML = `<span style="background:#dcfce7; padding:4px 12px; border-radius:12px; color:#14532d; font-weight:bold; font-size:1.15rem;">정답: ${targetSentence}</span>`;
+            hintBtn.textContent = "힌트 숨기기 🙈";
         } else {
-            const inputEl = document.getElementById('dictationInput');
-            inputEl.classList.add('wrong');
-            promptKoreanWrong(
-                { word: currentItem.word, wrongInput: inputVal },
-                () => {
-                    inputEl.classList.remove('wrong');
-                    inputEl.value = '';
-                    inputEl.focus();
-                }
-            );
+            hintEl.style.display = 'none';
+            hintBtn.textContent = "💡 힌트 보기 (초성)";
         }
     };
 
-    container.innerHTML = `
-        <div class="quiz-card">
-            ${orderToggleHtml}
-            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 10px;">받아쓰기 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <div style="font-size: 5rem; margin-bottom: 10px; cursor: pointer;" onclick="replayDictationAudio()">🎧</div>
-            <div style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">${audioSourceLabel}</div>
-            <div id="dictationHint" style="font-size: 1.2rem; color: #888; margin-bottom: 20px; display: none;">${currentItem.word}</div>
-            
-            <input id="dictationInput" class="text-input-field" type="text" autocomplete="off" placeholder="여기에 받아 적으세요" onkeypress="if(event.key === 'Enter') verifyKoreanDictation()" style="width:100%; margin-bottom:20px;">
-            
-            <div style="display:flex; gap:10px; justify-content:center;">
-                <button class="quiz-button" onclick="verifyKoreanDictation()">정답 내기</button>
-                <button class="quiz-button" style="background:#ff9f43;" onclick="replayDictationAudio()">🔊 다시 듣기</button>
+    // 정답 제출 및 검증 (자석판 or 키보드)
+    window.verifyKoreanDictation = function() {
+        let submission = "";
+        if (dictationInputMode === 'magnet') {
+            submission = dictationUserSlots.map(s => s.isSpace ? ' ' : s.char).join('').trim();
+        } else {
+            const inputEl = document.getElementById('dictationInput');
+            submission = inputEl ? inputEl.value.trim() : "";
+        }
+
+        if (!submission) {
+            alert("문장을 완성한 뒤 제출해 주세요!");
+            return;
+        }
+
+        if (submission === targetSentence) {
+            speakFairyTTS("완벽해요! 띄어쓰기까지 정확하게 맞췄어요!");
+            const board = document.getElementById('dictationBoard');
+            if (board) board.style.borderColor = '#10b981';
+            const inputEl = document.getElementById('dictationInput');
+            if (inputEl) inputEl.classList.add('correct');
+            advanceKoreanQuizAfterCorrect(1400);
+        } else {
+            speakFairyTTS("괜찮아요! 글자를 다시 한번 살펴보고 맞춰볼까요?");
+            if (dictationInputMode === 'magnet') {
+                const board = document.getElementById('dictationBoard');
+                if (board) {
+                    board.style.borderColor = '#ef4444';
+                    setTimeout(() => { if (board) board.style.borderColor = '#f472b6'; }, 800);
+                }
+            } else {
+                const inputEl = document.getElementById('dictationInput');
+                if (inputEl) {
+                    inputEl.classList.add('wrong');
+                    promptKoreanWrong(
+                        { word: currentItem.word, wrongInput: submission },
+                        () => {
+                            inputEl.classList.remove('wrong');
+                            inputEl.value = '';
+                            inputEl.focus();
+                        }
+                    );
+                }
+            }
+        }
+    };
+
+    // 본문 UI 생성
+    let inputAreaHtml = '';
+    if (dictationInputMode === 'magnet') {
+        inputAreaHtml = `
+            <!-- 자석 칠판 (조립 슬롯) -->
+            <div id="dictationBoard" class="dictation-board">
+                <span style="color:#f472b6; opacity:0.7; font-size:1.05rem; font-family:'Gaegu', cursive;">아래 자석을 눌러 문장을 완성해봐요! ✨</span>
             </div>
-            <button style="margin-top: 20px; background: none; border: none; color: #ccc; text-decoration: underline; cursor: pointer;" onclick="document.getElementById('dictationHint').style.display='block'">모르겠어요 (정답 보기)</button>
+
+            <!-- 자석 조립 도구 (지우기/공백) -->
+            <div style="display:flex; justify-content:center; gap:8px; margin-bottom:14px;">
+                <button class="syllable-chip space-chip" onclick="tapDictationSpace()">띄어쓰기 ␣</button>
+                <button class="quiz-button" style="background:#f43f5e; padding:8px 14px; font-size:0.95rem;" onclick="backspaceDictation()">⌫ 지우기</button>
+                <button class="quiz-button" style="background:#94a3b8; padding:8px 14px; font-size:0.95rem;" onclick="resetDictationBoard()">↺ 다시 하기</button>
+            </div>
+
+            <!-- 흩어진 음절 자석 칩 풀 -->
+            <div class="magnet-pool">
+                ${shuffledChips.map(chip => `
+                    <button id="dictChip_${chip.chipId}" class="syllable-chip" onclick="tapDictationChip(${chip.chipId}, '${chip.char}')">${chip.char}</button>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        inputAreaHtml = `
+            <input id="dictationInput" class="text-input-field" type="text" autocomplete="off" placeholder="공책에 쓰고 여기에 입력하세요" onkeypress="if(event.key === 'Enter') verifyKoreanDictation()" style="width:100%; margin-bottom:20px;">
+        `;
+    }
+
+    container.innerHTML = `
+        <div class="quiz-card" style="border: 2.5px solid #fbcfe8;">
+            ${orderToggleHtml}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size: 0.95rem; color:#be185d; font-weight:bold;">[${selectedKoreanUnit || '받아쓰기'}] ${activeQuizIdx + 1} / ${activeSectionData.length}</span>
+                <span style="font-size: 0.85rem; color: #888;">${audioSourceLabel}</span>
+            </div>
+
+            ${modeToggleHtml}
+
+            <div style="font-size: 4rem; margin-bottom: 8px; cursor: pointer;" onclick="replayDictationAudio()" title="소리 다시 듣기">🎧</div>
+            <p style="font-size:0.9rem; color:#888; margin-bottom:14px;">헤드폰을 누르면 소리를 다시 들려줘요!</p>
+
+            <div id="dictationHint" style="margin-bottom: 15px; display: none;"></div>
+
+            ${inputAreaHtml}
+
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+                <button class="quiz-button" style="background:linear-gradient(135deg, #ec4899 0%, #db2777 100%); font-size:1.15rem; padding:12px 28px;" onclick="verifyKoreanDictation()">✅ 정답 확인</button>
+                <button class="quiz-button" style="background:#ff9f43;" onclick="replayDictationAudio()">🔊 소리 다시 듣기</button>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button id="dictationHintBtn" style="background: none; border: none; color: #db2777; text-decoration: underline; cursor: pointer; font-size:0.9rem; font-weight:bold;" onclick="stepDictationHint()">💡 힌트 보기 (초성)</button>
+            </div>
         </div>
     `;
+
     setTimeout(() => playDictationAudio(currentItem), 500);
 }
 
@@ -1099,7 +1314,7 @@ window.renderReadingStage = function() {
                 readingStage++;
                 setTimeout(renderReadingStage, 1500);
             } else {
-                speakFairyTTS("순서가 틀렸어요. 다시 한번 잘 읽어보고 선택해봐!");
+                speakFairyTTS("앗 아쉬워요! 코코가 다시 고를 수 있게 도와줄게요. 차근차근 순서를 찾아봐요!");
                 // 💡 리셋 로직 추가: 틀리면 다시 고를 수 있게 초기화
                 userOrderTracking = [];
                 const puzzleBlocks = document.querySelectorAll('.puzzle-block');
@@ -1153,7 +1368,7 @@ window.renderReadingStage = function() {
                         },
                     });
                 } else {
-                    speakFairyTTS("틀렸어요. 다시 한번 찾아볼까요?");
+                    speakFairyTTS("괜찮아요! 어떤 연결 말이 어울릴지 다시 한번 생각해 볼까요?");
                 }
             }
         };
@@ -1192,7 +1407,7 @@ window.renderReadingStage = function() {
                         },
                     });
                 } else {
-                    speakFairyTTS("아니에요. 다시 한번 생각해볼까요?");
+                    speakFairyTTS("거의 다 왔어요! 힌트를 생각하며 다시 한번 골라볼까요?");
                 }
             }
         };
@@ -1211,12 +1426,27 @@ window.renderReadingStage = function() {
             dispatchReadingClearBonus('reading', activePassage?.id, activePassage?.title);
         }
         // 완료 및 보상
+        const goldenHtml = activePassage?.goldenSentences && activePassage.goldenSentences.length > 0 ? `
+            <div style="background: rgba(255, 255, 255, 0.9); border: 2px solid var(--purple); border-radius: 14px; padding: 16px; margin: 20px 0; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+                <div style="font-family:'Jua', sans-serif; font-size:1.1rem; color:var(--purple); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                    <span>🌟</span> 오늘의 황금 문장 공식 완성!
+                </div>
+                ${activePassage.goldenSentences.map(s => `
+                    <div style="margin-bottom:8px; font-size:0.95rem; line-height:1.5; color:#333;">
+                        <span style="background:var(--purple); color:white; padding:2px 8px; border-radius:8px; font-size:0.8rem; font-weight:bold; margin-right:6px;">${s.formula}</span>
+                        ${s.text}
+                    </div>
+                `).join('')}
+            </div>
+        ` : '';
+
         container.innerHTML = `
-            <div style="text-align:center; padding: 40px 20px;">
-                <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                <p style="font-size:1.4rem; color:var(--mint); margin-bottom:10px;">독해 미션을 완벽하게 클리어했습니다!</p>
-                <p style="font-size:1rem; color:#666; margin-bottom:20px;">단계별 5점 × 3 + 클리어 보너스 15점 = 총 30점!</p>
-                <button class="back-to-lobby-btn" style="background:var(--sky); color:white; border:none;" onclick="closeMissionView();">🎁 보상 확인하고 나가기</button>
+            <div style="text-align:center; padding: 30px 20px;">
+                <div style="font-size:3rem; margin-bottom:12px;">🎉</div>
+                <p style="font-size:1.4rem; color:var(--mint); margin-bottom:8px; font-family:'Jua', sans-serif;">독해 미션을 완벽하게 클리어했습니다!</p>
+                <p style="font-size:0.95rem; color:#666; margin-bottom:16px;">단계별 5점 × 3 + 클리어 보너스 15점 = 총 30점!</p>
+                ${goldenHtml}
+                <button class="back-to-lobby-btn" style="background:var(--sky); color:white; border:none; padding:12px 24px; font-size:1rem; cursor:pointer;" onclick="closeMissionView();">🎁 보상 확인하고 나가기</button>
             </div>
         `;
     }

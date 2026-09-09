@@ -79,3 +79,114 @@ body.theme--minecraft .quiz-choice-btn { border-color: #00f2fe; color: #00f2fe; 
 body.theme--minecraft .quiz-choice-btn:hover { background: #00f2fe; color: #0e0a1f; }
 body.theme--slime .quiz-choice-btn { border-color: #ff6b9d; color: #ff6b9d; background: #fffcfd; }
 body.theme--slime .quiz-choice-btn:hover { background: #ff6b9d; color: #fff; }
+
+/* ========================================================
+   🧲 슬라임 받아쓰기 자석판 & 단원 선택 그리드 스타일
+   ======================================================== */
+.dictation-board {
+    background: #fdf2f8;
+    border: 3px solid #f472b6;
+    border-radius: 18px;
+    padding: 16px;
+    min-height: 65px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    box-shadow: inset 0 2px 8px rgba(244, 114, 182, 0.15);
+}
+.dictation-slot-chip {
+    background: #fff;
+    border: 2px solid #ec4899;
+    color: #be185d;
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 12px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    animation: popIn 0.2s ease-out;
+}
+.dictation-slot-space {
+    width: 16px;
+    height: 26px;
+    border-bottom: 3px dashed #f472b6;
+    margin: 0 3px;
+}
+.magnet-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #fff;
+    border-radius: 16px;
+    border: 2px dashed #f9a8d4;
+}
+.syllable-chip {
+    background: linear-gradient(135deg, #fbcfe8 0%, #f472b6 100%);
+    color: #831843;
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(244, 114, 182, 0.25);
+    transition: transform 0.15s, box-shadow 0.15s;
+    user-select: none;
+}
+.syllable-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(244, 114, 182, 0.35);
+}
+.syllable-chip:active {
+    transform: scale(0.95);
+}
+.syllable-chip.space-chip {
+    background: linear-gradient(135deg, #fef08a 0%, #facc15 100%);
+    color: #713f12;
+}
+.syllable-chip.used {
+    opacity: 0.25;
+    pointer-events: none;
+    transform: scale(0.88);
+}
+.dictation-unit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.dictation-unit-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%);
+    border: 2px solid #f472b6;
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.dictation-unit-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(244, 114, 182, 0.25);
+    border-color: #db2777;
+}
+.dictation-unit-num {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: #db2777;
+    margin-bottom: 4px;
+}
+.dictation-unit-range {
+    font-size: 0.8rem;
+    color: #9d174d;
+    font-weight: bold;
+}
+@keyframes popIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
