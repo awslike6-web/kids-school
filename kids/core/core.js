@@ -19,8 +19,27 @@ window.isAdmin = (window.savedName === '아빠' || window.savedName === '엄마'
 
 // 🏰 코어 및 테마 준비
 document.addEventListener("DOMContentLoaded", () => {
-    // 상대 경로: html 파일 기준](../../core/ 로드 경로
-    const corePath = "../../core/";
+    // 💡 [경로 무결성 자동 계산] 어떤 HTML(루트, 1단계, 2단계 하위)에서 호출되더라도
+    // 현재 core.js 스크립트가 위치한 실제 디렉토리를 찾아내어 정확한 경로로 부품을 조립합니다.
+    let corePath = "../../core/";
+    try {
+        const coreScript = document.querySelector('script[src*="core.js"]');
+        if (coreScript && coreScript.src) {
+            const cleanUrl = coreScript.src.split('?')[0];
+            corePath = cleanUrl.substring(0, cleanUrl.lastIndexOf('/') + 1);
+        } else {
+            const path = window.location.pathname;
+            if (path.includes('/subjects/') || path.includes('/playground/')) {
+                corePath = "../../core/";
+            } else if (path.includes('/common_space/') || path.includes('/kids/')) {
+                corePath = "../core/";
+            } else {
+                corePath = "kids/core/";
+            }
+        }
+    } catch (e) {
+        corePath = "../../core/";
+    }
     
     // 💡 모든 로비 복귀 링크에 현재 활성 자녀 파라미터 자동 동기화
     const syncLobbyReturnLinks = () => {

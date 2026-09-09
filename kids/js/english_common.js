@@ -154,6 +154,130 @@ window.changeEnglishSpeechRate = function(rate) {
 };
 
 // ========================================================
+// 🗣️ 초등 영어 파닉스(한글 발음) 1:1 딕셔너리 & 렌더링 엔진
+// ========================================================
+const ENGLISH_PHONICS_DICT = {
+  // 의문사 & 조동사 & be동사
+  "what": "왓", "where": "웨어", "how": "하우", "when": "웬", "who": "후", "why": "와이",
+  "did": "디드", "do": "두", "does": "더즈", "done": "던", "doing": "두잉",
+  "is": "이즈", "was": "워즈", "are": "아", "were": "워", "am": "앰", "be": "비", "been": "빈",
+  "can": "캔", "could": "쿠드", "will": "윌", "would": "우드", "should": "슈드", "may": "메이",
+
+  // 인칭대명사 & 지시대명사 & 부사
+  "i": "아이", "you": "유", "he": "히", "she": "쉬", "it": "잇", "we": "위", "they": "데이",
+  "my": "마이", "your": "유어", "his": "히즈", "her": "허", "its": "잇츠", "our": "아워", "their": "데어",
+  "me": "미", "him": "힘", "them": "뎀", "us": "어스",
+  "this": "디스", "that": "댓", "these": "디즈", "those": "도즈",
+  "there": "데어", "here": "히어", "now": "나우", "then": "덴", "too": "투", "very": "베리",
+
+  // 7단원 (지난 일 묻고 답하기) 핵심 단어 & 동사 과거형
+  "played": "플레이드", "play": "플레이", "basketball": "배스킷볼", "baseball": "베이스볼", "soccer": "사커",
+  "took": "툭", "take": "테이크", "many": "매니", "pictures": "픽처스", "picture": "픽처",
+  "visited": "비지티드", "visit": "비짓", "grandpa": "그랜파", "grandparents": "그랜드패런츠",
+  "watched": "왓치드", "watch": "왓치", "movie": "무비", "movies": "무비스",
+  "saw": "쏘", "see": "씨", "cleaned": "클린드", "clean": "클린", "room": "룸",
+  "went": "웬트", "go": "고", "camping": "캠핑", "camp": "캠프", "campfire": "캠프파이어",
+  "fun": "펀", "hard": "하드", "boring": "보링", "great": "그레이트", "good": "굿", "nice": "나이스",
+  "delicious": "딜리셔스", "food": "푸드", "chicken": "치킨", "made": "메이드", "make": "메이크", "car": "카",
+  "ate": "에이트", "eat": "잇", "summer": "서머", "weekend": "위켄드", "yesterday": "예스터데이",
+  "wonderful": "원더풀", "family": "패밀리", "dad": "대드", "mom": "맘",
+
+  // 8단원 (길 찾기 & 장소 안내) 핵심 단어
+  "library": "라이브러리", "straight": "스트레이트", "turn": "턴", "left": "레프트", "right": "라이트",
+  "corner": "코너", "first": "퍼스트", "second": "세컨드", "third": "써드", "floor": "플로어",
+  "school": "스쿨", "park": "파크", "hospital": "하스피털", "post": "포스트", "office": "오피스",
+  "bank": "뱅크", "bookstore": "북스토어", "behind": "비하인드", "front": "프런트", "excuse": "익스큐즈",
+  "find": "파인드", "station": "스테이션", "store": "스토어", "market": "마켓",
+
+  // 관사 & 전치사 & 접속사
+  "a": "어", "an": "앤", "the": "더",
+  "in": "인", "on": "온", "at": "앳", "to": "투", "for": "포", "of": "오브", "with": "위드",
+  "next": "넥스트", "under": "언더", "by": "바이", "about": "어바웃",
+  "and": "앤드", "but": "벗", "so": "쏘", "because": "비코즈",
+
+  // 기타 주요 초등 어휘
+  "hello": "헬로", "hi": "하이", "bye": "바이", "thanks": "땡큐", "thank": "땡크",
+  "please": "플리즈", "sorry": "쏘리", "help": "헬프", "like": "라이크", "liked": "라이크트",
+  "have": "해브", "had": "헤드", "has": "해즈", "want": "원트", "need": "니드",
+  "look": "룩", "listen": "리슨", "read": "리드", "write": "라이트", "speak": "스피크",
+  "night": "나이트", "nose": "노즈", "nest": "네스트", "nut": "너트", "net": "넷",
+  "neck": "넥", "music": "뮤직", "moon": "문", "milk": "밀크", "melon": "멜론", "monkey": "멍키", "mouse": "마우스",
+
+  // 축약형
+  "what's": "왓츠", "it's": "잇츠", "i'm": "아임", "you're": "유어", "he's": "히즈", "she's": "쉬즈",
+  "we're": "위어", "they're": "데어", "don't": "돈트", "didn't": "디든트", "can't": "캔트", "let's": "렛츠"
+};
+
+// 단어 끝 구두점(? . , ! ' ")을 분리하여 한글 발음으로 변환
+function getPhonicsKorean(rawWord) {
+  if (!rawWord) return "";
+  const trimmed = String(rawWord).trim();
+  if (!trimmed) return "";
+
+  // 앞뒤 구두점 분리
+  const match = trimmed.match(/^([^a-zA-Z0-9]*)([a-zA-Z0-9'’-]+)([^a-zA-Z0-9]*)$/);
+  if (!match) {
+    return trimmed; // 특수문자만 있는 경우 그대로
+  }
+
+  const prefix = match[1] || "";
+  const coreWord = match[2].toLowerCase();
+  const postfix = match[3] || "";
+
+  let kor = ENGLISH_PHONICS_DICT[coreWord];
+  if (!kor) {
+    // 사전에 없는 경우 아포스트로피 제거 후 재시도
+    const noApos = coreWord.replace(/['’]/g, '');
+    kor = ENGLISH_PHONICS_DICT[noApos];
+  }
+
+  if (!kor) {
+    // 규칙 기반 간이 파닉스 폴백 생성기
+    kor = phonicsRuleFallback(coreWord);
+  }
+
+  return `${prefix}${kor}${postfix}`;
+}
+
+// 규칙 기반 기본 파닉스 음가 생성기
+function phonicsRuleFallback(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return word;
+  
+  // 간단한 음가 맵
+  const map = {
+    'ph': '프', 'th': '쓰', 'sh': '쉬', 'ch': '치', 'ck': '크', 'ng': '응', 'wh': '왓',
+    'b': '브', 'c': '크', 'd': '드', 'f': '프', 'g': '그', 'h': '흐', 'j': '즈',
+    'k': '크', 'l': '르', 'm': '므', 'n': '느', 'p': '프', 'q': '크', 'r': '르',
+    's': '스', 't': '트', 'v': '브', 'w': '우', 'x': '크스', 'y': '이', 'z': '즈',
+    'a': '애', 'e': '에', 'i': '이', 'o': '오', 'u': '어',
+    'ai': '에이', 'ay': '에이', 'ee': '이', 'ea': '이', 'oa': '오', 'oo': '우', 'ou': '아우', 'ow': '아우'
+  };
+  
+  // 3음절 이하 약식 조합
+  return w.length <= 4 ? (ENGLISH_PHONICS_DICT[w] || w) : w;
+}
+
+// 문장 전체를 단어별 1:1 상하 파닉스 블록 HTML로 렌더링
+function renderSentencePhonicsHtml(sentence) {
+  if (!sentence) return "";
+  const words = String(sentence).trim().split(/\s+/);
+  return `
+    <div class="phonics-sentence-box">
+      ${words.map(w => `
+        <div class="phonics-word-unit">
+          <span class="p-eng">${w}</span>
+          <span class="p-kor">${getPhonicsKorean(w)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+window.getPhonicsKorean = getPhonicsKorean;
+window.renderSentencePhonicsHtml = renderSentencePhonicsHtml;
+
+// ========================================================
 // 🚪 오버레이 미션 팝업 연동 총 제어
 // ========================================================
 function isEnglishMissionInProgress() {
@@ -738,8 +862,11 @@ function renderVocaPoolUI(container) {
         `;
     } else {
         displayContentHtml = `
-            <div class="quiz-descr" style="font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 8px 0 14px;">
+            <div class="quiz-descr" style="font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 8px 0 4px;">
                 ${answerWord}
+            </div>
+            <div style="margin-bottom: 12px;">
+                <span class="voca-phonics-badge">🗣️ [${getPhonicsKorean(answerWord)}]</span>
             </div>
             <div style="font-size: 1.05rem; color: #64748b; margin-bottom: 20px;">
                 이 단어의 알맞은 우리말 뜻을 골라보세요!
@@ -850,7 +977,10 @@ function renderStage1UI(container) {
             ${getEnglishOrderToggleHtml()}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">알파벳 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
-            <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;">${answerWord}</div>
+            <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 4px;">${answerWord}</div>
+            <div style="margin-bottom: 12px;">
+                <span class="voca-phonics-badge">🗣️ [${getPhonicsKorean(answerWord)}]</span>
+            </div>
             ${meaningHtml}
             <div style="margin-bottom: 20px; color: #666;">이 단어를 소리 내어 읽고 아래 버튼을 눌러보세요!</div>
             
@@ -1163,9 +1293,15 @@ function renderStage4UI(container) {
             let html = '';
             for (let i = 0; i < window.sentenceTargetWords.length; i++) {
                 if (i < window.currentSentenceAnswer.length) {
-                    html += `<span style="border-bottom:3px solid var(--primary); padding:0 10px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold; margin:0 5px;">${window.currentSentenceAnswer[i].word}</span>`;
+                    const ansItem = window.currentSentenceAnswer[i];
+                    html += `
+                        <span style="border-bottom:3px solid var(--primary); padding:2px 8px; display:inline-flex; flex-direction:column; align-items:center; color:var(--primary); font-weight:bold; margin:0 4px; line-height:1.2;">
+                            <span style="font-size:1.4rem;">${ansItem.word}</span>
+                            <span style="font-size:0.85rem; font-family:'Jua',sans-serif; color:#0284c7; margin-top:2px;">${getPhonicsKorean(ansItem.word)}</span>
+                        </span>
+                    `;
                 } else {
-                    html += '<span style="border-bottom:3px solid #ccc; width:50px; display:inline-block; margin:0 5px;"></span>';
+                    html += '<span style="border-bottom:3px solid #ccc; width:50px; display:inline-block; margin:0 5px; height:36px;"></span>';
                 }
             }
             blankContainer.innerHTML = html;
@@ -1200,11 +1336,16 @@ function renderStage4UI(container) {
         };
 
         interactiveHtml = `
-            <div id="sent-word-blanks" style="font-size: 1.5rem; margin-bottom: 20px; min-height: 40px; display: flex; justify-content: center; flex-wrap: wrap; line-height: 2;">
-                ${wordsArray.map(() => '<span style="border-bottom:3px solid #ccc; width:50px; display:inline-block; margin:0 5px;"></span>').join('')}
+            <div id="sent-word-blanks" style="font-size: 1.5rem; margin-bottom: 20px; min-height: 48px; display: flex; justify-content: center; flex-wrap: wrap; line-height: 2;">
+                ${wordsArray.map(() => '<span style="border-bottom:3px solid #ccc; width:50px; display:inline-block; margin:0 5px; height:36px;"></span>').join('')}
             </div>
             <div id="sent-word-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                ${scrambled.map((w, i) => `<button id="sent-word-btn-${i}" class="quiz-choice-btn" onclick="selectSentenceWord('${w.replace(/'/g, "\\'")}', ${i})">${w}</button>`).join('')}
+                ${scrambled.map((w, i) => `
+                    <button id="sent-word-btn-${i}" class="quiz-choice-btn sent-word-btn" onclick="selectSentenceWord('${w.replace(/'/g, "\\'")}', ${i})">
+                        <span class="btn-eng">${w}</span>
+                        <span class="btn-kor-phonics">${getPhonicsKorean(w)}</span>
+                    </button>
+                `).join('')}
             </div>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
                 <button class="quiz-button" style="background:#ff9f43;" onclick="resetSentenceWords()">다시 배열하기</button>
@@ -1236,7 +1377,10 @@ function renderStage4UI(container) {
         interactiveHtml = `
             <div class="quiz-choices-container" style="display: flex; flex-direction: column; gap: 10px;">
                 ${choices.map(choice => `
-                     <button class="quiz-choice-btn" onclick="verifyStage4Choice('${choice.replace(/'/g, "\\'")}')">${choice}</button>
+                     <button class="quiz-choice-btn" style="padding: 14px 18px; text-align: left; line-height: 1.4;" onclick="verifyStage4Choice('${choice.replace(/'/g, "\\'")}')">
+                        <div style="font-size: 1.25rem; font-weight: bold;">${choice}</div>
+                        <div style="font-size: 0.95rem; font-family: 'Jua', sans-serif; color: #0284c7; margin-top: 4px;">🗣️ ${choice.split(/\s+/).map(w => getPhonicsKorean(w)).join(' ')}</div>
+                     </button>
                 `).join('')}
             </div>
         `;
@@ -1277,12 +1421,10 @@ function renderStage4SuccessCard(container, sentence, meaning) {
                     참 잘했어요! 멋진 영어 문장 완성!
                 </div>
 
-                <!-- 완성된 문장 하이라이트 박스 -->
-                <div style="background: rgba(16, 185, 129, 0.12); border: 2px solid #10b981; border-radius: 18px; padding: 22px 16px; margin-bottom: 18px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);">
-                    <div style="font-size: 1.7rem; font-weight: 800; color: #065f46; margin-bottom: 10px; line-height: 1.45; word-break: keep-all;">
-                        ${sentence}
-                    </div>
-                    <div style="font-size: 1.2rem; font-weight: bold; color: #1e293b; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 6px 18px; border-radius: 25px; border: 1.5px solid #a7f3d0;">
+                <!-- 완성된 문장 및 단어별 한글 파닉스 발음 1:1 블록 -->
+                <div style="background: rgba(16, 185, 129, 0.12); border: 2px solid #10b981; border-radius: 18px; padding: 16px 12px; margin-bottom: 18px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);">
+                    ${renderSentencePhonicsHtml(sentence)}
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #1e293b; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 6px 18px; border-radius: 25px; border: 1.5px solid #a7f3d0; margin-top: 4px;">
                         🇰🇷 ${meaning}
                     </div>
                 </div>

@@ -491,6 +491,19 @@ export default {
       return await handleBootstrap(url, request, env, ctx);
     }
 
+    // 4-B. 🔑 Gemini 런타임 보안 키 디스펜서 (/api/gemini-key)
+    if (url.pathname === '/api/gemini-key') {
+      const geminiKey = (env && (env.GEMINI_API_KEY || env.GEMINI_KEY)) || '';
+      return new Response(JSON.stringify({
+        status: 'ok',
+        key: geminiKey,
+        timestamp: new Date().toISOString()
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    }
+
     // 5. 노션 REST API 요청 처리 (/v1/...)
     if (url.pathname.startsWith('/v1/')) {
       const authHeader = getNotionAuthHeader(request, env);
