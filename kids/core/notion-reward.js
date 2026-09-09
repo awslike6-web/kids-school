@@ -287,6 +287,22 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
         throw new Error(`노션 업데이트 실패 (상태: ${patchRes.status}): ${errText}`);
     }
     
+    // ⚡ [SWR 캐시 동기화] 로비 인벤토리 로컬 캐시 즉각 최신화 (페이지 복귀 시 0.01초 반영)
+    try {
+      const invCacheKey = `MINMIN_INVENTORY_CACHE_${userName}`;
+      const diamondVal = currentTheme === '마인크래프트' ? currentWealth : (props["다이아몬드 개수"]?.number || 0);
+      const slimeVal = currentTheme !== '마인크래프트' ? currentWealth : (typeof getDaughterRewardCount === 'function' ? getDaughterRewardCount(props) : (props["슬라임 파츠 개수"]?.number || 0));
+      localStorage.setItem(invCacheKey, JSON.stringify({
+        diamond: diamondVal,
+        slime: slimeVal,
+        level: currLevelInfo.level,
+        theme: currentTheme,
+        updatedAt: Date.now()
+      }));
+    } catch (e) {
+      console.warn("[Inventory Cache] 로컬 캐시 갱신 실패:", e);
+    }
+    
     if (!isSilent) {
         let rewardName = typeof getRewardDisplayLabel === 'function'
             ? getRewardDisplayLabel(currentTheme)

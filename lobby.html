@@ -562,7 +562,39 @@ loadCoreScripts("kids/core/", requiredCores, () => {
           container.className = "inventory-card " + (defaultTheme === '마인크래프트' ? 'theme--minecraft' : 'theme--slime');
           return; // 🔥 노션 통신망 차단완료!
       }
+
+      function renderInventoryCard(diamond, slime, level, theme) {
+        localStorage.setItem('currentTheme', theme);
+        container.classList.remove('theme--minecraft', 'theme--slime');
+        if (theme === '마인크래프트') {
+          container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
+          container.classList.add('theme--minecraft');
+        } else {
+          const hariboHtml = typeof getRewardWealthHtml === 'function'
+            ? getRewardWealthHtml(theme, slime, '')
+            : `🍬 <span style="color:#E84393;">x${slime}</span>`;
+          container.innerHTML = `<div class="reward-badge">${hariboHtml}</div><div class="math-level">통합 Lv. ${level}</div>`;
+          container.classList.add('theme--slime');
+        }
+      }
+
+      // ⚡ 1. SWR 캐시 즉각 로딩 (0.01초 렌더링)
+      const invCacheKey = `MINMIN_INVENTORY_CACHE_${childName}`;
+      let hasCachedData = false;
+      try {
+        const cachedRaw = localStorage.getItem(invCacheKey);
+        if (cachedRaw) {
+          const cached = JSON.parse(cachedRaw);
+          if (cached && typeof cached.level !== 'undefined') {
+            renderInventoryCard(cached.diamond || 0, cached.slime || 0, cached.level || 1, cached.theme || (childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임'));
+            hasCachedData = true;
+          }
+        }
+      } catch (e) {
+        console.warn("[Inventory Cache] 캐시 로드 실패:", e);
+      }
       
+      // 🌐 2. 백그라운드 최신화 (워커 엣지 캐시 또는 노션 연동)
       try {
         const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
           method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
@@ -578,27 +610,28 @@ loadCoreScripts("kids/core/", requiredCores, () => {
           : (props["슬라임 파츠 개수"]?.number || 0);
         const level = props["통합 레벨"]?.formula?.number || props["수학 레벨"]?.number || 1;
         
-        localStorage.setItem('currentTheme', theme);
-        if (theme === '마인크래프트') {
-          container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
-          container.classList.add('theme--minecraft');
-        } else {
-          const hariboHtml = typeof getRewardWealthHtml === 'function'
-            ? getRewardWealthHtml(theme, slime, '')
-            : `🍬 <span style="color:#E84393;">x${slime}</span>`;
-          container.innerHTML = `<div class="reward-badge">${hariboHtml}</div><div class="math-level">통합 Lv. ${level}</div>`;
-          container.classList.add('theme--slime');
-        }
+        renderInventoryCard(diamond, slime, level, theme);
+
+        // 로컬 캐시 갱신
+        localStorage.setItem(invCacheKey, JSON.stringify({
+          diamond,
+          slime,
+          level,
+          theme,
+          updatedAt: Date.now()
+        }));
       } catch (error) {
         console.error("인벤토리 로드 에러:", error);
-        const defaultTheme = childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임';
-        localStorage.setItem('currentTheme', defaultTheme);
-        const failHtml = defaultTheme === '마인크래프트'
-          ? '💎'
-          : (typeof getRewardWealthHtml === 'function'
-            ? getRewardWealthHtml(defaultTheme, 0, '')
-            : '🍬');
-        container.innerHTML = `<div class="reward-badge">${failHtml} <span>x0 (연결 필요)</span></div>`;
+        if (!hasCachedData) {
+          const defaultTheme = childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임';
+          localStorage.setItem('currentTheme', defaultTheme);
+          const failHtml = defaultTheme === '마인크래프트'
+            ? '💎'
+            : (typeof getRewardWealthHtml === 'function'
+              ? getRewardWealthHtml(defaultTheme, 0, '')
+              : '🍬');
+          container.innerHTML = `<div class="reward-badge">${failHtml} <span>x0 (연결 필요)</span></div>`;
+        }
       }
     }
 
