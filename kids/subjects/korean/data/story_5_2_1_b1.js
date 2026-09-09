@@ -9,7 +9,7 @@ window.STORY_BOOK = {
   themeColorDark: "#059669",
   backUrl: "korean.html",
   backLabel: "🚪 국어방 대기실",
-  version: "20260909_b1",
+  version: "20260909_b2",
   pages: [
     {
       page: 1,
@@ -141,11 +141,11 @@ window.STORY_BOOK = {
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p9.png",
       textHtml: `
         <div class="webtoon-passage">
-          슬찬이가 넘어진 모습을 보았기 때문에, 민수는 먼저 달려가 손을 내밀었습니다.<br>
-          <div class="webtoon-dialogue">"우리는 한 팀이잖아. 끝까지 함께하자!"</div>
-          민수의 따뜻한 격려 덕분에 슬찬이는 마침내 눈물을 닦고 환하게 미소 지었습니다.
+          슬찬이가 넘어진 모습을 보았기 때문에, 민수는 먼저 달려가 따뜻한 손을 내밀었습니다.<br>
+          <div class="webtoon-dialogue">"슬찬아, 정말 속상했지? 팀을 위해 1등을 하고 싶어서 열심히 달렸는데 아쉬웠을 거야. 우리는 한 팀이니까 끝까지 함께 가자!"</div>
+          민수의 따뜻한 말 한마디에 슬찬이는 눈물을 닦고 환하게 웃으며 일어섰습니다.
         </div>
-        <div class="webtoon-ref-badge">💡 2대 황금 문장 공식 ② : "~때문에 ~했다" (인과 서술)</div>
+        <div class="webtoon-ref-badge">💡 2대 황금 문장 공식 : "~때문에 손을 내밀었다" / "~아쉬웠을 것이다. 왜냐하면 ~이기 때문이다"</div>
       `,
       audio: "../../assets/audio/storybook/korean_5_2_1/book1/korean_5_2_1_b1_p9.mp3"
     },

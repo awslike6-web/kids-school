@@ -404,7 +404,7 @@ function renderStorybookLibrary(innerBody) {
                                 <span style="font-size: 1.3rem;">${book.icon}</span>
                             </div>
                             
-                            <img src="${book.coverImg}?v=20260909_1" alt="${book.title}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <img src="${book.coverImg}?v=20260909_2" alt="${book.title}" style="width: 100%; height: 160px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1);">
                             
                             <h4 style="font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #f8fafc; margin-bottom: 4px;">
                                 ${book.title}
