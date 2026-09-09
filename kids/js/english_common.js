@@ -171,7 +171,7 @@ const ENGLISH_PHONICS_DICT = {
   "there": "데어", "here": "히어", "now": "나우", "then": "덴", "too": "투", "very": "베리",
 
   // 7단원 (지난 일 묻고 답하기) 핵심 단어 & 동사 과거형
-  "played": "플레이드", "play": "플레이", "basketball": "배스킷볼", "baseball": "베이스볼", "soccer": "사커",
+  "last": "래스트", "played": "플레이드", "play": "플레이", "basketball": "배스킷볼", "baseball": "베이스볼", "soccer": "사커",
   "took": "툭", "take": "테이크", "many": "매니", "pictures": "픽처스", "picture": "픽처",
   "visited": "비지티드", "visit": "비짓", "grandpa": "그랜파", "grandparents": "그랜드패런츠",
   "watched": "왓치드", "watch": "왓치", "movie": "무비", "movies": "무비스",
