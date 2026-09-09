@@ -19,9 +19,9 @@ window.STORY_BOOK = {
       spreadImg: "raw_page_1.png",
       korSpreadImg: "raw_page_1.png",
       illImg: "eng_l7_ill_p1_cover.png",
-      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
-      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_p1.mp3",
-      audio: "../../assets/audio/storybook/english_l7/eng_l7_p1.mp3",
+      engAudio: "../../assets/audio/storybook/english_l7/eng_l7_cover.mp3",
+      korAudio: "../../assets/audio/storybook/english_l7/kor_l7_cover.mp3",
+      audio: "../../assets/audio/storybook/english_l7/eng_l7_cover.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8; text-align: center; padding: 10px 0;">
           <div style="font-size: 1.45rem; font-weight: bold; color: #60a5fa; margin-bottom: 8px; text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);">
