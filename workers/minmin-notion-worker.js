@@ -3,7 +3,9 @@
  *
  * 💡 주요 기능:
  *  1. 🏰 노션 REST API 보안 프록시 (Notion-Version: 2022-06-28 주입, CORS 처리, Token 관리)
- *  2. ⚡ Cloudflare Cache API (caches.default) 기반 초고속 엣지 캐싱 (100ms 이내 반환)
+ *  2. ⚡ 2계층 스마트 캐시 시스템 (L1: In-Memory / L2: Cloudflare Cache API)
+ *     - 동일 인스턴스 L1 메모리 캐시: 1ms 초저지연 즉답
+ *     - Cloudflare Cache API (L2): 전 세계 엣지 캐싱 (origin 기반 정밀 매핑)
  *     - POST /v1/databases/:id/query 요청의 본문 해시 기반 스마트 캐싱 (TTL 5분)
  *     - X-Cache-Status: HIT / MISS 응답 헤더 제공
  *  3. 🚀 단일 번들링 부트스트랩 API (/api/bootstrap)
@@ -35,6 +37,45 @@ const DEFAULT_DBS = {
 // 캐시 TTL (초 단위)
 const CACHE_TTL_QUERY = 300;      // 노션 DB 쿼리: 5분 (300초)
 const CACHE_TTL_BOOTSTRAP = 180;  // 부트스트랩 번들: 3분 (180초)
+
+// ============================================================================
+// ⚡ 2계층 스마트 캐시 시스템 (L1: In-Memory / L2: Cloudflare Cache API)
+// ============================================================================
+const MEMORY_CACHE = new Map();
+const MAX_MEM_CACHE_ENTRIES = 300;
+
+function getFromMemoryCache(key) {
+  const item = MEMORY_CACHE.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiresAt) {
+    MEMORY_CACHE.delete(key);
+    return null;
+  }
+  return item;
+}
+
+function saveToMemoryCache(key, bodyText, status, headers, ttlSeconds) {
+  if (MEMORY_CACHE.size >= MAX_MEM_CACHE_ENTRIES) {
+    const firstKey = MEMORY_CACHE.keys().next().value;
+    MEMORY_CACHE.delete(firstKey);
+  }
+  MEMORY_CACHE.set(key, {
+    body: bodyText,
+    status,
+    headers: Array.from(headers.entries()),
+    expiresAt: Date.now() + (ttlSeconds * 1000)
+  });
+}
+
+function createMemoryCacheResponse(cachedItem, source = 'HIT') {
+  const headers = new Headers(cachedItem.headers);
+  headers.set('X-Cache-Status', source);
+  headers.set('Access-Control-Allow-Origin', '*');
+  return new Response(cachedItem.body, {
+    status: cachedItem.status,
+    headers
+  });
+}
 
 // ============================================================================
 // 🔑 Edge TTS 엔진 (Microsoft Edge Neural AI)
@@ -203,11 +244,11 @@ async function sha256Hex(str) {
 }
 
 /**
- * Cloudflare Cache API용 고유 GET 가상 요청 객체 생성
- * (Cache API는 GET/HEAD 메서드만 캐싱 가능하므로 가상 URL을 key로 매핑)
+ * Cloudflare Cache API용 GET 가상 요청 객체 생성
+ * (반드시 현재 워커의 origin 도메인을 사용하여 캐시 저장/조회 완벽 보장)
  */
-function createCacheKeyRequest(virtualPath, hash) {
-  const cacheUrl = `https://cache.minmin-notion.internal${virtualPath}?h=${hash}`;
+function createCacheKeyRequest(origin, virtualPath, hash) {
+  const cacheUrl = `${origin}/__cf_cache${virtualPath}?h=${hash}`;
   return new Request(cacheUrl, { method: 'GET' });
 }
 
@@ -260,24 +301,37 @@ async function handleBootstrap(url, request, env, ctx) {
     });
   }
 
-  // 1. 엣지 캐시 확인
-  const cache = caches.default;
-  const cacheKeyReq = createCacheKeyRequest(`/api/bootstrap`, `${encodeURIComponent(childName)}`);
+  const cacheKeyStr = `bootstrap_${childName}`;
+  const cacheKeyReq = createCacheKeyRequest(url.origin, `/api/bootstrap`, `${encodeURIComponent(childName)}`);
 
+  // 1. L1 메모리 캐시 확인
   if (!forceRefresh) {
-    const cachedResponse = await cache.match(cacheKeyReq);
-    if (cachedResponse) {
-      const respHeaders = new Headers(cachedResponse.headers);
-      respHeaders.set('X-Cache-Status', 'HIT');
-      respHeaders.set('Access-Control-Allow-Origin', '*');
-      return new Response(cachedResponse.body, {
-        status: cachedResponse.status,
-        headers: respHeaders
-      });
+    const memCached = getFromMemoryCache(cacheKeyStr);
+    if (memCached) {
+      return createMemoryCacheResponse(memCached, 'HIT');
     }
   }
 
-  // 2. 캐시 부재 시 백엔드에서 3대 핵심 DB 병렬 벌크 호출
+  // 2. L2 Cloudflare Cache API 확인
+  const cache = caches.default;
+  if (!forceRefresh) {
+    try {
+      const cachedResponse = await cache.match(cacheKeyReq);
+      if (cachedResponse) {
+        const respHeaders = new Headers(cachedResponse.headers);
+        respHeaders.set('X-Cache-Status', 'HIT');
+        respHeaders.set('Access-Control-Allow-Origin', '*');
+        const bodyText = await cachedResponse.text();
+        saveToMemoryCache(cacheKeyStr, bodyText, cachedResponse.status, respHeaders, CACHE_TTL_BOOTSTRAP);
+        return new Response(bodyText, {
+          status: cachedResponse.status,
+          headers: respHeaders
+        });
+      }
+    } catch (e) {}
+  }
+
+  // 3. 캐시 부재 시 백엔드에서 3대 핵심 DB 병렬 벌크 호출
   const inventoryDbId = (env && env.INVENTORY_DB_ID) || DEFAULT_DBS.INVENTORY;
   const timetableDbId = (env && env.STATIC_TIMETABLE_DB_ID) || DEFAULT_DBS.STATIC_TIMETABLE;
   const overlayDbId = (env && env.EVENT_OVERLAY_DB_ID) || DEFAULT_DBS.EVENT_OVERLAY;
@@ -310,22 +364,30 @@ async function handleBootstrap(url, request, env, ctx) {
     };
 
     const responseBody = JSON.stringify(bundle);
-    const response = new Response(responseBody, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': `public, max-age=${CACHE_TTL_BOOTSTRAP}, stale-while-revalidate=300`,
-        'X-Cache-Status': 'MISS',
-        ...CORS_HEADERS
-      }
+    const respHeaders = new Headers({
+      'Content-Type': 'application/json',
+      'Cache-Control': `public, max-age=${CACHE_TTL_BOOTSTRAP}, stale-while-revalidate=300`,
+      'X-Cache-Status': 'MISS',
+      ...CORS_HEADERS
     });
 
-    // 백그라운드 엣지 캐시 저장
-    if (ctx && ctx.waitUntil) {
-      ctx.waitUntil(cache.put(cacheKeyReq, response.clone()));
-    } else {
-      await cache.put(cacheKeyReq, response.clone());
-    }
+    // L1 메모리 캐시 저장
+    saveToMemoryCache(cacheKeyStr, responseBody, 200, respHeaders, CACHE_TTL_BOOTSTRAP);
+
+    const response = new Response(responseBody, {
+      status: 200,
+      headers: respHeaders
+    });
+
+    // L2 엣지 캐시 저장
+    try {
+      if (ctx && ctx.waitUntil) {
+        ctx.waitUntil(cache.put(cacheKeyReq, response.clone()));
+      } else {
+        await cache.put(cacheKeyReq, response.clone());
+      }
+    } catch (e) {}
+
     return response;
 
   } catch (err) {
@@ -353,12 +415,13 @@ export default {
       return new Response(JSON.stringify({
         status: 'ok',
         service: 'minmin-notion-edge-cache',
-        version: '2026.09-v2',
-        features: ['notion-proxy', 'edge-cache-api', 'bootstrap-bundle', 'edge-tts'],
+        version: '2026.09-v3-l1l2',
+        features: ['notion-proxy', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts'],
         cacheTTL: {
           query: `${CACHE_TTL_QUERY}s`,
           bootstrap: `${CACHE_TTL_BOOTSTRAP}s`
         },
+        memoryCacheEntries: MEMORY_CACHE.size,
         timestamp: new Date().toISOString()
       }), {
         status: 200,
@@ -447,21 +510,34 @@ export default {
         const reqBodyText = await request.text();
         const forceRefresh = url.searchParams.get('force') === 'true' || request.headers.get('Pragma') === 'no-cache';
         const bodyHash = await sha256Hex(url.pathname + '_' + reqBodyText);
+        const cacheKeyStr = `query_${bodyHash}`;
+        const cacheKeyReq = createCacheKeyRequest(url.origin, url.pathname, bodyHash);
 
-        const cache = caches.default;
-        const cacheKeyReq = createCacheKeyRequest(url.pathname, bodyHash);
-
+        // 1) L1 메모리 캐시 확인
         if (!forceRefresh) {
-          const cachedResp = await cache.match(cacheKeyReq);
-          if (cachedResp) {
-            const respHeaders = new Headers(cachedResp.headers);
-            respHeaders.set('X-Cache-Status', 'HIT');
-            respHeaders.set('Access-Control-Allow-Origin', '*');
-            return new Response(cachedResp.body, {
-              status: cachedResp.status,
-              headers: respHeaders
-            });
+          const memCached = getFromMemoryCache(cacheKeyStr);
+          if (memCached) {
+            return createMemoryCacheResponse(memCached, 'HIT');
           }
+        }
+
+        // 2) L2 Cloudflare Cache API 확인
+        const cache = caches.default;
+        if (!forceRefresh) {
+          try {
+            const cachedResp = await cache.match(cacheKeyReq);
+            if (cachedResp) {
+              const respHeaders = new Headers(cachedResp.headers);
+              respHeaders.set('X-Cache-Status', 'HIT');
+              respHeaders.set('Access-Control-Allow-Origin', '*');
+              const bodyText = await cachedResp.text();
+              saveToMemoryCache(cacheKeyStr, bodyText, cachedResp.status, respHeaders, CACHE_TTL_QUERY);
+              return new Response(bodyText, {
+                status: cachedResp.status,
+                headers: respHeaders
+              });
+            }
+          } catch (e) {}
         }
 
         // 캐시 MISS: 노션 원본 API 호출
@@ -474,16 +550,24 @@ export default {
 
         if (notionResp.ok) {
           responseHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL_QUERY}, stale-while-revalidate=600`);
+          
+          // L1 메모리 캐시 저장
+          saveToMemoryCache(cacheKeyStr, respData, notionResp.status, responseHeaders, CACHE_TTL_QUERY);
+
           const cacheableResponse = new Response(respData, {
             status: notionResp.status,
             headers: responseHeaders
           });
-          // 엣지 캐시 저장
-          if (ctx && ctx.waitUntil) {
-            ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
-          } else {
-            await cache.put(cacheKeyReq, cacheableResponse.clone());
-          }
+          
+          // L2 엣지 캐시 저장
+          try {
+            if (ctx && ctx.waitUntil) {
+              ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
+            } else {
+              await cache.put(cacheKeyReq, cacheableResponse.clone());
+            }
+          } catch (e) {}
+
           return cacheableResponse;
         } else {
           return new Response(respData, {
@@ -495,22 +579,36 @@ export default {
 
       // 5-B. 노션 페이지 읽기 (GET /v1/pages/:id, GET /v1/blocks/:id/children 등)
       if (request.method === 'GET') {
-        const cache = caches.default;
         const bodyHash = await sha256Hex(url.pathname + url.search);
-        const cacheKeyReq = createCacheKeyRequest(url.pathname, bodyHash);
+        const cacheKeyStr = `get_${bodyHash}`;
+        const cacheKeyReq = createCacheKeyRequest(url.origin, url.pathname, bodyHash);
         const forceRefresh = url.searchParams.get('force') === 'true';
 
+        // 1) L1 메모리 캐시 확인
         if (!forceRefresh) {
-          const cachedResp = await cache.match(cacheKeyReq);
-          if (cachedResp) {
-            const respHeaders = new Headers(cachedResp.headers);
-            respHeaders.set('X-Cache-Status', 'HIT');
-            respHeaders.set('Access-Control-Allow-Origin', '*');
-            return new Response(cachedResp.body, {
-              status: cachedResp.status,
-              headers: respHeaders
-            });
+          const memCached = getFromMemoryCache(cacheKeyStr);
+          if (memCached) {
+            return createMemoryCacheResponse(memCached, 'HIT');
           }
+        }
+
+        // 2) L2 Cache API 확인
+        const cache = caches.default;
+        if (!forceRefresh) {
+          try {
+            const cachedResp = await cache.match(cacheKeyReq);
+            if (cachedResp) {
+              const respHeaders = new Headers(cachedResp.headers);
+              respHeaders.set('X-Cache-Status', 'HIT');
+              respHeaders.set('Access-Control-Allow-Origin', '*');
+              const bodyText = await cachedResp.text();
+              saveToMemoryCache(cacheKeyStr, bodyText, cachedResp.status, respHeaders, CACHE_TTL_QUERY);
+              return new Response(bodyText, {
+                status: cachedResp.status,
+                headers: respHeaders
+              });
+            }
+          } catch (e) {}
         }
 
         const notionResp = await callNotionRaw(url.pathname + url.search, 'GET', null, authHeader);
@@ -522,21 +620,28 @@ export default {
 
         if (notionResp.ok) {
           responseHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL_QUERY}, stale-while-revalidate=600`);
+          saveToMemoryCache(cacheKeyStr, respData, notionResp.status, responseHeaders, CACHE_TTL_QUERY);
+
           const cacheableResponse = new Response(respData, {
             status: notionResp.status,
             headers: responseHeaders
           });
-          if (ctx && ctx.waitUntil) {
-            ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
-          } else {
-            await cache.put(cacheKeyReq, cacheableResponse.clone());
-          }
+          try {
+            if (ctx && ctx.waitUntil) {
+              ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
+            } else {
+              await cache.put(cacheKeyReq, cacheableResponse.clone());
+            }
+          } catch (e) {}
           return cacheableResponse;
         }
         return new Response(respData, { status: notionResp.status, headers: responseHeaders });
       }
 
       // 5-C. 노션 쓰기/수정 (PATCH /v1/pages/:id, POST /v1/pages 등)
+      // 쓰기 시에는 L1 메모리 캐시 전체를 무효화하여 즉시 최신 상태 반영 보장
+      MEMORY_CACHE.clear();
+
       const reqBody = await request.text();
       const notionResp = await callNotionRaw(url.pathname + url.search, request.method, reqBody, authHeader);
       const respData = await notionResp.text();
