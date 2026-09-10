@@ -354,7 +354,9 @@ const requiredCores = [
     "fairy-config.js",
     "fairy-engine.js",
     "fairy-chatbot.js",
-    "daily-diary.js"
+    "daily-diary.js",
+    "quiz-flow-controller.js",
+    "timetable-boost.js"
 ];
 
 loadCoreScripts("kids/core/", requiredCores, () => {
@@ -493,10 +495,31 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         roomList.className = 'sub-room-list';
 
         world.rooms.forEach(room => {
+          let detectedSubj = null;
+          if (room.href.includes('math.html')) detectedSubj = '수학';
+          else if (room.href.includes('korean.html')) detectedSubj = '국어';
+          else if (room.href.includes('english.html')) detectedSubj = '영어';
+          else if (room.href.includes('science.html')) detectedSubj = '과학';
+          else if (room.href.includes('society.html')) detectedSubj = '사회';
+
+          let boostHtml = '';
+          if (detectedSubj && typeof window.TimetableBoost !== 'undefined') {
+            const boost = window.TimetableBoost.getSubjectBoostInfo(detectedSubj, finalRealName);
+            if (boost && boost.badge) {
+              boostHtml = `
+                <div class="timetable-boost-chip" style="display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; padding:3px 10px; border-radius:12px; background:${boost.badge.bgGradient}; border:1.5px solid ${boost.badge.borderColor}; color:${boost.badge.color}; font-weight:bold; margin-bottom:6px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+                  <span>${boost.badge.text}</span>
+                  <span style="font-size:0.72rem; font-weight:normal; opacity:0.92;">${boost.badge.subText}</span>
+                </div>
+              `;
+            }
+          }
+
           const a = document.createElement('a');
           a.href = room.href;
           a.className = 'sub-room-btn';
           a.innerHTML = `
+            ${boostHtml}
             <div class="sub-room-name">${room.name}</div>
             <div class="sub-room-desc">${room.desc}</div>
           `;
@@ -602,7 +625,15 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         const data = await response.json();
         if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
         
-        const props = data.results[0].properties;
+        const page = data.results[0];
+        const pageId = page.id;
+        localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
+
+        const props = page.properties;
+        if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
+          syncQuizFlowFromCloud(props["학습설정"]);
+        }
+
         const theme = props["현재 테마"]?.select?.name || (childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임');
         const diamond = props["다이아몬드 개수"]?.number || 0;
         const slime = typeof getDaughterRewardCount === 'function'

@@ -24,7 +24,7 @@
     let currentAdvanceCallback = null;
 
     /**
-     * 현재 과목의 템포 모드 조회
+     * 현재 과목의 템포 모드 조회 (로컬 스토리지 우선 0초 로딩)
      */
     function getQuizFlowMode(subject) {
         const subj = subject || window.currentSubject || '기본';
@@ -34,7 +34,19 @@
     }
 
     /**
-     * 현재 과목의 템포 모드 설정
+     * 모든 과목의 현재 템포 모드 맵 조회
+     */
+    function getAllQuizFlowModes() {
+        const subjects = ['국어', '수학', '영어', '사회', '과학'];
+        const result = {};
+        subjects.forEach(subj => {
+            result[subj] = getQuizFlowMode(subj);
+        });
+        return result;
+    }
+
+    /**
+     * 현재 과목의 템포 모드 설정 (로컬 즉시 저장 + 백그라운드 노션 클라우드 동기화)
      */
     function setQuizFlowMode(subject, mode) {
         const subj = subject || window.currentSubject || '기본';
@@ -42,6 +54,135 @@
             localStorage.setItem(STORAGE_PREFIX + subj, mode);
             updateAllToggleButtons(subj, mode);
             console.log(`⏱️ [학습 템포 모드 변경] ${subj} ➔ ${mode === 'speed' ? '⚡ 자동 넘김' : '🔍 꼼꼼 확인'}`);
+            
+            // 🌐 클라우드(노션 인벤토리 DB '학습설정') 비동기 백그라운드 동기화
+            saveQuizFlowToCloud();
+        }
+    }
+
+    /**
+     * 🌐 노션 클라우드로부터 전달받은 '학습설정' 속성을 로컬과 안전하게 병합 (SWR)
+     * @param {Object|string} cloudRaw - 노션 rich_text 속성 또는 JSON 문자열/객체
+     */
+    function syncQuizFlowFromCloud(cloudRaw) {
+        if (!cloudRaw) return;
+        try {
+            let jsonText = '';
+            if (typeof cloudRaw === 'string') {
+                jsonText = cloudRaw;
+            } else if (Array.isArray(cloudRaw)) {
+                // rich_text 배열 형식
+                jsonText = cloudRaw.map(t => t.plain_text || t.text?.content || '').join('');
+            } else if (cloudRaw.rich_text && Array.isArray(cloudRaw.rich_text)) {
+                jsonText = cloudRaw.rich_text.map(t => t.plain_text || t.text?.content || '').join('');
+            } else if (typeof cloudRaw === 'object') {
+                jsonText = JSON.stringify(cloudRaw);
+            }
+
+            if (!jsonText || !jsonText.trim()) return;
+
+            let parsed = JSON.parse(jsonText);
+            // 만약 상위 설정 객체 내부에 quizFlow 키가 있는 구조라면 언랩
+            if (parsed && parsed.quizFlow) {
+                parsed = parsed.quizFlow;
+            }
+
+            if (typeof parsed === 'object' && parsed !== null) {
+                let changed = false;
+                Object.keys(parsed).forEach(subj => {
+                    const mode = parsed[subj];
+                    if (mode === 'speed' || mode === 'review') {
+                        const localVal = localStorage.getItem(STORAGE_PREFIX + subj);
+                        // 클라우드 설정을 로컬에 동기화
+                        if (localVal !== mode) {
+                            localStorage.setItem(STORAGE_PREFIX + subj, mode);
+                            changed = true;
+                        }
+                    }
+                });
+
+                if (changed) {
+                    console.log('☁️ [클라우드 템포 동기화 완료]', parsed);
+                    const currentSubj = window.currentSubject || '국어';
+                    updateAllToggleButtons(currentSubj, getQuizFlowMode(currentSubj));
+                }
+            }
+        } catch (err) {
+            console.warn('⚠️ [학습설정 클라우드 동기화 파싱 오류 (로컬 설정 유지)]:', err);
+        }
+    }
+
+    /**
+     * 🌐 현재 템포 설정을 노션 인벤토리 DB의 '학습설정' 속성에 비동기 저장
+     */
+    async function saveQuizFlowToCloud() {
+        try {
+            const childName = (typeof getActiveChildName === 'function' ? getActiveChildName() : null)
+                || (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo' || localStorage.getItem('currentUserName') === '민서' ? '민서' : '민수');
+
+            // 1. 캐시된 인벤토리 페이지 ID 확인
+            let pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);
+            const proxyUrl = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+            const invDbId = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12";
+
+            // 관리자 모드(아빠/엄마/어른)에서는 테스트 오염 방지를 위해 클라우드 전송 건너뜀
+            const savedName = localStorage.getItem('currentUserName');
+            if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
+                console.log(`🛠️ [학습설정 관리자 프리패스] ${savedName} 모드이므로 로컬만 반영합니다.`);
+                return;
+            }
+
+            // 페이지 ID가 없으면 쿼리
+            if (!pageId) {
+                const qRes = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+                });
+                if (qRes.ok) {
+                    const qData = await qRes.json();
+                    if (qData.results && qData.results.length > 0) {
+                        pageId = qData.results[0].id;
+                        localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
+                    }
+                }
+            }
+
+            if (!pageId) {
+                console.warn('[학습설정 클라우드 저장 실패] 학생 인벤토리 페이지를 찾을 수 없습니다.');
+                return;
+            }
+
+            // 현재 과목별 전체 템포 맵 직렬화
+            const currentFlows = getAllQuizFlowModes();
+            const payloadContent = JSON.stringify({
+                quizFlow: currentFlows,
+                updatedAt: new Date().toISOString()
+            });
+
+            // 비동기 PATCH 전송 (keepalive 지원)
+            fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    properties: {
+                        "학습설정": {
+                            rich_text: [{ text: { content: payloadContent } }]
+                        }
+                    }
+                }),
+                keepalive: true
+            }).then(res => {
+                if (res.ok) {
+                    console.log(`☁️ [학습설정 클라우드 동기화 성공] ${childName}:`, currentFlows);
+                } else {
+                    console.warn(`⚠️ [학습설정 클라우드 동기화 응답 오류 (${res.status})]`);
+                }
+            }).catch(e => {
+                console.warn('⚠️ [학습설정 클라우드 동기화 네트워크 오류 (로컬은 정상 유지)]:', e);
+            });
+        } catch (e) {
+            console.warn('⚠️ [saveQuizFlowToCloud 실패]:', e);
         }
     }
 
@@ -360,7 +501,10 @@
 
     // 전역 노출
     window.getQuizFlowMode = getQuizFlowMode;
+    window.getAllQuizFlowModes = getAllQuizFlowModes;
     window.setQuizFlowMode = setQuizFlowMode;
+    window.syncQuizFlowFromCloud = syncQuizFlowFromCloud;
+    window.saveQuizFlowToCloud = saveQuizFlowToCloud;
     window.triggerQuizAdvance = triggerQuizAdvance;
     window.cancelQuizAdvanceTimer = cancelQuizAdvanceTimer;
     window.renderQuizFlowToggleUI = renderQuizFlowToggleUI;

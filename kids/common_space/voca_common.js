@@ -360,23 +360,35 @@ function closeModal(event, force = false) {
     overlay.classList.remove('active'); 
     setTimeout(() => overlay.style.display = 'none', 300); 
 
-    // 🏆 5초 이상 읽었을 때 보상 스택 누적 및 지급 로직
+    // 🏆 체류형 정독 보상 (20초 이상 깊은 정독 시 즉시 지급, 또는 5초 이상 3단어 탐색 달성 시 지급)
     if (wordStartTime > 0) {
         const timeSpent = (Date.now() - wordStartTime) / 1000;
-        
-        if (timeSpent >= 5) {
-            viewedWordsCount++;
-            console.log(`단어 학습 인정! 현재 스택: ${viewedWordsCount}/3`);
-        } else {
-            console.log("대장님, 너무 빨리 넘겼습니다! 도파민 지급 보류 ㅋㅋㅋ");
-        }
+        const currentWordTitle = currentActiveWord?.word || '어휘';
+        const currentSubj = window.currentSubject || '사회';
 
-        // 3스택 달성 시 노션 DB로 다이아 1개 최종 슛!
-        if (viewedWordsCount >= 3) {
-            if (typeof grantRewardAndShowUI === 'function') {
-                grantRewardAndShowUI(1, false, 'voca'); // 1개 보상, voca 쌍끌이 모드
+        if (timeSpent >= 20) {
+            // 💡 [20초 마스터 정독 혜택] 깊이 있게 정독한 경우 즉시 보상 지급!
+            console.log(`📖 [20초 깊은 정독 완료] "${currentWordTitle}" (${timeSpent.toFixed(1)}초 체류)`);
+            if (typeof window.grantVocaDwellReward === 'function') {
+                window.grantVocaDwellReward(currentWordTitle, currentSubj);
+            } else if (typeof grantRewardAndShowUI === 'function') {
+                grantRewardAndShowUI(1, false, 'voca');
             }
-            viewedWordsCount = 0; // 카운터 초기화
+        } else if (timeSpent >= 5) {
+            viewedWordsCount++;
+            console.log(`단어 학습 인정! 현재 스택: ${viewedWordsCount}/3 ("${currentWordTitle}")`);
+
+            // 3단어 누적 탐색 시 1보상 & 용어 경험치 지급
+            if (viewedWordsCount >= 3) {
+                if (typeof window.grantVocaDwellReward === 'function') {
+                    window.grantVocaDwellReward(currentWordTitle, currentSubj);
+                } else if (typeof grantRewardAndShowUI === 'function') {
+                    grantRewardAndShowUI(1, false, 'voca');
+                }
+                viewedWordsCount = 0;
+            }
+        } else {
+            console.log(`[탐색 건너뜀] ${timeSpent.toFixed(1)}초 체류 (최소 5초 이상 정독 필요)`);
         }
         wordStartTime = 0; // 타이머 리셋
     }

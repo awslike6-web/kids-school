@@ -157,7 +157,12 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
       vocaExpPropName = `용어 경험치_${subjectName}`; // "용어 경험치_사회"
   }
 
-  const DAILY_LIMIT = 100; // 하루 보상 획득 상한선 (필요시 수정)
+  // 🚀 [시간표 부스트 연동] 오늘 복습 과목: 한도 150개 & EXP 1.2배!
+  const boostInfo = typeof window.TimetableBoost !== 'undefined'
+      ? window.TimetableBoost.getSubjectBoostInfo(subjectName, userName)
+      : { limit: 100, expMultiplier: 1.0, completionBonus: 5 };
+
+  const DAILY_LIMIT = boostInfo.limit || 100; // 하루 보상 획득 상한선 (복습 과목 150개 확장)
 
   try {
     const response = await fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, { 
@@ -176,6 +181,12 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     
     const page = data.results[0]; 
     const props = page.properties;
+
+    // ⚡ [SWR 클라우드 동기화] 인벤토리 페이지 ID 캐싱 및 노션 '학습설정' 동기화
+    localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${userName}`, page.id);
+    if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
+        syncQuizFlowFromCloud(props["학습설정"]);
+    }
 
     // 💡 2. 자정(12시) 초기화를 위한 스마트 날짜 체크 로직
     const todayStr = new Date().toLocaleDateString();
@@ -202,9 +213,9 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     // 만약 이미 상한을 채워서 받을 수 있는 보상이 0개라면 조용히 넘어가거나 알림
     if (allowedCurrency <= 0 && isLimitReached) {
         if (!isSilent) {
-            let msg = `⏳ 오늘 [${subjectName}] 과목에서 얻을 수 있는 보상을 모두 모았어요!\n(일일 상한선 ${DAILY_LIMIT}개 도달)\n내일 다시 즐겁게 탐험해 봐요!`;
+            let msg = `⏳ 오늘 [${subjectName}] 과목에서 얻을 수 있는 보상을 모두 모았어요!\n(일일 상한선 ${DAILY_LIMIT}개 도달${boostInfo.type === 'review' ? ' · 오늘 복습 부스트 150개 적용됨' : ''})\n내일 다시 즐겁게 탐험해 봐요!`;
             if (typeof showRewardModal === 'function' && typeof updateRewardModal === 'function') {
-                showRewardModal(`<div style="color: #ff073a; font-weight: bold;">⚠️ 오늘 ${subjectName} 보상을 모두 캤습니다!<br><br><button onclick="location.href=window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'">로비로 나가기</button></div>`);
+                showRewardModal(`<div style="color: #ff073a; font-weight: bold;">⚠️ 오늘 ${subjectName} 보상을 모두 캤습니다!<br><span style="font-size:0.9rem; color:#666;">(일일 상한선 ${DAILY_LIMIT}개 도달)</span><br><br><button onclick="location.href=window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'">로비로 나가기</button></div>`);
             } else {
                 alert(msg);
             }
@@ -212,7 +223,7 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
         return false; 
     }
 
-    // 💡 4. 자산 및 경험치 계산
+    // 💡 4. 자산 및 경험치 계산 (시간표 부스트 가산)
     let diamond = props["다이아몬드 개수"]?.number || 0; 
     let slime = typeof getDaughterRewardCount === 'function'
         ? getDaughterRewardCount(props)
@@ -222,12 +233,26 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     
     let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
     let currentWealth = previousWealth + allowedCurrency;
-    let newExp = currentExp + earned; // 메인 경험치는 깎이지 않고 순수하게 모두 오르게 처리
+    
+    // 🔥 복습 과목이면 경험치 1.2배 부스트 적용
+    let finalEarnedExp = Math.round(earned * (boostInfo.expMultiplier || 1.0));
+    let newExp = currentExp + finalEarnedExp; // 메인 경험치는 깎이지 않고 순수하게 모두 오르게 처리
     
     const prevLevelInfo = calculateLevelInfo(currentExp);
     const currLevelInfo = calculateLevelInfo(newExp);
 
-    let earnedTickets = Math.floor(currentWealth / 150) - Math.floor(previousWealth / 150);
+    // 🎫 [소원권 누적 발급 안정화] 마이룸 가구 구매로 지갑이 줄어도 누적 150개 기준 안전 보존!
+    const cumKey = `MINMIN_CUMULATIVE_WEALTH_${userName}`;
+    let cumulativeWealth = parseInt(localStorage.getItem(cumKey), 10);
+    if (isNaN(cumulativeWealth) || cumulativeWealth < currentWealth) {
+        cumulativeWealth = currentWealth;
+    }
+    const prevCumulative = cumulativeWealth;
+    cumulativeWealth += allowedCurrency;
+    localStorage.setItem(cumKey, String(cumulativeWealth));
+
+    let earnedTickets = Math.floor(cumulativeWealth / 150) - Math.floor(prevCumulative / 150);
+    earnedTickets = Math.max(0, earnedTickets);
     let newTickets = tickets + earnedTickets;
 
     // 📦 5. 노션 업데이트 보따리 (기본 공통 칼럼)
@@ -808,18 +833,22 @@ async function finalizeQuizRewardSession(options = {}) {
     const isFullComplete = opts.isFullComplete || false;
     const subj = opts.subject || window.currentSubject || '국어';
 
-    // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (+5💎/🍬 & 과목 경험치)
+    // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (기본 +5💎/🍬, 내일 예습 부스트 과목은 +7💎/🍬)
     if (isFullComplete) {
         const bonusKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_complete_bonus`;
+        const bonusAmount = (typeof window.TimetableBoost !== 'undefined'
+            ? window.TimetableBoost.getSubjectBoostInfo(subj, opts.childName).completionBonus
+            : 5) || 5;
+
         try {
             await claimMissionRewardOnce(bonusKey, {
-                amount: 5,
+                amount: bonusAmount,
                 missionType: session.missionType,
                 subject: subj,
                 silent: false,
                 skipStudyLog: true
             });
-            console.log(`🏆 [10문제 완주 보너스 지급 완료] +5개 획득! (${subj})`);
+            console.log(`🏆 [10문제 완주 보너스 지급 완료] +${bonusAmount}개 획득! (${subj}${bonusAmount > 5 ? ' - ✨ 내일 예습 부스트!' : ''})`);
         } catch (e) {
             console.warn("완주 보너스 지급 중 오류:", e);
         }
@@ -1261,3 +1290,33 @@ window.addEventListener('beforeunload', (e) => {
     e.preventDefault();
     e.returnValue = '';
 });
+
+// ========================================================
+// 📖 [체류형 어휘 탐구 보상] 용어 카드 20초 정독 시 용어 경험치 지급
+// ========================================================
+window.grantVocaDwellReward = async function (word, subject) {
+    const subj = subject || window.currentSubject || '사회';
+    const userName = (typeof getActiveChildName === 'function' ? getActiveChildName() : null)
+        || (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서' ? '민서' : '민수');
+
+    const todayStr = new Date().toLocaleDateString();
+    const dwellKey = `voca_dwell_count_${userName}_${subj}_${todayStr}`;
+    let dwellCount = parseInt(localStorage.getItem(dwellKey) || '0', 10);
+
+    // 하루 과목당 5회 한도 (남용 방지)
+    if (dwellCount >= 5) {
+        console.log(`[어휘 정독] 오늘 [${subj}] 용어 정독 보상(최대 5회)을 모두 달성했습니다.`);
+        return false;
+    }
+
+    dwellCount++;
+    localStorage.setItem(dwellKey, String(dwellCount));
+    console.log(`💡 [어휘 정독 탐구 완료] ${word || '용어'} (${subj}) ➔ 용어 경험치 +3 & 보상 +1💎/🍬 지급 (오늘 ${dwellCount}/5회)`);
+
+    // 용어방 쌍끌이 보상 모드('voca')로 지급
+    if (typeof grantRewardAndShowUI === 'function') {
+        return await grantRewardAndShowUI(1, true, 'voca');
+    }
+    return false;
+};
+
