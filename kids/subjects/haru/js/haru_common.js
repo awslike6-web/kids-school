@@ -83,6 +83,17 @@ function setupChildProfileUI() {
   if (moodDesc) {
     moodDesc.innerText = `내 마음속에는 알록달록 무지개가 살아요! 오늘 ${childName}의 마음 색깔은 어떤 빛깔인가요?`;
   }
+
+  // 탭 3 특별한 날 이야기 남기기 폼 문구
+  const storyAuthorTag = document.getElementById("storyAuthorNameTag");
+  if (storyAuthorTag) storyAuthorTag.innerText = childName;
+
+  const storySubmitBtn = document.getElementById("storySubmitBtn");
+  if (storySubmitBtn) {
+    storySubmitBtn.innerHTML = isMinsu 
+      ? "💖 추억 게시판에 등록하고 다이아 2개 받기 💎💎" 
+      : "💖 추억 게시판에 등록하고 젤리 2개 받기 🍬🍬";
+  }
 }
 
 // ==========================================
@@ -474,6 +485,41 @@ function playRainSound() {
 // =========================================================
 // 3. [특별한 날 추억 게시판] 렌더링 & 로직
 // =========================================================
+let selectedStoryPhotoBase64 = "";
+
+function handleStoryPhotoSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    selectedStoryPhotoBase64 = e.target.result;
+    const previewBox = document.getElementById("storyImgPreviewBox");
+    const previewImg = document.getElementById("storyImgPreview");
+    if (previewBox && previewImg) {
+      previewImg.src = selectedStoryPhotoBase64;
+      previewBox.style.display = "flex";
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleStoryUrlInput(url) {
+  const trimmed = url ? url.trim() : "";
+  const previewBox = document.getElementById("storyImgPreviewBox");
+  const previewImg = document.getElementById("storyImgPreview");
+  if (!previewBox || !previewImg) return;
+
+  if (trimmed) {
+    selectedStoryPhotoBase64 = trimmed;
+    previewImg.src = trimmed;
+    previewBox.style.display = "flex";
+  } else {
+    selectedStoryPhotoBase64 = "";
+    previewBox.style.display = "none";
+  }
+}
+
 function getSpecialStories() {
   try {
     const saved = localStorage.getItem("haru_special_stories_" + currentChild);
@@ -487,50 +533,101 @@ function renderSpecialDaysTab() {
   if (!container) return;
 
   const stories = getSpecialStories();
-  container.innerHTML = stories.map((s, idx) => `
-    <div class="special-card" onclick="speakText('${s.title}! ${s.desc}')">
-      <div class="special-card-icon">${s.icon || '🌟'}</div>
-      <div class="special-card-title">${s.title}</div>
-      <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
-      <p class="special-card-desc">${s.desc}</p>
-    </div>
-  `).join("");
+  container.innerHTML = stories.map((s, idx) => {
+    const hasPhoto = !!s.imageUrl;
+    const category = s.category || "특별한날";
+    const categoryIcon = s.categoryIcon || (hasPhoto ? "🌱" : (s.icon || "🌟"));
+
+    if (hasPhoto) {
+      return `
+        <div class="special-card has-photo" onclick="speakStoryText('${s.title}', '${s.desc}')" title="터치하면 요정이 이야기를 들려줘요!">
+          <div class="special-card-img-wrap">
+            <span class="special-card-category-chip">${categoryIcon} ${category}</span>
+            <img src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
+          </div>
+          <div class="special-card-title">${s.title}</div>
+          <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
+          <p class="special-card-desc">${s.desc}</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="special-card" onclick="speakStoryText('${s.title}', '${s.desc}')" title="터치하면 요정이 이야기를 들려줘요!">
+        <div class="special-card-icon">${s.icon || '🌟'}</div>
+        <div class="special-card-title">${s.title}</div>
+        <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
+        <p class="special-card-desc">${s.desc}</p>
+      </div>
+    `;
+  }).join("");
+}
+
+function speakStoryText(title, desc) {
+  const cleanTitle = title ? title.replace(/^[^\w가-힣\s]+/, '').trim() : '';
+  speakText(`${cleanTitle}! ${desc}`);
 }
 
 function addNewSpecialStory() {
+  const catInput = document.getElementById("newStoryCategory");
   const titleInput = document.getElementById("newStoryTitle");
   const dateInput = document.getElementById("newStoryDate");
   const descInput = document.getElementById("newStoryDesc");
+  const fileInput = document.getElementById("newStoryFileInput");
+  const urlInput = document.getElementById("newStoryUrlInput");
 
   if (!titleInput || !descInput) return;
 
+  const category = catInput ? catInput.value : "특별한날";
   const title = titleInput.value.trim();
-  const date = dateInput ? dateInput.value.trim() : "특별한 날";
+  const date = dateInput && dateInput.value.trim() ? dateInput.value.trim() : new Date().toISOString().slice(0, 10);
   const desc = descInput.value.trim();
+  const photoUrl = selectedStoryPhotoBase64 || (urlInput ? urlInput.value.trim() : "");
 
   if (!title || !desc) {
     alert("특별한 날의 제목과 즐거웠던 이야기를 적어주세요! ✏️");
     return;
   }
 
+  const categoryIconMap = {
+    "생태/텃밭": "🌱",
+    "학교활동": "🎒",
+    "가을소풍": "🍁",
+    "가족기념일": "🎂",
+    "자연관찰": "🌿",
+    "특별한날": "⭐"
+  };
+
   const stories = getSpecialStories();
   stories.unshift({
     id: "evt_custom_" + Date.now(),
+    category: category,
+    categoryIcon: categoryIconMap[category] || "⭐",
     title: `✨ ${title}`,
-    date: date || "소중한 추억",
+    date: date,
     desc: desc,
-    icon: "💖"
+    icon: categoryIconMap[category] || "💖",
+    imageUrl: photoUrl || null
   });
 
   localStorage.setItem("haru_special_stories_" + currentChild, JSON.stringify(stories));
   titleInput.value = "";
   if (dateInput) dateInput.value = "";
   descInput.value = "";
+  if (fileInput) fileInput.value = "";
+  if (urlInput) urlInput.value = "";
+  selectedStoryPhotoBase64 = "";
+  const previewBox = document.getElementById("storyImgPreviewBox");
+  if (previewBox) previewBox.style.display = "none";
 
   renderSpecialDaysTab();
+
+  const isMinsu = currentChild === "minsu";
+  const curSymbol = isMinsu ? "다이아 2개(+💎💎)" : "젤리 2개(+🍬🍬)";
+  const curWord = isMinsu ? "다이아몬드 2개" : "젤리 2개";
   grantReward(2, `특별한 하루 추억 작성: ${title}`);
-  speakText(`새로운 특별한 하루 이야기 [${title}]이 우리 게시판에 등록되었어요! 젤리 2개를 선물합니다!`);
-  alert(`🎉 [${title}] 이야기가 추억 게시판에 등록되었습니다! 젤리 2개(+🍬🍬)를 받았어요!`);
+  speakText(`새로운 특별한 하루 이야기 [${title}]이 우리 게시판에 등록되었어요! ${curWord}를 선물합니다!`);
+  alert(`🎉 [${title}] 이야기가 추억 게시판에 등록되었습니다! ${curSymbol}를 받았어요!\n\n💡 팁: 학교 사진을 12년 성장 아카이브(kids-archive)에 영구 보존하려면 [scripts/add_activity_photo.py] 도구를 활용해 보세요!`);
 }
 
 // =========================================================

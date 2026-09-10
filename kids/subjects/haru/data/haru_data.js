@@ -107,36 +107,55 @@ window.HARU_DATA = {
     title: "가장 좋아하는 하루 & 특별한 날 이야기 (20~21쪽)",
     defaultEvents: [
       {
+        id: "evt_peanut_harvest",
+        category: "생태/텃밭",
+        categoryIcon: "🌱",
+        title: "🥜 가을 텃밭 땅콩 수확과 모종 심기",
+        date: "자연과 함께한 특별한 하루",
+        desc: "학교 텃밭에서 친구들과 흙을 만지며 고소한 땅콩을 쑥쑥 뽑아 수확하고, 파릇파릇 새 모종도 정성껏 심었어요!",
+        icon: "🌱",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_peanut_harvest.jpg",
+        fallbackIcon: "🥜"
+      },
+      {
         id: "evt_birthday",
         category: "생일",
+        categoryIcon: "🎂",
         title: "🎂 달콤한 케이크와 생일 파티",
         date: "기억에 남는 하루",
         desc: "온 가족이 모여 촛불을 끄고 생일 노래를 불렀던 세상에서 제일 특별한 날!",
-        icon: "🎂"
+        icon: "🎂",
+        imageUrl: null
       },
       {
         id: "evt_children",
         category: "어린이날",
+        categoryIcon: "🎈",
         title: "🎈 놀이동산과 선물 가득 어린이날",
         date: "신나는 5월의 하루",
         desc: "엄마 아빠와 함께 신나는 놀이기구도 타고 맛있는 것도 먹었던 하루!",
-        icon: "🎈"
+        icon: "🎈",
+        imageUrl: null
       },
       {
         id: "evt_picnic",
         category: "가을소풍",
+        categoryIcon: "🍁",
         title: "🍁 알록달록 단풍잎과 김밥 소풍",
         date: "바람이 살랑이는 하루",
         desc: "노란 은행잎, 빨간 단풍잎을 주우며 돗자리 펴고 도시락 먹은 날!",
-        icon: "🍁"
+        icon: "🍁",
+        imageUrl: null
       },
       {
         id: "evt_christmas",
         category: "크리스마스",
+        categoryIcon: "🎄",
         title: "🎄 반짝이는 트리와 산타 선물",
         date: "눈 내리는 겨울 하루",
         desc: "예쁜 트리 전구를 켜고 캐럴을 부르며 산타 할아버지를 기다린 하루!",
-        icon: "🎄"
+        icon: "🎄",
+        imageUrl: null
       }
     ]
   }

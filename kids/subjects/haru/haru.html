@@ -227,15 +227,43 @@
 
       <!-- 나만의 특별한 하루 이야기 남기기 폼 -->
       <div class="story-write-card">
-        <div class="story-write-title">
-          <span>✏️</span> 민서의 특별한 하루 이야기 남기기
+        <div class="story-write-title" id="storyWriteCardTitle">
+          <span>✏️</span> <span id="storyAuthorNameTag">민서</span>의 특별한 하루 이야기 남기기
         </div>
+
         <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
-          <input type="text" id="newStoryTitle" class="review-input" style="flex:2; margin-bottom:0;" placeholder="특별한 날의 제목 (예: 할머니 댁에 간 날)" />
-          <input type="text" id="newStoryDate" class="review-input" style="flex:1; margin-bottom:0;" placeholder="날짜나 계절 (예: 5월 5일, 여름)" />
+          <select id="newStoryCategory" class="review-input" style="flex:1; margin-bottom:0; min-width:130px; font-family:'Jua', sans-serif;">
+            <option value="생태/텃밭">🌱 생태/텃밭체험</option>
+            <option value="학교활동">🎒 학교활동/수업</option>
+            <option value="가을소풍">🍁 소풍/현장학습</option>
+            <option value="가족기념일">🎂 가족/생일파티</option>
+            <option value="자연관찰">🌿 사계절 자연관찰</option>
+            <option value="특별한날">⭐ 소중한 하루</option>
+          </select>
+          <input type="text" id="newStoryTitle" class="review-input" style="flex:2; margin-bottom:0; min-width:180px;" placeholder="특별한 날의 제목 (예: 가을 텃밭 땅콩 수확하기)" />
+          <input type="text" id="newStoryDate" class="review-input" style="flex:1; margin-bottom:0; min-width:120px;" placeholder="날짜나 계절 (예: 2026-09-10, 가을)" />
         </div>
-        <textarea id="newStoryDesc" class="review-input" rows="3" placeholder="그날 어떤 재미있는 일이 있었는지, 왜 이 날이 가장 좋았는지 적어보세요!"></textarea>
-        <button class="back-btn" style="background:var(--haru-coral); color:#fff; border:none; cursor:pointer; font-size:1.05rem;" onclick="addNewSpecialStory()">
+
+        <textarea id="newStoryDesc" class="review-input" rows="3" placeholder="그날 어떤 재미있는 일이 있었는지, 흙을 만지거나 모종을 심을 때 어떤 기분이었는지 적어보세요!"></textarea>
+
+        <!-- 📷 사진 첨부 섹션 -->
+        <div style="background: rgba(255,255,255,0.7); border-radius:14px; padding:12px; margin-bottom:12px; border:1px solid #ffd1dc;">
+          <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#be185d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+            <span>📷</span> <span>특별한 날 사진 함께 담기 (선택)</span>
+          </div>
+          <div class="story-photo-upload-zone">
+            <input type="file" id="newStoryFileInput" class="review-input" style="flex:1; margin-bottom:0; padding:8px 10px; font-size:0.9rem;" accept="image/*" onchange="handleStoryPhotoSelect(event)" />
+            <input type="text" id="newStoryUrlInput" class="review-input" style="flex:1.5; margin-bottom:0; padding:8px 10px; font-size:0.9rem;" placeholder="또는 웹 이미지 주소 (kids-archive CDN 등)" oninput="handleStoryUrlInput(this.value)" />
+          </div>
+          <div class="story-img-preview-box" id="storyImgPreviewBox">
+            <img id="storyImgPreview" src="" alt="사진 미리보기" />
+          </div>
+          <div style="font-size:0.75rem; color:#888; margin-top:4px;">
+            💡 <b>영구 보존 안내:</b> 사진 파일은 12년 성장 아카이브(<code>kids-archive</code>) 레포지토리와 연동되어 안전하게 보존됩니다.
+          </div>
+        </div>
+
+        <button class="back-btn" id="storySubmitBtn" style="background:var(--haru-coral); color:#fff; border:none; cursor:pointer; font-size:1.05rem;" onclick="addNewSpecialStory()">
           💖 추억 게시판에 등록하고 젤리 2개 받기 🍬🍬
         </button>
       </div>
