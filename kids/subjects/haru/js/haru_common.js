@@ -53,23 +53,30 @@ function switchHaruTab(tabName) {
 }
 
 // ==========================================
-// 🔊 음성 TTS & 효과음
+// 🔊 음성 TTS & 효과음 (공통 초고음질 요정 엔진 연동)
 // ==========================================
 function toggleHaruTts() {
-  isTtsEnabled = !isTtsEnabled;
-  localStorage.setItem("fairy_tts_enabled", isTtsEnabled);
-  updateTtsButtonUI();
-  if (isTtsEnabled) {
-    speakText("요정 음성이 켜졌어요! 반짝이는 하루를 시작해요!");
+  if (typeof toggleFairyTtsSetting === "function") {
+    toggleFairyTtsSetting();
+    updateTtsButtonUI();
   } else {
-    window.speechSynthesis?.cancel();
+    isTtsEnabled = !isTtsEnabled;
+    localStorage.setItem("fairy_tts_enabled", isTtsEnabled ? "true" : "false");
+    updateTtsButtonUI();
+    if (isTtsEnabled) {
+      speakText("요정 음성이 켜졌어요! 반짝이는 하루를 시작해요!");
+    } else {
+      stopAllSpeech();
+    }
   }
 }
 
 function updateTtsButtonUI() {
   const btn = document.getElementById("haruTtsBtn");
   if (!btn) return;
-  if (isTtsEnabled) {
+  const isEnabled = localStorage.getItem("fairy_tts_enabled") !== "false";
+  isTtsEnabled = isEnabled;
+  if (isEnabled) {
     btn.classList.add("active");
     btn.innerHTML = "🔊 요정 음성 ON";
   } else {
@@ -79,7 +86,16 @@ function updateTtsButtonUI() {
 }
 
 function speakText(text) {
-  if (!isTtsEnabled) return;
+  const isEnabled = localStorage.getItem("fairy_tts_enabled") !== "false";
+  if (!isEnabled) return;
+
+  // 1순위: 초고음질 요정 엔진 (사전녹음 MP3 프리셋 및 Cloudflare Worker Edge-TTS 실시간 스트리밍)
+  if (typeof speakFairyTTS === "function") {
+    speakFairyTTS(text);
+    return;
+  }
+
+  // 2순위: 브라우저 WebSpeech API 오프라인 폴백
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -87,6 +103,15 @@ function speakText(text) {
     utterance.rate = 0.95;
     utterance.pitch = 1.15;
     window.speechSynthesis.speak(utterance);
+  }
+}
+
+function stopAllSpeech() {
+  if (typeof stopFairyTTS === "function") {
+    stopFairyTTS();
+  }
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
   }
 }
 
@@ -503,7 +528,7 @@ function closeQuickCheckInModal() {
   const overlay = document.getElementById("quickCheckInModalOverlay");
   if (overlay) overlay.classList.remove("active");
   document.body.style.overflow = "auto";
-  window.speechSynthesis?.cancel();
+  stopAllSpeech();
 }
 
 function renderCheckInStep() {
