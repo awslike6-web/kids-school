@@ -742,6 +742,23 @@ async function sendStudyLogToNotion(options = {}) {
         durationMinutes = Math.floor(timeDiff / 60000);
         if (durationMinutes < 1) durationMinutes = 1;
     }
+
+    // ⏰ [스크린타임 트래커 연동] 오늘 순수 공부 시간 누적 기록
+    if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.trackStudySession === 'function') {
+        window.ScreenTimeTracker.trackStudySession(durationMinutes, subject);
+    } else if (typeof window.trackStudySession === 'function') {
+        window.trackStudySession(durationMinutes, subject);
+    } else {
+        try {
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const k1 = `MINMIN_DAILY_STUDY_TIME_${childName}_${todayStr}`;
+            const k2 = `MINMIN_DAILY_STUDY_TIME_${childName}_${now.toLocaleDateString()}`;
+            const cur = Math.max(parseInt(localStorage.getItem(k1) || '0', 10), parseInt(localStorage.getItem(k2) || '0', 10)) + durationMinutes;
+            localStorage.setItem(k1, String(cur));
+            localStorage.setItem(k2, String(cur));
+        } catch(e) {}
+    }
     
     // 오답 리포트 자동 수집
     let errorReport = options.errorReport;
@@ -946,6 +963,25 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     const prevCumulative = cumulativeWealth;
     cumulativeWealth += allowedCurrency;
     localStorage.setItem(cumKey, String(cumulativeWealth));
+
+    // ⏰ [스크린타임 트래커 연동] 오늘 획득 보상 누적 기록 (50개 퀘스트용)
+    if (allowedCurrency > 0) {
+        if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.recordDailyRewardEarned === 'function') {
+            window.ScreenTimeTracker.recordDailyRewardEarned(allowedCurrency, userName);
+        } else if (typeof window.recordDailyRewardEarned === 'function') {
+            window.recordDailyRewardEarned(allowedCurrency, userName);
+        } else {
+            try {
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                const dk1 = `MINMIN_DAILY_REWARD_SUM_${userName}_${todayStr}`;
+                const dk2 = `MINMIN_DAILY_REWARD_SUM_${userName}_${now.toLocaleDateString()}`;
+                const curR = Math.max(parseInt(localStorage.getItem(dk1) || '0', 10), parseInt(localStorage.getItem(dk2) || '0', 10)) + allowedCurrency;
+                localStorage.setItem(dk1, String(curR));
+                localStorage.setItem(dk2, String(curR));
+            } catch(e) {}
+        }
+    }
 
     let earnedTickets = Math.floor(cumulativeWealth / 150) - Math.floor(prevCumulative / 150);
     earnedTickets = Math.max(0, earnedTickets);

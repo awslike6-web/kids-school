@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ========================================================
  * ⏰ [스크린타임 스마트 정산 엔진] screentime-tracker.js
  * ========================================================
@@ -13,7 +13,11 @@
     const APPROVAL_KEY_PREFIX = 'MINMIN_SCREENTIME_APPROVED_';
 
     function getTodayKey() {
-        return new Date().toLocaleDateString();
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const date = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${date}`;
     }
 
     function getCurrentChildName() {
@@ -23,7 +27,8 @@
         }
         const profile = localStorage.getItem('currentUser') || 'son';
         const user = localStorage.getItem('currentUserName') || '';
-        if (profile === 'daughter' || user === '민서') return '민서';
+        const child = localStorage.getItem('currentChild') || '';
+        if (profile === 'daughter' || user === '민서' || child === 'minseo') return '민서';
         return '민수';
     }
 
@@ -37,10 +42,15 @@
         const childName = getCurrentChildName();
         const todayStr = getTodayKey();
         const key = `${STORAGE_KEY_PREFIX}${childName}_${todayStr}`;
+        const legacyKey = `${STORAGE_KEY_PREFIX}${childName}_${new Date().toLocaleDateString()}`;
 
-        let currentTotal = parseInt(localStorage.getItem(key) || '0', 10);
+        let currentTotal = Math.max(
+            parseInt(localStorage.getItem(key) || '0', 10),
+            parseInt(localStorage.getItem(legacyKey) || '0', 10)
+        );
         currentTotal += mins;
         localStorage.setItem(key, String(currentTotal));
+        localStorage.setItem(legacyKey, String(currentTotal)); // 하위 호환 보존
 
         console.log(`⏱️ [순공 시간 기록] ${childName} +${mins}분 (${subject || '학습'}) ➔ 오늘 누적 ${currentTotal}분`);
         return currentTotal;
@@ -53,7 +63,10 @@
         const name = childName || getCurrentChildName();
         const todayStr = getTodayKey();
         const key = `${STORAGE_KEY_PREFIX}${name}_${todayStr}`;
-        return parseInt(localStorage.getItem(key) || '0', 10);
+        const legacyKey = `${STORAGE_KEY_PREFIX}${name}_${new Date().toLocaleDateString()}`;
+        const val = parseInt(localStorage.getItem(key) || '0', 10);
+        const legacyVal = parseInt(localStorage.getItem(legacyKey) || '0', 10);
+        return Math.max(val, legacyVal);
     }
 
     /**
@@ -62,6 +75,7 @@
     function getTodayEarnedCurrency(childName) {
         const name = childName || getCurrentChildName();
         const todayStr = getTodayKey();
+        const legacyDateStr = new Date().toLocaleDateString();
         
         // 각 과목별 '오늘 획득_과목' 로컬 캐시 또는 합산
         const subjects = ['국어', '수학', '영어', '사회', '과학', '용어사전'];
@@ -70,7 +84,7 @@
         subjects.forEach(subj => {
             const key = `last_play_date_${name}_${subj}`;
             const lastDate = localStorage.getItem(key);
-            if (lastDate === todayStr) {
+            if (lastDate === todayStr || lastDate === legacyDateStr) {
                 // 노션 일일 카운터 보조 합산
                 const val = parseInt(localStorage.getItem(`today_earned_${name}_${subj}`) || '0', 10);
                 total += val;
@@ -79,8 +93,10 @@
 
         // 인벤토리 캐시의 당일 누적 보정치 확인
         const dailyKey = `MINMIN_DAILY_REWARD_SUM_${name}_${todayStr}`;
+        const legacyDailyKey = `MINMIN_DAILY_REWARD_SUM_${name}_${legacyDateStr}`;
         const sumVal = parseInt(localStorage.getItem(dailyKey) || '0', 10);
-        return Math.max(total, sumVal);
+        const legacySumVal = parseInt(localStorage.getItem(legacyDailyKey) || '0', 10);
+        return Math.max(total, sumVal, legacySumVal);
     }
 
     /**
@@ -90,10 +106,71 @@
         const name = childName || getCurrentChildName();
         const todayStr = getTodayKey();
         const dailyKey = `MINMIN_DAILY_REWARD_SUM_${name}_${todayStr}`;
-        let current = parseInt(localStorage.getItem(dailyKey) || '0', 10);
+        const legacyDailyKey = `MINMIN_DAILY_REWARD_SUM_${name}_${new Date().toLocaleDateString()}`;
+        let current = Math.max(
+            parseInt(localStorage.getItem(dailyKey) || '0', 10),
+            parseInt(localStorage.getItem(legacyDailyKey) || '0', 10)
+        );
         current += Number(amount) || 0;
         localStorage.setItem(dailyKey, String(current));
+        localStorage.setItem(legacyDailyKey, String(current));
         return current;
+    }
+
+    /**
+     * 노션 학습일지 목록(studyLogs)에서 오늘 공부한 시간을 추출하여 로컬과 양방향 동기화
+     * (기기 간 이동, 모바일 학습 후 PC 대시보드 조회 시 100% 자동 복원)
+     * @param {Array} studyLogs - 노션 query 결과 객체 배열
+     * @param {string} [targetName] - 특정 자녀 이름 ('민수' 또는 '민서')
+     */
+    function syncFromStudyLogs(studyLogs, targetName) {
+        if (!Array.isArray(studyLogs) || studyLogs.length === 0) return;
+        const todayStr = getTodayKey();
+        const targetChildren = targetName ? [targetName] : ['민수', '민서'];
+
+        targetChildren.forEach(child => {
+            let notionTotalMinutes = 0;
+            studyLogs.forEach(page => {
+                const props = page.properties;
+                if (!props) return;
+                const pageChild = props['학생']?.select?.name;
+                if (pageChild !== child) return;
+
+                const enterDate = props['입장']?.date?.start || '';
+                let isToday = false;
+                if (enterDate) {
+                    if (enterDate.startsWith(todayStr)) {
+                        isToday = true;
+                    } else {
+                        const d = new Date(enterDate);
+                        if (!isNaN(d.getTime())) {
+                            const y = d.getFullYear();
+                            const m = String(d.getMonth() + 1).padStart(2, '0');
+                            const dt = String(d.getDate()).padStart(2, '0');
+                            if (`${y}-${m}-${dt}` === todayStr) isToday = true;
+                        }
+                    }
+                }
+
+                if (isToday) {
+                    const duration = Number(props['소요시간']?.number) || 1;
+                    notionTotalMinutes += duration;
+                }
+            });
+
+            if (notionTotalMinutes > 0) {
+                const key = `${STORAGE_KEY_PREFIX}${child}_${todayStr}`;
+                const legacyKey = `${STORAGE_KEY_PREFIX}${child}_${new Date().toLocaleDateString()}`;
+                const currentLocal = Math.max(
+                    parseInt(localStorage.getItem(key) || '0', 10),
+                    parseInt(localStorage.getItem(legacyKey) || '0', 10)
+                );
+                const maxMinutes = Math.max(currentLocal, notionTotalMinutes);
+                localStorage.setItem(key, String(maxMinutes));
+                localStorage.setItem(legacyKey, String(maxMinutes));
+                console.log(`☁️ [스크린타임 클라우드 동기화] ${child}: 노션 ${notionTotalMinutes}분 ➔ 로컬 동기화 완료 (최종: ${maxMinutes}분)`);
+            }
+        });
     }
 
     /**
@@ -379,6 +456,7 @@
         getTodayStudyMinutes,
         getTodayEarnedCurrency,
         recordDailyRewardEarned,
+        syncFromStudyLogs,
         getScreenTimeSummary,
         toggleParentApproval,
         openScreenTimeReceiptModal,
@@ -387,6 +465,8 @@
 
     window.openScreenTimeReceiptModal = openScreenTimeReceiptModal;
     window.closeScreenTimeReceiptModal = closeScreenTimeReceiptModal;
+    window.trackStudySession = trackStudySession;
+    window.recordDailyRewardEarned = recordDailyRewardEarned;
 
     console.log('⏰ [스크린타임 트래커 로드 완료] ScreenTimeTracker 활성화');
 })();

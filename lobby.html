@@ -1018,6 +1018,19 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     if (typeof prefetchVocaData === 'function') {
         prefetchVocaData(finalRealName);
     }
+
+    // ⏰ [스크린타임 클라우드 동기화] 노션에 기록된 오늘 공부 시간을 트래커에 즉시 반영
+    if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {
+        fetch(`${PROXY_URL}/v1/databases/${STUDY_LOG_DB_ID}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ page_size: 20, sorts: [{ property: "입장", direction: "descending" }] })
+        }).then(r => r.json()).then(data => {
+            if (data && data.results) {
+                window.ScreenTimeTracker.syncFromStudyLogs(data.results, finalRealName);
+            }
+        }).catch(e => console.warn("[ScreenTime] 일지 동기화 실패:", e));
+    }
 });
 </script>
 </body>

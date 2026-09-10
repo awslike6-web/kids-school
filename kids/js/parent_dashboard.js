@@ -427,6 +427,12 @@ async function loadDashboardData() {
     const studyLogs = logsData.results || [];
     const vocaList = (vocaData.results || []).map(parseVocaPage);
 
+    // ⏰ [스크린타임 클라우드 동기화] 노션에 저장된 오늘 학습일지 소요시간을 트래커에 즉시 반영
+    if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {
+        window.ScreenTimeTracker.syncFromStudyLogs(studyLogs, '민수');
+        window.ScreenTimeTracker.syncFromStudyLogs(studyLogs, '민서');
+    }
+
     if (invData.results && invData.results.length > 0) {
       invData.results.forEach(page => {
         const props = page.properties;
