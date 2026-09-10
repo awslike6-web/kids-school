@@ -340,7 +340,7 @@ const KOREAN_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#10b981",
         link: "korean_5_2_1_storybook.html",
-        coverImg: "images/minsu/5-2/1/storybook/korean_story_p1.png"
+        coverImg: "images/minsu/5-2/1/storybook/korean_story_cover.png"
     },
     {
         id: "1_2_1_1",
