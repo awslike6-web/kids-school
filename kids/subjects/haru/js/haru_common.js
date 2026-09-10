@@ -528,26 +528,114 @@ function getSpecialStories() {
   return window.HARU_DATA.specialDays.defaultEvents;
 }
 
+function switchCardPhoto(event, thumbEl, targetUrl, mainImgId) {
+  if (event) event.stopPropagation();
+  const mainImg = document.getElementById(mainImgId);
+  if (mainImg) {
+    mainImg.src = targetUrl;
+  }
+  const parent = thumbEl.parentElement;
+  if (parent) {
+    parent.querySelectorAll('.special-card-thumb-btn').forEach(btn => btn.classList.remove('active'));
+    thumbEl.classList.add('active');
+  }
+}
+
+function stampReaction(event, storyId, emoji, label, storyTitle) {
+  if (event) event.stopPropagation();
+  const childName = currentChild === "minsu" ? "민수" : "민서";
+  const isMinsu = currentChild === "minsu";
+  const curSymbol = isMinsu ? "다이아 2개(+💎💎)" : "젤리 2개(+🍬🍬)";
+  const curWord = isMinsu ? "다이아몬드 2개" : "젤리 2개";
+
+  const stampKey = `haru_stamp_${currentChild}_${storyId}`;
+  const alreadyStamped = localStorage.getItem(stampKey);
+
+  const stampData = {
+    emoji: emoji,
+    label: label,
+    date: new Date().toISOString().slice(5, 10).replace("-", "/")
+  };
+  localStorage.setItem(stampKey, JSON.stringify(stampData));
+
+  if (!alreadyStamped) {
+    grantReward(2, `특별한 하루 추억 도장: ${label}`);
+    speakText(`${childName}가 [${label}] 감정 도장을 쾅 찍었네요! 신나는 하루 추억을 완성해서 ${curWord}를 선물합니다!`);
+    alert(`🎉 도장 쾅! [${emoji} ${label}] 도장이 찍혔습니다!\n추억을 완성해서 ${curSymbol}를 선물 받았어요!`);
+  } else {
+    speakText(`${childName}의 마음이 [${label}] 도장으로 바뀌었어요!`);
+  }
+
+  renderSpecialDaysTab();
+}
+
 function renderSpecialDaysTab() {
   const container = document.getElementById("specialFeedGrid");
   if (!container) return;
 
+  const childName = currentChild === "minsu" ? "민수" : "민서";
   const stories = getSpecialStories();
+
   container.innerHTML = stories.map((s, idx) => {
     const hasPhoto = !!s.imageUrl;
     const category = s.category || "특별한날";
     const categoryIcon = s.categoryIcon || (hasPhoto ? "🌱" : (s.icon || "🌟"));
+    const galleryList = (s.galleryImages && s.galleryImages.length > 0) ? s.galleryImages : (hasPhoto ? [s.imageUrl] : []);
+    const mainImgId = `main_img_${s.id || idx}`;
+
+    const stampKey = `haru_stamp_${currentChild}_${s.id}`;
+    let savedStamp = null;
+    try {
+      const raw = localStorage.getItem(stampKey);
+      if (raw) savedStamp = JSON.parse(raw);
+    } catch(e) {}
+
+    const stampBtns = [
+      { emoji: "😆", label: "꿀잼" },
+      { emoji: "😲", label: "신기해" },
+      { emoji: "🧺", label: "뿌듯해" },
+      { emoji: "😋", label: "고소해" }
+    ];
+
+    const stampHtml = `
+      <div class="special-card-reactions">
+        <div class="reaction-label">
+          <span>💮 ${childName}의 감정 도장:</span>
+          ${savedStamp ? `<span style="font-size:0.75rem; color:#2ed573;">완성됨 ✨</span>` : `<span style="font-size:0.75rem; color:#888;">도장 찍고 젤리 받기 🍬</span>`}
+        </div>
+        <div class="reaction-btns">
+          ${stampBtns.map(st => {
+            const isSelected = savedStamp && savedStamp.label === st.label;
+            return `<button class="reaction-stamp-btn ${isSelected ? 'selected' : ''}" onclick="stampReaction(event, '${s.id}', '${st.emoji}', '${st.label}', '${s.title}')">${st.emoji} ${st.label}</button>`;
+          }).join("")}
+        </div>
+        ${savedStamp ? `<div class="reaction-stamp-badge"><span>💖</span> <b>${childName}의 소감:</b> [${savedStamp.emoji} ${savedStamp.label}!] (${savedStamp.date})</div>` : ''}
+      </div>
+    `;
 
     if (hasPhoto) {
+      const thumbsHtml = galleryList.length > 1 ? `
+        <div class="special-card-thumbs">
+          ${galleryList.map((gUrl, gIdx) => `
+            <button class="special-card-thumb-btn ${gIdx === 0 ? 'active' : ''}" onclick="switchCardPhoto(event, this, '${gUrl}', '${mainImgId}')" title="사진 ${gIdx + 1}">
+              <img src="${gUrl}" alt="썸네일 ${gIdx + 1}" />
+            </button>
+          `).join("")}
+        </div>
+      ` : "";
+
       return `
         <div class="special-card has-photo" onclick="speakStoryText('${s.title}', '${s.desc}')" title="터치하면 요정이 이야기를 들려줘요!">
           <div class="special-card-img-wrap">
             <span class="special-card-category-chip">${categoryIcon} ${category}</span>
-            <img src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
+            ${galleryList.length > 1 ? `<span class="special-card-photo-count">📷 사진 ${galleryList.length}장</span>` : ''}
+            <img id="${mainImgId}" src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
           </div>
-          <div class="special-card-title">${s.title}</div>
+          ${thumbsHtml}
+          <div class="special-card-title" style="margin-top:8px;">${s.title}</div>
           <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
           <p class="special-card-desc">${s.desc}</p>
+          ${stampHtml}
         </div>
       `;
     }
@@ -558,6 +646,7 @@ function renderSpecialDaysTab() {
         <div class="special-card-title">${s.title}</div>
         <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
         <p class="special-card-desc">${s.desc}</p>
+        ${stampHtml}
       </div>
     `;
   }).join("");

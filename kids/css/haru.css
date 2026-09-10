@@ -485,6 +485,111 @@ body {
   padding: 3px 9px;
   border-radius: 8px;
 }
+.special-card-photo-count {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(46, 213, 115, 0.9);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+.special-card-thumbs {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.special-card-thumb-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.special-card-thumb-btn.active {
+  border-color: #2ed573;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
+}
+.special-card-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 🌟 아이 감정 도장 (Reaction Stamp) UI */
+.special-card-reactions {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #ffd1dc;
+}
+.reaction-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  color: #ff6b81;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.reaction-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.reaction-stamp-btn {
+  background: #fff;
+  border: 1.5px solid #ffeaa7;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Jua', sans-serif;
+  color: #4b4b4b;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+.reaction-stamp-btn:hover {
+  background: #fff9e6;
+  border-color: #feca57;
+  transform: translateY(-2px);
+}
+.reaction-stamp-btn.selected {
+  background: linear-gradient(135deg, #ff9ff3, #feca57);
+  color: #fff;
+  border-color: transparent;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(254, 202, 87, 0.4);
+  animation: stampPop 0.3s ease-out;
+}
+@keyframes stampPop {
+  0% { transform: scale(0.7); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.reaction-stamp-badge {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  color: #be185d;
+  font-family: 'Jua', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
 .story-photo-upload-zone {
   display: flex;
   gap: 8px;

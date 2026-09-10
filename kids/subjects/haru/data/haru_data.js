@@ -107,14 +107,19 @@ window.HARU_DATA = {
     title: "가장 좋아하는 하루 & 특별한 날 이야기 (20~21쪽)",
     defaultEvents: [
       {
-        id: "evt_peanut_harvest",
+        id: "evt_minseo_peanut_20260910",
         category: "생태/텃밭",
         categoryIcon: "🌱",
-        title: "🥜 가을 텃밭 땅콩 수확과 모종 심기",
-        date: "자연과 함께한 특별한 하루",
-        desc: "학교 텃밭에서 친구들과 흙을 만지며 고소한 땅콩을 쑥쑥 뽑아 수확하고, 파릇파릇 새 모종도 정성껏 심었어요!",
+        title: "🥜 5학년 선배들이 선물한 가을 텃밭 땅콩 수확",
+        date: "2026-09-10 (가을 텃밭)",
+        desc: "우리 학교 5학년 선배들이 정성껏 재배한 땅콩을 수확하는 선물을 1학년이 받았어요! 땅콩 줄기를 쑥 뽑아보고 땅콩 단을 번쩍 안고 사진도 찍었답니다. 흙에서 딴 땅콩을 깨끗이 씻어 말리는 중인데, 잘 마르면 고소하게 맛볼 것이랍니다!",
         icon: "🌱",
-        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_peanut_harvest.jpg",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260910_peanut_01_single.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260910_peanut_01_single.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260910_peanut_02_friends.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260910_peanut_03_harvest.jpg"
+        ],
         fallbackIcon: "🥜"
       },
       {
