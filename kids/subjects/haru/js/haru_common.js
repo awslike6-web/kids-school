@@ -23,6 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // 지갑 잔액 표시
   updateCurrencyDisplay();
 
+  // 30초 하루 체크인 배너 상태 갱신
+  updateCheckInBannerStatus();
+
   // 탭별 콘텐츠 초기 렌더링
   renderHabitsTab();
   renderArtTab();
@@ -421,3 +424,275 @@ function addNewSpecialStory() {
   speakText(`새로운 특별한 하루 이야기 [${title}]이 우리 게시판에 등록되었어요! 젤리 2개를 선물합니다!`);
   alert(`🎉 [${title}] 이야기가 추억 게시판에 등록되었습니다! 젤리 2개(+🍬🍬)를 받았어요!`);
 }
+
+// =========================================================
+// ✨ 4. [30초 원스톱 하루 체크인 익스프레스] 모달 엔진
+// =========================================================
+let checkInState = {
+  step: 1,
+  habit: null,
+  workout: null,
+  mood: null
+};
+
+function getTodayCheckInKey() {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  return `haru_checkin_done_${todayStr}_${currentChild}`;
+}
+
+function updateCheckInBannerStatus() {
+  const isDone = localStorage.getItem(getTodayCheckInKey()) === "true";
+  const banner = document.getElementById("quickCheckInBanner");
+  const badge = document.getElementById("checkInStatusBadge");
+  const actionBtn = document.getElementById("checkInActionBtn");
+  if (!banner || !badge) return;
+
+  if (isDone) {
+    banner.classList.add("done");
+    badge.innerText = "오늘 완료! 🎉";
+    badge.style.background = "#10ac84";
+    if (actionBtn) actionBtn.innerText = "다시 확인하기 ➔";
+  } else {
+    banner.classList.remove("done");
+    badge.innerText = "미완료 ⏳";
+    badge.style.background = "rgba(255,255,255,0.3)";
+    if (actionBtn) actionBtn.innerText = "체크인 시작! ➔";
+  }
+}
+
+function openQuickCheckInModal() {
+  const overlay = document.getElementById("quickCheckInModalOverlay");
+  if (!overlay) return;
+
+  checkInState = { step: 1, habit: null, workout: null, mood: null };
+  renderCheckInStep();
+  overlay.classList.add("active");
+  document.body.style.overflow = "hidden";
+  speakText("30초 하루 체크인! 오늘 민서가 실천한 착한 행동을 하나 골라보세요!");
+}
+
+function closeQuickCheckInModal() {
+  const overlay = document.getElementById("quickCheckInModalOverlay");
+  if (overlay) overlay.classList.remove("active");
+  document.body.style.overflow = "auto";
+  window.speechSynthesis?.cancel();
+}
+
+function renderCheckInStep() {
+  const body = document.getElementById("checkInModalInnerBody");
+  if (!body) return;
+
+  const { step } = checkInState;
+
+  // 상단 스텝 인디케이터
+  const stepTrackerHtml = `
+    <div class="checkin-step-tracker">
+      <div class="step-dot ${step === 1 ? 'active' : (step > 1 ? 'completed' : '')}">1. 착한 습관 🐷</div>
+      <div class="step-dot ${step === 2 ? 'active' : (step > 2 ? 'completed' : '')}">2. 튼튼 운동 💪</div>
+      <div class="step-dot ${step === 3 ? 'active' : ''}">3. 마음 날씨 🌈</div>
+    </div>
+  `;
+
+  let contentHtml = "";
+
+  if (step === 1) {
+    const habits = window.HARU_DATA.dailyHabits.piggyBank.habits;
+    contentHtml = `
+      <div style="text-align:center; margin-bottom:14px;">
+        <h3 style="font-family:'Jua'; font-size:1.25rem; color:var(--dark);">
+          🐷 오늘 민서가 실천한 착한 행동은 무엇인가요?
+        </h3>
+        <p style="font-size:0.9rem; color:#888;">터치하면 땡그랑 황금 코인이 저금통으로 들어갑니다!</p>
+      </div>
+      <div class="checkin-choices-grid">
+        ${habits.map(h => `
+          <div class="checkin-card" onclick="selectCheckInHabit('${h.name}', '${h.icon}')">
+            <div class="checkin-card-icon">${h.icon}</div>
+            <div class="checkin-card-title">${h.name}</div>
+            <div class="checkin-card-sub">[${h.category}]</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } else if (step === 2) {
+    const exercises = window.HARU_DATA.dailyHabits.workout.exercises;
+    contentHtml = `
+      <div style="text-align:center; margin-bottom:14px;">
+        <h3 style="font-family:'Jua'; font-size:1.25rem; color:var(--dark);">
+          💪 오늘 몸을 튼튼하게 만든 운동은 무엇인가요?
+        </h3>
+        <p style="font-size:0.9rem; color:#888;">터치하면 일주일 운동 달력에 참잘했어요 도장이 찍혀요!</p>
+      </div>
+      <div class="checkin-choices-grid">
+        ${exercises.map(ex => `
+          <div class="checkin-card" onclick="selectCheckInWorkout('${ex.name}', '${ex.icon}')">
+            <div class="checkin-card-icon">${ex.icon}</div>
+            <div class="checkin-card-title">${ex.name}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  } else if (step === 3) {
+    const moods = window.HARU_DATA.dailyHabits.mind.moodColors;
+    contentHtml = `
+      <div style="text-align:center; margin-bottom:14px;">
+        <h3 style="font-family:'Jua'; font-size:1.25rem; color:var(--dark);">
+          🌈 오늘 민서의 마음속 무지개 날씨는 어떤 색깔인가요?
+        </h3>
+        <p style="font-size:0.9rem; color:#888;">터치하면 오늘 마음 날씨가 기록되고 젤리 3개를 받아요!</p>
+      </div>
+      <div class="checkin-choices-grid">
+        ${moods.map(m => `
+          <div class="checkin-card" onclick="selectCheckInMood('${m.mood}', '${m.color}', '${m.icon}', '${m.desc}')">
+            <div class="checkin-card-icon">${m.icon}</div>
+            <div class="checkin-card-title" style="color:${m.color};">${m.mood}</div>
+            <div class="checkin-card-sub">${m.desc}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  body.innerHTML = stepTrackerHtml + contentHtml;
+}
+
+function selectCheckInHabit(name, icon) {
+  checkInState.habit = { name, icon };
+  playCoinSound();
+  checkInState.step = 2;
+  renderCheckInStep();
+  speakText(`참 착해요! [${name}] 실천 완료! 이번엔 오늘 실천한 튼튼 운동을 골라보세요!`);
+}
+
+function selectCheckInWorkout(name, icon) {
+  checkInState.workout = { name, icon };
+  playCoinSound();
+  checkInState.step = 3;
+  renderCheckInStep();
+  speakText(`몸도 튼튼! [${name}] 완료! 마지막으로 오늘 민서의 마음 날씨를 골라보세요!`);
+}
+
+function selectCheckInMood(mood, color, icon, desc) {
+  checkInState.mood = { mood, color, icon, desc };
+  finishQuickCheckIn();
+}
+
+async function finishQuickCheckIn() {
+  const { habit, workout, mood } = checkInState;
+
+  // 1) 저금통 코인 +1 적립
+  let coins = getPiggyCoins();
+  const max = window.HARU_DATA.dailyHabits.piggyBank.maxCoins;
+  if (coins >= max) coins = 0;
+  coins++;
+  setPiggyCoins(coins);
+
+  // 2) 운동 달력 오늘 요일 스탬프 저장
+  const todayIdx = new Date().getDay();
+  const workoutLogs = getWorkoutLogs();
+  workoutLogs[todayIdx] = workout.icon;
+  localStorage.setItem("haru_workout_logs_" + currentChild, JSON.stringify(workoutLogs));
+
+  // 3) 마음 날씨 저장
+  localStorage.setItem("haru_today_mood_" + currentChild, mood.mood);
+
+  // 4) 오늘 완료 플래그 저장
+  localStorage.setItem(getTodayCheckInKey(), "true");
+
+  // 5) 보상 지급 (하리보 젤리 3개!)
+  grantReward(3, "30초 하루 체크인 올인원 달성");
+
+  // 6) 배너 및 하단 위젯 화면 갱신
+  updateCheckInBannerStatus();
+  renderHabitsTab();
+
+  // 7) 노션 학습일지 DB 자동 전송
+  sendCheckInToNotion(habit, workout, mood);
+
+  // 8) 완료 축하 뷰 표시
+  renderCheckInCompletionView();
+}
+
+function renderCheckInCompletionView() {
+  const body = document.getElementById("checkInModalInnerBody");
+  if (!body) return;
+
+  const { habit, workout, mood } = checkInState;
+
+  body.innerHTML = `
+    <div style="text-align:center; padding:20px 10px;">
+      <div style="font-size:3.8rem; margin-bottom:10px;">🎉</div>
+      <h2 style="font-family:'Jua'; font-size:1.6rem; color:#10ac84; margin-bottom:12px;">
+        민서의 30초 하루 체크인 완료!
+      </h2>
+      <p style="font-size:1.05rem; color:#57606f; margin-bottom:20px;">
+        방마다 찾아다니지 않아도 모든 기록이 예쁘게 쏙 들어갔어요! 젤리 3개(+🍬🍬🍬)가 지급되었습니다!
+      </p>
+
+      <div style="background:#f8f9fa; border-radius:18px; padding:16px; margin-bottom:22px; text-align:left; display:flex; flex-direction:column; gap:10px; border:2px solid #eef2f5;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>🐷</span> <b>저금통:</b> [${habit.name}] 황금 코인 1개 적립!
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>💪</span> <b>운동 달력:</b> [${workout.name}] 오늘 스탬프 쾅!
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>🌈</span> <b>마음 날씨:</b> [${mood.mood}] ${mood.desc}
+        </div>
+      </div>
+
+      <button class="card-footer-btn" style="padding:12px 36px; font-size:1.1rem; border-radius:999px;" onclick="closeQuickCheckInModal()">
+        확인하고 둘러보기 💖
+      </button>
+    </div>
+  `;
+
+  speakText("와아! 오늘 하루 체크인이 멋지게 완료되었어요! 저금통과 운동 달력에 쏙 들어가고 젤리 3개를 선물받았습니다!");
+}
+
+// 🌐 노션 학습일지 DB 자동 기록
+async function sendCheckInToNotion(habit, workout, mood) {
+  const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+  const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+
+  const payload = {
+    parent: { database_id: dbId },
+    properties: {
+      "제목": {
+        title: [{ text: { content: `${currentChild === 'minseo' ? '민서' : '민수'}_${todayStr} (슬기로운 하루 체크인)` } }]
+      },
+      "학생": {
+        select: { name: currentChild === 'minseo' ? '민서' : '민수' }
+      },
+      "과목": {
+        select: { name: "하루" }
+      },
+      "날짜": {
+        date: { start: todayStr }
+      },
+      "학습내용": {
+        rich_text: [{
+          text: {
+            content: `[30초 하루 체크인]\n• 착한습관: ${habit.name}\n• 튼튼운동: ${workout.name}\n• 마음날씨: ${mood.mood} (${mood.desc}) [${timeStr}]`
+          }
+        }]
+      },
+      "획득보상": {
+        number: 3
+      }
+    }
+  };
+
+  try {
+    await fetch(`${proxyUrl}/v1/pages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    console.warn("노션 하루 체크인 자동 동기화 예외 (로컬 안전 보존됨):", e);
+  }
+}
+

@@ -472,3 +472,136 @@ body {
   .workout-days-row { grid-template-columns: repeat(4, 1fr); }
   .piggy-board-grid { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* =========================================================
+   ✨ 30초 원스톱 '하루 체크인' 익스프레스 UI
+   ========================================================= */
+.quick-checkin-banner {
+  background: linear-gradient(135deg, #10ac84 0%, #2ed573 50%, #ffa502 100%);
+  border-radius: 22px;
+  padding: 16px 22px;
+  margin-bottom: 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(46, 213, 115, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  transition: transform 0.25s, box-shadow 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.quick-checkin-banner:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 14px 30px rgba(46, 213, 115, 0.45);
+}
+.quick-checkin-banner.done {
+  background: linear-gradient(135deg, #2ed573, #1dd1a1);
+}
+.checkin-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.checkin-banner-icon {
+  font-size: 2.6rem;
+  animation: pulseIcon 1.8s infinite ease-in-out;
+}
+@keyframes pulseIcon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.checkin-banner-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.35rem;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.checkin-banner-desc {
+  font-size: 0.92rem;
+  opacity: 0.95;
+}
+.checkin-action-btn {
+  background: #fff;
+  color: #10ac84;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* 체크인 모달 내부 */
+.checkin-step-tracker {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.step-dot {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #f1f2f6;
+  color: #747d8c;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+.step-dot.active {
+  background: var(--haru-green);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(46, 213, 115, 0.3);
+  transform: scale(1.05);
+}
+.step-dot.completed {
+  background: #20bf6b;
+  color: #fff;
+}
+
+.checkin-choices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.checkin-card {
+  background: #fff;
+  border: 2px solid #e4e7eb;
+  border-radius: 18px;
+  padding: 18px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+.checkin-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--haru-green);
+  box-shadow: 0 8px 18px rgba(46, 213, 115, 0.2);
+}
+.checkin-card.selected {
+  border-color: var(--haru-green);
+  background: #e8f8f0;
+  box-shadow: 0 6px 16px rgba(46, 213, 115, 0.3);
+}
+.checkin-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+.checkin-card-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.15rem;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.checkin-card-sub {
+  font-size: 0.8rem;
+  color: #888;
+}
+
