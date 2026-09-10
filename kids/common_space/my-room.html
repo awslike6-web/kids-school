@@ -215,6 +215,7 @@
         <div class="nav-left" id="user-badge">👦 마이룸</div>
         <div class="nav-right">
             <div class="wealth-badge" id="wealth-display">⏳ 지갑 확인 중...</div>
+            <button onclick="if(typeof openScreenTimeReceiptModal === 'function') openScreenTimeReceiptModal();" class="home-btn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 20px; box-shadow: 0 3px 8px rgba(16,185,129,0.3); cursor: pointer;">⏰ 오늘 폰시간 정산</button>
             
             <!-- 🚪 동선 수정: 한 칸 위(../)에 있는 로비 파일로 연결! -->
             <!-- ⚠️ 주의: 대형 로비 파일 이름이 lobby.html이 아니라면 파일명에 맞게 변경해주세요! -->
@@ -1256,7 +1257,8 @@
                 'notion-helper.js',
                 'fairy-config.js',
                 'fairy-engine.js',
-                'fairy-chatbot.js'
+                'fairy-chatbot.js',
+                'screentime-tracker.js'
             ];
 
             if (typeof loadCoreScripts === 'function') {

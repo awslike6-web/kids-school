@@ -161,11 +161,12 @@
   <h1 class="main-title" id="mainLobbyTitle"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
   <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
 
-  <!-- 📦 3대 상단 핵심 히어로 바 (인벤토리 보상 + 데일리 마음일기 + 시간표) -->
+  <!-- 📦 4대 상단 핵심 히어로 바 (인벤토리 보상 + 폰시간 정산 + 데일리 마음일기 + 시간표) -->
   <div class="status-hero-bar">
     <div class="inventory-card" id="inventoryDisplay">
       <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
     </div>
+    <button type="button" class="hero-chip-btn screentime-chip-btn" id="lobbyScreenTimeBtn" onclick="if(typeof openScreenTimeReceiptModal === 'function') openScreenTimeReceiptModal();" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: 1.5px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); cursor: pointer;">⏰ 오늘 폰시간 정산</button>
     <button type="button" class="hero-chip-btn diary-chip-btn" id="lobbyDiaryBtn" onclick="openDailyDiaryModal()">📝 마음일기 (+5💎)</button>
     <a href="timetable.html" class="hero-chip-btn timetable-chip-btn" id="timetableLink">📅 오늘 시간표</a>
   </div>
@@ -356,7 +357,8 @@ const requiredCores = [
     "fairy-chatbot.js",
     "daily-diary.js",
     "quiz-flow-controller.js",
-    "timetable-boost.js"
+    "timetable-boost.js",
+    "screentime-tracker.js"
 ];
 
 loadCoreScripts("kids/core/", requiredCores, () => {

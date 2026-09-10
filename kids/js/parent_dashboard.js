@@ -503,6 +503,9 @@ async function loadDashboardData() {
           // 5. 5대 과목 레이더 차트 렌더링
           const radarScores = buildRadarScores(props, vocaList, name);
           renderRadarChart(prefix + "-radar-chart", name + " 과목 밸런스", radarScores, isMinseo);
+
+          // 6. 스크린타임 스마트 정산기 위젯 렌더링
+          renderScreenTimeWidget(name);
         }
       });
     }
@@ -513,8 +516,100 @@ async function loadDashboardData() {
       el.style.color = "#ff6b6b";
       el.classList.remove("loading-shimmer");
     });
+  } finally {
+    // 트래커 데이터 로컬 렌더링 보장
+    renderScreenTimeWidget("민수");
+    renderScreenTimeWidget("민서");
   }
 }
+
+// 📱 스크린타임 스마트 정산기 UI 바인딩
+function renderScreenTimeWidget(childName) {
+  if (typeof window.ScreenTimeTracker === 'undefined') return;
+
+  const prefix = childName === "민수" ? "ms" : "ds";
+  const isMinseo = childName === "민서";
+  const summary = window.ScreenTimeTracker.getScreenTimeSummary(childName);
+
+  const studyTimeEl = document.getElementById(prefix + "-st-study-time");
+  const roundedNoteEl = document.getElementById(prefix + "-st-rounded-note");
+  const rewardQuestEl = document.getElementById(prefix + "-st-reward-quest");
+  const rewardTicketNoteEl = document.getElementById(prefix + "-st-reward-ticket-note");
+  const totalTimeEl = document.getElementById(prefix + "-st-total-time");
+  const ticketSplitEl = document.getElementById(prefix + "-st-ticket-split");
+  const badgeEl = document.getElementById(prefix + "-st-status-badge");
+  const approveBtn = document.getElementById(prefix + "-st-approve-btn");
+
+  if (studyTimeEl) studyTimeEl.textContent = summary.rawStudyMinutes + "분";
+  if (roundedNoteEl) roundedNoteEl.textContent = `➔ 10분 올림: ${summary.studyMinutes}분`;
+  if (rewardQuestEl) rewardQuestEl.textContent = `${summary.todayRewardEarned} / 50개`;
+  
+  if (rewardTicketNoteEl) {
+    if (summary.isBonusTicketEarned || summary.todayRewardEarned >= 50) {
+      rewardTicketNoteEl.textContent = "🎉 30분권 획득!";
+      rewardTicketNoteEl.style.color = "#16a34a";
+    } else {
+      rewardTicketNoteEl.textContent = `${50 - summary.todayRewardEarned}개 더 필요`;
+      rewardTicketNoteEl.style.color = "#b45309";
+    }
+  }
+
+  if (totalTimeEl) {
+    const hours = Math.floor(summary.totalTimeGrantMinutes / 60);
+    const mins = summary.totalTimeGrantMinutes % 60;
+    const hourStr = hours > 0 ? `${hours}시간 ${mins}분` : `${mins}분`;
+    totalTimeEl.textContent = `${summary.totalTimeGrantMinutes}분 (${hourStr})`;
+  }
+
+  if (ticketSplitEl) {
+    if (summary.tickets && summary.tickets.length > 0) {
+      const parts = summary.tickets.map(t => `${t.label}(${t.minutes}분)`);
+      ticketSplitEl.textContent = "발급: " + parts.join(" + ");
+    } else {
+      ticketSplitEl.textContent = "발급 티켓: 없음";
+    }
+  }
+
+  if (summary.isParentApproved) {
+    if (badgeEl) {
+      badgeEl.textContent = "승인 완료 💖";
+      badgeEl.style.background = "#dcfce7";
+      badgeEl.style.color = "#15803d";
+    }
+    if (approveBtn) {
+      approveBtn.textContent = "↩️ 연장 승인 취소하기";
+      approveBtn.style.background = "#64748b";
+    }
+  } else {
+    if (badgeEl) {
+      badgeEl.textContent = summary.totalTimeGrantMinutes > 0 ? "승인 대기 ⏳" : "대기 중";
+      badgeEl.style.background = summary.totalTimeGrantMinutes > 0 ? "#fef3c7" : "#e0f2fe";
+      badgeEl.style.color = summary.totalTimeGrantMinutes > 0 ? "#b45309" : "#0369a1";
+    }
+    if (approveBtn) {
+      approveBtn.textContent = "✅ 패밀리링크 연장 완료 승인";
+      approveBtn.style.background = isMinseo
+        ? "linear-gradient(135deg, #ec4899, #db2777)"
+        : "linear-gradient(135deg, #10b981, #059669)";
+    }
+  }
+}
+
+// 📱 부모 승인 토글 핸들러 전역 노출
+window.toggleParentScreenTimeApproval = function(childName) {
+  if (typeof window.ScreenTimeTracker === 'undefined') {
+    alert("스크린타임 트래커 모듈이 준비되지 않았습니다.");
+    return;
+  }
+  const newState = window.ScreenTimeTracker.toggleParentApproval(childName);
+  renderScreenTimeWidget(childName);
+  
+  if (newState) {
+    alert(`💖 [${childName}] 패밀리링크 연장 승인이 완료되었습니다!\n아이의 화면에도 영수증 승인 완료 도장이 쾅 찍힙니다.`);
+  } else {
+    alert(`↩️ [${childName}] 패밀리링크 연장 승인이 취소되었습니다.`);
+  }
+};
 
 // 기동 처리
 window.addEventListener('DOMContentLoaded', () => {

@@ -46,6 +46,11 @@ async function sendStudyLogToNotion(options = {}) {
         durationMinutes = Math.floor(timeDiff / 60000);
         if (durationMinutes < 1) durationMinutes = 1;
     }
+
+    // ⏰ [스크린타임 트래커 연동] 오늘 순수 공부 시간 누적 기록
+    if (typeof window.ScreenTimeTracker !== 'undefined') {
+        window.ScreenTimeTracker.trackStudySession(durationMinutes, subject);
+    }
     
     // 오답 리포트 자동 수집
     let errorReport = options.errorReport;
@@ -233,6 +238,11 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     
     let previousWealth = currentTheme === '마인크래프트' ? diamond : slime;
     let currentWealth = previousWealth + allowedCurrency;
+
+    // ⏰ [스크린타임 50개 퀘스트 연동] 오늘 획득 보상 누적
+    if (typeof window.ScreenTimeTracker !== 'undefined' && allowedCurrency > 0) {
+        window.ScreenTimeTracker.recordDailyRewardEarned(allowedCurrency, userName);
+    }
     
     // 🔥 복습 과목이면 경험치 1.2배 부스트 적용
     let finalEarnedExp = Math.round(earned * (boostInfo.expMultiplier || 1.0));
