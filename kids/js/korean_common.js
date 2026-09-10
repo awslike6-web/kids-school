@@ -808,25 +808,41 @@ async function finalizeKoreanMissionImmediately() {
             return q.word || q.text || q;
         }).join(' / ') : "오답 없음";
 
-        if (typeof sendStudyLogToNotion === 'function') {
+        // 🏆 10문제 완주 보너스(+5💎/🍬) 및 노션 학습일지 자동 전송
+        if (typeof finalizeQuizRewardSession === 'function') {
+            await finalizeQuizRewardSession({
+                isFullComplete: true,
+                subject: subj,
+                childName: student,
+                errorReport: errorReport
+            });
+            console.log(`🎉 [국어 미션 완수] 완주 보너스(+5) & 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
+        } else if (typeof sendStudyLogToNotion === 'function') {
             await sendStudyLogToNotion({
                 childName: student,
                 subject: subj,
                 errorReport: errorReport
             });
-            console.log(`🎉 [국어 미션 완수] 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
         }
     } catch (e) {
         console.error("국어 미션 완수 일지 전송 오류:", e);
     }
 }
 
-async function advanceKoreanQuizAfterCorrect(delayMs = 1000) {
+async function advanceKoreanQuizAfterCorrect(delayMs = 1200) {
     if (typeof rewardQuizCorrect === 'function') {
         await rewardQuizCorrect(activeQuizIdx);
     }
     activeQuizIdx++;
-    setTimeout(renderSectionUI, delayMs);
+    if (typeof triggerQuizAdvance === 'function') {
+        triggerQuizAdvance({
+            onAdvance: renderSectionUI,
+            delayMs: delayMs,
+            subject: '국어'
+        });
+    } else {
+        setTimeout(renderSectionUI, delayMs);
+    }
 }
 
 function skipKoreanQuestion() {

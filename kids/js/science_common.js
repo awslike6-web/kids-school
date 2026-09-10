@@ -1109,20 +1109,26 @@ function renderSectionUI(type, container, unitObj) {
     }
 }
 
-window.verifyExperimentChoice = function(choiceIdx, correctIdx) {
+window.verifyExperimentChoice = async function(choiceIdx, correctIdx) {
     if (choiceIdx === correctIdx) {
         if (typeof playSoundEffect === 'function') playSoundEffect('correct');
         speakFairyTTS("정답이야! 아주 잘했어!");
         alert("🎉 정답입니다!");
+        if (typeof rewardQuizCorrect === 'function') {
+            await rewardQuizCorrect(activeQuizIdx);
+        }
         skipToNextScienceQuiz();
     } else {
         if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
+        const currentItem = activeSectionData[activeQuizIdx] || {};
+        if (!window.wrongNotes) window.wrongNotes = [];
+        window.wrongNotes.push({ word: currentItem.title || '탐구 실험', wrongInput: `선택 ${choiceIdx + 1}` });
         speakFairyTTS("다시 한번 관찰해 봐!");
         alert("앗, 다시 한 번 생각해 볼까요? 교과서 사진을 확대해서 살펴보세요!");
     }
 };
 
-window.verifyScienceVocaAnswer = function() {
+window.verifyScienceVocaAnswer = async function() {
     const input = document.getElementById("scienceAnswerInput");
     if (!input) return;
     const userVal = input.value.trim().replace(/\s+/g, '');
@@ -1133,9 +1139,23 @@ window.verifyScienceVocaAnswer = function() {
         if (typeof playSoundEffect === 'function') playSoundEffect('correct');
         speakFairyTTS("정답이야! 잘했어!");
         alert(`🎉 정답! [${currentItem.word}] 맞습니다!`);
-        skipToNextScienceQuiz();
+        if (typeof rewardQuizCorrect === 'function') {
+            await rewardQuizCorrect(activeQuizIdx);
+        }
+        if (typeof triggerQuizAdvance === 'function') {
+            triggerQuizAdvance({
+                onAdvance: skipToNextScienceQuiz,
+                delayMs: 1200,
+                subject: '과학',
+                explanation: `<strong>${currentItem.word}</strong> : ${currentItem.meaning || currentItem.desc || ''}`
+            });
+        } else {
+            skipToNextScienceQuiz();
+        }
     } else {
         if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
+        if (!window.wrongNotes) window.wrongNotes = [];
+        window.wrongNotes.push({ word: currentItem.word, wrongInput: userVal });
         speakFairyTTS("힌트를 보고 다시 맞춰봐!");
         alert("아쉬워요! 초성 힌트를 다시 확인해 보세요!");
         input.value = "";
@@ -1143,15 +1163,19 @@ window.verifyScienceVocaAnswer = function() {
     }
 };
 
-window.skipToNextScienceQuiz = function() {
+window.skipToNextScienceQuiz = async function() {
     activeQuizIdx++;
     if (activeQuizIdx < activeSectionData.length) {
         const curriculum = getCurriculumUnits();
         const unitObj = curriculum.find(u => u.code === selectedScienceUnit);
         renderSectionUI(currentMissionType, document.getElementById('overlayInnerBody'), unitObj);
     } else {
+        // 🏆 10문제 전량 완료 시 완주 보너스(+5) 및 일지 자동 전송!
+        if (typeof finalizeQuizRewardSession === 'function') {
+            await finalizeQuizRewardSession({ isFullComplete: true, subject: '과학' });
+        }
         if (typeof showRewardPopup === 'function') {
-            showRewardPopup("과학 탐구 정복 완료!", "5학년 1학기 과학 단원 탐구를 완벽하게 마쳤습니다! 🌟");
+            showRewardPopup("과학 탐구 정복 완료!", "과학 단원 탐구를 완벽하게 마쳤습니다! 🌟");
         }
         openMissionView(currentMissionType);
     }

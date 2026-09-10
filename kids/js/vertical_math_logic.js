@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof initFairyAudio === 'function') initFairyAudio();
   if (typeof initFairyChat === 'function') initFairyChat("MATH", "세로셈방");
   if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
+  if (typeof renderQuizFlowToggleUI === 'function') renderQuizFlowToggleUI('verticalMathFlowToggle', '수학');
 });
 
 // 📝 계산 메모장 (글씨 / 그리기)
@@ -164,21 +165,22 @@ window.exitRoom = async function(force) {
   const opNames = { add: '수학(덧셈 세로셈)', sub: '수학(뺄셈 세로셈)', mul: '수학(곱셈 세로셈)', div: '수학(나눗셈 세로셈)' };
   const currentOpName = gameState.mode ? opNames[gameState.mode] : '수학(세로셈 메인)';
 
-  if (typeof sendStudyLogToNotion === 'function') {
-      await sendStudyLogToNotion({ subject: currentOpName });
+  const errorReportText = (window.wrongNotes && window.wrongNotes.length > 0)
+      ? window.wrongNotes.map(n => `${n.text} (입력:${n.userAns}/정답:${n.answer})`).join(' / ')
+      : '오답 없음';
+
+  if (typeof finalizeQuizRewardSession === 'function') {
+      await finalizeQuizRewardSession({
+          isFullComplete: false,
+          subject: currentOpName,
+          errorReport: errorReportText
+      });
+  } else if (typeof sendStudyLogToNotion === 'function') {
+      await sendStudyLogToNotion({ subject: currentOpName, errorReport: errorReportText });
   }
   
   location.href = 'math.html';
 };
-
-// 🚨 돌발 이탈 방지 (블랙박스 기록)
-window.addEventListener('pagehide', () => {
-    if (!isExiting && typeof sendStudyLogToNotion === 'function') {
-        const opNames = { add: '덧셈', sub: '뺄셈', mul: '곱셈', div: '나눗셈' };
-        const modeName = gameState.mode ? opNames[gameState.mode] : '기초';
-        sendStudyLogToNotion({ subject: `수학(세로셈_${modeName}_중도이탈)` });
-    }
-});
 
 function setFocus(el) {
   if (!el) return;
@@ -336,6 +338,11 @@ window.startGame = function(mode, lvl) {
 
   gameState = { mode, lvl, questions: generateQuestions(mode, lvl), current: 0, correctCount: 0 };
   
+  // 🚀 세로셈 퀴즈 세션 초기화 (표준 보상 & 일지 트래커)
+  if (typeof initQuizRewardSession === 'function') {
+      initQuizRewardSession('vertical_math_' + mode);
+  }
+
   const titles = { add: '➕ 덧셈 기지', sub: '➖ 뺄셈 기지', mul: '✖️ 곱셈 기지', div: '➗ 나눗셈 기지' };
   document.getElementById('game-title').innerHTML = `${titles[mode]} <span style="font-size:1rem;color:#ccc;font-weight:normal;">(${lvl.label})</span>`;
   
@@ -562,7 +569,22 @@ window.submitAnswer = function() {
       
       gameState.correctCount++;
       gameState.current++;
-      setTimeout(nextQuestion, 1200); // 1.2초 후 자동으로 다음 문제 그려짐
+
+      // 💡 [2문제당 1개 지급 표준화]
+      if (typeof rewardQuizCorrect === 'function') {
+          rewardQuizCorrect(gameState.current - 1);
+      }
+
+      if (typeof triggerQuizAdvance === 'function') {
+          triggerQuizAdvance({
+              onAdvance: nextQuestion,
+              delayMs: 1300,
+              subject: '수학',
+              container: document.getElementById('vertical-container')
+          });
+      } else {
+          setTimeout(nextQuestion, 1200); // 1.2초 후 자동으로 다음 문제 그려짐
+      }
   } else {
       // 💥 땡 연출
       document.querySelectorAll('.cell-ans').forEach(c => {
@@ -639,11 +661,23 @@ async function showResult() {
   document.getElementById('r-detail').textContent = `10문제 중 ${gameState.correctCount}개 성공!`;
   showScreen('screen-result');
 
-  // 노션 보상 연동: 1타 2피 쌍끌이 모드 & MAX 자동 제한 캡 탑재
-  if (gameState.correctCount > 0 && typeof grantRewardAndShowUI === 'function') {
-      window.currentSubject = "수학";
-      // 'voca' 커스텀 타입을 던져서 [오늘 획득_수학]과 [용어 경험치_수학]을 실시간 동시 누적!
-      await grantRewardAndShowUI(gameState.correctCount, false, 'voca');
+  const opNames = { add: '수학(덧셈 세로셈)', sub: '수학(뺄셈 세로셈)', mul: '수학(곱셈 세로셈)', div: '수학(나눗셈 세로셈)' };
+  const currentOpName = gameState.mode ? opNames[gameState.mode] : '수학(세로셈)';
+
+  // 🏆 10문제 완주 보너스(+5💎/🍬) 및 노션 학습일지 자동 전송!
+  window.currentSubject = "수학";
+  const errorReportText = (window.wrongNotes && window.wrongNotes.length > 0)
+      ? window.wrongNotes.map(n => `${n.text} (입력:${n.userAns}/정답:${n.answer})`).join(' / ')
+      : '오답 없음';
+
+  if (typeof finalizeQuizRewardSession === 'function') {
+      await finalizeQuizRewardSession({
+          isFullComplete: true,
+          subject: currentOpName,
+          errorReport: errorReportText
+      });
+  } else if (gameState.correctCount > 0 && typeof grantRewardAndShowUI === 'function') {
+      await grantRewardAndShowUI(5, false, 'voca');
   }
 }
 

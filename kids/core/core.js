@@ -6,7 +6,8 @@ var requiredCores = [
     "notion-helper.js",
     "fairy-config.js",
     "fairy-engine.js",
-    "daily-diary.js"
+    "daily-diary.js",
+    "quiz-flow-controller.js"
 ];
 
 // 글로벌 헬퍼 상태 정의 (공통 사용)
@@ -219,6 +220,13 @@ window.detectSubjectFromContext = detectSubjectFromContext;
 window.addEventListener("beforeunload", () => {
     const isAdminUser = window.isAdmin || (localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마');
     if (isAdminUser) return;
+
+    // 💡 퀴즈 세션이 활성화되어 있거나 이미 세션 일지가 발행된 경우 중복 발행 차단
+    if (window.__quizRewardSession) {
+        if (window.__quizRewardSession.isLogged) return;
+        // 아직 세션 일지가 안 보내졌다면 notion-reward.js의 플러시가 담당하도록 위임
+        return;
+    }
 
     if (typeof sendStudyLogToNotion === 'function') {
         const subjectName = detectSubjectFromContext();

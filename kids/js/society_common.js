@@ -671,13 +671,47 @@ function renderSectionUI(type, container) {
         return;
     }
 
+let isCurrentSocietyMissionLogged = false;
+
+async function finalizeSocietyMissionImmediately() {
+    if (isCurrentSocietyMissionLogged) return;
+    isCurrentSocietyMissionLogged = true;
+
+    try {
+        const student = (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+        let subj = '사회';
+        if (selectedSocietyUnit) subj = `사회(${selectedSocietyUnit})`;
+
+        const targetNotes = window.wrongNotes || [];
+        const errorReport = targetNotes.length > 0 ? targetNotes.map(q => {
+            if (q.wrongInput) return `${q.word || q.text} (오답: ${q.wrongInput})`;
+            return q.word || q.text || q;
+        }).join(' / ') : "오답 없음";
+
+        // 🏆 10문제 완주 보너스(+5💎/🍬) 및 노션 학습일지 자동 전송
+        if (typeof finalizeQuizRewardSession === 'function') {
+            await finalizeQuizRewardSession({
+                isFullComplete: true,
+                subject: subj,
+                childName: student,
+                errorReport: errorReport
+            });
+            console.log(`🎉 [사회 미션 완수] 완주 보너스(+5) & 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
+        }
+    } catch (e) {
+        console.error("사회 미션 완수 일지 전송 오류:", e);
+    }
+}
+
         // 10문제 커트라인 체크 팝업 (용어방 전용)
     if (type === 'voca' && activeQuizIdx > 0 && activeQuizIdx % 10 === 0 && !window.societyVocaContinueFlag) {
+        finalizeSocietyMissionImmediately();
         container.innerHTML = `
             <div class="screen loaded quiz-card" style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3.5rem; margin-bottom:10px;">🏆</div>
-                <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 풀었어요!</h2>
-                <p style="font-size:1.2rem; color:#666; margin-bottom:30px;">맞힌 문제마다 보상 1점씩 받았어요!<br>계속 탐험할까요?</p>
+                <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 완주했어요!</h2>
+                <p style="font-size:1.15rem; color:#10b981; font-weight:bold; margin-bottom:15px;">🎉 완주 보너스(+5💎)와 학습일지가 안전하게 기록되었어요!</p>
+                <p style="font-size:1.1rem; color:#666; margin-bottom:30px;">더 탐험하고 싶다면 계속해서 도전해볼까요?</p>
                 <div style="display:flex; justify-content:center; gap:15px;">
                     <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="closeMissionView(true);">✅ 여기서 나가기</button>
                     <button class="back-to-lobby-btn" style="background:#6EC6F5; color:white;" onclick="window.societyVocaContinueFlag=true; renderSectionUI('${type}', document.getElementById('overlayInnerBody'));">🚀 계속 이어서 풀기</button>
@@ -1005,7 +1039,18 @@ window.handleVocaCorrect = async function() {
         await rewardQuizCorrect(activeQuizIdx);
     }
 
-    setTimeout(() => skipToNextQuiz('voca'), 1200);
+    const curWord = activeSectionData[activeQuizIdx];
+    const expl = curWord ? `<strong>${curWord.word}</strong>: ${curWord.meaning || curWord.desc || ''}` : null;
+    if (typeof triggerQuizAdvance === 'function') {
+        triggerQuizAdvance({
+            onAdvance: () => skipToNextQuiz('voca'),
+            delayMs: 1200,
+            subject: '사회',
+            explanation: expl
+        });
+    } else {
+        setTimeout(() => skipToNextQuiz('voca'), 1200);
+    }
 }
 
 window.handleVocaWrong = function(wrongInput, onRetryReset) {

@@ -743,12 +743,28 @@ function checkStage3Answer(inputVal, answerWord, currentItem) {
     return normalized === answerWord.toLowerCase().trim();
 }
 
-async function advanceEnglishQuizAfterCorrect(delayMs = 1000) {
+async function advanceEnglishQuizAfterCorrect(delayMs = 1200) {
     if (typeof rewardQuizCorrect === 'function') {
         await rewardQuizCorrect(activeQuizIdx);
     }
+    const prevItem = activeSectionData[activeQuizIdx];
     activeQuizIdx++;
-    setTimeout(renderSectionUI, delayMs);
+
+    let expl = null;
+    if (prevItem) {
+        expl = `<strong>${prevItem.word}</strong> : ${prevItem.meaning || prevItem.desc || ''}`;
+    }
+
+    if (typeof triggerQuizAdvance === 'function') {
+        triggerQuizAdvance({
+            onAdvance: renderSectionUI,
+            delayMs: delayMs,
+            subject: '영어',
+            explanation: expl
+        });
+    } else {
+        setTimeout(renderSectionUI, delayMs);
+    }
 }
 
 function skipEnglishQuestion() {
@@ -766,6 +782,38 @@ function promptEnglishWrong(onRetry) {
     retry();
 }
 
+let isCurrentEnglishMissionLogged = false;
+
+async function finalizeEnglishMissionImmediately() {
+    if (isCurrentEnglishMissionLogged) return;
+    isCurrentEnglishMissionLogged = true;
+
+    try {
+        const student = (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+        let subj = '영어';
+        if (selectedEnglishUnit) subj = `영어(${selectedEnglishUnit})`;
+
+        const targetNotes = window.engWrongNotes || window.wrongNotes || [];
+        const errorReport = targetNotes.length > 0 ? targetNotes.map(q => {
+            if (q.wrongInput) return `${q.word || q.text} (오답: ${q.wrongInput})`;
+            return q.word || q.text || q;
+        }).join(' / ') : "오답 없음";
+
+        // 🏆 10문제 완주 보너스(+5💎/🍬) 및 노션 학습일지 자동 전송
+        if (typeof finalizeQuizRewardSession === 'function') {
+            await finalizeQuizRewardSession({
+                isFullComplete: true,
+                subject: subj,
+                childName: student,
+                errorReport: errorReport
+            });
+            console.log(`🎉 [영어 미션 완수] 완주 보너스(+5) & 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
+        }
+    } catch (e) {
+        console.error("영어 미션 완수 일지 전송 오류:", e);
+    }
+}
+
 // ========================================================
 // 🎯 각 모드별 UI 렌더링 및 로직
 // ========================================================
@@ -774,11 +822,13 @@ function renderSectionUI() {
     container.innerHTML = "";
     
     if (activeQuizIdx >= activeSectionData.length) {
+        // ⚡ 10문제 완료 즉각 완주 보너스 & 학습일지 자동 전송
+        finalizeEnglishMissionImmediately();
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--primary); margin-bottom:10px;">모든 문제를 완료했습니다!</p>
-                <p style="font-size:1rem; color:#666; margin-bottom:20px;">${getStage3ModeLabel(stage3QuizMode)} 연습 완료</p>
+                <p style="font-size:1rem; color:#10b981; font-weight:bold; margin-bottom:20px;">✨ 완주 보너스(+5💎)와 학습일지가 안전하게 기록되었어요!</p>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     ${currentMissionType === 'stage3' ? `<button class="quiz-button" style="background:var(--sky-blue); color:white;" onclick="showStage3ModeSelect()">🔄 다른 방식으로 다시하기</button>` : ''}
                     <button class="quiz-button" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>

@@ -55,7 +55,8 @@
   <div class="screen" id="screen-game">
     <div class="game-header">
       <div class="game-stat-box" id="game-title">덧셈 기지</div>
-      <div>
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div id="verticalMathFlowToggle"></div>
         <button class="print-btn" onclick="printWorksheet()">🖨️ 오늘의 문제 인쇄하기</button>
       </div>
       <div class="game-stat-box" id="game-qnum">1/10</div>
@@ -121,6 +122,7 @@
 <script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/fairy-chatbot.js"></script>
+<script src="../../core/quiz-flow-controller.js"></script>
 <script src="../../js/vertical_math_logic.js"></script>
   <script>window.currentSubject = "수학";</script>
 </body>

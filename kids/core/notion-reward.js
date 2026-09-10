@@ -763,39 +763,107 @@ function initQuizRewardSession(missionType) {
     window.__quizRewardSession = {
         missionType: missionType || window.currentMissionType || 'quiz',
         sessionId: String(Date.now()),
-        solvedCount: 0
+        solvedCount: 0,
+        correctCount: 0,
+        awardedCount: 0,
+        isLogged: false,
+        startTime: new Date().toISOString()
     };
 }
 
-async function rewardQuizCorrect(quizIndex) {
+async function rewardQuizCorrect(quizIndex, options = {}) {
     if (!window.__quizRewardSession) {
         initQuizRewardSession(window.currentMissionType);
     }
     const session = window.__quizRewardSession;
-    const idx = typeof quizIndex === 'number' ? quizIndex : session.solvedCount;
-    const rewardKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_q${idx}`;
-    const result = await claimMissionRewardOnce(rewardKey, {
-        amount: 1,
-        missionType: session.missionType,
-        subject: window.currentSubject,
-        silent: false,
-        skipStudyLog: true
-    });
-    if (result) session.solvedCount = (session.solvedCount || 0) + 1;
-    return result;
+    session.solvedCount = (session.solvedCount || 0) + 1;
+    session.correctCount = (session.correctCount || 0) + 1;
+
+    // 💡 [신규 보상 밸런스 공식]
+    // 2문제 맞출 때마다 1개씩 즉시 실시간 지급 (2, 4, 6, 8, 10번째 정답 시 +1💎/🍬)
+    const shouldAward = (session.correctCount % 2 === 0) || options.forceAward;
+    if (shouldAward) {
+        const pairIdx = Math.floor(session.correctCount / 2);
+        const rewardKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_pair${pairIdx}`;
+        session.awardedCount = (session.awardedCount || 0) + 1;
+        const result = await claimMissionRewardOnce(rewardKey, {
+            amount: 1,
+            missionType: session.missionType,
+            subject: window.currentSubject,
+            silent: false,
+            skipStudyLog: true
+        });
+        return result;
+    }
+    return true;
 }
 
-async function finalizeQuizRewardSession() {
+async function finalizeQuizRewardSession(options = {}) {
     const session = window.__quizRewardSession;
-    if (!session || session.solvedCount <= 0) {
-        window.__quizRewardSession = null;
+    if (!session) {
         return false;
     }
-    if (typeof sendStudyLogToNotion === 'function') {
-        await sendStudyLogToNotion({ subject: window.currentSubject || '국어' });
+
+    const opts = typeof options === 'boolean' ? { isFullComplete: options } : (options || {});
+    const isFullComplete = opts.isFullComplete || false;
+    const subj = opts.subject || window.currentSubject || '국어';
+
+    // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (+5💎/🍬 & 과목 경험치)
+    if (isFullComplete) {
+        const bonusKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_complete_bonus`;
+        try {
+            await claimMissionRewardOnce(bonusKey, {
+                amount: 5,
+                missionType: session.missionType,
+                subject: subj,
+                silent: false,
+                skipStudyLog: true
+            });
+            console.log(`🏆 [10문제 완주 보너스 지급 완료] +5개 획득! (${subj})`);
+        } catch (e) {
+            console.warn("완주 보너스 지급 중 오류:", e);
+        }
     }
+
+    // 2. 📝 노션 학습일지 안전 전송 (1세션 1회 전송 원칙, 중복 방지)
+    if (!session.isLogged && (session.solvedCount > 0 || session.correctCount > 0)) {
+        session.isLogged = true;
+        if (typeof sendStudyLogToNotion === 'function') {
+            try {
+                await sendStudyLogToNotion({
+                    subject: subj,
+                    childName: opts.childName,
+                    errorReport: opts.errorReport,
+                    startTime: session.startTime,
+                    endTime: new Date().toISOString()
+                });
+                console.log(`📝 [퀴즈 세션 일지 기록 완료] ${session.solvedCount}문제 풀이 반영 (${subj})`);
+            } catch (e) {
+                console.error("퀴즈 세션 일지 전송 오류:", e);
+            }
+        }
+    }
+
     window.__quizRewardSession = null;
     return true;
+}
+
+// 🛡️ 브라우저 이탈(탭 닫기, 새로고침, 뒤로가기) 시 미기록 세션 안전 자동 플러시
+if (typeof window !== 'undefined') {
+    window.addEventListener('pagehide', () => {
+        const session = window.__quizRewardSession;
+        if (session && !session.isLogged && (session.solvedCount > 0 || session.correctCount > 0)) {
+            session.isLogged = true;
+            const subj = window.currentSubject || (typeof detectSubjectFromContext === 'function' ? detectSubjectFromContext() : '국어');
+            if (typeof sendStudyLogToNotion === 'function') {
+                sendStudyLogToNotion({
+                    subject: subj,
+                    startTime: session.startTime,
+                    endTime: new Date().toISOString()
+                });
+            }
+        }
+    });
 }
 
 const DISCUSSION_STOP_WORDS = new Set([
