@@ -207,6 +207,9 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
 
     // ⚡ [SWR 클라우드 동기화] 인벤토리 페이지 ID 캐싱 및 노션 '학습설정' 동기화
     localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${userName}`, page.id);
+    if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
+        window.ScreenTimeTracker.syncFromInventoryProps(props, userName);
+    }
     if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
         syncQuizFlowFromCloud(props["학습설정"]);
     }

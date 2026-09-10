@@ -969,6 +969,9 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
 
         const props = page.properties;
+        if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
+          window.ScreenTimeTracker.syncFromInventoryProps(props, childName);
+        }
         if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
           syncQuizFlowFromCloud(props["학습설정"]);
         }

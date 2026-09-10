@@ -442,6 +442,11 @@ async function loadDashboardData() {
           const prefix = name === "민수" ? "ms" : "ds";
           const isMinseo = name === "민서";
           
+          // ⏰ [스크린타임 보상 & 승인 클라우드 동기화] 노션 인벤토리 DB 데이터 트래커 반영
+          if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
+            window.ScreenTimeTracker.syncFromInventoryProps(props, name);
+          }
+
           // 로컬 상태 보존
           memoryState[name].pageId = page.id;
           memoryState[name].ticketCount = props["소원권 개수"]?.number || 0;
@@ -551,37 +556,49 @@ function renderScreenTimeWidget(childName) {
   const badgeEl = document.getElementById(prefix + "-st-status-badge");
   const approveBtn = document.getElementById(prefix + "-st-approve-btn");
 
-  if (studyTimeEl) studyTimeEl.textContent = summary.rawStudyMinutes + "분";
-  if (roundedNoteEl) roundedNoteEl.textContent = `➔ 10분 올림: ${summary.studyMinutes}분`;
-  if (rewardQuestEl) rewardQuestEl.textContent = `${summary.todayRewardEarned} / 50개`;
+  const rawMinutes = summary.rawStudyMinutes ?? summary.rawMinutes ?? 0;
+  const studyMinutes = summary.studyMinutes ?? summary.adjustedStudyMinutes ?? 0;
+  const rewardEarned = summary.todayRewardEarned ?? summary.earnedCurrency ?? 0;
+  const is50Reached = summary.isBonusTicketEarned ?? summary.is50QuestReached ?? (rewardEarned >= 50);
+  const totalMinutes = summary.totalTimeGrantMinutes ?? summary.totalMinutes ?? 0;
+  const isApproved = summary.isParentApproved ?? summary.isApproved ?? false;
+
+  if (studyTimeEl) studyTimeEl.textContent = rawMinutes + "분";
+  if (roundedNoteEl) roundedNoteEl.textContent = `➔ 10분 올림: ${studyMinutes}분`;
+  if (rewardQuestEl) rewardQuestEl.textContent = `${rewardEarned} / 50개`;
   
   if (rewardTicketNoteEl) {
-    if (summary.isBonusTicketEarned || summary.todayRewardEarned >= 50) {
-      rewardTicketNoteEl.textContent = "🎉 30분권 획득!";
+    if (is50Reached) {
+      rewardTicketNoteEl.textContent = "🎉 30분권 획득 (+30분)!";
       rewardTicketNoteEl.style.color = "#16a34a";
     } else {
-      rewardTicketNoteEl.textContent = `${50 - summary.todayRewardEarned}개 더 필요`;
+      rewardTicketNoteEl.textContent = `${Math.max(0, 50 - rewardEarned)}개 더 모으면 +30분`;
       rewardTicketNoteEl.style.color = "#b45309";
     }
   }
 
   if (totalTimeEl) {
-    const hours = Math.floor(summary.totalTimeGrantMinutes / 60);
-    const mins = summary.totalTimeGrantMinutes % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
     const hourStr = hours > 0 ? `${hours}시간 ${mins}분` : `${mins}분`;
-    totalTimeEl.textContent = `${summary.totalTimeGrantMinutes}분 (${hourStr})`;
+    totalTimeEl.textContent = `${totalMinutes}분 (${hourStr})`;
   }
 
   if (ticketSplitEl) {
     if (summary.tickets && summary.tickets.length > 0) {
-      const parts = summary.tickets.map(t => `${t.label}(${t.minutes}분)`);
+      const parts = summary.tickets.map(t => `${t.label}(${t.minutes}분) x${t.count || 1}장`);
+      ticketSplitEl.textContent = "발급: " + parts.join(" + ");
+    } else if (summary.count30m > 0 || summary.count10m > 0) {
+      const parts = [];
+      if (summary.count30m > 0) parts.push(`30분권 x${summary.count30m}장`);
+      if (summary.count10m > 0) parts.push(`10분권 x${summary.count10m}장`);
       ticketSplitEl.textContent = "발급: " + parts.join(" + ");
     } else {
       ticketSplitEl.textContent = "발급 티켓: 없음";
     }
   }
 
-  if (summary.isParentApproved) {
+  if (isApproved) {
     if (badgeEl) {
       badgeEl.textContent = "승인 완료 💖";
       badgeEl.style.background = "#dcfce7";
@@ -593,9 +610,9 @@ function renderScreenTimeWidget(childName) {
     }
   } else {
     if (badgeEl) {
-      badgeEl.textContent = summary.totalTimeGrantMinutes > 0 ? "승인 대기 ⏳" : "대기 중";
-      badgeEl.style.background = summary.totalTimeGrantMinutes > 0 ? "#fef3c7" : "#e0f2fe";
-      badgeEl.style.color = summary.totalTimeGrantMinutes > 0 ? "#b45309" : "#0369a1";
+      badgeEl.textContent = totalMinutes > 0 ? "승인 대기 ⏳" : "대기 중";
+      badgeEl.style.background = totalMinutes > 0 ? "#fef3c7" : "#e0f2fe";
+      badgeEl.style.color = totalMinutes > 0 ? "#b45309" : "#0369a1";
     }
     if (approveBtn) {
       approveBtn.textContent = "✅ 패밀리링크 연장 완료 승인";
@@ -606,8 +623,8 @@ function renderScreenTimeWidget(childName) {
   }
 }
 
-// 📱 부모 승인 토글 핸들러 전역 노출
-window.toggleParentScreenTimeApproval = function(childName) {
+// 📱 부모 승인 토글 핸들러 전역 노출 (로컬 즉시 반영 + 노션 클라우드 영구 저장)
+window.toggleParentScreenTimeApproval = async function(childName) {
   if (typeof window.ScreenTimeTracker === 'undefined') {
     alert("스크린타임 트래커 모듈이 준비되지 않았습니다.");
     return;
@@ -615,8 +632,47 @@ window.toggleParentScreenTimeApproval = function(childName) {
   const newState = window.ScreenTimeTracker.toggleParentApproval(childName);
   renderScreenTimeWidget(childName);
   
+  // ☁️ [클라우드 영구 동기화] 노션 인벤토리 DB의 '학습설정' 속성에 비동기 저장
+  const childData = memoryState[childName];
+  if (childData && childData.pageId) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    try {
+      let existingSettings = {};
+      const childKey = childName === "민수" ? "minsu" : "minseo";
+      try {
+        const cachedRaw = localStorage.getItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey);
+        if (cachedRaw) existingSettings = JSON.parse(cachedRaw);
+      } catch (_) {}
+
+      existingSettings.screentimeApproval = {
+        date: todayStr,
+        approved: newState,
+        approvedAt: new Date().toISOString()
+      };
+
+      const updatedJson = JSON.stringify(existingSettings);
+      localStorage.setItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey, updatedJson);
+
+      fetch(PROXY_URL + "/v1/pages/" + childData.pageId, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          properties: {
+            "학습설정": {
+              rich_text: [{ type: "text", text: { content: updatedJson } }]
+            }
+          }
+        })
+      }).then(res => {
+        if (res.ok) console.log(`☁️ [스크린타임 승인 클라우드 저장 완료] ${childName}:`, newState);
+      }).catch(err => console.warn(`⚠️ [스크린타임 승인 클라우드 전송 실패]:`, err));
+    } catch (e) {
+      console.warn("⚠️ [스크린타임 클라우드 패치 에러]:", e);
+    }
+  }
+
   if (newState) {
-    alert(`💖 [${childName}] 패밀리링크 연장 승인이 완료되었습니다!\n아이의 화면에도 영수증 승인 완료 도장이 쾅 찍힙니다.`);
+    alert(`💖 [${childName}] 패밀리링크 연장 승인이 완료되었습니다!\n아이의 스마트폰 화면에서도 실시간 승인 완료 도장이 쾅 찍힙니다.`);
   } else {
     alert(`↩️ [${childName}] 패밀리링크 연장 승인이 취소되었습니다.`);
   }

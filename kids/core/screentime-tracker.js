@@ -144,9 +144,11 @@
                     } else {
                         const d = new Date(enterDate);
                         if (!isNaN(d.getTime())) {
-                            const y = d.getFullYear();
-                            const m = String(d.getMonth() + 1).padStart(2, '0');
-                            const dt = String(d.getDate()).padStart(2, '0');
+                            // KST (UTC+9) 기준 당일 판별
+                            const kstTime = new Date(d.getTime() + (9 * 60 * 60 * 1000));
+                            const y = kstTime.getUTCFullYear();
+                            const m = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
+                            const dt = String(kstTime.getUTCDate()).padStart(2, '0');
                             if (`${y}-${m}-${dt}` === todayStr) isToday = true;
                         }
                     }
@@ -171,6 +173,66 @@
                 console.log(`☁️ [스크린타임 클라우드 동기화] ${child}: 노션 ${notionTotalMinutes}분 ➔ 로컬 동기화 완료 (최종: ${maxMinutes}분)`);
             }
         });
+    }
+
+    /**
+     * ☁️ 노션 인벤토리 DB 데이터(오늘 획득_*, 학습설정)에서 보상 및 부모 승인 상태를 추출하여 동기화
+     * (부모 대시보드 및 타 기기 접속 시 실시간 100% 동기화)
+     * @param {Object} props - 노션 페이지 properties
+     * @param {string} childName - 학생 이름 ('민수' 또는 '민서')
+     */
+    function syncFromInventoryProps(props, childName) {
+        if (!props) return;
+        const name = childName || getCurrentChildName();
+        const todayStr = getTodayKey();
+        const legacyDateStr = new Date().toLocaleDateString();
+
+        // 1. 노션 인벤토리 내 '오늘 획득_*' 속성 전수 합산
+        let totalEarned = 0;
+        Object.keys(props).forEach(key => {
+            if (key.startsWith('오늘 획득') || key.startsWith('오늘_획득')) {
+                const val = Number(props[key]?.number) || 0;
+                totalEarned += val;
+            }
+        });
+
+        if (totalEarned > 0) {
+            const dailyKey = `MINMIN_DAILY_REWARD_SUM_${name}_${todayStr}`;
+            const legacyDailyKey = `MINMIN_DAILY_REWARD_SUM_${name}_${legacyDateStr}`;
+            const current = Math.max(
+                parseInt(localStorage.getItem(dailyKey) || '0', 10),
+                parseInt(localStorage.getItem(legacyDailyKey) || '0', 10)
+            );
+            const maxEarned = Math.max(current, totalEarned);
+            localStorage.setItem(dailyKey, String(maxEarned));
+            localStorage.setItem(legacyDailyKey, String(maxEarned));
+            console.log(`☁️ [스크린타임 보상 동기화] ${name}: 노션 인벤토리 합산 ${totalEarned}개 ➔ 로컬 동기화 완료 (${maxEarned}개)`);
+        }
+
+        // 2. 노션 인벤토리 내 '학습설정' 속성에서 부모 승인 상태 추출
+        try {
+            const settingRaw = props['학습설정']?.rich_text || props['학습설정'];
+            let jsonText = '';
+            if (typeof settingRaw === 'string') jsonText = settingRaw;
+            else if (Array.isArray(settingRaw)) jsonText = settingRaw.map(t => t.plain_text || t.text?.content || '').join('');
+            else if (settingRaw?.rich_text && Array.isArray(settingRaw.rich_text)) jsonText = settingRaw.rich_text.map(t => t.plain_text || t.text?.content || '').join('');
+
+            if (jsonText && jsonText.trim()) {
+                const parsed = JSON.parse(jsonText);
+                if (parsed && typeof parsed === 'object') {
+                    // 예: parsed.screentimeApproval = { "2026-09-10": true } 또는 parsed.screentime_approved === true
+                    const approvalDate = parsed.screentimeApproval?.date || parsed.screentime_approved_date;
+                    const isApproved = parsed.screentimeApproval?.approved ?? (approvalDate === todayStr);
+                    if (approvalDate === todayStr && typeof isApproved === 'boolean') {
+                        const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
+                        localStorage.setItem(approvalKey, String(isApproved));
+                        console.log(`☁️ [스크린타임 승인 동기화] ${name}: 클라우드 승인 상태 (${isApproved ? '승인' : '미승인'}) ➔ 로컬 반영 완료`);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ [학습설정 승인 상태 파싱 경고]:', e);
+        }
     }
 
     /**
@@ -218,8 +280,18 @@
         const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
         const isApproved = localStorage.getItem(approvalKey) === 'true';
 
+        // 7. 티켓 객체 배열 구성
+        const tickets = [];
+        if (count30m > 0) {
+            tickets.push({ label: '30분권', minutes: 30, count: count30m, badge: '시계 반 바퀴' });
+        }
+        if (count10m > 0) {
+            tickets.push({ label: '10분권', minutes: 10, count: count10m, badge: '보너스 칸' });
+        }
+
         return {
             childName: name,
+            // [포맷 1] screentime-tracker 원본 프로퍼티
             rawMinutes,
             adjustedStudyMinutes,
             roundUpBonus,
@@ -230,7 +302,16 @@
             count30m,
             count10m,
             clockMetaphor,
-            isApproved
+            isApproved,
+
+            // [포맷 2] parent_dashboard.js 완전 호환 프로퍼티
+            rawStudyMinutes: rawMinutes,
+            studyMinutes: adjustedStudyMinutes,
+            todayRewardEarned: earnedCurrency,
+            isBonusTicketEarned: is50QuestReached,
+            totalTimeGrantMinutes: totalMinutes,
+            isParentApproved: isApproved,
+            tickets: tickets
         };
     }
 
@@ -457,6 +538,7 @@
         getTodayEarnedCurrency,
         recordDailyRewardEarned,
         syncFromStudyLogs,
+        syncFromInventoryProps,
         getScreenTimeSummary,
         toggleParentApproval,
         openScreenTimeReceiptModal,
@@ -467,6 +549,7 @@
     window.closeScreenTimeReceiptModal = closeScreenTimeReceiptModal;
     window.trackStudySession = trackStudySession;
     window.recordDailyRewardEarned = recordDailyRewardEarned;
+    window.syncFromInventoryProps = syncFromInventoryProps;
 
     console.log('⏰ [스크린타임 트래커 로드 완료] ScreenTimeTracker 활성화');
 })();
