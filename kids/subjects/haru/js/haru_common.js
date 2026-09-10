@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   currentChild = urlParams.get("user") || localStorage.getItem("currentChild") || "minseo";
 
+  // 민수 / 민서 프로필 UI 동적 세팅
+  setupChildProfileUI();
+
   // TTS 설정 로드
   const savedTts = localStorage.getItem("fairy_tts_enabled");
   if (savedTts !== null) isTtsEnabled = savedTts === "true";
@@ -31,6 +34,56 @@ document.addEventListener("DOMContentLoaded", () => {
   renderArtTab();
   renderSpecialDaysTab();
 });
+
+// 👦👧 사용자 프로필별 UI 동적 전환
+function setupChildProfileUI() {
+  const isMinsu = currentChild === "minsu";
+  const childName = isMinsu ? "민수" : "민서";
+  const curSymbol = isMinsu ? "💎" : "🍬";
+
+  // 로비 복귀 링크
+  const exitBtn = document.getElementById("haruExitBtn");
+  if (exitBtn) exitBtn.href = `../../../lobby.html?user=${currentChild}`;
+
+  // 상단 지갑 배너
+  const currencyBadgeIcon = document.querySelector(".currency-badge > span:first-child");
+  if (currencyBadgeIcon) currencyBadgeIcon.textContent = curSymbol;
+  const currencyBadge = document.querySelector(".currency-badge");
+  if (currencyBadge) currencyBadge.title = `${childName}의 지갑 잔액`;
+
+  // 헤더 배너
+  const headerBadge = document.querySelector(".haru-header-badge");
+  if (headerBadge && isMinsu) {
+    headerBadge.innerText = "초등 5학년 데일리 라이프 (착한 습관 & 건강 운동 루틴)";
+  }
+
+  const headerDesc = document.querySelector(".haru-header-desc");
+  if (headerDesc && isMinsu) {
+    headerDesc.innerHTML = "매일의 좋은 습관과 건강한 운동, 신기한 자연 관찰, 잊지 못할 특별한 날의 추억이 모두 모여있는 민수의 하루 공간이에요 ✨";
+  }
+
+  // 30초 체크인 배너 문구
+  const bannerDesc = document.querySelector(".checkin-banner-desc");
+  if (bannerDesc && isMinsu) {
+    bannerDesc.innerHTML = "착한 일 1개 + 운동 1개 + 마음 날씨 1개 톡! 땡그랑 황금 코인 & 다이아 받기 💎";
+  }
+
+  // 위젯 섹션별 프롬프트 문구
+  const habitPrompt = document.getElementById("habitsSectionPrompt");
+  if (habitPrompt) {
+    habitPrompt.innerText = `✨ 오늘 ${childName}가 실천한 착한 행동을 골라보세요!`;
+  }
+
+  const workoutDesc = document.getElementById("workoutSectionDesc");
+  if (workoutDesc && isMinsu) {
+    workoutDesc.innerText = "스트레칭, 줄넘기, 걷기와 달리기! 오늘 실천한 운동을 눌러 건강 스탬프를 찍고 다이아몬드를 받아요.";
+  }
+
+  const moodDesc = document.getElementById("moodSectionDesc");
+  if (moodDesc) {
+    moodDesc.innerText = `내 마음속에는 알록달록 무지개가 살아요! 오늘 ${childName}의 마음 색깔은 어떤 빛깔인가요?`;
+  }
+}
 
 // ==========================================
 // 🧭 3대 영역 탭 스위칭
@@ -135,6 +188,8 @@ function playCoinSound() {
 function updateCurrencyDisplay() {
   const curDisplay = document.getElementById("walletCurrencyVal");
   if (!curDisplay) return;
+  const isMinsu = currentChild === "minsu";
+  const curSymbol = isMinsu ? " 💎" : " 🍬";
   const savedWallet = localStorage.getItem("kids_wallet_" + currentChild);
   let count = 0;
   if (savedWallet) {
@@ -143,7 +198,7 @@ function updateCurrencyDisplay() {
   } else {
     count = parseInt(localStorage.getItem("rewardCount_" + currentChild) || "0");
   }
-  curDisplay.innerText = count + " 🍬";
+  curDisplay.innerText = count + curSymbol;
 }
 
 function grantReward(amount, desc) {
@@ -521,7 +576,8 @@ function openQuickCheckInModal() {
   renderCheckInStep();
   overlay.classList.add("active");
   document.body.style.overflow = "hidden";
-  speakText("30초 하루 체크인! 오늘 민서가 실천한 착한 행동을 하나 골라보세요!");
+  const childTitle = currentChild === "minsu" ? "민수" : "민서";
+  speakText(`30초 하루 체크인! 오늘 ${childTitle}가 실천한 착한 행동을 하나 골라보세요!`);
 }
 
 function closeQuickCheckInModal() {
@@ -536,6 +592,8 @@ function renderCheckInStep() {
   if (!body) return;
 
   const { step } = checkInState;
+  const childTitle = currentChild === "minsu" ? "민수" : "민서";
+  const curName = currentChild === "minsu" ? "다이아 1개" : "젤리 1개";
 
   // 상단 스텝 인디케이터
   const stepTrackerHtml = `
@@ -553,7 +611,7 @@ function renderCheckInStep() {
     contentHtml = `
       <div style="text-align:center; margin-bottom:14px;">
         <h3 style="font-family:'Jua'; font-size:1.25rem; color:var(--dark);">
-          🐷 오늘 민서가 실천한 착한 행동은 무엇인가요?
+          🐷 오늘 ${childTitle}가 실천한 착한 행동은 무엇인가요?
         </h3>
         <p style="font-size:0.9rem; color:#888;">터치하면 땡그랑 황금 코인이 저금통으로 들어갑니다!</p>
       </div>
@@ -590,9 +648,9 @@ function renderCheckInStep() {
     contentHtml = `
       <div style="text-align:center; margin-bottom:14px;">
         <h3 style="font-family:'Jua'; font-size:1.25rem; color:var(--dark);">
-          🌈 오늘 민서의 마음속 무지개 날씨는 어떤 색깔인가요?
+          🌈 오늘 ${childTitle}의 마음속 무지개 날씨는 어떤 색깔인가요?
         </h3>
-        <p style="font-size:0.9rem; color:#888;">터치하면 오늘 마음 날씨가 기록되고 젤리 3개를 받아요!</p>
+        <p style="font-size:0.9rem; color:#888;">터치하면 오늘 마음 날씨가 기록되고 ${curName}를 받아요!</p>
       </div>
       <div class="checkin-choices-grid">
         ${moods.map(m => `
@@ -622,7 +680,8 @@ function selectCheckInWorkout(name, icon) {
   playCoinSound();
   checkInState.step = 3;
   renderCheckInStep();
-  speakText(`몸도 튼튼! [${name}] 완료! 마지막으로 오늘 민서의 마음 날씨를 골라보세요!`);
+  const childTitle = currentChild === "minsu" ? "민수" : "민서";
+  speakText(`몸도 튼튼! [${name}] 완료! 마지막으로 오늘 ${childTitle}의 마음 날씨를 골라보세요!`);
 }
 
 function selectCheckInMood(mood, color, icon, desc) {
@@ -655,7 +714,7 @@ async function finishQuickCheckIn() {
   // 4) 오늘 완료 플래그 저장
   localStorage.setItem(getTodayCheckInKey(), "true");
 
-  // 5) 보상 지급 (참여 격려 젤리 1개로 절제)
+  // 5) 보상 지급 (참여 격려 1개로 절제)
   grantReward(1, "30초 하루 체크인 완료");
 
   // 6) 배너 및 하단 위젯 화면 갱신
@@ -683,17 +742,21 @@ function renderCheckInCompletionView(reachedMilestone = false) {
   if (!body) return;
 
   const { habit, workout, mood } = checkInState;
+  const childTitle = currentChild === "minsu" ? "민수" : "민서";
+  const curSymbol = currentChild === "minsu" ? "💎" : "🍬";
+  const curName = currentChild === "minsu" ? "다이아 1개" : "젤리 1개";
+  const curWordSpoken = currentChild === "minsu" ? "다이아몬드 1개" : "젤리 1개";
 
   body.innerHTML = `
     <div style="text-align:center; padding:20px 10px;">
       <div style="font-size:3.8rem; margin-bottom:10px;">${reachedMilestone ? '🎊' : '🎉'}</div>
       <h2 style="font-family:'Jua'; font-size:1.6rem; color:#10ac84; margin-bottom:12px;">
-        ${reachedMilestone ? '대박! 20칸 저금통 완주 달성!' : '민서의 30초 하루 체크인 완료!'}
+        ${reachedMilestone ? '대박! 20칸 저금통 완주 달성!' : `${childTitle}의 30초 체크인 완료!`}
       </h2>
       <p style="font-size:1.05rem; color:#57606f; margin-bottom:20px;">
         ${reachedMilestone 
           ? '20일 동안 착한 습관을 실천하여 [황금 돼지 트로피]와 [주말 가족 소원권]을 얻었어요!' 
-          : '기록들이 제자리에 쏙 들어가고 오늘의 참여 젤리 1개(+🍬)를 받았어요!'}
+          : `기록들이 제자리에 쏙 들어가고 오늘의 참여 ${curName}(+${curSymbol})를 받았어요!`}
       </p>
 
       <div style="background:#f8f9fa; border-radius:18px; padding:16px; margin-bottom:22px; text-align:left; display:flex; flex-direction:column; gap:10px; border:2px solid #eef2f5;">
@@ -715,7 +778,7 @@ function renderCheckInCompletionView(reachedMilestone = false) {
   `;
 
   if (!reachedMilestone) {
-    speakText("오늘 하루 체크인 완료! 저금통과 운동 달력에 쏙 들어가고 젤리 1개를 선물받았습니다!");
+    speakText(`오늘 하루 체크인 완료! 저금통과 운동 달력에 쏙 들어가고 ${curWordSpoken}를 선물받았습니다!`);
   }
 }
 
@@ -724,14 +787,15 @@ async function sendMilestoneToNotion(milestoneTitle) {
   const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
   const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
   const todayStr = new Date().toISOString().slice(0, 10);
+  const childTitle = currentChild === "minseo" ? "민서" : "민수";
 
   const payload = {
     parent: { database_id: dbId },
     properties: {
       "제목": {
-        title: [{ text: { content: `🏆 [마일스톤 완주] ${currentChild === 'minseo' ? '민서' : '민수'}_${milestoneTitle}` } }]
+        title: [{ text: { content: `🏆 [마일스톤 완주] ${childTitle}_${milestoneTitle}` } }]
       },
-      "학생": { select: { name: currentChild === 'minseo' ? '민서' : '민수' } },
+      "학생": { select: { name: childTitle } },
       "과목": { select: { name: "하루" } },
       "날짜": { date: { start: todayStr } },
       "학습내용": {
@@ -758,15 +822,17 @@ async function sendCheckInToNotion(habit, workout, mood) {
   const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
   const todayStr = new Date().toISOString().slice(0, 10);
   const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  const childTitle = currentChild === "minseo" ? "민서" : "민수";
+  const isMinsu = currentChild === "minsu";
 
   const payload = {
     parent: { database_id: dbId },
     properties: {
       "제목": {
-        title: [{ text: { content: `${currentChild === 'minseo' ? '민서' : '민수'}_${todayStr} (슬기로운 하루 체크인)` } }]
+        title: [{ text: { content: `${childTitle}_${todayStr} (${isMinsu ? '데일리 루틴 체크인' : '슬기로운 하루 체크인'})` } }]
       },
       "학생": {
-        select: { name: currentChild === 'minseo' ? '민서' : '민수' }
+        select: { name: childTitle }
       },
       "과목": {
         select: { name: "하루" }
@@ -777,12 +843,12 @@ async function sendCheckInToNotion(habit, workout, mood) {
       "학습내용": {
         rich_text: [{
           text: {
-            content: `[30초 하루 체크인]\n• 착한습관: ${habit.name}\n• 튼튼운동: ${workout.name}\n• 마음날씨: ${mood.mood} (${mood.desc}) [${timeStr}]`
+            content: `[30초 ${isMinsu ? '데일리 루틴' : '하루'} 체크인]\n• 착한습관: ${habit.name}\n• 건강운동: ${workout.name}\n• 마음날씨: ${mood.mood} (${mood.desc}) [${timeStr}]`
           }
         }]
       },
       "획득보상": {
-        number: 3
+        number: 1
       }
     }
   };

@@ -507,10 +507,8 @@ async function loadDashboardData() {
           // 6. 스크린타임 스마트 정산기 위젯 렌더링
           renderScreenTimeWidget(name);
 
-          // 7. [민서 전용] 슬기로운 하루 습관 & 부모 칭찬 코칭 카드 렌더링
-          if (isMinseo) {
-            renderHaruParentCoaching(studyLogs);
-          }
+          // 7. 데일리 습관 & 부모 칭찬 코칭 카드 렌더링 (민수 / 민서 공통 지원)
+          renderHaruParentCoaching(studyLogs, name);
         }
       });
     }
@@ -525,7 +523,8 @@ async function loadDashboardData() {
     // 트래커 데이터 로컬 렌더링 보장
     renderScreenTimeWidget("민수");
     renderScreenTimeWidget("민서");
-    renderHaruParentCoaching();
+    renderHaruParentCoaching([], "민수");
+    renderHaruParentCoaching([], "민서");
   }
 }
 
@@ -617,17 +616,21 @@ window.toggleParentScreenTimeApproval = function(childName) {
   }
 };
 
-// 🌱 [통합교과 하루] 민서의 생활 습관 & 부모 칭찬 코칭 카드 렌더링
-function renderHaruParentCoaching(studyLogs = []) {
-  const boxEl = document.getElementById("ds-haru-coaching-box");
+// 🌱 [데일리 루틴 & 하루] 생활 습관 & 부모 칭찬 코칭 카드 렌더링 (민수/민서 공통)
+function renderHaruParentCoaching(studyLogs = [], childName = "민서") {
+  const isMinsu = childName === "민수";
+  const childKey = isMinsu ? "minsu" : "minseo";
+  const prefix = isMinsu ? "ms" : "ds";
+
+  const boxEl = document.getElementById(prefix + "-haru-coaching-box");
   if (!boxEl) return;
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const isDoneLocal = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
-  let coins = parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
-  let habitName = localStorage.getItem("haru_today_habit_minseo") || "";
-  let workoutName = localStorage.getItem("haru_today_workout_minseo") || "";
-  let moodName = localStorage.getItem("haru_today_mood_minseo") || "";
+  const isDoneLocal = localStorage.getItem("haru_checkin_done_" + todayStr + "_" + childKey) === "true";
+  let coins = parseInt(localStorage.getItem("haru_piggy_coins_" + childKey) || "0");
+  let habitName = localStorage.getItem("haru_today_habit_" + childKey) || "";
+  let workoutName = localStorage.getItem("haru_today_workout_" + childKey) || "";
+  let moodName = localStorage.getItem("haru_today_mood_" + childKey) || "";
   let isDone = isDoneLocal;
 
   // 노션 학습일지 DB 데이터가 전달된 경우 원격 부모 디바이스 폴백 지원
@@ -637,14 +640,14 @@ function renderHaruParentCoaching(studyLogs = []) {
       const subj = log.properties["과목"]?.select?.name;
       const date = log.properties["날짜"]?.date?.start;
       const title = log.properties["제목"]?.title?.[0]?.plain_text || "";
-      return child === "민서" && (subj === "하루" || title.includes("하루 체크인")) && (date === todayStr || title.includes(todayStr));
+      return child === childName && (subj === "하루" || title.includes("하루 체크인") || title.includes("루틴 체크인")) && (date === todayStr || title.includes(todayStr));
     });
 
     if (todayHaruLog) {
       isDone = true;
       const content = todayHaruLog.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
       const habitMatch = content.match(/착한습관:\s*([^\n\r]+)/);
-      const workoutMatch = content.match(/튼튼운동:\s*([^\n\r]+)/);
+      const workoutMatch = content.match(/(?:튼튼운동|건강운동):\s*([^\n\r]+)/);
       const moodMatch = content.match(/마음날씨:\s*([^\(\[\n\r]+)/);
 
       if (habitMatch && habitMatch[1] && !habitName) habitName = habitMatch[1].trim();
@@ -654,13 +657,13 @@ function renderHaruParentCoaching(studyLogs = []) {
   }
 
   // 엘리먼트 참조
-  const badgeEl = document.getElementById("ds-haru-today-badge");
-  const habitValEl = document.getElementById("coach-habit-val");
-  const workoutValEl = document.getElementById("coach-workout-val");
-  const moodValEl = document.getElementById("coach-mood-val");
-  const piggyTextEl = document.getElementById("coach-piggy-progress-text");
-  const piggyBarEl = document.getElementById("coach-piggy-progress-bar");
-  const praiseScriptEl = document.getElementById("coach-praise-script");
+  const badgeEl = document.getElementById(prefix + "-haru-today-badge");
+  const habitValEl = document.getElementById(isMinsu ? "ms-coach-habit-val" : "coach-habit-val");
+  const workoutValEl = document.getElementById(isMinsu ? "ms-coach-workout-val" : "coach-workout-val");
+  const moodValEl = document.getElementById(isMinsu ? "ms-coach-mood-val" : "coach-mood-val");
+  const piggyTextEl = document.getElementById(isMinsu ? "ms-coach-piggy-progress-text" : "coach-piggy-progress-text");
+  const piggyBarEl = document.getElementById(isMinsu ? "ms-coach-piggy-progress-bar" : "coach-piggy-progress-bar");
+  const praiseScriptEl = document.getElementById(isMinsu ? "ms-coach-praise-script" : "coach-praise-script");
 
   // 20칸 저금통 진행률
   const pct = Math.min(Math.round((coins / 20) * 100), 100);
@@ -681,44 +684,64 @@ function renderHaruParentCoaching(studyLogs = []) {
 
     // 💡 맞춤형 칭찬 큐시트 생성
     let habitPraise = "";
-    if (habitName.includes("신발")) {
-      habitPraise = "👟 <b>[신발 정리]:</b> \"현관에 신발을 예쁘게 정리해 줘서 집이 훨씬 밝아졌네! 민서의 배려 덕분에 엄마·아빠 기분이 참 좋다!\"";
-    } else if (habitName.includes("가방") || habitName.includes("알림장")) {
-      habitPraise = "🎒 <b>[스스로 챙기기]:</b> \"학교 가방과 알림장을 똑소리 나게 스스로 챙기다니 정말 의젓한 1학년 언니가 다 됐네!\"";
-    } else if (habitName.includes("손") || habitName.includes("양치")) {
-      habitPraise = "🫧 <b>[청결 습관]:</b> \"스스로 깨끗하게 손 씻고 양치질하는 민서 모습이 반짝반짝 빛나고 정말 멋져!\"";
-    } else if (habitName.includes("장난감") || habitName.includes("방") || habitName.includes("정리")) {
-      habitPraise = "🧸 <b>[제자리 정리]:</b> \"놀던 물건을 스스로 쏙쏙 제자리에 정리해 줘서 방이 깨끗해졌어! 민서는 정리 마법사야!\"";
-    } else if (habitName.includes("인사")) {
-      habitPraise = "🌸 <b>[밝은 인사]:</b> \"예쁜 목소리로 먼저 밝게 인사해 줘서 온 가족의 마음이 사르르 녹아내려!\"";
-    } else if (habitName.includes("도움") || habitName.includes("돕기")) {
-      habitPraise = "💖 <b>[가족 돕기]:</b> \"엄마·아빠를 먼저 도와주려고 나선 민서의 착하고 따뜻한 마음씨가 정말 큰 힘이 돼!\"";
+    if (isMinsu) {
+      // 👦 민수 전용: 의젓한 5학년 자기주도성 & 배려심 강화 칭찬
+      if (habitName.includes("신발")) {
+        habitPraise = "👟 <b>[현관 신발 정리]:</b> \"현관 신발을 가지런히 정돈해 둔 민수의 멋진 배려심을 칭찬해 주세요! 든든한 5학년 형아의 품격이 느껴져요.\"";
+      } else if (habitName.includes("가방") || habitName.includes("알림장") || habitName.includes("준비물") || habitName.includes("책")) {
+        habitPraise = "🎒 <b>[수업 준비물 스스로 챙기기]:</b> \"5학년 수업 준비물과 책가방을 스스로 꼼꼼히 챙기다니 정말 자기주도적인 멋진 모습입니다!\"";
+      } else if (habitName.includes("손") || habitName.includes("양치")) {
+        habitPraise = "🫧 <b>[청결 & 위생 관리]:</b> \"위생 습관을 잊지 않고 스스로 깔끔하게 실천하는 민수의 관리 태도가 아주 훌륭해요!\"";
+      } else if (habitName.includes("정리") || habitName.includes("방") || habitName.includes("책상")) {
+        habitPraise = "📚 <b>[책상 & 방 정리정돈]:</b> \"자신의 공부방과 책상을 스스로 단정하게 정리한 민수의 책임감을 크게 인정해 주세요!\"";
+      } else if (habitName.includes("인사")) {
+        habitPraise = "🌸 <b>[의젓한 예절 인사]:</b> \"가족과 이웃에게 먼저 의젓하고 정중하게 인사하는 민수의 태도가 정말 멋져요!\"";
+      } else if (habitName.includes("도움") || habitName.includes("돕기")) {
+        habitPraise = "💖 <b>[가족 배려와 도움]:</b> \"가족을 위해 먼저 손을 내밀고 도와준 민수의 듬직하고 따뜻한 마음씨가 큰 힘이 됩니다!\"";
+      } else {
+        habitPraise = `✨ <b>[자기주도 실천]:</b> \"오늘 스스로 <b>[${habitName || '착한 습관'}]</b>을(를) 멋지게 실천한 민수의 노력을 인정하고 하이파이브를 나눠주세요!\"`;
+      }
     } else {
-      habitPraise = `✨ <b>[착한 실천]:</b> \"오늘 스스로 <b>[${habitName || '착한 습관'}]</b>을(를) 멋지게 실천한 민서의 노력을 꼭 안아주며 칭찬해 주세요!\"`;
+      // 👧 민서 전용: 아기자기 1학년 자신감 & 사랑 듬뿍 칭찬
+      if (habitName.includes("신발")) {
+        habitPraise = "👟 <b>[신발 정리]:</b> \"현관에 신발을 예쁘게 정리해 줘서 집이 훨씬 밝아졌네! 민서의 배려 덕분에 엄마·아빠 기분이 참 좋다!\"";
+      } else if (habitName.includes("가방") || habitName.includes("알림장")) {
+        habitPraise = "🎒 <b>[스스로 챙기기]:</b> \"학교 가방과 알림장을 똑소리 나게 스스로 챙기다니 정말 의젓한 1학년 언니가 다 됐네!\"";
+      } else if (habitName.includes("손") || habitName.includes("양치")) {
+        habitPraise = "🫧 <b>[청결 습관]:</b> \"스스로 깨끗하게 손 씻고 양치질하는 민서 모습이 반짝반짝 빛나고 정말 멋져!\"";
+      } else if (habitName.includes("장난감") || habitName.includes("방") || habitName.includes("정리")) {
+        habitPraise = "🧸 <b>[제자리 정리]:</b> \"놀던 물건을 스스로 쏙쏙 제자리에 정리해 줘서 방이 깨끗해졌어! 민서는 정리 마법사야!\"";
+      } else if (habitName.includes("인사")) {
+        habitPraise = "🌸 <b>[밝은 인사]:</b> \"예쁜 목소리로 먼저 밝게 인사해 줘서 온 가족의 마음이 사르르 녹아내려!\"";
+      } else if (habitName.includes("도움") || habitName.includes("돕기")) {
+        habitPraise = "💖 <b>[가족 돕기]:</b> \"엄마·아빠를 먼저 도와주려고 나선 민서의 착하고 따뜻한 마음씨가 정말 큰 힘이 돼!\"";
+      } else {
+        habitPraise = `✨ <b>[착한 실천]:</b> \"오늘 스스로 <b>[${habitName || '착한 습관'}]</b>을(를) 멋지게 실천한 민서의 노력을 꼭 안아주며 칭찬해 주세요!\"`;
+      }
     }
 
-    let workoutPraise = workoutName ? `<br>💪 <b>[튼튼 운동]:</b> 오늘 <b>[${workoutName}]</b>까지 씩씩하게 실천하여 체력도 쑥쑥 자랐어요!` : "";
+    let workoutPraise = workoutName ? `<br>💪 <b>[건강 운동]:</b> 오늘 <b>[${workoutName}]</b>까지 씩씩하게 실천하여 체력도 쑥쑥 길렀어요!` : "";
 
     let moodPraise = "";
     if (moodName.includes("기쁨") || moodName.includes("행복")) {
-      moodPraise = "<br>☀️ <b>[햇살 마음 대화]:</b> \"오늘 민서 마음이 햇살처럼 환해서 기뻐! 저녁에 오늘 어떤 일이 제일 즐거웠는지 엄마·아빠한테 들려줄래?\"";
+      moodPraise = `<br>☀️ <b>[햇살 마음 대화]:</b> \"오늘 ${childName} 마음이 햇살처럼 환해서 기뻐! 오늘 있었던 제일 즐거운 일이나 성취감을 엄마·아빠한테 들려줄래?\"`;
     } else if (moodName.includes("즐거움") || moodName.includes("신남")) {
-      moodPraise = "<br>🌈 <b>[무지개 마음 대화]:</b> \"오늘 신나는 일이 가득했구나! 어떤 재미난 모험이 있었는지 함께 들려줘!\"";
+      moodPraise = `<br>🌈 <b>[무지개 마음 대화]:</b> \"오늘 신나는 일이 가득했구나! 어떤 재미난 모험이 있었는지 함께 들려줘!\"`;
     } else if (moodName.includes("슬픔") || moodName.includes("속상")) {
-      moodPraise = "<br>🌧️ <b>[비구름 공감 대화]:</b> \"마음에 비구름이 살짝 지나갔네. 속상한 일 있었어? 엄마 아빠는 항상 민서 편이야, 꼭 안아줄게.\"";
+      moodPraise = `<br>🌧️ <b>[비구름 공감 대화]:</b> \"마음에 비구름이 살짝 지나갔네. 속상한 일 있었어? 엄마 아빠는 항상 ${childName} 편이야, 든든하게 응원해 줄게.\"`;
     } else if (moodName.includes("화남") || moodName.includes("짜증")) {
-      moodPraise = "<br>⚡ <b>[번개 진정 대화]:</b> \"마음속에 화나고 답답한 바람이 불었구나. 괜찮아, 그럴 때도 있어. 심호흡 한번 하고 푹 쉬자.\"";
+      moodPraise = `<br>⚡ <b>[번개 진정 대화]:</b> \"마음속에 화나고 답답한 바람이 불었구나. 괜찮아, 그럴 때도 있어. 심호흡 한번 하고 편안히 쉬자.\"`;
     } else if (moodName.includes("피곤") || moodName.includes("지침")) {
-      moodPraise = "<br>🌫️ <b>[안개 위로 대화]:</b> \"오늘 학교에서 열심히 배우고 활동하느라 피곤했지? 정말 고생 많았어, 오늘은 푹 쉬자!\"";
+      moodPraise = `<br>🌫️ <b>[안개 위로 대화]:</b> \"오늘 학교에서 열심히 배우고 활동하느라 피곤했지? 정말 고생 많았어, 오늘은 푹 쉬자!\"`;
     } else if (moodName.includes("평온") || moodName.includes("보통")) {
-      moodPraise = "<br>🌱 <b>[새싹 안정 대화]:</b> \"차분하고 평온하게 하루를 잘 보냈네! 오늘 하루도 무탈하게 예쁘게 자라줘서 고마워.\"";
+      moodPraise = `<br>🌱 <b>[새싹 안정 대화]:</b> \"차분하고 평온하게 하루를 잘 보냈네! 오늘 하루도 무탈하게 잘 자라줘서 고마워.\"`;
     }
 
     let milestonePraise = "";
     if (coins >= 20) {
       milestonePraise = `
         <div style="margin-top: 8px; padding: 6px 10px; background: #fef9c3; border-radius: 8px; border: 1px solid #fde047; font-weight: bold; color: #854d0e;">
-          🎊 <b>[20칸 저금통 완주 특급 알림]:</b> 마이룸에 <b>[🏆 황금 돼지 트로피]</b>가 수여되었습니다! 이번 주말 <b>[가족 소원권]</b>을 무엇으로 함께 즐길지 민서와 신나게 대화해 보세요!
+          🎊 <b>[20칸 저금통 완주 특급 알림]:</b> 마이룸에 <b>[🏆 황금 돼지 트로피]</b>가 수여되었습니다! 이번 주말 <b>[가족 소원권]</b>을 무엇으로 함께 즐길지 ${childName}와 신나게 대화해 보세요!
         </div>
       `;
     }
@@ -745,12 +768,14 @@ function renderHaruParentCoaching(studyLogs = []) {
     if (moodValEl) moodValEl.textContent = "미실천";
 
     if (praiseScriptEl) {
+      const roomLink = isMinsu ? "[🌱 데일리 루틴 & 저금통]" : "[🌱 슬기로운 하루 탐험관]";
+      const curIcon = isMinsu ? "다이아 💎" : "젤리 🍬";
       if (isAdmin) {
         praiseScriptEl.innerHTML = `
           <div style="color: #64748b; font-size: 0.88rem;">
-            <span>민서가 아직 오늘 하루 체크인을 하지 않았어요.</span><br>
+            <span>${childName}가 아직 오늘 하루 체크인을 하지 않았어요.</span><br>
             <span style="color: #d97706; font-weight: bold; margin-top: 4px; display: inline-block;">
-              💬 다정한 말 건네기 팁: "민서야, 오늘 학교에서 재미있는 일 있었어?" 하고 물어보며 <b>[🌱 슬기로운 하루 탐험관]</b>에 함께 들어가 30초 체크인을 시작해 보세요!
+              💬 다정한 말 건네기 팁: "${childName}야, 오늘 학교 잘 다녀왔어? 오늘 실천한 착한 습관 저금통에 넣고 ${curIcon} 챙겨볼까?" 하고 <b>${roomLink}</b> 30초 체크인을 가볍게 권유해 보세요!
             </span>
           </div>
         `;
@@ -759,7 +784,7 @@ function renderHaruParentCoaching(studyLogs = []) {
           <div style="color: #64748b; font-size: 0.88rem;">
             <span>오늘 착한 습관과 운동을 실천하고 마음 날씨를 골라보세요!</span><br>
             <span style="color: #2563eb; font-weight: bold; margin-top: 4px; display: inline-block;">
-              👉 <b>[🌱 하루 탐험관]</b>에서 30초 체크인하고 땡그랑 황금 코인과 참여 젤리를 받아보자! ✨
+              👉 <b>${roomLink}</b>에서 30초 체크인하고 땡그랑 황금 코인과 ${curIcon}을 받아보자! ✨
             </span>
           </div>
         `;

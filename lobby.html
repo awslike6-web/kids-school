@@ -410,6 +410,7 @@ const USER_CONFIGS = {
         title: '🏠 나만의 비밀 아지트',
         color: '#0ea5e9',
         rooms: [
+          { name: '🌱 30초 데일리 루틴 & 저금통', href: 'kids/subjects/haru/haru.html?user=minsu', desc: '⚡ [매일 30초 체크인] 착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 & 20칸 트로피 도전!' },
           { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' },
           { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교에서 만들고 그려온 멋진 미술·공예 작품을 전시하고 자랑해보자!' },
           { name: '📊 나의 성장 대시보드', href: 'parent_dashboard.html?user=minsu', desc: '5대 교과 학습 밸런스 방사형 차트와 실시간 퀘스트 달성도 점검!' },
@@ -709,6 +710,7 @@ loadCoreScripts("kids/core/", requiredCores, () => {
       } else {
         // 민수
         if (avatarEl) avatarEl.textContent = "🚀";
+        const isHaruDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minsu") === "true";
         let timetableInfo = null;
         if (typeof window.TimetableBoost !== 'undefined') {
           timetableInfo = window.TimetableBoost.getTimetableSubjects('민수');
@@ -717,20 +719,44 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         const subjStr = todaySubjs.length > 0 ? todaySubjs.join('·') : '수학·국어';
 
         if (hour >= 5 && hour < 12) {
-          badge = "⚡ 활기찬 아침 출격";
-          textHtml = "에너지 100% 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야! 🚀";
-          rawText = "에너지 백 퍼센트 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야!";
-          targetUrl = "kids/subjects/math/math.html";
+          // 아침 (05:00 ~ 11:59)
+          if (!isHaruDone) {
+            badge = "⚡ 등교 전 30초 데일리 루틴";
+            textHtml = "민수야 좋은 아침! 등교 전에 <b>[30초 데일리 루틴]</b> 체크인하고 저금통 황금 코인 & 다이아 챙겨볼까? 💎";
+            rawText = "민수야 좋은 아침! 등교 전에 30초 데일리 루틴 체크인하고 저금통 황금 코인과 다이아 챙겨볼까?";
+            targetUrl = "kids/subjects/haru/haru.html?user=minsu";
+          } else {
+            badge = "⚡ 활기찬 아침 출격";
+            textHtml = "에너지 100% 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야! 🚀";
+            rawText = "에너지 백 퍼센트 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야!";
+            targetUrl = "kids/subjects/math/math.html";
+          }
         } else if (hour >= 12 && hour < 18) {
-          badge = "🔥 오늘 시간표 복습 1.2배 부스트";
-          textHtml = `스테이지 복귀 완료! 오늘 학교에서 배운 <b>[${subjStr}]</b>을 복습하면 경험치(EXP) 1.2배 부스트 보너스! 🕹️`;
-          rawText = `스테이지 복귀 완료! 오늘 학교에서 배운 ${subjStr}을 복습하면 경험치 1.2배 부스트 보너스를 받아!`;
-          targetUrl = todaySubjs.includes('수학') ? 'kids/subjects/math/math.html' : 'kids/subjects/korean/korean.html';
+          // 오후 (12:00 ~ 17:59)
+          if (!isHaruDone) {
+            badge = "🌱 방과 후 30초 데일리 루틴";
+            textHtml = `학교 잘 다녀왔어! 오늘 실천한 착한 습관과 운동을 <b>[30초 루틴 체크인]</b>으로 기록하고 다이아 챙겨봐! 💎`;
+            rawText = "학교 잘 다녀왔어! 오늘 실천한 착한 습관과 운동을 30초 루틴 체크인으로 기록하고 다이아 챙겨봐!";
+            targetUrl = "kids/subjects/haru/haru.html?user=minsu";
+          } else {
+            badge = "🔥 오늘 시간표 복습 1.2배 부스트";
+            textHtml = `스테이지 복귀 완료! 오늘 학교에서 배운 <b>[${subjStr}]</b>을 복습하면 경험치(EXP) 1.2배 부스트 보너스! 🕹️`;
+            rawText = `스테이지 복귀 완료! 오늘 학교에서 배운 ${subjStr}을 복습하면 경험치 1.2배 부스트 보너스를 받아!`;
+            targetUrl = todaySubjs.includes('수학') ? 'kids/subjects/math/math.html' : 'kids/subjects/korean/korean.html';
+          }
         } else {
-          badge = "🌙 오늘 퀘스트 & 폰시간 결산";
-          textHtml = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 <b>[오늘 폰시간 정산]</b> 영수증을 확인해봐! 🔋";
-          rawText = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 오늘 폰시간 정산 영수증을 확인해봐!";
-          targetUrl = "#screentime";
+          // 저녁/밤 (18:00 ~ 04:59)
+          if (!isHaruDone) {
+            badge = "🌙 자기 전 30초 데일리 체크인";
+            textHtml = "오늘 하루도 수고 많았어! 잠들기 전 <b>[30초 데일리 루틴]</b>으로 저금통 코인 채우고 다이아몬드 받자! 💎";
+            rawText = "오늘 하루도 수고 많았어! 잠들기 전 30초 데일리 루틴으로 저금통 코인 채우고 다이아몬드 받자!";
+            targetUrl = "kids/subjects/haru/haru.html?user=minsu";
+          } else {
+            badge = "🌙 오늘 퀘스트 & 폰시간 결산";
+            textHtml = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 <b>[오늘 폰시간 정산]</b> 영수증을 확인해봐! 🔋";
+            rawText = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 오늘 폰시간 정산 영수증을 확인해봐!";
+            targetUrl = "#screentime";
+          }
         }
       }
 

@@ -199,6 +199,54 @@
         </button>
       </div>
 
+      <!-- 🌱 [데일리 루틴 & 저금통] 민수의 생활 습관 & 부모 칭찬 코칭 카드 -->
+      <div class="status-block" id="ms-haru-coaching-box" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(59, 130, 246, 0.12)); border: 2px solid #0284c7; border-radius: 18px; padding: 16px; margin-top: 15px;">
+        <div class="status-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-size: 1.05rem; font-weight: bold; color: #0284c7; display: flex; align-items: center; gap: 6px;">
+            <span>🌱</span> <span>민수의 데일리 습관 & 부모 칭찬 코칭</span>
+          </span>
+          <span class="status-title-sub" id="ms-haru-today-badge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: bold;">확인 중</span>
+        </div>
+
+        <!-- 오늘 실천 요약 3열 그리드 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 0.85rem; text-align: center;">
+          <div style="background: rgba(255,255,255,0.9); padding: 8px 6px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div style="color: #64748b; font-size: 0.72rem;">🐷 오늘 착한 습관</div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #2f3542; margin-top: 2px;" id="ms-coach-habit-val">확인 중...</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.9); padding: 8px 6px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div style="color: #64748b; font-size: 0.72rem;">💪 오늘 건강 운동</div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #2f3542; margin-top: 2px;" id="ms-coach-workout-val">확인 중...</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.9); padding: 8px 6px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div style="color: #64748b; font-size: 0.72rem;">🌈 오늘 마음 날씨</div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #2f3542; margin-top: 2px;" id="ms-coach-mood-val">확인 중...</div>
+          </div>
+        </div>
+
+        <!-- 20칸 저금통 완주 진행률 프로그레스 바 -->
+        <div style="background: #ffffff; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; border: 1px solid #bfdbfe;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; margin-bottom: 4px;">
+            <span style="color: #0284c7;">🐷 20칸 저금통 완주 트로피 도전</span>
+            <span style="color: #2563eb;" id="ms-coach-piggy-progress-text">0 / 20개 (0%)</span>
+          </div>
+          <div style="width: 100%; height: 10px; background: #eee; border-radius: 999px; overflow: hidden;">
+            <div id="ms-coach-piggy-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0284c7, #3b82f6); transition: width 0.5s;"></div>
+          </div>
+          <div style="font-size: 0.72rem; color: #888; margin-top: 4px;">완주 시: 마이룸 [황금 돼지 트로피] + [주말 가족 소원권] 발급</div>
+        </div>
+
+        <!-- 💡 부모 전용 즉각 칭찬 큐시트 박스 -->
+        <div style="background: #ffffff; border-left: 4px solid #3b82f6; border-radius: 0 12px 12px 0; padding: 10px 12px; font-size: 0.88rem; line-height: 1.5; color: #2f3542; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+          <div style="font-weight: bold; color: #1d4ed8; font-size: 0.85rem; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <span>💬</span> <span>오늘의 부모 칭찬 & 대화 큐시트</span>
+          </div>
+          <div id="ms-coach-praise-script" style="word-break: keep-all;">
+            확인 중입니다...
+          </div>
+        </div>
+      </div>
+
       <!-- ⚙️ 실시간 인프라 제어 (부모 승인 전용 / 아이 모드 안내) -->
       <div class="action-zone" id="ms-action-zone">
         <div id="ms-parent-actions" style="display: none;">
