@@ -221,10 +221,14 @@ window.addEventListener("beforeunload", () => {
     const isAdminUser = window.isAdmin || (localStorage.getItem('currentUserName') === '아빠' || localStorage.getItem('currentUserName') === '엄마');
     if (isAdminUser) return;
 
-    // 💡 퀴즈 세션이 활성화되어 있거나 이미 세션 일지가 발행된 경우 중복 발행 차단
+    // 💡 이미 세션 학습일지가 발행되었거나 퀴즈 세션이 완료된 경우 중복 발행 원천 차단
+    if (window.__isStudyLogSentInSession || window.isCurrentEnglishMissionLogged || (window.__quizRewardSession && window.__quizRewardSession.isLogged)) {
+        console.log("🛡️ [core.js 이탈 방어막] 이미 학습일지가 발행되었으므로 중복 전송을 차단합니다.");
+        return;
+    }
+
+    // 💡 퀴즈 세션이 활성화되어 아직 미발행된 경우 notion-reward.js 플러시에 위임
     if (window.__quizRewardSession) {
-        if (window.__quizRewardSession.isLogged) return;
-        // 아직 세션 일지가 안 보내졌다면 notion-reward.js의 플러시가 담당하도록 위임
         return;
     }
 

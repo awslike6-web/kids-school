@@ -381,6 +381,9 @@ function openMissionView(type) {
     activeQuizIdx = 0;
     activePassage = null;
     stopFairyTTS();
+    window.engWrongNotes = [];
+    window.wrongNotes = [];
+    isCurrentEnglishMissionLogged = false;
     
     currentMissionType = type;
     if (type === 'stage3') stage3QuizMode = null;
@@ -772,6 +775,35 @@ function skipEnglishQuestion() {
     renderSectionUI();
 }
 
+// 📝 영어 오답 노트 자동 수집기 (틀린 문장/단어 누적)
+window.engWrongNotes = [];
+window.wrongNotes = [];
+
+function recordEnglishWrongAnswer(item, wrongInput) {
+    if (!item) return;
+    window.engWrongNotes = window.engWrongNotes || [];
+    window.wrongNotes = window.engWrongNotes;
+
+    const targetWord = (item.word || item.text || '').trim();
+    if (!targetWord) return;
+    const meaning = (item.meaning || item.desc || '').trim();
+    const wrongStr = typeof wrongInput === 'string' ? wrongInput.trim() : (wrongInput ? String(wrongInput).trim() : '오답');
+
+    // 이미 기록된 문장/단어라면 최근 오답 텍스트만 업데이트 (중복 카드 방지)
+    const existing = window.engWrongNotes.find(q => (q.word || q.text || '').trim() === targetWord);
+    if (existing) {
+        if (wrongStr) existing.wrongInput = wrongStr;
+    } else {
+        window.engWrongNotes.push({
+            word: targetWord,
+            text: targetWord,
+            meaning: meaning,
+            wrongInput: wrongStr
+        });
+        console.log(`📝 [영어 오답노트 수집] ${targetWord} (제출오답: ${wrongStr}) ➔ 누적 ${window.engWrongNotes.length}개`);
+    }
+}
+
 function promptEnglishWrong(onRetry) {
     const retry = typeof onRetry === 'function' ? onRetry : () => {};
     if (typeof promptQuizRetryOrSkip === 'function') {
@@ -882,6 +914,7 @@ function renderVocaPoolUI(container) {
             if (typeof speakEnglish === 'function') speakEnglish(answerWord);
             advanceEnglishQuizAfterCorrect(1000);
         } else {
+            recordEnglishWrongAnswer(currentItem, selectedMeaning);
             promptEnglishWrong(() => {});
         }
     };
@@ -1215,6 +1248,7 @@ function renderStage3UI(container) {
                 if (typeof speakEnglish === 'function') speakEnglish(answerWord);
                 advanceEnglishQuizAfterCorrect(1000);
             } else {
+                recordEnglishWrongAnswer(currentItem, answerStr || '철자 오류');
                 const blankContainer = document.getElementById('eng-magnet-blanks');
                 if (blankContainer) blankContainer.classList.add('wrong');
                 promptEnglishWrong(() => {
@@ -1247,6 +1281,7 @@ function renderStage3UI(container) {
                 inputEl.classList.add('correct');
                 advanceEnglishQuizAfterCorrect(1000);
             } else {
+                recordEnglishWrongAnswer(currentItem, inputVal || '오답');
                 inputEl.classList.add('wrong');
                 promptEnglishWrong(() => {
                     inputEl.classList.remove('wrong');
@@ -1376,6 +1411,7 @@ function renderStage4UI(container) {
                 }
                 renderStage4SuccessCard(container, answerSentence, currentItem.meaning);
             } else {
+                recordEnglishWrongAnswer(currentItem, answerStr || '순서 오류');
                 const blankContainer = document.getElementById('sent-word-blanks');
                 if (blankContainer) blankContainer.classList.add('wrong');
                 promptEnglishWrong(() => {
@@ -1420,6 +1456,7 @@ function renderStage4UI(container) {
                 }
                 renderStage4SuccessCard(container, answerSentence, currentItem.meaning);
             } else {
+                recordEnglishWrongAnswer(currentItem, selectedSentence);
                 promptEnglishWrong(() => {});
             }
         };

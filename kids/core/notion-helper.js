@@ -732,6 +732,21 @@ async function sendStudyLogToNotion(options = {}) {
         return false;
     }
 
+    // 🛑 [원천 중복 전송 방어막] 동일 세션 25초 이내 동일/유사 과목 재전송 원천 차단 (버튼 연타 및 화면 이탈 중복 방지)
+    const nowTs = Date.now();
+    window.__lastStudyLogHistory = window.__lastStudyLogHistory || [];
+    const recentDuplicate = window.__lastStudyLogHistory.find(h => {
+        const timeDiff = (nowTs - h.time) / 1000;
+        const isSameStudent = h.childName === childName;
+        const isRelatedSubj = h.subject === subject || h.subject.startsWith(subject) || subject.startsWith(h.subject);
+        return isSameStudent && isRelatedSubj && timeDiff < 25;
+    });
+
+    if (recentDuplicate) {
+        console.warn(`🛑 [학습일지 중복 방어막] 최근 ${Math.round((nowTs - recentDuplicate.time)/1000)}초 전에 이미 [${recentDuplicate.subject}] 일지가 기록되었습니다. 중복 전송을 안전하게 차단합니다! (시도: ${childName} - ${subject})`);
+        return true;
+    }
+
     const startTime = options.startTime || (window.roomStartTime ? window.roomStartTime.toISOString() : new Date().toISOString());
     const endTime = options.endTime || new Date().toISOString();
     
@@ -821,6 +836,9 @@ async function sendStudyLogToNotion(options = {}) {
         });
 
         if (!response.ok) throw new Error(`노션 통신 오류 (상태: ${response.status})`);
+
+        window.__isStudyLogSentInSession = true;
+        window.__lastStudyLogHistory.push({ childName, subject, time: nowTs });
 
         console.log("🎉 노션에 학습 일지가 완벽하게 기록되었습니다!");
         return true;
