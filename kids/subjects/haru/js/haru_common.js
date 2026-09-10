@@ -614,6 +614,10 @@ async function finishQuickCheckIn() {
   coins++;
   setPiggyCoins(coins);
 
+  // 1-1) 오늘 실천한 착한 습관 & 운동 명칭 저장 (부모 대시보드 코칭 연동)
+  localStorage.setItem("haru_today_habit_" + currentChild, habit.name);
+  localStorage.setItem("haru_today_workout_" + currentChild, workout.name);
+
   // 2) 운동 달력 오늘 요일 스탬프 저장
   const todayIdx = new Date().getDay();
   const workoutLogs = getWorkoutLogs();
