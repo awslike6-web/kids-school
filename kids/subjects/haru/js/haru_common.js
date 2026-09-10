@@ -183,20 +183,48 @@ function renderPiggyBankWidget() {
 function recordHabitAction(habitName) {
   let coins = getPiggyCoins();
   const max = window.HARU_DATA.dailyHabits.piggyBank.maxCoins;
-  if (coins >= max) {
-    alert("🎉 20칸 저금통이 가득 찼어요! 정말 성실하게 실천했군요! 새로운 저금통으로 비워둘게요!");
-    coins = 0;
-  }
+  
   coins++;
   setPiggyCoins(coins);
   playCoinSound();
   renderPiggyBankWidget();
   speakText(`땡그랑! [${habitName}] 실천 완료! 황금 코인이 쏙 들어갔어요!`);
 
-  if (coins % 5 === 0) {
-    grantReward(2, `저금통 ${coins}코인 달성`);
-    alert(`🎊 축하합니다! 착한 습관 ${coins}회 달성 보너스로 하리보 젤리 2개(+🍬🍬)가 지급되었습니다!`);
+  // 20칸 완주 마일스톤 발동!
+  if (coins >= max) {
+    triggerPiggyBankMilestone();
+    setPiggyCoins(0); // 새로운 저금통으로 리셋
+    renderPiggyBankWidget();
   }
+}
+
+// 🐷 20칸 완주 특별 마일스톤 (마이룸 황금 돼지 가구 + 주말 가족 소원권)
+function triggerPiggyBankMilestone() {
+  playSuccessSound();
+  unlockMyRoomTrophy("trophy_golden_piggy");
+
+  const childTitle = currentChild === 'minseo' ? '민서' : '민수';
+  speakText(`축하합니다! ${childTitle}가 20칸 착한 습관 저금통을 모두 채웠어요! 마이룸에 황금 돼지 저금통 인형이 배달되었고 주말 가족 소원권이 발급되었습니다!`);
+
+  alert(`🎉 대단해요! 20칸 착한 습관 저금통 완주 달성! 🎊\n\n1. 🐷 마이룸에 [🏆 황금 돼지 저금통] 명예 가구가 배달되었습니다!\n2. 🎫 이번 주말 [가족 소원권] 1장이 발급되었습니다! (엄마 아빠와 함께 가고 싶은 곳이나 맛있는 메뉴를 골라보세요!)`);
+
+  // 노션 학습일지에 완주 축하 피드 전송
+  sendMilestoneToNotion("20칸 하루 저금통 완주 (가족 소원권 발급)");
+}
+
+function unlockMyRoomTrophy(itemId) {
+  const profileKey = currentChild === 'minsu' ? 'son' : 'daughter';
+  // my-room.html에서 사용하는 로컬스토리지 키 양식 지원
+  const keys = [`myroom_owned_${profileKey}`, `kids_myroom_owned_${profileKey}`, `ownedItems_${profileKey}`];
+  keys.forEach(k => {
+    try {
+      let owned = JSON.parse(localStorage.getItem(k) || "[]");
+      if (!owned.includes(itemId)) {
+        owned.push(itemId);
+        localStorage.setItem(k, JSON.stringify(owned));
+      }
+    } catch(e) {}
+  });
 }
 
 // 💪 운동 체크 위젯
@@ -583,7 +611,6 @@ async function finishQuickCheckIn() {
   // 1) 저금통 코인 +1 적립
   let coins = getPiggyCoins();
   const max = window.HARU_DATA.dailyHabits.piggyBank.maxCoins;
-  if (coins >= max) coins = 0;
   coins++;
   setPiggyCoins(coins);
 
@@ -599,8 +626,8 @@ async function finishQuickCheckIn() {
   // 4) 오늘 완료 플래그 저장
   localStorage.setItem(getTodayCheckInKey(), "true");
 
-  // 5) 보상 지급 (하리보 젤리 3개!)
-  grantReward(3, "30초 하루 체크인 올인원 달성");
+  // 5) 보상 지급 (참여 격려 젤리 1개로 절제)
+  grantReward(1, "30초 하루 체크인 완료");
 
   // 6) 배너 및 하단 위젯 화면 갱신
   updateCheckInBannerStatus();
@@ -609,11 +636,20 @@ async function finishQuickCheckIn() {
   // 7) 노션 학습일지 DB 자동 전송
   sendCheckInToNotion(habit, workout, mood);
 
-  // 8) 완료 축하 뷰 표시
-  renderCheckInCompletionView();
+  // 8) 20칸 저금통 완주 여부 확인
+  let reachedMilestone = false;
+  if (coins >= max) {
+    reachedMilestone = true;
+    triggerPiggyBankMilestone();
+    setPiggyCoins(0);
+    renderHabitsTab();
+  }
+
+  // 9) 완료 축하 뷰 표시
+  renderCheckInCompletionView(reachedMilestone);
 }
 
-function renderCheckInCompletionView() {
+function renderCheckInCompletionView(reachedMilestone = false) {
   const body = document.getElementById("checkInModalInnerBody");
   if (!body) return;
 
@@ -621,17 +657,19 @@ function renderCheckInCompletionView() {
 
   body.innerHTML = `
     <div style="text-align:center; padding:20px 10px;">
-      <div style="font-size:3.8rem; margin-bottom:10px;">🎉</div>
+      <div style="font-size:3.8rem; margin-bottom:10px;">${reachedMilestone ? '🎊' : '🎉'}</div>
       <h2 style="font-family:'Jua'; font-size:1.6rem; color:#10ac84; margin-bottom:12px;">
-        민서의 30초 하루 체크인 완료!
+        ${reachedMilestone ? '대박! 20칸 저금통 완주 달성!' : '민서의 30초 하루 체크인 완료!'}
       </h2>
       <p style="font-size:1.05rem; color:#57606f; margin-bottom:20px;">
-        방마다 찾아다니지 않아도 모든 기록이 예쁘게 쏙 들어갔어요! 젤리 3개(+🍬🍬🍬)가 지급되었습니다!
+        ${reachedMilestone 
+          ? '20일 동안 착한 습관을 실천하여 [황금 돼지 트로피]와 [주말 가족 소원권]을 얻었어요!' 
+          : '기록들이 제자리에 쏙 들어가고 오늘의 참여 젤리 1개(+🍬)를 받았어요!'}
       </p>
 
       <div style="background:#f8f9fa; border-radius:18px; padding:16px; margin-bottom:22px; text-align:left; display:flex; flex-direction:column; gap:10px; border:2px solid #eef2f5;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span>🐷</span> <b>저금통:</b> [${habit.name}] 황금 코인 1개 적립!
+          <span>🐷</span> <b>저금통:</b> [${habit.name}] 황금 코인 1개 적립! (20칸 완주 시 황금 돼지 트로피 & 소원권)
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <span>💪</span> <b>운동 달력:</b> [${workout.name}] 오늘 스탬프 쾅!
@@ -647,7 +685,42 @@ function renderCheckInCompletionView() {
     </div>
   `;
 
-  speakText("와아! 오늘 하루 체크인이 멋지게 완료되었어요! 저금통과 운동 달력에 쏙 들어가고 젤리 3개를 선물받았습니다!");
+  if (!reachedMilestone) {
+    speakText("오늘 하루 체크인 완료! 저금통과 운동 달력에 쏙 들어가고 젤리 1개를 선물받았습니다!");
+  }
+}
+
+// 🌐 노션 완주 마일스톤 피드 전송
+async function sendMilestoneToNotion(milestoneTitle) {
+  const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+  const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  const payload = {
+    parent: { database_id: dbId },
+    properties: {
+      "제목": {
+        title: [{ text: { content: `🏆 [마일스톤 완주] ${currentChild === 'minseo' ? '민서' : '민수'}_${milestoneTitle}` } }]
+      },
+      "학생": { select: { name: currentChild === 'minseo' ? '민서' : '민수' } },
+      "과목": { select: { name: "하루" } },
+      "날짜": { date: { start: todayStr } },
+      "학습내용": {
+        rich_text: [{
+          text: { content: `🎉 축하합니다! 20칸 착한 습관 저금통을 모두 채웠습니다.\n• 마이룸 [황금 돼지 저금통] 트로피 가구 지급 완료\n• 이번 주말 [가족 소원권] 발급 완료 (부모님 확인 필요)` }
+        }]
+      },
+      "획득보상": { number: 0 }
+    }
+  };
+
+  try {
+    await fetch(`${proxyUrl}/v1/pages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
 }
 
 // 🌐 노션 학습일지 DB 자동 기록
