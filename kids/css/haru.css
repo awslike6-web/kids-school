@@ -534,7 +534,101 @@ body {
   border: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   white-space: nowrap;
-  pointer-events: none;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.checkin-action-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+/* 🌟 30초 하루 체크인 모달 오버레이 & 팝업창 */
+.haru-modal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.haru-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.haru-modal-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 620px;
+  max-height: 88vh;
+  border-radius: 26px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 3px solid #ffffff;
+  animation: haruModalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes haruModalPop {
+  from { transform: scale(0.88) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.modal-header-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.5px;
+}
+
+.modal-close-btn {
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.45);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+  max-height: calc(88vh - 75px);
+  background: #ffffff;
 }
 
 /* 체크인 모달 내부 */
@@ -604,4 +698,43 @@ body {
   font-size: 0.8rem;
   color: #888;
 }
+
+.card-footer-btn {
+  background: linear-gradient(135deg, #10ac84, #2ed573);
+  color: #fff;
+  border: none;
+  font-family: 'Jua', sans-serif;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 14px rgba(46, 213, 115, 0.35);
+}
+.card-footer-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(46, 213, 115, 0.45);
+}
+
+@media (max-width: 600px) {
+  .haru-modal-box {
+    max-height: 94vh;
+    border-radius: 20px;
+  }
+  .modal-body {
+    padding: 16px 14px;
+    max-height: calc(94vh - 65px);
+  }
+  .checkin-choices-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .checkin-card {
+    padding: 12px 6px !important;
+  }
+  .checkin-card-icon {
+    font-size: 2rem !important;
+  }
+  .checkin-card-title {
+    font-size: 0.95rem !important;
+  }
+}
+
 
