@@ -132,6 +132,150 @@
   .admin-tool-chip { padding: 7px 14px; border-radius: 14px; font-size: 0.88rem; font-family: 'Jua', sans-serif; text-decoration: none; background: rgba(30, 41, 59, 0.85); color: #38bdf8; border: 1.5px solid #0284c7; transition: all 0.2s; }
   .admin-tool-chip:hover { transform: translateY(-2px); color: #fff; background: #0284c7; }
 
+  /* 🧚 상황별 요정 코코 반응형 인터랙티브 말풍선 배너 */
+  .lobby-speech-bubble {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto 14px auto;
+    padding: 13px 18px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-sizing: border-box;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    touch-action: manipulation;
+  }
+  .lobby-speech-bubble:hover {
+    transform: translateY(-2px);
+  }
+
+  body.theme--arcade .lobby-speech-bubble {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 2px solid #3b82f6;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+    color: #f1f5f9;
+  }
+  body.theme--arcade .lobby-speech-bubble:hover {
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.4);
+    border-color: #60a5fa;
+  }
+
+  body.theme--hideout .lobby-speech-bubble {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 245, 247, 0.98) 100%);
+    border: 2px solid #ff758c;
+    box-shadow: 0 8px 24px rgba(255, 117, 140, 0.25);
+    color: #4a3b42;
+  }
+  body.theme--hideout .lobby-speech-bubble:hover {
+    box-shadow: 0 10px 28px rgba(255, 117, 140, 0.4);
+    border-color: #ff4757;
+  }
+
+  .bubble-avatar-box {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    flex-shrink: 0;
+  }
+  body.theme--arcade .bubble-avatar-box {
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    border: 2px solid #60a5fa;
+  }
+  body.theme--hideout .bubble-avatar-box {
+    background: linear-gradient(135deg, #ffeef2, #ffd1dc);
+    border: 2px solid #ff758c;
+  }
+
+  .bubble-pulse {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    animation: bubblePulse 2s infinite ease-out;
+  }
+  body.theme--arcade .bubble-pulse { border-color: rgba(96, 165, 250, 0.6); }
+  body.theme--hideout .bubble-pulse { border-color: rgba(255, 117, 140, 0.6); }
+
+  @keyframes bubblePulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+
+  .bubble-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .bubble-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.76rem;
+    font-weight: 800;
+    font-family: 'Jua', sans-serif;
+    padding: 2px 8px;
+    border-radius: 8px;
+    width: fit-content;
+  }
+  body.theme--arcade .bubble-badge {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+  }
+  body.theme--hideout .bubble-badge {
+    background: #ffe4e8;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+  }
+
+  .bubble-text {
+    font-size: 0.98rem;
+    line-height: 1.45;
+    font-weight: 600;
+    word-break: keep-all;
+  }
+
+  .bubble-voice-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1.5px solid rgba(255, 255, 255, 0.3);
+    color: inherit;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .bubble-voice-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.35);
+  }
+  body.theme--arcade .bubble-voice-btn {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: #3b82f6;
+  }
+  body.theme--hideout .bubble-voice-btn {
+    background: rgba(255, 117, 140, 0.15);
+    border-color: #ff758c;
+  }
+
   /* 💎 과목 카드 격리 그리드 */
   .world-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 860px; margin-top: 10px; }
   @media (max-width: 768px) { .world-grid { grid-template-columns: 1fr; max-width: 440px; } }
@@ -160,6 +304,23 @@
   <!-- 💡 메인 타이틀 & 환영 인사 -->
   <h1 class="main-title" id="mainLobbyTitle"><span class="accent2">민민이네</span><br><span class="accent">공부방</span></h1>
   <div class="user-welcome"><span id="welcomeMessage">안녕하세요!</span></div>
+
+  <!-- 🧚 상황별 요정 코코 반응형 인터랙티브 말풍선 배너 -->
+  <div class="lobby-speech-bubble" id="lobbySpeechBubble" onclick="handleFairyBubbleClick()">
+    <div class="bubble-avatar-box">
+      <span class="bubble-avatar" id="bubbleAvatar">🧚</span>
+      <span class="bubble-pulse"></span>
+    </div>
+    <div class="bubble-content">
+      <div class="bubble-badge" id="bubbleBadge">☀️ 상쾌한 하루 시작</div>
+      <div class="bubble-text" id="bubbleText">
+        반가워요! 오늘의 신나는 공부방 모험을 시작해볼까요?
+      </div>
+    </div>
+    <button type="button" class="bubble-voice-btn" id="bubbleVoiceBtn" onclick="speakBubbleMessage(event)" title="요정 목소리로 듣기">
+      🔊
+    </button>
+  </div>
 
   <!-- 📦 4대 상단 핵심 히어로 바 (인벤토리 보상 + 폰시간 정산 + 데일리 마음일기 + 시간표) -->
   <div class="status-hero-bar">
@@ -467,6 +628,149 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         localStorage.setItem('currentUserName', finalRealName);
         document.getElementById('timetableLink').textContent = `📅 ${finalRealName}의 시간표 보기`;
     }
+
+    // 🧚 상황별 요정 코코 반응형 인터랙티브 말풍선 배너 갱신 엔진
+    let currentFairySpeechText = "";
+    let currentFairyTargetUrl = null;
+
+    function updateLobbyFairyBubble(childName, childKey, isParentAdmin) {
+      const bubbleEl = document.getElementById("lobbySpeechBubble");
+      const badgeEl = document.getElementById("bubbleBadge");
+      const textEl = document.getElementById("bubbleText");
+      const avatarEl = document.getElementById("bubbleAvatar");
+      if (!bubbleEl || !badgeEl || !textEl) return;
+
+      const now = new Date();
+      const hour = now.getHours();
+      const dayIdx = now.getDay(); // 0: 일, 1: 월, 2: 화, 3: 수, 4: 목, 5: 금, 6: 토
+      const todayStr = now.toISOString().slice(0, 10);
+
+      let badge = "☀️ 활기찬 하루 시작";
+      let textHtml = "반가워요! 오늘의 신나는 공부방 모험을 시작해볼까요?";
+      let rawText = "반가워요! 오늘의 신나는 공부방 모험을 시작해볼까요?";
+      let targetUrl = null;
+
+      if (isParentAdmin) {
+        if (avatarEl) avatarEl.textContent = "👨‍👩‍👧‍👦";
+        badge = "🔧 부모 관제 모드 가이드";
+        textHtml = `우리 아이들의 시간표 및 하루 습관 체크인 현황이 실시간 동기화 중입니다. <b>[실시간 통합 성장 대시보드]</b>에서 코칭 카드를 확인해 보세요.`;
+        rawText = "우리 아이들의 시간표 및 하루 습관 체크인 현황이 실시간 동기화 중입니다. 성장 대시보드에서 코칭 카드를 확인해 보세요.";
+        targetUrl = "parent_dashboard.html?role=parent";
+      } else if (childName === "민서" || childKey === "daughter") {
+        if (avatarEl) avatarEl.textContent = "🧚";
+        const isHaruDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
+        const hasHaruToday = (dayIdx === 1 || dayIdx === 3 || dayIdx === 4 || dayIdx === 5); // 월,수,목,금
+
+        if (hour >= 5 && hour < 12) {
+          // 아침 (05:00 ~ 11:59)
+          if (!isHaruDone) {
+            badge = "☀️ 상쾌한 아침 등교 전";
+            textHtml = "민서야 좋은 아침! 등교 전에 <b>[30초 하루 체크인]</b>하고 저금통에 황금 코인을 쏙 넣어볼까? 🐷";
+            rawText = "민서야 좋은 아침! 등교 전에 30초 하루 체크인하고 저금통에 황금 코인을 쏙 넣어볼까?";
+            targetUrl = "kids/subjects/haru/haru.html";
+          } else {
+            badge = "☀️ 아침 착한 습관 완료";
+            textHtml = "아침부터 착한 습관을 스스로 실천한 민서 최고야! 오늘 학교에서도 반짝반짝 빛나는 하루 보내고 와! 🌸";
+            rawText = "아침부터 착한 습관을 스스로 실천한 민서 최고야! 오늘 학교에서도 반짝반짝 빛나는 하루 보내고 와!";
+            targetUrl = "kids/subjects/haru/haru.html";
+          }
+        } else if (hour >= 12 && hour < 18) {
+          // 오후 (12:00 ~ 17:59)
+          if (hasHaruToday && !isHaruDone) {
+            badge = "🌱 방과 후 [하루] 30초 체크인";
+            textHtml = "학교 잘 다녀왔어, 민서야! 오늘 시간표에 배운 <b>[슬기로운 하루]</b> 30초 체크인하고 달콤한 젤리를 챙겨봐! 🍬";
+            rawText = "학교 잘 다녀왔어, 민서야! 오늘 시간표에 배운 슬기로운 하루 30초 체크인하고 달콤한 젤리를 챙겨봐!";
+            targetUrl = "kids/subjects/haru/haru.html";
+          } else if (!isHaruDone) {
+            badge = "🍰 방과 후 데일리 체크인";
+            textHtml = "학교 다녀오느라 수고했어, 민서야! 오늘 실천한 착한 일과 운동을 <b>[30초 체크인]</b>으로 쏙 기록해볼까? ✨";
+            rawText = "학교 다녀오느라 수고했어, 민서야! 오늘 실천한 착한 일과 운동을 30초 체크인으로 쏙 기록해볼까?";
+            targetUrl = "kids/subjects/haru/haru.html";
+          } else {
+            badge = "🌸 체크인 완료 & 도서관 탐험";
+            textHtml = "오늘 하루 체크인을 멋지게 완료했네! 이제 재미난 수학·국어 <b>단원 동화 도서관</b>을 신나게 둘러볼까? 📚";
+            rawText = "오늘 하루 체크인을 멋지게 완료했네! 이제 재미난 수학 국어 단원 동화 도서관을 신나게 둘러볼까?";
+            targetUrl = "kids/subjects/korean/korean.html";
+          }
+        } else {
+          // 저녁/밤 (18:00 ~ 04:59)
+          if (!isHaruDone) {
+            badge = "🌙 자기 전 30초 체크인";
+            textHtml = "오늘 하루도 정말 고생 많았어! 잠들기 전에 <b>[30초 하루 체크인]</b>으로 저금통 코인 채우는 거 잊지 않았지? 🧸";
+            rawText = "오늘 하루도 정말 고생 많았어! 잠들기 전에 30초 하루 체크인으로 저금통 코인 채우는 거 잊지 않았지?";
+            targetUrl = "kids/subjects/haru/haru.html";
+          } else {
+            badge = "💖 포근한 저녁 마무리";
+            textHtml = "오늘 착한 습관과 운동까지 알차게 해낸 민서! 푹 쉬고 예쁜 꿈꿔, 내일 또 신나게 놀자! 🌙";
+            rawText = "오늘 착한 습관과 운동까지 알차게 해낸 민서! 푹 쉬고 예쁜 꿈꿔, 내일 또 신나게 놀자!";
+            targetUrl = "kids/subjects/haru/haru.html";
+          }
+        }
+      } else {
+        // 민수
+        if (avatarEl) avatarEl.textContent = "🚀";
+        let timetableInfo = null;
+        if (typeof window.TimetableBoost !== 'undefined') {
+          timetableInfo = window.TimetableBoost.getTimetableSubjects('민수');
+        }
+        const todaySubjs = (timetableInfo && timetableInfo.todaySubjects) || [];
+        const subjStr = todaySubjs.length > 0 ? todaySubjs.join('·') : '수학·국어';
+
+        if (hour >= 5 && hour < 12) {
+          badge = "⚡ 활기찬 아침 출격";
+          textHtml = "에너지 100% 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야! 🚀";
+          rawText = "에너지 백 퍼센트 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야!";
+          targetUrl = "kids/subjects/math/math.html";
+        } else if (hour >= 12 && hour < 18) {
+          badge = "🔥 오늘 시간표 복습 1.2배 부스트";
+          textHtml = `스테이지 복귀 완료! 오늘 학교에서 배운 <b>[${subjStr}]</b>을 복습하면 경험치(EXP) 1.2배 부스트 보너스! 🕹️`;
+          rawText = `스테이지 복귀 완료! 오늘 학교에서 배운 ${subjStr}을 복습하면 경험치 1.2배 부스트 보너스를 받아!`;
+          targetUrl = todaySubjs.includes('수학') ? 'kids/subjects/math/math.html' : 'kids/subjects/korean/korean.html';
+        } else {
+          badge = "🌙 오늘 퀘스트 & 폰시간 결산";
+          textHtml = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 <b>[오늘 폰시간 정산]</b> 영수증을 확인해봐! 🔋";
+          rawText = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 오늘 폰시간 정산 영수증을 확인해봐!";
+          targetUrl = "#screentime";
+        }
+      }
+
+      badgeEl.textContent = badge;
+      textEl.innerHTML = textHtml;
+      currentFairySpeechText = rawText;
+      currentFairyTargetUrl = targetUrl;
+    }
+
+    window.handleFairyBubbleClick = function() {
+      if (currentFairyTargetUrl) {
+        if (currentFairyTargetUrl === '#screentime') {
+          if (typeof openScreenTimeReceiptModal === 'function') openScreenTimeReceiptModal();
+        } else {
+          location.href = currentFairyTargetUrl;
+        }
+      } else if (currentFairySpeechText) {
+        speakFairyCocoBubble();
+      }
+    };
+
+    window.speakBubbleMessage = function(event) {
+      if (event) event.stopPropagation();
+      speakFairyCocoBubble();
+    };
+
+    function speakFairyCocoBubble() {
+      if (!currentFairySpeechText) return;
+      if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS(currentFairySpeechText);
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(currentFairySpeechText);
+        u.lang = 'ko-KR';
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    // 상황별 요정 말풍선 즉시 최초 갱신
+    updateLobbyFairyBubble(finalRealName, currentConfig.key, isAdmin);
 
     window.switchAdminLobbyChild = function(targetChild) {
         const targetKey = targetChild === 'minseo' ? 'daughter' : 'son';
