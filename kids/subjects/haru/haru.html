@@ -246,6 +246,23 @@
 
         <textarea id="newStoryDesc" class="review-input" rows="3" placeholder="그날 어떤 재미있는 일이 있었는지, 흙을 만지거나 모종을 심을 때 어떤 기분이었는지 적어보세요!"></textarea>
 
+        <!-- 💮 내 감정 도장 선택 & 직접 입력 -->
+        <div style="background: rgba(255,255,255,0.7); border-radius:14px; padding:10px 12px; margin-bottom:12px; border:1px solid #ffd1dc;">
+          <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#be185d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+            <span>💮</span> <span>내 감정 도장 함께 찍기 (선택)</span>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <select id="newStoryStampPreset" class="review-input" style="flex:1; min-width:130px; margin-bottom:0; padding:8px 10px; font-family:'Jua', sans-serif;" onchange="handleNewStoryStampPreset(this.value)">
+              <option value="😆 꿀잼">😆 꿀잼</option>
+              <option value="😲 신기해">😲 신기해</option>
+              <option value="🧺 뿌듯해">🧺 뿌듯해</option>
+              <option value="😋 고소해">😋 고소해</option>
+              <option value="custom">✏️ 직접 쓰기...</option>
+            </select>
+            <input type="text" id="newStoryCustomStamp" class="review-input" style="flex:1.5; min-width:150px; margin-bottom:0; padding:8px 10px; font-size:0.9rem; display:none;" placeholder="직접 쓸 느낌 (예: 너무 재밌었어!)" maxlength="15" />
+          </div>
+        </div>
+
         <!-- 📷 사진 첨부 섹션 -->
         <div style="background: rgba(255,255,255,0.7); border-radius:14px; padding:12px; margin-bottom:12px; border:1px solid #ffd1dc;">
           <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#be185d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">

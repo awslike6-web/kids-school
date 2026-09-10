@@ -569,6 +569,91 @@ function stampReaction(event, storyId, emoji, label, storyTitle) {
   renderSpecialDaysTab();
 }
 
+function toggleEditTitle(event, storyId) {
+  if (event) event.stopPropagation();
+  const editBox = document.getElementById(`title_edit_box_${storyId}`);
+  const displayBox = document.getElementById(`title_display_${storyId}`);
+  if (!editBox) return;
+
+  const isHidden = editBox.style.display === "none" || !editBox.style.display;
+  editBox.style.display = isHidden ? "flex" : "none";
+  if (displayBox) displayBox.style.display = isHidden ? "none" : "block";
+
+  if (isHidden) {
+    const input = document.getElementById(`title_edit_input_${storyId}`);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }
+}
+
+function saveEditedTitle(event, storyId) {
+  if (event) event.stopPropagation();
+  const input = document.getElementById(`title_edit_input_${storyId}`);
+  if (!input) return;
+
+  const newTitle = input.value.trim();
+  if (!newTitle) {
+    alert("제목을 입력해 주세요! ✏️");
+    return;
+  }
+
+  const stories = JSON.parse(JSON.stringify(getSpecialStories()));
+  const story = stories.find(s => s.id === storyId);
+  if (story) {
+    story.title = newTitle;
+    localStorage.setItem("haru_special_stories_" + currentChild, JSON.stringify(stories));
+    renderSpecialDaysTab();
+    speakText(`제목이 '${newTitle}'(으)로 변경되었어요!`);
+  }
+}
+
+function toggleCustomStampInput(event, storyId) {
+  if (event) event.stopPropagation();
+  const row = document.getElementById(`custom_stamp_row_${storyId}`);
+  if (!row) return;
+
+  const isHidden = row.style.display === "none" || !row.style.display;
+  row.style.display = isHidden ? "flex" : "none";
+  if (isHidden) {
+    const input = document.getElementById(`custom_stamp_input_${storyId}`);
+    if (input) {
+      input.focus();
+      input.select();
+    }
+  }
+}
+
+function submitCustomStamp(event, storyId, storyTitle) {
+  if (event) event.stopPropagation();
+  const input = document.getElementById(`custom_stamp_input_${storyId}`);
+  if (!input) return;
+
+  const text = input.value.trim();
+  if (!text) {
+    alert("느낌이나 생각을 적어주세요! (예: 너무 신났어! 😋)");
+    return;
+  }
+
+  const emojiMatch = text.match(/^(\p{Emoji})/u);
+  const emoji = emojiMatch ? emojiMatch[1] : "💮";
+  const label = emojiMatch ? text.slice(emoji.length).trim() : text;
+
+  stampReaction(event, storyId, emoji, label || text, storyTitle);
+}
+
+function handleNewStoryStampPreset(val) {
+  const customInput = document.getElementById("newStoryCustomStamp");
+  if (!customInput) return;
+  if (val === "custom") {
+    customInput.style.display = "block";
+    customInput.focus();
+  } else {
+    customInput.style.display = "none";
+  }
+}
+
 function renderSpecialDaysTab() {
   const container = document.getElementById("specialFeedGrid");
   if (!container) return;
@@ -597,6 +682,18 @@ function renderSpecialDaysTab() {
       { emoji: "😋", label: "고소해" }
     ];
 
+    const titleRowHtml = `
+      <div class="special-card-title-row">
+        <div class="special-card-title" id="title_display_${s.id}">${s.title}</div>
+        <button class="title-edit-btn" onclick="toggleEditTitle(event, '${s.id}')" title="제목 직접 수정하기">✏️</button>
+      </div>
+      <div id="title_edit_box_${s.id}" class="title-edit-row" style="display:none;" onclick="event.stopPropagation();">
+        <input type="text" id="title_edit_input_${s.id}" class="title-edit-input" value="${s.title}" placeholder="새로운 제목 입력" onkeydown="if(event.key==='Enter') saveEditedTitle(event, '${s.id}')" />
+        <button class="title-save-btn" onclick="saveEditedTitle(event, '${s.id}')">저장</button>
+        <button class="title-cancel-btn" onclick="toggleEditTitle(event, '${s.id}')">취소</button>
+      </div>
+    `;
+
     const stampHtml = `
       <div class="special-card-reactions">
         <div class="reaction-label">
@@ -608,6 +705,11 @@ function renderSpecialDaysTab() {
             const isSelected = savedStamp && savedStamp.label === st.label;
             return `<button class="reaction-stamp-btn ${isSelected ? 'selected' : ''}" onclick="stampReaction(event, '${s.id}', '${st.emoji}', '${st.label}', '${s.title}')">${st.emoji} ${st.label}</button>`;
           }).join("")}
+          <button class="reaction-stamp-btn custom-btn" onclick="toggleCustomStampInput(event, '${s.id}')" title="내 느낌 직접 쓰기">✏️ 직접 쓰기</button>
+        </div>
+        <div id="custom_stamp_row_${s.id}" class="custom-stamp-input-row" style="display:none;" onclick="event.stopPropagation();">
+          <input type="text" id="custom_stamp_input_${s.id}" class="custom-stamp-input" placeholder="나만의 느낌 쓰기 (예: 너무 재밌었어!)" maxlength="15" onkeydown="if(event.key==='Enter') submitCustomStamp(event, '${s.id}', '${s.title}')" />
+          <button class="custom-stamp-submit-btn" onclick="submitCustomStamp(event, '${s.id}', '${s.title}')">도장 쾅! 💮</button>
         </div>
         ${savedStamp ? `<div class="reaction-stamp-badge"><span>💖</span> <b>${childName}의 소감:</b> [${savedStamp.emoji} ${savedStamp.label}!] (${savedStamp.date})</div>` : ''}
       </div>
@@ -632,7 +734,7 @@ function renderSpecialDaysTab() {
             <img id="${mainImgId}" src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
           </div>
           ${thumbsHtml}
-          <div class="special-card-title" style="margin-top:8px;">${s.title}</div>
+          ${titleRowHtml}
           <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
           <p class="special-card-desc">${s.desc}</p>
           ${stampHtml}
@@ -643,7 +745,7 @@ function renderSpecialDaysTab() {
     return `
       <div class="special-card" onclick="speakStoryText('${s.title}', '${s.desc}')" title="터치하면 요정이 이야기를 들려줘요!">
         <div class="special-card-icon">${s.icon || '🌟'}</div>
-        <div class="special-card-title">${s.title}</div>
+        ${titleRowHtml}
         <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
         <p class="special-card-desc">${s.desc}</p>
         ${stampHtml}
@@ -687,9 +789,28 @@ function addNewSpecialStory() {
     "특별한날": "⭐"
   };
 
+  const stampPreset = document.getElementById("newStoryStampPreset") ? document.getElementById("newStoryStampPreset").value : "";
+  const customStampInput = document.getElementById("newStoryCustomStamp") ? document.getElementById("newStoryCustomStamp").value.trim() : "";
+
+  let initialStamp = null;
+  if (stampPreset === "custom" && customStampInput) {
+    const emojiMatch = customStampInput.match(/^(\p{Emoji})/u);
+    const emoji = emojiMatch ? emojiMatch[1] : "💮";
+    const label = emojiMatch ? customStampInput.slice(emoji.length).trim() : customStampInput;
+    initialStamp = { emoji: emoji, label: label || customStampInput, date: new Date().toISOString().slice(5, 10).replace("-", "/") };
+  } else if (stampPreset && stampPreset !== "custom") {
+    const parts = stampPreset.split(" ");
+    initialStamp = { emoji: parts[0], label: parts.slice(1).join(" "), date: new Date().toISOString().slice(5, 10).replace("-", "/") };
+  }
+
+  const newStoryId = "evt_custom_" + Date.now();
+  if (initialStamp) {
+    localStorage.setItem(`haru_stamp_${currentChild}_${newStoryId}`, JSON.stringify(initialStamp));
+  }
+
   const stories = getSpecialStories();
   stories.unshift({
-    id: "evt_custom_" + Date.now(),
+    id: newStoryId,
     category: category,
     categoryIcon: categoryIconMap[category] || "⭐",
     title: `✨ ${title}`,
@@ -705,6 +826,13 @@ function addNewSpecialStory() {
   descInput.value = "";
   if (fileInput) fileInput.value = "";
   if (urlInput) urlInput.value = "";
+  if (document.getElementById("newStoryCustomStamp")) {
+    document.getElementById("newStoryCustomStamp").value = "";
+    document.getElementById("newStoryCustomStamp").style.display = "none";
+  }
+  if (document.getElementById("newStoryStampPreset")) {
+    document.getElementById("newStoryStampPreset").value = "😆 꿀잼";
+  }
   selectedStoryPhotoBase64 = "";
   const previewBox = document.getElementById("storyImgPreviewBox");
   if (previewBox) previewBox.style.display = "none";

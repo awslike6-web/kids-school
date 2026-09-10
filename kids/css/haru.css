@@ -430,11 +430,75 @@ body {
   font-size: 2.2rem;
   margin-bottom: 8px;
 }
+.special-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
 .special-card-title {
   font-family: 'Jua', sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   color: var(--dark);
-  margin-bottom: 4px;
+  line-height: 1.35;
+  flex: 1;
+}
+.title-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  opacity: 0.45;
+  transition: all 0.2s;
+  padding: 3px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.special-card:hover .title-edit-btn,
+.title-edit-btn:hover {
+  opacity: 1;
+  background: #f1f2f6;
+  transform: scale(1.1);
+}
+.title-edit-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  animation: fadeIn 0.2s ease-in;
+}
+.title-edit-input {
+  flex: 1;
+  border: 1.5px solid #2ed573;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+}
+.title-edit-input:focus {
+  box-shadow: 0 0 6px rgba(46, 213, 115, 0.3);
+}
+.title-save-btn {
+  background: #2ed573;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.title-cancel-btn {
+  background: #dfe4ea;
+  color: #57606f;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 .special-card-date {
   font-size: 0.85rem;
@@ -563,6 +627,46 @@ body {
   background: #fff9e6;
   border-color: #feca57;
   transform: translateY(-2px);
+}
+.reaction-stamp-btn.custom-btn {
+  background: #fdf2f8;
+  border-color: #fbcfe8;
+  color: #db2777;
+}
+.reaction-stamp-btn.custom-btn:hover {
+  background: #fce7f3;
+  border-color: #f472b6;
+}
+.custom-stamp-input-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  animation: fadeIn 0.2s ease-in;
+}
+.custom-stamp-input {
+  flex: 1;
+  border: 1.5px solid #ff9ff3;
+  border-radius: 12px;
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-family: 'Jua', sans-serif;
+  outline: none;
+}
+.custom-stamp-input:focus {
+  border-color: #f368e0;
+  box-shadow: 0 0 6px rgba(243, 104, 224, 0.3);
+}
+.custom-stamp-submit-btn {
+  background: linear-gradient(135deg, #ff9ff3, #feca57);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  font-family: 'Jua', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(254, 202, 87, 0.4);
 }
 .reaction-stamp-btn.selected {
   background: linear-gradient(135deg, #ff9ff3, #feca57);
