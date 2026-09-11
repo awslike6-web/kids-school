@@ -68,6 +68,11 @@
       <span class="nav-tab-title">특별한 날 추억 게시판</span>
       <span class="nav-tab-subtitle">생일 · 소풍 · 축제 이야기</span>
     </button>
+    <button class="nav-tab-btn" data-tab="safety" onclick="switchHaruTab('safety')">
+      <span class="nav-tab-icon">🚨</span>
+      <span class="nav-tab-title">119 안전 & 닥터 코코</span>
+      <span class="nav-tab-subtitle">위기탈출 OX · 응급 상담</span>
+    </button>
   </div>
 
   <!-- =========================================================
@@ -285,6 +290,163 @@
         </button>
       </div>
 
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       탭 4: 🚨 119 안전 수호대 & 닥터 코코 (74~83쪽 위험/안전 & 응급처치)
+       ========================================================= -->
+  <div class="tab-content-panel" id="tab_safety">
+    
+    <!-- 🚨 헤더 배너 -->
+    <div class="safety-hero-card">
+      <div class="safety-hero-icon">🚨</div>
+      <div>
+        <div class="safety-hero-title">출동! 119 안전 수호대 & 닥터 코코 응급처치 상담소</div>
+        <div class="safety-hero-desc">
+          학교와 집에서 다치지 않고 안전하게 생활하는 방법을 배우고, 혹시 긁히거나 부딪혔을 때는 닥터 코코에게 침착하게 물어보아요!
+        </div>
+      </div>
+    </div>
+
+    <!-- 🚒 위젯 1: 위기탈출 OX 안전 퀴즈 -->
+    <div class="safety-quiz-box">
+      <div class="safety-quiz-header">
+        <div class="safety-quiz-badge">
+          <span>🚒</span> <span id="safetyQuizPlaceTag">학교 복도와 계단</span>
+        </div>
+        <div class="safety-quiz-progress" id="safetyQuizProgressTag">문제 1 / 6</div>
+      </div>
+
+      <div class="safety-question-text" id="safetyQuestionText">
+        복도나 계단에서는 앞을 잘 보고 천천히 오른쪽으로 사뿐사뿐 걸어가요.
+      </div>
+
+      <div class="ox-btn-group" id="oxBtnGroup">
+        <button type="button" class="ox-btn ox-btn-o" onclick="handleSafetyQuizAnswer(true)">
+          <span class="ox-symbol">⭕</span>
+          <span class="ox-label">맞아요 (안전해요!)</span>
+        </button>
+        <button type="button" class="ox-btn ox-btn-x" onclick="handleSafetyQuizAnswer(false)">
+          <span class="ox-symbol">❌</span>
+          <span class="ox-label">아니에요 (위험해요!)</span>
+        </button>
+      </div>
+
+      <!-- 피드백 박스 -->
+      <div class="quiz-feedback-box" id="safetyQuizFeedbackBox">
+        <div class="feedback-title" id="safetyFeedbackTitle">
+          <span>✨</span> <span>정답이에요!</span>
+        </div>
+        <div class="feedback-desc" id="safetyFeedbackDesc">
+          맞아요! 계단이나 복도에서 뛰어가면 친구와 세게 부딪혀 크게 다칠 수 있어요.
+        </div>
+        <button type="button" class="quiz-next-btn" id="safetyQuizNextBtn" onclick="nextSafetyQuizQuestion()">
+          다음 안전 수칙으로 ➔
+        </button>
+        <div style="clear:both;"></div>
+      </div>
+
+      <!-- 🏆 황금 안전 지킴이 면허증 카드 (6문제 완주 시 노출) -->
+      <div class="safety-license-card" id="safetyLicenseCard">
+        <div class="license-watermark">🛡️</div>
+        <div class="license-title">🏆 119 황금 안전 지킴이 면허증 🏆</div>
+        <div class="license-subtitle">위기탈출 안전 수칙을 모두 완벽하게 익혔음을 인정합니다!</div>
+        <div class="license-body">
+          <div class="license-photo-frame" id="licensePhotoFrame">👧</div>
+          <div class="license-info">
+            <div><b>지킴이 성명:</b> <span id="licenseChildName">민서</span> 어린이</div>
+            <div><b>소속 학급:</b> <span id="licenseChildGrade">초등학교 1학년</span></div>
+            <div><b>인증 항목:</b> 학교 복도, 횡단보도, 날카로운 도구, 놀이터 안전 마스터</div>
+            <div><b>발급 일자:</b> <span id="licenseIssueDate">2026-09-11</span></div>
+          </div>
+        </div>
+        <div class="license-reward-badge" id="licenseRewardBadge">
+          <span>🍬 완주 축하 보너스 젤리 +5개 획득!</span>
+        </div>
+        <div style="margin-top:14px;">
+          <button type="button" class="checkin-action-btn" onclick="restartSafetyQuiz()" style="padding:8px 20px; font-size:0.95rem;">
+            🔄 다시 도전해보기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🩺 위젯 2: 닥터 코코 365 응급처치 상담소 -->
+    <div class="doctor-coco-box">
+      <div class="doctor-coco-header">
+        <div class="doctor-coco-avatar">🩺</div>
+        <div>
+          <div class="doctor-coco-title">닥터 코코의 365 안심 응급처치 상담소</div>
+          <div class="doctor-coco-sub">
+            다치거나 아플 때는 당황하지 마세요! 어디가 아픈지 누르면 코코가 단계별로 침착하게 알려주고, 부모님께 안심 알림을 보내드려요.
+          </div>
+        </div>
+      </div>
+
+      <!-- 6대 다침 증상 버튼 -->
+      <div class="symptom-chips-grid" id="symptomChipsGrid">
+        <div class="symptom-chip" data-symptom="scrape" onclick="selectFirstAidSymptom('scrape')">
+          <span class="symptom-icon">🩹</span>
+          <span class="symptom-label">무릎/손 까짐</span>
+        </div>
+        <div class="symptom-chip" data-symptom="bump" onclick="selectFirstAidSymptom('bump')">
+          <span class="symptom-icon">🤕</span>
+          <span class="symptom-label">쿵 부딪힘 (혹/멍)</span>
+        </div>
+        <div class="symptom-chip" data-symptom="burn" onclick="selectFirstAidSymptom('burn')">
+          <span class="symptom-icon">🔥</span>
+          <span class="symptom-label">뜨거운 곳 데임</span>
+        </div>
+        <div class="symptom-chip" data-symptom="nosebleed" onclick="selectFirstAidSymptom('nosebleed')">
+          <span class="symptom-icon">🩸</span>
+          <span class="symptom-label">코피가 주르륵</span>
+        </div>
+        <div class="symptom-chip" data-symptom="bugbite" onclick="selectFirstAidSymptom('bugbite')">
+          <span class="symptom-icon">🐝</span>
+          <span class="symptom-label">벌레/모기 물림</span>
+        </div>
+        <div class="symptom-chip" data-symptom="eye" onclick="selectFirstAidSymptom('eye')">
+          <span class="symptom-icon">👀</span>
+          <span class="symptom-label">눈에 모래/먼지</span>
+        </div>
+      </div>
+
+      <!-- 직접 증상 입력바 -->
+      <div class="custom-symptom-bar">
+        <input type="text" id="customSymptomInput" class="custom-symptom-input" placeholder="또는 어디가 어떻게 아픈지 직접 적어보세요 (예: 넘어졌어, 손가락 베였어)" onkeydown="if(event.key==='Enter') consultDoctorCocoCustom();">
+        <button type="button" class="custom-symptom-btn" onclick="consultDoctorCocoCustom()">닥터 코코에게 물어보기 🩺</button>
+      </div>
+
+      <!-- 처치 가이드 결과 카드 -->
+      <div class="firstaid-result-card" id="firstAidResultCard">
+        <div class="firstaid-title-row">
+          <div class="firstaid-title">
+            <span id="firstAidIcon">🩹</span>
+            <span id="firstAidTitle">무릎이나 손이 까졌을 때 (찰과상)</span>
+          </div>
+          <span class="firstaid-badge" id="firstAidBadge">피가 나거나 껍질이 벗겨짐</span>
+        </div>
+
+        <div class="coco-speech-bubble">
+          <div style="flex:1;" id="cocoVoiceSpeechText">
+            "아팠겠다! 괜찮아, 많이 놀랐지? 먼저 흐르는 물에 깨끗이 씻고 밴드를 톡 붙이자. 그리고 선생님이나 부모님께 꼭 보여드려야 해!"
+          </div>
+          <button type="button" class="coco-listen-btn" id="cocoListenBtn" onclick="playCurrentFirstAidVoice()">
+            🔊 코코 목소리 듣기
+          </button>
+        </div>
+
+        <div class="firstaid-steps-list" id="firstAidStepsList">
+          <!-- 단계별 동적 렌더링 -->
+        </div>
+
+        <div class="parent-notified-banner">
+          <span>💌 <b>부모님 안심 알림:</b> 노션 학습일지 DB 및 부모 대시보드에 실시간 안심 기록이 등록되었습니다.</span>
+          <span style="font-size:0.78rem; color:#15803d; font-weight:bold;" id="parentNotifiedTimeTag">방금 전</span>
+        </div>
+      </div>
     </div>
 
   </div>

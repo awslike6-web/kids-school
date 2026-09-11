@@ -520,6 +520,9 @@ async function loadDashboardData() {
 
           // 7. 데일리 습관 & 부모 칭찬 코칭 카드 렌더링 (민수 / 민서 공통 지원)
           renderHaruParentCoaching(studyLogs, name);
+
+          // 8. 닥터 코코 실시간 안심 알림 위젯 렌더링 (민수 / 민서 공통 지원)
+          renderSafetyAlertWidget(studyLogs, name);
         }
       });
     }
@@ -536,6 +539,8 @@ async function loadDashboardData() {
     renderScreenTimeWidget("민서");
     renderHaruParentCoaching([], "민수");
     renderHaruParentCoaching([], "민서");
+    renderSafetyAlertWidget([], "민수");
+    renderSafetyAlertWidget([], "민서");
   }
 }
 
@@ -852,6 +857,103 @@ function renderHaruParentCoaching(studyLogs = [], childName = "민서") {
         `;
       }
     }
+  }
+}
+
+// 🚨 [닥터 코코 안심 알림] 실시간 안전/응급처치 위젯 렌더링
+function renderSafetyAlertWidget(studyLogs = [], childName = "민서") {
+  const isMinsu = childName === "민수";
+  const childKey = isMinsu ? "minsu" : "minseo";
+  const prefix = isMinsu ? "ms" : "ds";
+
+  const alertBox = document.getElementById(prefix + "-safety-alert-box");
+  const timeBadge = document.getElementById(prefix + "-safety-time-badge");
+  const contentEl = document.getElementById(prefix + "-safety-alert-content");
+  if (!alertBox || !contentEl) return;
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  let latestLog = null;
+
+  // 1. 로컬스토리지 최신 기록 확인
+  const localSaved = localStorage.getItem("haru_last_safety_consultation_" + childKey);
+  if (localSaved) {
+    try {
+      const parsed = JSON.parse(localSaved);
+      if (parsed.date === todayStr) {
+        latestLog = parsed;
+      }
+    } catch(e) {}
+  }
+
+  // 2. 노션 학습일지 DB 데이터에서 오늘 발생한 닥터 코코 상담 확인 (원격 폴백)
+  if (!latestLog && Array.isArray(studyLogs) && studyLogs.length > 0) {
+    const remoteLog = studyLogs.find(log => {
+      const child = log.properties["학생"]?.select?.name;
+      const date = log.properties["날짜"]?.date?.start;
+      const title = log.properties["제목"]?.title?.[0]?.plain_text || "";
+      return child === childName && title.includes("닥터 코코 상담") && (date === todayStr || title.includes(todayStr));
+    });
+
+    if (remoteLog) {
+      const titleText = remoteLog.properties["제목"]?.title?.[0]?.plain_text || "";
+      const contentText = remoteLog.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
+      const symptomMatch = titleText.match(/\[🚨 닥터 코코 상담\]\s*(.+)/);
+      const sayMatch = contentText.match(/처치안내:\s*([^\n\r]+)/);
+      const timeMatch = contentText.match(/시간:\s*([^\n\r]+)/);
+
+      latestLog = {
+        title: symptomMatch ? symptomMatch[1].trim() : "응급 상담",
+        icon: "🩺",
+        time: timeMatch ? timeMatch[1].trim() : "오늘",
+        cocoSay: sayMatch ? sayMatch[1].trim() : "단계별 응급처치 안내를 확인했습니다."
+      };
+    }
+  }
+
+  // 3. UI 렌더링
+  if (latestLog) {
+    alertBox.style.display = "block";
+    alertBox.style.borderColor = "#ff4757";
+    alertBox.style.background = "linear-gradient(135deg, rgba(255, 71, 87, 0.08), rgba(255, 107, 129, 0.12))";
+
+    if (timeBadge) {
+      timeBadge.innerText = `${latestLog.time || '오늘'} 상담 발생 🚨`;
+      timeBadge.style.background = "#ffeaa7";
+      timeBadge.style.color = "#d63031";
+    }
+
+    contentEl.style.borderColor = "#ffccd2";
+    contentEl.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+        <span style="font-size:1.4rem;">${latestLog.icon || '🩹'}</span>
+        <span style="font-weight:bold; color:#d63031; font-size:0.98rem;">${latestLog.title}</span>
+      </div>
+      <div style="font-size:0.88rem; color:#4b5563; line-height:1.45; background:#f9fafb; padding:8px 10px; border-radius:10px; margin-bottom:8px; border-left:3px solid #0984e3;">
+        <b>닥터 코코 안내:</b> "${latestLog.cocoSay || '깨끗이 소독하고 치료를 완료하세요.'}"
+      </div>
+      <div style="font-size:0.8rem; color:#15803d; font-weight:bold; display:flex; align-items:center; gap:4px;">
+        <span>💡</span> <span><b>부모 안심 코칭:</b> 귀가 후 상처 부위가 덧나지 않았는지 다정하게 한 번 더 살펴봐 주세요.</span>
+      </div>
+    `;
+  } else {
+    // 오늘 상담 내역이 없는 경우: 정상 안심 상태
+    alertBox.style.display = "block";
+    alertBox.style.borderColor = "#86efac";
+    alertBox.style.background = "linear-gradient(135deg, rgba(240, 253, 244, 0.6), rgba(220, 252, 231, 0.6))";
+    
+    if (timeBadge) {
+      timeBadge.innerText = "안전 상태 양호 🛡️";
+      timeBadge.style.background = "#dcfce7";
+      timeBadge.style.color = "#15803d";
+    }
+
+    contentEl.style.borderColor = "#bbf7d0";
+    contentEl.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; color:#166534; font-size:0.88rem;">
+        <span style="font-size:1.2rem;">🛡️</span>
+        <span>오늘 다치거나 응급처치를 상담한 내역이 없이 건강하고 안전하게 하루를 보내고 있어요!</span>
+      </div>
+    `;
   }
 }
 

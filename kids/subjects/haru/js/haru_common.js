@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHabitsTab();
   renderArtTab();
   renderSpecialDaysTab();
+  renderSafetyQuizQuestion();
 });
 
 // 👦👧 사용자 프로필별 UI 동적 전환
@@ -94,10 +95,24 @@ function setupChildProfileUI() {
       ? "💖 추억 게시판에 등록하고 다이아 2개 받기 💎💎" 
       : "💖 추억 게시판에 등록하고 젤리 2개 받기 🍬🍬";
   }
+
+  // 탭 4 황금 안전 지킴이 면허증 정보 세팅
+  const licName = document.getElementById("licenseChildName");
+  if (licName) licName.innerText = childName;
+  const licGrade = document.getElementById("licenseChildGrade");
+  if (licGrade) licGrade.innerText = isMinsu ? "초등학교 5학년" : "초등학교 1학년";
+  const licPhoto = document.getElementById("licensePhotoFrame");
+  if (licPhoto) licPhoto.innerText = isMinsu ? "👦" : "👧";
+  const licReward = document.getElementById("licenseRewardBadge");
+  if (licReward) {
+    licReward.innerHTML = isMinsu 
+      ? "💎 완주 축하 보너스 다이아 +5개 획득!" 
+      : "🍬 완주 축하 보너스 젤리 +5개 획득!";
+  }
 }
 
 // ==========================================
-// 🧭 3대 영역 탭 스위칭
+// 🧭 4대 영역 탭 스위칭
 // ==========================================
 function switchHaruTab(tabName) {
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
@@ -113,6 +128,8 @@ function switchHaruTab(tabName) {
     speakText("하늘과 자연의 변화를 느끼며 모네와 고흐의 명화를 감상해 보아요!");
   } else if (tabName === "special") {
     speakText("생일, 소풍, 축제! 내가 가장 좋아하는 특별한 날의 이야기를 나누어 보아요!");
+  } else if (tabName === "safety") {
+    speakText("출동 119 안전 수호대와 닥터 코코의 응급처치 상담소예요! 안전 수칙을 익히고 다쳤을 땐 코코에게 물어보세요!");
   }
 }
 
@@ -1177,4 +1194,293 @@ async function sendCheckInToNotion(habit, workout, mood) {
     console.warn("노션 하루 체크인 자동 동기화 예외 (로컬 안전 보존됨):", e);
   }
 }
+
+// =========================================================
+// 4. [출동! 119 안전 수호대 & 닥터 코코 응급처치 상담소]
+// =========================================================
+let currentSafetyQuizIndex = 0;
+let currentActiveSymptomKey = "scrape";
+
+function getSafetyQuizList() {
+  return window.HARU_DATA?.safetyStation?.oxQuizList || [];
+}
+
+function renderSafetyQuizQuestion() {
+  const quizList = getSafetyQuizList();
+  if (!quizList || quizList.length === 0) return;
+
+  const placeTag = document.getElementById("safetyQuizPlaceTag");
+  const progressTag = document.getElementById("safetyQuizProgressTag");
+  const questionEl = document.getElementById("safetyQuestionText");
+  const feedbackBox = document.getElementById("safetyQuizFeedbackBox");
+  const licenseCard = document.getElementById("safetyLicenseCard");
+  const oxGroup = document.getElementById("oxBtnGroup");
+
+  if (licenseCard) licenseCard.style.display = "none";
+  if (oxGroup) oxGroup.style.display = "grid";
+  if (feedbackBox) feedbackBox.style.display = "none";
+
+  const item = quizList[currentSafetyQuizIndex];
+  if (!item) return;
+
+  if (placeTag) placeTag.innerText = item.place;
+  if (progressTag) progressTag.innerText = `문제 ${currentSafetyQuizIndex + 1} / ${quizList.length}`;
+  if (questionEl) questionEl.innerText = item.question;
+
+  // 문제 출제 음성
+  speakText(`${item.place} 안전 수칙이에요! ${item.question}`);
+}
+
+function handleSafetyQuizAnswer(userChoice) {
+  const quizList = getSafetyQuizList();
+  const item = quizList[currentSafetyQuizIndex];
+  if (!item) return;
+
+  const feedbackBox = document.getElementById("safetyQuizFeedbackBox");
+  const feedbackTitle = document.getElementById("safetyFeedbackTitle");
+  const feedbackDesc = document.getElementById("safetyFeedbackDesc");
+  const nextBtn = document.getElementById("safetyQuizNextBtn");
+  if (!feedbackBox || !feedbackTitle || !feedbackDesc) return;
+
+  const isCorrect = userChoice === item.answer;
+
+  feedbackBox.style.display = "block";
+  feedbackBox.className = "quiz-feedback-box " + (isCorrect ? "correct" : "hint");
+
+  if (isCorrect) {
+    playCoinSound();
+    feedbackTitle.innerHTML = `<span>✨</span> <span>참 잘했어요! 완벽한 안전 수칙이에요!</span>`;
+    feedbackDesc.innerText = item.explain;
+    speakText(`딩동댕! ${item.explain}`);
+  } else {
+    // 무감점 원칙: 오답 스트레스 없이 다정한 안전 팁 안내
+    feedbackTitle.innerHTML = `<span>💡</span> <span>코코의 안전 힌트! 이렇게 하면 더 안전해요:</span>`;
+    feedbackDesc.innerText = item.explain + (item.tip ? ` (${item.tip})` : "");
+    speakText(`괜찮아! ${item.explain}`);
+  }
+
+  const isLast = currentSafetyQuizIndex >= quizList.length - 1;
+  if (nextBtn) {
+    nextBtn.innerText = isLast ? "🏆 황금 안전 지킴이 면허증 받기! ➔" : "다음 안전 수칙으로 ➔";
+  }
+}
+
+function nextSafetyQuizQuestion() {
+  const quizList = getSafetyQuizList();
+  if (currentSafetyQuizIndex < quizList.length - 1) {
+    currentSafetyQuizIndex++;
+    renderSafetyQuizQuestion();
+  } else {
+    renderSafetyLicense();
+  }
+}
+
+function renderSafetyLicense() {
+  const feedbackBox = document.getElementById("safetyQuizFeedbackBox");
+  const licenseCard = document.getElementById("safetyLicenseCard");
+  const oxGroup = document.getElementById("oxBtnGroup");
+  const questionEl = document.getElementById("safetyQuestionText");
+  const progressTag = document.getElementById("safetyQuizProgressTag");
+
+  if (feedbackBox) feedbackBox.style.display = "none";
+  if (oxGroup) oxGroup.style.display = "none";
+  if (questionEl) questionEl.innerText = "🎉 축하합니다! 모든 안전 수칙을 완벽하게 마스터했어요!";
+  if (progressTag) progressTag.innerText = "미션 완료 🏅";
+
+  if (licenseCard) {
+    licenseCard.style.display = "block";
+    const dateEl = document.getElementById("licenseIssueDate");
+    if (dateEl) {
+      dateEl.innerText = new Date().toISOString().slice(0, 10);
+    }
+  }
+
+  playCoinSound();
+  const childTitle = currentChild === "minsu" ? "민수" : "민서";
+  const rewardName = currentChild === "minsu" ? "다이아 5개" : "젤리 5개";
+
+  speakText(`축하합니다! ${childTitle} 어린이가 119 황금 안전 지킴이 면허증을 획득했어요! 보너스 ${rewardName}를 선물로 드립니다!`);
+  grantReward(5, "119 안전 수호대 면허증 취득 보너스");
+
+  // 노션 학습일지 자동 전송
+  sendSafetyLicenseToNotion();
+}
+
+function restartSafetyQuiz() {
+  currentSafetyQuizIndex = 0;
+  renderSafetyQuizQuestion();
+}
+
+// 🩺 닥터 코코 365 응급처치 상담소
+function selectFirstAidSymptom(key) {
+  currentActiveSymptomKey = key;
+  document.querySelectorAll(".symptom-chip").forEach(chip => {
+    chip.classList.toggle("active", chip.dataset.symptom === key);
+  });
+  renderFirstAidGuide(key);
+}
+
+function renderFirstAidGuide(key) {
+  const guides = window.HARU_DATA?.safetyStation?.firstAidGuides;
+  if (!guides || !guides[key]) return;
+
+  const guide = guides[key];
+  const resultCard = document.getElementById("firstAidResultCard");
+  const iconEl = document.getElementById("firstAidIcon");
+  const titleEl = document.getElementById("firstAidTitle");
+  const badgeEl = document.getElementById("firstAidBadge");
+  const cocoSpeech = document.getElementById("cocoVoiceSpeechText");
+  const stepsList = document.getElementById("firstAidStepsList");
+  const timeTag = document.getElementById("parentNotifiedTimeTag");
+
+  if (iconEl) iconEl.innerText = guide.icon;
+  if (titleEl) titleEl.innerText = guide.title;
+  if (badgeEl) badgeEl.innerText = guide.badge;
+  if (cocoSpeech) cocoSpeech.innerText = `"${guide.cocoSay}"`;
+
+  if (stepsList && guide.steps) {
+    stepsList.innerHTML = guide.steps.map(s => `
+      <div class="firstaid-step-item">
+        <div class="step-num-bubble">${s.step}</div>
+        <div class="step-info">
+          <div class="step-title">${s.title}</div>
+          <div class="step-desc">${s.desc}</div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  const nowTime = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  if (timeTag) timeTag.innerText = nowTime;
+
+  if (resultCard) {
+    resultCard.style.display = "block";
+    resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  // 코코의 따뜻한 안내 음성
+  speakText(guide.cocoSay);
+
+  // 로컬스토리지에 부모 대시보드 연동용 최신 상담 저장
+  const consultationLog = {
+    key: guide.id,
+    title: guide.title,
+    icon: guide.icon,
+    badge: guide.badge,
+    date: new Date().toISOString().slice(0, 10),
+    time: nowTime,
+    cocoSay: guide.cocoSay
+  };
+  localStorage.setItem("haru_last_safety_consultation_" + currentChild, JSON.stringify(consultationLog));
+
+  // 노션 학습일지 DB 자동 전송
+  sendSafetyConsultationToNotion(guide);
+}
+
+function playCurrentFirstAidVoice() {
+  const guides = window.HARU_DATA?.safetyStation?.firstAidGuides;
+  if (guides && guides[currentActiveSymptomKey]) {
+    speakText(guides[currentActiveSymptomKey].cocoSay);
+  }
+}
+
+function consultDoctorCocoCustom() {
+  const input = document.getElementById("customSymptomInput");
+  if (!input) return;
+  const q = input.value.trim();
+  if (!q) {
+    speakText("어디가 어떻게 다쳤는지 적어주세요!");
+    return;
+  }
+
+  let matchedKey = "scrape";
+  if (q.includes("부딪") || q.includes("혹") || q.includes("멍") || q.includes("이마")) {
+    matchedKey = "bump";
+  } else if (q.includes("데였") || q.includes("뜨거") || q.includes("화상") || q.includes("물집")) {
+    matchedKey = "burn";
+  } else if (q.includes("코피") || q.includes("피가") && q.includes("코")) {
+    matchedKey = "nosebleed";
+  } else if (q.includes("벌레") || q.includes("모기") || q.includes("가려") || q.includes("물렸")) {
+    matchedKey = "bugbite";
+  } else if (q.includes("눈") || q.includes("모래") || q.includes("먼지")) {
+    matchedKey = "eye";
+  }
+
+  selectFirstAidSymptom(matchedKey);
+}
+
+// 🌐 노션 학습일지 DB: 면허증 발급 기록
+async function sendSafetyLicenseToNotion() {
+  const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+  const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  const childTitle = currentChild === "minseo" ? "민서" : "민수";
+
+  const payload = {
+    parent: { database_id: dbId },
+    properties: {
+      "제목": {
+        title: [{ text: { content: `${childTitle}_${todayStr} [119 안전수호대] 황금 지킴이 면허증 취득` } }]
+      },
+      "학생": { select: { name: childTitle } },
+      "과목": { select: { name: "하루" } },
+      "날짜": { date: { start: todayStr } },
+      "학습내용": {
+        rich_text: [{
+          text: {
+            content: `[119 안전 수호대 완주 인증]\n• 획득: 황금 안전 지킴이 면허증 발급 🏆\n• 항목: 학교 복도, 계단, 횡단보도, 날카로운 도구, 놀이터 안전 수칙 6문항 100% 마스터\n• 시간: ${timeStr}\n• 보상: 보너스 +5개 획득`
+          }
+        }]
+      },
+      "획득보상": { number: 5 }
+    }
+  };
+
+  try {
+    await fetch(`${proxyUrl}/v1/pages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+}
+
+// 🌐 노션 학습일지 DB: 닥터 코코 응급 상담 기록
+async function sendSafetyConsultationToNotion(guide) {
+  const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+  const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  const childTitle = currentChild === "minseo" ? "민서" : "민수";
+
+  const payload = {
+    parent: { database_id: dbId },
+    properties: {
+      "제목": {
+        title: [{ text: { content: `${childTitle}_${todayStr} [🚨 닥터 코코 상담] ${guide.title}` } }]
+      },
+      "학생": { select: { name: childTitle } },
+      "과목": { select: { name: "하루" } },
+      "날짜": { date: { start: todayStr } },
+      "학습내용": {
+        rich_text: [{
+          text: {
+            content: `[닥터 코코 365 안심 응급상담]\n• 증상: ${guide.icon} ${guide.title} (${guide.badge})\n• 처치안내: ${guide.cocoSay}\n• 시간: ${timeStr}\n• 부모 대시보드 실시간 알림 연동 완료`
+          }
+        }]
+      },
+      "획득보상": { number: 0 }
+    }
+  };
+
+  try {
+    await fetch(`${proxyUrl}/v1/pages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+}
+
 
