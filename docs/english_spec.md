@@ -186,7 +186,7 @@ graph TD
 
 ## 7. 노션 VOCA DB 연동 규격 (Notion Database Specification)
 
-* **데이터베이스 ID**: `375a27115b6880ea89cff00dc6b694be` (VOCA DB)
+* **데이터베이스 ID**: `375a27115b688038b686d3994ee12919` (VOCA DB)
 * **주요 필드 매핑**:
   - `단어` (title): 영문 단어/문장 (예: *"What did you do last weekend?"*)
   - `뜻` (rich_text): 한국어 뜻 (예: *"지난 주말에 뭐 했니?"*)
@@ -216,6 +216,29 @@ graph TD
 16. `It was hard.` (힘들었어.)
 17. `It was boring.` (지루했어.)
 
+### 8단원(He Has Short Curly Hair) 핵심 어휘 25선 & 문장 10선 SSOT:
+* **단원 제재**: 외모와 옷차림 묻고 답하기 / 친구를 찾아라! (Find Your Friend!)
+* **1구간 (헤어스타일 & 색상)**: `curly hair`, `straight hair`, `short hair`, `long hair`, `blonde hair`, `brown`, `blue`, `green`, `black`, `hazel`
+* **2구간 (신체 & 의류 & 동사)**: `eyes`, `glasses`, `pants`, `shirt`, `dress`, `he`, `she`, `find`, `cry`, `wear`
+* **3구간 (기타 어휘)**: `wrong`, `girl`, `boy`, `ask`, `any`
+* **핵심 문장 10선**:
+  1. `What does he look like?` (그는 어떻게 생겼나요?)
+  2. `She has long straight hair and blue eyes.` (그녀는 긴 생머리와 파란 눈을 가지고 있어요.)
+  3. `He has short curly hair and green eyes.` (그는 짧은 곱슬머리와 초록색 눈을 가지고 있어요.)
+  4. `What is she wearing?` (그녀는 무엇을 입고 있나요?)
+  5. `He is wearing blue pants.` (그는 파란 바지를 입고 있어요.)
+  6. `She is wearing a red skirt.` (그녀는 빨간 치마를 입고 있어요.)
+  7. `I don't know her.` (저는 그녀를 모릅니다.)
+  8. `This is my friend, Sam.` (이 사람은 제 친구, 샘입니다.)
+  9. `He looks cool!` (그는 멋져 보여요!)
+  10. `Find your friend!` (친구를 찾아라!)
+* **Phonics Fun (ow 소리)**: `show` [쇼], `snow` [스노], `yellow` [옐로]
+
+### 11단원(Where Is the Library?) 핵심 어휘 & 길 찾기 표현 SSOT:
+* **단원 제재**: 위치 묻고 길 안내하기 (Minsu Explores the Village)
+* **핵심 표현**: `Where is the library?` (도서관이 어디에 있나요?), `Go straight and turn right.` (똑바로 가서 우회전하세요.), `It's on your left.` (왼쪽에 있어요.)
+* **핵심 어휘**: `library`, `straight`, `turn`, `left`, `right`, `corner`, `first`, `second`, `third`, `floor`, `behind`, `next to`
+
 ---
 
 ## 8. 보상 및 시간표 부스트 규칙 (Rewards & Timetable Boost)
@@ -225,3 +248,10 @@ graph TD
    - **오늘 복습 과목**: 일일 보상 획득 상한 100개 ➔ **150개 확장**, 경험치 **1.2배** 가산.
    - **내일 예습 과목**: 10문제 완주 보너스 기본 +5 ➔ **+7개** 지급.
 4. **학습일지 자동 기록**: 1세션 완료 시 노션 학습일지 DB(`37aa2711...`)에 정답률, 문제 수, 소요 시간을 안전 전송 (`isLogged` 락 및 `pagehide` 이탈 가드 적용).
+5. **영어 문장 오답노트 수집 체계 (`recordEnglishWrongAnswer`)**:
+   - 4단계 문장 조각 배열, 3단계 자석/카드 매칭, 2단계 퐁당 퀴즈에서 오답 발생 시 `window.wrongNotes` 배열에 실시간 수집.
+   - 학습 종료(`exitRoom`) 시 노션 학습일지 DB의 `오답리포트` 속성에 자동 반영되어 부모 대시보드 및 복습 큐에 연동.
+6. **스크린타임 스마트 정산소 연동 (`screentime-tracker.js`)**:
+   - 실제 순수 공부 시간 10분 단위 올림 보정.
+   - 당일 획득 보상 50개 달성 시 `[🎫 30분 자유 시간 추가권]` 1장 자동 발급.
+   - 부모 대시보드(`parent_dashboard.html`)에서 실시간 조회 및 원클릭 승인 (`학습설정` 클라우드 연동).
