@@ -316,7 +316,12 @@
         <div class="safety-quiz-badge">
           <span>🚒</span> <span id="safetyQuizPlaceTag">학교 복도와 계단</span>
         </div>
-        <div class="safety-quiz-progress" id="safetyQuizProgressTag">문제 1 / 6</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button type="button" class="quiz-listen-btn" onclick="playSafetyQuizAudio()" title="문제 음성 듣기">
+            🔊 문제 듣기
+          </button>
+          <div class="safety-quiz-progress" id="safetyQuizProgressTag">문제 1 / 6</div>
+        </div>
       </div>
 
       <div class="safety-question-text" id="safetyQuestionText">

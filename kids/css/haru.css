@@ -1080,6 +1080,25 @@ body {
   font-size: 1rem;
   color: #e17055;
 }
+.quiz-listen-btn {
+  background: #fff;
+  border: 1.5px solid #ff7675;
+  color: #d63031;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(255, 118, 117, 0.15);
+}
+.quiz-listen-btn:hover {
+  background: #fff5f5;
+  transform: translateY(-1px);
+}
 
 .safety-question-text {
   font-family: 'Jua', sans-serif;

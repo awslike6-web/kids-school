@@ -29,11 +29,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // 30초 하루 체크인 배너 상태 갱신
   updateCheckInBannerStatus();
 
-  // 탭별 콘텐츠 초기 렌더링
+  // 탭별 콘텐츠 초기 렌더링 (첫 진입 시 음성은 나가지 않도록 false 전달)
   renderHabitsTab();
   renderArtTab();
   renderSpecialDaysTab();
-  renderSafetyQuizQuestion();
+  renderSafetyQuizQuestion(false);
+
+  // 첫 진입 시 짧고 산뜻한 환영 안내 1회만 제공
+  const isMinsu = currentChild === "minsu";
+  const welcomeMsg = isMinsu 
+    ? "민수의 데일리 라이프 공간이에요! ✨" 
+    : "슬기로운 하루 공간에 온 걸 환영해요! ✨";
+  speakText(welcomeMsg);
 });
 
 // 👦👧 사용자 프로필별 UI 동적 전환
@@ -123,13 +130,13 @@ function switchHaruTab(tabName) {
   });
 
   if (tabName === "habits") {
-    speakText("매일매일 실천하는 착한 습관 저금통과 건강 운동을 확인해 보아요!");
+    speakText("착한 습관 저금통과 건강 운동 구역이에요!");
   } else if (tabName === "art") {
-    speakText("하늘과 자연의 변화를 느끼며 모네와 고흐의 명화를 감상해 보아요!");
+    speakText("하늘과 자연, 명화를 감상하는 구역이에요!");
   } else if (tabName === "special") {
-    speakText("생일, 소풍, 축제! 내가 가장 좋아하는 특별한 날의 이야기를 나누어 보아요!");
+    speakText("소중하고 특별한 날의 이야기 구역이에요!");
   } else if (tabName === "safety") {
-    speakText("출동 119 안전 수호대와 닥터 코코의 응급처치 상담소예요! 안전 수칙을 익히고 다쳤을 땐 코코에게 물어보세요!");
+    speakText("출동 119 안전 수호대와 닥터 코코 응급 상담소 구역이에요!");
   }
 }
 
@@ -1205,7 +1212,7 @@ function getSafetyQuizList() {
   return window.HARU_DATA?.safetyStation?.oxQuizList || [];
 }
 
-function renderSafetyQuizQuestion() {
+function renderSafetyQuizQuestion(shouldSpeak = false) {
   const quizList = getSafetyQuizList();
   if (!quizList || quizList.length === 0) return;
 
@@ -1227,7 +1234,17 @@ function renderSafetyQuizQuestion() {
   if (progressTag) progressTag.innerText = `문제 ${currentSafetyQuizIndex + 1} / ${quizList.length}`;
   if (questionEl) questionEl.innerText = item.question;
 
-  // 문제 출제 음성
+  // 버튼을 누르거나 다음 문제로 넘어갔을 때만 음성 안내 (첫 진입 시에는 무음)
+  if (shouldSpeak) {
+    speakText(`${item.place} 안전 수칙이에요! ${item.question}`);
+  }
+}
+
+// 🔊 안전 퀴즈 문제 음성 다시 듣기
+function playSafetyQuizAudio() {
+  const quizList = getSafetyQuizList();
+  const item = quizList[currentSafetyQuizIndex];
+  if (!item) return;
   speakText(`${item.place} 안전 수칙이에요! ${item.question}`);
 }
 
@@ -1269,7 +1286,7 @@ function nextSafetyQuizQuestion() {
   const quizList = getSafetyQuizList();
   if (currentSafetyQuizIndex < quizList.length - 1) {
     currentSafetyQuizIndex++;
-    renderSafetyQuizQuestion();
+    renderSafetyQuizQuestion(true);
   } else {
     renderSafetyLicense();
   }
@@ -1308,7 +1325,7 @@ function renderSafetyLicense() {
 
 function restartSafetyQuiz() {
   currentSafetyQuizIndex = 0;
-  renderSafetyQuizQuestion();
+  renderSafetyQuizQuestion(true);
 }
 
 // 🩺 닥터 코코 365 응급처치 상담소
