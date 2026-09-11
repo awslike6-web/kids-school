@@ -258,22 +258,84 @@ function phonicsRuleFallback(word) {
   return w.length <= 4 ? (ENGLISH_PHONICS_DICT[w] || w) : w;
 }
 
-// 문장 전체를 단어별 1:1 상하 파닉스 블록 HTML로 렌더링
+// 한글 발음 ON/OFF 설정 확인 (기본값: true/ON)
+function isEnglishPhonicsEnabled() {
+  try {
+    const saved = localStorage.getItem('english_phonics_visible');
+    if (saved === 'false' || saved === 'off') return false;
+  } catch (e) {}
+  return true;
+}
+
+function setEnglishPhonicsEnabled(enabled) {
+  try {
+    localStorage.setItem('english_phonics_visible', enabled ? 'on' : 'off');
+  } catch (e) {}
+  updateEnglishPhonicsUi();
+}
+
+function toggleEnglishPhonics() {
+  const nextState = !isEnglishPhonicsEnabled();
+  setEnglishPhonicsEnabled(nextState);
+}
+
+function updateEnglishPhonicsUi() {
+  const isEnabled = isEnglishPhonicsEnabled();
+  // 토글 버튼 텍스트/스타일 갱신
+  const btns = document.querySelectorAll('.phonics-toggle-btn');
+  btns.forEach(btn => {
+    btn.innerHTML = isEnabled ? '🗣️ 한글 발음 ON 🟢' : '🗣️ 한글 발음 OFF ⚪';
+    if (isEnabled) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+
+  // 화면 내 파닉스 발음 텍스트 노출/숨김 토글
+  const phonicsKors = document.querySelectorAll('.p-kor, .voca-phonics-badge');
+  phonicsKors.forEach(el => {
+    el.style.display = isEnabled ? '' : 'none';
+  });
+
+  const boxes = document.querySelectorAll('.phonics-sentence-box');
+  boxes.forEach(box => {
+    if (isEnabled) box.classList.remove('hide-phonics');
+    else box.classList.add('hide-phonics');
+  });
+}
+
+function getEnglishPhonicsToggleBtnHtml() {
+  const isEnabled = isEnglishPhonicsEnabled();
+  return `
+    <button type="button" 
+            class="phonics-toggle-btn ${isEnabled ? 'active' : ''}" 
+            onclick="window.toggleEnglishPhonics()" 
+            title="한글 발음 켜기 / 끄기">
+      ${isEnabled ? '🗣️ 한글 발음 ON 🟢' : '🗣️ 한글 발음 OFF ⚪'}
+    </button>
+  `;
+}
+
+// 문장 전체를 단어별 1:1 상하 파닉스 블록 HTML로 렌더링 (ON일 때만 발음 표시)
 function renderSentencePhonicsHtml(sentence) {
   if (!sentence) return "";
   const words = String(sentence).trim().split(/\s+/);
+  const showPhonics = isEnglishPhonicsEnabled();
   return `
-    <div class="phonics-sentence-box">
+    <div class="phonics-sentence-box ${showPhonics ? '' : 'hide-phonics'}">
       ${words.map(w => `
         <div class="phonics-word-unit">
           <span class="p-eng">${w}</span>
-          <span class="p-kor">${getPhonicsKorean(w)}</span>
+          <span class="p-kor" style="${showPhonics ? '' : 'display:none;'}">${getPhonicsKorean(w)}</span>
         </div>
       `).join('')}
     </div>
   `;
 }
 
+window.isEnglishPhonicsEnabled = isEnglishPhonicsEnabled;
+window.setEnglishPhonicsEnabled = setEnglishPhonicsEnabled;
+window.toggleEnglishPhonics = toggleEnglishPhonics;
+window.updateEnglishPhonicsUi = updateEnglishPhonicsUi;
+window.getEnglishPhonicsToggleBtnHtml = getEnglishPhonicsToggleBtnHtml;
 window.getPhonicsKorean = getPhonicsKorean;
 window.renderSentencePhonicsHtml = renderSentencePhonicsHtml;
 
@@ -945,11 +1007,8 @@ function renderVocaPoolUI(container) {
         `;
     } else {
         displayContentHtml = `
-            <div class="quiz-descr" style="font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 8px 0 4px;">
+            <div class="quiz-descr" style="font-size: 2.5rem; font-weight: bold; color: var(--primary); margin: 8px 0 14px;">
                 ${answerWord}
-            </div>
-            <div style="margin-bottom: 12px;">
-                <span class="voca-phonics-badge">🗣️ [${getPhonicsKorean(answerWord)}]</span>
             </div>
             <div style="font-size: 1.05rem; color: #64748b; margin-bottom: 20px;">
                 이 단어의 알맞은 우리말 뜻을 골라보세요!
@@ -1060,10 +1119,7 @@ function renderStage1UI(container) {
             ${getEnglishOrderToggleHtml()}
             <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 15px;">알파벳 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             ${imageHtml}
-            <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 4px;">${answerWord}</div>
-            <div style="margin-bottom: 12px;">
-                <span class="voca-phonics-badge">🗣️ [${getPhonicsKorean(answerWord)}]</span>
-            </div>
+            <div class="quiz-descr" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 10px;">${answerWord}</div>
             ${meaningHtml}
             <div style="margin-bottom: 20px; color: #666;">이 단어를 소리 내어 읽고 아래 버튼을 눌러보세요!</div>
             
@@ -1379,12 +1435,7 @@ function renderStage4UI(container) {
             for (let i = 0; i < window.sentenceTargetWords.length; i++) {
                 if (i < window.currentSentenceAnswer.length) {
                     const ansItem = window.currentSentenceAnswer[i];
-                    html += `
-                        <span style="border-bottom:3px solid var(--primary); padding:2px 8px; display:inline-flex; flex-direction:column; align-items:center; color:var(--primary); font-weight:bold; margin:0 4px; line-height:1.2;">
-                            <span style="font-size:1.4rem;">${ansItem.word}</span>
-                            <span style="font-size:0.85rem; font-family:'Jua',sans-serif; color:#0284c7; margin-top:2px;">${getPhonicsKorean(ansItem.word)}</span>
-                        </span>
-                    `;
+                    html += `<span style="border-bottom:3px solid var(--primary); padding:0 10px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold; margin:0 5px; font-size:1.4rem;">${ansItem.word}</span>`;
                 } else {
                     html += '<span style="border-bottom:3px solid #ccc; width:50px; display:inline-block; margin:0 5px; height:36px;"></span>';
                 }
@@ -1427,10 +1478,7 @@ function renderStage4UI(container) {
             </div>
             <div id="sent-word-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
                 ${scrambled.map((w, i) => `
-                    <button id="sent-word-btn-${i}" class="quiz-choice-btn sent-word-btn" onclick="selectSentenceWord('${w.replace(/'/g, "\\'")}', ${i})">
-                        <span class="btn-eng">${w}</span>
-                        <span class="btn-kor-phonics">${getPhonicsKorean(w)}</span>
-                    </button>
+                    <button id="sent-word-btn-${i}" class="quiz-choice-btn" style="padding: 12px 20px; font-size: 1.25rem;" onclick="selectSentenceWord('${w.replace(/'/g, "\\'")}', ${i})">${w}</button>
                 `).join('')}
             </div>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
@@ -1464,10 +1512,7 @@ function renderStage4UI(container) {
         interactiveHtml = `
             <div class="quiz-choices-container" style="display: flex; flex-direction: column; gap: 10px;">
                 ${choices.map(choice => `
-                     <button class="quiz-choice-btn" style="padding: 14px 18px; text-align: left; line-height: 1.4;" onclick="verifyStage4Choice('${choice.replace(/'/g, "\\'")}')">
-                        <div style="font-size: 1.25rem; font-weight: bold;">${choice}</div>
-                        <div style="font-size: 0.95rem; font-family: 'Jua', sans-serif; color: #0284c7; margin-top: 4px;">🗣️ ${choice.split(/\s+/).map(w => getPhonicsKorean(w)).join(' ')}</div>
-                     </button>
+                     <button class="quiz-choice-btn" style="padding: 16px 20px; font-size: 1.25rem;" onclick="verifyStage4Choice('${choice.replace(/'/g, "\\'")}')">${choice}</button>
                 `).join('')}
             </div>
         `;
@@ -1516,6 +1561,11 @@ function renderStage4SuccessCard(container, sentence, meaning) {
                     </div>
                 </div>
 
+                <!-- 발음 ON/OFF 토글 버튼 -->
+                <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin: 4px 0 14px; flex-wrap:wrap;">
+                    ${getEnglishPhonicsToggleBtnHtml()}
+                </div>
+
                 <!-- 배속 조절 칩 -->
                 ${getEnglishSpeechRateChipsHtml()}
 
@@ -1532,10 +1582,17 @@ function renderStage4SuccessCard(container, sentence, meaning) {
         </div>
     `;
 
-    // 느긋하게 눈으로 확인할 수 있도록 15초 안전 자동 진행 타이머
-    window._sentenceAutoAdvanceTimer = setTimeout(() => {
-        window.proceedToNextSentenceQuiz();
-    }, 15000);
+    // ⏱️ 템포 모드 연동: '꼼꼼 탐구'일 때는 자동 타이머를 완전히 끄고 버튼 클릭 시에만 넘어감!
+    const flowMode = (typeof getQuizFlowMode === 'function') ? getQuizFlowMode('영어') : 'review';
+    if (flowMode === 'speed') {
+        // ⚡ 빠른 진행 모드: 1.8초 후 자동 다음 문제 진행
+        window._sentenceAutoAdvanceTimer = setTimeout(() => {
+            window.proceedToNextSentenceQuiz();
+        }, 1800);
+    } else {
+        // 🔍 꼼꼼 탐구 모드: 자동 타이머 없음! 오직 다음 문제 버튼을 눌렀을 때만 이동!
+        window._sentenceAutoAdvanceTimer = null;
+    }
 }
 
 window.proceedToNextSentenceQuiz = function() {

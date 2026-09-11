@@ -673,3 +673,45 @@ body.theme--minecraft .voca-phonics-badge {
   background: rgba(56, 189, 248, 0.15);
   border-color: rgba(56, 189, 248, 0.4);
 }
+
+/* 🗣️ 한글 발음 ON/OFF 토글 버튼 */
+.phonics-toggle-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.phonics-toggle-btn:hover {
+  background: #f1f5f9;
+  border-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.phonics-toggle-btn.active {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  border-color: transparent;
+  color: #ffffff;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+body.theme--minecraft .phonics-toggle-btn {
+  background: #2a2a38;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+body.theme--minecraft .phonics-toggle-btn.active {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45);
+}
