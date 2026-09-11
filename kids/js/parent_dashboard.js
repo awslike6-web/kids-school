@@ -3,7 +3,9 @@ const INVENTORY_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTOR
 const STUDY_LOG_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID ? APP_CONFIG.STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
 const VOCA_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.VOCA_DB_ID ? APP_CONFIG.VOCA_DB_ID : "375a27115b688038b686d3994ee12919";
 
-const SUBJECTS_5 = ['국어', '수학', '영어', '과학', '사회'];
+const SUBJECTS_MINSU = ['국어', '수학', '사회', '과학', '영어'];
+const SUBJECTS_MINSEO = ['국어', '수학', '하루(통합)', '창의·예술', '착한 습관'];
+const SUBJECTS_5 = SUBJECTS_MINSU;
 
 // 로컬 동시성 통제용 임시 상태 저장소
 const memoryState = {
@@ -272,33 +274,89 @@ function levelToScore(level) {
   return Math.min(Math.round((level || 1) * 10), 100);
 }
 
-function buildRadarScores(props, vocaList, childName) {
+function buildRadarScores(props, vocaList, childName, studyLogs = []) {
+  if (childName === '민서') {
+    // 👧 [민서 - 초등학교 1학년] 5각 맞춤 밸런스: ['국어', '수학', '하루(통합)', '창의·예술', '착한 습관']
+
+    // 1. 국어 (기초 문해력 / 받아쓰기)
+    const korLevel = props["국어 레벨"]?.number || 1;
+    const korVoca = subjectAchievement(vocaList, '민서', '국어');
+    const korScore = korVoca !== null ? Math.round((levelToScore(korLevel) + korVoca) / 2) : levelToScore(korLevel);
+
+    // 2. 수학 (기초 연산 / 가르기·모으기)
+    const mathLevel = props["수학 레벨"]?.number || 1;
+    const mathVoca = subjectAchievement(vocaList, '민서', '수학');
+    const mathScore = mathVoca !== null ? Math.round((levelToScore(mathLevel) + mathVoca) / 2) : levelToScore(mathLevel);
+
+    // 3. 하루(통합) (계절 탐험 / 슬기로운·바른 생활)
+    const haruLevel = props["하루 레벨"]?.number || props["통합 레벨"]?.number || 1;
+    let haruScore = levelToScore(haruLevel);
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const isTodayDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
+    let haruLogCount = 0;
+    if (Array.isArray(studyLogs)) {
+      haruLogCount = studyLogs.filter(log => {
+        const child = log.properties["학생"]?.select?.name;
+        const subj = log.properties["과목"]?.select?.name;
+        const title = log.properties["제목"]?.title?.[0]?.plain_text || "";
+        return child === "민서" && (subj === "하루" || title.includes("하루") || title.includes("루틴"));
+      }).length;
+    }
+    const haruActivity = 60 + (isTodayDone ? 20 : 0) + Math.min(haruLogCount * 5, 20);
+    haruScore = Math.max(haruScore, Math.min(haruActivity, 100));
+
+    // 4. 창의·예술 (미술 갤러리 작품 / 난타 / 공예)
+    let artCount = 0;
+    if (typeof DEFAULT_GALLERY_DATA !== 'undefined' && Array.isArray(DEFAULT_GALLERY_DATA)) {
+      artCount = DEFAULT_GALLERY_DATA.filter(item => item.author === '민서' || item.author === '공동').length;
+    } else {
+      try {
+        const localGal = JSON.parse(localStorage.getItem('MY_STUDY_ROOM_GALLERY_DATA') || '[]');
+        artCount = localGal.filter(item => item.author === '민서' || item.author === '공동').length;
+      } catch (e) {}
+    }
+    const artScore = Math.min(50 + (artCount * 5), 100);
+
+    // 5. 착한 습관 (데일리 루틴 / 20칸 저금통 코인)
+    const coins = parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
+    const habitScore = Math.min(50 + Math.round((coins / 20) * 50), 100);
+
+    return [korScore, mathScore, haruScore, artScore, habitScore];
+  }
+
+  // 👦 [민수 - 초등학교 5학년] 5대 정규 교과: ['국어', '수학', '사회', '과학', '영어']
   const korLevel = props["국어 레벨"]?.number || 1;
   const mathLevel = props["수학 레벨"]?.number || 1;
-  const engLevel = props["영어 레벨"]?.number || 1;
-  const sciLevel = props["과학 레벨"]?.number || 1;
   const socLevel = props["사회 레벨"]?.number || 1;
+  const sciLevel = props["과학 레벨"]?.number || 1;
+  const engLevel = props["영어 레벨"]?.number || 1;
 
-  const sciVoca = subjectAchievement(vocaList, childName, '과학');
-  const socVoca = subjectAchievement(vocaList, childName, '사회');
   const korVoca = subjectAchievement(vocaList, childName, '국어');
   const mathVoca = subjectAchievement(vocaList, childName, '수학');
+  const socVoca = subjectAchievement(vocaList, childName, '사회');
+  const sciVoca = subjectAchievement(vocaList, childName, '과학');
   const engVoca = subjectAchievement(vocaList, childName, '영어');
 
-  // 레벨 점수와 VOCA 달성률의 조화 평균/가중 계산
   return [
     korVoca !== null ? Math.round((levelToScore(korLevel) + korVoca) / 2) : levelToScore(korLevel),
     mathVoca !== null ? Math.round((levelToScore(mathLevel) + mathVoca) / 2) : levelToScore(mathLevel),
-    engVoca !== null ? Math.round((levelToScore(engLevel) + engVoca) / 2) : levelToScore(engLevel),
-    sciVoca !== null ? Math.round((levelToScore(sciLevel) + sciVoca) / 2) : (sciLevel > 1 ? levelToScore(sciLevel) : (engVoca ?? 60)),
     socVoca !== null ? Math.round((levelToScore(socLevel) + socVoca) / 2) : (socLevel > 1 ? levelToScore(socLevel) : (korVoca ?? 60)),
+    sciVoca !== null ? Math.round((levelToScore(sciLevel) + sciVoca) / 2) : (sciLevel > 1 ? levelToScore(sciLevel) : (engVoca ?? 60)),
+    engVoca !== null ? Math.round((levelToScore(engLevel) + engVoca) / 2) : levelToScore(engLevel),
   ];
 }
 
 function buildTrafficLights(vocaList, childName) {
   const now = Date.now();
   const items = vocaList
-    .filter(v => v.targets.length === 0 || v.targets.includes(childName))
+    .filter(v => {
+      // 👧 민서(초1)에게는 아직 편성되지 않은 3~6학년 전용 과목(사회, 과학, 영어) 어휘를 신호등에서 제외
+      if (childName === '민서') {
+        const subj = v.subjects[0] || '';
+        if (['사회', '과학', '영어'].includes(subj)) return false;
+      }
+      return v.targets.length === 0 || v.targets.includes(childName);
+    })
     .map(v => {
       const days = v.lastEdited
         ? Math.floor((now - new Date(v.lastEdited).getTime()) / 86400000)
@@ -339,10 +397,11 @@ function renderTrafficUI(listElId, trafficItems) {
   });
 }
 
-function renderRadarChart(canvasId, label, scores, isPink) {
+function renderRadarChart(canvasId, label, scores, isPink, customLabels) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
 
+  const labels = customLabels || (isPink ? SUBJECTS_MINSEO : SUBJECTS_MINSU);
   const colorPrimary = isPink ? 'rgba(255, 107, 157, 0.85)' : 'rgba(110, 198, 245, 0.85)';
   const colorBg = isPink ? 'rgba(255, 107, 157, 0.22)' : 'rgba(110, 198, 245, 0.22)';
   const colorBorder = isPink ? '#FF6B9D' : '#6EC6F5';
@@ -355,7 +414,7 @@ function renderRadarChart(canvasId, label, scores, isPink) {
   radarCharts[chartKey] = new Chart(ctx, {
     type: 'radar',
     data: {
-      labels: SUBJECTS_5,
+      labels: labels,
       datasets: [{
         label: label,
         data: scores,
@@ -511,9 +570,11 @@ async function loadDashboardData() {
           const trafficItems = buildTrafficLights(vocaList, name);
           renderTrafficUI(prefix + "-traffic-list", trafficItems);
 
-          // 5. 5대 과목 레이더 차트 렌더링
-          const radarScores = buildRadarScores(props, vocaList, name);
-          renderRadarChart(prefix + "-radar-chart", name + " 과목 밸런스", radarScores, isMinseo);
+          // 5. 과목/성장 레이더 차트 렌더링 (민수: 5대 교과 / 민서: 초1 맞춤 5각 밸런스)
+          const radarScores = buildRadarScores(props, vocaList, name, studyLogs);
+          const radarLabels = isMinseo ? SUBJECTS_MINSEO : SUBJECTS_MINSU;
+          const radarTitle = isMinseo ? "민서 맞춤 성장 밸런스" : "민수 과목 밸런스";
+          renderRadarChart(prefix + "-radar-chart", radarTitle, radarScores, isMinseo, radarLabels);
 
           // 6. 스크린타임 스마트 정산기 위젯 렌더링
           renderScreenTimeWidget(name);
