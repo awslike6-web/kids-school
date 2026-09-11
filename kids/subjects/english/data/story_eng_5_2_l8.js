@@ -1,21 +1,21 @@
 // ========================================================
-// 📖 Minsu Explores the Village (영어 5-2 8단원: Where Is the Library?) 데이터 모듈
+// 📖 Find Your Friend! (영어 5-2 8단원: He Has Short Curly Hair) 데이터 모듈
 // ========================================================
 window.STORY_BOOK = {
   id: "english_5_2_l8",
-  title: "Minsu Explores the Village (영어 5-2 8단원)",
-  icon: "🧭",
-  themeColor: "#10b981",
-  themeColorDark: "#059669",
+  title: "Find Your Friend! (영어 5-2 8단원)",
+  icon: "🔍",
+  themeColor: "#f59e0b",
+  themeColorDark: "#d97706",
   backUrl: "english.html",
   backLabel: "🚪 영어방 대기실",
-  version: "20260909_l8_v2",
+  version: "20260911_l8_v3",
   bilingual: true,
   imgBase: "images/storybook/l8/",
   pages: [
     {
       page: 1,
-      tag: "🌟 표지 : 민수의 신나는 마을 탐험",
+      tag: "🌟 표지 : 친구를 찾아라! (Find Your Friend!)",
       spreadImg: "raw_page_1.png",
       korSpreadImg: "kor_l8_spread_p1.png",
       illImg: "eng_l8_ill_p1_cover.png",
@@ -24,33 +24,33 @@ window.STORY_BOOK = {
       audio: "../../assets/audio/storybook/english_l8/eng_l8_p1.mp3",
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8; text-align: center; padding: 10px 0;">
-          <div style="font-size: 1.45rem; font-weight: bold; color: #34d399; margin-bottom: 6px; text-shadow: 0 0 10px rgba(52, 211, 153, 0.3);">
-            Minsu Explores the Village
+          <div style="font-size: 1.45rem; font-weight: bold; color: #fbbf24; margin-bottom: 6px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.3);">
+            Find Your Friend!
           </div>
           <div style="font-size: 1.15rem; font-weight: bold; color: #f8fafc; margin-bottom: 14px;">
-            "민수의 신나는 마인크래프트 마을 탐험"
+            "친구를 찾아라! (외모와 옷차림 묘사)"
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 14px; margin-bottom: 14px; text-align: left; border: 1.5px solid #334155;">
-            <div style="font-size: 1.1rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
+            <div style="font-size: 1.1rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px;">
               Welcome to Lesson 8 storybook!
             </div>
             <div style="font-size: 0.98rem; color: #cbd5e1; margin-bottom: 10px;">
-              초등학교 5학년 2학기 영어 8단원 동화에 온 것을 환영해요!
+              초등학교 5학년 2학기 영어 8단원 동화에 온 것을 환영해요! ✨
             </div>
-            <div style="font-size: 1.1rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
-              Let's explore the village and find the library together!
+            <div style="font-size: 1.1rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px;">
+              Find your friend and come together!
             </div>
             <div style="font-size: 0.98rem; color: #cbd5e1;">
-              민수와 함께 길을 찾아 마을을 신나게 탐험해 볼까요?
+              체육대회와 축제장에서 친구들의 멋진 머리 모양과 눈, 옷차림을 보고 친구를 찾아볼까요?
             </div>
           </div>
         </div>
-        <div class="webtoon-ref-badge">📖 교과서 연계 : 초등 영어 5학년 2학기 8단원 (위치 묻고 길 안내하기)</div>
+        <div class="webtoon-ref-badge">📖 교과서 연계 : 초등 영어 5학년 2학기 8단원 (외모와 옷차림 묘사하기)</div>
       `
     },
     {
       page: 2,
-      tag: "🏫 1장 : 준우에게 길을 물어봐요",
+      tag: "🏃 1장 : 소라의 친구를 찾아요 (Sora's Friend)",
       spreadImg: "eng_l8_spread_p1.png",
       korSpreadImg: "kor_l8_spread_p2.png",
       illImg: "eng_l8_ill_p1.png",
@@ -60,41 +60,57 @@ window.STORY_BOOK = {
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            Minsu met Junwoo in the village.
+            Look at Sora's mission card.
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            민수는 마을 입구에서 친구 준우를 만났어요.
+            소라의 미션 카드를 살펴봐요.
           </div>
 
-          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px; text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);">
-            "Excuse me, Junwoo. Where is the library?"
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "He has short curly hair and green eyes."
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            "실례지만 준우야, 도서관이 어디에 있니?"
+            "그는 짧은 곱슬머리에 초록색 눈을 가지고 있어요."
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "He's wearing a brown T-shirt and blue pants."
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            "그는 갈색 티셔츠와 파란색 바지를 입고 있어요."
           </div>
 
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            Minsu wanted to read magic books.
+            "He's wearing yellow shoes, too. Where is he?"
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            민수는 도서관에서 신비한 마법 책을 읽고 싶었거든요.
+            "노란색 신발도 신고 있네요. 그는 어디에 있을까요?"
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
+            "Look, there he is! He is sitting on the steps!"
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            "저기 보세요! 스탠드 계단에 앉아 있네요!"
           </div>
         </div>
 
         <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 12px 16px; margin-top: 12px; border: 1.5px solid #334155;">
-          <div style="font-weight: bold; color: #34d399; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
+          <div style="font-weight: bold; color: #fbbf24; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
           <div style="font-size: 0.92rem; color: #e2e8f0; line-height: 1.6;">
-            • <b>Excuse me.</b> [익스큐즈 미] : 실례합니다.<br>
-            • <b>Where is the ~?</b> [웨어 이즈 더 ~?] : ~은 어디에 있나요?<br>
-            • <b>library</b> [라이브러리] : 도서관
+            • <b>short curly hair</b> [쇼트 컬리 헤어] : 짧은 곱슬머리<br>
+            • <b>green eyes</b> [그린 아이즈] : 초록색 눈<br>
+            • <b>brown T-shirt</b> [브라운 티셔츠] : 갈색 티셔츠<br>
+            • <b>blue pants</b> [블루 팬츠] : 파란색 바지<br>
+            • <b>yellow shoes</b> [옐로 슈즈] : 노란색 신발
           </div>
         </div>
-        <div class="webtoon-ref-badge">🎯 핵심 표현 : Where is the library? (도서관이 어디에 있나요?)</div>
+        <div class="webtoon-ref-badge">🎯 핵심 표현 : He has short curly hair and green eyes.</div>
       `
     },
     {
       page: 3,
-      tag: "🍞 2장 : 준우의 친절한 길 안내",
+      tag: "👒 2장 : 찰리의 친구를 찾아요 (Charlie's Friend)",
       spreadImg: "eng_l8_spread_p2.png",
       korSpreadImg: "kor_l8_spread_p3.png",
       illImg: "eng_l8_ill_p2.png",
@@ -104,42 +120,59 @@ window.STORY_BOOK = {
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            Junwoo smiled and pointed with his finger.
+            Now, let's find Charlie's friend.
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            준우는 환하게 웃으며 손가락으로 길을 가리켰어요.
+            이번엔 찰리의 친구를 찾아볼까요?
           </div>
 
-          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px; text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);">
-            "Go straight and turn right at the corner."
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "She has long straight hair and brown eyes."
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            "앞으로 똑바로 가서 코너에서 오른쪽으로 돌아."
+            "그녀는 긴 생머리에 갈색 눈을 가지고 있어요."
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "She's wearing a red jacket and an orange scarf."
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            "그녀는 빨간색 재킷과 주황색 목도리를 두르고 있어요."
           </div>
 
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            "It is next to the bakery. You can't miss it!"
+            "She's wearing glasses and a green hat. She's wearing blue shoes. Where is she?"
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            "달콤한 냄새가 나는 빵집 바로 옆에 있어. 쉽게 찾을 수 있을 거야!"
+            "안경을 쓰고 초록색 모자도 썼네요. 파란 신발을 신고 있어요. 그녀는 어디에 있을까요?"
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
+            "Look! She is reading a book over there!"
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            "저기 보세요! 저쪽에서 책을 읽고 있어요!"
           </div>
         </div>
 
         <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 12px 16px; margin-top: 12px; border: 1.5px solid #334155;">
-          <div style="font-weight: bold; color: #34d399; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
+          <div style="font-weight: bold; color: #fbbf24; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
           <div style="font-size: 0.92rem; color: #e2e8f0; line-height: 1.6;">
-            • <b>Go straight.</b> [고 스트레이트] : 똑바로 곧장 가세요.<br>
-            • <b>Turn right.</b> [턴 라이트] : 오른쪽으로 도세요.<br>
-            • <b>next to</b> [넥스트 투] : ~의 바로 옆에<br>
-            • <b>bakery</b> [베이커리] : 빵집
+            • <b>long straight hair</b> [롱 스트레이트 헤어] : 긴 생머리<br>
+            • <b>brown eyes</b> [브라운 아이즈] : 갈색 눈<br>
+            • <b>red jacket</b> [레드 재킷] : 빨간 재킷<br>
+            • <b>orange scarf</b> [오렌지 스카프] : 주황색 목도리<br>
+            • <b>glasses</b> [글래시스] : 안경<br>
+            • <b>green hat</b> [그린 햇] : 초록색 모자<br>
+            • <b>blue shoes</b> [블루 슈즈] : 파란색 신발
           </div>
         </div>
-        <div class="webtoon-ref-badge">🎯 핵심 표현 : Go straight and turn right. (똑바로 가서 우회전하세요.)</div>
+        <div class="webtoon-ref-badge">🎯 핵심 표현 : She's wearing glasses and a green hat.</div>
       `
     },
     {
       page: 4,
-      tag: "📚 3장 : 도서관을 찾았어요!",
+      tag: "🎪 3장 : 축제장에서 동생을 찾아요 (At the Festival)",
       spreadImg: "eng_l8_spread_p3.png",
       korSpreadImg: "kor_l8_spread_p4.png",
       illImg: "eng_l8_ill_p3.png",
@@ -149,41 +182,56 @@ window.STORY_BOOK = {
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            Minsu walked straight and turned right.
+            Emily visited the festival, but she lost her brother.
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            민수는 똑바로 걸어가서 오른쪽으로 돌아갔어요.
+            에밀리는 축제장에 놀러 왔다가 남동생을 잃어버렸어요.
           </div>
 
-          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px; text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);">
-            "Wow, here it is! It's on my left!"
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "I can't find my brother! What does he look like?"
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            "와, 찾았다! 내 왼쪽 편에 도서관이 있네!"
+            "제 남동생을 찾을 수가 없어요!" "남동생이 어떻게 생겼니?"
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "He has short curly hair and green eyes."
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            "짧은 곱슬머리에 초록색 눈이에요."
           </div>
 
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            The library was big and made of wood blocks.
+            "What is he wearing? He's wearing a brown T-shirt."
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            도서관은 아주 웅장하고 예쁜 나무 블록으로 지어져 있었어요.
+            "무엇을 입고 있니?" "갈색 티셔츠를 입고 있어요."
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
+            "Look, there he is! He is smiling next to the cotton candy!"
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            "저기 보세요! 솜사탕 옆에서 환하게 웃고 있어요!"
           </div>
         </div>
 
         <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 12px 16px; margin-top: 12px; border: 1.5px solid #334155;">
-          <div style="font-weight: bold; color: #34d399; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
+          <div style="font-weight: bold; color: #fbbf24; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
           <div style="font-size: 0.92rem; color: #e2e8f0; line-height: 1.6;">
-            • <b>on my left</b> [온 마이 레프트] : 내 왼쪽에<br>
-            • <b>wood blocks</b> [우드 블록스] : 나무 블록들<br>
-            • <b>here it is</b> [히어 잇 이즈] : 여기 있구나!
+            • <b>What does he look like?</b> [왓 더즈 히 룩 라이크?] : 그는 어떻게 생겼나요?<br>
+            • <b>What is he wearing?</b> [왓 이즈 히 웨어링?] : 그는 무엇을 입고 있나요?<br>
+            • <b>brother</b> [브라더] : 남동생, 형, 오빠<br>
+            • <b>wear</b> [웨어] : 입다, 착용하다
           </div>
         </div>
-        <div class="webtoon-ref-badge">🎯 핵심 표현 : It's on my left. (내 왼쪽에 있어요.)</div>
+        <div class="webtoon-ref-badge">🎯 핵심 표현 : What does he look like? / What is he wearing?</div>
       `
     },
     {
       page: 5,
-      tag: "💎 4장 : 마법 책과 다이아몬드 발견",
+      tag: "✨ 4장 : 마법 쇼와 함께 모인 친구들 (Magic Show & Come Together)",
       spreadImg: "eng_l8_spread_p4.png",
       korSpreadImg: "kor_l8_spread_p5.png",
       illImg: "eng_l8_ill_p4.png",
@@ -193,36 +241,44 @@ window.STORY_BOOK = {
       textHtml: `
         <div class="webtoon-passage" style="line-height: 1.8;">
           <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            Inside the library, Minsu opened a shiny book.
+            "Find your friend and come together!"
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            도서관 안으로 들어간 민수는 반짝이는 마법 책을 펼쳤어요.
+            "친구를 찾아 다 함께 모여요!"
           </div>
 
-          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px; text-shadow: 0 0 8px rgba(52, 211, 153, 0.3);">
-            "Look! There is a blue diamond in the treasure box!"
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "It's a magic show! Look, it's snowing!"
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            "우와, 이것 봐! 보물 상자 안에 영롱한 파란색 다이아몬드가 있어!"
+            "신나는 마법 쇼가 시작됐어요! 저것 봐, 눈이 내리고 있어!"
           </div>
 
-          <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
-            Minsu was so proud of finding the way alone.
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            "She's wearing a yellow jacket and yellow shoes, too."
           </div>
           <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
-            스스로 길을 찾아 멋진 보물까지 발견한 민수는 정말 자랑스럽고 뿌듯했답니다! 💎
+            "마법사는 노란 재킷과 노란 신발을 신고 있네요."
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
+            All the friends smiled and said, "He looks cool!"
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            모든 친구들이 활짝 웃으며 말했어요. "그는 정말 멋져 보여!"
           </div>
         </div>
 
         <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 12px 16px; margin-top: 12px; border: 1.5px solid #334155;">
-          <div style="font-weight: bold; color: #34d399; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어</div>
+          <div style="font-weight: bold; color: #fbbf24; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어 (Phonics ow)</div>
           <div style="font-size: 0.92rem; color: #e2e8f0; line-height: 1.6;">
-            • <b>treasure box</b> [트레져 박스] : 보물 상자<br>
-            • <b>blue diamond</b> [블루 다이아몬드] : 파란 다이아몬드 💎<br>
-            • <b>proud</b> [프라우드] : 자랑스러운, 뿌듯한
+            • <b>show</b> [쇼] : 쇼, 보여주다<br>
+            • <b>snow</b> [스노] : 눈, 눈이 내리다<br>
+            • <b>yellow</b> [옐로] : 노란색<br>
+            • <b>He looks cool!</b> [히 룩스 쿨!] : 그는 멋져 보여요!
           </div>
         </div>
-        <div class="webtoon-ref-badge">🎯 핵심 표현 : I found a diamond! (다이아몬드를 찾았어요!)</div>
+        <div class="webtoon-ref-badge">🎯 핵심 표현 : Find your friend and come together!</div>
       `
     }
   ]

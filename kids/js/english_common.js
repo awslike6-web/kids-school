@@ -182,12 +182,22 @@ const ENGLISH_PHONICS_DICT = {
   "ate": "에이트", "eat": "잇", "summer": "서머", "weekend": "위켄드", "yesterday": "예스터데이",
   "wonderful": "원더풀", "family": "패밀리", "dad": "대드", "mom": "맘",
 
-  // 8단원 (길 찾기 & 장소 안내) 핵심 단어
-  "library": "라이브러리", "straight": "스트레이트", "turn": "턴", "left": "레프트", "right": "라이트",
+  // 8단원 (외모 & 옷차림 묘사 & 친구 찾기) 핵심 단어
+  "curly": "컬리", "straight": "스트레이트", "short": "쇼트", "long": "롱", "blonde": "블론드", "blond": "블론드",
+  "hair": "헤어", "brown": "브라운", "blue": "블루", "green": "그린", "black": "블랙", "hazel": "헤이즐",
+  "eyes": "아이즈", "eye": "아이", "glasses": "글래시스", "pants": "팬츠", "shirt": "셔츠", "dress": "드레스", "skirt": "스커트",
+  "jacket": "재킷", "scarf": "스카프", "hat": "햇", "cap": "캡", "shoes": "슈즈", "shoe": "슈",
+  "wear": "웨어", "wearing": "웨어링", "wore": "워", "he": "히", "she": "쉬", "find": "파인드", "cry": "크라이",
+  "wrong": "롱", "girl": "걸", "boy": "보이", "ask": "애스크", "any": "애니", "looks": "룩스", "cool": "쿨",
+  "sam": "샘", "brother": "브라더", "sister": "시스터",
+  "magic": "매직", "show": "쇼", "snow": "스노", "snowing": "스노잉", "yellow": "옐로", "together": "투게더",
+
+  // 11단원 (길 찾기 & 장소 안내) 핵심 단어
+  "library": "라이브러리", "turn": "턴", "left": "레프트", "right": "라이트",
   "corner": "코너", "first": "퍼스트", "second": "세컨드", "third": "써드", "floor": "플로어",
   "school": "스쿨", "park": "파크", "hospital": "하스피털", "post": "포스트", "office": "오피스",
   "bank": "뱅크", "bookstore": "북스토어", "behind": "비하인드", "front": "프런트", "excuse": "익스큐즈",
-  "find": "파인드", "station": "스테이션", "store": "스토어", "market": "마켓",
+  "station": "스테이션", "store": "스토어", "market": "마켓",
 
   // 관사 & 전치사 & 접속사
   "a": "어", "an": "앤", "the": "더",
@@ -376,18 +386,17 @@ window.openEnglishLibraryModal = function() {
     if (headerTitle) headerTitle.textContent = "📚 단원 동화 도서관 서가";
     if (headerIcon) headerIcon.textContent = "📚";
 
-    const isMinecraft = (currentProfile === 'son');
     const books = [
         {
             id: "l8",
-            badge: "🧭 8단원 최신 동화",
-            title: "Minsu Explores the Village",
-            koreanTitle: "민수의 신나는 마을 탐험",
-            desc: "초등 영어 5-2 8단원 (위치 묻고 길 안내하기)",
-            keyExpr: "Where is the library? / Go straight and turn right.",
+            badge: "🔍 8단원 최신 동화",
+            title: "Find Your Friend!",
+            koreanTitle: "친구를 찾아라! (외모와 옷차림)",
+            desc: "초등 영어 5-2 8단원 (외모와 옷차림 묘사하기)",
+            keyExpr: "He has short curly hair. / She's wearing glasses.",
             url: "english_l8_storybook.html",
-            color: "#10b981",
-            themeTag: isMinecraft ? "🟩 마인크래프트 마을" : "🟢 슬라임 파크"
+            color: "#f59e0b",
+            themeTag: isMinecraft ? "🔎 탐정 친구 찾기" : "✨ 친구 찾기"
         },
         {
             id: "l7",
@@ -399,6 +408,17 @@ window.openEnglishLibraryModal = function() {
             url: "english_l7_storybook.html",
             color: "#3b82f6",
             themeTag: isMinecraft ? "🏕️ 캠핑과 별빛 밤" : "✨ 주말 나들이"
+        },
+        {
+            id: "l11",
+            badge: "🧭 11단원 예습 동화",
+            title: "Minsu Explores the Village",
+            koreanTitle: "민수의 신나는 마을 탐험",
+            desc: "초등 영어 5-2 11단원 (위치 묻고 길 안내하기)",
+            keyExpr: "Where is the library? / Go straight and turn right.",
+            url: "english_l11_storybook.html",
+            color: "#10b981",
+            themeTag: isMinecraft ? "🟩 마인크래프트 마을" : "🟢 길 찾기 탐험"
         }
     ];
 

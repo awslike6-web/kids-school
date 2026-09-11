@@ -3,8 +3,52 @@
 
 const ENGLISH_READING_DATABASE = [
     {
+        id: "eng_read_12",
+        title: "Find Your Friend! (8단원)",
+        fullText: "Today is Sports Day at school. The teacher said, \"Find your friend and come together!\"\nSora looked at her mission card. \"He has short curly hair and green eyes. He's wearing a brown T-shirt and blue pants. He's wearing yellow shoes, too. Where is he?\"\nCharlie looked at his card. \"She has long straight hair and brown eyes. She's wearing a red jacket and an orange scarf. She's wearing glasses and a green hat!\"\nAt the festival, Emily found her brother next to the sweet cotton candy. And look! It's a magic show! All the friends gathered together happily.",
+        translation: "오늘은 학교 체육대회 날입니다. 선생님께서 말씀하셨습니다. \"친구를 찾아 다 함께 모이세요!\"\n소라는 자신의 미션 카드를 살펴보았습니다. \"그는 짧은 곱슬머리에 초록색 눈을 가지고 있어. 갈색 티셔츠와 파란색 바지를 입고 있네. 노란색 신발도 신었어. 그는 어디에 있을까?\"\n찰리도 카드를 보았습니다. \"그녀는 긴 생머리에 갈색 눈을 가지고 있어. 빨간색 재킷과 주황색 목도리를 두르고 있네. 안경을 쓰고 초록색 모자도 썼어!\"\n축제장에서 에밀리는 달콤한 솜사탕 옆에서 남동생을 찾았습니다. 그리고 저것 보세요! 마법 쇼가 시작되었네요! 모든 친구들이 기쁘게 다 함께 모였습니다.",
+        paragraphs: [
+            { id: "p1", label: "A", text: "Today is Sports Day at school. The teacher said, \"Find your friend and come together!\"" },
+            { id: "p2", label: "B", text: "Sora said, \"He has short curly hair and green eyes. He's wearing a brown T-shirt and blue pants.\"" },
+            { id: "p3", label: "C", text: "Charlie said, \"She has long straight hair and brown eyes. She's wearing glasses and a green hat.\"" },
+            { id: "p4", label: "D", text: "Emily found her brother at the festival, and all the friends enjoyed the magic show together!" }
+        ],
+        correctOrder: ["p1", "p2", "p3", "p4"],
+        conjunctions: [
+            {
+                sentenceBefore: "The teacher gave them mission cards.",
+                sentenceAfter: "They started to find their friends.",
+                options: ["And then", "However", "Because"],
+                answer: "And then",
+                commentary: "선생님께 미션 카드를 받은 뒤, '그리고 나서(And then)' 친구들을 찾기 시작했다는 자연스러운 순서의 연결이에요."
+            }
+        ],
+        themeQuiz: {
+            question: "What is this story about?",
+            options: [
+                "Reading mission cards and finding friends by their hair, eyes, and clothes.",
+                "How to bake delicious sweet bread at home.",
+                "Why playing games alone is fun."
+            ],
+            answerIndex: 0,
+            commentary: "이 글은 미션 카드에 적힌 머리 모양, 눈동자 색, 옷차림을 보고 친구를 찾아 함께 모이는 이야기입니다."
+        },
+        chatbotSystemPrompt: `
+            너는 'Find Your Friend!' 이야기를 함께 읽고 아이와 대화하는 다정한 AI 영어 요정 코코야.
+            민수는 느린 학습자(약한 경계선 지능)의 사랑스러운 아이이므로, 어려운 문법 용어를 쓰지 말고 아주 쉽고 따뜻하게 격려해줘.
+            
+            다음 핵심 표현들을 아이와 함께 자연스럽게 알아가거나 칭찬해줘:
+            1. 외모 묻고 답하기: "What does he look like?" / "He has short curly hair." / "She has blue eyes."
+            2. 옷차림 묻고 답하기: "What is she wearing?" / "She's wearing a red jacket." / "blue pants"
+            3. 친구 칭찬하기: "He looks cool!", "Find your friend and come together!"
+            
+            말투는 언제나 상냥한 동화나라 요정처럼 말하고, 문법이 서툴러도 무조건 먼저 칭찬하고 올바른 표현을 부드럽게 들려줘.
+            아이가 단어 하나라도 영어로 말하거나 대화에 참여했다면 반드시 대답 끝에 [SUCCESS]를 붙여줘.
+        `
+    },
+    {
         id: "eng_read_11",
-        title: "Minsu Explores the Village (8단원)",
+        title: "Minsu Explores the Village (11단원)",
         fullText: "Minsu arrived at a new village. He wanted to read magic books, but he did not know the way. Minsu met Junwoo and asked, \"Excuse me. Where is the library?\"\nJunwoo smiled kindly and pointed down the street. Junwoo said, \"Go straight and turn right at the corner. It is next to the sweet bakery!\"\nMinsu walked straight and turned right. And then, he saw a big wooden library on his left. He was so happy to find it!\nInside the library, Minsu opened a shiny book and found a blue diamond in the treasure box. He was proud of exploring the village by himself.",
         translation: "민수는 새로운 마을에 도착했습니다. 신기한 마법 책을 읽고 싶었지만 길을 알지 못했습니다. 민수는 준우를 만나 물었습니다. \"실례지만, 도서관이 어디에 있니?\"\n준우는 다정하게 미소 지으며 길을 가리켰습니다. 준우가 말했습니다. \"앞으로 곧장 가서 코너에서 오른쪽으로 돌아. 달콤한 빵집 바로 옆에 있단다!\"\n민수는 똑바로 걸어가서 오른쪽으로 돌았습니다. 그리고 나서, 민수는 왼쪽에 있는 커다란 나무 도서관을 발견했습니다. 도서관을 찾아서 정말 기뻤습니다!\n도서관 안에서 민수는 반짝이는 책을 펼쳤고 보물 상자 안에서 파란 다이아몬드를 발견했습니다. 민수는 스스로 마을을 탐험해 낸 자신이 정말 자랑스러웠습니다.",
         paragraphs: [
