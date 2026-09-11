@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>민민 연산 멀티 스튜디오 🧮 | 민민 수학 멀티버스</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+  :root {
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.9);
+    --border-color: #334155;
+    --primary: #0284c7;
+    --primary-glow: rgba(2, 132, 199, 0.35);
+    --accent: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  body {
+    font-family: 'Nanum Gothic', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* 🎮 민수 네온 아케이드 테마 */
+  body.theme--arcade {
+    background: radial-gradient(circle at 15% 15%, #1e1b4b 0%, #0f172a 100%);
+  }
+
+  /* 🎠 민서 밀키스 동화 테마 */
+  body.theme--slime {
+    background: radial-gradient(circle at 15% 15%, #fdf2f8 0%, #fff1f2 100%);
+    color: #334155;
+    --card-bg: rgba(255, 255, 255, 0.96);
+    --border-color: #fbcfe8;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+  }
+
+  .studio-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px 80px;
+  }
+
+  /* 상단 내비게이션 바 */
+  .top-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .nav-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    backdrop-filter: blur(8px);
+  }
+  .action-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+  }
+
+  /* 히어로 헤더 */
+  .hero-banner {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 24px;
+    padding: 28px 20px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(12px);
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: linear-gradient(90deg, #0284c7, #8b5cf6);
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.88rem;
+    border-radius: 16px;
+    margin-bottom: 10px;
+  }
+  .hero-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 2.2rem;
+    margin: 0 0 8px;
+    background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.theme--slime .hero-title {
+    background: linear-gradient(135deg, #0284c7 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.55;
+    word-break: keep-all;
+  }
+
+  /* 연산자 탭 바 */
+  .op-tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .op-tab-btn {
+    padding: 10px 22px;
+    border-radius: 9999px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .op-tab-btn:hover {
+    color: var(--text-main);
+    border-color: var(--primary);
+  }
+  .op-tab-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 4px 16px var(--primary-glow);
+  }
+
+  /* 문제 직접 입력 카드 */
+  .input-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .input-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .num-input {
+    width: 100px;
+    height: 58px;
+    font-family: 'Jua', 'JetBrains Mono', sans-serif;
+    font-size: 2.2rem;
+    text-align: center;
+    border-radius: 16px;
+    border: 2.5px solid var(--border-color);
+    background: rgba(15, 23, 42, 0.7);
+    color: #38bdf8;
+    outline: none;
+    transition: all 0.2s;
+  }
+  body.theme--slime .num-input {
+    background: #ffffff;
+    color: #0284c7;
+  }
+  .num-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 14px var(--primary-glow);
+  }
+  .op-sign {
+    font-family: 'Jua', sans-serif;
+    font-size: 2.2rem;
+    color: var(--accent);
+  }
+  .btn-submit-calc {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 16px;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+  }
+  .btn-submit-calc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+  }
+
+  /* 추천 문제 칩스 */
+  .preset-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .preset-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .preset-btn {
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .preset-btn:hover {
+    background: rgba(2, 132, 199, 0.2);
+    border-color: var(--primary);
+  }
+
+  /* 시각화 표현 4대 모드 탭 */
+  .view-tabs-container {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .view-tab-btn {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .view-tab-btn:hover {
+    color: var(--text-main);
+  }
+  .view-tab-btn.active {
+    color: #38bdf8;
+    border-bottom-color: #38bdf8;
+  }
+  body.theme--slime .view-tab-btn.active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
+  }
+
+  /* 메인 스튜디오 뷰포트 */
+  .studio-viewport {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 26px;
+    min-height: 420px;
+    position: relative;
+  }
+
+  /* 요정 음성 및 해설 말풍선 도크 */
+  .fairy-dock {
+    margin-top: 24px;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+    border: 2px solid rgba(2, 132, 199, 0.4);
+    border-radius: 20px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .fairy-avatar {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+  .fairy-content {
+    flex-grow: 1;
+  }
+  .fairy-name {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    color: #38bdf8;
+    margin-bottom: 4px;
+  }
+  body.theme--slime .fairy-name {
+    color: #0284c7;
+  }
+  .fairy-speech-text {
+    font-size: 1.05rem;
+    color: var(--text-main);
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .btn-replay-voice {
+    background: rgba(2, 132, 199, 0.2);
+    border: 1.5px solid #0284c7;
+    color: #38bdf8;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-family: 'Jua', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: 0.2s;
+  }
+  .btn-replay-voice:hover {
+    background: #0284c7;
+    color: #fff;
+  }
+
+  /* ======================================================== */
+  /* [탭 1] 🧱 십진 블록 분배 모형 스타일                     */
+  /* ======================================================== */
+  .block-stage-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .block-step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 10px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+  }
+  .step-pill {
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    color: #38bdf8;
+  }
+  .nav-btn-group {
+    display: flex;
+    gap: 8px;
+  }
+  .step-control-btn {
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-family: 'Jua', sans-serif;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .step-control-btn:hover:not(:disabled) {
+    border-color: #38bdf8;
+    background: rgba(2, 132, 199, 0.2);
+  }
+  .step-control-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* 블록 그래픽 */
+  .block-display-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .block-group-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  body.theme--slime .block-group-box {
+    background: #fff;
+  }
+  .block-group-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .blocks-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 60px;
+    align-items: center;
+  }
+  .ten-rod {
+    display: inline-flex;
+    flex-direction: column;
+    width: 22px;
+    height: 110px;
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+    border: 1.5px solid #60a5fa;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .ten-rod::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, rgba(255,255,255,0.4) 10px, rgba(255,255,255,0.4) 11px);
+  }
+  .ten-rod.explode {
+    animation: explodeAnim 0.5s forwards;
+  }
+  @keyframes explodeAnim {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.2); filter: brightness(2); }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  .unit-cube {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: 1.5px solid #fbbf24;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  .basket-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .person-basket {
+    background: rgba(255,255,255,0.05);
+    border: 1.5px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+  .basket-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  /* ======================================================== */
+  /* [탭 2] 📝 단계별 격자 세로셈 튜터 스타일                 */
+  /* ======================================================== */
+  .vertical-tutor-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .division-board-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 2px solid #38bdf8;
+    border-radius: 18px;
+    padding: 24px 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  body.theme--slime .division-board-card {
+    background: #fff;
+    border-color: #0284c7;
+  }
+  .division-table {
+    border-collapse: collapse;
+    font-family: 'Courier New', monospace, 'Jua', sans-serif;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--text-main);
+  }
+  .division-table td {
+    width: 44px;
+    height: 48px;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+  }
+  .td-quotient-line {
+    border-bottom: 3.5px solid #38bdf8;
+  }
+  .td-divisor-arc {
+    border-right: 3.5px solid #38bdf8;
+    border-radius: 0 16px 0 0;
+  }
+  .calc-step-line {
+    border-bottom: 2.5px solid #94a3b8;
+  }
+  .cell-active {
+    background: rgba(56, 189, 248, 0.25);
+    border-radius: 8px;
+    animation: pulseActive 1.2s infinite;
+  }
+  @keyframes pulseActive {
+    0%, 100% { box-shadow: 0 0 0 2px #38bdf8; }
+    50% { box-shadow: 0 0 12px #38bdf8; }
+  }
+
+  .tutor-guide-panel {
+    flex-grow: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .tutor-step-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .tutor-step-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .tutor-step-desc {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-main);
+  }
+  .interactive-choice-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .tutor-choice-btn {
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .tutor-choice-btn:hover {
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+  }
+
+  /* ======================================================== */
+  /* [탭 3] 📏 수직선 덜어내기 스타일                          */
+  /* ======================================================== */
+  .numberline-wrap {
+    padding: 20px 10px;
+  }
+  .nl-axis-container {
+    position: relative;
+    height: 140px;
+    margin-top: 40px;
+  }
+  .nl-axis-line {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    height: 4px;
+    background: #64748b;
+  }
+  .nl-jump-arc {
+    position: absolute;
+    bottom: 34px;
+    border: 3px dashed #38bdf8;
+    border-bottom: none;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    pointer-events: none;
+  }
+  .nl-label {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  /* ======================================================== */
+  /* [탭 4] 🍫 면적/넓이 모델 스타일                           */
+  /* ======================================================== */
+  .area-model-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+  }
+  .area-rect-container {
+    display: flex;
+    align-items: stretch;
+    border: 3px solid #38bdf8;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .area-box {
+    padding: 24px;
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border-right: 2px dashed rgba(255,255,255,0.3);
+  }
+  .area-box:last-child {
+    border-right: none;
+  }
+
+  @media (max-width: 640px) {
+    .hero-title { font-size: 1.8rem; }
+    .num-input { width: 80px; height: 50px; font-size: 1.8rem; }
+    .vertical-tutor-container { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="studio-container">
+  
+  <!-- 상단 내비게이션 바 -->
+  <div class="top-action-bar">
+    <div class="nav-group">
+      <a href="math.html" class="action-btn">🔙 수학 탐험 본부</a>
+      <a href="math_storybook_library.html" class="action-btn">📚 동화 도서관</a>
+    </div>
+    <div class="nav-group">
+      <button class="action-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
+      <div class="action-btn" id="userProfileTag" style="border-color: var(--primary); color: #38bdf8;">🚀 [민수] 5학년 모드</div>
+    </div>
+  </div>
+
+  <!-- 히어로 배너 -->
+  <div class="hero-banner">
+    <span class="hero-badge">✨ 시각화 & 음성 튜터링 인터랙티브 스튜디오</span>
+    <h1 class="hero-title">민민 연산 멀티 스튜디오</h1>
+    <p class="hero-desc">
+      어떤 문제든 직접 입력해 보세요! 10개 묶음 블록 쪼개기, 단계별 세로셈, 수직선, 면적 분할로 연산의 비밀을 시원하게 밝혀드립니다.
+    </p>
+  </div>
+
+  <!-- 1. 사칙연산 선택 탭 -->
+  <div class="op-tabs-container">
+    <button class="op-tab-btn active" onclick="switchOperation('div', this)">➗ 나눗셈 (집중 특화)</button>
+    <button class="op-tab-btn" onclick="switchOperation('mul', this)">✖️ 곱셈 (넓이 모델)</button>
+    <button class="op-tab-btn" onclick="switchOperation('add', this)">➕ 덧셈 (모으기)</button>
+    <button class="op-tab-btn" onclick="switchOperation('sub', this)">➖ 뺄셈 (가르기)</button>
+  </div>
+
+  <!-- 2. 수식 직접 입력 카드 -->
+  <div class="input-card">
+    <div class="input-row">
+      <input type="number" id="numA" class="num-input" value="74" min="1" max="999" aria-label="나누어지는 수">
+      <span class="op-sign" id="opSymbol">÷</span>
+      <input type="number" id="numB" class="num-input" value="6" min="1" max="99" aria-label="나누는 수">
+      <button class="btn-submit-calc" onclick="startStudioCalculation()">🚀 스튜디오 탐구 시작!</button>
+    </div>
+
+    <!-- 추천 프리셋 칩스 -->
+    <div class="preset-row">
+      <span class="preset-label">💡 민수 맞춤 추천 문제:</span>
+      <button class="preset-btn" onclick="loadPreset(74, 6)">74 ÷ 6 (나머지 2)</button>
+      <button class="preset-btn" onclick="loadPreset(85, 4)">85 ÷ 4 (나머지 1)</button>
+      <button class="preset-btn" onclick="loadPreset(92, 3)">92 ÷ 3 (나머지 2)</button>
+      <button class="preset-btn" onclick="loadPreset(48, 4)">48 ÷ 4 (딱 떨어짐)</button>
+      <button class="preset-btn" onclick="loadPreset(56, 8)">56 ÷ 8 (구구단 한자리)</button>
+      <button class="preset-btn" onclick="loadPreset(35, 5)">35 ÷ 5 (구구단 5단)</button>
+    </div>
+  </div>
+
+  <!-- 3. 다차원 시각화 4대 표현 탭 -->
+  <div class="view-tabs-container">
+    <button class="view-tab-btn active" onclick="switchViewTab('blocks', this)">🧱 십진 블록 분배관</button>
+    <button class="view-tab-btn" onclick="switchViewTab('vertical', this)">📝 단계별 세로셈 튜터</button>
+    <button class="view-tab-btn" onclick="switchViewTab('numberline', this)">📏 수직선 덜어내기</button>
+    <button class="view-tab-btn" onclick="switchViewTab('area', this)">🍫 면적(넓이) 모델</button>
+  </div>
+
+  <!-- 4. 스튜디오 뷰포트 (선택된 탭 렌더링) -->
+  <div class="studio-viewport" id="studioViewport">
+    <!-- 동적으로 렌더링 -->
+  </div>
+
+  <!-- 5. 요정 코코 음성 해설 도크 -->
+  <div class="fairy-dock">
+    <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-avatar">
+    <div class="fairy-content">
+      <div class="fairy-name">🧚 요정 코코의 나긋나긋 해설</div>
+      <div class="fairy-speech-text" id="fairySpeechText">
+        문제를 입력하고 탐구 시작을 누르면, 코코가 단계별로 친절하게 설명해줄게요!
+      </div>
+    </div>
+    <button class="btn-replay-voice" onclick="replayCurrentVoice()">🔊 다시 듣기</button>
+  </div>
+
+</div>
+
+<!-- 코어 및 오디오 엔진 로드 -->
+<script src="../../config.js"></script>
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script src="../../core/fairy-chatbot.js"></script>
+
+<script>
+// ========================================================
+// 🧮 연산 멀티 스튜디오 상태 관리 및 로직 엔진
+// ========================================================
+let currentOp = 'div'; // 'div', 'mul', 'add', 'sub'
+let curNumA = 74;
+let curNumB = 6;
+let currentViewTab = 'blocks'; // 'blocks', 'vertical', 'numberline', 'area'
+
+// 블록 모형 스텝
+let blockCurrentStep = 1;
+const blockMaxSteps = 5;
+
+// 세로셈 스텝
+let tutorCurrentStep = 1;
+let divisionPlan = [];
+
+// 사용자 프로필
+let currentProfile = localStorage.getItem('currentUser') || 'son';
+
+// 음성 낭독 함수 래퍼
+function studioSpeak(text) {
+  const fairyEl = document.getElementById('fairySpeechText');
+  if (fairyEl) fairyEl.textContent = text;
+
+  if (typeof speakFairyTTS === 'function') {
+    speakFairyTTS(text);
+  } else if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function replayCurrentVoice() {
+  const text = document.getElementById('fairySpeechText')?.textContent;
+  if (text) studioSpeak(text);
+}
+
+// 연산자 전환
+function switchOperation(op, btn) {
+  currentOp = op;
+  document.querySelectorAll('.op-tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const sym = document.getElementById('opSymbol');
+  if (op === 'div') {
+    sym.textContent = '÷';
+    loadPreset(74, 6);
+  } else if (op === 'mul') {
+    sym.textContent = '×';
+    loadPreset(23, 4);
+  } else if (op === 'add') {
+    sym.textContent = '+';
+    loadPreset(48, 37);
+  } else if (op === 'sub') {
+    sym.textContent = '−';
+    loadPreset(82, 35);
+  }
+}
+
+// 프리셋 로드
+function loadPreset(a, b) {
+  document.getElementById('numA').value = a;
+  document.getElementById('numB').value = b;
+  startStudioCalculation();
+}
+
+// 뷰 탭 전환
+function switchViewTab(tab, btn) {
+  currentViewTab = tab;
+  document.querySelectorAll('.view-tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCurrentTab();
+}
+
+// 계산 시작
+function startStudioCalculation() {
+  curNumA = parseInt(document.getElementById('numA').value, 10) || 1;
+  curNumB = parseInt(document.getElementById('numB').value, 10) || 1;
+  
+  if (curNumB === 0 && currentOp === 'div') {
+    alert('0으로는 나눌 수 없어요!');
+    curNumB = 1;
+    document.getElementById('numB').value = 1;
+  }
+
+  // 나눗셈 풀이 계획 수립
+  if (currentOp === 'div') {
+    buildDivisionPlan(curNumA, curNumB);
+  }
+
+  blockCurrentStep = 1;
+  tutorCurrentStep = 1;
+
+  renderCurrentTab();
+}
+
+// ========================================================
+// ➗ 나눗셈 풀이 계획 엔진 (Build Division Plan)
+// ========================================================
+function buildDivisionPlan(dividend, divisor) {
+  divisionPlan = [];
+  const sDiv = String(dividend);
+  const qTotal = Math.floor(dividend / divisor);
+  const rTotal = dividend % divisor;
+
+  // 두 자리 수 나누기 한 자리 수 표준
+  const tensDigit = Math.floor(dividend / 10);
+  const onesDigit = dividend % 10;
+
+  if (sDiv.length === 2) {
+    const qTens = Math.floor(tensDigit / divisor);
+    const multTens = qTens * divisor;
+    const remTens = tensDigit - multTens;
+
+    // 1단계: 십의 자리 몫
+    if (qTens > 0) {
+      divisionPlan.push({
+        step: 1,
+        title: "1단계: 십의 자리 몫 구하기",
+        desc: `십의 자리 숫자 <strong>${tensDigit}</strong>에 ${divisor}이(가) 몇 번 들어갈까요?`,
+        speech: `십의 자리 ${tensDigit}에는 ${divisor}가 ${qTens}번 들어가요! 몫의 십의 자리에 ${qTens}을 적어볼까요?`,
+        focus: "q_tens",
+        val: qTens
+      });
+      // 2단계: 곱하기
+      divisionPlan.push({
+        step: 2,
+        title: "2단계: 십의 자리 곱해서 빼기",
+        desc: `${divisor} × ${qTens} = <strong>${multTens}</strong>`,
+        speech: `${divisor} 곱하기 ${qTens}은 ${multTens}이에요. ${tensDigit} 밑에 ${multTens}을 적고 빼요!`,
+        focus: "mult_tens",
+        val: multTens
+      });
+      // 3단계: 빼고 남은 수
+      divisionPlan.push({
+        step: 3,
+        title: "3단계: 십의 자리 뺀 값",
+        desc: `${tensDigit} - ${multTens} = <strong>${remTens}</strong>`,
+        speech: `${tensDigit} 빼기 ${multTens}은 ${remTens}이에요.`,
+        focus: "rem_tens",
+        val: remTens
+      });
+    }
+
+    // 4단계: 일의 자리 내려쓰기
+    const newCombined = (remTens * 10) + onesDigit;
+    divisionPlan.push({
+      step: 4,
+      title: "4단계: 일의 자리 내려오기 ⬇️",
+      desc: `일의 자리 <strong>${onesDigit}</strong>이 스르륵 내려와서 <strong>${newCombined}</strong>이 되었어요!`,
+      speech: `일의 자리 숫자 ${onesDigit}이 스르륵 내려와서 ${newCombined}이 되었어요! 이제 ${newCombined}을 나눌 차례예요.`,
+      focus: "bring_down",
+      val: newCombined
+    });
+
+    // 5단계: 일의 자리 몫
+    const qOnes = Math.floor(newCombined / divisor);
+    const multOnes = qOnes * divisor;
+    const finalRem = newCombined - multOnes;
+
+    divisionPlan.push({
+      step: 5,
+      title: "5단계: 일의 자리 몫 구하기",
+      desc: `<strong>${newCombined}</strong>에 ${divisor}이(가) 몇 번 들어갈까요?`,
+      speech: `${newCombined}에는 ${divisor}가 ${qOnes}번 들어가요! 몫의 일의 자리에 ${qOnes}을 올려요!`,
+      focus: "q_ones",
+      val: qOnes
+    });
+
+    // 6단계: 일의 자리 곱하기
+    divisionPlan.push({
+      step: 6,
+      title: "6단계: 곱해서 적기",
+      desc: `${divisor} × ${qOnes} = <strong>${multOnes}</strong>`,
+      speech: `${divisor} 곱하기 ${qOnes}은 ${multOnes}! ${newCombined} 밑에 ${multOnes}을 적어요.`,
+      focus: "mult_ones",
+      val: multOnes
+    });
+
+    // 7단계: 최종 나머지 확인
+    divisionPlan.push({
+      step: 7,
+      title: "7단계: 빼고 나머지 확인 🎉",
+      desc: `${newCombined} - ${multOnes} = <strong>${finalRem}</strong> (나머지: ${finalRem})`,
+      speech: `${newCombined}에서 ${multOnes}을 빼면 ${finalRem}이 남아요! 전체 몫은 ${qTotal}이고 나머지는 ${rTotal}이에요. 참 잘했어요!`,
+      focus: "remainder",
+      val: finalRem
+    });
+  } else {
+    // 한 자리 수 나누기 또는 세 자리 기본 처리
+    divisionPlan.push({
+      step: 1,
+      title: "단원 연산 한눈에 보기",
+      desc: `${dividend} ÷ ${divisor} = 몫 <strong>${qTotal}</strong>, 나머지 <strong>${rTotal}</strong>`,
+      speech: `${dividend}을 ${divisor}로 나누면 몫은 ${qTotal}이고 나머지는 ${rTotal}이에요!`,
+      focus: "all",
+      val: qTotal
+    });
+  }
+}
+
+// 탭 렌더링 디스패처
+function renderCurrentTab() {
+  const container = document.getElementById('studioViewport');
+  if (!container) return;
+
+  if (currentOp === 'div') {
+    if (currentViewTab === 'blocks') {
+      renderBlocksView(container);
+    } else if (currentViewTab === 'vertical') {
+      renderVerticalTutorView(container);
+    } else if (currentViewTab === 'numberline') {
+      renderNumberLineView(container);
+    } else if (currentViewTab === 'area') {
+      renderAreaModelView(container);
+    }
+  } else {
+    renderGenericOpView(container);
+  }
+}
+
+// ========================================================
+// 🧱 [탭 1] 십진 블록 분배관 렌더링
+// ========================================================
+function renderBlocksView(container) {
+  const tens = Math.floor(curNumA / 10);
+  const ones = curNumA % 10;
+  const divisor = curNumB;
+  const quotient = Math.floor(curNumA / divisor);
+  const remainder = curNumA % divisor;
+
+  let stepTitle = "";
+  let stepDesc = "";
+  let speechText = "";
+
+  if (blockCurrentStep === 1) {
+    stepTitle = "1단계: 원래 수 블록으로 만들기";
+    stepDesc = `<strong>${curNumA}</strong>는 <strong>10개짜리 막대 ${tens}개</strong>와 <strong>낱개 큐브 ${ones}개</strong>예요.`;
+    speechText = `${curNumA}는 10개짜리 막대 ${tens}개와 낱개 큐브 ${ones}개로 이루어져 있어요. 이걸 ${divisor}명에게 똑같이 나누어 줄 거예요!`;
+  } else if (blockCurrentStep === 2) {
+    const tensPerPerson = Math.floor(tens / divisor);
+    const leftTens = tens % divisor;
+    stepTitle = "2단계: 10개짜리 막대 먼저 똑같이 나누기";
+    stepDesc = `10개짜리 막대 ${tens}개를 ${divisor}명에게 나누어주면, <strong>한 사람당 ${tensPerPerson}개씩</strong> 받고 <strong>${leftTens}개</strong>가 남아요!`;
+    speechText = `먼저 10개짜리 막대를 나누어줄게요. 한 사람당 ${tensPerPerson}개씩 받고, 10개짜리 ${leftTens}개가 남았어요!`;
+  } else if (blockCurrentStep === 3) {
+    const leftTens = tens % divisor;
+    const brokenOnes = (leftTens * 10) + ones;
+    stepTitle = "3단계: 남은 10개 막대 펑! 💥 낱개로 쪼개기";
+    stepDesc = `남은 10개짜리 막대 ${leftTens}개를 낱개 10개로 쪼개서 기존 낱개 ${ones}개와 합치면 <strong>총 ${brokenOnes}개</strong>가 돼요!`;
+    speechText = `남은 10개짜리 막대를 낱개로 쪼개볼까요? 펑! 낱개 10개로 변신해서 기존 낱개와 합치니 총 ${brokenOnes}개가 되었어요!`;
+  } else if (blockCurrentStep === 4) {
+    const tensPerPerson = Math.floor(tens / divisor);
+    const onesPerPerson = Math.floor(((tens % divisor) * 10 + ones) / divisor);
+    stepTitle = "4단계: 낱개 큐브 똑같이 나누어 담기";
+    stepDesc = `낱개를 ${divisor}명에게 나누어주면 <strong>한 사람당 낱개 ${onesPerPerson}개씩</strong> 더 받아요!`;
+    speechText = `이제 낱개들을 나누어 담아요. 한 사람당 낱개 ${onesPerPerson}개씩 더 받았어요!`;
+  } else {
+    stepTitle = "5단계: 최종 몫과 나머지 확인 🎉";
+    stepDesc = `한 사람당 <strong>10개 막대 ${Math.floor(quotient / 1)}개 + 낱개 ${quotient % 10}개 = 총 ${quotient}개(몫)</strong>! 남은 낱개 = <strong>${remainder}개(나머지)</strong>!`;
+    speechText = `짜잔! 한 사람당 총 ${quotient}개씩 받았으니 몫은 ${quotient}이고, 바구니에 못 들어간 남은 낱개 ${remainder}개가 바로 나머지예요!`;
+  }
+
+  // 10개짜리 막대 HTML 생성
+  let tensHtml = '';
+  for (let i = 0; i < tens; i++) {
+    tensHtml += `<div class="ten-rod"></div>`;
+  }
+
+  // 낱개 큐브 HTML 생성
+  let onesHtml = '';
+  for (let i = 0; i < ones; i++) {
+    onesHtml += `<div class="unit-cube"></div>`;
+  }
+
+  // 바구니 생성
+  let basketsHtml = '';
+  const tensPerPerson = (blockCurrentStep >= 2) ? Math.floor(tens / divisor) : 0;
+  const onesPerPerson = (blockCurrentStep >= 4) ? Math.floor(((tens % divisor) * 10 + ones) / divisor) : 0;
+
+  for (let b = 1; b <= divisor; b++) {
+    let bTens = '';
+    for (let t = 0; t < tensPerPerson; t++) bTens += `<div class="ten-rod" style="height:70px;"></div>`;
+    let bOnes = '';
+    for (let o = 0; o < onesPerPerson; o++) bOnes += `<div class="unit-cube"></div>`;
+
+    basketsHtml += `
+      <div class="person-basket">
+        <div class="basket-label">🧺 ${b}번 친구</div>
+        <div style="display:flex; gap:4px; justify-content:center; align-items:center; flex-wrap:wrap; min-height:80px;">
+          ${bTens} ${bOnes}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="block-stage-wrap">
+      <div class="block-step-nav">
+        <span class="step-pill">🧱 블록 쪼개기 탐험 (${blockCurrentStep} / ${blockMaxSteps}단계)</span>
+        <div class="nav-btn-group">
+          <button class="step-control-btn" onclick="changeBlockStep(-1)" ${blockCurrentStep === 1 ? 'disabled' : ''}>◀ 이전</button>
+          <button class="step-control-btn" onclick="changeBlockStep(1)" ${blockCurrentStep === blockMaxSteps ? 'disabled' : ''} style="background:#0284c7; color:#fff; border-color:#38bdf8;">다음 단계 ▶</button>
+        </div>
+      </div>
+
+      <div style="background:rgba(2,132,199,0.15); border:1.5px solid #0284c7; border-radius:14px; padding:14px;">
+        <h3 style="margin:0 0 6px; font-family:'Jua'; color:#38bdf8; font-size:1.25rem;">${stepTitle}</h3>
+        <p style="margin:0; font-size:1.05rem; line-height:1.5;">${stepDesc}</p>
+      </div>
+
+      <div class="block-display-area">
+        <div class="block-group-box">
+          <div class="block-group-title">
+            <span>📦 원래 전체 수 (${curNumA})</span>
+            <span style="font-size:0.85rem; color:#94a3b8;">10개짜리 ${tens}개 / 낱개 ${ones}개</span>
+          </div>
+          <div class="blocks-row">
+            ${tensHtml}
+            <div style="width:12px;"></div>
+            ${onesHtml}
+          </div>
+        </div>
+
+        <div class="block-group-box">
+          <div class="block-group-title">
+            <span>👥 ${divisor}명에게 똑같이 나누어주기</span>
+            <span style="font-size:0.85rem; color:#4ade80;">한 사람당 몫: ${quotient}</span>
+          </div>
+          <div class="basket-grid">
+            ${basketsHtml}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  studioSpeak(speechText);
+}
+
+function changeBlockStep(delta) {
+  blockCurrentStep = Math.max(1, Math.min(blockMaxSteps, blockCurrentStep + delta));
+  renderBlocksView(document.getElementById('studioViewport'));
+}
+
+// ========================================================
+// 📝 [탭 2] 단계별 격자 세로셈 튜터 렌더링
+// ========================================================
+function renderVerticalTutorView(container) {
+  if (!divisionPlan || divisionPlan.length === 0) {
+    buildDivisionPlan(curNumA, curNumB);
+  }
+
+  const curPlan = divisionPlan[tutorCurrentStep - 1] || divisionPlan[0];
+  const tensDigit = Math.floor(curNumA / 10);
+  const onesDigit = curNumA % 10;
+  const divisor = curNumB;
+
+  const qTens = Math.floor(tensDigit / divisor);
+  const multTens = qTens * divisor;
+  const remTens = tensDigit - multTens;
+  const broughtDown = (remTens * 10) + onesDigit;
+  const qOnes = Math.floor(broughtDown / divisor);
+  const multOnes = qOnes * divisor;
+  const remainder = broughtDown - multOnes;
+
+  // 세로셈 테이블 셀 렌더링
+  container.innerHTML = `
+    <div class="vertical-tutor-container">
+      <div class="division-board-card">
+        <table class="division-table">
+          <!-- 몫 행 -->
+          <tr>
+            <td></td>
+            <td class="td-divisor-arc"></td>
+            <td class="td-quotient-line ${curPlan.focus === 'q_tens' ? 'cell-active' : ''}">
+              ${tutorCurrentStep >= 1 && qTens > 0 ? qTens : ''}
+            </td>
+            <td class="td-quotient-line ${curPlan.focus === 'q_ones' ? 'cell-active' : ''}">
+              ${tutorCurrentStep >= 5 ? qOnes : ''}
+            </td>
+          </tr>
+          <!-- 나누어지는 수 행 -->
+          <tr>
+            <td style="color:#f59e0b;">${divisor}</td>
+            <td class="td-divisor-arc">)</td>
+            <td style="color:#38bdf8;">${tensDigit}</td>
+            <td style="color:#38bdf8;">${onesDigit}</td>
+          </tr>
+          <!-- 십의 자리 곱한 값 -->
+          ${tutorCurrentStep >= 2 ? `
+          <tr>
+            <td></td>
+            <td>-</td>
+            <td class="${curPlan.focus === 'mult_tens' ? 'cell-active' : ''}" style="color:#ec4899;">${multTens}</td>
+            <td></td>
+          </tr>
+          ` : ''}
+          <!-- 십의 자리 뺀 값 및 내려쓰기 -->
+          ${tutorCurrentStep >= 3 ? `
+          <tr>
+            <td></td>
+            <td class="calc-step-line"></td>
+            <td class="calc-step-line ${curPlan.focus === 'rem_tens' ? 'cell-active' : ''}">${remTens}</td>
+            <td class="calc-step-line ${curPlan.focus === 'bring_down' ? 'cell-active' : ''}" style="color:#10b981;">
+              ${tutorCurrentStep >= 4 ? onesDigit : ''}
+            </td>
+          </tr>
+          ` : ''}
+          <!-- 일의 자리 곱한 값 -->
+          ${tutorCurrentStep >= 6 ? `
+          <tr>
+            <td></td>
+            <td>-</td>
+            <td>${Math.floor(multOnes / 10) || ''}</td>
+            <td class="${curPlan.focus === 'mult_ones' ? 'cell-active' : ''}" style="color:#ec4899;">${multOnes % 10}</td>
+          </tr>
+          ` : ''}
+          <!-- 최종 나머지 행 -->
+          ${tutorCurrentStep >= 7 ? `
+          <tr>
+            <td></td>
+            <td class="calc-step-line"></td>
+            <td class="calc-step-line"></td>
+            <td class="calc-step-line ${curPlan.focus === 'remainder' ? 'cell-active' : ''}" style="color:#ef4444;">
+              ${remainder}
+            </td>
+          </tr>
+          ` : ''}
+        </table>
+      </div>
+
+      <div class="tutor-guide-panel">
+        <div class="tutor-step-card">
+          <div class="tutor-step-title">${curPlan.title}</div>
+          <div class="tutor-step-desc">${curPlan.desc}</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <span style="font-family:'Jua'; color:#94a3b8;">진행: ${tutorCurrentStep} / ${divisionPlan.length}단계</span>
+          <div class="nav-btn-group">
+            <button class="step-control-btn" onclick="changeTutorStep(-1)" ${tutorCurrentStep === 1 ? 'disabled' : ''}>◀ 이전</button>
+            <button class="step-control-btn" onclick="changeTutorStep(1)" ${tutorCurrentStep === divisionPlan.length ? 'disabled' : ''} style="background:#0284c7; color:#fff; border-color:#38bdf8;">다음 단계 ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  studioSpeak(curPlan.speech);
+}
+
+function changeTutorStep(delta) {
+  tutorCurrentStep = Math.max(1, Math.min(divisionPlan.length, tutorCurrentStep + delta));
+  renderVerticalTutorView(document.getElementById('studioViewport'));
+}
+
+// ========================================================
+// 📏 [탭 3] 수직선 덜어내기 렌더링
+// ========================================================
+function renderNumberLineView(container) {
+  const dividend = curNumA;
+  const divisor = curNumB;
+  const quotient = Math.floor(dividend / divisor);
+  const remainder = dividend % divisor;
+
+  const speech = `수직선에서 ${dividend}부터 ${divisor}씩 뒤로 점프하며 덜어내 볼까요? 총 ${quotient}번 덜어내고 ${remainder}이 남아요!`;
+
+  container.innerHTML = `
+    <div class="numberline-wrap">
+      <h3 style="font-family:'Jua'; color:#38bdf8; margin:0 0 10px;">📏 수직선 동수누감 (점프해서 덜어내기)</h3>
+      <p style="color:var(--text-muted); font-size:1rem; margin:0 0 20px;">
+        ${dividend}에서 ${divisor}씩 몇 번을 뺄 수 있을까요? <strong>총 ${quotient}번 덜어내고 ${remainder}이 남습니다!</strong>
+      </p>
+
+      <div style="background:rgba(15,23,42,0.6); border:2px solid var(--border-color); border-radius:16px; padding:30px 20px; text-align:center;">
+        <div style="font-family:'Jua'; font-size:1.8rem; color:#f59e0b; margin-bottom:20px;">
+          ${dividend} - (${divisor} × ${quotient}) = <span style="color:#ef4444;">${remainder}</span>
+        </div>
+        <div style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="background:rgba(2,132,199,0.15); border:1.5px solid #0284c7; border-radius:12px; padding:14px 20px;">
+            <div style="font-size:0.9rem; color:#94a3b8;">뛰어 덜어낸 횟수 (몫)</div>
+            <div style="font-family:'Jua'; font-size:2rem; color:#38bdf8;">${quotient}번</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.15); border:1.5px solid #ef4444; border-radius:12px; padding:14px 20px;">
+            <div style="font-size:0.9rem; color:#94a3b8;">0에 못 닿고 남은 수 (나머지)</div>
+            <div style="font-family:'Jua'; font-size:2rem; color:#ef4444;">${remainder}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  studioSpeak(speech);
+}
+
+// ========================================================
+// 🍫 [탭 4] 면적(넓이) 모델 렌더링
+// ========================================================
+function renderAreaModelView(container) {
+  const dividend = curNumA;
+  const divisor = curNumB;
+  const quotient = Math.floor(dividend / divisor);
+  const remainder = dividend % divisor;
+
+  const tensQ = Math.floor(quotient / 10) * 10;
+  const onesQ = quotient % 10;
+
+  const speech = `면적 모델이에요! 가로가 ${divisor}인 직사각형의 전체 넓이가 ${dividend}일 때, 세로 길이는 몫인 ${quotient}이 되고 남는 넓이는 ${remainder}가 돼요!`;
+
+  container.innerHTML = `
+    <div class="area-model-wrap">
+      <div style="text-align:center; max-width:600px;">
+        <h3 style="font-family:'Jua'; color:#38bdf8; margin:0 0 6px;">🍫 면적 분할 모델 (Area Model)</h3>
+        <p style="color:var(--text-muted); font-size:0.95rem; margin:0;">
+          가로 길이가 <strong>${divisor}</strong>일 때, 넓이 <strong>${dividend}</strong>를 채우는 세로 길이를 찾아요!
+        </p>
+      </div>
+
+      <div class="area-rect-container">
+        ${tensQ > 0 ? `
+        <div class="area-box" style="background:linear-gradient(135deg, rgba(2,132,199,0.35) 0%, rgba(3,105,161,0.35) 100%); min-width:140px;">
+          <div style="color:#94a3b8; font-size:0.85rem;">세로 ${tensQ}</div>
+          <div style="color:#38bdf8; font-size:1.5rem;">넓이 ${tensQ * divisor}</div>
+          <div style="color:#94a3b8; font-size:0.85rem;">(${divisor} × ${tensQ})</div>
+        </div>
+        ` : ''}
+
+        <div class="area-box" style="background:linear-gradient(135deg, rgba(16,185,129,0.35) 0%, rgba(5,150,105,0.35) 100%); min-width:140px;">
+          <div style="color:#94a3b8; font-size:0.85rem;">세로 ${onesQ}</div>
+          <div style="color:#4ade80; font-size:1.5rem;">넓이 ${onesQ * divisor}</div>
+          <div style="color:#94a3b8; font-size:0.85rem;">(${divisor} × ${onesQ})</div>
+        </div>
+
+        ${remainder > 0 ? `
+        <div class="area-box" style="background:linear-gradient(135deg, rgba(239,68,68,0.25) 0%, rgba(185,28,28,0.25) 100%); min-width:100px;">
+          <div style="color:#94a3b8; font-size:0.85rem;">남은 넓이</div>
+          <div style="color:#ef4444; font-size:1.5rem;">${remainder}</div>
+          <div style="color:#94a3b8; font-size:0.85rem;">(나머지)</div>
+        </div>
+        ` : ''}
+      </div>
+
+      <div style="font-family:'Jua'; font-size:1.3rem; color:#f8fafc; text-align:center;">
+        전체 세로 길이(몫) = ${tensQ > 0 ? tensQ + ' + ' : ''}${onesQ} = <span style="color:#38bdf8;">${quotient}</span>
+        ${remainder > 0 ? ` (나머지: <span style="color:#ef4444;">${remainder}</span>)` : ''}
+      </div>
+    </div>
+  `;
+
+  studioSpeak(speech);
+}
+
+// 덧셈/뺄셈/곱셈 일반 뷰 렌더링
+function renderGenericOpView(container) {
+  let res = 0;
+  let desc = "";
+  if (currentOp === 'mul') {
+    res = curNumA * curNumB;
+    desc = `${curNumA}를 ${curNumB}번 더한 것과 같아요! 넓이 = ${res}`;
+  } else if (currentOp === 'add') {
+    res = curNumA + curNumB;
+    desc = `${curNumA}와 ${curNumB}를 한 상자에 모았어요! 합 = ${res}`;
+  } else if (currentOp === 'sub') {
+    res = curNumA - curNumB;
+    desc = `${curNumA}에서 ${curNumB}만큼 덜어냈어요! 남은 수 = ${res}`;
+  }
+
+  container.innerHTML = `
+    <div style="text-align:center; padding:40px 20px;">
+      <h3 style="font-family:'Jua'; font-size:2.2rem; color:#38bdf8; margin-bottom:16px;">
+        ${curNumA} ${document.getElementById('opSymbol').textContent} ${curNumB} = ${res}
+      </h3>
+      <p style="font-size:1.2rem; color:var(--text-main); margin-bottom:24px;">${desc}</p>
+      <div style="background:rgba(255,255,255,0.05); border:1px dashed var(--border-color); border-radius:16px; padding:20px; max-width:480px; margin:0 auto;">
+        💡 사칙연산 전체 인터랙티브 모듈이 준비되어 있습니다. 상단 ➗ 나눗셈 탭에서 집중 특화된 4대 시각화를 경험해 보세요!
+      </div>
+    </div>
+  `;
+
+  studioSpeak(`${curNumA} 계산 결과는 ${res}입니다!`);
+}
+
+// 테마 초기화
+function applyTheme() {
+  document.body.className = (currentProfile === 'son') ? 'theme--arcade' : 'theme--slime';
+  const tag = document.getElementById('userProfileTag');
+  if (tag) {
+    tag.textContent = (currentProfile === 'son') ? '🚀 [민수] 5학년 모드' : '🎠 [민서] 1학년 모드';
+    tag.style.borderColor = (currentProfile === 'son') ? '#0284c7' : '#ec4899';
+    tag.style.color = (currentProfile === 'son') ? '#38bdf8' : '#ec4899';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  startStudioCalculation();
+});
+</script>
+
+</body>
+</html>
