@@ -694,7 +694,7 @@
       <input type="number" id="numA" class="num-input" value="74" min="1" max="999" aria-label="나누어지는 수">
       <span class="op-sign" id="opSymbol">÷</span>
       <input type="number" id="numB" class="num-input" value="6" min="1" max="99" aria-label="나누는 수">
-      <button class="btn-submit-calc" onclick="startStudioCalculation()">🚀 스튜디오 탐구 시작!</button>
+      <button class="btn-submit-calc" onclick="startStudioCalculation(true)">🚀 스튜디오 탐구 시작!</button>
     </div>
 
     <!-- 추천 프리셋 칩스 -->
@@ -761,13 +761,21 @@ const blockMaxSteps = 5;
 let tutorCurrentStep = 1;
 let divisionPlan = [];
 
-// 사용자 프로필
+// 사용자 프로필 및 음성 재생 제어 플래그
 let currentProfile = localStorage.getItem('currentUser') || 'son';
+let hasUserStarted = false; // 🚨 최초 진입 시 자동 음성 재생 방지 플래그
 
 // 음성 낭독 함수 래퍼
-function studioSpeak(text) {
+function studioSpeak(text, force = false) {
   const fairyEl = document.getElementById('fairySpeechText');
-  if (fairyEl) fairyEl.textContent = text;
+  if (hasUserStarted || force) {
+    if (fairyEl) fairyEl.textContent = text;
+  }
+
+  // 사용자가 아직 시작 버튼을 누르지 않았으면 소리를 내지 않음
+  if (!hasUserStarted && !force) {
+    return;
+  }
 
   if (typeof speakFairyTTS === 'function') {
     speakFairyTTS(text);
@@ -781,8 +789,9 @@ function studioSpeak(text) {
 }
 
 function replayCurrentVoice() {
+  hasUserStarted = true;
   const text = document.getElementById('fairySpeechText')?.textContent;
-  if (text) studioSpeak(text);
+  if (text) studioSpeak(text, true);
 }
 
 // 연산자 전환
@@ -807,11 +816,12 @@ function switchOperation(op, btn) {
   }
 }
 
-// 프리셋 로드
+// 프리셋 로드 (사용자 클릭 액션이므로 음성 허용)
 function loadPreset(a, b) {
+  hasUserStarted = true;
   document.getElementById('numA').value = a;
   document.getElementById('numB').value = b;
-  startStudioCalculation();
+  startStudioCalculation(true);
 }
 
 // 뷰 탭 전환
@@ -822,8 +832,12 @@ function switchViewTab(tab, btn) {
   renderCurrentTab();
 }
 
-// 계산 시작
-function startStudioCalculation() {
+// 계산 시작 (userInitiated가 true일 때만 음성 활성화)
+function startStudioCalculation(userInitiated = false) {
+  if (userInitiated) {
+    hasUserStarted = true;
+  }
+
   curNumA = parseInt(document.getElementById('numA').value, 10) || 1;
   curNumB = parseInt(document.getElementById('numB').value, 10) || 1;
   
@@ -1089,6 +1103,7 @@ function renderBlocksView(container) {
 }
 
 function changeBlockStep(delta) {
+  hasUserStarted = true;
   blockCurrentStep = Math.max(1, Math.min(blockMaxSteps, blockCurrentStep + delta));
   renderBlocksView(document.getElementById('studioViewport'));
 }
@@ -1201,6 +1216,7 @@ function renderVerticalTutorView(container) {
 }
 
 function changeTutorStep(delta) {
+  hasUserStarted = true;
   tutorCurrentStep = Math.max(1, Math.min(divisionPlan.length, tutorCurrentStep + delta));
   renderVerticalTutorView(document.getElementById('studioViewport'));
 }
@@ -1344,7 +1360,7 @@ function applyTheme() {
 
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
-  startStudioCalculation();
+  startStudioCalculation(false); // 🚨 최초 진입 시에는 음성을 내지 않음
 });
 </script>
 
