@@ -712,7 +712,28 @@ window.openNoticeGuideModal = function() {
               </ul>
             </div>
 
-            <!-- 4. 실행일 기준의 장점 -->
+            <!-- 🌟 [실전 꿀팁 ①] 주간 과제(글쓰기/독서록 등) 등록 팁 -->
+            <div style="background: rgba(167, 139, 250, 0.08); border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 12px; padding: 12px 14px;">
+              <div style="font-weight: bold; color: #a78bfa; font-size: 0.98rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <span>✍️</span> <span>3. 주간 과제 (1주일에 1편 글쓰기 · 독서록 등)</span>
+              </div>
+              <ul style="margin: 0; padding-left: 18px; color: #cbd5e1; font-size: 0.9rem; line-height: 1.55;">
+                <li><b>날짜 설정</b>: <span style="color:#00f2fe; font-weight:bold;">기간형(월요일 ~ 금요일)</span>으로 등록</li>
+                <li><b>유지 & 체크</b>: 한 주 내내 시간표 상단에 상시 표시되며, 아이가 과제를 마쳤을 때 <b>[챙겼어요! ✅]</b>를 누르면 완료(취소선) 처리됩니다.</li>
+              </ul>
+            </div>
+
+            <!-- 🌟 [실전 꿀팁 ②] 아이 맞춤 정제 팁 (불필요한 혼선 방지) -->
+            <div style="background: rgba(46, 213, 115, 0.08); border: 1px solid rgba(46, 213, 115, 0.3); border-radius: 12px; padding: 12px 14px;">
+              <div style="font-weight: bold; color: #2ed573; font-size: 0.98rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <span>🎯</span> <span>4. 해당 없는 내용은 과감히 빼고 등록하기!</span>
+              </div>
+              <div style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.55;">
+                전체 알림장 중 우리 아이가 제외되거나 해당하지 않는 안내(예: 민수 제외 학습지 등)는 공지에서 <b>과감히 제외</b>하고, 아이가 직접 해야 할 핵심 미션만 남겨서 등록하면 인지 부담과 불필요한 혼선을 완벽히 방지할 수 있습니다.
+              </div>
+            </div>
+
+            <!-- 5. 실행일 기준의 장점 -->
             <div style="background: rgba(0,242,254,0.05); border: 1px solid rgba(0,242,254,0.22); border-radius: 12px; padding: 12px 14px;">
               <div style="font-weight: bold; color: #00f2fe; font-size: 0.92rem; margin-bottom: 5px;">
                 ✨ 왜 실행일(내일)로 등록하면 좋을까요?
