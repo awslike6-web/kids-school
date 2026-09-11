@@ -595,9 +595,19 @@
   window.closeCompletionModal = closeCompletionModal;
   window.dispenseStorybookReward = dispenseStorybookReward;
 
-  window.addEventListener('DOMContentLoaded', () => {
+  function bootStorybook() {
     if (window.STORY_BOOK) {
       initStorybook(window.STORY_BOOK);
+    } else {
+      setTimeout(() => {
+        if (window.STORY_BOOK) initStorybook(window.STORY_BOOK);
+      }, 50);
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootStorybook);
+  } else {
+    bootStorybook();
+  }
 })();

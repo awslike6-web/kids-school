@@ -18,6 +18,13 @@ let radarCharts = {
   minseo: null
 };
 
+// 📅 로컬 타임존(한국 KST) 기준 날짜 생성 헬퍼 (YYYY-MM-DD)
+function getTodayDateStr() {
+  const d = new Date();
+  const kst = new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+  return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+}
+
 // 배경 버블 생성기
 function makeBgFloats() {
   const container = document.getElementById('bgFloats');
@@ -291,15 +298,15 @@ function buildRadarScores(props, vocaList, childName, studyLogs = []) {
     // 3. 하루(통합) (계절 탐험 / 슬기로운·바른 생활)
     const haruLevel = props["하루 레벨"]?.number || props["통합 레벨"]?.number || 1;
     let haruScore = levelToScore(haruLevel);
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getTodayDateStr();
     const isTodayDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
     let haruLogCount = 0;
     if (Array.isArray(studyLogs)) {
       haruLogCount = studyLogs.filter(log => {
         const child = log.properties["학생"]?.select?.name;
-        const subj = log.properties["과목"]?.select?.name;
-        const title = log.properties["제목"]?.title?.[0]?.plain_text || "";
-        return child === "민서" && (subj === "하루" || title.includes("하루") || title.includes("루틴"));
+        const subj = log.properties["과목"]?.rich_text?.[0]?.plain_text || log.properties["과목"]?.select?.name || "";
+        const title = log.properties["ID"]?.title?.[0]?.plain_text || log.properties["제목"]?.title?.[0]?.plain_text || "";
+        return child === "민서" && (subj.includes("하루") || subj.includes("루틴") || title.includes("하루") || title.includes("루틴"));
       }).length;
     }
     const haruActivity = 60 + (isTodayDone ? 20 : 0) + Math.min(haruLogCount * 5, 20);
@@ -701,7 +708,7 @@ window.toggleParentScreenTimeApproval = async function(childName) {
   // ☁️ [클라우드 영구 동기화] 노션 인벤토리 DB의 '학습설정' 속성에 비동기 저장
   const childData = memoryState[childName];
   if (childData && childData.pageId) {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getTodayDateStr();
     try {
       let existingSettings = {};
       const childKey = childName === "민수" ? "minsu" : "minseo";
@@ -753,7 +760,7 @@ function renderHaruParentCoaching(studyLogs = [], childName = "민서") {
   const boxEl = document.getElementById(prefix + "-haru-coaching-box");
   if (!boxEl) return;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const isDoneLocal = localStorage.getItem("haru_checkin_done_" + todayStr + "_" + childKey) === "true";
   let coins = parseInt(localStorage.getItem("haru_piggy_coins_" + childKey) || "0");
   let habitName = localStorage.getItem("haru_today_habit_" + childKey) || "";
@@ -765,22 +772,30 @@ function renderHaruParentCoaching(studyLogs = [], childName = "민서") {
   if (Array.isArray(studyLogs) && studyLogs.length > 0) {
     const todayHaruLog = studyLogs.find(log => {
       const child = log.properties["학생"]?.select?.name;
-      const subj = log.properties["과목"]?.select?.name;
-      const date = log.properties["날짜"]?.date?.start;
-      const title = log.properties["제목"]?.title?.[0]?.plain_text || "";
-      return child === childName && (subj === "하루" || title.includes("하루 체크인") || title.includes("루틴 체크인")) && (date === todayStr || title.includes(todayStr));
+      const subj = log.properties["과목"]?.rich_text?.[0]?.plain_text || log.properties["과목"]?.select?.name || "";
+      const date = log.properties["입장"]?.date?.start || log.properties["날짜"]?.date?.start || "";
+      const title = log.properties["ID"]?.title?.[0]?.plain_text || log.properties["제목"]?.title?.[0]?.plain_text || "";
+      const matchesChild = child === childName;
+      const matchesSubj = subj.includes("하루") || subj.includes("루틴") || title.includes("하루") || title.includes("루틴");
+      const matchesDate = (date && date.startsWith(todayStr)) || title.includes(todayStr);
+      return matchesChild && matchesSubj && matchesDate;
     });
 
     if (todayHaruLog) {
       isDone = true;
-      const content = todayHaruLog.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
-      const habitMatch = content.match(/착한습관:\s*([^\n\r]+)/);
+      const content = todayHaruLog.properties["오답리포트"]?.rich_text?.[0]?.plain_text || todayHaruLog.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
+      const habitMatch = content.match(/착한\s*습관:\s*([^\n\r]+)/);
       const workoutMatch = content.match(/(?:튼튼운동|건강운동):\s*([^\n\r]+)/);
-      const moodMatch = content.match(/마음날씨:\s*([^\(\[\n\r]+)/);
+      const moodMatch = content.match(/마음\s*날씨:\s*([^\(\[\n\r]+)/);
 
       if (habitMatch && habitMatch[1] && !habitName) habitName = habitMatch[1].trim();
       if (workoutMatch && workoutMatch[1] && !workoutName) workoutName = workoutMatch[1].trim();
       if (moodMatch && moodMatch[1] && !moodName) moodName = moodMatch[1].trim();
+
+      if (!moodName) {
+        const moodProp = todayHaruLog.properties["감정날씨"]?.rich_text?.[0]?.plain_text;
+        if (moodProp) moodName = moodProp.trim();
+      }
     }
   }
 
@@ -932,7 +947,7 @@ function renderSafetyAlertWidget(studyLogs = [], childName = "민서") {
   const contentEl = document.getElementById(prefix + "-safety-alert-content");
   if (!alertBox || !contentEl) return;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   let latestLog = null;
 
   // 1. 로컬스토리지 최신 기록 확인
@@ -950,20 +965,24 @@ function renderSafetyAlertWidget(studyLogs = [], childName = "민서") {
   if (!latestLog && Array.isArray(studyLogs) && studyLogs.length > 0) {
     const remoteLog = studyLogs.find(log => {
       const child = log.properties["학생"]?.select?.name;
-      const date = log.properties["날짜"]?.date?.start;
-      const title = log.properties["제목"]?.title?.[0]?.plain_text || "";
-      return child === childName && title.includes("닥터 코코 상담") && (date === todayStr || title.includes(todayStr));
+      const date = log.properties["입장"]?.date?.start || log.properties["날짜"]?.date?.start || "";
+      const title = log.properties["ID"]?.title?.[0]?.plain_text || log.properties["제목"]?.title?.[0]?.plain_text || "";
+      const content = log.properties["오답리포트"]?.rich_text?.[0]?.plain_text || log.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
+      const matchesChild = child === childName;
+      const isSafety = title.includes("닥터 코코") || content.includes("닥터 코코") || content.includes("응급상담");
+      const matchesDate = (date && date.startsWith(todayStr)) || title.includes(todayStr);
+      return matchesChild && isSafety && matchesDate;
     });
 
     if (remoteLog) {
-      const titleText = remoteLog.properties["제목"]?.title?.[0]?.plain_text || "";
-      const contentText = remoteLog.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
-      const symptomMatch = titleText.match(/\[🚨 닥터 코코 상담\]\s*(.+)/);
+      const titleText = remoteLog.properties["ID"]?.title?.[0]?.plain_text || remoteLog.properties["제목"]?.title?.[0]?.plain_text || "";
+      const contentText = remoteLog.properties["오답리포트"]?.rich_text?.[0]?.plain_text || remoteLog.properties["학습내용"]?.rich_text?.[0]?.plain_text || "";
+      const symptomMatch = titleText.match(/\[🚨 닥터 코코 상담\]\s*(.+)/) || contentText.match(/증상:\s*([^\n\r]+)/);
       const sayMatch = contentText.match(/처치안내:\s*([^\n\r]+)/);
       const timeMatch = contentText.match(/시간:\s*([^\n\r]+)/);
 
       latestLog = {
-        title: symptomMatch ? symptomMatch[1].trim() : "응급 상담",
+        title: symptomMatch ? (symptomMatch[1] || symptomMatch[0]).trim() : "응급 상담",
         icon: "🩺",
         time: timeMatch ? timeMatch[1].trim() : "오늘",
         cocoSay: sayMatch ? sayMatch[1].trim() : "단계별 응급처치 안내를 확인했습니다."

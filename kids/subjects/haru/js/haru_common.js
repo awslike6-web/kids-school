@@ -881,9 +881,15 @@ let checkInState = {
   mood: null
 };
 
+// 📅 로컬 타임존(한국 KST) 기준 날짜 생성 헬퍼 (YYYY-MM-DD)
+function getTodayDateStr() {
+  const d = new Date();
+  const kst = new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+  return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+}
+
 function getTodayCheckInKey() {
-  const todayStr = new Date().toISOString().slice(0, 10);
-  return `haru_checkin_done_${todayStr}_${currentChild}`;
+  return `haru_checkin_done_${getTodayDateStr()}_${currentChild}`;
 }
 
 function updateCheckInBannerStatus() {
@@ -1039,6 +1045,7 @@ async function finishQuickCheckIn() {
   // 1-1) 오늘 실천한 착한 습관 & 운동 명칭 저장 (부모 대시보드 코칭 연동)
   localStorage.setItem("haru_today_habit_" + currentChild, habit.name);
   localStorage.setItem("haru_today_workout_" + currentChild, workout.name);
+  localStorage.setItem("haru_last_checkin_date_" + currentChild, getTodayDateStr());
 
   // 2) 운동 달력 오늘 요일 스탬프 저장
   const todayIdx = new Date().getDay();
@@ -1099,13 +1106,25 @@ function renderCheckInCompletionView(reachedMilestone = false) {
 
       <div style="background:#f8f9fa; border-radius:18px; padding:16px; margin-bottom:22px; text-align:left; display:flex; flex-direction:column; gap:10px; border:2px solid #eef2f5;">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span>🐷</span> <b>저금통:</b> [${habit.name}] 황금 코인 1개 적립! (20칸 완주 시 황금 돼지 트로피 & 소원권)
+          <span style="font-size:1.5rem;">🐷</span>
+          <div>
+            <div style="font-size:0.8rem; color:#888;">오늘 실천한 착한 습관</div>
+            <strong style="color:var(--dark);">${habit.name}</strong>
+          </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span>💪</span> <b>운동 달력:</b> [${workout.name}] 오늘 스탬프 쾅!
+          <span style="font-size:1.5rem;">💪</span>
+          <div>
+            <div style="font-size:0.8rem; color:#888;">오늘 실천한 튼튼 운동</div>
+            <strong style="color:var(--dark);">${workout.name}</strong>
+          </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span>🌈</span> <b>마음 날씨:</b> [${mood.mood}] ${mood.desc}
+          <span style="font-size:1.5rem;">${mood.icon}</span>
+          <div>
+            <div style="font-size:0.8rem; color:#888;">오늘 마음 날씨</div>
+            <strong style="color:${mood.color};">${mood.mood}</strong> <span style="font-size:0.85rem; color:#666;">(${mood.desc})</span>
+          </div>
         </div>
       </div>
 
@@ -1124,31 +1143,34 @@ function renderCheckInCompletionView(reachedMilestone = false) {
 async function sendMilestoneToNotion(milestoneTitle) {
   const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
   const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const childTitle = currentChild === "minseo" ? "민서" : "민수";
+  const nowIso = new Date().toISOString();
 
   const payload = {
     parent: { database_id: dbId },
     properties: {
-      "제목": {
+      "ID": {
         title: [{ text: { content: `🏆 [마일스톤 완주] ${childTitle}_${milestoneTitle}` } }]
       },
       "학생": { select: { name: childTitle } },
-      "과목": { select: { name: "하루" } },
-      "날짜": { date: { start: todayStr } },
-      "학습내용": {
+      "과목": { rich_text: [{ text: { content: "하루" } }] },
+      "입장": { date: { start: nowIso } },
+      "퇴장": { date: { start: nowIso } },
+      "오답리포트": {
         rich_text: [{
           text: { content: `🎉 축하합니다! 20칸 착한 습관 저금통을 모두 채웠습니다.\n• 마이룸 [황금 돼지 저금통] 트로피 가구 지급 완료\n• 이번 주말 [가족 소원권] 발급 완료 (부모님 확인 필요)` }
         }]
       },
-      "획득보상": { number: 0 }
+      "소요시간": { number: 1 },
+      "단어요정": { number: 0 }
     }
   };
 
   try {
     await fetch(`${proxyUrl}/v1/pages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
       body: JSON.stringify(payload)
     });
   } catch(e) {}
@@ -1158,35 +1180,45 @@ async function sendMilestoneToNotion(milestoneTitle) {
 async function sendCheckInToNotion(habit, workout, mood) {
   const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
   const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
   const childTitle = currentChild === "minseo" ? "민서" : "민수";
   const isMinsu = currentChild === "minsu";
+  const nowIso = new Date().toISOString();
 
   const payload = {
     parent: { database_id: dbId },
     properties: {
-      "제목": {
+      "ID": {
         title: [{ text: { content: `${childTitle}_${todayStr} (${isMinsu ? '데일리 루틴 체크인' : '슬기로운 하루 체크인'})` } }]
       },
       "학생": {
         select: { name: childTitle }
       },
       "과목": {
-        select: { name: "하루" }
+        rich_text: [{ text: { content: isMinsu ? "데일리 루틴" : "하루" } }]
       },
-      "날짜": {
-        date: { start: todayStr }
+      "입장": {
+        date: { start: nowIso }
       },
-      "학습내용": {
+      "퇴장": {
+        date: { start: nowIso }
+      },
+      "오답리포트": {
         rich_text: [{
           text: {
             content: `[30초 ${isMinsu ? '데일리 루틴' : '하루'} 체크인]\n• 착한습관: ${habit.name}\n• 건강운동: ${workout.name}\n• 마음날씨: ${mood.mood} (${mood.desc}) [${timeStr}]`
           }
         }]
       },
-      "획득보상": {
+      "감정날씨": {
+        rich_text: [{ text: { content: `${mood.icon} ${mood.mood}` } }]
+      },
+      "소요시간": {
         number: 1
+      },
+      "단어요정": {
+        number: 0
       }
     }
   };
@@ -1194,7 +1226,7 @@ async function sendCheckInToNotion(habit, workout, mood) {
   try {
     await fetch(`${proxyUrl}/v1/pages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
       body: JSON.stringify(payload)
     });
   } catch(e) {
@@ -1384,7 +1416,7 @@ function renderFirstAidGuide(key) {
     title: guide.title,
     icon: guide.icon,
     badge: guide.badge,
-    date: new Date().toISOString().slice(0, 10),
+    date: getTodayDateStr(),
     time: nowTime,
     cocoSay: guide.cocoSay
   };
@@ -1430,34 +1462,37 @@ function consultDoctorCocoCustom() {
 async function sendSafetyLicenseToNotion() {
   const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
   const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
   const childTitle = currentChild === "minseo" ? "민서" : "민수";
+  const nowIso = new Date().toISOString();
 
   const payload = {
     parent: { database_id: dbId },
     properties: {
-      "제목": {
+      "ID": {
         title: [{ text: { content: `${childTitle}_${todayStr} [119 안전수호대] 황금 지킴이 면허증 취득` } }]
       },
       "학생": { select: { name: childTitle } },
-      "과목": { select: { name: "하루" } },
-      "날짜": { date: { start: todayStr } },
-      "학습내용": {
+      "과목": { rich_text: [{ text: { content: "하루" } }] },
+      "입장": { date: { start: nowIso } },
+      "퇴장": { date: { start: nowIso } },
+      "오답리포트": {
         rich_text: [{
           text: {
             content: `[119 안전 수호대 완주 인증]\n• 획득: 황금 안전 지킴이 면허증 발급 🏆\n• 항목: 학교 복도, 계단, 횡단보도, 날카로운 도구, 놀이터 안전 수칙 6문항 100% 마스터\n• 시간: ${timeStr}\n• 보상: 보너스 +5개 획득`
           }
         }]
       },
-      "획득보상": { number: 5 }
+      "소요시간": { number: 3 },
+      "단어요정": { number: 0 }
     }
   };
 
   try {
     await fetch(`${proxyUrl}/v1/pages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
       body: JSON.stringify(payload)
     });
   } catch(e) {}
@@ -1467,34 +1502,37 @@ async function sendSafetyLicenseToNotion() {
 async function sendSafetyConsultationToNotion(guide) {
   const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
   const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = getTodayDateStr();
   const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
   const childTitle = currentChild === "minseo" ? "민서" : "민수";
+  const nowIso = new Date().toISOString();
 
   const payload = {
     parent: { database_id: dbId },
     properties: {
-      "제목": {
+      "ID": {
         title: [{ text: { content: `${childTitle}_${todayStr} [🚨 닥터 코코 상담] ${guide.title}` } }]
       },
       "학생": { select: { name: childTitle } },
-      "과목": { select: { name: "하루" } },
-      "날짜": { date: { start: todayStr } },
-      "학습내용": {
+      "과목": { rich_text: [{ text: { content: "하루" } }] },
+      "입장": { date: { start: nowIso } },
+      "퇴장": { date: { start: nowIso } },
+      "오답리포트": {
         rich_text: [{
           text: {
             content: `[닥터 코코 365 안심 응급상담]\n• 증상: ${guide.icon} ${guide.title} (${guide.badge})\n• 처치안내: ${guide.cocoSay}\n• 시간: ${timeStr}\n• 부모 대시보드 실시간 알림 연동 완료`
           }
         }]
       },
-      "획득보상": { number: 0 }
+      "소요시간": { number: 1 },
+      "단어요정": { number: 0 }
     }
   };
 
   try {
     await fetch(`${proxyUrl}/v1/pages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
       body: JSON.stringify(payload)
     });
   } catch(e) {}

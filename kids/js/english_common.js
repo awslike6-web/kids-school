@@ -386,6 +386,8 @@ window.openEnglishLibraryModal = function() {
     if (headerTitle) headerTitle.textContent = "📚 단원 동화 도서관 서가";
     if (headerIcon) headerIcon.textContent = "📚";
 
+    const isMinecraft = (typeof currentProfile !== 'undefined' ? currentProfile === 'son' : (localStorage.getItem('currentUser') !== 'daughter' && localStorage.getItem('currentChild') !== 'minseo'));
+
     const books = [
         {
             id: "l8",
