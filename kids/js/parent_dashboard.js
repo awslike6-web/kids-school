@@ -601,14 +601,15 @@ async function loadDashboardData() {
       el.style.color = "#ff6b6b";
       el.classList.remove("loading-shimmer");
     });
-  } finally {
-    // 트래커 데이터 로컬 렌더링 보장
-    renderScreenTimeWidget("민수");
-    renderScreenTimeWidget("민서");
+    // 네트워크 실패 시 로컬 캐시 데이터 폴백 렌더링
     renderHaruParentCoaching([], "민수");
     renderHaruParentCoaching([], "민서");
     renderSafetyAlertWidget([], "민수");
     renderSafetyAlertWidget([], "민서");
+  } finally {
+    // 트래커 데이터 로컬 렌더링 보장 (화면 타이머 위젯)
+    renderScreenTimeWidget("민수");
+    renderScreenTimeWidget("민서");
   }
 }
 
@@ -796,6 +797,22 @@ function renderHaruParentCoaching(studyLogs = [], childName = "민서") {
         const moodProp = todayHaruLog.properties["감정날씨"]?.rich_text?.[0]?.plain_text;
         if (moodProp) moodName = moodProp.trim();
       }
+
+      // 로컬 스토리지에 동기화 캐시 (부모 디바이스 새로고침 및 로컬 보존)
+      try {
+        localStorage.setItem("haru_checkin_done_" + todayStr + "_" + childKey, "true");
+        if (habitName) localStorage.setItem("haru_today_habit_" + childKey, habitName);
+        if (workoutName) localStorage.setItem("haru_today_workout_" + childKey, workoutName);
+        if (moodName) localStorage.setItem("haru_today_mood_" + childKey, moodName);
+      } catch(_) {}
+    }
+  }
+
+  // 이미 화면이 완료 상태로 렌더링되어 있다면 빈 배열 호출 시 다운그레이드 방지
+  if (!isDone && (!studyLogs || studyLogs.length === 0)) {
+    const currentBadge = document.getElementById(prefix + "-haru-today-badge");
+    if (currentBadge && currentBadge.textContent.includes("완료")) {
+      return;
     }
   }
 
