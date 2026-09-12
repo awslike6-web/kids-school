@@ -596,17 +596,27 @@ async function loadDashboardData() {
             if (socEl) { socEl.textContent = "Lv." + socLv; socEl.classList.remove("loading-shimmer"); }
           }
 
-          // 인벤토리 주입
-          diaEl.textContent = (props["다이아몬드 개수"]?.number || 0) + "개";
-          diaEl.classList.remove("loading-shimmer");
+          // 2. 인벤토리 주입 (다이아 / 하리보 / 소원권)
+          const diaEl = document.getElementById(prefix + "-dia");
+          const slimeEl = document.getElementById(prefix + "-slime");
+          const ticketEl = document.getElementById(prefix + "-ticket");
 
-          slimeEl.textContent = (typeof getDaughterRewardCount === 'function'
-            ? getDaughterRewardCount(props)
-            : (props["하리보 젤리 개수"]?.number || props["슬라임 파츠 개수"]?.number || 0)) + "개";
-          slimeEl.classList.remove("loading-shimmer");
+          if (diaEl) {
+            diaEl.textContent = (props["다이아몬드 개수"]?.number || 0) + "개";
+            diaEl.classList.remove("loading-shimmer");
+          }
 
-          ticketEl.textContent = memoryState[name].ticketCount + "장";
-          ticketEl.classList.remove("loading-shimmer");
+          if (slimeEl) {
+            slimeEl.textContent = (typeof getDaughterRewardCount === 'function'
+              ? getDaughterRewardCount(props)
+              : (props["하리보 젤리 개수"]?.number || props["슬라임 파츠 개수"]?.number || 0)) + "개";
+            slimeEl.classList.remove("loading-shimmer");
+          }
+
+          if (ticketEl) {
+            ticketEl.textContent = memoryState[name].ticketCount + "장";
+            ticketEl.classList.remove("loading-shimmer");
+          }
 
           // 2. 연속 학습 Streak 계산 & UI 주입
           const streak = calcStreak(studyLogs, name);
