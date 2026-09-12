@@ -4,7 +4,7 @@
 const ENGLISH_READING_DATABASE = [
     {
         id: "eng_read_12",
-        title: "Find Your Friend! (8단원)",
+        title: "The Great Festival Mission (8단원)",
         fullText: "Today is Sports Day at school. The teacher said, \"Find your friend and come together!\"\nSora looked at her mission card. \"He has short curly hair and green eyes. He's wearing a brown T-shirt and blue pants. He's wearing yellow shoes, too. Where is he?\"\nCharlie looked at his card. \"She has long straight hair and brown eyes. She's wearing a red jacket and an orange scarf. She's wearing glasses and a green hat!\"\nAt the festival, Emily found her brother next to the sweet cotton candy. And look! It's a magic show! All the friends gathered together happily.",
         translation: "오늘은 학교 체육대회 날입니다. 선생님께서 말씀하셨습니다. \"친구를 찾아 다 함께 모이세요!\"\n소라는 자신의 미션 카드를 살펴보았습니다. \"그는 짧은 곱슬머리에 초록색 눈을 가지고 있어. 갈색 티셔츠와 파란색 바지를 입고 있네. 노란색 신발도 신었어. 그는 어디에 있을까?\"\n찰리도 카드를 보았습니다. \"그녀는 긴 생머리에 갈색 눈을 가지고 있어. 빨간색 재킷과 주황색 목도리를 두르고 있네. 안경을 쓰고 초록색 모자도 썼어!\"\n축제장에서 에밀리는 달콤한 솜사탕 옆에서 남동생을 찾았습니다. 그리고 저것 보세요! 마법 쇼가 시작되었네요! 모든 친구들이 기쁘게 다 함께 모였습니다.",
         paragraphs: [

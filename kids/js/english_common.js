@@ -391,11 +391,11 @@ window.openEnglishLibraryModal = function() {
     const books = [
         {
             id: "l8",
-            badge: "🔍 8단원 최신 동화",
-            title: "Find Your Friend!",
-            koreanTitle: "친구를 찾아라! (외모와 옷차림)",
-            desc: "초등 영어 5-2 8단원 (외모와 옷차림 묘사하기)",
-            keyExpr: "He has short curly hair. / She's wearing glasses.",
+            badge: "🔍 8단원 일러스트 동화",
+            title: "The Great Festival Mission",
+            koreanTitle: "위대한 축제 미션 (친구를 찾아라!)",
+            desc: "초등 영어 5-2 8단원 (외모와 옷차림 묻고 답하기)",
+            keyExpr: "What does he look like? / What is she wearing?",
             url: "english_l8_storybook.html",
             color: "#f59e0b",
             themeTag: isMinecraft ? "🔎 탐정 친구 찾기" : "✨ 친구 찾기"
