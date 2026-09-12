@@ -473,19 +473,18 @@ async function loadDashboardData() {
       "Pragma": "no-cache",
       "Cache-Control": "no-cache"
     };
-    const tStamp = Date.now();
     const [invRes, logsRes, vocaRes] = await Promise.all([
-      fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query?force=true&_t=${tStamp}`, {
+      fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
         method: "POST",
         headers: noCacheHeaders,
         body: JSON.stringify({ page_size: 10 })
       }),
-      fetch(`${PROXY_URL}/v1/databases/${STUDY_LOG_DB_ID}/query?force=true&_t=${tStamp}`, {
+      fetch(`${PROXY_URL}/v1/databases/${STUDY_LOG_DB_ID}/query`, {
         method: "POST",
         headers: noCacheHeaders,
         body: JSON.stringify({ page_size: 50, sorts: [{ property: "입장", direction: "descending" }] })
       }).catch(() => null),
-      fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query?force=true&_t=${tStamp}`, {
+      fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query`, {
         method: "POST",
         headers: noCacheHeaders,
         body: JSON.stringify({ page_size: 100 })

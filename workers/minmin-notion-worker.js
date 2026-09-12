@@ -553,8 +553,12 @@ export default {
           } catch (e) {}
         }
 
-        // 캐시 MISS: 노션 원본 API 호출
-        const notionResp = await callNotionRaw(url.pathname + url.search, 'POST', reqBodyText, authHeader);
+        // 캐시 MISS: 노션 원본 API 호출 (워커 내부 제어 파라미터 force, _t 제거하여 Notion validation_error 400 방어)
+        const forwardUrl = new URL(url.toString());
+        forwardUrl.searchParams.delete('force');
+        forwardUrl.searchParams.delete('_t');
+        const forwardSearch = forwardUrl.search;
+        const notionResp = await callNotionRaw(url.pathname + forwardSearch, 'POST', reqBodyText, authHeader);
         const respData = await notionResp.text();
 
         const responseHeaders = new Headers(notionResp.headers);
