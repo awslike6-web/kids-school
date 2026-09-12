@@ -517,32 +517,64 @@ async function loadDashboardData() {
           memoryState[name].pageId = page.id;
           memoryState[name].ticketCount = props["소원권 개수"]?.number || 0;
 
-          // 1. 6대 과목 레벨 요소 바인딩
-          const mathEl = document.getElementById(prefix + "-math");
-          const engEl = document.getElementById(prefix + "-eng");
-          const korEl = document.getElementById(prefix + "-kor");
-          const korRealEl = document.getElementById(prefix + "-kor-real");
-          const sciEl = document.getElementById(prefix + "-sci");
-          const socEl = document.getElementById(prefix + "-soc");
+          // 1. 과목별 성장 마스터 바인딩 (민수 vs 민서 이원화)
+          if (isMinseo) {
+            // 👧 민서: 초1 맞춤 3대 교과 (국어, 수학, 하루) + 3대 활동 (창의, 습관, 어휘)
+            const korRealEl = document.getElementById("ds-kor-real");
+            const mathEl = document.getElementById("ds-math");
+            const haruEl = document.getElementById("ds-haru");
+            const artEl = document.getElementById("ds-art");
+            const habitEl = document.getElementById("ds-habit");
+            const korVocaEl = document.getElementById("ds-kor");
 
-          const diaEl = document.getElementById(prefix + "-dia");
-          const slimeEl = document.getElementById(prefix + "-slime");
-          const ticketEl = document.getElementById(prefix + "-ticket");
+            const korRealLv = props["국어 레벨"]?.number || 1;
+            const mathLv = props["수학 레벨"]?.number || 1;
+            const haruLv = props["하루 레벨"]?.number || props["사회 레벨"]?.number || 1;
+            const korVocaLv = props["용어 레벨"]?.number || 1;
 
-          // 레벨 주입
-          const mathLv = props["수학 레벨"]?.number || 1;
-          const engLv = props["영어 레벨"]?.number || 1;
-          const korVocaLv = props["용어 레벨"]?.number || 1;
-          const korRealLv = props["국어 레벨"]?.number || 1;
-          const sciLv = props["과학 레벨"]?.number || 1;
-          const socLv = props["사회 레벨"]?.number || 1;
+            if (korRealEl) { korRealEl.textContent = "Lv." + korRealLv; korRealEl.classList.remove("loading-shimmer"); }
+            if (mathEl) { mathEl.textContent = "Lv." + mathLv; mathEl.classList.remove("loading-shimmer"); }
+            if (haruEl) { haruEl.textContent = "Lv." + haruLv; haruEl.classList.remove("loading-shimmer"); }
+            if (korVocaEl) { korVocaEl.textContent = "Lv." + korVocaLv; korVocaEl.classList.remove("loading-shimmer"); }
 
-          mathEl.textContent = "Lv." + mathLv; mathEl.classList.remove("loading-shimmer");
-          engEl.textContent = "Lv." + engLv; engEl.classList.remove("loading-shimmer");
-          korEl.textContent = "Lv." + korVocaLv; korEl.classList.remove("loading-shimmer");
-          korRealEl.textContent = "Lv." + korRealLv; korRealEl.classList.remove("loading-shimmer");
-          sciEl.textContent = "Lv." + sciLv; sciEl.classList.remove("loading-shimmer");
-          socEl.textContent = "Lv." + socLv; socEl.classList.remove("loading-shimmer");
+            // 창의·예술: 갤러리 등록 작품 수 실시간 카운트
+            let minseoArtCount = 0;
+            if (typeof DEFAULT_GALLERY_DATA !== 'undefined' && Array.isArray(DEFAULT_GALLERY_DATA)) {
+              minseoArtCount = DEFAULT_GALLERY_DATA.filter(item => item.author === '민서' || item.author === '공동').length;
+            } else {
+              try {
+                const localGal = JSON.parse(localStorage.getItem('MY_STUDY_ROOM_GALLERY_DATA') || '[]');
+                minseoArtCount = localGal.filter(item => item.author === '민서' || item.author === '공동').length;
+              } catch (e) {}
+            }
+            if (artEl) { artEl.textContent = minseoArtCount + "작품"; artEl.classList.remove("loading-shimmer"); }
+
+            // 착한 습관: 저금통 코인 수 실시간 연동
+            const minseoCoins = parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
+            if (habitEl) { habitEl.textContent = minseoCoins + "/20코인"; habitEl.classList.remove("loading-shimmer"); }
+          } else {
+            // 👦 민수: 5대 정규 교과 + 용어사전
+            const mathEl = document.getElementById("ms-math");
+            const engEl = document.getElementById("ms-eng");
+            const korEl = document.getElementById("ms-kor");
+            const korRealEl = document.getElementById("ms-kor-real");
+            const sciEl = document.getElementById("ms-sci");
+            const socEl = document.getElementById("ms-soc");
+
+            const mathLv = props["수학 레벨"]?.number || 1;
+            const engLv = props["영어 레벨"]?.number || 1;
+            const korVocaLv = props["용어 레벨"]?.number || 1;
+            const korRealLv = props["국어 레벨"]?.number || 1;
+            const sciLv = props["과학 레벨"]?.number || 1;
+            const socLv = props["사회 레벨"]?.number || 1;
+
+            if (mathEl) { mathEl.textContent = "Lv." + mathLv; mathEl.classList.remove("loading-shimmer"); }
+            if (engEl) { engEl.textContent = "Lv." + engLv; engEl.classList.remove("loading-shimmer"); }
+            if (korEl) { korEl.textContent = "Lv." + korVocaLv; korEl.classList.remove("loading-shimmer"); }
+            if (korRealEl) { korRealEl.textContent = "Lv." + korRealLv; korRealEl.classList.remove("loading-shimmer"); }
+            if (sciEl) { sciEl.textContent = "Lv." + sciLv; sciEl.classList.remove("loading-shimmer"); }
+            if (socEl) { socEl.textContent = "Lv." + socLv; socEl.classList.remove("loading-shimmer"); }
+          }
 
           // 인벤토리 주입
           diaEl.textContent = (props["다이아몬드 개수"]?.number || 0) + "개";
