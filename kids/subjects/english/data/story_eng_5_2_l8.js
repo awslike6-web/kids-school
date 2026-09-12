@@ -10,7 +10,7 @@ window.STORY_BOOK = {
   themeColorDark: "#d97706",
   backUrl: "english.html",
   backLabel: "🚪 영어방 대기실",
-  version: "20260912_l8_v4",
+  version: "20260912_l8_v5",
   bilingual: true,
   imgBase: "images/storybook/l8/",
   pages: [
@@ -542,6 +542,58 @@ window.STORY_BOOK = {
             • <b>tricks</b> : 마술 묘기<br>
             • <b>cheers</b> : 환호하다<br>
             • <b>enjoy</b> : 즐기다
+          </div>
+        </div>
+      `
+    },
+    {
+      page: 12,
+      tag: "🌟 보너스 11장 : 나를 찾아라! (Find ME!)",
+      spreadImg: "eng_l8_spread_p12.png",
+      korSpreadImg: "kor_l8_spread_p12.png",
+      illImg: "eng_l8_ill_p12.png",
+      engAudio: "../../assets/audio/storybook/english_l8/eng_l8_p11.mp3",
+      korAudio: "../../assets/audio/storybook/english_l8/kor_l8_p11.mp3",
+      audio: "../../assets/audio/storybook/english_l8/eng_l8_p11.mp3",
+      textHtml: `
+        <div class="webtoon-passage" style="line-height: 1.8;">
+          <div style="font-size: 1.25rem; font-weight: bold; color: #f8fafc; margin-bottom: 4px;">
+            Now, it is Minsu's turn!
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            이제 민수의 차례예요!
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            What does Minsu look like? He has short straight hair and warm brown eyes.
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            민수는 어떻게 생겼을까요? 짧은 생머리에 따뜻한 갈색 눈을 가지고 있어요.
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #fbbf24; margin-bottom: 4px; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3);">
+            What is he wearing today? He is wearing a cool white hoodie and blue pants.
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            오늘 민수는 무엇을 입고 있나요? 멋진 흰색 후드티와 파란 바지를 입고 있네요.
+          </div>
+
+          <div style="font-size: 1.25rem; font-weight: bold; color: #34d399; margin-bottom: 4px;">
+            You found Minsu! You look so awesome, Minsu!
+          </div>
+          <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 16px;">
+            민수를 찾았어요! 민수야, 넌 정말 최고야!
+          </div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 12px 16px; margin-top: 12px; border: 1.5px solid #334155;">
+          <div style="font-weight: bold; color: #fbbf24; margin-bottom: 4px; font-size: 0.95rem;">💡 콕 집어보는 쉬운 단어 & 표현</div>
+          <div style="font-size: 0.92rem; color: #e2e8f0; line-height: 1.6;">
+            • <b>short straight hair</b> : 짧은 생머리<br>
+            • <b>brown eyes</b> : 갈색 눈<br>
+            • <b>white hoodie</b> : 흰색 후드티<br>
+            • <b>blue pants</b> : 파란 바지<br>
+            • <b>awesome</b> : 멋진, 최고인
           </div>
         </div>
       `
