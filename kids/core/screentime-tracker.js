@@ -186,15 +186,12 @@
                     parseInt(localStorage.getItem(key) || '0', 10),
                     parseInt(localStorage.getItem(legacyKey) || '0', 10)
                 );
-                // ☁️ [클라우드 SSOT] 노션 학습일지가 존재하면 기기간 오차를 방지하기 위해 노션 합계를 최우선 적용
-                // 단, 현재 기기에서 방금 학습을 마치고 노션 저장 대기 중인 오차(<= 5분)만 로컬 우선 인정
-                let finalMinutes = notionTotalMinutes;
-                if (currentLocal > notionTotalMinutes && (currentLocal - notionTotalMinutes) <= 5) {
-                    finalMinutes = currentLocal;
-                }
+                // ☁️ [클라우드 SSOT & 아동 노력 100% 보존] 
+                // 네트워크 지연으로 노션 저장이 늦어지더라도 아이의 방금 공부한 시간이 일시 감소하지 않도록 안전 합산
+                const finalMinutes = Math.max(currentLocal, notionTotalMinutes);
                 localStorage.setItem(key, String(finalMinutes));
                 localStorage.setItem(legacyKey, String(finalMinutes));
-                console.log(`☁️ [스크린타임 클라우드 동기화] ${child}: 노션 ${notionTotalMinutes}분 ➔ 로컬 동기화 완료 (최종: ${finalMinutes}분)`);
+                console.log(`☁️ [스크린타임 클라우드 동기화] ${child}: 노션 ${notionTotalMinutes}분 / 로컬 ${currentLocal}분 ➔ 최종: ${finalMinutes}분`);
             }
         });
     }
