@@ -843,8 +843,13 @@ window.resetParentScreenTimeApproval = async function(childName) {
 
 // ☁️ 스크린타임 승인 데이터 노션 클라우드 PATCH 헬퍼
 async function saveScreenTimeApprovalToCloud(childName, isApproved, approvedMinutes) {
-  const childData = memoryState[childName];
-  if (!childData || !childData.pageId) return;
+  let pageId = memoryState[childName]?.pageId;
+  if (!pageId) {
+    pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);
+  }
+  if (!pageId) {
+    pageId = childName === "민수" ? "374a2711-5b68-8030-aede-d4c2493fe233" : "374a2711-5b68-80ed-9efc-c44e109b102c";
+  }
 
   const todayStr = getTodayDateStr();
   const childKey = childName === "민수" ? "minsu" : "minseo";

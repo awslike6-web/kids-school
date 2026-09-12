@@ -327,7 +327,7 @@
     <div class="inventory-card" id="inventoryDisplay">
       <div class="reward-badge"><span style="font-size:1.2rem;">⏳</span> <span style="font-size:1rem; color:#888;">보상 상자 충전 중...</span></div>
     </div>
-    <button type="button" class="hero-chip-btn screentime-chip-btn" id="lobbyScreenTimeBtn" onclick="if(typeof openScreenTimeReceiptModal === 'function') openScreenTimeReceiptModal();" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: 1.5px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); cursor: pointer;">⏰ 오늘 폰시간 정산</button>
+    <button type="button" class="hero-chip-btn screentime-chip-btn" id="lobbyScreenTimeBtn" onclick="if(typeof openScreenTimeReceiptModal === 'function') openScreenTimeReceiptModal(typeof finalRealName !== 'undefined' ? finalRealName : null);" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: 1.5px solid rgba(255,255,255,0.4); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); cursor: pointer;">⏰ 오늘 폰시간 정산</button>
     <button type="button" class="hero-chip-btn diary-chip-btn" id="lobbyDiaryBtn" onclick="openDailyDiaryModal()">📝 마음일기 (+5💎)</button>
     <a href="timetable.html" class="hero-chip-btn timetable-chip-btn" id="timetableLink">📅 오늘 시간표</a>
   </div>
@@ -961,8 +961,15 @@ loadCoreScripts("kids/core/", requiredCores, () => {
       try {
         const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
         const invDbId = typeof INVENTORY_DB_ID !== 'undefined' ? INVENTORY_DB_ID : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID) ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12");
-        const response = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
-          method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" }, body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+        const response = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query?force=true&_t=${Date.now()}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0",
+            "Pragma": "no-cache",
+            "Cache-Control": "no-cache"
+          },
+          body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
         });
         const data = await response.json();
         if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
@@ -975,6 +982,9 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
           window.ScreenTimeTracker.syncFromInventoryProps(props, childName);
           updateLobbyScreenTimeBtn(childName);
+          if (document.getElementById('screenTimeReceiptModal') && typeof window.openScreenTimeReceiptModal === 'function') {
+            window.openScreenTimeReceiptModal(childName);
+          }
         }
         if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
           syncQuizFlowFromCloud(props["학습설정"]);
@@ -1030,9 +1040,9 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {
         const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
         const studyDbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID) ? APP_CONFIG.STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2");
-        fetch(`${proxyUrl}/v1/databases/${studyDbId}/query`, {
+        fetch(`${proxyUrl}/v1/databases/${studyDbId}/query?force=true&_t=${Date.now()}`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0", "Pragma": "no-cache", "Cache-Control": "no-cache" },
             body: JSON.stringify({ page_size: 30, sorts: [{ property: "입장", direction: "descending" }] })
         }).then(r => r.json()).then(data => {
             if (data && data.results) {
@@ -1048,11 +1058,11 @@ loadCoreScripts("kids/core/", requiredCores, () => {
       if (!btn || typeof window.ScreenTimeTracker === 'undefined') return;
       const s = window.ScreenTimeTracker.getScreenTimeSummary(childName);
       if (s.pendingMinutes > 0) {
-        btn.innerHTML = `⏰ 폰시간 <b>+${s.pendingMinutes}분</b> 정산`;
+        btn.innerHTML = `⏰ 폰시간 <b>+${s.pendingMinutes}분</b> 신청 대기`;
         btn.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
         btn.style.boxShadow = "0 4px 12px rgba(245, 158, 11, 0.35)";
       } else if (s.totalMinutes > 0) {
-        btn.innerHTML = `💖 폰시간 <b>${s.totalMinutes}분</b> 승인 완료!`;
+        btn.innerHTML = `💖 폰시간 <b>${s.totalMinutes}분</b> 연장 완료 (대기 0분)`;
         btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
         btn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.25)";
       } else {

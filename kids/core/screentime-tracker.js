@@ -31,10 +31,11 @@
     }
 
     function getTodayKey() {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const date = String(now.getDate()).padStart(2, '0');
+        const d = new Date();
+        const kst = new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+        const year = kst.getFullYear();
+        const month = String(kst.getMonth() + 1).padStart(2, '0');
+        const date = String(kst.getDate()).padStart(2, '0');
         return `${year}-${month}-${date}`;
     }
 
@@ -422,35 +423,55 @@
     }
 
     /**
-     * 학생용 스크린타임 정산 영수증 모달 렌더링
+     * 학생용 스크린타임 정산 영수증 모달 렌더링 (차액 정산 및 사용 완료 도장 완벽 연동)
      */
-    function openScreenTimeReceiptModal() {
+    function openScreenTimeReceiptModal(targetChildName) {
         removeScreenTimeModal();
 
-        const s = getScreenTimeSummary();
+        const name = targetChildName || getCurrentChildName();
+        const s = getScreenTimeSummary(name);
         const modal = document.createElement('div');
         modal.id = 'screenTimeReceiptModal';
         modal.className = 'screentime-modal-overlay';
+
+        const isApprovedAll = s.isFullyApproved || (s.totalMinutes > 0 && s.pendingMinutes === 0);
+
         modal.innerHTML = `
             <div class="screentime-modal-card animate-pop-up">
                 <button type="button" class="screentime-close-btn" onclick="window.closeScreenTimeReceiptModal()">✕</button>
                 
                 <div class="screentime-header">
-                    <span class="screentime-icon">🎟️</span>
+                    <span class="screentime-icon">${isApprovedAll ? '💖' : '🎟️'}</span>
                     <div>
-                        <h2 class="screentime-title">${s.childName}의 오늘 스크린타임 정산소</h2>
-                        <span class="screentime-subtitle">공부하느라 쓴 폰 시간 100% 보상 & 보너스 정산!</span>
+                        <h2 class="screentime-title">${s.childName}의 오늘 폰시간 정산소</h2>
+                        <span class="screentime-subtitle">${isApprovedAll ? '오늘 획득한 폰 시간이 모두 패밀리링크에 충전되었습니다!' : '공부하느라 쓴 폰 시간 100% 보상 & 보너스 정산!'}</span>
                     </div>
                 </div>
 
-                <!-- 1. 시계 바늘 비유 배너 (초1 민서 눈높이) -->
-                <div class="screentime-clock-banner">
-                    <div class="clock-icon-anim">⏰</div>
+                <!-- 1. 시계 바늘 비유 배너 -->
+                <div class="screentime-clock-banner ${isApprovedAll ? 'banner-completed' : ''}">
+                    <div class="clock-icon-anim">${isApprovedAll ? '🎉' : '⏰'}</div>
                     <div class="clock-banner-text">
-                        <div class="clock-headline">${s.clockMetaphor}</div>
-                        <div class="clock-subline">실제 공부 ${s.rawMinutes}분 ➔ 10분 단위 올림으로 <b>${s.adjustedStudyMinutes}분</b> 인정!</div>
+                        <div class="clock-headline">${isApprovedAll ? `오늘 획득한 ${s.totalMinutes}분 모두 충전 완료!` : s.clockMetaphor}</div>
+                        <div class="clock-subline">${isApprovedAll ? '부모님이 패밀리링크에서 시간을 이미 늘려주셨어요. 지금 신청할 대기 시간이 없습니다.' : `실제 공부 ${s.rawMinutes}분 ➔ 10분 단위 올림으로 <b>${s.adjustedStudyMinutes}분</b> 인정!`}</div>
                     </div>
                 </div>
+
+                ${isApprovedAll ? `
+                <!-- 🌟 전량 충전 완료 안심 카드 (아이가 착각하여 추가 요구하지 않도록 0장 명확 고지) -->
+                <div class="screentime-completed-hero">
+                    <div class="completed-hero-title">✅ 오늘 폰 시간 충전 완료</div>
+                    <div class="completed-hero-desc">
+                        오늘 열심히 공부해서 획득한 <b>${s.totalMinutes}분</b>을 부모님이 패밀리링크에 모두 충전해주셨습니다.
+                    </div>
+                    <div class="completed-zero-badge">
+                        🚫 지금 사용할 수 있는 남은 티켓: <b>0장 (모두 사용 완료)</b>
+                    </div>
+                    <div class="completed-hero-sub">
+                        💡 문제를 더 풀거나 새로운 과목을 공부하면 추가 시간이 다시 쌓여요!
+                    </div>
+                </div>
+                ` : ''}
 
                 <!-- 2. 영수증 내역 리스트 -->
                 <div class="screentime-receipt-box">
@@ -476,47 +497,62 @@
                         <span class="r-total-label">🏆 오늘 총 인정 시간</span>
                         <span class="r-total-val" style="color:#0284c7;">${s.totalMinutes}분</span>
                     </div>
+                    ${s.approvedMinutes > 0 ? `
                     <div class="receipt-row" style="margin-top:6px; font-size:0.92rem;">
-                        <span class="r-label" style="color:#16a34a; font-weight:bold;">✅ 이미 부모님 연장 완료</span>
-                        <span class="r-val" style="color:#16a34a; font-weight:bold;">${s.approvedMinutes}분</span>
+                        <span class="r-label" style="color:#16a34a; font-weight:bold;">✅ 부모님 패밀리링크 충전 완료</span>
+                        <span class="r-val" style="color:#16a34a; font-weight:bold;">${s.approvedMinutes}분 (사용됨)</span>
+                    </div>` : ''}
+                    
+                    ${isApprovedAll ? `
+                    <div class="receipt-row" style="margin-top:6px; font-size:1.02rem; background:#f0fdf4; padding:7px 10px; border-radius:10px; border:1.5px solid #86efac;">
+                        <span class="r-label" style="color:#15803d; font-weight:bold;">👉 지금 추가 연장할 남은 시간</span>
+                        <span class="r-val" style="color:#15803d; font-weight:900; font-size:1.25rem;">0분 (대기 없음)</span>
                     </div>
-                    <div class="receipt-row" style="margin-top:4px; font-size:1.02rem; background:#fff1f2; padding:6px 10px; border-radius:10px; border:1px solid #fecdd3;">
-                        <span class="r-label" style="color:#e11d48; font-weight:bold;">⏳ 지금 추가 연장 대기</span>
-                        <span class="r-val" style="color:#e11d48; font-weight:bold; font-size:1.25rem;">${s.pendingMinutes}분</span>
+                    ` : `
+                    <div class="receipt-row" style="margin-top:6px; font-size:1.02rem; background:#fff1f2; padding:7px 10px; border-radius:10px; border:1.5px solid #fecdd3;">
+                        <span class="r-label" style="color:#e11d48; font-weight:bold;">⏳ 지금 부모님께 받을 시간</span>
+                        <span class="r-val" style="color:#e11d48; font-weight:bold; font-size:1.35rem;">+${s.pendingMinutes}분</span>
                     </div>
+                    `}
                 </div>
 
                 <!-- 3. 발급 티켓 꾸러미 -->
                 <div class="screentime-tickets-area">
-                    <div class="tickets-title">🎫 발급된 티켓 목록 (부모님께 보여주세요!)</div>
+                    <div class="tickets-title">
+                        ${isApprovedAll 
+                            ? '📁 오늘 사용 완료된 티켓 보관소 (재사용 불가)' 
+                            : '🎫 지금 부모님께 보여드릴 티켓 (총 ' + s.pendingMinutes + '분)'}
+                    </div>
                     <div class="tickets-grid">
                         ${s.count30m > 0 ? `
                             <div class="screentime-ticket ticket-30m animate-pulse-ticket">
-                                <div class="ticket-badge" style="background:#ea580c; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장</div>
+                                <div class="ticket-badge" style="background:#ea580c; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장 신청</div>
                                 <div class="ticket-time">30분권</div>
                                 <div class="ticket-qty">x ${s.count30m}장</div>
                             </div>
                         ` : ''}
                         ${s.count10m > 0 ? `
                             <div class="screentime-ticket ticket-10m animate-pulse-ticket">
-                                <div class="ticket-badge" style="background:#c026d3; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장</div>
+                                <div class="ticket-badge" style="background:#c026d3; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장 신청</div>
                                 <div class="ticket-time">10분권</div>
                                 <div class="ticket-qty">x ${s.count10m}장</div>
                             </div>
                         ` : ''}
-                        ${s.approvedCount30m > 0 ? `
-                            <div class="screentime-ticket ticket-30m" style="opacity:0.75; filter:grayscale(0.2); background:#f1f5f9; border-color:#94a3b8; color:#475569;">
-                                <div class="ticket-badge" style="background:#16a34a; color:#fff; border-radius:6px; padding:2px 6px;">✅ 연장 완료</div>
-                                <div class="ticket-time">30분권</div>
-                                <div class="ticket-qty">x ${s.approvedCount30m}장</div>
-                            </div>
-                        ` : ''}
-                        ${s.approvedCount10m > 0 ? `
-                            <div class="screentime-ticket ticket-10m" style="opacity:0.75; filter:grayscale(0.2); background:#f1f5f9; border-color:#94a3b8; color:#475569;">
-                                <div class="ticket-badge" style="background:#16a34a; color:#fff; border-radius:6px; padding:2px 6px;">✅ 연장 완료</div>
-                                <div class="ticket-time">10분권</div>
-                                <div class="ticket-qty">x ${s.approvedCount10m}장</div>
-                            </div>
+                        ${isApprovedAll ? `
+                            ${s.approvedCount30m > 0 ? `
+                                <div class="screentime-ticket ticket-used">
+                                    <div class="ticket-badge badge-used">🚫 사용 완료 (0장 남음)</div>
+                                    <div class="ticket-time time-used">30분권</div>
+                                    <div class="ticket-qty qty-used">패밀리링크 충전 완료</div>
+                                </div>
+                            ` : ''}
+                            ${s.approvedCount10m > 0 ? `
+                                <div class="screentime-ticket ticket-used">
+                                    <div class="ticket-badge badge-used">🚫 사용 완료 (0장 남음)</div>
+                                    <div class="ticket-time time-used">10분권</div>
+                                    <div class="ticket-qty qty-used">패밀리링크 충전 완료</div>
+                                </div>
+                            ` : ''}
                         ` : ''}
                         ${s.totalMinutes === 0 ? `
                             <div class="no-tickets-msg">아직 오늘 공부 기록이 없어요! 문제를 풀면 시간이 쌓여요. 🚀</div>
@@ -526,11 +562,13 @@
 
                 <!-- 4. 하단 승인 상태 및 안내 -->
                 <div class="screentime-footer">
-                    <div class="approval-status-chip ${s.isFullyApproved ? 'is-approved' : 'is-pending'}">
-                        ${s.isFullyApproved ? '✅ 오늘 공부한 시간 모두 부모님 승인 완료! (패밀리링크 반영됨)' : (s.pendingMinutes > 0 ? `⏳ ${s.pendingMinutes}분 추가 연장 대기 중 (아빠/엄마께 보여주세요!)` : '대기 중')}
+                    <div class="approval-status-chip ${isApprovedAll ? 'is-approved' : 'is-pending'}">
+                        ${isApprovedAll 
+                            ? '💖 오늘 폰 시간 충전이 모두 끝났습니다! (남은 대기 티켓 없음)' 
+                            : (s.pendingMinutes > 0 ? `⏳ ${s.pendingMinutes}분 추가 연장 대기 중 (아빠/엄마께 보여주세요!)` : '대기 중')}
                     </div>
-                    <button type="button" class="screentime-confirm-btn" onclick="window.closeScreenTimeReceiptModal()">
-                        확인 완료 👍
+                    <button type="button" class="screentime-confirm-btn ${isApprovedAll ? 'btn-completed' : ''}" onclick="window.closeScreenTimeReceiptModal()">
+                        ${isApprovedAll ? '확인 완료 (닫기) 👍' : '부모님께 보여드리기 👍'}
                     </button>
                 </div>
             </div>
@@ -593,6 +631,10 @@
                 padding: 14px 18px; display: flex; align-items: center; gap: 14px;
                 margin-bottom: 18px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
             }
+            .screentime-clock-banner.banner-completed {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+            }
             .clock-icon-anim { font-size: 2.2rem; animation: pulseClock 2s infinite ease-in-out; }
             @keyframes pulseClock {
                 0%, 100% { transform: scale(1); }
@@ -600,6 +642,26 @@
             }
             .clock-headline { font-family: 'Jua', sans-serif; font-size: 1.15rem; margin-bottom: 3px; }
             .clock-subline { font-size: 0.85rem; opacity: 0.92; word-break: keep-all; }
+
+            .screentime-completed-hero {
+                background: #f0fdf4; border: 2px solid #86efac;
+                border-radius: 18px; padding: 14px 16px; text-align: center;
+                margin-bottom: 16px;
+            }
+            .completed-hero-title {
+                font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #15803d; margin-bottom: 4px;
+            }
+            .completed-hero-desc {
+                font-size: 0.88rem; color: #166534; line-height: 1.45; word-break: keep-all;
+            }
+            .completed-zero-badge {
+                margin-top: 8px; display: inline-block; background: #ffffff;
+                border: 1.5px solid #22c55e; border-radius: 12px; padding: 5px 12px;
+                font-size: 0.95rem; font-weight: bold; color: #15803d;
+            }
+            .completed-hero-sub {
+                font-size: 0.78rem; color: #64748b; margin-top: 6px;
+            }
 
             .screentime-receipt-box {
                 background: #f8fafc; border: 1.5px solid #e2e8f0;
@@ -629,6 +691,21 @@
             .ticket-qty { font-size: 0.88rem; font-weight: bold; margin-top: 2px; }
             .no-tickets-msg { grid-column: 1 / -1; text-align: center; color: #94a3b8; font-size: 0.9rem; padding: 10px 0; }
 
+            .screentime-ticket.ticket-used {
+                background: #f1f5f9; border-color: #cbd5e1; color: #64748b;
+                box-shadow: none; opacity: 0.8;
+            }
+            .ticket-badge.badge-used {
+                background: #dc2626; color: #ffffff; border-radius: 6px;
+                padding: 2px 6px; font-size: 0.72rem; font-weight: bold;
+            }
+            .ticket-time.time-used {
+                color: #94a3b8; text-decoration: line-through; font-size: 1.25rem; margin: 3px 0;
+            }
+            .ticket-qty.qty-used {
+                color: #dc2626; font-size: 0.78rem; font-weight: bold;
+            }
+
             .screentime-footer { display: flex; flex-direction: column; gap: 10px; }
             .approval-status-chip {
                 padding: 10px 14px; border-radius: 12px; text-align: center;
@@ -641,6 +718,10 @@
                 color: #ffffff; border: none; border-radius: 14px;
                 padding: 12px; font-family: 'Jua', sans-serif; font-size: 1.15rem;
                 cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+            }
+            .screentime-confirm-btn.btn-completed {
+                background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+                box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
             }
             @keyframes popUpReceipt {
                 from { transform: scale(0.92); opacity: 0; }
