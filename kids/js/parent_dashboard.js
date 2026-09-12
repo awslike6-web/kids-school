@@ -466,21 +466,28 @@ function renderRadarChart(canvasId, label, scores, isPink, customLabels) {
 // 노션에서 실시간 통합 인벤토리 & 학습일지 & VOCA 데이터 로드
 async function loadDashboardData() {
   try {
-    // 3대 노션 DB 병렬 쿼리
+    // 3대 노션 DB 병렬 쿼리 (캐시 무효화로 기기간 100% 실시간 동기화)
+    const noCacheHeaders = {
+      "Content-Type": "application/json",
+      "User-Agent": "Mozilla/5.0",
+      "Pragma": "no-cache",
+      "Cache-Control": "no-cache"
+    };
+    const tStamp = Date.now();
     const [invRes, logsRes, vocaRes] = await Promise.all([
-      fetch(PROXY_URL + "/v1/databases/" + INVENTORY_DB_ID + "/query", {
+      fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query?force=true&_t=${tStamp}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: noCacheHeaders,
         body: JSON.stringify({ page_size: 10 })
       }),
-      fetch(PROXY_URL + "/v1/databases/" + STUDY_LOG_DB_ID + "/query", {
+      fetch(`${PROXY_URL}/v1/databases/${STUDY_LOG_DB_ID}/query?force=true&_t=${tStamp}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: noCacheHeaders,
         body: JSON.stringify({ page_size: 50, sorts: [{ property: "입장", direction: "descending" }] })
       }).catch(() => null),
-      fetch(PROXY_URL + "/v1/databases/" + VOCA_DB_ID + "/query", {
+      fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query?force=true&_t=${tStamp}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: noCacheHeaders,
         body: JSON.stringify({ page_size: 100 })
       }).catch(() => null)
     ]);
@@ -516,6 +523,19 @@ async function loadDashboardData() {
           // 로컬 상태 보존
           memoryState[name].pageId = page.id;
           memoryState[name].ticketCount = props["소원권 개수"]?.number || 0;
+          localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${name}`, page.id);
+
+          // 💾 [학습설정 원본 캐시 보존] 타 모듈(퀴즈 플로우 등)과의 덮어쓰기 방지
+          const settingRaw = props["학습설정"]?.rich_text || props["학습설정"];
+          let jsonText = '';
+          if (typeof settingRaw === 'string') jsonText = settingRaw;
+          else if (Array.isArray(settingRaw)) jsonText = settingRaw.map(t => t.plain_text || t.text?.content || '').join('');
+          else if (settingRaw?.rich_text && Array.isArray(settingRaw.rich_text)) jsonText = settingRaw.rich_text.map(t => t.plain_text || t.text?.content || '').join('');
+          if (jsonText && jsonText.trim()) {
+            localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${name}`, jsonText);
+            const childKey = name === "민수" ? "minsu" : "minseo";
+            localStorage.setItem(`MINMIN_LAST_CLOUD_SETTINGS_${childKey}`, jsonText);
+          }
 
           // 1. 과목별 성장 마스터 바인딩 (민수 vs 민서 이원화)
           if (isMinseo) {
@@ -856,23 +876,33 @@ async function saveScreenTimeApprovalToCloud(childName, isApproved, approvedMinu
   try {
     let existingSettings = {};
     try {
-      const cachedRaw = localStorage.getItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey);
+      const cachedRaw = localStorage.getItem("MINMIN_CLOUD_SETTINGS_" + childName) || localStorage.getItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey) || "{}";
       if (cachedRaw) existingSettings = JSON.parse(cachedRaw);
     } catch (_) {}
 
-    existingSettings.screentimeApproval = {
+    if (typeof existingSettings !== 'object' || existingSettings === null) existingSettings = {};
+
+    const approvalData = {
       date: todayStr,
       approved: isApproved,
       approvedMinutes: approvedMinutes,
       lastApprovedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       approvedBy: "부모"
     };
 
+    // 1) 계층형 screenTime 스키마
+    existingSettings.screenTime = existingSettings.screenTime || {};
+    existingSettings.screenTime[childKey] = approvalData;
+    // 2) 레거시 및 단일형 screentimeApproval 스키마 (100% 상호 호환)
+    existingSettings.screentimeApproval = approvalData;
+
     const updatedJson = JSON.stringify(existingSettings);
+    localStorage.setItem("MINMIN_CLOUD_SETTINGS_" + childName, updatedJson);
     localStorage.setItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey, updatedJson);
 
     const proxyUrl = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : PROXY_URL;
-    const res = await fetch(proxyUrl + "/v1/pages/" + childData.pageId, {
+    const res = await fetch(proxyUrl + "/v1/pages/" + pageId, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -1204,3 +1234,14 @@ window.addEventListener('DOMContentLoaded', () => {
   setupAuthUI();
   loadDashboardData();
 });
+
+// 🔄 [실시간 기기 간 동기화] 스마트폰 등 타 기기 승인 후 PC 창 복귀 시 자동 갱신
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    loadDashboardData();
+  }
+});
+window.addEventListener('focus', () => {
+  loadDashboardData();
+});
+

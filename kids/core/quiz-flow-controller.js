@@ -81,7 +81,12 @@
 
             if (!jsonText || !jsonText.trim()) return;
 
-            let parsed = JSON.parse(jsonText);
+            let rawParsed = JSON.parse(jsonText);
+            // 전체 클라우드 설정 캐시 보존 (screenTime 등 타 모듈 데이터 보존)
+            const childKeyName = (typeof getActiveChildName === 'function' ? getActiveChildName() : null) || '민수';
+            localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childKeyName}`, jsonText);
+
+            let parsed = rawParsed;
             // 만약 상위 설정 객체 내부에 quizFlow 키가 있는 구조라면 언랩
             if (parsed && parsed.quizFlow) {
                 parsed = parsed.quizFlow;
@@ -153,12 +158,45 @@
                 return;
             }
 
+            // 2. 기존 설정 객체(screenTime 등) 보존하며 deep merge
+            let currentSettings = {};
+            try {
+                const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || localStorage.getItem("MINMIN_QUIZ_FLOW_SETTINGS") || "{}";
+                currentSettings = JSON.parse(cachedRaw);
+                if (typeof currentSettings !== 'object' || currentSettings === null) currentSettings = {};
+            } catch (e) {
+                currentSettings = {};
+            }
+
             // 현재 과목별 전체 템포 맵 직렬화
             const currentFlows = getAllQuizFlowModes();
-            const payloadContent = JSON.stringify({
-                quizFlow: currentFlows,
-                updatedAt: new Date().toISOString()
-            });
+            currentSettings.quizFlow = currentFlows;
+            currentSettings.updatedAt = new Date().toISOString();
+
+            // screenTime 키가 누락되지 않도록 로컬 트래커 승인 상태 보존
+            if (!currentSettings.screenTime && typeof window.ScreenTimeTracker !== 'undefined') {
+                const summary = window.ScreenTimeTracker.getScreenTimeSummary(childName);
+                if (summary.approvedMinutes > 0) {
+                    const todayStr = window.ScreenTimeTracker.getTodayKey();
+                    const childKey = childName === "민수" ? "minsu" : "minseo";
+                    currentSettings.screenTime = currentSettings.screenTime || {};
+                    currentSettings.screenTime[childKey] = {
+                        date: todayStr,
+                        approved: summary.pendingMinutes === 0,
+                        approvedMinutes: summary.approvedMinutes,
+                        updatedAt: new Date().toISOString()
+                    };
+                    currentSettings.screentimeApproval = {
+                        date: todayStr,
+                        approved: summary.pendingMinutes === 0,
+                        approvedMinutes: summary.approvedMinutes,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+            }
+
+            const payloadContent = JSON.stringify(currentSettings);
+            localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, payloadContent);
 
             // 비동기 PATCH 전송 (keepalive 지원)
             fetch(`${proxyUrl}/v1/pages/${pageId}`, {

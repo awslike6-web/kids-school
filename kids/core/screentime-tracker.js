@@ -186,10 +186,15 @@
                     parseInt(localStorage.getItem(key) || '0', 10),
                     parseInt(localStorage.getItem(legacyKey) || '0', 10)
                 );
-                const maxMinutes = Math.max(currentLocal, notionTotalMinutes);
-                localStorage.setItem(key, String(maxMinutes));
-                localStorage.setItem(legacyKey, String(maxMinutes));
-                console.log(`☁️ [스크린타임 클라우드 동기화] ${child}: 노션 ${notionTotalMinutes}분 ➔ 로컬 동기화 완료 (최종: ${maxMinutes}분)`);
+                // ☁️ [클라우드 SSOT] 노션 학습일지가 존재하면 기기간 오차를 방지하기 위해 노션 합계를 최우선 적용
+                // 단, 현재 기기에서 방금 학습을 마치고 노션 저장 대기 중인 오차(<= 5분)만 로컬 우선 인정
+                let finalMinutes = notionTotalMinutes;
+                if (currentLocal > notionTotalMinutes && (currentLocal - notionTotalMinutes) <= 5) {
+                    finalMinutes = currentLocal;
+                }
+                localStorage.setItem(key, String(finalMinutes));
+                localStorage.setItem(legacyKey, String(finalMinutes));
+                console.log(`☁️ [스크린타임 클라우드 동기화] ${child}: 노션 ${notionTotalMinutes}분 ➔ 로컬 동기화 완료 (최종: ${finalMinutes}분)`);
             }
         });
     }
@@ -239,23 +244,36 @@
             if (jsonText && jsonText.trim()) {
                 const parsed = JSON.parse(jsonText);
                 if (parsed && typeof parsed === 'object') {
-                    const approvalDate = parsed.screentimeApproval?.date || parsed.screentime_approved_date;
-                    const isApproved = parsed.screentimeApproval?.approved ?? (approvalDate === todayStr);
-                    if (approvalDate === todayStr && typeof isApproved === 'boolean') {
-                        const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
-                        localStorage.setItem(approvalKey, String(isApproved));
-                        
-                        // ⏰ [차액 정산] 승인 누적 분 동기화
-                        if (parsed.screentimeApproval?.approvedMinutes !== undefined) {
-                            setTodayApprovedMinutes(parsed.screentimeApproval.approvedMinutes, name);
-                        } else if (isApproved) {
-                            // 과거 호환: boolean이 true면 현재까지 계산된 시간 전량 승인으로 간주
-                            const raw = getTodayStudyMinutes(name);
-                            const adj = raw > 0 ? Math.ceil(raw / 10) * 10 : 0;
-                            const bonus = (getTodayEarnedCurrency(name) >= 50) ? 30 : 0;
-                            setTodayApprovedMinutes(adj + bonus, name);
+                    // 💾 전체 설정 로컬 캐시 보존
+                    localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${name}`, jsonText);
+                    const childKey = name === "민수" ? "minsu" : "minseo";
+                    localStorage.setItem(`MINMIN_LAST_CLOUD_SETTINGS_${childKey}`, jsonText);
+
+                    // 다중 스키마 전수 지원: screenTime.minsu / screenTime.minseo / screenTime / screentimeApproval
+                    const approvalObj = parsed.screenTime?.[childKey]
+                        || parsed.screenTime?.[name]
+                        || (parsed.screenTime && typeof parsed.screenTime.date === 'string' ? parsed.screenTime : null)
+                        || parsed.screentimeApproval
+                        || null;
+
+                    if (approvalObj) {
+                        const approvalDate = approvalObj.date || parsed.screentime_approved_date;
+                        const isApproved = approvalObj.approved ?? (approvalDate === todayStr);
+                        if (approvalDate === todayStr) {
+                            const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
+                            localStorage.setItem(approvalKey, String(isApproved));
+                            
+                            // ⏰ [차액 정산] 승인 누적 분 동기화 (클라우드 최우선 SSOT)
+                            if (approvalObj.approvedMinutes !== undefined) {
+                                setTodayApprovedMinutes(approvalObj.approvedMinutes, name);
+                            } else if (isApproved) {
+                                const raw = getTodayStudyMinutes(name);
+                                const adj = raw > 0 ? Math.ceil(raw / 10) * 10 : 0;
+                                const bonus = (getTodayEarnedCurrency(name) >= 50) ? 30 : 0;
+                                setTodayApprovedMinutes(adj + bonus, name);
+                            }
+                            console.log(`☁️ [스크린타임 승인 동기화] ${name}: 승인 (${isApproved ? '완료' : '대기'}), 누적승인: ${getTodayApprovedMinutes(name)}분 ➔ 로컬 반영 완료`);
                         }
-                        console.log(`☁️ [스크린타임 승인 동기화] ${name}: 승인 (${isApproved ? '완료' : '대기'}), 누적승인: ${getTodayApprovedMinutes(name)}분 ➔ 로컬 반영 완료`);
                     }
                 }
             }
