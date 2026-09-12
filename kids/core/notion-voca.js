@@ -314,7 +314,7 @@ function mapNotionRecordsToReadingBooks(records, localDatabase) {
         .map(res => {
             const barcode = res.properties?.["도서 키(ID)"]?.rich_text?.[0]?.plain_text;
             if (!barcode) return null;
-            return localDatabase.find(book => book.id === barcode) || null;
+            return localDatabase.find(book => book.id === barcode || book.aliasId === barcode) || null;
         })
         .filter(Boolean)
         .slice(0, MAX_READING_PASSAGES);
