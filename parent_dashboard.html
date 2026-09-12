@@ -188,7 +188,7 @@
         </div>
 
         <div style="background: #ffffff; border: 1.5px dashed #10b981; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; text-align: center;">
-          <div style="font-size: 0.8rem; color: #065f46; font-weight: bold; margin-bottom: 2px;">패밀리링크 총 연장 권장 시간</div>
+          <div style="font-size: 0.8rem; color: #065f46; font-weight: bold; margin-bottom: 2px;" id="ms-st-total-label">패밀리링크 지금 추가 연장할 시간</div>
           <div style="font-size: 1.45rem; font-weight: 900; color: #059669;" id="ms-st-total-time">0분 (0시간 0분)</div>
           <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;" id="ms-st-ticket-split">발급 티켓: 없음</div>
         </div>
@@ -197,6 +197,9 @@
         <button type="button" id="ms-st-approve-btn" onclick="toggleParentScreenTimeApproval('민수')" style="width: 100%; padding: 10px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; border: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: linear-gradient(135deg, #10b981, #059669); color: #fff;">
           ✅ 패밀리링크 연장 완료 승인
         </button>
+        <div id="ms-st-reset-wrap" style="text-align: center; margin-top: 6px; display: none;">
+          <button type="button" onclick="resetParentScreenTimeApproval('민수')" style="background: none; border: none; color: #64748b; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">↩️ 오늘 연장 승인 초기화 (대기 시간 복원)</button>
+        </div>
       </div>
 
       <!-- 🌱 [데일리 루틴 & 저금통] 민수의 생활 습관 & 부모 칭찬 코칭 카드 -->
@@ -427,7 +430,7 @@
         </div>
 
         <div style="background: #ffffff; border: 1.5px dashed #ec4899; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; text-align: center;">
-          <div style="font-size: 0.8rem; color: #9d174d; font-weight: bold; margin-bottom: 2px;">패밀리링크 총 연장 권장 시간</div>
+          <div style="font-size: 0.8rem; color: #9d174d; font-weight: bold; margin-bottom: 2px;" id="ds-st-total-label">패밀리링크 지금 추가 연장할 시간</div>
           <div style="font-size: 1.45rem; font-weight: 900; color: #db2777;" id="ds-st-total-time">0분 (0시간 0분)</div>
           <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;" id="ds-st-ticket-split">발급 티켓: 없음</div>
         </div>
@@ -436,6 +439,9 @@
         <button type="button" id="ds-st-approve-btn" onclick="toggleParentScreenTimeApproval('민서')" style="width: 100%; padding: 10px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; border: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: linear-gradient(135deg, #ec4899, #db2777); color: #fff;">
           ✅ 패밀리링크 연장 완료 승인
         </button>
+        <div id="ds-st-reset-wrap" style="text-align: center; margin-top: 6px; display: none;">
+          <button type="button" onclick="resetParentScreenTimeApproval('민서')" style="background: none; border: none; color: #64748b; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">↩️ 오늘 연장 승인 초기화 (대기 시간 복원)</button>
+        </div>
       </div>
 
       <!-- 🌱 [통합교과 하루] 민서의 생활 습관 & 부모 칭찬 코칭 카드 -->
@@ -643,11 +649,11 @@
       </div>
 
       <div>
-        <h4 style="margin:0 0 6px; color:#059669; font-family:'Jua', sans-serif; font-size:1.15rem;">6. 스크린타임 스마트 정산소 & 10분 올림 30분 추가권 시스템</h4>
-        <p style="margin:0;">• <b>쿨한 10분 올림</b>: 공부방 이용으로 아이의 폰 스크린타임이 닳는 억울함을 해소하기 위해, 실제 순수 공부 시간을 10분 단위로 무조건 올려서 정산합니다 (예: 29분 ➔ 30분, 36분 ➔ 40분).<br>
+        <h4 style="margin:0 0 6px; color:#059669; font-family:'Jua', sans-serif; font-size:1.15rem;">6. 스크린타임 스마트 정산소 & 차액 정산 (0분 초기화 시스템)</h4>
+        <p style="margin:0;">• <b>쿨한 10분 올림</b>: 공부방 이용으로 아이의 폰 스크린타임이 닳는 억울함을 해소하기 위해, 실제 순수 공부 시간을 10분 단위로 무조건 올려서 정산합니다 (예: 21분 ➔ 30분, 36분 ➔ 40분).<br>
         • <b>30분권 단위 분할</b>: 시계 보기를 배우는 초1 민서의 눈높이에 맞춰 30분 단위(<code>⏰ 시계 반 바퀴</code>) 티켓과 10분 자투리 티켓으로 분할 발급합니다.<br>
         • <b>오늘 보상 50개 달성 보너스</b>: 하루 보상 50개(오늘 복습 2회+예습 1회+스토리북 1권 수준)를 모으면 <b>[🎫 30분 자유 시간 추가권]</b> 1장이 자동으로 추가 보너스 지급됩니다.<br>
-        • <b>부모 원클릭 승인</b>: 부모 대시보드에서 '패밀리링크 총 연장 권장 시간'을 확인하고 [✅ 패밀리링크 연장 완료 승인] 버튼을 누르면 상태가 즉시 동기화됩니다.</p>
+        • <b>차액 정산 & 대기 시간 0분 초기화</b>: 부모님이 [✅ 지금 N분 연장 완료 승인] 버튼을 누르면 대기 시간이 <b>0분으로 즉시 초기화</b>되며, 노션 클라우드에 영구 저장되어 엄마/아빠 어느 기기에서 접속하든 지금 추가로 연장해 줄 시간만 깔끔하게 계산되어 보입니다.</p>
       </div>
     </div>
 

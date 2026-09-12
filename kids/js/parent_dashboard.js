@@ -645,7 +645,7 @@ async function loadDashboardData() {
   }
 }
 
-// 📱 스크린타임 스마트 정산기 UI 바인딩
+// 📱 스크린타임 스마트 정산기 UI 바인딩 (차액 정산: 대기시간 0분 초기화 및 기기간 동기화)
 function renderScreenTimeWidget(childName) {
   if (typeof window.ScreenTimeTracker === 'undefined') return;
 
@@ -657,17 +657,21 @@ function renderScreenTimeWidget(childName) {
   const roundedNoteEl = document.getElementById(prefix + "-st-rounded-note");
   const rewardQuestEl = document.getElementById(prefix + "-st-reward-quest");
   const rewardTicketNoteEl = document.getElementById(prefix + "-st-reward-ticket-note");
+  const totalLabelEl = document.getElementById(prefix + "-st-total-label");
   const totalTimeEl = document.getElementById(prefix + "-st-total-time");
   const ticketSplitEl = document.getElementById(prefix + "-st-ticket-split");
   const badgeEl = document.getElementById(prefix + "-st-status-badge");
   const approveBtn = document.getElementById(prefix + "-st-approve-btn");
+  const resetWrapEl = document.getElementById(prefix + "-st-reset-wrap");
 
-  const rawMinutes = summary.rawStudyMinutes ?? summary.rawMinutes ?? 0;
-  const studyMinutes = summary.studyMinutes ?? summary.adjustedStudyMinutes ?? 0;
-  const rewardEarned = summary.todayRewardEarned ?? summary.earnedCurrency ?? 0;
-  const is50Reached = summary.isBonusTicketEarned ?? summary.is50QuestReached ?? (rewardEarned >= 50);
-  const totalMinutes = summary.totalTimeGrantMinutes ?? summary.totalMinutes ?? 0;
-  const isApproved = summary.isParentApproved ?? summary.isApproved ?? false;
+  const rawMinutes = summary.rawMinutes ?? 0;
+  const studyMinutes = summary.adjustedStudyMinutes ?? 0;
+  const rewardEarned = summary.earnedCurrency ?? 0;
+  const is50Reached = summary.is50QuestReached ?? false;
+  const totalMinutes = summary.totalMinutes ?? 0;
+  const approvedMinutes = summary.approvedMinutes ?? 0;
+  const pendingMinutes = summary.pendingMinutes ?? 0;
+  const isFullyApproved = summary.isFullyApproved ?? false;
 
   if (studyTimeEl) studyTimeEl.textContent = rawMinutes + "분";
   if (roundedNoteEl) roundedNoteEl.textContent = `➔ 10분 올림: ${studyMinutes}분`;
@@ -683,106 +687,209 @@ function renderScreenTimeWidget(childName) {
     }
   }
 
-  if (totalTimeEl) {
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    const hourStr = hours > 0 ? `${hours}시간 ${mins}분` : `${mins}분`;
-    totalTimeEl.textContent = `${totalMinutes}분 (${hourStr})`;
+  // 1. 라벨 영역 동적 반영
+  if (totalLabelEl) {
+    if (pendingMinutes > 0) {
+      totalLabelEl.innerHTML = `👉 지금 패밀리링크 <span style="text-decoration:underline;">추가 연장</span>할 시간`;
+      totalLabelEl.style.color = isMinseo ? "#9d174d" : "#065f46";
+    } else if (totalMinutes > 0) {
+      totalLabelEl.innerHTML = `🎉 오늘 달성 시간 모두 연장 완료`;
+      totalLabelEl.style.color = "#15803d";
+    } else {
+      totalLabelEl.innerHTML = `패밀리링크 총 연장 권장 시간`;
+      totalLabelEl.style.color = isMinseo ? "#9d174d" : "#065f46";
+    }
   }
 
+  // 2. 대기 시간 vs 누적 인정 시간 3단 직관 박스 (대기 시간 0분 초기화 지원)
+  if (totalTimeEl) {
+    if (pendingMinutes > 0) {
+      const hours = Math.floor(pendingMinutes / 60);
+      const mins = pendingMinutes % 60;
+      const hourStr = hours > 0 ? `${hours}시간 ${mins}분` : `${mins}분`;
+      totalTimeEl.innerHTML = `
+        <div style="font-size: 1.55rem; font-weight: 900; color: ${isMinseo ? '#db2777' : '#059669'};">
+          +${pendingMinutes}분 <span style="font-size: 0.85rem; font-weight: bold; color: #b45309; background: #fef3c7; padding: 2px 7px; border-radius: 8px; vertical-align: middle;">⏳ 연장 대기</span>
+        </div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 3px; font-weight: normal;">
+          오늘 총 인정: <b>${totalMinutes}분</b> ${approvedMinutes > 0 ? `| 이미 연장: <b style="color:#16a34a;">${approvedMinutes}분</b>` : `(아직 연장 전)`}
+        </div>
+      `;
+    } else if (totalMinutes > 0) {
+      totalTimeEl.innerHTML = `
+        <div style="font-size: 1.45rem; font-weight: 900; color: #16a34a;">
+          0분 <span style="font-size: 0.85rem; font-weight: bold; color: #15803d; background: #dcfce7; padding: 2px 7px; border-radius: 8px; vertical-align: middle;">💖 대기 없음</span>
+        </div>
+        <div style="font-size: 0.75rem; color: #15803d; margin-top: 3px; font-weight: normal;">
+          오늘 달성한 <b>${totalMinutes}분</b> 모두 패밀리링크 연장 완료!
+        </div>
+      `;
+    } else {
+      totalTimeEl.innerHTML = `
+        <div style="font-size: 1.35rem; font-weight: 900; color: #94a3b8;">
+          0분 (0시간 0분)
+        </div>
+        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px; font-weight: normal;">
+          아이의 오늘 공부를 기다리고 있어요
+        </div>
+      `;
+    }
+  }
+
+  // 3. 발급 티켓 내역 (지금 연장 대기 vs 승인 완료 구분)
   if (ticketSplitEl) {
     if (summary.tickets && summary.tickets.length > 0) {
-      const parts = summary.tickets.map(t => `${t.label}(${t.minutes}분) x${t.count || 1}장`);
-      ticketSplitEl.textContent = "발급: " + parts.join(" + ");
-    } else if (summary.count30m > 0 || summary.count10m > 0) {
-      const parts = [];
-      if (summary.count30m > 0) parts.push(`30분권 x${summary.count30m}장`);
-      if (summary.count10m > 0) parts.push(`10분권 x${summary.count10m}장`);
-      ticketSplitEl.textContent = "발급: " + parts.join(" + ");
+      const pendingParts = summary.tickets.filter(t => t.status === 'pending').map(t => `${t.label} x${t.count}장`);
+      const approvedParts = summary.tickets.filter(t => t.status === 'approved').map(t => `${t.label} x${t.count}장`);
+      let html = '';
+      if (pendingParts.length > 0) {
+        html += `<span style="color:#b45309; font-weight:bold;">⏳ 지금 연장: ${pendingParts.join(' + ')}</span>`;
+      }
+      if (approvedParts.length > 0) {
+        if (html) html += ' <span style="color:#cbd5e1;">|</span> ';
+        html += `<span style="color:#15803d; font-weight:bold;">✅ 연장 완료: ${approvedParts.join(' + ')}</span>`;
+      }
+      ticketSplitEl.innerHTML = html;
     } else {
       ticketSplitEl.textContent = "발급 티켓: 없음";
     }
   }
 
-  if (isApproved) {
-    if (badgeEl) {
-      badgeEl.textContent = "승인 완료 💖";
+  // 4. 상태 배지
+  if (badgeEl) {
+    if (pendingMinutes > 0) {
+      badgeEl.textContent = `연장 대기: ${pendingMinutes}분 ⏳`;
+      badgeEl.style.background = "#fef3c7";
+      badgeEl.style.color = "#b45309";
+    } else if (totalMinutes > 0) {
+      badgeEl.textContent = "연장 완료 💖 (대기 0분)";
       badgeEl.style.background = "#dcfce7";
       badgeEl.style.color = "#15803d";
+    } else {
+      badgeEl.textContent = "대기 중";
+      badgeEl.style.background = isMinseo ? "#fce7f3" : "#e0f2fe";
+      badgeEl.style.color = isMinseo ? "#be185d" : "#0369a1";
     }
-    if (approveBtn) {
-      approveBtn.textContent = "↩️ 연장 승인 취소하기";
-      approveBtn.style.background = "#64748b";
-    }
-  } else {
-    if (badgeEl) {
-      badgeEl.textContent = totalMinutes > 0 ? "승인 대기 ⏳" : "대기 중";
-      badgeEl.style.background = totalMinutes > 0 ? "#fef3c7" : "#e0f2fe";
-      badgeEl.style.color = totalMinutes > 0 ? "#b45309" : "#0369a1";
-    }
-    if (approveBtn) {
-      approveBtn.textContent = "✅ 패밀리링크 연장 완료 승인";
+  }
+
+  // 5. 원클릭 승인 버튼
+  if (approveBtn) {
+    if (pendingMinutes > 0) {
+      approveBtn.textContent = `✅ 지금 ${pendingMinutes}분 패밀리링크 연장 완료 승인`;
+      approveBtn.disabled = false;
+      approveBtn.style.opacity = "1";
+      approveBtn.style.cursor = "pointer";
       approveBtn.style.background = isMinseo
         ? "linear-gradient(135deg, #ec4899, #db2777)"
         : "linear-gradient(135deg, #10b981, #059669)";
+    } else if (totalMinutes > 0) {
+      approveBtn.textContent = `🎉 오늘 ${totalMinutes}분 연장 완료 (대기 0분)`;
+      approveBtn.disabled = true;
+      approveBtn.style.opacity = "0.85";
+      approveBtn.style.cursor = "default";
+      approveBtn.style.background = "#64748b";
+    } else {
+      approveBtn.textContent = "⏳ 공부 시간 대기 중 (0분)";
+      approveBtn.disabled = true;
+      approveBtn.style.opacity = "0.6";
+      approveBtn.style.cursor = "not-allowed";
+      approveBtn.style.background = "#94a3b8";
     }
+  }
+
+  // 6. 승인 재설정/초기화 링크
+  if (resetWrapEl) {
+    resetWrapEl.style.display = approvedMinutes > 0 ? "block" : "none";
   }
 }
 
-// 📱 부모 승인 토글 핸들러 전역 노출 (로컬 즉시 반영 + 노션 클라우드 영구 저장)
+// 📱 부모 승인 실행 핸들러 (차액 승인: 대기시간 0분 초기화 + 노션 클라우드 영구 저장)
 window.toggleParentScreenTimeApproval = async function(childName) {
   if (typeof window.ScreenTimeTracker === 'undefined') {
     alert("스크린타임 트래커 모듈이 준비되지 않았습니다.");
     return;
   }
-  const newState = window.ScreenTimeTracker.toggleParentApproval(childName);
+  const summaryBefore = window.ScreenTimeTracker.getScreenTimeSummary(childName);
+  if (summaryBefore.pendingMinutes <= 0) {
+    alert(`[${childName}] 이미 오늘 달성한 모든 시간(${summaryBefore.totalMinutes}분)이 패밀리링크 연장 완료되었습니다.`);
+    return;
+  }
+
+  const approveResult = window.ScreenTimeTracker.approvePendingTime(childName);
+  const newlyApproved = approveResult.newlyApprovedMinutes;
   renderScreenTimeWidget(childName);
   
   // ☁️ [클라우드 영구 동기화] 노션 인벤토리 DB의 '학습설정' 속성에 비동기 저장
-  const childData = memoryState[childName];
-  if (childData && childData.pageId) {
-    const todayStr = getTodayDateStr();
-    try {
-      let existingSettings = {};
-      const childKey = childName === "민수" ? "minsu" : "minseo";
-      try {
-        const cachedRaw = localStorage.getItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey);
-        if (cachedRaw) existingSettings = JSON.parse(cachedRaw);
-      } catch (_) {}
+  await saveScreenTimeApprovalToCloud(childName, true, approveResult.totalMinutes);
 
-      existingSettings.screentimeApproval = {
-        date: todayStr,
-        approved: newState,
-        approvedAt: new Date().toISOString()
-      };
-
-      const updatedJson = JSON.stringify(existingSettings);
-      localStorage.setItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey, updatedJson);
-
-      fetch(PROXY_URL + "/v1/pages/" + childData.pageId, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          properties: {
-            "학습설정": {
-              rich_text: [{ type: "text", text: { content: updatedJson } }]
-            }
-          }
-        })
-      }).then(res => {
-        if (res.ok) console.log(`☁️ [스크린타임 승인 클라우드 저장 완료] ${childName}:`, newState);
-      }).catch(err => console.warn(`⚠️ [스크린타임 승인 클라우드 전송 실패]:`, err));
-    } catch (e) {
-      console.warn("⚠️ [스크린타임 클라우드 패치 에러]:", e);
-    }
-  }
-
-  if (newState) {
-    alert(`💖 [${childName}] 패밀리링크 연장 승인이 완료되었습니다!\n아이의 스마트폰 화면에서도 실시간 승인 완료 도장이 쾅 찍힙니다.`);
-  } else {
-    alert(`↩️ [${childName}] 패밀리링크 연장 승인이 취소되었습니다.`);
-  }
+  alert(`💖 [${childName}] ${newlyApproved}분 패밀리링크 연장 확인이 완료되었습니다!\n\n👉 지금 연장할 대기 시간이 0분으로 초기화되었습니다.\n☁️ 노션 클라우드에 영구 저장되어 엄마/아빠 모든 기기에서 즉시 '연장 완료'로 공유됩니다.`);
 };
+
+// 📱 부모 승인 초기화 핸들러 (취소 시 대기 시간으로 복원)
+window.resetParentScreenTimeApproval = async function(childName) {
+  if (typeof window.ScreenTimeTracker === 'undefined') return;
+  if (!confirm(`[${childName}] 오늘 연장 승인을 초기화하고 대기 시간으로 다시 복원하시겠습니까?\n(엄마/아빠 기기 모두 대기 시간으로 복원됩니다.)`)) {
+    return;
+  }
+
+  window.ScreenTimeTracker.resetApproval(childName);
+  renderScreenTimeWidget(childName);
+
+  // ☁️ [클라우드 영구 동기화] 노션 인벤토리 DB의 '학습설정' 속성에 초기화 저장
+  await saveScreenTimeApprovalToCloud(childName, false, 0);
+
+  alert(`↩️ [${childName}] 오늘 연장 승인이 초기화되었습니다.\n오늘 달성한 시간이 다시 승인 대기 상태로 복원되었습니다.`);
+};
+
+// ☁️ 스크린타임 승인 데이터 노션 클라우드 PATCH 헬퍼
+async function saveScreenTimeApprovalToCloud(childName, isApproved, approvedMinutes) {
+  const childData = memoryState[childName];
+  if (!childData || !childData.pageId) return;
+
+  const todayStr = getTodayDateStr();
+  const childKey = childName === "민수" ? "minsu" : "minseo";
+  try {
+    let existingSettings = {};
+    try {
+      const cachedRaw = localStorage.getItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey);
+      if (cachedRaw) existingSettings = JSON.parse(cachedRaw);
+    } catch (_) {}
+
+    existingSettings.screentimeApproval = {
+      date: todayStr,
+      approved: isApproved,
+      approvedMinutes: approvedMinutes,
+      lastApprovedAt: new Date().toISOString(),
+      approvedBy: "부모"
+    };
+
+    const updatedJson = JSON.stringify(existingSettings);
+    localStorage.setItem("MINMIN_LAST_CLOUD_SETTINGS_" + childKey, updatedJson);
+
+    const proxyUrl = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : PROXY_URL;
+    const res = await fetch(proxyUrl + "/v1/pages/" + childData.pageId, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+      },
+      body: JSON.stringify({
+        properties: {
+          "학습설정": {
+            rich_text: [{ type: "text", text: { content: updatedJson } }]
+          }
+        }
+      })
+    });
+    if (res.ok) {
+      console.log(`☁️ [스크린타임 승인 클라우드 저장 완료] ${childName}:`, isApproved, `누적승인: ${approvedMinutes}분`);
+    } else {
+      console.warn(`⚠️ [스크린타임 승인 클라우드 전송 실패]: 응답 코드`, res.status);
+    }
+  } catch (e) {
+    console.warn("⚠️ [스크린타임 클라우드 패치 에러]:", e);
+  }
+}
 
 // 🌱 [데일리 루틴 & 하루] 생활 습관 & 부모 칭찬 코칭 카드 렌더링 (민수/민서 공통)
 function renderHaruParentCoaching(studyLogs = [], childName = "민서") {

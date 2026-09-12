@@ -11,6 +11,24 @@
 (function () {
     const STORAGE_KEY_PREFIX = 'MINMIN_DAILY_STUDY_TIME_';
     const APPROVAL_KEY_PREFIX = 'MINMIN_SCREENTIME_APPROVED_';
+    const APPROVED_MINS_KEY_PREFIX = 'MINMIN_SCREENTIME_APPROVED_MINS_';
+
+    function getTodayApprovedMinutes(childName) {
+        const name = childName || getCurrentChildName();
+        const todayStr = getTodayKey();
+        const key = `${APPROVED_MINS_KEY_PREFIX}${name}_${todayStr}`;
+        const val = parseInt(localStorage.getItem(key) || '0', 10);
+        return Math.max(0, val);
+    }
+
+    function setTodayApprovedMinutes(minutes, childName) {
+        const name = childName || getCurrentChildName();
+        const todayStr = getTodayKey();
+        const key = `${APPROVED_MINS_KEY_PREFIX}${name}_${todayStr}`;
+        const mins = Math.max(0, Number(minutes) || 0);
+        localStorage.setItem(key, String(mins));
+        return mins;
+    }
 
     function getTodayKey() {
         const now = new Date();
@@ -209,7 +227,7 @@
             console.log(`☁️ [스크린타임 보상 동기화] ${name}: 노션 인벤토리 합산 ${totalEarned}개 ➔ 로컬 동기화 완료 (${maxEarned}개)`);
         }
 
-        // 2. 노션 인벤토리 내 '학습설정' 속성에서 부모 승인 상태 추출
+        // 2. 노션 인벤토리 내 '학습설정' 속성에서 부모 승인 상태 및 누적 승인분 추출
         try {
             const settingRaw = props['학습설정']?.rich_text || props['학습설정'];
             let jsonText = '';
@@ -220,13 +238,23 @@
             if (jsonText && jsonText.trim()) {
                 const parsed = JSON.parse(jsonText);
                 if (parsed && typeof parsed === 'object') {
-                    // 예: parsed.screentimeApproval = { "2026-09-10": true } 또는 parsed.screentime_approved === true
                     const approvalDate = parsed.screentimeApproval?.date || parsed.screentime_approved_date;
                     const isApproved = parsed.screentimeApproval?.approved ?? (approvalDate === todayStr);
                     if (approvalDate === todayStr && typeof isApproved === 'boolean') {
                         const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
                         localStorage.setItem(approvalKey, String(isApproved));
-                        console.log(`☁️ [스크린타임 승인 동기화] ${name}: 클라우드 승인 상태 (${isApproved ? '승인' : '미승인'}) ➔ 로컬 반영 완료`);
+                        
+                        // ⏰ [차액 정산] 승인 누적 분 동기화
+                        if (parsed.screentimeApproval?.approvedMinutes !== undefined) {
+                            setTodayApprovedMinutes(parsed.screentimeApproval.approvedMinutes, name);
+                        } else if (isApproved) {
+                            // 과거 호환: boolean이 true면 현재까지 계산된 시간 전량 승인으로 간주
+                            const raw = getTodayStudyMinutes(name);
+                            const adj = raw > 0 ? Math.ceil(raw / 10) * 10 : 0;
+                            const bonus = (getTodayEarnedCurrency(name) >= 50) ? 30 : 0;
+                            setTodayApprovedMinutes(adj + bonus, name);
+                        }
+                        console.log(`☁️ [스크린타임 승인 동기화] ${name}: 승인 (${isApproved ? '완료' : '대기'}), 누적승인: ${getTodayApprovedMinutes(name)}분 ➔ 로컬 반영 완료`);
                     }
                 }
             }
@@ -236,7 +264,7 @@
     }
 
     /**
-     * 10분 단위 올림 및 티켓 정산 종합 분석
+     * 10분 단위 올림 및 티켓 정산 종합 분석 (차액 정산 기반)
      * @param {string} [childName]
      */
     function getScreenTimeSummary(childName) {
@@ -252,46 +280,62 @@
         const is50QuestReached = earnedCurrency >= 50;
         const questBonusMinutes = is50QuestReached ? 30 : 0;
 
-        // 3. 총 인정 시간 합산
+        // 3. 오늘 총 인정 시간 합산
         const totalMinutes = adjustedStudyMinutes + questBonusMinutes;
 
-        // 4. 티켓 분할 연산 (30분권 단위 묶음 + 10분권 자투리)
-        const count30m = Math.floor(totalMinutes / 30);
-        const count10m = Math.floor((totalMinutes % 30) / 10);
+        // 4. [차액 정산 핵심] 오늘 이미 승인(연장) 완료된 시간 & 지금 추가 연장할 잔여 대기 시간
+        const todayStr = getTodayKey();
+        const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
+        const legacyApproved = localStorage.getItem(approvalKey) === 'true';
+        let approvedMinutes = getTodayApprovedMinutes(name);
 
-        // 5. 초1 민서 맞춤형 시계 바늘 비유 텍스트
+        // 과거 호환: approvedMinutes가 0인데 legacyApproved가 true면 totalMinutes 전량 승인으로 간주
+        if (approvedMinutes === 0 && legacyApproved && totalMinutes > 0) {
+            approvedMinutes = totalMinutes;
+            setTodayApprovedMinutes(totalMinutes, name);
+        }
+        // 승인 완료 시간은 총 인정 시간을 초과할 수 없음
+        approvedMinutes = Math.min(totalMinutes, approvedMinutes);
+
+        // 👉 지금 추가 연장해야 할 대기 시간 (정산 차액)
+        const pendingMinutes = Math.max(0, totalMinutes - approvedMinutes);
+        const isFullyApproved = totalMinutes > 0 && pendingMinutes === 0;
+
+        // 5. 티켓 분할 연산 (대기 중인 티켓 & 승인 완료 티켓)
+        const count30m = Math.floor(pendingMinutes / 30);
+        const count10m = Math.floor((pendingMinutes % 30) / 10);
+        const totalCount30m = Math.floor(totalMinutes / 30);
+        const totalCount10m = Math.floor((totalMinutes % 30) / 10);
+        const approvedCount30m = Math.floor(approvedMinutes / 30);
+        const approvedCount10m = Math.floor((approvedMinutes % 30) / 10);
+
+        // 6. 초1 민서 맞춤형 시계 바늘 비유 텍스트
         let clockMetaphor = '';
         if (totalMinutes === 0) {
             clockMetaphor = '아직 공부를 시작하지 않았어요!';
-        } else if (totalMinutes < 30) {
-            clockMetaphor = `⏰ 깜짝 10분 보너스 ${count10m}칸!`;
-        } else if (totalMinutes === 30) {
-            clockMetaphor = '⏰ 시계 긴바늘 딱 반 바퀴(30분) 완성!';
-        } else if (totalMinutes === 60) {
-            clockMetaphor = '⏰ 시계 긴바늘 한 바퀴(60분) 완벽 정복!';
+        } else if (pendingMinutes > 0) {
+            clockMetaphor = `⏰ 지금 추가 연장할 시간: ${pendingMinutes}분!`;
         } else {
-            const hours = Math.floor(totalMinutes / 60);
-            const remainMins = totalMinutes % 60;
-            clockMetaphor = `⏰ 총 ${hours > 0 ? hours + '시간 ' : ''}${remainMins > 0 ? remainMins + '분' : ''} 자유 이용권!`;
+            clockMetaphor = `🎉 오늘 달성한 ${totalMinutes}분 모두 승인 완료!`;
         }
-
-        // 6. 부모 승인 상태 확인
-        const todayStr = getTodayKey();
-        const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
-        const isApproved = localStorage.getItem(approvalKey) === 'true';
 
         // 7. 티켓 객체 배열 구성
         const tickets = [];
         if (count30m > 0) {
-            tickets.push({ label: '30분권', minutes: 30, count: count30m, badge: '시계 반 바퀴' });
+            tickets.push({ label: '30분권', minutes: 30, count: count30m, badge: '지금 연장', status: 'pending' });
         }
         if (count10m > 0) {
-            tickets.push({ label: '10분권', minutes: 10, count: count10m, badge: '보너스 칸' });
+            tickets.push({ label: '10분권', minutes: 10, count: count10m, badge: '지금 연장', status: 'pending' });
+        }
+        if (approvedCount30m > 0) {
+            tickets.push({ label: '30분권', minutes: 30, count: approvedCount30m, badge: '승인 완료', status: 'approved' });
+        }
+        if (approvedCount10m > 0) {
+            tickets.push({ label: '10분권', minutes: 10, count: approvedCount10m, badge: '승인 완료', status: 'approved' });
         }
 
         return {
             childName: name,
-            // [포맷 1] screentime-tracker 원본 프로퍼티
             rawMinutes,
             adjustedStudyMinutes,
             roundUpBonus,
@@ -299,33 +343,82 @@
             is50QuestReached,
             questBonusMinutes,
             totalMinutes,
+
+            // [차액 정산 핵심 프로퍼티]
+            approvedMinutes,
+            pendingMinutes,
+            isFullyApproved,
+            isApproved: isFullyApproved,
+
             count30m,
             count10m,
+            totalCount30m,
+            totalCount10m,
+            approvedCount30m,
+            approvedCount10m,
             clockMetaphor,
-            isApproved,
 
-            // [포맷 2] parent_dashboard.js 완전 호환 프로퍼티
+            // [parent_dashboard 호환 프로퍼티]
             rawStudyMinutes: rawMinutes,
             studyMinutes: adjustedStudyMinutes,
             todayRewardEarned: earnedCurrency,
             isBonusTicketEarned: is50QuestReached,
             totalTimeGrantMinutes: totalMinutes,
-            isParentApproved: isApproved,
+            isParentApproved: isFullyApproved,
             tickets: tickets
         };
     }
 
     /**
-     * 부모 승인 토글 처리
+     * 부모가 '지금 추가 연장 대기 시간'을 승인 완료 처리
+     * (대기 시간 ➔ 승인 누적치로 합산, 대기 시간 0분으로 초기화)
      */
-    function toggleParentApproval(childName, approvedState) {
+    function approvePendingTime(childName) {
+        const name = childName || getCurrentChildName();
+        const s = getScreenTimeSummary(name);
+        const todayStr = getTodayKey();
+        const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
+
+        // 총 인정 시간을 전량 승인 완료로 확정
+        setTodayApprovedMinutes(s.totalMinutes, name);
+        localStorage.setItem(approvalKey, 'true');
+        console.log(`📱 [스크린타임 연장 승인 완료] ${name}: 총 ${s.totalMinutes}분 승인 (새로 승인: +${s.pendingMinutes}분) ➔ 대기 시간 0분 초기화`);
+
+        return {
+            childName: name,
+            totalMinutes: s.totalMinutes,
+            approvedMinutes: s.totalMinutes,
+            newlyApprovedMinutes: s.pendingMinutes,
+            pendingMinutes: 0
+        };
+    }
+
+    /**
+     * 승인 초기화/재계산 (취소 시 대기 시간 복원)
+     */
+    function resetApproval(childName) {
         const name = childName || getCurrentChildName();
         const todayStr = getTodayKey();
         const approvalKey = `${APPROVAL_KEY_PREFIX}${name}_${todayStr}`;
-        const state = approvedState !== undefined ? !!approvedState : (localStorage.getItem(approvalKey) !== 'true');
-        localStorage.setItem(approvalKey, String(state));
-        console.log(`📱 [스크린타임 승인 상태 변경] ${name}: ${state ? '승인 완료 ✅' : '미승인 ⏳'}`);
-        return state;
+        setTodayApprovedMinutes(0, name);
+        localStorage.setItem(approvalKey, 'false');
+        console.log(`📱 [스크린타임 승인 초기화] ${name}: 승인 누적분 0분으로 재설정`);
+        return getScreenTimeSummary(name);
+    }
+
+    /**
+     * 부모 승인 토글 처리 (하위 호환)
+     */
+    function toggleParentApproval(childName, approvedState) {
+        const name = childName || getCurrentChildName();
+        const s = getScreenTimeSummary(name);
+        if (approvedState === true || (approvedState === undefined && s.pendingMinutes > 0)) {
+            approvePendingTime(name);
+            return true;
+        } else {
+            resetApproval(name);
+            return false;
+        }
     }
 
     /**
@@ -366,17 +459,30 @@
                         <span class="r-val">${s.rawMinutes}분</span>
                     </div>
                     <div class="receipt-row highlight-bonus">
-                        <span class="r-label">🎁 아빠의 쿨한 올림 보너스</span>
-                        <span class="r-val">+${s.roundUpBonus}분 보정</span>
+                        <span class="r-label">🎁 10분 단위 쿨한 올림 보정</span>
+                        <span class="r-val">+${s.roundUpBonus}분</span>
                     </div>
+                    ${s.is50QuestReached ? `
+                    <div class="receipt-row highlight-bonus">
+                        <span class="r-label">🎯 오늘 50개 달성 보너스</span>
+                        <span class="r-val">+30분 추가!</span>
+                    </div>` : `
                     <div class="receipt-row">
                         <span class="r-label">🎯 오늘 보상 획득 (${s.earnedCurrency}/50개)</span>
-                        <span class="r-val">${s.is50QuestReached ? '✨ 50개 달성 완료 (+30분)' : '⏳ 진행 중'}</span>
-                    </div>
+                        <span class="r-val" style="color:#64748b;">${Math.max(0, 50 - s.earnedCurrency)}개 더 모으면 +30분</span>
+                    </div>`}
                     <div class="receipt-divider"></div>
                     <div class="receipt-row total-row">
-                        <span class="r-total-label">👉 오늘 총 획득 시간</span>
-                        <span class="r-total-val">${s.totalMinutes}분</span>
+                        <span class="r-total-label">🏆 오늘 총 인정 시간</span>
+                        <span class="r-total-val" style="color:#0284c7;">${s.totalMinutes}분</span>
+                    </div>
+                    <div class="receipt-row" style="margin-top:6px; font-size:0.92rem;">
+                        <span class="r-label" style="color:#16a34a; font-weight:bold;">✅ 이미 부모님 연장 완료</span>
+                        <span class="r-val" style="color:#16a34a; font-weight:bold;">${s.approvedMinutes}분</span>
+                    </div>
+                    <div class="receipt-row" style="margin-top:4px; font-size:1.02rem; background:#fff1f2; padding:6px 10px; border-radius:10px; border:1px solid #fecdd3;">
+                        <span class="r-label" style="color:#e11d48; font-weight:bold;">⏳ 지금 추가 연장 대기</span>
+                        <span class="r-val" style="color:#e11d48; font-weight:bold; font-size:1.25rem;">${s.pendingMinutes}분</span>
                     </div>
                 </div>
 
@@ -385,17 +491,31 @@
                     <div class="tickets-title">🎫 발급된 티켓 목록 (부모님께 보여주세요!)</div>
                     <div class="tickets-grid">
                         ${s.count30m > 0 ? `
-                            <div class="screentime-ticket ticket-30m">
-                                <div class="ticket-badge">시계 반 바퀴</div>
+                            <div class="screentime-ticket ticket-30m animate-pulse-ticket">
+                                <div class="ticket-badge" style="background:#ea580c; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장</div>
                                 <div class="ticket-time">30분권</div>
                                 <div class="ticket-qty">x ${s.count30m}장</div>
                             </div>
                         ` : ''}
                         ${s.count10m > 0 ? `
-                            <div class="screentime-ticket ticket-10m">
-                                <div class="ticket-badge">보너스 칸</div>
+                            <div class="screentime-ticket ticket-10m animate-pulse-ticket">
+                                <div class="ticket-badge" style="background:#c026d3; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장</div>
                                 <div class="ticket-time">10분권</div>
                                 <div class="ticket-qty">x ${s.count10m}장</div>
+                            </div>
+                        ` : ''}
+                        ${s.approvedCount30m > 0 ? `
+                            <div class="screentime-ticket ticket-30m" style="opacity:0.75; filter:grayscale(0.2); background:#f1f5f9; border-color:#94a3b8; color:#475569;">
+                                <div class="ticket-badge" style="background:#16a34a; color:#fff; border-radius:6px; padding:2px 6px;">✅ 연장 완료</div>
+                                <div class="ticket-time">30분권</div>
+                                <div class="ticket-qty">x ${s.approvedCount30m}장</div>
+                            </div>
+                        ` : ''}
+                        ${s.approvedCount10m > 0 ? `
+                            <div class="screentime-ticket ticket-10m" style="opacity:0.75; filter:grayscale(0.2); background:#f1f5f9; border-color:#94a3b8; color:#475569;">
+                                <div class="ticket-badge" style="background:#16a34a; color:#fff; border-radius:6px; padding:2px 6px;">✅ 연장 완료</div>
+                                <div class="ticket-time">10분권</div>
+                                <div class="ticket-qty">x ${s.approvedCount10m}장</div>
                             </div>
                         ` : ''}
                         ${s.totalMinutes === 0 ? `
@@ -406,8 +526,8 @@
 
                 <!-- 4. 하단 승인 상태 및 안내 -->
                 <div class="screentime-footer">
-                    <div class="approval-status-chip ${s.isApproved ? 'is-approved' : 'is-pending'}">
-                        ${s.isApproved ? '✅ 부모님 승인 완료! (패밀리링크 연장됨)' : '⏳ 부모님 승인 대기 중 (아빠/엄마께 자랑하세요!)'}
+                    <div class="approval-status-chip ${s.isFullyApproved ? 'is-approved' : 'is-pending'}">
+                        ${s.isFullyApproved ? '✅ 오늘 공부한 시간 모두 부모님 승인 완료! (패밀리링크 반영됨)' : (s.pendingMinutes > 0 ? `⏳ ${s.pendingMinutes}분 추가 연장 대기 중 (아빠/엄마께 보여주세요!)` : '대기 중')}
                     </div>
                     <button type="button" class="screentime-confirm-btn" onclick="window.closeScreenTimeReceiptModal()">
                         확인 완료 👍
@@ -541,6 +661,10 @@
         syncFromInventoryProps,
         getScreenTimeSummary,
         toggleParentApproval,
+        approvePendingTime,
+        resetApproval,
+        getTodayApprovedMinutes,
+        setTodayApprovedMinutes,
         openScreenTimeReceiptModal,
         closeScreenTimeReceiptModal
     };
@@ -550,6 +674,8 @@
     window.trackStudySession = trackStudySession;
     window.recordDailyRewardEarned = recordDailyRewardEarned;
     window.syncFromInventoryProps = syncFromInventoryProps;
+    window.approvePendingScreenTime = approvePendingTime;
+    window.resetScreenTimeApproval = resetApproval;
 
-    console.log('⏰ [스크린타임 트래커 로드 완료] ScreenTimeTracker 활성화');
+    console.log('⏰ [스크린타임 트래커 로드 완료] ScreenTimeTracker 활성화 (차액 정산 엔진 탑재)');
 })();

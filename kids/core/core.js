@@ -7,7 +7,8 @@ var requiredCores = [
     "fairy-config.js",
     "fairy-engine.js",
     "daily-diary.js",
-    "quiz-flow-controller.js"
+    "quiz-flow-controller.js",
+    "screentime-tracker.js"
 ];
 
 // 글로벌 헬퍼 상태 정의 (공통 사용)
