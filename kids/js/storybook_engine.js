@@ -64,7 +64,15 @@
     initLanguageToggleUi();
 
     bindAudioEvents();
-    renderEbook();
+
+    // 6. URL 파라미터 기반 모드 초기화 (예: ?mode=webtoon)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialMode = urlParams.get('mode');
+    if (initialMode === 'webtoon') {
+      setViewerMode('webtoon');
+    } else {
+      renderEbook();
+    }
   }
 
   function initLanguageToggleUi() {
