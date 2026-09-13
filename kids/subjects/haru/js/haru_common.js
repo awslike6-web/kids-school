@@ -1822,7 +1822,7 @@ function startClockLiveTimer() {
   }, 10000);
 }
 
-// 시계판 스티커 핀 렌더링
+// 시계판 스티커 핀 렌더링 (2중 동심원 지그재그 & 충돌 회피 알고리즘)
 function renderClockPins() {
   const pinsLayer = document.getElementById("clockPinsLayer");
   if (!pinsLayer) return;
@@ -1833,34 +1833,110 @@ function renderClockPins() {
     ? items 
     : items.filter(it => it.period === timelineFilterPeriod);
 
-  filtered.forEach(item => {
-    if (!item.time) return;
-    const parts = item.time.split(":");
-    const h = parseInt(parts[0], 10) || 0;
-    const m = parseInt(parts[1], 10) || 0;
+  if (!filtered || filtered.length === 0) return;
 
-    const angleDeg = (h % 24) * 15 + (m / 60) * 15;
-    const rad = (angleDeg - 90) * (Math.PI / 180);
-    // 반경 30% (사분면 내부 중심축)
-    const x = 50 + 30 * Math.cos(rad);
-    const y = 50 + 30 * Math.sin(rad);
+  // 1. 유효 시간 파싱 및 각도 계산 후 시간순 정렬
+  const parsedItems = filtered
+    .filter(item => item.time && item.time.includes(":"))
+    .map(item => {
+      const parts = item.time.split(":");
+      const h = parseInt(parts[0], 10) || 0;
+      const m = parseInt(parts[1], 10) || 0;
+      const totalMinutes = (h % 24) * 60 + m;
+      // 24시간 원형: 1440분 = 360도 => 1분당 0.25도
+      const angleDeg = totalMinutes * 0.25;
+      return { item, h, m, totalMinutes, angleDeg };
+    })
+    .sort((a, b) => a.totalMinutes - b.totalMinutes);
+
+  // 2. 2중 지그재그 트랙 (외곽 36.5% / 내곽 25.5% / 보조 18.5%)
+  // 기본 규칙: 정각대 (m < 15 || m >= 45) -> 외곽 트랙 (36.5%)
+  //           30분대 (15 <= m < 45) -> 내곽 트랙 (25.5%)
+  // 인접 핀(12도 미만 / 48분 이내) 충돌 시 지그재그 트랙 스왑 및 거리 확보
+  const placedPins = [];
+
+  parsedItems.forEach((entry) => {
+    const { item, m, angleDeg } = entry;
+    const radAngle = (angleDeg - 90) * (Math.PI / 180);
+
+    // 정각 vs 30분대 우선순위 반경 후보군
+    const isThirtyish = (m >= 15 && m < 45);
+    const candidateRadii = isThirtyish 
+      ? [25.5, 36.5, 18.5, 31.0] 
+      : [36.5, 25.5, 31.0, 18.5];
+
+    let chosenRadius = candidateRadii[0];
+    let bestDist = -1;
+
+    // 이미 배치된 핀들과의 화면상 거리(%) 계산하여 겹치지 않는(최소 9.5% 이상) 최적 반경 선택
+    for (let r of candidateRadii) {
+      const curX = 50 + r * Math.cos(radAngle);
+      const curY = 50 + r * Math.sin(radAngle);
+
+      let minDistance = 9999;
+      for (let p of placedPins) {
+        const dist = Math.hypot(curX - p.x, curY - p.y);
+        if (dist < minDistance) minDistance = dist;
+      }
+
+      // 30px 뱃지는 약 330px 시계에서 약 9.1% 크기. 9.5% 이상이면 완벽히 비접촉
+      if (minDistance >= 9.5) {
+        chosenRadius = r;
+        bestDist = minDistance;
+        break;
+      } else if (minDistance > bestDist) {
+        bestDist = minDistance;
+        chosenRadius = r;
+      }
+    }
+
+    const finalX = 50 + chosenRadius * Math.cos(radAngle);
+    const finalY = 50 + chosenRadius * Math.sin(radAngle);
+
+    placedPins.push({ x: finalX, y: finalY, item });
 
     const pinEl = document.createElement("div");
-    pinEl.className = "clock-pin-badge";
-    pinEl.style.left = `${x}%`;
-    pinEl.style.top = `${y}%`;
-    pinEl.title = `${item.time} ${item.title}`;
+    pinEl.className = `clock-pin-badge period-${item.period || 'lunch'}`;
+    pinEl.style.left = `${finalX.toFixed(2)}%`;
+    pinEl.style.top = `${finalY.toFixed(2)}%`;
+
+    // 상단 22% 이내에 위치한 핀은 툴팁이 시계 밖 위로 잘리지 않도록 아래쪽으로 팝업
+    if (finalY < 22) {
+      pinEl.classList.add("pop-down");
+    }
+
+    // 미니멀 원형 아이콘 + 플로팅 툴팁 팝업 구조
     pinEl.innerHTML = `
       <span class="pin-icon">${item.icon || "⭐"}</span>
-      <span class="pin-time-bubble">${item.time}</span>
+      <div class="pin-pop-tooltip">
+        <span class="pin-pop-time">⏰ ${item.time}</span>
+        <span class="pin-pop-title">${item.icon || "⭐"} ${item.title}</span>
+        ${item.memo ? `<span class="pin-pop-memo">💭 ${item.memo}</span>` : ""}
+      </div>
     `;
 
-    pinEl.addEventListener("click", () => {
+    // 클릭 / 터치 시 툴팁 토글 및 요정 코코 음성 안내 + 시계 바늘 가리키기
+    pinEl.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const allPins = pinsLayer.querySelectorAll(".clock-pin-badge");
+      allPins.forEach(p => { if (p !== pinEl) p.classList.remove("active"); });
+      pinEl.classList.toggle("active");
+
       speakTimelineItem(item);
     });
 
     pinsLayer.appendChild(pinEl);
   });
+
+  // 시계판 핀 팝업 외부 클릭 시 닫기 (1회 등록)
+  if (!window._clockPinGlobalClickBound) {
+    window._clockPinGlobalClickBound = true;
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".clock-pin-badge")) {
+        document.querySelectorAll(".clock-pin-badge.active").forEach(p => p.classList.remove("active"));
+      }
+    });
+  }
 }
 
 // 타임라인 리스트 렌더링

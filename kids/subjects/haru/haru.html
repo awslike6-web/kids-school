@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>민민이네 공부방 - 🌱 슬기로운 하루 탐험관 (1학년 2학기)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/haru.css?v=20260913_05">
+  <link rel="stylesheet" href="../../css/haru.css?v=20260914_01">
 </head>
 <body>
 
@@ -362,11 +362,13 @@
         <!-- 24시간 원형 시계 비주얼 -->
         <div class="magic-clock-container">
           <div class="magic-clock-dial" id="magicClockDial">
-            <!-- 4대 시간대 배경 사분면 -->
-            <div class="clock-period-quad morning" title="상쾌한 아침 (06~12시)"></div>
-            <div class="clock-period-quad lunch" title="활기찬 점심 (12~17시)"></div>
-            <div class="clock-period-quad evening" title="노을빛 저녁 (17~21시)"></div>
-            <div class="clock-period-quad night" title="포근한 밤 (21~06시)"></div>
+            <!-- 4대 시간대 배경 사분면 (원형 클리핑) -->
+            <div class="clock-quads-layer">
+              <div class="clock-period-quad morning" title="상쾌한 아침 (06~12시)"></div>
+              <div class="clock-period-quad lunch" title="활기찬 점심 (12~17시)"></div>
+              <div class="clock-period-quad evening" title="노을빛 저녁 (17~21시)"></div>
+              <div class="clock-period-quad night" title="포근한 밤 (21~06시)"></div>
+            </div>
 
             <!-- 시계 중심 바늘 및 허브 -->
             <div class="clock-hand-hour" id="clockHandHour"></div>
@@ -708,7 +710,7 @@
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/daily-diary.js"></script>
 <script src="data/haru_data.js?v=20260913_05"></script>
-<script src="js/haru_common.js?v=20260913_05"></script>
+<script src="js/haru_common.js?v=20260914_01"></script>
 
 </body>
 </html>
