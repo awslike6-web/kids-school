@@ -107,6 +107,18 @@ window.HARU_DATA = {
     title: "가장 좋아하는 하루 & 특별한 날 이야기 (20~21쪽)",
     defaultEvents: [
       {
+        id: "evt_baseball_droneshow_20260912",
+        category: "가족기념일",
+        categoryIcon: "⚾",
+        title: "⚾ 밤하늘을 수놓은 야구 드론쇼 & 온 가족 나들이",
+        date: "2026-09-12 (초가을 밤)",
+        desc: "온 가족이 함께 밤하늘에서 반짝반짝 빛나는 환상적인 야구 드론쇼를 보았어요! 야구공과 글러브, 시원한 홈런 배트 모양으로 수많은 드론들이 밤하늘을 수놓았답니다. 15분 동안 눈을 뗄 수 없을 만큼 신기하고 가슴 벅찬 하루였어요!",
+        icon: "⚾",
+        imageUrl: null,
+        videoUrl: "",
+        fallbackIcon: "⚾"
+      },
+      {
         id: "evt_minseo_peanut_20260910",
         category: "생태/텃밭",
         categoryIcon: "🌱",

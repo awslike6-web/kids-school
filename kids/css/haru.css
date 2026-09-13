@@ -561,6 +561,22 @@ body {
   border-radius: 8px;
   backdrop-filter: blur(4px);
 }
+.special-card-video-chip {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 71, 87, 0.92);
+  color: #fff;
+  font-size: 0.75rem;
+  font-family: 'Jua', sans-serif;
+  padding: 3px 9px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .special-card-thumbs {
   display: flex;
   gap: 6px;
@@ -693,6 +709,51 @@ body {
   align-items: center;
   gap: 6px;
   margin-top: 6px;
+}
+
+/* 🎬 특별한 날 동영상 감상 UI */
+.special-card-video-wrap {
+  margin: 10px 0 6px 0;
+}
+.special-card-video-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  color: #ffffff !important;
+  text-decoration: none;
+  border-radius: 14px;
+  padding: 9px 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.92rem;
+  box-shadow: 0 3px 10px rgba(255, 71, 87, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.special-card-video-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 71, 87, 0.5);
+  background: linear-gradient(135deg, #ee5253, #ff4757);
+}
+.video-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.video-btn-icon {
+  font-size: 1.15rem;
+}
+.video-btn-text {
+  letter-spacing: -0.2px;
+}
+.video-btn-badge {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  letter-spacing: -0.2px;
 }
 .story-photo-upload-zone {
   display: flex;

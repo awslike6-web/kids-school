@@ -743,6 +743,18 @@ function renderSpecialDaysTab() {
       </div>
     `;
 
+    const videoBtnHtml = s.videoUrl ? `
+      <div class="special-card-video-wrap" onclick="event.stopPropagation();">
+        <a href="${s.videoUrl}" target="_blank" rel="noopener noreferrer" class="special-card-video-btn" title="동영상 감상하기 (구글 포토/유튜브/드라이브)">
+          <div class="video-btn-left">
+            <span class="video-btn-icon">🎬</span>
+            <span class="video-btn-text">동영상 보러가기</span>
+          </div>
+          <span class="video-btn-badge">고화질 재생 ➔</span>
+        </a>
+      </div>
+    ` : "";
+
     if (hasPhoto) {
       const thumbsHtml = galleryList.length > 1 ? `
         <div class="special-card-thumbs">
@@ -759,12 +771,14 @@ function renderSpecialDaysTab() {
           <div class="special-card-img-wrap">
             <span class="special-card-category-chip">${categoryIcon} ${category}</span>
             ${galleryList.length > 1 ? `<span class="special-card-photo-count">📷 사진 ${galleryList.length}장</span>` : ''}
+            ${s.videoUrl ? `<span class="special-card-video-chip">🎬 영상 포함</span>` : ''}
             <img id="${mainImgId}" src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
           </div>
           ${thumbsHtml}
           ${titleRowHtml}
           <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
           <p class="special-card-desc">${s.desc}</p>
+          ${videoBtnHtml}
           ${stampHtml}
         </div>
       `;
@@ -776,6 +790,7 @@ function renderSpecialDaysTab() {
         ${titleRowHtml}
         <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
         <p class="special-card-desc">${s.desc}</p>
+        ${videoBtnHtml}
         ${stampHtml}
       </div>
     `;
@@ -794,6 +809,7 @@ function addNewSpecialStory() {
   const descInput = document.getElementById("newStoryDesc");
   const fileInput = document.getElementById("newStoryFileInput");
   const urlInput = document.getElementById("newStoryUrlInput");
+  const videoInput = document.getElementById("newStoryVideoInput");
 
   if (!titleInput || !descInput) return;
 
@@ -802,6 +818,7 @@ function addNewSpecialStory() {
   const date = dateInput && dateInput.value.trim() ? dateInput.value.trim() : new Date().toISOString().slice(0, 10);
   const desc = descInput.value.trim();
   const photoUrl = selectedStoryPhotoBase64 || (urlInput ? urlInput.value.trim() : "");
+  const videoUrl = videoInput ? videoInput.value.trim() : "";
 
   if (!title || !desc) {
     alert("특별한 날의 제목과 즐거웠던 이야기를 적어주세요! ✏️");
@@ -845,7 +862,8 @@ function addNewSpecialStory() {
     date: date,
     desc: desc,
     icon: categoryIconMap[category] || "💖",
-    imageUrl: photoUrl || null
+    imageUrl: photoUrl || null,
+    videoUrl: videoUrl || null
   });
 
   localStorage.setItem("haru_special_stories_" + currentChild, JSON.stringify(stories));
@@ -854,6 +872,7 @@ function addNewSpecialStory() {
   descInput.value = "";
   if (fileInput) fileInput.value = "";
   if (urlInput) urlInput.value = "";
+  if (videoInput) videoInput.value = "";
   if (document.getElementById("newStoryCustomStamp")) {
     document.getElementById("newStoryCustomStamp").value = "";
     document.getElementById("newStoryCustomStamp").style.display = "none";
