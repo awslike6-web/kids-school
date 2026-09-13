@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>민민이네 공부방 - 🌱 슬기로운 하루 탐험관 (1학년 2학기)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/haru.css?v=20260914_01">
+  <link rel="stylesheet" href="../../css/haru.css?v=20260914_02">
 </head>
 <body>
 
@@ -355,7 +355,14 @@
       <!-- 1. 좌측: 24시간 원형 매직 시계판 -->
       <div class="timeline-clock-section">
         <div class="section-badge-row">
-          <span class="badge-sub">🌈 4색 시간 다이얼</span>
+          <div class="clock-mode-toggle-group">
+            <button type="button" class="clock-mode-btn active" id="clockMode24Btn" onclick="setClockHourFormat('24')">
+              🕰️ 24시간
+            </button>
+            <button type="button" class="clock-mode-btn" id="clockMode12Btn" onclick="setClockHourFormat('12')">
+              ⏰ 12시간
+            </button>
+          </div>
           <div class="clock-live-time" id="clockLiveTimeTag">오후 01:40</div>
         </div>
 
@@ -624,7 +631,7 @@
 </div>
 
 <!-- ✏️ 나만의 일과 직접 쓰기 전용 모달 오버레이 -->
-<div class="haru-modal-overlay" id="customTimelineModalOverlay" onclick="if(event.target===this) closeCustomTimelineModal();" style="display:none;">
+<div class="haru-modal-overlay" id="customTimelineModalOverlay" onclick="if(event.target===this) closeCustomTimelineModal();">
   <div class="haru-modal-box" style="max-width:460px;">
     <div class="modal-header" style="background: linear-gradient(135deg, #0984e3, #74b9ff);">
       <div class="modal-header-title">
@@ -633,6 +640,22 @@
       <button class="modal-close-btn" onclick="closeCustomTimelineModal()" title="닫기">✖</button>
     </div>
     <div class="modal-body" style="padding:20px 22px;">
+      
+      <!-- 일정 종류 선택: 당일 특별 일정 vs 매일 반복 루틴 -->
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
+          📌 일정 종류를 골라주세요
+        </label>
+        <div class="schedule-type-toggle-row">
+          <button type="button" class="schedule-type-btn active" id="schedTypeDailyBtn" onclick="selectScheduleType('daily')">
+            📅 이 날만 하는 일
+          </button>
+          <button type="button" class="schedule-type-btn" id="schedTypeRecurringBtn" onclick="selectScheduleType('recurring')">
+            🔄 매일 반복 고정 루틴
+          </button>
+        </div>
+        <input type="hidden" id="customItemScheduleType" value="daily">
+      </div>
       
       <!-- 시간 선택 -->
       <div style="margin-bottom:16px;">
@@ -710,7 +733,7 @@
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/daily-diary.js"></script>
 <script src="data/haru_data.js?v=20260913_05"></script>
-<script src="js/haru_common.js?v=20260914_01"></script>
+<script src="js/haru_common.js?v=20260914_02"></script>
 
 </body>
 </html>

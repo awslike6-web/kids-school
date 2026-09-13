@@ -1642,23 +1642,30 @@ async function sendSafetyConsultationToNotion(guide) {
 }
 
 // =========================================================
-// 🕰️ 5. 24시간 매직 타임머신 시계판 (하루 일과 & 시간 표현, 32~57쪽)
+// =========================================================
+// 🕰️ 5. 매직 타임머신 시계판 (하루 일과 & 시간 표현, 32~57쪽)
 // =========================================================
 let currentTimelineDate = getTodayDateStr();
 let timelineFilterPeriod = "all";
 let selectedCustomEmoji = "⭐";
 let clockLiveInterval = null;
+let clockHourFormat = localStorage.getItem("haru_clock_format_" + currentChild) || "24"; // "12" or "24"
 
-function getTimelineStorageKey(dateStr) {
-  return `haru_timeline_${currentChild}_${dateStr || currentTimelineDate}`;
+function getRecurringStorageKey() {
+  return `haru_recurring_routine_${currentChild}`;
+}
+
+function getDailyStorageKey(dateStr) {
+  return `haru_daily_timeline_${currentChild}_${dateStr || currentTimelineDate}`;
 }
 
 function getTimelineCompletedKey(dateStr) {
   return `haru_timeline_completed_${currentChild}_${dateStr || currentTimelineDate}`;
 }
 
-function getTimelineItems(dateStr) {
-  const key = getTimelineStorageKey(dateStr);
+// 매일 반복되는 고정 루틴 로드
+function getRecurringRoutine() {
+  const key = getRecurringStorageKey();
   const raw = localStorage.getItem(key);
   if (raw) {
     try {
@@ -1667,24 +1674,106 @@ function getTimelineItems(dateStr) {
       return [];
     }
   }
-  // 오늘 날짜이고 최초 진입인 경우, 따뜻한 하루 가이드 기본 세팅 제공
-  const targetDate = dateStr || currentTimelineDate;
-  if (targetDate === getTodayDateStr() && window.HARU_DATA && window.HARU_DATA.timelineClock && window.HARU_DATA.timelineClock.defaultPlan) {
-    const defaultItems = JSON.parse(JSON.stringify(window.HARU_DATA.timelineClock.defaultPlan));
-    localStorage.setItem(key, JSON.stringify(defaultItems));
-    return defaultItems;
+
+  // 레거시 데이터 마이그레이션: 기존 오늘 날짜 데이터가 있으면 기본 고정 루틴으로 승격
+  const oldTodayKey = `haru_timeline_${currentChild}_${getTodayDateStr()}`;
+  const oldRaw = localStorage.getItem(oldTodayKey);
+  if (oldRaw) {
+    try {
+      const parsed = JSON.parse(oldRaw).map(it => ({ ...it, isRecurring: true }));
+      localStorage.setItem(key, JSON.stringify(parsed));
+      return parsed;
+    } catch(e) {}
+  }
+
+  // 기본 defaultPlan으로 초기화
+  if (window.HARU_DATA && window.HARU_DATA.timelineClock && window.HARU_DATA.timelineClock.defaultPlan) {
+    const defaults = JSON.parse(JSON.stringify(window.HARU_DATA.timelineClock.defaultPlan)).map(it => ({
+      ...it,
+      isRecurring: true
+    }));
+    localStorage.setItem(key, JSON.stringify(defaults));
+    return defaults;
   }
   return [];
 }
 
-function saveTimelineItems(items, dateStr) {
-  const key = getTimelineStorageKey(dateStr);
+// 매일 반복되는 고정 루틴 저장
+function saveRecurringRoutine(items) {
+  const key = getRecurringStorageKey();
   localStorage.setItem(key, JSON.stringify(items));
+}
+
+// 해당 날짜만의 특별 일정 로드
+function getDailyTimelineItems(dateStr) {
+  const key = getDailyStorageKey(dateStr);
+  const raw = localStorage.getItem(key);
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch(e) {
+      return [];
+    }
+  }
+  return [];
+}
+
+// 해당 날짜만의 특별 일정 저장
+function saveDailyTimelineItems(items, dateStr) {
+  const key = getDailyStorageKey(dateStr);
+  localStorage.setItem(key, JSON.stringify(items));
+}
+
+// 통합 일정 조회 (고정 루틴 + 해당 날짜 특별 일정)
+function getTimelineItems(dateStr) {
+  const targetDate = dateStr || currentTimelineDate;
+  const recurring = getRecurringRoutine();
+  const daily = getDailyTimelineItems(targetDate);
+
+  const combined = [...recurring, ...daily];
+  combined.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
+  return combined;
+}
+
+// 시계판 12시간 / 24시간 모드 전환
+function setClockHourFormat(format) {
+  if (format !== "12" && format !== "24") return;
+  clockHourFormat = format;
+  localStorage.setItem(`haru_clock_format_${currentChild}`, format);
+
+  const btn24 = document.getElementById("clockMode24Btn");
+  const btn12 = document.getElementById("clockMode12Btn");
+  if (btn24) btn24.classList.toggle("active", format === "24");
+  if (btn12) btn12.classList.toggle("active", format === "12");
+
+  const quadsLayer = document.querySelector(".clock-quads-layer");
+  if (quadsLayer) {
+    quadsLayer.style.opacity = format === "12" ? "0.15" : "1";
+  }
+
+  renderClockTicks(true);
+  updateLiveClockHands();
+  renderClockPins();
+
+  const modeName = format === "12" ? "12시간 표준 시계" : "24시간 매직 시계";
+  speakText(`${modeName} 모드로 바꿨어요!`);
 }
 
 // 탭 렌더링 진입점
 function renderTimelineTab() {
   updateTimelineDateUI();
+
+  // 12h / 24h 토글 버튼 UI 초기화
+  const btn24 = document.getElementById("clockMode24Btn");
+  const btn12 = document.getElementById("clockMode12Btn");
+  if (btn24) btn24.classList.toggle("active", clockHourFormat === "24");
+  if (btn12) btn12.classList.toggle("active", clockHourFormat === "12");
+
+  const quadsLayer = document.querySelector(".clock-quads-layer");
+  if (quadsLayer) {
+    quadsLayer.style.opacity = clockHourFormat === "12" ? "0.15" : "1";
+  }
+
   renderClockBoard();
   renderTimelineList();
   renderStickerTray();
@@ -1750,39 +1839,58 @@ function filterTimelinePeriod(period) {
   renderStickerTray();
 }
 
-// 24시간 원형 시계판 렌더링
+// 원형 시계판 렌더링
 function renderClockBoard() {
   renderClockTicks();
   updateLiveClockHands();
   renderClockPins();
 }
 
-// 24시간 눈금 레이어 렌더링 (0~23시)
-function renderClockTicks() {
+/// 24시간 또는 12시간 눈금 레이어 렌더링
+function renderClockTicks(force = false) {
   const ticksLayer = document.getElementById("clockTicksLayer");
-  if (!ticksLayer || ticksLayer.children.length >= 24) return;
+  if (!ticksLayer) return;
+  if (!force && ticksLayer.dataset.format === clockHourFormat && ticksLayer.children.length > 0) return;
+
   ticksLayer.innerHTML = "";
+  ticksLayer.dataset.format = clockHourFormat;
 
-  for (let h = 0; h < 24; h++) {
-    const angleDeg = h * 15; // 360도 / 24시간 = 15도/시
-    const rad = (angleDeg - 90) * (Math.PI / 180);
-    // 반경 약 42%
-    const x = 50 + 42 * Math.cos(rad);
-    const y = 50 + 42 * Math.sin(rad);
+  if (clockHourFormat === "12") {
+    // 12시간 표준 아날로그 시계 눈금 (1 ~ 12)
+    for (let h = 1; h <= 12; h++) {
+      const angleDeg = (h % 12) * 30; // 360도 / 12시간 = 30도/시
+      const rad = (angleDeg - 90) * (Math.PI / 180);
+      const x = 50 + 43 * Math.cos(rad);
+      const y = 50 + 43 * Math.sin(rad);
 
-    const tickEl = document.createElement("div");
-    tickEl.className = "clock-tick-mark";
-    tickEl.style.left = `${x}%`;
-    tickEl.style.top = `${y}%`;
-
-    // 주요 시각(0, 3, 6, 9, 12, 15, 18, 21시)은 숫자 강조
-    if (h % 3 === 0) {
-      tickEl.classList.add("major");
+      const tickEl = document.createElement("div");
+      tickEl.className = "clock-tick-mark major";
+      tickEl.style.left = `${x.toFixed(2)}%`;
+      tickEl.style.top = `${y.toFixed(2)}%`;
       tickEl.innerHTML = `<span>${h}</span>`;
-    } else {
-      tickEl.classList.add("minor");
+      ticksLayer.appendChild(tickEl);
     }
-    ticksLayer.appendChild(tickEl);
+  } else {
+    // 24시간 눈금 (0 ~ 23)
+    for (let h = 0; h < 24; h++) {
+      const angleDeg = h * 15; // 360도 / 24시간 = 15도/시
+      const rad = (angleDeg - 90) * (Math.PI / 180);
+      const x = 50 + 43 * Math.cos(rad);
+      const y = 50 + 43 * Math.sin(rad);
+
+      const tickEl = document.createElement("div");
+      tickEl.className = "clock-tick-mark";
+      tickEl.style.left = `${x.toFixed(2)}%`;
+      tickEl.style.top = `${y.toFixed(2)}%`;
+
+      if (h % 3 === 0) {
+        tickEl.classList.add("major");
+        tickEl.innerHTML = `<span>${h}</span>`;
+      } else {
+        tickEl.classList.add("minor");
+      }
+      ticksLayer.appendChild(tickEl);
+    }
   }
 }
 
@@ -1798,15 +1906,28 @@ function updateLiveClockHands() {
   const hours = now.getHours();
   const minutes = now.getMinutes();
 
-  // 24시간 시계 바늘 각도 (0시는 위쪽 0도 기준)
-  const hourAngle = (hours % 24) * 15 + (minutes / 60) * 15;
-  const minAngle = minutes * 6; // 360도 / 60분 = 6도/분
+  let hourAngle = 0;
+  let minAngle = minutes * 6; // 360도 / 60분 = 6도/분
+
+  if (clockHourFormat === "12") {
+    // 12시간제: 시침은 1시간에 30도, 1분에 0.5도
+    hourAngle = (hours % 12) * 30 + (minutes / 60) * 30;
+  } else {
+    // 24시간제: 시침은 1시간에 15도, 1분에 0.25도
+    hourAngle = (hours % 24) * 15 + (minutes / 60) * 15;
+  }
 
   hourHand.style.transform = `rotate(${hourAngle}deg)`;
   minHand.style.transform = `rotate(${minAngle}deg)`;
 
   if (hubTime) {
-    hubTime.textContent = `${hours}시`;
+    if (clockHourFormat === "12") {
+      const ampm = hours < 12 ? "오전" : "오후";
+      const h12 = hours % 12 || 12;
+      hubTime.textContent = `${ampm} ${h12}시`;
+    } else {
+      hubTime.textContent = `${hours}시`;
+    }
   }
   if (liveTimeTag) {
     const timeFormatted = now.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
@@ -1822,7 +1943,7 @@ function startClockLiveTimer() {
   }, 10000);
 }
 
-// 시계판 스티커 핀 렌더링 (2중 동심원 지그재그 & 충돌 회피 알고리즘)
+// 시계판 스티커 핀 렌더링 (2중 동심원 지그재그 & 12h/24h 지원)
 function renderClockPins() {
   const pinsLayer = document.getElementById("clockPinsLayer");
   if (!pinsLayer) return;
@@ -1835,6 +1956,8 @@ function renderClockPins() {
 
   if (!filtered || filtered.length === 0) return;
 
+  const is12H = clockHourFormat === "12";
+
   // 1. 유효 시간 파싱 및 각도 계산 후 시간순 정렬
   const parsedItems = filtered
     .filter(item => item.time && item.time.includes(":"))
@@ -1843,32 +1966,45 @@ function renderClockPins() {
       const h = parseInt(parts[0], 10) || 0;
       const m = parseInt(parts[1], 10) || 0;
       const totalMinutes = (h % 24) * 60 + m;
-      // 24시간 원형: 1440분 = 360도 => 1분당 0.25도
-      const angleDeg = totalMinutes * 0.25;
+
+      let angleDeg = 0;
+      if (is12H) {
+        // 12시간 원형: 720분 = 360도 => 1분당 0.5도, 1시간당 30도
+        angleDeg = ((h % 12) * 60 + m) * 0.5;
+      } else {
+        // 24시간 원형: 1440분 = 360도 => 1분당 0.25도, 1시간당 15도
+        angleDeg = totalMinutes * 0.25;
+      }
       return { item, h, m, totalMinutes, angleDeg };
     })
     .sort((a, b) => a.totalMinutes - b.totalMinutes);
 
   // 2. 2중 지그재그 트랙 (외곽 36.5% / 내곽 25.5% / 보조 18.5%)
-  // 기본 규칙: 정각대 (m < 15 || m >= 45) -> 외곽 트랙 (36.5%)
-  //           30분대 (15 <= m < 45) -> 내곽 트랙 (25.5%)
-  // 인접 핀(12도 미만 / 48분 이내) 충돌 시 지그재그 트랙 스왑 및 거리 확보
   const placedPins = [];
 
   parsedItems.forEach((entry) => {
-    const { item, m, angleDeg } = entry;
+    const { item, h, m, angleDeg } = entry;
     const radAngle = (angleDeg - 90) * (Math.PI / 180);
 
-    // 정각 vs 30분대 우선순위 반경 후보군
-    const isThirtyish = (m >= 15 && m < 45);
-    const candidateRadii = isThirtyish 
-      ? [25.5, 36.5, 18.5, 31.0] 
-      : [36.5, 25.5, 31.0, 18.5];
+    let candidateRadii;
+    if (is12H) {
+      // 12시간 모드: 오전(h < 12)은 내곽 우선, 오후(h >= 12)는 외곽 우선
+      const isAM = h < 12;
+      candidateRadii = isAM 
+        ? [25.5, 36.5, 18.5, 31.0] 
+        : [36.5, 25.5, 31.0, 18.5];
+    } else {
+      // 24시간 모드: 30분대는 내곽, 정각대는 외곽
+      const isThirtyish = (m >= 15 && m < 45);
+      candidateRadii = isThirtyish 
+        ? [25.5, 36.5, 18.5, 31.0] 
+        : [36.5, 25.5, 31.0, 18.5];
+    }
 
     let chosenRadius = candidateRadii[0];
     let bestDist = -1;
 
-    // 이미 배치된 핀들과의 화면상 거리(%) 계산하여 겹치지 않는(최소 9.5% 이상) 최적 반경 선택
+    // 이미 배치된 핀들과의 거리(%) 계산하여 겹치지 않는(최소 9.5% 이상) 최적 반경 선택
     for (let r of candidateRadii) {
       const curX = 50 + r * Math.cos(radAngle);
       const curY = 50 + r * Math.sin(radAngle);
@@ -1879,7 +2015,6 @@ function renderClockPins() {
         if (dist < minDistance) minDistance = dist;
       }
 
-      // 30px 뱃지는 약 330px 시계에서 약 9.1% 크기. 9.5% 이상이면 완벽히 비접촉
       if (minDistance >= 9.5) {
         chosenRadius = r;
         bestDist = minDistance;
@@ -1900,22 +2035,27 @@ function renderClockPins() {
     pinEl.style.left = `${finalX.toFixed(2)}%`;
     pinEl.style.top = `${finalY.toFixed(2)}%`;
 
-    // 상단 22% 이내에 위치한 핀은 툴팁이 시계 밖 위로 잘리지 않도록 아래쪽으로 팝업
     if (finalY < 22) {
       pinEl.classList.add("pop-down");
     }
 
-    // 미니멀 원형 아이콘 + 플로팅 툴팁 팝업 구조
+    // 12시간제 시간 라벨 및 반복 뱃지
+    const ampmStr = h < 12 ? "오전" : "오후";
+    const h12 = h % 12 || 12;
+    const timeDisplay = is12H 
+      ? `${ampmStr} ${h12}:${String(m).padStart(2, "0")}` 
+      : item.time;
+    const repeatLabel = item.isRecurring ? "🔄 매일" : "📅 오늘";
+
     pinEl.innerHTML = `
       <span class="pin-icon">${item.icon || "⭐"}</span>
       <div class="pin-pop-tooltip">
-        <span class="pin-pop-time">⏰ ${item.time}</span>
+        <span class="pin-pop-time">⏰ ${timeDisplay} · ${repeatLabel}</span>
         <span class="pin-pop-title">${item.icon || "⭐"} ${item.title}</span>
         ${item.memo ? `<span class="pin-pop-memo">💭 ${item.memo}</span>` : ""}
       </div>
     `;
 
-    // 클릭 / 터치 시 툴팁 토글 및 요정 코코 음성 안내 + 시계 바늘 가리키기
     pinEl.addEventListener("click", (e) => {
       e.stopPropagation();
       const allPins = pinsLayer.querySelectorAll(".clock-pin-badge");
@@ -1928,7 +2068,6 @@ function renderClockPins() {
     pinsLayer.appendChild(pinEl);
   });
 
-  // 시계판 핀 팝업 외부 클릭 시 닫기 (1회 등록)
   if (!window._clockPinGlobalClickBound) {
     window._clockPinGlobalClickBound = true;
     document.addEventListener("click", (e) => {
@@ -1946,7 +2085,6 @@ function renderTimelineList() {
   if (!scrollContainer) return;
 
   const items = getTimelineItems();
-  // 시간순 정렬
   items.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
 
   if (countChip) {
@@ -1969,38 +2107,94 @@ function renderTimelineList() {
   }
 
   const periodMap = {
-    morning: { label: "아침", badgeClass: "period-morning" },
-    lunch: { label: "점심", badgeClass: "period-lunch" },
-    evening: { label: "저녁", badgeClass: "period-evening" },
-    night: { label: "밤", badgeClass: "period-night" }
+    morning: { label: "아침" },
+    lunch: { label: "점심" },
+    evening: { label: "저녁" },
+    night: { label: "밤" }
   };
 
+  const isToday = currentTimelineDate === getTodayDateStr();
+
   scrollContainer.innerHTML = filtered.map(item => {
-    const pMeta = periodMap[item.period] || { label: "일과", badgeClass: "period-lunch" };
+    const pMeta = periodMap[item.period] || { label: "일과" };
+    const isRec = !!item.isRecurring;
     return `
-      <div class="timeline-item-card" data-id="${item.id}">
-        <div class="item-time-col">
-          <span class="item-period-badge ${pMeta.badgeClass}">${pMeta.label}</span>
-          <span class="item-time-text">${item.time || "12:00"}</span>
-        </div>
-        <div class="item-body-col" onclick="speakTimelineItemById('${item.id}')">
-          <div class="item-title-row">
-            <span class="item-icon">${item.icon || "⭐"}</span>
-            <span class="item-title">${item.title}</span>
+      <div class="timeline-card-item period-${item.period || 'lunch'}" data-id="${item.id}">
+        <!-- 좌측: 시간 영역 및 반복 배지 -->
+        <div class="timeline-card-time-col">
+          <div class="timeline-badge-group">
+            <span class="timeline-period-badge ${item.period || 'lunch'}">${pMeta.label}</span>
+            ${isRec 
+              ? `<span class="item-repeat-chip recurring" title="매일 반복되는 고정 루틴">🔄 매일</span>` 
+              : `<span class="item-repeat-chip daily" title="이 날만의 특별 일정">📅 ${isToday ? "오늘" : "이날"}</span>`}
           </div>
-          ${item.memo ? `<div class="item-memo-text">💭 ${item.memo}</div>` : ""}
+          <div class="timeline-time-input-wrap" title="시간을 콕 눌러 원하는 시간으로 변경해요">
+            <span class="time-prefix-icon">⏰</span>
+            <input type="time" class="timeline-time-input" value="${item.time || '12:00'}" 
+                   onchange="updateTimelineItemTime('${item.id}', this.value)"
+                   onclick="event.stopPropagation()">
+          </div>
         </div>
-        <div class="item-action-col">
-          <button type="button" class="item-audio-btn" onclick="speakTimelineItemById('${item.id}')" title="요정 코코에게 듣기">
+
+        <!-- 중앙: 아이콘 + 제목 + 메모 -->
+        <div class="timeline-card-body" onclick="speakTimelineItemById('${item.id}')">
+          <span class="timeline-card-icon">${item.icon || "⭐"}</span>
+          <div class="timeline-card-info">
+            <div class="timeline-card-title">${item.title}</div>
+            ${item.memo ? `<div class="timeline-card-memo">💭 ${item.memo}</div>` : ""}
+          </div>
+        </div>
+
+        <!-- 우측: 액션 버튼들 -->
+        <div class="timeline-card-actions">
+          <button type="button" class="timeline-icon-btn audio-btn" onclick="speakTimelineItemById('${item.id}')" title="요정 코코에게 듣기">
             🔊
           </button>
-          <button type="button" class="item-delete-btn" onclick="removeTimelineItem('${item.id}')" title="스티커 떼기">
+          <button type="button" class="timeline-icon-btn delete-btn" onclick="removeTimelineItem('${item.id}')" title="일정 삭제하기">
             ✖
           </button>
         </div>
       </div>
     `;
   }).join("");
+}
+
+// 기존 카드에서 시간 임의 직접 수정
+function updateTimelineItemTime(id, newTime) {
+  if (!newTime || !newTime.includes(":")) return;
+
+  const recurring = getRecurringRoutine();
+  const daily = getDailyTimelineItems(currentTimelineDate);
+
+  const parts = newTime.split(":");
+  const h = parseInt(parts[0], 10) || 0;
+  let newPeriod = "lunch";
+  if (h >= 6 && h < 12) newPeriod = "morning";
+  else if (h >= 12 && h < 17) newPeriod = "lunch";
+  else if (h >= 17 && h < 21) newPeriod = "evening";
+  else newPeriod = "night";
+
+  let foundTitle = "일과";
+
+  const recIdx = recurring.findIndex(it => it.id === id);
+  if (recIdx !== -1) {
+    recurring[recIdx].time = newTime;
+    recurring[recIdx].period = newPeriod;
+    foundTitle = recurring[recIdx].title;
+    saveRecurringRoutine(recurring);
+  } else {
+    const dailyIdx = daily.findIndex(it => it.id === id);
+    if (dailyIdx !== -1) {
+      daily[dailyIdx].time = newTime;
+      daily[dailyIdx].period = newPeriod;
+      foundTitle = daily[dailyIdx].title;
+      saveDailyTimelineItems(daily, currentTimelineDate);
+    }
+  }
+
+  renderClockBoard();
+  renderTimelineList();
+  speakText(`${foundTitle} 시간을 ${newTime}으로 바꿨어요! ✨`);
 }
 
 // 추천 스티커 보관함 렌더링
@@ -2022,52 +2216,58 @@ function renderStickerTray() {
   `).join("");
 }
 
-// 스티커 보관함에서 쏙 붙이기
+// 스티커 보관함에서 쏙 붙이기 (당일 일정으로 추가)
 function addTimelineItemFromSticker(stickerId) {
   if (!window.HARU_DATA || !window.HARU_DATA.timelineClock) return;
   const sticker = window.HARU_DATA.timelineClock.stickers.find(s => s.id === stickerId);
   if (!sticker) return;
 
-  const items = getTimelineItems();
+  const dailyItems = getDailyTimelineItems(currentTimelineDate);
   const newItem = {
-    id: `stk_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    id: `daily_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     time: sticker.time,
     title: sticker.title,
     icon: sticker.icon,
     period: sticker.period,
-    memo: sticker.speech || ""
+    memo: sticker.speech || "",
+    isRecurring: false
   };
 
-  items.push(newItem);
-  saveTimelineItems(items);
+  dailyItems.push(newItem);
+  saveDailyTimelineItems(dailyItems, currentTimelineDate);
 
   renderClockBoard();
   renderTimelineList();
 
-  // 요정 코코 다정한 한마디
   const speechText = sticker.speech || `${sticker.time}! ${sticker.title} 스티커를 쏙 붙였어요!`;
   speakText(speechText);
 }
 
-// 스티커 아이템 음성 안내 및 시계 바늘 가리키기
+// 스티커 아이템 음성 안내 및 시계 바늘 가리키기 (12h/24h 지원)
 function speakTimelineItem(item) {
   if (!item) return;
   const speechText = item.memo || `${item.time}! ${item.title} 시간이에요!`;
   speakText(speechText);
 
-  // 시계 바늘 잠시 해당 시간으로 가리키기 효과
   const hourHand = document.getElementById("clockHandHour");
   const minHand = document.getElementById("clockHandMinute");
   if (hourHand && minHand && item.time) {
     const parts = item.time.split(":");
     const h = parseInt(parts[0], 10) || 0;
     const m = parseInt(parts[1], 10) || 0;
-    const hAngle = (h % 24) * 15 + (m / 60) * 15;
-    const mAngle = m * 6;
+
+    let hAngle = 0;
+    let mAngle = m * 6;
+
+    if (clockHourFormat === "12") {
+      hAngle = (h % 12) * 30 + (m / 60) * 30;
+    } else {
+      hAngle = (h % 24) * 15 + (m / 60) * 15;
+    }
+
     hourHand.style.transform = `rotate(${hAngle}deg)`;
     minHand.style.transform = `rotate(${mAngle}deg)`;
 
-    // 3초 후 현재 시간으로 부드럽게 복귀
     setTimeout(() => {
       updateLiveClockHands();
     }, 3000);
@@ -2080,23 +2280,42 @@ function speakTimelineItemById(id) {
   if (found) speakTimelineItem(found);
 }
 
-// 스티커 제거 (삭제)
+// 스티커 제거 (고정 일정 vs 당일 일정 분기 삭제)
 function removeTimelineItem(id) {
-  const items = getTimelineItems();
-  const found = items.find(it => it.id === id);
-  const title = found ? found.title : "일과";
+  const recurring = getRecurringRoutine();
+  const daily = getDailyTimelineItems(currentTimelineDate);
 
-  if (!confirm(`'${title}' 스티커를 시계판에서 뗄까요?`)) return;
-
-  const updated = items.filter(it => it.id !== id);
-  saveTimelineItems(updated);
+  const recItem = recurring.find(it => it.id === id);
+  if (recItem) {
+    if (!confirm(`'${recItem.title}'은 매일 반복되는 고정 일정이에요.\n고정 일정에서 완전히 삭제할까요?`)) return;
+    const updated = recurring.filter(it => it.id !== id);
+    saveRecurringRoutine(updated);
+    speakText(`'${recItem.title}' 고정 일정을 삭제했어요.`);
+  } else {
+    const dailyItem = daily.find(it => it.id === id);
+    const title = dailyItem ? dailyItem.title : "일과";
+    if (!confirm(`'${title}' 스티커를 시계판에서 뗄까요?`)) return;
+    const updated = daily.filter(it => it.id !== id);
+    saveDailyTimelineItems(updated, currentTimelineDate);
+    speakText(`'${title}' 스티커를 뗐어요! 언제든 다시 붙일 수 있어요.`);
+  }
 
   renderClockBoard();
   renderTimelineList();
-  speakText(`'${title}' 스티커를 뗐어요! 언제든 다시 붙일 수 있어요.`);
 }
 
-// 나만의 일과 직접 쓰기 모달 열기
+// 나만의 일과 모달: 일정 종류 선택 토글 (당일 vs 고정)
+function selectScheduleType(type) {
+  const typeInput = document.getElementById("customItemScheduleType");
+  if (typeInput) typeInput.value = type;
+
+  const dailyBtn = document.getElementById("schedTypeDailyBtn");
+  const recBtn = document.getElementById("schedTypeRecurringBtn");
+  if (dailyBtn) dailyBtn.classList.toggle("active", type === "daily");
+  if (recBtn) recBtn.classList.toggle("active", type === "recurring");
+}
+
+// 나만의 일과 직접 쓰기 모달 열기 (정상 active 클래스 적용)
 function openCustomTimelineModal() {
   const modal = document.getElementById("customTimelineModalOverlay");
   if (!modal) return;
@@ -2123,19 +2342,23 @@ function openCustomTimelineModal() {
   const memoInput = document.getElementById("customItemMemoInput");
   if (memoInput) memoInput.value = "";
 
+  selectScheduleType("daily");
+
   selectedCustomEmoji = "⭐";
   document.querySelectorAll("#customEmojiRow .emoji-opt").forEach((opt, idx) => {
     opt.classList.toggle("active", idx === 0);
   });
 
-  modal.style.display = "flex";
+  modal.classList.add("active");
+  document.body.style.overflow = "hidden";
   speakText("어떤 멋진 일을 했나요? 나만의 스티커를 만들어봐요!");
 }
 
 // 모달 닫기
 function closeCustomTimelineModal() {
   const modal = document.getElementById("customTimelineModalOverlay");
-  if (modal) modal.style.display = "none";
+  if (modal) modal.classList.remove("active");
+  document.body.style.overflow = "auto";
 }
 
 // 모달 이모지 선택
@@ -2145,12 +2368,13 @@ function selectCustomEmoji(el, emoji) {
   selectedCustomEmoji = emoji;
 }
 
-// 나만의 일과 저장
+// 나만의 일과 저장 (고정 일정 vs 당일 일정 분기 저장)
 function saveCustomTimelineItem() {
   const titleInput = document.getElementById("customItemTitleInput");
   const timeInput = document.getElementById("customItemTimeInput");
   const periodSelect = document.getElementById("customItemPeriodSelect");
   const memoInput = document.getElementById("customItemMemoInput");
+  const typeInput = document.getElementById("customItemScheduleType");
 
   const title = (titleInput ? titleInput.value : "").trim();
   if (!title) {
@@ -2162,25 +2386,34 @@ function saveCustomTimelineItem() {
   const time = (timeInput ? timeInput.value : "") || "12:00";
   const period = (periodSelect ? periodSelect.value : "") || "lunch";
   const memo = (memoInput ? memoInput.value : "").trim();
+  const scheduleType = (typeInput ? typeInput.value : "daily");
 
-  const items = getTimelineItems();
   const newItem = {
-    id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    id: `${scheduleType}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     time: time,
     title: title,
     icon: selectedCustomEmoji || "⭐",
     period: period,
-    memo: memo
+    memo: memo,
+    isRecurring: scheduleType === "recurring"
   };
 
-  items.push(newItem);
-  saveTimelineItems(items);
+  if (scheduleType === "recurring") {
+    const recurring = getRecurringRoutine();
+    recurring.push(newItem);
+    saveRecurringRoutine(recurring);
+  } else {
+    const daily = getDailyTimelineItems(currentTimelineDate);
+    daily.push(newItem);
+    saveDailyTimelineItems(daily, currentTimelineDate);
+  }
 
   closeCustomTimelineModal();
   renderClockBoard();
   renderTimelineList();
 
-  speakText(`${time}! ${title} 스티커를 찰칵 붙였어요! 멋져요!`);
+  const typeDesc = scheduleType === "recurring" ? "매일 반복되는 고정 루틴으로" : "오늘의 특별 일정으로";
+  speakText(`${time}! ${title} 스티커를 ${typeDesc} 찰칵 붙였어요! 멋져요!`);
 }
 
 // 오늘 하루 완성하기 (보상 + 노션 연동)

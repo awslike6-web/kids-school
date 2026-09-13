@@ -1824,18 +1824,35 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-.badge-sub {
-  font-family: 'Jua', sans-serif;
-  font-size: 0.92rem;
-  color: #636e72;
+.clock-mode-toggle-group {
+  display: inline-flex;
   background: #f1f2f6;
-  padding: 4px 10px;
+  padding: 3px;
   border-radius: 12px;
+  gap: 3px;
+}
+.clock-mode-btn {
+  background: transparent;
+  border: none;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  color: #636e72;
+  padding: 4px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.clock-mode-btn.active {
+  background: #ffffff;
+  color: #0984e3;
+  box-shadow: 0 2px 6px rgba(9, 132, 227, 0.2);
 }
 .clock-live-time {
   font-family: 'Jua', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #0984e3;
   background: #e3f2fd;
   padding: 4px 12px;
@@ -2232,72 +2249,154 @@ body {
 }
 .timeline-card-item {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 18px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 14px;
   border: 2px solid #eef2f5;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-  transition: all 0.2s;
-  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
 }
 .timeline-card-item:hover {
-  transform: translateX(4px);
+  transform: translateY(-2px);
   border-color: #74b9ff;
-  box-shadow: 0 4px 12px rgba(9, 132, 227, 0.12);
+  box-shadow: 0 6px 16px rgba(9, 132, 227, 0.12);
 }
-.timeline-card-time {
-  font-family: 'Jua', sans-serif;
-  font-size: 0.95rem;
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 12px;
-  white-space: nowrap;
+
+/* 시간 컬럼 */
+.timeline-card-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 100px;
+}
+.timeline-badge-group {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
+}
+.timeline-period-badge {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: 8px;
+  color: #fff;
+  line-height: 1.2;
+}
+.timeline-period-badge.morning { background: #ff7675; }
+.timeline-period-badge.lunch { background: #0984e3; }
+.timeline-period-badge.evening { background: #e17055; }
+.timeline-period-badge.night { background: #6c5ce7; }
+
+.item-repeat-chip {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+  line-height: 1.2;
+}
+.item-repeat-chip.recurring {
+  background: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+.item-repeat-chip.daily {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+/* 시간 직접 입력 박스 */
+.timeline-time-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  padding: 3px 6px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.timeline-time-input-wrap:hover,
+.timeline-time-input-wrap:focus-within {
+  border-color: #0984e3;
+  background: #ffffff;
+  box-shadow: 0 0 0 2.5px rgba(9, 132, 227, 0.15);
+}
+.time-prefix-icon {
+  font-size: 0.85rem;
+}
+.timeline-time-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 0;
+  width: 68px;
+}
+
+/* 본문 (아이콘 + 제목 + 메모) */
+.timeline-card-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
 }
 .timeline-card-icon {
   font-size: 1.8rem;
   line-height: 1;
+  flex-shrink: 0;
 }
 .timeline-card-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .timeline-card-title {
   font-family: 'Jua', sans-serif;
   font-size: 1.05rem;
-  color: var(--dark);
-  margin-bottom: 2px;
+  color: #2d3436;
 }
 .timeline-card-memo {
-  font-size: 0.85rem;
-  color: #636e72;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.3;
 }
+
+/* 액션 버튼 */
 .timeline-card-actions {
   display: flex;
   gap: 6px;
+  align-items: center;
 }
 .timeline-icon-btn {
-  background: #f1f2f6;
+  background: #f1f5f9;
   border: none;
-  border-radius: 8px;
-  width: 32px;
-  height: 32px;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   transition: all 0.2s;
 }
 .timeline-icon-btn:hover {
-  background: #dfe6e9;
+  background: #e2e8f0;
+  transform: scale(1.08);
 }
 .timeline-icon-btn.delete-btn:hover {
-  background: #ffeaa7;
-  color: #d63031;
+  background: #fee2e2;
+  color: #ef4444;
 }
 .timeline-empty-notice {
   text-align: center;
@@ -2415,6 +2514,38 @@ body {
   background: #fff;
   border-color: #0984e3;
   box-shadow: 0 2px 8px rgba(9, 132, 227, 0.25);
+}
+
+/* 나만의 일과 모달: 일정 종류 선택 토글 */
+.schedule-type-toggle-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.schedule-type-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 2px solid transparent;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.92rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.schedule-type-btn:hover {
+  background: #e2e8f0;
+}
+.schedule-type-btn.active {
+  background: #ffffff;
+  border-color: #0984e3;
+  color: #0984e3;
+  box-shadow: 0 3px 10px rgba(9, 132, 227, 0.18);
 }
 
 @media (max-width: 850px) {
