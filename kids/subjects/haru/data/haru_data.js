@@ -305,5 +305,57 @@ window.HARU_DATA = {
         cocoSay: "눈 비비면 절대 안 돼! 각막이 긁힐 수 있거든. 인공눈물이나 흐르는 물에 눈을 깜빡깜빡해서 모래를 스르륵 흘려보내자!"
       }
     }
+  },
+
+  // ==========================================
+  // 5. 24시간 매직 타임머신 시계판 (하루 일과 & 시간 표현, 32~57쪽)
+  // ==========================================
+  timelineClock: {
+    title: "24시간 매직 타임머신 시계판",
+    desc: "아침, 점심, 저녁, 밤! 언제 무엇을 했는지 스티커를 붙이고 시간 여행을 떠나요 ✨",
+    periods: {
+      morning: { id: "morning", name: "상쾌한 아침", icon: "🌅", timeRange: "06:00 ~ 11:59", color: "#ff7675", bg: "rgba(255, 118, 117, 0.12)", badge: "해가 방긋 ☀️" },
+      lunch: { id: "lunch", name: "활기찬 점심", icon: "☀️", timeRange: "12:00 ~ 16:59", color: "#0984e3", bg: "rgba(9, 132, 227, 0.12)", badge: "배가 꼬르륵 🍱" },
+      evening: { id: "evening", name: "노을빛 저녁", icon: "🌇", timeRange: "17:00 ~ 20:59", color: "#e17055", bg: "rgba(225, 112, 85, 0.12)", badge: "노을이 물들 때 🌆" },
+      night: { id: "night", name: "포근한 밤", icon: "🌙", timeRange: "21:00 ~ 05:59", color: "#6c5ce7", bg: "rgba(108, 92, 231, 0.12)", badge: "별이 반짝 🌟" }
+    },
+    // 추천 일과 스티커 팩 (20종)
+    stickers: [
+      // 🌅 아침 (06~11시)
+      { id: "st_wake", period: "morning", time: "07:00", title: "상쾌한 기상", icon: "⏰", tag: "아침", speech: "째깍째깍 아침 7시! 기분 좋게 눈을 뜨고 기지개를 켜요! ☀️" },
+      { id: "st_breakfast", period: "morning", time: "07:30", title: "맛있는 아침밥", icon: "🍳", tag: "식사", speech: "아침 7시 30분! 든든하게 아침밥을 냠냠 먹어요!" },
+      { id: "st_brush", period: "morning", time: "08:00", title: "치카치카 양치", icon: "🫧", tag: "위생", speech: "아침 8시! 이빨을 치카치카 깨끗하게 닦아요!" },
+      { id: "st_bag", period: "morning", time: "08:20", title: "책가방 챙기기", icon: "🎒", tag: "준비", speech: "오전 8시 20분! 알림장과 준비물을 스스로 챙겨요!" },
+      { id: "st_school", period: "morning", time: "08:40", title: "신나는 등교길", icon: "🏫", tag: "학교", speech: "오전 8시 40분! 씩씩하게 학교로 출발해요!" },
+
+      // ☀️ 점심 (12~16시)
+      { id: "st_class", period: "lunch", time: "09:00", title: "두근두근 수업시간", icon: "📖", tag: "공부", speech: "오전 9시! 선생님 말씀을 귀 기울여 재미있게 배워요!" },
+      { id: "st_recess", period: "lunch", time: "10:40", title: "중간놀이 시간", icon: "🏃", tag: "놀이", speech: "오전 10시 40분! 친구들과 운동장에서 신나게 뛰어놀아요!" },
+      { id: "st_lunch", period: "lunch", time: "12:10", title: "맛있는 학교급식", icon: "🍱", tag: "식사", speech: "배에서 꼬르륵! 낮 12시 10분, 맛있는 급식을 냠냠 먹어요!" },
+      { id: "st_library", period: "lunch", time: "13:00", title: "도서관 책읽기", icon: "📚", tag: "독서", speech: "오후 1시! 조용한 도서관에서 동화책을 읽어요!" },
+      { id: "st_home", period: "lunch", time: "13:30", title: "룰루랄라 하교길", icon: "🏡", tag: "귀가", speech: "오후 1시 30분! 친구들에게 손 흔들며 집으로 돌아와요!" },
+
+      // 🌇 저녁 (17~20시)
+      { id: "st_playground", period: "evening", time: "14:30", title: "놀이터 모험", icon: "🛝", tag: "놀이", speech: "오후 2시 30분! 그네와 미끄럼틀을 타며 놀아요!" },
+      { id: "st_academy", period: "evening", time: "15:30", title: "예술·운동 학원", icon: "🎨", tag: "배움", speech: "오후 3시 30분! 피아노, 미술, 태권도에서 솜씨를 뽐내요!" },
+      { id: "st_homework", period: "evening", time: "17:00", title: "스스로 숙제하기", icon: "✏️", tag: "자립", speech: "오후 5시! 오늘 배운 내용을 공부방에서 복습해요!" },
+      { id: "st_dinner", period: "evening", time: "18:30", title: "가족 저녁식사", icon: "🍲", tag: "식사", speech: "저녁 6시 30분! 온 가족이 모여 즐겁게 저녁을 먹고 대화해요!" },
+      { id: "st_family", period: "evening", time: "19:30", title: "가족 자유놀이", icon: "🧩", tag: "휴식", speech: "저녁 7시 30분! 보드게임이나 장난감으로 즐겁게 놀아요!" },
+
+      // 🌙 밤 (21~05시)
+      { id: "st_bath", period: "night", time: "20:30", title: "따뜻한 목욕", icon: "🛁", tag: "위생", speech: "밤 8시 30분! 따뜻한 물로 깨끗이 씻고 피로를 풀어요!" },
+      { id: "st_tomorrow", period: "night", time: "21:00", title: "내일 옷·가방 준비", icon: "👕", tag: "자립", speech: "밤 9시! 내일 입을 예쁜 옷과 가방을 미리 챙겨요!" },
+      { id: "st_story", period: "night", time: "21:20", title: "베드타임 동화책", icon: "🌙", tag: "마음", speech: "밤 9시 20분! 엄마 아빠의 다정한 동화책 이야기를 들어요!" },
+      { id: "st_sleep", period: "night", time: "21:40", title: "포근한 꿈나라", icon: "😴", tag: "수면", speech: "밤 9시 40분! 포근한 이불 속에서 좋은 꿈을 꿔요. 잘 자요!" }
+    ],
+    // 기본 샘플 일과 (처음 진입 시 보여줄 따뜻한 하루 가이드)
+    defaultPlan: [
+      { id: "def_1", time: "07:30", title: "기상 및 아침밥", icon: "🍳", period: "morning", memo: "맛있는 아침밥 냠냠 먹기" },
+      { id: "def_2", time: "08:40", title: "즐거운 학교 등교", icon: "🏫", period: "morning", memo: "친구들과 반갑게 인사하기" },
+      { id: "def_3", time: "12:10", title: "맛있는 학교 급식", icon: "🍱", period: "lunch", memo: "골고루 냠냠 남기지 않기" },
+      { id: "def_4", time: "15:00", title: "놀이터에서 신나게 놀기", icon: "🛝", period: "evening", memo: "미끄럼틀이랑 그네 타기" },
+      { id: "def_5", time: "18:30", title: "온 가족 저녁식사", icon: "🍲", period: "evening", memo: "오늘 있었던 일 이야기하기" },
+      { id: "def_6", time: "21:30", title: "포근한 꿈나라", icon: "😴", period: "night", memo: "동화책 읽고 꿀잠 자기" }
+    ]
   }
 };

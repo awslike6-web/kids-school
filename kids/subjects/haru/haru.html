@@ -68,6 +68,11 @@
       <span class="nav-tab-title">특별한 날 추억 게시판</span>
       <span class="nav-tab-subtitle">생일 · 소풍 · 축제 이야기</span>
     </button>
+    <button class="nav-tab-btn" data-tab="timeline" onclick="switchHaruTab('timeline')">
+      <span class="nav-tab-icon">🕰️</span>
+      <span class="nav-tab-title">24시간 매직 시계판</span>
+      <span class="nav-tab-subtitle">하루 일과 · 시간 표현</span>
+    </button>
     <button class="nav-tab-btn" data-tab="safety" onclick="switchHaruTab('safety')">
       <span class="nav-tab-icon">🚨</span>
       <span class="nav-tab-title">119 안전 & 닥터 코코</span>
@@ -295,7 +300,134 @@
   </div>
 
   <!-- =========================================================
-       탭 4: 🚨 119 안전 수호대 & 닥터 코코 (74~83쪽 위험/안전 & 응급처치)
+       탭 4: 🕰️ 24시간 매직 타임머신 시계판 (32~57쪽 하루 일과 & 시간 표현)
+       ========================================================= -->
+  <div class="tab-content-panel" id="tab_timeline">
+
+    <!-- 🕰️ 타임머신 헤더 & 날짜 네비게이터 -->
+    <div class="timeline-hero-card">
+      <div class="timeline-hero-top">
+        <div class="timeline-hero-title-group">
+          <span class="timeline-hero-icon">🕰️</span>
+          <div>
+            <h2 class="timeline-hero-title">24시간 매직 타임머신 시계판</h2>
+            <p class="timeline-hero-desc">언제 무엇을 했는지 알록달록 스티커를 붙이고, 시간 여행을 떠나요 ✨</p>
+          </div>
+        </div>
+        <div class="timeline-action-group">
+          <button type="button" class="timeline-complete-btn" id="timelineCompleteBtn" onclick="completeTodayTimeline()">
+            ✨ 오늘 하루 완성하기 (+2🍬)
+          </button>
+        </div>
+      </div>
+
+      <!-- 📅 날짜 네비게이터 바 -->
+      <div class="timeline-date-bar">
+        <button type="button" class="date-nav-btn" onclick="changeTimelineDate(-1)">◀ 어제</button>
+        <div class="current-date-display" id="timelineCurrentDateDisplay">
+          <span id="timelineDateText">2026-09-13 (일)</span>
+          <span class="timeline-star-badge" id="timelineStarBadge" style="display:none;">⭐ 기록 완료</span>
+        </div>
+        <button type="button" class="date-nav-btn" onclick="changeTimelineDate(1)">내일 ▶</button>
+        <button type="button" class="date-today-btn" onclick="goToTodayTimeline()">오늘로 이동</button>
+      </div>
+    </div>
+
+    <!-- 🧭 2단 메인 레이아웃 (시계판 + 타임라인 리스트) -->
+    <div class="timeline-main-grid">
+
+      <!-- 1. 좌측: 24시간 원형 매직 시계판 -->
+      <div class="timeline-clock-section">
+        <div class="section-badge-row">
+          <span class="badge-sub">🌈 4색 시간 다이얼</span>
+          <div class="clock-live-time" id="clockLiveTimeTag">오후 01:40</div>
+        </div>
+
+        <!-- 24시간 원형 시계 비주얼 -->
+        <div class="magic-clock-container">
+          <div class="magic-clock-dial" id="magicClockDial">
+            <!-- 4대 시간대 배경 사분면 -->
+            <div class="clock-period-quad morning" title="상쾌한 아침 (06~12시)"></div>
+            <div class="clock-period-quad lunch" title="활기찬 점심 (12~17시)"></div>
+            <div class="clock-period-quad evening" title="노을빛 저녁 (17~21시)"></div>
+            <div class="clock-period-quad night" title="포근한 밤 (21~06시)"></div>
+
+            <!-- 시계 중심 바늘 및 허브 -->
+            <div class="clock-hand-hour" id="clockHandHour"></div>
+            <div class="clock-hand-minute" id="clockHandMinute"></div>
+            <div class="clock-center-hub">
+              <span class="hub-icon">✨</span>
+              <span class="hub-time" id="clockHubTime">12시</span>
+            </div>
+
+            <!-- 24시간 시간 눈금 및 스티커 핀 컨테이너 -->
+            <div class="clock-ticks-layer" id="clockTicksLayer"></div>
+            <div class="clock-pins-layer" id="clockPinsLayer"></div>
+          </div>
+        </div>
+
+        <!-- 시간대 필터 버튼 바 -->
+        <div class="period-filter-row">
+          <button type="button" class="period-filter-btn active" data-period="all" onclick="filterTimelinePeriod('all')">
+            ✨ 전체 24시
+          </button>
+          <button type="button" class="period-filter-btn" data-period="morning" onclick="filterTimelinePeriod('morning')">
+            🌅 아침 (06~12)
+          </button>
+          <button type="button" class="period-filter-btn" data-period="lunch" onclick="filterTimelinePeriod('lunch')">
+            ☀️ 낮·점심 (12~17)
+          </button>
+          <button type="button" class="period-filter-btn" data-period="evening" onclick="filterTimelinePeriod('evening')">
+            🌇 저녁 (17~21)
+          </button>
+          <button type="button" class="period-filter-btn" data-period="night" onclick="filterTimelinePeriod('night')">
+            🌙 밤 (21~06)
+          </button>
+        </div>
+
+        <div class="clock-guide-tip">
+          💡 <b>시계 보는 팁:</b> 시계판의 스티커를 콕 누르면 요정 코코가 시계 시간과 다정한 하루 이야기를 들려줘요!
+        </div>
+      </div>
+
+      <!-- 2. 우측: 타임라인 일과 목록 & 스티커 보관함 -->
+      <div class="timeline-list-section">
+        
+        <!-- 상단 헤더 & 직접 추가 버튼 -->
+        <div class="timeline-section-header">
+          <div class="section-title">
+            <span>📋</span> <span id="timelineListSectionTitle">오늘의 하루 일과 스티커</span>
+            <span class="item-count-chip" id="timelineCountChip">0개</span>
+          </div>
+          <button type="button" class="custom-add-btn" onclick="openCustomTimelineModal()">
+            ✏️ 나만의 일과 직접 쓰기
+          </button>
+        </div>
+
+        <!-- 등록된 일과 카드 리스트 -->
+        <div class="timeline-cards-scroll" id="timelineCardsScroll">
+          <!-- 동적 렌더링 -->
+        </div>
+
+        <!-- 🎨 하루 일과 스티커 보관함 (트레이) -->
+        <div class="sticker-tray-card">
+          <div class="tray-title-row">
+            <span class="tray-title">🎨 추천 일과 스티커 보관함 (터치해서 쏙 붙이기!)</span>
+            <span class="tray-tip">터치하면 시계판에 즉시 붙어요</span>
+          </div>
+          <div class="sticker-tray-grid" id="stickerTrayGrid">
+            <!-- 동적 렌더링 -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       탭 5: 🚨 119 안전 수호대 & 닥터 코코 (74~83쪽 위험/안전 & 응급처치)
        ========================================================= -->
   <div class="tab-content-panel" id="tab_safety">
     
@@ -473,15 +605,87 @@
   </div>
 </div>
 
+<!-- ✏️ 나만의 일과 직접 쓰기 전용 모달 오버레이 -->
+<div class="haru-modal-overlay" id="customTimelineModalOverlay" onclick="if(event.target===this) closeCustomTimelineModal();" style="display:none;">
+  <div class="haru-modal-box" style="max-width:460px;">
+    <div class="modal-header" style="background: linear-gradient(135deg, #0984e3, #74b9ff);">
+      <div class="modal-header-title">
+        <span>✏️</span> 나만의 일과 스티커 만들기
+      </div>
+      <button class="modal-close-btn" onclick="closeCustomTimelineModal()" title="닫기">✖</button>
+    </div>
+    <div class="modal-body" style="padding:20px 22px;">
+      
+      <!-- 시간 선택 -->
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
+          ⏰ 언제 한 일인가요?
+        </label>
+        <div style="display:flex; gap:8px;">
+          <select id="customItemPeriodSelect" class="timeline-form-input" style="flex:1;">
+            <option value="morning">🌅 아침 (06~12)</option>
+            <option value="lunch" selected>☀️ 낮·점심 (12~17)</option>
+            <option value="evening">🌇 저녁 (17~21)</option>
+            <option value="night">🌙 밤 (21~06)</option>
+          </select>
+          <input type="time" id="customItemTimeInput" class="timeline-form-input" value="14:00" style="flex:1;">
+        </div>
+      </div>
+
+      <!-- 이모지 선택 -->
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
+          🎨 어울리는 스티커 아이콘
+        </label>
+        <div class="emoji-selector-row" id="customEmojiRow">
+          <span class="emoji-opt active" onclick="selectCustomEmoji(this, '⭐')">⭐</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🚲')">🚲</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🎨')">🎨</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🍦')">🍦</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🛒')">🛒</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🐾')">🐾</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🎮')">🎮</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🍰')">🍰</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🏊')">🏊</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🪴')">🪴</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '🥜')">🥜</span>
+          <span class="emoji-opt" onclick="selectCustomEmoji(this, '💖')">💖</span>
+        </div>
+      </div>
+
+      <!-- 일과 제목 입력 -->
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
+          📝 어떤 일을 했나요? (최대 18자)
+        </label>
+        <input type="text" id="customItemTitleInput" class="timeline-form-input" placeholder="예: 엄마랑 마트 장보기, 땅콩 수확하기" maxlength="18">
+      </div>
+
+      <!-- 간단 메모 입력 -->
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
+          💭 기억에 남는 한 줄 생각 (선택)
+        </label>
+        <input type="text" id="customItemMemoInput" class="timeline-form-input" placeholder="예: 수박이 정말 달콤하고 맛있었다!" maxlength="35">
+      </div>
+
+      <button type="button" class="card-footer-btn" style="width:100%; padding:12px; font-size:1.1rem; border-radius:14px;" onclick="saveCustomTimelineItem()">
+        시계판에 스티커 찰칵 붙이기! 📌
+      </button>
+
+    </div>
+  </div>
+</div>
+
 <!-- 스크립트 모듈 로드 -->
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
-<script src="../../core/notion-helper.js?v=20260910_02"></script>
+<script src="../../core/notion-helper.js?v=20260913_01"></script>
 <script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/daily-diary.js"></script>
-<script src="data/haru_data.js?v=20260910_02"></script>
-<script src="js/haru_common.js?v=20260910_02"></script>
+<script src="data/haru_data.js?v=20260913_01"></script>
+<script src="js/haru_common.js?v=20260913_01"></script>
 
 </body>
 </html>
