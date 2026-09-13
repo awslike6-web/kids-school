@@ -2308,6 +2308,11 @@ body {
   color: #0369a1;
   border: 1px solid #bae6fd;
 }
+.item-repeat-chip.days {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
 
 /* 시간 직접 입력 박스 */
 .timeline-time-input-wrap {
@@ -2546,6 +2551,66 @@ body {
   border-color: #0984e3;
   color: #0984e3;
   box-shadow: 0 3px 10px rgba(9, 132, 227, 0.18);
+}
+
+/* 특정 요일 선택기 UI */
+.days-selector-box {
+  margin-top: 10px;
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  animation: haruModalPop 0.2s ease;
+}
+.days-preset-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.78rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.days-preset-btn:hover {
+  background: #f1f5f9;
+  border-color: #0984e3;
+  color: #0984e3;
+}
+.weekday-chips-row {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+.weekday-chip {
+  flex: 1;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+.weekday-chip.weekend {
+  color: #e11d48;
+}
+.weekday-chip:hover {
+  transform: translateY(-2px);
+  border-color: #0984e3;
+}
+.weekday-chip.active {
+  background: #0984e3;
+  border-color: #0984e3;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(9, 132, 227, 0.3);
+  font-weight: bold;
 }
 
 @media (max-width: 850px) {

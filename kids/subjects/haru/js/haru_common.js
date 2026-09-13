@@ -1663,6 +1663,19 @@ function getTimelineCompletedKey(dateStr) {
   return `haru_timeline_completed_${currentChild}_${dateStr || currentTimelineDate}`;
 }
 
+// 요일 배열(0=일, 1=월, ..., 6=토) 한글 라벨 변환 헬퍼
+function formatRepeatDays(days) {
+  if (!Array.isArray(days) || days.length === 0 || days.length >= 7) return "매일";
+  const sorted = [...days].sort((a, b) => a - b);
+  const sStr = sorted.join(",");
+  if (sStr === "1,2,3,4,5") return "평일";
+  if (sStr === "0,6") return "주말";
+  if (sStr === "1,3,5") return "월·수·금";
+  if (sStr === "2,4") return "화·목";
+  const names = ["일", "월", "화", "수", "목", "금", "토"];
+  return sorted.map(d => names[d]).join("·");
+}
+
 // 매일 반복되는 고정 루틴 로드
 function getRecurringRoutine() {
   const key = getRecurringStorageKey();
@@ -1724,13 +1737,24 @@ function saveDailyTimelineItems(items, dateStr) {
   localStorage.setItem(key, JSON.stringify(items));
 }
 
-// 통합 일정 조회 (고정 루틴 + 해당 날짜 특별 일정)
+// 통합 일정 조회 (고정 루틴 + 해당 날짜 특별 일정 - 특정 요일 필터링 지원)
 function getTimelineItems(dateStr) {
   const targetDate = dateStr || currentTimelineDate;
   const recurring = getRecurringRoutine();
   const daily = getDailyTimelineItems(targetDate);
 
-  const combined = [...recurring, ...daily];
+  // 대상 날짜의 요일 (0: 일, 1: 월, ..., 6: 토)
+  const targetDayIdx = (new Date(targetDate + "T00:00:00")).getDay();
+
+  // 고정 루틴 요일 필터링 (매일 반복 or 특정 요일 반복 매칭)
+  const matchedRecurring = recurring.filter(it => {
+    if (!it.repeatDays || !Array.isArray(it.repeatDays) || it.repeatDays.length === 0 || it.repeatDays.length >= 7) {
+      return true; // 매일 반복
+    }
+    return it.repeatDays.includes(targetDayIdx);
+  });
+
+  const combined = [...matchedRecurring, ...daily];
   combined.sort((a, b) => (a.time || "").localeCompare(b.time || ""));
   return combined;
 }
@@ -2045,7 +2069,14 @@ function renderClockPins() {
     const timeDisplay = is12H 
       ? `${ampmStr} ${h12}:${String(m).padStart(2, "0")}` 
       : item.time;
-    const repeatLabel = item.isRecurring ? "🔄 매일" : "📅 오늘";
+    let repeatLabel = "📅 오늘";
+    if (item.isRecurring) {
+      if (item.repeatDays && Array.isArray(item.repeatDays) && item.repeatDays.length > 0 && item.repeatDays.length < 7) {
+        repeatLabel = `🏫 ${formatRepeatDays(item.repeatDays)}`;
+      } else {
+        repeatLabel = "🔄 매일";
+      }
+    }
 
     pinEl.innerHTML = `
       <span class="pin-icon">${item.icon || "⭐"}</span>
@@ -2125,7 +2156,9 @@ function renderTimelineList() {
           <div class="timeline-badge-group">
             <span class="timeline-period-badge ${item.period || 'lunch'}">${pMeta.label}</span>
             ${isRec 
-              ? `<span class="item-repeat-chip recurring" title="매일 반복되는 고정 루틴">🔄 매일</span>` 
+              ? (item.repeatDays && Array.isArray(item.repeatDays) && item.repeatDays.length > 0 && item.repeatDays.length < 7
+                  ? `<span class="item-repeat-chip days" title="매주 ${formatRepeatDays(item.repeatDays)} 반복되는 학원/고정 일정">🏫 ${formatRepeatDays(item.repeatDays)}</span>`
+                  : `<span class="item-repeat-chip recurring" title="매일 반복되는 고정 루틴">🔄 매일</span>`)
               : `<span class="item-repeat-chip daily" title="이 날만의 특별 일정">📅 ${isToday ? "오늘" : "이날"}</span>`}
           </div>
           <div class="timeline-time-input-wrap" title="시간을 콕 눌러 원하는 시간으로 변경해요">
@@ -2287,7 +2320,10 @@ function removeTimelineItem(id) {
 
   const recItem = recurring.find(it => it.id === id);
   if (recItem) {
-    if (!confirm(`'${recItem.title}'은 매일 반복되는 고정 일정이에요.\n고정 일정에서 완전히 삭제할까요?`)) return;
+    const daysLabel = (recItem.repeatDays && Array.isArray(recItem.repeatDays) && recItem.repeatDays.length > 0 && recItem.repeatDays.length < 7)
+      ? `매주 ${formatRepeatDays(recItem.repeatDays)} 고정 일정`
+      : "매일 반복되는 고정 일정";
+    if (!confirm(`'${recItem.title}'은 ${daysLabel}이에요.\n고정 일정에서 완전히 삭제할까요?`)) return;
     const updated = recurring.filter(it => it.id !== id);
     saveRecurringRoutine(updated);
     speakText(`'${recItem.title}' 고정 일정을 삭제했어요.`);
@@ -2304,15 +2340,58 @@ function removeTimelineItem(id) {
   renderTimelineList();
 }
 
-// 나만의 일과 모달: 일정 종류 선택 토글 (당일 vs 고정)
+// 나만의 일과 모달: 일정 종류 선택 토글 (당일 vs 매일 반복 vs 특정 요일)
 function selectScheduleType(type) {
   const typeInput = document.getElementById("customItemScheduleType");
   if (typeInput) typeInput.value = type;
 
   const dailyBtn = document.getElementById("schedTypeDailyBtn");
   const recBtn = document.getElementById("schedTypeRecurringBtn");
+  const daysBtn = document.getElementById("schedTypeDaysBtn");
+  const daysBox = document.getElementById("customDaysSelectorBox");
+
   if (dailyBtn) dailyBtn.classList.toggle("active", type === "daily");
   if (recBtn) recBtn.classList.toggle("active", type === "recurring");
+  if (daysBtn) daysBtn.classList.toggle("active", type === "days");
+
+  if (daysBox) {
+    daysBox.style.display = type === "days" ? "block" : "none";
+  }
+
+  // 특정 요일 선택 시, 아무 요일도 선택되어 있지 않다면 현재 선택 날짜의 요일 기본 활성화
+  if (type === "days") {
+    const activeChips = document.querySelectorAll("#customWeekdayChipsRow .weekday-chip.active");
+    if (activeChips.length === 0) {
+      const curDay = (new Date(currentTimelineDate + "T00:00:00")).getDay();
+      const targetChip = document.querySelector(`#customWeekdayChipsRow .weekday-chip[data-day="${curDay}"]`);
+      if (targetChip) targetChip.classList.add("active");
+    }
+  }
+}
+
+// 요일 칩 개별 토글
+function toggleWeekdayChip(btn) {
+  if (!btn) return;
+  btn.classList.toggle("active");
+}
+
+// 요일 프리셋 일괄 설정 (평일, 월수금, 화목, 주말)
+function setDaysPreset(preset) {
+  const chips = document.querySelectorAll("#customWeekdayChipsRow .weekday-chip");
+  chips.forEach(chip => {
+    const day = parseInt(chip.dataset.day, 10);
+    let shouldActive = false;
+    if (preset === "weekdays") {
+      shouldActive = (day >= 1 && day <= 5);
+    } else if (preset === "mwf") {
+      shouldActive = (day === 1 || day === 3 || day === 5);
+    } else if (preset === "tt") {
+      shouldActive = (day === 2 || day === 4);
+    } else if (preset === "weekend") {
+      shouldActive = (day === 0 || day === 6);
+    }
+    chip.classList.toggle("active", shouldActive);
+  });
 }
 
 // 나만의 일과 직접 쓰기 모달 열기 (정상 active 클래스 적용)
@@ -2343,6 +2422,7 @@ function openCustomTimelineModal() {
   if (memoInput) memoInput.value = "";
 
   selectScheduleType("daily");
+  document.querySelectorAll("#customWeekdayChipsRow .weekday-chip").forEach(c => c.classList.remove("active"));
 
   selectedCustomEmoji = "⭐";
   document.querySelectorAll("#customEmojiRow .emoji-opt").forEach((opt, idx) => {
@@ -2388,6 +2468,23 @@ function saveCustomTimelineItem() {
   const memo = (memoInput ? memoInput.value : "").trim();
   const scheduleType = (typeInput ? typeInput.value : "daily");
 
+  let repeatDays = [];
+  if (scheduleType === "days") {
+    const activeChips = document.querySelectorAll("#customWeekdayChipsRow .weekday-chip.active");
+    activeChips.forEach(c => {
+      const d = parseInt(c.dataset.day, 10);
+      if (!isNaN(d)) repeatDays.push(d);
+    });
+    repeatDays.sort((a, b) => a - b);
+
+    if (repeatDays.length === 0) {
+      alert("반복할 요일을 하나 이상 선택해 주세요! 🏫");
+      return;
+    }
+  }
+
+  const isRecurring = (scheduleType === "recurring" || scheduleType === "days");
+
   const newItem = {
     id: `${scheduleType}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     time: time,
@@ -2395,10 +2492,11 @@ function saveCustomTimelineItem() {
     icon: selectedCustomEmoji || "⭐",
     period: period,
     memo: memo,
-    isRecurring: scheduleType === "recurring"
+    isRecurring: isRecurring,
+    ...(scheduleType === "days" ? { repeatDays } : {})
   };
 
-  if (scheduleType === "recurring") {
+  if (isRecurring) {
     const recurring = getRecurringRoutine();
     recurring.push(newItem);
     saveRecurringRoutine(recurring);
@@ -2412,7 +2510,12 @@ function saveCustomTimelineItem() {
   renderClockBoard();
   renderTimelineList();
 
-  const typeDesc = scheduleType === "recurring" ? "매일 반복되는 고정 루틴으로" : "오늘의 특별 일정으로";
+  let typeDesc = "오늘의 특별 일정으로";
+  if (scheduleType === "recurring") {
+    typeDesc = "매일 반복되는 고정 루틴으로";
+  } else if (scheduleType === "days") {
+    typeDesc = `매주 ${formatRepeatDays(repeatDays)} 고정 일정으로`;
+  }
   speakText(`${time}! ${title} 스티커를 ${typeDesc} 찰칵 붙였어요! 멋져요!`);
 }
 

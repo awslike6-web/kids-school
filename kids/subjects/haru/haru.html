@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>민민이네 공부방 - 🌱 슬기로운 하루 탐험관 (1학년 2학기)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/haru.css?v=20260914_02">
+  <link rel="stylesheet" href="../../css/haru.css?v=20260914_03">
 </head>
 <body>
 
@@ -641,20 +641,45 @@
     </div>
     <div class="modal-body" style="padding:20px 22px;">
       
-      <!-- 일정 종류 선택: 당일 특별 일정 vs 매일 반복 루틴 -->
+      <!-- 일정 종류 선택: 당일 특별 일정 vs 매일 반복 vs 특정 요일 반복 -->
       <div style="margin-bottom:16px;">
         <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
           📌 일정 종류를 골라주세요
         </label>
         <div class="schedule-type-toggle-row">
           <button type="button" class="schedule-type-btn active" id="schedTypeDailyBtn" onclick="selectScheduleType('daily')">
-            📅 이 날만 하는 일
+            📅 이 날만
           </button>
           <button type="button" class="schedule-type-btn" id="schedTypeRecurringBtn" onclick="selectScheduleType('recurring')">
-            🔄 매일 반복 고정 루틴
+            🔄 매일 반복
+          </button>
+          <button type="button" class="schedule-type-btn" id="schedTypeDaysBtn" onclick="selectScheduleType('days')">
+            🏫 특정 요일
           </button>
         </div>
         <input type="hidden" id="customItemScheduleType" value="daily">
+
+        <!-- 특정 요일 선택 박스 (월~일 및 프리셋) -->
+        <div id="customDaysSelectorBox" class="days-selector-box" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-family:'Jua', sans-serif; font-size:0.88rem; color:#475569;">반복할 요일 선택:</span>
+            <div style="display:flex; gap:4px;">
+              <button type="button" class="days-preset-btn" onclick="setDaysPreset('weekdays')">평일</button>
+              <button type="button" class="days-preset-btn" onclick="setDaysPreset('mwf')">월수금</button>
+              <button type="button" class="days-preset-btn" onclick="setDaysPreset('tt')">화목</button>
+              <button type="button" class="days-preset-btn" onclick="setDaysPreset('weekend')">주말</button>
+            </div>
+          </div>
+          <div class="weekday-chips-row" id="customWeekdayChipsRow">
+            <button type="button" class="weekday-chip" data-day="1" onclick="toggleWeekdayChip(this)">월</button>
+            <button type="button" class="weekday-chip" data-day="2" onclick="toggleWeekdayChip(this)">화</button>
+            <button type="button" class="weekday-chip" data-day="3" onclick="toggleWeekdayChip(this)">수</button>
+            <button type="button" class="weekday-chip" data-day="4" onclick="toggleWeekdayChip(this)">목</button>
+            <button type="button" class="weekday-chip" data-day="5" onclick="toggleWeekdayChip(this)">금</button>
+            <button type="button" class="weekday-chip weekend" data-day="6" onclick="toggleWeekdayChip(this)">토</button>
+            <button type="button" class="weekday-chip weekend" data-day="0" onclick="toggleWeekdayChip(this)">일</button>
+          </div>
+        </div>
       </div>
       
       <!-- 시간 선택 -->
@@ -733,7 +758,7 @@
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/daily-diary.js"></script>
 <script src="data/haru_data.js?v=20260913_05"></script>
-<script src="js/haru_common.js?v=20260914_02"></script>
+<script src="js/haru_common.js?v=20260914_03"></script>
 
 </body>
 </html>
