@@ -46,21 +46,33 @@ function makeBgFloats() {
 // 사용자 권한 확인 및 뷰 설정
 function getUserAuth() {
   const urlParams = new URLSearchParams(window.location.search);
-  const userParam = urlParams.get('user'); // 'minsu', 'minseo', 'admin'
+  const userParam = urlParams.get('user'); // 'minsu', 'minseo', 'admin', 'parent'
+  const roleParam = urlParams.get('role'); // 'parent', 'admin'
   const savedName = localStorage.getItem('currentUserName') || '';
   const savedUser = localStorage.getItem('currentUser') || '';
   const savedChild = localStorage.getItem('currentChild') || '';
 
-  const isAdmin = (savedName === '아빠' || savedName === '엄마' || savedUser === 'admin' || userParam === 'admin');
+  const isAdmin = (
+    savedName === '아빠' || 
+    savedName === '엄마' || 
+    savedUser === 'admin' || 
+    savedUser === 'parent' ||
+    userParam === 'admin' || 
+    userParam === 'parent' ||
+    roleParam === 'parent' ||
+    roleParam === 'admin'
+  );
   
   let targetChild = null;
-  if (userParam === 'minsu' || savedChild === 'minsu' || savedName === '민수' || savedUser === 'son') {
-    targetChild = 'minsu';
-  } else if (userParam === 'minseo' || savedChild === 'minseo' || savedName === '민서' || savedUser === 'daughter') {
-    targetChild = 'minseo';
+  if (!isAdmin) {
+    if (userParam === 'minsu' || savedChild === 'minsu' || savedName === '민수' || savedUser === 'son') {
+      targetChild = 'minsu';
+    } else if (userParam === 'minseo' || savedChild === 'minseo' || savedName === '민서' || savedUser === 'daughter') {
+      targetChild = 'minseo';
+    }
   }
 
-  return { isAdmin, targetChild, userParam };
+  return { isAdmin, targetChild, userParam, roleParam };
 }
 
 // 뷰 스위칭 (전체 / 민수 / 민서)
@@ -466,32 +478,41 @@ function renderRadarChart(canvasId, label, scores, isPink, customLabels) {
 // 노션에서 실시간 통합 인벤토리 & 학습일지 & VOCA 데이터 로드
 async function loadDashboardData() {
   try {
-    // 3대 노션 DB 병렬 쿼리 (캐시 무효화로 기기간 100% 실시간 동기화)
-    const noCacheHeaders = {
-      "Content-Type": "application/json",
-      "User-Agent": "Mozilla/5.0",
-      "Pragma": "no-cache",
-      "Cache-Control": "no-cache"
+    // 3대 노션 DB 병렬 쿼리 (CORS 호환 표준 헤더 및 브라우저 캐시 바이패스)
+    const apiHeaders = {
+      "Content-Type": "application/json"
     };
     const [invRes, logsRes, vocaRes] = await Promise.all([
       fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
         method: "POST",
-        headers: noCacheHeaders,
+        headers: apiHeaders,
+        cache: "no-store",
         body: JSON.stringify({ page_size: 10 })
       }),
       fetch(`${PROXY_URL}/v1/databases/${STUDY_LOG_DB_ID}/query`, {
         method: "POST",
-        headers: noCacheHeaders,
+        headers: apiHeaders,
+        cache: "no-store",
         body: JSON.stringify({ page_size: 50, sorts: [{ property: "입장", direction: "descending" }] })
-      }).catch(() => null),
+      }).catch((e) => {
+        console.warn("학습일지 DB 쿼리 예외 (진행 계속):", e);
+        return null;
+      }),
       fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query`, {
         method: "POST",
-        headers: noCacheHeaders,
+        headers: apiHeaders,
+        cache: "no-store",
         body: JSON.stringify({ page_size: 100 })
-      }).catch(() => null)
+      }).catch((e) => {
+        console.warn("VOCA DB 쿼리 예외 (진행 계속):", e);
+        return null;
+      })
     ]);
 
-    if (!invRes.ok) throw new Error("인벤토리 DB 네트워크 응답 오류");
+    if (!invRes || !invRes.ok) {
+      const errDetail = invRes ? await invRes.text().catch(() => "텍스트 읽기 실패") : "응답 객체 없음";
+      throw new Error(`인벤토리 DB 네트워크 응답 오류 (${invRes ? invRes.status : 'null'}): ${errDetail}`);
+    }
     const invData = await invRes.json();
     const logsData = logsRes && logsRes.ok ? await logsRes.json() : { results: [] };
     const vocaData = vocaRes && vocaRes.ok ? await vocaRes.json() : { results: [] };
@@ -914,8 +935,7 @@ async function saveScreenTimeApprovalToCloud(childName, isApproved, approvedMinu
     const res = await fetch(proxyUrl + "/v1/pages/" + pageId, {
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         properties: {
