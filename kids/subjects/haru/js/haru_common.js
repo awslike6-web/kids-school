@@ -743,12 +743,13 @@ function renderSpecialDaysTab() {
       </div>
     `;
 
+    const btnLabel = s.videoBtnText || (s.videoUrl && s.videoUrl.includes("photos.app.goo.gl") ? "구글 포토 영상 보러가기" : "동영상 보러가기");
     const videoBtnHtml = s.videoUrl ? `
       <div class="special-card-video-wrap" onclick="event.stopPropagation();">
         <a href="${s.videoUrl}" target="_blank" rel="noopener noreferrer" class="special-card-video-btn" title="동영상 감상하기 (구글 포토/유튜브/드라이브)">
           <div class="video-btn-left">
             <span class="video-btn-icon">🎬</span>
-            <span class="video-btn-text">동영상 보러가기</span>
+            <span class="video-btn-text">${btnLabel}</span>
           </div>
           <span class="video-btn-badge">고화질 재생 ➔</span>
         </a>

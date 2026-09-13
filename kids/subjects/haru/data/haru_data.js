@@ -110,13 +110,30 @@ window.HARU_DATA = {
         id: "evt_baseball_droneshow_20260912",
         category: "가족기념일",
         categoryIcon: "⚾",
-        title: "⚾ 밤하늘을 수놓은 야구 드론쇼 & 온 가족 나들이",
-        date: "2026-09-12 (초가을 밤)",
-        desc: "온 가족이 함께 밤하늘에서 반짝반짝 빛나는 환상적인 야구 드론쇼를 보았어요! 야구공과 글러브, 시원한 홈런 배트 모양으로 수많은 드론들이 밤하늘을 수놓았답니다. 15분 동안 눈을 뗄 수 없을 만큼 신기하고 가슴 벅찬 하루였어요!",
+        title: "⚾ 밤하늘을 수놓은 영웅 야구 드론쇼",
+        date: "2026-09-12 (가을밤 야구장)",
+        desc: "온 가족이 함께 밤하늘에서 반짝반짝 빛나는 환상적인 야구 드론쇼를 보았어요! 멋진 야구 모자와 펄럭이는 망토를 두른 히어로 캐릭터가 밤하늘을 가득 채울 때 온 가족이 감탄했답니다. 15분 동안 눈을 뗄 수 없었던 감동의 드론쇼였어요! ✨",
         icon: "⚾",
-        imageUrl: null,
-        videoUrl: "",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260912_droneshow_01.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260912_droneshow_01.jpg"
+        ],
+        videoUrl: "https://photos.app.goo.gl/fgvwr6ChSVsTjfna7",
+        videoBtnText: "15분 드론쇼 풀영상 감상하기",
         fallbackIcon: "⚾"
+      },
+      {
+        id: "evt_cheerleader_dance_20260912",
+        category: "특별한날",
+        categoryIcon: "💃",
+        title: "💃 치어리더 음악에 맞춘 신나는 댄스 파티!",
+        date: "2026-09-12 (드론쇼 시작 전)",
+        desc: "드론쇼가 시작하기 전, 신나는 야구 치어리더 음악에 맞춰 아이들이 온몸으로 리듬을 타며 춤을 추었어요! 엉덩이를 씰룩이며 신나게 노는 귀여운 모습에 엄마 아빠 모두 빵 터져서 웃음꽃이 활짝 피었답니다! 🎶🍬",
+        icon: "💃",
+        imageUrl: null,
+        videoUrl: "https://photos.app.goo.gl/UWsCZfbhVteVu5LM7",
+        videoBtnText: "아이들 치어리더 댄스 영상 보기",
+        fallbackIcon: "💃"
       },
       {
         id: "evt_minseo_peanut_20260910",
