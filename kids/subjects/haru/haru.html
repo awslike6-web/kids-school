@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>민민이네 공부방 - 🌱 슬기로운 하루 탐험관 (1학년 2학기)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/haru.css?v=20260913_03">
+  <link rel="stylesheet" href="../../css/haru.css?v=20260913_05">
 </head>
 <body>
 
@@ -21,6 +21,9 @@
         <span>🍬</span>
         <span id="walletCurrencyVal">0 🍬</span>
       </div>
+      <button class="audio-quick-stop-btn" id="haruQuickStopBtn" onclick="stopAllSpeech(true)" style="display:none;" title="지금 나오는 음성 즉시 멈추기">
+        ⏹️ 음성 멈춤
+      </button>
       <button class="tts-toggle-btn active" id="haruTtsBtn" onclick="toggleHaruTts()">
         🔊 요정 음성 ON
       </button>
@@ -690,6 +693,13 @@
   </div>
 </div>
 
+<!-- ⏹️ 실시간 음성 중단 플로팅 컨트롤러 -->
+<div id="haruAudioFloatingBar" class="haru-audio-floating-bar" style="display:none;" onclick="stopAllSpeech(true)" title="터치하면 음성을 즉시 멈춰요">
+  <span class="pulse-speaker">🔊</span>
+  <span class="floating-audio-text" id="floatingAudioText">요정 코코 낭독 중...</span>
+  <span class="floating-stop-chip">⏹️ 멈추기</span>
+</div>
+
 <!-- 스크립트 모듈 로드 -->
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
@@ -697,8 +707,8 @@
 <script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/daily-diary.js"></script>
-<script src="data/haru_data.js?v=20260913_04"></script>
-<script src="js/haru_common.js?v=20260913_04"></script>
+<script src="data/haru_data.js?v=20260913_05"></script>
+<script src="js/haru_common.js?v=20260913_05"></script>
 
 </body>
 </html>

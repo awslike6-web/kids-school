@@ -120,9 +120,12 @@ function setupChildProfileUI() {
 }
 
 // ==========================================
-// 🧭 4대 영역 탭 스위칭
+// 🧭 4대 영역 탭 스위칭 (탭 이동 시 이전 음성 즉시 정지 & 불필요한 자동 낭독 제거)
 // ==========================================
 function switchHaruTab(tabName) {
+  // 💡 탭을 왔다갔다 할 때는 이전 음성을 즉시 끊어 사용자 피로도를 방지합니다!
+  stopAllSpeech();
+
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.tab === tabName);
   });
@@ -130,23 +133,43 @@ function switchHaruTab(tabName) {
     panel.classList.toggle("active", panel.id === `tab_${tabName}`);
   });
 
-  if (tabName === "habits") {
-    speakText("착한 습관 저금통과 건강 운동 구역이에요!");
-  } else if (tabName === "art") {
-    speakText("하늘과 자연, 명화를 감상하는 구역이에요!");
-  } else if (tabName === "special") {
-    speakText("소중하고 특별한 날의 이야기 구역이에요!");
-  } else if (tabName === "timeline") {
-    speakText("24시간 매직 타임머신 시계판 구역이에요! 언제 무엇을 했는지 스티커를 붙여보아요!");
+  if (tabName === "timeline") {
     renderTimelineTab();
-  } else if (tabName === "safety") {
-    speakText("출동 119 안전 수호대와 닥터 코코 응급 상담소 구역이에요!");
   }
 }
 
 // ==========================================
-// 🔊 음성 TTS & 효과음 (공통 초고음질 요정 엔진 연동)
+// 🔊 음성 TTS & 효과음 (공통 초고음질 요정 엔진 연동 & 멈춤 토글 지원)
 // ==========================================
+let isHaruSpeaking = false;
+let currentSpeakingCardId = null;
+
+function showAudioControls(text) {
+  isHaruSpeaking = true;
+  const stopBtn = document.getElementById("haruQuickStopBtn");
+  if (stopBtn) stopBtn.style.display = "inline-flex";
+  const floatBar = document.getElementById("haruAudioFloatingBar");
+  const floatText = document.getElementById("floatingAudioText");
+  if (floatBar) {
+    if (floatText && text) {
+      const cleanText = text.replace(/^[^\w가-힣\s]+/, '').trim();
+      const short = cleanText.length > 18 ? cleanText.slice(0, 18) + "..." : cleanText;
+      floatText.innerText = `요정 코코: "${short}"`;
+    }
+    floatBar.style.display = "flex";
+  }
+}
+
+function hideAudioControls() {
+  isHaruSpeaking = false;
+  currentSpeakingCardId = null;
+  const stopBtn = document.getElementById("haruQuickStopBtn");
+  if (stopBtn) stopBtn.style.display = "none";
+  const floatBar = document.getElementById("haruAudioFloatingBar");
+  if (floatBar) floatBar.style.display = "none";
+  updateSpeakingCardUi();
+}
+
 function toggleHaruTts() {
   if (typeof toggleFairyTtsSetting === "function") {
     toggleFairyTtsSetting();
@@ -177,33 +200,51 @@ function updateTtsButtonUI() {
   }
 }
 
-function speakText(text) {
+function speakText(text, onEndCallback = null) {
   const isEnabled = localStorage.getItem("fairy_tts_enabled") !== "false";
-  if (!isEnabled) return;
+  if (!isEnabled || !text) {
+    if (onEndCallback) onEndCallback();
+    return;
+  }
+
+  showAudioControls(text);
+
+  const handleEnd = () => {
+    hideAudioControls();
+    if (onEndCallback) onEndCallback();
+  };
 
   // 1순위: 초고음질 요정 엔진 (사전녹음 MP3 프리셋 및 Cloudflare Worker Edge-TTS 실시간 스트리밍)
   if (typeof speakFairyTTS === "function") {
-    speakFairyTTS(text);
+    speakFairyTTS(text, handleEnd);
     return;
   }
 
   // 2순위: 브라우저 WebSpeech API 오프라인 폴백
   if ("speechSynthesis" in window) {
-    window.speechSynthesis.cancel();
+    try { window.speechSynthesis.cancel(); } catch(e) {}
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "ko-KR";
     utterance.rate = 0.95;
     utterance.pitch = 1.15;
+    utterance.onend = handleEnd;
+    utterance.onerror = handleEnd;
     window.speechSynthesis.speak(utterance);
+  } else {
+    handleEnd();
   }
 }
 
-function stopAllSpeech() {
+function stopAllSpeech(userInitiated = false) {
   if (typeof stopFairyTTS === "function") {
     stopFairyTTS();
   }
   if (window.speechSynthesis) {
-    window.speechSynthesis.cancel();
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+  }
+  hideAudioControls();
+  if (userInitiated) {
+    console.log("⏹️ 사용자가 음성을 즉시 중단했습니다.");
   }
 }
 
@@ -768,7 +809,7 @@ function renderSpecialDaysTab() {
       ` : "";
 
       return `
-        <div class="special-card has-photo" onclick="speakStoryText('${s.title}', '${s.desc}')" title="터치하면 요정이 이야기를 들려줘요!">
+        <div class="special-card has-photo" id="special_card_${s.id}" onclick="toggleSpeakStoryText('${s.id}', '${s.title}', '${s.desc}')" title="터치하면 이야기 낭독 / 다시 터치하면 멈춤 ⏹️">
           <div class="special-card-img-wrap">
             <span class="special-card-category-chip">${categoryIcon} ${category}</span>
             ${galleryList.length > 1 ? `<span class="special-card-photo-count">📷 사진 ${galleryList.length}장</span>` : ''}
@@ -786,7 +827,7 @@ function renderSpecialDaysTab() {
     }
 
     return `
-      <div class="special-card" onclick="speakStoryText('${s.title}', '${s.desc}')" title="터치하면 요정이 이야기를 들려줘요!">
+      <div class="special-card" id="special_card_${s.id}" onclick="toggleSpeakStoryText('${s.id}', '${s.title}', '${s.desc}')" title="터치하면 이야기 낭독 / 다시 터치하면 멈춤 ⏹️">
         <div class="special-card-icon">${s.icon || '🌟'}</div>
         ${titleRowHtml}
         <div class="special-card-date">📅 ${s.date || '특별한 날'}</div>
@@ -798,9 +839,47 @@ function renderSpecialDaysTab() {
   }).join("");
 }
 
-function speakStoryText(title, desc) {
+function updateSpeakingCardUi() {
+  document.querySelectorAll(".special-card").forEach(el => {
+    const badge = el.querySelector(".card-speaking-badge");
+    if (badge) badge.remove();
+    el.classList.remove("is-speaking");
+  });
+  if (currentSpeakingCardId) {
+    const activeEl = document.getElementById(`special_card_${currentSpeakingCardId}`);
+    if (activeEl) {
+      activeEl.classList.add("is-speaking");
+      const badge = document.createElement("div");
+      badge.className = "card-speaking-badge";
+      badge.innerHTML = `<span>🔊 낭독 중</span> <span>(터치 시 멈춤 ⏹️)</span>`;
+      activeEl.appendChild(badge);
+    }
+  }
+}
+
+function toggleSpeakStoryText(cardId, title, desc) {
+  // 💡 이미 이 카드가 낭독 중일 때 다시 누르면 즉시 음성 중단! (피로도 방지 토글)
+  if (currentSpeakingCardId === cardId && isHaruSpeaking) {
+    stopAllSpeech(true);
+    return;
+  }
+
+  // 이전 음성 중단 후 새 카드 낭독 시작
+  stopAllSpeech();
+  currentSpeakingCardId = cardId;
+  updateSpeakingCardUi();
+
   const cleanTitle = title ? title.replace(/^[^\w가-힣\s]+/, '').trim() : '';
-  speakText(`${cleanTitle}! ${desc}`);
+  speakText(`${cleanTitle}! ${desc}`, () => {
+    if (currentSpeakingCardId === cardId) {
+      currentSpeakingCardId = null;
+      updateSpeakingCardUi();
+    }
+  });
+}
+
+function speakStoryText(title, desc) {
+  toggleSpeakStoryText('temp_' + Date.now(), title, desc);
 }
 
 function addNewSpecialStory() {

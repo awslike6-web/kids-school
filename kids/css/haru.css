@@ -93,6 +93,31 @@ body {
   background: #6c5ce7;
   color: #fff;
 }
+.audio-quick-stop-btn {
+  background: linear-gradient(135deg, #ff4757, #ee5253);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+  animation: pulseStopBtn 1.5s infinite;
+  transition: all 0.2s;
+}
+.audio-quick-stop-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 71, 87, 0.6);
+}
+@keyframes pulseStopBtn {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
 
 /* 🌅 메인 헤더 배너 */
 .haru-header-card {
@@ -754,6 +779,84 @@ body {
   border-radius: 10px;
   font-size: 0.76rem;
   letter-spacing: -0.2px;
+}
+
+/* ⏹️ 플로팅 실시간 음성 중단 컨트롤러 */
+.haru-audio-floating-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 71, 87, 0.65);
+  border-radius: 30px;
+  padding: 9px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+  z-index: 9999;
+  cursor: pointer;
+  animation: slideUpAudio 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s;
+}
+.haru-audio-floating-bar:hover {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: #ff4757;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255, 71, 87, 0.45);
+}
+@keyframes slideUpAudio {
+  from { opacity: 0; transform: translateX(-50%) translateY(25px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.pulse-speaker {
+  animation: pulseSpeakerIcon 0.8s infinite alternate;
+}
+@keyframes pulseSpeakerIcon {
+  0% { transform: scale(0.9); }
+  100% { transform: scale(1.25); }
+}
+.floating-stop-chip {
+  background: linear-gradient(135deg, #ff4757, #ee5253);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  box-shadow: 0 2px 6px rgba(255, 71, 87, 0.4);
+}
+
+/* 🔊 카드 낭독 중 시각적 하이라이트 & 토글 안내 */
+.special-card.is-speaking {
+  border: 2px solid #ff4757 !important;
+  box-shadow: 0 0 18px rgba(255, 71, 87, 0.45) !important;
+  transform: translateY(-2px);
+}
+.card-speaking-badge {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 71, 87, 0.95);
+  color: #fff;
+  font-size: 0.76rem;
+  font-family: 'Jua', sans-serif;
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fadeInBadge 0.2s ease-out;
+}
+@keyframes fadeInBadge {
+  from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
 }
 .story-photo-upload-zone {
   display: flex;
