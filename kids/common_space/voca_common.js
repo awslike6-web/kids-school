@@ -11,6 +11,7 @@ let allDictionaryWords = [];
 let selectedStudents = []; 
 let selectedSubjects = []; 
 let selectedGrades = [];   
+let selectedUnit = ""; // 🔖 선택된 단원 (Select HTML 동적 배선용)
 let MODAL_CHAT_HISTORY = [];
 let isFairyVoiceOn = true; 
 
@@ -141,13 +142,76 @@ function buildFilterButtons() {
   }
 }
 
+// 🔖 4. 단원 드롭다운 동적 생성 (사용자가 학생/과목/학년을 변경할 때마다 자동 갱신)
+function updateUnitSelectOptions() {
+  const selectEl = document.getElementById('unitSelect');
+  if (!selectEl) return;
+
+  // 현재 활성화된 학생, 과목, 학년에 부합하는 단어들을 추출
+  const matchedWords = allDictionaryWords.filter(w => {
+    const studentMatch = selectedStudents.length === 0 || 
+                         selectedStudents.some(stu => (w.target || []).includes(stu) || (w.target || []).includes("공통"));
+    const subjectMatch = selectedSubjects.length === 0 || 
+                         selectedSubjects.some(sub => (w.subject || []).includes(sub));
+    const gradeMatch = selectedGrades.length === 0 || 
+                       selectedGrades.some(g => (w.grades || []).includes(g));
+    return studentMatch && subjectMatch && gradeMatch;
+  });
+
+  // 고유 단원 목록 추출
+  const rawUnits = [...new Set(matchedWords.map(w => (w.stage || w.level || "").trim()).filter(u => u && u !== "미분류" && u !== "기본 단원"))];
+
+  // 단원 목록 정렬 (L1~L10 우선, 숫자 우선, 한글 가나다순)
+  rawUnits.sort((a, b) => {
+    const matchLa = a.match(/^L(\d+)/i);
+    const matchLb = b.match(/^L(\d+)/i);
+    if (matchLa && matchLb) {
+      return parseInt(matchLa[1], 10) - parseInt(matchLb[1], 10);
+    }
+    const numA = parseFloat(a.replace(/[^0-9.]/g, ''));
+    const numB = parseFloat(b.replace(/[^0-9.]/g, ''));
+    if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+      return numA - numB;
+    }
+    return a.localeCompare(b, 'ko');
+  });
+
+  const prevVal = selectedUnit;
+  let optionsHtml = `<option value="">📖 전체 단원 보기 (${rawUnits.length}개 단원)</option>`;
+  rawUnits.forEach(u => {
+    const count = matchedWords.filter(w => (w.stage || w.level || "").trim() === u).length;
+    const isSelected = (u === prevVal) ? 'selected' : '';
+    optionsHtml += `<option value="${u}" ${isSelected}>🔖 ${u} (${count}개)</option>`;
+  });
+
+  selectEl.innerHTML = optionsHtml;
+
+  // 이전에 선택했던 단원이 현재 조건의 단원 목록에 없으면 리셋
+  if (prevVal && !rawUnits.includes(prevVal)) {
+    selectedUnit = "";
+    selectEl.value = "";
+  }
+}
+
+function handleUnitChange(val) {
+  selectedUnit = (val || "").trim();
+  updateStatusAndFilter(false); // 단원 변경 시에는 드롭다운 옵션 재생성 건너뜀
+}
+
+function resetUnitSelect() {
+  selectedUnit = "";
+  const selectEl = document.getElementById('unitSelect');
+  if (selectEl) selectEl.value = "";
+  updateStatusAndFilter(false);
+}
+
 function selectStudentAll(btnEl) {
   selectedStudents = [];
   if (document.getElementById('studentFilterArea')) {
     document.querySelectorAll('#studentFilterArea .filter-btn').forEach(b => b.classList.remove('active'));
     btnEl.classList.add('active');
   }
-  updateStatusAndFilter();
+  updateStatusAndFilter(true);
 }
 
 function toggleStudent(student, btnEl) {
@@ -163,7 +227,7 @@ function toggleStudent(student, btnEl) {
   if (selectedStudents.length === 0 && allBtn) {
     allBtn.classList.add('active');
   }
-  updateStatusAndFilter();
+  updateStatusAndFilter(true);
 }
 
 function toggleSubject(subject, btnEl) {
@@ -173,7 +237,7 @@ function toggleSubject(subject, btnEl) {
   } else {
     selectedSubjects.push(subject);
   }
-  updateStatusAndFilter();
+  updateStatusAndFilter(true);
 }
 
 function toggleGrade(grade, btnEl) {
@@ -183,19 +247,24 @@ function toggleGrade(grade, btnEl) {
   } else {
     selectedGrades.push(grade);
   }
-  updateStatusAndFilter();
+  updateStatusAndFilter(true);
 }
 
 function handleSearch() {
-  updateStatusAndFilter();
+  updateStatusAndFilter(false);
 }
 
-function updateStatusAndFilter() {
+function updateStatusAndFilter(rebuildUnits = true) {
+  if (rebuildUnits) {
+    updateUnitSelectOptions();
+  }
+
   const searchText = document.getElementById('searchInput').value.trim();
   let msgParts = [];
   if (selectedStudents.length > 0) msgParts.push(`👤 [${selectedStudents.join(', ')}]`);
   if (selectedSubjects.length > 0) msgParts.push(`📘 [${selectedSubjects.join(', ')}]`);
   if (selectedGrades.length > 0) msgParts.push(`🎒 [${selectedGrades.join(', ')}]`);
+  if (selectedUnit) msgParts.push(`🔖 [단원: ${selectedUnit}]`);
   if (searchText) msgParts.push(`🔍 "${searchText}"`);
   
   const statusMsg = document.getElementById('statusMsg');
@@ -211,7 +280,9 @@ function updateStatusAndFilter() {
                        selectedGrades.some(g => (w.grades || []).includes(g));
     const studentMatch = selectedStudents.length === 0 || 
                          selectedStudents.some(stu => (w.target || []).includes(stu) || (w.target || []).includes("공통"));
-    return textMatch && subjectMatch && gradeMatch && studentMatch;
+    const wUnit = (w.stage || w.level || "").trim();
+    const unitMatch = !selectedUnit || (wUnit === selectedUnit);
+    return textMatch && subjectMatch && gradeMatch && studentMatch && unitMatch;
   });
 
   if (fairyRoom) fairyRoom.style.display = 'block';
