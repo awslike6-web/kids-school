@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>이슬과 안개 발생 실험 🧊 | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --primary: #0284c7;
+        --primary-dark: #0369a1;
+        --accent: #f59e0b;
+        --bg-color: #0b1528;
+        --card-bg: #13233f;
+        --text-light: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: var(--bg-color);
+        min-height: 100vh;
+        color: var(--text-light);
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 50px;
+    }
+
+    /* 상단 네비게이션 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 20px; background: rgba(11, 21, 40, 0.95); backdrop-filter: blur(12px);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
+        border-bottom: 1.5px solid #1e3a66;
+    }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: #1a3258; color: #e2e8f0; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; text-decoration: none; border: 1px solid #2d5088; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #2d5088; color: #fff; }
+    .page-title {
+        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #38bdf8;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .gem-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white; font-family: 'Jua', sans-serif; padding: 6px 14px;
+        border-radius: 20px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .main-wrap {
+        max-width: 980px; width: 100%; margin: 0 auto; padding: 18px 16px;
+        display: flex; flex-direction: column; gap: 22px;
+    }
+
+    /* 헤더 배너 */
+    .header-banner {
+        background: linear-gradient(135deg, #0c284e 0%, #1e4976 100%);
+        border: 2px solid #2b598f; border-radius: 20px; padding: 20px 24px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+    }
+    .banner-sub {
+        font-family: 'Jua', sans-serif; color: #38bdf8; font-size: 0.95rem;
+        display: inline-block; margin-bottom: 6px; letter-spacing: 0.5px;
+    }
+    .banner-title {
+        font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #ffffff;
+        margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+    }
+    .banner-desc {
+        color: #cbd5e1; font-size: 0.98rem; line-height: 1.55;
+    }
+
+    /* 카드 섹션 */
+    .section-card {
+        background: var(--card-bg); border-radius: 20px; border: 2px solid #1e3a66;
+        padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        display: flex; flex-direction: column; gap: 14px;
+    }
+    .section-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1.5px solid #1e3a66; padding-bottom: 12px;
+    }
+    .section-tag {
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #38bdf8;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .source-badge {
+        background: #0369a1; color: #e0f2fe; padding: 4px 10px; border-radius: 8px;
+        font-size: 0.82rem; font-family: 'Jua', sans-serif;
+    }
+
+    /* 영상 래퍼 */
+    .video-frame-wrap {
+        position: relative; padding-bottom: 56.25%; height: 0;
+        border-radius: 14px; overflow: hidden; border: 2px solid #2d5088;
+        background: #000;
+    }
+    .video-frame-wrap iframe {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        border: 0;
+    }
+    .observation-tips {
+        background: #0d1b32; border-left: 4px solid #f59e0b;
+        padding: 12px 16px; border-radius: 8px; font-size: 0.92rem; color: #e2e8f0;
+        line-height: 1.55;
+    }
+
+    /* 실험 모드 전환 탭 (이슬 vs 안개) */
+    .lab-mode-tabs {
+        display: flex; gap: 10px; border-bottom: 2px solid #1e3a66; padding-bottom: 10px;
+    }
+    .mode-tab-btn {
+        flex: 1; padding: 12px 16px; border-radius: 14px; border: 2px solid #1e3a66;
+        background: #0d1b32; color: #94a3b8; font-family: 'Jua', sans-serif;
+        font-size: 1.05rem; cursor: pointer; display: flex; align-items: center;
+        justify-content: center; gap: 8px; transition: all 0.2s;
+    }
+    .mode-tab-btn.active {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: white; border-color: #38bdf8; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    }
+
+    /* 시뮬레이터 뷰포트 */
+    .sim-viewport {
+        background: radial-gradient(circle at center, #162b4d 0%, #0c182b 100%);
+        border-radius: 16px; border: 2px solid #224275;
+        min-height: 400px; position: relative; overflow: hidden;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 20px;
+    }
+
+    /* [실험 A: 이슬] 듀얼 컵 스테이지 */
+    .dew-stage {
+        display: flex; justify-content: space-around; align-items: flex-end;
+        width: 100%; max-width: 600px; height: 280px; position: relative;
+    }
+    .cup-unit {
+        display: flex; flex-direction: column; align-items: center; gap: 8px; width: 180px;
+    }
+    .cup-title { font-family: 'Jua', sans-serif; font-size: 1.1rem; }
+    .glass-cup {
+        width: 140px; height: 190px; border: 3px solid #38bdf8;
+        border-radius: 6px 6px 20px 20px; position: relative;
+        background: rgba(255,255,255,0.05); overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+    .cup-liquid {
+        position: absolute; bottom: 0; width: 100%; height: 70%;
+        border-radius: 0 0 16px 16px; transition: all 0.3s;
+    }
+    /* 얼음 둥둥 */
+    .ice-cubes {
+        position: absolute; top: 10px; width: 100%; display: flex;
+        justify-content: center; gap: 8px; font-size: 1.4rem;
+        animation: floatIce 2s infinite alternate ease-in-out;
+    }
+    @keyframes floatIce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-4px); }
+    }
+    /* 컵 바깥 물방울(이슬) 레이어 */
+    .dew-drops-layer {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0; transition: opacity 1s ease; pointer-events: none;
+    }
+    .dew-foggy-glass {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(2px);
+        opacity: 0; transition: opacity 0.8s ease;
+    }
+
+    /* [실험 B: 안개] 집기병 스테이지 */
+    .fog-stage {
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        width: 100%; height: 300px; position: relative;
+    }
+    .jar-container {
+        width: 220px; height: 260px; border: 3.5px solid #38bdf8;
+        border-radius: 12px 12px 28px 28px; position: relative;
+        background: rgba(255,255,255,0.04); overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .jar-warm-water {
+        position: absolute; bottom: 0; width: 100%; height: 30px;
+        background: rgba(2, 132, 199, 0.45); border-top: 1.5px solid #38bdf8;
+    }
+    .ice-dish-lid {
+        position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+        width: 240px; height: 32px; background: rgba(56, 189, 248, 0.65);
+        border: 2px solid #e0f2fe; border-radius: 16px; z-index: 20;
+        display: flex; justify-content: center; align-items: center;
+        font-family: 'Jua'; font-size: 0.95rem; color: #0f172a;
+        box-shadow: 0 4px 15px rgba(56, 189, 248, 0.5);
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    #fogCanvas {
+        position: absolute; top: 10px; left: 10px; width: 200px; height: 215px;
+        pointer-events: none; z-index: 10;
+    }
+
+    /* 말풍선 */
+    .fairy-guide-bubble {
+        margin-top: 16px;
+        background: rgba(3, 105, 161, 0.9); border: 2px solid #38bdf8;
+        padding: 10px 20px; border-radius: 30px; font-family: 'Jua', sans-serif;
+        font-size: 1.05rem; color: white; display: flex; align-items: center; gap: 10px;
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+    }
+
+    /* 액션 버튼 바 */
+    .control-actions-bar {
+        display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+        margin-top: 12px;
+    }
+    .btn-action {
+        font-family: 'Jua', sans-serif; font-size: 1.05rem; padding: 12px 22px;
+        border-radius: 14px; border: none; cursor: pointer; display: inline-flex;
+        align-items: center; gap: 8px; transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn-blue {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: white; border: 2px solid #38bdf8;
+    }
+    .btn-blue:hover { background: #0369a1; transform: translateY(-2px); }
+
+    /* 비교 요약 카드 */
+    .compare-summary-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    }
+    @media (max-width: 600px) {
+        .compare-summary-grid { grid-template-columns: 1fr; }
+    }
+    .compare-box {
+        background: #091322; border: 2px solid #1e3a66; border-radius: 14px;
+        padding: 14px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .compare-box-title { font-family: 'Jua', sans-serif; font-size: 1.15rem; }
+
+    /* 퀴즈 카드 */
+    .quiz-card {
+        background: linear-gradient(180deg, #162b4d 0%, #11203b 100%);
+        border: 2px solid #284c80; border-radius: 20px; padding: 22px;
+        display: flex; flex-direction: column; gap: 14px;
+    }
+    .quiz-title {
+        font-family: 'Jua', sans-serif; font-size: 1.18rem; color: #fbbf24;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .quiz-sentence-box {
+        background: #091322; border: 1.5px dashed #38bdf8; border-radius: 14px;
+        padding: 16px 20px; font-size: 1.15rem; line-height: 2.2; color: #f1f5f9;
+        font-family: 'Nanum Gothic', sans-serif; font-weight: 700;
+    }
+    .quiz-blank-slot {
+        display: inline-block; min-width: 110px; padding: 2px 14px; margin: 0 4px;
+        background: #1e3a66; border-radius: 8px; border: 2px solid #38bdf8;
+        color: #38bdf8; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .quiz-options-row {
+        display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;
+    }
+    .option-chip {
+        background: #1a3258; color: #e2e8f0; border: 2px solid #2d5088;
+        font-family: 'Jua', sans-serif; font-size: 1.05rem; padding: 8px 18px;
+        border-radius: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .option-chip:hover {
+        background: #0284c7; color: white; border-color: #38bdf8; transform: translateY(-2px);
+    }
+    .quiz-result-msg {
+        display: none; padding: 12px 16px; border-radius: 10px; font-family: 'Jua', sans-serif;
+        font-size: 1.05rem; text-align: center;
+    }
+
+    /* 다음/이전 실험 이동 네비게이션 */
+    .lab-nav-footer {
+        display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .lab-nav-btn {
+        flex: 1; min-width: 220px; background: #0d1b32; border: 1.5px dashed #38bdf8;
+        border-radius: 14px; padding: 14px 18px; text-decoration: none; color: inherit;
+        display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
+    }
+    .lab-nav-btn:hover { background: #15294b; border-color: #60a5fa; }
+</style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <a href="science.html" class="btn-back">⬅️ 과학 대기실</a>
+        <a href="science_hygrometer_lab.html" class="btn-back" style="background:#0369a1; border-color:#38bdf8; color:white;">🌡️ [실험 1] 습도계</a>
+    </div>
+    <div class="page-title">🧊 이슬과 안개 발생 가상실험실</div>
+    <div class="gem-badge" id="gemDisplay">💎 <span id="gemCount">0</span>개</div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">[5학년 2학기 2단원 2차시] 날씨와 우리 생활 🌤️</span>
+        <h1 class="banner-title">🧊 이슬과 안개는 어떻게 만들어질까?</h1>
+        <p class="banner-desc">
+            둘 다 공기 중의 수증기가 차가워져 생긴 <b>액체 물방울</b>이지만 맺히는 장소가 달라요!<br>
+            차가운 얼음컵 표면에 맺히는 <b>이슬</b>과, 차가운 공기 중에 둥둥 뜨는 <b>안개</b>를 직접 만들어보세요!
+        </p>
+    </div>
+
+    <!-- 🎬 1단계: 교과서 공식 실험 영상관 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">🎬 [1단계] 3분 생생 교과서 실험 영상</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <a href="https://www.youtube.com/watch?v=ROjo_rnyAl8" target="_blank" rel="noopener noreferrer" 
+                   style="background: #dc2626; color: white; padding: 6px 12px; border-radius: 8px; font-family: 'Jua', sans-serif; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(220,38,38,0.4);">
+                    📺 YouTube 앱/새 창에서 보기 ➔
+                </a>
+                <span class="source-badge">비상한 과학교실 공식 클립</span>
+            </div>
+        </div>
+        
+        <div class="video-frame-wrap">
+            <!-- 비상한 과학교실 이슬과 안개 실험 영상 (ROjo_rnyAl8) -->
+            <iframe 
+                id="ytIframe"
+                src="https://www.youtube.com/embed/ROjo_rnyAl8?enablejsapi=1&origin=https://awslike6-web.github.io" 
+                title="초등 5학년 2학기 이슬과 안개 발생 실험" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="observation-tips">
+            💡 <b>민수의 관찰 핵심 포인트</b>:<br>
+            • <b>이슬</b>: 차가운 얼음물 컵 바깥쪽에 김이 서리고 <b>물방울(이슬)</b>이 송글송글 맺혀요! (물체 표면)<br>
+            • <b>안개</b>: 집기병 위에 얼음 페트리 접시를 얹으면 <b>공기 중에 뿌옇게</b> 퍼져요! (공기 중)
+        </div>
+    </div>
+
+    <!-- 🧪 2단계: 내 손으로 직접 만드는 이슬과 안개 시뮬레이터 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">🧪 [2단계] 내 손으로 직접 조작하는 듀얼 실험실</div>
+            <span class="source-badge" id="subLabBadge">실험 A : 얼음물 컵 이슬 관찰</span>
+        </div>
+
+        <!-- 실험 모드 탭 -->
+        <div class="lab-mode-tabs">
+            <button type="button" class="mode-tab-btn active" id="tabDew" onclick="switchLabMode('dew')">
+                💧 [실험 A] 차가운 컵에 이슬 맺히기
+            </button>
+            <button type="button" class="mode-tab-btn" id="tabFog" onclick="switchLabMode('fog')">
+                🌫️ [실험 B] 집기병 속 안개 만들기
+            </button>
+        </div>
+
+        <div class="sim-viewport">
+            
+            <!-- [실험 A] 듀얼 컵 이슬 스테이지 -->
+            <div class="dew-stage" id="dewStage">
+                <!-- 얼음물 컵 -->
+                <div class="cup-unit">
+                    <span class="cup-title" style="color:#38bdf8;">🧊 얼음물 컵 (0°C)</span>
+                    <div class="glass-cup" id="iceCup">
+                        <div class="cup-liquid" style="background: rgba(56, 189, 248, 0.4);">
+                            <div class="ice-cubes">🧊 🧊 🧊</div>
+                        </div>
+                        <div class="dew-foggy-glass" id="iceCupFog"></div>
+                        <div class="dew-drops-layer" id="iceCupDrops">
+                            <!-- 이슬 물방울들 SVG -->
+                            <svg width="100%" height="100%">
+                                <circle cx="35" cy="80" r="4" fill="#38bdf8" opacity="0.8"/>
+                                <circle cx="45" cy="120" r="5" fill="#e0f2fe" opacity="0.9"/>
+                                <circle cx="85" cy="95" r="4.5" fill="#38bdf8" opacity="0.85"/>
+                                <circle cx="95" cy="140" r="6" fill="#e0f2fe" opacity="0.9"/>
+                                <circle cx="65" cy="160" r="5.5" fill="#38bdf8" opacity="0.8"/>
+                                <circle cx="115" cy="110" r="4" fill="#e0f2fe" opacity="0.85"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span style="font-size:0.88rem; color:#cbd5e1; font-family:'Jua';" id="iceCupStatus">표면 상태 : 뽀송함</span>
+                </div>
+
+                <!-- 미지근한 물 컵 -->
+                <div class="cup-unit">
+                    <span class="cup-title" style="color:#fbbf24;">💧 미지근한 물 컵 (22°C)</span>
+                    <div class="glass-cup">
+                        <div class="cup-liquid" style="background: rgba(245, 158, 11, 0.25);"></div>
+                    </div>
+                    <span style="font-size:0.88rem; color:#94a3b8; font-family:'Jua';">표면 상태 : 물방울 없음</span>
+                </div>
+            </div>
+
+            <!-- [실험 B] 집기병 안개 스테이지 -->
+            <div class="fog-stage" id="fogStage">
+                <div class="jar-container">
+                    <!-- 얼음 페트리 접시 뚜껑 -->
+                    <div class="ice-dish-lid" id="iceLid">🧊 얼음 페트리 접시 뚜껑</div>
+                    <div class="jar-warm-water">
+                        <span style="position:absolute; bottom:5px; left:50%; transform:translateX(-50%); font-size:0.75rem; color:#e0f2fe; font-family:'Jua';">따뜻한 물 & 향 연기</span>
+                    </div>
+                    <canvas id="fogCanvas" width="200" height="215"></canvas>
+                </div>
+            </div>
+
+            <div class="fairy-guide-bubble" id="fairyBubble">
+                <span>🧚 코코: "아래 [얼음컵 10초 관찰하기] 버튼을 눌러 표면에 이슬이 맺히는지 봐봐!"</span>
+            </div>
+
+        </div>
+
+        <!-- 컨트롤 버튼 -->
+        <div class="control-actions-bar" id="dewControls">
+            <button class="btn-action btn-blue" onclick="startDewExperiment()">
+                🧊 얼음컵 10초 관찰하기 (이슬 맺힘)
+            </button>
+            <button class="btn-action" onclick="wipeCup()" style="background:#475569; color:white; border:1.5px solid #64748b;">
+                🧻 수건으로 컵 닦아보기
+            </button>
+        </div>
+
+        <div class="control-actions-bar" id="fogControls" style="display: none;">
+            <button class="btn-action btn-blue" id="btnPutLid" onclick="putIceLid()">
+                🧊 얼음 뚜껑 덮기 (찬 공기 하강)
+            </button>
+            <button class="btn-action" id="btnRemoveLid" onclick="removeIceLid()" style="display:none; background:#ea580c; color:white; border:2px solid #fb923c;">
+                ☀️ 얼음 뚜껑 치우기 (안개 걷힘)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 📊 공통점 vs 차이점 한눈에 비교 -->
+    <div class="compare-summary-grid">
+        <div class="compare-box" style="border-color: #38bdf8;">
+            <div class="compare-box-title" style="color: #38bdf8;">💧 이슬 (Dew)</div>
+            <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.5;">
+                • <b>생기는 장소</b>: 풀잎, 나뭇가지, 차가운 돌 등 <b>차가운 물체의 표면</b><br>
+                • <b>원리</b>: 밤사이 차가워진 물체에 공기 중 수증기가 닿아 물방울로 맺힘
+            </p>
+        </div>
+        <div class="compare-box" style="border-color: #a78bfa;">
+            <div class="compare-box-title" style="color: #a78bfa;">🌫️ 안개 (Fog)</div>
+            <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.5;">
+                • <b>생기는 장소</b>: 지표면 근처의 <b>차가운 공기 중</b>에 둥둥 떠 있음<br>
+                • <b>원리</b>: 차가워진 공기 중의 수증기가 먼지(응결핵)에 달라붙어 물방울로 뜸
+            </p>
+        </div>
+    </div>
+
+    <!-- 📝 3단계: 민수 맞춤형 1문장 원리 퀴즈 -->
+    <div class="quiz-card">
+        <div class="quiz-title">
+            <span>📝 [3단계] 꼬마 과학자의 1문장 원리 정리 퀴즈</span>
+            <span style="font-size: 0.9rem; color: #38bdf8;">(성공 시 +1💎)</span>
+        </div>
+
+        <div class="quiz-sentence-box">
+            이슬과 안개의 공통점은 공기 중의 수증기가 
+            <span class="quiz-blank-slot" id="blank1" onclick="clearBlank()">[ ❓ 선택 ]</span>
+            생긴 액체 상태의 작은 물방울이라는 점입니다!
+        </div>
+
+        <div class="quiz-options-row">
+            <span style="color: #94a3b8; font-family:'Jua'; align-self:center;">알맞은 낱말 선택:</span>
+            <div class="option-chip" onclick="selectAnswer('차가워져서')">❄️ 차가워져서 (냉각/응결)</div>
+            <div class="option-chip" onclick="selectAnswer('뜨거워져서')">🔥 뜨거워져서 (가열/증발)</div>
+        </div>
+
+        <div class="quiz-result-msg" id="quizMsg"></div>
+    </div>
+
+    <!-- 다음/이전 실험 네비게이션 -->
+    <div class="lab-nav-footer">
+        <a href="science_hygrometer_lab.html" class="lab-nav-btn">
+            <div>
+                <div style="font-family:'Jua'; color:#94a3b8; font-size:0.85rem;">⬅️ 이전 차시 실험</div>
+                <div style="font-family:'Jua'; color:#38bdf8; font-size:1.05rem;">🌡️ [실험 1] 건습구 습도계</div>
+            </div>
+            <span>➔</span>
+        </a>
+        <a href="science_cloud_lab.html" class="lab-nav-btn">
+            <div>
+                <div style="font-family:'Jua'; color:#94a3b8; font-size:0.85rem;">다음 차시 실험 ➔</div>
+                <div style="font-family:'Jua'; color:#60a5fa; font-size:1.05rem;">☁️ [실험 3] 간이 구름 발생 실험</div>
+            </div>
+            <span>➔</span>
+        </a>
+    </div>
+
+</div>
+
+<script>
+    let currentMode = 'dew'; // 'dew' or 'fog'
+    let isFogging = false;
+    let fogParticles = [];
+    let fogAnimId = null;
+    let gems = parseInt(localStorage.getItem('min_science_gems') || '0', 10);
+    document.getElementById('gemCount').textContent = gems;
+
+    // Web Audio 사운드
+    let audioCtx = null;
+    function getAudioContext() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return audioCtx;
+    }
+    function playTone(freq, type, duration) {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    // 탭 모드 전환
+    function switchLabMode(mode) {
+        currentMode = mode;
+        playTone(500, 'sine', 0.1);
+
+        const tabDew = document.getElementById('tabDew');
+        const tabFog = document.getElementById('tabFog');
+        const dewStage = document.getElementById('dewStage');
+        const fogStage = document.getElementById('fogStage');
+        const dewControls = document.getElementById('dewControls');
+        const fogControls = document.getElementById('fogControls');
+        const subBadge = document.getElementById('subLabBadge');
+
+        if (mode === 'dew') {
+            tabDew.classList.add('active');
+            tabFog.classList.remove('active');
+            dewStage.style.display = 'flex';
+            fogStage.style.display = 'none';
+            dewControls.style.display = 'flex';
+            fogControls.style.display = 'none';
+            subBadge.textContent = "실험 A : 얼음물 컵 이슬 관찰";
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '얼음물 컵 바깥쪽에 김이 서리고 물방울이 맺히는지 확인해 봐!'</span>";
+            if (fogAnimId) cancelAnimationFrame(fogAnimId);
+        } else {
+            tabFog.classList.add('active');
+            tabDew.classList.remove('active');
+            dewStage.style.display = 'none';
+            fogStage.style.display = 'flex';
+            dewControls.style.display = 'none';
+            fogControls.style.display = 'flex';
+            subBadge.textContent = "실험 B : 집기병 속 안개 만들기";
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '[얼음 뚜껑 덮기]를 누르면 집기병 안에 안개가 피어올라!'</span>";
+            initFogCanvas();
+        }
+    }
+
+    // [실험 A] 이슬 관찰
+    function startDewExperiment() {
+        playTone(600, 'triangle', 0.2);
+        const fog = document.getElementById('iceCupFog');
+        const drops = document.getElementById('iceCupDrops');
+        const status = document.getElementById('iceCupStatus');
+
+        status.textContent = "관찰 중... 김이 서리고 물방울 맺힘!";
+        status.style.color = "#38bdf8";
+
+        fog.style.opacity = "1";
+        setTimeout(() => {
+            drops.style.opacity = "1";
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '우와! 공기 중의 수증기가 차가운 컵에 닿아 <b>반짝이는 이슬</b>이 송글송글 맺혔어!'</span>";
+        }, 600);
+    }
+
+    function wipeCup() {
+        playTone(350, 'sine', 0.15);
+        const fog = document.getElementById('iceCupFog');
+        const drops = document.getElementById('iceCupDrops');
+        const status = document.getElementById('iceCupStatus');
+
+        fog.style.opacity = "0";
+        drops.style.opacity = "0";
+        status.textContent = "수건으로 닦음 : 다시 깨끗해짐";
+        status.style.color = "#94a3b8";
+        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '수건으로 닦았더니 뽀송뽀송해졌어! 컵 밖에서 생긴 물방울이 맞네!'</span>";
+    }
+
+    // [실험 B] 안개 관찰
+    function initFogCanvas() {
+        const canvas = document.getElementById('fogCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function putIceLid() {
+        playTone(400, 'sine', 0.2);
+        const lid = document.getElementById('iceLid');
+        lid.style.transform = "translateX(-50%) translateY(24px)";
+        
+        document.getElementById('btnPutLid').style.display = 'none';
+        document.getElementById('btnRemoveLid').style.display = 'inline-flex';
+        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '얼음 뚜껑 덕분에 공기가 차가워지며 집기병 전체가 <b>뿌연 안개</b>로 가득 찼어!'</span>";
+
+        startFogAnimation();
+    }
+
+    function removeIceLid() {
+        playTone(550, 'sine', 0.2);
+        const lid = document.getElementById('iceLid');
+        lid.style.transform = "translateX(-50%) translateY(0)";
+
+        document.getElementById('btnPutLid').style.display = 'inline-flex';
+        document.getElementById('btnRemoveLid').style.display = 'none';
+        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '얼음 뚜껑을 치우니까 공기가 다시 따뜻해져서 안개가 스르륵 걷혔어!'</span>";
+
+        isFogging = false;
+    }
+
+    function startFogAnimation() {
+        isFogging = true;
+        const canvas = document.getElementById('fogCanvas');
+        fogParticles = [];
+        for (let i = 0; i < 40; i++) {
+            fogParticles.push({
+                x: Math.random() * canvas.width,
+                y: 10 + Math.random() * (canvas.height - 20),
+                radius: 14 + Math.random() * 16,
+                alpha: 0,
+                maxAlpha: 0.35 + Math.random() * 0.3,
+                speedX: (Math.random() - 0.5) * 0.5
+            });
+        }
+        renderFogFrame();
+    }
+
+    function renderFogFrame() {
+        const canvas = document.getElementById('fogCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        fogParticles.forEach(p => {
+            p.x += p.speedX;
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+
+            if (isFogging) {
+                if (p.alpha < p.maxAlpha) p.alpha += 0.02;
+            } else {
+                if (p.alpha > 0.01) p.alpha -= 0.03;
+                else p.alpha = 0;
+            }
+
+            if (p.alpha > 0) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+            }
+        });
+
+        fogAnimId = requestAnimationFrame(renderFogFrame);
+    }
+
+    // 퀴즈
+    let quizSolved = false;
+    function selectAnswer(ans) {
+        const slot = document.getElementById('blank1');
+        const msg = document.getElementById('quizMsg');
+
+        if (ans === '차가워져서') {
+            slot.textContent = '차가워져서 ❄️';
+            slot.style.background = '#0284c7';
+            slot.style.color = 'white';
+
+            msg.style.display = 'block';
+            msg.style.background = '#065f46';
+            msg.style.color = '#a7f3d0';
+            msg.innerHTML = "🎉 <b>딩동댕! 정답입니다!</b> 이슬과 안개 모두 공기 중의 수증기가 <b>차가워져서(응결되어)</b> 생긴 물방울이랍니다! (+1💎 획득)";
+
+            if (!quizSolved) {
+                quizSolved = true;
+                gems++;
+                localStorage.setItem('min_science_gems', gems);
+                document.getElementById('gemCount').textContent = gems;
+                playTone(523, 'sine', 0.15);
+                setTimeout(() => playTone(659, 'sine', 0.15), 120);
+                setTimeout(() => playTone(784, 'sine', 0.3), 240);
+            }
+        } else {
+            slot.textContent = '다시 생각하기 💡';
+            slot.style.background = '#854d0e';
+            slot.style.color = '#fef08a';
+
+            msg.style.display = 'block';
+            msg.style.background = '#78350f';
+            msg.style.color = '#fde68a';
+            msg.innerHTML = "💡 <b>힌트</b>: 얼음물 컵처럼 주위가 <b>시원하고 차가워질 때</b> 수증기가 물방울로 맺힌답니다! 다시 골라보세요.";
+        }
+    }
+
+    function clearBlank() {
+        document.getElementById('blank1').textContent = '[ ❓ 선택 ]';
+        document.getElementById('blank1').style.background = '#1e3a66';
+        document.getElementById('blank1').style.color = '#38bdf8';
+        document.getElementById('quizMsg').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
