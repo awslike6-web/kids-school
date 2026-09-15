@@ -429,6 +429,50 @@ export default {
       });
     }
 
+    // 2-B. 🔑 Gemini API 키 런타임 디스펜서 (/api/gemini-key)
+    // Cloudflare Worker 시크릿(env.GEMINI_API_KEY)을 공부방 브라우저 런타임에 안전하게 전달
+    if (url.pathname === '/api/gemini-key') {
+      const apiKey = (env && env.GEMINI_API_KEY) ? env.GEMINI_API_KEY : '';
+      return new Response(JSON.stringify({
+        status: apiKey ? 'ok' : 'empty',
+        key: apiKey
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    }
+
+    // 2-C. 🤖 Gemini AI 백엔드 프록시 (/v1/gemini)
+    // 브라우저에서 워커 프록시로 요정 코코 대화를 요청했을 때 Cloudflare 시크릿 키로 구글 최신 플래그십(gemini-3.8-flash) 호출
+    if (url.pathname === '/v1/gemini') {
+      try {
+        const apiKey = (env && env.GEMINI_API_KEY) ? env.GEMINI_API_KEY : '';
+        if (!apiKey) {
+          return new Response(JSON.stringify({ error: 'GEMINI_API_KEY secret is not configured in Worker' }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+          });
+        }
+        const reqBody = await request.json();
+        const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+        const googleRes = await fetch(googleUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reqBody)
+        });
+        const googleData = await googleRes.text();
+        return new Response(googleData, {
+          status: googleRes.status,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message || 'Gemini proxy error' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
+      }
+    }
+
     // 3. Edge Neural AI TTS 스트리밍 엔드포인트 (/api/tts)
     if (url.pathname === '/api/tts' || url.pathname === '/v1/audio/speech' || url.pathname.endsWith('/tts')) {
       try {

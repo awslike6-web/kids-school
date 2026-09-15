@@ -2496,10 +2496,35 @@ async function callDirectGoogleGemini(payload) {
     if (!window.__RUNTIME_GEMINI_KEY && typeof initRuntimeGeminiKey === 'function') {
         await initRuntimeGeminiKey();
     }
-    const apiKey = window.__RUNTIME_GEMINI_KEY
+    let apiKey = window.__RUNTIME_GEMINI_KEY
         || (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GEMINI_API_KEY)
         || localStorage.getItem('gemini_api_key')
         || "";
+
+    // 🛡️ [자가 치유] 키가 비어있다면 워커의 /api/gemini-key 엔드포인트에서 즉시 직접 수령
+    if (!apiKey) {
+        try {
+            const proxyUrl = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL)
+                ? APP_CONFIG.WORKER_PROXY_URL
+                : "https://minmin-notion.awslike6.workers.dev";
+            const keyRes = await fetch(`${proxyUrl}/api/gemini-key`);
+            if (keyRes.ok) {
+                const keyData = await keyRes.json();
+                if (keyData && keyData.key) {
+                    apiKey = keyData.key;
+                    window.__RUNTIME_GEMINI_KEY = apiKey;
+                    if (typeof APP_CONFIG !== 'undefined') APP_CONFIG.GEMINI_API_KEY = apiKey;
+                    console.log("🔑 [Gemini 키 자가 치유 성공] 워커로부터 시크릿 키 자동 획득!");
+                }
+            }
+        } catch (e) {
+            console.warn("[callDirectGoogleGemini] 워커 키 직접 수령 예외:", e);
+        }
+    }
+
+    if (!apiKey) {
+        throw new Error("Gemini API 키가 설정되지 않았습니다. Cloudflare Worker 또는 브라우저 로컬스토리지를 확인하세요.");
+    }
 
     let geminiPayload = payload || {};
     if (payload && Array.isArray(payload.messages)) {
