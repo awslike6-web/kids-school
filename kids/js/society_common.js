@@ -211,7 +211,7 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(180, 83, 9, 0.18) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#f59e0b",
         link: "three_kingdoms_storybook.html",
-        coverImg: "images/storybook/three_kingdoms/three_kingdoms_p1.jpg"
+        coverImg: "images/storybook/three_kingdoms/three_kingdoms_story_p1.png"
     }
 ];
 

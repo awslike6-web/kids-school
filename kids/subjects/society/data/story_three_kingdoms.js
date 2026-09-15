@@ -14,12 +14,12 @@ window.STORY_BOOK = {
   backUrl: "society.html",
   backLabel: "🔙 사회 탐구실",
   imgBase: "images/storybook/three_kingdoms/",
-  version: "20260915_three_kingdoms_v1",
+  version: "20260915_three_kingdoms_v2",
   pages: [
     {
       page: 1,
       tag: "🌟 앞표지 : 삼국의 영웅들과 찬란한 황금빛 나라",
-      spreadImg: "three_kingdoms_p1.jpg",
+      spreadImg: "three_kingdoms_story_p1.png",
       illImg: "three_kingdoms_p1.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -35,7 +35,7 @@ window.STORY_BOOK = {
     {
       page: 2,
       tag: "✨ 1장 : 삼국 시대로의 초대 (1쪽)",
-      spreadImg: "three_kingdoms_p2.jpg",
+      spreadImg: "three_kingdoms_story_p2.png",
       illImg: "three_kingdoms_p2.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -50,7 +50,7 @@ window.STORY_BOOK = {
     {
       page: 3,
       tag: "🗺️ 2장 : 삼국의 경쟁이 시작되다 (2쪽)",
-      spreadImg: "three_kingdoms_p3.jpg",
+      spreadImg: "three_kingdoms_story_p3.png",
       illImg: "three_kingdoms_p3.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -65,7 +65,7 @@ window.STORY_BOOK = {
     {
       page: 4,
       tag: "🐎 3장 : 만주 벌판의 고구려와 광개토 대왕릉비 (3쪽)",
-      spreadImg: "three_kingdoms_p4.jpg",
+      spreadImg: "three_kingdoms_story_p4.png",
       illImg: "three_kingdoms_p4.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -80,7 +80,7 @@ window.STORY_BOOK = {
     {
       page: 5,
       tag: "🌊 4장 : 살수를 지켜낸 명장 을지문덕 (4쪽)",
-      spreadImg: "three_kingdoms_p5.jpg",
+      spreadImg: "three_kingdoms_story_p5.png",
       illImg: "three_kingdoms_p5.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -95,7 +95,7 @@ window.STORY_BOOK = {
     {
       page: 6,
       tag: "⛵ 5장 : 한강을 누빈 백제와 근초고왕 (5쪽)",
-      spreadImg: "three_kingdoms_p6.jpg",
+      spreadImg: "three_kingdoms_story_p6.png",
       illImg: "three_kingdoms_p6.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -110,7 +110,7 @@ window.STORY_BOOK = {
     {
       page: 7,
       tag: "🪔 6장 : 신비로운 백제 금동대향로 (6쪽)",
-      spreadImg: "three_kingdoms_p7.jpg",
+      spreadImg: "three_kingdoms_story_p7.png",
       illImg: "three_kingdoms_p7.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -124,7 +124,7 @@ window.STORY_BOOK = {
     {
       page: 8,
       tag: "👑 7장 : 첨성대와 번쩍이는 신라 황금 금관 (7쪽)",
-      spreadImg: "three_kingdoms_p8.jpg",
+      spreadImg: "three_kingdoms_story_p8.png",
       illImg: "three_kingdoms_p8.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -139,7 +139,7 @@ window.STORY_BOOK = {
     {
       page: 9,
       tag: "⚔️ 8장 : 철의 나라 가야와 가야금 (8쪽)",
-      spreadImg: "three_kingdoms_p9.jpg",
+      spreadImg: "three_kingdoms_story_p9.png",
       illImg: "three_kingdoms_p9.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -153,7 +153,7 @@ window.STORY_BOOK = {
     {
       page: 10,
       tag: "🏛️ 9장 : 삼국 통일과 불국사·석굴암 (9쪽)",
-      spreadImg: "three_kingdoms_p10.jpg",
+      spreadImg: "three_kingdoms_story_p10.png",
       illImg: "three_kingdoms_p10.jpg",
       textHtml: `
         <div class="webtoon-passage">
@@ -168,7 +168,7 @@ window.STORY_BOOK = {
     {
       page: 11,
       tag: "🦅 10장 : 해동성국 발해와 청해진 장보고 (10쪽)",
-      spreadImg: "three_kingdoms_p11.jpg",
+      spreadImg: "three_kingdoms_story_p11.png",
       illImg: "three_kingdoms_p11.jpg",
       textHtml: `
         <div class="webtoon-passage">
