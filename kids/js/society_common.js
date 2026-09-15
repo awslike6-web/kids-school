@@ -197,6 +197,21 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         border: "#d97706",
         link: "history_time_travel_storybook.html",
         coverImg: "images/storybook/history_time_travel/history_story_p1.png"
+    },
+    {
+        id: "5_2_2",
+        grade: "5학년 2학기",
+        unit: "1단원 : 옛사람들의 삶과 문화",
+        bookNum: "5-2 삼국·남북국",
+        title: "민수와 친구들의 사회교과서 시간 여행 2편",
+        subtitle: "삼국의 영웅들과 찬란한 황금빛 나라 (삼국·가야·통일신라·발해)",
+        desc: "황금빛 포털을 타고 삼국 시대로 도약! 만주 벌판 광개토대왕릉비, 살수대첩 을지문덕, 백제 금동대향로, 신라 황금 금관, 가야 철갑옷과 석굴암 본존불까지!",
+        icon: "⚔️",
+        color: "#b45309",
+        bgGrad: "linear-gradient(135deg, rgba(180, 83, 9, 0.18) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#f59e0b",
+        link: "three_kingdoms_storybook.html",
+        coverImg: "images/storybook/three_kingdoms/three_kingdoms_p1.jpg"
     }
 ];
 
