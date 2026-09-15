@@ -212,6 +212,21 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         border: "#f59e0b",
         link: "three_kingdoms_storybook.html",
         coverImg: "images/storybook/three_kingdoms/three_kingdoms_story_p1.png"
+    },
+    {
+        id: "5_2_3",
+        grade: "5학년 2학기",
+        unit: "1단원 : 옛사람들의 삶과 문화",
+        bookNum: "5-2 고려",
+        title: "민수와 친구들의 사회교과서 시간 여행 3편",
+        subtitle: "푸른 비취빛 고려와 바다 너머 코리아",
+        desc: "교과서의 푸른빛을 따라 고려의 개경으로! 후삼국을 통일한 태조 왕건, 서희의 외교 담판, 귀주대첩 강감찬, 팔만대장경, 고려청자와 벽란도의 아라비아 상인들까지!",
+        icon: "🏺",
+        color: "#0d9488",
+        bgGrad: "linear-gradient(135deg, rgba(13, 148, 136, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
+        border: "#14b8a6",
+        link: "goryeo_storybook.html",
+        coverImg: "images/storybook/goryeo/goryeo_story_p1.png"
     }
 ];
 
