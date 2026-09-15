@@ -312,8 +312,24 @@
     <!-- 🧪 2단계: 내 손으로 직접 해보는 구름 발생 시뮬레이터 -->
     <div class="section-card">
         <div class="section-header">
-            <div class="section-tag">🧪 [2단계] 내 손으로 직접 만드는 구름 시뮬레이터</div>
-            <span class="source-badge" id="stepBadge">준비 단계 : 펌프 누르기</span>
+            <div class="section-tag">🧪 [2단계] 내 손으로 만드는 구름 & 응결핵 비교 실험</div>
+            <span class="source-badge" id="stepBadge">조건 선택 : 향 연기 설정</span>
+        </div>
+
+        <!-- 비교 실험 조건 설정 바 -->
+        <div style="background: #0d1b32; border: 1.5px solid #2d5088; border-radius: 14px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="font-family:'Jua', sans-serif; color:#e2e8f0; font-size:1rem; display:flex; align-items:center; gap:6px;">
+                <span>🔬 실험 조건 (응결핵) :</span>
+                <span id="conditionText" style="color:#38bdf8;">향 연기 있음 (응결핵 O)</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="option-chip" id="btnSmokeOn" onclick="setSmokeMode(true)" style="background:#0284c7; color:white; border-color:#38bdf8; font-size:0.9rem; padding:6px 14px;">
+                    💨 향 연기 넣기 (추천)
+                </button>
+                <button type="button" class="option-chip" id="btnSmokeOff" onclick="setSmokeMode(false)" style="background:#1a3258; color:#94a3b8; border-color:#2d5088; font-size:0.9rem; padding:6px 14px;">
+                    💧 물만 넣기 (연기 없음)
+                </button>
+            </div>
         </div>
 
         <div class="sim-viewport">
@@ -323,6 +339,10 @@
                 <div class="dash-box">
                     <span class="dash-label">내부 기압 (Pressure)</span>
                     <span class="dash-value" id="pressureVal">1.0 atm</span>
+                </div>
+                <div class="dash-box">
+                    <span class="dash-label">내부 상태 (State)</span>
+                    <span class="dash-value" id="stateVal" style="font-size: 1.05rem; color:#38bdf8;">보통 상태</span>
                 </div>
                 <div class="dash-box">
                     <span class="dash-label">내부 온도 (Temp)</span>
@@ -336,20 +356,16 @@
                 <!-- 펌프 마개 (터치 인터랙션) -->
                 <div class="pump-handle-wrap" id="pumpHandle" onclick="pressPump()" title="클릭해서 펌프를 누르세요!">
                     <svg width="80" height="60" viewBox="0 0 80 60">
-                        <!-- 펌프 누름 헤드 -->
                         <rect x="25" y="5" width="30" height="15" rx="5" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
-                        <!-- 펌프 지지 기둥 -->
                         <rect x="35" y="20" width="10" height="20" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-                        <!-- 마개 결합부 -->
                         <ellipse cx="40" cy="45" rx="18" ry="8" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
                     </svg>
                 </div>
 
                 <!-- 페트병 본체 SVG -->
-                <div class="bottle-svg-wrap">
+                <div class="bottle-svg-wrap" id="bottleWrap">
                     <svg width="180" height="260" viewBox="0 0 180 260">
                         <defs>
-                            <!-- 유리 반사광 그라디언트 -->
                             <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
                                 <stop offset="30%" stop-color="#ffffff" stop-opacity="0.45"/>
@@ -366,15 +382,15 @@
                         <path id="bottleBody" d="M 65 30 L 115 30 L 125 65 Q 155 90 155 130 L 155 220 Q 155 245 135 245 L 45 245 Q 25 245 25 220 L 25 130 Q 25 90 55 65 Z" 
                               fill="url(#glassGrad)" stroke="#38bdf8" stroke-width="3"/>
                         
-                        <!-- 바닥 물 웅덩이 (약간의 물) -->
+                        <!-- 바닥 물 웅덩이 -->
                         <path d="M 28 220 Q 90 225 152 220 L 152 235 Q 152 245 135 245 L 45 245 Q 28 245 28 235 Z" 
                               fill="url(#waterGrad)"/>
                         
-                        <!-- 병 표면 반사 하이라이트 라인 -->
+                        <!-- 병 표면 반사 하이라이트 -->
                         <path d="M 38 90 Q 38 150 42 210" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
                     </svg>
                     
-                    <!-- 구름 파티클 렌더링 캔버스 -->
+                    <!-- 구름 파티클 캔버스 -->
                     <canvas id="cloudCanvas" width="130" height="190"></canvas>
                 </div>
 
@@ -382,7 +398,7 @@
 
             <!-- 안내 말풍선 -->
             <div class="fairy-guide-bubble" id="fairyBubble">
-                <span>🧚 코코: "오른쪽 아래 [공기 펌프 꾹꾹 누르기] 버튼을 5번 눌러봐!"</span>
+                <span>🧚 코코: "먼저 [공기 펌프 누르기]로 공기를 꽉 채워봐!"</span>
             </div>
 
         </div>
@@ -395,6 +411,12 @@
             <button class="btn-action btn-open" id="openBtn" onclick="openCap()" style="display: none;">
                 💥 뚜껑 펑! 열기 (단열 팽창)
             </button>
+            
+            <!-- [마법 인터랙션] 눌렀다 뗐다 실시간 반응 버튼 (뚜껑 열기 후 활성화) -->
+            <button class="btn-action" id="squeezeBtn" onmousedown="startSqueeze()" onmouseup="endSqueeze()" ontouchstart="startSqueeze()" ontouchend="endSqueeze()" style="display: none; background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:white; border:2px solid #a78bfa;">
+                ✊ 꾹 누르고 있기 (누르면 맑아짐!)
+            </button>
+
             <button class="btn-action" id="zoomBtn" onclick="showZoom()" style="display: none; background: #059669; color: white; border: 2px solid #34d399;">
                 🔍 돋보기로 구름 관찰하기
             </button>
@@ -431,16 +453,17 @@
 <!-- 돋보기 모달 -->
 <div class="zoom-modal" id="zoomModal" onclick="closeZoom()">
     <div class="zoom-box" onclick="event.stopPropagation()">
-        <h2 style="font-family:'Jua'; color:#38bdf8; margin-bottom:12px; font-size:1.4rem;">🔍 돋보기로 본 구름 속 세상</h2>
-        <div style="width:160px; height:160px; border-radius:50%; background:#0b192c; border:4px solid #38bdf8; margin:0 auto 16px auto; position:relative; overflow:hidden; display:flex; justify-content:center; align-items:center;">
-            <!-- 미세 물방울 방울들 -->
-            <div style="font-size:2.5rem; animation: floatDrops 2s infinite alternate ease-in-out;">💧 🫧 💧</div>
+        <h2 style="font-family:'Jua'; color:#38bdf8; margin-bottom:12px; font-size:1.4rem;">🔍 돋보기로 본 구름 속 비밀 : 응결핵</h2>
+        <div style="width:160px; height:160px; border-radius:50%; background:#0b192c; border:4px solid #38bdf8; margin:0 auto 16px auto; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div style="font-size:1.2rem; color:#94a3b8; font-family:'Jua'; margin-bottom:4px;">향 연기 알갱이 💨</div>
+            <div style="font-size:2.2rem; animation: floatDrops 2s infinite alternate ease-in-out;">💧 🫧 💧</div>
+            <div style="font-size:0.75rem; color:#38bdf8; font-family:'Jua';">수증기가 달라붙음!</div>
         </div>
-        <p style="color:#e2e8f0; line-height:1.6; font-size:1rem; margin-bottom:18px;">
-            <b>"수증기가 차가워져 아주 작은 물방울이 되었어요!"</b><br>
-            병 안에 넣었던 <b>향 연기(응결핵)</b>에 수증기들이 달라붙어 수억 개의 작은 물방울로 뭉쳐 빛을 반사하기 때문에 하얗게 보이는 것이랍니다.
+        <p style="color:#e2e8f0; line-height:1.6; font-size:0.98rem; margin-bottom:18px;">
+            <b>"향 연기는 구름의 발판(응결핵)이에요!"</b><br>
+            향 연기 자체가 뿌연 것이 아닙니다! 공기 중에 연기나 먼지 알갱이가 있으면, 차가워진 수증기들이 그 알갱이에 <b>수억 개씩 엉겨 붙어</b> 눈에 보이는 하얀 물방울(진짜 구름)이 되는 것이랍니다.
         </p>
-        <button class="btn-action btn-pump" onclick="closeZoom()">확인 완료 ✨</button>
+        <button class="btn-action btn-pump" onclick="closeZoom()">완벽히 이해했어! ✨</button>
     </div>
 </div>
 
@@ -449,6 +472,8 @@
     let pumpCount = 0;
     const maxPumps = 5;
     let isCloudFormed = false;
+    let hasSmoke = true; // 응결핵 유무 (기본값 true)
+    let isSqueezing = false;
     let gems = parseInt(localStorage.getItem('min_science_gems') || '0', 10);
     document.getElementById('gemCount').textContent = gems;
 
@@ -483,20 +508,52 @@
     }
 
     function playPopSound() {
-        // 펑! 소리
-        playTone(150, 'sine', 0.25);
-        setTimeout(() => playTone(80, 'triangle', 0.3), 50);
+        playTone(160, 'sine', 0.25);
+        setTimeout(() => playTone(90, 'triangle', 0.3), 50);
     }
 
     function playPumpSound() {
-        // 치익- 펌프 소리
-        playTone(300, 'sawtooth', 0.08);
+        playTone(320, 'sawtooth', 0.08);
     }
 
     function playSuccessSound() {
         playTone(523, 'sine', 0.15);
         setTimeout(() => playTone(659, 'sine', 0.15), 120);
         setTimeout(() => playTone(784, 'sine', 0.3), 240);
+    }
+
+    // 응결핵(향 연기) 모드 설정
+    function setSmokeMode(smokeOn) {
+        if (isCloudFormed || pumpCount > 0) {
+            if (!confirm("실험 조건을 변경하려면 처음부터 다시 시작합니다. 계속할까요?")) return;
+            resetExperiment();
+        }
+        hasSmoke = smokeOn;
+        const btnOn = document.getElementById('btnSmokeOn');
+        const btnOff = document.getElementById('btnSmokeOff');
+        const text = document.getElementById('conditionText');
+
+        if (hasSmoke) {
+            btnOn.style.background = '#0284c7';
+            btnOn.style.color = 'white';
+            btnOn.style.borderColor = '#38bdf8';
+            btnOff.style.background = '#1a3258';
+            btnOff.style.color = '#94a3b8';
+            btnOff.style.borderColor = '#2d5088';
+            text.textContent = '향 연기 있음 (응결핵 O - 구름 뽀얗게 발생)';
+            text.style.color = '#38bdf8';
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '향 연기를 넣었어! 이제 공기 펌프를 5번 눌러봐!'</span>";
+        } else {
+            btnOff.style.background = '#0284c7';
+            btnOff.style.color = 'white';
+            btnOff.style.borderColor = '#38bdf8';
+            btnOn.style.background = '#1a3258';
+            btnOn.style.color = '#94a3b8';
+            btnOn.style.borderColor = '#2d5088';
+            text.textContent = '물만 있음 (연기 없음 - 구름이 거의 안 보임)';
+            text.style.color = '#94a3b8';
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '연기 없이 물만 넣었어! 구름이 생기는지 비교해 보자!'</span>";
+        }
     }
 
     // 펌프 누르기 인터랙션
@@ -507,14 +564,12 @@
         pumpCount++;
         playPumpSound();
 
-        // 펌프 애니메이션
         const handle = document.getElementById('pumpHandle');
         handle.style.transform = "translateX(-50%) translateY(14px) scale(0.95)";
         setTimeout(() => {
             handle.style.transform = "translateX(-50%) translateY(0) scale(1)";
         }, 120);
 
-        // 계기판 갱신 (단열 압축 -> 기압 상승, 미세한 온도 상승)
         const pressure = (1.0 + pumpCount * 0.25).toFixed(1);
         const temp = (20.0 + pumpCount * 0.4).toFixed(1);
         
@@ -522,9 +577,10 @@
         document.getElementById('pressureVal').style.color = "#ef4444";
         document.getElementById('tempVal').textContent = temp + " °C";
         document.getElementById('tempVal').style.color = "#f59e0b";
+        document.getElementById('stateVal').textContent = "단열 압축 중";
+        document.getElementById('stateVal').style.color = "#ef4444";
         document.getElementById('pumpCount').textContent = pumpCount;
 
-        // 병이 팽팽해지는 느낌
         const bottle = document.getElementById('bottleBody');
         bottle.style.stroke = "#f59e0b";
         bottle.style.strokeWidth = "4";
@@ -535,7 +591,7 @@
             document.getElementById('stepBadge').textContent = "단열 팽창 준비 완료!";
             document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '우와! 팽팽하게 압축됐어! 이제 [뚜껑 펑! 열기]를 눌러봐!'</span>";
         } else {
-            document.getElementById('fairyBubble').innerHTML = `<span>🧚 코코: '좋아! 공기가 꽉 차고 있어! (${pumpCount}/5회)'</span>`;
+            document.getElementById('fairyBubble').innerHTML = `<span>🧚 코코: '공기가 꽉 차고 있어! (${pumpCount}/5회)'</span>`;
         }
     }
 
@@ -545,31 +601,36 @@
         isCloudFormed = true;
         playPopSound();
 
-        // 뚜껑 날아가는 애니메이션
         const handle = document.getElementById('pumpHandle');
         handle.style.transition = "transform 0.4s ease-out, opacity 0.4s";
         handle.style.transform = "translateX(-50%) translateY(-60px) rotate(20deg)";
         handle.style.opacity = "0";
 
-        // 계기판 급강하 (단열 팽창: 기압 1.0atm 정상화, 온도 14.5°C로 급락)
         document.getElementById('pressureVal').textContent = "1.0 atm";
         document.getElementById('pressureVal').style.color = "#38bdf8";
         document.getElementById('tempVal').textContent = "14.5 °C (급하강!)";
         document.getElementById('tempVal').style.color = "#38bdf8";
+        document.getElementById('stateVal').textContent = "단열 팽창 (구름!)";
+        document.getElementById('stateVal').style.color = "#38bdf8";
 
-        // 병 색깔 정상화
         const bottle = document.getElementById('bottleBody');
         bottle.style.stroke = "#38bdf8";
         bottle.style.strokeWidth = "3";
 
-        // 구름 파티클 애니메이션 시작
+        // 구름 애니메이션 시작
         startCloudAnimation();
 
-        // UI 갱신
         document.getElementById('openBtn').style.display = 'none';
+        document.getElementById('squeezeBtn').style.display = 'inline-flex';
         document.getElementById('zoomBtn').style.display = 'inline-flex';
-        document.getElementById('stepBadge').textContent = "구름 발생 성공! ☁️";
-        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '와아! 병 안이 하얗게 변했어! 돋보기로 자세히 볼까?'</span>";
+
+        if (hasSmoke) {
+            document.getElementById('stepBadge').textContent = "하얀 구름 발생 성공! ☁️";
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '와아! 향 연기(응결핵) 덕분에 <b>새하얀 구름</b>이 가득 찼어! 이제 보라색 [꾹 누르고 있기] 버튼을 눌러봐!'</span>";
+        } else {
+            document.getElementById('stepBadge').textContent = "구름 희미함 (응결핵 없음) 🌫️";
+            document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '어라? 향 연기가 없으니까 수증기가 뭉치지 못해서 <b>구름이 거의 안 보여!</b>'</span>";
+        }
     }
 
     // 캔버스 구름 파티클 렌더링
@@ -580,15 +641,20 @@
 
     function startCloudAnimation() {
         particles = [];
-        for (let i = 0; i < 45; i++) {
+        // 향 연기 유무에 따라 입자 수와 불투명도 차등
+        const particleCount = hasSmoke ? 50 : 10;
+        const maxAlphaCap = hasSmoke ? 0.6 : 0.12;
+
+        for (let i = 0; i < particleCount; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
                 y: canvas.height - 10 - Math.random() * 20,
-                radius: 12 + Math.random() * 16,
-                targetY: 20 + Math.random() * (canvas.height - 40),
+                radius: 14 + Math.random() * 18,
+                targetY: 15 + Math.random() * (canvas.height - 30),
                 alpha: 0,
-                maxAlpha: 0.25 + Math.random() * 0.35,
-                speedY: 1.5 + Math.random() * 2
+                baseMaxAlpha: (0.3 + Math.random() * 0.3) * (hasSmoke ? 1.0 : 0.2),
+                currentMaxAlpha: (0.3 + Math.random() * 0.3) * (hasSmoke ? 1.0 : 0.2),
+                speedY: 1.5 + Math.random() * 2.5
             });
         }
         renderCloudFrame();
@@ -601,19 +667,65 @@
             if (p.y > p.targetY) {
                 p.y -= p.speedY;
             }
-            if (p.alpha < p.maxAlpha) {
-                p.alpha += 0.02;
+
+            // 누르고 있을 땐 투명(증발), 놓으면 다시 나타남
+            if (isSqueezing) {
+                if (p.alpha > 0.02) p.alpha -= 0.05;
+                else p.alpha = 0;
+            } else {
+                if (p.alpha < p.currentMaxAlpha) p.alpha += 0.025;
             }
 
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
-            ctx.shadowBlur = 10;
-            ctx.fill();
+            if (p.alpha > 0) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+                ctx.shadowBlur = 12;
+                ctx.fill();
+            }
         });
 
         cloudAnimId = requestAnimationFrame(renderCloudFrame);
+    }
+
+    // ✊ [마법 실시간 토글] 꾹 누르기 (단열 압축 -> 구름 사라짐/투명해짐)
+    function startSqueeze() {
+        if (!isCloudFormed) return;
+        isSqueezing = true;
+
+        // 병 찌그러짐 시각 효과
+        const wrap = document.getElementById('bottleWrap');
+        wrap.style.transition = "transform 0.15s ease";
+        wrap.style.transform = "scaleX(0.88) scaleY(1.04)";
+
+        // 계기판 변화 (압축: 기압 상승, 온도 상승)
+        document.getElementById('pressureVal').textContent = "1.8 atm (압축!)";
+        document.getElementById('pressureVal').style.color = "#ef4444";
+        document.getElementById('tempVal').textContent = "22.5 °C (상승!)";
+        document.getElementById('tempVal').style.color = "#ef4444";
+        document.getElementById('stateVal').textContent = "압축: 구름 증발!";
+        document.getElementById('stateVal').style.color = "#f59e0b";
+
+        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '우와! 꾹 누르니까 온도가 올라가서 <b>구름이 마법처럼 사라지고 투명</b>해졌어!'</span>";
+    }
+
+    // 손 떼기 (단열 팽창 -> 구름 재발생)
+    function endSqueeze() {
+        if (!isCloudFormed) return;
+        isSqueezing = false;
+
+        const wrap = document.getElementById('bottleWrap');
+        wrap.style.transform = "scale(1)";
+
+        document.getElementById('pressureVal').textContent = "1.0 atm";
+        document.getElementById('pressureVal').style.color = "#38bdf8";
+        document.getElementById('tempVal').textContent = "14.5 °C (하강!)";
+        document.getElementById('tempVal').style.color = "#38bdf8";
+        document.getElementById('stateVal').textContent = "팽창: 구름 재발생!";
+        document.getElementById('stateVal').style.color = "#38bdf8";
+
+        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '손을 떼니까 다시 차가워져서 <b>하얀 구름이 퐁퐁</b> 다시 나타났어!'</span>";
     }
 
     // 돋보기 모달
@@ -631,23 +743,30 @@
 
         pumpCount = 0;
         isCloudFormed = false;
+        isSqueezing = false;
 
         const handle = document.getElementById('pumpHandle');
         handle.style.transition = "none";
         handle.style.transform = "translateX(-50%) translateY(0)";
         handle.style.opacity = "1";
 
+        const wrap = document.getElementById('bottleWrap');
+        wrap.style.transform = "scale(1)";
+
         document.getElementById('pressureVal').textContent = "1.0 atm";
         document.getElementById('pressureVal').style.color = "#38bdf8";
         document.getElementById('tempVal').textContent = "20.0 °C";
         document.getElementById('tempVal').style.color = "#38bdf8";
+        document.getElementById('stateVal').textContent = "보통 상태";
+        document.getElementById('stateVal').style.color = "#38bdf8";
         document.getElementById('pumpCount').textContent = "0";
 
         document.getElementById('pumpBtn').style.display = 'inline-flex';
         document.getElementById('openBtn').style.display = 'none';
+        document.getElementById('squeezeBtn').style.display = 'none';
         document.getElementById('zoomBtn').style.display = 'none';
         document.getElementById('stepBadge').textContent = "준비 단계 : 펌프 누르기";
-        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '다시 실험해보자! 공기 펌프를 5번 눌러봐!'</span>";
+        document.getElementById('fairyBubble').innerHTML = "<span>🧚 코코: '다시 시작해보자! 펌프를 5번 눌러봐!'</span>";
     }
 
     // 퀴즈 처리 (실패 없는 민수 인지 프로필)
@@ -664,7 +783,7 @@
             msg.style.display = 'block';
             msg.style.background = '#065f46';
             msg.style.color = '#a7f3d0';
-            msg.innerHTML = "🎉 <b>딩동댕! 정답입니다!</b> 단열 팽창으로 온도가 <b>낮아져서(차가워져서)</b> 구름이 생겨요! (+1💎 획득)";
+            msg.innerHTML = "🎉 <b>딩동댕! 정답입니다!</b> 단열 팽창으로 온도가 <b>낮아져서(차가워져서)</b> 수증기가 향 연기(응결핵)에 달라붙어 구름이 생겨요! (+1💎 획득)";
 
             if (!quizSolved) {
                 quizSolved = true;
@@ -674,7 +793,6 @@
                 playSuccessSound();
             }
         } else {
-            // 실패 없는 친절한 힌트
             slot.textContent = '다시 생각하기 💡';
             slot.style.background = '#854d0e';
             slot.style.color = '#fef08a';
@@ -682,7 +800,7 @@
             msg.style.display = 'block';
             msg.style.background = '#78350f';
             msg.style.color = '#fde68a';
-            msg.innerHTML = "💡 <b>힌트</b>: 뚜껑을 열면 공기가 팽창하면서 온도가 <b>얼음물처럼 시원하게 낮아진답니다!</b> 다시 골라보세요.";
+            msg.innerHTML = "💡 <b>힌트</b>: 뚜껑을 열거나 손을 떼면 공기가 팽창하면서 온도가 <b>시원하게 낮아진답니다!</b> 다시 골라보세요.";
         }
     }
 
