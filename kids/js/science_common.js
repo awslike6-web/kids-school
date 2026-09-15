@@ -154,7 +154,7 @@ function renderScienceStorybookLibrary(innerBody) {
 }
 
 let allFetchedRecords = [];
-let selectedScienceGrade = "5학년 1학기";
+let selectedScienceGrade = "5-1";
 let selectedScienceUnit = "";
 let currentMissionType = '';
 let activeSectionData = [];
@@ -205,7 +205,7 @@ function openMissionView(type) {
     overlay.style.display = 'flex';
     activeQuizIdx = 0;
     currentMissionType = type;
-    selectedScienceGrade = "5학년 1학기";
+    selectedScienceGrade = "5-1";
     selectedScienceUnit = "";
     stopFairyTTS();
 
@@ -759,8 +759,8 @@ function getCurriculumRecords(type) {
                 detailContext: item.desc || item.meaning || "",
                 meaning: item.meaning || item.desc || "",
                 imageUrl: item.img || item.image || "",
-                grade: unit.grade || "5학년 1학기",
-                grades: [unit.grade || "5학년 1학기"],
+                grade: unit.grade || "5-1",
+                grades: [unit.grade || "5-1"],
                 level: unit.unit || unit.title,
                 summaryPassage: unit.summary || "",
                 quiz: item.quiz || "",
@@ -825,15 +825,18 @@ function renderScienceGradeUI(grades, container) {
             <p style="color:var(--text-muted); margin-bottom:20px; font-size:0.95rem;">탐구하고 싶은 교과서 학기와 단원을 선택해 보세요!</p>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-                ${grades.map(g => `
+                ${grades.map(g => {
+                    const label = (g === '5-1' || g === '5학년 1학기') ? '📖 5학년 1학기 (5-1)' : (g === '5-2' || g === '5학년 2학기') ? '📖 5학년 2학기 (5-2)' : `📖 ${g}`;
+                    return `
                     <button class="quiz-choice-btn" style="
-                        padding:18px 14px; font-size:1.2rem; text-align:center; justify-content:center;
+                        padding:18px 14px; font-size:1.15rem; text-align:center; justify-content:center;
                         border-radius:14px; background:linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
                         border:2px solid #38bdf8;
                     " onclick="selectScienceGrade('${g}')">
-                        📖 ${g}
+                        ${label}
                     </button>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
 
             <button class="quiz-choice-btn" style="
@@ -854,7 +857,14 @@ function selectScienceGrade(grade) {
     if (grade === 'ALL') {
         matchedRecords = allFetchedRecords;
     } else {
-        matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades && r.grades.includes(grade)));
+        matchedRecords = allFetchedRecords.filter(r => {
+            if (r.grade === grade || (r.grades && r.grades.includes(grade))) return true;
+            if (grade === '5-1' && (r.grade === '5학년 1학기' || (r.grades && r.grades.includes('5학년 1학기')))) return true;
+            if (grade === '5-2' && (r.grade === '5학년 2학기' || (r.grades && r.grades.includes('5학년 2학기')))) return true;
+            if (grade === '5학년 1학기' && (r.grade === '5-1' || (r.grades && r.grades.includes('5-1')))) return true;
+            if (grade === '5학년 2학기' && (r.grade === '5-2' || (r.grades && r.grades.includes('5-2')))) return true;
+            return false;
+        });
     }
 
     // 💡 단원 목록 추출
@@ -873,14 +883,16 @@ function renderScienceUnitUI(units, container, matchedRecords, grade) {
         unitCountMap[u] = matchedRecords.filter(r => String(r.level || r.stage || '').trim() === u).length;
     });
 
+    const gradeLabel = grade === 'ALL' ? '전체 학년·학기' : (grade === '5-1' || grade === '5학년 1학기') ? '5-1 (1학기)' : (grade === '5-2' || grade === '5학년 2학기') ? '5-2 (2학기)' : grade;
+
     container.innerHTML = `
         <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:620px; margin:0 auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <button class="back-to-lobby-btn" style="padding:6px 14px; font-size:0.9rem;" onclick="renderScienceGradeUI(['5학년 1학기', '5학년 2학기'], document.getElementById('overlayInnerBody'))">
+                <button class="back-to-lobby-btn" style="padding:6px 14px; font-size:0.9rem;" onclick="renderScienceGradeUI(['5-1', '5-2'], document.getElementById('overlayInnerBody'))">
                     🔙 학년 다시 고르기
                 </button>
                 <span style="font-size:1.05rem; color:#0284c7; font-weight:bold; background:#e0f2fe; padding:4px 12px; border-radius:8px;">
-                    📖 ${grade === 'ALL' ? '전체 학년·학기' : grade}
+                    📖 ${gradeLabel}
                 </span>
             </div>
 
