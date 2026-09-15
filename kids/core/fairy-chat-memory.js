@@ -645,8 +645,8 @@ async function callDirectGoogleGemini(payload) {
         }
     }
 
-    // 🚀 구글 최신 플래그십 모델 (gemini-3.8-flash ➔ gemini-3.6-flash ➔ gemini-2.0-flash) 및 503 자동 재시도
-    const modelCandidates = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-2.0-flash"];
+    // 🚀 2026 구글 최신 플래그십 모델 (gemini-3.8-flash ➔ gemini-3.6-flash) 및 503 자동 재시도
+    const modelCandidates = ["gemini-3.8-flash", "gemini-3.6-flash"];
     let lastErr = null;
 
     for (const modelName of modelCandidates) {

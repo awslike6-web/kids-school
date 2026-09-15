@@ -2,7 +2,7 @@
 
 ## 1. 개요
 * **목적**: 1학년(민서)과 5학년(민수)의 초등 교과(국어·수학·사회·과학·영어) 자기주도 학습 및 게임형 보상(다이아/하리보), AI 단어요정 튜터링 제공.
-* **주요 기술**: Pure Vanilla JS, HTML5/CSS3 Grid, Web Speech API (STT/TTS), Google Gemini 2.5 Flash, Notion API (Cloudflare Worker Proxy).
+* **주요 기술**: Pure Vanilla JS, HTML5/CSS3 Grid, Web Speech API (STT/TTS), Google Gemini 3.8 Flash (2026 최신 플래그십), Notion API (Cloudflare Worker Proxy).
 
 ---
 
