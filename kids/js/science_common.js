@@ -881,47 +881,59 @@ function getCurriculumRecords(type) {
     return list;
 }
 
+let scienceDataLoadPromise = null;
+
 async function fetchAndBuildScienceUI(type, innerBody) {
     const curriculumRecords = getCurriculumRecords(type);
-    try {
-        let records = [];
+    scienceDataLoadPromise = (async () => {
         try {
-            if (typeof fetchVocaFromNotion === 'function') {
-                records = await fetchVocaFromNotion({
-                    subject: "과학",
-                    areaZone: "용어방",
-                    useServerFilter: true,
-                    filterByStudent: !isAdmin
-                });
+            let records = [];
+            try {
+                if (typeof fetchVocaFromNotion === 'function') {
+                    records = await fetchVocaFromNotion({
+                        subject: "과학",
+                        areaZone: "용어방",
+                        useServerFilter: true,
+                        filterByStudent: !isAdmin
+                    });
+                }
+            } catch (netErr) {
+                console.warn("ℹ️ 노션 통신 대기 -> 표준 과학 데이터셋으로 전환합니다.", netErr);
             }
-        } catch (netErr) {
-            console.warn("ℹ️ 노션 통신 대기 -> 표준 과학 데이터셋으로 전환합니다.", netErr);
-        }
 
-        if (!records || records.length === 0) {
-            records = curriculumRecords;
-        } else if (curriculumRecords.length > 0) {
-            const existingWords = new Set(records.map(r => r.word));
-            const extra = curriculumRecords.filter(r => !existingWords.has(r.word));
-            records = [...records, ...extra];
-        }
+            if (!records || records.length === 0) {
+                records = curriculumRecords;
+            } else if (curriculumRecords.length > 0) {
+                const existingWords = new Set(records.map(r => r.word));
+                const extra = curriculumRecords.filter(r => !existingWords.has(r.word));
+                records = [...records, ...extra];
+            }
 
-        allFetchedRecords = records;
-        
-        // 학년/학기 목록 추출 (예: ["5학년 1학기", "5학년 2학기"])
-        const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
+            allFetchedRecords = records;
+            
+            // 학년/학기 목록 추출 (예: ["5-1", "5-2"])
+            const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
 
-        if (uniqueGrades.length === 0) {
-            startScienceMissionWithFilteredData(records, innerBody, "과학 탐구");
-        } else {
-            renderScienceGradeUI(uniqueGrades, innerBody);
+            // 직결 오픈(openScienceVocaDirect) 중이면 중간 학년 선택 화면 렌더링 생략
+            if (!window._isScienceDirectNavigating) {
+                if (uniqueGrades.length === 0) {
+                    startScienceMissionWithFilteredData(records, innerBody, "과학 탐구");
+                } else {
+                    renderScienceGradeUI(uniqueGrades, innerBody);
+                }
+            }
+            return records;
+        } catch(e) {
+            console.warn("데이터 로딩 예외 -> 교과서 데이터셋 구동", e);
+            allFetchedRecords = curriculumRecords;
+            const uniqueGrades = [...new Set(curriculumRecords.map(r => r.grade))].filter(Boolean).sort();
+            if (!window._isScienceDirectNavigating) {
+                renderScienceGradeUI(uniqueGrades, innerBody);
+            }
+            return curriculumRecords;
         }
-    } catch(e) {
-        console.warn("데이터 로딩 예외 -> 교과서 데이터셋 구동", e);
-        allFetchedRecords = curriculumRecords;
-        const uniqueGrades = [...new Set(curriculumRecords.map(r => r.grade))].filter(Boolean).sort();
-        renderScienceGradeUI(uniqueGrades, innerBody);
-    }
+    })();
+    return scienceDataLoadPromise;
 }
 
 function renderScienceGradeUI(grades, container) {
@@ -1042,11 +1054,31 @@ function selectScienceUnit(unitName, grade) {
     if (grade === 'ALL') {
         matchedRecords = allFetchedRecords;
     } else {
-        matchedRecords = allFetchedRecords.filter(r => r.grade === grade || (r.grades && r.grades.includes(grade)));
+        matchedRecords = allFetchedRecords.filter(r => {
+            const g = r.grade || '';
+            const gArr = r.grades || [];
+            if (g === grade || gArr.includes(grade)) return true;
+            if (grade === '5-1' && (g === '5학년 1학기' || g === '5학년' || gArr.includes('5학년 1학기') || gArr.includes('5-1'))) return true;
+            if (grade === '5-2' && (g === '5학년 2학기' || gArr.includes('5학년 2학기') || gArr.includes('5-2'))) return true;
+            if (grade === '5학년 1학기' && (g === '5-1' || gArr.includes('5-1'))) return true;
+            if (grade === '5학년 2학기' && (g === '5-2' || gArr.includes('5-2'))) return true;
+            return false;
+        });
     }
 
     if (unitName !== 'ALL') {
-        matchedRecords = matchedRecords.filter(r => String(r.level || r.stage || '').trim() === unitName);
+        const cleanUnit = String(unitName || '').replace(/단원$/, '').trim();
+        const unitNumMatch = cleanUnit.match(/^(\d+)/);
+        const unitNum = unitNumMatch ? unitNumMatch[1] : cleanUnit;
+
+        matchedRecords = matchedRecords.filter(r => {
+            const levelStr = String(r.level || r.stage || '').trim();
+            if (!levelStr) return false;
+            if (levelStr === unitName) return true;
+            if (levelStr.includes(unitName)) return true;
+            if (unitNum && (levelStr.startsWith(unitNum + '.') || levelStr.startsWith(unitNum + '단원') || levelStr.includes(unitNum + '단원'))) return true;
+            return false;
+        });
     }
 
     startScienceMissionWithFilteredData(matchedRecords, innerBody, `${grade} - ${unitName === 'ALL' ? '전체 종합' : unitName}`);
@@ -1446,20 +1478,50 @@ function initCardZoomListeners() {
 // ==========================================
 // 🔬 단원 직결 보카 오픈 헬퍼
 // ==========================================
-window.openScienceVocaDirect = function(targetGrade, targetUnit) {
+window.openScienceVocaDirect = async function(targetGrade, targetUnit) {
+    window._isScienceDirectNavigating = true;
     openMissionView('voca');
-    setTimeout(() => {
-        if (typeof selectScienceGrade === 'function') {
-            selectScienceGrade(targetGrade);
-            if (targetUnit) {
-                setTimeout(() => {
-                    if (typeof selectScienceUnit === 'function') {
-                        selectScienceUnit(targetGrade, targetUnit);
-                    }
-                }, 120);
-            }
+
+    // 노션 또는 로컬 데이터셋 로딩 완료 대기
+    if (scienceDataLoadPromise) {
+        try {
+            await scienceDataLoadPromise;
+        } catch (e) {
+            console.warn("과학 데이터 로딩 대기 중 예외:", e);
         }
-    }, 250);
+    } else {
+        let attempts = 0;
+        while ((!allFetchedRecords || allFetchedRecords.length === 0) && attempts < 25) {
+            await new Promise(r => setTimeout(r, 100));
+            attempts++;
+        }
+    }
+
+    window._isScienceDirectNavigating = false;
+
+    // 단원명 스마트 자동 매칭 탐색 (예: '1단원' ➔ '1. 혼합물의 분리')
+    let matchedUnit = targetUnit;
+    if (allFetchedRecords && allFetchedRecords.length > 0 && targetUnit) {
+        const cleanUnit = String(targetUnit).replace(/단원$/, '').trim();
+        const unitNumMatch = cleanUnit.match(/^(\d+)/);
+        const unitNum = unitNumMatch ? unitNumMatch[1] : cleanUnit;
+
+        const availableUnits = [...new Set(allFetchedRecords.map(r => String(r.level || r.stage || '').trim()))].filter(Boolean);
+        const found = availableUnits.find(u => {
+            if (u === targetUnit) return true;
+            if (u.includes(targetUnit)) return true;
+            if (unitNum && (u.startsWith(unitNum + '.') || u.startsWith(unitNum + '단원') || u.includes(unitNum + '단원'))) return true;
+            return false;
+        });
+        if (found) {
+            matchedUnit = found;
+        }
+    }
+
+    // 올바른 인자 순서 호출: selectScienceUnit(unitName, grade)
+    if (typeof selectScienceUnit === 'function') {
+        selectScienceUnit(matchedUnit, targetGrade);
+    }
 };
 
 // ==========================================
