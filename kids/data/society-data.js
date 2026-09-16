@@ -1728,7 +1728,7 @@ const SOCIETY_CURRICULUM_DATA = {
             },
             {
                   "title": "삼국의 전성기와 한강 유역 경쟁",
-                  "img": "./images/storybook/three_kingdoms/three_kingdoms_p3.jpg",
+                  "img": "./images/artifacts/three_kingdoms_han_river_map.png",
                   "artifactName": "삼국의 영토 확장과 한강 유역 판도",
                   "artifactPeriod": "삼국 시대 (4세기~6세기)",
                   "artifactUsage": "삼국이 전성기마다 차지했던 한반도의 젖줄, 한강 유역과 영토 확장을 보여주는 역사 지도 사료입니다.",

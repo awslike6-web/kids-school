@@ -79,6 +79,9 @@ async function fetchLibraryData(forceRefresh = false) {
     buildFilterButtons();
     updateStatusAndFilter();
 
+    // 🔗 딥링크 URL 쿼리 파라미터 수신 배선 (?subject=수학&search=...)
+    handleDeepLinkParams();
+
     if (forceRefresh && syncBtn) {
       syncBtn.disabled = false;
       syncBtn.innerHTML = '✅ 동기화 완료!';
@@ -354,16 +357,111 @@ function renderCatalogSections(wordsToRender) {
   requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
 }
 
+// 🧮 수학 세로 분수 (Vertical Fraction) 및 특수 기호 포맷터
+function formatMathExpressions(text) {
+  if (!text) return "";
+  // 1) 세로 분수 치환: 단독 분수 패턴 (\d+)/(\d+) (단, 날짜/URL/경로 등 제외)
+  let formatted = String(text).replace(/(?<![0-9a-zA-Z\/\-\:])(\d+)\s*\/\s*(\d+)(?![0-9a-zA-Z\/\-\:])/g, (match, num, den) => {
+    return `<span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span>`;
+  });
+  return formatted;
+}
+
+// 📐 상세설명(심화) 본문 포맷터 (수식/공식 하이라이트 카드 박스 배선)
+function formatDetailContext(rawText, isMath = false) {
+  if (!rawText) return "";
+  const lines = String(rawText).split("\n");
+  const processedLines = lines.map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return "";
+    const formattedLine = formatMathExpressions(trimmed);
+    
+    // 수학 과목이거나 공식/계산 관련 줄인 경우 하이라이트 박스 처리
+    const isFormulaLine = isMath && (
+      trimmed.startsWith("• 공식:") || 
+      trimmed.startsWith("공식:") ||
+      trimmed.includes("➔") ||
+      trimmed.includes("=") ||
+      trimmed.includes("×") ||
+      trimmed.includes("÷") ||
+      trimmed.includes("≥") ||
+      trimmed.includes("≤") ||
+      /^[1-3]등:/.test(trimmed)
+    );
+
+    if (isFormulaLine) {
+      return `<div class="math-formula-box">${formattedLine}</div>`;
+    }
+    return `<div style="margin: 4px 0;">${formattedLine}</div>`;
+  });
+
+  return processedLines.filter(l => l).join("");
+}
+
+// 🔗 딥링크 URL 쿼리 파라미터 수신 배선 (?subject=수학&search=사다리꼴 등)
+function handleDeepLinkParams() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetSubj = urlParams.get('subject');
+    const targetGrade = urlParams.get('grade');
+    const targetUnit = urlParams.get('unit');
+    const targetSearch = urlParams.get('search') || urlParams.get('word');
+
+    let hasParam = false;
+
+    if (targetSubj) {
+      selectedSubjects = [targetSubj.trim()];
+      hasParam = true;
+    }
+    if (targetGrade) {
+      selectedGrades = [targetGrade.trim()];
+      hasParam = true;
+    }
+    if (targetUnit) {
+      selectedUnit = targetUnit.trim();
+      hasParam = true;
+    }
+    if (targetSearch) {
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = targetSearch.trim();
+      hasParam = true;
+    }
+
+    if (hasParam) {
+      buildFilterButtons();
+      updateStatusAndFilter(true);
+
+      if (targetSearch) {
+        const cleanSearch = targetSearch.trim().toLowerCase();
+        const matched = allDictionaryWords.find(w => {
+          const wName = (w.word || '').toLowerCase();
+          return wName === cleanSearch || wName.startsWith(cleanSearch) || wName.includes(cleanSearch);
+        });
+        if (matched) {
+          setTimeout(() => {
+            openModal(matched);
+          }, 250);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[DeepLink] 쿼리 파라미터 처리 오류:", err);
+  }
+}
+
 let currentActiveWord = null;
 
 function openModal(wordData) {
   currentActiveWord = wordData;
+  const isMathSubject = (wordData.subject || []).includes("수학");
+
   // 💡 모달 열 때 현재 과목을 전역에 설정 (보상 헬퍼가 이 값을 참조함)
   window.currentSubject = (wordData.subject && wordData.subject.length > 0) ? wordData.subject[0] : "사회";
   wordStartTime = Date.now(); // 단어 화면 진입 시간 기록
 
   document.getElementById('modalWordTitle').textContent = wordData.word;
-  document.getElementById('modalMeaning').textContent = wordData.meaning;
+  // 🧮 뜻풀이에 세로 분수 포맷터 적용
+  document.getElementById('modalMeaning').innerHTML = formatMathExpressions(wordData.meaning);
   
   const imgEl = document.getElementById('modalImage');
   if (wordData.imageUrl) { 
@@ -388,9 +486,15 @@ function openModal(wordData) {
   
   const detailsGroup = document.getElementById('modalDetailsGroup');
   if (wordData.detailContext) {
-    document.getElementById('modalDetailContext').innerHTML = wordData.detailContext.replace(/\n/g, '<br>');
+    // 📐 상세설명에 세로 분수 및 공식 하이라이트 카드 박스 적용
+    document.getElementById('modalDetailContext').innerHTML = formatDetailContext(wordData.detailContext, isMathSubject);
     detailsGroup.style.display = 'block'; 
-    detailsGroup.removeAttribute('open');
+    // 수학 과목은 아이들이 교과서 공식과 원리를 즉시 확인할 수 있도록 자동 펼침
+    if (isMathSubject) {
+      detailsGroup.setAttribute('open', 'true');
+    } else {
+      detailsGroup.removeAttribute('open');
+    }
   } else { 
     detailsGroup.style.display = 'none'; 
   }
@@ -671,8 +775,13 @@ async function askCocoFairy() {
 
   MODAL_CHAT_HISTORY.push({ role: "user", content: questionText });
 
-  const wordContext = currentActiveWord ? `현재 아이가 공부 중인 단어: [${currentActiveWord.word}], 뜻풀이: [${currentActiveWord.meaning}]` : '';
-  const fairyPrompt = getVocaFairySystemPrompt(wordContext ? `${wordContext}. 아이의 질문에 아주 친절하고 알기 쉽게 3줄 이내로 다정하게 설명해줘.` : '');
+  let mathGuide = '';
+  if (currentActiveWord && (currentActiveWord.subject || []).includes('수학')) {
+    mathGuide = ' 이 단어는 [수학] 개념이야. 학생은 초등학교 5학년 민수(언어치료 병행, 인지/어휘 발달 배려 필요)야. 기계적인 공식 나열 대신 피자, 사탕, 초콜릿 나누기나 색종이 접기 같은 친근한 실생활 비유를 들어서 다정하고 쉽게 설명해줘. 핵심 공식은 눈에 띄게 콕 짚어주고 따뜻하게 격려해줘.';
+  }
+
+  const wordContext = currentActiveWord ? `현재 아이가 공부 중인 단어: [${currentActiveWord.word}], 뜻풀이: [${currentActiveWord.meaning}].${mathGuide}` : '';
+  const fairyPrompt = getVocaFairySystemPrompt(wordContext ? `${wordContext} 아이의 질문에 아주 친절하고 알기 쉽게 3줄 이내로 다정하게 설명해줘.` : '');
 
   try {
     const { text: reply } = await fetchWithGeminiRetry(
