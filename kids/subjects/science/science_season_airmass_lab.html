@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>계절별 날씨와 공기 덩어리(기단) 탐구실 🌏 | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/design-system.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --primary: #7c3aed;
+        --primary-dark: #6d28d9;
+        --accent: #f59e0b;
+        --bg-color: #0b1528;
+        --card-bg: #13233f;
+        --text-light: #f8fafc;
+        --siberia-color: #38bdf8;
+        --pacific-color: #ef4444;
+        --okhotsk-color: #14b8a6;
+        --yangtze-color: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: var(--bg-color);
+        min-height: 100vh;
+        color: var(--text-light);
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 60px;
+    }
+
+    /* 상단 네비게이션 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 20px; background: rgba(11, 21, 40, 0.95); backdrop-filter: blur(12px);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
+        border-bottom: 1.5px solid #1e3a66;
+    }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: #1a3258; color: #e2e8f0; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; text-decoration: none; border: 1px solid #2d5088; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #2d5088; color: #fff; }
+    .page-title {
+        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #a78bfa;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .gem-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white; font-family: 'Jua', sans-serif; padding: 6px 14px;
+        border-radius: 20px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .main-wrap {
+        max-width: 980px; width: 100%; margin: 0 auto; padding: 18px 16px;
+        display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* 헤더 배너 */
+    .header-banner {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #1e3a8a 100%);
+        border: 2px solid #4338ca; border-radius: 20px; padding: 20px 24px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+    }
+    .banner-sub {
+        font-family: 'Jua', sans-serif; color: #c4b5fd; font-size: 0.95rem;
+        display: inline-block; margin-bottom: 6px; letter-spacing: 0.5px;
+    }
+    .banner-title {
+        font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #ffffff;
+        margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+    }
+    .banner-desc {
+        color: #e0e7ff; font-size: 0.96rem; line-height: 1.55;
+    }
+
+    /* 5대 가상실험실 퀵 네비게이터 */
+    .lab-nav-pills {
+        display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+        padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);
+    }
+    .lab-pill {
+        padding: 6px 13px; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 0.88rem;
+        text-decoration: none; color: #cbd5e1; background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .lab-pill:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .lab-pill.active {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        color: white; border-color: #c4b5fd; box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 탭 메뉴 */
+    .mode-tab-bar {
+        display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .mode-tab-btn {
+        flex: 1; min-width: 140px; padding: 12px 14px; border-radius: 14px; border: 2px solid #1e3a66;
+        background: #0d1b32; color: #94a3b8; font-family: 'Jua', sans-serif;
+        font-size: 1.02rem; cursor: pointer; display: flex; align-items: center;
+        justify-content: center; gap: 8px; transition: all 0.2s; white-space: nowrap;
+    }
+    .mode-tab-btn.active {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        color: white; border-color: #a78bfa; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 카드 섹션 */
+    .section-card {
+        background: var(--card-bg); border-radius: 20px; border: 2px solid #1e3a66;
+        padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .section-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1.5px solid #1e3a66; padding-bottom: 12px;
+    }
+    .section-tag {
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #a78bfa;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .tip-box {
+        background: #0d1b32; border-left: 4px solid #7c3aed;
+        padding: 12px 16px; border-radius: 8px; font-size: 0.92rem; color: #e2e8f0;
+        line-height: 1.55;
+    }
+
+    /* =======================================================
+       모드 1: 입체 지도 & 4대 기단
+       ======================================================= */
+    .map-container {
+        position: relative; width: 100%; min-height: 480px;
+        background: radial-gradient(circle at center, #15294b 0%, #0a1322 100%);
+        border-radius: 18px; border: 2px solid #224275; overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .korea-map-svg {
+        width: 100%; height: 100%; max-height: 480px; display: block;
+    }
+
+    /* 4대 기단 카드 그리드 */
+    .airmass-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+    }
+    .airmass-card {
+        background: #0d1b32; border-radius: 14px; border: 2px solid #1e3a66; padding: 14px;
+        cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden;
+    }
+    .airmass-card:hover, .airmass-card.active {
+        transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    .airmass-card.siberia.active { border-color: var(--siberia-color); background: #0c2742; }
+    .airmass-card.pacific.active { border-color: var(--pacific-color); background: #3b1115; }
+    .airmass-card.okhotsk.active { border-color: var(--okhotsk-color); background: #082928; }
+    .airmass-card.yangtze.active { border-color: var(--yangtze-color); background: #092e1f; }
+
+    .airmass-title-row {
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .airmass-name {
+        font-family: 'Jua', sans-serif; font-size: 1.15rem; display: flex; align-items: center; gap: 6px;
+    }
+    .airmass-season-tag {
+        font-family: 'Jua', sans-serif; font-size: 0.8rem; padding: 3px 8px; border-radius: 8px;
+    }
+    .airmass-prop-badges {
+        display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .airmass-badge {
+        font-size: 0.78rem; font-family: 'Jua', sans-serif; padding: 3px 8px; border-radius: 6px;
+        background: #1e3a66; color: #cbd5e1;
+    }
+    .airmass-desc {
+        font-size: 0.88rem; color: #cbd5e1; line-height: 1.45;
+    }
+
+    /* =======================================================
+       모드 2: 사계절 시뮬레이터
+       ======================================================= */
+    .season-selector-bar {
+        display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .season-btn {
+        padding: 10px 18px; border-radius: 12px; border: 2px solid #1e3a66;
+        background: #0d1b32; color: #cbd5e1; font-family: 'Jua', sans-serif; font-size: 1.05rem;
+        cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .season-btn:hover { border-color: #a78bfa; color: #fff; }
+    .season-btn.active {
+        background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+        color: white; border-color: #c4b5fd; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    }
+    .season-btn.active.summer {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        border-color: #fca5a5; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+    .season-btn.active.winter {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        border-color: #7dd3fc; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    }
+    .season-btn.active.monsoon {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+        border-color: #5eead4; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+    }
+
+    .season-display-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 768px) {
+        .season-display-grid { grid-template-columns: 1fr; }
+    }
+
+    .weather-board {
+        background: #0d1b32; border-radius: 16px; border: 2px solid #1e3a66; padding: 18px;
+        display: flex; flex-direction: column; gap: 14px;
+    }
+    .weather-stat-row {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #13233f; padding: 10px 14px; border-radius: 10px;
+    }
+    .stat-label { font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #94a3b8; }
+    .stat-val { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #fff; }
+
+    .life-card {
+        background: linear-gradient(135deg, #13233f 0%, #1e3a66 100%);
+        border-radius: 16px; border: 2px solid #2d5088; padding: 18px;
+        display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 10px;
+    }
+    .life-icon { font-size: 3.5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+    .life-title { font-family: 'Jua', sans-serif; font-size: 1.3rem; color: #38bdf8; }
+    .life-desc { font-size: 0.95rem; color: #e2e8f0; line-height: 1.5; }
+
+    /* 장마 충돌 특수 배너 */
+    .monsoon-special-box {
+        background: linear-gradient(135deg, #134e4a 0%, #0f172a 100%);
+        border: 2px solid #14b8a6; border-radius: 14px; padding: 16px;
+        display: none; flex-direction: column; gap: 8px; animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 10px rgba(20, 184, 166, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.5); }
+    }
+
+    /* =======================================================
+       모드 3: 2x2 원리 매트릭스
+       ======================================================= */
+    .matrix-container {
+        display: grid; grid-template-columns: 90px 1fr 1fr; gap: 8px;
+        background: #0d1b32; padding: 16px; border-radius: 16px; border: 2px solid #1e3a66;
+    }
+    .matrix-header {
+        font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #94a3b8;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        background: #13233f; border-radius: 10px; padding: 8px;
+    }
+    .matrix-cell {
+        background: #162a4d; border-radius: 12px; border: 2px solid #234275; padding: 14px;
+        display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .matrix-cell:hover { border-color: #a78bfa; background: #1e3969; }
+    .cell-title { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: #fff; }
+    .cell-char { font-family: 'Jua', sans-serif; font-size: 0.85rem; }
+    .cell-desc { font-size: 0.82rem; color: #cbd5e1; line-height: 1.4; }
+
+    /* =======================================================
+       모드 4: 실전 퀴즈
+       ======================================================= */
+    .quiz-card {
+        background: #0d1b32; border-radius: 16px; border: 2px solid #1e3a66; padding: 20px;
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .quiz-question {
+        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #f8fafc; line-height: 1.5;
+        display: flex; align-items: flex-start; gap: 10px;
+    }
+    .quiz-num-badge {
+        background: #7c3aed; color: white; border-radius: 50%; width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .quiz-options {
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .quiz-opt-btn {
+        padding: 13px 18px; border-radius: 12px; border: 2px solid #1e3a66;
+        background: #13233f; color: #e2e8f0; font-family: 'Nanum Gothic', sans-serif;
+        font-size: 1rem; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;
+    }
+    .quiz-opt-btn:hover { background: #1a3258; border-color: #38bdf8; }
+    .quiz-opt-btn.correct {
+        background: #065f46; border-color: #34d399; color: #ecfdf5;
+    }
+    .quiz-opt-btn.wrong {
+        background: #7f1d1d; border-color: #f87171; color: #fef2f2;
+    }
+    .quiz-feedback {
+        display: none; padding: 14px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5;
+    }
+    .quiz-nav-row {
+        display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
+    }
+    .btn-next-quiz {
+        padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        color: white; font-family: 'Jua', sans-serif; font-size: 1rem;
+        display: none; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 요정 도크 */
+    .fairy-dock {
+        background: rgba(19, 35, 63, 0.9); backdrop-filter: blur(10px);
+        border: 2px solid #1e3a66; border-radius: 18px; padding: 14px 18px;
+        display: flex; align-items: center; gap: 14px; margin-top: 8px;
+    }
+    .fairy-avatar { width: 50px; height: 50px; object-fit: contain; flex-shrink: 0; }
+    .fairy-msg { font-size: 0.95rem; color: #e2e8f0; line-height: 1.5; }
+    .fairy-msg b { color: #a78bfa; }
+
+    /* 완주 모달 */
+    .reward-modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+    .reward-modal {
+        background: linear-gradient(135deg, #1e1b4b 0%, #0d1b32 100%);
+        border: 2.5px solid #a78bfa; border-radius: 24px; padding: 30px; max-width: 440px; width: 90%;
+        text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 14px;
+        animation: popUp 0.3s ease-out;
+    }
+    @keyframes popUp {
+        0% { transform: scale(0.85); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .reward-btn {
+        padding: 12px 24px; border-radius: 14px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white; font-family: 'Jua', sans-serif; font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+</style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">🔙 과학 탐구실로</a>
+    <div class="page-title">
+        <span>🌏</span>
+        <span>계절과 공기 덩어리 탐구실</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 2단원 5차시</span>
+        <h1 class="banner-title">🌏 계절별 날씨와 공기 덩어리(기단) 가상 탐구실</h1>
+        <p class="banner-desc">
+            우리나라의 봄, 여름, 가을, 겨울 날씨는 거대한 <b>공기 덩어리(기단)</b>들의 성질에 따라 결정돼요! 
+            4대 공기 거인들이 어디서 태어나 어떤 계절을 만드는지 입체 지도와 사계절 시뮬레이터로 탐구해 볼까요?
+        </p>
+        <!-- 5대 가상실험실 퀵 네비게이터 -->
+        <div class="lab-nav-pills">
+            <a href="science_hygrometer_lab.html" class="lab-pill">🌡️ [1] 습도계</a>
+            <a href="science_dew_fog_lab.html" class="lab-pill">🧊 [2] 이슬·안개</a>
+            <a href="science_cloud_lab.html" class="lab-pill">☁️ [3] 구름 발생</a>
+            <a href="science_wind_lab.html" class="lab-pill">💨 [4] 바람의 까닭</a>
+            <a href="science_season_airmass_lab.html" class="lab-pill active">🌏 [5] 계절과 기단</a>
+        </div>
+    </div>
+
+    <!-- 탭 네비게이션 -->
+    <div class="mode-tab-bar">
+        <button class="mode-tab-btn active" onclick="switchMode('map')">🗺️ 4대 기단 지도</button>
+        <button class="mode-tab-btn" onclick="switchMode('season')">🔄 사계절 시뮬레이터</button>
+        <button class="mode-tab-btn" onclick="switchMode('matrix')">🧩 기단 탄생 원리</button>
+        <button class="mode-tab-btn" onclick="switchMode('quiz')">🎯 예보관 실전 퀴즈</button>
+    </div>
+
+    <!-- =======================================================
+         모드 1: 우리나라 주변 4대 기단 입체 지도 탐험
+         ======================================================= -->
+    <div id="modeMap" class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🗺️</span>
+                <span>우리나라 주변 4대 공기 덩어리 입체 지도</span>
+            </div>
+            <span class="airmass-badge" style="background: #7c3aed; color: #fff;">인터랙티브 지도</span>
+        </div>
+
+        <div class="tip-box">
+            💡 <b>공기 덩어리(기단)란?</b> 넓은 대륙이나 바다 위에 오랫동안 머물면서, 그 지역의 <b>기온과 습도</b>를 쏙 빼닮은 거대한 공기 덩어리예요! 기단을 터치하여 한반도에 미치는 영향을 확인해 보세요.
+        </div>
+
+        <!-- 인터랙티브 지도 SVG -->
+        <div class="map-container">
+            <svg class="korea-map-svg" viewBox="0 0 800 480">
+                <defs>
+                    <!-- 그라데이션 정의 -->
+                    <radialGradient id="seaGrad" cx="50%" cy="50%" r="60%">
+                        <stop offset="0%" stop-color="#1b3a6b"/>
+                        <stop offset="100%" stop-color="#0a1526"/>
+                    </radialGradient>
+                    <radialGradient id="siberiaGlow" cx="40%" cy="40%" r="50%">
+                        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2"/>
+                    </radialGradient>
+                    <radialGradient id="pacificGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ef4444" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#b91c1c" stop-opacity="0.2"/>
+                    </radialGradient>
+                    <radialGradient id="okhotskGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#0f766e" stop-opacity="0.2"/>
+                    </radialGradient>
+                    <radialGradient id="yangtzeGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#10b981" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#047857" stop-opacity="0.2"/>
+                    </radialGradient>
+                    <!-- 화살표 마커 -->
+                    <marker id="arrowSiberia" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#38bdf8" />
+                    </marker>
+                    <marker id="arrowPacific" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#ef4444" />
+                    </marker>
+                    <marker id="arrowOkhotsk" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#14b8a6" />
+                    </marker>
+                    <marker id="arrowYangtze" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#10b981" />
+                    </marker>
+                </defs>
+
+                <!-- 바다 배경 -->
+                <rect width="800" height="480" fill="url(#seaGrad)"/>
+
+                <!-- 위도/경도선 (가상 그리드) -->
+                <line x1="50" y1="120" x2="750" y2="120" stroke="#234275" stroke-dasharray="4,4"/>
+                <line x1="50" y1="240" x2="750" y2="240" stroke="#234275" stroke-dasharray="4,4"/>
+                <line x1="50" y1="360" x2="750" y2="360" stroke="#234275" stroke-dasharray="4,4"/>
+                <text x="60" y="115" fill="#64748b" font-family="Jua" font-size="12">북위 45° (고위도 · 차가운 지역)</text>
+                <text x="60" y="355" fill="#64748b" font-family="Jua" font-size="12">북위 25° (저위도 · 따뜻한 지역)</text>
+
+                <!-- 아시아 대륙 실루엣 (좌측 & 북측) -->
+                <path d="M 0,0 L 420,0 L 400,100 L 330,160 L 300,240 L 220,310 L 160,370 L 100,480 L 0,480 Z" fill="#162947" stroke="#2b4f85" stroke-width="2"/>
+                <text x="140" y="60" fill="#475569" font-family="Jua" font-size="15">유라시아 대륙 (건조)</text>
+                <text x="560" y="440" fill="#3b82f6" font-family="Jua" font-size="15">태평양 해양 (습함)</text>
+
+                <!-- 한반도 윤곽선 (중앙) -->
+                <g transform="translate(370, 150) scale(1.15)">
+                    <!-- 한반도 본토 -->
+                    <path d="M 30,10 C 45,5 60,18 65,35 C 70,55 60,75 58,95 C 55,115 50,130 45,145 C 38,155 25,160 15,152 C 5,145 10,130 14,115 C 18,95 2,80 8,55 C 12,35 18,15 30,10 Z"
+                          fill="#2563eb" stroke="#60a5fa" stroke-width="2.5" filter="drop-shadow(0 4px 10px rgba(37,99,235,0.5))"/>
+                    <!-- 제주도 & 울릉도/독도 -->
+                    <ellipse cx="12" cy="172" rx="7" ry="4" fill="#38bdf8"/>
+                    <circle cx="85" cy="85" r="3" fill="#38bdf8"/>
+                    <circle cx="102" cy="90" r="2.5" fill="#38bdf8"/>
+                    <text x="22" y="85" fill="#ffffff" font-family="Jua" font-size="15" font-weight="bold">한반도</text>
+                </g>
+
+                <!-- 바람 흐름 화살표 (동적 토글용) -->
+                <path id="windArrowSiberia" d="M 210,120 Q 320,180 380,210" stroke="#38bdf8" stroke-width="5" fill="none" marker-end="url(#arrowSiberia)" opacity="0" stroke-dasharray="8,4"/>
+                <path id="windArrowPacific" d="M 620,360 Q 520,300 440,250" stroke="#ef4444" stroke-width="5" fill="none" marker-end="url(#arrowPacific)" opacity="0" stroke-dasharray="8,4"/>
+                <path id="windArrowOkhotsk" d="M 640,110 Q 540,160 450,200" stroke="#14b8a6" stroke-width="5" fill="none" marker-end="url(#arrowOkhotsk)" opacity="0" stroke-dasharray="8,4"/>
+                <path id="windArrowYangtze" d="M 190,340 Q 280,310 360,260" stroke="#10b981" stroke-width="5" fill="none" marker-end="url(#arrowYangtze)" opacity="0" stroke-dasharray="8,4"/>
+
+                <!-- 1. 시베리아 기단 (북서쪽 대륙) -->
+                <g id="nodeSiberia" class="airmass-node" onclick="selectAirmass('siberia')" style="cursor: pointer;">
+                    <circle cx="160" cy="90" r="65" fill="url(#siberiaGlow)" stroke="#38bdf8" stroke-width="2.5"/>
+                    <text x="160" y="75" text-anchor="middle" font-size="28">❄️</text>
+                    <text x="160" y="100" text-anchor="middle" fill="#ffffff" font-family="Jua" font-size="17">시베리아 기단</text>
+                    <text x="160" y="120" text-anchor="middle" fill="#bae6fd" font-family="Jua" font-size="12">차갑고 건조 (겨울)</text>
+                </g>
+
+                <!-- 2. 오호츠크해 기단 (북동쪽 바다) -->
+                <g id="nodeOkhotsk" class="airmass-node" onclick="selectAirmass('okhotsk')" style="cursor: pointer;">
+                    <circle cx="660" cy="85" r="65" fill="url(#okhotskGlow)" stroke="#14b8a6" stroke-width="2.5"/>
+                    <text x="660" y="70" text-anchor="middle" font-size="28">🌊</text>
+                    <text x="660" y="95" text-anchor="middle" fill="#ffffff" font-family="Jua" font-size="17">오호츠크해 기단</text>
+                    <text x="660" y="115" text-anchor="middle" fill="#99f6e4" font-family="Jua" font-size="12">차갑고 습함 (초여름)</text>
+                </g>
+
+                <!-- 3. 양쯔강 기단 (남서쪽 대륙) -->
+                <g id="nodeYangtze" class="airmass-node" onclick="selectAirmass('yangtze')" style="cursor: pointer;">
+                    <circle cx="160" cy="370" r="65" fill="url(#yangtzeGlow)" stroke="#10b981" stroke-width="2.5"/>
+                    <text x="160" y="355" text-anchor="middle" font-size="28">🌾</text>
+                    <text x="160" y="380" text-anchor="middle" fill="#ffffff" font-family="Jua" font-size="17">양쯔강 기단</text>
+                    <text x="160" y="400" text-anchor="middle" fill="#a7f3d0" font-family="Jua" font-size="12">따뜻하고 건조 (봄/가을)</text>
+                </g>
+
+                <!-- 4. 북태평양 기단 (남동쪽 바다) -->
+                <g id="nodePacific" class="airmass-node" onclick="selectAirmass('pacific')" style="cursor: pointer;">
+                    <circle cx="650" cy="370" r="65" fill="url(#pacificGlow)" stroke="#ef4444" stroke-width="2.5"/>
+                    <text x="650" y="355" text-anchor="middle" font-size="28">☀️</text>
+                    <text x="650" y="380" text-anchor="middle" fill="#ffffff" font-family="Jua" font-size="17">북태평양 기단</text>
+                    <text x="650" y="400" text-anchor="middle" fill="#fecaca" font-family="Jua" font-size="12">덥고 습함 (여름)</text>
+                </g>
+            </svg>
+        </div>
+
+        <!-- 4대 기단 선택 카드 그리드 -->
+        <div class="airmass-grid">
+            <div id="cardSiberia" class="airmass-card siberia active" onclick="selectAirmass('siberia')">
+                <div class="airmass-title-row">
+                    <span class="airmass-name" style="color: #38bdf8;">❄️ 시베리아 기단</span>
+                    <span class="airmass-season-tag" style="background: #0284c7; color: white;">겨울</span>
+                </div>
+                <div class="airmass-prop-badges">
+                    <span class="airmass-badge">북서쪽 고위도 대륙</span>
+                    <span class="airmass-badge" style="color:#7dd3fc;">차갑고 건조함</span>
+                </div>
+                <p class="airmass-desc">차가운 시베리아 대륙에서 발생하여 우리나라에 매서운 한파와 눈보라, 북서풍을 몰고 와요.</p>
+            </div>
+
+            <div id="cardPacific" class="airmass-card pacific" onclick="selectAirmass('pacific')">
+                <div class="airmass-title-row">
+                    <span class="airmass-name" style="color: #f87171;">☀️ 북태평양 기단</span>
+                    <span class="airmass-season-tag" style="background: #dc2626; color: white;">여름</span>
+                </div>
+                <div class="airmass-prop-badges">
+                    <span class="airmass-badge">남동쪽 저위도 해양</span>
+                    <span class="airmass-badge" style="color:#fca5a5;">덥고 습함</span>
+                </div>
+                <p class="airmass-desc">뜨거운 남쪽 바다에서 발생하여 우리나라에 푹푹 찌는 무더위와 열대야, 시원한 소나기를 내려요.</p>
+            </div>
+
+            <div id="cardOkhotsk" class="airmass-card okhotsk" onclick="selectAirmass('okhotsk')">
+                <div class="airmass-title-row">
+                    <span class="airmass-name" style="color: #2dd4bf;">🌊 오호츠크해 기단</span>
+                    <span class="airmass-season-tag" style="background: #0d9488; color: white;">초여름</span>
+                </div>
+                <div class="airmass-prop-badges">
+                    <span class="airmass-badge">북동쪽 고위도 해양</span>
+                    <span class="airmass-badge" style="color:#5eead4;">차갑고 습함</span>
+                </div>
+                <p class="airmass-desc">북쪽의 차가운 바다에서 발생하여 초여름 동해안에 서늘한 안개를 만들고, 북태평양 기단과 만나 장마를 만들어요.</p>
+            </div>
+
+            <div id="cardYangtze" class="airmass-card yangtze" onclick="selectAirmass('yangtze')">
+                <div class="airmass-title-row">
+                    <span class="airmass-name" style="color: #34d399;">🌾 양쯔강 기단</span>
+                    <span class="airmass-season-tag" style="background: #059669; color: white;">봄·가을</span>
+                </div>
+                <div class="airmass-prop-badges">
+                    <span class="airmass-badge">남서쪽 저위도 대륙</span>
+                    <span class="airmass-badge" style="color:#6ee7b7;">따뜻하고 건조함</span>
+                </div>
+                <p class="airmass-desc">남쪽 대륙에서 발생하여 우리나라의 봄과 가을에 화창하고 따뜻하며 포근한 날씨를 선물해요.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================
+         모드 2: 사계절 체감 & 초여름 장마전선 시뮬레이터
+         ======================================================= -->
+    <div id="modeSeason" class="section-card" style="display: none;">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🔄</span>
+                <span>사계절 체감 & 초여름 장마전선 시뮬레이터</span>
+            </div>
+            <span class="airmass-badge" style="background: #3b82f6; color: #fff;">실시간 기상 시뮬레이션</span>
+        </div>
+
+        <div class="season-selector-bar">
+            <button class="season-btn active" onclick="setSeason('spring')">🌸 봄</button>
+            <button class="season-btn" onclick="setSeason('summer')">☀️ 여름</button>
+            <button class="season-btn" onclick="setSeason('monsoon')">☔ 초여름 (장마)</button>
+            <button class="season-btn" onclick="setSeason('autumn')">🍁 가을</button>
+            <button class="season-btn" onclick="setSeason('winter')">❄️ 겨울</button>
+        </div>
+
+        <!-- 초여름 장마 특수 충돌 알림 배너 -->
+        <div id="monsoonBanner" class="monsoon-special-box">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.5rem;">⚡☔</span>
+                <span style="font-family: 'Jua', sans-serif; font-size: 1.1rem; color: #5eead4;">초여름 장마전선(정체전선) 형성!</span>
+            </div>
+            <p style="font-size: 0.92rem; color: #ccfbf1; line-height: 1.45;">
+                북쪽의 <b>오호츠크해 기단(차갑고 습함)</b>과 남쪽의 <b>북태평양 기단(덥고 습함)</b>이 한반도 상공에서 팽팽하게 힘겨루기를 하며 거대한 비구름대를 형성했어요!
+            </p>
+        </div>
+
+        <div class="season-display-grid">
+            <!-- 한반도 기상 상태 보드 -->
+            <div class="weather-board">
+                <div class="weather-stat-row">
+                    <span class="stat-label">현재 계절</span>
+                    <span class="stat-val" id="dispSeasonName" style="color: #38bdf8;">🌸 봄</span>
+                </div>
+                <div class="weather-stat-row">
+                    <span class="stat-label">주도 공기 덩어리</span>
+                    <span class="stat-val" id="dispAirmassName" style="color: #34d399;">🌾 양쯔강 기단</span>
+                </div>
+                <div class="weather-stat-row">
+                    <span class="stat-label">공기 성질</span>
+                    <span class="stat-val" id="dispAirmassProp">따뜻하고 건조함</span>
+                </div>
+                <div class="weather-stat-row">
+                    <span class="stat-label">평균 기온</span>
+                    <span class="stat-val" id="dispTemp" style="color: #fbbf24;">16°C (포근함)</span>
+                </div>
+                <div class="weather-stat-row">
+                    <span class="stat-label">평균 습도</span>
+                    <span class="stat-val" id="dispHumidity" style="color: #60a5fa;">45% (건조)</span>
+                </div>
+                <div class="weather-stat-row">
+                    <span class="stat-label">주요 바람 방향</span>
+                    <span class="stat-val" id="dispWindDir">남서풍 / 이동성 고기압</span>
+                </div>
+            </div>
+
+            <!-- 민수의 생활과 옷차림 카드 -->
+            <div class="life-card">
+                <div class="life-icon" id="dispLifeIcon">🧥</div>
+                <div class="life-title" id="dispLifeTitle">가벼운 겉옷과 꽃구경 나들이</div>
+                <p class="life-desc" id="dispLifeDesc">
+                    날씨가 따뜻하고 맑아 소풍 가기 좋아요! 하지만 때때로 꽃샘추위가 찾아오거나 건조하여 산불을 조심해야 해요.
+                </p>
+                <div style="background: rgba(0,0,0,0.25); border-radius: 10px; padding: 8px 14px; width: 100%; font-size: 0.85rem; color: #bae6fd;">
+                    민수의 패션: <span id="dispFashion" style="font-weight: bold; color: #fff;">봄 자켓 & 활동화</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =======================================================
+         모드 3: 기단 탄생 원리 2x2 매트릭스
+         ======================================================= -->
+    <div id="modeMatrix" class="section-card" style="display: none;">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧩</span>
+                <span>공기 덩어리 탄생 원리 (2x2 매트릭스)</span>
+            </div>
+            <span class="airmass-badge" style="background: #10b981; color: #fff;">개념 빌드업</span>
+        </div>
+
+        <div class="tip-box">
+            💡 공기 덩어리의 성질은 단 두 가지로 결정돼요! <br>
+            ① <b>위도(태양열)</b>: 북쪽(고위도)은 <b>차갑고</b>, 남쪽(저위도)은 <b>따뜻(덥다)</b>해요.<br>
+            ② <b>지표면(물기)</b>: <b>대륙(땅)</b>은 물이 없어 <b>건조</b>하고, <b>해양(바다)</b>은 물이 많아 <b>습해요</b>.
+        </div>
+
+        <!-- 2x2 테이블 그리드 -->
+        <div class="matrix-container">
+            <div></div>
+            <div class="matrix-header" style="color: #38bdf8;">고위도 (북쪽 · 차가움 ❄️)</div>
+            <div class="matrix-header" style="color: #f87171;">저위도 (남쪽 · 따뜻/더움 ☀️)</div>
+
+            <div class="matrix-header" style="color: #fbbf24;">대륙<br>(땅 · 건조 🏜️)</div>
+            <!-- 차가움 + 대륙 = 시베리아 -->
+            <div class="matrix-cell" onclick="highlightMatrix('siberia')" style="border-color: #38bdf8;">
+                <span class="cell-title" style="color: #38bdf8;">❄️ 시베리아 기단</span>
+                <span class="cell-char" style="color: #bae6fd;">[차갑고 + 건조함]</span>
+                <p class="cell-desc">북쪽 거대한 시베리아 땅에서 태어난 매서운 겨울 공기!</p>
+            </div>
+            <!-- 따뜻함 + 대륙 = 양쯔강 -->
+            <div class="matrix-cell" onclick="highlightMatrix('yangtze')" style="border-color: #10b981;">
+                <span class="cell-title" style="color: #34d399;">🌾 양쯔강 기단</span>
+                <span class="cell-char" style="color: #a7f3d0;">[따뜻하고 + 건조함]</span>
+                <p class="cell-desc">남쪽 중국 대륙에서 불어오는 온화하고 맑은 봄·가을 공기!</p>
+            </div>
+
+            <div class="matrix-header" style="color: #60a5fa;">해양<br>(바다 · 습함 🌊)</div>
+            <!-- 차가움 + 해양 = 오호츠크해 -->
+            <div class="matrix-cell" onclick="highlightMatrix('okhotsk')" style="border-color: #14b8a6;">
+                <span class="cell-title" style="color: #2dd4bf;">🌊 오호츠크해 기단</span>
+                <span class="cell-char" style="color: #99f6e4;">[차갑고 + 습함]</span>
+                <p class="cell-desc">북동쪽 차가운 바다에서 만들어진 축축하고 서늘한 초여름 공기!</p>
+            </div>
+            <!-- 따뜻/더움 + 해양 = 북태평양 -->
+            <div class="matrix-cell" onclick="highlightMatrix('pacific')" style="border-color: #ef4444;">
+                <span class="cell-title" style="color: #f87171;">☀️ 북태평양 기단</span>
+                <span class="cell-char" style="color: #fecaca;">[덥고 + 습함]</span>
+                <p class="cell-desc">뜨거운 남쪽 태평양 바다에서 수증기를 듬뿍 머금은 여름 공기!</p>
+            </div>
+        </div>
+
+        <div id="matrixGuide" style="background: #13233f; padding: 14px; border-radius: 12px; border: 1.5px solid #2d5088; font-size: 0.93rem; color: #e2e8f0; line-height: 1.5;">
+            👉 매트릭스의 각 칸을 클릭해 보세요! 공기 덩어리가 태어난 고향(땅/바다, 찬곳/더운곳)의 성질을 그대로 지니고 있음을 바로 알 수 있어요.
+        </div>
+    </div>
+
+    <!-- =======================================================
+         모드 4: 기상청 예보관 실전 퀴즈
+         ======================================================= -->
+    <div id="modeQuiz" class="section-card" style="display: none;">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🎯</span>
+                <span>기상청 꼬마 예보관 실전 퀴즈 (5문항)</span>
+            </div>
+            <span id="quizProgress" class="airmass-badge" style="background: #7c3aed; color: #fff;">문제 1 / 5</span>
+        </div>
+
+        <div class="quiz-card">
+            <div class="quiz-question">
+                <span class="quiz-num-badge" id="qNum">1</span>
+                <span id="qText">공기 덩어리(기단)에 대한 설명으로 가장 알맞은 것은 무엇일까요?</span>
+            </div>
+
+            <div class="quiz-options" id="qOptions">
+                <!-- 동적 렌더링 -->
+            </div>
+
+            <div class="quiz-feedback" id="qFeedback"></div>
+
+            <div class="quiz-nav-row">
+                <span id="quizHint" style="font-size: 0.88rem; color: #94a3b8;">정답을 고르면 코코의 음성 해설과 함께 보석이 적립돼요!</span>
+                <button class="btn-next-quiz" id="btnNextQuiz" onclick="nextQuiz()">다음 문제 ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 요정 코코 라이브 도크 -->
+    <div class="fairy-dock">
+        <img class="fairy-avatar" src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코">
+        <div class="fairy-msg" id="fairyMsg">
+            안녕, 민수야! 우리나라 날씨를 만드는 <b>4명의 거대한 공기 거인</b>들을 만나러 왔구나? 
+            지도를 터치해서 각 공기 덩어리의 성질과 계절을 탐구해 봐!
+        </div>
+    </div>
+
+</div>
+
+<!-- 완주 축하 모달 -->
+<div class="reward-modal-overlay" id="rewardModal">
+    <div class="reward-modal">
+        <span style="font-size: 3.5rem;">🏆🌏</span>
+        <h2 style="font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #a78bfa;">1급 꼬마 기상예보관 합격!</h2>
+        <p style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.5;">
+            사계절 날씨와 4대 공기 덩어리의 비밀을 완벽하게 마스터했어요!<br>
+            <b>보석 +5💎</b>가 성공적으로 적립되었습니다!
+        </p>
+        <button class="reward-btn" onclick="closeRewardModal()">멋져요! 확인</button>
+    </div>
+</div>
+
+<script>
+    // ========================================================
+    // 전역 상태 & 보석 관리
+    // ========================================================
+    let gems = parseInt(localStorage.getItem('min_science_gems') || '0', 10);
+    document.getElementById('gemCount').textContent = gems;
+
+    let currentMode = 'map';
+    let currentQuizIdx = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    // Web Audio 사운드 엔진
+    let audioCtx = null;
+    function playTone(freq, type = 'sine', duration = 0.2) {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    function playSuccessSound() {
+        playTone(523, 'sine', 0.12);
+        setTimeout(() => playTone(659, 'sine', 0.12), 100);
+        setTimeout(() => playTone(784, 'sine', 0.25), 200);
+    }
+
+    function playFanfareSound() {
+        const notes = [523, 659, 784, 1046];
+        notes.forEach((n, idx) => {
+            setTimeout(() => playTone(n, 'triangle', 0.25), idx * 120);
+        });
+    }
+
+    // ========================================================
+    // 탭 모드 전환
+    // ========================================================
+    function switchMode(mode) {
+        currentMode = mode;
+        const tabs = document.querySelectorAll('.mode-tab-btn');
+        tabs.forEach(t => t.classList.remove('active'));
+
+        document.getElementById('modeMap').style.display = 'none';
+        document.getElementById('modeSeason').style.display = 'none';
+        document.getElementById('modeMatrix').style.display = 'none';
+        document.getElementById('modeQuiz').style.display = 'none';
+
+        if (mode === 'map') {
+            tabs[0].classList.add('active');
+            document.getElementById('modeMap').style.display = 'flex';
+            setFairyMsg("지도의 <b>4대 공기 덩어리(기단)</b>를 터치하면 성질과 계절 바람 방향을 볼 수 있어!");
+        } else if (mode === 'season') {
+            tabs[1].classList.add('active');
+            document.getElementById('modeSeason').style.display = 'flex';
+            setFairyMsg("봄, 여름, 가을, 겨울, 그리고 <b>초여름 장마</b> 버튼을 눌러 계절별 기상 변화를 체감해 봐!");
+        } else if (mode === 'matrix') {
+            tabs[2].classList.add('active');
+            document.getElementById('modeMatrix').style.display = 'flex';
+            setFairyMsg("공기 덩어리는 <b>태어난 땅(대륙/바다)</b>과 <b>위도(찬곳/더운곳)</b>의 성질을 그대로 빼닮는단다!");
+        } else if (mode === 'quiz') {
+            tabs[3].classList.add('active');
+            document.getElementById('modeQuiz').style.display = 'flex';
+            renderQuiz();
+            setFairyMsg("기상청 꼬마 예보관 라이선스 퀴즈 5문항에 도전해 봐! 모두 맞히면 <b>+5💎</b> 보석을 줘!");
+        }
+        playTone(440, 'sine', 0.08);
+    }
+
+    function setFairyMsg(html) {
+        document.getElementById('fairyMsg').innerHTML = html;
+    }
+
+    // ========================================================
+    // 모드 1: 기단 선택 및 지도 애니메이션
+    // ========================================================
+    const AIRMASS_DATA = {
+        siberia: {
+            name: "시베리아 기단",
+            season: "겨울 ❄️",
+            origin: "북서쪽 고위도 유라시아 대륙",
+            prop: "차갑고 건조함",
+            temp: "-10°C ~ 2°C",
+            wind: "북서풍 (차가운 삭풍)",
+            desc: "매서운 한파와 눈보라, 삼한사온 현상을 몰고 와요.",
+            arrowId: "windArrowSiberia"
+        },
+        pacific: {
+            name: "북태평양 기단",
+            season: "여름 ☀️",
+            origin: "남동쪽 저위도 태평양 바다",
+            prop: "덥고 습함 (고온다습)",
+            temp: "28°C ~ 35°C",
+            wind: "남동풍 (따뜻하고 축축한 바람)",
+            desc: "푹푹 찌는 무더위와 열대야, 소나기를 몰고 와요.",
+            arrowId: "windArrowPacific"
+        },
+        okhotsk: {
+            name: "오호츠크해 기단",
+            season: "초여름 🌊",
+            origin: "북동쪽 고위도 오호츠크해 바다",
+            prop: "차갑고 습함 (한랭다습)",
+            temp: "15°C ~ 20°C",
+            wind: "북동풍 (서늘한 바닷바람)",
+            desc: "동해안에 서늘한 안개를 만들고, 북태평양 기단과 부딪혀 장마전선을 형성해요.",
+            arrowId: "windArrowOkhotsk"
+        },
+        yangtze: {
+            name: "양쯔강 기단",
+            season: "봄·가을 🌾",
+            origin: "남서쪽 저위도 중국 대륙",
+            prop: "따뜻하고 건조함 (온난건조)",
+            temp: "14°C ~ 22°C",
+            wind: "남서풍 / 이동성 고기압",
+            desc: "화창하고 맑은 날씨를 선물하지만, 봄철 건조와 꽃샘추위, 황사를 동반하기도 해요.",
+            arrowId: "windArrowYangtze"
+        }
+    };
+
+    function selectAirmass(key) {
+        const cards = document.querySelectorAll('.airmass-card');
+        cards.forEach(c => c.classList.remove('active'));
+
+        const targetCard = document.getElementById('card' + key.charAt(0).toUpperCase() + key.slice(1));
+        if (targetCard) targetCard.classList.add('active');
+
+        // 지도 화살표 가시화
+        ['windArrowSiberia', 'windArrowPacific', 'windArrowOkhotsk', 'windArrowYangtze'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('opacity', '0');
+        });
+
+        const info = AIRMASS_DATA[key];
+        const arrow = document.getElementById(info.arrowId);
+        if (arrow) {
+            arrow.setAttribute('opacity', '1');
+        }
+
+        setFairyMsg(`<b>${info.name}</b>은(는) <b>${info.origin}</b>에서 발생해서 <b>[${info.prop}]</b> 성질을 띠고 <b>${info.season}</b> 날씨를 만들어!`);
+        playTone(587, 'triangle', 0.15);
+    }
+
+    // ========================================================
+    // 모드 2: 사계절 시뮬레이터
+    // ========================================================
+    const SEASON_DATA = {
+        spring: {
+            name: "🌸 봄",
+            airmass: "🌾 양쯔강 기단",
+            prop: "따뜻하고 건조함",
+            temp: "16°C (포근함)",
+            humidity: "45% (건조)",
+            wind: "남서풍 / 이동성 고기압",
+            icon: "🧥",
+            title: "가벼운 겉옷과 꽃구경 나들이",
+            desc: "따뜻하고 맑은 날씨가 이어져요! 하지만 이동성 고기압으로 날씨가 자주 변하고 꽃샘추위가 찾아올 수 있어요.",
+            fashion: "봄 자켓 & 편안한 운동화",
+            monsoon: false
+        },
+        summer: {
+            name: "☀️ 여름",
+            airmass: "☀️ 북태평양 기단",
+            prop: "덥고 습함 (고온다습)",
+            temp: "32°C (한낮 무더위)",
+            humidity: "85% (매우 습함)",
+            wind: "남동풍 (축축하고 더운 바람)",
+            icon: "🍉",
+            title: "시원한 물놀이와 에어컨 필수!",
+            desc: "북태평양 기단이 우리나라를 완전히 덮어 푹푹 찌는 무더위와 열대야가 계속돼요. 시원한 수박과 물놀이가 최고!",
+            fashion: "시원한 반팔 티셔츠 & 선글라스",
+            monsoon: false
+        },
+        monsoon: {
+            name: "☔ 초여름 (장마철)",
+            airmass: "🌊 오호츠크해 + ☀️ 북태평양 기단",
+            prop: "차갑고 습함 vs 덥고 습함의 충돌!",
+            temp: "23°C (눅눅하고 축축함)",
+            humidity: "95% (비구름 가득)",
+            wind: "불안정한 전선풍 (장마전선)",
+            icon: "🌧️",
+            title: "우산과 비옷, 장화 필수 착용!",
+            desc: "차가운 오호츠크해 기단과 더운 북태평양 기단이 한반도 상공에서 팽팽하게 맞서며 며칠 동안 많은 비를 뿌려요!",
+            fashion: "튼튼한 우산 & 방수 장화 & 레인코트",
+            monsoon: true
+        },
+        autumn: {
+            name: "🍁 가을",
+            airmass: "🌾 양쯔강 기단 (맑은 이동성 고기압)",
+            prop: "선선하고 맑으며 쾌적함",
+            temp: "18°C (선선하고 청명함)",
+            humidity: "50% (쾌적)",
+            wind: "선선한 북서~남서풍",
+            icon: "📚",
+            title: "청명한 가을 하늘과 독서의 계절",
+            desc: "하늘이 높고 푸르며 공기가 맑고 쾌적해요! 야외 활동과 단풍놀이 가기에 가장 좋은 계절이랍니다.",
+            fashion: "포근한 니트 가디건 & 청바지",
+            monsoon: false
+        },
+        winter: {
+            name: "❄️ 겨울",
+            airmass: "❄️ 시베리아 기단",
+            prop: "차갑고 건조함 (한랭건조)",
+            temp: "-8°C (매서운 한파)",
+            humidity: "35% (바싹 건조)",
+            wind: "강한 북서풍 (살을 에는 칼바람)",
+            icon: "⛄",
+            title: "두꺼운 패딩 점퍼와 눈사람 만들기",
+            desc: "시베리아 기단이 강하게 확장하면 영하의 한파와 폭설이 찾아와요. 3일 춥고 4일 따뜻한 삼한사온이 나타나요.",
+            fashion: "롱패딩 점퍼 & 털모자 & 장갑",
+            monsoon: false
+        }
+    };
+
+    function setSeason(seasonKey) {
+        const btns = document.querySelectorAll('.season-btn');
+        btns.forEach(b => b.className = 'season-btn');
+
+        const btnMap = { spring: 0, summer: 1, monsoon: 2, autumn: 3, winter: 4 };
+        const activeBtn = btns[btnMap[seasonKey]];
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            if (seasonKey === 'summer') activeBtn.classList.add('summer');
+            if (seasonKey === 'winter') activeBtn.classList.add('winter');
+            if (seasonKey === 'monsoon') activeBtn.classList.add('monsoon');
+        }
+
+        const data = SEASON_DATA[seasonKey];
+        document.getElementById('dispSeasonName').textContent = data.name;
+        document.getElementById('dispAirmassName').textContent = data.airmass;
+        document.getElementById('dispAirmassProp').textContent = data.prop;
+        document.getElementById('dispTemp').textContent = data.temp;
+        document.getElementById('dispHumidity').textContent = data.humidity;
+        document.getElementById('dispWindDir').textContent = data.wind;
+
+        document.getElementById('dispLifeIcon').textContent = data.icon;
+        document.getElementById('dispLifeTitle').textContent = data.title;
+        document.getElementById('dispLifeDesc').textContent = data.desc;
+        document.getElementById('dispFashion').textContent = data.fashion;
+
+        const monsoonBanner = document.getElementById('monsoonBanner');
+        if (data.monsoon) {
+            monsoonBanner.style.display = 'flex';
+            playTone(350, 'sawtooth', 0.25);
+            setFairyMsg("⚡ <b>오호츠크해 기단</b>과 <b>북태평양 기단</b>이 힘겨루기를 하며 한반도에 <b>장마전선</b>을 만들었어!");
+        } else {
+            monsoonBanner.style.display = 'none';
+            playTone(520, 'sine', 0.12);
+            setFairyMsg(`<b>${data.name}</b>에는 <b>${data.airmass}</b>의 영향으로 날씨가 <b>${data.prop}</b>해진단다!`);
+        }
+    }
+
+    // ========================================================
+    // 모드 3: 매트릭스 하이라이트
+    // ========================================================
+    function highlightMatrix(key) {
+        const info = AIRMASS_DATA[key];
+        const guide = document.getElementById('matrixGuide');
+        guide.innerHTML = `🌟 <b>${info.name}</b>은(는) <b>${info.origin}</b>에서 만들어져서 <b>[${info.prop}]</b> 성질을 띠고 <b>${info.season}</b> 날씨를 지배해요!`;
+        guide.style.borderColor = '#38bdf8';
+        playTone(659, 'sine', 0.15);
+    }
+
+    // ========================================================
+    // 모드 4: 실전 퀴즈 엔진 (5문항)
+    // ========================================================
+    const QUIZ_LIST = [
+        {
+            q: "넓은 지역에 오랫동안 머물면서 기온과 습도가 지표면의 성질을 닮은 '거대한 공기 덩어리'를 무엇이라고 부를까요?",
+            options: [
+                "기단 (공기 덩어리)",
+                "수증기",
+                "이슬방울",
+                "응결핵"
+            ],
+            ans: 0,
+            exp: "넓은 대륙이나 바다에 머물며 고유한 기온과 습도를 지닌 큰 공기 덩어리를 <b>기단(Air Mass)</b>이라고 합니다."
+        },
+        {
+            q: "우리나라의 '한겨울'에 찾아와 살을 에는 매서운 한파와 눈보라, 북서풍을 몰고 오는 공기 덩어리는 무엇일까요?",
+            options: [
+                "북태평양 기단 (남동쪽 바다)",
+                "시베리아 기단 (북서쪽 대륙)",
+                "양쯔강 기단 (남서쪽 대륙)",
+                "적도 기단 (남쪽 바다)"
+            ],
+            ans: 1,
+            exp: "겨울철에는 북서쪽의 차가운 유라시아 대륙에서 발생한 <b>시베리아 기단</b>이 확장하여 춥고 건조한 날씨를 만듭니다."
+        },
+        {
+            q: "우리나라의 '한여름'에 찾아와 푹푹 찌는 찜통 무더위와 열대야, 시원한 소나기를 내리는 공기 덩어리는?",
+            options: [
+                "시베리아 기단 (차갑고 건조함)",
+                "오호츠크해 기단 (차갑고 습함)",
+                "북태평양 기단 (덥고 습함)",
+                "양쯔강 기단 (따뜻하고 건조함)"
+            ],
+            ans: 2,
+            exp: "여름철에는 남동쪽의 뜨거운 바다에서 수증기를 가득 머금고 발달한 <b>북태평양 기단</b>이 무더위를 가져옵니다."
+        },
+        {
+            q: "초여름 장마철에 며칠 동안 많은 비를 뿌리는 '장마전선'은 어떤 두 공기 덩어리가 한반도 상공에서 충돌하여 생길까요?",
+            options: [
+                "오호츠크해 기단(차갑고 습함) + 북태평양 기단(덥고 습함)",
+                "시베리아 기단(차갑고 건조) + 양쯔강 기단(따뜻하고 건조)",
+                "북태평양 기단(덥고 습함) + 적도 기단(덥고 건조)",
+                "시베리아 기단(차갑고 건조) + 오호츠크해 기단(차갑고 습함)"
+            ],
+            ans: 0,
+            exp: "초여름에는 북쪽의 차가운 <b>오호츠크해 기단</b>과 남쪽의 더운 <b>북태평양 기단</b>이 팽팽하게 힘겨루기를 하며 비구름대(정체전선)를 형성합니다."
+        },
+        {
+            q: "공기 덩어리의 성질에 대한 설명으로 옳은 것은 무엇일까요?",
+            options: [
+                "바다(해양)에서 태어난 공기는 건조하다.",
+                "대륙(땅)에서 태어난 공기는 물이 없어 건조하다.",
+                "북쪽 고위도에서 태어난 공기는 언제나 뜨겁다.",
+                "공기 덩어리의 성질은 태어난 곳과 아무런 상관이 없다."
+            ],
+            ans: 1,
+            exp: "바다는 물이 증발하여 <b>습하고</b>, 대륙은 물기가 적어 <b>건조</b>하며, 북쪽은 <b>차갑고</b> 남쪽은 <b>따뜻</b>합니다!"
+        }
+    ];
+
+    function renderQuiz() {
+        quizAnswered = false;
+        const q = QUIZ_LIST[currentQuizIdx];
+        document.getElementById('qNum').textContent = currentQuizIdx + 1;
+        document.getElementById('qText').innerHTML = q.q;
+        document.getElementById('quizProgress').textContent = `문제 ${currentQuizIdx + 1} / ${QUIZ_LIST.length}`;
+
+        const optsDiv = document.getElementById('qOptions');
+        optsDiv.innerHTML = '';
+
+        q.options.forEach((optText, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-opt-btn';
+            btn.innerHTML = `${idx + 1}. ${optText}`;
+            btn.onclick = () => checkQuiz(idx, btn);
+            optsDiv.appendChild(btn);
+        });
+
+        const feedback = document.getElementById('qFeedback');
+        feedback.style.display = 'none';
+        document.getElementById('btnNextQuiz').style.display = 'none';
+    }
+
+    function checkQuiz(selectedIdx, btnEl) {
+        if (quizAnswered) return;
+        quizAnswered = true;
+
+        const q = QUIZ_LIST[currentQuizIdx];
+        const allBtns = document.querySelectorAll('.quiz-opt-btn');
+        const feedback = document.getElementById('qFeedback');
+
+        if (selectedIdx === q.ans) {
+            btnEl.classList.add('correct');
+            feedback.style.display = 'block';
+            feedback.style.background = '#065f46';
+            feedback.style.color = '#d1fae5';
+            feedback.style.border = '1.5px solid #34d399';
+            feedback.innerHTML = `🎉 <b>정답입니다!</b> ${q.exp}`;
+            playSuccessSound();
+
+            quizScore++;
+            gems++;
+            localStorage.setItem('min_science_gems', gems);
+            document.getElementById('gemCount').textContent = gems;
+        } else {
+            btnEl.classList.add('wrong');
+            allBtns[q.ans].classList.add('correct');
+            feedback.style.display = 'block';
+            feedback.style.background = '#7f1d1d';
+            feedback.style.color = '#fee2e2';
+            feedback.style.border = '1.5px solid #f87171';
+            feedback.innerHTML = `💡 <b>아쉬워요!</b> 정답은 <b>${q.ans + 1}번</b>입니다.<br>${q.exp}`;
+            playTone(220, 'sawtooth', 0.25);
+        }
+
+        document.getElementById('btnNextQuiz').style.display = 'inline-flex';
+    }
+
+    function nextQuiz() {
+        currentQuizIdx++;
+        if (currentQuizIdx < QUIZ_LIST.length) {
+            renderQuiz();
+        } else {
+            // 퀴즈 완주
+            showRewardModal();
+        }
+    }
+
+    function showRewardModal() {
+        playFanfareSound();
+        gems += 5; // 완주 보너스
+        localStorage.setItem('min_science_gems', gems);
+        document.getElementById('gemCount').textContent = gems;
+        document.getElementById('rewardModal').style.display = 'flex';
+    }
+
+    function closeRewardModal() {
+        document.getElementById('rewardModal').style.display = 'none';
+        currentQuizIdx = 0;
+        switchMode('map');
+    }
+
+    // 초기 실행
+    document.addEventListener('DOMContentLoaded', () => {
+        selectAirmass('siberia');
+    });
+</script>
+
+</body>
+</html>
