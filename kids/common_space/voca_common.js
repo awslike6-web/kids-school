@@ -31,6 +31,11 @@ window.addEventListener('load', async () => {
   document.body.className = (currentTheme === '슬라임' || currentTheme === 'theme--slime') ? 'theme--slime' : 'theme--minecraft';
   document.getElementById('welcomeMsg').textContent = `${currentUserName}의 지식 도서관에 오신 것을 환영해요!`;
   
+  if (typeof unlockFairySpeechEngine === 'function') {
+      unlockFairySpeechEngine();
+  }
+  syncVoiceToggleBtnUi();
+
   if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
       speechSynthesis.onvoiceschanged = speechSynthesis.getVoices;
   }
@@ -503,20 +508,15 @@ function openModal(wordData) {
   }
   
   document.getElementById('modalAudioBtn').onclick = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); 
-      const utterance = new SpeechSynthesisUtterance(wordData.word);
-      const isEnglish = /[a-zA-Z]/.test(wordData.word);
-      utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
-      
-      const voices = window.speechSynthesis.getVoices();
-      const targetVoice = voices.find(voice => 
-        isEnglish ? voice.lang.includes('en-US') : (voice.name.includes('Google') && voice.lang.includes('ko'))
-      );
-      if (targetVoice) utterance.voice = targetVoice;
-      utterance.rate = 0.85; 
-      window.speechSynthesis.speak(utterance);
+    // [1] 노션에 사전 등록된 고음질 MP3 음성 파일이 있는 경우 최우선 재생
+    if (wordData.audioUrl) {
+      if (typeof stopFairyTTS === 'function') stopFairyTTS();
+      const directAudio = new Audio(wordData.audioUrl);
+      directAudio.play().catch(() => playWordViaTTS(wordData.word));
+      return;
     }
+    // [2] 고화질 Neural TTS (영단어는 Jenny Neural, 한국어는 SunHi Neural 실시간 스트리밍)
+    playWordViaTTS(wordData.word);
   };
 
   MODAL_CHAT_HISTORY = []; 
@@ -529,10 +529,35 @@ function openModal(wordData) {
   setTimeout(() => overlay.classList.add('active'), 10);
 }
 
+// 🔊 단어 맞춤형 Neural TTS 발화 헬퍼
+function playWordViaTTS(targetWord) {
+  if (!targetWord) return;
+  if (typeof stopFairyTTS === 'function') stopFairyTTS();
+
+  const isEnglish = (typeof isEnglishText === 'function') ? isEnglishText(targetWord) : /[a-zA-Z]/.test(targetWord);
+
+  if (isEnglish && typeof speakEnglish === 'function') {
+    speakEnglish(targetWord);
+  } else if (typeof speakFairyTTS === 'function') {
+    speakFairyTTS(targetWord);
+  } else if ('speechSynthesis' in window) {
+    // 브라우저 네이티브 안전 폴백
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(targetWord);
+    utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
+    utterance.rate = 0.85;
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
 function closeModal(event, force = false) {
   const overlay = document.getElementById('wordModal');
   if (force || event.target === overlay) { 
-    if('speechSynthesis' in window) window.speechSynthesis.cancel(); 
+    if (typeof stopFairyTTS === 'function') {
+      stopFairyTTS();
+    } else if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     const interFrame = document.getElementById('modalInteractiveFrame');
     if (interFrame) interFrame.src = 'about:blank';
     overlay.classList.remove('active'); 
@@ -573,35 +598,53 @@ function closeModal(event, force = false) {
   }
 }
 
-function toggleFairyVoice() {
-  isFairyVoiceOn = !isFairyVoiceOn;
+function syncVoiceToggleBtnUi() {
   const btn = document.getElementById("voiceToggleBtn");
-  if (isFairyVoiceOn) {
+  if (!btn) return;
+  const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+  isFairyVoiceOn = isTtsEnabled;
+  if (isTtsEnabled) {
     btn.innerHTML = "🔊 요정 소리 켜짐";
     btn.style.backgroundColor = "#4facfe";
   } else {
     btn.innerHTML = "🔇 요정 소리 꺼짐";
     btn.style.backgroundColor = "#95a5a6";
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+}
+
+function toggleFairyVoice() {
+  if (typeof toggleFairyTtsSetting === 'function') {
+    toggleFairyTtsSetting();
+    syncVoiceToggleBtnUi();
+  } else {
+    isFairyVoiceOn = !isFairyVoiceOn;
+    localStorage.setItem('fairy_tts_enabled', isFairyVoiceOn ? 'true' : 'false');
+    syncVoiceToggleBtnUi();
+  }
+  if (!isFairyVoiceOn) {
+    if (typeof stopFairyTTS === 'function') stopFairyTTS();
+    else if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }
 }
 
 function speakFairyText(htmlText) {
-  if (!isFairyVoiceOn || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel(); 
+  const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
+  if (!isTtsEnabled || !isFairyVoiceOn) return;
 
   const cleanText = htmlText.replace(/<[^>]+>/g, '').replace(/🧚‍♀️ 코코 요정님:/g, '').trim();
-  const utterance = new SpeechSynthesisUtterance(cleanText);
-  const isEnglish = /[a-zA-Z]/.test(cleanText);
-  utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
-  utterance.rate = 1.0; 
+  if (!cleanText) return;
 
-  const voices = window.speechSynthesis.getVoices();
-  const targetVoice = voices.find(voice => 
-    isEnglish ? voice.lang.includes('en-US') : (voice.name.includes('Google') && voice.lang.includes('ko'))
-  );
-  if (targetVoice) utterance.voice = targetVoice;
-  window.speechSynthesis.speak(utterance);
+  // 🌟 고음질 Neural Edge-TTS 실시간 스트리밍 및 프리셋 MP3 자동 매칭
+  if (typeof speakFairyTTS === 'function') {
+    speakFairyTTS(cleanText);
+  } else if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); 
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const isEnglish = (typeof isEnglishText === 'function') ? isEnglishText(cleanText) : /[a-zA-Z]/.test(cleanText);
+    utterance.lang = isEnglish ? 'en-US' : 'ko-KR';
+    utterance.rate = 1.0; 
+    window.speechSynthesis.speak(utterance);
+  }
 }
 
 function startVoiceInput() {
