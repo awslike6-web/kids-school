@@ -410,6 +410,7 @@ function getCurriculumRecords(type) {
                     detailContext: item.desc || item.explanation || "",
                     meaning: item.meaning || item.desc || "",
                     imageUrl: item.image || item.img || "",
+                    interactiveUrl: item.interactiveUrl || item.link || "",
                     grade: grade,
                     grades: [grade],
                     level: unitName,
@@ -423,6 +424,15 @@ function getCurriculumRecords(type) {
         }
     }
     return list;
+}
+
+// 🎒 노션(5-2)과 교과서(5학년 2학기) 학년 표기 완벽 정규화 헬퍼
+function normalizeSocietyGrade(g) {
+    if (!g) return "";
+    const str = String(g).trim();
+    if (str === "5-1" || str === "5학년 1학기" || str === "5-1 (5학년 1학기)") return "5-1 (5학년 1학기)";
+    if (str === "5-2" || str === "5학년 2학기" || str === "5-2 (5학년 2학기)") return "5-2 (5학년 2학기)";
+    return str;
 }
 
 async function fetchAndBuildDynamicUI(type, innerBody) {
@@ -457,8 +467,8 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         if (records && records.length > 0) {
             allFetchedRecords = records; 
 
-            // 💡 노션 DB 및 교과서 데이터셋에 적혀있는 '학년' 텍스트를 중복 없이 그대로 수집
-            const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
+            // 💡 노션 DB 및 교과서 데이터셋에 적혀있는 '학년' 텍스트를 정규화하여 중복 제거
+            const uniqueGrades = [...new Set(records.flatMap(r => (r.grades || [r.grade]).map(normalizeSocietyGrade)))].filter(g => g && g !== "공통").sort();
 
             if (uniqueGrades.length === 0) {
                 startMissionWithFilteredData(records, innerBody);
@@ -502,7 +512,10 @@ function selectDynamicGrade(grade) {
     const innerBody = document.getElementById('overlayInnerBody');
     
     // 💡 선택한 학년에 들어있는 '단원' 글자들만 노션에서 쏙쏙 뽑아내기
-    const matchedRecords = allFetchedRecords.filter(r => r.grade === grade || r.grades.includes(grade));
+    const matchedRecords = allFetchedRecords.filter(r => {
+        const rGrades = (r.grades || [r.grade]).map(normalizeSocietyGrade);
+        return rGrades.includes(grade) || r.grade === grade;
+    });
     const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level).trim()))].filter(u => u && u !== "기본 단원").sort();
 
     if (uniqueUnits.length === 0) {
@@ -538,10 +551,11 @@ function selectDynamicUnit(unit) {
     selectedSocietyUnit = unit;
     const innerBody = document.getElementById('overlayInnerBody');
     
-    const finalRecords = allFetchedRecords.filter(r => 
-        (r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)) &&
-        String(r.level).trim() === unit
-    );
+    const finalRecords = allFetchedRecords.filter(r => {
+        const rGrades = (r.grades || [r.grade]).map(normalizeSocietyGrade);
+        return (rGrades.includes(selectedSocietyGrade) || r.grade === selectedSocietyGrade) &&
+               String(r.level).trim() === unit;
+    });
     
     startMissionWithFilteredData(finalRecords, innerBody);
 }
@@ -557,6 +571,7 @@ function startMissionWithFilteredData(records, innerBody) {
         const imgUrl = record.imageUrl || record.img || "";
         const hintStr = record.hint || getChosung(titleStr);
         const summaryPassage = record.summaryPassage || "";
+        const interactiveUrl = record.interactiveUrl || "";
 
         if (currentMissionType === 'voca') {
             return { 
@@ -565,6 +580,7 @@ function startMissionWithFilteredData(records, innerBody) {
                 hint: hintStr, 
                 desc: descStr, 
                 image: imgUrl, 
+                interactiveUrl: interactiveUrl,
                 pageId: record.pageId, 
                 isMastered: record.isMastered,
                 summaryPassage: summaryPassage
@@ -575,6 +591,7 @@ function startMissionWithFilteredData(records, innerBody) {
                 img: imgUrl, 
                 meaning: meaningStr, 
                 desc: descStr,
+                interactiveUrl: interactiveUrl,
                 quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격으로 가장 알맞은 것은?`,
                 choices: (record.choices && record.choices.length > 0) ? record.choices : ["전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설", "1등급 유망 자료"],
                 correctIdx: (typeof record.correctIdx === 'number') ? record.correctIdx : 0,
@@ -587,6 +604,7 @@ function startMissionWithFilteredData(records, innerBody) {
                 img: imgUrl, 
                 meaning: meaningStr, 
                 desc: descStr,
+                interactiveUrl: interactiveUrl,
                 summaryPassage: summaryPassage
             };
         }
@@ -869,6 +887,13 @@ async function finalizeSocietyMissionImmediately() {
                 <div style="margin-top: 10px; font-size: 1rem; line-height: 1.5;">${currentItem.desc}</div>
             </details>
             ${interactiveHtml}
+            ${currentItem.interactiveUrl ? `
+                <div style="text-align:center; margin-top: 10px; margin-bottom: 5px;">
+                    <a href="${currentItem.interactiveUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; color:#4f46e5; background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:99px; padding:6px 16px; font-size:0.9rem; font-weight:bold; text-decoration:none;">
+                        🏛️ 국립박물관 유물·역사관 공식 정보 보기 ↗
+                    </a>
+                </div>
+            ` : ''}
             <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
                 <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning}')">🔊 문제 한번 더 듣기</button>
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
@@ -1008,8 +1033,9 @@ async function finalizeSocietyMissionImmediately() {
                 </div>
             </div>
 
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center;">
                 <button class="quiz-button" style="background:var(--gold); color:#111;" onclick="collectArtifact('${currentItem.name}')">💎 박물관 가랜드에 소장하기</button>
+                ${currentItem.interactiveUrl ? `<a href="${currentItem.interactiveUrl}" target="_blank" rel="noopener noreferrer" class="quiz-button" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">🏛️ 국립박물관 유물 정보 ↗</a>` : ''}
                 <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">다음 유물 ⏩</button>
             </div>
 
