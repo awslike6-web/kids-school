@@ -1,444 +1,1110 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>수학 공식/개념 퀴즈방 🚀</title>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../css/math_style.css">
-<style>
-/* 퀴즈 전용 커스텀 스타일 (gugudan.html 참조) */
-.quiz-wrap { max-width: 640px; margin: 0 auto; width: 100%; }
-.quiz-meta { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 0.88rem; color: var(--muted); font-weight: 800; }
-.quiz-meta .score-badge { background: var(--pink); color: #fff; padding: 4px 14px; border-radius: 40px; font-weight: 800; }
-.q-card { background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 36px 28px; text-align: center; margin-bottom: 16px; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-.q-tag { font-size: 0.85rem; font-weight: 800; color: var(--cyan); letter-spacing: 1px; }
-.q-text { font-family: 'Gaegu', cursive; font-size: clamp(1.8rem, 6vw, 3rem); font-weight: 700; color: var(--white); word-break: keep-all; }
-.q-hint { font-size: 0.82rem; color: #000; padding: 4px 12px; background: var(--green); border-radius: 20px; font-weight:bold; display: none; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🔤 수학 문장제 지시어 번역소 ➔ 🧮 | 민민 수학 멀티버스</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/math_style.css">
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <style>
+    :root {
+      --primary: #00d4ff;
+      --primary-dark: #0284c7;
+      --accent: #ff6b9d;
+      --yellow: #ffd93d;
+      --green: #6bcb77;
+      --card-bg: rgba(30, 30, 50, 0.9);
+      --border-color: #3a3a5a;
+    }
 
-.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-@media (max-width: 480px) { .choice-grid { grid-template-columns: 1fr; } }
-.choice { padding: 18px 12px; border: 2px solid var(--border); border-radius: 16px; background: rgba(0,0,0,0.3); color: var(--white); font-family: 'Gaegu', cursive; font-size: 1.5rem; font-weight: 700; cursor: pointer; transition: all 0.15s; word-break: keep-all; }
-.choice:hover { border-color: var(--cyan); color: var(--cyan); transform: scale(1.04); }
-.choice.correct { background: rgba(107,203,119,0.15); border-color: var(--green); color: var(--green); }
-.choice.wrong { background: rgba(255,107,157,0.15); border-color: var(--pink); color: var(--pink); opacity:0.7; }
-.choice:disabled { cursor: default; }
+    body {
+      font-family: 'Nanum Gothic', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: #ffffff;
+      user-select: none;
+    }
 
-.q-feedback { text-align: center; font-family: 'Jua', cursive; font-size: 1.2rem; padding: 12px 20px; border-radius: 14px; display: none; margin-bottom: 10px; animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
-.q-feedback.ok { display:block; background:rgba(107,203,119,0.15); border:1.5px solid var(--green); color:var(--green); }
-.q-feedback.no { display:block; background:rgba(255,107,157,0.15); border:1.5px solid var(--pink); color:var(--pink); }
-.q-explain { font-size: 0.9rem; color: var(--muted); padding: 10px 16px; background: var(--surface); border-radius: 10px; border: 1.5px dashed var(--cyan); display: none; text-align: center; line-height: 1.7; margin-bottom: 10px; }
-.q-explain.show { display:block; }
-.q-explain img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border); }
-.next-btn { width: 100%; padding: 16px; border: none; border-radius: 16px; background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #fff; font-family: 'Jua', cursive; font-size: 1.15rem; cursor: pointer; display: none; transition: transform 0.15s; box-shadow: 0 4px 10px rgba(0,212,255,0.3); }
-.next-btn:hover { transform: scale(1.02); }
-.next-btn.show { display: block; }
+    body.theme--arcade {
+      background: #12121e;
+      --card-bg: rgba(30, 30, 50, 0.9);
+      --border-color: #3a3a5a;
+      color: #ffffff;
+    }
 
-.progress-track { height: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--cyan), var(--purple)); transition: width 0.4s ease; }
+    body.theme--slime {
+      background: #fff3f5;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --border-color: #ffb3c6;
+      color: #334155;
+    }
 
-@keyframes popIn { from { opacity:0; transform:scale(0.6); } to { opacity:1; transform:scale(1); } }
+    .translator-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 16px 80px;
+    }
 
-/* 로딩 UI */
-.loading-wrap { text-align: center; padding: 50px 20px; font-family: 'Jua', cursive; font-size: 1.5rem; color: var(--cyan); }
-.loading-spinner { font-size: 3rem; animation: spin 1.5s linear infinite; display: inline-block; margin-bottom: 15px; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
-</style>
+    /* 상단 탑바 */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .profile-badge {
+      background: rgba(0, 212, 255, 0.12);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+    }
+    .btn-exit {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid #64748b;
+      color: #e2e8f0;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-exit:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    /* 메인 타이틀 */
+    .header-banner {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .main-logo-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #00d4ff, #c77dff, #ff6b9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .main-sub-title {
+      color: #94a3b8;
+      font-size: 1rem;
+      word-break: keep-all;
+    }
+
+    /* 3단계 레벨 선택 탭 */
+    .level-tab-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 640px) {
+      .level-tab-bar { grid-template-columns: 1fr 1fr; }
+    }
+    .level-tab-btn {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px 8px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      color: #94a3b8;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .level-tab-btn:hover {
+      border-color: var(--primary);
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+    .level-tab-btn.active {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(199, 125, 255, 0.2));
+      border-color: var(--primary);
+      color: var(--yellow);
+      font-weight: bold;
+      box-shadow: 0 6px 16px rgba(0, 212, 255, 0.25);
+      transform: scale(1.02);
+    }
+    .level-sub-desc {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: normal;
+    }
+    .level-tab-btn.active .level-sub-desc {
+      color: #93c5fd;
+    }
+
+    /* 퀴즈 메타 바 (진행률 & 점수) */
+    .quiz-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-family: 'Jua', sans-serif;
+      color: #94a3b8;
+    }
+    .score-chip {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3);
+    }
+    .progress-bar-bg {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+
+    /* 문장제 지문 카드 */
+    .passage-card {
+      background: var(--card-bg);
+      border: 3px solid var(--border-color);
+      border-radius: 24px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      position: relative;
+    }
+    .passage-badge {
+      display: inline-block;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      padding: 4px 14px;
+      border-radius: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.9rem;
+      margin-bottom: 14px;
+    }
+    .passage-sentence {
+      font-family: 'Gaegu', cursive;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      line-height: 1.5;
+      word-break: keep-all;
+      margin-bottom: 14px;
+    }
+
+    /* 핵심 지시어 하이라이트 */
+    .highlight-word {
+      background: rgba(255, 217, 61, 0.25);
+      border-bottom: 3px solid #ffd93d;
+      color: #ffd93d;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-weight: 800;
+      display: inline-block;
+      animation: pulseHighlight 2s infinite ease-in-out;
+    }
+    @keyframes pulseHighlight {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .passage-prompt {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      color: #38bdf8;
+      margin-top: 8px;
+    }
+
+    /* 3지선다 선택지 그리드 */
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .choice-card-btn {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid var(--border-color);
+      border-radius: 18px;
+      padding: 16px 20px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      color: #ffffff;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      word-break: keep-all;
+    }
+    body.theme--slime .choice-card-btn {
+      background: #ffffff;
+      color: #1e293b;
+    }
+    .choice-card-btn:hover {
+      border-color: var(--primary);
+      background: rgba(0, 212, 255, 0.15);
+      transform: translateX(6px);
+    }
+    .choice-num-tag {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: #94a3b8;
+      flex-shrink: 0;
+    }
+    .choice-card-btn.correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: #10b981 !important;
+      color: #34d399 !important;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+    }
+    .choice-card-btn.wrong {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: #ef4444 !important;
+      color: #f87171 !important;
+      opacity: 0.75;
+    }
+
+    /* 정답/오답 해설 & 수식 모델 박스 */
+    .explain-card {
+      background: rgba(16, 185, 129, 0.12);
+      border: 2px solid #10b981;
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      display: none;
+      animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .explain-card.show {
+      display: block;
+    }
+    .explain-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #34d399;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .explain-body {
+      font-size: 1rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    body.theme--slime .explain-body { color: #334155; }
+    .explain-formula-box {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-top: 10px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.4rem;
+      color: #ffd93d;
+      text-align: center;
+    }
+    body.theme--slime .explain-formula-box {
+      background: #f1f5f9;
+      color: #b45309;
+    }
+
+    /* 다음 문제 버튼 */
+    .btn-next-question {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      border-radius: 18px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #ffffff;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 6px 18px rgba(0, 212, 255, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-next-question:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.4);
+    }
+    .btn-next-question.show {
+      display: block;
+    }
+
+    /* 세로 분수 스타일 */
+    .inline-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 1.05em;
+      line-height: 1.1;
+      font-weight: 700;
+    }
+    .inline-frac .num { display: block; padding-bottom: 2px; }
+    .inline-frac .bar {
+      display: block;
+      border-top: 2px solid currentColor;
+      height: 0;
+      width: 100%;
+      min-width: 16px;
+      margin: 2px 0;
+      font-size: 0;
+    }
+    .inline-frac .den { display: block; padding-top: 2px; }
+
+    /* 결과 축하 모달 */
+    .result-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .result-modal-card {
+      background: #1e1e32;
+      border: 3px solid var(--primary);
+      border-radius: 28px;
+      max-width: 440px;
+      width: 90%;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 212, 255, 0.3);
+    }
+    body.theme--slime .result-modal-card {
+      background: #ffffff;
+      border-color: #ff6b9d;
+    }
+    .modal-trophy { font-size: 4.5rem; margin-bottom: 12px; }
+    .modal-title { font-family: 'Jua', sans-serif; font-size: 2rem; color: var(--yellow); margin-bottom: 10px; }
+    .modal-score { font-size: 1.15rem; color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; }
+    body.theme--slime .modal-score { color: #475569; }
+    .btn-modal-replay {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      border-radius: 16px;
+      padding: 12px 32px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.2rem;
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-modal-replay:hover { transform: translateY(-2px); }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
 </head>
-<body>
+<body class="theme--arcade">
 
-<div class="app-container">
+<div class="translator-wrap">
+  
+  <!-- 상단 프로필 및 뒤로가기 -->
   <div class="top-bar">
-    <div class="profile-badge" id="profileBadge">접속중: 👨‍🚀 <b>로딩중...</b></div>
-    <div style="display: flex; gap: 8px; align-items: center;">
-      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
-      <button class="exit-btn" onclick="exitRoom()">🚪 로비로 돌아가기</button>
+    <div class="profile-badge" id="profileBadge">접속중: 👨‍🚀 <b>민수</b></div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-exit" id="ttsBtn" onclick="toggleTts()">🔊 음성 켜기</button>
+      <a href="math.html" class="btn-exit">🔙 수학 대문</a>
     </div>
   </div>
 
-  <header>
-    <div class="logo-title">수학 공식/개념 탐험대 🚀</div>
-  </header>
-
-  <div class="screen active" id="sec-loading">
-    <div class="loading-wrap">
-      <div class="loading-spinner">⏳</div>
-      <div>노션에서 수학 공식과 개념을 불러오는 중...</div>
-    </div>
+  <!-- 헤더 배너 -->
+  <div class="header-banner">
+    <h1 class="main-logo-title">🔤 수학 문장제 지시어 번역소 ➔ 🧮</h1>
+    <p class="main-sub-title">문제 속 헷갈리는 우리말 지시어를 사칙연산 기호로 척척 번역해요!</p>
   </div>
 
-  <div class="screen" id="sec-quiz">
-    <div class="quiz-wrap">
-      <div class="quiz-meta">
-        <span id="q-progress">문제 1 / 10</span>
-        <span class="score-badge" id="q-score">0점</span>
-      </div>
-      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
-
-      <div id="quiz-play">
-        <div class="q-card" id="q-card">
-          <div class="q-tag" id="q-tag"></div>
-          <div class="q-text" id="q-text"></div>
-          <div class="q-hint" id="q-hint"></div>
-        </div>
-        <div class="choice-grid" id="choice-grid"></div>
-        <div class="q-feedback" id="q-feedback"></div>
-        <div class="q-explain" id="q-explain"></div>
-        <button class="next-btn" id="next-btn" onclick="nextQ()">다음 문제 →</button>
-      </div>
-
-      <div class="result-card" id="result-wrap" style="display:none;">
-        <div class="result-emoji" id="r-emoji"></div>
-        <div class="r-title" id="r-title" style="font-family:'Jua'; font-size:2rem; color:var(--yellow); margin-bottom:10px;"></div>
-        <div class="result-score" id="r-score"></div>
-        <div class="r-msg" id="r-msg" style="color:var(--muted); margin-bottom:20px;"></div>
-        <div id="r-detail" style="margin-bottom: 20px;"></div>
-        <button class="btn-big" onclick="initQuiz()">🔄 다시 도전!</button>
-      </div>
-    </div>
+  <!-- 3단계 레벨 선택 탭 바 -->
+  <div class="level-tab-bar">
+    <button class="level-tab-btn active" id="tab_lvl_0" onclick="switchLevel(0)">
+      <span>🟢 1단계 기초</span>
+      <span class="level-sub-desc">덧셈·뺄셈 일상말 (초1~2)</span>
+    </button>
+    <button class="level-tab-btn" id="tab_lvl_1" onclick="switchLevel(1)">
+      <span>🔵 2단계 묶음</span>
+      <span class="level-sub-desc">곱셈·나눗셈 묶음 (초3~4)</span>
+    </button>
+    <button class="level-tab-btn" id="tab_lvl_2" onclick="switchLevel(2)">
+      <span>👑 3단계 실전 ⭐</span>
+      <span class="level-sub-desc">분수·범위·조건 (초5~6)</span>
+    </button>
+    <button class="level-tab-btn" id="tab_lvl_3" onclick="switchLevel(3)">
+      <span>🌟 마스터 챌린지</span>
+      <span class="level-sub-desc">전 단계 랜덤 10제</span>
+    </button>
   </div>
+
+  <!-- 퀴즈 상태 바 -->
+  <div class="quiz-status-bar">
+    <span id="qProgressText">문제 1 / 10</span>
+    <span class="score-chip" id="qScoreBadge">정답 0개</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+
+  <!-- 문장제 지문 카드 -->
+  <div class="passage-card">
+    <span class="passage-badge" id="passageStageBadge">🟢 1단계: 덧셈·뺄셈 일상말</span>
+    <div class="passage-sentence" id="passageSentence">
+      사과 3개와 귤 4개를 <mark class="highlight-word">[ 모두 합하면 ]</mark> 몇 개일까요?
+    </div>
+    <div class="passage-prompt">👉 강조된 말은 어떤 계산 기호나 의미로 바꿔야 할까요?</div>
+  </div>
+
+  <!-- 3지선다 선택지 리스트 -->
+  <div class="choices-grid" id="choicesGrid">
+    <!-- 동적 생성 -->
+  </div>
+
+  <!-- 피드백 및 코코 번역 해설 블록 -->
+  <div class="explain-card" id="explainCard">
+    <div class="explain-title" id="explainTitle">💡 코코의 번역 팁</div>
+    <div class="explain-body" id="explainBody">해설 내용이 들어갑니다.</div>
+    <div class="explain-formula-box" id="explainFormula">3 + 4 = 7</div>
+  </div>
+
+  <!-- 다음 문제 버튼 -->
+  <button class="btn-next-question" id="btnNext" onclick="nextQuestion()">다음 번역 문제로 이동 ➔</button>
 
 </div>
 
-<script>
-    window.currentSubject = "수학";
-    const roomStartTime = new Date();
-    let isExiting = false;
-    let wrongNotes = [];
-    
-    let dbData = [];
-    let qList = [];
-    let qIdx = 0;
-    let qScore = 0;
-    let qAnswered = false;
-
-    let currentProfile = 'son';
-    let currentTheme = '마인크래프트';
-</script>
+<!-- 결과 축하 모달 -->
+<div class="result-modal-backdrop" id="resultModal">
+  <div class="result-modal-card">
+    <div class="modal-trophy">🏆</div>
+    <h2 class="modal-title" id="modalTitle">번역 훈련 완주!</h2>
+    <p class="modal-score" id="modalScore">10문제 중 10문제를 정확하게 번역했습니다!<br><b>보석 +5 💎 & 수학 경험치 +15 EXP</b> 획득!</p>
+    <button class="btn-modal-replay" onclick="closeResultModal()">한 번 더 도전!</button>
+  </div>
+</div>
 
 <script src="../../config.js"></script>
-
+<script src="../../core/core.js"></script>
+<script src="../../core/notion-helper.js"></script>
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
 <script>
-    const requiredCores = [
-        "notion-helper.js",
-        "fairy-config.js",
-        "fairy-engine.js",
-        "fairy-chatbot.js"
-    ];
+// ========================================================
+// 📐 정품 세로 분수 HTML 렌더러
+// ========================================================
+function renderFrac(num, den) {
+  return `<span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span>`;
+}
+function renderMixed(whole, num, den) {
+  return `<span class="mixed-frac"><span class="whole">${whole}</span><span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span></span>`;
+}
 
-    loadCoreScripts("../../core/", requiredCores, () => {
-        console.log("🚀 수학 공식/개념 퀴즈 하이브리드 엔진 조립 완료!");
+// ========================================================
+// 📚 3단계 문장제 지시어 마스터 데이터셋 (총 35문항)
+// ========================================================
+const DIRECTIVE_BANKS = {
+  // 🟢 1단계: 덧셈·뺄셈 일상말 (초1~2 기초 10제)
+  0: [
+    {
+      sentence: `사과 3개와 귤 4개를 <mark class="highlight-word">[ 모두 합하면 ]</mark> 몇 개일까요?`,
+      word: "모두 합하면",
+      opts: ["➕ (더하기)", "➖ (빼기)", "➗ (나누기)"],
+      ans: 0,
+      tip: "'모두 합하여', '합하면'은 두 양을 하나로 모으는 덧셈(➕) 기호예요!",
+      formula: "3 + 4 = 7"
+    },
+    {
+      sentence: `민수가 구슬 5개를 가지고 있었는데, 3개를 <mark class="highlight-word">[ 더 많이 ]</mark> 모았습니다.`,
+      word: "더 많이",
+      opts: ["➖ (빼기)", "➕ (더하기)", "✖️ (곱하기)"],
+      ans: 1,
+      tip: "'더 많이', '더 얻었다'는 수가 늘어나는 덧셈(➕)을 의미해요!",
+      formula: "5 + 3 = 8"
+    },
+    {
+      sentence: `사탕 10개 중에서 동생에게 4개를 <mark class="highlight-word">[ 주고 남은 것 ]</mark>은 몇 개일까요?`,
+      word: "주고 남은 것",
+      opts: ["➕ (더하기)", "➖ (빼기)", "➗ (나누기)"],
+      ans: 1,
+      tip: "주고 '남은 것'을 구할 때는 원래 수에서 덜어내는 뺄셈(➖)을 써요!",
+      formula: "10 - 4 = 6"
+    },
+    {
+      sentence: `민수의 연필 8자루와 민서의 연필 5자루의 <mark class="highlight-word">[ 차이는 ]</mark> 몇 자루일까요?`,
+      word: "차이는",
+      opts: ["➖ (빼기)", "➕ (더하기)", "✖️ (곱하기)"],
+      ans: 0,
+      tip: "두 수의 '차이', '누가 몇 개 더 많은가'를 비교할 때는 큰 수에서 작은 수를 빼는 뺄셈(➖)이에요!",
+      formula: "8 - 5 = 3"
+    },
+    {
+      sentence: `주차장에 차가 6대 있었는데, 3대가 <mark class="highlight-word">[ 더 들어왔습니다 ]</mark>.`,
+      word: "더 들어왔습니다",
+      opts: ["➖ (빼기)", "➕ (더하기)", "➗ (나누기)"],
+      ans: 1,
+      tip: "새로 더 들어오거나 모여들 때는 덧셈(➕)으로 계산해요!",
+      formula: "6 + 3 = 9"
+    },
+    {
+      sentence: `초콜릿 7개 중 2개를 <mark class="highlight-word">[ 먹어버렸습니다 ]</mark>.`,
+      word: "먹어버렸습니다",
+      opts: ["➕ (더하기)", "➖ (빼기)", "✖️ (곱하기)"],
+      ans: 1,
+      tip: "먹거나, 잃어버리거나, 날아간 것은 수가 줄어드므로 뺄셈(➖)이에요!",
+      formula: "7 - 2 = 5"
+    },
+    {
+      sentence: `숫자 2, 5, 8 중에서 <mark class="highlight-word">[ 가장 큰 수 ]</mark>를 고르세요.`,
+      word: "가장 큰 수",
+      opts: ["가장 양이 많은 수 (8)", "가장 양이 적은 수 (2)", "가운데 수 (5)"],
+      ans: 0,
+      tip: "'가장 큰 수'는 수직선에서 가장 오른쪽에 있고 수량이 가장 풍부한 수예요!",
+      formula: "8 > 5 > 2"
+    },
+    {
+      sentence: `2부터 시작하여 2씩 <mark class="highlight-word">[ 뛰어 세기 ]</mark>를 합니다.`,
+      word: "뛰어 세기",
+      opts: ["일정한 수만큼 더하기 (+2)", "일정한 수만큼 빼기 (-2)", "거꾸로 세기"],
+      ans: 0,
+      tip: "'뛰어 세기'는 같은 크기만큼 깡충깡충 더하며 앞으로 나아가는 규칙이에요!",
+      formula: "2, 4, 6, 8, 10 (+2씩)"
+    },
+    {
+      sentence: `도토리 34개는 <mark class="highlight-word">[ 10개씩 묶음 ]</mark> 몇 개와 낱개 몇 개일까요?`,
+      word: "10개씩 묶음",
+      opts: ["십의 자리 숫자 (3묶음)", "일의 자리 숫자 (4묶음)", "백의 자리 숫자"],
+      ans: 0,
+      tip: "'10개씩 묶음'은 두 자리 수에서 앞자리에 있는 [십의 자리]를 뜻해요!",
+      formula: "34 = 10개 묶음 3개 + 낱개 4개"
+    },
+    {
+      sentence: `민서가 딱지 12장을 가지고 있다가 친구에게 5장을 <mark class="highlight-word">[ 잃었습니다 ]</mark>.`,
+      word: "잃었습니다",
+      opts: ["➕ (더하기)", "➖ (빼기)", "➗ (나누기)"],
+      ans: 1,
+      tip: "가지고 있던 것이 줄어들었으므로 뺄셈(➖)으로 계산해요!",
+      formula: "12 - 5 = 7"
+    }
+  ],
 
-        // 🧚 수학요정 코코 시동
-        if (typeof initFairyAudio === 'function') initFairyAudio();
-        if (typeof initFairyChat === 'function') initFairyChat("MATH", "수학공식개념방");
+  // 🔵 2단계: 곱셈·나눗셈 묶음 지시어 (초3~4 핵심 10제)
+  1: [
+    {
+      sentence: `사탕 15개를 친구 3명에게 <mark class="highlight-word">[ 똑같이 나누어 ]</mark> 주려고 합니다.`,
+      word: "똑같이 나누어",
+      opts: ["➗ (나눗셈)", "✖️ (곱셈)", "➖ (뺄셈)"],
+      ans: 0,
+      tip: "'똑같이 나눈다', '똑같이 분배한다'는 나눗셈(➗)의 핵심 기호예요!",
+      formula: "15 ÷ 3 = 5"
+    },
+    {
+      sentence: `민수의 색종이는 4장이고, 민서의 색종이는 민수의 <mark class="highlight-word">[ 3배 ]</mark>입니다.`,
+      word: "~의 몇 배",
+      opts: ["➕ (더하기)", "✖️ (곱셈)", "➗ (나누기)"],
+      ans: 1,
+      tip: "'~의 몇 배'는 그 수만큼 곱해주는 곱셈(✖️) 기호예요!",
+      formula: "4 × 3 = 12"
+    },
+    {
+      sentence: `한 상자에 6개씩 <mark class="highlight-word">[ 4묶음 ]</mark>이 있습니다. 전체는 몇 개일까요?`,
+      word: "몇 묶음",
+      opts: ["✖️ (곱셈)", "➗ (나눗셈)", "➕ (더하기)"],
+      ans: 0,
+      tip: "같은 수가 반복되는 '묶음'은 동수누가, 즉 곱셈(✖️)으로 빠르게 구해요!",
+      formula: "6 × 4 = 24"
+    },
+    {
+      sentence: `구슬 20개를 4개씩 나누어 주면 <mark class="highlight-word">[ 남김없이 나누어떨어집니다 ]</mark>.`,
+      word: "나누어떨어진다",
+      opts: ["나머지가 0이다", "나머지가 1이다", "몫이 0이다"],
+      ans: 0,
+      tip: "'나누어떨어진다'는 것은 나머지가 하나도 없이 0으로 딱 맞아떨어진다는 뜻이에요!",
+      formula: "20 ÷ 4 = 5 (나머지 0)"
+    },
+    {
+      sentence: `과자 14개를 3명에게 똑같이 나누어 주었더니 2개가 <mark class="highlight-word">[ 남았습니다 ]</mark>.`,
+      word: "나머지",
+      opts: ["몫", "나머지", "나누는 수"],
+      ans: 1,
+      tip: "똑같이 덜어주고 난 뒤 끝에 '남은 수'를 나눗셈에서 [나머지]라고 불러요!",
+      formula: "14 ÷ 3 = 4 ... 나머지 2"
+    },
+    {
+      sentence: `삼각형에서 반듯한 각으로 크기가 90°인 각을 <mark class="highlight-word">[ 직각 ]</mark>이라고 합니다.`,
+      word: "직각",
+      opts: ["90° 반듯한 각", "180° 평평한 각", "45° 뾰족한 각"],
+      ans: 0,
+      tip: "도화지 모서리처럼 반듯하게 꺾인 각을 '직각(90°)'이라고 해요!",
+      formula: "직각 = 90°"
+    },
+    {
+      sentence: `직사각형 운동장 가장자리를 한 바퀴 도는 <mark class="highlight-word">[ 둘레 ]</mark>의 길이를 구하시오.`,
+      word: "둘레",
+      opts: ["모든 변의 길이를 합한 것", "가로와 세로를 곱한 것", "한 변의 길이만"],
+      ans: 0,
+      tip: "'둘레'는 도형의 바깥 테두리 가장자리를 모두 더한 길이예요!",
+      formula: "(가로 + 세로) × 2"
+    },
+    {
+      sentence: `영화가 오후 2시에 시작해서 3시 30분에 끝났을 때의 <mark class="highlight-word">[ 걸린 시간 ]</mark>을 구하시오.`,
+      word: "걸린 시간",
+      opts: ["끝난 시각 - 시작 시각", "시작 시각 + 끝난 시각", "시각의 곱셈"],
+      ans: 0,
+      tip: "얼마나 걸렸는지 '시간'을 구할 때는 끝난 시각에서 시작 시각을 빼요!",
+      formula: "3시 30분 - 2시 = 1시간 30분"
+    },
+    {
+      sentence: `수 4를 1배, 2배, 3배 한 수 (4, 8, 12...)를 4의 <mark class="highlight-word">[ 배수 ]</mark>라고 합니다.`,
+      word: "배수",
+      opts: ["몇 배로 커진 수 (곱셈 구구)", "나누어떨어지게 하는 수", "짝수"],
+      ans: 0,
+      tip: "어떤 수를 몇 배씩 키워나간 수를 그 수의 '배수'라고 해요!",
+      formula: "4 × 1, 4 × 2, 4 × 3..."
+    },
+    {
+      sentence: `도넛 18개를 상자당 6개씩 담으면 필요한 상자의 수인 <mark class="highlight-word">[ 몫 ]</mark>은 몇일까요?`,
+      word: "몫",
+      opts: ["나눗셈의 결과 값 (3)", "남은 도넛의 개수", "상자의 크기"],
+      ans: 0,
+      tip: "나눗셈을 해서 얻어지는 알맹이 결과 값을 '몫'이라고 해요!",
+      formula: "18 ÷ 6 = 3 (몫 3)"
+    }
+  ],
 
-        window.initProfile = function() {
-            const savedUser = localStorage.getItem('currentUser'); if (savedUser) currentProfile = savedUser;
-            const savedTheme = localStorage.getItem('currentTheme'); if (savedTheme) currentTheme = savedTheme;
-            const themeClass = currentTheme === '슬라임' ? 'theme--slime' : 'theme--arcade';
-            document.body.className = themeClass;
-            
-            const badge = document.getElementById('profileBadge');
-            if (badge) {
-                const name = currentProfile === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
-                const icon = currentProfile === 'son' ? '👨‍🚀' : (currentProfile === 'daughter' ? '👩‍🚀' : '👨‍💻');
-                badge.innerHTML = `접속중: ${icon} <b>${name}</b>`;
-            }
-        }
+  // 👑 3단계: 분수·범위·조건 지시어 (초5~6 실전 15제 ⭐ 민수 타깃!)
+  2: [
+    {
+      sentence: `피자 1판 중에서 <mark class="highlight-word">[ 전체의 ${renderFrac(2, 3)}만큼 ]</mark>을 먹었습니다.`,
+      word: "전체의 몇 분의 몇",
+      opts: ["✖️ (분수의 곱셈)", "➕ (덧셈)", "➗ (나눗셈)"],
+      ans: 0,
+      tip: "'전체의 몇 분의 몇'은 전체 양에 그 분수를 곱해주는 곱셈(✖️) 기호예요!",
+      formula: `1 × ${renderFrac(2, 3)} = ${renderFrac(2, 3)}`
+    },
+    {
+      sentence: `놀이기구 탑승 가능한 키가 130cm <mark class="highlight-word">[ 이상 ]</mark>입니다.`,
+      word: "이상 (●)",
+      opts: ["130cm를 포함하여 큰 쪽 (●)", "130cm를 포함하지 않고 큰 쪽 (○)", "130cm보다 작은 쪽"],
+      ans: 0,
+      tip: "'이상'은 기준 숫자(130)를 까만 점(●)으로 [포함]하면서 같거나 큰 수예요!",
+      formula: "130, 131, 132... (130 포함)"
+    },
+    {
+      sentence: `상자 무게가 10kg <mark class="highlight-word">[ 이하 ]</mark>여야 택배를 보낼 수 있습니다.`,
+      word: "이하 (●)",
+      opts: ["10kg을 포함하여 작은 쪽 (●)", "10kg을 포함하지 않고 작은 쪽 (○)", "10kg보다 큰 쪽"],
+      ans: 0,
+      tip: "'이하'는 기준 숫자(10)를 까만 점(●)으로 [포함]하면서 같거나 작은 수예요!",
+      formula: "10, 9, 8... (10 포함)"
+    },
+    {
+      sentence: `점수가 80점 <mark class="highlight-word">[ 초과 ]</mark>인 학생만 상장을 받습니다. (80점은 상장을 받을까요?)`,
+      word: "초과 (○)",
+      opts: ["80점을 포함하지 않음 (못 받음)", "80점도 포함함 (받음)", "80점 이하만 받음"],
+      ans: 0,
+      tip: "'초과'는 기준 숫자를 하얀 구멍(○)으로 [포함하지 않고] 더 큰 수예요! (81점부터)",
+      formula: "81, 82, 83... (80 미포함)"
+    },
+    {
+      sentence: `나이가 12세 <mark class="highlight-word">[ 미만 ]</mark>인 어린이는 무료입장입니다. (12세는 무료일까요?)`,
+      word: "미만 (○)",
+      opts: ["12세를 포함하지 않음 (유료)", "12세도 포함함 (무료)", "12세 이상만 무료"],
+      ans: 0,
+      tip: "'미만'은 기준 숫자를 구멍(○)으로 [포함하지 않고] 더 작은 수예요! (11세까지 무료)",
+      formula: "11, 10, 9... (12 미포함)"
+    },
+    {
+      sentence: `책 246권을 100권씩 묶어 포장할 때, 남는 것도 상자에 담는 <mark class="highlight-word">[ 올림 ]</mark>을 하면?`,
+      word: "올림",
+      opts: ["구하려는 자리 아래를 1 올려 300권", "구하려는 자리 아래를 버려 200권", "그냥 246권"],
+      ans: 0,
+      tip: "'올림'은 남는 찌꺼기 숫자가 조금이라도 있으면 윗자리로 무조건 1 올려주는 어림이에요!",
+      formula: "246 ➔ 올림하여 백의 자리까지: 300"
+    },
+    {
+      sentence: `사탕 158개를 100개들이 상자에 담고 남는 것을 버리는 <mark class="highlight-word">[ 버림 ]</mark>을 하면?`,
+      word: "버림",
+      opts: ["구하려는 자리 아래를 0으로 버려 100개", "올려서 200개", "반올림하여 160개"],
+      ans: 0,
+      tip: "'버림'은 구하려는 자리 미만의 숫자를 싹 0으로 잘라버리는 어림이에요!",
+      formula: "158 ➔ 버림하여 백의 자리까지: 100"
+    },
+    {
+      sentence: `숫자 345를 십의 자리에서 <mark class="highlight-word">[ 반올림 ]</mark>할 때 기준이 되는 숫자는?`,
+      word: "반올림 (0~4 버림, 5~9 올림)",
+      opts: ["일의 자리 숫자 5 (5이므로 올림)", "백의 자리 숫자 3", "무조건 버림"],
+      ans: 0,
+      tip: "반올림은 바로 아랫자리 숫자가 0,1,2,3,4면 버리고, 5,6,7,8,9면 올려줘요!",
+      formula: "345 ➔ 일의 자리가 5이므로 올림: 350"
+    },
+    {
+      sentence: `12를 나누었을 때 나머지가 0이 되는 <mark class="highlight-word">[ 나누어떨어지게 하는 수 ]</mark>는?`,
+      word: "약수",
+      opts: ["12의 약수 (1, 2, 3, 4, 6, 12)", "12의 배수 (12, 24, 36...)", "소수"],
+      ans: 0,
+      tip: "어떤 수를 딱 나누어떨어지게 만드는 수들을 그 수의 '약수'라고 해요!",
+      formula: "12의 약수: 1, 2, 3, 4, 6, 12"
+    },
+    {
+      sentence: `8과 12를 <mark class="highlight-word">[ 둘 다 나누어떨어지게 하는 공통된 수 ]</mark>를 무엇이라 할까요?`,
+      word: "공약수",
+      opts: ["공약수", "공배수", "자연수"],
+      ans: 0,
+      tip: "두 수 모두의 공통된 약수를 '공약수', 그중 가장 큰 수를 '최대공약수'라고 해요!",
+      formula: "8과 12의 공약수: 1, 2, 4"
+    },
+    {
+      sentence: `두 도형을 포갰을 때 <mark class="highlight-word">[ 완전히 겹쳐서 모양과 크기가 똑같은 ]</mark> 관계는?`,
+      word: "합동",
+      opts: ["합동", "대칭", "닮음"],
+      ans: 0,
+      tip: "모양과 크기가 똑같아서 서로 포갰을 때 완벽하게 겹치는 두 도형을 '합동'이라고 해요!",
+      formula: "도형 가 ≡ 도형 나 (완전 일치)"
+    },
+    {
+      sentence: `한 직선을 따라 접었을 때 <mark class="highlight-word">[ 완전히 겹치는 데칼코마니 도형 ]</mark>은?`,
+      word: "선대칭도형",
+      opts: ["선대칭도형", "점대칭도형", "직사각형"],
+      ans: 0,
+      tip: "대칭축 접는 선을 중심으로 반을 접었을 때 딱 겹치는 도형은 '선대칭도형'이에요!",
+      formula: "나비 날개, 하트 모양 등"
+    },
+    {
+      sentence: `어떤 점을 중심으로 <mark class="highlight-word">[ 180° 돌렸을 때 처음과 겹치는 도형 ]</mark>은?`,
+      word: "점대칭도형",
+      opts: ["점대칭도형", "선대칭도형", "삼각형"],
+      ans: 0,
+      tip: "대칭의 중심을 잡고 180도 뱅글 돌려도 처음 모양과 똑같은 도형은 '점대칭도형'이에요!",
+      formula: "바람개비, 평행사변형 등"
+    },
+    {
+      sentence: `분수의 곱셈에서 <mark class="highlight-word">[ 대각선에 마주 보는 숫자끼리 똑같이 나누는 것 ]</mark>은?`,
+      word: "번개 약분술",
+      opts: ["약분술 (계산을 간단히 하기)", "통분술 (분모 같게 하기)", "대분수 만들기"],
+      ans: 0,
+      tip: "곱하기 전에 대각선 짝꿍을 미리 나누어 숫자를 작고 날씬하게 만드는 기술이 '약분'이에요!",
+      formula: `${renderFrac(3, 4)} × ${renderFrac(2, 7)} (4와 2 약분)`
+    },
+    {
+      sentence: `분자가 분모보다 더 큰 <mark class="highlight-word">[ 무거운 가분수 ]</mark>는 어떻게 정리할까요?`,
+      word: "가분수 ➔ 대분수 정리",
+      opts: ["온전한 1을 밖으로 꺼내 대분수로 만든다", "분모와 분자를 바꾼다", "그대로 둔다"],
+      ans: 0,
+      tip: `머리가 무거운 가분수는 온전한 1개(${renderFrac(5, 5)})를 뽑아 대분수(${renderMixed(1, 1, 5)})로 변신시켜요!`,
+      formula: `${renderFrac(6, 5)} = ${renderMixed(1, 1, 5)}`
+    }
+  ]
+};
 
-        window.initProfile();
+// ========================================================
+// 🎮 퀴즈 상태 및 로직
+// ========================================================
+let currentLevel = 2; // 기본 3단계(5-6 실전)로 시작
+let quizList = [];
+let currentQIdx = 0;
+let score = 0;
+let answered = false;
+let isTtsOn = true;
 
-        // 데이터 로드
-        async function loadData() {
-            try {
-                // notion-helper.js 의 fetchVocaFromNotion 활용
-                const rawData = await fetchVocaFromNotion({ subject: '수학', areaZone: '용어방' });
-                
-                if (!rawData || rawData.length === 0) {
-                    alert("노션 DB에 수학 용어/공식 데이터가 없습니다.");
-                    return;
-                }
-                
-                dbData = rawData;
-                console.log(`불러온 수학 용어/공식 데이터: ${dbData.length}건`);
-                
-                document.getElementById('sec-loading').classList.remove('active');
-                document.getElementById('sec-quiz').classList.add('active');
-                
-                initQuiz();
-            } catch (error) {
-                console.error("데이터 로딩 실패:", error);
-                alert("데이터를 불러오는데 실패했습니다.");
-            }
-        }
+// 노션에서 가져온 데이터 보관
+let notionDirectives = [];
 
-        function isMathVocaQuizInProgress() {
-            const play = document.getElementById('quiz-play');
-            const result = document.getElementById('result-wrap');
-            return !!(play && play.style.display !== 'none'
-                && result && result.style.display !== 'block'
-                && Array.isArray(qList) && qList.length > 0 && qIdx < qList.length);
-        }
-
-        window.initQuiz = function() {
-            // 10문제 랜덤 추출
-            const shuffled = [...dbData].sort(() => Math.random() - 0.5);
-            const selected = shuffled.slice(0, Math.min(10, shuffled.length));
-            
-            qList = selected.map(item => generateQuestion(item));
-            
-            qIdx = 0;
-            qScore = 0;
-            qAnswered = false;
-            wrongNotes = [];
-            
-            document.getElementById('quiz-play').style.display = 'block';
-            document.getElementById('result-wrap').style.display = 'none';
-            
-            renderQ();
-            if (typeof armQuizLeaveGuard === 'function') {
-                armQuizLeaveGuard({
-                    isActive: isMathVocaQuizInProgress,
-                    onLeave: () => window.exitRoom(true)
-                });
-            }
-        }
-
-        function generateQuestion(item) {
-            // 50:50 확률로 타입 A(공식 빈칸) 또는 타입 B(개념 역추적)
-            let type = Math.random() < 0.5 ? 'A' : 'B';
-            
-            // 타입 A 조건 검사
-            let extractedWords = [];
-            let formulaText = item.detailContext || ""; // 상세설명(formula)
-            
-            if (type === 'A') {
-                if (!formulaText.includes('=')) {
-                    type = 'B'; // 등호가 없으면 타입 B로 전환
-                } else {
-                    const rightSide = formulaText.substring(formulaText.indexOf('='));
-                    // 소괄호나 중괄호 안의 단어 추출
-                    const regex = /[\(\{\[]([^()\{\}\[\]]+)[\)\}\]]/g;
-                    let match;
-                    while ((match = regex.exec(rightSide)) !== null) {
-                        extractedWords.push(match[1].trim());
-                    }
-                    if (extractedWords.length === 0) {
-                        type = 'B'; // 괄호가 없으면 타입 B로 전환
-                    }
-                }
-            }
-            
-            let qText = "";
-            let ans = "";
-            let wrongs = new Set();
-            
-            if (type === 'A') {
-                // 타입 A: 공식 빈칸 뚫기
-                const targetWord = extractedWords[Math.floor(Math.random() * extractedWords.length)];
-                ans = targetWord;
-                
-                // 공식에서 해당 단어를 [ ? ] 로 치환
-                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                qText = formulaText.replace(new RegExp(`([\\(\\{\\[])\\s*${escapeRegExp(targetWord)}\\s*([\\)\\}\\]])`, 'g'), '$1 ? $2');
-                
-                // 오답 보기 추출 (다른 공식들의 괄호 안 단어들)
-                dbData.forEach(d => {
-                    if (d.id === item.id) return;
-                    const fText = d.detailContext || "";
-                    if (fText.includes('=')) {
-                        const rSide = fText.substring(fText.indexOf('='));
-                        const r = /[\(\{\[]([^()\{\}\[\]]+)[\)\}\]]/g;
-                        let m;
-                        while ((m = r.exec(rSide)) !== null) {
-                            const w = m[1].trim();
-                            if (w !== ans && w.length > 0) wrongs.add(w);
-                        }
-                    }
-                });
-            } else {
-                // 타입 B: 개념 역추적
-                qText = item.meaning || "설명이 없습니다.";
-                ans = item.word;
-                
-                // 오답 보기 추출 (다른 단어들)
-                dbData.forEach(d => {
-                    if (d.id !== item.id && d.word) {
-                        wrongs.add(d.word);
-                    }
-                });
-            }
-            
-            let wrongArr = [...wrongs].sort(() => Math.random() - 0.5);
-            
-            // 오답 보기가 부족할 경우 더미 텍스트 추가
-            const dummies = ["미지수", "정답 없음", "계산 오류", "알 수 없음", "0"];
-            let dummyIdx = 0;
-            while (wrongArr.length < 3) {
-                if (!wrongArr.includes(dummies[dummyIdx]) && ans !== dummies[dummyIdx]) {
-                    wrongArr.push(dummies[dummyIdx]);
-                }
-                dummyIdx = (dummyIdx + 1) % dummies.length;
-            }
-            
-            wrongArr = wrongArr.slice(0, 3);
-            
-            return {
-                type,
-                item,
-                qText,
-                ans,
-                wrongs: wrongArr,
-                tag: type === 'A' ? '📝 공식 빈칸 채우기' : '🔍 개념 맞추기'
-            };
-        }
-
-        window.renderQ = function() {
-            qAnswered = false; 
-            const q = qList[qIdx];
-            
-            document.getElementById('q-progress').textContent = `문제 ${qIdx+1} / ${qList.length}`;
-            document.getElementById('q-score').textContent = `${qScore}점`;
-            document.getElementById('prog-fill').style.width = (qIdx/qList.length*100)+'%';
-
-            document.getElementById('q-tag').textContent = q.tag;
-            document.getElementById('q-text').textContent = q.qText;
-            
-            document.getElementById('q-feedback').className = 'q-feedback'; 
-            document.getElementById('q-explain').className = 'q-explain'; 
-            document.getElementById('next-btn').className = 'next-btn';
-
-            const grid = document.getElementById('choice-grid'); 
-            grid.innerHTML = '';
-            
-            const choices = [...q.wrongs, q.ans].sort(() => Math.random() - 0.5);
-            choices.forEach(c => {
-                const btn = document.createElement('button'); 
-                btn.className = 'choice'; 
-                btn.textContent = c; 
-                btn.onclick = () => window.checkQ(c, q, btn); 
-                grid.appendChild(btn);
+async function loadNotionData() {
+  try {
+    if (typeof fetchVocaFromNotion === 'function') {
+      const records = await fetchVocaFromNotion({ subject: '수학' });
+      if (records && records.length > 0) {
+        console.log(`[노션 연동] 수학 단어 ${records.length}건 로드 성공`);
+        records.forEach(r => {
+          if (r.detailContext && r.word && r.meaning) {
+            notionDirectives.push({
+              sentence: r.detailContext.replace(r.word, `<mark class="highlight-word">[ ${r.word} ]</mark>`),
+              word: r.word,
+              opts: [r.meaning, "기타 의미", "알 수 없음"],
+              ans: 0,
+              tip: r.hint || r.meaning,
+              formula: r.word
             });
-        }
-
-        window.checkQ = function(selected, q, btn) {
-            if (qAnswered) return; 
-            qAnswered = true;
-            
-            document.querySelectorAll('.choice').forEach(b => { 
-                b.disabled = true; 
-                if (b.textContent === q.ans) b.classList.add('correct'); 
-            });
-
-            const fb = document.getElementById('q-feedback'); 
-            const ex = document.getElementById('q-explain');
-
-            if (selected === q.ans) {
-                qScore += 10; 
-                btn.classList.add('correct'); 
-                fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)]; 
-                fb.className = 'q-feedback ok'; 
-                document.getElementById('q-score').textContent = `${qScore}점`; 
-                document.getElementById('next-btn').className = 'next-btn show';
-                if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
-            } else {
-                btn.classList.add('wrong'); 
-                fb.textContent = `😅 아쉬워요! 정답은 [ ${q.ans} ]`; 
-                fb.className = 'q-feedback no';
-                if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${q.ans} 이에요.`);
-                
-                // 오답 노트 기록
-                wrongNotes.push(q.item.word);
-                
-                // 설명 및 이미지 노출
-                let explainHtml = `<strong>정답:</strong> ${q.ans}<br>`;
-                if (q.type === 'B') {
-                    explainHtml += `<strong>공식:</strong> ${q.item.detailContext || '없음'}`;
-                } else {
-                    explainHtml += `<strong>뜻풀이:</strong> ${q.item.meaning || '없음'}`;
-                }
-                
-                if (q.item.interactiveUrl) {
-                    explainHtml += `<br><iframe src="${q.item.interactiveUrl}" style="width:100%; height:350px; border:1px solid var(--border); border-radius:8px; margin-top:10px; background:#fff;"></iframe>`;
-                    explainHtml += `<br><a href="${q.item.interactiveUrl}" target="_blank" style="display:inline-block; margin-top:5px; color:var(--cyan); font-size:0.85rem; text-decoration:none;">🔗 새 창에서 크게 보기</a>`;
-                } else if (q.item.imageUrl) {
-                    explainHtml += `<br><img src="${q.item.imageUrl}" alt="설명 이미지">`;
-                }
-                
-                ex.innerHTML = explainHtml;
-                ex.className = 'q-explain show';
-                
-                document.getElementById('next-btn').className = 'next-btn show';
-            }
-        }
-
-        window.nextQ = function() { 
-            qIdx++; 
-            if (qIdx >= qList.length) window.showResult(); 
-            else window.renderQ(); 
-        }
-
-        window.showResult = async function() {
-            document.getElementById('prog-fill').style.width = '100%'; 
-            document.getElementById('quiz-play').style.display = 'none';
-            const wrap = document.getElementById('result-wrap'); 
-            wrap.style.display = 'block';
-
-            const correctCount = qScore / 10; 
-            const pct = correctCount / qList.length;
-            let emoji, title, msg;
-            
-            if (pct === 1) { emoji='🏆'; title='완벽해요!'; msg='전부 맞혔어요! 수학 마스터!'; }
-            else if (pct >= 0.6) { emoji='🌟'; title='훌륭해요!'; msg='거의 다 맞혔어요. 최고예요!'; }
-            else { emoji='💪'; title='도전 중!'; msg='개념을 다시 살펴보고 또 도전해 봐요!'; }
-
-            document.getElementById('r-emoji').textContent = emoji; 
-            document.getElementById('r-title').textContent = title;
-            document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`; 
-            document.getElementById('r-msg').textContent = msg;
-
-            if (correctCount > 0) {
-                if (typeof grantRewardAndShowUI === 'function') {
-                    await grantRewardAndShowUI(correctCount, false, 'voca');
-                }
-            }
-        }
-
-        window.exitRoom = async function(force) {
-            if (isExiting) return;
-            if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
-                return;
-            }
-            if (typeof disarmQuizLeaveGuard === 'function') disarmQuizLeaveGuard();
-            isExiting = true;      
-
-            const roomEndTime = new Date(); 
-            
-            // 오답 리스트 문자열
-            const errorReportStr = wrongNotes.length > 0 ? wrongNotes.join(', ') : "오답 없음";
-
-            const success = await sendStudyLogToNotion({ 
-                subject: "수학(공식방)",
-                errorReport: errorReportStr
-            });
-
-            if (success) {
-                console.log(`⏱️ 공부 완료! 로비로 이동합니다.`);
-                location.href = '../../../lobby.html'; 
-            } else {
-                alert("앗! 학습 일지 기록에 문제가 생겨서 대문으로 나가지 못했습니다.");
-                isExiting = false; 
-            }
-        }
-
-        window.addEventListener('pagehide', () => {
-            if (typeof window.exitRoom === 'function') window.exitRoom(true);
+          }
         });
+      }
+    }
+  } catch (e) {
+    console.warn("노션 연동 실패 (오프라인 모드 유지):", e);
+  }
+}
 
-        // 시작!
-        loadData();
+function initLevelQuiz(lvl) {
+  currentLevel = lvl;
+  currentQIdx = 0;
+  score = 0;
+  answered = false;
+
+  let pool = [];
+  if (lvl === 3) {
+    // 마스터 챌린지 (전 단계 통합)
+    pool = [...DIRECTIVE_BANKS[0], ...DIRECTIVE_BANKS[1], ...DIRECTIVE_BANKS[2], ...notionDirectives];
+  } else {
+    pool = [...DIRECTIVE_BANKS[lvl]];
+  }
+
+  // 10문제 무작위 셔플 추출
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  quizList = shuffled.slice(0, Math.min(10, shuffled.length));
+
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const qData = quizList[currentQIdx];
+
+  // 진행률 & 점수 업데이트
+  document.getElementById('qProgressText').textContent = `문제 ${currentQIdx + 1} / ${quizList.length}`;
+  document.getElementById('qScoreBadge').textContent = `정답 ${score}개`;
+  const pct = (currentQIdx / quizList.length) * 100;
+  document.getElementById('progressBar').style.width = `${pct}%`;
+
+  // 배지 텍스트
+  const badgeMap = ["🟢 1단계: 덧셈·뺄셈 일상말", "🔵 2단계: 곱셈·나눗셈 묶음", "👑 3단계: 5학년 실전 조건", "🌟 전 단계 마스터 챌린지"];
+  document.getElementById('passageStageBadge').textContent = badgeMap[currentLevel];
+
+  // 지문 표시
+  document.getElementById('passageSentence').innerHTML = qData.sentence;
+
+  // 선택지 3종 렌더링 (셔플)
+  const choicesGrid = document.getElementById('choicesGrid');
+  choicesGrid.innerHTML = '';
+
+  const optsWithIdx = qData.opts.map((opt, i) => ({ opt, isAns: i === qData.ans }));
+  const shuffledOpts = [...optsWithIdx].sort(() => Math.random() - 0.5);
+
+  shuffledOpts.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-card-btn';
+    btn.innerHTML = `<span class="choice-num-tag">${idx + 1}</span> <span>${item.opt}</span>`;
+    btn.onclick = () => selectChoice(item.isAns, btn, qData);
+    choicesGrid.appendChild(btn);
+  });
+
+  // 해설 및 다음 버튼 숨김
+  const exCard = document.getElementById('explainCard');
+  exCard.classList.remove('show');
+  document.getElementById('btnNext').classList.remove('show');
+
+  // TTS 음성 출력
+  if (isTtsOn && typeof speakFairyTTS === 'function') {
+    const cleanSentence = qData.sentence.replace(/<[^>]*>?/gm, '');
+    speakFairyTTS(cleanSentence);
+  }
+}
+
+function selectChoice(isCorrect, selectedBtn, qData) {
+  if (answered) return;
+  answered = true;
+
+  const exCard = document.getElementById('explainCard');
+  const exTitle = document.getElementById('explainTitle');
+  const exBody = document.getElementById('explainBody');
+  const exFormula = document.getElementById('explainFormula');
+
+  if (isCorrect) {
+    score++;
+    selectedBtn.classList.add('correct');
+    playSfx('correct');
+    exTitle.innerHTML = "🎉 완벽한 번역이에요! 참 잘했어요!";
+    exTitle.style.color = "#34d399";
+    if (isTtsOn && typeof speakFairyTTS === 'function') {
+      speakFairyTTS("정답이에요! 참 잘했어요!");
+    }
+  } else {
+    selectedBtn.classList.add('wrong');
+    playSfx('wrong');
+    exTitle.innerHTML = "💡 코코의 번역 힌트";
+    exTitle.style.color = "#fbbf24";
+    // 정답 버튼도 살짝 표시
+    document.querySelectorAll('.choice-card-btn').forEach(btn => {
+      if (btn.textContent.includes(qData.opts[qData.ans])) {
+        btn.classList.add('correct');
+      }
     });
+    if (isTtsOn && typeof speakFairyTTS === 'function') {
+      speakFairyTTS(qData.tip);
+    }
+  }
+
+  // 해설 및 수식 채우기
+  exBody.innerHTML = qData.tip;
+  exFormula.innerHTML = `수식 모델 ➔ <b>${qData.formula}</b>`;
+  exCard.classList.add('show');
+
+  // 다음 문제 버튼 오픈
+  document.getElementById('btnNext').classList.add('show');
+}
+
+function nextQuestion() {
+  playSfx('click');
+  if (currentQIdx < quizList.length - 1) {
+    currentQIdx++;
+    renderQuestion();
+  } else {
+    // 10문제 완료
+    playSfx('fanfare');
+    document.getElementById('progressBar').style.width = '100%';
+    showCompletionModal();
+  }
+}
+
+function showCompletionModal() {
+  const modal = document.getElementById('resultModal');
+  const title = document.getElementById('modalTitle');
+  const scoreTxt = document.getElementById('modalScore');
+
+  // 보상 지급
+  let earnedGems = Math.max(1, Math.floor(score / 2));
+  if (score >= 8) earnedGems += 2; // 고득점 보너스
+
+  if (typeof addGems === 'function') {
+    addGems(earnedGems);
+  } else {
+    const cur = parseInt(localStorage.getItem('minmin_gems') || '0', 10);
+    localStorage.setItem('minmin_gems', (cur + earnedGems).toString());
+  }
+
+  title.textContent = score >= 8 ? "🎉 번역 마스터 등극! 🎉" : "✨ 훈련 완주 성공! ✨";
+  scoreTxt.innerHTML = `10문제 중 <b>${score}문제</b>를 멋지게 번역했습니다!<br>보석 <b>+${earnedGems} 💎 & 경험치 +15 EXP</b> 획득!`;
+  modal.style.display = 'flex';
+}
+
+function closeResultModal() {
+  playSfx('click');
+  document.getElementById('resultModal').style.display = 'none';
+  initLevelQuiz(currentLevel);
+}
+
+function switchLevel(lvl) {
+  playSfx('click');
+  document.querySelectorAll('.level-tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === lvl);
+  });
+  initLevelQuiz(lvl);
+}
+
+function toggleTts() {
+  isTtsOn = !isTtsOn;
+  const btn = document.getElementById('ttsBtn');
+  btn.textContent = isTtsOn ? "🔊 음성 켜기" : "🔇 음성 끄기";
+  btn.style.color = isTtsOn ? "#ffffff" : "#94a3b8";
+}
+
+// 사운드 엔진
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSfx(type) {
+  try {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    const now = ctx.currentTime;
+
+    if (type === 'correct') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    } else if (type === 'wrong') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.setValueAtTime(180, now + 0.1);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    } else if (type === 'click') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } else if (type === 'fanfare') {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(freq, now + i * 0.1);
+        g.gain.setValueAtTime(0.25, now + i * 0.1);
+        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.35);
+        o.start(now + i * 0.1);
+        o.stop(now + i * 0.1 + 0.35);
+      });
+    }
+  } catch (e) {
+    console.warn("Audio error:", e);
+  }
+}
+
+// 초기 실행
+window.addEventListener('DOMContentLoaded', async () => {
+  const profile = localStorage.getItem('currentUser') || 'son';
+  const name = profile === 'daughter' ? '민서' : '민수';
+  const icon = profile === 'daughter' ? '👧' : '👦';
+  document.getElementById('profileBadge').innerHTML = `접속중: ${icon} <b>${name}</b>`;
+
+  // 기본 레벨 설정: 민수는 3단계(5-6 실전), 민서는 1단계(1-2 기초)
+  if (profile === 'daughter') {
+    switchLevel(0);
+  } else {
+    switchLevel(2);
+  }
+
+  // 노션 데이터 비동기 병합
+  await loadNotionData();
+});
 </script>
 </body>
 </html>
