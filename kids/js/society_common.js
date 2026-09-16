@@ -406,10 +406,14 @@ function getCurriculumRecords(type) {
                 const titleStr = item.word || item.title || item.name || "";
                 list.push({
                     word: titleStr,
+                    title: titleStr,
+                    name: titleStr,
                     hint: item.hint || getChosung(titleStr),
                     detailContext: item.desc || item.explanation || "",
+                    desc: item.desc || item.detailContext || "",
                     meaning: item.meaning || item.desc || "",
                     imageUrl: item.image || item.img || "",
+                    img: item.image || item.img || "",
                     interactiveUrl: item.interactiveUrl || item.link || "",
                     grade: grade,
                     grades: [grade],
@@ -418,7 +422,10 @@ function getCurriculumRecords(type) {
                     quiz: item.quiz || "",
                     choices: item.choices || [],
                     correctIdx: (typeof item.correctIdx === 'number') ? item.correctIdx : 0,
-                    explanation: item.explanation || item.desc || ""
+                    explanation: item.explanation || item.desc || "",
+                    artifactName: item.artifactName || titleStr,
+                    artifactPeriod: item.artifactPeriod || "",
+                    artifactUsage: item.artifactUsage || item.meaning || ""
                 });
             });
         }
@@ -596,7 +603,10 @@ function startMissionWithFilteredData(records, innerBody) {
                 choices: (record.choices && record.choices.length > 0) ? record.choices : ["전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설", "1등급 유망 자료"],
                 correctIdx: (typeof record.correctIdx === 'number') ? record.correctIdx : 0,
                 explanation: record.explanation || descStr,
-                summaryPassage: summaryPassage
+                summaryPassage: summaryPassage,
+                artifactName: record.artifactName || titleStr,
+                artifactPeriod: record.artifactPeriod || "",
+                artifactUsage: record.artifactUsage || meaningStr
             };
         } else {
             return { 
@@ -912,6 +922,11 @@ async function finalizeSocietyMissionImmediately() {
 
     } else if (type === 'chart') {
         screenWrapper.className += " quiz-card";
+
+        const safeTitle = (currentItem.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        const safeArtifactName = (currentItem.artifactName || currentItem.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        const safePeriod = (currentItem.artifactPeriod || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        const safeUsage = (currentItem.artifactUsage || currentItem.meaning || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
         
         const chartMediaHtml = currentItem.img ? `
             <div class="chart-container-box">
@@ -922,7 +937,7 @@ async function finalizeSocietyMissionImmediately() {
                         <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
                         <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
                     </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}', '${safeArtifactName}', '${safePeriod}', '${safeUsage}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
                 </div>
                 <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
                     <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.closest('.chart-container-box').style.display='none';">
@@ -937,11 +952,28 @@ async function finalizeSocietyMissionImmediately() {
             </div>
         `;
 
+        // 💡 문제 풀기 전 스포일러 방지 & 필요 시 엿볼 수 있는 아코디언 토글
+        const artifactHintToggleHtml = `
+            <details class="artifact-hint-toggle" style="margin: 12px 0; background: rgba(255, 255, 255, 0.9); border: 1.5px dashed var(--purple, #8b5cf6); border-radius: 14px; padding: 10px 14px; text-align: left; cursor: pointer;">
+                <summary style="font-weight: bold; color: var(--purple, #8b5cf6); font-size: 0.95rem; outline: none; user-select: none; font-family:'Jua', sans-serif;">
+                    💡 사진 속 유물/자료 돋보기 (이름과 쓰임새 살짝 엿보기)
+                </summary>
+                <div style="margin-top: 10px; font-size: 0.9rem; line-height: 1.55; color: #334155; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+                    <div style="font-weight:bold; color:#0f172a; margin-bottom:4px;">
+                        🏛️ <b>유물/자료명</b>: ${currentItem.artifactName || currentItem.title} 
+                        ${currentItem.artifactPeriod ? `<span style="font-size:0.8rem; background:#8b5cf6; color:white; padding:2px 8px; border-radius:10px; margin-left:4px;">${currentItem.artifactPeriod}</span>` : ''}
+                    </div>
+                    <div>📌 <b>핵심 쓰임새</b>: ${currentItem.artifactUsage || currentItem.meaning || '교과서 핵심 사료'}</div>
+                </div>
+            </details>
+        `;
+
         screenWrapper.innerHTML = `
             ${passageHtml}
             <div style="font-size: 0.95rem; opacity:0.7;">자료분석 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
             <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title}</h3>
             ${chartMediaHtml}
+            ${artifactHintToggleHtml}
             <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem;">${currentItem.desc}</div>
             <p style="font-weight: bold; font-size:1.15rem; text-align: left; margin-top:14px;">❓ ${currentItem.quiz}</p>
             <div class="quiz-choices-container">
@@ -1213,26 +1245,82 @@ window.verifyVocaMagnet = function() {
     }
 }
 
+window.showChartSuccessModal = function(item) {
+    let modal = document.getElementById('chartSuccessModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'chartSuccessModal';
+        modal.style.position = 'fixed';
+        modal.style.inset = '0';
+        modal.style.background = 'rgba(15, 23, 42, 0.85)';
+        modal.style.backdropFilter = 'blur(6px)';
+        modal.style.zIndex = '999999';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.padding = '20px';
+        document.body.appendChild(modal);
+    }
+
+    const artName = item.artifactName || item.title || '역사 사료';
+    const artPeriod = item.artifactPeriod ? `<span style="display:inline-block; background:#8b5cf6; color:white; font-size:0.8rem; padding:2px 8px; border-radius:12px; margin-left:6px;">${item.artifactPeriod}</span>` : '';
+    const artUsage = (item.artifactUsage || item.meaning) ? `<div style="background:#f8fafc; border-left:4px solid #3b82f6; padding:10px 14px; border-radius:8px; margin:12px 0; text-align:left; font-size:0.95rem; color:#334155; line-height:1.55;">📌 <b>유물/자료의 쓰임새</b><br>${item.artifactUsage || item.meaning}</div>` : '';
+    const expl = item.explanation ? `<div style="background:#f0fdf4; border-left:4px solid #22c55e; padding:10px 14px; border-radius:8px; margin:12px 0; text-align:left; font-size:0.95rem; color:#166534; line-height:1.55;">💡 <b>교과서 핵심 해설</b><br>${item.explanation}</div>` : '';
+    const museumBtn = item.interactiveUrl ? `<a href="${item.interactiveUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; padding:10px 18px; border-radius:12px; text-decoration:none; font-family:'Jua', sans-serif; font-size:0.95rem; box-shadow:0 4px 12px rgba(37,99,235,0.3);">🏛️ 국립박물관 공식 정보 ↗</a>` : '';
+
+    modal.innerHTML = `
+        <div style="background:white; border-radius:24px; max-width:540px; width:100%; padding:26px 22px; box-shadow:0 20px 40px rgba(0,0,0,0.35); text-align:center; max-height:90vh; overflow-y:auto; box-sizing:border-box; animation:popIn 0.3s ease-out;">
+            <div style="font-size:3rem; margin-bottom:6px;">🎉</div>
+            <h3 style="font-family:'Jua', sans-serif; font-size:1.6rem; color:#10b981; margin:0 0 10px 0;">정답입니다! 아주 완벽해요!</h3>
+            
+            <div style="display:flex; align-items:center; gap:14px; background:#f1f5f9; padding:12px; border-radius:14px; margin-bottom:12px; text-align:left;">
+                ${item.img ? `<img src="${item.img}" style="width:70px; height:70px; object-fit:cover; border-radius:10px; border:2px solid #cbd5e1; flex-shrink:0;">` : ''}
+                <div>
+                    <div style="font-family:'Jua', sans-serif; font-size:1.15rem; color:#0f172a; display:flex; align-items:center; flex-wrap:wrap;">
+                        ${artName} ${artPeriod}
+                    </div>
+                    <div style="font-size:0.85rem; color:#64748b; margin-top:3px;">${item.title}</div>
+                </div>
+            </div>
+
+            ${artUsage}
+            ${expl}
+
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:20px;">
+                ${museumBtn}
+                <button onclick="closeChartSuccessModalAndNext()" style="background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:10px 24px; border-radius:14px; font-family:'Jua', sans-serif; font-size:1.1rem; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+                    다음 사료 탐구하기 ⏩
+                </button>
+            </div>
+        </div>
+    `;
+    modal.style.display = 'flex';
+};
+
+window.closeChartSuccessModalAndNext = function() {
+    const modal = document.getElementById('chartSuccessModal');
+    if (modal) modal.style.display = 'none';
+    skipToNextQuiz('chart');
+};
+
 async function verifyChartChoice(selectedIdx, correctIdx) {
     const currentItem = activeSectionData[activeQuizIdx] || {};
-    const explanationText = currentItem.explanation ? `\n\n💡 [교과서 해설]\n${currentItem.explanation}` : "";
 
     if (selectedIdx === correctIdx) {
-        speakFairyTTS("정답이에요! 아주 잘했어요!");
-        alert(`🎉 정답입니다!${explanationText}`);
+        speakFairyTTS("정답이에요! " + (currentItem.artifactName ? currentItem.artifactName + "에 대한 탐구를 완벽히 해냈어요!" : "아주 잘했어요!"));
         if (typeof rewardQuizCorrect === 'function') {
             await rewardQuizCorrect(activeQuizIdx);
         }
-        skipToNextQuiz('chart');
+        showChartSuccessModal(currentItem);
     } else {
         if (typeof promptQuizRetryOrSkip === 'function') {
             promptQuizRetryOrSkip({
-                message: '아쉽지만 틀렸어요!',
+                message: '아쉽지만 틀렸어요! 돋보기를 다시 한번 살펴볼까요?',
                 onRetry: () => {},
                 onSkip: () => skipToNextQuiz('chart'),
             });
         } else {
-            speakFairyTTS("아쉬워요. 다시 한번 확인해볼까요?");
+            speakFairyTTS("아쉬워요. 다른 보기를 다시 골라볼까요?");
             alert("❌ 아쉽지만 틀렸어요! 다른 보기를 선택해주세요!");
         }
     }
@@ -1430,7 +1518,7 @@ function resetCardZoom() {
     updateCardZoomTransform();
 }
 
-function openImageInNewWindow(imgSrc) {
+function openImageInNewWindow(imgSrc, title, period, usage) {
     const img = document.getElementById("cardZoomImg");
     const url = imgSrc || (img ? img.src : "");
     if (!url) return;
@@ -1438,11 +1526,104 @@ function openImageInNewWindow(imgSrc) {
     const h = Math.min(900, window.screen.availHeight - 80);
     const left = Math.max(0, Math.floor((window.screen.availWidth - w) / 2));
     const top = Math.max(0, Math.floor((window.screen.availHeight - h) / 2));
-    window.open(
-        url,
+
+    const newWin = window.open(
+        "",
         "TextbookViewer_" + Date.now(),
         `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`
     );
+    if (newWin) {
+        newWin.document.write(`
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${title || '교과서 사료 돋보기'}</title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 20px;
+                        background: #0f172a;
+                        color: #f8fafc;
+                        font-family: 'Noto Sans KR', sans-serif;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        box-sizing: border-box;
+                    }
+                    .header-box {
+                        width: 100%;
+                        max-width: 960px;
+                        background: rgba(30, 41, 59, 0.95);
+                        border: 2px solid #8b5cf6;
+                        border-radius: 16px;
+                        padding: 16px 20px;
+                        box-sizing: border-box;
+                        margin-bottom: 16px;
+                    }
+                    .title {
+                        font-family: 'Jua', sans-serif;
+                        font-size: 1.5rem;
+                        color: #fbbf24;
+                        margin: 0 0 8px 0;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                    }
+                    .period-badge {
+                        font-size: 0.85rem;
+                        background: #3b82f6;
+                        color: white;
+                        padding: 3px 10px;
+                        border-radius: 99px;
+                        font-family: 'Noto Sans KR', sans-serif;
+                    }
+                    .usage {
+                        font-size: 1rem;
+                        line-height: 1.6;
+                        color: #e2e8f0;
+                        margin: 0;
+                    }
+                    .img-frame {
+                        width: 100%;
+                        max-width: 960px;
+                        background: #1e293b;
+                        border-radius: 16px;
+                        padding: 16px;
+                        box-sizing: border-box;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+                    }
+                    .img-frame img {
+                        max-width: 100%;
+                        max-height: 72vh;
+                        object-fit: contain;
+                        border-radius: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header-box">
+                    <div class="title">
+                        🏛️ ${title || '교과서 탐구 자료'}
+                        ${period ? `<span class="period-badge">${period}</span>` : ''}
+                    </div>
+                    ${usage ? `<p class="usage">📌 <b>쓰임새 및 해설</b>: ${usage}</p>` : ''}
+                </div>
+                <div class="img-frame">
+                    <img src="${url}" alt="${title || '사료 사진'}">
+                </div>
+            </body>
+            </html>
+        `);
+        newWin.document.close();
+    }
 }
 
 function initCardZoomListeners() {

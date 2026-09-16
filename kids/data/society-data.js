@@ -1707,12 +1707,15 @@ const SOCIETY_CURRICULUM_DATA = {
                   "interactiveUrl": "http://jikjiworld.cheongju.go.kr"
             }
       ],
-      "chart": [
+            "chart": [
             {
                   "title": "청동기 시대 고인돌 축조와 사회 모습",
                   "img": "./images/artifacts/ganghwa_dolmen.jpg",
-                  "desc": "수많은 사람들이 통나무를 굴려 무거운 굄돌과 덮개돌을 운반하여 거대한 고인돌을 세우는 모습입니다.",
-                  "quiz": "그림을 통해 알 수 있는 청동기 시대의 사회 모습으로 가장 알맞은 것은 무엇일까요?",
+                  "artifactName": "강화 부근리 고인돌 (탁자식 고인돌)",
+                  "artifactPeriod": "청동기 시대",
+                  "artifactUsage": "당시 지배자(족장)의 강력한 권력과 위엄을 드러내는 거대한 무덤입니다. 수많은 사람이 거대한 덮개돌을 옮겨 만들었습니다.",
+                  "desc": "선사 시대 사람들이 통나무를 굴려 거대한 덮개돌을 운반하여 무덤을 완성해 나가는 역사 사료 그림입니다.",
+                  "quiz": "이 그림을 통해 알 수 있는 청동기 시대의 사회 모습으로 가장 알맞은 것은 무엇일까요?",
                   "choices": [
                         "수많은 사람을 지휘할 수 있는 강력한 지배자(족장)가 있었다.",
                         "사람들이 농사를 짓지 않고 열매만 채집하며 살았다.",
@@ -1720,375 +1723,98 @@ const SOCIETY_CURRICULUM_DATA = {
                         "쇠로 만든 기계를 사용하여 순식간에 돌을 옮겼다."
                   ],
                   "correctIdx": 0,
-                  "explanation": "거대한 돌을 옮겨 고인돌을 만들기 위해서는 수많은 사람들의 노동력이 필요했습니다. 이를 통해 청동기 시대에는 많은 사람을 다스리는 힘센 지배자(족장)가 등장했음을 알 수 있습니다."
+                  "explanation": "거대한 바위를 운반하여 고인돌을 세우기 위해서는 수많은 사람의 힘을 한데 모으고 지휘할 수 있는 강력한 지배자(족장)가 필요했습니다. 이는 청동기 시대에 계급 사회가 시작되었음을 분명하게 보여줍니다.",
+                  "interactiveUrl": "https://www.ganghwa.go.kr/open_content/museum/"
             },
             {
                   "title": "삼국의 전성기와 한강 유역 경쟁",
-                  "img": "./images/artifacts/gwanggaeto_stele.jpg",
-                  "desc": "4세기 백제(근초고왕), 5세기 고구려(장수왕), 6세기 신라(진흥왕)가 차례로 한강 유역을 차지하며 전성기를 누렸음을 보여주는 역사 자료입니다.",
+                  "img": "./images/storybook/three_kingdoms/three_kingdoms_p3.jpg",
+                  "artifactName": "삼국의 영토 확장과 한강 유역 판도",
+                  "artifactPeriod": "삼국 시대 (4세기~6세기)",
+                  "artifactUsage": "삼국이 전성기마다 차지했던 한반도의 젖줄, 한강 유역과 영토 확장을 보여주는 역사 지도 사료입니다.",
+                  "desc": "고구려, 백제, 신라 삼국이 한반도의 중심인 한강 유역을 차지하기 위해 치열하게 각축전을 벌였던 역사적 형세입니다.",
                   "quiz": "삼국이 모두 '한강 유역'을 차지하려고 치열하게 다툰 가장 중요한 이유는 무엇일까요?",
                   "choices": [
-                        "땅이 기름지고, 바다를 통해 다른 나라와 교류하기 유리해서",
+                        "땅이 비옥하여 농사가 잘되고, 바다를 통해 다른 나라와 교류하기 유리해서",
                         "한강 유역에 황금이 대량으로 묻혀 있었기 때문에",
                         "주변에 높은 산이 전혀 없어서 방어하기가 쉬웠기 때문에",
                         "추운 겨울에도 강물이 얼지 않아 배를 띄우기 좋았기 때문에"
                   ],
                   "correctIdx": 0,
-                  "explanation": "한강 유역은 농사짓기에 땅이 비옥하고, 수로와 서해를 통해 중국 등 주변 나라와 교류하기에 가장 유리한 핵심 요충지였기 때문에 삼국이 전성기마다 한강을 차지하려 했습니다."
+                  "explanation": "한강 유역은 농경에 유리한 넓고 기름진 평야가 있고, 강과 서해를 통해 중국 등 주변국과 활발히 교류하고 선진 문물을 받아들일 수 있는 전략적 요충지였습니다. 4세기 백제(근초고왕), 5세기 고구려(장수왕), 6세기 신라(진흥왕)가 차례로 한강을 차지하며 전성기를 누렸습니다.",
+                  "interactiveUrl": "https://www.museum.go.kr"
             },
             {
-                  "title": "고려의 국제 무역항 벽란도와 교역품",
-                  "img": "./images/artifacts/byeokrando_trade.png",
-                  "desc": "수도 개경과 가까운 예성강 하구 벽란도에 송나라, 아라비아, 일본의 상인들이 배를 타고 들어와 물건을 거래하는 모습입니다.",
-                  "quiz": "자료를 통해 알 수 있는 사실로 옳지 않은 것은 무엇일까요?",
+                  "title": "고구려의 드넓은 기상과 광개토대왕릉비",
+                  "img": "./images/artifacts/gwanggaeto_stele.jpg",
+                  "artifactName": "고구려 광개토대왕릉비 (廣開土大王陵碑)",
+                  "artifactPeriod": "삼국 시대 (고구려, 414년 건립)",
+                  "artifactUsage": "아들 장수왕이 아버지 광개토대왕의 위대한 영토 확장 업적과 고구려 건국 내력을 기리기 위해 세운 거대한 비석입니다.",
+                  "desc": "높이 약 6.39m에 달하는 거대한 화강암 자연석 4면에 총 1,775자의 글씨가 새겨져 있는 웅장한 돌 유적입니다.",
+                  "quiz": "사진 속 거대한 돌 유적의 이름과 역사적 쓰임새로 가장 알맞은 것은 무엇일까요?",
                   "choices": [
-                        "고려는 다른 나라와의 무역을 엄격히 금지하고 문을 닫았다.",
-                        "아라비아 상인들을 통해 고려(코리아)의 이름이 서양에 널리 알려졌다.",
-                        "고려는 인삼, 나전칠기, 고려청자 등을 외국에 수출했다.",
-                        "벽란도는 수도 개경과 가까워 국제 무역항으로 크게 번성했다."
+                        "광개토대왕릉비 - 광개토대왕의 위대한 영토 확장과 업적을 기리기 위해 세운 비석",
+                        "단군왕검비 - 고조선 최초의 법률인 8조법을 널리 알리기 위해 세운 돌기둥",
+                        "북한산 진흥왕 순수비 - 신라 진흥왕이 한강을 차지하고 국경을 순수한 기념비",
+                        "첨성대 - 하늘의 별과 달의 움직임을 관측하기 위해 쌓은 천문 관측소"
                   ],
                   "correctIdx": 0,
-                  "explanation": "고려는 매우 개방적이고 국제적인 나라였습니다. 벽란도를 통해 송나라뿐 아니라 멀리 아라비아 상인들과도 활발하게 무역을 펼쳤습니다."
-            },
-            {
-                  "title": "팔만대장경판의 보관 과학과 장경판전",
-                  "img": "./images/artifacts/tripitaka_koreana.jpg",
-                  "desc": "합천 해인사 장경판전의 앞뒤 살창 크기를 다르게 만들어 자연 바람이 골고루 통하도록 한 신비로운 통풍 과학 구조도입니다.",
-                  "quiz": "팔만대장경판이 750년이 넘는 세월 동안 썩거나 뒤틀리지 않고 온전히 보존될 수 있었던 비결은 무엇일까요?",
-                  "choices": [
-                        "장경판전 살창의 크기를 달리하여 자연 바람이 잘 통하고 습기를 조절해서",
-                        "경판을 깊은 얼음 동굴 속에 꽁꽁 얼려 보관했기 때문에",
-                        "철과 구리로 특수 코팅을 두껍게 입혔기 때문에",
-                        "바람과 햇빛이 전혀 들어오지 못하게 사방을 흙벽으로 막아서"
-                  ],
-                  "correctIdx": 0,
-                  "explanation": "장경판전은 앞뒤 살창의 크기를 위아래 서로 다르게 설계하여 바람이 자연스럽게 순환하고, 바닥에는 숯과 소금을 묻어 습도를 완벽히 조절한 선조들의 놀라운 건축 과학입니다."
-            }
-      ],
-      "map": [
-            {
-                  "name": "연천 전곡리 구석기 유적지",
-                  "img": "./images/artifacts/handaxe.png",
-                  "desc": "경기도 연천 한탄강변에 위치한 유적으로, 동아시아에서도 정교한 아슐리안형 주먹도끼가 사용되었음을 전 세계에 처음으로 입증한 세계적인 구석기 유적지입니다.",
+                  "explanation": "이 돌 유적은 서기 414년 장수왕이 아버지 광개토대왕의 드넓은 영토 확장 업적을 기리기 위해 세운 '광개토대왕릉비'입니다. 비석의 4면에는 주몽의 고구려 건국 신화, 백제와 왜를 물리친 정복 활동, 무덤을 지키는 수묘인 규정 등 1,775자의 소중한 역사가 생생히 기록되어 있습니다.",
                   "interactiveUrl": "https://www.museum.go.kr"
             },
             {
-                  "name": "고구려 국내성과 광개토대왕릉비",
-                  "img": "./images/artifacts/gwanggaeto_stele.jpg",
-                  "desc": "압록강 너머 만주 벌판에 우뚝 솟아 있는 거대한 광개토대왕릉비와 국내성 성벽입니다. 북방의 드넓은 영토를 호령하던 고구려인들의 웅장한 기상이 고스란히 남아 있습니다.",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "name": "경주 역사유적지구 (첨성대와 대릉원)",
-                  "img": "./images/artifacts/cheomseongdae.jpg",
-                  "desc": "신라 천년의 수도 서라벌(경주)에 위치한 역사유적지구입니다. 별을 관측하던 첨성대와 거대한 고분들, 황금 문화재들이 도시 전체에 살아 숨 쉬고 있습니다.",
-                  "interactiveUrl": "https://gyeongju.museum.go.kr"
-            },
-            {
-                  "name": "예성강 벽란도와 개경 만월대 터",
-                  "img": "./images/artifacts/byeokrando_trade.png",
-                  "desc": "고려의 수도 개경으로 들어가는 바닷길 어귀인 벽란도와 왕궁 만월대 터입니다. 바다 너머 세계 각국의 상인들이 오가며 '코리아(KOREA)'의 빛나는 이름을 온 세상에 떨친 유서 깊은 무대입니다.",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            }
-      ]
-}
-  },
-  "5-2": {
-    "1. 옛사람들의 삶과 문화": {
-      "unitTitle": "1. 옛사람들의 삶과 문화",
-      "summaryPassage": "선사 시대부터 고조선, 삼국과 남북국 시대, 그리고 고려에 이르기까지 우리 조상들의 슬기와 찬란한 문화유산을 생생하게 탐구하는 역사 단원입니다. 주먹도끼와 고인돌, 삼국의 영토 확장과 불교 문화, 그리고 푸른 비취빛 고려청자와 팔만대장경까지 조상들의 역사와 삶의 숨결을 배워봅니다.",
-      "voca": [
-            {
-                  "word": "주먹도끼",
-                  "hint": "ㅈㅁㄷㄲ",
-                  "desc": "구석기 시대 조상들이 돌을 깨뜨려 만든 만능 사냥 도구로, 사냥과 가죽 벗기기 등에 두루 쓰였습니다.",
-                  "meaning": "구석기 시대의 만능 돌도끼",
-                  "image": "./images/artifacts/handaxe.png",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "빗살무늬토기",
-                  "hint": "ㅂㅅㅁㄴㅌㄱ",
-                  "desc": "신석기 시대 사람들이 곡식을 저장하기 위해 바닥을 뾰족하게 만들어 모래나 흙에 꽂아 쓰던 그릇입니다.",
-                  "meaning": "신석기 시대의 뾰족한 흙그릇",
-                  "image": "./images/artifacts/comb_pottery.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "고인돌",
-                  "hint": "ㄱㅇㄷ",
-                  "desc": "청동기 시대에 큰 돌을 괴어 만든 무덤으로, 당시 힘센 족장이나 지배자의 권력을 보여줍니다.",
-                  "meaning": "청동기 시대 족장의 큰 돌무덤",
-                  "image": "./images/artifacts/ganghwa_dolmen.jpg",
-                  "interactiveUrl": "https://www.ganghwa.go.kr/open_content/museum/"
-            },
-            {
-                  "word": "단군왕검",
-                  "hint": "ㄷㄱㅇㄱ",
-                  "desc": "기원전 2333년 우리 역사 최초의 나라인 고조선을 세운 임금님입니다.",
-                  "meaning": "고조선을 세운 첫 임금님",
-                  "image": "./images/artifacts/dangun.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "팔조법",
-                  "hint": "ㅍㅈㅂ",
-                  "desc": "고조선 시대에 사람들의 생명과 재산을 보호하고 질서를 지키기 위해 만든 8가지 법률입니다.",
-                  "meaning": "고조선의 8가지 법률",
-                  "image": "./images/artifacts/liaoning_dagger.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "광개토대왕",
-                  "hint": "ㄱㄱㅌㄷㅇ",
-                  "desc": "고구려의 전성기를 이끌며 만주와 북쪽으로 영토를 크게 넓힌 위대한 정복 군주입니다.",
-                  "meaning": "영토를 크게 넓힌 고구려의 왕",
-                  "image": "./images/artifacts/gwanggaeto_stele.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "살수대첩",
-                  "hint": "ㅅㅅㄷㅊ",
-                  "desc": "고구려의 을지문덕 장군이 살수(청천강)에서 수나라의 30만 대군을 크게 무찌른 빛나는 승리입니다.",
-                  "meaning": "을지문덕 장군이 수나라를 물리친 싸움",
-                  "image": "./images/artifacts/eulji_mundeok.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "백제금동대향로",
-                  "hint": "ㅂㅈㄱㄷㄷㅎㄹ",
-                  "desc": "백제의 뛰어난 금속 공예 기술과 불교·도교 사상을 담아낸 국보급의 아름다운 향로입니다.",
-                  "meaning": "백제의 화려하고 정교한 향로",
-                  "image": "./images/artifacts/baekje_burner.jpg",
-                  "interactiveUrl": "https://buyeo.museum.go.kr"
-            },
-            {
-                  "word": "화랑도",
-                  "hint": "ㅎㄹㄷ",
-                  "desc": "신라의 청소년들이 산천을 누비며 몸과 마음을 단련하고 충성과 효도를 배운 인재 양성 모임입니다.",
-                  "meaning": "신라 청소년들의 수련 단체",
-                  "image": "./images/artifacts/hwarangdo.jpg",
-                  "interactiveUrl": "https://gyeongju.museum.go.kr"
-            },
-            {
-                  "word": "골품제",
-                  "hint": "ㄱㅍㅈ",
-                  "desc": "신라 시대에 타고난 혈통에 따라 관직 진출, 옷 색깔, 집 크기까지 제한했던 엄격한 신분 제도입니다.",
-                  "meaning": "신라의 엄격한 신분 제도",
-                  "image": "./images/artifacts/gold_crown.jpg",
-                  "interactiveUrl": "https://gyeongju.museum.go.kr"
-            },
-            {
-                  "word": "첨성대",
-                  "hint": "ㅊㅅㄷ",
-                  "desc": "신라 선덕여왕 때 별과 하늘의 움직임을 관측하여 농사와 국가의 길흉을 점치던 동양 최고의 천문대입니다.",
-                  "meaning": "신라의 별 관측 천문대",
-                  "image": "./images/artifacts/cheomseongdae.jpg",
-                  "interactiveUrl": "https://gyeongju.museum.go.kr"
-            },
-            {
-                  "word": "해동성국",
-                  "hint": "ㅎㄷㅅㄱ",
-                  "desc": "'바다 동쪽의 번성한 나라'라는 뜻으로, 고구려를 계승하여 만주와 연해주에 강성했던 발해의 별칭입니다.",
-                  "meaning": "번성했던 발해를 부르던 별명",
-                  "image": "./images/artifacts/balhae_buddha.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "왕건",
-                  "hint": "ㅇㄱ",
-                  "meaning": "고려를 세운 태조 임금님",
-                  "desc": "후삼국을 통일하고 918년 새로운 나라인 고려를 건국한 태조 임금님입니다.",
-                  "image": "./images/artifacts/wanggeon.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "서희",
-                  "hint": "ㅅㅎ",
-                  "meaning": "외교 담판으로 땅을 되찾은 장군",
-                  "desc": "거란의 80만 대군 침략 때 소손녕과의 당당한 외교 담판으로 피 한 방울 흘리지 않고 강동 6주를 되찾은 고려의 명신입니다.",
-                  "image": "./images/artifacts/seohui.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "강감찬",
-                  "hint": "ㄱㄱㅊ",
-                  "meaning": "귀주대첩의 고려 명장",
-                  "desc": "귀주에서 거란의 10만 대군을 수공과 매복 작전으로 크게 물리친 귀주대첩의 영웅입니다.",
-                  "image": "./images/artifacts/ganggamchan.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "팔만대장경",
-                  "hint": "ㅍㅁㄷㅈㄱ",
-                  "meaning": "몽골을 물리치려 새긴 목판 경전",
-                  "desc": "몽골의 침략을 부처님의 힘으로 막아내기 위해 16년에 걸쳐 8만여 장의 나무판에 정성껏 새긴 목판 경전입니다.",
-                  "image": "./images/artifacts/tripitaka_koreana.jpg",
-                  "interactiveUrl": "http://www.haeinsa.or.kr"
-            },
-            {
-                  "word": "고려청자",
-                  "hint": "ㄱㄹㅊㅈ",
-                  "meaning": "고려의 푸른 비취빛 도자기",
-                  "desc": "비취색의 맑고 푸른 빛깔과 상감 기법으로 세계를 매료시킨 고려의 대표적인 예술 도자기입니다.",
-                  "image": "./images/artifacts/goryeo_celadon.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "직지심체요절",
-                  "hint": "ㅈㅈㅅㅊㅇㅈ",
-                  "meaning": "세계에서 가장 오래된 금속활자 책",
-                  "desc": "서양의 구텐베르크보다 78년 앞서 고려 우왕 때 금속활자로 인쇄된 현존 세계 최고의 금속활자본입니다.",
-                  "image": "./images/artifacts/jikji.jpg",
-                  "interactiveUrl": "http://jikjiworld.cheongju.go.kr"
-            },
-            {
-                  "word": "벽란도",
-                  "hint": "ㅂㄹㄷ",
-                  "meaning": "고려의 유명한 국제 무역항",
-                  "desc": "고려의 수도 개경 근처 예성강 하구에 위치하여 송나라, 아라비아 상인들까지 드나들던 국제 무역항입니다.",
-                  "image": "./images/artifacts/byeokrando_trade.png",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "word": "코리아",
-                  "hint": "ㅋㄹㅇ",
-                  "meaning": "고려에서 유래한 우리나라의 영문 이름",
-                  "desc": "벽란도를 찾은 아라비아 상인들이 고려의 이름을 서양에 널리 전파하여 오늘날 우리나라의 영문 이름이 되었습니다.",
-                  "image": "./images/artifacts/goryeo_celadon.jpg",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            }
-      ],
-      "history": [
-            {
-                  "name": "연천 전곡리 주먹도끼",
-                  "img": "./images/artifacts/handaxe.png",
-                  "desc": "구석기 시대 조상들이 돌을 깨뜨려 만든 만능 도구입니다. 동아시아 구석기 문화의 발달을 전 세계에 입증한 역사적 유물입니다.",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "name": "서울 암사동 빗살무늬 토기",
-                  "img": "./images/artifacts/comb_pottery.jpg",
-                  "desc": "신석기 시대 조상들이 곡식을 담아 땅이나 모래에 꽂아 보관할 수 있도록 밑바닥을 뾰족하게 만든 지혜로운 흙그릇입니다.",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "name": "강화 부근리 고인돌",
-                  "img": "./images/artifacts/ganghwa_dolmen.jpg",
-                  "desc": "청동기 시대 족장의 힘과 위엄을 보여주는 거대한 탁자식 무덤으로, 유네스코 세계문화유산에 등재된 자랑스러운 유적입니다.",
-                  "interactiveUrl": "https://www.ganghwa.go.kr/open_content/museum/"
-            },
-            {
-                  "name": "고구려 광개토대왕릉비",
-                  "img": "./images/artifacts/gwanggaeto_stele.jpg",
-                  "desc": "장수왕이 아버지 광개토대왕의 위대한 영토 확장과 업적을 기리기 위해 거대한 바위에 새겨 세운 고구려의 자랑스러운 비석입니다.",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "name": "백제 금동대향로",
+                  "title": "백제의 찬란한 금속 공예, 백제 금동대향로",
                   "img": "./images/artifacts/baekje_burner.jpg",
-                  "desc": "부여 능산리 절터에서 온전한 모습으로 발견된 국보입니다. 뚜껑에는 5악사와 봉황, 몸체에는 연꽃이 섬세하게 조각되어 있습니다.",
+                  "artifactName": "백제 금동대향로 (국보 제287호)",
+                  "artifactPeriod": "삼국 시대 (백제 사비기)",
+                  "artifactUsage": "왕실의 제사나 의식 때 향을 피워 나쁜 기운을 물리치고 하늘과 소통하던 정교하고 화려한 청동제 도금 향로입니다.",
+                  "desc": "꼭대기의 봉황, 5명의 악사와 신선, 몸체의 연꽃과 26마리의 동물이 입체적으로 조각된 백제 예술의 결정체입니다.",
+                  "quiz": "백제 금동대향로를 통해 알 수 있는 당시 백제의 문화적 특징으로 가장 알맞은 것은 무엇일까요?",
+                  "choices": [
+                        "불교와 도교 사상이 조화롭게 어우러지고 금속 공예 기술이 매우 뛰어났다.",
+                        "다른 나라와 교류하지 않고 오직 철기 무기만 만들었다.",
+                        "향료를 피우는 의식을 엄격히 금지하였다.",
+                        "그림이나 조각 예술이 발달하지 못해 겉모양이 단순하고 투박했다."
+                  ],
+                  "correctIdx": 0,
+                  "explanation": "백제 금동대향로는 뚜껑의 신선과 상상의 동물(도교 사상)과 몸체의 연꽃 장식(불교 사상)이 완벽히 조화를 이루며, 당대 동아시아 최고의 정밀 주조 및 도금 기술을 증명하는 백제 문화의 최고 정점입니다.",
                   "interactiveUrl": "https://buyeo.museum.go.kr"
             },
             {
-                  "name": "경주 첨성대",
-                  "img": "./images/artifacts/cheomseongdae.jpg",
-                  "desc": "신라 선덕여왕 때 별과 하늘의 움직임을 관찰하여 농사와 나라의 길흉을 점치던 동양에서 가장 오래된 천문 관측소입니다.",
-                  "interactiveUrl": "https://gyeongju.museum.go.kr"
-            },
-            {
-                  "name": "신라 천마총 금관",
-                  "img": "./images/artifacts/gold_crown.jpg",
-                  "desc": "'황금의 나라' 신라 왕의 권위와 위엄을 상징하는 정교하고 눈부신 황금 관으로, 나뭇가지와 사슴뿔 모양 장식이 돋보입니다.",
-                  "interactiveUrl": "https://gyeongju.museum.go.kr"
-            },
-            {
-                  "name": "대가야 철제 갑옷과 투구",
-                  "img": "./images/artifacts/gaya_armor.jpg",
-                  "desc": "철이 풍부했던 가야의 뛰어난 제철 기술을 보여주는 튼튼한 무사의 철제 갑옷과 투구입니다.",
-                  "interactiveUrl": "https://gimhae.museum.go.kr"
-            },
-            {
-                  "name": "경주 석굴암 본존불",
-                  "img": "./images/artifacts/seokguram.jpg",
-                  "desc": "통일신라 시대에 화강암을 깎아 둥근 돔 형태의 석굴 안에 모신 불상으로, 온화하고 자비로운 미소가 전 세계를 감탄하게 합니다.",
-                  "interactiveUrl": "https://www.heritage.go.kr"
-            },
-            {
-                  "name": "청자 상감운학문 매병",
-                  "img": "./images/artifacts/goryeo_celadon.jpg",
-                  "desc": "맑은 비취빛 푸른 바탕에 하늘로 날아오르는 학과 구름을 상감 기법으로 새겨 넣은 고려 공예 예술의 최고 걸작입니다.",
-                  "interactiveUrl": "https://www.museum.go.kr"
-            },
-            {
-                  "name": "합천 해인사 팔만대장경판",
-                  "img": "./images/artifacts/tripitaka_koreana.jpg",
-                  "desc": "몽골의 침략을 부처님의 힘으로 물리치고자 백성들의 간절한 소망을 모아 16년에 걸쳐 한 글자 한 글자 정성스레 새긴 세계기록유산입니다.",
-                  "interactiveUrl": "http://www.haeinsa.or.kr"
-            },
-            {
-                  "name": "직지심체요절 (직지)",
-                  "img": "./images/artifacts/jikji.jpg",
-                  "desc": "고려 우왕 때 청주 흥덕사에서 인쇄된 책으로, 서양의 구텐베르크 성서보다 78년이나 앞선 현존 세계 최고의 금속활자본입니다.",
-                  "interactiveUrl": "http://jikjiworld.cheongju.go.kr"
-            }
-      ],
-      "chart": [
-            {
-                  "title": "청동기 시대 고인돌 축조와 사회 모습",
-                  "img": "./images/artifacts/ganghwa_dolmen.jpg",
-                  "desc": "수많은 사람들이 통나무를 굴려 무거운 굄돌과 덮개돌을 운반하여 거대한 고인돌을 세우는 모습입니다.",
-                  "quiz": "그림을 통해 알 수 있는 청동기 시대의 사회 모습으로 가장 알맞은 것은 무엇일까요?",
-                  "choices": [
-                        "수많은 사람을 지휘할 수 있는 강력한 지배자(족장)가 있었다.",
-                        "사람들이 농사를 짓지 않고 열매만 채집하며 살았다.",
-                        "모든 사람이 똑같이 재산을 나누어 가지는 평등한 사회였다.",
-                        "쇠로 만든 기계를 사용하여 순식간에 돌을 옮겼다."
-                  ],
-                  "correctIdx": 0,
-                  "explanation": "거대한 돌을 옮겨 고인돌을 만들기 위해서는 수많은 사람들의 노동력이 필요했습니다. 이를 통해 청동기 시대에는 많은 사람을 다스리는 힘센 지배자(족장)가 등장했음을 알 수 있습니다."
-            },
-            {
-                  "title": "삼국의 전성기와 한강 유역 경쟁",
-                  "img": "./images/artifacts/gwanggaeto_stele.jpg",
-                  "desc": "4세기 백제(근초고왕), 5세기 고구려(장수왕), 6세기 신라(진흥왕)가 차례로 한강 유역을 차지하며 전성기를 누렸음을 보여주는 역사 자료입니다.",
-                  "quiz": "삼국이 모두 '한강 유역'을 차지하려고 치열하게 다툰 가장 중요한 이유는 무엇일까요?",
-                  "choices": [
-                        "땅이 기름지고, 바다를 통해 다른 나라와 교류하기 유리해서",
-                        "한강 유역에 황금이 대량으로 묻혀 있었기 때문에",
-                        "주변에 높은 산이 전혀 없어서 방어하기가 쉬웠기 때문에",
-                        "추운 겨울에도 강물이 얼지 않아 배를 띄우기 좋았기 때문에"
-                  ],
-                  "correctIdx": 0,
-                  "explanation": "한강 유역은 농사짓기에 땅이 비옥하고, 수로와 서해를 통해 중국 등 주변 나라와 교류하기에 가장 유리한 핵심 요충지였기 때문에 삼국이 전성기마다 한강을 차지하려 했습니다."
-            },
-            {
-                  "title": "고려의 국제 무역항 벽란도와 교역품",
+                  "title": "고려의 국제 무역항 벽란도와 '코리아(KOREA)'",
                   "img": "./images/artifacts/byeokrando_trade.png",
-                  "desc": "수도 개경과 가까운 예성강 하구 벽란도에 송나라, 아라비아, 일본의 상인들이 배를 타고 들어와 물건을 거래하는 모습입니다.",
-                  "quiz": "자료를 통해 알 수 있는 사실로 옳지 않은 것은 무엇일까요?",
+                  "artifactName": "예성강 벽란도 국제 무역도",
+                  "artifactPeriod": "고려 시대",
+                  "artifactUsage": "수도 개경의 관문인 예성강 벽란도를 통해 송나라, 아라비아, 일본 등 세계 각국의 상인들이 활발히 교류하던 모습을 담은 사료입니다.",
+                  "desc": "외국 상인들이 배를 타고 들어와 비단, 서적, 향약 등을 고려의 인삼, 나전칠기, 종이 등과 교역하는 활기찬 항구 풍경입니다.",
+                  "quiz": "벽란도 무역 자료를 통해 알 수 있는 역사적 사실로 옳지 않은 것은 무엇일까요?",
                   "choices": [
-                        "고려는 다른 나라와의 무역을 엄격히 금지하고 문을 닫았다.",
-                        "아라비아 상인들을 통해 고려(코리아)의 이름이 서양에 널리 알려졌다.",
-                        "고려는 인삼, 나전칠기, 고려청자 등을 외국에 수출했다.",
+                        "고려는 다른 나라와의 무역을 엄격히 금지하고 쇄국 정책을 폈다.",
+                        "아라비아 상인들과의 교류를 통해 '코리아(KOREA)'라는 이름이 서양에 널리 알려졌다.",
+                        "고려는 인삼, 나전칠기, 화려한 고려청자 등을 외국에 수출했다.",
                         "벽란도는 수도 개경과 가까워 국제 무역항으로 크게 번성했다."
                   ],
                   "correctIdx": 0,
-                  "explanation": "고려는 매우 개방적이고 국제적인 나라였습니다. 벽란도를 통해 송나라뿐 아니라 멀리 아라비아 상인들과도 활발하게 무역을 펼쳤습니다."
+                  "explanation": "고려는 주변 여러 나라와 개방적으로 활발하게 교류한 국제적인 국가였습니다. 특히 벽란도를 오간 아라비아(이슬람) 상인들을 통해 '고려(Corea / Korea)'라는 이름이 전 세계에 널리 전파되었습니다.",
+                  "interactiveUrl": "https://www.museum.go.kr"
             },
             {
-                  "title": "팔만대장경판의 보관 과학과 장경판전",
+                  "title": "750년 과학의 기적, 팔만대장경판과 장경판전",
                   "img": "./images/artifacts/tripitaka_koreana.jpg",
-                  "desc": "합천 해인사 장경판전의 앞뒤 살창 크기를 다르게 만들어 자연 바람이 골고루 통하도록 한 신비로운 통풍 과학 구조도입니다.",
-                  "quiz": "팔만대장경판이 750년이 넘는 세월 동안 썩거나 뒤틀리지 않고 온전히 보존될 수 있었던 비결은 무엇일까요?",
+                  "artifactName": "합천 해인사 대장경판 및 장경판전 (국보·세계기록유산)",
+                  "artifactPeriod": "고려 시대 (몽골 침략기)",
+                  "artifactUsage": "외세(몽골)의 침략을 부처님의 힘으로 극복하고자 백성의 간절한 염원을 모아 제작하고 썩지 않게 보관한 대규모 목판과 서고입니다.",
+                  "desc": "살창의 크기를 위아래, 앞뒤 다르게 설계하여 공기가 스스로 순환하도록 만든 신비로운 건축 과학 자료입니다.",
+                  "quiz": "팔만대장경판이 750년이 넘는 긴 세월 동안 썩거나 뒤틀리지 않고 온전히 보존된 가장 큰 비결은 무엇일까요?",
                   "choices": [
-                        "장경판전 살창의 크기를 달리하여 자연 바람이 잘 통하고 습기를 조절해서",
-                        "경판을 깊은 얼음 동굴 속에 꽁꽁 얼려 보관했기 때문에",
-                        "철과 구리로 특수 코팅을 두껍게 입혔기 때문에",
-                        "바람과 햇빛이 전혀 들어오지 못하게 사방을 흙벽으로 막아서"
+                        "장경판전의 앞뒤 살창 크기를 다르게 하여 자연 바람이 통풍되고 습기가 자동 조절되어서",
+                        "경판 전체를 차가운 얼음 동굴 속에 영구 밀폐 보관했기 때문에",
+                        "경판 표면에 두꺼운 철과 구리 합금을 씌웠기 때문에",
+                        "바람과 햇빛이 전혀 들어오지 못하도록 사방을 단단한 흙벽으로 막아서"
                   ],
                   "correctIdx": 0,
-                  "explanation": "장경판전은 앞뒤 살창의 크기를 위아래 서로 다르게 설계하여 바람이 자연스럽게 순환하고, 바닥에는 숯과 소금을 묻어 습도를 완벽히 조절한 선조들의 놀라운 건축 과학입니다."
+                  "explanation": "해인사 장경판전은 남향과 북향 살창의 크기를 위아래 엇갈리게 배치하여 건물 안으로 들어온 바람이 소용돌이치며 고루 순환하게 만들었고, 바닥에는 숯과 횟가루, 소금을 묻어 습도를 완벽하게 자동 조절한 조상들의 위대한 과학 유산입니다.",
+                  "interactiveUrl": "http://www.haeinsa.or.kr"
             }
       ],
       "map": [
