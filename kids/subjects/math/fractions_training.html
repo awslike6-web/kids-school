@@ -53,108 +53,90 @@
       background: #fef3c7;
       color: #b45309;
       border: 2px solid #f59e0b;
-      border-radius: 18px;
+      border-radius: 14px;
       padding: 6px 14px;
       font-family: 'Jua', sans-serif;
       font-size: 1rem;
+      cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       transition: all 0.2s;
     }
     .btn-nav-back:hover {
       background: #fde68a;
       transform: translateY(-2px);
     }
-    .header-title-box {
-      display: flex;
-      flex-direction: column;
-    }
-    .header-sub {
-      font-size: 0.82rem;
-      color: #b45309;
-      font-weight: 700;
-    }
-    .header-title {
-      font-family: 'Jua', sans-serif;
-      font-size: 1.35rem;
-      color: #78350f;
+    .header-title-box h1 {
       margin: 0;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .btn-link-pill {
-      background: #fef3c7;
-      color: #b45309;
-      border: 2px solid #f59e0b;
-      border-radius: 18px;
-      padding: 6px 12px;
       font-family: 'Jua', sans-serif;
-      font-size: 0.95rem;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .btn-link-pill:hover {
-      background: #fde68a;
-      transform: translateY(-2px);
-    }
-    .gem-pill {
-      background: #ecfdf5;
-      border: 2px solid #10b981;
-      border-radius: 18px;
-      padding: 6px 12px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1rem;
-      color: #047857;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* 메인 래퍼 */
-    .main-wrap {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 20px 16px 60px;
-    }
-
-    /* 모드 전환 탭 스위처 */
-    .mode-switcher-wrap {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .mode-btn {
-      background: #ffffff;
-      border: 2px solid #e5e7eb;
-      border-radius: 20px;
-      padding: 12px 24px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.15rem;
-      color: #6b7280;
-      cursor: pointer;
-      transition: all 0.2s ease;
+      font-size: 1.4rem;
+      color: #78350f;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .mode-btn:hover {
-      border-color: #f59e0b;
-      color: #b45309;
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-    .mode-btn.active {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #ffffff;
-      border-color: #d97706;
-      box-shadow: 0 6px 18px rgba(217, 119, 6, 0.3);
+    .gem-badge {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      color: #1d4ed8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    /* 메인 카드 */
+    /* 메인 컨테이너 */
+    .training-container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+
+    /* 상단 모드 전환 탭 (Mode 1 vs Mode 2) */
+    .mode-tab-bar {
+      display: flex;
+      background: #fef3c7;
+      padding: 6px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      gap: 6px;
+      border: 2px solid #fde68a;
+    }
+    .mode-tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 14px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      color: #92400e;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .mode-tab-btn.active {
+      background: #ffffff;
+      color: #b45309;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+      font-weight: 800;
+      transform: scale(1.02);
+    }
+
+    /* 공통 카드 스타일 */
     .train-card {
       background: #ffffff;
       border: 3px solid #fde68a;
@@ -164,7 +146,9 @@
       position: relative;
     }
 
-    /* 세로 분수 */
+    /* ======================================================== */
+    /* 📐 교과서 실물 정품 세로 분수 (Vertical Fraction)       */
+    /* ======================================================== */
     .inline-frac {
       display: inline-flex;
       flex-direction: column;
@@ -175,23 +159,47 @@
       line-height: 1.1;
       font-weight: 700;
     }
+    .inline-frac .num {
+      display: block;
+      padding-bottom: 2px;
+    }
     .inline-frac .bar {
+      display: block;
       border-top: 2px solid currentColor;
+      height: 0;
+      width: 100%;
+      min-width: 16px;
       margin: 2px 0;
       font-size: 0;
-      height: 0;
+    }
+    .inline-frac .den {
       display: block;
+      padding-top: 2px;
     }
 
-    /* 🧱 Mode 1: 단계별 빈칸 연산 훈련소 */
-    .trainer-topic-pills {
+    /* 대분수 래퍼 */
+    .mixed-frac {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      gap: 3px;
+      font-weight: 700;
+    }
+    .mixed-frac .whole {
+      font-size: 1.25em;
+      line-height: 1;
+      color: currentColor;
+    }
+
+    /* 🧱 Mode 1: 6대 파트 대분류 탭 */
+    .category-pills-bar {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       justify-content: center;
     }
-    .topic-pill {
+    .cat-pill {
       background: #f9fafb;
       border: 2px solid #e5e7eb;
       border-radius: 14px;
@@ -202,18 +210,87 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .topic-pill:hover, .topic-pill.active {
-      background: #fffbeb;
-      border-color: #d97706;
+    .cat-pill:hover {
+      border-color: #f59e0b;
       color: #b45309;
-      transform: translateY(-2px);
+    }
+    .cat-pill.active {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #b45309;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
     }
 
+    /* 서브 문제 번호 선택 바 (1번~5번 + 랜덤) */
+    .sub-problem-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      padding: 10px;
+      background: #fefce8;
+      border-radius: 18px;
+      border: 1.5px dashed #fcd34d;
+    }
+    .prob-num-btn {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 6px 14px;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .prob-num-btn:hover {
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
+    .prob-num-btn.active {
+      background: #3b82f6;
+      border-color: #2563eb;
+      color: #ffffff;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    }
+    .prob-num-btn.done::after {
+      content: ' ✔';
+      color: #10b981;
+      font-weight: bold;
+    }
+    .prob-num-btn.active.done::after {
+      color: #a7f3d0;
+    }
+    .btn-random-generate {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 2px solid #047857;
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 6px 16px;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+      transition: all 0.2s;
+    }
+    .btn-random-generate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    /* 문제 타이틀 박스 */
     .problem-hero-box {
       background: linear-gradient(135deg, #fffbeb, #fef3c7);
-      border: 2px solid #f59e0b;
+      border: 2px solid #fcd34d;
       border-radius: 20px;
-      padding: 20px;
+      padding: 20px 24px;
       text-align: center;
       margin-bottom: 24px;
     }
@@ -222,7 +299,7 @@
       background: #d97706;
       color: #ffffff;
       padding: 4px 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-family: 'Jua', sans-serif;
       font-size: 0.9rem;
       margin-bottom: 10px;
@@ -234,178 +311,177 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
     }
 
+    /* 단계별 연산 비계(Scaffolding) 스텝 */
     .scaffold-steps-wrap {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom: 24px;
     }
     .step-row {
-      background: #fafaf9;
-      border: 2px solid #e7e5e4;
-      border-radius: 16px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
       padding: 16px 20px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: all 0.2s;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.3s;
     }
     .step-row.active {
-      background: #ffffff;
       border-color: #f59e0b;
-      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+      background: #fffdf5;
+      box-shadow: 0 6px 16px rgba(245, 158, 11, 0.12);
     }
     .step-row.done {
-      background: #ecfdf5;
       border-color: #10b981;
+      background: #f0fdf4;
     }
     .step-info {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-family: 'Jua', sans-serif;
     }
     .step-badge {
-      background: #f3f4f6;
-      color: #4b5563;
-      padding: 4px 10px;
-      border-radius: 10px;
-      font-size: 0.9rem;
+      background: #e2e8f0;
+      color: #475569;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.85rem;
+      padding: 3px 10px;
+      border-radius: 8px;
     }
     .step-row.active .step-badge {
-      background: #fef3c7;
-      color: #b45309;
+      background: #f59e0b;
+      color: #ffffff;
     }
     .step-row.done .step-badge {
       background: #10b981;
       color: #ffffff;
     }
     .step-desc {
-      font-size: 1.1rem;
-      color: #374151;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #334155;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
     }
-
     .step-formula-area {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.8rem;
+      color: #1e293b;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.6rem;
-      color: #78350f;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     /* 빈칸 인풋 */
     .blank-input {
       width: 54px;
       height: 48px;
-      border: 3px solid #d97706;
+      border: 3px dashed #d97706;
       border-radius: 12px;
-      font-family: 'Jua', sans-serif;
-      font-size: 1.5rem;
+      background: #ffffff;
       text-align: center;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.6rem;
       color: #b45309;
-      background: #fffbeb;
       outline: none;
       transition: all 0.2s;
     }
     .blank-input:focus {
+      border-style: solid;
       border-color: #2563eb;
-      background: #ffffff;
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+      background: #eff6ff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
     }
     .blank-input.correct {
-      background: #d1fae5;
+      border-style: solid;
       border-color: #10b981;
+      background: #d1fae5;
       color: #047857;
       pointer-events: none;
     }
 
-    /* 온스크린 숫자 키패드 (태블릿 터치 지원) */
+    /* 힌트 알림창 */
+    .hint-alert-box {
+      background: #fef2f2;
+      border: 2px solid #fecaca;
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-top: 16px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      color: #991b1b;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* 온스크린 키패드 */
     .keypad-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       gap: 8px;
-      margin-top: 10px;
-    }
-    @media (max-width: 600px) {
-      .keypad-grid {
-        grid-template-columns: repeat(5, 1fr);
-      }
+      max-width: 480px;
+      margin: 16px auto 0;
     }
     .keypad-btn {
       background: #ffffff;
-      border: 2px solid #e5e7eb;
+      border: 2px solid #e2e8f0;
       border-radius: 12px;
-      padding: 10px 0;
+      padding: 12px 0;
       font-family: 'Jua', sans-serif;
       font-size: 1.3rem;
-      color: #374151;
+      color: #334155;
       cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.04);
       transition: all 0.15s;
-    }
-    .keypad-btn:hover {
-      background: #fef3c7;
-      border-color: #f59e0b;
-      transform: translateY(-2px);
     }
     .keypad-btn:active {
       transform: scale(0.95);
+      background: #f1f5f9;
     }
 
-    /* 코코 힌트 박스 */
-    .hint-alert-box {
-      background: #eff6ff;
-      border: 2px solid #3b82f6;
-      border-radius: 16px;
-      padding: 12px 18px;
-      margin-top: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1rem;
-      color: #1e3a8a;
-      display: none;
-    }
-
-    /* ⚔️ Mode 2: 6대 공식 퀴즈 배틀 */
+    /* ⚔️ Mode 2: 퀴즈 배틀 */
     .quiz-progress-bar {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
       font-family: 'Jua', sans-serif;
-      color: #78350f;
+      color: #64748b;
+      margin-bottom: 12px;
     }
     .quiz-question-box {
-      background: linear-gradient(135deg, #fffbeb, #fef3c7);
-      border: 2px solid #f59e0b;
+      background: linear-gradient(135deg, #fff7ed, #ffedd5);
+      border: 2px solid #fdba74;
       border-radius: 20px;
-      padding: 24px 20px;
+      padding: 24px;
       margin-bottom: 24px;
       text-align: center;
     }
     .quiz-q-num {
-      display: inline-block;
-      background: #d97706;
+      background: #ea580c;
       color: #ffffff;
       padding: 4px 12px;
       border-radius: 10px;
       font-family: 'Jua', sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      display: inline-block;
       margin-bottom: 12px;
     }
     .quiz-question-text {
       font-family: 'Jua', sans-serif;
-      font-size: 1.45rem;
-      color: #78350f;
+      font-size: 1.5rem;
+      color: #7c2d12;
       line-height: 1.5;
       margin: 0;
+      word-break: keep-all;
     }
-
     .quiz-options-list {
       display: flex;
       flex-direction: column;
@@ -413,129 +489,151 @@
     }
     .quiz-opt-btn {
       background: #ffffff;
-      border: 2px solid #e5e7eb;
-      border-radius: 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
       padding: 16px 20px;
       text-align: left;
       font-family: 'Jua', sans-serif;
       font-size: 1.25rem;
-      color: #374151;
+      color: #334155;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
     .quiz-opt-btn:hover {
       border-color: #f59e0b;
-      background: #fffbeb;
+      background: #fffdf5;
       transform: translateX(4px);
     }
     .quiz-opt-num {
       width: 32px;
       height: 32px;
+      background: #f1f5f9;
       border-radius: 50%;
-      background: #f3f4f6;
-      color: #6b7280;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
+      color: #64748b;
+      font-size: 1rem;
       flex-shrink: 0;
     }
     .quiz-opt-btn.correct {
       background: #d1fae5 !important;
       border-color: #10b981 !important;
-      color: #065f46 !important;
-    }
-    .quiz-opt-btn.correct .quiz-opt-num {
-      background: #10b981;
-      color: #ffffff;
+      color: #047857 !important;
     }
     .quiz-opt-btn.wrong {
-      background: #fef2f2 !important;
-      border-color: #f87171 !important;
-      color: #991b1b !important;
+      background: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #b91c1c !important;
     }
 
-    /* 축하 모달 */
-    .modal-overlay {
+    /* 팝업 모달 */
+    .train-modal-backdrop {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      backdrop-filter: blur(4px);
     }
-    .modal-content {
+    .train-modal-box {
       background: #ffffff;
       border-radius: 28px;
-      padding: 36px 28px;
       max-width: 440px;
       width: 90%;
+      padding: 32px 24px;
       text-align: center;
-      border: 4px solid #10b981;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 3px solid #fde68a;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     }
-    @keyframes popIn {
-      from { transform: scale(0.8); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    .modal-trophy {
+      font-size: 4rem;
+      margin-bottom: 12px;
+    }
+    .modal-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.8rem;
+      color: #78350f;
+      margin-bottom: 10px;
+    }
+    .modal-desc {
+      font-size: 1.05rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      word-break: keep-all;
+    }
+    .btn-modal-action {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      border: none;
+      border-radius: 16px;
+      padding: 12px 32px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-modal-action:hover {
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 640px) {
+      .problem-title { font-size: 1.6rem; }
+      .step-formula-area { font-size: 1.4rem; }
+      .blank-input { width: 46px; height: 42px; font-size: 1.3rem; }
+      .keypad-grid { max-width: 100%; }
+      .keypad-btn { font-size: 1.15rem; padding: 10px 0; }
     }
   </style>
 </head>
 <body>
 
 <!-- 상단 탑바 -->
-<header class="top-header">
+<div class="top-header">
   <div class="header-left">
-    <a href="math.html" class="btn-nav-back" onclick="playSfx('click')">🔙 수학 대문</a>
+    <a href="math.html" class="btn-nav-back">🔙 수학 대문</a>
     <div class="header-title-box">
-      <span class="header-sub">초등 5-2 수학 2단원 실전</span>
-      <h1 class="header-title">⚔️ 분수의 곱셈 실전 훈련관</h1>
+      <h1>⚡ 5학년 분수의 곱셈 실전 훈련관</h1>
     </div>
   </div>
   <div class="header-right">
-    <a href="fractions_multiplication.html" class="btn-link-pill" onclick="playSfx('click')">🍰 개념 탐험관</a>
-    <a href="math_minsu_bakery_storybook.html" class="btn-link-pill" onclick="playSfx('click')">📖 동화 도서관</a>
-    <div class="gem-pill">💎 <span id="gemCount">0</span></div>
+    <div class="gem-badge">💎 <span id="gemCount">0</span></div>
   </div>
-</header>
+</div>
 
-<div class="main-wrap">
-
-  <!-- 듀얼 모드 전환 탭 -->
-  <div class="mode-switcher-wrap">
-    <button class="mode-btn active" id="btnModeScaffold" onclick="switchTrainMode('scaffold')">
-      <span>🧱</span> 모드 1: 단계별 빈칸 연산 훈련
+<div class="training-container">
+  
+  <!-- 모드 전환 탭 -->
+  <div class="mode-tab-bar">
+    <button class="mode-tab-btn active" id="tabScaffold" onclick="switchTrainMode('scaffold')">
+      🧩 1. 단계별 빈칸 연산 훈련소
     </button>
-    <button class="mode-btn" id="btnModeBattle" onclick="switchTrainMode('battle')">
-      <span>⚔️</span> 모드 2: 6대 공식 퀴즈 배틀 (10제)
+    <button class="mode-tab-btn" id="tabBattle" onclick="switchTrainMode('battle')">
+      🏆 2. 6대 공식 퀴즈 배틀 (10제)
     </button>
   </div>
 
-  <!-- 메인 카드 -->
-  <main class="train-card" id="mainTrainArea">
-    <!-- 동적 렌더링 -->
-  </main>
+  <!-- 메인 훈련 카드 -->
+  <div class="train-card" id="mainTrainArea">
+    <!-- 동적 렌더링 영역 -->
+  </div>
 
 </div>
 
-<!-- 완주 축하 모달 -->
-<div class="modal-overlay" id="trainModal">
-  <div class="modal-content">
-    <div style="font-size: 3.5rem; margin-bottom: 12px;">🎉 🏆 💎</div>
-    <h2 style="font-family:'Jua',sans-serif; color:#065f46; font-size:1.8rem; margin:0 0 10px;" id="modalTitle">실전 훈련 완료!</h2>
-    <p style="font-size:1.05rem; color:#4b5563; line-height:1.6; margin-bottom:20px;" id="modalDesc">
-      문제를 훌륭하게 완파했습니다!<br>
-      <b>보석 +5 💎 & 수학 경험치 +15 EXP</b>가 지급되었습니다!
-    </p>
-    <div style="display:flex; gap:10px; justify-content:center;">
-      <button class="keypad-btn" style="padding:10px 20px; background:#10b981; color:#fff; border:none;" onclick="closeTrainModal()">계속 훈련하기</button>
-      <a href="math.html" class="keypad-btn" style="padding:10px 20px; text-decoration:none; text-align:center;">수학 대문으로</a>
-    </div>
+<!-- 팝업 모달 -->
+<div class="train-modal-backdrop" id="trainModal">
+  <div class="train-modal-box">
+    <div class="modal-trophy">🏆</div>
+    <h2 class="modal-title" id="modalTitle">훈련 완료!</h2>
+    <p class="modal-desc" id="modalDesc">축하합니다! 보상을 획득했습니다.</p>
+    <button class="btn-modal-action" onclick="closeTrainModal()">확인</button>
   </div>
 </div>
 
@@ -543,246 +641,484 @@
 <script src="../../core/fairy-engine.js"></script>
 <script>
 // ========================================================
-// ⚔️ 5-2 수학 2단원 실전 훈련관 엔진
+// 🔊 사운드 및 보상 헬퍼
 // ========================================================
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
 
-// 🎵 Web Audio 효과음
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function playSfx(type) {
   try {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const now = audioCtx.currentTime;
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
 
-    if (type === 'click') {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.frequency.setValueAtTime(600, now);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.linearRampToValueAtTime(0, now + 0.05);
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(now); osc.stop(now + 0.05);
-    } else if (type === 'correct') {
-      // 딩동댕 2톤
-      [523, 659, 783].forEach((f, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.setValueAtTime(f, now + i * 0.08);
-        gain.gain.setValueAtTime(0.25, now + i * 0.08);
-        gain.gain.linearRampToValueAtTime(0, now + i * 0.08 + 0.15);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.15);
-      });
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+
+    if (type === 'correct') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.15);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      osc.start(now);
+      osc.stop(now + 0.3);
     } else if (type === 'wrong') {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(250, now);
-      osc.frequency.setValueAtTime(200, now + 0.1);
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.setValueAtTime(196, now + 0.1);
       gain.gain.setValueAtTime(0.2, now);
-      gain.gain.linearRampToValueAtTime(0, now + 0.25);
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.start(now); osc.stop(now + 0.25);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    } else if (type === 'click') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
     } else if (type === 'fanfare') {
-      [440, 554, 659, 880].forEach((f, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(f, now + i * 0.1);
-        gain.gain.setValueAtTime(0.3, now + i * 0.1);
-        gain.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.3);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(freq, now + i * 0.1);
+        g.gain.setValueAtTime(0.25, now + i * 0.1);
+        g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.35);
+        o.start(now + i * 0.1);
+        o.stop(now + i * 0.1 + 0.35);
       });
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Audio error:", e);
+  }
 }
 
 function getGemCount() {
-  return parseInt(localStorage.getItem('math_gem_count') || '0', 10);
+  return parseInt(localStorage.getItem('minmin_gems') || '0', 10);
 }
-function addGems(n) {
-  const c = getGemCount() + n;
-  localStorage.setItem('math_gem_count', c);
-  document.getElementById('gemCount').textContent = c;
+function addGems(amount) {
+  const cur = getGemCount() + amount;
+  localStorage.setItem('minmin_gems', cur.toString());
+  document.getElementById('gemCount').textContent = cur;
 }
 
+// ========================================================
+// 📐 정품 세로 분수 HTML 생성 헬퍼 (슬래시 분수 표기 완전 제거)
+// ========================================================
+function renderFrac(num, den) {
+  return `<span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span>`;
+}
+
+function renderMixed(whole, num, den) {
+  return `<span class="mixed-frac"><span class="whole">${whole}</span><span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span></span>`;
+}
+
+// ========================================================
+// 🧱 1. 단계별 빈칸 연산 훈련소 (6대 파트별 문제 은행 & 랜덤 생성)
+// ========================================================
 let trainMode = 'scaffold'; // 'scaffold' | 'battle'
+let curCatIdx = 0;          // 0: 진분수x자연수, 1: 가분수탈출, 2: 대분수x자연수, 3: 자연수x진분수, 4: 진분수x진분수, 5: 대분수x대분수
+let curProbIdx = 0;         // 0~4 (기본 5문제) or -1 (랜덤 생성 문제)
+let customRandomProb = null;// 랜덤 생성 문제 임시 저장
+let solvedMap = {};         // key: `${cat}_${prob}`, val: true
 
-function switchTrainMode(mode) {
-  playSfx('click');
-  trainMode = mode;
-  document.getElementById('btnModeScaffold').classList.toggle('active', mode === 'scaffold');
-  document.getElementById('btnModeBattle').classList.toggle('active', mode === 'battle');
-  if (mode === 'scaffold') {
-    renderScaffoldMode();
-  } else {
-    renderBattleMode();
-  }
-}
-
-// ========================================================
-// 🧱 1. 단계별 빈칸 연산 훈련소 데이터 & 로직
-// ========================================================
-
-const SCAFFOLD_PROBLEMS = [
-  // 1. 진분수 x 자연수
-  {
-    id: 0,
-    name: "🍕 진분수 × 자연수",
-    displayHero: `<span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span> × 2`,
-    steps: [
-      {
-        desc: "자연수 2는 분자에만 곱해요!",
-        formula: `<span class="inline-frac"><span>1 × <input class="blank-input" id="inp_0_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>3</span></span>`,
-        hint: "자연수 2를 분자에 쏙 넣어보세요!"
-      },
-      {
-        desc: "분자 1 × 2를 계산하면?",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_0_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>3</span></span>`,
-        hint: "1 곱하기 2는 2예요!"
-      }
-    ]
-  },
-  // 2. 가분수 탈출
-  {
-    id: 1,
-    name: "🐸 가분수 탈출",
-    displayHero: `<span class="inline-frac"><span>2</span><span class="bar">/</span><span>5</span></span> × 3`,
-    steps: [
-      {
-        desc: "분자에 3을 곱해요 (2 × 3)",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_1_0" data-ans="6" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>5</span></span>`,
-        hint: "2 곱하기 3은 6이에요!"
-      },
-      {
-        desc: "가분수 6/5를 대분수로 바꿔요! (6 = 5 × 1 + 1)",
-        formula: `= <input class="blank-input" id="inp_1_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)"><span class="inline-frac"><span><input class="blank-input" id="inp_1_2" data-ans="1" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>5</span></span>`,
-        hint: "6 안에 5가 1번 들어가고 1이 남아요! (1과 1/5)"
-      }
-    ]
-  },
-  // 3. 대분수 x 자연수
-  {
-    id: 2,
-    name: "🧪 대분수 × 자연수",
-    displayHero: `1<span class="inline-frac"><span>2</span><span class="bar">/</span><span>3</span></span> × 2`,
-    steps: [
-      {
-        desc: "1과 2/3에게 가분수 투구 씌우기! (1×3 + 2)",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_2_0" data-ans="5" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>3</span></span> × 2`,
-        hint: "온전한 1병은 3잔! 3 + 2 = 5잔이에요!"
-      },
-      {
-        desc: "분자 5에 자연수 2 곱하기",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_2_1" data-ans="10" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>3</span></span>`,
-        hint: "5 곱하기 2는 10이에요!"
-      },
-      {
-        desc: "가분수 10/3을 대분수로 정리! (10 = 3 × 3 + 1)",
-        formula: `= <input class="blank-input" id="inp_2_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)"><span class="inline-frac"><span><input class="blank-input" id="inp_2_3" data-ans="1" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>3</span></span>`,
-        hint: "10 안에 3이 3번 들어가고 1이 남아요! (3과 1/3)"
-      }
-    ]
-  },
-  // 4. 자연수 x 진분수 약분
-  {
-    id: 3,
-    name: "🧶 자연수 × 진분수",
-    displayHero: `6 × <span class="inline-frac"><span>2</span><span class="bar">/</span><span>3</span></span>`,
-    steps: [
-      {
-        desc: "자연수 6과 분모 3을 3으로 약분하면 6은 몇이 될까요?",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_3_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)"> × 2</span><span class="bar">/</span><span>1</span></span>`,
-        hint: "6 나누기 3은 2예요!"
-      },
-      {
-        desc: "남은 수 2 × 2를 계산하면?",
-        formula: `= <input class="blank-input" id="inp_3_1" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`,
-        hint: "2 곱하기 2는 4예요!"
-      }
-    ]
-  },
-  // 5. 단위분수 x 단위분수
-  {
-    id: 4,
-    name: "💎 단위분수 곱셈",
-    displayHero: `<span class="inline-frac"><span>1</span><span class="bar">/</span><span>2</span></span> × <span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span>`,
-    steps: [
-      {
-        desc: "분모끼리 곱하고, 분자끼리 곱해요!",
-        formula: `= <span class="inline-frac"><span>1 × 1</span><span class="bar">/</span><span><input class="blank-input" id="inp_4_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)"> × <input class="blank-input" id="inp_4_1" data-ans="3" maxlength="2" onkeyup="checkInput(this)"></span></span>`,
-        hint: "분모 2와 3을 분모 자리에 써요!"
-      },
-      {
-        desc: "분모 2 × 3을 계산하면 전체 칸 수는?",
-        formula: `= <span class="inline-frac"><span>1</span><span class="bar">/</span><span><input class="blank-input" id="inp_4_2" data-ans="6" maxlength="2" onkeyup="checkInput(this)"></span></span>`,
-        hint: "2 곱하기 3은 6이에요!"
-      }
-    ]
-  },
-  // 6. 진분수 x 진분수 번개 약분
-  {
-    id: 5,
-    name: "✂️ 대각선 번개 약분",
-    displayHero: `<span class="inline-frac"><span>3</span><span class="bar">/</span><span>4</span></span> × <span class="inline-frac"><span>2</span><span class="bar">/</span><span>7</span></span>`,
-    steps: [
-      {
-        desc: "대각선의 4와 2를 2로 약분! 4는 무엇이 될까요?",
-        formula: `분모 4는 ➔ <input class="blank-input" id="inp_5_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`,
-        hint: "4 나누기 2는 2예요!"
-      },
-      {
-        desc: "분자 2는 2로 나누면 무엇이 될까요?",
-        formula: `분자 2는 ➔ <input class="blank-input" id="inp_5_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`,
-        hint: "2 나누기 2는 1이에요!"
-      },
-      {
-        desc: "약분된 수로 계산: (3×1) / (2×7)",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_5_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span><input class="blank-input" id="inp_5_3" data-ans="14" maxlength="2" onkeyup="checkInput(this)"></span></span>`,
-        hint: "분자는 3×1=3, 분모는 2×7=14예요!"
-      }
-    ]
-  },
-  // 7. 대분수 x 대분수 보스
-  {
-    id: 6,
-    name: "👑 대분수 × 대분수 보스",
-    displayHero: `2<span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span> × 1<span class="inline-frac"><span>1</span><span class="bar">/</span><span>5</span></span>`,
-    steps: [
-      {
-        desc: "두 대분수를 모두 가분수로 변신! (7/3 × 6/5)",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_6_0" data-ans="7" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>3</span></span> × <span class="inline-frac"><span><input class="blank-input" id="inp_6_1" data-ans="6" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>5</span></span>`,
-        hint: "2×3+1=7, 1×5+1=6이에요!"
-      },
-      {
-        desc: "분모 3과 분자 6을 3으로 약분하면 분자는 7 × 2 = ?",
-        formula: `= <span class="inline-frac"><span><input class="blank-input" id="inp_6_2" data-ans="14" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>5</span></span>`,
-        hint: "6이 2가 되니까 7 곱하기 2는 14예요!"
-      },
-      {
-        desc: "가분수 14/5를 대분수로 변신! (14 = 5 × 2 + 4)",
-        formula: `= <input class="blank-input" id="inp_6_3" data-ans="2" maxlength="2" onkeyup="checkInput(this)"><span class="inline-frac"><span><input class="blank-input" id="inp_6_4" data-ans="4" maxlength="2" onkeyup="checkInput(this)"></span><span class="bar">/</span><span>5</span></span>`,
-        hint: "14 안에 5가 2번 들어가고 4가 남아요! (2와 4/5)"
-      }
-    ]
-  }
+const CATEGORIES = [
+  { name: "🍕 진분수 × 자연수", desc: "분모는 쉬고, 분자에만 자연수를 곱해요!" },
+  { name: "🐸 가분수 탈출", desc: "분자가 분모보다 커지면 대분수로 변신!" },
+  { name: "🧪 대분수 × 자연수", desc: "가분수 투구를 씌운 뒤 곱하고 대분수로 정리!" },
+  { name: "🧶 자연수 × 진분수", desc: "자연수와 분모를 미리 싹둑 약분해요!" },
+  { name: "💎 진분수 × 진분수", desc: "대각선 번개 약분 후 분모끼리, 분자끼리 곱해요!" },
+  { name: "👑 대분수 × 대분수", desc: "양쪽 모두 가분수로 바꾼 뒤 번개 약분!" }
 ];
 
-let curScaffoldIdx = 0;
+// 각 카테고리별 정선된 5개 문제 세트 (총 30문제)
+const PROBLEM_BANKS = {
+  // Part 0: 진분수 x 자연수 (결과가 진분수)
+  0: [
+    {
+      hero: `${renderFrac(1, 3)} × 2`,
+      steps: [
+        { desc: "자연수 2는 분자에만 쏙 곱해요!", formula: `${renderFrac(`1 × <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "자연수 2를 분자 자리에 넣으세요!" },
+        { desc: "분자 1 × 2를 계산하면?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "1 곱하기 2는 2예요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(1, 4)} × 3`,
+      steps: [
+        { desc: "자연수 3을 분자에만 곱해요!", formula: `${renderFrac(`1 × <input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "자연수 3을 분자 자리에 써보세요!" },
+        { desc: "분자 1 × 3을 계산하면?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "1 곱하기 3은 3이에요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(2, 7)} × 3`,
+      steps: [
+        { desc: "분자 2에 자연수 3을 곱해요!", formula: `${renderFrac(`2 × <input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 7)}`, hint: "자연수 3을 분자에 곱해요!" },
+        { desc: "분자 2 × 3을 계산하면?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="6" maxlength="2" onkeyup="checkInput(this)">`, 7)}`, hint: "2 곱하기 3은 6이에요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(1, 5)} × 4`,
+      steps: [
+        { desc: "자연수 4를 분자에만 곱해요!", formula: `${renderFrac(`1 × <input class="blank-input" id="inp_s_0" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "자연수 4를 분자에 넣어요!" },
+        { desc: "분자 1 × 4를 계산하면?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "1 곱하기 4는 4예요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(3, 8)} × 2`,
+      steps: [
+        { desc: "분모 8과 자연수 2를 2로 약분하면 분모 8은 무엇이 될까요?", formula: `분모 8은 ➔ <input class="blank-input" id="inp_s_0" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, hint: "8 나누기 2는 4예요!" },
+        { desc: "약분하고 남은 분수 계산 결과는?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "분자는 3 그대로 4분의 3이에요!" }
+      ]
+    }
+  ],
+
+  // Part 1: 진분수 x 자연수 (가분수 탈출 -> 대분수)
+  1: [
+    {
+      hero: `${renderFrac(2, 5)} × 3`,
+      steps: [
+        { desc: `분자에 3을 곱해요 (2 × 3)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="6" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "2 곱하기 3은 6이에요!" },
+        { desc: `가분수 ${renderFrac(6, 5)}를 대분수로 바꿔요! (6 = 5 × 1 + 1)`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "6 안에 5가 1번 들어가고 1이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(3, 4)} × 3`,
+      steps: [
+        { desc: `분자에 3을 곱해요 (3 × 3)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="9" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "3 곱하기 3은 9예요!" },
+        { desc: `가분수 ${renderFrac(9, 4)}를 대분수로 바꿔요! (9 = 4 × 2 + 1)`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "9 안에 4가 2번 들어가고 1이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(4, 5)} × 2`,
+      steps: [
+        { desc: `분자에 2를 곱해요 (4 × 2)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="8" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "4 곱하기 2는 8이에요!" },
+        { desc: `가분수 ${renderFrac(8, 5)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "8 안에 5가 1번 들어가고 3이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(2, 3)} × 4`,
+      steps: [
+        { desc: `분자에 4를 곱해요 (2 × 4)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="8" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "2 곱하기 4는 8이에요!" },
+        { desc: `가분수 ${renderFrac(8, 3)}를 대분수로 변신!`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "8 안에 3이 2번 들어가고 2가 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(5, 6)} × 2`,
+      steps: [
+        { desc: `분모 6과 자연수 2를 2로 약분하면 분모 6은?`, formula: `분모 6은 ➔ <input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, hint: "6 나누기 2는 3이에요!" },
+        { desc: `약분 후 가분수 ${renderFrac(5, 3)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "5 안에 3이 1번 들어가고 2가 남아요!" }
+      ]
+    }
+  ],
+
+  // Part 2: 대분수 x 자연수
+  2: [
+    {
+      hero: `${renderMixed(1, 2, 3)} × 2`,
+      steps: [
+        { desc: `대분수 ${renderMixed(1, 2, 3)}에게 가분수 투구 씌우기! (1×3 + 2)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`, 3)} × 2`, hint: "1×3+2 = 5잔이에요!" },
+        { desc: "분자 5에 자연수 2 곱하기", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="10" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "5 곱하기 2는 10이에요!" },
+        { desc: `가분수 ${renderFrac(10, 3)}을 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_3" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "10 안에 3이 3번 들어가고 1이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(1, 1, 4)} × 3`,
+      steps: [
+        { desc: `대분수 ${renderMixed(1, 1, 4)}를 가분수로 변신! (1×4 + 1)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`, 4)} × 3`, hint: "1×4+1 = 5예요!" },
+        { desc: "분자 5에 자연수 3 곱하기", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="15" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "5 곱하기 3은 15예요!" },
+        { desc: `가분수 ${renderFrac(15, 4)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_3" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "15 안에 4가 3번 들어가고 3이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(2, 1, 5)} × 2`,
+      steps: [
+        { desc: `대분수 ${renderMixed(2, 1, 5)}를 가분수로 변신! (2×5 + 1)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="11" maxlength="2" onkeyup="checkInput(this)">`, 5)} × 2`, hint: "2×5+1 = 11이에요!" },
+        { desc: "분자 11에 자연수 2 곱하기", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="22" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "11 곱하기 2는 22예요!" },
+        { desc: `가분수 ${renderFrac(22, 5)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_2" data-ans="4" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_3" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "22 안에 5가 4번 들어가고 2가 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(1, 1, 6)} × 3`,
+      steps: [
+        { desc: `대분수 ${renderMixed(1, 1, 6)}를 가분수로 변신! (1×6 + 1)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="7" maxlength="2" onkeyup="checkInput(this)">`, 6)} × 3`, hint: "1×6+1 = 7이에요!" },
+        { desc: "분모 6과 자연수 3을 3으로 약분하면 분모는?", formula: `분모 6은 ➔ <input class="blank-input" id="inp_s_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "6 나누기 3은 2예요!" },
+        { desc: `남은 수 ${renderFrac(7, 2)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_3" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, 2)}`, hint: "7 안에 2가 3번 들어가고 1이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(2, 2, 3)} × 2`,
+      steps: [
+        { desc: `대분수 ${renderMixed(2, 2, 3)}를 가분수로 변신! (2×3 + 2)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="8" maxlength="2" onkeyup="checkInput(this)">`, 3)} × 2`, hint: "2×3+2 = 8이에요!" },
+        { desc: "분자 8에 자연수 2 곱하기", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="16" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "8 곱하기 2는 16이에요!" },
+        { desc: `가분수 ${renderFrac(16, 3)}을 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_2" data-ans="5" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_3" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "16 안에 3이 5번 들어가고 1이 남아요!" }
+      ]
+    }
+  ],
+
+  // Part 3: 자연수 x 진분수 (약분 훈련)
+  3: [
+    {
+      hero: `6 × ${renderFrac(2, 3)}`,
+      steps: [
+        { desc: "자연수 6과 분모 3을 3으로 약분하면 6은 몇이 될까요?", formula: `6은 ➔ <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "6 나누기 3은 2예요!" },
+        { desc: "남은 수 2 × 2를 계산하면?", formula: `= <input class="blank-input" id="inp_s_1" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, hint: "2 곱하기 2는 4예요!" }
+      ]
+    },
+    {
+      hero: `8 × ${renderFrac(3, 4)}`,
+      steps: [
+        { desc: "자연수 8과 분모 4를 4로 약분하면 8은 몇이 될까요?", formula: `8은 ➔ <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "8 나누기 4는 2예요!" },
+        { desc: "남은 수 2 × 3을 계산하면?", formula: `= <input class="blank-input" id="inp_s_1" data-ans="6" maxlength="2" onkeyup="checkInput(this)">`, hint: "2 곱하기 3은 6이에요!" }
+      ]
+    },
+    {
+      hero: `10 × ${renderFrac(2, 5)}`,
+      steps: [
+        { desc: "자연수 10과 분모 5를 5로 약분하면 10은 몇이 될까요?", formula: `10은 ➔ <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "10 나누기 5는 2예요!" },
+        { desc: "남은 수 2 × 2를 계산하면?", formula: `= <input class="blank-input" id="inp_s_1" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, hint: "2 곱하기 2는 4예요!" }
+      ]
+    },
+    {
+      hero: `9 × ${renderFrac(2, 3)}`,
+      steps: [
+        { desc: "자연수 9와 분모 3을 3으로 약분하면 9는 몇이 될까요?", formula: `9는 ➔ <input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, hint: "9 나누기 3은 3이에요!" },
+        { desc: "남은 수 3 × 2를 계산하면?", formula: `= <input class="blank-input" id="inp_s_1" data-ans="6" maxlength="2" onkeyup="checkInput(this)">`, hint: "3 곱하기 2는 6이에요!" }
+      ]
+    },
+    {
+      hero: `12 × ${renderFrac(3, 4)}`,
+      steps: [
+        { desc: "자연수 12와 분모 4를 4로 약분하면 12는 몇이 될까요?", formula: `12는 ➔ <input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, hint: "12 나누기 4는 3이에요!" },
+        { desc: "남은 수 3 × 3을 계산하면?", formula: `= <input class="blank-input" id="inp_s_1" data-ans="9" maxlength="2" onkeyup="checkInput(this)">`, hint: "3 곱하기 3은 9예요!" }
+      ]
+    }
+  ],
+
+  // Part 4: 진분수 x 진분수 (번개 약분)
+  4: [
+    {
+      hero: `${renderFrac(1, 2)} × ${renderFrac(1, 3)}`,
+      steps: [
+        { desc: "분모끼리 곱하고, 분자끼리 곱해요!", formula: `= ${renderFrac("1 × 1", `<input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)"> × <input class="blank-input" id="inp_s_1" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: "분모 2와 3을 분모 자리에 써요!" },
+        { desc: "분모 2 × 3을 계산하면 전체 칸 수는?", formula: `= ${renderFrac(1, `<input class="blank-input" id="inp_s_2" data-ans="6" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: "2 곱하기 3은 6이에요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(3, 4)} × ${renderFrac(2, 7)}`,
+      steps: [
+        { desc: "대각선의 4와 2를 2로 약분! 분모 4는 무엇이 될까요?", formula: `분모 4는 ➔ <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "4 나누기 2는 2예요!" },
+        { desc: "분자 2는 2로 나누면 무엇이 될까요?", formula: `분자 2는 ➔ <input class="blank-input" id="inp_s_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, hint: "2 나누기 2는 1이에요!" },
+        { desc: `약분된 수로 계산: (3×1) / (2×7)`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, `<input class="blank-input" id="inp_s_3" data-ans="14" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: "분자는 3, 분모는 2×7=14예요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(2, 3)} × ${renderFrac(3, 5)}`,
+      steps: [
+        { desc: "대각선의 3과 3을 3으로 싹둑 약분하면 둘 다 무엇이 될까요?", formula: `3은 ➔ <input class="blank-input" id="inp_s_0" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, hint: "3 나누기 3은 1이에요!" },
+        { desc: "남은 수로 계산한 최종 분수는?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, `<input class="blank-input" id="inp_s_2" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: "분자는 2×1=2, 분모는 1×5=5예요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(5, 8)} × ${renderFrac(4, 9)}`,
+      steps: [
+        { desc: "대각선의 8과 4를 4로 약분하면 분모 8은 무엇이 될까요?", formula: `분모 8은 ➔ <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "8 나누기 4는 2예요!" },
+        { desc: "분자 4는 4로 나누면 무엇이 될까요?", formula: `분자 4는 ➔ <input class="blank-input" id="inp_s_1" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, hint: "4 나누기 4는 1이에요!" },
+        { desc: "약분된 수로 계산한 분모는?", formula: `= ${renderFrac(5, `<input class="blank-input" id="inp_s_2" data-ans="18" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: "분모 2 × 9 = 18이에요!" }
+      ]
+    },
+    {
+      hero: `${renderFrac(3, 5)} × ${renderFrac(5, 6)}`,
+      steps: [
+        { desc: "대각선의 5와 5를 약분하면 1! 3과 6을 3으로 약분하면 분모 6은?", formula: `분모 6은 ➔ <input class="blank-input" id="inp_s_0" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "6 나누기 3은 2예요!" },
+        { desc: "최종 약분 계산 결과는?", formula: `= ${renderFrac(1, `<input class="blank-input" id="inp_s_1" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: "모두 약분되어 2분의 1이 돼요!" }
+      ]
+    }
+  ],
+
+  // Part 5: 대분수 x 대분수 보스
+  5: [
+    {
+      hero: `${renderMixed(2, 1, 3)} × ${renderMixed(1, 1, 5)}`,
+      steps: [
+        { desc: `두 대분수를 모두 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="7" maxlength="2" onkeyup="checkInput(this)">`, 3)} × ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="6" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "2×3+1=7, 1×5+1=6이에요!" },
+        { desc: "분모 3과 분자 6을 3으로 약분하면 분자는 7 × 2 = ?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="14" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "6이 2가 되니 7 곱하기 2는 14예요!" },
+        { desc: `가분수 ${renderFrac(14, 5)}를 대분수로 변신!`, formula: `= <input class="blank-input" id="inp_s_3" data-ans="2" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_4" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "14 안에 5가 2번 들어가고 4가 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(1, 1, 2)} × ${renderMixed(1, 1, 3)}`,
+      steps: [
+        { desc: `두 대분수를 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 2)} × ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "1×2+1=3, 1×3+1=4예요!" },
+        { desc: "3끼리 약분되고, 분자 4를 분모 2로 나누면 남는 자연수는?", formula: `= <input class="blank-input" id="inp_s_2" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "4 나누기 2는 2예요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(1, 1, 4)} × ${renderMixed(2, 2, 5)}`,
+      steps: [
+        { desc: `두 대분수를 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`, 4)} × ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="12" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "1×4+1=5, 2×5+2=12예요!" },
+        { desc: "5끼리 약분되고, 12를 4로 나누면 최종 답은?", formula: `= <input class="blank-input" id="inp_s_2" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, hint: "12 나누기 4는 3이에요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(1, 2, 3)} × ${renderMixed(1, 1, 4)}`,
+      steps: [
+        { desc: `두 대분수를 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`, 3)} × ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`, 4)}`, hint: "1×3+2=5, 1×4+1=5예요!" },
+        { desc: "분자끼리 곱하면 5 × 5 = ?", formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="25" maxlength="2" onkeyup="checkInput(this)">`, 12)}`, hint: "5 곱하기 5는 25예요!" },
+        { desc: `가분수 ${renderFrac(25, 12)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_3" data-ans="2" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_4" data-ans="1" maxlength="2" onkeyup="checkInput(this)">`, 12)}`, hint: "25 안에 12가 2번 들어가고 1이 남아요!" }
+      ]
+    },
+    {
+      hero: `${renderMixed(2, 1, 2)} × ${renderMixed(1, 3, 5)}`,
+      steps: [
+        { desc: `두 대분수를 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="5" maxlength="2" onkeyup="checkInput(this)">`, 2)} × ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="8" maxlength="2" onkeyup="checkInput(this)">`, 5)}`, hint: "2×2+1=5, 1×5+3=8이에요!" },
+        { desc: "5끼리 약분되고, 8을 2로 나누면 답은?", formula: `= <input class="blank-input" id="inp_s_2" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, hint: "8 나누기 2는 4예요!" }
+      ]
+    }
+  ]
+};
+
+// ========================================================
+// 🎲 무한 랜덤 문제 생성 알고리즘
+// ========================================================
+function generateRandomProblem(catIdx) {
+  if (catIdx === 0) {
+    // 진분수 x 자연수 (결과 진분수)
+    const dens = [5, 6, 7, 8, 9, 10];
+    const d = dens[Math.floor(Math.random() * dens.length)];
+    const n = Math.floor(Math.random() * 2) + 1; // 1 or 2
+    const m = Math.floor(Math.random() * (Math.floor((d - 1) / n) - 1)) + 2;
+    const prod = n * m;
+    return {
+      hero: `${renderFrac(n, d)} × ${m}`,
+      steps: [
+        { desc: `자연수 ${m}은 분자에만 곱해요!`, formula: `${renderFrac(`${n} × <input class="blank-input" id="inp_s_0" data-ans="${m}" maxlength="2" onkeyup="checkInput(this)">`, d)}`, hint: `자연수 ${m}을 분자에 쏙 넣어보세요!` },
+        { desc: `분자 ${n} × ${m}을 계산하면?`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="${prod}" maxlength="2" onkeyup="checkInput(this)">`, d)}`, hint: `${n} 곱하기 ${m}은 ${prod}이에요!` }
+      ]
+    };
+  } else if (catIdx === 1) {
+    // 가분수 탈출 (결과 대분수)
+    const d = [3, 4, 5, 7][Math.floor(Math.random() * 4)];
+    const n = Math.floor(Math.random() * (d - 1)) + 1;
+    const m = Math.floor(Math.random() * 3) + 2;
+    const prod = n * m;
+    if (prod <= d) return generateRandomProblem(catIdx); // 가분수가 되도록 재시도
+    const w = Math.floor(prod / d);
+    const rem = prod % d;
+    return {
+      hero: `${renderFrac(n, d)} × ${m}`,
+      steps: [
+        { desc: `분자에 ${m}을 곱해요 (${n} × ${m})`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="${prod}" maxlength="2" onkeyup="checkInput(this)">`, d)}`, hint: `${n} 곱하기 ${m}은 ${prod}이에요!` },
+        { desc: `가분수 ${renderFrac(prod, d)}를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="${w}" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_2" data-ans="${rem}" maxlength="2" onkeyup="checkInput(this)">`, d)}`, hint: `${prod} 안에 ${d}가 ${w}번 들어가고 ${rem}이 남아요!` }
+      ]
+    };
+  } else if (catIdx === 2) {
+    // 대분수 x 자연수
+    const d = [3, 4, 5][Math.floor(Math.random() * 3)];
+    const w = Math.floor(Math.random() * 2) + 1;
+    const n = Math.floor(Math.random() * (d - 1)) + 1;
+    const m = Math.floor(Math.random() * 2) + 2;
+    const improper = w * d + n;
+    const prod = improper * m;
+    const finW = Math.floor(prod / d);
+    const finRem = prod % d;
+    return {
+      hero: `${renderMixed(w, n, d)} × ${m}`,
+      steps: [
+        { desc: `대분수 ${renderMixed(w, n, d)}를 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="${improper}" maxlength="2" onkeyup="checkInput(this)">`, d)} × ${m}`, hint: `${w}×${d}+${n} = ${improper}예요!` },
+        { desc: `분자 ${improper}에 자연수 ${m} 곱하기`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="${prod}" maxlength="2" onkeyup="checkInput(this)">`, d)}`, hint: `${improper} 곱하기 ${m}은 ${prod}이에요!` },
+        { desc: `가분수를 대분수로 정리!`, formula: `= <input class="blank-input" id="inp_s_2" data-ans="${finW}" maxlength="2" onkeyup="checkInput(this)">${renderFrac(`<input class="blank-input" id="inp_s_3" data-ans="${finRem}" maxlength="2" onkeyup="checkInput(this)">`, d)}`, hint: `${prod} 안에 ${d}가 ${finW}번 들어가고 ${finRem}이 남아요!` }
+      ]
+    };
+  } else if (catIdx === 3) {
+    // 자연수 x 진분수 (약분)
+    const d = [3, 4, 5, 6][Math.floor(Math.random() * 4)];
+    const mult = Math.floor(Math.random() * 3) + 2;
+    const nat = d * mult;
+    const n = Math.floor(Math.random() * (d - 1)) + 1;
+    const ans = mult * n;
+    return {
+      hero: `${nat} × ${renderFrac(n, d)}`,
+      steps: [
+        { desc: `자연수 ${nat}과 분모 ${d}를 ${d}로 약분하면 ${nat}은?`, formula: `${nat}은 ➔ <input class="blank-input" id="inp_s_0" data-ans="${mult}" maxlength="2" onkeyup="checkInput(this)">`, hint: `${nat} 나누기 ${d}는 ${mult}이에요!` },
+        { desc: `남은 수 ${mult} × ${n}을 계산하면?`, formula: `= <input class="blank-input" id="inp_s_1" data-ans="${ans}" maxlength="2" onkeyup="checkInput(this)">`, hint: `${mult} 곱하기 ${n}은 ${ans}이에요!` }
+      ]
+    };
+  } else if (catIdx === 4) {
+    // 단위/진분수 x 진분수
+    const d1 = [2, 3, 4][Math.floor(Math.random() * 3)];
+    const d2 = [3, 5, 7][Math.floor(Math.random() * 3)];
+    const prodDen = d1 * d2;
+    return {
+      hero: `${renderFrac(1, d1)} × ${renderFrac(1, d2)}`,
+      steps: [
+        { desc: "분모끼리 곱하고, 분자끼리 곱해요!", formula: `= ${renderFrac("1 × 1", `<input class="blank-input" id="inp_s_0" data-ans="${d1}" maxlength="2" onkeyup="checkInput(this)"> × <input class="blank-input" id="inp_s_1" data-ans="${d2}" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: `분모 ${d1}과 ${d2}를 분모 자리에 써요!` },
+        { desc: `분모 ${d1} × ${d2}를 계산하면 전체 칸 수는?`, formula: `= ${renderFrac(1, `<input class="blank-input" id="inp_s_2" data-ans="${prodDen}" maxlength="2" onkeyup="checkInput(this)">`)}`, hint: `${d1} 곱하기 ${d2}는 ${prodDen}이에요!` }
+      ]
+    };
+  } else {
+    // 대분수 x 대분수
+    return {
+      hero: `${renderMixed(1, 1, 2)} × ${renderMixed(1, 1, 3)}`,
+      steps: [
+        { desc: `두 대분수를 가분수로 변신!`, formula: `= ${renderFrac(`<input class="blank-input" id="inp_s_0" data-ans="3" maxlength="2" onkeyup="checkInput(this)">`, 2)} × ${renderFrac(`<input class="blank-input" id="inp_s_1" data-ans="4" maxlength="2" onkeyup="checkInput(this)">`, 3)}`, hint: "1×2+1=3, 1×3+1=4예요!" },
+        { desc: "3끼리 약분되고, 분자 4를 분모 2로 나누면 남는 자연수는?", formula: `= <input class="blank-input" id="inp_s_2" data-ans="2" maxlength="2" onkeyup="checkInput(this)">`, hint: "4 나누기 2는 2예요!" }
+      ]
+    };
+  }
+}
+
 let lastFocusedInput = null;
 
 function renderScaffoldMode() {
-  const prob = SCAFFOLD_PROBLEMS[curScaffoldIdx];
   const area = document.getElementById('mainTrainArea');
-
-  // 상단 주제 알약들
-  let pillsHtml = SCAFFOLD_PROBLEMS.map((p, i) => `
-    <button class="topic-pill ${i === curScaffoldIdx ? 'active' : ''}" onclick="selectScaffoldProblem(${i})">
-      ${p.name}
+  
+  // 1. 카테고리 알약 탭 (6대 파트)
+  let catPillsHtml = CATEGORIES.map((cat, i) => `
+    <button class="cat-pill ${i === curCatIdx ? 'active' : ''}" onclick="selectCategory(${i})">
+      ${cat.name}
     </button>
   `).join('');
 
-  // 스텝들
+  // 2. 문제 번호 선택 바 (1번~5번 + 🎲 무한 랜덤 버튼)
+  const isRandom = (curProbIdx === -1);
+  let subPillsHtml = [0, 1, 2, 3, 4].map(pIdx => {
+    const isSolved = solvedMap[`${curCatIdx}_${pIdx}`];
+    return `
+      <button class="prob-num-btn ${(!isRandom && curProbIdx === pIdx) ? 'active' : ''} ${isSolved ? 'done' : ''}" onclick="selectProblem(${pIdx})">
+        ${pIdx + 1}번 문제
+      </button>
+    `;
+  }).join('');
+
+  subPillsHtml += `
+    <button class="btn-random-generate" onclick="generateAndPlayRandom()">
+      🎲 무한 랜덤 문제 뽑기!
+    </button>
+  `;
+
+  // 현재 문제 객체 가져오기
+  let prob;
+  if (isRandom) {
+    prob = customRandomProb || generateRandomProblem(curCatIdx);
+    customRandomProb = prob;
+  } else {
+    prob = PROBLEM_BANKS[curCatIdx][curProbIdx];
+  }
+
+  // 3. 단계별 수식 스텝들
   let stepsHtml = prob.steps.map((st, sIdx) => `
     <div class="step-row ${sIdx === 0 ? 'active' : ''}" id="stepRow_${sIdx}">
       <div class="step-info">
@@ -796,13 +1132,19 @@ function renderScaffoldMode() {
   `).join('');
 
   area.innerHTML = `
-    <div class="trainer-topic-pills">${pillsHtml}</div>
+    <!-- 6대 카테고리 탭 -->
+    <div class="category-pills-bar">${catPillsHtml}</div>
 
+    <!-- 1~5번 및 랜덤 선택 바 -->
+    <div class="sub-problem-bar">${subPillsHtml}</div>
+
+    <!-- 문제 헤로 박스 -->
     <div class="problem-hero-box">
-      <span class="problem-badge">단계별 템플릿 연산</span>
-      <div class="problem-title">${prob.displayHero}</div>
+      <span class="problem-badge">${CATEGORIES[curCatIdx].name}</span>
+      <div class="problem-title">${prob.hero}</div>
     </div>
 
+    <!-- 단계별 비계 입력 -->
     <div class="scaffold-steps-wrap">
       ${stepsHtml}
     </div>
@@ -810,11 +1152,11 @@ function renderScaffoldMode() {
     <!-- 코코 힌트 박스 -->
     <div class="hint-alert-box" id="hintAlertBox">
       <span style="font-size:1.4rem;">💡</span>
-      <span id="hintAlertText">힌트 내용이 여기에 표시됩니다.</span>
+      <span id="hintAlertText">힌트가 여기에 표시됩니다.</span>
     </div>
 
     <!-- 온스크린 키패드 -->
-    <div style="margin-top:20px; text-align:center;">
+    <div style="margin-top:24px; text-align:center;">
       <span style="font-family:'Jua'; color:#9ca3af; font-size:0.95rem;">📱 터치 입력 키패드</span>
       <div class="keypad-grid">
         ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button class="keypad-btn" onclick="pressKeypad('${n}')">${n}</button>`).join('')}
@@ -826,22 +1168,38 @@ function renderScaffoldMode() {
 
   // 첫 번째 인풋 포커스
   setTimeout(() => {
-    const firstInp = document.getElementById(`inp_${prob.id}_0`);
+    const firstInp = document.getElementById('inp_s_0');
     if (firstInp) {
       firstInp.focus();
       lastFocusedInput = firstInp;
     }
   }, 100);
 
-  // 모든 인풋에 포커스 이벤트 연결
+  // 인풋 포커스 이벤트 연결
   document.querySelectorAll('.blank-input').forEach(inp => {
     inp.addEventListener('focus', () => { lastFocusedInput = inp; });
   });
 }
 
-function selectScaffoldProblem(idx) {
+function selectCategory(catIdx) {
   playSfx('click');
-  curScaffoldIdx = idx;
+  curCatIdx = catIdx;
+  curProbIdx = 0;
+  customRandomProb = null;
+  renderScaffoldMode();
+}
+
+function selectProblem(pIdx) {
+  playSfx('click');
+  curProbIdx = pIdx;
+  customRandomProb = null;
+  renderScaffoldMode();
+}
+
+function generateAndPlayRandom() {
+  playSfx('click');
+  curProbIdx = -1;
+  customRandomProb = generateRandomProblem(curCatIdx);
   renderScaffoldMode();
 }
 
@@ -854,7 +1212,6 @@ function checkInput(inp) {
     playSfx('correct');
     hideHint();
 
-    // 다음 빈칸 찾아서 포커스
     const inputs = Array.from(document.querySelectorAll('.blank-input'));
     const currIdx = inputs.indexOf(inp);
     const nextInp = inputs[currIdx + 1];
@@ -862,28 +1219,36 @@ function checkInput(inp) {
     if (nextInp) {
       nextInp.focus();
       lastFocusedInput = nextInp;
-      // 다음 스텝 로우 active 하이라이트
       const nextRow = nextInp.closest('.step-row');
       if (nextRow) nextRow.classList.add('active');
     } else {
-      // 모든 단계 완료!
+      // 모든 단계 정답 완료!
       playSfx('fanfare');
       addGems(1);
       document.querySelectorAll('.step-row').forEach(r => r.classList.add('done'));
-      showTrainModal("문제 정복 완료! 💎 +1 획득", "단계별 공식을 꼼꼼하게 채워 정답을 완성했습니다!");
+      
+      if (curProbIdx >= 0) {
+        solvedMap[`${curCatIdx}_${curProbIdx}`] = true;
+      }
+
+      showTrainModal("🎉 문제 정복 완료! 💎 +1 획득", "교과서 계산 공식을 완벽하게 마스터했습니다!");
     }
   } else if (userVal.length >= correctAns.length) {
-    // 오답 시 힌트 표시 (Errorless Learning)
     playSfx('wrong');
     showHint(inp);
   }
 }
 
 function showHint(inp) {
-  const prob = SCAFFOLD_PROBLEMS[curScaffoldIdx];
+  let prob;
+  if (curProbIdx === -1) {
+    prob = customRandomProb;
+  } else {
+    prob = PROBLEM_BANKS[curCatIdx][curProbIdx];
+  }
   const row = inp.closest('.step-row');
   const stepIdx = Array.from(document.querySelectorAll('.step-row')).indexOf(row);
-  const hintText = prob.steps[stepIdx]?.hint || "다시 한번 차근차근 생각해 보세요!";
+  const hintText = prob?.steps[stepIdx]?.hint || "다시 한번 차근차근 생각해 보세요!";
 
   const box = document.getElementById('hintAlertBox');
   const txt = document.getElementById('hintAlertText');
@@ -914,66 +1279,66 @@ function pressKeypad(key) {
 }
 
 // ========================================================
-// ⚔️ 2. 6대 공식 퀴즈 배틀 (10문제)
+// ⚔️ 2. 6대 공식 퀴즈 배틀 (10제 - 세로 분수 전면 적용)
 // ========================================================
 
 const QUIZ_QUESTIONS = [
   {
-    q: "진분수와 자연수를 곱할 때, 자연수는 어디에만 곱할까요?",
+    q: `진분수와 자연수를 곱할 때, 자연수는 어디에만 곱할까요?`,
     opts: ["분모에만 곱한다", "분자에만 곱한다", "분모와 분자 둘 다 곱한다"],
     ans: 1,
     tip: "분모는 피자 조각 크기라 침대에 누워 쉬고, 조각 수인 분자에만 곱해요!"
   },
   {
-    q: "5분의 6처럼 분자가 분모보다 더 큰 무거운 분수는 무엇으로 바꿀까요?",
+    q: `분수 ${renderFrac(6, 5)}처럼 분자가 분모보다 더 큰 무거운 가분수는 무엇으로 바꿀까요?`,
     opts: ["대분수", "단위분수", "소수"],
     ans: 0,
-    tip: "온전한 1개(5/5)를 쏙 뽑아 대분수 1과 1/5로 변신시켜요!"
+    tip: `온전한 1개(${renderFrac(5, 5)})를 쏙 뽑아 대분수 ${renderMixed(1, 1, 5)}로 변신시켜요!`
   },
   {
-    q: "대분수와 자연수를 곱할 때는 대분수에게 무엇을 먼저 씌워야 할까요?",
+    q: `대분수와 자연수를 곱할 때는 대분수에게 무엇을 먼저 씌워야 할까요?`,
     opts: ["소수 안경", "가분수 투구", "거꾸로 모자"],
     ans: 1,
     tip: "뚱뚱한 대분수를 날씬한 가분수로 바꾸면 계산이 훨씬 쉬워져요!"
   },
   {
-    q: "자연수 6과 3분의 2를 곱할 때, 6과 3을 미리 약분하면 6은 무엇이 될까요?",
+    q: `자연수 6과 ${renderFrac(2, 3)}를 곱할 때, 6과 3을 미리 약분하면 6은 무엇이 될까요?`,
     opts: ["1", "2", "3"],
     ans: 1,
     tip: "6 나누기 3은 2! 2가 남아요."
   },
   {
-    q: "단위분수 2분의 1과 3분의 1을 곱하면 전체는 몇 칸으로 나뉠까요?",
+    q: `단위분수 ${renderFrac(1, 2)}과 ${renderFrac(1, 3)}을 곱하면 전체는 몇 칸으로 나뉠까요?`,
     opts: ["5칸", "6칸", "8칸"],
     ans: 1,
     tip: "가로 2줄 × 세로 3줄 = 분모끼리 곱해서 6칸이 돼요!"
   },
   {
-    q: "분수끼리의 곱셈에서 계산하기 전에 대각선에 있는 숫자끼리 나누는 기술은?",
+    q: `분수끼리의 곱셈에서 계산하기 전에 대각선에 있는 숫자끼리 나누는 기술은?`,
     opts: ["통분술", "번개 약분술", "내림술"],
     ans: 1,
     tip: "마법 가위로 대각선 친구를 똑같은 수로 미리 싹둑 자르는 번개 약분술!"
   },
   {
-    q: "대분수끼리 곱할 때 (예: 2와 1/3 × 1과 1/5) 가장 먼저 해야 할 일은?",
+    q: `대분수끼리 곱할 때 (${renderMixed(2, 1, 3)} × ${renderMixed(1, 1, 5)}) 가장 먼저 해야 할 일은?`,
     opts: ["둘 다 가분수로 바꾼다", "자연수끼리만 곱한다", "분모를 통분한다"],
     ans: 0,
     tip: "두 대분수를 반드시 모두 가분수로 먼저 변신시켜야 곱할 수 있어요!"
   },
   {
-    q: "1보다 작은 진분수를 곱하면 원래 수보다 어떻게 될까요?",
+    q: `1보다 작은 진분수를 곱하면 원래 수보다 어떻게 될까요?`,
     opts: ["더 커진다", "더 작아진다", "변함이 없다"],
     ans: 1,
     tip: "1보다 작은 수를 곱하면 조각의 조각이 되어 알맞게 작아져요!"
   },
   {
-    q: "3/4 × 2/7에서 대각선 4와 2를 2로 약분하면 분모는 몇이 될까요?",
+    q: `${renderFrac(3, 4)} × ${renderFrac(2, 7)}에서 대각선 4와 2를 2로 약분하면 분모는 몇이 될까요?`,
     opts: ["14", "28", "8"],
     ans: 0,
     tip: "4가 2가 되었으니 분모는 2 × 7 = 14가 돼요!"
   },
   {
-    q: "분수의 곱셈을 할 때 '약분'은 언제 하는 것이 가장 좋을까요?",
+    q: `분수의 곱셈을 할 때 '약분'은 언제 하는 것이 가장 좋을까요?`,
     opts: ["곱하기 전에 미리 약분한다", "계산이 다 끝나고만 한다", "약분은 안 해도 된다"],
     ans: 0,
     tip: "곱하기 전에 미리 대각선 약분을 하면 숫자가 작아져서 계산 실수가 없어져요!"
@@ -1028,7 +1393,6 @@ function selectQuizOption(choiceIdx) {
     selectedBtn.classList.add('correct');
     playSfx('correct');
 
-    // 2문제마다 보석 1개
     if (quizScore % 2 === 0) {
       addGems(1);
     }
@@ -1042,17 +1406,36 @@ function selectQuizOption(choiceIdx) {
         addGems(5);
         showTrainModal("🎉 10문제 배틀 완주 성공! 🎉", `10문제 중 ${quizScore}문제를 완벽하게 풀었습니다!<br><b>보석 +5 💎 & 수학 경험치 +15 EXP</b> 획득!`);
       }
-    }, 1000);
+    }, 900);
   } else {
-    // 오답 (Errorless Learning: 힌트 제공 후 재도전)
     playSfx('wrong');
     selectedBtn.classList.add('wrong');
     const hintBox = document.getElementById('quizHintBox');
     const hintTxt = document.getElementById('quizHintText');
     if (hintBox && hintTxt) {
-      hintTxt.textContent = qData.tip;
+      hintTxt.innerHTML = qData.tip;
       hintBox.style.display = 'flex';
     }
+  }
+}
+
+// 모드 스위치
+function switchTrainMode(mode) {
+  playSfx('click');
+  trainMode = mode;
+  const tabS = document.getElementById('tabScaffold');
+  const tabB = document.getElementById('tabBattle');
+
+  if (mode === 'scaffold') {
+    tabS.classList.add('active');
+    tabB.classList.remove('active');
+    renderScaffoldMode();
+  } else {
+    tabS.classList.remove('active');
+    tabB.classList.add('active');
+    curQuizIdx = 0;
+    quizScore = 0;
+    renderBattleMode();
   }
 }
 
@@ -1066,8 +1449,12 @@ function closeTrainModal() {
   playSfx('click');
   document.getElementById('trainModal').style.display = 'none';
   if (trainMode === 'scaffold') {
-    // 다음 문제로 이동
-    curScaffoldIdx = (curScaffoldIdx + 1) % SCAFFOLD_PROBLEMS.length;
+    if (curProbIdx >= 0) {
+      curProbIdx = (curProbIdx + 1) % 5;
+    } else {
+      generateAndPlayRandom();
+      return;
+    }
     renderScaffoldMode();
   } else {
     curQuizIdx = 0;
