@@ -583,3 +583,218 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
 }
+
+/* =======================================================
+   🥽 안전 선행 학습 게이트 (Pre-Study Safety Gate)
+   ======================================================= */
+.safety-gate-card {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #0d9488 100%);
+  border: 2.5px solid #34d399;
+  border-radius: 20px;
+  padding: 18px 24px;
+  margin-bottom: 25px;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(6, 78, 59, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.safety-gate-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(6, 78, 59, 0.5);
+  border-color: #a7f3d0;
+}
+.safety-gate-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.safety-gate-icon {
+  font-size: 2.8rem;
+  background: rgba(0, 0, 0, 0.2);
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+}
+.safety-gate-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.safety-gate-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f59e0b;
+  color: #78350f;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: bold;
+}
+.safety-gate-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.3rem;
+  color: #ffffff;
+  margin: 0;
+}
+.safety-gate-desc {
+  font-size: 0.92rem;
+  color: #d1fae5;
+  margin: 0;
+  line-height: 1.45;
+}
+.safety-gate-btn {
+  background: #f59e0b;
+  color: #78350f;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.safety-gate-card:hover .safety-gate-btn {
+  background: #fbbf24;
+  transform: scale(1.05);
+}
+
+/* =======================================================
+   📚 단원 선택 탭 컨트롤러 (Unit Selector Tabs)
+   ======================================================= */
+.unit-tab-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.unit-tab-btn {
+  flex: 1;
+  min-width: 160px;
+  padding: 13px 18px;
+  border-radius: 16px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.unit-tab-btn:hover {
+  border-color: #0284c7;
+  color: #0284c7;
+}
+.unit-tab-btn.active {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+}
+
+/* =======================================================
+   📦 단원별 묶음 섹션 (Unit Section Container)
+   ======================================================= */
+.unit-section-wrap {
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid #e0f2fe;
+  border-radius: 24px;
+  padding: 24px 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+}
+.unit-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed #bae6fd;
+}
+.unit-section-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.45rem;
+  color: #0369a1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.unit-section-badge {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.88rem;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+/* 2단원 5대 가상실험실 칩 그리드 */
+.unit-lab-chips-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1.5px dashed rgba(0, 0, 0, 0.08);
+}
+.lab-chip-pill {
+  padding: 5px 11px;
+  border-radius: 12px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  text-decoration: none;
+  background: #f0f9ff;
+  border: 1px solid #7dd3fc;
+  color: #0369a1;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.lab-chip-pill:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.3);
+}
+
+@media (max-width: 680px) {
+  .safety-gate-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+  .safety-gate-main {
+    flex-direction: column;
+    text-align: center;
+  }
+  .safety-gate-badge {
+    margin: 0 auto;
+  }
+  .safety-gate-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

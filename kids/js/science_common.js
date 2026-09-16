@@ -1348,3 +1348,53 @@ function initCardZoomListeners() {
         cardLastTouchDist = 0;
     };
 }
+
+// ==========================================
+// 🔬 단원 직결 보카 오픈 헬퍼
+// ==========================================
+window.openScienceVocaDirect = function(targetGrade, targetUnit) {
+    openMissionView('voca');
+    setTimeout(() => {
+        if (typeof selectScienceGrade === 'function') {
+            selectScienceGrade(targetGrade);
+            if (targetUnit) {
+                setTimeout(() => {
+                    if (typeof selectScienceUnit === 'function') {
+                        selectScienceUnit(targetGrade, targetUnit);
+                    }
+                }, 120);
+            }
+        }
+    }, 250);
+};
+
+// ==========================================
+// 📝 2단원 『실험관찰』 탐구 보고서 안내
+// ==========================================
+window.openScienceReport2 = function() {
+    const overlay = document.getElementById('missionOverlay');
+    const titleEl = document.getElementById('overlayHeaderTitle');
+    const iconEl = document.getElementById('overlayHeaderIcon');
+    const innerBody = document.getElementById('overlayInnerBody');
+    overlay.style.display = 'flex';
+    titleEl.textContent = "2단원 『실험관찰』 디지털 탐구 보고서";
+    iconEl.textContent = "📝";
+    innerBody.innerHTML = `
+        <div style="text-align: center; padding: 25px 15px; font-family: 'Jua', sans-serif;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">🌤️ 📝 🔬</div>
+            <h3 style="color: #0284c7; font-size: 1.4rem; margin-bottom: 8px;">2단원 날씨와 우리 생활 탐구 일지</h3>
+            <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
+                교과서 『실험관찰』 24~35쪽 습도계 측정, 이슬·안개, 구름 발생, 바람, 사계절 기단 탐구 기록이 준비 중입니다!<br>
+                현재 완비된 <b>5대 가상 실험실</b>에서 각 차시별 실험을 생생하게 직접 체험하고 퀴즈를 풀어보세요!
+            </p>
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+                <a href="science_hygrometer_lab.html" class="back-to-lobby-btn" style="background:#0284c7; color:white; font-size:0.9rem; text-decoration:none;">🌡️ [1] 습도계</a>
+                <a href="science_dew_fog_lab.html" class="back-to-lobby-btn" style="background:#059669; color:white; font-size:0.9rem; text-decoration:none;">🧊 [2] 이슬·안개</a>
+                <a href="science_cloud_lab.html" class="back-to-lobby-btn" style="background:#3b82f6; color:white; font-size:0.9rem; text-decoration:none;">☁️ [3] 구름 발생</a>
+                <a href="science_wind_lab.html" class="back-to-lobby-btn" style="background:#d97706; color:white; font-size:0.9rem; text-decoration:none;">💨 [4] 바람의 까닭</a>
+                <a href="science_season_airmass_lab.html" class="back-to-lobby-btn" style="background:#7c3aed; color:white; font-size:0.9rem; text-decoration:none;">🌏 [5] 계절과 기단</a>
+            </div>
+            <button class="back-to-lobby-btn" onclick="closeMissionView(true)">닫기</button>
+        </div>
+    `;
+};
