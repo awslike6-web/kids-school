@@ -360,7 +360,7 @@ function renderCatalogSections(wordsToRender) {
 // 🧮 수학 세로 분수 (Vertical Fraction) 및 특수 기호 포맷터
 function formatMathExpressions(text) {
   if (!text) return "";
-  // 1) 세로 분수 치환: 단독 분수 패턴 (\d+)/(\d+) (단, 날짜/URL/경로 등 제외)
+// [1] 세로 분수 치환: 단독 분수 패턴 (\d+)/(\d+) [단, 날짜/URL/경로 등 제외]
   let formatted = String(text).replace(/(?<![0-9a-zA-Z\/\-\:])(\d+)\s*\/\s*(\d+)(?![0-9a-zA-Z\/\-\:])/g, (match, num, den) => {
     return `<span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span>`;
   });

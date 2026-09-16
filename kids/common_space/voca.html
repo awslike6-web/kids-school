@@ -131,6 +131,41 @@
 
   .loading-spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--purple); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 50px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  /* 🧮 수학 전용 세로 분수 (Vertical Fraction) & 수식 카드 */
+  .inline-frac {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0 4px;
+    font-size: 1.05em;
+    line-height: 1.1;
+    font-weight: 700;
+  }
+  .inline-frac .num { display: block; padding-bottom: 2px; }
+  .inline-frac .bar {
+    display: block;
+    border-top: 2px solid currentColor;
+    height: 0;
+    width: 100%;
+    min-width: 16px;
+    margin: 2px 0;
+  }
+  .inline-frac .den { display: block; padding-top: 2px; }
+
+  .math-formula-box {
+    background: #eef7ff;
+    border: 1.5px solid #b3d7ff;
+    border-left: 4px solid #3b82f6;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 6px 0;
+    font-weight: bold;
+    color: #1e40af;
+    word-break: keep-all;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
