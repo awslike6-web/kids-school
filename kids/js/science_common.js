@@ -23,7 +23,7 @@ const SCIENCE_MISSION_META = {
 const SCIENCE_STORYBOOK_LIBRARY = [
     {
         id: "5_1_0_1",
-        grade: "5학년 1학기",
+        grade: "5-1",
         unit: "0단원",
         bookNum: "1권",
         title: "과학 교과서 탐험대: 완벽 공부법",
@@ -38,7 +38,7 @@ const SCIENCE_STORYBOOK_LIBRARY = [
     },
     {
         id: "5_1_0_2",
-        grade: "5학년 1학기",
+        grade: "5-1",
         unit: "0단원",
         bookNum: "2권",
         title: "안전을 지키는 꼬마 과학자 탐험대",
@@ -53,7 +53,7 @@ const SCIENCE_STORYBOOK_LIBRARY = [
     },
     {
         id: "5_1_1_1",
-        grade: "5학년 1학기",
+        grade: "5-2",
         unit: "1단원",
         bookNum: "3권",
         title: "섞여 있어도 괜찮아! 혼합물 분리 대모험",
@@ -65,6 +65,21 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         border: "#2563eb",
         link: "science_mix_storybook.html",
         coverImg: "images/minsu/5-1/1/storybook/science_mix_story_p1.png"
+    },
+    {
+        id: "5_2_2_1",
+        grade: "5-2",
+        unit: "2단원",
+        bookNum: "4권",
+        title: "하늘을 나는 날씨 연구소: 민수와 코코의 대모험",
+        subtitle: "2단원 날씨와 우리 생활 (습도·구름·바람·기단 완벽 정복)",
+        desc: "호기심 많은 소년 민수와 날씨 요정 코코가 비행선을 타고 구름과 바람의 비밀을 찾아 떠나는 과학 탐험 이야기!",
+        icon: "☁️",
+        color: "#0284c7",
+        bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#38bdf8",
+        link: "science_weather_storybook.html",
+        coverImg: "images/minsu/5-2/2/storybook/science_weather_story_p1.jpg"
     }
 ];
 
