@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🍰 5학년 분수의 곱셈 마법 개념 탐험관 🚀 | 민민이네 공부방</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="../../css/math_factors.css">
+  <style>
+    :root {
+      --primary: #d97706;
+      --primary-dark: #b45309;
+      --primary-light: #fef3c7;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fffdf7;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--text-main);
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    /* 상단 탑바 */
+    .top-header {
+      background: #ffffff;
+      border-bottom: 2px solid #fde68a;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-nav-back {
+      background: #fef3c7;
+      color: #b45309;
+      border: 2px solid #f59e0b;
+      border-radius: 18px;
+      padding: 6px 14px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-nav-back:hover {
+      background: #fde68a;
+      transform: translateY(-2px);
+    }
+    .header-title-box {
+      display: flex;
+      flex-direction: column;
+    }
+    .header-sub {
+      font-size: 0.82rem;
+      color: #b45309;
+      font-weight: 700;
+    }
+    .header-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.35rem;
+      color: #78350f;
+      margin: 0;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-link-story {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      padding: 8px 14px;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+      transition: all 0.2s;
+    }
+    .btn-link-story:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(217, 119, 6, 0.4);
+    }
+    .gem-pill {
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      border-radius: 18px;
+      padding: 6px 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1rem;
+      color: #047857;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 메인 컨테이너 */
+    .main-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+
+    /* 탐험 진행도 바 */
+    .progress-card {
+      background: #ffffff;
+      border: 2px solid #fde68a;
+      border-radius: 20px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .progress-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-icon {
+      font-size: 1.8rem;
+    }
+    .progress-text-box h4 {
+      margin: 0 0 4px 0;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.1rem;
+      color: #92400e;
+    }
+    .progress-text-box p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #78716c;
+    }
+    .progress-bar-wrap {
+      flex: 1;
+      height: 14px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #10b981);
+      width: 16%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    /* 6대 관 탭 내비게이션 */
+    .tabs-nav-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .tabs-nav-bar {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .nav-tab-btn {
+      background: #ffffff;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 12px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .nav-tab-btn:hover {
+      transform: translateY(-2px);
+      border-color: #f59e0b;
+    }
+    .nav-tab-btn.active {
+      background: #fffbeb;
+      border-color: #d97706;
+      box-shadow: 0 6px 16px rgba(217, 119, 6, 0.2);
+    }
+    .nav-tab-icon {
+      font-size: 1.5rem;
+    }
+    .nav-tab-label {
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      color: #4b5563;
+      white-space: nowrap;
+    }
+    .nav-tab-btn.active .nav-tab-label {
+      color: #b45309;
+      font-weight: 700;
+    }
+    .nav-tab-sub {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    .nav-tab-btn.active .nav-tab-sub {
+      color: #d97706;
+    }
+
+    /* 메인 탭 콘텐츠 카드 */
+    .concept-card {
+      background: #ffffff;
+      border: 3px solid #fde68a;
+      border-radius: 28px;
+      padding: 28px 24px;
+      box-shadow: 0 8px 24px rgba(217, 119, 6, 0.1);
+      position: relative;
+    }
+    .concept-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      border-bottom: 2px dashed #fef3c7;
+      padding-bottom: 16px;
+    }
+    .concept-tag {
+      display: inline-block;
+      background: #fef3c7;
+      color: #b45309;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+    .concept-title {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.6rem;
+      color: #78350f;
+      margin: 0;
+    }
+    .btn-speak-tts {
+      background: #f0fdf4;
+      border: 2px solid #10b981;
+      border-radius: 16px;
+      padding: 8px 14px;
+      color: #047857;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+    .btn-speak-tts:hover {
+      background: #10b981;
+      color: #ffffff;
+    }
+
+    /* 세로 분수 공통 스타일 */
+    .inline-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 1.05em;
+      line-height: 1.1;
+      font-weight: 700;
+    }
+    .inline-frac .bar {
+      border-top: 2px solid currentColor;
+      margin: 2px 0;
+      font-size: 0;
+      height: 0;
+      display: block;
+    }
+
+    /* 시각 조작 인터랙션 뷰 영역 */
+    .visual-playground {
+      background: #fafaf9;
+      border: 2px solid #e7e5e4;
+      border-radius: 20px;
+      padding: 24px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 조작 컨트롤 바 */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .ctrl-btn {
+      background: #ffffff;
+      border: 2px solid #d97706;
+      border-radius: 16px;
+      padding: 8px 16px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      color: #b45309;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ctrl-btn:hover {
+      background: #fef3c7;
+      transform: translateY(-2px);
+    }
+    .ctrl-btn.primary {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.3);
+    }
+    .ctrl-btn.primary:hover {
+      box-shadow: 0 6px 14px rgba(217, 119, 6, 0.4);
+    }
+
+    /* 민수의 한 줄 공식 카드 */
+    .formula-rule-card {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 2px solid #f59e0b;
+      border-radius: 20px;
+      padding: 18px 24px;
+      position: relative;
+    }
+    .formula-badge {
+      display: inline-block;
+      background: #d97706;
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .formula-catchphrase {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #78350f;
+      margin-bottom: 8px;
+    }
+    .formula-math-display {
+      background: #ffffff;
+      border: 2px solid #fbbf24;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      color: #92400e;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.08);
+    }
+
+    /* 축하 모달 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 36px 28px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      border: 4px solid #10b981;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 상단 탑바 -->
+<header class="top-header">
+  <div class="header-left">
+    <a href="math.html" class="btn-nav-back">🔙 수학 대문</a>
+    <div class="header-title-box">
+      <span class="header-sub">초등 5-2 수학 2단원</span>
+      <h1 class="header-title">🍰 분수의 곱셈 마법 개념 탐험관</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <a href="math_minsu_bakery_storybook.html" class="btn-link-story">📖 분수 베이커리 동화</a>
+    <div class="gem-pill">💎 <span id="gemCount">0</span></div>
+  </div>
+</header>
+
+<div class="main-wrap">
+
+  <!-- 탐험 진행도 바 -->
+  <div class="progress-card">
+    <div class="progress-info">
+      <div class="progress-icon">🌟</div>
+      <div class="progress-text-box">
+        <h4>민수의 분수 마법 탐험 진도</h4>
+        <p><span id="exploredCount">1</span> / 6개 관 탐험 완료 (+5💎 보너스!)</p>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+  </div>
+
+  <!-- 6대 관 탭 내비게이션 -->
+  <nav class="tabs-nav-bar">
+    <button class="nav-tab-btn active" onclick="switchTab(0)">
+      <span class="nav-tab-icon">🍕</span>
+      <span class="nav-tab-label">1관 피자 복제</span>
+      <span class="nav-tab-sub">진분수×자연수</span>
+    </button>
+    <button class="nav-tab-btn" onclick="switchTab(1)">
+      <span class="nav-tab-icon">🐸</span>
+      <span class="nav-tab-label">2관 징검다리</span>
+      <span class="nav-tab-sub">가분수 탈출</span>
+    </button>
+    <button class="nav-tab-btn" onclick="switchTab(2)">
+      <span class="nav-tab-icon">🧪</span>
+      <span class="nav-tab-label">3관 투구 변신</span>
+      <span class="nav-tab-sub">대분수×자연수</span>
+    </button>
+    <button class="nav-tab-btn" onclick="switchTab(3)">
+      <span class="nav-tab-icon">🧶</span>
+      <span class="nav-tab-label">4관 무지개 털실</span>
+      <span class="nav-tab-sub">자연수×진분수</span>
+    </button>
+    <button class="nav-tab-btn" onclick="switchTab(4)">
+      <span class="nav-tab-icon">💎</span>
+      <span class="nav-tab-label">5관 크리스털 창</span>
+      <span class="nav-tab-sub">단위분수 곱</span>
+    </button>
+    <button class="nav-tab-btn" onclick="switchTab(5)">
+      <span class="nav-tab-icon">✂️</span>
+      <span class="nav-tab-label">6관 번개 약분</span>
+      <span class="nav-tab-sub">분수끼리의 곱</span>
+    </button>
+  </nav>
+
+  <!-- 메인 개념 카드 컨테이너 -->
+  <main id="conceptContainer">
+    <!-- 동적으로 탭 콘텐츠 렌더링 -->
+  </main>
+
+</div>
+
+<!-- 6대 관 완료 축하 모달 -->
+<div class="modal-overlay" id="completionModal">
+  <div class="modal-content">
+    <div style="font-size: 3.5rem; margin-bottom: 12px;">🎉 🏆 🎉</div>
+    <h2 style="font-family:'Jua',sans-serif; color:#065f46; font-size:1.8rem; margin:0 0 10px;">분수 곱셈 마스터 완주!</h2>
+    <p style="font-size:1.05rem; color:#4b5563; line-height:1.6; margin-bottom:20px;">
+      6가지 핵심 분수 곱셈 마법을 모두 완벽하게 정복했습니다!<br>
+      <b>보석 +5 💎 & 수학 경험치 +15 EXP</b>가 지급되었습니다!
+    </p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="ctrl-btn primary" onclick="closeCompletionModal()">계속 탐험하기</button>
+      <a href="math_minsu_bakery_storybook.html" class="ctrl-btn" style="text-decoration:none;">📖 동화 다시보기</a>
+    </div>
+  </div>
+</div>
+
+<script src="../../core/fairy-config.js"></script>
+<script src="../../core/fairy-engine.js"></script>
+<script>
+// ========================================================
+// 🍰 5-2 수학 2단원 : 분수의 곱셈 개념 탐험관 엔진
+// ========================================================
+
+const TAB_DATA = [
+  // 1관: 진분수 × 자연수 (딸기 피자 복제기)
+  {
+    id: 0,
+    tag: "🍕 제 1 관 : 딸기 피자 복제기",
+    title: "진분수 × 자연수 : 조각의 개수 늘리기",
+    tts: "진분수에 자연수를 곱할 때는, 분모는 그대로 두고 분자에만 자연수를 곱해요! 조각의 크기는 그대로이고, 조각의 개수만 늘어나기 때문이랍니다.",
+    ruleCatch: "분모는 침대에 누워 쉬고, 분자랑 자연수만 곱해요!",
+    mathType: "pizza",
+    formulaHtml: `
+      <span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span> 
+      × 2 = 
+      <span class="inline-frac"><span>1 × 2</span><span class="bar">/</span><span>3</span></span>
+      = <span class="inline-frac" style="color:#b45309; font-size:1.15em;"><span>2</span><span class="bar">/</span><span>3</span></span>
+    `
+  },
+  // 2관: 가분수 ➔ 대분수 탈출 (수직선 징검다리)
+  {
+    id: 1,
+    tag: "🐸 제 2 관 : 수직선 징검다리",
+    title: "가분수 탈출 : 온전한 1을 뽑아 대분수로!",
+    tts: "점프를 계속해서 분자가 분모보다 커지면 무거운 가분수가 돼요. 온전한 1개, 즉 5분의 5를 쏙 뽑아내면 가벼운 대분수 1과 5분의 1로 변신할 수 있어요!",
+    ruleCatch: "무거운 가분수는 온전한 1을 쏙 뽑아 대분수로 변신!",
+    mathType: "numberline",
+    formulaHtml: `
+      <span class="inline-frac"><span>2</span><span class="bar">/</span><span>5</span></span> 
+      × 3 = 
+      <span class="inline-frac"><span>6</span><span class="bar">/</span><span>5</span></span>
+      = <span style="color:#b45309; font-size:1.15em;">1<span class="inline-frac"><span>1</span><span class="bar">/</span><span>5</span></span></span>
+    `
+  },
+  // 3관: 대분수 × 자연수 (가분수 투구 변신소)
+  {
+    id: 2,
+    tag: "🧪 제 3 관 : 가분수 투구 변신소",
+    title: "대분수 × 자연수 : 가분수로 바꾸어 계산!",
+    tts: "대분수는 계산하기 복잡해 보여요. 하지만 가분수 투구를 씌워 3분의 5로 변신시키면 자연수와 쉽게 곱할 수 있답니다. 마지막엔 다시 대분수로 예쁘게 정리해요!",
+    ruleCatch: "대분수는 날씬한 가분수로 싹 바꾸고 곱하면 끝!",
+    mathType: "potion",
+    formulaHtml: `
+      1<span class="inline-frac"><span>2</span><span class="bar">/</span><span>3</span></span> × 2 
+      = <span class="inline-frac"><span>5</span><span class="bar">/</span><span>3</span></span> × 2 
+      = <span class="inline-frac"><span>10</span><span class="bar">/</span><span>3</span></span>
+      = <span style="color:#b45309; font-size:1.15em;">3<span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span></span>
+    `
+  },
+  // 4관: 자연수 × 진분수 (요술 무지개 털실)
+  {
+    id: 3,
+    tag: "🧶 제 4 관 : 요술 무지개 털실",
+    title: "자연수 × 진분수 : 전체의 몇 분의 몇 구하기",
+    tts: "6미터의 3분의 2를 구할 때는, 6을 분모 3으로 먼저 나누어 1도막인 2미터를 구한 뒤, 분자 2를 곱해 4미터를 만들어요! 약분을 미리 하면 훨씬 빨라져요.",
+    ruleCatch: "'전체의 몇 분의 몇'은 분모로 나누고 분자만큼 곱하기!",
+    mathType: "yarn",
+    formulaHtml: `
+      6 × <span class="inline-frac"><span>2</span><span class="bar">/</span><span>3</span></span>
+      = <span class="inline-frac"><span><del style="color:#ef4444;">6</del> <small style="color:#2563eb;">2</small> × 2</span><span class="bar">/</span><span><del style="color:#ef4444;">3</del> <small style="color:#2563eb;">1</small></span></span>
+      = <span style="color:#b45309; font-size:1.15em;">4 (m)</span>
+    `
+  },
+  // 5관: 단위분수 × 단위분수 (차원의 크리스털 창문)
+  {
+    id: 4,
+    tag: "💎 제 5 관 : 차원의 크리스털 창문",
+    title: "단위분수 × 단위분수 : 가로×세로 면적 겹치기",
+    tts: "2분의 1의 3분의 1은, 가로로 2등분하고 세로로 3등분한 사각형에서 겹치는 1칸의 넓이예요! 분모끼리 곱하면 전체 6칸, 분자끼리 곱하면 1칸으로 6분의 1이 돼요.",
+    ruleCatch: "분모끼리 슝! 분자끼리 착! 조각의 조각을 구해요!",
+    mathType: "window",
+    formulaHtml: `
+      <span class="inline-frac"><span>1</span><span class="bar">/</span><span>2</span></span> 
+      × <span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span> 
+      = <span class="inline-frac"><span>1 × 1</span><span class="bar">/</span><span>2 × 3</span></span>
+      = <span class="inline-frac" style="color:#b45309; font-size:1.15em;"><span>1</span><span class="bar">/</span><span>6</span></span>
+    `
+  },
+  // 6관: 진분수 × 진분수 (마법 가위 번개 약분술)
+  {
+    id: 5,
+    tag: "✂️ 제 6 관 : 마법 가위 번개 약분술",
+    title: "진분수 × 진분수 : 대각선 미리 약분으로 숫자 축소!",
+    tts: "분수끼리 곱할 때 숫자가 너무 커지면 계산이 힘들어져요. 곱하기 전에 대각선에 있는 숫자끼리 같은 수로 싹둑 약분하면, 놀랍도록 쉽고 빠르게 답을 찾을 수 있답니다!",
+    ruleCatch: "계산하기 전에 대각선 친구를 똑같은 수로 미리 싹둑!",
+    mathType: "scissor",
+    formulaHtml: `
+      <span class="inline-frac"><span>3</span><span class="bar">/</span><span><del style="color:#ef4444;">4</del> <small style="color:#2563eb;">2</small></span></span> 
+      × 
+      <span class="inline-frac"><span><del style="color:#ef4444;">2</del> <small style="color:#2563eb;">1</small></span><span class="bar">/</span><span>7</span></span> 
+      = <span class="inline-frac"><span>3 × 1</span><span class="bar">/</span><span>2 × 7</span></span>
+      = <span class="inline-frac" style="color:#b45309; font-size:1.15em;"><span>3</span><span class="bar">/</span><span>14</span></span>
+    `
+  }
+];
+
+let currentTab = 0;
+let exploredSet = new Set([0]);
+
+// 보석 로드 & 저장
+function getGemCount() {
+  return parseInt(localStorage.getItem('math_gem_count') || '0', 10);
+}
+function addGems(n) {
+  const c = getGemCount() + n;
+  localStorage.setItem('math_gem_count', c);
+  document.getElementById('gemCount').textContent = c;
+}
+
+// 탭 전환
+function switchTab(idx) {
+  currentTab = idx;
+  exploredSet.add(idx);
+  updateProgressUI();
+
+  // 탭 버튼 active 클래스 갱신
+  document.querySelectorAll('.nav-tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === idx);
+  });
+
+  renderConceptTab(idx);
+}
+
+function updateProgressUI() {
+  const count = exploredSet.size;
+  document.getElementById('exploredCount').textContent = count;
+  const pct = Math.round((count / 6) * 100);
+  document.getElementById('progressBarFill').style.width = `${pct}%`;
+
+  if (count === 6 && !localStorage.getItem('math_bakery_concepts_completed')) {
+    localStorage.setItem('math_bakery_concepts_completed', 'true');
+    addGems(5);
+    setTimeout(() => {
+      document.getElementById('completionModal').style.display = 'flex';
+    }, 600);
+  }
+}
+
+function closeCompletionModal() {
+  document.getElementById('completionModal').style.display = 'none';
+}
+
+// 탭별 렌더링
+function renderConceptTab(idx) {
+  const data = TAB_DATA[idx];
+  const container = document.getElementById('conceptContainer');
+
+  container.innerHTML = `
+    <article class="concept-card">
+      <div class="concept-header">
+        <div>
+          <span class="concept-tag">${data.tag}</span>
+          <h2 class="concept-title">${data.title}</h2>
+        </div>
+        <button class="btn-speak-tts" onclick="speakConceptTTS('${data.tts.replace(/'/g, "\'")}')">
+          <span>🔊</span> 코코의 설명 듣기
+        </button>
+      </div>
+
+      <!-- 인터랙티브 조작 캔버스 -->
+      <div class="visual-playground" id="playgroundArea">
+        ${getPlaygroundHtml(data.mathType)}
+      </div>
+
+      <!-- 조작 버튼들 -->
+      <div class="controls-bar" id="controlsArea">
+        ${getControlsHtml(data.mathType)}
+      </div>
+
+      <!-- 민수의 한 줄 공식 카드 -->
+      <div class="formula-rule-card">
+        <span class="formula-badge">💡 민수의 한 줄 공식</span>
+        <div class="formula-catchphrase">"${data.ruleCatch}"</div>
+        <div class="formula-math-display" id="formulaMathBox">
+          ${data.formulaHtml}
+        </div>
+      </div>
+    </article>
+  `;
+
+  // 각 탭별 초기 인터랙션 바인딩
+  initPlayground(data.mathType);
+}
+
+// 요정 코코 TTS 음성 출력 (단일 SSOT 인터페이스 speakFairyTTS)
+function speakConceptTTS(text) {
+  if (typeof speakFairyTTS === 'function') {
+    speakFairyTTS(text);
+  } else if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+// ========================================================
+// 🎮 6대 시각화 인터랙션 뷰 HTML & 스크립트
+// ========================================================
+
+// 1. 피자 복제기 상태
+let pizzaDen = 3;
+let pizzaMult = 2;
+
+// 2. 수직선 점프 상태
+let jumpStep = 0;
+
+// 3. 포션 가분수 투구 상태
+let potionState = 'mixed'; // 'mixed' | 'helmet' | 'multiplied' | 'restored'
+
+// 4. 무지개 털실 상태
+let yarnStep = 0; // 0: 원본, 1: 3도막 나눔, 2: 2도막 선택
+
+// 5. 크리스털 창문 상태
+let windowOverlapped = false;
+let windowX = 2; // 가로 2등분
+let windowY = 3; // 세로 3등분
+
+// 6. 마법 가위 번개 약분 상태
+let scissorCut = false;
+let scissorMode = 1; // 1: 3/4 * 2/7, 2: 2 1/3 * 1 1/5
+
+function getPlaygroundHtml(type) {
+  if (type === 'pizza') {
+    return `<div id="pizzaCanvasWrap" style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px; align-items:center;"></div>`;
+  }
+  if (type === 'numberline') {
+    return `
+      <div style="width:100%; max-width:640px; text-align:center;">
+        <svg id="numberlineSvg" viewBox="0 0 600 160" style="width:100%; height:auto;"></svg>
+        <div id="jumpStatusText" style="font-family:'Jua',sans-serif; font-size:1.15rem; color:#b45309; margin-top:10px;">
+          🐸 개구리가 징검다리를 건널 준비를 하고 있어요! (0 / 3 점프)
+        </div>
+      </div>
+    `;
+  }
+  if (type === 'potion') {
+    return `<div id="potionWrap" style="display:flex; flex-direction:column; align-items:center; gap:16px;"></div>`;
+  }
+  if (type === 'yarn') {
+    return `<div id="yarnWrap" style="width:100%; max-width:640px; text-align:center;"></div>`;
+  }
+  if (type === 'window') {
+    return `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div id="windowFrame" style="width:240px; height:240px; border:4px solid #0284c7; border-radius:12px; position:relative; overflow:hidden; background:#ffffff; box-shadow:0 8px 20px rgba(2,132,199,0.15);"></div>
+        <div id="windowLegend" style="font-family:'Jua',sans-serif; font-size:1.05rem; color:#0369a1;"></div>
+      </div>
+    `;
+  }
+  if (type === 'scissor') {
+    return `<div id="scissorWrap" style="display:flex; flex-direction:column; align-items:center; gap:16px;"></div>`;
+  }
+  return '';
+}
+
+function getControlsHtml(type) {
+  if (type === 'pizza') {
+    return `
+      <button class="ctrl-btn" onclick="changePizzaMult(-1)">➖ 개수 줄이기</button>
+      <button class="ctrl-btn primary" onclick="changePizzaMult(1)">➕ 피자 조각 곱하기 (× ${pizzaMult})</button>
+      <button class="ctrl-btn" onclick="resetPizza()">🔄 처음으로</button>
+    `;
+  }
+  if (type === 'numberline') {
+    return `
+      <button class="ctrl-btn primary" onclick="doJump()">🐸 다음 징검다리로 점프! (2/5씩)</button>
+      <button class="ctrl-btn" onclick="resetJump()">🔄 출발선으로</button>
+    `;
+  }
+  if (type === 'potion') {
+    return `
+      <button class="ctrl-btn primary" id="potionStepBtn" onclick="nextPotionStep()">🪖 1단계: 가분수 투구 씌우기!</button>
+      <button class="ctrl-btn" onclick="resetPotion()">🔄 처음으로</button>
+    `;
+  }
+  if (type === 'yarn') {
+    return `
+      <button class="ctrl-btn primary" id="yarnStepBtn" onclick="nextYarnStep()">✂️ 1단계: 3도막으로 똑같이 나누기</button>
+      <button class="ctrl-btn" onclick="resetYarn()">🔄 처음으로</button>
+    `;
+  }
+  if (type === 'window') {
+    return `
+      <button class="ctrl-btn primary" onclick="toggleWindowOverlap()">✨ 마법 빛 겹치기 (1/2 × 1/3)</button>
+      <button class="ctrl-btn" onclick="resetWindow()">🔄 분리하기</button>
+    `;
+  }
+  if (type === 'scissor') {
+    return `
+      <button class="ctrl-btn primary" onclick="toggleScissorCut()">✂️⚡ 번개 약분술 발동!</button>
+      <button class="ctrl-btn" onclick="toggleScissorExample()">🔁 예제 바꾸기 (대분수×대분수)</button>
+    `;
+  }
+  return '';
+}
+
+function initPlayground(type) {
+  if (type === 'pizza') renderPizzaPlayground();
+  if (type === 'numberline') renderNumberlinePlayground();
+  if (type === 'potion') renderPotionPlayground();
+  if (type === 'yarn') renderYarnPlayground();
+  if (type === 'window') renderWindowPlayground();
+  if (type === 'scissor') renderScissorPlayground();
+}
+
+// ----------------------------------------------------
+// 1. 피자 복제기 렌더링
+// ----------------------------------------------------
+function renderPizzaPlayground() {
+  const wrap = document.getElementById('pizzaCanvasWrap');
+  if (!wrap) return;
+
+  const totalSlices = 1 * pizzaMult; // 분자 1 * mult
+  const fullPizzas = Math.floor(totalSlices / pizzaDen);
+  const remainSlices = totalSlices % pizzaDen;
+  const numPizzas = fullPizzas + (remainSlices > 0 ? 1 : 0);
+
+  let html = '';
+  let sliceCountSoFar = 0;
+
+  for (let p = 0; p < Math.max(1, numPizzas); p++) {
+    const activeInThisPizza = Math.min(pizzaDen, totalSlices - sliceCountSoFar);
+    sliceCountSoFar += activeInThisPizza;
+
+    html += `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+        <svg width="150" height="150" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="46" fill="#fef3c7" stroke="#d97706" stroke-width="4"/>
+          ${renderPizzaSvgSlices(pizzaDen, activeInThisPizza)}
+        </svg>
+        <span style="font-family:'Jua',sans-serif; color:#78350f; font-size:1rem;">
+          피자 ${p + 1}판 (${activeInThisPizza}/${pizzaDen} 조각)
+        </span>
+      </div>
+    `;
+  }
+
+  wrap.innerHTML = html;
+
+  // 공식 박스 실시간 갱신
+  const mathBox = document.getElementById('formulaMathBox');
+  if (mathBox) {
+    const isOver = totalSlices >= pizzaDen;
+    let resHtml = `<span class="inline-frac"><span>${totalSlices}</span><span class="bar">/</span><span>${pizzaDen}</span></span>`;
+    if (isOver && remainSlices > 0) {
+      resHtml += ` = ${fullPizzas}<span class="inline-frac"><span>${remainSlices}</span><span class="bar">/</span><span>${pizzaDen}</span></span>`;
+    } else if (isOver && remainSlices === 0) {
+      resHtml += ` = ${fullPizzas}판`;
+    }
+
+    mathBox.innerHTML = `
+      <span class="inline-frac"><span>1</span><span class="bar">/</span><span>${pizzaDen}</span></span> 
+      × ${pizzaMult} = 
+      <span class="inline-frac"><span>1 × ${pizzaMult}</span><span class="bar">/</span><span>${pizzaDen}</span></span>
+      = <span style="color:#b45309; font-size:1.15em;">${resHtml}</span>
+    `;
+  }
+}
+
+function renderPizzaSvgSlices(den, activeCount) {
+  let paths = '';
+  const cx = 50, cy = 50, r = 44;
+  const angleStep = 360 / den;
+
+  for (let i = 0; i < den; i++) {
+    const startAngle = i * angleStep - 90;
+    const endAngle = (i + 1) * angleStep - 90;
+    const isFilled = (i < activeCount);
+
+    const x1 = cx + r * Math.cos(startAngle * Math.PI / 180);
+    const y1 = cy + r * Math.sin(startAngle * Math.PI / 180);
+    const x2 = cx + r * Math.cos(endAngle * Math.PI / 180);
+    const y2 = cy + r * Math.sin(endAngle * Math.PI / 180);
+
+    const largeArc = angleStep > 180 ? 1 : 0;
+    const fill = isFilled ? "#ef4444" : "#ffedd5"; // 딸기색 vs 빈도우색
+    const stroke = "#d97706";
+
+    paths += `
+      <path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z" 
+            fill="${fill}" stroke="${stroke}" stroke-width="2" style="transition:all 0.3s;"/>
+    `;
+
+    if (isFilled) {
+      const midAngle = (startAngle + endAngle) / 2;
+      const sx = cx + (r * 0.6) * Math.cos(midAngle * Math.PI / 180);
+      const sy = cy + (r * 0.6) * Math.sin(midAngle * Math.PI / 180);
+      paths += `<circle cx="${sx}" cy="${sy}" r="3" fill="#ffffff" opacity="0.9"/>`;
+    }
+  }
+  return paths;
+}
+
+function changePizzaMult(delta) {
+  pizzaMult = Math.max(1, Math.min(6, pizzaMult + delta));
+  renderPizzaPlayground();
+  const controls = document.getElementById('controlsArea');
+  if (controls) controls.innerHTML = getControlsHtml('pizza');
+}
+
+function resetPizza() {
+  pizzaMult = 2;
+  renderPizzaPlayground();
+  const controls = document.getElementById('controlsArea');
+  if (controls) controls.innerHTML = getControlsHtml('pizza');
+}
+
+// ----------------------------------------------------
+// 2. 수직선 징검다리 렌더링
+// ----------------------------------------------------
+function renderNumberlinePlayground() {
+  const svg = document.getElementById('numberlineSvg');
+  if (!svg) return;
+
+  const startX = 50;
+  const endX = 550;
+  const lineY = 90;
+  const totalLength = endX - startX;
+  const unitPx = totalLength / 2;
+  const stepPx = unitPx / 5; // 2/5 = 2 * stepPx
+
+  let ticks = '';
+  for (let i = 0; i <= 10; i++) {
+    const x = startX + i * stepPx;
+    const isMain = (i % 5 === 0);
+    const h = isMain ? 24 : 12;
+    const strokeW = isMain ? 3 : 1.5;
+    const strokeC = isMain ? "#b45309" : "#9ca3af";
+
+    ticks += `<line x1="${x}" y1="${lineY - h/2}" x2="${x}" y2="${lineY + h/2}" stroke="${strokeC}" stroke-width="${strokeW}"/>`;
+
+    if (isMain) {
+      const val = i / 5;
+      ticks += `<text x="${x}" y="${lineY + 30}" font-family="Jua" font-size="18" fill="#78350f" text-anchor="middle">${val}</text>`;
+      if (val === 1 || val === 2) {
+        ticks += `<text x="${x}" y="${lineY - 24}" font-size="18" text-anchor="middle">🚩</text>`;
+      }
+    }
+  }
+
+  let jumpArcs = '';
+  for (let j = 0; j < jumpStep; j++) {
+    const x1 = startX + (j * 2) * stepPx;
+    const x2 = startX + ((j + 1) * 2) * stepPx;
+    const midX = (x1 + x2) / 2;
+    const arcY = lineY - 45;
+    jumpArcs += `
+      <path d="M ${x1} ${lineY} Q ${midX} ${arcY} ${x2} ${lineY}" 
+            fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="6,4"/>
+      <text x="${midX}" y="${arcY - 6}" font-family="Jua" font-size="14" fill="#047857" text-anchor="middle">+2/5</text>
+    `;
+  }
+
+  const currentFrogX = startX + (jumpStep * 2) * stepPx;
+  const frogEl = `
+    <g transform="translate(${currentFrogX}, ${lineY - 14})">
+      <circle cx="0" cy="0" r="16" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+      <text x="0" y="5" font-size="16" text-anchor="middle">🐸</text>
+    </g>
+  `;
+
+  svg.innerHTML = `
+    <line x1="${startX}" y1="${lineY}" x2="${endX}" y2="${lineY}" stroke="#d97706" stroke-width="4" stroke-linecap="round"/>
+    ${ticks}
+    ${jumpArcs}
+    ${frogEl}
+  `;
+
+  const statusEl = document.getElementById('jumpStatusText');
+  if (statusEl) {
+    if (jumpStep === 0) {
+      statusEl.textContent = "🐸 개구리가 징검다리를 건널 준비를 하고 있어요! (0 / 3 점프)";
+    } else if (jumpStep === 1) {
+      statusEl.innerHTML = "첫 번째 점프! <b>2/5 지점</b>에 도착했어요!";
+    } else if (jumpStep === 2) {
+      statusEl.innerHTML = "두 번째 점프! <b>4/5 지점</b>에 도착했어요!";
+    } else if (jumpStep === 3) {
+      statusEl.innerHTML = "세 번째 점프! 깃발 1을 넘어 <b>6/5 (즉 1과 1/5)</b>에 완벽 도착! 🎉";
+    }
+  }
+}
+
+function doJump() {
+  if (jumpStep < 3) {
+    jumpStep++;
+    renderNumberlinePlayground();
+  }
+}
+
+function resetJump() {
+  jumpStep = 0;
+  renderNumberlinePlayground();
+}
+
+// ----------------------------------------------------
+// 3. 포션 가분수 투구 렌더링
+// ----------------------------------------------------
+function renderPotionPlayground() {
+  const wrap = document.getElementById('potionWrap');
+  if (!wrap) return;
+
+  let contentHtml = '';
+  const stepBtn = document.getElementById('potionStepBtn');
+
+  if (potionState === 'mixed') {
+    if (stepBtn) stepBtn.textContent = "🪖 1단계: 가분수 투구 씌우기!";
+    contentHtml = `
+      <div style="display:flex; align-items:center; gap:20px;">
+        <div style="text-align:center;">
+          <div style="font-size:3.5rem;">🏺</div>
+          <div style="font-family:'Jua'; color:#78350f;">온전한 1병 (3/3)</div>
+        </div>
+        <div style="font-size:2rem; font-family:'Jua'; color:#b45309;">+</div>
+        <div style="text-align:center;">
+          <div style="display:flex; gap:6px; font-size:2.4rem;">🧪🧪</div>
+          <div style="font-family:'Jua'; color:#78350f;">작은 잔 2개 (2/3)</div>
+        </div>
+      </div>
+      <div style="font-family:'Jua'; font-size:1.15rem; color:#b45309; background:#fffbeb; padding:8px 18px; border-radius:14px; border:1px solid #fde68a;">
+        현재 상태: 대분수 1과 2/3병
+      </div>
+    `;
+  } else if (potionState === 'helmet') {
+    if (stepBtn) stepBtn.textContent = "🧪 2단계: 2배로 복제하기 (× 2)!";
+    contentHtml = `
+      <div style="text-align:center;">
+        <div style="font-size:1.5rem; margin-bottom:6px;">🪖 펑! 1병이 작은 잔 3개로 변신!</div>
+        <div style="display:flex; gap:8px; font-size:2.6rem; justify-content:center;">
+          🧪🧪🧪 🧪🧪
+        </div>
+        <div style="font-family:'Jua'; color:#2563eb; font-size:1.2rem; margin-top:8px;">
+          가분수 투구 착용: 총 5잔 (5/3)
+        </div>
+      </div>
+    `;
+  } else if (potionState === 'multiplied') {
+    if (stepBtn) stepBtn.textContent = "✨ 3단계: 대분수로 정리하기!";
+    contentHtml = `
+      <div style="text-align:center;">
+        <div style="font-size:1.4rem; color:#d97706; margin-bottom:8px;">× 2 복제 마법 발동! 잔이 2배로 늘어났어요!</div>
+        <div style="display:flex; flex-wrap:wrap; max-width:320px; gap:8px; font-size:2.4rem; justify-content:center;">
+          🧪🧪🧪🧪🧪 🧪🧪🧪🧪🧪
+        </div>
+        <div style="font-family:'Jua'; color:#b45309; font-size:1.2rem; margin-top:8px;">
+          총 10잔 (10/3)
+        </div>
+      </div>
+    `;
+  } else if (potionState === 'restored') {
+    if (stepBtn) stepBtn.textContent = "🎉 마법 완성! 처음으로";
+    contentHtml = `
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:3.2rem;">🏺🏺🏺</div>
+          <div style="font-family:'Jua'; color:#047857;">온전한 3병 (9/3)</div>
+        </div>
+        <div style="font-size:2rem; font-family:'Jua'; color:#047857;">+</div>
+        <div style="text-align:center;">
+          <div style="font-size:2.4rem;">🧪</div>
+          <div style="font-family:'Jua'; color:#047857;">남은 1잔 (1/3)</div>
+        </div>
+      </div>
+      <div style="font-family:'Jua'; font-size:1.25rem; color:#065f46; background:#ecfdf5; padding:10px 22px; border-radius:14px; border:2px solid #10b981;">
+        최종 결과: 대분수 3과 1/3 리터 완성!
+      </div>
+    `;
+  }
+
+  wrap.innerHTML = contentHtml;
+}
+
+function nextPotionStep() {
+  if (potionState === 'mixed') potionState = 'helmet';
+  else if (potionState === 'helmet') potionState = 'multiplied';
+  else if (potionState === 'multiplied') potionState = 'restored';
+  else if (potionState === 'restored') potionState = 'mixed';
+  renderPotionPlayground();
+}
+
+function resetPotion() {
+  potionState = 'mixed';
+  renderPotionPlayground();
+}
+
+// ----------------------------------------------------
+// 4. 무지개 털실 렌더링
+// ----------------------------------------------------
+function renderYarnPlayground() {
+  const wrap = document.getElementById('yarnWrap');
+  if (!wrap) return;
+
+  const stepBtn = document.getElementById('yarnStepBtn');
+  let blocksHtml = '';
+
+  if (yarnStep === 0) {
+    if (stepBtn) stepBtn.textContent = "✂️ 1단계: 3도막으로 똑같이 나누기";
+    blocksHtml = `
+      <div style="width:100%; height:46px; background:linear-gradient(90deg, #f43f5e, #f59e0b, #10b981, #3b82f6); border-radius:14px; border:3px solid #d97706; display:flex; align-items:center; justify-content:center; color:#ffffff; font-family:'Jua'; font-size:1.3rem; box-shadow:0 4px 12px rgba(217,119,6,0.2);">
+        길이가 6m인 전체 무지개 털실
+      </div>
+    `;
+  } else if (yarnStep === 1) {
+    if (stepBtn) stepBtn.textContent = "🎁 2단계: 2도막 가져오기 (× 2)";
+    blocksHtml = `
+      <div style="display:flex; gap:10px; width:100%;">
+        <div style="flex:1; height:46px; background:#e0f2fe; border:2px dashed #0284c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.1rem; color:#0369a1;">1도막 (2m)</div>
+        <div style="flex:1; height:46px; background:#e0f2fe; border:2px dashed #0284c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.1rem; color:#0369a1;">2도막 (2m)</div>
+        <div style="flex:1; height:46px; background:#e0f2fe; border:2px dashed #0284c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.1rem; color:#0369a1;">3도막 (2m)</div>
+      </div>
+      <div style="font-family:'Jua'; color:#0369a1; margin-top:12px; font-size:1.05rem;">
+        6m를 분모 3으로 나누니 1도막은 <b>2m</b>!
+      </div>
+    `;
+  } else if (yarnStep === 2) {
+    if (stepBtn) stepBtn.textContent = "🎉 4m 완성! 처음으로";
+    blocksHtml = `
+      <div style="display:flex; gap:10px; width:100%;">
+        <div style="flex:1; height:46px; background:#fef3c7; border:3px solid #d97706; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.15rem; color:#b45309; box-shadow:0 4px 10px rgba(217,119,6,0.2);">선택 1도막 (2m) ⭐</div>
+        <div style="flex:1; height:46px; background:#fef3c7; border:3px solid #d97706; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.15rem; color:#b45309; box-shadow:0 4px 10px rgba(217,119,6,0.2);">선택 2도막 (2m) ⭐</div>
+        <div style="flex:1; height:46px; background:#f3f4f6; border:2px solid #d1d5db; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:'Jua'; font-size:1.1rem; color:#9ca3af;">남은 3도막 (2m)</div>
+      </div>
+      <div style="font-family:'Jua'; color:#065f46; margin-top:12px; font-size:1.2rem; background:#ecfdf5; padding:8px 18px; border-radius:12px; border:2px solid #10b981;">
+        2도막을 가져오니 2m × 2 = <b>4m</b> 싹둑 완성! ✂️
+      </div>
+    `;
+  }
+
+  wrap.innerHTML = blocksHtml;
+}
+
+function nextYarnStep() {
+  yarnStep = (yarnStep + 1) % 3;
+  renderYarnPlayground();
+}
+
+function resetYarn() {
+  yarnStep = 0;
+  renderYarnPlayground();
+}
+
+// ----------------------------------------------------
+// 5. 크리스털 창문 렌더링
+// ----------------------------------------------------
+function renderWindowPlayground() {
+  const frame = document.getElementById('windowFrame');
+  const legend = document.getElementById('windowLegend');
+  if (!frame) return;
+
+  if (!windowOverlapped) {
+    frame.innerHTML = `
+      <div style="width:100%; height:100%; position:relative;">
+        <div style="position:absolute; top:0; left:0; width:50%; height:100%; background:rgba(59, 130, 246, 0.4); border-right:2px solid #2563eb; display:flex; align-items:center; justify-content:center; font-family:'Jua'; color:#1d4ed8; font-size:1.2rem;">
+          가로 1/2
+        </div>
+        <div style="position:absolute; top:0; left:0; width:100%; height:33.33%; background:rgba(234, 179, 8, 0.35); border-bottom:2px solid #ca8a04; display:flex; align-items:center; justify-content:center; font-family:'Jua'; color:#a16207; font-size:1.2rem;">
+          세로 1/3
+        </div>
+      </div>
+    `;
+    legend.textContent = "가로 1/2 빛과 세로 1/3 빛이 포개질 준비를 하고 있어요!";
+  } else {
+    let gridCells = '';
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 2; c++) {
+        const isOverlap = (r === 0 && c === 0);
+        const bg = isOverlap ? "linear-gradient(135deg, #10b981, #059669)" : (c === 0 ? "rgba(59,130,246,0.2)" : (r === 0 ? "rgba(234,179,8,0.2)" : "#ffffff"));
+        const border = "1px solid #94a3b8";
+        const txt = isOverlap ? "<b style='color:#fff; font-size:1.2rem;'>1/6 ✨</b>" : "";
+        gridCells += `
+          <div style="background:${bg}; border:${border}; display:flex; align-items:center; justify-content:center; font-family:'Jua';">
+            ${txt}
+          </div>
+        `;
+      }
+    }
+    frame.innerHTML = `
+      <div style="display:grid; grid-template-columns:repeat(2, 1fr); grid-template-rows:repeat(3, 1fr); width:100%; height:100%;">
+        ${gridCells}
+      </div>
+    `;
+    legend.innerHTML = "겹쳐진 초록색 에메랄드 칸은 전체 <b>6칸 중 딱 1칸 (1/6)</b>!";
+  }
+}
+
+function toggleWindowOverlap() {
+  windowOverlapped = true;
+  renderWindowPlayground();
+}
+
+function resetWindow() {
+  windowOverlapped = false;
+  renderWindowPlayground();
+}
+
+// ----------------------------------------------------
+// 6. 마법 가위 번개 약분술 렌더링
+// ----------------------------------------------------
+function renderScissorPlayground() {
+  const wrap = document.getElementById('scissorWrap');
+  if (!wrap) return;
+
+  let exprHtml = '';
+  if (scissorMode === 1) {
+    if (!scissorCut) {
+      exprHtml = `
+        <div style="display:flex; align-items:center; gap:16px; font-family:'Jua'; font-size:2rem; color:#78350f;">
+          <span class="inline-frac"><span>3</span><span class="bar">/</span><span style="color:#ef4444; border:2px solid #ef4444; border-radius:8px; padding:2px 6px;">4</span></span>
+          <span>×</span>
+          <span class="inline-frac"><span style="color:#ef4444; border:2px solid #ef4444; border-radius:8px; padding:2px 6px;">2</span><span class="bar">/</span><span>7</span></span>
+        </div>
+        <div style="font-family:'Jua'; color:#ef4444; font-size:1.15rem; background:#fee2e2; padding:8px 18px; border-radius:12px; border:1px solid #f87171;">
+          ⚡ 대각선의 4와 2가 둘 다 2로 나누어져요! 짝꿍 발견!
+        </div>
+      `;
+    } else {
+      exprHtml = `
+        <div style="display:flex; align-items:center; gap:16px; font-family:'Jua'; font-size:2rem; color:#78350f;">
+          <span class="inline-frac">
+            <span>3</span>
+            <span class="bar">/</span>
+            <span><del style="color:#ef4444;">4</del> <small style="color:#2563eb; font-size:0.9em;">2</small></span>
+          </span>
+          <span>×</span>
+          <span class="inline-frac">
+            <span><del style="color:#ef4444;">2</del> <small style="color:#2563eb; font-size:0.9em;">1</small></span>
+            <span class="bar">/</span>
+            <span>7</span>
+          </span>
+          <span>=</span>
+          <span class="inline-frac">
+            <span>3 × 1</span>
+            <span class="bar">/</span>
+            <span>2 × 7</span>
+          </span>
+          <span>=</span>
+          <span class="inline-frac" style="color:#047857; font-size:1.2em;">
+            <span>3</span>
+            <span class="bar">/</span>
+            <span>14</span>
+          </span>
+        </div>
+        <div style="font-family:'Jua'; color:#065f46; font-size:1.2rem; background:#ecfdf5; padding:8px 20px; border-radius:12px; border:2px solid #10b981;">
+          ✂️ 싹둑! 4는 2가 되고, 2는 1이 되어 답이 3/14로 쏙 나왔어요!
+        </div>
+      `;
+    }
+  } else {
+    if (!scissorCut) {
+      exprHtml = `
+        <div style="display:flex; align-items:center; gap:16px; font-family:'Jua'; font-size:1.8rem; color:#78350f;">
+          <span>2<span class="inline-frac"><span>1</span><span class="bar">/</span><span>3</span></span> × 1<span class="inline-frac"><span>1</span><span class="bar">/</span><span>5</span></span></span>
+          <span>➔</span>
+          <span class="inline-frac"><span>7</span><span class="bar">/</span><span style="color:#ef4444; border:2px solid #ef4444; border-radius:8px; padding:2px 6px;">3</span></span>
+          <span>×</span>
+          <span class="inline-frac"><span style="color:#ef4444; border:2px solid #ef4444; border-radius:8px; padding:2px 6px;">6</span><span class="bar">/</span><span>5</span></span>
+        </div>
+        <div style="font-family:'Jua'; color:#ef4444; font-size:1.15rem; background:#fee2e2; padding:8px 18px; border-radius:12px; border:1px solid #f87171;">
+          둘 다 가분수로 변신! 분모 3과 분자 6을 3으로 싹둑 약분할 수 있어요!
+        </div>
+      `;
+    } else {
+      exprHtml = `
+        <div style="display:flex; align-items:center; gap:14px; font-family:'Jua'; font-size:1.8rem; color:#78350f;">
+          <span class="inline-frac">
+            <span>7</span>
+            <span class="bar">/</span>
+            <span><del style="color:#ef4444;">3</del> <small style="color:#2563eb;">1</small></span>
+          </span>
+          <span>×</span>
+          <span class="inline-frac">
+            <span><del style="color:#ef4444;">6</del> <small style="color:#2563eb;">2</small></span>
+            <span class="bar">/</span>
+            <span>5</span>
+          </span>
+          <span>=</span>
+          <span class="inline-frac">
+            <span>14</span>
+            <span class="bar">/</span>
+            <span>5</span>
+          </span>
+          <span>=</span>
+          <span style="color:#047857; font-size:1.15em;">2<span class="inline-frac"><span>4</span><span class="bar">/</span><span>5</span></span></span>
+        </div>
+        <div style="font-family:'Jua'; color:#065f46; font-size:1.2rem; background:#ecfdf5; padding:8px 20px; border-radius:12px; border:2px solid #10b981;">
+          약분 덕분에 7×2=14, 1×5=5로 쉬워졌어요! 대분수 2와 4/5 정답!
+        </div>
+      `;
+    }
+  }
+
+  wrap.innerHTML = exprHtml;
+}
+
+function toggleScissorCut() {
+  scissorCut = true;
+  renderScissorPlayground();
+}
+
+function toggleScissorExample() {
+  scissorMode = scissorMode === 1 ? 2 : 1;
+  scissorCut = false;
+  renderScissorPlayground();
+}
+
+// 초기 로드
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('gemCount').textContent = getGemCount();
+  switchTab(0);
+});
+</script>
+</body>
+</html>
