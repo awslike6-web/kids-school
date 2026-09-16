@@ -44,7 +44,7 @@
     }
 
     .translator-wrap {
-      max-width: 760px;
+      max-width: 820px;
       margin: 0 auto;
       padding: 20px 16px 80px;
     }
@@ -86,7 +86,7 @@
     /* 메인 타이틀 */
     .header-banner {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .main-logo-title {
       font-family: 'Jua', sans-serif;
@@ -102,44 +102,59 @@
       word-break: keep-all;
     }
 
-    /* 3단계 레벨 선택 탭 */
+    /* 5단계 세분화 레벨 선택 탭 바 */
     .level-tab-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
-    @media (max-width: 640px) {
-      .level-tab-bar { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 720px) {
+      .level-tab-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .level-tab-bar { grid-template-columns: 1fr; }
     }
     .level-tab-btn {
       background: rgba(255,255,255,0.05);
       border: 2px solid var(--border-color);
       border-radius: 16px;
-      padding: 12px 8px;
+      padding: 10px 8px;
       font-family: 'Jua', sans-serif;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #94a3b8;
       cursor: pointer;
       text-align: center;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
+    }
+    body.theme--slime .level-tab-btn {
+      background: #ffffff;
+      color: #64748b;
     }
     .level-tab-btn:hover {
       border-color: var(--primary);
       color: #ffffff;
       transform: translateY(-2px);
     }
+    body.theme--slime .level-tab-btn:hover {
+      color: #0284c7;
+    }
     .level-tab-btn.active {
       background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(199, 125, 255, 0.2));
       border-color: var(--primary);
       color: var(--yellow);
       font-weight: bold;
-      box-shadow: 0 6px 16px rgba(0, 212, 255, 0.25);
+      box-shadow: 0 4px 14px rgba(0, 212, 255, 0.25);
       transform: scale(1.02);
+    }
+    body.theme--slime .level-tab-btn.active {
+      background: linear-gradient(135deg, #e0f2fe, #fce7f3);
+      border-color: #0284c7;
+      color: #0284c7;
     }
     .level-sub-desc {
       font-size: 0.75rem;
@@ -149,13 +164,16 @@
     .level-tab-btn.active .level-sub-desc {
       color: #93c5fd;
     }
+    body.theme--slime .level-tab-btn.active .level-sub-desc {
+      color: #0369a1;
+    }
 
     /* 퀴즈 메타 바 (진행률 & 점수) */
     .quiz-status-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       font-family: 'Jua', sans-serif;
       color: #94a3b8;
     }
@@ -187,7 +205,7 @@
       background: var(--card-bg);
       border: 3px solid var(--border-color);
       border-radius: 24px;
-      padding: 28px 24px;
+      padding: 26px 22px;
       margin-bottom: 20px;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -202,14 +220,14 @@
       border-radius: 12px;
       font-family: 'Jua', sans-serif;
       font-size: 0.9rem;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .passage-sentence {
       font-family: 'Gaegu', cursive;
       font-size: clamp(1.6rem, 5vw, 2.2rem);
       line-height: 1.5;
       word-break: keep-all;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     /* 핵심 지시어 하이라이트 */
@@ -223,6 +241,11 @@
       display: inline-block;
       animation: pulseHighlight 2s infinite ease-in-out;
     }
+    body.theme--slime .highlight-word {
+      background: #fef08a;
+      color: #854d0e;
+      border-bottom-color: #eab308;
+    }
     @keyframes pulseHighlight {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
@@ -232,7 +255,10 @@
       font-family: 'Jua', sans-serif;
       font-size: 1.15rem;
       color: #38bdf8;
-      margin-top: 8px;
+      margin-top: 6px;
+    }
+    body.theme--slime .passage-prompt {
+      color: #0284c7;
     }
 
     /* 3지선다 선택지 그리드 */
@@ -267,6 +293,9 @@
       background: rgba(0, 212, 255, 0.15);
       transform: translateX(6px);
     }
+    body.theme--slime .choice-card-btn:hover {
+      background: #f0f9ff;
+    }
     .choice-num-tag {
       width: 34px;
       height: 34px;
@@ -279,17 +308,29 @@
       color: #94a3b8;
       flex-shrink: 0;
     }
+    body.theme--slime .choice-num-tag {
+      background: #f1f5f9;
+      color: #64748b;
+    }
     .choice-card-btn.correct {
       background: rgba(16, 185, 129, 0.25) !important;
       border-color: #10b981 !important;
       color: #34d399 !important;
       box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
     }
+    body.theme--slime .choice-card-btn.correct {
+      background: #d1fae5 !important;
+      color: #047857 !important;
+    }
     .choice-card-btn.wrong {
       background: rgba(239, 68, 68, 0.2) !important;
       border-color: #ef4444 !important;
       color: #f87171 !important;
       opacity: 0.75;
+    }
+    body.theme--slime .choice-card-btn.wrong {
+      background: #fee2e2 !important;
+      color: #b91c1c !important;
     }
 
     /* 정답/오답 해설 & 수식 모델 박스 */
@@ -301,6 +342,9 @@
       margin-bottom: 20px;
       display: none;
       animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    body.theme--slime .explain-card {
+      background: #f0fdf4;
     }
     .explain-card.show {
       display: block;
@@ -314,6 +358,7 @@
       align-items: center;
       gap: 8px;
     }
+    body.theme--slime .explain-title { color: #059669; }
     .explain-body {
       font-size: 1rem;
       color: #e2e8f0;
@@ -327,13 +372,13 @@
       padding: 10px 16px;
       margin-top: 10px;
       font-family: 'Jua', sans-serif;
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       color: #ffd93d;
       text-align: center;
     }
     body.theme--slime .explain-formula-box {
-      background: #f1f5f9;
-      color: #b45309;
+      background: #e2e8f0;
+      color: #0f172a;
     }
 
     /* 다음 문제 버튼 */
@@ -382,6 +427,16 @@
     }
     .inline-frac .den { display: block; padding-top: 2px; }
 
+    /* 대분수 */
+    .mixed-frac {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      gap: 3px;
+      font-weight: 700;
+    }
+    .mixed-frac .whole { font-size: 1.25em; line-height: 1; }
+
     /* 결과 축하 모달 */
     .result-modal-backdrop {
       position: fixed;
@@ -409,6 +464,7 @@
     }
     .modal-trophy { font-size: 4.5rem; margin-bottom: 12px; }
     .modal-title { font-family: 'Jua', sans-serif; font-size: 2rem; color: var(--yellow); margin-bottom: 10px; }
+    body.theme--slime .modal-title { color: #b45309; }
     .modal-score { font-size: 1.15rem; color: #cbd5e1; margin-bottom: 20px; line-height: 1.6; }
     body.theme--slime .modal-score { color: #475569; }
     .btn-modal-replay {
@@ -450,23 +506,31 @@
     <p class="main-sub-title">문제 속 헷갈리는 우리말 지시어를 사칙연산 기호로 척척 번역해요!</p>
   </div>
 
-  <!-- 3단계 레벨 선택 탭 바 -->
+  <!-- 5단계 세분화 레벨 선택 탭 바 (6개 탭) -->
   <div class="level-tab-bar">
-    <button class="level-tab-btn active" id="tab_lvl_0" onclick="switchLevel(0)">
-      <span>🟢 1단계 기초</span>
+    <button class="level-tab-btn" id="tab_lvl_0" onclick="switchLevel(0)">
+      <span>🟢 1단계 기초 연산</span>
       <span class="level-sub-desc">덧셈·뺄셈 일상말 (초1~2)</span>
     </button>
     <button class="level-tab-btn" id="tab_lvl_1" onclick="switchLevel(1)">
-      <span>🔵 2단계 묶음</span>
-      <span class="level-sub-desc">곱셈·나눗셈 묶음 (초3~4)</span>
+      <span>🔵 2단계 연산·단위</span>
+      <span class="level-sub-desc">곱셈·나눗셈·단위 (초3~4)</span>
     </button>
     <button class="level-tab-btn" id="tab_lvl_2" onclick="switchLevel(2)">
-      <span>👑 3단계 실전 ⭐</span>
-      <span class="level-sub-desc">분수·범위·조건 (초5~6)</span>
+      <span>📐 3단계 평면도형</span>
+      <span class="level-sub-desc">도형·각도·둘레 (초3~4)</span>
     </button>
-    <button class="level-tab-btn" id="tab_lvl_3" onclick="switchLevel(3)">
+    <button class="level-tab-btn active" id="tab_lvl_3" onclick="switchLevel(3)">
+      <span>👑 4단계 분수·범위 ⭐</span>
+      <span class="level-sub-desc">분수·약수·범위 (초5 실전)</span>
+    </button>
+    <button class="level-tab-btn" id="tab_lvl_4" onclick="switchLevel(4)">
+      <span>🏰 5단계 넓이·입체·비율</span>
+      <span class="level-sub-desc">넓이·입체·비율 (초5~6 심화)</span>
+    </button>
+    <button class="level-tab-btn" id="tab_lvl_5" onclick="switchLevel(5)">
       <span>🌟 마스터 챌린지</span>
-      <span class="level-sub-desc">전 단계 랜덤 10제</span>
+      <span class="level-sub-desc">전 단계 통합 10제</span>
     </button>
   </div>
 
@@ -481,9 +545,9 @@
 
   <!-- 문장제 지문 카드 -->
   <div class="passage-card">
-    <span class="passage-badge" id="passageStageBadge">🟢 1단계: 덧셈·뺄셈 일상말</span>
+    <span class="passage-badge" id="passageStageBadge">👑 4단계: 5학년 분수·약수·범위 실전</span>
     <div class="passage-sentence" id="passageSentence">
-      사과 3개와 귤 4개를 <mark class="highlight-word">[ 모두 합하면 ]</mark> 몇 개일까요?
+      로딩 중...
     </div>
     <div class="passage-prompt">👉 강조된 말은 어떤 계산 기호나 의미로 바꿔야 할까요?</div>
   </div>
@@ -497,7 +561,7 @@
   <div class="explain-card" id="explainCard">
     <div class="explain-title" id="explainTitle">💡 코코의 번역 팁</div>
     <div class="explain-body" id="explainBody">해설 내용이 들어갑니다.</div>
-    <div class="explain-formula-box" id="explainFormula">3 + 4 = 7</div>
+    <div class="explain-formula-box" id="explainFormula">수식 모델</div>
   </div>
 
   <!-- 다음 문제 버튼 -->
@@ -532,10 +596,10 @@ function renderMixed(whole, num, den) {
 }
 
 // ========================================================
-// 📚 3단계 문장제 지시어 마스터 데이터셋 (총 35문항)
+// 📚 5단계 문장제 지시어 마스터 데이터셋 (총 88문항 완비)
 // ========================================================
 const DIRECTIVE_BANKS = {
-  // 🟢 1단계: 덧셈·뺄셈 일상말 (초1~2 기초 10제)
+  // 🟢 1단계: 초1~2 기초 연산 & 일상 수 감각 (16제)
   0: [
     {
       sentence: `사과 3개와 귤 4개를 <mark class="highlight-word">[ 모두 합하면 ]</mark> 몇 개일까요?`,
@@ -594,6 +658,14 @@ const DIRECTIVE_BANKS = {
       formula: "8 > 5 > 2"
     },
     {
+      sentence: `숫자 1, 4, 7 중에서 <mark class="highlight-word">[ 가장 작은 수 ]</mark>를 고르세요.`,
+      word: "가장 작은 수",
+      opts: ["가장 양이 적은 수 (1)", "가장 양이 많은 수 (7)", "가운데 수 (4)"],
+      ans: 0,
+      tip: "'가장 작은 수'는 수량이 가장 적고 0에 가장 가까운 수예요!",
+      formula: "1 < 4 < 7"
+    },
+    {
       sentence: `2부터 시작하여 2씩 <mark class="highlight-word">[ 뛰어 세기 ]</mark>를 합니다.`,
       word: "뛰어 세기",
       opts: ["일정한 수만큼 더하기 (+2)", "일정한 수만큼 빼기 (-2)", "거꾸로 세기"],
@@ -616,10 +688,50 @@ const DIRECTIVE_BANKS = {
       ans: 1,
       tip: "가지고 있던 것이 줄어들었으므로 뺄셈(➖)으로 계산해요!",
       formula: "12 - 5 = 7"
+    },
+    {
+      sentence: `시계의 긴바늘이 12를 가리킬 때를 <mark class="highlight-word">[ 몇 시 정각 ]</mark>이라고 합니다.`,
+      word: "몇 시 정각",
+      opts: ["긴바늘이 12를 가리킴", "긴바늘이 6을 가리킴", "짧은바늘이 12를 가리킴"],
+      ans: 0,
+      tip: "긴바늘이 12에 똑바로 서 있으면 정각(00분)이에요!",
+      formula: "긴바늘 12 = 00분"
+    },
+    {
+      sentence: `시계의 긴바늘이 6을 가리킬 때를 <mark class="highlight-word">[ 몇 시 30분 ]</mark>이라고 합니다.`,
+      word: "몇 시 30분",
+      opts: ["긴바늘이 6을 가리킴", "긴바늘이 12를 가리킴", "긴바늘이 3을 가리킴"],
+      ans: 0,
+      tip: "긴바늘이 반 바퀴 돌아 6을 가리키면 30분이에요!",
+      formula: "긴바늘 6 = 30분"
+    },
+    {
+      sentence: `주사위나 상자처럼 평평한 네모 면으로만 둘러싸인 입체를 <mark class="highlight-word">[ 상자 모양 ]</mark>이라 합니다.`,
+      word: "상자 모양 (직육면체)",
+      opts: ["평평한 네모 면만 있는 모양", "둥글게 잘 굴러가는 모양", "기둥 모양"],
+      ans: 0,
+      tip: "상자 모양은 평평한 면이 있어 잘 쌓을 수 있고 굴러가지 않아요!",
+      formula: "네모난 면 6개"
+    },
+    {
+      sentence: `음료수 캔처럼 위아래는 평평하고 옆은 둥글게 굴러가는 모양을 <mark class="highlight-word">[ 둥근기둥 모양 ]</mark>이라 합니다.`,
+      word: "둥근기둥 모양 (원기둥)",
+      opts: ["평평한 원과 둥근 옆면", "어디로든 굴러가는 모양", "상자 모양"],
+      ans: 0,
+      tip: "둥근기둥 모양은 세우면 쌓을 수 있고, 눕히면 데굴데굴 굴러가요!",
+      formula: "원 2개 + 둥근 옆면"
+    },
+    {
+      sentence: `축구공이나 구슬처럼 어느 방향으로 놓아도 잘 굴러가는 모양을 <mark class="highlight-word">[ 공 모양 ]</mark>이라 합니다.`,
+      word: "공 모양 (구)",
+      opts: ["어느 쪽으로도 잘 구르는 모양", "쌓기 쉬운 모양", "모서리가 있는 모양"],
+      ans: 0,
+      tip: "공 모양은 모서리나 꼭짓점이 전혀 없어 모든 방향으로 굴러가요!",
+      formula: "완전한 둥근 입체"
     }
   ],
 
-  // 🔵 2단계: 곱셈·나눗셈 묶음 지시어 (초3~4 핵심 10제)
+  // 🔵 2단계: 초3~4 사칙연산 & 측정 단위 (18제)
   1: [
     {
       sentence: `사탕 15개를 친구 3명에게 <mark class="highlight-word">[ 똑같이 나누어 ]</mark> 주려고 합니다.`,
@@ -662,20 +774,76 @@ const DIRECTIVE_BANKS = {
       formula: "14 ÷ 3 = 4 ... 나머지 2"
     },
     {
-      sentence: `삼각형에서 반듯한 각으로 크기가 90°인 각을 <mark class="highlight-word">[ 직각 ]</mark>이라고 합니다.`,
-      word: "직각",
-      opts: ["90° 반듯한 각", "180° 평평한 각", "45° 뾰족한 각"],
+      sentence: `도넛 18개를 상자당 6개씩 담으면 필요한 상자의 수인 <mark class="highlight-word">[ 몫 ]</mark>은 몇일까요?`,
+      word: "몫",
+      opts: ["나눗셈의 결과 값 (3)", "남은 도넛의 개수", "상자의 크기"],
       ans: 0,
-      tip: "도화지 모서리처럼 반듯하게 꺾인 각을 '직각(90°)'이라고 해요!",
-      formula: "직각 = 90°"
+      tip: "나눗셈을 해서 얻어지는 알맹이 결과 값을 '몫'이라고 해요!",
+      formula: "18 ÷ 6 = 3 (몫 3)"
     },
     {
-      sentence: `직사각형 운동장 가장자리를 한 바퀴 도는 <mark class="highlight-word">[ 둘레 ]</mark>의 길이를 구하시오.`,
-      word: "둘레",
-      opts: ["모든 변의 길이를 합한 것", "가로와 세로를 곱한 것", "한 변의 길이만"],
+      sentence: `나눗셈 14 ÷ 3 = 4 ... 2가 맞는지 확인하는 <mark class="highlight-word">[ 검산식 ]</mark>은?`,
+      word: "나눗셈 검산식",
+      opts: ["(나누는 수 × 몫) + 나머지", "몫 + 나머지", "나누는 수 ÷ 몫"],
       ans: 0,
-      tip: "'둘레'는 도형의 바깥 테두리 가장자리를 모두 더한 길이예요!",
-      formula: "(가로 + 세로) × 2"
+      tip: "검산은 (3 × 4) + 2 = 14 처럼 곱하고 나머지를 더해 원래 수가 나오는지 확인해요!",
+      formula: "(3 × 4) + 2 = 14"
+    },
+    {
+      sentence: `만, 억, 조와 같은 거대한 큰 수는 몇 자리씩 끊어서 읽을까요? <mark class="highlight-word">[ 큰 수 자릿값 ]</mark>`,
+      word: "큰 수 읽기",
+      opts: ["4자리씩 끊어 읽기", "3자리씩 끊어 읽기", "5자리씩 끊어 읽기"],
+      ans: 0,
+      tip: "우리나라 큰 수 체계(만, 억, 조)는 일-십-백-천 4자리마다 단위가 올라가요!",
+      formula: "1 | 0000(만) | 0000(억)"
+    },
+    {
+      sentence: `1km는 몇 m와 같을까요? <mark class="highlight-word">[ 거리의 단위 ]</mark>`,
+      word: "1km 단위 변환",
+      opts: ["1000m", "100m", "10m"],
+      ans: 0,
+      tip: "k(킬로)는 1000배를 뜻하므로 1km는 1000m예요!",
+      formula: "1km = 1000m"
+    },
+    {
+      sentence: `1m는 몇 cm와 같을까요? <mark class="highlight-word">[ 길이의 단위 ]</mark>`,
+      word: "1m 단위 변환",
+      opts: ["100cm", "10cm", "1000cm"],
+      ans: 0,
+      tip: "우리가 쓰는 1미터 자는 100센티미터와 완벽히 같아요!",
+      formula: "1m = 100cm"
+    },
+    {
+      sentence: `1cm는 몇 mm와 같을까요? <mark class="highlight-word">[ 작은 길이 단위 ]</mark>`,
+      word: "1cm 단위 변환",
+      opts: ["10mm", "100mm", "1000mm"],
+      ans: 0,
+      tip: "1cm 눈금 안에는 1mm 작은 칸이 10개 들어있어요!",
+      formula: "1cm = 10mm"
+    },
+    {
+      sentence: `우유팩 1L는 몇 mL의 들이와 같을까요? <mark class="highlight-word">[ 들이 단위 ]</mark>`,
+      word: "1L 들이 변환",
+      opts: ["1000mL", "100mL", "10mL"],
+      ans: 0,
+      tip: "1L들이 우유는 1000밀리리터(mL)와 똑같은 양이에요!",
+      formula: "1L = 1000mL"
+    },
+    {
+      sentence: `사과 1상자 무게 1kg은 몇 g과 같을까요? <mark class="highlight-word">[ 무게 단위 ]</mark>`,
+      word: "1kg 무게 변환",
+      opts: ["1000g", "100g", "10g"],
+      ans: 0,
+      tip: "k(킬로)그램은 1000그램(g)과 같아요!",
+      formula: "1kg = 1000g"
+    },
+    {
+      sentence: `트럭이나 코끼리의 큰 무게를 나타내는 1t(톤)은 몇 kg일까요? <mark class="highlight-word">[ 톤 단위 ]</mark>`,
+      word: "1t 무게 변환",
+      opts: ["1000kg", "100kg", "10000kg"],
+      ans: 0,
+      tip: "1톤(t)은 1kg짜리 쌀가마니 1000개와 같은 거대한 무게예요!",
+      formula: "1t = 1000kg"
     },
     {
       sentence: `영화가 오후 2시에 시작해서 3시 30분에 끝났을 때의 <mark class="highlight-word">[ 걸린 시간 ]</mark>을 구하시오.`,
@@ -686,6 +854,14 @@ const DIRECTIVE_BANKS = {
       formula: "3시 30분 - 2시 = 1시간 30분"
     },
     {
+      sentence: `시계 초바늘이 한 바퀴 도는 1분은 몇 초일까요? <mark class="highlight-word">[ 초 단위 ]</mark>`,
+      word: "1분과 초",
+      opts: ["60초", "100초", "30초"],
+      ans: 0,
+      tip: "시계의 초바늘이 60칸을 째깍째깍 돌면 1분이 돼요!",
+      formula: "1분 = 60초"
+    },
+    {
       sentence: `수 4를 1배, 2배, 3배 한 수 (4, 8, 12...)를 4의 <mark class="highlight-word">[ 배수 ]</mark>라고 합니다.`,
       word: "배수",
       opts: ["몇 배로 커진 수 (곱셈 구구)", "나누어떨어지게 하는 수", "짝수"],
@@ -694,17 +870,149 @@ const DIRECTIVE_BANKS = {
       formula: "4 × 1, 4 × 2, 4 × 3..."
     },
     {
-      sentence: `도넛 18개를 상자당 6개씩 담으면 필요한 상자의 수인 <mark class="highlight-word">[ 몫 ]</mark>은 몇일까요?`,
-      word: "몫",
-      opts: ["나눗셈의 결과 값 (3)", "남은 도넛의 개수", "상자의 크기"],
+      sentence: `덧셈, 뺄셈, 곱셈이 섞여 있는 식에서 <mark class="highlight-word">[ 가장 먼저 계산하는 순서 ]</mark>는?`,
+      word: "사칙혼합 계산순서",
+      opts: ["( ) 괄호 안 ➔ 곱셈/나눗셈 ➔ 덧셈/뺄셈", "앞에서부터 차례대로", "덧셈부터 먼저"],
       ans: 0,
-      tip: "나눗셈을 해서 얻어지는 알맹이 결과 값을 '몫'이라고 해요!",
-      formula: "18 ÷ 6 = 3 (몫 3)"
+      tip: "혼합 계산은 무조건 ( ) 괄호가 1등, ×와 ÷가 2등, +와 -가 3등이에요!",
+      formula: "( ) ➔ ×, ÷ ➔ +, -"
     }
   ],
 
-  // 👑 3단계: 분수·범위·조건 지시어 (초5~6 실전 15제 ⭐ 민수 타깃!)
+  // 📐 3단계: 초3~4 평면도형 & 각도 마스터 (16제)
   2: [
+    {
+      sentence: `두 점을 곧게 이은 선을 무엇이라고 할까요? <mark class="highlight-word">[ 곧게 이은 선 ]</mark>`,
+      word: "선분",
+      opts: ["선분", "반직선", "직선"],
+      ans: 0,
+      tip: "두 점 사이를 반듯하게 곧게 자른 선을 '선분'이라고 해요! (끝이 있음)",
+      formula: "선분 ㄱㄴ (양 끝점 존재)"
+    },
+    {
+      sentence: `한 점에서 시작하여 한쪽으로만 끝없이 늘인 곧은 선은? <mark class="highlight-word">[ 한쪽으로 늘인 선 ]</mark>`,
+      word: "반직선",
+      opts: ["반직선", "선분", "직선"],
+      ans: 0,
+      tip: "시작점이 있고 한쪽 방향으로만 무한히 나아가는 레이저 빛 같은 선은 '반직선'이에요!",
+      formula: "반직선 ㄱㄴ (ㄱ에서 시작)"
+    },
+    {
+      sentence: `양쪽으로 끝없이 늘인 곧은 선을 무엇이라고 할까요? <mark class="highlight-word">[ 양쪽 끝없는 선 ]</mark>`,
+      word: "직선",
+      opts: ["직선", "선분", "반직선"],
+      ans: 0,
+      tip: "양쪽 모두 끝이 없이 무한히 뻗어나가는 곧은 선을 '직선'이라고 해요!",
+      formula: "직선 ㄱㄴ (끝점이 없음)"
+    },
+    {
+      sentence: `삼각자 모서리처럼 반듯하게 꺾인 크기가 90°인 각을 <mark class="highlight-word">[ 직각 ]</mark>이라고 합니다.`,
+      word: "직각",
+      opts: ["90° 반듯한 각", "180° 평평한 각", "45° 뾰족한 각"],
+      ans: 0,
+      tip: "도화지 모서리처럼 반듯하게 꺾인 각을 '직각(90°)'이라고 해요!",
+      formula: "직각 = 90°"
+    },
+    {
+      sentence: `0°보다 크고 직각(90°)보다 작은 뾰족한 각을 <mark class="highlight-word">[ 예각 ]</mark>이라고 합니다.`,
+      word: "예각",
+      opts: ["0°보다 크고 90°보다 작은 각", "90°보다 큰 각", "90°인 각"],
+      ans: 0,
+      tip: "송곳 끝처럼 뾰족하게 좁은 각을 '예각'이라고 해요! (예리한 각)",
+      formula: "0° < 예각 < 90°"
+    },
+    {
+      sentence: `직각(90°)보다 크고 180°보다 작은 둔한 각을 <mark class="highlight-word">[ 둔각 ]</mark>이라고 합니다.`,
+      word: "둔각",
+      opts: ["90°보다 크고 180°보다 작은 각", "90°보다 작은 각", "180°인 각"],
+      ans: 0,
+      tip: "부채를 넓게 펼친 것처럼 둔하게 벌어진 각을 '둔각'이라고 해요!",
+      formula: "90° < 둔각 < 180°"
+    },
+    {
+      sentence: `일직선으로 곧게 펴진 각으로 크기가 180°인 각을 <mark class="highlight-word">[ 평각 ]</mark>이라고 합니다.`,
+      word: "평각",
+      opts: ["180° 평평한 각", "90° 직각", "360° 둥근 각"],
+      ans: 0,
+      tip: "평평한 직선을 이루는 각은 직각 2개가 모인 180° 평각이에요!",
+      formula: "평각 = 180°"
+    },
+    {
+      sentence: `모든 삼각형의 세 각의 크기를 모두 합하면 항상 <mark class="highlight-word">[ 삼각형 세 각의 합 ]</mark> 몇 도일까요?`,
+      word: "삼각형 세 각의 합",
+      opts: ["180°", "360°", "90°"],
+      ans: 0,
+      tip: "어떤 삼각형이든 세 모서리를 잘라 모으면 일직선 180°가 돼요!",
+      formula: "각A + 각B + 각C = 180°"
+    },
+    {
+      sentence: `모든 사각형의 네 각의 크기를 모두 합하면 항상 <mark class="highlight-word">[ 사각형 네 각의 합 ]</mark> 몇 도일까요?`,
+      word: "사각형 네 각의 합",
+      opts: ["360°", "180°", "270°"],
+      ans: 0,
+      tip: "사각형은 삼각형 2개로 쪼갤 수 있으므로 180° × 2 = 360°예요!",
+      formula: "네 각의 합 = 360°"
+    },
+    {
+      sentence: `두 변의 길이가 같고 두 밑각의 크기가 같은 삼각형을 <mark class="highlight-word">[ 이등변삼각형 ]</mark>이라 합니다.`,
+      word: "이등변삼각형",
+      opts: ["두 변의 길이가 같은 삼각형", "세 변의 길이가 같은 삼각형", "직각이 있는 삼각형"],
+      ans: 0,
+      tip: "'이(2개) 등(같은) 변' 즉 2개의 변과 밑각이 서로 같은 삼각형이에요!",
+      formula: "두 변의 길이 같음, 두 밑각 같음"
+    },
+    {
+      sentence: `세 변의 길이가 모두 같고 세 각이 모두 60°인 삼각형을 <mark class="highlight-word">[ 정삼각형 ]</mark>이라 합니다.`,
+      word: "정삼각형",
+      opts: ["세 변이 같고 세 각이 60°인 삼각형", "두 변만 같은 삼각형", "직각삼각형"],
+      ans: 0,
+      tip: "완벽하게 바른 삼각형! 세 변의 길이가 같고 세 각도 모두 60°로 똑같아요!",
+      formula: "세 변 같음, 세 각 60°"
+    },
+    {
+      sentence: `평행한 변이 마주 보며 한 쌍이라도 있는 사각형을 <mark class="highlight-word">[ 사다리꼴 ]</mark>이라고 합니다.`,
+      word: "사다리꼴",
+      opts: ["평행한 변이 한 쌍이라도 있는 사각형", "네 변이 모두 같은 사각형", "직각이 4개인 사각형"],
+      ans: 0,
+      tip: "사다리 발판처럼 위아래(또는 좌우) 마주 보는 변이 평행하면 사다리꼴이에요!",
+      formula: "적어도 한 쌍 평행"
+    },
+    {
+      sentence: `마주 보는 두 쌍의 변이 서로 평행한 사각형을 <mark class="highlight-word">[ 평행사변형 ]</mark>이라고 합니다.`,
+      word: "평행사변형",
+      opts: ["두 쌍의 마주 보는 변이 평행", "한 쌍만 평행", "네 각이 모두 직각"],
+      ans: 0,
+      tip: "위아래도 평행, 양옆도 평행! 두 쌍이 나란히 달리는 사각형이에요!",
+      formula: "두 쌍 평행, 마주보는 변/각 같음"
+    },
+    {
+      sentence: `네 변의 길이가 모두 같은 다이아몬드 사각형을 <mark class="highlight-word">[ 마름모 ]</mark>라고 합니다.`,
+      word: "마름모",
+      opts: ["네 변의 길이가 모두 같은 사각형", "네 각이 직각인 사각형", "평행한 변이 없는 사각형"],
+      ans: 0,
+      tip: "연이나 보석 다이아몬드처럼 네 모서리 변의 길이가 전부 똑같은 사각형이에요!",
+      formula: "네 변의 길이 일치"
+    },
+    {
+      sentence: `운동장 가장자리를 한 바퀴 도는 테두리 길이를 <mark class="highlight-word">[ 도형의 둘레 ]</mark>라고 합니다.`,
+      word: "둘레",
+      opts: ["모든 바깥 변의 길이를 합한 것", "가로와 세로를 곱한 것", "도형의 넓이"],
+      ans: 0,
+      tip: "'둘레'는 도형의 바깥 테두리 선들의 길이를 전부 더한 총길이예요!",
+      formula: "직사각형 둘레 = (가로 + 세로) × 2"
+    },
+    {
+      sentence: `도형을 밀거나, 뒤집거나, 90° 돌려도 절대 변하지 않는 것은? <mark class="highlight-word">[ 도형의 이동 ]</mark>`,
+      word: "도형 이동의 불변성",
+      opts: ["도형의 모양과 크기", "도형의 위치", "도형의 방향"],
+      ans: 0,
+      tip: "도형을 아무리 밀고, 뒤집고, 뱅글 돌려도 본래의 모양과 크기는 변하지 않아요!",
+      formula: "모양과 크기는 그대로 유지"
+    }
+  ],
+
+  // 👑 4단계: 초5 분수·소수 & 약수배수·범위 (20제 ⭐ 민수 현재 학기 핵심!)
+  3: [
     {
       sentence: `피자 1판 중에서 <mark class="highlight-word">[ 전체의 ${renderFrac(2, 3)}만큼 ]</mark>을 먹었습니다.`,
       word: "전체의 몇 분의 몇",
@@ -786,6 +1094,130 @@ const DIRECTIVE_BANKS = {
       formula: "8과 12의 공약수: 1, 2, 4"
     },
     {
+      sentence: `두 수의 공약수 중에서 가장 큰 수를 무엇이라 할까요? <mark class="highlight-word">[ 가장 큰 공통 약수 ]</mark>`,
+      word: "최대공약수",
+      opts: ["최대공약수", "최소공배수", "기약분수"],
+      ans: 0,
+      tip: "공약수들 중에서 대장 격인 가장 큰 수를 '최대공약수'라고 불러요!",
+      formula: "최대공약수로 약분하면 기약분수가 됨"
+    },
+    {
+      sentence: `3과 4의 배수 중에서 <mark class="highlight-word">[ 둘 다 공통으로 들어있는 배수 ]</mark>는?`,
+      word: "공배수",
+      opts: ["공배수 (12, 24, 36...)", "공약수", "소수"],
+      ans: 0,
+      tip: "두 수의 배수 목록에서 겹치는 공통된 배수를 '공배수'라고 해요!",
+      formula: "공배수: 12, 24, 36..."
+    },
+    {
+      sentence: `공배수 중에서 0을 제외하고 가장 작은 수를 무엇이라 할까요? <mark class="highlight-word">[ 가장 작은 공배수 ]</mark>`,
+      word: "최소공배수",
+      opts: ["최소공배수", "최대공약수", "통분"],
+      ans: 0,
+      tip: "공배수 중에서 가장 첫 번째로 만나는 작은 수를 '최소공배수'라고 해요! (분모 통분의 열쇠)",
+      formula: "통분할 때 공통분모로 사용"
+    },
+    {
+      sentence: `분모와 분자의 공약수가 1뿐이어서 <mark class="highlight-word">[ 더 이상 약분할 수 없는 분수 ]</mark>는?`,
+      word: "기약분수",
+      opts: ["기약분수", "진분수", "가분수"],
+      ans: 0,
+      tip: "이미 약분을 끝까지 다 해서 더는 줄일 수 없는 가장 깔끔한 분수를 '기약분수'라고 해요!",
+      formula: `${renderFrac(3, 4)}, ${renderFrac(2, 5)} 등`
+    },
+    {
+      sentence: `분모가 다른 분수들의 덧셈을 위해 <mark class="highlight-word">[ 분모를 같게 만드는 것 ]</mark>은?`,
+      word: "통분",
+      opts: ["통분", "약분", "대각선 곱"],
+      ans: 0,
+      tip: "분모가 다르면 더하거나 뺄 수 없어요! 분모를 똑같이 통일하는 작업을 '통분'이라고 해요!",
+      formula: `${renderFrac(1, 2)} + ${renderFrac(1, 3)} ➔ ${renderFrac(3, 6)} + ${renderFrac(2, 6)}`
+    },
+    {
+      sentence: `분모와 분자를 공약수로 나누어 숫자를 간단하게 줄이는 것을 무엇이라 할까요? <mark class="highlight-word">[ 숫자 줄이기 ]</mark>`,
+      word: "약분",
+      opts: ["약분", "통분", "가분수"],
+      ans: 0,
+      tip: "분모와 분자를 똑같은 수로 나누어 날씬하게 만드는 것을 '약분'이라고 해요!",
+      formula: `${renderFrac(4, 6)} = ${renderFrac(2, 3)} (2로 약분)`
+    },
+    {
+      sentence: `분수의 곱셈에서 <mark class="highlight-word">[ 대각선에 마주 보는 숫자끼리 똑같이 나누는 것 ]</mark>은?`,
+      word: "번개 약분술",
+      opts: ["약분술 (계산을 간단히 하기)", "통분술 (분모 같게 하기)", "대분수 만들기"],
+      ans: 0,
+      tip: "곱하기 전에 대각선 짝꿍을 미리 나누어 숫자를 작고 날씬하게 만드는 기술이 '약분'이에요!",
+      formula: `${renderFrac(3, 4)} × ${renderFrac(2, 7)} (4와 2 약분)`
+    },
+    {
+      sentence: `분자가 분모보다 더 큰 <mark class="highlight-word">[ 무거운 가분수 ]</mark>는 어떻게 정리할까요?`,
+      word: "가분수 ➔ 대분수 정리",
+      opts: ["온전한 1을 밖으로 꺼내 대분수로 만든다", "분모와 분자를 바꾼다", "그대로 둔다"],
+      ans: 0,
+      tip: `머리가 무거운 가분수는 온전한 1개(${renderFrac(5, 5)})를 뽑아 대분수(${renderMixed(1, 1, 5)})로 변신시켜요!`,
+      formula: `${renderFrac(6, 5)} = ${renderMixed(1, 1, 5)}`
+    },
+    {
+      sentence: `어떤 자연수에 1보다 작은 진분수(${renderFrac(1, 2)})를 곱하면 원래 수보다 어떻게 될까요?`,
+      word: "1보다 작은 수 곱셈",
+      opts: ["원래 수보다 더 작아진다", "원래 수보다 더 커진다", "변함이 없다"],
+      ans: 0,
+      tip: "1보다 작은 조각을 곱하면 원래 크기보다 알맞게 줄어들어요!",
+      formula: `6 × ${renderFrac(1, 2)} = 3 (6보다 작아짐)`
+    },
+    {
+      sentence: `어떤 수에 1보다 큰 대분수(${renderMixed(1, 1, 2)})를 곱하면 원래 수보다 어떻게 될까요?`,
+      word: "1보다 큰 수 곱셈",
+      opts: ["원래 수보다 더 커진다", "원래 수보다 작아진다", "변함이 없다"],
+      ans: 0,
+      tip: "1배보다 더 많이 곱하므로 원래 수보다 쑥쑥 불어나서 커져요!",
+      formula: `6 × 1.5 = 9 (6보다 커짐)`
+    }
+  ],
+
+  // 🏰 5단계: 초5~6 다각형 넓이 · 입체도형 · 비와 비율 (18제)
+  4: [
+    {
+      sentence: `직사각형의 바닥 면적을 나타내는 <mark class="highlight-word">[ 직사각형의 넓이 ]</mark> 구하는 공식은?`,
+      word: "직사각형 넓이",
+      opts: ["가로 × 세로", "(가로 + 세로) × 2", "가로 × 4"],
+      ans: 0,
+      tip: "가로 줄 수와 세로 줄 수를 곱하면 전체 1cm² 타일 개수가 나와요!",
+      formula: "넓이 = 가로 × 세로 (cm²)"
+    },
+    {
+      sentence: `평행사변형을 쪼개어 직사각형으로 만들었을 때 <mark class="highlight-word">[ 평행사변형의 넓이 ]</mark> 공식은?`,
+      word: "평행사변형 넓이",
+      opts: ["밑변 × 높이", "(밑변 + 높이) ÷ 2", "밑변 × 옆변"],
+      ans: 0,
+      tip: "삼각형 조각을 오른쪽으로 옮기면 직사각형이 되므로 밑변 × 높이예요!",
+      formula: "넓이 = 밑변 × 높이"
+    },
+    {
+      sentence: `평행사변형을 반으로 똑 자른 모양인 <mark class="highlight-word">[ 삼각형의 넓이 ]</mark> 공식은?`,
+      word: "삼각형 넓이",
+      opts: ["(밑변 × 높이) ÷ 2", "밑변 × 높이", "(밑변 + 높이) × 2"],
+      ans: 0,
+      tip: "삼각형 2개를 붙이면 평행사변형이 되므로 반드시 2로 나누어주어야 해요!",
+      formula: "넓이 = (밑변 × 높이) ÷ 2"
+    },
+    {
+      sentence: `마름모를 감싸는 직사각형 넓이의 절반인 <mark class="highlight-word">[ 마름모의 넓이 ]</mark> 공식은?`,
+      word: "마름모 넓이",
+      opts: ["(한 대각선 × 다른 대각선) ÷ 2", "한 대각선 × 다른 대각선", "한 변 × 4"],
+      ans: 0,
+      tip: "마름모는 두 대각선을 곱한 사각형의 딱 절반(÷2) 크기예요!",
+      formula: "넓이 = (대각선 × 대각선) ÷ 2"
+    },
+    {
+      sentence: `사다리꼴 2개를 거꾸로 붙여 평행사변형을 만드는 <mark class="highlight-word">[ 사다리꼴의 넓이 ]</mark> 공식은?`,
+      word: "사다리꼴 넓이",
+      opts: ["(윗변 + 아랫변) × 높이 ÷ 2", "(윗변 × 아랫변) ÷ 높이", "윗변 + 아랫변 × 높이"],
+      ans: 0,
+      tip: "사다리꼴 2개를 붙이면 밑변이 (윗변+아랫변)인 평행사변형이 되므로 2로 나눠요!",
+      formula: "(윗변 + 아랫변) × 높이 ÷ 2"
+    },
+    {
       sentence: `두 도형을 포갰을 때 <mark class="highlight-word">[ 완전히 겹쳐서 모양과 크기가 똑같은 ]</mark> 관계는?`,
       word: "합동",
       opts: ["합동", "대칭", "닮음"],
@@ -810,20 +1242,84 @@ const DIRECTIVE_BANKS = {
       formula: "바람개비, 평행사변형 등"
     },
     {
-      sentence: `분수의 곱셈에서 <mark class="highlight-word">[ 대각선에 마주 보는 숫자끼리 똑같이 나누는 것 ]</mark>은?`,
-      word: "번개 약분술",
-      opts: ["약분술 (계산을 간단히 하기)", "통분술 (분모 같게 하기)", "대분수 만들기"],
+      sentence: `직육면체의 면, 모서리, 꼭짓점의 개수는 각각 몇 개일까요? <mark class="highlight-word">[ 직육면체의 구성 ]</mark>`,
+      word: "직육면체 구성 요소",
+      opts: ["면 6개, 모서리 12개, 꼭짓점 8개", "면 4개, 모서리 6개, 꼭짓점 4개", "면 8개, 모서리 12개, 꼭짓점 6개"],
       ans: 0,
-      tip: "곱하기 전에 대각선 짝꿍을 미리 나누어 숫자를 작고 날씬하게 만드는 기술이 '약분'이에요!",
-      formula: `${renderFrac(3, 4)} × ${renderFrac(2, 7)} (4와 2 약분)`
+      tip: "주사위를 떠올려보세요! 면은 6개, 선분 모서리는 12개, 뾰족한 점은 8개예요!",
+      formula: "면 6, 모서리 12, 꼭짓점 8"
     },
     {
-      sentence: `분자가 분모보다 더 큰 <mark class="highlight-word">[ 무거운 가분수 ]</mark>는 어떻게 정리할까요?`,
-      word: "가분수 ➔ 대분수 정리",
-      opts: ["온전한 1을 밖으로 꺼내 대분수로 만든다", "분모와 분자를 바꾼다", "그대로 둔다"],
+      sentence: `직육면체에서 보이지 않는 모서리를 점선으로 나타낸 그림은? <mark class="highlight-word">[ 겨냥도 ]</mark>`,
+      word: "겨냥도",
+      opts: ["겨냥도", "전개도", "평면도"],
       ans: 0,
-      tip: `머리가 무거운 가분수는 온전한 1개(${renderFrac(5, 5)})를 뽑아 대분수(${renderMixed(1, 1, 5)})로 변신시켜요!`,
-      formula: `${renderFrac(6, 5)} = ${renderMixed(1, 1, 5)}`
+      tip: "보이는 선은 실선, 숨어있는 보이지 않는 선은 점선으로 그린 입체 투시도를 '겨냥도'라고 해요!",
+      formula: "실선(보임) + 점선(안보임)"
+    },
+    {
+      sentence: `직육면체의 모서리를 잘라서 평면에 펼쳐놓은 그림은? <mark class="highlight-word">[ 전개도 ]</mark>`,
+      word: "전개도",
+      opts: ["전개도", "겨냥도", "단면도"],
+      ans: 0,
+      tip: "상자를 가위로 오려서 바닥에 활짝 펼쳐놓은 도면을 '전개도'라고 해요!",
+      formula: "접으면 입체 상자가 됨"
+    },
+    {
+      sentence: `위아래 면이 서로 평행하고 합동인 다각형으로 된 기둥 입체는? <mark class="highlight-word">[ 각기둥 ]</mark>`,
+      word: "각기둥",
+      opts: ["각기둥 (삼각기둥, 사각기둥...)", "각뿔", "원기둥"],
+      ans: 0,
+      tip: "두 밑면이 다각형이고 옆면이 모두 직사각형인 입체를 '각기둥'이라고 해요!",
+      formula: "밑면 2개 평행·합동"
+    },
+    {
+      sentence: `바닥은 다각형이고 옆면이 모두 삼각형으로 꼭대기에 뿔이 있는 입체는? <mark class="highlight-word">[ 각뿔 ]</mark>`,
+      word: "각뿔 (삼각뿔, 사각뿔...)",
+      opts: ["각뿔", "각기둥", "원뿔"],
+      ans: 0,
+      tip: "피라미드처럼 바닥은 다각형이고 꼭대기 한 점에서 모이는 입체를 '각뿔'이라고 해요!",
+      formula: "밑면 1개 + 옆면 삼각형"
+    },
+    {
+      sentence: `사과 3개와 배 5개의 양을 비교할 때 쓰는 기호 3 : 5 를 무엇이라 할까요? <mark class="highlight-word">[ 비 ]</mark>`,
+      word: "비 (A : B)",
+      opts: ["비 (3 대 5)", "비율", "분수"],
+      ans: 0,
+      tip: "두 수의 크기를 기호 ':'를 써서 나타낸 것을 '비'라고 읽어요!",
+      formula: "3 : 5 (3 대 5)"
+    },
+    {
+      sentence: `비 3 : 5 에서 기호 ':' 뒤에 있는 숫자 5를 무엇이라고 부를까요? <mark class="highlight-word">[ 기준량 ]</mark>`,
+      word: "기준량",
+      opts: ["기준량 (뒤에 있는 수)", "비교하는 양 (앞에 있는 수)", "비율"],
+      ans: 0,
+      tip: "기호 ':'의 뒤에 있는 수가 비교의 바닥 바탕이 되는 '기준량'이에요!",
+      formula: "비교하는 양 : 기준량"
+    },
+    {
+      sentence: `기준량에 대해 비교하는 양이 몇 배인지 나타낸 크기를 무엇이라 할까요? <mark class="highlight-word">[ 비율 ]</mark>`,
+      word: "비율 (비교하는 양 ÷ 기준량)",
+      opts: ["비율 (분수 또는 소수)", "비", "백분율"],
+      ans: 0,
+      tip: "비교하는 양을 기준량으로 나눈 값(분수)을 '비율'이라고 해요!",
+      formula: `비율 = ${renderFrac("비교하는 양", "기준량")}`
+    },
+    {
+      sentence: `비율에 100을 곱하여 % 기호를 붙여 나타낸 것을 무엇이라 할까요? <mark class="highlight-word">[ 백분율 ]</mark>`,
+      word: "백분율 (%)",
+      opts: ["백분율 (퍼센트)", "할인율", "기준량"],
+      ans: 0,
+      tip: "기준을 100으로 잡고 100을 곱해 % 기호를 붙인 것을 '백분율'이라고 해요!",
+      formula: "비율 × 100 (%)"
+    },
+    {
+      sentence: `시험 점수들의 총합을 과목 수로 똑같이 나눈 대표 값을 무엇이라 할까요? <mark class="highlight-word">[ 평균 ]</mark>`,
+      word: "평균",
+      opts: ["평균 (총합 ÷ 개수)", "중간값", "최빈값"],
+      ans: 0,
+      tip: "골고루 똑같이 맞추어 대표하는 값을 '평균'이라고 해요!",
+      formula: "평균 = 자료의 총합 ÷ 자료의 개수"
     }
   ]
 };
@@ -831,7 +1327,7 @@ const DIRECTIVE_BANKS = {
 // ========================================================
 // 🎮 퀴즈 상태 및 로직
 // ========================================================
-let currentLevel = 2; // 기본 3단계(5-6 실전)로 시작
+let currentLevel = 3; // 기본 4단계(초5 분수·약수·범위 실전 ⭐)로 시작
 let quizList = [];
 let currentQIdx = 0;
 let score = 0;
@@ -873,9 +1369,16 @@ function initLevelQuiz(lvl) {
   answered = false;
 
   let pool = [];
-  if (lvl === 3) {
-    // 마스터 챌린지 (전 단계 통합)
-    pool = [...DIRECTIVE_BANKS[0], ...DIRECTIVE_BANKS[1], ...DIRECTIVE_BANKS[2], ...notionDirectives];
+  if (lvl === 5) {
+    // 🌟 마스터 챌린지 (전 5단계 통합 88문항 + 노션)
+    pool = [
+      ...DIRECTIVE_BANKS[0],
+      ...DIRECTIVE_BANKS[1],
+      ...DIRECTIVE_BANKS[2],
+      ...DIRECTIVE_BANKS[3],
+      ...DIRECTIVE_BANKS[4],
+      ...notionDirectives
+    ];
   } else {
     pool = [...DIRECTIVE_BANKS[lvl]];
   }
@@ -898,7 +1401,14 @@ function renderQuestion() {
   document.getElementById('progressBar').style.width = `${pct}%`;
 
   // 배지 텍스트
-  const badgeMap = ["🟢 1단계: 덧셈·뺄셈 일상말", "🔵 2단계: 곱셈·나눗셈 묶음", "👑 3단계: 5학년 실전 조건", "🌟 전 단계 마스터 챌린지"];
+  const badgeMap = [
+    "🟢 1단계: 초1~2 기초 연산 & 일상 수 감각",
+    "🔵 2단계: 초3~4 사칙연산 & 측정 단위",
+    "📐 3단계: 초3~4 평면도형 & 각도 마스터",
+    "👑 4단계: 초5 분수·소수 & 약수배수·범위 실전 ⭐",
+    "🏰 5단계: 초5~6 다각형 넓이 · 입체도형 · 비와 비율",
+    "🌟 전 단계 마스터 챌린지 (통합 10제)"
+  ];
   document.getElementById('passageStageBadge').textContent = badgeMap[currentLevel];
 
   // 지문 표시
@@ -952,7 +1462,7 @@ function selectChoice(isCorrect, selectedBtn, qData) {
   } else {
     selectedBtn.classList.add('wrong');
     playSfx('wrong');
-    exTitle.innerHTML = "💡 코코의 번역 힌트";
+    exTitle.innerHTML = "💡 코코의 번역 팁";
     exTitle.style.color = "#fbbf24";
     // 정답 버튼도 살짝 표시
     document.querySelectorAll('.choice-card-btn').forEach(btn => {
@@ -1095,11 +1605,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   const icon = profile === 'daughter' ? '👧' : '👦';
   document.getElementById('profileBadge').innerHTML = `접속중: ${icon} <b>${name}</b>`;
 
-  // 기본 레벨 설정: 민수는 3단계(5-6 실전), 민서는 1단계(1-2 기초)
+  // 기본 레벨 설정: 민수는 4단계(5학년 분수·약수·범위 실전 ⭐), 민서는 1단계(1-2 기초)
   if (profile === 'daughter') {
     switchLevel(0);
   } else {
-    switchLevel(2);
+    switchLevel(3);
   }
 
   // 노션 데이터 비동기 병합
