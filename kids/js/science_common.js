@@ -243,8 +243,15 @@ function openMissionView(type) {
         return;
     }
 
-    if (type === 'report') {
-        renderLabReportUI(innerBody);
+    if (type === 'report' || type === 'report_unit1') {
+        currentReportUnitId = 1;
+        renderLabReportUI(innerBody, 'doc', 1);
+        return;
+    }
+
+    if (type === 'report_unit2') {
+        currentReportUnitId = 2;
+        renderLabReportUI(innerBody, 'doc', 2);
         return;
     }
 
@@ -423,32 +430,66 @@ function renderGoldLicenseCard(container) {
 // ==========================================
 let currentReportTab = 'doc'; // 'doc' | 'quiz'
 let currentReportQuizIdx = 0;
+let currentReportUnitId = 1; // 1: 1단원 혼합물, 2: 2단원 날씨
 let userBlankAnswers = {};
 
-function renderLabReportUI(container, tabName) {
+function getActiveReportData() {
+    if (currentReportUnitId === 2) {
+        return window.SCIENCE_LAB_REPORT_2_DATA || window.SCIENCE_LAB_REPORT_DATA;
+    }
+    return window.SCIENCE_LAB_REPORT_DATA;
+}
+
+window.openScienceReport = function(unitId = 1) {
+    currentReportUnitId = unitId;
+    openMissionView('report');
+};
+
+function renderLabReportUI(container, tabName, unitId) {
+    if (typeof unitId !== 'undefined') currentReportUnitId = unitId;
     if (tabName) currentReportTab = tabName;
-    const data = window.SCIENCE_LAB_REPORT_DATA;
+    const data = getActiveReportData();
     if (!data) return;
+
+    // 헤더 타이틀 및 아이콘 실시간 갱신
+    const titleEl = document.getElementById('overlayHeaderTitle');
+    const iconEl = document.getElementById('overlayHeaderIcon');
+    if (titleEl) titleEl.textContent = data.title;
+    if (iconEl) iconEl.textContent = currentReportUnitId === 2 ? "🌤️" : "📝";
+
+    const unitThemeColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
+    const unitBgColor = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
+    const unitTextColor = currentReportUnitId === 2 ? '#b45309' : '#0369a1';
 
     container.innerHTML = `
         <div style="max-width: 780px; margin: 0 auto; padding: 6px 12px; font-family: 'Jua', sans-serif;">
             
+            <!-- 단원 배지 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="background: ${unitBgColor}; color: ${unitTextColor}; padding: 4px 12px; border-radius: 8px; font-size: 0.92rem; font-weight: bold;">
+                    ${data.unit}
+                </span>
+                <span style="font-size: 0.85rem; color: #64748b;">
+                    ${currentReportUnitId === 2 ? '🌤️ 교과서 24~35쪽 탐구 일지' : '🧪 교과서 12~19쪽 탐구 일지'}
+                </span>
+            </div>
+
             <!-- 상단 2단계 모드 전환 탭 -->
-            <div style="display: flex; gap: 8px; margin-bottom: 16px; background: #e0f2fe; padding: 6px; border-radius: 14px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 16px; background: ${unitBgColor}; padding: 6px; border-radius: 14px;">
                 <button onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'doc')" style="
                     flex: 1; padding: 10px 14px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.05rem; cursor: pointer;
-                    background: ${currentReportTab === 'doc' ? '#0284c7' : 'transparent'};
-                    color: ${currentReportTab === 'doc' ? 'white' : '#0369a1'};
-                    box-shadow: ${currentReportTab === 'doc' ? '0 2px 8px rgba(2, 132, 199, 0.3)' : 'none'};
+                    background: ${currentReportTab === 'doc' ? unitThemeColor : 'transparent'};
+                    color: ${currentReportTab === 'doc' ? 'white' : unitTextColor};
+                    box-shadow: ${currentReportTab === 'doc' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'};
                     transition: all 0.2s;
                 ">
                     📑 1. 탐구 요약 노트 (읽기 & 복습)
                 </button>
                 <button onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')" style="
                     flex: 1; padding: 10px 14px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.05rem; cursor: pointer;
-                    background: ${currentReportTab === 'quiz' ? '#0284c7' : 'transparent'};
-                    color: ${currentReportTab === 'quiz' ? 'white' : '#0369a1'};
-                    box-shadow: ${currentReportTab === 'quiz' ? '0 2px 8px rgba(2, 132, 199, 0.3)' : 'none'};
+                    background: ${currentReportTab === 'quiz' ? unitThemeColor : 'transparent'};
+                    color: ${currentReportTab === 'quiz' ? 'white' : unitTextColor};
+                    box-shadow: ${currentReportTab === 'quiz' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'};
                     transition: all 0.2s;
                 ">
                     ✍️ 2. 실전 탐구 퀴즈 (참여형 문제 풀기)
@@ -471,21 +512,27 @@ function renderLabReportUI(container, tabName) {
 
 // 📑 [탭 1] 완벽 요약 노트
 function renderLabReportDoc(container) {
-    const data = window.SCIENCE_LAB_REPORT_DATA;
+    const data = getActiveReportData();
+    const btnColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
+    const borderColor = currentReportUnitId === 2 ? '#fde68a' : '#bae6fd';
+    const tagBg = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
+    const tagColor = currentReportUnitId === 2 ? '#b45309' : '#0284c7';
+    const pageGuide = currentReportUnitId === 2 ? '교과서 『실험관찰』 24~35쪽 날씨 탐구 핵심 내용을 한눈에 읽어보세요!' : '교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!';
+
     container.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <span style="font-size: 0.92rem; color: #64748b;">교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!</span>
-            <button class="back-to-lobby-btn" style="background: #0284c7; color: white; padding: 6px 14px; font-size: 0.9rem;" onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')">
+            <span style="font-size: 0.92rem; color: #64748b;">${pageGuide}</span>
+            <button class="back-to-lobby-btn" style="background: ${btnColor}; color: white; padding: 6px 14px; font-size: 0.9rem;" onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')">
                 ✍️ 퀴즈 풀러 가기 ➔
             </button>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 16px; max-height: 520px; overflow-y: auto; padding-right: 4px;">
             ${data.summaryDoc.map((item, idx) => `
-                <div style="background: white; border-radius: 16px; padding: 16px; border: 2px solid #bae6fd; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
+                <div style="background: white; border-radius: 16px; padding: 16px; border: 2px solid ${borderColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h4 style="color: #0369a1; font-size: 1.15rem; margin: 0;">${item.title}</h4>
-                        <span style="font-size: 0.8rem; background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 6px;">${item.page}</span>
+                        <h4 style="color: ${tagColor}; font-size: 1.15rem; margin: 0;">${item.title}</h4>
+                        <span style="font-size: 0.8rem; background: ${tagBg}; color: ${tagColor}; padding: 2px 8px; border-radius: 6px;">${item.page}</span>
                     </div>
                     
                     <div style="font-size: 0.9rem; line-height: 1.55; color: #334155; margin-bottom: 8px;">
@@ -493,7 +540,7 @@ function renderLabReportDoc(container) {
                         ${item.process}
                     </div>
 
-                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border-left: 4px solid #0284c7; font-size: 0.88rem; line-height: 1.55; color: #1e293b; margin-bottom: 8px;">
+                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border-left: 4px solid ${tagColor}; font-size: 0.88rem; line-height: 1.55; color: #1e293b; margin-bottom: 8px;">
                         <b>[관찰 결과]</b><br>
                         ${item.result}
                     </div>
@@ -513,16 +560,34 @@ function renderLabReportDoc(container) {
 
 // ✍️ [탭 2] 인터랙티브 참여형 실전 퀴즈
 function renderLabReportQuiz(container, qIdx) {
-    const data = window.SCIENCE_LAB_REPORT_DATA;
+    const data = getActiveReportData();
     const q = data.quizItems[qIdx];
     currentReportQuizIdx = qIdx;
+
+    const themeColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
+    const borderColor = currentReportUnitId === 2 ? '#fde68a' : '#bae6fd';
+    const tagBg = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
 
     let quizBodyHtml = "";
 
     // 1) 빈칸 채우기 (q1)
     if (q.type === 'blank') {
-        quizBodyHtml = `
-            <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 1rem; line-height: 1.8; color: #1e293b;">
+        let questionRenderText = "";
+        if (currentReportUnitId === 2) {
+            questionRenderText = `
+                공기가 건조할수록 습구 온도계의 젖은 헝겊에서 물이 활발하게 
+                <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
+                    ${userBlankAnswers['b1'] || '❓ 선택'}
+                </span>하면서 주변의 열을 빼앗아갑니다. 따라서 건구 온도와 습구 온도의 차이가 
+                <span id="blank_2" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
+                    ${userBlankAnswers['b2'] || '❓ 선택'}
+                </span>. 이 온도 차이를 이용해 현재 공기 중의 
+                <span id="blank_3" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
+                    ${userBlankAnswers['b3'] || '❓ 선택'}
+                </span>를 측정합니다.
+            `;
+        } else {
+            questionRenderText = `
                 콩, 팥, 조가 섞인 혼합물을 눈이 큰 체에 넣고 흔들었을 때, 체 위에 남는 물질은 
                 <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
                     ${userBlankAnswers['b1'] || '❓ 선택'}
@@ -533,6 +598,12 @@ function renderLabReportQuiz(container, qIdx) {
                 <span id="blank_3" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
                     ${userBlankAnswers['b3'] || '❓ 선택'}
                 </span> 차이를 이용한 것입니다.
+            `;
+        }
+
+        quizBodyHtml = `
+            <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 1rem; line-height: 1.8; color: #1e293b;">
+                ${questionRenderText}
             </div>
 
             <div style="margin-bottom: 12px;">
@@ -548,7 +619,7 @@ function renderLabReportQuiz(container, qIdx) {
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
                 <button class="btn-reset" onclick="resetBlankAnswers()">🔄 다시 채우기</button>
-                <button class="btn-action-primary" onclick="checkBlankAnswer(${qIdx})">
+                <button class="btn-action-primary" style="background: ${themeColor};" onclick="checkBlankAnswer(${qIdx})">
                     ✅ 정답 확인하기
                 </button>
             </div>
@@ -564,7 +635,7 @@ function renderLabReportQuiz(container, qIdx) {
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 ${q.choices.map((choice, idx) => `
                     <button class="quiz-choice-btn" style="padding: 12px 16px; font-size: 0.98rem; text-align: left; justify-content: flex-start; line-height: 1.4;" onclick="submitChoiceQuiz(${qIdx}, ${idx})">
-                        <span style="font-weight: bold; color: #0284c7; margin-right: 8px;">${idx + 1}.</span> ${choice}
+                        <span style="font-weight: bold; color: ${themeColor}; margin-right: 8px;">${idx + 1}.</span> ${choice}
                     </button>
                 `).join('')}
             </div>
@@ -579,14 +650,14 @@ function renderLabReportQuiz(container, qIdx) {
 
             <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
                 ${q.steps.map(s => `
-                    <div style="background: #f0f9ff; padding: 10px 14px; border-radius: 10px; border: 1.5px solid #bae6fd; font-size: 0.95rem; color: #0369a1; display: flex; align-items: center; gap: 8px;">
+                    <div style="background: ${tagBg}; padding: 10px 14px; border-radius: 10px; border: 1.5px solid ${borderColor}; font-size: 0.95rem; color: ${themeColor}; display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 1.2rem;">🔹</span> ${s.text}
                     </div>
                 `).join('')}
             </div>
 
             <div style="text-align: center;">
-                <button class="btn-action-primary" onclick="passOrderQuiz(${qIdx})">
+                <button class="btn-action-primary" style="background: ${themeColor};" onclick="passOrderQuiz(${qIdx})">
                     ✅ 순서 확인 완료! 다음 문제로 ➔
                 </button>
             </div>
@@ -621,12 +692,12 @@ function renderLabReportQuiz(container, qIdx) {
     }
 
     container.innerHTML = `
-        <div style="background: white; border-radius: 18px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); border: 2px solid #bae6fd;">
+        <div style="background: white; border-radius: 18px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); border: 2px solid ${borderColor};">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                <div style="color: #0369a1; font-size: 1.15rem; font-weight: bold;">
+                <div style="color: ${themeColor}; font-size: 1.15rem; font-weight: bold;">
                     ${q.title}
                 </div>
-                <span style="background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem;">
+                <span style="background: ${tagBg}; color: ${themeColor}; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem;">
                     문제 ${qIdx + 1} / ${data.quizItems.length}
                 </span>
             </div>
@@ -645,32 +716,44 @@ function selectBlankWord(word) {
         userBlankAnswers['b3'] = word;
     }
     const tabContent = document.getElementById('reportTabContent');
-    renderLabReportQuiz(tabContent, 0);
+    renderLabReportQuiz(tabContent, currentReportQuizIdx);
 }
 
 function resetBlankAnswers() {
     userBlankAnswers = {};
     const tabContent = document.getElementById('reportTabContent');
-    renderLabReportQuiz(tabContent, 0);
+    renderLabReportQuiz(tabContent, currentReportQuizIdx);
 }
 
 function checkBlankAnswer(qIdx) {
-    const isCorrect = (userBlankAnswers['b1'] === "콩과 팥" && userBlankAnswers['b2'] === "조" && userBlankAnswers['b3'] === "알갱이의 크기");
+    const data = getActiveReportData();
+    const q = data.quizItems[qIdx];
+    
+    let isCorrect = false;
+    if (currentReportUnitId === 2) {
+        isCorrect = (userBlankAnswers['b1'] === "증발" && userBlankAnswers['b2'] === "커집니다" && userBlankAnswers['b3'] === "습도");
+    } else {
+        isCorrect = (userBlankAnswers['b1'] === "콩과 팥" && userBlankAnswers['b2'] === "조" && userBlankAnswers['b3'] === "알갱이의 크기");
+    }
+
     const container = document.getElementById('reportTabContent');
 
     if (isCorrect) {
-        showQuizFeedback(container, true, "정답입니다! 👏 알갱이 크기 차이로 콩과 팥은 체 위에 남고 조는 빠져나갑니다.", () => {
+        showQuizFeedback(container, true, `정답입니다! 👏 ${q.explanation}`, () => {
             renderLabReportQuiz(container, qIdx + 1);
         });
     } else {
-        showQuizFeedback(container, false, "앗! 다시 한번 생각해 볼까요? 체 위에 남는 것은 큰 알갱이, 빠져나가는 것은 작은 알갱이입니다.", () => {
+        const hintMsg = currentReportUnitId === 2
+            ? "앗! 다시 한번 생각해 볼까요? 건조할수록 물이 활발하게 [증발]하여 열을 빼앗기 때문에 온도 차이가 [커집니다]."
+            : "앗! 다시 한번 생각해 볼까요? 체 위에 남는 것은 큰 알갱이, 빠져나가는 것은 작은 알갱이입니다.";
+        showQuizFeedback(container, false, hintMsg, () => {
             resetBlankAnswers();
         });
     }
 }
 
 function submitChoiceQuiz(qIdx, selectedIdx) {
-    const data = window.SCIENCE_LAB_REPORT_DATA;
+    const data = getActiveReportData();
     const q = data.quizItems[qIdx];
     const isCorrect = (selectedIdx === q.answer);
     const container = document.getElementById('reportTabContent');
@@ -692,6 +775,7 @@ function passOrderQuiz(qIdx) {
 }
 
 function showQuizFeedback(container, isSuccess, message, nextCallback) {
+    const okColor = isSuccess ? '#059669' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
     container.innerHTML = `
         <div style="text-align: center; padding: 24px; background: white; border-radius: 18px; border: 3px solid ${isSuccess ? '#10b981' : '#f87171'};">
             <div style="font-size: 3rem; margin-bottom: 8px;">${isSuccess ? '🎉' : '💡'}</div>
@@ -701,7 +785,7 @@ function showQuizFeedback(container, isSuccess, message, nextCallback) {
             <p style="color: #334155; font-size: 0.98rem; line-height: 1.6; margin-bottom: 18px;">
                 ${message}
             </p>
-            <button class="btn-action-primary" style="background: ${isSuccess ? '#059669' : '#0284c7'};" onclick="(${nextCallback.toString()})()">
+            <button class="btn-action-primary" style="background: ${okColor};" onclick="(${nextCallback.toString()})()">
                 ${isSuccess ? '다음 문제로 ➔' : '🔄 다시 풀기'}
             </button>
         </div>
@@ -710,15 +794,25 @@ function showQuizFeedback(container, isSuccess, message, nextCallback) {
 
 function finishAllReportQuiz() {
     if (typeof grantRewardGem === 'function') {
-        grantRewardGem(5, '실험관찰 탐구 보고서 완벽 마스터');
+        const rewardMsg = currentReportUnitId === 2 
+            ? '2단원 날씨와 우리 생활 실험관찰 탐구 보고서 완벽 마스터' 
+            : '1단원 혼합물의 분리 실험관찰 탐구 보고서 완벽 마스터';
+        grantRewardGem(5, rewardMsg);
     }
     const container = document.getElementById('overlayInnerBody');
+    const unitTitle = currentReportUnitId === 2 ? '2단원 날씨와 우리 생활' : '1단원 혼합물의 분리';
+    const iconStr = currentReportUnitId === 2 ? '🌤️ 📝 💎' : '🌟 📝 💎';
+    const unitDesc = currentReportUnitId === 2 
+        ? '습도계 측정, 이슬과 안개, 구름 발생, 바람, 사계절 기단 탐구 기록을 완벽하게 마스터했습니다! (+5💎)'
+        : '1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)';
+
     container.innerHTML = `
         <div style="text-align: center; padding: 30px; font-family: 'Jua';">
-            <div style="font-size: 3.5rem; margin-bottom: 10px;">🌟 📝 💎</div>
+            <div style="font-size: 3.5rem; margin-bottom: 10px;">${iconStr}</div>
             <h2 style="color: #059669; font-size: 1.55rem; margin-bottom: 8px;">『실험관찰』 디지털 탐구 보고서 마스터 완료!</h2>
+            <h3 style="color: #0284c7; font-size: 1.25rem; margin-bottom: 8px;">[${unitTitle}]</h3>
             <p style="color: #475569; font-size: 1.05rem; margin-bottom: 20px;">
-                1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)
+                ${unitDesc}
             </p>
             <button class="back-to-lobby-btn" style="background: #0284c7; color: white;" onclick="closeMissionView(true)">
                 과학 대기실로 돌아가기
@@ -1369,32 +1463,8 @@ window.openScienceVocaDirect = function(targetGrade, targetUnit) {
 };
 
 // ==========================================
-// 📝 2단원 『실험관찰』 탐구 보고서 안내
+// 📝 2단원 『실험관찰』 탐구 보고서 직접 실행
 // ==========================================
 window.openScienceReport2 = function() {
-    const overlay = document.getElementById('missionOverlay');
-    const titleEl = document.getElementById('overlayHeaderTitle');
-    const iconEl = document.getElementById('overlayHeaderIcon');
-    const innerBody = document.getElementById('overlayInnerBody');
-    overlay.style.display = 'flex';
-    titleEl.textContent = "2단원 『실험관찰』 디지털 탐구 보고서";
-    iconEl.textContent = "📝";
-    innerBody.innerHTML = `
-        <div style="text-align: center; padding: 25px 15px; font-family: 'Jua', sans-serif;">
-            <div style="font-size: 3rem; margin-bottom: 10px;">🌤️ 📝 🔬</div>
-            <h3 style="color: #0284c7; font-size: 1.4rem; margin-bottom: 8px;">2단원 날씨와 우리 생활 탐구 일지</h3>
-            <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.6;">
-                교과서 『실험관찰』 24~35쪽 습도계 측정, 이슬·안개, 구름 발생, 바람, 사계절 기단 탐구 기록이 준비 중입니다!<br>
-                현재 완비된 <b>5대 가상 실험실</b>에서 각 차시별 실험을 생생하게 직접 체험하고 퀴즈를 풀어보세요!
-            </p>
-            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
-                <a href="science_hygrometer_lab.html" class="back-to-lobby-btn" style="background:#0284c7; color:white; font-size:0.9rem; text-decoration:none;">🌡️ [1] 습도계</a>
-                <a href="science_dew_fog_lab.html" class="back-to-lobby-btn" style="background:#059669; color:white; font-size:0.9rem; text-decoration:none;">🧊 [2] 이슬·안개</a>
-                <a href="science_cloud_lab.html" class="back-to-lobby-btn" style="background:#3b82f6; color:white; font-size:0.9rem; text-decoration:none;">☁️ [3] 구름 발생</a>
-                <a href="science_wind_lab.html" class="back-to-lobby-btn" style="background:#d97706; color:white; font-size:0.9rem; text-decoration:none;">💨 [4] 바람의 까닭</a>
-                <a href="science_season_airmass_lab.html" class="back-to-lobby-btn" style="background:#7c3aed; color:white; font-size:0.9rem; text-decoration:none;">🌏 [5] 계절과 기단</a>
-            </div>
-            <button class="back-to-lobby-btn" onclick="closeMissionView(true)">닫기</button>
-        </div>
-    `;
+    window.openScienceReport(2);
 };
