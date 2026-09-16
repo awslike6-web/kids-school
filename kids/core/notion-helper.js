@@ -92,7 +92,7 @@ function _matchesVocaRecord(record, options) {
 // ========================================================
 // ⚡ VOCA DB 당일(하루) 캐시 매니저 & 프리패치 엔진
 // ========================================================
-const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V6_";
+const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V10_";
 
 function _getVocaCacheKey(studentName, dbId) {
     const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -121,21 +121,42 @@ function _saveVocaToCache(studentName, dbId, records) {
         const todayStr = new Date().toISOString().slice(0, 10);
         const key = _getVocaCacheKey(studentName, dbId);
         
-        // 이전 날짜 캐시 정리
+        // 이전 날짜 및 구버전 캐시 전수 정리
         for (let i = localStorage.length - 1; i >= 0; i--) {
             const k = localStorage.key(i);
-            if (k && k.startsWith(VOCA_CACHE_PREFIX) && !k.endsWith(todayStr)) {
+            if (k && k.includes("_VOCA_CACHE_") && (!k.startsWith(VOCA_CACHE_PREFIX) || !k.endsWith(todayStr))) {
                 localStorage.removeItem(k);
             }
         }
         
+        // 💡 localStorage 용량(5MB) 방어를 위해 핵심 필드만 슬림화하여 저장
+        const slimRecords = records.map(r => ({
+            id: r.id,
+            word: r.word,
+            meaning: r.meaning,
+            detailContext: r.detailContext || "",
+            imageUrl: r.imageUrl || null,
+            audioUrl: r.audioUrl || null,
+            interactiveUrl: r.interactiveUrl || null,
+            pos: r.pos || "",
+            stage: r.stage || "기본 단원",
+            level: r.level || "기본 단원",
+            grades: r.grades || [],
+            grade: r.grade || "공통",
+            subject: r.subject || [],
+            target: r.target || [],
+            isAchieved: !!r.isAchieved,
+            hint: r.hint || "",
+            areaZone: r.areaZone || ""
+        }));
+
         localStorage.setItem(key, JSON.stringify({
             date: todayStr,
             timestamp: Date.now(),
-            records
+            records: slimRecords
         }));
     } catch (e) {
-        console.warn("[VOCA Cache] 캐시 저장 실패:", e);
+        console.warn("[VOCA Cache] 캐시 저장 실패 (용량 초과 등):", e);
     }
 }
 
@@ -143,7 +164,7 @@ function clearVocaCache(studentName = null) {
     try {
         for (let i = localStorage.length - 1; i >= 0; i--) {
             const k = localStorage.key(i);
-            if (k && k.startsWith(VOCA_CACHE_PREFIX)) {
+            if (k && k.includes("_VOCA_CACHE_")) {
                 if (!studentName || k.includes(`_${studentName.trim()}_`)) {
                     localStorage.removeItem(k);
                 }
@@ -248,6 +269,10 @@ async function fetchVocaFromNotion(options = {}) {
             allResults = allResults.concat(data.results || []);
             hasMore = data.has_more;
             nextCursor = data.next_cursor;
+            // 💡 Notion API Rate Limit(초당 3회) 및 Worker 과부하 방어 딜레이
+            if (hasMore) {
+                await new Promise(r => setTimeout(r, 60));
+            }
         }
 
         const parsedRecords = allResults.map(parseVocaPage);

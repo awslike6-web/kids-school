@@ -99,6 +99,9 @@ async function fetchLibraryData(forceRefresh = false) {
 }
 
 async function manualSyncVocaData() {
+  if (typeof clearVocaCache === 'function') {
+    clearVocaCache();
+  }
   await fetchLibraryData(true);
 }
 window.manualSyncVocaData = manualSyncVocaData;
