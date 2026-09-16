@@ -15,8 +15,8 @@ window.STORY_BOOK = {
     {
       page: 1,
       tag: "🌟 표지 : 하늘을 나는 날씨 연구소: 민수와 코코의 대모험",
-      spreadImg: "science_weather_story_p1.jpg",
-      illImg: "science_weather_story_p1.jpg",
+      spreadImg: "science_weather_story_p1.png",
+      illImg: "science_weather_ill_p1.jpg",
       textHtml: `
         <div class="webtoon-passage" style="text-align: center; padding: 10px 0;">
           <h2 style="font-family: 'Jua', sans-serif; font-size: 1.4rem; color: #0284c7; margin-bottom: 8px;">하늘을 나는 날씨 연구소: 민수와 코코의 대모험</h2>
@@ -31,8 +31,8 @@ window.STORY_BOOK = {
     {
       page: 2,
       tag: "🚀 1장 : 날씨 나라로 출발!",
-      spreadImg: "science_weather_story_p2.jpg",
-      illImg: "science_weather_story_p2.jpg",
+      spreadImg: "science_weather_story_p2.png",
+      illImg: "science_weather_ill_p2.jpg",
       textHtml: `
         <div class="webtoon-passage">
           호기심 많은 소년 <b>민수</b>는 어느 날 신비로운 날씨 탐험 요정 <b>코코</b>를 만났어요.<br>
@@ -46,8 +46,8 @@ window.STORY_BOOK = {
     {
       page: 3,
       tag: "🌡️ 2장 : 신기한 건습구 습도계",
-      spreadImg: "science_weather_story_p3.jpg",
-      illImg: "science_weather_story_p3.jpg",
+      spreadImg: "science_weather_story_p3.png",
+      illImg: "science_weather_ill_p3.jpg",
       textHtml: `
         <div class="webtoon-passage">
           비행선 안에는 신기한 <b>'건습구 습도계'</b>가 있었어요.<br>
@@ -61,8 +61,8 @@ window.STORY_BOOK = {
     {
       page: 4,
       tag: "💧 3장 : 풀잎의 이슬과 자욱한 안개",
-      spreadImg: "science_weather_story_p4.jpg",
-      illImg: "science_weather_story_p4.jpg",
+      spreadImg: "science_weather_story_p4.png",
+      illImg: "science_weather_ill_p4.jpg",
       textHtml: `
         <div class="webtoon-passage">
           비행선이 풀밭 위를 낮게 날자 반짝이는 <b>이슬</b>과 자욱한 <b>안개</b>가 보였어요.<br>
@@ -75,8 +75,8 @@ window.STORY_BOOK = {
     {
       page: 5,
       tag: "🎈 4장 : 하늘 높이, 단열 팽창!",
-      spreadImg: "science_weather_story_p5.jpg",
-      illImg: "science_weather_story_p5.jpg",
+      spreadImg: "science_weather_story_p5.png",
+      illImg: "science_weather_ill_p5.jpg",
       textHtml: `
         <div class="webtoon-passage">
           "이제 더 높이 올라가 보자!"<br>
@@ -90,8 +90,8 @@ window.STORY_BOOK = {
     {
       page: 6,
       tag: "☁️ 5장 : 펑! 뭉게구름의 탄생",
-      spreadImg: "science_weather_story_p6.jpg",
-      illImg: "science_weather_story_p6.jpg",
+      spreadImg: "science_weather_story_p6.png",
+      illImg: "science_weather_ill_p6.jpg",
       textHtml: `
         <div class="webtoon-passage">
           공기 속에 떠다니던 작은 먼지 씨앗들이 물방울을 불러 모았어요.<br>
@@ -104,8 +104,8 @@ window.STORY_BOOK = {
     {
       page: 7,
       tag: "⚖️ 6장 : 고기압과 저기압 마을",
-      spreadImg: "science_weather_story_p7.jpg",
-      illImg: "science_weather_story_p7.jpg",
+      spreadImg: "science_weather_story_p7.png",
+      illImg: "science_weather_ill_p7.jpg",
       textHtml: `
         <div class="webtoon-passage">
           "공기가 꾹 누르는 힘이 세면 <b>고기압</b>, 약하면 <b>저기압</b>이야."<br>
@@ -118,8 +118,8 @@ window.STORY_BOOK = {
     {
       page: 8,
       tag: "🏖️ 7장 : 낮에 부는 시원한 해풍",
-      spreadImg: "science_weather_story_p8.jpg",
-      illImg: "science_weather_story_p8.jpg",
+      spreadImg: "science_weather_story_p8.png",
+      illImg: "science_weather_ill_p8.jpg",
       textHtml: `
         <div class="webtoon-passage">
           해가 쨍쨍한 낮이 되자 시원한 <b>'해풍'</b>이 바다에서 육지로 불어왔어요.<br>
@@ -132,8 +132,8 @@ window.STORY_BOOK = {
     {
       page: 9,
       tag: "🌙 8장 : 밤에 부는 고요한 육풍",
-      spreadImg: "science_weather_story_p9.jpg",
-      illImg: "science_weather_story_p9.jpg",
+      spreadImg: "science_weather_story_p9.png",
+      illImg: "science_weather_ill_p9.jpg",
       textHtml: `
         <div class="webtoon-passage">
           밤이 되자 이번에는 바람의 방향이 반대로 바뀌어 <b>'육풍'</b>이 불었어요.<br>
@@ -146,8 +146,8 @@ window.STORY_BOOK = {
     {
       page: 10,
       tag: "❄️ 9장 : 사계절을 만드는 공기 거인들",
-      spreadImg: "science_weather_story_p10.jpg",
-      illImg: "science_weather_story_p10.jpg",
+      spreadImg: "science_weather_story_p10.png",
+      illImg: "science_weather_ill_p10.jpg",
       textHtml: `
         <div class="webtoon-passage">
           저 멀리 북쪽에서 차가운 기운을 뿜어내는 <b>시베리아 거인</b>과 남쪽의 뜨거운 <b>북태평양 거인</b>이 보였어요.<br>
@@ -160,8 +160,8 @@ window.STORY_BOOK = {
     {
       page: 11,
       tag: "🎓 10장 : 미래의 멋진 기상학자!",
-      spreadImg: "science_weather_story_p11.jpg",
-      illImg: "science_weather_story_p11.jpg",
+      spreadImg: "science_weather_story_p11.png",
+      illImg: "science_weather_ill_p11.jpg",
       textHtml: `
         <div class="webtoon-passage">
           어느덧 탐험을 마친 비행선이 민수의 집 마당에 안전하게 내려앉았어요.<br>
