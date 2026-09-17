@@ -219,6 +219,26 @@
       100% { transform: rotate(540deg) translate(180px, 160px); opacity: 0.7; }
     }
 
+    
+    @keyframes partSnap {
+      0% { transform: scale(0.5); opacity: 0.2; }
+      60% { transform: scale(1.12); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .part-snap {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: partSnap 0.45s ease-out forwards;
+    }
+    @keyframes wsShake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    .ws-shake {
+      animation: wsShake 0.4s ease-in-out;
+    }
+
     /* Lab 4 조립 공방 */
     .workshop-blueprint-canvas {
       background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
@@ -461,10 +481,10 @@
           💡 중심을 단단히 잡을 수 있는 평평한 모양을 골라주세요!
         </div>
 
-        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <button class="divide-btn" style="background:#ec4899; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('box')">📦 상자 모양</button>
-          <button class="divide-btn" style="background:#0284c7; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('cylinder')">🥫 둥근기둥 모양</button>
-          <button class="divide-btn" style="background:#10b981; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('sphere')">⚽ 공 모양</button>
+        <div id="ws-controls" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="divide-btn" id="btn-ws-part-box" style="background:#ec4899; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('box')">📦 상자 모양</button>
+          <button class="divide-btn" id="btn-ws-part-cylinder" style="background:#0284c7; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('cylinder')">🥫 둥근기둥 모양</button>
+          <button class="divide-btn" id="btn-ws-part-sphere" style="background:#10b981; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('sphere')">⚽ 공 모양</button>
         </div>
       </div>
 
@@ -1248,108 +1268,225 @@
       wsTheme = theme;
       wsStep = 0;
       document.querySelectorAll('#lab-4 .shape-selector-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('btn-ws-' + theme).classList.add('active');
+      const activeBtn = document.getElementById('btn-ws-' + theme);
+      if (activeBtn) activeBtn.classList.add('active');
       renderWorkshopSVG();
+      const fb = document.getElementById('lab4-feedback-box');
+      if (fb) fb.innerHTML = `설계도를 보고 알맞은 모양 부품을 골라보세요! 🔧`;
+    }
+
+    function resetWorkshopCurrent() {
+      wsStep = 0;
+      renderWorkshopSVG();
+      const fb = document.getElementById('lab4-feedback-box');
+      if (fb) fb.innerHTML = `다시 처음부터 조립을 시작해요! 첫 번째 부품을 골라보세요! 🔧`;
+    }
+
+    function nextWorkshopTheme() {
+      const themes = ['robot', 'car', 'castle'];
+      const nextIdx = (themes.indexOf(wsTheme) + 1) % themes.length;
+      selectWorkshopTheme(themes[nextIdx]);
     }
 
     function renderWorkshopSVG() {
       const cfg = WS_CONFIG[wsTheme];
-      const stepInfo = cfg.steps[wsStep];
       const svg = document.getElementById('workshop-svg');
       const titleEl = document.getElementById('ws-step-title');
       const hintEl = document.getElementById('ws-step-hint');
+      const controlsEl = document.getElementById('ws-controls');
 
-      titleEl.textContent = stepInfo.title + ` (${wsStep + 1}/3)`;
-      hintEl.textContent = stepInfo.hint;
+      // 1. 단계별 텍스트 및 조작 버튼 렌더링
+      if (wsStep < 3) {
+        const stepInfo = cfg.steps[wsStep];
+        titleEl.innerHTML = `${stepInfo.title} <span style="color:#0284c7; font-size:1.1rem;">(${wsStep + 1}/3)</span>`;
+        hintEl.textContent = stepInfo.hint;
 
+        if (controlsEl) {
+          controlsEl.innerHTML = `
+            <button class="divide-btn" id="btn-ws-part-box" style="background:#ec4899; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('box')">📦 상자 모양</button>
+            <button class="divide-btn" id="btn-ws-part-cylinder" style="background:#0284c7; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('cylinder')">🥫 둥근기둥 모양</button>
+            <button class="divide-btn" id="btn-ws-part-sphere" style="background:#10b981; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('sphere')">⚽ 공 모양</button>
+          `;
+        }
+      } else {
+        // 완공 상태
+        titleEl.innerHTML = `🎉 <span style="color:#10b981;">[${cfg.name}] 완벽 조립 대성공!</span>`;
+        hintEl.innerHTML = `상자 · 둥근기둥 · 공 모양이 하나로 합체되어 멋진 작품이 되었어요! 🌟`;
+
+        if (controlsEl) {
+          controlsEl.innerHTML = `
+            <button class="divide-btn" style="background:#8b5cf6; font-size:1.1rem; padding:10px 20px;" onclick="resetWorkshopCurrent()">🔄 다시 조립하기</button>
+            <button class="divide-btn" style="background:#059669; font-size:1.1rem; padding:10px 20px;" onclick="nextWorkshopTheme()">✨ 다음 작품 만들기 ➔</button>
+          `;
+        }
+      }
+
+      // 2. SVG 그래픽 실시간 렌더링
       let svgHtml = '';
 
       if (wsTheme === 'robot') {
-        // 로봇 파츠 렌더링
-        // 1. 몸통 (Box)
+        // ----------------------------------------------------
+        // 테마 1: 모양 로봇
+        // ----------------------------------------------------
+        // 1. 몸통 (상자 모양)
         let bodyFill = (wsStep >= 1) ? '#ec4899' : 'none';
         let bodyStroke = (wsStep >= 1) ? '#be185d' : '#38bdf8';
-        svgHtml += `<rect x="130" y="110" width="100" height="90" rx="10" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+        let bodyAnim = (wsStep === 1) ? 'class="part-snap"' : '';
+        svgHtml += `<rect x="130" y="110" width="100" height="90" rx="12" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}" ${bodyAnim}/>`;
+        if (wsStep >= 1) {
+          // 몸통 내부 하트 에너지 코어
+          svgHtml += `<circle cx="180" cy="155" r="18" fill="#f43f5e" stroke="#ffe4e6" stroke-width="2"/>`;
+          svgHtml += `<text x="180" y="161" font-size="14" text-anchor="middle" fill="#ffffff">❤</text>`;
+        }
 
-        // 2. 팔과 다리 (Cylinder)
+        // 2. 팔과 다리 (둥근기둥 모양)
         let limbFill = (wsStep >= 2) ? '#0284c7' : 'none';
         let limbStroke = (wsStep >= 2) ? '#0369a1' : '#38bdf8';
-        // 팔
-        svgHtml += `<rect x="85" y="125" width="35" height="60" rx="14" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
-        svgHtml += `<rect x="240" y="125" width="35" height="60" rx="14" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
-        // 다리
-        svgHtml += `<rect x="145" y="205" width="30" height="55" rx="12" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
-        svgHtml += `<rect x="185" y="205" width="30" height="55" rx="12" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        let limbAnim = (wsStep === 2) ? 'class="part-snap"' : '';
+        // 양팔
+        svgHtml += `<rect x="82" y="125" width="36" height="60" rx="14" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${limbAnim}/>`;
+        svgHtml += `<rect x="242" y="125" width="36" height="60" rx="14" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${limbAnim}/>`;
+        // 양다리
+        svgHtml += `<rect x="144" y="205" width="30" height="55" rx="12" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${limbAnim}/>`;
+        svgHtml += `<rect x="186" y="205" width="30" height="55" rx="12" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${limbAnim}/>`;
+        if (wsStep >= 2) {
+          // 팔다리 관절 링
+          svgHtml += `<line x1="82" y1="145" x2="118" y2="145" stroke="#bae6fd" stroke-width="3"/>`;
+          svgHtml += `<line x1="242" y1="145" x2="278" y2="145" stroke="#bae6fd" stroke-width="3"/>`;
+        }
 
-        // 3. 머리와 눈 (Sphere)
+        // 3. 머리와 눈 (공 모양)
         let headFill = (wsStep >= 3) ? '#10b981' : 'none';
         let headStroke = (wsStep >= 3) ? '#047857' : '#38bdf8';
-        svgHtml += `<circle cx="180" cy="65" r="40" fill="${headFill}" stroke="${headStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+        let headAnim = (wsStep >= 3) ? 'class="part-snap"' : '';
+        // 머리 구체
+        svgHtml += `<circle cx="180" cy="65" r="42" fill="${headFill}" stroke="${headStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}" ${headAnim}/>`;
         if (wsStep >= 3) {
-          // 로봇 눈/입
-          svgHtml += `<circle cx="168" cy="60" r="6" fill="#fff"/><circle cx="168" cy="60" r="3" fill="#0f172a"/>`;
-          svgHtml += `<circle cx="192" cy="60" r="6" fill="#fff"/><circle cx="192" cy="60" r="3" fill="#0f172a"/>`;
-          svgHtml += `<path d="M 172 78 Q 180 86 188 78" stroke="#fff" stroke-width="3" fill="none"/>`;
+          // 안테나 (봉 + 구슬)
+          svgHtml += `<line x1="180" y1="23" x2="180" y2="12" stroke="#fde047" stroke-width="3"/>`;
+          svgHtml += `<circle cx="180" cy="10" r="7" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>`;
+          // 초롱초롱한 눈
+          svgHtml += `<circle cx="166" cy="62" r="7" fill="#ffffff"/><circle cx="166" cy="62" r="4" fill="#0f172a"/><circle cx="164" cy="60" r="2" fill="#ffffff"/>`;
+          svgHtml += `<circle cx="194" cy="62" r="7" fill="#ffffff"/><circle cx="194" cy="62" r="4" fill="#0f172a"/><circle cx="192" cy="60" r="2" fill="#ffffff"/>`;
+          // 웃는 입 & 볼터치
+          svgHtml += `<path d="M 172 78 Q 180 87 188 78" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none"/>`;
+          svgHtml += `<ellipse cx="157" cy="73" rx="5" ry="3" fill="#f43f5e" opacity="0.7"/>`;
+          svgHtml += `<ellipse cx="203" cy="73" rx="5" ry="3" fill="#f43f5e" opacity="0.7"/>`;
+          // 축하 반짝임 별
+          svgHtml += `<text x="110" y="50" font-size="22">✨</text><text x="235" y="50" font-size="22">⭐</text>`;
         }
       } else if (wsTheme === 'car') {
-        // 자동차
-        // 1. 차체 (상자)
+        // ----------------------------------------------------
+        // 테마 2: 씽씽 자동차
+        // ----------------------------------------------------
+        // 1. 차체 (상자 모양)
         let bodyFill = (wsStep >= 1) ? '#ea580c' : 'none';
         let bodyStroke = (wsStep >= 1) ? '#9a3412' : '#38bdf8';
-        svgHtml += `<rect x="70" y="110" width="220" height="75" rx="14" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
-        svgHtml += `<rect x="115" y="60" width="130" height="52" rx="10" fill="${wsStep >= 1 ? '#fed7aa' : 'none'}" stroke="${bodyStroke}" stroke-width="2.5" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+        let bodyAnim = (wsStep === 1) ? 'class="part-snap"' : '';
+        // 하부 차체
+        svgHtml += `<rect x="65" y="115" width="230" height="75" rx="14" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}" ${bodyAnim}/>`;
+        // 상부 캐빈
+        svgHtml += `<rect x="115" y="65" width="130" height="52" rx="10" fill="${wsStep >= 1 ? '#fed7aa' : 'none'}" stroke="${bodyStroke}" stroke-width="2.5" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}" ${bodyAnim}/>`;
+        if (wsStep >= 1) {
+          // 유리창
+          svgHtml += `<rect x="125" y="72" width="50" height="38" rx="6" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/>`;
+          svgHtml += `<rect x="185" y="72" width="50" height="38" rx="6" fill="#bae6fd" stroke="#0284c7" stroke-width="1.5"/>`;
+        }
 
-        // 2. 바퀴 (눕힌 둥근기둥)
+        // 2. 바퀴 (눕힌 둥근기둥 모양)
         let wheelFill = (wsStep >= 2) ? '#0284c7' : 'none';
         let wheelStroke = (wsStep >= 2) ? '#0369a1' : '#38bdf8';
-        svgHtml += `<circle cx="120" cy="190" r="32" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
-        svgHtml += `<circle cx="240" cy="190" r="32" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        let wheelAnim = (wsStep === 2) ? 'class="part-snap"' : '';
+        svgHtml += `<circle cx="120" cy="190" r="33" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="4" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${wheelAnim}/>`;
+        svgHtml += `<circle cx="240" cy="190" r="33" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="4" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${wheelAnim}/>`;
         if (wsStep >= 2) {
-          svgHtml += `<circle cx="120" cy="190" r="12" fill="#fff"/><circle cx="240" cy="190" r="12" fill="#fff"/>`;
+          // 휠 캡 & 스포크
+          svgHtml += `<circle cx="120" cy="190" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>`;
+          svgHtml += `<circle cx="240" cy="190" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>`;
+          svgHtml += `<line x1="120" y1="160" x2="120" y2="220" stroke="#ffffff" stroke-width="2.5"/>`;
+          svgHtml += `<line x1="90" y1="190" x2="150" y2="190" stroke="#ffffff" stroke-width="2.5"/>`;
+          svgHtml += `<line x1="240" y1="160" x2="240" y2="220" stroke="#ffffff" stroke-width="2.5"/>`;
+          svgHtml += `<line x1="210" y1="190" x2="270" y2="190" stroke="#ffffff" stroke-width="2.5"/>`;
         }
 
-        // 3. 헤드라이트 (공 모양)
+        // 3. 헤드라이트 & 경광등 (공 모양)
         let lightFill = (wsStep >= 3) ? '#fde047' : 'none';
         let lightStroke = (wsStep >= 3) ? '#ca8a04' : '#38bdf8';
-        svgHtml += `<circle cx="290" cy="135" r="16" fill="${lightFill}" stroke="${lightStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+        let lightAnim = (wsStep >= 3) ? 'class="part-snap"' : '';
+        // 전면 헤드라이트 공 모양
+        svgHtml += `<circle cx="295" cy="145" r="18" fill="${lightFill}" stroke="${lightStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}" ${lightAnim}/>`;
+        // 지붕 위 회전 경광등 공 모양
+        svgHtml += `<circle cx="180" cy="52" r="14" fill="${wsStep >= 3 ? '#ef4444' : 'none'}" stroke="${wsStep >= 3 ? '#991b1b' : '#38bdf8'}" stroke-width="2.5" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}" ${lightAnim}/>`;
         if (wsStep >= 3) {
-          // 라이트 빔
-          svgHtml += `<polygon points="305,135 350,110 350,160" fill="rgba(253, 224, 71, 0.45)"/>`;
+          // 밝은 헤드라이트 광선 빔
+          svgHtml += `<polygon points="312,145 358,115 358,175" fill="rgba(253, 224, 71, 0.45)"/>`;
+          svgHtml += `<text x="320" y="110" font-size="20">💡</text>`;
+          svgHtml += `<text x="165" y="35" font-size="18">🚨</text>`;
         }
       } else if (wsTheme === 'castle') {
-        // 성
-        // 1. 성벽 바닥 (상자)
+        // ----------------------------------------------------
+        // 테마 3: 튼튼한 성
+        // ----------------------------------------------------
+        // 1. 성벽 (상자 모양)
         let wallFill = (wsStep >= 1) ? '#64748b' : 'none';
         let wallStroke = (wsStep >= 1) ? '#334155' : '#38bdf8';
-        svgHtml += `<rect x="90" y="140" width="180" height="90" rx="8" fill="${wallFill}" stroke="${wallStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+        let wallAnim = (wsStep === 1) ? 'class="part-snap"' : '';
+        svgHtml += `<rect x="90" y="135" width="180" height="95" rx="8" fill="${wallFill}" stroke="${wallStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}" ${wallAnim}/>`;
+        if (wsStep >= 1) {
+          // 성벽 아치 출입문
+          svgHtml += `<path d="M 155 230 L 155 180 A 25 25 0 0 1 205 180 L 205 230 Z" fill="#1e293b" stroke="#f8fafc" stroke-width="2"/>`;
+          // 성벽 요철
+          for (let bx = 95; bx < 270; bx += 28) {
+            svgHtml += `<rect x="${bx}" y="120" width="18" height="15" fill="#64748b" stroke="#334155" stroke-width="2"/>`;
+          }
+        }
 
-        // 2. 기둥 성탑 (세운 둥근기둥)
+        // 2. 기둥 성탑 (세운 둥근기둥 모양)
         let towerFill = (wsStep >= 2) ? '#0284c7' : 'none';
         let towerStroke = (wsStep >= 2) ? '#0369a1' : '#38bdf8';
-        svgHtml += `<rect x="65" y="75" width="45" height="155" rx="14" fill="${towerFill}" stroke="${towerStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
-        svgHtml += `<rect x="250" y="75" width="45" height="155" rx="14" fill="${towerFill}" stroke="${towerStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        let towerAnim = (wsStep === 2) ? 'class="part-snap"' : '';
+        svgHtml += `<rect x="55" y="75" width="48" height="155" rx="16" fill="${towerFill}" stroke="${towerStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${towerAnim}/>`;
+        svgHtml += `<rect x="257" y="75" width="48" height="155" rx="16" fill="${towerFill}" stroke="${towerStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}" ${towerAnim}/>`;
+        if (wsStep >= 2) {
+          // 탑 창문
+          svgHtml += `<rect x="71" y="110" width="16" height="28" rx="8" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>`;
+          svgHtml += `<rect x="273" y="110" width="16" height="28" rx="8" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>`;
+        }
 
-        // 3. 꼭대기 마법 구슬 (공)
+        // 3. 꼭대기 마법 구슬 (공 모양)
         let gemFill = (wsStep >= 3) ? '#f59e0b' : 'none';
         let gemStroke = (wsStep >= 3) ? '#d97706' : '#38bdf8';
-        svgHtml += `<circle cx="87" cy="55" r="20" fill="${gemFill}" stroke="${gemStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
-        svgHtml += `<circle cx="272" cy="55" r="20" fill="${gemFill}" stroke="${gemStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+        let gemAnim = (wsStep >= 3) ? 'class="part-snap"' : '';
+        // 좌/우 꼭대기 황금 마법 구슬
+        svgHtml += `<circle cx="79" cy="52" r="22" fill="${gemFill}" stroke="${gemStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}" ${gemAnim}/>`;
+        svgHtml += `<circle cx="281" cy="52" r="22" fill="${gemFill}" stroke="${gemStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}" ${gemAnim}/>`;
+        if (wsStep >= 3) {
+          // 마법 구슬 에너지 하이라이트
+          svgHtml += `<circle cx="73" cy="46" r="6" fill="#ffffff" opacity="0.75"/>`;
+          svgHtml += `<circle cx="275" cy="46" r="6" fill="#ffffff" opacity="0.75"/>`;
+          svgHtml += `<text x="68" y="25" font-size="20">🔮</text>`;
+          svgHtml += `<text x="270" y="25" font-size="20">🔮</text>`;
+          svgHtml += `<text x="165" y="90" font-size="26">🏰✨</text>`;
+        }
       }
 
       svg.innerHTML = svgHtml;
     }
 
     function chooseWorkshopPart(choice) {
+      if (wsStep >= 3) return; // 이미 완성된 상태면 무시
+
       const cfg = WS_CONFIG[wsTheme];
       const stepInfo = cfg.steps[wsStep];
       const fb = document.getElementById('lab4-feedback-box');
+      const clickedBtn = document.getElementById('btn-ws-part-' + choice);
 
       if (choice === stepInfo.correct) {
         wsStep++;
         renderWorkshopSVG();
 
         if (wsStep < 3) {
-          fb.innerHTML = `✨ <strong>정답!</strong> 부품이 설계도에 '철컥!' 결합되었어요! 다음 단계로 가볼까요?`;
+          fb.innerHTML = `✨ <strong>정답!</strong> 알맞은 모양 부품이 설계도에 '철컥!' 결합되었어요! 다음 단계로 가볼까요?`;
           if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 부품이 멋지게 결합되었어요!');
         } else {
           // 완공 축하
@@ -1359,8 +1496,12 @@
           triggerConfetti();
         }
       } else {
+        if (clickedBtn) {
+          clickedBtn.classList.add('ws-shake');
+          setTimeout(() => clickedBtn.classList.remove('ws-shake'), 450);
+        }
         fb.innerHTML = `💡 아쉬워요! 지금 단계에는 다른 모양이 더 튼튼해요. 힌트를 다시 읽어보세요!`;
-        if (typeof fairySpeak === 'function') fairySpeak('다른 모양이 더 어울려요. 힌트를 읽어보세요!');
+        if (typeof fairySpeak === 'function') fairySpeak('다른 모양이 더 어울려요. 힌트를 다시 확인해보세요!');
       }
     }
 
