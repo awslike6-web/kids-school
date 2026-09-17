@@ -1700,6 +1700,22 @@ window.renderReadingStage = function() {
             dispatchReadingClearBonus('reading', activePassage?.id, activePassage?.title);
         }
         // 완료 및 보상
+        const lessonCardsHtml = activePassage?.lessonCards && activePassage.lessonCards.length > 0 ? `
+            <div style="background: #fffdf7; border: 2px solid #ffb300; border-radius: 14px; padding: 16px; margin: 16px 0; text-align: left; box-shadow: 0 4px 15px rgba(255, 179, 0, 0.12);">
+                <div style="font-family:'Jua', sans-serif; font-size:1.1rem; color:#e65100; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                    <span>💡</span> 오늘의 핵심 배움 & 꿀팁 카드
+                </div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    ${activePassage.lessonCards.map((card, idx) => `
+                        <div style="display:flex; align-items:flex-start; gap:8px; font-size:0.95rem; line-height:1.5; color:#37474f;">
+                            <span style="background:#ffe082; color:#bf360c; font-weight:bold; min-width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.8rem; flex-shrink:0;">${idx + 1}</span>
+                            <span>${card}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : '';
+
         const goldenHtml = activePassage?.goldenSentences && activePassage.goldenSentences.length > 0 ? `
             <div style="background: rgba(255, 255, 255, 0.9); border: 2px solid var(--purple); border-radius: 14px; padding: 16px; margin: 20px 0; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
                 <div style="font-family:'Jua', sans-serif; font-size:1.1rem; color:var(--purple); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
@@ -1719,6 +1735,7 @@ window.renderReadingStage = function() {
                 <div style="font-size:3rem; margin-bottom:12px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--mint); margin-bottom:8px; font-family:'Jua', sans-serif;">독해 미션을 완벽하게 클리어했습니다!</p>
                 <p style="font-size:0.95rem; color:#666; margin-bottom:16px;">단계별 5점 × 3 + 클리어 보너스 15점 = 총 30점!</p>
+                ${lessonCardsHtml}
                 ${goldenHtml}
                 <button class="back-to-lobby-btn" style="background:var(--sky); color:white; border:none; padding:12px 24px; font-size:1rem; cursor:pointer;" onclick="closeMissionView();">🎁 보상 확인하고 나가기</button>
             </div>
