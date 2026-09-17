@@ -3,49 +3,288 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🔷 여러 가지 모양 탐험대 🔶</title>
+  <title>🔷 1-2 여러 가지 모양 탐험관 🔶</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/math_factors.css">
   <style>
-    .shape-card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
+    :root {
+      --primary-color: #0284c7;
+      --accent-box: #ec4899;
+      --accent-cyl: #0ea5e9;
+      --accent-sphere: #10b981;
+      --bg-cream: #fdfbf7;
+    }
+
+    body {
+      background: #f0fdf4;
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .math-room-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 15px 15px 80px 15px;
+    }
+
+    .nav-tab-container {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 5px;
+      margin-bottom: 20px;
+      scrollbar-width: none;
+    }
+    .nav-tab-container::-webkit-scrollbar { display: none; }
+
+    .nav-tab-btn {
+      flex: 0 0 auto;
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .nav-tab-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .lab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .lab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 3D 관찰실 */
+    .viewer-stage {
+      perspective: 800px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      background: radial-gradient(circle, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .shape-3d-box {
+      width: 110px;
+      height: 110px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-20deg) rotateY(35deg);
+      transition: transform 0.1s linear;
+    }
+    .shape-face {
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border: 3px solid rgba(255,255,255,0.8);
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Jua';
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: bold;
+      opacity: 0.92;
+      border-radius: 6px;
+    }
+    .shape-cube .front  { background: #ec4899; transform: rotateY(0deg) translateZ(55px); }
+    .shape-cube .back   { background: #db2777; transform: rotateY(180deg) translateZ(55px); }
+    .shape-cube .right  { background: #be185d; transform: rotateY(90deg) translateZ(55px); }
+    .shape-cube .left   { background: #f472b6; transform: rotateY(-90deg) translateZ(55px); }
+    .shape-cube .top    { background: #fbcfe8; color: #831843; transform: rotateX(90deg) translateZ(55px); }
+    .shape-cube .bottom { background: #9d174d; transform: rotateX(-90deg) translateZ(55px); }
+
+    .shape-cylinder-view {
+      width: 100px;
+      height: 140px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-15deg) rotateY(25deg);
+    }
+    .cyl-top, .cyl-bottom {
+      width: 100px;
+      height: 50px;
+      background: #7dd3fc;
+      border-radius: 50%;
+      position: absolute;
+      border: 3px solid #0284c7;
+    }
+    .cyl-top { top: 0; z-index: 3; background: #bae6fd; }
+    .cyl-bottom { bottom: 0; background: #0284c7; }
+    .cyl-body {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(90deg, #0284c7, #38bdf8 50%, #0369a1);
+      position: absolute;
+      top: 25px;
+      border-left: 3px solid #0284c7;
+      border-right: 3px solid #0284c7;
+    }
+
+    .shape-sphere-view {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #6ee7b7, #10b981 60%, #047857 100%);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+      position: relative;
+      animation: gentleSpin 8s infinite linear;
+    }
+    @keyframes gentleSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 슬라이드 굴리기 시뮬레이터 */
+    .slide-canvas-area {
+      background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%);
+      border-radius: 20px;
+      border: 3px solid #bae6fd;
+      position: relative;
+      height: 260px;
+      overflow: hidden;
       margin: 20px 0;
     }
-    .shape-feature-card {
-      background: #ffffff !important;
-      border: 3px solid #e2e8f0;
+    .slide-ramp {
+      position: absolute;
+      left: 0;
+      top: 40px;
+      width: 320px;
+      height: 140px;
+      border-bottom: 8px solid #f97316;
+      transform: rotate(20deg);
+      transform-origin: left top;
+    }
+    .slide-floor {
+      position: absolute;
+      bottom: 25px;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: #84cc16;
+      border-top: 3px solid #4d7c0f;
+    }
+    .runner-obj {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      font-size: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      left: 20px;
+      top: 30px;
+      transition: none;
+      z-index: 10;
+    }
+
+    /* 블록 탑 쌓기 */
+    .stack-stage {
+      height: 280px;
+      background: #fdfbf7;
+      border: 3px dashed #cbd5e1;
       border-radius: 20px;
-      padding: 22px 18px;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      justify-content: flex-start;
+      padding-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stack-base-line {
+      width: 80%;
+      height: 12px;
+      background: #64748b;
+      border-radius: 6px;
+      margin-bottom: 5px;
+    }
+    .stack-block {
+      width: 90px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Jua';
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: all 0.3s;
+    }
+    .wobble-fall {
+      animation: topple 1.2s forwards ease-in;
+    }
+    @keyframes topple {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(15deg) translateX(10px); }
+      50% { transform: rotate(-25deg) translateX(-15px); }
+      75% { transform: rotate(45deg) translateY(40px) translateX(30px); opacity: 0.8; }
+      100% { transform: rotate(90deg) translateY(180px) translateX(60px); opacity: 0; }
+    }
+
+    /* 조립 공방 */
+    .workshop-blueprint {
+      background: #0f172a;
+      border-radius: 20px;
+      color: #38bdf8;
+      padding: 20px;
       text-align: center;
-      transition: all 0.2s ease;
+      border: 3px solid #38bdf8;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .workshop-parts-row {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .part-chip {
+      background: #fff;
+      border: 3px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 10px 18px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      font-family: 'Jua';
+      font-size: 1.15rem;
+      transition: all 0.2s;
     }
-    .shape-feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-    }
-    .shape-icon-big {
-      font-size: 3.8rem;
-      margin-bottom: 10px;
-    }
-    .shape-card-title {
-      font-family: 'Jua', sans-serif !important;
-      font-size: 1.65rem !important;
-      margin-bottom: 8px !important;
-      font-weight: 800 !important;
-    }
-    .shape-tag {
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      font-weight: 800;
-      margin-top: 5px;
+    .part-chip:hover {
+      border-color: #0284c7;
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -66,104 +305,188 @@
   <div class="math-room-container">
 
     <header class="math-header-hero">
-      <h1 class="hero-title">🔷 여러 가지 모양 탐험대 🔶</h1>
-      <p class="hero-subtitle">상자 모양, 둥근기둥 모양, 공 모양의 특징을 알아보고 모양을 척척 분류해 봐요!</p>
+      <h1 class="hero-title">🔷 여러 가지 모양 탐험관 🔶</h1>
+      <p class="hero-subtitle">상자 모양, 둥근기둥 모양, 공 모양을 직접 돌려보고, 굴려보고, 튼튼하게 쌓아봐요!</p>
     </header>
 
-    <!-- 1. 입체 모양 3총사 탐험 -->
-    <section class="math-section-card" id="section-3d-shapes">
+    <!-- 상단 랩 네비게이션 탭 -->
+    <div class="nav-tab-container">
+      <button class="nav-tab-btn active" onclick="switchLab(1)">🔬 1. 3D 회전 관찰실</button>
+      <button class="nav-tab-btn" onclick="switchLab(2)">🛝 2. 미끄럼틀 굴리기</button>
+      <button class="nav-tab-btn" onclick="switchLab(3)">🧱 3. 와르르 탑 쌓기</button>
+      <button class="nav-tab-btn" onclick="switchLab(4)">🤖 4. 모양 조립 공방</button>
+      <button class="nav-tab-btn" onclick="switchLab(5)">🔍 5. 모양 분류 퀴즈</button>
+    </div>
+
+    <!-- LAB 1 -->
+    <section class="math-section-card lab-panel active" id="lab-1">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-candy">섹션 1 : 입체 모양 3총사</span>
-          <h2 class="section-title">📦 상자, 둥근기둥, 공 모양의 특징</h2>
-          <p class="section-desc" style="color: #334155 !important; font-weight: 600;">카드를 누르면 모양의 쌓기/굴리기 비밀을 요정이 알려줘요!</p>
+          <span class="section-badge badge-candy">LAB 1 : 입체 모양 3총사 관찰실</span>
+          <h2 class="section-title">📦 모양을 직접 돌려보며 비밀을 찾아요</h2>
+          <p class="section-desc">모양을 선택하고 특징 버튼을 눌러 평평한 면과 둥근 면을 비교해 보세요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('입체 모양 3총사의 특징을 눌러보세요!')">🔊</button>
+        <button class="speaker-btn" onclick="fairySpeak('상자 모양, 둥근기둥 모양, 공 모양을 돌려보며 관찰해 보세요!')">🔊</button>
       </div>
 
-      <div class="shape-card-grid">
-        <div class="shape-feature-card" style="border-color: #fbcfe8;" onclick="explainShape('box')">
-          <div class="shape-icon-big">📦</div>
-          <h3 class="shape-card-title" style="color: #db2777 !important;">상자 모양</h3>
-          <div class="shape-tag" style="background:#fce7f3; color:#db2777;">🧱 잘 쌓여요</div>
-          <div class="shape-tag" style="background:#fee2e2; color:#b91c1c;">🛑 안 굴러가요</div>
-        </div>
-
-        <div class="shape-feature-card" style="border-color: #bae6fd;" onclick="explainShape('cylinder')">
-          <div class="shape-icon-big">🥫</div>
-          <h3 class="shape-card-title" style="color: #0284c7 !important;">둥근기둥 모양</h3>
-          <div class="shape-tag" style="background:#e0f2fe; color:#0284c7;">🧱 세우면 쌓여요</div>
-          <div class="shape-tag" style="background:#dcfce7; color:#15803d;">🌀 눕히면 굴러가요</div>
-        </div>
-
-        <div class="shape-feature-card" style="border-color: #bbf7d0;" onclick="explainShape('sphere')">
-          <div class="shape-icon-big">⚽</div>
-          <h3 class="shape-card-title" style="color: #16a34a !important;">공 모양</h3>
-          <div class="shape-tag" style="background:#fee2e2; color:#b91c1c;">❌ 못 쌓아요</div>
-          <div class="shape-tag" style="background:#dcfce7; color:#15803d;">⚡ 어디로든 굴러가요</div>
-        </div>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+        <button class="divide-btn" style="background:#ec4899;" onclick="selectLab1Shape('box')">📦 상자 모양</button>
+        <button class="divide-btn" style="background:#0ea5e9;" onclick="selectLab1Shape('cylinder')">🥫 둥근기둥 모양</button>
+        <button class="divide-btn" style="background:#10b981;" onclick="selectLab1Shape('sphere')">⚽ 공 모양</button>
       </div>
 
-      <div id="shape-explain-box" style="background:#fdfbf7; border:2px dashed #f472b6; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b; margin-top:10px;">
-        입체 모양 카드를 터치해 보세요! 👆
+      <div class="viewer-stage" id="viewer-stage"></div>
+
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+        <button class="divide-btn" style="background:#8b5cf6;" onclick="inspectFeature('flat')">📐 평평한 면 보기</button>
+        <button class="divide-btn" style="background:#f59e0b;" onclick="inspectFeature('round')">🌀 둥근 면 보기</button>
+        <button class="divide-btn" style="background:#ef4444;" onclick="inspectFeature('point')">📍 뾰족한 곳 보기</button>
+        <button class="divide-btn" style="background:#64748b;" onclick="spinShape()">🔄 빙글 돌리기</button>
+      </div>
+
+      <div id="lab1-explain-box" style="background:#fff; border:2px dashed #0284c7; border-radius:16px; padding:16px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b;">
+        관찰하고 싶은 모양과 특징 버튼을 눌러보세요! ✨
       </div>
     </section>
 
-    <!-- 2. 평면 모양 (○, △, □) 특징 -->
-    <section class="math-section-card" id="section-2d-shapes">
+    <!-- LAB 2 -->
+    <section class="math-section-card lab-panel" id="lab-2">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-pairs">섹션 2 : 평면 모양 3총사</span>
-          <h2 class="section-title">🔺 동그라미(○), 세모(△), 네모(□)</h2>
-          <p class="section-desc" style="color: #334155 !important; font-weight: 600;">꼭짓점과 곧은 선(변)의 개수를 관찰해 봐요!</p>
+          <span class="section-badge badge-pairs">LAB 2 : 미끄럼틀 굴리기 실험실</span>
+          <h2 class="section-title">🛝 떼구르르 구를까? 스르륵 미끄러질까?</h2>
+          <p class="section-desc">미끄럼틀 위에 모양을 올려놓고 출발 버튼을 눌러보세요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('동그라미, 세모, 네모의 변과 꼭짓점을 세어보세요!')">🔊</button>
+        <button class="speaker-btn" onclick="fairySpeak('둥근 면이 바닥에 닿으면 굴러가고, 평평한 면이 닿으면 미끄러져요!')">🔊</button>
       </div>
 
-      <div class="shape-card-grid">
-        <div class="shape-feature-card" style="border-color: #fecdd3;" onclick="explain2D('circle')">
-          <div class="shape-icon-big">🔴</div>
-          <h3 class="shape-card-title" style="color: #e11d48 !important;">동그라미 <span style="color: #be123c !important;">(○)</span></h3>
-          <p style="font-size:1rem; font-weight:800; color:#9f1239 !important; background:#ffe4e6; padding:8px 12px; border-radius:14px; margin-top:8px;">굽은 선 1개 · 뾰족한 곳 0개</p>
-        </div>
-
-        <div class="shape-feature-card" style="border-color: #bae6fd;" onclick="explain2D('triangle')">
-          <div class="shape-icon-big">🔺</div>
-          <h3 class="shape-card-title" style="color: #0284c7 !important;">세모 <span style="color: #0369a1 !important;">(△)</span></h3>
-          <p style="font-size:1rem; font-weight:800; color:#075985 !important; background:#e0f2fe; padding:8px 12px; border-radius:14px; margin-top:8px;">곧은 선 3개 · 뾰족한 곳 3개</p>
-        </div>
-
-        <div class="shape-feature-card" style="border-color: #bbf7d0;" onclick="explain2D('rectangle')">
-          <div class="shape-icon-big">🟩</div>
-          <h3 class="shape-card-title" style="color: #15803d !important;">네모 <span style="color: #166534 !important;">(□)</span></h3>
-          <p style="font-size:1rem; font-weight:800; color:#14532d !important; background:#dcfce7; padding:8px 12px; border-radius:14px; margin-top:8px;">곧은 선 4개 · 뾰족한 곳 4개</p>
-        </div>
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+        <button class="divide-btn" style="background:#ec4899;" onclick="setRampShape('box')">📦 상자 모양</button>
+        <button class="divide-btn" style="background:#0284c7;" onclick="setRampShape('cyl-stand')">🥫 세운 둥근기둥</button>
+        <button class="divide-btn" style="background:#0ea5e9;" onclick="setRampShape('cyl-roll')">🥫 눕힌 둥근기둥</button>
+        <button class="divide-btn" style="background:#10b981;" onclick="setRampShape('sphere')">⚽ 공 모양</button>
       </div>
 
-      <div id="shape2d-explain-box" style="background:#fdfbf7; border:2px dashed #0284c7; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b; margin-top:10px;">
-        평면 모양 카드를 터치해 보세요! 👆
+      <div class="slide-canvas-area" id="slide-area">
+        <div class="slide-ramp"></div>
+        <div class="slide-floor"></div>
+        <div class="runner-obj" id="slide-runner">📦</div>
+        <div style="position: absolute; right: 20px; bottom: 35px; font-family:'Jua'; font-size:1.3rem; color:#0369a1;" id="slide-finish-flag">🏁 도착점</div>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 15px;">
+        <button class="divide-btn" style="background:#f97316; font-size:1.3rem; padding:12px 36px;" id="slide-launch-btn" onclick="launchSlide()">🚀 준비, 출발!</button>
+        <button class="divide-btn" style="background:#64748b;" onclick="resetSlide()">🔄 다시 놓기</button>
+      </div>
+
+      <div id="lab2-result-box" style="background:#fff; border:2px dashed #f97316; border-radius:16px; padding:16px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b;">
+        모양을 고르고 [🚀 준비, 출발!] 버튼을 눌러보세요!
       </div>
     </section>
 
-    <!-- 3. 실생활 모양 분류 퀴즈 -->
-    <section class="math-section-card" id="section-quiz">
+    <!-- LAB 3 -->
+    <section class="math-section-card lab-panel" id="lab-3">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-grid">섹션 3 : 모양 분류 퀴즈</span>
+          <span class="section-badge badge-grid">LAB 3 : 와르르 블록 탑 쌓기</span>
+          <h2 class="section-title">🧱 튼튼한 탑을 지어라! (에러리스 학습)</h2>
+          <p class="section-desc">1층, 2층, 3층에 알맞은 모양을 골라 바람에도 안 무너지는 탑을 완성해 봐요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('바닥에는 평평한 상자나 세운 둥근기둥을 놓아야 튼튼하게 쌓여요!')">🔊</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 15px;">
+        <div style="background:#f8fafc; padding:12px; border-radius:14px; text-align:center; border:2px solid #e2e8f0;">
+          <div style="font-family:'Jua'; font-size:1.1rem; color:#ec4899; margin-bottom:6px;">1층 (맨 아래 바닥)</div>
+          <select id="stack-sel-1" style="font-family:'Jua'; font-size:1rem; padding:6px 10px; border-radius:10px; width:100%;">
+            <option value="box">📦 상자 모양</option>
+            <option value="cyl-stand">🥫 세운 둥근기둥</option>
+            <option value="cyl-roll">🥫 눕힌 둥근기둥</option>
+            <option value="sphere">⚽ 공 모양</option>
+          </select>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:14px; text-align:center; border:2px solid #e2e8f0;">
+          <div style="font-family:'Jua'; font-size:1.1rem; color:#0284c7; margin-bottom:6px;">2층 (중간 기둥)</div>
+          <select id="stack-sel-2" style="font-family:'Jua'; font-size:1rem; padding:6px 10px; border-radius:10px; width:100%;">
+            <option value="cyl-stand">🥫 세운 둥근기둥</option>
+            <option value="box">📦 상자 모양</option>
+            <option value="cyl-roll">🥫 눕힌 둥근기둥</option>
+            <option value="sphere">⚽ 공 모양</option>
+          </select>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:14px; text-align:center; border:2px solid #e2e8f0;">
+          <div style="font-family:'Jua'; font-size:1.1rem; color:#10b981; margin-bottom:6px;">3층 (맨 위 꼭대기)</div>
+          <select id="stack-sel-3" style="font-family:'Jua'; font-size:1rem; padding:6px 10px; border-radius:10px; width:100%;">
+            <option value="sphere">⚽ 공 모양 (보석)</option>
+            <option value="box">📦 상자 모양</option>
+            <option value="cyl-stand">🥫 세운 둥근기둥</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stack-stage" id="stack-stage">
+        <div class="stack-base-line"></div>
+      </div>
+
+      <div style="text-align: center; margin: 15px 0;">
+        <button class="divide-btn" style="background:#10b981; font-size:1.3rem; padding:12px 36px;" onclick="testStack()">🏗️ 탑 쌓기 도전!</button>
+        <button class="divide-btn" style="background:#64748b;" onclick="resetStack()">🔄 다시 쌓기</button>
+      </div>
+
+      <div id="lab3-feedback-box" style="background:#fff; border:2px dashed #10b981; border-radius:16px; padding:16px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b;">
+        각 층에 올릴 블록을 고르고 [🏗️ 탑 쌓기 도전!] 버튼을 누르세요!
+      </div>
+    </section>
+
+    <!-- LAB 4 -->
+    <section class="math-section-card lab-panel" id="lab-4">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">LAB 4 : 모양 조립 공방</span>
+          <h2 class="section-title">🤖 모양을 모아 멋진 발명품을 만들어요</h2>
+          <p class="section-desc">로봇, 자동차, 성의 설계도를 보고 알맞은 모양 부품을 짝지어 봐요!</p>
+        </div>
+        <button class="speaker-btn" onclick="fairySpeak('상자, 둥근기둥, 공 모양으로 로봇과 자동차를 조립해 봐요!')">🔊</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+        <button class="divide-btn" style="background:#ec4899;" onclick="setWorkshopTheme('robot')">🤖 모양 로봇</button>
+        <button class="divide-btn" style="background:#0284c7;" onclick="setWorkshopTheme('car')">🚗 씽씽 자동차</button>
+        <button class="divide-btn" style="background:#8b5cf6;" onclick="setWorkshopTheme('castle')">🏰 튼튼한 성</button>
+      </div>
+
+      <div class="workshop-blueprint" id="workshop-screen">
+        <div style="font-size: 4rem; margin-bottom: 10px;" id="workshop-preview-icon">🤖</div>
+        <div style="font-family:'Jua'; font-size:1.6rem; color:#fff;" id="workshop-step-title">로봇의 [몸통]을 만들어 볼까요?</div>
+        <div style="font-size:1.1rem; color:#94a3b8; margin-top:5px;" id="workshop-step-hint">튼튼하게 중심을 잡아주는 평평한 모양을 골라주세요!</div>
+      </div>
+
+      <div class="workshop-parts-row" id="workshop-choices"></div>
+
+      <div id="lab4-feedback-box" style="background:#fff; border:2px dashed #8b5cf6; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b; margin-top:10px;">
+        원하는 발명품을 고르고 조립을 시작해 보세요! 🔧
+      </div>
+    </section>
+
+    <!-- LAB 5 -->
+    <section class="math-section-card lab-panel" id="lab-5">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs">LAB 5 : 모양 분류 퀴즈</span>
           <h2 class="section-title">🔍 이 물건은 어떤 모양일까요?</h2>
-          <p class="section-desc">사진 속 물건을 보고 알맞은 모양 상자를 골라주세요!</p>
+          <p class="section-desc">우리 주변의 물건을 보고 알맞은 모양 상자를 척척 골라주세요!</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('물건의 모양을 맞춰보세요!')">🔊</button>
       </div>
 
-      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0;">
-        <div style="font-size:4.5rem; margin-bottom:10px;" id="item-emoji">🎲</div>
-        <div style="font-family:'Jua'; font-size:1.8rem; color:#333; margin-bottom:15px;" id="item-name">주사위</div>
+      <div style="max-width:500px; margin:0 auto; background:#fff; border-radius:24px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 6px 16px rgba(0,0,0,0.06);">
+        <div style="font-size:5rem; margin-bottom:10px;" id="item-emoji">🎲</div>
+        <div style="font-family:'Jua'; font-size:2rem; color:#1e293b; margin-bottom:15px;" id="item-name">주사위</div>
 
-        <div id="shape-quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
+        <div id="shape-quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;"></div>
 
-        <div id="shape-quiz-feedback" style="font-family:'Jua'; font-size:1.2rem; min-height:30px;"></div>
-        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px;" onclick="nextShapeQuiz()">다음 문제 ➡️</button>
+        <div id="shape-quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:35px;"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem; padding:12px;" onclick="nextShapeQuiz()">다음 문제 풀기 ➡️</button>
       </div>
     </section>
 
@@ -177,42 +500,344 @@
   <script src="../../core/fairy-chatbot.js"></script>
 
   <script>
-  window.currentSubject = "수학"; // 🚨 전역 과목명 명시
-    function explainShape(type) {
-      const box = document.getElementById('shape-explain-box');
+    window.currentSubject = "수학";
+
+    function switchLab(num) {
+      document.querySelectorAll('.lab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+
+      const targetLab = document.getElementById('lab-' + num);
+      if (targetLab) targetLab.classList.add('active');
+
+      const tabs = document.querySelectorAll('.nav-tab-btn');
+      if (tabs[num - 1]) tabs[num - 1].classList.add('active');
+
+      if (num === 1) render3DViewer();
+      if (num === 4) initWorkshop();
+    }
+
+    let cur3DShape = 'box';
+    let rotX = -20, rotY = 35;
+
+    function selectLab1Shape(type) {
+      cur3DShape = type;
+      render3DViewer();
+      const fb = document.getElementById('lab1-explain-box');
       if (type === 'box') {
-        box.innerHTML = "📦 <strong>상자 모양:</strong> 평평한 면만 있어서 차곡차곡 아주 잘 쌓여요! 하지만 굴러가지 않아요.";
-        if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 평평해서 잘 쌓이지만 굴러가지 않아요!');
+        fb.innerHTML = "📦 <strong>상자 모양:</strong> 평평한 면이 6개 있고, 뾰족한 꼭짓점이 8개 있어요! 평평해서 아주 잘 쌓여요.";
+        if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 평평한 면이 있어서 아주 잘 쌓여요!');
       } else if (type === 'cylinder') {
-        box.innerHTML = "🥫 <strong>둥근기둥 모양:</strong> 평평한 쪽으로 세우면 쌓을 수 있고, 둥근 쪽으로 눕히면 떼구르르 굴러가요!";
+        fb.innerHTML = "🥫 <strong>둥근기둥 모양:</strong> 위아래 평평한 원 모양 면 2개와 둥근 옆면이 있어요! 세우면 쌓이고 눕히면 굴러가요.";
         if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 세우면 쌓이고 눕히면 굴러가요!');
       } else if (type === 'sphere') {
-        box.innerHTML = "⚽ <strong>공 모양:</strong> 모든 곳이 둥글어서 어느 쪽으로도 잘 굴러가요! 하지만 쌓을 수는 없어요.";
-        if (typeof fairySpeak === 'function') fairySpeak('공 모양은 어디로든 잘 굴러가지만 쌓을 수 없어요!');
+        fb.innerHTML = "⚽ <strong>공 모양:</strong> 모든 곳이 매끈하게 둥글어요! 뾰족한 곳이나 평평한 곳이 없어서 어디로든 씽씽 굴러가요.";
+        if (typeof fairySpeak === 'function') fairySpeak('공 모양은 어디로든 잘 굴러가지만 쌓을 수는 없어요!');
       }
     }
 
-    function explain2D(type) {
-      const box = document.getElementById('shape2d-explain-box');
-      if (type === 'circle') {
-        if (box) box.innerHTML = "🔴 <strong>동그라미 (○):</strong> 둥근 선(굽은 선) 1개로 둘러싸여 있고, 뾰족한 꼭짓점이 0개예요!";
-        if (typeof fairySpeak === 'function') fairySpeak('동그라미는 굽은 선 1개로 되어 있고 뾰족한 곳이 없어요!');
-      } else if (type === 'triangle') {
-        if (box) box.innerHTML = "🔺 <strong>세모 (△):</strong> 곧은 선(변)이 3개이고, 뾰족한 꼭짓점도 3개예요!";
-        if (typeof fairySpeak === 'function') fairySpeak('세모는 곧은 선 3개와 뾰족한 꼭짓점 3개로 되어 있어요!');
-      } else if (type === 'rectangle') {
-        if (box) box.innerHTML = "🟩 <strong>네모 (□):</strong> 곧은 선(변)이 4개이고, 뾰족한 꼭짓점도 4개예요!";
-        if (typeof fairySpeak === 'function') fairySpeak('네모는 곧은 선 4개와 뾰족한 꼭짓점 4개로 되어 있어요!');
+    function render3DViewer() {
+      const stage = document.getElementById('viewer-stage');
+      if (!stage) return;
+      stage.innerHTML = '';
+
+      if (cur3DShape === 'box') {
+        stage.innerHTML = `
+          <div class="shape-3d-box shape-cube" id="cube-obj" style="transform: rotateX(${rotX}deg) rotateY(${rotY}deg);">
+            <div class="shape-face front">앞</div>
+            <div class="shape-face back">뒤</div>
+            <div class="shape-face right">오른쪽</div>
+            <div class="shape-face left">왼쪽</div>
+            <div class="shape-face top">위</div>
+            <div class="shape-face bottom">아래</div>
+          </div>
+        `;
+      } else if (cur3DShape === 'cylinder') {
+        stage.innerHTML = `
+          <div class="shape-cylinder-view" id="cyl-obj">
+            <div class="cyl-top" id="cyl-top-face"></div>
+            <div class="cyl-body" id="cyl-body-face"></div>
+            <div class="cyl-bottom" id="cyl-bottom-face"></div>
+          </div>
+        `;
+      } else if (cur3DShape === 'sphere') {
+        stage.innerHTML = `
+          <div class="shape-sphere-view" id="sphere-obj"></div>
+        `;
+      }
+    }
+
+    function spinShape() {
+      rotY += 45;
+      const cube = document.getElementById('cube-obj');
+      if (cube) cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      const cyl = document.getElementById('cyl-obj');
+      if (cyl) cyl.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+
+    function inspectFeature(feat) {
+      const fb = document.getElementById('lab1-explain-box');
+      if (feat === 'flat') {
+        if (cur3DShape === 'box') {
+          fb.innerHTML = "📐 <strong>상자 모양:</strong> 6개 면이 <u>모두 평평해요!</u> (바닥에 닿는 면이 넓어서 안정적이에요)";
+          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 모든 면이 평평해요!');
+        } else if (cur3DShape === 'cylinder') {
+          fb.innerHTML = "📐 <strong>둥근기둥 모양:</strong> 위와 아래의 <u>둥근 면 2개가 평평해요!</u> (이쪽으로 세우면 쌓을 수 있어요)";
+          if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 위와 아래의 동그란 면이 평평해요!');
+        } else {
+          fb.innerHTML = "📐 <strong>공 모양:</strong> <u>평평한 면이 하나도 없어요!</u> 그래서 바닥에 닿는 점이 아주 작아요.";
+          if (typeof fairySpeak === 'function') fairySpeak('공 모양은 평평한 면이 하나도 없어요!');
+        }
+      } else if (feat === 'round') {
+        if (cur3DShape === 'box') {
+          fb.innerHTML = "🌀 <strong>상자 모양:</strong> 둥근 면이 <u>0개</u>예요. 그래서 전혀 굴러가지 않아요!";
+          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 둥근 면이 없어서 굴러가지 않아요.');
+        } else if (cur3DShape === 'cylinder') {
+          fb.innerHTML = "🌀 <strong>둥근기둥 모양:</strong> 옆을 둘러싼 면이 <u>매끈하게 둥글어요!</u> 눕히면 떼구르르 굴러가요.";
+          if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 옆면은 둥글어서 눕히면 잘 굴러가요!');
+        } else {
+          fb.innerHTML = "🌀 <strong>공 모양:</strong> <u>몸 전체가 둥근 면이에요!</u> 어느 방향으로 밀어도 씽씽 굴러가요.";
+          if (typeof fairySpeak === 'function') fairySpeak('공 모양은 전체가 둥글어서 어디로든 잘 굴러가요!');
+        }
+      } else if (feat === 'point') {
+        if (cur3DShape === 'box') {
+          fb.innerHTML = "📍 <strong>상자 모양:</strong> 뾰족한 곳(꼭짓점)이 <u>8개</u> 있어요! 찔리지 않게 조심해요.";
+          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 뾰족한 꼭짓점이 여덟 개 있어요.');
+        } else if (cur3DShape === 'cylinder') {
+          fb.innerHTML = "📍 <strong>둥근기둥 모양:</strong> 뾰족한 꼭짓점이 <u>0개</u>예요! 둥근 테두리만 있어요.";
+          if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 뾰족한 곳이 없어요.');
+        } else {
+          fb.innerHTML = "📍 <strong>공 모양:</strong> 뾰족한 꼭짓점이 <u>0개</u>예요! 손으로 쥐었을 때 부드러워요.";
+          if (typeof fairySpeak === 'function') fairySpeak('공 모양은 뾰족한 곳이 전혀 없어요.');
+        }
+      }
+    }
+
+    let curRampShape = 'box';
+    let isSliding = false;
+
+    function setRampShape(type) {
+      if (isSliding) return;
+      curRampShape = type;
+      const runner = document.getElementById('slide-runner');
+      runner.style.transition = 'none';
+      runner.style.transform = 'none';
+      runner.style.left = '20px';
+      runner.style.top = '30px';
+
+      if (type === 'box') runner.textContent = '📦';
+      else if (type === 'cyl-stand') runner.textContent = '🥫';
+      else if (type === 'cyl-roll') runner.textContent = '🛢️';
+      else if (type === 'sphere') runner.textContent = '⚽';
+
+      const fb = document.getElementById('lab2-result-box');
+      fb.innerHTML = `선택된 모양: <strong>${getShapeKorean(type)}</strong>! [🚀 준비, 출발!] 버튼을 눌러보세요.`;
+    }
+
+    function getShapeKorean(type) {
+      if (type === 'box') return '상자 모양';
+      if (type === 'cyl-stand') return '세운 둥근기둥 모양';
+      if (type === 'cyl-roll') return '눕힌 둥근기둥 모양';
+      if (type === 'sphere') return '공 모양';
+      return '';
+    }
+
+    function launchSlide() {
+      if (isSliding) return;
+      isSliding = true;
+      const runner = document.getElementById('slide-runner');
+      const fb = document.getElementById('lab2-result-box');
+
+      if (curRampShape === 'sphere' || curRampShape === 'cyl-roll') {
+        runner.style.transition = 'all 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        runner.style.left = '75%';
+        runner.style.top = '175px';
+        runner.style.transform = 'rotate(720deg)';
+
+        setTimeout(() => {
+          fb.innerHTML = `🎉 <strong>${getShapeKorean(curRampShape)}</strong>은(는) 둥근 면이 바닥에 닿아 <span style="color:#10b981;">떼구르르 회전하며 굴러갔어요!</span>`;
+          if (typeof fairySpeak === 'function') fairySpeak(`${getShapeKorean(curRampShape)}은 둥근 면이 닿아서 떼구르르 굴러갔어요!`);
+          isSliding = false;
+        }, 1500);
+      } else {
+        runner.style.transition = 'all 2.0s ease-in-out';
+        runner.style.left = '65%';
+        runner.style.top = '175px';
+        runner.style.transform = 'rotate(0deg)';
+
+        setTimeout(() => {
+          fb.innerHTML = `💡 <strong>${getShapeKorean(curRampShape)}</strong>은(는) 평평한 면이 바닥에 닿아 <span style="color:#0284c7;">스르륵 미끄러져 내려왔어요!</span>`;
+          if (typeof fairySpeak === 'function') fairySpeak(`${getShapeKorean(curRampShape)}은 평평한 면이 닿아서 스르륵 미끄러져 내려왔어요!`);
+          isSliding = false;
+        }, 2100);
+      }
+    }
+
+    function resetSlide() {
+      isSliding = false;
+      setRampShape(curRampShape);
+    }
+
+    function testStack() {
+      const s1 = document.getElementById('stack-sel-1').value;
+      const s2 = document.getElementById('stack-sel-2').value;
+      const s3 = document.getElementById('stack-sel-3').value;
+      const stage = document.getElementById('stack-stage');
+      const fb = document.getElementById('lab3-feedback-box');
+
+      stage.innerHTML = '<div class="stack-base-line"></div>';
+
+      const b1 = createStackBlock(s1, '1층');
+      const b2 = createStackBlock(s2, '2층');
+      const b3 = createStackBlock(s3, '3층');
+
+      stage.appendChild(b1);
+      stage.appendChild(b2);
+      stage.appendChild(b3);
+
+      const willFall = (s1 === 'sphere' || s1 === 'cyl-roll' || s2 === 'sphere' || s2 === 'cyl-roll');
+
+      if (willFall) {
+        setTimeout(() => {
+          b3.classList.add('wobble-fall');
+          b2.classList.add('wobble-fall');
+          if (s1 === 'sphere' || s1 === 'cyl-roll') b1.classList.add('wobble-fall');
+
+          fb.innerHTML = `⚠️ <span style="color:#ef4444;">와르르 쿵! 탑이 무너졌어요!</span><br>둥근 면은 흔들려서 위에 다른 블록을 쌓을 수 없어요. 바닥에는 <strong>평평한 상자나 세운 둥근기둥</strong>을 놓아보세요!`;
+          if (typeof fairySpeak === 'function') fairySpeak('와르르 무너졌어요! 둥근 모양 위에는 쌓을 수 없어요. 바닥에는 평평한 상자를 놓아볼까요?');
+        }, 300);
+      } else {
+        setTimeout(() => {
+          fb.innerHTML = `🎉 <span style="color:#10b981;">대성공! 튼튼하고 끄떡없는 탑 완성!</span><br>평평한 면끼리 만나서 바람이 불어도 안전해요! ⭐ 별 보상 획득!`;
+          if (typeof fairySpeak === 'function') fairySpeak('대성공이에요! 평평한 면끼리 만나서 아주 튼튼한 탑이 완성되었어요!');
+          if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+          triggerConfetti();
+        }, 400);
+      }
+    }
+
+    function createStackBlock(type, label) {
+      const el = document.createElement('div');
+      el.className = 'stack-block';
+      if (type === 'box') {
+        el.style.background = '#ec4899';
+        el.textContent = `📦 ${label} 상자`;
+      } else if (type === 'cyl-stand') {
+        el.style.background = '#0284c7';
+        el.textContent = `🥫 ${label} 기둥`;
+      } else if (type === 'cyl-roll') {
+        el.style.background = '#f59e0b';
+        el.textContent = `🛢️ ${label} 눕힘`;
+      } else if (type === 'sphere') {
+        el.style.background = '#10b981';
+        el.style.borderRadius = '50%';
+        el.style.width = '60px';
+        el.style.height = '60px';
+        el.textContent = `⚽ ${label}`;
+      }
+      return el;
+    }
+
+    function resetStack() {
+      const stage = document.getElementById('stack-stage');
+      stage.innerHTML = '<div class="stack-base-line"></div>';
+      document.getElementById('lab3-feedback-box').innerHTML = '각 층에 올릴 블록을 고르고 [🏗️ 탑 쌓기 도전!] 버튼을 누르세요!';
+    }
+
+    const WORKSHOP_DATA = {
+      robot: {
+        name: "모양 로봇",
+        icon: "🤖",
+        steps: [
+          { part: "몸통", hint: "튼튼하게 중심을 잡아주는 평평한 상자 모양을 골라요!", correct: "box" },
+          { part: "팔과 다리", hint: "길쭉하게 뻗어나갈 수 있는 둥근기둥 모양을 골라요!", correct: "cylinder" },
+          { part: "머리와 눈", hint: "귀엽게 돌아가는 동글동글 공 모양을 골라요!", correct: "sphere" }
+        ]
+      },
+      car: {
+        name: "씽씽 자동차",
+        icon: "🚗",
+        steps: [
+          { part: "차체 (몸체)", hint: "사람이 타고 짐을 싣는 반듯한 상자 모양을 골라요!", correct: "box" },
+          { part: "달리는 바퀴", hint: "데굴데굴 씽씽 굴러갈 수 있는 눕힌 둥근기둥 모양을 골라요!", correct: "cylinder" },
+          { part: "헤드라이트", hint: "반짝반짝 빛나는 둥근 공 모양을 골라요!", correct: "sphere" }
+        ]
+      },
+      castle: {
+        name: "튼튼한 성",
+        icon: "🏰",
+        steps: [
+          { part: "1층 성벽", hint: "바닥에 흔들림 없이 착 달라붙는 상자 모양을 골라요!", correct: "box" },
+          { part: "높은 성탑 기둥", hint: "하늘 높이 솟아오르는 세운 둥근기둥 모양을 골라요!", correct: "cylinder" },
+          { part: "꼭대기 마법 구슬", hint: "맨 꼭대기를 영롱하게 빛내줄 공 모양 보석을 골라요!", correct: "sphere" }
+        ]
+      }
+    };
+
+    let curTheme = 'robot';
+    let curStepIdx = 0;
+
+    function setWorkshopTheme(th) {
+      curTheme = th;
+      curStepIdx = 0;
+      initWorkshop();
+    }
+
+    function initWorkshop() {
+      const item = WORKSHOP_DATA[curTheme];
+      const step = item.steps[curStepIdx];
+      const preview = document.getElementById('workshop-preview-icon');
+      const title = document.getElementById('workshop-step-title');
+      const hint = document.getElementById('workshop-step-hint');
+      const choices = document.getElementById('workshop-choices');
+
+      preview.textContent = item.icon;
+      title.textContent = `${item.name}의 [${step.part}]을 만들어 볼까요? (${curStepIdx + 1}/3 단계)`;
+      hint.textContent = step.hint;
+
+      choices.innerHTML = `
+        <button class="part-chip" onclick="checkWorkshopChoice('box')">📦 상자 모양</button>
+        <button class="part-chip" onclick="checkWorkshopChoice('cylinder')">🥫 둥근기둥 모양</button>
+        <button class="part-chip" onclick="checkWorkshopChoice('sphere')">⚽ 공 모양</button>
+      `;
+    }
+
+    function checkWorkshopChoice(choice) {
+      const item = WORKSHOP_DATA[curTheme];
+      const step = item.steps[curStepIdx];
+      const fb = document.getElementById('lab4-feedback-box');
+
+      if (choice === step.correct) {
+        fb.innerHTML = `✨ <strong>정답!</strong> ${step.part} 부품이 멋지게 합체되었어요!`;
+        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 멋지게 합체되었어요!');
+
+        curStepIdx++;
+        if (curStepIdx < item.steps.length) {
+          setTimeout(initWorkshop, 1000);
+        } else {
+          setTimeout(() => {
+            fb.innerHTML = `🎉 <strong>멋져요! 세상에 하나뿐인 [${item.name}] 완성!</strong> 🍬 보상 획득!`;
+            if (typeof fairySpeak === 'function') fairySpeak(`축하해요! 멋진 ${item.name}이 완성되었어요!`);
+            if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+            triggerConfetti();
+          }, 800);
+        }
+      } else {
+        fb.innerHTML = `💡 아쉬워요! [${step.part}]에는 다른 모양이 더 어울려요. 힌트를 다시 읽어보세요!`;
+        if (typeof fairySpeak === 'function') fairySpeak('다른 모양이 더 어울려요. 힌트를 다시 읽어보세요!');
       }
     }
 
     const SHAPE_QUIZ = [
-      { emoji: "🎲", name: "주사위", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "고깔 모양"] },
+      { emoji: "🎲", name: "주사위", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원뿔 모양"] },
       { emoji: "🥫", name: "음료수 캔", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "도넛 모양"] },
       { emoji: "🏀", name: "농구공", ans: "공 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "달걀 모양"] },
-      { emoji: "🍕", name: "피자 조각", ans: "세모 모양", choices: ["동그라미 모양", "세모 모양", "네모 모양", "별 모양"] },
-      { emoji: "📺", name: "텔레비전 화면", ans: "네모 모양", choices: ["동그라미 모양", "세모 모양", "네모 모양", "별 모양"] },
-      { emoji: "🌕", name: "보름달", ans: "동그라미 모양", choices: ["동그라미 모양", "세모 모양", "네모 모양", "하트 모양"] }
+      { emoji: "📦", name: "택배 상자", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "삼각기둥"] },
+      { emoji: "🛢️", name: "기름 드럼통", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원뿔 모양"] },
+      { emoji: "⚽", name: "축구공", ans: "공 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "별 모양"] },
+      { emoji: "🧱", name: "붉은 벽돌", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "고깔 모양"] },
+      { emoji: "🪵", name: "통나무 토막", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "하트 모양"] },
+      { emoji: "🌍", name: "지구본", ans: "공 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "도넛 모양"] },
+      { emoji: "🎁", name: "선물 상자", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원기둥 모양"] }
     ];
     let sqIdx = 0;
 
@@ -227,7 +852,8 @@
       q.choices.forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'divide-btn';
-        btn.style.fontSize = '1.1rem';
+        btn.style.fontSize = '1.15rem';
+        btn.style.padding = '12px 10px';
         btn.textContent = c;
         btn.onclick = () => checkShapeAns(c, q.ans);
         cBox.appendChild(btn);
@@ -237,9 +863,10 @@
     function checkShapeAns(selected, correct) {
       const fb = document.getElementById('shape-quiz-feedback');
       if (selected === correct) {
-        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 참 잘했어요!</span>`;
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! [${correct}] 맞았어요! 참 잘했어요!</span>`;
         if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
         if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+        triggerConfetti();
       } else {
         fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 [${correct}] 이에요.</span>`;
         if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
@@ -249,6 +876,51 @@
     function nextShapeQuiz() {
       sqIdx++;
       renderShapeQuiz();
+    }
+
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      const colors = ['#ec4899', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6'];
+      for (let i = 0; i < 40; i++) {
+        pieces.push({
+          x: canvas.width / 2,
+          y: canvas.height / 2,
+          vx: (Math.random() - 0.5) * 12,
+          vy: (Math.random() - 0.7) * 14,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frames = 0;
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35;
+          p.rot += p.vrot;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+        frames++;
+        if (frames < 50) requestAnimationFrame(render);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      render();
     }
 
     function exitRoom() {
@@ -264,6 +936,7 @@
       document.getElementById('userName').textContent = `${name} 대원`;
       document.getElementById('userIcon').textContent = icon;
 
+      render3DViewer();
       renderShapeQuiz();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
