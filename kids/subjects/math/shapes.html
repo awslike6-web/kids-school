@@ -3,39 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>🔷 1-2 여러 가지 모양 탐험관 🔶</title>
+  <title>🔷 여러 가지 모양 탐험관 🔶</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/math_factors.css">
   <style>
     :root {
-      --primary-color: #0284c7;
-      --accent-box: #ec4899;
-      --accent-cyl: #0ea5e9;
-      --accent-sphere: #10b981;
-      --bg-cream: #fdfbf7;
+      --primary: #0284c7;
+      --box-color: #ec4899;
+      --cyl-color: #0ea5e9;
+      --sphere-color: #10b981;
     }
 
     body {
       background: #f0fdf4;
       font-family: 'Noto Sans KR', sans-serif;
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     .math-room-container {
       max-width: 960px;
       margin: 0 auto;
-      padding: 15px 15px 80px 15px;
+      padding: 15px 15px 90px 15px;
     }
 
+    /* 상단 탭 네비게이션 */
     .nav-tab-container {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 10px 5px;
+      display: flex; gap: 8px;
+      overflow-x: auto; padding: 10px 4px;
       margin-bottom: 20px;
       scrollbar-width: none;
     }
@@ -43,13 +41,13 @@
 
     .nav-tab-btn {
       flex: 0 0 auto;
-      padding: 10px 16px;
+      padding: 10px 18px;
       border-radius: 20px;
       border: 2px solid #e2e8f0;
       background: #ffffff;
       color: #475569;
       font-family: 'Jua', sans-serif;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 2px 6px rgba(0,0,0,0.04);
@@ -66,231 +64,204 @@
       display: none;
       animation: fadeIn 0.3s ease-out;
     }
-    .lab-panel.active {
-      display: block;
-    }
+    .lab-panel.active { display: block; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 3D 관찰실 */
-    .viewer-stage {
-      perspective: 800px;
-      height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 20px 0;
-      background: radial-gradient(circle, #f8fafc 0%, #e2e8f0 100%);
-      border-radius: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .shape-3d-box {
-      width: 110px;
-      height: 110px;
-      position: relative;
-      transform-style: preserve-3d;
-      transform: rotateX(-20deg) rotateY(35deg);
-      transition: transform 0.1s linear;
-    }
-    .shape-face {
-      position: absolute;
-      width: 110px;
-      height: 110px;
-      border: 3px solid rgba(255,255,255,0.8);
-      box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Jua';
-      font-size: 1.1rem;
+    /* 버튼 공통 */
+    .shape-selector-btn {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      padding: 10px 20px;
+      border-radius: 16px;
+      border: none;
       color: #fff;
-      font-weight: bold;
-      opacity: 0.92;
-      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .shape-cube .front  { background: #ec4899; transform: rotateY(0deg) translateZ(55px); }
-    .shape-cube .back   { background: #db2777; transform: rotateY(180deg) translateZ(55px); }
-    .shape-cube .right  { background: #be185d; transform: rotateY(90deg) translateZ(55px); }
-    .shape-cube .left   { background: #f472b6; transform: rotateY(-90deg) translateZ(55px); }
-    .shape-cube .top    { background: #fbcfe8; color: #831843; transform: rotateX(90deg) translateZ(55px); }
-    .shape-cube .bottom { background: #9d174d; transform: rotateX(-90deg) translateZ(55px); }
+    .shape-selector-btn:hover { transform: translateY(-2px) scale(1.03); }
+    .shape-selector-btn.active { outline: 4px solid #fbbf24; }
 
-    .shape-cylinder-view {
-      width: 100px;
-      height: 140px;
+    /* Lab 1 Canvas */
+    .canvas-card-stage {
+      background: radial-gradient(circle, #ffffff 0%, #f1f5f9 100%);
+      border: 3px solid #cbd5e1;
+      border-radius: 24px;
       position: relative;
-      transform-style: preserve-3d;
-      transform: rotateX(-15deg) rotateY(25deg);
+      margin: 15px 0;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      touch-action: none;
     }
-    .cyl-top, .cyl-bottom {
-      width: 100px;
-      height: 50px;
-      background: #7dd3fc;
-      border-radius: 50%;
-      position: absolute;
-      border: 3px solid #0284c7;
+    #viewer-canvas {
+      display: block;
+      width: 100%;
+      height: 320px;
+      cursor: grab;
     }
-    .cyl-top { top: 0; z-index: 3; background: #bae6fd; }
-    .cyl-bottom { bottom: 0; background: #0284c7; }
-    .cyl-body {
-      width: 100px;
-      height: 100px;
-      background: linear-gradient(90deg, #0284c7, #38bdf8 50%, #0369a1);
-      position: absolute;
-      top: 25px;
-      border-left: 3px solid #0284c7;
-      border-right: 3px solid #0284c7;
-    }
+    #viewer-canvas:active { cursor: grabbing; }
 
-    .shape-sphere-view {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #6ee7b7, #10b981 60%, #047857 100%);
-      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
-      position: relative;
-      animation: gentleSpin 8s infinite linear;
-    }
-    @keyframes gentleSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* 슬라이드 굴리기 시뮬레이터 */
-    .slide-canvas-area {
+    /* Lab 2 미끄럼틀 Canvas */
+    #slide-canvas {
+      display: block;
+      width: 100%;
+      height: 320px;
       background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 100%);
       border-radius: 20px;
       border: 3px solid #bae6fd;
-      position: relative;
-      height: 260px;
-      overflow: hidden;
-      margin: 20px 0;
-    }
-    .slide-ramp {
-      position: absolute;
-      left: 0;
-      top: 40px;
-      width: 320px;
-      height: 140px;
-      border-bottom: 8px solid #f97316;
-      transform: rotate(20deg);
-      transform-origin: left top;
-    }
-    .slide-floor {
-      position: absolute;
-      bottom: 25px;
-      left: 0;
-      right: 0;
-      height: 10px;
-      background: #84cc16;
-      border-top: 3px solid #4d7c0f;
-    }
-    .runner-obj {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      font-size: 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      left: 20px;
-      top: 30px;
-      transition: none;
-      z-index: 10;
     }
 
-    /* 블록 탑 쌓기 */
-    .stack-stage {
-      height: 280px;
+    /* Lab 3 탑 쌓기 */
+    .stacking-workbench {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 15px 0;
+    }
+    @media (max-width: 680px) {
+      .stacking-workbench { grid-template-columns: 1fr; }
+    }
+
+    .stack-preview-box {
       background: #fdfbf7;
       border: 3px dashed #cbd5e1;
-      border-radius: 20px;
+      border-radius: 24px;
+      height: 360px;
+      position: relative;
       display: flex;
       flex-direction: column-reverse;
       align-items: center;
       justify-content: flex-start;
-      padding-bottom: 20px;
-      position: relative;
+      padding-bottom: 25px;
       overflow: hidden;
     }
-    .stack-base-line {
-      width: 80%;
-      height: 12px;
-      background: #64748b;
-      border-radius: 6px;
-      margin-bottom: 5px;
-    }
-    .stack-block {
-      width: 90px;
-      height: 50px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Jua';
-      font-size: 1.1rem;
-      color: #fff;
-      margin-bottom: 4px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      transition: all 0.3s;
-    }
-    .wobble-fall {
-      animation: topple 1.2s forwards ease-in;
-    }
-    @keyframes topple {
-      0% { transform: rotate(0deg); }
-      25% { transform: rotate(15deg) translateX(10px); }
-      50% { transform: rotate(-25deg) translateX(-15px); }
-      75% { transform: rotate(45deg) translateY(40px) translateX(30px); opacity: 0.8; }
-      100% { transform: rotate(90deg) translateY(180px) translateX(60px); opacity: 0; }
+    .stack-table-base {
+      width: 85%;
+      height: 18px;
+      background: #854d0e;
+      border-radius: 9px;
+      border-bottom: 4px solid #713f12;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
     }
 
-    /* 조립 공방 */
-    .workshop-blueprint {
-      background: #0f172a;
-      border-radius: 20px;
-      color: #38bdf8;
-      padding: 20px;
-      text-align: center;
-      border: 3px solid #38bdf8;
-      min-height: 220px;
+    /* 실물 블록 디자인 */
+    .block-item {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-bottom: 2px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      position: relative;
-    }
-    .workshop-parts-row {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 15px 0;
-    }
-    .part-chip {
-      background: #fff;
-      border: 3px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 10px 18px;
-      cursor: pointer;
       font-family: 'Jua';
-      font-size: 1.15rem;
-      transition: all 0.2s;
+      font-size: 1.05rem;
+      color: #fff;
+      user-select: none;
     }
-    .part-chip:hover {
-      border-color: #0284c7;
-      transform: scale(1.05);
+    /* 1. 상자 블록 (Cube) */
+    .block-cube {
+      width: 120px;
+      height: 65px;
+      background: linear-gradient(135deg, #f472b6, #db2777);
+      border-radius: 8px;
+      border: 3px solid #be185d;
+      box-shadow: inset 0 3px 0 rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.15);
+    }
+    /* 2. 세운 원기둥 (Stand Cylinder) */
+    .block-cyl-stand {
+      width: 90px;
+      height: 85px;
+      background: linear-gradient(90deg, #0284c7, #38bdf8 50%, #0369a1);
+      border-radius: 20px / 12px;
+      border: 3px solid #0284c7;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    /* 3. 눕힌 원기둥 (Roll Cylinder) */
+    .block-cyl-roll {
+      width: 110px;
+      height: 55px;
+      background: linear-gradient(180deg, #38bdf8, #0284c7);
+      border-radius: 30px;
+      border: 3px solid #0369a1;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    /* 4. 공 모양 (Sphere) */
+    .block-sphere {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #6ee7b7, #10b981 60%, #047857 100%);
+      border: 3px solid #059669;
+      box-shadow: 0 6px 12px rgba(16,185,129,0.3);
+    }
+
+    /* 무너짐 애니메이션 */
+    .fall-scatter-1 { animation: scatterLeft 1.2s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .fall-scatter-2 { animation: scatterRight 1.2s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .fall-scatter-3 { animation: scatterRoll 1.4s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+
+    @keyframes scatterLeft {
+      0% { transform: rotate(0deg); }
+      30% { transform: rotate(-25deg) translate(-20px, -10px); }
+      100% { transform: rotate(-110deg) translate(-140px, 120px); opacity: 0.8; }
+    }
+    @keyframes scatterRight {
+      0% { transform: rotate(0deg); }
+      30% { transform: rotate(30deg) translate(25px, -15px); }
+      100% { transform: rotate(135deg) translate(150px, 130px); opacity: 0.8; }
+    }
+    @keyframes scatterRoll {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg) translate(50px, 60px); }
+      100% { transform: rotate(540deg) translate(180px, 160px); opacity: 0.7; }
+    }
+
+    /* Lab 4 조립 공방 */
+    .workshop-blueprint-canvas {
+      background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+      border: 3px solid #38bdf8;
+      border-radius: 24px;
+      height: 330px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin: 15px 0;
+      box-shadow: inset 0 0 25px rgba(56, 189, 248, 0.15);
+    }
+    .grid-blueprint-bg {
+      position: absolute;
+      inset: 0;
+      background-size: 20px 20px;
+      background-image: 
+        linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+      pointer-events: none;
+    }
+
+    /* 피드백 박스 공통 */
+    .lab-feedback-card {
+      background: #ffffff;
+      border: 2px dashed #0284c7;
+      border-radius: 18px;
+      padding: 16px 20px;
+      text-align: center;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      margin-top: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
 
-  <canvas id="confetti-canvas"></canvas>
+  <canvas id="confetti-canvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:999;"></canvas>
 
   <div class="top-bar">
     <div class="profile-badge">
@@ -306,10 +277,10 @@
 
     <header class="math-header-hero">
       <h1 class="hero-title">🔷 여러 가지 모양 탐험관 🔶</h1>
-      <p class="hero-subtitle">상자 모양, 둥근기둥 모양, 공 모양을 직접 돌려보고, 굴려보고, 튼튼하게 쌓아봐요!</p>
+      <p class="hero-subtitle">상자 모양, 둥근기둥 모양, 공 모양을 직접 3D로 돌려보고, 미끄럼틀에서 굴려보고, 성을 조립해 봐요!</p>
     </header>
 
-    <!-- 상단 랩 네비게이션 탭 -->
+    <!-- 5대 랩 네비게이션 -->
     <div class="nav-tab-container">
       <button class="nav-tab-btn active" onclick="switchLab(1)">🔬 1. 3D 회전 관찰실</button>
       <button class="nav-tab-btn" onclick="switchLab(2)">🛝 2. 미끄럼틀 굴리기</button>
@@ -318,157 +289,193 @@
       <button class="nav-tab-btn" onclick="switchLab(5)">🔍 5. 모양 분류 퀴즈</button>
     </div>
 
-    <!-- LAB 1 -->
+    <!-- ========================================================
+         LAB 1 : Canvas 정밀 3D 회전 관찰실
+    ======================================================== -->
     <section class="math-section-card lab-panel active" id="lab-1">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-candy">LAB 1 : 입체 모양 3총사 관찰실</span>
-          <h2 class="section-title">📦 모양을 직접 돌려보며 비밀을 찾아요</h2>
-          <p class="section-desc">모양을 선택하고 특징 버튼을 눌러 평평한 면과 둥근 면을 비교해 보세요!</p>
+          <span class="section-badge badge-candy">LAB 1 : 정밀 3D 회전 관찰실</span>
+          <h2 class="section-title">📦 마우스나 손가락으로 360도 굴려보세요</h2>
+          <p class="section-desc">어느 방향으로 돌려도 두께가 얇아지지 않는 진짜 입체 도형의 비밀을 관찰해 봐요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('상자 모양, 둥근기둥 모양, 공 모양을 돌려보며 관찰해 보세요!')">🔊</button>
+        <button class="speaker-btn" onclick="fairySpeak('도형을 손가락으로 이리저리 돌려보며 평평한 면과 둥근 면을 관찰해 보세요!')">🔊</button>
       </div>
 
-      <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-        <button class="divide-btn" style="background:#ec4899;" onclick="selectLab1Shape('box')">📦 상자 모양</button>
-        <button class="divide-btn" style="background:#0ea5e9;" onclick="selectLab1Shape('cylinder')">🥫 둥근기둥 모양</button>
-        <button class="divide-btn" style="background:#10b981;" onclick="selectLab1Shape('sphere')">⚽ 공 모양</button>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+        <button class="shape-selector-btn active" id="btn-3d-box" style="background:#ec4899;" onclick="set3DShape('box')">📦 상자 모양</button>
+        <button class="shape-selector-btn" id="btn-3d-cyl" style="background:#0ea5e9;" onclick="set3DShape('cylinder')">🥫 둥근기둥 모양</button>
+        <button class="shape-selector-btn" id="btn-3d-sphere" style="background:#10b981;" onclick="set3DShape('sphere')">⚽ 공 모양</button>
       </div>
 
-      <div class="viewer-stage" id="viewer-stage"></div>
-
-      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
-        <button class="divide-btn" style="background:#8b5cf6;" onclick="inspectFeature('flat')">📐 평평한 면 보기</button>
-        <button class="divide-btn" style="background:#f59e0b;" onclick="inspectFeature('round')">🌀 둥근 면 보기</button>
-        <button class="divide-btn" style="background:#ef4444;" onclick="inspectFeature('point')">📍 뾰족한 곳 보기</button>
-        <button class="divide-btn" style="background:#64748b;" onclick="spinShape()">🔄 빙글 돌리기</button>
+      <div class="canvas-card-stage">
+        <canvas id="viewer-canvas" width="600" height="320"></canvas>
+        <div style="position: absolute; right: 15px; bottom: 12px; font-family:'Jua'; font-size:0.95rem; color:#64748b; background:rgba(255,255,255,0.85); padding:4px 10px; border-radius:12px; pointer-events:none;">
+          👆 마우스로 드래그하여 회전
+        </div>
       </div>
 
-      <div id="lab1-explain-box" style="background:#fff; border:2px dashed #0284c7; border-radius:16px; padding:16px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b;">
-        관찰하고 싶은 모양과 특징 버튼을 눌러보세요! ✨
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+        <button class="divide-btn" style="background:#8b5cf6;" onclick="highlightFeature('flat')">📐 평평한 면 찾기</button>
+        <button class="divide-btn" style="background:#f59e0b;" onclick="highlightFeature('round')">🌀 둥근 면 찾기</button>
+        <button class="divide-btn" style="background:#ef4444;" onclick="highlightFeature('point')">📍 뾰족한 곳 찾기</button>
+        <button class="divide-btn" style="background:#64748b;" onclick="autoSpin3D()">🔄 자동 회전</button>
+      </div>
+
+      <div class="lab-feedback-card" id="lab1-explain-box">
+        입체 모양을 선택하고 특징 버튼을 눌러보세요! ✨
       </div>
     </section>
 
-    <!-- LAB 2 -->
+    <!-- ========================================================
+         LAB 2 : 미끄럼틀 굴리기 물리 실험실
+    ======================================================== -->
     <section class="math-section-card lab-panel" id="lab-2">
       <div class="section-header-wrap">
         <div>
           <span class="section-badge badge-pairs">LAB 2 : 미끄럼틀 굴리기 실험실</span>
-          <h2 class="section-title">🛝 떼구르르 구를까? 스르륵 미끄러질까?</h2>
-          <p class="section-desc">미끄럼틀 위에 모양을 올려놓고 출발 버튼을 눌러보세요!</p>
+          <h2 class="section-title">🛝 데굴데굴 구를까? 스르륵 미끄러질까?</h2>
+          <p class="section-desc">미끄럼틀 위에 모양을 올려놓고 출발 버튼을 눌러 실제 굴러가는 물리 법칙을 체득해요!</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('둥근 면이 바닥에 닿으면 굴러가고, 평평한 면이 닿으면 미끄러져요!')">🔊</button>
       </div>
 
-      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
-        <button class="divide-btn" style="background:#ec4899;" onclick="setRampShape('box')">📦 상자 모양</button>
-        <button class="divide-btn" style="background:#0284c7;" onclick="setRampShape('cyl-stand')">🥫 세운 둥근기둥</button>
-        <button class="divide-btn" style="background:#0ea5e9;" onclick="setRampShape('cyl-roll')">🥫 눕힌 둥근기둥</button>
-        <button class="divide-btn" style="background:#10b981;" onclick="setRampShape('sphere')">⚽ 공 모양</button>
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+        <button class="shape-selector-btn active" id="btn-slide-box" style="background:#ec4899;" onclick="selectSlideShape('box')">📦 상자 모양</button>
+        <button class="shape-selector-btn" id="btn-slide-cyl-stand" style="background:#0284c7;" onclick="selectSlideShape('cyl-stand')">🥫 세운 둥근기둥</button>
+        <button class="shape-selector-btn" id="btn-slide-cyl-roll" style="background:#f59e0b;" onclick="selectSlideShape('cyl-roll')">🛢️ 눕힌 둥근기둥 (바퀴)</button>
+        <button class="shape-selector-btn" id="btn-slide-sphere" style="background:#10b981;" onclick="selectSlideShape('sphere')">⚽ 공 모양</button>
       </div>
 
-      <div class="slide-canvas-area" id="slide-area">
-        <div class="slide-ramp"></div>
-        <div class="slide-floor"></div>
-        <div class="runner-obj" id="slide-runner">📦</div>
-        <div style="position: absolute; right: 20px; bottom: 35px; font-family:'Jua'; font-size:1.3rem; color:#0369a1;" id="slide-finish-flag">🏁 도착점</div>
+      <div class="canvas-card-stage" style="background:none; border:none; box-shadow:none;">
+        <canvas id="slide-canvas" width="800" height="320"></canvas>
       </div>
 
-      <div style="text-align: center; margin-bottom: 15px;">
-        <button class="divide-btn" style="background:#f97316; font-size:1.3rem; padding:12px 36px;" id="slide-launch-btn" onclick="launchSlide()">🚀 준비, 출발!</button>
-        <button class="divide-btn" style="background:#64748b;" onclick="resetSlide()">🔄 다시 놓기</button>
+      <div style="text-align: center; margin-bottom: 10px;">
+        <button class="divide-btn" style="background:#f97316; font-size:1.35rem; padding:12px 40px;" id="btn-launch-slide" onclick="startSlideSimulation()">🚀 준비, 출발!</button>
+        <button class="divide-btn" style="background:#64748b;" onclick="resetSlideSimulation()">🔄 다시 놓기</button>
       </div>
 
-      <div id="lab2-result-box" style="background:#fff; border:2px dashed #f97316; border-radius:16px; padding:16px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b;">
+      <div class="lab-feedback-card" id="lab2-feedback-box" style="border-color:#f97316;">
         모양을 고르고 [🚀 준비, 출발!] 버튼을 눌러보세요!
       </div>
     </section>
 
-    <!-- LAB 3 -->
+    <!-- ========================================================
+         LAB 3 : 와르르 블록 탑 쌓기 밸런스 챌린지
+    ======================================================== -->
     <section class="math-section-card lab-panel" id="lab-3">
       <div class="section-header-wrap">
         <div>
           <span class="section-badge badge-grid">LAB 3 : 와르르 블록 탑 쌓기</span>
           <h2 class="section-title">🧱 튼튼한 탑을 지어라! (에러리스 학습)</h2>
-          <p class="section-desc">1층, 2층, 3층에 알맞은 모양을 골라 바람에도 안 무너지는 탑을 완성해 봐요!</p>
+          <p class="section-desc">진짜 원목 블록을 선택해 3층 탑을 쌓아보세요. 바닥에 둥근 모양을 놓으면 어떻게 될까요?</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('바닥에는 평평한 상자나 세운 둥근기둥을 놓아야 튼튼하게 쌓여요!')">🔊</button>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 15px;">
-        <div style="background:#f8fafc; padding:12px; border-radius:14px; text-align:center; border:2px solid #e2e8f0;">
-          <div style="font-family:'Jua'; font-size:1.1rem; color:#ec4899; margin-bottom:6px;">1층 (맨 아래 바닥)</div>
-          <select id="stack-sel-1" style="font-family:'Jua'; font-size:1rem; padding:6px 10px; border-radius:10px; width:100%;">
-            <option value="box">📦 상자 모양</option>
-            <option value="cyl-stand">🥫 세운 둥근기둥</option>
-            <option value="cyl-roll">🥫 눕힌 둥근기둥</option>
-            <option value="sphere">⚽ 공 모양</option>
-          </select>
+      <div class="stacking-workbench">
+        <!-- 층별 블록 선택 패널 -->
+        <div style="background:#fff; border-radius:20px; padding:18px; border:2px solid #e2e8f0;">
+          <h3 style="font-family:'Jua'; color:#1e293b; margin-bottom:12px; font-size:1.25rem;">🏗️ 층별 블록 선택</h3>
+          
+          <div style="margin-bottom:12px;">
+            <label style="font-family:'Jua'; color:#ec4899; font-size:1.05rem;">1층 (맨 아래 바닥 받침)</label>
+            <select id="stack-floor-1" onchange="previewStack()" style="width:100%; padding:8px 12px; border-radius:12px; border:2px solid #fbcfe8; font-family:'Jua'; font-size:1.05rem; margin-top:4px;">
+              <option value="box">📦 상자 블록 (평평한 면)</option>
+              <option value="cyl-stand">🥫 세운 둥근기둥 (위아래 평평)</option>
+              <option value="cyl-roll">🛢️ 눕힌 둥근기둥 (둥근 면)</option>
+              <option value="sphere">⚽ 공 블록 (완전 둥근 면)</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label style="font-family:'Jua'; color:#0284c7; font-size:1.05rem;">2층 (중간 기둥)</label>
+            <select id="stack-floor-2" onchange="previewStack()" style="width:100%; padding:8px 12px; border-radius:12px; border:2px solid #bae6fd; font-family:'Jua'; font-size:1.05rem; margin-top:4px;">
+              <option value="cyl-stand">🥫 세운 둥근기둥 (위아래 평평)</option>
+              <option value="box">📦 상자 블록 (평평한 면)</option>
+              <option value="cyl-roll">🛢️ 눕힌 둥근기둥 (둥근 면)</option>
+              <option value="sphere">⚽ 공 블록 (완전 둥근 면)</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:15px;">
+            <label style="font-family:'Jua'; color:#10b981; font-size:1.05rem;">3층 (맨 위 꼭대기)</label>
+            <select id="stack-floor-3" onchange="previewStack()" style="width:100%; padding:8px 12px; border-radius:12px; border:2px solid #bbf7d0; font-family:'Jua'; font-size:1.05rem; margin-top:4px;">
+              <option value="sphere">⚽ 공 블록 (보석 장식)</option>
+              <option value="box">📦 상자 블록</option>
+              <option value="cyl-stand">🥫 세운 둥근기둥</option>
+            </select>
+          </div>
+
+          <button class="divide-btn" style="background:#10b981; width:100%; font-size:1.25rem; padding:12px;" onclick="runStackChallenge()">🏗️ 탑 쌓기 도전!</button>
         </div>
-        <div style="background:#f8fafc; padding:12px; border-radius:14px; text-align:center; border:2px solid #e2e8f0;">
-          <div style="font-family:'Jua'; font-size:1.1rem; color:#0284c7; margin-bottom:6px;">2층 (중간 기둥)</div>
-          <select id="stack-sel-2" style="font-family:'Jua'; font-size:1rem; padding:6px 10px; border-radius:10px; width:100%;">
-            <option value="cyl-stand">🥫 세운 둥근기둥</option>
-            <option value="box">📦 상자 모양</option>
-            <option value="cyl-roll">🥫 눕힌 둥근기둥</option>
-            <option value="sphere">⚽ 공 모양</option>
-          </select>
-        </div>
-        <div style="background:#f8fafc; padding:12px; border-radius:14px; text-align:center; border:2px solid #e2e8f0;">
-          <div style="font-family:'Jua'; font-size:1.1rem; color:#10b981; margin-bottom:6px;">3층 (맨 위 꼭대기)</div>
-          <select id="stack-sel-3" style="font-family:'Jua'; font-size:1rem; padding:6px 10px; border-radius:10px; width:100%;">
-            <option value="sphere">⚽ 공 모양 (보석)</option>
-            <option value="box">📦 상자 모양</option>
-            <option value="cyl-stand">🥫 세운 둥근기둥</option>
-          </select>
+
+        <!-- 무대 프리뷰 -->
+        <div class="stack-preview-box" id="stack-box">
+          <div class="stack-table-base"></div>
+          <div id="stack-layer-1" class="block-item block-cube">📦 상자</div>
+          <div id="stack-layer-2" class="block-item block-cyl-stand">🥫 기둥</div>
+          <div id="stack-layer-3" class="block-item block-sphere">⚽ 보석</div>
         </div>
       </div>
 
-      <div class="stack-stage" id="stack-stage">
-        <div class="stack-base-line"></div>
-      </div>
-
-      <div style="text-align: center; margin: 15px 0;">
-        <button class="divide-btn" style="background:#10b981; font-size:1.3rem; padding:12px 36px;" onclick="testStack()">🏗️ 탑 쌓기 도전!</button>
-        <button class="divide-btn" style="background:#64748b;" onclick="resetStack()">🔄 다시 쌓기</button>
-      </div>
-
-      <div id="lab3-feedback-box" style="background:#fff; border:2px dashed #10b981; border-radius:16px; padding:16px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b;">
-        각 층에 올릴 블록을 고르고 [🏗️ 탑 쌓기 도전!] 버튼을 누르세요!
+      <div class="lab-feedback-card" id="lab3-feedback-box" style="border-color:#10b981;">
+        블록을 고르고 [🏗️ 탑 쌓기 도전!] 버튼을 눌러보세요!
       </div>
     </section>
 
-    <!-- LAB 4 -->
+    <!-- ========================================================
+         LAB 4 : 뚝딱뚝딱 모양 조립 공방
+    ======================================================== -->
     <section class="math-section-card lab-panel" id="lab-4">
       <div class="section-header-wrap">
         <div>
           <span class="section-badge badge-candy">LAB 4 : 모양 조립 공방</span>
-          <h2 class="section-title">🤖 모양을 모아 멋진 발명품을 만들어요</h2>
-          <p class="section-desc">로봇, 자동차, 성의 설계도를 보고 알맞은 모양 부품을 짝지어 봐요!</p>
+          <h2 class="section-title">🤖 설계도를 보고 부품을 하나씩 결합해요</h2>
+          <p class="section-desc">알맞은 모양을 터치하면 설계도에 실제 부품이 '철컥!' 합체돼요!</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('상자, 둥근기둥, 공 모양으로 로봇과 자동차를 조립해 봐요!')">🔊</button>
       </div>
 
-      <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-        <button class="divide-btn" style="background:#ec4899;" onclick="setWorkshopTheme('robot')">🤖 모양 로봇</button>
-        <button class="divide-btn" style="background:#0284c7;" onclick="setWorkshopTheme('car')">🚗 씽씽 자동차</button>
-        <button class="divide-btn" style="background:#8b5cf6;" onclick="setWorkshopTheme('castle')">🏰 튼튼한 성</button>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 12px;">
+        <button class="shape-selector-btn active" id="btn-ws-robot" style="background:#ec4899;" onclick="selectWorkshopTheme('robot')">🤖 모양 로봇</button>
+        <button class="shape-selector-btn" id="btn-ws-car" style="background:#0284c7;" onclick="selectWorkshopTheme('car')">🚗 씽씽 자동차</button>
+        <button class="shape-selector-btn" id="btn-ws-castle" style="background:#8b5cf6;" onclick="selectWorkshopTheme('castle')">🏰 튼튼한 성</button>
       </div>
 
-      <div class="workshop-blueprint" id="workshop-screen">
-        <div style="font-size: 4rem; margin-bottom: 10px;" id="workshop-preview-icon">🤖</div>
-        <div style="font-family:'Jua'; font-size:1.6rem; color:#fff;" id="workshop-step-title">로봇의 [몸통]을 만들어 볼까요?</div>
-        <div style="font-size:1.1rem; color:#94a3b8; margin-top:5px;" id="workshop-step-hint">튼튼하게 중심을 잡아주는 평평한 모양을 골라주세요!</div>
+      <!-- 중앙 인터랙티브 조립 무대 -->
+      <div class="workshop-blueprint-canvas">
+        <div class="grid-blueprint-bg"></div>
+        <svg id="workshop-svg" width="360" height="280" viewBox="0 0 360 280">
+          <!-- 동적 파츠 SVG 렌더링 -->
+        </svg>
       </div>
 
-      <div class="workshop-parts-row" id="workshop-choices"></div>
+      <!-- 하단 조립 질문 및 선택 버튼 -->
+      <div style="background:#fff; border-radius:20px; padding:15px; border:2px solid #e2e8f0; text-align:center;">
+        <div style="font-family:'Jua'; font-size:1.35rem; color:#1e293b; margin-bottom:6px;" id="ws-step-title">
+          1단계: 로봇의 [몸통]을 만들어 볼까요?
+        </div>
+        <div style="font-size:1.05rem; color:#64748b; margin-bottom:12px;" id="ws-step-hint">
+          💡 중심을 단단히 잡을 수 있는 평평한 모양을 골라주세요!
+        </div>
 
-      <div id="lab4-feedback-box" style="background:#fff; border:2px dashed #8b5cf6; border-radius:16px; padding:15px; text-align:center; font-family:'Jua'; font-size:1.25rem; color:#1e293b; margin-top:10px;">
-        원하는 발명품을 고르고 조립을 시작해 보세요! 🔧
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="divide-btn" style="background:#ec4899; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('box')">📦 상자 모양</button>
+          <button class="divide-btn" style="background:#0284c7; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('cylinder')">🥫 둥근기둥 모양</button>
+          <button class="divide-btn" style="background:#10b981; font-size:1.15rem; padding:10px 22px;" onclick="chooseWorkshopPart('sphere')">⚽ 공 모양</button>
+        </div>
+      </div>
+
+      <div class="lab-feedback-card" id="lab4-feedback-box" style="border-color:#8b5cf6;">
+        설계도를 보고 알맞은 모양 부품을 골라보세요! 🔧
       </div>
     </section>
 
-    <!-- LAB 5 -->
+    <!-- ========================================================
+         LAB 5 : 실생활 모양 분류 퀴즈
+    ======================================================== -->
     <section class="math-section-card lab-panel" id="lab-5">
       <div class="section-header-wrap">
         <div>
@@ -502,331 +509,864 @@
   <script>
     window.currentSubject = "수학";
 
+    /* ========================================================
+       0. 네비게이션 탭 스위처
+    ======================================================== */
     function switchLab(num) {
       document.querySelectorAll('.lab-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
 
-      const targetLab = document.getElementById('lab-' + num);
-      if (targetLab) targetLab.classList.add('active');
+      const target = document.getElementById('lab-' + num);
+      if (target) target.classList.add('active');
 
       const tabs = document.querySelectorAll('.nav-tab-btn');
       if (tabs[num - 1]) tabs[num - 1].classList.add('active');
 
-      if (num === 1) render3DViewer();
-      if (num === 4) initWorkshop();
+      if (num === 1) render3D();
+      if (num === 2) drawSlideScene();
+      if (num === 3) previewStack();
+      if (num === 4) renderWorkshopSVG();
     }
 
-    let cur3DShape = 'box';
-    let rotX = -20, rotY = 35;
+    /* ========================================================
+       1. LAB 1 : Canvas 정밀 3D 입체 렌더러
+    ======================================================== */
+    const vCanvas = document.getElementById('viewer-canvas');
+    const vCtx = vCanvas.getContext('2d');
+    let shape3DType = 'box';
+    let rotX = 0.35, rotY = 0.55;
+    let isDragging3D = false;
+    let lastMouseX = 0, lastMouseY = 0;
+    let autoSpinActive = false;
+    let activeHighlight = null; // 'flat', 'round', 'point'
 
-    function selectLab1Shape(type) {
-      cur3DShape = type;
-      render3DViewer();
+    function set3DShape(type) {
+      shape3DType = type;
+      activeHighlight = null;
+      document.querySelectorAll('#lab-1 .shape-selector-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-3d-' + (type === 'cylinder' ? 'cyl' : type)).classList.add('active');
+
       const fb = document.getElementById('lab1-explain-box');
       if (type === 'box') {
-        fb.innerHTML = "📦 <strong>상자 모양:</strong> 평평한 면이 6개 있고, 뾰족한 꼭짓점이 8개 있어요! 평평해서 아주 잘 쌓여요.";
-        if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 평평한 면이 있어서 아주 잘 쌓여요!');
+        fb.innerHTML = "📦 <strong>상자 모양:</strong> 6개 면이 모두 평평하고 뾰족한 꼭짓점이 8개 있어요. 어느 방향으로도 잘 쌓여요!";
+        if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 모든 면이 평평해서 아주 잘 쌓여요!');
       } else if (type === 'cylinder') {
-        fb.innerHTML = "🥫 <strong>둥근기둥 모양:</strong> 위아래 평평한 원 모양 면 2개와 둥근 옆면이 있어요! 세우면 쌓이고 눕히면 굴러가요.";
+        fb.innerHTML = "🥫 <strong>둥근기둥 모양:</strong> 위와 아래는 평평한 원이고, 옆면은 매끈하게 둥글어요. 세우면 쌓이고 눕히면 굴러가요!";
         if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 세우면 쌓이고 눕히면 굴러가요!');
       } else if (type === 'sphere') {
-        fb.innerHTML = "⚽ <strong>공 모양:</strong> 모든 곳이 매끈하게 둥글어요! 뾰족한 곳이나 평평한 곳이 없어서 어디로든 씽씽 굴러가요.";
+        fb.innerHTML = "⚽ <strong>공 모양:</strong> 몸 전체가 부드러운 둥근 면이에요. 뾰족한 곳이 없어서 어디로든 가장 잘 굴러가요!";
         if (typeof fairySpeak === 'function') fairySpeak('공 모양은 어디로든 잘 굴러가지만 쌓을 수는 없어요!');
       }
+      render3D();
     }
 
-    function render3DViewer() {
-      const stage = document.getElementById('viewer-stage');
-      if (!stage) return;
-      stage.innerHTML = '';
-
-      if (cur3DShape === 'box') {
-        stage.innerHTML = `
-          <div class="shape-3d-box shape-cube" id="cube-obj" style="transform: rotateX(${rotX}deg) rotateY(${rotY}deg);">
-            <div class="shape-face front">앞</div>
-            <div class="shape-face back">뒤</div>
-            <div class="shape-face right">오른쪽</div>
-            <div class="shape-face left">왼쪽</div>
-            <div class="shape-face top">위</div>
-            <div class="shape-face bottom">아래</div>
-          </div>
-        `;
-      } else if (cur3DShape === 'cylinder') {
-        stage.innerHTML = `
-          <div class="shape-cylinder-view" id="cyl-obj">
-            <div class="cyl-top" id="cyl-top-face"></div>
-            <div class="cyl-body" id="cyl-body-face"></div>
-            <div class="cyl-bottom" id="cyl-bottom-face"></div>
-          </div>
-        `;
-      } else if (cur3DShape === 'sphere') {
-        stage.innerHTML = `
-          <div class="shape-sphere-view" id="sphere-obj"></div>
-        `;
-      }
+    function autoSpin3D() {
+      autoSpinActive = !autoSpinActive;
+      if (autoSpinActive) requestAnimationFrame(spin3DLoop);
     }
 
-    function spinShape() {
-      rotY += 45;
-      const cube = document.getElementById('cube-obj');
-      if (cube) cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-      const cyl = document.getElementById('cyl-obj');
-      if (cyl) cyl.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    function spin3DLoop() {
+      if (!autoSpinActive) return;
+      rotY += 0.02;
+      render3D();
+      requestAnimationFrame(spin3DLoop);
     }
 
-    function inspectFeature(feat) {
+    function highlightFeature(feat) {
+      activeHighlight = feat;
       const fb = document.getElementById('lab1-explain-box');
       if (feat === 'flat') {
-        if (cur3DShape === 'box') {
-          fb.innerHTML = "📐 <strong>상자 모양:</strong> 6개 면이 <u>모두 평평해요!</u> (바닥에 닿는 면이 넓어서 안정적이에요)";
-          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 모든 면이 평평해요!');
-        } else if (cur3DShape === 'cylinder') {
-          fb.innerHTML = "📐 <strong>둥근기둥 모양:</strong> 위와 아래의 <u>둥근 면 2개가 평평해요!</u> (이쪽으로 세우면 쌓을 수 있어요)";
-          if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 위와 아래의 동그란 면이 평평해요!');
+        if (shape3DType === 'box') {
+          fb.innerHTML = "📐 <strong>상자 모양:</strong> 6개 면이 <span style='color:#db2777; font-weight:bold;'>모두 평평해요!</span> 바닥에 닿는 면이 넓어서 튼튼해요.";
+          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 여섯 개 면이 모두 평평해요!');
+        } else if (shape3DType === 'cylinder') {
+          fb.innerHTML = "📐 <strong>둥근기둥 모양:</strong> 위아래의 <span style='color:#0284c7; font-weight:bold;'>둥근 원 2개가 평평해요!</span> 이쪽으로 세우면 쌓을 수 있어요.";
+          if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 위와 아래의 면이 평평해요!');
         } else {
-          fb.innerHTML = "📐 <strong>공 모양:</strong> <u>평평한 면이 하나도 없어요!</u> 그래서 바닥에 닿는 점이 아주 작아요.";
-          if (typeof fairySpeak === 'function') fairySpeak('공 모양은 평평한 면이 하나도 없어요!');
+          fb.innerHTML = "📐 <strong>공 모양:</strong> <span style='color:#b91c1c; font-weight:bold;'>평평한 면이 0개예요!</span> 바닥에 닿는 면적이 1개 점이라 쌓을 수 없어요.";
+          if (typeof fairySpeak === 'function') fairySpeak('공 모양은 평평한 면이 전혀 없어요!');
         }
       } else if (feat === 'round') {
-        if (cur3DShape === 'box') {
-          fb.innerHTML = "🌀 <strong>상자 모양:</strong> 둥근 면이 <u>0개</u>예요. 그래서 전혀 굴러가지 않아요!";
-          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 둥근 면이 없어서 굴러가지 않아요.');
-        } else if (cur3DShape === 'cylinder') {
-          fb.innerHTML = "🌀 <strong>둥근기둥 모양:</strong> 옆을 둘러싼 면이 <u>매끈하게 둥글어요!</u> 눕히면 떼구르르 굴러가요.";
+        if (shape3DType === 'box') {
+          fb.innerHTML = "🌀 <strong>상자 모양:</strong> 둥근 면이 <span style='color:#b91c1c; font-weight:bold;'>0개예요!</span> 그래서 전혀 굴러가지 않아요.";
+          if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 둥근 면이 없어요.');
+        } else if (shape3DType === 'cylinder') {
+          fb.innerHTML = "🌀 <strong>둥근기둥 모양:</strong> 둘레를 감싼 <span style='color:#0284c7; font-weight:bold;'>옆면이 매끈하게 둥글어요!</span> 눕히면 떼구르르 굴러가요.";
           if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 옆면은 둥글어서 눕히면 잘 굴러가요!');
         } else {
-          fb.innerHTML = "🌀 <strong>공 모양:</strong> <u>몸 전체가 둥근 면이에요!</u> 어느 방향으로 밀어도 씽씽 굴러가요.";
+          fb.innerHTML = "🌀 <strong>공 모양:</strong> <span style='color:#10b981; font-weight:bold;'>몸 전체가 하나의 둥근 면이에요!</span> 어떤 방향으로 밀어도 씽씽 굴러가요.";
           if (typeof fairySpeak === 'function') fairySpeak('공 모양은 전체가 둥글어서 어디로든 잘 굴러가요!');
         }
       } else if (feat === 'point') {
-        if (cur3DShape === 'box') {
-          fb.innerHTML = "📍 <strong>상자 모양:</strong> 뾰족한 곳(꼭짓점)이 <u>8개</u> 있어요! 찔리지 않게 조심해요.";
+        if (shape3DType === 'box') {
+          fb.innerHTML = "📍 <strong>상자 모양:</strong> 뾰족한 꼭짓점이 <span style='color:#ef4444; font-weight:bold;'>8개 있어요!</span> 찔리지 않게 만져보세요.";
           if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 뾰족한 꼭짓점이 여덟 개 있어요.');
-        } else if (cur3DShape === 'cylinder') {
-          fb.innerHTML = "📍 <strong>둥근기둥 모양:</strong> 뾰족한 꼭짓점이 <u>0개</u>예요! 둥근 테두리만 있어요.";
+        } else if (shape3DType === 'cylinder') {
+          fb.innerHTML = "📍 <strong>둥근기둥 모양:</strong> 뾰족한 꼭짓점이 <span style='color:#10b981; font-weight:bold;'>0개예요!</span> 부드러운 둥근 테두리만 있어요.";
           if (typeof fairySpeak === 'function') fairySpeak('둥근기둥 모양은 뾰족한 곳이 없어요.');
         } else {
-          fb.innerHTML = "📍 <strong>공 모양:</strong> 뾰족한 꼭짓점이 <u>0개</u>예요! 손으로 쥐었을 때 부드러워요.";
+          fb.innerHTML = "📍 <strong>공 모양:</strong> 뾰족한 꼭짓점이 <span style='color:#10b981; font-weight:bold;'>0개예요!</span> 어디를 쥐어도 손이 아프지 않아요.";
           if (typeof fairySpeak === 'function') fairySpeak('공 모양은 뾰족한 곳이 전혀 없어요.');
         }
       }
+      render3D();
     }
 
-    let curRampShape = 'box';
-    let isSliding = false;
+    // 마우스/터치 드래그 바인딩
+    vCanvas.addEventListener('mousedown', e => {
+      isDragging3D = true;
+      autoSpinActive = false;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => isDragging3D = false);
+    vCanvas.addEventListener('mousemove', e => {
+      if (!isDragging3D) return;
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      rotY += dx * 0.01;
+      rotX += dy * 0.01;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      render3D();
+    });
 
-    function setRampShape(type) {
-      if (isSliding) return;
-      curRampShape = type;
-      const runner = document.getElementById('slide-runner');
-      runner.style.transition = 'none';
-      runner.style.transform = 'none';
-      runner.style.left = '20px';
-      runner.style.top = '30px';
+    vCanvas.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        isDragging3D = true;
+        autoSpinActive = false;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+      }
+    }, {passive: false});
+    window.addEventListener('touchend', () => isDragging3D = false);
+    vCanvas.addEventListener('touchmove', e => {
+      if (!isDragging3D || e.touches.length !== 1) return;
+      e.preventDefault();
+      const dx = e.touches[0].clientX - lastMouseX;
+      const dy = e.touches[0].clientY - lastMouseY;
+      rotY += dx * 0.01;
+      rotX += dy * 0.01;
+      lastMouseX = e.touches[0].clientX;
+      lastMouseY = e.touches[0].clientY;
+      render3D();
+    }, {passive: false});
 
-      if (type === 'box') runner.textContent = '📦';
-      else if (type === 'cyl-stand') runner.textContent = '🥫';
-      else if (type === 'cyl-roll') runner.textContent = '🛢️';
-      else if (type === 'sphere') runner.textContent = '⚽';
+    // 3D 투영 보조 함수
+    function project3D(x, y, z, cx, cy, fov = 420) {
+      // Y-axis rotation
+      let cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      let x1 = x * cosY + z * sinY;
+      let z1 = -x * sinY + z * cosY;
 
-      const fb = document.getElementById('lab2-result-box');
-      fb.innerHTML = `선택된 모양: <strong>${getShapeKorean(type)}</strong>! [🚀 준비, 출발!] 버튼을 눌러보세요.`;
+      // X-axis rotation
+      let cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      let y2 = y * cosX - z1 * sinX;
+      let z2 = y * sinX + z1 * cosX;
+
+      let scale = fov / (fov + z2);
+      return { x: cx + x1 * scale, y: cy + y2 * scale, z: z2, scale: scale };
     }
 
-    function getShapeKorean(type) {
+    function render3D() {
+      const W = vCanvas.width;
+      const H = vCanvas.height;
+      const cx = W / 2, cy = H / 2;
+
+      vCtx.clearRect(0, 0, W, H);
+
+      // 부드러운 그림자
+      vCtx.save();
+      vCtx.beginPath();
+      vCtx.ellipse(cx, cy + 105, 110, 26, 0, 0, Math.PI * 2);
+      vCtx.fillStyle = "rgba(100, 116, 139, 0.18)";
+      vCtx.fill();
+      vCtx.restore();
+
+      if (shape3DType === 'box') {
+        render3DCube(cx, cy);
+      } else if (shape3DType === 'cylinder') {
+        render3DCylinder(cx, cy);
+      } else if (shape3DType === 'sphere') {
+        render3DSphere(cx, cy);
+      }
+    }
+
+    /* 1-1. 상자 모양 3D 렌더러 */
+    function render3DCube(cx, cy) {
+      const s = 65;
+      const vertices = [
+        [-s, -s, -s], [s, -s, -s], [s, s, -s], [-s, s, -s],
+        [-s, -s,  s], [s, -s,  s], [s, s,  s], [-s, s,  s]
+      ];
+      const faces = [
+        { idx: [0, 1, 2, 3], norm: [0, 0, -1], name: "front", color: "#ec4899" },
+        { idx: [5, 4, 7, 6], norm: [0, 0, 1],  name: "back",  color: "#db2777" },
+        { idx: [4, 0, 3, 7], norm: [-1, 0, 0], name: "left",  color: "#f472b6" },
+        { idx: [1, 5, 6, 2], norm: [1, 0, 0],  name: "right", color: "#be185d" },
+        { idx: [4, 5, 1, 0], norm: [0, -1, 0], name: "top",   color: "#fbcfe8" },
+        { idx: [3, 2, 6, 7], norm: [0, 1, 0],  name: "bottom",color: "#9d174d" }
+      ];
+
+      const proj = vertices.map(v => project3D(v[0], v[1], v[2], cx, cy));
+
+      // 면 정렬 및 뒷면 제거
+      faces.forEach(f => {
+        let avgZ = (proj[f.idx[0]].z + proj[f.idx[1]].z + proj[f.idx[2]].z + proj[f.idx[3]].z) / 4;
+        f.avgZ = avgZ;
+      });
+      faces.sort((a, b) => b.avgZ - a.avgZ);
+
+      faces.forEach(f => {
+        const p0 = proj[f.idx[0]], p1 = proj[f.idx[1]], p2 = proj[f.idx[2]], p3 = proj[f.idx[3]];
+        // Backface check (2D cross product)
+        const cross = (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
+        if (cross < 0) return; // 뒤쪽 면 숨김
+
+        vCtx.beginPath();
+        vCtx.moveTo(p0.x, p0.y);
+        vCtx.lineTo(p1.x, p1.y);
+        vCtx.lineTo(p2.x, p2.y);
+        vCtx.lineTo(p3.x, p3.y);
+        vCtx.closePath();
+
+        if (activeHighlight === 'flat') {
+          vCtx.fillStyle = "rgba(251, 191, 36, 0.85)";
+          vCtx.strokeStyle = "#b45309";
+          vCtx.lineWidth = 4;
+        } else {
+          vCtx.fillStyle = f.color;
+          vCtx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+          vCtx.lineWidth = 2.5;
+        }
+        vCtx.fill();
+        vCtx.stroke();
+      });
+
+      // 뾰족한 곳(꼭짓점) 하이라이트
+      if (activeHighlight === 'point') {
+        proj.forEach(p => {
+          vCtx.beginPath();
+          vCtx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+          vCtx.fillStyle = "#ef4444";
+          vCtx.strokeStyle = "#fff";
+          vCtx.lineWidth = 2.5;
+          vCtx.fill();
+          vCtx.stroke();
+        });
+      }
+    }
+
+    /* 1-2. 둥근기둥 모양 3D 렌더러 (완벽한 볼륨 32각 원통) */
+    function render3DCylinder(cx, cy) {
+      const R = 62;
+      const H2 = 70;
+      const N = 32;
+
+      const topPts = [], botPts = [];
+      for (let i = 0; i < N; i++) {
+        let theta = (i / N) * Math.PI * 2;
+        let x = Math.cos(theta) * R;
+        let z = Math.sin(theta) * R;
+        topPts.push(project3D(x, -H2, z, cx, cy));
+        botPts.push(project3D(x,  H2, z, cx, cy));
+      }
+
+      // 측면 패싯(Quad) 구성 및 Z-sort
+      const quads = [];
+      for (let i = 0; i < N; i++) {
+        let next = (i + 1) % N;
+        let pTop1 = topPts[i], pTop2 = topPts[next];
+        let pBot1 = botPts[i], pBot2 = botPts[next];
+        let avgZ = (pTop1.z + pTop2.z + pBot1.z + pBot2.z) / 4;
+        quads.push({ pTop1, pTop2, pBot1, pBot2, avgZ, idx: i });
+      }
+      quads.sort((a, b) => b.avgZ - a.avgZ);
+
+      // 1. 측면 그리기
+      quads.forEach(q => {
+        vCtx.beginPath();
+        vCtx.moveTo(q.pTop1.x, q.pTop1.y);
+        vCtx.lineTo(q.pTop2.x, q.pTop2.y);
+        vCtx.lineTo(q.pBot2.x, q.pBot2.y);
+        vCtx.lineTo(q.pBot1.x, q.pBot1.y);
+        vCtx.closePath();
+
+        if (activeHighlight === 'round') {
+          vCtx.fillStyle = "rgba(14, 165, 233, 0.9)";
+          vCtx.strokeStyle = "#fbbf24";
+          vCtx.lineWidth = 1.5;
+        } else {
+          // 광원 효과
+          let light = Math.sin((q.idx / N) * Math.PI * 2 + rotY);
+          let brightness = Math.floor(180 + light * 60);
+          vCtx.fillStyle = `rgb(2, ${brightness}, 235)`;
+          vCtx.strokeStyle = "rgba(2, 132, 199, 0.15)";
+          vCtx.lineWidth = 0.5;
+        }
+        vCtx.fill();
+        vCtx.stroke();
+      });
+
+      // 2. 상단 원 & 하단 원 렌더링
+      const drawCap = (pts, isTop) => {
+        vCtx.beginPath();
+        vCtx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < N; i++) vCtx.lineTo(pts[i].x, pts[i].y);
+        vCtx.closePath();
+
+        if (activeHighlight === 'flat') {
+          vCtx.fillStyle = "rgba(251, 191, 36, 0.95)";
+          vCtx.strokeStyle = "#b45309";
+          vCtx.lineWidth = 3.5;
+        } else {
+          vCtx.fillStyle = isTop ? "#7dd3fc" : "#0284c7";
+          vCtx.strokeStyle = "#0284c7";
+          vCtx.lineWidth = 2;
+        }
+        vCtx.fill();
+        vCtx.stroke();
+      };
+
+      // 법선 방향에 따른 뚜껑 그리기
+      let topCenter = project3D(0, -H2, 0, cx, cy);
+      let botCenter = project3D(0,  H2, 0, cx, cy);
+
+      if (botCenter.z < topCenter.z) {
+        drawCap(topPts, true);
+        drawCap(botPts, false);
+      } else {
+        drawCap(botPts, false);
+        drawCap(topPts, true);
+      }
+    }
+
+    /* 1-3. 공 모양 3D 렌더러 */
+    function render3DSphere(cx, cy) {
+      const R = 75;
+      const center = project3D(0, 0, 0, cx, cy);
+
+      // 본체 구
+      vCtx.save();
+      vCtx.beginPath();
+      vCtx.arc(center.x, center.y, R, 0, Math.PI * 2);
+
+      if (activeHighlight === 'round') {
+        vCtx.fillStyle = "rgba(16, 185, 129, 0.95)";
+        vCtx.strokeStyle = "#fbbf24";
+        vCtx.lineWidth = 5;
+      } else {
+        let grad = vCtx.createRadialGradient(
+          center.x - R * 0.35, center.y - R * 0.35, R * 0.1,
+          center.x, center.y, R
+        );
+        grad.addColorStop(0, "#a7f3d0");
+        grad.addColorStop(0.4, "#10b981");
+        grad.addColorStop(1, "#047857");
+        vCtx.fillStyle = grad;
+        vCtx.strokeStyle = "#059669";
+        vCtx.lineWidth = 2.5;
+      }
+      vCtx.fill();
+      vCtx.stroke();
+      vCtx.restore();
+
+      // 위도선/경도선 (회전 체감용 3D 와이어)
+      vCtx.save();
+      vCtx.beginPath();
+      vCtx.ellipse(center.x, center.y, R * Math.abs(Math.cos(rotY)), R, rotX, 0, Math.PI * 2);
+      vCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+      vCtx.lineWidth = 2;
+      vCtx.stroke();
+
+      vCtx.beginPath();
+      vCtx.ellipse(center.x, center.y, R, R * Math.abs(Math.sin(rotX)), 0, 0, Math.PI * 2);
+      vCtx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+      vCtx.lineWidth = 1.5;
+      vCtx.stroke();
+      vCtx.restore();
+    }
+
+    /* ========================================================
+       2. LAB 2 : 미끄럼틀 굴리기 60fps 물리 시뮬레이션
+    ======================================================== */
+    const sCanvas = document.getElementById('slide-canvas');
+    const sCtx = sCanvas.getContext('2d');
+    let slideShape = 'box';
+    let simState = 'idle'; // 'idle', 'running', 'finished'
+    let simTime = 0;
+    let animFrameId = null;
+
+    // 미끄럼틀 트랙 지오메트리
+    // 상단 대기대: (70, 70)
+    // 경사로: (70, 70) -> (380, 245)
+    // 평지 활주로: (380, 245) -> (740, 245)
+    function selectSlideShape(type) {
+      if (simState === 'running') return;
+      slideShape = type;
+      document.querySelectorAll('#lab-2 .shape-selector-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-slide-' + type).classList.add('active');
+
+      const fb = document.getElementById('lab2-feedback-box');
+      fb.innerHTML = `선택된 모양: <strong>${getShapeName(type)}</strong>! [🚀 준비, 출발!] 버튼을 눌러보세요.`;
+      resetSlideSimulation();
+    }
+
+    function getShapeName(type) {
       if (type === 'box') return '상자 모양';
-      if (type === 'cyl-stand') return '세운 둥근기둥 모양';
-      if (type === 'cyl-roll') return '눕힌 둥근기둥 모양';
+      if (type === 'cyl-stand') return '세운 둥근기둥';
+      if (type === 'cyl-roll') return '눕힌 둥근기둥 (바퀴)';
       if (type === 'sphere') return '공 모양';
       return '';
     }
 
-    function launchSlide() {
-      if (isSliding) return;
-      isSliding = true;
-      const runner = document.getElementById('slide-runner');
-      const fb = document.getElementById('lab2-result-box');
+    function drawSlideScene(posX = 70, posY = 70, angle = 0) {
+      const W = sCanvas.width, H = sCanvas.height;
+      sCtx.clearRect(0, 0, W, H);
 
-      if (curRampShape === 'sphere' || curRampShape === 'cyl-roll') {
-        runner.style.transition = 'all 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        runner.style.left = '75%';
-        runner.style.top = '175px';
-        runner.style.transform = 'rotate(720deg)';
+      // 1. 잔디 지면
+      sCtx.fillStyle = "#84cc16";
+      sCtx.fillRect(0, 255, W, H - 255);
+      sCtx.fillStyle = "#4d7c0f";
+      sCtx.fillRect(0, 255, W, 6);
 
-        setTimeout(() => {
-          fb.innerHTML = `🎉 <strong>${getShapeKorean(curRampShape)}</strong>은(는) 둥근 면이 바닥에 닿아 <span style="color:#10b981;">떼구르르 회전하며 굴러갔어요!</span>`;
-          if (typeof fairySpeak === 'function') fairySpeak(`${getShapeKorean(curRampShape)}은 둥근 면이 닿아서 떼구르르 굴러갔어요!`);
-          isSliding = false;
-        }, 1500);
-      } else {
-        runner.style.transition = 'all 2.0s ease-in-out';
-        runner.style.left = '65%';
-        runner.style.top = '175px';
-        runner.style.transform = 'rotate(0deg)';
+      // 2. 나무 계단 탑 & 미끄럼틀 기둥
+      sCtx.fillStyle = "#b45309";
+      sCtx.fillRect(35, 75, 20, 180);
+      sCtx.fillRect(65, 75, 15, 180);
+      // 사다리 발판
+      for (let y = 100; y < 250; y += 30) {
+        sCtx.fillRect(30, y, 55, 6);
+      }
+      // 탑승 데크
+      sCtx.fillStyle = "#92400e";
+      sCtx.fillRect(20, 65, 80, 14);
 
-        setTimeout(() => {
-          fb.innerHTML = `💡 <strong>${getShapeKorean(curRampShape)}</strong>은(는) 평평한 면이 바닥에 닿아 <span style="color:#0284c7;">스르륵 미끄러져 내려왔어요!</span>`;
-          if (typeof fairySpeak === 'function') fairySpeak(`${getShapeKorean(curRampShape)}은 평평한 면이 닿아서 스르륵 미끄러져 내려왔어요!`);
-          isSliding = false;
-        }, 2100);
+      // 3. 미끄럼틀 경사로 (주황색 슬라이드)
+      sCtx.save();
+      sCtx.beginPath();
+      sCtx.moveTo(70, 75);
+      sCtx.lineTo(380, 250);
+      sCtx.lineTo(380, 260);
+      sCtx.lineTo(70, 85);
+      sCtx.closePath();
+      sCtx.fillStyle = "#ea580c";
+      sCtx.fill();
+
+      // 슬라이드 레일
+      sCtx.beginPath();
+      sCtx.moveTo(70, 75);
+      sCtx.lineTo(380, 250);
+      sCtx.strokeStyle = "#fbbf24";
+      sCtx.lineWidth = 5;
+      sCtx.stroke();
+      sCtx.restore();
+
+      // 4. 도착 깃발 (우측 끝)
+      sCtx.save();
+      sCtx.fillStyle = "#64748b";
+      sCtx.fillRect(680, 160, 6, 95);
+      // 깃발 천
+      sCtx.beginPath();
+      sCtx.moveTo(686, 160);
+      sCtx.lineTo(740, 180);
+      sCtx.lineTo(686, 200);
+      sCtx.closePath();
+      sCtx.fillStyle = "#ef4444";
+      sCtx.fill();
+      sCtx.font = "bold 13px Jua";
+      sCtx.fillStyle = "#fff";
+      sCtx.fillText("도착", 692, 185);
+      sCtx.restore();
+
+      // 5. 물체 렌더링
+      drawMovingObject(posX, posY, angle);
+    }
+
+    function drawMovingObject(x, y, angle) {
+      sCtx.save();
+      sCtx.translate(x, y);
+      sCtx.rotate(angle);
+
+      if (slideShape === 'box') {
+        // 상자 블록 (회전 안 함)
+        sCtx.fillStyle = "#ec4899";
+        sCtx.fillRect(-22, -22, 44, 44);
+        sCtx.strokeStyle = "#be185d";
+        sCtx.lineWidth = 3;
+        sCtx.strokeRect(-22, -22, 44, 44);
+        // 리본
+        sCtx.fillStyle = "#fbcfe8";
+        sCtx.fillRect(-4, -22, 8, 44);
+        sCtx.fillRect(-22, -4, 44, 8);
+      } else if (slideShape === 'cyl-stand') {
+        // 세운 둥근기둥 (회전 안 함)
+        sCtx.fillStyle = "#0284c7";
+        sCtx.fillRect(-18, -25, 36, 50);
+        sCtx.strokeStyle = "#0369a1";
+        sCtx.lineWidth = 2.5;
+        sCtx.strokeRect(-18, -25, 36, 50);
+        // 캔 상하 타원
+        sCtx.beginPath();
+        sCtx.ellipse(0, -25, 18, 7, 0, 0, Math.PI * 2);
+        sCtx.fillStyle = "#7dd3fc";
+        sCtx.fill();
+        sCtx.stroke();
+      } else if (slideShape === 'cyl-roll') {
+        // 눕힌 둥근기둥 (바퀴처럼 고속 회전!)
+        sCtx.beginPath();
+        sCtx.arc(0, 0, 22, 0, Math.PI * 2);
+        sCtx.fillStyle = "#f59e0b";
+        sCtx.fill();
+        sCtx.strokeStyle = "#b45309";
+        sCtx.lineWidth = 3;
+        sCtx.stroke();
+        // 바퀴 스포크 무늬
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 2) {
+          sCtx.beginPath();
+          sCtx.moveTo(0, 0);
+          sCtx.lineTo(Math.cos(a) * 22, Math.sin(a) * 22);
+          sCtx.strokeStyle = "#78350f";
+          sCtx.lineWidth = 2.5;
+          sCtx.stroke();
+        }
+        sCtx.beginPath();
+        sCtx.arc(0, 0, 6, 0, Math.PI * 2);
+        sCtx.fillStyle = "#fff";
+        sCtx.fill();
+      } else if (slideShape === 'sphere') {
+        // 공 모양 (360도 롤링 회전)
+        sCtx.beginPath();
+        sCtx.arc(0, 0, 24, 0, Math.PI * 2);
+        let grad = sCtx.createRadialGradient(-7, -7, 3, 0, 0, 24);
+        grad.addColorStop(0, "#6ee7b7");
+        grad.addColorStop(0.6, "#10b981");
+        grad.addColorStop(1, "#047857");
+        sCtx.fillStyle = grad;
+        sCtx.fill();
+        sCtx.strokeStyle = "#065f46";
+        sCtx.lineWidth = 2.5;
+        sCtx.stroke();
+        // 공 무늬
+        sCtx.beginPath();
+        sCtx.arc(0, 0, 11, 0, Math.PI * 2);
+        sCtx.strokeStyle = "rgba(255,255,255,0.7)";
+        sCtx.lineWidth = 3;
+        sCtx.stroke();
+      }
+      sCtx.restore();
+    }
+
+    function startSlideSimulation() {
+      if (simState === 'running') return;
+      simState = 'running';
+      simTime = 0;
+
+      const fb = document.getElementById('lab2-feedback-box');
+      fb.innerHTML = `🚀 <strong>${getShapeName(slideShape)}</strong> 출발합니다!`;
+
+      function step() {
+        simTime += 0.016;
+
+        let posX, posY, angle;
+        // 경사 구간: t in 0..1.2
+        if (simTime <= 1.2) {
+          let t = simTime / 1.2;
+          posX = 70 + (380 - 70) * t;
+          posY = 60 + (235 - 60) * t;
+
+          if (slideShape === 'sphere' || slideShape === 'cyl-roll') {
+            angle = simTime * 12; // 떼구르르 고속 회전!
+          } else {
+            angle = 0.52; // 경사각 30도에 맞춘 슬라이딩
+          }
+        } else {
+          // 평지 구간: t in 1.2..3.0
+          let t2 = simTime - 1.2;
+          posY = 232;
+
+          if (slideShape === 'sphere') {
+            // 공: 가장 멀리 도착깃발 너머까지 골인
+            posX = Math.min(710, 380 + t2 * 250);
+            angle = 1.2 * 12 + t2 * 10;
+          } else if (slideShape === 'cyl-roll') {
+            // 눕힌 원기둥: 도착 깃발 부근까지 굴러감
+            posX = Math.min(660, 380 + t2 * 210);
+            angle = 1.2 * 12 + t2 * 8;
+          } else if (slideShape === 'box') {
+            // 상자: 마찰력으로 460 부근에서 스르륵 멈춤
+            posX = Math.min(460, 380 + (1 - Math.exp(-t2 * 2.5)) * 90);
+            angle = 0;
+          } else if (slideShape === 'cyl-stand') {
+            // 세운 원기둥: 480 부근에서 멈춤
+            posX = Math.min(480, 380 + (1 - Math.exp(-t2 * 2.8)) * 105);
+            angle = 0;
+          }
+        }
+
+        drawSlideScene(posX, posY, angle);
+
+        if (simTime < 2.5) {
+          animFrameId = requestAnimationFrame(step);
+        } else {
+          simState = 'finished';
+          showSlideResult();
+        }
+      }
+      animFrameId = requestAnimationFrame(step);
+    }
+
+    function showSlideResult() {
+      const fb = document.getElementById('lab2-feedback-box');
+      if (slideShape === 'sphere') {
+        fb.innerHTML = `🎉 <strong>공 모양</strong>은 몸 전체가 둥글어서 <span style="color:#10b981;">데굴데굴 360도 회전하며 가장 멀리 굴러갔어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('공 모양은 어디로든 가장 씽씽 잘 굴러가요!');
+      } else if (slideShape === 'cyl-roll') {
+        fb.innerHTML = `🌀 <strong>눕힌 둥근기둥</strong>은 옆면이 둥글어서 <span style="color:#f59e0b;">바퀴처럼 데굴데굴 고속으로 굴러갔어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('눕힌 둥근기둥은 바퀴처럼 잘 굴러가요!');
+      } else if (slideShape === 'cyl-stand') {
+        fb.innerHTML = `💡 <strong>세운 둥근기둥</strong>은 평평한 바닥면이 닿아서 <span style="color:#0284c7;">굴러가지 않고 스르륵 미끄러져 멈췄어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('세운 둥근기둥은 굴러가지 않고 미끄러져요!');
+      } else if (slideShape === 'box') {
+        fb.innerHTML = `💡 <strong>상자 모양</strong>은 모든 면이 평평해서 <span style="color:#ec4899;">전혀 구르지 않고 미끄러지듯 내려왔어요!</span>`;
+        if (typeof fairySpeak === 'function') fairySpeak('상자 모양은 평평해서 굴러가지 않고 미끄러져 내려와요!');
       }
     }
 
-    function resetSlide() {
-      isSliding = false;
-      setRampShape(curRampShape);
+    function resetSlideSimulation() {
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      simState = 'idle';
+      drawSlideScene(70, 60, (slideShape === 'box' || slideShape === 'cyl-stand') ? 0.52 : 0);
     }
 
-    function testStack() {
-      const s1 = document.getElementById('stack-sel-1').value;
-      const s2 = document.getElementById('stack-sel-2').value;
-      const s3 = document.getElementById('stack-sel-3').value;
-      const stage = document.getElementById('stack-stage');
+    /* ========================================================
+       3. LAB 3 : 와르르 블록 탑 쌓기 챌린지 (실물 블록 & 슬랩스틱)
+    ======================================================== */
+    function previewStack() {
+      const f1 = document.getElementById('stack-floor-1').value;
+      const f2 = document.getElementById('stack-floor-2').value;
+      const f3 = document.getElementById('stack-floor-3').value;
+
+      applyBlockStyle('stack-layer-1', f1, '1층');
+      applyBlockStyle('stack-layer-2', f2, '2층');
+      applyBlockStyle('stack-layer-3', f3, '3층');
+
+      // 애니메이션 리셋
+      ['stack-layer-1', 'stack-layer-2', 'stack-layer-3'].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'block-item ' + getBlockClass(id === 'stack-layer-1' ? f1 : (id === 'stack-layer-2' ? f2 : f3));
+        el.style.transform = 'none';
+        el.style.opacity = '1';
+      });
+    }
+
+    function getBlockClass(type) {
+      if (type === 'box') return 'block-cube';
+      if (type === 'cyl-stand') return 'block-cyl-stand';
+      if (type === 'cyl-roll') return 'block-cyl-roll';
+      if (type === 'sphere') return 'block-sphere';
+      return '';
+    }
+
+    function applyBlockStyle(elId, type, label) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.className = 'block-item ' + getBlockClass(type);
+      if (type === 'box') el.textContent = `📦 ${label} 상자`;
+      else if (type === 'cyl-stand') el.textContent = `🥫 ${label} 기둥`;
+      else if (type === 'cyl-roll') el.textContent = `🛢️ ${label} 눕힘`;
+      else if (type === 'sphere') el.textContent = `⚽ ${label} 공`;
+    }
+
+    function runStackChallenge() {
+      const f1 = document.getElementById('stack-floor-1').value;
+      const f2 = document.getElementById('stack-floor-2').value;
+      const f3 = document.getElementById('stack-floor-3').value;
       const fb = document.getElementById('lab3-feedback-box');
 
-      stage.innerHTML = '<div class="stack-base-line"></div>';
-
-      const b1 = createStackBlock(s1, '1층');
-      const b2 = createStackBlock(s2, '2층');
-      const b3 = createStackBlock(s3, '3층');
-
-      stage.appendChild(b1);
-      stage.appendChild(b2);
-      stage.appendChild(b3);
-
-      const willFall = (s1 === 'sphere' || s1 === 'cyl-roll' || s2 === 'sphere' || s2 === 'cyl-roll');
+      const willFall = (f1 === 'sphere' || f1 === 'cyl-roll' || f2 === 'sphere' || f2 === 'cyl-roll');
 
       if (willFall) {
-        setTimeout(() => {
-          b3.classList.add('wobble-fall');
-          b2.classList.add('wobble-fall');
-          if (s1 === 'sphere' || s1 === 'cyl-roll') b1.classList.add('wobble-fall');
+        // 와르르 슬랩스틱 연출
+        const b1 = document.getElementById('stack-layer-1');
+        const b2 = document.getElementById('stack-layer-2');
+        const b3 = document.getElementById('stack-layer-3');
 
-          fb.innerHTML = `⚠️ <span style="color:#ef4444;">와르르 쿵! 탑이 무너졌어요!</span><br>둥근 면은 흔들려서 위에 다른 블록을 쌓을 수 없어요. 바닥에는 <strong>평평한 상자나 세운 둥근기둥</strong>을 놓아보세요!`;
+        setTimeout(() => {
+          b3.classList.add('fall-scatter-2');
+          b2.classList.add('fall-scatter-1');
+          if (f1 === 'sphere' || f1 === 'cyl-roll') b1.classList.add('fall-scatter-3');
+
+          fb.innerHTML = `⚠️ <span style="color:#ef4444; font-size:1.35rem;">와르르 쿵! 탑이 무너졌어요!</span><br>둥근 모양은 흔들려서 위에 다른 블록을 쌓을 수 없어요. 바닥에는 <strong>평평한 상자나 세운 둥근기둥</strong>을 놓아보세요!`;
           if (typeof fairySpeak === 'function') fairySpeak('와르르 무너졌어요! 둥근 모양 위에는 쌓을 수 없어요. 바닥에는 평평한 상자를 놓아볼까요?');
         }, 300);
       } else {
+        // 대성공!
         setTimeout(() => {
-          fb.innerHTML = `🎉 <span style="color:#10b981;">대성공! 튼튼하고 끄떡없는 탑 완성!</span><br>평평한 면끼리 만나서 바람이 불어도 안전해요! ⭐ 별 보상 획득!`;
-          if (typeof fairySpeak === 'function') fairySpeak('대성공이에요! 평평한 면끼리 만나서 아주 튼튼한 탑이 완성되었어요!');
+          fb.innerHTML = `🎉 <span style="color:#10b981; font-size:1.35rem;">대성공! 튼튼하고 끄떡없는 탑 완성!</span><br>평평한 면끼리 맞닿아서 바람이 불어도 끄떡없어요! ⭐ 별 보상 획득!`;
+          if (typeof fairySpeak === 'function') fairySpeak('대성공이에요! 평평한 면끼리 만나서 튼튼한 탑이 완성되었어요!');
           if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
           triggerConfetti();
-        }, 400);
+        }, 350);
       }
     }
 
-    function createStackBlock(type, label) {
-      const el = document.createElement('div');
-      el.className = 'stack-block';
-      if (type === 'box') {
-        el.style.background = '#ec4899';
-        el.textContent = `📦 ${label} 상자`;
-      } else if (type === 'cyl-stand') {
-        el.style.background = '#0284c7';
-        el.textContent = `🥫 ${label} 기둥`;
-      } else if (type === 'cyl-roll') {
-        el.style.background = '#f59e0b';
-        el.textContent = `🛢️ ${label} 눕힘`;
-      } else if (type === 'sphere') {
-        el.style.background = '#10b981';
-        el.style.borderRadius = '50%';
-        el.style.width = '60px';
-        el.style.height = '60px';
-        el.textContent = `⚽ ${label}`;
-      }
-      return el;
-    }
+    /* ========================================================
+       4. LAB 4 : 뚝딱뚝딱 모양 조립 공방 (파츠 결합형)
+    ======================================================== */
+    let wsTheme = 'robot';
+    let wsStep = 0; // 0, 1, 2
 
-    function resetStack() {
-      const stage = document.getElementById('stack-stage');
-      stage.innerHTML = '<div class="stack-base-line"></div>';
-      document.getElementById('lab3-feedback-box').innerHTML = '각 층에 올릴 블록을 고르고 [🏗️ 탑 쌓기 도전!] 버튼을 누르세요!';
-    }
-
-    const WORKSHOP_DATA = {
+    const WS_CONFIG = {
       robot: {
         name: "모양 로봇",
-        icon: "🤖",
         steps: [
-          { part: "몸통", hint: "튼튼하게 중심을 잡아주는 평평한 상자 모양을 골라요!", correct: "box" },
-          { part: "팔과 다리", hint: "길쭉하게 뻗어나갈 수 있는 둥근기둥 모양을 골라요!", correct: "cylinder" },
-          { part: "머리와 눈", hint: "귀엽게 돌아가는 동글동글 공 모양을 골라요!", correct: "sphere" }
+          { title: "1단계: 로봇의 [몸통]을 조립해요", hint: "💡 중심을 단단히 잡을 수 있는 평평한 상자 모양을 골라주세요!", correct: "box" },
+          { title: "2단계: 로봇의 [팔과 다리]를 달아줘요", hint: "💡 길쭉하게 뻗어나갈 수 있는 둥근기둥 모양을 골라주세요!", correct: "cylinder" },
+          { title: "3단계: 로봇의 [머리와 눈]을 올려줘요", hint: "💡 귀엽고 동글동글한 공 모양을 골라주세요!", correct: "sphere" }
         ]
       },
       car: {
         name: "씽씽 자동차",
-        icon: "🚗",
         steps: [
-          { part: "차체 (몸체)", hint: "사람이 타고 짐을 싣는 반듯한 상자 모양을 골라요!", correct: "box" },
-          { part: "달리는 바퀴", hint: "데굴데굴 씽씽 굴러갈 수 있는 눕힌 둥근기둥 모양을 골라요!", correct: "cylinder" },
-          { part: "헤드라이트", hint: "반짝반짝 빛나는 둥근 공 모양을 골라요!", correct: "sphere" }
+          { title: "1단계: 자동차의 [차체(몸체)]를 만들어요", hint: "💡 사람이 타고 짐을 싣는 평평한 상자 모양을 골라주세요!", correct: "box" },
+          { title: "2단계: 씽씽 달릴 [바퀴 4개]를 달아줘요", hint: "💡 데굴데굴 잘 굴러갈 수 있는 눕힌 둥근기둥 모양을 골라주세요!", correct: "cylinder" },
+          { title: "3단계: 반짝이는 [헤드라이트]를 달아줘요", hint: "💡 앞을 환하게 비춰줄 동그란 공 모양을 골라주세요!", correct: "sphere" }
         ]
       },
       castle: {
         name: "튼튼한 성",
-        icon: "🏰",
         steps: [
-          { part: "1층 성벽", hint: "바닥에 흔들림 없이 착 달라붙는 상자 모양을 골라요!", correct: "box" },
-          { part: "높은 성탑 기둥", hint: "하늘 높이 솟아오르는 세운 둥근기둥 모양을 골라요!", correct: "cylinder" },
-          { part: "꼭대기 마법 구슬", hint: "맨 꼭대기를 영롱하게 빛내줄 공 모양 보석을 골라요!", correct: "sphere" }
+          { title: "1단계: 성의 [튼튼한 1층 성벽]을 쌓아요", hint: "💡 바닥에 흔들림 없이 착 달라붙는 상자 모양을 골라주세요!", correct: "box" },
+          { title: "2단계: 높이 솟은 [성탑 기둥]을 세워요", hint: "💡 하늘 높이 뻗어나갈 수 있는 세운 둥근기둥 모양을 골라주세요!", correct: "cylinder" },
+          { title: "3단계: 꼭대기 [마법 보석 구슬]을 얹어요", hint: "💡 성 꼭대기를 눈부시게 빛내줄 공 모양 보석을 골라주세요!", correct: "sphere" }
         ]
       }
     };
 
-    let curTheme = 'robot';
-    let curStepIdx = 0;
-
-    function setWorkshopTheme(th) {
-      curTheme = th;
-      curStepIdx = 0;
-      initWorkshop();
+    function selectWorkshopTheme(theme) {
+      wsTheme = theme;
+      wsStep = 0;
+      document.querySelectorAll('#lab-4 .shape-selector-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-ws-' + theme).classList.add('active');
+      renderWorkshopSVG();
     }
 
-    function initWorkshop() {
-      const item = WORKSHOP_DATA[curTheme];
-      const step = item.steps[curStepIdx];
-      const preview = document.getElementById('workshop-preview-icon');
-      const title = document.getElementById('workshop-step-title');
-      const hint = document.getElementById('workshop-step-hint');
-      const choices = document.getElementById('workshop-choices');
+    function renderWorkshopSVG() {
+      const cfg = WS_CONFIG[wsTheme];
+      const stepInfo = cfg.steps[wsStep];
+      const svg = document.getElementById('workshop-svg');
+      const titleEl = document.getElementById('ws-step-title');
+      const hintEl = document.getElementById('ws-step-hint');
 
-      preview.textContent = item.icon;
-      title.textContent = `${item.name}의 [${step.part}]을 만들어 볼까요? (${curStepIdx + 1}/3 단계)`;
-      hint.textContent = step.hint;
+      titleEl.textContent = stepInfo.title + ` (${wsStep + 1}/3)`;
+      hintEl.textContent = stepInfo.hint;
 
-      choices.innerHTML = `
-        <button class="part-chip" onclick="checkWorkshopChoice('box')">📦 상자 모양</button>
-        <button class="part-chip" onclick="checkWorkshopChoice('cylinder')">🥫 둥근기둥 모양</button>
-        <button class="part-chip" onclick="checkWorkshopChoice('sphere')">⚽ 공 모양</button>
-      `;
+      let svgHtml = '';
+
+      if (wsTheme === 'robot') {
+        // 로봇 파츠 렌더링
+        // 1. 몸통 (Box)
+        let bodyFill = (wsStep >= 1) ? '#ec4899' : 'none';
+        let bodyStroke = (wsStep >= 1) ? '#be185d' : '#38bdf8';
+        svgHtml += `<rect x="130" y="110" width="100" height="90" rx="10" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+
+        // 2. 팔과 다리 (Cylinder)
+        let limbFill = (wsStep >= 2) ? '#0284c7' : 'none';
+        let limbStroke = (wsStep >= 2) ? '#0369a1' : '#38bdf8';
+        // 팔
+        svgHtml += `<rect x="85" y="125" width="35" height="60" rx="14" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        svgHtml += `<rect x="240" y="125" width="35" height="60" rx="14" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        // 다리
+        svgHtml += `<rect x="145" y="205" width="30" height="55" rx="12" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        svgHtml += `<rect x="185" y="205" width="30" height="55" rx="12" fill="${limbFill}" stroke="${limbStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+
+        // 3. 머리와 눈 (Sphere)
+        let headFill = (wsStep >= 3) ? '#10b981' : 'none';
+        let headStroke = (wsStep >= 3) ? '#047857' : '#38bdf8';
+        svgHtml += `<circle cx="180" cy="65" r="40" fill="${headFill}" stroke="${headStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+        if (wsStep >= 3) {
+          // 로봇 눈/입
+          svgHtml += `<circle cx="168" cy="60" r="6" fill="#fff"/><circle cx="168" cy="60" r="3" fill="#0f172a"/>`;
+          svgHtml += `<circle cx="192" cy="60" r="6" fill="#fff"/><circle cx="192" cy="60" r="3" fill="#0f172a"/>`;
+          svgHtml += `<path d="M 172 78 Q 180 86 188 78" stroke="#fff" stroke-width="3" fill="none"/>`;
+        }
+      } else if (wsTheme === 'car') {
+        // 자동차
+        // 1. 차체 (상자)
+        let bodyFill = (wsStep >= 1) ? '#ea580c' : 'none';
+        let bodyStroke = (wsStep >= 1) ? '#9a3412' : '#38bdf8';
+        svgHtml += `<rect x="70" y="110" width="220" height="75" rx="14" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+        svgHtml += `<rect x="115" y="60" width="130" height="52" rx="10" fill="${wsStep >= 1 ? '#fed7aa' : 'none'}" stroke="${bodyStroke}" stroke-width="2.5" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+
+        // 2. 바퀴 (눕힌 둥근기둥)
+        let wheelFill = (wsStep >= 2) ? '#0284c7' : 'none';
+        let wheelStroke = (wsStep >= 2) ? '#0369a1' : '#38bdf8';
+        svgHtml += `<circle cx="120" cy="190" r="32" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        svgHtml += `<circle cx="240" cy="190" r="32" fill="${wheelFill}" stroke="${wheelStroke}" stroke-width="3.5" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        if (wsStep >= 2) {
+          svgHtml += `<circle cx="120" cy="190" r="12" fill="#fff"/><circle cx="240" cy="190" r="12" fill="#fff"/>`;
+        }
+
+        // 3. 헤드라이트 (공 모양)
+        let lightFill = (wsStep >= 3) ? '#fde047' : 'none';
+        let lightStroke = (wsStep >= 3) ? '#ca8a04' : '#38bdf8';
+        svgHtml += `<circle cx="290" cy="135" r="16" fill="${lightFill}" stroke="${lightStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+        if (wsStep >= 3) {
+          // 라이트 빔
+          svgHtml += `<polygon points="305,135 350,110 350,160" fill="rgba(253, 224, 71, 0.45)"/>`;
+        }
+      } else if (wsTheme === 'castle') {
+        // 성
+        // 1. 성벽 바닥 (상자)
+        let wallFill = (wsStep >= 1) ? '#64748b' : 'none';
+        let wallStroke = (wsStep >= 1) ? '#334155' : '#38bdf8';
+        svgHtml += `<rect x="90" y="140" width="180" height="90" rx="8" fill="${wallFill}" stroke="${wallStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 1 ? 'none' : '6 4'}"/>`;
+
+        // 2. 기둥 성탑 (세운 둥근기둥)
+        let towerFill = (wsStep >= 2) ? '#0284c7' : 'none';
+        let towerStroke = (wsStep >= 2) ? '#0369a1' : '#38bdf8';
+        svgHtml += `<rect x="65" y="75" width="45" height="155" rx="14" fill="${towerFill}" stroke="${towerStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+        svgHtml += `<rect x="250" y="75" width="45" height="155" rx="14" fill="${towerFill}" stroke="${towerStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 2 ? 'none' : '6 4'}"/>`;
+
+        // 3. 꼭대기 마법 구슬 (공)
+        let gemFill = (wsStep >= 3) ? '#f59e0b' : 'none';
+        let gemStroke = (wsStep >= 3) ? '#d97706' : '#38bdf8';
+        svgHtml += `<circle cx="87" cy="55" r="20" fill="${gemFill}" stroke="${gemStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+        svgHtml += `<circle cx="272" cy="55" r="20" fill="${gemFill}" stroke="${gemStroke}" stroke-width="3" stroke-dasharray="${wsStep >= 3 ? 'none' : '6 4'}"/>`;
+      }
+
+      svg.innerHTML = svgHtml;
     }
 
-    function checkWorkshopChoice(choice) {
-      const item = WORKSHOP_DATA[curTheme];
-      const step = item.steps[curStepIdx];
+    function chooseWorkshopPart(choice) {
+      const cfg = WS_CONFIG[wsTheme];
+      const stepInfo = cfg.steps[wsStep];
       const fb = document.getElementById('lab4-feedback-box');
 
-      if (choice === step.correct) {
-        fb.innerHTML = `✨ <strong>정답!</strong> ${step.part} 부품이 멋지게 합체되었어요!`;
-        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 멋지게 합체되었어요!');
+      if (choice === stepInfo.correct) {
+        wsStep++;
+        renderWorkshopSVG();
 
-        curStepIdx++;
-        if (curStepIdx < item.steps.length) {
-          setTimeout(initWorkshop, 1000);
+        if (wsStep < 3) {
+          fb.innerHTML = `✨ <strong>정답!</strong> 부품이 설계도에 '철컥!' 결합되었어요! 다음 단계로 가볼까요?`;
+          if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 부품이 멋지게 결합되었어요!');
         } else {
-          setTimeout(() => {
-            fb.innerHTML = `🎉 <strong>멋져요! 세상에 하나뿐인 [${item.name}] 완성!</strong> 🍬 보상 획득!`;
-            if (typeof fairySpeak === 'function') fairySpeak(`축하해요! 멋진 ${item.name}이 완성되었어요!`);
-            if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
-            triggerConfetti();
-          }, 800);
+          // 완공 축하
+          fb.innerHTML = `🎉 <strong>대성공! [${cfg.name}] 완벽 조립 완성!</strong> 🍬 사탕 보상 획득!`;
+          if (typeof fairySpeak === 'function') fairySpeak(`축하해요! 세상에서 가장 멋진 ${cfg.name}이 완성되었어요!`);
+          if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+          triggerConfetti();
         }
       } else {
-        fb.innerHTML = `💡 아쉬워요! [${step.part}]에는 다른 모양이 더 어울려요. 힌트를 다시 읽어보세요!`;
-        if (typeof fairySpeak === 'function') fairySpeak('다른 모양이 더 어울려요. 힌트를 다시 읽어보세요!');
+        fb.innerHTML = `💡 아쉬워요! 지금 단계에는 다른 모양이 더 튼튼해요. 힌트를 다시 읽어보세요!`;
+        if (typeof fairySpeak === 'function') fairySpeak('다른 모양이 더 어울려요. 힌트를 읽어보세요!');
       }
     }
 
+    /* ========================================================
+       5. LAB 5 : 실생활 모양 분류 퀴즈
+    ======================================================== */
     const SHAPE_QUIZ = [
       { emoji: "🎲", name: "주사위", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원뿔 모양"] },
       { emoji: "🥫", name: "음료수 캔", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "도넛 모양"] },
@@ -936,7 +1476,10 @@
       document.getElementById('userName').textContent = `${name} 대원`;
       document.getElementById('userIcon').textContent = icon;
 
-      render3DViewer();
+      render3D();
+      drawSlideScene();
+      previewStack();
+      renderWorkshopSVG();
       renderShapeQuiz();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
