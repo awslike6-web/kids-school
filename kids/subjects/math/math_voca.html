@@ -381,6 +381,38 @@
       color: #0f172a;
     }
 
+    /* 용어사전 백과 딥링크 버튼 */
+    .explain-voca-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      width: 100%;
+      padding: 11px 16px;
+      background: rgba(167, 139, 250, 0.15);
+      border: 1.5px solid #a78bfa;
+      border-radius: 14px;
+      color: #c4b5fd;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    .explain-voca-btn:hover {
+      background: rgba(167, 139, 250, 0.3);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
+    }
+    body.theme--slime .explain-voca-btn {
+      background: #f3e8ff;
+      border-color: #a855f7;
+      color: #7e22ce;
+    }
+
     /* 다음 문제 버튼 */
     .btn-next-question {
       width: 100%;
@@ -562,6 +594,9 @@
     <div class="explain-title" id="explainTitle">💡 코코의 번역 팁</div>
     <div class="explain-body" id="explainBody">해설 내용이 들어갑니다.</div>
     <div class="explain-formula-box" id="explainFormula">수식 모델</div>
+    <a id="explainVocaLink" class="explain-voca-btn" href="#" target="_blank" style="display: none;">
+      📖 용어사전에서 공식/개념 깊이 보기 ↗
+    </a>
   </div>
 
   <!-- 다음 문제 버튼 -->
@@ -1478,10 +1513,70 @@ function selectChoice(isCorrect, selectedBtn, qData) {
   // 해설 및 수식 채우기
   exBody.innerHTML = qData.tip;
   exFormula.innerHTML = `수식 모델 ➔ <b>${qData.formula}</b>`;
+
+  // 📖 용어사전 백과 딥링크 동적 배선
+  const vocaBtn = document.getElementById('explainVocaLink');
+  const targetConcept = getMathVocaSearchKeyword(qData);
+  if (vocaBtn) {
+    if (targetConcept) {
+      vocaBtn.href = `../../common_space/voca.html?subject=수학&search=${encodeURIComponent(targetConcept)}`;
+      vocaBtn.innerHTML = `📖 [${targetConcept}] 용어사전에서 공식/개념 깊이 보기 ↗`;
+      vocaBtn.style.display = 'inline-flex';
+    } else {
+      vocaBtn.style.display = 'none';
+    }
+  }
+
   exCard.classList.add('show');
 
   // 다음 문제 버튼 오픈
   document.getElementById('btnNext').classList.add('show');
+}
+
+// 🧮 문장제 지시어와 매핑되는 용어사전 공식/개념어 탐색 헬퍼
+function getMathVocaSearchKeyword(qData) {
+  if (!qData || !qData.word) return null;
+  const w = qData.word;
+  if (w.includes('이상') || w.includes('이하')) return '이상과 이하';
+  if (w.includes('초과') || w.includes('미만')) return '초과와 미만';
+  if (w.includes('올림') || w.includes('버림')) return '올림과 버림';
+  if (w.includes('반올림')) return '반올림';
+  if (w.includes('분수') && w.includes('곱')) return '분수의 곱셈 공식';
+  if (w.includes('전체') && w.includes('몇 분의 몇')) return '전체의 몇 분의 몇';
+  if (w.includes('합동')) return '도형의 합동';
+  if (w.includes('선대칭')) return '선대칭도형과 대칭축';
+  if (w.includes('점대칭')) return '점대칭도형과 대칭의 중심';
+  if (w.includes('겨냥도')) return '직육면체의 겨냥도';
+  if (w.includes('전개도')) return '직육면체의 전개도';
+  if (w.includes('각기둥')) return '각기둥';
+  if (w.includes('각뿔')) return '각뿔';
+  if (w.includes('기준량') || w.includes('비율') || w.includes('비 (')) return '비와 기준량';
+  if (w.includes('평균')) return '평균';
+  if (w.includes('들이') || w.includes('1L') || w.includes('mL')) return '들이의 단위';
+  if (w.includes('무게') || w.includes('1kg') || w.includes('1t') || w.includes('g')) return '무게의 단위';
+  if (w.includes('사칙혼합') || w.includes('계산순서')) return '사칙혼합 계산의 순서';
+  if (w.includes('사다리꼴')) return '사다리꼴의 넓이';
+  if (w.includes('평행사변형')) return '평행사변형의 넓이';
+  if (w.includes('마름모')) return '마름모의 넓이';
+  if (w.includes('삼각형') && w.includes('넓이')) return '삼각형의 넓이';
+  if (w.includes('직사각형') && w.includes('넓이')) return '직사각형의 넓이';
+  if (w.includes('둘레')) return '다각형의 둘레 공식';
+  if (w.includes('약수') || w.includes('배수')) return '약수와 배수';
+  if (w.includes('기약') || w.includes('통분') || w.includes('약분')) return '약분과 통분';
+  if (w.includes('직육면체') || w.includes('정육면체')) return '직육면체 & 정육면체';
+  if (w.includes('원주율') || w.includes('원의 넓이')) return '원주율과 원의 넓이';
+  if (w.includes('선분') || w.includes('반직선') || w.includes('직선')) return '선분 · 반직선 · 직선 & 각';
+  if (w.includes('직각') || w.includes('예각') || w.includes('둔각') || w.includes('평각') || w.includes('각도')) return '예각 · 직각 · 둔각 · 평각';
+  if (w.includes('이등변') || w.includes('정삼각형')) return '이등변삼각형 & 정삼각형';
+  if (w.includes('나눗셈') || w.includes('검산')) return '나눗셈의 검산 공식';
+  if (w.includes('시계') || w.includes('정각') || w.includes('30분')) return '시계 읽기 (시와 분)';
+  if (w.includes('상자') || w.includes('원기둥') || w.includes('공 모양')) return '입체도형 3총사';
+  if (w.includes('동그라미') || w.includes('세모') || w.includes('네모')) return '평면도형 3총사';
+  if (w.includes('가르기') || w.includes('모으기') || w.includes('10개씩 묶음')) return '가르기와 모으기';
+  if (w.includes('큰 수') || w.includes('만') || w.includes('억') || w.includes('조')) return '큰 수 (만 · 억 · 조 자릿값)';
+  if (w.includes('1km') || w.includes('1m') || w.includes('1cm')) return '길이와 시간의 단위 환산';
+  if (w.includes('1분')) return '길이와 시간의 단위 환산';
+  return null;
 }
 
 function nextQuestion() {
