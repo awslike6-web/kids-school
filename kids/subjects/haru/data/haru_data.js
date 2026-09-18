@@ -152,14 +152,46 @@ window.HARU_DATA = {
         fallbackIcon: "🥜"
       },
       {
-        id: "evt_birthday",
-        category: "생일",
+        id: "evt_minseo_birthday_20260915",
+        category: "가족기념일",
         categoryIcon: "🎂",
-        title: "🎂 달콤한 케이크와 생일 파티",
-        date: "기억에 남는 하루",
-        desc: "온 가족이 모여 촛불을 끄고 생일 노래를 불렀던 세상에서 제일 특별한 날!",
+        title: "🎂 사랑하는 민서의 8번째 생일 파티 (꽃다발과 슬라임 선물!)",
+        date: "2026-09-15 (생일 전날 가족 파티)",
+        desc: "민서의 8번째 생일을 축하하며 온 가족이 모여 행복한 생일 축하 파티를 열었어요! 환하게 반짝반짝 빛나는 은은한 LED 꽃다발과 알록달록 신나는 박사퍼티 슬라임 선물을 받고 민서 얼굴에 행복한 웃음꽃이 활짝 피었답니다. 가족들의 따뜻한 축하와 사랑이 가득 넘쳤던 세상에서 가장 행복하고 특별한 하루였어요! 💐🎂✨",
         icon: "🎂",
-        imageUrl: null
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260915_birthday_01_flower.png",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260915_birthday_01_flower.png",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260915_birthday_02_slime.jpg"
+        ],
+        videoUrl: "https://photos.app.goo.gl/YLZokUWW4x2uwkNZ9",
+        videoBtnText: "🎂 가족 생일 축하 파티 영상 보기",
+        videos: [
+          {
+            url: "https://photos.app.goo.gl/YLZokUWW4x2uwkNZ9",
+            text: "🎂 가족들의 생일 축하 노래 & 촛불 끄기 영상",
+            icon: "🎂"
+          },
+          {
+            url: "https://photos.app.goo.gl/f47BfrTRV5jDTzue6",
+            text: "🎶 수노 AI 생일 축하송 & 민서 추억 뮤직비디오",
+            icon: "🎵"
+          }
+        ],
+        fallbackIcon: "🎂"
+      },
+      {
+        id: "evt_minseo_birthday_mv_20260915",
+        category: "특별한날",
+        categoryIcon: "🎶",
+        title: "🎶 아빠표 수노 AI 생일 축하송 & 민서 추억 뮤직비디오",
+        date: "2026-09-15 (세상에 하나뿐인 선물)",
+        desc: "아빠가 수노(Suno) AI로 민서만을 위해 정성껏 만든 신나는 생일 축하 노래와 민서의 사랑스러운 성장 사진들을 하나하나 엮어 세상에 단 하나뿐인 특별 뮤직비디오를 완성했어요! 귓가에 맴도는 신나는 멜로디와 사진들을 함께 감상하며 온 가족이 감동 가득한 시간을 보냈답니다! 🎵🎬💖",
+        icon: "🎶",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260915_birthday_01_flower.png",
+        videoUrl: "https://photos.app.goo.gl/f47BfrTRV5jDTzue6",
+        videoBtnText: "🎶 수노 AI 생일송 & 민서 뮤비 감상하기",
+        fallbackIcon: "🎵"
       },
       {
         id: "evt_children",

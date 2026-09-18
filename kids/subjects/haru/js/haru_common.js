@@ -590,11 +590,25 @@ function handleStoryUrlInput(url) {
 }
 
 function getSpecialStories() {
+  const defaults = (window.HARU_DATA && window.HARU_DATA.specialDays && window.HARU_DATA.specialDays.defaultEvents) || [];
   try {
     const saved = localStorage.getItem("haru_special_stories_" + currentChild);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // 사용자가 직접 추가한 커스텀 스토리(evt_custom_...) 분리
+      const customStories = parsed.filter(s => s.id && s.id.startsWith("evt_custom_"));
+      // 기본 이벤트들은 HARU_DATA 최신 데이터 기준으로 동기화 (사용자가 제목 수정한 경우 그 제목만 유지)
+      const mergedDefaults = defaults.map(def => {
+        const found = parsed.find(s => s.id === def.id);
+        if (found && found._userEditedTitle) {
+          return { ...def, title: found.title, _userEditedTitle: true };
+        }
+        return def;
+      });
+      return [...customStories, ...mergedDefaults];
+    }
   } catch(e) {}
-  return window.HARU_DATA.specialDays.defaultEvents;
+  return defaults;
 }
 
 function switchCardPhoto(event, thumbEl, targetUrl, mainImgId) {
@@ -672,6 +686,7 @@ function saveEditedTitle(event, storyId) {
   const story = stories.find(s => s.id === storyId);
   if (story) {
     story.title = newTitle;
+    story._userEditedTitle = true;
     localStorage.setItem("haru_special_stories_" + currentChild, JSON.stringify(stories));
     renderSpecialDaysTab();
     speakText(`제목이 '${newTitle}'(으)로 변경되었어요!`);
@@ -784,18 +799,30 @@ function renderSpecialDaysTab() {
       </div>
     `;
 
-    const btnLabel = s.videoBtnText || (s.videoUrl && s.videoUrl.includes("photos.app.goo.gl") ? "구글 포토 영상 보러가기" : "동영상 보러가기");
-    const videoBtnHtml = s.videoUrl ? `
-      <div class="special-card-video-wrap" onclick="event.stopPropagation();">
-        <a href="${s.videoUrl}" target="_blank" rel="noopener noreferrer" class="special-card-video-btn" title="동영상 감상하기 (구글 포토/유튜브/드라이브)">
-          <div class="video-btn-left">
-            <span class="video-btn-icon">🎬</span>
-            <span class="video-btn-text">${btnLabel}</span>
-          </div>
-          <span class="video-btn-badge">고화질 재생 ➔</span>
-        </a>
-      </div>
-    ` : "";
+    const videoList = (s.videos && Array.isArray(s.videos) && s.videos.length > 0)
+      ? s.videos
+      : (s.videoUrl ? [{ url: s.videoUrl, text: s.videoBtnText, icon: "🎬" }] : []);
+
+    let videoBtnHtml = "";
+    if (videoList.length > 0) {
+      videoBtnHtml = `
+        <div class="special-card-video-wrap" style="display:flex; flex-direction:column; gap:8px;" onclick="event.stopPropagation();">
+          ${videoList.map(v => {
+            const label = v.text || (v.url && v.url.includes("photos.app.goo.gl") ? "구글 포토 영상 보러가기" : "동영상 보러가기");
+            const icon = v.icon || "🎬";
+            return `
+              <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="special-card-video-btn" title="동영상 감상하기 (구글 포토/유튜브/드라이브)">
+                <div class="video-btn-left">
+                  <span class="video-btn-icon">${icon}</span>
+                  <span class="video-btn-text">${label}</span>
+                </div>
+                <span class="video-btn-badge">고화질 재생 ➔</span>
+              </a>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
 
     if (hasPhoto) {
       const thumbsHtml = galleryList.length > 1 ? `
@@ -813,7 +840,7 @@ function renderSpecialDaysTab() {
           <div class="special-card-img-wrap">
             <span class="special-card-category-chip">${categoryIcon} ${category}</span>
             ${galleryList.length > 1 ? `<span class="special-card-photo-count">📷 사진 ${galleryList.length}장</span>` : ''}
-            ${s.videoUrl ? `<span class="special-card-video-chip">🎬 영상 포함</span>` : ''}
+            ${videoList.length > 0 ? `<span class="special-card-video-chip">🎬 영상 ${videoList.length > 1 ? `${videoList.length}편 ` : ''}포함</span>` : ''}
             <img id="${mainImgId}" src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
           </div>
           ${thumbsHtml}
