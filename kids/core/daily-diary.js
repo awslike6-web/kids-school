@@ -707,10 +707,10 @@ async function getOrCreateAiDailyLog(dateStr) {
     return null;
 }
 
-// 4-1. 노션 학습일지 DB 직통 일기 저장 헬퍼 (과목, 속성 및 AI 대화록 관계형 연동)
+// 4-1. 노션 성장 갤러리 & 마음일기 DB 직통 일기 저장 헬퍼 (구분, 주인공, 작가의 한마디 및 AI 대화록 관계형 연동)
 async function sendDiaryLogToNotionDirect(entry) {
-    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
-    const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
+    const dbId = typeof DIARY_DB_ID !== 'undefined' ? DIARY_DB_ID : (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DIARY_DB_ID ? APP_CONFIG.DIARY_DB_ID : "3dfa27115b688010a85be385f91d64ee");
 
     const { isParentMode } = getCurrentDiaryTarget();
     const isParentSelf = (entry.childName === '아빠' || entry.childName === '엄마' || entry.isParentSelfDiary);
@@ -720,18 +720,21 @@ async function sendDiaryLogToNotionDirect(entry) {
         studentName = entry.childName;
     }
 
-    let subjectName = '일기';
+    // 신규 DB '구분' 옵션: ['특별한 날', '일기', '종이일기', '마음일기', '작품']
+    let categoryName = '일기';
     if (entry.childName === '민서') {
-        subjectName = '마음일기';
-    } else if (isParentSelf) {
-        subjectName = '일기';
+        categoryName = (entry.type === '종이일기') ? '종이일기' : '마음일기';
+    } else if (entry.type === '종이일기') {
+        categoryName = '종이일기';
+    } else {
+        categoryName = '일기';
     }
 
     let titleText = "";
     if (isParentSelf) {
         titleText = `${entry.childName}_${entry.date} (${entry.timeStr || ''})`;
     } else if (isParentMode) {
-        titleText = `부모관리자_${entry.date} (${entry.childName} ${subjectName})`;
+        titleText = `부모관리자_${entry.date} (${entry.childName} ${categoryName})`;
     } else {
         titleText = `${entry.childName}_${entry.date} (${entry.timeStr || ''})`;
     }
@@ -759,44 +762,75 @@ async function sendDiaryLogToNotionDirect(entry) {
         pureContent = `[부모관리자 검수] ` + pureContent;
     }
 
+    // 일기 전문 텍스트 조합 (작가의 한마디/일기본문 용)
+    let fullDiaryBody = "";
+    if (entry.childName === '민서') {
+        if (weatherAndMood) fullDiaryBody += `[날씨/감정: ${weatherAndMood}]\n`;
+        fullDiaryBody += pureContent.trim();
+        if (iMessageText) fullDiaryBody += `\n\n[나-전달법]: ${iMessageText.trim()}`;
+    } else {
+        if (weatherAndMood) fullDiaryBody += `[오늘의 기분: ${weatherAndMood}]\n`;
+        fullDiaryBody += pureContent.trim();
+        if (iMessageText) fullDiaryBody += `\n\n[나에게 한마디]: ${iMessageText.trim()}`;
+    }
+
+    // 일기 제목
+    const diarySubjectTitle = entry.title || (weatherAndMood ? weatherAndMood.trim() : (entry.childName === '민서' ? '오늘의 마음일기' : '오늘의 일기'));
+
     // 💡 AI 대화록 및 일상 기록 DB 관계형 자동 연동 ID 조회/생성
     const aiLogPageId = await getOrCreateAiDailyLog(entry.date);
 
+    // 신규 노션 DB 스키마 완벽 매핑
     const payload = {
         parent: { database_id: dbId },
         properties: {
-            "ID": {
+            "식별ID": {
                 title: [{ text: { content: titleText } }]
             },
-            "학생": {
+            "구분": {
+                select: { name: categoryName }
+            },
+            "주인공": {
                 select: { name: studentName }
             },
-            "과목": {
-                rich_text: [{ text: { content: subjectName } }]
+            "날짜": {
+                date: { start: entry.date || new Date().toISOString().split('T')[0] }
             },
-            "감정날씨": {
-                rich_text: [{ text: { content: weatherAndMood.trim() } }]
+            "제목": {
+                rich_text: [{ text: { content: diarySubjectTitle } }]
             },
-            "오답리포트": {
-                rich_text: [{ text: { content: pureContent.trim() || "기록 완료" } }]
-            },
-            "나-전달법": {
-                rich_text: [{ text: { content: iMessageText.trim() } }]
-            },
-            "입장": {
-                date: { start: entry.createdAt || new Date().toISOString() }
-            },
-            "퇴장": {
-                date: { start: new Date().toISOString() }
-            },
-            "소요시간": {
-                number: 5
-            },
-            "단어요정": {
-                number: 0
+            "작가의 한마디/일기본문": {
+                rich_text: [{ text: { content: fullDiaryBody.trim() || "기록 완료" } }]
             }
-        }
+        },
+        children: [
+            {
+                object: "block",
+                type: "heading_2",
+                heading_2: {
+                    rich_text: [{ type: "text", text: { content: `📖 ${entry.childName}의 ${categoryName} (${entry.date})` } }]
+                }
+            },
+            {
+                object: "block",
+                type: "callout",
+                callout: {
+                    icon: { type: "emoji", emoji: entry.childName === '민서' ? "💖" : (isParentSelf ? "☕" : "⭐") },
+                    rich_text: [{ type: "text", text: { content: pureContent.trim() || "기록 내용 없음" } }]
+                }
+            }
+        ]
     };
+
+    if (iMessageText.trim()) {
+        payload.children.push({
+            object: "block",
+            type: "quote",
+            quote: {
+                rich_text: [{ type: "text", text: { content: `💬 ${entry.childName === '민서' ? '나-전달법' : '오늘의 다짐/한마디'}: ${iMessageText.trim()}` } }]
+            }
+        });
+    }
 
     // AI 대화록 관계형 속성 주입
     if (aiLogPageId) {
@@ -813,17 +847,17 @@ async function sendDiaryLogToNotionDirect(entry) {
         });
         if (resp.ok) {
             const data = await resp.json();
-            console.log(`🎉 [노션 직통] 일기 학습일지 등록 성공! (과목: ${subjectName}, 학생: ${studentName}, AI연동: ${aiLogPageId ? '성공' : '없음'}) Page ID: ${data.id}`);
+            console.log(`🎉 [노션 직통] 성장 갤러리 & 마음일기 등록 성공! (구분: ${categoryName}, 주인공: ${studentName}, AI연동: ${aiLogPageId ? '성공' : '없음'}) Page ID: ${data.id}`);
             if (entry.id) {
                 bindNotionPageIdToEntry(entry.id, data.id);
             }
             return data.id;
         } else {
             const errText = await resp.text();
-            console.warn("노션 학습일지 직통 전송 실패:", errText);
+            console.warn("노션 마음일기 직통 전송 실패:", errText);
         }
     } catch (e) {
-        console.warn("노션 학습일지 통신 오류:", e);
+        console.warn("노션 마음일기 통신 오류:", e);
     }
     return null;
 }
@@ -887,15 +921,17 @@ async function dispenseDiaryRewardDirect(childName, amount = 5) {
     return false;
 }
 
-// 4-3. 노션 일기 페이지 -> 앱 일기 객체 역변환 파서 (신구 규격 100% 호환)
+// 4-3. 노션 일기 페이지 -> 앱 일기 객체 역변환 파서 (신규 감성DB & 구 학습일지DB 100% 듀얼 호환)
 function parseNotionDiaryPage(page, targetChild) {
     if (!page || !page.properties) return null;
     const props = page.properties;
-    const student = props["학생"]?.select?.name || '';
-    const title = props["ID"]?.title?.[0]?.text?.content || '';
+
+    // 1) 학생/주인공 식별 (신규 '주인공' 우선, 구 '학생' 폴백)
+    const student = props["주인공"]?.select?.name || props["학생"]?.select?.name || '';
+    const title = props["식별ID"]?.title?.[0]?.text?.content || props["ID"]?.title?.[0]?.text?.content || '';
 
     let matchedChild = student;
-    if (student === '부모관리자') {
+    if (student === '부모관리자' || student === '공동') {
         if (title.includes('아빠')) matchedChild = '아빠';
         else if (title.includes('엄마')) matchedChild = '엄마';
         else if (title.includes('민서')) matchedChild = '민서';
@@ -907,20 +943,29 @@ function parseNotionDiaryPage(page, targetChild) {
         return null;
     }
 
-    // 날짜 및 시간 파싱
+    // 2) 날짜 및 시간 파싱 (신규 '날짜' 우선, 구 '입장' 폴백)
     let dateStr = "";
     let timeStr = "";
-    const entryDate = props["입장"]?.date?.start;
+    const entryDate = props["날짜"]?.date?.start || props["입장"]?.date?.start;
     if (entryDate) {
         const d = new Date(entryDate);
         dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        // 시간 텍스트 추출 (title의 괄호 시간 우선, 없으면 Date 객체)
+        const timeMatch = title.match(/\(([^)]+)\)/);
+        if (timeMatch && (timeMatch[1].includes('오전') || timeMatch[1].includes('오후') || timeMatch[1].includes(':'))) {
+            timeStr = timeMatch[1];
+        } else {
+            timeStr = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        }
     } else {
         const match = title.match(/(\d{4}[-.\s]+\d{1,2}[-.\s]+\d{1,2})/);
         dateStr = match ? match[1].replace(/\s+/g, '').replace(/\./g, '-') : new Date().toISOString().split('T')[0];
         timeStr = '기록';
     }
 
+    // 3) 신규 DB 속성 vs 구 DB 속성 듀얼 파싱
+    const bodyProp = props["작가의 한마디/일기본문"]?.rich_text?.[0]?.text?.content || "";
+    const titleProp = props["제목"]?.rich_text?.[0]?.text?.content || "";
     const moodProp = props["감정날씨"]?.rich_text?.[0]?.text?.content || "";
     const reportProp = props["오답리포트"]?.rich_text?.[0]?.text?.content || "";
     const iMessageProp = props["나-전달법"]?.rich_text?.[0]?.text?.content || "";
@@ -929,11 +974,62 @@ function parseNotionDiaryPage(page, targetChild) {
     let moods = [];
     let content = "";
     let accomplish = "";
-    let iMessage = iMessageProp;
-    let goal = (matchedChild === '민수') ? iMessageProp : "";
+    let iMessage = "";
+    let goal = "";
 
-    if (moodProp) {
-        // 1) 신규 분리 속성에서 추출
+    if (bodyProp) {
+        // [신규 DB 파싱] '작가의 한마디/일기본문' 및 '제목'에서 추출
+        let rawBody = bodyProp;
+
+        // 감정/날씨 추출 (중첩 대괄호 완벽 대응)
+        if (rawBody.startsWith('[날씨/감정:')) {
+            const firstLineEnd = rawBody.indexOf('\n');
+            const firstLine = firstLineEnd !== -1 ? rawBody.substring(0, firstLineEnd) : rawBody;
+            weatherOrEnergy = firstLine.replace(/^\[날씨\/감정:\s*/, '').replace(/\]\s*$/, '').trim();
+            rawBody = firstLineEnd !== -1 ? rawBody.substring(firstLineEnd + 1).trim() : '';
+        } else if (rawBody.startsWith('[오늘의 기분:')) {
+            const firstLineEnd = rawBody.indexOf('\n');
+            const firstLine = firstLineEnd !== -1 ? rawBody.substring(0, firstLineEnd) : rawBody;
+            weatherOrEnergy = firstLine.replace(/^\[오늘의 기분:\s*/, '').replace(/\]\s*$/, '').trim();
+            rawBody = firstLineEnd !== -1 ? rawBody.substring(firstLineEnd + 1).trim() : '';
+        } else if (titleProp && !titleProp.includes('오늘의') && !titleProp.includes('마음일기')) {
+            weatherOrEnergy = titleProp.trim();
+        }
+
+        // 대괄호 감정 태그 분리 (예: [🎈 신나요, 🎈 설레어요])
+        if (weatherOrEnergy.includes('[') && weatherOrEnergy.includes(']')) {
+            const bMatch = weatherOrEnergy.match(/\[([^\]]+)\]/);
+            if (bMatch) {
+                moods = bMatch[1].split(',').map(m => m.trim());
+                weatherOrEnergy = weatherOrEnergy.replace(/\[[^\]]+\]/, '').trim();
+            }
+        }
+
+        // 나-전달법 / 다짐 추출
+        if (rawBody.includes('[나-전달법]:')) {
+            const parts = rawBody.split('[나-전달법]:');
+            iMessage = parts[1]?.trim() || '';
+            rawBody = parts[0]?.trim() || '';
+        } else if (rawBody.includes('[나에게 한마디]:')) {
+            const parts = rawBody.split('[나에게 한마디]:');
+            goal = parts[1]?.trim() || '';
+            iMessage = goal;
+            rawBody = parts[0]?.trim() || '';
+        } else if (rawBody.includes('[다짐/한마디]:')) {
+            const parts = rawBody.split('[다짐/한마디]:');
+            goal = parts[1]?.trim() || '';
+            iMessage = goal;
+            rawBody = parts[0]?.trim() || '';
+        }
+
+        if (matchedChild === '민서' || matchedChild === '아빠' || matchedChild === '엄마') {
+            content = rawBody.trim();
+        } else {
+            accomplish = rawBody.trim();
+            goal = goal || iMessage;
+        }
+    } else if (moodProp || reportProp) {
+        // [구 DB 파싱 - 레거시 호환]
         weatherOrEnergy = moodProp;
         if (moodProp.includes('[') && moodProp.includes(']')) {
             const bMatch = moodProp.match(/\[([^\]]+)\]/);
@@ -942,19 +1038,14 @@ function parseNotionDiaryPage(page, targetChild) {
                 weatherOrEnergy = moodProp.replace(/\[[^\]]+\]/, '').trim();
             }
         }
-        if (matchedChild === '민서' || matchedChild === '아빠' || matchedChild === '엄마') {
-            content = reportProp;
-        } else {
-            accomplish = reportProp;
-        }
-    } else {
-        // 2) 레거시 복합 텍스트에서 안전하게 역추출
+
         if (reportProp.includes('[감정:')) {
             const moodMatch = reportProp.match(/\[감정:\s*([^\]]+)\]/);
             if (moodMatch) {
                 moods = moodMatch[1].split(',').map(s => s.trim());
             }
         }
+
         if (reportProp.includes('/ 나-전달법:')) {
             const parts = reportProp.split('/ 나-전달법:');
             iMessage = parts[1]?.trim() || '';
@@ -965,12 +1056,19 @@ function parseNotionDiaryPage(page, targetChild) {
             accomplish = m1 ? m1[1] : '';
             goal = m2 ? m2[1] : '';
         } else {
-            content = reportProp.replace(/\[감정:[^\]]+\]/, '').trim();
+            if (matchedChild === '민서' || matchedChild === '아빠' || matchedChild === '엄마') {
+                content = reportProp.replace(/\[감정:[^\]]+\]/, '').trim();
+            } else {
+                accomplish = reportProp.replace(/\[감정:[^\]]+\]/, '').trim();
+            }
         }
+
+        iMessage = iMessage || iMessageProp;
+        goal = goal || (matchedChild === '민수' ? iMessageProp : "");
 
         const subj = props["과목"]?.rich_text?.[0]?.text?.content || '';
         const weatherMatch = subj.match(/\(([^)]+)\)/);
-        if (weatherMatch) {
+        if (weatherMatch && !weatherOrEnergy) {
             weatherOrEnergy = weatherMatch[1];
         }
     }
@@ -994,12 +1092,61 @@ function parseNotionDiaryPage(page, targetChild) {
     };
 }
 
-// 4-4. 노션 학습일지 DB에서 해당 학생 일기 원격 조회
+// 4-4. 노션 성장 갤러리 & 마음일기 DB에서 해당 학생 일기 원격 조회 (구 DB 안전 자동 폴백 탑재)
 async function fetchNotionDiaries(childName) {
-    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
-    const dbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+    const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
+    const diaryDbId = typeof DIARY_DB_ID !== 'undefined' ? DIARY_DB_ID : (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DIARY_DB_ID ? APP_CONFIG.DIARY_DB_ID : "3dfa27115b688010a85be385f91d64ee");
+    const oldStudyDbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
 
+    // 1차: 신규 감성/일기 전용 DB(3dfa...) 쿼리
     const queryBody = {
+        filter: {
+            and: [
+                {
+                    or: [
+                        { property: "구분", select: { equals: "마음일기" } },
+                        { property: "구분", select: { equals: "일기" } },
+                        { property: "구분", select: { equals: "종이일기" } },
+                        { property: "구분", select: { equals: "특별한 날" } }
+                    ]
+                },
+                {
+                    or: [
+                        { property: "주인공", select: { equals: childName } },
+                        { property: "주인공", select: { equals: "부모관리자" } },
+                        { property: "주인공", select: { equals: "공동" } }
+                    ]
+                }
+            ]
+        },
+        sorts: [
+            { property: "날짜", direction: "descending" }
+        ],
+        page_size: 100
+    };
+
+    try {
+        const resp = await fetch(`${proxyUrl}/v1/databases/${diaryDbId}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+            body: JSON.stringify(queryBody)
+        });
+        if (resp.ok) {
+            const data = await resp.json();
+            const pages = data.results || [];
+            const parsed = pages.map(p => parseNotionDiaryPage(p, childName)).filter(Boolean);
+            if (parsed.length > 0) {
+                console.log(`📖 [신규 감성DB] ${childName} 일기 ${parsed.length}건 원격 조회 성공!`);
+                return parsed;
+            }
+        }
+    } catch (e) {
+        console.warn("신규 노션 일기 DB 조회 중 통신 오류:", e);
+    }
+
+    // 2차: 안전 폴백 - 구 학습일지 DB(37aa...) 레거시 쿼리
+    console.log(`ℹ️ [레거시 폴백] 신규 DB에 일기가 없어 구 학습일지 DB에서 ${childName} 일기를 조회합니다.`);
+    const fallbackQuery = {
         filter: {
             and: [
                 {
@@ -1023,19 +1170,20 @@ async function fetchNotionDiaries(childName) {
     };
 
     try {
-        const resp = await fetch(`${proxyUrl}/v1/databases/${dbId}/query`, {
+        const resp = await fetch(`${proxyUrl}/v1/databases/${oldStudyDbId}/query`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
-            body: JSON.stringify(queryBody)
+            body: JSON.stringify(fallbackQuery)
         });
-        if (!resp.ok) return [];
-        const data = await resp.json();
-        const pages = data.results || [];
-        return pages.map(p => parseNotionDiaryPage(p, childName)).filter(Boolean);
+        if (resp.ok) {
+            const data = await resp.json();
+            const pages = data.results || [];
+            return pages.map(p => parseNotionDiaryPage(p, childName)).filter(Boolean);
+        }
     } catch (e) {
-        console.warn("노션 일기 목록 조회 통신 오류:", e);
-        return [];
+        console.warn("구 학습일지 DB 일기 폴백 조회 오류:", e);
     }
+    return [];
 }
 
 // 4-5. 노션 원격 데이터와 로컬 스토리지 지능형 병합 (Merge)

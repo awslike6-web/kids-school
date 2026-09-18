@@ -33,7 +33,8 @@ var APP_CONFIG = {
     STATIC_TIMETABLE_DB_ID: "32ba27115b68828bbda201a1bdce12fc", // 🏛️ 아이들 고정 시간표 DB (학기 1회 입력)
     EVENT_OVERLAY_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",    // 📢 학사일정 및 알림장 DB (동적 이벤트 오버레이)
     TIMETABLE_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",        // 레거시 호환 ID
-    GALLERY_DB_ID: "3dfa27115b688010a85be385f91d64ee", // 🎨 꿈나무 갤러리 & 마음일기 실시간 노션 DB ID (3dfa2711...)
+    DIARY_DB_ID: "3dfa27115b688010a85be385f91d64ee",            // 📖 신규 성장 갤러리 & 마음일기 실시간 노션 DB ID
+    GALLERY_DB_ID: "3dfa27115b688010a85be385f91d64ee",          // 🎨 꿈나무 갤러리 & 마음일기 실시간 노션 DB ID (3dfa2711...)
 
     // 🏰 Master Tower 종합 관제탑 (아빠 프로필 전용)
     MASTER_TOWER_URL: "https://master-tower.awslike6.workers.dev/",
