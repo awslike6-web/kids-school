@@ -53,6 +53,16 @@ def run():
     for d in target_dirs.values():
         os.makedirs(d, exist_ok=True)
         
+    # 🧹 아카이브 내 오등록된 일기/비작품 파일 자동 정화
+    for wrong_file in ['minsu_20260908_민수일기_보건수업.jpg', 'minsu_20260909_민수일기_반려동물체험.jpg']:
+        wf_path = os.path.join(archive_media_base, 'minsu', '2026_elem_5', wrong_file)
+        if os.path.exists(wf_path):
+            try:
+                os.remove(wf_path)
+                print(f"🧹 아카이브 내 비작품 파일 삭제 정화: {wrong_file}")
+            except Exception:
+                pass
+
     sf_files = os.listdir(sf_dir) if os.path.exists(sf_dir) else []
     
     # 커스텀 메타데이터 불러오기
@@ -88,6 +98,22 @@ def run():
                 continue
                 
             full_source = os.path.join(folder_full, f)
+            
+            # 🛡️ 갤러리 비작품 파일(일기/생활기록 등) 자동 격리 및 스캔 제외
+            if '일기' in f or 'diary' in f.lower() or f.startswith('.'):
+                diary_dir = os.path.join(project_root, 'uploads', 'ex', '일기', author_name)
+                os.makedirs(diary_dir, exist_ok=True)
+                dest_diary_path = os.path.join(diary_dir, f)
+                try:
+                    if not os.path.exists(dest_diary_path):
+                        shutil.move(full_source, dest_diary_path)
+                        print(f"📦 일기 사진 전용 폴더로 자동 격리 이동: {f} -> uploads/ex/일기/{author_name}/")
+                    else:
+                        os.remove(full_source)
+                        print(f"📦 일기 사진 정리 완료: {f}")
+                except Exception as me:
+                    print(f"⚠️ 일기 파일 격리 오류: {me}")
+                continue
             
             # 새 폴더에 누끼 png가 존재하는지 확인
             candidate_png = [x for x in sf_files if os.path.splitext(x)[0] == base_name and x.lower().endswith('.png')]

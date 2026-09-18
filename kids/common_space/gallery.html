@@ -535,6 +535,80 @@
             line-height: 1.4;
             color: var(--text-main);
         }
+        .artist-quote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .edit-note-trigger-btn {
+            background: rgba(79, 172, 254, 0.15);
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            border-radius: 18px;
+            padding: 4px 12px;
+            font-family: 'Jua', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .edit-note-trigger-btn:hover {
+            transform: scale(1.05);
+            background: var(--primary);
+            color: #fff;
+        }
+        .note-edit-area {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .note-edit-textarea {
+            width: 100%;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-family: 'Gaegu', cursive;
+            font-size: 1.25rem;
+            line-height: 1.4;
+            border: 2px solid var(--primary);
+            background: var(--card-bg);
+            color: var(--text-main);
+            outline: none;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .note-edit-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .note-action-btn {
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-family: 'Jua', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.15s ease;
+        }
+        .note-action-btn:hover {
+            transform: scale(1.04);
+        }
+        .note-action-btn.cancel {
+            background: rgba(0,0,0,0.08);
+            color: var(--text-sub);
+        }
+        .note-action-btn.save {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
 
         /* 💖 칭찬 스티커 바 */
         .praise-sticker-section {
@@ -804,8 +878,22 @@
 
                 <!-- 🗣️ 작가의 한마디 -->
                 <div class="artist-quote-box">
-                    <div class="artist-quote-title">🗣️ 작가의 한마디</div>
+                    <div class="artist-quote-header">
+                        <div class="artist-quote-title">🗣️ 작가의 한마디</div>
+                        <button type="button" class="edit-note-trigger-btn" id="editNoteTriggerBtn" onclick="toggleEditArtistNote()" title="내가 직접 한마디 고치기">
+                            <span>✏️</span> <span>내가 직접 쓰기</span>
+                        </button>
+                    </div>
                     <div class="artist-quote-text" id="modalArtistNote">작품에 대한 설명이 들어갑니다.</div>
+
+                    <!-- ✏️ 인라인 편집 폼 -->
+                    <div id="artistNoteEditArea" class="note-edit-area" style="display: none;">
+                        <textarea id="editArtistNoteInput" class="note-edit-textarea" rows="3" placeholder="어떤 생각과 마음으로 만들었는지 민수/민서만의 멋진 한마디를 적어보세요!"></textarea>
+                        <div class="note-edit-actions">
+                            <button type="button" class="note-action-btn cancel" onclick="cancelEditArtistNote()">취소</button>
+                            <button type="button" class="note-action-btn save" onclick="saveEditedArtistNote()">💾 저장하기</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 💖 칭찬 스티커 반응 -->
@@ -908,6 +996,10 @@
         </div>
     </div>
 
+    <!-- ⚙️ 환경 설정 및 요정 코코 음성 엔진 로드 -->
+    <script src="../config.js"></script>
+    <script src="../core/fairy-config.js"></script>
+    <script src="../core/fairy-engine.js"></script>
     <!-- 📚 갤러리 기본 데이터 로드 -->
     <script src="../data/gallery-data.js"></script>
 
@@ -960,6 +1052,27 @@
             applyUserTheme();
         }
 
+        const CUSTOM_NOTES_KEY = 'GALLERY_CUSTOM_ARTIST_NOTES';
+
+        function getCustomArtistNotes() {
+            try {
+                const raw = localStorage.getItem(CUSTOM_NOTES_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function setCustomArtistNote(artId, note) {
+            try {
+                const notes = getCustomArtistNotes();
+                notes[artId] = note;
+                localStorage.setItem(CUSTOM_NOTES_KEY, JSON.stringify(notes));
+            } catch (e) {
+                console.error("작가의 한마디 로컬 저장 오류:", e);
+            }
+        }
+
         // 📦 갤러리 데이터 로드 (마스터 DB + 사용자 등록 커스텀 작품 스마트 병합)
         function loadGalleryData() {
             // 🛡️ 구버전 더미 댓글/반응 캐시 자동 정화 (Purge)
@@ -974,6 +1087,7 @@
             let savedLikesMap = {};
             let savedStickersMap = {};
             let savedCommentsMap = {};
+            const customNotes = getCustomArtistNotes();
 
             if (saved) {
                 try {
@@ -992,12 +1106,14 @@
                 }
             }
 
-            // 마스터 데이터 복제 후 로컬에서 저장된 좋아요/댓글/스티커 병합
+            // 마스터 데이터 복제 후 로컬에서 저장된 좋아요/댓글/스티커/작가의한마디 병합
             const masterList = (typeof DEFAULT_GALLERY_DATA !== 'undefined' ? DEFAULT_GALLERY_DATA : []).map(item => {
                 const copy = { ...item };
                 if (savedLikesMap[item.id]) copy.likes = savedLikesMap[item.id];
                 if (savedStickersMap[item.id]) copy.stickers = savedStickersMap[item.id];
                 if (savedCommentsMap[item.id]) copy.comments = savedCommentsMap[item.id];
+                // 아이들이 직접 수정한 한마디가 있으면 AI 기본 설명보다 항상 최우선 반영
+                if (customNotes[item.id]) copy.artistNote = customNotes[item.id];
                 return copy;
             });
 
@@ -1005,6 +1121,9 @@
             saveGalleryData();
             renderGallery();
             updateStats();
+
+            // 📡 노션 DB 실시간 원격 동기화 시도 (노션 DB ID가 세팅된 경우)
+            syncFromNotionGallery();
         }
 
         function saveGalleryData() {
@@ -1108,6 +1227,8 @@
             if (!art) return;
             activeArtId = artId;
 
+            cancelEditArtistNote();
+
             document.getElementById('modalImg').src = art.imageUrl;
             document.getElementById('modalTitle').textContent = art.title;
             
@@ -1136,8 +1257,69 @@
         }
 
         function closeDetailModal() {
+            cancelEditArtistNote();
             document.getElementById('detailModal').style.display = 'none';
             activeArtId = null;
+        }
+
+        // ========================================================
+        // 🗣️ 작가의 한마디 직접 수정 인터랙션
+        // ========================================================
+        function toggleEditArtistNote() {
+            if (!activeArtId) return;
+            const art = galleryData.find(a => a.id === activeArtId);
+            if (!art) return;
+
+            const editArea = document.getElementById('artistNoteEditArea');
+            const viewText = document.getElementById('modalArtistNote');
+            const triggerBtn = document.getElementById('editNoteTriggerBtn');
+            const input = document.getElementById('editArtistNoteInput');
+
+            input.value = art.artistNote || '';
+            editArea.style.display = 'flex';
+            viewText.style.display = 'none';
+            triggerBtn.style.display = 'none';
+            input.focus();
+        }
+
+        function cancelEditArtistNote() {
+            const editArea = document.getElementById('artistNoteEditArea');
+            const viewText = document.getElementById('modalArtistNote');
+            const triggerBtn = document.getElementById('editNoteTriggerBtn');
+            if (editArea) editArea.style.display = 'none';
+            if (viewText) viewText.style.display = 'block';
+            if (triggerBtn) triggerBtn.style.display = 'inline-flex';
+        }
+
+        async function saveEditedArtistNote() {
+            if (!activeArtId) return;
+            const art = galleryData.find(a => a.id === activeArtId);
+            if (!art) return;
+
+            const input = document.getElementById('editArtistNoteInput');
+            const newNote = input.value.trim();
+            if (!newNote) {
+                alert("작가의 한마디를 입력해 주세요!");
+                return;
+            }
+
+            // 1. 메모리 및 로컬 영구 스토리지 반영
+            art.artistNote = newNote;
+            setCustomArtistNote(art.id, newNote);
+            saveGalleryData();
+
+            // 2. 화면 UI 즉시 갱신
+            document.getElementById('modalArtistNote').textContent = newNote;
+            cancelEditArtistNote();
+            renderGallery();
+
+            // 3. 🧚 요정 코코 TTS 음성 칭찬 피드백
+            if (typeof speakFairyTTS === 'function') {
+                speakFairyTTS("작가의 한마디가 멋지게 저장되었어요!");
+            }
+
+            // 4. 📡 노션 데이터베이스 실시간 동기화
+            syncNoteToNotion(art);
         }
 
         function openOriginalImage() {
@@ -1181,6 +1363,9 @@
             saveGalleryData();
             renderGallery();
             updateStats();
+
+            // 📡 노션 스티커 동기화
+            syncStickerToNotion(art, type);
         }
 
         // 칭찬 댓글 등록
@@ -1196,13 +1381,225 @@
 
             if (!art.comments) art.comments = [];
             const todayStr = new Date().toISOString().split('T')[0];
-            art.comments.push({ author, text, date: todayStr });
+            const newComment = { author, text, date: todayStr };
+            art.comments.push(newComment);
 
             textInput.value = '';
             renderModalComments(art.comments);
             saveGalleryData();
             renderGallery();
             updateStats();
+
+            // 📡 노션 댓글 동기화
+            syncCommentToNotion(art, newComment);
+        }
+
+        // ========================================================
+        // 📡 노션 데이터베이스 실시간 양방향 동기화 모듈
+        // ========================================================
+        const NOTION_PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) || "https://minmin-notion.awslike6.workers.dev";
+        const NOTION_HEADERS = { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" };
+        let notionPageIdMap = {}; // artId -> notionPageId 캐시
+
+        // 1. 노션에서 전체 갤러리 상호작용 데이터(한마디/댓글/스티커) 백그라운드 동기화
+        async function syncFromNotionGallery() {
+            const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
+            if (!dbId) return; // 아직 노션 갤러리 DB ID가 설정되지 않은 경우 안전 스킵
+
+            try {
+                const res = await fetch(`${NOTION_PROXY}/v1/databases/${dbId}/query`, {
+                    method: 'POST',
+                    headers: NOTION_HEADERS,
+                    body: JSON.stringify({ page_size: 100 })
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                const pages = data.results || [];
+                let hasChanges = false;
+
+                pages.forEach(p => {
+                    const props = p.properties;
+                    // 작품ID 추출 (title 속성)
+                    const titleProp = props["작품ID"] || props["ID"] || props["title"];
+                    const artId = titleProp?.title?.[0]?.plain_text;
+                    if (!artId) return;
+
+                    notionPageIdMap[artId] = p.id;
+                    const art = galleryData.find(a => a.id === artId);
+                    if (!art) return;
+
+                    // 작가의 한마디
+                    const noteProp = props["작가의 한마디"] || props["작가한마디"];
+                    const remoteNote = noteProp?.rich_text?.[0]?.plain_text;
+                    if (remoteNote && remoteNote !== art.artistNote) {
+                        art.artistNote = remoteNote;
+                        setCustomArtistNote(artId, remoteNote);
+                        hasChanges = true;
+                    }
+
+                    // 가족 댓글 (JSON 파싱)
+                    const commentProp = props["가족 칭찬 댓글"] || props["댓글"];
+                    const rawComments = commentProp?.rich_text?.[0]?.plain_text;
+                    if (rawComments) {
+                        try {
+                            const parsedComments = JSON.parse(rawComments);
+                            if (Array.isArray(parsedComments) && parsedComments.length > 0) {
+                                art.comments = parsedComments;
+                                hasChanges = true;
+                            }
+                        } catch (je) {}
+                    }
+
+                    // 스티커 반응
+                    if (!art.stickers) art.stickers = { heart: 0, thumb: 0, star: 0, trophy: 0 };
+                    const heart = props["❤️ 하트"]?.number ?? props["하트"]?.number;
+                    const thumb = props["👍 최고"]?.number ?? props["최고"]?.number;
+                    const star = props["✨ 별"]?.number ?? props["별"]?.number;
+                    const trophy = props["🏆 트로피"]?.number ?? props["트로피"]?.number;
+
+                    if (heart !== undefined && heart > (art.stickers.heart || 0)) { art.stickers.heart = heart; hasChanges = true; }
+                    if (thumb !== undefined && thumb > (art.stickers.thumb || 0)) { art.stickers.thumb = thumb; hasChanges = true; }
+                    if (star !== undefined && star > (art.stickers.star || 0)) { art.stickers.star = star; hasChanges = true; }
+                    if (trophy !== undefined && trophy > (art.stickers.trophy || 0)) { art.stickers.trophy = trophy; hasChanges = true; }
+                });
+
+                if (hasChanges) {
+                    saveGalleryData();
+                    renderGallery();
+                    updateStats();
+                    if (activeArtId) {
+                        const activeArt = galleryData.find(a => a.id === activeArtId);
+                        if (activeArt) {
+                            document.getElementById('modalArtistNote').textContent = activeArt.artistNote || '';
+                            renderModalComments(activeArt.comments || []);
+                            document.getElementById('stickerCount_heart').textContent = activeArt.stickers?.heart || 0;
+                            document.getElementById('stickerCount_thumb').textContent = activeArt.stickers?.thumb || 0;
+                            document.getElementById('stickerCount_star').textContent = activeArt.stickers?.star || 0;
+                            document.getElementById('stickerCount_trophy').textContent = activeArt.stickers?.trophy || 0;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("[갤러리 노션 동기화]", err);
+            }
+        }
+
+        // 2. 작가의 한마디 노션 PATCH / POST
+        async function syncNoteToNotion(art) {
+            const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
+            if (!dbId) return;
+
+            try {
+                const pageId = notionPageIdMap[art.id];
+                if (pageId) {
+                    // 기존 페이지 업데이트
+                    await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+                        method: 'PATCH',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({
+                            properties: {
+                                "작가의 한마디": { rich_text: [{ text: { content: art.artistNote || "" } }] }
+                            }
+                        })
+                    });
+                } else {
+                    // 신규 페이지 등록
+                    const createRes = await fetch(`${NOTION_PROXY}/v1/pages`, {
+                        method: 'POST',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({
+                            parent: { database_id: dbId },
+                            properties: {
+                                "작품ID": { title: [{ text: { content: art.id } }] },
+                                "작품명": { rich_text: [{ text: { content: art.title } }] },
+                                "작가": { select: { name: art.author } },
+                                "작가의 한마디": { rich_text: [{ text: { content: art.artistNote || "" } }] }
+                            }
+                        })
+                    });
+                    if (createRes.ok) {
+                        const newPage = await createRes.json();
+                        notionPageIdMap[art.id] = newPage.id;
+                    }
+                }
+            } catch (err) {
+                console.warn("[노션 한마디 저장 오류]", err);
+            }
+        }
+
+        // 3. 댓글 노션 PATCH / POST
+        async function syncCommentToNotion(art) {
+            const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
+            if (!dbId) return;
+
+            try {
+                const pageId = notionPageIdMap[art.id];
+                const commentsJson = JSON.stringify(art.comments || []);
+                if (pageId) {
+                    await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+                        method: 'PATCH',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({
+                            properties: {
+                                "가족 칭찬 댓글": { rich_text: [{ text: { content: commentsJson } }] }
+                            }
+                        })
+                    });
+                } else {
+                    const createRes = await fetch(`${NOTION_PROXY}/v1/pages`, {
+                        method: 'POST',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({
+                            parent: { database_id: dbId },
+                            properties: {
+                                "작품ID": { title: [{ text: { content: art.id } }] },
+                                "작품명": { rich_text: [{ text: { content: art.title } }] },
+                                "작가": { select: { name: art.author } },
+                                "가족 칭찬 댓글": { rich_text: [{ text: { content: commentsJson } }] }
+                            }
+                        })
+                    });
+                    if (createRes.ok) {
+                        const newPage = await createRes.json();
+                        notionPageIdMap[art.id] = newPage.id;
+                    }
+                }
+            } catch (err) {
+                console.warn("[노션 댓글 저장 오류]", err);
+            }
+        }
+
+        // 4. 스티커 반응 노션 PATCH
+        async function syncStickerToNotion(art, type) {
+            const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
+            if (!dbId) return;
+
+            const stickerPropMap = {
+                heart: "❤️ 하트",
+                thumb: "👍 최고",
+                star: "✨ 별",
+                trophy: "🏆 트로피"
+            };
+            const propName = stickerPropMap[type];
+            if (!propName) return;
+
+            try {
+                const pageId = notionPageIdMap[art.id];
+                const count = art.stickers?.[type] || 0;
+                if (pageId) {
+                    await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+                        method: 'PATCH',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({
+                            properties: {
+                                [propName]: { number: count }
+                            }
+                        })
+                    });
+                }
+            } catch (err) {
+                console.warn("[노션 스티커 저장 오류]", err);
+            }
         }
 
         // ========================================================
