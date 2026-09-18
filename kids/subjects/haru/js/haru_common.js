@@ -624,6 +624,77 @@ function switchCardPhoto(event, thumbEl, targetUrl, mainImgId) {
   }
 }
 
+// 🖼️ 특별한 날 사진 팝업 모달 열기
+function openSpecialPhotoModal(storyId, mainImgId) {
+  const modal = document.getElementById("specialPhotoModalOverlay");
+  const modalImg = document.getElementById("photoModalImg");
+  const modalTitle = document.getElementById("photoModalTitle");
+  const modalThumbs = document.getElementById("photoModalThumbs");
+  const modalCaption = document.getElementById("photoModalCaption");
+  if (!modal || !modalImg) return;
+
+  const stories = getSpecialStories();
+  const story = stories.find(s => s.id === storyId);
+  if (!story) return;
+
+  if (modalTitle) {
+    modalTitle.innerHTML = `<span>📸</span> ${story.title || '사진 전체보기'}`;
+  }
+
+  // 현재 카드에서 선택된 사진이 있으면 해당 URL 우선 적용
+  let currentSrc = story.imageUrl;
+  if (mainImgId) {
+    const cardMainImg = document.getElementById(mainImgId);
+    if (cardMainImg && cardMainImg.src) {
+      currentSrc = cardMainImg.src;
+    }
+  }
+  modalImg.src = currentSrc;
+
+  const galleryList = (story.galleryImages && story.galleryImages.length > 0) ? story.galleryImages : (story.imageUrl ? [story.imageUrl] : []);
+
+  if (modalThumbs) {
+    if (galleryList.length > 1) {
+      modalThumbs.innerHTML = galleryList.map((gUrl, idx) => `
+        <button type="button" class="photo-modal-thumb-btn ${gUrl === currentSrc ? 'active' : ''}" onclick="switchModalPhoto(this, '${gUrl}')" title="사진 ${idx + 1}">
+          <img src="${gUrl}" alt="사진 ${idx + 1}" />
+        </button>
+      `).join("");
+      modalThumbs.style.display = "flex";
+    } else {
+      modalThumbs.innerHTML = "";
+      modalThumbs.style.display = "none";
+    }
+  }
+
+  if (modalCaption) {
+    modalCaption.textContent = `📅 ${story.date || '특별한 날'} · ${galleryList.length > 1 ? '아래 썸네일을 눌러 사진을 바꿔볼 수 있어요' : '사진 전체보기'}`;
+  }
+
+  modal.classList.add("active");
+  document.body.style.overflow = "hidden";
+}
+
+// 모달 내부 사진 전환
+function switchModalPhoto(btn, targetUrl) {
+  const modalImg = document.getElementById("photoModalImg");
+  if (modalImg) {
+    modalImg.src = targetUrl;
+  }
+  const parent = btn.parentElement;
+  if (parent) {
+    parent.querySelectorAll(".photo-modal-thumb-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+  }
+}
+
+// 팝업 모달 닫기
+function closeSpecialPhotoModal() {
+  const modal = document.getElementById("specialPhotoModalOverlay");
+  if (modal) modal.classList.remove("active");
+  document.body.style.overflow = "auto";
+}
+
 function stampReaction(event, storyId, emoji, label, storyTitle) {
   if (event) event.stopPropagation();
   const childName = currentChild === "minsu" ? "민수" : "민서";
@@ -837,10 +908,11 @@ function renderSpecialDaysTab() {
 
       return `
         <div class="special-card has-photo" id="special_card_${s.id}" onclick="toggleSpeakStoryText('${s.id}', '${s.title}', '${s.desc}')" title="터치하면 이야기 낭독 / 다시 터치하면 멈춤 ⏹️">
-          <div class="special-card-img-wrap">
+          <div class="special-card-img-wrap" onclick="event.stopPropagation(); openSpecialPhotoModal('${s.id}', '${mainImgId}')" title="터치하면 사진을 팝업으로 전체 감상해요 🔍">
             <span class="special-card-category-chip">${categoryIcon} ${category}</span>
             ${galleryList.length > 1 ? `<span class="special-card-photo-count">📷 사진 ${galleryList.length}장</span>` : ''}
             ${videoList.length > 0 ? `<span class="special-card-video-chip">🎬 영상 ${videoList.length > 1 ? `${videoList.length}편 ` : ''}포함</span>` : ''}
+            <span class="special-card-zoom-chip">🔍 전체보기</span>
             <img id="${mainImgId}" src="${s.imageUrl}" class="special-card-img" alt="${s.title}" onerror="this.parentElement.style.display='none';" />
           </div>
           ${thumbsHtml}

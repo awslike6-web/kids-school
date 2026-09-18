@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>민민이네 공부방 - 🌱 슬기로운 하루 탐험관 (1학년 2학기)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/haru.css?v=20260914_03">
+  <link rel="stylesheet" href="../../css/haru.css?v=20260918_02">
 </head>
 <body>
 
@@ -743,6 +743,29 @@
   </div>
 </div>
 
+<!-- 🖼️ 특별한 날 사진 팝업 모달 오버레이 -->
+<div class="haru-modal-overlay" id="specialPhotoModalOverlay" onclick="if(event.target===this) closeSpecialPhotoModal();">
+  <div class="haru-modal-box photo-modal-box">
+    <div class="modal-header" style="background: linear-gradient(135deg, #ff7675, #fab1a0);">
+      <div class="modal-header-title" id="photoModalTitle">
+        <span>📸</span> 사진 전체보기
+      </div>
+      <button class="modal-close-btn" onclick="closeSpecialPhotoModal()" title="닫기">✖</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px; display:flex; flex-direction:column; align-items:center;">
+      <div class="photo-modal-view-wrap">
+        <img id="photoModalImg" src="" alt="사진 전체보기" class="photo-modal-view-img" />
+      </div>
+      <div id="photoModalThumbs" class="photo-modal-thumbs-row">
+        <!-- 여러 장인 경우 동적 썸네일 버튼 -->
+      </div>
+      <div id="photoModalCaption" class="photo-modal-caption">
+        <!-- 사진 설명 및 안내 -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ⏹️ 실시간 음성 중단 플로팅 컨트롤러 -->
 <div id="haruAudioFloatingBar" class="haru-audio-floating-bar" style="display:none;" onclick="stopAllSpeech(true)" title="터치하면 음성을 즉시 멈춰요">
   <span class="pulse-speaker">🔊</span>
@@ -757,8 +780,8 @@
 <script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/daily-diary.js"></script>
-<script src="data/haru_data.js?v=20260918_01"></script>
-<script src="js/haru_common.js?v=20260918_01"></script>
+<script src="data/haru_data.js?v=20260918_02"></script>
+<script src="js/haru_common.js?v=20260918_02"></script>
 
 </body>
 </html>

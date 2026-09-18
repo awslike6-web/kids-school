@@ -181,19 +181,6 @@ window.HARU_DATA = {
         fallbackIcon: "🎂"
       },
       {
-        id: "evt_minseo_birthday_mv_20260915",
-        category: "특별한날",
-        categoryIcon: "🎶",
-        title: "🎶 아빠표 수노 AI 생일 축하송 & 민서 추억 뮤직비디오",
-        date: "2026-09-15 (세상에 하나뿐인 선물)",
-        desc: "아빠가 수노(Suno) AI로 민서만을 위해 정성껏 만든 신나는 생일 축하 노래와 민서의 사랑스러운 성장 사진들을 하나하나 엮어 세상에 단 하나뿐인 특별 뮤직비디오를 완성했어요! 귓가에 맴도는 신나는 멜로디와 사진들을 함께 감상하며 온 가족이 감동 가득한 시간을 보냈답니다! 🎵🎬💖",
-        icon: "🎶",
-        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260915_birthday_01_flower.png",
-        videoUrl: "https://photos.app.goo.gl/f47BfrTRV5jDTzue6",
-        videoBtnText: "🎶 수노 AI 생일송 & 민서 뮤비 감상하기",
-        fallbackIcon: "🎵"
-      },
-      {
         id: "evt_children",
         category: "어린이날",
         categoryIcon: "🎈",
