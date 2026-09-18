@@ -806,16 +806,8 @@ async function sendDiaryLogToNotionDirect(entry) {
         children: [
             {
                 object: "block",
-                type: "heading_2",
-                heading_2: {
-                    rich_text: [{ type: "text", text: { content: `📖 ${entry.childName}의 ${categoryName} (${entry.date})` } }]
-                }
-            },
-            {
-                object: "block",
-                type: "callout",
-                callout: {
-                    icon: { type: "emoji", emoji: entry.childName === '민서' ? "💖" : (isParentSelf ? "☕" : "⭐") },
+                type: "paragraph",
+                paragraph: {
                     rich_text: [{ type: "text", text: { content: pureContent.trim() || "기록 내용 없음" } }]
                 }
             }
@@ -825,8 +817,9 @@ async function sendDiaryLogToNotionDirect(entry) {
     if (iMessageText.trim()) {
         payload.children.push({
             object: "block",
-            type: "quote",
-            quote: {
+            type: "callout",
+            callout: {
+                icon: { type: "emoji", emoji: entry.childName === '민서' ? "💖" : (isParentSelf ? "☕" : "⭐") },
                 rich_text: [{ type: "text", text: { content: `💬 ${entry.childName === '민서' ? '나-전달법' : '오늘의 다짐/한마디'}: ${iMessageText.trim()}` } }]
             }
         });
