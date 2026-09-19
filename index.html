@@ -55,15 +55,40 @@
   .shake { animation: shake 0.4s; }
   @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
 
-  /* 💡 부모님 전용 메뉴 모달 UI 추가 */
-  .admin-btn { width: 100%; padding: 16px; margin-bottom: 12px; border: none; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; transition: transform 0.2s; box-shadow: 0 6px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .admin-btn:hover { transform: translateY(-3px); }
-  .admin-btn.multi { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; }
-  .admin-btn.dash { background: linear-gradient(145deg, #FFD93D, #FF6B9D); color: white; }
+  /* 💡 부모님 전용 메뉴 모달 UI 개편 */
+  .admin-modal-box { width: 92%; max-width: 380px; padding: 26px 20px 22px; border-radius: 28px; }
+  .admin-menu-list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  
+  .admin-btn { width: 100%; padding: 13px 14px; border: none; border-radius: 14px; font-family: 'Jua', sans-serif; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+  .admin-btn:active { transform: scale(0.98); }
+
+  .admin-btn.tower { background: linear-gradient(145deg, #1e293b, #0ea5e9); color: #fff; font-size: 1.15rem; border: 1.5px solid #38bdf8; }
+  .admin-btn.dash { background: linear-gradient(145deg, #f59e0b, #ec4899); color: #fff; }
+  .admin-btn.monitor { background: linear-gradient(145deg, #3b82f6, #6366f1); color: #fff; }
+  
+  /* 아이들 환경 테스트 2열 그리드 */
+  .test-btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 2px; }
+  .test-btn-grid .admin-btn { padding: 12px 10px; font-size: 1rem; margin-bottom: 0; }
   .admin-btn.son-test { background: linear-gradient(145deg, #6EC6F5, #A78BFA); color: white; }
   .admin-btn.dau-test { background: linear-gradient(145deg, #FF6B9D, #FF9F43); color: white; }
-  .admin-btn.tower { background: linear-gradient(145deg, #1a2332, #4fc3f7); color: white; }
-  .admin-btn.diary { background: linear-gradient(145deg, #ec4899, #8b5cf6); color: white; }
+
+  /* 📁 기타 도구 접이식 아코디언 */
+  .extra-tools-wrap { margin-top: 4px; width: 100%; border-top: 1px dashed #e2e8f0; padding-top: 8px; }
+  .extra-toggle-btn { width: 100%; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; color: #64748b; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s, color 0.2s; }
+  .extra-toggle-btn:hover { background: #f1f5f9; color: #334155; }
+  .extra-toggle-btn .toggle-icon { font-size: 0.75rem; transition: transform 0.25s ease; }
+  .extra-toggle-btn.open .toggle-icon { transform: rotate(180deg); }
+  
+  .extra-tools-content { display: none; flex-direction: column; gap: 6px; margin-top: 8px; animation: slideDown 0.2s ease; }
+  .extra-tools-content.open { display: flex; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .admin-sub-btn { width: 100%; padding: 10px 12px; border: none; border-radius: 10px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; transition: transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .admin-sub-btn:hover { transform: translateY(-1px); }
+  .admin-sub-btn.diary { background: linear-gradient(145deg, #ec4899, #8b5cf6); color: white; }
+  .admin-sub-btn.changer { background: #f0f9ff; border: 1.5px solid #38bdf8; color: #0284c7; }
+  .admin-sub-btn.multi { background: linear-gradient(145deg, #4ECDC4, #44A08D); color: white; }
 </style>
 </head>
 <body>
@@ -105,24 +130,38 @@
 </div>
 
 <div class="pw-overlay" id="adminOverlay" onclick="closeAdminModal(event)">
-  <div class="pw-modal" style="max-width: 360px;" onclick="event.stopPropagation()">
-    <div class="pw-title" id="adminWelcomeTitle" style="margin-bottom: 25px; color: var(--purple); font-weight: bold;">어디로 이동할까요?</div>
+  <div class="pw-modal admin-modal-box" onclick="event.stopPropagation()">
+    <div class="pw-title" id="adminWelcomeTitle" style="margin-bottom: 18px; color: var(--purple); font-weight: bold;">어디로 이동할까요?</div>
     
-    <div style="display:flex; flex-direction:column;">
-      <button class="admin-btn diary" onclick="goAdminCustom('parent_diary.html')">📝 엄마·아빠 일기장 (일상 & 생각)</button>
-      <button class="admin-btn multi" onclick="goAdminCustom('multiverse/index_friends.html')">🌌 멀티버스 (친구들)</button>
-      <button class="admin-btn dash" onclick="goAdminCustom('parent_dashboard.html')">🛠️ 대시보드 / 문제 등록</button>
-      <button class="admin-btn dash" style="border: 2px solid #58a6ff; color: #0284c7; font-weight: bold;" onclick="goAdminCustom('admin-image-changer.html')">🖼️ 교재 이미지 퀵 체인저</button>
+    <div class="admin-menu-list">
+      <!-- 1. 관제탑 (아빠 전용 메인 카드) -->
       <button class="admin-btn tower" id="adminTowerBtn" style="display:none" onclick="goMasterTower()">🏰 Master Tower 관제탑</button>
-      <button class="admin-btn dash" onclick="goAdminCustom('timetable.html?view=monitor')">📺 로비 모니터용 실시간 시간표</button>
+
+      <!-- 2. 대시보드 및 시간표 -->
+      <button class="admin-btn dash" onclick="goAdminCustom('parent_dashboard.html')">🛠️ 학습 대시보드 & 문제 등록</button>
+      <button class="admin-btn monitor" onclick="goAdminCustom('timetable.html?view=monitor')">📺 로비 모니터용 실시간 시간표</button>
       
-      <div style="margin: 15px 0; border-top: 2px dashed #eee;"></div>
+      <!-- 3. 아이들 환경 테스트 (가로 2열 컴팩트) -->
+      <div class="test-btn-grid">
+        <button class="admin-btn son-test" onclick="goAdminTestLobby('son', 'minsu')">👦 민수 화면 테스트</button>
+        <button class="admin-btn dau-test" onclick="goAdminTestLobby('daughter', 'minseo')">👧 민서 화면 테스트</button>
+      </div>
       
-      <button class="admin-btn son-test" onclick="goAdminTestLobby('son', 'minsu')">👦 민수 환경 테스트 (로비)</button>
-      <button class="admin-btn dau-test" onclick="goAdminTestLobby('daughter', 'minseo')">👧 민서 환경 테스트 (로비)</button>
+      <!-- 4. 기타 관리 도구 (원클릭 접이식 토글) -->
+      <div class="extra-tools-wrap">
+        <button class="extra-toggle-btn" id="extraToggleBtn" onclick="toggleExtraTools(event)">
+          <span>📁 기타 도구 (일기·교재·멀티버스)</span>
+          <span class="toggle-icon" id="extraToggleIcon">▼</span>
+        </button>
+        <div class="extra-tools-content" id="extraToolsContent">
+          <button class="admin-sub-btn diary" onclick="goAdminCustom('parent_diary.html')">📝 엄마·아빠 일기장 (일상 & 생각)</button>
+          <button class="admin-sub-btn changer" onclick="goAdminCustom('admin-image-changer.html')">🖼️ 교재 이미지 퀵 체인저</button>
+          <button class="admin-sub-btn multi" onclick="goAdminCustom('multiverse/index_friends.html')">🌌 멀티버스 (친구들)</button>
+        </div>
+      </div>
     </div>
     
-    <button class="key-btn del" style="margin-top:20px; font-size:1rem;" onclick="closeAdminModal()">← 취소하고 닫기</button>
+    <button class="key-btn del" style="margin-top:14px; font-size:0.95rem; height:auto; padding:6px 12px;" onclick="closeAdminModal()">← 취소하고 닫기</button>
   </div>
 </div>
 
@@ -164,6 +203,7 @@ function updateDots() { for (let i = 0; i < 4; i++) { const dot = document.getEl
 function checkPassword() {
   if (pwBuffer === PARENT_PASSWORD) {
     closePasswordModal(); 
+    resetExtraTools();
     document.getElementById('adminWelcomeTitle').innerText = `${currentAdminName}, 어디로 이동할까요?`;
     document.getElementById('adminTowerBtn').style.display = currentAdminName === '아빠' ? 'flex' : 'none';
     document.getElementById('adminOverlay').classList.add('active');
@@ -176,9 +216,26 @@ function checkPassword() {
 }
 
 // 💡 부모님 메뉴 로직
+function resetExtraTools() {
+  const content = document.getElementById('extraToolsContent');
+  const btn = document.getElementById('extraToggleBtn');
+  if (content) content.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+}
+
+function toggleExtraTools(e) {
+  if (e) e.stopPropagation();
+  const content = document.getElementById('extraToolsContent');
+  const btn = document.getElementById('extraToggleBtn');
+  if (!content || !btn) return;
+  const isOpen = content.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+}
+
 function closeAdminModal(e) {
   if(e) e.stopPropagation();
   document.getElementById('adminOverlay').classList.remove('active');
+  resetExtraTools();
 }
 
 // 멀티버스 및 대시보드로 이동
