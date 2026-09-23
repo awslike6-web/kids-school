@@ -178,8 +178,21 @@ def run():
             default_cat = "만들기/공예" if has_cutout else "그림/미술"
             default_icon = "✂️" if has_cutout else "🎨"
             title = meta.get("title", default_title)
-            category = meta.get("category", default_cat)
-            category_icon = meta.get("categoryIcon", default_icon)
+            
+            # 5대 표준 분야 정규화
+            raw_cat = meta.get("category", default_cat)
+            raw_icon = meta.get("categoryIcon", default_icon)
+            if "종이접기" in raw_cat or "디자인" in raw_cat:
+                category, category_icon = "종이접기/디자인", "📐"
+            elif "만들기" in raw_cat or "공예" in raw_cat:
+                category, category_icon = "만들기/공예", "✂️"
+            elif "상장" in raw_cat or "기념" in raw_cat or "수상" in raw_cat:
+                category, category_icon = "상장/기념", "🏆"
+            elif "탐구" in raw_cat or "프로젝트" in raw_cat or "연구" in raw_cat:
+                category, category_icon = "탐구/프로젝트", "🔬"
+            else:
+                category, category_icon = "그림/미술", "🎨"
+
             artist_note = meta.get("artistNote", f"{author_name}가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.")
             likes = meta.get("likes", 0)
             stickers = meta.get("stickers", { "heart": 0, "thumb": 0, "star": 0, "trophy": 0 })
