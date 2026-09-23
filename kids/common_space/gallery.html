@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>꿈나무 작품 갤러리 - 민민이네 공부방</title>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/quick-uploader.css">
     <style>
         :root {
             --primary: #4facfe;
@@ -821,8 +822,8 @@
                 <p id="heroSubtitle">학교와 집에서 정성껏 만든 소중한 작품들을 감상하고 칭찬해 주세요!</p>
             </div>
             <div class="hero-actions">
-                <button class="add-art-btn" onclick="openUploadModal()">
-                    <span>✨</span> <span>새 작품 전시하기</span>
+                <button class="add-art-btn" onclick="openQuickUploader({ defaultCategory: '작품', defaultAuthor: (typeof currentUserName !== 'undefined' && currentUserName === '민서') ? '민서' : '민수' })">
+                    <span>✨</span> <span>새 작품 찰칵 올리기</span>
                 </button>
             </div>
         </header>
@@ -1711,5 +1712,6 @@
             loadGalleryData();
         });
     </script>
+    <script src="../core/quick-uploader.js"></script>
 </body>
 </html>
