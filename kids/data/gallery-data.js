@@ -6,35 +6,18 @@ const DEFAULT_GALLERY_DATA = [
     "id": "art_minsu_20260922_213854",
     "author": "민수",
     "authorKey": "son",
-    "title": "민수의 창의 예술 작품 (3854)",
-    "category": "그림/미술",
-    "categoryIcon": "🎨",
+    "title": "괴수대백과 (로텤스펲펲 & 뿌쀳히탈탈)",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
     "date": "2026-09-22",
-    "grade": "5학년",
+    "grade": "5학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_213854.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_213854.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_214010.jpg"
+    ],
     "hasCutout": false,
-    "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
-    "likes": 0,
-    "stickers": {
-      "heart": 0,
-      "thumb": 0,
-      "star": 0,
-      "trophy": 0
-    },
-    "comments": []
-  },
-  {
-    "id": "art_minsu_20260922_214010",
-    "author": "민수",
-    "authorKey": "son",
-    "title": "민수의 창의 예술 작품 (4010)",
-    "category": "그림/미술",
-    "categoryIcon": "🎨",
-    "date": "2026-09-22",
-    "grade": "5학년",
-    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_214010.jpg",
-    "hasCutout": false,
-    "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
+    "artistNote": "접고 펼쳐보는 상상 속 괴수대백과예요!\n(왼쪽부터)\n• 이름 : 로텤스펲펲 | 능력 : 사람을 늘릴 수 있고, 집을 뒤집을 수 있다.\n• 이름 : 모름? | 능력 : 모름?\n• 이름 : 뿌쀳히탈탈 | 능력 : 5분 뒤에 복제됨\n• 이름 : 콧툰봉돔돌 | 능력 : 사람 조종 / 사람을 안으면 인형이 됨",
     "likes": 0,
     "stickers": {
       "heart": 0,
@@ -48,14 +31,17 @@ const DEFAULT_GALLERY_DATA = [
     "id": "art_minseo_20260922_212553",
     "author": "민서",
     "authorKey": "daughter",
-    "title": "민서의 창의 예술 작품 (2553)",
-    "category": "그림/미술",
-    "categoryIcon": "🎨",
+    "title": "복이 듬뿍 담기는 알록달록 복주머니",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
     "date": "2026-09-22",
-    "grade": "1학년",
+    "grade": "1학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260922_212553.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260922_212553.jpg"
+    ],
     "hasCutout": false,
-    "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
+    "artistNote": "추석을 맞이하여 온 가족의 건강과 행복을 바라는 마음을 담아 정성껏 만든 예쁜 복주머니예요!",
     "likes": 0,
     "stickers": {
       "heart": 0,
@@ -69,14 +55,17 @@ const DEFAULT_GALLERY_DATA = [
     "id": "art_minseo_20260922_212617",
     "author": "민서",
     "authorKey": "daughter",
-    "title": "민서의 창의 예술 작품 (2617)",
-    "category": "그림/미술",
-    "categoryIcon": "🎨",
+    "title": "행운과 소원을 적은 말발굽 공예",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
     "date": "2026-09-22",
-    "grade": "1학년",
+    "grade": "1학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260922_212617.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260922_212617.jpg"
+    ],
     "hasCutout": false,
-    "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
+    "artistNote": "늘봄학교에서 말 친구들을 만나고 행운을 가져다주는 말발굽에 소중한 마음과 소원을 적어 예쁘게 꾸몄어요!",
     "likes": 0,
     "stickers": {
       "heart": 0,
@@ -90,14 +79,17 @@ const DEFAULT_GALLERY_DATA = [
     "id": "art_minseo_20260922_212802",
     "author": "민서",
     "authorKey": "daughter",
-    "title": "민서의 창의 예술 작품 (2802)",
+    "title": "추석맞이 클레이 송편 비누",
     "category": "만들기/공예",
     "categoryIcon": "✂️",
     "date": "2026-09-22",
-    "grade": "1학년",
+    "grade": "1학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260922_212802.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260922_212802.png"
+    ],
     "hasCutout": true,
-    "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
+    "artistNote": "클레이처럼 조물조물 빚어 만든 알록달록 추석 송편 비누예요! 가정에서 깨끗하게 손을 씻을 때 사용할 수 있답니다.",
     "likes": 0,
     "stickers": {
       "heart": 0,
@@ -117,6 +109,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-18",
     "grade": "1학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260918_111036(1).jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260918_111036(1).jpg"
+    ],
     "hasCutout": false,
     "artistNote": "둥근 보름달 속에서 옥토끼 두 마리가 정답게 방아를 찧는 모습을 알록달록 색칠하고 조립해 완성한 한가위 전통 원목 벽걸이 모빌입니다!",
     "likes": 0,
@@ -138,6 +133,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-18",
     "grade": "1학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_28129358_1789698695249740.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_28129358_1789698695249740.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "예쁜 핫핑크와 연핑크 색종이를 정성껏 접어 시계 줄을 만들고, 반짝이 하트와 손으로 직접 시침·분침을 그려 넣은 세상에 하나뿐인 나만의 패션 손목시계예요!",
     "likes": 0,
@@ -159,6 +157,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-15",
     "grade": "5학년 2학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260915_212259(1).jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260915_212259(1).jpg"
+    ],
     "hasCutout": false,
     "artistNote": "흙으로 빚은 도자기 종에 개성 넘치는 표정과 눈물방울을 익살스럽게 그리고 구슬과 바람추를 연결해 완성한 감성 도자기 풍경(윈드차임)입니다!",
     "likes": 0,
@@ -180,6 +181,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년 1학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_194147.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_194147.png"
+    ],
     "hasCutout": true,
     "artistNote": "향긋한 계피 스틱과 샛노란 드라이플라워, 푸른 모래를 담아 싱그러운 숲의 향기가 날 것 같은 원형 입체 액자를 완성했습니다.",
     "likes": 0,
@@ -201,6 +205,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_194238.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_194238.png"
+    ],
     "hasCutout": true,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -222,6 +229,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년 1학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204259.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204259.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "산타 할아버지와 진저브레드맨이 함께하는 원목 크리스마스 트리를 조립하고 촛불 무드등을 밝힐 수 있게 만들었어요.",
     "likes": 0,
@@ -243,6 +253,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204346.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204346.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -264,6 +277,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204602.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204602.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -285,6 +301,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204711.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204711.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -306,6 +325,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204734.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204734.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -327,6 +349,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204851.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_204851.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -348,6 +373,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205132.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205132.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -369,6 +397,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205222.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205222.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -390,6 +421,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205306.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205306.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -411,6 +445,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205344.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205344.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -432,6 +469,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205407.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205407.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -453,6 +493,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205513.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205513.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -474,6 +517,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205640.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205640.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -495,6 +541,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205712.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205712.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -516,6 +565,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205748.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205748.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -537,6 +589,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205836.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205836.png"
+    ],
     "hasCutout": true,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -558,6 +613,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205906.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_205906.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -579,6 +637,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_210024.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_210024.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -600,6 +661,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_210122.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_210122.png"
+    ],
     "hasCutout": true,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -621,6 +685,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "5학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_210137.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260906_210137.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민수가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -642,6 +709,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년 1학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_194054.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_194054.png"
+    ],
     "hasCutout": true,
     "artistNote": "눈 내리는 밤하늘에 반짝이는 크리스마스 트리와 선물 가득 담긴 산타 양말을 정성껏 그려 넣은 따뜻한 겨울 캔버스 작품이에요!",
     "likes": 0,
@@ -663,6 +733,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204407.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204407.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -684,6 +757,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204434.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204434.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -705,6 +781,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204502.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204502.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -726,6 +805,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204628.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204628.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -747,6 +829,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204800.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204800.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -768,6 +853,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "유치원",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204832.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204832.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "유치원 다닐 때 킹콩블럭으로 멋진 상상력을 펼치는 과학창의력대회에 나가서 자랑스럽게 받은 영광의 금메달이에요! 🥇✨",
     "likes": 0,
@@ -789,6 +877,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204939.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204939.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -810,6 +901,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-06",
     "grade": "1학년",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_210412.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_210412.png"
+    ],
     "hasCutout": true,
     "artistNote": "민서가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.",
     "likes": 0,
@@ -831,6 +925,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-02",
     "grade": "5학년 1학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_cubism_art_20260902.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_cubism_art_20260902.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "피카소의 입체파(큐비즘) 기법을 활용하여 얼굴의 옆모습과 앞모습을 한 화면에 담았어요. 따뜻한 노랑과 시원한 하늘색, 무지개 배경으로 다양한 마음의 색깔을 표현했습니다!",
     "likes": 0,
@@ -852,6 +949,9 @@ const DEFAULT_GALLERY_DATA = [
     "date": "2026-09-02",
     "grade": "1학년 1학기",
     "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_mini_garden_20260902.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_mini_garden_20260902.jpg"
+    ],
     "hasCutout": false,
     "artistNote": "투명한 아크릴 온실 집에 알록달록 클레이로 빚은 핑크빛 지붕 꽃과 앙증맞은 선인장, 보라색 꽃 화분을 만들었어요. 미니 조루와 디딤돌도 놓아주었답니다!",
     "likes": 0,

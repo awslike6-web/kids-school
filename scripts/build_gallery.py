@@ -74,6 +74,12 @@ def run():
         except Exception as e:
             print(f"⚠️ gallery-meta.json 읽기 오류 (무시됨): {e}")
 
+    # 다른 작품의 서브 이미지(subImages)로 등록된 파일 매핑
+    sub_image_to_parent = {}
+    for pid, m in meta_dict.items():
+        for sf in m.get('subImages', []):
+            sub_image_to_parent[sf] = pid
+
     items = []
     archive_entries = []
     
@@ -113,6 +119,10 @@ def run():
                         print(f"📦 일기 사진 정리 완료: {f}")
                 except Exception as me:
                     print(f"⚠️ 일기 파일 격리 오류: {me}")
+                continue
+
+            # 다른 작품의 서브 이미지로 묶인 파일인 경우 단독 카드 생성 스킵 (부모 작품에서 변환 및 묶음 처리)
+            if f in sub_image_to_parent:
                 continue
             
             # 새 폴더에 누끼 png가 존재하는지 확인
@@ -199,6 +209,38 @@ def run():
             comments = meta.get("comments", [])
             grade_str = meta.get("grade", "5학년" if author_name == "민수" else ("1학년" if author_name == "민서" else "민수 & 민서 합작"))
 
+            # 🖼️ 다중 이미지(galleryImages) 묶음 구성
+            gallery_images = [cdn_url]
+            archive_gallery_images = [rel_archive_media]
+            for sub_f in meta.get("subImages", []):
+                sub_base, sub_ext = os.path.splitext(sub_f)
+                sub_target_ext = '.png' if sub_ext.lower() == '.png' else '.jpg'
+                sub_dest_filename = f'{sub_dir}_{sub_base}{sub_target_ext}'
+                sub_rel_archive = f"assets/media/{sub_dir}/{sub_path}/{sub_dest_filename}"
+                sub_cdn = f"{CDN_BASE}/{sub_rel_archive}"
+                
+                sub_full_source = os.path.join(folder_full, sub_f)
+                sub_dest_full = os.path.join(target_dirs[sub_dir], sub_dest_filename)
+                if os.path.exists(sub_full_source):
+                    if not os.path.exists(sub_dest_full) or os.path.getmtime(sub_full_source) > os.path.getmtime(sub_dest_full):
+                        try:
+                            with Image.open(sub_full_source) as simg:
+                                simg = ImageOps.exif_transpose(simg)
+                                sw, sh = simg.size
+                                max_dim = 1200
+                                if max(sw, sh) > max_dim:
+                                    scale = max_dim / max(sw, sh)
+                                    simg = simg.resize((int(sw * scale), int(sh * scale)), Image.Resampling.LANCZOS)
+                                if simg.mode in ('RGBA', 'P'):
+                                    simg = simg.convert('RGB')
+                                simg.save(sub_dest_full, format='JPEG', quality=85, optimize=True)
+                            print(f"✨ 서브 이미지 아카이브 최적화 변환: {sub_dest_filename}")
+                        except Exception as se:
+                            print(f"⚠️ 서브 이미지 변환 실패 ({sub_full_source}): {se}")
+                
+                gallery_images.append(sub_cdn)
+                archive_gallery_images.append(sub_rel_archive)
+
             items.append({
                 "id": art_id,
                 "author": author_name,
@@ -209,6 +251,7 @@ def run():
                 "date": meta.get("date", date_str),
                 "grade": grade_str,
                 "imageUrl": cdn_url,
+                "galleryImages": gallery_images,
                 "hasCutout": has_cutout,
                 "artistNote": artist_note,
                 "likes": likes,
@@ -239,7 +282,7 @@ def run():
                 "categoryIcon": category_icon,
                 "title": title,
                 "coverImage": rel_archive_media,
-                "galleryImages": [rel_archive_media],
+                "galleryImages": archive_gallery_images,
                 "description": artist_note,
                 "learningPoints": learning_pts,
                 "awards": "가족 갤러리 명예의 전당 등록",

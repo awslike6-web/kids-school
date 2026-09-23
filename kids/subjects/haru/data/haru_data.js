@@ -181,6 +181,72 @@ window.HARU_DATA = {
         fallbackIcon: "🎂"
       },
       {
+        id: "evt_minseo_horse_20260922",
+        category: "생태/텃밭",
+        categoryIcon: "🐴",
+        title: "🐴 조랑조랑 말들과 친숙해져요",
+        date: "2026-09-22 (늘봄 말 체험)",
+        desc: "학교 수업이 끝나고 늘봄 시간에 조랑조랑 말들과 친숙한 시간을 보냈습니다. 말의 눈을 바라보고, 말의 등을 만져보며 말과 친해지는 시간을 가졌습니다.",
+        icon: "🐴",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_horse_01.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_horse_01.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_horse_02.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_horse_03.jpg"
+        ],
+        fallbackIcon: "🐴"
+      },
+      {
+        id: "evt_minseo_soap_20260922",
+        category: "특별한날",
+        categoryIcon: "🌕",
+        title: "🌕 추석맞이 클레이 비누와 복주머니 만들기",
+        date: "2026-09-22 (추석맞이 늘봄활동)",
+        desc: "추석을 맞이하여 클레이 비누를 만들었습니다. 여러 모양으로 만든 비누와 복이 담기는 복주머니를 만들었습니다. 비누는 가정에서 사용할 수 있습니다. 이렇게 만들기를 하다보니 마음은 벌써 추석으로 가 있습니다.",
+        icon: "🌕",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_soap_01.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_soap_01.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260922_soap_02.jpg"
+        ],
+        fallbackIcon: "🌕"
+      },
+      {
+        id: "evt_minseo_farm_20260904",
+        category: "생태/텃밭",
+        categoryIcon: "🌱",
+        title: "🌱 배추와 무 모종 심기",
+        date: "2026-09-04 (상자 텃밭 모종심기)",
+        desc: "토마토와 고추 및 당근을 심었던 상자 텃밭에 배추와 무 모종을 심었습니다. 손바닥보다 작은 모종이 아직은 여려서 조심조심 심었습니다. \"무럭무럭 자라라\" \"잘 자라주기를 바래\" 이렇게 다정하게 인사하며 배추와 무의 모종을 심었습니다.",
+        icon: "🌱",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_sprout_01.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_sprout_01.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_sprout_02.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_sprout_03.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_sprout_04.jpg"
+        ],
+        fallbackIcon: "🌱"
+      },
+      {
+        id: "evt_minseo_semester2_20260904",
+        category: "학교생활",
+        categoryIcon: "🎒",
+        title: "🎒 2학기 시작! 친구들과 신나는 놀이터",
+        date: "2026-09-04 (2학기 개학 첫 주)",
+        desc: "2학기를 시작하며 놀이터에서 함께 사진을 찍었습니다. 우리 아이들이 방학 동안 자란 모습이 사진에도 보이네요.",
+        icon: "🎒",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_playground_01.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_playground_01.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_playground_02.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_playground_03.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_playground_04.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20260904_playground_05.jpg"
+        ],
+        fallbackIcon: "🎒"
+      },
+      {
         id: "evt_children",
         category: "어린이날",
         categoryIcon: "🎈",

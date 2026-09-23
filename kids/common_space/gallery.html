@@ -947,6 +947,8 @@
             <button class="modal-close-btn" onclick="closeDetailModal()">✕</button>
             <div class="modal-img-container">
                 <img src="" alt="작품 확대 이미지" id="modalImg" class="modal-img">
+                <!-- 🖼️ 다중 사진 썸네일 스위처 바 -->
+                <div id="modalThumbsContainer" style="display:none; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; margin-top:8px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; margin-top:8px;">
                     <button class="modal-zoom-btn" onclick="openOriginalImage()">🪟 새 창에서 원본 보기</button>
                     <a id="modalVideoBtn" href="#" target="_blank" class="modal-video-btn" style="display:none;">
@@ -1577,11 +1579,18 @@
                     </span>
                 ` : '';
 
+                const multiPhotoBadgeHtml = (item.galleryImages && item.galleryImages.length > 1) ? `
+                    <span style="position:absolute; bottom:12px; right:12px; z-index:2; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); color:#fff; font-size:0.78rem; font-family:'Jua', sans-serif; padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; gap:4px;">
+                        <span>📷</span> ${item.galleryImages.length}장
+                    </span>
+                ` : '';
+
                 card.innerHTML = `
                     <div class="card-img-wrap" style="position:relative;">
                         <span class="card-tag-badge">${item.categoryIcon || (isSpecial ? '🌟' : '🎨')} ${item.category}</span>
                         <span class="card-author-badge ${authorBadgeClass}">${authorDisplay}</span>
                         ${videoBadgeHtml}
+                        ${multiPhotoBadgeHtml}
                         <img src="${imgUrl}" alt="${item.title}" class="card-img ${isCutoutClass}" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80'">
                     </div>
                     <div class="card-body">
@@ -1640,6 +1649,41 @@
             document.getElementById('modalImg').src = imgUrl;
             document.getElementById('modalTitle').textContent = item.title;
             
+            // 🖼️ 다중 사진 썸네일 스위처 제어
+            const thumbsContainer = document.getElementById('modalThumbsContainer');
+            const images = (item.galleryImages && item.galleryImages.length > 0) ? item.galleryImages : (item.imageUrl ? [item.imageUrl] : []);
+            if (thumbsContainer) {
+                if (images.length > 1) {
+                    thumbsContainer.style.display = 'flex';
+                    thumbsContainer.innerHTML = '';
+                    images.forEach((imgSrc, idx) => {
+                        const thumbBtn = document.createElement('button');
+                        thumbBtn.type = 'button';
+                        thumbBtn.className = `modal-thumb-btn ${idx === 0 ? 'active' : ''}`;
+                        thumbBtn.title = `사진 ${idx + 1} 보기`;
+                        thumbBtn.style.cssText = `
+                            width: 54px; height: 54px; border-radius: 10px; border: 2.5px solid ${idx === 0 ? 'var(--primary, #4a90e2)' : 'rgba(0,0,0,0.1)'};
+                            padding: 0; overflow: hidden; cursor: pointer; background: #fff; transition: all 0.2s ease;
+                            box-shadow: ${idx === 0 ? '0 2px 8px rgba(74,144,226,0.35)' : 'none'};
+                        `;
+                        thumbBtn.innerHTML = `<img src="${imgSrc}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="사진 ${idx + 1}">`;
+                        thumbBtn.onclick = () => {
+                            document.getElementById('modalImg').src = imgSrc;
+                            thumbsContainer.querySelectorAll('.modal-thumb-btn').forEach(b => {
+                                b.style.borderColor = 'rgba(0,0,0,0.1)';
+                                b.style.boxShadow = 'none';
+                            });
+                            thumbBtn.style.borderColor = 'var(--primary, #4a90e2)';
+                            thumbBtn.style.boxShadow = '0 2px 8px rgba(74,144,226,0.35)';
+                        };
+                        thumbsContainer.appendChild(thumbBtn);
+                    });
+                } else {
+                    thumbsContainer.style.display = 'none';
+                    thumbsContainer.innerHTML = '';
+                }
+            }
+            
             const authorTag = document.getElementById('modalAuthorTag');
             const isMinsu = item.author === '민수';
             const isMinseo = item.author === '민서';
@@ -1694,6 +1738,13 @@
             cancelEditArtistNote();
             document.getElementById('detailModal').style.display = 'none';
             activeArtId = null;
+        }
+
+        function openOriginalImage() {
+            const modalImg = document.getElementById('modalImg');
+            if (modalImg && modalImg.src) {
+                window.open(modalImg.src, '_blank');
+            }
         }
 
         // ========================================================
