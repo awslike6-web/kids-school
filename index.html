@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>민민이네 공부방 - 프로필 선택</title>
+
+<!-- 모바일 웹 앱 메타 태그 및 PWA 파비콘 -->
+<meta name="theme-color" content="#6EC6F5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="manifest" href="./manifest.json?v=20260923_v1">
+
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./kids/css/quick-uploader.css">
 <style>
@@ -273,6 +283,17 @@ document.addEventListener('keydown', function (e) {
   if (e.key >= '0' && e.key <= '9') addNumber(e.key);
   else if (e.key === 'Backspace') keyDel();
   else if (e.key === 'Escape') closePasswordModal();
+});
+
+// 🚀 PWA 바로가기 및 딥링크 라우터
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const action = params.get('action');
+  if (action === 'parent_auth') {
+    setTimeout(() => {
+      openPasswordModal('아빠');
+    }, 150);
+  }
 });
 </script>
 <script src="./kids/core/quick-uploader.js"></script>
