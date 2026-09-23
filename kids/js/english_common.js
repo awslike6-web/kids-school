@@ -622,13 +622,19 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
 function isSentenceRecord(r) {
     if (!r) return false;
     const type = String(r.wordType || r.type || r.pos || '').trim();
-    return type === '문장';
+    if (type === '문장') return true;
+    
+    // 💡 방어 로직: type/pos 누락 시에도 문장부호(. ? !)로 끝나거나 3단어 이상인 경우 문장으로 자동 인식
+    const word = String(r.word || '').trim();
+    if (word.includes(' ') && (word.endsWith('.') || word.endsWith('?') || word.endsWith('!') || word.split(/\s+/).length >= 3)) {
+        return true;
+    }
+    return false;
 }
 
 function isVocaOrIdiomRecord(r) {
     if (!r) return false;
-    const type = String(r.wordType || r.type || r.pos || '').trim();
-    if (type === '문장') return false;
+    if (isSentenceRecord(r)) return false;
     return true; // '단어', '숙어' 및 기본 어휘 항목
 }
 
