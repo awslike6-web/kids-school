@@ -561,8 +561,35 @@ function renderWeeklyGrid() {
       </tr>`;
   }).join('');
 
+  // 🌟 [모바일 2일 뷰포트] 오늘 요일 페어 판별 (0=일, 1=월, 2=화, 3=수, 4=목, 5=금, 6=토)
+  const dayNum = new Date().getDay();
+  let defaultPair = 'mon-tue';
+  if (dayNum === 3 || dayNum === 4) {
+    defaultPair = 'wed-thu';
+  } else if (dayNum === 5) {
+    defaultPair = 'thu-fri';
+  } else {
+    defaultPair = 'mon-tue';
+  }
+
+  // 모바일 전용 요일 페어 퀵 네비게이션 탭 바 (월화 / 수목 / 목금)
+  const mobilePairNavHtml = `
+    <div class="mobile-day-pair-nav" id="mobileDayPairNav">
+      <button type="button" class="day-pair-btn ${defaultPair === 'mon-tue' ? 'active' : ''}" data-pair="mon-tue" onclick="scrollToDayPair('mon-tue')">
+        ${(dayNum === 1 || dayNum === 2) ? '<span class="today-dot"></span>' : ''}월 · 화
+      </button>
+      <button type="button" class="day-pair-btn ${defaultPair === 'wed-thu' ? 'active' : ''}" data-pair="wed-thu" onclick="scrollToDayPair('wed-thu')">
+        ${(dayNum === 3 || dayNum === 4) ? '<span class="today-dot"></span>' : ''}수 · 목
+      </button>
+      <button type="button" class="day-pair-btn ${defaultPair === 'thu-fri' ? 'active' : ''}" data-pair="thu-fri" onclick="scrollToDayPair('thu-fri')">
+        ${dayNum === 5 ? '<span class="today-dot"></span>' : ''}목 · 금
+      </button>
+    </div>
+  `;
+
   container.className = '';
   container.innerHTML = `
+    ${mobilePairNavHtml}
     <div class="grid-wrap">
       <table class="weekly-grid">
         <thead>
@@ -574,6 +601,114 @@ function renderWeeklyGrid() {
         <tbody>${bodyRows}</tbody>
       </table>
     </div>`;
+
+  // 🌟 [모바일 2일 뷰포트] 기기 화면 폭에 맞춘 동적 너비 계산 및 오늘 요일 자동 스크롤
+  adjustMobileColumnWidths();
+  autoScrollToTodayPair(defaultPair);
+  initMobileScrollSync();
+}
+
+/**
+ * 🌟 [모바일 2일 뷰포트] 스마트폰 화면 폭에 맞춰 요일 2개 열이 100% 꽉 차도록 동적 너비 계산
+ */
+function adjustMobileColumnWidths() {
+  if (window.innerWidth > 900) return;
+  const gridWrap = document.querySelector('.grid-wrap');
+  if (!gridWrap) return;
+
+  const periodTh = gridWrap.querySelector('th.period-col');
+  const periodWidth = periodTh ? periodTh.offsetWidth : 78;
+  const visibleWidth = gridWrap.clientWidth;
+
+  if (visibleWidth > periodWidth) {
+    const dayColWidth = Math.floor((visibleWidth - periodWidth) / 2);
+    document.documentElement.style.setProperty('--mobile-day-w', `${dayColWidth}px`);
+  }
+}
+
+/**
+ * 🌟 [모바일 2일 뷰포트] 지정한 요일 페어('mon-tue', 'wed-thu', 'thu-fri')로 스크롤 이동
+ */
+window.scrollToDayPair = function(pairKey, isSmooth = true) {
+  const gridWrap = document.querySelector('.grid-wrap');
+  if (!gridWrap || window.innerWidth > 900) return;
+
+  const periodTh = gridWrap.querySelector('th.period-col');
+  const periodWidth = periodTh ? periodTh.offsetWidth : 78;
+  let targetLeft = 0;
+
+  if (pairKey === 'wed-thu') {
+    const wedTh = gridWrap.querySelector('th.day-wed');
+    if (wedTh) {
+      targetLeft = Math.max(0, wedTh.offsetLeft - periodWidth);
+    }
+  } else if (pairKey === 'thu-fri') {
+    const thuTh = gridWrap.querySelector('th.day-thu');
+    if (thuTh) {
+      targetLeft = Math.max(0, thuTh.offsetLeft - periodWidth);
+    }
+  } else {
+    targetLeft = 0;
+  }
+
+  gridWrap.scrollTo({
+    left: targetLeft,
+    behavior: isSmooth ? 'smooth' : 'auto'
+  });
+
+  // 버튼 active 클래스 갱신
+  document.querySelectorAll('.day-pair-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.pair === pairKey);
+  });
+};
+
+/**
+ * 🌟 [모바일 2일 뷰포트] 오늘 요일에 맞춰 최적 요일 쌍으로 자동 스크롤
+ */
+function autoScrollToTodayPair(targetPair) {
+  if (window.innerWidth > 900) return;
+  setTimeout(() => {
+    adjustMobileColumnWidths();
+    scrollToDayPair(targetPair, false);
+  }, 60);
+}
+
+/**
+ * 🌟 [모바일 2일 뷰포트] 스크롤 시 현재 화면에 보이는 요일 페어 버튼 활성화 동기화
+ */
+function initMobileScrollSync() {
+  const gridWrap = document.querySelector('.grid-wrap');
+  if (!gridWrap || gridWrap._scrollSyncBound) return;
+  gridWrap._scrollSyncBound = true;
+
+  let scrollTimeout = null;
+  gridWrap.addEventListener('scroll', () => {
+    if (window.innerWidth > 900) return;
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const periodTh = gridWrap.querySelector('th.period-col');
+      const periodWidth = periodTh ? periodTh.offsetWidth : 78;
+      const wedTh = gridWrap.querySelector('th.day-wed');
+      const thuTh = gridWrap.querySelector('th.day-thu');
+
+      const wedLeft = wedTh ? (wedTh.offsetLeft - periodWidth) : 200;
+      const thuLeft = thuTh ? (thuTh.offsetLeft - periodWidth) : 300;
+      const currentScroll = gridWrap.scrollLeft;
+
+      let activePair = 'mon-tue';
+      if (currentScroll >= thuLeft - 30) {
+        activePair = 'thu-fri';
+      } else if (currentScroll >= wedLeft - 30) {
+        activePair = 'wed-thu';
+      } else {
+        activePair = 'mon-tue';
+      }
+
+      document.querySelectorAll('.day-pair-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.pair === activePair);
+      });
+    }, 60);
+  }, { passive: true });
 }
 
 /**
@@ -1056,6 +1191,11 @@ window.addEventListener('DOMContentLoaded', () => {
   applyViewerUi();
   loadTimetableData();
   setInterval(loadTimetableData, 5 * 60 * 1000);
+
+  // 📱 모바일 화면 회전 및 리사이즈 시 컬럼 너비 재조정
+  window.addEventListener('resize', () => {
+    adjustMobileColumnWidths();
+  });
 
   // 바깥 영역 클릭/터치 시 모든 활성화된 툴팁(수업 메모 & 공지사항) 일괄 닫기
   document.addEventListener('click', () => {
