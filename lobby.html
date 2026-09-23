@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>민민이네 공부방 - 대형 로비</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./kids/css/quick-uploader.css">
 <style>
   :root {
     --sky: #6EC6F5; --yellow: #FFD93D; --pink: #FF6B9D; --mint: #4ECDC4;
@@ -287,6 +288,30 @@
   .sub-room-name { font-size: 1.15rem; font-weight: bold; margin-bottom: 2px; }
   .sub-room-desc { font-size: 0.8rem; opacity: 0.8; font-family: 'Gaegu', cursive; }
   .back-btn { margin-top: 36px; padding: 14px 32px; border-radius: 18px; border: 2.5px solid rgba(0,0,0,0.08); font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
+
+  /* 🔮 3학년 미래 교과 접이식 보관소 */
+  .future-worlds-wrap { width: 100%; max-width: 860px; margin-top: 24px; }
+  .future-toggle-btn { width: 100%; padding: 16px 20px; border-radius: 20px; font-family: 'Jua', sans-serif; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.25s ease; box-shadow: 0 4px 14px rgba(0,0,0,0.06); touch-action: manipulation; }
+  body.theme--hideout .future-toggle-btn { background: #fff5f7; border: 2px dashed #f472b6; color: #db2777; }
+  body.theme--hideout .future-toggle-btn:hover { background: #ffe4e6; transform: translateY(-2px); }
+  body.theme--arcade .future-toggle-btn { background: rgba(30, 25, 50, 0.7); border: 2px dashed #818cf8; color: #a5b4fc; }
+  body.theme--arcade .future-toggle-btn:hover { background: rgba(45, 36, 84, 0.8); transform: translateY(-2px); }
+
+  .future-toggle-btn .toggle-icon { font-size: 0.9rem; transition: transform 0.25s ease; }
+  .future-toggle-btn.open .toggle-icon { transform: rotate(180deg); }
+
+  .future-notice-badge { font-size: 0.85rem; font-family: 'Nanum Gothic', sans-serif; opacity: 0.85; font-weight: normal; margin-left: 8px; }
+  
+  .future-content-box { display: none; margin-top: 14px; animation: futureFadeIn 0.3s ease; }
+  .future-content-box.open { display: block; }
+  @keyframes futureFadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .future-guide-banner { padding: 12px 16px; border-radius: 14px; font-size: 0.9rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  body.theme--hideout .future-guide-banner { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+  body.theme--arcade .future-guide-banner { background: rgba(99, 102, 241, 0.15); color: #c7d2fe; border: 1px solid rgba(165, 180, 252, 0.3); }
+
+  .future-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+  @media (max-width: 768px) { .future-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -298,7 +323,12 @@
   <div class="lobby-top-bar">
     <a href="index.html" class="top-back-btn">← 프로필</a>
     <div class="admin-child-switcher" id="adminChildSwitcher"></div>
-    <button type="button" class="compact-tts-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button type="button" class="qu-trigger-btn" style="padding: 7px 14px; font-size: 0.88rem;" onclick="openQuickUploader({ defaultAuthor: (typeof currentChild !== 'undefined' && currentChild === 'minseo') ? '민서' : '민수' })">
+        <span>📸</span> 찰칵! 올리기
+      </button>
+      <button type="button" class="compact-tts-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성 ON</button>
+    </div>
   </div>
 
   <!-- 💡 메인 타이틀 & 환영 인사 -->
@@ -334,6 +364,7 @@
 
   <!-- 🛠️ 관리자 / 보조 퀵 툴바 (성장 대시보드, 부모 일기장, 교재 이미지 체인저, 관제탑) -->
   <div class="admin-quick-toolbar" id="quickToolbar" style="display: none;">
+    <button type="button" class="admin-tool-chip" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: bold; border:none; cursor:pointer;" onclick="openQuickUploader()">📸 성장 사진 퀵 등록</button>
     <a href="parent_diary.html" class="admin-tool-chip diary-btn" id="parentDiaryLink" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); color: #fff; font-weight: bold;">📝 엄마·아빠 일기장</a>
     <a href="parent_dashboard.html" class="admin-tool-chip dashboard-btn" id="dashboardLink">📊 실시간 통합 성장 대시보드</a>
     <a href="admin-image-changer.html" class="admin-tool-chip image-changer-btn" id="imageChangerLink" style="display:none; background: linear-gradient(135deg, #0284c7, #38bdf8); color: #fff; font-weight: bold;">🖼️ 교재 이미지 체인저</a>
@@ -446,12 +477,29 @@ const USER_CONFIGS = {
         ]
       },
       {
+        title: '🌱 슬기로운 하루 (통합)',
+        color: '#2ed573',
+        rooms: [
+          { name: '하루 탐험관 (1학년 2학기)', href: 'kids/subjects/haru/haru.html', desc: '⚡ [매일 30초 체크인] 착한 습관 저금통 + 튼튼 운동 도장 + 마음 날씨 원스톱 기록 & 명화·추억 갤러리!' }
+        ]
+      },
+      {
         title: '🔤 영어 던전',
         color: '#0284c7',
         rooms: [
           { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
         ]
       },
+      {
+        title: '🦖 탐구 사전관',
+        color: '#8b5cf6',
+        rooms: [
+          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
+        ]
+      }
+    ],
+    // 🔮 3학년 이후 개방되는 미래 교과 보관소 (평소에는 가려짐)
+    futureWorlds: [
       {
         title: '🧪 과학 실험실',
         color: '#10b981',
@@ -464,20 +512,6 @@ const USER_CONFIGS = {
         color: '#d97706',
         rooms: [
           { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
-        ]
-      },
-      {
-        title: '🌱 슬기로운 하루 (통합)',
-        color: '#2ed573',
-        rooms: [
-          { name: '하루 탐험관 (1학년 2학기)', href: 'kids/subjects/haru/haru.html', desc: '⚡ [매일 30초 체크인] 착한 습관 저금통 + 튼튼 운동 도장 + 마음 날씨 원스톱 기록 & 명화·추억 갤러리!' }
-        ]
-      },
-      {
-        title: '🦖 탐구 사전관',
-        color: '#8b5cf6',
-        rooms: [
-          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
         ]
       }
     ],
@@ -507,7 +541,7 @@ const USER_CONFIGS = {
 
 // 기존 worlds 참조 코드와의 완벽한 하위 호환성 유지
 Object.values(USER_CONFIGS).forEach(cfg => {
-  cfg.worlds = [...(cfg.studyWorlds || []), ...(cfg.hideoutWorlds || [])];
+  cfg.worlds = [...(cfg.studyWorlds || []), ...(cfg.futureWorlds || []), ...(cfg.hideoutWorlds || [])];
 });
 
 // (노션 헬퍼에 통합되었으므로 중복 선언 삭제)
@@ -813,63 +847,113 @@ loadCoreScripts("kids/core/", requiredCores, () => {
       currentLobbyTab = 'hideout';
     }
 
+    function createWorldCard(world) {
+      const card = document.createElement('div');
+      card.className = 'world-card';
+      if (world.color) {
+        card.style.borderTop = `4px solid ${world.color}`;
+      }
+
+      const title = document.createElement('div');
+      title.className = 'world-title';
+      title.textContent = world.title;
+      card.appendChild(title);
+
+      const roomList = document.createElement('div');
+      roomList.className = 'sub-room-list';
+
+      world.rooms.forEach(room => {
+        let detectedSubj = null;
+        if (room.href.includes('math.html')) detectedSubj = '수학';
+        else if (room.href.includes('korean.html')) detectedSubj = '국어';
+        else if (room.href.includes('english.html')) detectedSubj = '영어';
+        else if (room.href.includes('science.html')) detectedSubj = '과학';
+        else if (room.href.includes('society.html')) detectedSubj = '사회';
+
+        let boostHtml = '';
+        if (detectedSubj && typeof window.TimetableBoost !== 'undefined') {
+          const boost = window.TimetableBoost.getSubjectBoostInfo(detectedSubj, finalRealName);
+          if (boost && boost.badge) {
+            boostHtml = `
+              <div class="timetable-boost-chip" style="display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; padding:3px 10px; border-radius:12px; background:${boost.badge.bgGradient}; border:1.5px solid ${boost.badge.borderColor}; color:${boost.badge.color}; font-weight:bold; margin-bottom:6px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+                <span>${boost.badge.text}</span>
+                <span style="font-size:0.72rem; font-weight:normal; opacity:0.92;">${boost.badge.subText}</span>
+              </div>
+            `;
+          }
+        }
+
+        const a = document.createElement('a');
+        a.href = room.href;
+        a.className = 'sub-room-btn';
+        a.innerHTML = `
+          ${boostHtml}
+          <div class="sub-room-name">${room.name}</div>
+          <div class="sub-room-desc">${room.desc}</div>
+        `;
+        roomList.appendChild(a);
+      });
+
+      card.appendChild(roomList);
+      return card;
+    }
+
     function renderWorldGrid(tab) {
       const grid = document.getElementById('worldGrid');
       if (!grid) return;
       grid.innerHTML = '';
+
+      // 기존 미래 교과 보관소가 DOM에 있으면 먼저 정리
+      const existingFutureWrap = document.getElementById('futureWorldsWrap');
+      if (existingFutureWrap) existingFutureWrap.remove();
+
       const worlds = tab === 'hideout' ? currentConfig.hideoutWorlds : currentConfig.studyWorlds;
-
       (worlds || []).forEach(world => {
-        const card = document.createElement('div');
-        card.className = 'world-card';
-        if (world.color) {
-          card.style.borderTop = `4px solid ${world.color}`;
-        }
-
-        const title = document.createElement('div');
-        title.className = 'world-title';
-        title.textContent = world.title;
-        card.appendChild(title);
-
-        const roomList = document.createElement('div');
-        roomList.className = 'sub-room-list';
-
-        world.rooms.forEach(room => {
-          let detectedSubj = null;
-          if (room.href.includes('math.html')) detectedSubj = '수학';
-          else if (room.href.includes('korean.html')) detectedSubj = '국어';
-          else if (room.href.includes('english.html')) detectedSubj = '영어';
-          else if (room.href.includes('science.html')) detectedSubj = '과학';
-          else if (room.href.includes('society.html')) detectedSubj = '사회';
-
-          let boostHtml = '';
-          if (detectedSubj && typeof window.TimetableBoost !== 'undefined') {
-            const boost = window.TimetableBoost.getSubjectBoostInfo(detectedSubj, finalRealName);
-            if (boost && boost.badge) {
-              boostHtml = `
-                <div class="timetable-boost-chip" style="display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; padding:3px 10px; border-radius:12px; background:${boost.badge.bgGradient}; border:1.5px solid ${boost.badge.borderColor}; color:${boost.badge.color}; font-weight:bold; margin-bottom:6px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
-                  <span>${boost.badge.text}</span>
-                  <span style="font-size:0.72rem; font-weight:normal; opacity:0.92;">${boost.badge.subText}</span>
-                </div>
-              `;
-            }
-          }
-
-          const a = document.createElement('a');
-          a.href = room.href;
-          a.className = 'sub-room-btn';
-          a.innerHTML = `
-            ${boostHtml}
-            <div class="sub-room-name">${room.name}</div>
-            <div class="sub-room-desc">${room.desc}</div>
-          `;
-          roomList.appendChild(a);
-        });
-
-        card.appendChild(roomList);
-        grid.appendChild(card);
+        grid.appendChild(createWorldCard(world));
       });
+
+      // 🔮 3학년 미래 교과 보관소 (사회·과학) 렌더링 (공부방 탭 & futureWorlds 데이터가 있을 때만)
+      if (tab === 'study' && currentConfig.futureWorlds && currentConfig.futureWorlds.length > 0) {
+        const futureWrap = document.createElement('div');
+        futureWrap.id = 'futureWorldsWrap';
+        futureWrap.className = 'future-worlds-wrap';
+        futureWrap.innerHTML = `
+          <button type="button" class="future-toggle-btn" id="futureToggleBtn" onclick="toggleFutureWorlds()">
+            <span>🔮 3학년 미래 교과 보관소 <span class="future-notice-badge">(사회·과학 미리보기)</span></span>
+            <span class="toggle-icon">▼</span>
+          </button>
+          <div class="future-content-box" id="futureContentBox">
+            <div class="future-guide-banner">
+              <span>🎒</span>
+              <div>초등 3학년부터 시작되는 새로운 탐구 과목이에요! 지금은 먼저 둘러보며 구경하거나 오빠 공부를 엿볼 수 있어요. 민서가 3학년이 되면 정규 공부방으로 올라옵니다 ✨</div>
+            </div>
+            <div class="future-grid" id="futureGrid"></div>
+          </div>
+        `;
+        grid.insertAdjacentElement('afterend', futureWrap);
+
+        const futureGrid = futureWrap.querySelector('#futureGrid');
+        if (futureGrid) {
+          currentConfig.futureWorlds.forEach(world => {
+            futureGrid.appendChild(createWorldCard(world));
+          });
+        }
+      }
     }
+
+    window.toggleFutureWorlds = function() {
+      const btn = document.getElementById('futureToggleBtn');
+      const box = document.getElementById('futureContentBox');
+      if (!btn || !box) return;
+      const isOpen = box.classList.contains('open');
+      if (isOpen) {
+        box.classList.remove('open');
+        btn.classList.remove('open');
+      } else {
+        box.classList.add('open');
+        btn.classList.add('open');
+      }
+    };
 
     window.switchLobbyTab = function(tab) {
       currentLobbyTab = tab;
@@ -1073,5 +1157,6 @@ loadCoreScripts("kids/core/", requiredCores, () => {
     updateLobbyScreenTimeBtn(finalRealName);
 });
 </script>
+<script src="./kids/core/quick-uploader.js"></script>
 </body>
 </html>

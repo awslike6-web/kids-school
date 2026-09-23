@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>민민이네 공부방 - 프로필 선택</title>
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./kids/css/quick-uploader.css">
 <style>
   /* 기본 설정 및 테마 */
   :root {
@@ -114,6 +115,11 @@
       <div class="profile-avatar">👩</div><div>엄마</div>
     </button>
   </div>
+  <div style="margin-top: 24px; text-align: center;">
+    <button type="button" class="qu-trigger-btn" onclick="openQuickUploader()">
+      <span>📸</span> 우리 가족 찰칵! 바로 올리기
+    </button>
+  </div>
 </div>
 
 <div class="pw-overlay" id="pwOverlay" onclick="closePasswordModal(event)">
@@ -154,6 +160,7 @@
           <span class="toggle-icon" id="extraToggleIcon">▼</span>
         </button>
         <div class="extra-tools-content" id="extraToolsContent">
+          <button class="admin-sub-btn" style="background: linear-gradient(145deg, #10b981, #059669); color: white;" onclick="openQuickUploader({ defaultAuthor: currentAdminName })">📸 성장 사진 퀵 등록</button>
           <button class="admin-sub-btn diary" onclick="goAdminCustom('parent_diary.html')">📝 엄마·아빠 일기장 (일상 & 생각)</button>
           <button class="admin-sub-btn changer" onclick="goAdminCustom('admin-image-changer.html')">🖼️ 교재 이미지 퀵 체인저</button>
           <button class="admin-sub-btn multi" onclick="goAdminCustom('multiverse/index_friends.html')">🌌 멀티버스 (친구들)</button>
@@ -268,5 +275,6 @@ document.addEventListener('keydown', function (e) {
   else if (e.key === 'Escape') closePasswordModal();
 });
 </script>
+<script src="./kids/core/quick-uploader.js"></script>
 </body>
 </html>
