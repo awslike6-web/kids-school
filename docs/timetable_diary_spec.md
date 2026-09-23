@@ -135,10 +135,14 @@ graph LR
 3. **영구 미디어 보관**:
    - 원본 사진은 `uploads/ex/갤러리/{학생}/YYYYMMDD_{학생}일기_{주제}.jpg`로 복사.
    - `build_gallery.py` 실행 시 1200px 압축 후 영구 보존소인 **`kids-archive`** (`https://github.com/awslike6-web/kids-archive`)에 배포되어 12년 성장 아카이브로 영구 보존된다.
-4. **[로드맵 / 백로그] 종이일기 구분 및 원본 사진 링크 연동 표준 (`uploads/ex/일기/민수/`)**:
-   - **단순 종이 사진만 업로드 시**: 노션 DB의 `구분` 속성을 **`"종이일기"`**로 지정.
-   - **내용을 텍스트로 옮겨 적었을 시**: 노션 DB의 `구분` 속성을 **`"일기"`**로 지정하되, 본문에 원본 종이 사진 링크(GitHub CDN 경로 또는 이미지 블록)가 자동 포함되도록 연동.
-   - **현황판 추적**: 공부방 개발 현황판 `[시작 전]` 카드로 등록 보존 관리 (`https://app.notion.com/p/3dfa27115b6881fba37efbbfd7655a80`).
+4. **손글씨 종이일기 원본 보존 & 노션 연동 표준 파이프라인 (`scripts/sync_paper_diaries.py`) [구축 완료]**:
+   - **원본 수납**: `kids-school-main/uploads/ex/일기/{학생}/`
+   - **영구 배포**: `kids-archive/assets/media/{학생}/paper_diary/paper_diary_{학생}_{YYYYMMDD}_{주제}.jpg` (EXIF 보정, 1400px 최적화)
+   - **GitHub CDN 참조**: `https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/{학생}/paper_diary/...`
+   - **노션 블록 레이아웃 표준 (Page content 카드 뷰 최적화)**:
+     - **단순 종이 사진만 업로드 시 (`구분: 종이일기`)**: 1번 블록에 고화질 손글씨 이미지 블록(`image external`) 배치 ➔ 노션 카드 썸네일에서 손글씨 사진이 바로 노출.
+     - **텍스트 전사 완료 시 (`구분: 일기`)**: 1번 블록(아이가 쓴 일기 텍스트 paragraph ➔ 카드 요약 텍스트 노출) + 2번 블록(다짐/한마디 callout) + 3번 블록(고화질 손글씨 원본 image external 블록 연동).
+   - **일괄 재구성 보호**: `scripts/update_diary_page_blocks.py` 실행 시에도 기존 image 블록이 절대 유실되지 않고 자동 보존됨.
 
 ---
 
