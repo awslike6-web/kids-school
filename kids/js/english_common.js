@@ -184,8 +184,8 @@ const ENGLISH_PHONICS_DICT = {
 
   // 8단원 (외모 & 옷차림 묘사 & 친구 찾기) 핵심 단어
   "curly": "컬리", "straight": "스트레이트", "short": "쇼트", "long": "롱", "blonde": "블론드", "blond": "블론드",
-  "hair": "헤어", "brown": "브라운", "blue": "블루", "green": "그린", "black": "블랙", "hazel": "헤이즐",
-  "eyes": "아이즈", "eye": "아이", "glasses": "글래시스", "pants": "팬츠", "shirt": "셔츠", "dress": "드레스", "skirt": "스커트",
+  "hair": "헤어", "brown": "브라운", "blue": "블루", "green": "그린", "black": "블랙", "red": "레드", "hazel": "헤이즐",
+  "eyes": "아이즈", "eye": "아이", "glasses": "글래시스", "pants": "팬츠", "shirt": "셔츠", "t-shirt": "티셔츠", "tshirt": "티셔츠", "dress": "드레스", "skirt": "스커트",
   "jacket": "재킷", "scarf": "스카프", "hat": "햇", "cap": "캡", "shoes": "슈즈", "shoe": "슈",
   "wear": "웨어", "wearing": "웨어링", "wore": "워", "he": "히", "she": "쉬", "find": "파인드", "cry": "크라이",
   "wrong": "롱", "girl": "걸", "boy": "보이", "ask": "애스크", "any": "애니", "looks": "룩스", "cool": "쿨",
