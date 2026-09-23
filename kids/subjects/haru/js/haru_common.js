@@ -591,24 +591,41 @@ function handleStoryUrlInput(url) {
 
 function getSpecialStories() {
   const defaults = (window.HARU_DATA && window.HARU_DATA.specialDays && window.HARU_DATA.specialDays.defaultEvents) || [];
+  let customMeta = {};
+  try {
+    const rawMeta = localStorage.getItem("SPECIAL_DAYS_CUSTOM_META");
+    if (rawMeta) customMeta = JSON.parse(rawMeta);
+  } catch(e) {}
+
   try {
     const saved = localStorage.getItem("haru_special_stories_" + currentChild);
     if (saved) {
       const parsed = JSON.parse(saved);
       // 사용자가 직접 추가한 커스텀 스토리(evt_custom_...) 분리
       const customStories = parsed.filter(s => s.id && s.id.startsWith("evt_custom_"));
-      // 기본 이벤트들은 HARU_DATA 최신 데이터 기준으로 동기화 (사용자가 제목 수정한 경우 그 제목만 유지)
+      // 기본 이벤트들은 HARU_DATA 최신 데이터 기준으로 동기화 (커스텀 메타 및 사용자 제목 수정 반영)
       const mergedDefaults = defaults.map(def => {
+        let res = { ...def };
+        if (customMeta[def.id]) {
+          res = { ...res, ...customMeta[def.id] };
+        }
         const found = parsed.find(s => s.id === def.id);
         if (found && found._userEditedTitle) {
-          return { ...def, title: found.title, _userEditedTitle: true };
+          res.title = found.title;
+          res._userEditedTitle = true;
         }
-        return def;
+        return res;
       });
       return [...customStories, ...mergedDefaults];
     }
   } catch(e) {}
-  return defaults;
+
+  return defaults.map(def => {
+    if (customMeta[def.id]) {
+      return { ...def, ...customMeta[def.id] };
+    }
+    return def;
+  });
 }
 
 function switchCardPhoto(event, thumbEl, targetUrl, mainImgId) {

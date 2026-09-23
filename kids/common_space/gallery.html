@@ -791,6 +791,78 @@
         }
         .empty-gallery h3 { font-family: 'Jua', sans-serif; font-size: 1.5rem; margin-bottom: 8px; color: var(--primary); }
         .empty-gallery p { font-family: 'Gaegu', cursive; font-size: 1.2rem; color: var(--text-sub); }
+
+        /* 🌟 2대 뷰 모드 스위처 (작품 vs 특별한 날) */
+        .view-mode-switcher-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 14px 0 20px 0;
+        }
+        .view-mode-switcher {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.06);
+            padding: 5px;
+            border-radius: 20px;
+            border: 1.5px solid var(--frame-border);
+            gap: 6px;
+        }
+        .view-mode-btn {
+            padding: 9px 20px;
+            border-radius: 15px;
+            font-family: 'Jua', sans-serif;
+            font-size: 1.05rem;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-sub);
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .view-mode-btn:hover {
+            color: var(--text-main);
+        }
+        .view-mode-btn.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+            font-weight: bold;
+        }
+        .card-video-badge {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.78);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: 'Jua', sans-serif;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 2;
+        }
+        .modal-video-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: #fff;
+            border-radius: 12px;
+            font-family: 'Jua', sans-serif;
+            font-size: 0.95rem;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(255, 65, 108, 0.35);
+            transition: transform 0.2s ease;
+        }
+        .modal-video-btn:hover {
+            transform: scale(1.03);
+            color: #fff;
+        }
     </style>
 </head>
 <body class="theme--arcade">
@@ -799,7 +871,7 @@
     <nav class="nav-bar">
         <div class="nav-left">
             <a href="../../lobby.html" class="nav-logo">
-                <span>🖼️</span> <span>꿈나무 작품 갤러리</span>
+                <span>🖼️</span> <span id="navLogoText">꿈나무 작품 갤러리</span>
             </a>
         </div>
         <div class="nav-right">
@@ -822,15 +894,27 @@
                 <p id="heroSubtitle">학교와 집에서 정성껏 만든 소중한 작품들을 감상하고 칭찬해 주세요!</p>
             </div>
             <div class="hero-actions">
-                <button class="add-art-btn" onclick="openQuickUploader({ defaultCategory: '작품', defaultAuthor: (typeof currentUserName !== 'undefined' && currentUserName === '민서') ? '민서' : '민수' })">
-                    <span>✨</span> <span>새 작품 찰칵 올리기</span>
+                <button class="add-art-btn" id="heroUploadActionBtn" onclick="handleHeroUploadAction()">
+                    <span>✨</span> <span id="heroUploadBtnText">새 작품 찰칵 올리기</span>
                 </button>
             </div>
         </header>
 
+        <!-- 🌟 2대 뷰 모드 스위처 (성장 작품 vs 특별한 날 추억) -->
+        <div class="view-mode-switcher-wrap">
+            <div class="view-mode-switcher">
+                <button type="button" class="view-mode-btn active" id="btnModeArt" onclick="switchViewMode('art')">
+                    <span>🎨</span> <span>성장 작품</span> (<span id="countArtworks">41</span>)
+                </button>
+                <button type="button" class="view-mode-btn" id="btnModeSpecial" onclick="switchViewMode('special')">
+                    <span>🌟</span> <span>특별한 날 추억</span> (<span id="countSpecials">4</span>)
+                </button>
+            </div>
+        </div>
+
         <!-- 🎯 통계 미니 바 -->
         <div class="stats-mini-bar">
-            <div class="stat-badge">🖼️ 총 전시 작품 <span id="statTotalCount">0</span>점</div>
+            <div class="stat-badge"><span id="statCountLabel">🖼️ 총 전시 작품</span> <span id="statTotalCount">0</span>점</div>
             <div class="stat-badge">💖 받은 칭찬 하트 <span id="statTotalLikes">0</span>개</div>
             <div class="stat-badge">💬 가족 칭찬 메모 <span id="statTotalComments">0</span>개</div>
         </div>
@@ -863,7 +947,12 @@
             <button class="modal-close-btn" onclick="closeDetailModal()">✕</button>
             <div class="modal-img-container">
                 <img src="" alt="작품 확대 이미지" id="modalImg" class="modal-img">
-                <button class="modal-zoom-btn" onclick="openOriginalImage()">🪟 새 창에서 원본 보기</button>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; margin-top:8px;">
+                    <button class="modal-zoom-btn" onclick="openOriginalImage()">🪟 새 창에서 원본 보기</button>
+                    <a id="modalVideoBtn" href="#" target="_blank" class="modal-video-btn" style="display:none;">
+                        <span>🎬</span> <span id="modalVideoBtnText">동영상 풀영상 감상하기</span>
+                    </a>
+                </div>
             </div>
             <div class="modal-content">
                 <div class="modal-header-info">
@@ -882,17 +971,17 @@
                             </div>
                         </div>
 
-                        <!-- 📝 작품 전체 정보(분야/일자/제목/내용) 웹 편집 폼 -->
+                        <!-- 📝 작품 / 특별한 날 전체 정보 웹 편집 폼 -->
                         <div id="artFullEditArea" class="art-full-edit-box" style="display: none; margin-top: 10px; margin-bottom: 14px; padding: 14px; background: rgba(0,0,0,0.03); border-radius: 14px; border: 1.5px solid var(--frame-border);">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <span style="font-family:'Jua', sans-serif; font-size:1.05rem; color:var(--primary); display:flex; align-items:center; gap:6px;">
+                                <span id="editModalHeaderTitle" style="font-family:'Jua', sans-serif; font-size:1.05rem; color:var(--primary); display:flex; align-items:center; gap:6px;">
                                     <span>✏️</span> 작품 정보 & 표준 5대 분야 수정
                                 </span>
-                                <span style="font-size:0.8rem; color:var(--text-sub);">실시간 노션 DB 연동</span>
+                                <span style="font-size:0.8rem; color:var(--text-sub);">실시간 노션 DB 연동 & 이력 백업</span>
                             </div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                                 <div>
-                                    <label style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">분야 (표준 5대 분류)</label>
+                                    <label id="editCategoryLabel" style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">분야 (표준 5대 분류)</label>
                                     <select id="editArtCategorySelect" style="width:100%; padding:8px 10px; border-radius:10px; border:1.5px solid var(--frame-border); font-family:'Jua', sans-serif; font-size:0.95rem; background:var(--card-bg); color:var(--text-main);">
                                         <option value="그림/미술">🎨 그림/미술</option>
                                         <option value="만들기/공예">✂️ 만들기/공예</option>
@@ -907,11 +996,16 @@
                                 </div>
                             </div>
                             <div style="margin-bottom:10px;">
-                                <label style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">작품 제목</label>
+                                <label id="editTitleLabel" style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">작품 제목</label>
                                 <input type="text" id="editArtTitleInput" style="width:100%; padding:8px 12px; border-radius:10px; border:1.5px solid var(--frame-border); font-family:'Jua', sans-serif; font-size:1rem; background:var(--card-bg); color:var(--text-main);" placeholder="멋진 작품 제목을 입력하세요">
                             </div>
+                            <!-- 특별한 날 전용 동영상 링크 입력 row -->
+                            <div id="editSpecialVideoRow" style="display:none; margin-bottom:10px;">
+                                <label style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">🎬 동영상 링크 (구글 포토, 유튜브 등)</label>
+                                <input type="url" id="editArtVideoInput" style="width:100%; padding:8px 12px; border-radius:10px; border:1.5px solid var(--frame-border); font-size:0.95rem; background:var(--card-bg); color:var(--text-main);" placeholder="예: https://photos.app.goo.gl/...">
+                            </div>
                             <div style="margin-bottom:12px;">
-                                <label style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">작가의 한마디 / 작품 설명</label>
+                                <label id="editDescLabel" style="font-family:'Jua', sans-serif; font-size:0.85rem; color:var(--text-sub); display:block; margin-bottom:4px;">작가의 한마디 / 작품 설명</label>
                                 <textarea id="editArtDescInput" rows="3" style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid var(--frame-border); font-family:'Gaegu', cursive; font-size:1.15rem; line-height:1.4; background:var(--card-bg); color:var(--text-main); resize:vertical;" placeholder="어떤 생각과 마음으로 만들었는지 민수/민서만의 멋진 한마디를 적어보세요!"></textarea>
                             </div>
                             <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -1046,17 +1140,25 @@
     <script src="../config.js"></script>
     <script src="../core/fairy-config.js"></script>
     <script src="../core/fairy-engine.js"></script>
-    <!-- 📚 갤러리 기본 데이터 로드 -->
+    <!-- 📚 갤러리 및 특별한 날 마스터 데이터 로드 -->
     <script src="../data/gallery-data.js"></script>
+    <script src="../data/special-days-data.js"></script>
 
     <script>
         // ========================================================
-        // 🏛️ 갤러리 상태 및 데이터 관리
+        // 🏛️ 갤러리 및 특별한 날 상태 / 데이터 관리
         // ========================================================
         const STORAGE_KEY = 'MY_STUDY_ROOM_GALLERY_DATA';
         const STORAGE_VERSION_KEY = 'MY_STUDY_ROOM_GALLERY_VER';
         const CURRENT_STORAGE_VER = 'v20260907_clean';
+        const SPECIAL_STORAGE_KEY = 'MY_STUDY_ROOM_SPECIAL_DAYS_DATA';
+        const SPECIAL_META_KEY = 'SPECIAL_DAYS_CUSTOM_META';
+        const CUSTOM_NOTES_KEY = 'GALLERY_CUSTOM_ARTIST_NOTES';
+        const CUSTOM_META_KEY = 'GALLERY_CUSTOM_META';
+
+        let currentViewMode = 'art'; // 'art' (성장 작품) | 'special' (특별한 날 추억)
         let galleryData = [];
+        let specialDaysData = [];
         let currentAuthorFilter = 'all';
         let currentCategoryFilter = 'all';
         let activeArtId = null;
@@ -1065,6 +1167,26 @@
         // 유저 프로필 및 테마 초기화
         let currentUser = localStorage.getItem('currentUser') || 'son';
         let currentUserName = localStorage.getItem('currentUserName') || '민수';
+
+        // 🏷️ 표준 카테고리 정의
+        const ART_CATEGORIES = [
+            { key: 'all', label: '전체 카테고리', icon: '🎨' },
+            { key: '그림/미술', label: '그림/미술', icon: '🎨' },
+            { key: '만들기/공예', label: '만들기/공예', icon: '✂️' },
+            { key: '종이접기/디자인', label: '종이접기/디자인', icon: '📐' },
+            { key: '상장/기념', label: '상장/기념', icon: '🏆' },
+            { key: '탐구/프로젝트', label: '탐구/프로젝트', icon: '🔬' }
+        ];
+
+        const SPECIAL_CATEGORIES = [
+            { key: 'all', label: '전체 추억', icon: '🌟' },
+            { key: '가족/생일파티', label: '가족/생일파티', icon: '🎂' },
+            { key: '생태/텃밭/체험', label: '생태/텃밭/체험', icon: '🌱' },
+            { key: '소풍/현장학습', label: '소풍/현장학습', icon: '🍁' },
+            { key: '학교행사/운동회', label: '학교행사/운동회', icon: '🎒' },
+            { key: '사계절 자연관찰', label: '사계절 자연관찰', icon: '🌿' },
+            { key: '소중한 하루', label: '소중한 하루', icon: '⭐' }
+        ];
 
         function applyUserTheme() {
             const isDaughter = currentUser === 'daughter' || localStorage.getItem('currentChild') === 'minseo';
@@ -1097,9 +1219,6 @@
             localStorage.setItem('currentUserName', currentUserName);
             applyUserTheme();
         }
-
-        const CUSTOM_NOTES_KEY = 'GALLERY_CUSTOM_ARTIST_NOTES';
-        const CUSTOM_META_KEY = 'GALLERY_CUSTOM_META';
 
         function getCustomArtistNotes() {
             try {
@@ -1139,18 +1258,45 @@
             }
         }
 
+        function getCustomSpecialMetaMap() {
+            try {
+                const raw = localStorage.getItem(SPECIAL_META_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function setCustomSpecialMeta(id, metaObj) {
+            try {
+                const map = getCustomSpecialMetaMap();
+                map[id] = { ...(map[id] || {}), ...metaObj };
+                localStorage.setItem(SPECIAL_META_KEY, JSON.stringify(map));
+            } catch (e) {
+                console.error("특별한 날 커스텀 메타 로컬 저장 오류:", e);
+            }
+        }
+
         function getCategoryIcon(catName) {
             if (!catName) return "🎨";
+            // 작품 분류 아이콘
             if (catName.includes("만들기") || catName.includes("공예")) return "✂️";
             if (catName.includes("종이접기") || catName.includes("디자인")) return "📐";
             if (catName.includes("상장") || catName.includes("기념") || catName.includes("수상")) return "🏆";
             if (catName.includes("탐구") || catName.includes("프로젝트") || catName.includes("연구")) return "🔬";
-            return "🎨";
+            if (catName.includes("그림") || catName.includes("미술")) return "🎨";
+            // 특별한 날 분류 아이콘
+            if (catName.includes("생일") || catName.includes("파티")) return "🎂";
+            if (catName.includes("텃밭") || catName.includes("생태") || catName.includes("체험")) return "🌱";
+            if (catName.includes("소풍") || catName.includes("현장학습")) return "🍁";
+            if (catName.includes("학교") || catName.includes("운동회")) return "🎒";
+            if (catName.includes("자연") || catName.includes("사계절")) return "🌿";
+            if (catName.includes("소중한") || catName.includes("하루")) return "⭐";
+            return "🌟";
         }
 
-        // 📦 갤러리 데이터 로드 (마스터 DB + 사용자 등록 커스텀 작품 스마트 병합)
+        // 📦 갤러리 작품 데이터 로드
         function loadGalleryData() {
-            // 🛡️ 구버전 더미 댓글/반응 캐시 자동 정화 (Purge)
             const savedVer = localStorage.getItem(STORAGE_VERSION_KEY);
             if (savedVer !== CURRENT_STORAGE_VER) {
                 localStorage.removeItem(STORAGE_KEY);
@@ -1185,16 +1331,13 @@
                 }
             }
 
-            // 마스터 데이터 복제 후 로컬에서 저장된 좋아요/댓글/스티커/작가의한마디/커스텀메타 병합
             const masterList = (typeof DEFAULT_GALLERY_DATA !== 'undefined' ? DEFAULT_GALLERY_DATA : []).map(item => {
                 const copy = { ...item };
                 if (savedLikesMap[item.id]) copy.likes = savedLikesMap[item.id];
                 if (savedStickersMap[item.id]) copy.stickers = savedStickersMap[item.id];
                 if (savedCommentsMap[item.id]) copy.comments = savedCommentsMap[item.id];
-                // 기존 한마디 반영
                 if (customNotes[item.id]) copy.artistNote = customNotes[item.id];
 
-                // 웹에서 수정한 전체 메타(분야/일자/제목/한마디)가 있으면 최우선 반영!
                 if (customMeta[item.id]) {
                     if (customMeta[item.id].title) copy.title = customMeta[item.id].title;
                     if (customMeta[item.id].category) {
@@ -1209,86 +1352,246 @@
 
             galleryData = [...masterList, ...customItems];
             saveGalleryData();
-            renderGallery();
-            updateStats();
-
-            // 📡 노션 DB 실시간 원격 동기화 시도 (노션 DB ID가 세팅된 경우)
-            syncFromNotionGallery();
         }
 
         function saveGalleryData() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(galleryData));
         }
 
+        // 🌟 특별한 날 추억 데이터 로드
+        function loadSpecialDaysData() {
+            const customSpecialMeta = getCustomSpecialMetaMap();
+            const saved = localStorage.getItem(SPECIAL_STORAGE_KEY);
+            let customEvents = [];
+            let savedLikesMap = {};
+            let savedStickersMap = {};
+            let savedCommentsMap = {};
+
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    parsed.forEach(it => {
+                        if (it.id && it.id.startsWith('evt_custom_')) {
+                            if (customSpecialMeta[it.id]) {
+                                Object.assign(it, customSpecialMeta[it.id]);
+                            }
+                            customEvents.push(it);
+                        } else if (it.id) {
+                            if (it.likes) savedLikesMap[it.id] = it.likes;
+                            if (it.stickers) savedStickersMap[it.id] = it.stickers;
+                            if (it.comments) savedCommentsMap[it.id] = it.comments;
+                        }
+                    });
+                } catch (e) {
+                    console.error("특별한 날 데이터 파싱 오류:", e);
+                }
+            }
+
+            const masterList = (typeof DEFAULT_SPECIAL_DAYS_DATA !== 'undefined' ? DEFAULT_SPECIAL_DAYS_DATA : []).map(item => {
+                const copy = { ...item };
+                if (savedLikesMap[item.id]) copy.likes = savedLikesMap[item.id];
+                if (savedStickersMap[item.id]) copy.stickers = savedStickersMap[item.id];
+                if (savedCommentsMap[item.id]) copy.comments = savedCommentsMap[item.id];
+
+                if (customSpecialMeta[item.id]) {
+                    if (customSpecialMeta[item.id].title) copy.title = customSpecialMeta[item.id].title;
+                    if (customSpecialMeta[item.id].category) {
+                        copy.category = customSpecialMeta[item.id].category;
+                        copy.categoryIcon = customSpecialMeta[item.id].categoryIcon || getCategoryIcon(copy.category);
+                    }
+                    if (customSpecialMeta[item.id].date) copy.date = customSpecialMeta[item.id].date;
+                    if (customSpecialMeta[item.id].desc) copy.desc = customSpecialMeta[item.id].desc;
+                    if (customSpecialMeta[item.id].videoUrl !== undefined) copy.videoUrl = customSpecialMeta[item.id].videoUrl;
+                }
+                return copy;
+            });
+
+            specialDaysData = [...masterList, ...customEvents];
+            saveSpecialDaysData();
+        }
+
+        function saveSpecialDaysData() {
+            localStorage.setItem(SPECIAL_STORAGE_KEY, JSON.stringify(specialDaysData));
+        }
+
+        // 🔄 2대 뷰 모드 전환 (성장 작품 ↔ 특별한 날 추억)
+        function switchViewMode(mode) {
+            if (currentViewMode === mode) return;
+            currentViewMode = mode;
+            currentAuthorFilter = 'all';
+            currentCategoryFilter = 'all';
+
+            const btnArt = document.getElementById('btnModeArt');
+            const btnSpecial = document.getElementById('btnModeSpecial');
+            if (btnArt && btnSpecial) {
+                btnArt.classList.toggle('active', mode === 'art');
+                btnSpecial.classList.toggle('active', mode === 'special');
+            }
+
+            const heroTitle = document.getElementById('heroTitle');
+            const heroSubtitle = document.getElementById('heroSubtitle');
+            const heroUploadBtnText = document.getElementById('heroUploadBtnText');
+            if (mode === 'special') {
+                if (heroTitle) heroTitle.innerHTML = '🌟 민민이네 특별한 날 추억관';
+                if (heroSubtitle) heroSubtitle.textContent = '가족 소풍, 텃밭 수확, 생일 파티, 축제 등 반짝이는 특별한 날의 이야기와 동영상!';
+                if (heroUploadBtnText) heroUploadBtnText.textContent = '특별한 날 추억 찰칵!';
+            } else {
+                if (heroTitle) heroTitle.innerHTML = '🎨 민민이네 꿈나무 갤러리';
+                if (heroSubtitle) heroSubtitle.textContent = '학교와 집에서 정성껏 만든 소중한 작품들을 감상하고 칭찬해 주세요!';
+                if (heroUploadBtnText) heroUploadBtnText.textContent = '새 작품 찰칵 올리기';
+            }
+
+            renderFilterBar();
+            renderGallery();
+            updateStats();
+        }
+
+        // 🎛️ 필터 탭 & 툴바 동적 렌더링
+        function renderFilterBar() {
+            const authorTabs = document.getElementById('authorTabs');
+            const categoryPills = document.getElementById('categoryPills');
+            if (!authorTabs || !categoryPills) return;
+
+            if (currentViewMode === 'special') {
+                authorTabs.innerHTML = `
+                    <button class="author-tab-btn ${currentAuthorFilter === 'all' ? 'active' : ''}" onclick="setAuthorFilter('all', this)">🌟 전체 추억</button>
+                    <button class="author-tab-btn ${currentAuthorFilter === '민수' ? 'active' : ''}" onclick="setAuthorFilter('민수', this)">👦 민수의 추억</button>
+                    <button class="author-tab-btn ${currentAuthorFilter === '민서' ? 'active' : ''}" onclick="setAuthorFilter('민서', this)">👧 민서의 추억</button>
+                    <button class="author-tab-btn ${currentAuthorFilter === '공동' ? 'active' : ''}" onclick="setAuthorFilter('공동', this)">👨‍👩‍👧‍👦 온 가족 추억</button>
+                `;
+                let catHtml = `<button class="category-pill ${currentCategoryFilter === 'all' ? 'active' : ''}" onclick="setCategoryFilter('all', this)">전체 추억</button>`;
+                SPECIAL_CATEGORIES.filter(c => c.key !== 'all').forEach(c => {
+                    catHtml += `<button class="category-pill ${currentCategoryFilter === c.key ? 'active' : ''}" onclick="setCategoryFilter('${c.key}', this)">${c.icon} ${c.label}</button>`;
+                });
+                categoryPills.innerHTML = catHtml;
+            } else {
+                authorTabs.innerHTML = `
+                    <button class="author-tab-btn ${currentAuthorFilter === 'all' ? 'active' : ''}" onclick="setAuthorFilter('all', this)">🌟 전체 작품</button>
+                    <button class="author-tab-btn ${currentAuthorFilter === '민수' ? 'active' : ''}" onclick="setAuthorFilter('민수', this)">👦 민수의 갤러리</button>
+                    <button class="author-tab-btn ${currentAuthorFilter === '민서' ? 'active' : ''}" onclick="setAuthorFilter('민서', this)">👧 민서의 아틀리에</button>
+                    <button class="author-tab-btn ${currentAuthorFilter === '공동' ? 'active' : ''}" onclick="setAuthorFilter('공동', this)">🤝 함께 만든 작품</button>
+                `;
+                let catHtml = `<button class="category-pill ${currentCategoryFilter === 'all' ? 'active' : ''}" onclick="setCategoryFilter('all', this)">전체 카테고리</button>`;
+                ART_CATEGORIES.filter(c => c.key !== 'all').forEach(c => {
+                    catHtml += `<button class="category-pill ${currentCategoryFilter === c.key ? 'active' : ''}" onclick="setCategoryFilter('${c.key}', this)">${c.icon} ${c.label}</button>`;
+                });
+                categoryPills.innerHTML = catHtml;
+            }
+        }
+
         // 📊 통계 업데이트
         function updateStats() {
-            document.getElementById('statTotalCount').textContent = galleryData.length;
-            const totalLikes = galleryData.reduce((sum, item) => sum + (item.likes || 0), 0);
-            document.getElementById('statTotalLikes').textContent = totalLikes;
-            const totalComments = galleryData.reduce((sum, item) => sum + ((item.comments && item.comments.length) || 0), 0);
-            document.getElementById('statTotalComments').textContent = totalComments;
+            const countArtEl = document.getElementById('countArtworks');
+            const countSpecEl = document.getElementById('countSpecials');
+            if (countArtEl) countArtEl.textContent = galleryData.length;
+            if (countSpecEl) countSpecEl.textContent = specialDaysData.length;
+
+            const isSpecial = currentViewMode === 'special';
+            const currentList = isSpecial ? specialDaysData : galleryData;
+
+            const labelEl = document.getElementById('statCountLabel');
+            if (labelEl) labelEl.textContent = isSpecial ? '🌟 총 특별한 날 추억' : '🖼️ 총 전시 작품';
+
+            const totalCountEl = document.getElementById('statTotalCount');
+            if (totalCountEl) totalCountEl.textContent = currentList.length;
+
+            const totalLikes = currentList.reduce((sum, item) => sum + (item.likes || 0), 0);
+            const totalLikesEl = document.getElementById('statTotalLikes');
+            if (totalLikesEl) totalLikesEl.textContent = totalLikes;
+
+            const totalComments = currentList.reduce((sum, item) => sum + ((item.comments && item.comments.length) || 0), 0);
+            const totalCommentsEl = document.getElementById('statTotalComments');
+            if (totalCommentsEl) totalCommentsEl.textContent = totalComments;
         }
 
         // 🔍 필터 핸들러
         function setAuthorFilter(author, btnEl) {
             currentAuthorFilter = author;
             document.querySelectorAll('#authorTabs .author-tab-btn').forEach(b => b.classList.remove('active'));
-            btnEl.classList.add('active');
+            if (btnEl) btnEl.classList.add('active');
             renderGallery();
         }
 
         function setCategoryFilter(category, btnEl) {
             currentCategoryFilter = category;
             document.querySelectorAll('#categoryPills .category-pill').forEach(b => b.classList.remove('active'));
-            btnEl.classList.add('active');
+            if (btnEl) btnEl.classList.add('active');
             renderGallery();
         }
 
-        // 🖼️ 갤러리 카드 렌더링
+        // 🖼️ 갤러리 카드 렌더링 (모드별 분기)
         function renderGallery() {
             const grid = document.getElementById('galleryGrid');
+            if (!grid) return;
             grid.innerHTML = '';
 
-            let filtered = galleryData.filter(item => {
-                const matchAuthor = (currentAuthorFilter === 'all') || (item.author === currentAuthorFilter);
+            const isSpecial = currentViewMode === 'special';
+            const list = isSpecial ? specialDaysData : galleryData;
+
+            let filtered = list.filter(item => {
+                let matchAuthor = false;
+                if (currentAuthorFilter === 'all') matchAuthor = true;
+                else if (currentAuthorFilter === '공동') matchAuthor = (item.author === '공동' || item.author === '가족' || item.author === '함께');
+                else matchAuthor = (item.author === currentAuthorFilter);
+
                 const matchCategory = (currentCategoryFilter === 'all') || (item.category === currentCategoryFilter);
                 return matchAuthor && matchCategory;
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-gallery">
-                        <h3>🎨 아직 등록된 작품이 없어요!</h3>
-                        <p>우측 상단의 '+ 새 작품 전시하기' 버튼을 눌러 첫 번째 멋진 작품을 자랑해 보세요.</p>
-                    </div>
-                `;
+                if (isSpecial) {
+                    grid.innerHTML = `
+                        <div class="empty-gallery">
+                            <h3>🌟 아직 등록된 특별한 날 추억이 없어요!</h3>
+                            <p>상단의 '+ 특별한 날 추억 찰칵!' 버튼을 눌러 행복했던 가족 이야기를 남겨보세요.</p>
+                        </div>
+                    `;
+                } else {
+                    grid.innerHTML = `
+                        <div class="empty-gallery">
+                            <h3>🎨 아직 등록된 작품이 없어요!</h3>
+                            <p>상단의 '+ 새 작품 찰칵 올리기' 버튼을 눌러 첫 번째 멋진 작품을 자랑해 보세요.</p>
+                        </div>
+                    `;
+                }
                 return;
             }
 
-            filtered.forEach(art => {
+            filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'gallery-card';
-                card.onclick = () => openDetailModal(art.id);
+                card.onclick = () => openDetailModal(item.id);
 
-                const authorBadgeClass = art.author === '민수' ? 'badge--minsu' : (art.author === '민서' ? 'badge--minseo' : 'badge--together');
-                const authorDisplay = art.author === '공동' ? '🤝 공동' : art.author;
-                const isCutoutClass = (art.hasCutout || (art.imageUrl && art.imageUrl.endsWith('.png'))) ? 'is-cutout' : '';
-                const commentsCount = (art.comments && art.comments.length) || 0;
+                const isMinsu = item.author === '민수';
+                const isMinseo = item.author === '민서';
+                const authorBadgeClass = isMinsu ? 'badge--minsu' : (isMinseo ? 'badge--minseo' : 'badge--together');
+                const authorDisplay = (item.author === '공동' || item.author === '가족') ? '👨‍👩‍👧‍👦 온 가족' : item.author;
+                const isCutoutClass = (item.hasCutout || (item.imageUrl && item.imageUrl.endsWith('.png'))) ? 'is-cutout' : '';
+                const commentsCount = (item.comments && item.comments.length) || 0;
+                const imgUrl = item.imageUrl || (item.galleryImages && item.galleryImages[0]) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800';
+                const notePreview = isSpecial ? (item.desc || '가족과 함께한 행복하고 특별한 추억입니다.') : (item.artistNote || '소중하게 완성한 멋진 작품입니다.');
+
+                const videoBadgeHtml = item.videoUrl ? `
+                    <span style="position:absolute; bottom:12px; left:12px; z-index:2; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); color:#ff416c; font-size:0.78rem; font-family:'Jua', sans-serif; padding:4px 8px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; gap:4px;">
+                        <span>🎬</span> 동영상 포함
+                    </span>
+                ` : '';
 
                 card.innerHTML = `
-                    <div class="card-img-wrap">
-                        <span class="card-tag-badge">${art.categoryIcon || '🎨'} ${art.category}</span>
+                    <div class="card-img-wrap" style="position:relative;">
+                        <span class="card-tag-badge">${item.categoryIcon || (isSpecial ? '🌟' : '🎨')} ${item.category}</span>
                         <span class="card-author-badge ${authorBadgeClass}">${authorDisplay}</span>
-                        <img src="${art.imageUrl}" alt="${art.title}" class="card-img ${isCutoutClass}" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80'">
+                        ${videoBadgeHtml}
+                        <img src="${imgUrl}" alt="${item.title}" class="card-img ${isCutoutClass}" onerror="this.src='https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80'">
                     </div>
                     <div class="card-body">
-                        <h3 class="card-title">${art.title}</h3>
-                        <p class="card-note-preview">"${art.artistNote || '소중하게 완성한 멋진 작품입니다.'}"</p>
+                        <h3 class="card-title">${item.title}</h3>
+                        <p class="card-note-preview">"${notePreview}"</p>
                         <div class="card-footer">
-                            <span class="card-date">📅 ${art.date}</span>
+                            <span class="card-date">📅 ${item.date}</span>
                             <div style="display:flex; gap:10px; align-items:center;">
-                                <button class="card-like-btn" onclick="event.stopPropagation(); quickLike('${art.id}')">
-                                    ❤️ <span>${art.likes || 0}</span>
+                                <button class="card-like-btn" onclick="event.stopPropagation(); quickLike('${item.id}')">
+                                    ❤️ <span>${item.likes || 0}</span>
                                 </button>
                                 <span style="font-size:0.85rem;">💬 ${commentsCount}</span>
                             </div>
@@ -1300,11 +1603,19 @@
         }
 
         // ❤️ 빠른 좋아요
-        function quickLike(artId) {
-            const item = galleryData.find(a => a.id === artId);
+        function quickLike(id) {
+            let item = galleryData.find(a => a.id === id);
+            let isSpecial = false;
+            if (!item) {
+                item = specialDaysData.find(s => s.id === id);
+                isSpecial = true;
+            }
             if (!item) return;
+
             item.likes = (item.likes || 0) + 1;
-            saveGalleryData();
+            if (isSpecial) saveSpecialDaysData();
+            else saveGalleryData();
+
             renderGallery();
             updateStats();
         }
@@ -1312,34 +1623,65 @@
         // ========================================================
         // 🪟 상세 모달 제어
         // ========================================================
-        function openDetailModal(artId) {
-            const art = galleryData.find(a => a.id === artId);
-            if (!art) return;
-            activeArtId = artId;
+        function openDetailModal(id) {
+            let item = galleryData.find(a => a.id === id);
+            let isSpecial = false;
+            if (!item || currentViewMode === 'special') {
+                const sp = specialDaysData.find(s => s.id === id);
+                if (sp) { item = sp; isSpecial = true; }
+            }
+            if (!item) return;
+            activeArtId = id;
 
             toggleEditArtFull(false);
             cancelEditArtistNote();
 
-            document.getElementById('modalImg').src = art.imageUrl;
-            document.getElementById('modalTitle').textContent = art.title;
+            const imgUrl = item.imageUrl || (item.galleryImages && item.galleryImages[0]) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800';
+            document.getElementById('modalImg').src = imgUrl;
+            document.getElementById('modalTitle').textContent = item.title;
             
             const authorTag = document.getElementById('modalAuthorTag');
-            authorTag.textContent = art.author === '공동' ? '🤝 민수 & 민서 (공동)' : art.author;
-            authorTag.className = `card-author-badge ${art.author === '민수' ? 'badge--minsu' : (art.author === '민서' ? 'badge--minseo' : 'badge--together')}`;
+            const isMinsu = item.author === '민수';
+            const isMinseo = item.author === '민서';
+            authorTag.textContent = (item.author === '공동' || item.author === '가족') ? '👨‍👩‍👧‍👦 온 가족 (공동)' : item.author;
+            authorTag.className = `card-author-badge ${isMinsu ? 'badge--minsu' : (isMinseo ? 'badge--minseo' : 'badge--together')}`;
             
-            document.getElementById('modalCategoryTag').textContent = `${art.categoryIcon || '🎨'} ${art.category}`;
-            document.getElementById('modalDateTag').textContent = `📅 ${art.date}`;
-            document.getElementById('modalArtistNote').textContent = art.artistNote || "작품에 담긴 이야기와 열정을 느껴보세요!";
+            document.getElementById('modalCategoryTag').textContent = `${item.categoryIcon || (isSpecial ? '🌟' : '🎨')} ${item.category}`;
+            document.getElementById('modalDateTag').textContent = `📅 ${item.date}`;
+            
+            const noteText = isSpecial ? (item.desc || "가족과 함께한 행복하고 특별한 추억입니다.") : (item.artistNote || "작품에 담긴 이야기와 열정을 느껴보세요!");
+            document.getElementById('modalArtistNote').textContent = noteText;
+
+            // 동영상 풀영상 버튼 제어
+            const videoBtn = document.getElementById('modalVideoBtn');
+            const videoBtnText = document.getElementById('modalVideoBtnText');
+            if (isSpecial && item.videoUrl) {
+                videoBtn.href = item.videoUrl;
+                if (videoBtnText) videoBtnText.textContent = item.videoBtnText || '동영상 풀영상 감상하기';
+                videoBtn.style.display = 'inline-flex';
+            } else {
+                videoBtn.style.display = 'none';
+            }
+
+            // 편집 버튼 라벨 조정
+            const editBtnSpan = document.querySelector('#editArtFullTriggerBtn span:last-child');
+            if (editBtnSpan) {
+                editBtnSpan.textContent = isSpecial ? '추억 정보 수정' : '작품 정보 수정';
+            }
+            const quoteTitle = document.querySelector('.artist-quote-title');
+            if (quoteTitle) {
+                quoteTitle.textContent = isSpecial ? '🌟 그날의 생생한 이야기' : '🗣️ 작가의 한마디';
+            }
 
             // 스티커 반응 카운트
-            const stickers = art.stickers || { heart: 0, thumb: 0, star: 0, trophy: 0 };
+            const stickers = item.stickers || { heart: 0, thumb: 0, star: 0, trophy: 0 };
             document.getElementById('stickerCount_heart').textContent = stickers.heart || 0;
             document.getElementById('stickerCount_thumb').textContent = stickers.thumb || 0;
             document.getElementById('stickerCount_star').textContent = stickers.star || 0;
             document.getElementById('stickerCount_trophy').textContent = stickers.trophy || 0;
 
             // 댓글 리스트
-            renderModalComments(art.comments || []);
+            renderModalComments(item.comments || []);
 
             // 현재 접속자에 맞게 기본 댓글 작성자 선택
             document.getElementById('commentAuthorSelect').value = currentUserName || '아빠';
@@ -1355,7 +1697,7 @@
         }
 
         // ========================================================
-        // ✏️ 작품 전체 메타(분야/일자/제목/한마디) 웹 편집 인터랙션
+        // ✏️ 작품 / 특별한 날 전체 메타 웹 편집 인터랙션
         // ========================================================
         function toggleEditArtFull(open) {
             const area = document.getElementById('artFullEditArea');
@@ -1364,15 +1706,53 @@
 
             if (open) {
                 if (!activeArtId) return;
-                const art = galleryData.find(a => a.id === activeArtId);
-                if (!art) return;
+                let item = galleryData.find(a => a.id === activeArtId);
+                let isSpecial = false;
+                if (!item || currentViewMode === 'special') {
+                    const sp = specialDaysData.find(s => s.id === activeArtId);
+                    if (sp) { item = sp; isSpecial = true; }
+                }
+                if (!item) return;
 
                 cancelEditArtistNote();
 
-                document.getElementById('editArtCategorySelect').value = art.category || '그림/미술';
-                document.getElementById('editArtDateInput').value = art.date || '';
-                document.getElementById('editArtTitleInput').value = art.title || '';
-                document.getElementById('editArtDescInput').value = art.artistNote || '';
+                const catSelect = document.getElementById('editArtCategorySelect');
+                const headerTitle = document.getElementById('editModalHeaderTitle');
+                const catLabel = document.getElementById('editCategoryLabel');
+                const titleLabel = document.getElementById('editTitleLabel');
+                const descLabel = document.getElementById('editDescLabel');
+                const videoRow = document.getElementById('editSpecialVideoRow');
+                const videoInput = document.getElementById('editArtVideoInput');
+
+                if (isSpecial) {
+                    if (headerTitle) headerTitle.innerHTML = '<span>🌟</span> 특별한 날 추억 & 상세 정보 수정';
+                    if (catLabel) catLabel.textContent = '분야 (특별한 날 6대 카테고리)';
+                    if (titleLabel) titleLabel.textContent = '추억 제목';
+                    if (descLabel) descLabel.textContent = '추억 이야기 / 상세 내용';
+                    if (videoRow) videoRow.style.display = 'block';
+                    if (videoInput) videoInput.value = item.videoUrl || '';
+
+                    catSelect.innerHTML = SPECIAL_CATEGORIES.filter(c => c.key !== 'all').map(c => 
+                        `<option value="${c.key}">${c.icon} ${c.label}</option>`
+                    ).join('');
+                    catSelect.value = item.category || '가족/생일파티';
+                    document.getElementById('editArtDescInput').value = item.desc || '';
+                } else {
+                    if (headerTitle) headerTitle.innerHTML = '<span>✏️</span> 작품 정보 & 표준 5대 분야 수정';
+                    if (catLabel) catLabel.textContent = '분야 (표준 5대 분류)';
+                    if (titleLabel) titleLabel.textContent = '작품 제목';
+                    if (descLabel) descLabel.textContent = '작가의 한마디 / 작품 설명';
+                    if (videoRow) videoRow.style.display = 'none';
+
+                    catSelect.innerHTML = ART_CATEGORIES.filter(c => c.key !== 'all').map(c => 
+                        `<option value="${c.key}">${c.icon} ${c.label}</option>`
+                    ).join('');
+                    catSelect.value = item.category || '그림/미술';
+                    document.getElementById('editArtDescInput').value = item.artistNote || '';
+                }
+
+                document.getElementById('editArtDateInput').value = item.date || '';
+                document.getElementById('editArtTitleInput').value = item.title || '';
 
                 area.style.display = 'block';
                 if (triggerBtn) triggerBtn.style.display = 'none';
@@ -1384,16 +1764,23 @@
 
         async function saveEditedArtFull() {
             if (!activeArtId) return;
-            const art = galleryData.find(a => a.id === activeArtId);
-            if (!art) return;
+            let item = galleryData.find(a => a.id === activeArtId);
+            let isSpecial = false;
+            if (!item || currentViewMode === 'special') {
+                const sp = specialDaysData.find(s => s.id === activeArtId);
+                if (sp) { item = sp; isSpecial = true; }
+            }
+            if (!item) return;
 
             const newCategory = document.getElementById('editArtCategorySelect').value;
             const newDate = document.getElementById('editArtDateInput').value.trim();
             const newTitle = document.getElementById('editArtTitleInput').value.trim();
             const newDesc = document.getElementById('editArtDescInput').value.trim();
+            const videoInput = document.getElementById('editArtVideoInput');
+            const newVideoUrl = (videoInput && isSpecial) ? videoInput.value.trim() : '';
 
             if (!newTitle) {
-                alert("작품 제목을 입력해 주세요!");
+                alert(isSpecial ? "추억 제목을 입력해 주세요!" : "작품 제목을 입력해 주세요!");
                 return;
             }
             if (!newDate) {
@@ -1403,55 +1790,113 @@
 
             const newIcon = getCategoryIcon(newCategory);
 
-            // 1. 메모리 및 로컬 영구 스토리지 반영
-            art.title = newTitle;
-            art.category = newCategory;
-            art.categoryIcon = newIcon;
-            art.date = newDate;
-            art.artistNote = newDesc;
+            // 변경 전 상태 스냅샷 (수정 이력 생성용)
+            const oldState = {
+                title: item.title,
+                date: item.date,
+                category: item.category,
+                desc: isSpecial ? (item.desc || '') : (item.artistNote || ''),
+                videoUrl: item.videoUrl || ''
+            };
 
-            setCustomMeta(art.id, {
-                title: newTitle,
-                category: newCategory,
-                categoryIcon: newIcon,
-                date: newDate,
-                artistNote: newDesc
-            });
-            saveGalleryData();
+            if (isSpecial) {
+                // 1. 메모리 및 영구 스토리지 반영
+                item.title = newTitle;
+                item.category = newCategory;
+                item.categoryIcon = newIcon;
+                item.date = newDate;
+                item.desc = newDesc;
+                item.videoUrl = newVideoUrl;
 
-            // 2. 모달 뷰 갱신
-            document.getElementById('modalTitle').textContent = newTitle;
-            document.getElementById('modalCategoryTag').textContent = `${newIcon} ${newCategory}`;
-            document.getElementById('modalDateTag').textContent = `📅 ${newDate}`;
-            document.getElementById('modalArtistNote').textContent = newDesc || "작품에 담긴 이야기와 열정을 느껴보세요!";
+                setCustomSpecialMeta(item.id, {
+                    title: newTitle,
+                    category: newCategory,
+                    categoryIcon: newIcon,
+                    date: newDate,
+                    desc: newDesc,
+                    videoUrl: newVideoUrl
+                });
+                saveSpecialDaysData();
 
-            toggleEditArtFull(false);
-            renderGallery();
-            updateStats();
+                // 2. 모달 뷰 갱신
+                document.getElementById('modalTitle').textContent = newTitle;
+                document.getElementById('modalCategoryTag').textContent = `${newIcon} ${newCategory}`;
+                document.getElementById('modalDateTag').textContent = `📅 ${newDate}`;
+                document.getElementById('modalArtistNote').textContent = newDesc || "가족과 함께한 행복하고 특별한 추억입니다.";
 
-            // 3. 🧚 요정 코코 TTS 음성 피드백
-            if (typeof speakFairyTTS === 'function') {
-                speakFairyTTS("작품 정보가 멋지게 저장되고 동기화되었어요!");
+                const videoBtn = document.getElementById('modalVideoBtn');
+                if (newVideoUrl) {
+                    videoBtn.href = newVideoUrl;
+                    videoBtn.style.display = 'inline-flex';
+                } else {
+                    videoBtn.style.display = 'none';
+                }
+
+                toggleEditArtFull(false);
+                renderGallery();
+                updateStats();
+
+                if (typeof speakFairyTTS === 'function') {
+                    speakFairyTTS("특별한 날 추억이 멋지게 저장되고 동기화되었어요!");
+                }
+
+                // 3. 📡 노션 데이터베이스 실시간 동기화 & 영구 수정 이력 블록 적재
+                syncSpecialDayToNotion(item, oldState);
+            } else {
+                // 1. 메모리 및 영구 스토리지 반영
+                item.title = newTitle;
+                item.category = newCategory;
+                item.categoryIcon = newIcon;
+                item.date = newDate;
+                item.artistNote = newDesc;
+
+                setCustomMeta(item.id, {
+                    title: newTitle,
+                    category: newCategory,
+                    categoryIcon: newIcon,
+                    date: newDate,
+                    artistNote: newDesc
+                });
+                saveGalleryData();
+
+                // 2. 모달 뷰 갱신
+                document.getElementById('modalTitle').textContent = newTitle;
+                document.getElementById('modalCategoryTag').textContent = `${newIcon} ${newCategory}`;
+                document.getElementById('modalDateTag').textContent = `📅 ${newDate}`;
+                document.getElementById('modalArtistNote').textContent = newDesc || "작품에 담긴 이야기와 열정을 느껴보세요!";
+
+                toggleEditArtFull(false);
+                renderGallery();
+                updateStats();
+
+                if (typeof speakFairyTTS === 'function') {
+                    speakFairyTTS("작품 정보가 멋지게 저장되고 동기화되었어요!");
+                }
+
+                // 3. 📡 노션 데이터베이스 실시간 동기화 & 영구 수정 이력 블록 적재
+                syncArtworkToNotion(item, oldState);
             }
-
-            // 4. 📡 노션 데이터베이스 실시간 동기화
-            syncArtworkToNotion(art);
         }
 
         // ========================================================
-        // 🗣️ 작가의 한마디 직접 수정 인터랙션
+        // 🗣️ 작가의 한마디 / 추억 이야기 직접 수정 인터랙션
         // ========================================================
         function toggleEditArtistNote() {
             if (!activeArtId) return;
-            const art = galleryData.find(a => a.id === activeArtId);
-            if (!art) return;
+            let item = galleryData.find(a => a.id === activeArtId);
+            let isSpecial = false;
+            if (!item || currentViewMode === 'special') {
+                const sp = specialDaysData.find(s => s.id === activeArtId);
+                if (sp) { item = sp; isSpecial = true; }
+            }
+            if (!item) return;
 
             const editArea = document.getElementById('artistNoteEditArea');
             const viewText = document.getElementById('modalArtistNote');
             const triggerBtn = document.getElementById('editNoteTriggerBtn');
             const input = document.getElementById('editArtistNoteInput');
 
-            input.value = art.artistNote || '';
+            input.value = isSpecial ? (item.desc || '') : (item.artistNote || '');
             editArea.style.display = 'flex';
             viewText.style.display = 'none';
             triggerBtn.style.display = 'none';
@@ -1469,45 +1914,64 @@
 
         async function saveEditedArtistNote() {
             if (!activeArtId) return;
-            const art = galleryData.find(a => a.id === activeArtId);
-            if (!art) return;
+            let item = galleryData.find(a => a.id === activeArtId);
+            let isSpecial = false;
+            if (!item || currentViewMode === 'special') {
+                const sp = specialDaysData.find(s => s.id === activeArtId);
+                if (sp) { item = sp; isSpecial = true; }
+            }
+            if (!item) return;
 
             const input = document.getElementById('editArtistNoteInput');
             const newNote = input.value.trim();
             if (!newNote) {
-                alert("작가의 한마디를 입력해 주세요!");
+                alert("내용을 입력해 주세요!");
                 return;
             }
 
-            // 1. 메모리 및 로컬 영구 스토리지 반영
-            art.artistNote = newNote;
-            setCustomArtistNote(art.id, newNote);
-            saveGalleryData();
+            const oldDesc = isSpecial ? (item.desc || '') : (item.artistNote || '');
 
-            // 2. 화면 UI 즉시 갱신
-            document.getElementById('modalArtistNote').textContent = newNote;
-            cancelEditArtistNote();
-            renderGallery();
+            if (isSpecial) {
+                item.desc = newNote;
+                setCustomSpecialMeta(item.id, { desc: newNote });
+                saveSpecialDaysData();
+                document.getElementById('modalArtistNote').textContent = newNote;
+                cancelEditArtistNote();
+                renderGallery();
 
-            // 3. 🧚 요정 코코 TTS 음성 칭찬 피드백
-            if (typeof speakFairyTTS === 'function') {
-                speakFairyTTS("작가의 한마디가 멋지게 저장되었어요!");
+                if (typeof speakFairyTTS === 'function') {
+                    speakFairyTTS("특별한 날 이야기가 멋지게 저장되었어요!");
+                }
+                syncSpecialDayToNotion(item, { ...item, desc: oldDesc });
+            } else {
+                item.artistNote = newNote;
+                setCustomArtistNote(item.id, newNote);
+                setCustomMeta(item.id, { artistNote: newNote });
+                saveGalleryData();
+                document.getElementById('modalArtistNote').textContent = newNote;
+                cancelEditArtistNote();
+                renderGallery();
+
+                if (typeof speakFairyTTS === 'function') {
+                    speakFairyTTS("작가의 한마디가 멋지게 저장되었어요!");
+                }
+                syncNoteToNotion(item);
             }
-
-            // 4. 📡 노션 데이터베이스 실시간 동기화
-            syncNoteToNotion(art);
         }
 
         function openOriginalImage() {
             if (!activeArtId) return;
-            const art = galleryData.find(a => a.id === activeArtId);
-            if (art && art.imageUrl) {
-                window.open(art.imageUrl, '_blank');
+            let item = galleryData.find(a => a.id === activeArtId);
+            if (!item) item = specialDaysData.find(s => s.id === activeArtId);
+            const imgUrl = item?.imageUrl || (item?.galleryImages && item.galleryImages[0]);
+            if (imgUrl) {
+                window.open(imgUrl, '_blank');
             }
         }
 
         function renderModalComments(comments) {
             const list = document.getElementById('modalCommentsList');
+            if (!list) return;
             list.innerHTML = '';
             if (!comments || comments.length === 0) {
                 list.innerHTML = '<div style="color:var(--text-sub); font-size:0.9rem; padding:8px 0;">아직 남겨진 칭찬이 없어요. 첫 칭찬을 남겨보세요!</div>';
@@ -1525,23 +1989,30 @@
             });
         }
 
-        // 스티커 누르기
+        // 스티커 반응 누르기
         function addStickerReaction(type) {
             if (!activeArtId) return;
-            const art = galleryData.find(a => a.id === activeArtId);
-            if (!art) return;
+            let item = galleryData.find(a => a.id === activeArtId);
+            let isSpecial = false;
+            if (!item) {
+                item = specialDaysData.find(s => s.id === activeArtId);
+                isSpecial = true;
+            }
+            if (!item) return;
 
-            if (!art.stickers) art.stickers = { heart: 0, thumb: 0, star: 0, trophy: 0 };
-            art.stickers[type] = (art.stickers[type] || 0) + 1;
-            art.likes = (art.likes || 0) + 1;
+            if (!item.stickers) item.stickers = { heart: 0, thumb: 0, star: 0, trophy: 0 };
+            item.stickers[type] = (item.stickers[type] || 0) + 1;
+            item.likes = (item.likes || 0) + 1;
 
-            document.getElementById(`stickerCount_${type}`).textContent = art.stickers[type];
-            saveGalleryData();
+            document.getElementById(`stickerCount_${type}`).textContent = item.stickers[type];
+            if (isSpecial) saveSpecialDaysData();
+            else saveGalleryData();
+
             renderGallery();
             updateStats();
 
             // 📡 노션 스티커 동기화
-            syncStickerToNotion(art, type);
+            syncStickerToNotion(item, type);
         }
 
         // 칭찬 댓글 등록
@@ -1552,35 +2023,96 @@
             if (!text) return;
 
             const author = document.getElementById('commentAuthorSelect').value;
-            const art = galleryData.find(a => a.id === activeArtId);
-            if (!art) return;
+            let item = galleryData.find(a => a.id === activeArtId);
+            let isSpecial = false;
+            if (!item) {
+                item = specialDaysData.find(s => s.id === activeArtId);
+                isSpecial = true;
+            }
+            if (!item) return;
 
-            if (!art.comments) art.comments = [];
+            if (!item.comments) item.comments = [];
             const todayStr = new Date().toISOString().split('T')[0];
             const newComment = { author, text, date: todayStr };
-            art.comments.push(newComment);
+            item.comments.push(newComment);
 
             textInput.value = '';
-            renderModalComments(art.comments);
-            saveGalleryData();
+            renderModalComments(item.comments);
+            if (isSpecial) saveSpecialDaysData();
+            else saveGalleryData();
+
             renderGallery();
             updateStats();
 
             // 📡 노션 댓글 동기화
-            syncCommentToNotion(art, newComment);
+            syncCommentToNotion(item, newComment);
         }
 
         // ========================================================
-        // 📡 노션 데이터베이스 실시간 양방향 동기화 모듈
+        // 📡 노션 데이터베이스 실시간 양방향 동기화 & 수정 이력 모듈
         // ========================================================
         const NOTION_PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) || "https://minmin-notion.awslike6.workers.dev";
         const NOTION_HEADERS = { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" };
-        let notionPageIdMap = {}; // artId -> notionPageId 캐시
+        let notionPageIdMap = {}; // item.id -> notionPageId 캐시
 
-        // 1. 노션에서 전체 갤러리 상호작용 데이터(한마디/댓글/스티커) 백그라운드 동기화
+        // 🕒 노션 페이지 내 영구 수정 이력(Audit Trail) 콜아웃 블록 적재
+        async function appendRevisionHistoryToNotion(pageId, typeName, oldState, newState) {
+            if (!pageId || !oldState || !newState) return;
+            try {
+                const now = new Date();
+                const timestamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                
+                let diffLines = [];
+                if (oldState.title && oldState.title !== newState.title) {
+                    diffLines.push(`• 제목 변경: "${oldState.title}" ➔ "${newState.title}"`);
+                }
+                if (oldState.date && oldState.date !== newState.date) {
+                    diffLines.push(`• 날짜 변경: "${oldState.date}" ➔ "${newState.date}"`);
+                }
+                if (oldState.category && oldState.category !== newState.category) {
+                    diffLines.push(`• 분야 변경: "${oldState.category}" ➔ "${newState.category}"`);
+                }
+                if (oldState.desc !== undefined && oldState.desc !== newState.desc) {
+                    const previewOld = oldState.desc.length > 120 ? oldState.desc.substring(0, 120) + '...' : oldState.desc;
+                    diffLines.push(`• 이전 내용 백업: "${previewOld}"`);
+                }
+                if (oldState.videoUrl !== undefined && oldState.videoUrl !== newState.videoUrl) {
+                    diffLines.push(`• 동영상 링크: "${oldState.videoUrl || '(없음)'}" ➔ "${newState.videoUrl || '(없음)'}"`);
+                }
+
+                if (diffLines.length === 0) return;
+
+                const auditContent = `[🕒 웹 ${typeName} 수정 이력: ${timestamp}]\n` + diffLines.join('\n');
+
+                await fetch(`${NOTION_PROXY}/v1/blocks/${pageId}/children`, {
+                    method: 'PATCH',
+                    headers: NOTION_HEADERS,
+                    body: JSON.stringify({
+                        children: [
+                            {
+                                object: "block",
+                                type: "callout",
+                                callout: {
+                                    icon: { type: "emoji", emoji: "🕒" },
+                                    color: "gray_background",
+                                    rich_text: [{
+                                        type: "text",
+                                        text: { content: auditContent }
+                                    }]
+                                }
+                            }
+                        ]
+                    })
+                });
+            } catch (e) {
+                console.warn("[노션 수정 이력 기록 실패]", e);
+            }
+        }
+
+        // 1. 노션에서 전체 갤러리/특별한 날 데이터 백그라운드 동기화
         async function syncFromNotionGallery() {
             const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
-            if (!dbId) return; // 아직 노션 갤러리 DB ID가 설정되지 않은 경우 안전 스킵
+            if (!dbId) return;
 
             try {
                 const res = await fetch(`${NOTION_PROXY}/v1/databases/${dbId}/query`, {
@@ -1591,105 +2123,98 @@
                 if (!res.ok) return;
                 const data = await res.json();
                 const pages = data.results || [];
-                let hasChanges = false;
+                let hasArtChanges = false;
+                let hasSpecialChanges = false;
 
                 pages.forEach(p => {
                     const props = p.properties;
-                    // 작품ID 추출 (식별ID 또는 title 속성)
                     const titleProp = props["식별ID"] || props["작품ID"] || props["ID"] || props["title"];
-                    const artId = titleProp?.title?.[0]?.plain_text;
-                    if (!artId) return;
+                    const itemId = titleProp?.title?.[0]?.plain_text;
+                    if (!itemId) return;
 
-                    notionPageIdMap[artId] = p.id;
-                    const art = galleryData.find(a => a.id === artId);
-                    if (!art) return;
+                    notionPageIdMap[itemId] = p.id;
+                    const typeProp = props["구분"]?.select?.name;
+                    const isSpecialItem = typeProp === "특별한 날" || itemId.startsWith("evt_");
 
-                    // 원격 제목 반영
-                    const remoteTitle = props["제목"]?.rich_text?.[0]?.plain_text;
-                    if (remoteTitle && remoteTitle !== art.title) {
-                        art.title = remoteTitle;
-                        setCustomMeta(artId, { title: remoteTitle });
-                        hasChanges = true;
-                    }
-
-                    // 원격 날짜 반영
-                    const remoteDate = props["날짜"]?.date?.start;
-                    if (remoteDate && remoteDate !== art.date) {
-                        art.date = remoteDate;
-                        setCustomMeta(artId, { date: remoteDate });
-                        hasChanges = true;
-                    }
-
-                    // 원격 분야 반영
-                    const remoteCat = props["분야"]?.select?.name;
-                    if (remoteCat && remoteCat !== art.category) {
-                        art.category = remoteCat;
-                        art.categoryIcon = getCategoryIcon(remoteCat);
-                        setCustomMeta(artId, { category: remoteCat, categoryIcon: art.categoryIcon });
-                        hasChanges = true;
-                    }
-
-                    // 작가의 한마디
-                    const noteProp = props["작가의 한마디/일기본문"] || props["작가의 한마디"] || props["작가한마디"];
-                    const remoteNote = noteProp?.rich_text?.[0]?.plain_text;
-                    if (remoteNote && remoteNote !== art.artistNote) {
-                        art.artistNote = remoteNote;
-                        setCustomArtistNote(artId, remoteNote);
-                        setCustomMeta(artId, { artistNote: remoteNote });
-                        hasChanges = true;
-                    }
-
-                    // 가족 댓글 (JSON 파싱)
-                    const commentProp = props["가족 칭찬 댓글"] || props["댓글"];
-                    const rawComments = commentProp?.rich_text?.[0]?.plain_text;
-                    if (rawComments) {
-                        try {
-                            const parsedComments = JSON.parse(rawComments);
-                            if (Array.isArray(parsedComments) && parsedComments.length > 0) {
-                                art.comments = parsedComments;
-                                hasChanges = true;
+                    if (isSpecialItem) {
+                        const item = specialDaysData.find(s => s.id === itemId);
+                        if (item) {
+                            const remoteTitle = props["제목"]?.rich_text?.[0]?.plain_text;
+                            if (remoteTitle && remoteTitle !== item.title) {
+                                item.title = remoteTitle;
+                                setCustomSpecialMeta(itemId, { title: remoteTitle });
+                                hasSpecialChanges = true;
                             }
-                        } catch (je) {}
-                    }
+                            const remoteDate = props["날짜"]?.date?.start;
+                            if (remoteDate && remoteDate !== item.date) {
+                                item.date = remoteDate;
+                                setCustomSpecialMeta(itemId, { date: remoteDate });
+                                hasSpecialChanges = true;
+                            }
+                            const remoteCat = props["분야"]?.select?.name;
+                            if (remoteCat && remoteCat !== item.category) {
+                                item.category = remoteCat;
+                                item.categoryIcon = getCategoryIcon(remoteCat);
+                                setCustomSpecialMeta(itemId, { category: remoteCat, categoryIcon: item.categoryIcon });
+                                hasSpecialChanges = true;
+                            }
+                            const noteProp = props["작가의 한마디/일기본문"] || props["작가의 한마디"];
+                            const remoteNote = noteProp?.rich_text?.[0]?.plain_text;
+                            if (remoteNote && remoteNote !== item.desc) {
+                                item.desc = remoteNote;
+                                setCustomSpecialMeta(itemId, { desc: remoteNote });
+                                hasSpecialChanges = true;
+                            }
+                        }
+                    } else {
+                        const art = galleryData.find(a => a.id === itemId);
+                        if (!art) return;
 
-                    // 스티커 반응
-                    if (!art.stickers) art.stickers = { heart: 0, thumb: 0, star: 0, trophy: 0 };
-                    const heart = props["❤️ 하트"]?.number ?? props["하트"]?.number;
-                    const thumb = props["👍 최고"]?.number ?? props["최고"]?.number;
-                    const star = props["✨ 별"]?.number ?? props["별"]?.number;
-                    const trophy = props["🏆 트로피"]?.number ?? props["트로피"]?.number;
+                        const remoteTitle = props["제목"]?.rich_text?.[0]?.plain_text;
+                        if (remoteTitle && remoteTitle !== art.title) {
+                            art.title = remoteTitle;
+                            setCustomMeta(itemId, { title: remoteTitle });
+                            hasArtChanges = true;
+                        }
 
-                    if (heart !== undefined && heart > (art.stickers.heart || 0)) { art.stickers.heart = heart; hasChanges = true; }
-                    if (thumb !== undefined && thumb > (art.stickers.thumb || 0)) { art.stickers.thumb = thumb; hasChanges = true; }
-                    if (star !== undefined && star > (art.stickers.star || 0)) { art.stickers.star = star; hasChanges = true; }
-                    if (trophy !== undefined && trophy > (art.stickers.trophy || 0)) { art.stickers.trophy = trophy; hasChanges = true; }
-                });
+                        const remoteDate = props["날짜"]?.date?.start;
+                        if (remoteDate && remoteDate !== art.date) {
+                            art.date = remoteDate;
+                            setCustomMeta(itemId, { date: remoteDate });
+                            hasArtChanges = true;
+                        }
 
-                if (hasChanges) {
-                    saveGalleryData();
-                    renderGallery();
-                    updateStats();
-                    if (activeArtId) {
-                        const activeArt = galleryData.find(a => a.id === activeArtId);
-                        if (activeArt) {
-                            document.getElementById('modalTitle').textContent = activeArt.title || '';
-                            document.getElementById('modalCategoryTag').textContent = `${activeArt.categoryIcon || '🎨'} ${activeArt.category || ''}`;
-                            document.getElementById('modalDateTag').textContent = `📅 ${activeArt.date || ''}`;
-                            document.getElementById('modalArtistNote').textContent = activeArt.artistNote || '';
-                            renderModalComments(activeArt.comments || []);
-                            document.getElementById('stickerCount_heart').textContent = activeArt.stickers?.heart || 0;
-                            document.getElementById('stickerCount_thumb').textContent = activeArt.stickers?.thumb || 0;
-                            document.getElementById('stickerCount_star').textContent = activeArt.stickers?.star || 0;
-                            document.getElementById('stickerCount_trophy').textContent = activeArt.stickers?.trophy || 0;
+                        const remoteCat = props["분야"]?.select?.name;
+                        if (remoteCat && remoteCat !== art.category) {
+                            art.category = remoteCat;
+                            art.categoryIcon = getCategoryIcon(remoteCat);
+                            setCustomMeta(itemId, { category: remoteCat, categoryIcon: art.categoryIcon });
+                            hasArtChanges = true;
+                        }
+
+                        const noteProp = props["작가의 한마디/일기본문"] || props["작가의 한마디"];
+                        const remoteNote = noteProp?.rich_text?.[0]?.plain_text;
+                        if (remoteNote && remoteNote !== art.artistNote) {
+                            art.artistNote = remoteNote;
+                            setCustomArtistNote(itemId, remoteNote);
+                            setCustomMeta(itemId, { artistNote: remoteNote });
+                            hasArtChanges = true;
                         }
                     }
+                });
+
+                if (hasArtChanges) saveGalleryData();
+                if (hasSpecialChanges) saveSpecialDaysData();
+                if (hasArtChanges || hasSpecialChanges) {
+                    renderGallery();
+                    updateStats();
                 }
             } catch (err) {
                 console.warn("[갤러리 노션 동기화]", err);
             }
         }
 
-        // 2. 작가의 한마디 노션 PATCH / POST (속성 + 본문 블록 동시 적재)
+        // 2. 작가의 한마디 노션 PATCH / POST
         async function syncNoteToNotion(art) {
             const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
             if (!dbId) return;
@@ -1697,7 +2222,6 @@
             try {
                 const pageId = notionPageIdMap[art.id];
                 if (pageId) {
-                    // 기존 페이지 업데이트 (상단 속성 갱신)
                     await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                         method: 'PATCH',
                         headers: NOTION_HEADERS,
@@ -1707,54 +2231,20 @@
                             }
                         })
                     });
-                } else {
-                    // 신규 페이지 등록 (상단 속성 + 하단 본문 도화지 블록 동시 생성)
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    const createRes = await fetch(`${NOTION_PROXY}/v1/pages`, {
-                        method: 'POST',
-                        headers: NOTION_HEADERS,
-                        body: JSON.stringify({
-                            parent: { database_id: dbId },
-                            properties: {
-                                "식별ID": { title: [{ text: { content: art.id } }] },
-                                "제목": { rich_text: [{ text: { content: art.title } }] },
-                                "구분": { select: { name: "작품" } },
-                                "주인공": { select: { name: art.author } },
-                                "날짜": { date: { start: art.date || todayStr } },
-                                "작가의 한마디/일기본문": { rich_text: [{ text: { content: art.artistNote || "" } }] }
-                            },
-                            children: [
-                                {
-                                    object: "block",
-                                    type: "heading_2",
-                                    heading_2: { rich_text: [{ type: "text", text: { content: `🎨 ${art.title} (작가의 한마디)` } }] }
-                                },
-                                {
-                                    object: "block",
-                                    type: "quote",
-                                    quote: { rich_text: [{ type: "text", text: { content: art.artistNote || "작품에 담긴 이야기와 열정을 느껴보세요!" } }] }
-                                }
-                            ]
-                        })
-                    });
-                    if (createRes.ok) {
-                        const newPage = await createRes.json();
-                        notionPageIdMap[art.id] = newPage.id;
-                    }
                 }
             } catch (err) {
                 console.warn("[노션 한마디 저장 오류]", err);
             }
         }
 
-        // 3. 댓글 노션 PATCH / POST
-        async function syncCommentToNotion(art) {
+        // 3. 댓글 노션 PATCH
+        async function syncCommentToNotion(item, newComment) {
             const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
             if (!dbId) return;
 
             try {
-                const pageId = notionPageIdMap[art.id];
-                const commentsJson = JSON.stringify(art.comments || []);
+                const pageId = notionPageIdMap[item.id];
+                const commentsJson = JSON.stringify(item.comments || []);
                 if (pageId) {
                     await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                         method: 'PATCH',
@@ -1765,27 +2255,6 @@
                             }
                         })
                     });
-                } else {
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    const createRes = await fetch(`${NOTION_PROXY}/v1/pages`, {
-                        method: 'POST',
-                        headers: NOTION_HEADERS,
-                        body: JSON.stringify({
-                            parent: { database_id: dbId },
-                            properties: {
-                                "식별ID": { title: [{ text: { content: art.id } }] },
-                                "제목": { rich_text: [{ text: { content: art.title } }] },
-                                "구분": { select: { name: "작품" } },
-                                "주인공": { select: { name: art.author } },
-                                "날짜": { date: { start: art.date || todayStr } },
-                                "가족 칭찬 댓글": { rich_text: [{ text: { content: commentsJson } }] }
-                            }
-                        })
-                    });
-                    if (createRes.ok) {
-                        const newPage = await createRes.json();
-                        notionPageIdMap[art.id] = newPage.id;
-                    }
                 }
             } catch (err) {
                 console.warn("[노션 댓글 저장 오류]", err);
@@ -1793,7 +2262,7 @@
         }
 
         // 4. 스티커 반응 노션 PATCH
-        async function syncStickerToNotion(art, type) {
+        async function syncStickerToNotion(item, type) {
             const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
             if (!dbId) return;
 
@@ -1807,8 +2276,8 @@
             if (!propName) return;
 
             try {
-                const pageId = notionPageIdMap[art.id];
-                const count = art.stickers?.[type] || 0;
+                const pageId = notionPageIdMap[item.id];
+                const count = item.stickers?.[type] || 0;
                 if (pageId) {
                     await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                         method: 'PATCH',
@@ -1825,8 +2294,8 @@
             }
         }
 
-        // 4. 작품 전체 메타(분야/일자/제목/한마디) 노션 실시간 PATCH / POST
-        async function syncArtworkToNotion(art) {
+        // 5. 작품 정보 노션 PATCH / POST + 수정 이력 콜아웃 블록 적재
+        async function syncArtworkToNotion(art, oldState) {
             const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
             if (!dbId) return;
 
@@ -1868,19 +2337,27 @@
                 }
 
                 if (pageId) {
-                    // 1차 업데이트 시도 (분야 포함)
                     let patchRes = await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                         method: 'PATCH',
                         headers: NOTION_HEADERS,
                         body: JSON.stringify({ properties: propsPayload })
                     });
-                    // 혹시 노션 DB에 '분야' 프로퍼티가 아직 없거나 권한 등으로 에러 시 분야 제외 안전 재시도
                     if (!patchRes.ok && propsPayload["분야"]) {
                         delete propsPayload["분야"];
                         await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                             method: 'PATCH',
                             headers: NOTION_HEADERS,
                             body: JSON.stringify({ properties: propsPayload })
+                        });
+                    }
+
+                    // 🕒 수정 이력(Audit Trail) 블록 적재
+                    if (oldState) {
+                        await appendRevisionHistoryToNotion(pageId, "작품", oldState, {
+                            title: art.title,
+                            date: art.date,
+                            category: art.category,
+                            desc: art.artistNote
                         });
                     }
                 } else {
@@ -1920,9 +2397,133 @@
             }
         }
 
+        // 6. 특별한 날 노션 PATCH / POST + 수정 이력 콜아웃 블록 적재
+        async function syncSpecialDayToNotion(item, oldState) {
+            const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.GALLERY_DB_ID);
+            if (!dbId) return;
+
+            try {
+                let pageId = notionPageIdMap[item.id];
+                if (!pageId) {
+                    try {
+                        const searchRes = await fetch(`${NOTION_PROXY}/v1/databases/${dbId}/query`, {
+                            method: 'POST',
+                            headers: NOTION_HEADERS,
+                            body: JSON.stringify({
+                                filter: {
+                                    property: "식별ID",
+                                    title: { equals: item.id }
+                                },
+                                page_size: 1
+                            })
+                        });
+                        if (searchRes.ok) {
+                            const sData = await searchRes.json();
+                            if (sData.results && sData.results.length > 0) {
+                                pageId = sData.results[0].id;
+                                notionPageIdMap[item.id] = pageId;
+                            }
+                        }
+                    } catch (se) {
+                        console.warn("[노션 식별ID 검색 경고]", se);
+                    }
+                }
+
+                const propsPayload = {
+                    "제목": { rich_text: [{ text: { content: item.title } }] },
+                    "날짜": { date: { start: item.date } },
+                    "작가의 한마디/일기본문": { rich_text: [{ text: { content: item.desc || "" } }] }
+                };
+
+                if (item.category) {
+                    propsPayload["분야"] = { select: { name: item.category } };
+                }
+
+                if (pageId) {
+                    let patchRes = await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+                        method: 'PATCH',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({ properties: propsPayload })
+                    });
+                    if (!patchRes.ok && propsPayload["분야"]) {
+                        delete propsPayload["분야"];
+                        await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+                            method: 'PATCH',
+                            headers: NOTION_HEADERS,
+                            body: JSON.stringify({ properties: propsPayload })
+                        });
+                    }
+
+                    // 🕒 수정 이력(Audit Trail) 블록 적재
+                    if (oldState) {
+                        await appendRevisionHistoryToNotion(pageId, "특별한 날", oldState, {
+                            title: item.title,
+                            date: item.date,
+                            category: item.category,
+                            desc: item.desc,
+                            videoUrl: item.videoUrl
+                        });
+                    }
+                } else {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const childrenBlocks = [
+                        {
+                            object: "block",
+                            type: "heading_2",
+                            heading_2: { rich_text: [{ type: "text", text: { content: `🌟 ${item.title}` } }] }
+                        },
+                        {
+                            object: "block",
+                            type: "quote",
+                            quote: { rich_text: [{ type: "text", text: { content: item.desc || "가족과 함께한 행복하고 특별한 추억입니다." } }] }
+                        }
+                    ];
+
+                    if (item.videoUrl) {
+                        childrenBlocks.push({
+                            object: "block",
+                            type: "bookmark",
+                            bookmark: { url: item.videoUrl }
+                        });
+                    }
+
+                    const createRes = await fetch(`${NOTION_PROXY}/v1/pages`, {
+                        method: 'POST',
+                        headers: NOTION_HEADERS,
+                        body: JSON.stringify({
+                            parent: { database_id: dbId },
+                            properties: {
+                                "식별ID": { title: [{ text: { content: item.id } }] },
+                                "구분": { select: { name: "특별한 날" } },
+                                "주인공": { select: { name: item.author || "공동" } },
+                                ...propsPayload
+                            },
+                            children: childrenBlocks
+                        })
+                    });
+                    if (createRes.ok) {
+                        const newPage = await createRes.json();
+                        notionPageIdMap[item.id] = newPage.id;
+                    }
+                }
+            } catch (err) {
+                console.warn("[노션 특별한 날 동기화 오류]", err);
+            }
+        }
+
         // ========================================================
-        // 📝 새 작품 업로드 모달 제어
+        // 📸 헤더 업로드 액션 & 모달 제어
         // ========================================================
+        function handleHeroUploadAction() {
+            if (typeof window.openQuickUploader === 'function') {
+                const cat = currentViewMode === 'special' ? '특별한 날' : '작품';
+                const author = (currentUserName === '민서') ? '민서' : '민수';
+                window.openQuickUploader({ defaultAuthor: author, defaultCategory: cat });
+            } else {
+                openUploadModal();
+            }
+        }
+
         function openUploadModal() {
             document.getElementById('newArtDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('newArtTitle').value = '';
@@ -1932,7 +2533,6 @@
             selectedUploadedImageBase64 = '';
             document.getElementById('imgPreviewBox').innerHTML = '<span style="color: #aaa; font-size: 0.9rem;">사진 미리보기가 여기에 표시됩니다.</span>';
             
-            // 현재 로그인 프로필 기준 작가 자동 세팅
             document.getElementById('newArtAuthor').value = (currentUserName === '민서') ? '민서' : '민수';
             document.getElementById('uploadModal').style.display = 'flex';
         }
@@ -1973,21 +2573,13 @@
 
             const imgUrl = selectedUploadedImageBase64 || "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80";
 
-            const categoryIconMap = {
-                "그림/미술": "🎨",
-                "만들기/공예": "✂️",
-                "상장/기념": "🏆",
-                "학교 과제": "🏫",
-                "종이접기/컬러링": "📐"
-            };
-
             const newArt = {
                 id: `art_custom_${Date.now()}`,
                 author: author,
                 authorKey: author === '민수' ? 'son' : 'daughter',
                 title: title,
                 category: category,
-                categoryIcon: categoryIconMap[category] || "🎨",
+                categoryIcon: getCategoryIcon(category),
                 date: date,
                 grade: author === '민수' ? '5학년' : '1학년',
                 imageUrl: imgUrl,
@@ -2009,6 +2601,11 @@
         window.addEventListener('load', () => {
             applyUserTheme();
             loadGalleryData();
+            loadSpecialDaysData();
+            renderFilterBar();
+            renderGallery();
+            updateStats();
+            syncFromNotionGallery();
         });
     </script>
     <script src="../core/quick-uploader.js"></script>
