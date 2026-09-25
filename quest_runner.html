@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>5-Min Quest Runner 🚀</title>
+  
+  <meta name="theme-color" content="#120924"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <link rel="icon" type="image/png" href="./icon-192.png"/>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "lab-bg": "#120924",
+            "lab-card": "#1e1338",
+            "lab-card-border": "#2d1f4e",
+            "neon-green": "#39ff14",
+            "neon-green-shadow": "#045300",
+            "neon-cyan": "#7df4ff",
+            "fire-orange": "#ff7f1c",
+            "error-red": "#ff4d4d"
+          },
+          fontFamily: {
+            "jua": ["Jua", "sans-serif"],
+            "eng": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      background: radial-gradient(circle at 50% 20%, #221340 0%, #120924 80%);
+      min-height: 100dvh;
+      font-family: 'Jua', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* ======================================================== */
+    /* 📐 공부방 공식: 교과서 실물 정품 세로 분수 (Vertical Fraction) */
+    /* ======================================================== */
+    .inline-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 1.1em;
+      line-height: 1;
+      font-weight: 700;
+    }
+    .inline-frac .num {
+      display: block;
+      padding-bottom: 2px;
+      color: inherit;
+      line-height: 1;
+    }
+    .inline-frac .bar {
+      display: block;
+      border-top: 2.5px solid currentColor;
+      height: 0;
+      width: 100%;
+      min-width: 16px;
+      margin: 2px 0;
+      font-size: 0;
+    }
+    .inline-frac .den {
+      display: block;
+      padding-top: 2px;
+      color: inherit;
+      line-height: 1;
+    }
+
+    /* 대분수 래퍼 */
+    .mixed-frac {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      gap: 3px;
+      font-weight: 700;
+    }
+    .mixed-frac .whole {
+      font-size: 1.25em;
+      line-height: 1;
+      color: inherit;
+    }
+
+    /* 3D 젤리 버튼 물리 효과 */
+    .jelly-btn {
+      position: relative;
+      transition: all 0.08s ease;
+      cursor: pointer;
+    }
+    .jelly-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 0 var(--depth-color, #045300) !important;
+    }
+
+    /* 바텀시트 슬라이드업 */
+    @keyframes sheetSlideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .animate-sheet-up {
+      animation: sheetSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* 몬스터 응원 바운스 */
+    @keyframes cheerBounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-8px) scale(1.05); }
+    }
+    .animate-cheer {
+      animation: cheerBounce 2.4s ease-in-out infinite;
+    }
+
+    /* 정답 팡파르 몬스터 점프 */
+    @keyframes victoryJump {
+      0% { transform: translateY(0) scale(1); }
+      30% { transform: translateY(-24px) scale(1.15) rotate(5deg); }
+      60% { transform: translateY(-4px) scale(0.95) rotate(-3deg); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    .victory-jump {
+      animation: victoryJump 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+  </style>
+</head>
+
+<body class="text-white min-h-[100dvh] flex flex-col justify-between overflow-x-hidden p-4 pb-6 max-w-md mx-auto">
+
+  <!-- ================= 1. 상단 HUD: 나가기 + 게이지바 + 하트 라이프 ================= -->
+  <header class="flex items-center gap-3 pt-1">
+    <!-- 나가기 버튼 -->
+    <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-400 hover:text-white active:scale-95 transition-transform" onclick="confirmExit()">
+      <span class="material-symbols-outlined text-lg">close</span>
+    </button>
+
+    <!-- 실시간 진행 게이지 바 -->
+    <div class="flex-1 bg-lab-card h-4 rounded-full border border-lab-card-border overflow-hidden p-0.5 relative">
+      <div id="progressBar" class="bg-gradient-to-r from-neon-cyan to-neon-green h-full rounded-full transition-all duration-300" style="width: 20%;"></div>
+    </div>
+
+    <!-- 하트 라이프 -->
+    <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-2.5 py-1 rounded-full">
+      <span class="text-sm" id="heartIcons">❤️❤️❤️</span>
+    </div>
+  </header>
+
+  <!-- ================= 2. 중앙 문제 쇼케이스 & 치어리더 몬스터 ================= -->
+  <main class="flex-1 flex flex-col justify-center py-4 space-y-4">
+    
+    <!-- 과목 테마 뱃지 -->
+    <div class="flex items-center justify-between">
+      <div class="inline-flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-3 py-1 rounded-full text-xs text-neon-cyan font-bold">
+        <span id="subjectBadgeIcon">🧮</span>
+        <span id="subjectBadgeTitle">수학 분쇄 던전 · 5-2 분수</span>
+      </div>
+      <span class="text-xs font-eng text-gray-400 font-bold" id="stepCounter">문제 1 / 5</span>
+    </div>
+
+    <!-- 문제 카드 -->
+    <div class="bg-lab-card border-2 border-lab-card-border rounded-3xl p-5 shadow-2xl relative">
+      
+      <!-- 오디오 듣기 버튼 (영어 과목일 때 노출) -->
+      <div id="audioPlayWrapper" class="hidden mb-3">
+        <button class="jelly-btn inline-flex items-center gap-2 bg-yellow-400 text-lab-bg px-4 py-2 rounded-2xl font-bold text-sm shadow-[0_4px_0_0_#997300]" onclick="playQuestionAudio()">
+          <span class="material-symbols-outlined text-lg">volume_up</span>
+          <span>원어민 발음 듣기</span>
+        </button>
+      </div>
+
+      <!-- 문제 텍스트 (세로 분수 완벽 지원) -->
+      <h2 id="questionText" class="text-lg font-bold text-white leading-relaxed">
+        <!-- 동적 렌더링 -->
+      </h2>
+
+      <!-- 보조 힌트 / 수식 박스 (세로 분수 수평선 완벽 렌더링) -->
+      <div id="formulaBox" class="mt-4 bg-lab-bg/90 border border-lab-card-border rounded-2xl p-4 text-center text-xl md:text-2xl font-bold text-neon-cyan flex items-center justify-center gap-2.5 flex-wrap">
+        <!-- 동적 렌더링 -->
+      </div>
+    </div>
+
+    <!-- 몬스터 치어리더 (좌측 하단 응원단) -->
+    <div class="flex items-center gap-3 px-2">
+      <div class="relative w-14 h-14 flex items-center justify-center">
+        <img 
+          id="cheerMonster" 
+          src="./kids/assets/images/monsters/purple_monster.png" 
+          alt="클레이 바이트" 
+          class="animate-cheer w-14 h-14 object-contain filter drop-shadow-md"
+        />
+      </div>
+      <!-- 작은 응원 말풍선 -->
+      <div class="flex-1 bg-lab-card/70 border border-lab-card-border px-3.5 py-2 rounded-2xl">
+        <p id="cheerSpeech" class="text-xs text-gray-300">
+          "민수야, 분모는 그대로 두고 분자끼리 더하면 돼! ⚡"
+        </p>
+      </div>
+    </div>
+
+    <!-- 3D 젤리 선택지 버튼 목록 (세로 분수 완벽 렌더링) -->
+    <div id="choicesList" class="space-y-2.5 pt-1">
+      <!-- 동적 생성 -->
+    </div>
+
+  </main>
+
+  <!-- ================= 3. 하단 확인 버튼 ================= -->
+  <footer class="w-full pt-2">
+    <button 
+      id="checkAnswerBtn"
+      class="jelly-btn w-full bg-neon-green text-[#023300] py-4 rounded-2xl text-center shadow-[0_6px_0_0_#045300] font-bold text-lg tracking-wide border border-[#55ff35] disabled:opacity-40 disabled:cursor-not-allowed"
+      style="--depth-color: #045300;"
+      disabled
+      onclick="handleCheckAnswer()"
+    >
+      확인하기 🚀
+    </button>
+  </footer>
+
+  <!-- ================= 4. 정답 / 오답 판정 바텀시트 ================= -->
+  <div id="feedbackSheet" class="fixed inset-x-0 bottom-0 z-50 hidden animate-sheet-up">
+    <div id="feedbackBox" class="max-w-md mx-auto p-5 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.8)] border-t-2 space-y-3">
+      
+      <!-- 상태 텍스트 & 아이콘 -->
+      <div class="flex items-center gap-3">
+        <div id="feedbackIconWrapper" class="w-10 h-10 rounded-full flex items-center justify-center text-xl">
+          🎉
+        </div>
+        <div>
+          <h4 id="feedbackTitle" class="text-base font-bold">정답입니다!</h4>
+          <p id="feedbackDesc" class="text-xs opacity-90">+10 EXP / +3 🪙 획득!</p>
+        </div>
+      </div>
+
+      <!-- 다음 버튼 -->
+      <button 
+        id="nextStepBtn"
+        class="jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center shadow-md active:translate-y-1"
+        onclick="goToNextStep()"
+      >
+        계속하기 ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= 4.5. 나가기 확인 모달 (내 방 연동) ================= -->
+  <div id="exitModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-lab-card border-2 border-lab-card-border rounded-3xl max-w-xs w-full p-5 text-center space-y-3.5 shadow-2xl">
+      <div class="w-14 h-14 rounded-2xl bg-purple-900/60 border border-purple-500/50 mx-auto flex items-center justify-center text-3xl">
+        🚪
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-white">퀘스트를 멈출까요?</h3>
+        <p class="text-xs text-gray-300 mt-1">언제든 다시 도전할 수 있어요!</p>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <button class="jelly-btn w-full py-3 rounded-xl bg-neon-green text-[#023300] font-bold text-sm shadow-[0_4px_0_0_#045300]" onclick="closeExitModal()">
+          계속 공부하기 🚀
+        </button>
+        <button class="w-full py-2.5 rounded-xl bg-lab-bg border border-lab-card-border text-gray-300 text-xs font-bold hover:text-white" onclick="returnToLab()">
+          👾 몬스터 연구실로
+        </button>
+        <button class="w-full py-2.5 rounded-xl bg-lab-bg border border-neon-cyan/50 text-neon-cyan text-xs font-bold hover:bg-neon-cyan/10" id="exitDeepTrainingBtn" onclick="goToSubjectDeepTraining()">
+          🧮 과목 심화 훈련관으로
+        </button>
+        <button class="w-full py-2.5 rounded-xl bg-lab-bg border border-lab-card-border text-gray-400 text-xs font-bold hover:text-white" onclick="goToLobby()">
+          🏠 공부방 로비로
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 4.8. 몬스터 리벤지 배틀 모달 (오답 즉시 구출) ================= -->
+  <div id="revengeModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+    <div class="bg-lab-card border-2 border-fire-orange rounded-3xl max-w-xs w-full p-5 text-center space-y-3.5 shadow-2xl animate-sheet-up">
+      <div class="w-16 h-16 rounded-2xl bg-fire-orange/20 border-2 border-fire-orange mx-auto flex items-center justify-center text-3xl animate-bounce">
+        👾
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-white">앗! 놓친 몬스터가 나타났다!</h3>
+        <p class="text-xs text-gray-300 mt-1">방금 아깝게 놓친 문제를 지금 바로 잡고 보너스 다이아💎를 챙겨가자!</p>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <button class="jelly-btn w-full py-3.5 rounded-2xl bg-fire-orange text-white font-bold text-sm shadow-[0_4px_0_0_#602a00]" onclick="startRevengeRound()">
+          복수전 출격하기! ⚔️
+        </button>
+        <button class="w-full py-2.5 rounded-xl bg-lab-bg border border-lab-card-border text-gray-400 text-xs font-bold hover:text-white" onclick="skipRevengeAndClear()">
+          다음에 다시 잡기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 5. 5문제 완료 축하 모달 ================= -->
+  <div id="clearModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+    <div class="bg-lab-card border-2 border-neon-green rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+      <!-- 팡파르 아이콘 -->
+      <div class="w-20 h-20 rounded-full bg-neon-green/20 border-2 border-neon-green mx-auto flex items-center justify-center text-4xl animate-bounce">
+        🏆
+      </div>
+      
+      <div>
+        <h3 class="text-xl font-bold text-white">5분 퀘스트 완료!</h3>
+        <p class="text-xs text-neon-green mt-1 font-bold">🔥 4일 연속 불꽃 스트릭 유지 성공!</p>
+      </div>
+
+      <!-- 보상 요약 박스 -->
+      <div class="bg-lab-bg border border-lab-card-border rounded-2xl p-3.5 text-left space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-gray-400">클리어 보너스</span>
+          <span class="font-eng font-bold text-neon-cyan">+50 EXP</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-gray-400">골드 획득</span>
+          <span class="font-eng font-bold text-yellow-300">🪙 15 코인</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-gray-400">파트너 유대감</span>
+          <span class="font-eng font-bold text-neon-green">Lv.12 ➔ 99% 💖</span>
+        </div>
+      </div>
+
+      <!-- 버튼 3개: 연구실 복귀 & 과목별 심화 훈련 & 공부방 로비 -->
+      <div class="space-y-2 pt-1">
+        <button class="jelly-btn w-full py-3.5 rounded-2xl bg-neon-green text-[#023300] font-bold text-base shadow-[0_6px_0_0_#045300]" onclick="returnToLab()">
+          연구실로 돌아가기 👾
+        </button>
+        <button class="w-full py-2.5 rounded-2xl bg-lab-bg border border-neon-cyan/50 text-neon-cyan font-bold text-xs hover:bg-neon-cyan/10" id="deepTrainingBtn" onclick="goToSubjectDeepTraining()">
+          🧮 과목 심화 실전 훈련관 가기 ➔
+        </button>
+        <button class="w-full py-2.5 rounded-2xl bg-lab-bg border border-lab-card-border text-gray-300 font-bold text-xs hover:text-white" onclick="goToLobby()">
+          🏠 공부방 로비(lobby.html)로 가기 ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 6. 노션 보상 및 학습일지 DB & 요정 음성 코어 모듈 로드 ================= -->
+  <script src="./kids/config.js"></script>
+  <script src="./kids/core/notion-reward.js"></script>
+  <script src="./kids/core/fairy-config.js"></script>
+  <script src="./kids/core/fairy-engine.js"></script>
+
+  <!-- ================= 7. 실시간 퀴즈 러너 엔진 스크립트 ================= -->
+  <script>
+    // ========================================================
+    // 📐 공부방 공식 세로 분수 (Vertical Fraction) 렌더러 헬퍼
+    // ========================================================
+    function renderFrac(num, den) {
+      return `<span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span>`;
+    }
+
+    function renderMixed(whole, num, den) {
+      return `<span class="mixed-frac"><span class="whole">${whole}</span><span class="inline-frac"><span class="num">${num}</span><span class="bar"></span><span class="den">${den}</span></span></span>`;
+    }
+
+    // 텍스트 내의 "1/4" 나 "1과 2/7"을 교과서 정품 세로 분수로 자동 치환
+    function formatFractions(str) {
+      if (typeof str !== 'string') return str;
+      return str
+        .replace(/(\d+)과\s+(\d+)\/(\d+)/g, (_, w, n, d) => renderMixed(w, n, d))
+        .replace(/(\d+)\/(\d+)/g, (_, n, d) => renderFrac(n, d));
+    }
+
+    // ========================================================
+    // 🧮 실제 민수의 방(fractions_training.html SSOT) 5-2 분수의 곱셈 공식 퀴즈 및 실전 문제 은행
+    // ========================================================
+    const mathFractionBank = [
+      // 1. 핵심 개념 공식 배틀 (fractions_training.html QUIZ_QUESTIONS)
+      {
+        q: "진분수와 자연수를 곱할 때, 자연수는 어디에만 곱할까요?",
+        formula: `진분수 × 자연수 = [ ? ]`,
+        options: ["분모에만 곱한다", "분자에만 곱한다", "분모와 분자 둘 다 곱한다"],
+        answer: 1,
+        hint: "분모는 피자 조각 크기라 침대에 누워 쉬고, 조각 수인 분자에만 곱해요! 🍕"
+      },
+      {
+        q: `분수 ${renderFrac(6, 5)}처럼 분자가 분모보다 더 큰 무거운 가분수는 무엇으로 바꿀까요?`,
+        formula: `${renderFrac(6, 5)} ➔ [ ? ]`,
+        options: ["대분수", "단위분수", "소수"],
+        answer: 0,
+        hint: `온전한 1개(${renderFrac(5, 5)})를 쏙 뽑아 대분수 ${renderMixed(1, 1, 5)}로 변신시켜요!`
+      },
+      {
+        q: "대분수와 자연수를 곱할 때는 대분수에게 무엇을 먼저 씌워야 할까요?",
+        formula: `대분수 × 자연수 계산 전`,
+        options: ["소수 안경", "가분수 투구", "거꾸로 모자"],
+        answer: 1,
+        hint: "뚱뚱한 대분수를 날씬한 가분수로 바꾸면 계산이 훨씬 쉬워져요! 🧪"
+      },
+      {
+        q: `자연수 6과 ${renderFrac(2, 3)}를 곱할 때, 6과 3을 미리 약분하면 6은 무엇이 될까요?`,
+        formula: `6 × ${renderFrac(2, 3)} (6과 3 약분)`,
+        options: ["1", "2", "3"],
+        answer: 1,
+        hint: "6 나누기 3은 2! 약분하면 2가 남아요! ✂️"
+      },
+      {
+        q: `단위분수 ${renderFrac(1, 2)}과 ${renderFrac(1, 3)}을 곱하면 전체는 몇 칸으로 나뉠까요?`,
+        formula: `${renderFrac(1, 2)} × ${renderFrac(1, 3)} = [ ? ]`,
+        options: ["5칸", "6칸", "8칸"],
+        answer: 1,
+        hint: "가로 2줄 × 세로 3줄 = 분모끼리 곱해서 전체 6칸이 돼요! 💎"
+      },
+      {
+        q: "분수끼리의 곱셈에서 계산하기 전에 대각선에 있는 숫자끼리 나누는 기술은?",
+        formula: `대각선 숫자 나누기 = [ ? ]`,
+        options: ["통분술", "번개 약분술", "내림술"],
+        answer: 1,
+        hint: "마법 가위로 대각선 친구를 똑같은 수로 미리 싹둑 자르는 번개 약분술! ⚡"
+      },
+      {
+        q: `대분수끼리 곱할 때 (${renderMixed(2, 1, 3)} × ${renderMixed(1, 1, 5)}) 가장 먼저 해야 할 일은?`,
+        formula: `${renderMixed(2, 1, 3)} × ${renderMixed(1, 1, 5)} 첫 단계`,
+        options: ["둘 다 가분수로 바꾼다", "자연수끼리만 곱한다", "분모를 통분한다"],
+        answer: 0,
+        hint: "두 대분수를 반드시 모두 가분수로 먼저 변신시켜야 곱할 수 있어요! 👑"
+      },
+      {
+        q: "1보다 작은 진분수를 곱하면 원래 수보다 어떻게 될까요?",
+        formula: `어떤 수 × 진분수 (&lt; 1)`,
+        options: ["더 커진다", "더 작아진다", "변함이 없다"],
+        answer: 1,
+        hint: "1보다 작은 수를 곱하면 조각의 조각이 되어 알맞게 작아져요! 🍰"
+      },
+      {
+        q: `${renderFrac(3, 4)} × ${renderFrac(2, 7)}에서 대각선 4와 2를 2로 약분하면 분모는 몇이 될까요?`,
+        formula: `${renderFrac(3, 4)} × ${renderFrac(2, 7)} ➔ 분모 = [ ? ]`,
+        options: ["14", "28", "8"],
+        answer: 0,
+        hint: "4가 2가 되었으니 분모는 2 × 7 = 14가 돼요! ⚡"
+      },
+      {
+        q: "분수의 곱셈을 할 때 '약분'은 언제 하는 것이 가장 좋을까요?",
+        formula: `약분의 황금 타이밍`,
+        options: ["곱하기 전에 미리 약분한다", "계산이 다 끝나고만 한다", "약분은 안 해도 된다"],
+        answer: 0,
+        hint: "곱하기 전에 미리 대각선 약분을 하면 숫자가 작아져 실수가 사라져요! ✨"
+      },
+
+      // 2. 실전 계산 문제 (fractions_training.html PROBLEM_BANKS 연동)
+      {
+        q: `${renderFrac(1, 4)} × 3을 계산한 값으로 알맞은 것은?`,
+        formula: `${renderFrac(1, 4)} × 3 = [ ? ]`,
+        options: [renderFrac(1, 4), renderFrac(3, 4), renderFrac(3, 12)],
+        answer: 1,
+        hint: `분모 4는 그대로 쉬고, 분자 1 × 3 = 3이므로 정답은 ${renderFrac(3, 4)}!`
+      },
+      {
+        q: `${renderFrac(2, 5)} × 3을 계산하여 대분수로 나타낸 것은?`,
+        formula: `${renderFrac(2, 5)} × 3 = ${renderFrac(6, 5)} = [ ? ]`,
+        options: [renderMixed(1, 1, 5), renderMixed(1, 2, 5), renderFrac(5, 5)],
+        answer: 0,
+        hint: `분자 2 × 3 = 6! 가분수 ${renderFrac(6, 5)}는 온전한 1개와 ${renderFrac(1, 5)}이므로 ${renderMixed(1, 1, 5)}!`
+      },
+      {
+        q: `6 × ${renderFrac(2, 3)}를 약분하여 계산한 값은?`,
+        formula: `6 × ${renderFrac(2, 3)} = [ ? ]`,
+        options: ["4", "3", "6"],
+        answer: 0,
+        hint: "자연수 6과 분모 3을 3으로 약분하면 2가 남고, 2 × 2 = 4입니다!"
+      },
+      {
+        q: `${renderFrac(1, 2)} × ${renderFrac(1, 3)}을 계산한 값은?`,
+        formula: `${renderFrac(1, 2)} × ${renderFrac(1, 3)} = [ ? ]`,
+        options: [renderFrac(1, 5), renderFrac(1, 6), renderFrac(2, 5)],
+        answer: 1,
+        hint: `분모끼리 곱하고(2 × 3 = 6), 분자끼리 곱하면(1 × 1 = 1) 정답은 ${renderFrac(1, 6)}!`
+      },
+      {
+        q: `[보스 문제] ${renderMixed(1, 1, 4)} × 2를 계산한 결과는?`,
+        formula: `${renderMixed(1, 1, 4)} × 2 = [ ? ]`,
+        options: [renderMixed(2, 1, 2), renderMixed(1, 2, 4), renderFrac(5, 4)],
+        answer: 0,
+        hint: `대분수를 가분수 ${renderFrac(5, 4)}로 바꾼 뒤 2와 약분하면 ${renderFrac(5, 2)} = ${renderMixed(2, 1, 2)}!`
+      }
+    ];
+
+    // ========================================================
+    // 🧠 적응형 라이트너 3상자 오답 큐 엔진 (Universal Spaced Repetition)
+    // ========================================================
+    const ADAPTIVE_STORAGE_KEY = 'MINMIN_ADAPTIVE_QUEUE_V1';
+
+    function getAdaptiveQueue(subj) {
+      try {
+        const raw = localStorage.getItem(ADAPTIVE_STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : {};
+        return data[subj] || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveAdaptiveQueue(subj, queue) {
+      try {
+        const raw = localStorage.getItem(ADAPTIVE_STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : {};
+        data[subj] = queue;
+        localStorage.setItem(ADAPTIVE_STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function recordWrongItem(subj, questionObj) {
+      const q = getAdaptiveQueue(subj);
+      const existing = q.find(item => item.q === questionObj.q);
+      const today = new Date().toISOString().slice(0, 10);
+      if (existing) {
+        existing.failCount = (existing.failCount || 1) + 1;
+        existing.streak = 0;
+        existing.lastReviewed = today;
+      } else {
+        q.push({
+          id: questionObj.id || `q_${Date.now()}`,
+          q: questionObj.q,
+          formula: questionObj.formula,
+          options: questionObj.options,
+          answer: questionObj.answer,
+          hint: questionObj.hint,
+          audioText: questionObj.audioText,
+          failCount: 1,
+          streak: 0,
+          box: 1,
+          lastReviewed: today
+        });
+      }
+      saveAdaptiveQueue(subj, q);
+    }
+
+    function recordCorrectItem(subj, questionObj) {
+      const q = getAdaptiveQueue(subj);
+      const idx = q.findIndex(item => item.q === questionObj.q);
+      if (idx !== -1) {
+        q[idx].streak = (q[idx].streak || 0) + 1;
+        q[idx].box = Math.min(3, (q[idx].box || 1) + 1);
+        q[idx].lastReviewed = new Date().toISOString().slice(0, 10);
+        // 3회 연속 성공 시 완전 마스터 졸업!
+        if (q[idx].streak >= 3) {
+          q.splice(idx, 1);
+        }
+        saveAdaptiveQueue(subj, q);
+      }
+    }
+
+    // ========================================================
+    // 🔤 초등 5학년 2학기 영어 SSOT (함순애 교과서 8단원 & 7단원)
+    // ========================================================
+    const englishMasterBank = {
+      // 8단원: He Has Short Curly Hair (외모와 옷차림 묘사 ⭐ 민수 현재 진도)
+      unit8: {
+        title: "8단원: 외모·옷차림 (He Has Short Curly Hair)",
+        words: [
+          {
+            id: "eng_l8_w1",
+            q: "'curly hair'의 알맞은 뜻은?",
+            formula: "curly hair",
+            audioText: "curly hair",
+            options: ["곱슬머리", "긴 생머리", "짧은 머리"],
+            answer: 0,
+            hint: "curly는 라면처럼 꼬불꼬불한 '곱슬'을 뜻해요! 🍜"
+          },
+          {
+            id: "eng_l8_w2",
+            q: "'straight hair'의 알맞은 뜻은?",
+            formula: "straight hair",
+            audioText: "straight hair",
+            options: ["생머리 (곧은 머리)", "곱슬머리", "대머리"],
+            answer: 0,
+            hint: "straight는 똑바로 쭉 뻗은 '곧은 생머리'예요! 📏"
+          },
+          {
+            id: "eng_l8_w3",
+            q: "'glasses'의 뜻으로 알맞은 것은?",
+            formula: "glasses",
+            audioText: "glasses",
+            options: ["안경", "신발", "장갑"],
+            answer: 0,
+            hint: "glass(유리알)가 2개 모여 눈에 쓰는 '안경'이에요! 👓"
+          },
+          {
+            id: "eng_l8_w4",
+            q: "'wear' (wearing)의 뜻은 무엇일까요?",
+            formula: "wear / wearing",
+            audioText: "wearing",
+            options: ["옷을 입다 (입고 있다)", "달리다", "노래하다"],
+            answer: 0,
+            hint: "옷, 바지, 안경, 모자를 착용하고 '입고 있는' 동작이에요! 👕"
+          },
+          {
+            id: "eng_l8_w5",
+            q: "'skirt'의 알맞은 뜻은?",
+            formula: "skirt",
+            audioText: "skirt",
+            options: ["치마", "바지", "양말"],
+            answer: 0,
+            hint: "skirt는 예쁜 '치마'를 뜻해요! 👗"
+          },
+          {
+            id: "eng_l8_w6",
+            q: "'pants'의 알맞은 뜻은?",
+            formula: "pants",
+            audioText: "pants",
+            options: ["바지", "모자", "티셔츠"],
+            answer: 0,
+            hint: "다리가 2개라 항상 복수형 s가 붙는 '바지'예요! 👖"
+          }
+        ],
+        sentences: [
+          {
+            id: "eng_l8_s1",
+            q: "'What does he look like?'의 알맞은 우리말 뜻은?",
+            formula: "What does he look like?",
+            audioText: "What does he look like?",
+            options: ["그는 어떻게 생겼나요?", "그는 지금 어디에 있나요?", "그는 무엇을 먹고 있나요?"],
+            answer: 0,
+            hint: "'look like ~'는 '~처럼 생기다/보이다'라는 외모 질문이에요! 🔍"
+          },
+          {
+            id: "eng_l8_s2",
+            q: "'He has short curly hair.'의 뜻은?",
+            formula: "He has short curly hair.",
+            audioText: "He has short curly hair.",
+            options: ["그는 짧은 곱슬머리를 가지고 있어요.", "그는 긴 생머리예요.", "그는 키가 커요."],
+            answer: 0,
+            hint: "short(짧은) + curly hair(곱슬머리) = 짧은 곱슬머리! 👦"
+          },
+          {
+            id: "eng_l8_s3",
+            q: "'What is she wearing?'에 대한 올바른 대답은?",
+            formula: "Q. What is she wearing?",
+            audioText: "What is she wearing?",
+            options: ["She is wearing a red skirt.", "She likes apples.", "She is at home."],
+            answer: 0,
+            hint: "무엇을 입고 있냐는 질문엔 'She is wearing ~'로 옷차림을 답해요! 👗"
+          },
+          {
+            id: "eng_l8_s4",
+            q: "'She has long straight hair and blue eyes.'의 뜻은?",
+            formula: "She has long straight hair and blue eyes.",
+            audioText: "She has long straight hair and blue eyes.",
+            options: ["그녀는 긴 생머리와 파란 눈을 가지고 있어요.", "그녀는 짧은 파마머리와 갈색 눈이에요.", "그녀는 빨간 모자를 썼어요."],
+            answer: 0,
+            hint: "long straight(긴 생머리) + blue eyes(파란 눈)! 👁️"
+          },
+          {
+            id: "eng_l8_s5",
+            q: "[보스 문장] 'Find your friend!'의 의미는 무엇일까요?",
+            formula: "Find your friend!",
+            audioText: "Find your friend!",
+            options: ["친구를 찾아라!", "친구와 악수해라!", "친구에게 인사해라!"],
+            answer: 0,
+            hint: "Find는 '찾다', your friend는 '너의 친구'예요! 🤝"
+          }
+        ]
+      },
+
+      // 7단원: What Did You Do Last Weekend? (지난 주말 이야기 복습)
+      unit7: {
+        title: "7단원: 지난 주말 (What Did You Do Last Weekend?)",
+        words: [
+          {
+            id: "eng_l7_w1",
+            q: "'weekend'의 알맞은 뜻은?",
+            formula: "weekend",
+            audioText: "weekend",
+            options: ["주말 (토요일, 일요일)", "평일", "휴가"],
+            answer: 0,
+            hint: "week(한 주) + end(끝) = 토/일요일 '주말'이에요! 🏖️"
+          },
+          {
+            id: "eng_l7_w2",
+            q: "'visited'의 알맞은 뜻은?",
+            formula: "visited",
+            audioText: "visited",
+            options: ["방문했다 (놀러 갔다)", "청소했다", "요리했다"],
+            answer: 0,
+            hint: "visit(방문하다)의 과거형으로 '방문했다'예요! 🏡"
+          },
+          {
+            id: "eng_l7_w3",
+            q: "'cleaned'의 알맞은 뜻은?",
+            formula: "cleaned",
+            audioText: "cleaned",
+            options: ["청소했다", "운동했다", "그렸다"],
+            answer: 0,
+            hint: "clean(청소하다)에 ed가 붙은 과거형 '청소했다'예요! 🧹"
+          }
+        ],
+        sentences: [
+          {
+            id: "eng_l7_s1",
+            q: "'What did you do last weekend?'의 뜻은?",
+            formula: "What did you do last weekend?",
+            audioText: "What did you do last weekend?",
+            options: ["지난 주말에 무엇을 했니?", "이번 주말에 어디 갈 거니?", "주말이 좋았니?"],
+            answer: 0,
+            hint: "last weekend는 '지난 주말'에 한 일을 묻는 질문이에요! 🗓️"
+          },
+          {
+            id: "eng_l7_s2",
+            q: "'I visited my grandparents.'의 뜻은?",
+            formula: "I visited my grandparents.",
+            audioText: "I visited my grandparents.",
+            options: ["나는 조부모님(할머니, 할아버지) 댁을 방문했어.", "나는 친구를 만났어.", "나는 캠핑을 갔어."],
+            answer: 0,
+            hint: "visited(방문했다) + grandparents(조부모님)! 👵👴"
+          }
+        ]
+      }
+    };
+
+    function getSubjectQuest(subj, unitScope = '8', mode = 'mixed') {
+      const queue = getAdaptiveQueue(subj);
+
+      if (subj === 'math') {
+        let pool = [...mathFractionBank];
+        let selected = pool.sort(() => Math.random() - 0.5).slice(0, 5);
+        // 익일 1번 문제 오답 우선 출제
+        if (queue.length > 0 && mode !== 'revenge') {
+          const w = queue[0];
+          selected = [w, ...selected.filter(x => x.q !== w.q).slice(0, 4)];
+        }
+        return {
+          title: "수학 분쇄 던전 · 5-2 분수의 곱셈",
+          icon: "🧮",
+          questions: selected
+        };
+      }
+
+      if (subj === 'english') {
+        let pool = [];
+        if (unitScope === '8' || !unitScope) {
+          const u8 = englishMasterBank.unit8;
+          if (mode === 'word') pool = [...u8.words];
+          else if (mode === 'sentence') pool = [...u8.sentences];
+          else pool = [...u8.words.slice(0, 3), ...u8.sentences.slice(0, 2)];
+        } else if (unitScope === '7') {
+          const u7 = englishMasterBank.unit7;
+          if (mode === 'word') pool = [...u7.words];
+          else if (mode === 'sentence') pool = [...u7.sentences];
+          else pool = [...u7.words, ...u7.sentences];
+        } else if (unitScope === '7,8' || unitScope === 'all') {
+          const u8 = englishMasterBank.unit8;
+          const u7 = englishMasterBank.unit7;
+          pool = [...u8.words, ...u8.sentences, ...u7.words, ...u7.sentences];
+        }
+
+        let selected = [...pool].sort(() => Math.random() - 0.5).slice(0, 5);
+
+        // 익일 1번 문제 오답 우선 출제 (라이트너 3상자 루프)
+        if (queue.length > 0 && mode !== 'revenge') {
+          const w = queue[0];
+          selected = [w, ...selected.filter(x => x.q !== w.q).slice(0, 4)];
+        } else if (mode === 'revenge' && queue.length > 0) {
+          selected = queue.slice(0, 5);
+        }
+
+        const titles = {
+          '8': "8단원: 외모·옷차림 (He Has Short Curly Hair)",
+          '7': "7단원: 지난 주말 이야기 (What Did You Do Last Weekend?)",
+          '7,8': "7~8단원 시험대비 종합 팩 (중간/기말 평가)"
+        };
+
+        return {
+          title: `스피킹 콜로세움 · ${titles[unitScope] || titles['8']}`,
+          icon: "🔤",
+          questions: selected
+        };
+      }
+
+      return questData[subj] || questData.korean;
+    }
+
+    // 국·사·과 마이크로 문제 데이터셋
+    const questData = {
+      korean: {
+        title: "어휘 배틀 아레나 · 초5 국어",
+        icon: "📖",
+        questions: [
+          {
+            q: "‘가는 말이 고와야 ( ? )’ 속담의 빈칸은?",
+            formula: "가는 말이 고와야 [ ? ]",
+            options: ["오는 말이 곱다", "발 없는 말이 천 리 간다", "입이 무겁다", "말 한마디에 천 냥 빚 갚는다"],
+            answer: 0,
+            hint: "내가 남에게 곱게 말해야 상대방도 나에게 곱게 말해요!"
+          },
+          {
+            q: "‘기쁨’의 반대말(반의어)로 가장 알맞은 것은?",
+            formula: "기쁨 ↔ [ ? ]",
+            options: ["행복", "즐거움", "슬픔", "환희"],
+            answer: 2,
+            hint: "기쁜 감정과 반대되는 우울하고 눈물 나는 감정이에요!"
+          },
+          {
+            q: "낮말은 새가 듣고, 밤말은 ( ? )가 듣는다.",
+            formula: "낮말은 새, 밤말은 [ ? ]",
+            options: ["쥐", "소", "호랑이", "도깨비"],
+            answer: 0,
+            hint: "밤에 조용히 돌아다니는 작은 동물이에요!"
+          },
+          {
+            q: "‘우물 안 ( ? )’ - 세상 물정을 모르는 사람을 이르는 말",
+            formula: "우물 안 [ ? ]",
+            options: ["개구리", "올챙이", "미꾸라지", "금붕어"],
+            answer: 0,
+            hint: "개골개골 우물 안에만 갇혀 있는 동물이에요!"
+          },
+          {
+            q: "[보스 문제] ‘백지장도 맞들면 낫다’의 교훈은?",
+            formula: "백지장도 맞들면 낫다",
+            options: ["쉬운 일도 함께 협동하면 더 쉽다", "종이는 소중히 아껴 써야 한다", "혼자서 하는 것이 가장 빠르다", "백 번 생각하고 행동하자"],
+            answer: 0,
+            hint: "가벼운 종이 한 장도 같이 들면 더 가볍다는 뜻이에요!"
+          }
+        ]
+      },
+      science: {
+        title: "볼케이노 코어 · 5-2 과학",
+        icon: "🔬",
+        questions: [
+          {
+            q: "온도가 높은 곳에서 낮은 곳으로 이동하는 에너지는?",
+            formula: "온도 이동 에너지 = [ ? ]",
+            options: ["소리", "열", "빛", "전기"],
+            answer: 1,
+            hint: "따뜻한 물체에서 차가운 물체로 전달되는 에너지예요!"
+          },
+          {
+            q: "물이 끓어 수증기로 변하는 현상은?",
+            formula: "액체 ➔ 기체 상태 변화",
+            options: ["증발(기화)", "응결", "응고", "용해"],
+            answer: 0,
+            hint: "액체 상태의 물이 기체인 수증기가 되는 것을 뜻해요!"
+          },
+          {
+            q: "열이 물질을 따라 직접 전해지는 현상은? (예: 쇠숟가락)",
+            formula: "고체에서의 열 이동",
+            options: ["전도", "대류", "복사", "반사"],
+            answer: 0,
+            hint: "냄비나 금속 숟가락 끝이 뜨거워지는 원리예요!"
+          },
+          {
+            q: "태양계 행성 중 태양에서 가장 가까운 행성은?",
+            formula: "태양계 1번 행성",
+            options: ["금성", "수성", "지구", "화성"],
+            answer: 1,
+            hint: "수-금-지-화-목-토-천-해의 첫 번째예요!"
+          },
+          {
+            q: "[보스 문제] 산성 용액에 붉은 양배추 지시약을 넣으면 변하는 색은?",
+            formula: "산성 + 붉은 양배추 지시약",
+            options: ["붉은색 계열", "푸른색 계열", "노란색", "검은색"],
+            answer: 0,
+            hint: "식초나 레몬즙 같은 산성 용액에서는 붉은색으로 변해요!"
+          }
+        ]
+      },
+      society: {
+        title: "고대 유물 지도 · 5-2 사회",
+        icon: "🗺️",
+        questions: [
+          {
+            q: "조선시대 한양 도성의 남쪽 정문의 정식 이름은?",
+            formula: "남대문 = [ ? ]",
+            options: ["흥인지문", "숭례문", "돈의문", "숙정문"],
+            answer: 1,
+            hint: "‘예절을 숭상한다’는 뜻의 남대문 정식 명칭이에요!"
+          },
+          {
+            q: "조선을 건국한 태조의 이름은?",
+            formula: "조선 건국 시조",
+            options: ["왕건", "이성계", "세종대왕", "이순신"],
+            answer: 1,
+            hint: "위화도 회군을 통해 조선을 건국한 장군이에요!"
+          },
+          {
+            q: "훈민정음(한글)을 창제하신 조선의 임금은?",
+            formula: "훈민정음 창제",
+            options: ["세종대왕", "정조", "태종", "영조"],
+            answer: 0,
+            hint: "집현전 학사들과 함께 백성을 위해 글자를 만드셨어요!"
+          },
+          {
+            q: "임진왜란 때 한산도 대첩과 명량 대첩을 이끈 장군은?",
+            formula: "거북선과 수군 장군",
+            options: ["을지문덕", "강감찬", "이순신", "권율"],
+            answer: 2,
+            hint: "나의 죽음을 적에게 알리지 말라!"
+          },
+          {
+            q: "[보스 문제] 조선시대 백성들의 억울함을 알리기 위해 대궐 문에 단 북은?",
+            formula: "억울함을 호소하는 북",
+            options: ["신문고", "자격루", "측우기", "혼천의"],
+            answer: 0,
+            hint: "태종 때 대궐 밖 문루에 달아 백성이 칠 수 있게 한 북이에요!"
+          }
+        ]
+      }
+    };
+
+    // URL 파라미터 파싱 및 퀘스트 데이터 바인딩
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSubj = urlParams.get('subject') || 'english';
+    const currentUnit = urlParams.get('unit') || '8';
+    const currentMode = urlParams.get('mode') || 'mixed';
+    let currentQuest = getSubjectQuest(currentSubj, currentUnit, currentMode);
+
+    let currentIndex = 0;
+    let selectedOptionIndex = null;
+    let hearts = 3;
+    let isAnswerChecked = false;
+    let audioCtx = null;
+    let sessionMissedQuestions = [];
+    let sessionWrongLogs = [];
+    let isRevengeMode = false;
+
+    // Web Audio 사운드 엔진
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    window.addEventListener('pointerdown', initAudio, { once: true });
+
+    function playSound(type) {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      if (type === 'tap') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(540, now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.07);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'correct') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.29);
+        });
+      } else if (type === 'wrong') {
+        [320, 240].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.2);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.22);
+        });
+      } else if (type === 'fanfare') {
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+          gain.gain.setValueAtTime(0.3, now + idx * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.1);
+          osc.stop(now + idx * 0.1 + 0.45);
+        });
+      }
+    }
+
+    // 초기 화면 렌더링
+    function initScreen() {
+      document.getElementById('subjectBadgeIcon').textContent = currentQuest.icon;
+      document.getElementById('subjectBadgeTitle').textContent = currentQuest.title;
+
+      const deepBtn = document.getElementById('deepTrainingBtn');
+      const exitDeepBtn = document.getElementById('exitDeepTrainingBtn');
+      if (currentSubj === 'english') {
+        if (deepBtn) deepBtn.innerHTML = `🔤 초5 영어 원어민 스피킹관(english.html) 가기 ➔`;
+        if (exitDeepBtn) exitDeepBtn.innerHTML = `🔤 초5 영어 원어민 스피킹관으로`;
+      } else if (currentSubj === 'math') {
+        if (deepBtn) deepBtn.innerHTML = `🧮 5-2 분수 실전 훈련관(fractions_training) 가기 ➔`;
+        if (exitDeepBtn) exitDeepBtn.innerHTML = `🧮 5-2 분수 실전 훈련관으로`;
+      } else {
+        if (deepBtn) deepBtn.innerHTML = `${currentQuest.icon} ${currentQuest.title} 심화관 가기 ➔`;
+        if (exitDeepBtn) exitDeepBtn.innerHTML = `${currentQuest.icon} 과목 심화관으로`;
+      }
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = currentQuest.questions[currentIndex];
+      selectedOptionIndex = null;
+      isAnswerChecked = false;
+
+      // 헤더 상태 갱신
+      document.getElementById('stepCounter').textContent = `문제 ${currentIndex + 1} / ${currentQuest.questions.length}`;
+      document.getElementById('progressBar').style.width = `${((currentIndex + 1) / currentQuest.questions.length) * 100}%`;
+      
+      // 문제 텍스트 & 수식 (HTML 세로 분수 렌더링)
+      document.getElementById('questionText').innerHTML = q.q;
+      document.getElementById('formulaBox').innerHTML = q.formula;
+      document.getElementById('cheerSpeech').textContent = `"민수야 조금만 더 집중해봐! ⚡"`;
+
+      // 오디오 버튼 제어 (영어 및 발음 지원 문제)
+      const audioWrapper = document.getElementById('audioPlayWrapper');
+      if (q.audioText) {
+        audioWrapper.classList.remove('hidden');
+      } else {
+        audioWrapper.classList.add('hidden');
+      }
+
+      // 선택지 렌더링 (세로 분수 완벽 지원)
+      const list = document.getElementById('choicesList');
+      list.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `jelly-btn w-full bg-lab-card/90 border-2 border-lab-card-border hover:border-neon-cyan/60 py-3 px-4 rounded-2xl flex items-center justify-between text-left text-sm font-bold shadow-md transition-all`;
+        btn.id = `opt-${idx}`;
+        btn.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-full bg-lab-bg flex items-center justify-center text-xs font-eng text-gray-400 border border-lab-card-border">${idx + 1}</span>
+            <span class="text-white text-base">${opt}</span>
+          </div>
+          <span class="material-symbols-outlined text-transparent text-lg check-icon">check_circle</span>
+        `;
+        btn.onclick = () => selectChoice(idx);
+        list.appendChild(btn);
+      });
+
+      // 확인 버튼 초기화
+      const checkBtn = document.getElementById('checkAnswerBtn');
+      checkBtn.disabled = true;
+      checkBtn.className = "jelly-btn w-full bg-neon-green text-[#023300] py-4 rounded-2xl text-center shadow-[0_6px_0_0_#045300] font-bold text-lg tracking-wide border border-[#55ff35] disabled:opacity-40 disabled:cursor-not-allowed";
+      
+      // 바텀시트 닫기
+      document.getElementById('feedbackSheet').classList.add('hidden');
+    }
+
+    // 원어민 발음 듣기 (Cloudflare Edge-TTS 실시간 스트리밍 Jenny 원어민 음성)
+    function playQuestionAudio() {
+      const q = currentQuest.questions[currentIndex];
+      if (!q || !q.audioText) return;
+      playSound('tap');
+      if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS(q.audioText, { forceVoice: 'en-US-JennyNeural' });
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(q.audioText);
+        utter.lang = 'en-US';
+        utter.rate = 0.85; // 또렷한 아동용 원어민 리스닝 속도
+        const voices = window.speechSynthesis.getVoices();
+        const enVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Google') || v.name.includes('Samantha')));
+        if (enVoice) utter.voice = enVoice;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    // 보기 선택
+    function selectChoice(index) {
+      if (isAnswerChecked) return;
+      playSound('tap');
+      selectedOptionIndex = index;
+
+      currentQuest.questions[currentIndex].options.forEach((_, idx) => {
+        const el = document.getElementById(`opt-${idx}`);
+        const icon = el.querySelector('.check-icon');
+        if (idx === index) {
+          el.classList.add('border-neon-green', 'bg-neon-green/10');
+          el.classList.remove('border-lab-card-border');
+          icon.classList.remove('text-transparent');
+          icon.classList.add('text-neon-green');
+        } else {
+          el.classList.remove('border-neon-green', 'bg-neon-green/10');
+          el.classList.add('border-lab-card-border');
+          icon.classList.add('text-transparent');
+          icon.classList.remove('text-neon-green');
+        }
+      });
+
+      document.getElementById('checkAnswerBtn').disabled = false;
+    }
+
+    // 정답 확인
+    function handleCheckAnswer() {
+      if (selectedOptionIndex === null || isAnswerChecked) return;
+      isAnswerChecked = true;
+
+      const q = currentQuest.questions[currentIndex];
+      const isCorrect = selectedOptionIndex === q.answer;
+
+      const sheet = document.getElementById('feedbackSheet');
+      const box = document.getElementById('feedbackBox');
+      const title = document.getElementById('feedbackTitle');
+      const desc = document.getElementById('feedbackDesc');
+      const nextBtn = document.getElementById('nextStepBtn');
+      const iconWrap = document.getElementById('feedbackIconWrapper');
+      const monster = document.getElementById('cheerMonster');
+
+      sheet.classList.remove('hidden');
+
+      if (isCorrect) {
+        playSound('correct');
+        recordCorrectItem(currentSubj, q);
+
+        if (typeof speakFairyTTS === 'function') {
+          speakFairyTTS("정답이야! 대단해!");
+        }
+
+        monster.classList.remove('victory-jump');
+        void monster.offsetWidth;
+        monster.classList.add('victory-jump');
+
+        box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-neon-green bg-[#112d14] text-white space-y-3";
+        title.textContent = "대단해! 정답이야! 🎉";
+        title.className = "text-base font-bold text-neon-green";
+        desc.textContent = "+10 EXP / +3 🪙 획득!";
+        iconWrap.textContent = "✨";
+        iconWrap.className = "w-10 h-10 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center text-xl";
+        nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-neon-green text-[#023300] shadow-[0_4px_0_0_#045300]";
+      } else {
+        playSound('wrong');
+        recordWrongItem(currentSubj, q);
+        if (!sessionMissedQuestions.some(m => m.q === q.q)) {
+          sessionMissedQuestions.push(q);
+        }
+
+        if (typeof speakFairyTTS === 'function') {
+          speakFairyTTS("아쉬워! 다시 힘내보자!");
+        }
+
+        // 📝 노션 오답 리포트용 상세 로그 수집
+        sessionWrongLogs.push({
+          q: q.q,
+          chosen: q.options[selectedOptionIndex] || "선택지 확인",
+          answer: q.options[q.answer] || ""
+        });
+
+        hearts = Math.max(0, hearts - 1);
+        updateHearts();
+
+        box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-fire-orange bg-[#331811] text-white space-y-3";
+        title.textContent = "아까워요! 💡";
+        title.className = "text-base font-bold text-fire-orange";
+        desc.innerHTML = `정답 해설: ${q.hint}`;
+        iconWrap.textContent = "💔";
+        iconWrap.className = "w-10 h-10 rounded-full bg-fire-orange/20 text-fire-orange flex items-center justify-center text-xl";
+        nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-fire-orange text-white shadow-[0_4px_0_0_#602a00]";
+      }
+    }
+
+    function updateHearts() {
+      const hStr = "❤️".repeat(hearts) + "🖤".repeat(3 - hearts);
+      document.getElementById('heartIcons').textContent = hStr;
+    }
+
+    // 다음 문제로 이동 (오답 발생 시 리벤지 배틀 트리거)
+    function goToNextStep() {
+      playSound('tap');
+      if (currentIndex + 1 < currentQuest.questions.length) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        if (sessionMissedQuestions.length > 0 && !isRevengeMode) {
+          showRevengeModal();
+        } else {
+          showClearModal();
+        }
+      }
+    }
+
+    // ⚔️ 몬스터 리벤지 배틀 모달 표시
+    function showRevengeModal() {
+      playSound('wrong');
+      const modal = document.getElementById('revengeModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    // ⚔️ 놓친 문제 즉시 복수전 시작 (당일 100% 구출 성공)
+    function startRevengeRound() {
+      playSound('tap');
+      document.getElementById('revengeModal').classList.add('hidden');
+      document.getElementById('revengeModal').classList.remove('flex');
+      isRevengeMode = true;
+      currentQuest = {
+        title: `⚔️ ${currentQuest.title} · 리벤지 배틀`,
+        icon: "👾",
+        questions: [...sessionMissedQuestions]
+      };
+      sessionMissedQuestions = [];
+      currentIndex = 0;
+      hearts = 3;
+      updateHearts();
+      renderQuestion();
+    }
+
+    // 복수전 스킵하고 클리어 모달로
+    function skipRevengeAndClear() {
+      playSound('tap');
+      document.getElementById('revengeModal').classList.add('hidden');
+      document.getElementById('revengeModal').classList.remove('flex');
+      showClearModal();
+    }
+
+    // 5문제 완독 모달 (노션 인벤토리 보상 DB + 노션 학습일지 DB 자동 전송)
+    async function showClearModal() {
+      playSound('fanfare');
+      if (typeof speakFairyTTS === 'function') {
+        speakFairyTTS("퀘스트 완료!");
+      }
+      const modal = document.getElementById('clearModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      const koreanSubjMap = {
+        math: "수학",
+        english: "영어",
+        korean: "국어",
+        science: "과학",
+        society: "사회"
+      };
+      const curKoreanSubj = koreanSubjMap[currentSubj] || "영어";
+
+      // 💎 1. 노션 인벤토리 DB 연동 (보상 +3💎, +50 EXP 지급)
+      if (typeof grantRewardAndShowUI === 'function') {
+        try {
+          window.currentSubject = curKoreanSubj;
+          await grantRewardAndShowUI(3, true);
+          console.log(`[노션 인벤토리 동기화 완료] ${curKoreanSubj} 보상 +3💎 및 EXP 반영`);
+        } catch (e) {
+          console.warn("[노션 보상 동기화 알림]", e);
+        }
+      }
+
+      // 📝 2. 노션 학습일지 DB 연동 (오답 리포트 수집 및 5분 소요시간 전송)
+      if (typeof sendStudyLogToNotion === 'function') {
+        try {
+          const missedSummary = sessionWrongLogs.length > 0
+            ? sessionWrongLogs.map(item => `${item.q} (선택: ${item.chosen})`).join(' // ')
+            : "오답 없음 (100% 마스터)";
+
+          await sendStudyLogToNotion({
+            subject: curKoreanSubj,
+            durationMinutes: 5,
+            errorReport: missedSummary
+          });
+          console.log(`[노션 학습일지 동기화 완료] 과목: ${curKoreanSubj} | 오답: ${missedSummary}`);
+        } catch (e) {
+          console.warn("[노션 학습일지 동기화 알림]", e);
+        }
+      }
+    }
+
+    function returnToLab() {
+      playSound('tap');
+      window.location.href = 'monster_lab.html';
+    }
+
+    // 🎯 과목별 심화 실전 훈련관으로 직결 (수학: 분수관, 영어: 스피킹관, 기타: 과목 메인)
+    function goToSubjectDeepTraining() {
+      playSound('tap');
+      if (currentSubj === 'english') {
+        window.location.href = 'kids/subjects/english/english.html';
+      } else if (currentSubj === 'math') {
+        window.location.href = 'kids/subjects/math/fractions_training.html';
+      } else {
+        window.location.href = `kids/subjects/${currentSubj}/${currentSubj}.html`;
+      }
+    }
+    const goToMathDeepTraining = goToSubjectDeepTraining;
+
+    // 🏠 공부방 메인 로비로 직결
+    function goToLobby() {
+      playSound('tap');
+      window.location.href = 'lobby.html';
+    }
+
+    function confirmExit() {
+      playSound('tap');
+      const modal = document.getElementById('exitModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeExitModal() {
+      playSound('tap');
+      const modal = document.getElementById('exitModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // 초기 실행
+    window.addEventListener('DOMContentLoaded', initScreen);
+  </script>
+</body>
+</html>

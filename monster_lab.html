@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Minsu's Monster Lab 👾</title>
+  
+  <!-- 모바일 웹앱 PWA 메타 & 아이콘 -->
+  <meta name="theme-color" content="#130924"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <link rel="icon" type="image/png" href="./icon-192.png"/>
+  <link rel="apple-touch-icon" href="./icon-192.png"/>
+
+  <!-- Google Fonts: Jua & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet"/>
+  
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "lab-bg": "#120924",
+            "lab-card": "#1e1338",
+            "lab-card-border": "#2d1f4e",
+            "neon-green": "#39ff14",
+            "neon-green-shadow": "#045300",
+            "neon-cyan": "#7df4ff",
+            "fire-orange": "#ff7f1c"
+          },
+          fontFamily: {
+            "jua": ["Jua", "sans-serif"],
+            "eng": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* 공통 기본 세팅 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      background: radial-gradient(circle at 50% 25%, #241445 0%, #120924 75%);
+      min-height: 100dvh;
+      font-family: 'Jua', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* 👾 3D 클레이 몬스터 안정적이고 잔잔한 부유 */
+    @keyframes floatMonster {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-6px) rotate(1deg);
+      }
+    }
+    .animate-monster-float {
+      animation: floatMonster 3.2s ease-in-out infinite;
+    }
+
+    /* 발밑 네온 링 펄스 */
+    @keyframes ringPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.85;
+        filter: drop-shadow(0 0 10px rgba(57, 255, 20, 0.7));
+      }
+      50% {
+        transform: scale(0.88);
+        opacity: 0.5;
+        filter: drop-shadow(0 0 5px rgba(57, 255, 20, 0.3));
+      }
+    }
+    .animate-ring-pulse {
+      animation: ringPulse 3.2s ease-in-out infinite;
+    }
+
+    /* 몬스터 콕(Poke) 바운스 */
+    @keyframes pokeWobble {
+      0% { transform: scale(1) translateY(0); }
+      25% { transform: scale(1.15, 0.85) translateY(4px); }
+      50% { transform: scale(0.92, 1.12) translateY(-12px) rotate(-3deg); }
+      75% { transform: scale(1.04, 0.96) translateY(-2px) rotate(2deg); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    .poke-bounce {
+      animation: pokeWobble 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    }
+
+    /* 3D 젤리 버튼 물리 효과 */
+    .jelly-btn {
+      position: relative;
+      transition: all 0.08s ease;
+      cursor: pointer;
+    }
+    .jelly-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 0 var(--depth-color, #045300) !important;
+    }
+
+    /* 말풍선 팝업 */
+    @keyframes popBubble {
+      0% { transform: scale(0.6) translateY(10px); opacity: 0; }
+      80% { transform: scale(1.05) translateY(-2px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .animate-bubble {
+      animation: popBubble 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    /* 부드러운 바텀시트 슬라이드업 */
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .animate-sheet-up {
+      animation: sheetUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+
+<body class="text-white min-h-[100dvh] flex flex-col justify-between overflow-x-hidden p-4 pb-20 max-w-md mx-auto">
+
+  <!-- ================= 1. 초심플 상단 HUD (로비 복귀 + 3개 칩) ================= -->
+  <header class="flex items-center justify-between pt-1">
+    <!-- 좌측: 🏠 공부방 로비 복귀 + 민수 아바타 & 레벨 -->
+    <div class="flex items-center gap-2">
+      <!-- 🏠 로비 홈 바로가기 (내 방 연동) -->
+      <a 
+        href="lobby.html" 
+        class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-neon-cyan/60 active:scale-95 transition-all shadow-lg"
+        title="공부방 로비로 돌아가기"
+      >
+        <span class="material-symbols-outlined text-lg">home</span>
+      </a>
+
+      <!-- 민수 아바타 & 레벨 -->
+      <div class="flex items-center gap-2 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="pokeSound('level')">
+        <div class="w-8 h-8 rounded-full bg-purple-700/60 flex items-center justify-center text-lg border border-neon-cyan/50">
+          👦
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-sm font-bold text-white">민수</span>
+          <span class="bg-neon-cyan text-lab-bg text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none">
+            Lv.12
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 우측 스트릭 & 코인 & 사운드 칩 -->
+    <div class="flex items-center gap-2">
+      <!-- 🔥 3일 스트릭 -->
+      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="handleStreakClick()">
+        <span class="text-base animate-pulse">🔥</span>
+        <span class="text-sm font-eng font-black text-fire-orange">3일</span>
+      </div>
+
+      <!-- 🪙 120 코인 -->
+      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="handleCoinClick()">
+        <span class="text-base">🪙</span>
+        <span class="text-sm font-eng font-black text-yellow-300">120</span>
+      </div>
+
+      <!-- 🔊 사운드 토글 -->
+      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition-transform shadow-lg" onclick="toggleSound()">
+        <span class="material-symbols-outlined text-lg" id="soundIcon">volume_up</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= 2. 중앙 몬스터 무대 (시원한 여백 & 주인공 몰입) ================= -->
+  <main class="flex-1 flex flex-col items-center justify-center relative py-2">
+    
+    <!-- 몬스터 상단 심플 말풍선 -->
+    <div id="monsterSpeechBubble" class="relative z-30 mb-2 bg-lab-card/95 border-2 border-neon-cyan px-3.5 py-1.5 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.6)] text-center max-w-[260px]">
+      <p id="speechText" class="text-xs text-neon-cyan font-bold tracking-wide">
+        "민수야! 오늘 5분 퀘스트 깨러 가자! 🚀"
+      </p>
+      <!-- 말풍선 꼬리 -->
+      <div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-lab-card border-r-2 border-b-2 border-neon-cyan rotate-45"></div>
+    </div>
+
+    <!-- 👾 3D 클레이 몬스터 & 네온 스테이지 발판 (발판 바로 위 안정적 저고도 부유) -->
+    <div class="relative w-72 h-64 flex flex-col items-center justify-end cursor-pointer group" onclick="pokeMonster(event)">
+      
+      <!-- 배경 은은한 네온 방사광 -->
+      <div class="absolute inset-0 bg-gradient-to-t from-neon-green/10 via-transparent to-transparent rounded-full filter blur-xl pointer-events-none"></div>
+
+      <!-- 3D 네온 발판 스테이지 (하단에 듬직하게 안착) -->
+      <img 
+        src="./kids/assets/images/monsters/lab_stage_pedestal.png" 
+        alt="Neon Pedestal Stage" 
+        class="absolute bottom-0 w-64 h-64 object-contain opacity-90 pointer-events-none filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
+      />
+
+      <!-- 발판 윗면 원형 플레이트의 네온 그림자 링 -->
+      <div class="absolute bottom-20 w-24 h-4 bg-neon-green/45 rounded-full blur-sm animate-ring-pulse pointer-events-none"></div>
+
+      <!-- 👾 보라색 클레이 몬스터 (발판 링 바로 위에서 안정적으로 잔잔히 부유: w-28) -->
+      <div class="relative z-20 mb-[88px] flex flex-col items-center">
+        <img 
+          id="monsterImg" 
+          src="./kids/assets/images/monsters/purple_monster.png" 
+          alt="클레이 바이트" 
+          class="animate-monster-float w-28 h-28 object-contain filter drop-shadow-[0_10px_16px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform"
+        />
+      </div>
+    </div>
+
+    <!-- 몬스터 심플 이름표 (이름 + 파트너 레벨만 딱!) -->
+    <div class="flex items-center gap-1.5 mt-0.5 bg-lab-card/70 border border-lab-card-border px-3 py-0.5 rounded-full shadow-md">
+      <span class="text-xs font-bold text-white tracking-wide">클레이 바이트</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
+      <span class="text-[11px] text-neon-green font-bold">수호 파트너</span>
+    </div>
+
+  </main>
+
+  <!-- ================= 3. 하단 액션 구역: 거대 3D 젤리 버튼 1개만 강조 ================= -->
+  <footer class="w-full space-y-3">
+    
+    <!-- 🟢 메인 3D 젤리 버튼: 누르고 싶어 미치겠는 거대한 크기 -->
+    <button 
+      id="mainQuestBtn"
+      class="jelly-btn w-full bg-neon-green hover:bg-[#45ff22] text-[#023300] py-4 px-6 rounded-2xl text-center shadow-[0_8px_0_0_#045300] active:translate-y-2 active:shadow-[0_2px_0_0_#045300] transition-all flex flex-col items-center justify-center gap-0.5 border-2 border-[#55ff35]"
+      style="--depth-color: #045300;"
+      onclick="handleStartQuest()"
+    >
+      <!-- 상단 하이라이트 광택 -->
+      <div class="absolute inset-x-0 top-0 h-1/2 bg-white/35 rounded-t-2xl pointer-events-none"></div>
+      
+      <div class="relative z-10 flex items-center justify-center gap-2 text-xl font-bold tracking-wide">
+        <span>오늘의 5분 퀘스트 출격! 🚀</span>
+      </div>
+      <div class="relative z-10 text-xs font-bold text-[#034400]/80">
+        🧮 5-2 분수의 곱셈 던전 · 보너스 1.5배!
+      </div>
+    </button>
+
+    <!-- 🔽 부담 없는 보조 텍스트 버튼: [다른 과목 둘러보기] -->
+    <div class="text-center pt-0.5">
+      <button 
+        class="text-xs text-gray-400 hover:text-neon-cyan py-1.5 px-4 rounded-full hover:bg-lab-card/50 transition-colors inline-flex items-center gap-1 font-bold"
+        onclick="openDrawer()"
+      >
+        <span>국·영·수·사·과 다른 과목 보기</span>
+        <span class="material-symbols-outlined text-sm">expand_less</span>
+      </button>
+    </div>
+
+  </footer>
+
+  <!-- ================= 4. 다른 과목 서랍 (바텀시트: 평소엔 숨겨서 시원함 유지) ================= -->
+  <div id="drawerOverlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-end justify-center" onclick="closeDrawer(event)">
+    <div class="bg-lab-card border-t-2 border-neon-cyan/40 w-full max-w-md rounded-t-3xl p-5 shadow-2xl animate-sheet-up space-y-3" onclick="event.stopPropagation()">
+      
+      <!-- 서랍 핸들바 -->
+      <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-1"></div>
+      
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-1.5">
+          <span>📚 5대 교과 마이크로 던전</span>
+        </h3>
+        <button class="text-gray-400 hover:text-white p-1" onclick="closeDrawer()">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- 5대 과목 심플 알약형 리스트 -->
+      <div class="space-y-2 pt-1">
+        
+        <!-- 🧮 수학 -->
+        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-neon-green p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('math', '🧮 수학 던전: 5-2 분수의 곱셈 & 번개 약분술', '진분수, 대분수 곱셈과 번개 약분술 5분 실전 퀘스트!')">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🧮</span>
+            <div>
+              <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                5-2 분수의 곱셈 던전
+                <span class="bg-neon-green/20 text-neon-green text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">1.5배 🪙</span>
+              </div>
+              <p class="text-xs text-gray-400">교과서 실물 세로 분수 5문제</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
+        </div>
+
+        <!-- 🔤 영어 -->
+        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-yellow-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('english', '🔤 영어 8단원: 외모·옷차림 묘사', '초5-2 현재 진도 ⭐ He Has Short Curly Hair!')">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🔤</span>
+            <div>
+              <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                8단원 외모 & 옷차림 던전
+                <span class="bg-yellow-400/20 text-yellow-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">현재 진도 ⭐</span>
+              </div>
+              <p class="text-xs text-gray-400">He Has Short Curly Hair · 5분 퀘스트</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
+        </div>
+
+        <!-- 📖 국어 -->
+        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-purple-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('korean', '📖 국어 던전: 어휘 아레나', '속담, 반의어, 사자성어 60초 스피드 듀얼!')">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">📖</span>
+            <div>
+              <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                어휘 배틀 아레나
+                <span class="bg-purple-500/20 text-purple-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">+40 EXP</span>
+              </div>
+              <p class="text-xs text-gray-400">속담 & 어휘 듀얼</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
+        </div>
+
+        <!-- 🔬 과학 -->
+        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-blue-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('science', '🔬 과학 던전: 볼케이노 코어', '온도와 열의 이동! 가상 실험실에서 화학 합성!')">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🔬</span>
+            <div>
+              <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                볼케이노 코어
+                <span class="bg-blue-500/20 text-blue-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">+70 EXP</span>
+              </div>
+              <p class="text-xs text-gray-400">온도와 열 가상 실험</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
+        </div>
+
+        <!-- 🗺️ 사회 -->
+        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-pink-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('society', '🗺️ 사회 던전: 고대 유물 지도', '조선시대 한양 도성과 삼국시대 역사 탐험!')">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🗺️</span>
+            <div>
+              <div class="text-sm font-bold text-white flex items-center gap-1.5">
+                고대 유물 지도
+                <span class="bg-pink-500/20 text-pink-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded animate-pulse">먼지털기 2배! ✨</span>
+              </div>
+              <p class="text-xs text-gray-400">조선시대 유물 발굴</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 5. 초간단 출격 확인 모달 ================= -->
+  <div id="questModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-lab-card border-2 border-neon-green rounded-3xl max-w-sm w-full p-5 text-center space-y-3.5 shadow-2xl">
+      <div class="w-14 h-14 rounded-2xl bg-neon-green/20 border-2 border-neon-green mx-auto flex items-center justify-center text-3xl" id="modalIcon">
+        🚀
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-white" id="modalTitle">오늘의 5분 퀘스트</h3>
+        <p class="text-xs text-gray-300 mt-1" id="modalDesc">클레이 바이트와 함께 5문제 출격!</p>
+      </div>
+
+      <!-- 과목 맞춤 세부 옵션 (단원 및 모드 선택) -->
+      <div id="questOptionsBox" class="space-y-2.5 text-left bg-lab-bg/80 border border-lab-card-border p-3 rounded-2xl hidden">
+        <!-- 단원 범위 선택 -->
+        <div>
+          <span class="text-[11px] font-bold text-gray-400 block mb-1.5">🎯 학습 단원 범위</span>
+          <div class="grid grid-cols-3 gap-1.5" id="unitScopeChips">
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="8" onclick="setQuestUnit('8')">8단원 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7" onclick="setQuestUnit('7')">7단원 복습</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7,8" onclick="setQuestUnit('7,8')">7~8단원 팩</button>
+          </div>
+        </div>
+
+        <!-- 학습 모드 선택 -->
+        <div>
+          <span class="text-[11px] font-bold text-gray-400 block mb-1.5">⚡ 학습 집중 모드</span>
+          <div class="grid grid-cols-3 gap-1.5" id="modeChips">
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">통합(단어+문장)</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-1">
+        <button class="flex-1 py-3 rounded-xl bg-lab-bg border border-lab-card-border text-gray-300 text-xs font-bold" onclick="closeQuestModal()">
+          다음에
+        </button>
+        <button class="jelly-btn flex-1 py-3 rounded-xl bg-neon-green text-[#023300] font-bold text-sm shadow-[0_4px_0_0_#045300]" onclick="launchQuestNow()">
+          지금 출격! 👾
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 6. 직관적 사운드 & 인터랙션 스크립트 ================= -->
+  <script>
+    let isSoundEnabled = true;
+    let audioCtx = null;
+
+    // 브라우저 첫 터치 즉시 AudioContext 자동 언락
+    async function unlockAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+    }
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      const icon = document.getElementById('soundIcon');
+      if (isSoundEnabled) {
+        icon.textContent = 'volume_up';
+        pokeSound('level');
+      } else {
+        icon.textContent = 'volume_off';
+      }
+    }
+
+    function triggerHaptic(duration = 20) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(duration); } catch (e) {}
+      }
+    }
+
+    // 4대 직관적 신디사이저 사운드
+    async function pokeSound(type = 'pop') {
+      if (!isSoundEnabled) return;
+      await unlockAudio();
+      triggerHaptic(type === 'launch' ? [40, 60, 40] : 15);
+
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      switch (type) {
+        // ① 쫀득한 젤리 팝음
+        case 'pop': {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.09);
+          break;
+        }
+
+        // ② 출격 워프음
+        case 'launch': {
+          const osc1 = audioCtx.createOscillator();
+          const gain1 = audioCtx.createGain();
+          osc1.type = 'triangle';
+          osc1.frequency.setValueAtTime(160, now);
+          osc1.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+          gain1.gain.setValueAtTime(0.3, now);
+          gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.32);
+          osc1.connect(gain1);
+          gain1.connect(audioCtx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.33);
+          break;
+        }
+
+        // ③ 짤랑 코인음
+        case 'coin': {
+          [987.77, 1318.51].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.28, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.26);
+          });
+          break;
+        }
+
+        // ④ 몬스터 콕(Poke) 워블음
+        case 'monster': {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.09);
+          osc.frequency.exponentialRampToValueAtTime(340, now + 0.22);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.25);
+          break;
+        }
+
+        // 레벨 / 차임
+        case 'level': {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+            gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.08);
+            osc.stop(now + idx * 0.08 + 0.26);
+          });
+          break;
+        }
+      }
+    }
+
+    // 몬스터 콕 터치 대사
+    const simpleDialogues = [
+      "민수야! 오늘 5분 퀘스트 깨러 가자! 🚀",
+      "오늘 수학 보스 격파하고 치킨 먹자! 🍗",
+      "클레이 바이트 에너지 충전 완료! ⚡",
+      "오늘 1개만 풀면 불꽃 유지 성공! 🔥",
+      "간지러워 크하핫! 몬스터 빔 발사! ✨"
+    ];
+    let dIndex = 0;
+
+    function pokeMonster(event) {
+      if (event) event.stopPropagation();
+      pokeSound('monster');
+      triggerHaptic(30);
+
+      const monsterImg = document.getElementById('monsterImg');
+      const bubble = document.getElementById('monsterSpeechBubble');
+      const speechText = document.getElementById('speechText');
+
+      monsterImg.classList.remove('poke-bounce');
+      void monsterImg.offsetWidth;
+      monsterImg.classList.add('poke-bounce');
+
+      dIndex = (dIndex + 1) % simpleDialogues.length;
+      speechText.textContent = simpleDialogues[dIndex];
+
+      bubble.classList.remove('animate-bubble');
+      void bubble.offsetWidth;
+      bubble.classList.add('animate-bubble');
+    }
+
+    let targetSubject = 'math';
+
+    // 메인 시작 버튼
+    function handleStartQuest() {
+      pokeSound('launch');
+      triggerHaptic(50);
+      openQuestModal('🧮', '오늘의 5분 퀘스트: 수학', '분수의 덧셈과 뺄셈 5문제를 풀고 오늘 불꽃 스트릭을 획득하세요!', 'math');
+    }
+
+    // 서랍 제어
+    function openDrawer() {
+      pokeSound('pop');
+      const overlay = document.getElementById('drawerOverlay');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+    }
+
+    function closeDrawer(event) {
+      if (event) event.stopPropagation();
+      pokeSound('pop');
+      const overlay = document.getElementById('drawerOverlay');
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }
+
+    function selectSubject(subj, title, desc) {
+      closeDrawer();
+      const icons = { math: '🧮', english: '🔤', korean: '📖', science: '🔬', society: '🗺️' };
+      openQuestModal(icons[subj] || '🚀', title, desc, subj);
+    }
+
+    let selectedUnit = '8';
+    let selectedMode = 'mixed';
+
+    function setQuestUnit(unit) {
+      selectedUnit = unit;
+      pokeSound('pop');
+      document.querySelectorAll('.unit-chip').forEach(btn => {
+        if (btn.getAttribute('data-unit') === unit) {
+          btn.className = 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all';
+        } else {
+          btn.className = 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all';
+        }
+      });
+    }
+
+    function setQuestMode(mode) {
+      selectedMode = mode;
+      pokeSound('pop');
+      document.querySelectorAll('.mode-chip').forEach(btn => {
+        if (btn.getAttribute('data-mode') === mode) {
+          btn.className = 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all';
+        } else {
+          btn.className = 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all';
+        }
+      });
+    }
+
+    // 모달 제어
+    function openQuestModal(icon, title, desc, subj = 'math') {
+      targetSubject = subj;
+      document.getElementById('modalIcon').textContent = icon;
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDesc').textContent = desc;
+
+      const optBox = document.getElementById('questOptionsBox');
+      if (subj === 'english') {
+        optBox.classList.remove('hidden');
+      } else {
+        optBox.classList.add('hidden');
+      }
+
+      const modal = document.getElementById('questModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeQuestModal() {
+      pokeSound('pop');
+      const modal = document.getElementById('questModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function launchQuestNow() {
+      pokeSound('launch');
+      triggerHaptic([50, 80, 50]);
+      setTimeout(() => {
+        let targetUrl = `quest_runner.html?subject=${targetSubject}`;
+        if (targetSubject === 'english') {
+          targetUrl += `&unit=${selectedUnit}&mode=${selectedMode}`;
+        }
+        window.location.href = targetUrl;
+      }, 350);
+    }
+
+    function handleStreakClick() {
+      pokeSound('level');
+      alert('🔥 3일 연속 학습 성공 중!\n오늘 딱 1개 퀘스트만 완료하면 불꽃이 유지됩니다!');
+    }
+
+    function handleCoinClick() {
+      pokeSound('coin');
+      alert('🪙 보유 코인: 120개\n퀘스트를 완료하면 코인이 쌓입니다!');
+    }
+  </script>
+</body>
+</html>
