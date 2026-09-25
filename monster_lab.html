@@ -291,15 +291,15 @@
       <div class="space-y-2 pt-1">
         
         <!-- 🧮 수학 -->
-        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-neon-green p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('math', '🧮 수학 던전: 5-2 분수의 곱셈 & 번개 약분술', '진분수, 대분수 곱셈과 번개 약분술 5분 실전 퀘스트!')">
+        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-neon-green p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('math', '🧮 수학 던전: 두 자릿수 나눗셈 (기본 진도 ⭐)', '민수 맞춤 필수 기초 연산! 두 자릿수 ÷ 한 자릿수 5분 마이크로 퀘스트!')">
           <div class="flex items-center gap-3">
             <span class="text-2xl">🧮</span>
             <div>
               <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                5-2 분수의 곱셈 던전
-                <span class="bg-neon-green/20 text-neon-green text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">1.5배 🪙</span>
+                두 자릿수 나눗셈 던전
+                <span class="bg-neon-green/20 text-neon-green text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">기본 진도 ⭐</span>
               </div>
-              <p class="text-xs text-gray-400">교과서 실물 세로 분수 5문제</p>
+              <p class="text-xs text-gray-400">두 자릿수 ÷ 한 자릿수 5문제 (십의 자리/나머지/검산식)</p>
             </div>
           </div>
           <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
@@ -576,11 +576,11 @@
 
     let targetSubject = 'math';
 
-    // 메인 시작 버튼
+    // 메인 시작 버튼 (민수 기본 진도: 두 자릿수 나눗셈)
     function handleStartQuest() {
       pokeSound('launch');
       triggerHaptic(50);
-      openQuestModal('🧮', '오늘의 5분 퀘스트: 수학', '분수의 덧셈과 뺄셈 5문제를 풀고 오늘 불꽃 스트릭을 획득하세요!', 'math');
+      openQuestModal('🧮', '오늘의 5분 퀘스트: 수학', '민수 맞춤 두 자릿수 나눗셈 5문제를 풀고 오늘 불꽃 스트릭을 획득하세요!', 'math');
     }
 
     // 서랍 제어
@@ -605,7 +605,7 @@
       openQuestModal(icons[subj] || '🚀', title, desc, subj);
     }
 
-    let selectedUnit = '8';
+    let selectedUnit = 'division';
     let selectedMode = 'mixed';
 
     function setQuestUnit(unit) {
@@ -632,7 +632,7 @@
       });
     }
 
-    // 모달 제어
+    // 모달 제어 (수학 / 영어 과목 맞춤 옵션 칩 동적 렌더링)
     function openQuestModal(icon, title, desc, subj = 'math') {
       targetSubject = subj;
       document.getElementById('modalIcon').textContent = icon;
@@ -640,8 +640,41 @@
       document.getElementById('modalDesc').textContent = desc;
 
       const optBox = document.getElementById('questOptionsBox');
-      if (subj === 'english') {
+      const unitContainer = document.getElementById('unitScopeChips');
+      const modeContainer = document.getElementById('modeChips');
+
+      if (subj === 'math') {
+        selectedUnit = 'division';
+        selectedMode = 'mixed';
         optBox.classList.remove('hidden');
+
+        unitContainer.innerHTML = `
+          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="division" onclick="setQuestUnit('division')">두 자릿수 나눗셈 ⭐</button>
+          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="fraction" onclick="setQuestUnit('fraction')">5-2 분수의 곱셈</button>
+          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="all" onclick="setQuestUnit('all')">수학 종합 팩</button>
+        `;
+
+        modeContainer.innerHTML = `
+          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">종합 배틀</button>
+          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="calc" onclick="setQuestMode('calc')">실전 계산 ⚡</button>
+          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="principle" onclick="setQuestMode('principle')">원리·검산식 🔍</button>
+        `;
+      } else if (subj === 'english') {
+        selectedUnit = '8';
+        selectedMode = 'mixed';
+        optBox.classList.remove('hidden');
+
+        unitContainer.innerHTML = `
+          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="8" onclick="setQuestUnit('8')">8단원 ⭐</button>
+          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7" onclick="setQuestUnit('7')">7단원 복습</button>
+          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7,8" onclick="setQuestUnit('7,8')">7~8단원 팩</button>
+        `;
+
+        modeContainer.innerHTML = `
+          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">통합(단어+문장)</button>
+          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
+          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
+        `;
       } else {
         optBox.classList.add('hidden');
       }
@@ -663,7 +696,7 @@
       triggerHaptic([50, 80, 50]);
       setTimeout(() => {
         let targetUrl = `quest_runner.html?subject=${targetSubject}`;
-        if (targetSubject === 'english') {
+        if (targetSubject === 'english' || targetSubject === 'math') {
           targetUrl += `&unit=${selectedUnit}&mode=${selectedMode}`;
         }
         window.location.href = targetUrl;
