@@ -814,6 +814,38 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         document.getElementById('timetableLink').textContent = `📅 ${finalRealName}의 시간표 보기`;
     }
 
+    // 👾 5분 퀘스트 퀵 칩 및 배너 링크 & 테마 동적 업데이트
+    const labBtn = document.getElementById('lobbyMonsterLabBtn');
+    const questBanner = document.getElementById('questQuickBanner');
+    if (labBtn) {
+      labBtn.href = `monster_lab.html?user=${userKey}`;
+      if (userKey === 'minseo') {
+        labBtn.innerHTML = `🧸 5분 퀘스트`;
+        labBtn.title = '말랑 젤리 토끼와 5분 일일 퀘스트 출발!';
+      } else {
+        labBtn.innerHTML = `👾 5분 퀘스트`;
+        labBtn.title = '3D 몬스터 바이트와 5분 일일 퀘스트 출격!';
+      }
+    }
+    if (questBanner) {
+      questBanner.href = `monster_lab.html?user=${userKey}`;
+      if (userKey === 'minseo') {
+        const iconEl = questBanner.querySelector('.quest-quick-icon');
+        const titleEl = questBanner.querySelector('.quest-quick-title');
+        const descEl = questBanner.querySelector('.quest-quick-desc');
+        if (iconEl) iconEl.textContent = '🧸';
+        if (titleEl) titleEl.innerHTML = `오늘의 5분 달콤 퀘스트 시작! <span class="quest-quick-tag">💖 사랑 충전</span>`;
+        if (descEl) descEl.textContent = '말랑 젤리 토끼와 함께 하루·국어·수학 5문제 풀고 반짝 가루✨ 챙기기!';
+      } else {
+        const iconEl = questBanner.querySelector('.quest-quick-icon');
+        const titleEl = questBanner.querySelector('.quest-quick-title');
+        const descEl = questBanner.querySelector('.quest-quick-desc');
+        if (iconEl) iconEl.textContent = '👾';
+        if (titleEl) titleEl.innerHTML = `오늘의 5분 퀘스트 출격하기! <span class="quest-quick-tag">🔥 불꽃 스트릭</span>`;
+        if (descEl) descEl.textContent = '3D 클레이 몬스터와 함께 나눗셈·영어 5문제 풀고 보상 다이아💎 챙기기!';
+      }
+    }
+
     // 🧚 상황별 요정 코코 반응형 인터랙티브 말풍선 배너 갱신 엔진
     let currentFairySpeechText = "";
     let currentFairyTargetUrl = null;
