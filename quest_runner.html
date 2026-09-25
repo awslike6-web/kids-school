@@ -864,13 +864,15 @@
     const urlParams = new URLSearchParams(window.location.search);
     const currentUser = urlParams.get('user') || localStorage.getItem('currentChild') || localStorage.getItem('currentUser') || 'minsu';
     const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
-    const currentSubj = urlParams.get('subject') || (isMinseo ? 'haru' : 'math');
-    const currentUnit = urlParams.get('unit') || (isMinseo ? (currentSubj === 'math' ? '100num' : (currentSubj === 'korean' ? 'dictation' : (currentSubj === 'haru' ? 'safety' : (currentSubj === 'english' ? 'phonics' : 'math_voca')))) : (currentSubj === 'math' ? 'division' : '8'));
+    const currentSubj = urlParams.get('subject') || (isMinseo ? 'math' : 'math');
+    const currentUnit = urlParams.get('unit') || (isMinseo ? (currentSubj === 'korean' ? 'voca' : (currentSubj === 'english' ? 'phonics' : '100num')) : (currentSubj === 'math' ? 'division' : '8'));
     const currentMode = urlParams.get('mode') || (isMinseo ? 'speed' : 'mixed');
 
     // ========================================================
     // 🌸 [민서 초등 1학년 2학기 맞춤형 5분 퀘스트 문제 은행]
-    // 3대 메인(하루, 국어, 수학) + 2대 보조(영어, 그림 낱말 용어방)
+    // 3대 정예 교과 (수학 · 국어 · 영어)
+    // - 그림 낱말은 국어 단원으로 통합 흡수
+    // - 하루는 로비의 30초 데일리 체크인(저금통/칭찬) 고유 영역으로 환원
     // ========================================================
     const minseoMasterBank = {
       math: {
@@ -1006,6 +1008,48 @@
       korean: {
         title: "낱말 베이커리 · 초1 국어",
         icon: "📖",
+        voca: [
+          {
+            id: "v_1",
+            q: "둘을 하나로 합칠 때 쓰는 '+' 기호의 이름은?",
+            formula: "'+' 기호의 이름",
+            options: ["더하기 (덧셈)", "빼기 (뺄셈)", "곱하기", "나누기"],
+            answer: 0,
+            hint: "수를 보태고 합치는 '더하기'예요! ➕"
+          },
+          {
+            id: "v_2",
+            q: "10개 묶음과 남은 '낱개'에서 하나씩 있는 것을 이르는 말은?",
+            formula: "묶음과 [ ? ]",
+            options: ["낱개", "묶음", "상자", "바구니"],
+            answer: 0,
+            hint: "하나씩 따로 있는 것은 '낱개'예요! 🍬"
+          },
+          {
+            id: "v_3",
+            q: "친구와 다정하게 생각을 주고받는 이야기를 무엇이라고 할까요?",
+            formula: "마음 나누기",
+            options: ["대화 (이야기)", "싸움", "침묵", "도망"],
+            answer: 0,
+            hint: "다정하게 이야기를 나누는 '대화'예요! 🗣️"
+          },
+          {
+            id: "v_4",
+            q: "사람들이 길을 안전하게 건너도록 하얀 줄을 그어놓은 곳은?",
+            formula: "안전한 건널목",
+            options: ["횡단보도", "차도", "골목길", "고속도로"],
+            answer: 0,
+            hint: "초록불에 손을 들고 건너는 '횡단보도'예요! 🦓"
+          },
+          {
+            id: "v_5",
+            q: "신호등에서 '길을 건너도 좋아요'를 알리는 불빛은?",
+            formula: "안전 보행 신호",
+            options: ["초록불 (녹색)", "빨간불 (적색)", "노란불", "파란불"],
+            answer: 0,
+            hint: "건너도 되는 안전 신호는 '초록불'이에요! 🟢"
+          }
+        ],
         dictation: [
           {
             id: "k_dic_1",
@@ -1106,112 +1150,6 @@
             options: ["마침표(.)", "물음표(?)", "느낌표(!)", "줄표(-)"],
             answer: 0,
             hint: "문장이 끝나면 얌전하게 마침표(.)를 찍어요!"
-          }
-        ]
-      },
-      haru: {
-        title: "별빛 하루 던전 · 슬기로운 하루",
-        icon: "🎒",
-        safety: [
-          {
-            id: "h_saf_1",
-            q: "횡단보도를 건널 때는 초록불이 켜진 후 좌우를 살피고 손을 들고 건너요.",
-            formula: "생활 안전 O / X 퀴즈",
-            options: ["O (맞아요)", "X (틀려요)"],
-            answer: 0,
-            hint: "초록불이라도 차가 멈췄는지 보고 손을 들고 건너야 안전해요! 🚦"
-          },
-          {
-            id: "h_saf_2",
-            q: "비 오는 날에는 앞이 훤히 보이는 투명 우산을 쓰는 것이 안전해요.",
-            formula: "비 오는 날 안전 O / X",
-            options: ["O (맞아요)", "X (틀려요)"],
-            answer: 0,
-            hint: "투명 우산은 앞이 잘 보여 위험을 피할 수 있어요! ☔"
-          },
-          {
-            id: "h_saf_3",
-            q: "엘리베이터 안에서는 높이높이 뛰면서 장난쳐야 해요.",
-            formula: "엘리베이터 안전 O / X",
-            options: ["X (틀려요)", "O (맞아요)"],
-            answer: 0,
-            hint: "엘리베이터에서 뛰면 멈추거나 갇힐 수 있어요! 🛑"
-          },
-          {
-            id: "h_saf_4",
-            q: "길을 걸어갈 때 스마트폰을 보면서 걸으면 안전해요.",
-            formula: "보행 안전 O / X",
-            options: ["X (틀려요)", "O (맞아요)"],
-            answer: 0,
-            hint: "스마트폰을 보며 걸으면 넘어지거나 다칠 수 있어요! 📵"
-          },
-          {
-            id: "h_saf_5",
-            q: "모르는 사람이 과자를 사준다고 따라오라고 할 때 올바른 행동은?",
-            formula: "낯선 사람 안전 수칙",
-            options: ["'싫어요! 안 돼요!' 큰 소리로 외치며 도망친다", "좋아서 따라간다", "가만히 있는다", "손을 잡는다"],
-            answer: 0,
-            hint: "'싫어요! 안 돼요!' 크게 외치고 사람이 많은 곳으로 피해요! 🏃"
-          }
-        ],
-        season: [
-          {
-            id: "h_sea_1",
-            q: "가을이 되면 나뭇잎이 빨갛고 노랗게 변하는 것은?",
-            formula: "가을 나뭇잎",
-            options: ["단풍", "새싹", "눈꽃", "이끼"],
-            answer: 0,
-            hint: "빨강 노랑 곱게 물드는 '단풍'이에요! 🍁"
-          },
-          {
-            id: "h_sea_2",
-            q: "다람쥐가 추운 겨울을 나기 위해 가을에 모으는 숲속 열매는?",
-            formula: "다람쥐의 열매",
-            options: ["도토리", "수박", "딸기", "참외"],
-            answer: 0,
-            hint: "모자를 쓴 귀여운 갈색 열매 '도토리'예요! 🌰"
-          },
-          {
-            id: "h_sea_3",
-            q: "겨울이 오면 하늘에서 하얗게 내리는 얼음 결정은?",
-            formula: "겨울 날씨",
-            options: ["눈", "비", "안개", "이슬"],
-            answer: 0,
-            hint: "펄펄 하늘에서 내려와 눈사람을 만드는 '눈'이에요! ⛄"
-          },
-          {
-            id: "h_sea_4",
-            q: "가을에 익어 황금빛으로 들판을 물들이는 곡식은?",
-            formula: "가을 들판 곡식",
-            options: ["벼 (쌀)", "보리", "해바라기", "장미"],
-            answer: 0,
-            hint: "고개를 숙인 황금빛 벼예요! 🌾"
-          }
-        ],
-        manners: [
-          {
-            id: "h_man_1",
-            q: "식사 전과 외출 후에는 무엇을 가장 먼저 해야 할까요?",
-            formula: "바른 위생 습관",
-            options: ["비누로 손 깨끗이 씻기", "게임하기", "누워있기", "소리 지르기"],
-            answer: 0,
-            hint: "세균을 없애기 위해 비누로 손을 씻어요! 🧼"
-          },
-          {
-            id: "h_man_2",
-            q: "학교에 갈 준비물은 언제 스스로 챙기면 좋을까요?",
-            formula: "스스로 정리 정돈",
-            options: ["전날 밤 미리 챙긴다", "아침에 허둥지둥 챙긴다", "안 챙긴다", "학교 가서 챙긴다"],
-            answer: 0,
-            hint: "전날 밤 시간표와 알림장을 보고 미리 챙겨요! 🎒"
-          },
-          {
-            id: "h_man_3",
-            q: "친구와 장난감을 사이좋게 나누어 쓰고 양보해요.",
-            formula: "친구 배려 O / X",
-            options: ["O (맞아요)", "X (틀려요)"],
-            answer: 0,
-            hint: "차례차례 사이좋게 쓰면 친구와 더 즐거워요! 🤝"
           }
         ]
       },
@@ -1323,75 +1261,25 @@
             hint: "헤어질 때는 'Good bye!'해요! 👋"
           }
         ]
-      },
-      voca: {
-        title: "달콤 그림 낱말 사전 · 초1 어휘",
-        icon: "📚",
-        questions: [
-          {
-            id: "v_1",
-            q: "둘을 하나로 합칠 때 쓰는 '+' 기호의 이름은?",
-            formula: "'+' 기호의 이름",
-            options: ["더하기 (덧셈)", "빼기 (뺄셈)", "곱하기", "나누기"],
-            answer: 0,
-            hint: "수를 보태고 합치는 '더하기'예요! ➕"
-          },
-          {
-            id: "v_2",
-            q: "10개 묶음과 남은 '낱개'에서 하나씩 있는 것을 이르는 말은?",
-            formula: "묶음과 [ ? ]",
-            options: ["낱개", "묶음", "상자", "바구니"],
-            answer: 0,
-            hint: "하나씩 따로 있는 것은 '낱개'예요! 🍬"
-          },
-          {
-            id: "v_3",
-            q: "친구와 다정하게 생각을 주고받는 이야기를 무엇이라고 할까요?",
-            formula: "마음 나누기",
-            options: ["대화 (이야기)", "싸움", "침묵", "도망"],
-            answer: 0,
-            hint: "다정하게 이야기를 나누는 '대화'예요! 🗣️"
-          },
-          {
-            id: "v_4",
-            q: "사람들이 길을 안전하게 건너도록 하얀 줄을 그어놓은 곳은?",
-            formula: "안전한 건널목",
-            options: ["횡단보도", "차도", "골목길", "고속도로"],
-            answer: 0,
-            hint: "초록불에 손을 들고 건너는 '횡단보도'예요! 🦓"
-          },
-          {
-            id: "v_5",
-            q: "신호등에서 '길을 건너도 좋아요'를 알리는 불빛은?",
-            formula: "안전 보행 신호",
-            options: ["초록불 (녹색)", "빨간불 (적색)", "노란불", "파란불"],
-            answer: 0,
-            hint: "건너도 되는 안전 신호는 '초록불'이에요! 🟢"
-          }
-        ]
       }
     };
 
     function getSubjectQuest(subj, unitScope = 'division', mode = 'mixed') {
       const queue = getAdaptiveQueue(subj);
 
-      // 🌸 [민서 초1 5대 교과 라우팅] (수학/국어/하루 메인 + 영어/용어방 보조, 사회·과학 없음)
+      // 🌸 [민서 초1 3대 정예 교과 라우팅] (수학 · 국어 · 영어)
       if (isMinseo) {
-        const mData = minseoMasterBank[subj] || minseoMasterBank.haru;
+        const mData = minseoMasterBank[subj] || minseoMasterBank.math;
         let pool = [];
         if (subj === 'math') {
           pool = mData[unitScope] || mData['100num'];
         } else if (subj === 'korean') {
-          pool = mData[unitScope] || mData['dictation'];
-        } else if (subj === 'haru') {
-          pool = mData[unitScope] || mData['safety'];
+          pool = mData[unitScope] || mData['voca'] || mData['dictation'];
         } else if (subj === 'english') {
           pool = mData[unitScope] || mData['phonics'];
-        } else if (subj === 'voca') {
-          pool = mData.questions;
         }
 
-        let selected = [...(pool || mData.questions || [])].sort(() => Math.random() - 0.5).slice(0, 5);
+        let selected = [...(pool || [])].sort(() => Math.random() - 0.5).slice(0, 5);
         if (queue.length > 0 && mode !== 'revenge') {
           const w = queue[0];
           selected = [w, ...selected.filter(x => x.q !== w.q).slice(0, 4)];
@@ -2178,16 +2066,12 @@
     function goToSubjectDeepTraining() {
       playSound('tap');
       if (isMinseo) {
-        if (currentSubj === 'haru') {
-          window.location.href = 'kids/subjects/haru/haru.html';
-        } else if (currentSubj === 'korean') {
+        if (currentSubj === 'korean') {
           window.location.href = 'kids/subjects/korean/korean.html';
-        } else if (currentSubj === 'math') {
-          window.location.href = 'kids/subjects/math/math.html';
         } else if (currentSubj === 'english') {
           window.location.href = 'kids/subjects/english/english.html';
         } else {
-          window.location.href = 'kids/common_space/voca.html';
+          window.location.href = 'kids/subjects/math/math.html';
         }
       } else {
         if (currentSubj === 'english') {

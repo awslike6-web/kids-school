@@ -449,56 +449,36 @@
         </button>
       </div>
 
-      <!-- 2) 👧 민서용 맞춤 교과 2열 그리드 (수학/국어/하루 메인 + 영어/용어방 보조, 사회·과학 없음) -->
-      <div id="minseoSubjectGrid" class="hidden grid grid-cols-2 gap-2.5 pt-1.5">
-        <!-- 🧮 수학 (메인) -->
+      <!-- 2) 👧 민서용 맞춤 3대 정예 교과 (수학, 국어, 영어) -->
+      <div id="minseoSubjectGrid" class="hidden grid grid-cols-3 gap-2 pt-1.5">
+        <!-- 🧮 수학 -->
         <button 
           type="button"
-          class="jelly-btn bg-white border-2 border-teal-300 hover:border-teal-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-teal-800 shadow-sm active:translate-y-1 transition-all"
+          class="jelly-btn bg-white border-2 border-teal-300 hover:border-teal-400 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer text-teal-800 shadow-sm active:translate-y-1 transition-all"
           onclick="selectSubject('math')"
         >
-          <span class="text-2xl">🧮</span>
-          <span class="text-base font-bold tracking-wide">수학</span>
+          <span class="text-3xl">🧮</span>
+          <span class="text-sm font-bold tracking-wide">수학</span>
         </button>
 
-        <!-- 📖 국어 (메인) -->
+        <!-- 📖 국어 (그림 낱말 통합) -->
         <button 
           type="button"
-          class="jelly-btn bg-white border-2 border-rose-300 hover:border-rose-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-rose-800 shadow-sm active:translate-y-1 transition-all"
+          class="jelly-btn bg-white border-2 border-rose-300 hover:border-rose-400 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer text-rose-800 shadow-sm active:translate-y-1 transition-all"
           onclick="selectSubject('korean')"
         >
-          <span class="text-2xl">📖</span>
-          <span class="text-base font-bold tracking-wide">국어</span>
+          <span class="text-3xl">📖</span>
+          <span class="text-sm font-bold tracking-wide">국어</span>
         </button>
 
-        <!-- 🎒 하루 (메인 통합교과) -->
+        <!-- 🔤 영어 -->
         <button 
           type="button"
-          class="jelly-btn bg-white border-2 border-amber-300 hover:border-amber-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-amber-800 shadow-sm active:translate-y-1 transition-all"
-          onclick="selectSubject('haru')"
-        >
-          <span class="text-2xl">🎒</span>
-          <span class="text-base font-bold tracking-wide">하루</span>
-        </button>
-
-        <!-- 🔤 영어 (보조) -->
-        <button 
-          type="button"
-          class="jelly-btn bg-white border-2 border-sky-300 hover:border-sky-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-sky-800 shadow-sm active:translate-y-1 transition-all"
+          class="jelly-btn bg-white border-2 border-sky-300 hover:border-sky-400 p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 cursor-pointer text-sky-800 shadow-sm active:translate-y-1 transition-all"
           onclick="selectSubject('english')"
         >
-          <span class="text-2xl">🔤</span>
-          <span class="text-base font-bold tracking-wide">영어</span>
-        </button>
-
-        <!-- 📚 용어방 (보조 - 가로 전체 확장) -->
-        <button 
-          type="button"
-          class="col-span-2 jelly-btn bg-white border-2 border-pink-300 hover:border-pink-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-[#a03a57] shadow-sm active:translate-y-1 transition-all"
-          onclick="selectSubject('voca')"
-        >
-          <span class="text-2xl">📚</span>
-          <span class="text-base font-bold tracking-wide">그림 낱말 용어방</span>
+          <span class="text-3xl">🔤</span>
+          <span class="text-sm font-bold tracking-wide">영어</span>
         </button>
       </div>
 
@@ -752,26 +732,14 @@
       korean: {
         icon: '📖',
         title: '📖 낱말 베이커리 5분 퀘스트',
-        desc: '초1-2 받아쓰기 100문장 & 받침 낱말 짝 맞추기 5문제!',
-        recommend: '💡 오늘의 추천 진도: 받침 글자 짝 맞추기 & 바른 말 (필수 ⭐)'
-      },
-      haru: {
-        icon: '🎒',
-        title: '🎒 별빛 하루 5분 퀘스트',
-        desc: '초1 사계절(가을·겨울) 생활안전과 별빛 씨앗 모으기!',
-        recommend: '💡 오늘의 생활 주제: 횡단보도 안전 & 가을 열매 탐험 (필수 ⭐)'
+        desc: '초1-2 받아쓰기 100문장 & 알쏭달쏭 그림 낱말 탐험 5문제!',
+        recommend: '💡 오늘의 추천 진도: 그림 낱말 탐험 & 받침 글자 (필수 ⭐)'
       },
       english: {
         icon: '🔤',
         title: '🔤 파닉스 영어 5분 퀘스트',
         desc: '초1 기초 알파벳 소리 & 그림 단어 매칭 훈련!',
         recommend: '💡 오늘의 권장 진도: 파닉스 소리 익히기 & 첫 단어 ⭐'
-      },
-      voca: {
-        icon: '📚',
-        title: '📚 달콤 그림 낱말 사전',
-        desc: '초1 교과에 쏙쏙 나오는 재미있는 그림 낱말 탐구!',
-        recommend: '💡 오늘의 추천 어휘: 교과서 속 알쏭달쏭 그림 낱말'
       }
     };
 
@@ -840,7 +808,7 @@
         if (drawerTitle) drawerTitle.textContent = '🌸 민서의 달콤 과목 던전';
 
         const drawerBtnText = document.getElementById('drawerBtnText');
-        if (drawerBtnText) drawerBtnText.textContent = '수학·국어·하루·영어 다른 과목 보기';
+        if (drawerBtnText) drawerBtnText.textContent = '수학·국어·영어 다른 과목 보기';
 
         const speech = document.getElementById('speechText');
         if (speech) speech.textContent = simpleDialogues[0];
@@ -861,7 +829,7 @@
         if (qTitle) qTitle.textContent = '오늘의 5분 요정 퀘스트 시작! 🧸';
 
         const qSub = document.getElementById('mainQuestSub');
-        if (qSub) qSub.textContent = '🎒 슬기로운 하루 & 🧮 100까지 수 던전 · 필수 ⭐';
+        if (qSub) qSub.textContent = '🧮 1-2 100까지 수 & 덧셈 던전 · 필수 ⭐';
 
         const modalIconEl = document.getElementById('modalIcon');
         const modalRecBox = document.getElementById('modalRecommendBox');
@@ -1093,12 +1061,12 @@
       } else if (subj === 'korean') {
         if (isMinseo) {
           optBox.classList.remove('hidden');
-          selectedUnit = 'dictation';
+          selectedUnit = 'voca';
           selectedMode = 'word';
           unitContainer.innerHTML = `
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="dictation" onclick="setQuestUnit('dictation')">받아쓰기 100 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="voca" onclick="setQuestUnit('voca')">그림 낱말 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="dictation" onclick="setQuestUnit('dictation')">받아쓰기 100</button>
             <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="batchim" onclick="setQuestUnit('batchim')">받침 글자</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="sentence" onclick="setQuestUnit('sentence')">예쁜 문장</button>
           `;
           modeContainer.innerHTML = `
             <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">낱말 자석</button>
@@ -1107,19 +1075,6 @@
         } else {
           optBox.classList.add('hidden');
         }
-      } else if (subj === 'haru') {
-        optBox.classList.remove('hidden');
-        selectedUnit = 'safety';
-        selectedMode = 'ox';
-        unitContainer.innerHTML = `
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="safety" onclick="setQuestUnit('safety')">생활 안전 ⭐</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="season" onclick="setQuestUnit('season')">가을·겨울</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="manners" onclick="setQuestUnit('manners')">바른 생활</button>
-        `;
-        modeContainer.innerHTML = `
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="ox" onclick="setQuestMode('ox')">O/X 퀴즈</button>
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="situation" onclick="setQuestMode('situation')">상황 맞추기</button>
-        `;
       } else if (subj === 'english') {
         optBox.classList.remove('hidden');
         if (isMinseo) {
@@ -1148,19 +1103,6 @@
             <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
           `;
         }
-      } else if (subj === 'voca') {
-        optBox.classList.remove('hidden');
-        selectedUnit = 'math_voca';
-        selectedMode = 'quiz';
-        unitContainer.innerHTML = `
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="math_voca" onclick="setQuestUnit('math_voca')">수학 낱말 ⭐</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="kor_voca" onclick="setQuestUnit('kor_voca')">국어 낱말</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="haru_voca" onclick="setQuestUnit('haru_voca')">하루 낱말</button>
-        `;
-        modeContainer.innerHTML = `
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="quiz" onclick="setQuestMode('quiz')">그림 낱말 퀴즈</button>
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="card" onclick="setQuestMode('card')">낱말 카드</button>
-        `;
       } else {
         optBox.classList.add('hidden');
       }
