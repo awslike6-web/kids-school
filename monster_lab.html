@@ -202,6 +202,20 @@
       border-color: #ffd1dc !important;
     }
   </style>
+
+  <!-- 즉시 테마 판별 및 다크모드/클래스 초기화 (깜빡임 방지) -->
+  <script>
+    (function() {
+      const p = new URLSearchParams(window.location.search);
+      const u = p.get('user') || localStorage.getItem('currentChild') || 'minsu';
+      if (u === 'minseo' || u === 'daughter') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('theme-minseo');
+      } else {
+        document.documentElement.classList.add('dark', 'theme-minsu');
+      }
+    })();
+  </script>
 </head>
 
 <body class="text-white min-h-[100dvh] flex flex-col justify-between overflow-x-hidden p-4 pb-20 max-w-md mx-auto">
@@ -615,8 +629,6 @@
       }
     }
 
-    // 몬스터 콕 터치 대사
-    const simpleDialogues = [
     // ================= 사용자 및 테마 동적 스위칭 (민수 vs 민서) =================
     const urlParams = new URLSearchParams(window.location.search);
     let currentChild = urlParams.get('user') || localStorage.getItem('currentChild') || 'minsu';
@@ -716,7 +728,9 @@
     // 🎨 테마 및 DOM 초기화
     function applyTheme() {
       if (isMinseo) {
-        document.body.classList.remove('theme-minsu');
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('theme-minseo');
+        document.body.classList.remove('theme-minsu', 'text-white');
         document.body.classList.add('theme-minseo');
         document.title = "Minseo's Dreamy Plushie Lab 🧸";
 
@@ -784,8 +798,10 @@
         const qSub = document.getElementById('mainQuestSub');
         if (qSub) qSub.textContent = '🧮 1-2 100까지 수 & 덧셈 던전 · 필수 ⭐';
       } else {
+        document.documentElement.classList.add('dark', 'theme-minsu');
+        document.documentElement.classList.remove('theme-minseo');
         document.body.classList.remove('theme-minseo');
-        document.body.classList.add('theme-minsu');
+        document.body.classList.add('theme-minsu', 'text-white');
         document.title = "Minsu's Monster Lab 👾";
 
         const lobbyLink = document.getElementById('headerLobbyLink');
