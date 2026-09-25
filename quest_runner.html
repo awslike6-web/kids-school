@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="ko">
+<html lang="ko">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
@@ -42,6 +42,31 @@
     };
   </script>
 
+  <!-- 즉시 테마 판별 및 다크모드/클래스 초기화 (깜빡임 완벽 방지) -->
+  <script>
+    (function() {
+      const p = new URLSearchParams(window.location.search);
+      const u = p.get('user') || localStorage.getItem('currentChild') || localStorage.getItem('currentUser') || 'minsu';
+      const isMin = (u === 'minseo' || u === 'daughter' || u === '민서');
+      if (isMin) {
+        document.documentElement.classList.remove('dark', 'theme-minsu');
+        document.documentElement.classList.add('theme-minseo');
+      } else {
+        document.documentElement.classList.remove('theme-minseo');
+        document.documentElement.classList.add('dark', 'theme-minsu');
+      }
+      document.addEventListener('DOMContentLoaded', function() {
+        if (isMin) {
+          document.body.classList.remove('theme-minsu', 'text-white');
+          document.body.classList.add('theme-minseo');
+        } else {
+          document.body.classList.remove('theme-minseo');
+          document.body.classList.add('theme-minsu', 'text-white');
+        }
+      });
+    })();
+  </script>
+
   <style>
     * {
       -webkit-tap-highlight-color: transparent;
@@ -51,6 +76,130 @@
       background: radial-gradient(circle at 50% 20%, #221340 0%, #120924 80%);
       min-height: 100dvh;
       font-family: 'Jua', sans-serif;
+    }
+
+    /* 🌸 민서 전용 파스텔 피치/핑크 테마 (Dreamy Plushie Runner) */
+    html.theme-minseo body,
+    body.theme-minseo {
+      background: radial-gradient(circle at 50% 20%, #ffffff 0%, #fef8f4 60%, #ffeef3 100%) !important;
+      color: #1d1b19 !important;
+    }
+    html.theme-minseo .bg-lab-card,
+    html.theme-minseo .bg-lab-card\/80,
+    html.theme-minseo .bg-lab-card\/90,
+    html.theme-minseo .bg-lab-card\/95,
+    html.theme-minseo .bg-lab-card\/70,
+    body.theme-minseo .bg-lab-card,
+    body.theme-minseo .bg-lab-card\/80,
+    body.theme-minseo .bg-lab-card\/90,
+    body.theme-minseo .bg-lab-card\/95,
+    body.theme-minseo .bg-lab-card\/70 {
+      background-color: rgba(255, 255, 255, 0.96) !important;
+      border-color: #ffd1dc !important;
+      color: #1d1b19 !important;
+      box-shadow: 0 4px 16px rgba(255, 182, 193, 0.25) !important;
+    }
+    html.theme-minseo .border-lab-card-border,
+    body.theme-minseo .border-lab-card-border {
+      border-color: #ffd1dc !important;
+    }
+    html.theme-minseo .text-white,
+    body.theme-minseo .text-white {
+      color: #a03a57 !important;
+    }
+    html.theme-minseo .text-gray-300,
+    html.theme-minseo .text-gray-400,
+    body.theme-minseo .text-gray-300,
+    body.theme-minseo .text-gray-400 {
+      color: #887175 !important;
+    }
+    html.theme-minseo #formulaBox,
+    body.theme-minseo #formulaBox {
+      background-color: #fff5f8 !important;
+      border-color: #ffd1dc !important;
+      color: #a03a57 !important;
+    }
+    html.theme-minseo .bg-lab-bg,
+    html.theme-minseo .bg-lab-bg\/90,
+    html.theme-minseo .bg-lab-bg\/95,
+    body.theme-minseo .bg-lab-bg,
+    body.theme-minseo .bg-lab-bg\/90,
+    body.theme-minseo .bg-lab-bg\/95 {
+      background-color: #fff5f8 !important;
+      border-color: #ffd1dc !important;
+      color: #a03a57 !important;
+    }
+    html.theme-minseo #progressBar,
+    body.theme-minseo #progressBar {
+      background: linear-gradient(to right, #ffb6c1, #ff7597) !important;
+    }
+    html.theme-minseo #checkAnswerBtn,
+    body.theme-minseo #checkAnswerBtn {
+      background: linear-gradient(to bottom, #ff9bb3, #ff7597) !important;
+      border-color: #ffffff !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 0 0 #f472b6, 0 8px 16px rgba(255, 133, 162, 0.3) !important;
+      --depth-color: #f472b6 !important;
+    }
+    html.theme-minseo #checkAnswerBtn:disabled,
+    body.theme-minseo #checkAnswerBtn:disabled {
+      opacity: 0.45 !important;
+      cursor: not-allowed !important;
+    }
+    html.theme-minseo .choice-btn,
+    body.theme-minseo .choice-btn {
+      background-color: #ffffff !important;
+      border-color: #ffd1dc !important;
+      color: #2b1d22 !important;
+    }
+    html.theme-minseo .choice-btn:hover,
+    body.theme-minseo .choice-btn:hover {
+      border-color: #ff85a2 !important;
+    }
+    html.theme-minseo .choice-btn.selected,
+    body.theme-minseo .choice-btn.selected {
+      border-color: #ff85a2 !important;
+      background-color: #fff0f4 !important;
+    }
+    html.theme-minseo .choice-num,
+    body.theme-minseo .choice-num {
+      background-color: #ffeef3 !important;
+      border-color: #ffd1dc !important;
+      color: #a03a57 !important;
+    }
+    html.theme-minseo #audioPlayWrapper button,
+    body.theme-minseo #audioPlayWrapper button {
+      background: linear-gradient(135deg, #ff85a2, #ff6b8b) !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 0 0 #db2777 !important;
+    }
+    html.theme-minseo #cheerSpeech,
+    body.theme-minseo #cheerSpeech {
+      color: #a03a57 !important;
+    }
+    html.theme-minseo #exitModal > div,
+    html.theme-minseo #revengeModal > div,
+    html.theme-minseo #clearModal > div,
+    body.theme-minseo #exitModal > div,
+    body.theme-minseo #revengeModal > div,
+    body.theme-minseo #clearModal > div {
+      background-color: #ffffff !important;
+      border-color: #ffd1dc !important;
+      box-shadow: 0 16px 36px rgba(255, 133, 162, 0.3) !important;
+      color: #1d1b19 !important;
+    }
+    html.theme-minseo #exitModal h3,
+    html.theme-minseo #revengeModal h3,
+    html.theme-minseo #clearModal h3,
+    body.theme-minseo #exitModal h3,
+    body.theme-minseo #revengeModal h3,
+    body.theme-minseo #clearModal h3 {
+      color: #a03a57 !important;
+    }
+    body.theme-minseo .subject-badge {
+      background-color: #fff0f4 !important;
+      border-color: #ff85a2 !important;
+      color: #a03a57 !important;
     }
 
     .material-symbols-outlined {
@@ -186,11 +335,11 @@
     <!-- 문제 카드 -->
     <div class="bg-lab-card border-2 border-lab-card-border rounded-3xl p-5 shadow-2xl relative">
       
-      <!-- 오디오 듣기 버튼 (영어 과목일 때 노출) -->
+      <!-- 오디오 듣기 버튼 (영어 및 국어 듣기 문제일 때 노출) -->
       <div id="audioPlayWrapper" class="hidden mb-3">
-        <button class="jelly-btn inline-flex items-center gap-2 bg-yellow-400 text-lab-bg px-4 py-2 rounded-2xl font-bold text-sm shadow-[0_4px_0_0_#997300]" onclick="playQuestionAudio()">
+        <button id="audioPlayBtn" class="jelly-btn inline-flex items-center gap-2 bg-yellow-400 text-lab-bg px-4 py-2.5 rounded-2xl font-bold text-sm shadow-[0_4px_0_0_#997300] active:translate-y-1 transition-all" onclick="playQuestionAudio()">
           <span class="material-symbols-outlined text-lg">volume_up</span>
-          <span>원어민 발음 듣기</span>
+          <span id="audioPlayBtnText">🎧 소리 듣기</span>
         </button>
       </div>
 
@@ -211,14 +360,14 @@
         <img 
           id="cheerMonster" 
           src="./kids/assets/images/monsters/purple_monster.png" 
-          alt="클레이 바이트" 
+          alt="치어리더 파트너" 
           class="animate-cheer w-14 h-14 object-contain filter drop-shadow-md"
         />
       </div>
       <!-- 작은 응원 말풍선 -->
       <div class="flex-1 bg-lab-card/70 border border-lab-card-border px-3.5 py-2 rounded-2xl">
         <p id="cheerSpeech" class="text-xs text-gray-300">
-          "민수야, 분모는 그대로 두고 분자끼리 더하면 돼! ⚡"
+          "민수야, 조금만 더 집중해봐! ⚡"
         </p>
       </div>
     </div>
@@ -304,8 +453,8 @@
         👾
       </div>
       <div>
-        <h3 class="text-lg font-bold text-white">앗! 놓친 몬스터가 나타났다!</h3>
-        <p class="text-xs text-gray-300 mt-1">방금 아깝게 놓친 문제를 지금 바로 잡고 보너스 다이아💎를 챙겨가자!</p>
+        <h3 class="text-lg font-bold text-white">앗! 놓친 문제가 나타났다!</h3>
+        <p class="text-xs text-gray-300 mt-1">방금 아깝게 놓친 문제를 지금 바로 잡고 보너스를 챙겨가자!</p>
       </div>
 
       <div class="space-y-2 pt-1">
@@ -321,36 +470,36 @@
 
   <!-- ================= 5. 5문제 완료 축하 모달 ================= -->
   <div id="clearModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-    <div class="bg-lab-card border-2 border-neon-green rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+    <div id="clearModalBox" class="bg-lab-card border-2 border-neon-green rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
       <!-- 팡파르 아이콘 -->
-      <div class="w-20 h-20 rounded-full bg-neon-green/20 border-2 border-neon-green mx-auto flex items-center justify-center text-4xl animate-bounce">
+      <div id="clearModalIcon" class="w-20 h-20 rounded-full bg-neon-green/20 border-2 border-neon-green mx-auto flex items-center justify-center text-4xl animate-bounce">
         🏆
       </div>
       
       <div>
-        <h3 class="text-xl font-bold text-white">5분 퀘스트 완료!</h3>
-        <p class="text-xs text-neon-green mt-1 font-bold">🔥 4일 연속 불꽃 스트릭 유지 성공!</p>
+        <h3 id="clearModalTitle" class="text-xl font-bold text-white">5분 퀘스트 완료!</h3>
+        <p id="clearModalStreak" class="text-xs text-neon-green mt-1 font-bold">🔥 4일 연속 불꽃 스트릭 유지 성공!</p>
       </div>
 
       <!-- 보상 요약 박스 -->
-      <div class="bg-lab-bg border border-lab-card-border rounded-2xl p-3.5 text-left space-y-2">
+      <div id="clearRewardBox" class="bg-lab-bg border border-lab-card-border rounded-2xl p-3.5 text-left space-y-2">
         <div class="flex justify-between items-center text-xs">
           <span class="text-gray-400">클리어 보너스</span>
-          <span class="font-eng font-bold text-neon-cyan">+50 EXP</span>
+          <span id="clearExpText" class="font-eng font-bold text-neon-cyan">+50 EXP</span>
         </div>
         <div class="flex justify-between items-center text-xs">
           <span class="text-gray-400">골드 획득</span>
-          <span class="font-eng font-bold text-yellow-300">🪙 15 코인</span>
+          <span id="clearCoinText" class="font-eng font-bold text-yellow-300">🪙 15 코인</span>
         </div>
         <div class="flex justify-between items-center text-xs">
           <span class="text-gray-400">파트너 유대감</span>
-          <span class="font-eng font-bold text-neon-green">Lv.12 ➔ 99% 💖</span>
+          <span id="clearPartnerText" class="font-eng font-bold text-neon-green">Lv.12 ➔ 99% 💖</span>
         </div>
       </div>
 
       <!-- 버튼 3개: 연구실 복귀 & 과목별 심화 훈련 & 공부방 로비 -->
       <div class="space-y-2 pt-1">
-        <button class="jelly-btn w-full py-3.5 rounded-2xl bg-neon-green text-[#023300] font-bold text-base shadow-[0_6px_0_0_#045300]" onclick="returnToLab()">
+        <button id="clearReturnBtn" class="jelly-btn w-full py-3.5 rounded-2xl bg-neon-green text-[#023300] font-bold text-base shadow-[0_6px_0_0_#045300]" onclick="returnToLab()">
           연구실로 돌아가기 👾
         </button>
         <button class="w-full py-2.5 rounded-2xl bg-lab-bg border border-neon-cyan/50 text-neon-cyan font-bold text-xs hover:bg-neon-cyan/10" id="deepTrainingBtn" onclick="goToSubjectDeepTraining()">
@@ -1011,41 +1160,51 @@
         voca: [
           {
             id: "v_1",
-            q: "둘을 하나로 합칠 때 쓰는 '+' 기호의 이름은?",
-            formula: "'+' 기호의 이름",
+            q: "둘을 하나로 합칠 때 쓰는 '+' 기호의 이름은 무엇일까요?",
+            formula: "'+' 기호의 이름 = [ ? ]",
+            audioText: "더하기",
+            audioLang: "ko",
             options: ["더하기 (덧셈)", "빼기 (뺄셈)", "곱하기", "나누기"],
             answer: 0,
-            hint: "수를 보태고 합치는 '더하기'예요! ➕"
+            hint: "수를 보태고 합치는 것은 '더하기'예요! ➕"
           },
           {
             id: "v_2",
-            q: "10개 묶음과 남은 '낱개'에서 하나씩 있는 것을 이르는 말은?",
-            formula: "묶음과 [ ? ]",
-            options: ["낱개", "묶음", "상자", "바구니"],
+            q: "사탕이 10개씩 묶여 있지 않고, 하나씩 따로따로 있는 것을 무엇이라고 부를까요?",
+            formula: "하나씩 따로 있는 것 = [ ? ]",
+            audioText: "낱개",
+            audioLang: "ko",
+            options: ["낱개 🍬", "묶음 📦", "상자", "바구니"],
             answer: 0,
-            hint: "하나씩 따로 있는 것은 '낱개'예요! 🍬"
+            hint: "묶이지 않고 하나씩 따로따로 있는 것을 '낱개'라고 해요! 🍬"
           },
           {
             id: "v_3",
             q: "친구와 다정하게 생각을 주고받는 이야기를 무엇이라고 할까요?",
-            formula: "마음 나누기",
+            formula: "다정하게 나누는 이야기 = [ ? ]",
+            audioText: "대화",
+            audioLang: "ko",
             options: ["대화 (이야기)", "싸움", "침묵", "도망"],
             answer: 0,
-            hint: "다정하게 이야기를 나누는 '대화'예요! 🗣️"
+            hint: "다정하게 이야기를 나누는 것은 '대화'예요! 🗣️"
           },
           {
             id: "v_4",
             q: "사람들이 길을 안전하게 건너도록 하얀 줄을 그어놓은 곳은?",
-            formula: "안전한 건널목",
-            options: ["횡단보도", "차도", "골목길", "고속도로"],
+            formula: "하얀 줄이 그어진 건널목 = [ ? ]",
+            audioText: "횡단보도",
+            audioLang: "ko",
+            options: ["횡단보도 🦓", "차도", "골목길", "철길"],
             answer: 0,
-            hint: "초록불에 손을 들고 건너는 '횡단보도'예요! 🦓"
+            hint: "초록불에 손을 들고 건너는 곳은 '횡단보도'예요! 🦓"
           },
           {
             id: "v_5",
-            q: "신호등에서 '길을 건너도 좋아요'를 알리는 불빛은?",
-            formula: "안전 보행 신호",
-            options: ["초록불 (녹색)", "빨간불 (적색)", "노란불", "파란불"],
+            q: "신호등에서 '길을 건너도 좋아요'를 알리는 안전한 불빛은?",
+            formula: "안전하게 건너는 불빛 = [ ? ]",
+            audioText: "초록불",
+            audioLang: "ko",
+            options: ["초록불 (녹색)", "빨간불 (적색)", "노란불", "깜빡이"],
             answer: 0,
             hint: "건너도 되는 안전 신호는 '초록불'이에요! 🟢"
           }
@@ -1053,77 +1212,115 @@
         dictation: [
           {
             id: "k_dic_1",
-            q: "다음 중 바른 띄어쓰기는 무엇일까요?",
-            formula: "띄어쓰기 바른 문장",
-            options: ["마음을 나누어요", "마음을나누어요", "마 음 을 나누어요", "마음을나 누어요"],
+            q: "🎧 소리를 잘 듣고, 띄어쓰기가 바르게 된 문장을 골라보세요!",
+            formula: "🎧 '마음을 나누어요'",
+            audioText: "마음을 나누어요",
+            audioLang: "ko",
+            options: ["마음을 나누어요 ✍️", "마음을나누어요", "마 음 을 나누어요", "마음을나 누어요"],
             answer: 0,
-            hint: "'마음을'과 '나누어요'를 띄어 써야 해요! ✍️"
+            hint: "'마음을'과 '나누어요' 사이에 띄어쓰기를 쏙 넣어요! ✍️"
           },
           {
             id: "k_dic_2",
-            q: "친구에게 감사한 마음을 전할 때 알맞은 말은?",
-            formula: "고마운 마음 표현",
-            options: ["친구야 도와줘서 고마워", "친구야 저리 가", "친구야 몰라", "친구야 상관없어"],
+            q: "🎧 소리를 잘 듣고, 친구에게 감사한 마음을 전하는 바른 말을 골라보세요!",
+            formula: "🎧 '친구야 도와줘서 고마워'",
+            audioText: "친구야 도와줘서 고마워",
+            audioLang: "ko",
+            options: ["친구야 도와줘서 고마워 💖", "친구야 저리 가", "친구야 몰라", "친구야 상관없어"],
             answer: 0,
             hint: "도와준 친구에게 '고마워'라고 예쁘게 말해요! 🌸"
           },
           {
             id: "k_dic_3",
-            q: "아침에 선생님을 뵈었을 때 바른 인사말은?",
-            formula: "바른 인사말",
-            options: ["선생님, 안녕하세요!", "안녕!", "잘 가!", "누구세요?"],
+            q: "🎧 소리를 잘 듣고, 아침에 선생님을 뵈었을 때 바른 인사말을 골라보세요!",
+            formula: "🎧 '선생님, 안녕하세요!'",
+            audioText: "선생님 안녕하세요",
+            audioLang: "ko",
+            options: ["선생님, 안녕하세요! 🎒", "안녕!", "잘 가!", "누구세요?"],
             answer: 0,
             hint: "선생님께 공손하게 '안녕하세요!' 하고 인사해요! 🎒"
           },
           {
             id: "k_dic_4",
-            q: "받침이 바르게 쓰인 낱말은 무엇일까요?",
-            formula: "바른 낱말 찾기",
-            options: ["학교", "학꾜", "핰교", "하꾜"],
+            q: "🎧 소리를 잘 듣고, 배움터의 이름이 바르게 쓰인 글자를 찾아보세요!",
+            formula: "🎧 '즐거운 [ ? ]'",
+            audioText: "즐거운 학교",
+            audioLang: "ko",
+            options: ["학교 🏫", "학꾜", "핰교", "하꾜"],
             answer: 0,
-            hint: "배우러 가는 곳은 '학교'예요! 🏫"
+            hint: "선생님과 친구들이 모여 공부하는 곳은 '학교'예요! 🏫"
           },
           {
             id: "k_dic_5",
-            q: "친구를 기분 좋게 해주는 칭찬의 말로 알맞은 것은?",
-            formula: "칭찬하는 말",
-            options: ["너 정말 멋지다!", "너 왜 그래?", "저리 비켜!", "나빠!"],
+            q: "🎧 소리를 잘 듣고, 친구의 기분을 북돋아 주는 칭찬의 말을 골라보세요!",
+            formula: "🎧 '너 정말 멋지다!'",
+            audioText: "너 정말 멋지다",
+            audioLang: "ko",
+            options: ["너 정말 멋지다! 💖", "너 왜 그래?", "저리 비켜!", "나빠!"],
             answer: 0,
-            hint: "친구를 응원하는 말은 '정말 멋지다!'예요! 💖"
+            hint: "친구를 칭찬하고 응원할 때는 '정말 멋지다!'예요! 💖"
           }
         ],
         batchim: [
           {
             id: "k_bat_1",
-            q: "'꽃' 낱말의 받침 글자는 무엇일까요?",
-            formula: "꽃의 받침 = [ ? ]",
-            options: ["ㅊ", "ㅈ", "ㄱ", "ㅅ"],
+            q: "🎧 소리를 잘 듣고, '꼬꼬댁 [ ? ]'에 들어갈 바른 글자를 찾아보세요!",
+            formula: "🎧 '꼬꼬댁 [ ? ]'",
+            audioText: "꼬꼬댁 닭",
+            audioLang: "ko",
+            options: ["닭 🐔", "닥", "달", "답"],
             answer: 0,
-            hint: "예쁜 '꽃'의 받침은 ㅊ이에요! 🌺"
+            hint: "소리는 [닥]으로 나지만, 꼬꼬댁 암탉과 수탉은 '닭'으로 써요! 🐔"
           },
           {
             id: "k_bat_2",
-            q: "'닭' 낱말의 받침 글자는 무엇일까요?",
-            formula: "닭의 받침 = [ ? ]",
-            options: ["ㄺ", "ㄼ", "ㄱ", "ㄹ"],
+            q: "🎧 소리를 잘 듣고, '알록달록 [ ? ]'의 바른 글자를 골라보세요!",
+            formula: "🎧 '알록달록 [ ? ]'",
+            audioText: "알록달록 꽃",
+            audioLang: "ko",
+            options: ["꽃 🌺", "꼳", "꼮", "꼧"],
             answer: 0,
-            hint: "꼬꼬댁 '닭'은 리을기역(ㄺ) 받침이에요! 🐔"
+            hint: "소리는 [꼳]으로 나지만, 예쁜 꽃은 ㅊ 받침 '꽃'으로 써요! 🌺"
           },
           {
             id: "k_bat_3",
-            q: "'달' 낱말의 받침 글자는 무엇일까요?",
-            formula: "달의 받침 = [ ? ]",
-            options: ["ㄹ", "ㄴ", "ㅁ", "ㅇ"],
+            q: "🎧 소리를 잘 듣고, 시원하고 달콤한 여름 과일의 바른 이름을 찾아보세요!",
+            formula: "🎧 '시원한 [ ? ]'",
+            audioText: "시원한 수박",
+            audioLang: "ko",
+            options: ["수박 🍉", "수밖", "수방", "수발"],
             answer: 0,
-            hint: "밤하늘에 뜨는 '달'은 ㄹ 받침이에요! 🌙"
+            hint: "초록 바탕에 검은 줄이 있는 시원한 과일은 '수박'이에요! 🍉"
           },
           {
             id: "k_bat_4",
-            q: "'눈' 낱말의 받침 글자는 무엇일까요?",
-            formula: "눈의 받침 = [ ? ]",
-            options: ["ㄴ", "ㄹ", "ㅁ", "ㅂ"],
+            q: "🎧 소리를 잘 듣고, '밤하늘의 [ ? ]'에 들어갈 알맞은 글자를 골라보세요!",
+            formula: "🎧 '밤하늘의 [ ? ]'",
+            audioText: "밤하늘의 달",
+            audioLang: "ko",
+            options: ["달 🌙", "탈", "딸", "돌"],
             answer: 0,
-            hint: "하얗게 내리는 '눈'은 ㄴ 받침이에요! ❄️"
+            hint: "밤하늘을 환하게 비추는 둥근 친구는 '달'이에요! 🌙"
+          },
+          {
+            id: "k_bat_5",
+            q: "🎧 소리를 잘 듣고, '하늘에서 내리는 [ ? ]'의 바른 글자를 골라보세요!",
+            formula: "🎧 '하늘에서 내리는 [ ? ]'",
+            audioText: "하늘에서 내리는 눈",
+            audioLang: "ko",
+            options: ["눈 ❄️", "문 🚪", "손 ✋", "돈 🪙"],
+            answer: 0,
+            hint: "펄펄 하늘에서 내려와 눈사람을 만드는 것은 '눈'이에요! ❄️"
+          },
+          {
+            id: "k_bat_6",
+            q: "🎧 소리를 잘 듣고, '숲속의 귀여운 [ ? ]'에 들어갈 바른 글자를 찾아보세요!",
+            formula: "🎧 '숲속의 귀여운 [ ? ]'",
+            audioText: "숲속의 곰",
+            audioLang: "ko",
+            options: ["곰 🐻", "공", "골", "곱"],
+            answer: 0,
+            hint: "꿀을 좋아하는 엉금엉금 동물은 '곰'이에요! 🐻"
           }
         ],
         sentence: [
@@ -1743,14 +1940,19 @@
     // 초기 화면 렌더링
     function initScreen() {
       if (isMinseo) {
+        document.body.classList.remove('theme-minsu', 'text-white');
+        document.body.classList.add('theme-minseo');
         document.title = "5-Min Sweet Quest Runner 🧸";
         const monster = document.getElementById('cheerMonster');
         if (monster) {
-          monster.src = './kids/assets/images/minseo/avatar.png';
+          monster.src = './assets/images/minseo-char1.png';
           monster.onerror = () => {
-            monster.src = './kids/assets/images/monsters/purple_monster.png';
+            monster.src = './assets/images/minseo-char1.png';
           };
         }
+      } else {
+        document.body.classList.remove('theme-minseo');
+        document.body.classList.add('theme-minsu', 'text-white');
       }
 
       document.getElementById('subjectBadgeIcon').textContent = currentQuest.icon;
@@ -1807,10 +2009,18 @@
         ? `"민서야 힘내! 예쁜 별빛을 모아보자! 🌸"`
         : `"민수야 조금만 더 집중해봐! ⚡"`;
 
-      // 오디오 버튼 제어 (영어 및 발음 지원 문제)
+      // 오디오 버튼 제어 (영어 및 국어 듣기 문제 지원)
       const audioWrapper = document.getElementById('audioPlayWrapper');
+      const audioBtnText = document.getElementById('audioPlayBtnText');
       if (q.audioText) {
         audioWrapper.classList.remove('hidden');
+        if (audioBtnText) {
+          if (q.audioLang === 'ko' || currentSubj === 'korean') {
+            audioBtnText.textContent = "🎧 소리 듣기";
+          } else {
+            audioBtnText.textContent = "🎧 Jenny 원어민 발음 듣기";
+          }
+        }
       } else {
         audioWrapper.classList.add('hidden');
       }
@@ -1820,15 +2030,27 @@
       list.innerHTML = '';
       q.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
-        btn.className = `jelly-btn w-full bg-lab-card/90 border-2 border-lab-card-border hover:border-neon-cyan/60 py-3 px-4 rounded-2xl flex items-center justify-between text-left text-sm font-bold shadow-md transition-all`;
-        btn.id = `opt-${idx}`;
-        btn.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="w-6 h-6 rounded-full bg-lab-bg flex items-center justify-center text-xs font-eng text-gray-400 border border-lab-card-border">${idx + 1}</span>
-            <span class="text-white text-base">${opt}</span>
-          </div>
-          <span class="material-symbols-outlined text-transparent text-lg check-icon">check_circle</span>
-        `;
+        if (isMinseo) {
+          btn.className = `jelly-btn w-full bg-white/95 border-2 border-[#ffd1dc] hover:border-[#ff6584] py-3.5 px-4 rounded-2xl flex items-center justify-between text-left text-sm font-bold shadow-sm transition-all text-[#4a2e2b]`;
+          btn.id = `opt-${idx}`;
+          btn.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-[#fff0f5] flex items-center justify-center text-xs font-eng text-[#ff6584] font-bold border border-[#ffd1dc]">${idx + 1}</span>
+              <span class="text-[#4a2e2b] text-base font-bold">${opt}</span>
+            </div>
+            <span class="material-symbols-outlined text-transparent text-lg check-icon">check_circle</span>
+          `;
+        } else {
+          btn.className = `jelly-btn w-full bg-lab-card/90 border-2 border-lab-card-border hover:border-neon-cyan/60 py-3 px-4 rounded-2xl flex items-center justify-between text-left text-sm font-bold shadow-md transition-all`;
+          btn.id = `opt-${idx}`;
+          btn.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-full bg-lab-bg flex items-center justify-center text-xs font-eng text-gray-400 border border-lab-card-border">${idx + 1}</span>
+              <span class="text-white text-base">${opt}</span>
+            </div>
+            <span class="material-symbols-outlined text-transparent text-lg check-icon">check_circle</span>
+          `;
+        }
         btn.onclick = () => selectChoice(idx);
         list.appendChild(btn);
       });
@@ -1836,27 +2058,41 @@
       // 확인 버튼 초기화
       const checkBtn = document.getElementById('checkAnswerBtn');
       checkBtn.disabled = true;
-      checkBtn.className = "jelly-btn w-full bg-neon-green text-[#023300] py-4 rounded-2xl text-center shadow-[0_6px_0_0_#045300] font-bold text-lg tracking-wide border border-[#55ff35] disabled:opacity-40 disabled:cursor-not-allowed";
+      if (isMinseo) {
+        checkBtn.className = "jelly-btn w-full bg-[#ff7597] text-white py-4 rounded-2xl text-center shadow-[0_6px_0_0_#d8496e] font-bold text-lg tracking-wide border border-[#ffa3ba] disabled:opacity-40 disabled:cursor-not-allowed";
+        checkBtn.style.setProperty('--depth-color', '#d8496e');
+      } else {
+        checkBtn.className = "jelly-btn w-full bg-neon-green text-[#023300] py-4 rounded-2xl text-center shadow-[0_6px_0_0_#045300] font-bold text-lg tracking-wide border border-[#55ff35] disabled:opacity-40 disabled:cursor-not-allowed";
+        checkBtn.style.setProperty('--depth-color', '#045300');
+      }
       
       // 바텀시트 닫기
       document.getElementById('feedbackSheet').classList.add('hidden');
     }
 
-    // 원어민 발음 듣기 (Cloudflare Edge-TTS 실시간 스트리밍 Jenny 원어민 음성)
+    // 소리 / 발음 듣기 (Edge-TTS 실시간 스트리밍: 국어는 SunHi, 영어는 Jenny)
     function playQuestionAudio() {
       const q = currentQuest.questions[currentIndex];
       if (!q || !q.audioText) return;
       playSound('tap');
+      const isKoreanAudio = q.audioLang === 'ko' || currentSubj === 'korean';
+      const voice = isKoreanAudio ? 'ko-KR-SunHiNeural' : 'en-US-JennyNeural';
+
       if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(q.audioText, { forceVoice: 'en-US-JennyNeural' });
+        speakFairyTTS(q.audioText, { forceVoice: voice });
       } else if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(q.audioText);
-        utter.lang = 'en-US';
-        utter.rate = 0.85; // 또렷한 아동용 원어민 리스닝 속도
+        utter.lang = isKoreanAudio ? 'ko-KR' : 'en-US';
+        utter.rate = isKoreanAudio ? 0.9 : 0.85;
         const voices = window.speechSynthesis.getVoices();
-        const enVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Google') || v.name.includes('Samantha')));
-        if (enVoice) utter.voice = enVoice;
+        if (isKoreanAudio) {
+          const koVoice = voices.find(v => v.lang.startsWith('ko') && (v.name.includes('SunHi') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Yuna')));
+          if (koVoice) utter.voice = koVoice;
+        } else {
+          const enVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Google') || v.name.includes('Samantha')));
+          if (enVoice) utter.voice = enVoice;
+        }
         window.speechSynthesis.speak(utter);
       }
     }
@@ -1869,17 +2105,40 @@
 
       currentQuest.questions[currentIndex].options.forEach((_, idx) => {
         const el = document.getElementById(`opt-${idx}`);
+        if (!el) return;
         const icon = el.querySelector('.check-icon');
-        if (idx === index) {
-          el.classList.add('border-neon-green', 'bg-neon-green/10');
-          el.classList.remove('border-lab-card-border');
-          icon.classList.remove('text-transparent');
-          icon.classList.add('text-neon-green');
+        if (isMinseo) {
+          if (idx === index) {
+            el.classList.add('border-[#ff6584]', 'bg-[#ffeef2]');
+            el.classList.remove('border-[#ffd1dc]');
+            if (icon) {
+              icon.classList.remove('text-transparent');
+              icon.classList.add('text-[#ff6584]');
+            }
+          } else {
+            el.classList.remove('border-[#ff6584]', 'bg-[#ffeef2]');
+            el.classList.add('border-[#ffd1dc]');
+            if (icon) {
+              icon.classList.add('text-transparent');
+              icon.classList.remove('text-[#ff6584]');
+            }
+          }
         } else {
-          el.classList.remove('border-neon-green', 'bg-neon-green/10');
-          el.classList.add('border-lab-card-border');
-          icon.classList.add('text-transparent');
-          icon.classList.remove('text-neon-green');
+          if (idx === index) {
+            el.classList.add('border-neon-green', 'bg-neon-green/10');
+            el.classList.remove('border-lab-card-border');
+            if (icon) {
+              icon.classList.remove('text-transparent');
+              icon.classList.add('text-neon-green');
+            }
+          } else {
+            el.classList.remove('border-neon-green', 'bg-neon-green/10');
+            el.classList.add('border-lab-card-border');
+            if (icon) {
+              icon.classList.add('text-transparent');
+              icon.classList.remove('text-neon-green');
+            }
+          }
         }
       });
 
@@ -1909,20 +2168,34 @@
         recordCorrectItem(currentSubj, q);
 
         if (typeof speakFairyTTS === 'function') {
-          speakFairyTTS("정답이야! 대단해!");
+          speakFairyTTS(isMinseo ? "정답이야! 참 잘했어!" : "정답이야! 대단해!");
         }
 
-        monster.classList.remove('victory-jump');
-        void monster.offsetWidth;
-        monster.classList.add('victory-jump');
+        if (monster) {
+          monster.classList.remove('victory-jump');
+          void monster.offsetWidth;
+          monster.classList.add('victory-jump');
+        }
 
-        box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-neon-green bg-[#112d14] text-white space-y-3";
-        title.textContent = "대단해! 정답이야! 🎉";
-        title.className = "text-base font-bold text-neon-green";
-        desc.textContent = "+10 EXP / +3 🪙 획득!";
-        iconWrap.textContent = "✨";
-        iconWrap.className = "w-10 h-10 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center text-xl";
-        nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-neon-green text-[#023300] shadow-[0_4px_0_0_#045300]";
+        if (isMinseo) {
+          box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-[#ff6584] bg-[#fff5f8] text-[#4a2e2b] space-y-3";
+          title.textContent = "참 잘했어요! 정답이야! 🌸";
+          title.className = "text-base font-bold text-[#d8496e]";
+          desc.textContent = "+10 EXP / +3 🍬 획득!";
+          desc.className = "text-xs text-[#a03a57] font-bold";
+          iconWrap.textContent = "💖";
+          iconWrap.className = "w-10 h-10 rounded-full bg-[#ffe4ec] text-[#ff6584] flex items-center justify-center text-xl";
+          nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-[#ff7597] text-white shadow-[0_4px_0_0_#d8496e]";
+        } else {
+          box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-neon-green bg-[#112d14] text-white space-y-3";
+          title.textContent = "대단해! 정답이야! 🎉";
+          title.className = "text-base font-bold text-neon-green";
+          desc.textContent = "+10 EXP / +3 🪙 획득!";
+          desc.className = "text-xs opacity-90";
+          iconWrap.textContent = "✨";
+          iconWrap.className = "w-10 h-10 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center text-xl";
+          nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-neon-green text-[#023300] shadow-[0_4px_0_0_#045300]";
+        }
       } else {
         playSound('wrong');
         recordWrongItem(currentSubj, q);
@@ -1931,7 +2204,7 @@
         }
 
         if (typeof speakFairyTTS === 'function') {
-          speakFairyTTS("아쉬워! 다시 힘내보자!");
+          speakFairyTTS(isMinseo ? "괜찮아! 다시 해보자!" : "아쉬워! 다시 힘내보자!");
         }
 
         // 📝 노션 오답 리포트용 상세 로그 수집
@@ -1944,13 +2217,25 @@
         hearts = Math.max(0, hearts - 1);
         updateHearts();
 
-        box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-fire-orange bg-[#331811] text-white space-y-3";
-        title.textContent = "아까워요! 💡";
-        title.className = "text-base font-bold text-fire-orange";
-        desc.innerHTML = `정답 해설: ${q.hint}`;
-        iconWrap.textContent = "💔";
-        iconWrap.className = "w-10 h-10 rounded-full bg-fire-orange/20 text-fire-orange flex items-center justify-center text-xl";
-        nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-fire-orange text-white shadow-[0_4px_0_0_#602a00]";
+        if (isMinseo) {
+          box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-[#ff9aa2] bg-[#fff0f2] text-[#4a2e2b] space-y-3";
+          title.textContent = "아쉬워요! 다시 해볼까요? 💡";
+          title.className = "text-base font-bold text-[#e05769]";
+          desc.innerHTML = `정답 해설: ${q.hint}`;
+          desc.className = "text-xs text-[#8c3a45]";
+          iconWrap.textContent = "💧";
+          iconWrap.className = "w-10 h-10 rounded-full bg-[#ffebee] text-[#ff6b81] flex items-center justify-center text-xl";
+          nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-[#ff9aa2] text-white shadow-[0_4px_0_0_#d46a74]";
+        } else {
+          box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-fire-orange bg-[#331811] text-white space-y-3";
+          title.textContent = "아까워요! 💡";
+          title.className = "text-base font-bold text-fire-orange";
+          desc.innerHTML = `정답 해설: ${q.hint}`;
+          desc.className = "text-xs opacity-90";
+          iconWrap.textContent = "💔";
+          iconWrap.className = "w-10 h-10 rounded-full bg-fire-orange/20 text-fire-orange flex items-center justify-center text-xl";
+          nextBtn.className = "jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-fire-orange text-white shadow-[0_4px_0_0_#602a00]";
+        }
       }
     }
 
@@ -1974,10 +2259,36 @@
       }
     }
 
-    // ⚔️ 몬스터 리벤지 배틀 모달 표시
+    // ⚔️ 몬스터 리벤지 배틀 모달 표시 (민서는 베리 버니 핑크 모달)
     function showRevengeModal() {
       playSound('wrong');
       const modal = document.getElementById('revengeModal');
+      if (isMinseo) {
+        const box = modal.querySelector('div');
+        if (box) {
+          box.className = "bg-[#fff5f8] border-2 border-[#ff7597] rounded-3xl max-w-xs w-full p-5 text-center space-y-3.5 shadow-2xl animate-sheet-up text-[#4a2e2b]";
+        }
+        const iconDiv = box ? box.querySelector('div') : null;
+        if (iconDiv) {
+          iconDiv.className = "w-16 h-16 rounded-2xl bg-[#ffe4ec] border-2 border-[#ff7597] mx-auto flex items-center justify-center text-3xl animate-bounce";
+          iconDiv.textContent = "🐰";
+        }
+        const titleH3 = box ? box.querySelector('h3') : null;
+        if (titleH3) {
+          titleH3.textContent = "🌸 베리 버니와 다시 도전!";
+          titleH3.className = "text-lg font-bold text-[#d8496e]";
+        }
+        const descP = box ? box.querySelector('p') : null;
+        if (descP) {
+          descP.textContent = "놓쳤던 문제를 다시 풀고 예쁜 별빛 캔디를 100% 모아보자!";
+          descP.className = "text-xs text-[#a03a57] mt-1";
+        }
+        const revengeBtn = modal.querySelector('.jelly-btn');
+        if (revengeBtn) {
+          revengeBtn.className = "jelly-btn w-full py-3.5 rounded-2xl bg-[#ff7597] text-white font-bold text-sm shadow-[0_4px_0_0_#d8496e]";
+          revengeBtn.textContent = "별빛 구출하러 가기! 🌸";
+        }
+      }
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
@@ -1989,8 +2300,8 @@
       document.getElementById('revengeModal').classList.remove('flex');
       isRevengeMode = true;
       currentQuest = {
-        title: `⚔️ ${currentQuest.title} · 리벤지 배틀`,
-        icon: "👾",
+        title: isMinseo ? `🌸 ${currentQuest.title} · 별빛 구출` : `⚔️ ${currentQuest.title} · 리벤지 배틀`,
+        icon: isMinseo ? "🐰" : "👾",
         questions: [...sessionMissedQuestions]
       };
       sessionMissedQuestions = [];
@@ -2012,9 +2323,55 @@
     async function showClearModal() {
       playSound('fanfare');
       if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS("퀘스트 완료!");
+        speakFairyTTS(isMinseo ? "축하해! 퀘스트 완료!" : "퀘스트 완료!");
       }
       const modal = document.getElementById('clearModal');
+
+      if (isMinseo) {
+        const clearBox = document.getElementById('clearModalBox');
+        if (clearBox) {
+          clearBox.className = "bg-[#fff5f8] border-2 border-[#ff7597] rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl text-[#4a2e2b]";
+        }
+        const icon = document.getElementById('clearModalIcon');
+        if (icon) {
+          icon.className = "w-20 h-20 rounded-full bg-[#ffe4ec] border-2 border-[#ff7597] mx-auto flex items-center justify-center text-4xl animate-bounce";
+          icon.textContent = "🎀";
+        }
+        const title = document.getElementById('clearModalTitle');
+        if (title) {
+          title.textContent = "오늘의 달콤 퀘스트 완독! 🌸";
+          title.className = "text-xl font-bold text-[#d8496e]";
+        }
+        const streak = document.getElementById('clearModalStreak');
+        if (streak) {
+          streak.textContent = "✨ 반짝반짝 별빛 도장 획득 성공!";
+          streak.className = "text-xs text-[#ff6584] mt-1 font-bold";
+        }
+        const rewardBox = document.getElementById('clearRewardBox');
+        if (rewardBox) {
+          rewardBox.className = "bg-white/90 border border-[#ffd1dc] rounded-2xl p-3.5 text-left space-y-2 text-[#4a2e2b]";
+        }
+        const expText = document.getElementById('clearExpText');
+        if (expText) {
+          expText.className = "font-eng font-bold text-[#d8496e]";
+        }
+        const coinText = document.getElementById('clearCoinText');
+        if (coinText) {
+          coinText.className = "font-eng font-bold text-[#e67e22]";
+          coinText.textContent = "🍬 3 캔디";
+        }
+        const partnerText = document.getElementById('clearPartnerText');
+        if (partnerText) {
+          partnerText.className = "font-eng font-bold text-[#ff6584]";
+          partnerText.textContent = "민서 & 베리 버니 💖";
+        }
+        const returnBtn = document.getElementById('clearReturnBtn');
+        if (returnBtn) {
+          returnBtn.className = "jelly-btn w-full py-3.5 rounded-2xl bg-[#ff7597] text-white font-bold text-base shadow-[0_6px_0_0_#d8496e]";
+          returnBtn.textContent = "연구실로 돌아가기 🧸";
+        }
+      }
+
       modal.classList.remove('hidden');
       modal.classList.add('flex');
 
@@ -2023,16 +2380,18 @@
         english: "영어",
         korean: "국어",
         science: "과학",
-        society: "사회"
+        society: "사회",
+        voca: "용어",
+        haru: "하루"
       };
-      const curKoreanSubj = koreanSubjMap[currentSubj] || "영어";
+      const curKoreanSubj = koreanSubjMap[currentSubj] || "국어";
 
-      // 💎 1. 노션 인벤토리 DB 연동 (보상 +3💎, +50 EXP 지급)
+      // 💎 1. 노션 인벤토리 DB 연동 (보상 +3💎/🍬, +50 EXP 지급)
       if (typeof grantRewardAndShowUI === 'function') {
         try {
           window.currentSubject = curKoreanSubj;
           await grantRewardAndShowUI(3, true);
-          console.log(`[노션 인벤토리 동기화 완료] ${curKoreanSubj} 보상 +3💎 및 EXP 반영`);
+          console.log(`[노션 인벤토리 동기화 완료] ${curKoreanSubj} 보상 반영`);
         } catch (e) {
           console.warn("[노션 보상 동기화 알림]", e);
         }
@@ -2094,6 +2453,21 @@
     function confirmExit() {
       playSound('tap');
       const modal = document.getElementById('exitModal');
+      if (isMinseo) {
+        const box = modal.querySelector('div');
+        if (box) {
+          box.className = "bg-[#fff5f8] border-2 border-[#ffd1dc] rounded-3xl max-w-xs w-full p-5 text-center space-y-3.5 shadow-2xl text-[#4a2e2b]";
+        }
+        const titleH3 = box ? box.querySelector('h3') : null;
+        if (titleH3) {
+          titleH3.className = "text-lg font-bold text-[#d8496e]";
+        }
+        const keepBtn = box ? box.querySelector('.jelly-btn') : null;
+        if (keepBtn) {
+          keepBtn.className = "jelly-btn w-full py-3 rounded-xl bg-[#ff7597] text-white font-bold text-sm shadow-[0_4px_0_0_#d8496e]";
+          keepBtn.textContent = "계속 공부하기 🌸";
+        }
+      }
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
