@@ -145,13 +145,22 @@
   <header class="flex items-center justify-between pt-1">
     <!-- 좌측: 🏠 공부방 로비 복귀 + 민수 아바타 & 레벨 -->
     <div class="flex items-center gap-2">
-      <!-- 🏠 로비 홈 바로가기 (내 방 연동) -->
+      <!-- 🚪 처음 프로필 화면 (index.html) 바로가기 -->
+      <a 
+        href="index.html" 
+        class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-purple-400 active:scale-95 transition-all shadow-lg"
+        title="처음 프로필 화면으로 가기"
+      >
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+      </a>
+
+      <!-- 🏠 전체 공부방 로비 (lobby.html) 바로가기 -->
       <a 
         href="lobby.html" 
         class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-neon-cyan/60 active:scale-95 transition-all shadow-lg"
-        title="공부방 로비로 돌아가기"
+        title="전체 공부방 로비(lobby.html)로 가기"
       >
-        <span class="material-symbols-outlined text-lg">home</span>
+        <span class="material-symbols-outlined text-base">home</span>
       </a>
 
       <!-- 민수 아바타 & 레벨 -->

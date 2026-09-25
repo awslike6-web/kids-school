@@ -10,12 +10,12 @@ window.STORY_BOOK = {
   themeColorDark: "#059669",
   backUrl: "korean.html",
   backLabel: "🚪 국어방 대기실",
-  version: "20260910_gems_v2",
+  version: "20260925_webtoon_fix",
   pages: [
     {
       page: 1,
       tag: "🎈 표지 : 민수의 따뜻한 말 한마디",
-      img: "images/minsu/5-2/1/storybook/korean_story_p1.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p1.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_cover.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -32,7 +32,7 @@ window.STORY_BOOK = {
     {
       page: 2,
       tag: "✨ 1장 : 공감이란 무엇일까요?",
-      img: "images/minsu/5-2/1/storybook/korean_story_p2.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p2.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p2.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -47,7 +47,7 @@ window.STORY_BOOK = {
     {
       page: 3,
       tag: "🏃 2장 : 운동회 이어달리기 경기",
-      img: "images/minsu/5-2/1/storybook/korean_story_p3.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p3.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p3.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -63,7 +63,7 @@ window.STORY_BOOK = {
     {
       page: 4,
       tag: "💥 3장 : 쿵! 트랙에서 넘어진 슬찬이",
-      img: "images/minsu/5-2/1/storybook/korean_story_p4.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p4.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p4.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -78,7 +78,7 @@ window.STORY_BOOK = {
     {
       page: 5,
       tag: "😢 4장 : 슬찬이의 눈물과 자책",
-      img: "images/minsu/5-2/1/storybook/korean_story_p5.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p5.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p5.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -94,7 +94,7 @@ window.STORY_BOOK = {
     {
       page: 6,
       tag: "🤝 5장 : 섣부른 충고 대신 다가간 민수",
-      img: "images/minsu/5-2/1/storybook/korean_story_p6.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p6.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p6.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -109,7 +109,7 @@ window.STORY_BOOK = {
     {
       page: 7,
       tag: "👂 6장 : 공감 비법 1 - 끝까지 듣는 '경청'",
-      img: "images/minsu/5-2/1/storybook/korean_story_p7.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p7.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p7.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -125,7 +125,7 @@ window.STORY_BOOK = {
     {
       page: 8,
       tag: "💭 7장 : 공감 비법 2 - 처지를 바꾸는 '역지사지'",
-      img: "images/minsu/5-2/1/storybook/korean_story_p8.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p8.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p8.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -140,7 +140,7 @@ window.STORY_BOOK = {
     {
       page: 9,
       tag: "💬 8장 : 공감 비법 3 - '따뜻한 말 한마디'",
-      img: "images/minsu/5-2/1/storybook/korean_story_p9.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p9.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p9.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -155,7 +155,7 @@ window.STORY_BOOK = {
     {
       page: 10,
       tag: "🤝 9장 : 우리 끝까지 같이 가자!",
-      img: "images/minsu/5-2/1/storybook/korean_story_p10.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p10.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p10.png",
       textHtml: `
         <div class="webtoon-passage">
@@ -170,7 +170,7 @@ window.STORY_BOOK = {
     {
       page: 11,
       tag: "🏆 10장 : 세상에서 가장 값진 우정",
-      img: "images/minsu/5-2/1/storybook/korean_story_p11.png",
+      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p11.png",
       illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p11.png",
       textHtml: `
         <div class="webtoon-passage">

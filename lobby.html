@@ -119,6 +119,128 @@
   body.theme--hideout .compact-tts-btn { background: #ffffff; border-color: #ff6b9d; color: #ff6b9d; }
   body.theme--hideout .compact-tts-btn:hover { box-shadow: 0 4px 12px rgba(255,107,157,0.35); transform: scale(1.04); }
 
+  /* 👾 몬스터 연구실 5분 퀘스트 퀵 칩 */
+  .monster-lab-quick-chip {
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  body.theme--arcade .monster-lab-quick-chip {
+    background: linear-gradient(135deg, rgba(9, 7, 15, 0.95), rgba(26, 21, 46, 0.95));
+    color: #39ff14;
+    border: 1.5px solid #39ff14;
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+  }
+  body.theme--arcade .monster-lab-quick-chip:hover {
+    color: #fff;
+    border-color: #55ff35;
+    box-shadow: 0 0 16px rgba(57, 255, 20, 0.5);
+    transform: scale(1.04);
+  }
+  body.theme--hideout .monster-lab-quick-chip {
+    background: #ffffff;
+    color: #059669;
+    border: 1.5px solid #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  }
+  body.theme--hideout .monster-lab-quick-chip:hover {
+    background: #ecfdf5;
+    color: #047857;
+    transform: scale(1.04);
+  }
+
+  /* 👾 오늘의 5분 일일 퀘스트 하이라이트 배너 */
+  .quest-quick-banner {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto 12px auto;
+    padding: 12px 18px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  .quest-quick-banner:hover {
+    transform: translateY(-2px);
+  }
+  body.theme--arcade .quest-quick-banner {
+    background: linear-gradient(135deg, rgba(14, 10, 31, 0.95) 0%, rgba(26, 21, 46, 0.98) 100%);
+    border: 2px solid #39ff14;
+    box-shadow: 0 4px 18px rgba(57, 255, 20, 0.25);
+    color: #fff;
+  }
+  body.theme--arcade .quest-quick-banner:hover {
+    box-shadow: 0 8px 24px rgba(57, 255, 20, 0.45);
+    border-color: #55ff35;
+  }
+  body.theme--hideout .quest-quick-banner {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border: 2px solid #10b981;
+    box-shadow: 0 4px 18px rgba(16, 185, 129, 0.2);
+    color: #1e293b;
+  }
+  body.theme--hideout .quest-quick-banner:hover {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+  }
+  .quest-quick-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .quest-quick-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+  .quest-quick-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .quest-quick-tag {
+    font-size: 0.72rem;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: 'Nanum Gothic', sans-serif;
+  }
+  body.theme--arcade .quest-quick-tag {
+    background: rgba(255, 159, 67, 0.25);
+    color: #ff9f43;
+    border: 1px solid rgba(255, 159, 67, 0.5);
+  }
+  body.theme--hideout .quest-quick-tag {
+    background: rgba(244, 63, 94, 0.15);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.3);
+  }
+  .quest-quick-desc {
+    font-size: 0.78rem;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+  .quest-quick-arrow {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #39ff14;
+    transition: transform 0.2s ease;
+  }
+  body.theme--hideout .quest-quick-arrow {
+    color: #059669;
+  }
+  .quest-quick-banner:hover .quest-quick-arrow {
+    transform: translateX(4px);
+  }
+
   /* 🛠️ 관리자 자녀 퀵 스위처 바 */
   .admin-child-switcher { display: none; justify-content: center; gap: 8px; z-index: 10; flex: 1; max-width: 380px; }
   .admin-child-btn { flex: 1; padding: 7px 12px; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 0.9rem; font-weight: bold; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.12); touch-action: manipulation; white-space: nowrap; }
@@ -329,9 +451,12 @@
 <div class="bg-floats" id="bgFloats"></div>
 
 <div class="screen" id="screen-subjects" style="display: flex;">
-  <!-- 🛠️ 상단 고정 유틸리티 바 (뒤로가기, 관리자 스위처, 구석 TTS) -->
+  <!-- 🛠️ 상단 고정 유틸리티 바 (뒤로가기, 5분 퀘스트 퀵 칩, 관리자 스위처, 구석 TTS) -->
   <div class="lobby-top-bar">
-    <a href="index.html" class="top-back-btn">← 프로필</a>
+    <div style="display:flex; align-items:center; gap:6px;">
+      <a href="index.html" class="top-back-btn">← 프로필</a>
+      <a href="monster_lab.html" class="top-back-btn monster-lab-quick-chip" id="lobbyMonsterLabBtn" title="3D 몬스터 바이트와 5분 일일 퀘스트 출격!">👾 5분 퀘스트</a>
+    </div>
     <div class="admin-child-switcher" id="adminChildSwitcher"></div>
     <div style="display:flex; align-items:center; gap:8px;">
       <button type="button" class="qu-trigger-btn" style="padding: 7px 14px; font-size: 0.88rem;" onclick="openQuickUploader({ defaultAuthor: (typeof currentChild !== 'undefined' && currentChild === 'minseo') ? '민서' : '민수' })">
@@ -361,6 +486,21 @@
       🔊
     </button>
   </div>
+
+  <!-- 👾 5분 일일 퀘스트 하이라이트 배너 (몬스터 연구실 직결) -->
+  <a href="monster_lab.html" class="quest-quick-banner" id="questQuickBanner">
+    <div class="quest-quick-content">
+      <span class="quest-quick-icon">👾</span>
+      <div class="quest-quick-text">
+        <div class="quest-quick-title">
+          오늘의 5분 퀘스트 출격하기!
+          <span class="quest-quick-tag">🔥 불꽃 스트릭</span>
+        </div>
+        <p class="quest-quick-desc">3D 클레이 몬스터와 함께 나눗셈·영어 5문제 풀고 보상 다이아💎 챙기기!</p>
+      </div>
+    </div>
+    <span class="quest-quick-arrow">➔</span>
+  </a>
 
   <!-- 📦 4대 상단 핵심 히어로 바 (인벤토리 보상 + 폰시간 정산 + 데일리 마음일기 + 시간표) -->
   <div class="status-hero-bar">
