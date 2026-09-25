@@ -12,7 +12,7 @@ window.STORY_BOOK = {
   backLabel: "🚪 영어방 대기실",
   version: "20260912_l8_v5",
   bilingual: true,
-  imgBase: "images/storybook/l8/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/english/minsu/5-2/8/",
   pages: [
     {
       page: 1,

@@ -181,7 +181,7 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#10b981",
         link: "climate_storybook.html",
-        coverImg: "images/storybook/climate/climate_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-1/1/climate_story_p1.png"
     },
     {
         id: "5_2_1",
@@ -196,7 +196,7 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#d97706",
         link: "history_time_travel_storybook.html",
-        coverImg: "images/storybook/history_time_travel/history_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/1/history_story_p1.png"
     },
     {
         id: "5_2_2",
@@ -211,7 +211,7 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(180, 83, 9, 0.18) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#f59e0b",
         link: "three_kingdoms_storybook.html",
-        coverImg: "images/storybook/three_kingdoms/three_kingdoms_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/2/three_kingdoms_story_p1.png"
     },
     {
         id: "5_2_3",
@@ -226,7 +226,7 @@ const SOCIETY_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(13, 148, 136, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
         border: "#14b8a6",
         link: "goryeo_storybook.html",
-        coverImg: "images/storybook/goryeo/goryeo_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/3/goryeo_story_p1.png"
     }
 ];
 

@@ -13,7 +13,7 @@ window.STORY_BOOK = {
   themeColorDark: "#0f766e",
   backUrl: "society.html",
   backLabel: "🔙 사회 탐구실",
-  imgBase: "images/storybook/goryeo/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/3/",
   version: "20260916_goryeo_v1",
   pages: [
     {

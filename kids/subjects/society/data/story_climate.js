@@ -11,7 +11,7 @@ window.STORY_BOOK = {
   themeColorDark: "#059669",
   backUrl: "society.html",
   backLabel: "🔙 사회 탐구실",
-  imgBase: "images/storybook/climate/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-1/1/",
   version: "20260906_climate_v2",
   pages: [
         {

@@ -11,7 +11,7 @@ window.STORY_BOOK = {
   backLabel: "🚪 영어방 대기실",
   version: "20260911_l11_v1",
   bilingual: true,
-  imgBase: "images/storybook/l11/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/english/minsu/5-2/11/",
   pages: [
     {
       page: 1,

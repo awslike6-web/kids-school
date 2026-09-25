@@ -9,7 +9,7 @@ window.STORY_BOOK = {
   themeColorDark: "#d97706",
   backUrl: "science.html",
   backLabel: "🔙 과학 탐구실",
-  imgBase: "images/minsu/5-1/0/safety_storybook/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/0/safety/",
   version: "20260902_safety",
   pages: [
         {

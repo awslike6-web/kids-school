@@ -10,13 +10,14 @@ window.STORY_BOOK = {
   themeColorDark: "#059669",
   backUrl: "korean.html",
   backLabel: "🚪 국어방 대기실",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minsu/5-2/1/",
   version: "20260925_webtoon_fix",
   pages: [
     {
       page: 1,
       tag: "🎈 표지 : 민수의 따뜻한 말 한마디",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p1.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_cover.png",
+      spreadImg: "korean_story_p1.png",
+      illImg: "korean_story_cover.png",
       textHtml: `
         <div class="webtoon-passage">
           <h2 style="margin:0 0 10px 0; color:#10b981; font-size:1.4rem;">민수의 따뜻한 말 한마디</h2>
@@ -32,8 +33,8 @@ window.STORY_BOOK = {
     {
       page: 2,
       tag: "✨ 1장 : 공감이란 무엇일까요?",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p2.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p2.png",
+      spreadImg: "korean_story_p2.png",
+      illImg: "korean_story_ill_p2.png",
       textHtml: `
         <div class="webtoon-passage">
           우리가 다른 사람과 대화할 때 가장 중요한 것은 무엇일까요?<br>
@@ -47,8 +48,8 @@ window.STORY_BOOK = {
     {
       page: 3,
       tag: "🏃 2장 : 운동회 이어달리기 경기",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p3.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p3.png",
+      spreadImg: "korean_story_p3.png",
+      illImg: "korean_story_ill_p3.png",
       textHtml: `
         <div class="webtoon-passage">
           시원한 가을바람이 솔솔 부는 운동회 날이었습니다.<br>
@@ -63,8 +64,8 @@ window.STORY_BOOK = {
     {
       page: 4,
       tag: "💥 3장 : 쿵! 트랙에서 넘어진 슬찬이",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p4.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p4.png",
+      spreadImg: "korean_story_p4.png",
+      illImg: "korean_story_ill_p4.png",
       textHtml: `
         <div class="webtoon-passage">
           "탕!" 소리와 함께 경기가 시작되었습니다.<br>
@@ -78,8 +79,8 @@ window.STORY_BOOK = {
     {
       page: 5,
       tag: "😢 4장 : 슬찬이의 눈물과 자책",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p5.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p5.png",
+      spreadImg: "korean_story_p5.png",
+      illImg: "korean_story_ill_p5.png",
       textHtml: `
         <div class="webtoon-passage">
           무릎에서는 피가 났고 바지에는 흙이 잔뜩 묻었습니다.<br>
@@ -94,8 +95,8 @@ window.STORY_BOOK = {
     {
       page: 6,
       tag: "🤝 5장 : 섣부른 충고 대신 다가간 민수",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p6.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p6.png",
+      spreadImg: "korean_story_p6.png",
+      illImg: "korean_story_ill_p6.png",
       textHtml: `
         <div class="webtoon-passage">
           주변에서 구경하던 친구들이 "어떡해, 넘어져 버렸어!", "조금만 조심하지"라며 웅성거리기 시작했습니다.<br>
@@ -109,8 +110,8 @@ window.STORY_BOOK = {
     {
       page: 7,
       tag: "👂 6장 : 공감 비법 1 - 끝까지 듣는 '경청'",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p7.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p7.png",
+      spreadImg: "korean_story_p7.png",
+      illImg: "korean_story_ill_p7.png",
       textHtml: `
         <div class="webtoon-passage">
           공감의 첫 번째 비법은 끝까지 들어주는 '경청'입니다.<br>
@@ -125,8 +126,8 @@ window.STORY_BOOK = {
     {
       page: 8,
       tag: "💭 7장 : 공감 비법 2 - 처지를 바꾸는 '역지사지'",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p8.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p8.png",
+      spreadImg: "korean_story_p8.png",
+      illImg: "korean_story_ill_p8.png",
       textHtml: `
         <div class="webtoon-passage">
           공감의 두 번째 비법은 처지를 바꾸어 생각하는 '역지사지'입니다.<br>
@@ -140,8 +141,8 @@ window.STORY_BOOK = {
     {
       page: 9,
       tag: "💬 8장 : 공감 비법 3 - '따뜻한 말 한마디'",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p9.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p9.png",
+      spreadImg: "korean_story_p9.png",
+      illImg: "korean_story_ill_p9.png",
       textHtml: `
         <div class="webtoon-passage">
           공감의 세 번째 비법은 마음을 그대로 읽어주는 '따뜻한 말 한마디'입니다.<br>
@@ -155,8 +156,8 @@ window.STORY_BOOK = {
     {
       page: 10,
       tag: "🤝 9장 : 우리 끝까지 같이 가자!",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p10.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p10.png",
+      spreadImg: "korean_story_p10.png",
+      illImg: "korean_story_ill_p10.png",
       textHtml: `
         <div class="webtoon-passage">
           <div class="webtoon-dialogue">"자, 내 손 잡아. 우리 끝까지 같이 가자."</div>
@@ -170,8 +171,8 @@ window.STORY_BOOK = {
     {
       page: 11,
       tag: "🏆 10장 : 세상에서 가장 값진 우정",
-      spreadImg: "images/minsu/5-2/1/storybook/korean_story_p11.png",
-      illImg: "images/minsu/5-2/1/storybook/korean_story_ill_p11.png",
+      spreadImg: "korean_story_p11.png",
+      illImg: "korean_story_ill_p11.png",
       textHtml: `
         <div class="webtoon-passage">
           두 친구는 손을 꼭 맞잡고 결승선을 향해 천천히, 하지만 힘차게 걸어갔습니다.<br>

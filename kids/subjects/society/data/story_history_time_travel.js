@@ -12,7 +12,7 @@ window.STORY_BOOK = {
   themeColorDark: "#b45309",
   backUrl: "society.html",
   backLabel: "🔙 사회 탐구실",
-  imgBase: "images/storybook/history_time_travel/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/1/",
   version: "20260906_history_v2",
   pages: [
     {

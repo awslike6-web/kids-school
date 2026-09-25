@@ -340,7 +340,7 @@ const KOREAN_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#10b981",
         link: "korean_5_2_1_storybook.html",
-        coverImg: "images/minsu/5-2/1/storybook/korean_story_cover.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minsu/5-2/1/korean_story_cover.png"
     },
     {
         id: "1_2_1_1",
@@ -359,7 +359,7 @@ const KOREAN_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#ec4899",
         link: "korean_1_2_1_storybook.html",
-        coverImg: "images/minseo/1-2/1/storybook/korean_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/1/book1/korean_story_p1.png"
     },
     {
         id: "1_2_1_2",
@@ -378,7 +378,7 @@ const KOREAN_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#3b82f6",
         link: "korean_1_2_1_storybook_2.html",
-        coverImg: "images/minseo/1-2/1/storybook_2/korean_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/1/book2/korean_story_p1.png"
     },
     {
         id: "1_2_1_3",
@@ -397,7 +397,7 @@ const KOREAN_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#10b981",
         link: "korean_1_2_1_storybook_3.html",
-        coverImg: "images/minseo/1-2/1/storybook_3/korean_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/1/book3/korean_story_p1.png"
     },
     {
         id: "1_2_1_4",
@@ -416,7 +416,7 @@ const KOREAN_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#8b5cf6",
         link: "korean_1_2_1_storybook_4.html",
-        coverImg: "images/minseo/1-2/1/storybook_4/korean_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/1/book4/korean_story_p1.png"
     }
 ];
 

@@ -296,83 +296,58 @@
         </button>
       </div>
 
-      <!-- 5대 과목 심플 알약형 리스트 -->
-      <div class="space-y-2 pt-1">
+      <!-- 5대 과목 심플 3D 젤리 버튼 2열 그리드 (아이콘 + 과목명 중심 직관적 단순화) -->
+      <div class="grid grid-cols-2 gap-2.5 pt-1.5">
         
         <!-- 🧮 수학 -->
-        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-neon-green p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('math', '🧮 수학 던전: 두 자릿수 나눗셈 (기본 진도 ⭐)', '민수 맞춤 필수 기초 연산! 두 자릿수 ÷ 한 자릿수 5분 마이크로 퀘스트!')">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🧮</span>
-            <div>
-              <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                두 자릿수 나눗셈 던전
-                <span class="bg-neon-green/20 text-neon-green text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">기본 진도 ⭐</span>
-              </div>
-              <p class="text-xs text-gray-400">두 자릿수 ÷ 한 자릿수 5문제 (십의 자리/나머지/검산식)</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
-        </div>
+        <button 
+          type="button"
+          class="jelly-btn bg-lab-bg/95 border-2 border-neon-green/50 hover:border-neon-green p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-white shadow-md active:translate-y-1 transition-all"
+          onclick="selectSubject('math')"
+        >
+          <span class="text-2xl">🧮</span>
+          <span class="text-base font-bold tracking-wide">수학</span>
+        </button>
 
         <!-- 🔤 영어 -->
-        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-yellow-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('english', '🔤 영어 8단원: 외모·옷차림 묘사', '초5-2 현재 진도 ⭐ He Has Short Curly Hair!')">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🔤</span>
-            <div>
-              <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                8단원 외모 & 옷차림 던전
-                <span class="bg-yellow-400/20 text-yellow-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">현재 진도 ⭐</span>
-              </div>
-              <p class="text-xs text-gray-400">He Has Short Curly Hair · 5분 퀘스트</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
-        </div>
+        <button 
+          type="button"
+          class="jelly-btn bg-lab-bg/95 border-2 border-yellow-400/50 hover:border-yellow-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-white shadow-md active:translate-y-1 transition-all"
+          onclick="selectSubject('english')"
+        >
+          <span class="text-2xl">🔤</span>
+          <span class="text-base font-bold tracking-wide">영어</span>
+        </button>
 
         <!-- 📖 국어 -->
-        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-purple-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('korean', '📖 국어 던전: 어휘 아레나', '속담, 반의어, 사자성어 60초 스피드 듀얼!')">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">📖</span>
-            <div>
-              <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                어휘 배틀 아레나
-                <span class="bg-purple-500/20 text-purple-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">+40 EXP</span>
-              </div>
-              <p class="text-xs text-gray-400">속담 & 어휘 듀얼</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
-        </div>
+        <button 
+          type="button"
+          class="jelly-btn bg-lab-bg/95 border-2 border-purple-400/50 hover:border-purple-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-white shadow-md active:translate-y-1 transition-all"
+          onclick="selectSubject('korean')"
+        >
+          <span class="text-2xl">📖</span>
+          <span class="text-base font-bold tracking-wide">국어</span>
+        </button>
 
         <!-- 🔬 과학 -->
-        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-blue-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('science', '🔬 과학 던전: 볼케이노 코어', '온도와 열의 이동! 가상 실험실에서 화학 합성!')">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🔬</span>
-            <div>
-              <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                볼케이노 코어
-                <span class="bg-blue-500/20 text-blue-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded">+70 EXP</span>
-              </div>
-              <p class="text-xs text-gray-400">온도와 열 가상 실험</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
-        </div>
+        <button 
+          type="button"
+          class="jelly-btn bg-lab-bg/95 border-2 border-blue-400/50 hover:border-blue-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-white shadow-md active:translate-y-1 transition-all"
+          onclick="selectSubject('science')"
+        >
+          <span class="text-2xl">🔬</span>
+          <span class="text-base font-bold tracking-wide">과학</span>
+        </button>
 
-        <!-- 🗺️ 사회 -->
-        <div class="jelly-btn bg-lab-bg/90 border border-lab-card-border hover:border-pink-400 p-3 rounded-2xl flex items-center justify-between cursor-pointer" onclick="selectSubject('society', '🗺️ 사회 던전: 고대 유물 지도', '조선시대 한양 도성과 삼국시대 역사 탐험!')">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🗺️</span>
-            <div>
-              <div class="text-sm font-bold text-white flex items-center gap-1.5">
-                고대 유물 지도
-                <span class="bg-pink-500/20 text-pink-300 text-[10px] font-eng font-bold px-1.5 py-0.2 rounded animate-pulse">먼지털기 2배! ✨</span>
-              </div>
-              <p class="text-xs text-gray-400">조선시대 유물 발굴</p>
-            </div>
-          </div>
-          <span class="material-symbols-outlined text-gray-400">arrow_forward_ios</span>
-        </div>
+        <!-- 🗺️ 사회 (가로 전체 확장) -->
+        <button 
+          type="button"
+          class="col-span-2 jelly-btn bg-lab-bg/95 border-2 border-pink-400/50 hover:border-pink-400 p-3.5 rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer text-white shadow-md active:translate-y-1 transition-all"
+          onclick="selectSubject('society')"
+        >
+          <span class="text-2xl">🗺️</span>
+          <span class="text-base font-bold tracking-wide">사회</span>
+        </button>
 
       </div>
     </div>
@@ -387,6 +362,11 @@
       <div>
         <h3 class="text-base font-bold text-white" id="modalTitle">오늘의 5분 퀘스트</h3>
         <p class="text-xs text-gray-300 mt-1" id="modalDesc">클레이 바이트와 함께 5문제 출격!</p>
+
+        <!-- 💡 알고리즘 권장 진도 안내 배너 -->
+        <div id="modalRecommendBox" class="mt-2.5 py-1.5 px-3 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 text-[11px] text-neon-cyan font-bold">
+          <span id="modalRecommend">💡 오늘의 추천 진도: 두 자릿수 나눗셈 (기초 필수 ⭐)</span>
+        </div>
       </div>
 
       <!-- 과목 맞춤 세부 옵션 (단원 및 모드 선택) -->
@@ -395,9 +375,7 @@
         <div>
           <span class="text-[11px] font-bold text-gray-400 block mb-1.5">🎯 학습 단원 범위</span>
           <div class="grid grid-cols-3 gap-1.5" id="unitScopeChips">
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="8" onclick="setQuestUnit('8')">8단원 ⭐</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7" onclick="setQuestUnit('7')">7단원 복습</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7,8" onclick="setQuestUnit('7,8')">7~8단원 팩</button>
+            <!-- 동적 생성 -->
           </div>
         </div>
 
@@ -405,9 +383,7 @@
         <div>
           <span class="text-[11px] font-bold text-gray-400 block mb-1.5">⚡ 학습 집중 모드</span>
           <div class="grid grid-cols-3 gap-1.5" id="modeChips">
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">통합(단어+문장)</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
+            <!-- 동적 생성 -->
           </div>
         </div>
       </div>
@@ -422,6 +398,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- ================= 6. 직관적 사운드 & 인터랙션 스크립트 ================= -->
   <script>
@@ -583,13 +560,45 @@
       bubble.classList.add('animate-bubble');
     }
 
-    let targetSubject = 'math';
+    // 5대 교과 메타데이터 (아이콘, 과목명, 세부 설명, 알고리즘 권장 진도)
+    const SUBJECT_METAS = {
+      math: {
+        icon: '🧮',
+        title: '🧮 수학 5분 퀘스트',
+        desc: '민수의 학습 진도에 맞춘 기초 필수 나눗셈 & 분수 배틀!',
+        recommend: '💡 오늘의 권장 진도: 두 자릿수 나눗셈 (기초 필수 ⭐)'
+      },
+      english: {
+        icon: '🔤',
+        title: '🔤 영어 5분 퀘스트',
+        desc: '초5-2 정규 교과 외모·옷차림 묘사 & 원어민 스피킹 훈련!',
+        recommend: '💡 오늘의 권장 진도: 8단원 He Has Short Curly Hair ⭐'
+      },
+      korean: {
+        icon: '📖',
+        title: '📖 국어 5분 퀘스트',
+        desc: '속담, 반의어, 접속사, 3문장 중심 생각 독해 5문제 출제!',
+        recommend: '💡 오늘의 배틀 주제: 어휘·속담 & 문맥 독해 아레나'
+      },
+      science: {
+        icon: '🔬',
+        title: '🔬 과학 5분 퀘스트',
+        desc: '온도와 열의 3대 이동, 물질의 상태변화, 산·염기 지시약 5문제!',
+        recommend: '💡 오늘의 탐구 주제: 온도와 열의 이동 & 가상 실험'
+      },
+      society: {
+        icon: '🗺️',
+        title: '🗺️ 사회 5분 퀘스트',
+        desc: '조선 건국, 한양 4대문, 세종대왕 발명품, 임진왜란 5문제!',
+        recommend: '💡 오늘의 역사 주제: 조선의 건국과 발전 & 한양 도성'
+      }
+    };
 
-    // 메인 시작 버튼 (민수 기본 진도: 두 자릿수 나눗셈)
+    // 메인 시작 버튼 (민수 기본 진도: 두 자릿수 나눗셈 팝업)
     function handleStartQuest() {
       pokeSound('launch');
       triggerHaptic(50);
-      openQuestModal('🧮', '오늘의 5분 퀘스트: 수학', '민수 맞춤 두 자릿수 나눗셈 5문제를 풀고 오늘 불꽃 스트릭을 획득하세요!', 'math');
+      selectSubject('math');
     }
 
     // 서랍 제어
@@ -608,10 +617,11 @@
       overlay.classList.remove('flex');
     }
 
-    function selectSubject(subj, title, desc) {
+    // 과목 선택 (외부 버튼은 [과목/아이콘]만, 세부 내용은 팝업으로 위임)
+    function selectSubject(subj = 'math') {
       closeDrawer();
-      const icons = { math: '🧮', english: '🔤', korean: '📖', science: '🔬', society: '🗺️' };
-      openQuestModal(icons[subj] || '🚀', title, desc, subj);
+      const meta = SUBJECT_METAS[subj] || SUBJECT_METAS.math;
+      openQuestModal(meta.icon, meta.title, meta.desc, subj, meta.recommend);
     }
 
     let selectedUnit = 'division';
@@ -641,12 +651,17 @@
       });
     }
 
-    // 모달 제어 (수학 / 영어 과목 맞춤 옵션 칩 동적 렌더링)
-    function openQuestModal(icon, title, desc, subj = 'math') {
+    // 모달 제어 (과목별 권장 진도 안내 + 수학/영어 세부 단원 선택 칩 동적 렌더링)
+    function openQuestModal(icon, title, desc, subj = 'math', recommend = '') {
       targetSubject = subj;
       document.getElementById('modalIcon').textContent = icon;
       document.getElementById('modalTitle').textContent = title;
       document.getElementById('modalDesc').textContent = desc;
+
+      const recEl = document.getElementById('modalRecommend');
+      if (recEl) {
+        recEl.textContent = recommend || (SUBJECT_METAS[subj] ? SUBJECT_METAS[subj].recommend : '');
+      }
 
       const optBox = document.getElementById('questOptionsBox');
       const unitContainer = document.getElementById('unitScopeChips');

@@ -11,7 +11,7 @@ window.STORY_BOOK = {
   themeColorDark: "#b45309",
   backUrl: "math_storybook_library.html",
   backLabel: "🔙 수학 동화 도서관",
-  imgBase: "images/minsu/5-2/2/storybook_bakery/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/math/minsu/5-2/2/",
   version: "20260916_bakery_v2",
   pages: [
     {

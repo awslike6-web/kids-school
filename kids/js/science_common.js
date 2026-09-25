@@ -34,7 +34,7 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#0284c7",
         link: "science_storybook.html",
-        coverImg: "images/minsu/5-1/0/storybook/science_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/0/study/science_story_p1.png"
     },
     {
         id: "5_1_0_2",
@@ -49,7 +49,7 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(5, 150, 105, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#059669",
         link: "science_safety_storybook.html",
-        coverImg: "images/minsu/5-1/0/safety_storybook/science_safety_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/0/safety/science_safety_story_p1.png"
     },
     {
         id: "5_1_1_1",
@@ -64,7 +64,7 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#2563eb",
         link: "science_mix_storybook.html",
-        coverImg: "images/minsu/5-1/1/storybook/science_mix_story_p1.png"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/1/science_mix_story_p1.png"
     },
     {
         id: "5_2_2_1",
@@ -79,7 +79,7 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
         border: "#38bdf8",
         link: "science_weather_storybook.html",
-        coverImg: "images/minsu/5-2/2/storybook/science_weather_story_p1.jpg"
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/2/science_weather_story_p1.jpg"
     }
 ];
 

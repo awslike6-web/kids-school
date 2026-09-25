@@ -13,7 +13,7 @@ window.STORY_BOOK = {
   themeColorDark: "#78350f",
   backUrl: "society.html",
   backLabel: "🔙 사회 탐구실",
-  imgBase: "images/storybook/three_kingdoms/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/2/",
   version: "20260915_three_kingdoms_v2",
   pages: [
     {

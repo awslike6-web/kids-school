@@ -10,7 +10,7 @@ window.STORY_BOOK = {
   themeColorDark: "#047857",
   backUrl: "math_storybook_library.html",
   backLabel: "🔙 수학 동화 도서관",
-  imgBase: "images/minseo/1-2/2/storybook_jewels/",
+  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/math/minseo/1-2/2/",
   version: "20260914_jewels",
   pages: [
     {
