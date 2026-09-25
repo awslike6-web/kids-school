@@ -136,6 +136,71 @@
     .animate-sheet-up {
       animation: sheetUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+
+    /* 🌸 민서 전용 파스텔 피치/핑크 테마 (Dreamy Plushie Lab) */
+    body.theme-minseo {
+      background: radial-gradient(circle at 50% 20%, #ffffff 0%, #fef8f4 60%, #ffeef3 100%) !important;
+      color: #1d1b19 !important;
+    }
+    body.theme-minseo .bg-lab-card,
+    body.theme-minseo .bg-lab-card\/80,
+    body.theme-minseo .bg-lab-card\/95,
+    body.theme-minseo .bg-lab-card\/70 {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+      border-color: #ffd1dc !important;
+      color: #1d1b19 !important;
+      box-shadow: 0 4px 16px rgba(255, 182, 193, 0.25) !important;
+    }
+    body.theme-minseo .border-lab-card-border {
+      border-color: #ffd1dc !important;
+    }
+    body.theme-minseo .text-white {
+      color: #a03a57 !important;
+    }
+    body.theme-minseo .text-gray-300,
+    body.theme-minseo .text-gray-400 {
+      color: #887175 !important;
+    }
+    body.theme-minseo #monsterSpeechBubble {
+      background-color: #ffffff !important;
+      border-color: #ff85a2 !important;
+      box-shadow: 0 4px 16px rgba(255, 133, 162, 0.2) !important;
+    }
+    body.theme-minseo #monsterSpeechBubble div {
+      background-color: #ffffff !important;
+      border-color: #ff85a2 !important;
+    }
+    body.theme-minseo #speechText {
+      color: #a03a57 !important;
+    }
+    body.theme-minseo #mainQuestBtn {
+      background: linear-gradient(to bottom, #ff9bb3, #ff7597) !important;
+      border-color: #ffffff !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 0 0 #f472b6, 0 10px 20px rgba(255, 133, 162, 0.35) !important;
+      --depth-color: #f472b6;
+    }
+    body.theme-minseo #mainQuestBtn div,
+    body.theme-minseo #mainQuestBtn span {
+      color: #ffffff !important;
+    }
+    body.theme-minseo #questModal > div {
+      background-color: #ffffff !important;
+      border-color: #ff85a2 !important;
+      box-shadow: 0 16px 36px rgba(255, 133, 162, 0.3) !important;
+    }
+    body.theme-minseo #modalRecommendBox {
+      background-color: #fff0f4 !important;
+      border-color: #ff85a2 !important;
+      color: #a03a57 !important;
+    }
+    body.theme-minseo #modalRecommend {
+      color: #a03a57 !important;
+    }
+    body.theme-minseo #questOptionsBox {
+      background-color: #fff5f8 !important;
+      border-color: #ffd1dc !important;
+    }
   </style>
 </head>
 
@@ -156,21 +221,22 @@
 
       <!-- 🏠 전체 공부방 로비 (lobby.html) 바로가기 -->
       <a 
+        id="headerLobbyLink"
         href="lobby.html" 
         class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-neon-cyan/60 active:scale-95 transition-all shadow-lg"
-        title="전체 공부방 로비(lobby.html)로 가기"
+        title="전체 공부방 로비로 가기"
       >
         <span class="material-symbols-outlined text-base">home</span>
       </a>
 
-      <!-- 민수 아바타 & 레벨 -->
+      <!-- 유저 아바타 & 레벨 -->
       <div class="flex items-center gap-2 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="pokeSound('level')">
-        <div class="w-8 h-8 rounded-full bg-purple-700/60 flex items-center justify-center text-lg border border-neon-cyan/50">
+        <div id="userAvatar" class="w-8 h-8 rounded-full bg-purple-700/60 flex items-center justify-center text-lg border border-neon-cyan/50">
           👦
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="text-sm font-bold text-white">민수</span>
-          <span class="bg-neon-cyan text-lab-bg text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none">
+          <span id="userName" class="text-sm font-bold text-white">민수</span>
+          <span id="userLevel" class="bg-neon-cyan text-lab-bg text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none">
             Lv.12
           </span>
         </div>
@@ -179,16 +245,16 @@
 
     <!-- 우측 스트릭 & 코인 & 사운드 칩 -->
     <div class="flex items-center gap-2">
-      <!-- 🔥 3일 스트릭 -->
+      <!-- 스트릭 칩 (불꽃 / 핑크 하트) -->
       <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="handleStreakClick()">
-        <span class="text-base animate-pulse">🔥</span>
-        <span class="text-sm font-eng font-black text-fire-orange">3일</span>
+        <span id="streakIcon" class="text-base animate-pulse">🔥</span>
+        <span id="streakText" class="text-sm font-eng font-black text-fire-orange">15일</span>
       </div>
 
-      <!-- 🪙 120 코인 -->
+      <!-- 재화 칩 (코인 / 요정가루) -->
       <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="handleCoinClick()">
-        <span class="text-base">🪙</span>
-        <span class="text-sm font-eng font-black text-yellow-300">120</span>
+        <span id="coinIcon" class="text-base">🪙</span>
+        <span id="coinText" class="text-sm font-eng font-black text-yellow-300">120</span>
       </div>
 
       <!-- 🔊 사운드 토글 -->
@@ -201,8 +267,8 @@
   <!-- ================= 2. 중앙 몬스터 무대 (시원한 여백 & 주인공 몰입) ================= -->
   <main class="flex-1 flex flex-col items-center justify-center relative py-2">
     
-    <!-- 몬스터 상단 심플 말풍선 -->
-    <div id="monsterSpeechBubble" class="relative z-30 mb-2 bg-lab-card/95 border-2 border-neon-cyan px-3.5 py-1.5 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.6)] text-center max-w-[260px]">
+    <!-- 상단 심플 말풍선 -->
+    <div id="monsterSpeechBubble" class="relative z-30 mb-2 bg-lab-card/95 border-2 border-neon-cyan px-3.5 py-1.5 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.6)] text-center max-w-[270px]">
       <p id="speechText" class="text-xs text-neon-cyan font-bold tracking-wide">
         "민수야! 오늘 5분 퀘스트 깨러 가자! 🚀"
       </p>
@@ -210,13 +276,12 @@
       <div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-lab-card border-r-2 border-b-2 border-neon-cyan rotate-45"></div>
     </div>
 
-    <!-- 👾 3D 클레이 몬스터 & 네온 스테이지 발판 (발판 바로 위 안정적 저고도 부유) -->
-    <div class="relative w-72 h-64 flex flex-col items-center justify-end cursor-pointer group" onclick="pokeMonster(event)">
-      
-      <!-- 배경 은은한 네온 방사광 -->
+    <!-- 1) 👾 민수용: 3D 클레이 몬스터 & 네온 스테이지 발판 -->
+    <div id="minsuStageWrap" class="relative w-72 h-64 flex flex-col items-center justify-end cursor-pointer group" onclick="pokeMonster(event)">
+      <!-- 은은한 네온 방사광 -->
       <div class="absolute inset-0 bg-gradient-to-t from-neon-green/10 via-transparent to-transparent rounded-full filter blur-xl pointer-events-none"></div>
 
-      <!-- 3D 네온 발판 스테이지 (하단에 듬직하게 안착) -->
+      <!-- 3D 네온 발판 스테이지 -->
       <img 
         src="./kids/assets/images/monsters/lab_stage_pedestal.png" 
         alt="Neon Pedestal Stage" 
@@ -226,7 +291,7 @@
       <!-- 발판 윗면 원형 플레이트의 네온 그림자 링 -->
       <div class="absolute bottom-20 w-24 h-4 bg-neon-green/45 rounded-full blur-sm animate-ring-pulse pointer-events-none"></div>
 
-      <!-- 👾 보라색 클레이 몬스터 (발판 링 바로 위에서 안정적으로 잔잔히 부유: w-28) -->
+      <!-- 보라색 클레이 몬스터 -->
       <div class="relative z-20 mb-[88px] flex flex-col items-center">
         <img 
           id="monsterImg" 
@@ -237,11 +302,32 @@
       </div>
     </div>
 
-    <!-- 몬스터 심플 이름표 (이름 + 파트너 레벨만 딱!) -->
-    <div class="flex items-center gap-1.5 mt-0.5 bg-lab-card/70 border border-lab-card-border px-3 py-0.5 rounded-full shadow-md">
-      <span class="text-xs font-bold text-white tracking-wide">클레이 바이트</span>
-      <span class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
-      <span class="text-[11px] text-neon-green font-bold">수호 파트너</span>
+    <!-- 2) 🧸 민서용: 분홍색 튜브 챔버 & 캐릭터 레이어 (기본 hidden, 민서 접속 시 flex) -->
+    <div id="minseoChamberWrap" class="hidden relative rounded-2xl border-4 border-white bg-gradient-to-b from-rose-50 to-pink-100/50 overflow-hidden shadow-[0_8px_24px_rgba(255,133,162,0.25)] aspect-square w-72 max-w-sm mx-auto items-center justify-center p-0 cursor-pointer" onclick="pokeMonster(event)">
+      <!-- 튜브 배경 이미지 (사용자 원본 베이스) -->
+      <img 
+        alt="분홍색 튜브 쿠션 베이스" 
+        class="relative z-10 w-full h-full object-cover rounded-xl" 
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV-IDp_iDn-WfxdakzUuquXBg47J6J6FCU6ZPIHrVuqK-0ncWASu9Yy6zkPaN6Hm6AMT5YxPIqpTyMD8a1gxRL0XMb7QAMoJN5ZzXrNkqN9o6I6UPw4A4aw1fKXJFdXEh95qHievw9KkjTBUDSYFuyhoZSq3Y6WpgVUvLt7X1pdOHvUoTLbjDZmVAWZfux4CkaKfJs3Bx1uMfMAXqQKNrEMQ3EfDGFG8PVi3AyijSLWbUxBCxJfV1aYw"
+      />
+      <!-- 튜브 위에 얹어질 민서 캐릭터 투명 레이어 (현재는 비워둠, 둥실 부유 효과 완비) -->
+      <div id="minseoCharacterLayer" class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+        <div id="characterPlushieWrap" class="relative w-40 h-40 flex items-center justify-center animate-monster-float">
+          <!-- 은은한 별빛 반짝임 대기 -->
+          <span class="text-3xl text-pink-300 opacity-70">✨</span>
+        </div>
+      </div>
+      <!-- 튜브 하단 쿠션 안내 배너 -->
+      <div class="absolute bottom-3 z-30 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border-2 border-pink-300 shadow-sm flex items-center gap-1 text-center">
+        <span class="text-[11px] font-bold text-[#a03a57]">🧸 분홍 튜브에 민서 인형 친구 준비 중 ✨</span>
+      </div>
+    </div>
+
+    <!-- 파트너 심플 이름표 -->
+    <div id="partnerBadge" class="flex items-center gap-1.5 mt-2 bg-lab-card/70 border border-lab-card-border px-3 py-0.5 rounded-full shadow-md">
+      <span id="partnerName" class="text-xs font-bold text-white tracking-wide">클레이 바이트</span>
+      <span id="partnerDot" class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
+      <span id="partnerRole" class="text-[11px] text-neon-green font-bold">수호 파트너</span>
     </div>
 
   </main>
@@ -260,10 +346,10 @@
       <div class="absolute inset-x-0 top-0 h-1/2 bg-white/35 rounded-t-2xl pointer-events-none"></div>
       
       <div class="relative z-10 flex items-center justify-center gap-2 text-xl font-bold tracking-wide">
-        <span>오늘의 5분 퀘스트 출격! 🚀</span>
+        <span id="mainQuestTitle">오늘의 5분 퀘스트 출격! 🚀</span>
       </div>
-      <div class="relative z-10 text-xs font-bold text-[#034400]/80">
-        🧮 5-2 분수의 곱셈 던전 · 보너스 1.5배!
+      <div id="mainQuestSub" class="relative z-10 text-xs font-bold text-[#034400]/80">
+        🧮 5-2 두 자릿수 나눗셈 던전 · 필수 ⭐
       </div>
     </button>
 
@@ -531,37 +617,35 @@
 
     // 몬스터 콕 터치 대사
     const simpleDialogues = [
+    // ================= 사용자 및 테마 동적 스위칭 (민수 vs 민서) =================
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentChild = urlParams.get('user') || localStorage.getItem('currentChild') || 'minsu';
+    if (currentChild === 'son') currentChild = 'minsu';
+    if (currentChild === 'daughter') currentChild = 'minseo';
+    const isMinseo = (currentChild === 'minseo');
+
+    // 캐릭터 말풍선 대사 목록
+    const DIALOGUES_MINSU = [
       "민수야! 오늘 5분 퀘스트 깨러 가자! 🚀",
       "오늘 수학 보스 격파하고 치킨 먹자! 🍗",
       "클레이 바이트 에너지 충전 완료! ⚡",
-      "오늘 1개만 풀면 불꽃 유지 성공! 🔥",
+      "오늘 1개만 풀면 불꽃 스트릭 유지 성공! 🔥",
       "간지러워 크하핫! 몬스터 빔 발사! ✨"
     ];
+
+    const DIALOGUES_MINSEO = [
+      "민서야! 오늘 달콤 인형 퀘스트 하러 가자! 🧸",
+      "포근한 튜브 위에서 100까지 수 정복하자! 🌸",
+      "베리 버니가 민서를 기다리고 있었어! 💖",
+      "오늘 1개만 풀면 하트 스트릭 충전 완료! ✨",
+      "달콤한 마시멜로 퐁당! 뽀용뽀용~ 🍭"
+    ];
+
+    let simpleDialogues = isMinseo ? DIALOGUES_MINSEO : DIALOGUES_MINSU;
     let dIndex = 0;
 
-    function pokeMonster(event) {
-      if (event) event.stopPropagation();
-      pokeSound('monster');
-      triggerHaptic(30);
-
-      const monsterImg = document.getElementById('monsterImg');
-      const bubble = document.getElementById('monsterSpeechBubble');
-      const speechText = document.getElementById('speechText');
-
-      monsterImg.classList.remove('poke-bounce');
-      void monsterImg.offsetWidth;
-      monsterImg.classList.add('poke-bounce');
-
-      dIndex = (dIndex + 1) % simpleDialogues.length;
-      speechText.textContent = simpleDialogues[dIndex];
-
-      bubble.classList.remove('animate-bubble');
-      void bubble.offsetWidth;
-      bubble.classList.add('animate-bubble');
-    }
-
     // 5대 교과 메타데이터 (아이콘, 과목명, 세부 설명, 알고리즘 권장 진도)
-    const SUBJECT_METAS = {
+    const SUBJECT_METAS_MINSU = {
       math: {
         icon: '🧮',
         title: '🧮 수학 5분 퀘스트',
@@ -594,7 +678,210 @@
       }
     };
 
-    // 메인 시작 버튼 (민수 기본 진도: 두 자릿수 나눗셈 팝업)
+    const SUBJECT_METAS_MINSEO = {
+      math: {
+        icon: '🧮',
+        title: '🧮 캔디 수학 5분 퀘스트',
+        desc: '민서 맞춤 100까지의 수 & 달콤 한 자릿수 덧뺄셈 5문제 출제!',
+        recommend: '💡 오늘의 권장 진도: 100까지의 수 & 덧셈 기초 (필수 ⭐)'
+      },
+      english: {
+        icon: '🔤',
+        title: '🔤 파닉스 영어 5분 퀘스트',
+        desc: '초1 기초 알파벳 소리 & 그림 단어 매칭 훈련!',
+        recommend: '💡 오늘의 권장 진도: 파닉스 소리 익히기 & 첫 단어 ⭐'
+      },
+      korean: {
+        icon: '📖',
+        title: '📖 낱말 베이커리 5분 퀘스트',
+        desc: '초1-2 받아쓰기 100문장 & 받침 낱말 짝 맞추기 5문제!',
+        recommend: '💡 오늘의 권장 진도: 받침 글자 짝 맞추기 & 바른 말'
+      },
+      science: {
+        icon: '🔬',
+        title: '🔬 꽃잎 포션 5분 퀘스트',
+        desc: '색깔 물방울 섞기 & 포근한 꽃잎 반응 가상 실험 퀴즈!',
+        recommend: '💡 오늘의 권장 주제: 색깔 물방울 믹스 & 포션 조합'
+      },
+      society: {
+        icon: '🗺️',
+        title: '🗺️ 별빛 하루 5분 퀘스트',
+        desc: '초1 사계절(가을·겨울) 생활안전과 별빛 씨앗 모으기!',
+        recommend: '💡 오늘의 권장 주제: 횡단보도 안전 & 가을 열매'
+      }
+    };
+
+    const SUBJECT_METAS = isMinseo ? SUBJECT_METAS_MINSEO : SUBJECT_METAS_MINSU;
+
+    // 🎨 테마 및 DOM 초기화
+    function applyTheme() {
+      if (isMinseo) {
+        document.body.classList.remove('theme-minsu');
+        document.body.classList.add('theme-minseo');
+        document.title = "Minseo's Dreamy Plushie Lab 🧸";
+
+        const lobbyLink = document.getElementById('headerLobbyLink');
+        if (lobbyLink) lobbyLink.href = 'lobby.html?user=minseo';
+
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar) userAvatar.textContent = '👧';
+
+        const userName = document.getElementById('userName');
+        if (userName) userName.textContent = '민서';
+
+        const userLevel = document.getElementById('userLevel');
+        if (userLevel) {
+          userLevel.textContent = 'Lv.15';
+          userLevel.className = 'bg-[#ff85a2] text-white text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none';
+        }
+
+        const streakIcon = document.getElementById('streakIcon');
+        if (streakIcon) streakIcon.textContent = '💖';
+
+        const streakText = document.getElementById('streakText');
+        if (streakText) {
+          streakText.textContent = '15일';
+          streakText.className = 'text-sm font-eng font-black text-[#ff85a2]';
+        }
+
+        const coinIcon = document.getElementById('coinIcon');
+        if (coinIcon) coinIcon.textContent = '✨';
+
+        const coinText = document.getElementById('coinText');
+        if (coinText) {
+          coinText.textContent = '2,450';
+          coinText.className = 'text-sm font-eng font-black text-[#a03a57]';
+        }
+
+        // 챔버 스위칭 (민수 스테이지 숨김, 민서 튜브 챔버 노출)
+        const minsuStage = document.getElementById('minsuStageWrap');
+        if (minsuStage) minsuStage.classList.add('hidden');
+
+        const minseoChamber = document.getElementById('minseoChamberWrap');
+        if (minseoChamber) {
+          minseoChamber.classList.remove('hidden');
+          minseoChamber.classList.add('flex');
+        }
+
+        const speech = document.getElementById('speechText');
+        if (speech) speech.textContent = simpleDialogues[0];
+
+        const pName = document.getElementById('partnerName');
+        if (pName) pName.textContent = '베리 버니';
+
+        const pDot = document.getElementById('partnerDot');
+        if (pDot) pDot.className = 'w-1.5 h-1.5 rounded-full bg-[#ff85a2] animate-pulse';
+
+        const pRole = document.getElementById('partnerRole');
+        if (pRole) {
+          pRole.textContent = '드림 요정';
+          pRole.className = 'text-[11px] text-[#ff85a2] font-bold';
+        }
+
+        const qTitle = document.getElementById('mainQuestTitle');
+        if (qTitle) qTitle.textContent = '오늘의 5분 요정 퀘스트 시작! 🧸';
+
+        const qSub = document.getElementById('mainQuestSub');
+        if (qSub) qSub.textContent = '🧮 1-2 100까지 수 & 덧셈 던전 · 필수 ⭐';
+      } else {
+        document.body.classList.remove('theme-minseo');
+        document.body.classList.add('theme-minsu');
+        document.title = "Minsu's Monster Lab 👾";
+
+        const lobbyLink = document.getElementById('headerLobbyLink');
+        if (lobbyLink) lobbyLink.href = 'lobby.html?user=minsu';
+
+        const userAvatar = document.getElementById('userAvatar');
+        if (userAvatar) userAvatar.textContent = '👦';
+
+        const userName = document.getElementById('userName');
+        if (userName) userName.textContent = '민수';
+
+        const userLevel = document.getElementById('userLevel');
+        if (userLevel) {
+          userLevel.textContent = 'Lv.12';
+          userLevel.className = 'bg-neon-cyan text-lab-bg text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none';
+        }
+
+        const streakIcon = document.getElementById('streakIcon');
+        if (streakIcon) streakIcon.textContent = '🔥';
+
+        const streakText = document.getElementById('streakText');
+        if (streakText) {
+          streakText.textContent = '15일';
+          streakText.className = 'text-sm font-eng font-black text-fire-orange';
+        }
+
+        const coinIcon = document.getElementById('coinIcon');
+        if (coinIcon) coinIcon.textContent = '🪙';
+
+        const coinText = document.getElementById('coinText');
+        if (coinText) {
+          coinText.textContent = '120';
+          coinText.className = 'text-sm font-eng font-black text-yellow-300';
+        }
+
+        const minsuStage = document.getElementById('minsuStageWrap');
+        if (minsuStage) minsuStage.classList.remove('hidden');
+
+        const minseoChamber = document.getElementById('minseoChamberWrap');
+        if (minseoChamber) {
+          minseoChamber.classList.add('hidden');
+          minseoChamber.classList.remove('flex');
+        }
+
+        const speech = document.getElementById('speechText');
+        if (speech) speech.textContent = simpleDialogues[0];
+
+        const pName = document.getElementById('partnerName');
+        if (pName) pName.textContent = '클레이 바이트';
+
+        const pDot = document.getElementById('partnerDot');
+        if (pDot) pDot.className = 'w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse';
+
+        const pRole = document.getElementById('partnerRole');
+        if (pRole) {
+          pRole.textContent = '수호 파트너';
+          pRole.className = 'text-[11px] text-neon-green font-bold';
+        }
+
+        const qTitle = document.getElementById('mainQuestTitle');
+        if (qTitle) qTitle.textContent = '오늘의 5분 퀘스트 출격! 🚀';
+
+        const qSub = document.getElementById('mainQuestSub');
+        if (qSub) qSub.textContent = '🧮 5-2 두 자릿수 나눗셈 던전 · 필수 ⭐';
+      }
+    }
+
+    // 콕 찌르기 (Poke)
+    function pokeMonster(event) {
+      if (event) event.stopPropagation();
+      pokeSound(isMinseo ? 'pop' : 'monster');
+      triggerHaptic(30);
+
+      const targetAnim = isMinseo 
+        ? document.getElementById('characterPlushieWrap') 
+        : document.getElementById('monsterImg');
+      const bubble = document.getElementById('monsterSpeechBubble');
+      const speechText = document.getElementById('speechText');
+
+      if (targetAnim) {
+        targetAnim.classList.remove('poke-bounce');
+        void targetAnim.offsetWidth;
+        targetAnim.classList.add('poke-bounce');
+      }
+
+      dIndex = (dIndex + 1) % simpleDialogues.length;
+      if (speechText) speechText.textContent = simpleDialogues[dIndex];
+
+      if (bubble) {
+        bubble.classList.remove('animate-bubble');
+        void bubble.offsetWidth;
+        bubble.classList.add('animate-bubble');
+      }
+    }
+
+    // 메인 시작 버튼 (민수: 두 자릿수 나눗셈, 민서: 100까지 수 & 덧셈)
     function handleStartQuest() {
       pokeSound('launch');
       triggerHaptic(50);
@@ -624,15 +911,17 @@
       openQuestModal(meta.icon, meta.title, meta.desc, subj, meta.recommend);
     }
 
-    let selectedUnit = 'division';
-    let selectedMode = 'mixed';
+    let selectedUnit = isMinseo ? '100num' : 'division';
+    let selectedMode = isMinseo ? 'speed' : 'mixed';
 
     function setQuestUnit(unit) {
       selectedUnit = unit;
       pokeSound('pop');
       document.querySelectorAll('.unit-chip').forEach(btn => {
         if (btn.getAttribute('data-unit') === unit) {
-          btn.className = 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all';
+          btn.className = isMinseo 
+            ? 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all'
+            : 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all';
         } else {
           btn.className = 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all';
         }
@@ -644,14 +933,16 @@
       pokeSound('pop');
       document.querySelectorAll('.mode-chip').forEach(btn => {
         if (btn.getAttribute('data-mode') === mode) {
-          btn.className = 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all';
+          btn.className = isMinseo
+            ? 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all'
+            : 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all';
         } else {
           btn.className = 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all';
         }
       });
     }
 
-    // 모달 제어 (과목별 권장 진도 안내 + 수학/영어 세부 단원 선택 칩 동적 렌더링)
+    // 모달 제어 (과목별 권장 진도 안내 + 과목/학년 맞춤 옵션 칩 동적 주입)
     function openQuestModal(icon, title, desc, subj = 'math', recommend = '') {
       targetSubject = subj;
       document.getElementById('modalIcon').textContent = icon;
@@ -668,37 +959,61 @@
       const modeContainer = document.getElementById('modeChips');
 
       if (subj === 'math') {
-        selectedUnit = 'division';
-        selectedMode = 'mixed';
         optBox.classList.remove('hidden');
-
-        unitContainer.innerHTML = `
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="division" onclick="setQuestUnit('division')">두 자릿수 나눗셈 ⭐</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="fraction" onclick="setQuestUnit('fraction')">5-2 분수의 곱셈</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="all" onclick="setQuestUnit('all')">수학 종합 팩</button>
-        `;
-
-        modeContainer.innerHTML = `
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">종합 배틀</button>
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="calc" onclick="setQuestMode('calc')">실전 계산 ⚡</button>
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="principle" onclick="setQuestMode('principle')">원리·검산식 🔍</button>
-        `;
+        if (isMinseo) {
+          selectedUnit = '100num';
+          selectedMode = 'speed';
+          unitContainer.innerHTML = `
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="100num" onclick="setQuestUnit('100num')">100까지 수 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="addsub" onclick="setQuestUnit('addsub')">한자리 덧뺄셈</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="shapes" onclick="setQuestUnit('shapes')">여러가지 모양</button>
+          `;
+          modeContainer.innerHTML = `
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="speed" onclick="setQuestMode('speed')">스피드 연산</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="puzzle" onclick="setQuestMode('puzzle')">그림 퀴즈</button>
+          `;
+        } else {
+          selectedUnit = 'division';
+          selectedMode = 'mixed';
+          unitContainer.innerHTML = `
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="division" onclick="setQuestUnit('division')">두 자릿수 나눗셈 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="fraction" onclick="setQuestUnit('fraction')">5-2 분수의 곱셈</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="all" onclick="setQuestUnit('all')">수학 종합 팩</button>
+          `;
+          modeContainer.innerHTML = `
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">종합 배틀</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="calc" onclick="setQuestMode('calc')">실전 계산 ⚡</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="principle" onclick="setQuestMode('principle')">원리·검산식 🔍</button>
+          `;
+        }
       } else if (subj === 'english') {
-        selectedUnit = '8';
-        selectedMode = 'mixed';
         optBox.classList.remove('hidden');
-
-        unitContainer.innerHTML = `
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="8" onclick="setQuestUnit('8')">8단원 ⭐</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7" onclick="setQuestUnit('7')">7단원 복습</button>
-          <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7,8" onclick="setQuestUnit('7,8')">7~8단원 팩</button>
-        `;
-
-        modeContainer.innerHTML = `
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">통합(단어+문장)</button>
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
-          <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
-        `;
+        if (isMinseo) {
+          selectedUnit = 'phonics';
+          selectedMode = 'word';
+          unitContainer.innerHTML = `
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="phonics" onclick="setQuestUnit('phonics')">파닉스 단어 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="abc" onclick="setQuestUnit('abc')">알파벳 소리</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="greetings" onclick="setQuestUnit('greetings')">기초 인사말</button>
+          `;
+          modeContainer.innerHTML = `
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="listen" onclick="setQuestMode('listen')">듣기 🎧</button>
+          `;
+        } else {
+          selectedUnit = '8';
+          selectedMode = 'mixed';
+          unitContainer.innerHTML = `
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="8" onclick="setQuestUnit('8')">8단원 ⭐</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7" onclick="setQuestUnit('7')">7단원 복습</button>
+            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7,8" onclick="setQuestUnit('7,8')">7~8단원 팩</button>
+          `;
+          modeContainer.innerHTML = `
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">통합(단어+문장)</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
+            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
+          `;
+        }
       } else {
         optBox.classList.add('hidden');
       }
@@ -719,7 +1034,7 @@
       pokeSound('launch');
       triggerHaptic([50, 80, 50]);
       setTimeout(() => {
-        let targetUrl = `quest_runner.html?subject=${targetSubject}`;
+        let targetUrl = `quest_runner.html?subject=${targetSubject}&user=${currentChild}`;
         if (targetSubject === 'english' || targetSubject === 'math') {
           targetUrl += `&unit=${selectedUnit}&mode=${selectedMode}`;
         }
@@ -729,13 +1044,24 @@
 
     function handleStreakClick() {
       pokeSound('level');
-      alert('🔥 3일 연속 학습 성공 중!\n오늘 딱 1개 퀘스트만 완료하면 불꽃이 유지됩니다!');
+      if (isMinseo) {
+        alert('💖 15일 연속 사랑 충전 중!\n오늘 딱 1개 퀘스트만 완료하면 하트가 유지돼요! ✨');
+      } else {
+        alert('🔥 15일 연속 학습 성공 중!\n오늘 딱 1개 퀘스트만 완료하면 불꽃이 유지됩니다!');
+      }
     }
 
     function handleCoinClick() {
       pokeSound('coin');
-      alert('🪙 보유 코인: 120개\n퀘스트를 완료하면 코인이 쌓입니다!');
+      if (isMinseo) {
+        alert('✨ 보유 요정 가루: 2,450개\n퀘스트를 완료하면 반짝이는 요정 가루가 쌓여요!');
+      } else {
+        alert('🪙 보유 코인: 120개\n퀘스트를 완료하면 코인이 쌓입니다!');
+      }
     }
+
+    // 페이지 진입 즉시 테마 적용
+    window.addEventListener('DOMContentLoaded', applyTheme);
   </script>
 </body>
 </html>

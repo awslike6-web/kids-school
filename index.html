@@ -181,6 +181,25 @@
     color: #0284c7;
     border: 1px solid rgba(110, 198, 245, 0.6);
   }
+  .mode-badge-pink {
+    background: rgba(255, 133, 162, 0.25);
+    color: #a03a57;
+    border: 1px solid rgba(255, 133, 162, 0.6);
+  }
+  .mode-card--minseo-lab {
+    background: linear-gradient(135deg, #ffffff 0%, #fff0f4 100%);
+    border-color: #ff85a2;
+    box-shadow: 0 8px 24px rgba(255, 133, 162, 0.25);
+    color: #1d1b19;
+  }
+  .mode-card--minseo-lab:hover {
+    box-shadow: 0 12px 30px rgba(255, 133, 162, 0.45);
+    border-color: #f472b6;
+  }
+  .mode-card--minseo-lab .mode-icon-box {
+    background: rgba(255, 133, 162, 0.2);
+    border: 1px solid rgba(255, 133, 162, 0.5);
+  }
   .mode-title {
     font-family: 'Jua', sans-serif;
     font-size: 1.15rem;
@@ -206,7 +225,7 @@
     <button class="profile-btn son" onclick="openMinsuModeModal()">
       <div class="profile-avatar">👦</div><div>오빠</div><div class="profile-role">민수</div>
     </button>
-    <button class="profile-btn daughter" onclick="selectUser('daughter', '민서', 'lobby.html?user=minseo')">
+    <button class="profile-btn daughter" onclick="openMinseoModeModal()">
       <div class="profile-avatar">👧</div><div>동생</div><div class="profile-role">민서</div>
     </button>
     
@@ -261,6 +280,43 @@
   </div>
 </div>
 
+<!-- 🌸 민서 모드 선택 모달 (5분 인형 연구실 vs 전체 공부방) -->
+<div class="pw-overlay" id="minseoModeOverlay" onclick="closeMinseoModeModal(event)">
+  <div class="pw-modal mode-modal-box" style="border: 2.5px solid #ff85a2; background: linear-gradient(to bottom, #ffffff, #fff8fa);" onclick="event.stopPropagation()">
+    <div style="font-size: 2.2rem; margin-bottom: 4px;">👧🧸</div>
+    <div class="pw-title" style="margin-bottom: 6px; color: #a03a57; font-weight: bold; font-size: 1.25rem;">
+      민서야, 어떤 모드로 놀러갈까?
+    </div>
+    <p style="font-size: 0.85rem; color: #887175; margin-bottom: 12px; font-family: 'Jua', sans-serif;">
+      오늘 하고 싶은 즐거운 공부를 골라봐! ✨
+    </p>
+
+    <div class="mode-card-list">
+      <!-- 1. 5분 달콤 퀘스트 (인형 연구실) -->
+      <div class="mode-choice-card mode-card--minseo-lab" onclick="selectMinseoMode('lab')">
+        <div class="mode-icon-box" style="color: #a03a57;">🧸</div>
+        <div>
+          <span class="mode-badge mode-badge-pink">💖 5분 달콤 퀘스트 &amp; 인형 돌보기</span>
+          <div class="mode-title" style="color: #a03a57;">5분 연구실 (드림 인형 랩)</div>
+          <div class="mode-desc" style="color: #771a38;">포근한 인형과 100까지 수·받아쓰기 5문제 풀고 하트 충전!</div>
+        </div>
+      </div>
+
+      <!-- 2. 전체 공부방 월드 (정규 로비) -->
+      <div class="mode-choice-card mode-card--lobby" onclick="selectMinseoMode('lobby')">
+        <div class="mode-icon-box">🌸</div>
+        <div>
+          <span class="mode-badge mode-badge-blue">📚 초1 교과방 &amp; 나만의 아지트</span>
+          <div class="mode-title" style="color: #1e293b;">전체 공부방 월드 (민서 로비)</div>
+          <div class="mode-desc" style="color: #64748b;">수학·국어 도서관, 가상실험실, 동화책, 마이룸 탐험하기</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="key-btn del" style="margin-top: 16px; font-size: 0.95rem; height: auto; padding: 6px 14px; background: #ffe4eb; color: #a03a57; border: 1.5px solid #ff85a2;" onclick="closeMinseoModeModal()">← 닫기</button>
+  </div>
+</div>
+
 <div class="pw-overlay" id="pwOverlay" onclick="closePasswordModal(event)">
   <div class="pw-modal" id="pwModal" onclick="event.stopPropagation()">
     <div class="pw-title">부모님 비밀번호 입력</div>
@@ -291,7 +347,10 @@
         <button class="admin-btn son-test" onclick="goAdminTestLobby('son', 'minsu')">👦 민수 화면 테스트</button>
         <button class="admin-btn dau-test" onclick="goAdminTestLobby('daughter', 'minseo')">👧 민서 화면 테스트</button>
       </div>
-      <button class="admin-btn" style="background: linear-gradient(145deg, #10b981, #047857); color: white; margin-top: 6px; font-size: 0.95rem;" onclick="goAdminCustom('monster_lab.html')">👾 5분 퀘스트 (몬스터 연구실) 테스트</button>
+      <div class="test-btn-grid" style="margin-top: 6px;">
+        <button class="admin-btn" style="background: linear-gradient(145deg, #10b981, #047857); color: white; font-size: 0.9rem;" onclick="goAdminCustom('monster_lab.html?user=minsu')">👾 민수 연구실</button>
+        <button class="admin-btn" style="background: linear-gradient(145deg, #ff85a2, #db2777); color: white; font-size: 0.9rem;" onclick="goAdminCustom('monster_lab.html?user=minseo')">🧸 민서 연구실</button>
+      </div>
       
       <!-- 4. 기타 관리 도구 (원클릭 접이식 토글) -->
       <div class="extra-tools-wrap">
@@ -335,9 +394,28 @@ function closeMinsuModeModal(e) {
 function selectMinsuMode(mode) {
   closeMinsuModeModal();
   if (mode === 'lab') {
-    selectUser('son', '민수', 'monster_lab.html');
+    selectUser('son', '민수', 'monster_lab.html?user=minsu');
   } else {
     selectUser('son', '민수', 'lobby.html?user=minsu');
+  }
+}
+
+// 🌸 민서 모드 선택 모달 (5분 인형 연구실 vs 전체 로비)
+function openMinseoModeModal() {
+  document.getElementById('minseoModeOverlay').classList.add('active');
+}
+
+function closeMinseoModeModal(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('minseoModeOverlay').classList.remove('active');
+}
+
+function selectMinseoMode(mode) {
+  closeMinseoModeModal();
+  if (mode === 'lab') {
+    selectUser('daughter', '민서', 'monster_lab.html?user=minseo');
+  } else {
+    selectUser('daughter', '민서', 'lobby.html?user=minseo');
   }
 }
 
