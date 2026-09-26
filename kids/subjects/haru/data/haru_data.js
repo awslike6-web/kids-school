@@ -181,6 +181,30 @@ window.HARU_DATA = {
         fallbackIcon: "🎂"
       },
       {
+        id: "evt_chuseok_reunion_20260926",
+        category: "특별한날",
+        categoryIcon: "🌕",
+        title: "🌕 추석맞이 친척들과의 만남! (펜션 카페 & 대전 어린이 과학관)",
+        date: "2026-09-26 (추석 친척 나들이)",
+        desc: "추석을 맞이하여 온 가족과 친척들이 함께 모여 즐겁고 따뜻한 시간을 보냈습니다. 펜션 근처 예쁜 카페 테라스 흔들의자에서 시원한 가을바람을 맞으며 달콤한 휴식을 즐기고, 대전 어린이 과학관으로 이동해 신나는 음악에 맞춰 춤추는 로봇쇼도 보고 야외 놀이터에서 회전 놀이기구를 타며 온 가족이 행복한 웃음꽃을 피웠답니다! 🤖☕🎶",
+        icon: "🌕",
+        imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_01.jpg",
+        galleryImages: [
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_01.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_02.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_03.jpg",
+          "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_04.jpg"
+        ],
+        videoLinks: [
+          {
+            url: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_robotshow.mp4",
+            text: "🤖 대전 어린이 과학관 로봇쇼 티니핑 댄스 영상",
+            icon: "🤖"
+          }
+        ],
+        fallbackIcon: "🌕"
+      },
+      {
         id: "evt_minseo_horse_20260922",
         category: "생태/텃밭",
         categoryIcon: "🐴",

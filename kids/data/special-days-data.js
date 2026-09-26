@@ -4,6 +4,29 @@
 
 const DEFAULT_SPECIAL_DAYS_DATA = [
   {
+    id: "evt_chuseok_reunion_20260926",
+    author: "공동",
+    category: "가족/생일파티",
+    categoryIcon: "🌕",
+    title: "🌕 추석맞이 친척들과의 만남! (펜션 카페 & 대전 어린이 과학관)",
+    date: "2026-09-26",
+    desc: "추석을 맞이하여 온 가족과 친척들이 함께 모여 즐겁고 따뜻한 시간을 보냈습니다. 펜션 근처 예쁜 카페 테라스 흔들의자에서 시원한 가을바람을 맞으며 달콤한 휴식을 즐기고, 대전 어린이 과학관으로 이동해 신나는 음악에 맞춰 춤추는 로봇쇼도 보고 야외 놀이터에서 회전 놀이기구를 타며 온 가족이 행복한 웃음꽃을 피웠답니다! 🤖☕🎶",
+    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_01.jpg",
+    galleryImages: [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_01.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_02.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_03.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_chuseok_04.jpg"
+    ],
+    videoUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20260926_robotshow.mp4",
+    videoBtnText: "🤖 과학관 로봇쇼 풀영상 감상하기",
+    likes: 12,
+    stickers: { heart: 8, thumb: 6, star: 5, trophy: 3 },
+    comments: [
+      { author: "아빠", text: "친척들과 다 함께 모여 맛있는 것도 먹고 과학관에서 신나게 뛰노니 정말 보람찬 추석 연휴였어! 👍", date: "2026-09-26" }
+    ]
+  },
+  {
     id: "evt_baseball_droneshow_20260912",
     author: "공동",
     category: "가족/생일파티",
