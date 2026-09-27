@@ -1480,16 +1480,327 @@
     // 다음 단원(맛보기) 맵핑
     const NEXT_UNIT_MAP = {
       minseo: {
-        korean: { current: 'batchim', next: 'sentence' },
-        math: { current: '100num', next: 'addsub' },
-        english: { current: 'phonics', next: 'greetings' }
+        korean: { current: 'batchim', next: 'dictation', batchim: 'dictation', dictation: 'voca', voca: 'batchim' },
+        math: { current: '100num', next: 'addsub', '100num': 'addsub', addsub: 'shapes', shapes: '100num' },
+        english: { current: 'phonics', next: 'abc', phonics: 'abc', abc: 'greetings', greetings: 'phonics' }
       },
       minsu: {
-        math: { current: 'division', next: 'fraction' },
-        english: { current: '8', next: '7' },
-        korean: { current: '1', next: '1' },
-        science: { current: '1', next: '1' },
-        society: { current: '1', next: '1' }
+        math: { current: 'division', next: 'fraction', division: 'fraction', fraction: 'division' },
+        english: { current: '8', next: '7', '8': '7', '7': '8' },
+        korean: { current: '1', next: '2', '1': '2', '2': '1' },
+        science: { current: '1', next: '2', '1': '2', '2': '1' },
+        society: { current: '1', next: '2', '1': '2', '2': '1' }
+      }
+    };
+
+    // ========================================================
+    // 👦 [민수 초등 5학년 2학기 5대 교과 마스터 문제 은행]
+    // 수학·영어·국어·과학·사회 단원별 4+1 듀오링고 출제 지원
+    // ========================================================
+    const minsuMasterBank = {
+      math: {
+        title: "수학 분쇄 던전 · 초5 수학",
+        icon: "🧮",
+        division: mathDivisionBank,
+        fraction: mathFractionBank
+      },
+      english: {
+        title: "스피킹 콜로세움 · 초5 영어",
+        icon: "🔤",
+        '8': [...englishMasterBank.unit8.words, ...englishMasterBank.unit8.sentences],
+        '7': [...englishMasterBank.unit7.words, ...englishMasterBank.unit7.sentences]
+      },
+      korean: {
+        title: "어휘 배틀 아레나 · 초5 국어",
+        icon: "📖",
+        '1': [
+          {
+            id: "kor_u1_1",
+            q: "‘가는 말이 고와야 ( ? )’ 속담의 빈칸은?",
+            formula: "가는 말이 고와야 [ ? ]",
+            options: ["오는 말이 곱다", "발 없는 말이 천 리 간다", "입이 무겁다", "말 한마디에 천 냥 빚 갚는다"],
+            answer: 0,
+            hint: "내가 남에게 곱게 말해야 상대방도 나에게 곱게 말해요! 🗣️"
+          },
+          {
+            id: "kor_u1_2",
+            q: "‘기쁨’의 반대말(반의어)로 가장 알맞은 것은?",
+            formula: "기쁨 ↔ [ ? ]",
+            options: ["슬픔", "행복", "즐거움", "환희"],
+            answer: 0,
+            hint: "기쁜 감정과 반대되는 우울하고 눈물 나는 감정이에요!"
+          },
+          {
+            id: "kor_u1_3",
+            q: "‘낮말은 새가 듣고, 밤말은 ( ? )가 듣는다.’",
+            formula: "낮말은 새, 밤말은 [ ? ]",
+            options: ["쥐", "소", "호랑이", "도깨비"],
+            answer: 0,
+            hint: "밤에 조용히 돌아다니는 작은 동물이에요! 아무도 안 볼 때도 말조심해야 해요."
+          },
+          {
+            id: "kor_u1_4",
+            q: "‘우물 안 ( ? )’ - 세상 물정을 모르는 사람을 이르는 말",
+            formula: "우물 안 [ ? ]",
+            options: ["개구리", "올챙이", "미꾸라지", "금붕어"],
+            answer: 0,
+            hint: "개골개골 우물 안에만 갇혀 더 넓은 바깥세상을 모르는 동물이에요!"
+          },
+          {
+            id: "kor_u1_5",
+            q: "‘천 리 길도 ( ? )부터’ - 모든 일은 첫 시작이 중요하다는 속담",
+            formula: "천 리 길도 [ ? ]부터",
+            options: ["한 걸음", "달리기", "준비운동", "자동차"],
+            answer: 0,
+            hint: "아무리 먼 길도 맨 처음 '한 걸음'을 내딛는 것에서 시작해요! 👣"
+          }
+        ],
+        '2': [
+          {
+            id: "kor_u2_1",
+            q: "문맥에 맞는 말: '비가 많이 내렸다. ( ? ) 우리는 우산을 쓰고 학교에 갔다.'",
+            formula: "원인과 결과의 접속 표현",
+            options: ["그래서", "하지만", "왜냐하면", "그런데"],
+            answer: 0,
+            hint: "앞의 일(비가 옴)이 원인이 되어 뒤의 일(우산을 씀)이 일어났으므로 '그래서'가 알맞아요!"
+          },
+          {
+            id: "kor_u2_2",
+            q: "문맥에 맞는 말: '민수는 피아노 연습을 매일 했다. ( ? ) 어려운 곡을 멋지게 연주해냈다.'",
+            formula: "노력 끝에 이룬 결과",
+            options: ["마침내", "비록", "설마", "혹시"],
+            answer: 0,
+            hint: "오랜 노력 끝에 결국 멋진 결과를 얻었을 때 '마침내'를 써요! 🎹"
+          },
+          {
+            id: "kor_u2_3",
+            q: "‘성공’의 반대말(반의어)로 가장 알맞은 것은?",
+            formula: "성공 ↔ [ ? ]",
+            options: ["실패", "합격", "도전", "노력"],
+            answer: 0,
+            hint: "뜻한 바를 이루지 못하고 어긋나는 것을 '실패'라고 해요!"
+          },
+          {
+            id: "kor_u2_4",
+            q: "‘원숭이도 ( ? )에서 떨어진다’ - 아무리 익숙한 일도 실수할 수 있다는 속담",
+            formula: "원숭이도 [ ? ]에서 떨어진다",
+            options: ["나무", "절벽", "의자", "구름"],
+            answer: 0,
+            hint: "원숭이가 가장 잘 타는 나무에서도 방심하면 떨어질 수 있어요! 🐒"
+          },
+          {
+            id: "kor_u2_5",
+            q: "[보스 독해] '민수는 아침 일찍 일어나 반려견 몽이와 산책을 했다. 공원에는 예쁜 가을 단풍이 가득했다. 민수는 상쾌한 공기를 마시며 기분이 좋아졌다.' - 이 글의 중심 생각은?",
+            formula: "3문장 중심 생각 찾기",
+            options: ["아침 산책을 하며 상쾌하고 즐거운 시간을 보냈다.", "몽이가 밥을 먹지 않아 걱정이다.", "공원에 나무가 없어서 아쉬웠다.", "아침에 늦잠을 자서 지각했다."],
+            answer: 0,
+            hint: "민수가 아침에 강아지와 산책하며 기분 좋고 상쾌했던 마음을 쓴 글이에요! 🐕"
+          }
+        ]
+      },
+      science: {
+        title: "볼케이노 코어 · 5-2 과학",
+        icon: "🔬",
+        '1': [
+          {
+            id: "sci_u1_1",
+            q: "온도가 높은 곳에서 낮은 곳으로 이동하는 에너지는 무엇일까요?",
+            formula: "온도 이동 에너지 = [ ? ]",
+            options: ["열", "소리", "빛", "전기"],
+            answer: 0,
+            hint: "따뜻한 물체에서 차가운 물체로 전달되는 에너지예요! 🔥"
+          },
+          {
+            id: "sci_u1_2",
+            q: "열이 고체 물질을 따라 직접 전해지는 현상은? (예: 국에 넣은 쇠숟가락)",
+            formula: "고체에서의 열 이동",
+            options: ["전도", "대류", "복사", "반사"],
+            answer: 0,
+            hint: "금속이나 냄비 바닥처럼 고체를 타고 열이 직접 번지는 현상은 '전도'예요! 🥄"
+          },
+          {
+            id: "sci_u1_3",
+            q: "주전자의 물을 끓일 때 따뜻해진 액체나 기체가 직접 위로 올라가며 퍼지는 현상은?",
+            formula: "액체·기체에서의 열 이동",
+            options: ["대류", "전도", "복사", "굴절"],
+            answer: 0,
+            hint: "물질 자체가 직접 돌면서 열을 고루 전달하는 '대류'예요! 💨"
+          },
+          {
+            id: "sci_u1_4",
+            q: "햇빛이나 난로 가까이에 있을 때 물질의 도움 없이 온기가 피부에 직접 느껴지는 현상은?",
+            formula: "물질 없는 공간을 가르는 열 이동",
+            options: ["복사", "전도", "대류", "증발"],
+            answer: 0,
+            hint: "중간 물질 없이 빛처럼 열이 직접 뻗어나가는 '복사'예요! ☀️"
+          },
+          {
+            id: "sci_u1_5",
+            q: "보온병에서 은색 도금을 하여 열이 밖으로 빠져나가지 못하게 막는 열의 이동 방법은?",
+            formula: "보온병 내부 반사 원리",
+            options: ["복사 차단", "대류 차단", "전도 차단", "증발 차단"],
+            answer: 0,
+            hint: "거울처럼 은색 벽으로 복사열을 반사해 보온성을 유지해요! 🍶"
+          }
+        ],
+        '2': [
+          {
+            id: "sci_u2_1",
+            q: "물이 끓어 눈에 보이지 않는 기체인 수증기로 변하는 현상은?",
+            formula: "액체 ➔ 기체 상태 변화",
+            options: ["증발(기화)", "응결", "응고", "용해"],
+            answer: 0,
+            hint: "액체 물이 기체인 수증기로 변신하는 것은 '증발(기화)'이에요! ☁️"
+          },
+          {
+            id: "sci_u2_2",
+            q: "산성 용액(식초, 레몬즙)에 붉은 양배추 지시약을 넣으면 변하는 색은?",
+            formula: "산성 + 붉은 양배추 지시약",
+            options: ["붉은색 계열", "푸른색 계열", "노란색", "검은색"],
+            answer: 0,
+            hint: "새콤한 산성 용액에서는 예쁜 붉은색·분홍색 계열로 변해요! 🧪"
+          },
+          {
+            id: "sci_u2_3",
+            q: "물이 얼어 얼음이 될 때, 부피와 무게의 변화로 알맞은 것은?",
+            formula: "물 ➔ 얼음 (상태 변화)",
+            options: ["부피는 늘어나고, 무게는 변함없다", "부피는 줄어들고, 무게는 무거워진다", "부피와 무게 둘 다 줄어든다", "부피와 무게 둘 다 늘어난다"],
+            answer: 0,
+            hint: "얼음이 얼면 육각 구조로 부피는 팽창해 커지지만, 물질의 본래 양인 무게는 똑같아요! 🧊"
+          },
+          {
+            id: "sci_u2_4",
+            q: "비눗물이나 유리 세정제처럼 손으로 만졌을 때 미끌거리며 단백질을 녹이는 용액은?",
+            formula: "미끌미끌한 수용액의 성질",
+            options: ["염기성 용액", "산성 용액", "중성 용액", "증류수"],
+            answer: 0,
+            hint: "비누, 표백제처럼 미끌미끌한 성질은 '염기성'이에요! 🧼"
+          },
+          {
+            id: "sci_u2_5",
+            q: "[보스 가상실험] 여름날 차가운 얼음물이 든 유리컵 표면에 물방울이 송골송골 맺히는 원인은?",
+            formula: "컵 표면 물방울의 정체",
+            options: ["공기 중 수증기가 차가운 컵을 만나 액체 물로 응결했기 때문", "컵 속 물이 컵 구멍을 뚫고 새어 나왔기 때문", "얼음이 컵 밖으로 녹아 흘렀기 때문", "공기 중 산소가 얼어붙었기 때문"],
+            answer: 0,
+            hint: "공기 중의 기체 수증기가 차가운 표면에 닿아 물방울로 변하는 '응결' 현상이에요! 💧"
+          }
+        ]
+      },
+      society: {
+        title: "고대 유물 지도 · 5-2 사회",
+        icon: "🗺️",
+        '1': [
+          {
+            id: "soc_u1_1",
+            q: "조선시대 한양 도성의 남쪽 정문(남대문)의 정식 이름은 무엇일까요?",
+            formula: "남대문 = [ ? ]",
+            options: ["숭례문", "흥인지문", "돈의문", "숙정문"],
+            answer: 0,
+            hint: "‘예절을 숭상한다’는 뜻을 담은 남대문 정식 명칭이에요! 🏯"
+          },
+          {
+            id: "soc_u1_2",
+            q: "고려를 무너뜨리고 조선을 건국한 태조의 이름은?",
+            formula: "조선 건국 시조",
+            options: ["이성계", "왕건", "세종대왕", "이순신"],
+            answer: 0,
+            hint: "위화도 회군을 통해 1392년 조선을 건국한 장군이에요!"
+          },
+          {
+            id: "soc_u1_3",
+            q: "한양 도성의 동쪽 대문(동대문)의 정식 이름으로 알맞은 것은?",
+            formula: "동대문 = [ ? ]",
+            options: ["흥인지문", "숭례문", "돈의문", "숙정문"],
+            answer: 0,
+            hint: "‘어진 마음을 흥하게 한다’는 뜻의 동대문 정식 명칭이에요!"
+          },
+          {
+            id: "soc_u1_4",
+            q: "조선시대 백성들의 억울함을 임금에게 직접 알리기 위해 대궐 문루에 달았던 북은?",
+            formula: "억울함을 호소하는 북",
+            options: ["신문고", "자격루", "측우기", "혼천의"],
+            answer: 0,
+            hint: "태종 때 대궐 밖 문루에 달아 백성이 칠 수 있게 한 북 '신문고'예요! 🥁"
+          },
+          {
+            id: "soc_u1_5",
+            q: "조선 건국 후 도읍을 개경에서 한양으로 옮긴 이유로 알맞지 않은 것은?",
+            formula: "한양 천도 이유",
+            options: ["바다와 바로 닿아 있어 왜구의 침략을 쉽게 받아서", "나라의 중심에 위치해서", "한강이 있어 물과 물자 수송이 편리해서", "산으로 둘러싸여 방어하기 좋아서"],
+            answer: 0,
+            hint: "한양은 한강 수운이 편리하고 산세가 아늑하여 방어에 유리했어요!"
+          }
+        ],
+        '2': [
+          {
+            id: "soc_u2_1",
+            q: "백성들이 글을 몰라 억울한 일을 당하지 않도록 훈민정음(한글)을 창제하신 조선의 임금은?",
+            formula: "훈민정음 창제",
+            options: ["세종대왕", "정조", "태종", "영조"],
+            answer: 0,
+            hint: "집현전 학사들과 함께 1443년 훈민정음을 만드셨어요! 👑"
+          },
+          {
+            id: "soc_u2_2",
+            q: "세종대왕 때 비가 내린 양을 정확히 측정하기 위해 세계 최초로 만든 기구는?",
+            formula: "강우량 측정 기구",
+            options: ["측우기", "앙부일구", "혼천의", "풍기대"],
+            answer: 0,
+            hint: "원통형 쇠통에 빗물을 받아 깊이를 쟀던 '측우기'예요! 🌧️"
+          },
+          {
+            id: "soc_u2_3",
+            q: "조선 세종 때 장영실이 만든, 스스로 종과 북을 쳐서 시간을 알려주던 자동 물시계는?",
+            formula: "자동 시보 물시계",
+            options: ["자격루", "앙부일구", "일성정시의", "혼천의"],
+            answer: 0,
+            hint: "물의 흐름을 이용해 시각마다 인형이 종을 치는 '자격루'예요! ⏰"
+          },
+          {
+            id: "soc_u2_4",
+            q: "임진왜란 때 한산도 대첩과 명량 대첩에서 바다를 지켜낸 명장은?",
+            formula: "수군 통제사 장군",
+            options: ["이순신", "권율", "강감찬", "을지문덕"],
+            answer: 0,
+            hint: "‘나의 죽음을 적에게 알리지 말라!’ 거북선을 이끈 성웅 이순신 장군이에요! ⚔️"
+          },
+          {
+            id: "soc_u2_5",
+            q: "임진왜란 당시 왜군을 격파하기 위해 이순신 장군이 고안한 철갑 전투선은?",
+            formula: "조선 수군의 비밀 병기",
+            options: ["거북선", "판옥선", "포격선", "비거"],
+            answer: 0,
+            hint: "용머리에서 포와 연기를 뿜고 등에는 쇠송곳을 꽂은 '거북선'이에요! 🐢"
+          }
+        ]
+      }
+    };
+
+    // ========================================================
+    // 📦 단원 팩 단일 원천(SSOT) 어댑터 & 동적 로더 인터페이스
+    // 코랩(Colab)이나 외부 JSON 빌더에서 'unit_{X}.json' 형태로
+    // 생성된 단원 데이터를 동적으로 주입받거나 정적 은행에 합성합니다.
+    // 규격: { id, subject, unit, title, questions: [ { id, q, formula, options, answer, hint } ] }
+    // ========================================================
+    window.loadCustomUnitPack = function(unitPackJson) {
+      try {
+        if (!unitPackJson || !unitPackJson.subject || !unitPackJson.unit) return false;
+        const s = unitPackJson.subject;
+        const u = String(unitPackJson.unit);
+        if (minsuMasterBank[s]) {
+          minsuMasterBank[s][u] = unitPackJson.questions || [];
+          console.log(`[SSOT Unit Pack Loaded] 민수 ${s} ${u}단원 (${unitPackJson.questions.length}문항)`);
+          return true;
+        }
+        if (minseoMasterBank[s]) {
+          minseoMasterBank[s][u] = unitPackJson.questions || [];
+          console.log(`[SSOT Unit Pack Loaded] 민서 ${s} ${u}단원 (${unitPackJson.questions.length}문항)`);
+          return true;
+        }
+        return false;
+      } catch (e) {
+        console.error('[SSOT Loader Error]', e);
+        return false;
       }
     };
 
@@ -1503,7 +1814,7 @@
         const mData = minseoMasterBank[subj] || minseoMasterBank.math;
         const currentUnitKey = (activeUnit && mData[activeUnit]) ? activeUnit : (subj === 'korean' ? 'batchim' : (subj === 'math' ? '100num' : 'phonics'));
         const nextMap = NEXT_UNIT_MAP.minseo[subj] || {};
-        const nextUnitKey = (nextMap.current === currentUnitKey && mData[nextMap.next]) ? nextMap.next : null;
+        const nextUnitKey = nextMap[currentUnitKey] || (nextMap.current === currentUnitKey ? nextMap.next : null);
 
         const mainPool = mData[currentUnitKey] || [];
         const nextPool = nextUnitKey ? (mData[nextUnitKey] || []) : [];
@@ -1514,8 +1825,7 @@
 
         // 4번: 최근 오답 복습 1개 (오답 없으면 현재 풀에서 추가)
         if (queue.length > 0 && mode !== 'revenge') {
-          const w = queue[0];
-          selected.push(w);
+          selected.push(queue[0]);
         } else {
           const remaining = shuffledMain.slice(3, 4);
           if (remaining.length > 0) selected.push(remaining[0]);
@@ -1525,15 +1835,11 @@
         // 5번: 🎁 다음 단원 비밀 맛보기 탐험 (하트 면제!)
         if (nextPool.length > 0) {
           const nextSample = nextPool[Math.floor(Math.random() * nextPool.length)];
-          selected.push({
-            ...nextSample,
-            isPreview: true
-          });
+          selected.push({ ...nextSample, isPreview: true });
         } else if (shuffledMain.length > 4) {
           selected.push(shuffledMain[4]);
         }
 
-        // 5문제가 채워지지 않은 경우 폴백
         while (selected.length < 5 && mainPool.length > 0) {
           selected.push(mainPool[selected.length % mainPool.length]);
         }
@@ -1545,360 +1851,55 @@
         };
       }
 
-      // 👦 [민수 초5 5대 교과 4+1 출제]
-      // 🧮 수학
-      if (subj === 'math') {
-        const curUnit = activeUnit || 'division';
-        let mainPool = curUnit === 'fraction' ? [...mathFractionBank] : [...mathDivisionBank];
-        let nextPool = curUnit === 'division' ? [...mathFractionBank] : [...mathDivisionBank];
-        let questTitle = curUnit === 'fraction' 
-          ? "수학 분쇄 던전 · 5-2 분수의 곱셈 (심화)" 
-          : "수학 분쇄 던전 · 두 자릿수 나눗셈 (기본 진도 ⭐)";
-
-        const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
-        let selected = shuffledMain.slice(0, 3);
-
-        // 4번: 오답 복습
-        if (queue.length > 0 && mode !== 'revenge') {
-          selected.push(queue[0]);
-        } else {
-          selected.push(shuffledMain[3] || shuffledMain[0]);
-        }
-
-        // 5번: 🎁 분수 곱셈 맛보기 (하트 면제!)
-        if (nextPool.length > 0) {
-          const nextSample = nextPool[Math.floor(Math.random() * nextPool.length)];
-          selected.push({
-            ...nextSample,
-            isPreview: true
-          });
-        } else {
-          selected.push(shuffledMain[4] || shuffledMain[0]);
-        }
-
-        return {
-          title: questTitle,
-          icon: "🧮",
-          questions: selected
-        };
+      // 👦 [민수 초5 5대 교과 (수학·영어·국어·과학·사회) 4+1 출제]
+      const sData = minsuMasterBank[subj] || minsuMasterBank.math;
+      let curUnit = activeUnit;
+      if (!sData[curUnit]) {
+        curUnit = (subj === 'math') ? 'division' : ((subj === 'english') ? '8' : '1');
       }
 
-      // 🔤 영어
-      if (subj === 'english') {
-        const u8 = englishMasterBank.unit8;
-        const u7 = englishMasterBank.unit7;
-        const mainPool = [...u8.words, ...u8.sentences];
-        const nextPool = [...u7.words, ...u7.sentences];
+      const nextMap = NEXT_UNIT_MAP.minsu[subj] || {};
+      const nextUnitKey = nextMap[curUnit] || (curUnit === '1' ? '2' : (curUnit === 'division' ? 'fraction' : '7'));
 
-        const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
-        let selected = shuffledMain.slice(0, 3);
+      const mainPool = sData[curUnit] || [];
+      const nextPool = sData[nextUnitKey] || [];
 
-        if (queue.length > 0 && mode !== 'revenge') {
-          selected.push(queue[0]);
-        } else {
-          selected.push(shuffledMain[3] || shuffledMain[0]);
-        }
+      // 1~3번: 현재 진도 드릴 3문제
+      const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
+      let selected = shuffledMain.slice(0, 3);
 
-        if (nextPool.length > 0) {
-          const nextSample = nextPool[Math.floor(Math.random() * nextPool.length)];
-          selected.push({ ...nextSample, isPreview: true });
-        } else {
-          selected.push(shuffledMain[4] || shuffledMain[0]);
-        }
-
-        return {
-          title: "스피킹 콜로세움 · 8단원 외모·옷차림 (현재 진도 ⭐)",
-          icon: "🔤",
-          questions: selected
-        };
-      }
-
-      // 📖 국어 / 🔬 과학 / 🗺️ 사회 (초5)
-      const data = questData[subj] || questData.korean;
-      const pool = [...data.questions];
-      const shuffled = pool.sort(() => Math.random() - 0.5);
-      let selected = shuffled.slice(0, 3);
-
+      // 4번: 최근 오답 복습 1문제
       if (queue.length > 0 && mode !== 'revenge') {
         selected.push(queue[0]);
       } else {
-        selected.push(shuffled[3] || shuffled[0]);
+        selected.push(shuffledMain[3] || shuffledMain[0]);
       }
 
-      // 5번: 보너스 탐험
-      selected.push({
-        ...shuffled[4] || shuffled[1],
-        isPreview: true
-      });
+      // 5번: 🎁 다음 단원 비밀 맛보기 탐험 (하트 면제!)
+      if (nextPool.length > 0) {
+        const nextSample = nextPool[Math.floor(Math.random() * nextPool.length)];
+        selected.push({ ...nextSample, isPreview: true });
+      } else {
+        selected.push(shuffledMain[4] || shuffledMain[0]);
+      }
+
+      while (selected.length < 5 && mainPool.length > 0) {
+        selected.push(mainPool[selected.length % mainPool.length]);
+      }
+
+      let questTitle = sData.title;
+      if (subj === 'math') {
+        questTitle = curUnit === 'fraction' ? "수학 분쇄 던전 · 5-2 분수의 곱셈 (심화)" : "수학 분쇄 던전 · 두 자릿수 나눗셈 (기본 진도 ⭐)";
+      } else if (subj === 'english') {
+        questTitle = curUnit === '7' ? "스피킹 콜로세움 · 7단원 지난 주말 이야기 (복습)" : "스피킹 콜로세움 · 8단원 외모·옷차림 (현재 진도 ⭐)";
+      }
 
       return {
-        title: data.title,
-        icon: data.icon,
+        title: questTitle,
+        icon: sData.icon,
         questions: selected
       };
     }
-
-    // 국·사·과 마이크로 문제 데이터셋 (각 10문제 풀 구축)
-    const questData = {
-      korean: {
-        title: "어휘 배틀 아레나 · 초5 국어",
-        icon: "📖",
-        questions: [
-          {
-            id: "kor_1",
-            q: "‘가는 말이 고와야 ( ? )’ 속담의 빈칸은?",
-            formula: "가는 말이 고와야 [ ? ]",
-            options: ["오는 말이 곱다", "발 없는 말이 천 리 간다", "입이 무겁다", "말 한마디에 천 냥 빚 갚는다"],
-            answer: 0,
-            hint: "내가 남에게 곱게 말해야 상대방도 나에게 곱게 말해요!"
-          },
-          {
-            id: "kor_2",
-            q: "‘기쁨’의 반대말(반의어)로 가장 알맞은 것은?",
-            formula: "기쁨 ↔ [ ? ]",
-            options: ["행복", "즐거움", "슬픔", "환희"],
-            answer: 2,
-            hint: "기쁜 감정과 반대되는 우울하고 눈물 나는 감정이에요!"
-          },
-          {
-            id: "kor_3",
-            q: "낮말은 새가 듣고, 밤말은 ( ? )가 듣는다.",
-            formula: "낮말은 새, 밤말은 [ ? ]",
-            options: ["쥐", "소", "호랑이", "도깨비"],
-            answer: 0,
-            hint: "밤에 조용히 돌아다니는 작은 동물이에요!"
-          },
-          {
-            id: "kor_4",
-            q: "‘우물 안 ( ? )’ - 세상 물정을 모르는 사람을 이르는 말",
-            formula: "우물 안 [ ? ]",
-            options: ["개구리", "올챙이", "미꾸라지", "금붕어"],
-            answer: 0,
-            hint: "개골개골 우물 안에만 갇혀 있는 동물이에요!"
-          },
-          {
-            id: "kor_5",
-            q: "‘천 리 길도 ( ? )부터’ - 모든 일은 첫 시작이 중요하다는 속담",
-            formula: "천 리 길도 [ ? ]부터",
-            options: ["한 걸음", "달리기", "준비운동", "자동차"],
-            answer: 0,
-            hint: "아무리 먼 길도 맨 처음 '한 걸음'을 내딛는 것에서 시작해요! 👣"
-          },
-          {
-            id: "kor_6",
-            q: "‘원숭이도 ( ? )에서 떨어진다’ - 아무리 익숙한 일도 실수할 수 있다는 속담",
-            formula: "원숭이도 [ ? ]에서 떨어진다",
-            options: ["나무", "절벽", "의자", "구름"],
-            answer: 0,
-            hint: "원숭이가 가장 잘 타는 '나무'에서도 실수로 떨어질 때가 있어요! 🐒"
-          },
-          {
-            id: "kor_7",
-            q: "문맥에 맞는 말: '비가 많이 내렸다. ( ? ) 우리는 우산을 쓰고 학교에 갔다.'",
-            formula: "원인과 결과의 접속 표현",
-            options: ["그래서", "하지만", "왜냐하면", "그런데"],
-            answer: 0,
-            hint: "앞의 일(비가 옴)이 원인이 되어 뒤의 일(우산을 씀)이 일어났으므로 '그래서'가 알맞아요!"
-          },
-          {
-            id: "kor_8",
-            q: "문맥에 맞는 말: '민수는 피아노 연습을 매일 했다. ( ? ) 어려운 곡을 멋지게 연주해냈다.'",
-            formula: "노력 끝에 이룬 결과",
-            options: ["마침내", "비록", "설마", "혹시"],
-            answer: 0,
-            hint: "오랜 노력 끝에 결국 멋진 결과를 얻었을 때 '마침내'를 써요! 🎹"
-          },
-          {
-            id: "kor_9",
-            q: "‘성공’의 반대말(반의어)로 가장 알맞은 것은?",
-            formula: "성공 ↔ [ ? ]",
-            options: ["실패", "합격", "도전", "노력"],
-            answer: 0,
-            hint: "뜻한 바를 이루지 못하고 어긋나는 것을 '실패'라고 해요!"
-          },
-          {
-            id: "kor_10",
-            q: "[보스 독해] '민수는 아침 일찍 일어나 반려견 몽이와 산책을 했다. 공원에는 예쁜 가을 단풍이 가득했다. 민수는 상쾌한 공기를 마시며 기분이 좋아졌다.' - 이 글의 중심 생각은?",
-            formula: "3문장 중심 생각 찾기",
-            options: ["아침 산책을 하며 상쾌하고 즐거운 시간을 보냈다.", "몽이가 밥을 먹지 않아 걱정이다.", "공원에 나무가 없어서 아쉬웠다.", "아침에 늦잠을 자서 지각했다."],
-            answer: 0,
-            hint: "민수가 아침에 강아지와 산책하며 기분 좋고 상쾌했던 마음을 쓴 글이에요! 🐕"
-          }
-        ]
-      },
-      science: {
-        title: "볼케이노 코어 · 5-2 과학",
-        icon: "🔬",
-        questions: [
-          {
-            id: "sci_1",
-            q: "온도가 높은 곳에서 낮은 곳으로 이동하는 에너지는?",
-            formula: "온도 이동 에너지 = [ ? ]",
-            options: ["소리", "열", "빛", "전기"],
-            answer: 1,
-            hint: "따뜻한 물체에서 차가운 물체로 전달되는 에너지예요!"
-          },
-          {
-            id: "sci_2",
-            q: "물이 끓어 수증기로 변하는 현상은?",
-            formula: "액체 ➔ 기체 상태 변화",
-            options: ["증발(기화)", "응결", "응고", "용해"],
-            answer: 0,
-            hint: "액체 상태의 물이 기체인 수증기가 되는 것을 뜻해요!"
-          },
-          {
-            id: "sci_3",
-            q: "열이 물질을 따라 직접 전해지는 현상은? (예: 쇠숟가락)",
-            formula: "고체에서의 열 이동",
-            options: ["전도", "대류", "복사", "반사"],
-            answer: 0,
-            hint: "냄비나 금속 숟가락 끝이 뜨거워지는 원리예요!"
-          },
-          {
-            id: "sci_4",
-            q: "태양계 행성 중 태양에서 가장 가까운 행성은?",
-            formula: "태양계 1번 행성",
-            options: ["금성", "수성", "지구", "화성"],
-            answer: 1,
-            hint: "수-금-지-화-목-토-천-해의 첫 번째예요!"
-          },
-          {
-            id: "sci_5",
-            q: "산성 용액에 붉은 양배추 지시약을 넣으면 변하는 색은?",
-            formula: "산성 + 붉은 양배추 지시약",
-            options: ["붉은색 계열", "푸른색 계열", "노란색", "검은색"],
-            answer: 0,
-            hint: "식초나 레몬즙 같은 산성 용액에서는 붉은색으로 변해요!"
-          },
-          {
-            id: "sci_6",
-            q: "주전자의 물을 끓일 때 따뜻해진 물이 위로 올라가고 찬 물이 내려오며 열이 퍼지는 현상은?",
-            formula: "액체와 기체에서의 열 이동",
-            options: ["대류", "전도", "복사", "굴절"],
-            answer: 0,
-            hint: "기체나 액체 물질이 직접 이동하면서 열을 전달하는 '대류'예요! 💨"
-          },
-          {
-            id: "sci_7",
-            q: "햇빛이나 난로 가까이에 있을 때 물질의 도움 없이 따뜻함이 피부에 직접 느껴지는 열의 이동은?",
-            formula: "공간을 가로지르는 열 이동",
-            options: ["복사", "전도", "대류", "증발"],
-            answer: 0,
-            hint: "중간에 아무 물질이 없어도 빛처럼 직접 열이 전달되는 '복사'예요! ☀️"
-          },
-          {
-            id: "sci_8",
-            q: "물이 얼어 얼음이 될 때, 부피와 무게의 변화로 알맞은 것은?",
-            formula: "물 ➔ 얼음 (상태 변화)",
-            options: ["부피는 늘어나고, 무게는 변함없다", "부피는 줄어들고, 무게는 무거워진다", "부피와 무게 둘 다 줄어든다", "부피와 무게 둘 다 늘어난다"],
-            answer: 0,
-            hint: "얼음이 얼면 육각 구조로 부피는 팽창해 커지지만, 물질의 양인 무게는 똑같아요! 🧊"
-          },
-          {
-            id: "sci_9",
-            q: "유리 세정제나 비눗물처럼 손으로 만졌을 때 미끌미끌하며 단백질을 녹이는 성질의 용액은?",
-            formula: "미끌미끌한 수용액의 성질",
-            options: ["염기성 용액", "산성 용액", "중성 용액", "증류수"],
-            answer: 0,
-            hint: "식초 같은 산성과 반대로 비누, 락스처럼 미끌미끌한 것은 '염기성'이에요! 🧼"
-          },
-          {
-            id: "sci_10",
-            q: "[보스 가상실험] 더운 여름날, 얼음물이 든 유리컵 표면에 차가운 물방울이 송골송골 맺히는 과학적 이유는?",
-            formula: "컵 표면 물방울의 정체",
-            options: ["공기 중의 수증기가 차가운 컵을 만나 액체 물로 응결했기 때문", "컵 안에 있는 물이 컵 유리구멍을 뚫고 나왔기 때문", "얼음이 컵 밖으로 녹아 흘러내렸기 때문", "공기 중의 산소가 얼어붙었기 때문"],
-            answer: 0,
-            hint: "공기 중에 보이지 않던 수증기가 차가운 표면에 닿아 물방울로 변하는 '응결' 현상이에요! 💧"
-          }
-        ]
-      },
-      society: {
-        title: "고대 유물 지도 · 5-2 사회",
-        icon: "🗺️",
-        questions: [
-          {
-            id: "soc_1",
-            q: "조선시대 한양 도성의 남쪽 정문의 정식 이름은?",
-            formula: "남대문 = [ ? ]",
-            options: ["흥인지문", "숭례문", "돈의문", "숙정문"],
-            answer: 1,
-            hint: "‘예절을 숭상한다’는 뜻의 남대문 정식 명칭이에요!"
-          },
-          {
-            id: "soc_2",
-            q: "조선을 건국한 태조의 이름은?",
-            formula: "조선 건국 시조",
-            options: ["왕건", "이성계", "세종대왕", "이순신"],
-            answer: 1,
-            hint: "위화도 회군을 통해 조선을 건국한 장군이에요!"
-          },
-          {
-            id: "soc_3",
-            q: "훈민정음(한글)을 창제하신 조선의 임금은?",
-            formula: "훈민정음 창제",
-            options: ["세종대왕", "정조", "태종", "영조"],
-            answer: 0,
-            hint: "집현전 학사들과 함께 백성을 위해 글자를 만드셨어요!"
-          },
-          {
-            id: "soc_4",
-            q: "임진왜란 때 한산도 대첩과 명량 대첩을 이끈 장군은?",
-            formula: "거북선과 수군 장군",
-            options: ["을지문덕", "강감찬", "이순신", "권율"],
-            answer: 2,
-            hint: "나의 죽음을 적에게 알리지 말라!"
-          },
-          {
-            id: "soc_5",
-            q: "조선시대 백성들의 억울함을 알리기 위해 대궐 문에 단 북은?",
-            formula: "억울함을 호소하는 북",
-            options: ["신문고", "자격루", "측우기", "혼천의"],
-            answer: 0,
-            hint: "태종 때 대궐 밖 문루에 달아 백성이 칠 수 있게 한 북이에요!"
-          },
-          {
-            id: "soc_6",
-            q: "한양 도성의 동쪽 대문의 정식 이름으로 알맞은 것은?",
-            formula: "동대문 = [ ? ]",
-            options: ["흥인지문", "숭례문", "돈의문", "숙정문"],
-            answer: 0,
-            hint: "‘어진 마음을 흥하게 한다’는 뜻의 동대문 정식 명칭이에요! 🏯"
-          },
-          {
-            id: "soc_7",
-            q: "세종대왕 때 비가 내린 양을 정확히 측정하기 위해 세계 최초로 만든 기구는?",
-            formula: "강우량 측정 기구",
-            options: ["측우기", "앙부일구", "혼천의", "풍기대"],
-            answer: 0,
-            hint: "원통형 쇠통에 빗물을 받아 깊이를 쟀던 '측우기'예요! 🌧️"
-          },
-          {
-            id: "soc_8",
-            q: "조선 세종 때 장영실이 만든, 스스로 종과 북을 쳐서 시간을 알려주던 물시계는?",
-            formula: "자동 시보 물시계",
-            options: ["자격루", "앙부일구", "일성정시의", "혼천의"],
-            answer: 0,
-            hint: "스스로 격발하여 시간을 알려주는 정밀 물시계 '자격루'예요! ⏰"
-          },
-          {
-            id: "soc_9",
-            q: "임진왜란 때 바다에서 왜군을 격파하기 위해 이순신 장군이 만든 철갑선 형태의 전투선은?",
-            formula: "조선 수군의 비밀 병기",
-            options: ["거북선", "판옥선", "포격선", "비거"],
-            answer: 0,
-            hint: "용의 머리에서 대포와 연기를 뿜고 등에는 쇠송곳을 꽂은 '거북선'이에요! 🐢"
-          },
-          {
-            id: "soc_10",
-            q: "[보스 역사 탐구] 이성계가 명나라를 치러 가던 중 압록강의 섬에서 군사를 돌려 정권을 잡고 조선을 세우게 된 역사적 사건은?",
-            formula: "조선 건국의 결정적 계기",
-            options: ["위화도 회군", "살수대첩", "귀주대첩", "삼별초의 항쟁"],
-            answer: 0,
-            hint: "위화도에서 4가지 불가론을 들며 군사를 돌린 '위화도 회군'이에요! 🐎"
-          }
-        ]
-      }
-    };
 
     // 퀘스트 데이터 바인딩
     let currentQuest = getSubjectQuest(currentSubj, currentUnit, currentMode);

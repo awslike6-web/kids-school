@@ -329,16 +329,20 @@
         class="relative z-10 w-full h-full object-cover rounded-xl" 
         src="https://lh3.googleusercontent.com/aida-public/AB6AXuAV-IDp_iDn-WfxdakzUuquXBg47J6J6FCU6ZPIHrVuqK-0ncWASu9Yy6zkPaN6Hm6AMT5YxPIqpTyMD8a1gxRL0XMb7QAMoJN5ZzXrNkqN9o6I6UPw4A4aw1fKXJFdXEh95qHievw9KkjTBUDSYFuyhoZSq3Y6WpgVUvLt7X1pdOHvUoTLbjDZmVAWZfux4CkaKfJs3Bx1uMfMAXqQKNrEMQ3EfDGFG8PVi3AyijSLWbUxBCxJfV1aYw"
       />
-      <!-- 튜브 위에 얹어질 민서 캐릭터 투명 레이어 (현재는 비워둠, 둥실 부유 효과 완비) -->
+      <!-- 튜브 위에 얹어질 민서 캐릭터 투명 레이어 (둥실 부유 및 콕 바운스) -->
       <div id="minseoCharacterLayer" class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
         <div id="characterPlushieWrap" class="relative w-40 h-40 flex items-center justify-center animate-monster-float">
-          <!-- 은은한 별빛 반짝임 대기 -->
-          <span class="text-3xl text-pink-300 opacity-70">✨</span>
+          <img 
+            id="minseoPartnerImg" 
+            src="./assets/images/minseo-char1.png" 
+            alt="베리 버니" 
+            class="w-32 h-32 object-contain filter drop-shadow-[0_8px_16px_rgba(255,133,162,0.5)] group-hover:scale-105 transition-transform"
+          />
         </div>
       </div>
       <!-- 튜브 하단 쿠션 안내 배너 -->
       <div class="absolute bottom-3 z-30 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border-2 border-pink-300 shadow-sm flex items-center gap-1 text-center">
-        <span class="text-[11px] font-bold text-[#a03a57]">🧸 분홍 튜브에 민서 인형 친구 준비 중 ✨</span>
+        <span class="text-[11px] font-bold text-[#a03a57]">🧸 사랑스러운 베리 버니와 함께하는 달콤 연구실 💖</span>
       </div>
     </div>
 
@@ -642,13 +646,39 @@
           </div>
         </div>
 
-        <!-- 국어 / 과학 / 사회 -->
+        <!-- 국어 -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
-          <span class="text-xs font-bold text-purple-300 flex items-center gap-1">📚 국·사·과 배틀 주제</span>
-          <div class="text-[11px] text-gray-400 space-y-1">
-            <div class="flex justify-between"><span>📖 국어:</span><span class="text-white">어휘·속담 & 문맥 독해</span></div>
-            <div class="flex justify-between"><span>🔬 과학:</span><span class="text-white">온도와 열의 이동 & 실험</span></div>
-            <div class="flex justify-between"><span>🗺️ 사회:</span><span class="text-white">조선의 건국과 한양 도성</span></div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-300 flex items-center gap-1">📖 국어 현재 진도</span>
+            <span class="text-[10px] text-purple-300 font-bold" id="badgeMinsuKorean">1단원 어휘·속담</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuKoreanChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="1" onclick="setParentUnit('minsu', 'korean', '1')">1단원 어휘·속담 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="2" onclick="setParentUnit('minsu', 'korean', '2')">2단원 문맥·독해</button>
+          </div>
+        </div>
+
+        <!-- 과학 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-blue-300 flex items-center gap-1">🔬 과학 현재 진도</span>
+            <span class="text-[10px] text-blue-300 font-bold" id="badgeMinsuScience">1단원 온도와 열</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuScienceChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" onclick="setParentUnit('minsu', 'science', '1')">1단원 온도와 열 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
+          </div>
+        </div>
+
+        <!-- 사회 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-pink-300 flex items-center gap-1">🗺️ 사회 현재 진도</span>
+            <span class="text-[10px] text-pink-300 font-bold" id="badgeMinsuSociety">1단원 조선 건국·한양</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuSocietyChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="1" onclick="setParentUnit('minsu', 'society', '1')">1단원 조선 건국·한양 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="2" onclick="setParentUnit('minsu', 'society', '2')">2단원 문화발전·이순신</button>
           </div>
         </div>
       </div>
@@ -1245,6 +1275,18 @@
       const bMinuEng = document.getElementById('badgeMinsuEnglish');
       if (bMinuEng) {
         bMinuEng.textContent = minsuSets.english === '7' ? '7단원 길찾기' : '8단원 외모 묘사';
+      }
+      const bMinuKor = document.getElementById('badgeMinsuKorean');
+      if (bMinuKor) {
+        bMinuKor.textContent = minsuSets.korean === '2' ? '2단원 문맥·독해' : '1단원 어휘·속담';
+      }
+      const bMinuSci = document.getElementById('badgeMinsuScience');
+      if (bMinuSci) {
+        bMinuSci.textContent = minsuSets.science === '2' ? '2단원 상태변화·지시약' : '1단원 온도와 열';
+      }
+      const bMinuSoc = document.getElementById('badgeMinsuSociety');
+      if (bMinuSoc) {
+        bMinuSoc.textContent = minsuSets.society === '2' ? '2단원 문화발전·이순신' : '1단원 조선 건국·한양';
       }
     }
 
