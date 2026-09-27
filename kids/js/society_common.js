@@ -456,7 +456,7 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                     subject: "사회", 
                     areaZone: zoneTag,
                     useServerFilter: true,
-                    filterByStudent: !isAdmin 
+                    filterByStudent: true 
                 });
             }
         } catch (netErr) {

@@ -894,7 +894,7 @@ async function fetchAndBuildScienceUI(type, innerBody) {
                         subject: "과학",
                         areaZone: "용어방",
                         useServerFilter: true,
-                        filterByStudent: !isAdmin
+                        filterByStudent: true
                     });
                 }
             } catch (netErr) {

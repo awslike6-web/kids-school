@@ -583,7 +583,7 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             }
         } else {
             // 단어/문장/파닉스 등 노션 VOCA DB 연동
-            const records = await fetchVocaFromNotion({ subject: "영어", filterByStudent: !isAdmin });
+            const records = await fetchVocaFromNotion({ subject: "영어", filterByStudent: true });
             
             if (records && records.length > 0) {
                 allFetchedRecords = records;
