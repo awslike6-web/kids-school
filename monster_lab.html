@@ -331,18 +331,18 @@
       />
       <!-- 튜브 위에 얹어질 민서 캐릭터 투명 레이어 (둥실 부유 및 콕 바운스) -->
       <div id="minseoCharacterLayer" class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-        <div id="characterPlushieWrap" class="relative w-40 h-40 flex items-center justify-center animate-monster-float">
+        <div id="characterPlushieWrap" class="relative w-64 h-48 flex items-center justify-center animate-monster-float">
           <img 
             id="minseoPartnerImg" 
-            src="./assets/images/minseo-char1.png" 
-            alt="베리 버니" 
-            class="w-32 h-32 object-contain filter drop-shadow-[0_8px_16px_rgba(255,133,162,0.5)] group-hover:scale-105 transition-transform"
+            src="./assets/images/characters/minseo_family_clay_trio.png" 
+            alt="민수 오빠 & 민서 & 별빛 인형 삼총사" 
+            class="max-w-[230px] w-[82%] h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(255,133,162,0.55)] group-hover:scale-105 transition-transform"
           />
         </div>
       </div>
       <!-- 튜브 하단 쿠션 안내 배너 -->
-      <div class="absolute bottom-3 z-30 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border-2 border-pink-300 shadow-sm flex items-center gap-1 text-center">
-        <span class="text-[11px] font-bold text-[#a03a57]">🧸 사랑스러운 베리 버니와 함께하는 달콤 연구실 💖</span>
+      <div class="absolute bottom-3 z-30 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border-2 border-pink-300 shadow-sm flex items-center gap-1.5 text-center">
+        <span class="text-[11px] font-bold text-[#a03a57]">🧸 민수 오빠 & 민서 & 별빛 인형 삼총사 💖</span>
       </div>
     </div>
 
@@ -843,11 +843,11 @@
     ];
 
     const DIALOGUES_MINSEO = [
-      "민서야! 오늘 달콤 인형 퀘스트 하러 가자! 🧸",
-      "포근한 튜브 위에서 100까지 수 정복하자! 🌸",
-      "베리 버니가 민서를 기다리고 있었어! 💖",
+      "오빠랑 내 인형이랑 같이 5분 퀘스트 하러 가자! 🚀✨",
+      "민수 오빠랑 힘을 합치면 100점 문제도 뚝딱! 💖",
+      "민서가 직접 그린 친구들과 함께하는 달콤 연구실! 🧸",
       "오늘 1개만 풀면 하트 스트릭 충전 완료! ✨",
-      "달콤한 마시멜로 퐁당! 뽀용뽀용~ 🍭"
+      "달콤 마시멜로 튜브 타고 출격! 뽀용뽀용~ 🍭"
     ];
 
     let simpleDialogues = isMinseo ? DIALOGUES_MINSEO : DIALOGUES_MINSU;
@@ -979,14 +979,14 @@
         if (speech) speech.textContent = simpleDialogues[0];
 
         const pName = document.getElementById('partnerName');
-        if (pName) pName.textContent = '베리 버니';
+        if (pName) pName.textContent = '민수 & 민서 삼총사';
 
         const pDot = document.getElementById('partnerDot');
         if (pDot) pDot.className = 'w-1.5 h-1.5 rounded-full bg-[#ff85a2] animate-pulse';
 
         const pRole = document.getElementById('partnerRole');
         if (pRole) {
-          pRole.textContent = '드림 요정';
+          pRole.textContent = '패밀리 수호대';
           pRole.className = 'text-[11px] text-[#ff85a2] font-bold';
         }
 
