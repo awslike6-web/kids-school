@@ -276,6 +276,11 @@
         <span class="material-symbols-outlined text-lg" id="soundIcon">volume_up</span>
       </button>
 
+      <!-- 📖 5분 퀘스트 부모 설명서 버튼 -->
+      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-amber-400/50 flex items-center justify-center text-amber-300 hover:text-amber-200 hover:border-amber-400 active:scale-95 transition-transform shadow-lg" onclick="openParentProgressModal('guide')" title="5분 퀘스트 원리·활용 설명서">
+        <span class="material-symbols-outlined text-lg">menu_book</span>
+      </button>
+
       <!-- ⚙️ 부모 진도 설정판 버튼 -->
       <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-neon-cyan active:scale-95 transition-transform shadow-lg" onclick="openParentProgressModal()" title="부모 진도 관리판">
         <span class="material-symbols-outlined text-lg">settings</span>
@@ -558,18 +563,21 @@
         </button>
       </div>
 
-      <!-- 탭: 👧 민서(초1) / 👦 민수(초5) -->
-      <div class="flex rounded-2xl bg-lab-bg p-1 border border-lab-card-border">
-        <button id="parentTabMinseo" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5" onclick="switchParentTab('minseo')">
+      <!-- 탭: 👧 민서(초1) / 👦 민수(초5) / 📖 원리·활용 가이드 -->
+      <div class="flex rounded-2xl bg-lab-bg p-1 border border-lab-card-border gap-1">
+        <button id="parentTabMinseo" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1" onclick="switchParentTab('minseo')">
           <span>👧</span><span>민서 (초1)</span>
         </button>
-        <button id="parentTabMinsu" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5" onclick="switchParentTab('minsu')">
+        <button id="parentTabMinsu" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1" onclick="switchParentTab('minsu')">
           <span>👦</span><span>민수 (초5)</span>
+        </button>
+        <button id="parentTabGuide" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1" onclick="switchParentTab('guide')">
+          <span>📖</span><span>활용 설명서</span>
         </button>
       </div>
 
-      <!-- 안내 배너 -->
-      <div class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-2xl p-2.5 text-[11px] text-neon-cyan flex items-start gap-2">
+      <!-- 안내 배너 (진도 설정 탭에서만 표시) -->
+      <div id="parentProgressBanner" class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-2xl p-2.5 text-[11px] text-neon-cyan flex items-start gap-2">
         <span class="text-base leading-none">💡</span>
         <span>
           <strong>1~3번</strong>: 선택한 현재 진도 집중 드릴<br/>
@@ -683,12 +691,113 @@
         </div>
       </div>
 
+      <!-- 📖 5분 퀘스트 원리 & 활용 설명서 영역 -->
+      <div id="parentGuideSettings" class="space-y-3.5 max-h-[50vh] overflow-y-auto pr-1 hidden text-xs leading-relaxed text-gray-200">
+        
+        <!-- 개요 카드 -->
+        <div class="bg-gradient-to-br from-amber-500/20 via-lab-bg to-lab-card border border-amber-400/40 rounded-2xl p-3.5 space-y-2">
+          <div class="flex items-center gap-2 text-amber-300 font-bold text-sm">
+            <span>💡</span>
+            <span>5분 퀘스트란 무엇인가요?</span>
+          </div>
+          <p class="text-[11px] text-gray-300 leading-normal">
+            바쁜 하루 속에서 아이가 지치지 않고 <strong>하루 3~5분 동안 학교 진도 핵심을 다지고 복습하는 적응형 마이크로 러닝(Micro-learning) 엔진</strong>입니다.
+          </p>
+        </div>
+
+        <!-- 1부: 작동 원리 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3.5 space-y-3">
+          <div class="flex items-center gap-2 text-neon-cyan font-bold text-xs border-b border-lab-card-border pb-2">
+            <span>⚙️</span>
+            <span>1부. 5분 퀘스트는 어떻게 돌아가나요?</span>
+          </div>
+
+          <!-- 4+1 구조 설명 -->
+          <div class="space-y-2">
+            <span class="text-xs font-bold text-white block">🚀 듀오링고형 4+1 스마트 출제 엔진</span>
+            <div class="grid grid-cols-1 gap-2 text-[11px]">
+              <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border">
+                <span class="font-bold text-neon-green">1~3번 [학교 진도 집중 드릴]</span>
+                <p class="text-gray-300 mt-0.5">부모님이 지정한 현재 단원의 핵심 개념, 연산, 어휘가 출제됩니다. (노션에 단어를 넣으면 실시간 4지선다로 자동 융합!)</p>
+              </div>
+              <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border">
+                <span class="font-bold text-yellow-300">4번 [망각곡선 자동 복습]</span>
+                <p class="text-gray-300 mt-0.5">최근 틀렸던 문제가 <strong>라이트너 3상자 시스템</strong>에 의해 자동 소환되어 장기 기억으로 전환됩니다. (3회 연속 맞히면 졸업!)</p>
+              </div>
+              <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border">
+                <span class="font-bold text-amber-300">5번 [🎁 다음 단원 비밀 맛보기]</span>
+                <p class="text-gray-300 mt-0.5">내일 배울 다음 단원 문제를 미리 탐험합니다. <strong>틀려도 하트가 전혀 깎이지 않고</strong>, 맞히면 보너스 경험치가 2배 지급됩니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 철벽 학년 분리 가드 -->
+          <div class="bg-teal-500/10 border border-teal-500/30 rounded-xl p-2.5 text-[11px] text-teal-200">
+            <span class="font-bold block mb-0.5">🛡️ 타 학년 침투 차단 철벽 가드</span>
+            <span>초1 민서와 초5 민수의 문제 은행 및 오답 큐가 100% 완전 분리되어 있어, 민서에게 오빠의 분수나 나눗셈 문제가 섞여 들어가지 않습니다.</span>
+          </div>
+        </div>
+
+        <!-- 2부: 부모 활용법 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3.5 space-y-3">
+          <div class="flex items-center gap-2 text-yellow-300 font-bold text-xs border-b border-lab-card-border pb-2">
+            <span>🎯</span>
+            <span>2부. 부모는 어떻게 활용하면 되나요? (4대 스마트 활용법)</span>
+          </div>
+
+          <div class="space-y-2.5 text-[11px]">
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-neon-cyan/20 text-neon-cyan flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</span>
+              <div>
+                <strong class="text-white">학교 알림장 보고 진도 맞추기 (1초 설정)</strong>
+                <p class="text-gray-300 mt-0.5">아이가 학교에서 새 단원에 들어가면, 본 관리판에서 해당 단원 칩을 눌러두세요. 1~3번과 5번 문제가 알아서 맞춰집니다.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</span>
+              <div>
+                <strong class="text-white">노션 용어사전(VOCA DB)과 100% 자동 연동</strong>
+                <p class="text-gray-300 mt-0.5">부모님이 스마트폰 노션 표에 단어, 뜻, 힌트, 사진이나 실험실 웹링크를 입력하면, 5분 퀘스트 4지선다 문제로 실시간 자동 변환 출제됩니다. (코드 수정 없이 단어만 넣으면 끝!)</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
+              <div>
+                <strong class="text-white">스마트폰 노션 학습일지에서 오답 실시간 확인</strong>
+                <p class="text-gray-300 mt-0.5">아이가 5분 퀘스트를 마치면 어떤 문제를 틀렸고 어떤 보기를 골랐는지 노션 학습일지 DB에 즉시 기록됩니다. 퇴근길에 1분 확인하고 칭찬과 가벼운 피드백을 건네보세요.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-purple-400/20 text-purple-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">4</span>
+              <div>
+                <strong class="text-white">몬스터 진화 & 데일리 스트릭 동기부여</strong>
+                <p class="text-gray-300 mt-0.5">5문제를 완주하면 +3 보석/캔디와 +50 EXP가 쌓이고 몬스터가 뛰어오릅니다. 하루 1번 풀 때마다 로비 연속 출석(스트릭)이 늘어나 자기주도 습관이 길러집니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3부: 인터랙티브 및 특수 도구 안내 -->
+        <div class="bg-lab-card/80 border border-lab-card-border rounded-2xl p-3 space-y-2 text-[11px]">
+          <span class="font-bold text-gray-200 block">✨ 특수 기능 안내</span>
+          <ul class="space-y-1 text-gray-300 list-disc list-inside">
+            <li><strong class="text-teal-300">세로 분수 정품 렌더러</strong>: 초등 교과서 서식 그대로 세로 분수와 대분수가 깨짐 없이 표시됩니다.</li>
+            <li><strong class="text-sky-300">원어민 발음 & 요정 TTS</strong>: 영어 Jenny 원어민 발음 및 국어 소리 듣기를 버튼 하나로 지원합니다.</li>
+            <li><strong class="text-pink-300">인터랙티브 탐구관</strong>: 노션에 등록된 가상 실험실이나 시각자료가 문제 화면에 직접 연동됩니다.</li>
+          </ul>
+        </div>
+
+      </div>
+
       <!-- 하단 저장 및 취소 버튼 -->
-      <div class="flex gap-2 pt-2 border-t border-lab-card-border">
+      <div class="flex gap-2 pt-2 border-t border-lab-card-border" id="parentModalFooter">
         <button type="button" class="flex-1 py-3 rounded-xl bg-lab-bg border border-lab-card-border text-gray-400 text-xs font-bold hover:text-white" onclick="closeParentProgressModal()">
           닫기
         </button>
-        <button type="button" class="jelly-btn flex-1 py-3 rounded-xl bg-neon-cyan hover:bg-[#92f6ff] text-[#052c33] font-bold text-sm shadow-[0_4px_0_0_#064e5b]" onclick="saveParentProgressSettings()">
+        <button id="btnParentSaveSettings" type="button" class="jelly-btn flex-1 py-3 rounded-xl bg-neon-cyan hover:bg-[#92f6ff] text-[#052c33] font-bold text-sm shadow-[0_4px_0_0_#064e5b]" onclick="saveParentProgressSettings()">
           💾 설정 저장하기
         </button>
       </div>
@@ -1166,9 +1275,9 @@
 
     let currentParentTab = isMinseo ? 'minseo' : 'minsu';
 
-    function openParentProgressModal() {
+    function openParentProgressModal(initialTab = '') {
       pokeSound('pop');
-      currentParentTab = isMinseo ? 'minseo' : 'minsu';
+      currentParentTab = initialTab || (isMinseo ? 'minseo' : 'minsu');
       switchParentTab(currentParentTab);
       renderParentProgressChips();
 
@@ -1195,28 +1304,60 @@
 
       const btnMinseo = document.getElementById('parentTabMinseo');
       const btnMinsu = document.getElementById('parentTabMinsu');
+      const btnGuide = document.getElementById('parentTabGuide');
       const secMinseo = document.getElementById('parentMinseoSettings');
       const secMinsu = document.getElementById('parentMinsuSettings');
+      const secGuide = document.getElementById('parentGuideSettings');
+      const banner = document.getElementById('parentProgressBanner');
+      const btnSave = document.getElementById('btnParentSaveSettings');
+      const title = document.getElementById('parentModalTitle');
+
+      // 탭 스타일 초기화
+      const inactiveClass = 'flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-1';
+      if (btnMinseo) btnMinseo.className = inactiveClass;
+      if (btnMinsu) btnMinsu.className = inactiveClass;
+      if (btnGuide) btnGuide.className = inactiveClass;
+
+      // 영역 숨김
+      if (secMinseo) secMinseo.classList.add('hidden');
+      if (secMinsu) secMinsu.classList.add('hidden');
+      if (secGuide) secGuide.classList.add('hidden');
 
       if (tab === 'minseo') {
-        if (btnMinseo) {
-          btnMinseo.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-[#ff85a2] text-white shadow transition-all flex items-center justify-center gap-1.5';
-        }
-        if (btnMinsu) {
-          btnMinsu.className = 'flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-1.5';
-        }
+        if (btnMinseo) btnMinseo.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-[#ff85a2] text-white shadow transition-all flex items-center justify-center gap-1 font-black';
         if (secMinseo) secMinseo.classList.remove('hidden');
-        if (secMinsu) secMinsu.classList.add('hidden');
-      } else {
-        if (btnMinsu) {
-          btnMinsu.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-neon-cyan text-lab-bg shadow transition-all flex items-center justify-center gap-1.5 font-black';
+        if (banner) banner.classList.remove('hidden');
+        if (btnSave) {
+          btnSave.classList.remove('hidden');
+          btnSave.textContent = '💾 민서 설정 저장';
         }
-        if (btnMinseo) {
-          btnMinseo.className = 'flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-1.5';
-        }
+        if (title) title.textContent = '부모 진도 관리판 (민서)';
+      } else if (tab === 'minsu') {
+        if (btnMinsu) btnMinsu.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-neon-cyan text-lab-bg shadow transition-all flex items-center justify-center gap-1 font-black';
         if (secMinsu) secMinsu.classList.remove('hidden');
-        if (secMinseo) secMinseo.classList.add('hidden');
+        if (banner) banner.classList.remove('hidden');
+        if (btnSave) {
+          btnSave.classList.remove('hidden');
+          btnSave.textContent = '💾 민수 설정 저장';
+        }
+        if (title) title.textContent = '부모 진도 관리판 (민수)';
+      } else if (tab === 'guide') {
+        if (btnGuide) btnGuide.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-amber-400 text-amber-950 shadow transition-all flex items-center justify-center gap-1 font-black';
+        if (secGuide) secGuide.classList.remove('hidden');
+        if (banner) banner.classList.add('hidden');
+        if (btnSave) {
+          btnSave.classList.remove('hidden');
+          btnSave.textContent = '🎯 진도 설정하러 가기';
+          btnSave.onclick = () => switchParentTab(isMinseo ? 'minseo' : 'minsu');
+        }
+        if (title) title.textContent = '5분 퀘스트 원리·활용 가이드';
       }
+
+      // 진도 설정 탭 복귀 시 저장 이벤트 리스너 복구
+      if (tab !== 'guide' && btnSave) {
+        btnSave.onclick = saveParentProgressSettings;
+      }
+
       renderParentProgressChips();
     }
 
