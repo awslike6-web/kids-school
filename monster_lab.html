@@ -272,8 +272,13 @@
       </div>
 
       <!-- 🔊 사운드 토글 -->
-      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition-transform shadow-lg" onclick="toggleSound()">
+      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition-transform shadow-lg" onclick="toggleSound()" title="소리 켜기/끄기">
         <span class="material-symbols-outlined text-lg" id="soundIcon">volume_up</span>
+      </button>
+
+      <!-- ⚙️ 부모 진도 설정판 버튼 -->
+      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-neon-cyan active:scale-95 transition-transform shadow-lg" onclick="openParentProgressModal()" title="부모 진도 관리판">
+        <span class="material-symbols-outlined text-lg">settings</span>
       </button>
     </div>
   </header>
@@ -528,6 +533,136 @@
           지금 출격! 👾
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ================= 5-2. ⚙️ 부모 진도 설정판 모달 (Parent Progress Controller) ================= -->
+  <div id="parentProgressModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4" onclick="closeParentProgressModal(event)">
+    <div class="bg-lab-card border-2 border-neon-cyan/80 rounded-3xl max-w-md w-full p-5 text-left space-y-4 shadow-2xl animate-sheet-up" onclick="event.stopPropagation()">
+      
+      <!-- 상단 타이틀 & 닫기 -->
+      <div class="flex items-center justify-between border-b border-lab-card-border pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">⚙️</span>
+          <div>
+            <h3 class="text-base font-bold text-white" id="parentModalTitle">부모 진도 관리판</h3>
+            <p class="text-[11px] text-gray-400">4+1 듀오링고 엔진의 학교 진도 단원을 설정합니다.</p>
+          </div>
+        </div>
+        <button class="w-8 h-8 rounded-full bg-lab-bg border border-lab-card-border flex items-center justify-center text-gray-400 hover:text-white" onclick="closeParentProgressModal()">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- 탭: 👧 민서(초1) / 👦 민수(초5) -->
+      <div class="flex rounded-2xl bg-lab-bg p-1 border border-lab-card-border">
+        <button id="parentTabMinseo" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5" onclick="switchParentTab('minseo')">
+          <span>👧</span><span>민서 (초1)</span>
+        </button>
+        <button id="parentTabMinsu" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5" onclick="switchParentTab('minsu')">
+          <span>👦</span><span>민수 (초5)</span>
+        </button>
+      </div>
+
+      <!-- 안내 배너 -->
+      <div class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-2xl p-2.5 text-[11px] text-neon-cyan flex items-start gap-2">
+        <span class="text-base leading-none">💡</span>
+        <span>
+          <strong>1~3번</strong>: 선택한 현재 진도 집중 드릴<br/>
+          <strong>4번</strong>: 최근 오답 복습 (누적 점검)<br/>
+          <strong>5번</strong>: 🎁 다음 단원 비밀 맛보기 탐험 (하트 차감 0, 보너스 2배)
+        </span>
+      </div>
+
+      <!-- 👧 민서 진도 설정 영역 -->
+      <div id="parentMinseoSettings" class="space-y-3.5 max-h-[48vh] overflow-y-auto pr-1">
+        <!-- 국어 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-300 flex items-center gap-1">📖 국어 현재 진도</span>
+            <span class="text-[10px] text-rose-400 font-bold" id="badgeMinseoKorean">받침 글자 집중</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5" id="parentMinseoKoreanChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="voca" onclick="setParentUnit('minseo', 'korean', 'voca')">그림 낱말 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="dictation" onclick="setParentUnit('minseo', 'korean', 'dictation')">받아쓰기 100</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="batchim" onclick="setParentUnit('minseo', 'korean', 'batchim')">받침 글자 ⭐</button>
+          </div>
+        </div>
+
+        <!-- 수학 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-teal-300 flex items-center gap-1">🧮 수학 현재 진도</span>
+            <span class="text-[10px] text-teal-400 font-bold" id="badgeMinseoMath">100까지 수</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5" id="parentMinseoMathChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="100num" onclick="setParentUnit('minseo', 'math', '100num')">100까지 수 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="addsub" onclick="setParentUnit('minseo', 'math', 'addsub')">한자리 덧뺄셈</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="shapes" onclick="setParentUnit('minseo', 'math', 'shapes')">여러가지 모양</button>
+          </div>
+        </div>
+
+        <!-- 영어 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-300 flex items-center gap-1">🔤 영어 현재 진도</span>
+            <span class="text-[10px] text-sky-400 font-bold" id="badgeMinseoEnglish">파닉스 단어</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5" id="parentMinseoEnglishChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="phonics" onclick="setParentUnit('minseo', 'english', 'phonics')">파닉스 단어 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="abc" onclick="setParentUnit('minseo', 'english', 'abc')">알파벳 소리</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="greetings" onclick="setParentUnit('minseo', 'english', 'greetings')">기초 인사말</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 👦 민수 진도 설정 영역 -->
+      <div id="parentMinsuSettings" class="space-y-3.5 max-h-[48vh] overflow-y-auto pr-1 hidden">
+        <!-- 수학 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-neon-green flex items-center gap-1">🧮 수학 현재 진도</span>
+            <span class="text-[10px] text-neon-green font-bold" id="badgeMinsuMath">두 자릿수 나눗셈</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuMathChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="division" onclick="setParentUnit('minsu', 'math', 'division')">두 자릿수 나눗셈 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="fraction" onclick="setParentUnit('minsu', 'math', 'fraction')">5-2 분수의 곱셈</button>
+          </div>
+        </div>
+
+        <!-- 영어 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">🔤 영어 현재 진도</span>
+            <span class="text-[10px] text-yellow-300 font-bold" id="badgeMinsuEnglish">8단원 외모 묘사</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuEnglishChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="8" onclick="setParentUnit('minsu', 'english', '8')">8단원 외모 묘사 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="7" onclick="setParentUnit('minsu', 'english', '7')">7단원 길찾기 복습</button>
+          </div>
+        </div>
+
+        <!-- 국어 / 과학 / 사회 -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <span class="text-xs font-bold text-purple-300 flex items-center gap-1">📚 국·사·과 배틀 주제</span>
+          <div class="text-[11px] text-gray-400 space-y-1">
+            <div class="flex justify-between"><span>📖 국어:</span><span class="text-white">어휘·속담 & 문맥 독해</span></div>
+            <div class="flex justify-between"><span>🔬 과학:</span><span class="text-white">온도와 열의 이동 & 실험</span></div>
+            <div class="flex justify-between"><span>🗺️ 사회:</span><span class="text-white">조선의 건국과 한양 도성</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 저장 및 취소 버튼 -->
+      <div class="flex gap-2 pt-2 border-t border-lab-card-border">
+        <button type="button" class="flex-1 py-3 rounded-xl bg-lab-bg border border-lab-card-border text-gray-400 text-xs font-bold hover:text-white" onclick="closeParentProgressModal()">
+          닫기
+        </button>
+        <button type="button" class="jelly-btn flex-1 py-3 rounded-xl bg-neon-cyan hover:bg-[#92f6ff] text-[#052c33] font-bold text-sm shadow-[0_4px_0_0_#064e5b]" onclick="saveParentProgressSettings()">
+          💾 설정 저장하기
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -923,6 +1058,9 @@
         if (modalIconEl) modalIconEl.className = 'w-14 h-14 rounded-2xl bg-neon-green/20 border-2 border-neon-green mx-auto flex items-center justify-center text-3xl';
         if (modalRecBox) modalRecBox.className = 'mt-2.5 py-1.5 px-3 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 text-[11px] text-neon-cyan font-bold';
       }
+      if (typeof updateMainQuestSubText === 'function') {
+        updateMainQuestSubText();
+      }
     }
 
     // 콕 찌르기 (Poke)
@@ -976,11 +1114,189 @@
       overlay.classList.remove('flex');
     }
 
-    // 과목 선택 (외부 버튼은 [과목/아이콘]만, 세부 내용은 팝업으로 위임)
+    // ================= 부모 진도 설정판 (Parent Progress Controller) 로직 =================
+    const DEFAULT_PARENT_SETTINGS = {
+      minseo: { korean: 'batchim', math: '100num', english: 'phonics' },
+      minsu: { math: 'division', english: '8', korean: '1', science: '1', society: '1' }
+    };
+
+    let currentParentSettings = (function() {
+      try {
+        const raw = localStorage.getItem('MINMIN_QUEST_SETTINGS');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return {
+            minseo: { ...DEFAULT_PARENT_SETTINGS.minseo, ...(parsed.minseo || {}) },
+            minsu: { ...DEFAULT_PARENT_SETTINGS.minsu, ...(parsed.minsu || {}) }
+          };
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_PARENT_SETTINGS));
+    })();
+
+    let currentParentTab = isMinseo ? 'minseo' : 'minsu';
+
+    function openParentProgressModal() {
+      pokeSound('pop');
+      currentParentTab = isMinseo ? 'minseo' : 'minsu';
+      switchParentTab(currentParentTab);
+      renderParentProgressChips();
+
+      const modal = document.getElementById('parentProgressModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeParentProgressModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      pokeSound('pop');
+      const modal = document.getElementById('parentProgressModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function switchParentTab(tab = 'minseo') {
+      currentParentTab = tab;
+      pokeSound('pop');
+
+      const btnMinseo = document.getElementById('parentTabMinseo');
+      const btnMinsu = document.getElementById('parentTabMinsu');
+      const secMinseo = document.getElementById('parentMinseoSettings');
+      const secMinsu = document.getElementById('parentMinsuSettings');
+
+      if (tab === 'minseo') {
+        if (btnMinseo) {
+          btnMinseo.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-[#ff85a2] text-white shadow transition-all flex items-center justify-center gap-1.5';
+        }
+        if (btnMinsu) {
+          btnMinsu.className = 'flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-1.5';
+        }
+        if (secMinseo) secMinseo.classList.remove('hidden');
+        if (secMinsu) secMinsu.classList.add('hidden');
+      } else {
+        if (btnMinsu) {
+          btnMinsu.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-neon-cyan text-lab-bg shadow transition-all flex items-center justify-center gap-1.5 font-black';
+        }
+        if (btnMinseo) {
+          btnMinseo.className = 'flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-1.5';
+        }
+        if (secMinsu) secMinsu.classList.remove('hidden');
+        if (secMinseo) secMinseo.classList.add('hidden');
+      }
+      renderParentProgressChips();
+    }
+
+    function setParentUnit(child, subject, unit) {
+      if (!currentParentSettings[child]) currentParentSettings[child] = {};
+      currentParentSettings[child][subject] = unit;
+      pokeSound('pop');
+      renderParentProgressChips();
+    }
+
+    function renderParentProgressChips() {
+      // 1) 민서 칩 렌더링
+      const minseoSets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
+      document.querySelectorAll('#parentMinseoSettings .parent-chip').forEach(btn => {
+        const subj = btn.getAttribute('data-subject');
+        const unit = btn.getAttribute('data-unit');
+        const isSelected = (minseoSets[subj] === unit);
+        if (isSelected) {
+          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-[#ff85a2] text-white border-[#ff85a2] shadow-sm';
+        } else {
+          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-pink-300';
+        }
+      });
+
+      // 민서 배지 텍스트
+      const bMinKor = document.getElementById('badgeMinseoKorean');
+      if (bMinKor) {
+        bMinKor.textContent = minseoSets.korean === 'batchim' ? '받침 글자 (2~3단원 추천)' : (minseoSets.korean === 'dictation' ? '받아쓰기 100문장' : '그림 낱말 탐험');
+      }
+      const bMinMath = document.getElementById('badgeMinseoMath');
+      if (bMinMath) {
+        bMinMath.textContent = minseoSets.math === '100num' ? '100까지의 수' : (minseoSets.math === 'addsub' ? '한자리 덧뺄셈' : '여러가지 모양');
+      }
+      const bMinEng = document.getElementById('badgeMinseoEnglish');
+      if (bMinEng) {
+        bMinEng.textContent = minseoSets.english === 'phonics' ? '파닉스 첫단어' : (minseoSets.english === 'abc' ? '알파벳 소리' : '기초 인사말');
+      }
+
+      // 2) 민수 칩 렌더링
+      const minsuSets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
+      document.querySelectorAll('#parentMinsuSettings .parent-chip').forEach(btn => {
+        const subj = btn.getAttribute('data-subject');
+        const unit = btn.getAttribute('data-unit');
+        const isSelected = (minsuSets[subj] === unit);
+        if (isSelected) {
+          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-neon-green text-[#023300] border-neon-green shadow-sm';
+        } else {
+          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
+        }
+      });
+
+      const bMinuMath = document.getElementById('badgeMinsuMath');
+      if (bMinuMath) {
+        bMinuMath.textContent = minsuSets.math === 'fraction' ? '5-2 분수의 곱셈' : '두 자릿수 나눗셈';
+      }
+      const bMinuEng = document.getElementById('badgeMinsuEnglish');
+      if (bMinuEng) {
+        bMinuEng.textContent = minsuSets.english === '7' ? '7단원 길찾기' : '8단원 외모 묘사';
+      }
+    }
+
+    function saveParentProgressSettings() {
+      try {
+        localStorage.setItem('MINMIN_QUEST_SETTINGS', JSON.stringify(currentParentSettings));
+      } catch (e) {}
+      pokeSound('launch');
+      triggerHaptic([40, 80, 40]);
+      updateMainQuestSubText();
+      closeParentProgressModal();
+      alert('🎉 부모 진도 설정이 저장되었습니다!\n다음 퀘스트부터 4+1 듀오링고 출제에 자동 반영됩니다. ✨');
+    }
+
+    // 메인 젤리 버튼 서브텍스트 및 추천 안내 배너 동적 갱신
+    function updateMainQuestSubText() {
+      const qSub = document.getElementById('mainQuestSub');
+      const rec = document.getElementById('modalRecommend');
+      if (isMinseo) {
+        const sets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
+        const korName = sets.korean === 'batchim' ? '2~3단원 받침 글자 드릴' : (sets.korean === 'dictation' ? '받아쓰기 100문장' : '그림 낱말 탐험');
+        const mathName = sets.math === '100num' ? '100까지 수 & 덧셈' : (sets.math === 'addsub' ? '한자리 덧뺄셈' : '여러가지 모양');
+        if (qSub) qSub.textContent = `🧮 1-2 ${mathName} · 필수 ⭐`;
+        if (rec) rec.textContent = `💡 오늘의 추천 진도: ${korName} & ${mathName} (필수 ⭐)`;
+      } else {
+        const sets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
+        const mathName = sets.math === 'fraction' ? '5-2 분수의 곱셈 집중 연산' : '5-2 두 자릿수 나눗셈 집중 연산';
+        if (qSub) qSub.textContent = `🧮 ${mathName} · 필수 ⭐`;
+        if (rec) rec.textContent = `💡 오늘의 권장 진도: ${mathName} (기초 필수 ⭐)`;
+      }
+    }
+
+    // ================= 아이 원터치 직결 출격 파이프라인 =================
+    // 과목 터치 시 묻지 않고 4+1 듀오링고 퀘스트로 즉시 출격!
+    function launchQuestDirect(subj = 'math') {
+      pokeSound('launch');
+      triggerHaptic([50, 80, 50]);
+
+      // 출격 중 시각 피드백 (버튼 눌림 유지)
+      const btn = document.getElementById('mainQuestBtn');
+      if (btn) btn.classList.add('scale-95', 'opacity-90');
+
+      setTimeout(() => {
+        const targetUrl = `quest_runner.html?subject=${encodeURIComponent(subj)}&user=${encodeURIComponent(currentChild)}`;
+        window.location.href = targetUrl;
+      }, 250);
+    }
+
+    // 과목 선택 (서랍에서 터치 시 직결 출격)
     function selectSubject(subj = 'math') {
       closeDrawer();
-      const meta = SUBJECT_METAS[subj] || SUBJECT_METAS.math;
-      openQuestModal(meta.icon, meta.title, meta.desc, subj, meta.recommend);
+      launchQuestDirect(subj);
     }
 
     let selectedUnit = isMinseo ? '100num' : 'division';
@@ -989,146 +1305,30 @@
     function setQuestUnit(unit) {
       selectedUnit = unit;
       pokeSound('pop');
-      document.querySelectorAll('.unit-chip').forEach(btn => {
-        if (btn.getAttribute('data-unit') === unit) {
-          btn.className = isMinseo 
-            ? 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all'
-            : 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all';
-        } else {
-          btn.className = 'unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all';
-        }
-      });
     }
 
     function setQuestMode(mode) {
       selectedMode = mode;
       pokeSound('pop');
-      document.querySelectorAll('.mode-chip').forEach(btn => {
-        if (btn.getAttribute('data-mode') === mode) {
-          btn.className = isMinseo
-            ? 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all'
-            : 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all';
-        } else {
-          btn.className = 'mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all';
-        }
-      });
     }
 
-    // 모달 제어 (과목별 권장 진도 안내 + 과목/학년 맞춤 옵션 칩 동적 주입)
+    // 초간단 확인 모달 제어 (필요 시 직접 출격과 호환)
     function openQuestModal(icon, title, desc, subj = 'math', recommend = '') {
       targetSubject = subj;
-      document.getElementById('modalIcon').textContent = icon;
-      document.getElementById('modalTitle').textContent = title;
-      document.getElementById('modalDesc').textContent = desc;
-
-      const recEl = document.getElementById('modalRecommend');
-      if (recEl) {
-        recEl.textContent = recommend || (SUBJECT_METAS[subj] ? SUBJECT_METAS[subj].recommend : '');
-      }
-
-      const optBox = document.getElementById('questOptionsBox');
-      const unitContainer = document.getElementById('unitScopeChips');
-      const modeContainer = document.getElementById('modeChips');
-
-      if (subj === 'math') {
-        optBox.classList.remove('hidden');
-        if (isMinseo) {
-          selectedUnit = '100num';
-          selectedMode = 'speed';
-          unitContainer.innerHTML = `
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="100num" onclick="setQuestUnit('100num')">100까지 수 ⭐</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="addsub" onclick="setQuestUnit('addsub')">한자리 덧뺄셈</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="shapes" onclick="setQuestUnit('shapes')">여러가지 모양</button>
-          `;
-          modeContainer.innerHTML = `
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="speed" onclick="setQuestMode('speed')">스피드 연산</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="puzzle" onclick="setQuestMode('puzzle')">그림 퀴즈</button>
-          `;
-        } else {
-          selectedUnit = 'division';
-          selectedMode = 'mixed';
-          unitContainer.innerHTML = `
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="division" onclick="setQuestUnit('division')">두 자릿수 나눗셈 ⭐</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="fraction" onclick="setQuestUnit('fraction')">5-2 분수의 곱셈</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="all" onclick="setQuestUnit('all')">수학 종합 팩</button>
-          `;
-          modeContainer.innerHTML = `
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">종합 배틀</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="calc" onclick="setQuestMode('calc')">실전 계산 ⚡</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="principle" onclick="setQuestMode('principle')">원리·검산식 🔍</button>
-          `;
-        }
-      } else if (subj === 'korean') {
-        if (isMinseo) {
-          optBox.classList.remove('hidden');
-          selectedUnit = 'voca';
-          selectedMode = 'word';
-          unitContainer.innerHTML = `
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="voca" onclick="setQuestUnit('voca')">그림 낱말 ⭐</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="dictation" onclick="setQuestUnit('dictation')">받아쓰기 100</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="batchim" onclick="setQuestUnit('batchim')">받침 글자</button>
-          `;
-          modeContainer.innerHTML = `
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">낱말 자석</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="complete" onclick="setQuestMode('complete')">문장 완성</button>
-          `;
-        } else {
-          optBox.classList.add('hidden');
-        }
-      } else if (subj === 'english') {
-        optBox.classList.remove('hidden');
-        if (isMinseo) {
-          selectedUnit = 'phonics';
-          selectedMode = 'word';
-          unitContainer.innerHTML = `
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-[#ff85a2]/25 border border-[#ff85a2] text-[#a03a57] text-center transition-all" data-unit="phonics" onclick="setQuestUnit('phonics')">파닉스 단어 ⭐</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="abc" onclick="setQuestUnit('abc')">알파벳 소리</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="greetings" onclick="setQuestUnit('greetings')">기초 인사말</button>
-          `;
-          modeContainer.innerHTML = `
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-amber-400/25 border border-amber-400 text-amber-700 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="listen" onclick="setQuestMode('listen')">듣기 🎧</button>
-          `;
-        } else {
-          selectedUnit = '8';
-          selectedMode = 'mixed';
-          unitContainer.innerHTML = `
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-neon-green/20 border border-neon-green text-neon-green text-center transition-all" data-unit="8" onclick="setQuestUnit('8')">8단원 ⭐</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7" onclick="setQuestUnit('7')">7단원 복습</button>
-            <button type="button" class="unit-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-unit="7,8" onclick="setQuestUnit('7,8')">7~8단원 팩</button>
-          `;
-          modeContainer.innerHTML = `
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-yellow-400/20 border border-yellow-400 text-yellow-300 text-center transition-all" data-mode="mixed" onclick="setQuestMode('mixed')">통합(단어+문장)</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="word" onclick="setQuestMode('word')">단어 🔤</button>
-            <button type="button" class="mode-chip py-1.5 px-2 rounded-xl text-xs font-bold bg-lab-card border border-lab-card-border text-gray-400 text-center transition-all" data-mode="sentence" onclick="setQuestMode('sentence')">문장 💬</button>
-          `;
-        }
-      } else {
-        optBox.classList.add('hidden');
-      }
-
-      const modal = document.getElementById('questModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      launchQuestDirect(subj);
     }
 
     function closeQuestModal() {
       pokeSound('pop');
       const modal = document.getElementById('questModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
     }
 
     function launchQuestNow() {
-      pokeSound('launch');
-      triggerHaptic([50, 80, 50]);
-      setTimeout(() => {
-        let targetUrl = `quest_runner.html?subject=${targetSubject}&user=${currentChild}`;
-        if (selectedUnit && selectedMode) {
-          targetUrl += `&unit=${selectedUnit}&mode=${selectedMode}`;
-        }
-        window.location.href = targetUrl;
-      }, 350);
+      launchQuestDirect(targetSubject || 'math');
     }
 
     function handleStreakClick() {
