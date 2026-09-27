@@ -778,68 +778,119 @@
     ];
 
     // ========================================================
-    // 🧠 적응형 라이트너 3상자 오답 큐 엔진 (Universal Spaced Repetition)
+    // 🧠 [멀티유저 완전 격리 V2] 적응형 라이트너 3상자 오답 큐 엔진
+    // 사용자별(user -> subject) 100% 독립 파티셔닝 & 타 학년 침투 차단 가드
     // ========================================================
-    const ADAPTIVE_STORAGE_KEY = 'MINMIN_ADAPTIVE_QUEUE_V1';
+    const ADAPTIVE_STORAGE_KEY_V2 = 'MINMIN_ADAPTIVE_QUEUE_V2';
 
-    function getAdaptiveQueue(subj) {
+    // 레거시 V1(미격리) 캐시 자동 청소
+    (function cleanupLegacyV1Queue() {
       try {
-        const raw = localStorage.getItem(ADAPTIVE_STORAGE_KEY);
+        if (localStorage.getItem('MINMIN_ADAPTIVE_QUEUE_V1')) {
+          localStorage.removeItem('MINMIN_ADAPTIVE_QUEUE_V1');
+          console.log('[Adaptive Queue] 레거시 V1 단일 큐 정리 완료');
+        }
+      } catch (e) {}
+    })();
+
+    function getNormalizedChildId(child) {
+      if (!child) return 'minsu';
+      const c = String(child).trim().toLowerCase();
+      if (c === 'minseo' || c === 'daughter' || c === '민서') return 'minseo';
+      return 'minsu';
+    }
+
+    function getAdaptiveQueue(child, subj) {
+      try {
+        const u = getNormalizedChildId(child);
+        const raw = localStorage.getItem(ADAPTIVE_STORAGE_KEY_V2);
         const data = raw ? JSON.parse(raw) : {};
-        return data[subj] || [];
+        if (data && data[u] && Array.isArray(data[u][subj])) {
+          return data[u][subj];
+        }
+        return [];
       } catch (e) {
         return [];
       }
     }
 
-    function saveAdaptiveQueue(subj, queue) {
+    function saveAdaptiveQueue(child, subj, queue) {
       try {
-        const raw = localStorage.getItem(ADAPTIVE_STORAGE_KEY);
+        const u = getNormalizedChildId(child);
+        const raw = localStorage.getItem(ADAPTIVE_STORAGE_KEY_V2);
         const data = raw ? JSON.parse(raw) : {};
-        data[subj] = queue;
-        localStorage.setItem(ADAPTIVE_STORAGE_KEY, JSON.stringify(data));
+        if (!data[u]) data[u] = {};
+        data[u][subj] = queue;
+        localStorage.setItem(ADAPTIVE_STORAGE_KEY_V2, JSON.stringify(data));
       } catch (e) {}
     }
 
-    function recordWrongItem(subj, questionObj) {
-      const q = getAdaptiveQueue(subj);
-      const existing = q.find(item => item.q === questionObj.q);
+    function recordWrongItem(child, subj, questionObj) {
+      if (!questionObj || !subj) return;
+      const u = getNormalizedChildId(child);
+      const qList = getAdaptiveQueue(u, subj);
+      const existing = qList.find(item => item.q === questionObj.q);
       const today = new Date().toISOString().slice(0, 10);
       if (existing) {
         existing.failCount = (existing.failCount || 1) + 1;
         existing.streak = 0;
         existing.lastReviewed = today;
       } else {
-        q.push({
+        qList.push({
           id: questionObj.id || `q_${Date.now()}`,
           q: questionObj.q,
-          formula: questionObj.formula,
-          options: questionObj.options,
+          formula: questionObj.formula || '',
+          options: questionObj.options || [],
           answer: questionObj.answer,
-          hint: questionObj.hint,
-          audioText: questionObj.audioText,
+          hint: questionObj.hint || '',
+          audioText: questionObj.audioText || '',
           failCount: 1,
           streak: 0,
           box: 1,
           lastReviewed: today
         });
       }
-      saveAdaptiveQueue(subj, q);
+      saveAdaptiveQueue(u, subj, qList);
     }
 
-    function recordCorrectItem(subj, questionObj) {
-      const q = getAdaptiveQueue(subj);
-      const idx = q.findIndex(item => item.q === questionObj.q);
+    function recordCorrectItem(child, subj, questionObj) {
+      if (!questionObj || !subj) return;
+      const u = getNormalizedChildId(child);
+      const qList = getAdaptiveQueue(u, subj);
+      const idx = qList.findIndex(item => item.q === questionObj.q);
       if (idx !== -1) {
-        q[idx].streak = (q[idx].streak || 0) + 1;
-        q[idx].box = Math.min(3, (q[idx].box || 1) + 1);
-        q[idx].lastReviewed = new Date().toISOString().slice(0, 10);
+        qList[idx].streak = (qList[idx].streak || 0) + 1;
+        qList[idx].box = Math.min(3, (qList[idx].box || 1) + 1);
+        qList[idx].lastReviewed = new Date().toISOString().slice(0, 10);
         // 3회 연속 성공 시 완전 마스터 졸업!
-        if (q[idx].streak >= 3) {
-          q.splice(idx, 1);
+        if (qList[idx].streak >= 3) {
+          qList.splice(idx, 1);
         }
-        saveAdaptiveQueue(subj, q);
+        saveAdaptiveQueue(u, subj, qList);
       }
+    }
+
+    // ========================================================
+    // 🛡️ [철벽 학년 가드] 타 학년/타 교과 문제 침투 차단 검증기
+    // 오답 큐에 엉뚱한 문제(예: 민서에게 초5 분수/약분)가 들어와도 즉시 감지 후 폐기
+    // ========================================================
+    function isValidQuestionForChild(child, subj, questionObj) {
+      if (!questionObj || !questionObj.q) return false;
+      const u = getNormalizedChildId(child);
+      const bank = (u === 'minseo') ? (typeof minseoMasterBank !== 'undefined' ? minseoMasterBank : null) : (typeof minsuMasterBank !== 'undefined' ? minsuMasterBank : null);
+      if (!bank || !bank[subj]) return true; // 검증 풀이 아직 로드되지 않은 경우 통과
+
+      const subjPool = bank[subj];
+      // 해당 과목의 모든 단원 문제 풀 합치기
+      const allQuestions = [];
+      Object.keys(subjPool).forEach(key => {
+        if (key !== 'title' && key !== 'icon' && Array.isArray(subjPool[key])) {
+          allQuestions.push(...subjPool[key]);
+        }
+      });
+
+      // q 텍스트 또는 id로 일치 여부 전수 검증
+      return allQuestions.some(item => (item.id && item.id === questionObj.id) || (item.q === questionObj.q));
     }
 
     // ========================================================
@@ -1805,7 +1856,8 @@
     };
 
     function getSubjectQuest(subj, unitScope = '', mode = 'mixed') {
-      const queue = getAdaptiveQueue(subj);
+      const activeChild = getNormalizedChildId(currentUser);
+      const queue = getAdaptiveQueue(activeChild, subj);
       const parentSettings = getParentQuestSettings(currentUser);
       const activeUnit = unitScope || (parentSettings ? parentSettings[subj] : '') || 'default';
 
@@ -1823,9 +1875,23 @@
         const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
         let selected = shuffledMain.slice(0, 3);
 
-        // 4번: 최근 오답 복습 1개 (오답 없으면 현재 풀에서 추가)
+        // 4번: 최근 오답 복습 1개 (타 학년 오염 방지 가드 검증)
+        let reviewQuestion = null;
         if (queue.length > 0 && mode !== 'revenge') {
-          selected.push(queue[0]);
+          for (let i = 0; i < queue.length; i++) {
+            if (isValidQuestionForChild('minseo', subj, queue[i])) {
+              reviewQuestion = queue[i];
+              break;
+            } else {
+              // 타 학년/오염된 문제는 큐에서 영구 폐기
+              queue.splice(i, 1);
+              i--;
+              saveAdaptiveQueue('minseo', subj, queue);
+            }
+          }
+        }
+        if (reviewQuestion) {
+          selected.push(reviewQuestion);
         } else {
           const remaining = shuffledMain.slice(3, 4);
           if (remaining.length > 0) selected.push(remaining[0]);
@@ -1868,9 +1934,22 @@
       const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
       let selected = shuffledMain.slice(0, 3);
 
-      // 4번: 최근 오답 복습 1문제
+      // 4번: 최근 오답 복습 1문제 (타 학년 오염 방지 가드 검증)
+      let reviewQuestion = null;
       if (queue.length > 0 && mode !== 'revenge') {
-        selected.push(queue[0]);
+        for (let i = 0; i < queue.length; i++) {
+          if (isValidQuestionForChild('minsu', subj, queue[i])) {
+            reviewQuestion = queue[i];
+            break;
+          } else {
+            queue.splice(i, 1);
+            i--;
+            saveAdaptiveQueue('minsu', subj, queue);
+          }
+        }
+      }
+      if (reviewQuestion) {
+        selected.push(reviewQuestion);
       } else {
         selected.push(shuffledMain[3] || shuffledMain[0]);
       }
@@ -2219,7 +2298,7 @@
 
       if (isCorrect) {
         playSound('correct');
-        recordCorrectItem(currentSubj, q);
+        recordCorrectItem(currentUser, currentSubj, q);
 
         if (typeof speakFairyTTS === 'function') {
           speakFairyTTS(isMinseo ? "정답이야! 참 잘했어!" : "정답이야! 대단해!");
@@ -2256,7 +2335,7 @@
         }
       } else {
         playSound('wrong');
-        recordWrongItem(currentSubj, q);
+        recordWrongItem(currentUser, currentSubj, q);
         if (!sessionMissedQuestions.some(m => m.q === q.q)) {
           sessionMissedQuestions.push(q);
         }
