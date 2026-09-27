@@ -514,6 +514,7 @@
 
   <!-- ================= 6. 노션 보상 및 학습일지 DB & 요정 음성 코어 모듈 로드 ================= -->
   <script src="./kids/config.js"></script>
+  <script src="./kids/core/notion-voca.js"></script>
   <script src="./kids/core/notion-reward.js"></script>
   <script src="./kids/core/fairy-config.js"></script>
   <script src="./kids/core/fairy-engine.js"></script>
@@ -683,9 +684,16 @@
       }
       document.getElementById('progressBar').style.width = `${((currentIndex + 1) / currentQuest.questions.length) * 100}%`;
       
-      // 문제 텍스트 & 수식 (HTML 세로 분수 렌더링)
+      // 문제 텍스트 & 수식 (HTML 세로 분수 & 노션 시각자료 렌더링)
       document.getElementById('questionText').innerHTML = q.q;
-      document.getElementById('formulaBox').innerHTML = q.formula;
+      let formulaHtml = q.formula || '';
+      if (q.imageUrl) {
+        formulaHtml += `<div class="mt-2 text-center"><img src="${q.imageUrl}" class="max-h-32 mx-auto rounded-xl border border-white/20 shadow-sm object-contain" alt="시각 자료" /></div>`;
+      }
+      if (q.interactiveUrl) {
+        formulaHtml += `<div class="mt-2 text-center"><a href="${q.interactiveUrl}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${isMinseo ? 'bg-[#ff6584]/15 text-[#ff6584] border border-[#ff6584]/30' : 'bg-neon-cyan/15 text-neon-cyan border border-neon-cyan/30'} hover:opacity-80 transition-all">🔬 인터랙티브 탐구관 열기 ↗</a></div>`;
+      }
+      document.getElementById('formulaBox').innerHTML = formulaHtml;
       
       if (q.isPreview) {
         document.getElementById('cheerSpeech').textContent = isMinseo 
@@ -1096,15 +1104,18 @@
       if (typeof sendStudyLogToNotion === 'function') {
         try {
           const missedSummary = sessionWrongLogs.length > 0
-            ? sessionWrongLogs.map(item => `${item.q} (선택: ${item.chosen})`).join(' // ')
-            : "오답 없음 (100% 마스터)";
+            ? sessionWrongLogs.map((item, idx) => `[${idx + 1}] ${String(item.q).replace(/\n/g, ' ')} ➔ 선택: "${item.chosen}" / 정답: "${item.answer}"`).join(' // ')
+            : "🎉 100% 올클리어! 모든 문제를 완벽히 맞혔습니다! (마스터)";
+
+          const activeStudentName = isMinseo ? '민서' : '민수';
 
           await sendStudyLogToNotion({
+            childName: activeStudentName,
             subject: curKoreanSubj,
             durationMinutes: 5,
             errorReport: missedSummary
           });
-          console.log(`[노션 학습일지 동기화 완료] 과목: ${curKoreanSubj} | 오답: ${missedSummary}`);
+          console.log(`[노션 학습일지 동기화 완료] 학생: ${activeStudentName} | 과목: ${curKoreanSubj} | 오답: ${missedSummary}`);
         } catch (e) {
           console.warn("[노션 학습일지 동기화 알림]", e);
         }

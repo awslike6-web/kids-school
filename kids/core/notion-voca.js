@@ -408,6 +408,16 @@ async function updateVocaMasteryStatus(pageId, isMastered) {
 }
 
 // ========================================================
-// 🎙️ STT 디바운스 엔진 (interim 차단 + 1.5초 정적 후 1회 전송)
+// 🌐 전역(window) 명시적 노출 (5분 퀘스트 및 서브 모듈 연동용)
 // ========================================================
+if (typeof window !== 'undefined') {
+    window._loadVocaFromCache = _loadVocaFromCache;
+    window._saveVocaToCache = _saveVocaToCache;
+    window.fetchVocaFromNotion = fetchVocaFromNotion;
+    window.prefetchVocaData = prefetchVocaData;
+    window.clearVocaCache = clearVocaCache;
+    window.updateVocaMasteryStatus = updateVocaMasteryStatus;
+    window.parseVocaPage = parseVocaPage;
+    window.VOCA_DB_ID = VOCA_DB_ID;
+}
 

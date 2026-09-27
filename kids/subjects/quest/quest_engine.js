@@ -124,6 +124,15 @@
   function isValidQuestionForChild(child, subj, questionObj) {
     if (!questionObj || !questionObj.q) return false;
     const u = getNormalizedChildId(child);
+
+    // 💡 [노션 어휘 출제 문항 검증] 노션 어휘 문제는 학생 타겟 및 과목 일치 여부로 안전 검증
+    if (questionObj.source === 'notion_voca') {
+      const targetChild = questionObj.targetChild || 'all';
+      if (targetChild !== 'all' && targetChild !== u) return false;
+      if (questionObj.subject && questionObj.subject !== subj) return false;
+      return true;
+    }
+
     const bank = (u === 'minseo') ? window.minseoMasterBank : window.minsuMasterBank;
     if (!bank || !bank[subj]) return true;
 
@@ -170,7 +179,198 @@
   };
 
   // ========================================================
-  // 5. 🚀 듀오링고형 Universal 4+1 출제 엔진
+  // 5. 📚 [노션 어휘 연동 엔진] 노션 용어사전 캐시 기반 4지선다 자동 합성기
+  // ========================================================
+  const KOREAN_TO_SUBJ_MAP = {
+    korean: ['국어', '받아쓰기', '어휘', '문해력'],
+    math: ['수학', '연산'],
+    english: ['영어', '영단어', '파닉스'],
+    society: ['사회', '역사', '지리', '문화재'],
+    science: ['과학', '실험', '탐구'],
+    voca: ['용어', '국어', '어휘']
+  };
+
+  function getNotionCachedVocaList(child) {
+    try {
+      const u = getNormalizedChildId(child);
+      const childName = (u === 'minseo') ? '민서' : '민수';
+      const vocaDbId = (typeof window !== 'undefined' && window.VOCA_DB_ID) ? window.VOCA_DB_ID : '375a27115b688038b686d3994ee12919';
+
+      // 1) 전역 _loadVocaFromCache 시도
+      if (typeof window !== 'undefined' && typeof window._loadVocaFromCache === 'function') {
+        const cached = window._loadVocaFromCache(childName, vocaDbId);
+        if (cached && Array.isArray(cached) && cached.length > 0) return cached;
+      }
+
+      // 2) 직접 localStorage 캐시 탐색 (오늘 날짜)
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const key = `MINMIN_VOCA_CACHE_V11_${vocaDbId}_${childName}_${todayStr}`;
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.records) && parsed.records.length > 0) {
+          return parsed.records;
+        }
+      }
+
+      // 3) 오늘 날짜 외의 최신 캐시 탐색 (날짜 갱신 과도기 대응)
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('MINMIN_VOCA_CACHE_V11_') && k.includes(`_${childName}_`)) {
+          try {
+            const item = JSON.parse(localStorage.getItem(k));
+            if (item && Array.isArray(item.records) && item.records.length > 0) {
+              return item.records;
+            }
+          } catch (e) {}
+        }
+      }
+    } catch (e) {
+      console.warn('[VOCA Quest Loader] 캐시 로드 알림:', e);
+    }
+    return [];
+  }
+
+  function buildVocaQuestionsFromNotion(child, subj, unitKey = '') {
+    try {
+      const u = getNormalizedChildId(child);
+      const childName = (u === 'minseo') ? '민서' : '민수';
+      const vocaList = getNotionCachedVocaList(child);
+      if (!vocaList || vocaList.length === 0) return [];
+
+      const targetSubjNames = KOREAN_TO_SUBJ_MAP[subj] || [subj];
+
+      // 1) 학생 및 과목 필터링
+      const candidateRecords = vocaList.filter(item => {
+        if (!item.word || !item.meaning) return false;
+
+        // 학생 타겟 필터 (타겟이 비어있으면 공통)
+        if (Array.isArray(item.target) && item.target.length > 0) {
+          const hasChild = item.target.some(t => String(t).trim() === childName);
+          if (!hasChild) return false;
+        }
+
+        // 과목 필터
+        if (Array.isArray(item.subject) && item.subject.length > 0) {
+          const hasSubj = item.subject.some(s => targetSubjNames.includes(String(s).trim()));
+          if (!hasSubj) return false;
+        }
+
+        return true;
+      });
+
+      if (candidateRecords.length === 0) return [];
+
+      // 2) 단원 필터링 (일치 우선 정렬)
+      let prioritized = candidateRecords;
+      if (unitKey && unitKey !== 'default') {
+        const uStr = String(unitKey).trim().toLowerCase();
+        const matched = candidateRecords.filter(item => {
+          const stage = String(item.stage || '').toLowerCase();
+          const level = String(item.level || '').toLowerCase();
+          return stage.includes(uStr) || level.includes(uStr);
+        });
+        if (matched.length >= 2) {
+          prioritized = matched;
+        }
+      }
+
+      // 3) 전체 어휘 풀에서 오답 후보 수집
+      const allWords = Array.from(new Set(candidateRecords.map(r => r.word.trim()))).filter(Boolean);
+      const allMeanings = Array.from(new Set(candidateRecords.map(r => r.meaning.trim()))).filter(Boolean);
+
+      const generated = [];
+      const shuffledRecords = [...prioritized].sort(() => Math.random() - 0.5);
+
+      for (const rec of shuffledRecords) {
+        if (generated.length >= 5) break;
+
+        const isMeaningToWord = Math.random() > 0.3; // 70%는 뜻->단어, 30%는 단어->뜻
+
+        if (isMeaningToWord) {
+          // 유형 A: 뜻을 보고 알맞은 단어 고르기
+          const questionText = `다음 뜻풀이에 알맞은 낱말은 무엇일까요?\n"${rec.meaning}"`;
+          const correctAnswer = rec.word.trim();
+
+          const wrongCandidates = allWords.filter(w => w !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 3);
+
+          const fallbackWrongs = ['성실', '탐구', '배려', '관찰', '협동', '지혜'];
+          for (const fb of fallbackWrongs) {
+            if (wrongCandidates.length >= 3) break;
+            if (fb !== correctAnswer && !wrongCandidates.includes(fb)) {
+              wrongCandidates.push(fb);
+            }
+          }
+
+          const options = [correctAnswer, ...wrongCandidates.slice(0, 3)].sort(() => Math.random() - 0.5);
+          const answerIndex = options.indexOf(correctAnswer);
+
+          generated.push({
+            id: `voca_${rec.id || Math.random().toString(36).slice(2, 7)}`,
+            q: questionText,
+            formula: `[어휘 개념] ${rec.hint ? '힌트: ' + rec.hint : '어휘 탐험'}`,
+            options: options,
+            answer: answerIndex,
+            hint: rec.hint ? `초성 힌트: ${rec.hint} 💡` : `의미를 찬찬히 읽어보세요!`,
+            audioText: `${rec.word}. ${rec.meaning}`,
+            imageUrl: rec.imageUrl || null,
+            interactiveUrl: rec.interactiveUrl || null,
+            source: 'notion_voca',
+            targetChild: u,
+            subject: subj,
+            word: rec.word,
+            meaning: rec.meaning
+          });
+        } else {
+          // 유형 B: 단어를 보고 알맞은 뜻 고르기
+          const questionText = `낱말 [${rec.word}]의 알맞은 뜻풀이는 무엇일까요?`;
+          const correctAnswer = rec.meaning.trim();
+
+          const wrongCandidates = allMeanings.filter(m => m !== correctAnswer).sort(() => Math.random() - 0.5).slice(0, 3);
+
+          const fallbackWrongs = [
+            '사물의 상태나 모양을 자세히 살펴보는 것',
+            '여러 사람이 함께 힘을 합쳐 일을 해내는 것',
+            '남의 처지나 생각을 깊이 이해하고 도와주는 마음'
+          ];
+          for (const fb of fallbackWrongs) {
+            if (wrongCandidates.length >= 3) break;
+            if (fb !== correctAnswer && !wrongCandidates.includes(fb)) {
+              wrongCandidates.push(fb);
+            }
+          }
+
+          const options = [correctAnswer, ...wrongCandidates.slice(0, 3)].sort(() => Math.random() - 0.5);
+          const answerIndex = options.indexOf(correctAnswer);
+
+          generated.push({
+            id: `voca_${rec.id || Math.random().toString(36).slice(2, 7)}`,
+            q: questionText,
+            formula: `[낱말 뜻] ${rec.word}`,
+            options: options,
+            answer: answerIndex,
+            hint: rec.hint ? `초성 힌트: ${rec.hint} 💡` : `문맥 속에서 뜻을 연상해 보세요!`,
+            audioText: `${rec.word}. ${rec.meaning}`,
+            imageUrl: rec.imageUrl || null,
+            interactiveUrl: rec.interactiveUrl || null,
+            source: 'notion_voca',
+            targetChild: u,
+            subject: subj,
+            word: rec.word,
+            meaning: rec.meaning
+          });
+        }
+      }
+
+      return generated;
+    } catch (e) {
+      console.warn('[buildVocaQuestionsFromNotion] 합성 실패:', e);
+      return [];
+    }
+  }
+
+  // ========================================================
+  // 6. 🚀 듀오링고형 Universal 4+1 출제 엔진 (정적 + 노션 어휘 융합)
   // ========================================================
   function getSubjectQuest(subj, unitScope = '', mode = 'mixed', customUser = '') {
     const p = new URLSearchParams(window.location.search);
@@ -193,8 +393,16 @@
       const mainPool = mData[currentUnitKey] || [];
       const nextPool = nextUnitKey ? (mData[nextUnitKey] || []) : [];
 
+      // 💡 노션 용어사전 캐시 기반 어휘 문제 동적 합성 및 융합
+      const vocaQuestions = buildVocaQuestionsFromNotion('minseo', subj, currentUnitKey);
+      let combinedMain = [...mainPool];
+      if (vocaQuestions.length > 0) {
+        // 어휘 문제를 1~2개 융합하여 교과 개념 드릴의 다양성 부여
+        combinedMain.push(...vocaQuestions.slice(0, 2));
+      }
+
       // 1~3번: 현재 진도 문제 3개
-      const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
+      const shuffledMain = [...combinedMain].sort(() => Math.random() - 0.5);
       let selected = shuffledMain.slice(0, 3);
 
       // 4번: 최근 오답 복습 1개 (타 학년 오염 방지 가드 검증)
@@ -227,8 +435,8 @@
         selected.push(shuffledMain[4]);
       }
 
-      while (selected.length < 5 && mainPool.length > 0) {
-        selected.push(mainPool[selected.length % mainPool.length]);
+      while (selected.length < 5 && combinedMain.length > 0) {
+        selected.push(combinedMain[selected.length % combinedMain.length]);
       }
 
       return {
@@ -252,8 +460,15 @@
     const mainPool = sData[curUnit] || [];
     const nextPool = sData[nextUnitKey] || [];
 
+    // 💡 노션 용어사전 캐시 기반 어휘 문제 동적 합성 및 융합
+    const vocaQuestions = buildVocaQuestionsFromNotion('minsu', subj, curUnit);
+    let combinedMain = [...mainPool];
+    if (vocaQuestions.length > 0) {
+      combinedMain.push(...vocaQuestions.slice(0, 2));
+    }
+
     // 1~3번: 현재 진도 드릴 3문제
-    const shuffledMain = [...mainPool].sort(() => Math.random() - 0.5);
+    const shuffledMain = [...combinedMain].sort(() => Math.random() - 0.5);
     let selected = shuffledMain.slice(0, 3);
 
     // 4번: 최근 오답 복습 1문제 (타 학년 오염 방지 가드 검증)
@@ -284,8 +499,8 @@
       selected.push(shuffledMain[4] || shuffledMain[0]);
     }
 
-    while (selected.length < 5 && mainPool.length > 0) {
-      selected.push(mainPool[selected.length % mainPool.length]);
+    while (selected.length < 5 && combinedMain.length > 0) {
+      selected.push(combinedMain[selected.length % combinedMain.length]);
     }
 
     let questTitle = sData.title;
@@ -303,7 +518,7 @@
   }
 
   // ========================================================
-  // 6. 📦 단원 팩 단일 원천(SSOT) 동적 로더 인터페이스
+  // 7. 📦 단원 팩 단일 원천(SSOT) 동적 로더 인터페이스
   // ========================================================
   window.loadCustomUnitPack = function(unitPackJson) {
     try {
@@ -340,4 +555,6 @@
   window.getParentQuestSettings = getParentQuestSettings;
   window.NEXT_UNIT_MAP = NEXT_UNIT_MAP;
   window.getSubjectQuest = getSubjectQuest;
+  window.getNotionCachedVocaList = getNotionCachedVocaList;
+  window.buildVocaQuestionsFromNotion = buildVocaQuestionsFromNotion;
 })();
