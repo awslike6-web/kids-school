@@ -312,7 +312,7 @@
             options: options,
             answer: answerIndex,
             hint: rec.hint ? `초성 힌트: ${rec.hint} 💡` : `의미를 찬찬히 읽어보세요!`,
-            audioText: `${rec.word}. ${rec.meaning}`,
+            audioText: (subj === 'english') ? rec.word : `${rec.word}. ${rec.meaning}`,
             imageUrl: rec.imageUrl || null,
             interactiveUrl: rec.interactiveUrl || null,
             source: 'notion_voca',
@@ -350,7 +350,7 @@
             options: options,
             answer: answerIndex,
             hint: rec.hint ? `초성 힌트: ${rec.hint} 💡` : `문맥 속에서 뜻을 연상해 보세요!`,
-            audioText: `${rec.word}. ${rec.meaning}`,
+            audioText: (subj === 'english') ? rec.word : `${rec.word}. ${rec.meaning}`,
             imageUrl: rec.imageUrl || null,
             interactiveUrl: rec.interactiveUrl || null,
             source: 'notion_voca',
@@ -370,7 +370,235 @@
   }
 
   // ========================================================
-  // 6. 🚀 듀오링고형 Universal 4+1 출제 엔진 (정적 + 노션 어휘 융합)
+  // 5-2. 🏛️ 노션 교재·사료 마스터 DB 및 실전 탐구 퀴즈 융합 엔진
+  // ========================================================
+  function buildCurriculumQuestionsFromNotion(child, subj, unitKey = '') {
+    try {
+      const u = getNormalizedChildId(child);
+      const generated = [];
+
+      // 1) 사회(사료/지도/차트) 탐구 퀴즈 생성
+      if (subj === 'society') {
+        let historyPool = [];
+        if (typeof SOCIETY_CURRICULUM_DATA !== 'undefined') {
+          const gradeKey = (u === 'minseo') ? '1학년 2학기' : '5학년 2학기';
+          const gradeData = SOCIETY_CURRICULUM_DATA[gradeKey] || {};
+          for (const unitName in gradeData) {
+            const uData = gradeData[unitName];
+            if (uData && Array.isArray(uData.history) && uData.history.length > 0) {
+              historyPool.push(...uData.history);
+            }
+            if (uData && Array.isArray(uData.voca) && uData.voca.length > 0) {
+              const withImages = uData.voca.filter(v => v.image || v.img);
+              if (withImages.length > 0) historyPool.push(...withImages);
+            }
+          }
+        }
+
+        // 전역 노션 사료 데이터가 있으면 병합
+        if (typeof window !== 'undefined' && Array.isArray(window.allFetchedRecords)) {
+          const notionHist = window.allFetchedRecords.filter(r => r.quiz || r.artifactName || r.img || r.imageUrl);
+          if (notionHist.length > 0) historyPool.push(...notionHist);
+        }
+
+        if (historyPool.length > 0) {
+          const shuffled = [...historyPool].sort(() => Math.random() - 0.5);
+          for (const item of shuffled) {
+            if (generated.length >= 2) break;
+            const name = item.name || item.title || item.artifactName || item.word || '역사 문화유산';
+            const desc = item.desc || item.detailContext || item.artifactUsage || item.meaning || '';
+            const img = item.img || item.image || item.imageUrl || null;
+            if (!desc) continue;
+
+            const allDescs = historyPool.map(h => h.desc || h.detailContext || h.meaning || '').filter(d => d && d !== desc);
+            const wrongOptions = Array.from(new Set(allDescs)).sort(() => Math.random() - 0.5).slice(0, 3);
+            const fallbackWrongs = [
+              '조선 후기에 백성들의 농사를 돕기 위해 만든 천문 기구입니다.',
+              '고려 시대에 외적의 침략을 막기 위해 쌓은 산성입니다.',
+              '삼국 시대에 왕과 귀족들이 착용하던 화려한 금관입니다.'
+            ];
+            for (const fb of fallbackWrongs) {
+              if (wrongOptions.length >= 3) break;
+              if (fb !== desc && !wrongOptions.includes(fb)) wrongOptions.push(fb);
+            }
+
+            const options = [desc, ...wrongOptions.slice(0, 3)].sort(() => Math.random() - 0.5);
+            const answerIdx = options.indexOf(desc);
+
+            generated.push({
+              id: `curr_soc_${Math.random().toString(36).slice(2, 7)}`,
+              q: item.quiz || `[역사 사료 돋보기] 다음 유물 사진에 대한 올바른 설명은 무엇일까요?`,
+              formula: `🏛️ ${name}`,
+              options: options,
+              answer: answerIdx,
+              hint: `유물의 쓰임새: ${desc.slice(0, 40)}... 💡`,
+              audioText: name,
+              imageUrl: img,
+              source: 'notion_curriculum',
+              targetChild: u,
+              subject: subj
+            });
+          }
+        }
+      }
+
+      // 2) 과학(실험/가상실험) 탐구 퀴즈 생성
+      if (subj === 'science') {
+        let sciencePool = [];
+        if (typeof window !== 'undefined' && Array.isArray(window.cachedScienceCurriculum)) {
+          sciencePool.push(...window.cachedScienceCurriculum);
+        }
+        if (typeof SCIENCE_CURRICULUM_DATA !== 'undefined') {
+          for (const gradeKey in SCIENCE_CURRICULUM_DATA) {
+            const uData = SCIENCE_CURRICULUM_DATA[gradeKey];
+            if (Array.isArray(uData)) sciencePool.push(...uData);
+          }
+        }
+
+        if (sciencePool.length > 0) {
+          const shuffled = [...sciencePool].sort(() => Math.random() - 0.5);
+          for (const item of shuffled) {
+            if (generated.length >= 2) break;
+            if (item.quiz && Array.isArray(item.choices) && item.choices.length >= 2) {
+              generated.push({
+                id: `curr_sci_${item.id || Math.random().toString(36).slice(2, 7)}`,
+                q: item.quiz,
+                formula: `🔬 ${item.title || '실험 관찰'}`,
+                options: item.choices,
+                answer: item.correctIdx ?? (item.ans ? item.ans - 1 : 0),
+                hint: item.explanation || item.desc || '실험의 원리와 관찰 결과를 떠올려보세요! 💡',
+                audioText: item.title || '',
+                imageUrl: item.mediaUrl || null,
+                source: 'notion_curriculum',
+                targetChild: u,
+                subject: subj
+              });
+            }
+          }
+        }
+      }
+
+      return generated;
+    } catch (e) {
+      console.warn('[buildCurriculumQuestionsFromNotion] 합성 알림:', e);
+      return [];
+    }
+  }
+
+  // ========================================================
+  // 5-3. 🎲 [수학 특화] 무한 랜덤 암산 생성기 (답 외우기 원천 방지)
+  // ========================================================
+  function generateDynamicMentalMath(child, unitKey = '') {
+    const u = getNormalizedChildId(child);
+
+    // 👦 [초5 민수 맞춤 10초 컷 무한 암산]
+    if (u === 'minsu') {
+      const isFractionMode = (unitKey === 'fraction' || unitKey === '2' || Math.random() > 0.5);
+
+      if (isFractionMode) {
+        // [유형 1: 분수의 곱셈 (진분수 × 자연수)]
+        const dens = [3, 5, 7];
+        const d = dens[Math.floor(Math.random() * dens.length)];
+        const n = Math.floor(Math.random() * (d - 1)) + 1;
+        const k = Math.floor(Math.random() * 3) + 2;
+
+        const correctNum = n * k;
+        const correctFraction = `${correctNum}/${d}`;
+
+        const wrongCandidates = [
+          `${correctNum}/${d * k}`,
+          `${n + k}/${d}`,
+          `${n}/${d * k}`
+        ].filter(w => w !== correctFraction);
+
+        const options = [correctFraction, ...wrongCandidates.slice(0, 3)].sort(() => Math.random() - 0.5);
+        const answerIdx = options.indexOf(correctFraction);
+
+        return {
+          id: `math_dyn_frac_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          q: `다음 분수의 곱셈을 계산한 값은 얼마일까요?`,
+          formula: `${n}/${d} × ${k} = [ ? ]`,
+          options: options,
+          answer: answerIdx,
+          hint: `분수의 곱셈에서 분모는 그대로 두고, 분자에만 자연수를 쏙 곱해요! 🍕`,
+          source: 'dynamic_mental_math',
+          subject: 'math'
+        };
+      } else {
+        // [유형 2: 두 자릿수 ÷ 한 자릿수 실전 나눗셈 (나머지 0 보장)]
+        const divisors = [2, 3, 4, 5, 6];
+        const b = divisors[Math.floor(Math.random() * divisors.length)];
+        const q = Math.floor(Math.random() * 14) + 11;
+        const a = b * q;
+
+        const correctAns = String(q);
+        const wrongCandidates = [
+          String(q - 1),
+          String(q + 1),
+          String(q + 10),
+          String(q - 2)
+        ].filter(w => w !== correctAns);
+
+        const options = [correctAns, ...wrongCandidates.slice(0, 3)].sort(() => Math.random() - 0.5);
+        const answerIdx = options.indexOf(correctAns);
+
+        return {
+          id: `math_dyn_div_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          q: `${a} ÷ ${b} 를 계산한 몫은 얼마일까요?`,
+          formula: `${a} ÷ ${b} = [ ? ]`,
+          options: options,
+          answer: answerIdx,
+          hint: `십의 자리와 일의 자리를 각각 ${b}로 나누어보세요! 💡`,
+          source: 'dynamic_mental_math',
+          subject: 'math'
+        };
+      }
+    }
+
+    // 👧 [초1 민서 맞춤 10초 컷 무한 암산]
+    const isMakeTen = Math.random() > 0.5;
+    if (isMakeTen) {
+      const n1 = Math.floor(Math.random() * 8) + 1;
+      const n2 = 10 - n1;
+      const correctAns = String(n2);
+      const wrongCandidates = [String(n2 + 1), String(Math.max(1, n2 - 1)), String(n1)].filter(w => w !== correctAns);
+      const options = [correctAns, ...wrongCandidates.slice(0, 3)].sort(() => Math.random() - 0.5);
+      const answerIdx = options.indexOf(correctAns);
+
+      return {
+        id: `math_dyn_m10_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        q: `${n1}에 얼마를 더해야 10이 될까요?`,
+        formula: `${n1} + [ ? ] = 10`,
+        options: options,
+        answer: answerIdx,
+        hint: `10 묶음을 채우려면 몇 개가 더 필요할까요? 🍬`,
+        source: 'dynamic_mental_math',
+        subject: 'math'
+      };
+    } else {
+      const n1 = Math.floor(Math.random() * 5) + 1;
+      const n2 = Math.floor(Math.random() * 4) + 1;
+      const sum = n1 + n2;
+      const correctAns = String(sum);
+      const wrongCandidates = [String(sum + 1), String(sum - 1), String(sum + 2)].filter(w => w !== correctAns);
+      const options = [correctAns, ...wrongCandidates.slice(0, 3)].sort(() => Math.random() - 0.5);
+      const answerIdx = options.indexOf(correctAns);
+
+      return {
+        id: `math_dyn_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        q: `${n1} + ${n2} 를 더하면 얼마일까요?`,
+        formula: `${n1} + ${n2} = [ ? ]`,
+        options: options,
+        answer: answerIdx,
+        hint: `사탕 ${n1}개와 ${n2}개를 쏙 모아보세요! 🍬`,
+        source: 'dynamic_mental_math',
+        subject: 'math'
+      };
+    }
+  }
+
+  // ========================================================
+  // 6. 🚀 듀오링고형 Universal 4+1 출제 엔진 (정적 + 노션 마스터 융합)
   // ========================================================
   function getSubjectQuest(subj, unitScope = '', mode = 'mixed', customUser = '') {
     const p = new URLSearchParams(window.location.search);
@@ -396,14 +624,27 @@
       // 💡 노션 용어사전 캐시 기반 어휘 문제 동적 합성 및 융합
       const vocaQuestions = buildVocaQuestionsFromNotion('minseo', subj, currentUnitKey);
       let combinedMain = [...mainPool];
-      if (vocaQuestions.length > 0) {
-        // 어휘 문제를 1~2개 융합하여 교과 개념 드릴의 다양성 부여
-        combinedMain.push(...vocaQuestions.slice(0, 2));
+
+      // 🎲 수학 과목: 답 외우기 원천 차단 무한 랜덤 암산 1문제 우선 융합
+      if (subj === 'math') {
+        combinedMain.unshift(generateDynamicMentalMath('minseo', currentUnitKey));
       }
 
-      // 1~3번: 현재 진도 문제 3개
-      const shuffledMain = [...combinedMain].sort(() => Math.random() - 0.5);
-      let selected = shuffledMain.slice(0, 3);
+      // 🏛️ 사회/과학 과목: 노션 교재·사료/실험 탐구 퀴즈 1문제 우선 융합
+      if (subj === 'society' || subj === 'science') {
+        const currQuestions = buildCurriculumQuestionsFromNotion('minseo', subj, currentUnitKey);
+        if (currQuestions.length > 0) combinedMain.unshift(...currQuestions.slice(0, 1));
+      }
+
+      if (vocaQuestions.length > 0) {
+        // 어휘 문제를 1개 융합하여 교과 개념 드릴의 다양성 부여
+        combinedMain.push(...vocaQuestions.slice(0, 1));
+      }
+
+      // 1~3번: 현재 진도 문제 3개 (우선 융합 문제 보장 + 셔플)
+      const topPriority = combinedMain.slice(0, 2);
+      const restShuffled = combinedMain.slice(2).sort(() => Math.random() - 0.5);
+      let selected = [...topPriority, ...restShuffled].slice(0, 3);
 
       // 4번: 최근 오답 복습 1개 (타 학년 오염 방지 가드 검증)
       let reviewQuestion = null;
@@ -422,17 +663,18 @@
       if (reviewQuestion) {
         selected.push(reviewQuestion);
       } else {
-        const remaining = shuffledMain.slice(3, 4);
+        const remaining = restShuffled.slice(1, 2);
         if (remaining.length > 0) selected.push(remaining[0]);
-        else if (shuffledMain.length > 0) selected.push(shuffledMain[0]);
+        else if (combinedMain.length > 3) selected.push(combinedMain[3]);
+        else selected.push(combinedMain[0]);
       }
 
       // 5번: 🎁 다음 단원 비밀 맛보기 탐험 (하트 면제!)
       if (nextPool.length > 0) {
         const nextSample = nextPool[Math.floor(Math.random() * nextPool.length)];
         selected.push({ ...nextSample, isPreview: true });
-      } else if (shuffledMain.length > 4) {
-        selected.push(shuffledMain[4]);
+      } else if (combinedMain.length > 4) {
+        selected.push(combinedMain[4]);
       }
 
       while (selected.length < 5 && combinedMain.length > 0) {
@@ -463,13 +705,26 @@
     // 💡 노션 용어사전 캐시 기반 어휘 문제 동적 합성 및 융합
     const vocaQuestions = buildVocaQuestionsFromNotion('minsu', subj, curUnit);
     let combinedMain = [...mainPool];
-    if (vocaQuestions.length > 0) {
-      combinedMain.push(...vocaQuestions.slice(0, 2));
+
+    // 🎲 수학 과목: 답 외우기 원천 차단 무한 랜덤 암산 1문제 우선 융합
+    if (subj === 'math') {
+      combinedMain.unshift(generateDynamicMentalMath('minsu', curUnit));
     }
 
-    // 1~3번: 현재 진도 드릴 3문제
-    const shuffledMain = [...combinedMain].sort(() => Math.random() - 0.5);
-    let selected = shuffledMain.slice(0, 3);
+    // 🏛️ 사회/과학 과목: 노션 교재·사료/실험 탐구 퀴즈 1~2문제 우선 융합
+    if (subj === 'society' || subj === 'science') {
+      const currQuestions = buildCurriculumQuestionsFromNotion('minsu', subj, curUnit);
+      if (currQuestions.length > 0) combinedMain.unshift(...currQuestions.slice(0, 2));
+    }
+
+    if (vocaQuestions.length > 0) {
+      combinedMain.push(...vocaQuestions.slice(0, 1));
+    }
+
+    // 1~3번: 현재 진도 드릴 3문제 (우선 융합 문제 보장 + 셔플)
+    const topPriority = combinedMain.slice(0, 2);
+    const restShuffled = combinedMain.slice(2).sort(() => Math.random() - 0.5);
+    let selected = [...topPriority, ...restShuffled].slice(0, 3);
 
     // 4번: 최근 오답 복습 1문제 (타 학년 오염 방지 가드 검증)
     let reviewQuestion = null;
@@ -488,7 +743,7 @@
     if (reviewQuestion) {
       selected.push(reviewQuestion);
     } else {
-      selected.push(shuffledMain[3] || shuffledMain[0]);
+      selected.push(restShuffled[1] || combinedMain[0]);
     }
 
     // 5번: 🎁 다음 단원 비밀 맛보기 탐험 (하트 면제!)
@@ -496,7 +751,7 @@
       const nextSample = nextPool[Math.floor(Math.random() * nextPool.length)];
       selected.push({ ...nextSample, isPreview: true });
     } else {
-      selected.push(shuffledMain[4] || shuffledMain[0]);
+      selected.push(combinedMain[4] || combinedMain[0]);
     }
 
     while (selected.length < 5 && combinedMain.length > 0) {

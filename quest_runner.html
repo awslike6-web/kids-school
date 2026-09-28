@@ -314,6 +314,12 @@
       <div id="progressBar" class="bg-gradient-to-r from-neon-cyan to-neon-green h-full rounded-full transition-all duration-300" style="width: 20%;"></div>
     </div>
 
+    <!-- 📝 수학 전용 원터치 계산 메모 버튼 (수학 과목일 때만 노출) -->
+    <button id="mathMemoBtn" class="hidden items-center gap-1 bg-amber-500/20 border border-amber-400/50 text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold active:scale-95 transition-transform hover:bg-amber-500/30" onclick="toggleMathMemoPad()">
+      <span class="text-sm">📝</span>
+      <span>메모</span>
+    </button>
+
     <!-- 하트 라이프 -->
     <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-2.5 py-1 rounded-full">
       <span class="text-sm" id="heartIcons">❤️❤️❤️</span>
@@ -512,6 +518,47 @@
     </div>
   </div>
 
+  <!-- ================= 5-1. 📝 [수학 전용] 원터치 손글씨 계산 연습장 모달 ================= -->
+  <div id="mathMemoModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end justify-center p-3">
+    <div class="w-full max-w-md bg-lab-card border-2 border-amber-400/80 rounded-3xl p-4 shadow-2xl space-y-3 animate-fade-in text-white">
+      <div class="flex items-center justify-between pb-2 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📝</span>
+          <span class="text-sm font-bold text-amber-300">손글씨 계산 연습장</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="px-3 py-1 text-xs rounded-xl bg-red-500/20 text-red-300 border border-red-400/30 font-bold active:scale-95" onclick="clearMathMemoCanvas()">
+            🗑️ 지우기
+          </button>
+          <button type="button" class="w-8 h-8 rounded-full bg-white/10 text-gray-300 flex items-center justify-center font-bold text-sm active:scale-95" onclick="toggleMathMemoPad()">
+            ✕
+          </button>
+        </div>
+      </div>
+      <!-- 캔버스 터치 패드 -->
+      <div class="relative bg-[#0d1b1e] rounded-2xl border border-lab-card-border overflow-hidden touch-none" style="height: 190px;">
+        <canvas id="mathMemoCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+      </div>
+      <button type="button" class="w-full py-3 rounded-2xl bg-amber-400 text-lab-bg font-bold text-sm shadow-[0_4px_0_0_#997300] active:translate-y-1" onclick="toggleMathMemoPad()">
+        확인 완료 (문제 계속 풀기)
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= 5-2. 🔍 사료/실험/지도 이미지 고화질 확대 모달 ================= -->
+  <div id="imageZoomModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4" onclick="closeImageZoom()">
+    <div class="relative max-w-lg w-full bg-lab-card/90 border-2 border-neon-cyan/50 rounded-3xl p-4 shadow-2xl text-center space-y-3" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center pb-2 border-b border-white/10">
+        <span class="text-xs text-neon-cyan font-bold">🔍 사진 크게 보기</span>
+        <button type="button" class="w-7 h-7 rounded-full bg-white/10 text-gray-300 flex items-center justify-center font-bold text-xs" onclick="closeImageZoom()">✕</button>
+      </div>
+      <div class="max-h-[65vh] overflow-auto rounded-2xl">
+        <img id="imageZoomTarget" src="" class="w-full h-auto object-contain rounded-xl" alt="확대 사진" />
+      </div>
+      <p class="text-xs text-gray-400">화면 밖을 누르면 닫힙니다.</p>
+    </div>
+  </div>
+
   <!-- ================= 6. 노션 보상 및 학습일지 DB & 요정 음성 코어 모듈 로드 ================= -->
   <script src="./kids/config.js"></script>
   <script src="./kids/core/notion-voca.js"></script>
@@ -667,6 +714,18 @@
         }
       }
 
+      // 📝 수학 과목 전용 원터치 계산 메모장 버튼 제어
+      const memoBtn = document.getElementById('mathMemoBtn');
+      if (memoBtn) {
+        if (currentSubj === 'math') {
+          memoBtn.classList.remove('hidden');
+          memoBtn.classList.add('flex');
+        } else {
+          memoBtn.classList.add('hidden');
+          memoBtn.classList.remove('flex');
+        }
+      }
+
       renderQuestion();
     }
 
@@ -688,7 +747,10 @@
       document.getElementById('questionText').innerHTML = q.q;
       let formulaHtml = q.formula || '';
       if (q.imageUrl) {
-        formulaHtml += `<div class="mt-2 text-center"><img src="${q.imageUrl}" class="max-h-32 mx-auto rounded-xl border border-white/20 shadow-sm object-contain" alt="시각 자료" /></div>`;
+        formulaHtml += `<div class="mt-2 text-center">
+          <img src="${q.imageUrl}" class="max-h-48 mx-auto rounded-2xl border-2 border-white/20 shadow-md object-contain cursor-pointer hover:scale-105 active:scale-95 transition-all" alt="시각 자료" onclick="openImageZoom('${q.imageUrl}')" />
+          <span class="block text-xs text-gray-400 mt-1.5 font-sans">🔍 사진을 터치하면 크게 볼 수 있어요</span>
+        </div>`;
       }
       if (q.interactiveUrl) {
         formulaHtml += `<div class="mt-2 text-center"><a href="${q.interactiveUrl}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${isMinseo ? 'bg-[#ff6584]/15 text-[#ff6584] border border-[#ff6584]/30' : 'bg-neon-cyan/15 text-neon-cyan border border-neon-cyan/30'} hover:opacity-80 transition-all">🔬 인터랙티브 탐구관 열기 ↗</a></div>`;
@@ -766,30 +828,23 @@
       document.getElementById('feedbackSheet').classList.add('hidden');
     }
 
-    // 소리 / 발음 듣기 (Edge-TTS 실시간 스트리밍: 국어는 SunHi, 영어는 Jenny)
+    // 소리 / 발음 듣기 (공부방 SSOT 단일 오디오 파이프라인: 영어는 Jenny 원어민 0.85x, 국어는 SunHi)
     function playQuestionAudio() {
       const q = currentQuest.questions[currentIndex];
       if (!q || !q.audioText) return;
       playSound('tap');
-      const isKoreanAudio = q.audioLang === 'ko' || currentSubj === 'korean';
-      const voice = isKoreanAudio ? 'ko-KR-SunHiNeural' : 'en-US-JennyNeural';
+
+      const isEnglish = currentSubj === 'english' || q.audioLang === 'en' || (typeof isEnglishText === 'function' && isEnglishText(q.audioText));
+
+      if (isEnglish) {
+        if (typeof speakEnglish === 'function') {
+          speakEnglish(q.audioText);
+          return;
+        }
+      }
 
       if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(q.audioText, { forceVoice: voice });
-      } else if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(q.audioText);
-        utter.lang = isKoreanAudio ? 'ko-KR' : 'en-US';
-        utter.rate = isKoreanAudio ? 0.9 : 0.85;
-        const voices = window.speechSynthesis.getVoices();
-        if (isKoreanAudio) {
-          const koVoice = voices.find(v => v.lang.startsWith('ko') && (v.name.includes('SunHi') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Yuna')));
-          if (koVoice) utter.voice = koVoice;
-        } else {
-          const enVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Jenny') || v.name.includes('Google') || v.name.includes('Samantha')));
-          if (enVoice) utter.voice = enVoice;
-        }
-        window.speechSynthesis.speak(utter);
+        speakFairyTTS(q.audioText, null, { forceVoice: isEnglish ? 'en-US-JennyNeural' : 'ko-KR-SunHiNeural' });
       }
     }
 
@@ -863,7 +918,9 @@
         playSound('correct');
         recordCorrectItem(currentUser, currentSubj, q);
 
-        if (typeof speakFairyTTS === 'function') {
+        if (typeof fairyPraise === 'function') {
+          fairyPraise();
+        } else if (typeof speakFairyTTS === 'function') {
           speakFairyTTS(isMinseo ? "정답이야! 참 잘했어!" : "정답이야! 대단해!");
         }
 
@@ -903,7 +960,9 @@
           sessionMissedQuestions.push(q);
         }
 
-        if (typeof speakFairyTTS === 'function') {
+        if (typeof fairyEncourage === 'function') {
+          fairyEncourage();
+        } else if (typeof speakFairyTTS === 'function') {
           speakFairyTTS(q.isPreview ? "괜찮아! 내일 배울 거니까!" : (isMinseo ? "괜찮아! 다시 해보자!" : "아쉬워! 다시 힘내보자!"));
         }
 
@@ -1025,7 +1084,9 @@
     // 5문제 완독 모달 (노션 인벤토리 보상 DB + 노션 학습일지 DB 자동 전송)
     async function showClearModal() {
       playSound('fanfare');
-      if (typeof speakFairyTTS === 'function') {
+      if (typeof fairyReward === 'function') {
+        fairyReward();
+      } else if (typeof speakFairyTTS === 'function') {
         speakFairyTTS(isMinseo ? "축하해! 퀘스트 완료!" : "퀘스트 완료!");
       }
       const modal = document.getElementById('clearModal');
@@ -1183,6 +1244,85 @@
       const modal = document.getElementById('exitModal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    // ========================================================
+    // 📝 [수학 전용] 손글씨 계산 메모장 제어
+    // ========================================================
+    let memoCanvas = null, memoCtx = null, isMemoDrawing = false;
+    function initMathMemo() {
+      memoCanvas = document.getElementById('mathMemoCanvas');
+      if (!memoCanvas) return;
+      memoCtx = memoCanvas.getContext('2d');
+
+      const rect = memoCanvas.getBoundingClientRect();
+      memoCanvas.width = rect.width * (window.devicePixelRatio || 1);
+      memoCanvas.height = rect.height * (window.devicePixelRatio || 1);
+      memoCtx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      memoCtx.strokeStyle = '#fef08a'; // 선명한 분필 노란색
+      memoCtx.lineWidth = 3.5;
+      memoCtx.lineCap = 'round';
+      memoCtx.lineJoin = 'round';
+
+      const getPos = (e) => {
+        const r = memoCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - r.left, y: clientY - r.top };
+      };
+
+      const startDraw = (e) => {
+        isMemoDrawing = true;
+        const pos = getPos(e);
+        memoCtx.beginPath();
+        memoCtx.moveTo(pos.x, pos.y);
+      };
+      const draw = (e) => {
+        if (!isMemoDrawing) return;
+        const pos = getPos(e);
+        memoCtx.lineTo(pos.x, pos.y);
+        memoCtx.stroke();
+      };
+      const stopDraw = () => { isMemoDrawing = false; };
+
+      memoCanvas.onmousedown = startDraw;
+      memoCanvas.onmousemove = draw;
+      window.onmouseup = stopDraw;
+      memoCanvas.ontouchstart = (e) => { e.preventDefault(); startDraw(e); };
+      memoCanvas.ontouchmove = (e) => { e.preventDefault(); draw(e); };
+      memoCanvas.ontouchend = stopDraw;
+    }
+
+    function toggleMathMemoPad() {
+      const modal = document.getElementById('mathMemoModal');
+      if (!modal) return;
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden')) {
+        setTimeout(initMathMemo, 50);
+      }
+    }
+
+    function clearMathMemoCanvas() {
+      if (memoCanvas && memoCtx) {
+        memoCtx.clearRect(0, 0, memoCanvas.width, memoCanvas.height);
+      }
+    }
+
+    // ========================================================
+    // 🔍 사료/실험/지도 사진 고화질 라이트박스 돋보기
+    // ========================================================
+    function openImageZoom(imgUrl) {
+      if (!imgUrl) return;
+      const modal = document.getElementById('imageZoomModal');
+      const target = document.getElementById('imageZoomTarget');
+      if (modal && target) {
+        target.src = imgUrl;
+        modal.classList.remove('hidden');
+      }
+    }
+    function closeImageZoom() {
+      const modal = document.getElementById('imageZoomModal');
+      if (modal) modal.classList.add('hidden');
     }
 
     // 초기 실행

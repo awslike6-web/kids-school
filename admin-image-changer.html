@@ -1201,7 +1201,18 @@
         }
 
         modifiedItems.clear();
-        logPush('\n🎉 [배포 완료] 깃허브 푸시와 노션 DB가 100% 동시 최신화되었습니다!');
+
+        // 🧹 공부방 및 5분 퀘스트 로컬 캐시 즉각 무효화 (실시간 반영 보장)
+        try {
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && (k.includes('VOCA_CACHE') || k.includes('CURRICULUM_CACHE') || k.startsWith('MINMIN_VOCA_CACHE_'))) {
+              localStorage.removeItem(k);
+            }
+          }
+        } catch (e) {}
+
+        logPush('\n🎉 [배포 완료] 깃허브 푸시와 노션 DB가 100% 동시 최신화되었습니다! (로컬 캐시 갱신)');
         document.getElementById('pushModalTitle').textContent = '🎉 배포 성공 완료!';
         document.getElementById('pushModalActions').style.display = 'flex';
         showToast('🚀 깃허브와 노션에 실시간 반영이 완료되었습니다!');
@@ -1306,6 +1317,17 @@
         if (!res.ok) throw new Error(await res.text());
         
         closeAddModal();
+
+        // 🧹 공부방 및 5분 퀘스트 로컬 캐시 즉각 무효화
+        try {
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && (k.includes('VOCA_CACHE') || k.includes('CURRICULUM_CACHE') || k.startsWith('MINMIN_VOCA_CACHE_'))) {
+              localStorage.removeItem(k);
+            }
+          }
+        } catch (e) {}
+
         showToast(`🎉 [${title}] 새 항목이 노션 DB에 성공적으로 등록되었습니다!`);
         refreshCurrentModeData();
       } catch (err) {

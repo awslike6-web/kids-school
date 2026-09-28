@@ -615,6 +615,12 @@ function cleanTextForTTS(rawText) {
  * 📢 요정 음성 메인 출력 함수 (1순위: OpenAI TTS ➔ 2순위: WebSpeech 폴백)
  */
 async function speakFairyTTS(text, onEndCallback = null, options = {}) {
+    // 💡 2번째 인자로 옵션 객체가 전달된 경우(오버로딩) 안전 지원
+    if (onEndCallback && typeof onEndCallback === 'object' && !options.forceVoice && !options.skipPreset) {
+        options = onEndCallback;
+        onEndCallback = null;
+    }
+
     stopFairyTTS(); // 새 발화 요청 시 이전 오디오/TTS 즉시 중단
 
     const isTtsEnabled = localStorage.getItem('fairy_tts_enabled') !== 'false';
@@ -645,9 +651,11 @@ async function speakFairyTTS(text, onEndCallback = null, options = {}) {
         return;
     }
 
-    // 2. 🌟 1순위: Cloudflare Worker Edge Neural AI TTS (선희 성우 초고음질 실시간 스트리밍)
+    const targetForceVoice = (options && options.forceVoice) || null;
+
+    // 2. 🌟 1순위: Cloudflare Worker Edge Neural AI TTS (선희/제니 성우 초고음질 실시간 스트리밍)
     try {
-        await playCloudflareEdgeTtsStream(cleanText, onEndCallback);
+        await playCloudflareEdgeTtsStream(cleanText, onEndCallback, targetForceVoice);
         return;
     } catch (edgeError) {
         console.warn("ℹ️ [Cloudflare Edge-TTS 미응답/폴백] OpenAI TTS 또는 WebSpeech로 자동 전환합니다:", edgeError.message || edgeError);
@@ -664,14 +672,14 @@ async function speakFairyTTS(text, onEndCallback = null, options = {}) {
         }
     }
 
-    // 4. 🗣️ 3순위 (폴백): 브라우저 WebSpeech API 최고 품질 낭독
-    speakWebSpeechFallback(cleanText, isQuestion, onEndCallback);
+    // 4. 🗣️ 3순위 (폴백): 브라우저 WebSpeech API 최고 품질 낭독 (영어/한국어 스마트 분기)
+    speakWebSpeechFallback(cleanText, isQuestion, onEndCallback, options);
 }
 
 /**
  * 🛡️ WebSpeech API 폴백 낭독기
  */
-function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
+function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback, options = {}) {
     if (!window.speechSynthesis) {
         if (onEndCallback) onEndCallback();
         return;
@@ -685,17 +693,27 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback) {
         window.speechSynthesis.cancel();
     } catch (e) {}
 
+    const isEng = (options && options.forceVoice && (options.forceVoice.includes('Jenny') || options.forceVoice.includes('en-'))) || isEnglishText(cleanText);
+
     const runSpeak = () => {
         if (sessionId !== currentTtsSessionId) return; // 최신 세션이 아니면 취소
 
         try {
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'ko-KR';
-            utterance.rate = isQuestion ? 1.0 : 1.05;
-            utterance.pitch = isQuestion ? 1.22 : 1.06;
-
-            const bestVoice = getBestKoreanVoice();
-            if (bestVoice) utterance.voice = bestVoice;
+            if (isEng) {
+                utterance.lang = 'en-US';
+                const speechRate = (typeof window.getEnglishSpeechRate === 'function') ? window.getEnglishSpeechRate() : 0.85;
+                utterance.rate = speechRate;
+                const voices = window.speechSynthesis.getVoices() || [];
+                const enVoice = voices.find(v => v.lang && v.lang.startsWith('en') && (v.name.includes('Jenny') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')));
+                if (enVoice) utterance.voice = enVoice;
+            } else {
+                utterance.lang = 'ko-KR';
+                utterance.rate = isQuestion ? 1.0 : 1.05;
+                utterance.pitch = isQuestion ? 1.22 : 1.06;
+                const bestVoice = getBestKoreanVoice();
+                if (bestVoice) utterance.voice = bestVoice;
+            }
 
             utterance.onend = () => {
                 if (sessionId !== currentTtsSessionId) return;
