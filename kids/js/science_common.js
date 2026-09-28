@@ -201,6 +201,160 @@ function getChosung(str) {
 function initializeScienceRoom() {
     console.log("🧬 과학방 초기화 완료!");
     scienceVocaMasterCountMap = JSON.parse(localStorage.getItem(`science_voca_master_${currentUserName}`) || '{}');
+
+    // 📡 노션 교재 DB 실시간 프리페치 (백그라운드 캐시)
+    if (typeof fetchScienceCurriculumFromNotion === 'function') {
+        fetchScienceCurriculumFromNotion().catch(err => {
+            console.warn("과학 교재 백그라운드 프리페치 폴백 안내:", err);
+        });
+    }
+}
+
+// =========================================================================
+// 🔬 노션 [공부방 교재·사료 마스터 DB] 과학 데이터 실시간 하이브리드 연동 엔진
+// =========================================================================
+let cachedScienceCurriculum = null;
+let scienceCurriculumPromise = null;
+
+async function fetchScienceCurriculumFromNotion() {
+    if (cachedScienceCurriculum) return cachedScienceCurriculum;
+    if (scienceCurriculumPromise) return scienceCurriculumPromise;
+
+    const PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CURRICULUM_DB_ID) ? APP_CONFIG.CURRICULUM_DB_ID : "3e8a27115b68806d94bfc81e9b3435fa";
+
+    scienceCurriculumPromise = (async () => {
+        try {
+            const url = `${PROXY}/v1/databases/${DB_ID}/query`;
+            let results = [];
+            let hasMore = true;
+            let cursor = null;
+
+            while (hasMore) {
+                const payload = {
+                    page_size: 100,
+                    filter: { property: "과목", select: { equals: "과학" } }
+                };
+                if (cursor) payload.start_cursor = cursor;
+
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) throw new Error(`Notion Query Failed: HTTP ${res.status}`);
+                const data = await res.json();
+                results = results.concat(data.results || []);
+                hasMore = data.has_more || false;
+                cursor = data.next_cursor || null;
+            }
+
+            cachedScienceCurriculum = results.map(page => {
+                const p = page.properties || {};
+                const title = (p["제목"]?.title || []).map(x => x.plain_text).join('').trim() || '무제';
+                const grade = p["학년"]?.select?.name || '5-2';
+                const unit = (p["단원"]?.rich_text || []).map(x => x.plain_text).join('').trim() || '';
+                const zone = p["구역"]?.select?.name || '실험실';
+                const mediaUrl = p["미디어 URL"]?.url || '';
+                const interactiveUrl = p["인터랙티브 URL"]?.url || '';
+                const desc = (p["핵심 쓰임새/설명"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+                const quiz = (p["퀴즈 질문"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+                const choicesText = (p["보기 1~4"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+                const choices = choicesText ? choicesText.split('\n').map(s => s.trim()).filter(Boolean) : [];
+                const ans = p["정답"]?.number ?? null;
+                const correctIdx = ans !== null ? Math.max(0, ans - 1) : null;
+                const explanation = (p["해설"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+
+                return {
+                    id: page.id,
+                    title,
+                    grade,
+                    unit,
+                    zone,
+                    mediaUrl,
+                    interactiveUrl,
+                    desc,
+                    quiz,
+                    choices,
+                    ans,
+                    correctIdx,
+                    explanation,
+                    _fromNotion: true
+                };
+            });
+
+            console.log(`📡 노션 교재 DB에서 과학 데이터 총 ${cachedScienceCurriculum.length}건 실시간 로드 완료!`);
+            applyNotionDataToScienceGlobals(cachedScienceCurriculum);
+            return cachedScienceCurriculum;
+        } catch (err) {
+            console.warn("⚠️ 노션 교재 DB 쿼리 실패, 로컬 정적 데이터셋으로 안전 폴백합니다:", err);
+            return null;
+        }
+    })();
+
+    return scienceCurriculumPromise;
+}
+
+function applyNotionDataToScienceGlobals(items) {
+    if (!items || !items.length) return;
+
+    // 1) 안전 라이선스 (zone === '안전수칙')
+    const safeItems = items.filter(x => x.zone === '안전수칙');
+    if (safeItems.length > 0 && window.SCIENCE_SAFETY_LICENSE_DATA) {
+        window.SCIENCE_SAFETY_LICENSE_DATA.questions = safeItems.map((it, idx) => {
+            const catMatch = it.title.match(/\]\s*(.+)$/);
+            const category = catMatch ? catMatch[1] : `안전 수칙 ${idx + 1}`;
+            return {
+                id: idx + 1,
+                category,
+                question: it.quiz || it.title,
+                options: it.choices.length > 0 ? it.choices : ["보안경, 실험복 착용", "슬리퍼 착용"],
+                answer: it.correctIdx !== null ? it.correctIdx : 0,
+                explanation: it.explanation || it.desc,
+                img: it.mediaUrl || ""
+            };
+        });
+    }
+
+    // 2) 1단원 탐구보고서 요약노트 및 퀴즈
+    const rep1Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('1.') || x.unit.includes('혼합물')));
+    if (rep1Docs.length > 0 && window.SCIENCE_LAB_REPORT_DATA) {
+        window.SCIENCE_LAB_REPORT_DATA.summaryDoc = rep1Docs.map(it => {
+            const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
+            const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
+            const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
+            const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
+            const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
+            return {
+                title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
+                page: pg,
+                process: proc,
+                result: res,
+                conclusion: conc,
+                think: thk
+            };
+        });
+    }
+
+    // 3) 2단원 탐구보고서 요약노트 및 퀴즈
+    const rep2Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('2.') || x.unit.includes('날씨')));
+    if (rep2Docs.length > 0 && window.SCIENCE_LAB_REPORT_2_DATA) {
+        window.SCIENCE_LAB_REPORT_2_DATA.summaryDoc = rep2Docs.map(it => {
+            const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
+            const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
+            const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
+            const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
+            const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
+            return {
+                title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
+                page: pg,
+                process: proc,
+                result: res,
+                conclusion: conc,
+                think: thk
+            };
+        });
+    }
 }
 
 function isScienceMissionInProgress() {
@@ -888,17 +1042,51 @@ async function fetchAndBuildScienceUI(type, innerBody) {
     scienceDataLoadPromise = (async () => {
         try {
             let records = [];
-            try {
-                if (typeof fetchVocaFromNotion === 'function') {
-                    records = await fetchVocaFromNotion({
-                        subject: "과학",
-                        areaZone: "용어방",
-                        useServerFilter: true,
-                        filterByStudent: true
-                    });
+            if (type === 'voca') {
+                try {
+                    if (typeof fetchVocaFromNotion === 'function') {
+                        records = await fetchVocaFromNotion({
+                            subject: "과학",
+                            areaZone: "용어방",
+                            useServerFilter: true,
+                            filterByStudent: true
+                        });
+                    }
+                } catch (netErr) {
+                    console.warn("ℹ️ 노션 통신 대기 -> 표준 과학 데이터셋으로 전환합니다.", netErr);
                 }
-            } catch (netErr) {
-                console.warn("ℹ️ 노션 통신 대기 -> 표준 과학 데이터셋으로 전환합니다.", netErr);
+            } else {
+                // 🔬 교재 마스터 DB (실험실, 자연탐험, 발명가)
+                try {
+                    const zoneName = SCIENCE_ZONE_MAP[type] || "실험실";
+                    const allCurriculum = await fetchScienceCurriculumFromNotion();
+                    if (allCurriculum && allCurriculum.length > 0) {
+                        const matched = allCurriculum.filter(it => it.zone === zoneName);
+                        if (matched.length > 0) {
+                            records = matched.map(it => ({
+                                word: it.title,
+                                title: it.title,
+                                name: it.title,
+                                hint: getChosung(it.title),
+                                detailContext: it.desc,
+                                meaning: it.desc,
+                                imageUrl: it.mediaUrl,
+                                img: it.mediaUrl,
+                                grade: it.grade,
+                                grades: [it.grade],
+                                level: it.unit,
+                                summaryPassage: "",
+                                quiz: it.quiz,
+                                choices: it.choices,
+                                correctIdx: it.correctIdx,
+                                explanation: it.explanation,
+                                _fromNotion: true
+                            }));
+                        }
+                    }
+                } catch (netErr) {
+                    console.warn("ℹ️ 노션 교재 DB 통신 대기 -> 로컬 데이터셋으로 전환합니다.", netErr);
+                }
             }
 
             if (!records || records.length === 0) {

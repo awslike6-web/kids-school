@@ -530,17 +530,30 @@
 
       try {
         const url = `${PROXY_URL}/v1/databases/${CURRICULUM_DB_ID}/query`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
-          body: JSON.stringify({ page_size: 100 })
-        });
+        let results = [];
+        let hasMore = true;
+        let cursor = null;
 
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        
-        allNotionItems = (data.results || []).map(parseCurriculumPage);
+        while (hasMore) {
+          const bodyPayload = { page_size: 100 };
+          if (cursor) bodyPayload.start_cursor = cursor;
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+            body: JSON.stringify(bodyPayload)
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          results = results.concat(data.results || []);
+          hasMore = data.has_more || false;
+          cursor = data.next_cursor || null;
+        }
+
+        allNotionItems = results.map(parseCurriculumPage);
         updateUnitSelectOptions();
+        updateZoneSelectOptions();
         renderQuestions();
 
         statsChip.innerHTML = `<span class="notion-live-dot"></span> 교재 DB 연동됨 (${allNotionItems.length}개)`;
@@ -686,6 +699,7 @@
         }
       });
 
+      const prevVal = unitSelect.value;
       unitSelect.innerHTML = '<option value="all" selected>전체 단원</option>';
       Array.from(units).sort().forEach(u => {
         const opt = document.createElement('option');
@@ -693,10 +707,42 @@
         opt.textContent = u;
         unitSelect.appendChild(opt);
       });
+      if (units.has(prevVal)) {
+        unitSelect.value = prevVal;
+      }
+    }
+
+    function updateZoneSelectOptions() {
+      const zoneSelect = document.getElementById('zoneSelect');
+      if (!zoneSelect) return;
+      const subject = document.getElementById('subjectSelect').value;
+      const grade = document.getElementById('gradeSelect').value;
+
+      const zones = new Set();
+      allNotionItems.forEach(item => {
+        if (subject === 'all' || item.subject === subject) {
+          if (grade === 'all' || item.grade === grade) {
+            if (item.zone) zones.add(item.zone);
+          }
+        }
+      });
+
+      const prevVal = zoneSelect.value;
+      zoneSelect.innerHTML = '<option value="all" selected>전체 보기</option>';
+      Array.from(zones).sort().forEach(z => {
+        const opt = document.createElement('option');
+        opt.value = z;
+        opt.textContent = z;
+        zoneSelect.appendChild(opt);
+      });
+      if (zones.has(prevVal)) {
+        zoneSelect.value = prevVal;
+      }
     }
 
     function onFilterChange() {
       updateUnitSelectOptions();
+      updateZoneSelectOptions();
       renderQuestions();
     }
 
