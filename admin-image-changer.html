@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🖼️ 민민이네 교재 이미지 퀵 체인저 2.0 (Admin Tool)</title>
+  <title>🖼️ 민민이네 교재 & 용어사전 통합 퀵 체인저 2.5 (Admin Tool)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Jua&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -17,6 +17,7 @@
       --orange: #f0883e;
       --purple: #a371f7;
       --red: #f85149;
+      --pink: #f472b6;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -30,7 +31,7 @@
     .admin-header {
       display: flex; justify-content: space-between; align-items: center;
       flex-wrap: wrap; gap: 1rem; padding-bottom: 1.25rem;
-      border-bottom: 1px solid var(--card-border); margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border); margin-bottom: 1.25rem;
     }
     .header-title h1 {
       font-family: 'Jua', sans-serif; font-size: 1.6rem; color: var(--accent);
@@ -61,6 +62,24 @@
       background: linear-gradient(135deg, #9a67ea 0%, #79c0ff 100%);
       transform: translateY(-1px);
     }
+
+    /* 🎛️ 모드 전환 탭 (교재 vs 용어사전) */
+    .mode-tab-bar {
+      display: flex; gap: 8px; background: #090d13; border: 1px solid var(--card-border);
+      padding: 6px; border-radius: 12px; margin-bottom: 1.25rem;
+    }
+    .mode-tab-btn {
+      flex: 1; padding: 0.75rem 1rem; border: none; border-radius: 8px; font-family: 'Jua', sans-serif;
+      font-size: 1.1rem; color: var(--text-sub); background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;
+    }
+    .mode-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .mode-tab-btn.active {
+      color: #fff; background: #21262d; border: 1px solid rgba(88, 166, 255, 0.4);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .mode-tab-btn.active.curriculum-active { color: var(--accent); }
+    .mode-tab-btn.active.voca-active { color: var(--purple); border-color: rgba(163, 113, 247, 0.5); }
 
     /* 필터 바 */
     .filter-bar {
@@ -120,7 +139,11 @@
     .card-notion-link:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); }
 
     .card-body { padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
-    .card-title { font-size: 1.05rem; font-weight: 800; color: #fff; line-height: 1.4; }
+    .card-title { font-size: 1.15rem; font-weight: 800; color: #fff; line-height: 1.4; }
+    .card-meaning {
+      font-size: 0.9rem; color: #79c0ff; background: rgba(88, 166, 255, 0.08);
+      padding: 0.6rem 0.75rem; border-radius: 6px; border-left: 3px solid var(--accent); line-height: 1.4;
+    }
     .card-desc { font-size: 0.82rem; color: var(--text-sub); line-height: 1.4; }
     .card-quiz {
       font-size: 0.85rem; color: #f0f6fc; background: rgba(0, 0, 0, 0.3);
@@ -220,19 +243,30 @@
   <div class="admin-container">
     <header class="admin-header">
       <div class="header-title">
-        <h1>🖼️ 교재 문제 이미지 퀵 체인저 2.0</h1>
-        <p>노션 교재 마스터 DB 실시간 쿼리 · 스마트 이미지 자동 압축 · GitHub & 노션 동시 자동 반영</p>
+        <h1>🖼️ 교재 & 용어사전 통합 퀵 체인저 2.5</h1>
+        <p>노션 마스터 DB 실시간 쿼리 · 스마트 이미지 자동 압축 · GitHub & 노션 원클릭 배포</p>
       </div>
       <div class="header-actions">
         <a href="parent_dashboard.html" class="btn-action">📊 대시보드로</a>
         <a href="lobby.html" class="btn-action">🏠 로비로</a>
-        <button type="button" class="btn-action btn-sync" onclick="refreshNotionData()">🔄 노션 실시간 새로고침</button>
-        <button type="button" class="btn-action btn-add" onclick="openAddModal()">➕ 새 문제/사료 등록</button>
+        <button type="button" class="btn-action btn-sync" onclick="refreshCurrentModeData()">🔄 실시간 새로고침</button>
+        <button type="button" class="btn-action btn-add" onclick="openAddModal()">➕ 새 항목 등록</button>
         <button type="button" class="btn-action" onclick="openTokenModal()">🔑 GitHub 토큰</button>
         <button type="button" class="btn-action btn-github" onclick="startGithubPush()">🚀 원클릭 배포 (GitHub+노션)</button>
       </div>
     </header>
 
+    <!-- 🎛️ 모드 전환 탭 -->
+    <div class="mode-tab-bar">
+      <button type="button" class="mode-tab-btn active curriculum-active" id="tabCurriculum" onclick="switchMode('curriculum')">
+        🏛️ 교재·사료 탐구실 모드 (문제 & 지도)
+      </button>
+      <button type="button" class="mode-tab-btn" id="tabVoca" onclick="switchMode('voca')">
+        📚 용어사전 낱말 카드 모드 (어휘 & 개념 사진)
+      </button>
+    </div>
+
+    <!-- 필터 바 -->
     <div class="filter-bar">
       <div class="filter-group">
         <label>📚 과목 선택</label>
@@ -241,6 +275,8 @@
           <option value="과학">🧪 과학 (Science)</option>
           <option value="국어">📖 국어 (Korean)</option>
           <option value="수학">🧮 수학 (Math)</option>
+          <option value="영어">🔤 영어 (English)</option>
+          <option value="all">전체 과목</option>
         </select>
       </div>
 
@@ -262,7 +298,7 @@
         </select>
       </div>
 
-      <div class="filter-group">
+      <div class="filter-group" id="zoneFilterGroup">
         <label>🎯 구역/유형</label>
         <select id="zoneSelect" onchange="renderQuestions()">
           <option value="all" selected>전체 보기</option>
@@ -310,14 +346,14 @@
     </div>
   </div>
 
-  <!-- ➕ 새 문제/사료 등록 모달 -->
+  <!-- ➕ 새 문제/단어 등록 모달 -->
   <div class="modal-overlay" id="addModal">
     <div class="modal-box">
-      <div class="modal-title">➕ 새 문제/사료 노션 DB 등록</div>
-      <div class="modal-desc">새로운 사료, 지도, 차트 퀴즈를 노션 [교재·사료 마스터 DB]에 즉시 생성합니다.</div>
+      <div class="modal-title" id="addModalTitle">➕ 새 항목 노션 DB 등록</div>
+      <div class="modal-desc" id="addModalDesc">새로운 항목을 노션 DB에 즉시 생성합니다.</div>
       
       <div class="drawer-field" style="margin-bottom:8px;">
-        <label>사료/문제 제목 *</label>
+        <label id="addTitleLabel">사료/문제 제목 *</label>
         <input type="text" id="newTitle" placeholder="예: 삼국의 전성기와 한강 유역 판도">
       </div>
 
@@ -329,6 +365,7 @@
             <option value="과학">과학</option>
             <option value="국어">국어</option>
             <option value="수학">수학</option>
+            <option value="영어">영어</option>
           </select>
         </div>
         <div class="drawer-field" style="flex:1;">
@@ -340,7 +377,7 @@
             <option value="1-1">1-1</option>
           </select>
         </div>
-        <div class="drawer-field" style="flex:1;">
+        <div class="drawer-field" style="flex:1;" id="newZoneField">
           <label>구역</label>
           <select id="newZone" style="background:#0d1117; border:1px solid var(--card-border); color:#fff; padding:6px; border-radius:6px;">
             <option value="자료분석" selected>자료분석</option>
@@ -352,38 +389,63 @@
 
       <div class="drawer-field" style="margin-bottom:8px;">
         <label>단원</label>
-        <input type="text" id="newUnit" placeholder="1단원 (옛사람들의 삶과 문화)">
+        <input type="text" id="newUnit" placeholder="1단원">
       </div>
 
-      <div class="drawer-field" style="margin-bottom:8px;">
-        <label>핵심 쓰임새/설명</label>
-        <textarea id="newDesc" placeholder="유적이나 사료의 역사적 의미, 쓰임새 설명"></textarea>
-      </div>
-
-      <div class="drawer-field" style="margin-bottom:8px;">
-        <label>퀴즈 질문 (선택)</label>
-        <input type="text" id="newQuiz" placeholder="삼국이 한강 유역을 다툰 가장 큰 이유는?">
-      </div>
-
-      <div class="drawer-field" style="margin-bottom:8px;">
-        <label>보기 1~4 (줄바꿈으로 4줄 입력)</label>
-        <textarea id="newChoices" placeholder="1번 보기&#10;2번 보기&#10;3번 보기&#10;4번 보기"></textarea>
-      </div>
-
-      <div style="display:flex; gap:8px; margin-bottom:8px;">
-        <div class="drawer-field" style="width:120px;">
-          <label>정답 번호 (1~4)</label>
-          <input type="number" id="newAns" min="1" max="4" value="1">
+      <!-- 교재 모드 전용 폼 -->
+      <div id="curriculumFields">
+        <div class="drawer-field" style="margin-bottom:8px;">
+          <label>핵심 쓰임새/설명</label>
+          <textarea id="newDesc" placeholder="유적이나 사료의 역사적 의미, 쓰임새 설명"></textarea>
         </div>
-        <div class="drawer-field" style="flex:1;">
-          <label>인터랙티브 URL (박물관/체험 링크)</label>
-          <input type="url" id="newInteractive" placeholder="https://www.museum.go.kr">
+
+        <div class="drawer-field" style="margin-bottom:8px;">
+          <label>퀴즈 질문 (선택)</label>
+          <input type="text" id="newQuiz" placeholder="삼국이 한강 유역을 다툰 가장 큰 이유는?">
+        </div>
+
+        <div class="drawer-field" style="margin-bottom:8px;">
+          <label>보기 1~4 (줄바꿈으로 4줄 입력)</label>
+          <textarea id="newChoices" placeholder="1번 보기&#10;2번 보기&#10;3번 보기&#10;4번 보기"></textarea>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <div class="drawer-field" style="width:120px;">
+            <label>정답 번호 (1~4)</label>
+            <input type="number" id="newAns" min="1" max="4" value="1">
+          </div>
+          <div class="drawer-field" style="flex:1;">
+            <label>인터랙티브 URL</label>
+            <input type="url" id="newInteractive" placeholder="https://www.museum.go.kr">
+          </div>
+        </div>
+
+        <div class="drawer-field" style="margin-bottom:12px;">
+          <label>해설</label>
+          <textarea id="newExplanation" placeholder="정답 풀이 및 돋보기 해설"></textarea>
         </div>
       </div>
 
-      <div class="drawer-field" style="margin-bottom:12px;">
-        <label>해설</label>
-        <textarea id="newExplanation" placeholder="정답 풀이 및 돋보기 해설"></textarea>
+      <!-- 용어사전 모드 전용 폼 -->
+      <div id="vocaFields" style="display:none;">
+        <div class="drawer-field" style="margin-bottom:8px;">
+          <label>뜻풀이 *</label>
+          <textarea id="newVocaMeaning" placeholder="단어의 핵심 뜻을 알기 쉽게 요약"></textarea>
+        </div>
+        <div class="drawer-field" style="margin-bottom:8px;">
+          <label>상세 설명 (실생활 예시, 배경)</label>
+          <textarea id="newVocaDetail" placeholder="아이들이 이해하기 쉬운 상세 설명이나 힌트"></textarea>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <div class="drawer-field" style="flex:1;">
+            <label>품사 (명사/동사/형용사 등)</label>
+            <input type="text" id="newVocaPos" placeholder="명사">
+          </div>
+          <div class="drawer-field" style="flex:1;">
+            <label>초성 힌트</label>
+            <input type="text" id="newVocaHint" placeholder="ㅎㅂ">
+          </div>
+        </div>
       </div>
 
       <div class="modal-actions">
@@ -413,20 +475,55 @@
   <script>
     const PROXY_URL = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const CURRICULUM_DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CURRICULUM_DB_ID) ? APP_CONFIG.CURRICULUM_DB_ID : "3e8a27115b68806d94bfc81e9b3435fa";
+    const VOCA_DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.VOCA_DB_ID) ? APP_CONFIG.VOCA_DB_ID : "375a27115b688038b686d3994ee12919";
     const GITHUB_REPO = 'awslike6-web/kids-school';
     const GITHUB_BRANCH = 'main';
 
+    let currentMode = 'curriculum'; // 'curriculum' | 'voca'
     let allNotionItems = [];
     let modifiedItems = new Map(); // pageId -> itemObj
 
     window.addEventListener('DOMContentLoaded', () => {
-      refreshNotionData();
+      refreshCurrentModeData();
     });
 
-    // 📡 노션 마스터 DB 실시간 쿼리
-    async function refreshNotionData() {
+    // 🎛️ 모드 전환 핸들러
+    function switchMode(mode) {
+      if (currentMode === mode) return;
+      currentMode = mode;
+
+      const tabCurriculum = document.getElementById('tabCurriculum');
+      const tabVoca = document.getElementById('tabVoca');
+      const zoneFilterGroup = document.getElementById('zoneFilterGroup');
+
+      if (mode === 'curriculum') {
+        tabCurriculum.className = 'mode-tab-btn active curriculum-active';
+        tabVoca.className = 'mode-tab-btn';
+        zoneFilterGroup.style.display = 'flex';
+      } else {
+        tabCurriculum.className = 'mode-tab-btn';
+        tabVoca.className = 'mode-tab-btn active voca-active';
+        zoneFilterGroup.style.display = 'none'; // 용어사전 모드에서는 구역 필터 숨김
+      }
+
+      modifiedItems.clear();
+      refreshCurrentModeData();
+    }
+
+    function refreshCurrentModeData() {
+      if (currentMode === 'curriculum') {
+        refreshCurriculumData();
+      } else {
+        refreshVocaData();
+      }
+    }
+
+    // =========================================================
+    // 🏛️ 1. 교재·사료 마스터 DB 데이터 fetch
+    // =========================================================
+    async function refreshCurriculumData() {
       const statsChip = document.getElementById('statsChip');
-      statsChip.innerHTML = '<span class="notion-live-dot" style="background:#e3b341;"></span> 노션 데이터 동기화 중...';
+      statsChip.innerHTML = '<span class="notion-live-dot" style="background:#e3b341;"></span> 교재 DB 동기화 중...';
       
       const grid = document.getElementById('questionGrid');
       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">📡 노션 교재·사료 마스터 DB에서 실시간 데이터를 가져오는 중입니다...</div>';
@@ -442,22 +539,22 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         
-        allNotionItems = (data.results || []).map(parseNotionPage);
+        allNotionItems = (data.results || []).map(parseCurriculumPage);
         updateUnitSelectOptions();
         renderQuestions();
 
-        statsChip.innerHTML = `<span class="notion-live-dot"></span> 노션 실시간 연동됨 (${allNotionItems.length}개)`;
-        showToast(`✅ 노션 DB에서 총 ${allNotionItems.length}개 항목을 성공적으로 불러왔습니다!`);
+        statsChip.innerHTML = `<span class="notion-live-dot"></span> 교재 DB 연동됨 (${allNotionItems.length}개)`;
+        showToast(`✅ 교재 DB에서 총 ${allNotionItems.length}개 항목을 성공적으로 불러왔습니다!`);
       } catch (err) {
-        console.error("노션 동기화 실패:", err);
-        statsChip.innerHTML = `<span class="notion-live-dot" style="background:#f85149;"></span> 노션 통신 오류`;
+        console.error("교재 DB 동기화 실패:", err);
+        statsChip.innerHTML = `<span class="notion-live-dot" style="background:#f85149;"></span> 통신 오류`;
         grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#ff7b72;">
-          ❌ 노션 데이터베이스를 불러오지 못했습니다.<br><small>${err.message}</small>
+          ❌ 교재 데이터베이스를 불러오지 못했습니다.<br><small>${err.message}</small>
         </div>`;
       }
     }
 
-    function parseNotionPage(page) {
+    function parseCurriculumPage(page) {
       const p = page.properties || {};
       const title = (p["제목"]?.title || []).map(x => x.plain_text).join('').trim() || '무제';
       const subject = p["과목"]?.select?.name || '사회';
@@ -474,6 +571,7 @@
       const explanation = (p["해설"]?.rich_text || []).map(x => x.plain_text).join('').trim();
 
       return {
+        mode: 'curriculum',
         pageId: page.id,
         notionUrl: `https://app.notion.com/p/${page.id.replace(/-/g, '')}`,
         title,
@@ -489,6 +587,84 @@
         choicesText,
         ans,
         explanation,
+        _previewUrl: mediaUrl,
+        _isModified: false,
+        _compressedBlob: null,
+        _fileName: ''
+      };
+    }
+
+    // =========================================================
+    // 📚 2. 용어사전 DB (VOCA) 데이터 fetch
+    // =========================================================
+    async function refreshVocaData() {
+      const statsChip = document.getElementById('statsChip');
+      statsChip.innerHTML = '<span class="notion-live-dot" style="background:#a371f7;"></span> 용어사전 DB 동기화 중...';
+      
+      const grid = document.getElementById('questionGrid');
+      grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">📡 노션 용어사전 DB(VOCA)에서 실시간 낱말 데이터를 가져오는 중입니다...</div>';
+
+      try {
+        const url = `${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+          body: JSON.stringify({ page_size: 100 })
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        allNotionItems = (data.results || []).map(parseVocaPage);
+        updateUnitSelectOptions();
+        renderQuestions();
+
+        statsChip.innerHTML = `<span class="notion-live-dot" style="background:#a371f7;"></span> 용어 DB 연동됨 (${allNotionItems.length}개)`;
+        showToast(`✅ 용어사전 DB에서 총 ${allNotionItems.length}개 낱말을 성공적으로 불러왔습니다!`);
+      } catch (err) {
+        console.error("용어사전 DB 동기화 실패:", err);
+        statsChip.innerHTML = `<span class="notion-live-dot" style="background:#f85149;"></span> 통신 오류`;
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#ff7b72;">
+          ❌ 용어사전 데이터베이스를 불러오지 못했습니다.<br><small>${err.message}</small>
+        </div>`;
+      }
+    }
+
+    function parseVocaPage(page) {
+      const p = page.properties || {};
+      const title = (p["단어"]?.title || []).map(x => x.plain_text).join('').trim() || '무제';
+      
+      // multi_select 과목 & 학년 파싱
+      const subjectList = (p["과목"]?.multi_select || []).map(x => x.name);
+      const subject = subjectList.length > 0 ? subjectList[0] : '사회';
+      const gradeList = (p["학년"]?.multi_select || []).map(x => x.name);
+      const grade = gradeList.length > 0 ? gradeList[0] : '5-1';
+      
+      const unit = (p["단원"]?.rich_text || []).map(x => x.plain_text).join('').trim() || '1단원';
+      const meaning = (p["뜻풀이"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+      const desc = (p["상세설명"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+      const pos = (p["품사"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+
+      // files 속성 이미지 파싱
+      const imgFiles = p["이미지파일"]?.files || [];
+      let mediaUrl = '';
+      if (imgFiles.length > 0) {
+        mediaUrl = imgFiles[0].external?.url || imgFiles[0].file?.url || '';
+      }
+
+      return {
+        mode: 'voca',
+        pageId: page.id,
+        notionUrl: `https://app.notion.com/p/${page.id.replace(/-/g, '')}`,
+        title,
+        subject,
+        grade,
+        unit,
+        zone: '용어카드',
+        meaning,
+        desc,
+        pos,
+        mediaUrl,
         _previewUrl: mediaUrl,
         _isModified: false,
         _compressedBlob: null,
@@ -536,7 +712,7 @@
         if (subject !== 'all' && item.subject !== subject) return false;
         if (grade !== 'all' && item.grade !== grade) return false;
         if (unit !== 'all' && item.unit !== unit) return false;
-        if (zone !== 'all' && item.zone !== zone) return false;
+        if (currentMode === 'curriculum' && zone !== 'all' && item.zone !== zone) return false;
 
         const hasImg = !!(item._previewUrl || item.mediaUrl);
         if (statusFilter === 'no-img' && hasImg) return false;
@@ -546,11 +722,13 @@
       });
 
       const statsChip = document.getElementById('statsChip');
-      statsChip.innerHTML = `<span class="notion-live-dot"></span> 노션 실시간 연동됨 (${filtered.length}개 표시 / 전체 ${allNotionItems.length}개)`;
+      const dotColor = currentMode === 'curriculum' ? '#3fb950' : '#a371f7';
+      const modeLabel = currentMode === 'curriculum' ? '교재 DB' : '용어사전 DB';
+      statsChip.innerHTML = `<span class="notion-live-dot" style="background:${dotColor}; box-shadow:0 0 8px ${dotColor};"></span> ${modeLabel} (${filtered.length}개 표시 / 전체 ${allNotionItems.length}개)`;
 
       grid.innerHTML = '';
       if (filtered.length === 0) {
-        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">선택된 조건에 해당하는 교재/사료 항목이 없습니다.</div>';
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#8b949e;">선택된 조건에 해당하는 항목이 없습니다.</div>';
         return;
       }
 
@@ -562,72 +740,131 @@
         let tagClass = 'tag-chart';
         if (item.zone === '지도탐방') tagClass = 'tag-map';
         else if (item.zone === '역사사료') tagClass = 'tag-history';
+        else if (item.zone === '용어카드') tagClass = 'tag-voca';
 
         const displayUrl = item._previewUrl || item.mediaUrl;
 
-        card.innerHTML = `
-          <div class="card-top">
-            <span class="card-idx-badge">#${idx + 1}</span>
-            <span class="card-type-tag ${tagClass}">[${item.grade}] ${item.zone}</span>
-            ${item._isModified ? '<span style="font-size:0.75rem; color:#f0883e; font-weight:bold;">✏️ 수정됨</span>' : ''}
-            <a href="${item.notionUrl}" target="_blank" rel="noopener" class="card-notion-link" title="노션에서 직접 열기">
-              <span>🔗 노션</span>
-            </a>
-          </div>
-          <div class="card-body">
-            <div class="card-title">${item.title}</div>
-            ${item.desc ? `<div class="card-desc">${item.desc}</div>` : ''}
-            ${item.quiz ? `<div class="card-quiz">❓ ${item.quiz}</div>` : ''}
-
-            <div class="img-preview-box ${!displayUrl ? 'no-img' : ''}" id="pbox_${item.pageId}" onclick="document.getElementById('file_${item.pageId}').click()">
-              ${displayUrl ? `<img src="${displayUrl}" alt="${item.title}">` : `
-                <span>⚠️ 미디어 이미지 없음</span>
-                <span style="font-size:0.75rem; color:#8b949e;">클릭하거나 새 사진을 여기에 드래그 앤 드롭하세요</span>
-              `}
-              <div class="img-drop-overlay">
-                <span>📥 사진을 놓으면 자동 최적화 압축됩니다!</span>
-              </div>
+        if (currentMode === 'curriculum') {
+          // 🏛️ 교재 모드 카드 레이아웃
+          card.innerHTML = `
+            <div class="card-top">
+              <span class="card-idx-badge">#${idx + 1}</span>
+              <span class="card-type-tag ${tagClass}">[${item.grade}] ${item.zone}</span>
+              ${item._isModified ? '<span style="font-size:0.75rem; color:#f0883e; font-weight:bold;">✏️ 수정됨</span>' : ''}
+              <a href="${item.notionUrl}" target="_blank" rel="noopener" class="card-notion-link" title="노션에서 직접 열기">
+                <span>🔗 노션</span>
+              </a>
             </div>
-            ${item._compressionInfo ? `<div class="compression-badge">${item._compressionInfo}</div>` : ''}
+            <div class="card-body">
+              <div class="card-title">${item.title}</div>
+              ${item.desc ? `<div class="card-desc">${item.desc}</div>` : ''}
+              ${item.quiz ? `<div class="card-quiz">❓ ${item.quiz}</div>` : ''}
 
-            <input type="file" id="file_${item.pageId}" style="display:none;" accept="image/*" onchange="handleFileSelect(event, '${item.pageId}')">
-
-            <div class="card-img-form">
-              <input type="text" class="card-img-input" id="input_${item.pageId}" value="${item.mediaUrl || ''}" placeholder="./images/... 또는 https://..." onkeydown="if(event.key==='Enter') applyPathInput('${item.pageId}')">
-              <button type="button" class="btn-apply-img" onclick="applyPathInput('${item.pageId}')">경로적용</button>
-            </div>
-
-            <button type="button" class="card-details-toggle" onclick="toggleDrawer('${item.pageId}')">⚙️ 퀴즈/설명 편집 열기</button>
-            <div class="card-edit-drawer" id="drawer_${item.pageId}">
-              <div class="drawer-field">
-                <label>제목</label>
-                <input type="text" value="${item.title}" onchange="updateItemField('${item.pageId}', 'title', this.value)">
-              </div>
-              <div class="drawer-field">
-                <label>퀴즈 질문</label>
-                <input type="text" value="${item.quiz || ''}" onchange="updateItemField('${item.pageId}', 'quiz', this.value)">
-              </div>
-              <div class="drawer-field">
-                <label>보기 1~4 (줄바꿈 구분)</label>
-                <textarea onchange="updateItemField('${item.pageId}', 'choicesText', this.value)">${item.choicesText || ''}</textarea>
-              </div>
-              <div style="display:flex; gap:6px;">
-                <div class="drawer-field" style="width:80px;">
-                  <label>정답 (1~4)</label>
-                  <input type="number" min="1" max="4" value="${item.ans || 1}" onchange="updateItemField('${item.pageId}', 'ans', Number(this.value))">
-                </div>
-                <div class="drawer-field" style="flex:1;">
-                  <label>인터랙티브 URL</label>
-                  <input type="url" value="${item.interactiveUrl || ''}" onchange="updateItemField('${item.pageId}', 'interactiveUrl', this.value)">
+              <div class="img-preview-box ${!displayUrl ? 'no-img' : ''}" id="pbox_${item.pageId}" onclick="document.getElementById('file_${item.pageId}').click()">
+                ${displayUrl ? `<img src="${displayUrl}" alt="${item.title}">` : `
+                  <span>⚠️ 미디어 이미지 없음</span>
+                  <span style="font-size:0.75rem; color:#8b949e;">클릭하거나 새 사진을 여기에 드래그 앤 드롭하세요</span>
+                `}
+                <div class="img-drop-overlay">
+                  <span>📥 사진을 놓으면 자동 최적화 압축됩니다!</span>
                 </div>
               </div>
-              <div class="drawer-field">
-                <label>해설</label>
-                <textarea onchange="updateItemField('${item.pageId}', 'explanation', this.value)">${item.explanation || ''}</textarea>
+              ${item._compressionInfo ? `<div class="compression-badge">${item._compressionInfo}</div>` : ''}
+
+              <input type="file" id="file_${item.pageId}" style="display:none;" accept="image/*" onchange="handleFileSelect(event, '${item.pageId}')">
+
+              <div class="card-img-form">
+                <input type="text" class="card-img-input" id="input_${item.pageId}" value="${item.mediaUrl || ''}" placeholder="./images/... 또는 https://..." onkeydown="if(event.key==='Enter') applyPathInput('${item.pageId}')">
+                <button type="button" class="btn-apply-img" onclick="applyPathInput('${item.pageId}')">경로적용</button>
+              </div>
+
+              <button type="button" class="card-details-toggle" onclick="toggleDrawer('${item.pageId}')">⚙️ 퀴즈/설명 편집 열기</button>
+              <div class="card-edit-drawer" id="drawer_${item.pageId}">
+                <div class="drawer-field">
+                  <label>제목</label>
+                  <input type="text" value="${item.title}" onchange="updateItemField('${item.pageId}', 'title', this.value)">
+                </div>
+                <div class="drawer-field">
+                  <label>퀴즈 질문</label>
+                  <input type="text" value="${item.quiz || ''}" onchange="updateItemField('${item.pageId}', 'quiz', this.value)">
+                </div>
+                <div class="drawer-field">
+                  <label>보기 1~4 (줄바꿈 구분)</label>
+                  <textarea onchange="updateItemField('${item.pageId}', 'choicesText', this.value)">${item.choicesText || ''}</textarea>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <div class="drawer-field" style="width:80px;">
+                    <label>정답 (1~4)</label>
+                    <input type="number" min="1" max="4" value="${item.ans || 1}" onchange="updateItemField('${item.pageId}', 'ans', Number(this.value))">
+                  </div>
+                  <div class="drawer-field" style="flex:1;">
+                    <label>인터랙티브 URL</label>
+                    <input type="url" value="${item.interactiveUrl || ''}" onchange="updateItemField('${item.pageId}', 'interactiveUrl', this.value)">
+                  </div>
+                </div>
+                <div class="drawer-field">
+                  <label>해설</label>
+                  <textarea onchange="updateItemField('${item.pageId}', 'explanation', this.value)">${item.explanation || ''}</textarea>
+                </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        } else {
+          // 📚 용어사전 모드 카드 레이아웃
+          card.innerHTML = `
+            <div class="card-top">
+              <span class="card-idx-badge">#VOCA ${idx + 1}</span>
+              <span class="card-type-tag tag-voca">[${item.subject} ${item.grade}] ${item.pos || '낱말'}</span>
+              ${item._isModified ? '<span style="font-size:0.75rem; color:#f0883e; font-weight:bold;">✏️ 수정됨</span>' : ''}
+              <a href="${item.notionUrl}" target="_blank" rel="noopener" class="card-notion-link" title="노션에서 직접 열기">
+                <span>🔗 노션</span>
+              </a>
+            </div>
+            <div class="card-body">
+              <div class="card-title" style="color:#d2a8ff; font-family:'Jua', sans-serif; font-size:1.3rem;">${item.title}</div>
+              ${item.meaning ? `<div class="card-meaning">📖 <strong>뜻풀이:</strong> ${item.meaning}</div>` : ''}
+              ${item.desc ? `<div class="card-desc" style="font-size:0.85rem; color:#c9d1d9;">💡 ${item.desc}</div>` : ''}
+
+              <div class="img-preview-box ${!displayUrl ? 'no-img' : ''}" id="pbox_${item.pageId}" onclick="document.getElementById('file_${item.pageId}').click()">
+                ${displayUrl ? `<img src="${displayUrl}" alt="${item.title}">` : `
+                  <span>📷 낱말 삽화 이미지 없음</span>
+                  <span style="font-size:0.75rem; color:#8b949e;">클릭하거나 새 사진을 여기에 드래그 앤 드롭하세요</span>
+                `}
+                <div class="img-drop-overlay">
+                  <span>📥 낱말 사진 자동 압축 등록!</span>
+                </div>
+              </div>
+              ${item._compressionInfo ? `<div class="compression-badge">${item._compressionInfo}</div>` : ''}
+
+              <input type="file" id="file_${item.pageId}" style="display:none;" accept="image/*" onchange="handleFileSelect(event, '${item.pageId}')">
+
+              <div class="card-img-form">
+                <input type="text" class="card-img-input" id="input_${item.pageId}" value="${item.mediaUrl || ''}" placeholder="이미지 CDN 링크 또는 파일 경로" onkeydown="if(event.key==='Enter') applyPathInput('${item.pageId}')">
+                <button type="button" class="btn-apply-img" onclick="applyPathInput('${item.pageId}')">적용</button>
+              </div>
+
+              <button type="button" class="card-details-toggle" onclick="toggleDrawer('${item.pageId}')">⚙️ 뜻풀이/상세설명 편집 열기</button>
+              <div class="card-edit-drawer" id="drawer_${item.pageId}">
+                <div class="drawer-field">
+                  <label>단어명</label>
+                  <input type="text" value="${item.title}" onchange="updateItemField('${item.pageId}', 'title', this.value)">
+                </div>
+                <div class="drawer-field">
+                  <label>뜻풀이</label>
+                  <textarea onchange="updateItemField('${item.pageId}', 'meaning', this.value)">${item.meaning || ''}</textarea>
+                </div>
+                <div class="drawer-field">
+                  <label>상세 설명 (실생활 비유, 힌트)</label>
+                  <textarea onchange="updateItemField('${item.pageId}', 'desc', this.value)">${item.desc || ''}</textarea>
+                </div>
+                <div class="drawer-field">
+                  <label>품사</label>
+                  <input type="text" value="${item.pos || ''}" onchange="updateItemField('${item.pageId}', 'pos', this.value)">
+                </div>
+              </div>
+            </div>
+          `;
+        }
 
         // 드래그 앤 드롭 이벤트 바인딩
         const pBox = card.querySelector(`#pbox_${item.pageId}`);
@@ -644,7 +881,6 @@
       });
     }
 
-    // 🛡️ 브라우저 기본 드래그 방지
     window.addEventListener('dragover', e => e.preventDefault(), false);
     window.addEventListener('drop', e => e.preventDefault(), false);
 
@@ -682,7 +918,6 @@
       }
     }
 
-    // ⚡ 캔버스 기반 스마트 자동 이미지 압축 (최대 1600px, 85% 품질)
     async function compressImageFile(file, maxWidth = 1600, quality = 0.85) {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -723,10 +958,15 @@
       if (!item) return;
 
       const compResult = await compressImageFile(file);
-      
       const cleanFileName = file.name.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-      const unitNum = (item.unit.match(/\d+/) || ['1'])[0];
-      const autoRelPath = `./images/minsu/${item.grade}/${unitNum}/${cleanFileName}`;
+      
+      let autoRelPath = '';
+      if (currentMode === 'curriculum') {
+        const unitNum = (item.unit.match(/\d+/) || ['1'])[0];
+        autoRelPath = `./images/minsu/${item.grade}/${unitNum}/${cleanFileName}`;
+      } else {
+        autoRelPath = `./images/voca/${item.grade}/${cleanFileName}`;
+      }
 
       item._compressedBlob = compResult.blob;
       item._previewUrl = compResult.dataUrl;
@@ -741,7 +981,7 @@
     }
 
     // =========================================================
-    // 🚀 GitHub 원클릭 업로드 & 노션 DB 실시간 PATCH
+    // 🚀 GitHub 원클릭 업로드 & 노션 DB 실시간 PATCH (통합 엔진)
     // =========================================================
     function openTokenModal() {
       document.getElementById('githubTokenInput').value = localStorage.getItem('kids_github_token') || '';
@@ -817,21 +1057,45 @@
       return await res.json();
     }
 
-    async function updateNotionPage(item) {
+    async function updateNotionItem(item) {
       const url = `${PROXY_URL}/v1/pages/${item.pageId}`;
       const rt = (txt) => txt ? [{ type: "text", text: { content: String(txt).slice(0, 2000) } }] : [];
 
-      const properties = {
-        "제목": { title: rt(item.title) },
-        "미디어 URL": { url: item.mediaUrl || null },
-        "인터랙티브 URL": { url: item.interactiveUrl || null },
-        "핵심 쓰임새/설명": { rich_text: rt(item.desc) },
-        "퀴즈 질문": { rich_text: rt(item.quiz) },
-        "보기 1~4": { rich_text: rt(item.choicesText) },
-        "해설": { rich_text: rt(item.explanation) }
-      };
-      if (item.ans !== null && item.ans !== undefined) {
-        properties["정답"] = { number: Number(item.ans) };
+      let properties = {};
+      if (currentMode === 'curriculum') {
+        // 교재 마스터 DB 속성
+        properties = {
+          "제목": { title: rt(item.title) },
+          "미디어 URL": { url: item.mediaUrl || null },
+          "인터랙티브 URL": { url: item.interactiveUrl || null },
+          "핵심 쓰임새/설명": { rich_text: rt(item.desc) },
+          "퀴즈 질문": { rich_text: rt(item.quiz) },
+          "보기 1~4": { rich_text: rt(item.choicesText) },
+          "해설": { rich_text: rt(item.explanation) }
+        };
+        if (item.ans !== null && item.ans !== undefined) {
+          properties["정답"] = { number: Number(item.ans) };
+        }
+      } else {
+        // 용어사전 DB (VOCA) 속성
+        properties = {
+          "단어": { title: rt(item.title) },
+          "뜻풀이": { rich_text: rt(item.meaning) },
+          "상세설명": { rich_text: rt(item.desc) },
+          "품사": { rich_text: rt(item.pos) }
+        };
+        // 이미지파일 속성은 files 타입
+        if (item._rawCdnUrl || item.mediaUrl) {
+          const finalUrl = item._rawCdnUrl || item.mediaUrl;
+          const fileName = item._fileName || "voca_image.png";
+          properties["이미지파일"] = {
+            files: [{
+              name: fileName,
+              type: "external",
+              external: { url: finalUrl }
+            }]
+          };
+        }
       }
 
       const res = await fetch(url, {
@@ -861,32 +1125,30 @@
       openPushModal();
 
       try {
-        logPush(`📡 GitHub 및 노션 연결 확인... (총 ${itemsToPush.length}개 항목 처리 예정)`);
+        logPush(`📡 [${currentMode === 'curriculum' ? '교재 모드' : '용어사전 모드'}] GitHub 및 노션 연결 확인... (총 ${itemsToPush.length}개)`);
 
         for (let i = 0; i < itemsToPush.length; i++) {
           const item = itemsToPush[i];
           logPush(`\n[${i + 1}/${itemsToPush.length}] 처리 중: [${item.title}]`);
 
-          // 1. 이미지가 로컬에서 선택/압축된 경우 GitHub에 업로드
           if (item._compressedBlob) {
-            const subjectFolder = item.subject === '사회' ? 'kids/subjects/society' : (item.subject === '과학' ? 'kids/subjects/science' : 'kids/subjects/korean');
+            const subjectFolder = item.subject === '사회' ? 'kids/subjects/society' : (item.subject === '과학' ? 'kids/subjects/science' : (item.subject === '영어' ? 'kids/subjects/english' : 'kids/subjects/korean'));
             let cleanRel = item.mediaUrl.replace('./', '').replace(/^images\//, '');
             const targetPath = `${subjectFolder}/images/${cleanRel}`;
 
-            logPush(`  🖼️ 최적화 이미지 깃허브 푸시: ${targetPath}`);
+            logPush(`  🖼️ 이미지 깃허브 푸시: ${targetPath}`);
             const b64 = await blobToBase64(item._compressedBlob);
-            await putFileToGithub(targetPath, b64, `feat(image): 교재 사료 이미지 업로드 (${cleanRel})`, token);
+            await putFileToGithub(targetPath, b64, `feat(image): ${currentMode === 'curriculum' ? '교재 사료' : '용어사전 낱말'} 이미지 업로드 (${cleanRel})`, token);
 
-            // GitHub 공식 Raw CDN URL 생성
             const rawCdnUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${targetPath}`;
+            item._rawCdnUrl = rawCdnUrl;
             item.mediaUrl = rawCdnUrl;
             item._previewUrl = rawCdnUrl;
             logPush(`  ✅ 깃허브 업로드 성공! (CDN: ${cleanRel})`);
           }
 
-          // 2. 노션 DB에 실시간 PATCH
-          logPush(`  📝 노션 DB 속성 실시간 업데이트 중...`);
-          await updateNotionPage(item);
+          logPush(`  📝 노션 DB 실시간 업데이트 중...`);
+          await updateNotionItem(item);
           logPush(`  ✅ 노션 DB 갱신 성공!`);
 
           item._isModified = false;
@@ -906,44 +1168,88 @@
     }
 
     // =========================================================
-    // ➕ 새 항목 노션 DB 등록 모달
+    // ➕ 새 항목 등록 모달 (모드 연동)
     // =========================================================
-    function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+    function openAddModal() {
+      const modal = document.getElementById('addModal');
+      const titleLabel = document.getElementById('addTitleLabel');
+      const zoneField = document.getElementById('newZoneField');
+      const curriculumFields = document.getElementById('curriculumFields');
+      const vocaFields = document.getElementById('vocaFields');
+
+      if (currentMode === 'curriculum') {
+        document.getElementById('addModalTitle').textContent = '➕ 새 교재·사료 노션 DB 등록';
+        titleLabel.textContent = '사료/문제 제목 *';
+        zoneField.style.display = 'flex';
+        curriculumFields.style.display = 'block';
+        vocaFields.style.display = 'none';
+      } else {
+        document.getElementById('addModalTitle').textContent = '➕ 새 낱말 노션 VOCA DB 등록';
+        titleLabel.textContent = '새 단어명 *';
+        zoneField.style.display = 'none';
+        curriculumFields.style.display = 'none';
+        vocaFields.style.display = 'block';
+      }
+
+      modal.style.display = 'flex';
+    }
     function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
 
     async function submitNewItem() {
       const title = document.getElementById('newTitle').value.trim();
-      if (!title) return alert('제목을 입력해주세요.');
+      if (!title) return alert('제목(단어명)을 입력해주세요.');
 
       const subject = document.getElementById('newSubject').value;
       const grade = document.getElementById('newGrade').value;
-      const zone = document.getElementById('newZone').value;
       const unit = document.getElementById('newUnit').value.trim() || '1단원';
-      const desc = document.getElementById('newDesc').value.trim();
-      const quiz = document.getElementById('newQuiz').value.trim();
-      const choicesText = document.getElementById('newChoices').value.trim();
-      const ans = Number(document.getElementById('newAns').value) || 1;
-      const interactiveUrl = document.getElementById('newInteractive').value.trim();
-      const explanation = document.getElementById('newExplanation').value.trim();
-
       const rt = (txt) => txt ? [{ type: "text", text: { content: String(txt).slice(0, 2000) } }] : [];
 
-      const payload = {
-        parent: { database_id: CURRICULUM_DB_ID },
-        properties: {
-          "제목": { title: rt(title) },
-          "과목": { select: { name: subject } },
-          "학년": { select: { name: grade } },
-          "단원": { rich_text: rt(unit) },
-          "구역": { select: { name: zone } },
-          "핵심 쓰임새/설명": { rich_text: rt(desc) },
-          "퀴즈 질문": { rich_text: rt(quiz) },
-          "보기 1~4": { rich_text: rt(choicesText) },
-          "정답": { number: ans },
-          "해설": { rich_text: rt(explanation) },
-          "인터랙티브 URL": { url: interactiveUrl || null }
-        }
-      };
+      let payload = {};
+
+      if (currentMode === 'curriculum') {
+        const zone = document.getElementById('newZone').value;
+        const desc = document.getElementById('newDesc').value.trim();
+        const quiz = document.getElementById('newQuiz').value.trim();
+        const choicesText = document.getElementById('newChoices').value.trim();
+        const ans = Number(document.getElementById('newAns').value) || 1;
+        const interactiveUrl = document.getElementById('newInteractive').value.trim();
+        const explanation = document.getElementById('newExplanation').value.trim();
+
+        payload = {
+          parent: { database_id: CURRICULUM_DB_ID },
+          properties: {
+            "제목": { title: rt(title) },
+            "과목": { select: { name: subject } },
+            "학년": { select: { name: grade } },
+            "단원": { rich_text: rt(unit) },
+            "구역": { select: { name: zone } },
+            "핵심 쓰임새/설명": { rich_text: rt(desc) },
+            "퀴즈 질문": { rich_text: rt(quiz) },
+            "보기 1~4": { rich_text: rt(choicesText) },
+            "정답": { number: ans },
+            "해설": { rich_text: rt(explanation) },
+            "인터랙티브 URL": { url: interactiveUrl || null }
+          }
+        };
+      } else {
+        // 용어사전 모드
+        const meaning = document.getElementById('newVocaMeaning').value.trim();
+        const desc = document.getElementById('newVocaDetail').value.trim();
+        const pos = document.getElementById('newVocaPos').value.trim();
+
+        payload = {
+          parent: { database_id: VOCA_DB_ID },
+          properties: {
+            "단어": { title: rt(title) },
+            "과목": { multi_select: [{ name: subject }] },
+            "학년": { multi_select: [{ name: grade }] },
+            "단원": { rich_text: rt(unit) },
+            "뜻풀이": { rich_text: rt(meaning) },
+            "상세설명": { rich_text: rt(desc) },
+            "품사": { rich_text: rt(pos) }
+          }
+        };
+      }
 
       try {
         const res = await fetch(`${PROXY_URL}/v1/pages`, {
@@ -954,8 +1260,8 @@
         if (!res.ok) throw new Error(await res.text());
         
         closeAddModal();
-        showToast(`🎉 [${title}] 새 항목이 노션 DB에 생성되었습니다!`);
-        refreshNotionData();
+        showToast(`🎉 [${title}] 새 항목이 노션 DB에 성공적으로 등록되었습니다!`);
+        refreshCurrentModeData();
       } catch (err) {
         alert(`생성 실패: ${err.message}`);
       }
