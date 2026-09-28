@@ -35,6 +35,7 @@ var APP_CONFIG = {
     TIMETABLE_DB_ID: "e3f9b3917c2b48bfa3d47db4bd0545fd",        // 레거시 호환 ID
     DIARY_DB_ID: "3dfa27115b688010a85be385f91d64ee",            // 📖 신규 성장 갤러리 & 마음일기 실시간 노션 DB ID
     GALLERY_DB_ID: "3dfa27115b688010a85be385f91d64ee",          // 🎨 꿈나무 갤러리 & 마음일기 실시간 노션 DB ID (3dfa2711...)
+    CURRICULUM_DB_ID: "3e8a27115b68806d94bfc81e9b3435fa",       // 🏛️ 공부방 교재·사료 마스터 DB ID (전 과목 공용)
 
     // 🏰 Master Tower 종합 관제탑 (아빠 프로필 전용)
     MASTER_TOWER_URL: "https://master-tower.awslike6.workers.dev/",
