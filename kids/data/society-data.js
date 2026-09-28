@@ -1838,7 +1838,7 @@ const SOCIETY_CURRICULUM_DATA = {
             },
             {
                   "name": "예성강 벽란도와 개경 만월대 터",
-                  "img": "./images/artifacts/byeokrando_trade.png",
+                  "img": "./images/minsu/5-2/1/Byeokrando-and-Manwoldae.png",
                   "desc": "고려의 수도 개경으로 들어가는 바닷길 어귀인 벽란도와 왕궁 만월대 터입니다. 바다 너머 세계 각국의 상인들이 오가며 '코리아(KOREA)'의 빛나는 이름을 온 세상에 떨친 유서 깊은 무대입니다.",
                   "interactiveUrl": "https://www.museum.go.kr"
             }
