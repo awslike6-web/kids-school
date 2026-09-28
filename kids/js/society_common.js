@@ -442,22 +442,98 @@ function normalizeSocietyGrade(g) {
     return str;
 }
 
-async function fetchAndBuildDynamicUI(type, innerBody) {
-    const propertyMap = { voca: "용어방", chart: "자료실", map: "지도탐방", history: "역사" };
-    const zoneTag = propertyMap[type];
+/**
+ * 🏛️ 신규 노션 [공부방 교재·사료 마스터 DB] 실시간 쿼리 함수 (2026 표준)
+ */
+async function fetchCurriculumFromNotion(type) {
+    const PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CURRICULUM_DB_ID) ? APP_CONFIG.CURRICULUM_DB_ID : "3e8a27115b68806d94bfc81e9b3435fa";
 
+    const zoneMap = { chart: "자료분석", map: "지도탐방", history: "역사사료" };
+    const targetZone = zoneMap[type];
+    if (!targetZone) return [];
+
+    const url = `${PROXY}/v1/databases/${DB_ID}/query`;
+    const payload = {
+        page_size: 100,
+        filter: {
+            and: [
+                { property: "과목", select: { equals: "사회" } },
+                { property: "구역", select: { equals: targetZone } }
+            ]
+        }
+    };
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`Notion Curriculum Query Failed: HTTP ${res.status}`);
+    const data = await res.json();
+
+    return (data.results || []).map(page => {
+        const p = page.properties || {};
+        const title = (p["제목"]?.title || []).map(x => x.plain_text).join('').trim() || '무제';
+        const grade = p["학년"]?.select?.name || '5-2';
+        const unit = (p["단원"]?.rich_text || []).map(x => x.plain_text).join('').trim() || '1단원';
+        const mediaUrl = p["미디어 URL"]?.url || '';
+        const interactiveUrl = p["인터랙티브 URL"]?.url || '';
+        const desc = (p["핵심 쓰임새/설명"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+        const quiz = (p["퀴즈 질문"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+        const choicesText = (p["보기 1~4"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+        const choices = choicesText ? choicesText.split('\n').map(s => s.trim()).filter(Boolean) : [];
+        const ans = p["정답"]?.number ?? 1;
+        const correctIdx = Math.max(0, ans - 1);
+        const explanation = (p["해설"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+
+        return {
+            word: title,
+            title: title,
+            name: title,
+            hint: (typeof getChosung === 'function') ? getChosung(title) : "",
+            detailContext: desc,
+            desc: desc,
+            meaning: desc,
+            imageUrl: mediaUrl,
+            img: mediaUrl,
+            interactiveUrl: interactiveUrl,
+            grade: grade,
+            grades: [grade],
+            level: unit,
+            summaryPassage: "",
+            quiz: quiz,
+            choices: choices,
+            correctIdx: correctIdx,
+            explanation: explanation,
+            artifactName: title,
+            artifactPeriod: "",
+            artifactUsage: desc,
+            _fromNotion: true
+        };
+    });
+}
+
+async function fetchAndBuildDynamicUI(type, innerBody) {
     const curriculumRecords = getCurriculumRecords(type);
 
     try {
         let records = [];
         try {
-            if (typeof fetchVocaFromNotion === 'function') {
-                records = await fetchVocaFromNotion({
-                    subject: "사회", 
-                    areaZone: zoneTag,
-                    useServerFilter: true,
-                    filterByStudent: true 
-                });
+            if (type === 'voca') {
+                // 📖 용어방: 순수 어휘 사전 DB (VOCA_DB) 실시간 연동
+                if (typeof fetchVocaFromNotion === 'function') {
+                    records = await fetchVocaFromNotion({
+                        subject: "사회", 
+                        areaZone: "용어방",
+                        useServerFilter: true,
+                        filterByStudent: true 
+                    });
+                }
+            } else {
+                // 🏛️ 차트/지도/역사: 신규 [교재·사료 마스터 DB] 실시간 쿼리 연동
+                records = await fetchCurriculumFromNotion(type);
             }
         } catch (netErr) {
             console.warn("ℹ️ 노션 통신 대기 -> 표준 교과서 데이터셋으로 전환합니다.", netErr);
@@ -466,8 +542,9 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         if (!records || records.length === 0) {
             records = curriculumRecords;
         } else if (curriculumRecords.length > 0) {
-            const existingWords = new Set(records.map(r => r.word));
-            const extra = curriculumRecords.filter(r => !existingWords.has(r.word));
+            // 노션에 아직 없는 단원(예: 5-1)의 데이터는 로컬 교과서 데이터셋에서 부드럽게 병합(보충)
+            const existingTitles = new Set(records.map(r => r.word || r.title || r.name));
+            const extra = curriculumRecords.filter(r => !existingTitles.has(r.word || r.title || r.name));
             records = [...records, ...extra];
         }
 
