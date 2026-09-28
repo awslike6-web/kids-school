@@ -24,8 +24,10 @@
 * **영어 (english/)**: english.html, english_voca.html.
 * **하루 (haru/)**: haru.html (민서 1-2 통합교과 로비 & 민수 5학년 데일리 루틴 룸), data/haru_data.js, js/haru_common.js. (※ 상세 명세: [haru_spec.md](file:///g:/master-tower/docs/haru_spec.md) 참조)
 
-### 3) 공용 공간 (kids/common_space/) & 정적 데이터 (kids/data/)
+### 3) 공용 공간 (kids/common_space/) & 5분 퀘스트 & 정적 데이터 (kids/data/)
 * lobby.html: 패밀리 통합 로비 및 일일 시간표 모니터.
+* quest_runner.html: 전 과목 5분 퀘스트 메인 러너 (4+1 듀오링고 출제, 수학 손글씨 메모장, 사료 돋보기 탑재).
+* kids/subjects/quest/: quest_engine.js(핵심 출제 엔진), quest_data_minsu.js, quest_data_minseo.js.
 * kids/common_space/my-room.html: 인벤토리 및 보상 상점.
 * kids/data/: 학기별 단원별 문제 정적 데이터셋.
 
@@ -43,13 +45,14 @@
 
 ---
 
-## 4. 노션 5대 데이터베이스 연동 기준
+## 4. 노션 6대 데이터베이스 연동 기준 (Single Source of Truth)
 
-1. VOCA_DB_ID (375a...): 단어사전 및 받아쓰기 문제 은행.
-2. INVENTORY_DB_ID (374a...): 자녀별 누적 재화(다이아/하리보) 및 상점 구매 아이템 창고.
-3. STUDY_LOG_DB_ID (37aa...): 일일 학습시간, 과목명, 오답노트 실시간 기록 일지.
-4. NOTION_CHAT_MEMORY_DB_ID (373a...): 요정 코코와의 대화 세션 기록 보관소.
-5. TIMETABLE_DB_ID (e3f9...): 로비 모니터 일일 시간표.
+1. VOCA_DB_ID (375a27115b688038b686d3994ee12919): 단어사전 및 5분 퀘스트 4지선다 어휘 자동 합성 원천.
+2. CURRICULUM_DB_ID (3e8a27115b68806d94bfc81e9b3435fa): 교재·사료 마스터 DB (사회 유물/지도, 과학 실험 사진 퀴즈 및 퀵체인지 2.0 연동).
+3. INVENTORY_DB_ID (374a...): 자녀별 누적 재화(다이아/하리보) 및 상점 구매 아이템 창고.
+4. STUDY_LOG_DB_ID (37aa27115b688001b2ffe5e6c8f82ab2): 일일 학습시간, 과목명, 오답노트 실시간 기록 일지.
+5. NOTION_CHAT_MEMORY_DB_ID (373a...): 요정 코코와의 대화 세션 기록 보관소.
+6. TIMETABLE_DB_ID (e3f9...): 로비 모니터 일일 시간표.
 
 * **학습일지 라이프사이클**:
   * 학습 시작 시 window.wrongNotes = [] 초기화.

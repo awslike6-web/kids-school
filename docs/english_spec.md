@@ -282,3 +282,10 @@ graph TD
      - 공통 스토리북 엔진 규격(`data/story_eng_5_2_l*.js`)에 맞춰 영문·한글 번역 및 어휘 팁 구조화.
      - `en-US-JennyNeural` (0.85x 원어민) + `ko-KR-SunHiNeural` (요정 코코 우리말 해설) 고음질 MP3 일괄 생성 및 배포.
 
+---
+
+## 9. 5분 퀘스트 영어 특화 규격 (Zero-Typing Phonics & Jenny Audio SSOT)
+* **음성 파이프라인 일원화**: 브라우저 날것의 `window.speechSynthesis` 호출을 엄격히 금지하며, 영문 어휘 및 지문 읽기는 반드시 `speakEnglish(text)`를 호출하여 `en-US-JennyNeural` (0.85x 감속 배속) 스트리밍으로 출력.
+* **4지선다 어휘 자동 조립**: `quest_engine.js`가 노션 VOCA DB의 영어 핵심 어휘(`rec.word`, `rec.meaning`)를 읽어 음성 지원 객관식 드릴을 자동 합성.
+* **청각 처리 지연 배려**: 단어 카드를 누르면 즉시 원어민 발음을 다시 들려주며, 15초 타이머 강제를 배제하고 아이가 충분히 듣고 선택할 수 있도록 보장.
+
