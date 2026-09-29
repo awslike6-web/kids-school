@@ -3,6 +3,55 @@
 
 const DEFAULT_GALLERY_DATA = [
   {
+    "id": "art_minseo_20260929_200109",
+    "author": "민서",
+    "authorKey": "daughter",
+    "title": "알쏭달쏭 사슴 단추 액자",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
+    "date": "2026-09-29",
+    "grade": "1학년 2학기",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260929_200109.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260929_200109.png"
+    ],
+    "hasCutout": true,
+    "artistNote": "학교에서 정성껏 만든 알쏭달쏭 입체 액자예요! 예쁜 사슴 뿔 위에 알록달록 무지개색 단추들을 하나하나 정성스럽게 붙여 멋진 뿔을 완성했답니다. 🦌✨",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": []
+  },
+  {
+    "id": "art_minseo_20260929_200356",
+    "author": "민서",
+    "authorKey": "daughter",
+    "title": "말랑말랑 마음교실 수료증 (한국마사회 기승능력인증서)",
+    "category": "상장/기념",
+    "categoryIcon": "🏆",
+    "date": "2026-09-29",
+    "grade": "1학년 2학기",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260929_200356.png",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260929_200356.png",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260929_195554.png"
+    ],
+    "hasCutout": true,
+    "artistNote": "학교에서 화요일마다 참여한 말랑말랑 마음교실 말 체험을 멋지게 수료하고 받은 한국마사회 기승능력인증 수료증이에요! 말을 사랑하고 감사하는 따뜻한 마음을 배웠답니다. 🐴📜",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": []
+  },
+  {
     "id": "art_minsu_20260922_213854",
     "author": "민수",
     "authorKey": "son",
