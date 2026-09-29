@@ -235,6 +235,50 @@ window.SCIENCE_CURRICULUM_DATA = [
     ]
   },
   {
+    "code": "5-2-3",
+    "title": "3. 온도와 열",
+    "unit": "3. 온도와 열",
+    "grade": "5-2",
+    "summary": "물체의 따뜻하거나 차가운 정도를 숫자로 나타내는 온도의 개념을 익히고, 열이 온도가 높은 곳에서 낮은 곳으로 이동하는 세 가지 방식(고체의 전도, 액체·기체의 대류, 빛 형태의 복사)과 열의 이동을 막는 단열의 원리를 탐구합니다.",
+    "voca": [
+      {
+        "word": "온도",
+        "hint": "ㅇㄷ",
+        "meaning": "물체의 따뜻하거나 차가운 정도를 숫자로 정확하게 나타낸 것이에요 (단위: ℃, 섭씨도).",
+        "desc": "손으로 느끼는 감각은 정확하지 않기 때문에 정밀한 측정을 위해 알맞은 온도계를 사용해야 해요.",
+        "img": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_ill_p2.jpg"
+      },
+      {
+        "word": "전도",
+        "hint": "ㅈㄷ",
+        "meaning": "고체 물질에서 온도가 높은 부분에서 온도가 낮은 부분으로 열이 차례대로 옮겨가는 이동 방식이에요.",
+        "desc": "뜨거운 국에 꽂아둔 숟가락 손잡이나 촛불로 가열한 구리판처럼, 이웃한 물질 입자를 통해 열이 순서대로 전달돼요.",
+        "img": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_ill_p5.jpg"
+      },
+      {
+        "word": "대류",
+        "hint": "ㄷㄹ",
+        "meaning": "물이나 공기 같은 액체·기체에서 따뜻해진 물질은 위로 올라가고 차가운 물질은 아래로 내려오며 열이 순환하는 방식이에요.",
+        "desc": "방 안 바닥에 둔 난로가 방 전체를 데우거나 냄비의 물을 끓일 때 일어나는 순환 현상이에요.",
+        "img": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_ill_p6.jpg"
+      },
+      {
+        "word": "복사",
+        "hint": "ㅂㅅ",
+        "meaning": "다른 물질을 거치지 않고 햇빛이나 난로처럼 빛을 통해 열이 직접 전달되는 방식이에요.",
+        "desc": "공기가 없어도 태양의 따스한 햇살이 지구까지 직접 닿는 것처럼, 빛의 형태로 열이 전달돼요.",
+        "img": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_ill_p7.jpg"
+      },
+      {
+        "word": "단열",
+        "hint": "ㄷㅇ",
+        "meaning": "보온병이나 아이스박스처럼 두 물체 사이에서 열이 빠져나가거나 들어오지 못하게 막는 것이에요.",
+        "desc": "겨울철 입는 패딩 옷이나 창문의 뽁뽁이(에어캡)처럼 열의 이동을 막아 온도를 오랫동안 유지해 줘요.",
+        "img": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_ill_p8.jpg"
+      }
+    ]
+  },
+  {
     "code": "3-1",
     "title": "1. 물에 녹을까, 녹지 않을까?",
     "unit": "3. 용해와 용액",

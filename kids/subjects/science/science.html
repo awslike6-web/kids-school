@@ -60,6 +60,9 @@
     <button class="unit-tab-btn" id="tabUnit2" onclick="filterScienceUnits('unit2')">
       🌤️ [2단원] 날씨와 우리 생활
     </button>
+    <button class="unit-tab-btn" id="tabUnit3" onclick="filterScienceUnits('unit3')">
+      🔥 [3단원] 온도와 열
+    </button>
   </div>
 
   <!-- =======================================================
@@ -157,11 +160,56 @@
     </div>
   </div>
 
+  <!-- =======================================================
+       🔥 [3단원] 온도와 열 묶음 섹션
+       ======================================================= -->
+  <div id="unit3Section" class="unit-section-wrap" style="border-color: #fdba74; background: rgba(255, 247, 237, 0.6);">
+    <div class="unit-section-header" style="border-bottom-color: #fb923c;">
+      <h2 class="unit-section-title" style="color: #c2410c;">
+        <span>🔥</span>
+        <span>3단원 : 온도와 열</span>
+      </h2>
+      <span class="unit-section-badge" style="background: #ea580c;">초등 5-2 과학 3단원</span>
+    </div>
+
+    <div class="science-grid" style="margin-bottom: 0;">
+      <!-- 1단계: 3단원 동화 -->
+      <a href="science_temp_storybook.html" class="science-grid-btn" style="text-decoration: none; color: inherit; border: 2.5px solid #ea580c; background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%);">
+        <span class="science-btn-icon">📚</span>
+        <div class="science-btn-title" style="color: #c2410c;">[1단계] 단원 동화</div>
+        <p class="science-btn-desc"><strong>『온도 탐험대 민수와 열의 이동 비밀 (5권)』</strong><br>민수와 요정 모리가 떠나는 온도 측정부터 전도·대류·복사·단열 탐험!</p>
+      </a>
+
+      <!-- 2단계: 3단원 어휘 -->
+      <div class="science-grid-btn" onclick="openScienceVocaDirect('5-2', '3단원')" style="border: 2.5px solid #10b981; background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%); cursor: pointer;">
+        <span class="science-btn-icon">🔬</span>
+        <div class="science-btn-title" style="color: #047857;">[2단계] 핵심 용어방</div>
+        <p class="science-btn-desc"><strong>[3단원 5종 어휘 완비]</strong><br>온도, 전도, 대류, 복사, 단열 필수 교과서 핵심 어휘 초성 퀴즈!</p>
+      </div>
+
+      <!-- 3단계: 3단원 가상 실험실 -->
+      <div class="science-grid-btn" style="border: 2.5px solid #f97316; background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%); text-align: left; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 8px;">
+          <span class="science-btn-icon" style="margin-bottom: 8px;">🧪</span>
+          <div class="science-btn-title" style="color: #c2410c; margin-bottom: 4px;">[3단계] 열의 이동 탐구관</div>
+          <p class="science-btn-desc" style="margin-bottom: 0;">구리판 전도와 물 대류, 복사열 원리 집중 탐구!</p>
+        </div>
+      </div>
+
+      <!-- 4단계: 3단원 탐구 보고서 -->
+      <div class="science-grid-btn" onclick="openScienceReport(2)" style="border: 2.5px solid #8b5cf6; background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%); cursor: pointer;">
+        <span class="science-btn-icon">📝</span>
+        <div class="science-btn-title" style="color: #6d28d9;">[4단계] 탐구 보고서</div>
+        <p class="science-btn-desc"><strong>[열의 이동 관찰 일지]</strong><br>온도 측정 기록, 전도·대류·복사 비교 정리 및 단열 실천 보고서!</p>
+      </div>
+    </div>
+  </div>
+
   <!-- 요정 코코 라이브 도크 -->
   <div class="fairy-live-dock">
     <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" style="width: 52px; height: 52px; object-fit: contain;">
     <div class="fairy-bubble">
-      <span id="fairySpeakerText">반가워! 과학방에 입장했구나. 실험하기 전 <b>안전 라이선스</b>를 먼저 따고, <b>1단원(혼합물)</b>과 <b>2단원(날씨)</b>을 차근차근 탐구해 봐! 🔬</span>
+      <span id="fairySpeakerText">반가워! 과학방에 입장했구나. 실험하기 전 <b>안전 라이선스</b>를 먼저 따고, <b>1단원(혼합물)</b>, <b>2단원(날씨)</b>, <b>3단원(온도와 열)</b>을 차근차근 탐구해 봐! 🔬</span>
       <div class="fairy-speech" id="fairyVoiceStatus">🔊 음량 수려함 - WebSpeech API 결합</div>
     </div>
   </div>
@@ -188,9 +236,9 @@
 <script src="../../core/fairy-config.js?v=20260830_no_intro"></script>
 <script src="../../core/fairy-engine.js?v=20260830_no_intro"></script>
 <script src="../../core/fairy-chatbot.js?v=20260830_no_intro"></script>
-<script src="../../data/science-data.js?v=20260916_voca_fix"></script>
+<script src="../../data/science-data.js?v=20260929_temp"></script>
 <script src="../../data/science_lab_data.js?v=20260916_report2"></script>
-<script src="../../js/science_common.js?v=20260916_voca_fix"></script>
+<script src="../../js/science_common.js?v=20260929_temp"></script>
 
 <script>
   // ========================================================
@@ -202,19 +250,28 @@
 
     const u1 = document.getElementById('unit1Section');
     const u2 = document.getElementById('unit2Section');
+    const u3 = document.getElementById('unit3Section');
 
     if (unitId === 'all') {
       document.getElementById('tabAll').classList.add('active');
-      u1.style.display = 'block';
-      u2.style.display = 'block';
+      if (u1) u1.style.display = 'block';
+      if (u2) u2.style.display = 'block';
+      if (u3) u3.style.display = 'block';
     } else if (unitId === 'unit1') {
       document.getElementById('tabUnit1').classList.add('active');
-      u1.style.display = 'block';
-      u2.style.display = 'none';
+      if (u1) u1.style.display = 'block';
+      if (u2) u2.style.display = 'none';
+      if (u3) u3.style.display = 'none';
     } else if (unitId === 'unit2') {
       document.getElementById('tabUnit2').classList.add('active');
-      u1.style.display = 'none';
-      u2.style.display = 'block';
+      if (u1) u1.style.display = 'none';
+      if (u2) u2.style.display = 'block';
+      if (u3) u3.style.display = 'none';
+    } else if (unitId === 'unit3') {
+      document.getElementById('tabUnit3').classList.add('active');
+      if (u1) u1.style.display = 'none';
+      if (u2) u2.style.display = 'none';
+      if (u3) u3.style.display = 'block';
     }
   }
 

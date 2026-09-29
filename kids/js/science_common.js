@@ -80,6 +80,21 @@ const SCIENCE_STORYBOOK_LIBRARY = [
         border: "#38bdf8",
         link: "science_weather_storybook.html",
         coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/2/science_weather_story_p1.jpg"
+    },
+    {
+        id: "5_2_3_1",
+        grade: "5-2",
+        unit: "3단원",
+        bookNum: "5권",
+        title: "온도 탐험대 민수와 열의 이동 비밀",
+        subtitle: "3단원 온도와 열 (온도계·전도·대류·복사·단열 완벽 정복)",
+        desc: "호기심 많은 소년 민수와 과학 요정 모리가 함께 떠나는 신나는 열의 이동 과학 탐험 이야기!",
+        icon: "🔥",
+        color: "#ea580c",
+        bgGrad: "linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+        border: "#ea580c",
+        link: "science_temp_storybook.html",
+        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_story_p1.png"
     }
 ];
 
