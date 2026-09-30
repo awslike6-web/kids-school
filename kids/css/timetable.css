@@ -872,13 +872,13 @@
       flex: none !important;
     }
 
-    /* ── 모바일 전용 요일 페어 퀵 탭 바 (월화/수목/목금) ── */
+    /* ── 모바일 전용 요일 페어 퀵 탭 바 (월화/화수/수목/목금) ── */
     .mobile-day-pair-nav {
       display: flex !important;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       margin-bottom: 10px;
-      padding: 4px;
+      padding: 4px 3px;
       background: rgba(18, 14, 32, 0.85);
       border: 1.5px solid rgba(0, 242, 254, 0.2);
       border-radius: 12px;
@@ -886,13 +886,14 @@
     }
     .day-pair-btn {
       flex: 1;
-      padding: 8px 6px;
+      padding: 7px 3px;
       border: 1px solid transparent;
       border-radius: 9px;
       background: transparent;
       color: var(--text-dim);
       font-family: 'Jua', sans-serif;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
+      letter-spacing: -0.3px;
       cursor: pointer;
       transition: all 0.2s ease;
       text-align: center;
@@ -900,7 +901,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 3px;
       touch-action: manipulation;
     }
     .day-pair-btn:hover {
@@ -916,8 +917,8 @@
     }
     .day-pair-btn .today-dot {
       display: inline-block;
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: var(--yellow);
       box-shadow: 0 0 6px var(--yellow);
@@ -931,7 +932,6 @@
       -webkit-overflow-scrolling: touch !important;
       touch-action: pan-x pan-y !important;
       scroll-behavior: smooth !important;
-      scroll-snap-type: x proximity;
     }
 
     /* ── 교시 열은 왼쪽에 항상 고정 (Sticky Column) ── */
@@ -983,11 +983,6 @@
       min-width: var(--mobile-day-w) !important;
       max-width: var(--mobile-day-w) !important;
       padding: 8px 5px !important;
-    }
-    .weekly-grid th.day-mon,
-    .weekly-grid th.day-wed,
-    .weekly-grid th.day-thu {
-      scroll-snap-align: start;
     }
 
     .lesson-name {

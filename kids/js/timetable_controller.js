@@ -564,25 +564,30 @@ function renderWeeklyGrid() {
   // 🌟 [모바일 2일 뷰포트] 오늘 요일 페어 판별 (0=일, 1=월, 2=화, 3=수, 4=목, 5=금, 6=토)
   const dayNum = new Date().getDay();
   let defaultPair = 'mon-tue';
-  if (dayNum === 3 || dayNum === 4) {
+  if (dayNum === 2) {
+    defaultPair = 'tue-wed';
+  } else if (dayNum === 3) {
     defaultPair = 'wed-thu';
-  } else if (dayNum === 5) {
+  } else if (dayNum === 4 || dayNum === 5) {
     defaultPair = 'thu-fri';
   } else {
     defaultPair = 'mon-tue';
   }
 
-  // 모바일 전용 요일 페어 퀵 네비게이션 탭 바 (월화 / 수목 / 목금)
+  // 모바일 전용 요일 페어 퀵 네비게이션 탭 바 (월화 / 화수 / 수목 / 목금)
   const mobilePairNavHtml = `
     <div class="mobile-day-pair-nav" id="mobileDayPairNav">
       <button type="button" class="day-pair-btn ${defaultPair === 'mon-tue' ? 'active' : ''}" data-pair="mon-tue" onclick="scrollToDayPair('mon-tue')">
-        ${(dayNum === 1 || dayNum === 2) ? '<span class="today-dot"></span>' : ''}월 · 화
+        ${dayNum === 1 ? '<span class="today-dot"></span>' : ''}월 · 화
+      </button>
+      <button type="button" class="day-pair-btn ${defaultPair === 'tue-wed' ? 'active' : ''}" data-pair="tue-wed" onclick="scrollToDayPair('tue-wed')">
+        ${dayNum === 2 ? '<span class="today-dot"></span>' : ''}화 · 수
       </button>
       <button type="button" class="day-pair-btn ${defaultPair === 'wed-thu' ? 'active' : ''}" data-pair="wed-thu" onclick="scrollToDayPair('wed-thu')">
-        ${(dayNum === 3 || dayNum === 4) ? '<span class="today-dot"></span>' : ''}수 · 목
+        ${dayNum === 3 ? '<span class="today-dot"></span>' : ''}수 · 목
       </button>
       <button type="button" class="day-pair-btn ${defaultPair === 'thu-fri' ? 'active' : ''}" data-pair="thu-fri" onclick="scrollToDayPair('thu-fri')">
-        ${dayNum === 5 ? '<span class="today-dot"></span>' : ''}목 · 금
+        ${(dayNum === 4 || dayNum === 5) ? '<span class="today-dot"></span>' : ''}목 · 금
       </button>
     </div>
   `;
@@ -627,28 +632,31 @@ function adjustMobileColumnWidths() {
 }
 
 /**
- * 🌟 [모바일 2일 뷰포트] 지정한 요일 페어('mon-tue', 'wed-thu', 'thu-fri')로 스크롤 이동
+ * 🌟 [모바일 2일 뷰포트] 페어 키와 인덱스 매핑 상수
+ */
+const MOBILE_PAIR_INDICES = {
+  'mon-tue': 0,
+  'tue-wed': 1,
+  'wed-thu': 2,
+  'thu-fri': 3
+};
+const MOBILE_PAIR_KEYS = ['mon-tue', 'tue-wed', 'wed-thu', 'thu-fri'];
+
+/**
+ * 🌟 [모바일 2일 뷰포트] 지정한 요일 페어('mon-tue', 'tue-wed', 'wed-thu', 'thu-fri')로 스크롤 이동
  */
 window.scrollToDayPair = function(pairKey, isSmooth = true) {
   const gridWrap = document.querySelector('.grid-wrap');
   if (!gridWrap || window.innerWidth > 900) return;
 
-  const periodTh = gridWrap.querySelector('th.period-col');
-  const periodWidth = periodTh ? periodTh.offsetWidth : 78;
-  let targetLeft = 0;
+  const targetIndex = MOBILE_PAIR_INDICES[pairKey] ?? 0;
+  const dayCol = gridWrap.querySelector('th:not(.period-col)');
+  const dayWidth = dayCol ? dayCol.offsetWidth : (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mobile-day-w')) || 140);
 
-  if (pairKey === 'wed-thu') {
-    const wedTh = gridWrap.querySelector('th.day-wed');
-    if (wedTh) {
-      targetLeft = Math.max(0, wedTh.offsetLeft - periodWidth);
-    }
-  } else if (pairKey === 'thu-fri') {
-    const thuTh = gridWrap.querySelector('th.day-thu');
-    if (thuTh) {
-      targetLeft = Math.max(0, thuTh.offsetLeft - periodWidth);
-    }
-  } else {
-    targetLeft = 0;
+  let targetLeft = Math.round(targetIndex * dayWidth);
+  const maxScroll = Math.max(0, gridWrap.scrollWidth - gridWrap.clientWidth);
+  if (targetLeft > maxScroll) {
+    targetLeft = maxScroll;
   }
 
   gridWrap.scrollTo({
@@ -686,23 +694,12 @@ function initMobileScrollSync() {
     if (window.innerWidth > 900) return;
     if (scrollTimeout) clearTimeout(scrollTimeout);
     scrollTimeout = setTimeout(() => {
-      const periodTh = gridWrap.querySelector('th.period-col');
-      const periodWidth = periodTh ? periodTh.offsetWidth : 78;
-      const wedTh = gridWrap.querySelector('th.day-wed');
-      const thuTh = gridWrap.querySelector('th.day-thu');
-
-      const wedLeft = wedTh ? (wedTh.offsetLeft - periodWidth) : 200;
-      const thuLeft = thuTh ? (thuTh.offsetLeft - periodWidth) : 300;
+      const dayCol = gridWrap.querySelector('th:not(.period-col)');
+      const dayWidth = dayCol ? dayCol.offsetWidth : (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--mobile-day-w')) || 140);
       const currentScroll = gridWrap.scrollLeft;
 
-      let activePair = 'mon-tue';
-      if (currentScroll >= thuLeft - 30) {
-        activePair = 'thu-fri';
-      } else if (currentScroll >= wedLeft - 30) {
-        activePair = 'wed-thu';
-      } else {
-        activePair = 'mon-tue';
-      }
+      const detectedIdx = Math.min(3, Math.max(0, Math.round(currentScroll / dayWidth)));
+      const activePair = MOBILE_PAIR_KEYS[detectedIdx] || 'mon-tue';
 
       document.querySelectorAll('.day-pair-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.pair === activePair);
