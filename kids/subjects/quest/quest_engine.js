@@ -178,6 +178,27 @@
     }
   };
 
+  /**
+   * 🔄 유연한 다음 단원 계산기 (정적 맵핑 + L1~L10/1~10단원 무한 자동 순환)
+   */
+  function getNextUnitKey(child, subj, currentUnit) {
+    const childMap = NEXT_UNIT_MAP[child] && NEXT_UNIT_MAP[child][subj];
+    if (childMap && childMap[currentUnit]) {
+      return childMap[currentUnit];
+    }
+    // L1, L2, L3... 또는 1, 2, 3... 패턴 자동 순환 계산
+    if (typeof currentUnit === 'string') {
+      const matchL = currentUnit.match(/^L?(\d+)$/i);
+      if (matchL) {
+        const num = parseInt(matchL[1], 10);
+        const prefix = currentUnit.toUpperCase().startsWith('L') ? 'L' : '';
+        const nextNum = num >= 10 ? 1 : num + 1;
+        return `${prefix}${nextNum}`;
+      }
+    }
+    return childMap ? (childMap.next || childMap.current) : null;
+  }
+
   // ========================================================
   // 5. 📚 [노션 어휘 연동 엔진] 노션 용어사전 캐시 기반 4지선다 자동 합성기
   // ========================================================
@@ -200,23 +221,14 @@
       if (typeof window !== 'undefined' && typeof window._loadVocaFromCache === 'function') {
         const cached = window._loadVocaFromCache(childName, vocaDbId);
         if (cached && Array.isArray(cached) && cached.length > 0) return cached;
+        const cachedAll = window._loadVocaFromCache('ALL', vocaDbId);
+        if (cachedAll && Array.isArray(cachedAll) && cachedAll.length > 0) return cachedAll;
       }
 
-      // 2) 직접 localStorage 캐시 탐색 (오늘 날짜)
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const key = `MINMIN_VOCA_CACHE_V11_${vocaDbId}_${childName}_${todayStr}`;
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.records) && parsed.records.length > 0) {
-          return parsed.records;
-        }
-      }
-
-      // 3) 오늘 날짜 외의 최신 캐시 탐색 (날짜 갱신 과도기 대응)
+      // 2) 직접 localStorage 캐시 탐색 (V11, V12 등 모든 VOCA 캐시 접두사 통합 지원)
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('MINMIN_VOCA_CACHE_V11_') && k.includes(`_${childName}_`)) {
+        if (k && k.includes('_VOCA_CACHE_') && (k.includes(`_${childName}_`) || k.includes('_ALL_'))) {
           try {
             const item = JSON.parse(localStorage.getItem(k));
             if (item && Array.isArray(item.records) && item.records.length > 0) {
@@ -261,14 +273,25 @@
 
       if (candidateRecords.length === 0) return [];
 
-      // 2) 단원 필터링 (일치 우선 정렬)
+      // 2) 단원 필터링 (일치 우선 정렬: L9, 9, 9단원 유연 매칭)
       let prioritized = candidateRecords;
       if (unitKey && unitKey !== 'default') {
         const uStr = String(unitKey).trim().toLowerCase();
+        const numMatch = uStr.match(/\d+/);
+        const uNum = numMatch ? numMatch[0] : '';
+
         const matched = candidateRecords.filter(item => {
-          const stage = String(item.stage || '').toLowerCase();
-          const level = String(item.level || '').toLowerCase();
-          return stage.includes(uStr) || level.includes(uStr);
+          const stage = String(item.stage || '').trim().toLowerCase();
+          const level = String(item.level || '').trim().toLowerCase();
+          if (stage === uStr || level === uStr) return true;
+          if (stage.includes(uStr) || level.includes(uStr)) return true;
+          if (uNum) {
+            const sNum = (stage.match(/\d+/) || [])[0];
+            if (sNum && sNum === uNum) return true;
+            const lNum = (level.match(/\d+/) || [])[0];
+            if (lNum && lNum === uNum) return true;
+          }
+          return false;
         });
         if (matched.length >= 2) {
           prioritized = matched;
@@ -692,18 +715,23 @@
     const bank = window.minsuMasterBank || {};
     const sData = bank[subj] || bank.math || { title: "수학 분쇄 던전", icon: "🧮" };
     let curUnit = activeUnit;
-    if (!sData[curUnit]) {
-      curUnit = (subj === 'math') ? 'division' : ((subj === 'english') ? '8' : '1');
+
+    // 💡 노션 동적 단원 우선 탐색: activeUnit이 노션 VOCA DB에 실제로 존재하는지 확인!
+    const testVoca = (activeUnit && activeUnit !== 'default') ? buildVocaQuestionsFromNotion('minsu', subj, activeUnit) : [];
+
+    if (!sData[curUnit] && testVoca.length === 0) {
+      curUnit = (subj === 'math') ? 'division' : ((subj === 'english') ? 'L9' : '1');
     }
 
-    const nextMap = (NEXT_UNIT_MAP.minsu && NEXT_UNIT_MAP.minsu[subj]) ? NEXT_UNIT_MAP.minsu[subj] : {};
-    const nextUnitKey = nextMap[curUnit] || (curUnit === '1' ? '2' : (curUnit === 'division' ? 'fraction' : '7'));
+    const nextUnitKey = getNextUnitKey('minsu', subj, curUnit);
 
     const mainPool = sData[curUnit] || [];
-    const nextPool = sData[nextUnitKey] || [];
+    const nextPool = (nextUnitKey && sData[nextUnitKey]) 
+      ? sData[nextUnitKey] 
+      : (nextUnitKey ? buildVocaQuestionsFromNotion('minsu', subj, nextUnitKey) : []);
 
     // 💡 노션 용어사전 캐시 기반 어휘 문제 동적 합성 및 융합
-    const vocaQuestions = buildVocaQuestionsFromNotion('minsu', subj, curUnit);
+    const vocaQuestions = testVoca.length > 0 ? testVoca : buildVocaQuestionsFromNotion('minsu', subj, curUnit);
     let combinedMain = [...mainPool];
 
     // 🎲 수학 과목: 답 외우기 원천 차단 무한 랜덤 암산 1문제 우선 융합
@@ -717,8 +745,11 @@
       if (currQuestions.length > 0) combinedMain.unshift(...currQuestions.slice(0, 2));
     }
 
-    if (vocaQuestions.length > 0) {
-      combinedMain.push(...vocaQuestions.slice(0, 1));
+    // 노션 기반 단원(L1~L10, 9단원 등)이고 mainPool이 비어있는 경우 노션 문제를 100% 메인 풀로 사용!
+    if (combinedMain.length === 0 && vocaQuestions.length > 0) {
+      combinedMain.push(...vocaQuestions);
+    } else if (vocaQuestions.length > 0) {
+      combinedMain.push(...vocaQuestions.slice(0, 2));
     }
 
     // 1~3번: 현재 진도 드릴 3문제 (우선 융합 문제 보장 + 셔플)
@@ -762,7 +793,9 @@
     if (subj === 'math') {
       questTitle = curUnit === 'fraction' ? "수학 분쇄 던전 · 5-2 분수의 곱셈 (심화)" : "수학 분쇄 던전 · 두 자릿수 나눗셈 (기본 진도 ⭐)";
     } else if (subj === 'english') {
-      questTitle = curUnit === '7' ? "스피킹 콜로세움 · 7단원 지난 주말 이야기 (복습)" : "스피킹 콜로세움 · 8단원 외모·옷차림 (현재 진도 ⭐)";
+      const matchL = String(curUnit).match(/^L?(\d+)$/i);
+      const uNum = matchL ? matchL[1] : curUnit;
+      questTitle = `스피킹 콜로세움 · ${uNum}단원 (${curUnit}) 실전 퀘스트 ⭐`;
     } else if (subj === 'science') {
       questTitle = curUnit === '3' ? "볼케이노 코어 · 3단원 온도와 열 (열의 이동 ⭐)" : (curUnit === '2' ? "볼케이노 코어 · 2단원 상태변화·지시약" : "볼케이노 코어 · 1단원 혼합물의 분리");
     } else if (subj === 'society') {

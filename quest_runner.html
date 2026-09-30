@@ -581,8 +581,9 @@
     const urlParams = new URLSearchParams(window.location.search);
     const currentUser = urlParams.get('user') || localStorage.getItem('currentChild') || localStorage.getItem('currentUser') || 'minsu';
     const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
-    const currentSubj = urlParams.get('subject') || (isMinseo ? 'math' : 'math');
-    const currentUnit = urlParams.get('unit') || (isMinseo ? (currentSubj === 'korean' ? 'voca' : (currentSubj === 'english' ? 'phonics' : '100num')) : (currentSubj === 'math' ? 'division' : '8'));
+    const parentSettings = (typeof getParentQuestSettings === 'function') ? getParentQuestSettings(currentUser) : null;
+    const configuredUnit = parentSettings && parentSettings[currentSubj];
+    const currentUnit = urlParams.get('unit') || configuredUnit || (isMinseo ? (currentSubj === 'korean' ? 'voca' : (currentSubj === 'english' ? 'phonics' : '100num')) : (currentSubj === 'math' ? 'division' : (currentSubj === 'english' ? 'L9' : '1')));
     const currentMode = urlParams.get('mode') || (isMinseo ? 'speed' : 'mixed');
 
     // 퀘스트 데이터 바인딩 (quest_engine.js getSubjectQuest 호출)

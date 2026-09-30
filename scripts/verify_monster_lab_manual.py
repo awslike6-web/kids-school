@@ -25,9 +25,9 @@ def test_monster_lab_manual():
     assert LAB_HTML.exists(), f"파일 누락: {LAB_HTML}"
     content = LAB_HTML.read_text(encoding='utf-8')
 
-    # 1) 헤더 버튼
-    assert "openParentProgressModal('guide')" in content, "헤더 설명서 버튼 누락"
-    print("  ✅ [PASS] 헤더 📖 설명서 직결 버튼 탑재 확인")
+    # 1) 부모 진도 관리판 트리거 버튼 (헤더 공간 절약을 위해 가이드 탭은 모달 내부로 통합)
+    assert "openParentProgressModal" in content, "부모 진도 설정 버튼 누락"
+    print("  ✅ [PASS] 부모 관리판 직결 버튼 및 내부 가이드 탭 구조 확인")
 
     # 2) 3대 탭 ID
     assert 'id="parentTabMinseo"' in content, "민서 탭 누락"

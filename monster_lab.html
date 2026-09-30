@@ -632,7 +632,7 @@
             <span class="text-[10px] text-blue-300 font-bold" id="badgeMinsuScience">3단원 온도와 열 (열의 이동) ⭐</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5" id="parentMinsuScienceChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" onclick="setParentUnit('minsu', 'science', '1')">1단원 온도와 열</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" onclick="setParentUnit('minsu', 'science', '1')">1단원 혼합물의 분리</button>
             <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
             <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="3" onclick="setParentUnit('minsu', 'science', '3')">3단원 온도와 열 (열의 이동) ⭐</button>
           </div>
@@ -650,15 +650,23 @@
           </div>
         </div>
 
-        <!-- 영어 -->
+        <!-- 영어 (노션 VOCA DB 연동 L1~L10 전체 지원) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">🔤 영어 현재 진도</span>
-            <span class="text-[10px] text-yellow-300 font-bold" id="badgeMinsuEnglish">8단원 외모 묘사</span>
+            <span class="text-[10px] text-yellow-300 font-bold" id="badgeMinsuEnglish">9단원 집·방 묘사 (L9) ⭐</span>
           </div>
-          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuEnglishChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="8" onclick="setParentUnit('minsu', 'english', '8')">8단원 외모 묘사 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="7" onclick="setParentUnit('minsu', 'english', '7')">7단원 길찾기 복습</button>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="parentMinsuEnglishChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L9" onclick="setParentUnit('minsu', 'english', 'L9')">9단원 (L9) ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L8" onclick="setParentUnit('minsu', 'english', 'L8')">8단원 (L8)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L7" onclick="setParentUnit('minsu', 'english', 'L7')">7단원 (L7)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L6" onclick="setParentUnit('minsu', 'english', 'L6')">6단원 (L6)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L5" onclick="setParentUnit('minsu', 'english', 'L5')">5단원 (L5)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L4" onclick="setParentUnit('minsu', 'english', 'L4')">4단원 (L4)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L3" onclick="setParentUnit('minsu', 'english', 'L3')">3단원 (L3)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L2" onclick="setParentUnit('minsu', 'english', 'L2')">2단원 (L2)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L1" onclick="setParentUnit('minsu', 'english', 'L1')">1단원 (L1)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L10" onclick="setParentUnit('minsu', 'english', 'L10')">10단원 (L10)</button>
           </div>
         </div>
 
@@ -680,9 +688,10 @@
             <span class="text-xs font-bold text-pink-300 flex items-center gap-1">🗺️ 사회 현재 진도</span>
             <span class="text-[10px] text-pink-300 font-bold" id="badgeMinsuSociety">1단원 조선 건국·한양</span>
           </div>
-          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuSocietyChips">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="parentMinsuSocietyChips">
             <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="1" onclick="setParentUnit('minsu', 'society', '1')">1단원 조선 건국·한양 ⭐</button>
             <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="2" onclick="setParentUnit('minsu', 'society', '2')">2단원 문화발전·이순신</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="3" onclick="setParentUnit('minsu', 'society', '3')">3단원 유교문화·민족의 시련</button>
           </div>
         </div>
       </div>
@@ -804,10 +813,14 @@
 
   <!-- ================= 6. 요정 코어 & 음성/설정 엔진 모듈 로드 ================= -->
   <script src="./kids/config.js"></script>
+  <script src="./kids/core/notion-helper.js"></script>
   <script src="./kids/core/fairy-config.js"></script>
   <script src="./kids/core/fairy-settings-catalog.js"></script>
   <script src="./kids/core/fairy-settings-engine.js"></script>
   <script src="./kids/core/fairy-engine.js"></script>
+  <script src="./kids/subjects/quest/quest_data_minsu.js"></script>
+  <script src="./kids/subjects/quest/quest_data_minseo.js"></script>
+  <script src="./kids/subjects/quest/quest_engine.js"></script>
 
   <!-- ================= 7. 직관적 사운드 & 인터랙션 스크립트 ================= -->
   <script>
@@ -1293,15 +1306,33 @@
           fraction: '5-2 분수의 곱셈'
         },
         english: {
+          'L1': '1단원 (L1)',
+          'L2': '2단원 (L2)',
+          'L3': '3단원 (L3)',
+          'L4': '4단원 (L4)',
+          'L5': '5단원 (L5)',
+          'L6': '6단원 (L6)',
+          'L7': '7단원 길찾기 (L7)',
+          'L8': '8단원 외모 묘사 (L8)',
+          'L9': '9단원 집·방 묘사 (L9) ⭐',
+          'L10': '10단원 과거 경험 (L10)',
+          '1': '1단원 (L1)',
+          '2': '2단원 (L2)',
+          '3': '3단원 (L3)',
+          '4': '4단원 (L4)',
+          '5': '5단원 (L5)',
+          '6': '6단원 (L6)',
+          '7': '7단원 길찾기',
           '8': '8단원 외모 묘사',
-          '7': '7단원 길찾기'
+          '9': '9단원 집·방 묘사 ⭐',
+          '10': '10단원 과거 경험'
         },
         korean: {
           '1': '1단원 어휘·속담',
           '2': '2단원 문맥·독해'
         },
         science: {
-          '1': '1단원 온도와 열',
+          '1': '1단원 혼합물의 분리',
           '2': '2단원 상태변화·지시약',
           '3': '3단원 온도와 열 (열의 이동) ⭐'
         },
@@ -1315,8 +1346,16 @@
 
     const DEFAULT_PARENT_SETTINGS = {
       minseo: { korean: 'batchim', math: '100num', english: 'phonics' },
-      minsu: { math: 'division', english: '8', korean: '1', science: '3', society: '1' }
+      minsu: { math: 'division', english: 'L9', korean: '1', science: '3', society: '1' }
     };
+
+    function isSameUnit(u1, u2) {
+      if (u1 === u2) return true;
+      if (!u1 || !u2) return false;
+      const s1 = String(u1).trim().toLowerCase().replace(/^l/i, '');
+      const s2 = String(u2).trim().toLowerCase().replace(/^l/i, '');
+      return s1 === s2;
+    }
 
     let currentParentSettings = (function() {
       try {
@@ -1355,44 +1394,85 @@
 
     /**
      * 🔄 문제은행(minsuMasterBank) 및 노션 캐시 기반 동적 단원 칩 자동 보강 엔진
-     * HTML에 하드코딩되지 않은 신규 단원(예: 과학 3단원, 사회 3단원 등)이 등록되면 자동으로 칩 버튼을 동적 생성
+     * 노션에 새로 등록된 단원(예: 영어 L9, 과학 3단원, 사회 3단원 등)이 등록되면 자동으로 칩 버튼을 동적 생성
      */
     function syncDynamicUnitChips() {
       try {
-        if (typeof window.minsuMasterBank === 'object' && window.minsuMasterBank) {
-          const subjects = ['science', 'society', 'korean', 'english', 'math'];
-          subjects.forEach(subj => {
-            const bankData = window.minsuMasterBank[subj];
-            if (!bankData) return;
+        const subjects = ['science', 'society', 'korean', 'english', 'math'];
 
-            const capitalized = subj.charAt(0).toUpperCase() + subj.slice(1);
-            const containerId = `parentMinsu${capitalized}Chips`;
-            const container = document.getElementById(containerId);
-            if (!container) return;
+        // 1) 캐시된 VOCA 레코드에서 과목별 단원 키 수집
+        const discoveredUnits = { english: [], science: [], society: [], korean: [], math: [] };
 
-            // 문제은행 키 목록 추출
-            const unitKeys = Object.keys(bankData).filter(k => !['title', 'icon'].includes(k));
-            
-            unitKeys.forEach(uKey => {
-              // 이미 존재하는 버튼인지 확인
-              const existingBtn = container.querySelector(`button[data-unit="${uKey}"]`);
-              if (!existingBtn) {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
-                btn.setAttribute('data-subject', subj);
-                btn.setAttribute('data-unit', uKey);
-                btn.onclick = () => setParentUnit('minsu', subj, uKey);
-
-                // 단원 라벨 결정
-                let label = (UNIT_META_MAP.minsu[subj] && UNIT_META_MAP.minsu[subj][uKey]) 
-                  || (bankData[uKey] && bankData[uKey].title) 
-                  || `${uKey}단원`;
-                btn.textContent = label;
-                container.appendChild(btn);
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.includes('_VOCA_CACHE_')) {
+            try {
+              const data = JSON.parse(localStorage.getItem(k));
+              if (data && Array.isArray(data.records)) {
+                data.records.forEach(r => {
+                  const stage = r.stage || r.level;
+                  if (!stage || stage === '기본 단원') return;
+                  const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
+                  subjs.forEach(s => {
+                    const sStr = String(s).trim();
+                    if (sStr.includes('영어')) discoveredUnits.english.push(stage);
+                    else if (sStr.includes('과학')) discoveredUnits.science.push(stage);
+                    else if (sStr.includes('사회')) discoveredUnits.society.push(stage);
+                    else if (sStr.includes('국어')) discoveredUnits.korean.push(stage);
+                    else if (sStr.includes('수학')) discoveredUnits.math.push(stage);
+                  });
+                });
               }
-            });
+            } catch(e) {}
+          }
+        }
+
+        subjects.forEach(subj => {
+          const capitalized = subj.charAt(0).toUpperCase() + subj.slice(1);
+          const containerId = `parentMinsu${capitalized}Chips`;
+          const container = document.getElementById(containerId);
+          if (!container) return;
+
+          // 마스터 뱅크 키 수집
+          const bankData = window.minsuMasterBank && window.minsuMasterBank[subj];
+          const bankKeys = bankData ? Object.keys(bankData).filter(k => !['title', 'icon'].includes(k)) : [];
+
+          // 유니크 단원 키 목록
+          const rawKeys = Array.from(new Set([...bankKeys, ...(discoveredUnits[subj] || [])]));
+
+          rawKeys.forEach(uKey => {
+            const cleanKey = String(uKey).trim();
+            if (!cleanKey) return;
+            // 이미 동일 단원 버튼이 있는지 확인
+            const allBtns = Array.from(container.querySelectorAll('button[data-unit]'));
+            const exists = allBtns.some(b => isSameUnit(b.getAttribute('data-unit'), cleanKey));
+            if (!exists) {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
+              btn.setAttribute('data-subject', subj);
+              btn.setAttribute('data-unit', cleanKey);
+              btn.onclick = () => setParentUnit('minsu', subj, cleanKey);
+
+              const numMatch = cleanKey.match(/\d+/);
+              const uNum = numMatch ? numMatch[0] : cleanKey;
+              const metaMap = UNIT_META_MAP.minsu[subj];
+              const metaLabel = metaMap && (metaMap[cleanKey] || metaMap[uNum] || metaMap['L' + uNum]);
+              btn.textContent = metaLabel || `${uNum}단원 (${cleanKey})`;
+              container.appendChild(btn);
+            }
           });
+        });
+
+        // 2) 백그라운드 노션 비동기 최신화 (논블로킹)
+        if (typeof fetchVocaFromNotion === 'function' && !window._hasSyncedNotionUnits) {
+          window._hasSyncedNotionUnits = true;
+          fetchVocaFromNotion({ filterByStudent: false }).then(records => {
+            if (records && records.length > 0) {
+              syncDynamicUnitChips();
+              renderParentProgressChips();
+            }
+          }).catch(e => console.warn('[fetchVocaFromNotion background sync]', e));
         }
       } catch (err) {
         console.warn('[syncDynamicUnitChips] 동적 단원 동기화 알림:', err);
@@ -1527,7 +1607,7 @@
       document.querySelectorAll('#parentMinsuSettings .parent-chip').forEach(btn => {
         const subj = btn.getAttribute('data-subject');
         const unit = btn.getAttribute('data-unit');
-        const isSelected = (minsuSets[subj] === unit);
+        const isSelected = isSameUnit(minsuSets[subj], unit);
         if (isSelected) {
           btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-neon-green text-[#023300] border-neon-green shadow-sm';
         } else {
@@ -1542,7 +1622,12 @@
       }
       const bMinuEng = document.getElementById('badgeMinsuEnglish');
       if (bMinuEng) {
-        bMinuEng.textContent = (UNIT_META_MAP.minsu.english && UNIT_META_MAP.minsu.english[minsuSets.english]) || `${minsuSets.english}단원`;
+        const u = minsuSets.english;
+        const meta = UNIT_META_MAP.minsu.english;
+        const numMatch = String(u).match(/\d+/);
+        const uNum = numMatch ? numMatch[0] : u;
+        const label = (meta && (meta[u] || meta[uNum] || meta['L' + uNum])) || `${uNum}단원 (${u})`;
+        bMinuEng.textContent = label;
       }
       const bMinuKor = document.getElementById('badgeMinsuKorean');
       if (bMinuKor) {
@@ -1638,8 +1723,13 @@
         const sets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
         const mathName = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[sets.math]) || sets.math;
         const sciName = (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[sets.science]) || `${sets.science}단원`;
+        const engU = sets.english;
+        const engMeta = UNIT_META_MAP.minsu.english;
+        const engNumMatch = String(engU).match(/\d+/);
+        const engNum = engNumMatch ? engNumMatch[0] : engU;
+        const engName = (engMeta && (engMeta[engU] || engMeta[engNum] || engMeta['L' + engNum])) || `${engNum}단원 (${engU})`;
         if (qSub) qSub.textContent = `🧮 ${mathName} · 필수 ⭐`;
-        if (rec) rec.textContent = `💡 오늘의 권장 진도: ${mathName} & 🔬 ${sciName}`;
+        if (rec) rec.textContent = `💡 오늘의 권장 진도: 🔤 ${engName} & 🔬 ${sciName}`;
       }
     }
 
@@ -1653,8 +1743,11 @@
       const btn = document.getElementById('mainQuestBtn');
       if (btn) btn.classList.add('scale-95', 'opacity-90');
 
+      const childKey = isMinseo ? 'minseo' : 'minsu';
+      const chosenUnit = (currentParentSettings[childKey] && currentParentSettings[childKey][subj]) ? currentParentSettings[childKey][subj] : '';
+
       setTimeout(() => {
-        const targetUrl = `quest_runner.html?subject=${encodeURIComponent(subj)}&user=${encodeURIComponent(currentChild)}`;
+        const targetUrl = `quest_runner.html?subject=${encodeURIComponent(subj)}&user=${encodeURIComponent(currentChild)}${chosenUnit ? `&unit=${encodeURIComponent(chosenUnit)}` : ''}`;
         window.location.href = targetUrl;
       }, 250);
     }
