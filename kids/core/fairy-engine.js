@@ -134,17 +134,8 @@ function resolveFairyPresetAudio(text) {
     if (/과학.*실험|과학.*탐험/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_science;
     if (/영어.*모험|영어.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_english;
 
-    // 4) 정답 & 칭찬 키워드 매칭
-    if (/정답|완벽|대단|천재|멋져|딩동댕|최고|잘했|맞혔|맞았|훌륭/i.test(trimmed)) {
-        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_correct_01.wav';
-        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_correct_01.wav';
-        const praises = FAIRY_AUDIO_PRESETS.praises;
-        const chosen = praises[Math.floor(Math.random() * praises.length)];
-        return baseUrl + chosen;
-    }
-
-    // 5) 오답 & 응원/힌트 키워드 매칭
-    if (/아쉬워|틀렸|다시.*생각|다시.*한번|힌트|힘내|포기하지|괜찮아|도전|아깝/i.test(trimmed)) {
+    // 4) 오답 & 응원/힌트 키워드 우선 매칭 (예: "아쉽네요! 정답은 14"와 같이 오답 문구 내 정답 단어 포함 시 오답 우선 판별)
+    if (/아쉽|아쉬|틀렸|오답|땡|다시.*생각|다시.*한번|힌트|힘내|포기하지|괜찮아|도전|아깝/i.test(trimmed)) {
         if (persona === 'tease_minsu') {
             const wrongFiles = ['tease_wrong_01.wav', 'tease_wrong_02.wav'];
             return voiceBase + 'tease/' + wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
@@ -155,6 +146,15 @@ function resolveFairyPresetAudio(text) {
         }
         const encourages = FAIRY_AUDIO_PRESETS.encourages;
         const chosen = encourages[Math.floor(Math.random() * encourages.length)];
+        return baseUrl + chosen;
+    }
+
+    // 5) 정답 & 칭찬 키워드 매칭 (오답 멘트가 아닐 때만 순수 정답으로 처리)
+    if (!/아쉽|아쉬|틀렸|오답|땡|다시/i.test(trimmed) && /정답|완벽|대단|천재|멋져|딩동댕|최고|잘했|맞혔|맞았|훌륭/i.test(trimmed)) {
+        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_correct_01.wav';
+        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_correct_01.wav';
+        const praises = FAIRY_AUDIO_PRESETS.praises;
+        const chosen = praises[Math.floor(Math.random() * praises.length)];
         return baseUrl + chosen;
     }
 
@@ -838,7 +838,9 @@ function playFairyPresetAudio(src, onEndCallback = null) {
             if (onEndCallback) onEndCallback();
         };
         fairyPresetAudio.play().catch(err => {
-            console.warn("오디오 자동재생 제한:", err);
+            if (err && err.name !== 'AbortError') {
+                console.warn("오디오 자동재생 제한:", err);
+            }
             if (onEndCallback) onEndCallback();
         });
     } catch (err) {

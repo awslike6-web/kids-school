@@ -821,6 +821,7 @@ window.submitAnswer = function() {
               hint: correctAnsText,
               onRetry: resetInputs,
               onSkip: goNext,
+              silent: true
           });
       } else {
           msgBox.textContent = "땡! 아쉽네요. 다시 한번 계산해볼까요? 💥";
