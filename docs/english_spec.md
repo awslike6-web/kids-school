@@ -234,6 +234,21 @@ graph TD
   10. `Find your friend!` (친구를 찾아라!)
 * **Phonics Fun (ow 소리)**: `show` [쇼], `snow` [스노], `yellow` [옐로]
 
+### 9단원(What a Nice House!) 핵심 문장 10선 (1구간) SSOT:
+* **단원 제재**: 집의 구조와 방 소개, 사물의 위치 및 존재 묻고 답하기 (미래엔 강정진 2022 개정)
+* **핵심 문법/구문**: `What a + 형용사 + 명사!`, `This is the + 방 이름`, `There is / There are ~`, `Where is the ~?`
+* **1구간 핵심 문장 10선**:
+  1. `What a nice living room!` (거실이 정말 좋네요!)
+  2. `What a nice house!` (정말 멋진 집이네요!)
+  3. `This is the bathroom.` (여기는 욕실입니다.)
+  4. `This is the bedroom.` (여기는 침실입니다.)
+  5. `What's in the garden?` (정원에는 무엇이 있나요?)
+  6. `There is a toilet in the bathroom.` (욕실에 변기가 있습니다.)
+  7. `There are 4 chairs in the kitchen.` (주방에 의자가 4개 있습니다.)
+  8. `Where is the bathroom?` (화장실은 어디예요?)
+  9. `This is my dream house.` (이곳은 제 꿈의 집입니다.)
+  10. `There are trees in the garden.` (정원에 나무가 있습니다.)
+
 ### 11단원(Where Is the Library?) 핵심 어휘 & 길 찾기 표현 SSOT:
 * **단원 제재**: 위치 묻고 길 안내하기 (Minsu Explores the Village)
 * **핵심 표현**: `Where is the library?` (도서관이 어디에 있나요?), `Go straight and turn right.` (똑바로 가서 우회전하세요.), `It's on your left.` (왼쪽에 있어요.)

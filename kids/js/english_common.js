@@ -192,6 +192,11 @@ const ENGLISH_PHONICS_DICT = {
   "sam": "샘", "brother": "브라더", "sister": "시스터",
   "magic": "매직", "show": "쇼", "snow": "스노", "snowing": "스노잉", "yellow": "옐로", "together": "투게더",
 
+  // 9단원 (집 & 방 & 사물과 위치) 핵심 단어
+  "house": "하우스", "living": "리빙", "bathroom": "배쓰룸", "bedroom": "베드룸", "garden": "가든",
+  "toilet": "토일렛", "chair": "체어", "chairs": "체어스", "kitchen": "키친", "dream": "드림",
+  "tree": "트리", "trees": "트리스", "4": "포", "four": "포",
+
   // 11단원 (길 찾기 & 장소 안내) 핵심 단어
   "library": "라이브러리", "turn": "턴", "left": "레프트", "right": "라이트",
   "corner": "코너", "first": "퍼스트", "second": "세컨드", "third": "써드", "floor": "플로어",
