@@ -146,6 +146,35 @@ window.clearMemoPad = function() {
   }
 };
 
+// 📝 계산 연습장 모달 토글
+window.toggleCalcMemoModal = function(forceOpen) {
+  const modal = document.getElementById('calc-memo-modal');
+  if (!modal) return;
+  const isHidden = (modal.style.display === 'none' || !modal.style.display);
+  const willOpen = (typeof forceOpen === 'boolean') ? forceOpen : isHidden;
+  
+  if (willOpen) {
+    modal.style.display = 'flex';
+    initMemoPad();
+    setTimeout(resizeMemoCanvas, 50);
+  } else {
+    modal.style.display = 'none';
+  }
+};
+
+// 📱 키패드 접기/펼치기 토글
+let isNumpadCollapsed = false;
+window.toggleNumpadCollapse = function() {
+  const container = document.getElementById('numpad-container');
+  const toggleText = document.getElementById('numpadToggleText');
+  if (!container) return;
+  isNumpadCollapsed = !isNumpadCollapsed;
+  container.classList.toggle('collapsed', isNumpadCollapsed);
+  if (toggleText) {
+    toggleText.textContent = isNumpadCollapsed ? '🔼 키패드 열기' : '🔽 키패드 접기';
+  }
+};
+
 function isVerticalMathInProgress() {
   const gameScreen = document.getElementById('screen-game');
   return !!(gameScreen && gameScreen.classList.contains('active')
@@ -196,33 +225,80 @@ window.showScreen = function(id) {
 
 window.goSetup = function() { showScreen('screen-setup'); }
 
-// 가상 키패드 로직 (자동 이동 기능 추가)
+// 가상 키패드 로직 (지능형 자동 이동 기능)
 window.pressNum = function(num) {
   if (!focusedInput) return;
-  focusedInput.value = num; // 동적 그리드는 셀당 1글자만!
+  focusedInput.value = num; // 셀당 1글자 입력
   
-  // 왼쪽 칸으로 자동 이동 (세로셈은 오른쪽에서 왼쪽으로 푸는 게 자연스러우므로)
-  const row = parseInt(focusedInput.dataset.row);
-  const col = parseInt(focusedInput.dataset.col);
-  const nextInput = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col - 1}"]`);
-  if (nextInput) setFocus(nextInput);
-}
+  const allInputs = Array.from(document.querySelectorAll('.grid-input:not([disabled])'));
+  const curIdx = allInputs.indexOf(focusedInput);
+  
+  // 1) 나눗셈 몫 칸(data-type="q"): 왼쪽에서 오른쪽으로 작성하므로 오른쪽 칸 우선 이동
+  if (focusedInput.dataset.type === 'q') {
+    const row = parseInt(focusedInput.dataset.row, 10);
+    const col = parseInt(focusedInput.dataset.col, 10);
+    const rightCell = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col + 1}"]`);
+    if (rightCell) {
+      setFocus(rightCell);
+      return;
+    }
+  }
+  
+  // 2) 일반 세로셈: 같은 행의 왼쪽 칸(col - 1)으로 자동 이동 (일의자리 ➔ 십의자리)
+  const row = parseInt(focusedInput.dataset.row, 10);
+  const col = parseInt(focusedInput.dataset.col, 10);
+  const leftCell = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col - 1}"]`);
+  if (leftCell) {
+    setFocus(leftCell);
+    return;
+  }
+  
+  // 3) 같은 행에 더 이상 칸이 없으면 DOM 순서상 다음 비어있는 칸으로 이동
+  const nextEmpty = allInputs.find((el, idx) => idx > curIdx && !el.value);
+  if (nextEmpty) {
+    setFocus(nextEmpty);
+  } else if (curIdx + 1 < allInputs.length) {
+    setFocus(allInputs[curIdx + 1]);
+  }
+};
 
 window.pressBackspace = function() {
   if (!focusedInput) return;
   focusedInput.value = '';
   
-  // 지울 때는 오른쪽 칸으로 역이동
-  const row = parseInt(focusedInput.dataset.row);
-  const col = parseInt(focusedInput.dataset.col);
-  const prevInput = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col + 1}"]`);
-  if (prevInput) setFocus(prevInput);
-}
+  const allInputs = Array.from(document.querySelectorAll('.grid-input:not([disabled])'));
+  const curIdx = allInputs.indexOf(focusedInput);
+  
+  // 1) 나눗셈 몫 칸: 지울 때는 왼쪽 칸으로 역이동
+  if (focusedInput.dataset.type === 'q') {
+    const row = parseInt(focusedInput.dataset.row, 10);
+    const col = parseInt(focusedInput.dataset.col, 10);
+    const leftCell = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col - 1}"]`);
+    if (leftCell) {
+      setFocus(leftCell);
+      return;
+    }
+  }
+  
+  // 2) 일반 세로셈: 지울 때는 오른쪽 칸(col + 1)으로 역이동
+  const row = parseInt(focusedInput.dataset.row, 10);
+  const col = parseInt(focusedInput.dataset.col, 10);
+  const rightCell = document.querySelector(`.grid-input[data-row="${row}"][data-col="${col + 1}"]`);
+  if (rightCell) {
+    setFocus(rightCell);
+    return;
+  }
+  
+  // 3) 이전 칸으로 역이동
+  if (curIdx > 0) {
+    setFocus(allInputs[curIdx - 1]);
+  }
+};
 
 window.pressClear = function() {
   if (!focusedInput) return;
   focusedInput.value = '';
-}
+};
 
 const DIFFICULTY_LEVELS = {
   add: [
@@ -356,7 +432,61 @@ window.startGame = function(mode, lvl) {
   }
 }
 
-// 🚀 핵심: 세로셈 동적 그리드 생성 함수 (isPrint 매개변수 추가)
+// ➗ 나눗셈 롱 디비전(Long Division) 시뮬레이터
+function simulateDivision(a, b) {
+  const aStr = String(a);
+  const steps = [];
+  let currentVal = 0;
+  const quotientDigits = [];
+  let started = false;
+
+  for (let i = 0; i < aStr.length; i++) {
+    currentVal = currentVal * 10 + parseInt(aStr[i], 10);
+    if (currentVal >= b) {
+      started = true;
+      const qDigit = Math.floor(currentVal / b);
+      const product = qDigit * b;
+      const remainder = currentVal - product;
+      quotientDigits.push({ digit: qDigit, colIdx: i });
+      steps.push({
+        colEnd: i, // 피제수 기준 인덱스 (0-based)
+        subDividend: currentVal,
+        qDigit: qDigit,
+        product: product,
+        remainder: remainder
+      });
+      currentVal = remainder;
+    } else if (started) {
+      quotientDigits.push({ digit: 0, colIdx: i });
+      steps.push({
+        colEnd: i,
+        subDividend: currentVal,
+        qDigit: 0,
+        product: 0,
+        remainder: currentVal
+      });
+    }
+  }
+
+  if (quotientDigits.length === 0) {
+    quotientDigits.push({ digit: 0, colIdx: aStr.length - 1 });
+    steps.push({
+      colEnd: aStr.length - 1,
+      subDividend: a,
+      qDigit: 0,
+      product: 0,
+      remainder: a
+    });
+  }
+
+  return {
+    quotientDigits,
+    steps,
+    finalRemainder: currentVal
+  };
+}
+
+// 🚀 핵심: 세로셈 동적 그리드 정밀 생성 함수 (필요한 칸 수만 동적 할당)
 function renderDynamicGrid(mode, q, isPrint = false) {
   const aStr = String(q.numA);
   const bStr = String(q.numB);
@@ -366,143 +496,170 @@ function renderDynamicGrid(mode, q, isPrint = false) {
   const commonInp = isPrint ? 'disabled' : `inputmode="none" readonly onclick="setFocus(this)"`;
 
   if (mode === 'add' || mode === 'sub') {
-      W = Math.max(aStr.length, bStr.length) + 2; // 연산자 기호 칸 1개 + 올림수 여유 칸 1개
-      gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
-      
-      // 1행: 올림/내림수 메모 (cell-carry)
-      for(let c=1; c<=W; c++) {
-          gridHTML += `<input type="text" class="grid-input cell-carry" data-row="1" data-col="${c}" style="grid-area: 1 / ${c};" ${commonInp}>`;
-      }
-      
-      // 2행: 피연산자 A (오른쪽 정렬)
-      for(let i=0; i<aStr.length; i++) {
-          let c = W - aStr.length + 1 + i;
-          gridHTML += `<div class="grid-cell" style="grid-area: 2 / ${c};">${aStr[i]}</div>`;
-      }
-      
-      // 3행: 연산자 기호 & 피연산자 B (오른쪽 정렬)
-      const opSym = mode === 'add' ? '＋' : '－';
-      let opCol = W - Math.max(aStr.length, bStr.length);
-      gridHTML += `<div class="grid-cell cell-op" style="grid-area: 3 / ${opCol};">${opSym}</div>`;
-      
-      for(let i=0; i<bStr.length; i++) {
-          let c = W - bStr.length + 1 + i;
-          gridHTML += `<div class="grid-cell" style="grid-area: 3 / ${c};">${bStr[i]}</div>`;
-      }
-      
-      // 4행: 밑줄
-      gridHTML += `<div class="grid-line" style="grid-area: 4 / 1 / 4 / ${W + 1};"></div>`;
-      
-      // 5행: 최종 정답 (cell-ans)
-      for(let c=1; c<=W; c++) {
-          gridHTML += `<input type="text" class="grid-input cell-ans" data-type="ans" data-row="5" data-col="${c}" style="grid-area: 5 / ${c};" ${commonInp}>`;
-      }
-      gridHTML += `</div>`;
+    const ansStr = String(q.answer);
+    const numMaxLen = Math.max(aStr.length, bStr.length, ansStr.length);
+    W = numMaxLen + 1; // 1열은 연산자 기호, 2~W열은 숫자
+    
+    gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
+    
+    // 1행: 올림/내림수 메모 (실제 연산이 일어나는 열 범위에만 콤팩트 생성)
+    const carryStartCol = Math.max(2, W - Math.max(aStr.length, bStr.length));
+    for (let c = carryStartCol; c <= W; c++) {
+      gridHTML += `<input type="text" class="grid-input cell-carry" data-row="1" data-col="${c}" style="grid-area: 1 / ${c};" ${commonInp}>`;
+    }
+    
+    // 2행: 피연산자 A (우측 정렬)
+    for (let i = 0; i < aStr.length; i++) {
+      let c = W - aStr.length + 1 + i;
+      gridHTML += `<div class="grid-cell" style="grid-area: 2 / ${c};">${aStr[i]}</div>`;
+    }
+    
+    // 3행: 연산자 기호 (1열) & 피연산자 B (우측 정렬)
+    const opSym = mode === 'add' ? '＋' : '－';
+    gridHTML += `<div class="grid-cell cell-op" style="grid-area: 3 / 1;">${opSym}</div>`;
+    for (let i = 0; i < bStr.length; i++) {
+      let c = W - bStr.length + 1 + i;
+      gridHTML += `<div class="grid-cell" style="grid-area: 3 / ${c};">${bStr[i]}</div>`;
+    }
+    
+    // 4행: 밑줄 (1열부터 W열까지)
+    gridHTML += `<div class="grid-line" style="grid-area: 4 / 1 / 4 / ${W + 1};"></div>`;
+    
+    // 5행: 최종 정답 (정확히 정답 자릿수만큼만 우측 정렬로 생성!)
+    const ansStartCol = W - ansStr.length + 1;
+    for (let c = ansStartCol; c <= W; c++) {
+      gridHTML += `<input type="text" class="grid-input cell-ans" data-type="ans" data-row="5" data-col="${c}" style="grid-area: 5 / ${c};" ${commonInp}>`;
+    }
+    gridHTML += `</div>`;
   }
   else if (mode === 'mul') {
-      W = aStr.length + bStr.length + 1; // 곱셈 결과 최대 길이 + 1
-      gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
-      
-      // 1행: 올림수
-      for(let c=1; c<=W; c++) {
-          gridHTML += `<input type="text" class="grid-input cell-carry" data-row="1" data-col="${c}" style="grid-area: 1 / ${c};" ${commonInp}>`;
+    const ansStr = String(q.answer);
+    const numMaxLen = Math.max(aStr.length, bStr.length, ansStr.length);
+    W = numMaxLen + 1; // 1열은 연산자 기호 '×'
+    
+    gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
+    
+    // 1행: 올림수
+    const carryStartCol = Math.max(2, W - aStr.length);
+    for (let c = carryStartCol; c <= W; c++) {
+      gridHTML += `<input type="text" class="grid-input cell-carry" data-row="1" data-col="${c}" style="grid-area: 1 / ${c};" ${commonInp}>`;
+    }
+    
+    // 2행: 피승수 A (우측 정렬)
+    for (let i = 0; i < aStr.length; i++) {
+      let c = W - aStr.length + 1 + i;
+      gridHTML += `<div class="grid-cell" style="grid-area: 2 / ${c};">${aStr[i]}</div>`;
+    }
+    
+    // 3행: 연산자 '×' (1열) & 승수 B (우측 정렬)
+    gridHTML += `<div class="grid-cell cell-op" style="grid-area: 3 / 1;">×</div>`;
+    for (let i = 0; i < bStr.length; i++) {
+      let c = W - bStr.length + 1 + i;
+      gridHTML += `<div class="grid-cell" style="grid-area: 3 / ${c};">${bStr[i]}</div>`;
+    }
+    
+    // 4행: 첫 번째 밑줄
+    gridHTML += `<div class="grid-line" style="grid-area: 4 / 1 / 4 / ${W + 1};"></div>`;
+    
+    let row = 5;
+    // B가 2자리 이상일 때만 중간 부분곱 행 생성! (1자리면 중간과정 없이 즉시 정답)
+    if (bStr.length > 1) {
+      for (let j = bStr.length - 1; j >= 0; j--) {
+        const bDigit = parseInt(bStr[j], 10);
+        const partialProd = q.numA * bDigit;
+        const pStr = String(partialProd);
+        const shift = (bStr.length - 1) - j;
+        const pEndCol = W - shift;
+        const pStartCol = pEndCol - pStr.length + 1;
+        
+        // 정확히 pStr.length개 칸에만 cell-inter 생성! (여유 빈칸 낭비 0개)
+        for (let c = pStartCol; c <= pEndCol; c++) {
+          gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-mul" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
+        row++;
       }
-      
-      // 2행: 피연산자 A
-      for(let i=0; i<aStr.length; i++) {
-          let c = W - aStr.length + 1 + i;
-          gridHTML += `<div class="grid-cell" style="grid-area: 2 / ${c};">${aStr[i]}</div>`;
-      }
-      
-      // 3행: 연산자 & 피연산자 B
-      let opCol = W - Math.max(aStr.length, bStr.length);
-      gridHTML += `<div class="grid-cell cell-op" style="grid-area: 3 / ${opCol};">×</div>`;
-      for(let i=0; i<bStr.length; i++) {
-          let c = W - bStr.length + 1 + i;
-          gridHTML += `<div class="grid-cell" style="grid-area: 3 / ${c};">${bStr[i]}</div>`;
-      }
-      
-      // 4행: 첫 번째 밑줄
-      gridHTML += `<div class="grid-line" style="grid-area: 4 / 2 / 4 / ${W + 1};"></div>`;
-      
-      let row = 5;
-      // B가 2자리 이상일 때 중간 풀이과정 행 생성
-      if (bStr.length > 1) {
-          // 오른쪽 자릿수부터 한 줄씩 생성
-          for(let j=bStr.length-1; j>=0; j--) {
-              let shift = (bStr.length - 1) - j; // 왼쪽으로 이동할 칸 수
-              for(let k=0; k<=aStr.length+1; k++) {
-                  let c = W - shift - k;
-                  if(c > 0) {
-                      gridHTML += `<input type="text" class="grid-input cell-inter" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
-                  }
-              }
-              row++;
-          }
-          // 덧셈 전 두 번째 밑줄
-          gridHTML += `<div class="grid-line" style="grid-area: ${row} / 1 / ${row} / ${W + 1};"></div>`;
-          row++;
-      }
-      
-      // 마지막 행: 최종 정답
-      for(let c=1; c<=W; c++) {
-          gridHTML += `<input type="text" class="grid-input cell-ans" data-type="ans" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
-      }
-      gridHTML += `</div>`;
+      // 덧셈 전 밑줄
+      gridHTML += `<div class="grid-line" style="grid-area: ${row} / 1 / ${row} / ${W + 1};"></div>`;
+      row++;
+    }
+    
+    // 최종 정답 행: ansStr.length개 칸만 우측 정렬로 생성!
+    const ansStartCol = W - ansStr.length + 1;
+    for (let c = ansStartCol; c <= W; c++) {
+      gridHTML += `<input type="text" class="grid-input cell-ans" data-type="ans" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+    }
+    gridHTML += `</div>`;
   }
   else if (mode === 'div') {
-      W = aStr.length + bStr.length + 2;
-      const dividendStartCol = bStr.length + 2;
-      const stepCount = aStr.length; // 2자리→2줄, 3자리→3줄 풀이과정
-      gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
-
-      let row = 1;
-      // 1행: 몫 (Quotient)
-      for (let i = 0; i < aStr.length; i++) {
-          let c = dividendStartCol + i;
-          gridHTML += `<input type="text" class="grid-input cell-ans" data-type="q" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+    const sim = simulateDivision(q.numA, q.numB);
+    const dividendStartCol = bStr.length + 2; // 제수 자리수 + 괄호 ')' 다음
+    W = dividendStartCol + aStr.length - 1;
+    
+    gridHTML += `<div class="math-grid" style="grid-template-columns: repeat(${W}, 45px);">`;
+    
+    let row = 1;
+    // 1행: 몫 (Quotient) - 실제 피제수의 해당 자릿수 열 위에만 정확히 몫 칸 생성!
+    sim.quotientDigits.forEach((qd) => {
+      const col = dividendStartCol + qd.colIdx;
+      gridHTML += `<input type="text" class="grid-input cell-ans" data-type="q" data-row="${row}" data-col="${col}" style="grid-area: ${row} / ${col};" ${commonInp}>`;
+    });
+    row++;
+    
+    // 2행: 지붕 가로선 (피제수 영역 전체)
+    gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${dividendStartCol} / ${row} / ${W + 1};"></div>`;
+    row++;
+    
+    // 3행: 제수 ) 피제수
+    for (let i = 0; i < bStr.length; i++) {
+      gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${1 + i};">${bStr[i]}</div>`;
+    }
+    gridHTML += `<div class="grid-cell cell-op" style="grid-area: ${row} / ${bStr.length + 1};">)</div>`;
+    for (let i = 0; i < aStr.length; i++) {
+      let c = dividendStartCol + i;
+      gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${c};">${aStr[i]}</div>`;
+    }
+    row++;
+    
+    // 4행 이후: 실제 나눗셈 단계들만 정밀 생성!
+    sim.steps.forEach((st, stepIdx) => {
+      const isLastStep = (stepIdx === sim.steps.length - 1);
+      const absColEnd = dividendStartCol + st.colEnd;
+      
+      // (1) 곱한 수 행
+      const prodStr = String(st.product);
+      const prodStartCol = absColEnd - prodStr.length + 1;
+      for (let c = prodStartCol; c <= absColEnd; c++) {
+        gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-mul" data-row="${row}" data-col="${c}" data-step="${stepIdx + 1}" data-part="mul" style="grid-area: ${row} / ${c};" ${commonInp}>`;
       }
       row++;
-
-      // 2행: 지붕 모양 가로선
-      gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${dividendStartCol} / ${row} / ${W + 1};"></div>`;
+      
+      // 밑줄 (곱한 수 영역)
+      gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${Math.min(prodStartCol, absColEnd)} / ${row} / ${absColEnd + 1};"></div>`;
       row++;
-
-      // 3행: 제수 ) 피제수
-      for (let i = 0; i < bStr.length; i++) {
-          gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${1 + i};">${bStr[i]}</div>`;
-      }
-      gridHTML += `<div class="grid-cell cell-op" style="grid-area: ${row} / ${bStr.length + 1};">)</div>`;
-      for (let i = 0; i < aStr.length; i++) {
-          let c = dividendStartCol + i;
-          gridHTML += `<div class="grid-cell" style="grid-area: ${row} / ${c};">${aStr[i]}</div>`;
-      }
-      row++;
-
-      // 피제수 자릿수만큼 곱·빼기 중간 과정 (단계당: 곱한 수 → 빼기 결과 → 밑줄)
-      for (let step = 0; step < stepCount; step++) {
-          for (let i = 0; i < aStr.length; i++) {
-              let c = dividendStartCol + i;
-              gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-mul" data-row="${row}" data-col="${c}" data-step="${step + 1}" data-part="mul" style="grid-area: ${row} / ${c};" ${commonInp}>`;
-          }
-          row++;
-
-          for (let i = 0; i < aStr.length; i++) {
-              let c = dividendStartCol + i;
-              gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-sub" data-row="${row}" data-col="${c}" data-step="${step + 1}" data-part="sub" style="grid-area: ${row} / ${c};" ${commonInp}>`;
-          }
-          row++;
-
-          gridHTML += `<div class="grid-line" style="grid-area: ${row} / ${dividendStartCol} / ${row} / ${W + 1};"></div>`;
-          row++;
-      }
-
-      // 마지막 행: 나머지 (Remainder)
-      for (let i = 0; i < aStr.length; i++) {
-          let c = dividendStartCol + i;
+      
+      // (2) 빼기 결과 행
+      if (!isLastStep) {
+        // 다음 단계가 있는 경우: 내려쓴 자리까지 포함한 다음 부분피제수 입력 칸 생성
+        const nextStep = sim.steps[stepIdx + 1];
+        const nextSubStr = String(nextStep.subDividend);
+        const nextColEnd = dividendStartCol + nextStep.colEnd;
+        const nextStartCol = nextColEnd - nextSubStr.length + 1;
+        
+        for (let c = nextStartCol; c <= nextColEnd; c++) {
+          gridHTML += `<input type="text" class="grid-input cell-inter cell-inter-sub" data-row="${row}" data-col="${c}" data-step="${stepIdx + 1}" data-part="sub" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
+        row++;
+      } else {
+        // 마지막 단계인 경우: 최종 나머지(Remainder) 행!
+        const remStr = String(sim.finalRemainder);
+        const remStartCol = absColEnd - remStr.length + 1;
+        for (let c = remStartCol; c <= absColEnd; c++) {
           gridHTML += `<input type="text" class="grid-input cell-ans" data-type="rem" data-row="${row}" data-col="${c}" style="grid-area: ${row} / ${c};" ${commonInp}>`;
+        }
       }
-      gridHTML += `</div>`;
+    });
+    
+    gridHTML += `</div>`;
   }
 
   return gridHTML;
@@ -522,10 +679,20 @@ function nextQuestion() {
   clearMemoPad();
   switchMemoMode('text');
 
-  // 포커스 자동 지정 로직: 입력해야 할 칸 중 가장 오른쪽 칸을 찾아서 포커스
-  const ansCells = Array.from(document.querySelectorAll('.cell-ans, .cell-inter'));
-  if (ansCells.length > 0) {
+  // 포커스 자동 지정:
+  // 나눗셈: 첫 번째 몫 칸
+  // 덧셈/뺄셈/곱셈: 정답 행의 가장 오른쪽(일의 자리) 칸
+  if (gameState.mode === 'div') {
+    const firstQCell = document.querySelector('.cell-ans[data-type="q"]');
+    if (firstQCell) setFocus(firstQCell);
+  } else {
+    const ansCells = Array.from(document.querySelectorAll('.cell-ans[data-type="ans"]'));
+    if (ansCells.length > 0) {
       setFocus(ansCells[ansCells.length - 1]);
+    } else {
+      const allInputs = Array.from(document.querySelectorAll('.grid-input:not([disabled])'));
+      if (allInputs.length > 0) setFocus(allInputs[allInputs.length - 1]);
+    }
   }
 }
 
@@ -536,25 +703,25 @@ window.submitAnswer = function() {
   let correctAnsText = "";
 
   if (gameState.mode === 'div') {
-      const qCells = Array.from(document.querySelectorAll('.cell-ans[data-type="q"]'));
-      const qStr = qCells.map(c => c.value || '0').join('');
-      const userQ = parseInt(qStr, 10);
-      
-      const remCells = Array.from(document.querySelectorAll('.cell-ans[data-type="rem"]'));
-      const remStr = remCells.map(c => c.value || '0').join('');
-      const userRem = parseInt(remStr, 10);
+    const qCells = Array.from(document.querySelectorAll('.cell-ans[data-type="q"]'));
+    const qStr = qCells.map(c => c.value.trim()).filter(v => v !== '').join('');
+    const userQ = qStr === '' ? NaN : parseInt(qStr, 10);
+    
+    const remCells = Array.from(document.querySelectorAll('.cell-ans[data-type="rem"]'));
+    const remStr = remCells.map(c => c.value.trim()).filter(v => v !== '').join('');
+    const userRem = remStr === '' ? 0 : parseInt(remStr, 10);
 
-      isCorrect = (userQ === q.answer && userRem === q.rem);
-      userAnsText = `몫 ${userQ} 나머지 ${userRem}`;
-      correctAnsText = `몫 ${q.answer} 나머지 ${q.rem}`;
+    isCorrect = (!isNaN(userQ) && userQ === q.answer && userRem === q.rem);
+    userAnsText = isNaN(userQ) ? '미입력' : `몫 ${userQ}${userRem > 0 ? ' 나머지 ' + userRem : ''}`;
+    correctAnsText = `몫 ${q.answer}${q.rem > 0 ? ' 나머지 ' + q.rem : ''}`;
   } else {
-      const ansCells = Array.from(document.querySelectorAll('.cell-ans[data-type="ans"]'));
-      const ansStr = ansCells.map(c => c.value || '').join('');
-      if (ansStr === '') return; // 아무것도 입력 안했을 때
-      const userAns = parseInt(ansStr, 10);
-      isCorrect = (userAns === q.answer);
-      userAnsText = `${userAns}`;
-      correctAnsText = `${q.answer}`;
+    const ansCells = Array.from(document.querySelectorAll('.cell-ans[data-type="ans"]'));
+    const ansStr = ansCells.map(c => c.value.trim()).join('');
+    if (ansStr === '') return; // 미입력 방어
+    const userAns = parseInt(ansStr, 10);
+    isCorrect = (userAns === q.answer);
+    userAnsText = `${userAns}`;
+    correctAnsText = `${q.answer}`;
   }
 
   const msgBox = document.getElementById('v-feedbackMsg');

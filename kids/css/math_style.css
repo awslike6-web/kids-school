@@ -76,39 +76,93 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
 .print-btn { background: var(--purple); color: white; border: none; padding: 6px 12px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 1rem; cursor: pointer; transition: 0.2s; }
 .print-btn:hover { background: var(--pink); }
 
-/* 동적 세로셈 보드 (CSS Grid) */
+.memo-toggle-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.memo-toggle-btn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* 동적 세로셈 보드 (CSS Grid) - 메인 집중 뷰 */
 .v-board-container {
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 10px;
   flex: 1;
 }
 
-.calc-memo-pad {
-  flex: 0 0 240px;
-  width: 240px;
+/* 📝 슬라이드 토글형 손글씨 계산 연습장 모달 */
+.calc-memo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 25, 0.75);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  backdrop-filter: blur(6px);
+  animation: fadeInModal 0.2s ease-out;
+}
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.calc-memo-modal-content {
   background: var(--card);
-  border: 2px solid var(--border);
-  border-radius: 18px;
-  padding: 12px;
+  border: 2px solid var(--cyan);
+  border-bottom: none;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 620px;
+  padding: 16px 20px 24px 20px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  max-height: 85vh;
+  animation: slideUpMemo 0.25s ease-out;
 }
-
-.memo-header {
+@keyframes slideUpMemo {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.memo-modal-top-bar {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+.memo-close-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 7px 12px;
+  background: #ef4444;
+  color: #fff;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.memo-close-btn:hover {
+  background: #dc2626;
 }
 
 .memo-title {
   font-family: 'Jua', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: var(--cyan);
 }
 
@@ -118,12 +172,11 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
 }
 
 .memo-tab {
-  flex: 1;
   border: 2px solid var(--border);
   background: rgba(255, 255, 255, 0.06);
   color: var(--white);
   border-radius: 10px;
-  padding: 6px 4px;
+  padding: 6px 10px;
   font-family: 'Jua', sans-serif;
   font-size: 0.95rem;
   cursor: pointer;
@@ -138,6 +191,19 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
 
 .memo-text {
   width: 100%;
+  min-height: 200px;
+  max-height: 45vh;
+  resize: vertical;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'Gaegu', 'Jua', sans-serif;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  background: #fff;
+  color: var(--dark);
+  outline: none;
+}
   min-height: 220px;
   flex: 1;
   resize: vertical;
@@ -286,12 +352,61 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
 
 .feedback-msg { font-family: 'Jua', sans-serif; font-size: 1.3rem; text-align: center; height: 2rem; margin-bottom: 10px; color: var(--yellow); }
 
-/* 📱 가상 키패드 */
-.numpad-container { width: 100%; background: rgba(22, 22, 44, 0.9); padding: 15px; border-radius: 24px 24px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: auto; border-top: 1px solid var(--border); box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
-.numpad-btn { background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 15px; font-size: 1.8rem; font-family: 'Jua', sans-serif; color: var(--white); cursor: pointer; transition: 0.1s; }
+/* 📱 화면 하단 고정 가상 키패드 */
+.numpad-container { 
+  width: 100%; 
+  background: rgba(22, 22, 44, 0.95); 
+  padding: 6px 14px 14px 14px; 
+  border-radius: 20px 20px 0 0; 
+  margin-top: auto; 
+  border-top: 2px solid var(--border); 
+  box-shadow: 0 -8px 25px rgba(0,0,0,0.5); 
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+.numpad-handle-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 0 6px 0;
+  cursor: pointer;
+  user-select: none;
+}
+.numpad-handle-bar span {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.9rem;
+  color: var(--cyan);
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 20px;
+  padding: 2px 14px;
+  transition: 0.2s;
+}
+.numpad-handle-bar:hover span {
+  background: rgba(0, 212, 255, 0.25);
+}
+.numpad-grid {
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 10px; 
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+  max-height: 400px;
+  overflow: hidden;
+}
+.numpad-container.collapsed {
+  padding-bottom: 6px;
+}
+.numpad-container.collapsed .numpad-grid {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  margin-top: 0;
+}
+.numpad-btn { background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 14px; font-size: 1.8rem; font-family: 'Jua', sans-serif; color: var(--white); cursor: pointer; transition: 0.1s; }
 .numpad-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.25); }
 .numpad-btn.action { background: rgba(255, 107, 157, 0.15); border-color: var(--pink); color: var(--pink); }
-.numpad-btn.submit { grid-column: span 3; background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #fff; border: none; font-size: 1.5rem; padding: 18px; }
+.numpad-btn.submit { grid-column: span 3; background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #fff; border: none; font-size: 1.45rem; padding: 16px; }
 
 /* 결과창 */
 .result-card { background: var(--card); border-radius: 30px; padding: 40px 32px; width: 100%; text-align: center; border: 2px solid var(--border); }
@@ -384,70 +499,104 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
   }
 }
 
-/* 📱 모바일 철벽 반응형 레이아웃 파괴 방지선 */
+/* 📱 모바일 철벽 반응형 레이아웃 파괴 방지선 (스크롤 프리) */
 @media (max-width: 680px) {
   .app-container {
-    padding: 10px;
+    padding: 8px 8px 0 8px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
   
+  .game-header {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+    gap: 6px;
+  }
+  
+  .game-stat-box {
+    padding: 4px 10px;
+    font-size: 0.95rem;
+  }
+  
+  .memo-toggle-btn {
+    padding: 4px 10px;
+    font-size: 0.9rem;
+  }
+
   .v-board-container {
     padding: 0;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .calc-memo-pad {
-    flex: none;
-    width: 100%;
-  }
-
-  #memo-canvas {
-    height: 180px;
-  }
-
-  .memo-text {
-    min-height: 140px;
+    margin-bottom: 6px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .v-board {
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-width: 3px;
-    border-radius: 16px;
-    width: 100%;
-    overflow-x: auto; /* 터지는 현상 방어 */
+    border-radius: 18px;
+    max-width: 100%;
+    overflow-x: auto; /* 폭이 긴 문제 안전 방어 */
   }
 
   .grid-cell {
-    font-size: 1.8rem;
-    width: 35px;
+    font-size: 1.7rem;
+    width: 36px;
     height: 40px;
   }
 
   .grid-input {
     min-height: 40px;
-    font-size: 1.6rem;
-  }
-
-  .numpad-container {
-    padding: 10px;
-    gap: 8px;
-    border-radius: 16px 16px 0 0;
-  }
-
-  .numpad-btn {
-    padding: 12px;
     font-size: 1.5rem;
   }
 
+  .grid-input.cell-carry {
+    min-height: 30px;
+    height: 30px;
+    font-size: 1.15rem;
+  }
+
+  .feedback-msg {
+    font-size: 1.1rem;
+    height: 1.6rem;
+    margin-bottom: 4px;
+  }
+
+  .numpad-container {
+    padding: 4px 8px 10px 8px;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .numpad-grid {
+    gap: 6px;
+  }
+
+  .numpad-btn {
+    padding: 10px;
+    font-size: 1.45rem;
+    border-radius: 12px;
+  }
+
   .numpad-btn.submit {
-    font-size: 1.3rem;
-    padding: 14px;
+    font-size: 1.25rem;
+    padding: 12px;
   }
   
-  .game-header {
-    font-size: 1rem;
+  .calc-memo-modal-content {
+    max-height: 85vh;
+    padding: 12px 14px 20px 14px;
   }
   
+  #memo-canvas {
+    height: 200px;
+  }
+
+  .memo-text {
+    min-height: 180px;
+  }
+
   .logo-title {
     font-size: 2rem;
   }

@@ -55,48 +55,61 @@
   <div class="screen" id="screen-game">
     <div class="game-header">
       <div class="game-stat-box" id="game-title">덧셈 기지</div>
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <button class="memo-toggle-btn" id="memoToggleBtn" onclick="toggleCalcMemoModal()">📝 계산 연습장</button>
         <div id="verticalMathFlowToggle"></div>
-        <button class="print-btn" onclick="printWorksheet()">🖨️ 오늘의 문제 인쇄하기</button>
+        <button class="print-btn" onclick="printWorksheet()">🖨️ 인쇄</button>
       </div>
       <div class="game-stat-box" id="game-qnum">1/10</div>
     </div>
     
     <div class="v-board-container">
       <div class="v-board" id="vertical-container"></div>
-      <aside class="calc-memo-pad" id="calc-memo-pad" aria-label="계산 메모장">
-        <div class="memo-header">
-          <span class="memo-title">📝 계산 메모</span>
-          <div class="memo-tabs">
-            <button type="button" class="memo-tab active" data-mode="text" onclick="switchMemoMode('text')">✏️ 글씨</button>
-            <button type="button" class="memo-tab" data-mode="draw" onclick="switchMemoMode('draw')">🖊️ 그리기</button>
-          </div>
-        </div>
-        <textarea class="memo-text" id="memo-text" placeholder="숫자나 메모를 적어보세요"></textarea>
-        <div class="memo-draw-wrap" id="memo-draw-wrap" hidden>
-          <canvas id="memo-canvas"></canvas>
-        </div>
-        <button type="button" class="memo-clear-btn" onclick="clearMemoPad()">🗑️ 메모 지우기</button>
-      </aside>
     </div>
     
     <div class="feedback-msg" id="v-feedbackMsg"></div>
     
-    <!-- 가상 키패드 -->
-    <div class="numpad-container">
-      <button class="numpad-btn" onclick="pressNum('1')">1</button>
-      <button class="numpad-btn" onclick="pressNum('2')">2</button>
-      <button class="numpad-btn" onclick="pressNum('3')">3</button>
-      <button class="numpad-btn" onclick="pressNum('4')">4</button>
-      <button class="numpad-btn" onclick="pressNum('5')">5</button>
-      <button class="numpad-btn" onclick="pressNum('6')">6</button>
-      <button class="numpad-btn" onclick="pressNum('7')">7</button>
-      <button class="numpad-btn" onclick="pressNum('8')">8</button>
-      <button class="numpad-btn" onclick="pressNum('9')">9</button>
-      <button class="numpad-btn action" onclick="pressClear()">C</button>
-      <button class="numpad-btn" onclick="pressNum('0')">0</button>
-      <button class="numpad-btn action" onclick="pressBackspace()">←</button>
-      <button class="numpad-btn submit" onclick="submitAnswer()">✅ 정답 확인</button>
+    <!-- 📱 화면 하단 고정 가상 키패드 (접기/펼치기 지원) -->
+    <div class="numpad-container" id="numpad-container">
+      <div class="numpad-handle-bar" onclick="toggleNumpadCollapse()">
+        <span id="numpadToggleText">🔽 키패드 접기</span>
+      </div>
+      <div class="numpad-grid" id="numpad-grid">
+        <button class="numpad-btn" onclick="pressNum('1')">1</button>
+        <button class="numpad-btn" onclick="pressNum('2')">2</button>
+        <button class="numpad-btn" onclick="pressNum('3')">3</button>
+        <button class="numpad-btn" onclick="pressNum('4')">4</button>
+        <button class="numpad-btn" onclick="pressNum('5')">5</button>
+        <button class="numpad-btn" onclick="pressNum('6')">6</button>
+        <button class="numpad-btn" onclick="pressNum('7')">7</button>
+        <button class="numpad-btn" onclick="pressNum('8')">8</button>
+        <button class="numpad-btn" onclick="pressNum('9')">9</button>
+        <button class="numpad-btn action" onclick="pressClear()">C</button>
+        <button class="numpad-btn" onclick="pressNum('0')">0</button>
+        <button class="numpad-btn action" onclick="pressBackspace()">←</button>
+        <button class="numpad-btn submit" onclick="submitAnswer()">✅ 정답 확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📝 슬라이드 토글형 손글씨 계산 연습장 모달 -->
+  <div id="calc-memo-modal" class="calc-memo-modal" style="display:none;" onclick="if(event.target===this) toggleCalcMemoModal()">
+    <div class="calc-memo-modal-content">
+      <div class="memo-modal-top-bar">
+        <span class="memo-title">📝 손글씨 계산 연습장</span>
+        <div class="memo-tabs">
+          <button type="button" class="memo-tab active" data-mode="text" onclick="switchMemoMode('text')">✏️ 글씨</button>
+          <button type="button" class="memo-tab" data-mode="draw" onclick="switchMemoMode('draw')">🖊️ 그리기</button>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button type="button" class="memo-clear-btn" onclick="clearMemoPad()">🗑️ 지우기</button>
+          <button type="button" class="memo-close-btn" onclick="toggleCalcMemoModal()">✕ 닫기</button>
+        </div>
+      </div>
+      <textarea class="memo-text" id="memo-text" placeholder="풀이 과정이나 암산 메모를 자유롭게 적어보세요"></textarea>
+      <div class="memo-draw-wrap" id="memo-draw-wrap" hidden>
+        <canvas id="memo-canvas"></canvas>
+      </div>
     </div>
   </div>
 
