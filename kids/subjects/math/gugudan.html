@@ -359,6 +359,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
     const requiredCores = [
         "notion-helper.js",
         "fairy-config.js",
+        "fairy-settings-catalog.js",
+        "fairy-settings-engine.js",
         "fairy-engine.js",
         "fairy-chatbot.js"
     ];
@@ -608,10 +610,14 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
                 qScore += 10; btn.classList.add('correct'); fb.textContent = ['🎉 정답!','✨ 완벽해!','🌟 대단해!','💯 맞아!'][Math.floor(Math.random()*4)]; fb.className = 'q-feedback ok'; 
                 ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--cyan)">${q.addExp}</span>`; ex.className = 'q-explain show';
                 document.getElementById('q-score').textContent = `${qScore}점`; document.getElementById('next-btn').className = 'next-btn show';
+                // 🎙️ 요정 코코 / 깐죽이 / 깍쟁이 칭찬 음성 재생
+                if (typeof fairyPraise === 'function') fairyPraise();
             } else {
                 btn.classList.add('wrong'); fb.textContent = `😅 아쉬워요! 정답은 ${q.ans}`; fb.className = 'q-feedback no';
                 ex.innerHTML = `<strong>왜냐하면:</strong> ${q.d}를 ${q.t}번 더하면<br><span style="color:var(--cyan)">${q.addExp}</span>`; ex.className = 'q-explain show';
                 document.getElementById('q-score').textContent = `${qScore}점`;
+                // 🎙️ 요정 코코 / 깐죽이 / 깍쟁이 격려 음성 재생
+                if (typeof fairyEncourage === 'function') fairyEncourage();
 
                 const retry = () => {
                     qAnswered = false;
@@ -654,6 +660,9 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 
             document.getElementById('r-emoji').textContent = emoji; document.getElementById('r-title').textContent = title;
             document.getElementById('r-score').textContent = `${qScore} / ${qList.length*10}점`; document.getElementById('r-detail').textContent = msg;
+
+            // 🎙️ 구구단 완주 보상 음성 재생
+            if (typeof fairyReward === 'function') fairyReward('finish');
 
             if (correctCount > 0) {
                 if (typeof grantRewardAndShowUI === 'function') {

@@ -802,18 +802,31 @@
   </div>
 
 
-  <!-- ================= 6. 직관적 사운드 & 인터랙션 스크립트 ================= -->
+  <!-- ================= 6. 요정 코어 & 음성/설정 엔진 모듈 로드 ================= -->
+  <script src="./kids/config.js"></script>
+  <script src="./kids/core/fairy-config.js"></script>
+  <script src="./kids/core/fairy-settings-catalog.js"></script>
+  <script src="./kids/core/fairy-settings-engine.js"></script>
+  <script src="./kids/core/fairy-engine.js"></script>
+
+  <!-- ================= 7. 직관적 사운드 & 인터랙션 스크립트 ================= -->
   <script>
     let isSoundEnabled = true;
     let audioCtx = null;
 
-    // 브라우저 첫 터치 즉시 AudioContext 자동 언락
+    // 브라우저 첫 터치 즉시 AudioContext 자동 언락 및 캐릭터 웰컴 보이스 재생
     async function unlockAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       }
       if (audioCtx.state === 'suspended') {
         await audioCtx.resume();
+      }
+      // 🎙️ 첫 터치 시 캐릭터 웰컴 음성 (깐죽이 / 깍쟁이 / 선희) 부드럽게 1회 재생
+      if (typeof fairyGreet === 'function' && !window._hasGreetedMonster) {
+        window._hasGreetedMonster = true;
+        const targetChild = (typeof currentChild !== 'undefined') ? currentChild : (isMinseo ? 'minseo' : 'minsu');
+        fairyGreet(targetChild);
       }
     }
     window.addEventListener('pointerdown', unlockAudio, { once: true });
@@ -1223,6 +1236,12 @@
         bubble.classList.remove('animate-bubble');
         void bubble.offsetWidth;
         bubble.classList.add('animate-bubble');
+      }
+
+      // 🎙️ 캐릭터 음성 (깐죽이 / 깍쟁이 / 선희) 대화 음성 출력
+      if (typeof fairyGreet === 'function') {
+        const targetChild = (typeof currentChild !== 'undefined') ? currentChild : (isMinseo ? 'minseo' : 'minsu');
+        fairyGreet(targetChild);
       }
     }
 

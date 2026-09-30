@@ -734,6 +734,9 @@ window.submitAnswer = function() {
       msgBox.style.color = 'var(--green)';
       msgBox.textContent = "딩동댕! 정답입니다! 🎵🎉";
       
+      // 🎙️ 요정 코코 / 깐죽이 / 깍쟁이 칭찬 음성 재생
+      if (typeof fairyPraise === 'function') fairyPraise();
+
       gameState.correctCount++;
       gameState.current++;
 
@@ -765,6 +768,9 @@ window.submitAnswer = function() {
 
       msgBox.style.color = 'var(--pink)';
       msgBox.textContent = "땡! 아쉽네요. 💥";
+
+      // 🎙️ 요정 코코 / 깐죽이 / 깍쟁이 격려 음성 재생
+      if (typeof fairyEncourage === 'function') fairyEncourage();
 
       // 🎒 오답 가방(wrongNotes)에 저장 (해당 문제에서 처음 틀렸을 때 1회만)
       if (!q.wrongLogged) {
@@ -827,6 +833,9 @@ async function showResult() {
   document.getElementById('r-score').textContent = (gameState.correctCount * 10) + '점';
   document.getElementById('r-detail').textContent = `10문제 중 ${gameState.correctCount}개 성공!`;
   showScreen('screen-result');
+
+  // 🎙️ 세로셈 완주 보상 음성 재생
+  if (typeof fairyReward === 'function') fairyReward('finish');
 
   const opNames = { add: '수학(덧셈 세로셈)', sub: '수학(뺄셈 세로셈)', mul: '수학(곱셈 세로셈)', div: '수학(나눗셈 세로셈)' };
   const currentOpName = gameState.mode ? opNames[gameState.mode] : '수학(세로셈)';
