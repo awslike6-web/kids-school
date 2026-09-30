@@ -1264,8 +1264,13 @@ loadCoreScripts("kids/core/", requiredCores, () => {
             window.openScreenTimeReceiptModal(childName);
           }
         }
-        if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
-          syncQuizFlowFromCloud(props["학습설정"]);
+        if (props["학습설정"]) {
+          if (typeof syncQuizFlowFromCloud === 'function') {
+            syncQuizFlowFromCloud(props["학습설정"]);
+          }
+          if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.syncFromCloud === 'function') {
+            SettingsManager.syncFromCloud(props["학습설정"]);
+          }
         }
 
         const theme = props["현재 테마"]?.select?.name || (childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임');

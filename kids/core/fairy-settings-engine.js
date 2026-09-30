@@ -18,10 +18,17 @@ const SettingsManager = {
         theme_skin: "default"
     },
 
-    // 2. 전체 설정값 로드
+    // 1-1. 학생별 로컬스토리지 키 생성
+    getStorageKey: function() {
+        const student = this.getCurrentStudent(); // 'son' | 'daughter'
+        return `${SETTINGS_STORAGE_KEY}_${student}`;
+    },
+
+    // 2. 전체 설정값 로드 (학생별 우선 로드, 없으면 기본값)
     getAll: function() {
         try {
-            const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+            const studentKey = this.getStorageKey();
+            const raw = localStorage.getItem(studentKey) || localStorage.getItem(SETTINGS_STORAGE_KEY);
             if (!raw) return { ...this.defaults };
             return { ...this.defaults, ...JSON.parse(raw) };
         } catch (e) {
@@ -36,15 +43,129 @@ const SettingsManager = {
         return all[key] !== undefined ? all[key] : this.defaults[key];
     },
 
-    // 4. 단일 설정값 저장
+    // 4. 단일 설정값 저장 (학생별 스토리지 + 노션 인벤토리 비동기 저장)
     set: function(key, value) {
         const all = this.getAll();
         all[key] = value;
         try {
+            const studentKey = this.getStorageKey();
+            localStorage.setItem(studentKey, JSON.stringify(all));
+            // 레거시 호환용 저장
             localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(all));
             this.onSettingChanged(key, value);
+            // 🌐 노션 인벤토리 DB 백그라운드 클라우드 동기화
+            this.saveToCloud();
         } catch (e) {
             console.error("설정 저장 실패:", e);
+        }
+    },
+
+    // 🌐 4-1. 노션 인벤토리 DB 비동기 클라우드 저장
+    saveToCloud: async function() {
+        const student = this.getCurrentStudent();
+        const childName = (student === 'daughter') ? '민서' : '민수';
+        
+        // 관리자 모드(아빠/엄마 테스트 중)일 때는 오염 방지
+        const savedName = localStorage.getItem('currentUserName');
+        if (savedName === '아빠' || savedName === '엄마') {
+            console.log(`🛠️ [설정 저장 프리패스] ${savedName} 모드이므로 로컬만 반영합니다.`);
+            return;
+        }
+
+        const proxyUrl = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+        const invDbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID) ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12";
+        
+        try {
+            let pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);
+            if (!pageId) {
+                const qRes = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+                });
+                if (qRes.ok) {
+                    const qData = await qRes.json();
+                    if (qData.results && qData.results.length > 0) {
+                        pageId = qData.results[0].id;
+                        localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
+                    }
+                }
+            }
+
+            if (!pageId) {
+                console.warn(`[설정 클라우드 저장 실패] ${childName} 인벤토리 페이지 ID를 찾을 수 없습니다.`);
+                return;
+            }
+
+            // 기존 노션 캐시된 설정 객체 가져오기 (screenTime, quizFlow 등 보존)
+            let currentCloud = {};
+            try {
+                const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || "{}";
+                currentCloud = JSON.parse(cachedRaw);
+                if (typeof currentCloud !== 'object' || currentCloud === null) currentCloud = {};
+            } catch(e) {
+                currentCloud = {};
+            }
+
+            // appSettings 업데이트
+            currentCloud.appSettings = this.getAll();
+            currentCloud.updatedAt = new Date().toISOString();
+
+            const jsonStr = JSON.stringify(currentCloud);
+            localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
+
+            // 노션 PATCH 요청
+            const patchRes = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    properties: {
+                        "학습설정": {
+                            rich_text: [{ text: { content: jsonStr } }]
+                        }
+                    }
+                })
+            });
+
+            if (patchRes.ok) {
+                console.log(`☁️ [노션 인벤토리 설정 저장 성공] ${childName}:`, currentCloud.appSettings);
+            } else {
+                console.warn(`⚠️ [노션 인벤토리 설정 저장 실패] HTTP ${patchRes.status}`);
+            }
+        } catch (err) {
+            console.warn("⚠️ [노션 인벤토리 설정 통신 에러]:", err);
+        }
+    },
+
+    // 🌐 4-2. 노션 클라우드로부터 받은 학습설정 JSON 병합 (SWR)
+    syncFromCloud: function(cloudSettingsRaw) {
+        if (!cloudSettingsRaw) return;
+        try {
+            let parsed = cloudSettingsRaw;
+            if (typeof cloudSettingsRaw === 'string') {
+                parsed = JSON.parse(cloudSettingsRaw);
+            } else if (cloudSettingsRaw.rich_text && Array.isArray(cloudSettingsRaw.rich_text)) {
+                const text = cloudSettingsRaw.rich_text.map(t => t.plain_text || t.text?.content || '').join('');
+                if (text) parsed = JSON.parse(text);
+            }
+            
+            // appSettings 필드가 있으면 병합
+            const appSettings = (parsed && parsed.appSettings) || (parsed && parsed.voice_persona ? parsed : null);
+            if (appSettings && typeof appSettings === 'object') {
+                const current = this.getAll();
+                const merged = { ...current, ...appSettings };
+                const studentKey = this.getStorageKey();
+                localStorage.setItem(studentKey, JSON.stringify(merged));
+                localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(merged));
+                
+                // 테마 등 UI 즉시 동기화
+                if (merged.theme_skin) {
+                    this.applyTheme(merged.theme_skin);
+                }
+                console.log("☁️ [설정 클라우드 동기화 완료]", merged);
+            }
+        } catch (e) {
+            console.warn("⚠️ [설정 클라우드 파싱 실패]:", e);
         }
     },
 
@@ -58,6 +179,12 @@ const SettingsManager = {
 
     // 6. 현재 학생 프로필 확인 ('son' | 'daughter' | 'admin')
     getCurrentStudent: function() {
+        if (typeof window !== 'undefined' && window.location) {
+            const params = new URLSearchParams(window.location.search);
+            const userParam = params.get('user');
+            if (userParam === 'daughter' || userParam === 'minseo' || userParam === '민서') return 'daughter';
+            if (userParam === 'son' || userParam === 'minsu' || userParam === '민수') return 'son';
+        }
         const curUser = localStorage.getItem('currentUser');
         const curChild = localStorage.getItem('currentChild');
         const curName = localStorage.getItem('currentUserName');

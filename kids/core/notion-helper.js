@@ -945,8 +945,13 @@ async function grantRewardAndShowUI(earned, isSilent = false, customExpType = nu
     if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
         window.ScreenTimeTracker.syncFromInventoryProps(props, userName);
     }
-    if (props["학습설정"] && typeof syncQuizFlowFromCloud === 'function') {
-        syncQuizFlowFromCloud(props["학습설정"]);
+    if (props["학습설정"]) {
+        if (typeof syncQuizFlowFromCloud === 'function') {
+            syncQuizFlowFromCloud(props["학습설정"]);
+        }
+        if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.syncFromCloud === 'function') {
+            SettingsManager.syncFromCloud(props["학습설정"]);
+        }
     }
 
     // 💡 2. 자정(12시) 초기화를 위한 스마트 날짜 체크 로직

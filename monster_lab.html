@@ -243,8 +243,8 @@
         <span class="material-symbols-outlined text-sm sm:text-base">home</span>
       </a>
 
-      <!-- 유저 아바타 & 레벨 -->
-      <div class="flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="pokeSound('level')">
+      <!-- 유저 아바타 & 레벨 (5회 탭 시 부모 인증 비상 오픈) -->
+      <div class="flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="pokeSound('level'); if(typeof handleSecretParentUnlock==='function') handleSecretParentUnlock();">
         <div id="userAvatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-purple-700/60 flex items-center justify-center text-sm sm:text-base border border-neon-cyan/50">
           👦
         </div>
@@ -276,8 +276,8 @@
         <span class="material-symbols-outlined text-base sm:text-lg" id="soundIcon">volume_up</span>
       </button>
 
-      <!-- ⚙️ 부모 진도 설정판 버튼 (설정 모달 내에 활용 가이드 탭 통합) -->
-      <button class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-neon-cyan/20 border-2 border-neon-cyan flex items-center justify-center text-neon-cyan hover:bg-neon-cyan/30 active:scale-95 transition-all shadow-[0_0_10px_rgba(0,243,255,0.3)] shrink-0" onclick="openParentProgressModal()" title="부모 진도 관리판">
+      <!-- ⚙️ 부모 진도 설정판 버튼 (관리자/부모님 모드일 때만 노출, 아이 프로필 시 원천 숨김) -->
+      <button id="btnParentProgressTrigger" class="hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-neon-cyan/20 border-2 border-neon-cyan flex items-center justify-center text-neon-cyan hover:bg-neon-cyan/30 active:scale-95 transition-all shadow-[0_0_10px_rgba(0,243,255,0.3)] shrink-0" onclick="openParentProgressModal()" title="부모 진도 관리판">
         <span class="material-symbols-outlined text-base sm:text-lg">settings</span>
       </button>
     </div>
@@ -1302,13 +1302,32 @@
     let currentParentSettings = (function() {
       try {
         const raw = localStorage.getItem('MINMIN_QUEST_SETTINGS');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          return {
-            minseo: { ...DEFAULT_PARENT_SETTINGS.minseo, ...(parsed.minseo || {}) },
-            minsu: { ...DEFAULT_PARENT_SETTINGS.minsu, ...(parsed.minsu || {}) }
-          };
+        let parsed = raw ? JSON.parse(raw) : {};
+
+        // 🌐 노션 클라우드 캐시에서 questSettings 가져와서 병합
+        const cloudMinsu = localStorage.getItem('MINMIN_CLOUD_SETTINGS_민수');
+        if (cloudMinsu) {
+          try {
+            const cObj = JSON.parse(cloudMinsu);
+            if (cObj && cObj.questSettings && cObj.questSettings.minsu) {
+              parsed.minsu = { ...(parsed.minsu || {}), ...cObj.questSettings.minsu };
+            }
+          } catch(e) {}
         }
+        const cloudMinseo = localStorage.getItem('MINMIN_CLOUD_SETTINGS_민서');
+        if (cloudMinseo) {
+          try {
+            const cObj = JSON.parse(cloudMinseo);
+            if (cObj && cObj.questSettings && cObj.questSettings.minseo) {
+              parsed.minseo = { ...(parsed.minseo || {}), ...cObj.questSettings.minseo };
+            }
+          } catch(e) {}
+        }
+
+        return {
+          minseo: { ...DEFAULT_PARENT_SETTINGS.minseo, ...(parsed.minseo || {}) },
+          minsu: { ...DEFAULT_PARENT_SETTINGS.minsu, ...(parsed.minsu || {}) }
+        };
       } catch (e) {}
       return JSON.parse(JSON.stringify(DEFAULT_PARENT_SETTINGS));
     })();
@@ -1520,6 +1539,59 @@
       }
     }
 
+    async function syncParentProgressToCloud() {
+      const childName = isMinseo ? '민서' : '민수';
+      const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
+      const invDbId = "374a27115b688042bb61e6a102242e12";
+      try {
+        let pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);
+        if (!pageId) {
+          const qRes = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
+          });
+          if (qRes.ok) {
+            const qData = await qRes.json();
+            if (qData.results && qData.results.length > 0) {
+              pageId = qData.results[0].id;
+              localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
+            }
+          }
+        }
+        if (!pageId) return;
+
+        let currentCloud = {};
+        try {
+          const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || "{}";
+          currentCloud = JSON.parse(cachedRaw);
+          if (typeof currentCloud !== 'object' || currentCloud === null) currentCloud = {};
+        } catch (e) {
+          currentCloud = {};
+        }
+
+        currentCloud.questSettings = currentParentSettings;
+        currentCloud.updatedAt = new Date().toISOString();
+        const jsonStr = JSON.stringify(currentCloud);
+        localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
+
+        await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            properties: {
+              "학습설정": {
+                rich_text: [{ text: { content: jsonStr } }]
+              }
+            }
+          })
+        });
+        console.log(`☁️ [5분 퀘스트 진도 노션 저장 성공] ${childName}:`, currentParentSettings);
+      } catch (err) {
+        console.warn("⚠️ [5분 퀘스트 진도 노션 저장 통신 에러]:", err);
+      }
+    }
+
     function saveParentProgressSettings() {
       try {
         localStorage.setItem('MINMIN_QUEST_SETTINGS', JSON.stringify(currentParentSettings));
@@ -1528,6 +1600,8 @@
       triggerHaptic([40, 80, 40]);
       updateMainQuestSubText();
       closeParentProgressModal();
+      // 🌐 노션 인벤토리 DB 비동기 클라우드 백업
+      syncParentProgressToCloud();
       alert('🎉 부모 진도 설정이 저장되었습니다!\n다음 퀘스트부터 4+1 듀오링고 출제에 자동 반영됩니다. ✨');
     }
 
@@ -1622,8 +1696,45 @@
       }
     }
 
-    // 페이지 진입 즉시 테마 적용
-    window.addEventListener('DOMContentLoaded', applyTheme);
+    // ⚙️ 부모 진도 설정 버튼 노출 제어 (아이들 프로필 접속 시 원천 숨김)
+    function updateParentProgressBtnVisibility() {
+      const savedName = localStorage.getItem('currentUserName');
+      const isAdmin = (savedName === '아빠' || savedName === '엄마') || urlParams.get('admin') === 'true' || urlParams.get('role') === 'admin';
+      const btnParent = document.getElementById('btnParentProgressTrigger');
+      if (btnParent) {
+        if (isAdmin) {
+          btnParent.classList.remove('hidden');
+        } else {
+          btnParent.classList.add('hidden');
+        }
+      }
+    }
+
+    // 💡 부모님 긴급 인증 해제 (아이 프로필 상태에서 상단 레벨 배지를 5회 연속 탭 시 비밀번호 입력으로 진도 설정 열기)
+    let secretTapCount = 0;
+    let secretTapTimer = null;
+    function handleSecretParentUnlock() {
+      secretTapCount++;
+      clearTimeout(secretTapTimer);
+      secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 2000);
+      if (secretTapCount >= 5) {
+        secretTapCount = 0;
+        const pw = prompt("🔒 부모님 비밀번호 4자리를 입력하세요:");
+        if (pw === "0000") {
+          const btnParent = document.getElementById('btnParentProgressTrigger');
+          if (btnParent) btnParent.classList.remove('hidden');
+          openParentProgressModal();
+        } else if (pw !== null) {
+          alert("❌ 비밀번호가 올바르지 않습니다.");
+        }
+      }
+    }
+
+    // 페이지 진입 즉시 테마 적용 및 버튼 노출 제어
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme();
+      updateParentProgressBtnVisibility();
+    });
   </script>
 </body>
 </html>
