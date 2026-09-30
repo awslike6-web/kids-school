@@ -99,6 +99,10 @@
   - 한국어 안내/도서: `speakFairyTTS(text)` (`ko-KR-SunHiNeural`)
   - 영어 학습/발음: `speakEnglish(text)` (`en-US-JennyNeural`, 0.85x 감속 배속)
   - 보상 효과음: `fairyPraise()`, `fairyReward()`, `fairyEncourage()`
+- **🚨 오디오 및 학습 설정 3단계 E2E 연결 체크리스트 (반드시 준수)**:
+  1. **[1단계 설정단]**: 설정창 모달에서 저장 시 학생별(`_son`, `_daughter`) 키 분리 및 노션 인벤토리 DB 비동기 저장이 일어나는지 확인.
+  2. **[2단계 코어단]**: 개별 페이지에 설정 스크립트가 누락되더라도 작동하는 `fairy-engine.js`의 자가 치유(Self-Healing) 및 단일 원천 라우팅(`resolveFairyPresetAudio`) 보장.
+  3. **[3단계 실전단]**: `quest_runner.html`, `gugudan.html`, `vertical_math.html` 등 **실제 문제 채점(정답 `fairyPraise`, 오답 `fairyEncourage`, 완주 `fairyReward`) 코드에서 오디오 함수가 직접 호출되는지 전수 확인**.
 
 ---
 
