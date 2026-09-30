@@ -16,6 +16,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./kids/css/quick-uploader.css">
+<link rel="stylesheet" href="./kids/css/fairy-settings-modal.css">
 <style>
   /* 기본 설정 및 테마 */
   :root {
@@ -236,9 +237,12 @@
       <div class="profile-avatar">👩</div><div>엄마</div>
     </button>
   </div>
-  <div style="margin-top: 24px; text-align: center;">
+  <div style="margin-top: 24px; text-align: center; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
     <button type="button" class="qu-trigger-btn" onclick="openQuickUploader()">
       <span>📸</span> 우리 가족 찰칵! 바로 올리기
+    </button>
+    <button type="button" class="qu-trigger-btn" id="indexSettingsBtn" onclick="if(typeof SettingsManager !== 'undefined') SettingsManager.openModal();" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; border: 1.5px solid #60a5fa;" title="공부방 맞춤 설정">
+      <span>⚙️</span> 공부방 설정
     </button>
   </div>
 </div>
@@ -522,7 +526,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 150);
   }
 });
-</script>
+<script src="./kids/core/fairy-settings-catalog.js"></script>
+<script src="./kids/core/fairy-settings-engine.js"></script>
 <script src="./kids/core/quick-uploader.js"></script>
 </body>
 </html>

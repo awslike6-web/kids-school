@@ -127,3 +127,36 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
   - 하루/생활: `#2ed573` (민트/새싹)
 - **공통 컴포넌트 클래스**:
   - `.card`, `.btn-primary`, `.badge`, `.modal-backdrop`, `.webtoon-dialogue`
+
+---
+
+## 6. ⚙️ 공부방 통합 맞춤 설정 & 3대 도감 (Settings & Catalogs)
+
+### 🌟 `fairy-settings-catalog.js` & `fairy-settings-engine.js`
+목소리 톤(페르소나), BGM 플레이리스트, 테마 스킨을 데이터 카탈로그 형태로 관리하고 글래스모피즘 모달을 동적으로 조립하는 통합 설정 코어입니다.
+- **파일 위치**:
+  - `kids/core/fairy-settings-catalog.js` (3대 도감 스키마)
+  - `kids/core/fairy-settings-engine.js` (설정 매니저 & UI 렌더러)
+  - `kids/css/fairy-settings-modal.css` (반응형 모달 디자인)
+- **HTML 로드 방법**:
+  ```html
+  <link rel="stylesheet" href="./kids/css/fairy-settings-modal.css">
+  <script src="./kids/core/fairy-settings-catalog.js"></script>
+  <script src="./kids/core/fairy-settings-engine.js"></script>
+  ```
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `SettingsManager.openModal()` | 설정 모달 열기 및 학생 맞춤형 동적 렌더링 |
+  | `SettingsManager.closeModal()` | 설정 모달 닫기 및 오디오 미리듣기 정리 |
+  | `SettingsManager.get(key)` | 단일 설정값 조회 (`voice_persona`, `sfx_enabled`, `theme_skin` 등) |
+  | `SettingsManager.set(key, val)` | 단일 설정값 저장 (`MINMIN_APP_SETTINGS` 로컬스토리지 싱크) |
+  | `SettingsManager.playPreview(id, btn)` | 해당 목소리 페르소나의 대표 음성 0.05초 즉각 미리듣기 |
+
+### 🌟 `scripts/generate_gemini_voices.py` (Gemini 3.8 Flash 커스텀 보이스 양산기)
+Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고품질 연극 디렉팅 프롬프트를 바탕으로 대사 리스트를 개별 `.wav` 오디오 파일로 일괄 양산하는 자동화 빌더입니다.
+- **실행 커맨드**:
+  ```bash
+  python scripts/generate_gemini_voices.py
+  ```
+

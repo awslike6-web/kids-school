@@ -817,18 +817,64 @@ function playFairyPresetAudio(src, onEndCallback = null) {
 }
 
 /**
- * 🌟 정답/극찬 전용 헬퍼 (10개 선희 고음질 음성 중 무작위 재생)
+ * 🌟 정답/극찬 전용 헬퍼 (페르소나 연동 & 선희 고음질 음성 지원)
  */
 function fairyPraise(onEndCallback = null) {
+    if (typeof SettingsManager !== 'undefined' && !SettingsManager.get('sfx_enabled')) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    const persona = (typeof SettingsManager !== 'undefined') ? SettingsManager.get('voice_persona') : 'default';
+    const baseUrl = getFairyAssetBaseUrl().replace('/assets/sounds/fairy/', '/');
+
+    // 😜 깐죽이 페르소나
+    if (persona === 'tease_minsu') {
+        const teaseFile = baseUrl + 'assets/voices/tease/tease_correct_01.wav';
+        playFairyPresetAudio(teaseFile, onEndCallback);
+        return;
+    }
+    // 😼 민서 깍쟁이 페르소나
+    if (persona === 'snarky_minseo') {
+        const snarkyFile = baseUrl + 'assets/voices/snarky/snarky_correct_01.wav';
+        playFairyPresetAudio(snarkyFile, onEndCallback);
+        return;
+    }
+
     const praises = FAIRY_AUDIO_PRESETS.praises;
     const chosen = praises[Math.floor(Math.random() * praises.length)];
     playFairyPresetAudio(getFairyAssetBaseUrl() + chosen, onEndCallback);
 }
 
 /**
- * 🌸 오답/응원 전용 헬퍼 (8개 선희 고음질 음성 중 무작위 재생)
+ * 🌸 오답/응원 전용 헬퍼 (페르소나 연동 & 선희 고음질 음성 지원)
  */
 function fairyEncourage(onEndCallback = null) {
+    if (typeof SettingsManager !== 'undefined' && !SettingsManager.get('sfx_enabled')) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    const persona = (typeof SettingsManager !== 'undefined') ? SettingsManager.get('voice_persona') : 'default';
+    const baseUrl = getFairyAssetBaseUrl().replace('/assets/sounds/fairy/', '/');
+
+    // 😜 깐죽이 페르소나 (오답 2종 중 무작위)
+    if (persona === 'tease_minsu') {
+        const wrongFiles = ['tease_wrong_01.wav', 'tease_wrong_02.wav'];
+        const chosen = wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
+        const teaseFile = baseUrl + 'assets/voices/tease/' + chosen;
+        playFairyPresetAudio(teaseFile, onEndCallback);
+        return;
+    }
+    // 😼 민서 깍쟁이 페르소나 (오답 2종 중 무작위)
+    if (persona === 'snarky_minseo') {
+        const wrongFiles = ['snarky_wrong_01.wav', 'snarky_wrong_02.wav'];
+        const chosen = wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
+        const snarkyFile = baseUrl + 'assets/voices/snarky/' + chosen;
+        playFairyPresetAudio(snarkyFile, onEndCallback);
+        return;
+    }
+
     const encourages = FAIRY_AUDIO_PRESETS.encourages;
     const chosen = encourages[Math.floor(Math.random() * encourages.length)];
     playFairyPresetAudio(getFairyAssetBaseUrl() + chosen, onEndCallback);
@@ -838,7 +884,27 @@ function fairyEncourage(onEndCallback = null) {
  * 🎁 퀘스트/레벨업/보상 전용 헬퍼
  */
 function fairyReward(type = 'quest', onEndCallback = null) {
-    const baseUrl = getFairyAssetBaseUrl();
+    if (typeof SettingsManager !== 'undefined' && !SettingsManager.get('sfx_enabled')) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    const persona = (typeof SettingsManager !== 'undefined') ? SettingsManager.get('voice_persona') : 'default';
+    const baseUrl = getFairyAssetBaseUrl().replace('/assets/sounds/fairy/', '/');
+
+    // 😜 깐죽이 페르소나 (완주/보상 시)
+    if (persona === 'tease_minsu' && (type === 'finish' || type === 'quest')) {
+        const teaseFile = baseUrl + 'assets/voices/tease/tease_clear_01.wav';
+        playFairyPresetAudio(teaseFile, onEndCallback);
+        return;
+    }
+    // 😼 민서 깍쟁이 페르소나 (완주/보상 시)
+    if (persona === 'snarky_minseo' && (type === 'finish' || type === 'quest')) {
+        const snarkyFile = baseUrl + 'assets/voices/snarky/snarky_clear_01.wav';
+        playFairyPresetAudio(snarkyFile, onEndCallback);
+        return;
+    }
+
     const map = {
         quest: FAIRY_AUDIO_PRESETS.quest_complete,
         level: FAIRY_AUDIO_PRESETS.level_up,
@@ -848,14 +914,34 @@ function fairyReward(type = 'quest', onEndCallback = null) {
         streak: FAIRY_AUDIO_PRESETS.streak_bonus
     };
     const file = map[type] || FAIRY_AUDIO_PRESETS.quest_complete;
-    playFairyPresetAudio(baseUrl + file, onEndCallback);
+    playFairyPresetAudio(getFairyAssetBaseUrl() + file, onEndCallback);
 }
 
 /**
  * 🏰 환영/과목 입장 전용 헬퍼
  */
 function fairyGreet(target = 'lobby', onEndCallback = null) {
-    const baseUrl = getFairyAssetBaseUrl();
+    if (typeof SettingsManager !== 'undefined' && !SettingsManager.get('sfx_enabled')) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+
+    const persona = (typeof SettingsManager !== 'undefined') ? SettingsManager.get('voice_persona') : 'default';
+    const baseUrl = getFairyAssetBaseUrl().replace('/assets/sounds/fairy/', '/');
+
+    // 😜 깐죽이 페르소나 (로비 또는 민수 입장 시)
+    if (persona === 'tease_minsu' && (target === 'lobby' || target === 'minsu')) {
+        const teaseFile = baseUrl + 'assets/voices/tease/tease_welcome_01.wav';
+        playFairyPresetAudio(teaseFile, onEndCallback);
+        return;
+    }
+    // 😼 민서 깍쟁이 페르소나 (로비 또는 민서 입장 시)
+    if (persona === 'snarky_minseo' && (target === 'lobby' || target === 'minseo')) {
+        const snarkyFile = baseUrl + 'assets/voices/snarky/snarky_welcome_01.wav';
+        playFairyPresetAudio(snarkyFile, onEndCallback);
+        return;
+    }
+
     const map = {
         lobby: FAIRY_AUDIO_PRESETS.welcome_lobby,
         minsu: FAIRY_AUDIO_PRESETS.welcome_minsu,
@@ -867,7 +953,7 @@ function fairyGreet(target = 'lobby', onEndCallback = null) {
         english: FAIRY_AUDIO_PRESETS.welcome_english
     };
     const file = map[target] || FAIRY_AUDIO_PRESETS.welcome_lobby;
-    playFairyPresetAudio(baseUrl + file, onEndCallback);
+    playFairyPresetAudio(getFairyAssetBaseUrl() + file, onEndCallback);
 }
 
 function toggleFairyTtsSetting() {
