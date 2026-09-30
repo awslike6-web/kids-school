@@ -173,8 +173,8 @@
       math: { current: 'division', next: 'fraction', division: 'fraction', fraction: 'division' },
       english: { current: '8', next: '7', '8': '7', '7': '8' },
       korean: { current: '1', next: '2', '1': '2', '2': '1' },
-      science: { current: '1', next: '2', '1': '2', '2': '1' },
-      society: { current: '1', next: '2', '1': '2', '2': '1' }
+      science: { current: '1', next: '2', '1': '2', '2': '3', '3': '1' },
+      society: { current: '1', next: '2', '1': '2', '2': '3', '3': '1' }
     }
   };
 
@@ -763,6 +763,10 @@
       questTitle = curUnit === 'fraction' ? "수학 분쇄 던전 · 5-2 분수의 곱셈 (심화)" : "수학 분쇄 던전 · 두 자릿수 나눗셈 (기본 진도 ⭐)";
     } else if (subj === 'english') {
       questTitle = curUnit === '7' ? "스피킹 콜로세움 · 7단원 지난 주말 이야기 (복습)" : "스피킹 콜로세움 · 8단원 외모·옷차림 (현재 진도 ⭐)";
+    } else if (subj === 'science') {
+      questTitle = curUnit === '3' ? "볼케이노 코어 · 3단원 온도와 열 (열의 이동 ⭐)" : (curUnit === '2' ? "볼케이노 코어 · 2단원 상태변화·지시약" : "볼케이노 코어 · 1단원 혼합물의 분리");
+    } else if (subj === 'society') {
+      questTitle = curUnit === '2' ? "고대 유물 지도 · 2단원 문화발전·이순신 ⭐" : "고대 유물 지도 · 1단원 조선 건국·한양 도성";
     }
 
     return {

@@ -218,72 +218,72 @@
   </script>
 </head>
 
-<body class="text-white min-h-[100dvh] flex flex-col justify-between overflow-x-hidden p-4 pb-20 max-w-md mx-auto">
+<body class="text-white min-h-[100dvh] flex flex-col justify-between overflow-x-hidden px-2.5 py-3 sm:px-4 sm:py-4 pb-20 max-w-md mx-auto">
 
   <!-- ================= 1. 초심플 상단 HUD (로비 복귀 + 3개 칩) ================= -->
-  <header class="flex items-center justify-between pt-1">
+  <header class="w-full flex items-center justify-between gap-1 sm:gap-2 pt-0.5">
     <!-- 좌측: 🏠 공부방 로비 복귀 + 민수 아바타 & 레벨 -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
       <!-- 🚪 처음 프로필 화면 (index.html) 바로가기 -->
       <a 
         href="index.html" 
-        class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-purple-400 active:scale-95 transition-all shadow-lg"
+        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-purple-400 active:scale-95 transition-all shadow-lg shrink-0"
         title="처음 프로필 화면으로 가기"
       >
-        <span class="material-symbols-outlined text-base">arrow_back</span>
+        <span class="material-symbols-outlined text-sm sm:text-base">arrow_back</span>
       </a>
 
       <!-- 🏠 전체 공부방 로비 (lobby.html) 바로가기 -->
       <a 
         id="headerLobbyLink"
         href="lobby.html" 
-        class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-neon-cyan/60 active:scale-95 transition-all shadow-lg"
+        class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white hover:border-neon-cyan/60 active:scale-95 transition-all shadow-lg shrink-0"
         title="전체 공부방 로비로 가기"
       >
-        <span class="material-symbols-outlined text-base">home</span>
+        <span class="material-symbols-outlined text-sm sm:text-base">home</span>
       </a>
 
       <!-- 유저 아바타 & 레벨 -->
-      <div class="flex items-center gap-2 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="pokeSound('level')">
-        <div id="userAvatar" class="w-8 h-8 rounded-full bg-purple-700/60 flex items-center justify-center text-lg border border-neon-cyan/50">
+      <div class="flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="pokeSound('level')">
+        <div id="userAvatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-purple-700/60 flex items-center justify-center text-sm sm:text-base border border-neon-cyan/50">
           👦
         </div>
-        <div class="flex items-center gap-1.5">
-          <span id="userName" class="text-sm font-bold text-white">민수</span>
-          <span id="userLevel" class="bg-neon-cyan text-lab-bg text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none">
+        <div class="flex items-center gap-1">
+          <span id="userName" class="text-xs sm:text-sm font-bold text-white">민수</span>
+          <span id="userLevel" class="bg-neon-cyan text-lab-bg text-[10px] sm:text-[11px] font-eng font-black px-1 sm:px-1.5 py-0.5 rounded-md leading-none">
             Lv.12
           </span>
         </div>
       </div>
     </div>
 
-    <!-- 우측 스트릭 & 코인 & 사운드 칩 -->
-    <div class="flex items-center gap-2">
+    <!-- 우측 스트릭 & 코인 & 사운드 & 설정 칩 -->
+    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
       <!-- 스트릭 칩 (불꽃 / 핑크 하트) -->
-      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="handleStreakClick()">
-        <span id="streakIcon" class="text-base animate-pulse">🔥</span>
-        <span id="streakText" class="text-sm font-eng font-black text-fire-orange">15일</span>
+      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="handleStreakClick()">
+        <span id="streakIcon" class="text-sm sm:text-base animate-pulse">🔥</span>
+        <span id="streakText" class="text-xs sm:text-sm font-eng font-black text-fire-orange">15일</span>
       </div>
 
       <!-- 재화 칩 (코인 / 요정가루) -->
-      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-3 py-1.5 rounded-full shadow-lg cursor-pointer" onclick="handleCoinClick()">
-        <span id="coinIcon" class="text-base">🪙</span>
-        <span id="coinText" class="text-sm font-eng font-black text-yellow-300">120</span>
+      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="handleCoinClick()">
+        <span id="coinIcon" class="text-sm sm:text-base">🪙</span>
+        <span id="coinText" class="text-xs sm:text-sm font-eng font-black text-yellow-300">120</span>
       </div>
 
       <!-- 🔊 사운드 토글 -->
-      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition-transform shadow-lg" onclick="toggleSound()" title="소리 켜기/끄기">
-        <span class="material-symbols-outlined text-lg" id="soundIcon">volume_up</span>
+      <button class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-white active:scale-95 transition-transform shadow-lg shrink-0" onclick="toggleSound()" title="소리 켜기/끄기">
+        <span class="material-symbols-outlined text-base sm:text-lg" id="soundIcon">volume_up</span>
       </button>
 
       <!-- 📖 5분 퀘스트 부모 설명서 버튼 -->
-      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-amber-400/50 flex items-center justify-center text-amber-300 hover:text-amber-200 hover:border-amber-400 active:scale-95 transition-transform shadow-lg" onclick="openParentProgressModal('guide')" title="5분 퀘스트 원리·활용 설명서">
-        <span class="material-symbols-outlined text-lg">menu_book</span>
+      <button class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-lab-card/80 border border-amber-400/50 flex items-center justify-center text-amber-300 hover:text-amber-200 hover:border-amber-400 active:scale-95 transition-transform shadow-lg shrink-0" onclick="openParentProgressModal('guide')" title="5분 퀘스트 원리·활용 설명서">
+        <span class="material-symbols-outlined text-base sm:text-lg">menu_book</span>
       </button>
 
-      <!-- ⚙️ 부모 진도 설정판 버튼 -->
-      <button class="w-9 h-9 rounded-full bg-lab-card/80 border border-lab-card-border flex items-center justify-center text-gray-300 hover:text-neon-cyan active:scale-95 transition-transform shadow-lg" onclick="openParentProgressModal()" title="부모 진도 관리판">
-        <span class="material-symbols-outlined text-lg">settings</span>
+      <!-- ⚙️ 부모 진도 설정판 버튼 (네온 시안 강조 및 절대 잘림 방지) -->
+      <button class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-neon-cyan/20 border-2 border-neon-cyan flex items-center justify-center text-neon-cyan hover:bg-neon-cyan/30 active:scale-95 transition-all shadow-[0_0_10px_rgba(0,243,255,0.3)] shrink-0" onclick="openParentProgressModal()" title="부모 진도 관리판">
+        <span class="material-symbols-outlined text-base sm:text-lg">settings</span>
       </button>
     </div>
   </header>
@@ -546,11 +546,11 @@
   </div>
 
   <!-- ================= 5-2. ⚙️ 부모 진도 설정판 모달 (Parent Progress Controller) ================= -->
-  <div id="parentProgressModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-4" onclick="closeParentProgressModal(event)">
-    <div class="bg-lab-card border-2 border-neon-cyan/80 rounded-3xl max-w-md w-full p-5 text-left space-y-4 shadow-2xl animate-sheet-up" onclick="event.stopPropagation()">
+  <div id="parentProgressModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden items-center justify-center p-2.5 sm:p-4 overflow-y-auto" onclick="closeParentProgressModal(event)">
+    <div class="bg-lab-card border-2 border-neon-cyan/80 rounded-3xl max-w-md w-full p-4 sm:p-5 text-left flex flex-col max-h-[92dvh] sm:max-h-[88dvh] shadow-2xl animate-sheet-up my-auto overflow-hidden gap-3" onclick="event.stopPropagation()">
       
-      <!-- 상단 타이틀 & 닫기 -->
-      <div class="flex items-center justify-between border-b border-lab-card-border pb-3">
+      <!-- 상단 타이틀 & 닫기 (고정) -->
+      <div class="flex items-center justify-between border-b border-lab-card-border pb-3 shrink-0">
         <div class="flex items-center gap-2">
           <span class="text-2xl">⚙️</span>
           <div>
@@ -558,13 +558,13 @@
             <p class="text-[11px] text-gray-400">4+1 듀오링고 엔진의 학교 진도 단원을 설정합니다.</p>
           </div>
         </div>
-        <button class="w-8 h-8 rounded-full bg-lab-bg border border-lab-card-border flex items-center justify-center text-gray-400 hover:text-white" onclick="closeParentProgressModal()">
+        <button class="w-8 h-8 rounded-full bg-lab-bg border border-lab-card-border flex items-center justify-center text-gray-400 hover:text-white shrink-0" onclick="closeParentProgressModal()">
           <span class="material-symbols-outlined text-base">close</span>
         </button>
       </div>
 
-      <!-- 탭: 👧 민서(초1) / 👦 민수(초5) / 📖 원리·활용 가이드 -->
-      <div class="flex rounded-2xl bg-lab-bg p-1 border border-lab-card-border gap-1">
+      <!-- 탭: 👧 민서(초1) / 👦 민수(초5) / 📖 원리·활용 가이드 (고정) -->
+      <div class="flex rounded-2xl bg-lab-bg p-1 border border-lab-card-border gap-1 shrink-0">
         <button id="parentTabMinseo" type="button" class="flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1" onclick="switchParentTab('minseo')">
           <span>👧</span><span>민서 (초1)</span>
         </button>
@@ -576,8 +576,8 @@
         </button>
       </div>
 
-      <!-- 안내 배너 (진도 설정 탭에서만 표시) -->
-      <div id="parentProgressBanner" class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-2xl p-2.5 text-[11px] text-neon-cyan flex items-start gap-2">
+      <!-- 안내 배너 (진도 설정 탭에서만 표시, 고정) -->
+      <div id="parentProgressBanner" class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-2xl p-2.5 text-[11px] text-neon-cyan flex items-start gap-2 shrink-0">
         <span class="text-base leading-none">💡</span>
         <span>
           <strong>1~3번</strong>: 선택한 현재 진도 집중 드릴<br/>
@@ -586,8 +586,8 @@
         </span>
       </div>
 
-      <!-- 👧 민서 진도 설정 영역 -->
-      <div id="parentMinseoSettings" class="space-y-3.5 max-h-[48vh] overflow-y-auto pr-1">
+      <!-- 👧 민서 진도 설정 영역 (스크롤 가능) -->
+      <div id="parentMinseoSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0">
         <!-- 국어 -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
@@ -628,8 +628,21 @@
         </div>
       </div>
 
-      <!-- 👦 민수 진도 설정 영역 -->
-      <div id="parentMinsuSettings" class="space-y-3.5 max-h-[48vh] overflow-y-auto pr-1 hidden">
+      <!-- 👦 민수 진도 설정 영역 (스크롤 가능) -->
+      <div id="parentMinsuSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0 hidden">
+        <!-- 과학 (최근 강조) -->
+        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-blue-300 flex items-center gap-1">🔬 과학 현재 진도</span>
+            <span class="text-[10px] text-blue-300 font-bold" id="badgeMinsuScience">3단원 온도와 열 (열의 이동) ⭐</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5" id="parentMinsuScienceChips">
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" onclick="setParentUnit('minsu', 'science', '1')">1단원 온도와 열</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="3" onclick="setParentUnit('minsu', 'science', '3')">3단원 온도와 열 (열의 이동) ⭐</button>
+          </div>
+        </div>
+
         <!-- 수학 -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
@@ -666,18 +679,6 @@
           </div>
         </div>
 
-        <!-- 과학 -->
-        <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-blue-300 flex items-center gap-1">🔬 과학 현재 진도</span>
-            <span class="text-[10px] text-blue-300 font-bold" id="badgeMinsuScience">1단원 온도와 열</span>
-          </div>
-          <div class="grid grid-cols-2 gap-1.5" id="parentMinsuScienceChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" onclick="setParentUnit('minsu', 'science', '1')">1단원 온도와 열 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
-          </div>
-        </div>
-
         <!-- 사회 -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
@@ -691,8 +692,8 @@
         </div>
       </div>
 
-      <!-- 📖 5분 퀘스트 원리 & 활용 설명서 영역 -->
-      <div id="parentGuideSettings" class="space-y-3.5 max-h-[50vh] overflow-y-auto pr-1 hidden text-xs leading-relaxed text-gray-200">
+      <!-- 📖 5분 퀘스트 원리 & 활용 설명서 영역 (스크롤 가능) -->
+      <div id="parentGuideSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0 hidden text-xs leading-relaxed text-gray-200">
         
         <!-- 개요 카드 -->
         <div class="bg-gradient-to-br from-amber-500/20 via-lab-bg to-lab-card border border-amber-400/40 rounded-2xl p-3.5 space-y-2">
@@ -792,8 +793,8 @@
 
       </div>
 
-      <!-- 하단 저장 및 취소 버튼 -->
-      <div class="flex gap-2 pt-2 border-t border-lab-card-border" id="parentModalFooter">
+      <!-- 하단 저장 및 취소 버튼 (고정) -->
+      <div class="flex gap-2 pt-2.5 border-t border-lab-card-border shrink-0 mt-auto" id="parentModalFooter">
         <button type="button" class="flex-1 py-3 rounded-xl bg-lab-bg border border-lab-card-border text-gray-400 text-xs font-bold hover:text-white" onclick="closeParentProgressModal()">
           닫기
         </button>
@@ -1254,9 +1255,53 @@
     }
 
     // ================= 부모 진도 설정판 (Parent Progress Controller) 로직 =================
+    const UNIT_META_MAP = {
+      minseo: {
+        korean: {
+          voca: '그림 낱말 탐험',
+          dictation: '받아쓰기 100문장',
+          batchim: '받침 글자 (2~3단원 추천)'
+        },
+        math: {
+          '100num': '100까지의 수',
+          addsub: '한자리 덧뺄셈',
+          shapes: '여러가지 모양'
+        },
+        english: {
+          phonics: '파닉스 첫단어',
+          abc: '알파벳 소리',
+          greetings: '기초 인사말'
+        }
+      },
+      minsu: {
+        math: {
+          division: '두 자릿수 나눗셈',
+          fraction: '5-2 분수의 곱셈'
+        },
+        english: {
+          '8': '8단원 외모 묘사',
+          '7': '7단원 길찾기'
+        },
+        korean: {
+          '1': '1단원 어휘·속담',
+          '2': '2단원 문맥·독해'
+        },
+        science: {
+          '1': '1단원 온도와 열',
+          '2': '2단원 상태변화·지시약',
+          '3': '3단원 온도와 열 (열의 이동) ⭐'
+        },
+        society: {
+          '1': '1단원 조선 건국·한양',
+          '2': '2단원 문화발전·이순신',
+          '3': '3단원 유교문화·민족의 시련'
+        }
+      }
+    };
+
     const DEFAULT_PARENT_SETTINGS = {
       minseo: { korean: 'batchim', math: '100num', english: 'phonics' },
-      minsu: { math: 'division', english: '8', korean: '1', science: '1', society: '1' }
+      minsu: { math: 'division', english: '8', korean: '1', science: '3', society: '1' }
     };
 
     let currentParentSettings = (function() {
@@ -1275,10 +1320,57 @@
 
     let currentParentTab = isMinseo ? 'minseo' : 'minsu';
 
+    /**
+     * 🔄 문제은행(minsuMasterBank) 및 노션 캐시 기반 동적 단원 칩 자동 보강 엔진
+     * HTML에 하드코딩되지 않은 신규 단원(예: 과학 3단원, 사회 3단원 등)이 등록되면 자동으로 칩 버튼을 동적 생성
+     */
+    function syncDynamicUnitChips() {
+      try {
+        if (typeof window.minsuMasterBank === 'object' && window.minsuMasterBank) {
+          const subjects = ['science', 'society', 'korean', 'english', 'math'];
+          subjects.forEach(subj => {
+            const bankData = window.minsuMasterBank[subj];
+            if (!bankData) return;
+
+            const capitalized = subj.charAt(0).toUpperCase() + subj.slice(1);
+            const containerId = `parentMinsu${capitalized}Chips`;
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // 문제은행 키 목록 추출
+            const unitKeys = Object.keys(bankData).filter(k => !['title', 'icon'].includes(k));
+            
+            unitKeys.forEach(uKey => {
+              // 이미 존재하는 버튼인지 확인
+              const existingBtn = container.querySelector(`button[data-unit="${uKey}"]`);
+              if (!existingBtn) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
+                btn.setAttribute('data-subject', subj);
+                btn.setAttribute('data-unit', uKey);
+                btn.onclick = () => setParentUnit('minsu', subj, uKey);
+
+                // 단원 라벨 결정
+                let label = (UNIT_META_MAP.minsu[subj] && UNIT_META_MAP.minsu[subj][uKey]) 
+                  || (bankData[uKey] && bankData[uKey].title) 
+                  || `${uKey}단원`;
+                btn.textContent = label;
+                container.appendChild(btn);
+              }
+            });
+          });
+        }
+      } catch (err) {
+        console.warn('[syncDynamicUnitChips] 동적 단원 동기화 알림:', err);
+      }
+    }
+
     function openParentProgressModal(initialTab = '') {
       pokeSound('pop');
       currentParentTab = initialTab || (isMinseo ? 'minseo' : 'minsu');
       switchParentTab(currentParentTab);
+      syncDynamicUnitChips();
       renderParentProgressChips();
 
       const modal = document.getElementById('parentProgressModal');
@@ -1358,6 +1450,7 @@
         btnSave.onclick = saveParentProgressSettings;
       }
 
+      syncDynamicUnitChips();
       renderParentProgressChips();
     }
 
@@ -1385,15 +1478,15 @@
       // 민서 배지 텍스트
       const bMinKor = document.getElementById('badgeMinseoKorean');
       if (bMinKor) {
-        bMinKor.textContent = minseoSets.korean === 'batchim' ? '받침 글자 (2~3단원 추천)' : (minseoSets.korean === 'dictation' ? '받아쓰기 100문장' : '그림 낱말 탐험');
+        bMinKor.textContent = (UNIT_META_MAP.minseo.korean && UNIT_META_MAP.minseo.korean[minseoSets.korean]) || minseoSets.korean;
       }
       const bMinMath = document.getElementById('badgeMinseoMath');
       if (bMinMath) {
-        bMinMath.textContent = minseoSets.math === '100num' ? '100까지의 수' : (minseoSets.math === 'addsub' ? '한자리 덧뺄셈' : '여러가지 모양');
+        bMinMath.textContent = (UNIT_META_MAP.minseo.math && UNIT_META_MAP.minseo.math[minseoSets.math]) || minseoSets.math;
       }
       const bMinEng = document.getElementById('badgeMinseoEnglish');
       if (bMinEng) {
-        bMinEng.textContent = minseoSets.english === 'phonics' ? '파닉스 첫단어' : (minseoSets.english === 'abc' ? '알파벳 소리' : '기초 인사말');
+        bMinEng.textContent = (UNIT_META_MAP.minseo.english && UNIT_META_MAP.minseo.english[minseoSets.english]) || minseoSets.english;
       }
 
       // 2) 민수 칩 렌더링
@@ -1409,25 +1502,26 @@
         }
       });
 
+      // 민수 배지 텍스트 동적 반영
       const bMinuMath = document.getElementById('badgeMinsuMath');
       if (bMinuMath) {
-        bMinuMath.textContent = minsuSets.math === 'fraction' ? '5-2 분수의 곱셈' : '두 자릿수 나눗셈';
+        bMinuMath.textContent = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[minsuSets.math]) || minsuSets.math;
       }
       const bMinuEng = document.getElementById('badgeMinsuEnglish');
       if (bMinuEng) {
-        bMinuEng.textContent = minsuSets.english === '7' ? '7단원 길찾기' : '8단원 외모 묘사';
+        bMinuEng.textContent = (UNIT_META_MAP.minsu.english && UNIT_META_MAP.minsu.english[minsuSets.english]) || `${minsuSets.english}단원`;
       }
       const bMinuKor = document.getElementById('badgeMinsuKorean');
       if (bMinuKor) {
-        bMinuKor.textContent = minsuSets.korean === '2' ? '2단원 문맥·독해' : '1단원 어휘·속담';
+        bMinuKor.textContent = (UNIT_META_MAP.minsu.korean && UNIT_META_MAP.minsu.korean[minsuSets.korean]) || `${minsuSets.korean}단원`;
       }
       const bMinuSci = document.getElementById('badgeMinsuScience');
       if (bMinuSci) {
-        bMinuSci.textContent = minsuSets.science === '2' ? '2단원 상태변화·지시약' : '1단원 온도와 열';
+        bMinuSci.textContent = (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[minsuSets.science]) || `${minsuSets.science}단원`;
       }
       const bMinuSoc = document.getElementById('badgeMinsuSociety');
       if (bMinuSoc) {
-        bMinuSoc.textContent = minsuSets.society === '2' ? '2단원 문화발전·이순신' : '1단원 조선 건국·한양';
+        bMinuSoc.textContent = (UNIT_META_MAP.minsu.society && UNIT_META_MAP.minsu.society[minsuSets.society]) || `${minsuSets.society}단원`;
       }
     }
 
@@ -1448,15 +1542,16 @@
       const rec = document.getElementById('modalRecommend');
       if (isMinseo) {
         const sets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
-        const korName = sets.korean === 'batchim' ? '2~3단원 받침 글자 드릴' : (sets.korean === 'dictation' ? '받아쓰기 100문장' : '그림 낱말 탐험');
-        const mathName = sets.math === '100num' ? '100까지 수 & 덧셈' : (sets.math === 'addsub' ? '한자리 덧뺄셈' : '여러가지 모양');
+        const korName = (UNIT_META_MAP.minseo.korean && UNIT_META_MAP.minseo.korean[sets.korean]) || sets.korean;
+        const mathName = (UNIT_META_MAP.minseo.math && UNIT_META_MAP.minseo.math[sets.math]) || sets.math;
         if (qSub) qSub.textContent = `🧮 1-2 ${mathName} · 필수 ⭐`;
         if (rec) rec.textContent = `💡 오늘의 추천 진도: ${korName} & ${mathName} (필수 ⭐)`;
       } else {
         const sets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
-        const mathName = sets.math === 'fraction' ? '5-2 분수의 곱셈 집중 연산' : '5-2 두 자릿수 나눗셈 집중 연산';
+        const mathName = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[sets.math]) || sets.math;
+        const sciName = (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[sets.science]) || `${sets.science}단원`;
         if (qSub) qSub.textContent = `🧮 ${mathName} · 필수 ⭐`;
-        if (rec) rec.textContent = `💡 오늘의 권장 진도: ${mathName} (기초 필수 ⭐)`;
+        if (rec) rec.textContent = `💡 오늘의 권장 진도: ${mathName} & 🔬 ${sciName}`;
       }
     }
 
