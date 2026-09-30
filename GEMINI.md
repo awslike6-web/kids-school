@@ -106,3 +106,18 @@
 - 아이들의 12년 성장 기록, 그림, 상장, 일기 고화질 원본은 영구 보존용 독립 레포지토리인 **`kids-archive`** (`https://github.com/awslike6-web/kids-archive`)를 유일한 단일 원천으로 삼는다.
 - `kids-school` 갤러리는 이미지를 내부에 복제하지 않고 `kids-archive`의 GitHub CDN 경로(`https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/...`)를 직접 참조한다.
 - 신규 작품 등록 시 `python scripts/build_gallery.py`를 실행하여 갤러리 메타데이터와 미디어를 일괄 동기화한다.
+
+---
+
+## 8. 클린 코드·모듈화·경량화 및 정기 리팩토링 의무 (Clean Code & Refactoring)
+공부방 플랫폼의 장기 지속 가능성과 모바일 초고속 로딩을 위해 아래 4대 규칙을 엄수한다:
+1. **중복 복붙 원천 차단 (Zero Copy-Paste)**:
+   - 신규 단원이나 기능을 추가할 때 기존 HTML/JS를 통째로 복사해서 새 파일을 만들지 않는다.
+   - 통신(`notion-helper.js`), 오디오(`fairy-engine.js`), 뷰어(`storybook_engine.js`) 등 공통 코어는 `kids/core/` 또는 `kids/js/`에 딱 1벌만 유지하고, 개별 화면은 초경량 래퍼만 둔다.
+2. **노션 동적 송출(Headless CMS) 엄수 (Zero Hardcoding)**:
+   - 문제 지문, 선택지, 정답, 이미지 URL을 프론트엔드 코드에 문자열로 하드코딩하지 않는다.
+   - 모든 교육 콘텐츠는 **노션 VOCA_DB, CURRICULUM_DB에서 실시간 동적 송출**받도록 설계하여, 부모가 폰으로 글자만 고치면 즉시 배포되게 한다.
+3. **순수 바닐라의 극단적 경량화 (Vanilla JS/CSS)**:
+   - 외부 거대 프레임워크를 배제하고 Modern Vanilla JS 규격을 유지하여, 저사양 태블릿에서도 0.1초 만에 로딩되도록 깃털 같은 반응성을 보장한다.
+4. **정기 리팩토링(대청소) 의무**:
+   - 단원이 3~4개 추가되거나 분기 결산 시점에는 반드시 코드 전수조사를 실시하여, 중복된 로직과 CSS를 공통 코어로 합치고 파일 크기를 다이어트(리팩토링)한다.
