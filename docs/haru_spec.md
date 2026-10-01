@@ -149,3 +149,27 @@ python scripts/add_activity_photo.py \
   - 시간, 상처 부위, 코코의 응급처치 안내 내역, 부모 안심 코칭(귀가 후 상처 점검 포인트)을 함께 표시하여 학교/야외 활동 후 귀가 시 안심 케어 지원.
   - 당일 상담 내역이 없을 때는 초록빛 **`[안전 상태 양호 🛡️]`** 배너로 무탈한 하루를 확인.
 
+---
+
+## 6. 골디락스 모듈화 아키텍처 (Goldilocks Modular Architecture)
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 2,720줄의 거대 단일 파일이었던 `haru_common.js`를 **1개의 초경량 대문 파사드 + 4개의 전문 엔진**으로 분리하여 100% 무결성을 달성했습니다.
+
+| 모듈 파일명 | 라인 수 | 전담 역할 및 책임 | 핵심 함수 |
+| :--- | :---: | :--- | :--- |
+| **`haru_common.js`** | 402줄 | **대문 파사드 & 핵심 제어기**<br>• 민수/민서 프로필 UI 동적 세팅<br>• 5대 라이프 탭 스위칭 & 음성 즉시 중단<br>• 초고음질 요정 TTS 발화 제어<br>• 모네/고흐 하늘 명화 및 달팽이 동요 감상실 | `setupChildProfileUI`<br>`switchHaruTab`<br>`speakText`<br>`stopAllSpeech`<br>`renderArtTab` |
+| **`haru-checkin-engine.js`** | 548줄 | **[습관] 30초 체크인 & 저금통 엔진**<br>• 착한 습관 저금통 코인 (+20개 완주 마일스톤)<br>• 건강 운동 일주일 달력 스탬프<br>• 알록달록 마음 날씨<br>• 30초 원스톱 모달 & 노션 STUDY_LOG 적재 | `renderHabitsTab`<br>`recordHabitAction`<br>`recordWorkout`<br>`openQuickCheckInModal`<br>`finishQuickCheckIn` |
+| **`haru-timeline-engine.js`** | 662줄 | **[시간] 24시간 매직 시계판 & 타임머신**<br>• 12h/24h 동적 눈금 & 시침·분침 실시간 애니메이션<br>• 2중 동심원 지그재그 스티커 핀 배치<br>• 고정 루틴 vs 당일 일정 분기 저장<br>• 추천 스티커 트레이 & 나만의 일과 직접 쓰기 모달<br>• 오늘 하루 완성 (+2 보상) & 노션 타임머신 일지 | `renderTimelineTab`<br>`setClockHourFormat`<br>`renderClockPins`<br>`openCustomTimelineModal`<br>`completeTodayTimeline` |
+| **`haru-safety-quiz.js`** | 305줄 | **[안전] 119 안전수호대 & 닥터 코코**<br>• 생활 안전 OX 퀴즈 6문항 (무감점 힌트)<br>• 황금 안전 지킴이 면허증 발급 (+5 보너스)<br>• 닥터 코코 365 응급처치 가이드<br>• 노션 면허증 인증 및 안심 상담 일지 적재 | `renderSafetyQuizQuestion`<br>`handleSafetyQuizAnswer`<br>`renderSafetyLicense`<br>`selectFirstAidSymptom`<br>`consultDoctorCocoCustom` |
+| **`haru-special-days.js`** | 473줄 | **[추억] 특별한 날 추억 피드 & 갤러리**<br>• 특별한 날 폴라로이드 스타일 포토 카드 피드<br>• 고화질 사진 전체보기 팝업 모달 & 동영상 바로가기<br>• 4종 감정 도장 & 나만의 생각 직접 쓰기<br>• 카드 제목 인라인 즉시 수정<br>• 새로운 추억 등록 & 12년 아카이브 연동 | `renderSpecialDaysTab`<br>`openSpecialPhotoModal`<br>`stampReaction`<br>`saveEditedTitle`<br>`addNewSpecialStory` |
+
+- **HTML 로드 표준 (`haru.html`)**:
+  ```html
+  <script src="data/haru_data.js"></script>
+  <script src="js/haru-checkin-engine.js"></script>
+  <script src="js/haru-timeline-engine.js"></script>
+  <script src="js/haru-safety-quiz.js"></script>
+  <script src="js/haru-special-days.js"></script>
+  <script src="js/haru_common.js"></script>
+  ```
+
+
