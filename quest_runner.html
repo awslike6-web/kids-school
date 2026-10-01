@@ -580,11 +580,15 @@
     // ========================================================
     const urlParams = new URLSearchParams(window.location.search);
     const currentUser = urlParams.get('user') || localStorage.getItem('currentChild') || localStorage.getItem('currentUser') || 'minsu';
+    const currentSubj = urlParams.get('subject') || 'math';
     const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
     const parentSettings = (typeof getParentQuestSettings === 'function') ? getParentQuestSettings(currentUser) : null;
     const configuredUnit = parentSettings && parentSettings[currentSubj];
     const currentUnit = urlParams.get('unit') || configuredUnit || (isMinseo ? (currentSubj === 'korean' ? 'voca' : (currentSubj === 'english' ? 'phonics' : '100num')) : (currentSubj === 'math' ? 'division' : (currentSubj === 'english' ? 'L9' : '1')));
     const currentMode = urlParams.get('mode') || (isMinseo ? 'speed' : 'mixed');
+
+    // Web Audio 사운드 컨텍스트 안전 선언
+    var audioCtx = null;
 
     // 퀘스트 데이터 바인딩 (quest_engine.js getSubjectQuest 호출)
     let currentQuest = getSubjectQuest(currentSubj, currentUnit, currentMode, currentUser);
@@ -593,7 +597,6 @@
     let selectedOptionIndex = null;
     let hearts = 3;
     let isAnswerChecked = false;
-    let audioCtx = null;
     let sessionMissedQuestions = [];
     let sessionWrongLogs = [];
     let isRevengeMode = false;
@@ -601,7 +604,7 @@
     // Web Audio 사운드 엔진
     function initAudio() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
     window.addEventListener('pointerdown', initAudio, { once: true });
 
