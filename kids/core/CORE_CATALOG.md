@@ -290,7 +290,75 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ---
 
-## 2-6. 📖 모바일 핀포인트 독해 뷰어 & 데이터 파이프라인 (Reading Engine & Pipeline)
+## 2-6. 🗺️ 사회 역사 탐험방 전담 엔진군 (Society Multiverse Engines)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,578줄의 비대했던 `society_common.js`를 1개의 초경량 대문 파사드와 5개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.
+
+### 🌟 `society_common.js` (사회 탐험방 대문 파사드)
+프로필/테마 초기화, 노션 어휘/사료 프리패치, 미션 오버레이 라우팅, 학습일지 전송, 오늘의 요약집 인쇄를 총괄하는 초경량 라우팅 파사드입니다.
+- **파일 위치**: `kids/js/society_common.js` (약 470줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `initializeSocietyRoom()` | 자녀 프로필 동기화, 테마 설정, 대기실 UI 활성화 |
+  | `openMissionView(type)` | 5대 미션 오버레이 열기 및 라우팅 (`storybook`, `voca`, `chart`, `map`, `history`) |
+  | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
+  | `fetchAndBuildDynamicUI(type)` | 노션 마스터 DB 실시간 쿼리 및 1·2단계 동적 학년/단원 렌더링 |
+  | `renderSectionUI(type)` | 10문제 완주 체크 및 5대 전문 서브모듈 렌더러로 디스패치 |
+  | `printSocietySummary()` | 당일 단원 핵심 용어 요약집 인쇄 모달 가동 |
+
+### 🌟 `society_storybook.js` ([1단계] 사회 단원 동화 도서관 전담 엔진)
+기후 대모험(5-1), 역사 시간 여행 1~3편(5-2) 등 4권의 고화질 사료 동화 서가 렌더링 및 뷰어 연동을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/society_storybook.js` (171줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `SocietyStorybook.render(container)` | 사회 단원 동화 서가 모달 UI 렌더링 |
+  | `SocietyStorybook.getList()` | 등록된 사회 동화 4권 메타데이터 조회 |
+
+### 🌟 `society_voca.js` ([2단계] 사회 용어방 전담 엔진)
+초성 힌트 퀴즈, 단어 길이에 따른 3종 반응형 인터랙션(긴 단어 자석 빈칸 채우기, 3단어 이상 객관식, 주관식 타이핑), 마스터 카운트(3회 정답 시 노션 [달성] 연동)를 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/society_voca.js` (452줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `SocietyVoca.render(container, item, ...)` | 용어 퀴즈 카드 렌더링 및 음성 자동 낭독 |
+  | `SocietyVoca.toggleOrder()` | 랜덤 섞기 ↔ 순서대로 풀기 모드 전환 |
+  | `SocietyVoca.resetMasterAndReload()` | 현재 단원 마스터 기록 초기화 및 노션 일괄 PATCH |
+  | `SocietyVoca.verifyAnswer()` / `verifyChoice()` / `verifyMagnet()` | 문항 유형별 정답 검증 및 보상 연동 |
+
+### 🌟 `society_chart.js` ([3단계] 차트 & 도표 자료실 전담 엔진)
+교과서 사료/도표/통계 이미지 분석, 4지선다 퀴즈 렌더러, 돋보기 뷰어 연동 및 정답 축하 모달을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/society_chart.js` (210줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `SocietyChart.render(container, item, ...)` | 차트 분석 퀴즈 카드 및 돋보기 뷰포트 렌더링 |
+  | `SocietyChart.verifyChoice(selectedIdx, correctIdx)` | 4지선다 객관식 채점 및 오답노트 적재 |
+  | `SocietyChart.showSuccessModal(item)` | 유물 쓰임새/핵심 해설 축하 모달 팝업 |
+
+### 🌟 `society_map.js` ([4단계] 랜선 지도 탐방실 전담 엔진)
+국토 지리 명소(백두산 천지, 독도, 성산일출봉 등) 고화질 사진 탐방, 요정 코코 음성 해설 및 한 줄 탐방기 입력을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/society_map.js` (108줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `SocietyMap.render(container, item, ...)` | 랜선 지도 탐방 뷰 렌더링 |
+  | `SocietyMap.submitJourney()` | 한 줄 탐방기 작성 검증 및 여정 기록 보상 |
+
+### 🌟 `society_history.js` ([5단계] 역사 & 문화재 돋보기 전담 엔진)
+국보·보물 역사 문화재 듀얼 카드 탐구, 하단 국보 역사박물관 가랜드 도크 렌더링, 유물 수집 및 로컬 스토리지 보존을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/society_history.js` (152줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `SocietyHistory.render(container, item, ...)` | 역사 문화재 듀얼 카드 및 박물관 쇼케이스 렌더링 |
+  | `SocietyHistory.renderMuseumGridDock()` | 하단 국보 박물관 소장 가랜드 도크 렌더링 |
+  | `SocietyHistory.collectArtifact(artName)` | 유물 수집, 축하 알림 및 영구 소장 처리 |
+
+---
+
+## 2-7. 📖 모바일 핀포인트 독해 뷰어 & 데이터 파이프라인 (Reading Engine & Pipeline)
 
 ### 🌟 `reading_engine.js` (모바일 핀포인트 독해 뷰어 엔진)
 노션 독해 마스터 DB(`LIBRARY_DB`)에서 지문과 문제를 실시간 수급하여, 모바일 좁은 화면에서도 스크롤 피로 없이 1문항 슬라이스 카드 및 단락 힌트 토글 방식으로 쾌적하게 학습할 수 있도록 구현된 국어·영어 공통 독립 뷰어 엔진입니다.
