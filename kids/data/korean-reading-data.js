@@ -1,11 +1,3 @@
-// ==========================================
-// 📖 국어 독해 교과 데이터 스켈레톤 (korean-reading-data.js)
-// ==========================================
-// 💡 [클린 아키텍처 Headless CMS 원칙 & 자가 치유 안전망]
-// 전체 국어 독해 지문과 퀘스트는 노션 LIBRARY_DB(37ca2711...)에서 실시간 동적 송출됩니다.
-// 본 파일은 노션 API 일시 점검이나 오프라인 환경에서도 아이들의 학습이 끊기지 않도록
-// 2계층 내결함성(Fault-Tolerant) 캐시 스켈레톤 역할을 수행합니다.
-
 const KOREAN_READING_DATABASE = [
   {
     "id": "reading_center_5",
@@ -873,6 +865,322 @@ const KOREAN_READING_DATABASE = [
         "chosung": "ㄱㄱ",
         "clue": "민수의 따뜻한 말 한마디 (공감의 힘)",
         "explanation": "친구나 다른 사람의 슬픔이나 기쁨을 내 마음처럼 함께 나누는 것을 '공감'이라고 합니다."
+      }
+    ]
+  },
+  {
+    "id": "eng_read_02",
+    "book_id": "eng_read_02",
+    "order": 2,
+    "title": "Exciting Summer Plans (6단원)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "6단원",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-07-15",
+    "difficulty": "보통",
+    "summary": "민지와 톰이 다가오는 여름 방학에 부산 여행, 등산, 캠핑, 축구 등 무엇을 할지 서로의 신나는 계획(will)을 나눕니다.",
+    "fullText": "Summer vacation is coming soon. Today, Minji and Tom are talking about their plans for this summer. \"What will you do this summer, Tom?\"\n\"I have a great plan! This weekend, I'll travel to Busan. I will go to the beach and ride a boat. I think I will feel fresh there. What about you?\"\n\"I'll visit my uncle tomorrow. I'll go hiking with him. We will go camping, too!\" \"That sounds great! Will you do anything else?\" \"Yes, I will take a piano class and learn Chinese. I worry a little bit, but I will try my best. I will also paint a picture.\"\n\"Don't worry. You will do great! By the way, I will practice soccer and play with my friends. Next month, my family will visit my grandparents and go to an amusement park. Do you want to join us?\" \"Yes, I'd love to! After the amusement park, we can try cooking dinner together.\" Both friends are very excited about this summer."
+  },
+  {
+    "id": "eng_read_03",
+    "book_id": "eng_read_03",
+    "order": 3,
+    "title": "The International Student Camp (1단원)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "1단원",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-03-20",
+    "difficulty": "보통",
+    "summary": "국제 학생 캠프에 모인 여러 나라 친구들이 서로의 출신 국가(Where are you from?)와 이름을 묻고 전통 문화를 나눕니다.",
+    "fullText": "Welcome to the International Student Camp! We have students from all over the world. They come from many different countries like the U.S., Canada, Mexico, Italy, Thailand, and Korea. When they meet, they usually ask, \"Where are you from?\" and answer, \"I'm from...\"\nMaking new friends is the key to this camp. Sometimes, names are hard to write. So, friends ask, \"How do you spell your name?\" They spell their names and share a special story or a big dream. They also make a short video together.\nStudents also give each other traditional food and sweet fruit. They listen to pop music and sing a beautiful song from their country. Learning about different cultures is very fun!"
+  },
+  {
+    "id": "eng_read_04",
+    "book_id": "eng_read_04",
+    "order": 4,
+    "title": "A Trip to the Museum and Park (2단원)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "2단원",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-04-10",
+    "difficulty": "보통",
+    "summary": "박물관과 공원에서 허락을 구하는 표현(Can I...?)과 장소에 따라 지켜야 할 규칙을 배웁니다.",
+    "fullText": "Today, my family went to a museum. We got a ticket to see a lot of old things. Inside, I asked the guide, \"Can I touch this?\" He answered, \"Sorry, you can't. You must keep your hands away.\" Then I asked, \"Can I take a picture of this old present?\" He smiled and said, \"Sure, you can.\"\nAfter that, we walked over to a park near the river. We saw many green trees and a plant with a beautiful flower. I was thirsty and hungry. \"Can I have some juice?\" I asked my mom. \"Sure, you can. Use this cup,\" she said. We decided to sit here under a tree. We ate a delicious cheese sandwich and had no problem relaxing.\nLater, I wanted to draw the river. \"Can I borrow your pen?\" I asked my dad, and he let me take it. Then I asked, \"Can I bring my bike and ride it here?\" Dad said, \"Sorry, you can't. Your bike doesn't work well on this grass, and we need to get some rest.\" We just enjoyed nature together."
+  },
+  {
+    "id": "eng_read_05",
+    "book_id": "eng_read_05",
+    "order": 5,
+    "title": "Finding Lost Things (3단원)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "3단원",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-05-02",
+    "difficulty": "보통",
+    "summary": "교실에서 잃어버린 가방, 재킷, 필통의 주인을 찾아주며 누구의 물건인지 묻고 답하는 표현(Whose...?)을 익힙니다.",
+    "fullText": "Minji and her friend are packing to go home to their family. Minji sees a blue bag. \"Whose backpack is this?\" she asks. Her friend says, \"It's mine.\" Then, Minji points to a coat. \"Whose jacket is that?\" Her friend says, \"It's Junho's. Look at the star button on the back.\"\nThey look out the window and continue to clean. They find a pencil case with a cute elephant sticker. The elephant has a long nose. \"Whose pencil case is this?\" asks Minji. Inside, there is a ruler, an eraser, and a pencil. Her friend has a good idea. \"Junho loves elephants. So, of course, this is his pencil case, too!\"\nNext, Minji holds up a heavy book and a water container. \"Is that your textbook and bottle?\" Her friend checks and says, \"It's yours, Minji!\" Minji laughs. Finally, she takes out her phone to call her mom. They are happy to give everything back to their friends."
+  },
+  {
+    "id": "eng_read_06",
+    "book_id": "eng_read_06",
+    "order": 6,
+    "title": "My Favorite Day at School (4단원)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "4단원",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-05-20",
+    "difficulty": "보통",
+    "summary": "교실에서 친구들이 가장 좋아하는 과목(favorite subject)에 대해 이야기하고 텃밭 채소를 관찰합니다.",
+    "fullText": "Today, we had a special talk in our classroom. The teacher asked, \"What is your favorite subject?\" Many friends raised their hands. Sumin stood up second and said, \"My favorite subject is math. I really like solving hard problems.\" Then Jiho stood up. \"My favorite subject is science. I want to see a beautiful bird in nature and study it,\" he said. Everyone had different ideas.\nFor me, it is hard to choose just one. My favorite subject is art because I like drawing pictures. I also love music class. Minji smiled and said, \"My favorite subject is English. I like reading books in English, and I want to speak it well.\" Some friends also said they like P.E. class because they can run outside in the beautiful spring weather.\nIn the afternoon, we went to the school garden. We checked the vegetables we planted. We could see a small potato and a green carrot starting to grow. They really need some water. Our teacher called us to take a picture together. School is so much fun when we share the things we like!"
+  },
+  {
+    "id": "eng_read_07",
+    "book_id": "eng_read_07",
+    "order": 7,
+    "title": "A Delicious Dinner at the Restaurant (5단원)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "5단원",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-06-10",
+    "difficulty": "보통",
+    "summary": "식당에서 원하는 음식을 주문(I'd like...)하고 음식의 다양한 맛(sweet, spicy, delicious)을 표현합니다.",
+    "fullText": "Today, my family went to a nice restaurant near the sea. A waiter came to our table and asked, \"What would you like?\" We were ready to order. I looked at the menu and said, \"I'd like a cheese pizza, please.\" My little brother smiled and said, \"I'd like sweet pancakes and chocolate ice cream!\" Mom wanted a vegetable pizza and a fresh fruit salad, and Dad chose spicy curry with noodles. We had to wait a little bit for our food.\nSoon, the food came. The cheese pizza and bread were hot, and we also got lemonade with a lot of ice. Dad looked at me and asked, \"How's your pizza?\" I tried a big piece and answered, \"It's delicious! It is not too salty.\" Then I asked my mom, \"How's your vegetable pizza?\" She said, \"It's great, but this lemonade is a bit sour.\"\nDad gave me some meat from his curry. It was very spicy, so I had to drink a lot of water. For dessert, we shared a big bowl of ice cream with sweet cream on top. Trying different kinds of food together was a great experience. We had a wonderful dinner time!"
+  },
+  {
+    "id": "eng_read_08",
+    "book_id": "eng_read_08",
+    "order": 8,
+    "title": "The Global Food Festival (5단원 Adv)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "5단원(심화)",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-06-25",
+    "difficulty": "보통",
+    "summary": "세계 음식 축제에서 베트남 분짜, 스페인 파에야, 한국 김치전을 맛보며 다채로운 식감(crunchy, crispy, chewy)을 표현합니다.",
+    "fullText": "Today, Minji and her friends visited the Global Food Festival. There were so many delicious smells in the air. First, they went to a Vietnam food booth. A kind worker smiled and asked, \"May I take your order?\" Minji answered, \"I'd like some noodles, please.\" She got a warm bowl of bun cha. Her friend Tom took a bite and asked, \"How's your bun cha?\" Minji smiled and said, \"It's soft and juicy! The meat is also very savory and sweet.\"\nNext, they walked to a Spanish booth and looked at a large pan. \"What is that?\" Tom asked. The worker said, \"It's paella. It has rice, seafood, and vegetables.\" Tom ordered some paella. The rice at the bottom was very crunchy and crispy, but some parts were a little greasy. \"It's salty and sweet, and the shrimp is so chewy!\" Tom said. They really enjoyed trying new textures.\nFinally, they saw a Korean food booth with a bright red pancake. Tom pointed at it and asked, \"What's kimchi jeon?\" Minji proudly answered, \"It's a kimchi pancake from Korea. It's spicy noodles' best friend!\" They ordered one to share. The edge of the pancake was very crispy, but the inside was soft. It was a bit spicy and sour, not bitter at all. It was a perfect hard day of walking, but their stomachs were very happy!"
+  },
+  {
+    "id": "eng_read_09",
+    "book_id": "eng_read_09",
+    "order": 9,
+    "title": "A New Student, Sophia (1단원 기초)",
+    "subject": "영어",
+    "track": "🏫 교과서 독해",
+    "unit": "1단원(기초)",
+    "grade": "5-1",
+    "student": [
+      "민수"
+    ],
+    "date": "2026-03-05",
+    "difficulty": "보통",
+    "summary": "전학 온 새로운 친구 소피아와 에밀리가 교실에서 만나 이름과 출신 나라를 소개하며 친해집니다.",
+    "fullText": "The teacher walks into the classroom. \"We have a new student today. This is Sophia,\" she says. Sophia smiles and looks at the class. \"Hi. Nice to meet you. Hello, I'm Sophia.\"\nSophia sits next to a girl. Sophia asks, \"What's your name?\" The girl smiles and answers, \"My name is Emily. Where are you from, Sophia?\" They are happy to talk to each other.\nSophia answers, \"I'm from Italy.\" Emily says, \"I'm from the U.S. Nice to meet you.\" They become good friends on the first day of school."
+  },
+  {
+    "id": "reading_center_30",
+    "book_id": "book_30",
+    "grade": "5-2",
+    "student": [
+      "민수"
+    ],
+    "track": "🏥 센터 독해",
+    "unit": "2학기 30번",
+    "order": 30,
+    "semester": "2학기",
+    "subject": "국어",
+    "title": "세계인이 가장 많이 찾는 대표 식량, 밀",
+    "summary": "밀은 기르기 쉽고 맛이 좋으며 오래 보관할 수 있어, 쌀, 옥수수와 함께 세계 3대 곡물로 꼽히는 매우 중요한 대표 식량입니다.",
+    "difficulty": "보통",
+    "full_text": "세계 사람들은 어떤 재료로 만든 음식을 가장 많이 먹을까요? 바로 밀이에요. 밀은 쌀, 옥수수와 함께 세계 3대 곡물로 유명해요. 이 곡물이 사람들이 가장 많이 찾는 대표적인 음식 재료가 된 이유는 무엇일까요?\n\n밀은 지구상의 아주 넓은 지역에서 심고 길러요. 밀은 비가 적게 내리고 서늘한 곳에서도 잘 자라지요. 풀이 자랄 수 있는 대부분의 땅에서 밀은 쉽게 생산될 수 있어요. 그래서 기르기 쉬운 밀을 많은 지역에서 심고 기르게 되었어요.\n\n밀은 맛이 좋아서 많은 사람이 좋아해요. 예전부터 밀을 한번 맛본 사람들은 계속해서 밀로 만든 음식을 먹고 싶어 했어요. 그래서 밀로 만든 음식을 매일 먹고 사는 사람도 많아졌답니다. 그 덕분에 밀을 심어 기르는 사람들은 점점 더 많아졌어요.\n\n밀은 고기나 채소 등 다른 식량에 비해 보관하기도 쉬워요. 고기와 채소는 오래 보관하기 어렵지요. 하지만 밀은 몇 년씩 보관해도 상하지 않아요. 밀은 단단한 껍질이 있어 오래 보관할 수 있거든요.\n\n밀이 없었다면 많은 사람이 굶어야 했을지도 몰라요. 밀이 있었기 때문에 많은 사람이 밀을 먹고 살 수 있었어요. 오늘날은 기술이 발달하여 먹을 것이 풍부해졌지만, 그래도 밀은 여전히 사람들에게 가장 중요한 대표 식량 중 하나예요.",
+    "fullText": "세계 사람들은 어떤 재료로 만든 음식을 가장 많이 먹을까요? 바로 밀이에요. 밀은 쌀, 옥수수와 함께 세계 3대 곡물로 유명해요. 이 곡물이 사람들이 가장 많이 찾는 대표적인 음식 재료가 된 이유는 무엇일까요?\n\n밀은 지구상의 아주 넓은 지역에서 심고 길러요. 밀은 비가 적게 내리고 서늘한 곳에서도 잘 자라지요. 풀이 자랄 수 있는 대부분의 땅에서 밀은 쉽게 생산될 수 있어요. 그래서 기르기 쉬운 밀을 많은 지역에서 심고 기르게 되었어요.\n\n밀은 맛이 좋아서 많은 사람이 좋아해요. 예전부터 밀을 한번 맛본 사람들은 계속해서 밀로 만든 음식을 먹고 싶어 했어요. 그래서 밀로 만든 음식을 매일 먹고 사는 사람도 많아졌답니다. 그 덕분에 밀을 심어 기르는 사람들은 점점 더 많아졌어요.\n\n밀은 고기나 채소 등 다른 식량에 비해 보관하기도 쉬워요. 고기와 채소는 오래 보관하기 어렵지요. 하지만 밀은 몇 년씩 보관해도 상하지 않아요. 밀은 단단한 껍질이 있어 오래 보관할 수 있거든요.\n\n밀이 없었다면 많은 사람이 굶어야 했을지도 몰라요. 밀이 있었기 때문에 많은 사람이 밀을 먹고 살 수 있었어요. 오늘날은 기술이 발달하여 먹을 것이 풍부해졌지만, 그래도 밀은 여전히 사람들에게 가장 중요한 대표 식량 중 하나예요.",
+    "questions": [
+      {
+        "type": "choice",
+        "question": "이 글의 중심 생각으로 가장 알맞은 것은 무엇인가요?",
+        "options": [
+          "밀은 기르기 쉽고 맛이 좋으며 보관도 쉬워 사람들에게 중요한 식량이다.",
+          "고기와 채소는 쉽게 상하므로 앞으로는 밀만 먹어야 한다.",
+          "밀은 비가 많이 오고 더운 곳에서 가장 잘 자라는 곡물이다.",
+          "오늘날에는 기술이 발달하여 밀이 더 이상 중요하지 않다."
+        ],
+        "answer": "밀은 기르기 쉽고 맛이 좋으며 보관도 쉬워 사람들에게 중요한 식량이다.",
+        "clue": "밀은 기르기 쉽고, 맛이 좋으며, 보관하기 쉬워서 오늘날에도 사람들에게 가장 중요한 대표 식량 중 하나입니다.",
+        "explanation": "이 글은 밀이 사람들에게 가장 많이 사랑받고 중요한 식량이 된 까닭(기르기 쉬움, 맛, 보관성)을 설명하고 있습니다."
+      },
+      {
+        "type": "choice",
+        "question": "글의 흐름으로 보아 4문단의 [ 빈칸 ]에 들어가기에 가장 알맞은 접속사는 무엇인가요?\n\n\"고기와 채소는 오래 보관하기 어렵지요. [     ] 밀은 몇 년씩 보관해도 상하지 않아요.\"",
+        "options": [
+          "그래서",
+          "하지만",
+          "왜냐하면",
+          "그러므로"
+        ],
+        "answer": "하지만",
+        "clue": "고기와 채소는 오래 보관하기 어렵지요. 하지만 밀은 몇 년씩 보관해도 상하지 않아요.",
+        "explanation": "앞 문장(보관하기 어려움)과 뒤 문장(오래 보관해도 상하지 않음)이 서로 상반되는 내용이므로 '하지만'이 들어가야 자연스럽습니다."
+      },
+      {
+        "type": "choice",
+        "question": "이 글의 내용과 일치하지 않는 것은 무엇인가요?",
+        "options": [
+          "밀은 영양이 풍부해서 주로 약의 재료로 사용된다.",
+          "밀은 비가 적게 내리고 서늘한 곳에서도 잘 자란다.",
+          "밀은 단단한 껍질이 있어서 몇 년씩 보관해도 상하지 않는다.",
+          "밀은 쌀, 옥수수와 함께 세계 3대 곡물로 유명하다."
+        ],
+        "answer": "밀은 영양이 풍부해서 주로 약의 재료로 사용된다.",
+        "clue": "밀은 쌀, 옥수수와 함께 세계 3대 곡물로 유명하며, 사람들이 가장 많이 찾는 대표적인 음식 재료입니다.",
+        "explanation": "지문에서 밀은 약의 재료가 아니라 사람들이 가장 많이 찾는 대표적인 음식 재료(식량)라고 설명하고 있습니다."
+      },
+      {
+        "type": "short",
+        "question": "밀은 쌀, 옥수수와 함께 '세계 3대 (        )'로 불립니다. 사람의 식량이 되는 벼, 보리, 옥수수 따위의 씨알이나 알곡을 뜻하는 이 낱말은 무엇일까요?",
+        "answer": "곡물",
+        "chosung": "ㄱㅁ",
+        "clue": "밀은 쌀, 옥수수와 함께 세계 3대 곡물로 유명해요.",
+        "explanation": "인간이 주식으로 삼는 쌀, 밀, 옥수수, 보리 등의 알곡을 '곡물'이라고 부릅니다."
+      }
+    ],
+    "vocas": [
+      {
+        "word": "곡물",
+        "meaning": "사람의 식량이 되는 벼, 보리, 밀, 옥수수, 콩 등의 곡식 알갱이.",
+        "desc": "밀은 쌀, 옥수수와 함께 전 세계 인류가 가장 많이 소비하는 3대 곡물 중 하나입니다.",
+        "vtype": "개념어"
+      },
+      {
+        "word": "보관",
+        "meaning": "물건이나 음식을 상하거나 잃어버리지 않도록 잘 맡아 두거나 간직함.",
+        "desc": "밀은 껍질이 단단하여 다른 음식에 비해 몇 년씩 오래 보관할 수 있는 장점이 있습니다.",
+        "vtype": "어휘"
+      },
+      {
+        "word": "밀가루 장사 하면 바람 불고 소금 장사 하면 비가 온다",
+        "meaning": "모처럼 좋은 기회가 와도 뜻하지 않은 방해가 생겨 일이 잘 풀리지 않음을 이르는 속담.",
+        "desc": "운이 따르지 않고 하는 일마다 얄궂게 어긋날 때 사용하는 관용적 표현입니다.",
+        "vtype": "속담"
+      }
+    ]
+  },
+  {
+    "id": "reading_center_31",
+    "book_id": "book_31",
+    "grade": "5-2",
+    "student": [
+      "민수"
+    ],
+    "track": "🏥 센터 독해",
+    "unit": "2학기 31번",
+    "order": 31,
+    "semester": "2학기",
+    "subject": "국어",
+    "title": "축구 선수 손흥민 (사회 문화)",
+    "summary": "손흥민 선수의 도전과 노력을 다룬 책을 읽고, 편견을 버리고 다문화 친구를 차별하지 말아야겠다고 다짐하는 글입니다.",
+    "difficulty": "보통",
+    "full_text": "얼마 전 도서관에서 『축구 선수 손흥민』이라는 책을 보았다. 이 책에는 손흥민이 세계적인 선수가 되기까지 어떠한 과정을 거쳤는지 자세히 나와 있었다. 나도 커서 축구 선수가 되는 것이 꿈이다. 그래서 손흥민 선수가 어떻게 축구를 잘하게 되었는지 궁금해서 읽게 되었다.\n\n손흥민은 어릴 적부터 축구밖에 모르던 소년이었다. 그는 프로 축구 선수 출신인 아버지에게 축구를 배웠다. 손흥민은 고등학교 1학년 때 우수 선수로 뽑혀 유럽으로 가게 되었다. 처음에는 동양인이라는 이유로 다른 선수들이 공도 잘 주지 않고, 말도 잘 걸지 않았다고 한다. 그러나 손흥민은 포기하지 않았다. 팀에 적응하고 실력으로 인정받기 위해 피나는 노력을 거듭했다. 그리하여 마침내 그는 세계 최고의 선수 중 한 명이 되었다.\n\n이 책에서 가장 기억에 남는 점은 손흥민 선수가 여러 어려움을 이겨 내고 최고의 선수가 되었다는 것이다. 인종 차별의 따가운 시선과 편견에도 불구하고 손흥민 선수는 끝까지 포기하지 않았다. 나라면 그런 어려움 속에서 한국으로 빨리 돌아오고 싶었을 것 같다. 그러나 손흥민 선수는 실력으로 보여 주려는 듯 더 열심히 훈련하며 경기를 하였다. 끝까지 자신의 뛰어난 점을 보여 주려 한 것이다.\n\n이 책을 보면서 우리 반의 다문화 가정 친구가 생각났다. 평소에 나는 그 친구가 우리와 피부색이 다르다는 이유로 친하게 지내지 않았다. 이 책을 읽으며, 나 또한 편견을 갖고 있다는 것을 알게 되었다. 피부색은 차이일 뿐이다. 피부색으로 친구를 차별하지 말아야겠다.",
+    "fullText": "얼마 전 도서관에서 『축구 선수 손흥민』이라는 책을 보았다. 이 책에는 손흥민이 세계적인 선수가 되기까지 어떠한 과정을 거쳤는지 자세히 나와 있었다. 나도 커서 축구 선수가 되는 것이 꿈이다. 그래서 손흥민 선수가 어떻게 축구를 잘하게 되었는지 궁금해서 읽게 되었다.\n\n손흥민은 어릴 적부터 축구밖에 모르던 소년이었다. 그는 프로 축구 선수 출신인 아버지에게 축구를 배웠다. 손흥민은 고등학교 1학년 때 우수 선수로 뽑혀 유럽으로 가게 되었다. 처음에는 동양인이라는 이유로 다른 선수들이 공도 잘 주지 않고, 말도 잘 걸지 않았다고 한다. 그러나 손흥민은 포기하지 않았다. 팀에 적응하고 실력으로 인정받기 위해 피나는 노력을 거듭했다. 그리하여 마침내 그는 세계 최고의 선수 중 한 명이 되었다.\n\n이 책에서 가장 기억에 남는 점은 손흥민 선수가 여러 어려움을 이겨 내고 최고의 선수가 되었다는 것이다. 인종 차별의 따가운 시선과 편견에도 불구하고 손흥민 선수는 끝까지 포기하지 않았다. 나라면 그런 어려움 속에서 한국으로 빨리 돌아오고 싶었을 것 같다. 그러나 손흥민 선수는 실력으로 보여 주려는 듯 더 열심히 훈련하며 경기를 하였다. 끝까지 자신의 뛰어난 점을 보여 주려 한 것이다.\n\n이 책을 보면서 우리 반의 다문화 가정 친구가 생각났다. 평소에 나는 그 친구가 우리와 피부색이 다르다는 이유로 친하게 지내지 않았다. 이 책을 읽으며, 나 또한 편견을 갖고 있다는 것을 알게 되었다. 피부색은 차이일 뿐이다. 피부색으로 친구를 차별하지 말아야겠다.",
+    "questions": [
+      {
+        "type": "choice",
+        "question": "이 글을 쓴 글쓴이가 글을 통해 궁극적으로 전하고자 하는 생각으로 가장 알맞은 것은 무엇인가요?",
+        "options": [
+          "세계적인 축구 선수가 되기 위해서는 어릴 때 유럽으로 유학을 가야 한다.",
+          "서로의 차이를 인정하고 편견이나 피부색으로 사람을 차별해서는 안 된다.",
+          "외국어를 배우지 않으면 낯선 환경에 적응하기 어렵다.",
+          "축구에서 성공하기 위해서는 가족의 지도가 가장 중요하다."
+        ],
+        "answer": "서로의 차이를 인정하고 편견이나 피부색으로 사람을 차별해서는 안 된다.",
+        "clue": "이 책을 읽으며, 나 또한 편견을 갖고 있다는 것을 알게 되었다. 피부색은 차이일 뿐이다. 피부색으로 친구를 차별하지 말아야겠다.",
+        "explanation": "글쓴이는 손흥민 선수가 인종 차별을 극복한 이야기를 통해, 피부색의 다름은 차이일 뿐이므로 편견을 버리고 다문화 친구를 차별하지 말아야겠다고 다짐하고 있습니다."
+      },
+      {
+        "type": "choice",
+        "question": "지문의 흐름으로 보아 다음 빈칸 [ ? ]에 들어가기에 가장 알맞은 접속어는 무엇인가요?\n\"처음에는 동양인이라는 이유로 다른 선수들이 공도 잘 주지 않고, 말도 잘 걸지 않았다고 한다. [ ? ] 손흥민은 포기하지 않았다.\"",
+        "options": [
+          "그래서",
+          "그러나",
+          "왜냐하면",
+          "그리하여"
+        ],
+        "answer": "그러나",
+        "clue": "처음에는 동양인이라는 이유로 다른 선수들이 공도 잘 주지 않고, 말도 잘 걸지 않았다고 한다. 그러나 손흥민은 포기하지 않았다.",
+        "explanation": "앞 문장의 힘든 상황과 뒤 문장의 포기하지 않았다는 내용이 서로 반대되므로 역접 접속사 '그러나'가 들어가는 것이 가장 알맞습니다."
+      },
+      {
+        "type": "choice",
+        "question": "손흥민 선수에 대한 글의 내용과 일치하지 않는 것은 무엇인가요?",
+        "options": [
+          "프로 축구 선수 출신인 아버지에게 축구를 배웠다.",
+          "고등학교 1학년 때 우수 선수로 뽑혀 유럽으로 갔다.",
+          "유럽에 처음 갔을 때 동양인이라는 이유로 인종 차별을 겪었다.",
+          "동양인이라고 무시당하자 한국으로 바로 돌아와 축구를 했다."
+        ],
+        "answer": "동양인이라고 무시당하자 한국으로 바로 돌아와 축구를 했다.",
+        "clue": "인종 차별의 따가운 시선과 편견에도 불구하고 손흥민 선수는 끝까지 포기하지 않았다. 나라면 그런 어려움 속에서 한국으로 빨리 돌아오고 싶었을 것 같다. 그러나 손흥민 선수는 실력으로 보여 주려는 듯 더 열심히 훈련하며 경기를 하였다.",
+        "explanation": "손흥민 선수는 어려움 속에서도 포기하지 않고 더 열심히 훈련하여 실력으로 인정받았습니다. 한국으로 바로 돌아왔다는 것은 사실이 아닙니다."
+      },
+      {
+        "type": "short",
+        "question": "글쓴이가 손흥민 선수의 책을 읽은 후 반성하며, 친구의 피부색이 다른 것은 틀린 것이 아니라 단순한 이것일 뿐이라고 생각했습니다. 빈칸에 들어갈 2글자 낱말을 쓰세요.",
+        "answer": "차이",
+        "chosung": "ㅊㅇ",
+        "clue": "피부색은 차이일 뿐이다. 피부색으로 친구를 차별하지 말아야겠다.",
+        "explanation": "글쓴이는 서로 다른 것은 다름이자 '차이'일 뿐이므로 차별해서는 안 된다고 깨달았습니다."
+      }
+    ],
+    "vocas": [
+      {
+        "word": "차별",
+        "meaning": "둘 이상의 대상을 고르지 못하게 대우하거나, 편견을 가지고 다르게 대함.",
+        "desc": "인종, 피부색, 성별 등을 이유로 사람을 부당하게 대우하는 것을 뜻하며, 지문에서는 피부색으로 친구를 차별하지 말아야 한다고 쓰였습니다.",
+        "vtype": "개념어"
+      },
+      {
+        "word": "다문화",
+        "meaning": "한 사회 안에 여러 민족이나 여러 국가의 문화가 섞여 공존하는 상태.",
+        "desc": "여러 나라의 문화적 배경을 지닌 가정을 '다문화 가정'이라고 부릅니다.",
+        "vtype": "개념어"
+      },
+      {
+        "word": "공든 탑이 무너지랴",
+        "meaning": "정성과 힘을 다하여 이룬 일은 쉽게 실패하지 않는다는 말.",
+        "desc": "포기하지 않고 꾸준히 노력과 정성을 쏟으면 결국 훌륭한 성과를 거두게 됨을 비유하는 속담입니다.",
+        "vtype": "속담"
+      },
+      {
+        "word": "거듭하다",
+        "meaning": "어떤 행동이나 일을 여러 번 되풀이하다.",
+        "desc": "지문에서 손흥민 선수가 팀에 적응하고 인정받기 위해 피나는 노력을 되풀이했다는 의미로 쓰였습니다.",
+        "vtype": "어휘"
       }
     ]
   }
