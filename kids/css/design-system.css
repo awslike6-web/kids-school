@@ -1,5 +1,5 @@
-﻿/* ==========================================
-   🏰 민민이네 공부방 공통 디자인 시스템 (design-system.css)
+/* ==========================================
+   🏰 민민이네 공부방 전사 공통 디자인 시스템 (design-system.css)
    ========================================== */
 
 :root {
@@ -14,24 +14,405 @@
   --dark: #2D2D4E;
   --white: #FFFEF7;
 
+  /* 📚 과목별 고유 테마 컬러 (SSOT) */
+  --subj-korean: #ec4899;
+  --subj-math: #f59e0b;
+  --subj-english: #3b82f6;
+  --subj-science: #10b981;
+  --subj-society: #d97706;
+  --subj-haru: #2ed573;
+
   /* 🌌 다크 / 스토리북 테마 토큰 */
   --primary: #8b5cf6;
   --primary-dark: #7c3aed;
+  --primary-light: #c4b5fd;
   --accent: #f59e0b;
   --bg-color: #0f172a;
   --card-bg: #1e293b;
+  --text-main: #2D2D4E;
+  --text-muted: #64748b;
   --text-light: #f8fafc;
 
   /* 📏 공통 곡률 및 그림자 */
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
-  --shadow-sm: 0 2px 6px rgba(0,0,0,0.06);
-  --shadow-md: 0 6px 18px rgba(0,0,0,0.1);
-  --shadow-lg: 0 12px 32px rgba(0,0,0,0.16);
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.16);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+
+  /* 🔤 공통 타이포그래피 */
+  --font-family-kids: 'Jua', 'Noto Sans KR', sans-serif;
+  --font-family-base: 'Noto Sans KR', sans-serif;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
 }
+
+/* ==========================================
+   1. 기본 레이아웃 & 반응형 가드
+   ========================================== */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* ==========================================
+   2. 🔘 통합 버튼 시스템 (Buttons)
+   ========================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: var(--font-family-kids);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* 모바일 터치 타겟 가드 */
+  line-height: 1.2;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: var(--dark);
+  border: 1px solid #cbd5e1;
+}
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+.btn-success {
+  background: var(--green);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(107, 203, 119, 0.35);
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+}
+
+.btn-warning {
+  background: var(--yellow);
+  color: var(--dark);
+  box-shadow: 0 4px 12px rgba(255, 217, 61, 0.35);
+}
+
+.btn-danger {
+  background: var(--pink);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.35);
+}
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  min-height: 36px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 1.25rem;
+  min-height: 52px;
+  border-radius: var(--radius-lg);
+}
+
+/* ==========================================
+   3. 📦 통합 카드 시스템 (Cards)
+   ========================================== */
+.card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-glass);
+}
+
+.card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.card-body {
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* ==========================================
+   4. 🏷️ 통합 배지 & 칩 시스템 (Badges & Chips)
+   ========================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-kids);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.badge-gem {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-candy {
+  background: #fdf2f8;
+  color: #db2777;
+  border: 1px solid #fbcfe8;
+}
+
+.badge-exp {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-kids);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chip:hover, .chip.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+/* ==========================================
+   5. 🪟 통합 모달 및 오버레이 (Modals & Overlays)
+   ========================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.active, .modal-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-dialog {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: scale(0.92) translateY(12px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-backdrop.active .modal-dialog,
+.modal-backdrop.show .modal-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  padding: 20px 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-title {
+  font-family: var(--font-family-kids);
+  font-size: 1.35rem;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background: #e2e8f0;
+  color: var(--text-main);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  font-size: 1rem;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+.modal-footer {
+  padding: 16px 24px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* ==========================================
+   6. ⏳ 통합 로딩 & 피드백 (Spinners)
+   ========================================== */
+.spinner, .loading-spinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid rgba(139, 92, 246, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: ds-spin 0.8s linear infinite;
+}
+
+@keyframes ds-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+  font-family: var(--font-family-kids);
+  color: var(--primary);
+}
+
+/* ==========================================
+   7. 💬 웹툰 대화 말풍선 (Webtoon Dialogue)
+   ========================================== */
+.webtoon-dialogue {
+  background: #ffffff;
+  border: 2px solid var(--dark);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  font-family: var(--font-family-kids);
+  font-size: 1.05rem;
+  color: var(--dark);
+  box-shadow: 4px 4px 0px rgba(45, 45, 78, 0.9);
+  position: relative;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   8. 🛠️ 공통 유틸리티 (Utilities)
+   ========================================== */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-center { text-align: center; }
+.hidden { display: none !important; }

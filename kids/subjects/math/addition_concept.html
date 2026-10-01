@@ -144,6 +144,7 @@
   <script src="../../core/fairy-config.js"></script>
   <script src="../../core/fairy-engine.js"></script>
   <script src="../../core/fairy-chatbot.js"></script>
+  <script src="./js/math_quiz_engine.js"></script>
 
   <script>
   window.currentSubject = "수학"; // 🚨 전역 과목명 명시
@@ -247,56 +248,29 @@
       { q: "7 + 5 = 10 + □", ans: 2, choices: [1, 2, 3, 4] },
       { q: "6 + 8 = 10 + □", ans: 4, choices: [3, 4, 5, 6] }
     ];
-    let qIdx = 0;
-
-    function shuffleArray(arr) {
-      const a = [...arr];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
 
     function renderQuiz() {
-      const q = QUIZ_LIST[qIdx % QUIZ_LIST.length];
-      document.getElementById('quiz-question').textContent = q.q;
-      const cBox = document.getElementById('quiz-choices');
-      cBox.innerHTML = '';
-      document.getElementById('quiz-feedback').textContent = '';
-
-      // 보기 무작위 셔플
-      const shuffled = shuffleArray(q.choices);
-
-      shuffled.forEach(c => {
-        const btn = document.createElement('button');
-        btn.className = 'divide-btn';
-        btn.style.fontSize = '1.4rem';
-        btn.textContent = c;
-        btn.onclick = () => checkAnswer(c, q.ans);
-        cBox.appendChild(btn);
-      });
+      if (window.MathQuizEngine) {
+        MathQuizEngine.init(QUIZ_LIST, {
+          questionId: 'quiz-question',
+          choicesId: 'quiz-choices',
+          feedbackId: 'quiz-feedback',
+          rewardSubject: '수학',
+          choiceBtnClass: 'divide-btn'
+        });
+      }
     }
 
     function checkAnswer(selected, correct) {
-      const fb = document.getElementById('quiz-feedback');
-      if (selected === correct) {
-        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! 참 잘했어요!</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak('정답이에요! 참 잘했어요!');
-        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
-      } else {
-        fb.innerHTML = `<span style="color:#ef4444;">😅 아쉬워요! 정답은 ${correct} 이에요.</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 정답은 ${correct} 입니다.`);
+      if (window.MathQuizEngine) {
+        MathQuizEngine.checkAnswer(selected, correct);
       }
     }
 
     function nextQuiz() {
-      qIdx++;
-      renderQuiz();
-    }
-
-    function exitRoom() {
-      location.href = 'math.html';
+      if (window.MathQuizEngine) {
+        MathQuizEngine.next();
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {

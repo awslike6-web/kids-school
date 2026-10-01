@@ -42,7 +42,9 @@ flowchart TD
 
 | 위치 / 저장소 | 파일 경로 | 핵심 역할 |
 | :--- | :--- | :--- |
-| **`kids-school`** | [`gallery.html`](file:///g:/master-tower/kids-school-main/gallery.html) | 꿈나무 갤러리 메인 뷰포트 (카테고리 필터, 반응형 그리드, 모달 뷰어) |
+| **`kids-school`** | [`gallery.html`](file:///g:/master-tower/kids-school-main/gallery.html) | 꿈나무 갤러리 메인 뷰포트 (295줄 초경량 래퍼, IIFE 로드) |
+| **`kids-school`** | [`kids/common_space/gallery_controller.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery_controller.js) | 갤러리 전용 컨트롤러 (카테고리 필터링, 라이트박스 팝업, 비디오 재생) |
+| **`kids-school`** | [`kids/common_space/gallery.css`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.css) | 갤러리 전용 3D 카드, 필터 바, 라이트박스 반응형 스타일 |
 | **`kids-school`** | [`kids/data/gallery-data.js`](file:///g:/master-tower/kids-school-main/kids/data/gallery-data.js) | 프론트엔드 갤러리 마스터 데이터 (CDN 이미지 직결, 좋아요/스티커) |
 | **`kids-school`** | [`kids/data/gallery-meta.json`](file:///g:/master-tower/kids-school-main/kids/data/gallery-meta.json) | 개별 작품 커스텀 메타데이터 (제목, 분야, 작가의 한마디, 서브이미지 번들) |
 | **`kids-school`** | [`kids-school-main/scripts/build_gallery.py`](file:///g:/master-tower/kids-school-main/scripts/build_gallery.py) | 갤러리 자동 최적화 빌더 (1200px 리사이즈, kids-archive 배포, JS 갱신) |

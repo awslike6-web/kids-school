@@ -15,6 +15,7 @@
 <link rel="manifest" href="./manifest.json?v=20260923_v1">
 
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./kids/css/design-system.css">
 <link rel="stylesheet" href="./kids/css/quick-uploader.css">
 <link rel="stylesheet" href="./kids/css/fairy-settings-modal.css">
 <style>
@@ -714,22 +715,23 @@ Object.values(USER_CONFIGS).forEach(cfg => {
 <script src="kids/config.js"></script>
 
 <script>
-const requiredCores = [
-    "core.js",
-    "notion-helper.js",
-    "fairy-config.js",
-    "fairy-engine.js",
-    "fairy-settings-catalog.js",
-    "fairy-settings-engine.js",
-    "fairy-chatbot.js",
-    "daily-diary.js",
-    "quiz-flow-controller.js",
-    "timetable-boost.js",
-    "screentime-tracker.js"
-];
+(function() {
+  const lobbyCores = [
+      "core.js",
+      "notion-helper.js",
+      "fairy-config.js",
+      "fairy-engine.js",
+      "fairy-settings-catalog.js",
+      "fairy-settings-engine.js",
+      "fairy-chatbot.js",
+      "daily-diary.js",
+      "quiz-flow-controller.js",
+      "timetable-boost.js",
+      "screentime-tracker.js"
+  ];
 
-loadCoreScripts("kids/core/", requiredCores, () => {
-    console.log("🏰 대형 로비 메인 하이브리드 엔진 결합 완료!");
+  loadCoreScripts("kids/core/", lobbyCores, () => {
+      console.log("🏰 대형 로비 메인 하이브리드 엔진 결합 완료!");
 
     // 유저 확인 파서
     const urlParams = new URLSearchParams(window.location.search);
@@ -1366,7 +1368,8 @@ loadCoreScripts("kids/core/", requiredCores, () => {
         }
       }, 350);
     }
-});
+  });
+})();
 </script>
 <script src="./kids/core/quick-uploader.js"></script>
 </body>

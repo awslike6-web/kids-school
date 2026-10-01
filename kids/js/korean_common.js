@@ -609,7 +609,14 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             return;
         }
 
-        if (type === 'sentence' || type === 'reading') {
+        if (type === 'reading') {
+            if (window.ReadingEngine && typeof window.ReadingEngine.renderLobby === 'function') {
+                await window.ReadingEngine.renderLobby(innerBody, { subject: "국어" });
+                return;
+            }
+        }
+
+        if (type === 'sentence') {
             let libraryRecords = [];
             if (typeof fetchLibraryBooksFromNotion === 'function') {
                 try {
@@ -628,11 +635,7 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                 return;
             }
 
-            if (type === 'sentence') {
-                renderSentenceUI(innerBody);
-            } else {
-                renderReadingLobby(innerBody);
-            }
+            renderSentenceUI(innerBody);
         } else if (type === 'voca' || type === 'dictation') {
             const subjectTag = type === 'voca' ? "국어" : "받아쓰기";
             let records = await fetchVocaFromNotion({ subject: subjectTag, filterByStudent: true, forceRefresh: false });
