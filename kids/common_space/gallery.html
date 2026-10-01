@@ -243,9 +243,9 @@
                         <select id="newArtCategory" class="form-control">
                             <option value="그림/미술">🎨 그림/미술</option>
                             <option value="만들기/공예">✂️ 만들기/공예</option>
+                            <option value="종이접기/디자인">📐 종이접기/디자인</option>
                             <option value="상장/기념">🏆 상장/기념</option>
-                            <option value="학교 과제">🏫 학교 과제</option>
-                            <option value="종이접기/컬러링">📐 종이접기/컬러링</option>
+                            <option value="탐구/프로젝트">🔬 탐구/프로젝트</option>
                         </select>
                     </div>
                 </div>
@@ -290,6 +290,9 @@
     <script src="../data/gallery-data.js"></script>
     <script src="../data/special-days-data.js"></script>
 
-  <script src="./gallery_controller.js"></script>
+    <!-- 🎨 갤러리 골디락스 서브모듈 로드 -->
+    <script src="./gallery-data-sync.js"></script>
+    <script src="./gallery-modal-manager.js"></script>
+    <script src="./gallery_controller.js"></script>
 </body>
 </html>
