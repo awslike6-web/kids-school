@@ -37,6 +37,32 @@ graph TD
 
 ---
 
+## 2-1. 🏰 영어 멀티버스 골디락스 모듈화 아키텍처 (Goldilocks Modular Architecture)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 2,154줄의 비대했던 `english_common.js`를 **1개의 초경량 대문 파사드와 4개의 전문 서브모듈**로 완전 분리 구축하였습니다.
+
+```mermaid
+graph TD
+    User([👦/👧 학습자]) --> EnglishHTML[🏰 대문 화면 english.html]
+    EnglishHTML --> EnglishFacade[🏰 대문 파사드 english_common.js <br> 466줄 / 프로필·오버레이·라우팅·일지 전송]
+    
+    EnglishFacade --> S1[📚 english_storybook.js <br> 112줄 / 단원 동화 도서관 도감]
+    EnglishFacade --> S2[🔤 english_phonics.js <br> 372줄 / 1:1 파닉스 사전 & 소리 귀 뚫기]
+    EnglishFacade --> S3[🧩 english_voca.js <br> 545줄 / 단어 퐁당 & 어휘 & 문장 조각 블록]
+    EnglishFacade --> S4[📖 reading_engine.js <br> 530줄 / 전사 공통 모바일 핀포인트 독해]
+    EnglishFacade --> S5[🗣️ english_chat.js <br> 229줄 / AI 코코 회화 토론 gemini-3.8-flash]
+```
+
+| 모듈 경로 | 역할 및 책임 | 라인 수 | 네임스페이스 |
+| :--- | :--- | :---: | :--- |
+| **`kids/js/english_common.js`** | 🏰 대문 파사드 (프로필 초기화, 오버레이 제어, 데이터 페칭, 학년/단원 필터링, 완료 학습일지 전송, 4선지 인쇄실) | 466줄 | `window.EnglishCommon` |
+| **`kids/js/english_storybook.js`** | 📚 [1단계] 스토리북 서가 도감 모듈 (단원별 동화 목록, 모달 렌더링, e-Book/웹툰 뷰어 연동) | 112줄 | `window.EnglishStorybook` |
+| **`kids/js/english_phonics.js`** | 🔤 [1단계 알파벳 & 3단계 파닉스] 발음 디딤돌 엔진 (1:1 파닉스 사전, Jenny Neural TTS 음성, [1단계] 알파벳 터치방, [3단계] 소리 귀 뚫기) | 372줄 | `window.EnglishPhonics` |
+| **`kids/js/english_voca.js`** | 🧩 [2·3·4단계] 어휘·문장 훈련소 ([2단계] 3지선다 퐁당, [3단계] 4종 어휘/슬라임 자석, [4단계] 문장 블록 빌더 & 성공 카드) | 545줄 | `window.EnglishVoca` |
+| **`kids/js/english_chat.js`** | 🗣️ [6단계] AI 코코 회화 토론 모듈 (지문별 롤플레잉, 생각 확장 대화, 2026 플래그십 `gemini-3.8-flash` 적용, 부모 검수 뱃지) | 229줄 | `window.EnglishChat` |
+
+---
+
 ## 3. 6단계 안심 사다리 학습 파이프라인 (6-Stage Learning Ladder)
 
 ```mermaid

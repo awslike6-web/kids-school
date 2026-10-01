@@ -155,25 +155,64 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | `KoreanSentence.renderUI(container)` | 지문 선택 목록 렌더링 |
   | `KoreanSentence.startMission(bookId)` | 지문 토론 세션 초기화 및 채팅창 렌더링 |
   | `KoreanSentence.processInput()` | 사용자 생각 입력 처리 및 Gemini API 통신·보상 판정 |
-  | `setParentSemester(child, sem)` | `child, sem` | 학기 알약 탭 전환 (5-2/5-1/지혜반/전체, 1-2/1-1/기초/전체) |
-  | `toggleReviewOption(child, opt)` | `child, opt` | 망각곡선 4번 누적 복습 풀 확장 토글 제어 |
-  | `setParentUnit(child, subj, unit)` | `child, subj, unit` | 개별 과목 단원 선택 및 하이라이트 동기화 |
-  | `syncDynamicUnitChips()` | - | HTML 빈 컨테이너에 노션 VOCA DB/로컬 마스터 기반 100% 동적 칩 주입 |
-  | `saveParentProgressSettings()` | - | 설정 로컬 저장 및 백그라운드 노션 클라우드 동기화 |
 
-### 🌟 `monster_lab_controller.js` & `monster_lab.css` (연구소 메인 인터랙션 코어)
-5분 퀘스트 메인 로비의 신디사이저 사운드 합성, 캐릭터/테마 동적 스위칭, 3D 몬스터 상호작용 및 4+1 듀오링고 직결 출격을 총괄하는 독립 컨트롤러 및 스타일시트입니다.
-- **파일 위치**:
-  - `kids/subjects/quest/monster_lab_controller.js` (인터랙션/오디오 컨트롤러)
-  - `kids/subjects/quest/monster_lab.css` (3D 클레이/애니메이션 스타일)
+---
+
+## 2-4. 🔤 영어 멀티버스 전담 엔진군 (English Multiverse Engines)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 2,154줄의 비대했던 `english_common.js`를 1개의 초경량 대문 파사드와 4개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.
+
+### 🌟 `english_common.js` (영어 멀티버스 대문 파사드)
+오버레이 팝업 라우팅, 학년/단원 동적 필터, 퀴즈 공통 진행/채점 브리지, 4선지 공책 인쇄실, 10문제 완주 즉시 학습일지 전송을 총괄하는 초경량 라우팅 파사드입니다.
+- **파일 위치**: `kids/js/english_common.js` (466줄)
 - **핵심 API**:
-  | 메서드 | 파라미터 | 설명 |
-  | :--- | :--- | :--- |
-  | `pokeSound(type)` | `'pop'\|'launch'\|'coin'\|'monster'\|'level'` | 웹 오디오 API 기반 4대 물리 사운드 합성 출력 |
-  | `applyTheme()` | - | 사용자 프로필 기반 민수(사이버 네온)/민서(파스텔 피치) 테마 스위칭 |
-  | `pokeMonster(event)` | `[event]` | 3D 몬스터 콕 바운스 애니메이션, 말풍선 대사 및 음성 출력 |
-  | `launchQuestDirect(subj)` | `subj` | 선택 과목 및 설정 단원으로 4+1 듀오링고 퀘스트 즉시 출격 |
-  | `handleSecretParentUnlock()` | - | 레벨 배지 5회 연속 탭 시 부모님 비밀번호 긴급 인증 해제 |
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `initializeEnglishRoom()` | 자녀 프로필 동기화, 테마 설정, 0.01초 어휘/독해 백그라운드 선캐싱 |
+  | `openMissionView(type)` | 6대 미션 오버레이 열기 및 라우팅 (`voca_pool`, `stage1~6`) |
+  | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
+  | `renderSectionUI()` | 10문제 완료 즉각 학습일지 자동 전송 및 서브모듈 렌더러 호출 |
+  | `renderDictionaryUI(container)` | 4선 공책 인쇄용 어휘 체크리스트 UI 렌더링 |
+
+### 🌟 `english_storybook.js` ([1단계] 원서/단원 동화 도서관 전담 엔진)
+L7, L8, L11 등 단원별 일러스트 동화 서가 도감 렌더링 및 뷰어 연결을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/english_storybook.js` (112줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `EnglishStorybook.openModal()` | 단원 동화 도서관 서가 모달 열기 및 카드 목록 렌더링 |
+
+### 🌟 `english_phonics.js` ([1단계 알파벳 & 3단계 파닉스] 발음 디딤돌 엔진)
+초등 5학년 1~11단원 핵심 1:1 파닉스 사전, Jenny Neural TTS 음성 및 4단계 배속(0.5x~1.0x) 제어, [1단계] 알파벳 터치방, [3단계] 소리 귀 뚫기(파닉스/듣기 객관식)를 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/english_phonics.js` (372줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `EnglishPhonics.speak(text)` | Jenny Neural 0.85x 원어민 음성 재생 |
+  | `EnglishPhonics.renderSentencePhonicsHtml(sent)` | 영단어 하단 1:1 수직 정렬 한글 발음 디딤돌 렌더링 |
+  | `EnglishPhonics.renderStage1UI(container, item, helpers)` | [1단계] 알파벳 터치방 렌더링 |
+  | `EnglishPhonics.renderStage2UI(container, item, helpers)` | [3단계] 소리 귀 뚫기 퀴즈 렌더링 |
+
+### 🌟 `english_voca.js` ([2·3·4단계] 영어 어휘·문장 훈련소 전담 엔진)
+[2단계] 단어 퐁당(3지선다 콕 터치 & 소리 듣기), [3단계] 영단어/숙어방(4종 모드 + 슬라임 철자 자석판), [4단계] 문장 조각 맞추기(단어 카드 순서 배열 + 1:1 파닉스 성공 카드)를 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/english_voca.js` (545줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `EnglishVoca.renderVocaPoolUI(container, item, helpers)` | [2단계] 단어 퐁당 3지선다 퀴즈 렌더링 |
+  | `EnglishVoca.renderStage3UI(container, item, helpers)` | [3단계] 4종 모드 / 슬라임 철자 자석판 퀴즈 렌더링 |
+  | `EnglishVoca.renderStage4UI(container, item, helpers)` | [4단계] 문장 조각 맞추기 블록 퀴즈 렌더링 |
+  | `EnglishVoca.renderStage4SuccessCard(container, sent, mean)` | 1:1 파닉스 디딤돌 및 수동 넘김 정답 성공 카드 렌더링 |
+
+### 🌟 `english_chat.js` ([6단계] 코코와 한 줄 인사 / AI 토론 회화 전담 엔진)
+Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉 및 생각 확장 코칭, 지문별 대화 큐, 한글 해석 토글, 부모 검수 뱃지를 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/english_chat.js` (229줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `EnglishChat.renderSentenceUI(container, books)` | 토론 지문 선택 목록 렌더링 |
+  | `EnglishChat.startSentenceMission(bookId, books)` | AI 회화 토론 세션 초기화 및 채팅창 렌더링 |
+  | `EnglishChat.renderSentenceChat()` | Gemini 3.8 Flash 연동 실시간 대화창 렌더링 |
 
 ---
 
