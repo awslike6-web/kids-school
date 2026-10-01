@@ -1539,144 +1539,16 @@ window.skipToNextScienceQuiz = async function() {
 
 // ========================================================
 // 🔍 퀴즈 카드 일체형 교과서 사진 줌/팬 & 새창 엔진
+// 💡 [단일 원천 원칙] 공통 코어(kids/core/image_zoom_modal.js)로 일원화 완료
 // ========================================================
-let cardZoomScale = 1.0;
-let cardZoomX = 0;
-let cardZoomY = 0;
-let cardRotationDeg = 0;
-let isCardZoomDragging = false;
-let startCardDragX = 0;
-let startCardDragY = 0;
-let cardLastTouchDist = 0;
 
-function updateCardZoomTransform() {
-    const img = document.getElementById("cardZoomImg");
-    if (img) {
-        img.style.transform = `translate(${cardZoomX}px, ${cardZoomY}px) rotate(${cardRotationDeg}deg) scale(${cardZoomScale})`;
-    }
-}
+// ========================================================
+// 🌐 전역 핵심 함수 명시적 바인딩 (인라인 HTML 이벤트 연동 철벽 방어)
+// ========================================================
+window.initializeScienceRoom = window.initializeScienceRoom || initializeScienceRoom;
+window.openMissionView = window.openMissionView || openMissionView;
+window.closeMissionView = window.closeMissionView || closeMissionView;
 
-function rotateCardImage() {
-    cardRotationDeg = (cardRotationDeg + 90) % 360;
-    updateCardZoomTransform();
-}
-
-function adjustCardZoom(delta) {
-    cardZoomScale = Math.min(Math.max(0.6, cardZoomScale + delta), 4.5);
-    updateCardZoomTransform();
-}
-
-function resetCardZoom() {
-    cardZoomScale = 1.0;
-    cardZoomX = 0;
-    cardZoomY = 0;
-    cardRotationDeg = 0;
-    updateCardZoomTransform();
-}
-
-function openImageInNewWindow(imgSrc) {
-    const img = document.getElementById("cardZoomImg");
-    const url = imgSrc || (img ? img.src : "");
-    if (!url) return;
-    const w = Math.min(1050, window.screen.availWidth - 80);
-    const h = Math.min(900, window.screen.availHeight - 80);
-    const left = Math.max(0, Math.floor((window.screen.availWidth - w) / 2));
-    const top = Math.max(0, Math.floor((window.screen.availHeight - h) / 2));
-    window.open(
-        url,
-        "ScienceViewer_" + Date.now(),
-        `width=${w},height=${h},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,location=no,toolbar=no,menubar=no`
-    );
-}
-
-function initCardZoomListeners() {
-    resetCardZoom();
-    const viewport = document.getElementById("cardZoomViewport");
-    if (!viewport) return;
-
-    // 1. 마우스 드래그 이동 (PC)
-    viewport.onmousedown = (e) => {
-        if (e.button !== 0) return;
-        e.preventDefault();
-        isCardZoomDragging = true;
-        viewport.classList.add("is-dragging");
-        startCardDragX = e.clientX - cardZoomX;
-        startCardDragY = e.clientY - cardZoomY;
-    };
-
-    window.onmousemove = (e) => {
-        if (!isCardZoomDragging) return;
-        e.preventDefault();
-        cardZoomX = e.clientX - startCardDragX;
-        cardZoomY = e.clientY - startCardDragY;
-        updateCardZoomTransform();
-    };
-
-    window.onmouseup = () => {
-        if (isCardZoomDragging) {
-            isCardZoomDragging = false;
-            if (viewport) viewport.classList.remove("is-dragging");
-        }
-    };
-
-    // 2. 휠 스크롤 줌 (PC)
-    viewport.onwheel = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const delta = e.deltaY < 0 ? 0.35 : -0.35;
-        adjustCardZoom(delta);
-    };
-
-    // 3. 더블클릭 토글 (PC)
-    viewport.ondblclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (cardZoomScale > 1.25) {
-            resetCardZoom();
-        } else {
-            cardZoomScale = 2.4;
-            updateCardZoomTransform();
-        }
-    };
-
-    // 4. 모바일 터치 드래그 및 핀치 줌
-    viewport.ontouchstart = (e) => {
-        if (e.touches.length === 1) {
-            isCardZoomDragging = true;
-            startCardDragX = e.touches[0].clientX - cardZoomX;
-            startCardDragY = e.touches[0].clientY - cardZoomY;
-        } else if (e.touches.length === 2) {
-            isCardZoomDragging = false;
-            cardLastTouchDist = Math.hypot(
-                e.touches[0].clientX - e.touches[1].clientX,
-                e.touches[0].clientY - e.touches[1].clientY
-            );
-        }
-    };
-
-    viewport.ontouchmove = (e) => {
-        if (e.touches.length === 1 && isCardZoomDragging) {
-            cardZoomX = e.touches[0].clientX - startCardDragX;
-            cardZoomY = e.touches[0].clientY - startCardDragY;
-            updateCardZoomTransform();
-        } else if (e.touches.length === 2) {
-            const dist = Math.hypot(
-                e.touches[0].clientX - e.touches[1].clientX,
-                e.touches[0].clientY - e.touches[1].clientY
-            );
-            if (cardLastTouchDist > 0) {
-                const diff = (dist - cardLastTouchDist) * 0.008;
-                adjustCardZoom(diff);
-            }
-            cardLastTouchDist = dist;
-        }
-    };
-
-    viewport.ontouchend = () => {
-        isCardZoomDragging = false;
-        cardLastTouchDist = 0;
-    };
-}
 
 // ==========================================
 // 🔬 단원 직결 보카 오픈 헬퍼
