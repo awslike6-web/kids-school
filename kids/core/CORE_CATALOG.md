@@ -29,13 +29,14 @@
 
 ## 2. 🗄️ 노션 연동 & 캐싱 (Notion API & Data Sync)
 
-### 🌟 `notion-helper.js` (공통 파사드)
-Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통신하는 통합 라이브러리입니다.
+### 🌟 `notion-helper.js` (순수 노션 파사드 & 자동 로더)
+Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통신하는 통합 라이브러리이자 하위 호환성 파사드입니다.
 - **파일 위치**: `kids/core/notion-helper.js`
-- **도메인별 분리 모듈**:
-  - `kids/core/notion-voca.js`: VOCA_DB(용어사전, 초성퀴즈, 4지선다) 연동
-  - `kids/core/notion-timetable.js`: 주간/일일 시간표 및 과목 메타 연동
-  - `kids/core/notion-reward.js`: 보석/사탕 재화 차감 및 적재
+- **단일 책임 분리 서브모듈 (클린 아키텍처 1단계)**:
+  - `kids/core/stt-debouncer.js`: STT 음성 인식 디바운스 및 세션 관리 (`setupDebouncedSTT`)
+  - `kids/core/mission-reward-engine.js`: 미션 보상 지급 및 축하 모달 렌더러 (`claimMissionRewardOnce`, `openMissionRewardModal`, `grantVocaDwellReward`)
+  - `kids/core/quiz-feedback-overlay.js`: 오답 다시풀기/다음문제 오버레이 및 이탈 방지 가드 (`ensureQuizWrongChoiceOverlay`, `window.__quizLeaveGuard`)
+  - `kids/core/fairy-chat-memory.js`: AI 요정 대화 기억 및 페르소나 매트릭스 (`parseChatMemoryPage`, `buildPersonaSystemPrompt`, `fetchRecentChatMemories`)
 - **핵심 API**:
   | 메서드 | 파라미터 | 설명 |
   | :--- | :--- | :--- |
@@ -43,6 +44,65 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | `fetchNotionVocabulary(subject, grade)` | `subject, grade` | 과목/학년별 핵심 어휘 목록 조회 |
   | `fetchNotionQuizItems(options)` | `options` | 5분 퀘스트용 단원별 4지선다 문항 동적 로드 |
   | `saveStudyLog(data)` | `{subject, duration, score}` | 당일 학습 시간 및 오답 큐 적재 |
+
+---
+
+## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
+
+### 🌟 `subject_engine.js` (4대 교과 공통 미션 엔진)
+국어, 과학, 사회, 영어 4대 교과의 3단계 학습 사다리 미션 뷰와 노션 데이터 수급 스피너를 표준화한 코어입니다.
+- **파일 위치**: `kids/core/subject_engine.js`
+- **핵심 API**:
+  | 메서드 | 파라미터 | 설명 |
+  | :--- | :--- | :--- |
+  | `SubjectEngine.showLoadingSpinner(container, msg)` | `container, [msg]` | 노션 데이터 수급 대기 공통 스피너 렌더링 |
+  | `SubjectEngine.openMissionView(options)` | `options` | 미션 전체화면 오버레이 열기 및 오디오/보상 세션 초기화 |
+  | `SubjectEngine.closeMissionView(options)` | `options` | 미션 닫기 및 세션 안전 정리 |
+  | `SubjectEngine.getChosung(text)` | `text` | 한글 자모 초성 분해 엔진 (단일 SSOT) |
+
+### 🌟 `image_zoom_modal.js` (통합 이미지 돋보기 & 핀치줌 엔진)
+과학 실험 관찰 사진 및 사회 역사 유물/지도 사료를 드래그, 90도 회전, 모바일 핀치줌으로 탐색하는 공통 뷰어입니다.
+- **파일 위치**: `kids/core/image_zoom_modal.js`
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `updateCardZoomTransform()` | 줌/이동/회전 CSS Transform 일괄 갱신 |
+  | `rotateCardImage()` | 이미지 90도 시계방향 회전 |
+  | `adjustCardZoom(delta)` | 줌 배율 확대/축소 (0.6x ~ 4.5x) |
+  | `resetCardZoom()` | 줌 배율 및 위치 1.0x 초기화 |
+  | `openImageInNewWindow(url, title)` | 고화질 전용 팝업 창으로 사진 열기 |
+  | `initCardZoomListeners()` | 마우스 드래그 및 모바일 핀치줌 리스너 일괄 활성화 |
+
+### 🌟 `math_quiz_engine.js` (수학관 공통 퀴즈 엔진)
+수학관 24개 단원 파일의 4지선다 퀴즈 루프, 보기 셔플, 분수 렌더러 및 오디오/보상을 표준화한 엔진입니다.
+- **파일 위치**: `kids/subjects/math/js/math_quiz_engine.js`
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `MathQuizEngine.init(quizList, options)` | 퀴즈 리스트 및 옵션 설정 후 첫 문제 렌더링 |
+  | `MathQuizEngine.checkAnswer(selected, correct)` | 정답 판정, 칭찬/격려 사운드 및 보상 지급 직결 |
+  | `MathQuizEngine.next()` | 다음 퀴즈 문항으로 전환 |
+  | `MathQuizEngine.shuffleArray(arr)` | Fisher-Yates 보기 무작위 셔플 |
+  | `MathQuizEngine.renderFrac(num, den)` | 진분수 HTML 시각화 렌더러 |
+  | `MathQuizEngine.renderMixed(w, num, den)` | 대분수 HTML 시각화 렌더러 |
+
+---
+
+## 2-2. 🎯 5분 퀘스트 & 부모 진도 제어 코어 (Quest & Parent Progress)
+
+### 🌟 `parent_progress_controller.js` (부모 진도 제어 및 노션 동적 단원 주입 엔진 2.0)
+5분 퀘스트의 부모 진도 관리판 모달을 100% 동적 송출(Zero Hardcoding) 방식으로 구동하며, 학기/지혜반 필터링, 망각곡선 4번 누적 복습 풀 제어, 노션 VOCA 캐시 단원 동적 합성을 총괄하는 독립 컨트롤러입니다.
+- **파일 위치**: `kids/subjects/quest/parent_progress_controller.js`
+- **핵심 API**:
+  | 메서드 | 파라미터 | 설명 |
+  | :--- | :--- | :--- |
+  | `openParentProgressModal()` | - | 부모 진도 관리판 모달 열기 및 최신 설정 동기화 |
+  | `closeParentProgressModal()` | - | 설정창 닫기 및 메인 퀘스트 부제목 갱신 |
+  | `setParentSemester(child, sem)` | `child, sem` | 학기 알약 탭 전환 (5-2/5-1/지혜반/전체, 1-2/1-1/기초/전체) |
+  | `toggleReviewOption(child, opt)` | `child, opt` | 망각곡선 4번 누적 복습 풀 확장 토글 제어 |
+  | `setParentUnit(child, subj, unit)` | `child, subj, unit` | 개별 과목 단원 선택 및 하이라이트 동기화 |
+  | `syncDynamicUnitChips()` | - | HTML 빈 컨테이너에 노션 VOCA DB/로컬 마스터 기반 100% 동적 칩 주입 |
+  | `saveParentProgressSettings()` | - | 설정 로컬 저장 및 백그라운드 노션 클라우드 동기화 |
 
 ---
 
@@ -118,15 +178,20 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 
 ### 🌟 `kids/css/design-system.css`
 - **폰트**: `'Jua', 'Noto Sans KR', sans-serif`
-- **테마 색상 팔레트**:
-  - 국어: `#ec4899` (핑크)
-  - 수학: `#f59e0b` (오렌지/옐로우)
-  - 영어: `#3b82f6` (블루)
-  - 과학: `#10b981` (에메랄드/그린)
-  - 사회: `#d97706` (앤틱 앰버)
-  - 하루/생활: `#2ed573` (민트/새싹)
-- **공통 컴포넌트 클래스**:
-  - `.card`, `.btn-primary`, `.badge`, `.modal-backdrop`, `.webtoon-dialogue`
+- **과목 테마 색상 팔레트**:
+  - 국어: `#ec4899` (`--subj-korean`)
+  - 수학: `#f59e0b` (`--subj-math`)
+  - 영어: `#3b82f6` (`--subj-english`)
+  - 과학: `#10b981` (`--subj-science`)
+  - 사회: `#d97706` (`--subj-society`)
+  - 하루/생활: `#2ed573` (`--subj-haru`)
+- **표준 공통 컴포넌트 클래스**:
+  - **버튼**: `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-success`, `.btn-accent`, `.btn-warning`, `.btn-danger`, `.btn-icon`, `.btn-sm`, `.btn-lg`
+  - **카드**: `.card`, `.card-glass` (글래스모피즘), `.card-interactive` (호버 반응), `.card-header`, `.card-body`
+  - **배지/칩**: `.badge`, `.badge-gem` (보석), `.badge-candy` (사탕), `.badge-exp` (경험치), `.chip` (필터 칩)
+  - **모달/오버레이**: `.modal-backdrop`, `.modal-dialog`, `.modal-header`, `.modal-title`, `.modal-body`, `.modal-footer`, `.modal-close-btn`
+  - **로딩/피드백**: `.spinner`, `.loading-spinner`, `.loading-overlay`
+  - **말풍선/유틸리티**: `.webtoon-dialogue`, `.flex-center`, `.flex-between`, `.text-center`
 
 ---
 

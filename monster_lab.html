@@ -599,42 +599,36 @@
           </div>
         </div>
 
-        <!-- 국어 -->
+        <!-- 국어 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-rose-300 flex items-center gap-1">📖 국어 현재 진도</span>
             <span class="text-[10px] text-rose-400 font-bold" id="badgeMinseoKorean">받침 글자 집중</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="parentMinseoKoreanChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="batchim" data-sem="1-2" onclick="setParentUnit('minseo', 'korean', 'batchim')">받침 글자 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="dictation" data-sem="1-2" onclick="setParentUnit('minseo', 'korean', 'dictation')">받아쓰기 100</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="voca" data-sem="1-1,basic" onclick="setParentUnit('minseo', 'korean', 'voca')">그림 낱말 탐험</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
-        <!-- 수학 -->
+        <!-- 수학 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-teal-300 flex items-center gap-1">🧮 수학 현재 진도</span>
             <span class="text-[10px] text-teal-400 font-bold" id="badgeMinseoMath">100까지 수</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="parentMinseoMathChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="100num" data-sem="1-2,basic" onclick="setParentUnit('minseo', 'math', '100num')">100까지 수 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="addsub" data-sem="1-2" onclick="setParentUnit('minseo', 'math', 'addsub')">한자리 덧뺄셈</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="shapes" data-sem="1-1" onclick="setParentUnit('minseo', 'math', 'shapes')">여러가지 모양</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
-        <!-- 영어 -->
+        <!-- 영어 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-sky-300 flex items-center gap-1">🔤 영어 현재 진도</span>
             <span class="text-[10px] text-sky-400 font-bold" id="badgeMinseoEnglish">파닉스 단어</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="parentMinseoEnglishChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="phonics" data-sem="basic,1-2" onclick="setParentUnit('minseo', 'english', 'phonics')">파닉스 첫단어 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="greetings" data-sem="1-2,basic" onclick="setParentUnit('minseo', 'english', 'greetings')">기초 인사말</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="abc" data-sem="1-1,basic" onclick="setParentUnit('minseo', 'english', 'abc')">알파벳 소리</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
@@ -677,74 +671,58 @@
           </div>
         </div>
 
-        <!-- 과학 -->
+        <!-- 과학 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-blue-300 flex items-center gap-1">🔬 과학 현재 진도</span>
             <span class="text-[10px] text-blue-300 font-bold" id="badgeMinsuScience">3단원 온도와 열 (열의 이동) ⭐</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5" id="parentMinsuScienceChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" data-sem="5-2" onclick="setParentUnit('minsu', 'science', '1')">1단원 혼합물의 분리</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" data-sem="5-2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="3" data-sem="5-2" onclick="setParentUnit('minsu', 'science', '3')">3단원 온도와 열 (열의 이동) ⭐</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
-        <!-- 수학 -->
+        <!-- 수학 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-neon-green flex items-center gap-1">🧮 수학 현재 진도</span>
             <span class="text-[10px] text-neon-green font-bold" id="badgeMinsuMath">두 자릿수 나눗셈</span>
           </div>
           <div class="grid grid-cols-2 gap-1.5" id="parentMinsuMathChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="division" data-sem="5-2" onclick="setParentUnit('minsu', 'math', 'division')">두 자릿수 나눗셈 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="fraction" data-sem="5-2" onclick="setParentUnit('minsu', 'math', 'fraction')">5-2 분수의 곱셈</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
-        <!-- 영어 (노션 VOCA DB 연동 L1~L10 학기별 정돈) -->
+        <!-- 영어 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">🔤 영어 현재 진도</span>
             <span class="text-[10px] text-yellow-300 font-bold" id="badgeMinsuEnglish">9단원 집·방 묘사 (L9) ⭐</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="parentMinsuEnglishChips">
-            <!-- 5-2학기 단원 (7, 8, 9단원) -->
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L9" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L9')">9단원 집·방 묘사 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L8" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L8')">8단원 외모 묘사</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L7" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L7')">7단원 길찾기</button>
-            <!-- 5-1학기 단원 (1~6단원) -->
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L1" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L1')">1단원 (L1)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L2" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L2')">2단원 (L2)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L3" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L3')">3단원 (L3)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L4" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L4')">4단원 (L4)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L5" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L5')">5단원 (L5)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L6" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L6')">6단원 (L6)</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
-        <!-- 국어 -->
+        <!-- 국어 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-purple-300 flex items-center gap-1">📖 국어 현재 진도</span>
             <span class="text-[10px] text-purple-300 font-bold" id="badgeMinsuKorean">1단원 어휘·속담</span>
           </div>
           <div class="grid grid-cols-2 gap-1.5" id="parentMinsuKoreanChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="1" data-sem="5-2" onclick="setParentUnit('minsu', 'korean', '1')">1단원 어휘·속담 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="2" data-sem="5-2" onclick="setParentUnit('minsu', 'korean', '2')">2단원 문맥·독해</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
-        <!-- 사회 -->
+        <!-- 사회 (동적 생성 컨테이너) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-pink-300 flex items-center gap-1">🗺️ 사회 현재 진도</span>
             <span class="text-[10px] text-pink-300 font-bold" id="badgeMinsuSociety">1단원 조선 건국·한양</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="parentMinsuSocietyChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="1" data-sem="5-2" onclick="setParentUnit('minsu', 'society', '1')">1단원 조선 건국·한양 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="2" data-sem="5-2" onclick="setParentUnit('minsu', 'society', '2')">2단원 문화발전·이순신</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="3" data-sem="5-2" onclick="setParentUnit('minsu', 'society', '3')">3단원 유교문화·민족의 시련</button>
+            <!-- ⚡ parent_progress_controller.js가 노션 기반으로 100% 동적 주입 -->
           </div>
         </div>
 
@@ -910,6 +888,7 @@
   <script src="./kids/subjects/quest/quest_data_minsu.js"></script>
   <script src="./kids/subjects/quest/quest_data_minseo.js"></script>
   <script src="./kids/subjects/quest/quest_engine.js"></script>
+  <script src="./kids/subjects/quest/parent_progress_controller.js"></script>
 
   <!-- ================= 7. 직관적 사운드 & 인터랙션 스크립트 ================= -->
   <script>
@@ -1370,586 +1349,8 @@
       overlay.classList.remove('flex');
     }
 
-    // ================= 부모 진도 설정판 (Parent Progress Controller) 로직 =================
-    const UNIT_META_MAP = {
-      minseo: {
-        korean: {
-          voca: '그림 낱말 탐험',
-          dictation: '받아쓰기 100문장',
-          batchim: '받침 글자 (2~3단원 추천)'
-        },
-        math: {
-          '100num': '100까지의 수',
-          addsub: '한자리 덧뺄셈',
-          shapes: '여러가지 모양'
-        },
-        english: {
-          phonics: '파닉스 첫단어',
-          abc: '알파벳 소리',
-          greetings: '기초 인사말'
-        }
-      },
-      minsu: {
-        math: {
-          division: '두 자릿수 나눗셈',
-          fraction: '5-2 분수의 곱셈'
-        },
-        english: {
-          'L1': '1단원 (L1)',
-          'L2': '2단원 (L2)',
-          'L3': '3단원 (L3)',
-          'L4': '4단원 (L4)',
-          'L5': '5단원 (L5)',
-          'L6': '6단원 (L6)',
-          'L7': '7단원 길찾기 (L7)',
-          'L8': '8단원 외모 묘사 (L8)',
-          'L9': '9단원 집·방 묘사 (L9) ⭐',
-          '1': '1단원 (L1)',
-          '2': '2단원 (L2)',
-          '3': '3단원 (L3)',
-          '4': '4단원 (L4)',
-          '5': '5단원 (L5)',
-          '6': '6단원 (L6)',
-          '7': '7단원 길찾기',
-          '8': '8단원 외모 묘사',
-          '9': '9단원 집·방 묘사 ⭐'
-        },
-        korean: {
-          '1': '1단원 어휘·속담',
-          '2': '2단원 문맥·독해'
-        },
-        science: {
-          '1': '1단원 혼합물의 분리',
-          '2': '2단원 상태변화·지시약',
-          '3': '3단원 온도와 열 (열의 이동) ⭐'
-        },
-        society: {
-          '1': '1단원 조선 건국·한양',
-          '2': '2단원 문화발전·이순신',
-          '3': '3단원 유교문화·민족의 시련'
-        }
-      }
-    };
-
-    const DEFAULT_PARENT_SETTINGS = {
-      minseo: {
-        semester: '1-2',
-        korean: 'batchim',
-        math: '100num',
-        english: 'phonics',
-        includeReviewSem1: false
-      },
-      minsu: {
-        semester: '5-2',
-        math: 'division',
-        english: 'L9',
-        korean: '1',
-        science: '3',
-        society: '1',
-        includeReviewSem1: false,
-        includeJihye: false
-      }
-    };
-
-    function getUnitNumber(unitStr) {
-      if (!unitStr) return '';
-      const match = String(unitStr).match(/\d+/);
-      return match ? match[0] : String(unitStr).trim();
-    }
-
-    function isSameUnit(u1, u2) {
-      if (u1 === u2) return true;
-      if (!u1 || !u2) return false;
-      const n1 = getUnitNumber(u1);
-      const n2 = getUnitNumber(u2);
-      if (n1 && n2 && n1 === n2) return true;
-      const s1 = String(u1).trim().toLowerCase().replace(/^l/i, '').replace(/단원$/, '');
-      const s2 = String(u2).trim().toLowerCase().replace(/^l/i, '').replace(/단원$/, '');
-      return s1 === s2;
-    }
-
-    let currentParentSettings = (function() {
-      try {
-        const raw = localStorage.getItem('MINMIN_QUEST_SETTINGS');
-        let parsed = raw ? JSON.parse(raw) : {};
-
-        // 🌐 노션 클라우드 캐시에서 questSettings 가져와서 병합
-        const cloudMinsu = localStorage.getItem('MINMIN_CLOUD_SETTINGS_민수');
-        if (cloudMinsu) {
-          try {
-            const cObj = JSON.parse(cloudMinsu);
-            if (cObj && cObj.questSettings && cObj.questSettings.minsu) {
-              parsed.minsu = { ...(parsed.minsu || {}), ...cObj.questSettings.minsu };
-            }
-          } catch(e) {}
-        }
-        const cloudMinseo = localStorage.getItem('MINMIN_CLOUD_SETTINGS_민서');
-        if (cloudMinseo) {
-          try {
-            const cObj = JSON.parse(cloudMinseo);
-            if (cObj && cObj.questSettings && cObj.questSettings.minseo) {
-              parsed.minseo = { ...(parsed.minseo || {}), ...cObj.questSettings.minseo };
-            }
-          } catch(e) {}
-        }
-
-        return {
-          minseo: { ...DEFAULT_PARENT_SETTINGS.minseo, ...(parsed.minseo || {}) },
-          minsu: { ...DEFAULT_PARENT_SETTINGS.minsu, ...(parsed.minsu || {}) }
-        };
-      } catch (e) {}
-      return JSON.parse(JSON.stringify(DEFAULT_PARENT_SETTINGS));
-    })();
-
-    let currentParentTab = isMinseo ? 'minseo' : 'minsu';
-
-    /**
-     * 🔄 학기/과정 범위 선택기
-     */
-    function setParentSemester(child, sem) {
-      if (!currentParentSettings[child]) currentParentSettings[child] = {};
-      currentParentSettings[child].semester = sem;
-      pokeSound('pop');
-      renderParentProgressChips();
-    }
-
-    /**
-     * 🔄 4번 망각곡선 복습 풀 확장 옵션 토글
-     */
-    function toggleReviewOption(child, optionKey, isChecked) {
-      if (!currentParentSettings[child]) currentParentSettings[child] = {};
-      currentParentSettings[child][optionKey] = !!isChecked;
-      pokeSound('pop');
-    }
-
-    /**
-     * 🔄 문제은행(minsuMasterBank) 및 노션 캐시 기반 동적 단원 칩 자동 보강 엔진 (단원 중복 완전 제거)
-     */
-    function syncDynamicUnitChips() {
-      try {
-        const subjects = ['science', 'society', 'korean', 'english', 'math'];
-
-        // 1) 캐시된 VOCA 레코드에서 과목별 단원 키 및 학기 태그 수집
-        const discoveredUnits = { english: [], science: [], society: [], korean: [], math: [] };
-
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.includes('_VOCA_CACHE_')) {
-            try {
-              const data = JSON.parse(localStorage.getItem(k));
-              if (data && Array.isArray(data.records)) {
-                data.records.forEach(r => {
-                  const stage = r.stage || r.level;
-                  if (!stage || stage === '기본 단원') return;
-                  const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
-                  
-                  // 학기/지혜반 메타 판별
-                  let semType = '5-2';
-                  const gList = Array.isArray(r.grades) ? r.grades : [r.grade];
-                  const gStr = gList.join(' ');
-                  if (gStr.includes('지혜') || String(r.wordType || '').includes('지혜')) {
-                    semType = 'jihye';
-                  } else if (gStr.includes('5-1')) {
-                    semType = '5-1';
-                  } else if (gStr.includes('1-1')) {
-                    semType = '1-1';
-                  } else if (gStr.includes('1-2')) {
-                    semType = '1-2';
-                  } else {
-                    const numMatch = String(stage).match(/\d+/);
-                    if (numMatch) {
-                      const num = parseInt(numMatch[0], 10);
-                      semType = (num <= 6) ? '5-1' : '5-2';
-                    }
-                  }
-
-                  subjs.forEach(s => {
-                    const sStr = String(s).trim();
-                    const item = { stage, semType };
-                    if (sStr.includes('영어')) discoveredUnits.english.push(item);
-                    else if (sStr.includes('과학')) discoveredUnits.science.push(item);
-                    else if (sStr.includes('사회')) discoveredUnits.society.push(item);
-                    else if (sStr.includes('국어')) discoveredUnits.korean.push(item);
-                    else if (sStr.includes('수학')) discoveredUnits.math.push(item);
-                  });
-                });
-              }
-            } catch(e) {}
-          }
-        }
-
-        subjects.forEach(subj => {
-          const capitalized = subj.charAt(0).toUpperCase() + subj.slice(1);
-          const containerId = `parentMinsu${capitalized}Chips`;
-          const container = document.getElementById(containerId);
-          if (!container) return;
-
-          // 마스터 뱅크 키 수집
-          const bankData = window.minsuMasterBank && window.minsuMasterBank[subj];
-          const bankKeys = bankData ? Object.keys(bankData).filter(k => !['title', 'icon'].includes(k)) : [];
-          
-          const masterItems = bankKeys.map(k => {
-            const num = parseInt(getUnitNumber(k), 10);
-            const sem = (!isNaN(num) && num <= 6 && subj === 'english') ? '5-1' : '5-2';
-            return { stage: k, semType: sem };
-          });
-
-          const rawList = [...masterItems, ...(discoveredUnits[subj] || [])];
-
-          rawList.forEach(item => {
-            const cleanKey = String(item.stage).trim();
-            if (!cleanKey) return;
-
-            // 이미 동일 단원 번호/이름 버튼이 있는지 확인 (L9 == 9단원 완벽 중복 제거!)
-            const allBtns = Array.from(container.querySelectorAll('button[data-unit]'));
-            const exists = allBtns.some(b => isSameUnit(b.getAttribute('data-unit'), cleanKey));
-            if (!exists) {
-              const btn = document.createElement('button');
-              btn.type = 'button';
-              btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
-              btn.setAttribute('data-subject', subj);
-              btn.setAttribute('data-unit', cleanKey);
-              btn.setAttribute('data-sem', item.semType || '5-2');
-              btn.onclick = () => setParentUnit('minsu', subj, cleanKey);
-
-              const numMatch = cleanKey.match(/\d+/);
-              const uNum = numMatch ? numMatch[0] : cleanKey;
-              const metaMap = UNIT_META_MAP.minsu[subj];
-              const metaLabel = metaMap && (metaMap[cleanKey] || metaMap[uNum] || metaMap['L' + uNum]);
-              btn.textContent = metaLabel || `${uNum}단원 (${cleanKey})`;
-              container.appendChild(btn);
-            }
-          });
-        });
-
-        // 2) 백그라운드 노션 비동기 최신화 (논블로킹)
-        if (typeof fetchVocaFromNotion === 'function' && !window._hasSyncedNotionUnits) {
-          window._hasSyncedNotionUnits = true;
-          fetchVocaFromNotion({ filterByStudent: false }).then(records => {
-            if (records && records.length > 0) {
-              syncDynamicUnitChips();
-              renderParentProgressChips();
-            }
-          }).catch(e => console.warn('[fetchVocaFromNotion background sync]', e));
-        }
-      } catch (err) {
-        console.warn('[syncDynamicUnitChips] 동적 단원 동기화 알림:', err);
-      }
-    }
-
-    function openParentProgressModal(initialTab = '') {
-      pokeSound('pop');
-      currentParentTab = initialTab || (isMinseo ? 'minseo' : 'minsu');
-      switchParentTab(currentParentTab);
-      syncDynamicUnitChips();
-      renderParentProgressChips();
-
-      const modal = document.getElementById('parentProgressModal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
-    }
-
-    function closeParentProgressModal(event) {
-      if (event && event.target !== event.currentTarget) return;
-      pokeSound('pop');
-      const modal = document.getElementById('parentProgressModal');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
-
-    function switchParentTab(tab = 'minseo') {
-      currentParentTab = tab;
-      pokeSound('pop');
-
-      const btnMinseo = document.getElementById('parentTabMinseo');
-      const btnMinsu = document.getElementById('parentTabMinsu');
-      const btnGuide = document.getElementById('parentTabGuide');
-      const secMinseo = document.getElementById('parentMinseoSettings');
-      const secMinsu = document.getElementById('parentMinsuSettings');
-      const secGuide = document.getElementById('parentGuideSettings');
-      const banner = document.getElementById('parentProgressBanner');
-      const btnSave = document.getElementById('btnParentSaveSettings');
-      const title = document.getElementById('parentModalTitle');
-
-      // 탭 스타일 초기화
-      const inactiveClass = 'flex-1 py-2 text-xs font-bold rounded-xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-1';
-      if (btnMinseo) btnMinseo.className = inactiveClass;
-      if (btnMinsu) btnMinsu.className = inactiveClass;
-      if (btnGuide) btnGuide.className = inactiveClass;
-
-      // 영역 숨김
-      if (secMinseo) secMinseo.classList.add('hidden');
-      if (secMinsu) secMinsu.classList.add('hidden');
-      if (secGuide) secGuide.classList.add('hidden');
-
-      if (tab === 'minseo') {
-        if (btnMinseo) btnMinseo.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-[#ff85a2] text-white shadow transition-all flex items-center justify-center gap-1 font-black';
-        if (secMinseo) secMinseo.classList.remove('hidden');
-        if (banner) banner.classList.remove('hidden');
-        if (btnSave) {
-          btnSave.classList.remove('hidden');
-          btnSave.textContent = '💾 민서 설정 저장';
-        }
-        if (title) title.textContent = '부모 진도 관리판 (민서)';
-      } else if (tab === 'minsu') {
-        if (btnMinsu) btnMinsu.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-neon-cyan text-lab-bg shadow transition-all flex items-center justify-center gap-1 font-black';
-        if (secMinsu) secMinsu.classList.remove('hidden');
-        if (banner) banner.classList.remove('hidden');
-        if (btnSave) {
-          btnSave.classList.remove('hidden');
-          btnSave.textContent = '💾 민수 설정 저장';
-        }
-        if (title) title.textContent = '부모 진도 관리판 (민수)';
-      } else if (tab === 'guide') {
-        if (btnGuide) btnGuide.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-amber-400 text-amber-950 shadow transition-all flex items-center justify-center gap-1 font-black';
-        if (secGuide) secGuide.classList.remove('hidden');
-        if (banner) banner.classList.add('hidden');
-        if (btnSave) {
-          btnSave.classList.remove('hidden');
-          btnSave.textContent = '🎯 진도 설정하러 가기';
-          btnSave.onclick = () => switchParentTab(isMinseo ? 'minseo' : 'minsu');
-        }
-        if (title) title.textContent = '5분 퀘스트 원리·활용 가이드';
-      }
-
-      // 진도 설정 탭 복귀 시 저장 이벤트 리스너 복구
-      if (tab !== 'guide' && btnSave) {
-        btnSave.onclick = saveParentProgressSettings;
-      }
-
-      syncDynamicUnitChips();
-      renderParentProgressChips();
-    }
-
-    function setParentUnit(child, subject, unit) {
-      if (!currentParentSettings[child]) currentParentSettings[child] = {};
-      currentParentSettings[child][subject] = unit;
-      pokeSound('pop');
-      renderParentProgressChips();
-    }
-
-    function renderParentProgressChips() {
-      // 1) 👧 민서 학기 탭 및 단원 칩 렌더링
-      const minseoSets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
-      const minseoSem = minseoSets.semester || '1-2';
-
-      // 민서 학기 알약 탭 스타일
-      document.querySelectorAll('#minseoSemesterTabGroup button[data-sem]').forEach(btn => {
-        const s = btn.getAttribute('data-sem');
-        if (s === minseoSem) {
-          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-pink-500 text-white border-pink-400 shadow-sm font-black';
-        } else {
-          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-lab-bg/80 text-gray-400 border-lab-card-border hover:text-white';
-        }
-      });
-
-      const bMinseoSemDesc = document.getElementById('badgeMinseoSemesterDesc');
-      if (bMinseoSemDesc) {
-        const sMap = { '1-2': '1-2학기 집중 (기본 ⭐)', '1-1': '1-1학기 복습', 'basic': '기초·파닉스 집중', 'all': '전체 단원 펼침' };
-        bMinseoSemDesc.textContent = sMap[minseoSem] || minseoSem;
-      }
-
-      // 민서 단원 칩 가시성 및 선택 상태
-      document.querySelectorAll('#parentMinseoSettings .parent-chip').forEach(btn => {
-        const subj = btn.getAttribute('data-subject');
-        const unit = btn.getAttribute('data-unit');
-        const btnSems = (btn.getAttribute('data-sem') || '').split(',').map(s => s.trim());
-
-        // 학기 필터링: 'all'이거나 해당 학기 태그가 포함되어 있으면 노출
-        const isVisible = (minseoSem === 'all') || btnSems.length === 0 || btnSems.includes(minseoSem);
-        btn.style.display = isVisible ? '' : 'none';
-
-        const isSelected = (minseoSets[subj] === unit);
-        if (isSelected) {
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-[#ff85a2] text-white border-[#ff85a2] shadow-sm';
-        } else {
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-pink-300';
-        }
-      });
-
-      // 민서 배지 텍스트
-      const bMinKor = document.getElementById('badgeMinseoKorean');
-      if (bMinKor) {
-        bMinKor.textContent = (UNIT_META_MAP.minseo.korean && UNIT_META_MAP.minseo.korean[minseoSets.korean]) || minseoSets.korean;
-      }
-      const bMinMath = document.getElementById('badgeMinseoMath');
-      if (bMinMath) {
-        bMinMath.textContent = (UNIT_META_MAP.minseo.math && UNIT_META_MAP.minseo.math[minseoSets.math]) || minseoSets.math;
-      }
-      const bMinEng = document.getElementById('badgeMinseoEnglish');
-      if (bMinEng) {
-        bMinEng.textContent = (UNIT_META_MAP.minseo.english && UNIT_META_MAP.minseo.english[minseoSets.english]) || minseoSets.english;
-      }
-
-      // 민서 복습 토글 체크박스 동기화
-      const chkMinseoRev = document.getElementById('chkMinseoReviewSem1');
-      if (chkMinseoRev) chkMinseoRev.checked = !!minseoSets.includeReviewSem1;
-
-      // 2) 👦 민수 학기 탭 및 단원 칩 렌더링
-      const minsuSets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
-      const minsuSem = minsuSets.semester || '5-2';
-
-      // 민수 학기 알약 탭 스타일
-      document.querySelectorAll('#minsuSemesterTabGroup button[data-sem]').forEach(btn => {
-        const s = btn.getAttribute('data-sem');
-        if (s === minsuSem) {
-          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-neon-cyan text-lab-bg border-neon-cyan shadow-sm font-black';
-        } else {
-          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-lab-bg/80 text-gray-400 border-lab-card-border hover:text-white';
-        }
-      });
-
-      const bMinsuSemDesc = document.getElementById('badgeMinsuSemesterDesc');
-      if (bMinsuSemDesc) {
-        const sMap = { '5-2': '5-2학기 집중 (기본 ⭐)', '5-1': '5-1학기 복습', 'jihye': '지혜반(특수학급) 집중', 'all': '전체 단원 펼침' };
-        bMinsuSemDesc.textContent = sMap[minsuSem] || minsuSem;
-      }
-
-      // 민수 단원 칩 가시성 및 선택 상태
-      document.querySelectorAll('#parentMinsuSettings .parent-chip').forEach(btn => {
-        const subj = btn.getAttribute('data-subject');
-        const unit = btn.getAttribute('data-unit');
-        const btnSems = (btn.getAttribute('data-sem') || '').split(',').map(s => s.trim());
-
-        // 학기 필터링
-        const isVisible = (minsuSem === 'all') || btnSems.length === 0 || btnSems.includes(minsuSem);
-        btn.style.display = isVisible ? '' : 'none';
-
-        const isSelected = isSameUnit(minsuSets[subj], unit);
-        if (isSelected) {
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-neon-green text-[#023300] border-neon-green shadow-sm';
-        } else {
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
-        }
-      });
-
-      // 민수 배지 텍스트 동적 반영
-      const bMinuMath = document.getElementById('badgeMinsuMath');
-      if (bMinuMath) {
-        bMinuMath.textContent = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[minsuSets.math]) || minsuSets.math;
-      }
-      const bMinuEng = document.getElementById('badgeMinsuEnglish');
-      if (bMinuEng) {
-        const u = minsuSets.english;
-        const meta = UNIT_META_MAP.minsu.english;
-        const numMatch = String(u).match(/\d+/);
-        const uNum = numMatch ? numMatch[0] : u;
-        const label = (meta && (meta[u] || meta[uNum] || meta['L' + uNum])) || `${uNum}단원 (${u})`;
-        bMinuEng.textContent = label;
-      }
-      const bMinuKor = document.getElementById('badgeMinsuKorean');
-      if (bMinuKor) {
-        bMinuKor.textContent = (UNIT_META_MAP.minsu.korean && UNIT_META_MAP.minsu.korean[minsuSets.korean]) || `${minsuSets.korean}단원`;
-      }
-      const bMinuSci = document.getElementById('badgeMinsuScience');
-      if (bMinuSci) {
-        bMinuSci.textContent = (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[minsuSets.science]) || `${minsuSets.science}단원`;
-      }
-      const bMinuSoc = document.getElementById('badgeMinsuSociety');
-      if (bMinuSoc) {
-        bMinuSoc.textContent = (UNIT_META_MAP.minsu.society && UNIT_META_MAP.minsu.society[minsuSets.society]) || `${minsuSets.society}단원`;
-      }
-
-      // 민수 복습 토글 체크박스 동기화
-      const chkMinsuRev1 = document.getElementById('chkMinsuReviewSem1');
-      if (chkMinsuRev1) chkMinsuRev1.checked = !!minsuSets.includeReviewSem1;
-      const chkMinsuJihye = document.getElementById('chkMinsuJihye');
-      if (chkMinsuJihye) chkMinsuJihye.checked = !!minsuSets.includeJihye;
-    }
-
-    async function syncParentProgressToCloud() {
-      const childName = isMinseo ? '민서' : '민수';
-      const proxyUrl = "https://minmin-notion.awslike6.workers.dev";
-      const invDbId = "374a27115b688042bb61e6a102242e12";
-      try {
-        let pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);
-        if (!pageId) {
-          const qRes = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
-          });
-          if (qRes.ok) {
-            const qData = await qRes.json();
-            if (qData.results && qData.results.length > 0) {
-              pageId = qData.results[0].id;
-              localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
-            }
-          }
-        }
-        if (!pageId) return;
-
-        let currentCloud = {};
-        try {
-          const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || "{}";
-          currentCloud = JSON.parse(cachedRaw);
-          if (typeof currentCloud !== 'object' || currentCloud === null) currentCloud = {};
-        } catch (e) {
-          currentCloud = {};
-        }
-
-        currentCloud.questSettings = currentParentSettings;
-        currentCloud.updatedAt = new Date().toISOString();
-        const jsonStr = JSON.stringify(currentCloud);
-        localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
-
-        await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            properties: {
-              "학습설정": {
-                rich_text: [{ text: { content: jsonStr } }]
-              }
-            }
-          })
-        });
-        console.log(`☁️ [5분 퀘스트 진도 노션 저장 성공] ${childName}:`, currentParentSettings);
-      } catch (err) {
-        console.warn("⚠️ [5분 퀘스트 진도 노션 저장 통신 에러]:", err);
-      }
-    }
-
-    function saveParentProgressSettings() {
-      try {
-        localStorage.setItem('MINMIN_QUEST_SETTINGS', JSON.stringify(currentParentSettings));
-      } catch (e) {}
-      pokeSound('launch');
-      triggerHaptic([40, 80, 40]);
-      updateMainQuestSubText();
-      closeParentProgressModal();
-      // 🌐 노션 인벤토리 DB 비동기 클라우드 백업
-      syncParentProgressToCloud();
-      alert('🎉 부모 진도 설정이 저장되었습니다!\n다음 퀘스트부터 4+1 듀오링고 출제에 자동 반영됩니다. ✨');
-    }
-
-    // 메인 젤리 버튼 서브텍스트 및 추천 안내 배너 동적 갱신
-    function updateMainQuestSubText() {
-      const qSub = document.getElementById('mainQuestSub');
-      const rec = document.getElementById('modalRecommend');
-      if (isMinseo) {
-        const sets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
-        const korName = (UNIT_META_MAP.minseo.korean && UNIT_META_MAP.minseo.korean[sets.korean]) || sets.korean;
-        const mathName = (UNIT_META_MAP.minseo.math && UNIT_META_MAP.minseo.math[sets.math]) || sets.math;
-        if (qSub) qSub.textContent = `🧮 1-2 ${mathName} · 필수 ⭐`;
-        if (rec) rec.textContent = `💡 오늘의 추천 진도: ${korName} & ${mathName} (필수 ⭐)`;
-      } else {
-        const sets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
-        const mathName = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[sets.math]) || sets.math;
-        const sciName = (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[sets.science]) || `${sets.science}단원`;
-        const engU = sets.english;
-        const engMeta = UNIT_META_MAP.minsu.english;
-        const engNumMatch = String(engU).match(/\d+/);
-        const engNum = engNumMatch ? engNumMatch[0] : engU;
-        const engName = (engMeta && (engMeta[engU] || engMeta[engNum] || engMeta['L' + engNum])) || `${engNum}단원 (${engU})`;
-        if (qSub) qSub.textContent = `🧮 ${mathName} · 필수 ⭐`;
-        if (rec) rec.textContent = `💡 오늘의 권장 진도: 🔤 ${engName} & 🔬 ${sciName}`;
-      }
-    }
+    // 💡 부모 진도 설정판(Parent Progress Controller 2.0) 핵심 로직은 
+    //    ./kids/subjects/quest/parent_progress_controller.js 로 100% 모듈화 분리되었습니다. (Zero Hardcoding)
 
     // ================= 아이 원터치 직결 출격 파이프라인 =================
     // 과목 터치 시 묻지 않고 4+1 듀오링고 퀘스트로 즉시 출격!
