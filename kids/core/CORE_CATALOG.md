@@ -221,27 +221,29 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 ### 🌟 `reading_engine.js` (모바일 핀포인트 독해 뷰어 엔진)
 노션 독해 마스터 DB(`LIBRARY_DB`)에서 지문과 문제를 실시간 수급하여, 모바일 좁은 화면에서도 스크롤 피로 없이 1문항 슬라이스 카드 및 단락 힌트 토글 방식으로 쾌적하게 학습할 수 있도록 구현된 국어·영어 공통 독립 뷰어 엔진입니다.
 - **파일 위치**: `kids/core/reading_engine.js`
-- **스타일시트**: `kids/css/korean.css` (`.reading-passage-card`, `.reading-hint-toggle-btn`, `.reading-bottom-sheet` 등)
+- **스타일시트**: `kids/css/reading_engine.css` (독립 정규 스타일시트, `.reading-grade-bar`, `.reading-unit-section`, `.reading-passage-card` 등)
 - **핵심 아키텍처 & UX**:
-  1. **투 트랙 서가 분리**: `🏥 센터 언어치료 독해 (회차순)` vs `🏫 5-2 학교 교과서 필수 독해 (단원순)` 탭 지원.
-  2. **1단계 편안한 지문 정독**: Jua/Nanum 폰트 기반 가독성 + 요정 코코 TTS 음성 낭독 + `[문제 풀기 시작! ➡️]`.
-  3. **2단계 1문항 집중 슬라이스 카드**: 스크롤 핑퐁 없이 1문제씩 풀고 넘기는 모바일 최적화 UX.
-  4. **💡 [결정적 단서 보기 (단락 힌트)] 접이식 토글**: 스스로 생각하게 숨겼다가, 막히면 톡 눌러 해당 문맥 2~3줄만 네온 박스로 확인.
-  5. **📜 [지문 전문 보기] 플로팅 바텀시트**: 문제 풀이 중 언제든 화면 하단에서 스르륵 올려보는 지문 전체 오버레이.
-  6. **유연한 문항 유형 지원**: 4지선다 객관식 + 자필 주관식 대비 단답형 (초성 힌트 제공) + 정답 해설.
-  7. **🛡️ 2계층 내결함성 안전망**: 노션 API 일시 점검/오프라인 시 로컬 캐시 스켈레톤(`KOREAN_READING_DATABASE`)으로 자동 폴백.
+  1. **공부방 표준 학년 선택 바 (`reading-grade-bar`)**: `5-1`, `5-2`, `전체보기` 단일 표준 칩을 통해 학기/학년별 정밀 필터링 제공.
+  2. **단원/회차별 그룹화 서가 (`reading-unit-section`)**: 지문들이 흩어지지 않고 단원명(1단원, 2단원... / 1학기 5번...) 헤더 아래에 가지런히 그룹화 배치.
+  3. **1단계 편안한 지문 정독**: Jua/Nanum 폰트 기반 가독성 + 원어민/요정 코코 TTS 음성 낭독 + `[문제 풀기 시작! ➡️]`.
+  4. **2단계 1문항 집중 슬라이스 카드**: 스크롤 핑퐁 없이 1문제씩 풀고 넘기는 모바일 최적화 UX.
+  5. **💡 [결정적 단서 보기 (단락 힌트)] 접이식 토글**: 스스로 생각하게 숨겼다가, 막히면 톡 눌러 해당 문맥 2~3줄만 네온 박스로 확인.
+  6. **📜 [지문 전문 보기] 플로팅 바텀시트**: 문제 풀이 중 언제든 화면 하단에서 스르륵 올려보는 지문 전체 오버레이.
+  7. **유연한 문항 유형 지원**: 4지선다 객관식 + 자필 주관식 대비 단답형 (초성 힌트 제공) + 정답 해설.
+  8. **🛡️ 내결함성 안전망**: 노션 API 일시 점검/오프라인 시 로컬 백업 캐시(`reading_passages_cache.json`)로 자동 폴백.
 - **핵심 API**:
   | 메서드 | 파라미터 | 설명 |
   | :--- | :--- | :--- |
-  | `ReadingEngine.renderLobby(container, options)` | `container, [opts]` | 트랙 탭 및 회차별/단원별 독해 서가 로비 렌더링 |
-  | `ReadingEngine.switchTrack(trackName)` | `trackName` | '🏥 센터 독해' ↔ '🏫 교과서 독해' 트랙 즉시 전환 |
+  | `ReadingEngine.renderLobby(container, options)` | `container, [opts]` | 학년 바 및 단원별 그룹화 독해 서가 로비 렌더링 |
+  | `ReadingEngine.switchGrade(gradeName)` | `gradeName` | '5-1', '5-2', 'ALL' 학년/학기 필터 즉시 전환 |
+  | `ReadingEngine.switchTrack(trackName)` | `trackName` | 레거시 트랙 전환 브리지 (센터 ➔ 5-1, 교과서 ➔ 5-2 자동 매핑) |
   | `ReadingEngine.startMission(passageId)` | `passageId` | 1단계 지문 정독 화면 진입 |
   | `ReadingEngine.startQuestions()` | - | 2단계 1문항 슬라이스 퀴즈 모드 시작 |
   | `ReadingEngine.toggleHint()` | - | 💡 결정적 단서(단락 힌트) 접이식 토글 개폐 |
   | `ReadingEngine.openBottomSheet()` / `closeBottomSheet()` | - | 📜 지문 전문 바텀시트 슬라이드업/다운 제어 |
   | `ReadingEngine.chooseAnswer(selectedIdx)` | `selectedIdx` | 객관식 채점, 에러리스 코칭 및 실시간 보상 지급 |
   | `ReadingEngine.submitShortAnswer()` | - | 단답형 주관식 채점 및 초성 힌트 대조 |
-  | `ReadingEngine.toggleTts()` | - | 요정 코코 지문 음성 낭독 재생/정지 |
+  | `ReadingEngine.toggleTts()` | - | 지문 음성 낭독 재생/정지 |
 
 ### 🛠️ `scripts/register_reading_passage.py` (지문 ➔ 독해DB + VOCA_DB 원소스 멀티유즈 분리 적재 도구)
 아버님이 지문과 문제를 대화창이나 파일로 전달했을 때, 단 1번의 커맨드로 노션 독해 DB에 지문/문항을 등록하고 지문 속 핵심 어휘/속담/사자성어를 노션 용어사전 DB(`VOCA_DB`)에 자동 분리 적재하는 전용 CLI 파이프라인입니다.
