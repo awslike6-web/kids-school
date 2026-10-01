@@ -424,7 +424,37 @@ const SettingsManager = {
                     ${themeChips}
                 </div>
             </div>
+
+            <!-- 섹션 4: 노션 클라우드 데이터 동기화 -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <span>☁️ 노션 클라우드 최신 동기화</span>
+                </div>
+                <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                    <div class="setting-subtext" style="line-height:1.5; color:#64748b; font-size:0.85rem;">
+                        부모님이 스마트폰 노션 앱에서 추가/수정한 어휘, 독해 지문, 퀴즈 데이터를 전체 과목에 즉시 반영합니다.
+                    </div>
+                    <button type="button" class="fairy-settings-save-btn" id="btnSyncNotionInSettings" style="width:100%; padding:11px 16px; font-size:0.95rem; background:linear-gradient(135deg, #0284c7 0%, #2563eb 100%); box-shadow:0 4px 12px rgba(37,99,235,0.3); border:none; border-radius:14px; cursor:pointer; color:#fff; font-family:'Jua',sans-serif;" onclick="SettingsManager.triggerNotionSync(this)">
+                        🔄 노션 전체 데이터 지금 최신화하기
+                    </button>
+                </div>
+            </div>
         `;
+    },
+
+    // 12-1. 노션 전체 동기화 실행
+    triggerNotionSync: async function(btnEl) {
+        if (btnEl) {
+            btnEl.disabled = true;
+            btnEl.textContent = "⏳ 노션에서 최신 데이터 가져오는 중...";
+        }
+        if (typeof window.syncAllNotionData === 'function') {
+            await window.syncAllNotionData();
+        }
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.textContent = "✅ 동기화 완료! (언제든 다시 누를 수 있어요)";
+        }
     },
 
     // 13. 전역 초기화 (페이지 로드 시 자동 실행)

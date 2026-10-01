@@ -137,10 +137,13 @@ function initializeKoreanRoom() {
         initChatMemorySession('공부방');
     }
 
-    // 🚀 [초고속 선로딩] 국어방 진입 즉시 백그라운드에서 오늘치 어휘 사전 캐싱 (0.01초 로딩 보장)
+    // 🚀 [초고속 선로딩] 국어방 진입 즉시 백그라운드에서 오늘치 어휘 및 독해 지문 사전 캐싱 (0.01초 로딩 보장)
+    const targetStudent = currentProfile === 'daughter' ? '민서' : '민수';
     if (typeof prefetchVocaData === 'function') {
-        const targetStudent = currentProfile === 'daughter' ? '민서' : '민수';
         prefetchVocaData(targetStudent);
+    }
+    if (typeof prefetchReadingData === 'function') {
+        prefetchReadingData({ student: targetStudent, subject: "국어" });
     }
 }
 
@@ -747,10 +750,10 @@ function renderDynamicUnitUI(units, container) {
 window.refreshKoreanVoca = async function() {
     const innerBody = document.getElementById('overlayInnerBody');
     if (innerBody) {
-        innerBody.innerHTML = `<div style="text-align:center; padding:40px;"><div class="quiz-spinner"></div><p style="margin-top:12px; color:#db2777; font-family:'Jua',sans-serif;">🔄 노션 VOCA DB에서 최신 단어를 동기화하는 중입니다...</p></div>`;
+        innerBody.innerHTML = `<div style="text-align:center; padding:40px;"><div class="quiz-spinner"></div><p style="margin-top:12px; color:#db2777; font-family:'Jua',sans-serif;">🔄 노션 전체 최신 데이터를 동기화하는 중입니다...</p></div>`;
     }
-    if (typeof clearVocaCache === 'function') {
-        clearVocaCache();
+    if (typeof window.syncAllNotionData === 'function') {
+        await window.syncAllNotionData();
     }
     if (typeof fetchAndBuildDynamicUI === 'function') {
         await fetchAndBuildDynamicUI(currentMissionType, innerBody);

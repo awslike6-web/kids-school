@@ -20,6 +20,9 @@
       <button class="back-to-lobby-btn" id="ttsToggleBtn" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; font-family:'Jua', sans-serif;" onclick="toggleFairyTtsSetting()">
         🔊 요정 음성 ON
       </button>
+      <button class="back-to-lobby-btn" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; cursor: pointer; padding: 10px 14px; font-size: 0.95rem; font-family:'Jua', sans-serif;" onclick="if(typeof SettingsManager !== 'undefined') SettingsManager.openModal();" title="공부방 맞춤 설정 & 노션 동기화">
+        ⚙️ 설정
+      </button>
       <div class="admin-status-badge" id="adminBadgeTag">💻 [민수] 우주선 활성</div>
     </div>
   </div>
@@ -88,17 +91,17 @@
 
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
-<script src="../../core/notion-helper.js?v=20261001_2330"></script>
+<script src="../../core/notion-helper.js?v=20261002_0010"></script>
 <script src="../../core/fairy-config.js"></script>
 <script src="../../core/fairy-settings-catalog.js"></script>
-<script src="../../core/fairy-settings-engine.js"></script>
+<script src="../../core/fairy-settings-engine.js?v=20261002_0010"></script>
 <script src="../../core/fairy-engine.js"></script>
 <script src="../../core/fairy-chatbot.js"></script>
 <script src="../../core/subject_engine.js?v=20260930_step2"></script>
-<script src="../../core/reading_engine.js?v=20261001_2330"></script>
+<script src="../../core/reading_engine.js?v=20261002_0010"></script>
 <script src="../../core/daily-diary.js"></script>
 <script src="../../data/korean-reading-data.js?v=20260923_2045"></script>
-<script src="../../js/korean_common.js?v=20261001_2330"></script>
+<script src="../../js/korean_common.js?v=20261002_0010"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {

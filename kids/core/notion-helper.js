@@ -320,8 +320,73 @@ async function prefetchVocaData(studentName = null) {
     }
 }
 
-async function fetchLibraryBooksFromNotion() {
+// ========================================================
+// ⚡ 독해 & 도서관 지문 당일(하루) 캐시 매니저
+// ========================================================
+const READING_CACHE_PREFIX = "MINMIN_READING_CACHE_V1_";
+const LIBRARY_CACHE_PREFIX = "MINMIN_LIBRARY_CACHE_V1_";
+
+function _getReadingCacheKey(subject, track, studentName) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const sName = (studentName || 'ALL').trim();
+    const tr = (track || 'ALL').replace(/\s+/g, '_');
+    return `${READING_CACHE_PREFIX}${subject}_${tr}_${sName}_${todayStr}`;
+}
+
+function _loadReadingFromCache(subject, track, studentName) {
+    try {
+        const key = _getReadingCacheKey(subject, track, studentName);
+        const cachedStr = localStorage.getItem(key);
+        if (!cachedStr) return null;
+        const parsed = JSON.parse(cachedStr);
+        if (parsed && Array.isArray(parsed.records) && parsed.records.length > 0) {
+            return parsed.records;
+        }
+    } catch (e) {
+        console.warn("[Reading Cache] 캐시 로드 오류:", e);
+    }
+    return null;
+}
+
+function _saveReadingToCache(subject, track, studentName, records) {
+    try {
+        if (!Array.isArray(records) || records.length === 0) return;
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const key = _getReadingCacheKey(subject, track, studentName);
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && k.includes("_READING_CACHE_") && (!k.startsWith(READING_CACHE_PREFIX) || !k.endsWith(todayStr))) {
+                localStorage.removeItem(k);
+            }
+        }
+        localStorage.setItem(key, JSON.stringify({
+            date: todayStr,
+            timestamp: Date.now(),
+            records
+        }));
+    } catch (e) {
+        console.warn("[Reading Cache] 캐시 저장 실패:", e);
+    }
+}
+
+async function fetchLibraryBooksFromNotion(options = {}) {
     const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee";
+    const forceRefresh = options.forceRefresh === true;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const libCacheKey = `${LIBRARY_CACHE_PREFIX}${todayStr}`;
+
+    if (!forceRefresh) {
+        try {
+            const cached = localStorage.getItem(libCacheKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            }
+        } catch(e) {}
+    }
+
     try {
         const response = await fetch(`${PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
             method: 'POST',
@@ -333,7 +398,11 @@ async function fetchLibraryBooksFromNotion() {
         });
         if (!response.ok) throw new Error(`노션 도서관 DB 통신 오류 (상태: ${response.status})`);
         const data = await response.json();
-        return data.results || [];
+        const results = data.results || [];
+        try {
+            localStorage.setItem(libCacheKey, JSON.stringify(results));
+        } catch(e) {}
+        return results;
     } catch (error) {
         console.error("[fetchLibraryBooksFromNotion] 로딩 실패:", error);
         throw error;
@@ -341,7 +410,7 @@ async function fetchLibraryBooksFromNotion() {
 }
 
 /**
- * 📖 노션 독해 마스터 DB (LIBRARY_DB_ID)에서 지문 및 1:N 문제 세트 실시간 조회
+ * 📖 노션 독해 마스터 DB (LIBRARY_DB_ID)에서 지문 및 1:N 문제 세트 실시간 조회 (당일 캐시 탑재)
  * @param {Object} options { subject: '국어', track: '🏥 센터 독해'|'🏫 교과서 독해', student: '민수'|'민서', forceRefresh: false }
  */
 async function fetchReadingPassagesFromNotion(options = {}) {
@@ -349,6 +418,16 @@ async function fetchReadingPassagesFromNotion(options = {}) {
     const subject = options.subject || "국어";
     const track = options.track || "";
     const targetStudent = options.student || (window.currentUserName === '민서' ? '민서' : '민수');
+    const forceRefresh = options.forceRefresh === true;
+
+    // 1. ⚡ 당일 캐시 확인 (0.01초 초고속 반환)
+    if (!forceRefresh) {
+        const cached = _loadReadingFromCache(subject, track, targetStudent);
+        if (cached && cached.length > 0) {
+            console.log(`⚡ [Reading Cache] ${subject} (${track || '전체'}) 독해 캐시 즉시 반환 (${cached.length}건)`);
+            return cached;
+        }
+    }
 
     try {
         const andFilters = [
@@ -431,13 +510,89 @@ async function fetchReadingPassagesFromNotion(options = {}) {
             return item.student.includes(targetStudent);
         });
 
-        console.log(`✅ [Reading] 독해 DB에서 ${finalPassages.length}개 지문 로드 완료 (트랙: ${track || '전체'})`);
+        // ⚡ 당일 캐시 보존
+        _saveReadingToCache(subject, track, targetStudent, finalPassages);
+
+        console.log(`✅ [Reading] 독해 DB에서 ${finalPassages.length}개 지문 로드 및 캐시 저장 (트랙: ${track || '전체'})`);
         return finalPassages;
     } catch(err) {
         console.error("[fetchReadingPassagesFromNotion] 로딩 에러:", err);
         return [];
     }
 }
+
+/**
+ * 🚀 국어/독해 데이터 백그라운드 사전 다운로드 (논블로킹)
+ */
+async function prefetchReadingData(options = {}) {
+    try {
+        const student = options.student || (window.currentUserName === '민서' ? '민서' : '민수');
+        const subject = options.subject || "국어";
+        await Promise.allSettled([
+            fetchReadingPassagesFromNotion({ subject, track: "🏥 센터 독해", student, forceRefresh: false }),
+            fetchReadingPassagesFromNotion({ subject, track: "🏫 교과서 독해", student, forceRefresh: false })
+        ]);
+    } catch(e) {}
+}
+
+/**
+ * 🔄 [전사 공통 마스터 동기화] 노션의 모든 캐시를 깨끗이 비우고 전체 최신화
+ */
+window.syncAllNotionData = async function(options = {}) {
+    const student = options.student || (window.currentUserName === '민서' ? '민서' : '민수');
+    console.log(`🔄 [syncAllNotionData] 노션 전체 데이터 동기화 시작 (학생: ${student})...`);
+
+    // 1. 모든 노션 로컬 캐시 일괄 삭제
+    try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && (k.includes("_VOCA_CACHE_") || k.includes("_READING_CACHE_") || k.includes("_LIBRARY_CACHE_") || k.includes("_CURRICULUM_CACHE_"))) {
+                localStorage.removeItem(k);
+            }
+        }
+    } catch(e) {}
+
+    // 2. 전체 핵심 데이터 일괄 재수급 (강제 새로고침)
+    try {
+        await Promise.allSettled([
+            fetchVocaFromNotion({ studentName: student, forceRefresh: true }),
+            fetchReadingPassagesFromNotion({ subject: "국어", track: "🏥 센터 독해", student, forceRefresh: true }),
+            fetchReadingPassagesFromNotion({ subject: "국어", track: "🏫 교과서 독해", student, forceRefresh: true }),
+            fetchLibraryBooksFromNotion({ forceRefresh: true })
+        ]);
+    } catch(e) {
+        console.warn("일부 동기화 실패:", e);
+    }
+
+    // 3. 토스트 알림
+    window.showNotionSyncToast("✅ 노션 전체 데이터가 최신 상태로 동기화되었습니다!");
+    return true;
+};
+
+/**
+ * 🍞 공통 노션 동기화 토스트 메시지
+ */
+window.showNotionSyncToast = function(msg) {
+    let toast = document.getElementById('notionSyncToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'notionSyncToast';
+        toast.style.cssText = `
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff; font-family: 'Jua', sans-serif; font-size: 1.05rem;
+            padding: 12px 24px; border-radius: 30px; box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 99999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none; border: 2px solid rgba(255,255,255,0.3);
+        `;
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.style.transform = "translateX(-50%) translateY(0)";
+    setTimeout(() => {
+        if (toast) toast.style.transform = "translateX(-50%) translateY(-100px)";
+    }, 2800);
+};
 
 const MAX_READING_PASSAGES = 10;
 
