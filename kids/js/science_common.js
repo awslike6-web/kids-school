@@ -1,4 +1,11 @@
-// kids/js/science_common.js - 🔬 5학년 1학기 과학 탐구방 통합 제어 엔진
+// kids/js/science_common.js - 🔬 초등 과학 탐구방 통합 대문 파사드 엔진 (골디락스 아키텍처)
+// - 전사 거버넌스 헌법(규칙 7조) 준수: 적정 응집도 300~600줄, 대문 파사드 표준
+// - 5대 전문 서브모듈 중계:
+//   1) 🥽 ScienceSafety (science_safety.js) : 실험실 안전 라이선스 시험 & 골드 연구원증
+//   2) 📚 ScienceStorybook (science_storybook.js) : 과학 단원 동화 도서관 (1~5권)
+//   3) 💡 ScienceVoca (science_voca.js) : 과학 핵심 용어방 & 2단계 학년·단원 선택
+//   4) 🧪 ScienceLab (science_lab.js) : 가상 실험실 & 교재 DB 실시간 연동
+//   5) 📝 ScienceReport (science_report.js) : 『실험관찰』 디지털 탐구 보고서 & 실전 퀴즈
 
 window.currentSubject = "과학";
 
@@ -20,169 +27,9 @@ const SCIENCE_MISSION_META = {
     report: { title: "『실험관찰』 디지털 탐구 보고서", icon: "📝" }
 };
 
-const SCIENCE_STORYBOOK_LIBRARY = [
-    {
-        id: "5_1_0_1",
-        grade: "5-1",
-        unit: "0단원",
-        bookNum: "1권",
-        title: "과학 교과서 탐험대: 완벽 공부법",
-        subtitle: "교과서 7단계 순서 정복과 완벽 공부 비법",
-        desc: "민우, 서연, 지훈이와 함께 떠나는 과학 교과서 탐험! '단원 열기'부터 '체험 더하기'까지 7단계로 과학 왕이 되어보자!",
-        icon: "🔍",
-        color: "#0284c7",
-        bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#0284c7",
-        link: "science_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/0/study/science_story_p1.png"
-    },
-    {
-        id: "5_1_0_2",
-        grade: "5-1",
-        unit: "0단원",
-        bookNum: "2권",
-        title: "안전을 지키는 꼬마 과학자 탐험대",
-        subtitle: "실험실 & 야외 탐구 안전 수칙 완벽 마스터",
-        desc: "유진, 수현, 지아와 함께 배우는 필수 안전 수칙! 실험 복장부터 비상 대피, 야외 탐구 안전까지 완벽 대비해요.",
-        icon: "🛡️",
-        color: "#059669",
-        bgGrad: "linear-gradient(135deg, rgba(5, 150, 105, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#059669",
-        link: "science_safety_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/0/safety/science_safety_story_p1.png"
-    },
-    {
-        id: "5_1_1_1",
-        grade: "5-2",
-        unit: "1단원",
-        bookNum: "3권",
-        title: "섞여 있어도 괜찮아! 혼합물 분리 대모험",
-        subtitle: "1단원 혼합물의 분리 원리와 생활 속 분리배출",
-        desc: "민재, 하은, 수아와 함께하는 신나는 과학 탐구! 콩·팥 분리, 거름, 증발, AI 선별 로봇부터 새활용 필통까지!",
-        icon: "🧪",
-        color: "#2563eb",
-        bgGrad: "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#2563eb",
-        link: "science_mix_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-1/1/science_mix_story_p1.png"
-    },
-    {
-        id: "5_2_2_1",
-        grade: "5-2",
-        unit: "2단원",
-        bookNum: "4권",
-        title: "하늘을 나는 날씨 연구소: 민수와 코코의 대모험",
-        subtitle: "2단원 날씨와 우리 생활 (습도·구름·바람·기단 완벽 정복)",
-        desc: "호기심 많은 소년 민수와 날씨 요정 코코가 비행선을 타고 구름과 바람의 비밀을 찾아 떠나는 과학 탐험 이야기!",
-        icon: "☁️",
-        color: "#0284c7",
-        bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#38bdf8",
-        link: "science_weather_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/2/science_weather_story_p1.jpg"
-    },
-    {
-        id: "5_2_3_1",
-        grade: "5-2",
-        unit: "3단원",
-        bookNum: "5권",
-        title: "온도 탐험대 민수와 열의 이동 비밀",
-        subtitle: "3단원 온도와 열 (온도계·전도·대류·복사·단열 완벽 정복)",
-        desc: "호기심 많은 소년 민수와 과학 요정 모리가 함께 떠나는 신나는 열의 이동 과학 탐험 이야기!",
-        icon: "🔥",
-        color: "#ea580c",
-        bgGrad: "linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#ea580c",
-        link: "science_temp_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_story_p1.png"
-    }
-];
-
-function renderScienceStorybookLibrary(innerBody) {
-    innerBody.innerHTML = `
-        <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
-            <div style="text-align: center; margin-bottom: 24px;">
-                <h3 style="font-family: 'Jua', sans-serif; font-size: 1.4rem; color: #38bdf8; margin-bottom: 6px;">
-                    📚 과학 단원 동화 도서관
-                </h3>
-                <p style="font-size: 0.95rem; color: #94a3b8;">
-                    교과서 내용이 쏙쏙 이해되는 재미있는 동화와 성우 구연동화 음성을 만나보세요!
-                </p>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
-                ${SCIENCE_STORYBOOK_LIBRARY.map(book => `
-                    <div style="
-                        background: ${book.bgGrad};
-                        border: 2px solid ${book.border};
-                        border-radius: 16px;
-                        padding: 16px;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-between;
-                        gap: 12px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                        transition: transform 0.2s, box-shadow 0.2s;
-                    ">
-                        <div style="display: flex; gap: 14px; align-items: flex-start;">
-                            <img src="${book.coverImg}?v=20260902_1" alt="${book.title}" style="
-                                width: 90px;
-                                height: 120px;
-                                object-fit: cover;
-                                border-radius: 8px;
-                                border: 1px solid rgba(255,255,255,0.2);
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                                flex-shrink: 0;
-                            ">
-                            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                                <div style="display: flex; gap: 6px; align-items: center;">
-                                    <span style="
-                                        background: ${book.color};
-                                        color: white;
-                                        padding: 2px 8px;
-                                        border-radius: 6px;
-                                        font-size: 0.75rem;
-                                        font-family: 'Jua', sans-serif;
-                                    ">${book.bookNum}</span>
-                                    <span style="font-size: 0.8rem; color: #94a3b8;">${book.grade}</span>
-                                </div>
-                                <h4 style="font-family: 'Jua', sans-serif; font-size: 1.15rem; color: white; margin: 2px 0;">
-                                    ${book.title}
-                                </h4>
-                                <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; margin: 0;">
-                                    ${book.subtitle}
-                                </p>
-                            </div>
-                        </div>
-
-                        <p style="font-size: 0.83rem; color: #94a3b8; line-height: 1.45; margin: 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-                            ${book.desc}
-                        </p>
-
-                        <a href="${book.link}" style="
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 6px;
-                            background: ${book.color};
-                            color: white;
-                            text-decoration: none;
-                            padding: 10px;
-                            border-radius: 10px;
-                            font-family: 'Jua', sans-serif;
-                            font-size: 1rem;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                            transition: filter 0.2s;
-                        ">
-                            📖 동화책 읽기 (구연동화)
-                        </a>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
-
+// ==========================================
+// 🌐 전역 상태 관리 (하위 호환성 유지)
+// ==========================================
 let allFetchedRecords = [];
 let selectedScienceGrade = "5-1";
 let selectedScienceUnit = "";
@@ -191,6 +38,15 @@ let activeSectionData = [];
 let activeQuizIdx = 0;
 let scienceVocaMasterCountMap = {};
 let scienceVocaOrderType = 'shuffle';
+let scienceDataLoadPromise = null;
+
+// window 공유 속성 동기화
+window.allFetchedRecords = allFetchedRecords;
+window.selectedScienceGrade = selectedScienceGrade;
+window.selectedScienceUnit = selectedScienceUnit;
+window.activeSectionData = activeSectionData;
+window.activeQuizIdx = activeQuizIdx;
+window.scienceDataLoadPromise = null;
 
 if (!window.stopFairyTTS) {
     window.stopFairyTTS = function() {};
@@ -199,179 +55,28 @@ if (!window.speakFairyTTS) {
     window.speakFairyTTS = function() {};
 }
 
-function getChosung(str) {
-    const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-    let result = "";
-    for (let i = 0; i < str.length; i++) {
-        const code = str.charCodeAt(i) - 44032;
-        if (code > -1 && code < 11172) {
-            result += cho[Math.floor(code / 588)];
-        } else {
-            result += str.charAt(i);
-        }
-    }
-    return result;
-}
-
+// ==========================================
+// 🚀 과학방 초기화 및 프리페치
+// ==========================================
 function initializeScienceRoom() {
-    console.log("🧬 과학방 초기화 완료!");
+    console.log("🧬 과학방 골디락스 통합 엔진 가동 완료!");
     scienceVocaMasterCountMap = JSON.parse(localStorage.getItem(`science_voca_master_${currentUserName}`) || '{}');
 
-    // 📡 노션 교재 DB 실시간 프리페치 (백그라운드 캐시)
-    if (typeof fetchScienceCurriculumFromNotion === 'function') {
+    // 📡 노션 교재 DB 실시간 프리페치 (ScienceLab 서브모듈 위임)
+    if (window.ScienceLab && typeof window.ScienceLab.fetchCurriculum === 'function') {
+        window.ScienceLab.fetchCurriculum().catch(err => {
+            console.warn("과학 교재 백그라운드 프리페치 폴백 안내:", err);
+        });
+    } else if (typeof fetchScienceCurriculumFromNotion === 'function') {
         fetchScienceCurriculumFromNotion().catch(err => {
             console.warn("과학 교재 백그라운드 프리페치 폴백 안내:", err);
         });
     }
 }
 
-// =========================================================================
-// 🔬 노션 [공부방 교재·사료 마스터 DB] 과학 데이터 실시간 하이브리드 연동 엔진
-// =========================================================================
-let cachedScienceCurriculum = null;
-let scienceCurriculumPromise = null;
-
-async function fetchScienceCurriculumFromNotion() {
-    if (cachedScienceCurriculum) return cachedScienceCurriculum;
-    if (scienceCurriculumPromise) return scienceCurriculumPromise;
-
-    const PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
-    const DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CURRICULUM_DB_ID) ? APP_CONFIG.CURRICULUM_DB_ID : "3e8a27115b68806d94bfc81e9b3435fa";
-
-    scienceCurriculumPromise = (async () => {
-        try {
-            const url = `${PROXY}/v1/databases/${DB_ID}/query`;
-            let results = [];
-            let hasMore = true;
-            let cursor = null;
-
-            while (hasMore) {
-                const payload = {
-                    page_size: 100,
-                    filter: { property: "과목", select: { equals: "과학" } }
-                };
-                if (cursor) payload.start_cursor = cursor;
-
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
-                    body: JSON.stringify(payload)
-                });
-                if (!res.ok) throw new Error(`Notion Query Failed: HTTP ${res.status}`);
-                const data = await res.json();
-                results = results.concat(data.results || []);
-                hasMore = data.has_more || false;
-                cursor = data.next_cursor || null;
-            }
-
-            cachedScienceCurriculum = results.map(page => {
-                const p = page.properties || {};
-                const title = (p["제목"]?.title || []).map(x => x.plain_text).join('').trim() || '무제';
-                const grade = p["학년"]?.select?.name || '5-2';
-                const unit = (p["단원"]?.rich_text || []).map(x => x.plain_text).join('').trim() || '';
-                const zone = p["구역"]?.select?.name || '실험실';
-                const mediaUrl = p["미디어 URL"]?.url || '';
-                const interactiveUrl = p["인터랙티브 URL"]?.url || '';
-                const desc = (p["핵심 쓰임새/설명"]?.rich_text || []).map(x => x.plain_text).join('').trim();
-                const quiz = (p["퀴즈 질문"]?.rich_text || []).map(x => x.plain_text).join('').trim();
-                const choicesText = (p["보기 1~4"]?.rich_text || []).map(x => x.plain_text).join('').trim();
-                const choices = choicesText ? choicesText.split('\n').map(s => s.trim()).filter(Boolean) : [];
-                const ans = p["정답"]?.number ?? null;
-                const correctIdx = ans !== null ? Math.max(0, ans - 1) : null;
-                const explanation = (p["해설"]?.rich_text || []).map(x => x.plain_text).join('').trim();
-
-                return {
-                    id: page.id,
-                    title,
-                    grade,
-                    unit,
-                    zone,
-                    mediaUrl,
-                    interactiveUrl,
-                    desc,
-                    quiz,
-                    choices,
-                    ans,
-                    correctIdx,
-                    explanation,
-                    _fromNotion: true
-                };
-            });
-
-            console.log(`📡 노션 교재 DB에서 과학 데이터 총 ${cachedScienceCurriculum.length}건 실시간 로드 완료!`);
-            applyNotionDataToScienceGlobals(cachedScienceCurriculum);
-            return cachedScienceCurriculum;
-        } catch (err) {
-            console.warn("⚠️ 노션 교재 DB 쿼리 실패, 로컬 정적 데이터셋으로 안전 폴백합니다:", err);
-            return null;
-        }
-    })();
-
-    return scienceCurriculumPromise;
-}
-
-function applyNotionDataToScienceGlobals(items) {
-    if (!items || !items.length) return;
-
-    // 1) 안전 라이선스 (zone === '안전수칙')
-    const safeItems = items.filter(x => x.zone === '안전수칙');
-    if (safeItems.length > 0 && window.SCIENCE_SAFETY_LICENSE_DATA) {
-        window.SCIENCE_SAFETY_LICENSE_DATA.questions = safeItems.map((it, idx) => {
-            const catMatch = it.title.match(/\]\s*(.+)$/);
-            const category = catMatch ? catMatch[1] : `안전 수칙 ${idx + 1}`;
-            return {
-                id: idx + 1,
-                category,
-                question: it.quiz || it.title,
-                options: it.choices.length > 0 ? it.choices : ["보안경, 실험복 착용", "슬리퍼 착용"],
-                answer: it.correctIdx !== null ? it.correctIdx : 0,
-                explanation: it.explanation || it.desc,
-                img: it.mediaUrl || ""
-            };
-        });
-    }
-
-    // 2) 1단원 탐구보고서 요약노트 및 퀴즈
-    const rep1Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('1.') || x.unit.includes('혼합물')));
-    if (rep1Docs.length > 0 && window.SCIENCE_LAB_REPORT_DATA) {
-        window.SCIENCE_LAB_REPORT_DATA.summaryDoc = rep1Docs.map(it => {
-            const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
-            const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
-            const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
-            const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
-            const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
-            return {
-                title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
-                page: pg,
-                process: proc,
-                result: res,
-                conclusion: conc,
-                think: thk
-            };
-        });
-    }
-
-    // 3) 2단원 탐구보고서 요약노트 및 퀴즈
-    const rep2Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('2.') || x.unit.includes('날씨')));
-    if (rep2Docs.length > 0 && window.SCIENCE_LAB_REPORT_2_DATA) {
-        window.SCIENCE_LAB_REPORT_2_DATA.summaryDoc = rep2Docs.map(it => {
-            const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
-            const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
-            const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
-            const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
-            const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
-            return {
-                title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
-                page: pg,
-                process: proc,
-                result: res,
-                conclusion: conc,
-                think: thk
-            };
-        });
-    }
-}
-
+// ==========================================
+// 🚦 미션 진행 상태 및 가드레일
+// ==========================================
 function isScienceMissionInProgress() {
     const overlay = document.getElementById('missionOverlay');
     if (!overlay || overlay.style.display !== 'flex') return false;
@@ -379,6 +84,9 @@ function isScienceMissionInProgress() {
         && activeQuizIdx < activeSectionData.length;
 }
 
+// ==========================================
+// 🏰 대문 라우팅: openMissionView
+// ==========================================
 function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const titleEl = document.getElementById('overlayHeaderTitle');
@@ -386,44 +94,68 @@ function openMissionView(type) {
     const innerBody = document.getElementById('overlayInnerBody');
     const meta = SCIENCE_MISSION_META[type] || { title: "과학 미션", icon: "🔬" };
 
+    if (!overlay || !innerBody) return;
+
     overlay.style.display = 'flex';
     activeQuizIdx = 0;
+    window.activeQuizIdx = 0;
     currentMissionType = type;
     selectedScienceGrade = "5-1";
     selectedScienceUnit = "";
+    window.selectedScienceGrade = "5-1";
+    window.selectedScienceUnit = "";
     stopFairyTTS();
 
-    titleEl.textContent = meta.title;
-    iconEl.textContent = meta.icon;
+    if (titleEl) titleEl.textContent = meta.title;
+    if (iconEl) iconEl.textContent = meta.icon;
 
+    // 1) 📚 [1단계] 동화 도서관 위임
     if (type === 'storybook') {
-        renderScienceStorybookLibrary(innerBody);
+        if (window.ScienceStorybook && typeof window.ScienceStorybook.renderLibrary === 'function') {
+            window.ScienceStorybook.renderLibrary(innerBody);
+        } else if (typeof renderScienceStorybookLibrary === 'function') {
+            renderScienceStorybookLibrary(innerBody);
+        }
         return;
     }
 
+    // 2) 🧪 [3단계] 가상 실험실 직접 이동
     if (type === 'lab') {
         overlay.style.display = 'none';
         location.href = 'science_virtual_lab.html';
         return;
     }
 
+    // 3) 🥽 [0단계] 안전 라이선스 시험장 위임
     if (type === 'safety') {
-        renderSafetyLicenseUI(innerBody);
+        if (window.ScienceSafety && typeof window.ScienceSafety.renderUI === 'function') {
+            window.ScienceSafety.renderUI(innerBody);
+        } else if (typeof renderSafetyLicenseUI === 'function') {
+            renderSafetyLicenseUI(innerBody);
+        }
         return;
     }
 
+    // 4) 📝 [4단계] 탐구 보고서 위임
     if (type === 'report' || type === 'report_unit1') {
-        currentReportUnitId = 1;
-        renderLabReportUI(innerBody, 'doc', 1);
+        if (window.ScienceReport && typeof window.ScienceReport.renderUI === 'function') {
+            window.ScienceReport.renderUI(innerBody, 'doc', 1);
+        } else if (typeof renderLabReportUI === 'function') {
+            renderLabReportUI(innerBody, 'doc', 1);
+        }
         return;
     }
 
     if (type === 'report_unit2') {
-        currentReportUnitId = 2;
-        renderLabReportUI(innerBody, 'doc', 2);
+        if (window.ScienceReport && typeof window.ScienceReport.renderUI === 'function') {
+            window.ScienceReport.renderUI(innerBody, 'doc', 2);
+        } else if (typeof renderLabReportUI === 'function') {
+            renderLabReportUI(innerBody, 'doc', 2);
+        }
         return;
     }
 
+    // 5) 보상 세션 및 이탈 가드 활성화
     if (typeof initQuizRewardSession === 'function') {
         initQuizRewardSession(type);
     }
@@ -435,559 +167,9 @@ function openMissionView(type) {
         });
     }
 
-    // 💡 용어방 등 미션 진입 시 노션 및 교과서 데이터셋을 동적으로 불러와 2단계(학년 ➔ 단원) 선택 UI 제공
+    // 6) 💡 용어방 등 동적 데이터 수급 및 2단계 선택 UI 진입
     showLoadingSpinner(innerBody);
     fetchAndBuildScienceUI(type, innerBody);
-}
-
-// ==========================================
-// 🥽 1. 실험실 안전 라이선스 시험 & 골드 카드 발급
-// ==========================================
-let safetyExamAnswers = {};
-let safetyExamCurrentIdx = 0;
-
-function renderSafetyLicenseUI(container) {
-    safetyExamAnswers = {};
-    safetyExamCurrentIdx = 0;
-    const data = window.SCIENCE_SAFETY_LICENSE_DATA;
-    if (!data) return;
-
-    renderSafetyQuestion(container, 0);
-}
-
-function renderSafetyQuestion(container, qIdx) {
-    const data = window.SCIENCE_SAFETY_LICENSE_DATA;
-    const q = data.questions[qIdx];
-    safetyExamCurrentIdx = qIdx;
-
-    container.innerHTML = `
-        <div style="max-width: 680px; margin: 0 auto; padding: 12px; font-family: 'Jua', sans-serif;">
-            <div style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); padding: 14px 18px; border-radius: 16px; color: white; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(4, 120, 87, 0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 1.15rem; color: #a7f3d0;">🥽 ${data.title}</span>
-                    <span style="background: rgba(0,0,0,0.25); padding: 4px 12px; border-radius: 10px; font-size: 0.95rem;">
-                        문제 ${qIdx + 1} / ${data.questions.length}
-                    </span>
-                </div>
-                <p style="font-size: 0.9rem; color: #e2e8f0; margin-top: 4px;">모든 안전 문제를 맞히면 '공인 꼬마 과학자 연구원증'이 발급됩니다!</p>
-            </div>
-
-            <div style="background: white; border-radius: 18px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 2px solid #a7f3d0;">
-                <div style="display: inline-block; background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 10px;">
-                    📌 [${q.category}]
-                </div>
-                <h3 style="color: #1e293b; font-size: 1.25rem; line-height: 1.5; margin-bottom: 18px;">
-                    ${q.question}
-                </h3>
-
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    ${q.options.map((opt, idx) => `
-                        <button class="quiz-choice-btn" style="
-                            padding: 14px 16px;
-                            font-size: 1.02rem;
-                            text-align: left;
-                            justify-content: flex-start;
-                            line-height: 1.4;
-                            border-radius: 12px;
-                        " onclick="submitSafetyAnswer(${qIdx}, ${idx})">
-                            <span style="font-weight: bold; color: #059669; margin-right: 8px;">${idx + 1}.</span> ${opt}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function submitSafetyAnswer(qIdx, selectedIdx) {
-    safetyExamAnswers[qIdx] = selectedIdx;
-    const data = window.SCIENCE_SAFETY_LICENSE_DATA;
-    const q = data.questions[qIdx];
-    const isCorrect = (selectedIdx === q.answer);
-
-    const container = document.getElementById('overlayInnerBody');
-
-    if (!isCorrect) {
-        container.innerHTML = `
-            <div style="max-width: 550px; margin: 30px auto; padding: 24px; text-align: center; background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: 3px solid #f87171; font-family: 'Jua', sans-serif;">
-                <div style="font-size: 3.5rem; margin-bottom: 10px;">⚠️</div>
-                <h3 style="color: #dc2626; font-size: 1.4rem; margin-bottom: 8px;">앗! 안전 수칙을 다시 확인해 볼까요?</h3>
-                <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin-bottom: 16px;">
-                    ${q.explanation}
-                </p>
-                <button class="btn-action-primary" style="background: #059669;" onclick="renderSafetyQuestion(document.getElementById('overlayInnerBody'), ${qIdx})">
-                    🔄 다시 도전하기
-                </button>
-            </div>
-        `;
-        return;
-    }
-
-    if (qIdx + 1 < data.questions.length) {
-        renderSafetyQuestion(container, qIdx + 1);
-    } else {
-        // 전원 정답 -> 골드 라이선스 발급
-        renderGoldLicenseCard(container);
-    }
-}
-
-function renderGoldLicenseCard(container) {
-    const studentName = currentUserName || '민수';
-    const dateStr = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
-
-    // 보석 지급
-    if (typeof grantRewardGem === 'function') {
-        grantRewardGem(10, '실험실 안전 라이선스 획득');
-    }
-
-    container.innerHTML = `
-        <div style="max-width: 580px; margin: 10px auto; padding: 12px; font-family: 'Jua', sans-serif; text-align: center;">
-            <div style="font-size: 2.5rem; margin-bottom: 6px;">🎉 🥽 🏆</div>
-            <h2 style="color: #059669; font-size: 1.5rem; margin-bottom: 14px;">실험실 안전 라이선스 합격을 축하합니다! (+10💎)</h2>
-
-            <!-- 골드 라이선스 카드 -->
-            <div style="
-                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #f59e0b 100%);
-                border: 4px solid #d97706;
-                border-radius: 20px;
-                padding: 24px 20px;
-                box-shadow: 0 15px 40px rgba(217, 119, 6, 0.4), inset 0 0 20px rgba(255,255,255,0.6);
-                color: #78350f;
-                position: relative;
-                overflow: hidden;
-            ">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #b45309; padding-bottom: 12px; margin-bottom: 16px;">
-                    <div style="text-align: left;">
-                        <span style="font-size: 0.85rem; color: #92400e; letter-spacing: 1px;">KIDS SCIENCE LAB LICENSE</span>
-                        <h3 style="font-size: 1.4rem; color: #78350f; margin: 2px 0;">공인 꼬마 과학자 연구원증</h3>
-                    </div>
-                    <span style="font-size: 2.8rem;">🔬</span>
-                </div>
-
-                <div style="display: flex; gap: 16px; align-items: center; text-align: left; margin-bottom: 16px;">
-                    <div style="width: 85px; height: 105px; background: white; border-radius: 10px; border: 2px solid #b45309; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                        <span style="font-size: 2.8rem;">🧑‍🔬</span>
-                        <span style="font-size: 0.75rem; color: #047857; font-weight: bold; margin-top: 2px;">수석 연구원</span>
-                    </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                        <div style="font-size: 1.15rem; color: #1e293b;"><b>연구원 성명</b> : <span style="color: #047857; font-size: 1.25rem;">${studentName}</span></div>
-                        <div style="font-size: 0.95rem; color: #334155;"><b>인증 등급</b> : 5학년 과학 탐구 마스터 (1급)</div>
-                        <div style="font-size: 0.95rem; color: #334155;"><b>발급 번호</b> : SCI-2026-SAFE-0501</div>
-                        <div style="font-size: 0.85rem; color: #64748b;"><b>발급 일자</b> : ${dateStr}</div>
-                    </div>
-                </div>
-
-                <div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 12px; font-size: 0.92rem; line-height: 1.5; color: #78350f;">
-                    위 학생은 과학 실험실 및 야외 탐구 안전 수칙을 완벽하게 숙지하였으므로 본 공인 라이선스를 수여합니다.
-                </div>
-            </div>
-
-            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-                <button class="back-to-lobby-btn" style="background: #0284c7; color: white;" onclick="openMissionView('lab')">
-                    🧪 가상 실험실로 이동하기
-                </button>
-                <button class="back-to-lobby-btn" onclick="closeMissionView(true)">
-                    닫기
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-// ==========================================
-// 📝 2. 『실험관찰』 디지털 탐구 보고서 (2단계: 요약 노트 + 실전 퀴즈)
-// ==========================================
-let currentReportTab = 'doc'; // 'doc' | 'quiz'
-let currentReportQuizIdx = 0;
-let currentReportUnitId = 1; // 1: 1단원 혼합물, 2: 2단원 날씨
-let userBlankAnswers = {};
-
-function getActiveReportData() {
-    if (currentReportUnitId === 2) {
-        return window.SCIENCE_LAB_REPORT_2_DATA || window.SCIENCE_LAB_REPORT_DATA;
-    }
-    return window.SCIENCE_LAB_REPORT_DATA;
-}
-
-window.openScienceReport = function(unitId = 1) {
-    currentReportUnitId = unitId;
-    openMissionView('report');
-};
-
-function renderLabReportUI(container, tabName, unitId) {
-    if (typeof unitId !== 'undefined') currentReportUnitId = unitId;
-    if (tabName) currentReportTab = tabName;
-    const data = getActiveReportData();
-    if (!data) return;
-
-    // 헤더 타이틀 및 아이콘 실시간 갱신
-    const titleEl = document.getElementById('overlayHeaderTitle');
-    const iconEl = document.getElementById('overlayHeaderIcon');
-    if (titleEl) titleEl.textContent = data.title;
-    if (iconEl) iconEl.textContent = currentReportUnitId === 2 ? "🌤️" : "📝";
-
-    const unitThemeColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
-    const unitBgColor = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
-    const unitTextColor = currentReportUnitId === 2 ? '#b45309' : '#0369a1';
-
-    container.innerHTML = `
-        <div style="max-width: 780px; margin: 0 auto; padding: 6px 12px; font-family: 'Jua', sans-serif;">
-            
-            <!-- 단원 배지 -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="background: ${unitBgColor}; color: ${unitTextColor}; padding: 4px 12px; border-radius: 8px; font-size: 0.92rem; font-weight: bold;">
-                    ${data.unit}
-                </span>
-                <span style="font-size: 0.85rem; color: #64748b;">
-                    ${currentReportUnitId === 2 ? '🌤️ 교과서 24~35쪽 탐구 일지' : '🧪 교과서 12~19쪽 탐구 일지'}
-                </span>
-            </div>
-
-            <!-- 상단 2단계 모드 전환 탭 -->
-            <div style="display: flex; gap: 8px; margin-bottom: 16px; background: ${unitBgColor}; padding: 6px; border-radius: 14px;">
-                <button onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'doc')" style="
-                    flex: 1; padding: 10px 14px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.05rem; cursor: pointer;
-                    background: ${currentReportTab === 'doc' ? unitThemeColor : 'transparent'};
-                    color: ${currentReportTab === 'doc' ? 'white' : unitTextColor};
-                    box-shadow: ${currentReportTab === 'doc' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'};
-                    transition: all 0.2s;
-                ">
-                    📑 1. 탐구 요약 노트 (읽기 & 복습)
-                </button>
-                <button onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')" style="
-                    flex: 1; padding: 10px 14px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.05rem; cursor: pointer;
-                    background: ${currentReportTab === 'quiz' ? unitThemeColor : 'transparent'};
-                    color: ${currentReportTab === 'quiz' ? 'white' : unitTextColor};
-                    box-shadow: ${currentReportTab === 'quiz' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'};
-                    transition: all 0.2s;
-                ">
-                    ✍️ 2. 실전 탐구 퀴즈 (참여형 문제 풀기)
-                </button>
-            </div>
-
-            <div id="reportTabContent"></div>
-        </div>
-    `;
-
-    const tabContent = document.getElementById('reportTabContent');
-    if (currentReportTab === 'doc') {
-        renderLabReportDoc(tabContent);
-    } else {
-        currentReportQuizIdx = 0;
-        userBlankAnswers = {};
-        renderLabReportQuiz(tabContent, 0);
-    }
-}
-
-// 📑 [탭 1] 완벽 요약 노트
-function renderLabReportDoc(container) {
-    const data = getActiveReportData();
-    const btnColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
-    const borderColor = currentReportUnitId === 2 ? '#fde68a' : '#bae6fd';
-    const tagBg = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
-    const tagColor = currentReportUnitId === 2 ? '#b45309' : '#0284c7';
-    const pageGuide = currentReportUnitId === 2 ? '교과서 『실험관찰』 24~35쪽 날씨 탐구 핵심 내용을 한눈에 읽어보세요!' : '교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!';
-
-    container.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <span style="font-size: 0.92rem; color: #64748b;">${pageGuide}</span>
-            <button class="back-to-lobby-btn" style="background: ${btnColor}; color: white; padding: 6px 14px; font-size: 0.9rem;" onclick="renderLabReportUI(document.getElementById('overlayInnerBody'), 'quiz')">
-                ✍️ 퀴즈 풀러 가기 ➔
-            </button>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 16px; max-height: 520px; overflow-y: auto; padding-right: 4px;">
-            ${data.summaryDoc.map((item, idx) => `
-                <div style="background: white; border-radius: 16px; padding: 16px; border: 2px solid ${borderColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h4 style="color: ${tagColor}; font-size: 1.15rem; margin: 0;">${item.title}</h4>
-                        <span style="font-size: 0.8rem; background: ${tagBg}; color: ${tagColor}; padding: 2px 8px; border-radius: 6px;">${item.page}</span>
-                    </div>
-                    
-                    <div style="font-size: 0.9rem; line-height: 1.55; color: #334155; margin-bottom: 8px;">
-                        <b>[탐구 과정]</b><br>
-                        ${item.process}
-                    </div>
-
-                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border-left: 4px solid ${tagColor}; font-size: 0.88rem; line-height: 1.55; color: #1e293b; margin-bottom: 8px;">
-                        <b>[관찰 결과]</b><br>
-                        ${item.result}
-                    </div>
-
-                    <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; color: #166534; line-height: 1.5; margin-bottom: 6px;">
-                        🎯 <b>결론</b> : ${item.conclusion}
-                    </div>
-
-                    <div style="font-size: 0.85rem; color: #d97706; padding-left: 4px;">
-                        💡 <b>생각해 볼까요?</b> : ${item.think}
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
-// ✍️ [탭 2] 인터랙티브 참여형 실전 퀴즈
-function renderLabReportQuiz(container, qIdx) {
-    const data = getActiveReportData();
-    const q = data.quizItems[qIdx];
-    currentReportQuizIdx = qIdx;
-
-    const themeColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
-    const borderColor = currentReportUnitId === 2 ? '#fde68a' : '#bae6fd';
-    const tagBg = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
-
-    let quizBodyHtml = "";
-
-    // 1) 빈칸 채우기 (q1)
-    if (q.type === 'blank') {
-        let questionRenderText = "";
-        if (currentReportUnitId === 2) {
-            questionRenderText = `
-                공기가 건조할수록 습구 온도계의 젖은 헝겊에서 물이 활발하게 
-                <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
-                    ${userBlankAnswers['b1'] || '❓ 선택'}
-                </span>하면서 주변의 열을 빼앗아갑니다. 따라서 건구 온도와 습구 온도의 차이가 
-                <span id="blank_2" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
-                    ${userBlankAnswers['b2'] || '❓ 선택'}
-                </span>. 이 온도 차이를 이용해 현재 공기 중의 
-                <span id="blank_3" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
-                    ${userBlankAnswers['b3'] || '❓ 선택'}
-                </span>를 측정합니다.
-            `;
-        } else {
-            questionRenderText = `
-                콩, 팥, 조가 섞인 혼합물을 눈이 큰 체에 넣고 흔들었을 때, 체 위에 남는 물질은 
-                <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
-                    ${userBlankAnswers['b1'] || '❓ 선택'}
-                </span>이고, 아래로 빠져나간 물질은 
-                <span id="blank_2" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
-                    ${userBlankAnswers['b2'] || '❓ 선택'}
-                </span>입니다. 이 분리 방법은 물질의 
-                <span id="blank_3" style="display:inline-block; min-width:80px; padding:2px 10px; background:#e0f2fe; color:#0369a1; border-bottom:2px solid #0284c7; border-radius:6px; font-weight:bold; text-align:center;">
-                    ${userBlankAnswers['b3'] || '❓ 선택'}
-                </span> 차이를 이용한 것입니다.
-            `;
-        }
-
-        quizBodyHtml = `
-            <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 1rem; line-height: 1.8; color: #1e293b;">
-                ${questionRenderText}
-            </div>
-
-            <div style="margin-bottom: 12px;">
-                <span style="font-size: 0.88rem; color: #64748b;">👇 알맞은 단어 카드를 순서대로 터치하세요:</span>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-                    ${q.options.map(opt => `
-                        <button class="quiz-choice-btn" style="padding: 8px 14px; font-size: 0.95rem;" onclick="selectBlankWord('${opt}')">
-                            🏷️ ${opt}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
-                <button class="btn-reset" onclick="resetBlankAnswers()">🔄 다시 채우기</button>
-                <button class="btn-action-primary" style="background: ${themeColor};" onclick="checkBlankAnswer(${qIdx})">
-                    ✅ 정답 확인하기
-                </button>
-            </div>
-        `;
-    } 
-    // 2) 객관식 4지선다 (q2, q4)
-    else if (q.type === 'choice') {
-        quizBodyHtml = `
-            <div style="color: #1e293b; font-size: 1.15rem; line-height: 1.5; margin-bottom: 16px;">
-                ${q.questionText}
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                ${q.choices.map((choice, idx) => `
-                    <button class="quiz-choice-btn" style="padding: 12px 16px; font-size: 0.98rem; text-align: left; justify-content: flex-start; line-height: 1.4;" onclick="submitChoiceQuiz(${qIdx}, ${idx})">
-                        <span style="font-weight: bold; color: ${themeColor}; margin-right: 8px;">${idx + 1}.</span> ${choice}
-                    </button>
-                `).join('')}
-            </div>
-        `;
-    }
-    // 3) 순서 맞추기 (q3)
-    else if (q.type === 'order') {
-        quizBodyHtml = `
-            <div style="color: #1e293b; font-size: 1.1rem; line-height: 1.5; margin-bottom: 14px;">
-                ${q.questionText}
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-                ${q.steps.map(s => `
-                    <div style="background: ${tagBg}; padding: 10px 14px; border-radius: 10px; border: 1.5px solid ${borderColor}; font-size: 0.95rem; color: ${themeColor}; display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 1.2rem;">🔹</span> ${s.text}
-                    </div>
-                `).join('')}
-            </div>
-
-            <div style="text-align: center;">
-                <button class="btn-action-primary" style="background: ${themeColor};" onclick="passOrderQuiz(${qIdx})">
-                    ✅ 순서 확인 완료! 다음 문제로 ➔
-                </button>
-            </div>
-        `;
-    }
-    // 4) 스스로 평가하기 (q5)
-    else if (q.type === 'self_check') {
-        quizBodyHtml = `
-            <div style="color: #1e293b; font-size: 1.1rem; line-height: 1.5; margin-bottom: 14px;">
-                ${q.questionText}
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-                ${q.checklist.map((item, idx) => `
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #bbf7d0;">
-                        <span style="font-size: 0.95rem; color: #166534;">${idx + 1}. ${item}</span>
-                        <div style="display: flex; gap: 6px; font-size: 1.4rem; cursor: pointer;">
-                            <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
-                            <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
-                            <span onclick="this.style.opacity=1" style="color: #eab308;">⭐</span>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-
-            <div style="text-align: center;">
-                <button class="btn-action-primary" style="background: #059669; font-size: 1.1rem; padding: 12px 30px;" onclick="finishAllReportQuiz()">
-                    🎉 탐구 보고서 마스터 완료! (+5💎)
-                </button>
-            </div>
-        `;
-    }
-
-    container.innerHTML = `
-        <div style="background: white; border-radius: 18px; padding: 20px; box-shadow: 0 8px 25px rgba(0,0,0,0.06); border: 2px solid ${borderColor};">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                <div style="color: ${themeColor}; font-size: 1.15rem; font-weight: bold;">
-                    ${q.title}
-                </div>
-                <span style="background: ${tagBg}; color: ${themeColor}; padding: 3px 10px; border-radius: 8px; font-size: 0.85rem;">
-                    문제 ${qIdx + 1} / ${data.quizItems.length}
-                </span>
-            </div>
-
-            ${quizBodyHtml}
-        </div>
-    `;
-}
-
-function selectBlankWord(word) {
-    if (!userBlankAnswers['b1']) {
-        userBlankAnswers['b1'] = word;
-    } else if (!userBlankAnswers['b2']) {
-        userBlankAnswers['b2'] = word;
-    } else if (!userBlankAnswers['b3']) {
-        userBlankAnswers['b3'] = word;
-    }
-    const tabContent = document.getElementById('reportTabContent');
-    renderLabReportQuiz(tabContent, currentReportQuizIdx);
-}
-
-function resetBlankAnswers() {
-    userBlankAnswers = {};
-    const tabContent = document.getElementById('reportTabContent');
-    renderLabReportQuiz(tabContent, currentReportQuizIdx);
-}
-
-function checkBlankAnswer(qIdx) {
-    const data = getActiveReportData();
-    const q = data.quizItems[qIdx];
-    
-    let isCorrect = false;
-    if (currentReportUnitId === 2) {
-        isCorrect = (userBlankAnswers['b1'] === "증발" && userBlankAnswers['b2'] === "커집니다" && userBlankAnswers['b3'] === "습도");
-    } else {
-        isCorrect = (userBlankAnswers['b1'] === "콩과 팥" && userBlankAnswers['b2'] === "조" && userBlankAnswers['b3'] === "알갱이의 크기");
-    }
-
-    const container = document.getElementById('reportTabContent');
-
-    if (isCorrect) {
-        showQuizFeedback(container, true, `정답입니다! 👏 ${q.explanation}`, () => {
-            renderLabReportQuiz(container, qIdx + 1);
-        });
-    } else {
-        const hintMsg = currentReportUnitId === 2
-            ? "앗! 다시 한번 생각해 볼까요? 건조할수록 물이 활발하게 [증발]하여 열을 빼앗기 때문에 온도 차이가 [커집니다]."
-            : "앗! 다시 한번 생각해 볼까요? 체 위에 남는 것은 큰 알갱이, 빠져나가는 것은 작은 알갱이입니다.";
-        showQuizFeedback(container, false, hintMsg, () => {
-            resetBlankAnswers();
-        });
-    }
-}
-
-function submitChoiceQuiz(qIdx, selectedIdx) {
-    const data = getActiveReportData();
-    const q = data.quizItems[qIdx];
-    const isCorrect = (selectedIdx === q.answer);
-    const container = document.getElementById('reportTabContent');
-
-    if (isCorrect) {
-        showQuizFeedback(container, true, `정답입니다! 🎉 ${q.explanation}`, () => {
-            renderLabReportQuiz(container, qIdx + 1);
-        });
-    } else {
-        showQuizFeedback(container, false, `오답입니다! 💡 ${q.explanation}`, () => {
-            renderLabReportQuiz(container, qIdx);
-        });
-    }
-}
-
-function passOrderQuiz(qIdx) {
-    const container = document.getElementById('reportTabContent');
-    renderLabReportQuiz(container, qIdx + 1);
-}
-
-function showQuizFeedback(container, isSuccess, message, nextCallback) {
-    const okColor = isSuccess ? '#059669' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
-    container.innerHTML = `
-        <div style="text-align: center; padding: 24px; background: white; border-radius: 18px; border: 3px solid ${isSuccess ? '#10b981' : '#f87171'};">
-            <div style="font-size: 3rem; margin-bottom: 8px;">${isSuccess ? '🎉' : '💡'}</div>
-            <h3 style="color: ${isSuccess ? '#059669' : '#dc2626'}; font-size: 1.35rem; margin-bottom: 10px;">
-                ${isSuccess ? '훌륭해요! 정답입니다!' : '힌트를 확인해 보세요!'}
-            </h3>
-            <p style="color: #334155; font-size: 0.98rem; line-height: 1.6; margin-bottom: 18px;">
-                ${message}
-            </p>
-            <button class="btn-action-primary" style="background: ${okColor};" onclick="(${nextCallback.toString()})()">
-                ${isSuccess ? '다음 문제로 ➔' : '🔄 다시 풀기'}
-            </button>
-        </div>
-    `;
-}
-
-function finishAllReportQuiz() {
-    if (typeof grantRewardGem === 'function') {
-        const rewardMsg = currentReportUnitId === 2 
-            ? '2단원 날씨와 우리 생활 실험관찰 탐구 보고서 완벽 마스터' 
-            : '1단원 혼합물의 분리 실험관찰 탐구 보고서 완벽 마스터';
-        grantRewardGem(5, rewardMsg);
-    }
-    const container = document.getElementById('overlayInnerBody');
-    const unitTitle = currentReportUnitId === 2 ? '2단원 날씨와 우리 생활' : '1단원 혼합물의 분리';
-    const iconStr = currentReportUnitId === 2 ? '🌤️ 📝 💎' : '🌟 📝 💎';
-    const unitDesc = currentReportUnitId === 2 
-        ? '습도계 측정, 이슬과 안개, 구름 발생, 바람, 사계절 기단 탐구 기록을 완벽하게 마스터했습니다! (+5💎)'
-        : '1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)';
-
-    container.innerHTML = `
-        <div style="text-align: center; padding: 30px; font-family: 'Jua';">
-            <div style="font-size: 3.5rem; margin-bottom: 10px;">${iconStr}</div>
-            <h2 style="color: #059669; font-size: 1.55rem; margin-bottom: 8px;">『실험관찰』 디지털 탐구 보고서 마스터 완료!</h2>
-            <h3 style="color: #0284c7; font-size: 1.25rem; margin-bottom: 8px;">[${unitTitle}]</h3>
-            <p style="color: #475569; font-size: 1.05rem; margin-bottom: 20px;">
-                ${unitDesc}
-            </p>
-            <button class="back-to-lobby-btn" style="background: #0284c7; color: white;" onclick="closeMissionView(true)">
-                과학 대기실로 돌아가기
-            </button>
-        </div>
-    `;
 }
 
 function closeMissionView(force) {
@@ -1000,24 +182,32 @@ function closeMissionView(force) {
     if (typeof finalizeQuizRewardSession === 'function') {
         finalizeQuizRewardSession();
     }
-    document.getElementById('missionOverlay').style.display = 'none';
+    const overlay = document.getElementById('missionOverlay');
+    if (overlay) overlay.style.display = 'none';
+
     activeSectionData = [];
     activeQuizIdx = 0;
+    window.activeSectionData = [];
+    window.activeQuizIdx = 0;
     stopFairyTTS();
 }
 
 function showLoadingSpinner(container) {
+    if (!container) return;
     container.innerHTML = `
       <div style="text-align:center; padding:50px 20px; font-family:'Jua', sans-serif;">
         <div style="width:45px; height:45px; border:4px solid #bae6fd; border-top:4px solid #0284c7; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 15px auto;"></div>
         <p style="font-size:1.15rem; color:#0369a1;">
-            🧚‍♀️ 코코 요정이 노션 등대에서 과학 용어들을 챙겨오고 있어요...
+            🧚‍♀️ 코코 요정이 노션 등대에서 과학 데이터들을 챙겨오고 있어요...
         </p>
       </div>
       <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
     `;
 }
 
+// ==========================================
+// 📡 교과 데이터셋 수급 파이프라인
+// ==========================================
 function getCurriculumUnits() {
     if (typeof window !== 'undefined' && window.SCIENCE_CURRICULUM_DATA && Array.isArray(window.SCIENCE_CURRICULUM_DATA)) {
         return window.SCIENCE_CURRICULUM_DATA;
@@ -1028,6 +218,8 @@ function getCurriculumUnits() {
 function getCurriculumRecords(type) {
     const curriculum = getCurriculumUnits();
     const list = [];
+    const getChosung = (window.ScienceVoca && window.ScienceVoca.getChosung) || function(s) { return s; };
+
     curriculum.forEach(unit => {
         const items = unit[type] || unit.voca || [];
         items.forEach(item => {
@@ -1050,10 +242,10 @@ function getCurriculumRecords(type) {
     return list;
 }
 
-let scienceDataLoadPromise = null;
-
 async function fetchAndBuildScienceUI(type, innerBody) {
     const curriculumRecords = getCurriculumRecords(type);
+    const getChosung = (window.ScienceVoca && window.ScienceVoca.getChosung) || function(s) { return s; };
+
     scienceDataLoadPromise = (async () => {
         try {
             let records = [];
@@ -1074,7 +266,9 @@ async function fetchAndBuildScienceUI(type, innerBody) {
                 // 🔬 교재 마스터 DB (실험실, 자연탐험, 발명가)
                 try {
                     const zoneName = SCIENCE_ZONE_MAP[type] || "실험실";
-                    const allCurriculum = await fetchScienceCurriculumFromNotion();
+                    const fetcher = (window.ScienceLab && window.ScienceLab.fetchCurriculum) || window.fetchScienceCurriculumFromNotion;
+                    const allCurriculum = fetcher ? await fetcher() : null;
+
                     if (allCurriculum && allCurriculum.length > 0) {
                         const matched = allCurriculum.filter(it => it.zone === zoneName);
                         if (matched.length > 0) {
@@ -1113,6 +307,7 @@ async function fetchAndBuildScienceUI(type, innerBody) {
             }
 
             allFetchedRecords = records;
+            window.allFetchedRecords = records;
             
             // 학년/학기 목록 추출 (예: ["5-1", "5-2"])
             const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
@@ -1122,171 +317,37 @@ async function fetchAndBuildScienceUI(type, innerBody) {
                 if (uniqueGrades.length === 0) {
                     startScienceMissionWithFilteredData(records, innerBody, "과학 탐구");
                 } else {
-                    renderScienceGradeUI(uniqueGrades, innerBody);
+                    if (window.ScienceVoca && typeof window.ScienceVoca.renderGradeUI === 'function') {
+                        window.ScienceVoca.renderGradeUI(uniqueGrades, innerBody);
+                    } else if (typeof renderScienceGradeUI === 'function') {
+                        renderScienceGradeUI(uniqueGrades, innerBody);
+                    }
                 }
             }
             return records;
         } catch(e) {
             console.warn("데이터 로딩 예외 -> 교과서 데이터셋 구동", e);
             allFetchedRecords = curriculumRecords;
+            window.allFetchedRecords = curriculumRecords;
             const uniqueGrades = [...new Set(curriculumRecords.map(r => r.grade))].filter(Boolean).sort();
             if (!window._isScienceDirectNavigating) {
-                renderScienceGradeUI(uniqueGrades, innerBody);
+                if (window.ScienceVoca && typeof window.ScienceVoca.renderGradeUI === 'function') {
+                    window.ScienceVoca.renderGradeUI(uniqueGrades, innerBody);
+                } else if (typeof renderScienceGradeUI === 'function') {
+                    renderScienceGradeUI(uniqueGrades, innerBody);
+                }
             }
             return curriculumRecords;
         }
     })();
+
+    window.scienceDataLoadPromise = scienceDataLoadPromise;
     return scienceDataLoadPromise;
 }
 
-function renderScienceGradeUI(grades, container) {
-    speakFairyTTS("공부할 학년과 학기를 골라보세요! 🧚‍♀️");
-    
-    container.innerHTML = `
-        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:540px; margin:0 auto;">
-            <div style="font-size:2.5rem; margin-bottom:6px;">🎒</div>
-            <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.6rem;">1. 학년 & 학기 고르기</h3>
-            <p style="color:var(--text-muted); margin-bottom:20px; font-size:0.95rem;">탐구하고 싶은 교과서 학기와 단원을 선택해 보세요!</p>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-                ${grades.map(g => {
-                    const label = (g === '5-1' || g === '5학년 1학기') ? '📖 5학년 1학기 (5-1)' : (g === '5-2' || g === '5학년 2학기') ? '📖 5학년 2학기 (5-2)' : `📖 ${g}`;
-                    return `
-                    <button class="quiz-choice-btn" style="
-                        padding:18px 14px; font-size:1.15rem; text-align:center; justify-content:center;
-                        border-radius:14px; background:linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
-                        border:2px solid #38bdf8;
-                    " onclick="selectScienceGrade('${g}')">
-                        ${label}
-                    </button>
-                    `;
-                }).join('')}
-            </div>
-
-            <button class="quiz-choice-btn" style="
-                background:#f1f5f9; width:100%; text-align:center; justify-content:center;
-                padding:12px; font-size:1.05rem; border-radius:12px;
-            " onclick="selectScienceGrade('ALL')">
-                🌟 전체 학년·학기 종합 탐구 (모아보기)
-            </button>
-        </div>
-    `;
-}
-
-function selectScienceGrade(grade) {
-    selectedScienceGrade = grade;
-    const innerBody = document.getElementById('overlayInnerBody');
-
-    let matchedRecords = [];
-    if (grade === 'ALL') {
-        matchedRecords = allFetchedRecords;
-    } else {
-        matchedRecords = allFetchedRecords.filter(r => {
-            if (r.grade === grade || (r.grades && r.grades.includes(grade))) return true;
-            if (grade === '5-1' && (r.grade === '5학년 1학기' || (r.grades && r.grades.includes('5학년 1학기')))) return true;
-            if (grade === '5-2' && (r.grade === '5학년 2학기' || (r.grades && r.grades.includes('5학년 2학기')))) return true;
-            if (grade === '5학년 1학기' && (r.grade === '5-1' || (r.grades && r.grades.includes('5-1')))) return true;
-            if (grade === '5학년 2학기' && (r.grade === '5-2' || (r.grades && r.grades.includes('5-2')))) return true;
-            return false;
-        });
-    }
-
-    // 💡 단원 목록 추출
-    const uniqueUnits = [...new Set(matchedRecords.map(r => String(r.level || r.stage || '').trim()))].filter(u => u && u !== "기본 단원").sort();
-
-    // 단원이 1개이든 여러 개이든 무조건 2단계 단원 선택 UI를 거치도록 보장!
-    renderScienceUnitUI(uniqueUnits, innerBody, matchedRecords, grade);
-}
-
-function renderScienceUnitUI(units, container, matchedRecords, grade) {
-    speakFairyTTS("공부할 과학 단원을 골라보세요!");
-    
-    // 각 단원별 단어 개수 계산
-    const unitCountMap = {};
-    units.forEach(u => {
-        unitCountMap[u] = matchedRecords.filter(r => String(r.level || r.stage || '').trim() === u).length;
-    });
-
-    const gradeLabel = grade === 'ALL' ? '전체 학년·학기' : (grade === '5-1' || grade === '5학년 1학기') ? '5-1 (1학기)' : (grade === '5-2' || grade === '5학년 2학기') ? '5-2 (2학기)' : grade;
-
-    container.innerHTML = `
-        <div style="text-align:center; padding:15px 10px; font-family:'Jua'; width:100%; max-width:620px; margin:0 auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <button class="back-to-lobby-btn" style="padding:6px 14px; font-size:0.9rem;" onclick="renderScienceGradeUI(['5-1', '5-2'], document.getElementById('overlayInnerBody'))">
-                    🔙 학년 다시 고르기
-                </button>
-                <span style="font-size:1.05rem; color:#0284c7; font-weight:bold; background:#e0f2fe; padding:4px 12px; border-radius:8px;">
-                    📖 ${gradeLabel}
-                </span>
-            </div>
-
-            <h3 style="margin-bottom:6px; color:var(--primary); font-size:1.55rem;">📚 2. 탐구할 단원 고르기</h3>
-            <p style="color:var(--text-muted); margin-bottom:18px; font-size:0.95rem;">원하는 단원을 선택해 교과서 핵심 용어를 정복해 보세요!</p>
-
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-                ${units.map(u => `
-                    <button class="quiz-choice-btn" style="
-                        padding:14px 18px; font-size:1.1rem; text-align:left; justify-content:space-between;
-                        border-radius:14px; border:2px solid #bae6fd; background:linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
-                    " onclick="selectScienceUnit('${u}', '${grade}')">
-                        <span style="display:flex; align-items:center; gap:8px;">
-                            🔬 <b>${u}</b>
-                        </span>
-                        <span style="font-size:0.85rem; background:#0284c7; color:white; padding:3px 10px; border-radius:10px; font-weight:normal;">
-                            ${unitCountMap[u] || 0}개 용어
-                        </span>
-                    </button>
-                `).join('')}
-            </div>
-
-            <button class="quiz-choice-btn" style="
-                background:#f1f5f9; width:100%; text-align:center; justify-content:center;
-                padding:12px; font-size:1.05rem; border-radius:12px;
-            " onclick="selectScienceUnit('ALL', '${grade}')">
-                🌟 [${grade === 'ALL' ? '전체' : grade}] 모든 단원 모아보기 (${matchedRecords.length}개 용어)
-            </button>
-        </div>
-    `;
-}
-
-function selectScienceUnit(unitName, grade) {
-    selectedScienceUnit = unitName;
-    const innerBody = document.getElementById('overlayInnerBody');
-
-    let matchedRecords = [];
-    if (grade === 'ALL') {
-        matchedRecords = allFetchedRecords;
-    } else {
-        matchedRecords = allFetchedRecords.filter(r => {
-            const g = r.grade || '';
-            const gArr = r.grades || [];
-            if (g === grade || gArr.includes(grade)) return true;
-            if (grade === '5-1' && (g === '5학년 1학기' || g === '5학년' || gArr.includes('5학년 1학기') || gArr.includes('5-1'))) return true;
-            if (grade === '5-2' && (g === '5학년 2학기' || gArr.includes('5학년 2학기') || gArr.includes('5-2'))) return true;
-            if (grade === '5학년 1학기' && (g === '5-1' || gArr.includes('5-1'))) return true;
-            if (grade === '5학년 2학기' && (g === '5-2' || gArr.includes('5-2'))) return true;
-            return false;
-        });
-    }
-
-    if (unitName !== 'ALL') {
-        const cleanUnit = String(unitName || '').replace(/단원$/, '').trim();
-        const unitNumMatch = cleanUnit.match(/^(\d+)/);
-        const unitNum = unitNumMatch ? unitNumMatch[1] : cleanUnit;
-
-        matchedRecords = matchedRecords.filter(r => {
-            const levelStr = String(r.level || r.stage || '').trim();
-            if (!levelStr) return false;
-            if (levelStr === unitName) return true;
-            if (levelStr.includes(unitName)) return true;
-            if (unitNum && (levelStr.startsWith(unitNum + '.') || levelStr.startsWith(unitNum + '단원') || levelStr.includes(unitNum + '단원'))) return true;
-            return false;
-        });
-    }
-
-    startScienceMissionWithFilteredData(matchedRecords, innerBody, `${grade} - ${unitName === 'ALL' ? '전체 종합' : unitName}`);
-}
-
+// ==========================================
+// 🎯 퀴즈 세션 가동 & 뷰어 디스패치
+// ==========================================
 function startScienceMissionWithFilteredData(records, container, titleStr) {
     let items = [...records];
     if (scienceVocaOrderType === 'shuffle') {
@@ -1295,9 +356,14 @@ function startScienceMissionWithFilteredData(records, container, titleStr) {
 
     activeSectionData = items;
     activeQuizIdx = 0;
+    window.activeSectionData = items;
+    window.activeQuizIdx = 0;
 
     if (titleStr) {
-        document.getElementById('overlayHeaderTitle').textContent = `${SCIENCE_MISSION_META[currentMissionType].title} [${titleStr}]`;
+        const headerTitleEl = document.getElementById('overlayHeaderTitle');
+        if (headerTitleEl) {
+            headerTitleEl.textContent = `${SCIENCE_MISSION_META[currentMissionType].title} [${titleStr}]`;
+        }
     }
 
     renderSectionUI(currentMissionType, container);
@@ -1305,6 +371,7 @@ function startScienceMissionWithFilteredData(records, container, titleStr) {
 
 function renderSectionUI(type, container, unitObj) {
     if (typeof container === 'string') container = document.getElementById('overlayInnerBody');
+    if (!container) return;
     container.innerHTML = "";
 
     if (!activeSectionData || activeSectionData.length === 0) {
@@ -1318,9 +385,6 @@ function renderSectionUI(type, container, unitObj) {
     }
 
     const currentItem = activeSectionData[activeQuizIdx];
-    const screenWrapper = document.createElement("div");
-
-    // 본문 지문 요약 박스
     const passageText = (unitObj && unitObj.summary) ? unitObj.summary : (currentItem.desc || "");
     const passageHtml = (activeQuizIdx === 0 && passageText) ? `
         <div class="passage-summary-box">
@@ -1333,194 +397,27 @@ function renderSectionUI(type, container, unitObj) {
     ` : '';
 
     if (type === 'experiment') {
-        screenWrapper.className = "quiz-card";
-        
-        const chartMediaHtml = currentItem.img ? `
-            <div class="chart-container-box">
-                <div class="chart-ctrl-toolbar">
-                    <div class="chart-ctrl-group">
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
-                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
-                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
-                    </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
-                </div>
-                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="과학 교과서 탐구 자료" onerror="this.closest('.chart-container-box').style.display='none';">
-                </div>
-                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🔄 90° 회전 / 🪟 새창 열기</div>
-            </div>
-        ` : `
-            <div style="text-align:center; margin-bottom:12px;">
-                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(78, 205, 196, 0.12); border:1.5px dashed var(--primary); border-radius:14px; padding:8px 18px; font-family:'Jua', sans-serif; color:#0d9488; font-size:1.05rem;">
-                    <span>🧪 교과서 핵심 탐구 실험 분석</span>
-                </div>
-            </div>
-        `;
-
-        const choices = currentItem.choices || ["선택지 1", "선택지 2", "선택지 3", "선택지 4"];
-        const correctIdx = currentItem.correctIdx !== undefined ? currentItem.correctIdx : 0;
-        const quizQuestion = currentItem.quiz || `${currentItem.title}에서 알 수 있는 사실은 무엇일까요?`;
-
-        screenWrapper.innerHTML = `
-            ${passageHtml}
-            <div style="font-size: 0.95rem; opacity:0.7;">탐구 실험 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title || "가상 실험실"}</h3>
-            ${chartMediaHtml}
-            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem;">${currentItem.desc || ""}</div>
-            <p style="font-weight: bold; font-size:1.15rem; text-align: left; margin-top:14px;">❓ ${quizQuestion}</p>
-            <div class="quiz-choices-container">
-                ${choices.map((choice, i) => `
-                     <button class="quiz-choice-btn" onclick="verifyExperimentChoice(${i}, ${correctIdx})">${i+1}. ${choice}</button>
-                `).join('')}
-            </div>
-            <div style="margin-top: 14px; display:flex; justify-content:center;">
-                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextScienceQuiz()">건너뛰기 ⏩</button>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        if (currentItem.img) {
-            initCardZoomListeners();
+        // 🧪 ScienceLab에 위임
+        if (window.ScienceLab && typeof window.ScienceLab.renderExperimentUI === 'function') {
+            window.ScienceLab.renderExperimentUI(container, currentItem, activeQuizIdx, activeSectionData.length, passageHtml);
         }
-        speakFairyTTS((currentItem.desc || "") + ". 퀴즈!" + quizQuestion);
-
     } else if (type === 'voca') {
-        screenWrapper.className = "quiz-card";
-
-        const imageHtml = currentItem.img ? `
-            <div class="chart-container-box">
-                <div class="chart-ctrl-toolbar">
-                    <div class="chart-ctrl-group">
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)">➕ 확대</button>
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)">➖ 축소</button>
-                        <button class="card-zoom-btn" onclick="resetCardZoom()">🔄 원본</button>
-                    </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')">🪟 새창 열기</button>
-                </div>
-                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.word}" onerror="this.closest('.chart-container-box').style.display='none';">
-                </div>
-            </div>
-        ` : '';
-
-        screenWrapper.innerHTML = `
-            ${passageHtml}
-            <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 8px;">용어 퀴즈 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <div class="quiz-hint-box" style="font-size:1.3rem; margin-bottom:12px;">초성 힌트: <strong style="color:var(--accent);">${currentItem.hint || getChosung(currentItem.word)}</strong></div>
-            ${imageHtml}
-            <div class="quiz-descr" style="font-size: 1.25rem; font-weight: bold; color: var(--text-main); margin-bottom:12px;">${currentItem.meaning || currentItem.desc}</div>
-            <div class="interactive-input-group">
-                <input type="text" class="text-input-field" id="scienceAnswerInput" placeholder="정답 용어를 입력하세요!" onkeypress="if(event.key==='Enter') verifyScienceVocaAnswer()">
-                <button class="quiz-button" onclick="verifyScienceVocaAnswer()">정답 확인</button>
-            </div>
-            <div style="margin-top: 14px; display:flex; justify-content:center;">
-                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextScienceQuiz()">건너뛰기 ⏩</button>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        if (currentItem.img) {
-            initCardZoomListeners();
+        // 💡 ScienceVoca에 위임
+        if (window.ScienceVoca && typeof window.ScienceVoca.renderVocaQuiz === 'function') {
+            window.ScienceVoca.renderVocaQuiz(container, currentItem, activeQuizIdx, activeSectionData.length, passageHtml);
         }
-        setTimeout(() => {
-            const input = document.getElementById("scienceAnswerInput");
-            if (input) input.focus();
-        }, 100);
-        speakFairyTTS(currentItem.meaning || currentItem.desc);
-
     } else {
-        // nature / inventor
-        screenWrapper.className = "quiz-card";
-        const mediaHtml = currentItem.img ? `
-            <div class="chart-container-box">
-                <div class="chart-ctrl-toolbar">
-                    <div class="chart-ctrl-group">
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)">➕ 확대</button>
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)">➖ 축소</button>
-                        <button class="card-zoom-btn" onclick="resetCardZoom()">🔄 원본</button>
-                    </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')">🪟 새창 열기</button>
-                </div>
-                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.title || '탐구 자료'}" onerror="this.closest('.chart-container-box').style.display='none';">
-                </div>
-            </div>
-        ` : '';
-
-        screenWrapper.innerHTML = `
-            ${passageHtml}
-            <div style="font-size: 0.95rem; opacity:0.7;">탐구 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title || "과학 탐구"}</h3>
-            ${mediaHtml}
-            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem; margin-bottom:14px;">${currentItem.desc || ""}</div>
-            <div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">
-                <button class="quiz-button" onclick="skipToNextScienceQuiz()">다음 탐구 보기 ⏩</button>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        if (currentItem.img) {
-            initCardZoomListeners();
+        // 🌿 nature / inventor 위임
+        if (window.ScienceLab && typeof window.ScienceLab.renderNatureInventorUI === 'function') {
+            window.ScienceLab.renderNatureInventorUI(container, currentItem, activeQuizIdx, activeSectionData.length, passageHtml);
         }
-        speakFairyTTS(currentItem.desc || currentItem.title);
     }
 }
 
-window.verifyExperimentChoice = async function(choiceIdx, correctIdx) {
-    if (choiceIdx === correctIdx) {
-        if (typeof playSoundEffect === 'function') playSoundEffect('correct');
-        speakFairyTTS("정답이야! 아주 잘했어!");
-        alert("🎉 정답입니다!");
-        if (typeof rewardQuizCorrect === 'function') {
-            await rewardQuizCorrect(activeQuizIdx);
-        }
-        skipToNextScienceQuiz();
-    } else {
-        if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
-        const currentItem = activeSectionData[activeQuizIdx] || {};
-        if (!window.wrongNotes) window.wrongNotes = [];
-        window.wrongNotes.push({ word: currentItem.title || '탐구 실험', wrongInput: `선택 ${choiceIdx + 1}` });
-        speakFairyTTS("다시 한번 관찰해 봐!");
-        alert("앗, 다시 한 번 생각해 볼까요? 교과서 사진을 확대해서 살펴보세요!");
-    }
-};
-
-window.verifyScienceVocaAnswer = async function() {
-    const input = document.getElementById("scienceAnswerInput");
-    if (!input) return;
-    const userVal = input.value.trim().replace(/\s+/g, '');
-    const currentItem = activeSectionData[activeQuizIdx];
-    const answer = currentItem.word.trim().replace(/\s+/g, '');
-
-    if (userVal === answer) {
-        if (typeof playSoundEffect === 'function') playSoundEffect('correct');
-        speakFairyTTS("정답이야! 잘했어!");
-        alert(`🎉 정답! [${currentItem.word}] 맞습니다!`);
-        if (typeof rewardQuizCorrect === 'function') {
-            await rewardQuizCorrect(activeQuizIdx);
-        }
-        if (typeof triggerQuizAdvance === 'function') {
-            triggerQuizAdvance({
-                onAdvance: skipToNextScienceQuiz,
-                delayMs: 1200,
-                subject: '과학',
-                explanation: `<strong>${currentItem.word}</strong> : ${currentItem.meaning || currentItem.desc || ''}`
-            });
-        } else {
-            skipToNextScienceQuiz();
-        }
-    } else {
-        if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
-        if (!window.wrongNotes) window.wrongNotes = [];
-        window.wrongNotes.push({ word: currentItem.word, wrongInput: userVal });
-        speakFairyTTS("힌트를 보고 다시 맞춰봐!");
-        alert("아쉬워요! 초성 힌트를 다시 확인해 보세요!");
-        input.value = "";
-        input.focus();
-    }
-};
-
-window.skipToNextScienceQuiz = async function() {
+async function skipToNextScienceQuiz() {
     activeQuizIdx++;
+    window.activeQuizIdx = activeQuizIdx;
+
     if (activeQuizIdx < activeSectionData.length) {
         const curriculum = getCurriculumUnits();
         const unitObj = curriculum.find(u => u.code === selectedScienceUnit);
@@ -1535,73 +432,27 @@ window.skipToNextScienceQuiz = async function() {
         }
         openMissionView(currentMissionType);
     }
+}
+
+// ==========================================
+// 🌟 네임스페이스 및 전역 하위 호환성 브리지
+// ==========================================
+window.ScienceCommon = {
+    initialize: initializeScienceRoom,
+    openMissionView,
+    closeMissionView,
+    isMissionInProgress: isScienceMissionInProgress,
+    fetchAndBuildUI: fetchAndBuildScienceUI,
+    startMissionWithFilteredData: startScienceMissionWithFilteredData,
+    renderSectionUI,
+    skipToNextQuiz: skipToNextScienceQuiz
 };
 
-// ========================================================
-// 🔍 퀴즈 카드 일체형 교과서 사진 줌/팬 & 새창 엔진
-// 💡 [단일 원천 원칙] 공통 코어(kids/core/image_zoom_modal.js)로 일원화 완료
-// ========================================================
-
-// ========================================================
-// 🌐 전역 핵심 함수 명시적 바인딩 (인라인 HTML 이벤트 연동 철벽 방어)
-// ========================================================
-window.initializeScienceRoom = window.initializeScienceRoom || initializeScienceRoom;
-window.openMissionView = window.openMissionView || openMissionView;
-window.closeMissionView = window.closeMissionView || closeMissionView;
-
-
-// ==========================================
-// 🔬 단원 직결 보카 오픈 헬퍼
-// ==========================================
-window.openScienceVocaDirect = async function(targetGrade, targetUnit) {
-    window._isScienceDirectNavigating = true;
-    openMissionView('voca');
-
-    // 노션 또는 로컬 데이터셋 로딩 완료 대기
-    if (scienceDataLoadPromise) {
-        try {
-            await scienceDataLoadPromise;
-        } catch (e) {
-            console.warn("과학 데이터 로딩 대기 중 예외:", e);
-        }
-    } else {
-        let attempts = 0;
-        while ((!allFetchedRecords || allFetchedRecords.length === 0) && attempts < 25) {
-            await new Promise(r => setTimeout(r, 100));
-            attempts++;
-        }
-    }
-
-    window._isScienceDirectNavigating = false;
-
-    // 단원명 스마트 자동 매칭 탐색 (예: '1단원' ➔ '1. 혼합물의 분리')
-    let matchedUnit = targetUnit;
-    if (allFetchedRecords && allFetchedRecords.length > 0 && targetUnit) {
-        const cleanUnit = String(targetUnit).replace(/단원$/, '').trim();
-        const unitNumMatch = cleanUnit.match(/^(\d+)/);
-        const unitNum = unitNumMatch ? unitNumMatch[1] : cleanUnit;
-
-        const availableUnits = [...new Set(allFetchedRecords.map(r => String(r.level || r.stage || '').trim()))].filter(Boolean);
-        const found = availableUnits.find(u => {
-            if (u === targetUnit) return true;
-            if (u.includes(targetUnit)) return true;
-            if (unitNum && (u.startsWith(unitNum + '.') || u.startsWith(unitNum + '단원') || u.includes(unitNum + '단원'))) return true;
-            return false;
-        });
-        if (found) {
-            matchedUnit = found;
-        }
-    }
-
-    // 올바른 인자 순서 호출: selectScienceUnit(unitName, grade)
-    if (typeof selectScienceUnit === 'function') {
-        selectScienceUnit(matchedUnit, targetGrade);
-    }
-};
-
-// ==========================================
-// 📝 2단원 『실험관찰』 탐구 보고서 직접 실행
-// ==========================================
-window.openScienceReport2 = function() {
-    window.openScienceReport(2);
-};
+// 🌐 기존 글로벌 식별자 100% 호환 보존
+window.initializeScienceRoom = initializeScienceRoom;
+window.openMissionView = openMissionView;
+window.closeMissionView = closeMissionView;
+window.isScienceMissionInProgress = isScienceMissionInProgress;
+window.startScienceMissionWithFilteredData = startScienceMissionWithFilteredData;
+window.renderSectionUI = renderSectionUI;
+window.skipToNextScienceQuiz = skipToNextScienceQuiz;

@@ -40,6 +40,33 @@ graph TD
 | **선행 필수** | **🥽 실험실 안전 라이선스** | 복장, 비상 대처, 가열 장치 안전 수칙 5문항 | 전원 만점 시 **골드 연구원증** 발급 (+10💎) |
 | **1단원 팩** | **🧪 1단원 : 혼합물의 분리** | 동화(3권), 어휘 15종, 3대 분리 실험실, 탐구보고서 | 체 흔들기/스포이트/거름·증발 (+5💎) |
 | **2단원 팩** | **🌤️ 2단원 : 날씨와 우리 생활** | 동화(4권), 어휘 14종, 5대 날씨 실험실, 탐구보고서 | 5대 실험실(습도/이슬/구름/바람/기단) (+5💎) |
+| **3단원 팩** | **🔥 3단원 : 온도와 열** | 동화(5권), 어휘 5종, 열의 이동 탐구관, 5분 퀘스트 | 온도계/전도·대류·복사/단열 (+5💎) |
+
+---
+
+## 2-1. 🏰 골디락스 모듈화 아키텍처 (대문 파사드 + 5대 전문 서브모듈)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 따라 1,608줄의 비대했던 `science_common.js`를 1개 대문 파사드와 5개 서브모듈로 완전 분리 완료:
+
+```mermaid
+graph TD
+    HTML["kids/subjects/science/science.html"] --> Facade["🏰 science_common.js (대문 파사드, 454줄)<br>라우팅, 단원 탭, 퀴즈 브리지, 세션 가드"]
+    
+    Facade --> S0["🥽 science_safety.js (176줄)<br>window.ScienceSafety"]
+    Facade --> S1["📚 science_storybook.js (182줄)<br>window.ScienceStorybook"]
+    Facade --> S2["💡 science_voca.js (334줄)<br>window.ScienceVoca"]
+    Facade --> S3["🧪 science_lab.js (293줄)<br>window.ScienceLab"]
+    Facade --> S4["📝 science_report.js (450줄)<br>window.ScienceReport"]
+```
+
+| 모듈명 | 파일 경로 | 줄 수 | 네임스페이스 | 전담 영역 |
+| :--- | :--- | :---: | :--- | :--- |
+| **대문 파사드** | `kids/js/science_common.js` | 454줄 | `window.ScienceCommon` | 단원 탭, 미션 오버레이 라우팅, 퀴즈 루프, 세션 가드 |
+| **안전 라이선스** | `kids/js/science_safety.js` | 176줄 | `window.ScienceSafety` | 5문항 안전 시험, 골드 연구원증 발급 (+10💎) |
+| **동화 도서관** | `kids/js/science_storybook.js` | 182줄 | `window.ScienceStorybook` | 과학 단원 동화 1~5권 서가 모달 렌더러 |
+| **핵심 용어방** | `kids/js/science_voca.js` | 334줄 | `window.ScienceVoca` | 2단계 학년/단원 선택, 단원 직결 오픈, 초성 퀴즈 검증 |
+| **가상 실험실** | `kids/js/science_lab.js` | 293줄 | `window.ScienceLab` | 노션 교재 DB 실시간 쿼리/캐싱, 실험 퀴즈 UI 및 채점 |
+| **탐구 보고서** | `kids/js/science_report.js` | 450줄 | `window.ScienceReport` | 1·2단원 실험관찰 요약 노트 및 5종 실전 퀴즈 (+5💎) |
 
 ---
 

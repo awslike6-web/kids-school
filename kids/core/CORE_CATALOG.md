@@ -216,7 +216,81 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ---
 
-## 2-3. 📖 모바일 핀포인트 독해 뷰어 & 데이터 파이프라인 (Reading Engine & Pipeline)
+## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,608줄의 비대했던 `science_common.js`를 1개의 초경량 대문 파사드와 5개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.
+
+### 🌟 `science_common.js` (과학 탐구방 대문 파사드)
+오버레이 팝업 라우팅, 단원 탭 필터링, 프로필 초기화, 미션 오버레이 라우팅, 퀴즈 공통 진행 브리지, 보상 디스패처를 총괄하는 초경량 라우팅 파사드입니다.
+- **파일 위치**: `kids/js/science_common.js` (454줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `initializeScienceRoom()` | 자녀 프로필 동기화, 마스터 카운트 로드, 교재 DB 백그라운드 프리페치 |
+  | `openMissionView(type)` | 5대 미션 오버레이 열기 및 라우팅 (`storybook`, `safety`, `voca`, `lab`, `report`) |
+  | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
+  | `startScienceMissionWithFilteredData(records, container, titleStr)` | 셔플 및 필터링된 데이터 기반 미션 시작 |
+  | `renderSectionUI(type, container, unitObj)` | 퀴즈 화면 렌더링 및 서브모듈 디스패치 |
+  | `skipToNextScienceQuiz()` | 다음 문제 전환 및 10문제 완주 보너스 정산 |
+
+### 🌟 `science_safety.js` ([0단계] 실험실 안전 라이선스 시험장 전담 엔진)
+실험실 및 야외 탐구 안전 수칙 5문항 퀴즈, 무감점 재도전 피드백, 100% 통과 시 '공인 꼬마 과학자 골드 연구원증' 발급(+10💎)을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_safety.js` (176줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `ScienceSafety.renderUI(container)` | 안전 라이선스 시험장 시작 및 첫 문제 렌더링 |
+  | `ScienceSafety.renderQuestion(container, qIdx)` | 안전 수칙 문항 카드 렌더링 |
+  | `ScienceSafety.submitAnswer(qIdx, selectedIdx)` | 정답 검증 및 오답 시 격려/재도전 피드백 |
+  | `ScienceSafety.renderGoldCard(container)` | 골드 연구원증 발급 카드 렌더링 및 10💎 보상 수여 |
+
+### 🌟 `science_storybook.js` ([1단계] 과학 단원 동화 도서관 전담 엔진)
+교과서 0~3단원 과학 동화 1~5권 메타데이터(`SCIENCE_STORYBOOK_LIBRARY`) 관리 및 모달 도서관 서가 렌더링을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_storybook.js` (182줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `ScienceStorybook.renderLibrary(container)` | 과학 단원 동화 1~5권 서가 모달 UI 렌더링 |
+
+### 🌟 `science_voca.js` ([2단계] 과학 핵심 용어방 전담 엔진)
+2단계(학년/학기 ➔ 단원) 동적 선택 UI, 단원 직결 오픈(`openScienceVocaDirect`), 초성 힌트 퀴즈 렌더러 및 정답 판정을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_voca.js` (334줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `ScienceVoca.renderGradeUI(grades, container)` | 1단계 학년/학기 선택 화면 렌더링 |
+  | `ScienceVoca.renderUnitUI(units, container, records, grade)` | 2단계 단원 선택 화면 렌더링 (단어 수 배지 포함) |
+  | `ScienceVoca.openDirect(targetGrade, targetUnit)` | 특정 단원 어휘방으로 직결 진입 헬퍼 |
+  | `ScienceVoca.renderVocaQuiz(container, item, ...)` | 용어 초성 퀴즈 카드 렌더링 |
+  | `ScienceVoca.verifyAnswer()` | 입력된 용어 정답 판정 및 자동 진행 트리거 |
+
+### 🌟 `science_lab.js` ([3단계] 가상 실험실 & 교재 DB 실시간 연동 엔진)
+노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_lab.js` (293줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `ScienceLab.fetchCurriculum()` | 노션 교재 DB에서 과학 실험실/탐구보고서 데이터 실시간 쿼리 및 캐싱 |
+  | `ScienceLab.applyNotionData(items)` | 노션 데이터를 안전 라이선스 및 보고서 전역 데이터셋에 주입 |
+  | `ScienceLab.renderExperimentUI(container, item, ...)` | 실험 분석 퀴즈 및 돋보기 뷰포트 렌더링 |
+  | `ScienceLab.verifyChoice(choiceIdx, correctIdx)` | 실험 객관식 퀴즈 정답 검증 및 오답노트 적재 |
+
+### 🌟 `science_report.js` ([4단계] 『실험관찰』 디지털 탐구 보고서 & 퀴즈 전담 엔진)
+1단원(혼합물) 및 2단원(날씨) 교과서 『실험관찰』 요약 노트(읽기/복습)와 5종 실전 퀴즈(빈칸, 객관식, 순서, 자기평가), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_report.js` (450줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `ScienceReport.open(unitId)` | 1단원 또는 2단원 탐구 보고서 모달 열기 |
+  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (요약 노트 ↔ 실전 퀴즈 탭) |
+  | `ScienceReport.selectBlankWord(word)` | 빈칸 퀴즈 단어 카드 순차 조립 |
+  | `ScienceReport.checkBlankAnswer(qIdx)` | 빈칸 조립 정답 검증 및 힌트 피드백 |
+  | `ScienceReport.submitChoiceQuiz(qIdx, selectedIdx)` | 객관식 문항 판정 |
+  | `ScienceReport.finishAllQuiz()` | 5종 퀴즈 완주 보너스(+5💎) 지급 및 축하 화면 렌더링 |
+
+---
+
+## 2-6. 📖 모바일 핀포인트 독해 뷰어 & 데이터 파이프라인 (Reading Engine & Pipeline)
 
 ### 🌟 `reading_engine.js` (모바일 핀포인트 독해 뷰어 엔진)
 노션 독해 마스터 DB(`LIBRARY_DB`)에서 지문과 문제를 실시간 수급하여, 모바일 좁은 화면에서도 스크롤 피로 없이 1문항 슬라이스 카드 및 단락 힌트 토글 방식으로 쾌적하게 학습할 수 있도록 구현된 국어·영어 공통 독립 뷰어 엔진입니다.
