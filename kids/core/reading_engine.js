@@ -46,6 +46,36 @@
             student
         });
 
+        // 🛡️ [내결함성 안전망] 노션 API 일시 장애/오프라인 시 로컬 스켈레톤 지문 자동 폴백
+        if ((!currentPassages || currentPassages.length === 0) && Array.isArray(window.KOREAN_READING_DATABASE)) {
+            console.info(`🛡️ [ReadingEngine] 노션 조회 결과 없음 ➔ 로컬 캐시 폴백 가동 (트랙: ${activeTrack})`);
+            currentPassages = window.KOREAN_READING_DATABASE.filter(p => {
+                if (activeTrack.includes("교과서")) {
+                    return p.track === "🏫 교과서 독해" || (p.unit && p.unit.includes("단원"));
+                } else {
+                    return p.track === "🏥 센터 독해" || !p.unit || p.unit.includes("회");
+                }
+            }).map(p => ({
+                id: p.id,
+                title: p.title,
+                track: p.track || activeTrack,
+                unit: p.unit || p.unitTitle || "1회차",
+                order: p.order || 1,
+                fullText: p.fullText || (p.paragraphs ? p.paragraphs.map(x => x.text).join('\n') : ""),
+                summary: p.summary || p.unitTitle || "",
+                date: p.date || "",
+                questions: p.questions || (p.themeQuiz ? [{
+                    type: "choice",
+                    question: p.themeQuiz.question,
+                    options: p.themeQuiz.options,
+                    answerIndex: p.themeQuiz.answerIndex,
+                    answer: p.themeQuiz.options[p.themeQuiz.answerIndex],
+                    clue: p.fullText ? p.fullText.slice(0, 100) : "",
+                    explanation: p.themeQuiz.commentary
+                }] : [])
+            }));
+        }
+
         // 탭 버튼 스타일
         const getTabStyle = (trackName) => {
             const isActive = activeTrack === trackName;
@@ -327,7 +357,21 @@
      */
     function chooseAnswer(selectedIdx) {
         const q = activePassage.questions[activeQuestionIdx];
-        const correctIdx = typeof q.answerIndex === 'number' ? q.answerIndex : (parseInt(q.answer, 10) - 1 || 0);
+        const choices = q.choices || q.options || [];
+        let correctIdx = 0;
+        if (typeof q.answerIndex === 'number') {
+            correctIdx = q.answerIndex;
+        } else if (typeof q.answer === 'number') {
+            correctIdx = q.answer;
+        } else if (typeof q.answer === 'string') {
+            const parsedNum = parseInt(q.answer, 10);
+            if (!isNaN(parsedNum) && parsedNum >= 1 && parsedNum <= choices.length) {
+                correctIdx = parsedNum - 1;
+            } else {
+                const foundIdx = choices.findIndex(c => c.trim() === q.answer.trim());
+                correctIdx = foundIdx !== -1 ? foundIdx : 0;
+            }
+        }
 
         const btn = document.getElementById(`choiceBtn_${selectedIdx}`);
 
