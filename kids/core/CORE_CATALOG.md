@@ -481,3 +481,20 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python scripts/sync_quick_upload.py            # 신규 미디어 자동 감지 & 원클릭 일괄 배포
   ```
 
+### 🌟 `scripts/extract_reading_from_image.py` (교재 사진 기반 지문·문제·VOCA 추출 파이프라인)
+대화방 크레딧(토큰) 소모 0원으로 Google AI Studio의 `gemini-3.8-flash` Vision API를 직접 호출하여, 학습지/교재 사진 속 지문 본문(단락 보존), 핀포인트 4+1 퀴즈(객관식/단답형), 핵심 어휘/속담을 완벽 추출하고 노션 독해 DB(`LIBRARY_DB`) 및 용어사전 DB(`VOCA_DB`)에 원클릭 자동 적재하는 올인원 도구입니다.
+- **파일 위치**: `scripts/extract_reading_from_image.py` (관제탑 루트)
+- **실행 커맨드**:
+  ```bash
+  # 1장 또는 여러 장의 교재 사진 지정 후 즉시 등록
+  python scripts/extract_reading_from_image.py --images "사진1.jpg" "사진2.jpg"
+
+  # 순번/과목 수동 지정
+  python scripts/extract_reading_from_image.py --images "지문.jpg" --order 30 --subject "국어"
+
+  # 노션 등록 없이 추출 내용만 미리보기
+  python scripts/extract_reading_from_image.py --images "지문.jpg" --dry-run
+  ```
+- **연동 모듈**: `scripts/register_reading_passage.py` (노션 독해·VOCA 원소스 멀티유즈 엔진)
+
+

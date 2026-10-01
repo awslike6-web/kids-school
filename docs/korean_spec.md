@@ -171,3 +171,23 @@ graph TD
 5. **`kids/js/korean_sentence.js` (5단계, 196줄)**:
    - 독해 지문 기반 AI 심층 토론, 생각 확장 코칭, 부모 검수 뱃지 제공.
    - 2026 플래그십 표준 모델(`gemini-3.8-flash`) 탑재.
+
+---
+
+## 8. 📸 교재 사진 기반 지문·문제 자동 추출 파이프라인 (Zero-Token Vision Pipeline)
+
+대화방 크레딧(토큰) 소모를 원천 차단하고, 교재/학습지 사진에서 지문 본문, 퀴즈(객관식/단답형), 핵심 어휘/속담을 원클릭으로 노션 마스터 DB에 적재하는 파이프라인입니다.
+
+1. **실행 스크립트**: `scripts/extract_reading_from_image.py`
+2. **동작 원리**:
+   - Google AI Studio의 **`gemini-3.8-flash` Vision API**를 로컬에서 독립 호출 (대화방 세션 크레딧 0원 소모).
+   - 연필 낙서 및 자필 필기를 필터링하고 인쇄된 지문 활자본만 단락 단위로 깨끗하게 복원.
+   - 핀포인트 4+1 퀴즈(주제 객관식, 접속사 빈칸 객관식, 내용 일치 객관식, 핵심어 단답형) 자동 구조화.
+   - 지문 속 핵심 개념어 및 속담 2~4건을 자동 발굴하여 VOCA 규격으로 추출.
+   - 기존 `scripts/register_reading_passage.py`와 자동 연동되어 노션 독해 마스터 DB(`LIBRARY_DB`), 용어사전 DB(`VOCA_DB`), 로컬 영구 캐시(`reading_passages_cache.json` 및 `korean-reading-data.js`)에 원클릭 동시 적재.
+3. **각 대화방 에이전트 실행 표준 가이드**:
+   ```bash
+   # 어느 대화방이든 사용자가 사진을 주면 에이전트는 아래 명령 1줄만 실행:
+   python scripts/extract_reading_from_image.py --images "사진1.jpg" "사진2.jpg" [--order 순번] [--subject 과목]
+   ```
+
