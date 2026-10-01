@@ -30,20 +30,45 @@
 ## 2. 🗄️ 노션 연동 & 캐싱 (Notion API & Data Sync)
 
 ### 🌟 `notion-helper.js` (순수 노션 파사드 & 자동 로더)
-Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통신하는 통합 라이브러리이자 하위 호환성 파사드입니다.
-- **파일 위치**: `kids/core/notion-helper.js`
-- **단일 책임 분리 서브모듈 (클린 아키텍처 1단계)**:
-  - `kids/core/stt-debouncer.js`: STT 음성 인식 디바운스 및 세션 관리 (`setupDebouncedSTT`)
-  - `kids/core/mission-reward-engine.js`: 미션 보상 지급 및 축하 모달 렌더러 (`claimMissionRewardOnce`, `openMissionRewardModal`, `grantVocaDwellReward`)
-  - `kids/core/quiz-feedback-overlay.js`: 오답 다시풀기/다음문제 오버레이 및 이탈 방지 가드 (`ensureQuizWrongChoiceOverlay`, `window.__quizLeaveGuard`)
-  - `kids/core/fairy-chat-memory.js`: AI 요정 대화 기억 및 페르소나 매트릭스 (`parseChatMemoryPage`, `buildPersonaSystemPrompt`, `fetchRecentChatMemories`)
-- **핵심 API**:
-  | 메서드 | 파라미터 | 설명 |
+Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통신하는 통합 라이브러리이자 하위 호환성 파사드(Facade)입니다. 골디락스 헌법(300~600줄)에 따라 전문 서브모듈을 분리하고 자동 결합 로더를 탑재했습니다.
+- **파일 위치**: `kids/core/notion-helper.js` (~240줄)
+- **단일 책임 분리 서브모듈 (6대 골디락스 전문 모듈)**:
+  - `kids/core/notion-cache-manager.js` (253줄): LocalStorage 1일 캐시, 프리패칭(`prefetchVocaData`, `prefetchReadingData`), 전사 통합 노션 동기화(`syncAllNotionData`), 토스트 알림 전담.
+  - `kids/core/notion-api-client.js` (471줄): Cloudflare Worker 프록시 통신, VOCA/독해/도서관/시간표 쿼리, 노션 블록 파서, 지수 백오프 재시도 및 Rate Limit 방어.
+  - `kids/core/notion-study-logger.js` (471줄): `STUDY_LOG_DB` 학습일지 기록(중복 방어막), 오답 큐 적재, `INVENTORY_DB` 보상/레벨업 엔진, 부모 관리자 모드 격리, 상대 경로 로비 복귀.
+  - `kids/core/stt-debouncer.js`: STT 음성 인식 디바운스 및 세션 관리 (`setupDebouncedSTT`).
+  - `kids/core/mission-reward-engine.js`: 미션 보상 지급 및 축하 모달 렌더러 (`claimMissionRewardOnce`, `openMissionRewardModal`, `grantVocaDwellReward`).
+  - `kids/core/quiz-feedback-overlay.js`: 오답 다시풀기/다음문제 오버레이 및 이탈 방지 가드 (`ensureQuizWrongChoiceOverlay`, `window.__quizLeaveGuard`).
+  - `kids/core/fairy-chat-memory.js`: AI 요정 대화 기억 및 페르소나 매트릭스 (`parseChatMemoryPage`, `buildPersonaSystemPrompt`, `fetchRecentChatMemories`).
+- **핵심 API (대문 파사드를 통해 100% 하위 호환 보존)**:
+  | 메서드 | 서브모듈 | 설명 |
   | :--- | :--- | :--- |
-  | `fetchNotionTimetable()` | - | 주간 시간표 전체 목록 조회 (로컬 캐시 우선) |
-  | `fetchNotionVocabulary(subject, grade)` | `subject, grade` | 과목/학년별 핵심 어휘 목록 조회 |
-  | `fetchNotionQuizItems(options)` | `options` | 5분 퀘스트용 단원별 4지선다 문항 동적 로드 |
-  | `saveStudyLog(data)` | `{subject, duration, score}` | 당일 학습 시간 및 오답 큐 적재 |
+  | `syncAllNotionData()` | `notion-cache-manager` | 전 과목 노션 캐시를 무효화하고 최신 데이터 일괄 선로딩 |
+  | `prefetchVocaData(student)` | `notion-cache-manager` | 당일 어휘 데이터를 백그라운드에서 사전 다운로드 (0.01초 로딩) |
+  | `fetchNotionTimetable()` | `notion-api-client` | 주간 시간표 전체 목록 조회 (로컬 캐시 우선) |
+  | `fetchNotionVocabulary(subject, grade)` | `notion-api-client` | 과목/학년별 핵심 어휘 목록 조회 |
+  | `fetchNotionQuizItems(options)` | `notion-api-client` | 5분 퀘스트용 단원별 4지선다 문항 동적 로드 |
+  | `sendStudyLogToNotion(data)` | `notion-study-logger` | 당일 학습 시간 및 오답 큐 적재 (STUDY_LOG_DB) |
+  | `grantReward(earned, subject, exp)` | `notion-study-logger` | 보석/하리보 지급 및 통합 레벨업 연산 (INVENTORY_DB) |
+
+---
+
+## 2-0. 🏰 대형 로비 통합 컨트롤러 (Lobby Controller & Architecture)
+
+### 🌟 `lobby_controller.js` & `lobby.css` (대형 로비 전담 제어 엔진)
+기존 1,381줄의 거대했던 `lobby.html`을 119줄의 초경량 순수 시맨틱 마크업으로 다이어트하고, 로비 데이터 및 비즈니스 로직을 완벽히 분리한 완성형 제어 엔진입니다.
+- **파일 위치**:
+  - `kids/js/lobby_controller.js` (463줄): 유저 테마 데이터(`USER_CONFIGS`), 코어 로더, 부모 시뮬레이터 모드 분기, 요정 코코 반응형 말풍선 배너 & TTS, 2대 탭 및 월드 카드 렌더러, 인벤토리/스크린타임 동기화.
+  - `kids/css/lobby.css` (444줄): 민수 아케이드(arcade) vs 민서 비밀 아지트(hideout) 2대 반응형 테마, 히어로 바, 5분 퀘스트 배너, 모바일 그리드 스타일.
+- **핵심 API**:
+  | 함수 / 프로퍼티 | 설명 |
+  | :--- | :--- |
+  | `window.USER_CONFIGS` | 민수/민서 전 교과 월드 맵 및 테마 속성 SSOT 데이터 |
+  | `switchLobbyTab(tab)` | 'study'(공부방 월드) ↔ 'hideout'(나만의 아지트) 2대 메인 탭 전환 |
+  | `toggleFutureWorlds()` | 민서 3학년 미래 교과 보관소(사회·과학 미리보기) 아코디언 토글 |
+  | `switchAdminLobbyChild(child)` | 부모 관리자 모드 전용 자녀 공부방 실시간 퀵 스위처 |
+  | `handleFairyBubbleClick()` | 요정 코코 추천 액션(하루 체크인, 폰시간 정산, 도서관) 즉시 라우팅 |
+  | `speakBubbleMessage(event)` | 시간대/요일별 요정 코코 응원 메시지 실시간 음성 발화 |
 
 ---
 

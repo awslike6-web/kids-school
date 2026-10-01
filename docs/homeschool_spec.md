@@ -159,3 +159,20 @@
   * **보상 실시간 합산**: 아이의 기기와 부모 PC 간 로컬스토리지 격리를 극복하기 위해, 대시보드 로드 시 노션 인벤토리 DB(`374a...`)의 `오늘 획득_*` 프로퍼티를 전수 합산하여 오늘 50개 퀘스트 달성 여부를 100% 클라우드 동기화한다.
   * **원클릭 승인 영구 보존**: 부모가 승인 버튼 클릭 시 노션 인벤토리 DB의 `학습설정` 속성에 `{ "screentimeApproval": { "date": "YYYY-MM-DD", "approved": true } }`를 비동기 PATCH 저장하여, 아이의 스마트폰 화면에서도 실시간으로 "✅ 부모님 승인 완료!" 도장이 쾅 찍히도록 양방향 연동한다.
 
+---
+
+## 9. 🏛️ 대형 로비 & 노션 코어 골디락스 아키텍처 표준 (Clean Architecture & Goldilocks Modularization)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여 비대했던 대형 로비와 노션 통신 코어를 완벽히 경량화 및 책임 분리한 표준 아키텍처입니다.
+
+### ① 노션 코어 (`kids/core/notion-helper.js` 및 서브모듈군)
+- **`notion-helper.js` (대문 파사드, ~240줄)**: 모든 전역 API(`syncAllNotionData`, `sendStudyLogToNotion`, `grantReward`, `fetchNotionQuizItems` 등)를 온전히 보존하며, 6대 전문 서브모듈을 비동기 자동 결합(`_initNotionFacade`)하여 기존 호출 인터페이스의 100% 하위 호환성을 유지한다.
+- **`notion-cache-manager.js` (253줄)**: LocalStorage 1일 캐시, 프리패칭(`prefetchVocaData`, `prefetchReadingData`), 전사 통합 노션 캐시 무효화 및 일괄 갱신(`syncAllNotionData`), 토스트 안내 팝업 전담.
+- **`notion-api-client.js` (471줄)**: Cloudflare Worker 프록시 통신, VOCA/독해/도서관/시간표 쿼리, 노션 블록 파서, 지수 백오프 재시도 및 Rate Limit 방어.
+- **`notion-study-logger.js` (471줄)**: `STUDY_LOG_DB` 학습일지(중복 방어막), 오답 큐, `INVENTORY_DB` 보상/레벨업 엔진, 부모 관리자 모드 격리, 상대 경로 로비 복귀(`getRelativeLobbyUrl`).
+
+### ② 대형 로비 (`lobby.html` 및 전담 컨트롤러)
+- **`lobby.html` (119줄)**: 1,381줄의 복잡했던 인라인 스타일과 자바스크립트를 전량 외부화하여, 0.01초 로딩을 자랑하는 순수 시맨틱 마크업 뷰어로 극단적 경량화.
+- **`kids/css/lobby.css` (444줄)**: 민수 아케이드(arcade) vs 민서 비밀 아지트(hideout) 2대 반응형 테마, 히어로 바, 5분 퀘스트 배너, 모바일 그리드 스타일을 100% 캡슐화.
+- **`kids/js/lobby_controller.js` (463줄)**: 민수/민서 전 교과 월드 맵 데이터(`USER_CONFIGS`), 비동기 코어 로더, 부모 시뮬레이터 모드 분기, 시간대/요일별 요정 코코 반응형 말풍선 배너 & TTS, 2대 탭 스위칭, 3학년 미래 교과 보관소 토글, 인벤토리/스크린타임 동기화를 총괄.
+
