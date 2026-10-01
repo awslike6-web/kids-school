@@ -1,0 +1,367 @@
+@charset "UTF-8";
+
+/* ========================================================
+   📖 모바일 핀포인트 독해 뷰어 공통 스타일시트 (reading_engine.css)
+   - 국어 및 영어 독해 멀티버스 공통 코어 스타일
+   - Mobile-First 1문항 슬라이스, 바텀시트, 힌트 토글
+   ======================================================== */
+
+.reading-lobby-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+.reading-passage-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+.reading-passage-card:hover {
+    transform: translateY(-3px);
+    border-color: #ec4899;
+    box-shadow: 0 8px 20px rgba(236, 72, 153, 0.15);
+}
+.reading-unit-chip {
+    background: #fdf2f8;
+    color: #db2777;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 10px;
+    border: 1px solid #fbcfe8;
+}
+.reading-card-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.15rem;
+    color: #1e293b;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+.reading-card-desc {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+/* 1단계 지문 정독 카드 */
+.reading-reader-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+}
+.reading-reader-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.reading-tts-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.88rem;
+    padding: 6px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.reading-tts-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+.reading-passage-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.4rem;
+    color: #0f172a;
+    margin-bottom: 16px;
+    text-align: center;
+}
+.reading-body-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 22px;
+    font-size: 1.12rem;
+    line-height: 1.85;
+    color: #1e293b;
+    word-break: keep-all;
+    max-height: 60vh;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.02);
+}
+
+/* 버튼 규격 */
+.reading-btn-primary {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    color: #ffffff;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    padding: 12px 24px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
+    transition: all 0.2s;
+}
+.reading-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(236, 72, 153, 0.45);
+}
+.reading-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    padding: 12px 20px;
+    border-radius: 16px;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.reading-btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* 2단계 문항 풀이 화면 */
+.reading-question-wrapper {
+    max-width: 650px;
+    margin: 0 auto;
+    position: relative;
+}
+.reading-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid #e2e8f0;
+}
+.reading-badge-count {
+    background: #059669;
+    color: #ffffff;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+/* 💡 단락 단서 힌트 토글 (아버님 요청사항) */
+.reading-hint-toggle-btn {
+    width: 100%;
+    background: #f0fdf4;
+    border: 1.5px dashed #10b981;
+    color: #047857;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    padding: 9px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+.reading-hint-toggle-btn:hover, .reading-hint-toggle-btn.active {
+    background: #dcfce7;
+    border-color: #059669;
+}
+.reading-hint-box {
+    margin-top: 8px;
+    background: #ffffff;
+    border: 2px solid #34d399;
+    border-radius: 14px;
+    padding: 14px 18px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    animation: popIn 0.2s ease-out;
+}
+
+/* 질문 카드 */
+.reading-question-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 24px;
+}
+.reading-q-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #0f172a;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    word-break: keep-all;
+}
+.reading-choices-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.reading-choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: #1e293b;
+    text-align: left;
+    transition: all 0.2s;
+}
+.reading-choice-btn:hover {
+    border-color: #ec4899;
+    background: #fdf2f8;
+}
+.choice-num-badge {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #475569;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.reading-choice-btn:hover .choice-num-badge {
+    background: #ec4899;
+    color: #ffffff;
+}
+.reading-choice-btn.correct {
+    border-color: #10b981 !important;
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+}
+.reading-choice-btn.correct .choice-num-badge {
+    background: #10b981 !important;
+    color: #ffffff !important;
+}
+.reading-choice-btn.wrong {
+    border-color: #ef4444 !important;
+    background: #fef2f2 !important;
+    color: #991b1b !important;
+}
+
+/* 📜 바텀시트 (지문 전문 확인용) */
+.reading-bottom-sheet-bar {
+    width: 100%;
+    background: #1e293b;
+    color: #f8fafc;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    padding: 12px 18px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+.reading-bottom-sheet-bar:hover {
+    background: #334155;
+}
+.reading-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
+    z-index: 10000;
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+.reading-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1.5px solid #e2e8f0;
+}
+.reading-sheet-body {
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 1.1rem;
+    line-height: 1.85;
+    color: #1e293b;
+    word-break: keep-all;
+}
+
+/* 3단계 주관식 단답형 전용 입력창 */
+.reading-short-input-box {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+.reading-short-input {
+    flex: 1;
+    padding: 14px 18px;
+    border: 2px solid #cbd5e1;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.reading-short-input:focus {
+    border-color: #ec4899;
+}
+.reading-short-submit-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    padding: 12px 20px;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* 4단계 학습 완료 축하 카드 */
+.reading-complete-card {
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    max-width: 550px;
+    margin: 20px auto;
+}
+.reading-complete-badge {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    animation: popIn 0.3s ease-out;
+}
+.reading-complete-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.6rem;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+.reading-complete-desc {
+    font-size: 1rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    word-break: keep-all;
+}
