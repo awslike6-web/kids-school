@@ -138,3 +138,36 @@ graph TD
 3. **부모/관리자 모드 데이터 격리 및 일기 정상 등록 보장**:
    - **교과 퀴즈 테스트**: 아빠/엄마 관리자 모드로 문제 풀이 시, 아이의 학습일지 통계 및 재화 오염 방지를 위해 `sendStudyLogToNotion`을 프리패스(가상 통과)한다.
    - **부모 마음일기 (예외 유지)**: 부모가 작성하는 '하루 마음일기' 및 아이 일기에 대한 '부모 피드백'은 소중한 패밀리 자산이므로, 학생 속성 `부모관리자`, 과목 `일기`로 학습일지 DB에 정상 적재하고 당일 일상 DB(`392a2711...`)와 양방향 관계형 연동을 온전히 유지한다.
+
+---
+
+## 7. 국어방 엔진 골디락스 모듈화 아키텍처 (Goldilocks Modular Architecture)
+
+2026 전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 맞추어 기존 1,807줄의 비대했던 `kids/js/korean_common.js`를 1개의 초경량 대문 파사드와 4개의 단일 책임 완성형 서브모듈로 분리 개편함.
+
+```mermaid
+graph TD
+    Facade["🏰 대문 파사드: korean_common.js (~485줄)<br/>(초기화, 미션 오버레이, 학년/단원 필터, 보상 디스패처)"]
+    
+    Facade -->|"1단계 도서관"| M1["📚 korean_storybook.js (273줄)<br/>window.KoreanStorybook"]
+    Facade -->|"2단계 받아쓰기"| M2["✍️ korean_dictation.js (266줄)<br/>window.KoreanDictation"]
+    Facade -->|"3단계 어휘방"| M3["🧩 korean_voca.js (287줄)<br/>window.KoreanVoca"]
+    Facade -->|"4단계 정밀독해"| M4["📖 reading_engine.js (코어 공통)<br/>window.ReadingEngine"]
+    Facade -->|"5단계 AI 토론"| M5["🗣️ korean_sentence.js (196줄)<br/>window.KoreanSentence (Gemini-3.8-Flash)"]
+```
+
+### 서브모듈별 역할 및 책임
+1. **`kids/js/korean_common.js` (파사드, 485줄)**:
+   - 프로필/테마 초기화 및 백그라운드 0.01초 어휘/독해 사전 캐싱 (`prefetchVocaData`, `prefetchReadingData`).
+   - 미션 오버레이 팝업 라우팅 및 10문제 완료 시 학습일지 즉각 자동 전송 (`finalizeKoreanMissionImmediately`).
+   - 구형 레거시 독해 코드(1539~1775줄, 240줄) 완전 삭제로 유지보수 청결도 극대화.
+2. **`kids/js/korean_storybook.js` (1단계, 273줄)**:
+   - 민수(5-2) 및 민서(1-2) 도서관 서가 도감 렌더링, 탭 전환, e-Book/웹툰 뷰어 연동.
+3. **`kids/js/korean_dictation.js` (2단계, 266줄)**:
+   - 슬라임 음절 자석판(`dictationBoard`) 셔플, 직접 쓰기 하이브리드 입력, 오디오 재생, 단계별 초성 힌트, 문장 정답 검증.
+   - 인라인 따옴표 깨짐 방지를 위해 `data-char` 속성 기반 문자 전달 및 이벤트 핸들러 안전화 완료.
+4. **`kids/js/korean_voca.js` (3단계, 287줄)**:
+   - 3지선다 객관식(단어->뜻) 및 3단계 하이브리드 주관식(긴 단어 자석 빈칸 채우기, 다단어 객관식, 직접 입력) 렌더링 및 에러리스 피드백.
+5. **`kids/js/korean_sentence.js` (5단계, 196줄)**:
+   - 독해 지문 기반 AI 심층 토론, 생각 확장 코칭, 부모 검수 뱃지 제공.
+   - 2026 플래그십 표준 모델(`gemini-3.8-flash`) 탑재.

@@ -98,6 +98,63 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | :--- | :--- | :--- |
   | `openParentProgressModal()` | - | 부모 진도 관리판 모달 열기 및 최신 설정 동기화 |
   | `closeParentProgressModal()` | - | 설정창 닫기 및 메인 퀘스트 부제목 갱신 |
+
+---
+
+## 2-3. 📖 국어 멀티버스 전담 엔진군 (Korean Multiverse Engines)
+
+전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,807줄의 비대했던 `korean_common.js`를 1개의 초경량 대문 파사드와 4개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.
+
+### 🌟 `korean_common.js` (국어 멀티버스 대문 파사드)
+오버레이 팝업, 학년/단원 동적 필터, 퀴즈 공통 진행/채점 브리지, 보상 디스패처를 총괄하는 초경량 라우팅 파사드입니다.
+- **파일 위치**: `kids/js/korean_common.js` (약 480줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `initializeKoreanRoom()` | 자녀 프로필 동기화, 테마 설정, 0.01초 어휘/독해 백그라운드 선캐싱 |
+  | `openMissionView(type)` | 5대 미션 오버레이 열기 및 라우팅 (`storybook`, `dictation`, `voca`, `reading`, `sentence`) |
+  | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
+  | `renderSectionUI()` | 10문제 완료 즉각 학습일지 자동 전송 및 서브모듈 렌더러 호출 |
+
+### 🌟 `korean_storybook.js` ([1단계] 단원 동화 도서관 전담 엔진)
+민수 생각마루(5-2) 및 민서 꿈자람(1-2) 도서관 도감 렌더링과 탭 전환을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/korean_storybook.js` (273줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `KoreanStorybook.renderLibrary(container)` | 서가 도서관 전체 UI 렌더링 |
+  | `KoreanStorybook.setTab(tab)` | 전체/민수/민서 서가 탭 전환 |
+
+### 🌟 `korean_dictation.js` ([2단계] 받아쓰기 훈련소 전담 엔진)
+슬라임 음절 자석판과 직접 쓰기 하이브리드 입력, 오디오 재생, 단계적 초성 힌트, 문장 검증을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/korean_dictation.js` (266줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `KoreanDictation.renderUI(container)` | 자석판/직접입력 훈련소 UI 렌더링 |
+  | `KoreanDictation.verify()` | 슬라임 자석판 및 입력 문장 정답 검증 |
+  | `KoreanDictation.setInputMode(mode)` | 'magnet' ↔ 'typing' 모드 전환 |
+  | `KoreanDictation.stepHint()` | 숨김 ➔ 초성 힌트 ➔ 전체 정답 단계별 힌트 제어 |
+
+### 🌟 `korean_voca.js` ([3단계] 국어 어휘 퀴즈 훈련소 전담 엔진)
+객관식(단어->뜻 3지선다) 및 주관식(뜻->단어: 긴 단어 자석 빈칸 채우기, 다단어 객관식, 직접 입력) 퀴즈와 힌트/채점을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/korean_voca.js` (287줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `KoreanVoca.renderUI(container)` | 어휘 퀴즈 카드 렌더링 및 음성 자동 낭독 |
+  | `KoreanVoca.setMode(mode)` | 'choice'(객관식) ↔ 'subjective'(주관식) 전환 |
+  | `KoreanVoca.getOrderToggleHtml(type)` | 랜덤 섞기 ↔ 순서대로 토글 버튼 HTML 생성 |
+
+### 🌟 `korean_sentence.js` ([5단계] AI 지문 토론방 전담 엔진)
+지문별 AI 심층 토론, 생각 확장 코칭, 부모 검수 뱃지, 실시간 대화 보상을 전담하며 2026 플래그십 표준(`gemini-3.8-flash`)을 탑재한 독립 모듈입니다.
+- **파일 위치**: `kids/js/korean_sentence.js` (196줄)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `KoreanSentence.renderUI(container)` | 지문 선택 목록 렌더링 |
+  | `KoreanSentence.startMission(bookId)` | 지문 토론 세션 초기화 및 채팅창 렌더링 |
+  | `KoreanSentence.processInput()` | 사용자 생각 입력 처리 및 Gemini API 통신·보상 판정 |
   | `setParentSemester(child, sem)` | `child, sem` | 학기 알약 탭 전환 (5-2/5-1/지혜반/전체, 1-2/1-1/기초/전체) |
   | `toggleReviewOption(child, opt)` | `child, opt` | 망각곡선 4번 누적 복습 풀 확장 토글 제어 |
   | `setParentUnit(child, subj, unit)` | `child, subj, unit` | 개별 과목 단원 선택 및 하이라이트 동기화 |
