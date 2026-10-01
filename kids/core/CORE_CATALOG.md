@@ -104,6 +104,20 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | `syncDynamicUnitChips()` | - | HTML 빈 컨테이너에 노션 VOCA DB/로컬 마스터 기반 100% 동적 칩 주입 |
   | `saveParentProgressSettings()` | - | 설정 로컬 저장 및 백그라운드 노션 클라우드 동기화 |
 
+### 🌟 `monster_lab_controller.js` & `monster_lab.css` (연구소 메인 인터랙션 코어)
+5분 퀘스트 메인 로비의 신디사이저 사운드 합성, 캐릭터/테마 동적 스위칭, 3D 몬스터 상호작용 및 4+1 듀오링고 직결 출격을 총괄하는 독립 컨트롤러 및 스타일시트입니다.
+- **파일 위치**:
+  - `kids/subjects/quest/monster_lab_controller.js` (인터랙션/오디오 컨트롤러)
+  - `kids/subjects/quest/monster_lab.css` (3D 클레이/애니메이션 스타일)
+- **핵심 API**:
+  | 메서드 | 파라미터 | 설명 |
+  | :--- | :--- | :--- |
+  | `pokeSound(type)` | `'pop'\|'launch'\|'coin'\|'monster'\|'level'` | 웹 오디오 API 기반 4대 물리 사운드 합성 출력 |
+  | `applyTheme()` | - | 사용자 프로필 기반 민수(사이버 네온)/민서(파스텔 피치) 테마 스위칭 |
+  | `pokeMonster(event)` | `[event]` | 3D 몬스터 콕 바운스 애니메이션, 말풍선 대사 및 음성 출력 |
+  | `launchQuestDirect(subj)` | `subj` | 선택 과목 및 설정 단원으로 4+1 듀오링고 퀘스트 즉시 출격 |
+  | `handleSecretParentUnlock()` | - | 레벨 배지 5회 연속 탭 시 부모님 비밀번호 긴급 인증 해제 |
+
 ---
 
 ## 3. 📖 스토리북 공통 뷰어 엔진 (Storybook Viewer)
