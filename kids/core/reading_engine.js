@@ -12,6 +12,8 @@
     let activePassage = null;
     let activeQuestionIdx = 0;
     let activeTrack = "🏥 센터 독해"; // "🏥 센터 독해" or "🏫 교과서 독해"
+    let activeGrade = "5-1"; // 영어 등 학기/학년 탭 구분
+    let activeSubject = "국어";
     let userAnswers = [];
     let isHintOpen = false;
     let isBottomSheetOpen = false;
@@ -23,7 +25,14 @@
     async function renderReadingLobby(container, options = {}) {
         containerEl = container;
         const subject = options.subject || window.currentSubject || "국어";
+        activeSubject = subject;
         const student = (window.currentUserName === '민서') ? '민서' : '민수';
+
+        if (subject === "영어") {
+            activeTrack = "🏫 교과서 독해";
+            if (!options.grade && !activeGrade) activeGrade = "5-1";
+            else if (options.grade) activeGrade = options.grade;
+        }
 
         container.innerHTML = `
             <div class="spinner-wrapper">
@@ -39,55 +48,65 @@
             return;
         }
 
-        // 노션 독해 마스터 DB에서 실시간 조회
-        currentPassages = await window.fetchReadingPassagesFromNotion({
+        // 노션 독해 마스터 DB에서 실시간 조회 (영어는 학년 필터 포함)
+        const fetchParams = {
             subject,
             track: activeTrack,
             student
-        });
+        };
+        if (subject === "영어") {
+            fetchParams.grade = activeGrade;
+        }
 
-        // 🛡️ [내결함성 안전망] 노션 API 일시 장애/오프라인 시 로컬 스켈레톤 지문 자동 폴백
-        if ((!currentPassages || currentPassages.length === 0) && Array.isArray(window.KOREAN_READING_DATABASE)) {
-            console.info(`🛡️ [ReadingEngine] 노션 조회 결과 없음 ➔ 로컬 캐시 폴백 가동 (트랙: ${activeTrack})`);
-            currentPassages = window.KOREAN_READING_DATABASE.filter(p => {
-                if (activeTrack.includes("교과서")) {
-                    return p.track === "🏫 교과서 독해" || (p.unit && p.unit.includes("단원"));
-                } else {
-                    return p.track === "🏥 센터 독해" || !p.unit || p.unit.includes("회");
-                }
-            }).map(p => ({
-                id: p.id,
-                title: p.title,
-                track: p.track || activeTrack,
-                unit: p.unit || p.unitTitle || "1회차",
-                order: p.order || 1,
-                fullText: p.fullText || (p.paragraphs ? p.paragraphs.map(x => x.text).join('\n') : ""),
-                summary: p.summary || p.unitTitle || "",
-                date: p.date || "",
-                questions: p.questions || (p.themeQuiz ? [{
-                    type: "choice",
-                    question: p.themeQuiz.question,
-                    options: p.themeQuiz.options,
-                    answerIndex: p.themeQuiz.answerIndex,
-                    answer: p.themeQuiz.options[p.themeQuiz.answerIndex],
-                    clue: p.fullText ? p.fullText.slice(0, 100) : "",
-                    explanation: p.themeQuiz.commentary
-                }] : [])
-            }));
+        currentPassages = await window.fetchReadingPassagesFromNotion(fetchParams);
+
+        // 🛡️ [내결함성 안전망] 노션 API 일시 장애/오프라인 시 로컬 캐시 폴백
+        if ((!currentPassages || currentPassages.length === 0)) {
+            const cacheKey = (subject === "영어") ? window.ENGLISH_READING_DATABASE : window.KOREAN_READING_DATABASE;
+            if (Array.isArray(cacheKey)) {
+                console.info(`🛡️ [ReadingEngine] 노션 조회 결과 없음 ➔ 로컬 캐시 폴백 가동 (과목: ${subject}, 학년: ${activeGrade})`);
+                currentPassages = cacheKey.filter(p => {
+                    if (subject === "영어") {
+                        const pGrade = p.grade || "5-1";
+                        return pGrade.includes(activeGrade) || (activeGrade === "5-1" && !pGrade.includes("5-2"));
+                    } else {
+                        if (activeTrack.includes("교과서")) {
+                            return p.track === "🏫 교과서 독해" || (p.unit && p.unit.includes("단원"));
+                        } else {
+                            return p.track === "🏥 센터 독해" || !p.unit || p.unit.includes("회");
+                        }
+                    }
+                }).map(p => ({
+                    id: p.id,
+                    title: p.title,
+                    track: p.track || activeTrack,
+                    unit: p.unit || p.unitTitle || "1회차",
+                    order: p.order || 1,
+                    fullText: p.fullText || (p.paragraphs ? p.paragraphs.map(x => x.text).join('\n') : ""),
+                    summary: p.summary || p.unitTitle || "",
+                    date: p.date || "",
+                    questions: p.questions || (p.themeQuiz ? [{
+                        type: "choice",
+                        question: p.themeQuiz.question,
+                        options: p.themeQuiz.options,
+                        answerIndex: p.themeQuiz.answerIndex,
+                        answer: p.themeQuiz.options[p.themeQuiz.answerIndex],
+                        clue: p.fullText ? p.fullText.slice(0, 100) : "",
+                        explanation: p.themeQuiz.commentary
+                    }] : [])
+                }));
+            }
         }
 
         // 탭 버튼 스타일
-        const getTabStyle = (trackName) => {
-            const isActive = activeTrack === trackName;
-            return `
-                padding: 10px 18px; border-radius: 20px; font-family: 'Jua', sans-serif;
-                font-size: 1rem; cursor: pointer; border: 2px solid ${isActive ? '#ec4899' : '#cbd5e1'};
-                background: ${isActive ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' : '#ffffff'};
-                color: ${isActive ? '#ffffff' : '#475569'};
-                box-shadow: ${isActive ? '0 4px 12px rgba(236, 72, 153, 0.3)' : 'none'};
-                transition: all 0.2s;
-            `;
-        };
+        const getTabStyle = (isSelected) => `
+            padding: 10px 18px; border-radius: 20px; font-family: 'Jua', sans-serif;
+            font-size: 1rem; cursor: pointer; border: 2px solid ${isSelected ? '#ec4899' : '#cbd5e1'};
+            background: ${isSelected ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' : '#ffffff'};
+            color: ${isSelected ? '#ffffff' : '#475569'};
+            box-shadow: ${isSelected ? '0 4px 12px rgba(236, 72, 153, 0.3)' : 'none'};
+            transition: all 0.2s;
+        `;
 
         const listHtml = currentPassages.length > 0 ? currentPassages.map((p, idx) => {
             const qCount = p.questions ? p.questions.length : 0;
@@ -111,32 +130,50 @@
         }).join('') : `
             <div style="grid-column: 1 / -1; text-align:center; padding:40px 20px; background:#fff; border-radius:18px; border:2px dashed #cbd5e1;">
                 <div style="font-size:2.5rem; margin-bottom:10px;">📭</div>
-                <h4 style="font-family:'Jua', sans-serif; font-size:1.2rem; color:#475569; margin-bottom:6px;">등록된 ${activeTrack} 지문이 없습니다.</h4>
+                <h4 style="font-family:'Jua', sans-serif; font-size:1.2rem; color:#475569; margin-bottom:6px;">등록된 ${subject === '영어' ? activeGrade : activeTrack} 지문이 없습니다.</h4>
                 <p style="font-size:0.9rem; color:#94a3b8;">부모님이 스마트폰 노션 앱에서 지문을 등록하시면 바로 여기에 나타납니다!</p>
             </div>
         `;
+
+        // 상단 탭 HTML (영어 vs 국어 분기)
+        let tabButtonsHtml = "";
+        if (subject === "영어") {
+            tabButtonsHtml = `
+                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <button style="${getTabStyle(activeGrade === '5-1')}" onclick="window.ReadingEngine.switchGrade('5-1')">
+                        📘 5-1 1학기 교과서 독해 (1~6단원)
+                    </button>
+                    <button style="${getTabStyle(activeGrade === '5-2')}" onclick="window.ReadingEngine.switchGrade('5-2')">
+                        📗 5-2 2학기 교과서 독해
+                    </button>
+                </div>
+            `;
+        } else {
+            tabButtonsHtml = `
+                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <button style="${getTabStyle(activeTrack === '🏥 센터 독해')}" onclick="window.ReadingEngine.switchTrack('🏥 센터 독해')">
+                        🏥 센터 언어치료 독해 (회차순)
+                    </button>
+                    <button style="${getTabStyle(activeTrack === '🏫 교과서 독해')}" onclick="window.ReadingEngine.switchTrack('🏫 교과서 독해')">
+                        🏫 5-2 학교 교과서 독해 (단원순)
+                    </button>
+                </div>
+            `;
+        }
 
         container.innerHTML = `
             <div style="max-width: 860px; margin: 0 auto; padding: 10px;">
                 <!-- 상단 헤더 -->
                 <div style="text-align: center; margin-bottom: 20px;">
                     <h3 style="font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #1e293b; margin-bottom: 6px;">
-                        📖 정밀 독해 트레이닝 멀티버스
+                        📖 [${subject}] 정밀 독해 트레이닝 멀티버스
                     </h3>
                     <p style="font-size: 0.95rem; color: #64748b;">
                         지문을 차근차근 정독하고, 문제 속 단서를 찾아 스스로 해결해 봐요! ✨
                     </p>
                 </div>
 
-                <!-- 2대 트랙 탭 바 (센터 vs 교과서) -->
-                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
-                    <button style="${getTabStyle('🏥 센터 독해')}" onclick="window.ReadingEngine.switchTrack('🏥 센터 독해')">
-                        🏥 센터 언어치료 독해 (회차순)
-                    </button>
-                    <button style="${getTabStyle('🏫 교과서 독해')}" onclick="window.ReadingEngine.switchTrack('🏫 교과서 독해')">
-                        🏫 5-2 학교 교과서 독해 (단원순)
-                    </button>
-                </div>
+                ${tabButtonsHtml}
 
                 <!-- 지문 카드 그리드 -->
                 <div class="reading-lobby-grid">
@@ -147,12 +184,22 @@
     }
 
     /**
+     * 🔄 학년 전환 (영어 전용: 5-1 vs 5-2)
+     */
+    function switchGrade(gradeName) {
+        activeGrade = gradeName;
+        if (containerEl) {
+            renderReadingLobby(containerEl, { subject: activeSubject, grade: gradeName });
+        }
+    }
+
+    /**
      * 🔄 트랙 전환 (센터 vs 교과서)
      */
     function switchTrack(trackName) {
         activeTrack = trackName;
         if (containerEl) {
-            renderReadingLobby(containerEl);
+            renderReadingLobby(containerEl, { subject: activeSubject });
         }
     }
 
@@ -515,6 +562,7 @@
     window.ReadingEngine = {
         renderLobby: (c, opts) => renderReadingLobby(c || containerEl, opts),
         switchTrack,
+        switchGrade,
         startMission,
         startQuestions,
         renderStep1Reader,

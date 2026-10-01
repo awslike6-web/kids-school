@@ -223,31 +223,57 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             }
         }
         
-        if (type === 'stage5' || type === 'stage6') {
-            let libraryRecords = [];
-            if (typeof fetchLibraryBooksFromNotion === 'function') {
+        if (type === 'stage6') {
+            let notionPassages = [];
+            if (typeof fetchReadingPassagesFromNotion === 'function') {
                 try {
-                    libraryRecords = await fetchLibraryBooksFromNotion();
+                    notionPassages = await fetchReadingPassagesFromNotion({ subject: "영어", student: targetStudent });
                 } catch (err) {
-                    console.warn('[english] 도서관 노션 조회 실패, 로컬 지문으로 대체:', err);
+                    console.warn('[english] 독해 DB 조회 실패, 로컬 지문으로 대체:', err);
                 }
             }
 
-            const fallbackDb = typeof ENGLISH_READING_DATABASE !== 'undefined' ? ENGLISH_READING_DATABASE : [];
-            readingFetchedBooks = typeof resolveReadingPassageList === 'function'
-                ? resolveReadingPassageList(libraryRecords, fallbackDb)
-                : fallbackDb.slice(0, 10);
+            const localDb = (typeof ENGLISH_READING_DATABASE !== 'undefined' && Array.isArray(ENGLISH_READING_DATABASE))
+                ? ENGLISH_READING_DATABASE
+                : [];
+
+            let mergedPassages = [];
+            const seen = new Set();
+
+            // 1. 2학기 최신 스토리북/단원 지문(8단원, 7단원 등) 우선 배치
+            for (const b of localDb) {
+                if (!seen.has(b.id)) {
+                    mergedPassages.push(b);
+                    seen.add(b.id);
+                }
+            }
+
+            // 2. 노션 독해 마스터 DB 지문 병합
+            for (const np of (notionPassages || [])) {
+                const docId = np.id || np.book_id;
+                if (docId && !seen.has(docId)) {
+                    mergedPassages.push({
+                        id: docId,
+                        title: np.title,
+                        fullText: np.fullText,
+                        summary: np.summary,
+                        translation: np.translation || np.summary || "",
+                        paragraphs: np.paragraphs || [{ id: 'p1', label: 'A', text: np.fullText }]
+                    });
+                    seen.add(docId);
+                }
+            }
+
+            readingFetchedBooks = mergedPassages;
             window.readingFetchedBooks = readingFetchedBooks;
 
             if (readingFetchedBooks.length === 0) {
-                innerBody.innerHTML = `<div style="text-align:center; padding:40px;">등록된 지문이 없습니다.</div>`;
+                innerBody.innerHTML = `<div style="text-align:center; padding:40px;">등록된 토론 지문이 없습니다.</div>`;
                 return;
             }
 
-            if (type === 'stage6') {
-                if (window.EnglishChat && typeof window.EnglishChat.renderSentenceUI === 'function') {
-                    window.EnglishChat.renderSentenceUI(innerBody, readingFetchedBooks);
-                }
+            if (window.EnglishChat && typeof window.EnglishChat.renderSentenceUI === 'function') {
+                window.EnglishChat.renderSentenceUI(innerBody, readingFetchedBooks);
             }
             return;
         }

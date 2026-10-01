@@ -438,6 +438,10 @@ async function fetchReadingPassagesFromNotion(options = {}) {
             andFilters.push({ property: "트랙", select: { equals: track } });
         }
 
+        if (options.grade) {
+            andFilters.push({ property: "학년", multi_select: { contains: options.grade } });
+        }
+
         const queryBody = {
             filter: andFilters.length > 1 ? { and: andFilters } : andFilters[0],
             sorts: [
