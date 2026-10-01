@@ -171,7 +171,7 @@
     },
     minsu: {
       math: { current: 'division', next: 'fraction', division: 'fraction', fraction: 'division' },
-      english: { current: '8', next: '7', '8': '7', '7': '8' },
+      english: { current: 'L9', next: 'L7', 'L7': 'L8', 'L8': 'L9', 'L9': 'L7', '7': '8', '8': '9', '9': '7' },
       korean: { current: '1', next: '2', '1': '2', '2': '1' },
       science: { current: '1', next: '2', '1': '2', '2': '3', '3': '1' },
       society: { current: '1', next: '2', '1': '2', '2': '3', '3': '1' }
@@ -179,7 +179,7 @@
   };
 
   /**
-   * 🔄 유연한 다음 단원 계산기 (정적 맵핑 + L1~L10/1~10단원 무한 자동 순환)
+   * 🔄 유연한 다음 단원 계산기 (정적 맵핑 + 2학기 7~9단원 자동 순환)
    */
   function getNextUnitKey(child, subj, currentUnit) {
     const childMap = NEXT_UNIT_MAP[child] && NEXT_UNIT_MAP[child][subj];
@@ -192,7 +192,14 @@
       if (matchL) {
         const num = parseInt(matchL[1], 10);
         const prefix = currentUnit.toUpperCase().startsWith('L') ? 'L' : '';
-        const nextNum = num >= 10 ? 1 : num + 1;
+        let nextNum;
+        if (subj === 'english' && num >= 7 && num <= 9) {
+          nextNum = (num >= 9) ? 7 : num + 1; // 2학기는 7, 8, 9단원 내에서 안전 순환
+        } else if (subj === 'english' && num <= 6) {
+          nextNum = (num >= 6) ? 1 : num + 1;
+        } else {
+          nextNum = (num >= 10) ? 1 : num + 1;
+        }
         return `${prefix}${nextNum}`;
       }
     }
