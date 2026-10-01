@@ -241,19 +241,23 @@
             return;
         }
 
+        isHintOpen = false; // 새 문항 시작 시 힌트 기본 접힘 상태 유지
         const q = questions[activeQuestionIdx];
         const total = questions.length;
         const currentNum = activeQuestionIdx + 1;
 
-        // 💡 단락 힌트 박스 HTML (아버님 요청: 토글로 숨김/표시)
-        const hintHtml = q.hintParagraph ? `
+        // 💡 단락 힌트 박스 HTML (아버님 요청: 토글로 숨김/표시 - clue / hintParagraph 완벽 호환)
+        const hintText = (q.clue || q.hint || q.hintParagraph || '').trim();
+        const chosungText = (q.chosung || q.chosungHint || '').trim();
+
+        const hintHtml = hintText ? `
             <div style="margin-bottom:14px;">
-                <button type="button" class="reading-hint-toggle-btn ${isHintOpen ? 'active' : ''}" onclick="window.ReadingEngine.toggleHint()">
+                <button type="button" id="readingHintToggleBtn" class="reading-hint-toggle-btn ${isHintOpen ? 'active' : ''}" onclick="window.ReadingEngine.toggleHint()">
                     💡 ${isHintOpen ? '이 문제의 결정적 단서 접기 🙈' : '이 문제의 결정적 단서 보기 (단락 힌트) 🔍'}
                 </button>
                 <div id="readingHintBox" class="reading-hint-box" style="display:${isHintOpen ? 'block' : 'none'};">
                     <div style="font-weight:bold; color:#059669; font-size:0.85rem; margin-bottom:4px;">✨ 지문 속 정답 단서:</div>
-                    <div style="font-size:0.95rem; color:#1e293b; line-height:1.6;">${q.hintParagraph}</div>
+                    <div style="font-size:0.95rem; color:#1e293b; line-height:1.6;">${hintText}</div>
                 </div>
             </div>
         ` : '';
@@ -264,7 +268,7 @@
             // 단답형 주관식
             inputHtml = `
                 <div style="margin: 20px 0;">
-                    ${q.chosungHint ? `<div class="quiz-hint-box" style="margin-bottom:12px;">초성 힌트: ${q.chosungHint}</div>` : ''}
+                    ${chosungText ? `<div class="quiz-hint-box" style="margin-bottom:12px;">초성 힌트: ${chosungText}</div>` : ''}
                     <input type="text" id="readingShortInput" class="text-input-field" placeholder="정답을 입력하세요" style="width:100%; max-width:360px;" onkeypress="if(event.key==='Enter')window.ReadingEngine.submitShortAnswer()">
                     <div style="margin-top:14px;">
                         <button class="reading-btn-primary" onclick="window.ReadingEngine.submitShortAnswer()">✅ 정답 확인</button>
@@ -332,8 +336,13 @@
     function toggleHint() {
         isHintOpen = !isHintOpen;
         const box = document.getElementById('readingHintBox');
+        const btn = document.getElementById('readingHintToggleBtn');
         if (box) {
             box.style.display = isHintOpen ? 'block' : 'none';
+        }
+        if (btn) {
+            btn.classList.toggle('active', isHintOpen);
+            btn.innerHTML = `💡 ${isHintOpen ? '이 문제의 결정적 단서 접기 🙈' : '이 문제의 결정적 단서 보기 (단락 힌트) 🔍'}`;
         }
     }
 

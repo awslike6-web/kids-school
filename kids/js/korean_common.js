@@ -720,7 +720,12 @@ function renderDynamicUnitUI(units, container) {
     }
 
     let html = `<div style="text-align:center; margin-bottom:20px;">
-        <h3 style="color:var(--sky); margin-bottom:15px;">📚 [${selectedKoreanGrade}] 도전할 단원을 선택하세요!</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
+            <h3 style="color:var(--sky); margin:0; font-family:'Jua', sans-serif;">📚 [${selectedKoreanGrade}] 도전할 단원을 선택하세요!</h3>
+            <button onclick="window.refreshKoreanVoca()" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:12px; padding:6px 12px; font-size:0.82rem; cursor:pointer; color:#475569; display:inline-flex; align-items:center; gap:4px;" title="노션 최신 단어 즉시 동기화">
+                🔄 최신 단어 동기화
+            </button>
+        </div>
         <div class="grade-grid">`;
     units.forEach(u => {
         html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnit('${u}')">${u}</button>`;
@@ -732,6 +737,19 @@ function renderDynamicUnitUI(units, container) {
     </div>`;
     container.innerHTML = html;
 }
+
+window.refreshKoreanVoca = async function() {
+    const innerBody = document.getElementById('overlayInnerBody');
+    if (innerBody) {
+        innerBody.innerHTML = `<div style="text-align:center; padding:40px;"><div class="quiz-spinner"></div><p style="margin-top:12px; color:#db2777; font-family:'Jua',sans-serif;">🔄 노션 VOCA DB에서 최신 단어를 동기화하는 중입니다...</p></div>`;
+    }
+    if (typeof clearVocaCache === 'function') {
+        clearVocaCache();
+    }
+    if (typeof fetchAndBuildDynamicUI === 'function') {
+        await fetchAndBuildDynamicUI(currentMissionType, innerBody);
+    }
+};
 
 window.selectDynamicUnit = function(unit) {
     selectedKoreanUnit = unit;
