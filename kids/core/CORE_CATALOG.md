@@ -329,3 +329,21 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   ```
 - **특징**: `CORE_CATALOG.md`를 런타임에 동적으로 읽어 들이므로, 카탈로그가 수정/추가/삭제되는 즉시 변경사항이 100% 실시간(Zero Drift)으로 네비게이션에 반영됩니다.
 
+### 🌟 `scripts/check_session_stats.py` (대화방 세션 건강도 & 압축 진단 초경량 도구)
+모든 대화방에서 토큰 소모 없이 0.05초 만에 압축(Compaction) 횟수, 총 스텝 수, 대화 턴 수, 세션 건강도(🟢 짱짱함 등)를 4줄 요약 박스로 출력하는 전사 공통 도구입니다.
+- **파일 위치**: `scripts/check_session_stats.py` (관제탑 루트)
+- **실행 커맨드**:
+  ```bash
+  python scripts/check_session_stats.py          # 현재/최근 활성 대화방 진단
+  python scripts/check_session_stats.py --all    # 전체 35개 대화방 현황 테이블
+  python scripts/check_session_stats.py [ID]     # 특정 대화방 진단
+  ```
+
+### 🌟 `scripts/sync_quick_upload.py` (모바일 퀵업로드 & 미디어 갤러리 원클릭 파이프라인)
+모바일 퀵업로드 감지 또는 로컬 신규 사진을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` 갱신, 양쪽 깃허브 푸시, 노션 연동까지 15~30초 만에 일괄 완결하는 올인원 파이프라인입니다.
+- **파일 위치**: `scripts/sync_quick_upload.py` (관제탑 루트)
+- **실행 커맨드**:
+  ```bash
+  python scripts/sync_quick_upload.py            # 신규 미디어 자동 감지 & 원클릭 일괄 배포
+  ```
+
