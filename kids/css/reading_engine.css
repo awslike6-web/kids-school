@@ -365,3 +365,69 @@
     margin-bottom: 24px;
     word-break: keep-all;
 }
+
+/* 🏷️ [단원별 그룹화 & 학년 선택 바 스타일] */
+.reading-grade-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+.reading-grade-chip {
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    box-shadow: none;
+    transition: all 0.2s;
+    user-select: none;
+}
+.reading-grade-chip:hover {
+    border-color: #f43f5e;
+    color: #f43f5e;
+    transform: translateY(-2px);
+}
+.reading-grade-chip.active {
+    border-color: #f43f5e;
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+}
+
+.reading-unit-section {
+    margin-bottom: 32px;
+}
+.reading-unit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    margin-bottom: 14px;
+    background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+    border-left: 5px solid #f43f5e;
+    border-radius: 0 12px 12px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.reading-unit-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.15rem;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.reading-unit-count {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: bold;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+

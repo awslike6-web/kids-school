@@ -430,15 +430,26 @@ async function fetchReadingPassagesFromNotion(options = {}) {
     }
 
     try {
-        const andFilters = [
-            { property: "과목", select: { equals: subject } }
-        ];
+        let subjectFilter;
+        if (subject === "영어") {
+            subjectFilter = { property: "과목", select: { equals: "영어" } };
+        } else {
+            // 국어는 명시적 '국어'이거나 과목 미설정 레코드(기본 국어 센터)까지 포괄
+            subjectFilter = {
+                or: [
+                    { property: "과목", select: { equals: "국어" } },
+                    { property: "과목", select: { is_empty: true } }
+                ]
+            };
+        }
+
+        const andFilters = [subjectFilter];
 
         if (track) {
             andFilters.push({ property: "트랙", select: { equals: track } });
         }
 
-        if (options.grade) {
+        if (options.grade && options.grade !== 'ALL') {
             andFilters.push({ property: "학년", multi_select: { contains: options.grade } });
         }
 
@@ -496,6 +507,7 @@ async function fetchReadingPassagesFromNotion(options = {}) {
                 id: barcode,
                 pageId: page.id,
                 title,
+                subject: p["과목"]?.select?.name || subject || "국어",
                 track: trackVal,
                 unit: unitVal,
                 order: orderVal,

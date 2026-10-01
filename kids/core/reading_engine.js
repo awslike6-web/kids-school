@@ -20,7 +20,7 @@
     let containerEl = null;
 
     /**
-     * 🏁 독해 로비 화면 (트랙 탭 + 회차별/단원별 서가)
+     * 🏁 독해 로비 화면 (공부방 표준: 학년 선택 바 + 단원별 그룹화 서가)
      */
     async function renderReadingLobby(container, options = {}) {
         containerEl = container;
@@ -28,10 +28,11 @@
         activeSubject = subject;
         const student = (window.currentUserName === '민서') ? '민서' : '민수';
 
-        if (subject === "영어") {
-            activeTrack = "🏫 교과서 독해";
-            if (!options.grade && !activeGrade) activeGrade = "5-1";
-            else if (options.grade) activeGrade = options.grade;
+        // 학년 기본값 설정
+        if (options.grade) {
+            activeGrade = options.grade;
+        } else if (!activeGrade || activeGrade === 'ALL') {
+            activeGrade = (subject === "영어") ? "5-1" : "5-2";
         }
 
         container.innerHTML = `
@@ -48,39 +49,25 @@
             return;
         }
 
-        // 노션 독해 마스터 DB에서 실시간 조회 (영어는 학년 필터 포함)
+        // 노션 독해 마스터 DB에서 실시간 조회 (과목 전체 수급 후 클라이언트 스마트 필터링)
         const fetchParams = {
             subject,
-            track: activeTrack,
             student
         };
-        if (subject === "영어") {
-            fetchParams.grade = activeGrade;
-        }
 
-        currentPassages = await window.fetchReadingPassagesFromNotion(fetchParams);
+        let rawPassages = await window.fetchReadingPassagesFromNotion(fetchParams);
 
         // 🛡️ [내결함성 안전망] 노션 API 일시 장애/오프라인 시 로컬 캐시 폴백
-        if ((!currentPassages || currentPassages.length === 0)) {
+        if (!rawPassages || rawPassages.length === 0) {
             const cacheKey = (subject === "영어") ? window.ENGLISH_READING_DATABASE : window.KOREAN_READING_DATABASE;
             if (Array.isArray(cacheKey)) {
-                console.info(`🛡️ [ReadingEngine] 노션 조회 결과 없음 ➔ 로컬 캐시 폴백 가동 (과목: ${subject}, 학년: ${activeGrade})`);
-                currentPassages = cacheKey.filter(p => {
-                    if (subject === "영어") {
-                        const pGrade = p.grade || "5-1";
-                        return pGrade.includes(activeGrade) || (activeGrade === "5-1" && !pGrade.includes("5-2"));
-                    } else {
-                        if (activeTrack.includes("교과서")) {
-                            return p.track === "🏫 교과서 독해" || (p.unit && p.unit.includes("단원"));
-                        } else {
-                            return p.track === "🏥 센터 독해" || !p.unit || p.unit.includes("회");
-                        }
-                    }
-                }).map(p => ({
+                console.info(`🛡️ [ReadingEngine] 노션 조회 결과 없음 ➔ 로컬 캐시 폴백 가동 (과목: ${subject})`);
+                rawPassages = cacheKey.map(p => ({
                     id: p.id,
                     title: p.title,
-                    track: p.track || activeTrack,
+                    track: p.track || (subject === '영어' ? '🏫 교과서 독해' : '🏥 센터 독해'),
                     unit: p.unit || p.unitTitle || "1회차",
+                    grade: p.grade || "5-1",
                     order: p.order || 1,
                     fullText: p.fullText || (p.paragraphs ? p.paragraphs.map(x => x.text).join('\n') : ""),
                     summary: p.summary || p.unitTitle || "",
@@ -98,67 +85,123 @@
             }
         }
 
-        // 탭 버튼 스타일
-        const getTabStyle = (isSelected) => `
-            padding: 10px 18px; border-radius: 20px; font-family: 'Jua', sans-serif;
-            font-size: 1rem; cursor: pointer; border: 2px solid ${isSelected ? '#ec4899' : '#cbd5e1'};
-            background: ${isSelected ? 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' : '#ffffff'};
-            color: ${isSelected ? '#ffffff' : '#475569'};
-            box-shadow: ${isSelected ? '0 4px 12px rgba(236, 72, 153, 0.3)' : 'none'};
-            transition: all 0.2s;
-        `;
+        currentPassages = rawPassages || [];
 
-        const listHtml = currentPassages.length > 0 ? currentPassages.map((p, idx) => {
-            const qCount = p.questions ? p.questions.length : 0;
-            const dateBadge = p.date ? `<span style="font-size:0.75rem; color:#888; background:#f1f5f9; padding:2px 8px; border-radius:10px;">📅 ${p.date}</span>` : '';
-            const unitLabel = p.unit || `${idx + 1}회차`;
+        // 1. 선택된 학년(activeGrade) 기준으로 지문 필터링
+        let filteredPassages = currentPassages.filter(p => {
+            if (activeGrade === 'ALL') return true;
+            const pGrade = p.grade || "5-1";
+            if (activeGrade === '5-1') {
+                return pGrade.includes('5-1') || (!pGrade.includes('5-2') && !pGrade.includes('1-'));
+            }
+            if (activeGrade === '5-2') {
+                return pGrade.includes('5-2');
+            }
+            return pGrade.includes(activeGrade);
+        });
 
-            return `
-                <div class="reading-passage-card" onclick="window.ReadingEngine.startMission('${p.id}')">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span class="reading-unit-chip">${unitLabel}</span>
-                        ${dateBadge}
-                    </div>
-                    <h4 class="reading-card-title">📖 ${p.title}</h4>
-                    <p class="reading-card-desc">${p.summary || (p.fullText ? p.fullText.slice(0, 70) + '...' : '지문을 정독하고 퀴즈를 풀어보아요!')}</p>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px dashed #e2e8f0; padding-top:8px;">
-                        <span style="font-size:0.85rem; color:#059669; font-weight:bold;">🎯 문제 ${qCount}문항</span>
-                        <span style="font-size:0.9rem; color:#db2777; font-family:'Jua', sans-serif;">도전하기 ▶</span>
-                    </div>
-                </div>
-            `;
-        }).join('') : `
-            <div style="grid-column: 1 / -1; text-align:center; padding:40px 20px; background:#fff; border-radius:18px; border:2px dashed #cbd5e1;">
-                <div style="font-size:2.5rem; margin-bottom:10px;">📭</div>
-                <h4 style="font-family:'Jua', sans-serif; font-size:1.2rem; color:#475569; margin-bottom:6px;">등록된 ${subject === '영어' ? activeGrade : activeTrack} 지문이 없습니다.</h4>
-                <p style="font-size:0.9rem; color:#94a3b8;">부모님이 스마트폰 노션 앱에서 지문을 등록하시면 바로 여기에 나타납니다!</p>
+        // 2. 상단 학년 칩 바 생성 (과목별 특화)
+        let gradeTabs = [];
+        if (subject === "영어") {
+            gradeTabs = [
+                { key: "5-1", label: "📘 5-1 (1학기)" },
+                { key: "5-2", label: "📗 5-2 (2학기)" },
+                { key: "ALL", label: "🌟 전체보기" }
+            ];
+        } else {
+            gradeTabs = [
+                { key: "5-2", label: "🏫 5-2 (2학기 교과·센터)" },
+                { key: "5-1", label: "🏥 5-1 (1학기 센터)" },
+                { key: "ALL", label: "🌟 전체보기" }
+            ];
+        }
+
+        const gradeBarHtml = `
+            <div class="reading-grade-bar">
+                ${gradeTabs.map(tab => `
+                    <button class="reading-grade-chip ${activeGrade === tab.key ? 'active' : ''}" 
+                            onclick="window.ReadingEngine.switchGrade('${tab.key}')">
+                        ${tab.label}
+                    </button>
+                `).join('')}
             </div>
         `;
 
-        // 상단 탭 HTML (영어 vs 국어 분기)
-        let tabButtonsHtml = "";
-        if (subject === "영어") {
-            tabButtonsHtml = `
-                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
-                    <button style="${getTabStyle(activeGrade === '5-1')}" onclick="window.ReadingEngine.switchGrade('5-1')">
-                        📘 5-1 1학기 교과서 독해 (1~6단원)
-                    </button>
-                    <button style="${getTabStyle(activeGrade === '5-2')}" onclick="window.ReadingEngine.switchGrade('5-2')">
-                        📗 5-2 2학기 교과서 독해
-                    </button>
+        // 3. 지문들을 단원/회차(unit) 기준으로 그룹화
+        let sectionsHtml = "";
+        if (filteredPassages.length === 0) {
+            sectionsHtml = `
+                <div style="text-align:center; padding:40px 20px; background:#fff; border-radius:18px; border:2px dashed #cbd5e1;">
+                    <div style="font-size:2.5rem; margin-bottom:10px;">📭</div>
+                    <h4 style="font-family:'Jua', sans-serif; font-size:1.2rem; color:#475569; margin-bottom:6px;">
+                        등록된 ${activeGrade === 'ALL' ? '전체' : activeGrade} 지문이 없습니다.
+                    </h4>
+                    <p style="font-size:0.9rem; color:#94a3b8;">부모님이 스마트폰 노션 앱에서 지문을 등록하시면 바로 여기에 나타납니다!</p>
                 </div>
             `;
         } else {
-            tabButtonsHtml = `
-                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
-                    <button style="${getTabStyle(activeTrack === '🏥 센터 독해')}" onclick="window.ReadingEngine.switchTrack('🏥 센터 독해')">
-                        🏥 센터 언어치료 독해 (회차순)
-                    </button>
-                    <button style="${getTabStyle(activeTrack === '🏫 교과서 독해')}" onclick="window.ReadingEngine.switchTrack('🏫 교과서 독해')">
-                        🏫 5-2 학교 교과서 독해 (단원순)
-                    </button>
-                </div>
-            `;
+            // 단원별 그룹 맵 생성
+            const unitGroupMap = new Map();
+
+            // 순서 보장을 위해 정렬
+            const sortedPassages = [...filteredPassages].sort((a, b) => {
+                const orderA = typeof a.order === 'number' ? a.order : 999;
+                const orderB = typeof b.order === 'number' ? b.order : 999;
+                if (orderA !== orderB) return orderA - orderB;
+                return (a.title || '').localeCompare(b.title || '');
+            });
+
+            for (const p of sortedPassages) {
+                const uKey = (p.unit || "기본 단원").trim();
+                if (!unitGroupMap.has(uKey)) {
+                    unitGroupMap.set(uKey, []);
+                }
+                unitGroupMap.get(uKey).push(p);
+            }
+
+            // 각 단원 그룹별 렌더링
+            const groupSections = [];
+            for (const [unitName, pList] of unitGroupMap.entries()) {
+                const cardsHtml = pList.map((p, idx) => {
+                    const qCount = p.questions ? p.questions.length : 0;
+                    const dateBadge = p.date ? `<span style="font-size:0.75rem; color:#888; background:#f1f5f9; padding:2px 8px; border-radius:10px;">📅 ${p.date}</span>` : '';
+                    const trackBadge = p.track ? `<span style="font-size:0.75rem; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; padding:2px 6px; border-radius:8px;">${p.track}</span>` : '';
+
+                    return `
+                        <div class="reading-passage-card" onclick="window.ReadingEngine.startMission('${p.id}')">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:6px; flex-wrap:wrap;">
+                                <span class="reading-unit-chip">${unitName}</span>
+                                <div style="display:flex; gap:4px; align-items:center;">
+                                    ${trackBadge}
+                                    ${dateBadge}
+                                </div>
+                            </div>
+                            <h4 class="reading-card-title">📖 ${p.title}</h4>
+                            <p class="reading-card-desc">${p.summary || (p.fullText ? p.fullText.slice(0, 70) + '...' : '지문을 정독하고 퀴즈를 풀어보아요!')}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; border-top:1px dashed #e2e8f0; padding-top:8px;">
+                                <span style="font-size:0.85rem; color:#059669; font-weight:bold;">🎯 문제 ${qCount}문항</span>
+                                <span style="font-size:0.9rem; color:#f43f5e; font-family:'Jua', sans-serif;">도전하기 ▶</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                groupSections.push(`
+                    <div class="reading-unit-section">
+                        <div class="reading-unit-header">
+                            <div class="reading-unit-title">
+                                📂 <span>${unitName}</span>
+                            </div>
+                            <span class="reading-unit-count">지문 ${pList.length}편</span>
+                        </div>
+                        <div class="reading-lobby-grid">
+                            ${cardsHtml}
+                        </div>
+                    </div>
+                `);
+            }
+
+            sectionsHtml = groupSections.join('');
         }
 
         container.innerHTML = `
@@ -169,22 +212,22 @@
                         📖 [${subject}] 정밀 독해 트레이닝 멀티버스
                     </h3>
                     <p style="font-size: 0.95rem; color: #64748b;">
-                        지문을 차근차근 정독하고, 문제 속 단서를 찾아 스스로 해결해 봐요! ✨
+                        학년과 단원별 지문을 차근차근 정독하고, 문제 속 단서를 찾아 스스로 해결해 봐요! ✨
                     </p>
                 </div>
 
-                ${tabButtonsHtml}
+                ${gradeBarHtml}
 
-                <!-- 지문 카드 그리드 -->
-                <div class="reading-lobby-grid">
-                    ${listHtml}
+                <!-- 단원별 그룹화 지문 섹션 -->
+                <div class="reading-sections-container">
+                    ${sectionsHtml}
                 </div>
             </div>
         `;
     }
 
     /**
-     * 🔄 학년 전환 (영어 전용: 5-1 vs 5-2)
+     * 🔄 학년 전환 (5-1, 5-2, ALL 등)
      */
     function switchGrade(gradeName) {
         activeGrade = gradeName;
@@ -194,12 +237,18 @@
     }
 
     /**
-     * 🔄 트랙 전환 (센터 vs 교과서)
+     * 🔄 레거시 트랙 전환 브리지 (하위 호환 100% 보장)
      */
     function switchTrack(trackName) {
         activeTrack = trackName;
-        if (containerEl) {
-            renderReadingLobby(containerEl, { subject: activeSubject });
+        if (trackName.includes('교과서')) {
+            switchGrade('5-2');
+        } else if (trackName.includes('센터')) {
+            switchGrade('5-1');
+        } else {
+            if (containerEl) {
+                renderReadingLobby(containerEl, { subject: activeSubject });
+            }
         }
     }
 
