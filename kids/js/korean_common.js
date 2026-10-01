@@ -136,6 +136,12 @@ function initializeKoreanRoom() {
     if (typeof initChatMemorySession === 'function') {
         initChatMemorySession('공부방');
     }
+
+    // 🚀 [초고속 선로딩] 국어방 진입 즉시 백그라운드에서 오늘치 어휘 사전 캐싱 (0.01초 로딩 보장)
+    if (typeof prefetchVocaData === 'function') {
+        const targetStudent = currentProfile === 'daughter' ? '민서' : '민수';
+        prefetchVocaData(targetStudent);
+    }
 }
 
 // ========================================================
