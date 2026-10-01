@@ -239,3 +239,93 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python scripts/generate_gemini_voices.py
   ```
 
+---
+
+## 7. 🎨 성장 아카이브 & 갤러리 코어 (Gallery & Growth Archive)
+
+### 🌟 `gallery_controller.js` & `gallery.css` (성장 아카이브 뷰어 컨트롤러)
+2,600줄에 달하던 `gallery.html`을 295줄의 초경량 래퍼로 다이어트하고 분리한 단일 책임 갤러리 전용 컨트롤러 및 반응형 스타일시트입니다.
+- **파일 위치**:
+  - `kids/common_space/gallery_controller.js` (갤러리 렌더링/이벤트 컨트롤러, IIFE 격리)
+  - `kids/common_space/gallery.css` (3D 카드, 필터 바, 라이트박스 전용 스타일)
+- **HTML 로드 방법**:
+  ```html
+  <link rel="stylesheet" href="./gallery.css">
+  <script src="./gallery_controller.js"></script>
+  ```
+- **핵심 API**:
+  | 메서드 | 파라미터 | 설명 |
+  | :--- | :--- | :--- |
+  | `GalleryController.init()` | - | 갤러리 초기 렌더링, URL 파라미터 파싱 및 이벤트 리스너 바인딩 |
+  | `GalleryController.filterGallery(category)` | `category` | 전체, 그림, 상장, 일기, 사진 등 카테고리별 동적 필터링 |
+  | `GalleryController.openLightbox(item)` | `item` | 고화질 원본 이미지/동영상 확대 라이트박스 팝업 열기 |
+  | `GalleryController.closeLightbox()` | - | 라이트박스 팝업 닫기 및 동영상 재생 정지 |
+
+---
+
+## 8. 🏰 관제탑 프론트엔드 모듈 (Master Tower Frontend Modules)
+
+### 🌟 `lifelog_quick_modal.js` (관제탑 원클릭 라이프로그 모달 컨트롤러)
+관제탑 메인 대시보드(`index.html`)에서 일상/사색/운동/식단 라이프로그를 원클릭으로 노션 메인 라이프로그 DB(`392a27115b6880dba5eede7ff33a22b9`)에 안전 전송하는 독립 모달 컨트롤러입니다.
+- **파일 위치**: `js/lifelog_quick_modal.js` (관제탑 루트)
+- **HTML 로드 방법**:
+  ```html
+  <script src="./js/lifelog_quick_modal.js"></script>
+  ```
+- **핵심 API**:
+  | 메서드 | 파라미터 | 설명 |
+  | :--- | :--- | :--- |
+  | `LifelogQuickModal.openModal(defaultCategory)` | `[category]` | 빠른 라이프로그 입력 모달 열기 및 카테고리 기본 선택 |
+  | `LifelogQuickModal.closeModal()` | - | 모달 닫기 및 폼 입력 초기화 |
+  | `LifelogQuickModal.submitLog()` | - | 관제탑 백엔드 API(`/api/notion/lifelog`)로 전송 및 실시간 토스트 피드백 |
+
+---
+
+## 9. ⏰ 생활 루틴 & 시간표 코어 (Daily Life & Routine Engines)
+
+### 🌟 `screentime-tracker.js` (스크린타임 트래커 & 차액 정산 엔진)
+아이들의 태블릿 학습 및 자유시간 이용시간을 정밀 추적하고, 보너스 적립 및 잔여 시간을 실시간 계산하는 엔진입니다.
+- **파일 위치**: `kids/core/screentime-tracker.js`
+- **핵심 API**:
+  | 메서드 | 파라미터 | 설명 |
+  | :--- | :--- | :--- |
+  | `ScreenTimeTracker.startTracking(user)` | `user` | 학생별 세션 타이머 시작 및 잔여 시간 계산 |
+  | `ScreenTimeTracker.stopTracking()` | - | 학습 세션 정지 및 차액 정산 데이터 로컬/노션 기록 |
+  | `ScreenTimeTracker.addBonusTime(mins, reason)` | `mins, reason` | 미션 달성 보너스 시간 추가 적립 |
+
+### 🌟 `timetable-boost.js` & `timetable_controller.js` (시간표 부스트 엔진)
+주간 시간표를 노션에서 프리패치하여 오늘 배울 과목과 숙제를 로비 헤더에 원터치 칩으로 띄워주는 부스트 엔진입니다.
+- **파일 위치**:
+  - `kids/core/timetable-boost.js` (시간표 프리패치 & 캐시 엔진)
+  - `kids/js/timetable_controller.js` (주간/일간 시간표 뷰어 컨트롤러)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `TimetableBoost.getTodaySchedule(user)` | 오늘 요일 기준 수업/학원 시간표 배열 반환 |
+  | `TimetableBoost.renderHeaderChips(container)` | 로비 상단에 오늘 수업 칩 동적 렌더링 |
+
+### 🌟 `daily-diary.js` & `quick-uploader.js` (하루 마음일기 & 모바일 퀵업로더)
+아이들의 날씨/기분 선택형 마음일기 기록 및 스마트폰 현장 촬영 사진을 노션 임시 보관함으로 전송하는 경량 모듈입니다.
+- **파일 위치**:
+  - `kids/core/daily-diary.js` (하루 마음일기 모달 & 감정 스티커)
+  - `kids/core/quick-uploader.js` (모바일 사진 촬영 & 퀵업로더 프론트엔드)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `DailyDiary.openDiaryModal(user)` | 마음일기 작성 모달 열기 (기분/날씨/한줄일기) |
+  | `QuickUploader.uploadPhoto(file, child, memo)` | Cloudflare Worker를 통해 노션 성장 DB로 1초 만에 즉시 전송 |
+
+---
+
+## 10. 🧭 에이전트 내비게이션 & 개발 도구 (Agent Navigation & Dev Tools)
+
+### 🌟 `scripts/agent_navi.py` (에이전트 스마트 내비게이션 & 아키텍처 라우터)
+본 카탈로그(`CORE_CATALOG.md`)를 실시간으로 직접 파싱하여, 에이전트가 작업 목표를 입력했을 때 최적의 부품 레시피, 권장 경로, 거버넌스 가드를 0.05초 만에 안내하는 스마트 GPS 도구입니다.
+- **파일 위치**: `scripts/agent_navi.py` (관제탑 루트)
+- **실행 커맨드**:
+  ```bash
+  python scripts/agent_navi.py "작업 목표 또는 만들고자 하는 기능"
+  python scripts/agent_navi.py --list
+  ```
+- **특징**: `CORE_CATALOG.md`를 런타임에 동적으로 읽어 들이므로, 카탈로그가 수정/추가/삭제되는 즉시 변경사항이 100% 실시간(Zero Drift)으로 네비게이션에 반영됩니다.
+

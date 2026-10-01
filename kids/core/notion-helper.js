@@ -340,6 +340,105 @@ async function fetchLibraryBooksFromNotion() {
     }
 }
 
+/**
+ * 📖 노션 독해 마스터 DB (LIBRARY_DB_ID)에서 지문 및 1:N 문제 세트 실시간 조회
+ * @param {Object} options { subject: '국어', track: '🏥 센터 독해'|'🏫 교과서 독해', student: '민수'|'민서', forceRefresh: false }
+ */
+async function fetchReadingPassagesFromNotion(options = {}) {
+    const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee";
+    const subject = options.subject || "국어";
+    const track = options.track || "";
+    const targetStudent = options.student || (window.currentUserName === '민서' ? '민서' : '민수');
+
+    try {
+        const andFilters = [
+            { property: "과목", select: { equals: subject } }
+        ];
+
+        if (track) {
+            andFilters.push({ property: "트랙", select: { equals: track } });
+        }
+
+        const queryBody = {
+            filter: andFilters.length > 1 ? { and: andFilters } : andFilters[0],
+            sorts: [
+                { property: "순번", direction: "ascending" }
+            ],
+            page_size: options.pageSize || 50
+        };
+
+        const response = await fetch(`${PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(queryBody)
+        });
+
+        if (!response.ok) throw new Error(`독해 DB 조회 실패 (HTTP ${response.status})`);
+        const data = await response.json();
+        const results = data.results || [];
+
+        const parsedPassages = await Promise.all(results.map(async (page) => {
+            const p = page.properties;
+            const titleArr = p["책 제목"]?.title || p["제목"]?.title || [];
+            const title = titleArr.map(t => t.plain_text).join("") || "제목 없음";
+            
+            const trackVal = p["트랙"]?.select?.name || "🏥 센터 독해";
+            const unitVal = (p["회차/단원"]?.rich_text || []).map(t => t.plain_text).join("") || "";
+            const orderVal = typeof p["순번"]?.number === 'number' ? p["순번"].number : 999;
+            const fullTextProp = (p["지문전문"]?.rich_text || []).map(t => t.plain_text).join("");
+            const summaryVal = (p["지문구성내용"]?.rich_text || []).map(t => t.plain_text).join("");
+            const rawQuestions = (p["문제데이터"]?.rich_text || []).map(t => t.plain_text).join("");
+            const dateVal = p["날짜"]?.date?.start || "";
+            const barcode = (p["도서 키(ID)"]?.rich_text || []).map(t => t.plain_text).join("") || page.id;
+
+            // 문제 데이터 JSON 파싱
+            let questions = [];
+            if (rawQuestions) {
+                try {
+                    questions = JSON.parse(rawQuestions);
+                } catch(e) {
+                    console.warn(`[Reading] 문제데이터 JSON 파싱 실패 (${title}):`, e);
+                }
+            }
+
+            // 지문 전문이 속성에 없으면 본문 블록에서 읽기 (하위 호환)
+            let fullText = fullTextProp;
+            if (!fullText && page.id) {
+                try {
+                    fullText = await fetchNotionPageBlocksPlainText(page.id);
+                } catch(e) {}
+            }
+
+            return {
+                id: barcode,
+                pageId: page.id,
+                title,
+                track: trackVal,
+                unit: unitVal,
+                order: orderVal,
+                fullText: fullText.trim(),
+                summary: summaryVal,
+                date: dateVal,
+                questions: Array.isArray(questions) ? questions : [],
+                grade: (p["학년"]?.multi_select || []).map(m => m.name).join(", "),
+                student: (p["학생"]?.multi_select || []).map(m => m.name)
+            };
+        }));
+
+        // 학생 타겟팅 필터 (민수/민서 지정된 경우)
+        const finalPassages = parsedPassages.filter(item => {
+            if (!item.student || item.student.length === 0) return true;
+            return item.student.includes(targetStudent);
+        });
+
+        console.log(`✅ [Reading] 독해 DB에서 ${finalPassages.length}개 지문 로드 완료 (트랙: ${track || '전체'})`);
+        return finalPassages;
+    } catch(err) {
+        console.error("[fetchReadingPassagesFromNotion] 로딩 에러:", err);
+        return [];
+    }
+}
+
 const MAX_READING_PASSAGES = 10;
 
 function mapNotionRecordsToReadingBooks(records, localDatabase) {
@@ -379,6 +478,7 @@ function resolveReadingPassageList(records, localDatabase) {
 }
 
 window.fetchLibraryBooksFromNotion = fetchLibraryBooksFromNotion;
+window.fetchReadingPassagesFromNotion = fetchReadingPassagesFromNotion;
 window.resolveReadingPassageList = resolveReadingPassageList;
 window.MAX_READING_PASSAGES = MAX_READING_PASSAGES;
 
