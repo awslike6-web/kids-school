@@ -583,6 +583,22 @@
 
       <!-- 👧 민서 진도 설정 영역 (스크롤 가능) -->
       <div id="parentMinseoSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0">
+        <!-- 👧 민서 학기/과정 범위 알약 필터 탭 -->
+        <div class="bg-lab-card/60 p-2.5 rounded-2xl border border-lab-card-border space-y-1.5">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-bold text-pink-300 flex items-center gap-1">
+              <span>🎯</span><span>출제 학기·과정 범위</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-bold" id="badgeMinseoSemesterDesc">1-2학기 집중</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1" id="minseoSemesterTabGroup">
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="1-2" onclick="setParentSemester('minseo', '1-2')">1-2학기 ⭐</button>
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="1-1" onclick="setParentSemester('minseo', '1-1')">1-1학기</button>
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="basic" onclick="setParentSemester('minseo', 'basic')">기초·파닉스</button>
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="all" onclick="setParentSemester('minseo', 'all')">전체</button>
+          </div>
+        </div>
+
         <!-- 국어 -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
@@ -590,9 +606,9 @@
             <span class="text-[10px] text-rose-400 font-bold" id="badgeMinseoKorean">받침 글자 집중</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="parentMinseoKoreanChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="voca" onclick="setParentUnit('minseo', 'korean', 'voca')">그림 낱말 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="dictation" onclick="setParentUnit('minseo', 'korean', 'dictation')">받아쓰기 100</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="batchim" onclick="setParentUnit('minseo', 'korean', 'batchim')">받침 글자 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="batchim" data-sem="1-2" onclick="setParentUnit('minseo', 'korean', 'batchim')">받침 글자 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="dictation" data-sem="1-2" onclick="setParentUnit('minseo', 'korean', 'dictation')">받아쓰기 100</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="voca" data-sem="1-1,basic" onclick="setParentUnit('minseo', 'korean', 'voca')">그림 낱말 탐험</button>
           </div>
         </div>
 
@@ -603,9 +619,9 @@
             <span class="text-[10px] text-teal-400 font-bold" id="badgeMinseoMath">100까지 수</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="parentMinseoMathChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="100num" onclick="setParentUnit('minseo', 'math', '100num')">100까지 수 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="addsub" onclick="setParentUnit('minseo', 'math', 'addsub')">한자리 덧뺄셈</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="shapes" onclick="setParentUnit('minseo', 'math', 'shapes')">여러가지 모양</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="100num" data-sem="1-2,basic" onclick="setParentUnit('minseo', 'math', '100num')">100까지 수 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="addsub" data-sem="1-2" onclick="setParentUnit('minseo', 'math', 'addsub')">한자리 덧뺄셈</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="shapes" data-sem="1-1" onclick="setParentUnit('minseo', 'math', 'shapes')">여러가지 모양</button>
           </div>
         </div>
 
@@ -616,25 +632,61 @@
             <span class="text-[10px] text-sky-400 font-bold" id="badgeMinseoEnglish">파닉스 단어</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="parentMinseoEnglishChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="phonics" onclick="setParentUnit('minseo', 'english', 'phonics')">파닉스 단어 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="abc" onclick="setParentUnit('minseo', 'english', 'abc')">알파벳 소리</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="greetings" onclick="setParentUnit('minseo', 'english', 'greetings')">기초 인사말</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="phonics" data-sem="basic,1-2" onclick="setParentUnit('minseo', 'english', 'phonics')">파닉스 첫단어 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="greetings" data-sem="1-2,basic" onclick="setParentUnit('minseo', 'english', 'greetings')">기초 인사말</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="abc" data-sem="1-1,basic" onclick="setParentUnit('minseo', 'english', 'abc')">알파벳 소리</button>
           </div>
+        </div>
+
+        <!-- 🔄 민서 망각곡선 복습 풀 확장 옵션 스위치 -->
+        <div class="bg-lab-card/60 p-3 rounded-2xl border border-lab-card-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1">
+              <span>🔄</span><span>4번 망각곡선 복습 풀 확장 옵션</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-medium">평소 1-2학기 집중</span>
+          </div>
+          <label class="flex items-center justify-between p-2 rounded-xl bg-lab-bg/80 border border-lab-card-border/60 cursor-pointer hover:border-amber-400/40 transition-colors">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">📚</span>
+              <div>
+                <div class="text-white font-bold text-[11px]">1-1학기 및 기초 낱말 복습 풀 함께 섞기</div>
+                <div class="text-[10px] text-gray-400">4번 오답/복습 문제에 1-1학기 어휘를 함께 소환합니다.</div>
+              </div>
+            </div>
+            <input type="checkbox" id="chkMinseoReviewSem1" class="w-4 h-4 rounded text-pink-400 accent-pink-400 cursor-pointer" onchange="toggleReviewOption('minseo', 'includeReviewSem1', this.checked)">
+          </label>
         </div>
       </div>
 
       <!-- 👦 민수 진도 설정 영역 (스크롤 가능) -->
       <div id="parentMinsuSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0 hidden">
-        <!-- 과학 (최근 강조) -->
+        <!-- 👦 민수 학기/과정 범위 알약 필터 탭 -->
+        <div class="bg-lab-card/60 p-2.5 rounded-2xl border border-lab-card-border space-y-1.5">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-bold text-neon-cyan flex items-center gap-1">
+              <span>🎯</span><span>출제 학기·과정 범위</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-bold" id="badgeMinsuSemesterDesc">5-2학기 집중 (기본)</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1" id="minsuSemesterTabGroup">
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="5-2" onclick="setParentSemester('minsu', '5-2')">5-2학기 ⭐</button>
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="5-1" onclick="setParentSemester('minsu', '5-1')">5-1학기</button>
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="jihye" onclick="setParentSemester('minsu', 'jihye')">지혜반</button>
+            <button type="button" class="py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all" data-sem="all" onclick="setParentSemester('minsu', 'all')">전체</button>
+          </div>
+        </div>
+
+        <!-- 과학 -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-blue-300 flex items-center gap-1">🔬 과학 현재 진도</span>
             <span class="text-[10px] text-blue-300 font-bold" id="badgeMinsuScience">3단원 온도와 열 (열의 이동) ⭐</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5" id="parentMinsuScienceChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" onclick="setParentUnit('minsu', 'science', '1')">1단원 혼합물의 분리</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="3" onclick="setParentUnit('minsu', 'science', '3')">3단원 온도와 열 (열의 이동) ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="1" data-sem="5-2" onclick="setParentUnit('minsu', 'science', '1')">1단원 혼합물의 분리</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="2" data-sem="5-2" onclick="setParentUnit('minsu', 'science', '2')">2단원 상태변화·지시약</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="science" data-unit="3" data-sem="5-2" onclick="setParentUnit('minsu', 'science', '3')">3단원 온도와 열 (열의 이동) ⭐</button>
           </div>
         </div>
 
@@ -645,28 +697,30 @@
             <span class="text-[10px] text-neon-green font-bold" id="badgeMinsuMath">두 자릿수 나눗셈</span>
           </div>
           <div class="grid grid-cols-2 gap-1.5" id="parentMinsuMathChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="division" onclick="setParentUnit('minsu', 'math', 'division')">두 자릿수 나눗셈 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="fraction" onclick="setParentUnit('minsu', 'math', 'fraction')">5-2 분수의 곱셈</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="division" data-sem="5-2" onclick="setParentUnit('minsu', 'math', 'division')">두 자릿수 나눗셈 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="math" data-unit="fraction" data-sem="5-2" onclick="setParentUnit('minsu', 'math', 'fraction')">5-2 분수의 곱셈</button>
           </div>
         </div>
 
-        <!-- 영어 (노션 VOCA DB 연동 L1~L10 전체 지원) -->
+        <!-- 영어 (노션 VOCA DB 연동 L1~L10 학기별 정돈) -->
         <div class="bg-lab-bg/90 border border-lab-card-border rounded-2xl p-3 space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-yellow-300 flex items-center gap-1">🔤 영어 현재 진도</span>
             <span class="text-[10px] text-yellow-300 font-bold" id="badgeMinsuEnglish">9단원 집·방 묘사 (L9) ⭐</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="parentMinsuEnglishChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L9" onclick="setParentUnit('minsu', 'english', 'L9')">9단원 (L9) ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L8" onclick="setParentUnit('minsu', 'english', 'L8')">8단원 (L8)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L7" onclick="setParentUnit('minsu', 'english', 'L7')">7단원 (L7)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L6" onclick="setParentUnit('minsu', 'english', 'L6')">6단원 (L6)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L5" onclick="setParentUnit('minsu', 'english', 'L5')">5단원 (L5)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L4" onclick="setParentUnit('minsu', 'english', 'L4')">4단원 (L4)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L3" onclick="setParentUnit('minsu', 'english', 'L3')">3단원 (L3)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L2" onclick="setParentUnit('minsu', 'english', 'L2')">2단원 (L2)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L1" onclick="setParentUnit('minsu', 'english', 'L1')">1단원 (L1)</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L10" onclick="setParentUnit('minsu', 'english', 'L10')">10단원 (L10)</button>
+            <!-- 5-2학기 단원 (7, 8, 9, 10단원) -->
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L9" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L9')">9단원 집·방 묘사 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L8" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L8')">8단원 외모 묘사</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L7" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L7')">7단원 길찾기</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L10" data-sem="5-2" onclick="setParentUnit('minsu', 'english', 'L10')">10단원 과거 경험</button>
+            <!-- 5-1학기 단원 (1~6단원) -->
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L1" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L1')">1단원 (L1)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L2" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L2')">2단원 (L2)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L3" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L3')">3단원 (L3)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L4" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L4')">4단원 (L4)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L5" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L5')">5단원 (L5)</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="english" data-unit="L6" data-sem="5-1" onclick="setParentUnit('minsu', 'english', 'L6')">6단원 (L6)</button>
           </div>
         </div>
 
@@ -677,8 +731,8 @@
             <span class="text-[10px] text-purple-300 font-bold" id="badgeMinsuKorean">1단원 어휘·속담</span>
           </div>
           <div class="grid grid-cols-2 gap-1.5" id="parentMinsuKoreanChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="1" onclick="setParentUnit('minsu', 'korean', '1')">1단원 어휘·속담 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="2" onclick="setParentUnit('minsu', 'korean', '2')">2단원 문맥·독해</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="1" data-sem="5-2" onclick="setParentUnit('minsu', 'korean', '1')">1단원 어휘·속담 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="korean" data-unit="2" data-sem="5-2" onclick="setParentUnit('minsu', 'korean', '2')">2단원 문맥·독해</button>
           </div>
         </div>
 
@@ -689,9 +743,45 @@
             <span class="text-[10px] text-pink-300 font-bold" id="badgeMinsuSociety">1단원 조선 건국·한양</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5" id="parentMinsuSocietyChips">
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="1" onclick="setParentUnit('minsu', 'society', '1')">1단원 조선 건국·한양 ⭐</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="2" onclick="setParentUnit('minsu', 'society', '2')">2단원 문화발전·이순신</button>
-            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="3" onclick="setParentUnit('minsu', 'society', '3')">3단원 유교문화·민족의 시련</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="1" data-sem="5-2" onclick="setParentUnit('minsu', 'society', '1')">1단원 조선 건국·한양 ⭐</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="2" data-sem="5-2" onclick="setParentUnit('minsu', 'society', '2')">2단원 문화발전·이순신</button>
+            <button type="button" class="parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all" data-subject="society" data-unit="3" data-sem="5-2" onclick="setParentUnit('minsu', 'society', '3')">3단원 유교문화·민족의 시련</button>
+          </div>
+        </div>
+
+        <!-- 🔄 4번 망각곡선 복습 풀 확장 옵션 스위치 -->
+        <div class="bg-lab-card/60 p-3 rounded-2xl border border-lab-card-border space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-300 flex items-center gap-1">
+              <span>🔄</span><span>4번 망각곡선 복습 풀 확장 옵션</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-medium">평소 2학기 집중</span>
+          </div>
+          
+          <div class="space-y-1.5 text-xs">
+            <!-- 1학기 복습 포함 스위치 -->
+            <label class="flex items-center justify-between p-2 rounded-xl bg-lab-bg/80 border border-lab-card-border/60 cursor-pointer hover:border-amber-400/40 transition-colors">
+              <div class="flex items-center gap-2">
+                <span class="text-sm">📚</span>
+                <div>
+                  <div class="text-white font-bold text-[11px]">1학기(5-1) 복습 단어 함께 섞기</div>
+                  <div class="text-[10px] text-gray-400">4번 오답/복습 문제에 1학기 핵심 어휘를 함께 소환합니다.</div>
+                </div>
+              </div>
+              <input type="checkbox" id="chkMinsuReviewSem1" class="w-4 h-4 rounded text-neon-cyan accent-neon-cyan cursor-pointer" onchange="toggleReviewOption('minsu', 'includeReviewSem1', this.checked)">
+            </label>
+
+            <!-- 지혜반 어휘 포함 스위치 -->
+            <label class="flex items-center justify-between p-2 rounded-xl bg-lab-bg/80 border border-lab-card-border/60 cursor-pointer hover:border-amber-400/40 transition-colors">
+              <div class="flex items-center gap-2">
+                <span class="text-sm">🌱</span>
+                <div>
+                  <div class="text-white font-bold text-[11px]">지혜반(특수학급) 실생활 어휘 함께 섞기</div>
+                  <div class="text-[10px] text-gray-400">지혜반에서 배운 실생활/기초 어휘를 복습 풀에 포함합니다.</div>
+                </div>
+              </div>
+              <input type="checkbox" id="chkMinsuJihye" class="w-4 h-4 rounded text-neon-cyan accent-neon-cyan cursor-pointer" onchange="toggleReviewOption('minsu', 'includeJihye', this.checked)">
+            </label>
           </div>
         </div>
       </div>
@@ -1345,15 +1435,39 @@
     };
 
     const DEFAULT_PARENT_SETTINGS = {
-      minseo: { korean: 'batchim', math: '100num', english: 'phonics' },
-      minsu: { math: 'division', english: 'L9', korean: '1', science: '3', society: '1' }
+      minseo: {
+        semester: '1-2',
+        korean: 'batchim',
+        math: '100num',
+        english: 'phonics',
+        includeReviewSem1: false
+      },
+      minsu: {
+        semester: '5-2',
+        math: 'division',
+        english: 'L9',
+        korean: '1',
+        science: '3',
+        society: '1',
+        includeReviewSem1: false,
+        includeJihye: false
+      }
     };
+
+    function getUnitNumber(unitStr) {
+      if (!unitStr) return '';
+      const match = String(unitStr).match(/\d+/);
+      return match ? match[0] : String(unitStr).trim();
+    }
 
     function isSameUnit(u1, u2) {
       if (u1 === u2) return true;
       if (!u1 || !u2) return false;
-      const s1 = String(u1).trim().toLowerCase().replace(/^l/i, '');
-      const s2 = String(u2).trim().toLowerCase().replace(/^l/i, '');
+      const n1 = getUnitNumber(u1);
+      const n2 = getUnitNumber(u2);
+      if (n1 && n2 && n1 === n2) return true;
+      const s1 = String(u1).trim().toLowerCase().replace(/^l/i, '').replace(/단원$/, '');
+      const s2 = String(u2).trim().toLowerCase().replace(/^l/i, '').replace(/단원$/, '');
       return s1 === s2;
     }
 
@@ -1393,14 +1507,32 @@
     let currentParentTab = isMinseo ? 'minseo' : 'minsu';
 
     /**
-     * 🔄 문제은행(minsuMasterBank) 및 노션 캐시 기반 동적 단원 칩 자동 보강 엔진
-     * 노션에 새로 등록된 단원(예: 영어 L9, 과학 3단원, 사회 3단원 등)이 등록되면 자동으로 칩 버튼을 동적 생성
+     * 🔄 학기/과정 범위 선택기
+     */
+    function setParentSemester(child, sem) {
+      if (!currentParentSettings[child]) currentParentSettings[child] = {};
+      currentParentSettings[child].semester = sem;
+      pokeSound('pop');
+      renderParentProgressChips();
+    }
+
+    /**
+     * 🔄 4번 망각곡선 복습 풀 확장 옵션 토글
+     */
+    function toggleReviewOption(child, optionKey, isChecked) {
+      if (!currentParentSettings[child]) currentParentSettings[child] = {};
+      currentParentSettings[child][optionKey] = !!isChecked;
+      pokeSound('pop');
+    }
+
+    /**
+     * 🔄 문제은행(minsuMasterBank) 및 노션 캐시 기반 동적 단원 칩 자동 보강 엔진 (단원 중복 완전 제거)
      */
     function syncDynamicUnitChips() {
       try {
         const subjects = ['science', 'society', 'korean', 'english', 'math'];
 
-        // 1) 캐시된 VOCA 레코드에서 과목별 단원 키 수집
+        // 1) 캐시된 VOCA 레코드에서 과목별 단원 키 및 학기 태그 수집
         const discoveredUnits = { english: [], science: [], society: [], korean: [], math: [] };
 
         for (let i = 0; i < localStorage.length; i++) {
@@ -1413,13 +1545,35 @@
                   const stage = r.stage || r.level;
                   if (!stage || stage === '기본 단원') return;
                   const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
+                  
+                  // 학기/지혜반 메타 판별
+                  let semType = '5-2';
+                  const gList = Array.isArray(r.grades) ? r.grades : [r.grade];
+                  const gStr = gList.join(' ');
+                  if (gStr.includes('지혜') || String(r.wordType || '').includes('지혜')) {
+                    semType = 'jihye';
+                  } else if (gStr.includes('5-1')) {
+                    semType = '5-1';
+                  } else if (gStr.includes('1-1')) {
+                    semType = '1-1';
+                  } else if (gStr.includes('1-2')) {
+                    semType = '1-2';
+                  } else {
+                    const numMatch = String(stage).match(/\d+/);
+                    if (numMatch) {
+                      const num = parseInt(numMatch[0], 10);
+                      semType = (num <= 6) ? '5-1' : '5-2';
+                    }
+                  }
+
                   subjs.forEach(s => {
                     const sStr = String(s).trim();
-                    if (sStr.includes('영어')) discoveredUnits.english.push(stage);
-                    else if (sStr.includes('과학')) discoveredUnits.science.push(stage);
-                    else if (sStr.includes('사회')) discoveredUnits.society.push(stage);
-                    else if (sStr.includes('국어')) discoveredUnits.korean.push(stage);
-                    else if (sStr.includes('수학')) discoveredUnits.math.push(stage);
+                    const item = { stage, semType };
+                    if (sStr.includes('영어')) discoveredUnits.english.push(item);
+                    else if (sStr.includes('과학')) discoveredUnits.science.push(item);
+                    else if (sStr.includes('사회')) discoveredUnits.society.push(item);
+                    else if (sStr.includes('국어')) discoveredUnits.korean.push(item);
+                    else if (sStr.includes('수학')) discoveredUnits.math.push(item);
                   });
                 });
               }
@@ -1436,14 +1590,20 @@
           // 마스터 뱅크 키 수집
           const bankData = window.minsuMasterBank && window.minsuMasterBank[subj];
           const bankKeys = bankData ? Object.keys(bankData).filter(k => !['title', 'icon'].includes(k)) : [];
+          
+          const masterItems = bankKeys.map(k => {
+            const num = parseInt(getUnitNumber(k), 10);
+            const sem = (!isNaN(num) && num <= 6 && subj === 'english') ? '5-1' : '5-2';
+            return { stage: k, semType: sem };
+          });
 
-          // 유니크 단원 키 목록
-          const rawKeys = Array.from(new Set([...bankKeys, ...(discoveredUnits[subj] || [])]));
+          const rawList = [...masterItems, ...(discoveredUnits[subj] || [])];
 
-          rawKeys.forEach(uKey => {
-            const cleanKey = String(uKey).trim();
+          rawList.forEach(item => {
+            const cleanKey = String(item.stage).trim();
             if (!cleanKey) return;
-            // 이미 동일 단원 버튼이 있는지 확인
+
+            // 이미 동일 단원 번호/이름 버튼이 있는지 확인 (L9 == 9단원 완벽 중복 제거!)
             const allBtns = Array.from(container.querySelectorAll('button[data-unit]'));
             const exists = allBtns.some(b => isSameUnit(b.getAttribute('data-unit'), cleanKey));
             if (!exists) {
@@ -1452,6 +1612,7 @@
               btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-lab-card/80 text-gray-300 border-lab-card-border hover:border-neon-green/40';
               btn.setAttribute('data-subject', subj);
               btn.setAttribute('data-unit', cleanKey);
+              btn.setAttribute('data-sem', item.semType || '5-2');
               btn.onclick = () => setParentUnit('minsu', subj, cleanKey);
 
               const numMatch = cleanKey.match(/\d+/);
@@ -1575,11 +1736,36 @@
     }
 
     function renderParentProgressChips() {
-      // 1) 민서 칩 렌더링
+      // 1) 👧 민서 학기 탭 및 단원 칩 렌더링
       const minseoSets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
+      const minseoSem = minseoSets.semester || '1-2';
+
+      // 민서 학기 알약 탭 스타일
+      document.querySelectorAll('#minseoSemesterTabGroup button[data-sem]').forEach(btn => {
+        const s = btn.getAttribute('data-sem');
+        if (s === minseoSem) {
+          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-pink-500 text-white border-pink-400 shadow-sm font-black';
+        } else {
+          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-lab-bg/80 text-gray-400 border-lab-card-border hover:text-white';
+        }
+      });
+
+      const bMinseoSemDesc = document.getElementById('badgeMinseoSemesterDesc');
+      if (bMinseoSemDesc) {
+        const sMap = { '1-2': '1-2학기 집중 (기본 ⭐)', '1-1': '1-1학기 복습', 'basic': '기초·파닉스 집중', 'all': '전체 단원 펼침' };
+        bMinseoSemDesc.textContent = sMap[minseoSem] || minseoSem;
+      }
+
+      // 민서 단원 칩 가시성 및 선택 상태
       document.querySelectorAll('#parentMinseoSettings .parent-chip').forEach(btn => {
         const subj = btn.getAttribute('data-subject');
         const unit = btn.getAttribute('data-unit');
+        const btnSems = (btn.getAttribute('data-sem') || '').split(',').map(s => s.trim());
+
+        // 학기 필터링: 'all'이거나 해당 학기 태그가 포함되어 있으면 노출
+        const isVisible = (minseoSem === 'all') || btnSems.length === 0 || btnSems.includes(minseoSem);
+        btn.style.display = isVisible ? '' : 'none';
+
         const isSelected = (minseoSets[subj] === unit);
         if (isSelected) {
           btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-[#ff85a2] text-white border-[#ff85a2] shadow-sm';
@@ -1602,11 +1788,40 @@
         bMinEng.textContent = (UNIT_META_MAP.minseo.english && UNIT_META_MAP.minseo.english[minseoSets.english]) || minseoSets.english;
       }
 
-      // 2) 민수 칩 렌더링
+      // 민서 복습 토글 체크박스 동기화
+      const chkMinseoRev = document.getElementById('chkMinseoReviewSem1');
+      if (chkMinseoRev) chkMinseoRev.checked = !!minseoSets.includeReviewSem1;
+
+      // 2) 👦 민수 학기 탭 및 단원 칩 렌더링
       const minsuSets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
+      const minsuSem = minsuSets.semester || '5-2';
+
+      // 민수 학기 알약 탭 스타일
+      document.querySelectorAll('#minsuSemesterTabGroup button[data-sem]').forEach(btn => {
+        const s = btn.getAttribute('data-sem');
+        if (s === minsuSem) {
+          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-neon-cyan text-lab-bg border-neon-cyan shadow-sm font-black';
+        } else {
+          btn.className = 'py-1.5 px-1.5 rounded-xl text-xs font-bold text-center border transition-all bg-lab-bg/80 text-gray-400 border-lab-card-border hover:text-white';
+        }
+      });
+
+      const bMinsuSemDesc = document.getElementById('badgeMinsuSemesterDesc');
+      if (bMinsuSemDesc) {
+        const sMap = { '5-2': '5-2학기 집중 (기본 ⭐)', '5-1': '5-1학기 복습', 'jihye': '지혜반(특수학급) 집중', 'all': '전체 단원 펼침' };
+        bMinsuSemDesc.textContent = sMap[minsuSem] || minsuSem;
+      }
+
+      // 민수 단원 칩 가시성 및 선택 상태
       document.querySelectorAll('#parentMinsuSettings .parent-chip').forEach(btn => {
         const subj = btn.getAttribute('data-subject');
         const unit = btn.getAttribute('data-unit');
+        const btnSems = (btn.getAttribute('data-sem') || '').split(',').map(s => s.trim());
+
+        // 학기 필터링
+        const isVisible = (minsuSem === 'all') || btnSems.length === 0 || btnSems.includes(minsuSem);
+        btn.style.display = isVisible ? '' : 'none';
+
         const isSelected = isSameUnit(minsuSets[subj], unit);
         if (isSelected) {
           btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-neon-green text-[#023300] border-neon-green shadow-sm';
@@ -1641,6 +1856,12 @@
       if (bMinuSoc) {
         bMinuSoc.textContent = (UNIT_META_MAP.minsu.society && UNIT_META_MAP.minsu.society[minsuSets.society]) || `${minsuSets.society}단원`;
       }
+
+      // 민수 복습 토글 체크박스 동기화
+      const chkMinsuRev1 = document.getElementById('chkMinsuReviewSem1');
+      if (chkMinsuRev1) chkMinsuRev1.checked = !!minsuSets.includeReviewSem1;
+      const chkMinsuJihye = document.getElementById('chkMinsuJihye');
+      if (chkMinsuJihye) chkMinsuJihye.checked = !!minsuSets.includeJihye;
     }
 
     async function syncParentProgressToCloud() {

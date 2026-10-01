@@ -159,8 +159,8 @@
       }
     } catch (e) {}
     return child === 'minseo'
-      ? { korean: 'batchim', math: '100num', english: 'phonics' }
-      : { math: 'division', english: '8', korean: '1', science: '1', society: '1' };
+      ? { semester: '1-2', korean: 'batchim', math: '100num', english: 'phonics', includeReviewSem1: false }
+      : { semester: '5-2', math: 'division', english: 'L9', korean: '1', science: '3', society: '1', includeReviewSem1: false, includeJihye: false };
   }
 
   const NEXT_UNIT_MAP = {
@@ -243,17 +243,18 @@
     return [];
   }
 
-  function buildVocaQuestionsFromNotion(child, subj, unitKey = '') {
+  function buildVocaQuestionsFromNotion(child, subj, unitKey = '', options = {}) {
     try {
       const u = getNormalizedChildId(child);
       const childName = (u === 'minseo') ? '민서' : '민수';
       const vocaList = getNotionCachedVocaList(child);
       if (!vocaList || vocaList.length === 0) return [];
 
+      const parentSettings = getParentQuestSettings(child) || {};
       const targetSubjNames = KOREAN_TO_SUBJ_MAP[subj] || [subj];
 
       // 1) 학생 및 과목 필터링
-      const candidateRecords = vocaList.filter(item => {
+      let candidateRecords = vocaList.filter(item => {
         if (!item.word || !item.meaning) return false;
 
         // 학생 타겟 필터 (타겟이 비어있으면 공통)
@@ -273,7 +274,36 @@
 
       if (candidateRecords.length === 0) return [];
 
-      // 2) 단원 필터링 (일치 우선 정렬: L9, 9, 9단원 유연 매칭)
+      // 2) 학기/지혜반 스코프 필터링 (명시적 options.semesterScope 또는 부모 설정)
+      const requestedScope = options.semesterScope || '';
+      if (requestedScope && requestedScope !== 'all') {
+        const scopeFiltered = candidateRecords.filter(item => {
+          const gList = Array.isArray(item.grades) ? item.grades : [item.grade];
+          const gStr = gList.join(' ');
+          const wType = String(item.wordType || '');
+          const stage = String(item.stage || '');
+
+          if (requestedScope === 'jihye') {
+            return gStr.includes('지혜') || wType.includes('지혜') || stage.includes('지혜');
+          } else if (requestedScope === '5-1' || requestedScope === '1-1') {
+            if (gStr.includes(requestedScope)) return true;
+            const numMatch = stage.match(/\d+/);
+            if (numMatch && parseInt(numMatch[0], 10) <= 6 && subj === 'english') return true;
+            return false;
+          } else if (requestedScope === '5-2' || requestedScope === '1-2') {
+            if (gStr.includes(requestedScope)) return true;
+            const numMatch = stage.match(/\d+/);
+            if (numMatch && parseInt(numMatch[0], 10) >= 7 && subj === 'english') return true;
+            return !gStr.includes('5-1') && !gStr.includes('1-1') && !gStr.includes('지혜');
+          }
+          return true;
+        });
+        if (scopeFiltered.length > 0) {
+          candidateRecords = scopeFiltered;
+        }
+      }
+
+      // 3) 단원 필터링 (일치 우선 정렬: L9, 9, 9단원 유연 매칭)
       let prioritized = candidateRecords;
       if (unitKey && unitKey !== 'default') {
         const uStr = String(unitKey).trim().toLowerCase();
@@ -683,6 +713,17 @@
           }
         }
       }
+
+      // 오답 큐가 비어있을 때, 부모 복습 풀 확장 옵션(1-1 복습 풀) 연동
+      if (!reviewQuestion && parentSettings.includeReviewSem1) {
+        const revVoca = buildVocaQuestionsFromNotion('minseo', subj, '', { semesterScope: '1-1' });
+        if (revVoca.length > 0) {
+          const sample = revVoca[Math.floor(Math.random() * revVoca.length)];
+          sample.formula = `[1-1 누적 복습 🔄] ${sample.formula || ''}`;
+          reviewQuestion = sample;
+        }
+      }
+
       if (reviewQuestion) {
         selected.push(reviewQuestion);
       } else {
@@ -771,6 +812,26 @@
         }
       }
     }
+
+    // 오답 큐가 비어있을 때, 부모 복습 풀 확장 옵션(5-1 복습 또는 지혜반 어휘) 연동
+    if (!reviewQuestion) {
+      if (parentSettings.includeReviewSem1) {
+        const sem1Voca = buildVocaQuestionsFromNotion('minsu', subj, '', { semesterScope: '5-1' });
+        if (sem1Voca.length > 0) {
+          const sample = sem1Voca[Math.floor(Math.random() * sem1Voca.length)];
+          sample.formula = `[5-1 누적 복습 🔄] ${sample.formula || ''}`;
+          reviewQuestion = sample;
+        }
+      } else if (parentSettings.includeJihye) {
+        const jihyeVoca = buildVocaQuestionsFromNotion('minsu', subj, '', { semesterScope: 'jihye' });
+        if (jihyeVoca.length > 0) {
+          const sample = jihyeVoca[Math.floor(Math.random() * jihyeVoca.length)];
+          sample.formula = `[지혜반 복습 🌱] ${sample.formula || ''}`;
+          reviewQuestion = sample;
+        }
+      }
+    }
+
     if (reviewQuestion) {
       selected.push(reviewQuestion);
     } else {
