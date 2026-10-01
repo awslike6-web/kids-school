@@ -12,29 +12,33 @@
 
 ---
 
-## 2. 사회방 4대 탐구 파이프라인 + 1대 도서관 아키텍처
+## 2. 사회방 골디락스 모듈화 아키텍처 (1개 대문 파사드 + 5대 전문 서브모듈)
+
+전사 최고 거버넌스 헌법(제7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,578줄의 비대했던 `society_common.js`를 1개의 초경량 대문 파사드와 5개의 전문 서브모듈로 완전 분리 구축했습니다.
 
 ```mermaid
 graph TD
-    Lobby[🏰 공부방 로비] --> Society[🏛️ 사회 탐험 대기실]
+    Lobby[🏡 공부방 로비] --> Facade[🏰 society_common.js 대문 파사드 ~470줄]
     
-    Society --> S0[📚 1번: 단원 동화 도서관]
-    Society --> S1[📖 2번: 사회 핵심 용어방]
-    Society --> S2[📊 3번: 차트 & 도표 분석실]
-    Society --> S3[🗺️ 4번: 랜선 지도 탐방실]
-    Society --> S4[⏳ 5번: 역사 & 문화재 돋보기]
+    Facade --> S0[📚 society_storybook.js<br/>1번: 단원 동화 도서관 171줄]
+    Facade --> S1[💡 society_voca.js<br/>2번: 사회 핵심 용어방 452줄]
+    Facade --> S2[📊 society_chart.js<br/>3번: 차트 & 도표 분석실 210줄]
+    Facade --> S3[🧭 society_map.js<br/>4번: 랜선 지도 탐방실 108줄]
+    Facade --> S4[⏳ society_history.js<br/>5번: 역사 & 문화재 돋보기 152줄]
     
     S0 -->|5-1 기후| Book1[🌍 민수와 친구들의 지구 지키기 : 기후 대모험]
-    S0 -->|5-2 역사| Book2[⏳ 민수와 친구들의 사회교과서 시간 여행 : 구석기~고조선]
+    S0 -->|5-2 역사| Book2[⏳ 민수와 친구들의 사회교과서 시간 여행 : 선사~고려 1~3편]
 ```
 
-| 구분 | 스테이지 명칭 | 주요 학습 내용 | 인터랙션 특징 |
-| :--- | :--- | :--- | :--- |
-| **1번** | **📚 단원 동화 도서관** | 교과서 배경지식 & 흥미 유발 | E-Book 책 넘김 뷰어 & 웹툰 세로 스크롤 뷰어 + 성우 낭독 |
-| **2번** | **📖 사회 핵심 용어방** | 교과서 핵심 한자 용어 정복 | 2단계(학년/학기 ➔ 단원) 동적 UI + 한자 어원 분해 + 20초 정독 보상 |
-| **3번** | **📊 차트 & 도표 분석실** | 인구·교통·지형 통계 그래프 해독 | 4지선다 분석 퀴즈 & 교과서 그래프 시각화 |
-| **4번** | **🗺️ 랜선 지도 탐방실** | 한반도 지형, 행정구역, 랜드마크 | 백두산·독도·성산일출봉 인터랙티브 탐방 & 1줄 탐방록 |
-| **5번** | **⏳ 역사 & 문화재 돋보기** | 시대별 핵심 유물 도감 수집 | 유물 카드 짝 맞추기 게임 & 나만의 유물 도감 |
+| 구분 | 모듈 파일명 | 전담 역할 | 줄 수 | 네임스페이스 / 주요 API |
+| :--- | :--- | :--- | :---: | :--- |
+| **대문** | `kids/js/society_common.js` | 초기화, 노션 통신, 오버레이 라우팅, 학습일지/인쇄 | ~470줄 | `openMissionView`, `initializeSocietyRoom`, `printSocietySummary` |
+| **1번** | `kids/js/society_storybook.js` | [1단계] 사회 단원 동화 도서관 (4권) | 171줄 | `window.SocietyStorybook` (`render`, `getList`) |
+| **2번** | `kids/js/society_voca.js` | [2단계] 사회 핵심 용어방 (초성/자석/객관식/주관식) | 452줄 | `window.SocietyVoca` (`render`, `verifyAnswer`, `resetMasterAndReload`) |
+| **3번** | `kids/js/society_chart.js` | [3단계] 차트 & 도표 분석실 (4지선다/성공 모달) | 210줄 | `window.SocietyChart` (`render`, `verifyChoice`, `showSuccessModal`) |
+| **4번** | `kids/js/society_map.js` | [4단계] 랜선 지도 탐방실 (명소 사진/한 줄 탐방록) | 108줄 | `window.SocietyMap` (`render`, `submitJourney`) |
+| **5번** | `kids/js/society_history.js` | [5단계] 역사 & 문화재 돋보기 (국보 박물관 도크/수집) | 152줄 | `window.SocietyHistory` (`render`, `collectArtifact`, `renderMuseumGridDock`) |
+| **데이터**| `kids/data/society-data.js` | 오프라인 폴백 스켈레톤 및 목업 데이터셋 | 73줄 | `window.SOCIETY_CURRICULUM_DATA`, `window.SOCIETY_MOCK_DATA` |
 
 ---
 

@@ -1,63 +1,39 @@
 // ========================================================
-// 💎 사회방 공통 비즈니스 로직 및 통신 모듈 (society_common.js)
+// 🏰 [대문 파사드] 사회방 공통 비즈니스 로직 및 통합 라우터 (society_common.js)
 // ========================================================
+// 💡 [골디락스 아키텍처 규격]
+// 프로필/테마 초기화, 노션 어휘/사료 프리패치, 미션 오버레이 라우팅, 학습일지 전송을 총괄하는 대문 파사드입니다.
+// 세부 학습 UI는 5대 전문 서브모듈(storybook, voca, chart, map, history)에 위임합니다.
 
 window.currentSubject = "사회"; // 전역 과목명 명시 (보상 및 학습일지 타겟용)
 
-// 🧚‍♀️ 아나운서 요정 코코 TTS 엔진 안전 우회막 (초기 로딩 충돌 방지용)
-if (!window.stopFairyTTS) {
-    window.stopFairyTTS = function() { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다."); };
-    window.stopFairyTTS.isMock = true;
-}
-if (!window.speakFairyTTS) {
-    window.speakFairyTTS = function(msg) { console.log("🔊 [TTS 우회] 아직 요정 엔진 로드 전입니다:", msg); };
-    window.speakFairyTTS.isMock = true;
-}
-
-// toggleFairyTtsSetting / updateTtsToggleUi → fairy-engine.js
-
-// ========================================================
-// 💎 핵심 아키텍처: 관리자 분기 및 대화/퀴즈 모킹 데이터
-// ========================================================
-var SOCIETY_MOCK_DATA = {
-  voca: [
-    { word: "중심지", hint: "ㅈㅅㅈ", desc: "사람들이 활동을 하거나 여러 가지 필요를 해결하기 위해 자주 모이는 핵심적이고 중심이 되는 장소입니다. 도청, 시청, 큰 시장 등이 발달한 곳이랍니다!", meaning: "사람들이 많이 모이는 곳", image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=500&auto=format&fit=crop" },
-    { word: "공공기관", hint: "ㄱㄱㄱㄱ", desc: "개인의 이익이 아니라 우리 동네 전체의 생활 편의와 복지를 위해 설립된 공공 보증 기관입니다. 예: 경찰서, 소방서, 동주민센터 등이 속해요.", meaning: "모두를 위한 기관" },
-    { word: "공해", hint: "ㄱㅎ", desc: "공장이나 자동차 등에서 나오는 매연, 먼지, 폐수 등으로 인해 우리 자연환경이 오염되거나 주민들의 건강을 훼손시키는 심각한 환경 피해를 말합니다.", meaning: "환경 오염 피해" }
-  ],
-  chart: [
-    { 
-      title: "지역별 인구 변화 도표",
-      img: "https://raw.githubusercontent.com/awslike6/images/main/chart1.png", // 깃허브 이미지 매핑 시뮬레이터
-      desc: "이 막대 그래프형 인구 도표를 보면 2010년에 비해 현재 우리 시의 어린이 비율은 줄고, 어르신 인구 비율이 가파르게 증가했음을 볼 수 있어요.",
-      quiz: "도표에 따르면, 2010년과 비교할 때 가장 전형적으로 늘어난 주 연령층은 무엇일까요?",
-      choices: ["어린이 연령층", "청장년 경제인구", "65세 이상 노인 어르신", "신생아 출생 비율"],
-      correctIdx: 2
-    },
-    { 
-      title: "중심지 교통량 도표",
-      img: "https://raw.githubusercontent.com/awslike6/images/main/chart2.png",
-      desc: "이 도표는 중심지별 하루 유입 수단 비중을 수치화한 것입니다. 대중교통(지하철, 버스)을 타고 유입되는 비중이 도보 유입의 4배가 넘습니다.",
-      quiz: "위 자료를 바탕으로 분석한 생각 중 맞지 않는 의견은 무엇일까요?",
-      choices: ["이 지역은 교통이 편리하게 잘 구축되어 있다.", "대중교통을 타는 손님 비중이 높은 편이다.", "지하철과 버스역 근처가 특히 발달할 것이다.", "모든 사람이 차를 끌고 다니므로 교통 정체가 없을 것이다."],
-      correctIdx: 3
+// 🔊 요정 음성 제어 헬퍼
+function stopFairyTTS() {
+    if (typeof FairyEngine !== 'undefined' && typeof FairyEngine.stop === 'function') {
+        FairyEngine.stop();
+        return;
     }
-  ],
-  map: [
-    { name: "백두산 천지", img: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=700&auto=format&fit=crop", desc: "한반도에서 가장 높고 장엄한 산인 백두산 정상에 위치한 화산호 천지입니다. 하늘의 연못이라 불릴 만큼 푸르고 웅장하며 하늘 빛깔을 가득 담고 있답니다." },
-    { name: "독도", img: "https://images.unsplash.com/photo-1610992015762-466afb70fd45?w=700&auto=format&fit=crop", desc: "대한민국 동쪽 가장 끝자락에서 홀로 우리 동해 영토를 지키고 있는 화산 섬입니다. 맑은 날 울릉도에서 맨눈으로 볼 수 있는 아름다운 우리 국토의 심장입니다." },
-    { name: "제주도 성산일출봉", img: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?w=700&auto=format&fit=crop", desc: "제주도 동쪽에 우뚝 솟아 있는 거대한 성 모양의 화산 봉우리입니다. 바닷속에서 화산이 분출하며 만들어진 세계 자연 유산으로, 해돋이 전경이 매우 찬란합니다." }
-  ],
-  history: [
-    { name: "경주 첨성대", img: "https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop", desc: "신라 선덕여왕 때 축조된 동양에서 가장 오래된 유서 깊은 천문 관측소입니다. 별자리의 움직임을 관찰해 농사기와 기후를 미리 파악했던 조상들의 지혜가 깃든 유적입니다." },
-    { name: "무령왕릉 석수", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop", desc: "백제 무령왕릉 수호신 역할을 하기 위해 무덤 앞을 듬직하게 지키고 선 돌짐승 조각상입니다. 국보이며, 무덤 속을 악귀로부터 지키려는 마음이 담겨있답니다." },
-    { name: "빗살무늬 토기", img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=500&auto=format&fit=crop", desc: "신석기 시대 조상들이 곡식을 담아 보관했던 지혜로운 그릇입니다. 모래땅이나 흙속에 깊게 꽂을 수 있게 뾰족한 팽이 형태로 밑바닥을 과학적으로 디자인했답니다." }
-  ]
-};
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
+}
+
+function speakFairyTTS(text) {
+    if (!text) return;
+    if (typeof FairyEngine !== 'undefined' && typeof FairyEngine.speak === 'function') {
+        FairyEngine.speak(text);
+        return;
+    }
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'ko-KR';
+        utter.rate = 0.9;
+        window.speechSynthesis.speak(utter);
+    }
+}
 
 // 🔒 로컬 속성 상태
-// 💡 [정비팀장 배선] 1. 먼저 로컬스토리지에서 현재 유저 프로필을 읽어옵니다.
-// 💡 [원상복구본] 전역 코어(core.js)가 부모 계정을 먼저 세탁해주므로, 여기선 오직 학생 데이터만 깔끔하게 읽어옵니다.
 let currentProfile = localStorage.getItem('currentUser') || 'son';
 let currentUserName = localStorage.getItem('currentUserName') || '민수';
 let currentTheme = localStorage.getItem('currentTheme') || 'theme--arcade';
@@ -65,10 +41,11 @@ let currentTheme = localStorage.getItem('currentTheme') || 'theme--arcade';
 const savedName = localStorage.getItem('currentUserName');
 const isAdmin = (savedName === '아빠' || savedName === '엄마');
 
-let activeSectionData = []; // 현재 로드된 해당 국어 DB/모킹 데이터 세트
+let activeSectionData = []; // 현재 로드된 해당 과목 DB 세트
 let activeQuizIdx = 0; 
 let societyVocaOrderType = "shuffle"; // 'shuffle' or 'sequence'
 let societyVocaMasterCountMap = {}; // 마스터 횟수 기록용
+
 let historyCollected = [];
 try {
     const rawHistory = localStorage.getItem('society_history_collectibles');
@@ -78,21 +55,26 @@ try {
     console.warn("⚠️ [사회방] 소장 유물 스토리지 복구 기본값 적용:", e);
     historyCollected = [];
 }
+window.historyCollected = historyCollected;
 
+// 💡 [동적 메모리] 노션 원본 데이터 보관 및 학년/단원 실시간 추출
+let allFetchedRecords = []; 
+let selectedSocietyGrade = "";
+let selectedSocietyUnit = "";
+let currentMissionType = "";
+let isCurrentSocietyMissionLogged = false;
+
+// ========================================================
+// 🛠️ 사회방 초기화 엔진 (initializeSocietyRoom)
+// ========================================================
 function initializeSocietyRoom() {
     console.log("🛠️ 사회방 초기화 엔진 가동...");
 
-    // 💡 [철벽 방어선 1] 현재 프로필 상태 안전하게 가져오기
-    // 로컬 스토리지에 데이터가 없으면 기본값으로 'son'(민수)을 할당합니다.
-    const currentProfile = localStorage.getItem('currentUser') || 'son';
-
-    // 💡 [철벽 방어선 2] undefined 에러가 발생하던 147번째 줄 타깃 방어
-    // 전역 객체가 비어있을 가능성을 대비해, 터지지 않도록 삼항연산자로 백업 이름을 심어줍니다.
+    const profile = localStorage.getItem('currentUser') || 'son';
     let firstName = "민수";
     let secondName = "민서";
 
     try {
-        // 기존에 에러를 내던 구조(예: APP_CONFIG.CHILDREN.son 등)가 있다면 안전하게 검증하고 바인딩
         if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) {
             firstName = APP_CONFIG.CHILDREN.first?.name || APP_CONFIG.CHILDREN.son?.name || "민수";
             secondName = APP_CONFIG.CHILDREN.second?.name || APP_CONFIG.CHILDREN.daughter?.name || "민서";
@@ -101,8 +83,7 @@ function initializeSocietyRoom() {
         console.log("⚠️ 전역 설정 객체 로드 지연으로 기본 이름을 사용합니다.");
     }
 
-    // 💡 [철벽 방어선 3] 프로필에 따른 테마 및 헤더 타이틀 강제 주입
-    if (currentProfile === 'son') {
+    if (profile === 'son') {
         document.body.className = "theme--arcade";
         const titleEl = document.getElementById('societyTitle');
         if (titleEl) titleEl.textContent = `${firstName}의 사회 탐험 대기실`;
@@ -112,7 +93,6 @@ function initializeSocietyRoom() {
             badgeEl.className = "admin-status-badge";
             badgeEl.textContent = `🎮 [${firstName}] 네온 관제`;
         }
-        console.log(`⚡ [환경 동기화] ${firstName} 아케이드 테마 배선 완료`);
     } else {
         document.body.className = "theme--slime";
         const titleEl = document.getElementById('societyTitle');
@@ -123,31 +103,28 @@ function initializeSocietyRoom() {
             badgeEl.className = "admin-status-badge korean--fairy";
             badgeEl.textContent = `🎠 [${secondName}] 동화 모드`;
         }
-        console.log(`⚡ [환경 동기화] ${secondName} 밀키스 테마 배선 완료`);
     }
 
-    // --------------------------------------------------------
-    // ⚙️ 이 아래에 있는 기존 로직(관리자 배선, 오버레이 초기화 등)은 
-    // 절대 건드리지 말고 그대로 유지해 주세요!
-    // --------------------------------------------------------
-    // 관리자 진입 시 UI 변경
     if (isAdmin) {
-        document.getElementById('societyTitle').innerHTML = `<span style="color:var(--orange);">🛠️ 사회 관리자 시뮬레이터</span>`;
-        document.getElementById('societyGoalText').textContent = "🔧 아버님/어머님 테스트 구역: 실질적인 노션 전송을 완전 차단하고, 고품격 가상 검증 데이터를 지원 중입니다.";
-        document.getElementById('adminBadgeTag').textContent = `🛠️ [${savedName} 검수용] 프리패스 가동`;
-        document.getElementById('adminBadgeTag').style.color = "var(--yellow)";
-        document.getElementById('adminBadgeTag').style.borderColor = "var(--orange)";
+        const titleEl = document.getElementById('societyTitle');
+        if (titleEl) titleEl.innerHTML = `<span style="color:var(--orange);">🛠️ 사회 관리자 시뮬레이터</span>`;
+        const goalEl = document.getElementById('societyGoalText');
+        if (goalEl) goalEl.textContent = "🔧 아버님/어머님 테스트 구역: 실질적인 노션 전송을 완전 차단하고, 고품격 가상 검증 데이터를 지원 중입니다.";
+        const badgeEl = document.getElementById('adminBadgeTag');
+        if (badgeEl) {
+            badgeEl.textContent = `🛠️ [${savedName} 검수용] 프리패스 가동`;
+            badgeEl.style.color = "var(--yellow)";
+            badgeEl.style.borderColor = "var(--orange)";
+        }
     } else {
-        // 학습 세션 개시
         if (typeof startLearning === 'function') {
             startLearning("초등 사회 탐색 교실");
         }
     }
 
-    // 요정 대화 다듬기 (화면 텍스트 표시만 유지하고 자동 음성 낭독은 제거)
     let customGreeting = "안녕! 보상을 얻으러 사회 탐험을 출발해볼까?";
     if (typeof FAIRY_CONFIG !== 'undefined' && FAIRY_CONFIG.greetings) {
-        customGreeting = FAIRY_CONFIG.greetings[currentProfile] || customGreeting;
+        customGreeting = FAIRY_CONFIG.greetings[profile] || customGreeting;
         if (isAdmin && FAIRY_CONFIG.greetings.admin) {
             customGreeting = FAIRY_CONFIG.greetings.admin;
         }
@@ -155,18 +132,11 @@ function initializeSocietyRoom() {
     const speakerEl = document.getElementById('fairySpeakerText');
     if (speakerEl) speakerEl.textContent = customGreeting;
 
-    // 🔊 요정 음성 버튼 UI 초기 적용 
     if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
 }
 
-// 💡 [정비팀장 동적 메모리] 노션 원본 데이터를 보관하고 학년/단원을 실시간 자동 추출합니다!
-let allFetchedRecords = []; 
-let selectedSocietyGrade = "";
-let selectedSocietyUnit = "";
-let currentMissionType = "";
-
 // ========================================================
-// 🚪 오버레이 미션 팝업 연동 총 제어
+// 🚪 오버레이 미션 팝업 라이프사이클 제어
 // ========================================================
 function isSocietyMissionInProgress() {
     const overlay = document.getElementById('missionOverlay');
@@ -175,159 +145,12 @@ function isSocietyMissionInProgress() {
         && activeQuizIdx < activeSectionData.length;
 }
 
-const SOCIETY_STORYBOOK_LIBRARY = [
-    {
-        id: "5_1_2",
-        grade: "5학년 1학기",
-        unit: "2단원 : 우리 국토의 기후",
-        bookNum: "5-1 기후",
-        title: "민수와 친구들의 지구 지키기 : 기후 수업 대모험",
-        subtitle: "날씨와 기후의 차이, 기온·강수량·바람과 지구온난화",
-        desc: "햇살 따스한 교실에서 시작되는 기후 탐험! 날씨와 기후의 정의부터 바람, 태풍, 지구를 지키는 온실가스 줄이기 실천까지!",
-        icon: "🌍",
-        color: "#10b981",
-        bgGrad: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#10b981",
-        link: "climate_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-1/1/climate_story_p1.png"
-    },
-    {
-        id: "5_2_1",
-        grade: "5학년 2학기",
-        unit: "1단원 : 옛사람들의 삶과 문화",
-        bookNum: "5-2 역사",
-        title: "민수와 친구들의 사회교과서 시간 여행",
-        subtitle: "구석기 주먹도끼부터 고조선 8조법까지 교과서 완전 정복",
-        desc: "역사 박물관 유물함의 푸른 빛을 따라 시작된 시간 여행! 한탄강 주먹도끼, 암사동 빗살무늬 토기, 거대 고인돌과 고조선 성문 앞 8조법 탐구!",
-        icon: "⏳",
-        color: "#d97706",
-        bgGrad: "linear-gradient(135deg, rgba(217, 119, 6, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#d97706",
-        link: "history_time_travel_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/1/history_story_p1.png"
-    },
-    {
-        id: "5_2_2",
-        grade: "5학년 2학기",
-        unit: "1단원 : 옛사람들의 삶과 문화",
-        bookNum: "5-2 삼국·남북국",
-        title: "민수와 친구들의 사회교과서 시간 여행 2편",
-        subtitle: "삼국의 영웅들과 찬란한 황금빛 나라 (삼국·가야·통일신라·발해)",
-        desc: "황금빛 포털을 타고 삼국 시대로 도약! 만주 벌판 광개토대왕릉비, 살수대첩 을지문덕, 백제 금동대향로, 신라 황금 금관, 가야 철갑옷과 석굴암 본존불까지!",
-        icon: "⚔️",
-        color: "#b45309",
-        bgGrad: "linear-gradient(135deg, rgba(180, 83, 9, 0.18) 0%, rgba(30, 41, 59, 0.9) 100%)",
-        border: "#f59e0b",
-        link: "three_kingdoms_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/2/three_kingdoms_story_p1.png"
-    },
-    {
-        id: "5_2_3",
-        grade: "5학년 2학기",
-        unit: "1단원 : 옛사람들의 삶과 문화",
-        bookNum: "5-2 고려",
-        title: "민수와 친구들의 사회교과서 시간 여행 3편",
-        subtitle: "푸른 비취빛 고려와 바다 너머 코리아",
-        desc: "교과서의 푸른빛을 따라 고려의 개경으로! 후삼국을 통일한 태조 왕건, 서희의 외교 담판, 귀주대첩 강감찬, 팔만대장경, 고려청자와 벽란도의 아라비아 상인들까지!",
-        icon: "🏺",
-        color: "#0d9488",
-        bgGrad: "linear-gradient(135deg, rgba(13, 148, 136, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
-        border: "#14b8a6",
-        link: "goryeo_storybook.html",
-        coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/3/goryeo_story_p1.png"
-    }
-];
-
-function renderSocietyStorybookLibrary(innerBody) {
-    innerBody.innerHTML = `
-        <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
-            <div style="text-align: center; margin-bottom: 24px;">
-                <h3 style="font-family: 'Jua', sans-serif; font-size: 1.45rem; color: #f59e0b; margin-bottom: 6px;">
-                    📚 사회 단원 동화 도서관
-                </h3>
-                <p style="font-size: 0.95rem; color: #94a3b8;">
-                    교과서 내용이 쏙쏙 이해되는 재미있는 동화와 성우 구연동화 음성을 학기별로 만나보세요!
-                </p>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
-                ${SOCIETY_STORYBOOK_LIBRARY.map(book => `
-                    <div style="
-                        background: ${book.bgGrad};
-                        border: 2px solid ${book.border};
-                        border-radius: 16px;
-                        padding: 16px;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-between;
-                        gap: 12px;
-                        box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-                        transition: transform 0.2s, box-shadow 0.2s;
-                    ">
-                        <div style="display: flex; gap: 14px; align-items: flex-start;">
-                            <img src="${book.coverImg}?v=20260906" alt="${book.title}" style="
-                                width: 90px;
-                                height: 120px;
-                                object-fit: cover;
-                                border-radius: 8px;
-                                border: 1px solid rgba(255,255,255,0.2);
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                                flex-shrink: 0;
-                            ">
-                            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-                                    <span style="
-                                        background: ${book.color};
-                                        color: white;
-                                        padding: 2px 8px;
-                                        border-radius: 6px;
-                                        font-size: 0.78rem;
-                                        font-family: 'Jua', sans-serif;
-                                    ">${book.bookNum}</span>
-                                    <span style="font-size: 0.82rem; color: #cbd5e1; font-weight: bold;">${book.grade}</span>
-                                </div>
-                                <h4 style="font-family: 'Jua', sans-serif; font-size: 1.15rem; color: white; margin: 2px 0; line-height: 1.3;">
-                                    ${book.title}
-                                </h4>
-                                <p style="font-size: 0.83rem; color: #94a3b8; line-height: 1.35; margin: 0;">
-                                    ${book.subtitle}
-                                </p>
-                            </div>
-                        </div>
-
-                        <p style="font-size: 0.83rem; color: #cbd5e1; line-height: 1.45; margin: 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
-                            ${book.desc}
-                        </p>
-
-                        <a href="${book.link}" style="
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 6px;
-                            background: ${book.color};
-                            color: white;
-                            text-decoration: none;
-                            padding: 10px;
-                            border-radius: 10px;
-                            font-family: 'Jua', sans-serif;
-                            font-size: 1rem;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                            transition: filter 0.2s;
-                        ">
-                            📖 동화책 읽기 (구연동화)
-                        </a>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
-
 function openMissionView(type) {
     const overlay = document.getElementById('missionOverlay');
     const headerTitle = document.getElementById('overlayHeaderTitle');
     const headerIcon = document.getElementById('overlayHeaderIcon');
     const innerBody = document.getElementById('overlayInnerBody');
+    if (!overlay || !innerBody) return;
     
     overlay.style.display = "flex";
     activeQuizIdx = 0;
@@ -351,11 +174,15 @@ function openMissionView(type) {
         case 'history': targetTitle = "역사 문화재 돋보기"; targetIcon = "⏳"; break;
     }
 
-    headerTitle.textContent = targetTitle;
-    headerIcon.textContent = targetIcon;
+    if (headerTitle) headerTitle.textContent = targetTitle;
+    if (headerIcon) headerIcon.textContent = targetIcon;
 
     if (type === 'storybook') {
-        renderSocietyStorybookLibrary(innerBody);
+        if (window.SocietyStorybook && typeof window.SocietyStorybook.render === 'function') {
+            window.SocietyStorybook.render(innerBody);
+        } else if (typeof renderSocietyStorybookLibrary === 'function') {
+            renderSocietyStorybookLibrary(innerBody);
+        }
         return;
     }
 
@@ -366,36 +193,35 @@ function openMissionView(type) {
         });
     }
 
-    // 💡 미션 창 켜자마자 스피너 돌리면서 노션에서 데이터를 통째로 긁어옵니다.
     showLoadingSpinner(innerBody);
     fetchAndBuildDynamicUI(type, innerBody);
 }
 
-/**
- * ⏳ 로딩 스피너 전송 헬퍼 함수 (안전하게 보존 완료!)
- */
 function showLoadingSpinner(container) {
+    if (!container) return;
     container.innerHTML = `
-      <div class="spinner-wrapper">
-        <div class="spinner-circle"></div>
-        <p style="font-family:'Gaegu', cursive; font-size:1.3rem; font-weight:bold; color:inherit; text-align:center; opacity: 0.95;">
-            Fairy_🧚‍♀️ 코코 요정이 노션 등대에서 자료를 가방에 챙겨오고 있어요...
-        </p>
-      </div>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; font-family: 'Jua', sans-serif;">
+            <div style="font-size: 3rem; animation: spin 1s infinite linear; margin-bottom: 16px;">⏳</div>
+            <h3 style="font-size: 1.3rem; color: var(--purple); margin-bottom: 8px;">노션 교재 데이터 수신 중...</h3>
+            <p style="font-size: 0.95rem; color: #888;">교과서 핵심 단원과 사료를 실시간으로 불러오고 있어요!</p>
+        </div>
     `;
 }
 
-function closeMissionView(force) {
-    if (!force && typeof confirmLeaveActiveSession === 'function' && !confirmLeaveActiveSession()) {
-        return;
+function closeMissionView(isForce = false) {
+    const overlay = document.getElementById('missionOverlay');
+    if (!overlay) return;
+
+    if (!isForce && isSocietyMissionInProgress()) {
+        if (typeof confirmQuizAbandon === 'function') {
+            confirmQuizAbandon({
+                onConfirm: () => closeMissionView(true)
+            });
+            return;
+        }
     }
-    if (typeof disarmQuizLeaveGuard === 'function') {
-        disarmQuizLeaveGuard();
-    }
-    if (typeof finalizeQuizRewardSession === 'function') {
-        finalizeQuizRewardSession();
-    }
-    document.getElementById('missionOverlay').style.display = "none";
+
+    overlay.style.display = "none";
     activeSectionData = [];
     activeQuizIdx = 0;
     stopFairyTTS();
@@ -416,7 +242,7 @@ function getCurriculumRecords(type) {
                     word: titleStr,
                     title: titleStr,
                     name: titleStr,
-                    hint: item.hint || getChosung(titleStr),
+                    hint: item.hint || (window.SocietyVoca ? window.SocietyVoca.getChosung(titleStr) : ""),
                     detailContext: item.desc || item.explanation || "",
                     desc: item.desc || item.detailContext || "",
                     meaning: item.meaning || item.desc || "",
@@ -441,7 +267,6 @@ function getCurriculumRecords(type) {
     return list;
 }
 
-// 🎒 노션(5-2)과 교과서(5학년 2학기) 학년 표기 완벽 정규화 헬퍼
 function normalizeSocietyGrade(g) {
     if (!g) return "";
     const str = String(g).trim();
@@ -451,7 +276,7 @@ function normalizeSocietyGrade(g) {
 }
 
 /**
- * 🏛️ 신규 노션 [공부방 교재·사료 마스터 DB] 실시간 쿼리 함수 (2026 표준)
+ * 🏛️ 노션 [교재·사료 마스터 DB] 실시간 쿼리 함수 (2026 표준)
  */
 async function fetchCurriculumFromNotion(type) {
     const PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
@@ -500,7 +325,7 @@ async function fetchCurriculumFromNotion(type) {
             word: title,
             title: title,
             name: title,
-            hint: (typeof getChosung === 'function') ? getChosung(title) : "",
+            hint: (window.SocietyVoca ? window.SocietyVoca.getChosung(title) : ""),
             detailContext: desc,
             desc: desc,
             meaning: desc,
@@ -525,12 +350,12 @@ async function fetchCurriculumFromNotion(type) {
 
 async function fetchAndBuildDynamicUI(type, innerBody) {
     const curriculumRecords = getCurriculumRecords(type);
+    const mockFallback = (window.SOCIETY_MOCK_DATA && window.SOCIETY_MOCK_DATA[type]) ? window.SOCIETY_MOCK_DATA[type] : [];
 
     try {
         let records = [];
         try {
             if (type === 'voca') {
-                // 📖 용어방: 순수 어휘 사전 DB (VOCA_DB) 실시간 연동
                 if (typeof fetchVocaFromNotion === 'function') {
                     records = await fetchVocaFromNotion({
                         subject: "사회", 
@@ -540,7 +365,6 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                     });
                 }
             } else {
-                // 🏛️ 차트/지도/역사: 신규 [교재·사료 마스터 DB] 실시간 쿼리 연동
                 records = await fetchCurriculumFromNotion(type);
             }
         } catch (netErr) {
@@ -550,7 +374,6 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         if (!records || records.length === 0) {
             records = curriculumRecords;
         } else if (curriculumRecords.length > 0) {
-            // 노션에 아직 없는 단원(예: 5-1)의 데이터는 로컬 교과서 데이터셋에서 부드럽게 병합(보충)
             const existingTitles = new Set(records.map(r => r.word || r.title || r.name));
             const extra = curriculumRecords.filter(r => !existingTitles.has(r.word || r.title || r.name));
             records = [...records, ...extra];
@@ -558,8 +381,8 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
 
         if (records && records.length > 0) {
             allFetchedRecords = records; 
+            window.allFetchedRecords = records;
 
-            // 💡 노션 DB 및 교과서 데이터셋에 적혀있는 '학년' 텍스트를 정규화하여 중복 제거
             const uniqueGrades = [...new Set(records.flatMap(r => (r.grades || [r.grade]).map(normalizeSocietyGrade)))].filter(g => g && g !== "공통").sort();
 
             if (uniqueGrades.length === 0) {
@@ -569,18 +392,20 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             }
         } else {
             console.warn("⚠️ 데이터 결과가 없습니다. 가상 데이터 구동");
-            activeSectionData = SOCIETY_MOCK_DATA[type];
+            activeSectionData = mockFallback;
+            window.activeSectionData = mockFallback;
             renderSectionUI(type, innerBody);
         }
     } catch(e) {
         console.warn("통신 에러. 교과서/가상 데이터 구동", e);
-        activeSectionData = (curriculumRecords && curriculumRecords.length > 0) ? curriculumRecords : SOCIETY_MOCK_DATA[type];
+        activeSectionData = (curriculumRecords && curriculumRecords.length > 0) ? curriculumRecords : mockFallback;
+        window.activeSectionData = activeSectionData;
         renderSectionUI(type, innerBody);
     }
 }
 
 /**
- * 🎒 1단계: 노션 텍스트 그대로 학년 버튼 자동 생성
+ * 🎒 1단계: 학년 버튼 자동 생성
  */
 function renderDynamicGradeUI(grades, container) {
     speakFairyTTS("공부할 학년과 학기를 마우스로 골라보세요! 🧚‍♀️");
@@ -601,9 +426,9 @@ function renderDynamicGradeUI(grades, container) {
 
 function selectDynamicGrade(grade) {
     selectedSocietyGrade = grade;
+    window.selectedSocietyGrade = grade;
     const innerBody = document.getElementById('overlayInnerBody');
     
-    // 💡 선택한 학년에 들어있는 '단원' 글자들만 노션에서 쏙쏙 뽑아내기
     const matchedRecords = allFetchedRecords.filter(r => {
         const rGrades = (r.grades || [r.grade]).map(normalizeSocietyGrade);
         return rGrades.includes(grade) || r.grade === grade;
@@ -618,7 +443,7 @@ function selectDynamicGrade(grade) {
 }
 
 /**
- * 📖 2단계: 노션 텍스트 그대로 단원 버튼 자동 생성
+ * 📖 2단계: 단원 버튼 자동 생성
  */
 function renderDynamicUnitUI(units, container) {
     speakFairyTTS("이어서 공부할 단원을 선택해 주세요!");
@@ -641,6 +466,7 @@ function renderDynamicUnitUI(units, container) {
 
 function selectDynamicUnit(unit) {
     selectedSocietyUnit = unit;
+    window.selectedSocietyUnit = unit;
     const innerBody = document.getElementById('overlayInnerBody');
     
     const finalRecords = allFetchedRecords.filter(r => {
@@ -653,7 +479,7 @@ function selectDynamicUnit(unit) {
 }
 
 /**
- * 🚀 데이터 조립 및 최종 퀴즈 렌더링
+ * 🚀 데이터 조립 및 최종 미션 개시
  */
 function startMissionWithFilteredData(records, innerBody) {
     const parsed = records.map(record => {
@@ -661,7 +487,7 @@ function startMissionWithFilteredData(records, innerBody) {
         const meaningStr = record.meaning || "뜻풀이 없음";
         const descStr = record.detailContext || record.desc || "해당 유적/지형 설명이 준비되어 있습니다.";
         const imgUrl = record.imageUrl || record.img || "";
-        const hintStr = record.hint || getChosung(titleStr);
+        const hintStr = record.hint || (window.SocietyVoca ? window.SocietyVoca.getChosung(titleStr) : "");
         const summaryPassage = record.summaryPassage || "";
         const interactiveUrl = record.interactiveUrl || "";
 
@@ -682,7 +508,7 @@ function startMissionWithFilteredData(records, innerBody) {
                 title: titleStr, 
                 img: imgUrl, 
                 meaning: meaningStr, 
-                desc: descStr,
+                desc: descStr, 
                 interactiveUrl: interactiveUrl,
                 quiz: record.quiz || `${titleStr}의 퀴즈: 본 자료의 성격으로 가장 알맞은 것은?`,
                 choices: (record.choices && record.choices.length > 0) ? record.choices : ["전형적인 통계 자료", "가짜 관찰 보고서", "모킹 가설", "1등급 유망 자료"],
@@ -698,7 +524,7 @@ function startMissionWithFilteredData(records, innerBody) {
                 name: titleStr, 
                 img: imgUrl, 
                 meaning: meaningStr, 
-                desc: descStr,
+                desc: descStr, 
                 interactiveUrl: interactiveUrl,
                 summaryPassage: summaryPassage
             };
@@ -706,147 +532,65 @@ function startMissionWithFilteredData(records, innerBody) {
     });
 
     if (currentMissionType === 'voca') {
-        // 용어방 마스터 기록 로드
         societyVocaMasterCountMap = JSON.parse(localStorage.getItem(`society_voca_master_${currentUserName}`) || '{}');
+        window.societyVocaMasterCountMap = societyVocaMasterCountMap;
         
-        // 💡 마스터 필터링: 노션 DB에서 '달성' 체크된 단어(isMastered) + 로컬에서 방금 3번 맞춘 단어 동시 제외
         activeSectionData = parsed.filter(item => {
             const isNotionMastered = item.isMastered === true;
             const isLocalMastered = (societyVocaMasterCountMap[item.word] || 0) >= 3;
             return !isNotionMastered && !isLocalMastered;
         });
         
-        // 필터링 후 섞기 적용 (기본값)
         if (societyVocaOrderType === "shuffle") {
             activeSectionData.sort(() => Math.random() - 0.5);
         }
     } else {
         activeSectionData = parsed;
     }
+
+    window.activeSectionData = activeSectionData;
+    window.activeQuizIdx = 0;
+    activeQuizIdx = 0;
     
     if (currentMissionType === 'voca' || currentMissionType === 'chart') {
         const badge = ` [${selectedSocietyGrade} ${selectedSocietyUnit}]`;
-        document.getElementById('overlayHeaderTitle').textContent = (currentMissionType === 'voca' ? "사회 용어방 (한자 초성 퀴즈)" : "차트 & 도표 자료 분석실") + badge;
+        const titleEl = document.getElementById('overlayHeaderTitle');
+        if (titleEl) {
+            titleEl.textContent = (currentMissionType === 'voca' ? "사회 용어방 (한자 초성 퀴즈)" : "차트 & 도표 자료 분석실") + badge;
+        }
     }
 
     renderSectionUI(currentMissionType, innerBody);
 }
 
-// 한글 초성을 자동으로 자르는 초강력 헬퍼함수
-function getChosung(str) {
-    const cho = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
-    let result = "";
-    for(let i=0; i<str.length; i++) {
-        const code = str.charCodeAt(i) - 44032;
-        if(code > -1 && code < 11172) {
-            result += cho[Math.floor(code / 588)];
-        } else {
-            result += str.charAt(i);
-        }
-    }
-    return result;
-}
-
-window.societyToggleOrder = function() {
-    societyVocaOrderType = (societyVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
-    activeQuizIdx = 0;
-    const innerBody = document.getElementById('overlayInnerBody');
-    if (!innerBody) return;
-
-    let matchedRecords = allFetchedRecords;
-    if (selectedSocietyGrade) {
-        matchedRecords = matchedRecords.filter(r =>
-            r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)
-        );
-    }
-    if (selectedSocietyUnit) {
-        matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedSocietyUnit);
-    }
-    startMissionWithFilteredData(matchedRecords, innerBody);
-};
-
-// ========================================================
-// 🖌️ 각 세부 파트별 학습 UI 렌더링 팩토리
-// ========================================================
-window.resetSocietyVocaMasterAndReload = async function() {
-    if (confirm("정말로 이 단원의 모든 용어 마스터(3회 정답) 기록을 지우고 처음부터 다시 시작할까요?")) {
-        const innerBody = document.getElementById('overlayInnerBody');
-        if(innerBody) innerBody.innerHTML = "<div style='text-align:center; padding:40px;'>노션 데이터를 초기화 중입니다... ⏳</div>";
-        
-        // 1. 로컬 카운트 스토리지 초기화
-        localStorage.removeItem(`society_voca_master_${currentUserName}`);
-        
-        // 2. 현재 선택된 단원 내에서 노션 [달성]이 true로 되어있는 레코드 추출
-        const recordsToReset = allFetchedRecords.filter(r => 
-            (r.grade === selectedSocietyGrade || r.grades.includes(selectedSocietyGrade)) &&
-            String(r.level).trim() === selectedSocietyUnit &&
-            r.isMastered === true
-        );
-
-        // 3. 노션 일괄 PATCH 처리 (달성 해제)
-        if (typeof updateVocaMasteryStatus === 'function') {
-            for (const r of recordsToReset) {
-                await updateVocaMasteryStatus(r.pageId, false);
-                r.isMastered = false; // 동기화를 위해 메모리 상의 원본 데이터도 해제
-            }
-        }
-        
-        alert("학습 기록이 노션에서 완전히 초기화되었습니다! 다시 신나게 풀어볼까요?");
-        closeMissionView();
-        setTimeout(() => openMissionView('voca'), 300);
-    }
-};
-
+/**
+ * 🎨 [통합 렌더링 라우터] 각 전문 서브모듈로 UI 렌더링 위임
+ */
 function renderSectionUI(type, container) {
-    container.innerHTML = "";
-    
+    if (!container) container = document.getElementById('overlayInnerBody');
+    if (!container) return;
+
     if (!activeSectionData || activeSectionData.length === 0) {
-        if (type === 'voca') {
-            container.innerHTML = `
-                <div style="text-align:center; padding: 40px 20px;">
-                    <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
-                    <p style="font-size:1.4rem; color:var(--purple); margin-bottom:20px;">이 단원의 모든 용어를 완벽하게 마스터했습니다! 대단해요!</p>
-                    <button class="back-to-lobby-btn" style="background:var(--pink); color:white;" onclick="closeMissionView(); resetSocietyVocaMasterAndReload()">✅ 나가기 (학습 리셋)</button>
-                </div>`;
-        } else {
-            container.innerHTML = `<p style="text-align:center; padding: 20px;">가용할 수 있는 학습 데이터가 비어 있습니다.</p>`;
-        }
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #cbd5e1;">
+                <div style="font-size: 3rem; margin-bottom: 12px;">🎉</div>
+                <h3 style="font-family: 'Jua'; font-size: 1.4rem; color: #10b981;">축하합니다! 모든 미션을 완료했습니다!</h3>
+                <p style="font-size: 1rem; color: #94a3b8; margin: 10px 0 20px;">이 단원의 모든 문항을 마스터했어요.</p>
+                <button class="back-to-lobby-btn" onclick="closeMissionView(true)">대기실로 돌아가기</button>
+            </div>
+        `;
         return;
     }
 
-let isCurrentSocietyMissionLogged = false;
-
-async function finalizeSocietyMissionImmediately() {
-    if (isCurrentSocietyMissionLogged) return;
-    isCurrentSocietyMissionLogged = true;
-
-    try {
-        const student = (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
-        let subj = '사회';
-        if (selectedSocietyUnit) subj = `사회(${selectedSocietyUnit})`;
-
-        const targetNotes = window.wrongNotes || [];
-        const errorReport = targetNotes.length > 0 ? targetNotes.map(q => {
-            if (q.wrongInput) return `${q.word || q.text} (오답: ${q.wrongInput})`;
-            return q.word || q.text || q;
-        }).join(' / ') : "오답 없음";
-
-        // 🏆 10문제 완주 보너스(+5💎/🍬) 및 노션 학습일지 자동 전송
-        if (typeof finalizeQuizRewardSession === 'function') {
-            await finalizeQuizRewardSession({
-                isFullComplete: true,
-                subject: subj,
-                childName: student,
-                errorReport: errorReport
-            });
-            console.log(`🎉 [사회 미션 완수] 완주 보너스(+5) & 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
-        }
-    } catch (e) {
-        console.error("사회 미션 완수 일지 전송 오류:", e);
+    if (activeQuizIdx >= activeSectionData.length) {
+        finalizeSocietyMissionImmediately();
+        speakFairyTTS("모든 미션을 완료했어요! 참 잘했어요!");
+        alert("🏆 축하합니다! 모든 사회 탐구 단계를 완료하셨습니다!");
+        closeMissionView(true);
+        return;
     }
-}
 
-        // 10문제 커트라인 체크 팝업 (용어방 전용)
+    // 10문제 커트라인 체크 팝업 (용어방 전용)
     if (type === 'voca' && activeQuizIdx > 0 && activeQuizIdx % 10 === 0 && !window.societyVocaContinueFlag) {
         finalizeSocietyMissionImmediately();
         container.innerHTML = `
@@ -866,8 +610,8 @@ async function finalizeSocietyMissionImmediately() {
     window.societyVocaContinueFlag = false;
 
     const currentItem = activeSectionData[activeQuizIdx];
+    container.innerHTML = "";
 
-    // 📖 교과서 핵심 지문 요약 카드 HTML 생성
     const safePassageText = (currentItem.summaryPassage || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
     const passageHtml = currentItem.summaryPassage ? `
         <div class="passage-summary-box">
@@ -879,691 +623,125 @@ async function finalizeSocietyMissionImmediately() {
         </div>
     ` : '';
 
-    // 🎬 .screen loaded 옷을 입힌 랩퍼를 생성하여 화면 떨림(Layout Shift) 방지 및 부드러운 페이드인 실현
-    const screenWrapper = document.createElement('div');
-    screenWrapper.className = "screen loaded";
-
-    if (type === 'voca') {
-        screenWrapper.className += " quiz-card";
-        
-        // 라디오 버튼 대신 현재 상태를 보여주고 누르면 전환되는 버튼 형태로 변경
-        const orderToggleHtml = `
-            <div style="display:flex; justify-content:center; align-items:center; margin-bottom: 20px;">
-                <button class="order-toggle-btn" onclick="window.societyToggleOrder()" style="padding: 8px 16px; font-size: 1rem; border-radius: 20px; font-family: 'Jua', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    ${societyVocaOrderType === 'shuffle' ? '🎲 랜덤 섞기 모드 (클릭하여 순서대로 풀기로 변경)' : '➡️ 순서대로 풀기 모드 (클릭하여 랜덤 섞기로 변경)'}
-                </button>
-            </div>
-        `;
-
-        const answerWord = currentItem.word;
-        const wordsArray = answerWord.trim().split(/\s+/);
-        const wordCount = wordsArray.length;
-        const totalLength = answerWord.length; // 띄어쓰기 포함 전체 글자 수
-        
-        let interactiveHtml = '';
-        
-        if (wordCount === 1 && totalLength > 5) {
-            // 💡 조건 1: 띄어쓰기 없는 '1개 단어'인데 5글자가 넘는 경우 (예: 조선왕국전도)
-            // ➔ 낱말 카드 툭툭 고르는 [빈칸 채우기 UI]
-            const chars = answerWord.split('').filter(c => c.trim() !== '');
-            const scrambled = [...chars].sort(() => Math.random() - 0.5);
-            
-            window.currentMagnetAnswer = [];
-            window.magnetTargetWord = answerWord;
-            window.magnetScrambled = scrambled;
-            
-            interactiveHtml = `
-                <div id="magnet-blanks" style="font-size: 2rem; letter-spacing: 5px; margin-bottom: 20px; min-height: 40px; display: flex; justify-content: center; gap: 5px;">
-                    ${answerWord.split('').map(c => c.trim() === '' ? '<span style="width:15px;"></span>' : '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>').join('')}
-                </div>
-                <div id="magnet-pool" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                    ${scrambled.map((l, i) => `<button id="magnet-btn-${i}" class="quiz-choice-btn" style="padding: 10px 20px; font-size: 1.5rem;" onclick="selectVocaMagnet('${l}', ${i})">${l}</button>`).join('')}
-                </div>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="quiz-button" style="background:#ff9f43;" onclick="resetVocaMagnets()">다시 조합하기</button>
-                    <button class="quiz-button" onclick="verifyVocaMagnet()">정답 확인</button>
-                </div>
-            `;
-        } else if (wordCount >= 3) {
-            // 💡 조건 2: 띄어쓰기가 있는 답 중 '3단어 이상' 결합된 경우 (예: 장애물 없는 생활 환경 인증 제도)
-            // ➔ 보기에서 고르는 [객관식 문제 UI]
-            const choices = [answerWord];
-            const otherWords = allFetchedRecords.filter(r => r.word !== answerWord).map(r => r.word);
-            otherWords.sort(() => Math.random() - 0.5);
-            choices.push(otherWords[0] || "오답1");
-            choices.push(otherWords[1] || "오답2");
-            choices.sort(() => Math.random() - 0.5);
-            
-            interactiveHtml = `
-                <div class="quiz-choices-container" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
-                    ${choices.map((choice, i) => `
-                         <button class="quiz-choice-btn" onclick="verifyVocaChoice('${choice}')">${choice}</button>
-                    `).join('')}
-                </div>
-            `;
-        } else {
-            // 💡 조건 3: 4글자 이하 단어이거나, 2단어 이하 결합인 경우 (기존 청정 규격)
-            // ➔ 얄짤없이 뇌를 자극하는 [기존 주관식 타이핑 UI]
-            interactiveHtml = `
-                <div class="interactive-input-group">
-                    <input type="text" class="text-input-field" id="vocaAnswerInput" placeholder="정답 한글 낱말을 입력하세요!" onkeypress="if(event.key==='Enter') verifyVocaAnswer()">
-                    <button class="quiz-button" onclick="verifyVocaAnswer()">정답 확인</button>
-                </div>
-            `;
-        }
-
-        const imageUrl = currentItem.imageUrl || currentItem.image;
-        const imageHtml = imageUrl ? `
-            <div class="chart-container-box">
-                <div class="chart-ctrl-toolbar">
-                    <div class="chart-ctrl-group">
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
-                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
-                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
-                    </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${imageUrl}')" title="새 창으로 띄워서 보기">🪟 새창 열기</button>
-                </div>
-                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${imageUrl}" class="chart-img" alt="${currentItem.word}" onerror="this.closest('.chart-container-box').style.display='none';">
-                </div>
-            </div>
-        ` : '';
-
-        screenWrapper.innerHTML = `
-            ${orderToggleHtml}
-            ${passageHtml}
-            <div style="font-size: 0.95rem; opacity:0.7;">단어 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <div class="quiz-hint-box">초성 힌트: ${currentItem.hint}</div>
-            ${imageHtml}
-            <div class="quiz-descr" style="font-size: 1.4rem; font-weight: bold;">${currentItem.meaning}</div>
-            <details class="hint-details" style="margin-bottom: 20px; text-align: left; border-radius: 10px; padding: 10px;">
-                <summary style="cursor: pointer; font-weight: bold;">💡 상세설명 (힌트) 보기</summary>
-                <div style="margin-top: 10px; font-size: 1rem; line-height: 1.5;">${currentItem.desc}</div>
-            </details>
-            ${interactiveHtml}
-            ${currentItem.interactiveUrl ? `
-                <div style="text-align:center; margin-top: 10px; margin-bottom: 5px;">
-                    <a href="${currentItem.interactiveUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; color:#4f46e5; background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:99px; padding:6px 16px; font-size:0.9rem; font-weight:bold; text-decoration:none;">
-                        🏛️ 국립박물관 유물·역사관 공식 정보 보기 ↗
-                    </a>
-                </div>
-            ` : ''}
-            <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.meaning}')">🔊 문제 한번 더 듣기</button>
-                <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
-            </div>
-            <div style="text-align:center; margin-top:20px;">
-                <button class="back-to-lobby-btn" style="background:#ffdd57; color:#555; padding: 8px 16px; font-size: 0.9rem;" onclick="resetSocietyVocaMasterAndReload()">🔄 학습 리셋하기</button>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        if (imageUrl) {
-            initCardZoomListeners();
-        }
-        
-        // 해당 단어 뜻풀이 자동 낭독 탑재 (아나운서 감성)
-        speakFairyTTS(currentItem.meaning);
-
-    } else if (type === 'chart') {
-        screenWrapper.className += " quiz-card";
-
-        const safeTitle = (currentItem.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        const safeArtifactName = (currentItem.artifactName || currentItem.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        const safePeriod = (currentItem.artifactPeriod || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        const safeUsage = (currentItem.artifactUsage || currentItem.meaning || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        
-        const chartMediaHtml = currentItem.img ? `
-            <div class="chart-container-box">
-                <div class="chart-ctrl-toolbar">
-                    <div class="chart-ctrl-group">
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
-                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
-                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
-                    </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}', '${safeArtifactName}', '${safePeriod}', '${safeUsage}')" title="새 창으로 띄워서 문제와 나란히 보기">🪟 새창 열기</button>
-                </div>
-                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="교과서 탐구 자료" onerror="this.closest('.chart-container-box').style.display='none';">
-                </div>
-                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🔄 90° 회전 / 🪟 새창 열기</div>
-            </div>
-        ` : `
-            <div style="text-align:center; margin-bottom:12px;">
-                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(110, 198, 245, 0.12); border:1.5px dashed var(--sky); border-radius:14px; padding:8px 18px; font-family:'Jua', sans-serif; color:var(--sky); font-size:1.05rem;">
-                    <span>📊 교과서 핵심 탐구 자료 분석</span>
-                </div>
-            </div>
-        `;
-
-        // 💡 문제 풀기 전 스포일러 방지 & 필요 시 엿볼 수 있는 아코디언 토글
-        const artifactHintToggleHtml = `
-            <details class="artifact-hint-toggle" style="margin: 12px 0; background: rgba(255, 255, 255, 0.9); border: 1.5px dashed var(--purple, #8b5cf6); border-radius: 14px; padding: 10px 14px; text-align: left; cursor: pointer;">
-                <summary style="font-weight: bold; color: var(--purple, #8b5cf6); font-size: 0.95rem; outline: none; user-select: none; font-family:'Jua', sans-serif;">
-                    💡 사진 속 유물/자료 돋보기 (이름과 쓰임새 살짝 엿보기)
-                </summary>
-                <div style="margin-top: 10px; font-size: 0.9rem; line-height: 1.55; color: #334155; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
-                    <div style="font-weight:bold; color:#0f172a; margin-bottom:4px;">
-                        🏛️ <b>유물/자료명</b>: ${currentItem.artifactName || currentItem.title} 
-                        ${currentItem.artifactPeriod ? `<span style="font-size:0.8rem; background:#8b5cf6; color:white; padding:2px 8px; border-radius:10px; margin-left:4px;">${currentItem.artifactPeriod}</span>` : ''}
-                    </div>
-                    <div>📌 <b>핵심 쓰임새</b>: ${currentItem.artifactUsage || currentItem.meaning || '교과서 핵심 사료'}</div>
-                </div>
-            </details>
-        `;
-
-        screenWrapper.innerHTML = `
-            ${passageHtml}
-            <div style="font-size: 0.95rem; opacity:0.7;">자료분석 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">${currentItem.title}</h3>
-            ${chartMediaHtml}
-            ${artifactHintToggleHtml}
-            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem;">${currentItem.desc}</div>
-            <p style="font-weight: bold; font-size:1.15rem; text-align: left; margin-top:14px;">❓ ${currentItem.quiz}</p>
-            <div class="quiz-choices-container">
-                ${currentItem.choices.map((choice, i) => `
-                     <button class="quiz-choice-btn" onclick="verifyChartChoice(${i}, ${currentItem.correctIdx})">${i+1}. ${choice}</button>
-                `).join('')}
-            </div>
-            <div style="margin-top: 14px; display:flex; justify-content:center;">
-                <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">건너뛰기 ⏩</button>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        if (currentItem.img) {
-            initCardZoomListeners();
-        }
-        speakFairyTTS(currentItem.desc + ". 퀴즈!" + currentItem.quiz);
-
-    } else if (type === 'map') {
-        screenWrapper.className += " quiz-card";
-
-        const mapMediaHtml = currentItem.img ? `
-            <div class="chart-container-box">
-                <div class="chart-ctrl-toolbar">
-                    <div class="chart-ctrl-group">
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(0.4)" title="확대">➕ 확대</button>
-                        <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)" title="축소">➖ 축소</button>
-                        <button class="card-zoom-btn" onclick="rotateCardImage()" title="시계방향 90도 회전">🔄 90° 회전</button>
-                        <button class="card-zoom-btn" onclick="resetCardZoom()" title="원래대로">🔄 원본</button>
-                    </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')" title="새 창으로 띄워서 보기">🪟 새창 열기</button>
-                </div>
-                <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.name}" onerror="this.closest('.chart-container-box').style.display='none';">
-                </div>
-                <div class="chart-zoom-guide">💡 마우스 드래그 이동 / 휠로 확대 / 더블클릭 토글 / 🔄 90° 회전 / 🪟 새창 열기</div>
-            </div>
-        ` : `
-            <div style="text-align:center; margin-bottom:12px;">
-                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(78, 205, 196, 0.12); border:1.5px dashed var(--mint); border-radius:14px; padding:8px 18px; font-family:'Jua', sans-serif; color:var(--mint); font-size:1.05rem;">
-                    <span>🗺️ 랜선 국토 지리 탐방</span>
-                </div>
-            </div>
-        `;
-
-        screenWrapper.innerHTML = `
-            ${passageHtml}
-            <div style="font-size: 0.95rem; opacity:0.7;">국토 명소 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <h3 style="font-size: 1.35rem; margin-bottom: 8px;">🏕️ ${currentItem.name}</h3>
-            ${mapMediaHtml}
-            <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem; margin-bottom:14px;">${currentItem.desc}</div>
-            
-            <div class="interactive-input-group" style="flex-direction:column; gap:5px; margin-bottom:12px;">
-                <label style="text-align:left; font-size: 0.9rem; font-weight:bold;">✍️ 요정 코코의 해설을 듣고 한 줄 탐방기를 남겨주세요!</label>
-                <div style="display:flex; gap:10px; width:100%;">
-                    <input type="text" class="text-input-field" id="mapJourneyInput" placeholder="이 아름다운 명소에 대해 느낀 생각을 자유롭게 남겨봐!">
-                    <button class="quiz-button" style="background:var(--mint);" onclick="submitMapJourney()">탐방기 완성</button>
-                </div>
-            </div>
-            <div style="display:flex; justify-content:center; gap:8px;">
-                <button class="quiz-button" style="background:#8b949e;" onclick="speakFairyTTS('${currentItem.desc.replace(/'/g, "\\'")}')">🔊 해설 전체 듣기</button>
-                <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">다음 장소 탐방 ⏩</button>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        if (currentItem.img) {
-            initCardZoomListeners();
-        }
-        speakFairyTTS(currentItem.name + " 탐방입니다. " + currentItem.desc);
-
-    } else if (type === 'history') {
-        // 유물 카드 맞추기 / 역사박물관 모으기 복합 수집 UI
-        const isCollected = historyCollected.includes(currentItem.name);
-        screenWrapper.className += " card-slide-box";
-        screenWrapper.innerHTML = `
-            <div style="font-size: 0.85rem; opacity:0.7;">역사유물 ${activeQuizIdx + 1} / ${activeSectionData.length}</div>
-            <div class="dual-card-container">
-                <div class="artifact-card-left">
-                    <div class="artifact-photo-frame">
-                        <img src="${currentItem.img}" class="artifact-img" alt="역사 유물" onerror="this.src='https://images.unsplash.com/photo-1598970434795-0c54fe7c0648?w=500&auto=format&fit=crop'">
-                    </div>
-                    <div class="artifact-name">${currentItem.name}</div>
-                    <span style="font-size:0.8rem; background:var(--gold); color:#333; padding:2px 8px; border-radius:99px; font-weight:bold;">
-                        ${isCollected ? "🏆 소장 완료" : "🔒 미소장"}
-                    </span>
-                </div>
-                
-                <div class="artifact-card-right">
-                    <p class="history-summary-text">"${currentItem.desc}"</p>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center;">
-                <button class="quiz-button" style="background:var(--gold); color:#111;" onclick="collectArtifact('${currentItem.name}')">💎 박물관 가랜드에 소장하기</button>
-                ${currentItem.interactiveUrl ? `<a href="${currentItem.interactiveUrl}" target="_blank" rel="noopener noreferrer" class="quiz-button" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">🏛️ 국립박물관 유물 정보 ↗</a>` : ''}
-                <button class="quiz-button" style="background:var(--pink);" onclick="skipToNextQuiz('${type}')">다음 유물 ⏩</button>
-            </div>
-
-            <div class="museum-showcase" style="width:100%;">
-                <div class="museum-title">🏛️ ${currentUserName}의 국보 역사박물관</div>
-                <div class="museum-grid" id="museumGridDock"></div>
-            </div>
-        `;
-        container.appendChild(screenWrapper);
-        renderMuseumGridDock();
-        speakFairyTTS(currentItem.name + "입니다. " + currentItem.desc);
-    }
-}
-
-// ========================================================
-// 🏆 역사 유물 박물관 컬랙션 렌더링 도킹
-// ========================================================
-function renderMuseumGridDock() {
-    const dock = document.getElementById('museumGridDock');
-    if(!dock) return;
-    dock.innerHTML = "";
-
-    const allArtNames = activeSectionData.map(item => item.name);
-    allArtNames.forEach(name => {
-        const activeItem = activeSectionData.find(x => x.name === name);
-        const collected = historyCollected.includes(name);
-
-        const el = document.createElement('span');
-        el.className = `collected-badge ${collected ? '' : 'locked'}`;
-        el.style.background = collected ? 'linear-gradient(90deg, #ff9a9e, #fecfef)' : 'transparent';
-        el.style.color = collected ? '#4a3352' : '#888';
-        el.style.border = collected ? '2px solid' : '1.5px solid';
-        el.style.borderColor = collected ? 'var(--gold)' : '#555';
-        el.innerHTML = collected ? `🏆 ${name}` : `🔒 ${name}`;
-        dock.appendChild(el);
-    });
-}
-
-// ========================================================
-// ✏️ 문제 검증 및 포인트 보상 지급 모듈
-// ========================================================
-window.handleVocaCorrect = async function() {
-    const wordKey = activeSectionData[activeQuizIdx].word;
-    societyVocaMasterCountMap[wordKey] = (societyVocaMasterCountMap[wordKey] || 0) + 1;
-    localStorage.setItem(`society_voca_master_${currentUserName}`, JSON.stringify(societyVocaMasterCountMap));
-
-    // 💡 3번 맞추면 노션 DB의 [달성] 체크박스 true 갱신
-    if (societyVocaMasterCountMap[wordKey] >= 3) {
-        const pageId = activeSectionData[activeQuizIdx].pageId;
-        if (typeof updateVocaMasteryStatus === 'function') {
-            updateVocaMasteryStatus(pageId, true);
-            activeSectionData[activeQuizIdx].isMastered = true; // 로컬 메모리도 달성 상태로 변경
-        }
-    }
-
-    if (typeof rewardQuizCorrect === 'function') {
-        await rewardQuizCorrect(activeQuizIdx);
-    }
-
-    const curWord = activeSectionData[activeQuizIdx];
-    const expl = curWord ? `<strong>${curWord.word}</strong>: ${curWord.meaning || curWord.desc || ''}` : null;
-    if (typeof triggerQuizAdvance === 'function') {
-        triggerQuizAdvance({
-            onAdvance: () => skipToNextQuiz('voca'),
-            delayMs: 1200,
-            subject: '사회',
-            explanation: expl
-        });
-    } else {
-        setTimeout(() => skipToNextQuiz('voca'), 1200);
-    }
-}
-
-window.handleVocaWrong = function(wrongInput, onRetryReset) {
-    if (typeof window.wrongNotes === 'undefined') window.wrongNotes = [];
-    window.wrongNotes.push({
-        word: activeSectionData[activeQuizIdx].word,
-        wrongInput: wrongInput
-    });
-
-    const retry = typeof onRetryReset === 'function' ? onRetryReset : () => {};
-    const skip = () => skipToNextQuiz('voca');
-
-    if (typeof promptQuizRetryOrSkip === 'function') {
-        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
-        return;
-    }
-
-    speakFairyTTS("아쉽다. 다시 한번 생각해봐!");
-    retry();
-}
-
-function verifyVocaAnswer() {
-    const input = document.getElementById('vocaAnswerInput');
-    const answer = input.value.trim().replace(/\s/g, '');
-    const correctTarget = activeSectionData[activeQuizIdx].word.replace(/\s/g, '');
-
-    if (answer === correctTarget) {
-        input.classList.add('correct-glow');
-        speakFairyTTS("정답이야! 아주 잘했어!");
-        handleVocaCorrect();
-    } else {
-        input.classList.add('wrong-shake');
-        handleVocaWrong(input.value, () => {
-            input.classList.remove('wrong-shake');
-            input.value = '';
-            input.focus();
-        });
-    }
-}
-
-window.verifyVocaChoice = function(selectedWord) {
-    const correctTarget = activeSectionData[activeQuizIdx].word;
-    if (selectedWord === correctTarget) {
-        speakFairyTTS("정답이야! 아주 잘했어!");
-        handleVocaCorrect();
-    } else {
-        handleVocaWrong(selectedWord, () => {});
-    }
-}
-
-window.selectVocaMagnet = function(letter, idx) {
-    const btn = document.getElementById(`magnet-btn-${idx}`);
-    if (btn.style.visibility === 'hidden') return;
-    btn.style.visibility = 'hidden';
-    window.currentMagnetAnswer.push({ letter, idx });
-    renderVocaMagnetBlanks();
-}
-
-window.renderVocaMagnetBlanks = function() {
-    const container = document.getElementById('magnet-blanks');
-    if (!container) return;
-    let html = '';
-    let answerIdx = 0;
-    for (let i = 0; i < window.magnetTargetWord.length; i++) {
-        const char = window.magnetTargetWord[i];
-        if (char.trim() === '') {
-            html += '<span style="width:15px;"></span>';
-        } else {
-            if (answerIdx < window.currentMagnetAnswer.length) {
-                html += `<span style="border-bottom:3px solid var(--primary); width:30px; display:inline-block; text-align:center; color:var(--primary); font-weight:bold;">${window.currentMagnetAnswer[answerIdx].letter}</span>`;
-                answerIdx++;
-            } else {
-                html += '<span style="border-bottom:3px solid #ccc; width:30px; display:inline-block; text-align:center;">_</span>';
+    // 5대 서브모듈로 UI 렌더링 위임
+    switch(type) {
+        case 'voca':
+            if (window.SocietyVoca && typeof window.SocietyVoca.render === 'function') {
+                window.SocietyVoca.render(container, currentItem, activeQuizIdx, activeSectionData.length);
             }
-        }
-    }
-    container.innerHTML = html;
-}
-
-window.resetVocaMagnets = function() {
-    window.currentMagnetAnswer.forEach(item => {
-        const btn = document.getElementById(`magnet-btn-${item.idx}`);
-        if (btn) btn.style.visibility = 'visible';
-    });
-    window.currentMagnetAnswer = [];
-    renderVocaMagnetBlanks();
-}
-
-window.verifyVocaMagnet = function() {
-    const answerStr = window.currentMagnetAnswer.map(item => item.letter).join('');
-    const correctTarget = window.magnetTargetWord.replace(/\s/g, '');
-    
-    if (answerStr === correctTarget) {
-        speakFairyTTS("정답이야! 아주 잘했어!");
-        handleVocaCorrect();
-    } else {
-        handleVocaWrong(answerStr, () => {
-            if (typeof resetVocaMagnets === 'function') resetVocaMagnets();
-            const container = document.getElementById('magnet-blanks');
-            if (container) container.classList.remove('wrong-shake');
-        });
-        const container = document.getElementById('magnet-blanks');
-        if (container) container.classList.add('wrong-shake');
+            break;
+        case 'chart':
+            if (window.SocietyChart && typeof window.SocietyChart.render === 'function') {
+                window.SocietyChart.render(container, currentItem, activeQuizIdx, activeSectionData.length, passageHtml);
+            }
+            break;
+        case 'map':
+            if (window.SocietyMap && typeof window.SocietyMap.render === 'function') {
+                window.SocietyMap.render(container, currentItem, activeQuizIdx, activeSectionData.length, passageHtml);
+            }
+            break;
+        case 'history':
+            if (window.SocietyHistory && typeof window.SocietyHistory.render === 'function') {
+                window.SocietyHistory.render(container, currentItem, activeQuizIdx, activeSectionData.length);
+            }
+            break;
+        default:
+            console.warn(`알 수 없는 미션 타입: ${type}`);
     }
 }
 
-window.showChartSuccessModal = function(item) {
-    let modal = document.getElementById('chartSuccessModal');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'chartSuccessModal';
-        modal.style.position = 'fixed';
-        modal.style.inset = '0';
-        modal.style.background = 'rgba(15, 23, 42, 0.85)';
-        modal.style.backdropFilter = 'blur(6px)';
-        modal.style.zIndex = '999999';
-        modal.style.display = 'flex';
-        modal.style.alignItems = 'center';
-        modal.style.justifyContent = 'center';
-        modal.style.padding = '20px';
-        document.body.appendChild(modal);
-    }
+/**
+ * 🏆 미션 완주 및 학습일지 전송
+ */
+async function finalizeSocietyMissionImmediately() {
+    if (isCurrentSocietyMissionLogged) return;
+    isCurrentSocietyMissionLogged = true;
 
-    const artName = item.artifactName || item.title || '역사 사료';
-    const artPeriod = item.artifactPeriod ? `<span style="display:inline-block; background:#8b5cf6; color:white; font-size:0.8rem; padding:2px 8px; border-radius:12px; margin-left:6px;">${item.artifactPeriod}</span>` : '';
-    const artUsage = (item.artifactUsage || item.meaning) ? `<div style="background:#f8fafc; border-left:4px solid #3b82f6; padding:10px 14px; border-radius:8px; margin:12px 0; text-align:left; font-size:0.95rem; color:#334155; line-height:1.55;">📌 <b>유물/자료의 쓰임새</b><br>${item.artifactUsage || item.meaning}</div>` : '';
-    const expl = item.explanation ? `<div style="background:#f0fdf4; border-left:4px solid #22c55e; padding:10px 14px; border-radius:8px; margin:12px 0; text-align:left; font-size:0.95rem; color:#166534; line-height:1.55;">💡 <b>교과서 핵심 해설</b><br>${item.explanation}</div>` : '';
-    const museumBtn = item.interactiveUrl ? `<a href="${item.interactiveUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; padding:10px 18px; border-radius:12px; text-decoration:none; font-family:'Jua', sans-serif; font-size:0.95rem; box-shadow:0 4px 12px rgba(37,99,235,0.3);">🏛️ 국립박물관 공식 정보 ↗</a>` : '';
+    try {
+        const student = (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+        let subj = '사회';
+        if (selectedSocietyUnit) subj = `사회(${selectedSocietyUnit})`;
 
-    modal.innerHTML = `
-        <div style="background:white; border-radius:24px; max-width:540px; width:100%; padding:26px 22px; box-shadow:0 20px 40px rgba(0,0,0,0.35); text-align:center; max-height:90vh; overflow-y:auto; box-sizing:border-box; animation:popIn 0.3s ease-out;">
-            <div style="font-size:3rem; margin-bottom:6px;">🎉</div>
-            <h3 style="font-family:'Jua', sans-serif; font-size:1.6rem; color:#10b981; margin:0 0 10px 0;">정답입니다! 아주 완벽해요!</h3>
-            
-            <div style="display:flex; align-items:center; gap:14px; background:#f1f5f9; padding:12px; border-radius:14px; margin-bottom:12px; text-align:left;">
-                ${item.img ? `<img src="${item.img}" style="width:70px; height:70px; object-fit:cover; border-radius:10px; border:2px solid #cbd5e1; flex-shrink:0;">` : ''}
-                <div>
-                    <div style="font-family:'Jua', sans-serif; font-size:1.15rem; color:#0f172a; display:flex; align-items:center; flex-wrap:wrap;">
-                        ${artName} ${artPeriod}
-                    </div>
-                    <div style="font-size:0.85rem; color:#64748b; margin-top:3px;">${item.title}</div>
-                </div>
-            </div>
+        const targetNotes = window.wrongNotes || [];
+        const errorReport = targetNotes.length > 0 ? targetNotes.map(q => {
+            if (q.wrongInput) return `${q.word || q.text} (오답: ${q.wrongInput})`;
+            return q.word || q.text || q;
+        }).join(' / ') : "오답 없음";
 
-            ${artUsage}
-            ${expl}
-
-            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:20px;">
-                ${museumBtn}
-                <button onclick="closeChartSuccessModalAndNext()" style="background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:10px 24px; border-radius:14px; font-family:'Jua', sans-serif; font-size:1.1rem; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.35);">
-                    다음 사료 탐구하기 ⏩
-                </button>
-            </div>
-        </div>
-    `;
-    modal.style.display = 'flex';
-};
-
-window.closeChartSuccessModalAndNext = function() {
-    const modal = document.getElementById('chartSuccessModal');
-    if (modal) modal.style.display = 'none';
-    skipToNextQuiz('chart');
-};
-
-async function verifyChartChoice(selectedIdx, correctIdx) {
-    const currentItem = activeSectionData[activeQuizIdx] || {};
-
-    if (selectedIdx === correctIdx) {
-        speakFairyTTS("정답이에요! " + (currentItem.artifactName ? currentItem.artifactName + "에 대한 탐구를 완벽히 해냈어요!" : "아주 잘했어요!"));
-        if (typeof rewardQuizCorrect === 'function') {
-            await rewardQuizCorrect(activeQuizIdx);
-        }
-        showChartSuccessModal(currentItem);
-    } else {
-        if (typeof promptQuizRetryOrSkip === 'function') {
-            promptQuizRetryOrSkip({
-                message: '아쉽지만 틀렸어요! 돋보기를 다시 한번 살펴볼까요?',
-                onRetry: () => {},
-                onSkip: () => skipToNextQuiz('chart'),
+        if (typeof finalizeQuizRewardSession === 'function') {
+            await finalizeQuizRewardSession({
+                isFullComplete: true,
+                subject: subj,
+                childName: student,
+                errorReport: errorReport
             });
-        } else {
-            speakFairyTTS("아쉬워요. 다른 보기를 다시 골라볼까요?");
-            alert("❌ 아쉽지만 틀렸어요! 다른 보기를 선택해주세요!");
+            console.log(`🎉 [사회 미션 완수] 완주 보너스(+5) & 노션 학습일지 자동 전송 완료! (${student} - ${subj})`);
         }
+    } catch (e) {
+        console.error("사회 미션 완수 일지 전송 오류:", e);
     }
 }
 
-async function submitMapJourney() {
-    const text = document.getElementById('mapJourneyInput').value.trim();
-    if (text.length < 5) {
-        alert("한 줄 탐방기를 작성해주세요! (최소 5글자 이상)");
-        return;
-    }
-
-    speakFairyTTS("멋진 탐방기네요! 참 잘했어요!");
-    alert("📝 멋진 랜선 지리 탐방록 기록 완료!");
-
-    if (typeof rewardQuizCorrect === 'function') {
-        await rewardQuizCorrect(activeQuizIdx);
-    }
-    skipToNextQuiz('map');
-}
-
-async function collectArtifact(artName) {
-    if (historyCollected.includes(artName)) {
-        alert("이미 박물관 컬렉션에 보존된 소중한 유물입니다!");
-        return;
-    }
-
-    historyCollected.push(artName);
-    localStorage.setItem('society_history_collectibles', JSON.stringify(historyCollected));
-    
-    speakFairyTTS(`축하해요! 유물 획득 완료!`);
-    alert(`🏆 유물 획득! [${artName}]을 소장했습니다!`);
-
-    if (typeof rewardQuizCorrect === 'function') {
-        await rewardQuizCorrect(activeQuizIdx);
-    }
-    renderMuseumGridDock();
-    
-    setTimeout(() => {
-        skipToNextQuiz('history');
-    }, 1200);
-}
-
-// 다음 퀴즈 넘어가기
 function skipToNextQuiz(type) {
     activeQuizIdx++;
+    window.activeQuizIdx = activeQuizIdx;
     const innerBody = document.getElementById('overlayInnerBody');
-    // voca 타입일 경우 renderSectionUI 내에서 10문제 커트라인, 전체 종료 체크를 모두 담당함
     if (type !== 'voca' && activeQuizIdx >= activeSectionData.length) {
         speakFairyTTS("모든 미션을 완료했어요! 참 잘했어요!");
         alert("🏆 축하합니다! 모든 사회 탐구 단계를 완료하셨습니다!");
-        closeMissionView();
+        closeMissionView(true);
     } else {
         renderSectionUI(type, innerBody);
     }
 }
 
-// ========================================================
-// 💎 보상 지급 브릿지 (전역 만능 보상 엔진 결합형)
-// ========================================================
+// 💎 보상 지급 브릿지
 async function triggerAwardDispense(amount, type) {
-    if (isAdmin) {
-        console.log("🛠️ 아버님/어머님 검수 중이므로 노션 실제 크레딧 지급을 프리패스합니다.");
-        return true;
-    }
-
-    // 💡 용어방(voca) 미션인 경우 'voca'라는 단서를 전역 만능 엔진에 넘겨줌!
-    // 만능 엔진이 이 단서를 받으면 '용어 경험치_사회' 칼럼에 데이터를 꽂아 넣습니다.
-    let customExp = (type === 'voca') ? 'voca' : null;
-
-    try {
-        if (typeof grantRewardAndShowUI === 'function') {
-            // 전역 파일(notion-helper.js)에 장착된 신형 만능 보상 엔진을 호출합니다.
-            await grantRewardAndShowUI(amount, false, customExp); 
-        }
-    } catch(err) {
-        console.warn("보상 지급 중 로컬 백엔드 연동 모듈 우회:", err);
+    if (typeof dispenseRewardDirectly === 'function') {
+        await dispenseRewardDirectly(amount, type);
     }
 }
 
-// 퇴장 시 일지 작성 자동 안전 배선
-window.addEventListener("beforeunload", () => {
-    if (!isAdmin && typeof sendStudyLogToNotion === 'function') {
-        sendStudyLogToNotion({ subject: "사회" });
-    }
-});
-
-// ========================================================
 // 🖨️ 사회방 인쇄 로직 (printSocietySummary)
-// ========================================================
-window.printSocietySummary = async function() {
-    const printArea = document.getElementById('print-area');
-    if (!printArea) return;
-    
-    let printData = SOCIETY_MOCK_DATA.voca;
-    
-    // 노션 원본 데이터의 키(detailContext, imageUrl)를 인쇄용 포맷으로 매핑하는 헬퍼 함수
-    const mapNotionToPrintData = (records) => {
-        return records
-            .filter(r => r.word && (r.desc || r.detailContext))
-            .map(r => ({
-                word: r.word,
-                desc: r.desc || r.detailContext,
-                img: r.imageUrl || r.image || null
-            }));
-    };
-    // 만약 한 번이라도 데이터를 긁어온 기록(allFetchedRecords)이 있다면 그걸 활용
-    if (allFetchedRecords && allFetchedRecords.length > 0) {
-        // 사회 용어방에 해당하는 데이터 추출 (word와 설명이 존재하는 경우)
-        const vocaRecords = mapNotionToPrintData(allFetchedRecords);
-        if (vocaRecords.length > 0) {
-            printData = vocaRecords;
-        }
-    } else {
-        // 아직 긁어오지 않았다면 실시간으로 백그라운드 스캔 시도!
-        try {
-            const records = await fetchVocaFromNotion({
-                subject: "사회", 
-                areaZone: "용어방",
-                useServerFilter: true,
-                filterByStudent: !isAdmin 
-            });
-            if (records && records.length > 0) {
-                const vocaRecords = mapNotionToPrintData(records);
-                if (vocaRecords.length > 0) {
-                    printData = vocaRecords;
-                }
-            }
-        } catch (e) {
-            console.warn("인쇄용 노션 데이터 로드 실패, 기본 데이터 출력", e);
-        }
+async function printSocietySummary() {
+    let printArea = document.getElementById('print-area');
+    if (!printArea) {
+        printArea = document.createElement('div');
+        printArea.id = 'print-area';
+        document.body.appendChild(printArea);
     }
     
-    let html = `<div class="print-title">민민 우주 정거장 🚀 - 오늘의 사회 핵심 요약집</div>`;
-    html += `<div class="print-voca-list">`;
+    let targetList = allFetchedRecords && allFetchedRecords.length > 0 ? allFetchedRecords : (window.SOCIETY_MOCK_DATA?.voca || []);
     
-    printData.forEach(item => {
+    let html = `
+        <div style="padding: 20px; font-family: 'Nanum Gothic', sans-serif;">
+            <div style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
+                <h1 style="margin: 0; font-size: 1.8rem;">🗺️ 민민이네 공부방 - 초등 사회 핵심 요약집</h1>
+                <p style="margin: 5px 0 0 0; color: #666;">단원: ${selectedSocietyGrade || '5-2'} ${selectedSocietyUnit || '1단원 옛사람들의 삶과 문화'} | 인쇄일자: ${new Date().toLocaleDateString('ko-KR')}</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+    `;
+    
+    targetList.forEach((item, idx) => {
+        const title = item.word || item.title || item.name || '';
+        const meaning = item.meaning || item.desc || item.detailContext || '';
+        const hint = item.hint || (window.SocietyVoca ? window.SocietyVoca.getChosung(title) : '');
         html += `
-            <div class="print-voca-item">
-                ${item.img ? `<div class="print-voca-img-wrapper"><img src="${item.img}" alt="${item.word}" class="print-voca-img"></div>` : ''}
-                <div class="print-voca-text-content">
-                    <div class="print-voca-word">📖 ${item.word}</div>
-                    <div class="print-voca-desc">${item.desc}</div>
+            <div style="border: 1px solid #ddd; padding: 12px; border-radius: 8px; page-break-inside: avoid;">
+                <div style="font-weight: bold; font-size: 1.1rem; color: #2563eb; margin-bottom: 6px;">
+                    ${idx + 1}. ${title} <span style="font-size: 0.85rem; color: #e11d48; border: 1px solid #fecdd3; padding: 1px 6px; border-radius: 10px;">[${hint}]</span>
+                </div>
+                <div style="font-size: 0.95rem; line-height: 1.5; color: #334155;">
+                    ${meaning}
                 </div>
             </div>
         `;
     });
     
-    html += `</div>`;
-    
+    html += `</div></div>`;
     printArea.innerHTML = html;
     window.print();
-};
-
-// ========================================================
-// 🔍 교과서 고화질 돋보기 확대/축소/이동 (Zoom & Pan) 엔진
-// 💡 [단일 원천 원칙] 공통 코어(kids/core/image_zoom_modal.js)로 일원화 완료
-// ========================================================
+}
 
 // ========================================================
 // 🌐 전역 핵심 함수 명시적 바인딩 (인라인 HTML 이벤트 연동 철벽 방어)
@@ -1571,7 +749,16 @@ window.printSocietySummary = async function() {
 window.initializeSocietyRoom = initializeSocietyRoom;
 window.openMissionView = openMissionView;
 window.closeMissionView = closeMissionView;
-window.collectArtifact = collectArtifact;
+window.renderSectionUI = renderSectionUI;
 window.skipToNextQuiz = skipToNextQuiz;
-
-
+window.triggerAwardDispense = triggerAwardDispense;
+window.printSocietySummary = printSocietySummary;
+window.startMissionWithFilteredData = startMissionWithFilteredData;
+window.selectDynamicGrade = selectDynamicGrade;
+window.selectDynamicUnit = selectDynamicUnit;
+window.fetchAndBuildDynamicUI = fetchAndBuildDynamicUI;
+window.getCurriculumRecords = getCurriculumRecords;
+window.normalizeSocietyGrade = normalizeSocietyGrade;
+window.isSocietyMissionInProgress = isSocietyMissionInProgress;
+window.stopFairyTTS = stopFairyTTS;
+window.speakFairyTTS = speakFairyTTS;
