@@ -1255,6 +1255,55 @@
       location.href = 'math.html#concepts';
     }
 
+    /* 💡 [노션 Headless CMS] CURRICULUM_DB 수의 범위 퀴즈 실시간 동기화 */
+    async function loadNotionCurriculumData() {
+      try {
+        const PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+        const DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CURRICULUM_DB_ID) ? APP_CONFIG.CURRICULUM_DB_ID : "3e8a27115b68806d94bfc81e9b3435fa";
+        const url = `${PROXY}/v1/databases/${DB_ID}/query`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            page_size: 100,
+            filter: {
+              and: [
+                { property: "과목", select: { equals: "수학" } },
+                { property: "단원", rich_text: { contains: "수의 범위" } }
+              ]
+            }
+          })
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const results = data.results || [];
+        if (results.length === 0) return;
+
+        const quizPages = results.filter(r => r.properties?.["구역"]?.select?.name === "탐구퀴즈");
+        if (quizPages.length > 0) {
+          const loadedQuizzes = quizPages.map(page => {
+            const p = page.properties || {};
+            const q = (p["퀴즈 질문"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+            const choicesText = (p["보기 1~4"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+            const choices = choicesText ? choicesText.split('\n').map(s => s.trim()).filter(Boolean) : [];
+            const ansNum = p["정답"]?.number;
+            const ansText = (ansNum && choices[ansNum - 1]) ? choices[ansNum - 1] : choices[0];
+            const explain = (p["해설"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+            return { q, ans: ansText, choices, explain };
+          }).filter(x => x.q && x.choices.length >= 2);
+
+          if (loadedQuizzes.length >= 5) {
+            QUIZ_LIST.length = 0;
+            loadedQuizzes.forEach(item => QUIZ_LIST.push(item));
+            renderQuiz();
+            console.log(`[노션 연동] 수의 범위 퀴즈 ${loadedQuizzes.length}건 실시간 연동 완료!`);
+          }
+        }
+      } catch (e) {
+        console.warn("노션 교재 데이터 동기화 폴백 안내 (로컬 캐시 안전 구동):", e);
+      }
+    }
+
     /* 초기화 */
     document.addEventListener('DOMContentLoaded', () => {
       let currentProfile = localStorage.getItem('currentUser') || 'daughter';
@@ -1271,6 +1320,9 @@
       calcCoinExchange();
       calcStadiumAudience();
       renderQuiz();
+
+      // 노션 교재 퀴즈 비동기 동기화
+      loadNotionCurriculumData();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
       if (typeof initFairyChat === 'function') initFairyChat("MATH", "수의 범위와 어림하기");

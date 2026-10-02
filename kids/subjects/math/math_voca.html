@@ -133,34 +133,74 @@ let score = 0;
 let answered = false;
 let isTtsOn = true;
 
-// 💡 [노션 Headless CMS 연동] VOCA_DB 실시간 동기화
+// 💡 [노션 Headless CMS 연동] CURRICULUM_DB 실시간 동기화
 async function loadNotionData() {
   try {
-    if (typeof fetchVocaFromNotion === 'function') {
-      const records = await fetchVocaFromNotion({ subject: '수학' });
-      if (records && records.length > 0) {
-        console.log(`[노션 연동] 수학 어휘/지시어 ${records.length}건 안전 연동 성공`);
-        const banks = window.DIRECTIVE_BANKS || DIRECTIVE_BANKS;
-        if (!banks) return;
+    const PROXY = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+    const DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CURRICULUM_DB_ID) ? APP_CONFIG.CURRICULUM_DB_ID : "3e8a27115b68806d94bfc81e9b3435fa";
 
-        // 노션 데이터는 검증된 88제 퀴즈의 보기/문맥을 훼손하지 않고, 팁과 수식 모델 보강에만 안전 반영
-        records.forEach(r => {
-          if (r.word) {
-            for (let lvl = 0; lvl <= 4; lvl++) {
-              if (banks[lvl]) {
-                const matchItem = banks[lvl].find(x => x.word === r.word || (x.word && r.word && (x.word.includes(r.word) || r.word.includes(x.word))));
-                if (matchItem) {
-                  if (r.meaning && r.meaning.length > 5) matchItem.tip = r.meaning;
-                  if (r.hint && r.hint.length > 0) matchItem.formula = r.hint;
-                }
+    const url = `${PROXY}/v1/databases/${DB_ID}/query`;
+    let results = [];
+    let hasMore = true;
+    let cursor = null;
+
+    while (hasMore) {
+      const payload = {
+        page_size: 100,
+        filter: {
+          and: [
+            { property: "과목", select: { equals: "수학" } },
+            { property: "구역", select: { equals: "지시어번역" } }
+          ]
+        }
+      };
+      if (cursor) payload.start_cursor = cursor;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) break;
+      const data = await res.json();
+      results = results.concat(data.results || []);
+      hasMore = data.has_more || false;
+      cursor = data.next_cursor || null;
+    }
+
+    if (results.length > 0) {
+      console.log(`[노션 연동] CURRICULUM_DB 수학 지시어 ${results.length}건 실시간 연동 완료!`);
+      const banks = window.DIRECTIVE_BANKS || DIRECTIVE_BANKS;
+      if (!banks) return;
+
+      results.forEach(page => {
+        const p = page.properties || {};
+        const title = (p["제목"]?.title || []).map(x => x.plain_text).join('').trim();
+        const word = title.replace(/^\[지시어\]\s*/, '').trim();
+        const quiz = (p["퀴즈 질문"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+        const choicesText = (p["보기 1~4"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+        const choices = choicesText ? choicesText.split('\n').map(s => s.trim()).filter(Boolean) : [];
+        const ans = p["정답"]?.number;
+        const explanation = (p["해설"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+        const formula = (p["핵심 쓰임새/설명"]?.rich_text || []).map(x => x.plain_text).join('').trim();
+
+        for (let lvl = 0; lvl <= 4; lvl++) {
+          if (banks[lvl]) {
+            const match = banks[lvl].find(x => x.word === word || (x.word && x.word.includes(word)));
+            if (match) {
+              if (quiz) match.sentence = quiz;
+              if (choices.length >= 2) {
+                match.opts = choices;
+                if (ans !== undefined && ans !== null) match.ans = Math.max(0, ans - 1);
               }
+              if (explanation) match.tip = explanation;
+              if (formula) match.formula = formula;
             }
           }
-        });
-      }
+        }
+      });
     }
   } catch (e) {
-    console.warn("노션 연동 경고 (로컬 캐시로 안전하게 구동):", e);
+    console.warn("노션 연동 폴백 안내 (로컬 캐시로 안전 구동):", e);
   }
 }
 
