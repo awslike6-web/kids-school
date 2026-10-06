@@ -81,6 +81,21 @@
             border: "#dc2626",
             link: "joseon_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/4/joseon_story_p1.png"
+        },
+        {
+            id: "5_2_5",
+            grade: "5학년 2학기",
+            unit: "2단원 : 사회의 새로운 변화와 오늘날의 우리",
+            bookNum: "5-2 유교사회",
+            title: "민수와 친구들의 유교 사회 시간 여행",
+            subtitle: "흥인지문부터 훈민정음까지, 예절과 지혜로 꽃피운 조선의 유교 문화",
+            desc: "차원의 문을 열고 조선 시대로! 흥인지문과 경복궁 근정전, 백성을 배려한 삼강행실도와 서당의 글소리, 관혼상제와 경국대전, 장영실의 발명품과 세종대왕의 훈민정음까지!",
+            icon: "📜",
+            color: "#4f46e5",
+            bgGrad: "linear-gradient(135deg, rgba(79, 70, 229, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
+            border: "#6366f1",
+            link: "confucian_society_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/5/confucian_society_story_p1.png"
         }
     ];
 

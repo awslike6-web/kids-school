@@ -33,7 +33,7 @@ graph TD
 | 구분 | 모듈 파일명 | 전담 역할 | 줄 수 | 네임스페이스 / 주요 API |
 | :--- | :--- | :--- | :---: | :--- |
 | **대문** | `kids/js/society_common.js` | 초기화, 노션 통신, 오버레이 라우팅, 학습일지/인쇄 | ~470줄 | `openMissionView`, `initializeSocietyRoom`, `printSocietySummary` |
-| **1번** | `kids/js/society_storybook.js` | [1단계] 사회 단원 동화 도서관 (총 5권) | ~190줄 | `window.SocietyStorybook` (`render`, `getList`) |
+| **1번** | `kids/js/society_storybook.js` | [1단계] 사회 단원 동화 도서관 (총 6권) | ~200줄 | `window.SocietyStorybook` (`render`, `getList`) |
 | **2번** | `kids/js/society_voca.js` | [2단계] 사회 핵심 용어방 (초성/자석/객관식/주관식) | 452줄 | `window.SocietyVoca` (`render`, `verifyAnswer`, `resetMasterAndReload`) |
 | **3번** | `kids/js/society_chart.js` | [3단계] 차트 & 도표 분석실 (4지선다/성공 모달) | 210줄 | `window.SocietyChart` (`render`, `verifyChoice`, `showSuccessModal`) |
 | **4번** | `kids/js/society_map.js` | [4단계] 랜선 지도 탐방실 (명소 사진/한 줄 탐방록) | 108줄 | `window.SocietyMap` (`render`, `submitJourney`) |
@@ -52,6 +52,7 @@ graph TD
   - **[5학년 2학기 2편]**: ⚔️ `1단원 : 옛사람들의 삶과 문화 (삼국·가야·통일신라·발해)` (`three_kingdoms_storybook.html`) - 광개토대왕릉비, 살수대첩 을지문덕, 백제 근초고왕·금동대향로, 신라 첨성대·황금금관, 가야 철갑옷·가야금, 불국사·석굴암, 발해·장보고.
   - **[5학년 2학기 3편]**: 🏺 `1단원 : 옛사람들의 삶과 문화 (고려)` (`goryeo_storybook.html`) - 태조 왕건 후삼국 통일, 서희 외교 담판, 귀주대첩 강감찬, 팔만대장경, 고려청자, 벽란도 아라비아 상인.
   - **[5학년 2학기 4편]**: 🛡️ `2단원 : 사회의 새로운 변화와 오늘날의 우리 (조선)` (`joseon_storybook.html`) - 전라좌수영, 거북선과 학익진, 한산도 대첩, 의병의 용기, 병자호란 남한산성, 백성들의 극복과 평화의 소중함.
+  - **[5학년 2학기 5편]**: 📜 `2단원 : 사회의 새로운 변화와 오늘날의 우리 (유교사회)` (`confucian_society_storybook.html`) - 흥인지문과 유교 정신, 경복궁 근정전, 삼강행실도, 서당과 천자문, 전통 혼례, 경국대전과 신분제, 장영실 발명품, 세종대왕 훈민정음.
 - **웹툰 모드 시인성 표준**:
   - 세로형 단일 삽화(896x1200 / 1100x1700)를 적용하여 웹툰 모드에서 `[상단 고화질 삽화] ➔ [하단 대사 텍스트]` 구조를 100% 보장.
 - **음성 싱크 표준**:
