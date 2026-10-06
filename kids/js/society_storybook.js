@@ -66,6 +66,21 @@
             border: "#14b8a6",
             link: "goryeo_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/3/goryeo_story_p1.png"
+        },
+        {
+            id: "5_2_4",
+            grade: "5학년 2학기",
+            unit: "2단원 : 사회의 새로운 변화와 오늘날의 우리",
+            bookNum: "5-2 조선",
+            title: "민수와 친구들: 조선을 지킨 용기의 불꽃",
+            subtitle: "임진왜란과 병자호란, 외침에 맞서 나라를 지킨 조선의 영웅과 백성들",
+            desc: "임진왜란의 바다에서 거북선과 학익진으로 승리를 이끈 이순신 장군과 수군, 나라를 위해 일어선 붉은 옷의 의병들, 남한산성에서 매서운 추위를 버텨낸 백성들의 가슴 뜨거운 시간 여행!",
+            icon: "🛡️",
+            color: "#dc2626",
+            bgGrad: "linear-gradient(135deg, rgba(220, 38, 38, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
+            border: "#dc2626",
+            link: "joseon_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/4/joseon_story_p1.png"
         }
     ];
 
