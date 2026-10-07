@@ -10,7 +10,7 @@ window.STORY_BOOK = {
   themeColorDark: "#1d4ed8",
   backUrl: "english.html",
   backLabel: "🚪 영어방 대기실",
-  version: "20261008_l9_v1",
+  version: "20261008_l9_v2",
   bilingual: true,
   imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/english/minsu/5-2/9/",
   pages: [
@@ -35,17 +35,17 @@ window.STORY_BOOK = {
             글쓴이: 언제나처럼
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-radius: 12px; padding: 14px; margin-bottom: 14px; text-align: left; border: 1.5px solid #334155;">
-            <div style="font-size: 1.1rem; font-weight: bold; color: #60a5fa; margin-bottom: 4px;">
-              Welcome to My Dream House!
+            <div style="font-size: 1.25rem; font-weight: bold; color: #60a5fa; margin-bottom: 4px; text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);">
+              Welcome to Lesson 9 Storybook!
             </div>
-            <div style="font-size: 0.98rem; color: #cbd5e1; margin-bottom: 10px;">
+            <div style="font-size: 1.05rem; color: #cbd5e1; margin-bottom: 14px;">
               초등학교 5학년 2학기 영어 9단원 일러스트 동화에 온 것을 환영해요! ✨
             </div>
-            <div style="font-size: 1.1rem; font-weight: bold; color: #60a5fa; margin-bottom: 4px;">
-              This is the bedroom. There is a bed in the bedroom.
+            <div style="font-size: 1.25rem; font-weight: bold; color: #60a5fa; margin-bottom: 4px; text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);">
+              Let's explore my dream house together!
             </div>
-            <div style="font-size: 0.98rem; color: #cbd5e1;">
-              집 구석구석을 둘러보며 거실, 주방, 침실, 욕실, 정원에 있는 멋진 물건들을 영어로 소개해볼까요?
+            <div style="font-size: 1.05rem; color: #cbd5e1;">
+              우리 함께 멋진 꿈의 집을 둘러보며 재미있게 영어를 배워볼까요?
             </div>
           </div>
         </div>
