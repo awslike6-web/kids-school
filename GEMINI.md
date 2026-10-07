@@ -3,7 +3,7 @@
 > **공식 배포 주소**: `https://awslike6-web.github.io/kids-school/`  
 > **공식 깃 저장소**: `https://github.com/awslike6-web/kids-school`  
 > **미디어 단일 원천**: `https://github.com/awslike6-web/kids-archive`  
-> **상위 헌법 참조**: `g:/master-tower/GEMINI.md` (전사 최고 규약 준수)
+> **상위 헌법 참조**: `g:/master-tower/GEMINI.md` (전사 최고 규약 및 [`카파시 ASDST 프로토콜`](file:///docs/ASDST_PROMPT_GUIDE.md) 준수)
 
 ---
 
