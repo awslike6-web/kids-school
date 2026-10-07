@@ -561,8 +561,8 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 
 ## 4. 🤖 자동화 빌더 스크립트 도감 (Automation Scripts)
 
-### 🌟 `scripts/build_storybook.py` (원클릭 스토리북 빌더)
-노트북LM 지문과 삽화 이미지를 입력받아 양면 펼침면 합성, TTS MP3, JS 데이터, HTML 뷰어까지 한 번에 생성하는 올인원 빌더입니다.
+### 🌟 `scripts/build_storybook.py` (원클릭 스토리북 빌더 & 자동 배포기)
+노트북LM/Gemini 지문과 삽화 이미지를 입력받아 양면 펼침면 합성, TTS MP3, JS 데이터, HTML 뷰어 생성부터 **무결성 검증(`ai_verify`), kids-archive & kids-school 깃 푸시, 노션 타임라인 연동까지 원스톱으로 처리하는 올인원 빌더**입니다.
 - **실행 커맨드**:
   ```bash
   python scripts/build_storybook.py \
@@ -573,7 +573,8 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
     --book-id {도서ID} \
     --title "도서명" \
     --text-file "지문경로.txt" \
-    --img-dir "삽화폴더경로"
+    --img-dir "삽화폴더경로" \
+    [--deploy (기본 활성화: 깃 푸시 + 노션 기록까지 완결)]
   ```
 
 ### 🌟 `scripts/build_gallery.py` (성장 아카이브 동기화 빌더)
