@@ -925,8 +925,28 @@ function isSafeSfxEnabled() {
     return true;
 }
 
+// 🎙️ 직전 재생 음성 추적 (연속 동일 음성 반복 방지용 SSOT 캐시)
+const _lastFairyAudioPlayed = {
+    praise_tease: null,
+    praise_snarky: null,
+    encourage_tease: null,
+    encourage_snarky: null
+};
+
+function getNonRepeatingRandomFairyVoice(list, trackKey) {
+    if (!list || list.length === 0) return null;
+    if (list.length === 1) return list[0];
+    const last = _lastFairyAudioPlayed[trackKey];
+    const filtered = list.filter(f => f !== last);
+    const chosen = (filtered.length > 0)
+        ? filtered[Math.floor(Math.random() * filtered.length)]
+        : list[Math.floor(Math.random() * list.length)];
+    _lastFairyAudioPlayed[trackKey] = chosen;
+    return chosen;
+}
+
 /**
- * 🌟 정답/극찬 전용 헬퍼 (페르소나 연동 & 선희 고음질 음성 지원)
+ * 🌟 정답/극찬 전용 헬퍼 (페르소나 5종 다채로운 랜덤 셔플 & 선희 고음질 음성 지원)
  */
 function fairyPraise(onEndCallback = null) {
     if (!isSafeSfxEnabled()) {
@@ -937,15 +957,31 @@ function fairyPraise(onEndCallback = null) {
     const persona = getSafeVoicePersona();
     const voiceBase = getFairyVoiceAssetBaseUrl();
 
-    // 😜 깐죽이 페르소나
+    // 😜 깐죽이 페르소나 (정답 5종 무작위 셔플)
     if (persona === 'tease_minsu') {
-        const teaseFile = voiceBase + 'tease/tease_correct_01.wav';
+        const correctFiles = [
+            'tease_correct_01.wav',
+            'tease_correct_02.wav',
+            'tease_correct_03.wav',
+            'tease_correct_04.wav',
+            'tease_correct_05.wav'
+        ];
+        const chosen = getNonRepeatingRandomFairyVoice(correctFiles, 'praise_tease');
+        const teaseFile = voiceBase + 'tease/' + chosen;
         playFairyPresetAudio(teaseFile, onEndCallback);
         return;
     }
-    // 😼 민서 깍쟁이 페르소나
+    // 😼 민서 깍쟁이 페르소나 (정답 5종 무작위 셔플)
     if (persona === 'snarky_minseo') {
-        const snarkyFile = voiceBase + 'snarky/snarky_correct_01.wav';
+        const correctFiles = [
+            'snarky_correct_01.wav',
+            'snarky_correct_02.wav',
+            'snarky_correct_03.wav',
+            'snarky_correct_04.wav',
+            'snarky_correct_05.wav'
+        ];
+        const chosen = getNonRepeatingRandomFairyVoice(correctFiles, 'praise_snarky');
+        const snarkyFile = voiceBase + 'snarky/' + chosen;
         playFairyPresetAudio(snarkyFile, onEndCallback);
         return;
     }
@@ -956,7 +992,7 @@ function fairyPraise(onEndCallback = null) {
 }
 
 /**
- * 🌸 오답/응원 전용 헬퍼 (페르소나 연동 & 선희 고음질 음성 지원)
+ * 🌸 오답/응원 전용 헬퍼 (페르소나 4종 다채로운 랜덤 셔플 & 선희 고음질 음성 지원)
  */
 function fairyEncourage(onEndCallback = null) {
     if (!isSafeSfxEnabled()) {
@@ -967,18 +1003,28 @@ function fairyEncourage(onEndCallback = null) {
     const persona = getSafeVoicePersona();
     const voiceBase = getFairyVoiceAssetBaseUrl();
 
-    // 😜 깐죽이 페르소나 (오답 2종 중 무작위)
+    // 😜 깐죽이 페르소나 (오답 4종 중 무작위 셔플)
     if (persona === 'tease_minsu') {
-        const wrongFiles = ['tease_wrong_01.wav', 'tease_wrong_02.wav'];
-        const chosen = wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
+        const wrongFiles = [
+            'tease_wrong_01.wav',
+            'tease_wrong_02.wav',
+            'tease_wrong_03.wav',
+            'tease_wrong_04.wav'
+        ];
+        const chosen = getNonRepeatingRandomFairyVoice(wrongFiles, 'encourage_tease');
         const teaseFile = voiceBase + 'tease/' + chosen;
         playFairyPresetAudio(teaseFile, onEndCallback);
         return;
     }
-    // 😼 민서 깍쟁이 페르소나 (오답 2종 중 무작위)
+    // 😼 민서 깍쟁이 페르소나 (오답 4종 중 무작위 셔플)
     if (persona === 'snarky_minseo') {
-        const wrongFiles = ['snarky_wrong_01.wav', 'snarky_wrong_02.wav'];
-        const chosen = wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
+        const wrongFiles = [
+            'snarky_wrong_01.wav',
+            'snarky_wrong_02.wav',
+            'snarky_wrong_03.wav',
+            'snarky_wrong_04.wav'
+        ];
+        const chosen = getNonRepeatingRandomFairyVoice(wrongFiles, 'encourage_snarky');
         const snarkyFile = voiceBase + 'snarky/' + chosen;
         playFairyPresetAudio(snarkyFile, onEndCallback);
         return;
@@ -990,13 +1036,16 @@ function fairyEncourage(onEndCallback = null) {
 }
 
 /**
- * 🎁 퀘스트/레벨업/보상 전용 헬퍼
+ * 🎁 퀘스트/레벨업/보상/완주 전용 헬퍼
  */
 function fairyReward(type = 'quest', onEndCallback = null) {
     if (!isSafeSfxEnabled()) {
         if (onEndCallback) onEndCallback();
         return;
     }
+
+    // 🛡️ 직전 정답 음성과 타이밍 충돌 방지: 직전 오디오 즉시 안전 정지
+    stopFairyTTS();
 
     const persona = getSafeVoicePersona();
     const voiceBase = getFairyVoiceAssetBaseUrl();

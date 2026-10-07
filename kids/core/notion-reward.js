@@ -866,6 +866,11 @@ async function finalizeQuizRewardSession(options = {}) {
 
     // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (기본 +5💎/🍬, 내일 예습 부스트 과목은 +7💎/🍬)
     if (isFullComplete) {
+        // 🎙️ 완주 축하 음성 자동 송출 (직전 정답 음성 안전 차단 후 완주 음성 100% 보장)
+        if (typeof fairyReward === 'function') {
+            fairyReward('finish');
+        }
+
         const bonusKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_complete_bonus`;
         const bonusAmount = (typeof window.TimetableBoost !== 'undefined'
             ? window.TimetableBoost.getSubjectBoostInfo(subj, opts.childName).completionBonus

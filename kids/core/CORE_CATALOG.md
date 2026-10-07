@@ -7,10 +7,10 @@
 ## 1. 🎙️ 오디오 & 음성 합성 (Audio & Interaction)
 
 ### 🌟 `fairy-engine.js` & `fairy-config.js`
-요정 코코의 한국어 안내, 원어민 영어 발음, 학습 보상 효과음을 담당하는 통합 오디오 코어입니다.
+요정 코코의 한국어 안내, 원어민 영어 발음, 학습 보상 효과음 및 **Gemini 3.8 Flash TTS 기반 캐릭터 페르소나(민수 깐죽이 / 민서 깍쟁이)** 음성을 전담하는 통합 오디오 코어입니다.
 - **파일 위치**:
   - `kids/core/fairy-config.js` (오디오 프리셋 맵 및 설정)
-  - `kids/core/fairy-engine.js` (통합 오디오 엔진)
+  - `kids/core/fairy-engine.js` (통합 오디오 엔진, 페르소나 비반복 셔플러 및 완주 가드 탑재)
 - **HTML 로드 방법**:
   ```html
   <script src="../core/fairy-config.js"></script>
@@ -21,9 +21,9 @@
   | :--- | :--- | :--- |
   | `speakFairyTTS(text, options)` | 한국어 안내/퀴즈 | Cloudflare Worker 스트리밍 ➔ Edge-TTS(`SunHiNeural`) 직결 |
   | `speakEnglish(text, options)` | 영어 원어민 발음 | Jenny Neural 0.85x 감속 배속 재생 + 한글 발음 디딤돌 |
-  | `fairyPraise()` | 정답/칭찬 효과음 | 경쾌한 팡파레 사운드 및 칭찬 음성 출력 |
-  | `fairyReward()` | 보상 획득 | 보석💎/사탕🍬 획득 시 찰랑거리는 효과음 출력 |
-  | `fairyEncourage()` | 오답/격려 효과음 | 부드러운 격려 멘트와 효과음 출력 |
+  | `fairyPraise(onEndCallback)` | 정답/칭찬 효과음 | 페르소나 활성화 시 Gemini 3.8 Flash TTS 5종 대사 비반복 무작위 셔플 재생 |
+  | `fairyEncourage(onEndCallback)` | 오답/격려 효과음 | 페르소나 활성화 시 Gemini 3.8 Flash TTS 4종 대사 비반복 무작위 셔플 재생 |
+  | `fairyReward(type, onEndCallback)` | 완주/보상 획득 | 직전 정답 음성을 즉시 안전 중단(`stopFairyTTS`) 후 완주 축하 음성 100% 보장 재생 |
 
 ---
 

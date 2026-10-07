@@ -95,7 +95,9 @@ window.promptQuizRetryOrSkip = function(options = {}) {
     window.__quizWrongChoiceSkip = options.onSkip || null;
     overlay.style.display = 'flex';
 
-    if (typeof speakFairyTTS === 'function') {
+    if (typeof fairyEncourage === 'function') {
+        fairyEncourage();
+    } else if (typeof speakFairyTTS === 'function') {
         speakFairyTTS(options.message || '아쉽지만 틀렸어요!');
     }
 };

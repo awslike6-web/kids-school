@@ -483,8 +483,11 @@
         if (selectedIdx === correctIdx) {
             // 정답!
             if (btn) btn.classList.add('correct');
-            if (typeof window.fairyPraise === 'function') window.fairyPraise();
-            if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS("정답이에요! 아주 훌륭해요!");
+            if (typeof window.fairyPraise === 'function') {
+                window.fairyPraise();
+            } else if (typeof window.speakFairyTTS === 'function') {
+                window.speakFairyTTS("정답이에요! 아주 훌륭해요!");
+            }
 
             // 실시간 소액 보상 (+1💎/🍬)
             if (typeof window.triggerAwardDispense === 'function') {
@@ -499,8 +502,11 @@
         } else {
             // 오답: 에러리스 학습 안내 & 힌트 자동 개방
             if (btn) btn.classList.add('wrong');
-            if (typeof window.fairyEncourage === 'function') window.fairyEncourage();
-            if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS("괜찮아요! 단락 힌트를 다시 한번 살펴볼까요?");
+            if (typeof window.fairyEncourage === 'function') {
+                window.fairyEncourage();
+            } else if (typeof window.speakFairyTTS === 'function') {
+                window.speakFairyTTS("괜찮아요! 단락 힌트를 다시 한번 살펴볼까요?");
+            }
 
             isHintOpen = true;
             const box = document.getElementById('readingHintBox');
@@ -531,8 +537,11 @@
 
         if (isMatch) {
             inputEl.classList.add('correct');
-            if (typeof window.fairyPraise === 'function') window.fairyPraise();
-            if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS("정답이에요! 완벽하게 맞췄어요!");
+            if (typeof window.fairyPraise === 'function') {
+                window.fairyPraise();
+            } else if (typeof window.speakFairyTTS === 'function') {
+                window.speakFairyTTS("정답이에요! 완벽하게 맞췄어요!");
+            }
 
             if (typeof window.triggerAwardDispense === 'function') {
                 window.triggerAwardDispense(1, 'reading');
