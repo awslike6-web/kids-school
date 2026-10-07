@@ -284,6 +284,15 @@
         const existing = container.querySelector('.quiz-flow-advance-bar');
         if (existing) existing.remove();
 
+        const activeData = window.activeSectionData || [];
+        const activeIdx = (typeof window.activeQuizIdx === 'number') ? window.activeQuizIdx : 0;
+        const curItem = activeData[activeIdx] || null;
+        const targetWord = options.word || curItem?.word || curItem?.text || null;
+        const subj = options.subject || window.currentSubject || '국어';
+        const vocaUrl = (targetWord && typeof window.getVocaCommonUrl === 'function')
+            ? window.getVocaCommonUrl(subj, targetWord)
+            : null;
+
         const bar = document.createElement('div');
         bar.className = 'quiz-flow-advance-bar animate-fade-in';
         bar.innerHTML = `
@@ -293,6 +302,13 @@
                         <span>💡 [풀이 & 핵심 원리]</span>
                     </div>
                     <p style="margin:0; font-size:1.05rem; line-height:1.5; color:#334155;">${options.explanation}</p>
+                    ${vocaUrl ? `
+                        <div style="margin-top:10px; border-top:1px dashed #cbd5e1; padding-top:8px;">
+                            <a href="${vocaUrl}" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:#eff6ff; border:1px solid #93c5fd; padding:6px 14px; border-radius:20px; font-size:0.88rem; font-weight:bold; color:#1d4ed8; transition:all 0.15s ease;">
+                                📖 <span>[${targetWord}] 용어사전에서 깊이 보기</span> ↗
+                            </a>
+                        </div>
+                    ` : ''}
                 </div>
             ` : ''}
             <div style="display:flex; justify-content:center; gap:12px; margin-top:14px;">

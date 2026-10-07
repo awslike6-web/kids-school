@@ -618,7 +618,15 @@ function promptKoreanWrong(note, onRetry) {
     window.wrongNotes.push(note);
     const retry = typeof onRetry === 'function' ? onRetry : () => {};
     if (typeof promptQuizRetryOrSkip === 'function') {
-        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skipKoreanQuestion });
+        const word = (typeof note === 'object' && note !== null) ? (note.word || note.text) : note;
+        const meaning = (typeof note === 'object' && note !== null) ? (note.meaning || note.desc || note.hint) : null;
+        promptQuizRetryOrSkip({
+            onRetry: retry,
+            onSkip: skipKoreanQuestion,
+            word: word,
+            subject: '국어',
+            meaning: meaning
+        });
         return;
     }
     speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");

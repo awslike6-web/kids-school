@@ -295,7 +295,15 @@
         const skip = () => window.skipToNextQuiz('voca');
 
         if (typeof window.promptQuizRetryOrSkip === 'function') {
-            window.promptQuizRetryOrSkip({ onRetry: retry, onSkip: skip });
+            const activeItem = activeData[activeIdx] || null;
+            window.promptQuizRetryOrSkip({
+                onRetry: retry,
+                onSkip: skip,
+                word: activeItem?.word || curWord,
+                subject: '사회',
+                meaning: activeItem?.meaning || activeItem?.desc || null,
+                hint: activeItem?.hint || null
+            });
             return;
         }
 

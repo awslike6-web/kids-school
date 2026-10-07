@@ -536,7 +536,15 @@ function recordEnglishWrongAnswer(item, wrongInput) {
 function promptEnglishWrong(onRetry) {
     const retry = typeof onRetry === 'function' ? onRetry : () => {};
     if (typeof promptQuizRetryOrSkip === 'function') {
-        promptQuizRetryOrSkip({ onRetry: retry, onSkip: skipEnglishQuestion });
+        const curItem = (activeSectionData && activeSectionData[activeQuizIdx]) ? activeSectionData[activeQuizIdx] : null;
+        promptQuizRetryOrSkip({
+            onRetry: retry,
+            onSkip: skipEnglishQuestion,
+            word: curItem?.word || curItem?.english || null,
+            subject: '영어',
+            meaning: curItem?.meaning || curItem?.korean || null,
+            hint: curItem?.phonics || curItem?.hint || null
+        });
         return;
     }
     speakFairyTTS("아쉽지만 틀렸어요. 다시 한번 생각해볼까요?");

@@ -307,6 +307,19 @@
             if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
             if (!window.wrongNotes) window.wrongNotes = [];
             window.wrongNotes.push({ word: currentItem.word, wrongInput: userVal });
+
+            if (typeof window.promptQuizRetryOrSkip === 'function') {
+                window.promptQuizRetryOrSkip({
+                    onRetry: () => { input.value = ""; input.focus(); },
+                    onSkip: () => { if (typeof window.skipToNextScienceQuiz === 'function') window.skipToNextScienceQuiz(); },
+                    word: currentItem.word,
+                    subject: '과학',
+                    meaning: currentItem.meaning || currentItem.desc || null,
+                    hint: currentItem.hint || currentItem.chosung || null
+                });
+                return;
+            }
+
             if (typeof speakFairyTTS === 'function') speakFairyTTS("힌트를 보고 다시 맞춰봐!");
             alert("아쉬워요! 초성 힌트를 다시 확인해 보세요!");
             input.value = "";

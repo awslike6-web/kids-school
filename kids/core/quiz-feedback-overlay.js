@@ -37,7 +37,29 @@ function getConjunctionCorrectAnswer(conj) {
 
 
 // ========================================================
-// 💥 퀴즈 오답 — 다시 풀기 / 다음 문제로 (전 과목 공통)
+// 🔗 전 과목 보카사전(voca.html) 상대 경로 생성 SSOT 헬퍼
+// ========================================================
+function getVocaCommonUrl(subject, word) {
+    let base = 'kids/common_space/voca.html';
+    if (typeof document !== 'undefined') {
+        const scripts = document.getElementsByTagName('script');
+        for (let s of scripts) {
+            if (s.src && (s.src.includes('quiz-feedback-overlay.js') || s.src.includes('quiz-flow-controller.js') || s.src.includes('core.js') || s.src.includes('fairy-engine.js'))) {
+                const coreUrl = s.src.substring(0, s.src.lastIndexOf('/'));
+                const kidsUrl = coreUrl.substring(0, coreUrl.lastIndexOf('/'));
+                base = kidsUrl + '/common_space/voca.html';
+                break;
+            }
+        }
+    }
+    const params = new URLSearchParams();
+    if (subject) params.set('subject', subject);
+    if (word) params.set('search', word);
+    return `${base}?${params.toString()}`;
+}
+
+// ========================================================
+// 💥 퀴즈 오답 — 다시 풀기 / 단어사전 확인 / 다음 문제로 (전 과목 공통)
 // ========================================================
 function ensureQuizWrongChoiceOverlay() {
     if (document.getElementById('quizWrongChoiceOverlay')) return;
@@ -45,16 +67,31 @@ function ensureQuizWrongChoiceOverlay() {
     const overlay = document.createElement('div');
     overlay.id = 'quizWrongChoiceOverlay';
     overlay.style.cssText =
-        'display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;';
+        'display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:100000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box; backdrop-filter:blur(3px);';
 
     overlay.innerHTML = `
-        <div style="background:#fff; border-radius:24px; padding:28px 22px; max-width:380px; width:100%; text-align:center; box-shadow:0 16px 48px rgba(0,0,0,0.25); font-family:'Nanum Gothic','Jua',sans-serif;">
-            <div style="font-size:2.5rem; margin-bottom:12px;">💥</div>
-            <div id="quizWrongChoiceMessage" style="font-size:1.25rem; color:#333; margin-bottom:8px; line-height:1.45;">아쉽지만 틀렸어요!</div>
-            <div id="quizWrongChoiceSub" style="font-size:0.95rem; color:#666; margin-bottom:22px; line-height:1.5;">다시 풀어볼까요, 아니면 다음 문제로 넘어갈까요?</div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button id="quizWrongChoiceRetryBtn" type="button" style="padding:14px; border:none; border-radius:16px; background:linear-gradient(135deg,#4facfe,#00f2fe); color:#fff; font-family:inherit; font-size:1.1rem; cursor:pointer;">🔄 다시 풀기</button>
-                <button id="quizWrongChoiceSkipBtn" type="button" style="padding:14px; border:none; border-radius:16px; background:#8b949e; color:#fff; font-family:inherit; font-size:1.1rem; cursor:pointer;">⏭️ 다음 문제로</button>
+        <div style="background:#fff; border-radius:24px; padding:28px 22px; max-width:390px; width:100%; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.3); font-family:'Nanum Gothic','Jua',sans-serif; animation:ds-scale-up 0.2s ease-out;">
+            <div style="font-size:2.5rem; margin-bottom:8px;">💥</div>
+            <div id="quizWrongChoiceMessage" style="font-size:1.25rem; font-weight:bold; color:#1e293b; margin-bottom:4px; line-height:1.4;">아쉽지만 틀렸어요!</div>
+            <div id="quizWrongChoiceSub" style="font-size:0.92rem; color:#64748b; margin-bottom:14px; line-height:1.45;">다시 풀어볼까요, 아니면 단어 뜻을 확인해볼까요?</div>
+            
+            <!-- 💡 [정답 및 핵심 뜻풀이 카드] -->
+            <div id="quizWrongChoiceAnswerBox" style="display:none; background:#f0f9ff; border:1.5px dashed #38bdf8; border-radius:14px; padding:11px 14px; margin-bottom:14px; text-align:left; font-size:0.92rem; color:#0f172a; line-height:1.5;">
+                <div style="font-weight:bold; color:#0284c7; margin-bottom:4px; font-size:0.88rem; display:flex; align-items:center; gap:4px;">
+                    <span>💡 [정답 & 핵심 풀이]</span>
+                </div>
+                <div id="quizWrongChoiceAnswerContent" style="word-break:break-word;"></div>
+            </div>
+
+            <!-- 🔘 액션 버튼 그룹 -->
+            <div style="display:flex; flex-direction:column; gap:9px;">
+                <button id="quizWrongChoiceRetryBtn" type="button" style="padding:13px; border:none; border-radius:14px; background:linear-gradient(135deg,#38bdf8,#0284c7); color:#fff; font-family:inherit; font-size:1.05rem; font-weight:bold; cursor:pointer; box-shadow:0 4px 12px rgba(2,132,199,0.3); transition:transform 0.1s ease;">🔄 다시 풀기</button>
+                
+                <a id="quizWrongChoiceVocaBtn" href="#" target="_blank" style="display:none; text-decoration:none; padding:12px; border-radius:14px; background:#eff6ff; border:1.5px solid #93c5fd; color:#1d4ed8; font-family:inherit; font-size:0.96rem; font-weight:bold; cursor:pointer; align-items:center; justify-content:center; gap:6px; transition:background 0.15s ease;">
+                    📖 <span id="quizWrongChoiceVocaBtnText">용어사전에서 뜻·예문 깊이 보기</span> ↗
+                </a>
+                
+                <button id="quizWrongChoiceSkipBtn" type="button" style="padding:11px; border:none; border-radius:14px; background:#f1f5f9; color:#64748b; font-family:inherit; font-size:0.92rem; font-weight:bold; cursor:pointer;">⏭️ 다음 문제로 넘어가기</button>
             </div>
         </div>
     `;
@@ -83,12 +120,53 @@ window.promptQuizRetryOrSkip = function(options = {}) {
     const overlay = document.getElementById('quizWrongChoiceOverlay');
     const msgEl = document.getElementById('quizWrongChoiceMessage');
     const subEl = document.getElementById('quizWrongChoiceSub');
+    const ansBox = document.getElementById('quizWrongChoiceAnswerBox');
+    const ansContent = document.getElementById('quizWrongChoiceAnswerContent');
+    const vocaBtn = document.getElementById('quizWrongChoiceVocaBtn');
+    const vocaText = document.getElementById('quizWrongChoiceVocaBtnText');
 
     msgEl.textContent = options.message || '아쉽지만 틀렸어요!';
     subEl.textContent =
         options.subMessage || '다시 풀어볼까요, 아니면 다음 문제로 넘어갈까요?';
-    if (options.hint) {
-        subEl.textContent += `\n💡 ${options.hint}`;
+
+    // 1. 단어/과목/뜻풀이 자가 치유 추출
+    const activeData = window.activeSectionData || [];
+    const activeIdx = (typeof window.activeQuizIdx === 'number') ? window.activeQuizIdx : 0;
+    const curItem = activeData[activeIdx] || null;
+    const lastWrong = (window.wrongNotes && window.wrongNotes.length > 0)
+        ? window.wrongNotes[window.wrongNotes.length - 1]
+        : null;
+
+    const targetWord = options.word || options.keyword || curItem?.word || curItem?.text || curItem?.name || lastWrong?.word || null;
+    const targetSubject = options.subject || window.currentSubject || (typeof detectSubjectFromContext === 'function' ? detectSubjectFromContext() : '국어');
+    const targetMeaning = options.meaning || options.answer || options.desc || curItem?.meaning || curItem?.desc || options.hint || null;
+
+    // 2. 💡 정답/뜻 카드 동적 렌더링
+    if (ansBox && ansContent) {
+        if (targetWord && targetMeaning) {
+            ansContent.innerHTML = `<b style="color:#0369a1; font-size:1rem;">${targetWord}</b> : ${targetMeaning}`;
+            ansBox.style.display = 'block';
+        } else if (targetMeaning) {
+            ansContent.innerHTML = `${targetMeaning}`;
+            ansBox.style.display = 'block';
+        } else if (options.hint) {
+            ansContent.innerHTML = `💡 힌트: ${options.hint}`;
+            ansBox.style.display = 'block';
+        } else {
+            ansBox.style.display = 'none';
+        }
+    }
+
+    // 3. 📖 보카사전 딥링크 배선
+    if (vocaBtn && vocaText) {
+        if (targetWord) {
+            const vocaUrl = getVocaCommonUrl(targetSubject, targetWord);
+            vocaBtn.href = vocaUrl;
+            vocaText.textContent = `[${targetWord}] 용어사전에서 뜻·예문 깊이 보기`;
+            vocaBtn.style.display = 'inline-flex';
+        } else {
+            vocaBtn.style.display = 'none';
+        }
     }
 
     window.__quizWrongChoiceRetry = options.onRetry || null;
@@ -101,6 +179,8 @@ window.promptQuizRetryOrSkip = function(options = {}) {
         speakFairyTTS(options.message || '아쉽지만 틀렸어요!');
     }
 };
+
+window.getVocaCommonUrl = getVocaCommonUrl;
 
 window.closeQuizWrongChoice = function() {
     const overlay = document.getElementById('quizWrongChoiceOverlay');

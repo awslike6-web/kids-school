@@ -985,11 +985,20 @@
           updateHearts();
         }
 
+        const vocaWord = q.word || null;
+        const vocaLinkHtml = vocaWord ? `
+          <div class="mt-2">
+            <a href="./kids/common_space/voca.html?subject=${encodeURIComponent(currentSubj)}&search=${encodeURIComponent(vocaWord)}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${isMinseo ? 'bg-[#ffe4ec] text-[#d8496e] border border-[#ffb6c1]' : 'bg-white/10 text-yellow-300 border border-yellow-500/40'}">
+              📖 [${vocaWord}] 용어사전에서 확인 ↗
+            </a>
+          </div>
+        ` : '';
+
         if (isMinseo) {
           box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-[#ff9aa2] bg-[#fff0f2] text-[#4a2e2b] space-y-3";
           title.textContent = q.isPreview ? "괜찮아요! 내일 배울 비밀 탐험이에요! 💡" : "아쉬워요! 다시 해볼까요? 💡";
           title.className = "text-base font-bold text-[#e05769]";
-          desc.innerHTML = (q.isPreview ? "<span class='text-xs text-amber-700 font-bold'>[하트 차감 0]</span> " : "") + `정답 해설: ${q.hint}`;
+          desc.innerHTML = (q.isPreview ? "<span class='text-xs text-amber-700 font-bold'>[하트 차감 0]</span> " : "") + `정답 해설: ${q.hint}` + vocaLinkHtml;
           desc.className = "text-xs text-[#8c3a45]";
           iconWrap.textContent = "💧";
           iconWrap.className = "w-10 h-10 rounded-full bg-[#ffebee] text-[#ff6b81] flex items-center justify-center text-xl";
@@ -998,7 +1007,7 @@
           box.className = "max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-fire-orange bg-[#331811] text-white space-y-3";
           title.textContent = q.isPreview ? "괜찮아요! 다음 단원 맛보기 탐험이에요! 💡" : "아까워요! 💡";
           title.className = "text-base font-bold text-fire-orange";
-          desc.innerHTML = (q.isPreview ? "<span class='text-xs text-yellow-400 font-bold'>[하트 차감 0]</span> " : "") + `정답 해설: ${q.hint}`;
+          desc.innerHTML = (q.isPreview ? "<span class='text-xs text-yellow-400 font-bold'>[하트 차감 0]</span> " : "") + `정답 해설: ${q.hint}` + vocaLinkHtml;
           desc.className = "text-xs opacity-90";
           iconWrap.textContent = "💔";
           iconWrap.className = "w-10 h-10 rounded-full bg-fire-orange/20 text-fire-orange flex items-center justify-center text-xl";
