@@ -237,7 +237,7 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | `renderDictionaryUI(container)` | 4선 공책 인쇄용 어휘 체크리스트 UI 렌더링 |
 
 ### 🌟 `english_storybook.js` ([1단계] 원서/단원 동화 도서관 전담 엔진)
-L7, L8, L11 등 단원별 일러스트 동화 서가 도감 렌더링 및 뷰어 연결을 전담하는 독립 모듈입니다.
+L7, L8, L9, L11 등 단원별 일러스트 동화 서가 도감 렌더링 및 뷰어 연결을 전담하는 독립 모듈입니다.
 - **파일 위치**: `kids/js/english_storybook.js` (112줄)
 - **핵심 API**:
   | 메서드 | 설명 |

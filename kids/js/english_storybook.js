@@ -7,7 +7,19 @@
     'use strict';
 
     const STORY_BOOKS = [
-        {
+                {
+            id: "l9",
+            badge: "🏠 9단원 일러스트 동화",
+            title: "Welcome to My Dream House!",
+            koreanTitle: "어서 와, 나의 꿈의 집으로!",
+            desc: "초등 영어 5-2 9단원 (집과 방의 물건 소개하기)",
+            keyExpr: "This is the bedroom. / There is a bed in the bedroom.",
+            url: "english_l9_storybook.html",
+            color: "#2563eb",
+            themeTagSon: "🏠 꿈의 집 투어",
+            themeTagDaughter: "✨ 예쁜 우리 집"
+        },
+{
             id: "l8",
             badge: "🔍 8단원 일러스트 동화",
             title: "The Great Festival Mission",
