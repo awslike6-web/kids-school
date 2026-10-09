@@ -11,6 +11,7 @@
     let currentPassages = [];
     let activePassage = null;
     let activeQuestionIdx = 0;
+    let currentStep = 0; // 0: 로비, 1: 지문정독, 2: 문제풀이, 3: 완료
     let activeTrack = "🏥 센터 독해"; // "🏥 센터 독해" or "🏫 교과서 독해"
     let activeGrade = "5-1"; // 영어 등 학기/학년 탭 구분
     let activeSubject = "국어";
@@ -23,6 +24,9 @@
      * 🏁 독해 로비 화면 (공부방 표준: 학년 선택 바 + 단원별 그룹화 서가)
      */
     async function renderReadingLobby(container, options = {}) {
+        currentStep = 0;
+        activePassage = null;
+        activeQuestionIdx = 0;
         containerEl = container;
         const subject = options.subject || window.currentSubject || "국어";
         activeSubject = subject;
@@ -272,6 +276,7 @@
      */
     function renderStep1Reader() {
         if (!containerEl || !activePassage) return;
+        currentStep = 1;
 
         const p = activePassage;
         const qCount = p.questions ? p.questions.length : 0;
@@ -320,6 +325,7 @@
             renderReadingLobby(containerEl);
             return;
         }
+        currentStep = 2;
 
         activeQuestionIdx = 0;
         renderQuestionStep();
@@ -586,6 +592,7 @@
             });
         }
 
+        currentStep = 3;
         containerEl.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3.5rem; margin-bottom:12px;">🎉</div>
@@ -609,6 +616,11 @@
         if (typeof window.fairyReward === 'function') window.fairyReward();
     }
 
+    function isMissionInProgress() {
+        // 문제 풀이 중(Step 2)이고 1문항 이상 풀었으며 아직 완주하지 않았을 때만 진행 중으로 판정
+        return currentStep === 2 && !!activePassage && activeQuestionIdx > 0 && activeQuestionIdx < (activePassage.questions || []).length;
+    }
+
     function toggleTts() {
         if (!activePassage || !activePassage.fullText) return;
         if (typeof window.speakFairyTTS === 'function') {
@@ -629,7 +641,8 @@
         closeBottomSheet,
         chooseAnswer,
         submitShortAnswer,
-        toggleTts
+        toggleTts,
+        isMissionInProgress
     };
 
 })();

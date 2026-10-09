@@ -231,6 +231,12 @@ function closeMissionView(force) {
     }
 
     const overlay = document.getElementById('missionOverlay');
+    if (overlay) {
+        overlay.style.display = "none";
+    }
+    stopDictationAudio();
+    stopFairyTTS();
+
     const finalizeDiscussion = async () => {
         const sHistory = window.sentenceHistory || [];
         if (currentMissionType === 'sentence' && sHistory.length > 0) {
@@ -258,14 +264,12 @@ function closeMissionView(force) {
         }
     };
 
-    finalizeDiscussion().finally(() => {
-        overlay.style.display = "none";
-        activeSectionData = [];
-        activeQuizIdx = 0;
-        activePassage = null;
-        stopDictationAudio();
-        stopFairyTTS();
-    });
+    finalizeDiscussion().catch(e => console.warn('[closeMissionView] 백그라운드 정산 경고:', e))
+        .finally(() => {
+            activeSectionData = [];
+            activeQuizIdx = 0;
+            activePassage = null;
+        });
 }
 
 function stopDictationAudio() {
