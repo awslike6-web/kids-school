@@ -284,11 +284,16 @@
 
         containerEl.innerHTML = `
             <div class="reading-reader-wrapper">
-                <!-- 상단 헤더 & 음성 낭독 -->
-                <div class="reading-reader-header">
-                    <span class="reading-unit-chip">${p.unit || '독해 미션'}</span>
-                    <button class="reading-tts-btn" onclick="window.ReadingEngine.toggleTts()">
-                        🔊 요정 코코 낭독 듣기
+                <!-- 상단 헤더 & 음성 낭독 & 서가 닫기 -->
+                <div class="reading-reader-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span class="reading-unit-chip">${p.unit || '독해 미션'}</span>
+                        <button class="reading-tts-btn" onclick="window.ReadingEngine.toggleTts()">
+                            🔊 요정 코코 낭독 듣기
+                        </button>
+                    </div>
+                    <button class="reading-btn-secondary" style="padding:6px 14px; font-size:0.9rem;" onclick="window.ReadingEngine.renderLobby()">
+                        ✖ 서가로 닫기
                     </button>
                 </div>
 
@@ -418,14 +423,22 @@
                     <span>📖 지문 전문 전체 확인하기 (터치) ⬆️</span>
                 </div>
 
+                <!-- 🌫️ 지문 전문 바텀시트 백드롭 (바깥 터치 시 즉시 닫힘) -->
+                <div id="readingSheetBackdrop" class="reading-sheet-backdrop" onclick="window.ReadingEngine.closeBottomSheet()"></div>
+
                 <!-- 📜 지문 전문 바텀시트 모달 (오버레이) -->
-                <div id="readingBottomSheet" class="reading-bottom-sheet ${isBottomSheetOpen ? 'open' : ''}">
+                <div id="readingBottomSheet" class="reading-bottom-sheet" style="display:none;">
                     <div class="bottom-sheet-header">
-                        <span style="font-family:'Jua', sans-serif; font-size:1.1rem; color:#1e293b;">📖 지문 전문</span>
+                        <span style="font-family:'Jua', sans-serif; font-size:1.15rem; color:#1e293b;">📖 지문 전문 전체 확인</span>
                         <button class="sheet-close-btn" onclick="window.ReadingEngine.closeBottomSheet()">✖ 닫기</button>
                     </div>
                     <div class="bottom-sheet-content">
-                        ${(activePassage.fullText || "").split('\n').filter(t => t.trim()).map(para => `<p style="margin-bottom:12px;">${para}</p>`).join('')}
+                        ${(activePassage.fullText || "").split('\n').filter(t => t.trim()).map(para => `<p style="margin-bottom:12px; text-indent:8px;">${para}</p>`).join('')}
+                    </div>
+                    <div style="padding:10px 16px; border-top:1px solid #f1f5f9; background:#f8fafc; text-align:center;">
+                        <button class="sheet-close-btn" style="width:100%; padding:10px; font-size:1rem;" onclick="window.ReadingEngine.closeBottomSheet()">
+                            ✖ 지문 전문 닫고 문제로 돌아가기
+                        </button>
                     </div>
                 </div>
             </div>
@@ -453,14 +466,36 @@
      */
     function openBottomSheet() {
         isBottomSheetOpen = true;
+        const backdrop = document.getElementById('readingSheetBackdrop');
         const sheet = document.getElementById('readingBottomSheet');
-        if (sheet) sheet.classList.add('open');
+        if (backdrop) {
+            backdrop.style.display = 'block';
+            requestAnimationFrame(() => backdrop.classList.add('open'));
+        }
+        if (sheet) {
+            sheet.style.display = 'flex';
+            sheet.style.transform = '';
+            requestAnimationFrame(() => sheet.classList.add('open'));
+        }
     }
 
     function closeBottomSheet() {
         isBottomSheetOpen = false;
+        const backdrop = document.getElementById('readingSheetBackdrop');
         const sheet = document.getElementById('readingBottomSheet');
-        if (sheet) sheet.classList.remove('open');
+        if (backdrop) {
+            backdrop.classList.remove('open');
+            backdrop.style.display = 'none';
+        }
+        if (sheet) {
+            sheet.classList.remove('open');
+            sheet.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                if (!isBottomSheetOpen && sheet) {
+                    sheet.style.display = 'none';
+                }
+            }, 250);
+        }
     }
 
     /**
