@@ -736,6 +736,7 @@
     }
 
     function renderQuestion() {
+      if (window.StudyActivity?.setPhase && window.__guardianStudyPhase !== 'quiz') window.StudyActivity.setPhase('quiz');
       const q = currentQuest.questions[currentIndex];
       selectedOptionIndex = null;
       isAnswerChecked = false;
@@ -1098,6 +1099,7 @@
 
     // 5문제 완독 모달 (노션 인벤토리 보상 DB + 노션 학습일지 DB 자동 전송)
     async function showClearModal() {
+      if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('paused');
       playSound('fanfare');
       if (typeof fairyReward === 'function') {
         fairyReward();

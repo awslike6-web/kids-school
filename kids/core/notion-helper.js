@@ -24,6 +24,7 @@ window.roomStartTime = window.roomStartTime || new Date();
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
     const submodules = [
+        'study-activity.js?v=20261010', // foreground, idle, interval ledger
         'notion-cache-manager.js',   // ⚡ 캐시 & 프리패치 & syncAllNotionData
         'notion-api-client.js',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
         'notion-study-logger.js',    // 📝 학습일지 & 보상/레벨업 전송 엔진

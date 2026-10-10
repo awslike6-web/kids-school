@@ -1,3 +1,13 @@
+
+// Load the shared active-study meter once, including pages without core.js.
+(function() {
+    if (window.StudyActivity || Array.from(document.scripts).some(s => (s.src || '').includes('study-activity.js'))) return;
+    const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-reward.js'))?.src;
+    if (!source) return;
+    const script=document.createElement('script');
+    script.src=new URL('study-activity.js?v=20261010',source).href; script.async=false;
+    document.head.appendChild(script);
+})();
 // ==========================================
 // 💎 민민이네 공부방 보상·학습일지·인벤토리 연동 모듈 (notion-reward.js)
 // ==========================================
@@ -54,19 +64,11 @@ async function sendStudyLogToNotion(options = {}) {
     const startTime = options.startTime || (window.roomStartTime ? window.roomStartTime.toISOString() : new Date().toISOString());
     const endTime = options.endTime || new Date().toISOString();
     
-    // 소요시간 자동 연산
-    let durationMinutes = options.durationMinutes;
-    if (durationMinutes === undefined) {
-        const timeDiff = new Date(endTime) - new Date(startTime);
-        durationMinutes = Math.floor(timeDiff / 60000);
-        if (durationMinutes < 1) durationMinutes = 1;
-    }
+    // Activity intervals are recorded separately, including unfinished sessions.
+    // Completion/error reports must not award the same interval a second time.
+    const durationMinutes = 0;
+    if (window.StudyActivity?.flush) window.StudyActivity.flush();
 
-    // ⏰ [스크린타임 트래커 연동] 오늘 순수 공부 시간 누적 기록
-    if (typeof window.ScreenTimeTracker !== 'undefined') {
-        window.ScreenTimeTracker.trackStudySession(durationMinutes, subject);
-    }
-    
     // 오답 리포트 자동 수집
     let errorReport = options.errorReport;
     if (errorReport === undefined) {
@@ -816,6 +818,7 @@ function dispatchReadingClearBonus(missionType, passageId, passageTitle) {
 window.__quizRewardSession = null;
 
 function initQuizRewardSession(missionType) {
+    if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('quiz');
     window.__quizRewardSession = {
         missionType: missionType || window.currentMissionType || 'quiz',
         sessionId: String(Date.now()),
@@ -855,6 +858,7 @@ async function rewardQuizCorrect(quizIndex, options = {}) {
 }
 
 async function finalizeQuizRewardSession(options = {}) {
+    if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('paused');
     const session = window.__quizRewardSession;
     if (!session) {
         return false;

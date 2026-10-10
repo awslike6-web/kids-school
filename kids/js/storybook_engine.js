@@ -1,3 +1,13 @@
+
+// Load the shared active-study meter once, including pages without core.js.
+(function() {
+    if (window.StudyActivity || Array.from(document.scripts).some(s => (s.src || '').includes('study-activity.js'))) return;
+    const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('storybook_engine.js'))?.src;
+    if (!source) return;
+    const script=document.createElement('script');
+    script.src=new URL('../core/study-activity.js?v=20261010',source).href; script.async=false;
+    document.head.appendChild(script);
+})();
 /* ========================================================
    📖 민민이네 공부방 스토리북 공통 뷰어 엔진 (storybook_engine.js)
    ======================================================== */

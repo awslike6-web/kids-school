@@ -87,31 +87,10 @@
         const startTime = options.startTime || (window.roomStartTime ? window.roomStartTime.toISOString() : new Date().toISOString());
         const endTime = options.endTime || new Date().toISOString();
         
-        // 소요시간 자동 연산
-        let durationMinutes = options.durationMinutes;
-        if (durationMinutes === undefined) {
-            const timeDiff = new Date(endTime) - new Date(startTime);
-            durationMinutes = Math.floor(timeDiff / 60000);
-            if (durationMinutes < 1) durationMinutes = 1;
-        }
+        // Completion reports preserve answers/rewards; active time has its own interval ledger.
+        const durationMinutes = 0;
+        if (window.StudyActivity?.flush) window.StudyActivity.flush();
 
-        // ⏰ [스크린타임 트래커 연동] 오늘 순수 공부 시간 누적 기록
-        if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.trackStudySession === 'function') {
-            window.ScreenTimeTracker.trackStudySession(durationMinutes, subject);
-        } else if (typeof window.trackStudySession === 'function') {
-            window.trackStudySession(durationMinutes, subject);
-        } else {
-            try {
-                const now = new Date();
-                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-                const k1 = `MINMIN_DAILY_STUDY_TIME_${childName}_${todayStr}`;
-                const k2 = `MINMIN_DAILY_STUDY_TIME_${childName}_${now.toLocaleDateString()}`;
-                const cur = Math.max(parseInt(localStorage.getItem(k1) || '0', 10), parseInt(localStorage.getItem(k2) || '0', 10)) + durationMinutes;
-                localStorage.setItem(k1, String(cur));
-                localStorage.setItem(k2, String(cur));
-            } catch(e) {}
-        }
-        
         // 오답 리포트 자동 수집
         let errorReport = options.errorReport;
         if (errorReport === undefined) {

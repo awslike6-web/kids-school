@@ -121,6 +121,7 @@ function dispatchReadingClearBonus(missionType, passageId, passageTitle) {
 window.__quizRewardSession = null;
 
 function initQuizRewardSession(missionType) {
+    if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('quiz');
     window.__quizRewardSession = {
         missionType: missionType || window.currentMissionType || 'quiz',
         sessionId: String(Date.now()),
@@ -159,6 +160,7 @@ async function rewardQuizCorrect(quizIndex, options = {}) {
 }
 
 async function finalizeQuizRewardSession(options = {}) {
+    if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('paused');
     const session = window.__quizRewardSession;
     if (!session) {
         return false;

@@ -2,10 +2,8 @@
  * ========================================================
  * ⏰ [스크린타임 스마트 정산 엔진] screentime-tracker.js
  * ========================================================
- * 공부방 웹 학습 시간으로 인해 폰 스크린타임이 깎여 억울해하지 않도록,
- * 1) 순수 공부방 학습 시간을 10분 단위로 쿨하게 올림(Round Up) 보정!
- * 2) 오늘 보상 50개 달성 시 '30분 자유 시간 추가권' 1장 지급!
- * 3) 30분 표준권 + 10분 보너스권으로 분할하여 직관적인 정산 영수증 제공!
+ * 실제 활동 구간을 초 단위로 합산해 1:1로 자동 지급합니다.
+ * 보석/사탕 보상과 부모 관리 설정은 학습 시간과 별도로 취급합니다.
  */
 
 (function () {
@@ -57,22 +55,8 @@
      * @param {string} [subject] - 과목명
      */
     function trackStudySession(minutes, subject) {
-        const mins = Math.max(1, Math.round(Number(minutes) || 1));
-        const childName = getCurrentChildName();
-        const todayStr = getTodayKey();
-        const key = `${STORAGE_KEY_PREFIX}${childName}_${todayStr}`;
-        const legacyKey = `${STORAGE_KEY_PREFIX}${childName}_${new Date().toLocaleDateString()}`;
-
-        let currentTotal = Math.max(
-            parseInt(localStorage.getItem(key) || '0', 10),
-            parseInt(localStorage.getItem(legacyKey) || '0', 10)
-        );
-        currentTotal += mins;
-        localStorage.setItem(key, String(currentTotal));
-        localStorage.setItem(legacyKey, String(currentTotal)); // 하위 호환 보존
-
-        console.log(`⏱️ [순공 시간 기록] ${childName} +${mins}분 (${subject || '학습'}) ➔ 오늘 누적 ${currentTotal}분`);
-        return currentTotal;
+        // Elapsed-time callers can no longer mint credits. The active meter owns this total.
+        return getTodayStudyMinutes();
     }
 
     /**
@@ -80,12 +64,7 @@
      */
     function getTodayStudyMinutes(childName) {
         const name = childName || getCurrentChildName();
-        const todayStr = getTodayKey();
-        const key = `${STORAGE_KEY_PREFIX}${name}_${todayStr}`;
-        const legacyKey = `${STORAGE_KEY_PREFIX}${name}_${new Date().toLocaleDateString()}`;
-        const val = parseInt(localStorage.getItem(key) || '0', 10);
-        const legacyVal = parseInt(localStorage.getItem(legacyKey) || '0', 10);
-        return Math.max(val, legacyVal);
+        return window.StudyActivity?.meter?.getTodayMinutes(name) || 0;
     }
 
     /**
@@ -148,37 +127,9 @@
         const targetChildren = targetName ? [targetName] : ['민수', '민서'];
 
         targetChildren.forEach(child => {
-            let notionTotalMinutes = 0;
-            studyLogs.forEach(page => {
-                const props = page.properties;
-                if (!props) return;
-                const pageChild = props['학생']?.select?.name;
-                if (pageChild !== child) return;
+            const notionTotalMinutes = window.StudyActivity?.measuredMinutes(studyLogs,child,todayStr) || 0;
 
-                const enterDate = props['입장']?.date?.start || '';
-                let isToday = false;
-                if (enterDate) {
-                    if (enterDate.startsWith(todayStr)) {
-                        isToday = true;
-                    } else {
-                        const d = new Date(enterDate);
-                        if (!isNaN(d.getTime())) {
-                            // KST (UTC+9) 기준 당일 판별
-                            const kstTime = new Date(d.getTime() + (9 * 60 * 60 * 1000));
-                            const y = kstTime.getUTCFullYear();
-                            const m = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
-                            const dt = String(kstTime.getUTCDate()).padStart(2, '0');
-                            if (`${y}-${m}-${dt}` === todayStr) isToday = true;
-                        }
-                    }
-                }
-
-                if (isToday) {
-                    const duration = Number(props['소요시간']?.number) || 1;
-                    notionTotalMinutes += duration;
-                }
-            });
-
+            localStorage.setItem(`GUARDIAN_STUDY_V2_CLOUD_${child}_${todayStr}`,String(notionTotalMinutes));
             if (notionTotalMinutes > 0) {
                 const key = `${STORAGE_KEY_PREFIX}${child}_${todayStr}`;
                 const legacyKey = `${STORAGE_KEY_PREFIX}${child}_${new Date().toLocaleDateString()}`;
@@ -265,7 +216,7 @@
                                 setTodayApprovedMinutes(approvalObj.approvedMinutes, name);
                             } else if (isApproved) {
                                 const raw = getTodayStudyMinutes(name);
-                                const adj = raw > 0 ? Math.ceil(raw / 10) * 10 : 0;
+                                const adj = raw > 0 ? Math.floor(raw) : 0;
                                 const bonus = (getTodayEarnedCurrency(name) >= 50) ? 30 : 0;
                                 setTodayApprovedMinutes(adj + bonus, name);
                             }
@@ -280,7 +231,7 @@
     }
 
     /**
-     * 10분 단위 올림 및 티켓 정산 종합 분석 (차액 정산 기반)
+     * 초 단위 활동 합산 및 티켓 정산 종합 분석 (차액 정산 기반)
      * @param {string} [childName]
      */
     function getScreenTimeSummary(childName) {
@@ -288,13 +239,13 @@
         const rawMinutes = getTodayStudyMinutes(name);
         const earnedCurrency = getTodayEarnedCurrency(name);
 
-        // 1. 순공 시간 10분 단위 올림 보정 (최소 10분, 단 공부 시간이 0분이면 0분)
-        const adjustedStudyMinutes = rawMinutes > 0 ? Math.ceil(rawMinutes / 10) * 10 : 0;
+        // 1. 순공 시간 초 단위 활동 합산 보정 (최소 10분, 단 공부 시간이 0분이면 0분)
+        const adjustedStudyMinutes = rawMinutes > 0 ? Math.floor(rawMinutes) : 0;
         const roundUpBonus = Math.max(0, adjustedStudyMinutes - rawMinutes);
 
-        // 2. 오늘의 50개 달성 보너스 (50개 이상 시 +30분)
-        const is50QuestReached = earnedCurrency >= 50;
-        const questBonusMinutes = is50QuestReached ? 30 : 0;
+        // 2. Currency rewards do not mint extra screen time.
+        const is50QuestReached = false;
+        const questBonusMinutes = 0; // Currency rewards are separate from automatic screen time.
 
         // 3. 오늘 총 인정 시간 합산
         const totalMinutes = adjustedStudyMinutes + questBonusMinutes;
@@ -442,155 +393,27 @@
      */
     function openScreenTimeReceiptModal(targetChildName) {
         removeScreenTimeModal();
-
-        const name = targetChildName || getCurrentChildName();
-        const s = getScreenTimeSummary(name);
+        const name = (targetChildName || getCurrentChildName()) === '민서' ? '민서' : '민수';
+        const minutes = getTodayStudyMinutes(name);
         const modal = document.createElement('div');
         modal.id = 'screenTimeReceiptModal';
         modal.className = 'screentime-modal-overlay';
-
-        const isApprovedAll = s.isFullyApproved || (s.totalMinutes > 0 && s.pendingMinutes === 0);
-
         modal.innerHTML = `
             <div class="screentime-modal-card animate-pop-up">
                 <button type="button" class="screentime-close-btn" onclick="window.closeScreenTimeReceiptModal()">✕</button>
-                
-                <div class="screentime-header">
-                    <span class="screentime-icon">${isApprovedAll ? '💖' : '🎟️'}</span>
-                    <div>
-                        <h2 class="screentime-title">${s.childName}의 오늘 폰시간 정산소</h2>
-                        <span class="screentime-subtitle">${isApprovedAll ? '오늘 획득한 폰 시간이 모두 패밀리링크에 충전되었습니다!' : '공부하느라 쓴 폰 시간 100% 보상 & 보너스 정산!'}</span>
-                    </div>
-                </div>
-
-                <!-- 1. 시계 바늘 비유 배너 -->
-                <div class="screentime-clock-banner ${isApprovedAll ? 'banner-completed' : ''}">
-                    <div class="clock-icon-anim">${isApprovedAll ? '🎉' : '⏰'}</div>
-                    <div class="clock-banner-text">
-                        <div class="clock-headline">${isApprovedAll ? `오늘 획득한 ${s.totalMinutes}분 모두 충전 완료!` : s.clockMetaphor}</div>
-                        <div class="clock-subline">${isApprovedAll ? '부모님이 패밀리링크에서 시간을 이미 늘려주셨어요. 지금 신청할 대기 시간이 없습니다.' : `실제 공부 ${s.rawMinutes}분 ➔ 10분 단위 올림으로 <b>${s.adjustedStudyMinutes}분</b> 인정!`}</div>
-                    </div>
-                </div>
-
-                ${isApprovedAll ? `
-                <!-- 🌟 전량 충전 완료 안심 카드 (아이가 착각하여 추가 요구하지 않도록 0장 명확 고지) -->
-                <div class="screentime-completed-hero">
-                    <div class="completed-hero-title">✅ 오늘 폰 시간 충전 완료</div>
-                    <div class="completed-hero-desc">
-                        오늘 열심히 공부해서 획득한 <b>${s.totalMinutes}분</b>을 부모님이 패밀리링크에 모두 충전해주셨습니다.
-                    </div>
-                    <div class="completed-zero-badge">
-                        🚫 지금 사용할 수 있는 남은 티켓: <b>0장 (모두 사용 완료)</b>
-                    </div>
-                    <div class="completed-hero-sub">
-                        💡 문제를 더 풀거나 새로운 과목을 공부하면 추가 시간이 다시 쌓여요!
-                    </div>
-                </div>
-                ` : ''}
-
-                <!-- 2. 영수증 내역 리스트 -->
-                <div class="screentime-receipt-box">
-                    <div class="receipt-row">
-                        <span class="r-label">📚 오늘 공부방 순수 열공</span>
-                        <span class="r-val">${s.rawMinutes}분</span>
-                    </div>
-                    <div class="receipt-row highlight-bonus">
-                        <span class="r-label">🎁 10분 단위 쿨한 올림 보정</span>
-                        <span class="r-val">+${s.roundUpBonus}분</span>
-                    </div>
-                    ${s.is50QuestReached ? `
-                    <div class="receipt-row highlight-bonus">
-                        <span class="r-label">🎯 오늘 50개 달성 보너스</span>
-                        <span class="r-val">+30분 추가!</span>
-                    </div>` : `
-                    <div class="receipt-row">
-                        <span class="r-label">🎯 오늘 보상 획득 (${s.earnedCurrency}/50개)</span>
-                        <span class="r-val" style="color:#64748b;">${Math.max(0, 50 - s.earnedCurrency)}개 더 모으면 +30분</span>
-                    </div>`}
-                    <div class="receipt-divider"></div>
-                    <div class="receipt-row total-row">
-                        <span class="r-total-label">🏆 오늘 총 인정 시간</span>
-                        <span class="r-total-val" style="color:#0284c7;">${s.totalMinutes}분</span>
-                    </div>
-                    ${s.approvedMinutes > 0 ? `
-                    <div class="receipt-row" style="margin-top:6px; font-size:0.92rem;">
-                        <span class="r-label" style="color:#16a34a; font-weight:bold;">✅ 부모님 패밀리링크 충전 완료</span>
-                        <span class="r-val" style="color:#16a34a; font-weight:bold;">${s.approvedMinutes}분 (사용됨)</span>
-                    </div>` : ''}
-                    
-                    ${isApprovedAll ? `
-                    <div class="receipt-row" style="margin-top:6px; font-size:1.02rem; background:#f0fdf4; padding:7px 10px; border-radius:10px; border:1.5px solid #86efac;">
-                        <span class="r-label" style="color:#15803d; font-weight:bold;">👉 지금 추가 연장할 남은 시간</span>
-                        <span class="r-val" style="color:#15803d; font-weight:900; font-size:1.25rem;">0분 (대기 없음)</span>
-                    </div>
-                    ` : `
-                    <div class="receipt-row" style="margin-top:6px; font-size:1.02rem; background:#fff1f2; padding:7px 10px; border-radius:10px; border:1.5px solid #fecdd3;">
-                        <span class="r-label" style="color:#e11d48; font-weight:bold;">⏳ 지금 부모님께 받을 시간</span>
-                        <span class="r-val" style="color:#e11d48; font-weight:bold; font-size:1.35rem;">+${s.pendingMinutes}분</span>
-                    </div>
-                    `}
-                </div>
-
-                <!-- 3. 발급 티켓 꾸러미 -->
-                <div class="screentime-tickets-area">
-                    <div class="tickets-title">
-                        ${isApprovedAll 
-                            ? '📁 오늘 사용 완료된 티켓 보관소 (재사용 불가)' 
-                            : '🎫 지금 부모님께 보여드릴 티켓 (총 ' + s.pendingMinutes + '분)'}
-                    </div>
-                    <div class="tickets-grid">
-                        ${s.count30m > 0 ? `
-                            <div class="screentime-ticket ticket-30m animate-pulse-ticket">
-                                <div class="ticket-badge" style="background:#ea580c; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장 신청</div>
-                                <div class="ticket-time">30분권</div>
-                                <div class="ticket-qty">x ${s.count30m}장</div>
-                            </div>
-                        ` : ''}
-                        ${s.count10m > 0 ? `
-                            <div class="screentime-ticket ticket-10m animate-pulse-ticket">
-                                <div class="ticket-badge" style="background:#c026d3; color:#fff; border-radius:6px; padding:2px 6px;">👉 지금 연장 신청</div>
-                                <div class="ticket-time">10분권</div>
-                                <div class="ticket-qty">x ${s.count10m}장</div>
-                            </div>
-                        ` : ''}
-                        ${isApprovedAll ? `
-                            ${s.approvedCount30m > 0 ? `
-                                <div class="screentime-ticket ticket-used">
-                                    <div class="ticket-badge badge-used">🚫 사용 완료 (0장 남음)</div>
-                                    <div class="ticket-time time-used">30분권</div>
-                                    <div class="ticket-qty qty-used">패밀리링크 충전 완료</div>
-                                </div>
-                            ` : ''}
-                            ${s.approvedCount10m > 0 ? `
-                                <div class="screentime-ticket ticket-used">
-                                    <div class="ticket-badge badge-used">🚫 사용 완료 (0장 남음)</div>
-                                    <div class="ticket-time time-used">10분권</div>
-                                    <div class="ticket-qty qty-used">패밀리링크 충전 완료</div>
-                                </div>
-                            ` : ''}
-                        ` : ''}
-                        ${s.totalMinutes === 0 ? `
-                            <div class="no-tickets-msg">아직 오늘 공부 기록이 없어요! 문제를 풀면 시간이 쌓여요. 🚀</div>
-                        ` : ''}
-                    </div>
-                </div>
-
-                <!-- 4. 하단 승인 상태 및 안내 -->
-                <div class="screentime-footer">
-                    <div class="approval-status-chip ${isApprovedAll ? 'is-approved' : 'is-pending'}">
-                        ${isApprovedAll 
-                            ? '💖 오늘 폰 시간 충전이 모두 끝났습니다! (남은 대기 티켓 없음)' 
-                            : (s.pendingMinutes > 0 ? `⏳ ${s.pendingMinutes}분 추가 연장 대기 중 (아빠/엄마께 보여주세요!)` : '대기 중')}
-                    </div>
-                    <button type="button" class="screentime-confirm-btn ${isApprovedAll ? 'btn-completed' : ''}" onclick="window.closeScreenTimeReceiptModal()">
-                        ${isApprovedAll ? '확인 완료 (닫기) 👍' : '부모님께 보여드리기 👍'}
-                    </button>
-                </div>
-            </div>
-        `;
-
+                <div class="screentime-header"><span class="screentime-icon">⏱️</span><div>
+                    <h2 class="screentime-title">${name}의 오늘 학습 시간</h2>
+                    <span class="screentime-subtitle">공부와 문제 풀이 시간이 자유시간으로 자동 반영돼요.</span>
+                </div></div>
+                <div class="receipt-row"><span class="r-label">오늘 기록한 학습 시간</span><span class="r-val">${minutes}분</span></div>
+                <p>화면을 보고 활동한 시간을 모아 1분마다 자유시간 1분이 생겨요. 쉬거나 다른 화면으로 이동하면 기록을 멈춰요.</p>
+                <p>인터넷에 연결되면 저장한 학습 시간이 자동 반영돼요. 실제로 남은 자유시간은 스크린 가디언 앱에서 확인해 주세요.</p>
+                <button type="button" class="screentime-close-btn" style="position:static" onclick="window.closeScreenTimeReceiptModal()">확인</button>
+            </div>`;
+        modal.addEventListener('click', event => { if (event.target === modal) closeScreenTimeReceiptModal(); });
         document.body.appendChild(modal);
         injectScreenTimeStyles();
+        if (window.StudyActivity?.flush) window.StudyActivity.flush();
     }
 
     function closeScreenTimeReceiptModal() {

@@ -770,3 +770,13 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **연동 모듈**: `scripts/register_reading_passage.py` (노션 독해·VOCA 원소스 멀티유즈 엔진)
 
 
+
+## 활동 시간 계측 (2026-10-10)
+
+- `kids/core/study-activity.js`: 공통 활동 측정, 노션 배치 큐, 오프라인 복구. Guardian 저장소 `learning/study-activity.js`와 동일한 파일.
+- 자동 로드: `core.js`, `notion-helper.js`, 기존 `notion-reward.js`, 동화 뷰어 `kids/js/storybook_engine.js`.
+- API: `window.StudyActivity.flush()`, `setPhase('quiz'|'study'|'paused')`, `meter.getTodayMinutes('민수'|'민서')`, `measuredMinutes(pages, child, kstDate)`.
+- 90초 무활동·숨김·포커스 이탈·절전·완료 화면은 중지. 수동 동화 낭독은 최대 10분. 과목 허브·놀이터·체크인·인쇄는 제외.
+- 노션 `활동측정` rich_text에는 v2 UUID·study/quiz·UTC 밀리초 구간을 기록. 실제 소요시간은 이 기록에만 저장하며, 오답/완료 보고의 소요시간은 0.
+- 자유시간은 공부·풀이 구간 합집합으로 1:1 자동 지급, 초를 모아 분 단위 지급. 보석/사탕 보상과 부모 추가 내역은 아이 정산 화면에 노출하지 않음.
+
