@@ -45,9 +45,11 @@
         }
         tick(wall, mono, eligible, readingAudio = false) {
             const elapsed=mono-this.mono, wallElapsed=wall-this.wall;
+            this.discontinuity=false;
             if (elapsed > MAX_TICK_MS || elapsed < 0 || Math.abs(wallElapsed-elapsed) > 1000) {
                 // Suspended browser/device sleep or clock changes must never earn a catch-up interval.
                 this.lastAction=-Infinity;
+                this.discontinuity=true;
             } else if (this.eligible && eligible && elapsed > 0) {
                 // Only the course book's audio can extend a manual interaction lease, up to ten minutes.
                 const stop=Math.min(mono, this.lastAction+(readingAudio ? 600000 : IDLE_MS));
@@ -147,6 +149,8 @@
             }
             const audio=win.document.getElementById('mainAudio');
             clock.tick(wall,mono,!!context && visible(),!!audio && !audio.paused && !audio.ended);
+            // Keep valid intervals from before a clock correction in their own immutable batch.
+            if (clock.discontinuity && clock.ranges.length) seal();
             // Include this tick before sealing, so the first 60 seconds award a complete minute.
             if (wall-lastFlush >= 60000 && clock.ranges.length) seal();
             if (wall-lastSave >= 5000) checkpoint();
