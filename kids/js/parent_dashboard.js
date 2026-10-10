@@ -46,15 +46,32 @@ function makeBgFloats() {
 // 사용자 권한 확인 및 뷰 설정
 function getUserAuth() {
   const urlParams = new URLSearchParams(window.location.search);
-  const userParam = urlParams.get('user'); // 'minsu', 'minseo', 'admin', 'parent'
-  const roleParam = urlParams.get('role'); // 'parent', 'admin'
+  const userParam = (urlParams.get('user') || '').toLowerCase(); // 'minsu', 'minseo', 'admin', 'parent', 'dad', 'mom'
+  const roleParam = (urlParams.get('role') || '').toLowerCase(); // 'parent', 'admin'
+  const nameParam = urlParams.get('name') || '';
   const savedName = localStorage.getItem('currentUserName') || '';
   const savedUser = localStorage.getItem('currentUser') || '';
   const savedChild = localStorage.getItem('currentChild') || '';
 
-  const isAdmin = (
-    savedName === '아빠' || 
+  const isMom = (
     savedName === '엄마' || 
+    userParam === 'mom' || 
+    nameParam === 'mom' || 
+    nameParam === '엄마'
+  );
+
+  const isDad = !isMom && (
+    savedName === '아빠' || 
+    userParam === 'dad' || 
+    nameParam === 'dad' || 
+    nameParam === '아빠' ||
+    // 만약 엄마가 아닌 상태에서 관리자(admin/parent)로 진입한 경우 기본 아빠 권한 부여
+    ((savedUser === 'admin' || savedUser === 'parent' || userParam === 'admin' || userParam === 'parent' || roleParam === 'admin' || roleParam === 'parent') && savedName !== '엄마')
+  );
+
+  const isAdmin = (
+    isDad || 
+    isMom || 
     savedUser === 'admin' || 
     savedUser === 'parent' ||
     userParam === 'admin' || 
@@ -72,7 +89,7 @@ function getUserAuth() {
     }
   }
 
-  return { isAdmin, targetChild, userParam, roleParam };
+  return { isAdmin, isDad, isMom, targetChild, userParam, roleParam, savedName };
 }
 
 // 뷰 스위칭 (전체 / 민수 / 민서)
@@ -114,7 +131,7 @@ function switchView(viewName) {
 
 // 권한에 따른 소원권 버튼 노출 처리
 function setupAuthUI() {
-  const { isAdmin, targetChild } = getUserAuth();
+  const { isAdmin, isDad, isMom, targetChild } = getUserAuth();
   
   const msParent = document.getElementById('ms-parent-actions');
   const msChild = document.getElementById('ms-child-actions');
@@ -126,8 +143,13 @@ function setupAuthUI() {
     if (msChild) msChild.style.display = 'none';
     if (dsParent) dsParent.style.display = 'block';
     if (dsChild) dsChild.style.display = 'none';
-    document.getElementById('pageTitle').textContent = '민민이네 실시간 대시보드 👨‍👩‍👧‍👦 (부모 관제)';
-    document.getElementById('pageSubtitle').textContent = '우리 아이들의 성장과 인벤토리를 실시간으로 모니터링하고 정비합니다.';
+    if (isMom) {
+      document.getElementById('pageTitle').textContent = '민민이네 실시간 대시보드 👩‍👧‍👦 (엄마 모드)';
+      document.getElementById('pageSubtitle').textContent = '아이들의 학습 성장과 습관을 따뜻하게 살펴보고 칭찬해 주세요.';
+    } else {
+      document.getElementById('pageTitle').textContent = '민민이네 실시간 대시보드 👨‍👧‍👦 (아빠 관제)';
+      document.getElementById('pageSubtitle').textContent = '아이들의 학습 성장과 스크린타임, 인벤토리를 통합 관리합니다.';
+    }
     switchView('all');
   } else {
     // 아이 접속 시: 소원권 결제 버튼 숨김 & 아이 뷰에 최적화
@@ -822,46 +844,125 @@ function renderScreenTimeWidget(childName) {
     }
   }
 
-  // 5. 원클릭 승인 버튼
-  if (approveBtn) {
-    if (pendingMinutes > 0) {
-      approveBtn.textContent = `✅ 지금 ${pendingMinutes}분 패밀리링크 연장 완료 승인`;
-      approveBtn.disabled = false;
-      approveBtn.style.opacity = "1";
-      approveBtn.style.cursor = "pointer";
-      approveBtn.style.background = isMinseo
-        ? "linear-gradient(135deg, #ec4899, #db2777)"
-        : "linear-gradient(135deg, #10b981, #059669)";
-    } else if (totalMinutes > 0) {
-      approveBtn.textContent = `🎉 오늘 ${totalMinutes}분 연장 완료 (대기 0분)`;
-      approveBtn.disabled = true;
-      approveBtn.style.opacity = "0.85";
-      approveBtn.style.cursor = "default";
-      approveBtn.style.background = "#64748b";
-    } else {
-      approveBtn.textContent = "⏳ 공부 시간 대기 중 (0분)";
-      approveBtn.disabled = true;
-      approveBtn.style.opacity = "0.6";
-      approveBtn.style.cursor = "not-allowed";
-      approveBtn.style.background = "#94a3b8";
-    }
-  }
+  // 5. 권한별 스크린타임 시간 추가 및 제어 UI 노출 통제
+  const { isDad, isMom } = getUserAuth();
+  const dadControlsEl = document.getElementById(prefix + "-st-dad-controls");
+  const momNoteEl = document.getElementById(prefix + "-st-mom-note");
 
-  // 6. 승인 재설정/초기화 링크
-  if (resetWrapEl) {
-    resetWrapEl.style.display = approvedMinutes > 0 ? "block" : "none";
+  if (isDad) {
+    if (approveBtn) approveBtn.style.display = "block";
+    if (dadControlsEl) dadControlsEl.style.display = "block";
+    if (momNoteEl) momNoteEl.style.display = "none";
+    if (resetWrapEl) resetWrapEl.style.display = approvedMinutes > 0 ? "block" : "none";
+
+    // 5-1. 원클릭 승인 버튼 (아빠 전용 활성화)
+    if (approveBtn) {
+      if (pendingMinutes > 0) {
+        approveBtn.textContent = `✅ 지금 ${pendingMinutes}분 스크린 가디언 충전 승인`;
+        approveBtn.disabled = false;
+        approveBtn.style.opacity = "1";
+        approveBtn.style.cursor = "pointer";
+        approveBtn.style.background = isMinseo
+          ? "linear-gradient(135deg, #ec4899, #db2777)"
+          : "linear-gradient(135deg, #10b981, #059669)";
+      } else if (totalMinutes > 0) {
+        approveBtn.textContent = `🎉 오늘 ${totalMinutes}분 충전 완료 (가디언 사용 중)`;
+        approveBtn.disabled = true;
+        approveBtn.style.opacity = "0.85";
+        approveBtn.style.cursor = "default";
+        approveBtn.style.background = "#64748b";
+      } else {
+        approveBtn.textContent = "⏳ 공부 시간 대기 중 (0분)";
+        approveBtn.disabled = true;
+        approveBtn.style.opacity = "0.6";
+        approveBtn.style.cursor = "not-allowed";
+        approveBtn.style.background = "#94a3b8";
+      }
+    }
+  } else {
+    // 엄마 또는 아이 프로필: 시간 추가 / 승인 / 잠금 버튼 일체 숨김 (기능 비활성화)
+    if (approveBtn) approveBtn.style.display = "none";
+    if (dadControlsEl) dadControlsEl.style.display = "none";
+    if (resetWrapEl) resetWrapEl.style.display = "none";
+    if (momNoteEl) {
+      momNoteEl.style.display = isMom ? "block" : "none";
+    }
   }
 }
 
-// 📱 부모 승인 실행 핸들러 (차액 승인: 대기시간 0분 초기화 + 노션 클라우드 영구 저장)
+// 📱 [원클릭 빠른 보너스 충전 - 아빠 전용]
+window.addScreenTimeBonus = async function(childName, minutes) {
+  const { isDad } = getUserAuth();
+  if (!isDad) {
+    alert("⚠️ 자유시간 추가 충전은 '아빠' 프로필에서만 가능합니다.");
+    return;
+  }
+
+  const mins = Number(minutes) || 15;
+  const childKey = childName === "민서" ? "minseo" : "minsu";
+  if (!confirm(`✨ [${childName}]에게 자유시간 +${mins}분을 보너스로 즉시 충전하시겠습니까?`)) return;
+
+  try {
+    const res = await fetch(`${PROXY_URL}/api/screentime`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ child: childKey, addMinutes: mins })
+    });
+    if (res.ok) {
+      alert(`🎉 [${childName}]에게 +${mins}분 충전이 완료되었습니다! 폰에 즉시 반영됩니다.`);
+      loadDashboardData();
+    } else {
+      alert("⚠️ 충전 요청 중 오류가 발생했습니다.");
+    }
+  } catch (e) {
+    alert("⚠️ 네트워크 통신 오류: " + e.message);
+  }
+};
+
+// 🔒 [원클릭 즉시 잠금 토글 - 아빠 전용]
+window.toggleScreenTimeLock = async function(childName, lockState) {
+  const { isDad } = getUserAuth();
+  if (!isDad) {
+    alert("⚠️ 즉시 잠금 및 해제는 '아빠' 프로필에서만 가능합니다.");
+    return;
+  }
+
+  const childKey = childName === "민서" ? "minseo" : "minsu";
+  const actionText = lockState ? "즉시 잠금" : "잠금 해제";
+  if (!confirm(`🔒 [${childName}]의 폰을 ${actionText}하시겠습니까?`)) return;
+
+  try {
+    const res = await fetch(`${PROXY_URL}/api/screentime`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ child: childKey, isLocked: lockState })
+    });
+    if (res.ok) {
+      alert(`✅ [${childName}] 폰이 ${actionText}되었습니다.`);
+      loadDashboardData();
+    } else {
+      alert("⚠️ 잠금 상태 변경 중 오류가 발생했습니다.");
+    }
+  } catch (e) {
+    alert("⚠️ 네트워크 통신 오류: " + e.message);
+  }
+};
+
+// 📱 부모 승인 실행 핸들러 (차액 승인: 대기시간 0분 초기화 + 노션 클라우드 영구 저장 - 아빠 전용)
 window.toggleParentScreenTimeApproval = async function(childName) {
+  const { isDad } = getUserAuth();
+  if (!isDad) {
+    alert("⚠️ 스크린 가디언 충전 승인은 '아빠' 프로필에서만 가능합니다.");
+    return;
+  }
+
   if (typeof window.ScreenTimeTracker === 'undefined') {
     alert("스크린타임 트래커 모듈이 준비되지 않았습니다.");
     return;
   }
   const summaryBefore = window.ScreenTimeTracker.getScreenTimeSummary(childName);
   if (summaryBefore.pendingMinutes <= 0) {
-    alert(`[${childName}] 이미 오늘 달성한 모든 시간(${summaryBefore.totalMinutes}분)이 패밀리링크 연장 완료되었습니다.`);
+    alert(`[${childName}] 이미 오늘 달성한 모든 시간(${summaryBefore.totalMinutes}분)이 스크린 가디언 충전 완료되었습니다.`);
     return;
   }
 
@@ -872,11 +973,17 @@ window.toggleParentScreenTimeApproval = async function(childName) {
   // ☁️ [클라우드 영구 동기화] 노션 인벤토리 DB의 '학습설정' 속성에 비동기 저장
   await saveScreenTimeApprovalToCloud(childName, true, approveResult.totalMinutes);
 
-  alert(`💖 [${childName}] ${newlyApproved}분 패밀리링크 연장 확인이 완료되었습니다!\n\n👉 지금 연장할 대기 시간이 0분으로 초기화되었습니다.\n☁️ 노션 클라우드에 영구 저장되어 엄마/아빠 모든 기기에서 즉시 '연장 완료'로 공유됩니다.`);
+  alert(`💖 [${childName}] ${newlyApproved}분 스크린 가디언 충전 승인이 완료되었습니다!\n\n👉 지금 연장할 대기 시간이 0분으로 초기화되었습니다.\n☁️ 노션 클라우드에 영구 저장되어 엄마/아빠 모든 기기에서 즉시 '충전 완료'로 공유됩니다.`);
 };
 
-// 📱 부모 승인 초기화 핸들러 (취소 시 대기 시간으로 복원)
+// 📱 부모 승인 초기화 핸들러 (취소 시 대기 시간으로 복원 - 아빠 전용)
 window.resetParentScreenTimeApproval = async function(childName) {
+  const { isDad } = getUserAuth();
+  if (!isDad) {
+    alert("⚠️ 스크린 가디언 충전 초기화는 '아빠' 프로필에서만 가능합니다.");
+    return;
+  }
+
   if (typeof window.ScreenTimeTracker === 'undefined') return;
   if (!confirm(`[${childName}] 오늘 연장 승인을 초기화하고 대기 시간으로 다시 복원하시겠습니까?\n(엄마/아빠 기기 모두 대기 시간으로 복원됩니다.)`)) {
     return;

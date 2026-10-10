@@ -400,6 +400,222 @@ async function handleBootstrap(url, request, env, ctx) {
 }
 
 // ============================================================================
+// 📱 스크린타임 단일 원천 API 핸들러 (/api/screentime)
+// ============================================================================
+const RESTRICTED_APP_PACKAGES = [
+  'com.google.android.youtube',
+  'com.roblox.client',
+  'com.supercell.brawlstars',
+  'com.mojang.minecraftpe'
+];
+
+async function handleScreenTime(url, request, env, ctx) {
+  const authHeader = getNotionAuthHeader(request, env);
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'Notion Auth required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+
+  const inventoryDbId = (env && env.INVENTORY_DB_ID) || DEFAULT_DBS.INVENTORY;
+  const studyLogDbId = (env && env.STUDY_LOG_DB_ID) || DEFAULT_DBS.STUDY_LOG;
+
+  // KST 기준 오늘 날짜 문자열 (YYYY-MM-DD)
+  const d = new Date();
+  const kst = new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+  const todayStr = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+
+  // 1. GET: 스크린타임 조회
+  if (request.method === 'GET') {
+    const rawChild = url.searchParams.get('child') || 'minsu';
+    const childName = (rawChild === 'minseo' || rawChild === 'daughter' || rawChild === '민서') ? '민서' : '민수';
+    const childKey = childName === '민수' ? 'minsu' : 'minseo';
+
+    try {
+      // 1) 인벤토리 & 학습일지 병렬 조회
+      const [invRes, studyRes] = await Promise.all([
+        callNotionRaw(`/v1/databases/${inventoryDbId}/query`, 'POST', {
+          filter: { property: '이름', title: { equals: childName } }
+        }, authHeader),
+        callNotionRaw(`/v1/databases/${studyLogDbId}/query`, 'POST', {
+          filter: {
+            and: [
+              { property: '학생', select: { equals: childName } },
+              { property: '입장', date: { on_or_after: `${todayStr}T00:00:00+09:00` } }
+            ]
+          },
+          page_size: 100
+        }, authHeader)
+      ]);
+
+      const [invData, studyData] = await Promise.all([
+        invRes.ok ? invRes.json() : { results: [] },
+        studyRes.ok ? studyRes.json() : { results: [] }
+      ]);
+
+      const invPage = invData.results && invData.results[0];
+      const props = invPage ? invPage.properties : {};
+
+      // 학습설정 JSON 파싱
+      let settings = {};
+      try {
+        const rawText = (props['학습설정']?.rich_text || []).map(t => t.plain_text || '').join('');
+        if (rawText) settings = JSON.parse(rawText);
+      } catch (e) {}
+
+      let screenData = settings.screenTime?.[childKey] || {};
+      if (screenData.date !== todayStr) {
+        screenData = {
+          date: todayStr,
+          approvedMinutes: 0,
+          usedMinutes: 0,
+          bonusMinutes: 0,
+          isLocked: false
+        };
+      }
+
+      // 순공 시간 합산
+      let rawStudyMinutes = 0;
+      (studyData.results || []).forEach(item => {
+        const p = item.properties || {};
+        rawStudyMinutes += Number(p['소요시간']?.number) || 0;
+      });
+
+      // 10분 올림 보정
+      const adjustedStudyMinutes = rawStudyMinutes > 0 ? Math.ceil(rawStudyMinutes / 10) * 10 : 0;
+      const roundupBonus = adjustedStudyMinutes - rawStudyMinutes;
+      const bonusMinutes = Number(screenData.bonusMinutes) || 0;
+      const approvedMinutes = Number(screenData.approvedMinutes) || 0;
+      const usedMinutes = Number(screenData.usedMinutes) || 0;
+      const isLocked = Boolean(screenData.isLocked);
+
+      // 총 허용 시간 & 잔여 시간
+      const totalAllowedMinutes = Math.max(adjustedStudyMinutes, approvedMinutes) + bonusMinutes;
+      const naturalRemaining = Math.max(0, totalAllowedMinutes - usedMinutes);
+      const effectiveRemaining = isLocked ? 0 : naturalRemaining;
+
+      return new Response(JSON.stringify({
+        status: 'ok',
+        child: childKey,
+        childName,
+        date: todayStr,
+        rawStudyMinutes,
+        adjustedStudyMinutes,
+        roundupBonus,
+        bonusMinutes,
+        totalAllowedMinutes,
+        usedMinutes,
+        remainingMinutes: effectiveRemaining,
+        isLocked,
+        restrictedPackages: RESTRICTED_APP_PACKAGES,
+        timestamp: new Date().toISOString()
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: err.message || 'ScreenTime GET failed' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    }
+  }
+
+  // 2. POST: 스크린타임 사용량 보고 및 즉시 제어
+  if (request.method === 'POST') {
+    try {
+      const body = await request.json();
+      const rawChild = body.child || 'minsu';
+      const childName = (rawChild === 'minseo' || rawChild === 'daughter' || rawChild === '민서') ? '민서' : '민수';
+      const childKey = childName === '민수' ? 'minsu' : 'minseo';
+
+      // 인벤토리 페이지 조회
+      const invRes = await callNotionRaw(`/v1/databases/${inventoryDbId}/query`, 'POST', {
+        filter: { property: '이름', title: { equals: childName } }
+      }, authHeader);
+      const invData = await invRes.json();
+      const invPage = invData.results && invData.results[0];
+      if (!invPage) {
+        return new Response(JSON.stringify({ error: `Child ${childName} page not found` }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+        });
+      }
+
+      const props = invPage.properties || {};
+      let settings = {};
+      try {
+        const rawText = (props['학습설정']?.rich_text || []).map(t => t.plain_text || '').join('');
+        if (rawText) settings = JSON.parse(rawText);
+      } catch (e) {}
+
+      if (!settings.screenTime) settings.screenTime = {};
+      let screenData = settings.screenTime[childKey] || {};
+      if (screenData.date !== todayStr) {
+        screenData = {
+          date: todayStr,
+          approvedMinutes: 0,
+          usedMinutes: 0,
+          bonusMinutes: 0,
+          isLocked: false
+        };
+      }
+
+      // 액션 처리
+      if (typeof body.addMinutes === 'number') {
+        screenData.bonusMinutes = (screenData.bonusMinutes || 0) + body.addMinutes;
+      }
+      if (typeof body.setBonusMinutes === 'number') {
+        screenData.bonusMinutes = Math.max(0, body.setBonusMinutes);
+      }
+      if (typeof body.usedMinutes === 'number') {
+        screenData.usedMinutes = body.usedMinutes;
+      }
+      if (typeof body.incrementUsedMinutes === 'number') {
+        screenData.usedMinutes = (screenData.usedMinutes || 0) + body.incrementUsedMinutes;
+      }
+      if (typeof body.isLocked === 'boolean') {
+        screenData.isLocked = body.isLocked;
+      }
+      screenData.lastSync = new Date().toISOString();
+      screenData.date = todayStr;
+
+      settings.screenTime[childKey] = screenData;
+
+      // 노션 업데이트
+      const patchRes = await callNotionRaw(`/v1/pages/${invPage.id}`, 'PATCH', {
+        properties: {
+          '학습설정': {
+            rich_text: [{ type: 'text', text: { content: JSON.stringify(settings) } }]
+          }
+        }
+      }, authHeader);
+
+      return new Response(JSON.stringify({
+        status: 'ok',
+        child: childKey,
+        screenData,
+        updated: patchRes.ok
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: err.message || 'ScreenTime POST failed' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    }
+  }
+
+  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    status: 405,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+  });
+}
+
+// ============================================================================
 // 🌐 메인 라우터 (Cloudflare Worker fetch)
 // ============================================================================
 export default {
@@ -534,6 +750,11 @@ export default {
     // 4. 단일 번들링 부트스트랩 엔드포인트 (/api/bootstrap)
     if (url.pathname === '/api/bootstrap') {
       return await handleBootstrap(url, request, env, ctx);
+    }
+
+    // 4-A. 📱 스크린타임 단일 원천 관제 엔드포인트 (/api/screentime)
+    if (url.pathname === '/api/screentime') {
+      return await handleScreenTime(url, request, env, ctx);
     }
 
     // 4-B. 🔑 Gemini 런타임 보안 키 디스펜서 (/api/gemini-key)
