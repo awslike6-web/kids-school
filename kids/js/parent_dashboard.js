@@ -334,16 +334,28 @@ function buildRadarScores(props, vocaList, childName, studyLogs = [], diaryList 
     const haruLevel = props["하루 레벨"]?.number || props["통합 레벨"]?.number || 1;
     let haruScore = levelToScore(haruLevel);
     const todayStr = getTodayDateStr();
-    const isTodayDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
+
+    // 오늘 하루 체크인 여부 (1순위: 노션 STUDY_LOG_DB 실시간 일지 확인, 2순위: 로컬스토리지 폴백)
+    let isTodayDone = false;
     let haruLogCount = 0;
     if (Array.isArray(studyLogs)) {
-      haruLogCount = studyLogs.filter(log => {
-        const child = log.properties["학생"]?.select?.name;
+      studyLogs.forEach(log => {
+        const child = log.properties["학생"]?.select?.name || log.properties["학생"]?.multi_select?.[0]?.name;
         const subj = log.properties["과목"]?.rich_text?.[0]?.plain_text || log.properties["과목"]?.select?.name || "";
         const title = log.properties["ID"]?.title?.[0]?.plain_text || log.properties["제목"]?.title?.[0]?.plain_text || "";
-        return child === "민서" && (subj.includes("하루") || subj.includes("루틴") || title.includes("하루") || title.includes("루틴"));
-      }).length;
+        const date = log.properties["입장"]?.date?.start || log.properties["날짜"]?.date?.start || "";
+        if (child === "민서" && (subj.includes("하루") || subj.includes("루틴") || title.includes("하루") || title.includes("루틴"))) {
+          haruLogCount++;
+          if ((date && date.startsWith(todayStr)) || title.includes(todayStr)) {
+            isTodayDone = true;
+          }
+        }
+      });
     }
+    if (!isTodayDone && typeof localStorage !== 'undefined') {
+      isTodayDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
+    }
+
     const haruActivity = 60 + (isTodayDone ? 20 : 0) + Math.min(haruLogCount * 5, 20);
     haruScore = Math.max(haruScore, Math.min(haruActivity, 100));
 
