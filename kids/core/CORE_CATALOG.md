@@ -799,3 +799,11 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - 지시 출력 도구: docs/windows/make-packet.mjs. --check는53개 카드의 구조를 검사하고 ID 인자는 해당 카드와 공통 요약·직접 선행 receipt만 출력합니다. 선행 accepted·확인 커밋·검증 증거·고정 receipt가 없으면 다음 작업을 거부합니다.
 - 예정 모듈: Windows Core 정산, Service 키/권한·SID, Session 감지, MV3 확장, Native Host, Admin 등록, 설치/복구. 현재 런타임 모듈이 존재하거나 검증됐다고 해석하지 않습니다.
 - 기존 /api/pair·/api/screentime·/api/usage 누적 장부를 재사용하고 자정60분·학습1:1·부모 추가 출처 숨김을 유지합니다. 엄격한 다중 기기 예약은 H단계의 Worker·Android 변경까지 별도 완료해야 합니다.
+
+## 민민 가디언 공부방 오차단 수정 (Android v2.1.1, 2026-10-11)
+
+- 원천: 관제탑 kids-screen-guardian/app/src/main/java/com/awslike6/screenguardian/BrowserPolicy.java와 ScreenGuardianService.java.
+- BrowserPolicy.update(pkg, windowId, address, editingAddress)는 접근성 창별 유튜브 상태를 유지합니다. isRestricted는 등록된 네이티브 앱 또는 확인된 YOUTUBE만 제한하며 UNKNOWN은 제외합니다. reset은 앱/창·화면 잠금·서비스 중단의 이전 판정을 초기화합니다.
+- 주소 없는 공부방/PWA·새 탭·주소 입력은 잔액 0/부모 잠금만으로 차단·차감하지 않습니다. 입력 문자열은 방문 주소로 신뢰하지 않습니다. 일반·학습 URL도 제외하며 기존 누적 장부·학습1:1·자정60분은 유지합니다.
+- 확인된 유튜브는 같은 창의 숨겨진 주소에서도 유지합니다. 처음부터 읽지 못하는 유튜브·전체 화면 창 ID 변경은 DNS VPN과 실제 기기에서 별도 실증/보강해야 합니다. 수정 APK 설치와 실기기 학습/제한 확인은 별개입니다.
+- APK versionCode4/versionName2.1.1, Actions artifact KidsScreenGuardian-v2.1.1. 검사 근거는 Guardian walkthrough.md를 참조합니다.
