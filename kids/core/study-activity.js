@@ -200,7 +200,8 @@
                     const record=parse(key);
                     if (!record || !Array.isArray(record.ranges) || (!record.ranges.length && !record.answers?.length)) { store.removeItem(key); continue; }
                     // Read before retrying a potentially committed write (including HTTP 503).
-                    const options={method:'POST',headers:{'Content-Type':'application/json','Pragma':'no-cache'},
+                    // 프록시 CORS 허용 헤더만 사용합니다. Pragma는 브라우저 전송을 차단합니다.
+                    const options={method:'POST',headers:{'Content-Type':'application/json'},
                         signal:AbortSignal.timeout(8000)};
                     const query=await win.fetch(`${proxy}/v1/databases/${database}/query`,{...options,body:JSON.stringify({
                         page_size:1,filter:{property:'ID',title:{equals:'학습활동_'+record.id}}})});

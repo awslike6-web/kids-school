@@ -838,3 +838,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - Guardian worker/src/study-measurement.js: measuredStudyRewards가 구간 합집합 분과 당일 고유 정답2개당1분을 반환. time-bank에 독립 정답 보너스 합산. 아이 API는 부모 추가 출처 없이 합계만 반환.
 - 실제 모바일 UI 통합: Guardian learning/test-quest-flow.cjs. 실 터치→모의 노션→서버 합산, 두 자녀 각 1분+정답2개→2분 추가·기존60→62, 오류/가로 넘침0. 운영 DB에 시험 기록을 쓰지 않음.
 - 작업 검증 규칙: Guardian learning/verification-rules.md. 전날 지연 업로드 및 실기기 확인은 별도 미완료.
+
+
+## 2026-10-11 계측 전송 CORS 복구
+
+공통 study-activity.js의 Pragma 헤더가 운영 프록시의 CORS 허용 목록에 없어 활동/정답 기록 전송만 차단됐습니다. 허용된 Content-Type만 보내도록 수정하고 계측/퀘스트/파사드 캐시 버전을20261011-4로 올립니다. 일반 과목방과 퀘스트 모두 적용합니다. 실제 활동0분이어도 정답2개당1분을 별도로 지급하며 완료 보고의 소요시간0과 구분합니다. 실제 브라우저 사전 요청·전송 및 업데이트 후 기존 큐 복구 검사(Guardian learning/test-study-cors.cjs)를 필수로 추가했습니다. 모의 API 검사만으로 전송 완료 처리하지 않습니다. 운영 프록시에서 구 헤더 차단/새 헤더200을 읽기 전용으로 확인했습니다. 실제 민서 잔액 증가 확인은 별도입니다.
