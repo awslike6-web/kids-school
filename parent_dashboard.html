@@ -167,58 +167,12 @@
         </div>
       </div>
 
-      <!-- ⏰ 스크린타임 스마트 정산소 (10분 올림 & 50개 보상 연계) -->
-      <div class="status-block screentime-widget" id="ms-screentime-box" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.08)); border: 2px solid rgba(16, 185, 129, 0.3); border-radius: 18px; padding: 16px; margin-top: 15px;">
-        <div class="status-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-size: 1.05rem; font-weight: bold; color: #065f46; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>스크린타임 스마트 정산기</span>
-          </span>
-          <span class="status-title-sub" id="ms-st-status-badge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; background: #e0f2fe; color: #0369a1; font-weight: bold;">대기 중</span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 0.85rem;">
-          <div style="background: rgba(255,255,255,0.85); padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: #64748b; font-size: 0.75rem;">순수 공부방 시간</div>
-            <div style="font-size: 1.1rem; font-weight: bold; color: #0f172a;" id="ms-st-study-time">0분</div>
-            <div style="font-size: 0.7rem; color: #059669;" id="ms-st-rounded-note">➔ 10분 올림: 0분</div>
-          </div>
-          <div style="background: rgba(255,255,255,0.85); padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: #64748b; font-size: 0.75rem;">오늘 보상 50개 달성</div>
-            <div style="font-size: 1.1rem; font-weight: bold; color: #d97706;" id="ms-st-reward-quest">0 / 50개</div>
-            <div style="font-size: 0.7rem; color: #b45309;" id="ms-st-reward-ticket-note">미달성</div>
-          </div>
-        </div>
-
-        <div style="background: #ffffff; border: 1.5px dashed #10b981; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; text-align: center;">
-          <div style="font-size: 0.8rem; color: #065f46; font-weight: bold; margin-bottom: 2px;" id="ms-st-total-label">🛡️ 스크린 가디언 충전 대기 시간</div>
-          <div style="font-size: 1.45rem; font-weight: 900; color: #059669;" id="ms-st-total-time">0분 (0시간 0분)</div>
-          <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;" id="ms-st-ticket-split">발급 티켓: 없음</div>
-        </div>
-
-        <!-- 부모 전용 승인 토글 버튼 -->
-        <button type="button" id="ms-st-approve-btn" onclick="toggleParentScreenTimeApproval('민수')" style="width: 100%; padding: 10px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; border: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: linear-gradient(135deg, #10b981, #059669); color: #fff;">
-          ✅ 스크린 가디언 충전 승인
-        </button>
-
-        <!-- ⚡ 빠른 제어 바 (+15분 / +30분 / +60분 충전 & 즉시 잠금/해제) [아빠 전용] -->
-        <div id="ms-st-dad-controls" class="st-dad-controls" style="display: none;">
-          <div style="display: flex; gap: 6px; margin-top: 8px;">
-            <button type="button" onclick="addScreenTimeBonus('민수', 15)" style="flex: 1; padding: 7px 4px; border-radius: 8px; font-size: 0.8rem; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; cursor: pointer; font-weight: bold;">✨ +15분</button>
-            <button type="button" onclick="addScreenTimeBonus('민수', 30)" style="flex: 1; padding: 7px 4px; border-radius: 8px; font-size: 0.8rem; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; cursor: pointer; font-weight: bold;">✨ +30분</button>
-            <button type="button" onclick="addScreenTimeBonus('민수', 60)" style="flex: 1; padding: 7px 4px; border-radius: 8px; font-size: 0.8rem; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; cursor: pointer; font-weight: bold;">✨ +60분</button>
-          </div>
-          <div style="display: flex; gap: 6px; margin-top: 5px;">
-            <button type="button" onclick="toggleScreenTimeLock('민수', true)" style="flex: 1; padding: 7px; border-radius: 8px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; cursor: pointer; font-weight: bold;">🔒 즉시 잠금</button>
-            <button type="button" onclick="toggleScreenTimeLock('민수', false)" style="flex: 1; padding: 7px; border-radius: 8px; font-size: 0.8rem; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; cursor: pointer; font-weight: bold;">🔓 잠금 해제</button>
-          </div>
-        </div>
-        <div id="ms-st-mom-note" class="st-mom-note" style="display: none; text-align: center; margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.03); border-radius: 8px; font-size: 0.75rem; color: #64748b;">
-          🔒 시간 추가 및 잠금 관리는 <b>아빠</b> 프로필에서 가능합니다.
-        </div>
-
-        <div id="ms-st-reset-wrap" style="text-align: center; margin-top: 6px; display: none;">
-          <button type="button" onclick="resetParentScreenTimeApproval('민수')" style="background: none; border: none; color: #64748b; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">↩️ 오늘 연장 승인 초기화 (대기 시간 복원)</button>
-        </div>
+      <!-- 가디언 전용 부모 관리 화면 연결 -->
+      <div class="status-block screentime-widget" id="ms-screentime-box" style="border: 1px solid #cbd5e1; border-radius: 16px; padding: 16px; margin-top: 15px;">
+        <h3 style="margin: 0 0 10px;">민수 · 민민 가디언</h3>
+        <p style="font-size: .9rem; line-height: 1.6;">학습 시간은 자동 지급되고 남은 시간은 계속 누적됩니다. 부모 로그인 후 실제 잔액·추가 시간·잠금을 관리해 주세요.</p>
+        <a id="ms-guardian-parent-link" href="https://kids-screen-guardian.awslike6.workers.dev/parent#minsu" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 10px 14px; border-radius: 10px; background: #244c96; color: #fff; text-decoration: none;">부모 로그인 · 가디언 열기</a>
+        <p style="font-size: .75rem; color: #64748b; margin-bottom: 0;">아빠는 시간 관리, 엄마는 조회 전용입니다. 부모 기기를 처음 연결할 때 로그인 코드가 필요합니다.</p>
       </div>
 
       <!-- 🌱 [데일리 루틴 & 저금통] 민수의 생활 습관 & 부모 칭찬 코칭 카드 -->
@@ -426,58 +380,12 @@
         </div>
       </div>
 
-      <!-- ⏰ 스크린타임 스마트 정산소 (10분 올림 & 50개 보상 연계) -->
-      <div class="status-block screentime-widget" id="ds-screentime-box" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(244, 114, 182, 0.08)); border: 2px solid rgba(236, 72, 153, 0.3); border-radius: 18px; padding: 16px; margin-top: 15px;">
-        <div class="status-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span style="font-size: 1.05rem; font-weight: bold; color: #9d174d; display: flex; align-items: center; gap: 6px;">
-            <span>📱</span> <span>스크린타임 스마트 정산기</span>
-          </span>
-          <span class="status-title-sub" id="ds-st-status-badge" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; background: #fce7f3; color: #be185d; font-weight: bold;">대기 중</span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 0.85rem;">
-          <div style="background: rgba(255,255,255,0.85); padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: #64748b; font-size: 0.75rem;">순수 공부방 시간</div>
-            <div style="font-size: 1.1rem; font-weight: bold; color: #0f172a;" id="ds-st-study-time">0분</div>
-            <div style="font-size: 0.7rem; color: #db2777;" id="ds-st-rounded-note">➔ 10분 올림: 0분</div>
-          </div>
-          <div style="background: rgba(255,255,255,0.85); padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.05);">
-            <div style="color: #64748b; font-size: 0.75rem;">오늘 보상 50개 달성</div>
-            <div style="font-size: 1.1rem; font-weight: bold; color: #d97706;" id="ds-st-reward-quest">0 / 50개</div>
-            <div style="font-size: 0.7rem; color: #b45309;" id="ds-st-reward-ticket-note">미달성</div>
-          </div>
-        </div>
-
-        <div style="background: #ffffff; border: 1.5px dashed #ec4899; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; text-align: center;">
-          <div style="font-size: 0.8rem; color: #9d174d; font-weight: bold; margin-bottom: 2px;" id="ds-st-total-label">🛡️ 스크린 가디언 충전 대기 시간</div>
-          <div style="font-size: 1.45rem; font-weight: 900; color: #db2777;" id="ds-st-total-time">0분 (0시간 0분)</div>
-          <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;" id="ds-st-ticket-split">발급 티켓: 없음</div>
-        </div>
-
-        <!-- 부모 전용 승인 토글 버튼 -->
-        <button type="button" id="ds-st-approve-btn" onclick="toggleParentScreenTimeApproval('민서')" style="width: 100%; padding: 10px; border-radius: 12px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; border: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: linear-gradient(135deg, #ec4899, #db2777); color: #fff;">
-          ✅ 스크린 가디언 충전 승인
-        </button>
-
-        <!-- ⚡ 빠른 제어 바 (+15분 / +30분 / +60분 충전 & 즉시 잠금/해제) [아빠 전용] -->
-        <div id="ds-st-dad-controls" class="st-dad-controls" style="display: none;">
-          <div style="display: flex; gap: 6px; margin-top: 8px;">
-            <button type="button" onclick="addScreenTimeBonus('민서', 15)" style="flex: 1; padding: 7px 4px; border-radius: 8px; font-size: 0.8rem; background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; cursor: pointer; font-weight: bold;">✨ +15분</button>
-            <button type="button" onclick="addScreenTimeBonus('민서', 30)" style="flex: 1; padding: 7px 4px; border-radius: 8px; font-size: 0.8rem; background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; cursor: pointer; font-weight: bold;">✨ +30분</button>
-            <button type="button" onclick="addScreenTimeBonus('민서', 60)" style="flex: 1; padding: 7px 4px; border-radius: 8px; font-size: 0.8rem; background: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; cursor: pointer; font-weight: bold;">✨ +60분</button>
-          </div>
-          <div style="display: flex; gap: 6px; margin-top: 5px;">
-            <button type="button" onclick="toggleScreenTimeLock('민서', true)" style="flex: 1; padding: 7px; border-radius: 8px; font-size: 0.8rem; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; cursor: pointer; font-weight: bold;">🔒 즉시 잠금</button>
-            <button type="button" onclick="toggleScreenTimeLock('민서', false)" style="flex: 1; padding: 7px; border-radius: 8px; font-size: 0.8rem; background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; cursor: pointer; font-weight: bold;">🔓 잠금 해제</button>
-          </div>
-        </div>
-        <div id="ds-st-mom-note" class="st-mom-note" style="display: none; text-align: center; margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.03); border-radius: 8px; font-size: 0.75rem; color: #64748b;">
-          🔒 시간 추가 및 잠금 관리는 <b>아빠</b> 프로필에서 가능합니다.
-        </div>
-
-        <div id="ds-st-reset-wrap" style="text-align: center; margin-top: 6px; display: none;">
-          <button type="button" onclick="resetParentScreenTimeApproval('민서')" style="background: none; border: none; color: #64748b; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">↩️ 오늘 연장 승인 초기화 (대기 시간 복원)</button>
-        </div>
+      <!-- 가디언 전용 부모 관리 화면 연결 -->
+      <div class="status-block screentime-widget" id="ds-screentime-box" style="border: 1px solid #cbd5e1; border-radius: 16px; padding: 16px; margin-top: 15px;">
+        <h3 style="margin: 0 0 10px;">민서 · 민민 가디언</h3>
+        <p style="font-size: .9rem; line-height: 1.6;">학습 시간은 자동 지급되고 남은 시간은 계속 누적됩니다. 부모 로그인 후 실제 잔액·추가 시간·잠금을 관리해 주세요.</p>
+        <a id="ds-guardian-parent-link" href="https://kids-screen-guardian.awslike6.workers.dev/parent#minseo" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 10px 14px; border-radius: 10px; background: #244c96; color: #fff; text-decoration: none;">부모 로그인 · 가디언 열기</a>
+        <p style="font-size: .75rem; color: #64748b; margin-bottom: 0;">아빠는 시간 관리, 엄마는 조회 전용입니다. 부모 기기를 처음 연결할 때 로그인 코드가 필요합니다.</p>
       </div>
 
       <!-- 🌱 [통합교과 하루] 민서의 생활 습관 & 부모 칭찬 코칭 카드 -->
@@ -715,7 +623,7 @@ function closeRewardSystemGuide() {
 <script src="kids/config.js?v=20260913_v1"></script>
 <script src="kids/data/gallery-data.js?v=20260913_v1"></script>
 <script src="kids/core/screentime-tracker.js?v=20260913_v1"></script>
-<script src="kids/js/parent_dashboard.js?v=20260913_v1"></script>
+<script src="kids/js/parent_dashboard.js?v=20261011_guardian_parent"></script>
 </body>
 </html>
 

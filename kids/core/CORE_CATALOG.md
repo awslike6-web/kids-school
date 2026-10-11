@@ -780,3 +780,13 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - 노션 `활동측정` rich_text에는 v2 UUID·study/quiz·UTC 밀리초 구간을 기록. 실제 소요시간은 이 기록에만 저장하며, 오답/완료 보고의 소요시간은 0.
 - 자유시간은 공부·풀이 구간 합집합으로 1:1 자동 지급, 초를 모아 분 단위 지급. 보석/사탕 보상과 부모 추가 내역은 아이 정산 화면에 노출하지 않음.
 
+
+
+## 민민 가디언 부모 관리 연결 (2026-10-11)
+
+- 화면 연결 부품: `kids/js/parent_dashboard.js`의 `renderScreenTimeWidget(childName)`과 `parent_dashboard.html`의 자녀별 가디언 링크.
+- 전용 관리 화면: https://kids-screen-guardian.awslike6.workers.dev/parent. 프로필은 진입 메뉴이며 실제 권한은 서버의 부모 세션으로 결정합니다.
+- 구현 원천: 관제탑 `kids-screen-guardian/worker/src/parent-auth.js`(일회 로그인·14일 HttpOnly 세션·역할·해제), `parent-portal.js`(모바일 관리·미확정 요청 재시도), `index.js`(정산·명령 영수증 원자 저장).
+- API: `GET /api/parent/summary`, `POST /api/parent/grant`(child/minutes/requestId), `POST /api/parent/lock`(child/isLocked/requestId). 추가·잠금은 아빠 인증 필요, 엄마는 조회만 허용합니다.
+- 학습은 활동 초 구간에 따라 자동 지급되며 부모 승인·10분 올림·통화 보상으로 가디언 시간을 중복 충전하지 않습니다. 기존 인벤토리 설정 PATCH와 /api/screentime 보너스 쓰기를 사용하지 않습니다.
+- 부모 로그인 코드 발급·분실 기기 로그인 해제는 관제탑 `kids-screen-guardian/worker/admin.ps1`의 browser-code/browser-revoke를 사용합니다. 부모 비밀키는 공개 공부방 JS에 전달하지 않습니다.
