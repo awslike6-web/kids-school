@@ -814,3 +814,10 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - SDK10.0.401은 사용자별 경로를 프로세스의 DOTNET_ROOT/PATH에 지정합니다. 표준 Node24.18.1에서 기존 Worker43개 통과, Windows11 Pro x64/계정 종류/브라우저/운영 읽기 지연을 확인했습니다. 실제 자녀 SID 매핑·가족 PC 정책 적용은 하지 않았습니다.
 - make-packet.mjs --check 결과 cards53/accepted1/implementation not-started, W01 지시 출력 성공. 다음 카드는 최소 C# Core 프로젝트이며 다른52개 카드와 Windows 제어 런타임은 미완료입니다.
 - 환경 검토와 실제 보호 완료를 구분합니다. 지연/실패·강제 설치/우회·부모 계정 보존·설치 복구는 해당 후속 카드에서 별도 검증합니다.
+
+## Windows 자가 검증·묶음 검토 도구 (2026-10-11)
+
+- 원천: 관제탑 kids-screen-guardian/docs/windows/make-packet.mjs, make-packet.test.mjs, batch-review.md, start-batch.md, tasks.json/progress.json. 지시서가 변경됐으며 Windows 런타임은 구현 전입니다.
+- --next는 실제 결과 SHA/receipt/명령·exitCode0·결과가 있는 self-verified 카드를 선행 검증으로 인정해 같은 묶음에서 자동 진행합니다. 카드 건너뛰기·실패/미실행 증거·임의 경로를 거부하고 다음 묶음은 독립 검토 accepted가 필요합니다. --check는 구현 시험을 대신하지 않습니다.
+- 검토 경계는 W10/W20/W27/W34/W42/H01/H10의 7개입니다. 권한·기기 키·브라우저 위조·설치/복구·통신 규약은 묶음 독립 검토에서 확인합니다. 운영 적용 전 검토와 필수 실기기 검사는 유지합니다.
+- 도구 시험8개 통과, 실제 카드 상태는 이전과 같아 W00만 accepted/자가 검증0/런타임 not-started입니다. 첫 실행은 W01~W10이며 사용자는 카드마다 결과를 복사하거나 승인할 필요가 없습니다. 가드는 기록의 형식/순서를 확인하며 거짓 시험 기록이나 검토자 신원을 인증하지는 않습니다.
