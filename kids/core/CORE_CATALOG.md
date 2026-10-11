@@ -828,3 +828,13 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - 독립 Core 시험46개 통과지만 추가 경계6개 실패(계측 누락/중복, 필수 응답 필드 누락, 다른 host 토큰 전송, 연결 오류 토큰 노출, 연속 이용 학습 GET 누락)와 ACL 실패 무시/VM 미실행으로 B01 blocked입니다. 원천은 관제탑 docs/windows/reviews/B01.md/fix-b01.md, W11은 승인 전까지 차단합니다. 보완은 같은 묶음에서 자동 진행 후 한 번 재검토합니다.
 - 패킷 가드 시험8개 통과, 현재 장부 accepted1/selfVerified10/in-progress. 가드 시험 fixture는 실제 진행 상태와 분리했습니다.
 - quest_runner.html은 notion-reward.js가 study-activity.js를 로드하고 문제풀이 quiz/완료 paused를 기록합니다. Worker의 measuredStudyMinutes는 quiz 활동 합집합을1:1 지급합니다. 고정5분 보상이 아니라 실제 인정 시간이며 전송/학습 캐시/앱 동기화가 필요합니다. 실제 자녀 폰의 이번 충전 성공은 미확인입니다.
+
+
+## 2026-10-11 학습 적립 v3와 정답 보상
+
+- kids/core/study-activity.js: Guardian learning/study-activity.js와 동일 미러. recordCorrect(attemptQuestionId), meter.getTodayCorrectAnswers(child), getStatus().eligible/failures 추가. 기존 flush/setPhase/getTodayMinutes 유지. v3 answers=[{id,at}], v2 구간 읽기 호환.
+- quest_runner.html: 계측 직접 선행 로드, URL 학생 식별, 실제 정답 분기에서 고유 문항 ID 기록, 활동/보너스/저장·전송 상태 표시.
+- notion-reward.js 및 mission-reward-engine.js: 두 공통 rewardQuizCorrect 경로에 고유 세션/문항 훅과 중복 채점 가드. notion-helper.js는 v3 캐시 버전을 로드.
+- Guardian worker/src/study-measurement.js: measuredStudyRewards가 구간 합집합 분과 당일 고유 정답2개당1분을 반환. time-bank에 독립 정답 보너스 합산. 아이 API는 부모 추가 출처 없이 합계만 반환.
+- 실제 모바일 UI 통합: Guardian learning/test-quest-flow.cjs. 실 터치→모의 노션→서버 합산, 두 자녀 각 1분+정답2개→2분 추가·기존60→62, 오류/가로 넘침0. 운영 DB에 시험 기록을 쓰지 않음.
+- 작업 검증 규칙: Guardian learning/verification-rules.md. 전날 지연 업로드 및 실기기 확인은 별도 미완료.

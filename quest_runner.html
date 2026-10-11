@@ -562,7 +562,8 @@
   <!-- ================= 6. 노션 보상 및 학습일지 DB & 요정 음성 코어 모듈 로드 ================= -->
   <script src="./kids/config.js"></script>
   <script src="./kids/core/notion-voca.js"></script>
-  <script src="./kids/core/notion-reward.js"></script>
+  <script src="./kids/core/study-activity.js?v=20261011-3"></script>
+  <script src="./kids/core/notion-reward.js?v=20261011-3"></script>
   <script src="./kids/core/fairy-config.js"></script>
   <script src="./kids/core/fairy-settings-catalog.js"></script>
   <script src="./kids/core/fairy-settings-engine.js"></script>
@@ -593,6 +594,24 @@
     // 퀘스트 데이터 바인딩 (quest_engine.js getSubjectQuest 호출)
     let currentQuest = getSubjectQuest(currentSubj, currentUnit, currentMode, currentUser);
 
+    // 실제 입력이 계측되지 않거나 전송이 실패하면 화면에서 확인할 수 있습니다.
+    const guardianStatus = document.createElement('p');
+    guardianStatus.id = 'guardianStudyStatus';
+    guardianStatus.className = 'text-xs text-center py-2 opacity-80';
+    guardianStatus.setAttribute('role', 'status');
+    document.getElementById('subjectBadgeTitle').parentElement.appendChild(guardianStatus);
+    function updateGuardianStudyStatus() {
+      const meter = window.StudyActivity?.meter;
+      if (!meter) { guardianStatus.textContent = '학습 기록을 시작하지 못했어요. 새로고침해 주세요.'; return; }
+      const status = meter.getStatus(), child = isMinseo ? '민서' : '민수';
+      const minutes = meter.getTodayMinutes(child), correct = meter.getTodayCorrectAnswers(child);
+      const detail = !status.storageHealthy ? ' · 저장 공간을 확인해 주세요' : status.failures ? ' · 전송 대기 중' : status.pending ? ' · 동기화 중' : '';
+      guardianStatus.textContent = '오늘 활동 ' + minutes + '분 · 이 기기 정답 보너스 ' + Math.floor(correct / 2) + '분' + detail;
+    }
+    setInterval(updateGuardianStudyStatus, 1000);
+    updateGuardianStudyStatus();
+    const guardianAttemptId = crypto.randomUUID();
+    const guardianQuestionIds = new WeakMap();
     let currentIndex = 0;
     let selectedOptionIndex = null;
     let hearts = 3;
@@ -924,6 +943,8 @@
       if (isCorrect) {
         playSound('correct');
         recordCorrectItem(currentUser, currentSubj, q);
+        if (!guardianQuestionIds.has(q)) guardianQuestionIds.set(q, `${guardianAttemptId}:${crypto.randomUUID()}`);
+        window.StudyActivity?.recordCorrect?.(guardianQuestionIds.get(q));
 
         if (typeof fairyPraise === 'function') {
           fairyPraise();

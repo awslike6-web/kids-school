@@ -124,7 +124,8 @@ function initQuizRewardSession(missionType) {
     if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('quiz');
     window.__quizRewardSession = {
         missionType: missionType || window.currentMissionType || 'quiz',
-        sessionId: String(Date.now()),
+        sessionId: crypto.randomUUID(),
+        answeredIds: new Set(),
         solvedCount: 0,
         correctCount: 0,
         awardedCount: 0,
@@ -138,6 +139,10 @@ async function rewardQuizCorrect(quizIndex, options = {}) {
         initQuizRewardSession(window.currentMissionType);
     }
     const session = window.__quizRewardSession;
+    const answerId = `${session.sessionId}:${quizIndex}`;
+    if (session.answeredIds.has(answerId)) return false;
+    session.answeredIds.add(answerId);
+    window.StudyActivity?.recordCorrect?.(answerId);
     session.solvedCount = (session.solvedCount || 0) + 1;
     session.correctCount = (session.correctCount || 0) + 1;
 
