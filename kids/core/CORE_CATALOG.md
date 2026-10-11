@@ -807,3 +807,10 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - 주소 없는 공부방/PWA·새 탭·주소 입력은 잔액 0/부모 잠금만으로 차단·차감하지 않습니다. 입력 문자열은 방문 주소로 신뢰하지 않습니다. 일반·학습 URL도 제외하며 기존 누적 장부·학습1:1·자정60분은 유지합니다.
 - 확인된 유튜브는 같은 창의 숨겨진 주소에서도 유지합니다. 처음부터 읽지 못하는 유튜브·전체 화면 창 ID 변경은 DNS VPN과 실제 기기에서 별도 실증/보강해야 합니다. 수정 APK 설치와 실기기 학습/제한 확인은 별개입니다.
 - APK versionCode4/versionName2.1.1, Actions artifact KidsScreenGuardian-v2.1.1. 검사 근거는 Guardian walkthrough.md를 참조합니다.
+
+## Windows W00 환경 검토 승인 (2026-10-11)
+
+- 원천: 관제탑 kids-screen-guardian/docs/windows/environment.md, receipts/W00.md, progress.json. 환경 결과 커밋812a351을 독립 검토하여 W00만 accepted로 기록했습니다.
+- SDK10.0.401은 사용자별 경로를 프로세스의 DOTNET_ROOT/PATH에 지정합니다. 표준 Node24.18.1에서 기존 Worker43개 통과, Windows11 Pro x64/계정 종류/브라우저/운영 읽기 지연을 확인했습니다. 실제 자녀 SID 매핑·가족 PC 정책 적용은 하지 않았습니다.
+- make-packet.mjs --check 결과 cards53/accepted1/implementation not-started, W01 지시 출력 성공. 다음 카드는 최소 C# Core 프로젝트이며 다른52개 카드와 Windows 제어 런타임은 미완료입니다.
+- 환경 검토와 실제 보호 완료를 구분합니다. 지연/실패·강제 설치/우회·부모 계정 보존·설치 복구는 해당 후속 카드에서 별도 검증합니다.
