@@ -30,10 +30,11 @@
                 const value=JSON.parse((props['활동측정']?.rich_text || [])
                     .map(t => t.plain_text ?? t.text?.content ?? '').join(''));
                 const entered=Date.parse(props['입장']?.date?.start), exited=Date.parse(props['퇴장']?.date?.start);
+                const exitBound=exited+(exited % 60000 === 0 ? 59999 : 0);
                 if (![2,3].includes(value.v) || !['study','quiz'].includes(value.kind) || !Array.isArray(value.ranges)
                     || value.ranges.length > 256 || !Number.isFinite(entered) || !Number.isFinite(exited)) continue;
                 if (value.ranges.some(r => !Array.isArray(r) || r.length !== 2 || !r.every(Number.isSafeInteger)
-                    || r[1] <= r[0] || r[1]-r[0] > 120000 || r[0] < entered || r[1] > exited || r[1] > Date.now())) continue;
+                    || r[1] <= r[0] || r[1]-r[0] > 120000 || r[0] < entered || r[1] > exitBound || r[1] > Date.now())) continue;
                 ranges.push(...value.ranges);
             } catch {}
         }

@@ -5,7 +5,7 @@
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-reward.js'))?.src;
     if (!source) return;
     const script=document.createElement('script');
-    script.src=new URL('study-activity.js?v=20261011-4',source).href; script.async=false;
+    script.src=new URL('study-activity.js?v=20261011-5',source).href; script.async=false;
     document.head.appendChild(script);
 })();
 // ==========================================

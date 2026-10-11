@@ -24,12 +24,12 @@ window.roomStartTime = window.roomStartTime || new Date();
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
     const submodules = [
-        'study-activity.js?v=20261011-4', // foreground, idle, interval ledger
+        'study-activity.js?v=20261011-5', // foreground, idle, interval ledger
         'notion-cache-manager.js',   // ⚡ 캐시 & 프리패치 & syncAllNotionData
         'notion-api-client.js',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
         'notion-study-logger.js',    // 📝 학습일지 & 보상/레벨업 전송 엔진
         'stt-debouncer.js',          // 🎙️ STT 음성인식 디바운서
-        'mission-reward-engine.js?v=20261011-4',  // 💎 미션 보상 및 축하 모달
+        'mission-reward-engine.js?v=20261011-5',  // 💎 미션 보상 및 축하 모달
         'quiz-feedback-overlay.js'   // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
     ];
 
