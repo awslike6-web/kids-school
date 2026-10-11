@@ -821,3 +821,10 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - --next는 실제 결과 SHA/receipt/명령·exitCode0·결과가 있는 self-verified 카드를 선행 검증으로 인정해 같은 묶음에서 자동 진행합니다. 카드 건너뛰기·실패/미실행 증거·임의 경로를 거부하고 다음 묶음은 독립 검토 accepted가 필요합니다. --check는 구현 시험을 대신하지 않습니다.
 - 검토 경계는 W10/W20/W27/W34/W42/H01/H10의 7개입니다. 권한·기기 키·브라우저 위조·설치/복구·통신 규약은 묶음 독립 검토에서 확인합니다. 운영 적용 전 검토와 필수 실기기 검사는 유지합니다.
 - 도구 시험8개 통과, 실제 카드 상태는 이전과 같아 W00만 accepted/자가 검증0/런타임 not-started입니다. 첫 실행은 W01~W10이며 사용자는 카드마다 결과를 복사하거나 승인할 필요가 없습니다. 가드는 기록의 형식/순서를 확인하며 거짓 시험 기록이나 검토자 신원을 인증하지는 않습니다.
+
+## Windows B01 독립 검토 및 퀘스트 학습 지급 확인 (2026-10-11)
+
+- Windows Core W01~W10 산출물·결과 커밋119b844~449a71d 보존. BudgetCalculator/UsageCounter/AccessStateMachine/AtomicStateStore/DeviceVault/PairingClient/GuardianApiClient/SyncCoordinator는 정산·측정·저장·기기 인증·통신을 담당합니다. 서비스/자녀 계정 제어는 미구현입니다.
+- 독립 Core 시험46개 통과지만 추가 경계6개 실패(계측 누락/중복, 필수 응답 필드 누락, 다른 host 토큰 전송, 연결 오류 토큰 노출, 연속 이용 학습 GET 누락)와 ACL 실패 무시/VM 미실행으로 B01 blocked입니다. 원천은 관제탑 docs/windows/reviews/B01.md/fix-b01.md, W11은 승인 전까지 차단합니다. 보완은 같은 묶음에서 자동 진행 후 한 번 재검토합니다.
+- 패킷 가드 시험8개 통과, 현재 장부 accepted1/selfVerified10/in-progress. 가드 시험 fixture는 실제 진행 상태와 분리했습니다.
+- quest_runner.html은 notion-reward.js가 study-activity.js를 로드하고 문제풀이 quiz/완료 paused를 기록합니다. Worker의 measuredStudyMinutes는 quiz 활동 합집합을1:1 지급합니다. 고정5분 보상이 아니라 실제 인정 시간이며 전송/학습 캐시/앱 동기화가 필요합니다. 실제 자녀 폰의 이번 충전 성공은 미확인입니다.
