@@ -39,6 +39,72 @@
   function setPiggyCoins(val) {
     const child = window.currentChild || "minseo";
     localStorage.setItem("haru_piggy_coins_" + child, val);
+    syncPiggyCoinsToCloud(child, val);
+  }
+
+  // 🌐 [노션 클라우드 동기화] 인벤토리 DB 학습설정(piggyBank) 안전 Deep Merge 저장 (SSOT)
+  async function syncPiggyCoinsToCloud(child, coinsVal) {
+    try {
+      const childName = child === 'minsu' ? '민수' : '민서';
+      const proxyUrl = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
+      
+      const savedUser = localStorage.getItem('currentUserName');
+      if (savedUser === '아빠' || savedUser === '엄마' || savedUser === '어른') return;
+
+      let pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);
+      if (!pageId) {
+        if (childName === '민서') pageId = '374a2711-5b68-80ed-9efc-c44e109b102c';
+        else if (childName === '민수') pageId = '374a2711-5b68-8030-aede-d4c2493fe233';
+      }
+
+      let currentSettings = {};
+      try {
+        const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || "{}";
+        currentSettings = JSON.parse(cachedRaw);
+        if (typeof currentSettings !== 'object' || currentSettings === null) currentSettings = {};
+      } catch (_) {
+        currentSettings = {};
+      }
+
+      if (Object.keys(currentSettings).length === 0 && pageId) {
+        try {
+          const pageRes = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+            headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' }
+          });
+          if (pageRes.ok) {
+            const pageData = await pageRes.json();
+            const rawText = (pageData.properties?.["학습설정"]?.rich_text || []).map(t => t.plain_text || '').join('');
+            if (rawText) currentSettings = JSON.parse(rawText) || {};
+          }
+        } catch (_) {}
+      }
+
+      currentSettings.piggyBank = {
+        coins: Number(coinsVal) || 0,
+        updatedAt: new Date().toISOString()
+      };
+      currentSettings.updatedAt = new Date().toISOString();
+
+      const payloadStr = JSON.stringify(currentSettings);
+      localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, payloadStr);
+
+      if (pageId) {
+        await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+          body: JSON.stringify({
+            properties: {
+              "학습설정": {
+                rich_text: [{ text: { content: payloadStr } }]
+              }
+            }
+          })
+        });
+        console.log(`☁️ [노션 저금통 코인 클라우드 저장 완료] ${childName}: ${coinsVal}코인`);
+      }
+    } catch (err) {
+      console.warn("⚠️ [노션 저금통 코인 통신 예외]:", err);
+    }
   }
 
   function renderHabitsTab() {

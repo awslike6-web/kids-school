@@ -316,6 +316,28 @@ function levelToScore(level) {
   return Math.min(Math.round((level || 1) * 10), 100);
 }
 
+// 🪙 노션 인벤토리 DB 학습설정(rich_text) JSON에서 저금통 코인 수 안전 추출 (SSOT 단일 원천)
+function extractPiggyCoins(settingProp, fallbackChildKey = 'minseo') {
+  try {
+    let jsonText = '';
+    const raw = settingProp?.rich_text || settingProp;
+    if (typeof raw === 'string') jsonText = raw;
+    else if (Array.isArray(raw)) jsonText = raw.map(t => t.plain_text || t.text?.content || '').join('');
+    else if (raw?.rich_text && Array.isArray(raw.rich_text)) jsonText = raw.rich_text.map(t => t.plain_text || t.text?.content || '').join('');
+    
+    if (jsonText && jsonText.trim()) {
+      const parsed = JSON.parse(jsonText);
+      if (parsed && parsed.piggyBank && typeof parsed.piggyBank.coins === 'number') {
+        return parsed.piggyBank.coins;
+      }
+      if (parsed && parsed.piggyBank && parsed.piggyBank[fallbackChildKey] && typeof parsed.piggyBank[fallbackChildKey].coins === 'number') {
+        return parsed.piggyBank[fallbackChildKey].coins;
+      }
+    }
+  } catch (_) {}
+  return null;
+}
+
 function buildRadarScores(props, vocaList, childName, studyLogs = [], diaryList = []) {
   if (childName === '민서') {
     // 👧 [민서 - 초등학교 1학년] 5각 맞춤 밸런스: ['국어', '수학', '하루(통합)', '창의·예술', '착한 습관']
@@ -379,8 +401,11 @@ function buildRadarScores(props, vocaList, childName, studyLogs = [], diaryList 
     }
     const artScore = Math.min(50 + (artCount * 5), 100);
 
-    // 5. 착한 습관 (데일리 루틴 / 20칸 저금통 코인)
-    const coins = parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
+    // 5. 착한 습관 (데일리 루틴 / 20칸 저금통 코인 - 노션 SSOT 1순위)
+    let coins = extractPiggyCoins(props["학습설정"], 'minseo');
+    if (coins === null) {
+      coins = parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
+    }
     const habitScore = Math.min(50 + Math.round((coins / 20) * 50), 100);
 
     return [korScore, mathScore, haruScore, artScore, habitScore];
@@ -654,8 +679,12 @@ async function loadDashboardData() {
             }
             if (artEl) { artEl.textContent = minseoArtCount + "작품"; artEl.classList.remove("loading-shimmer"); }
 
-            // 착한 습관: 저금통 코인 수 실시간 연동
-            const minseoCoins = parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
+            // 착한 습관: 노션 인벤토리 DB 학습설정(piggyBank) 기반 실시간 코인 연동 (SSOT 단일 원천)
+            const cloudCoins = extractPiggyCoins(props["학습설정"], 'minseo');
+            const minseoCoins = cloudCoins !== null ? cloudCoins : parseInt(localStorage.getItem("haru_piggy_coins_minseo") || "0");
+            if (cloudCoins !== null) {
+              try { localStorage.setItem("haru_piggy_coins_minseo", String(cloudCoins)); } catch (_) {}
+            }
             if (habitEl) { habitEl.textContent = minseoCoins + "/20코인"; habitEl.classList.remove("loading-shimmer"); }
           } else {
             // 👦 민수: 5대 정규 교과 + 용어사전
