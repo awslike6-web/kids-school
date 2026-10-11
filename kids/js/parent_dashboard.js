@@ -2,6 +2,7 @@ const PROXY_URL = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_U
 const INVENTORY_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12";
 const STUDY_LOG_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID ? APP_CONFIG.STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
 const VOCA_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.VOCA_DB_ID ? APP_CONFIG.VOCA_DB_ID : "375a27115b688038b686d3994ee12919";
+const DIARY_DB_ID = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DIARY_DB_ID ? APP_CONFIG.DIARY_DB_ID : "3dfa27115b688010a85be385f91d64ee";
 
 const SUBJECTS_MINSU = ['국어', '수학', '사회', '과학', '영어'];
 const SUBJECTS_MINSEO = ['국어', '수학', '하루(통합)', '창의·예술', '착한 습관'];
@@ -315,7 +316,7 @@ function levelToScore(level) {
   return Math.min(Math.round((level || 1) * 10), 100);
 }
 
-function buildRadarScores(props, vocaList, childName, studyLogs = []) {
+function buildRadarScores(props, vocaList, childName, studyLogs = [], diaryList = []) {
   if (childName === '민서') {
     // 👧 [민서 - 초등학교 1학년] 5각 맞춤 밸런스: ['국어', '수학', '하루(통합)', '창의·예술', '착한 습관']
 
@@ -346,15 +347,23 @@ function buildRadarScores(props, vocaList, childName, studyLogs = []) {
     const haruActivity = 60 + (isTodayDone ? 20 : 0) + Math.min(haruLogCount * 5, 20);
     haruScore = Math.max(haruScore, Math.min(haruActivity, 100));
 
-    // 4. 창의·예술 (미술 갤러리 작품 / 난타 / 공예)
+    // 4. 창의·예술 (노션 성장 갤러리 DB 3dfa2711... 기반 실시간 작품 수 카운트)
     let artCount = 0;
-    if (typeof DEFAULT_GALLERY_DATA !== 'undefined' && Array.isArray(DEFAULT_GALLERY_DATA)) {
-      artCount = DEFAULT_GALLERY_DATA.filter(item => item.author === '민서' || item.author === '공동').length;
-    } else {
-      try {
-        const localGal = JSON.parse(localStorage.getItem('MY_STUDY_ROOM_GALLERY_DATA') || '[]');
-        artCount = localGal.filter(item => item.author === '민서' || item.author === '공동').length;
-      } catch (e) {}
+    if (Array.isArray(diaryList) && diaryList.length > 0) {
+      artCount = diaryList.filter(item => {
+        const author = item.properties?.["주인공"]?.select?.name;
+        return author === '민서' || author === '공동';
+      }).length;
+    }
+    if (artCount === 0) {
+      if (typeof DEFAULT_GALLERY_DATA !== 'undefined' && Array.isArray(DEFAULT_GALLERY_DATA)) {
+        artCount = DEFAULT_GALLERY_DATA.filter(item => item.author === '민서' || item.author === '공동').length;
+      } else {
+        try {
+          const localGal = JSON.parse(localStorage.getItem('MY_STUDY_ROOM_GALLERY_DATA') || '[]');
+          artCount = localGal.filter(item => item.author === '민서' || item.author === '공동').length;
+        } catch (e) {}
+      }
     }
     const artScore = Math.min(50 + (artCount * 5), 100);
 
@@ -504,7 +513,7 @@ async function loadDashboardData() {
     const apiHeaders = {
       "Content-Type": "application/json"
     };
-    const [invRes, logsRes, vocaRes] = await Promise.all([
+    const [invRes, logsRes, vocaRes, diaryRes] = await Promise.all([
       fetch(`${PROXY_URL}/v1/databases/${INVENTORY_DB_ID}/query`, {
         method: "POST",
         headers: apiHeaders,
@@ -528,6 +537,18 @@ async function loadDashboardData() {
       }).catch((e) => {
         console.warn("VOCA DB 쿼리 예외 (진행 계속):", e);
         return null;
+      }),
+      fetch(`${PROXY_URL}/v1/databases/${DIARY_DB_ID}/query`, {
+        method: "POST",
+        headers: apiHeaders,
+        cache: "no-store",
+        body: JSON.stringify({
+          page_size: 100,
+          filter: { property: "구분", select: { equals: "작품" } }
+        })
+      }).catch((e) => {
+        console.warn("갤러리/다이어리 DB 쿼리 예외 (진행 계속):", e);
+        return null;
       })
     ]);
 
@@ -538,9 +559,11 @@ async function loadDashboardData() {
     const invData = await invRes.json();
     const logsData = logsRes && logsRes.ok ? await logsRes.json() : { results: [] };
     const vocaData = vocaRes && vocaRes.ok ? await vocaRes.json() : { results: [] };
+    const diaryData = diaryRes && diaryRes.ok ? await diaryRes.json() : { results: [] };
 
     const studyLogs = logsData.results || [];
     const vocaList = (vocaData.results || []).map(parseVocaPage);
+    const diaryList = diaryData.results || [];
 
     // ⏰ [스크린타임 클라우드 동기화] 노션에 저장된 오늘 학습일지 소요시간을 트래커에 즉시 반영
     if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {
@@ -599,15 +622,23 @@ async function loadDashboardData() {
             if (haruEl) { haruEl.textContent = "Lv." + haruLv; haruEl.classList.remove("loading-shimmer"); }
             if (korVocaEl) { korVocaEl.textContent = "Lv." + korVocaLv; korVocaEl.classList.remove("loading-shimmer"); }
 
-            // 창의·예술: 갤러리 등록 작품 수 실시간 카운트
+            // 창의·예술: 노션 성장 갤러리 DB 3dfa2711... 기반 실시간 작품 수 카운트 (SSOT 단일 원천)
             let minseoArtCount = 0;
-            if (typeof DEFAULT_GALLERY_DATA !== 'undefined' && Array.isArray(DEFAULT_GALLERY_DATA)) {
-              minseoArtCount = DEFAULT_GALLERY_DATA.filter(item => item.author === '민서' || item.author === '공동').length;
-            } else {
-              try {
-                const localGal = JSON.parse(localStorage.getItem('MY_STUDY_ROOM_GALLERY_DATA') || '[]');
-                minseoArtCount = localGal.filter(item => item.author === '민서' || item.author === '공동').length;
-              } catch (e) {}
+            if (Array.isArray(diaryList) && diaryList.length > 0) {
+              minseoArtCount = diaryList.filter(item => {
+                const author = item.properties?.["주인공"]?.select?.name;
+                return author === '민서' || author === '공동';
+              }).length;
+            }
+            if (minseoArtCount === 0) {
+              if (typeof DEFAULT_GALLERY_DATA !== 'undefined' && Array.isArray(DEFAULT_GALLERY_DATA)) {
+                minseoArtCount = DEFAULT_GALLERY_DATA.filter(item => item.author === '민서' || item.author === '공동').length;
+              } else {
+                try {
+                  const localGal = JSON.parse(localStorage.getItem('MY_STUDY_ROOM_GALLERY_DATA') || '[]');
+                  minseoArtCount = localGal.filter(item => item.author === '민서' || item.author === '공동').length;
+                } catch (e) {}
+              }
             }
             if (artEl) { artEl.textContent = minseoArtCount + "작품"; artEl.classList.remove("loading-shimmer"); }
 
@@ -682,7 +713,7 @@ async function loadDashboardData() {
           renderTrafficUI(prefix + "-traffic-list", trafficItems);
 
           // 5. 과목/성장 레이더 차트 렌더링 (민수: 5대 교과 / 민서: 초1 맞춤 5각 밸런스)
-          const radarScores = buildRadarScores(props, vocaList, name, studyLogs);
+          const radarScores = buildRadarScores(props, vocaList, name, studyLogs, diaryList);
           const radarLabels = isMinseo ? SUBJECTS_MINSEO : SUBJECTS_MINSU;
           const radarTitle = isMinseo ? "민서 맞춤 성장 밸런스" : "민수 과목 밸런스";
           renderRadarChart(prefix + "-radar-chart", radarTitle, radarScores, isMinseo, radarLabels);
