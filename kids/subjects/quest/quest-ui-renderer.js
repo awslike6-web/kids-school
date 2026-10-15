@@ -30,6 +30,8 @@
   .qm-options{display:flex;flex-direction:column;gap:10px}
   .qm-opt{width:100%;text-align:left;font-size:16px;font-weight:700;padding:14px 16px;border-radius:18px;border:2px solid var(--qm-border);background:var(--qm-card);color:var(--qm-text);cursor:pointer;word-break:keep-all;transition:transform .1s,opacity .2s}
   .qm-opt:active{transform:scale(.98)}
+  .qm-opt.qm-long{font-size:14px;line-height:1.45;padding:12px 14px}
+  .qm-cell.qm-long{font-size:12.5px;line-height:1.4}
   .qm-opt.qm-dim{opacity:.35;pointer-events:none}
   .qm-opt.qm-correct,.qm-cell.qm-correct{border-color:var(--qm-ok);box-shadow:0 0 0 3px rgba(57,255,20,.25)}
   .qm-guide{border-color:#facc15!important;box-shadow:0 0 0 3px rgba(250,204,21,.45)!important;animation:qm-shake .45s ease-in-out 2}
@@ -66,6 +68,12 @@
     el.textContent = CSS;
     document.head.appendChild(el);
   }
+  // 보기·짝맞추기 칸에 쓰는 뜻풀이: "(예: …)" 부연은 숨긴다 (정답 비교는 인덱스·id라 표시만 바뀜)
+  function shortMeaning(text) {
+    return String(text ?? '').replace(/\s*\(예:[^)]*\)/g, '').trim() || String(text ?? '');
+  }
+  const LONG_TEXT = 26; // 이보다 긴 보기는 글씨를 줄여 폰 한 화면에 3개가 들어가게
+
   function esc(text) {
     return String(text ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   }
@@ -107,7 +115,7 @@
       btn.onclick = speak;
       return btn;
     };
-    const showHint = () => hint.classList.remove('qm-hidden');
+    const showHint = () => { if (q.hint) hint.classList.remove('qm-hidden'); }; // 힌트가 비면(정답 노출 방지) 보이지 않음
     const onWrong = () => {
       state.errors++;
       if (state.firstTry) hooks.onEncourage && hooks.onEncourage();
@@ -131,7 +139,8 @@
     // 민서(초1) 국어: 긴 뜻풀이 보기를 혼자 읽기 어려우니 보기마다 🔊 읽어 주기 (누르면 듣기만, 고르기는 아님)
     const readAloud = ui.hooks.theme === 'minseo' && q.lang === 'ko' && typeof ui.hooks.speak === 'function';
     options.forEach((opt, idx) => {
-      const btn = h('button', 'qm-opt', esc(opt));
+      const shown = shortMeaning(opt);
+      const btn = h('button', `qm-opt${shown.length > LONG_TEXT ? ' qm-long' : ''}`, esc(shown));
       btn.type = 'button';
       if (readAloud) {
         const say = h('span', 'qm-opt-say', '🔊');
@@ -224,7 +233,8 @@
       leftCol.appendChild(el);
     });
     q.right.forEach(c => {
-      const el = h('button', 'qm-cell', esc(c.text));
+      const shown = shortMeaning(c.text);
+      const el = h('button', `qm-cell${shown.length > LONG_TEXT ? ' qm-long' : ''}`, esc(shown));
       el.type = 'button';
       el.onclick = () => tap('right', c, el);
       cells.right[c.id] = el;

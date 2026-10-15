@@ -77,7 +77,8 @@
   const DEFAULT_PARENT_SETTINGS = {
     minseo: {
       semester: '1-2',
-      korean: '1',        // 노션 VOCA "1단원 (1. 기분을 말해요)" (맨 앞 번호로 매칭)
+      korean: '1단원 (1. 기분을 말해요)', // 노션 단원명 그대로 ('1'은 1-1 받아쓰기 단원 "1"과 겹친다)
+      unitSchema: 2,
       math: '100num',
       english: 'L1',      // 노션 VOCA 영어 L1~L10 (학년 '기초')
       includeReviewSem1: false
@@ -121,10 +122,12 @@
   function isSameUnit(u1, u2) {
     if (u1 === u2) return true;
     if (!u1 || !u2) return false;
-    // 맨 앞 번호로만 비교 ("L9" == "9" == "9단원"). "[센터 5-2] 14번"처럼 앞 번호가 없는 단원명은 정확히 같아야 같은 단원
+    // 번호 비교는 짧은 단원 키("1"·"L9"·"9단원")가 한쪽에 있을 때만 ("L9" == "9" == "9단원").
+    // 노션 전체 단원명끼리("1단원 (1. 기분을 말해요)" vs "1회 (1. 기분을 말해요)")는 정확히 같아야 같은 단원
+    const isBareKey = u => /^\s*L?\d+\s*(단원)?\s*$/i.test(String(u));
     const n1 = getLeadingUnitNumber(u1);
     const n2 = getLeadingUnitNumber(u2);
-    if (n1 && n2 && n1 === n2) return true;
+    if ((isBareKey(u1) || isBareKey(u2)) && n1 && n2 && n1 === n2) return true;
     const s1 = String(u1).trim().toLowerCase().replace(/^l/i, '').replace(/단원$/, '');
     const s2 = String(u2).trim().toLowerCase().replace(/^l/i, '').replace(/단원$/, '');
     return s1 === s2;
@@ -155,6 +158,11 @@
         } catch(e) {}
       }
 
+      // 1회 이전: 민서 국어 '1'은 "1단원"을 뜻했다. 받아쓰기 1-1 단원 "1"과 겹치므로 정확한 단원명으로 옮긴다
+      if (parsed.minseo && parsed.minseo.unitSchema !== 2) {
+        if (parsed.minseo.korean === '1') parsed.minseo.korean = '1단원 (1. 기분을 말해요)';
+        parsed.minseo.unitSchema = 2;
+      }
       return {
         minseo: { ...DEFAULT_PARENT_SETTINGS.minseo, ...(parsed.minseo || {}) },
         minsu: { ...DEFAULT_PARENT_SETTINGS.minsu, ...(parsed.minsu || {}) }
@@ -295,7 +303,8 @@
       const isVisible = (minseoSem === 'all') || btnSems.length === 0 || btnSems.includes(minseoSem);
       btn.style.display = isVisible ? '' : 'none';
 
-      const isSelected = isUnitSelected(minseoSets[subj], unit);
+      // 민서 설정값은 노션 단원명·정적 키 그대로라 정확히 일치할 때만 선택 (1-1 받아쓰기 "4"와 1-2 "4회 (…)" 구분)
+      const isSelected = toUnitList(minseoSets[subj]).includes(unit);
       if (isSelected) {
         btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-[#ff85a2] text-white border-[#ff85a2] shadow-sm';
       } else {

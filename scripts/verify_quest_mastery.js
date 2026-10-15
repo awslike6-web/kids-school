@@ -183,6 +183,44 @@
     const r9 = QM.buildRound({ child, items: b4, subj: 'korean', today: '2026-10-15', rng: seeded(21) });
     check('묶음 판 5문제 생성', r9.questions.length === 5 && r9.meta.totalStages === 2, r9.questions.map(q => q.masteryType));
     reset(child);
+    // 10) 민서 받아쓰기 3·3·3 해금 & 빈칸 타겟 3단계 우선순위
+    const dict = [
+      { id: 'd1', word: '꽃이 활짝 피었습니다.', meaning: '식물의 봉오리가 벌어져 꽃이 핀 모습이에요.', detailContext: '1학년 2학기 받아쓰기 1회 1번', wordType: '문장', stage: '1회 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어', '받아쓰기'], target: ['민서'] },
+      { id: 'd2', word: '닭장 옆에서 책을 읽어요.', meaning: '닭을 키우는 곳 곁에서 책을 보는 모습이에요.', detailContext: '1학년 2학기 받아쓰기 1회 2번', wordType: '문장', stage: '1회 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어', '받아쓰기'], target: ['민서'] },
+      { id: 'd3', word: '넘어지지 않게 집중해서', meaning: '쓰러지지 않도록 온 마음을 모으는 모습이에요.', detailContext: '1학년 2학기 받아쓰기 1회 3번', wordType: '문장', stage: '1회 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어', '받아쓰기'], target: ['민서'] },
+      { id: 'd4', word: '맨 앞자리에 앉으라고', meaning: '1학년 2학기 받아쓰기 1회 4번', detailContext: '', wordType: '문장', stage: '1회 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어', '받아쓰기'], target: ['민서'] },
+      { id: 'd5', word: '여우', meaning: '꾀가 많은 동물이에요.', detailContext: '동화책에서 꾀 많은 ( )가 두루미를 초대했어요.', stage: '1', grades: ['1-1'], subject: ['국어', '받아쓰기'], target: ['민서'] },
+      { id: 'd6', word: '학교', meaning: '배우는 곳이에요.', detailContext: '노란 가방을 메고 ( )에 가요.', stage: '1', grades: ['1-1'], subject: ['국어', '받아쓰기'], target: ['민서'] },
+      { id: 'd7', word: '엄마', meaning: '나를 길러 주시는 분이에요.', detailContext: '다정하신 ( ) 손을 꼭 잡고 갔어요.', stage: '1', grades: ['1-1'], subject: ['국어', '받아쓰기'], target: ['민서'] }
+    ];
+    const minseoSel = unit => ({ childName: '민서', subjectKo: '국어', unit, semester: '1-2' });
+    const d12 = QM.selectUnitItems(dict, minseoSel('1회 (1. 기분을 말해요)'));
+    check('정상 뜻풀이 받아쓰기는 3·3·3 로드, 출처형 뜻풀이(4번)는 제외', d12.length === 3 && !d12.some(it => it.id === 'd4'), d12.map(it => it.id));
+    check('받아쓰기 상세설명의 회차 표기는 힌트로 쓰지 않음', d12.every(it => it.detail === '' && it.isDictation));
+    check('민수 단원 조회에 민서 받아쓰기 안 섞임', QM.selectUnitItems(dict, { childName: '민수', subjectKo: '국어', unit: '1회 (1. 기분을 말해요)' }).length === 0);
+    const pickWords = (word, seeds, extra = {}) => seeds.map(sd => (QM.pickBlankToken({ word, marked: '', detail: '', ...extra }, 'ko', seeded(sd)) || {}).clean);
+    const dakPicks = pickWords('닭장 옆에서 책을 읽어요', [1, 600000000, 1200000000, 1800000000, 2400000000, 3000000000, 3600000000, 4200000000]);
+    check('겹받침 어절(닭장·읽어요)이 빈칸 1순위', dakPicks.every(w => w === '닭장' || w === '읽어요') && new Set(dakPicks).size === 2, dakPicks);
+    check('겹받침 판별: 앉으라고(ㄵ)·않게(ㄶ)·많다(ㄶ)', [QM.koreanTier('앉으라고'), QM.koreanTier('않게'), QM.koreanTier('많다')].every(t => t === 1));
+    const plain = pickWords('꽃이 활짝 피었습니다', [1, 2, 3]);
+    check('겹받침 없는 문장도 받침 어절로 정상 폴백', plain.every(w => ['꽃이', '활짝', '피었습니다'].includes(w)), plain);
+    check('받침 없는 문장은 2글자 이상 핵심 어절(3순위)', pickWords('나무 아래 가 보자', [1])[0] === '나무');
+    check('복합모음 어절이 받침 어절보다 앞', pickWords('사과 먹어요', [1, 2, 3]).every(w => w === '사과'));
+    check('[대괄호] 지정 어절이 최우선', pickWords('닭장 옆에서 책을 읽어요', [1], { marked: '책을' })[0] === '책을');
+    check("상세설명 '핵심: 어절' 지정", pickWords('닭장 옆에서 책을 읽어요', [1], { detail: '핵심: 옆에서' })[0] === '옆에서');
+    const dakMs = QM.misspellingsOf('닭장');
+    check('받아쓰기 철자 오답: 닭장 → 달장·닥장 우선', dakMs[0] === '달장' && dakMs[1] === '닥장', dakMs.slice(0, 4));
+    const dakItem = d12.find(it => it.id === 'd2');
+    const fb = QM.buildFillBlank(dakItem, d12, 'ko', seeded(3));
+    const fbAnswer = fb && fb.options[fb.answer];
+    check('받아쓰기 빈칸 보기에 철자 오답 포함', fb && ['닭장', '읽어요'].includes(fbAnswer) && fb.options.some(o => QM.misspellingsOf(fbAnswer).includes(o)), fb && fb.options);
+    const d11 = QM.selectUnitItems(dict, minseoSel('1'));
+    const cloze = QM.buildFillBlank(d11[0], d11, 'ko', seeded(2));
+    check('1-1 낱말은 상세설명 빈칸 예문으로 출제', cloze && cloze.mode === 'choice' && cloze.display.includes('[ _ ]') && cloze.options[cloze.answer] === d11[0].word, cloze);
+    reset(child);
+    const rd = QM.buildRound({ child, items: d12, subj: 'korean', today: '2026-10-16', rng: seeded(4) });
+    check('뜻 고르기 문제는 상세설명이 없으면 힌트(=정답) 숨김', rd.questions.filter(q => q.masteryType === 'choice_audio' && !q.reverse).every(q => q.hint === ''));
+    reset(child);
     check('패턴(...)은 pattern 분류', QM.classify({ word: 'There is a ... in the ...', wordType: '숙어' }) === 'pattern');
 
     // 10) 민서(초1): 받아쓰기 제외 · 영어 '기초' 단원 · 문장 조립 3조각
@@ -193,9 +231,11 @@
     for (let i = 0; i < 10; i++) ms.push({ id: `d1_${i}`, word: `여우${i}`, meaning: '동물 친구', stage: '1', grades: ['1-1'], subject: ['국어', '받아쓰기'], target: ['민서'] });
     for (let i = 0; i < 10; i++) ms.push({ id: `e${i}`, word: `box${i}`, meaning: `상자${i}`, stage: 'L1', grades: ['기초'], subject: ['영어'], target: ['민서'] });
     const msSel = (subjectKo, unit) => QM.selectUnitItems(ms, { childName: '민서', subjectKo, unit, semester: '1-2' });
-    const kor1 = msSel('국어', '1');
-    check('민서 국어 "1": 받아쓰기 회차 빼고 1단원 어휘만', kor1.length === 7 && kor1.every(it => it.stage.startsWith('1단원')), kor1.map(i => i.id));
-    check('민서 받아쓰기 회차를 직접 지정해도 받아쓰기 문장은 안 나옴', msSel('국어', '1회 (1. 기분을 말해요)').every(it => !it.id.startsWith('d')));
+    // 받아쓰기 해금 후: 숫자뿐인 "1"은 1-1 받아쓰기 단원과 정확히 일치하므로 민서 국어 기본값은 단원명 전체를 쓴다
+    const kor1 = msSel('국어', '1단원 (1. 기분을 말해요)');
+    check('민서 국어 기본 단원(이름 전체) = 1단원 어휘만', kor1.length === 7 && kor1.every(it => it.stage.startsWith('1단원')), kor1.map(i => i.id));
+    check('민서 국어 "1"은 1-1 받아쓰기 1회(정상 뜻풀이)와 정확히 일치', msSel('국어', '1').every(it => it.id.startsWith('d1_')) && msSel('국어', '1').length === 10);
+    check('출처형 뜻풀이 받아쓰기 문장은 회차를 지정해도 안 나옴', msSel('국어', '1회 (1. 기분을 말해요)').every(it => !/^d\d$/.test(it.id)));
     check('민서 영어 L1(학년 기초)은 학기 1-2여도 단원 전체', msSel('영어', 'L1').length === 10);
     check('민수에게 민서 전용 단원 안 보임', QM.selectUnitItems(ms, { childName: '민수', subjectKo: '영어', unit: 'L1' }).length === 0);
     const c3 = QM.chunkSentence('친구와 함께 즐겁게 놀이터에서 그네를 탔어요.', 3);

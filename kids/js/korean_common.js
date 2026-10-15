@@ -505,6 +505,8 @@ window.selectDynamicUnit = function(unit) {
 
 function extractKoreanItemNumber(r) {
     if (!r) return null;
+    // 노션 상세설명의 회차·번호 표기("1학년 2학기 받아쓰기 10회 10번") 우선
+    if (r.detailContext) { const md = String(r.detailContext).match(/(\d+)\s*번/); if (md) return parseInt(md[1], 10); }
     if (r.meaning) {
         const m = String(r.meaning).match(/(\d+)\s*번/);
         if (m) return parseInt(m[1], 10);

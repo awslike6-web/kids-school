@@ -118,12 +118,23 @@
   }
   function isSentenceLike(item) { return item.kind !== 'word'; }
 
+  // "1학년 2학기 받아쓰기 3회 10번" 같은 출처·회차 표기 (뜻풀이·힌트로 쓰면 안 되는 메타 정보)
+  function isSourceTag(text) {
+    const t = String(text || '').trim();
+    return /^\d학년\s*\d학기/.test(t) || /^받아쓰기\s*\d+\s*회/.test(t);
+  }
+
   function toItem(rec) {
+    const rawWord = String(rec.word || '').trim();
+    const rawDetail = String(rec.detailContext || '').trim();
+    const subjects = Array.isArray(rec.subject) ? rec.subject : [];
     return {
       id: rec.id || rec.pageId,
-      word: String(rec.word || '').trim(),
+      word: rawWord.replace(/[\[\]]/g, ''),
+      marked: (rawWord.match(/\[([^\]]+)\]/) || [])[1] || '', // 단어 속 [어절] = 빈칸 1순위 타겟
       meaning: String(rec.meaning || '').trim(),
-      detail: String(rec.detailContext || '').trim(),
+      detail: isSourceTag(rawDetail) ? '' : rawDetail,
+      isDictation: subjects.some(sj => String(sj).includes('받아쓰기')),
       wordType: rec.wordType || rec.type || '',
       stage: String(rec.stage || ''),
       grades: Array.isArray(rec.grades) ? rec.grades : (rec.grade ? [rec.grade] : []),
@@ -152,8 +163,8 @@
       const target = Array.isArray(r.target) ? r.target : [];
       if (target.length && !target.includes(childName) && !target.includes('공통')) return false;
       const subj = Array.isArray(r.subject) ? r.subject : [];
-      // 받아쓰기 회차(과목 '국어,받아쓰기')는 뜻풀이가 출처 표시라 3·3·3에서 빼고 받아쓰기 화면에서만 연습한다
-      if (subj.includes('받아쓰기')) return false;
+      // 뜻풀이가 비었거나 출처 표기("1학년 2학기 받아쓰기 …")뿐인 항목만 뺀다 (정상 뜻풀이가 있는 받아쓰기는 3·3·3 출제)
+      if (isSourceTag(r.meaning)) return false;
       return !subjKo || subj.includes(subjKo);
     });
     const keys = parseUnitList(opts.unit).map(u => u.toLowerCase());
@@ -290,22 +301,104 @@
     return { seq, blocks, joiner, template: item.word };
   }
 
+  // ---------- 한글 받침·모음 분석 (빈칸 타겟 우선순위·받아쓰기 철자 오답 보기) ----------
+  const HANGUL_BASE = 0xAC00;
+  // 겹받침 종성 인덱스 → 구성 홑받침 (ㄳ ㄵ ㄶ ㄺ ㄻ ㄼ ㄽ ㄾ ㄿ ㅀ ㅄ)
+  // ㄶ·ㅀ은 ㅎ만 남긴 형태(앟게)는 실제 실수가 아니라서 앞 받침(안게·알다)만 쓴다
+  const DOUBLE_JONG = { 3: [1, 19], 5: [4, 22], 6: [4], 9: [8, 1], 10: [8, 16], 11: [8, 17], 12: [8, 19], 13: [8, 25], 14: [8, 26], 15: [8], 18: [17, 19] };
+  const COMPLEX_JUNG = [3, 7, 9, 10, 11, 14, 15, 16, 19]; // ㅒ ㅖ ㅘ ㅙ ㅚ ㅝ ㅞ ㅟ ㅢ
+  // 아이들이 실제로 헷갈리는 홑받침 짝 (앞쪽이 더 흔한 실수): ㅆ→ㅅ·ㄷ, ㅅ→ㅆ·ㄷ, ㅈ→ㅅ·ㅊ, ㄲ→ㄱ, ㅍ→ㅂ …
+  const SOUND_ALIKE_JONG = { 7: [19, 20], 19: [20, 7], 20: [19, 7], 22: [19, 23], 23: [19, 22], 25: [19, 23], 27: [19], 2: [1], 24: [1], 26: [17] };
+  const SOUND_ALIKE_JUNG = [[1, 5], [3, 7], [10, 11, 15]]; // ㅐ/ㅔ, ㅒ/ㅖ, ㅙ/ㅚ/ㅞ
+  const KO_STOPWORDS = ['그', '이', '저', '그것', '이것', '저것', '나', '너', '우리', '꼭', '잘', '더', '또', '안', '못', '참', '아주', '매우', '정말', '너무', '다', '좀', '그리고'];
+
+  function syllablesOf(text) {
+    return Array.from(String(text)).map(ch => {
+      const c = ch.charCodeAt(0) - HANGUL_BASE;
+      return c >= 0 && c < 11172 ? { ch, cho: Math.floor(c / 588), jung: Math.floor((c % 588) / 28), jong: c % 28 } : { ch };
+    });
+  }
+  const composeSyllable = (s, jung, jong) => String.fromCharCode(HANGUL_BASE + s.cho * 588 + jung * 28 + jong);
+
+  // 1 겹받침 → 2 복합모음 → 3 받침 → 4 일반(2글자 이상) / 9 제외(받침 없는 1글자)
+  function koreanTier(token) {
+    const syl = syllablesOf(token).filter(x => x.cho !== undefined);
+    if (syl.some(x => DOUBLE_JONG[x.jong])) return 1;
+    if (syl.length < 2) return 9;
+    if (syl.some(x => COMPLEX_JUNG.includes(x.jung))) return 2;
+    if (syl.some(x => x.jong)) return 3;
+    return 4;
+  }
+
+  // 받아쓰기 철자 오답: 겹받침을 홑받침으로(닭→달·닥), 소리가 같은 받침·모음 바꾸기(옷→옫, 개→게)
+  function misspellingsOf(token) {
+    const primary = [], secondary = [];
+    const syl = syllablesOf(token);
+    syl.forEach((x, idx) => {
+      if (x.cho === undefined) return;
+      const make = (jung, jong) => syl.map((y, k) => (k === idx ? composeSyllable(y, jung, jong) : y.ch)).join('');
+      if (DOUBLE_JONG[x.jong]) DOUBLE_JONG[x.jong].forEach(j => primary.push(make(x.jung, j)));
+      else if (x.jong) (SOUND_ALIKE_JONG[x.jong] || []).forEach(j => secondary.push(make(x.jung, j)));
+      (SOUND_ALIKE_JUNG.find(g => g.includes(x.jung)) || []).filter(v => v !== x.jung).forEach(v => secondary.push(make(v, x.jong)));
+    });
+    return [...new Set(primary.concat(secondary))].filter(w => w !== token);
+  }
+
+  // 문장 빈칸 어절 고르기 (3단계 우선순위)
+  // 1순위: 단어의 [어절] 또는 상세설명의 [어절]·'핵심: 어절' / 2순위(한글): 겹받침 → 복합모음 → 받침 어절 / 3순위: 2글자 이상 핵심 어절
+  function pickBlankToken(item, lang, rng) {
+    const clean = t => t.replace(/[^A-Za-z가-힣0-9']/g, '');
+    const info = item.word.split(/\s+/).map((t, i) => ({ t, i, clean: clean(t) })).filter(x => x.clean);
+    const detail = item.detail || '';
+    const key = clean(item.marked || (detail.match(/\[([^\]]+)\]/) || detail.match(/핵심\s*[:：]\s*([^\s,/]+)/) || [])[1] || '');
+    if (key) {
+      const hit = info.find(x => x.clean === key) || info.find(x => x.clean.includes(key) || key.includes(x.clean));
+      if (hit) return hit;
+    }
+    if (lang !== 'en') {
+      const ranked = info.filter(x => !KO_STOPWORDS.includes(x.clean)).map(x => ({ ...x, tier: koreanTier(x.clean) })).filter(x => x.tier < 9);
+      if (ranked.length) {
+        const best = Math.min(...ranked.map(x => x.tier));
+        const top = ranked.filter(x => x.tier === best);
+        return best === 4 ? top.sort((a, b) => b.clean.length - a.clean.length)[0] : top[Math.floor(rng() * top.length)];
+      }
+    }
+    return info.filter(x => !EN_STOPWORDS.includes(x.clean.toLowerCase())).sort((a, b) => b.clean.length - a.clean.length)[0] || null;
+  }
+
+  // 빈칸 보기 2개: 받아쓰기는 철자 오답 우선, 모자라면 다른 문장의 어절로 채운다
+  function blankDistractors(item, correct, all, lang, rng) {
+    // 철자 오답은 순서(겹받침 → 받침 → 모음)대로 앞의 2개를 쓴다 (보기 위치는 makeChoice가 섞음)
+    const out = item.isDictation && lang !== 'en' ? misspellingsOf(correct).slice(0, 2) : [];
+    const pool = all.filter(o => o.id !== item.id).flatMap(o => o.word.split(/\s+/))
+      .map(t => t.replace(/[^A-Za-z가-힣0-9']/g, ''))
+      .filter(t => t && t.toLowerCase() !== correct.toLowerCase() && !EN_STOPWORDS.includes(t.toLowerCase()));
+    for (const t of shuffle([...new Set(pool)], rng)) {
+      if (out.length >= 2) break;
+      if (!out.includes(t)) out.push(t);
+    }
+    return out;
+  }
+
   function buildFillBlank(item, all, lang, rng) {
-    // ① 문장: 핵심 어절 1개 빈칸 + 3지선다
+    // ① 문장: 우선순위로 고른 어절 1개 빈칸 + 3지선다
     if (isSentenceLike(item)) {
       const tokens = item.word.split(/\s+/);
-      const core = tokens
-        .map((t, i) => ({ t, i, clean: t.replace(/[^A-Za-z가-힣0-9']/g, '') }))
-        .filter(x => x.clean && !EN_STOPWORDS.includes(x.clean.toLowerCase()))
-        .sort((a, b) => b.clean.length - a.clean.length)[0];
+      const core = pickBlankToken(item, lang, rng);
       if (!core) return null;
-      const pool = all.filter(o => o.id !== item.id).flatMap(o => o.word.split(/\s+/))
-        .map(t => t.replace(/[^A-Za-z가-힣0-9']/g, ''))
-        .filter(t => t && t.toLowerCase() !== core.clean.toLowerCase() && !EN_STOPWORDS.includes(t.toLowerCase()));
-      const distractors = [...new Set(shuffle(pool, rng))].slice(0, 2);
+      const distractors = blankDistractors(item, core.clean, all, lang, rng);
       if (distractors.length < 2) return null;
       const display = tokens.map((t, i) => (i === core.i ? t.replace(core.clean, '[ _ ]') : t)).join(' ');
       return { mode: 'choice', display, ...makeChoice(core.clean, distractors, rng) };
+    }
+    // ①-2 한글 낱말 + 상세설명 빈칸 예문("꾀 많은 ( )가 …") → 예문 빈칸 3지선다
+    if (lang !== 'en' && /\(\s*\)/.test(item.detail || '')) {
+      const distractors = item.isDictation
+        ? blankDistractors(item, item.word, all, lang, rng)
+        : pickDistractors(item, all.filter(o => o.kind === 'word'), 'word', 2, rng);
+      if (distractors.length === 2) {
+        return { mode: 'choice', display: item.detail.replace(/\(\s*\)/, '[ _ ]'), ...makeChoice(item.word, distractors, rng) };
+      }
     }
     // ② 영단어 + 예문 변형: 예문 속 단어 빈칸 + 3지선다
     const example = lang === 'en' ? exampleSentence(item) : '';
@@ -383,7 +476,10 @@
       }
     }
     if (!body) body = { masteryType: 'scramble', scramble: buildScramble(item, lang, rng, ctx.maxChunks), q: `조립하기: ${item.meaning}` };
-    return Object.assign(q, body);
+    Object.assign(q, body);
+    // 뜻 고르기 문제에서 상세설명이 없으면 힌트(=뜻풀이)가 곧 정답이 되므로 숨긴다
+    if (q.masteryType === 'choice_audio' && !q.reverse && !item.detail) q.hint = '';
+    return q;
   }
 
   function buildMatch(items, ctx) {
@@ -622,7 +718,7 @@
     SUBJECT_KO, SILVER, GOLD,
     todayStr, daysBetween, parseMastery, formatMastery,
     loadStore, saveStore, mergeRemote, syncFromRecords,
-    classify, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
+    classify, isSourceTag, koreanTier, misspellingsOf, pickBlankToken, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
     levelOf, isLv3Eligible, isRusty,
     buildRound, applyResult, pushChanges, getProgressSummary, loadUnit,
     isEligibleSubject: subj => Object.prototype.hasOwnProperty.call(SUBJECT_KO, subj)

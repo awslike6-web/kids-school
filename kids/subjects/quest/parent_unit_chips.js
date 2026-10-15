@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------
  * - 노션 VOCA 캐시(localStorage `*_VOCA_CACHE_*`)에서 학생별·과목별 실제 단원을 찾아 칩으로 그린다.
  * - 학생 구분: `학생`이 비었거나 본인·`공통`인 항목만 그 학생 칩에 넣는다 (민서 단원이 민수 판에 새지 않게).
- * - 받아쓰기 회차(과목 `받아쓰기` 포함)는 5분 퀘스트 칩에서 뺀다 → 국어방 받아쓰기 화면 전용.
+ * - 받아쓰기 회차(과목 `받아쓰기` 포함)도 칩으로 낸다 (정상 뜻풀이가 있으면 3·3·3 출제, 라벨 `📝 받아쓰기 N회`).
  * - 민수: 기본 뼈대 칩 뒤에 노션 단원 (맨 앞 번호로 중복 제거, 기존 동작 유지)
  * - 민서: 노션 단원 칩을 앞에, 정적 문제은행 칩(phonics 등)을 뒤에 둔다.
  * - 선택·저장·묶음 규칙은 parent_progress_controller.js가 맡고, 여기서는 칩 DOM만 만든다.
@@ -122,7 +122,7 @@
         const stage = String(r.stage || r.level || '').trim();
         if (!stage || stage === '기본 단원') return;
         const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
-        if (subjs.some(s => String(s).includes('받아쓰기'))) return;
+        const isDictation = subjs.some(s => String(s).includes('받아쓰기'));
         Object.keys(CHILD_NAME).forEach(child => {
           if (!isForChild(r, child)) return;
           subjs.forEach(s => {
@@ -131,7 +131,7 @@
             const dupKey = `${child}::${subjKey}::${stage}::${r.id || r.word}`;
             if (seenRecord.has(dupKey)) return;
             seenRecord.add(dupKey);
-            units[child][subjKey].push({ stage, semType: semTypeOf(child, r, stage) });
+            units[child][subjKey].push({ stage, semType: semTypeOf(child, r, stage), isDictation });
             if (r.id) {
               const key = `${subjKey}::${stage}`;
               (idSets[child][key] = idSets[child][key] || new Set()).add(r.id);
@@ -186,7 +186,10 @@
         if (seen.has(item.stage)) return;
         seen.add(item.stage);
         const n = counts[`${subj}::${item.stage}`];
-        const label = `📒 ${prettyStage(item.stage)}${n ? ` · ${n}개` : ''}`;
+        const pretty = prettyStage(item.stage);
+        // 1-1 받아쓰기 단원명은 숫자뿐("1")이라 "받아쓰기 1회"로 풀어 쓴다
+        const name = item.isDictation ? `받아쓰기 ${/^\d+$/.test(pretty) ? `${pretty}회` : pretty}` : pretty;
+        const label = `${item.isDictation ? '📝' : '📒'} ${name}${n ? ` · ${n}개` : ''}`;
         container.appendChild(makeChip(child, subj, item.stage, item.semType, label, o.onPick(item.stage, true)));
       });
       baseUnits.forEach(item => {
@@ -224,7 +227,7 @@
       const hit = Object.keys(book).find(k => k.startsWith(`${subj}::`) && leadingNumber(k.slice(subj.length + 2)) === num);
       label = hit && book[hit];
     }
-    return label ? label.replace(/^📒\s*/, '') : null;
+    return label ? label.replace(/^(📒|📝)\s*/, '') : null;
   }
 
   window.ParentUnitChips = { BASE_UNITS, collectNotionUnits, renderSubjectChips, labelOf, prettyStage };

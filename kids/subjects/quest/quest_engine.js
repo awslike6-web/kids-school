@@ -156,11 +156,16 @@
       const raw = localStorage.getItem('MINMIN_QUEST_SETTINGS');
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && parsed[child]) return parsed[child];
+        if (parsed && parsed[child]) {
+          const sets = parsed[child];
+          // 옛 설정의 민서 국어 '1' = "1단원" (받아쓰기 1-1 단원 "1"과 구분, parent_progress_controller.js와 같은 규칙)
+          if (child === 'minseo' && sets.unitSchema !== 2 && sets.korean === '1') return { ...sets, korean: '1단원 (1. 기분을 말해요)' };
+          return sets;
+        }
       }
     } catch (e) {}
     return child === 'minseo'
-      ? { semester: '1-2', korean: '1', math: '100num', english: 'L1', includeReviewSem1: false }
+      ? { semester: '1-2', korean: '1단원 (1. 기분을 말해요)', math: '100num', english: 'L1', includeReviewSem1: false, unitSchema: 2 }
       : { semester: '5-2', math: 'division', english: 'L9', korean: '1', science: '3', society: '1', includeReviewSem1: false, includeJihye: false };
   }
 
