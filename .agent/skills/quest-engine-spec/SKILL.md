@@ -7,6 +7,8 @@ description: 5분 퀘스트(quest_runner.html, 퀘스트 러너) 작업 시 사�
 
 > **원본 위치**: 이 파일은 `.agent/skills/quest-engine-spec/SKILL.md`가 원본입니다. `.claude/skills/`는 사본이므로 직접 고치지 마세요. 고친 뒤에는 `python scripts/sync_agent_skills.py`를 실행합니다.
 >
+> **경로 기준**: 이 문서의 모든 경로는 `kids-school-main/` 기준입니다. master-tower 루트에서 작업 중이면 앞에 `kids-school-main/`을 붙이세요(예: `kids-school-main/kids/core/CORE_CATALOG.md`). git 명령도 `kids-school-main` 안에서 실행합니다(별도 저장소 `awslike6-web/kids-school`).
+>
 > **사실 정보의 원본은 따로 있습니다**: 파일 위치·전역 API·메서드 표는 `kids/core/CORE_CATALOG.md` §2-2가 유일한 원본입니다. 이 스킬에는 규칙 요약과 작업 절차·함정만 둡니다. 둘이 다르면 카탈로그와 실제 코드가 맞습니다.
 
 ## 1. 먼저 읽을 것
