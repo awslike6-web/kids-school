@@ -159,7 +159,7 @@
       }
     } catch (e) {}
     return child === 'minseo'
-      ? { semester: '1-2', korean: 'batchim', math: '100num', english: 'phonics', includeReviewSem1: false }
+      ? { semester: '1-2', korean: '1', math: '100num', english: 'L1', includeReviewSem1: false }
       : { semester: '5-2', math: 'division', english: 'L9', korean: '1', science: '3', society: '1', includeReviewSem1: false, includeJihye: false };
   }
 
@@ -660,7 +660,7 @@
   // ========================================================
   // 6. 🚀 듀오링고형 Universal 4+1 출제 엔진 (정적 + 노션 마스터 융합)
   // ========================================================
-  function getSubjectQuest(subj, unitScope = '', mode = 'mixed', customUser = '') {
+  function buildSubjectQuest(subj, unitScope = '', mode = 'mixed', customUser = '') {
     const p = new URLSearchParams(window.location.search);
     const currentUser = customUser || p.get('user') || localStorage.getItem('currentChild') || localStorage.getItem('currentUser') || 'minsu';
     const activeChild = getNormalizedChildId(currentUser);
@@ -875,6 +875,25 @@
       icon: sData.icon,
       questions: selected
     };
+  }
+
+  // 보기 순서 섞기: 정적 뱅크는 정답을 첫 보기(answer: 0)에 적어 두므로, 섞지 않으면 정답이 항상 1번이 된다.
+  // 원본 뱅크 객체는 건드리지 않고 사본의 보기와 정답 번호만 함께 바꾼다.
+  function withShuffledOptions(q) {
+    if (!q || !Array.isArray(q.options) || q.options.length < 2) return q;
+    if (!Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.options.length) return q;
+    const order = q.options.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return { ...q, options: order.map(i => q.options[i]), answer: order.indexOf(q.answer) };
+  }
+
+  function getSubjectQuest(subj, unitScope = '', mode = 'mixed', customUser = '') {
+    const quest = buildSubjectQuest(subj, unitScope, mode, customUser);
+    if (quest && Array.isArray(quest.questions)) quest.questions = quest.questions.map(withShuffledOptions);
+    return quest;
   }
 
   // ========================================================

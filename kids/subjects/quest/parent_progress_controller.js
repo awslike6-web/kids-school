@@ -77,9 +77,9 @@
   const DEFAULT_PARENT_SETTINGS = {
     minseo: {
       semester: '1-2',
-      korean: 'batchim',
+      korean: '1',        // 노션 VOCA "1단원 (1. 기분을 말해요)" (맨 앞 번호로 매칭)
       math: '100num',
-      english: 'phonics',
+      english: 'L1',      // 노션 VOCA 영어 L1~L10 (학년 '기초')
       includeReviewSem1: false
     },
     minsu: {
@@ -217,203 +217,33 @@
   }
   const combinableUnits = new Set();
 
-  // 8. 📦 기본 교과 단위 정적 뼈대 정의 (초기 동적 렌더링 템플릿)
-  const INITIAL_SUBJECT_UNITS = {
-    minseo: {
-      korean: [
-        { unit: 'batchim', label: '받침 글자 ⭐', sem: '1-2' },
-        { unit: 'dictation', label: '받아쓰기 100', sem: '1-2' },
-        { unit: 'voca', label: '그림 낱말 탐험', sem: '1-1,basic' }
-      ],
-      math: [
-        { unit: '100num', label: '100까지 수 ⭐', sem: '1-2,basic' },
-        { unit: 'addsub', label: '한자리 덧뺄셈', sem: '1-2' },
-        { unit: 'shapes', label: '여러가지 모양', sem: '1-1' }
-      ],
-      english: [
-        { unit: 'phonics', label: '파닉스 첫단어 ⭐', sem: 'basic,1-2' },
-        { unit: 'greetings', label: '기초 인사말', sem: '1-2,basic' },
-        { unit: 'abc', label: '알파벳 소리', sem: '1-1,basic' }
-      ]
-    },
-    minsu: {
-      science: [
-        { unit: '1', label: '1단원 혼합물의 분리', sem: '5-2' },
-        { unit: '2', label: '2단원 상태변화·지시약', sem: '5-2' },
-        { unit: '3', label: '3단원 온도와 열 (열의 이동) ⭐', sem: '5-2' }
-      ],
-      math: [
-        { unit: 'division', label: '두 자릿수 나눗셈 ⭐', sem: '5-2' },
-        { unit: 'fraction', label: '5-2 분수의 곱셈', sem: '5-2' }
-      ],
-      english: [
-        { unit: 'L9', label: '9단원 집·방 묘사 ⭐', sem: '5-2' },
-        { unit: 'L8', label: '8단원 외모 묘사', sem: '5-2' },
-        { unit: 'L7', label: '7단원 길찾기', sem: '5-2' }
-      ],
-      korean: [
-        { unit: '1', label: '1단원 어휘·속담 ⭐', sem: '5-2' },
-        { unit: '2', label: '2단원 문맥·독해', sem: '5-2' }
-      ],
-      society: [
-        { unit: '1', label: '1단원 조선 건국·한양 ⭐', sem: '5-2' },
-        { unit: '2', label: '2단원 문화발전·이순신', sem: '5-2' },
-        { unit: '3', label: '3단원 유교문화·민족의 시련', sem: '5-2' }
-      ]
-    }
-  };
-
-  /**
-   * 🔄 100% 동적 단원 칩 빌더 & 노션 캐시 자동 동기화 엔진 (Zero Hardcoding)
-   * HTML의 빈 컨테이너에 노션 및 문제은행 데이터를 기반으로 버튼을 동적 생성
-   */
+  // 8. 🔄 단원 칩 빌드 (칩 DOM·노션 캐시 탐색은 parent_unit_chips.js, 여기서는 선택 규칙만 연결)
   function syncDynamicUnitChips() {
     try {
-      // 1) 👧 민서 교과 칩 동적 빌드
-      Object.keys(INITIAL_SUBJECT_UNITS.minseo).forEach(subj => {
-        const capitalized = subj.charAt(0).toUpperCase() + subj.slice(1);
-        const container = document.getElementById(`parentMinseo${capitalized}Chips`);
-        if (!container) return;
-
-        container.innerHTML = ''; // 기존 하드코딩 완전 청소
-        const unitList = INITIAL_SUBJECT_UNITS.minseo[subj] || [];
-        unitList.forEach(item => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all';
-          btn.setAttribute('data-subject', subj);
-          btn.setAttribute('data-unit', item.unit);
-          btn.setAttribute('data-sem', item.sem);
-          btn.textContent = item.label;
-          btn.onclick = () => setParentUnit('minseo', subj, item.unit);
-          container.appendChild(btn);
-        });
-      });
-
-      // 2) 👦 민수 교과 칩 동적 빌드 및 노션 VOCA 캐시 단원 융합
-      const discoveredUnits = { english: [], science: [], society: [], korean: [], math: [] };
-      const stageIds = {}; // `${과목}::${단원}` → Set(페이지 id), 칩 옆 어휘 수 표시용
-
-      // 노션 VOCA 캐시에서 실제 등록된 단원 탐색
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.includes('_VOCA_CACHE_')) {
-          try {
-            const data = JSON.parse(localStorage.getItem(k));
-            if (data && Array.isArray(data.records)) {
-              data.records.forEach(r => {
-                const stage = r.stage || r.level;
-                if (!stage || stage === '기본 단원') return;
-                // 민수 칩에는 민수(또는 공통·학생 미지정) 항목만 — 민서 받아쓰기 '7'~'11' 같은 단원이 섞이지 않게
-                const targets = Array.isArray(r.target) ? r.target : [];
-                if (targets.length > 0 && !targets.includes('민수') && !targets.includes('공통')) return;
-                const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
-
-                let semType = '5-2';
-                const gList = (Array.isArray(r.grades) ? r.grades : [r.grade])
-                  .map(g => String(g || '').trim()).filter(g => g && g !== '공통');
-                const gStr = gList.join(' ');
-                if (gStr.includes('지혜') || String(r.wordType || '').includes('지혜')) {
-                  semType = 'jihye';
-                } else if (gStr.includes('5-1')) {
-                  semType = '5-1';
-                } else if (gStr.includes('5-2')) {
-                  semType = '5-2'; // 학년이 명시돼 있으면 단원명 숫자("[센터 5-2] 14번"의 5)로 추정하지 않음
-                } else if (gList.some(g => /^\d-\d$/.test(g))) {
-                  semType = gList.find(g => /^\d-\d$/.test(g)); // 다른 학년(4-1 등)은 그 학년 그대로 → '전체' 탭에서만 보임
-                } else {
-                  const numMatch = String(stage).match(/\d+/);
-                  if (numMatch) {
-                    const num = parseInt(numMatch[0], 10);
-                    semType = (num <= 6) ? '5-1' : '5-2';
-                  }
-                }
-
-                subjs.forEach(s => {
-                  const sStr = String(s).trim();
-                  const item = { stage, semType };
-                  let subjKey = '';
-                  if (sStr.includes('영어')) subjKey = 'english';
-                  else if (sStr.includes('과학')) subjKey = 'science';
-                  else if (sStr.includes('사회')) subjKey = 'society';
-                  else if (sStr.includes('국어')) subjKey = 'korean';
-                  else if (sStr.includes('수학')) subjKey = 'math';
-                  if (!subjKey) return;
-                  discoveredUnits[subjKey].push(item);
-                  if (r.id) {
-                    const key = `${subjKey}::${String(stage).trim()}`;
-                    (stageIds[key] = stageIds[key] || new Set()).add(r.id);
-                  }
-                });
-              });
+      const Chips = window.ParentUnitChips;
+      if (!Chips) return;
+      const found = Chips.collectNotionUnits();
+      unitWordCounts = found.counts.minsu || {};
+      ['minseo', 'minsu'].forEach(child => {
+        const prefix = child === 'minsu' ? 'parentMinsu' : 'parentMinseo';
+        Object.keys(Chips.BASE_UNITS[child]).forEach(subj => {
+          const container = document.getElementById(`${prefix}${subj.charAt(0).toUpperCase() + subj.slice(1)}Chips`);
+          if (!container) return;
+          Chips.renderSubjectChips({
+            child, subj, container, found,
+            metaMap: UNIT_META_MAP[child] && UNIT_META_MAP[child][subj],
+            onPick: (unit, isNotion) => {
+              // 민서는 한 단원만 고른다. 민수는 노션 단원끼리 최대 4개 묶음 (수학 제외)
+              if (child === 'minseo') return () => setParentUnit('minseo', subj, unit);
+              const combinable = subj !== 'math' && isNotion;
+              if (combinable) combinableUnits.add(`${subj}::${unit}`);
+              return () => toggleParentUnit('minsu', subj, unit, combinable);
             }
-          } catch(e) {}
-        }
-      }
-
-      unitWordCounts = Object.fromEntries(Object.entries(stageIds).map(([k, ids]) => [k, ids.size]));
-
-      // 민수 5대 교과 동적 칩 주입
-      const minsuSubjects = ['science', 'math', 'english', 'korean', 'society'];
-      minsuSubjects.forEach(subj => {
-        const capitalized = subj.charAt(0).toUpperCase() + subj.slice(1);
-        const container = document.getElementById(`parentMinsu${capitalized}Chips`);
-        if (!container) return;
-
-        container.innerHTML = ''; // 기존 하드코딩 완전 청소
-
-        // 기본 뼈대 단원
-        const baseUnits = INITIAL_SUBJECT_UNITS.minsu[subj] || [];
-        const seenUnitNumbers = new Set();
-        const isNotionStage = unit => stageIds[`${subj}::${unit}`] !== undefined;
-        const bundleSubject = subj !== 'math';
-
-        baseUnits.forEach(item => {
-          const uNum = getLeadingUnitNumber(item.unit) || getUnitNumber(item.unit);
-          if (uNum) seenUnitNumbers.add(uNum);
-          const combinable = bundleSubject && isNotionStage(item.unit);
-          if (combinable) combinableUnits.add(`${subj}::${item.unit}`);
-
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all';
-          btn.setAttribute('data-subject', subj);
-          btn.setAttribute('data-unit', item.unit);
-          btn.setAttribute('data-sem', item.sem);
-          btn.textContent = item.label;
-          btn.onclick = () => toggleParentUnit('minsu', subj, item.unit, combinable);
-          container.appendChild(btn);
-        });
-
-        // 노션에서 추가로 발견된 단원(1학기 복습 단원 등) 동적 주입 (중복 방지)
-        const discovered = [...(discoveredUnits[subj] || [])]
-          .sort((a, b) => String(a.stage).localeCompare(String(b.stage), 'ko', { numeric: true }));
-        discovered.forEach(item => {
-          const cleanKey = String(item.stage).trim();
-          const uNum = getLeadingUnitNumber(cleanKey);
-          if (!cleanKey || seenUnitNumbers.has(uNum || cleanKey)) return;
-
-          seenUnitNumbers.add(uNum || cleanKey);
-          const combinable = bundleSubject && isNotionStage(cleanKey);
-          if (combinable) combinableUnits.add(`${subj}::${cleanKey}`);
-
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all';
-          btn.setAttribute('data-subject', subj);
-          btn.setAttribute('data-unit', cleanKey);
-          btn.setAttribute('data-sem', item.semType || '5-2');
-
-          const metaMap = UNIT_META_MAP.minsu[subj];
-          const metaLabel = metaMap && (metaMap[cleanKey] || metaMap[uNum] || metaMap['L' + uNum]);
-          const shortKey = cleanKey.replace(/^\[[^\]]*\]\s*/, ''); // "[센터 5-2] 14번 - …" → "14번 - …"
-          btn.textContent = metaLabel || (uNum ? `${uNum}단원 (${cleanKey})` : shortKey);
-          btn.onclick = () => toggleParentUnit('minsu', subj, cleanKey, combinable);
-          container.appendChild(btn);
+          });
         });
       });
 
-      // 3) 백그라운드 노션 최신화 (논블로킹)
+      // 백그라운드 노션 최신화 (논블로킹)
       if (typeof window.fetchVocaFromNotion === 'function' && !window._hasSyncedNotionUnits) {
         window._hasSyncedNotionUnits = true;
         window.fetchVocaFromNotion({ filterByStudent: false }).then(records => {
@@ -426,6 +256,14 @@
     } catch (err) {
       console.warn('[syncDynamicUnitChips] 동적 단원 동기화 알림:', err);
     }
+  }
+
+  // 민서 단원 표시명: 칩 라벨 → 정적 메타 → 노션 단원명 정리
+  function minseoUnitName(subj, unit) {
+    const Chips = window.ParentUnitChips;
+    return (Chips && Chips.labelOf('minseo', subj, unit))
+      || (UNIT_META_MAP.minseo[subj] && UNIT_META_MAP.minseo[subj][unit])
+      || (Chips ? Chips.prettyStage(unit) : unit);
   }
 
   // 9. 단원 칩 가시성 및 배지 렌더링
@@ -457,7 +295,7 @@
       const isVisible = (minseoSem === 'all') || btnSems.length === 0 || btnSems.includes(minseoSem);
       btn.style.display = isVisible ? '' : 'none';
 
-      const isSelected = (minseoSets[subj] === unit);
+      const isSelected = isUnitSelected(minseoSets[subj], unit);
       if (isSelected) {
         btn.className = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all bg-[#ff85a2] text-white border-[#ff85a2] shadow-sm';
       } else {
@@ -465,18 +303,10 @@
       }
     });
 
-    const bMinKor = document.getElementById('badgeMinseoKorean');
-    if (bMinKor) {
-      bMinKor.textContent = (UNIT_META_MAP.minseo.korean && UNIT_META_MAP.minseo.korean[minseoSets.korean]) || minseoSets.korean;
-    }
-    const bMinMath = document.getElementById('badgeMinseoMath');
-    if (bMinMath) {
-      bMinMath.textContent = (UNIT_META_MAP.minseo.math && UNIT_META_MAP.minseo.math[minseoSets.math]) || minseoSets.math;
-    }
-    const bMinEng = document.getElementById('badgeMinseoEnglish');
-    if (bMinEng) {
-      bMinEng.textContent = (UNIT_META_MAP.minseo.english && UNIT_META_MAP.minseo.english[minseoSets.english]) || minseoSets.english;
-    }
+    [['badgeMinseoKorean', 'korean'], ['badgeMinseoMath', 'math'], ['badgeMinseoEnglish', 'english']].forEach(([id, subj]) => {
+      const badge = document.getElementById(id);
+      if (badge) badge.textContent = minseoUnitName(subj, minseoSets[subj]);
+    });
 
     const chkMinseoRev = document.getElementById('chkMinseoReviewSem1');
     if (chkMinseoRev) chkMinseoRev.checked = !!minseoSets.includeReviewSem1;
@@ -739,8 +569,8 @@
 
     if (isCurrentMinseoLocal) {
       const sets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
-      const korName = (UNIT_META_MAP.minseo.korean && UNIT_META_MAP.minseo.korean[sets.korean]) || sets.korean;
-      const mathName = (UNIT_META_MAP.minseo.math && UNIT_META_MAP.minseo.math[sets.math]) || sets.math;
+      const korName = minseoUnitName('korean', sets.korean);
+      const mathName = minseoUnitName('math', sets.math);
       if (qSub) qSub.textContent = `🧮 1-2 ${mathName} · 필수 ⭐`;
       if (rec) rec.textContent = `💡 오늘의 추천 진도: ${korName} & ${mathName} (필수 ⭐)`;
     } else {

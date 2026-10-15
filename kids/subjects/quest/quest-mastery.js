@@ -152,6 +152,8 @@
       const target = Array.isArray(r.target) ? r.target : [];
       if (target.length && !target.includes(childName) && !target.includes('공통')) return false;
       const subj = Array.isArray(r.subject) ? r.subject : [];
+      // 받아쓰기 회차(과목 '국어,받아쓰기')는 뜻풀이가 출처 표시라 3·3·3에서 빼고 받아쓰기 화면에서만 연습한다
+      if (subj.includes('받아쓰기')) return false;
       return !subjKo || subj.includes(subjKo);
     });
     const keys = parseUnitList(opts.unit).map(u => u.toLowerCase());
@@ -265,21 +267,21 @@
     return lang === 'en' ? text.split('') : Array.from(text);
   }
 
-  // 문장 → 최대 5조각 의미 단위 청크
-  function chunkSentence(sentence) {
+  // 문장 → 최대 5조각 의미 단위 청크 (민서 초1은 maxChunks 3)
+  function chunkSentence(sentence, maxChunks = 5) {
     const tokens = sentence.trim().split(/\s+/).filter(Boolean);
-    if (tokens.length <= 4) return tokens;
-    const k = tokens.length <= 7 ? 4 : 5;
+    if (tokens.length <= Math.min(4, maxChunks)) return tokens;
+    const k = maxChunks >= 5 ? (tokens.length <= 7 ? 4 : 5) : maxChunks;
     const out = Array.from({ length: k }, () => []);
     tokens.forEach((t, i) => out[Math.floor(i * k / tokens.length)].push(t));
     return out.map(c => c.join(' '));
   }
 
-  function buildScramble(item, lang, rng) {
+  function buildScramble(item, lang, rng, maxChunks = 5) {
     let seq;
     let joiner = '';
     if (isSentenceLike(item) || item.word.split(/\s+/).length >= 3) {
-      seq = chunkSentence(item.word);
+      seq = chunkSentence(item.word, maxChunks);
       joiner = ' ';
     } else {
       seq = splitUnits(item.word, lang).filter(ch => ch !== ' ');
@@ -374,13 +376,13 @@
       }
     } else {
       if (item.kind !== 'pattern') {
-        body = { masteryType: 'scramble', scramble: buildScramble(item, lang, rng), q: `조립하기: ${item.meaning}` };
+        body = { masteryType: 'scramble', scramble: buildScramble(item, lang, rng, ctx.maxChunks), q: `조립하기: ${item.meaning}` };
       } else {
         body = choiceTerm();
         if (body) { body.prompt = item.meaning; body.q = `뜻에 알맞은 표현: ${item.meaning}`; }
       }
     }
-    if (!body) body = { masteryType: 'scramble', scramble: buildScramble(item, lang, rng), q: `조립하기: ${item.meaning}` };
+    if (!body) body = { masteryType: 'scramble', scramble: buildScramble(item, lang, rng, ctx.maxChunks), q: `조립하기: ${item.meaning}` };
     return Object.assign(q, body);
   }
 
@@ -413,7 +415,7 @@
     const today = opts.today || todayStr();
     const store = opts.store || loadStore(opts.child);
     const items = opts.items;
-    const ctx = { rng, subj: opts.subj, lang: opts.subj === 'english' ? 'en' : 'ko' };
+    const ctx = { rng, subj: opts.subj, lang: opts.subj === 'english' ? 'en' : 'ko', maxChunks: opts.child === 'minseo' ? 3 : 5 };
     const st = it => getState(store, it.id);
     const stages = buildStages(items);
     let active = stages.findIndex(stage => stage.some(it => isPromotable(st(it))));

@@ -167,11 +167,31 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   - 번호형 기본 칩(`1`, `3` 등)을 누르면 기존처럼 단일 선택으로 돌아갑니다.
   - 저장 형식: 묶음은 **배열**, 단일은 기존 **문자열** 그대로입니다. 출격 URL(`monster_lab_controller.js`)에서는 `|`로 이어 붙입니다. 단원명에 쉼표가 있으므로 쉼표 구분은 쓰지 않습니다.
   - 단원 번호 비교와 칩 중복 제거는 단원명 **맨 앞** 번호(`getLeadingUnitNumber`)만 씁니다. 첫 숫자를 쓰면 `[센터 5-2] 14번`이 학년 숫자 5로 잡혀, 센터 칩이 1개로 합쳐지거나 단일 선택 시 전부 선택된 것처럼 보이던 문제가 있었습니다.
+- **칩 DOM은 `parent_unit_chips.js`에 위임** (2026-10-15): 컨트롤러는 선택·묶음·저장 규칙만 갖고, `syncDynamicUnitChips()`가 `ParentUnitChips.renderSubjectChips`에 클릭 핸들러(`onPick`)를 넘깁니다.
+- **민서 기본값** (2026-10-15): 영어 `L1`, 국어 `1`(노션 "1단원 (1. 기분을 말해요)"에 맨 앞 번호로 매칭), 수학 `100num`. 이미 저장된 설정이 있으면 그 값이 우선합니다.
+
+### 🌟 `parent_unit_chips.js` (진도판 단원 칩 빌더, 2026-10-15 분리)
+- **파일 위치**: `kids/subjects/quest/parent_unit_chips.js` (전역 `window.ParentUnitChips`, `monster_lab.html`에서 `parent_progress_controller.js` 앞에 로드)
+- **역할**: 노션 VOCA 캐시(`*_VOCA_CACHE_*`)에서 학생별·과목별 실제 단원을 찾아 칩을 그립니다.
+  - 학생 구분: `학생`이 비었거나 본인·`공통`인 항목만 그 학생 칩에 넣습니다. 이전에는 민서 단원(`L10`, `10회 …`)이 민수 판에 섞일 수 있었습니다.
+  - 받아쓰기 회차(과목에 `받아쓰기` 포함)는 칩에서 뺍니다. 국어방 받아쓰기 화면 전용입니다.
+  - 민수: 기본 뼈대 칩 → 노션 단원(맨 앞 번호로 중복 제거).
+  - 민서: 영어·국어는 노션 단원 칩(`📒 L1 · 10개`)을 앞에, 정적 문제은행 칩(`파닉스 첫단어 (기본 문제)` 등)을 뒤에 둡니다. 수학은 정적 칩만 씁니다.
+  - 학기 알약: 민서 학년 `기초`는 `basic,1-1,1-2`로 분류해 어느 학기 탭에서도 보입니다.
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `BASE_UNITS` | 학생·과목별 기본 뼈대 칩 (기존 `INITIAL_SUBJECT_UNITS`) |
+  | `collectNotionUnits()` | `{ units: {child: {subj: [{stage, semType}]}}, counts: {child: {'subj::단원': 어휘 수}} }` |
+  | `renderSubjectChips({child, subj, container, found, metaMap, onPick})` | 한 과목 칩 줄을 다시 그림. `onPick(unit, isNotion)`은 클릭 핸들러를 반환 |
+  | `labelOf(child, subj, unit)` | 저장값 → 칩 라벨 (배지·메인 버튼 안내 문구용, 번호 저장값 `"1"`도 맨 앞 번호로 찾음) |
+  | `prettyStage(stage)` | `"1단원 (1. 기분을 말해요)"` → `"1단원 기분을 말해요"` |
 
 ---
 
 ### 🌟 `quest-mastery.js` (3·3·3 듀오링고형 마스터리 엔진, 약 580줄)
 VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. DOM 조작 없이 동적 스테이지 분할·숙련도 계산·슬롯 배치·노션 동기화를 담당합니다. 수학·사료 퀴즈·민서 정적 뱅크·노션에 없는 단원(3개 미만)은 기존 `quest_engine.js` 4+1로 자동 폴백합니다. `?engine=classic`으로 강제 폴백.
+- **민서(초1)** (2026-10-15): 영어 L1~L10(학년 `기초`)·국어 1단원 노션 단원이 3·3·3 대상입니다. 받아쓰기 회차(과목 `받아쓰기` 포함)는 뜻풀이가 출처 표시라 `selectUnitItems`에서 항상 제외합니다. 민서 판은 `ctx.maxChunks = 3`이라 문장 조립이 최대 3조각입니다(민수는 5).
 - **파일 위치**: `kids/subjects/quest/quest-mastery.js` (전역 `window.QuestMastery`)
 - **규칙**: count 0~2 Lv.1 / 3~5 Lv.2 / 6 🥈(당일 `silverDate`, 그날은 승급 잠금) / 다음 날부터 6~8 Lv.3 / 9 👑(노션 `달성` true). 녹슨 왕관(금메달 후 2일+) 오답 시 count 5·`달성` false.
 - **스테이지**: `max(1, round(n/10))`개, `시험범위` 체크 항목을 앞 스테이지에 우선 배치, 단어·문장 비례 배분. 숙련도는 노션 페이지 `id` 기준이라 스테이지 재편 시에도 유실 없음.
@@ -190,13 +210,15 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 
 ### 🌟 `quest-ui-renderer.js` (4대 에러리스 인터랙션 렌더러, 약 350줄)
 - **파일 위치**: `kids/subjects/quest/quest-ui-renderer.js` (전역 `window.QuestUIRenderer`)
-- `render(container, question, {theme, speak, onPraise, onEncourage, onDone})`: `choice_audio`(Lv.1 원문+힌트 / Lv.2 영어는 🔊만, 국·사·과는 뜻→용어), `match_3x3`(터치 매칭 소거), `fill_blank`(철자 블록 / 예문·문장 빈칸 3지선다), `scramble`(알파벳·음절 / 문장 최대 5청크).
+- `render(container, question, {theme, speak, onPraise, onEncourage, onDone})`: `choice_audio`(Lv.1 원문+힌트 / Lv.2 영어는 🔊만, 국·사·과는 뜻→용어), `match_3x3`(터치 매칭 소거), `fill_blank`(철자 블록 / 예문·문장 빈칸 3지선다), `scramble`(알파벳·음절 / 문장 최대 5청크, 민서 3청크).
+- 민서 테마 + 국어(`lang: 'ko'`)의 선택형 보기에는 🔊 읽어 주기(`.qm-opt-say`)가 붙습니다. 누르면 `hooks.speak(보기, 'ko')`만 하고 고르기로 치지 않습니다.
 - 오답 시 빨간 X·경고음·하트 없음. 틀린 블록은 슬롯에 넣지 않고 정답 블록에 노란 테두리 + `shake`.
 - `renderProgressHeader(container, summary, meta, theme)`: 상단 광물 진척도 바.
 
 ### 🌟 `quest_runner.html` 러너 모듈 분리 (2026-10-15, 1,474줄 → HTML 592줄 + 2개 IIFE)
 골디락스 절대 상한(800줄 미만)에 맞춰 인라인 스크립트를 동작 변경 없이 분리했습니다. HTML에는 마크업·테마 CSS와 `window.addEventListener('DOMContentLoaded', QuestRunner.boot)` 연결부만 남습니다. 로드 순서: `quest_engine.js` → `quest-mastery.js` → `quest-ui-renderer.js` → 문제 은행 → **`quest-runner-ui.js` → `quest-runner.js`**.
 - **`quest-runner-ui.js`** (약 270줄, 전역 `window.QuestRunnerUI`): Web Audio 효과음 `playSound(tap|correct|wrong|fanfare)`, `applyChildTheme`, 과목 심화관 버튼 라벨 `applyDeepTrainingLabels`·경로 `deepTrainingUrl`, `setMathMemoVisible`, 모달 `showModal/hideModal` + 민서 스킨(`skinRevengeModalForMinseo`·`skinClearModalForMinseo`·`skinExitModalForMinseo`), 수학 손글씨 메모장, 사진 확대 라이트박스.
+- **`quest_engine.js` `getSubjectQuest`** (2026-10-15): 4+1 결과의 보기를 매번 섞고 정답 번호를 다시 매깁니다(`withShuffledOptions`). 정적 뱅크가 정답을 첫 보기(`answer: 0`)에 적어 두어, 섞지 않으면 정답이 늘 1번이던 버그를 막습니다. 원본 뱅크 객체는 바꾸지 않습니다.
 - **`quest-runner.js`** (약 570줄, 전역 `window.QuestRunner = { boot }`): URL 파싱·`getSubjectQuest` 바인딩, 가디언 학습 상태 표시, 3·3·3 마스터리 연결부(`bootQuest`·`renderMasteryQuestion`·`handleMasteryDone`), 기존 4+1 렌더링·채점·하트·리벤지, `showClearModal`(`QuestMastery.pushChanges` → `grantRewardAndShowUI(3, true)` → `sendStudyLogToNotion`), `StudyActivity.setPhase/recordCorrect` 연동.
 - **HTML onclick 호환 전역**: `handleCheckAnswer`, `goToNextStep`, `playQuestionAudio`, `selectChoice`, `startRevengeRound`, `skipRevengeAndClear`, `confirmExit`, `closeExitModal`, `returnToLab`, `goToSubjectDeepTraining`(별칭 `goToMathDeepTraining`), `goToLobby`, `playSound`, `toggleMathMemoPad`, `clearMathMemoCanvas`, `openImageZoom`, `closeImageZoom`.
 

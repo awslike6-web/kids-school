@@ -26,7 +26,7 @@
   // 다중 단원 묶음은 배열(부모 설정) 또는 '|' 결합 문자열(URL)로 들어온다 → '|' 문자열로 통일
   const rawConfiguredUnit = parentSettings && parentSettings[currentSubj];
   const configuredUnit = Array.isArray(rawConfiguredUnit) ? rawConfiguredUnit.join('|') : rawConfiguredUnit;
-  const currentUnit = urlParams.get('unit') || configuredUnit || (isMinseo ? (currentSubj === 'korean' ? 'voca' : (currentSubj === 'english' ? 'phonics' : '100num')) : (currentSubj === 'math' ? 'division' : (currentSubj === 'english' ? 'L9' : '1')));
+  const currentUnit = urlParams.get('unit') || configuredUnit || (isMinseo ? (currentSubj === 'korean' ? '1' : (currentSubj === 'english' ? 'L1' : '100num')) : (currentSubj === 'math' ? 'division' : (currentSubj === 'english' ? 'L9' : '1')));
   const currentMode = urlParams.get('mode') || (isMinseo ? 'speed' : 'mixed');
 
   // 퀘스트 데이터 바인딩 (quest_engine.js getSubjectQuest 호출)

@@ -185,6 +185,30 @@
     reset(child);
     check('패턴(...)은 pattern 분류', QM.classify({ word: 'There is a ... in the ...', wordType: '숙어' }) === 'pattern');
 
+    // 10) 민서(초1): 받아쓰기 제외 · 영어 '기초' 단원 · 문장 조립 3조각
+    const ms = [];
+    for (let i = 0; i < 6; i++) ms.push({ id: `k${i}`, word: `낱말${i}`, meaning: `뜻풀이${i}`, wordType: '단어', stage: '1단원 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어'], target: ['민서'] });
+    ms.push({ id: 'ks0', word: '친구와 함께 즐겁게 놀이터에서 그네를 탔어요.', meaning: '문장뜻', wordType: '문장', stage: '1단원 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어'], target: ['민서'] });
+    for (let i = 0; i < 10; i++) ms.push({ id: `d${i}`, word: `받아쓰기 문장 ${i}입니다.`, meaning: `1학년 2학기 받아쓰기 1회 ${i}번`, wordType: '문장', stage: '1회 (1. 기분을 말해요)', grades: ['1-2'], subject: ['국어', '받아쓰기'], target: ['민서'] });
+    for (let i = 0; i < 10; i++) ms.push({ id: `d1_${i}`, word: `여우${i}`, meaning: '동물 친구', stage: '1', grades: ['1-1'], subject: ['국어', '받아쓰기'], target: ['민서'] });
+    for (let i = 0; i < 10; i++) ms.push({ id: `e${i}`, word: `box${i}`, meaning: `상자${i}`, stage: 'L1', grades: ['기초'], subject: ['영어'], target: ['민서'] });
+    const msSel = (subjectKo, unit) => QM.selectUnitItems(ms, { childName: '민서', subjectKo, unit, semester: '1-2' });
+    const kor1 = msSel('국어', '1');
+    check('민서 국어 "1": 받아쓰기 회차 빼고 1단원 어휘만', kor1.length === 7 && kor1.every(it => it.stage.startsWith('1단원')), kor1.map(i => i.id));
+    check('민서 받아쓰기 회차를 직접 지정해도 받아쓰기 문장은 안 나옴', msSel('국어', '1회 (1. 기분을 말해요)').every(it => !it.id.startsWith('d')));
+    check('민서 영어 L1(학년 기초)은 학기 1-2여도 단원 전체', msSel('영어', 'L1').length === 10);
+    check('민수에게 민서 전용 단원 안 보임', QM.selectUnitItems(ms, { childName: '민수', subjectKo: '영어', unit: 'L1' }).length === 0);
+    const c3 = QM.chunkSentence('친구와 함께 즐겁게 놀이터에서 그네를 탔어요.', 3);
+    check('민서 문장 조립 ≤ 3조각', c3.length === 3 && c3.join(' ') === '친구와 함께 즐겁게 놀이터에서 그네를 탔어요.', c3);
+    reset('minseo');
+    kor1.forEach(it => setState('minseo', it.id, 6, '2026-10-14', '2026-10-14'));
+    const rMs = QM.buildRound({ child: 'minseo', items: kor1, subj: 'korean', today: '2026-10-15', rng: seeded(5) });
+    const scrMs = rMs.questions.filter(q => q.masteryType === 'scramble' && q.item.kind !== 'word');
+    check('민서 판: 5문제 · 3지선다 · 문장 조립 3조각 이하', rMs.questions.length === 5
+      && rMs.questions.every(q => { const o = (q.fill && q.fill.options) || q.options || []; return !o.length || o.length === 3; })
+      && scrMs.every(q => q.scramble.seq.length <= 3), rMs.questions.map(q => q.masteryType));
+    reset('minseo');
+
     const pass = results.filter(r => r.ok).length;
     const lines = results.map(r => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}${r.ok ? '' : '  ' + r.extra}`);
     lines.push(`\n${pass === results.length ? 'PASS' : 'FAIL'}: ${pass}/${results.length}`);

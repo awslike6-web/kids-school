@@ -22,6 +22,8 @@
   .qm-sentence{font-size:20px;font-weight:700;line-height:1.5;word-break:break-word}
   .qm-speaker{border:none;cursor:pointer;border-radius:18px;background:#facc15;color:#120924;font-weight:800;font-size:14px;padding:8px 14px;box-shadow:0 4px 0 0 #997300}
   .qm-speaker.qm-big{font-size:44px;width:120px;height:120px;border-radius:50%;padding:0}
+  .qm-opt:has(.qm-opt-say){display:flex;align-items:center}
+  .qm-opt-say{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-right:8px;border-radius:50%;background:#facc15;font-size:16px;vertical-align:middle;flex-shrink:0}
   .qm-speaker:active{transform:translateY(3px);box-shadow:0 1px 0 0 #997300}
   .qm-hint{font-size:13px;line-height:1.5;color:var(--qm-sub);background:rgba(250,204,21,.12);border:1px dashed #facc15;border-radius:14px;padding:8px 12px;width:100%;box-sizing:border-box;word-break:keep-all}
   .qm-hidden{display:none!important}
@@ -120,15 +122,24 @@
       setTimeout(() => hooks.onDone && hooks.onDone({ results: list, firstTry: list.every(r => r.firstTry) }), 650);
     };
     if (q.hintPolicy === 'always') showHint();
-    return { wrap, prompt, body, hint, state, speak, speakerBtn, onWrong, finish, showHint };
+    return { wrap, prompt, body, hint, state, hooks, speak, speakerBtn, onWrong, finish, showHint };
   }
 
   // ---------- 1. choice_audio (fill_blank 선택형도 공용) ----------
   function renderOptions(ui, q, options, answer) {
     const list = h('div', 'qm-options');
+    // 민서(초1) 국어: 긴 뜻풀이 보기를 혼자 읽기 어려우니 보기마다 🔊 읽어 주기 (누르면 듣기만, 고르기는 아님)
+    const readAloud = ui.hooks.theme === 'minseo' && q.lang === 'ko' && typeof ui.hooks.speak === 'function';
     options.forEach((opt, idx) => {
       const btn = h('button', 'qm-opt', esc(opt));
       btn.type = 'button';
+      if (readAloud) {
+        const say = h('span', 'qm-opt-say', '🔊');
+        say.setAttribute('role', 'button');
+        say.setAttribute('aria-label', '보기 읽어 주기');
+        say.onclick = e => { e.stopPropagation(); ui.hooks.speak(opt, 'ko'); };
+        btn.prepend(say);
+      }
       btn.onclick = () => {
         if (ui.state.finished) return;
         if (idx === answer) {
