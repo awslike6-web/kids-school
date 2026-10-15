@@ -280,6 +280,8 @@
     math: {
       title: "수학 분쇄 던전 · 초5 수학",
       icon: "🧮",
+      // 정적 문제은행 단원 이름 (노션에 없는 단원이라 은행 데이터와 함께 둔다)
+      unitTitles: { division: '두 자릿수 나눗셈', fraction: '5-2 분수의 곱셈 (심화)' },
       division: mathDivisionBank,
       fraction: mathFractionBank
     },

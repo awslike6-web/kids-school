@@ -85,7 +85,10 @@
         if (unit) {
           const round = QuestMastery.buildRound({ child: unit.child, items: unit.items, subj: currentSubj });
           masteryRound = { ...round, child: unit.child, items: unit.items };
-          currentQuest = { title: `${currentQuest.title} · 3·3·3 마스터리`, icon: currentQuest.icon, questions: round.questions };
+          // 제목 = 과목방 이름 + 실제로 불러온 노션 단원명
+          const brand = String(currentQuest.title).split(' · ')[0];
+          const unitName = QuestMastery.unitTitle(unit.items, unit.units);
+          currentQuest = { title: `${brand} · ${unitName || '3·3·3 마스터리'}`, icon: currentQuest.icon, questions: round.questions };
           document.getElementById('heartIcons').parentElement.classList.add('hidden');
         }
       } catch (e) {

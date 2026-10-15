@@ -5,7 +5,8 @@
  * - 노션 VOCA 캐시(localStorage `*_VOCA_CACHE_*`)에서 학생별·과목별 실제 단원을 찾아 칩으로 그린다.
  * - 학생 구분: `학생`이 비었거나 본인·`공통`인 항목만 그 학생 칩에 넣는다 (민서 단원이 민수 판에 새지 않게).
  * - 받아쓰기 회차(과목 `받아쓰기` 포함)도 칩으로 낸다 (정상 뜻풀이가 있으면 3·3·3 출제, 라벨 `📝 받아쓰기 N회`).
- * - 민수: 기본 뼈대 칩 뒤에 노션 단원 (맨 앞 번호로 중복 제거, 기존 동작 유지)
+ * - 민수: 영어·국어·과학·사회는 노션 단원 칩만 (라벨 = 노션 단원명, ⭐ = 그 단원에 `시험범위` 체크 항목이 있음).
+ *   노션 캐시가 비었을 때만 기본 뼈대 칩(BASE_UNITS)을 비상용으로 그린다. 수학은 정적 문제은행 칩.
  * - 민서: 노션 단원 칩을 앞에, 정적 문제은행 칩(phonics 등)을 뒤에 둔다.
  * - 선택·저장·묶음 규칙은 parent_progress_controller.js가 맡고, 여기서는 칩 DOM만 만든다.
  * ==============================================================================
@@ -18,7 +19,7 @@
   const SUBJECT_KEYS = [['영어', 'english'], ['과학', 'science'], ['사회', 'society'], ['국어', 'korean'], ['수학', 'math']];
   const CHIP_CLASS = 'parent-chip py-1.5 px-2 rounded-xl text-xs font-bold text-center border transition-all';
 
-  // 기본 교과 뼈대 칩 (노션 조회 전에도 보이는 칩, 민서는 정적 문제은행 quest_data_minseo.js와 짝)
+  // 기본 교과 뼈대 칩: 민서·수학은 정적 문제은행(quest_data_*.js)과 짝, 민수 노션 과목은 노션 캐시가 빌 때만 쓰는 비상용
   const BASE_UNITS = {
     minseo: {
       korean: [
@@ -105,10 +106,11 @@
    * 노션 VOCA 캐시 전수 탐색 → { units: {child: {subj: [{stage, semType}]}}, counts: {child: {'subj::단원': 어휘 수}} }
    */
   function collectNotionUnits() {
-    const units = {}, idSets = {};
+    const units = {}, idSets = {}, stars = {};
     Object.keys(CHILD_NAME).forEach(child => {
       units[child] = { english: [], science: [], society: [], korean: [], math: [] };
       idSets[child] = {};
+      stars[child] = {};
     });
     const seenRecord = new Set();
     for (let i = 0; i < localStorage.length; i++) {
@@ -131,10 +133,9 @@
             if (seenRecord.has(dupKey)) return;
             seenRecord.add(dupKey);
             units[child][subjKey].push({ stage, semType: semTypeOf(child, r, stage), isDictation });
-            if (r.id) {
-              const key = `${subjKey}::${stage}`;
-              (idSets[child][key] = idSets[child][key] || new Set()).add(r.id);
-            }
+            const key = `${subjKey}::${stage}`;
+            if (r.id) (idSets[child][key] = idSets[child][key] || new Set()).add(r.id);
+            if (r.examScope) stars[child][key] = true; // 노션 `시험범위` 체크 → 칩 ⭐
           });
         });
       });
@@ -143,10 +144,10 @@
     Object.keys(idSets).forEach(child => {
       counts[child] = Object.fromEntries(Object.entries(idSets[child]).map(([key, ids]) => [key, ids.size]));
     });
-    return { units, counts };
+    return { units, counts, stars };
   }
 
-  // "1단원 (1. 기분을 말해요)" → "1단원 기분을 말해요", "[센터 5-2] 14번 - …" → "14번 - …"
+  // "1단원 (1. 기분을 말해요)" → "1단원 기분을 말해요", "[센터 5-2] 14번 - …" → "14번 - …" (quest-mastery.js stageLabel과 같은 규칙)
   function prettyStage(stage) {
     return String(stage).replace(/^\[[^\]]*\]\s*/, '').replace(/\s*\(\d+\.\s*([^)]*)\)\s*$/, ' $1').trim();
   }
@@ -198,7 +199,21 @@
       return;
     }
 
-    // 민수: 기본 뼈대 → 노션에서 추가로 발견된 단원 (맨 앞 번호 기준 중복 제거)
+    // 민수 노션 과목: 노션 단원 칩만 (라벨·⭐·어휘 수 모두 노션에서). 캐시가 비면 아래 비상용 뼈대 칩으로
+    const stars = (found && found.stars && found.stars[child]) || {};
+    if (subj !== 'math' && discovered.length > 0) {
+      const seen = new Set();
+      discovered.forEach(item => {
+        if (seen.has(item.stage)) return;
+        seen.add(item.stage);
+        const key = `${subj}::${item.stage}`;
+        const label = `${prettyStage(item.stage)}${stars[key] ? ' ⭐' : ''}${counts[key] ? ` · ${counts[key]}개` : ''}`;
+        container.appendChild(makeChip(child, subj, item.stage, item.semType || '5-2', label, o.onPick(item.stage, true)));
+      });
+      return;
+    }
+
+    // 민수 수학(정적 문제은행) 또는 노션 캐시가 빈 경우: 기본 뼈대 → 노션에서 추가로 발견된 단원 (맨 앞 번호 기준 중복 제거)
     const seenUnitNumbers = new Set();
     baseUnits.forEach(item => {
       const uNum = leadingNumber(item.unit) || String(item.unit).trim();
@@ -217,16 +232,33 @@
     });
   }
 
-  // 저장된 단원값 → 칩 라벨 ('📒 ' 머리표 제거). 번호로 저장된 값("1")은 맨 앞 번호가 같은 칩 라벨을 쓴다. 칩이 없으면 null
+  // 저장된 단원값 → 표시 이름 ('📒 ' 머리표·'· N개' 꼬리 제거).
+  // 칩을 아직 안 그렸으면 노션 캐시에서 단원명을 찾는다. 번호로 저장된 값("3", "L9")은 맨 앞 번호가 같은 단원 중 어휘가 가장 많은 단원.
   function labelOf(child, subj, unit) {
     const book = labelBook[child] || {};
-    let label = book[`${subj}::${unit}`];
+    const clean = label => label.replace(/^(📒|📝)\s*/, '').replace(/\s·\s\d+개$/, '');
     const num = leadingNumber(unit);
-    if (!label && num && String(unit).trim() === num) {
-      const hit = Object.keys(book).find(k => k.startsWith(`${subj}::`) && leadingNumber(k.slice(subj.length + 2)) === num);
+    const isBare = num && /^\s*L?\d+\s*(단원)?\s*$/i.test(String(unit));
+    // 번호 키 "3"은 "3. 온도와 열"처럼 그 번호로 바로 시작하는 단원을 "3-1. …"(하위 차시)보다 먼저 고른다
+    const rank = st => {
+      const s = String(st).trim().replace(/^L/i, '');
+      return (s === num || [`${num}.`, `${num} `, `${num}단원`].some(p => s.startsWith(p))) ? 0 : 1;
+    };
+    let label = book[`${subj}::${unit}`];
+    if (!label && isBare) {
+      const hit = Object.keys(book).filter(k => k.startsWith(`${subj}::`) && leadingNumber(k.slice(subj.length + 2)) === num)
+        .sort((a, b) => rank(a.slice(subj.length + 2)) - rank(b.slice(subj.length + 2)))[0];
       label = hit && book[hit];
     }
-    return label ? label.replace(/^(📒|📝)\s*/, '') : null;
+    if (label) return clean(label);
+    const found = collectNotionUnits();
+    const counts = found.counts[child] || {};
+    const stages = [...new Set(((found.units[child] || {})[subj] || []).map(it => it.stage))];
+    const match = stages.includes(String(unit)) ? String(unit)
+      : (isBare ? stages.filter(st => leadingNumber(st) === num)
+        .sort((a, b) => (rank(a) - rank(b)) || ((counts[`${subj}::${b}`] || 0) - (counts[`${subj}::${a}`] || 0)))[0] : null);
+    if (!match) return null;
+    return `${prettyStage(match)}${(found.stars[child] || {})[`${subj}::${match}`] ? ' ⭐' : ''}`;
   }
 
   window.ParentUnitChips = { BASE_UNITS, collectNotionUnits, renderSubjectChips, labelOf, prettyStage };

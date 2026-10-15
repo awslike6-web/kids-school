@@ -421,18 +421,9 @@
       selected.push(combinedMain[selected.length % combinedMain.length]);
     }
 
-    let questTitle = sData.title;
-    if (subj === 'math') {
-      questTitle = curUnit === 'fraction' ? "수학 분쇄 던전 · 5-2 분수의 곱셈 (심화)" : "수학 분쇄 던전 · 두 자릿수 나눗셈 (기본 진도 ⭐)";
-    } else if (subj === 'english') {
-      const matchL = String(curUnit).match(/^L?(\d+)$/i);
-      const uNum = matchL ? matchL[1] : curUnit;
-      questTitle = `스피킹 콜로세움 · ${uNum}단원 (${curUnit}) 실전 퀘스트 ⭐`;
-    } else if (subj === 'science') {
-      questTitle = curUnit === '3' ? "볼케이노 코어 · 3단원 온도와 열 (열의 이동 ⭐)" : (curUnit === '2' ? "볼케이노 코어 · 2단원 상태변화·지시약" : "볼케이노 코어 · 1단원 혼합물의 분리");
-    } else if (subj === 'society') {
-      questTitle = curUnit === '2' ? "고대 유물 지도 · 2단원 문화발전·이순신 ⭐" : "고대 유물 지도 · 1단원 조선 건국·한양 도성";
-    }
+    // 제목 = 과목방 이름 + 단원 이름 (정적 문제은행 단원은 은행의 unitTitles, 그 외는 노션 캐시의 실제 단원명)
+    const unitName = (sData.unitTitles && sData.unitTitles[curUnit]) || notionUnitName('minsu', subj, curUnit);
+    const questTitle = unitName ? `${String(sData.title).split(' · ')[0]} · ${unitName}` : sData.title;
 
     return {
       title: questTitle,
@@ -452,6 +443,17 @@
       [order[i], order[j]] = [order[j], order[i]];
     }
     return { ...q, options: order.map(i => q.options[i]), answer: order.indexOf(q.answer) };
+  }
+
+  // 노션 VOCA 캐시에서 단원 키에 해당하는 실제 단원명 (quest-mastery.js가 없거나 못 찾으면 '')
+  function notionUnitName(child, subj, unitKey) {
+    const QM = window.QuestMastery;
+    if (!QM || !QM.SUBJECT_KO[subj] || !unitKey) return '';
+    const childName = child === 'minseo' ? '민서' : '민수';
+    const settings = getParentQuestSettings(child) || {};
+    const cached = synth() ? synth().getNotionCachedVocaList(child) : [];
+    const items = QM.selectUnitItems(cached, { childName, subjectKo: QM.SUBJECT_KO[subj], unit: unitKey, semester: settings.semester || '' });
+    return QM.unitTitle(items, QM.parseUnitList(unitKey));
   }
 
   function getSubjectQuest(subj, unitScope = '', mode = 'mixed', customUser = '') {

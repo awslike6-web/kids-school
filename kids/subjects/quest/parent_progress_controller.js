@@ -12,7 +12,7 @@
 (function(window) {
   'use strict';
 
-  // 1. 단원 친절 메타 명칭 사전 (Zero Hardcoding 기반 표시 라벨 매핑)
+  // 1. 정적 문제은행 단원 표시명 (민서 정적 칩·수학만. 노션 단원은 노션 단원명을 그대로 쓴다)
   const UNIT_META_MAP = {
     minseo: {
       korean: {
@@ -34,41 +34,8 @@
       math: {
         division: '두 자릿수 나눗셈 ⭐',
         fraction: '5-2 분수의 곱셈'
-      },
-      english: {
-        'L9': '9단원 집·방 묘사 (L9) ⭐',
-        'L8': '8단원 외모 묘사 (L8)',
-        'L7': '7단원 길찾기 (L7)',
-        'L6': '6단원 (L6)',
-        'L5': '5단원 (L5)',
-        'L4': '4단원 (L4)',
-        'L3': '3단원 (L3)',
-        'L2': '2단원 (L2)',
-        'L1': '1단원 (L1)',
-        '9': '9단원 집·방 묘사 ⭐',
-        '8': '8단원 외모 묘사',
-        '7': '7단원 길찾기',
-        '6': '6단원 (L6)',
-        '5': '5단원 (L5)',
-        '4': '4단원 (L4)',
-        '3': '3단원 (L3)',
-        '2': '2단원 (L2)',
-        '1': '1단원 (L1)'
-      },
-      korean: {
-        '1': '1단원 어휘·속담 ⭐',
-        '2': '2단원 문맥·독해'
-      },
-      science: {
-        '1': '1단원 혼합물의 분리',
-        '2': '2단원 상태변화·지시약',
-        '3': '3단원 온도와 열 (열의 이동) ⭐'
-      },
-      society: {
-        '1': '1단원 조선 건국·한양 ⭐',
-        '2': '2단원 문화발전·이순신',
-        '3': '3단원 유교문화·민족의 시련'
       }
+      // 영어·국어·과학·사회 단원 이름은 노션 단원명에서 가져온다 (ParentUnitChips.labelOf)
     }
   };
 
@@ -265,13 +232,15 @@
     }
   }
 
-  // 민서 단원 표시명: 칩 라벨 → 정적 메타 → 노션 단원명 정리
-  function minseoUnitName(subj, unit) {
+  // 단원 표시명: 노션 단원명(칩 라벨·캐시) → 정적 문제은행 이름 → 저장값 정리
+  function unitDisplayName(child, subj, unit) {
     const Chips = window.ParentUnitChips;
-    return (Chips && Chips.labelOf('minseo', subj, unit))
-      || (UNIT_META_MAP.minseo[subj] && UNIT_META_MAP.minseo[subj][unit])
-      || (Chips ? Chips.prettyStage(unit) : unit);
+    return (Chips && Chips.labelOf(child, subj, unit))
+      || (UNIT_META_MAP[child][subj] && UNIT_META_MAP[child][subj][unit])
+      || (Chips ? Chips.prettyStage(unit) : String(unit));
   }
+  const minseoUnitName = (subj, unit) => unitDisplayName('minseo', subj, unit);
+  const minsuUnitName = (subj, unit) => unitDisplayName('minsu', subj, Array.isArray(unit) ? unit[0] : unit);
 
   // 9. 단원 칩 가시성 및 배지 렌더링
   function renderParentProgressChips() {
@@ -380,31 +349,10 @@
       return `📚 ${list.length}개 묶음: ${list.map(u => u.replace(/^\[[^\]]*\]\s*/, '').split(' - ')[0]).join('·')}`;
     };
 
-    const bMinuMath = document.getElementById('badgeMinsuMath');
-    if (bMinuMath) {
-      bMinuMath.textContent = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[minsuSets.math]) || minsuSets.math;
-    }
-    const bMinuEng = document.getElementById('badgeMinsuEnglish');
-    if (bMinuEng) {
-      const u = minsuSets.english;
-      const meta = UNIT_META_MAP.minsu.english;
-      const numMatch = String(u).match(/\d+/);
-      const uNum = numMatch ? numMatch[0] : u;
-      const label = (meta && (meta[u] || meta[uNum] || meta['L' + uNum])) || `${uNum}단원 (${u})`;
-      bMinuEng.textContent = bundleBadge(u, label);
-    }
-    const bMinuKor = document.getElementById('badgeMinsuKorean');
-    if (bMinuKor) {
-      bMinuKor.textContent = bundleBadge(minsuSets.korean, (UNIT_META_MAP.minsu.korean && UNIT_META_MAP.minsu.korean[minsuSets.korean]) || `${minsuSets.korean}단원`);
-    }
-    const bMinuSci = document.getElementById('badgeMinsuScience');
-    if (bMinuSci) {
-      bMinuSci.textContent = bundleBadge(minsuSets.science, (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[minsuSets.science]) || `${minsuSets.science}단원`);
-    }
-    const bMinuSoc = document.getElementById('badgeMinsuSociety');
-    if (bMinuSoc) {
-      bMinuSoc.textContent = bundleBadge(minsuSets.society, (UNIT_META_MAP.minsu.society && UNIT_META_MAP.minsu.society[minsuSets.society]) || `${minsuSets.society}단원`);
-    }
+    [['Math', 'math'], ['English', 'english'], ['Korean', 'korean'], ['Science', 'science'], ['Society', 'society']].forEach(([cap, subj]) => {
+      const badge = document.getElementById(`badgeMinsu${cap}`);
+      if (badge) badge.textContent = bundleBadge(minsuSets[subj], minsuUnitName(subj, minsuSets[subj]));
+    });
 
     const chkMinsuRev1 = document.getElementById('chkMinsuReviewSem1');
     if (chkMinsuRev1) chkMinsuRev1.checked = !!minsuSets.includeReviewSem1;
@@ -583,13 +531,9 @@
       if (rec) rec.textContent = `💡 오늘의 추천 진도: ${korName} & ${mathName} (필수 ⭐)`;
     } else {
       const sets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
-      const mathName = (UNIT_META_MAP.minsu.math && UNIT_META_MAP.minsu.math[sets.math]) || sets.math;
-      const sciName = (UNIT_META_MAP.minsu.science && UNIT_META_MAP.minsu.science[sets.science]) || `${sets.science}단원`;
-      const engU = Array.isArray(sets.english) ? sets.english.join('+') : sets.english;
-      const engMeta = UNIT_META_MAP.minsu.english;
-      const engNumMatch = String(engU).match(/\d+/);
-      const engNum = engNumMatch ? engNumMatch[0] : engU;
-      const engName = (engMeta && (engMeta[engU] || engMeta[engNum] || engMeta['L' + engNum])) || `${engNum}단원 (${engU})`;
+      const mathName = minsuUnitName('math', sets.math);
+      const sciName = minsuUnitName('science', sets.science);
+      const engName = minsuUnitName('english', sets.english);
       if (qSub) qSub.textContent = `🧮 ${mathName} · 필수 ⭐`;
       if (rec) rec.textContent = `💡 오늘의 권장 진도: 🔤 ${engName} & 🔬 ${sciName}`;
     }

@@ -221,6 +221,11 @@
     const rd = QM.buildRound({ child, items: d12, subj: 'korean', today: '2026-10-16', rng: seeded(4) });
     check('뜻 고르기 문제는 상세설명이 없으면 힌트(=정답) 숨김', rd.questions.filter(q => q.masteryType === 'choice_audio' && !q.reverse).every(q => q.hint === ''));
     reset(child);
+    // 11) 노션 단원명 기반 제목
+    check('단원 표시명: 센터 접두·괄호 정리', QM.stageLabel('[센터 5-2] 14번 - 하늘을 나는 열기구') === '14번 - 하늘을 나는 열기구' && QM.stageLabel('1단원 (1. 기분을 말해요)') === '1단원 기분을 말해요' && QM.stageLabel('3. 온도와 열') === '3. 온도와 열');
+    check('제목: 단일 단원 = 노션 단원명', QM.unitTitle([{ stage: 'L9' }, { stage: 'L9' }], ['L9']) === 'L9');
+    check('제목: 번호 느슨 매칭 = 가장 큰 단원 외 N개', QM.unitTitle([{ stage: '3. 온도와 열' }, { stage: '3. 온도와 열' }, { stage: '3-1. 물' }], ['3']) === '3. 온도와 열 외 1개');
+    check('제목: 묶음 = N개 단원 묶음', QM.unitTitle([{ stage: 'a' }, { stage: 'b' }], ['a', 'b']) === '📚 2개 단원 묶음');
     check('패턴(...)은 pattern 분류', QM.classify({ word: 'There is a ... in the ...', wordType: '숙어' }) === 'pattern');
 
     // 10) 민서(초1): 받아쓰기 제외 · 영어 '기초' 단원 · 문장 조립 3조각

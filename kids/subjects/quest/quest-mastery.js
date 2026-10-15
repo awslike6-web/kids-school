@@ -210,6 +210,21 @@
     return items.filter(it => keep.has(it.id));
   }
 
+  // ---------- 노션 단원명 → 화면 표시 이름 (퀘스트 제목·배지) ----------
+  // "[센터 5-2] 14번 - …" → "14번 - …", "1단원 (1. 기분을 말해요)" → "1단원 기분을 말해요" (parent_unit_chips.js prettyStage와 같은 규칙)
+  function stageLabel(stage) {
+    return String(stage || '').replace(/^\[[^\]]*\]\s*/, '').replace(/\s*\(\d+\.\s*([^)]*)\)\s*$/, ' $1').trim();
+  }
+  // 로드된 항목의 실제 단원명으로 제목: 묶음 → "N개 단원 묶음", 번호 느슨 매칭으로 여러 단원 → "가장 큰 단원 외 N개"
+  function unitTitle(items, units) {
+    const list = items || [];
+    if ((units || []).length > 1) return `📚 ${units.length}개 단원 묶음`;
+    const size = st => list.filter(it => it.stage === st).length;
+    const stages = [...new Set(list.map(it => it.stage).filter(Boolean))].sort((a, b) => size(b) - size(a));
+    if (stages.length === 0) return '';
+    return stages.length === 1 ? stageLabel(stages[0]) : `${stageLabel(stages[0])} 외 ${stages.length - 1}개`;
+  }
+
   // ---------- 동적 스테이지 분할 ----------
   function sortItems(items) {
     return [...items].sort((a, b) =>
@@ -718,7 +733,7 @@
     SUBJECT_KO, SILVER, GOLD,
     todayStr, daysBetween, parseMastery, formatMastery,
     loadStore, saveStore, mergeRemote, syncFromRecords,
-    classify, isSourceTag, koreanTier, misspellingsOf, pickBlankToken, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
+    classify, stageLabel, unitTitle, isSourceTag, koreanTier, misspellingsOf, pickBlankToken, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
     levelOf, isLv3Eligible, isRusty,
     buildRound, applyResult, pushChanges, getProgressSummary, loadUnit,
     isEligibleSubject: subj => Object.prototype.hasOwnProperty.call(SUBJECT_KO, subj)
