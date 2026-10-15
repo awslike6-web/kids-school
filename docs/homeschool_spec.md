@@ -27,7 +27,7 @@
 ### 3) 공용 공간 (kids/common_space/) & 5분 퀘스트 & 정적 데이터 (kids/data/)
 * lobby.html: 패밀리 통합 로비 및 일일 시간표 모니터.
 * quest_runner.html: 전 과목 5분 퀘스트 메인 러너 (4+1 듀오링고 출제, 수학 손글씨 메모장, 사료 돋보기 탑재).
-* kids/subjects/quest/: quest_engine.js(핵심 출제 엔진), quest_data_minsu.js, quest_data_minseo.js.
+* kids/subjects/quest/: quest_engine.js(핵심 출제 엔진), quest_notion_synth.js(노션 어휘·교재 문제 합성·수학 무한 암산), quest_data_minsu.js, quest_data_minseo.js.
 * kids/common_space/my-room.html: 인벤토리 및 보상 상점.
 * kids/data/: 학기별 단원별 문제 정적 데이터셋.
 

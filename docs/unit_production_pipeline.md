@@ -39,14 +39,14 @@ flowchart LR
 ### 2) 노션 용어사전(VOCA DB) 자동 합성 원칙
 * **저장 위치**: 노션 VOCA DB (`375a27115b688038b686d3994ee12919`)
 * **핵심 필드**: `단어`(title), `뜻풀이`(rich_text), `초성힌트`(rich_text), `과목`(multi_select), `학생`(multi_select), `단원`(rich_text/number), `이미지파일`(files/url), `인터랙티브 링크`(url)
-* **엔진 동작**: `quest_engine.js`의 `buildVocaQuestionsFromNotion`이 당일 로컬 캐시(`MINMIN_VOCA_CACHE_V11_`)를 읽어 런타임에 4지선다 문제를 실시간 자동 조립함 (코드 수정 불필요).
+* **엔진 동작**: `quest_notion_synth.js`의 `buildVocaQuestionsFromNotion`이 당일 로컬 캐시(`MINMIN_VOCA_CACHE_V11_`)를 읽어 런타임에 4지선다 문제를 실시간 자동 조립함 (코드 수정 불필요).
 * **안티그래비티 자동화**: 부모님이 노트북LM 추출 텍스트를 대화창에 전달하면, 내부 파이썬 스크립트(`scripts/sync_*_voca_notion.py`) 또는 노션 API를 통해 안티그래비티가 VOCA DB에 원클릭으로 일괄 자동 전송.
 * **철벽 학년 가드**: `source === 'notion_voca'` 속성을 부여하여 초1 민서와 초5 민수의 어휘가 절대 섞이지 않도록 완전 격리.
 
 ### 3) 노션 교재·사료 마스터 DB 연동 및 퀵체인지 2.0 원칙
 * **저장 위치**: 노션 교재·사료 마스터 DB (`3e8a27115b68806d94bfc81e9b3435fa`)
 * **역할 및 용도**: 사회 역사 유물/지도, 과학 실험/관찰 사진 자료 및 관련 4지선다 퀴즈 저장.
-* **엔진 동작**: `quest_engine.js`의 `buildCurriculumQuestionsFromNotion`이 교재 마스터 캐시를 읽어 1~3번 진도 드릴 슬롯에 실전 사진 퀴즈를 1~2문제 자동 융합 출제.
+* **엔진 동작**: `quest_notion_synth.js`의 `buildCurriculumQuestionsFromNotion`이 교재 마스터 캐시를 읽어 1~3번 진도 드릴 슬롯에 실전 사진 퀴즈를 1~2문제 자동 융합 출제.
 * **퀵체인지 2.0 (`admin-image-changer.html`) 캐시 즉시 무효화**:
   - 관리자 퀵체인지 화면에서 깃허브 사진 푸시나 노션 데이터 갱신 시 `VOCA_CACHE` 및 `CURRICULUM_CACHE` 로컬 스토리지를 즉각 자동 삭제(`removeItem`)하여 0초 만에 공부방 화면 및 5분 퀘스트에 실시간 반영.
 

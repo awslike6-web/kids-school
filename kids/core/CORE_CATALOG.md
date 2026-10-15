@@ -189,6 +189,18 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
 
 ---
 
+### 🌟 `quest_engine.js` + `quest_notion_synth.js` (기존 4+1 출제 엔진, 2026-10-15 분리: 939줄 → 약 500줄 + 약 470줄)
+골디락스 절대 상한(800줄 미만)에 맞춰 문제 합성부를 동작 변경 없이 떼어 냈습니다. 두 파일은 늘 함께 로드합니다(`quest_engine.js` → `quest_notion_synth.js`). 서로의 함수를 호출할 때 전역에서 찾으므로 로드 시점 의존은 없습니다.
+- **`quest_engine.js`** (전역 함수): 세로 분수 `renderFrac`·`renderMixed`·`formatFractions`, 라이트너 오답 큐 `getAdaptiveQueue`·`saveAdaptiveQueue`·`recordWrongItem`·`recordCorrectItem`, 학년 가드 `isValidQuestionForChild`, `getNormalizedChildId`, `getParentQuestSettings`, `NEXT_UNIT_MAP`, 4+1 출제 `getSubjectQuest(subj, unitScope, mode, customUser)`(내부 `buildSubjectQuest` + 보기 섞기 `withShuffledOptions`), 단원 팩 로더 `loadCustomUnitPack`.
+- **`quest_notion_synth.js`** (전역 `window.QuestNotionSynth` + 기존 전역 유지):
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `getNotionCachedVocaList(child)` | 당일 VOCA 캐시(`_loadVocaFromCache` → localStorage `_VOCA_CACHE_`) 레코드 배열. 전역으로도 노출(`quest-mastery.js`가 사용) |
+  | `buildVocaQuestionsFromNotion(child, subj, unitKey?, {semesterScope?})` | VOCA 캐시로 4지선다 최대 5문제 합성(뜻→낱말 70% / 낱말→뜻 30%). 전역으로도 노출 |
+  | `buildCurriculumQuestionsFromNotion(child, subj, unitKey?)` | 사회 사료·과학 실험 탐구 퀴즈 최대 2문제 (`QuestNotionSynth`로만 노출) |
+  | `generateDynamicMentalMath(child, unitKey?)` | 수학 무한 랜덤 암산 1문제 (민수 분수 곱셈·나눗셈, 민서 10 만들기·덧셈) |
+- 새 출제 경로를 만들 때도 `getSubjectQuest`를 거쳐야 `withShuffledOptions`가 적용됩니다.
+
 ### 🌟 `quest-mastery.js` (3·3·3 듀오링고형 마스터리 엔진, 약 580줄)
 VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. DOM 조작 없이 동적 스테이지 분할·숙련도 계산·슬롯 배치·노션 동기화를 담당합니다. 수학·사료 퀴즈·민서 정적 뱅크·노션에 없는 단원(3개 미만)은 기존 `quest_engine.js` 4+1로 자동 폴백합니다. `?engine=classic`으로 강제 폴백.
 - **민서(초1)** (2026-10-15): 영어 L1~L10(학년 `기초`)·국어 1단원 노션 단원이 3·3·3 대상입니다. 받아쓰기 회차(과목 `받아쓰기` 포함)는 뜻풀이가 출처 표시라 `selectUnitItems`에서 항상 제외합니다. 민서 판은 `ctx.maxChunks = 3`이라 문장 조립이 최대 3조각입니다(민수는 5).
@@ -216,7 +228,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - `renderProgressHeader(container, summary, meta, theme)`: 상단 광물 진척도 바.
 
 ### 🌟 `quest_runner.html` 러너 모듈 분리 (2026-10-15, 1,474줄 → HTML 592줄 + 2개 IIFE)
-골디락스 절대 상한(800줄 미만)에 맞춰 인라인 스크립트를 동작 변경 없이 분리했습니다. HTML에는 마크업·테마 CSS와 `window.addEventListener('DOMContentLoaded', QuestRunner.boot)` 연결부만 남습니다. 로드 순서: `quest_engine.js` → `quest-mastery.js` → `quest-ui-renderer.js` → 문제 은행 → **`quest-runner-ui.js` → `quest-runner.js`**.
+골디락스 절대 상한(800줄 미만)에 맞춰 인라인 스크립트를 동작 변경 없이 분리했습니다. HTML에는 마크업·테마 CSS와 `window.addEventListener('DOMContentLoaded', QuestRunner.boot)` 연결부만 남습니다. 로드 순서: `quest_engine.js` → `quest_notion_synth.js` → `quest-mastery.js` → `quest-ui-renderer.js` → 문제 은행 → **`quest-runner-ui.js` → `quest-runner.js`**.
 - **`quest-runner-ui.js`** (약 270줄, 전역 `window.QuestRunnerUI`): Web Audio 효과음 `playSound(tap|correct|wrong|fanfare)`, `applyChildTheme`, 과목 심화관 버튼 라벨 `applyDeepTrainingLabels`·경로 `deepTrainingUrl`, `setMathMemoVisible`, 모달 `showModal/hideModal` + 민서 스킨(`skinRevengeModalForMinseo`·`skinClearModalForMinseo`·`skinExitModalForMinseo`), 수학 손글씨 메모장, 사진 확대 라이트박스.
 - **`quest_engine.js` `getSubjectQuest`** (2026-10-15): 4+1 결과의 보기를 매번 섞고 정답 번호를 다시 매깁니다(`withShuffledOptions`). 정적 뱅크가 정답을 첫 보기(`answer: 0`)에 적어 두어, 섞지 않으면 정답이 늘 1번이던 버그를 막습니다. 원본 뱅크 객체는 바꾸지 않습니다.
 - **`quest-runner.js`** (약 570줄, 전역 `window.QuestRunner = { boot }`): URL 파싱·`getSubjectQuest` 바인딩, 가디언 학습 상태 표시, 3·3·3 마스터리 연결부(`bootQuest`·`renderMasteryQuestion`·`handleMasteryDone`), 기존 4+1 렌더링·채점·하트·리벤지, `showClearModal`(`QuestMastery.pushChanges` → `grantRewardAndShowUI(3, true)` → `sendStudyLogToNotion`), `StudyActivity.setPhase/recordCorrect` 연동.
