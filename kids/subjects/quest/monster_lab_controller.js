@@ -316,7 +316,7 @@
       if (qTitle) qTitle.textContent = '오늘의 5분 요정 퀘스트 시작! 🧸';
 
       const qSub = document.getElementById('mainQuestSub');
-      if (qSub) qSub.textContent = '🧮 1-2 100까지 수 & 덧셈 던전 · 필수 ⭐';
+      if (qSub) qSub.textContent = '🚀 오늘의 퀘스트를 준비하고 있어요'; // 곧 진도판 설정(과목·단원)으로 바뀜
 
       const modalIconEl = document.getElementById('modalIcon');
       const modalRecBox = document.getElementById('modalRecommendBox');
@@ -403,7 +403,7 @@
       if (qTitle) qTitle.textContent = '오늘의 5분 몬스터 던전 입장! 🚀';
 
       const qSub = document.getElementById('mainQuestSub');
-      if (qSub) qSub.textContent = '🧮 5-2 두 자릿수 나눗셈 집중 연산 · 필수 ⭐';
+      if (qSub) qSub.textContent = '🚀 오늘의 퀘스트를 준비하고 있어요'; // 곧 진도판 설정(과목·단원)으로 바뀜
 
       const modalIconEl = document.getElementById('modalIcon');
       const modalRecBox = document.getElementById('modalRecommendBox');
@@ -450,11 +450,13 @@
     }
   }
 
-  // 6. 메인 시작 버튼 (민수: 두 자릿수 나눗셈, 민서: 100까지 수 & 덧셈)
+  // 6. 메인 시작 버튼: 부모 진도판의 '오늘의 큰 버튼 과목'으로 출격 (지정이 없으면 수학)
   function handleStartQuest() {
     pokeSound('launch');
     triggerHaptic(50);
-    selectSubject('math');
+    const child = isMinseo ? 'minseo' : 'minsu';
+    const subj = (typeof window.getMainQuestSubject === 'function' && window.getMainQuestSubject(child)) || 'math';
+    selectSubject(subj);
   }
 
   // 7. 서랍 제어

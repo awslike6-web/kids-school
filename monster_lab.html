@@ -428,6 +428,20 @@
 
       <!-- 👧 민서 진도 설정 영역 (스크롤 가능) -->
       <div id="parentMinseoSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0">
+        <!-- 🚀 오늘의 큰 버튼 과목 (메인 젤리 버튼이 이 과목·단원으로 출격) -->
+        <div class="bg-lab-card/60 p-2.5 rounded-2xl border border-lab-card-border space-y-1.5">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-bold text-pink-300 flex items-center gap-1">
+              <span>🚀</span><span>오늘의 큰 버튼 과목</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-bold">기본: 수학</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1" id="minseoMainSubjectGroup">
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="math" onclick="setMainSubject('minseo', 'math')">🧮 수학</button>
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="korean" onclick="setMainSubject('minseo', 'korean')">📖 국어</button>
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="english" onclick="setMainSubject('minseo', 'english')">🔤 영어</button>
+          </div>
+        </div>
         <!-- 👧 민서 학기/과정 범위 알약 필터 탭 -->
         <div class="bg-lab-card/60 p-2.5 rounded-2xl border border-lab-card-border space-y-1.5">
           <div class="flex items-center justify-between px-1">
@@ -500,6 +514,22 @@
 
       <!-- 👦 민수 진도 설정 영역 (스크롤 가능) -->
       <div id="parentMinsuSettings" class="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0 hidden">
+        <!-- 🚀 오늘의 큰 버튼 과목 (메인 젤리 버튼이 이 과목·단원으로 출격) -->
+        <div class="bg-lab-card/60 p-2.5 rounded-2xl border border-lab-card-border space-y-1.5">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-bold text-neon-cyan flex items-center gap-1">
+              <span>🚀</span><span>오늘의 큰 버튼 과목</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-bold">기본: 수학</span>
+          </div>
+          <div class="grid grid-cols-5 gap-1" id="minsuMainSubjectGroup">
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="math" onclick="setMainSubject('minsu', 'math')">🧮 수학</button>
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="english" onclick="setMainSubject('minsu', 'english')">🔤 영어</button>
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="korean" onclick="setMainSubject('minsu', 'korean')">📖 국어</button>
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="science" onclick="setMainSubject('minsu', 'science')">🔬 과학</button>
+            <button type="button" class="py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all" data-main-subj="society" onclick="setMainSubject('minsu', 'society')">🗺️ 사회</button>
+          </div>
+        </div>
         <!-- 👦 민수 학기/과정 범위 알약 필터 탭 -->
         <div class="bg-lab-card/60 p-2.5 rounded-2xl border border-lab-card-border space-y-1.5">
           <div class="flex items-center justify-between px-1">

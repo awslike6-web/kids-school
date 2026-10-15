@@ -191,6 +191,24 @@
   }
   const combinableUnits = new Set();
 
+  // 7-2. 🚀 오늘의 큰 버튼 과목: 부모가 고른 과목·단원으로 메인 젤리 버튼이 출격한다 (기본 수학 = 이전 동작)
+  const MAIN_SUBJECTS = { minsu: ['math', 'english', 'korean', 'science', 'society'], minseo: ['math', 'korean', 'english'] };
+  const SUBJECT_INFO = { math: ['🧮', '수학'], english: ['🔤', '영어'], korean: ['📖', '국어'], science: ['🔬', '과학'], society: ['🗺️', '사회'] };
+
+  function getMainQuestSubject(child) {
+    const subj = (currentParentSettings[child] || {}).mainSubject;
+    return MAIN_SUBJECTS[child] && MAIN_SUBJECTS[child].includes(subj) ? subj : 'math';
+  }
+
+  function setMainSubject(child, subj) {
+    if (!MAIN_SUBJECTS[child] || !MAIN_SUBJECTS[child].includes(subj)) return;
+    if (!currentParentSettings[child]) currentParentSettings[child] = {};
+    currentParentSettings[child].mainSubject = subj;
+    playUiPop();
+    renderParentProgressChips();
+    updateMainQuestSubText();
+  }
+
   // 8. 🔄 단원 칩 빌드 (칩 DOM·노션 캐시 탐색은 parent_unit_chips.js, 여기서는 선택 규칙만 연결)
   function syncDynamicUnitChips() {
     try {
@@ -244,6 +262,15 @@
 
   // 9. 단원 칩 가시성 및 배지 렌더링
   function renderParentProgressChips() {
+    // 0) 🚀 오늘의 큰 버튼 과목 강조
+    [['minseo', 'bg-[#ff85a2] text-white border-[#ff85a2] shadow-sm'], ['minsu', 'bg-neon-green text-[#023300] border-neon-green shadow-sm']].forEach(([child, onClass]) => {
+      const main = getMainQuestSubject(child);
+      document.querySelectorAll(`#${child}MainSubjectGroup button[data-main-subj]`).forEach(btn => {
+        const on = btn.getAttribute('data-main-subj') === main;
+        btn.className = `py-1.5 px-1 rounded-xl text-xs font-bold text-center border transition-all ${on ? onClass : 'bg-lab-bg/80 text-gray-400 border-lab-card-border hover:text-white'}`;
+      });
+    });
+
     // 1) 👧 민서 렌더링
     const minseoSets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
     const minseoSem = minseoSets.semester || '1-2';
@@ -517,26 +544,18 @@
     alert('🎉 부모 진도 설정이 저장되었습니다!\n다음 퀘스트부터 4+1 듀오링고 출제에 자동 반영됩니다. ✨');
   }
 
-  // 13. 메인 젤리 버튼 서브텍스트 갱신
+  // 13. 메인 젤리 버튼 서브텍스트 갱신: 오늘의 큰 버튼 과목 + 그 과목에 저장된 단원 이름
   function updateMainQuestSubText() {
     const qSub = document.getElementById('mainQuestSub');
     const rec = document.getElementById('modalRecommend');
-    const isCurrentMinseoLocal = (typeof window.isMinseo !== 'undefined') ? window.isMinseo : false;
-
-    if (isCurrentMinseoLocal) {
-      const sets = currentParentSettings.minseo || DEFAULT_PARENT_SETTINGS.minseo;
-      const korName = minseoUnitName('korean', sets.korean);
-      const mathName = minseoUnitName('math', sets.math);
-      if (qSub) qSub.textContent = `🧮 1-2 ${mathName} · 필수 ⭐`;
-      if (rec) rec.textContent = `💡 오늘의 추천 진도: ${korName} & ${mathName} (필수 ⭐)`;
-    } else {
-      const sets = currentParentSettings.minsu || DEFAULT_PARENT_SETTINGS.minsu;
-      const mathName = minsuUnitName('math', sets.math);
-      const sciName = minsuUnitName('science', sets.science);
-      const engName = minsuUnitName('english', sets.english);
-      if (qSub) qSub.textContent = `🧮 ${mathName} · 필수 ⭐`;
-      if (rec) rec.textContent = `💡 오늘의 권장 진도: 🔤 ${engName} & 🔬 ${sciName}`;
-    }
+    const child = ((typeof window.isMinseo !== 'undefined') ? window.isMinseo : false) ? 'minseo' : 'minsu';
+    const sets = currentParentSettings[child] || DEFAULT_PARENT_SETTINGS[child];
+    const subj = getMainQuestSubject(child);
+    const [icon, subjKo] = SUBJECT_INFO[subj];
+    const unit = sets[subj];
+    const name = Array.isArray(unit) && unit.length > 1 ? `📚 ${unit.length}개 단원 묶음` : unitDisplayName(child, subj, Array.isArray(unit) ? unit[0] : unit);
+    if (qSub) qSub.textContent = `${icon} ${subjKo} · ${name}`;
+    if (rec) rec.textContent = `💡 오늘의 큰 버튼: ${icon} ${subjKo} · ${name}`;
   }
 
   // 전역 인터페이스 노출
@@ -556,6 +575,8 @@
   window.switchParentTab = switchParentTab;
   window.saveParentProgressSettings = saveParentProgressSettings;
   window.updateMainQuestSubText = updateMainQuestSubText;
+  window.getMainQuestSubject = getMainQuestSubject;
+  window.setMainSubject = setMainSubject;
 
   // DOMContentLoaded 시 자동 동기화 1회 실행
   document.addEventListener('DOMContentLoaded', () => {

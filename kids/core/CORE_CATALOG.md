@@ -162,6 +162,7 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | `closeParentProgressModal()` | - | 설정창 닫기 및 메인 퀘스트 부제목 갱신 |
   | `setParentUnit(child, subject, unit)` | 단원 문자열 | 단일 단원 선택 (기존 방식) |
   | `toggleParentUnit(child, subject, unit, combinable)` | - | 다중 단원 묶음 토글 (2026-10-15) |
+  | `setMainSubject(child, subj)` / `getMainQuestSubject(child)` | 과목 키 | 🚀 오늘의 큰 버튼 과목 (2026-10-16). 진도판 맨 위 칩에서 고르고 설정의 `mainSubject`로 저장, 기본 `math`. 메인 젤리 버튼(`handleStartQuest`)이 이 과목·저장된 단원으로 출격하고, 버튼 아래 글씨는 `과목 · 노션 단원명`(`updateMainQuestSubText`) |
 - **다중 단원 묶음**:
   - 묶을 수 있는 칩: 수학을 제외한 민수 과목에서, 노션 VOCA `단원`명과 정확히 일치하는 칩(예: `[센터 5-2] 14번 - …`, `L9`). 최대 4개까지 누르면 묶이고, 칩 아래 요약 줄에 "N개 단원 묶음 · 어휘 합계"가 표시됩니다.
   - 번호형 기본 칩(`1`, `3` 등)을 누르면 기존처럼 단일 선택으로 돌아갑니다.
