@@ -171,7 +171,7 @@
 
   const NEXT_UNIT_MAP = {
     minseo: {
-      korean: { current: 'batchim', next: 'dictation', batchim: 'dictation', dictation: 'voca', voca: 'batchim' },
+      korean: { current: 'dictation', next: 'voca', dictation: 'voca', voca: 'dictation' },
       math: { current: '100num', next: 'addsub', '100num': 'addsub', addsub: 'shapes', shapes: '100num' },
       english: { current: 'phonics', next: 'abc', phonics: 'abc', abc: 'greetings', greetings: 'phonics' }
     },
@@ -238,7 +238,7 @@
     if (isMinseo) {
       const bank = window.minseoMasterBank || {};
       const mData = bank[subj] || bank.math || { title: "캔디 수학 놀이터", icon: "🧮" };
-      const currentUnitKey = (activeUnit && mData[activeUnit]) ? activeUnit : (subj === 'korean' ? 'batchim' : (subj === 'math' ? '100num' : 'phonics'));
+      const currentUnitKey = (activeUnit && mData[activeUnit]) ? activeUnit : (subj === 'korean' ? 'dictation' : (subj === 'math' ? '100num' : 'phonics'));
       const nextMap = (NEXT_UNIT_MAP.minseo && NEXT_UNIT_MAP.minseo[subj]) ? NEXT_UNIT_MAP.minseo[subj] : {};
       const nextUnitKey = nextMap[currentUnitKey] || (nextMap.current === currentUnitKey ? nextMap.next : null);
 

@@ -22,7 +22,6 @@
   const BASE_UNITS = {
     minseo: {
       korean: [
-        { unit: 'batchim', label: '받침 글자 (기본 문제)', sem: '1-2' },
         { unit: 'dictation', label: '받아쓰기 100 (기본 문제)', sem: '1-2' },
         { unit: 'voca', label: '그림 낱말 탐험 (기본 문제)', sem: '1-1,basic' }
       ],

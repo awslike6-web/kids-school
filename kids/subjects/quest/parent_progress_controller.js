@@ -16,7 +16,6 @@
   const UNIT_META_MAP = {
     minseo: {
       korean: {
-        batchim: '받침 글자 (2~3단원 추천) ⭐',
         dictation: '받아쓰기 100문장',
         voca: '그림 낱말 탐험'
       },
