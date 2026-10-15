@@ -163,6 +163,30 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
 
 ---
 
+### 🌟 `quest-mastery.js` (3·3·3 듀오링고형 마스터리 엔진, 약 580줄)
+VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. DOM 조작 없이 동적 스테이지 분할·숙련도 계산·슬롯 배치·노션 동기화를 담당합니다. 수학·사료 퀴즈·민서 정적 뱅크·노션에 없는 단원(3개 미만)은 기존 `quest_engine.js` 4+1로 자동 폴백합니다. `?engine=classic`으로 강제 폴백.
+- **파일 위치**: `kids/subjects/quest/quest-mastery.js` (전역 `window.QuestMastery`)
+- **규칙**: count 0~2 Lv.1 / 3~5 Lv.2 / 6 🥈(당일 `silverDate`, 그날은 승급 잠금) / 다음 날부터 6~8 Lv.3 / 9 👑(노션 `달성` true). 녹슨 왕관(금메달 후 2일+) 오답 시 count 5·`달성` false.
+- **스테이지**: `max(1, round(n/10))`개, `시험범위` 체크 항목을 앞 스테이지에 우선 배치, 단어·문장 비례 배분. 숙련도는 노션 페이지 `id` 기준이라 스테이지 재편 시에도 유실 없음.
+- **동기화**: 단원 로드 시 `fetchVocaUnitFresh` Pull → 미전송·10분 내 전송분만 Max-Merge 보호, 그 외 원격 기준. 5문제 완주 시 변경분만 `updateVocaMasteryProgress` 비동기 PATCH, 실패분은 다음 판 재전송.
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `loadUnit({child, subj, unit})` | 당일 캐시 + 노션 최신 Pull 병합, 단원 항목 반환 (3개 미만이면 null) |
+  | `buildRound({child, items, subj, today?, rng?})` | 1판 5문제 + `meta {activeStage, totalStages, isTodayAllSilver}` |
+  | `applyResult(child, question, [{id, firstTry}])` | 첫 시도 정답만 +1, 당일 은메달 잠금·녹슨 왕관 강등 반영 |
+  | `pushChanges(child)` | 변경 단어만 노션 '숙련도'/'달성' PATCH (Non-blocking) |
+  | `getProgressSummary(child, items)` | 🪨 돌 / 🟫 구리 / 🥈 은 / 💎 다이아 개수 |
+- **검증**: `scripts/verify_quest_mastery.html` (브라우저) 또는 `node scripts/verify_quest_mastery.js`
+
+### 🌟 `quest-ui-renderer.js` (4대 에러리스 인터랙션 렌더러, 약 350줄)
+- **파일 위치**: `kids/subjects/quest/quest-ui-renderer.js` (전역 `window.QuestUIRenderer`)
+- `render(container, question, {theme, speak, onPraise, onEncourage, onDone})`: `choice_audio`(Lv.1 원문+힌트 / Lv.2 영어는 🔊만, 국·사·과는 뜻→용어), `match_3x3`(터치 매칭 소거), `fill_blank`(철자 블록 / 예문·문장 빈칸 3지선다), `scramble`(알파벳·음절 / 문장 최대 5청크).
+- 오답 시 빨간 X·경고음·하트 없음. 틀린 블록은 슬롯에 넣지 않고 정답 블록에 노란 테두리 + `shake`.
+- `renderProgressHeader(container, summary, meta, theme)`: 상단 광물 진척도 바.
+
+---
+
 ## 2-3. 📖 국어 멀티버스 전담 엔진군 (Korean Multiverse Engines)
 
 전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,807줄의 비대했던 `korean_common.js`를 1개의 초경량 대문 파사드와 4개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.

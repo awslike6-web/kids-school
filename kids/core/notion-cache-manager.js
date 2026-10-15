@@ -66,6 +66,9 @@
                 subject: r.subject || [],
                 target: r.target || [],
                 isAchieved: !!r.isAchieved,
+                examScope: !!r.examScope,
+                mastery: r.mastery || "",
+                createdTime: r.createdTime || null,
                 hint: r.hint || "",
                 areaZone: r.areaZone || ""
             }));

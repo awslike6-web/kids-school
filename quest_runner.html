@@ -338,8 +338,11 @@
       <span class="text-xs font-eng text-gray-400 font-bold" id="stepCounter">문제 1 / 5</span>
     </div>
 
+    <!-- 🧠 3·3·3 마스터리 광물 진척도 (어휘 단원일 때만 노출) -->
+    <div id="masteryProgress" class="hidden"></div>
+
     <!-- 문제 카드 -->
-    <div class="bg-lab-card border-2 border-lab-card-border rounded-3xl p-5 shadow-2xl relative">
+    <div id="classicQuestionCard" class="bg-lab-card border-2 border-lab-card-border rounded-3xl p-5 shadow-2xl relative">
       
       <!-- 오디오 듣기 버튼 (영어 및 국어 듣기 문제일 때 노출) -->
       <div id="audioPlayWrapper" class="hidden mb-3">
@@ -382,6 +385,9 @@
     <div id="choicesList" class="space-y-2.5 pt-1">
       <!-- 동적 생성 -->
     </div>
+
+    <!-- 🎨 3·3·3 마스터리 4대 UI 무대 (quest-ui-renderer.js) -->
+    <div id="masteryStage" class="hidden"></div>
 
   </main>
 
@@ -570,6 +576,8 @@
   <script src="./kids/core/fairy-engine.js"></script>
   <!-- 🚀 5분 퀘스트 코어 엔진 & 문제 은행 데이터 모듈 로드 -->
   <script src="./kids/subjects/quest/quest_engine.js"></script>
+  <script src="./kids/subjects/quest/quest-mastery.js"></script>
+  <script src="./kids/subjects/quest/quest-ui-renderer.js"></script>
   <script src="./kids/subjects/quest/quest_data_minsu.js"></script>
   <script src="./kids/subjects/quest/quest_data_minseo.js"></script>
 
@@ -754,9 +762,99 @@
       renderQuestion();
     }
 
+    // ========================================================
+    // 🧠 3·3·3 마스터리 연결부 (quest-mastery.js + quest-ui-renderer.js)
+    // - VOCA_DB 어휘 단원이면 마스터리 판, 아니면 기존 4+1 그대로 (수학·사료·민서 정적 뱅크)
+    // ========================================================
+    let masteryRound = null;
+
+    async function bootQuest() {
+      const canMastery = window.QuestMastery && window.QuestUIRenderer && urlParams.get('engine') !== 'classic'
+        && QuestMastery.isEligibleSubject(currentSubj);
+      if (canMastery) {
+        document.getElementById('questionText').textContent = '단원 진도를 불러오는 중이에요... ⏳';
+        try {
+          const unit = await QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit });
+          if (unit) {
+            const round = QuestMastery.buildRound({ child: unit.child, items: unit.items, subj: currentSubj });
+            masteryRound = { ...round, child: unit.child, items: unit.items };
+            currentQuest = { title: `${currentQuest.title} · 3·3·3 마스터리`, icon: currentQuest.icon, questions: round.questions };
+            document.getElementById('heartIcons').parentElement.classList.add('hidden');
+          }
+        } catch (e) {
+          console.warn('[3·3·3 마스터리] 기존 퀘스트로 진행합니다:', e);
+          masteryRound = null;
+        }
+      }
+      initScreen();
+    }
+
+    function renderMasteryProgress() {
+      const box = document.getElementById('masteryProgress');
+      const summary = QuestMastery.getProgressSummary(masteryRound.child, masteryRound.items);
+      QuestUIRenderer.renderProgressHeader(box, summary, masteryRound.meta, isMinseo ? 'minseo' : 'minsu');
+      box.classList.remove('hidden');
+    }
+
+    function renderMasteryQuestion(q) {
+      document.getElementById('stepCounter').textContent = `문제 ${currentIndex + 1} / ${currentQuest.questions.length}`;
+      document.getElementById('progressBar').style.width = `${((currentIndex + 1) / currentQuest.questions.length) * 100}%`;
+      ['classicQuestionCard', 'choicesList'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('checkAnswerBtn').parentElement.classList.add('hidden');
+      document.getElementById('feedbackSheet').classList.add('hidden');
+      document.getElementById('cheerSpeech').textContent = q.isRustyReview
+        ? '"반짝이던 왕관에 먼지가 쌓였어! 다시 닦아 보자! 👑"'
+        : (isMinseo ? '"천천히 해도 괜찮아! 힌트를 보면서 해보자! 🌸"' : '"틀려도 괜찮아! 힌트를 보고 스스로 찾아봐! ⚡"');
+      renderMasteryProgress();
+      const stage = document.getElementById('masteryStage');
+      stage.classList.remove('hidden');
+      QuestUIRenderer.render(stage, q, {
+        theme: isMinseo ? 'minseo' : 'minsu',
+        speak: (text, lang) => {
+          if (lang === 'en' && typeof speakEnglish === 'function') return speakEnglish(text);
+          if (typeof speakFairyTTS === 'function') speakFairyTTS(text, null, { forceVoice: lang === 'en' ? 'en-US-JennyNeural' : 'ko-KR-SunHiNeural' });
+        },
+        onPraise: () => { playSound('correct'); if (typeof fairyPraise === 'function') fairyPraise(); },
+        onEncourage: () => { if (typeof fairyEncourage === 'function') fairyEncourage(); },
+        onDone: result => handleMasteryDone(q, result)
+      });
+    }
+
+    function handleMasteryDone(q, result) {
+      const changed = QuestMastery.applyResult(masteryRound.child, q, result.results);
+      result.results.forEach(r => {
+        if (r.firstTry) window.StudyActivity?.recordCorrect?.(`${guardianAttemptId}:${q.id}:${r.id}`);
+      });
+      if (!result.firstTry) {
+        sessionWrongLogs.push({ q: q.q, chosen: '힌트 보고 해결', answer: q.items ? q.items.map(i => i.word).join(', ') : q.item.word });
+      }
+      renderMasteryProgress();
+
+      const after = changed.map(c => c.after.c);
+      let title = isMinseo ? '참 잘했어요! 🌸' : '좋아! 해냈어! 🎉';
+      let desc = result.firstTry ? '첫 번에 성공! 숙련도 +1 ⬆️' : '힌트를 보고 스스로 해결했어요! 다음엔 첫 번에 도전! 💪';
+      if (q.noCredit) desc = '복습 완료! 오늘은 은메달 상한선이라 내일 승급할 수 있어요 🥈';
+      if (after.includes(QuestMastery.SILVER) && changed.some(c => c.before.c < QuestMastery.SILVER)) desc = '🥈 은메달 달성! 내일 다시 오면 금메달 도전이 열려요!';
+      if (after.includes(QuestMastery.GOLD) && changed.some(c => c.before.c < QuestMastery.GOLD)) desc = '👑 금메달 마스터! 완벽하게 외웠어요!';
+      if (q.isRustyReview && !result.firstTry) desc = '왕관을 다시 닦아야 해요. 은메달 직전 단계에서 다시 키워 보자! ✨';
+
+      const box = document.getElementById('feedbackBox');
+      box.className = isMinseo
+        ? 'max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-[#ff6584] bg-[#fff5f8] text-[#4a2e2b] space-y-3'
+        : 'max-w-md mx-auto p-5 rounded-t-3xl shadow-2xl border-t-4 border-neon-green bg-[#112d14] text-white space-y-3';
+      document.getElementById('feedbackTitle').textContent = title;
+      document.getElementById('feedbackDesc').textContent = desc;
+      document.getElementById('feedbackIconWrapper').textContent = result.firstTry ? '✨' : '💡';
+      document.getElementById('nextStepBtn').className = isMinseo
+        ? 'jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-[#ff7597] text-white shadow-[0_4px_0_0_#d8496e]'
+        : 'jelly-btn w-full py-3.5 rounded-2xl font-bold text-base text-center bg-neon-green text-[#023300] shadow-[0_4px_0_0_#045300]';
+      document.getElementById('feedbackSheet').classList.remove('hidden');
+    }
+
     function renderQuestion() {
       if (window.StudyActivity?.setPhase && window.__guardianStudyPhase !== 'quiz') window.StudyActivity.setPhase('quiz');
       const q = currentQuest.questions[currentIndex];
+      if (q && q.masteryType) return renderMasteryQuestion(q);
       selectedOptionIndex = null;
       isAnswerChecked = false;
 
@@ -1121,6 +1219,12 @@
     // 5문제 완독 모달 (노션 인벤토리 보상 DB + 노션 학습일지 DB 자동 전송)
     async function showClearModal() {
       if (window.StudyActivity?.setPhase) window.StudyActivity.setPhase('paused');
+      // 🧠 완주 시 변경된 단어만 노션 VOCA_DB '숙련도'/'달성' 백그라운드 동기화 (Non-blocking)
+      if (masteryRound) {
+        QuestMastery.pushChanges(masteryRound.child)
+          .then(r => console.log(`[3·3·3 마스터리 동기화] 전송 ${r.sent}건 / 실패 ${r.failed}건`))
+          .catch(e => console.warn('[3·3·3 마스터리 동기화 알림]', e));
+      }
       playSound('fanfare');
       if (typeof fairyReward === 'function') {
         fairyReward();
@@ -1364,7 +1468,7 @@
     }
 
     // 초기 실행
-    window.addEventListener('DOMContentLoaded', initScreen);
+    window.addEventListener('DOMContentLoaded', bootQuest);
   </script>
 </body>
 </html>

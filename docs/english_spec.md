@@ -334,5 +334,6 @@ graph TD
 ## 9. 5분 퀘스트 영어 특화 규격 (Zero-Typing Phonics & Jenny Audio SSOT)
 * **음성 파이프라인 일원화**: 브라우저 날것의 `window.speechSynthesis` 호출을 엄격히 금지하며, 영문 어휘 및 지문 읽기는 반드시 `speakEnglish(text)`를 호출하여 `en-US-JennyNeural` (0.85x 감속 배속) 스트리밍으로 출력.
 * **4지선다 어휘 자동 조립**: `quest_engine.js`가 노션 VOCA DB의 영어 핵심 어휘(`rec.word`, `rec.meaning`)를 읽어 음성 지원 객관식 드릴을 자동 합성.
+* **3·3·3 마스터리 (2026-10-15~)**: VOCA_DB 단원(L1~L9 등)은 `quest-mastery.js` + `quest-ui-renderer.js`로 출제. 슬롯 1~2 단어(Lv.1이면 2번은 3:3 짝맞추기), 3 문장/숙어(없으면 단어), 4 녹슨 왕관 → 이전 Stage 은메달 → 현재 Stage, 5 최고 레벨 승급 도전. Lv.3 조립은 한 판 최대 2개. `There is a ... in the ...` 같은 `...` 패턴 항목은 조립 대신 뜻→표현 선택으로 출제.
 * **청각 처리 지연 배려**: 단어 카드를 누르면 즉시 원어민 발음을 다시 들려주며, 15초 타이머 강제를 배제하고 아이가 충분히 듣고 선택할 수 있도록 보장.
 

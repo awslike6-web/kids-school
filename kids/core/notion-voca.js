@@ -48,6 +48,8 @@ function parseVocaPage(page) {
         target: p["학생"]?.multi_select?.map(item => item.name) || [],
         isAchieved: p["달성"]?.checkbox || false,
         isMastered: p["달성"]?.checkbox || false, // '달성' 필드 기반 마스터 여부 동기화
+        examScope: p["시험범위"]?.checkbox || false,
+        mastery: p["숙련도"]?.rich_text?.map(t => t.plain_text).join("") || "", // "count|silverDate|lastReviewed"
         areaZone: p["영역 분류"]?.select?.name || "",
         hint: p["초성힌트"]?.rich_text?.[0]?.plain_text || "",
         quiz: p["퀴즈제시"]?.rich_text?.[0]?.plain_text || ""
@@ -141,6 +143,9 @@ function _saveVocaToCache(studentName, dbId, records) {
             subject: r.subject || [],
             target: r.target || [],
             isAchieved: !!r.isAchieved,
+            examScope: !!r.examScope,
+            mastery: r.mastery || "",
+            createdTime: r.createdTime || null,
             hint: r.hint || "",
             areaZone: r.areaZone || ""
         }));
@@ -407,6 +412,83 @@ async function updateVocaMasteryStatus(pageId, isMastered) {
     }
 }
 
+/**
+ * 5분 퀘스트 숙련도 Pull 전용: 학생·과목(·단원) 서버 필터로 좁혀 당일 로컬 캐시 없이 노션 행을 읽는다.
+ * 일 단위 로컬 캐시(_saveVocaToCache)는 건드리지 않는다. 실패 시 null 반환.
+ *
+ * @param {Object} options
+ * @param {string} options.studentName - "민수" | "민서"
+ * @param {string} [options.subject] - "영어" 등 과목(multi_select contains)
+ * @param {string} [options.unit] - 단원 정확 일치(rich_text equals). 생략 시 과목 전체
+ * @param {number} [options.timeoutMs=4000]
+ */
+async function fetchVocaUnitFresh(options = {}) {
+    const filters = [];
+    if (options.studentName) filters.push({ property: "학생", multi_select: { contains: options.studentName } });
+    if (options.subject) filters.push({ property: "과목", multi_select: { contains: options.subject } });
+    if (options.unit) filters.push({ property: "단원", rich_text: { equals: String(options.unit) } });
+
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), options.timeoutMs || 4000) : null;
+    let results = [];
+    let cursor;
+    try {
+        do {
+            const body = { page_size: 100 };
+            if (filters.length === 1) body.filter = filters[0];
+            else if (filters.length > 1) body.filter = { and: filters };
+            if (cursor) body.start_cursor = cursor;
+            // 배포된 Worker는 Pragma 헤더(CORS)와 ?force(노션 400)를 받지 않으므로 기본 요청을 쓴다.
+            // 엣지 캐시(최대 5분) 지연은 quest-mastery.js의 최근 전송 보호 규칙이 흡수한다.
+            const res = await fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body),
+                signal: controller ? controller.signal : undefined
+            });
+            if (!res.ok) throw new Error(`노션 VOCA 단원 조회 오류 (상태: ${res.status})`);
+            const data = await res.json();
+            results = results.concat(data.results || []);
+            cursor = data.has_more ? data.next_cursor : null;
+        } while (cursor);
+        return results.map(parseVocaPage);
+    } catch (e) {
+        console.warn("[fetchVocaUnitFresh] 최신 숙련도 조회 실패 (로컬 상태로 진행):", e);
+        return null;
+    } finally {
+        if (timer) clearTimeout(timer);
+    }
+}
+
+/**
+ * 5분 퀘스트 숙련도 Push: '숙련도' 텍스트(+선택적으로 '달성')를 한 번에 PATCH.
+ * @param {string} pageId
+ * @param {string} masteryText - "count|silverDate|lastReviewed"
+ * @param {boolean|null} [isAchieved] - null이면 '달성'은 건드리지 않음
+ */
+async function updateVocaMasteryProgress(pageId, masteryText, isAchieved = null) {
+    if (!pageId) return false;
+    const savedName = localStorage.getItem('currentUserName');
+    if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
+        console.log(`🛠️ [마스터 프리패스] 관리자 모드이므로 숙련도 동기화를 생략합니다.`);
+        return true;
+    }
+    const properties = { "숙련도": { rich_text: [{ text: { content: String(masteryText) } }] } };
+    if (isAchieved === true || isAchieved === false) properties["달성"] = { checkbox: isAchieved };
+    try {
+        const res = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ properties })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return true;
+    } catch (e) {
+        console.error("❌ VOCA 숙련도 업데이트 실패:", e);
+        return false;
+    }
+}
+
 // ========================================================
 // 🌐 전역(window) 명시적 노출 (5분 퀘스트 및 서브 모듈 연동용)
 // ========================================================
@@ -417,6 +499,8 @@ if (typeof window !== 'undefined') {
     window.prefetchVocaData = prefetchVocaData;
     window.clearVocaCache = clearVocaCache;
     window.updateVocaMasteryStatus = updateVocaMasteryStatus;
+    window.fetchVocaUnitFresh = fetchVocaUnitFresh;
+    window.updateVocaMasteryProgress = updateVocaMasteryProgress;
     window.parseVocaPage = parseVocaPage;
     window.VOCA_DB_ID = VOCA_DB_ID;
 }

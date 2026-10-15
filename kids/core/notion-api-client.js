@@ -62,6 +62,8 @@
             target: p["학생"]?.multi_select?.map(item => item.name) || [],
             isAchieved: p["달성"]?.checkbox || false,
             isMastered: p["달성"]?.checkbox || false,
+            examScope: p["시험범위"]?.checkbox || false,
+            mastery: p["숙련도"]?.rich_text?.map(t => t.plain_text).join("") || "", // "count|silverDate|lastReviewed"
             areaZone: p["영역 분류"]?.select?.name || "",
             hint: p["초성힌트"]?.rich_text?.[0]?.plain_text || "",
             quiz: p["퀴즈제시"]?.rich_text?.[0]?.plain_text || ""

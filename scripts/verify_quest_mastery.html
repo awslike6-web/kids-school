@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quest Mastery Verify</title>
+  <style>body{background:#111;color:#eee;font:13px/1.5 monospace;padding:16px}pre{white-space:pre-wrap}</style>
+</head>
+<body>
+  <pre id="out">running...</pre>
+  <script>
+    // 캐시 무력화: 항상 최신 엔진·검증 스크립트를 로드
+    const v = Date.now();
+    document.write(`<script src="../kids/subjects/quest/quest-mastery.js?v=${v}"><\/script>`);
+    document.write(`<script src="./verify_quest_mastery.js?v=${v}"><\/script>`);
+  </script>
+</body>
+</html>
