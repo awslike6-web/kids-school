@@ -177,7 +177,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
   | `applyResult(child, question, [{id, firstTry}])` | 첫 시도 정답만 +1, 당일 은메달 잠금·녹슨 왕관 강등 반영 |
   | `pushChanges(child)` | 변경 단어만 노션 '숙련도'/'달성' PATCH (Non-blocking) |
   | `getProgressSummary(child, items)` | 🪨 돌 / 🟫 구리 / 🥈 은 / 💎 다이아 개수 |
-- **검증**: `scripts/verify_quest_mastery.html` (브라우저) 또는 `node scripts/verify_quest_mastery.js`
+- **검증**: `scripts/verify_quest_mastery.html` (브라우저, 이 PC에는 Node 없음) 또는 Node가 있는 환경에서 `node scripts/verify_quest_mastery.js`. 작업 절차·함정은 스킬 `quest-engine-spec` 참고
 
 ### 🌟 `quest-ui-renderer.js` (4대 에러리스 인터랙션 렌더러, 약 350줄)
 - **파일 위치**: `kids/subjects/quest/quest-ui-renderer.js` (전역 `window.QuestUIRenderer`)
@@ -754,6 +754,18 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ---
 
 ## 10. 🧭 에이전트 내비게이션 & 개발 도구 (Agent Navigation & Dev Tools)
+
+### 🌟 에이전트 진입 파일 & 작업별 스킬 (2026-10-15)
+여러 AI 도구가 같은 헌법을 읽도록 연결 파일만 두고, 본문은 한 벌만 유지합니다.
+- **`AGENTS.md`** (Codex 등 공통 진입): `GEMINI.md` → 상위 `../GEMINI.md` → 본 카탈로그 순서로 읽으라는 안내와 이 PC의 실행·검증 메모(Node 없음, Worker 403·CORS 함정, 운영 DB 보호). 규칙 본문은 쓰지 않습니다.
+- **`CLAUDE.md`** (Claude Code 자동 로드): `@GEMINI.md`, `@AGENTS.md` 불러오기만 합니다.
+- **작업별 스킬**: 원본 `.agent/skills/<스킬>/SKILL.md`, Claude Code용 사본 `.claude/skills/`. 스킬에는 작업 절차·함정만 두고, 파일·API 사실 정보는 본 카탈로그를 가리킵니다.
+  - `quest-engine-spec`: 5분 퀘스트 3·3·3 마스터리 작업 절차·검증·함정
+- **`scripts/sync_agent_skills.py`**: 원본을 사본으로 복사하고, `--check` 모드에서는 두 벌이 다르면 목록과 함께 종료 코드 1을 냅니다(줄바꿈 차이는 무시).
+  ```bash
+  python scripts/sync_agent_skills.py          # 원본 → 사본 동기화
+  python scripts/sync_agent_skills.py --check  # 커밋 전 일치 확인
+  ```
 
 ### 🌟 `scripts/agent_navi.py` (에이전트 스마트 내비게이션 & 아키텍처 라우터)
 본 카탈로그(`CORE_CATALOG.md`)를 실시간으로 직접 파싱하여, 에이전트가 작업 목표를 입력했을 때 최적의 부품 레시피, 권장 경로, 거버넌스 가드를 0.05초 만에 안내하는 스마트 GPS 도구입니다.
