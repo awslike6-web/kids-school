@@ -23,12 +23,15 @@
   const currentSubj = urlParams.get('subject') || 'math';
   const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
   const parentSettings = (typeof getParentQuestSettings === 'function') ? getParentQuestSettings(currentUser) : null;
-  const configuredUnit = parentSettings && parentSettings[currentSubj];
+  // 다중 단원 묶음은 배열(부모 설정) 또는 '|' 결합 문자열(URL)로 들어온다 → '|' 문자열로 통일
+  const rawConfiguredUnit = parentSettings && parentSettings[currentSubj];
+  const configuredUnit = Array.isArray(rawConfiguredUnit) ? rawConfiguredUnit.join('|') : rawConfiguredUnit;
   const currentUnit = urlParams.get('unit') || configuredUnit || (isMinseo ? (currentSubj === 'korean' ? 'voca' : (currentSubj === 'english' ? 'phonics' : '100num')) : (currentSubj === 'math' ? 'division' : (currentSubj === 'english' ? 'L9' : '1')));
   const currentMode = urlParams.get('mode') || (isMinseo ? 'speed' : 'mixed');
 
   // 퀘스트 데이터 바인딩 (quest_engine.js getSubjectQuest 호출)
-  let currentQuest = getSubjectQuest(currentSubj, currentUnit, currentMode, currentUser);
+  // 기존 4+1 경로는 단일 단원만 알아들으므로 묶음이면 첫 단원으로 폴백 출제
+  let currentQuest = getSubjectQuest(currentSubj, String(currentUnit).split('|')[0], currentMode, currentUser);
 
   // 실제 입력이 계측되지 않거나 전송이 실패하면 화면에서 확인할 수 있습니다.
   const guardianStatus = document.createElement('p');

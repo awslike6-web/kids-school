@@ -160,6 +160,13 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | :--- | :--- | :--- |
   | `openParentProgressModal()` | - | 부모 진도 관리판 모달 열기 및 최신 설정 동기화 |
   | `closeParentProgressModal()` | - | 설정창 닫기 및 메인 퀘스트 부제목 갱신 |
+  | `setParentUnit(child, subject, unit)` | 단원 문자열 | 단일 단원 선택 (기존 방식) |
+  | `toggleParentUnit(child, subject, unit, combinable)` | - | 다중 단원 묶음 토글 (2026-10-15) |
+- **다중 단원 묶음**:
+  - 묶을 수 있는 칩: 수학을 제외한 민수 과목에서, 노션 VOCA `단원`명과 정확히 일치하는 칩(예: `[센터 5-2] 14번 - …`, `L9`). 최대 4개까지 누르면 묶이고, 칩 아래 요약 줄에 "N개 단원 묶음 · 어휘 합계"가 표시됩니다.
+  - 번호형 기본 칩(`1`, `3` 등)을 누르면 기존처럼 단일 선택으로 돌아갑니다.
+  - 저장 형식: 묶음은 **배열**, 단일은 기존 **문자열** 그대로입니다. 출격 URL(`monster_lab_controller.js`)에서는 `|`로 이어 붙입니다. 단원명에 쉼표가 있으므로 쉼표 구분은 쓰지 않습니다.
+  - 단원 번호 비교와 칩 중복 제거는 단원명 **맨 앞** 번호(`getLeadingUnitNumber`)만 씁니다. 첫 숫자를 쓰면 `[센터 5-2] 14번`이 학년 숫자 5로 잡혀, 센터 칩이 1개로 합쳐지거나 단일 선택 시 전부 선택된 것처럼 보이던 문제가 있었습니다.
 
 ---
 
@@ -172,7 +179,9 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `loadUnit({child, subj, unit})` | 당일 캐시 + 노션 최신 Pull 병합, 단원 항목 반환 (3개 미만이면 null) |
+  | `loadUnit({child, subj, unit})` | 당일 캐시 + 노션 최신 Pull 병합, 단원 항목 반환 (3개 미만이면 null). `unit`은 문자열·`\|` 결합 문자열·배열 모두 가능, 반환에 `units`·`unitKey`(정렬 후 `+` 결합) 포함 |
+  | `parseUnitList(unit)` | 단원 설정값 → 단원명 목록 (배열 / `\|` 결합 / 단일) |
+  | `dedupeHeadwords(items, store)` | 띄어쓰기 무시 표제어가 같으면 숙련도 높은 항목 1개만 남김 (묶음 단원의 `칠전팔기` 등) |
   | `buildRound({child, items, subj, today?, rng?})` | 1판 5문제 + `meta {activeStage, totalStages, isTodayAllSilver}` |
   | `applyResult(child, question, [{id, firstTry}])` | 첫 시도 정답만 +1, 당일 은메달 잠금·녹슨 왕관 강등 반영 |
   | `pushChanges(child)` | 변경 단어만 노션 '숙련도'/'달성' PATCH (Non-blocking) |

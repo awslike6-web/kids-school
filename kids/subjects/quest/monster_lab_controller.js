@@ -488,7 +488,9 @@
 
     const childKey = isMinseo ? 'minseo' : 'minsu';
     const settings = window.currentParentSettings || {};
-    const chosenUnit = (settings[childKey] && settings[childKey][subj]) ? settings[childKey][subj] : '';
+    const rawUnit = (settings[childKey] && settings[childKey][subj]) ? settings[childKey][subj] : '';
+    // 다중 단원 묶음(배열)은 '|'로 이어 URL에 싣는다 (단원명에 쉼표가 있어 쉼표 구분 불가)
+    const chosenUnit = Array.isArray(rawUnit) ? rawUnit.join('|') : rawUnit;
 
     setTimeout(() => {
       const targetUrl = `quest_runner.html?subject=${encodeURIComponent(subj)}&user=${encodeURIComponent(currentChild)}${chosenUnit ? `&unit=${encodeURIComponent(chosenUnit)}` : ''}`;

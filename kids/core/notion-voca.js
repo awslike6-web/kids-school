@@ -420,13 +420,18 @@ async function updateVocaMasteryStatus(pageId, isMastered) {
  * @param {string} options.studentName - "민수" | "민서"
  * @param {string} [options.subject] - "영어" 등 과목(multi_select contains)
  * @param {string} [options.unit] - 단원 정확 일치(rich_text equals). 생략 시 과목 전체
+ * @param {string[]} [options.units] - 여러 단원 묶음 (각각 정확 일치를 or로 묶어 요청 1회)
  * @param {number} [options.timeoutMs=4000]
  */
 async function fetchVocaUnitFresh(options = {}) {
     const filters = [];
     if (options.studentName) filters.push({ property: "학생", multi_select: { contains: options.studentName } });
     if (options.subject) filters.push({ property: "과목", multi_select: { contains: options.subject } });
-    if (options.unit) filters.push({ property: "단원", rich_text: { equals: String(options.unit) } });
+    if (Array.isArray(options.units) && options.units.length > 0) {
+        filters.push({ or: options.units.map(u => ({ property: "단원", rich_text: { equals: String(u) } })) });
+    } else if (options.unit) {
+        filters.push({ property: "단원", rich_text: { equals: String(options.unit) } });
+    }
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
     const timer = controller ? setTimeout(() => controller.abort(), options.timeoutMs || 4000) : null;

@@ -10,7 +10,8 @@
 
   const STORE_PREFIX = 'MINMIN_QUEST_MASTERY_V1_';
   const SUBJECT_KO = { english: '영어', korean: '국어', society: '사회', science: '과학' };
-  const SENTENCE_TYPES = ['문장', '숙어', '관용구', '속담', '사자성어'];
+  // 사자성어는 4글자 낱말처럼 짝맞추기·음절 조립이 자연스러워 단어 슬롯으로 배정한다
+  const SENTENCE_TYPES = ['문장', '숙어', '관용구', '속담'];
   const SILVER = 6;
   const GOLD = 9;
   const RUSTY_DAYS = 2;
@@ -136,6 +137,13 @@
     };
   }
 
+  // 단원 설정값 → 단원 이름 목록. 배열, '|' 결합 문자열(URL 전달용), 단일 문자열 모두 허용.
+  // 쉼표는 실제 단원명에 들어 있으므로(예: "…황제, 나폴레옹 1") 구분자로 쓰지 않는다.
+  function parseUnitList(unit) {
+    const list = Array.isArray(unit) ? unit : String(unit ?? '').split('|');
+    return [...new Set(list.map(u => String(u ?? '').trim()).filter(Boolean))];
+  }
+
   function selectUnitItems(records, opts) {
     const childName = opts.childName;
     const subjKo = opts.subjectKo;
@@ -146,8 +154,16 @@
       const subj = Array.isArray(r.subject) ? r.subject : [];
       return !subjKo || subj.includes(subjKo);
     });
-    const key = String(opts.unit || '').trim().toLowerCase();
-    if (!key) return [];
+    const keys = parseUnitList(opts.unit).map(u => u.toLowerCase());
+    if (keys.length === 0) return [];
+    // 다중 단원 묶음: 고른 단원명과 정확히 일치하는 항목만 합친다 (번호 느슨 매칭·학기 필터 없음 — 부모가 명시적으로 고른 단원)
+    if (keys.length > 1) {
+      const wanted = new Set(keys);
+      const seenIds = new Set();
+      return base.filter(r => wanted.has(String(r.stage || '').trim().toLowerCase()))
+        .map(toItem).filter(it => !seenIds.has(it.id) && seenIds.add(it.id));
+    }
+    const key = keys[0];
     let matched = base.filter(r => String(r.stage || '').trim().toLowerCase() === key);
     if (matched.length < 3) {
       const num = (key.match(/\d+/) || [])[0];
@@ -165,6 +181,20 @@
     }
     const seen = new Set();
     return matched.map(toItem).filter(it => !seen.has(it.id) && seen.add(it.id));
+  }
+
+  // 같은 표제어(띄어쓰기·대소문자 무시)가 여러 단원에 있으면 숙련도(count)가 높은 항목 1개만 남긴다.
+  // 동률이면 시험범위 → 먼저 등록된 항목 순. 버려진 항목의 진도는 그 페이지 id에 그대로 남는다.
+  function dedupeHeadwords(items, store) {
+    const keyOf = it => String(it.word || '').replace(/\s+/g, '').toLowerCase();
+    const best = new Map();
+    sortItems(items).forEach(it => {
+      const k = keyOf(it);
+      const cur = best.get(k);
+      if (!cur || getState(store, it.id).c > getState(store, cur.id).c) best.set(k, it);
+    });
+    const keep = new Set([...best.values()].map(it => it.id));
+    return items.filter(it => keep.has(it.id));
   }
 
   // ---------- 동적 스테이지 분할 ----------
@@ -560,31 +590,37 @@
     const child = opts.child === 'minseo' ? 'minseo' : 'minsu';
     const childName = child === 'minseo' ? '민서' : '민수';
     const subjectKo = SUBJECT_KO[opts.subj];
-    if (!subjectKo || !opts.unit) return null;
+    const units = parseUnitList(opts.unit);
+    if (!subjectKo || units.length === 0) return null;
+    const multi = units.length > 1;
     const settings = typeof root.getParentQuestSettings === 'function' ? (root.getParentQuestSettings(child) || {}) : {};
     const sel = { childName, subjectKo, unit: opts.unit, semester: opts.semester || settings.semester || '' };
     const cached = typeof root.getNotionCachedVocaList === 'function' ? root.getNotionCachedVocaList(child) : [];
     let items = selectUnitItems(cached, sel);
     let fresh = null;
     if (typeof root.fetchVocaUnitFresh === 'function') {
-      fresh = await root.fetchVocaUnitFresh({ studentName: childName, subject: subjectKo, unit: opts.unit, timeoutMs: 3000 });
-      // '3' → "3-1. …"처럼 번호 느슨 매칭이 필요한 단원만 과목 전체를 다시 조회 (phonics 등 정적 단원은 생략)
-      if (fresh && selectUnitItems(fresh, sel).length < 3 && /\d/.test(String(opts.unit))) {
+      fresh = await root.fetchVocaUnitFresh(multi
+        ? { studentName: childName, subject: subjectKo, units, timeoutMs: 3000 }
+        : { studentName: childName, subject: subjectKo, unit: units[0], timeoutMs: 3000 });
+      // '3' → "3-1. …"처럼 번호 느슨 매칭이 필요한 단일 단원만 과목 전체를 다시 조회 (phonics 등 정적 단원은 생략)
+      if (!multi && fresh && selectUnitItems(fresh, sel).length < 3 && /\d/.test(units[0])) {
         fresh = await root.fetchVocaUnitFresh({ studentName: childName, subject: subjectKo, timeoutMs: 4000 });
       }
     }
     const freshItems = fresh ? selectUnitItems(fresh, sel) : [];
     if (freshItems.length >= 3) items = freshItems;
     if (items.length < 3) return null;
-    syncFromRecords(child, items, freshItems.length >= 3);
-    return { child, items, synced: freshItems.length >= 3 };
+    const store = syncFromRecords(child, items, freshItems.length >= 3);
+    items = dedupeHeadwords(items, store);
+    if (items.length < 3) return null;
+    return { child, items, units, unitKey: [...units].sort().join('+'), synced: freshItems.length >= 3 };
   }
 
   const api = {
     SUBJECT_KO, SILVER, GOLD,
     todayStr, daysBetween, parseMastery, formatMastery,
     loadStore, saveStore, mergeRemote, syncFromRecords,
-    classify, selectUnitItems, buildStages, chunkSentence, buildScramble, buildFillBlank,
+    classify, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
     levelOf, isLv3Eligible, isRusty,
     buildRound, applyResult, pushChanges, getProgressSummary, loadUnit,
     isEligibleSubject: subj => Object.prototype.hasOwnProperty.call(SUBJECT_KO, subj)
