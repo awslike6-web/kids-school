@@ -304,10 +304,14 @@
               data.records.forEach(r => {
                 const stage = r.stage || r.level;
                 if (!stage || stage === '기본 단원') return;
+                // 민수 칩에는 민수(또는 공통·학생 미지정) 항목만 — 민서 받아쓰기 '7'~'11' 같은 단원이 섞이지 않게
+                const targets = Array.isArray(r.target) ? r.target : [];
+                if (targets.length > 0 && !targets.includes('민수') && !targets.includes('공통')) return;
                 const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
 
                 let semType = '5-2';
-                const gList = Array.isArray(r.grades) ? r.grades : [r.grade];
+                const gList = (Array.isArray(r.grades) ? r.grades : [r.grade])
+                  .map(g => String(g || '').trim()).filter(g => g && g !== '공통');
                 const gStr = gList.join(' ');
                 if (gStr.includes('지혜') || String(r.wordType || '').includes('지혜')) {
                   semType = 'jihye';
@@ -315,6 +319,8 @@
                   semType = '5-1';
                 } else if (gStr.includes('5-2')) {
                   semType = '5-2'; // 학년이 명시돼 있으면 단원명 숫자("[센터 5-2] 14번"의 5)로 추정하지 않음
+                } else if (gList.some(g => /^\d-\d$/.test(g))) {
+                  semType = gList.find(g => /^\d-\d$/.test(g)); // 다른 학년(4-1 등)은 그 학년 그대로 → '전체' 탭에서만 보임
                 } else {
                   const numMatch = String(stage).match(/\d+/);
                   if (numMatch) {
@@ -334,8 +340,7 @@
                   else if (sStr.includes('수학')) subjKey = 'math';
                   if (!subjKey) return;
                   discoveredUnits[subjKey].push(item);
-                  const targets = Array.isArray(r.target) ? r.target : [];
-                  if (r.id && (targets.length === 0 || targets.includes('민수') || targets.includes('공통'))) {
+                  if (r.id) {
                     const key = `${subjKey}::${String(stage).trim()}`;
                     (stageIds[key] = stageIds[key] || new Set()).add(r.id);
                   }
