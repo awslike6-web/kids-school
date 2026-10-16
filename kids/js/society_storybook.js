@@ -96,6 +96,21 @@
             border: "#6366f1",
             link: "confucian_society_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/5/confucian_society_story_p1.png"
+        },
+        {
+            id: "5_2_6",
+            grade: "5학년 2학기",
+            unit: "2단원 : 사회의 새로운 변화와 오늘날의 우리",
+            bookNum: "5-2 조선 후기",
+            title: "조선 후기 사회와 문화 탐험",
+            subtitle: "모내기법부터 서민 문화와 실학까지, 새로운 세상을 꿈꾼 조상들의 지혜",
+            desc: "역사 숙제를 하던 민수와 요정 코코의 조선 후기 시간 여행! 황금빛 모내기 들판과 상평통보 장터, 신분 질서의 변화와 수원 화성 거중기, 실학자들의 열정과 신명 나는 탈춤까지!",
+            icon: "🎭",
+            color: "#0891b2",
+            bgGrad: "linear-gradient(135deg, rgba(8, 145, 178, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
+            border: "#06b6d4",
+            link: "late_joseon_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/6/late_joseon_story_p1.png"
         }
     ];
 
