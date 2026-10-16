@@ -541,7 +541,7 @@
     updateMainQuestSubText();
     closeParentProgressModal();
     syncParentProgressToCloud();
-    alert('🎉 부모 진도 설정이 저장되었습니다!\n다음 퀘스트부터 4+1 듀오링고 출제에 자동 반영됩니다. ✨');
+    alert('🎉 부모 진도 설정이 저장되었습니다!\n다음 퀘스트부터 반영됩니다. (영어·국어·과학·사회는 3·3·3 마스터리, 수학은 4+1) ✨');
   }
 
   // 13. 메인 젤리 버튼 서브텍스트 갱신: 오늘의 큰 버튼 과목 + 그 과목에 저장된 단원 이름

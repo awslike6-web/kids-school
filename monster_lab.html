@@ -395,7 +395,7 @@
           <span class="text-2xl">⚙️</span>
           <div>
             <h3 class="text-base font-bold text-white" id="parentModalTitle">부모 진도 관리판</h3>
-            <p class="text-[11px] text-gray-400">4+1 듀오링고 엔진의 학교 진도 단원을 설정합니다.</p>
+            <p class="text-[11px] text-gray-400">과목별 학교 진도 단원과 오늘의 큰 버튼 과목을 정합니다.</p>
           </div>
         </div>
         <button class="w-8 h-8 rounded-full bg-lab-bg border border-lab-card-border flex items-center justify-center text-gray-400 hover:text-white shrink-0" onclick="closeParentProgressModal()">
@@ -420,9 +420,9 @@
       <div id="parentProgressBanner" class="bg-neon-cyan/10 border border-neon-cyan/30 rounded-2xl p-2.5 text-[11px] text-neon-cyan flex items-start gap-2 shrink-0">
         <span class="text-base leading-none">💡</span>
         <span>
-          <strong>1~3번</strong>: 선택한 현재 진도 집중 드릴<br/>
-          <strong>4번</strong>: 최근 오답 복습 (누적 점검)<br/>
-          <strong>5번</strong>: 🎁 다음 단원 비밀 맛보기 탐험 (하트 차감 0, 보너스 2배)
+          <strong>영어·국어·과학·사회</strong>: 노션 단원 3·3·3 마스터리 (첫 시도 정답이 쌓이면 🥈 은메달 → 다음 날 👑 금메달, 틀려도 감점 없이 힌트)<br/>
+          <strong>수학·기본 문제</strong>: 기존 4+1 (1~3번 진도 · 4번 오답 복습 · 5번 🎁 다음 단원 맛보기)<br/>
+          <strong>🚀 큰 버튼</strong>: 맨 위에서 고른 과목·단원으로 출격
         </span>
       </div>
 
@@ -659,23 +659,29 @@
             <span>1부. 5분 퀘스트는 어떻게 돌아가나요?</span>
           </div>
 
-          <!-- 4+1 구조 설명 -->
+          <!-- 3·3·3 마스터리 (노션 단원) -->
           <div class="space-y-2">
-            <span class="text-xs font-bold text-white block">🚀 듀오링고형 4+1 스마트 출제 엔진</span>
+            <span class="text-xs font-bold text-white block">🧠 영어·국어·과학·사회: 듀오링고형 3·3·3 마스터리</span>
             <div class="grid grid-cols-1 gap-2 text-[11px]">
               <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border">
-                <span class="font-bold text-neon-green">1~3번 [학교 진도 집중 드릴]</span>
-                <p class="text-gray-300 mt-0.5">부모님이 지정한 현재 단원의 핵심 개념, 연산, 어휘가 출제됩니다. (노션에 단어를 넣으면 실시간 4지선다로 자동 융합!)</p>
+                <span class="font-bold text-neon-green">단어마다 3단계 계단</span>
+                <p class="text-gray-300 mt-0.5">노션 단원의 단어·문장마다 첫 시도 정답 횟수를 셉니다. 3번 → Lv.2, 6번이면 🥈 은메달(그날은 여기까지), <strong>다음 날</strong> 3번 더 맞히면 👑 금메달이고 노션 <strong>달성</strong>이 체크됩니다.</p>
               </div>
               <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border">
-                <span class="font-bold text-yellow-300">4번 [망각곡선 자동 복습]</span>
-                <p class="text-gray-300 mt-0.5">최근 틀렸던 문제가 <strong>라이트너 3상자 시스템</strong>에 의해 자동 소환되어 장기 기억으로 전환됩니다. (3회 연속 맞히면 졸업!)</p>
+                <span class="font-bold text-yellow-300">한 판 5문제 구성</span>
+                <p class="text-gray-300 mt-0.5">1~2번 단어(처음엔 3:3 짝맞추기), 3번 문장·속담, 4번 <strong>녹슨 왕관 복습</strong>(금메달 후 이틀 지난 단어), 5번 가장 높은 단계 도전. 소리 듣고 고르기·빈칸·조립(받아쓰기는 겹받침 빈칸과 헷갈리는 철자 보기)으로 나옵니다.</p>
               </div>
               <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border">
-                <span class="font-bold text-amber-300">5번 [🎁 다음 단원 비밀 맛보기]</span>
-                <p class="text-gray-300 mt-0.5">내일 배울 다음 단원 문제를 미리 탐험합니다. <strong>틀려도 하트가 전혀 깎이지 않고</strong>, 맞히면 보너스 경험치가 2배 지급됩니다.</p>
+                <span class="font-bold text-amber-300">틀려도 혼나지 않는 에러리스</span>
+                <p class="text-gray-300 mt-0.5">오답에 경고음·하트 감소가 없고, 정답 블록이 노랗게 흔들리며 스스로 찾게 돕습니다. 힌트를 보고 맞힌 문제는 단계만 오르지 않습니다. 진도는 노션에 저장돼 폰·태블릿·PC 어디서나 이어집니다.</p>
               </div>
             </div>
+          </div>
+
+          <!-- 기존 4+1 (수학·기본 문제) -->
+          <div class="bg-lab-card/80 p-2.5 rounded-xl border border-lab-card-border text-[11px]">
+            <span class="font-bold text-sky-300 block">🧮 수학·기본 문제: 기존 4+1 출제</span>
+            <p class="text-gray-300 mt-0.5">1~3번 현재 진도 집중(수학은 무한 암산 포함), 4번 최근 오답 복습(3회 연속 맞히면 졸업), 5번 🎁 다음 단원 맛보기(틀려도 하트 차감 없음, 보너스 2배). 노션에 단원이 없는 기본 문제도 이 방식입니다.</p>
           </div>
 
           <!-- 철벽 학년 분리 가드 -->
@@ -697,7 +703,7 @@
               <span class="w-5 h-5 rounded-full bg-neon-cyan/20 text-neon-cyan flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</span>
               <div>
                 <strong class="text-white">학교 알림장 보고 진도 맞추기 (1초 설정)</strong>
-                <p class="text-gray-300 mt-0.5">아이가 학교에서 새 단원에 들어가면, 본 관리판에서 해당 단원 칩을 눌러두세요. 1~3번과 5번 문제가 알아서 맞춰집니다.</p>
+                <p class="text-gray-300 mt-0.5">아이가 학교에서 새 단원에 들어가면, 본 관리판에서 해당 단원 칩을 눌러두세요(노션 단원은 최대 4개까지 묶기 가능). 맨 위 🚀 <strong>오늘의 큰 버튼 과목</strong>도 고르면 아이는 큰 버튼 하나만 누르면 됩니다.</p>
               </div>
             </div>
 
@@ -705,7 +711,7 @@
               <span class="w-5 h-5 rounded-full bg-neon-green/20 text-neon-green flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</span>
               <div>
                 <strong class="text-white">노션 용어사전(VOCA DB)과 100% 자동 연동</strong>
-                <p class="text-gray-300 mt-0.5">부모님이 스마트폰 노션 표에 단어, 뜻, 힌트, 사진이나 실험실 웹링크를 입력하면, 5분 퀘스트 4지선다 문제로 실시간 자동 변환 출제됩니다. (코드 수정 없이 단어만 넣으면 끝!)</p>
+                <p class="text-gray-300 mt-0.5">부모님이 스마트폰 노션 표에 단어, 뜻, 상세설명을 입력하면 3·3·3 마스터리 문제로 바로 출제됩니다. <strong>시험범위</strong>를 체크하면 그 단원에 ⭐가 붙고 먼저 나오며, 칩·퀘스트 제목은 노션 <strong>단원</strong> 이름 그대로 보입니다. (코드 수정 없이 노션만 고치면 끝!)</p>
               </div>
             </div>
 
@@ -713,7 +719,7 @@
               <span class="w-5 h-5 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</span>
               <div>
                 <strong class="text-white">스마트폰 노션 학습일지에서 오답 실시간 확인</strong>
-                <p class="text-gray-300 mt-0.5">아이가 5분 퀘스트를 마치면 어떤 문제를 틀렸고 어떤 보기를 골랐는지 노션 학습일지 DB에 즉시 기록됩니다. 퇴근길에 1분 확인하고 칭찬과 가벼운 피드백을 건네보세요.</p>
+                <p class="text-gray-300 mt-0.5">아이가 5분 퀘스트를 마치면 틀린 문제(3·3·3은 힌트를 보고 푼 문제)가 노션 학습일지 DB에 즉시 기록됩니다. 퇴근길에 1분 확인하고 칭찬과 가벼운 피드백을 건네보세요.</p>
               </div>
             </div>
 
