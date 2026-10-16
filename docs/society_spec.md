@@ -33,18 +33,18 @@ graph TD
 | 구분 | 모듈 파일명 | 전담 역할 | 줄 수 | 네임스페이스 / 주요 API |
 | :--- | :--- | :--- | :---: | :--- |
 | **대문** | `kids/js/society_common.js` | 초기화, 노션 통신, 오버레이 라우팅, 학습일지/인쇄 | ~470줄 | `openMissionView`, `initializeSocietyRoom`, `printSocietySummary` |
-| **1번** | `kids/js/society_storybook.js` | [1단계] 사회 단원 동화 도서관 (총 6권) | ~200줄 | `window.SocietyStorybook` (`render`, `getList`) |
+| **1번** | `kids/js/society_storybook.js` | [1단계] 사회 단원 동화 도서관 (총 7권) | ~220줄 | `window.SocietyStorybook` (`render`, `getList`) |
 | **2번** | `kids/js/society_voca.js` | [2단계] 사회 핵심 용어방 (초성/자석/객관식/주관식) | 452줄 | `window.SocietyVoca` (`render`, `verifyAnswer`, `resetMasterAndReload`) |
 | **3번** | `kids/js/society_chart.js` | [3단계] 차트 & 도표 분석실 (4지선다/성공 모달) | 210줄 | `window.SocietyChart` (`render`, `verifyChoice`, `showSuccessModal`) |
 | **4번** | `kids/js/society_map.js` | [4단계] 랜선 지도 탐방실 (명소 사진/한 줄 탐방록) | 108줄 | `window.SocietyMap` (`render`, `submitJourney`) |
 | **5번** | `kids/js/society_history.js` | [5단계] 역사 & 문화재 돋보기 (국보 박물관 도크/수집) | 152줄 | `window.SocietyHistory` (`render`, `collectArtifact`, `renderMuseumGridDock`) |
-| **데이터**| `kids/data/society-data.js` | 오프라인 폴백 스켈레톤 및 목업 데이터셋 | 73줄 | `window.SOCIETY_CURRICULUM_DATA`, `window.SOCIETY_MOCK_DATA` |
+| **데이터**| `kids/data/society-data.js` | 오프라인 폴백 스켈레톤 및 목업 데이터셋 | 429줄 | `window.SOCIETY_CURRICULUM_DATA`, `window.SOCIETY_MOCK_DATA` |
 
 ---
 
 ## 3. 세부 모듈 표준 및 구현 가이드
 
-### 1) 📚 단원 동화 도서관 (Storybook Library)
+### 1) 📚 단원 동화 도서관 (Storybook Library - 총 7권 체제)
 - **진입로**: 상단 퀵 액션바 (`📚 사회 동화 도서관`) 및 메인 그리드 1번 카드 (`openMissionView('storybook')`).
 - **서가 목록 (`SOCIETY_STORYBOOK_LIBRARY`)**:
   - **[5학년 1학기]**: 🌍 `2단원 : 우리 국토의 기후` (`climate_storybook.html`) - 날씨와 기후 차이, 바람, 온실가스 줄이기.
@@ -53,14 +53,19 @@ graph TD
   - **[5학년 2학기 3편]**: 🏺 `1단원 : 옛사람들의 삶과 문화 (고려)` (`goryeo_storybook.html`) - 태조 왕건 후삼국 통일, 서희 외교 담판, 귀주대첩 강감찬, 팔만대장경, 고려청자, 벽란도 아라비아 상인.
   - **[5학년 2학기 4편]**: 🛡️ `2단원 : 사회의 새로운 변화와 오늘날의 우리 (조선)` (`joseon_storybook.html`) - 전라좌수영, 거북선과 학익진, 한산도 대첩, 의병의 용기, 병자호란 남한산성, 백성들의 극복과 평화의 소중함.
   - **[5학년 2학기 5편]**: 📜 `2단원 : 사회의 새로운 변화와 오늘날의 우리 (유교사회)` (`confucian_society_storybook.html`) - 흥인지문과 유교 정신, 경복궁 근정전, 삼강행실도, 서당과 천자문, 전통 혼례, 경국대전과 신분제, 장영실 발명품, 세종대왕 훈민정음.
+  - **[5학년 2학기 6편]**: 🏮 `2단원 : 사회의 새로운 변화와 오늘날의 우리 (조선 후기)` (`late_joseon_storybook.html`) - 모내기법과 부농, 상평통보와 5일장, 요동치는 신분 질서, 수원 화성과 정조의 꿈, 정약용과 거중기, 실학, 탈춤과 판소리, 풍속화·민화, 서학·동학.
 - **웹툰 모드 시인성 표준**:
   - 세로형 단일 삽화(896x1200 / 1100x1700)를 적용하여 웹툰 모드에서 `[상단 고화질 삽화] ➔ [하단 대사 텍스트]` 구조를 100% 보장.
 - **음성 싱크 표준**:
   - 앞표지부터 마지막 장까지 실제 책 대사 텍스트와 `edge-tts` (`ko-KR-SunHiNeural`) 음성이 1:1로 완전 일치.
 
-### 2) 📖 사회 핵심 용어방 (Vocabulary Room)
-- **2단계 동적 선택 엔진**:
-  - `[1단계: 학년/학기 고르기]` ➔ `[2단계: 세부 단원 고르기]` ➔ `[3단계: 초성 퀴즈 & 요정 낭독]`.
+### 2) 📖 사회 핵심 용어방 및 5분 퀘스트 (VOCA & CURRICULUM DB)
+- **노션 DB 완전 연동 (SSOT)**:
+  - `VOCA_DB` (`375a2711...`): 단어, 뜻풀이, 초성힌트, 상세설명, 3·3·3 마스터리 숙련도.
+  - `CURRICULUM_DB` (`3e8a2711...`): 4지선다 퀴즈, 문제 질문, 보기, 정답, 해설, 핵심 쓰임새.
+- **5학년 2학기 단원 라인업**:
+  - `2-1. 유교 문화의 영향으로 달라진 조선 사회`: 핵심 어휘 5종 (유교, 삼강행실도, 경국대전, 관혼상제, 양반) & 4지선다 9문항
+  - `2-2. 새로운 사회를 향한 조선 후기 사람들의 노력`: 핵심 어휘 5종 (모내기법, 상평통보, 실학, 판소리, 동학) & 4지선다 11문항 (농업/신분제/서민문화/과학지도/근대문물)
 - **체류형 어휘 정독 탐구 보상 (`window.grantVocaDwellReward`)**:
   - 단어 카드를 **20초 이상 정독**하거나 요정 코코 TTS 음성 청취 시 **용어 EXP +3 및 +1💎/🍬** 즉시 지급 (일 5회 상한).
 
