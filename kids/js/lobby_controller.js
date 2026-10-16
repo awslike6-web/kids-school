@@ -1,833 +1,1007 @@
 /**
  * ==============================================================================
- * 🏰 [Lobby Controller] 대형 로비 통합 컨트롤러 모듈 (lobby_controller.js)
+ * 🏰 [Lobby Controller] Stitch AI 듀얼 테마 로비 & 한도 도달 모달 통합 컨트롤러
  * ==============================================================================
  * 역할 및 구성:
- * 1. USER_CONFIGS: 민수(아케이드) & 민서(동화 아지트) 월드 맵 및 테마 데이터 단일 원천.
- * 2. 동적 코어 결합: loadCoreScripts를 통한 공통 엔진(core, notion-helper, fairy 등) 비동기 마운트.
- * 3. 사용자 및 권한 판별: 부모 관리자 시뮬레이터 모드(노션 오염 방지막) vs 자녀 실전 모드 분기.
- * 4. 상황별 인터랙티브 배너: KST 시간대 및 요일 기반 요정 코코 반응형 말풍선 & TTS 안내.
- * 5. 2대 메인 탭 렌더러: 공부방 월드 vs 나만의 아지트 탭 스위칭 & 3학년 미래 교과 보관소.
- * 6. 클라우드 동기화: 인벤토리(SWR 0.01초 캐시), 스크린타임, 1일 단어/독해 프리패칭, 딥링크.
+ * 1. USER_CONFIGS & 상수: 민수(SECTOR-07 다크) / 민서(구름섬 라이트) 설정 및 하위 호환 유지.
+ * 2. 동적 테마 & 뷰 스왑: html.light.theme-minseo ↔ html.dark.theme-minsu 즉시 전환.
+ * 3. 노션 INVENTORY_DB & SWR 캐시: 하리보/다이아몬드, 통합 레벨, 소원권, 가디언 남은 시간 연동.
+ * 4. 시간표 연동 다중 과목 버프 & 과목별 일일 한도(Daily Cap) 신호등:
+ *    - 시간표 과목(2~4과목 동시 지원): 🔥 오늘 복습(1.2x, 한도 150) / ✨ 내일 예습(+2 보너스) 점등
+ *    - 여유(🟢/⚡) ➔ 마감임박 70%+(🟡/CRITICAL) ➔ 한도 100% 도달 시 소등(💤 완료/냉각)
+ * 5. 한도 도달 갈림길 모달(한도도달ui) & 5구역 하단바(일기·찰칵·용어사전·놀이터·프로필) 라우팅.
  * ==============================================================================
  */
 
-// =========================================================
-// 💎 1. 데이터 구조 정의 (공부방 월드 vs 나만의 아지트 탭 분리)
-// =========================================================
-const USER_CONFIGS = {
-  minsu: {
-    name: '민수', key: 'son', themeClass: 'theme--arcade',
-    bgSymbols: ['🛸', '🚀', '👾', '🕹️', '⚡', '+', '✖️', '=', '🤖', '🔋'],
-    studyWorlds: [
-      {
-        title: '🧮 수학 월드',
-        color: '#f59e0b',
-        rooms: [
-          { name: '수학 멀티버스 대모험', href: 'kids/subjects/math/math.html', desc: '단원 동화 도서관부터 시각적 개념 탐험관, 세로셈 무한 실전 연산 트레이닝까지!' }
-        ]
-      },
-      {
-        title: '✍️ 국어 월드',
-        color: '#ec4899',
-        rooms: [
-          { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '단원 동화부터 받아쓰기, 어휘, 정밀독해, AI토론까지!' }
-        ]
-      },
-      {
-        title: '🔤 영어 던전',
-        color: '#0284c7',
-        rooms: [
-          { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '스토리북 도서관부터 사이버 알파벳 던전 탐험! 단어 매핑 퀴즈 및 타자' }
-        ]
-      },
-      {
-        title: '🧪 과학 실험실',
-        color: '#10b981',
-        rooms: [
-          { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '자연과 우주 생태계의 비밀 법칙을 파헤치는 코어 실험실' }
-        ]
-      },
-      {
-        title: '🏛️ 사회 연대기',
-        color: '#d97706',
-        rooms: [
-          { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '지리 공간과 옛날 인물 이야기 역사를 추적하는 타임머신' }
-        ]
-      },
-      {
-        title: '🦖 탐구 사전관',
-        color: '#8b5cf6',
-        rooms: [
-          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '모든 교과서 낱말 총집합! 마스터 데이터베이스 지식 열람' }
-        ]
-      }
-    ],
-    hideoutWorlds: [
-      {
-        title: '🏠 나만의 비밀 아지트',
-        color: '#0ea5e9',
-        rooms: [
-          { name: '🌱 30초 데일리 루틴 & 저금통', href: 'kids/subjects/haru/haru.html?user=minsu', desc: '⚡ [매일 30초 체크인] 착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 & 20칸 트로피 도전!' },
-          { name: '👦 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '다이아몬드로 멋진 가구를 사고 나만의 비밀 기지를 꾸며보자!' },
-          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '학교에서 만들고 그려온 멋진 미술·공예 작품을 전시하고 자랑해보자!' },
-          { name: '📊 나의 성장 대시보드', href: 'parent_dashboard.html?user=minsu', desc: '5대 교과 학습 밸런스 방사형 차트와 실시간 퀘스트 달성도 점검!' },
-          { name: '📅 상세 시간표 & 수업 안내', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' }
-        ]
-      },
-      {
-        title: '🎡 창의 & 게이밍 놀이터',
-        color: '#f97316',
-        rooms: [
-          { name: '⚔️ 브롤 DPS & 밸런스 연구소', href: 'kids/playground/minsu/brawl_dps.html', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 대전 시뮬레이션' },
-          { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
-        ]
-      }
-    ]
+// 🖼️ 민수 상단 프로필 아바타 상수 (외부 임시 URL 대체 · 추후 자작 캐릭터로 교체 용이)
+const MINSU_AVATAR_SRC = './kids/assets/images/monsters/purple_monster.png';
+
+// 📚 과목 메타데이터 사전 (라우팅 경로, 아이콘, 추천 우선순위)
+const SUBJECT_META = {
+  korean: {
+    key: 'korean', ko: '국어', code: 'KOR', shortId: 'kor',
+    emoji: '📖', icon: 'menu_book', roomLabel: '📖 국어 방',
+    href: 'kids/subjects/korean/korean.html', bonusText: '남은 시간 +30분 보너스'
   },
-  minseo: {
-    name: '민서', key: 'daughter', themeClass: 'theme--hideout',
-    bgSymbols: ['🎈', '🧸', '🏰', '✨', '🍭', '🌸', '🧚', '🦄', '🎀', '🍓'],
-    studyWorlds: [
-      {
-        title: '🧮 수학 월드',
-        color: '#f59e0b',
-        rooms: [
-          { name: '수학 놀이터 대모험', href: 'kids/subjects/math/math.html', desc: '단원 동화 도서관부터 아기자기 개념 탐험관, 세로셈 실전 연산 트레이닝까지!' }
-        ]
-      },
-      {
-        title: '✍️ 국어 월드',
-        color: '#ec4899',
-        rooms: [
-          { name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '1-2 1단원 감정 스토리북과 비밀 요정들과 나누는 상상력 가득 논리 대화방' }
-        ]
-      },
-      {
-        title: '🌱 슬기로운 하루 (통합)',
-        color: '#2ed573',
-        rooms: [
-          { name: '하루 탐험관 (1학년 2학기)', href: 'kids/subjects/haru/haru.html', desc: '⚡ [매일 30초 체크인] 착한 습관 저금통 + 튼튼 운동 도장 + 마음 날씨 원스톱 기록 & 명화·추억 갤러리!' }
-        ]
-      },
-      {
-        title: '🔤 영어 던전',
-        color: '#0284c7',
-        rooms: [
-          { name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '반짝이는 요정 카드와 함께 타이핑하며 배우는 마법 단어장' }
-        ]
-      },
-      {
-        title: '🦖 탐구 사전관',
-        color: '#8b5cf6',
-        rooms: [
-          { name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 받아쓰기 마스터 교육과 아기자기 개념 백과사전' }
-        ]
-      }
-    ],
-    // 🔮 3학년 이후 개방되는 미래 교과 보관소 (평소에는 가려짐)
-    futureWorlds: [
-      {
-        title: '🧪 과학 실험실',
-        color: '#10b981',
-        rooms: [
-          { name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 신기한 과학방' }
-        ]
-      },
-      {
-        title: '🏛️ 사회 연대기',
-        color: '#d97706',
-        rooms: [
-          { name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 신나는 모험' }
-        ]
-      }
-    ],
-    hideoutWorlds: [
-      {
-        title: '🏠 나만의 비밀 아지트',
-        color: '#ec4899',
-        rooms: [
-          { name: '👧 마이룸 & 상점', href: 'kids/common_space/my-room.html', desc: '하리보 젤리로 예쁜 가구를 사고 나만의 핑꾸 하우스를 꾸며보자!' },
-          { name: '🖼️ 꿈나무 작품 갤러리', href: 'kids/common_space/gallery.html', desc: '예쁘게 그린 그림과 정성껏 만든 공예품을 전시하는 아틀리에!' },
-          { name: '📊 나의 성장 대시보드', href: 'parent_dashboard.html?user=minseo', desc: '5대 교과 학습 밸런스 방사형 차트와 실시간 퀘스트 달성도 점검!' },
-          { name: '📅 상세 시간표 & 수업 안내', href: 'timetable.html', desc: '오늘·내일 학교 수업과 준비물, 행정 안내를 한눈에 확인!' }
-        ]
-      },
-      {
-        title: '🎡 창의 & 게이밍 놀이터',
-        color: '#a855f7',
-        rooms: [
-          { name: '🎨 매직 컬러링 스튜디오', href: 'kids/playground/minseo/coloring.html', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력' },
-          { name: '📐 인터랙티브 종이접기', href: 'kids/playground/minseo/origami.html', desc: '비행기, 개구리, 동서남북 3D 단계별 접기 & 전용 도안 인쇄' },
-          { name: '🎁 스타 드롭 & 트로피 보관소', href: 'kids/playground/minsu/starr_drop.html', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!' }
-        ]
-      }
-    ]
+  math: {
+    key: 'math', ko: '수학', code: 'MATH', shortId: 'math',
+    emoji: '🧮', icon: 'calculate', roomLabel: '🧮 수학 방',
+    href: 'kids/subjects/math/math.html', bonusText: '남은 시간 +30분 보너스'
+  },
+  english: {
+    key: 'english', ko: '영어', code: 'ENG', shortId: 'eng',
+    emoji: '🔤', icon: 'translate', roomLabel: '🔤 영어 방',
+    href: 'kids/subjects/english/english.html', bonusText: '남은 시간 +30분 보너스'
+  },
+  society: {
+    key: 'society', ko: '사회', code: 'SOC', shortId: 'soc',
+    emoji: '🏛️', icon: 'public', roomLabel: '🏛️ 사회 방',
+    href: 'kids/subjects/society/society.html', bonusText: '남은 시간 +30분 보너스'
+  },
+  science: {
+    key: 'science', ko: '과학', code: 'SCI', shortId: 'sci',
+    emoji: '🧪', icon: 'science', roomLabel: '🧪 과학 방',
+    href: 'kids/subjects/science/science.html', bonusText: '남은 시간 +30분 보너스'
+  },
+  haru: {
+    key: 'haru', ko: '하루', code: 'HARU', shortId: 'haru',
+    emoji: '🌱', icon: 'wb_sunny', roomLabel: '🌱 하루 방',
+    href: 'kids/subjects/haru/haru.html', bonusText: '일일 30초 체크인 보너스'
   }
 };
 
-// 기존 worlds 참조 코드와의 완벽한 하위 호환성 유지
+// 🎡 자녀별 놀이터 & 특별 탐험 목록
+const PLAYGROUND_ITEMS = {
+  minsu: [
+    { icon: '⚔️', title: '브롤 DPS & 밸런스 연구소', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 시뮬레이션', href: 'kids/playground/minsu/brawl_dps.html', badge: '인기' },
+    { icon: '🎁', title: '스타 드롭 & 트로피 보관소', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!', href: 'kids/playground/minsu/starr_drop.html', badge: '보상' },
+    { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' }
+  ],
+  minseo: [
+    { icon: '🎨', title: '매직 컬러링 스튜디오', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력', href: 'kids/playground/minseo/coloring.html', badge: '미술' },
+    { icon: '📐', title: '인터랙티브 종이접기', desc: '비행기, 개구리, 동서남북 3D 단계별 접기 & 도안 인쇄', href: 'kids/playground/minseo/origami.html', badge: '공예' },
+    { icon: '🎁', title: '스타 드롭 & 트로피 보관소', desc: '톡톡 탭해서 신나는 스타 드롭 개봉!', href: 'kids/playground/minsu/starr_drop.html', badge: '보상' },
+    { icon: '🔬', title: '3학년 과학 실험실 (미리보기)', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 과학방', href: 'kids/subjects/science/science.html?user=minseo', badge: '예습' },
+    { icon: '🏛️', title: '3학년 사회 역사방 (미리보기)', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 모험', href: 'kids/subjects/society/society.html?user=minseo', badge: '예습' }
+  ]
+};
+
+// 💎 기존 모듈과의 하위 호환성을 위한 USER_CONFIGS 유지
+const USER_CONFIGS = {
+  minsu: {
+    name: '민수', key: 'son', themeClass: 'theme--arcade',
+    htmlClasses: ['dark', 'theme-minsu'],
+    subjects: ['english', 'korean', 'math', 'society', 'science', 'haru'],
+    defaultGuardianMins: 100,
+    studyWorlds: [
+      { title: '🧮 수학 월드', color: '#f59e0b', rooms: [{ name: '수학 멀티버스 대모험', href: 'kids/subjects/math/math.html', desc: '단원 동화부터 실전 연산까지!' }] },
+      { title: '✍️ 국어 월드', color: '#ec4899', rooms: [{ name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '어휘, 정밀독해, AI토론까지!' }] },
+      { title: '🔤 영어 던전', color: '#0284c7', rooms: [{ name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '사이버 알파벳 던전 탐험!' }] },
+      { title: '🧪 과학 실험실', color: '#10b981', rooms: [{ name: '과학 개념 탐구방', href: 'kids/subjects/science/science.html', desc: '생태계와 과학 법칙 실험실' }] },
+      { title: '🏛️ 사회 연대기', color: '#d97706', rooms: [{ name: '사회 역사 탐험방', href: 'kids/subjects/society/society.html', desc: '지리와 역사 타임머신' }] },
+      { title: '🦖 탐구 사전관', color: '#8b5cf6', rooms: [{ name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '모든 교과서 낱말 총집합!' }] }
+    ],
+    hideoutWorlds: []
+  },
+  minseo: {
+    name: '민서', key: 'daughter', themeClass: 'theme--hideout',
+    htmlClasses: ['light', 'theme-minseo'],
+    subjects: ['korean', 'math', 'english', 'haru'],
+    defaultGuardianMins: 45,
+    studyWorlds: [
+      { title: '🧮 수학 월드', color: '#f59e0b', rooms: [{ name: '수학 놀이터 대모험', href: 'kids/subjects/math/math.html', desc: '단원 동화부터 세로셈 연산까지!' }] },
+      { title: '✍️ 국어 월드', color: '#ec4899', rooms: [{ name: '국어 문장 구성방', href: 'kids/subjects/korean/korean.html', desc: '감정 스토리북과 논리 대화방' }] },
+      { title: '🌱 슬기로운 하루', color: '#2ed573', rooms: [{ name: '하루 탐험관', href: 'kids/subjects/haru/haru.html', desc: '매일 30초 착한 습관 체크인!' }] },
+      { title: '🔤 영어 던전', color: '#0284c7', rooms: [{ name: '영단어 기억방', href: 'kids/subjects/english/english.html', desc: '반짝이는 마법 단어장' }] },
+      { title: '🦖 탐구 사전관', color: '#8b5cf6', rooms: [{ name: '종합 용어사전방', href: 'kids/common_space/voca.html', desc: '초등 새싹 개념 백과사전' }] }
+    ],
+    futureWorlds: [],
+    hideoutWorlds: []
+  }
+};
+
 Object.values(USER_CONFIGS).forEach(cfg => {
   cfg.worlds = [...(cfg.studyWorlds || []), ...(cfg.futureWorlds || []), ...(cfg.hideoutWorlds || [])];
 });
 window.USER_CONFIGS = USER_CONFIGS;
 
-// =========================================================
-// 🚀 2. 대형 로비 통합 엔진 구동 및 렌더러
-// =========================================================
-(function() {
+(function () {
+  'use strict';
+
   const lobbyCores = [
-    "core.js",
-    "notion-helper.js",
-    "fairy-config.js",
-    "fairy-engine.js",
-    "fairy-settings-catalog.js",
-    "fairy-settings-engine.js",
-    "fairy-chatbot.js",
-    "daily-diary.js",
-    "quiz-flow-controller.js",
-    "timetable-boost.js",
-    "screentime-tracker.js"
+    'core.js',
+    'notion-helper.js',
+    'fairy-config.js',
+    'fairy-engine.js',
+    'fairy-settings-catalog.js',
+    'fairy-settings-engine.js',
+    'fairy-chatbot.js',
+    'daily-diary.js',
+    'quiz-flow-controller.js',
+    'timetable-boost.js',
+    'screentime-tracker.js'
   ];
 
-  loadCoreScripts("kids/core/", lobbyCores, () => {
-    console.log("🏰 대형 로비 메인 하이브리드 엔진 결합 완료!");
+  let activeUserKey = 'minsu';
+  let isAdminSession = false;
+  let modalState = {
+    completedSubjKey: 'korean',
+    recommendedSubjKey: 'math'
+  };
+  const runtimeDailyEarned = {
+    minseo: {},
+    minsu: {}
+  };
 
-    // 유저 확인 파서
+  function getTodayKstString() {
+    const now = new Date();
+    const kst = new Date(now.getTime() + (9 * 60 + now.getTimezoneOffset()) * 60000);
+    return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+  }
+
+  function resolveInitialUserKey() {
     const urlParams = new URLSearchParams(window.location.search);
-    let userKey = urlParams.get('user');
-    
-    // 💡 [추가] 로컬 스토리지에 아빠/엄마 이름이 남아있는지 실시간 확인
+    const paramUser = urlParams.get('user');
+    if (paramUser && USER_CONFIGS[paramUser]) return paramUser;
+
+    const savedChild = localStorage.getItem('currentChild');
+    if (savedChild && USER_CONFIGS[savedChild]) return savedChild;
+
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser === 'daughter') return 'minseo';
+    if (savedUser === 'son') return 'minsu';
+
     const savedName = localStorage.getItem('currentUserName');
-    const isAdmin = (savedName === '아빠' || savedName === '엄마');
+    if (savedName === '민서') return 'minseo';
+    return 'minsu';
+  }
 
-    if (!userKey || !USER_CONFIGS[userKey]) {
-      const savedChild = localStorage.getItem('currentChild');
-      const savedUser = localStorage.getItem('currentUser');
-      if (savedChild && USER_CONFIGS[savedChild]) {
-        userKey = savedChild;
-      } else if (savedUser === 'daughter') {
-        userKey = 'minseo';
-      } else if (savedUser === 'son') {
-        userKey = 'minsu';
-      } else if (savedName === '민서') {
-        userKey = 'minseo';
-      } else if (savedName === '민수') {
-        userKey = 'minsu';
+  function getRealChildName(userKey) {
+    if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.CHILDREN) {
+      return userKey === 'minseo' ? APP_CONFIG.CHILDREN.second.name : APP_CONFIG.CHILDREN.first.name;
+    }
+    return userKey === 'minseo' ? '민서' : '민수';
+  }
+
+  // =========================================================
+  // 🎨 1. 테마 & 유저 전환 엔진 (CSS 변수 스왑 + 뷰 토글)
+  // =========================================================
+  function applyLobbyThemeAndView(userKey, updateHistory = false) {
+    activeUserKey = USER_CONFIGS[userKey] ? userKey : 'minsu';
+    window.__activeLobbyUser = activeUserKey;
+    const cfg = USER_CONFIGS[activeUserKey];
+    const realName = getRealChildName(activeUserKey);
+
+    const savedName = localStorage.getItem('currentUserName');
+    isAdminSession = (savedName === '아빠' || savedName === '엄마');
+
+    localStorage.setItem('currentChild', activeUserKey);
+    localStorage.setItem('currentUser', cfg.key);
+    if (!isAdminSession) {
+      localStorage.setItem('currentUserName', realName);
+    }
+
+    const htmlEl = document.documentElement;
+    htmlEl.classList.remove('light', 'dark', 'theme-minseo', 'theme-minsu');
+    cfg.htmlClasses.forEach(cls => htmlEl.classList.add(cls));
+
+    const minseoView = document.getElementById('minseoLobbyView');
+    const minsuView = document.getElementById('minsuLobbyView');
+    if (minseoView && minsuView) {
+      if (activeUserKey === 'minseo') {
+        minseoView.classList.remove('hidden');
+        minsuView.classList.add('hidden');
       } else {
-        userKey = 'minsu';
+        minsuView.classList.remove('hidden');
+        minseoView.classList.add('hidden');
       }
     }
-    const currentConfig = USER_CONFIGS[userKey];
 
-    // 💡 활성 자녀 상태 영구 보존 (관리자/아이 공통: 어떤 방을 다녀와도 테마 유지)
-    localStorage.setItem('currentChild', userKey);
-    localStorage.setItem('currentUser', currentConfig.key);
-
-    // 일기장 버튼 상태 실시간 반영
-    if (typeof updateLobbyDiaryButton === 'function') {
-      updateLobbyDiaryButton(currentConfig.name);
+    const avatarEl = document.getElementById('minsuAvatarImg');
+    if (avatarEl) {
+      avatarEl.src = MINSU_AVATAR_SRC;
     }
 
-    // 테마 실시간 동적 치환 
-    document.body.className = currentConfig.themeClass;
-    
-    // APP_CONFIG 기반 동적 자녀 명칭 연동
-    const finalRealName = currentConfig.key === 'son' ? APP_CONFIG.CHILDREN.first.name : APP_CONFIG.CHILDREN.second.name;
-    
-    // 💡 [수정] 아빠, 엄마가 입장했을 때 UI 타이틀 및 웰컴 문구 완전 고도화
-    if (isAdmin) {
-      document.getElementById('mainLobbyTitle').innerHTML = `<span class="accent2">🛠️ 관리자</span><br><span class="accent">시뮬레이터</span>`;
-      document.getElementById('welcomeMessage').innerHTML = `🚀 <b>[${savedName} 모드]</b> 데이터 오염 방지막 가동 중! (${finalRealName} 환경 검수)`;
-      document.getElementById('lobbySubtitle').textContent = "🔧 디자인 확인 및 구동 테스트를 진행할 월드를 골라주세요.";
-      document.getElementById('timetableLink').textContent = '📺 전체 시간표 모니터';
-      document.getElementById('timetableLink').href = 'timetable.html?view=monitor';
+    if (updateHistory && window.history && window.history.replaceState) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('user', activeUserKey);
+      window.history.replaceState({}, '', url.toString());
+    }
 
-      // 🛠️ 관리자용 자녀 공부방 퀵 스위처 렌더링
-      const switcher = document.getElementById('adminChildSwitcher');
-      if (switcher) {
-        switcher.style.display = 'flex';
-        switcher.innerHTML = `
-          <button type="button" class="admin-child-btn minsu ${userKey === 'minsu' ? 'active' : ''}" onclick="switchAdminLobbyChild('minsu')">👦 민수 공부방 검수</button>
-          <button type="button" class="admin-child-btn minseo ${userKey === 'minseo' ? 'active' : ''}" onclick="switchAdminLobbyChild('minseo')">👧 민서 공부방 검수</button>
-        `;
+    updateAdminToolbar(realName);
+    updateQuestCtaAndBoosts(activeUserKey, realName);
+    renderSubjectCapStates(activeUserKey);
+    updateGuardianHud(activeUserKey, realName);
+    fetchInventoryForUser(activeUserKey, realName);
+  }
+
+  function updateAdminToolbar(realName) {
+    const toolbar = document.getElementById('adminQuickToolbar');
+    const modeLabel = document.getElementById('adminModeLabel');
+    const towerLink = document.getElementById('adminTowerLink');
+    const subStatus = document.getElementById('minseoSubStatusText');
+    const clearance = document.getElementById('minsuClearanceBadge');
+    const savedName = localStorage.getItem('currentUserName');
+
+    if (isAdminSession) {
+      if (toolbar) {
+        toolbar.classList.remove('hidden');
+        toolbar.classList.add('flex');
       }
-
-      const quickToolbar = document.getElementById('quickToolbar');
-      if (quickToolbar) quickToolbar.style.display = 'flex';
-      
-      const dashboardLink = document.getElementById('dashboardLink');
-      if (dashboardLink) {
-        dashboardLink.textContent = '📊 실시간 통합 성장 대시보드';
-        dashboardLink.href = 'parent_dashboard.html?role=parent';
-      }
-
-      const imgChangerLink = document.getElementById('imageChangerLink');
-      if (imgChangerLink) {
-        imgChangerLink.style.display = 'inline-flex';
-      }
-
-      if (savedName === '아빠' && typeof APP_CONFIG !== 'undefined' && APP_CONFIG.MASTER_TOWER_URL) {
-        const towerLink = document.getElementById('towerLink');
-        if (towerLink) {
-          towerLink.href = APP_CONFIG.MASTER_TOWER_URL;
-          towerLink.style.display = 'flex';
-        }
+      if (modeLabel) modeLabel.textContent = `🛠️ [${savedName} 검수] ${realName}`;
+      if (subStatus) subStatus.textContent = `🛠️ ${savedName} 시뮬레이터 가동 중`;
+      if (clearance) clearance.textContent = `SIMULATOR: ${savedName} MODE`;
+      if (towerLink && savedName === '아빠' && typeof APP_CONFIG !== 'undefined' && APP_CONFIG.MASTER_TOWER_URL) {
+        towerLink.href = APP_CONFIG.MASTER_TOWER_URL;
+        towerLink.classList.remove('hidden');
       }
     } else {
-      const switcher = document.getElementById('adminChildSwitcher');
-      if (switcher) switcher.style.display = 'none';
-
-      const quickToolbar = document.getElementById('quickToolbar');
-      if (quickToolbar) quickToolbar.style.display = 'none';
-
-      const finalWelcomeText = currentConfig.key === 'son' 
-        ? `🎮 아케이드 가동! 미션 스테이지를 클리어해라, ${finalRealName}!`
-        : `🎠 반짝반짝 동화 속 비밀 아지트에 온 걸 환영해, ${finalRealName}!`;
-      document.getElementById('welcomeMessage').innerHTML = finalWelcomeText;
-      
-      // 아이들일 때만 로컬스토리지 동기화 수행
-      localStorage.setItem('currentUser', currentConfig.key); 
-      localStorage.setItem('currentUserName', finalRealName);
-      document.getElementById('timetableLink').textContent = `📅 ${finalRealName}의 시간표 보기`;
-    }
-
-    // 👾 5분 퀘스트 퀵 칩 및 배너 링크 & 테마 동적 업데이트
-    const labBtn = document.getElementById('lobbyMonsterLabBtn');
-    const questBanner = document.getElementById('questQuickBanner');
-    if (labBtn) {
-      labBtn.href = `monster_lab.html?user=${userKey}`;
-      if (userKey === 'minseo') {
-        labBtn.innerHTML = `🧸 5분 퀘스트`;
-        labBtn.title = '말랑 젤리 토끼와 5분 일일 퀘스트 출발!';
-      } else {
-        labBtn.innerHTML = `👾 5분 퀘스트`;
-        labBtn.title = '3D 몬스터 바이트와 5분 일일 퀘스트 출격!';
+      if (toolbar) {
+        toolbar.classList.add('hidden');
+        toolbar.classList.remove('flex');
       }
+      if (subStatus) subStatus.textContent = '즐거운 1학년 탐험 중!';
+      if (clearance) clearance.textContent = 'CLEARANCE: O5-MINSU';
     }
-    if (questBanner) {
-      questBanner.href = `monster_lab.html?user=${userKey}`;
-      if (userKey === 'minseo') {
-        const iconEl = questBanner.querySelector('.quest-quick-icon');
-        const titleEl = questBanner.querySelector('.quest-quick-title');
-        const descEl = questBanner.querySelector('.quest-quick-desc');
-        if (iconEl) iconEl.textContent = '🧸';
-        if (titleEl) titleEl.innerHTML = `오늘의 5분 달콤 퀘스트 시작! <span class="quest-quick-tag">💖 사랑 충전</span>`;
-        if (descEl) descEl.textContent = '말랑 젤리 토끼와 함께 수학·국어·영어 5문제 풀고 반짝 가루✨ 챙기기!';
-      } else {
-        const iconEl = questBanner.querySelector('.quest-quick-icon');
-        const titleEl = questBanner.querySelector('.quest-quick-title');
-        const descEl = questBanner.querySelector('.quest-quick-desc');
-        if (iconEl) iconEl.textContent = '👾';
-        if (titleEl) titleEl.innerHTML = `오늘의 5분 퀘스트 출격하기! <span class="quest-quick-tag">🔥 불꽃 스트릭</span>`;
-        if (descEl) descEl.textContent = '3D 클레이 몬스터와 함께 나눗셈·영어 5문제 풀고 보상 다이아💎 챙기기!';
-      }
-    }
+  }
 
-    // 🧚 상황별 요정 코코 반응형 인터랙티브 말풍선 배너 갱신 엔진
-    let currentFairySpeechText = "";
-    let currentFairyTargetUrl = null;
+  function updateQuestCtaAndBoosts(userKey, realName) {
+    const nameEl = document.getElementById('minseoNameBadge');
+    if (nameEl) nameEl.textContent = realName;
 
-    function updateLobbyFairyBubble(childName, childKey, isParentAdmin) {
-      const bubbleEl = document.getElementById("lobbySpeechBubble");
-      const badgeEl = document.getElementById("bubbleBadge");
-      const textEl = document.getElementById("bubbleText");
-      const avatarEl = document.getElementById("bubbleAvatar");
-      if (!bubbleEl || !badgeEl || !textEl) return;
+    if (typeof window.TimetableBoost !== 'undefined' && typeof window.TimetableBoost.getTimetableSubjects === 'function') {
+      const tt = window.TimetableBoost.getTimetableSubjects(realName);
+      const todayList = (tt && tt.todaySubjects) ? tt.todaySubjects : [];
+      const tomorrowList = (tt && tt.tomorrowSubjects) ? tt.tomorrowSubjects : [];
 
-      const now = new Date();
-      const kst = new Date(now.getTime() + (9 * 60 + now.getTimezoneOffset()) * 60000);
-      const hour = kst.getHours();
-      const dayIdx = kst.getDay(); // 0: 일, 1: 월, 2: 화, 3: 수, 4: 목, 5: 금, 6: 토
-      const todayStr = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
-
-      let badge = "☀️ 활기찬 하루 시작";
-      let textHtml = "반가워요! 오늘의 신나는 공부방 모험을 시작해볼까요?";
-      let rawText = "반가워요! 오늘의 신나는 공부방 모험을 시작해볼까요?";
-      let targetUrl = null;
-
-      if (isParentAdmin) {
-        if (avatarEl) avatarEl.textContent = "👨‍👩‍👧‍👦";
-        badge = "🔧 부모 관제 모드 가이드";
-        textHtml = `우리 아이들의 시간표 및 하루 습관 체크인 현황이 실시간 동기화 중입니다. <b>[실시간 통합 성장 대시보드]</b>에서 코칭 카드를 확인해 보세요.`;
-        rawText = "우리 아이들의 시간표 및 하루 습관 체크인 현황이 실시간 동기화 중입니다. 성장 대시보드에서 코칭 카드를 확인해 보세요.";
-        targetUrl = "parent_dashboard.html?role=parent";
-      } else if (childName === "민서" || childKey === "daughter") {
-        if (avatarEl) avatarEl.textContent = "🧚";
-        const isHaruDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minseo") === "true";
-        const hasHaruToday = (dayIdx === 1 || dayIdx === 3 || dayIdx === 4 || dayIdx === 5); // 월,수,목,금
-
-        if (hour >= 5 && hour < 12) {
-          if (!isHaruDone) {
-            badge = "☀️ 상쾌한 아침 등교 전";
-            textHtml = "민서야 좋은 아침! 등교 전에 <b>[30초 하루 체크인]</b>하고 저금통에 황금 코인을 쏙 넣어볼까? 🐷";
-            rawText = "민서야 좋은 아침! 등교 전에 30초 하루 체크인하고 저금통에 황금 코인을 쏙 넣어볼까?";
-            targetUrl = "kids/subjects/haru/haru.html";
-          } else {
-            badge = "☀️ 아침 착한 습관 완료";
-            textHtml = "아침부터 착한 습관을 스스로 실천한 민서 최고야! 오늘 학교에서도 반짝반짝 빛나는 하루 보내고 와! 🌸";
-            rawText = "아침부터 착한 습관을 스스로 실천한 민서 최고야! 오늘 학교에서도 반짝반짝 빛나는 하루 보내고 와!";
-            targetUrl = "kids/subjects/haru/haru.html";
-          }
-        } else if (hour >= 12 && hour < 18) {
-          if (hasHaruToday && !isHaruDone) {
-            badge = "🌱 방과 후 [하루] 30초 체크인";
-            textHtml = "학교 잘 다녀왔어, 민서야! 오늘 시간표에 배운 <b>[슬기로운 하루]</b> 30초 체크인하고 달콤한 젤리를 챙겨봐! 🍬";
-            rawText = "학교 잘 다녀왔어, 민서야! 오늘 시간표에 배운 슬기로운 하루 30초 체크인하고 달콤한 젤리를 챙겨봐!";
-            targetUrl = "kids/subjects/haru/haru.html";
-          } else if (!isHaruDone) {
-            badge = "🍰 방과 후 데일리 체크인";
-            textHtml = "학교 다녀오느라 수고했어, 민서야! 오늘 실천한 착한 일과 운동을 <b>[30초 체크인]</b>으로 쏙 기록해볼까? ✨";
-            rawText = "학교 다녀오느라 수고했어, 민서야! 오늘 실천한 착한 일과 운동을 30초 체크인으로 쏙 기록해볼까?";
-            targetUrl = "kids/subjects/haru/haru.html";
-          } else {
-            badge = "🌸 체크인 완료 & 도서관 탐험";
-            textHtml = "오늘 하루 체크인을 멋지게 완료했네! 이제 재미난 수학·국어 <b>단원 동화 도서관</b>을 신나게 둘러볼까? 📚";
-            rawText = "오늘 하루 체크인을 멋지게 완료했네! 이제 재미난 수학 국어 단원 동화 도서관을 신나게 둘러볼까?";
-            targetUrl = "kids/subjects/korean/korean.html";
-          }
+      // 민서 상단 말풍선 툴팁: 오늘 복습 과목들 또는 내일 예습 과목들 동적 표시
+      const tooltipTitle = document.getElementById('minseo-math-tooltip-title');
+      const tooltipMult = document.getElementById('minseo-math-tooltip-mult');
+      const tooltipDesc = document.getElementById('minseo-math-tooltip-desc');
+      if (tooltipTitle && tooltipMult && tooltipDesc) {
+        if (todayList.length > 0) {
+          tooltipTitle.textContent = `🔥 오늘 복습 : ${todayList.join('·')}`;
+          tooltipMult.textContent = '1.2x';
+          tooltipDesc.textContent = '한도 150개 확장 · EXP 1.2배!';
+        } else if (tomorrowList.length > 0) {
+          tooltipTitle.textContent = `✨ 내일 예습 : ${tomorrowList.join('·')}`;
+          tooltipMult.textContent = '+2개';
+          tooltipDesc.textContent = '10문제 완주 시 보너스 +7개!';
         } else {
-          if (!isHaruDone) {
-            badge = "🌙 자기 전 30초 체크인";
-            textHtml = "오늘 하루도 정말 고생 많았어! 잠들기 전에 <b>[30초 하루 체크인]</b>으로 저금통 코인 채우는 거 잊지 않았지? 🧸";
-            rawText = "오늘 하루도 정말 고생 많았어! 잠들기 전에 30초 하루 체크인으로 저금통 코인 채우는 거 잊지 않았지?";
-            targetUrl = "kids/subjects/haru/haru.html";
-          } else {
-            badge = "💖 포근한 저녁 마무리";
-            textHtml = "오늘 착한 습관과 운동까지 알차게 해낸 민서! 푹 쉬고 예쁜 꿈꿔, 내일 또 신나게 놀자! 🌙";
-            rawText = "오늘 착한 습관과 운동까지 알차게 해낸 민서! 푹 쉬고 예쁜 꿈꿔, 내일 또 신나게 놀자!";
-            targetUrl = "kids/subjects/haru/haru.html";
-          }
+          tooltipTitle.textContent = '🧮 수학 : 10 만들기';
+          tooltipMult.textContent = '추천';
+          tooltipDesc.textContent = '오늘의 보물을 찾아 떠나볼까?';
         }
+      }
+
+      // 민수 하단 워프 요약줄: 시간표 부스트 과목 표시
+      const minsuBoostSummary = document.getElementById('minsuBoostSummaryText');
+      if (minsuBoostSummary) {
+        if (todayList.length > 0) {
+          minsuBoostSummary.textContent = `🔥 오늘 시간표 버프(1.2x): ${todayList.join(' · ')}`;
+        } else if (tomorrowList.length > 0) {
+          minsuBoostSummary.textContent = `✨ 내일 예습 버프(+2💎): ${tomorrowList.join(' · ')}`;
+        } else {
+          minsuBoostSummary.textContent = 'WARP VELOCITY // READY';
+        }
+      }
+    }
+  }
+
+  // =========================================================
+  // 🚦 2. 과목별 시간표 버프(2~4과목 동시) & 일일 한도(Daily Cap) 신호등
+  // =========================================================
+  function getSubjectBoost(subjKey, userKey) {
+    const meta = SUBJECT_META[subjKey];
+    if (!meta || subjKey === 'haru') return { type: 'normal', limit: 100, expMultiplier: 1.0 };
+    const childName = getRealChildName(userKey);
+    if (typeof window.TimetableBoost !== 'undefined' && typeof window.TimetableBoost.getSubjectBoostInfo === 'function') {
+      return window.TimetableBoost.getSubjectBoostInfo(meta.ko, childName) || { type: 'normal', limit: 100, expMultiplier: 1.0 };
+    }
+    return { type: 'normal', limit: 100, expMultiplier: 1.0 };
+  }
+
+  function getSubjectEarnedToday(subjKey, userKey) {
+    const meta = SUBJECT_META[subjKey];
+    if (!meta) return 0;
+    const childName = getRealChildName(userKey);
+    const todayKst = getTodayKstString();
+    const todayLocal = new Date().toLocaleDateString();
+
+    if (subjKey === 'haru') {
+      const done = localStorage.getItem(`haru_checkin_done_${todayKst}_${userKey}`) === 'true';
+      return done ? 100 : 0;
+    }
+
+    let localVal = 0;
+    const lastDate = localStorage.getItem(`last_play_date_${childName}_${meta.ko}`);
+    if (lastDate === todayKst || lastDate === todayLocal) {
+      localVal = parseInt(localStorage.getItem(`today_earned_${childName}_${meta.ko}`) || '0', 10) || 0;
+    }
+    const cloudVal = Number(runtimeDailyEarned[userKey]?.[subjKey] || 0);
+    return Math.max(localVal, cloudVal);
+  }
+
+  function getSubjectCapState(subjKey, userKey) {
+    const uKey = userKey || activeUserKey;
+    const override = localStorage.getItem(`DAILY_CAP_OVERRIDE_${uKey}_${subjKey}`);
+    if (override === 'available' || override === 'critical' || override === 'completed') {
+      return override;
+    }
+
+    const boost = getSubjectBoost(subjKey, uKey);
+    const limit = boost.limit || 100;
+    const earned = getSubjectEarnedToday(subjKey, uKey);
+
+    if (earned >= limit) return 'completed';
+    if (earned >= Math.floor(limit * 0.7)) return 'critical';
+    return 'available';
+  }
+
+  function renderSubjectCapStates(userKey) {
+    const uKey = userKey || activeUserKey;
+    if (uKey === 'minseo') {
+      renderMinseoSubjectStates();
+    } else {
+      renderMinsuSubjectStates();
+    }
+  }
+
+  function renderMinseoSubjectStates() {
+    const subjects = USER_CONFIGS.minseo.subjects;
+    subjects.forEach(subjKey => {
+      const state = getSubjectCapState(subjKey, 'minseo');
+      const boost = getSubjectBoost(subjKey, 'minseo');
+      const cardEl = document.getElementById(`minseo-card-${subjKey}`);
+      const statusEl = document.getElementById(`minseo-status-${subjKey}`);
+      const cornerEl = document.getElementById(`minseo-corner-${subjKey}`);
+      const boostEl = document.getElementById(`minseo-boost-${subjKey}`);
+      if (!cardEl || !statusEl) return;
+
+      // 1) 시간표 버프 배지 (한도 완료가 아닐 때만 시간표 해당 모든 과목에 동시 표시)
+      if (boostEl) {
+        if (state !== 'completed' && boost.type === 'review') {
+          boostEl.className = '-mb-1 z-20 bg-amber-100 border border-amber-400 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce';
+          boostEl.textContent = '🔥 오늘 복습 1.2x';
+        } else if (state !== 'completed' && boost.type === 'preview') {
+          boostEl.className = '-mb-1 z-20 bg-purple-100 border border-purple-400 text-purple-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap';
+          boostEl.textContent = '✨ 내일 예습 +2';
+        } else {
+          boostEl.className = 'hidden';
+        }
+      }
+
+      // 2) 일일 한도 신호등 상태 반영 (여유 ➔ 마지막 1판 ➔ 한도 도달 시 소등)
+      if (state === 'completed') {
+        cardEl.classList.add('clay-card-dim', 'grayscale', 'opacity-75');
+        cardEl.classList.remove('ring-4', 'ring-amber-300/80');
+        statusEl.className = 'mt-3.5 inline-flex items-center gap-1 bg-slate-200/80 text-slate-500 px-3 py-1 rounded-full font-bold text-xs';
+        statusEl.innerHTML = '완료 💤';
+        if (cornerEl) cornerEl.textContent = '💤';
+      } else if (state === 'critical') {
+        cardEl.classList.remove('clay-card-dim', 'grayscale', 'opacity-75');
+        cardEl.classList.add('ring-4', 'ring-amber-300/80');
+        statusEl.className = 'mt-3.5 inline-flex items-center gap-1 bg-amber-50 text-amber-800 px-3 py-1 rounded-full font-extrabold text-xs shadow-sm border border-amber-300 animate-pulse';
+        statusEl.innerHTML = '<span>⚡</span> 🟡 마지막 1판!';
+        if (cornerEl) cornerEl.textContent = '🔥';
       } else {
-        // 민수
-        if (avatarEl) avatarEl.textContent = "🚀";
-        const isHaruDone = localStorage.getItem("haru_checkin_done_" + todayStr + "_minsu") === "true";
-        let timetableInfo = null;
-        if (typeof window.TimetableBoost !== 'undefined') {
-          timetableInfo = window.TimetableBoost.getTimetableSubjects('민수');
-        }
-        const todaySubjs = (timetableInfo && timetableInfo.todaySubjects) || [];
-        const subjStr = todaySubjs.length > 0 ? todaySubjs.join('·') : '수학·국어';
-
-        if (hour >= 5 && hour < 12) {
-          if (!isHaruDone) {
-            badge = "⚡ 등교 전 30초 데일리 루틴";
-            textHtml = "민수야 좋은 아침! 등교 전에 <b>[30초 데일리 루틴]</b> 체크인하고 저금통 황금 코인 & 다이아 챙겨볼까? 💎";
-            rawText = "민수야 좋은 아침! 등교 전에 30초 데일리 루틴 체크인하고 저금통 황금 코인과 다이아 챙겨볼까?";
-            targetUrl = "kids/subjects/haru/haru.html?user=minsu";
-          } else {
-            badge = "⚡ 활기찬 아침 출격";
-            textHtml = "에너지 100% 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야! 🚀";
-            rawText = "에너지 백 퍼센트 충전 완료! 오늘의 5대 과목 퀘스트를 향해 힘차게 출격해볼까, 민수야!";
-            targetUrl = "kids/subjects/math/math.html";
-          }
-        } else if (hour >= 12 && hour < 18) {
-          if (!isHaruDone) {
-            badge = "🌱 방과 후 30초 데일리 루틴";
-            textHtml = `학교 잘 다녀왔어! 오늘 실천한 착한 습관과 운동을 <b>[30초 루틴 체크인]</b>으로 기록하고 다이아 챙겨봐! 💎`;
-            rawText = "학교 잘 다녀왔어! 오늘 실천한 착한 습관과 운동을 30초 루틴 체크인으로 기록하고 다이아 챙겨봐!";
-            targetUrl = "kids/subjects/haru/haru.html?user=minsu";
-          } else {
-            badge = "🔥 오늘 시간표 복습 1.2배 부스트";
-            textHtml = `스테이지 복귀 완료! 오늘 학교에서 배운 <b>[${subjStr}]</b>을 복습하면 경험치(EXP) 1.2배 부스트 보너스! 🕹️`;
-            rawText = `스테이지 복귀 완료! 오늘 학교에서 배운 ${subjStr}을 복습하면 경험치 1.2배 부스트 보너스를 받아!`;
-            targetUrl = todaySubjs.includes('수학') ? 'kids/subjects/math/math.html' : 'kids/subjects/korean/korean.html';
-          }
+        cardEl.classList.remove('clay-card-dim', 'grayscale', 'opacity-75');
+        if (boost.type === 'review') {
+          cardEl.classList.add('ring-4', 'ring-amber-300/80');
         } else {
-          if (!isHaruDone) {
-            badge = "🌙 자기 전 30초 데일리 체크인";
-            textHtml = "오늘 하루도 수고 많았어! 잠들기 전 <b>[30초 데일리 루틴]</b>으로 저금통 코인 채우고 다이아몬드 받자! 💎";
-            rawText = "오늘 하루도 수고 많았어! 잠들기 전 30초 데일리 루틴으로 저금통 코인 채우고 다이아몬드 받자!";
-            targetUrl = "kids/subjects/haru/haru.html?user=minsu";
-          } else {
-            badge = "🌙 오늘 퀘스트 & 폰시간 결산";
-            textHtml = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 <b>[오늘 폰시간 정산]</b> 영수증을 확인해봐! 🔋";
-            rawText = "오늘의 스테이지 정리 시간! 오늘 모은 보상 다이아와 오늘 폰시간 정산 영수증을 확인해봐!";
-            targetUrl = "#screentime";
-          }
+          cardEl.classList.remove('ring-4', 'ring-amber-300/80');
         }
+        statusEl.className = 'mt-3.5 inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-bold text-xs shadow-sm border border-emerald-200';
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림';
       }
+    });
+  }
 
-      badgeEl.textContent = badge;
-      textEl.innerHTML = textHtml;
-      currentFairySpeechText = rawText;
-      currentFairyTargetUrl = targetUrl;
+  function renderMinsuSubjectStates() {
+    // 민수 30초 하루 루틴 미니 위성 상태
+    const haruState = getSubjectCapState('haru', 'minsu');
+    const haruBtn = document.getElementById('minsu-node-haru');
+    const haruSub = document.getElementById('minsu-sub-haru');
+    if (haruBtn && haruSub) {
+      if (haruState === 'completed') {
+        haruBtn.className = 'flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-900/90 border border-slate-700 text-[10px] font-mono text-slate-500 opacity-75';
+        haruSub.textContent = '루틴 완료 💤';
+      } else {
+        haruBtn.className = 'flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-400/50 text-[10px] font-mono font-bold text-emerald-300 hover:scale-105 active:scale-95 transition-transform shadow-[0_0_10px_rgba(16,185,129,0.25)]';
+        haruSub.textContent = '30초 루틴 ⚡';
+      }
     }
 
-    window.handleFairyBubbleClick = function() {
-      if (currentFairyTargetUrl) {
-        if (currentFairyTargetUrl === '#screentime') {
-          if (typeof openScreenTimeReceiptModal === 'function') openScreenTimeReceiptModal();
+    // 민수 5대 차원 포털 상태 (시간표 다중 과목 버프 + 일일 한도 신호등)
+    const portalSubjects = ['english', 'korean', 'math', 'society', 'science'];
+    portalSubjects.forEach(subjKey => {
+      const meta = SUBJECT_META[subjKey];
+      if (!meta) return;
+      const state = getSubjectCapState(subjKey, 'minsu');
+      const boost = getSubjectBoost(subjKey, 'minsu');
+
+      const nodeEl = document.getElementById(`minsu-node-${subjKey}`);
+      const orbEl = document.getElementById(`minsu-orb-${subjKey}`);
+      const dotEl = document.getElementById(`minsu-dot-${subjKey}`);
+      const subEl = document.getElementById(`minsu-sub-${subjKey}`);
+      const boostEl = document.getElementById(`minsu-boost-${subjKey}`);
+      const cardHeaderEl = document.getElementById(`card-${meta.shortId}-header`);
+      const cardStatusEl = document.getElementById(`card-${meta.shortId}-status`);
+      const cardEl = document.getElementById(`card-${meta.shortId}`);
+      const entryBtn = cardEl ? cardEl.querySelector('button[onclick*="handleSubjectNodeClick"]') : null;
+
+      // 1) 시간표 다중 과목 버프 배지 점등 (2과목이든 4과목이든 모두 켜짐, 완료 시 소등)
+      if (boostEl) {
+        if (state !== 'completed' && boost.type === 'review') {
+          boostEl.className = '-mb-1 z-20 px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-mono text-[9px] font-black shadow-[0_0_8px_#F59E0B] animate-pulse';
+          boostEl.textContent = '🔥 복습 1.2x';
+        } else if (state !== 'completed' && boost.type === 'preview') {
+          boostEl.className = '-mb-1 z-20 px-1.5 py-0.5 rounded bg-purple-500 text-white font-mono text-[9px] font-black shadow-[0_0_8px_#A855F7]';
+          boostEl.textContent = '✨ 예습 +2';
         } else {
-          location.href = currentFairyTargetUrl;
+          boostEl.className = 'hidden';
         }
-      } else if (currentFairySpeechText) {
-        speakFairyCocoBubble();
-      }
-    };
-
-    window.speakBubbleMessage = function(event) {
-      if (event) event.stopPropagation();
-      speakFairyCocoBubble();
-    };
-
-    function speakFairyCocoBubble() {
-      if (!currentFairySpeechText) return;
-      if (typeof speakFairyTTS === 'function') {
-        speakFairyTTS(currentFairySpeechText);
-      } else if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(currentFairySpeechText);
-        u.lang = 'ko-KR';
-        window.speechSynthesis.speak(u);
-      }
-    }
-
-    // 상황별 요정 말풍선 즉시 최초 갱신
-    updateLobbyFairyBubble(finalRealName, currentConfig.key, isAdmin);
-
-    window.switchAdminLobbyChild = function(targetChild) {
-      const targetKey = targetChild === 'minseo' ? 'daughter' : 'son';
-      localStorage.setItem('currentChild', targetChild);
-      localStorage.setItem('currentUser', targetKey);
-      location.href = `lobby.html?user=${targetChild}`;
-    };
-
-    // 🛠️ 2대 메인 탭 전환 및 월드 그리드 렌더러
-    let currentLobbyTab = 'study';
-    const initialTabParam = urlParams.get('tab');
-    if (initialTabParam === 'hideout' || window.location.hash === '#hideout') {
-      currentLobbyTab = 'hideout';
-    }
-
-    function createWorldCard(world) {
-      const card = document.createElement('div');
-      card.className = 'world-card';
-      if (world.color) {
-        card.style.borderTop = `4px solid ${world.color}`;
       }
 
-      const title = document.createElement('div');
-      title.className = 'world-title';
-      title.textContent = world.title;
-      card.appendChild(title);
-
-      const roomList = document.createElement('div');
-      roomList.className = 'sub-room-list';
-
-      world.rooms.forEach(room => {
-        let detectedSubj = null;
-        if (room.href.includes('math.html')) detectedSubj = '수학';
-        else if (room.href.includes('korean.html')) detectedSubj = '국어';
-        else if (room.href.includes('english.html')) detectedSubj = '영어';
-        else if (room.href.includes('science.html')) detectedSubj = '과학';
-        else if (room.href.includes('society.html')) detectedSubj = '사회';
-
-        let boostHtml = '';
-        if (detectedSubj && typeof window.TimetableBoost !== 'undefined') {
-          const boost = window.TimetableBoost.getSubjectBoostInfo(detectedSubj, finalRealName);
-          if (boost && boost.badge) {
-            boostHtml = `
-              <div class="timetable-boost-chip" style="display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; padding:3px 10px; border-radius:12px; background:${boost.badge.bgGradient}; border:1.5px solid ${boost.badge.borderColor}; color:${boost.badge.color}; font-weight:bold; margin-bottom:6px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
-                <span>${boost.badge.text}</span>
-                <span style="font-size:0.72rem; font-weight:normal; opacity:0.92;">${boost.badge.subText}</span>
-              </div>
-            `;
+      // 2) 일일 한도 신호등 스타일 반영
+      if (state === 'completed') {
+        if (nodeEl) nodeEl.classList.add('opacity-70');
+        if (orbEl) {
+          orbEl.classList.add('grayscale', 'opacity-70');
+          orbEl.classList.remove('ring-2', 'ring-amber-400');
+        }
+        if (dotEl) dotEl.className = 'absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-slate-600';
+        if (subEl) {
+          subEl.className = 'mt-0.5 text-[9px] font-mono text-slate-500 bg-slate-900/90 px-1.5 py-0.5 rounded border border-slate-800';
+          subEl.textContent = '💤 냉각 (오늘완료)';
+        }
+        if (cardHeaderEl) cardHeaderEl.textContent = `[${meta.code} // DEPLETED]`;
+        if (cardStatusEl) cardStatusEl.textContent = '💤 금일 한도 도달 (냉각 중)';
+        if (entryBtn) entryBtn.textContent = '포털 진입 (보상없음)';
+      } else if (state === 'critical') {
+        if (nodeEl) nodeEl.classList.remove('opacity-70');
+        if (orbEl) {
+          orbEl.classList.remove('grayscale', 'opacity-70');
+          orbEl.classList.add('ring-2', 'ring-amber-400');
+        }
+        if (dotEl) dotEl.className = 'absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#F59E0B] animate-ping';
+        if (subEl) {
+          subEl.className = 'mt-0.5 text-[9px] font-mono font-bold text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded border border-amber-400/60';
+          subEl.textContent = '🟡 마지막 1판!';
+        }
+        if (cardHeaderEl) cardHeaderEl.textContent = `[${meta.code} // CRITICAL]`;
+        if (cardStatusEl) cardStatusEl.textContent = '🟡 마감 임박: 마지막 1판 보너스!';
+        if (entryBtn) entryBtn.textContent = '포털 진입 ➔';
+      } else {
+        if (nodeEl) nodeEl.classList.remove('opacity-70');
+        if (orbEl) {
+          orbEl.classList.remove('grayscale', 'opacity-70');
+          if (boost.type === 'review') {
+            orbEl.classList.add('ring-2', 'ring-amber-400');
+          } else {
+            orbEl.classList.remove('ring-2', 'ring-amber-400');
           }
         }
+        if (dotEl) {
+          dotEl.className = boost.type === 'review'
+            ? 'absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_#F59E0B]'
+            : 'absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_6px_#10B981]';
+        }
+        if (subEl) {
+          if (boost.type === 'review') {
+            subEl.className = 'mt-0.5 text-[9px] font-mono font-bold text-amber-300 bg-amber-500/15 px-1.5 py-0.5 rounded border border-amber-400/50';
+            subEl.textContent = '⚡ 채굴가능 (1.2x)';
+          } else {
+            subEl.className = 'mt-0.5 text-[9px] font-mono text-secondary bg-secondary/10 px-1.5 py-0.5 rounded border border-secondary/30';
+            subEl.textContent = '⚡ 채굴가능 +30m';
+          }
+        }
+        if (cardHeaderEl) cardHeaderEl.textContent = boost.type === 'review' ? `[${meta.code} // BOOST 1.2x]` : `[${meta.code} // ACTIVE]`;
+        if (cardStatusEl) cardStatusEl.textContent = boost.type === 'review' ? '🔥 오늘 복습: 한도 150 · EXP 1.2x' : '⚡ 채굴 가능: +30분 보너스 열림';
+        if (entryBtn) entryBtn.textContent = '포털 진입 ➔';
+      }
+    });
+  }
 
-        const a = document.createElement('a');
-        a.href = room.href;
-        a.className = 'sub-room-btn';
-        a.innerHTML = `
-          ${boostHtml}
-          <div class="sub-room-name">${room.name}</div>
-          <div class="sub-room-desc">${room.desc}</div>
-        `;
-        roomList.appendChild(a);
-      });
+  // =========================================================
+  // 🛑 3. 한도 도달 갈림길 모달 (한도도달ui.html) & 놀이터 모달 연동
+  // =========================================================
+  function findRecommendedSubject(excludedSubjKey, userKey) {
+    const uKey = userKey || activeUserKey;
+    const candidateOrder = uKey === 'minseo'
+      ? ['math', 'korean', 'english', 'haru']
+      : ['math', 'english', 'korean', 'society', 'science'];
 
-      card.appendChild(roomList);
-      return card;
+    // 1순위: 오늘 시간표 버프가 있으면서 아직 완료되지 않은 과목
+    for (const key of candidateOrder) {
+      if (key !== excludedSubjKey && getSubjectCapState(key, uKey) !== 'completed' && getSubjectBoost(key, uKey).type === 'review') {
+        return key;
+      }
+    }
+    // 2순위: 아직 완료되지 않은 첫 번째 과목
+    for (const key of candidateOrder) {
+      if (key !== excludedSubjKey && getSubjectCapState(key, uKey) !== 'completed') {
+        return key;
+      }
+    }
+    return candidateOrder.find(k => k !== excludedSubjKey) || 'math';
+  }
+
+  window.openDailyCapModal = function (subjKey) {
+    const doneMeta = SUBJECT_META[subjKey] || SUBJECT_META.korean;
+    const recKey = findRecommendedSubject(doneMeta.key, activeUserKey);
+    const recMeta = SUBJECT_META[recKey] || SUBJECT_META.math;
+    const recBoost = getSubjectBoost(recKey, activeUserKey);
+
+    modalState.completedSubjKey = doneMeta.key;
+    modalState.recommendedSubjKey = recMeta.key;
+
+    const doneTitleEl = document.getElementById('capModalDoneTitle');
+    const doneIconEl = document.getElementById('capModalDoneIcon');
+    const doneRoomEl = document.getElementById('capModalDoneRoomName');
+    const doneBadgeEl = document.getElementById('capModalDoneBadgeText');
+    const recIconEl = document.getElementById('capModalRecIcon');
+    const recRoomEl = document.getElementById('capModalRecRoomName');
+    const recBonusEl = document.getElementById('capModalRecBonusText');
+    const priBtnTextEl = document.getElementById('capModalPrimaryBtnText');
+    const secBtnTextEl = document.getElementById('capModalSecondaryBtnText');
+
+    if (doneTitleEl) doneTitleEl.textContent = `[${doneMeta.ko}]`;
+    if (doneIconEl) doneIconEl.textContent = doneMeta.icon;
+    if (doneRoomEl) doneRoomEl.textContent = doneMeta.roomLabel;
+    if (doneBadgeEl) doneBadgeEl.textContent = '보물 완료 (100% 충전)';
+    if (recIconEl) recIconEl.textContent = recMeta.icon;
+    if (recRoomEl) recRoomEl.textContent = `➔ ${recMeta.roomLabel}`;
+    if (recBonusEl) {
+      recBonusEl.textContent = recBoost.type === 'review' ? '🔥 오늘 복습 1.2x 보너스!' : '+30분 보물 가능!';
+    }
+    if (priBtnTextEl) priBtnTextEl.textContent = `보물이 남은 '${recMeta.ko}' 방 바로 가기!`;
+    if (secBtnTextEl) secBtnTextEl.textContent = `시간 추가 없이 그냥 ${doneMeta.ko} 복습만 더 할래요`;
+
+    const overlay = document.getElementById('dailyCapModalOverlay');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+    }
+  };
+
+  window.closeDailyCapModal = function () {
+    const overlay = document.getElementById('dailyCapModalOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }
+  };
+
+  window.handleCapModalGoRecommended = function () {
+    const recMeta = SUBJECT_META[modalState.recommendedSubjKey] || SUBJECT_META.math;
+    window.closeDailyCapModal();
+    navigateToSubjectRoom(recMeta.key);
+  };
+
+  window.handleCapModalReviewAnyway = function () {
+    const doneMeta = SUBJECT_META[modalState.completedSubjKey] || SUBJECT_META.korean;
+    window.closeDailyCapModal();
+    navigateToSubjectRoom(doneMeta.key);
+  };
+
+  window.openPlaygroundModal = function (userKey) {
+    const uKey = userKey || activeUserKey;
+    const realName = getRealChildName(uKey);
+    const titleEl = document.getElementById('playgroundModalTitle');
+    const listEl = document.getElementById('playgroundModalList');
+    const overlay = document.getElementById('playgroundModalOverlay');
+    if (!overlay || !listEl) return;
+
+    if (titleEl) {
+      titleEl.textContent = `🎡 ${realName}의 창의 놀이터 & 특별 탐험`;
     }
 
-    function renderWorldGrid(tab) {
-      const grid = document.getElementById('worldGrid');
-      if (!grid) return;
-      grid.innerHTML = '';
-
-      // 기존 미래 교과 보관소가 DOM에 있으면 먼저 정리
-      const existingFutureWrap = document.getElementById('futureWorldsWrap');
-      if (existingFutureWrap) existingFutureWrap.remove();
-
-      const worlds = tab === 'hideout' ? currentConfig.hideoutWorlds : currentConfig.studyWorlds;
-      (worlds || []).forEach(world => {
-        grid.appendChild(createWorldCard(world));
-      });
-
-      // 🔮 3학년 미래 교과 보관소 (사회·과학) 렌더링 (공부방 탭 & futureWorlds 데이터가 있을 때만)
-      if (tab === 'study' && currentConfig.futureWorlds && currentConfig.futureWorlds.length > 0) {
-        const futureWrap = document.createElement('div');
-        futureWrap.id = 'futureWorldsWrap';
-        futureWrap.className = 'future-worlds-wrap';
-        futureWrap.innerHTML = `
-          <button type="button" class="future-toggle-btn" id="futureToggleBtn" onclick="toggleFutureWorlds()">
-            <span>🔮 3학년 미래 교과 보관소 <span class="future-notice-badge">(사회·과학 미리보기)</span></span>
-            <span class="toggle-icon">▼</span>
-          </button>
-          <div class="future-content-box" id="futureContentBox">
-            <div class="future-guide-banner">
-              <span>🎒</span>
-              <div>초등 3학년부터 시작되는 새로운 탐구 과목이에요! 지금은 먼저 둘러보며 구경하거나 오빠 공부를 엿볼 수 있어요. 민서가 3학년이 되면 정규 공부방으로 올라옵니다 ✨</div>
-            </div>
-            <div class="future-grid" id="futureGrid"></div>
+    const items = PLAYGROUND_ITEMS[uKey] || PLAYGROUND_ITEMS.minsu;
+    listEl.innerHTML = items.map(item => `
+      <a href="${item.href}" class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 transition-all active:scale-98">
+        <div class="w-11 h-11 rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-2xl flex-shrink-0">${item.icon}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="font-extrabold text-sm text-slate-800 truncate">${item.title}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">${item.badge}</span>
           </div>
-        `;
-        grid.insertAdjacentElement('afterend', futureWrap);
+          <p class="text-xs text-slate-500 mt-0.5 line-clamp-1">${item.desc}</p>
+        </div>
+        <span class="text-slate-400 font-bold text-sm">➔</span>
+      </a>
+    `).join('');
 
-        const futureGrid = futureWrap.querySelector('#futureGrid');
-        if (futureGrid) {
-          currentConfig.futureWorlds.forEach(world => {
-            futureGrid.appendChild(createWorldCard(world));
-          });
-        }
-      }
+    overlay.classList.remove('hidden');
+    overlay.classList.add('flex');
+  };
+
+  window.closePlaygroundModal = function () {
+    const overlay = document.getElementById('playgroundModalOverlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
     }
+  };
 
-    window.toggleFutureWorlds = function() {
-      const btn = document.getElementById('futureToggleBtn');
-      const box = document.getElementById('futureContentBox');
-      if (!btn || !box) return;
-      const isOpen = box.classList.contains('open');
-      if (isOpen) {
-        box.classList.remove('open');
-        btn.classList.remove('open');
+  function navigateToSubjectRoom(subjKey) {
+    const meta = SUBJECT_META[subjKey];
+    if (!meta) return;
+    const sep = meta.href.includes('?') ? '&' : '?';
+    window.location.href = `${meta.href}${sep}user=${activeUserKey}`;
+  }
+
+  // =========================================================
+  // 🧭 4. 글로벌 클릭 핸들러 (과목 섬/포털, 4칸 허브, 5구역 하단바)
+  // =========================================================
+  window.handleSubjectNodeClick = function (subjKey) {
+    const state = getSubjectCapState(subjKey, activeUserKey);
+    if (state === 'completed') {
+      window.openDailyCapModal(subjKey);
+      return;
+    }
+    navigateToSubjectRoom(subjKey);
+  };
+
+  window.togglePortalCard = function (cardId) {
+    const cards = ['card-eng', 'card-kor', 'card-math', 'card-soc', 'card-sci'];
+    cards.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (id === cardId) {
+        el.classList.toggle('hidden');
       } else {
-        box.classList.add('open');
-        btn.classList.add('open');
+        el.classList.add('hidden');
       }
-    };
+    });
+  };
 
-    window.switchLobbyTab = function(tab) {
-      currentLobbyTab = tab;
-      const tabStudy = document.getElementById('tabStudy');
-      const tabHideout = document.getElementById('tabHideout');
-      const subtitle = document.getElementById('lobbySubtitle');
+  window.switchLobbyUser = function (targetUser) {
+    if (!USER_CONFIGS[targetUser]) return;
+    applyLobbyThemeAndView(targetUser, true);
+  };
 
-      if (tab === 'study') {
-        if (tabStudy) tabStudy.classList.add('active');
-        if (tabHideout) tabHideout.classList.remove('active');
-        if (subtitle) subtitle.textContent = "오늘 탐험하고 싶은 공부방 월드를 선택해봐!";
-      } else {
-        if (tabStudy) tabStudy.classList.remove('active');
-        if (tabHideout) tabHideout.classList.add('active');
-        if (subtitle) subtitle.textContent = "나만의 아지트에서 방을 꾸미고 놀이터에서 놀아보자!";
-      }
-      renderWorldGrid(tab);
-    };
+  window.switchAdminLobbyChild = function (targetChild) {
+    window.switchLobbyUser(targetChild);
+  };
 
-    // 초기 탭 활성화 실행
-    switchLobbyTab(currentLobbyTab);
+  window.handleLobbySettingsClick = function (event) {
+    if (event) event.stopPropagation();
+    const shield = document.getElementById('shield-icon');
+    if (shield) {
+      shield.classList.add('scale-125', 'text-amber-400');
+      setTimeout(() => shield.classList.remove('scale-125', 'text-amber-400'), 280);
+    }
+    if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.openModal === 'function') {
+      SettingsManager.openModal();
+    }
+  };
 
-    // 배경 부유물 애니메이션 모듈
-    (function createFloatingParticles() {
-      const wrap = document.getElementById('bgFloats');
-      if (!wrap) return;
-      wrap.innerHTML = '';
-      const symbols = currentConfig.bgSymbols;
-      for (let i = 0; i < 18; i++) {
-        const el = document.createElement('div');
-        el.className = 'float-item';
-        el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        el.style.left = (Math.random() * 92) + '%';
-        el.style.animationDuration = (11 + Math.random() * 13) + 's';
-        el.style.animationDelay = (-Math.random() * 15) + 's';
-        wrap.appendChild(el);
-      }
-    })();
+  window.handleGuardianClick = function (childName) {
+    const targetName = childName || getRealChildName(activeUserKey);
+    if (typeof window.openScreenTimeReceiptModal === 'function') {
+      window.openScreenTimeReceiptModal(targetName);
+    }
+  };
 
-    // 노션 백엔드 인벤토리 동기화 통신 모듈
-    async function fetchInventory() {
-      const container = document.getElementById('inventoryDisplay');
-      if (!container) return;
-      const childName = finalRealName;
-      
-      // 💡 [핵심 차단막] 아빠/엄마 관리자 모드일 때는 노션 데이터 조회를 완전히 패스하고 모킹데이터 주입!
-      if (isAdmin) {
-        const defaultTheme = currentConfig.key === 'son' ? '마인크래프트' : '슬라임';
-        localStorage.setItem('currentTheme', defaultTheme);
-        
-        container.innerHTML = `
-          <div class="reward-badge">🎟️ <span style="color:var(--mint);">무한 패스</span></div>
-          <div class="math-level" style="background:var(--purple); color:#fff;">🛠️ Lv. 999</div>
-        `;
-        container.className = "inventory-card " + (defaultTheme === '마인크래프트' ? 'theme--minecraft' : 'theme--slime');
-        return; // 🔥 노션 통신망 차단완료!
-      }
+  window.goToFiveMinQuest = function (userKey) {
+    const uKey = userKey || activeUserKey;
+    window.location.href = `monster_lab.html?user=${uKey}`;
+  };
 
-      function renderInventoryCard(diamond, slime, level, theme) {
-        localStorage.setItem('currentTheme', theme);
-        container.classList.remove('theme--minecraft', 'theme--slime');
-        if (theme === '마인크래프트') {
-          container.innerHTML = `<div class="reward-badge">💎 <span style="color:#0288D1;">x${diamond}</span></div><div class="math-level">통합 Lv. ${level}</div>`;
-          container.classList.add('theme--minecraft');
+  window.navigateToHub = function (hubType, userKey) {
+    const uKey = userKey || activeUserKey;
+    switch (hubType) {
+      case 'myroom':
+      case 'wishshop':
+        window.location.href = `kids/common_space/my-room.html?user=${uKey}`;
+        break;
+      case 'gallery':
+        window.location.href = `kids/common_space/gallery.html?user=${uKey}`;
+        break;
+      case 'timetable':
+        window.location.href = isAdminSession ? 'timetable.html?view=monitor' : `timetable.html?user=${uKey}`;
+        break;
+      case 'dashboard':
+        window.location.href = isAdminSession ? 'parent_dashboard.html?role=parent' : `parent_dashboard.html?user=${uKey}`;
+        break;
+      case 'voca':
+        window.location.href = `kids/common_space/voca.html?user=${uKey}`;
+        break;
+      default:
+        break;
+    }
+  };
+
+  window.handleBottomNav = function (tab, userKey, event) {
+    if (event) event.preventDefault();
+    const uKey = userKey || activeUserKey;
+    const realName = getRealChildName(uKey);
+
+    switch (tab) {
+      case 'diary':
+        if (typeof window.openDailyDiaryModal === 'function') {
+          window.openDailyDiaryModal();
         } else {
-          const hariboHtml = typeof getRewardWealthHtml === 'function'
-            ? getRewardWealthHtml(theme, slime, '')
-            : `🍬 <span style="color:#E84393;">x${slime}</span>`;
-          container.innerHTML = `<div class="reward-badge">${hariboHtml}</div><div class="math-level">통합 Lv. ${level}</div>`;
-          container.classList.add('theme--slime');
+          window.location.href = `lobby.html?user=${uKey}&action=diary`;
         }
-      }
+        break;
+      case 'upload':
+        if (typeof window.openQuickUploader === 'function') {
+          window.openQuickUploader({ defaultAuthor: realName });
+        }
+        break;
+      case 'voca':
+        window.location.href = `kids/common_space/voca.html?user=${uKey}`;
+        break;
+      case 'playground':
+        window.openPlaygroundModal(uKey);
+        break;
+      case 'profile':
+        window.location.href = 'index.html';
+        break;
+      default:
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        break;
+    }
+  };
 
-      // ⚡ 1. SWR 캐시 즉각 로딩 (0.01초 렌더링)
-      const invCacheKey = `MINMIN_INVENTORY_CACHE_${childName}`;
-      let hasCachedData = false;
-      try {
-        const cachedRaw = localStorage.getItem(invCacheKey);
-        if (cachedRaw) {
-          const cached = JSON.parse(cachedRaw);
-          if (cached && typeof cached.level !== 'undefined') {
-            renderInventoryCard(cached.diamond || 0, cached.slime || 0, cached.level || 1, cached.theme || (childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임'));
-            hasCachedData = true;
-          }
-        }
-      } catch (e) {
-        console.warn("[Inventory Cache] 캐시 로드 실패:", e);
-      }
-      
-      // 🌐 2. 백그라운드 최신화 (워커 엣지 캐시 또는 노션 연동)
-      try {
-        const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
-        const invDbId = typeof INVENTORY_DB_ID !== 'undefined' ? INVENTORY_DB_ID : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID) ? APP_CONFIG.INVENTORY_DB_ID : "374a27115b688042bb61e6a102242e12");
-        const response = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          cache: "no-store",
-          body: JSON.stringify({ filter: { property: "이름", title: { equals: childName } } })
-        });
-        const data = await response.json();
-        if (!data.results || data.results.length === 0) throw new Error("데이터 없음");
-        
-        const page = data.results[0];
-        const pageId = page.id;
-        localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, pageId);
+  window.switchLobbyTab = function () {};
+  window.toggleFutureWorlds = function () {};
+  window.setSubjectCapOverride = function (userKey, subjKey, state) {
+    if (!state) {
+      localStorage.removeItem(`DAILY_CAP_OVERRIDE_${userKey}_${subjKey}`);
+    } else {
+      localStorage.setItem(`DAILY_CAP_OVERRIDE_${userKey}_${subjKey}`, state);
+    }
+    renderSubjectCapStates(activeUserKey);
+  };
 
-        const props = page.properties;
-        if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
-          window.ScreenTimeTracker.syncFromInventoryProps(props, childName);
-          updateLobbyScreenTimeBtn(childName);
-          if (document.getElementById('screenTimeReceiptModal') && typeof window.openScreenTimeReceiptModal === 'function') {
-            window.openScreenTimeReceiptModal(childName);
-          }
-        }
-        if (props["학습설정"]) {
-          if (typeof syncQuizFlowFromCloud === 'function') {
-            syncQuizFlowFromCloud(props["학습설정"]);
-          }
-          if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.syncFromCloud === 'function') {
-            SettingsManager.syncFromCloud(props["학습설정"]);
-          }
-        }
+  // =========================================================
+  // ⏰ 5. 가디언 남은 시간 & 노션 INVENTORY_DB 동기화
+  // =========================================================
+  function updateGuardianHud(userKey, childName) {
+    const minseoText = document.getElementById('minseoGuardianText');
+    const minseoBar = document.getElementById('minseoGuardianBar');
+    const minsuText = document.getElementById('minsuGuardianText');
+    const minsuBars = document.getElementById('minsuGuardianBars');
 
-        const theme = props["현재 테마"]?.select?.name || (childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임');
-        const diamond = props["다이아몬드 개수"]?.number || 0;
-        const slime = typeof getDaughterRewardCount === 'function'
-          ? getDaughterRewardCount(props)
-          : (props["슬라임 파츠 개수"]?.number || 0);
-        const level = props["통합 레벨"]?.formula?.number || props["수학 레벨"]?.number || 1;
-        
-        renderInventoryCard(diamond, slime, level, theme);
-
-        // 로컬 캐시 갱신
-        localStorage.setItem(invCacheKey, JSON.stringify({
-          diamond,
-          slime,
-          level,
-          theme,
-          updatedAt: Date.now()
-        }));
-      } catch (error) {
-        console.error("인벤토리 로드 에러:", error);
-        if (!hasCachedData) {
-          const defaultTheme = childName === APP_CONFIG.CHILDREN.first.name ? '마인크래프트' : '슬라임';
-          localStorage.setItem('currentTheme', defaultTheme);
-          const failHtml = defaultTheme === '마인크래프트'
-            ? '💎'
-            : (typeof getRewardWealthHtml === 'function'
-              ? getRewardWealthHtml(defaultTheme, 0, '')
-              : '🍬');
-          container.innerHTML = `<div class="reward-badge">${failHtml} <span>x0 (연결 필요)</span></div>`;
-        }
-      }
+    let summary = null;
+    if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.getScreenTimeSummary === 'function') {
+      summary = window.ScreenTimeTracker.getScreenTimeSummary(childName);
     }
 
-    fetchInventory();
+    const totalStudied = summary ? Number(summary.totalMinutes || 0) : 0;
+    const pendingMins = summary ? Number(summary.pendingMinutes || 0) : 0;
 
-    if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
-
-    // 🧚‍♀️ 안전하게 단어요정 시동 (관리자 계정일 때는 세션 분리가 완료되어 자동 안전 구동)
-    if (typeof initFairyChat === 'function') {
-      initFairyChat('KOREAN', '로비'); 
-    }
-
-    // 🚀 [고속 캐싱] 백그라운드에서 조용히 오늘 공부할 단어 및 독해 지문 데이터를 사전 다운로드 (0.01초 로딩)
-    if (typeof prefetchVocaData === 'function') {
-      prefetchVocaData(finalRealName);
-    }
-    if (typeof prefetchReadingData === 'function') {
-      prefetchReadingData({ student: finalRealName });
-    }
-
-    // ⏰ [스크린타임 클라우드 동기화] 노션에 기록된 오늘 공부 시간을 트래커에 즉시 반영
-    if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {
-      const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
-      const studyDbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID) ? APP_CONFIG.STUDY_LOG_DB_ID : "37aa27115b688042bb61e6a102242e12");
-      fetch(`${proxyUrl}/v1/databases/${studyDbId}/query`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        cache: "no-store",
-        body: JSON.stringify({ page_size: 30, sorts: [{ property: "입장", direction: "descending" }] })
-      }).then(r => r.json()).then(data => {
-        if (data && data.results) {
-          window.ScreenTimeTracker.syncFromStudyLogs(data.results, finalRealName);
-          updateLobbyScreenTimeBtn(finalRealName);
+    if (minseoText) {
+      if (totalStudied > 0) {
+        const displayMins = pendingMins > 0 ? pendingMins : totalStudied;
+        minseoText.textContent = `${displayMins}분 획득`;
+        if (minseoBar) {
+          const pct = Math.min(100, Math.max(20, Math.round((totalStudied / 60) * 100)));
+          minseoBar.style.width = `${pct}%`;
         }
-      }).catch(e => console.warn("[ScreenTime] 일지 동기화 실패:", e));
-    }
-
-    // ⏰ 로비 상단 스크린타임 버튼 실시간 상태 반영 함수
-    function updateLobbyScreenTimeBtn(childName) {
-      const btn = document.getElementById('lobbyScreenTimeBtn');
-      if (!btn || typeof window.ScreenTimeTracker === 'undefined') return;
-      const s = window.ScreenTimeTracker.getScreenTimeSummary(childName);
-      if (s.pendingMinutes > 0) {
-        btn.innerHTML = `⏰ 폰시간 <b>+${s.pendingMinutes}분</b> 신청 대기`;
-        btn.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
-        btn.style.boxShadow = "0 4px 12px rgba(245, 158, 11, 0.35)";
-      } else if (s.totalMinutes > 0) {
-        btn.innerHTML = `💖 폰시간 <b>${s.totalMinutes}분</b> 연장 완료 (대기 0분)`;
-        btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
-        btn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.25)";
       } else {
-        btn.innerHTML = `⏰ 오늘 폰시간 정산`;
-        btn.style.background = "linear-gradient(135deg, #10b981, #059669)";
-        btn.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.25)";
+        minseoText.textContent = `${USER_CONFIGS.minseo.defaultGuardianMins}분 남음`;
+        if (minseoBar) minseoBar.style.width = '65%';
       }
     }
-    updateLobbyScreenTimeBtn(finalRealName);
 
-    // 🚀 PWA 바로가기 및 딥링크 라우터 (마음일기/시간표 등)
-    const actionParam = urlParams.get('action');
-    if (actionParam === 'diary') {
-      setTimeout(() => {
-        if (typeof openDailyDiaryModal === 'function') {
-          openDailyDiaryModal();
-        }
-      }, 350);
+    if (minsuText) {
+      if (totalStudied > 0) {
+        minsuText.textContent = `GUARDIAN: +${totalStudied}m`;
+      } else {
+        minsuText.textContent = `GUARDIAN: ${USER_CONFIGS.minsu.defaultGuardianMins}m`;
+      }
     }
-  });
+    if (minsuBars && totalStudied > 0) {
+      const activeCount = Math.min(4, Math.max(1, Math.ceil(totalStudied / 25)));
+      const spans = minsuBars.querySelectorAll('span');
+      spans.forEach((sp, idx) => {
+        sp.className = idx < activeCount
+          ? 'w-2 h-1.5 bg-secondary rounded-[1px] shadow-[0_0_3px_#10B981]'
+          : 'w-2 h-1.5 bg-slate-700 rounded-[1px]';
+      });
+    }
+  }
+
+  function renderHudInventoryValues(userKey, data) {
+    const diamond = Number(data.diamond ?? 2253);
+    const slime = Number(data.slime ?? 24);
+    const level = Number(data.level ?? 5);
+    const tickets = Number(data.tickets ?? 3);
+
+    const minseoHaribo = document.getElementById('minseoHariboText');
+    const minseoWishNum = document.getElementById('minseoWishHariboNum');
+    const minseoLevel = document.getElementById('minseoLevelBadge');
+    const minseoCoin = document.getElementById('minseoCoinCount');
+
+    if (minseoHaribo) minseoHaribo.textContent = `${slime.toLocaleString()} Haribo`;
+    if (minseoWishNum) minseoWishNum.textContent = slime.toLocaleString();
+    if (minseoLevel) minseoLevel.textContent = `★${level}`;
+    if (minseoCoin) minseoCoin.textContent = `코인: ${tickets}개`;
+
+    const minsuDiamond = document.getElementById('minsuDiamondText');
+    const minsuArmory = document.getElementById('minsuArmoryCount');
+    const minsuTitleLevel = document.getElementById('minsuTitleLevel');
+
+    if (minsuDiamond) minsuDiamond.textContent = diamond.toLocaleString();
+    if (minsuArmory) minsuArmory.textContent = `${diamond.toLocaleString()} 💎`;
+    if (minsuTitleLevel) {
+      minsuTitleLevel.textContent = isAdminSession
+        ? `관리자 시뮬레이터 [LVL-${level}]`
+        : `차원 사령관 [LVL-${level}]`;
+    }
+  }
+
+  async function fetchInventoryForUser(userKey, childName) {
+    const defaultTheme = userKey === 'minsu' ? '마인크래프트' : '슬라임';
+    localStorage.setItem('currentTheme', defaultTheme);
+
+    if (isAdminSession) {
+      renderHudInventoryValues(userKey, { diamond: 2253, slime: 24, level: 99, tickets: 9 });
+      return;
+    }
+
+    const invCacheKey = `MINMIN_INVENTORY_CACHE_${childName}`;
+    try {
+      const cachedRaw = localStorage.getItem(invCacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw);
+        if (cached && typeof cached === 'object') {
+          renderHudInventoryValues(userKey, {
+            diamond: cached.diamond ?? 2253,
+            slime: cached.slime ?? 24,
+            level: cached.level ?? 5,
+            tickets: cached.tickets ?? 3
+          });
+          if (cached.dailyEarned && typeof cached.dailyEarned === 'object') {
+            runtimeDailyEarned[userKey] = { ...cached.dailyEarned };
+            renderSubjectCapStates(userKey);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Lobby Inventory Cache] 캐시 파싱 경고:', e);
+    }
+
+    try {
+      const proxyUrl = typeof PROXY_URL !== 'undefined'
+        ? PROXY_URL
+        : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : 'https://minmin-notion.awslike6.workers.dev');
+      const invDbId = typeof INVENTORY_DB_ID !== 'undefined'
+        ? INVENTORY_DB_ID
+        : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.INVENTORY_DB_ID) ? APP_CONFIG.INVENTORY_DB_ID : '374a27115b688042bb61e6a102242e12');
+
+      const response = await fetch(`${proxyUrl}/v1/databases/${invDbId}/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({ filter: { property: '이름', title: { equals: childName } } })
+      });
+      const data = await response.json();
+      if (!data.results || data.results.length === 0) return;
+
+      const page = data.results[0];
+      const props = page.properties || {};
+      localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, page.id);
+
+      if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
+        window.ScreenTimeTracker.syncFromInventoryProps(props, childName);
+        updateGuardianHud(userKey, childName);
+      }
+      if (props['학습설정']) {
+        if (typeof syncQuizFlowFromCloud === 'function') syncQuizFlowFromCloud(props['학습설정']);
+        if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.syncFromCloud === 'function') {
+          SettingsManager.syncFromCloud(props['학습설정']);
+        }
+      }
+
+      const theme = props['현재 테마']?.select?.name || defaultTheme;
+      localStorage.setItem('currentTheme', theme);
+
+      const diamond = props['다이아몬드 개수']?.number ?? 2253;
+      const slime = typeof getDaughterRewardCount === 'function'
+        ? getDaughterRewardCount(props)
+        : (props['하리보 개수']?.number ?? props['슬라임 파츠 개수']?.number ?? 24);
+      const level = props['통합 레벨']?.formula?.number || props['수학 레벨']?.number || 5;
+      const tickets = props['소원권 개수']?.number ?? props['소원뽑기권']?.number ?? 3;
+
+      const lastDateText = props['오늘 획득_마지막날짜']?.rich_text?.[0]?.plain_text || '';
+      const todayKst = getTodayKstString();
+      const todayLocal = new Date().toLocaleDateString();
+      const isTodayRecord = !lastDateText || lastDateText === todayKst || lastDateText === todayLocal;
+
+      const dailyEarned = {};
+      if (isTodayRecord) {
+        Object.values(SUBJECT_META).forEach(meta => {
+          const val = props[`오늘 획득_${meta.ko}`]?.number || 0;
+          if (val > 0) dailyEarned[meta.key] = val;
+        });
+      }
+      runtimeDailyEarned[userKey] = dailyEarned;
+
+      renderHudInventoryValues(userKey, { diamond, slime, level, tickets });
+      renderSubjectCapStates(userKey);
+
+      localStorage.setItem(invCacheKey, JSON.stringify({
+        diamond, slime, level, tickets, theme, dailyEarned, updatedAt: Date.now()
+      }));
+    } catch (err) {
+      console.warn('[Lobby Inventory] 노션 동기화 오프라인/지연:', err);
+    }
+  }
+
+  // =========================================================
+  // ✨ 6. 마이크로 인터랙션 & 부트스트랩 구동
+  // =========================================================
+  function bindMicroInteractions() {
+    document.addEventListener('click', function (e) {
+      if (activeUserKey === 'minseo') {
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.innerHTML = '✨';
+        s.style.left = (e.pageX - 10) + 'px';
+        s.style.top = (e.pageY - 10) + 'px';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 600);
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        window.closeDailyCapModal();
+        window.closePlaygroundModal();
+      }
+    });
+  }
+
+  const initialUser = resolveInitialUserKey();
+  bindMicroInteractions();
+  applyLobbyThemeAndView(initialUser, false);
+
+  if (typeof loadCoreScripts === 'function') {
+    loadCoreScripts('kids/core/', lobbyCores, () => {
+      console.log('🏰 Stitch AI 듀얼 로비 & 코어 엔진 결합 완료!');
+      const realName = getRealChildName(activeUserKey);
+
+      applyLobbyThemeAndView(activeUserKey, false);
+
+      if (typeof initFairyChat === 'function') initFairyChat('KOREAN', '로비');
+      if (typeof prefetchVocaData === 'function') prefetchVocaData(realName);
+      if (typeof prefetchReadingData === 'function') prefetchReadingData({ student: realName });
+
+      if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {
+        const proxyUrl = typeof PROXY_URL !== 'undefined'
+          ? PROXY_URL
+          : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL) ? APP_CONFIG.WORKER_PROXY_URL : 'https://minmin-notion.awslike6.workers.dev');
+        const studyDbId = typeof STUDY_LOG_DB_ID !== 'undefined'
+          ? STUDY_LOG_DB_ID
+          : ((typeof APP_CONFIG !== 'undefined' && APP_CONFIG.STUDY_LOG_DB_ID) ? APP_CONFIG.STUDY_LOG_DB_ID : '37aa27115b688001b2ffe5e6c8f82ab2');
+
+        fetch(`${proxyUrl}/v1/databases/${studyDbId}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
+          body: JSON.stringify({ page_size: 30, sorts: [{ property: '입장', direction: 'descending' }] })
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.results) {
+              window.ScreenTimeTracker.syncFromStudyLogs(data.results, getRealChildName(activeUserKey));
+              updateGuardianHud(activeUserKey, getRealChildName(activeUserKey));
+            }
+          })
+          .catch(e => console.warn('[ScreenTime] 일지 동기화 경고:', e));
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('action') === 'diary') {
+        setTimeout(() => {
+          if (typeof openDailyDiaryModal === 'function') openDailyDiaryModal();
+        }, 350);
+      }
+    });
+  }
 })();

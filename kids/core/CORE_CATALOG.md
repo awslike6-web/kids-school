@@ -56,22 +56,27 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
 
 ---
 
-## 2-0. 🏰 대형 로비 통합 컨트롤러 (Lobby Controller & Architecture)
+## 2-0. 🏰 대형 로비 통합 컨트롤러 (Lobby Controller & Dual Theme Architecture)
 
-### 🌟 `lobby_controller.js` & `lobby.css` (대형 로비 전담 제어 엔진)
-기존 1,381줄의 거대했던 `lobby.html`을 119줄의 초경량 순수 시맨틱 마크업으로 다이어트하고, 로비 데이터 및 비즈니스 로직을 완벽히 분리한 완성형 제어 엔진입니다.
+### 🌟 `lobby_controller.js` & `lobby-themes.css` (Stitch AI 듀얼 테마 로비 & 한도 모달 엔진)
+Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECTOR-07 차원 성계도 · 시간 한도 도달 갈림길 모달)을 골디락스 응집도(800줄 미만)로 통합한 로비 제어 엔진입니다.
 - **파일 위치**:
-  - `kids/js/lobby_controller.js` (463줄): 유저 테마 데이터(`USER_CONFIGS`), 코어 로더, 부모 시뮬레이터 모드 분기, 요정 코코 반응형 말풍선 배너 & TTS, 2대 탭 및 월드 카드 렌더러, 인벤토리/스크린타임 동기화.
-  - `kids/css/lobby.css` (444줄): 민수 아케이드(arcade) vs 민서 비밀 아지트(hideout) 2대 반응형 테마, 히어로 바, 5분 퀘스트 배너, 모바일 그리드 스타일.
+  - `lobby.html` (740줄): 민서 뷰(`#minseoLobbyView`), 민수 뷰(`#minsuLobbyView`), 중단 4칸 아지트 허브(마이룸&상점·갤러리·대시보드·시간표), 하단 5칸 고정 유틸리티 바(`📝 마음일기 · 📸 찰칵등록 · 🦖 용어사전 · 🎡 놀이터 · 👥 프로필`), 놀이터 모달(`#playgroundModalOverlay`), 시간 한도 갈림길 모달(`#dailyCapModalOverlay`), 부모 관리자 시뮬레이터 툴바(`#adminQuickToolbar`) 통합 마크업.
+  - `kids/css/lobby-themes.css` (359줄): CSS RGB 채널 변수 스왑(`html.theme-minseo` vs `html.theme-minsu`)으로 Tailwind 컬러 토큰 충돌 원천 차단, `.clay-card*`, `.jelly-btn`, `.cosmic-map`, `.scanline`, `.hazard-stripe-amber`, 모달 라이트 격리 스타일.
+  - `kids/js/lobby_controller.js` (643줄): 유저/테마 즉시 스왑(`switchLobbyUser`), 노션 `INVENTORY_DB` & SWR 캐시 연동, 가디언 남은/획득 시간 HUD, 실제 학교 시간표 기반 다중 과목 부스트(`TimetableBoost` 연동으로 2~4과목 동시 점등 및 한도 도달 시 소등), 과목별 실제 일일 한도 신호등(`available`/`critical`/`completed`), 갈림길 모달 동적 치환(`openDailyCapModal`), 놀이터 모달(`openPlaygroundModal`).
 - **핵심 API**:
   | 함수 / 프로퍼티 | 설명 |
   | :--- | :--- |
-  | `window.USER_CONFIGS` | 민수/민서 전 교과 월드 맵 및 테마 속성 SSOT 데이터 |
-  | `switchLobbyTab(tab)` | 'study'(공부방 월드) ↔ 'hideout'(나만의 아지트) 2대 메인 탭 전환 |
-  | `toggleFutureWorlds()` | 민서 3학년 미래 교과 보관소(사회·과학 미리보기) 아코디언 토글 |
-  | `switchAdminLobbyChild(child)` | 부모 관리자 모드 전용 자녀 공부방 실시간 퀵 스위처 |
-  | `handleFairyBubbleClick()` | 요정 코코 추천 액션(하루 체크인, 폰시간 정산, 도서관) 즉시 라우팅 |
-  | `speakBubbleMessage(event)` | 시간대/요일별 요정 코코 응원 메시지 실시간 음성 발화 |
+  | `window.USER_CONFIGS` | 민수/민서 전 교과 월드 맵 및 테마 속성 SSOT 데이터 (하위 호환 유지) |
+  | `switchLobbyUser(targetUser)` | `'minseo'`(Light 클레이) ↔ `'minsu'`(Dark SECTOR-07) 테마·뷰·데이터 즉시 스왑 |
+  | `handleSubjectNodeClick(subjKey)` | 과목 섬/포털 진입. `completed`(`💤 완료/냉각`) 상태일 때 갈림길 모달 자동 팝업 |
+  | `navigateToHub(hubType, user)` | 중단 4칸 아지트 허브(`myroom`, `gallery`, `dashboard`, `timetable`) 중복 없는 단일 라우팅 |
+  | `handleBottomNav(navType, user, ev)` | 하단 5칸 고정바(`diary`, `upload`, `voca`, `playground`, `profile`) 통합 액션 실행 |
+  | `openPlaygroundModal(user)` / `closePlaygroundModal()` | 민서(색칠·종이접기·스타드롭·3학년 예습) / 민수(브롤DPS·스타드롭·30초 루틴) 놀이터 모달 제어 |
+  | `togglePortalCard(cardId)` | 민수 차원 성계도 5대 포털 홀로그램 상세 카드 토글 (`card-eng`, `card-math` 등) |
+  | `openDailyCapModal(subjKey)` / `closeDailyCapModal()` | 완료 과목과 보물 남은 추천 과목을 동적 비교하는 `한도도달ui` 모달 열기/닫기 |
+  | `handleCapModalGoRecommended()` / `handleCapModalReviewAnyway()` | 갈림길 모달 내 `[보물이 남은 OO방 바로 가기!]` 및 `[그냥 복습만 더 할래요]` 라우팅 |
+  | `setSubjectCapOverride(user, subj, state)` | 과목별 일일 한도 신호등 상태(`available`·`critical`·`completed`) 런타임 제어 |
 
 ---
 
