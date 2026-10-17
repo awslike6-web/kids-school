@@ -226,7 +226,7 @@ const SOCIETY_CURRICULUM_DATA = {
       "chart": [
         {
           "title": "[농업·경제 변화] 조선 후기 농업과 상평통보",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/sangpyeong_tongbo.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035492.jpg",
           "desc": "조선 후기에는 모내기법 보급과 상평통보 사용으로 농업과 상업이 함께 크게 발달했습니다.",
           "quiz": "조선 후기 농업과 경제생활의 변화에 대한 설명으로 올바르지 않은 것은 무엇일까요?",
           "choices": [
@@ -240,7 +240,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "title": "[서민 문화 풍속] 풍속화와 민화의 발달",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/pajeokdo_folk_painting.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035491.jpg",
           "desc": "조선 후기에는 서민들의 삶과 소망을 담은 한글 소설, 풍속화, 민화, 판소리, 탈춤 등 서민 문화가 활짝 피어났습니다.",
           "quiz": "조선 후기에 서민들이 즐기고 발전시킨 서민 문화에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -254,7 +254,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "title": "[농업·상품 작물] 조선 후기 농업의 새로운 변화",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/moraegi_gyeongjikdo.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035487.jpg",
           "desc": "모내기법 보급과 상품 작물 재배는 농민들의 소득을 늘리고 농업 생산량을 크게 높였습니다.",
           "quiz": "조선 후기 농업 기술과 재배 작물의 변화에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -268,7 +268,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "title": "[서민 문화 민화] 책가도와 백성들의 소망",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/chaekgado_minhwa.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035485.jpg",
           "desc": "민화는 백성들이 장수, 복, 학문적 성취 등 자신들의 소망을 담아 생활 공간을 꾸미던 그림입니다.",
           "quiz": "서재의 책장과 책, 붓, 먹 등 문방사우를 그려 넣어 '열심히 공부해서 훌륭한 사람이 되기를 바라는 소망'을 담은 조선 후기 민화는 무엇일까요?",
           "choices": [
@@ -282,7 +282,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "title": "[서민 문화 공연] 판소리와 탈춤의 매력",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/pansori_pyeongyangdo.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035482.jpg",
           "desc": "판소리와 탈춤은 서민들의 감정을 솔직하게 표현하고 양반 사회를 풍자하며 대중적인 사랑을 받았습니다.",
           "quiz": "조선 후기 서민들 사이에서 크게 유행했던 전통 공연 예술인 '판소리'에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -296,7 +296,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "title": "[근대 식문화 도입] 가비차와 짜장면의 유입",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/gojong_coffee_jajang.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035476.jpg",
           "desc": "개항 이후 커피, 짜장면 등 외래 음식의 유입은 한국인의 식생활 문화를 다양하게 변화시켰습니다.",
           "quiz": "개항 이후 외국과의 교류를 통해 우리나라에 새로 들어온 식문화에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -312,7 +312,7 @@ const SOCIETY_CURRICULUM_DATA = {
       "map": [
         {
           "name": "지구의와 세계지도로 넓어진 시각",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/cheonhado_jigue.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035489.jpg",
           "desc": "조선 후기에는 새로운 과학 문물의 유입으로 세계를 보는 눈이 넓어졌고, 우리 역사와 국토에 대한 탐구가 깊어졌습니다.",
           "quiz": "조선 후기 사람들이 세계와 국토를 바라보는 시각의 변화에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -328,7 +328,7 @@ const SOCIETY_CURRICULUM_DATA = {
       "history": [
         {
           "name": "현실 문제를 해결하려 한 실학",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/silhak_western_relics.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035490.jpg",
           "desc": "실학은 조선 후기 백성의 삶을 이롭게 하고 사회 문제를 해결하기 위해 등장한 실천적 학문입니다.",
           "quiz": "조선 후기 학문적 변화로 나타난 '실학'에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -342,7 +342,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "name": "평등사상을 전파한 동학과 천주교",
-          "img": "",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035488.jpg",
           "desc": "조선 후기에는 모든 사람이 평등하다는 생각을 담은 천주교와 동학 등이 퍼지면서 사회 변화를 바라는 백성들의 의식이 높아졌습니다.",
           "quiz": "조선 후기 신분제의 흔들림과 새로운 사회를 바라는 백성들의 신앙에 대한 설명으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -356,7 +356,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "name": "공명첩과 흔들리는 신분 질서",
-          "img": "",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035486.jpg",
           "desc": "경제적 부를 축적한 서민들의 신분 상승 시도로 조선 후기 양반 중심의 신분제가 크게 흔들렸습니다.",
           "quiz": "조선 후기 농업과 상업의 발달로 돈을 번 상민(평민)들이 양반 신분을 얻기 위해 이용했던 방법으로 올바른 것은 무엇일까요?",
           "choices": [
@@ -370,7 +370,7 @@ const SOCIETY_CURRICULUM_DATA = {
         },
         {
           "name": "전차의 등장과 일상생활의 변화",
-          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/artifacts/seoul_streetcar_1900s.jpg",
+          "img": "https://raw.githubusercontent.com/awslike6-web/kids-school/main/kids/subjects/society/images/minsu/5-2/2/1000035479.jpg",
           "desc": "전차의 도입은 교통의 편리함뿐만 아니라 평등한 대중교통 이용을 통해 신분 관념을 바꾸는 데 기여했습니다.",
           "quiz": "개항 이후 도입된 '전차'가 사람들의 일상생활에 가져온 변화로 올바른 것은 무엇일까요?",
           "choices": [
