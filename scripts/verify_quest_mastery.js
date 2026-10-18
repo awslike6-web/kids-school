@@ -143,10 +143,10 @@
     check('한글 용어 scramble 음절 분해', scrKo.seq.join('') === '강수량' && scrKo.seq.length === 3);
     // 8) 학기 필터: 과학 '3' 단원에 5-1 '용해와 용액'이 섞이지 않음
     const sci = [];
-    for (let i = 0; i < 5; i++) sci.push({ id: `t${i}`, word: `열${i}`, meaning: `온도${i}`, stage: '3. 온도와 열', grades: ['5-2', '5학년'], subject: ['과학'], target: ['민수'] });
+    for (let i = 0; i < 5; i++) sci.push({ id: `t${i}`, word: `열${i}`, meaning: `온도${i}`, stage: '3. 열과 우리 생활', grades: ['5-2', '5학년'], subject: ['과학'], target: ['민수'] });
     for (let i = 0; i < 10; i++) sci.push({ id: `y${i}`, word: `용액${i}`, meaning: `용해${i}`, stage: '3-1. 1. 물에 녹을까, 녹지 않을까?', grades: ['5-1'], subject: ['과학'], target: ['민수'] });
     const sci52 = QM.selectUnitItems(sci, { childName: '민수', subjectKo: '과학', unit: '3', semester: '5-2' });
-    check('과학 3단원 5-2: 온도와 열만', sci52.length === 5 && sci52.every(it => it.stage.startsWith('3. ')), sci52.length);
+    check('과학 3단원 5-2: 열과 우리 생활만', sci52.length === 5 && sci52.every(it => it.stage.startsWith('3. ')), sci52.length);
     const sci51 = QM.selectUnitItems(sci, { childName: '민수', subjectKo: '과학', unit: '3', semester: '5-1' });
     check('과학 3단원 5-1: 용해와 용액만', sci51.length === 10, sci51.length);
     check('학기 일치 없으면 단원 전체 유지', QM.selectUnitItems(sci, { childName: '민수', subjectKo: '과학', unit: '3', semester: '6-1' }).length === 15);

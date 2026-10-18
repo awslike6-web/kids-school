@@ -41,7 +41,7 @@
       science: [
         { unit: '1', label: '1단원 혼합물의 분리', sem: '5-2' },
         { unit: '2', label: '2단원 상태변화·지시약', sem: '5-2' },
-        { unit: '3', label: '3단원 온도와 열 (열의 이동) ⭐', sem: '5-2' }
+        { unit: '3', label: '3단원 열과 우리 생활 (열의 이동) ⭐', sem: '5-2' }
       ],
       math: [
         { unit: 'division', label: '두 자릿수 나눗셈 ⭐', sem: '5-2' },
