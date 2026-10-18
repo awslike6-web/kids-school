@@ -16,14 +16,25 @@
     let userStarRatings = {};
     let pendingFeedbackCallback = null;
 
+    const UNIT_THEME_DEFAULTS = {
+        1: { icon: "🧪", color: "#0284c7", bg: "#e0f2fe", text: "#0369a1", border: "#bae6fd", badge: "🧪 교과서 12~19쪽 탐구 일지", guide: "교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!" },
+        2: { icon: "🌤️", color: "#d97706", bg: "#fef3c7", text: "#b45309", border: "#fde68a", badge: "🌤️ 교과서 24~35쪽 탐구 일지", guide: "교과서 『실험관찰』 24~35쪽 날씨 탐구 핵심 내용을 한눈에 읽어보세요!" },
+        3: { icon: "🔥", color: "#ea580c", bg: "#ffedd5", text: "#c2410c", border: "#fed7aa", badge: "🔥 교과서 『실험관찰』 16~25쪽 · 실험연계 보고서", guide: "🌡️ 5종 온도계 비교표, 교과서 5대 실험 분석, KSTAR 인공 태양(1억 ℃) 단열 비밀까지 한눈에 정복하세요!" },
+        4: { icon: "🚀", color: "#7c3aed", bg: "#ede9fe", text: "#5b21b6", border: "#ddd6fe", badge: "🚀 4단원 실험연계 디지털 탐구 보고서", guide: "🔬 교과서 핵심 실험 비교표와 실험연계 탐구 노트를 한눈에 정복하세요!" },
+        5: { icon: "⚗️", color: "#059669", bg: "#d1fae5", text: "#047857", border: "#a7f3d0", badge: "⚗️ 5단원 실험연계 디지털 탐구 보고서", guide: "🔬 교과서 핵심 실험 비교표와 실험연계 탐구 노트를 한눈에 정복하세요!" }
+    };
+
     function getActiveReportData() {
-        if (currentReportUnitId === 3) {
-            return window.SCIENCE_LAB_REPORT_3_DATA || window.SCIENCE_LAB_REPORT_DATA;
-        }
-        if (currentReportUnitId === 2) {
-            return window.SCIENCE_LAB_REPORT_2_DATA || window.SCIENCE_LAB_REPORT_DATA;
+        if (currentReportUnitId > 1) {
+            const dynamicData = window[`SCIENCE_LAB_REPORT_${currentReportUnitId}_DATA`];
+            if (dynamicData) return dynamicData;
         }
         return window.SCIENCE_LAB_REPORT_DATA;
+    }
+
+    function getUnitTheme(data) {
+        const base = UNIT_THEME_DEFAULTS[currentReportUnitId] || UNIT_THEME_DEFAULTS[4];
+        return Object.assign({}, base, (data && data.theme) || {});
     }
 
     function openScienceReport(unitId = 1) {
@@ -33,13 +44,10 @@
         }
     }
 
-    function openScienceReport2() {
-        openScienceReport(2);
-    }
-
-    function openScienceReport3() {
-        openScienceReport(3);
-    }
+    function openScienceReport2() { openScienceReport(2); }
+    function openScienceReport3() { openScienceReport(3); }
+    function openScienceReport4() { openScienceReport(4); }
+    function openScienceReport5() { openScienceReport(5); }
 
     // 📈 [실험 1 전용] 따뜻한 물(600mL) + 차가운 물(300mL) 접촉 열평형 꺾은선그래프 SVG
     function renderEquilibriumGraphSvg(compact) {
@@ -98,17 +106,16 @@
         const data = getActiveReportData();
         if (!data) return;
 
+        const th = getUnitTheme(data);
         const titleEl = document.getElementById('overlayHeaderTitle');
         const iconEl = document.getElementById('overlayHeaderIcon');
         if (titleEl) titleEl.textContent = data.title;
-        if (iconEl) iconEl.textContent = currentReportUnitId === 3 ? "🔥" : (currentReportUnitId === 2 ? "🌤️" : "📝");
+        if (iconEl) iconEl.textContent = th.icon;
 
-        const unitThemeColor = currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
-        const unitBgColor = currentReportUnitId === 3 ? '#ffedd5' : (currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe');
-        const unitTextColor = currentReportUnitId === 3 ? '#c2410c' : (currentReportUnitId === 2 ? '#b45309' : '#0369a1');
-        const pageBadgeText = currentReportUnitId === 3
-            ? '🔥 교과서 『실험관찰』 16~25쪽 · 실험연계 보고서'
-            : (currentReportUnitId === 2 ? '🌤️ 교과서 24~35쪽 탐구 일지' : '🧪 교과서 12~19쪽 탐구 일지');
+        const unitThemeColor = th.color;
+        const unitBgColor = th.bg;
+        const unitTextColor = th.text;
+        const pageBadgeText = th.badge;
 
         container.innerHTML = `
             <div style="max-width: 820px; margin: 0 auto; padding: 6px 10px; font-family: 'Jua', sans-serif;">
@@ -131,7 +138,7 @@
                         box-shadow: ${currentReportTab === 'doc' ? '0 2px 8px rgba(0,0,0,0.15)' : 'none'};
                         transition: all 0.2s;
                     ">
-                        📑 1. 실험연계 탐구 노트 (개념표 & 실험 1~5)
+                        📑 1. 실험연계 탐구 노트 (개념표 & 실험 분석)
                     </button>
                     <button onclick="ScienceReport.renderUI(document.getElementById('overlayInnerBody'), 'quiz')" style="
                         flex: 1; padding: 10px 12px; border-radius: 10px; border: none; font-family: 'Jua'; font-size: 1.02rem; cursor: pointer;
@@ -160,19 +167,18 @@
         }
     }
 
-    // 📑 [탭 1] 실험연계 완벽 요약 노트 (비교표 + 실험 1~5 + KSTAR 심화 탐구)
+    // 📑 [탭 1] 실험연계 완벽 요약 노트 (비교표 + 실험 1~5 + 심화 탐구)
     function renderLabReportDoc(container) {
         const data = getActiveReportData();
         if (!data) return;
-        const btnColor = currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
-        const borderColor = currentReportUnitId === 3 ? '#fed7aa' : (currentReportUnitId === 2 ? '#fde68a' : '#bae6fd');
-        const tagBg = currentReportUnitId === 3 ? '#ffedd5' : (currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe');
-        const tagColor = currentReportUnitId === 3 ? '#c2410c' : (currentReportUnitId === 2 ? '#b45309' : '#0284c7');
-        const pageGuide = currentReportUnitId === 3
-            ? '🌡️ 5종 온도계 비교표, 교과서 5대 실험 분석, KSTAR 인공 태양(1억 ℃) 단열 비밀까지 한눈에 정복하세요!'
-            : (currentReportUnitId === 2 ? '교과서 『실험관찰』 24~35쪽 날씨 탐구 핵심 내용을 한눈에 읽어보세요!' : '교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!');
+        const th = getUnitTheme(data);
+        const btnColor = th.color;
+        const borderColor = th.border;
+        const tagBg = th.bg;
+        const tagColor = th.text;
+        const pageGuide = th.guide;
 
-        // 1) 상단 개념 비교표 렌더링 (3단원 등 conceptTables 보유 시)
+        // 1) 상단 개념 비교표 렌더링 (conceptTables 보유 시)
         const tablesHtml = Array.isArray(data.conceptTables) ? data.conceptTables.map(tb => `
             <div style="background: #ffffff; border-radius: 16px; padding: 14px 16px; border: 2px solid ${borderColor}; box-shadow: 0 3px 8px rgba(0,0,0,0.03);">
                 <h4 style="color: ${tagColor}; font-size: 1.08rem; margin: 0 0 10px 0;">${tb.title}</h4>
@@ -197,7 +203,7 @@
             </div>
         `).join('') : '';
 
-        // 2) 중단 5대 실험 상세 분석 카드
+        // 2) 중단 실험 상세 분석 카드
         const docsHtml = data.summaryDoc.map(item => `
             <div style="background: white; border-radius: 16px; padding: 16px; border: 2px solid ${borderColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
@@ -218,6 +224,7 @@
                 </div>
 
                 ${item.hasEquilibriumGraph ? renderEquilibriumGraphSvg(false) : ''}
+                ${item.diagramHtml ? item.diagramHtml : ''}
 
                 <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border-left: 4px solid ${tagColor}; font-size: 0.88rem; line-height: 1.55; color: #1e293b; margin-bottom: 8px;">
                     <b>[실험 결과 및 관찰 내용]</b><br>
@@ -284,10 +291,11 @@
         const q = data.quizItems[qIdx];
         currentReportQuizIdx = qIdx;
 
-        const themeColor = currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
-        const borderColor = currentReportUnitId === 3 ? '#fed7aa' : (currentReportUnitId === 2 ? '#fde68a' : '#bae6fd');
-        const tagBg = currentReportUnitId === 3 ? '#ffedd5' : (currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe');
-        const textColor = currentReportUnitId === 3 ? '#c2410c' : (currentReportUnitId === 2 ? '#b45309' : '#0369a1');
+        const th = getUnitTheme(data);
+        const themeColor = th.color;
+        const borderColor = th.border;
+        const tagBg = th.bg;
+        const textColor = th.text;
 
         let quizBodyHtml = "";
 
@@ -324,6 +332,7 @@
             quizBodyHtml = `
                 ${q.questionText ? `<div style="color: #334155; font-size: 0.96rem; line-height: 1.5; margin-bottom: 8px;">${q.questionText}</div>` : ''}
                 ${q.hasEquilibriumGraph ? renderEquilibriumGraphSvg(true) : ''}
+                ${q.diagramHtml ? q.diagramHtml : ''}
                 ${rubricHtml}
                 <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 14px; font-size: 0.98rem; line-height: 1.85; color: #1e293b; border: 1.5px solid #e2e8f0;">
                     ${questionRenderText}
@@ -615,7 +624,9 @@
     // 💡 피드백 콜백 안전 레지스트리
     function showQuizFeedback(container, isSuccess, message, nextCallback) {
         pendingFeedbackCallback = nextCallback;
-        const okColor = isSuccess ? '#059669' : (currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7'));
+        const data = getActiveReportData();
+        const th = getUnitTheme(data);
+        const okColor = isSuccess ? '#059669' : th.color;
         container.innerHTML = `
             <div style="text-align: center; padding: 24px; background: white; border-radius: 18px; border: 3px solid ${isSuccess ? '#10b981' : '#f87171'};">
                 <div style="font-size: 3rem; margin-bottom: 8px;">${isSuccess ? '🎉' : '💡'}</div>
@@ -641,30 +652,30 @@
     }
 
     function finishAllReportQuiz() {
+        const data = getActiveReportData() || {};
+        const th = getUnitTheme(data);
         if (typeof grantRewardGem === 'function') {
-            const rewardMsg = currentReportUnitId === 3
+            const rewardMsg = data.rewardMsg || (currentReportUnitId === 3
                 ? '3단원 열과 우리 생활 실험연계 탐구 보고서 완벽 마스터'
                 : (currentReportUnitId === 2
                     ? '2단원 날씨와 우리 생활 실험관찰 탐구 보고서 완벽 마스터'
-                    : '1단원 혼합물의 분리 실험관찰 탐구 보고서 완벽 마스터');
+                    : `${data.unit || currentReportUnitId + '단원'} 실험연계 탐구 보고서 완벽 마스터`));
             grantRewardGem(5, rewardMsg);
         }
         const container = document.getElementById('overlayInnerBody');
-        const unitTitle = currentReportUnitId === 3
-            ? '3단원 열과 우리 생활 (실험연계 학습 보고서)'
-            : (currentReportUnitId === 2 ? '2단원 날씨와 우리 생활' : '1단원 혼합물의 분리');
-        const iconStr = currentReportUnitId === 3 ? '🔥 🧪 🏆 💎' : (currentReportUnitId === 2 ? '🌤️ 📝 💎' : '🌟 📝 💎');
-        const unitDesc = currentReportUnitId === 3
+        const unitTitle = data.unit || `${currentReportUnitId}단원 실험연계 학습 보고서`;
+        const iconStr = `${th.icon} 🧪 🏆 💎`;
+        const unitDesc = data.masterDesc || (currentReportUnitId === 3
             ? '5종 온도계 비교, 두 물체 접촉 열평형 꺾은선그래프 서술형, ㄷ자 구리판 전도, 액체·기체 대류, 복사, 단열 장치와 KSTAR 인공 태양(1억 ℃)까지 완벽하게 정복했습니다! (+5💎)'
             : (currentReportUnitId === 2
                 ? '습도계 측정, 이슬과 안개, 구름 발생, 바람, 사계절 기단 탐구 기록을 완벽하게 마스터했습니다! (+5💎)'
-                : '1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)');
+                : `${unitTitle}의 핵심 개념표와 교과서 탐구 실험, 서술형 미션을 완벽하게 마스터했습니다! (+5💎)`));
 
         container.innerHTML = `
             <div style="text-align: center; padding: 30px; font-family: 'Jua';">
                 <div style="font-size: 3.4rem; margin-bottom: 10px;">${iconStr}</div>
                 <h2 style="color: #059669; font-size: 1.55rem; margin-bottom: 8px;">『실험관찰』 실험연계 탐구 보고서 마스터 완료!</h2>
-                <h3 style="color: #ea580c; font-size: 1.22rem; margin-bottom: 10px;">[${unitTitle}]</h3>
+                <h3 style="color: ${th.color}; font-size: 1.22rem; margin-bottom: 10px;">[${unitTitle}]</h3>
                 <p style="color: #475569; font-size: 1.02rem; line-height: 1.6; max-width: 580px; margin: 0 auto 22px auto;">
                     ${unitDesc}
                 </p>
@@ -680,6 +691,8 @@
         open: openScienceReport,
         openUnit2: openScienceReport2,
         openUnit3: openScienceReport3,
+        openUnit4: openScienceReport4,
+        openUnit5: openScienceReport5,
         renderUI: renderLabReportUI,
         renderDoc: renderLabReportDoc,
         renderQuiz: renderLabReportQuiz,
@@ -704,6 +717,8 @@
     window.openScienceReport = openScienceReport;
     window.openScienceReport2 = openScienceReport2;
     window.openScienceReport3 = openScienceReport3;
+    window.openScienceReport4 = openScienceReport4;
+    window.openScienceReport5 = openScienceReport5;
     window.renderLabReportUI = renderLabReportUI;
     window.renderLabReportDoc = renderLabReportDoc;
     window.renderLabReportQuiz = renderLabReportQuiz;
@@ -715,3 +730,4 @@
     window.finishAllReportQuiz = finishAllReportQuiz;
 
 })();
+

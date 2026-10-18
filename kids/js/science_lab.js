@@ -111,66 +111,33 @@
             });
         }
 
-        // 2) 1단원 탐구보고서 요약노트 및 퀴즈
-        const rep1Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('1.') || x.unit.includes('혼합물')));
-        if (rep1Docs.length > 0 && window.SCIENCE_LAB_REPORT_DATA) {
-            window.SCIENCE_LAB_REPORT_DATA.summaryDoc = rep1Docs.map(it => {
-                const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
-                const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
-                const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
-                const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
-                const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
-                return {
-                    title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
-                    page: pg,
-                    process: proc,
-                    result: res,
-                    conclusion: conc,
-                    think: thk
-                };
-            });
-        }
-
-        // 3) 2단원 탐구보고서 요약노트 및 퀴즈
-        const rep2Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('2.') || x.unit.includes('날씨')));
-        if (rep2Docs.length > 0 && window.SCIENCE_LAB_REPORT_2_DATA) {
-            window.SCIENCE_LAB_REPORT_2_DATA.summaryDoc = rep2Docs.map(it => {
-                const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
-                const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
-                const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
-                const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
-                const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
-                return {
-                    title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
-                    page: pg,
-                    process: proc,
-                    result: res,
-                    conclusion: conc,
-                    think: thk
-                };
-            });
-        }
-
-        // 4) 3단원 탐구보고서 요약노트 및 퀴즈 (기존 그래프·실험실 링크·안전수칙 속성 보존 병합)
-        const rep3Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('3.') || x.unit.includes('열과')));
-        if (rep3Docs.length > 0 && window.SCIENCE_LAB_REPORT_3_DATA) {
-            const baseDocs = window.SCIENCE_LAB_REPORT_3_DATA.summaryDoc || [];
-            window.SCIENCE_LAB_REPORT_3_DATA.summaryDoc = rep3Docs.map((it, idx) => {
-                const base = baseDocs[idx] || {};
-                const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || base.page || '『실험관찰』';
-                const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || base.process || it.desc;
-                const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || base.result || '';
-                const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || base.conclusion || '';
-                const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || base.think || '';
-                return Object.assign({}, base, {
-                    title: base.title || it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
-                    page: pg,
-                    process: base.process || proc,
-                    result: base.result || res,
-                    conclusion: base.conclusion || conc,
-                    think: base.think || thk
+        // 2) 1~6단원 탐구보고서 요약노트 동적 병합 (그래프·실험실 링크·안전수칙 등 확장 속성 보존)
+        const unitKeywords = { 1: ['1.', '1단원', '혼합물'], 2: ['2.', '2단원', '날씨'], 3: ['3.', '3단원', '열과'], 4: ['4.', '4단원'], 5: ['5.', '5단원'], 6: ['6.', '6단원'] };
+        for (let u = 1; u <= 6; u++) {
+            const globalKey = u === 1 ? 'SCIENCE_LAB_REPORT_DATA' : `SCIENCE_LAB_REPORT_${u}_DATA`;
+            const targetData = window[globalKey];
+            if (!targetData) continue;
+            const kws = unitKeywords[u] || [`${u}.`, `${u}단원`];
+            const repDocs = items.filter(x => x.zone === '탐구보고서' && kws.some(k => x.unit.includes(k)));
+            if (repDocs.length > 0) {
+                const baseDocs = targetData.summaryDoc || [];
+                targetData.summaryDoc = repDocs.map((it, idx) => {
+                    const base = baseDocs[idx] || {};
+                    const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || base.page || '『실험관찰』';
+                    const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || base.process || it.desc;
+                    const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || base.result || '';
+                    const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || base.conclusion || '';
+                    const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || base.think || '';
+                    return Object.assign({}, base, {
+                        title: base.title || it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
+                        page: pg,
+                        process: base.process || proc,
+                        result: base.result || res,
+                        conclusion: base.conclusion || conc,
+                        think: base.think || thk
+                    });
                 });
-            });
+            }
         }
     }
 

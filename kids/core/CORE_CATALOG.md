@@ -369,13 +369,13 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,608줄의 비대했던 `science_common.js`를 1개의 초경량 대문 파사드와 5개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.
 
 ### 🌟 `science_common.js` (과학 탐구방 대문 파사드)
-오버레이 팝업 라우팅, 단원 탭 필터링, 프로필 초기화, 미션 오버레이 라우팅, 퀴즈 공통 진행 브리지, 보상 디스패처를 총괄하는 초경량 라우팅 파사드입니다.
-- **파일 위치**: `kids/js/science_common.js` (461줄)
+오버레이 팝업 라우팅, 단원 탭 필터링, 프로필 초기화, N단원 미션 오버레이 동적 라우팅(`report_unit{N}`), 퀴즈 공통 진행 브리지, 보상 디스패처를 총괄하는 초경량 라우팅 파사드입니다.
+- **파일 위치**: `kids/js/science_common.js` (465줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
   | `initializeScienceRoom()` | 자녀 프로필 동기화, 마스터 카운트 로드, 교재 DB 백그라운드 프리페치 |
-  | `openMissionView(type)` | 5대 미션 오버레이 열기 및 라우팅 (`storybook`, `safety`, `voca`, `lab`, `report`) |
+  | `openMissionView(type)` | 5대 미션 오버레이 열기 및 N단원 동적 라우팅 (`storybook`, `safety`, `voca`, `lab`, `report_unit1~N`) |
   | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
   | `startScienceMissionWithFilteredData(records, container, titleStr)` | 셔플 및 필터링된 데이터 기반 미션 시작 |
   | `renderSectionUI(type, container, unitObj)` | 퀴즈 화면 렌더링 및 서브모듈 디스패치 |
@@ -413,24 +413,24 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceVoca.verifyAnswer()` | 입력된 용어 정답 판정 및 자동 진행 트리거 |
 
 ### 🌟 `science_lab.js` ([3단계] 가상 실험실 & 교재 DB 실시간 연동 엔진)
-노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 1·2·3단원 탐구보고서 요약문 동적 주입(`rep1Docs`, `rep2Docs`, `rep3Docs` — 기존 그래프·실험실 링크·안전수칙 속성 보존 병합), 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_lab.js` (317줄)
+노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 1~6단원 탐구보고서 요약문 동적 주입(`window['SCIENCE_LAB_REPORT_' + u + '_DATA']` — 기존 그래프·SVG 도해·실험실 링크·안전수칙 속성 보존 병합), 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_lab.js` (284줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
   | `ScienceLab.fetchCurriculum()` | 노션 교재 DB에서 과학 실험실/탐구보고서 데이터 실시간 쿼리 및 캐싱 |
-  | `ScienceLab.applyNotionData(items)` | 노션 데이터를 안전 라이선스 및 1·2·3단원 보고서 전역 데이터셋에 주입 |
+  | `ScienceLab.applyNotionData(items)` | 노션 데이터를 안전 라이선스 및 1~6단원 보고서 전역 데이터셋에 주입 |
   | `ScienceLab.renderExperimentUI(container, item, ...)` | 실험 분석 퀴즈 및 돋보기 뷰포트 렌더링 |
   | `ScienceLab.verifyChoice(choiceIdx, correctIdx)` | 실험 객관식 퀴즈 정답 검증 및 오답노트 적재 |
 
 ### 🌟 `science_report.js` ([4단계] 『실험관찰』 실험연계 디지털 탐구 보고서 & 서술형 빌더 전담 엔진)
-1단원(혼합물), 2단원(날씨), 3단원(열과 우리 생활) 교과서 『실험관찰』 실험연계 요약 노트(5종 온도계·열 이동·단열 비교표, 실험 1~5 상세 분석, 열평형 SVG 꺾은선그래프, KSTAR 1억 ℃ 심화 탐구, 가상 실험실 바로가기)와 참여형 탐구 미션(서술형 문장 조립 빌더·채점기준 가이드, 객관식 추론, 섞인 실험 순서 직접 조립기, 인터랙티브 별점 체크리스트), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_report.js` (405줄)
+1~N단원 플러그앤플레이(`window['SCIENCE_LAB_REPORT_' + unitId + '_DATA']` 및 `UNIT_THEME_DEFAULTS`) 구조로 교과서 『실험관찰』 실험연계 요약 노트(`conceptTables` 비교표, `summaryDoc` 실험 상세 분석, `hasEquilibriumGraph`·`diagramHtml` SVG 도해, `specialDeepDive` 심화 탐구, 가상 실험실 바로가기)와 참여형 탐구 미션(서술형 문장 조립 빌더·채점기준 가이드, 객관식 추론, 섞인 실험 순서 직접 조립기, 인터랙티브 별점 체크리스트), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_report.js` (733줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `ScienceReport.open(unitId)` | 1·2·3단원 탐구 보고서 모달 열기 (`openScienceReport(1|2|3)`) |
-  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (탐구 노트 ↔ 서술형·탐구 미션 탭, 단원별 테마 컬러) |
+  | `ScienceReport.open(unitId)` | 1~N단원 탐구 보고서 모달 열기 (`openScienceReport(1~5)`) |
+  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (탐구 노트 ↔ 서술형·탐구 미션 탭, 단원별 테마 컬러 자동 바인딩) |
   | `ScienceReport.selectBlankWordByIdx(qIdx, optIdx)` / `clearBlankSlot(id)` | 서술형 문장 조립 빌더 구절 카드 순차 삽입 및 개별 빈칸 클릭 취소 |
   | `ScienceReport.checkBlankAnswer(qIdx)` | `q.blanks` 데이터 기반 동적 서술형/빈칸 정답 검증 및 채점 힌트 피드백 |
   | `ScienceReport.pickOrderStep(stepId)` / `checkOrderQuiz(qIdx)` | 섞인 실험 과정 카드를 1~4단계로 직접 터치 배열 및 순서 정답 검증 |

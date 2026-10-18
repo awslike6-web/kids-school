@@ -56,23 +56,23 @@ graph TD
 
 ```mermaid
 graph TD
-    HTML["kids/subjects/science/science.html"] --> Facade["🏰 science_common.js (대문 파사드, 454줄)<br>라우팅, 단원 탭, 퀴즈 브리지, 세션 가드"]
+    HTML["kids/subjects/science/science.html"] --> Facade["🏰 science_common.js (대문 파사드, 465줄)<br>N단원 동적 라우팅, 단원 탭, 퀴즈 브리지, 세션 가드"]
     
     Facade --> S0["🥽 science_safety.js (176줄)<br>window.ScienceSafety"]
     Facade --> S1["📚 science_storybook.js (182줄)<br>window.ScienceStorybook"]
     Facade --> S2["💡 science_voca.js (352줄)<br>window.ScienceVoca"]
-    Facade --> S3["🧪 science_lab.js (315줄)<br>window.ScienceLab"]
-    Facade --> S4["📝 science_report.js (490줄)<br>window.ScienceReport"]
+    Facade --> S3["🧪 science_lab.js (284줄)<br>window.ScienceLab"]
+    Facade --> S4["📝 science_report.js (733줄)<br>window.ScienceReport"]
 ```
 
 | 모듈명 | 파일 경로 | 줄 수 | 네임스페이스 | 전담 영역 |
 | :--- | :--- | :---: | :--- | :--- |
-| **대문 파사드** | `kids/js/science_common.js` | 464줄 | `window.ScienceCommon` | 단원 탭, 미션 오버레이 라우팅(DOM 잔상 초기화 포함), 퀴즈 루프, 세션 가드 |
+| **대문 파사드** | `kids/js/science_common.js` | 465줄 | `window.ScienceCommon` | 단원 탭, N단원 미션 오버레이 동적 라우팅(`report_unit{N}`, DOM 잔상 초기화 포함), 퀴즈 루프, 세션 가드 |
 | **안전 라이선스** | `kids/js/science_safety.js` | 176줄 | `window.ScienceSafety` | 5문항 안전 시험, 골드 연구원증 발급 (+10💎) |
 | **동화 도서관** | `kids/js/science_storybook.js` | 182줄 | `window.ScienceStorybook` | 과학 단원 동화 1~5권 서가 모달 렌더러 |
 | **핵심 용어방** | `kids/js/science_voca.js` | 352줄 | `window.ScienceVoca` | 2단계 학년/단원 선택, 단원 직결 오픈, 초성 퀴즈 검증 |
-| **가상 실험실** | `kids/js/science_lab.js` | 317줄 | `window.ScienceLab` | 노션 교재 DB 실시간 쿼리/캐싱(탐구보고서 확장 속성 보존 병합), 실험 퀴즈 UI |
-| **탐구 보고서** | `kids/js/science_report.js` | 405줄 | `window.ScienceReport` | 1·2·3단원 실험연계 탐구 노트(개념표·열평형 그래프·KSTAR) 및 서술형 빌더·순서 조립 미션 (+5💎) |
+| **가상 실험실** | `kids/js/science_lab.js` | 284줄 | `window.ScienceLab` | 1~6단원 노션 교재 DB 실시간 쿼리/캐싱(탐구보고서 확장 속성 보존 병합), 실험 퀴즈 UI |
+| **탐구 보고서** | `kids/js/science_report.js` | 733줄 | `window.ScienceReport` | 1~N단원 플러그앤플레이 실험연계 탐구 노트(개념표·SVG 도해·심화탐구) 및 서술형 빌더·순서 조립 미션 (+5💎) |
 | **3단원 공통엔진** | `kids/js/science_u3_engine.js` | 342줄 | `window.ScienceU3Engine` | Retina DPI(숨김 탭 폴백), rAF 절전 루프, 보석 1회성 잠금 |
 
 ---

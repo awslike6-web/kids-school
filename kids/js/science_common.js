@@ -137,9 +137,10 @@ function openMissionView(type) {
         return;
     }
 
-    // 4) 📝 [4단계] 탐구 보고서 위임
-    if (type === 'report' || type === 'report_unit1' || type === 'report_unit2' || type === 'report_unit3') {
-        const unitId = type === 'report_unit1' ? 1 : (type === 'report_unit2' ? 2 : (type === 'report_unit3' ? 3 : undefined));
+    // 4) 📝 [4단계] 탐구 보고서 위임 (report, report_unit1 ~ report_unitN 동적 인식)
+    if (type === 'report' || /^report_unit\d+$/.test(type)) {
+        const unitMatch = type.match(/^report_unit(\d+)$/);
+        const unitId = unitMatch ? parseInt(unitMatch[1], 10) : undefined;
         if (window.ScienceReport && typeof window.ScienceReport.renderUI === 'function') {
             window.ScienceReport.renderUI(innerBody, 'doc', unitId);
         } else if (typeof renderLabReportUI === 'function') {

@@ -13,7 +13,9 @@
 - 원본 위치: `.agent/skills/<스킬>/SKILL.md`
 - Claude Code용 사본: `.claude/skills/` (직접 고치지 말 것)
 - 스킬을 고쳤으면 `python scripts/sync_agent_skills.py`로 사본을 맞추고, 커밋 전에 `python scripts/sync_agent_skills.py --check`가 통과해야 합니다.
-- 현재 스킬: `quest-engine-spec` (5분 퀘스트 3·3·3 마스터리 엔진·에러리스 UI·VOCA_DB 숙련도 동기화)
+- 현재 스킬:
+  - `quest-engine-spec` (5분 퀘스트 3·3·3 마스터리 엔진·에러리스 UI·VOCA_DB 숙련도 동기화)
+  - `science-unit-builder` (초등 과학 5대 가상실험실 & NotebookLM 기반 『실험관찰』 실험연계 디지털 탐구 보고서·서술형 빌더·실험순서 조립 표준 제작)
 
 ## 로컬 실행·검증 메모 (이 PC 기준)
 - **OS·런타임**: Windows이고 **Node.js가 없습니다**. JS 검증은 정적 서버(`python -m http.server`)와 브라우저로 합니다.
