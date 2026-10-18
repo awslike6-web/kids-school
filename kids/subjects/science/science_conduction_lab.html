@@ -48,7 +48,7 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/5F_CffpG1mQ?rel=0&modestbranding=1" 
+                src="https://www.youtube-nocookie.com/embed/aSOBt24wxRk?rel=0&modestbranding=1" 
                 title="고체에서의 열 이동 실험 영상" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
@@ -57,7 +57,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/5F_CffpG1mQ" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/aSOBt24wxRk" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -144,9 +144,9 @@
 
             <div class="fairy-bubble-card">
                 <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
-                <div class="fairy-bubble-text">
+                <div class="fairy-bubble-text" id="fairyPlateText">
                     🧚 <b>요정 코코의 관찰 돋보기:</b><br>
-                    "알코올램프 불꽃이 닿은 부분부터 붉은색 딱지가 <b>노란색으로</b> 바뀌는 게 보이지?
+                    "알코올램프 불꽃이 닿은 부분부터 <b>① ➔ ② ➔ ③ ➔ ④ 순서대로</b> 붉은색 딱지가 <b>노란색으로</b> 바뀌는 게 보이지?
                     열은 물질을 건너뛰지 않고 <b>맞닿은 이웃 알갱이로 차례대로</b> 옮겨가기 때문이야!"
                 </div>
             </div>
@@ -165,10 +165,10 @@
 
             <div class="fairy-bubble-card">
                 <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
-                <div class="fairy-bubble-text">
+                <div class="fairy-bubble-text" id="fairyRaceText">
                     🧚 <b>요정 코코의 레이스 중계:</b><br>
-                    "막대 끝에 똑같은 크기의 버터(🧈)를 붙이고 가운데를 동시에 가열했어!
-                    어느 막대의 버터가 가장 먼저 사르르 녹아 떨어질까? <b>금속의 열전도 속도</b>를 비교해 봐!"
+                    "막대 끝에 똑같은 크기의 버터(🧈)를 붙이고 왼쪽을 동시에 가열했어!
+                    어느 막대의 버터가 가장 먼저 사르르 녹아 떨어질까? <b>물질의 열전도 속도</b>를 비교해 봐!"
                 </div>
             </div>
         </div>
@@ -218,7 +218,7 @@
     // [모드 A] 열변색 구리판 시뮬레이터 로직
     // =========================================================================
     let plateHeatMode = 'corner'; // 'corner', 'center', 'rod'
-    let plateHeatProgress = 0; // 0 ~ 1.5
+    let plateHeatProgress = 0; // 0 ~ 1.3
     let plateLoop = null;
 
     function initPlateCanvas() {
@@ -226,6 +226,7 @@
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
+        if (plateLoop) plateLoop.stop();
         plateLoop = ScienceU3Engine.createLoop((timestamp) => {
             renderPlateFrame(dpi.ctx, dpi.width, dpi.height);
         });
@@ -239,6 +240,17 @@
         if (mode === 'corner') document.getElementById('btnHeatCorner').classList.add('active');
         if (mode === 'center') document.getElementById('btnHeatCenter').classList.add('active');
         if (mode === 'rod') document.getElementById('btnHeatRod').classList.add('active');
+
+        const fairyEl = document.getElementById('fairyPlateText');
+        if (fairyEl) {
+            if (mode === 'corner') {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (모서리 가열):</b><br>"구리판 왼쪽 아래 모서리를 가열하니까 <b>부채꼴 동심원 모양</b>으로 ① ➔ ② ➔ ③ ➔ ④ 차례대로 노랗게 변색되고 있어!"';
+            } else if (mode === 'center') {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (한가운데 가열):</b><br>"구리판 한가운데를 가열하니까 중심에서 사방으로 <b>둥근 원 모양</b>을 그리며 ① ➔ ② ➔ ③ ➔ ④ 고르게 열이 퍼져 나가네!"';
+            } else {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (길쭉한 막대 끝):</b><br>"막대의 왼쪽 끝을 가열하니까 열이 막대를 따라 <b>오른쪽 끝까지 ① ➔ ② ➔ ③ ➔ ④ 일렬로</b> 차례차례 전달되고 있어!"';
+            }
+        }
         ScienceU3Engine.playClickSound();
     }
 
@@ -247,59 +259,94 @@
         ScienceU3Engine.playClickSound();
     }
 
+    function drawSensorBadge(ctx, x, y, label, isHeated) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = isHeated ? '#fef08a' : '#be123c';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = isHeated ? '#ca8a04' : '#fda4af';
+        ctx.stroke();
+
+        ctx.font = 'bold 12px Jua, sans-serif';
+        ctx.fillStyle = isHeated ? '#713f12' : '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, x, y + 1);
+        ctx.restore();
+    }
+
     function renderPlateFrame(ctx, width, height) {
         ctx.clearRect(0, 0, width, height);
 
         // 점진적 가열 진행 (천천히 퍼짐)
-        if (plateHeatProgress < 1.3) {
+        if (plateHeatProgress < 1.2) {
             plateHeatProgress += 0.0035;
         }
 
         const cx = width / 2;
         const cy = height / 2;
+        let heatedCount = 0;
 
         if (plateHeatMode === 'rod') {
             // [모드 A-3] 길쭉한 구리 막대 렌더링
-            const rodW = width * 0.75;
-            const rodH = 40;
+            const rodW = Math.min(width * 0.78, 440);
+            const rodH = 44;
             const rx = (width - rodW) / 2;
             const ry = cy - rodH / 2;
 
             // 구리 막대 본체
-            ctx.fillStyle = '#b45309';
-            ctx.fillRect(rx, ry, rodW, rodH);
+            ctx.fillStyle = '#9a3412';
+            ctx.beginPath();
+            ctx.roundRect(rx, ry, rodW, rodH, 8);
+            ctx.fill();
 
-            // 열변색 붙임딱지 층
-            const heatX = rx + rodW * Math.min(plateHeatProgress, 1.0);
-            
             // 가열된 부분 (노란색)
             const grad = ctx.createLinearGradient(rx, ry, rx + rodW, ry);
             const stop = Math.min(Math.max(plateHeatProgress, 0), 1);
-            grad.addColorStop(0, '#fef08a');
-            grad.addColorStop(Math.min(stop, 0.99), '#fef08a');
-            grad.addColorStop(Math.min(stop + 0.05, 1), '#f43f5e');
-            grad.addColorStop(1, '#f43f5e');
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(Math.min(stop * 0.85, 0.95), '#fef08a');
+            grad.addColorStop(Math.min(stop + 0.04, 1), '#e11d48');
+            grad.addColorStop(1, '#e11d48');
 
             ctx.fillStyle = grad;
-            ctx.fillRect(rx + 4, ry + 4, rodW - 8, rodH - 8);
+            ctx.beginPath();
+            ctx.roundRect(rx + 4, ry + 4, rodW - 8, rodH - 8, 6);
+            ctx.fill();
+
+            // ①~④ 센서 지점 표시
+            const ratios = [0.18, 0.42, 0.66, 0.88];
+            const labels = ['①', '②', '③', '④'];
+            ratios.forEach((r, idx) => {
+                const sx = rx + rodW * r;
+                const sy = ry + rodH / 2;
+                const isHot = plateHeatProgress >= r;
+                if (isHot) heatedCount++;
+                drawSensorBadge(ctx, sx, sy, labels[idx], isHot);
+            });
 
             // 알코올 램프 불꽃 (막대 왼쪽 끝)
-            drawFlame(ctx, rx + 10, ry + rodH + 20);
+            drawFlame(ctx, rx + 16, ry + rodH + 22);
 
             // 텍스트 라벨
-            ctx.font = '14px Jua';
+            ctx.font = 'bold 13px Jua, sans-serif';
+            ctx.fillStyle = '#fef08a';
+            ctx.textAlign = 'left';
+            ctx.fillText('🔥 가열점 (약 90℃)', rx, ry - 14);
+            ctx.fillStyle = '#93c5fd';
+            ctx.textAlign = 'right';
+            ctx.fillText('차가운 끝 (20℃) ❄️', rx + rodW, ry - 14);
             ctx.fillStyle = '#f8fafc';
             ctx.textAlign = 'center';
-            ctx.fillText('🔥 가열점 (뜨거움 90℃)', rx + 40, ry - 14);
-            ctx.fillText('차가움 20℃ ❄️', rx + rodW - 40, ry - 14);
-            ctx.fillText('열의 이동 방향 ➔ ➔ ➔', cx, ry + rodH + 35);
+            ctx.fillText('열의 이동 방향: ① ➔ ② ➔ ③ ➔ ④', cx, ry + rodH + 42);
 
         } else {
             // [모드 A-1, A-2] 사각 구리판 렌더링
             const plateW = Math.min(width * 0.65, 340);
-            const plateH = Math.min(height * 0.65, 230);
+            const plateH = Math.min(height * 0.65, 220);
             const px = cx - plateW / 2;
-            const py = cy - plateH / 2;
+            const py = cy - plateH / 2 + 10;
 
             // 구리판 베이스
             ctx.fillStyle = '#9a3412';
@@ -309,7 +356,7 @@
 
             // 가열 지점 좌표 설정
             const heatOriginX = (plateHeatMode === 'corner') ? px + 35 : cx;
-            const heatOriginY = (plateHeatMode === 'corner') ? py + plateH - 35 : cy;
+            const heatOriginY = (plateHeatMode === 'corner') ? py + plateH - 35 : cy + 10;
 
             // 클리핑 영역 설정 (구리판 내부만 색상 변화)
             ctx.save();
@@ -322,7 +369,7 @@
             ctx.fillRect(px + 4, py + 4, plateW - 8, plateH - 8);
 
             // 동심원 형태 열 확산 (RadialGradient)
-            const maxRadius = Math.max(plateW, plateH) * 1.2;
+            const maxRadius = Math.max(plateW, plateH) * 1.15;
             const curRadius = maxRadius * Math.min(plateHeatProgress, 1.1);
 
             if (curRadius > 2) {
@@ -330,10 +377,10 @@
                     heatOriginX, heatOriginY, 0,
                     heatOriginX, heatOriginY, curRadius
                 );
-                heatGrad.addColorStop(0, '#ffffff'); // 가장 뜨거운 중심
-                heatGrad.addColorStop(0.35, '#fef08a'); // 노란 변색 영역
-                heatGrad.addColorStop(0.7, '#f97316'); // 주황 중간 전이대
-                heatGrad.addColorStop(1, 'rgba(225, 29, 72, 0)'); // 기존 붉은색 융합
+                heatGrad.addColorStop(0, '#ffffff');
+                heatGrad.addColorStop(0.45, '#fef08a');
+                heatGrad.addColorStop(0.78, '#f97316');
+                heatGrad.addColorStop(1, 'rgba(225, 29, 72, 0)');
 
                 ctx.fillStyle = heatGrad;
                 ctx.beginPath();
@@ -341,30 +388,71 @@
                 ctx.fill();
             }
 
-            ctx.restore();
-
-            // 알코올 램프 불꽃 그리기
-            drawFlame(ctx, heatOriginX, heatOriginY + 12);
-
             // 동심원 안내 점선 링 (열의 전달 시각화)
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+            ctx.lineWidth = 1.5;
             ctx.setLineDash([4, 4]);
-            for (let r = 40; r < curRadius; r += 45) {
+            for (let r = 38; r < curRadius; r += 42) {
                 ctx.beginPath();
                 ctx.arc(heatOriginX, heatOriginY, r, 0, Math.PI * 2);
                 ctx.stroke();
             }
             ctx.restore();
+
+            // ①~④ 센서 배지 배치
+            const labels = ['①', '②', '③', '④'];
+            const sensorPoints = (plateHeatMode === 'corner')
+                ? [
+                    { x: px + plateW * 0.24, y: py + plateH * 0.74 },
+                    { x: px + plateW * 0.44, y: py + plateH * 0.56 },
+                    { x: px + plateW * 0.64, y: py + plateH * 0.38 },
+                    { x: px + plateW * 0.84, y: py + plateH * 0.20 }
+                ]
+                : [
+                    { x: cx + plateW * 0.10, y: cy + 10 - plateH * 0.08 },
+                    { x: cx + plateW * 0.21, y: cy + 10 - plateH * 0.17 },
+                    { x: cx + plateW * 0.32, y: cy + 10 - plateH * 0.26 },
+                    { x: cx + plateW * 0.43, y: cy + 10 - plateH * 0.35 }
+                ];
+
+            sensorPoints.forEach((pt, idx) => {
+                const dist = Math.hypot(pt.x - heatOriginX, pt.y - heatOriginY);
+                const isHot = curRadius * 0.78 >= dist;
+                if (isHot) heatedCount++;
+                drawSensorBadge(ctx, pt.x, pt.y, labels[idx], isHot);
+            });
+
+            // 알코올 램프 불꽃 그리기
+            drawFlame(ctx, heatOriginX, heatOriginY + 14);
         }
+
+        // 상단 상태 요약 배지
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.beginPath();
+        ctx.roundRect(14, 12, 235, 34, 8);
+        ctx.fill();
+        ctx.strokeStyle = heatedCount === 4 ? '#10b981' : '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.font = 'bold 12px Jua, sans-serif';
+        ctx.fillStyle = heatedCount === 4 ? '#34d399' : '#fef08a';
+        ctx.textAlign = 'left';
+        ctx.fillText(
+            heatedCount === 4
+                ? '✅ ①➔②➔③➔④ 모든 지점 열전도 완료!'
+                : `🌡️ 열변색 딱지 변색 진행: ${heatedCount} / 4단계`,
+            24, 33
+        );
+        ctx.restore();
     }
 
     // 알코올 램프 불꽃 그리기 헬퍼
     function drawFlame(ctx, x, y) {
         const flicker = (Math.random() - 0.5) * 4;
         ctx.save();
-        // 외곽 불꽃
-        ctx.fillStyle = 'rgba(249, 115, 22, 0.85)';
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.88)';
         ctx.beginPath();
         ctx.moveTo(x - 10, y);
         ctx.quadraticCurveTo(x - 12, y - 25, x + flicker, y - 35);
@@ -372,7 +460,6 @@
         ctx.closePath();
         ctx.fill();
 
-        // 내부 불꽃 (파란/노란 코어)
         ctx.fillStyle = '#fef08a';
         ctx.beginPath();
         ctx.moveTo(x - 5, y);
@@ -381,7 +468,6 @@
         ctx.closePath();
         ctx.fill();
 
-        // 삼발이 거치대 받침점 표시
         ctx.fillStyle = '#475569';
         ctx.fillRect(x - 15, y + 2, 30, 6);
         ctx.restore();
@@ -396,9 +482,9 @@
 
     const metals = [
         { name: '구리 (Copper)', speed: 1.0, color: '#f97316', butterY: 0, dropped: false, rank: null },
-        { name: '알루미늄 (Aluminum)', speed: 0.65, color: '#94a3b8', butterY: 0, dropped: false, rank: null },
-        { name: '철 (Iron)', speed: 0.32, color: '#475569', butterY: 0, dropped: false, rank: null },
-        { name: '유리 (Glass)', speed: 0.08, color: '#38bdf8', butterY: 0, dropped: false, rank: null }
+        { name: '알루미늄 (Al)', speed: 0.68, color: '#94a3b8', butterY: 0, dropped: false, rank: null },
+        { name: '철 (Iron)', speed: 0.38, color: '#64748b', butterY: 0, dropped: false, rank: null },
+        { name: '유리 (Glass)', speed: 0.18, color: '#38bdf8', butterY: 0, dropped: false, rank: null }
     ];
     let nextRank = 1;
 
@@ -407,10 +493,10 @@
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
+        if (raceLoop) raceLoop.stop();
         raceLoop = ScienceU3Engine.createLoop((timestamp) => {
             renderRaceFrame(dpi.ctx, dpi.width, dpi.height);
         });
-        raceLoop.start();
     }
 
     function startMetalRace() {
@@ -423,7 +509,13 @@
             m.dropped = false;
             m.rank = null;
         });
-        document.getElementById('btnStartRace').disabled = true;
+        const btn = document.getElementById('btnStartRace');
+        btn.disabled = true;
+        btn.textContent = '🔥 가열 레이스 진행 중...';
+        const fairyEl = document.getElementById('fairyRaceText');
+        if (fairyEl) {
+            fairyEl.innerHTML = '🧚 <b>요정 코코의 레이스 중계:</b><br>"가열 시작! 붉은 열기가 막대를 타고 버터(🧈)가 있는 75% 지점으로 달려가고 있어! 누가 1등으로 버터를 녹일까?"';
+        }
         ScienceU3Engine.playClickSound();
     }
 
@@ -436,91 +528,133 @@
             m.dropped = false;
             m.rank = null;
         });
-        document.getElementById('btnStartRace').disabled = false;
+        const btn = document.getElementById('btnStartRace');
+        btn.disabled = false;
+        btn.textContent = '🚀 동시 가열 시작!';
+        const fairyEl = document.getElementById('fairyRaceText');
+        if (fairyEl) {
+            fairyEl.innerHTML = '🧚 <b>요정 코코의 레이스 중계:</b><br>"막대 위에 새 버터(🧈)를 올렸어! <b>[동시 가열 시작!]</b> 버튼을 눌러 물질마다 열이 이동하는 빠르기를 비교해 봐!"';
+        }
         ScienceU3Engine.playClickSound();
     }
 
     function renderRaceFrame(ctx, width, height) {
         ctx.clearRect(0, 0, width, height);
 
-        const leftMargin = 120;
-        const rightMargin = 70;
+        const leftMargin = Math.min(125, width * 0.26);
+        const rightMargin = 78;
         const startX = leftMargin;
-        const rodLength = width - leftMargin - rightMargin;
+        const rodLength = Math.max(120, width - leftMargin - rightMargin);
         const rowHeight = (height - 60) / 4;
 
         if (isRaceRunning) {
-            raceProgress += 0.004;
+            raceProgress += 0.0045;
         }
 
         // 공통 가열기 (왼쪽 열원)
-        ctx.fillStyle = '#dc2626';
-        ctx.fillRect(startX - 18, 30, 14, height - 70);
-        ctx.fillStyle = '#fef08a';
-        ctx.font = '12px Jua';
+        ctx.fillStyle = isRaceRunning ? '#dc2626' : '#475569';
+        ctx.beginPath();
+        ctx.roundRect(startX - 18, 34, 14, height - 74, 4);
+        ctx.fill();
+        ctx.fillStyle = isRaceRunning ? '#fef08a' : '#94a3b8';
+        ctx.font = 'bold 12px Jua, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🔥 가열', startX - 11, 24);
+        ctx.fillText(isRaceRunning ? '🔥 가열중' : '열원 대기', startX - 11, 24);
+
+        // 버터 목표선 (75% 지점 안내 점선)
+        const targetX = startX + rodLength * 0.75;
+        ctx.save();
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(targetX, 34);
+        ctx.lineTo(targetX, height - 40);
+        ctx.stroke();
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = '11px Jua, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🧈 버터 위치', targetX, 24);
+        ctx.restore();
 
         metals.forEach((m, idx) => {
             const y = 50 + idx * rowHeight;
 
             // 금속 이름 및 라벨
             ctx.fillStyle = '#e2e8f0';
-            ctx.font = '13px Jua';
+            ctx.font = 'bold 13px Jua, sans-serif';
             ctx.textAlign = 'right';
-            ctx.fillText(m.name, startX - 25, y + 10);
+            ctx.fillText(m.name, startX - 24, y + 11);
 
             // 막대 베이스
             ctx.fillStyle = '#1e293b';
-            ctx.fillRect(startX, y, rodLength, 14);
+            ctx.beginPath();
+            ctx.roundRect(startX, y, rodLength, 16, 4);
+            ctx.fill();
 
             // 열전도 파동 (가열 전진)
-            const heatDist = rodLength * Math.min(raceProgress * m.speed, 1.0);
+            const ratio = Math.min(raceProgress * m.speed, 1.0);
+            const heatDist = rodLength * ratio;
             if (heatDist > 0) {
                 const grad = ctx.createLinearGradient(startX, y, startX + heatDist, y);
                 grad.addColorStop(0, '#ef4444');
-                grad.addColorStop(0.7, '#f59e0b');
-                grad.addColorStop(1, m.color);
+                grad.addColorStop(0.65, '#f59e0b');
+                grad.addColorStop(1, '#fef08a');
                 ctx.fillStyle = grad;
-                ctx.fillRect(startX, y, heatDist, 14);
+                ctx.beginPath();
+                ctx.roundRect(startX, y, heatDist, 16, 4);
+                ctx.fill();
             }
 
-            // 버터(🧈) 위치 (막대의 75% 지점)
-            const butterX = startX + rodLength * 0.75;
-            const butterBaseY = y + 7;
-
-            // 열이 버터 위치에 도달했는지 판정
-            if (heatDist >= rodLength * 0.75 && !m.dropped) {
+            // 열이 버터 위치(0.75)에 도달했는지 판정
+            const butterBaseY = y + 8;
+            if (ratio >= 0.75 && !m.dropped) {
                 m.dropped = true;
                 m.rank = nextRank++;
-                ScienceU3Engine.playTone(600 + m.rank * 100, 'sine', 0.1);
+                ScienceU3Engine.playTone(550 + m.rank * 110, 'sine', 0.12);
+
+                if (nextRank > 4) {
+                    isRaceRunning = false;
+                    const btn = document.getElementById('btnStartRace');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = '🚀 다시 가열 레이스!';
+                    }
+                    const fairyEl = document.getElementById('fairyRaceText');
+                    if (fairyEl) {
+                        fairyEl.innerHTML = '🧚 <b>요정 코코의 레이스 최종 결과:</b><br>"완주 완료! 🏆 <b>1위 구리 ➔ 2위 알루미늄 ➔ 3위 철 ➔ 4위 유리</b> 순서로 버터가 녹았어! 금속이 유리보다 열을 훨씬 빠르게 전달한다는 걸 확인했지?"';
+                    }
+                }
             }
 
             // 버터 낙하 물리
-            if (m.dropped && m.butterY < 40) {
-                m.butterY += 3.5;
+            if (m.dropped && m.butterY < 36) {
+                m.butterY += 3.2;
             }
 
             // 버터 렌더링
             ctx.save();
-            ctx.font = '20px sans-serif';
+            ctx.font = '19px sans-serif';
             ctx.textAlign = 'center';
-            if (m.dropped && m.butterY >= 40) {
-                ctx.fillText('💧', butterX, butterBaseY + m.butterY);
+            if (m.dropped && m.butterY >= 36) {
+                ctx.fillText('💧', targetX, butterBaseY + m.butterY);
             } else {
-                ctx.fillText('🧈', butterX, butterBaseY - 10 + m.butterY);
+                ctx.fillText('🧈', targetX, butterBaseY - 10 + m.butterY);
             }
             ctx.restore();
 
-            // 순위 배지 표시
+            // 순위 배지 또는 진행률 표시
+            ctx.save();
+            ctx.font = 'bold 13px Jua, sans-serif';
+            ctx.textAlign = 'left';
             if (m.rank) {
-                ctx.save();
-                ctx.font = 'bold 13px Jua';
-                ctx.fillStyle = m.rank === 1 ? '#fbbf24' : (m.rank === 2 ? '#cbd5e1' : '#b45309');
-                ctx.textAlign = 'left';
-                ctx.fillText(`🏆 ${m.rank}위!`, startX + rodLength + 10, y + 12);
-                ctx.restore();
+                ctx.fillStyle = m.rank === 1 ? '#fbbf24' : (m.rank === 2 ? '#e2e8f0' : (m.rank === 3 ? '#f97316' : '#38bdf8'));
+                ctx.fillText(`🏆 ${m.rank}위!`, startX + rodLength + 10, y + 13);
+            } else {
+                const pct = Math.min(100, Math.round((ratio / 0.75) * 100));
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(`${pct}%`, startX + rodLength + 12, y + 13);
             }
+            ctx.restore();
         });
     }
 
@@ -531,20 +665,34 @@
         // 3컷 만화 요약 아코디언 바인딩
         ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
 
-        // 서브 탭 전환기 바인딩
+        let currentTab = 'paneConductionA';
         ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
+            currentTab = targetTab;
             if (targetTab === 'paneConductionA') {
                 if (raceLoop) raceLoop.stop();
-                if (plateLoop) plateLoop.start();
+                initPlateCanvas();
             } else {
                 if (plateLoop) plateLoop.stop();
+                initRaceCanvas();
                 if (raceLoop) raceLoop.start();
             }
         });
 
-        // 캔버스 초기화
+        // 초기 모드 A 캔버스만 구동 (모드 B는 비활성)
         initPlateCanvas();
-        initRaceCanvas();
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (currentTab === 'paneConductionA') {
+                    initPlateCanvas();
+                } else {
+                    initRaceCanvas();
+                    if (raceLoop) raceLoop.start();
+                }
+            }, 200);
+        });
 
         // 퀴즈 엔진 바인딩 (+5💎 1회성 가드)
         ScienceU3Engine.setupQuiz({

@@ -150,6 +150,26 @@
                 };
             });
         }
+
+        // 4) 3단원 탐구보고서 요약노트 및 퀴즈
+        const rep3Docs = items.filter(x => x.zone === '탐구보고서' && (x.unit.includes('3.') || x.unit.includes('열과')));
+        if (rep3Docs.length > 0 && window.SCIENCE_LAB_REPORT_3_DATA) {
+            window.SCIENCE_LAB_REPORT_3_DATA.summaryDoc = rep3Docs.map(it => {
+                const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
+                const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || it.desc;
+                const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || '';
+                const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || '';
+                const thk = (it.desc || '').match(/\[생각해 볼까요\?\]\s*([\s\S]*?)$/)?.[1]?.trim() || '';
+                return {
+                    title: it.title.replace(/^📝\s*\[[^\]]+\]\s*/, ''),
+                    page: pg,
+                    process: proc,
+                    result: res,
+                    conclusion: conc,
+                    think: thk
+                };
+            });
+        }
     }
 
     // 🧪 실험 퀴즈 UI 렌더링

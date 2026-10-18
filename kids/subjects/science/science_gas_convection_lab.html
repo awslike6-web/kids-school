@@ -48,7 +48,7 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/F4198jB5hYc?rel=0&modestbranding=1" 
+                src="https://www.youtube-nocookie.com/embed/KbBeiqJVAKM?rel=0&modestbranding=1" 
                 title="기체 대류와 복사열 실험 영상" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
@@ -57,7 +57,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/F4198jB5hYc" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/KbBeiqJVAKM" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -160,11 +160,11 @@
             </div>
 
             <div class="control-panel">
-                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnToggleShield" onclick="toggleRadiationShield()">
-                    🛡️ 차광판(가림판) 끼우기 / 치우기
+                <button type="button" class="btn-ctrl" id="btnToggleShield" onclick="toggleRadiationShield()">
+                    🛡️ 차광판(가림판) 끼우기
                 </button>
-                <button type="button" class="btn-ctrl" id="btnToggleHeater" onclick="toggleRadiationHeater()">
-                    🔥 난로 전원 ON / OFF
+                <button type="button" class="btn-ctrl btn-ctrl-primary active" id="btnToggleHeater" onclick="toggleRadiationHeater()">
+                    🔥 난로 전원 ON (가동 중)
                 </button>
             </div>
 
@@ -227,23 +227,18 @@
     let heaterPos = 'bottom'; // 'top' | 'bottom'
     let roomLoop = null;
 
-    const AIR_PARTICLES = 40;
+    const AIR_PARTICLES = 42;
     const airParticles = [];
 
-    function initAirParticles(width, height) {
+    function initAirParticles() {
         airParticles.length = 0;
-        const rw = width * 0.75;
-        const rh = height * 0.7;
-        const rx = (width - rw) / 2;
-        const ry = (height - rh) / 2;
-
         for (let i = 0; i < AIR_PARTICLES; i++) {
             airParticles.push({
-                x: rx + Math.random() * rw,
-                y: ry + Math.random() * rh,
-                vx: 0,
-                vy: 0,
-                type: Math.random() > 0.5 ? 'cool' : 'warm'
+                angle: (i / AIR_PARTICLES) * Math.PI * 2,
+                radiusRatio: 0.42 + (i % 4) * 0.14,
+                layer: i % 2 === 0 ? 'upper' : 'lower',
+                phase: Math.random() * Math.PI * 2,
+                size: 4 + (i % 2) * 1.2
             });
         }
     }
@@ -253,17 +248,33 @@
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
-        initAirParticles(dpi.width, dpi.height);
+        if (airParticles.length === 0) initAirParticles();
+        if (roomLoop) roomLoop.stop();
         roomLoop = ScienceU3Engine.createLoop((timestamp) => {
-            renderRoomFrame(dpi.ctx, dpi.width, dpi.height);
+            renderRoomFrame(dpi.ctx, dpi.width, dpi.height, timestamp);
         });
         roomLoop.start();
+    }
+
+    function updateRoomFairyComment() {
+        const el = document.getElementById('fairyRoomText');
+        if (!el) return;
+        if (acPos === 'top' && heaterPos === 'bottom') {
+            el.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (최적 배치 ✅):</b><br>"에어컨(천장)의 찬 공기는 아래로 내려오고, 난방기(바닥)의 따뜻한 공기는 위로 올라가서 <b>방 전체가 22℃로 골고루 순환</b>하고 있어!"';
+        } else if (acPos === 'bottom' && heaterPos === 'top') {
+            el.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (정반대 배치 ⚠️):</b><br>"에어컨을 바닥에, 난방기를 천장에 두니까 찬 공기는 바닥에만 고이고(15℃) 더운 공기는 천장에만 갇혀서(31℃) <b>대류가 완전히 멈춰버렸어!</b>"';
+        } else if (acPos === 'bottom' && heaterPos === 'bottom') {
+            el.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (에어컨 바닥 배치 ⚠️):</b><br>"난방기 공기는 위로 올라가지만, 바닥에 둔 에어컨의 찬 공기는 위로 올라가지 못하고 <b>바닥 쪽에만 차갑게 고여 있어!</b>"';
+        } else {
+            el.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (난방기 천장 배치 ⚠️):</b><br>"에어컨 찬 공기는 아래로 내려오지만, 천장에 둔 난방기의 따뜻한 공기는 가벼워서 <b>천장 위쪽에만 둥둥 떠 있어!</b>"';
+        }
     }
 
     function setAcPos(pos) {
         acPos = pos;
         document.getElementById('btnAcTop').classList.toggle('active', pos === 'top');
         document.getElementById('btnAcBottom').classList.toggle('active', pos === 'bottom');
+        updateRoomFairyComment();
         ScienceU3Engine.playClickSound();
     }
 
@@ -271,97 +282,149 @@
         heaterPos = pos;
         document.getElementById('btnHeaterBottom').classList.toggle('active', pos === 'bottom');
         document.getElementById('btnHeaterTop').classList.toggle('active', pos === 'top');
+        updateRoomFairyComment();
         ScienceU3Engine.playClickSound();
     }
 
-    function renderRoomFrame(ctx, width, height) {
+    function renderRoomFrame(ctx, width, height, timestamp) {
         ctx.clearRect(0, 0, width, height);
 
-        const rw = width * 0.75;
-        const rh = height * 0.7;
+        const rw = Math.min(width * 0.78, 450);
+        const rh = Math.min(height * 0.74, 260);
         const rx = (width - rw) / 2;
         const ry = (height - rh) / 2;
+        const isIdeal = (acPos === 'top' && heaterPos === 'bottom');
 
-        // 1. 방 외벽 렌더링
-        ctx.fillStyle = '#0f172a';
+        // 1. 방 배경 히트맵 그라데이션
+        ctx.save();
+        const bgGrad = ctx.createLinearGradient(rx, ry, rx, ry + rh);
+        if (isIdeal) {
+            bgGrad.addColorStop(0, 'rgba(16, 185, 129, 0.14)');
+            bgGrad.addColorStop(1, 'rgba(56, 189, 248, 0.14)');
+        } else if (acPos === 'bottom' && heaterPos === 'top') {
+            bgGrad.addColorStop(0, 'rgba(239, 68, 68, 0.25)');
+            bgGrad.addColorStop(0.5, 'rgba(15, 23, 42, 0.9)');
+            bgGrad.addColorStop(1, 'rgba(14, 165, 233, 0.28)');
+        } else {
+            bgGrad.addColorStop(0, 'rgba(245, 158, 11, 0.18)');
+            bgGrad.addColorStop(1, 'rgba(56, 189, 248, 0.20)');
+        }
+        ctx.fillStyle = bgGrad;
         ctx.fillRect(rx, ry, rw, rh);
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 4;
         ctx.strokeRect(rx, ry, rw, rh);
+        ctx.restore();
 
-        // 2. 에어컨 위치 렌더링 (파란색 박스)
-        const acY = (acPos === 'top') ? ry + 15 : ry + rh - 45;
+        // 2. 에어컨 위치 렌더링 (좌측 파란색 박스)
+        const acY = (acPos === 'top') ? ry + 14 : ry + rh - 44;
         ctx.fillStyle = '#0284c7';
-        ctx.fillRect(rx + 15, acY, 65, 30);
+        ctx.beginPath();
+        ctx.roundRect(rx + 14, acY, 76, 30, 6);
+        ctx.fill();
         ctx.fillStyle = '#ffffff';
-        ctx.font = '11px Jua';
+        ctx.font = 'bold 11px Jua, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('❄️ 에어컨', rx + 47, acY + 20);
+        ctx.fillText('❄️ 에어컨', rx + 52, acY + 19);
 
-        // 3. 난방기 위치 렌더링 (빨간색 박스)
-        const heaterY = (heaterPos === 'bottom') ? ry + rh - 45 : ry + 15;
+        // 3. 난방기 위치 렌더링 (우측 빨간색 박스)
+        const heaterY = (heaterPos === 'bottom') ? ry + rh - 44 : ry + 14;
         ctx.fillStyle = '#dc2626';
-        ctx.fillRect(rx + rw - 80, heaterY, 65, 30);
+        ctx.beginPath();
+        ctx.roundRect(rx + rw - 90, heaterY, 76, 30, 6);
+        ctx.fill();
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('🔥 난방기', rx + rw - 47, heaterY + 20);
+        ctx.fillText('🔥 난방기', rx + rw - 52, heaterY + 19);
 
-        // 4. 공기 입자 물리 이동
-        const isIdeal = (acPos === 'top' && heaterPos === 'bottom');
-
-        airParticles.forEach(p => {
+        // 4. 공기 입자 물리 이동 (4대 조합별 궤도)
+        const t = (timestamp || 0) * 0.0025;
+        airParticles.forEach((p, idx) => {
+            let px, py, pColor;
             if (isIdeal) {
-                // 이상적 순환: 에어컨(좌상단) ➔ 아래로 하강 ➔ 바닥 건너 난방기(우하단) ➔ 위로 상승 ➔ 천장 건너 에어컨
-                if (p.x < rx + rw * 0.35) p.vy += 0.05; // 좌측 찬공기 하강
-                if (p.y > ry + rh - 40) p.vx += 0.06; // 바닥 우측 이동
-                if (p.x > rx + rw * 0.65) p.vy -= 0.05; // 우측 더운공기 상승
-                if (p.y < ry + 40) p.vx -= 0.06; // 천장 좌측 이동
+                // 반시계 전체 순환: 좌측 하강(찬 공기) ➔ 바닥 우측 이동 ➔ 우측 상승(더운 공기) ➔ 천장 좌측 이동
+                p.angle = (p.angle - 0.018 + Math.PI * 2) % (Math.PI * 2);
+                px = rx + rw * 0.5 + Math.cos(p.angle) * (rw * 0.38 * p.radiusRatio);
+                py = ry + rh * 0.5 + Math.sin(p.angle) * (rh * 0.36 * p.radiusRatio);
+                pColor = (Math.cos(p.angle) < 0) ? '#38bdf8' : '#f97316';
+            } else if (acPos === 'bottom' && heaterPos === 'top') {
+                // 상하 완전 분리 정체: 위쪽은 더운 공기 갇힘, 아래쪽은 찬 공기 갇힘
+                const drift = Math.sin(t + p.phase) * (rw * 0.34);
+                px = rx + rw * 0.5 + drift;
+                if (p.layer === 'upper') {
+                    py = ry + 26 + (idx % 5) * 9 + Math.cos(t * 1.3 + p.phase) * 4;
+                    pColor = '#ef4444';
+                } else {
+                    py = ry + rh - 26 - (idx % 5) * 9 + Math.sin(t * 1.3 + p.phase) * 4;
+                    pColor = '#38bdf8';
+                }
+            } else if (acPos === 'bottom' && heaterPos === 'bottom') {
+                // 에어컨 바닥 정체 + 난방기 우측 반쪽 순환
+                if (p.layer === 'lower') {
+                    px = rx + rw * 0.28 + Math.sin(t + p.phase) * (rw * 0.18);
+                    py = ry + rh - 24 - (idx % 4) * 8;
+                    pColor = '#38bdf8';
+                } else {
+                    p.angle = (p.angle - 0.016 + Math.PI * 2) % (Math.PI * 2);
+                    px = rx + rw * 0.68 + Math.cos(p.angle) * (rw * 0.22 * p.radiusRatio);
+                    py = ry + rh * 0.5 + Math.sin(p.angle) * (rh * 0.34 * p.radiusRatio);
+                    pColor = '#f97316';
+                }
             } else {
-                // 잘못된 배치: 대류 정체
-                if (acPos === 'bottom' && p.y > ry + rh * 0.6) p.vy += 0.04; // 바닥에만 냉기 체류
-                if (heaterPos === 'top' && p.y < ry + rh * 0.4) p.vy -= 0.04; // 천장에만 온기 체류
+                // 에어컨 좌측 반쪽 순환 + 난방기 천장 정체
+                if (p.layer === 'upper') {
+                    px = rx + rw * 0.72 + Math.sin(t + p.phase) * (rw * 0.18);
+                    py = ry + 24 + (idx % 4) * 8;
+                    pColor = '#ef4444';
+                } else {
+                    p.angle = (p.angle - 0.016 + Math.PI * 2) % (Math.PI * 2);
+                    px = rx + rw * 0.32 + Math.cos(p.angle) * (rw * 0.22 * p.radiusRatio);
+                    py = ry + rh * 0.5 + Math.sin(p.angle) * (rh * 0.34 * p.radiusRatio);
+                    pColor = '#38bdf8';
+                }
             }
 
-            p.vx *= 0.95;
-            p.vy *= 0.95;
-            p.x += p.vx;
-            p.y += p.vy;
-
-            // 벽면 경계
-            if (p.x < rx + 10) { p.x = rx + 10; p.vx *= -0.5; }
-            if (p.x > rx + rw - 10) { p.x = rx + rw - 10; p.vx *= -0.5; }
-            if (p.y < ry + 10) { p.y = ry + 10; p.vy *= -0.5; }
-            if (p.y > ry + rh - 10) { p.y = ry + rh - 10; p.vy *= -0.5; }
-
-            // 입자 렌더링
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-            ctx.fillStyle = (p.y > ry + rh * 0.5) ? '#38bdf8' : '#f97316';
+            ctx.arc(px, py, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = pColor;
             ctx.fill();
         });
 
-        // 5. 방 순환 상태 표시 패널
+        // 5. 천장 / 바닥 온도 비교 배지 및 중앙 판정 패널
+        const topTemp = isIdeal ? '22℃' : (heaterPos === 'top' ? '31℃ 🥵' : '25℃');
+        const btmTemp = isIdeal ? '22℃' : (acPos === 'bottom' ? '15℃ 🥶' : '20℃');
+
         ctx.save();
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-        ctx.roundRect(rx + rw / 2 - 100, ry + rh / 2 - 25, 200, 50, 10);
+        ctx.font = 'bold 11px Jua, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fca5a5';
+        ctx.fillText(`🌡️ 천장 공기: ${topTemp}`, rx + rw / 2, ry + 22);
+        ctx.fillStyle = '#93c5fd';
+        ctx.fillText(`🌡️ 바닥 공기: ${btmTemp}`, rx + rw / 2, ry + rh - 12);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.beginPath();
+        ctx.roundRect(rx + rw / 2 - 110, ry + rh / 2 - 26, 220, 52, 10);
         ctx.fill();
         ctx.strokeStyle = isIdeal ? '#10b981' : '#f59e0b';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        ctx.font = 'bold 13px Jua';
-        ctx.textAlign = 'center';
+        ctx.font = 'bold 13px Jua, sans-serif';
         if (isIdeal) {
             ctx.fillStyle = '#34d399';
-            ctx.fillText('✨ 완벽한 대류 순환 중! (22℃ 쾌적)', rx + rw / 2, ry + rh / 2);
+            ctx.fillText('✨ 완벽한 대류 순환 중! (22℃ 쾌적)', rx + rw / 2, ry + rh / 2 - 4);
             ctx.font = '11px sans-serif';
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText('방 전체가 골고루 시원하고 따뜻함', rx + rw / 2, ry + rh / 2 + 16);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('찬 공기는 아래로, 더운 공기는 위로 순환', rx + rw / 2, ry + rh / 2 + 14);
         } else {
             ctx.fillStyle = '#fde68a';
-            ctx.fillText('⚠️ 대류 정체 현상 발생!', rx + rw / 2, ry + rh / 2);
+            ctx.fillText('⚠️ 대류 불균형 · 공기 정체 발생!', rx + rw / 2, ry + rh / 2 - 4);
             ctx.font = '11px sans-serif';
             ctx.fillStyle = '#fdba74';
-            ctx.fillText('천장은 덥고 바닥만 차가움', rx + rw / 2, ry + rh / 2 + 16);
+            const subMsg = (acPos === 'bottom' && heaterPos === 'top')
+                ? '천장만 덥고 바닥만 얼음장처럼 차가움'
+                : (acPos === 'bottom' ? '에어컨 냉기가 바닥에만 고여 있음' : '난방기 온기가 천장에만 머물러 있음');
+            ctx.fillText(subMsg, rx + rw / 2, ry + rh / 2 + 14);
         }
         ctx.restore();
     }
@@ -379,36 +442,78 @@
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
+        if (radLoop) radLoop.stop();
         radLoop = ScienceU3Engine.createLoop((timestamp) => {
             renderRadiationFrame(dpi.ctx, dpi.width, dpi.height, timestamp);
         });
         radLoop.start();
     }
 
+    function updateRadUI() {
+        const shieldBtn = document.getElementById('btnToggleShield');
+        const heaterBtn = document.getElementById('btnToggleHeater');
+        const fairyEl = document.getElementById('fairyRadText');
+
+        if (shieldBtn) {
+            shieldBtn.classList.toggle('active', hasShield);
+            shieldBtn.textContent = hasShield ? '🛡️ 차광판 치우기 (열 통과)' : '🛡️ 차광판(가림판) 끼우기';
+        }
+        if (heaterBtn) {
+            heaterBtn.classList.toggle('active', isHeaterOn);
+            heaterBtn.classList.toggle('btn-ctrl-primary', isHeaterOn);
+            heaterBtn.textContent = isHeaterOn ? '🔥 난로 전원 ON (가동 중)' : '❄️ 난로 전원 OFF (꺼짐)';
+        }
+        if (fairyEl) {
+            if (!isHeaterOn) {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (난로 OFF):</b><br>"난로 전원을 껐더니 적외선 복사 파동이 사라지고 센서 온도가 24.0℃ 실온으로 내려가고 있어!"';
+            } else if (hasShield) {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (차광판 장착 🛡️):</b><br>"차광판이 빛처럼 직진하는 <b>복사열을 한가운데서 가로막았어!</b> 난로가 켜져 있는데도 그늘에 있는 센서 온도가 뚝 떨어지지?"';
+            } else {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (복사열 직진 ☀️):</b><br>"난로에서 나온 붉은 적외선 파동이 공기를 데우지 않고도 센서까지 곧장 날아가 온도를 <b>58℃까지</b> 올리고 있어!"';
+            }
+        }
+    }
+
     function toggleRadiationShield() {
         hasShield = !hasShield;
+        updateRadUI();
         ScienceU3Engine.playClickSound();
     }
 
     function toggleRadiationHeater() {
         isHeaterOn = !isHeaterOn;
+        updateRadUI();
         ScienceU3Engine.playClickSound();
     }
 
     function renderRadiationFrame(ctx, width, height, timestamp) {
         ctx.clearRect(0, 0, width, height);
 
-        const cy = height / 2;
+        const cy = height / 2 + 6;
         const heaterX = width * 0.2;
         const sensorX = width * 0.8;
         const shieldX = width * 0.5;
 
         // 온도 계산
         if (isHeaterOn && !hasShield) {
-            if (sensorTemp < 58.0) sensorTemp += 0.15;
+            if (sensorTemp < 58.0) sensorTemp += 0.18;
         } else {
-            if (sensorTemp > 24.0) sensorTemp -= 0.12;
+            if (sensorTemp > 24.0) sensorTemp -= 0.15;
         }
+
+        // 상단 중간 공기 안내 배지 (물질을 거치지 않는 복사 강조)
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.beginPath();
+        ctx.roundRect(width / 2 - 115, 14, 230, 32, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#475569';
+        ctx.stroke();
+        ctx.font = 'bold 12px Jua, sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.textAlign = 'center';
+        ctx.fillText('💨 매질(공기) 없이 빛처럼 직접 이동하는 복사열', width / 2, 34);
+        ctx.restore();
 
         // 1. 전기난로 렌더링
         ctx.save();
@@ -427,22 +532,22 @@
             ctx.stroke();
         }
         ctx.fillStyle = '#ffffff';
-        ctx.font = '12px Jua';
+        ctx.font = 'bold 12px Jua, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(isHeaterOn ? '🔥 복사 열원' : '난로 OFF', heaterX, cy + 80);
         ctx.restore();
 
         // 2. 복사열 파동 (적외선 물결선)
         if (isHeaterOn) {
-            const waveLimit = hasShield ? shieldX : sensorX - 20;
+            const waveLimit = hasShield ? shieldX - 10 : sensorX - 38;
             ctx.save();
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
             ctx.lineWidth = 2.5;
 
             for (let offset = -40; offset <= 40; offset += 20) {
                 ctx.beginPath();
-                for (let x = heaterX + 40; x <= waveLimit; x += 8) {
-                    const waveY = cy + offset + Math.sin(x * 0.08 - timestamp * 0.006) * 6;
+                for (let x = heaterX + 40; x <= waveLimit; x += 6) {
+                    const waveY = cy + offset + Math.sin(x * 0.08 - (timestamp || 0) * 0.008) * 6;
                     if (x === heaterX + 40) ctx.moveTo(x, waveY);
                     else ctx.lineTo(x, waveY);
                 }
@@ -454,39 +559,42 @@
         // 3. 차광판 렌더링
         if (hasShield) {
             ctx.save();
-            ctx.fillStyle = '#64748b';
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 2;
-            ctx.fillRect(shieldX - 8, cy - 70, 16, 140);
-            ctx.strokeRect(shieldX - 8, cy - 70, 16, 140);
+            ctx.fillStyle = '#475569';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.roundRect(shieldX - 9, cy - 72, 18, 144, 4);
+            ctx.fill();
+            ctx.stroke();
 
-            ctx.fillStyle = '#f8fafc';
-            ctx.font = '12px Jua';
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 12px Jua, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('🛡️ 차광판 (빛 차단)', shieldX, cy - 80);
+            ctx.fillText('🛡️ 차광판 (복사열 반사/차단)', shieldX, cy - 82);
             ctx.restore();
         }
 
         // 4. 온도 센서 렌더링
         ctx.save();
         ctx.fillStyle = '#1e293b';
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2;
-        ctx.roundRect(sensorX - 35, cy - 45, 70, 90, 8);
+        ctx.strokeStyle = sensorTemp > 35 ? '#ef4444' : '#38bdf8';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(sensorX - 38, cy - 48, 76, 96, 10);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 15px Jua';
+        ctx.font = 'bold 14px Jua, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`🌡️ 센서`, sensorX, cy - 15);
-        ctx.fillStyle = sensorTemp > 40 ? '#ef4444' : '#38bdf8';
-        ctx.font = 'bold 18px Jua';
-        ctx.fillText(`${sensorTemp.toFixed(1)}℃`, sensorX, cy + 18);
+        ctx.fillText('🌡️ 온도 센서', sensorX, cy - 18);
+        ctx.fillStyle = sensorTemp > 35 ? '#ef4444' : '#38bdf8';
+        ctx.font = 'bold 19px Jua, sans-serif';
+        ctx.fillText(`${sensorTemp.toFixed(1)}℃`, sensorX, cy + 14);
 
         ctx.font = '11px sans-serif';
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillText(sensorTemp > 40 ? '복사열 흡수 중' : '시원한 상태', sensorX, cy + 35);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText((isHeaterOn && !hasShield) ? '☀️ 복사열 흡수중' : '❄️ 열 차단됨', sensorX, cy + 34);
         ctx.restore();
     }
 
@@ -496,18 +604,32 @@
     document.addEventListener('DOMContentLoaded', () => {
         ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
 
+        let currentTab = 'paneGasA';
         ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
+            currentTab = targetTab;
             if (targetTab === 'paneGasA') {
                 if (radLoop) radLoop.stop();
-                if (roomLoop) roomLoop.start();
+                initRoomCanvas();
             } else {
                 if (roomLoop) roomLoop.stop();
-                if (radLoop) radLoop.start();
+                initRadiationCanvas();
             }
         });
 
+        // 초기 모드 A 캔버스만 구동 (모드 B는 비활성)
         initRoomCanvas();
-        initRadiationCanvas();
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (currentTab === 'paneGasA') {
+                    initRoomCanvas();
+                } else {
+                    initRadiationCanvas();
+                }
+            }, 200);
+        });
 
         ScienceU3Engine.setupQuiz({
             labId: 'gas_convection',

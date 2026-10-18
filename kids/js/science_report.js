@@ -8,11 +8,14 @@
 
     let currentReportTab = 'doc'; // 'doc' | 'quiz'
     let currentReportQuizIdx = 0;
-    let currentReportUnitId = 1; // 1: 1단원 혼합물, 2: 2단원 날씨
+    let currentReportUnitId = 1; // 1: 1단원 혼합물, 2: 2단원 날씨, 3: 3단원 열과 우리 생활
     let userBlankAnswers = {};
     let pendingFeedbackCallback = null;
 
     function getActiveReportData() {
+        if (currentReportUnitId === 3) {
+            return window.SCIENCE_LAB_REPORT_3_DATA || window.SCIENCE_LAB_REPORT_DATA;
+        }
         if (currentReportUnitId === 2) {
             return window.SCIENCE_LAB_REPORT_2_DATA || window.SCIENCE_LAB_REPORT_DATA;
         }
@@ -30,6 +33,10 @@
         openScienceReport(2);
     }
 
+    function openScienceReport3() {
+        openScienceReport(3);
+    }
+
     function renderLabReportUI(container, tabName, unitId) {
         if (!container) container = document.getElementById('overlayInnerBody');
         if (!container) return;
@@ -43,11 +50,14 @@
         const titleEl = document.getElementById('overlayHeaderTitle');
         const iconEl = document.getElementById('overlayHeaderIcon');
         if (titleEl) titleEl.textContent = data.title;
-        if (iconEl) iconEl.textContent = currentReportUnitId === 2 ? "🌤️" : "📝";
+        if (iconEl) iconEl.textContent = currentReportUnitId === 3 ? "🔥" : (currentReportUnitId === 2 ? "🌤️" : "📝");
 
-        const unitThemeColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
-        const unitBgColor = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
-        const unitTextColor = currentReportUnitId === 2 ? '#b45309' : '#0369a1';
+        const unitThemeColor = currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
+        const unitBgColor = currentReportUnitId === 3 ? '#ffedd5' : (currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe');
+        const unitTextColor = currentReportUnitId === 3 ? '#c2410c' : (currentReportUnitId === 2 ? '#b45309' : '#0369a1');
+        const pageBadgeText = currentReportUnitId === 3
+            ? '🔥 교과서 『실험관찰』 16~25쪽 탐구 일지'
+            : (currentReportUnitId === 2 ? '🌤️ 교과서 24~35쪽 탐구 일지' : '🧪 교과서 12~19쪽 탐구 일지');
 
         container.innerHTML = `
             <div style="max-width: 780px; margin: 0 auto; padding: 6px 12px; font-family: 'Jua', sans-serif;">
@@ -58,7 +68,7 @@
                         ${data.unit}
                     </span>
                     <span style="font-size: 0.85rem; color: #64748b;">
-                        ${currentReportUnitId === 2 ? '🌤️ 교과서 24~35쪽 탐구 일지' : '🧪 교과서 12~19쪽 탐구 일지'}
+                        ${pageBadgeText}
                     </span>
                 </div>
 
@@ -102,11 +112,13 @@
     function renderLabReportDoc(container) {
         const data = getActiveReportData();
         if (!data) return;
-        const btnColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
-        const borderColor = currentReportUnitId === 2 ? '#fde68a' : '#bae6fd';
-        const tagBg = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
-        const tagColor = currentReportUnitId === 2 ? '#b45309' : '#0284c7';
-        const pageGuide = currentReportUnitId === 2 ? '교과서 『실험관찰』 24~35쪽 날씨 탐구 핵심 내용을 한눈에 읽어보세요!' : '교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!';
+        const btnColor = currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
+        const borderColor = currentReportUnitId === 3 ? '#fed7aa' : (currentReportUnitId === 2 ? '#fde68a' : '#bae6fd');
+        const tagBg = currentReportUnitId === 3 ? '#ffedd5' : (currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe');
+        const tagColor = currentReportUnitId === 3 ? '#c2410c' : (currentReportUnitId === 2 ? '#b45309' : '#0284c7');
+        const pageGuide = currentReportUnitId === 3
+            ? '교과서 『실험관찰』 16~25쪽 열과 우리 생활 핵심 탐구 내용을 한눈에 읽어보세요!'
+            : (currentReportUnitId === 2 ? '교과서 『실험관찰』 24~35쪽 날씨 탐구 핵심 내용을 한눈에 읽어보세요!' : '교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!');
 
         container.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
@@ -154,16 +166,29 @@
         const q = data.quizItems[qIdx];
         currentReportQuizIdx = qIdx;
 
-        const themeColor = currentReportUnitId === 2 ? '#d97706' : '#0284c7';
-        const borderColor = currentReportUnitId === 2 ? '#fde68a' : '#bae6fd';
-        const tagBg = currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe';
+        const themeColor = currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
+        const borderColor = currentReportUnitId === 3 ? '#fed7aa' : (currentReportUnitId === 2 ? '#fde68a' : '#bae6fd');
+        const tagBg = currentReportUnitId === 3 ? '#ffedd5' : (currentReportUnitId === 2 ? '#fef3c7' : '#e0f2fe');
 
         let quizBodyHtml = "";
 
         // 1) 빈칸 채우기 (q1)
         if (q.type === 'blank') {
             let questionRenderText = "";
-            if (currentReportUnitId === 2) {
+            if (currentReportUnitId === 3) {
+                questionRenderText = `
+                    고체에서는 열이 물질을 따라 차례대로 이동하는 
+                    <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#ffedd5; color:#c2410c; border-bottom:2px solid #ea580c; border-radius:6px; font-weight:bold; text-align:center;">
+                        ${userBlankAnswers['b1'] || '❓ 선택'}
+                    </span> 현상이 일어나고, 액체나 기체에서는 따뜻해진 물질이 직접 위로 올라가며 순환하는 
+                    <span id="blank_2" style="display:inline-block; min-width:80px; padding:2px 10px; background:#ffedd5; color:#c2410c; border-bottom:2px solid #ea580c; border-radius:6px; font-weight:bold; text-align:center;">
+                        ${userBlankAnswers['b2'] || '❓ 선택'}
+                    </span> 현상이 일어납니다. 보온병은 이러한 열의 이동을 막는 
+                    <span id="blank_3" style="display:inline-block; min-width:80px; padding:2px 10px; background:#ffedd5; color:#c2410c; border-bottom:2px solid #ea580c; border-radius:6px; font-weight:bold; text-align:center;">
+                        ${userBlankAnswers['b3'] || '❓ 선택'}
+                    </span> 원리를 이용한 도구입니다.
+                `;
+            } else if (currentReportUnitId === 2) {
                 questionRenderText = `
                     공기가 건조할수록 습구 온도계의 젖은 헝겊에서 물이 활발하게 
                     <span id="blank_1" style="display:inline-block; min-width:80px; padding:2px 10px; background:#fef3c7; color:#b45309; border-bottom:2px solid #d97706; border-radius:6px; font-weight:bold; text-align:center;">
@@ -320,7 +345,9 @@
         const q = data.quizItems[qIdx];
         
         let isCorrect = false;
-        if (currentReportUnitId === 2) {
+        if (currentReportUnitId === 3) {
+            isCorrect = (userBlankAnswers['b1'] === "전도" && userBlankAnswers['b2'] === "대류" && userBlankAnswers['b3'] === "단열");
+        } else if (currentReportUnitId === 2) {
             isCorrect = (userBlankAnswers['b1'] === "증발" && userBlankAnswers['b2'] === "커집니다" && userBlankAnswers['b3'] === "습도");
         } else {
             isCorrect = (userBlankAnswers['b1'] === "콩과 팥" && userBlankAnswers['b2'] === "조" && userBlankAnswers['b3'] === "알갱이의 크기");
@@ -333,9 +360,11 @@
                 renderLabReportQuiz(container, qIdx + 1);
             });
         } else {
-            const hintMsg = currentReportUnitId === 2
-                ? "앗! 다시 한번 생각해 볼까요? 건조할수록 물이 활발하게 [증발]하여 열을 빼앗기 때문에 온도 차이가 [커집니다]."
-                : "앗! 다시 한번 생각해 볼까요? 체 위에 남는 것은 큰 알갱이, 빠져나가는 것은 작은 알갱이입니다.";
+            const hintMsg = currentReportUnitId === 3
+                ? "앗! 다시 한번 생각해 볼까요? 고체에서 물질을 따라 열이 이동하는 것은 [전도], 액체·기체가 직접 순환하는 것은 [대류], 열의 이동을 막는 것은 [단열]입니다."
+                : (currentReportUnitId === 2
+                    ? "앗! 다시 한번 생각해 볼까요? 건조할수록 물이 활발하게 [증발]하여 열을 빼앗기 때문에 온도 차이가 [커집니다]."
+                    : "앗! 다시 한번 생각해 볼까요? 체 위에 남는 것은 큰 알갱이, 빠져나가는 것은 작은 알갱이입니다.");
             showQuizFeedback(container, false, hintMsg, () => {
                 resetBlankAnswers();
             });
@@ -367,7 +396,7 @@
     // 💡 피드백 콜백 안전 레지스트리 (따옴표 구문 파괴 원천 방지)
     function showQuizFeedback(container, isSuccess, message, nextCallback) {
         pendingFeedbackCallback = nextCallback;
-        const okColor = isSuccess ? '#059669' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7');
+        const okColor = isSuccess ? '#059669' : (currentReportUnitId === 3 ? '#ea580c' : (currentReportUnitId === 2 ? '#d97706' : '#0284c7'));
         container.innerHTML = `
             <div style="text-align: center; padding: 24px; background: white; border-radius: 18px; border: 3px solid ${isSuccess ? '#10b981' : '#f87171'};">
                 <div style="font-size: 3rem; margin-bottom: 8px;">${isSuccess ? '🎉' : '💡'}</div>
@@ -394,17 +423,23 @@
 
     function finishAllReportQuiz() {
         if (typeof grantRewardGem === 'function') {
-            const rewardMsg = currentReportUnitId === 2 
-                ? '2단원 날씨와 우리 생활 실험관찰 탐구 보고서 완벽 마스터' 
-                : '1단원 혼합물의 분리 실험관찰 탐구 보고서 완벽 마스터';
+            const rewardMsg = currentReportUnitId === 3
+                ? '3단원 열과 우리 생활 실험관찰 탐구 보고서 완벽 마스터'
+                : (currentReportUnitId === 2 
+                    ? '2단원 날씨와 우리 생활 실험관찰 탐구 보고서 완벽 마스터' 
+                    : '1단원 혼합물의 분리 실험관찰 탐구 보고서 완벽 마스터');
             grantRewardGem(5, rewardMsg);
         }
         const container = document.getElementById('overlayInnerBody');
-        const unitTitle = currentReportUnitId === 2 ? '2단원 날씨와 우리 생활' : '1단원 혼합물의 분리';
-        const iconStr = currentReportUnitId === 2 ? '🌤️ 📝 💎' : '🌟 📝 💎';
-        const unitDesc = currentReportUnitId === 2 
-            ? '습도계 측정, 이슬과 안개, 구름 발생, 바람, 사계절 기단 탐구 기록을 완벽하게 마스터했습니다! (+5💎)'
-            : '1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)';
+        const unitTitle = currentReportUnitId === 3
+            ? '3단원 열과 우리 생활'
+            : (currentReportUnitId === 2 ? '2단원 날씨와 우리 생활' : '1단원 혼합물의 분리');
+        const iconStr = currentReportUnitId === 3 ? '🔥 📝 💎' : (currentReportUnitId === 2 ? '🌤️ 📝 💎' : '🌟 📝 💎');
+        const unitDesc = currentReportUnitId === 3
+            ? '온도계 사용법, 고체 전도, 액체·기체 대류, 복사열, 보온병 단열 설계까지 3단원 실험관찰 기록을 완벽하게 마스터했습니다! (+5💎)'
+            : (currentReportUnitId === 2 
+                ? '습도계 측정, 이슬과 안개, 구름 발생, 바람, 사계절 기단 탐구 기록을 완벽하게 마스터했습니다! (+5💎)'
+                : '1단원 혼합물의 분리 핵심 개념과 실험관찰 기록을 완벽하게 학습했습니다! (+5💎)');
 
         container.innerHTML = `
             <div style="text-align: center; padding: 30px; font-family: 'Jua';">
@@ -425,6 +460,7 @@
     window.ScienceReport = {
         open: openScienceReport,
         openUnit2: openScienceReport2,
+        openUnit3: openScienceReport3,
         renderUI: renderLabReportUI,
         renderDoc: renderLabReportDoc,
         renderQuiz: renderLabReportQuiz,
@@ -440,6 +476,7 @@
     // 🌐 하위 호환성 전역 브리지
     window.openScienceReport = openScienceReport;
     window.openScienceReport2 = openScienceReport2;
+    window.openScienceReport3 = openScienceReport3;
     window.renderLabReportUI = renderLabReportUI;
     window.renderLabReportDoc = renderLabReportDoc;
     window.renderLabReportQuiz = renderLabReportQuiz;

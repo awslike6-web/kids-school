@@ -48,7 +48,7 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/n3W-5G0_6_c?rel=0&modestbranding=1" 
+                src="https://www.youtube-nocookie.com/embed/I-S_3s_FUKE?rel=0&modestbranding=1" 
                 title="액체에서의 열 이동 실험 영상" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
@@ -57,7 +57,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/n3W-5G0_6_c" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/I-S_3s_FUKE" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -125,17 +125,17 @@
                 <button type="button" class="btn-ctrl" id="btnHeatCenter" onclick="setConvectionMode('center')">🎯 바닥 가운데 가열 (양방향 분수)</button>
             </div>
             <div class="ctrl-group">
-                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnToggleHeat" onclick="toggleConvectionHeating()">🔥 가열 ON / OFF</button>
+                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnToggleHeat" onclick="toggleConvectionHeating()">🔥 가열 중 (ON)</button>
                 <button type="button" class="btn-ctrl" id="btnResetConvection" onclick="resetConvectionSim()">🔄 물 식히기 (초기화)</button>
             </div>
         </div>
 
         <div class="fairy-bubble-card">
             <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
-            <div class="fairy-bubble-text">
+            <div class="fairy-bubble-text" id="fairyConvectionText">
                 🧚 <b>요정 코코의 관찰 돋보기:</b><br>
-                "알갱이(톱밥)의 색깔 변화를 잘 봐! 불꽃 근처에서 <b>빨간색(따뜻함)</b>으로 변해 위로 솟구치고,
-                수면에서 식으면 <b>파란색(시원함)</b>으로 바뀌어 다시 바닥으로 내려오지? 이게 바로 액체의 <b>대류</b>란다!"
+                "알갱이(시온 잉크 입자)의 색깔 변화를 잘 봐! 불꽃 위에서 <b>빨간색(뜨거움)</b>으로 변해 위로 솟구치고,
+                수면을 지나며 <b>주황색 ➔ 파란색(시원함)</b>으로 바뀌어 바닥으로 내려오지? 이게 바로 액체의 <b>대류</b>란다!"
             </div>
         </div>
     </div>
@@ -181,32 +181,28 @@
 <script src="../../js/science_u3_engine.js"></script>
 <script>
     // =========================================================================
-    // 액체 대류 시뮬레이터 물리 엔진
+    // 액체 대류 시뮬레이터 물리 엔진 (타원 와류 스트림라인 기반)
     // =========================================================================
     let convectionMode = 'left'; // 'left' | 'center'
     let isHeating = true;
-    let waterAvgTemp = 18.0; // ℃
+    let waterAvgTemp = 20.0; // ℃
     let convectionLoop = null;
 
-    // 40개의 유체 입자 (톱밥/염료 시각화)
-    const PARTICLE_COUNT = 45;
+    const PARTICLE_COUNT = 44;
     const particles = [];
 
-    function initParticles(width, height) {
+    function initParticles() {
         particles.length = 0;
-        const tankW = width * 0.72;
-        const tankH = height * 0.68;
-        const left = (width - tankW) / 2;
-        const top = (height - tankH) / 2 - 15;
-
         for (let i = 0; i < PARTICLE_COUNT; i++) {
             particles.push({
-                x: left + Math.random() * tankW,
-                y: top + Math.random() * tankH,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                temp: 18 + Math.random() * 5, // ℃
-                size: 3.5 + Math.random() * 2
+                angle: (i / PARTICLE_COUNT) * Math.PI * 2 + (Math.random() - 0.5) * 0.25,
+                radiusRatio: 0.45 + (i % 4) * 0.14 + (Math.random() - 0.5) * 0.06,
+                side: i % 2 === 0 ? -1 : 1, // -1: 좌측 셀, +1: 우측 셀
+                speed: 0.018 + (Math.random() * 0.006),
+                curOmega: 0.018,
+                temp: 20 + Math.random() * 6,
+                size: 4.2 + (i % 3) * 0.8,
+                wobblePhase: Math.random() * Math.PI * 2
             });
         }
     }
@@ -216,10 +212,13 @@
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
-        initParticles(dpi.width, dpi.height);
+        if (particles.length === 0) {
+            initParticles();
+        }
 
+        if (convectionLoop) convectionLoop.stop();
         convectionLoop = ScienceU3Engine.createLoop((timestamp) => {
-            renderConvectionFrame(dpi.ctx, dpi.width, dpi.height);
+            renderConvectionFrame(dpi.ctx, dpi.width, dpi.height, timestamp);
         });
         convectionLoop.start();
     }
@@ -228,6 +227,15 @@
         convectionMode = mode;
         document.getElementById('btnHeatLeft').classList.toggle('active', mode === 'left');
         document.getElementById('btnHeatCenter').classList.toggle('active', mode === 'center');
+
+        const fairyEl = document.getElementById('fairyConvectionText');
+        if (fairyEl) {
+            if (mode === 'left') {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (바닥 왼쪽 가열):</b><br>"왼쪽 바닥에서 데워진 붉은 물이 <b>왼쪽 벽을 타고 위로 솟구친 뒤</b>, 수면을 지나 <b>오른쪽 벽으로 내려오는 큰 시계방향 대류</b>가 일어나고 있어!"';
+            } else {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (바닥 가운데 가열):</b><br>"한가운데에서 데워진 뜨거운 물이 <b>분수처럼 중앙으로 솟구쳐 오른 뒤</b>, 양쪽 벽면으로 갈라져 내려오는 <b>쌍둥이 대류 순환</b>이 만들어졌어!"';
+            }
+        }
         ScienceU3Engine.playClickSound();
     }
 
@@ -245,34 +253,36 @@
     }
 
     function resetConvectionSim() {
-        waterAvgTemp = 18.0;
+        waterAvgTemp = 20.0;
         isHeating = true;
-        const canvas = document.getElementById('convectionCanvas');
-        const rect = canvas.getBoundingClientRect();
-        initParticles(rect.width || 640, rect.height || 400);
-        document.getElementById('btnToggleHeat').textContent = '🔥 가열 중 (ON)';
-        document.getElementById('btnToggleHeat').classList.add('btn-ctrl-primary');
+        initParticles();
+        const btn = document.getElementById('btnToggleHeat');
+        btn.textContent = '🔥 가열 중 (ON)';
+        btn.classList.add('btn-ctrl-primary');
         ScienceU3Engine.playClickSound();
     }
 
-    function renderConvectionFrame(ctx, width, height) {
+    function renderConvectionFrame(ctx, width, height, timestamp) {
         ctx.clearRect(0, 0, width, height);
 
-        const tankW = width * 0.72;
-        const tankH = height * 0.68;
+        const tankW = Math.min(width * 0.74, 430);
+        const tankH = Math.min(height * 0.68, 250);
         const tx = (width - tankW) / 2;
-        const ty = (height - tankH) / 2 - 15;
+        const ty = (height - tankH) / 2 - 14;
 
         // 평균 수온 변화
         if (isHeating) {
-            if (waterAvgTemp < 85) waterAvgTemp += 0.04;
+            if (waterAvgTemp < 78) waterAvgTemp += 0.035;
         } else {
-            if (waterAvgTemp > 20) waterAvgTemp -= 0.06;
+            if (waterAvgTemp > 20) waterAvgTemp -= 0.05;
         }
 
         // 1. 비커 유리 수조 본체
         ctx.save();
-        ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
+        const waterGrad = ctx.createLinearGradient(tx, ty, tx, ty + tankH);
+        waterGrad.addColorStop(0, 'rgba(56, 189, 248, 0.16)');
+        waterGrad.addColorStop(1, isHeating ? 'rgba(249, 115, 22, 0.18)' : 'rgba(14, 165, 233, 0.14)');
+        ctx.fillStyle = waterGrad;
         ctx.fillRect(tx, ty, tankW, tankH);
 
         // 유리 비커 외곽선
@@ -286,22 +296,25 @@
         ctx.stroke();
 
         // 수면 물결선
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.strokeStyle = 'rgba(125, 211, 252, 0.7)';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(tx, ty + 4);
-        ctx.lineTo(tx + tankW, ty + 4);
+        ctx.moveTo(tx + 2, ty + 4);
+        ctx.lineTo(tx + tankW - 2, ty + 4);
         ctx.stroke();
 
         // 눈금선
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        for (let y = ty + 30; y < ty + tankH; y += 35) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        for (let y = ty + 32; y < ty + tankH; y += 36) {
             ctx.fillRect(tx + 4, y, 12, 1.5);
             ctx.fillRect(tx + tankW - 16, y, 12, 1.5);
         }
         ctx.restore();
 
-        // 2. 가열원 위치 결정 및 불꽃 렌더링
+        // 2. 대류 순환 안내 궤도 및 방향 화살표
+        drawConvectionFlowArrows(ctx, tx, ty, tankW, tankH);
+
+        // 3. 가열원 위치 결정 및 불꽃 렌더링
         const heatX = (convectionMode === 'left') ? tx + tankW * 0.25 : tx + tankW * 0.5;
         const heatY = ty + tankH + 10;
 
@@ -309,96 +322,94 @@
             drawLampFlame(ctx, heatX, heatY);
         }
 
-        // 3. 유체 입자 물리 시뮬레이션
-        particles.forEach(p => {
-            // 거리 기반 가열
-            const distToHeat = Math.hypot(p.x - heatX, p.y - (ty + tankH));
-            if (isHeating && distToHeat < tankW * 0.35) {
-                p.temp = Math.min(p.temp + 0.6, 95);
-            } else {
-                // 수면 및 벽면에서 냉각
-                if (p.y < ty + 30 || p.x < tx + 20 || p.x > tx + tankW - 20) {
-                    p.temp = Math.max(p.temp - 0.25, 18);
-                }
-            }
+        // 4. 유체 입자 스트림라인 순환 계산 및 렌더링
+        particles.forEach((p, idx) => {
+            const targetOmega = isHeating ? p.speed : 0.002;
+            p.curOmega += (targetOmega - p.curOmega) * 0.05;
 
-            // 부력에 따른 상하 가속도 (온도가 높으면 상승, 낮으면 하강)
-            const buoyancy = (p.temp - 30) * 0.04;
-            p.vy -= buoyancy * 0.06;
+            let px, py, risingFactor;
+            const wobble = Math.sin((timestamp || 0) * 0.004 + p.wobblePhase) * 3.5;
 
-            // 모드별 순환 가속도 (대류 궤도 유도)
             if (convectionMode === 'left') {
-                // 왼쪽 가열 ➔ 왼쪽 상승, 위쪽 오른쪽 이동, 오른쪽 하강, 바닥 왼쪽 복귀
-                if (p.y < ty + 40) p.vx += 0.06; // 수면에서 우측으로
-                if (p.x > tx + tankW - 35) p.vy += 0.05; // 우측 벽에서 하강
-                if (p.y > ty + tankH - 30) p.vx -= 0.06; // 바닥에서 좌측 가열점으로
-                if (p.x < tx + 35 && p.temp > 40) p.vy -= 0.05; // 좌측에서 상승
+                // 시계방향 단일 루프: angle 증가 시 좌측(π) ➔ 상단(3π/2) ➔ 우측(0) ➔ 하단(π/2)
+                p.angle = (p.angle + p.curOmega) % (Math.PI * 2);
+                const cx = tx + tankW * 0.5;
+                const cy = ty + tankH * 0.52;
+                const rx = tankW * 0.38 * p.radiusRatio;
+                const ry = tankH * 0.38 * p.radiusRatio;
+
+                px = cx + Math.cos(p.angle) * rx + wobble;
+                py = cy + Math.sin(p.angle) * ry;
+                // 좌측(cos < 0)에서 위로 올라갈 때 뜨거움, 우측(cos > 0)에서 내려올 때 차가움
+                risingFactor = -Math.cos(p.angle);
             } else {
-                // 가운데 가열 ➔ 가운데 상승, 양쪽으로 갈라져 하강 (분수형)
-                if (p.y < ty + 40) {
-                    p.vx += (p.x > heatX ? 0.06 : -0.06);
-                }
-                if (p.x < tx + 30 || p.x > tx + tankW - 30) {
-                    p.vy += 0.05; // 양쪽 벽면 하강
-                }
-                if (p.y > ty + tankH - 30) {
-                    p.vx += (p.x < heatX ? 0.05 : -0.05); // 바닥에서 중앙으로
-                }
+                // 가운데 가열 양방향 분수 루프 (좌/우 대칭 셀)
+                // 좌측 셀(side = -1): 반시계 회전 (우측 중앙변에서 상승, 좌측 벽에서 하강)
+                // 우측 셀(side = +1): 시계 회전 (좌측 중앙변에서 상승, 우측 벽에서 하강)
+                p.angle = (p.angle + p.curOmega * p.side + Math.PI * 2) % (Math.PI * 2);
+                const cellCenterX = (p.side === -1) ? (tx + tankW * 0.27) : (tx + tankW * 0.73);
+                const cellCenterY = ty + tankH * 0.52;
+                const rx = tankW * 0.20 * p.radiusRatio;
+                const ry = tankH * 0.38 * p.radiusRatio;
+
+                px = cellCenterX + Math.cos(p.angle) * rx + wobble * 0.7;
+                py = cellCenterY + Math.sin(p.angle) * ry;
+                // 중앙(heatX)에 가까울수록 뜨거운 상승류
+                risingFactor = (p.side === -1) ? Math.cos(p.angle) : -Math.cos(p.angle);
             }
 
-            // 속도 감쇠 (점성 마찰)
-            p.vx *= 0.96;
-            p.vy *= 0.96;
+            // 경계 클램핑
+            px = Math.max(tx + 10, Math.min(tx + tankW - 10, px));
+            py = Math.max(ty + 10, Math.min(ty + tankH - 10, py));
 
-            p.x += p.vx;
-            p.y += p.vy;
+            // 위치 및 가열 여부에 따른 입자 온도 보간
+            const targetTemp = isHeating
+                ? (48 + risingFactor * 34 + (waterAvgTemp - 20) * 0.25)
+                : 22;
+            p.temp += (targetTemp - p.temp) * 0.08;
 
-            // 비커 경계 반사
-            if (p.x < tx + 8) { p.x = tx + 8; p.vx *= -0.5; }
-            if (p.x > tx + tankW - 8) { p.x = tx + tankW - 8; p.vx *= -0.5; }
-            if (p.y < ty + 8) { p.y = ty + 8; p.vy *= -0.5; }
-            if (p.y > ty + tankH - 8) { p.y = ty + tankH - 8; p.vy *= -0.5; }
-
-            // 온도에 따른 입자 색상 (파랑 ➔ 노랑 ➔ 빨강)
-            const heatRatio = Math.min(Math.max((p.temp - 18) / 60, 0), 1);
-            let pColor = '#38bdf8';
-            if (heatRatio > 0.6) {
-                pColor = '#ef4444'; // 매우 뜨거움
-            } else if (heatRatio > 0.3) {
-                pColor = '#f59e0b'; // 따뜻함
+            // 온도에 따른 입자 색상 및 꼬리 효과
+            let pColor = '#38bdf8'; // 차가운 하강류 (파랑)
+            if (p.temp >= 62) {
+                pColor = '#ef4444'; // 뜨거운 상승류 (빨강)
+            } else if (p.temp >= 42) {
+                pColor = '#f59e0b'; // 따뜻한 수평 이동류 (주황/노랑)
             }
 
+            ctx.save();
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.arc(px, py, p.size, 0, Math.PI * 2);
             ctx.fillStyle = pColor;
+            ctx.shadowColor = pColor;
+            ctx.shadowBlur = p.temp >= 62 ? 6 : 0;
             ctx.fill();
+            ctx.restore();
         });
 
-        // 4. 대류 순환 안내 화살표
-        drawConvectionFlowArrows(ctx, tx, ty, tankW, tankH);
-
-        // 5. 온도계 정보창
+        // 5. 온도계 정보창 및 상승/하강 범례
         ctx.save();
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-        ctx.roundRect(tx + 15, ty + 15, 130, 48, 8);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+        ctx.beginPath();
+        ctx.roundRect(tx + 12, ty + 12, 148, 50, 8);
         ctx.fill();
         ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 1.2;
         ctx.stroke();
 
-        ctx.font = 'bold 13px Jua';
+        ctx.font = 'bold 13px Jua, sans-serif';
         ctx.fillStyle = '#f8fafc';
-        ctx.fillText(`🌡️ 평균 수온: ${waterAvgTemp.toFixed(1)}℃`, tx + 25, ty + 36);
+        ctx.textAlign = 'left';
+        ctx.fillText(`🌡️ 평균 수온: ${waterAvgTemp.toFixed(1)}℃`, tx + 22, ty + 32);
         ctx.font = '11px sans-serif';
-        ctx.fillStyle = '#38bdf8';
-        ctx.fillText(isHeating ? '🔥 가열 진행 중' : '❄️ 냉각 중', tx + 25, ty + 53);
+        ctx.fillStyle = isHeating ? '#fbbf24' : '#38bdf8';
+        ctx.fillText(isHeating ? '🔥 대류 순환 활발' : '❄️ 가열 중지 (서서히 정지)', tx + 22, ty + 49);
         ctx.restore();
     }
 
     function drawLampFlame(ctx, x, y) {
         const flicker = (Math.random() - 0.5) * 5;
         ctx.save();
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.88)';
         ctx.beginPath();
         ctx.moveTo(x - 12, y);
         ctx.quadraticCurveTo(x - 14, y - 28, x + flicker, y - 40);
@@ -421,23 +432,38 @@
 
     function drawConvectionFlowArrows(ctx, tx, ty, tw, th) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+        ctx.lineWidth = 2;
         ctx.setLineDash([6, 6]);
 
         if (convectionMode === 'left') {
-            // 시계 방향 타원 궤도 가이드
             ctx.beginPath();
-            ctx.ellipse(tx + tw * 0.5, ty + th * 0.5, tw * 0.35, th * 0.35, 0, 0, Math.PI * 2);
+            ctx.ellipse(tx + tw * 0.5, ty + th * 0.52, tw * 0.34, th * 0.34, 0, 0, Math.PI * 2);
             ctx.stroke();
+
+            ctx.setLineDash([]);
+            ctx.font = 'bold 12px Jua, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#fca5a5';
+            ctx.fillText('⬆️ 따뜻한 물 상승', tx + tw * 0.23, ty + th * 0.88);
+            ctx.fillStyle = '#93c5fd';
+            ctx.fillText('⬇️ 차가운 물 하강', tx + tw * 0.77, ty + th * 0.88);
         } else {
-            // 좌우 대칭 2개 타원 궤도 가이드
             ctx.beginPath();
-            ctx.ellipse(tx + tw * 0.28, ty + th * 0.5, tw * 0.18, th * 0.35, 0, 0, Math.PI * 2);
+            ctx.ellipse(tx + tw * 0.27, ty + th * 0.52, tw * 0.17, th * 0.34, 0, 0, Math.PI * 2);
             ctx.stroke();
             ctx.beginPath();
-            ctx.ellipse(tx + tw * 0.72, ty + th * 0.5, tw * 0.18, th * 0.35, 0, 0, Math.PI * 2);
+            ctx.ellipse(tx + tw * 0.73, ty + th * 0.52, tw * 0.17, th * 0.34, 0, 0, Math.PI * 2);
             ctx.stroke();
+
+            ctx.setLineDash([]);
+            ctx.font = 'bold 12px Jua, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#fca5a5';
+            ctx.fillText('⬆️ 중앙 상승', tx + tw * 0.5, ty + th * 0.88);
+            ctx.fillStyle = '#93c5fd';
+            ctx.fillText('⬇️ 좌측 하강', tx + tw * 0.16, ty + th * 0.88);
+            ctx.fillText('⬇️ 우측 하강', tx + tw * 0.84, ty + th * 0.88);
         }
         ctx.restore();
     }
@@ -448,6 +474,14 @@
     document.addEventListener('DOMContentLoaded', () => {
         ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
         initConvectionCanvas();
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                initConvectionCanvas();
+            }, 200);
+        });
 
         ScienceU3Engine.setupQuiz({
             labId: 'convection',

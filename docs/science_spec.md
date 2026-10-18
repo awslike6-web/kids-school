@@ -60,19 +60,20 @@ graph TD
     
     Facade --> S0["🥽 science_safety.js (176줄)<br>window.ScienceSafety"]
     Facade --> S1["📚 science_storybook.js (182줄)<br>window.ScienceStorybook"]
-    Facade --> S2["💡 science_voca.js (334줄)<br>window.ScienceVoca"]
-    Facade --> S3["🧪 science_lab.js (293줄)<br>window.ScienceLab"]
-    Facade --> S4["📝 science_report.js (450줄)<br>window.ScienceReport"]
+    Facade --> S2["💡 science_voca.js (352줄)<br>window.ScienceVoca"]
+    Facade --> S3["🧪 science_lab.js (315줄)<br>window.ScienceLab"]
+    Facade --> S4["📝 science_report.js (490줄)<br>window.ScienceReport"]
 ```
 
 | 모듈명 | 파일 경로 | 줄 수 | 네임스페이스 | 전담 영역 |
 | :--- | :--- | :---: | :--- | :--- |
-| **대문 파사드** | `kids/js/science_common.js` | 454줄 | `window.ScienceCommon` | 단원 탭, 미션 오버레이 라우팅, 퀴즈 루프, 세션 가드 |
+| **대문 파사드** | `kids/js/science_common.js` | 461줄 | `window.ScienceCommon` | 단원 탭, 미션 오버레이 라우팅, 퀴즈 루프, 세션 가드 |
 | **안전 라이선스** | `kids/js/science_safety.js` | 176줄 | `window.ScienceSafety` | 5문항 안전 시험, 골드 연구원증 발급 (+10💎) |
 | **동화 도서관** | `kids/js/science_storybook.js` | 182줄 | `window.ScienceStorybook` | 과학 단원 동화 1~5권 서가 모달 렌더러 |
-| **핵심 용어방** | `kids/js/science_voca.js` | 334줄 | `window.ScienceVoca` | 2단계 학년/단원 선택, 단원 직결 오픈, 초성 퀴즈 검증 |
-| **가상 실험실** | `kids/js/science_lab.js` | 293줄 | `window.ScienceLab` | 노션 교재 DB 실시간 쿼리/캐싱, 실험 퀴즈 UI 및 채점 |
-| **탐구 보고서** | `kids/js/science_report.js` | 450줄 | `window.ScienceReport` | 1·2단원 실험관찰 요약 노트 및 5종 실전 퀴즈 (+5💎) |
+| **핵심 용어방** | `kids/js/science_voca.js` | 352줄 | `window.ScienceVoca` | 2단계 학년/단원 선택, 단원 직결 오픈, 초성 퀴즈 검증 |
+| **가상 실험실** | `kids/js/science_lab.js` | 315줄 | `window.ScienceLab` | 노션 교재 DB 실시간 쿼리/캐싱, 실험 퀴즈 UI 및 채점 |
+| **탐구 보고서** | `kids/js/science_report.js` | 490줄 | `window.ScienceReport` | 1·2·3단원 실험관찰 요약 노트 및 5종 실전 퀴즈 (+5💎) |
+| **3단원 공통엔진** | `kids/js/science_u3_engine.js` | 342줄 | `window.ScienceU3Engine` | Retina DPI(숨김 탭 폴백), rAF 절전 루프, 보석 1회성 잠금 |
 
 ---
 
@@ -94,20 +95,22 @@ graph TD
   - **4차시: 💨 바람이 부는 까닭 (`science_wind_lab.html`)**: 모래와 물의 가열/냉각 속도 차이로 생기는 고기압·저기압 및 대류 향연기 이동(해풍/육풍).
   - **5차시: 🌏 계절별 날씨와 공기 덩어리 (`science_season_airmass_lab.html`)**: 우리나라 사계절을 지배하는 4대 기단(시베리아, 북태평양, 오호츠크해, 양쯔강) 입체 지도, 사계절 체감 및 초여름 장마전선 충돌 시뮬레이터.
 - **3단원: 열과 우리 생활 (5대 핵심 가상 실험실 100% 완비)**:
-  - **1차시: 🌡️ 온도와 온도계 (`science_thermometer_lab.html`)**: 3초 양손(차가운 물/따뜻한 물) 감각 착각 타이머 및 액체 기둥 끝 눈높이 수평 판독기.
-  - **2차시: 🍳 고체에서의 열 이동 (`science_conduction_lab.html`)**: 스팟 셀렉터(모서리/중앙/막대) 열변색 동심원 퍼짐 및 4종 금속(구리·알루미늄·철·유리) 버터 레이스.
-  - **3차시: 💧 액체에서의 열 이동 (`science_liquid_convection_lab.html`)**: 40개 유체 입자의 밀도/온도 연동(빨강 상승, 파랑 하강) 타원 궤도 대류 순환기.
-  - **4차시: 💨 기체 대류와 복사열 (`science_gas_convection_lab.html`)**: 방 단면도 에어컨(천장/바닥) 및 난방기(천장/바닥) 배치 히트맵과 난로 적외선 복사열 차광판 차단기.
-  - **5차시: 🧊 단열과 보온병 (`science_insulation_lab.html`)**: 4대 단열 부품(진공, 은도금, 마개, 폼) 조립기 및 종이컵 대비 60분 초고속 냉각 곡선 꺾은선 그래프.
+  - **1차시: 🌡️ 온도와 온도계 (`science_thermometer_lab.html`, 713줄)**: 3초 양손(차가운 물 10℃ / 따뜻한 물 40℃ ➔ 미지근한 물 25℃) Lerp 이동 감각 착각 타이머 및 액체 기둥 끝 눈높이 레이저 수평 판독기(수온 3종 스위치).
+  - **2차시: 🍳 고체에서의 열 이동 (`science_conduction_lab.html`, 710줄)**: 스팟 셀렉터(모서리/중앙/막대) 열변색 동심원 퍼짐(①~④ 센서 배지) 및 4종 물질(구리·알루미늄·철·유리) 열전도율 비례 버터 멜팅 레이스.
+  - **3차시: 💧 액체에서의 열 이동 (`science_liquid_convection_lab.html`, 498줄)**: 40개 유체 입자의 타원 와류 스트림라인(왼쪽 가열 단일 시계방향 루프 / 중앙 가열 양방향 분수 루프) 및 온도-색상 보간 대류 순환기.
+  - **4차시: 💨 기체 대류와 복사열 (`science_gas_convection_lab.html`, 646줄)**: 방 단면도 에어컨(천장/바닥) 및 난방기(천장/바닥) 4대 조합 히트맵·상하층 온도계와 전열기 적외선 복사열 차광판 차단기.
+  - **5차시: 🧊 단열과 보온병 (`science_insulation_lab.html`, 650줄)**: 4대 단열 부품(마개·이중진공벽·은도금·바깥폼) 조립기(전도·대류·복사 차단 콜아웃) 및 단열 점수 실시간 연동 60분 초고속 냉각 곡선 꺾은선 그래프.
 
 ### 3) 📝 『실험관찰』 디지털 탐구 보고서 (`renderLabReportUI`)
 - **단원별 완벽 분리 지원**:
   - `openScienceReport(1)` ➔ 1단원 혼합물의 분리 (교과서 『실험관찰』 12~19쪽 요약 및 퀴즈 5종)
   - `openScienceReport(2)` ➔ 2단원 날씨와 우리 생활 (교과서 『실험관찰』 24~35쪽 요약 및 퀴즈 5종)
+  - `openScienceReport(3)` ➔ 3단원 열과 우리 생활 (교과서 『실험관찰』 16~25쪽 요약 및 퀴즈 5종)
 - **2단계 탭 전환 구조**:
-  - 📑 **[탭 1] 『실험관찰』 완벽 요약 노트**: 탐구 과정, 관찰 결과, 결론, '생각해 볼까요?'를 체계적으로 정리한 복습 문서.
+  - 📑 **[탭 1] 『실험관찰』 완벽 요약 노트**: 탐구 과정, 관찰 결과, 결론, '생각해 볼까요?'를 체계적으로 정리한 복습 문서 (노션 `CURRICULUM_DB` `탐구보고서` 레코드 실시간 연동).
     - 1단원: 체 분리(12쪽), 물·식용유(14쪽), 소금·모래 거름·증발(16~17쪽), 생활 속 분리·새활용(18~19쪽).
     - 2단원: 건습구 습도계(24~25쪽), 이슬·안개(26~27쪽), 구름 발생(28~29쪽), 해풍·육풍(30~31쪽), 계절별 기단(32~33쪽), 단원 정리 및 우리 생활(34~35쪽).
+    - 3단원: 온도와 알코올 온도계(16~17쪽), 고체에서의 열의 전도(18~19쪽), 액체에서의 열의 대류(20~21쪽), 기체 대류와 태양 복사(22~23쪽), 단열과 보온병 설계(24~25쪽).
   - ✍️ **[탭 2] 인터랙티브 참여형 실전 퀴즈 (5종)**:
     - ① 빈칸 채우기 (단어 칩 터치 조립)
     - ② 객관식 4지선다 (원리 파악)

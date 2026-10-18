@@ -48,7 +48,7 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/4yZJvQO0eK4?rel=0&modestbranding=1" 
+                src="https://www.youtube-nocookie.com/embed/_fRlOk-jNCE?rel=0&modestbranding=1" 
                 title="단열과 보온병 실험 영상" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
@@ -57,7 +57,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/4yZJvQO0eK4" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/_fRlOk-jNCE" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -136,6 +136,7 @@
                 <button type="button" class="btn-ctrl" id="btnPartVacuum" onclick="togglePart('vacuum')">2. 이중벽 진공 공간</button>
                 <button type="button" class="btn-ctrl" id="btnPartSilver" onclick="togglePart('silver')">3. 은도금 반사 내벽</button>
                 <button type="button" class="btn-ctrl" id="btnPartFoam" onclick="togglePart('foam')">4. 외벽 단열재(스티로폼)</button>
+                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnAllParts" onclick="equipAllParts()">✨ 4대 부품 전체 장착</button>
             </div>
 
             <div class="fairy-bubble-card">
@@ -168,8 +169,8 @@
                 <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
                 <div class="fairy-bubble-text" id="fairyChartText">
                     🧚 <b>요정 코코의 관찰 돋보기:</b><br>
-                    "일반 종이컵(주황 점선)은 20분 만에 뚝 떨어져 식어버리지만,
-                    우리가 조립한 보온병(초록 실선)은 <b>60분이 지나도 80℃ 가까이 유지</b>되는 걸 그래프로 비교해 봐!"
+                    "일반 종이컵(주황 점선)은 20분 만에 식어버리지만,
+                    단열이 완벽한 보온병(초록 실선)은 <b>60분이 지나도 78℃ 가까이 유지</b>되는 걸 그래프로 비교해 봐!"
                 </div>
             </div>
         </div>
@@ -227,51 +228,102 @@
     };
     let thermosLoop = null;
 
+    function getInsulationScore() {
+        let s = 0;
+        if (parts.cap) s += 25;
+        if (parts.vacuum) s += 25;
+        if (parts.silver) s += 25;
+        if (parts.foam) s += 25;
+        return s;
+    }
+
     function initThermosCanvas() {
         const canvas = document.getElementById('thermosCanvas');
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
+        if (thermosLoop) thermosLoop.stop();
         thermosLoop = ScienceU3Engine.createLoop((timestamp) => {
             renderThermosFrame(dpi.ctx, dpi.width, dpi.height, timestamp);
         });
         thermosLoop.start();
     }
 
+    function syncPartButtons(lastChanged) {
+        const meta = {
+            cap: { id: 'btnPartCap', label: '1. 플라스틱 마개 뚜껑', desc: '<b>플라스틱 마개 뚜껑</b>을 닫아서 위쪽으로 빠져나가는 <b>공기의 대류와 전도</b>를 차단했어!' },
+            vacuum: { id: 'btnPartVacuum', label: '2. 이중벽 진공 공간', desc: '<b>이중벽 진공 공간</b>을 만들어서 열을 전달할 물질(공기)을 없애고 <b>전도와 대류</b>를 동시에 막았어!' },
+            silver: { id: 'btnPartSilver', label: '3. 은도금 반사 내벽', desc: '<b>은도금 반사 내벽</b>이 거울처럼 빛(적외선)을 안쪽으로 튕겨내어 <b>복사열 유출</b>을 차단했어!' },
+            foam: { id: 'btnPartFoam', label: '4. 외벽 단열재(스티로폼)', desc: '<b>외벽 스티로폼 단열재</b>의 촘촘한 공기 구멍이 바깥으로 빠져나가는 <b>고체 전도열</b>을 한 번 더 막아줘!' }
+        };
+
+        Object.keys(meta).forEach(k => {
+            const btn = document.getElementById(meta[k].id);
+            if (btn) {
+                btn.classList.toggle('active', parts[k]);
+                btn.textContent = parts[k] ? `${meta[k].label} ✅` : meta[k].label;
+            }
+        });
+
+        const score = getInsulationScore();
+        const fairyEl = document.getElementById('fairyThermosText');
+        if (fairyEl) {
+            if (score === 100) {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (100% 특급 단열 완성 🎉):</b><br>"와아! 4대 단열 부품을 모두 조립해서 <b>전도·대류·복사 3대 열 이동을 100% 완벽 차단</b>했어! 이제 [모드 B]에서 60분 냉각 그래프를 확인해 봐!"';
+            } else if (lastChanged && parts[lastChanged]) {
+                fairyEl.innerHTML = `🧚 <b>요정 코코의 부품 분석 (단열도 ${score}%):</b><br>"${meta[lastChanged].desc}"`;
+            } else if (score === 0) {
+                fairyEl.innerHTML = '🧚 <b>요정 코코의 관찰 돋보기 (단열도 0%):</b><br>"단열 부품이 하나도 없어서 전도·대류·복사로 열이 사방으로 빠져나가고 있어! 아래 부품 버튼을 눌러 보온병을 조립해 봐!"';
+            }
+        }
+    }
+
     function togglePart(partName) {
         parts[partName] = !parts[partName];
-        const btnMap = {
-            cap: 'btnPartCap',
-            vacuum: 'btnPartVacuum',
-            silver: 'btnPartSilver',
-            foam: 'btnPartFoam'
-        };
-        const btn = document.getElementById(btnMap[partName]);
-        if (btn) btn.classList.toggle('active', parts[partName]);
-        ScienceU3Engine.playClickSound();
+        syncPartButtons(partName);
+        if (getInsulationScore() === 100) {
+            ScienceU3Engine.playCorrectFanfare();
+        } else {
+            ScienceU3Engine.playClickSound();
+        }
+    }
+
+    function equipAllParts() {
+        const allOn = getInsulationScore() === 100;
+        parts.cap = !allOn;
+        parts.vacuum = !allOn;
+        parts.silver = !allOn;
+        parts.foam = !allOn;
+        syncPartButtons(null);
+        const btnAll = document.getElementById('btnAllParts');
+        if (btnAll) {
+            btnAll.textContent = !allOn ? '🔄 전체 부품 해제' : '✨ 4대 부품 전체 장착';
+        }
+        if (!allOn) {
+            ScienceU3Engine.playCorrectFanfare();
+        } else {
+            ScienceU3Engine.playClickSound();
+        }
     }
 
     function renderThermosFrame(ctx, width, height, timestamp) {
         ctx.clearRect(0, 0, width, height);
 
         const cx = width / 2;
-        const cy = height / 2 + 10;
-        const bodyW = 120;
-        const bodyH = 200;
-
-        // 단열율 계산
-        let score = 0;
-        if (parts.cap) score += 25;
-        if (parts.vacuum) score += 25;
-        if (parts.silver) score += 25;
-        if (parts.foam) score += 25;
+        const cy = height / 2 + 12;
+        const bodyW = 124;
+        const bodyH = 196;
+        const score = getInsulationScore();
 
         // 1. 외벽 단열재 (스티로폼 층)
         if (parts.foam) {
-            ctx.fillStyle = '#f1f5f9';
+            ctx.fillStyle = '#e2e8f0';
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.roundRect(cx - bodyW / 2 - 20, cy - bodyH / 2, bodyW + 40, bodyH + 15, 16);
+            ctx.roundRect(cx - bodyW / 2 - 20, cy - bodyH / 2, bodyW + 40, bodyH + 16, 16);
             ctx.fill();
+            ctx.stroke();
         }
 
         // 2. 외부 본체 금속 케이스
@@ -281,101 +333,108 @@
         ctx.fill();
 
         // 3. 이중벽 공간 (진공 층)
-        if (parts.vacuum) {
-            ctx.fillStyle = '#0f172a'; // 진공 (물질 없음)
-        } else {
-            ctx.fillStyle = '#60a5fa'; // 일반 공기층 (전도 일어남)
-        }
+        ctx.fillStyle = parts.vacuum ? '#090d16' : '#60a5fa';
         ctx.beginPath();
         ctx.roundRect(cx - bodyW / 2, cy - bodyH / 2 + 5, bodyW, bodyH - 5, 10);
         ctx.fill();
 
         // 4. 은도금 반사 내벽
-        if (parts.silver) {
-            ctx.fillStyle = '#e2e8f0'; // 반짝이는 은빛
-            ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 2;
-        } else {
-            ctx.fillStyle = '#94a3b8'; // 일반 유리
-            ctx.strokeStyle = 'transparent';
-        }
+        ctx.fillStyle = parts.silver ? '#f8fafc' : '#94a3b8';
         ctx.beginPath();
         ctx.roundRect(cx - bodyW / 2 + 10, cy - bodyH / 2 + 15, bodyW - 20, bodyH - 25, 8);
         ctx.fill();
-        if (parts.silver) ctx.stroke();
+        if (parts.silver) {
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
 
         // 5. 따뜻한 차 / 물 (내부 액체 85℃)
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.75)';
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.82)';
         ctx.beginPath();
         ctx.roundRect(cx - bodyW / 2 + 15, cy - bodyH / 2 + 25, bodyW - 30, bodyH - 40, 6);
         ctx.fill();
 
         // 물 표면 라벨
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 12px Jua';
+        ctx.font = 'bold 12px Jua, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('♨️ 뜨거운 물 (85℃)', cx, cy);
+        ctx.fillText('♨️ 뜨거운 물', cx, cy - 6);
+        ctx.fillStyle = '#fef08a';
+        ctx.fillText('(85℃ 보온 중)', cx, cy + 12);
 
         // 6. 플라스틱 마개 뚜껑
         if (parts.cap) {
             ctx.fillStyle = '#0284c7';
             ctx.beginPath();
-            ctx.roundRect(cx - 30, cy - bodyH / 2 - 25, 60, 30, 8);
+            ctx.roundRect(cx - 34, cy - bodyH / 2 - 26, 68, 30, 8);
             ctx.fill();
             ctx.fillStyle = '#ffffff';
-            ctx.font = '11px Jua';
-            ctx.fillText('마개 닫힘 ✅', cx, cy - bodyH / 2 - 8);
+            ctx.font = 'bold 11px Jua, sans-serif';
+            ctx.fillText('마개 밀폐 ✅', cx, cy - bodyH / 2 - 8);
         } else {
-            ctx.fillStyle = '#ef4444';
-            ctx.font = '12px Jua';
-            ctx.fillText('뚜껑 열림! (대류 유출) 💨', cx, cy - bodyH / 2 - 15);
+            ctx.fillStyle = '#fca5a5';
+            ctx.font = 'bold 12px Jua, sans-serif';
+            ctx.fillText('⚠️ 뚜껑 열림 (대류 유출) 💨', cx, cy - bodyH / 2 - 14);
         }
 
-        // 7. 열 탈출 화살표 시뮬레이션
+        // 7. 좌우 부품 상태 안내 콜아웃
+        ctx.save();
+        ctx.font = 'bold 11px Jua, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = parts.vacuum ? '#34d399' : '#94a3b8';
+        ctx.fillText(parts.vacuum ? '✅ 진공층 (전도·대류 차단)' : '❌ 일반 공기층 (전도 손실)', cx - bodyW / 2 - 28, cy - 28);
+        ctx.fillStyle = parts.silver ? '#38bdf8' : '#94a3b8';
+        ctx.fillText(parts.silver ? '✅ 은도금 (복사열 거울 반사)' : '❌ 은도금 없음 (복사 손실)', cx - bodyW / 2 - 28, cy + 28);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = parts.foam ? '#fbbf24' : '#94a3b8';
+        ctx.fillText(parts.foam ? '✅ 단열재 (외벽 전도 차단)' : '❌ 외벽 단열재 미장착', cx + bodyW / 2 + 28, cy);
+        ctx.restore();
+
+        // 8. 열 탈출 화살표 시뮬레이션
         if (score < 100) {
             ctx.save();
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.78)';
+            ctx.lineWidth = 2.5;
             ctx.setLineDash([4, 4]);
+            const wave = Math.sin((timestamp || 0) * 0.006) * 7;
 
-            // 마개가 없으면 위로 유출
             if (!parts.cap) {
                 ctx.beginPath();
-                ctx.moveTo(cx, cy - bodyH / 2 + 20);
-                ctx.lineTo(cx, cy - bodyH / 2 - 35);
+                ctx.moveTo(cx, cy - bodyH / 2 + 18);
+                ctx.lineTo(cx, cy - bodyH / 2 - 36 - Math.abs(wave));
                 ctx.stroke();
             }
-
-            // 진공/은벽/폼이 없으면 옆으로 유출
             if (!parts.vacuum || !parts.silver || !parts.foam) {
-                const wave = Math.sin(timestamp * 0.005) * 8;
                 ctx.beginPath();
-                ctx.moveTo(cx + bodyW / 2 - 20, cy);
-                ctx.lineTo(cx + bodyW / 2 + 35 + wave, cy);
-                ctx.moveTo(cx - bodyW / 2 + 20, cy);
-                ctx.lineTo(cx - bodyW / 2 - 35 - wave, cy);
+                ctx.moveTo(cx + bodyW / 2 - 15, cy - 15);
+                ctx.lineTo(cx + bodyW / 2 + 30 + wave, cy - 15);
+                ctx.moveTo(cx - bodyW / 2 + 15, cy - 15);
+                ctx.lineTo(cx - bodyW / 2 - 30 - wave, cy - 15);
                 ctx.stroke();
             }
             ctx.restore();
         }
 
-        // 8. 단열 점수 배지
+        // 9. 단열 점수 배지
         ctx.save();
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-        ctx.roundRect(width - 150, 15, 135, 60, 10);
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.beginPath();
+        ctx.roundRect(width - 148, 12, 134, 58, 10);
         ctx.fill();
         ctx.strokeStyle = score === 100 ? '#10b981' : '#f59e0b';
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        ctx.font = '12px Jua';
+        ctx.font = '12px Jua, sans-serif';
         ctx.fillStyle = '#94a3b8';
         ctx.textAlign = 'center';
-        ctx.fillText('🛡️ 단열 완성도', width - 82, 35);
+        ctx.fillText('🛡️ 단열 완성도', width - 81, 31);
 
-        ctx.font = 'bold 20px Jua';
+        ctx.font = 'bold 20px Jua, sans-serif';
         ctx.fillStyle = score === 100 ? '#34d399' : '#fbbf24';
-        ctx.fillText(`${score}%`, width - 82, 60);
+        ctx.fillText(`${score}%`, width - 81, 56);
         ctx.restore();
     }
 
@@ -384,13 +443,14 @@
     // =========================================================================
     let chartLoop = null;
     let isChartRunning = false;
-    let chartMinute = 0; // 0 ~ 60
+    let chartMinute = 60; // 초기 진입 시 60분 비교 그래프를 바로 보여주고 버튼 클릭 시 0➔60분 애니메이션 재생
 
     function initChartCanvas() {
         const canvas = document.getElementById('chartCanvas');
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
+        if (chartLoop) chartLoop.stop();
         chartLoop = ScienceU3Engine.createLoop((timestamp) => {
             renderChartFrame(dpi.ctx, dpi.width, dpi.height);
         });
@@ -398,33 +458,47 @@
     }
 
     function startCoolingChart() {
-        if (isChartRunning) return;
         isChartRunning = true;
         chartMinute = 0;
-        document.getElementById('btnStartChart').disabled = true;
+        const btn = document.getElementById('btnStartChart');
+        btn.disabled = true;
+        btn.textContent = '⏱️ 60분 냉각 측정 중...';
         ScienceU3Engine.playClickSound();
     }
 
     function resetCoolingChart() {
         isChartRunning = false;
         chartMinute = 0;
-        document.getElementById('btnStartChart').disabled = false;
+        const btn = document.getElementById('btnStartChart');
+        btn.disabled = false;
+        btn.textContent = '🚀 60분 초고속 냉각 테스트 시작!';
         ScienceU3Engine.playClickSound();
     }
 
     function renderChartFrame(ctx, width, height) {
         ctx.clearRect(0, 0, width, height);
 
-        if (isChartRunning && chartMinute < 60) {
-            chartMinute += 0.35;
+        if (isChartRunning) {
+            if (chartMinute < 60) {
+                chartMinute = Math.min(60, chartMinute + 0.45);
+            } else {
+                isChartRunning = false;
+                const btn = document.getElementById('btnStartChart');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = '🚀 다시 60분 테스트 시작!';
+                }
+                ScienceU3Engine.playTone(784, 'sine', 0.12);
+            }
         }
 
-        const leftPad = 60;
-        const rightPad = 40;
-        const topPad = 30;
-        const btmPad = 50;
-        const plotW = width - leftPad - rightPad;
-        const plotH = height - topPad - btmPad;
+        const leftPad = 58;
+        const rightPad = 36;
+        const topPad = 32;
+        const btmPad = 46;
+        const plotW = Math.max(160, width - leftPad - rightPad);
+        const plotH = Math.max(120, height - topPad - btmPad);
+        const score = getInsulationScore();
 
         // 축 그리기
         ctx.strokeStyle = '#475569';
@@ -456,14 +530,14 @@
             ctx.fillText(`${m}분`, x, topPad + plotH + 20);
         }
 
-        // 1. 일반 종이컵 곡선 (주황 점선)
+        // 1. 일반 종이컵 곡선 (주황 점선: 급격한 냉각)
         ctx.save();
         ctx.strokeStyle = '#f97316';
         ctx.lineWidth = 2.5;
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
         for (let m = 0; m <= chartMinute; m += 1) {
-            const temp = 20 + 65 * Math.exp(-m * 0.07); // 급격한 냉각
+            const temp = 20 + 65 * Math.exp(-m * 0.07);
             const x = leftPad + (m / 60) * plotW;
             const y = topPad + plotH - ((temp - 20) / 70) * plotH;
             if (m === 0) ctx.moveTo(x, y);
@@ -472,13 +546,31 @@
         ctx.stroke();
         ctx.restore();
 
-        // 2. 조립한 보온병 곡선 (초록 실선)
+        // 2. 조립 점수가 100% 미만일 때: 내가 조립한 보온병 곡선 (하늘색 실선)
+        const customDecay = 0.002 + ((100 - score) / 100) * 0.038;
+        if (score < 100) {
+            ctx.save();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let m = 0; m <= chartMinute; m += 1) {
+                const temp = 20 + 65 * Math.exp(-m * customDecay);
+                const x = leftPad + (m / 60) * plotW;
+                const y = topPad + plotH - ((temp - 20) / 70) * plotH;
+                if (m === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 3. 100% 완성형 특급 보온병 곡선 (초록 실선)
         ctx.save();
         ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 3;
         ctx.beginPath();
         for (let m = 0; m <= chartMinute; m += 1) {
-            const temp = 20 + 65 * Math.exp(-m * 0.002); // 완만한 보온
+            const temp = 20 + 65 * Math.exp(-m * 0.002);
             const x = leftPad + (m / 60) * plotW;
             const y = topPad + plotH - ((temp - 20) / 70) * plotH;
             if (m === 0) ctx.moveTo(x, y);
@@ -487,14 +579,27 @@
         ctx.stroke();
         ctx.restore();
 
-        // 범례 표시
+        // 현재 분(chartMinute) 기준 온도 계산 및 범례 표시
+        const cupTempNow = (20 + 65 * Math.exp(-chartMinute * 0.07)).toFixed(1);
+        const bestTempNow = (20 + 65 * Math.exp(-chartMinute * 0.002)).toFixed(1);
+        const myTempNow = (20 + 65 * Math.exp(-chartMinute * customDecay)).toFixed(1);
+
         ctx.save();
-        ctx.font = 'bold 12px Jua';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.86)';
+        ctx.beginPath();
+        ctx.roundRect(leftPad + 14, topPad + 6, Math.min(290, plotW - 20), score < 100 ? 66 : 48, 8);
+        ctx.fill();
+
+        ctx.font = 'bold 12px Jua, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillStyle = '#f97316';
-        ctx.fillText('ㅡ ㅡ 일반 종이컵 (20분 만에 식음)', leftPad + 20, topPad + 20);
         ctx.fillStyle = '#10b981';
-        ctx.fillText('━━━ 우리가 조립한 보온병 (60분 후 78℃ 유지)', leftPad + 20, topPad + 40);
+        ctx.fillText(`━━ 특급 보온병 (100% 단열): ${bestTempNow}℃ 유지`, leftPad + 24, topPad + 24);
+        ctx.fillStyle = '#f97316';
+        ctx.fillText(`ㅡ ㅡ 일반 종이컵 (0% 단열): ${cupTempNow}℃로 냉각`, leftPad + 24, topPad + 44);
+        if (score < 100) {
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText(`━━ 내 조립 보온병 (${score}% 단열): ${myTempNow}℃`, leftPad + 24, topPad + 64);
+        }
         ctx.restore();
     }
 
@@ -504,18 +609,31 @@
     document.addEventListener('DOMContentLoaded', () => {
         ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
 
+        let currentTab = 'paneInsulationA';
         ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
+            currentTab = targetTab;
             if (targetTab === 'paneInsulationA') {
                 if (chartLoop) chartLoop.stop();
-                if (thermosLoop) thermosLoop.start();
+                initThermosCanvas();
             } else {
                 if (thermosLoop) thermosLoop.stop();
-                if (chartLoop) chartLoop.start();
+                initChartCanvas();
             }
         });
 
         initThermosCanvas();
-        initChartCanvas();
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (currentTab === 'paneInsulationA') {
+                    initThermosCanvas();
+                } else {
+                    initChartCanvas();
+                }
+            }, 200);
+        });
 
         ScienceU3Engine.setupQuiz({
             labId: 'insulation',

@@ -370,7 +370,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🌟 `science_common.js` (과학 탐구방 대문 파사드)
 오버레이 팝업 라우팅, 단원 탭 필터링, 프로필 초기화, 미션 오버레이 라우팅, 퀴즈 공통 진행 브리지, 보상 디스패처를 총괄하는 초경량 라우팅 파사드입니다.
-- **파일 위치**: `kids/js/science_common.js` (454줄)
+- **파일 위치**: `kids/js/science_common.js` (461줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -401,8 +401,8 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceStorybook.renderLibrary(container)` | 과학 단원 동화 1~5권 서가 모달 UI 렌더링 |
 
 ### 🌟 `science_voca.js` ([2단계] 과학 핵심 용어방 전담 엔진)
-2단계(학년/학기 ➔ 단원) 동적 선택 UI, 단원 직결 오픈(`openScienceVocaDirect`), 초성 힌트 퀴즈 렌더러 및 정답 판정을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_voca.js` (334줄)
+2단계(학년/학기 ➔ 단원) 동적 선택 UI, 단원 직결 오픈(`openScienceVocaDirect`), 초성 힌트 퀴즈 렌더러(`img` / `imageUrl` 이중 호환) 및 정답 판정을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_voca.js` (352줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -413,44 +413,44 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceVoca.verifyAnswer()` | 입력된 용어 정답 판정 및 자동 진행 트리거 |
 
 ### 🌟 `science_lab.js` ([3단계] 가상 실험실 & 교재 DB 실시간 연동 엔진)
-노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_lab.js` (293줄)
+노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 1·2·3단원 탐구보고서 요약문 동적 주입(`rep1Docs`, `rep2Docs`, `rep3Docs`), 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_lab.js` (315줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
   | `ScienceLab.fetchCurriculum()` | 노션 교재 DB에서 과학 실험실/탐구보고서 데이터 실시간 쿼리 및 캐싱 |
-  | `ScienceLab.applyNotionData(items)` | 노션 데이터를 안전 라이선스 및 보고서 전역 데이터셋에 주입 |
+  | `ScienceLab.applyNotionData(items)` | 노션 데이터를 안전 라이선스 및 1·2·3단원 보고서 전역 데이터셋에 주입 |
   | `ScienceLab.renderExperimentUI(container, item, ...)` | 실험 분석 퀴즈 및 돋보기 뷰포트 렌더링 |
   | `ScienceLab.verifyChoice(choiceIdx, correctIdx)` | 실험 객관식 퀴즈 정답 검증 및 오답노트 적재 |
 
 ### 🌟 `science_report.js` ([4단계] 『실험관찰』 디지털 탐구 보고서 & 퀴즈 전담 엔진)
-1단원(혼합물) 및 2단원(날씨) 교과서 『실험관찰』 요약 노트(읽기/복습)와 5종 실전 퀴즈(빈칸, 객관식, 순서, 자기평가), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_report.js` (450줄)
+1단원(혼합물), 2단원(날씨), 3단원(열과 우리 생활) 교과서 『실험관찰』 요약 노트(읽기/복습)와 5종 실전 퀴즈(빈칸, 객관식, 순서, 자기평가), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_report.js` (490줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `ScienceReport.open(unitId)` | 1단원 또는 2단원 탐구 보고서 모달 열기 |
-  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (요약 노트 ↔ 실전 퀴즈 탭) |
+  | `ScienceReport.open(unitId)` | 1·2·3단원 탐구 보고서 모달 열기 (`openScienceReport(1|2|3)`) |
+  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (요약 노트 ↔ 실전 퀴즈 탭, 단원별 테마 컬러 적용) |
   | `ScienceReport.selectBlankWord(word)` | 빈칸 퀴즈 단어 카드 순차 조립 |
-  | `ScienceReport.checkBlankAnswer(qIdx)` | 빈칸 조립 정답 검증 및 힌트 피드백 |
+  | `ScienceReport.checkBlankAnswer(qIdx)` | 빈칸 조립 정답 검증 및 단원별 맞춤 힌트 피드백 |
   | `ScienceReport.submitChoiceQuiz(qIdx, selectedIdx)` | 객관식 문항 판정 |
   | `ScienceReport.finishAllQuiz()` | 5종 퀴즈 완주 보너스(+5💎) 지급 및 축하 화면 렌더링 |
 
 ### 🌟 `science_u3_engine.js` & `science_lab_common.css` (3단원 가상 실험실 공통 엔진 & 스타일)
-모바일 터치 충돌(touchmove)을 원천 배제한 에러리스 스팟 조작 UI, Retina DPI 캔버스 자동 보정, 백그라운드 절전 및 서브 탭 전환 시 rAF 애니메이션 루프 라이프사이클 관리, 1회성 보석 트랜잭션 잠금, 유튜브 3컷 요약 아코디언 및 Web Audio 효과음을 전담하는 공통 기반 엔진입니다.
+모바일 터치 충돌(touchmove)을 원천 배제한 에러리스 스팟 조작 UI, Retina DPI 캔버스 자동 보정(숨김 탭 `.sim-viewport` 너비 폴백 지원), 백그라운드 절전 및 서브 탭 전환 시 rAF 애니메이션 루프 라이프사이클 관리, 1회성 보석 트랜잭션 잠금, 검증된 초등 과학 유튜브 클립 & 3컷 요약 아코디언, Web Audio 효과음을 전담하는 공통 기반 엔진입니다.
 - **파일 위치**:
-  - `kids/js/science_u3_engine.js` (331줄, `window.ScienceU3Engine`)
+  - `kids/js/science_u3_engine.js` (342줄, `window.ScienceU3Engine`)
   - `kids/css/science_lab_common.css` (681줄, 16:10 캔버스 뷰포트, 다크네이비 테마)
 - **3단원 5대 가상 실험실 파일군**:
-  1. `kids/subjects/science/science_thermometer_lab.html` (508줄): 3초 양손 감각 착각 & 눈높이 수평 판독기
-  2. `kids/subjects/science/science_conduction_lab.html` (562줄): 스팟 셀렉터 열변색 구리판 & 4종 금속(구리·알루미늄·철·유리) 버터 레이스
-  3. `kids/subjects/science/science_liquid_convection_lab.html` (464줄): 타원 궤도 유체 입자(40개) 밀도/온도 연동 대류 순환기
-  4. `kids/subjects/science/science_gas_convection_lab.html` (524줄): 방 단면도 에어컨/난방기 배치 히트맵 & 난로 적외선 복사열 차광판 차단기
-  5. `kids/subjects/science/science_insulation_lab.html` (532줄): 4대 단열 부품(진공, 은도금, 마개, 폼) 조립기 & 60분 초고속 냉각 곡선 꺾은선 그래프
+  1. `kids/subjects/science/science_thermometer_lab.html` (713줄): 3초 양손 Lerp 이동 감각 착각 & 눈높이 레이저 수평 판독기
+  2. `kids/subjects/science/science_conduction_lab.html` (710줄): 스팟 셀렉터 열변색 구리판(①~④ 센서 배지) & 4종 물질(구리·알루미늄·철·유리) 버터 레이스
+  3. `kids/subjects/science/science_liquid_convection_lab.html` (498줄): 타원 와류 스트림라인 유체 입자(40개) 온도-색상 보간 대류 순환기
+  4. `kids/subjects/science/science_gas_convection_lab.html` (646줄): 방 단면도 에어컨/난방기 4조합 배치 히트맵·상하층 온도계 & 전열기 적외선 복사열 차광판 차단기
+  5. `kids/subjects/science/science_insulation_lab.html` (650줄): 4대 단열 부품(마개, 진공, 은도금, 폼) 조립기 & 단열 점수 실시간 연동 60분 초고속 냉각 곡선 꺾은선 그래프
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `ScienceU3Engine.setupCanvasDPI(canvas)` | Retina DPI 배율 감지 및 버퍼/CSS 픽셀 동기화 |
+  | `ScienceU3Engine.setupCanvasDPI(canvas)` | Retina DPI 배율 감지 및 숨김 탭(`display:none`) 폴백 포함 버퍼/CSS 픽셀 동기화 |
   | `ScienceU3Engine.createLoop(renderFn)` | 백그라운드 전환 및 탭 비활성화 시 자동 절전 rAF 루프 매니저 |
   | `ScienceU3Engine.initTabs(tabsSel, panesSel, onTabChange)` | 모바일 에러리스 서브 탭 전환 및 비활성 캔버스 즉시 정지 |
   | `ScienceU3Engine.initSummaryAccordion(btnSel, contentSel)` | 유튜브 영상 임베드 오류 대비 3컷 만화 요약 아코디언 토글 |

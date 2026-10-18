@@ -137,20 +137,12 @@ function openMissionView(type) {
     }
 
     // 4) 📝 [4단계] 탐구 보고서 위임
-    if (type === 'report' || type === 'report_unit1') {
+    if (type === 'report' || type === 'report_unit1' || type === 'report_unit2' || type === 'report_unit3') {
+        const unitId = type === 'report_unit1' ? 1 : (type === 'report_unit2' ? 2 : (type === 'report_unit3' ? 3 : undefined));
         if (window.ScienceReport && typeof window.ScienceReport.renderUI === 'function') {
-            window.ScienceReport.renderUI(innerBody, 'doc', 1);
+            window.ScienceReport.renderUI(innerBody, 'doc', unitId);
         } else if (typeof renderLabReportUI === 'function') {
-            renderLabReportUI(innerBody, 'doc', 1);
-        }
-        return;
-    }
-
-    if (type === 'report_unit2') {
-        if (window.ScienceReport && typeof window.ScienceReport.renderUI === 'function') {
-            window.ScienceReport.renderUI(innerBody, 'doc', 2);
-        } else if (typeof renderLabReportUI === 'function') {
-            renderLabReportUI(innerBody, 'doc', 2);
+            renderLabReportUI(innerBody, 'doc', unitId);
         }
         return;
     }
@@ -196,7 +188,7 @@ function showLoadingSpinner(container) {
     if (!container) return;
     container.innerHTML = `
       <div style="text-align:center; padding:50px 20px; font-family:'Jua', sans-serif;">
-        <div style="width:45px; height:45px; border:4px solid #bae6fd; border-top:4px solid #0284c7; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 15px auto;"></div>
+        <div style="width:45px; height:45px; border:4px solid #bae6fd; border:4px solid #bae6fd; border-top:4px solid #0284c7; border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 15px auto;"></div>
         <p style="font-size:1.15rem; color:#0369a1;">
             🧚‍♀️ 코코 요정이 노션 등대에서 과학 데이터들을 챙겨오고 있어요...
         </p>
@@ -223,12 +215,14 @@ function getCurriculumRecords(type) {
     curriculum.forEach(unit => {
         const items = unit[type] || unit.voca || [];
         items.forEach(item => {
+            const mediaImg = item.img || item.image || "";
             list.push({
                 word: item.word || item.title || "",
                 hint: item.hint || getChosung(item.word || item.title || ""),
                 detailContext: item.desc || item.meaning || "",
                 meaning: item.meaning || item.desc || "",
-                imageUrl: item.img || item.image || "",
+                imageUrl: mediaImg,
+                img: mediaImg,
                 grade: unit.grade || "5-1",
                 grades: [unit.grade || "5-1"],
                 level: unit.unit || unit.title,
@@ -301,6 +295,15 @@ async function fetchAndBuildScienceUI(type, innerBody) {
             if (!records || records.length === 0) {
                 records = curriculumRecords;
             } else if (curriculumRecords.length > 0) {
+                const localMap = new Map(curriculumRecords.map(r => [r.word, r]));
+                records.forEach(r => {
+                    const localMatch = localMap.get(r.word);
+                    if (!r.img && r.imageUrl) r.img = r.imageUrl;
+                    if (!r.img && localMatch && localMatch.img) {
+                        r.img = localMatch.img;
+                        r.imageUrl = localMatch.img;
+                    }
+                });
                 const existingWords = new Set(records.map(r => r.word));
                 const extra = curriculumRecords.filter(r => !existingWords.has(r.word));
                 records = [...records, ...extra];

@@ -30,9 +30,20 @@
         const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
         
-        // CSS 크기가 지정되어 있지 않은 경우 fallback
-        const displayWidth = rect.width > 0 ? rect.width : (canvas.clientWidth || 640);
-        const displayHeight = rect.height > 0 ? rect.height : (canvas.clientHeight || 400);
+        // CSS 크기가 지정되어 있지 않거나 숨김 탭(display:none)인 경우 부모 뷰포트 탐색
+        let displayWidth = rect.width;
+        let displayHeight = rect.height;
+        if (!displayWidth || displayWidth === 0) {
+            const parent = canvas.closest('.sim-viewport') || canvas.parentElement;
+            if (parent) {
+                const pRect = parent.getBoundingClientRect();
+                displayWidth = pRect.width > 0 ? pRect.width : (canvas.clientWidth || 640);
+                displayHeight = pRect.height > 0 ? pRect.height : (canvas.clientHeight || 400);
+            } else {
+                displayWidth = canvas.clientWidth || 640;
+                displayHeight = canvas.clientHeight || 400;
+            }
+        }
 
         canvas.width = Math.round(displayWidth * dpr);
         canvas.height = Math.round(displayHeight * dpr);

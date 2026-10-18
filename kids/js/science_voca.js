@@ -228,7 +228,8 @@
         const screenWrapper = document.createElement("div");
         screenWrapper.className = "quiz-card";
 
-        const imageHtml = currentItem.img ? `
+        const mediaUrl = currentItem.img || currentItem.imageUrl || "";
+        const imageHtml = mediaUrl ? `
             <div class="chart-container-box">
                 <div class="chart-ctrl-toolbar">
                     <div class="chart-ctrl-group">
@@ -236,10 +237,10 @@
                         <button class="card-zoom-btn" onclick="adjustCardZoom(-0.4)">➖ 축소</button>
                         <button class="card-zoom-btn" onclick="resetCardZoom()">🔄 원본</button>
                     </div>
-                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${currentItem.img}')">🪟 새창 열기</button>
+                    <button class="card-zoom-btn card-popup-btn" onclick="openImageInNewWindow('${mediaUrl}')">🪟 새창 열기</button>
                 </div>
                 <div class="chart-image-viewport" id="cardZoomViewport" ondragstart="return false;">
-                    <img id="cardZoomImg" src="${currentItem.img}" class="chart-img" alt="${currentItem.word}" onerror="this.closest('.chart-container-box').style.display='none';">
+                    <img id="cardZoomImg" src="${mediaUrl}" class="chart-img" alt="${currentItem.word}" onerror="this.closest('.chart-container-box').style.display='none';">
                 </div>
             </div>
         ` : '';
@@ -260,7 +261,7 @@
         `;
         container.appendChild(screenWrapper);
 
-        if (currentItem.img && typeof initCardZoomListeners === 'function') {
+        if (mediaUrl && typeof initCardZoomListeners === 'function') {
             initCardZoomListeners();
         }
 

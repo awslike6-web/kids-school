@@ -19,11 +19,14 @@
     .thermometer-wrap {
         display: flex;
         align-items: center;
-        gap: 30px;
+        gap: 20px;
         background: #0d1b32;
         padding: 24px 32px;
         border-radius: var(--radius-md);
         border: 2px solid #224275;
+        position: relative;
+        min-width: 320px;
+        max-width: 480px;
     }
     .tube-glass {
         width: 32px;
@@ -60,14 +63,71 @@
         color: #94a3b8;
         font-size: 0.9rem;
     }
+    .scale-item {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    .scale-item.highlight-target {
+        color: #34d399;
+        font-weight: bold;
+    }
+    .scale-item.highlight-error {
+        color: #f87171;
+        font-weight: bold;
+    }
+    /* 시선 안내선 및 관찰자 영역 */
+    .sight-tracker-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 200px;
+        position: relative;
+        width: 100px;
+    }
+    .sight-eye-pointer {
+        position: absolute;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Jua', sans-serif;
+        font-size: 0.95rem;
+        transition: top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
+    }
+    .sight-laser-beam {
+        position: absolute;
+        right: 60px;
+        height: 2px;
+        width: 130px;
+        background: #10b981;
+        transition: all 0.35s ease;
+        transform-origin: right center;
+    }
+    .sight-laser-beam.error-high {
+        background: #f59e0b;
+        transform: rotate(18deg);
+    }
+    .sight-laser-beam.level-ok {
+        background: #10b981;
+        transform: rotate(0deg);
+        box-shadow: 0 0 8px #10b981;
+    }
+    .sight-laser-beam.error-low {
+        background: #38bdf8;
+        transform: rotate(-18deg);
+    }
     .sight-line-display {
         font-family: 'Jua', sans-serif;
-        font-size: 1.3rem;
+        font-size: 1.2rem;
         color: #fdba74;
         background: #142848;
-        padding: 10px 20px;
+        padding: 12px 24px;
         border-radius: 12px;
         border: 1.5px solid #2d5088;
+        text-align: center;
+        width: 100%;
+        max-width: 520px;
     }
 </style>
 </head>
@@ -114,7 +174,7 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/PsmB7fT4d_k?rel=0&modestbranding=1" 
+                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
                 title="온도와 온도계 실험 영상" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
@@ -123,7 +183,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/PsmB7fT4d_k" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -221,38 +281,53 @@
                 <div class="sight-stage">
                     <div class="thermometer-wrap">
                         <div class="scale-markings">
-                            <span>30℃ ㅡ</span>
-                            <span>28℃ ㅡ</span>
-                            <span>26℃ ㅡ</span>
-                            <span>24℃ ㅡ (실제 액체 높이)</span>
-                            <span>22℃ ㅡ</span>
-                            <span>20℃ ㅡ</span>
+                            <span class="scale-item" id="scale30">30℃ ㅡ</span>
+                            <span class="scale-item" id="scale28">28℃ ㅡ</span>
+                            <span class="scale-item" id="scale26">26℃ ㅡ (내려다볼 때 오차)</span>
+                            <span class="scale-item highlight-target" id="scale24">24℃ ㅡ 🎯 실제 액체 높이</span>
+                            <span class="scale-item" id="scale22">22℃ ㅡ (올려다볼 때 오차)</span>
+                            <span class="scale-item" id="scale20">20℃ ㅡ</span>
                         </div>
                         <div class="tube-glass">
                             <div class="liquid-column" id="thermometerLiquid" style="height: 120px;"></div>
                             <div class="liquid-bulb"></div>
                         </div>
+                        <div class="sight-tracker-col">
+                            <div class="sight-laser-beam level-ok" id="sightBeam" style="top: 110px;"></div>
+                            <div class="sight-eye-pointer" id="sightEye" style="top: 98px;">
+                                <span>👀</span>
+                                <span id="sightEyeLabel" style="color: #34d399;">수평 시선</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="sight-line-display" id="sightResultText">
-                        👀 시선 각도를 선택해보세요!
+                        🎯 눈높이 수평 맞춤 : <b>24.0℃ (오차 없이 정확한 온도 판독!) ✅</b>
                     </div>
                 </div>
             </div>
 
             <div class="control-panel">
-                <span class="ctrl-label">👀 시선 각도 선택:</span>
-                <button type="button" class="btn-ctrl" id="btnSightHigh" onclick="setSightAngle('high')">🔼 위에서 내려다보기</button>
-                <button type="button" class="btn-ctrl active" id="btnSightLevel" onclick="setSightAngle('level')">🎯 수평으로 눈높이 맞추기 (정확)</button>
-                <button type="button" class="btn-ctrl" id="btnSightLow" onclick="setSightAngle('low')">🔽 아래에서 올려다보기</button>
+                <div class="ctrl-group">
+                    <span class="ctrl-label">🌡️ 측정할 물 온도:</span>
+                    <button type="button" class="btn-ctrl" id="btnTemp22" onclick="setTargetWaterTemp(22)">❄️ 시원한 물 (22℃)</button>
+                    <button type="button" class="btn-ctrl active" id="btnTemp24" onclick="setTargetWaterTemp(24)">🍵 미지근한 물 (24℃)</button>
+                    <button type="button" class="btn-ctrl" id="btnTemp28" onclick="setTargetWaterTemp(28)">♨️ 따뜻한 물 (28℃)</button>
+                </div>
+                <div class="ctrl-group">
+                    <span class="ctrl-label">👀 시선 각도 선택:</span>
+                    <button type="button" class="btn-ctrl" id="btnSightHigh" onclick="setSightAngle('high')">🔼 위에서 내려다보기</button>
+                    <button type="button" class="btn-ctrl active" id="btnSightLevel" onclick="setSightAngle('level')">🎯 수평 눈높이 맞추기 (정확)</button>
+                    <button type="button" class="btn-ctrl" id="btnSightLow" onclick="setSightAngle('low')">🔽 아래에서 올려다보기</button>
+                </div>
             </div>
 
             <div class="fairy-bubble-card">
                 <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
                 <div class="fairy-bubble-text" id="fairySightText">
                     🧚 <b>요정 코코의 관찰 돋보기:</b><br>
-                    "위에서 내려다보면 실제보다 <b>더 높게(26℃)</b> 보이고, 아래에서 올려다보면 <b>더 낮게(22℃)</b> 보여!
-                    반드시 <b>액체 기둥 끝과 수평으로 눈높이를</b> 맞춰야 정확한 <b>24℃</b>를 읽을 수 있단다!"
+                    "위에서 내려다보면 실제보다 <b>+2℃ 더 높게</b> 보이고, 아래에서 올려다보면 <b>-2℃ 더 낮게</b> 보여!
+                    반드시 <b>액체 기둥 끝과 수평으로 눈높이를</b> 맞춰야 정확한 온도를 읽을 수 있단다!"
                 </div>
             </div>
         </div>
@@ -300,19 +375,21 @@
 <script src="../../js/science_u3_engine.js"></script>
 <script>
     // =========================================================================
-    // [모드 A] 3수조 감각 착각 시뮬레이터
+    // [모드 A] 3수조 감각 착각 시뮬레이터 (부드러운 Lerp 보간 이동)
     // =========================================================================
     let handExpStep = 0; // 0: 대기, 1: 양끝 물(3초 카운트), 2: 미지근한 물 이동 완료
     let handTimer = 3;
     let handTimerInterval = null;
     let handLoop = null;
+    let curLeftX = null, curLeftY = null, curRightX = null, curRightY = null;
 
     function initHandCanvas() {
         const canvas = document.getElementById('handCanvas');
         const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
         if (!dpi) return;
 
-        handLoop = ScienceU3Engine.createLoop((timestamp) => {
+        if (handLoop) handLoop.stop();
+        handLoop = ScienceU3Engine.createLoop(() => {
             renderHandFrame(dpi.ctx, dpi.width, dpi.height);
         });
         handLoop.start();
@@ -323,6 +400,10 @@
         handExpStep = 1;
         handTimer = 3;
         document.getElementById('btnStartHandSim').disabled = true;
+        const fairyEl = document.getElementById('fairyHandText');
+        if (fairyEl) {
+            fairyEl.innerHTML = `🧚 <b>요정 코코의 실시간 중계:</b><br>"지금 왼손은 <b>5℃ 얼음물</b>에, 오른손은 <b>45℃ 따뜻한 물</b>에 넣고 3초 동안 감각을 적응시키고 있어!"`;
+        }
         ScienceU3Engine.playClickSound();
 
         clearInterval(handTimerInterval);
@@ -331,9 +412,12 @@
             ScienceU3Engine.playTone(500, 'sine', 0.08);
             if (handTimer <= 0) {
                 clearInterval(handTimerInterval);
-                handExpStep = 2; // 미지근한 물로 순간 이동
+                handExpStep = 2; // 미지근한 물로 부드럽게 이동
                 ScienceU3Engine.playTone(800, 'triangle', 0.2);
                 document.getElementById('btnStartHandSim').disabled = false;
+                if (fairyEl) {
+                    fairyEl.innerHTML = `🧚 <b>요정 코코의 핵심 발견!</b><br>"와! 똑같은 <b>25℃ 미지근한 물</b>인데, 차가운 물에 있던 왼손은 <b>'따뜻해!'</b>라고 느끼고 따뜻한 물에 있던 오른손은 <b>'차가워!'</b>라고 착각하네! 그래서 정확한 <b>온도계</b>가 필요한 거야!"`;
+                }
             }
         }, 1000);
     }
@@ -343,6 +427,10 @@
         handExpStep = 0;
         handTimer = 3;
         document.getElementById('btnStartHandSim').disabled = false;
+        const fairyEl = document.getElementById('fairyHandText');
+        if (fairyEl) {
+            fairyEl.innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>"버튼을 누르면 왼손은 차가운 물(5℃), 오른손은 따뜻한 물(45℃)에 3초간 머물렀다가 가운데 <b>미지근한 물(25℃)</b>로 동시에 이동해! 양손의 말풍선을 비교해 봐!"`;
+        }
         ScienceU3Engine.playClickSound();
     }
 
@@ -358,50 +446,89 @@
         const rightX = width * 0.8 - bowlW / 2;
 
         // 3개 수조 렌더링
-        drawBeaker(ctx, leftX, cy - bowlH / 2, bowlW, bowlH, 'rgba(56, 189, 248, 0.25)', '❄️ 차가운 물\n(5℃)');
-        drawBeaker(ctx, midX, cy - bowlH / 2, bowlW, bowlH, 'rgba(34, 197, 94, 0.25)', '🍵 미지근한 물\n(25℃)');
-        drawBeaker(ctx, rightX, cy - bowlH / 2, bowlW, bowlH, 'rgba(239, 68, 68, 0.25)', '♨️ 따뜻한 물\n(45℃)');
+        drawBeaker(ctx, leftX, cy - bowlH / 2, bowlW, bowlH, 'rgba(56, 189, 248, 0.28)', '❄️ 차가운 물\n(5℃)');
+        drawBeaker(ctx, midX, cy - bowlH / 2, bowlW, bowlH, 'rgba(34, 197, 94, 0.28)', '🍵 미지근한 물\n(실제 25.0℃)');
+        drawBeaker(ctx, rightX, cy - bowlH / 2, bowlW, bowlH, 'rgba(239, 68, 68, 0.28)', '♨️ 따뜻한 물\n(45℃)');
 
-        // 양손 위치 계산
-        let leftHandX, leftHandY, rightHandX, rightHandY;
+        // 가운데 수조 고정 온도계 배지
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(width * 0.5 - 62, cy - bowlH / 2 + 8, 124, 24, 6);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#34d399';
+        ctx.font = 'bold 12px Jua';
+        ctx.textAlign = 'center';
+        ctx.fillText('🌡️ 온도계 측정: 25.0℃', width * 0.5, cy - bowlH / 2 + 24);
+        ctx.restore();
+
+        // 목표 양손 위치 계산
+        let targetLX, targetLY, targetRX, targetRY;
 
         if (handExpStep === 0) {
-            // 수조 위 대기
-            leftHandX = leftX + bowlW / 2;
-            leftHandY = cy - bowlH / 2 - 35;
-            rightHandX = rightX + bowlW / 2;
-            rightHandY = cy - bowlH / 2 - 35;
+            targetLX = leftX + bowlW / 2;
+            targetLY = cy - bowlH / 2 - 35;
+            targetRX = rightX + bowlW / 2;
+            targetRY = cy - bowlH / 2 - 35;
         } else if (handExpStep === 1) {
-            // 양끝 수조 침수 (3초)
-            leftHandX = leftX + bowlW / 2;
-            leftHandY = cy;
-            rightHandX = rightX + bowlW / 2;
-            rightHandY = cy;
+            targetLX = leftX + bowlW / 2;
+            targetLY = cy + 8;
+            targetRX = rightX + bowlW / 2;
+            targetRY = cy + 8;
 
-            // 카운트다운 타이머
+            // 카운트다운 타이머 및 적응 말풍선
             ctx.save();
-            ctx.font = 'bold 24px Jua';
+            ctx.font = 'bold 22px Jua';
             ctx.fillStyle = '#f59e0b';
             ctx.textAlign = 'center';
-            ctx.fillText(`⏳ 감각 적응 중... ${handTimer}초`, width / 2, 45);
+            ctx.fillText(`⏳ 양손 감각 적응 중... ${handTimer}초`, width / 2, 38);
             ctx.restore();
-        } else {
-            // 미지근한 물에 동시 진입
-            leftHandX = midX + bowlW * 0.35;
-            leftHandY = cy;
-            rightHandX = midX + bowlW * 0.65;
-            rightHandY = cy;
 
-            // 양손 체감 말풍선
-            drawSpeechBubble(ctx, leftHandX - 40, cy - 90, '왼손: "어라?\n따뜻해! ♨️"', '#fef08a');
-            drawSpeechBubble(ctx, rightHandX + 40, cy - 90, '오른손: "어?\n차가워! ❄️"', '#bae6fd');
+            drawSpeechBubble(ctx, targetLX, cy - 85, '왼손: "으으~\n얼음처럼 차가워! ❄️"', '#93c5fd');
+            drawSpeechBubble(ctx, targetRX, cy - 85, '오른손: "후아~\n목욕탕처럼 따뜻해! ♨️"', '#fca5a5');
+        } else {
+            targetLX = midX + bowlW * 0.32;
+            targetLY = cy + 12;
+            targetRX = midX + bowlW * 0.68;
+            targetRY = cy + 12;
+
+            // 양손 체감 착각 말풍선
+            drawSpeechBubble(ctx, targetLX - 48, cy - 90, '왼손: "어라?\n따뜻하네! ♨️"', '#fef08a');
+            drawSpeechBubble(ctx, targetRX + 48, cy - 90, '오른손: "어?\n차가운데! ❄️"', '#bae6fd');
         }
 
-        // 손 그리기
+        // 부드러운 위치 보간 (Lerp)
+        if (curLeftX === null) {
+            curLeftX = targetLX; curLeftY = targetLY;
+            curRightX = targetRX; curRightY = targetRY;
+        } else {
+            curLeftX += (targetLX - curLeftX) * 0.14;
+            curLeftY += (targetLY - curLeftY) * 0.14;
+            curRightX += (targetRX - curRightX) * 0.14;
+            curRightY += (targetRY - curRightY) * 0.14;
+        }
+
+        // 손 주변 온도 적응 후광(Aura) 및 손 아이콘
+        if (handExpStep >= 1) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(curLeftX, curLeftY - 10, 22, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.28)';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(curRightX, curRightY - 10, 22, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.28)';
+            ctx.fill();
+            ctx.restore();
+        }
+
         ctx.font = '32px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('🤚', leftHandX, leftHandY);
-        ctx.fillText('✋', rightHandX, rightHandY);
+        ctx.fillText('🤚', curLeftX, curLeftY);
+        ctx.fillText('✋', curRightX, curRightY);
     }
 
     function drawBeaker(ctx, x, y, w, h, fillCol, label) {
@@ -436,7 +563,7 @@
         ctx.strokeStyle = col;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(x - 55, y - 25, 110, 50, 10);
+        ctx.roundRect(x - 58, y - 25, 116, 50, 10);
         ctx.fill();
         ctx.stroke();
 
@@ -451,30 +578,98 @@
     }
 
     // =========================================================================
-    // [모드 B] 눈높이 판독기
+    // [모드 B] 눈높이 판독기 (수온 변경 + 시선 각도 굴절 오차 연동)
     // =========================================================================
-    function setSightAngle(angle) {
-        document.querySelectorAll('#paneThermometerB .btn-ctrl').forEach(b => b.classList.remove('active'));
-        const resText = document.getElementById('sightResultText');
-        const fairyText = document.getElementById('fairySightText');
+    let currentWaterTemp = 24; // 22, 24, 28
+    let currentSightAngle = 'level'; // 'high', 'level', 'low'
 
-        if (angle === 'high') {
-            document.getElementById('btnSightHigh').classList.add('active');
-            resText.innerHTML = "🔼 위에서 내려다봄 : <b>26.0℃ (실제보다 +2℃ 높게 측정되는 오차 발생!) ❌</b>";
+    function setTargetWaterTemp(temp) {
+        currentWaterTemp = temp;
+        ['22', '24', '28'].forEach(t => {
+            const btn = document.getElementById('btnTemp' + t);
+            if (btn) btn.classList.toggle('active', parseInt(t, 10) === temp);
+        });
+        updateThermometerSightUI();
+        ScienceU3Engine.playClickSound();
+    }
+
+    function setSightAngle(angle) {
+        currentSightAngle = angle;
+        ['High', 'Level', 'Low'].forEach(a => {
+            const btn = document.getElementById('btnSight' + a);
+            if (btn) btn.classList.toggle('active', a.toLowerCase() === angle);
+        });
+        updateThermometerSightUI();
+        ScienceU3Engine.playClickSound();
+    }
+
+    function updateThermometerSightUI() {
+        const resText = document.getElementById('sightResultText');
+        const beam = document.getElementById('sightBeam');
+        const eye = document.getElementById('sightEye');
+        const eyeLabel = document.getElementById('sightEyeLabel');
+        const liquid = document.getElementById('thermometerLiquid');
+
+        // 수온별 액체 기둥 높이 및 기준 top 좌표 매핑
+        const tempConfig = {
+            28: { liquidH: 168, baseTop: 62 },
+            24: { liquidH: 120, baseTop: 110 },
+            22: { liquidH: 96,  baseTop: 134 }
+        }[currentWaterTemp] || { liquidH: 120, baseTop: 110 };
+
+        if (liquid) liquid.style.height = tempConfig.liquidH + 'px';
+        if (beam) beam.style.top = tempConfig.baseTop + 'px';
+
+        // 눈금 텍스트 및 하이라이트 갱신
+        const allTemps = [30, 28, 26, 24, 22, 20];
+        const readTemp = currentSightAngle === 'high' ? currentWaterTemp + 2 : (currentSightAngle === 'low' ? currentWaterTemp - 2 : currentWaterTemp);
+
+        allTemps.forEach(t => {
+            const el = document.getElementById('scale' + t);
+            if (!el) return;
+            el.className = 'scale-item';
+            if (t === currentWaterTemp) {
+                el.textContent = `${t}℃ ㅡ 🎯 실제 액체 높이`;
+                el.classList.add('highlight-target');
+            } else if (t === readTemp && currentSightAngle !== 'level') {
+                el.textContent = `${t}℃ ㅡ ⚠️ 시선 오차 눈금`;
+                el.classList.add('highlight-error');
+            } else {
+                el.textContent = `${t}℃ ㅡ`;
+            }
+        });
+
+        if (currentSightAngle === 'high') {
+            resText.innerHTML = `🔼 위에서 내려다봄 : <b>${readTemp}.0℃ (실제 ${currentWaterTemp}℃보다 +2℃ 높게 읽히는 오차 발생!) ❌</b>`;
             resText.style.borderColor = "#f59e0b";
             resText.style.color = "#fef08a";
-        } else if (angle === 'level') {
-            document.getElementById('btnSightLevel').classList.add('active');
-            resText.innerHTML = "🎯 눈높이 수평 맞춤 : <b>24.0℃ (오차 없이 정확한 온도 판독!) ✅</b>";
+            if (beam) beam.className = 'sight-laser-beam error-high';
+            if (eye) eye.style.top = Math.max(10, tempConfig.baseTop - 62) + 'px';
+            if (eyeLabel) {
+                eyeLabel.textContent = '위에서 내려다봄';
+                eyeLabel.style.color = '#f59e0b';
+            }
+        } else if (currentSightAngle === 'level') {
+            resText.innerHTML = `🎯 눈높이 수평 맞춤 : <b>${currentWaterTemp}.0℃ (오차 없이 정확한 온도 판독!) ✅</b>`;
             resText.style.borderColor = "#10b981";
             resText.style.color = "#34d399";
-        } else if (angle === 'low') {
-            document.getElementById('btnSightLow').classList.add('active');
-            resText.innerHTML = "🔽 아래에서 올려다봄 : <b>22.0℃ (실제보다 -2℃ 낮게 측정되는 오차 발생!) ❌</b>";
+            if (beam) beam.className = 'sight-laser-beam level-ok';
+            if (eye) eye.style.top = (tempConfig.baseTop - 12) + 'px';
+            if (eyeLabel) {
+                eyeLabel.textContent = '수평 시선 (정확)';
+                eyeLabel.style.color = '#34d399';
+            }
+        } else if (currentSightAngle === 'low') {
+            resText.innerHTML = `🔽 아래에서 올려다봄 : <b>${readTemp}.0℃ (실제 ${currentWaterTemp}℃보다 -2℃ 낮게 읽히는 오차 발생!) ❌</b>`;
             resText.style.borderColor = "#38bdf8";
             resText.style.color = "#93c5fd";
+            if (beam) beam.className = 'sight-laser-beam error-low';
+            if (eye) eye.style.top = Math.min(180, tempConfig.baseTop + 48) + 'px';
+            if (eyeLabel) {
+                eyeLabel.textContent = '아래에서 올려다봄';
+                eyeLabel.style.color = '#38bdf8';
+            }
         }
-        ScienceU3Engine.playClickSound();
     }
 
     // =========================================================================
@@ -485,13 +680,23 @@
 
         ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
             if (targetTab === 'paneThermometerA') {
-                if (handLoop) handLoop.start();
+                initHandCanvas();
             } else {
                 if (handLoop) handLoop.stop();
+                updateThermometerSightUI();
             }
         });
 
         initHandCanvas();
+        updateThermometerSightUI();
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                initHandCanvas();
+            }, 200);
+        });
 
         ScienceU3Engine.setupQuiz({
             labId: 'thermometer',
