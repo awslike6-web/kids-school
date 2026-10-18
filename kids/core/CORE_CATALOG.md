@@ -413,8 +413,8 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceVoca.verifyAnswer()` | 입력된 용어 정답 판정 및 자동 진행 트리거 |
 
 ### 🌟 `science_lab.js` ([3단계] 가상 실험실 & 교재 DB 실시간 연동 엔진)
-노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 1·2·3단원 탐구보고서 요약문 동적 주입(`rep1Docs`, `rep2Docs`, `rep3Docs`), 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_lab.js` (315줄)
+노션 교재·사료 마스터 DB(`CURRICULUM_DB`) 실시간 쿼리 및 캐싱, 1·2·3단원 탐구보고서 요약문 동적 주입(`rep1Docs`, `rep2Docs`, `rep3Docs` — 기존 그래프·실험실 링크·안전수칙 속성 보존 병합), 실험 퀴즈 UI 렌더러, 4지선다 정답 판정을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_lab.js` (317줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -423,18 +423,19 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceLab.renderExperimentUI(container, item, ...)` | 실험 분석 퀴즈 및 돋보기 뷰포트 렌더링 |
   | `ScienceLab.verifyChoice(choiceIdx, correctIdx)` | 실험 객관식 퀴즈 정답 검증 및 오답노트 적재 |
 
-### 🌟 `science_report.js` ([4단계] 『실험관찰』 디지털 탐구 보고서 & 퀴즈 전담 엔진)
-1단원(혼합물), 2단원(날씨), 3단원(열과 우리 생활) 교과서 『실험관찰』 요약 노트(읽기/복습)와 5종 실전 퀴즈(빈칸, 객관식, 순서, 자기평가), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_report.js` (490줄)
+### 🌟 `science_report.js` ([4단계] 『실험관찰』 실험연계 디지털 탐구 보고서 & 서술형 빌더 전담 엔진)
+1단원(혼합물), 2단원(날씨), 3단원(열과 우리 생활) 교과서 『실험관찰』 실험연계 요약 노트(5종 온도계·열 이동·단열 비교표, 실험 1~5 상세 분석, 열평형 SVG 꺾은선그래프, KSTAR 1억 ℃ 심화 탐구, 가상 실험실 바로가기)와 참여형 탐구 미션(서술형 문장 조립 빌더·채점기준 가이드, 객관식 추론, 섞인 실험 순서 직접 조립기, 인터랙티브 별점 체크리스트), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_report.js` (405줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
   | `ScienceReport.open(unitId)` | 1·2·3단원 탐구 보고서 모달 열기 (`openScienceReport(1|2|3)`) |
-  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (요약 노트 ↔ 실전 퀴즈 탭, 단원별 테마 컬러 적용) |
-  | `ScienceReport.selectBlankWord(word)` | 빈칸 퀴즈 단어 카드 순차 조립 |
-  | `ScienceReport.checkBlankAnswer(qIdx)` | 빈칸 조립 정답 검증 및 단원별 맞춤 힌트 피드백 |
-  | `ScienceReport.submitChoiceQuiz(qIdx, selectedIdx)` | 객관식 문항 판정 |
-  | `ScienceReport.finishAllQuiz()` | 5종 퀴즈 완주 보너스(+5💎) 지급 및 축하 화면 렌더링 |
+  | `ScienceReport.renderUI(container, tabName, unitId)` | 보고서 메인 화면 렌더링 (탐구 노트 ↔ 서술형·탐구 미션 탭, 단원별 테마 컬러) |
+  | `ScienceReport.selectBlankWordByIdx(qIdx, optIdx)` / `clearBlankSlot(id)` | 서술형 문장 조립 빌더 구절 카드 순차 삽입 및 개별 빈칸 클릭 취소 |
+  | `ScienceReport.checkBlankAnswer(qIdx)` | `q.blanks` 데이터 기반 동적 서술형/빈칸 정답 검증 및 채점 힌트 피드백 |
+  | `ScienceReport.pickOrderStep(stepId)` / `checkOrderQuiz(qIdx)` | 섞인 실험 과정 카드를 1~4단계로 직접 터치 배열 및 순서 정답 검증 |
+  | `ScienceReport.setStarRating(itemIdx, stars)` / `fillAllStars(count)` | 배움 확인 체크리스트 항목별 ⭐ 별점(1~3점) 인터랙티브 평가 |
+  | `ScienceReport.finishAllQuiz()` | 탐구 미션 완주 보너스(+5💎) 지급 및 축하 화면 렌더링 |
 
 ### 🌟 `science_u3_engine.js` & `science_lab_common.css` (3단원 가상 실험실 공통 엔진 & 스타일)
 모바일 터치 충돌(touchmove)을 원천 배제한 에러리스 스팟 조작 UI, Retina DPI 캔버스 자동 보정(숨김 탭 `.sim-viewport` 너비 폴백 지원), 백그라운드 절전 및 서브 탭 전환 시 rAF 애니메이션 루프 라이프사이클 관리, 1회성 보석 트랜잭션 잠금, 검증된 초등 과학 유튜브 클립 & 3컷 요약 아코디언, Web Audio 효과음을 전담하는 공통 기반 엔진입니다.

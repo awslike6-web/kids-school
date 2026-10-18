@@ -97,6 +97,7 @@ function openMissionView(type) {
     if (!overlay || !innerBody) return;
 
     overlay.style.display = 'flex';
+    innerBody.innerHTML = '';
     activeQuizIdx = 0;
     window.activeQuizIdx = 0;
     currentMissionType = type;
@@ -175,7 +176,9 @@ function closeMissionView(force) {
         finalizeQuizRewardSession();
     }
     const overlay = document.getElementById('missionOverlay');
+    const innerBody = document.getElementById('overlayInnerBody');
     if (overlay) overlay.style.display = 'none';
+    if (innerBody) innerBody.innerHTML = '';
 
     activeSectionData = [];
     activeQuizIdx = 0;
