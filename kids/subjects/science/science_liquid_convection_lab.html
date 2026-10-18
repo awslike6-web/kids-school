@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>액체에서의 열 이동 (대류) 💧 | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>💧</span>
+        <span>액체에서의 열 이동 (대류)</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 3단원 · 열과 우리 생활</span>
+        <h1 class="banner-title">
+            <span>🌊</span>
+            <span>따뜻해진 액체가 스스로 빙글빙글 도는 비밀</span>
+        </h1>
+        <p class="banner-desc">
+            물을 아래에서 끓이면 어떻게 냄비 전체가 골고루 데워질까요?
+            따뜻해진 물은 위로 올라가고, 차가운 물은 아래로 내려오는 <b>대류</b> 현상을 눈으로 직접 확인해보세요!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 실험 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 20~21쪽</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/n3W-5G0_6_c?rel=0&modestbranding=1" 
+                title="액체에서의 열 이동 실험 영상" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/n3W-5G0_6_c" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>따뜻해진 물은 위로</span>
+                        </div>
+                        <h4 class="summary-card-title">부피 팽창과 상승</h4>
+                        <p class="summary-card-desc">
+                            바닥에서 열을 받은 물은 부피가 늘어나면서 <b>주변보다 가벼워져 위로 솟구쳐</b> 올라가요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>차가워진 물은 아래로</span>
+                        </div>
+                        <h4 class="summary-card-title">밀도 증가와 하강</h4>
+                        <p class="summary-card-desc">
+                            위쪽에 있던 차가운 물은 상대적으로 무거워져서 <b>바닥 쪽으로 밀려 내려오게</b> 돼요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>물질 전체의 순환</span>
+                        </div>
+                        <h4 class="summary-card-title">골고루 데워지는 대류</h4>
+                        <p class="summary-card-desc">
+                            물질 자체가 돌고 돌며 열을 운반하는 방식을 <b>'대류'</b>라고 하며, 결국 물 전체의 온도가 올라가요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 대류 시뮬레이터 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 가상 수조 대류 시뮬레이터</span>
+            </div>
+            <span class="source-badge">유체 입자 순환 엔진</span>
+        </div>
+
+        <div class="sim-viewport">
+            <canvas id="convectionCanvas" class="sim-canvas"></canvas>
+        </div>
+
+        <div class="control-panel">
+            <div class="ctrl-group">
+                <span class="ctrl-label">🔥 가열 위치:</span>
+                <button type="button" class="btn-ctrl active" id="btnHeatLeft" onclick="setConvectionMode('left')">📐 바닥 왼쪽 가열 (시계방향)</button>
+                <button type="button" class="btn-ctrl" id="btnHeatCenter" onclick="setConvectionMode('center')">🎯 바닥 가운데 가열 (양방향 분수)</button>
+            </div>
+            <div class="ctrl-group">
+                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnToggleHeat" onclick="toggleConvectionHeating()">🔥 가열 ON / OFF</button>
+                <button type="button" class="btn-ctrl" id="btnResetConvection" onclick="resetConvectionSim()">🔄 물 식히기 (초기화)</button>
+            </div>
+        </div>
+
+        <div class="fairy-bubble-card">
+            <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+            <div class="fairy-bubble-text">
+                🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                "알갱이(톱밥)의 색깔 변화를 잘 봐! 불꽃 근처에서 <b>빨간색(따뜻함)</b>으로 변해 위로 솟구치고,
+                수면에서 식으면 <b>파란색(시원함)</b>으로 바뀌어 다시 바닥으로 내려오지? 이게 바로 액체의 <b>대류</b>란다!"
+            </div>
+        </div>
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">대류 원리 점검</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 냄비에 물을 넣고 바닥을 가열할 때, 물 전체가 따뜻해지는 <b>대류 현상</b>에 대한 설명으로 올바른 것은?
+            <br>
+            "따뜻해진 액체는 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 이동한다!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>위로 올라가고, 차가운 액체는 아래로 내려오며 순환하여</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>바닥에만 가만히 있고, 차가운 액체만 위로 솟구쳐올라</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>액체는 이동하지 않고 그릇의 쇠 알갱이를 통해서만</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>주변 공기 중으로 모두 증발해 사라지면서</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    // =========================================================================
+    // 액체 대류 시뮬레이터 물리 엔진
+    // =========================================================================
+    let convectionMode = 'left'; // 'left' | 'center'
+    let isHeating = true;
+    let waterAvgTemp = 18.0; // ℃
+    let convectionLoop = null;
+
+    // 40개의 유체 입자 (톱밥/염료 시각화)
+    const PARTICLE_COUNT = 45;
+    const particles = [];
+
+    function initParticles(width, height) {
+        particles.length = 0;
+        const tankW = width * 0.72;
+        const tankH = height * 0.68;
+        const left = (width - tankW) / 2;
+        const top = (height - tankH) / 2 - 15;
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push({
+                x: left + Math.random() * tankW,
+                y: top + Math.random() * tankH,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                temp: 18 + Math.random() * 5, // ℃
+                size: 3.5 + Math.random() * 2
+            });
+        }
+    }
+
+    function initConvectionCanvas() {
+        const canvas = document.getElementById('convectionCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        initParticles(dpi.width, dpi.height);
+
+        convectionLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderConvectionFrame(dpi.ctx, dpi.width, dpi.height);
+        });
+        convectionLoop.start();
+    }
+
+    function setConvectionMode(mode) {
+        convectionMode = mode;
+        document.getElementById('btnHeatLeft').classList.toggle('active', mode === 'left');
+        document.getElementById('btnHeatCenter').classList.toggle('active', mode === 'center');
+        ScienceU3Engine.playClickSound();
+    }
+
+    function toggleConvectionHeating() {
+        isHeating = !isHeating;
+        const btn = document.getElementById('btnToggleHeat');
+        if (isHeating) {
+            btn.textContent = '🔥 가열 중 (ON)';
+            btn.classList.add('btn-ctrl-primary');
+        } else {
+            btn.textContent = '❄️ 가열 멈춤 (OFF)';
+            btn.classList.remove('btn-ctrl-primary');
+        }
+        ScienceU3Engine.playClickSound();
+    }
+
+    function resetConvectionSim() {
+        waterAvgTemp = 18.0;
+        isHeating = true;
+        const canvas = document.getElementById('convectionCanvas');
+        const rect = canvas.getBoundingClientRect();
+        initParticles(rect.width || 640, rect.height || 400);
+        document.getElementById('btnToggleHeat').textContent = '🔥 가열 중 (ON)';
+        document.getElementById('btnToggleHeat').classList.add('btn-ctrl-primary');
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderConvectionFrame(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+
+        const tankW = width * 0.72;
+        const tankH = height * 0.68;
+        const tx = (width - tankW) / 2;
+        const ty = (height - tankH) / 2 - 15;
+
+        // 평균 수온 변화
+        if (isHeating) {
+            if (waterAvgTemp < 85) waterAvgTemp += 0.04;
+        } else {
+            if (waterAvgTemp > 20) waterAvgTemp -= 0.06;
+        }
+
+        // 1. 비커 유리 수조 본체
+        ctx.save();
+        ctx.fillStyle = 'rgba(14, 165, 233, 0.15)';
+        ctx.fillRect(tx, ty, tankW, tankH);
+
+        // 유리 비커 외곽선
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(tx, ty + tankH);
+        ctx.lineTo(tx + tankW, ty + tankH);
+        ctx.lineTo(tx + tankW, ty);
+        ctx.stroke();
+
+        // 수면 물결선
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty + 4);
+        ctx.lineTo(tx + tankW, ty + 4);
+        ctx.stroke();
+
+        // 눈금선
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        for (let y = ty + 30; y < ty + tankH; y += 35) {
+            ctx.fillRect(tx + 4, y, 12, 1.5);
+            ctx.fillRect(tx + tankW - 16, y, 12, 1.5);
+        }
+        ctx.restore();
+
+        // 2. 가열원 위치 결정 및 불꽃 렌더링
+        const heatX = (convectionMode === 'left') ? tx + tankW * 0.25 : tx + tankW * 0.5;
+        const heatY = ty + tankH + 10;
+
+        if (isHeating) {
+            drawLampFlame(ctx, heatX, heatY);
+        }
+
+        // 3. 유체 입자 물리 시뮬레이션
+        particles.forEach(p => {
+            // 거리 기반 가열
+            const distToHeat = Math.hypot(p.x - heatX, p.y - (ty + tankH));
+            if (isHeating && distToHeat < tankW * 0.35) {
+                p.temp = Math.min(p.temp + 0.6, 95);
+            } else {
+                // 수면 및 벽면에서 냉각
+                if (p.y < ty + 30 || p.x < tx + 20 || p.x > tx + tankW - 20) {
+                    p.temp = Math.max(p.temp - 0.25, 18);
+                }
+            }
+
+            // 부력에 따른 상하 가속도 (온도가 높으면 상승, 낮으면 하강)
+            const buoyancy = (p.temp - 30) * 0.04;
+            p.vy -= buoyancy * 0.06;
+
+            // 모드별 순환 가속도 (대류 궤도 유도)
+            if (convectionMode === 'left') {
+                // 왼쪽 가열 ➔ 왼쪽 상승, 위쪽 오른쪽 이동, 오른쪽 하강, 바닥 왼쪽 복귀
+                if (p.y < ty + 40) p.vx += 0.06; // 수면에서 우측으로
+                if (p.x > tx + tankW - 35) p.vy += 0.05; // 우측 벽에서 하강
+                if (p.y > ty + tankH - 30) p.vx -= 0.06; // 바닥에서 좌측 가열점으로
+                if (p.x < tx + 35 && p.temp > 40) p.vy -= 0.05; // 좌측에서 상승
+            } else {
+                // 가운데 가열 ➔ 가운데 상승, 양쪽으로 갈라져 하강 (분수형)
+                if (p.y < ty + 40) {
+                    p.vx += (p.x > heatX ? 0.06 : -0.06);
+                }
+                if (p.x < tx + 30 || p.x > tx + tankW - 30) {
+                    p.vy += 0.05; // 양쪽 벽면 하강
+                }
+                if (p.y > ty + tankH - 30) {
+                    p.vx += (p.x < heatX ? 0.05 : -0.05); // 바닥에서 중앙으로
+                }
+            }
+
+            // 속도 감쇠 (점성 마찰)
+            p.vx *= 0.96;
+            p.vy *= 0.96;
+
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // 비커 경계 반사
+            if (p.x < tx + 8) { p.x = tx + 8; p.vx *= -0.5; }
+            if (p.x > tx + tankW - 8) { p.x = tx + tankW - 8; p.vx *= -0.5; }
+            if (p.y < ty + 8) { p.y = ty + 8; p.vy *= -0.5; }
+            if (p.y > ty + tankH - 8) { p.y = ty + tankH - 8; p.vy *= -0.5; }
+
+            // 온도에 따른 입자 색상 (파랑 ➔ 노랑 ➔ 빨강)
+            const heatRatio = Math.min(Math.max((p.temp - 18) / 60, 0), 1);
+            let pColor = '#38bdf8';
+            if (heatRatio > 0.6) {
+                pColor = '#ef4444'; // 매우 뜨거움
+            } else if (heatRatio > 0.3) {
+                pColor = '#f59e0b'; // 따뜻함
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = pColor;
+            ctx.fill();
+        });
+
+        // 4. 대류 순환 안내 화살표
+        drawConvectionFlowArrows(ctx, tx, ty, tankW, tankH);
+
+        // 5. 온도계 정보창
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.roundRect(tx + 15, ty + 15, 130, 48, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.font = 'bold 13px Jua';
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(`🌡️ 평균 수온: ${waterAvgTemp.toFixed(1)}℃`, tx + 25, ty + 36);
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText(isHeating ? '🔥 가열 진행 중' : '❄️ 냉각 중', tx + 25, ty + 53);
+        ctx.restore();
+    }
+
+    function drawLampFlame(ctx, x, y) {
+        const flicker = (Math.random() - 0.5) * 5;
+        ctx.save();
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+        ctx.beginPath();
+        ctx.moveTo(x - 12, y);
+        ctx.quadraticCurveTo(x - 14, y - 28, x + flicker, y - 40);
+        ctx.quadraticCurveTo(x + 14, y - 28, x + 12, y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.moveTo(x - 6, y);
+        ctx.quadraticCurveTo(x - 8, y - 16, x, y - 25);
+        ctx.quadraticCurveTo(x + 8, y - 16, x + 6, y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(x - 20, y + 2, 40, 8);
+        ctx.restore();
+    }
+
+    function drawConvectionFlowArrows(ctx, tx, ty, tw, th) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([6, 6]);
+
+        if (convectionMode === 'left') {
+            // 시계 방향 타원 궤도 가이드
+            ctx.beginPath();
+            ctx.ellipse(tx + tw * 0.5, ty + th * 0.5, tw * 0.35, th * 0.35, 0, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            // 좌우 대칭 2개 타원 궤도 가이드
+            ctx.beginPath();
+            ctx.ellipse(tx + tw * 0.28, ty + th * 0.5, tw * 0.18, th * 0.35, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(tx + tw * 0.72, ty + th * 0.5, tw * 0.18, th * 0.35, 0, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // 초기화 & 이벤트 바인딩
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+        initConvectionCanvas();
+
+        ScienceU3Engine.setupQuiz({
+            labId: 'convection',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '액체나 기체에서는 온도가 높아진 부분이 위로 올라가고, 차가운 부분이 아래로 내려오면서 전체가 순환하여 골고루 데워지는 대류 현상이 일어납니다.',
+            gemAmount: 5
+        });
+    });
+</script>
+
+</body>
+</html>

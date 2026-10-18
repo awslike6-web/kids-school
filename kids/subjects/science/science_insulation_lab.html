@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>단열과 보온병 🧊 | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>🧊</span>
+        <span>단열과 보온병</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 3단원 · 열과 우리 생활</span>
+        <h1 class="banner-title">
+            <span>🛡️</span>
+            <span>열의 이동을 꽁꽁 막아내는 단열의 비밀</span>
+        </h1>
+        <p class="banner-desc">
+            보온병 속에 든 따뜻한 차는 어떻게 반나절이 지나도 따뜻할까요?
+            전도, 대류, 복사 3대 열 이동을 완벽하게 차단하는 <b>단열</b>의 원리를 부품 조립과 냉각 그래프로 파헤쳐보세요!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 실험 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 24~25쪽</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/4yZJvQO0eK4?rel=0&modestbranding=1" 
+                title="단열과 보온병 실험 영상" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/4yZJvQO0eK4" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>열을 가두는 단열</span>
+                        </div>
+                        <h4 class="summary-card-title">두 물체 사이 열 차단</h4>
+                        <p class="summary-card-desc">
+                            열이 빠져나가거나 들어오지 못하게 막는 것을 <b>'단열'</b>이라고 부르며, 열을 잘 전달하지 않는 재료를 써요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>보온병 3중 방어막</span>
+                        </div>
+                        <h4 class="summary-card-title">진공과 은도금</h4>
+                        <p class="summary-card-desc">
+                            <b>진공 공간</b>은 전도와 대류를 막고, <b>반짝이는 은벽</b>은 복사열을 반사하여 열 탈출을 완벽히 차단해요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>생활 속 단열재</span>
+                        </div>
+                        <h4 class="summary-card-title">스티로폼과 이중창</h4>
+                        <p class="summary-card-desc">
+                            아이스박스, 패딩의 솜/깃털, 집의 이중창과 단열벽은 모두 <b>공기층을 가두어 전도를 막는</b> 지혜예요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 시뮬레이터 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 가상 단열 시뮬레이터</span>
+            </div>
+            <span class="source-badge">부품 조립 & 냉각 곡선</span>
+        </div>
+
+        <!-- 서브 탭 전환 -->
+        <div class="lab-mode-tabs">
+            <button type="button" class="mode-tab-btn active" data-tab="paneInsulationA">
+                <span>🛠️ [모드 A] 나만의 보온병 부품 조립기</span>
+            </button>
+            <button type="button" class="mode-tab-btn" data-tab="paneInsulationB">
+                <span>⏱️ [모드 B] 60분 초고속 냉각 곡선 그래프</span>
+            </button>
+        </div>
+
+        <!-- [모드 A] 보온병 조립 탭 -->
+        <div class="tab-pane active" id="paneInsulationA" data-tab="paneInsulationA">
+            <div class="sim-viewport">
+                <canvas id="thermosCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <span class="ctrl-label">🧩 단열 부품 장착/해제:</span>
+                <button type="button" class="btn-ctrl" id="btnPartCap" onclick="togglePart('cap')">1. 플라스틱 마개 뚜껑</button>
+                <button type="button" class="btn-ctrl" id="btnPartVacuum" onclick="togglePart('vacuum')">2. 이중벽 진공 공간</button>
+                <button type="button" class="btn-ctrl" id="btnPartSilver" onclick="togglePart('silver')">3. 은도금 반사 내벽</button>
+                <button type="button" class="btn-ctrl" id="btnPartFoam" onclick="togglePart('foam')">4. 외벽 단열재(스티로폼)</button>
+            </div>
+
+            <div class="fairy-bubble-card">
+                <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+                <div class="fairy-bubble-text" id="fairyThermosText">
+                    🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                    "부품이 하나도 없으면 붉은 열 화살표가 사방으로 새어 나가!
+                    <b>진공</b>을 켜면 전도·대류 화살표가 사라지고, <b>은도금</b>을 켜면 복사열이 튕겨 나가지?
+                    4개 부품을 모두 켜서 <b>100% 특급 단열</b>을 완성해 봐!"
+                </div>
+            </div>
+        </div>
+
+        <!-- [모드 B] 냉각 곡선 탭 -->
+        <div class="tab-pane" id="paneInsulationB" data-tab="paneInsulationB">
+            <div class="sim-viewport">
+                <canvas id="chartCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnStartChart" onclick="startCoolingChart()">
+                    🚀 60분 초고속 냉각 테스트 시작!
+                </button>
+                <button type="button" class="btn-ctrl" id="btnResetChart" onclick="resetCoolingChart()">
+                    🔄 처음 온도(85℃)로 리셋
+                </button>
+            </div>
+
+            <div class="fairy-bubble-card">
+                <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+                <div class="fairy-bubble-text" id="fairyChartText">
+                    🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                    "일반 종이컵(주황 점선)은 20분 만에 뚝 떨어져 식어버리지만,
+                    우리가 조립한 보온병(초록 실선)은 <b>60분이 지나도 80℃ 가까이 유지</b>되는 걸 그래프로 비교해 봐!"
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">단열 원리 점검</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 보온병 내부를 진공 공간으로 만들고 안쪽 벽을 반짝이는 은으로 칠한 <b>과학적 까닭</b>은?
+            <br>
+            "진공은 전도와 대류를 막고, 은벽은 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 열 이동을 차단하기 위해!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>복사열을 반사하여 튕겨내어</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>물을 바깥으로 흘러넘치게 만들어</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>보온병 무게를 깃털처럼 가볍게 하려고</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>공기가 속으로 더 잘 빨려 들어가게 하려고</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    // =========================================================================
+    // [모드 A] 보온병 조립 시뮬레이터
+    // =========================================================================
+    const parts = {
+        cap: false,
+        vacuum: false,
+        silver: false,
+        foam: false
+    };
+    let thermosLoop = null;
+
+    function initThermosCanvas() {
+        const canvas = document.getElementById('thermosCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        thermosLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderThermosFrame(dpi.ctx, dpi.width, dpi.height, timestamp);
+        });
+        thermosLoop.start();
+    }
+
+    function togglePart(partName) {
+        parts[partName] = !parts[partName];
+        const btnMap = {
+            cap: 'btnPartCap',
+            vacuum: 'btnPartVacuum',
+            silver: 'btnPartSilver',
+            foam: 'btnPartFoam'
+        };
+        const btn = document.getElementById(btnMap[partName]);
+        if (btn) btn.classList.toggle('active', parts[partName]);
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderThermosFrame(ctx, width, height, timestamp) {
+        ctx.clearRect(0, 0, width, height);
+
+        const cx = width / 2;
+        const cy = height / 2 + 10;
+        const bodyW = 120;
+        const bodyH = 200;
+
+        // 단열율 계산
+        let score = 0;
+        if (parts.cap) score += 25;
+        if (parts.vacuum) score += 25;
+        if (parts.silver) score += 25;
+        if (parts.foam) score += 25;
+
+        // 1. 외벽 단열재 (스티로폼 층)
+        if (parts.foam) {
+            ctx.fillStyle = '#f1f5f9';
+            ctx.beginPath();
+            ctx.roundRect(cx - bodyW / 2 - 20, cy - bodyH / 2, bodyW + 40, bodyH + 15, 16);
+            ctx.fill();
+        }
+
+        // 2. 외부 본체 금속 케이스
+        ctx.fillStyle = '#475569';
+        ctx.beginPath();
+        ctx.roundRect(cx - bodyW / 2 - 10, cy - bodyH / 2, bodyW + 20, bodyH + 10, 14);
+        ctx.fill();
+
+        // 3. 이중벽 공간 (진공 층)
+        if (parts.vacuum) {
+            ctx.fillStyle = '#0f172a'; // 진공 (물질 없음)
+        } else {
+            ctx.fillStyle = '#60a5fa'; // 일반 공기층 (전도 일어남)
+        }
+        ctx.beginPath();
+        ctx.roundRect(cx - bodyW / 2, cy - bodyH / 2 + 5, bodyW, bodyH - 5, 10);
+        ctx.fill();
+
+        // 4. 은도금 반사 내벽
+        if (parts.silver) {
+            ctx.fillStyle = '#e2e8f0'; // 반짝이는 은빛
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+        } else {
+            ctx.fillStyle = '#94a3b8'; // 일반 유리
+            ctx.strokeStyle = 'transparent';
+        }
+        ctx.beginPath();
+        ctx.roundRect(cx - bodyW / 2 + 10, cy - bodyH / 2 + 15, bodyW - 20, bodyH - 25, 8);
+        ctx.fill();
+        if (parts.silver) ctx.stroke();
+
+        // 5. 따뜻한 차 / 물 (내부 액체 85℃)
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.75)';
+        ctx.beginPath();
+        ctx.roundRect(cx - bodyW / 2 + 15, cy - bodyH / 2 + 25, bodyW - 30, bodyH - 40, 6);
+        ctx.fill();
+
+        // 물 표면 라벨
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px Jua';
+        ctx.textAlign = 'center';
+        ctx.fillText('♨️ 뜨거운 물 (85℃)', cx, cy);
+
+        // 6. 플라스틱 마개 뚜껑
+        if (parts.cap) {
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.roundRect(cx - 30, cy - bodyH / 2 - 25, 60, 30, 8);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '11px Jua';
+            ctx.fillText('마개 닫힘 ✅', cx, cy - bodyH / 2 - 8);
+        } else {
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '12px Jua';
+            ctx.fillText('뚜껑 열림! (대류 유출) 💨', cx, cy - bodyH / 2 - 15);
+        }
+
+        // 7. 열 탈출 화살표 시뮬레이션
+        if (score < 100) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+
+            // 마개가 없으면 위로 유출
+            if (!parts.cap) {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - bodyH / 2 + 20);
+                ctx.lineTo(cx, cy - bodyH / 2 - 35);
+                ctx.stroke();
+            }
+
+            // 진공/은벽/폼이 없으면 옆으로 유출
+            if (!parts.vacuum || !parts.silver || !parts.foam) {
+                const wave = Math.sin(timestamp * 0.005) * 8;
+                ctx.beginPath();
+                ctx.moveTo(cx + bodyW / 2 - 20, cy);
+                ctx.lineTo(cx + bodyW / 2 + 35 + wave, cy);
+                ctx.moveTo(cx - bodyW / 2 + 20, cy);
+                ctx.lineTo(cx - bodyW / 2 - 35 - wave, cy);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // 8. 단열 점수 배지
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.roundRect(width - 150, 15, 135, 60, 10);
+        ctx.fill();
+        ctx.strokeStyle = score === 100 ? '#10b981' : '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.font = '12px Jua';
+        ctx.fillStyle = '#94a3b8';
+        ctx.textAlign = 'center';
+        ctx.fillText('🛡️ 단열 완성도', width - 82, 35);
+
+        ctx.font = 'bold 20px Jua';
+        ctx.fillStyle = score === 100 ? '#34d399' : '#fbbf24';
+        ctx.fillText(`${score}%`, width - 82, 60);
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // [모드 B] 60분 초고속 냉각 곡선 그래프
+    // =========================================================================
+    let chartLoop = null;
+    let isChartRunning = false;
+    let chartMinute = 0; // 0 ~ 60
+
+    function initChartCanvas() {
+        const canvas = document.getElementById('chartCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        chartLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderChartFrame(dpi.ctx, dpi.width, dpi.height);
+        });
+        chartLoop.start();
+    }
+
+    function startCoolingChart() {
+        if (isChartRunning) return;
+        isChartRunning = true;
+        chartMinute = 0;
+        document.getElementById('btnStartChart').disabled = true;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function resetCoolingChart() {
+        isChartRunning = false;
+        chartMinute = 0;
+        document.getElementById('btnStartChart').disabled = false;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderChartFrame(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+
+        if (isChartRunning && chartMinute < 60) {
+            chartMinute += 0.35;
+        }
+
+        const leftPad = 60;
+        const rightPad = 40;
+        const topPad = 30;
+        const btmPad = 50;
+        const plotW = width - leftPad - rightPad;
+        const plotH = height - topPad - btmPad;
+
+        // 축 그리기
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(leftPad, topPad);
+        ctx.lineTo(leftPad, topPad + plotH);
+        ctx.lineTo(leftPad + plotW, topPad + plotH);
+        ctx.stroke();
+
+        // Y축 눈금 (20℃ ~ 90℃)
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'right';
+        for (let t = 20; t <= 90; t += 15) {
+            const y = topPad + plotH - ((t - 20) / 70) * plotH;
+            ctx.fillText(`${t}℃`, leftPad - 8, y + 4);
+            ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(leftPad, y);
+            ctx.lineTo(leftPad + plotW, y);
+            ctx.stroke();
+        }
+
+        // X축 눈금 (0분 ~ 60분)
+        ctx.textAlign = 'center';
+        for (let m = 0; m <= 60; m += 15) {
+            const x = leftPad + (m / 60) * plotW;
+            ctx.fillText(`${m}분`, x, topPad + plotH + 20);
+        }
+
+        // 1. 일반 종이컵 곡선 (주황 점선)
+        ctx.save();
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        for (let m = 0; m <= chartMinute; m += 1) {
+            const temp = 20 + 65 * Math.exp(-m * 0.07); // 급격한 냉각
+            const x = leftPad + (m / 60) * plotW;
+            const y = topPad + plotH - ((temp - 20) / 70) * plotH;
+            if (m === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // 2. 조립한 보온병 곡선 (초록 실선)
+        ctx.save();
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let m = 0; m <= chartMinute; m += 1) {
+            const temp = 20 + 65 * Math.exp(-m * 0.002); // 완만한 보온
+            const x = leftPad + (m / 60) * plotW;
+            const y = topPad + plotH - ((temp - 20) / 70) * plotH;
+            if (m === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // 범례 표시
+        ctx.save();
+        ctx.font = 'bold 12px Jua';
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#f97316';
+        ctx.fillText('ㅡ ㅡ 일반 종이컵 (20분 만에 식음)', leftPad + 20, topPad + 20);
+        ctx.fillStyle = '#10b981';
+        ctx.fillText('━━━ 우리가 조립한 보온병 (60분 후 78℃ 유지)', leftPad + 20, topPad + 40);
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // 초기화 & 이벤트 바인딩
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+
+        ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
+            if (targetTab === 'paneInsulationA') {
+                if (chartLoop) chartLoop.stop();
+                if (thermosLoop) thermosLoop.start();
+            } else {
+                if (thermosLoop) thermosLoop.stop();
+                if (chartLoop) chartLoop.start();
+            }
+        });
+
+        initThermosCanvas();
+        initChartCanvas();
+
+        ScienceU3Engine.setupQuiz({
+            labId: 'insulation',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '보온병은 이중벽 진공 공간을 만들어 전도와 대류를 막고, 안쪽 벽의 은도금으로 복사열을 반사하여 열이 빠져나가거나 들어오는 것을 완벽히 차단합니다.',
+            gemAmount: 5
+        });
+    });
+</script>
+
+</body>
+</html>

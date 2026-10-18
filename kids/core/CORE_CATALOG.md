@@ -436,6 +436,27 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceReport.submitChoiceQuiz(qIdx, selectedIdx)` | 객관식 문항 판정 |
   | `ScienceReport.finishAllQuiz()` | 5종 퀴즈 완주 보너스(+5💎) 지급 및 축하 화면 렌더링 |
 
+### 🌟 `science_u3_engine.js` & `science_lab_common.css` (3단원 가상 실험실 공통 엔진 & 스타일)
+모바일 터치 충돌(touchmove)을 원천 배제한 에러리스 스팟 조작 UI, Retina DPI 캔버스 자동 보정, 백그라운드 절전 및 서브 탭 전환 시 rAF 애니메이션 루프 라이프사이클 관리, 1회성 보석 트랜잭션 잠금, 유튜브 3컷 요약 아코디언 및 Web Audio 효과음을 전담하는 공통 기반 엔진입니다.
+- **파일 위치**:
+  - `kids/js/science_u3_engine.js` (331줄, `window.ScienceU3Engine`)
+  - `kids/css/science_lab_common.css` (681줄, 16:10 캔버스 뷰포트, 다크네이비 테마)
+- **3단원 5대 가상 실험실 파일군**:
+  1. `kids/subjects/science/science_thermometer_lab.html` (508줄): 3초 양손 감각 착각 & 눈높이 수평 판독기
+  2. `kids/subjects/science/science_conduction_lab.html` (562줄): 스팟 셀렉터 열변색 구리판 & 4종 금속(구리·알루미늄·철·유리) 버터 레이스
+  3. `kids/subjects/science/science_liquid_convection_lab.html` (464줄): 타원 궤도 유체 입자(40개) 밀도/온도 연동 대류 순환기
+  4. `kids/subjects/science/science_gas_convection_lab.html` (524줄): 방 단면도 에어컨/난방기 배치 히트맵 & 난로 적외선 복사열 차광판 차단기
+  5. `kids/subjects/science/science_insulation_lab.html` (532줄): 4대 단열 부품(진공, 은도금, 마개, 폼) 조립기 & 60분 초고속 냉각 곡선 꺾은선 그래프
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `ScienceU3Engine.setupCanvasDPI(canvas)` | Retina DPI 배율 감지 및 버퍼/CSS 픽셀 동기화 |
+  | `ScienceU3Engine.createLoop(renderFn)` | 백그라운드 전환 및 탭 비활성화 시 자동 절전 rAF 루프 매니저 |
+  | `ScienceU3Engine.initTabs(tabsSel, panesSel, onTabChange)` | 모바일 에러리스 서브 탭 전환 및 비활성 캔버스 즉시 정지 |
+  | `ScienceU3Engine.initSummaryAccordion(btnSel, contentSel)` | 유튜브 영상 임베드 오류 대비 3컷 만화 요약 아코디언 토글 |
+  | `ScienceU3Engine.setupQuiz(config)` | 퀴즈 빈칸 바인딩, 정답 판정, 피드백 및 1회성 보석(+5💎) 트랜잭션 잠금 |
+  | `ScienceU3Engine.playSuccessFanfare()` | 도-미-솔-도 4화음 팡파르 Web Audio 신시사이저 합성 재생 |
+
 ---
 
 ## 2-6. 🗺️ 사회 역사 탐험방 전담 엔진군 (Society Multiverse Engines)

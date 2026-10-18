@@ -1,0 +1,681 @@
+/* ==========================================================================
+   🔬 민민이네 과학실험실 - 3단원 [열과 우리 생활] 공통 디자인 시스템
+   파일: kids/css/science_lab_common.css
+   규격: 모바일 터치 세이프(에러리스 UI), 다크네이비 테마, 16:10 캔버스 뷰포트
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+:root {
+    --bg-color: #0b1528;
+    --card-bg: #13233f;
+    --card-bg-subtle: #0d1b32;
+    --border-color: #1e3a66;
+    --border-highlight: #38bdf8;
+    --primary: #ea580c;
+    --primary-light: #fb923c;
+    --primary-dark: #c2410c;
+    --accent: #f59e0b;
+    --accent-glow: rgba(245, 158, 11, 0.35);
+    --accent-blue: #0284c7;
+    --accent-teal: #0d9488;
+    --text-light: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --success-bg: #064e3b;
+    --success-border: #10b981;
+    --success-text: #a7f3d0;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Nanum Gothic', sans-serif;
+    background: var(--bg-color);
+    min-height: 100vh;
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 60px;
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   1. 상단 네비게이션 바 & 보석 배지
+   ========================================================================== */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(11, 21, 40, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1.5px solid var(--border-color);
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: #1a3258;
+    color: #e2e8f0;
+    border-radius: var(--radius-md);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid #2d5088;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    background: #2d5088;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.page-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: #fdba74;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gem-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+    color: white;
+    font-family: 'Jua', sans-serif;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+/* ==========================================================================
+   2. 메인 컨테이너 & 헤더 배너
+   ========================================================================== */
+.main-wrap {
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.header-banner {
+    background: linear-gradient(135deg, #431407 0%, #7c2d12 60%, #9a3412 100%);
+    border: 2px solid #ea580c;
+    border-radius: var(--radius-lg);
+    padding: 22px 26px;
+    box-shadow: 0 10px 30px rgba(234, 88, 12, 0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.banner-sub {
+    font-family: 'Jua', sans-serif;
+    color: #fdba74;
+    font-size: 0.95rem;
+    display: inline-block;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.banner-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.65rem;
+    color: #ffffff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.banner-desc {
+    color: #ffedd5;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   3. 카드 섹션 & 헤더
+   ========================================================================== */
+.section-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-color);
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.section-tag {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: #fdba74;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.source-badge {
+    background: #9a3412;
+    color: #ffedd5;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-family: 'Jua', sans-serif;
+}
+
+/* ==========================================================================
+   4. 영상 래퍼 & 3컷 만화 요약 아코디언 (YouTube Fallback)
+   ========================================================================== */
+.video-frame-wrap {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 2px solid #2d5088;
+    background: #000;
+}
+
+.video-frame-wrap iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.yt-fallback-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg-subtle);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+.btn-yt-external {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #dc2626;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-yt-external:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+
+.summary-accordion {
+    border: 1.5px solid #2d5088;
+    border-radius: var(--radius-md);
+    background: var(--card-bg-subtle);
+    overflow: hidden;
+}
+
+.summary-toggle-btn {
+    width: 100%;
+    padding: 12px 16px;
+    background: #142848;
+    color: #93c5fd;
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.summary-toggle-btn:hover {
+    background: #1a3560;
+}
+
+.summary-content {
+    display: none;
+    padding: 16px;
+    border-top: 1px solid #1e3a66;
+}
+
+.summary-content.open {
+    display: block;
+}
+
+.summary-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+.summary-card {
+    background: #0b1528;
+    border: 1.5px solid #224275;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.summary-card-step {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    color: #fb923c;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.summary-card-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    color: #f8fafc;
+}
+
+.summary-card-desc {
+    font-size: 0.92rem;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   5. 서브 탭 전환기
+   ========================================================================== */
+.lab-mode-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 12px;
+}
+
+.mode-tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border-color);
+    background: var(--card-bg-subtle);
+    color: var(--text-muted);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.mode-tab-btn.active {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    color: white;
+    border-color: #fb923c;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+}
+
+.tab-pane {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tab-pane.active {
+    display: flex;
+}
+
+/* ==========================================================================
+   6. 시뮬레이터 뷰포트 & 캔버스 (16:10 종횡비 & 터치 세이프)
+   ========================================================================== */
+.sim-viewport {
+    background: radial-gradient(circle at center, #162b4d 0%, #0c182b 100%);
+    border-radius: var(--radius-md);
+    border: 2px solid #224275;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    touch-action: manipulation;
+}
+
+.sim-canvas {
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    aspect-ratio: 16 / 10;
+    display: block;
+    border-radius: var(--radius-sm);
+    background: #081120;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+}
+
+/* ==========================================================================
+   7. 에러리스 조작 패널 & 스팟 셀렉터
+   ========================================================================== */
+.control-panel {
+    background: var(--card-bg-subtle);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ctrl-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    color: #fdba74;
+    white-space: nowrap;
+}
+
+.btn-ctrl {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-color);
+    background: #162c50;
+    color: #e2e8f0;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.98rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.btn-ctrl:hover:not(:disabled) {
+    background: #234478;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.btn-ctrl.active {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    border-color: #fb923c;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+}
+
+.btn-ctrl-primary {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    border-color: #38bdf8;
+    color: #ffffff;
+}
+
+.btn-ctrl-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+}
+
+.btn-ctrl:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ==========================================================================
+   8. 요정 코코 관찰 가이드 말풍선
+   ========================================================================== */
+.fairy-bubble-card {
+    background: #0d1b32;
+    border-left: 5px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.fairy-img-icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.fairy-bubble-text {
+    color: #e2e8f0;
+    font-size: 0.96rem;
+    line-height: 1.6;
+}
+
+.fairy-bubble-text b {
+    color: #fbbf24;
+}
+
+/* ==========================================================================
+   9. 탐구 퀴즈 & 보석 리워드 섹션
+   ========================================================================== */
+.quiz-box {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-color);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.quiz-badge {
+    background: linear-gradient(135deg, #ea580c 0%, #d97706 100%);
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+}
+
+.quiz-question {
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.65;
+}
+
+.quiz-blank-slot {
+    display: inline-block;
+    min-width: 120px;
+    padding: 2px 10px;
+    border-bottom: 2.5px dashed #fb923c;
+    color: #fdba74;
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    transition: all 0.2s;
+}
+
+.quiz-choices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.quiz-choice-btn {
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    border: 2px solid #234478;
+    background: #142848;
+    color: #f1f5f9;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quiz-choice-btn:hover:not(:disabled) {
+    background: #1e3a66;
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+.quiz-choice-btn.correct {
+    background: var(--success-bg) !important;
+    border-color: var(--success-border) !important;
+    color: var(--success-text) !important;
+}
+
+.quiz-choice-btn.wrong {
+    background: #78350f !important;
+    border-color: #f59e0b !important;
+    color: #fef08a !important;
+}
+
+.quiz-choice-btn:disabled {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.quiz-feedback-box {
+    display: none;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: 0.98rem;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+}
+
+.quiz-feedback-box.show {
+    display: block;
+}
+
+.quiz-feedback-box.correct {
+    background: var(--success-bg);
+    border: 1.5px solid var(--success-border);
+    color: var(--success-text);
+}
+
+.quiz-feedback-box.wrong {
+    background: #451a03;
+    border: 1.5px solid #d97706;
+    color: #fde68a;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   10. 반응형 미디어 쿼리
+   ========================================================================== */
+@media (max-width: 640px) {
+    .main-wrap {
+        padding: 14px 12px;
+        gap: 18px;
+    }
+
+    .header-banner {
+        padding: 16px 18px;
+    }
+
+    .banner-title {
+        font-size: 1.35rem;
+    }
+
+    .section-card {
+        padding: 16px;
+    }
+
+    .lab-mode-tabs {
+        flex-direction: column;
+    }
+
+    .mode-tab-btn {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 0.98rem;
+    }
+
+    .sim-viewport {
+        min-height: 300px;
+        padding: 10px;
+    }
+
+    .control-panel {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .btn-ctrl {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+
+    .quiz-choices-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>기체 대류와 복사열 💨 | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>💨</span>
+        <span>기체 대류와 복사열</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 3단원 · 열과 우리 생활</span>
+        <h1 class="banner-title">
+            <span>🏠</span>
+            <span>공기의 순환(대류)과 직접 와닿는 빛(복사)의 비밀</span>
+        </h1>
+        <p class="banner-desc">
+            왜 에어컨은 천장 높은 곳에, 난로는 바닥 낮은 곳에 설치할까요?
+            공기의 순환을 통한 <b>기체 대류</b>와, 물질을 거치지 않고 빛처럼 직접 전달되는 <b>복사열</b>을 탐구해보세요!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 실험 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 22~23쪽</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/F4198jB5hYc?rel=0&modestbranding=1" 
+                title="기체 대류와 복사열 실험 영상" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/F4198jB5hYc" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>따뜻한 공기는 위로</span>
+                        </div>
+                        <h4 class="summary-card-title">기체의 대류 현상</h4>
+                        <p class="summary-card-desc">
+                            난로 주변의 데워진 공기는 가벼워져 <b>천장 쪽으로 올라가고</b>, 식은 공기는 바닥으로 내려와요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>냉난방기 설치의 지혜</span>
+                        </div>
+                        <h4 class="summary-card-title">에어컨은 위, 난로는 아래</h4>
+                        <p class="summary-card-desc">
+                            찬 공기는 아래로 가라앉으므로 <b>에어컨은 위쪽</b>에, 따뜻한 공기는 뜨므로 <b>난로는 아래쪽</b>에 두어야 방 전체가 쾌적해요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>물질 없이 직진하는 열</span>
+                        </div>
+                        <h4 class="summary-card-title">빛처럼 전달되는 복사</h4>
+                        <p class="summary-card-desc">
+                            햇빛이나 난로의 열이 공기를 데우지 않고도 내 피부로 <b>직접 전달되는 방식</b>을 <b>'복사'</b>라고 해요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 시뮬레이터 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 기체 대류 & 복사열 시뮬레이터</span>
+            </div>
+            <span class="source-badge">에러리스 모드 전환</span>
+        </div>
+
+        <!-- 서브 탭 전환 -->
+        <div class="lab-mode-tabs">
+            <button type="button" class="mode-tab-btn active" data-tab="paneGasA">
+                <span>🏠 [모드 A] 냉난방기 배치와 방 안 대류 히트맵</span>
+            </button>
+            <button type="button" class="mode-tab-btn" data-tab="paneGasB">
+                <span>☀️ [모드 B] 난로 복사열과 차광판 실험</span>
+            </button>
+        </div>
+
+        <!-- [모드 A] 방 안 대류 히트맵 탭 -->
+        <div class="tab-pane active" id="paneGasA" data-tab="paneGasA">
+            <div class="sim-viewport">
+                <canvas id="roomCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <div class="ctrl-group">
+                    <span class="ctrl-label">❄️ 에어컨 위치:</span>
+                    <button type="button" class="btn-ctrl active" id="btnAcTop" onclick="setAcPos('top')">천장 위쪽 (추천 ✅)</button>
+                    <button type="button" class="btn-ctrl" id="btnAcBottom" onclick="setAcPos('bottom')">바닥 아래쪽</button>
+                </div>
+                <div class="ctrl-group">
+                    <span class="ctrl-label">🔥 난방기 위치:</span>
+                    <button type="button" class="btn-ctrl active" id="btnHeaterBottom" onclick="setHeaterPos('bottom')">바닥 아래쪽 (추천 ✅)</button>
+                    <button type="button" class="btn-ctrl" id="btnHeaterTop" onclick="setHeaterPos('top')">천장 위쪽</button>
+                </div>
+            </div>
+
+            <div class="fairy-bubble-card">
+                <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+                <div class="fairy-bubble-text" id="fairyRoomText">
+                    🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                    "에어컨을 천장에, 난로를 바닥에 두면 <b>공기가 방 전체를 골고루 순환</b>해서 아주 쾌적해져!
+                    반대로 에어컨을 바닥에 두면 발만 시렵고 천장은 더운 채로 머물게 된단다!"
+                </div>
+            </div>
+        </div>
+
+        <!-- [모드 B] 복사열과 차광판 탭 -->
+        <div class="tab-pane" id="paneGasB" data-tab="paneGasB">
+            <div class="sim-viewport">
+                <canvas id="radiationCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnToggleShield" onclick="toggleRadiationShield()">
+                    🛡️ 차광판(가림판) 끼우기 / 치우기
+                </button>
+                <button type="button" class="btn-ctrl" id="btnToggleHeater" onclick="toggleRadiationHeater()">
+                    🔥 난로 전원 ON / OFF
+                </button>
+            </div>
+
+            <div class="fairy-bubble-card">
+                <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+                <div class="fairy-bubble-text" id="fairyRadText">
+                    🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                    "난로에서 나오는 붉은 파동(적외선)이 보이지? 중간 공기가 데워지지 않아도 빛처럼 <b>직접 전달되는 열(복사)</b>이야!
+                    차광판으로 빛을 막으면 온도계의 온도가 순식간에 뚝 떨어지는 것을 확인해 봐!"
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">기체 대류와 복사 점검</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 에어컨을 방 높은 곳에 설치하고, 난로를 낮은 곳에 설치하는 과학적인 이유로 <b>올바른 것</b>은?
+            <br>
+            "차가운 공기는 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 방 전체가 골고루 순환하기 때문이다!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>아래로 내려오고, 따뜻한 공기는 위로 올라가</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>위로 솟구치고, 따뜻한 공기는 바닥에만 가라앉아</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>움직이지 않고 벽면을 통해서만 열이 전도되어</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>벽지 색깔을 알록달록하게 보호하기 위해</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    // =========================================================================
+    // [모드 A] 방 안 대류 시뮬레이터
+    // =========================================================================
+    let acPos = 'top'; // 'top' | 'bottom'
+    let heaterPos = 'bottom'; // 'top' | 'bottom'
+    let roomLoop = null;
+
+    const AIR_PARTICLES = 40;
+    const airParticles = [];
+
+    function initAirParticles(width, height) {
+        airParticles.length = 0;
+        const rw = width * 0.75;
+        const rh = height * 0.7;
+        const rx = (width - rw) / 2;
+        const ry = (height - rh) / 2;
+
+        for (let i = 0; i < AIR_PARTICLES; i++) {
+            airParticles.push({
+                x: rx + Math.random() * rw,
+                y: ry + Math.random() * rh,
+                vx: 0,
+                vy: 0,
+                type: Math.random() > 0.5 ? 'cool' : 'warm'
+            });
+        }
+    }
+
+    function initRoomCanvas() {
+        const canvas = document.getElementById('roomCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        initAirParticles(dpi.width, dpi.height);
+        roomLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderRoomFrame(dpi.ctx, dpi.width, dpi.height);
+        });
+        roomLoop.start();
+    }
+
+    function setAcPos(pos) {
+        acPos = pos;
+        document.getElementById('btnAcTop').classList.toggle('active', pos === 'top');
+        document.getElementById('btnAcBottom').classList.toggle('active', pos === 'bottom');
+        ScienceU3Engine.playClickSound();
+    }
+
+    function setHeaterPos(pos) {
+        heaterPos = pos;
+        document.getElementById('btnHeaterBottom').classList.toggle('active', pos === 'bottom');
+        document.getElementById('btnHeaterTop').classList.toggle('active', pos === 'top');
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderRoomFrame(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+
+        const rw = width * 0.75;
+        const rh = height * 0.7;
+        const rx = (width - rw) / 2;
+        const ry = (height - rh) / 2;
+
+        // 1. 방 외벽 렌더링
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(rx, ry, rw, rh);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(rx, ry, rw, rh);
+
+        // 2. 에어컨 위치 렌더링 (파란색 박스)
+        const acY = (acPos === 'top') ? ry + 15 : ry + rh - 45;
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(rx + 15, acY, 65, 30);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '11px Jua';
+        ctx.textAlign = 'center';
+        ctx.fillText('❄️ 에어컨', rx + 47, acY + 20);
+
+        // 3. 난방기 위치 렌더링 (빨간색 박스)
+        const heaterY = (heaterPos === 'bottom') ? ry + rh - 45 : ry + 15;
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(rx + rw - 80, heaterY, 65, 30);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('🔥 난방기', rx + rw - 47, heaterY + 20);
+
+        // 4. 공기 입자 물리 이동
+        const isIdeal = (acPos === 'top' && heaterPos === 'bottom');
+
+        airParticles.forEach(p => {
+            if (isIdeal) {
+                // 이상적 순환: 에어컨(좌상단) ➔ 아래로 하강 ➔ 바닥 건너 난방기(우하단) ➔ 위로 상승 ➔ 천장 건너 에어컨
+                if (p.x < rx + rw * 0.35) p.vy += 0.05; // 좌측 찬공기 하강
+                if (p.y > ry + rh - 40) p.vx += 0.06; // 바닥 우측 이동
+                if (p.x > rx + rw * 0.65) p.vy -= 0.05; // 우측 더운공기 상승
+                if (p.y < ry + 40) p.vx -= 0.06; // 천장 좌측 이동
+            } else {
+                // 잘못된 배치: 대류 정체
+                if (acPos === 'bottom' && p.y > ry + rh * 0.6) p.vy += 0.04; // 바닥에만 냉기 체류
+                if (heaterPos === 'top' && p.y < ry + rh * 0.4) p.vy -= 0.04; // 천장에만 온기 체류
+            }
+
+            p.vx *= 0.95;
+            p.vy *= 0.95;
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // 벽면 경계
+            if (p.x < rx + 10) { p.x = rx + 10; p.vx *= -0.5; }
+            if (p.x > rx + rw - 10) { p.x = rx + rw - 10; p.vx *= -0.5; }
+            if (p.y < ry + 10) { p.y = ry + 10; p.vy *= -0.5; }
+            if (p.y > ry + rh - 10) { p.y = ry + rh - 10; p.vy *= -0.5; }
+
+            // 입자 렌더링
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = (p.y > ry + rh * 0.5) ? '#38bdf8' : '#f97316';
+            ctx.fill();
+        });
+
+        // 5. 방 순환 상태 표시 패널
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.roundRect(rx + rw / 2 - 100, ry + rh / 2 - 25, 200, 50, 10);
+        ctx.fill();
+        ctx.strokeStyle = isIdeal ? '#10b981' : '#f59e0b';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.font = 'bold 13px Jua';
+        ctx.textAlign = 'center';
+        if (isIdeal) {
+            ctx.fillStyle = '#34d399';
+            ctx.fillText('✨ 완벽한 대류 순환 중! (22℃ 쾌적)', rx + rw / 2, ry + rh / 2);
+            ctx.font = '11px sans-serif';
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText('방 전체가 골고루 시원하고 따뜻함', rx + rw / 2, ry + rh / 2 + 16);
+        } else {
+            ctx.fillStyle = '#fde68a';
+            ctx.fillText('⚠️ 대류 정체 현상 발생!', rx + rw / 2, ry + rh / 2);
+            ctx.font = '11px sans-serif';
+            ctx.fillStyle = '#fdba74';
+            ctx.fillText('천장은 덥고 바닥만 차가움', rx + rw / 2, ry + rh / 2 + 16);
+        }
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // [모드 B] 복사열과 차광판 시뮬레이터
+    // =========================================================================
+    let radLoop = null;
+    let hasShield = false;
+    let isHeaterOn = true;
+    let sensorTemp = 24.0; // ℃
+
+    function initRadiationCanvas() {
+        const canvas = document.getElementById('radiationCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        radLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderRadiationFrame(dpi.ctx, dpi.width, dpi.height, timestamp);
+        });
+        radLoop.start();
+    }
+
+    function toggleRadiationShield() {
+        hasShield = !hasShield;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function toggleRadiationHeater() {
+        isHeaterOn = !isHeaterOn;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderRadiationFrame(ctx, width, height, timestamp) {
+        ctx.clearRect(0, 0, width, height);
+
+        const cy = height / 2;
+        const heaterX = width * 0.2;
+        const sensorX = width * 0.8;
+        const shieldX = width * 0.5;
+
+        // 온도 계산
+        if (isHeaterOn && !hasShield) {
+            if (sensorTemp < 58.0) sensorTemp += 0.15;
+        } else {
+            if (sensorTemp > 24.0) sensorTemp -= 0.12;
+        }
+
+        // 1. 전기난로 렌더링
+        ctx.save();
+        ctx.fillStyle = isHeaterOn ? '#b91c1c' : '#334155';
+        ctx.beginPath();
+        ctx.roundRect(heaterX - 35, cy - 60, 70, 120, 12);
+        ctx.fill();
+
+        // 발열 코일
+        ctx.strokeStyle = isHeaterOn ? '#fef08a' : '#64748b';
+        ctx.lineWidth = 4;
+        for (let y = cy - 40; y <= cy + 40; y += 20) {
+            ctx.beginPath();
+            ctx.moveTo(heaterX - 25, y);
+            ctx.lineTo(heaterX + 25, y);
+            ctx.stroke();
+        }
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '12px Jua';
+        ctx.textAlign = 'center';
+        ctx.fillText(isHeaterOn ? '🔥 복사 열원' : '난로 OFF', heaterX, cy + 80);
+        ctx.restore();
+
+        // 2. 복사열 파동 (적외선 물결선)
+        if (isHeaterOn) {
+            const waveLimit = hasShield ? shieldX : sensorX - 20;
+            ctx.save();
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+            ctx.lineWidth = 2.5;
+
+            for (let offset = -40; offset <= 40; offset += 20) {
+                ctx.beginPath();
+                for (let x = heaterX + 40; x <= waveLimit; x += 8) {
+                    const waveY = cy + offset + Math.sin(x * 0.08 - timestamp * 0.006) * 6;
+                    if (x === heaterX + 40) ctx.moveTo(x, waveY);
+                    else ctx.lineTo(x, waveY);
+                }
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        // 3. 차광판 렌더링
+        if (hasShield) {
+            ctx.save();
+            ctx.fillStyle = '#64748b';
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.fillRect(shieldX - 8, cy - 70, 16, 140);
+            ctx.strokeRect(shieldX - 8, cy - 70, 16, 140);
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = '12px Jua';
+            ctx.textAlign = 'center';
+            ctx.fillText('🛡️ 차광판 (빛 차단)', shieldX, cy - 80);
+            ctx.restore();
+        }
+
+        // 4. 온도 센서 렌더링
+        ctx.save();
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.roundRect(sensorX - 35, cy - 45, 70, 90, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 15px Jua';
+        ctx.textAlign = 'center';
+        ctx.fillText(`🌡️ 센서`, sensorX, cy - 15);
+        ctx.fillStyle = sensorTemp > 40 ? '#ef4444' : '#38bdf8';
+        ctx.font = 'bold 18px Jua';
+        ctx.fillText(`${sensorTemp.toFixed(1)}℃`, sensorX, cy + 18);
+
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(sensorTemp > 40 ? '복사열 흡수 중' : '시원한 상태', sensorX, cy + 35);
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // 초기화 & 이벤트 바인딩
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+
+        ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
+            if (targetTab === 'paneGasA') {
+                if (radLoop) radLoop.stop();
+                if (roomLoop) roomLoop.start();
+            } else {
+                if (roomLoop) roomLoop.stop();
+                if (radLoop) radLoop.start();
+            }
+        });
+
+        initRoomCanvas();
+        initRadiationCanvas();
+
+        ScienceU3Engine.setupQuiz({
+            labId: 'gas_convection',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '차가운 공기는 무거워져 아래로 내려오고, 따뜻한 공기는 가벼워져 위로 올라가므로 에어컨은 높은 곳에, 난로는 낮은 곳에 설치해야 방 전체가 순환하여 골고루 데워집니다.',
+            gemAmount: 5
+        });
+    });
+</script>
+
+</body>
+</html>

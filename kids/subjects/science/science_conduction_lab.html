@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>고체에서의 열 이동 (전도) 🍳 | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>🍳</span>
+        <span>고체에서의 열 이동 (전도)</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 3단원 · 열과 우리 생활</span>
+        <h1 class="banner-title">
+            <span>🔥</span>
+            <span>고체 물질을 따라 번져가는 열의 비밀</span>
+        </h1>
+        <p class="banner-desc">
+            가열한 부분에서부터 이웃한 알갱이로 열이 차례대로 옮겨가는 <b>전도</b> 현상을 관찰해보세요.
+            열변색 붙임딱지의 색 변화와 금속 종류에 따른 전도 속도 차이를 직접 시뮬레이션할 수 있습니다!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 실험 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 18~19쪽</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/5F_CffpG1mQ?rel=0&modestbranding=1" 
+                title="고체에서의 열 이동 실험 영상" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/5F_CffpG1mQ" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>고체에서의 열 이동</span>
+                        </div>
+                        <h4 class="summary-card-title">이웃한 물질로 전달</h4>
+                        <p class="summary-card-desc">
+                            고체 물질을 가열하면 열은 물질을 따라 온도가 <b>높은 곳에서 낮은 곳으로</b> 차례대로 전해져요. 이를 <b>'전도'</b>라고 불러요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>가열 지점부터 차례로</span>
+                        </div>
+                        <h4 class="summary-card-title">동심원 형태로 퍼짐</h4>
+                        <p class="summary-card-desc">
+                            구리판의 모서리를 가열하든 가운데를 가열하든, 불꽃이 닿은 곳부터 <b>동심원 모양으로 열변색 딱지의 색이 변해</b>가요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>물질마다 다른 빠르기</span>
+                        </div>
+                        <h4 class="summary-card-title">금속 전도 레이스</h4>
+                        <p class="summary-card-desc">
+                            모든 물질의 전도 속도가 같지 않아요. <b>구리 ➔ 알루미늄 ➔ 철 ➔ 유리</b> 순으로 열이 빠르게 이동한답니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 물리 실험실 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 가상 열전도 시뮬레이터</span>
+            </div>
+            <span class="source-badge">에러리스 터치 조작</span>
+        </div>
+
+        <!-- 모드 전환 서브 탭 -->
+        <div class="lab-mode-tabs">
+            <button type="button" class="mode-tab-btn active" data-tab="paneConductionA">
+                <span>🎨 [모드 A] 열변색 구리판 실험</span>
+            </button>
+            <button type="button" class="mode-tab-btn" data-tab="paneConductionB">
+                <span>🏁 [모드 B] 4종 금속 버터 레이스</span>
+            </button>
+        </div>
+
+        <!-- [모드 A] 열변색 구리판 실험 탭 -->
+        <div class="tab-pane active" id="paneConductionA" data-tab="paneConductionA">
+            <div class="sim-viewport">
+                <canvas id="plateCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <div class="ctrl-group">
+                    <span class="ctrl-label">🔥 가열 위치 선택:</span>
+                    <button type="button" class="btn-ctrl active" id="btnHeatCorner" onclick="setPlateHeatMode('corner')">📐 모서리 가열</button>
+                    <button type="button" class="btn-ctrl" id="btnHeatCenter" onclick="setPlateHeatMode('center')">🎯 한가운데 가열</button>
+                    <button type="button" class="btn-ctrl" id="btnHeatRod" onclick="setPlateHeatMode('rod')">🥢 길쭉한 막대 끝</button>
+                </div>
+                <div class="ctrl-group">
+                    <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnResetPlate" onclick="resetPlateSim()">🔄 처음부터 다시 가열</button>
+                </div>
+            </div>
+
+            <div class="fairy-bubble-card">
+                <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+                <div class="fairy-bubble-text">
+                    🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                    "알코올램프 불꽃이 닿은 부분부터 붉은색 딱지가 <b>노란색으로</b> 바뀌는 게 보이지?
+                    열은 물질을 건너뛰지 않고 <b>맞닿은 이웃 알갱이로 차례대로</b> 옮겨가기 때문이야!"
+                </div>
+            </div>
+        </div>
+
+        <!-- [모드 B] 4종 금속 레이스 탭 -->
+        <div class="tab-pane" id="paneConductionB" data-tab="paneConductionB">
+            <div class="sim-viewport">
+                <canvas id="raceCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="control-panel">
+                <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnStartRace" onclick="startMetalRace()">🚀 동시 가열 시작!</button>
+                <button type="button" class="btn-ctrl" id="btnResetRace" onclick="resetMetalRace()">🔄 버터 다시 올리기</button>
+            </div>
+
+            <div class="fairy-bubble-card">
+                <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+                <div class="fairy-bubble-text">
+                    🧚 <b>요정 코코의 레이스 중계:</b><br>
+                    "막대 끝에 똑같은 크기의 버터(🧈)를 붙이고 가운데를 동시에 가열했어!
+                    어느 막대의 버터가 가장 먼저 사르르 녹아 떨어질까? <b>금속의 열전도 속도</b>를 비교해 봐!"
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">열전도 원리 점검</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 구리판과 금속 막대의 열전도 실험 결과로 <b>올바른 설명</b>은 무엇일까요?
+            <br>
+            "고체에서는 열이 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 이동한다!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>가열한 곳부터 차례대로 퍼지고, 구리가 유리보다 훨씬 빠르다</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>판 전체가 동시에 순식간에 데워지고, 유리가 가장 빠르다</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>가열하지 않은 차가운 반대쪽 모서리부터 거꾸로 번져온다</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>철이 구리나 알루미늄보다 열을 훨씬 더 빠르게 전달한다</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    // =========================================================================
+    // [모드 A] 열변색 구리판 시뮬레이터 로직
+    // =========================================================================
+    let plateHeatMode = 'corner'; // 'corner', 'center', 'rod'
+    let plateHeatProgress = 0; // 0 ~ 1.5
+    let plateLoop = null;
+
+    function initPlateCanvas() {
+        const canvas = document.getElementById('plateCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        plateLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderPlateFrame(dpi.ctx, dpi.width, dpi.height);
+        });
+        plateLoop.start();
+    }
+
+    function setPlateHeatMode(mode) {
+        plateHeatMode = mode;
+        plateHeatProgress = 0;
+        document.querySelectorAll('#paneConductionA .btn-ctrl').forEach(b => b.classList.remove('active'));
+        if (mode === 'corner') document.getElementById('btnHeatCorner').classList.add('active');
+        if (mode === 'center') document.getElementById('btnHeatCenter').classList.add('active');
+        if (mode === 'rod') document.getElementById('btnHeatRod').classList.add('active');
+        ScienceU3Engine.playClickSound();
+    }
+
+    function resetPlateSim() {
+        plateHeatProgress = 0;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderPlateFrame(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+
+        // 점진적 가열 진행 (천천히 퍼짐)
+        if (plateHeatProgress < 1.3) {
+            plateHeatProgress += 0.0035;
+        }
+
+        const cx = width / 2;
+        const cy = height / 2;
+
+        if (plateHeatMode === 'rod') {
+            // [모드 A-3] 길쭉한 구리 막대 렌더링
+            const rodW = width * 0.75;
+            const rodH = 40;
+            const rx = (width - rodW) / 2;
+            const ry = cy - rodH / 2;
+
+            // 구리 막대 본체
+            ctx.fillStyle = '#b45309';
+            ctx.fillRect(rx, ry, rodW, rodH);
+
+            // 열변색 붙임딱지 층
+            const heatX = rx + rodW * Math.min(plateHeatProgress, 1.0);
+            
+            // 가열된 부분 (노란색)
+            const grad = ctx.createLinearGradient(rx, ry, rx + rodW, ry);
+            const stop = Math.min(Math.max(plateHeatProgress, 0), 1);
+            grad.addColorStop(0, '#fef08a');
+            grad.addColorStop(Math.min(stop, 0.99), '#fef08a');
+            grad.addColorStop(Math.min(stop + 0.05, 1), '#f43f5e');
+            grad.addColorStop(1, '#f43f5e');
+
+            ctx.fillStyle = grad;
+            ctx.fillRect(rx + 4, ry + 4, rodW - 8, rodH - 8);
+
+            // 알코올 램프 불꽃 (막대 왼쪽 끝)
+            drawFlame(ctx, rx + 10, ry + rodH + 20);
+
+            // 텍스트 라벨
+            ctx.font = '14px Jua';
+            ctx.fillStyle = '#f8fafc';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔥 가열점 (뜨거움 90℃)', rx + 40, ry - 14);
+            ctx.fillText('차가움 20℃ ❄️', rx + rodW - 40, ry - 14);
+            ctx.fillText('열의 이동 방향 ➔ ➔ ➔', cx, ry + rodH + 35);
+
+        } else {
+            // [모드 A-1, A-2] 사각 구리판 렌더링
+            const plateW = Math.min(width * 0.65, 340);
+            const plateH = Math.min(height * 0.65, 230);
+            const px = cx - plateW / 2;
+            const py = cy - plateH / 2;
+
+            // 구리판 베이스
+            ctx.fillStyle = '#9a3412';
+            ctx.beginPath();
+            ctx.roundRect(px, py, plateW, plateH, 10);
+            ctx.fill();
+
+            // 가열 지점 좌표 설정
+            const heatOriginX = (plateHeatMode === 'corner') ? px + 35 : cx;
+            const heatOriginY = (plateHeatMode === 'corner') ? py + plateH - 35 : cy;
+
+            // 클리핑 영역 설정 (구리판 내부만 색상 변화)
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(px + 4, py + 4, plateW - 8, plateH - 8, 8);
+            ctx.clip();
+
+            // 열변색 딱지 기본 붉은색
+            ctx.fillStyle = '#e11d48';
+            ctx.fillRect(px + 4, py + 4, plateW - 8, plateH - 8);
+
+            // 동심원 형태 열 확산 (RadialGradient)
+            const maxRadius = Math.max(plateW, plateH) * 1.2;
+            const curRadius = maxRadius * Math.min(plateHeatProgress, 1.1);
+
+            if (curRadius > 2) {
+                const heatGrad = ctx.createRadialGradient(
+                    heatOriginX, heatOriginY, 0,
+                    heatOriginX, heatOriginY, curRadius
+                );
+                heatGrad.addColorStop(0, '#ffffff'); // 가장 뜨거운 중심
+                heatGrad.addColorStop(0.35, '#fef08a'); // 노란 변색 영역
+                heatGrad.addColorStop(0.7, '#f97316'); // 주황 중간 전이대
+                heatGrad.addColorStop(1, 'rgba(225, 29, 72, 0)'); // 기존 붉은색 융합
+
+                ctx.fillStyle = heatGrad;
+                ctx.beginPath();
+                ctx.arc(heatOriginX, heatOriginY, curRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+
+            // 알코올 램프 불꽃 그리기
+            drawFlame(ctx, heatOriginX, heatOriginY + 12);
+
+            // 동심원 안내 점선 링 (열의 전달 시각화)
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.setLineDash([4, 4]);
+            for (let r = 40; r < curRadius; r += 45) {
+                ctx.beginPath();
+                ctx.arc(heatOriginX, heatOriginY, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+    }
+
+    // 알코올 램프 불꽃 그리기 헬퍼
+    function drawFlame(ctx, x, y) {
+        const flicker = (Math.random() - 0.5) * 4;
+        ctx.save();
+        // 외곽 불꽃
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.85)';
+        ctx.beginPath();
+        ctx.moveTo(x - 10, y);
+        ctx.quadraticCurveTo(x - 12, y - 25, x + flicker, y - 35);
+        ctx.quadraticCurveTo(x + 12, y - 25, x + 10, y);
+        ctx.closePath();
+        ctx.fill();
+
+        // 내부 불꽃 (파란/노란 코어)
+        ctx.fillStyle = '#fef08a';
+        ctx.beginPath();
+        ctx.moveTo(x - 5, y);
+        ctx.quadraticCurveTo(x - 6, y - 15, x, y - 22);
+        ctx.quadraticCurveTo(x + 6, y - 15, x + 5, y);
+        ctx.closePath();
+        ctx.fill();
+
+        // 삼발이 거치대 받침점 표시
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(x - 15, y + 2, 30, 6);
+        ctx.restore();
+    }
+
+    // =========================================================================
+    // [모드 B] 4종 금속 레이스 시뮬레이터 로직
+    // =========================================================================
+    let raceLoop = null;
+    let isRaceRunning = false;
+    let raceProgress = 0;
+
+    const metals = [
+        { name: '구리 (Copper)', speed: 1.0, color: '#f97316', butterY: 0, dropped: false, rank: null },
+        { name: '알루미늄 (Aluminum)', speed: 0.65, color: '#94a3b8', butterY: 0, dropped: false, rank: null },
+        { name: '철 (Iron)', speed: 0.32, color: '#475569', butterY: 0, dropped: false, rank: null },
+        { name: '유리 (Glass)', speed: 0.08, color: '#38bdf8', butterY: 0, dropped: false, rank: null }
+    ];
+    let nextRank = 1;
+
+    function initRaceCanvas() {
+        const canvas = document.getElementById('raceCanvas');
+        const dpi = ScienceU3Engine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        raceLoop = ScienceU3Engine.createLoop((timestamp) => {
+            renderRaceFrame(dpi.ctx, dpi.width, dpi.height);
+        });
+        raceLoop.start();
+    }
+
+    function startMetalRace() {
+        if (isRaceRunning) return;
+        isRaceRunning = true;
+        raceProgress = 0;
+        nextRank = 1;
+        metals.forEach(m => {
+            m.butterY = 0;
+            m.dropped = false;
+            m.rank = null;
+        });
+        document.getElementById('btnStartRace').disabled = true;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function resetMetalRace() {
+        isRaceRunning = false;
+        raceProgress = 0;
+        nextRank = 1;
+        metals.forEach(m => {
+            m.butterY = 0;
+            m.dropped = false;
+            m.rank = null;
+        });
+        document.getElementById('btnStartRace').disabled = false;
+        ScienceU3Engine.playClickSound();
+    }
+
+    function renderRaceFrame(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+
+        const leftMargin = 120;
+        const rightMargin = 70;
+        const startX = leftMargin;
+        const rodLength = width - leftMargin - rightMargin;
+        const rowHeight = (height - 60) / 4;
+
+        if (isRaceRunning) {
+            raceProgress += 0.004;
+        }
+
+        // 공통 가열기 (왼쪽 열원)
+        ctx.fillStyle = '#dc2626';
+        ctx.fillRect(startX - 18, 30, 14, height - 70);
+        ctx.fillStyle = '#fef08a';
+        ctx.font = '12px Jua';
+        ctx.textAlign = 'center';
+        ctx.fillText('🔥 가열', startX - 11, 24);
+
+        metals.forEach((m, idx) => {
+            const y = 50 + idx * rowHeight;
+
+            // 금속 이름 및 라벨
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '13px Jua';
+            ctx.textAlign = 'right';
+            ctx.fillText(m.name, startX - 25, y + 10);
+
+            // 막대 베이스
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(startX, y, rodLength, 14);
+
+            // 열전도 파동 (가열 전진)
+            const heatDist = rodLength * Math.min(raceProgress * m.speed, 1.0);
+            if (heatDist > 0) {
+                const grad = ctx.createLinearGradient(startX, y, startX + heatDist, y);
+                grad.addColorStop(0, '#ef4444');
+                grad.addColorStop(0.7, '#f59e0b');
+                grad.addColorStop(1, m.color);
+                ctx.fillStyle = grad;
+                ctx.fillRect(startX, y, heatDist, 14);
+            }
+
+            // 버터(🧈) 위치 (막대의 75% 지점)
+            const butterX = startX + rodLength * 0.75;
+            const butterBaseY = y + 7;
+
+            // 열이 버터 위치에 도달했는지 판정
+            if (heatDist >= rodLength * 0.75 && !m.dropped) {
+                m.dropped = true;
+                m.rank = nextRank++;
+                ScienceU3Engine.playTone(600 + m.rank * 100, 'sine', 0.1);
+            }
+
+            // 버터 낙하 물리
+            if (m.dropped && m.butterY < 40) {
+                m.butterY += 3.5;
+            }
+
+            // 버터 렌더링
+            ctx.save();
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            if (m.dropped && m.butterY >= 40) {
+                ctx.fillText('💧', butterX, butterBaseY + m.butterY);
+            } else {
+                ctx.fillText('🧈', butterX, butterBaseY - 10 + m.butterY);
+            }
+            ctx.restore();
+
+            // 순위 배지 표시
+            if (m.rank) {
+                ctx.save();
+                ctx.font = 'bold 13px Jua';
+                ctx.fillStyle = m.rank === 1 ? '#fbbf24' : (m.rank === 2 ? '#cbd5e1' : '#b45309');
+                ctx.textAlign = 'left';
+                ctx.fillText(`🏆 ${m.rank}위!`, startX + rodLength + 10, y + 12);
+                ctx.restore();
+            }
+        });
+    }
+
+    // =========================================================================
+    // 초기화 & 이벤트 바인딩
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // 3컷 만화 요약 아코디언 바인딩
+        ScienceU3Engine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+
+        // 서브 탭 전환기 바인딩
+        ScienceU3Engine.initTabs('.mode-tab-btn', '.tab-pane', (targetTab) => {
+            if (targetTab === 'paneConductionA') {
+                if (raceLoop) raceLoop.stop();
+                if (plateLoop) plateLoop.start();
+            } else {
+                if (plateLoop) plateLoop.stop();
+                if (raceLoop) raceLoop.start();
+            }
+        });
+
+        // 캔버스 초기화
+        initPlateCanvas();
+        initRaceCanvas();
+
+        // 퀴즈 엔진 바인딩 (+5💎 1회성 가드)
+        ScienceU3Engine.setupQuiz({
+            labId: 'conduction',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '고체에서는 열이 물질을 따라 온도가 높은 곳에서 낮은 곳으로 차례대로 이동하며(전도), 물질에 따라 빠르기가 다릅니다(구리 > 알루미늄 > 철 > 유리).',
+            gemAmount: 5
+        });
+    });
+</script>
+
+</body>
+</html>

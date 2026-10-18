@@ -187,12 +187,19 @@
         <p class="science-btn-desc"><strong>[3단원 5종 어휘 완비]</strong><br>온도, 전도, 대류, 복사, 단열 필수 교과서 핵심 어휘 초성 퀴즈!</p>
       </div>
 
-      <!-- 3단계: 3단원 가상 실험실 -->
-      <div class="science-grid-btn" style="border: 2.5px solid #f97316; background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%); text-align: left; padding: 20px;">
+      <!-- 3단계: 3단원 5대 가상 실험실 -->
+      <div class="science-grid-btn" style="border: 2.5px solid #ea580c; background: linear-gradient(180deg, #ffffff 0%, #fff7ed 100%); text-align: left; padding: 20px;">
         <div style="text-align: center; margin-bottom: 8px;">
           <span class="science-btn-icon" style="margin-bottom: 8px;">🧪</span>
-          <div class="science-btn-title" style="color: #c2410c; margin-bottom: 4px;">[3단계] 열의 이동 탐구관</div>
-          <p class="science-btn-desc" style="margin-bottom: 0;">구리판 전도와 물 대류, 복사열 원리 집중 탐구!</p>
+          <div class="science-btn-title" style="color: #c2410c; margin-bottom: 4px;">[3단계] 열의 이동 탐구관 (5대 가상 실험실)</div>
+          <p class="science-btn-desc" style="margin-bottom: 0;">원하는 실험실을 터치하여 바로 탐구하세요!</p>
+        </div>
+        <div class="unit-lab-chips-box">
+          <a href="science_thermometer_lab.html" class="lab-chip-pill" id="chipU3Thermometer" style="border-color: #fdba74; color: #c2410c; background: #fff7ed;">🌡️ [1] 온도와 온도계</a>
+          <a href="science_conduction_lab.html" class="lab-chip-pill" id="chipU3Conduction" style="border-color: #fdba74; color: #c2410c; background: #fff7ed;">🍳 [2] 고체 열전도</a>
+          <a href="science_liquid_convection_lab.html" class="lab-chip-pill" id="chipU3Liquid" style="border-color: #fdba74; color: #c2410c; background: #fff7ed;">💧 [3] 액체 열대류</a>
+          <a href="science_gas_convection_lab.html" class="lab-chip-pill" id="chipU3Gas" style="border-color: #fdba74; color: #c2410c; background: #fff7ed;">💨 [4] 기체 대류·복사</a>
+          <a href="science_insulation_lab.html" class="lab-chip-pill" id="chipU3Insulation" style="border-color: #fed7aa; color: #9a3412; background: #fff7ed;">🧊 [5] 단열과 보온병</a>
         </div>
       </div>
 
@@ -297,6 +304,23 @@
     if (typeof initFairyChat === 'function') {
         initFairyChat("SCIENCE");
     }
+
+    // 3단원 5대 가상 실험실 클리어(✅) 배지 갱신
+    const u3Labs = [
+        { id: 'thermometer', elId: 'chipU3Thermometer' },
+        { id: 'conduction', elId: 'chipU3Conduction' },
+        { id: 'convection', elId: 'chipU3Liquid' },
+        { id: 'gas_convection', elId: 'chipU3Gas' },
+        { id: 'insulation', elId: 'chipU3Insulation' }
+    ];
+    u3Labs.forEach(lab => {
+        if (localStorage.getItem(`minmin_sci_u3_${lab.id}_cleared`) === 'true') {
+            const el = document.getElementById(lab.elId);
+            if (el && !el.innerHTML.includes('✅')) {
+                el.innerHTML += ' <span style="color:#10b981; font-weight:bold;">✅</span>';
+            }
+        }
+    });
   });
 </script>
 </body>
