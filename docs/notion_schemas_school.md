@@ -21,7 +21,7 @@
 | **깃허브 링크** | `url` | - |
 | **사용 자재** | `multi_select` (GitHub Pages, yfinance, Flask, Python, API, Notion, Git, JavaScript, HTML/CSS, Notion API) 외 9개 | - |
 | **생성일** | `date` | - |
-| **작업 구역** | `select` (인프라(Git/드라이브), 기지국 공통, 사회, 국어, 영어, 자산 관제 (Asset), 유틸, pnc-bot, 수학) | - |
+| **작업 구역** | `select` (인프라(Git/드라이브), 기지국 공통, 사회, 국어, 영어, 자산 관제 (Asset), 유틸, pnc-bot, 수학, 과학, 보육비서, 라이프로그, 하루·시간표·일기, 스크린 가디언) | - |
 | **작업 단계** | `status` | - |
 
 ### 📝 [라이프 DB] AI 대화록 및 일상 기록 DB
