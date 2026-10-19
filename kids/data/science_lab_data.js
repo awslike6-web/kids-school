@@ -13,7 +13,12 @@ const SCIENCE_LAB_DATA = {
     "conduction": { "title": "고체에서의 열 이동(전도) 실험", "unit": "3단원", "grade": "5-2" },
     "liquid_convection": { "title": "액체에서의 열 이동(대류) 실험", "unit": "3단원", "grade": "5-2" },
     "gas_convection": { "title": "기체 대류와 복사열 실험", "unit": "3단원", "grade": "5-2" },
-    "insulation": { "title": "단열과 보온병 조립 실험", "unit": "3단원", "grade": "5-2" }
+    "insulation": { "title": "단열과 보온병 조립 실험", "unit": "3단원", "grade": "5-2" },
+    "wind_turbine": { "title": "풍력 발전기 가상 실험", "unit": "4단원", "grade": "5-2" },
+    "resource_finite": { "title": "자원의 유한성 탐구", "unit": "4단원", "grade": "5-2" },
+    "renewable_energy": { "title": "6대 재생 에너지 발전관", "unit": "4단원", "grade": "5-2" },
+    "energy_efficiency": { "title": "에너지 효율 & 절전소", "unit": "4단원", "grade": "5-2" },
+    "eco_house": { "title": "단열 에코하우스 탐구", "unit": "4단원", "grade": "5-2" }
 };
 
 if (typeof window !== 'undefined') {
@@ -562,4 +567,217 @@ window.SCIENCE_LAB_REPORT_3_DATA = {
         }
     ]
 };
+
+// ============================================================================
+// 🔬 [4단원] 자원과 에너지 교과서 실험관찰 디지털 탐구 보고서 데이터 (SSOT)
+// ============================================================================
+window.SCIENCE_LAB_REPORT_4_DATA = {
+    unit: "4단원",
+    grade: "5학년 2학기",
+    title: "4단원 『자원과 에너지』 교과서 실험관찰 디지털 탐구 보고서",
+    sub: "『실험관찰』 36~45쪽 · 5대 핵심 실험 상세 분석, 개념 비교표, SVG 도해, 에너지 하베스팅 심화탐구, 서술형 문장 조립 빌더",
+    
+    // 📊 [개념 비교표 2종]
+    conceptTables: [
+        {
+            title: "📋 [개념 비교 1] 천연자원 vs 재생 에너지 특성 분석표",
+            headers: ["구분", "정의 및 특징", "고갈 여부", "환경 영향 (온실가스)", "대표 자원/에너지"],
+            rows: [
+                ["천연자원 (지하자원)", "지구 생성 과정에서 수억 년에 걸쳐 만들어진 한정된 자원", "사용할수록 고갈됨 (유한성)", "연소 시 온실가스(CO₂) 및 매연 배출", "석유, 석탄, 천연가스, 철, 구리"],
+                ["재생 에너지 (자연에너지)", "자연에서 지속적으로 얻을 수 있으며 무한히 보충되는 에너지", "고갈되지 않음 (무한 지속성)", "발전 과정에서 탄소 배출 제로(0)", "태양광, 풍력, 수력, 해양, 지열, 바이오"]
+            ]
+        },
+        {
+            title: "🏷️ [개념 비교 2] 가전제품 에너지 소비 효율 등급(1~5등급) 비교표",
+            headers: ["등급 구분", "에너지 효율성", "소비 전력 절감률", "연간 전기요금 영향", "대표 실천 방안"],
+            rows: [
+                ["🥇 1등급 (초고효율)", "에너지를 가장 알뜰하게 소비하는 최고 효율 제품", "5등급 대비 약 30~40% 절전", "전기요금 대폭 절약 (최저 누진)", "냉장고, 세탁기 등 상시 가전 우선 구매"],
+                ["🥉 3등급 (표준)", "일반적인 표준 효율을 충족하는 평균 제품", "기준 소비량 유지", "표준 전기요금 발생", "대기전력 차단 콘센트와 병행 사용"],
+                ["⚠️ 5등급 (다소비)", "전력 소모량이 크고 에너지 손실이 많은 제품", "에너지 낭비 심함", "전기요금 급상승 유발", "노후 가전 교체 및 사용 시간 최소화"]
+            ]
+        }
+    ],
+
+    // 📖 [탭 1] 5대 핵심 실험 상세 분석 (실험관찰 연계)
+    summaryDoc: [
+        {
+            title: "[실험 1] 바람의 세기와 풍력 발전기의 전기 생산량 탐구",
+            bookRef: "『실험관찰』 36~37쪽",
+            labLink: "science_wind_turbine_lab.html",
+            safetyTip: "선풍기나 팬으로 강풍을 일으킬 때 손가락이 날개망에 닿지 않도록 주의하고, 보안경을 착용합니다.",
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 120" style="width:100%;max-width:480px;height:auto;"><rect x="10" y="10" width="130" height="100" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/><text x="75" y="40" fill="#93c5fd" font-size="12" font-family="'Jua',sans-serif" text-anchor="middle">바람의 운동 에너지</text><text x="75" y="70" fill="#ffffff" font-size="20" text-anchor="middle">🌬️ ➔ 🌪️</text><text x="75" y="95" fill="#cbd5e1" font-size="11" text-anchor="middle">바람 세기 증가</text><path d="M 145 60 L 180 60" stroke="#f59e0b" stroke-width="3"/><rect x="185" y="10" width="130" height="100" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/><text x="250" y="40" fill="#fde047" font-size="12" font-family="'Jua',sans-serif" text-anchor="middle">발전기 터빈 회전</text><text x="250" y="70" fill="#ffffff" font-size="20" text-anchor="middle">⚙️ ➔ ⚡</text><text x="250" y="95" fill="#cbd5e1" font-size="11" text-anchor="middle">회전속도 극대화</text><path d="M 320 60 L 355 60" stroke="#10b981" stroke-width="3"/><rect x="360" y="10" width="130" height="100" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/><text x="425" y="40" fill="#34d399" font-size="12" font-family="'Jua',sans-serif" text-anchor="middle">전기 생산 & 전구</text><text x="425" y="70" fill="#ffffff" font-size="20" text-anchor="middle">💡 🌟 4.5V</text><text x="425" y="95" fill="#34d399" font-size="11" text-anchor="middle">눈부신 전구 발광</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 풍력 발전 에너지 변환 파이프라인 (운동 에너지 ➔ 전기 에너지)</div></div>`,
+            points: [
+                "💨 <b>바람 세기와 회전 속도</b>: 바람이 세게 불수록 풍력 발전기의 날개(블레이드)가 빠르게 회전하며 더 큰 회전 운동 에너지가 발생합니다.",
+                "⚡ <b>전기 에너지의 생산</b>: 날개 축에 연결된 발전기 내부 자석과 코일이 회전하면서 유도 전류가 발생하여 전기가 생산됩니다.",
+                "💡 <b>전구 불빛의 변화</b>: 바람이 강할수록 발전 전압(V)이 상승하여 연결된 LED 전구의 불빛이 더욱 밝아집니다."
+            ]
+        },
+        {
+            title: "[실험 2] 한정된 자원의 유한성과 매장량 분석",
+            bookRef: "『실험관찰』 38~39쪽",
+            labLink: "science_resource_finite_lab.html",
+            safetyTip: "자원 카드를 분류할 때 종이에 손이 베이지 않도록 조심합니다.",
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 115" style="width:100%;max-width:480px;height:auto;"><rect x="20" y="15" width="80" height="24" fill="#f97316" rx="4"/><text x="60" y="32" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">⚙️ 철 47년</text><rect x="110" y="15" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="15" width="130" height="24" fill="#f97316" rx="4"/><rect x="20" y="47" width="80" height="24" fill="#a855f7" rx="4"/><text x="60" y="64" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">🛢️ 석유 50년</text><rect x="110" y="47" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="47" width="140" height="24" fill="#a855f7" rx="4"/><rect x="20" y="79" width="80" height="24" fill="#10b981" rx="4"/><text x="60" y="96" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">♻️ 3R 실천</text><rect x="110" y="79" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="79" width="215" height="24" fill="#10b981" rx="4"/><text x="400" y="96" fill="#34d399" font-size="12" font-family="'Jua',sans-serif">수명 100년+ 연장!</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 자원별 잔여 매장량 및 3R(절약·재사용·재활용) 수명 연장 효과</div></div>`,
+            points: [
+                "⛏️ <b>지하 자원의 유한성</b>: 철, 구리, 알루미늄 등 광물 자원과 석유, 석탄 등 화석 연료는 매장량이 한정되어 있어 언젠가 고갈됩니다.",
+                "⏳ <b>철 매장량 약 47년</b>: 현재 소비 속도가 지속될 경우 인류 문명의 기초인 철 자원은 약 47년 뒤 바닥을 드러낼 위기에 처해 있습니다.",
+                "♻️ <b>3R 실천을 통한 극복</b>: 줄이기(Reduce), 다시 쓰기(Reuse), 재활용하기(Recycle)를 통해 자원의 수명을 2배 이상 연장해야 합니다."
+            ]
+        },
+        {
+            title: "[실험 3] 6대 재생 에너지의 전기 변환 원리",
+            bookRef: "『실험관찰』 40~41쪽",
+            labLink: "science_renewable_energy_lab.html",
+            safetyTip: "전선과 모터 조립 시 합선이 일어나지 않도록 피복 상태를 확인합니다.",
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-family:'Jua',sans-serif;font-size:0.85rem;"><div style="background:#1e293b;padding:6px;border-radius:6px;border-left:3px solid #f59e0b;">☀️ 태양광: 빛➔전지판</div><div style="background:#1e293b;padding:6px;border-radius:6px;border-left:3px solid #38bdf8;">🌬️ 풍력: 바람➔터빈</div><div style="background:#1e293b;padding:6px;border-radius:6px;border-left:3px solid #3b82f6;">💧 수력: 낙차➔수차</div><div style="background:#1e293b;padding:6px;border-radius:6px;border-left:3px solid #06b6d4;">🌊 해양: 조석➔터빈</div><div style="background:#1e293b;padding:6px;border-radius:6px;border-left:3px solid #ef4444;">🌋 지열: 증기➔터빈</div><div style="background:#1e293b;padding:6px;border-radius:6px;border-left:3px solid #10b981;">🌿 바이오: 유기물➔가스</div></div><div style="font-size:0.85rem;color:#94a3b8;margin-top:6px;">▲ 6대 재생 에너지 발전 방식 요약</div></div>`,
+            points: [
+                "☀️ <b>빛과 열의 직접 변환</b>: 태양광 발전은 전지판의 반도체를 통해 빛을 전기로 즉시 변환하고, 태양열 발전은 복사열로 물을 끓여 터빈을 돌립니다.",
+                "💧 <b>자연 운동력의 회전 변환</b>: 풍력, 수력, 조력 발전은 바람과 물의 흐름으로 거대한 터빈을 돌려 운동 에너지를 전기 에너지로 변환합니다.",
+                "🌿 <b>지속가능한 순환</b>: 지열은 지구 내부의 마그마 열을, 바이오는 유기성 폐기물의 가스를 활용하여 자원을 순환시킵니다."
+            ]
+        },
+        {
+            title: "[실험 4] 가전제품 에너지 소비 효율 등급과 대기전력 차단",
+            bookRef: "『실험관찰』 42~43쪽",
+            labLink: "science_energy_efficiency_lab.html",
+            safetyTip: "전기 콘센트를 다룰 때는 마른 손으로 플러그 몸체를 잡고 꽂거나 뽑아야 합니다.",
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 100" style="width:100%;max-width:480px;height:auto;"><circle cx="90" cy="50" r="35" fill="#065f46" stroke="#34d399" stroke-width="3"/><text x="90" y="47" fill="#ffffff" font-size="15" font-family="'Jua',sans-serif" text-anchor="middle">1등급</text><text x="90" y="65" fill="#34d399" font-size="11" text-anchor="middle">최고 절전</text><circle cx="250" cy="50" r="35" fill="#78350f" stroke="#f59e0b" stroke-width="3"/><text x="250" y="47" fill="#ffffff" font-size="15" font-family="'Jua',sans-serif" text-anchor="middle">3등급</text><text x="250" y="65" fill="#fbbf24" font-size="11" text-anchor="middle">표준 수준</text><circle cx="410" cy="50" r="35" fill="#7f1d1d" stroke="#f87171" stroke-width="3"/><text x="410" y="47" fill="#ffffff" font-size="15" font-family="'Jua',sans-serif" text-anchor="middle">5등급</text><text x="410" y="65" fill="#f87171" font-size="11" text-anchor="middle">다소비 낭비</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 에너지 소비 효율 등급 비교 (1등급은 5등급 대비 약 35% 절전)</div></div>`,
+            points: [
+                "🏷️ <b>1등급 스티커의 의미</b>: 1등급 제품은 최신 절전 기술이 적용되어 5등급에 비해 전력을 약 30~40% 적게 소비합니다.",
+                "🔌 <b>대기전력의 차단</b>: 리모컨 신호를 받기 위해 전원을 꺼도 소모되는 '대기전력'은 가정 전기요금의 약 6~11%를 차지하므로 개별 스위치 콘센트로 차단합니다.",
+                "💡 <b>고효율 LED 조명</b>: 기존 백열등을 LED 조명으로 교체하면 소비전력을 최대 80% 이상 줄일 수 있습니다."
+            ]
+        },
+        {
+            title: "[실험 5] 단열재와 창문 뽁뽁이를 이용한 에코하우스 5분 냉각 실험",
+            bookRef: "『실험관찰』 44~45쪽",
+            labLink: "science_eco_house_lab.html",
+            safetyTip: "백열전구를 켠 직후에는 겉 표면이 매우 뜨거우므로 직접 손으로 만지지 않습니다.",
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 120" style="width:100%;max-width:480px;height:auto;"><path d="M 40 95 L 460 95" stroke="#475569" stroke-width="1.5"/><path d="M 40 15 L 40 95" stroke="#475569" stroke-width="1.5"/><text x="25" y="20" fill="#94a3b8" font-size="10">38℃</text><text x="25" y="55" fill="#94a3b8" font-size="10">30℃</text><text x="25" y="90" fill="#94a3b8" font-size="10">23℃</text><text x="40" y="110" fill="#94a3b8" font-size="10">0분</text><text x="145" y="110" fill="#94a3b8" font-size="10">1분</text><text x="250" y="110" fill="#94a3b8" font-size="10">2분</text><text x="355" y="110" fill="#94a3b8" font-size="10">3분</text><text x="450" y="110" fill="#94a3b8" font-size="10">5분 후</text><polyline points="40,20 145,45 250,65 355,80 450,90" fill="none" stroke="#ef4444" stroke-width="2.5"/><text x="400" y="80" fill="#ef4444" font-size="10" font-family="'Jua',sans-serif">일반 집(23℃)</text><polyline points="40,20 145,25 250,29 355,33 450,37" fill="none" stroke="#10b981" stroke-width="2.5"/><text x="400" y="32" fill="#34d399" font-size="10" font-family="'Jua',sans-serif">에코하우스(34.1℃)</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 전등 소등 후 1분 간격 5회 실내 온도 냉각 곡선 비교 (단열 보온 효과)</div></div>`,
+            points: [
+                "🏡 <b>에어캡(뽁뽁이)의 공기층 단열</b>: 뽁뽁이 비닐 방울 속의 갇힌 공기는 열전도율이 매우 낮아 유리창을 통한 열 손실을 막아 줍니다.",
+                "📉 <b>급격한 냉각 방어</b>: 난방(전등)을 끈 뒤 일반 집은 5분 만에 23℃로 차갑게 식지만, 단열 에코하우스는 34.1℃로 따뜻함을 장시간 유지합니다.",
+                "🌱 <b>제로에너지 하우스</b>: 고성능 단열재와 창호, 태양광 패널을 결합하면 외부 화석 연료 공급 없이도 스스로 냉난방을 해결하는 친환경 주택이 됩니다."
+            ]
+        }
+    ],
+
+    // ⚡ [심화 탐구 박스] 에너지 하베스팅
+    specialDeepDive: {
+        title: "⚡ [심화 탐구 박스] 버려지는 에너지를 전기로 수확하는 '에너지 하베스팅(Energy Harvesting)'",
+        intro: "우리가 걸을 때 생기는 진동과 압력, 체온, 와이파이 전파처럼 일상생활 속에서 무심코 버려지는 미세한 에너지를 모아 전기로 바꾸는 똑똑한 지속가능 미래 기술입니다.",
+        points: [
+            "👟 <b>압전 발전 블록 (신발·보도블록)</b> : 사람이 보도블록이나 계단을 밟을 때 바닥에 가해지는 압력과 진동을 '압전 소자'를 통해 전기로 변환하여 야간 가로등을 켭니다.",
+            "🌡️ <b>열전 소자 체온 발전 (스마트 워치)</b> : 사람의 따뜻한 체온(36.5℃)과 차가운 바깥 공기의 온도 차이를 이용해 전기를 생산하여 충전기 없이 작동하는 웨어러블 기기를 만듭니다.",
+            "📡 <b>전자기파 무선 에너지 수확</b> : 주변 스마트폰 기지국이나 방송 안테나에서 공기 중으로 흩어지는 미세한 무선 전파를 흡수하여 소형 사물인터넷(IoT) 센서를 작동시킵니다."
+        ]
+    },
+
+    // ✍️ [탭 2] 실험 연계 탐구 & 서술형 문장 조립 미션 (6종)
+    quizItems: [
+        {
+            id: "q1",
+            type: "blank",
+            title: "🌬️ [실험 1 서술형 빌더] 바람 세기와 풍력 발전기 전기 생산 원리",
+            bookRef: "『실험관찰』 36~37쪽 · 서술형 평가 1번 (채점 기준 100%)",
+            questionText: "바람의 세기가 풍력 발전기의 회전과 전기 생산에 미치는 영향을 아래 과학 구절 카드를 터치하여 완벽한 서술형 답안으로 완성해 보세요!",
+            rubric: [
+                "채점기준 ① (35%) : 바람이 셀수록 날개의 회전 속도가 빨라짐을 기술",
+                "채점기준 ② (35%) : 운동 에너지가 전기 에너지로 변환되어 발전 전압이 높아짐을 설명",
+                "채점기준 ③ (30%) : 연결된 전구의 밝기가 밝아진다는 관찰 결과를 포함"
+            ],
+            templateHtml: "바람의 세기가 {b1} 풍력 발전기의 날개가 점점 더 {b2} 회전합니다.<br>이로 인해 발전기 내부에서 생산되는 전기 에너지가 {b3} 발전 전압이 높아져, 연결된 전구의 불빛이 더욱 {b4} 빛나게 됩니다.<br>즉, 바람의 {b5}가 전구의 빛 에너지로 변환된 것입니다.",
+            blanks: [
+                { id: "b1", target: "바람의 변화", answer: "강해질수록" },
+                { id: "b2", target: "날개 회전 상태", answer: "빠르게" },
+                { id: "b3", target: "전기 생산량 변화", answer: "증가하여" },
+                { id: "b4", target: "전구 불빛 상태", answer: "밝게" },
+                { id: "b5", target: "원천 에너지 형태", answer: "운동 에너지" }
+            ],
+            options: ["강해질수록", "빠르게", "증가하여", "밝게", "운동 에너지", "약해질수록", "느리게", "감소하여"],
+            explanation: "완벽한 서술형 답안입니다! 바람의 세기가 강해질수록 날개가 빠르게 회전하여 더 많은 전기 에너지를 생산하므로 전구가 훨씬 밝게 빛납니다(100점 만점!)."
+        },
+        {
+            id: "q2",
+            type: "choice",
+            title: "⛏️ [실험 2 추론] 지구 자원의 유한성과 철 매장량",
+            bookRef: "『실험관찰』 38~39쪽 · 자원 유한성 분석",
+            questionText: "우리가 일상에서 사용하는 <b>지하 자원의 특성</b>과 <b>철 매장량</b>에 대한 설명으로 가장 알맞은 것은 무엇일까요?",
+            choices: [
+                "철과 석유는 한 번 쓰면 사라지는 유한한 자원이며, 현재 소비 속도로는 철이 약 47년 후 고갈될 수 있으므로 재활용(3R)이 필수적이다.",
+                "철은 지하 마그마에서 매일 생성되므로 마음껏 낭비해도 수만 년 동안 절대 고갈되지 않는다.",
+                "석유와 석탄은 물속에서 무한히 증식하므로 굳이 재생 에너지를 개발할 필요가 없다.",
+                "자원을 아끼는 가장 좋은 방법은 모든 광산을 즉시 폐쇄하고 원시 시대로 돌아가는 것이다."
+            ],
+            answer: 0,
+            explanation: "정답입니다! 철, 석유 등 천연자원은 매장량이 한정된 유한 자원이며, 특히 철은 약 47년 후 고갈될 수 있어 줄이기·재사용·재활용(3R)과 대체 에너지 개발이 필수입니다."
+        },
+        {
+            id: "q3",
+            type: "order",
+            title: "🏡 [실험 5 과정 조립] 단열 에코하우스 냉각 실험 순서 배열",
+            bookRef: "『실험관찰』 44~45쪽 · 탐구 설계 및 수행",
+            questionText: "에코하우스의 단열 성능을 검증하는 실험 과정 카드가 섞여 있습니다! <b>1단계부터 4단계까지 올바른 실험 순서대로 카드를 터치</b>하여 조립해 보세요.",
+            steps: [
+                { id: 1, text: "우드록과 뽁뽁이(에어캡)를 사용해 창문과 벽체를 단열 처리한 에코하우스와 일반 집 모형을 각각 제작합니다." },
+                { id: 2, text: "두 집 모형 내부에 온도계를 설치하고, 상단에 백열전구를 켜서 5분 동안 동일하게 가열합니다." },
+                { id: 3, text: "5분 후 두 집의 온도가 38℃에 도달하면 백열전구를 끄고 자연 냉각을 시작합니다." },
+                { id: 4, text: "소등 후 1분 간격으로 5회 동안 실내 온도를 기록하여 두 집의 냉각 곡선과 보온 성능을 비교합니다." }
+            ],
+            explanation: "실험 순서를 완벽하게 맞췄습니다! [집 모형 제작 ➔ 5분 가열 ➔ 38℃ 도달 후 소등 ➔ 1분 간격 5회 측정 및 냉각 곡선 비교] 순서로 탐구를 진행합니다."
+        },
+        {
+            id: "q4",
+            type: "choice",
+            title: "☀️ [실험 3 & 4 비교] 6대 재생 에너지와 에너지 소비 효율 등급",
+            bookRef: "『실험관찰』 40~43쪽 · 청정 에너지 종합 분석",
+            questionText: "다음 중 <b>재생 에너지</b>와 <b>에너지 소비 효율 등급</b>에 대한 설명으로 <b>옳지 않은</b> 것은 무엇일까요?",
+            choices: [
+                "태양광, 풍력, 수력, 해양, 지열, 바이오 에너지는 발전 과정에서 온실가스를 배출하지 않는 청정 에너지이다.",
+                "가전제품의 에너지 소비 효율 등급은 1등급에 가까울수록 에너지를 적게 소비하는 고효율 제품이다.",
+                "가전제품을 끄고 플러그만 꽂아두어도 소비되는 전기를 '대기전력'이라고 하며, 스위치형 콘센트로 차단할 수 있다.",
+                "5등급 가전제품이 1등급보다 전기를 훨씬 적게 쓰므로 국가에서 5등급 제품 구매를 적극 권장하고 있다."
+            ],
+            answer: 3,
+            explanation: "5등급 가전제품은 에너지를 가장 많이 낭비하는 저효율 제품입니다! 국가에서는 에너지를 30~40% 알뜰하게 절약해 주는 [1등급 고효율 제품]의 구매를 적극 권장합니다."
+        },
+        {
+            id: "q5",
+            type: "blank",
+            title: "⚡ [실험 5 & 에너지 하베스팅 서술형 빌더] 단열의 원리와 미래 에너지 기술",
+            bookRef: "『실험관찰』 44~45쪽 · 서술형 평가 2번 & 심화 탐구",
+            questionText: "에코하우스의 <b>에어캡(뽁뽁이) 단열 원리</b>와 일상에서 버려지는 에너지를 전기로 수확하는 <b>에너지 하베스팅</b>에 대한 서술형 답안을 완성해 보세요!",
+            rubric: [
+                "채점기준 ① (35%) : 뽁뽁이 비닐 방울 속의 '공기층'이 열의 전도를 막아 보온을 유지함을 설명",
+                "채점기준 ② (35%) : 에너지 하베스팅이 버려지는 미세 에너지를 전기로 수확하는 기술임을 기술",
+                "채점기준 ③ (30%) : 압전 발판, 체온 열전 소자 등 구체적 미래 적용 사례 포함"
+            ],
+            templateHtml: "창문에 붙이는 에어캡(뽁뽁이)은 비닐 방울 속의 갇힌 {b1}이 열의 {b2}를 크게 차단하여 겨울철 실내 온도가 식지 않도록 보호해 줍니다.<br>한편, 우리가 걸을 때 생기는 진동이나 체온처럼 일상에서 버려지는 미세한 에너지를 전기로 모으는 기술을 {b3}이라고 합니다.<br>예를 들어 사람이 밟을 때 전기가 생기는 {b4}이나 사람의 체온으로 충전되는 스마트 기기 등이 있습니다.",
+            blanks: [
+                { id: "b1", target: "뽁뽁이 내부 단열 구조", answer: "공기층" },
+                { id: "b2", target: "고체·기체 열 이동", answer: "전도" },
+                { id: "b3", target: "미래 에너지 수확 기술", answer: "에너지 하베스팅" },
+                { id: "b4", target: "발로 밟는 발전 장치", answer: "압전 보도블록" }
+            ],
+            options: ["공기층", "전도", "에너지 하베스팅", "압전 보도블록", "복사열", "화석 연료"],
+            explanation: "훌륭합니다! 뽁뽁이는 [공기층]을 이용해 [전도]를 차단하며, 버려지는 에너지를 전기로 재생하는 [에너지 하베스팅]과 [압전 보도블록]은 미래 친환경 지속가능 사회의 핵심 기술입니다!"
+        },
+        {
+            id: "q6",
+            type: "self_check",
+            title: "⭐ [배움 확인 체크리스트] 4단원 실험연계 학습 스스로 평가하기",
+            bookRef: "『실험관찰』 45쪽 & NotebookLM 배움 확인 체크리스트 6문항",
+            questionText: "4단원 『자원과 에너지』 5가지 실험과 핵심 개념을 얼마나 완벽하게 정복했는지 각 항목마다 별점(⭐ 1~3개)을 직접 터치하여 체크해 보세요!",
+            checklist: [
+                "자원의 뜻과 유한성을 이해하고, 철(47년) 등 지하 자원 고갈을 막기 위한 3R(절약·재사용·재활용)을 실천할 수 있나요?",
+                "바람의 세기에 따른 풍력 발전기 날개 회전과 전기 생산량(전압·전구 밝기)의 비례 관계를 설명할 수 있나요?",
+                "태양광, 풍력, 수력, 해양, 지열, 바이오 등 6대 재생 에너지의 발전 원리와 탄소 배출 제로 장점을 말할 수 있나요?",
+                "가전제품 에너지 소비 효율 등급(1~5등급)의 의미와 대기전력 차단 콘센트, LED 전등의 절전 효과를 설명할 수 있나요?",
+                "창문 뽁뽁이(공기층)와 단열재를 적용한 에코하우스의 5분 냉각 곡선 그래프를 분석하고 보온 원리를 설명할 수 있나요?",
+                "에너지 하베스팅의 뜻을 알고 일상생활(압전 보도블록, 체온 발전)에서 버려지는 에너지를 모으는 기술을 설명할 수 있나요?"
+            ]
+        }
+    ]
+};
+
 

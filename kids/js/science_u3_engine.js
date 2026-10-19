@@ -160,6 +160,11 @@
     // 5. 보석 리워드 트랜잭션 & 클리어 관리 (1회 한정 수령 가드)
     // =========================================================================
     function getLabStorageKey(labId) {
+        if (!labId) return 'minmin_sci_lab_cleared';
+        if (labId.startsWith('minmin_sci_')) return labId;
+        if (labId.startsWith('u4_') || labId.startsWith('u4-') || labId.includes('_u4_')) {
+            return `minmin_sci_${labId}_cleared`;
+        }
         return `minmin_sci_u3_${labId}_cleared`;
     }
 
@@ -317,11 +322,13 @@
     // =========================================================================
     // 🌟 네임스페이스 노출
     // =========================================================================
-    window.ScienceU3Engine = {
+    const engineExport = {
         setupCanvasDPI,
+        setupHiDPICanvas: setupCanvasDPI,
         createLoop,
         initTabs,
         initSummaryAccordion,
+        getLabStorageKey,
         isLabCleared,
         grantLabReward,
         getCurrentGems,
@@ -333,6 +340,9 @@
         playClickSound,
         setupQuiz
     };
+
+    window.ScienceU3Engine = engineExport;
+    window.ScienceLabEngine = engineExport;
 
     // 초기 보석 카운트 동기화
     document.addEventListener('DOMContentLoaded', () => {

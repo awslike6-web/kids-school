@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>6대 재생 에너지 발전관 ☀️ | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+<style>
+    .energy-nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 8px;
+        width: 100%;
+        max-width: 680px;
+        margin-bottom: 12px;
+    }
+    .energy-tab-chip {
+        background: #0d1b32;
+        border: 1.5px solid #224275;
+        border-radius: var(--radius-sm);
+        padding: 10px 8px;
+        text-align: center;
+        font-family: 'Jua', sans-serif;
+        font-size: 0.95rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+    .energy-tab-chip.active {
+        background: #1e3a8a;
+        border-color: #38bdf8;
+        color: #ffffff;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+    .energy-info-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+        max-width: 680px;
+        justify-content: center;
+    }
+    .info-card {
+        background: #0d1b32;
+        border: 1.5px solid #224275;
+        border-radius: var(--radius-md);
+        padding: 12px 18px;
+        flex: 1;
+        min-width: 180px;
+    }
+    .info-tag {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .info-title {
+        font-family: 'Jua', sans-serif;
+        font-size: 1.25rem;
+        color: #38bdf8;
+        margin-top: 2px;
+    }
+</style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>☀️</span>
+        <span>6대 재생 에너지 발전관</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 4단원 · 자원과 에너지</span>
+        <h1 class="banner-title">
+            <span>☀️</span>
+            <span>지구를 살리는 6대 청정 재생 에너지</span>
+        </h1>
+        <p class="banner-desc">
+            석탄과 석유 대신 자연의 끝없는 힘으로 전기를 만들어요!
+            태양광, 풍력, 수력, 해양, 지열, 바이오까지 6가지 재생 에너지가 전기로 변환되는 원리를 직접 탐색해보세요!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 4단원</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
+                title="재생 에너지 발전 원리" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>고갈 없는 무한 에너지</span>
+                        </div>
+                        <h4 class="summary-card-title">자연에서 계속 생겨나요</h4>
+                        <p class="summary-card-desc">
+                            햇빛, 바람, 물, 땅속 열은 써도 써도 없어지지 않고 자연에서 계속 다시 얻을 수 있어요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>탄소 배출 제로(0)</span>
+                        </div>
+                        <h4 class="summary-card-title">온실가스와 미세먼지 방지</h4>
+                        <p class="summary-card-desc">
+                            화석 연료와 달리 매연이나 이산화 탄소를 내뿜지 않아 지구 온난화를 막아줘요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>다양한 발전 방식</span>
+                        </div>
+                        <h4 class="summary-card-title">자연의 특징을 활용</h4>
+                        <p class="summary-card-desc">
+                            바람 터빈, 태양 전지판, 댐 수로, 지하 마그마 열 등 자연의 힘을 똑똑하게 이용해요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 물리 실험실 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 6대 재생 에너지 변환 시뮬레이터</span>
+            </div>
+            <span class="source-badge">에러리스 조작</span>
+        </div>
+
+        <!-- 6대 에너지 선택 칩 -->
+        <div class="energy-nav-grid">
+            <div class="energy-tab-chip active" id="chipSolar" onclick="switchEnergy('solar')">
+                <span>☀️</span><span>태양광</span>
+            </div>
+            <div class="energy-tab-chip" id="chipWind" onclick="switchEnergy('wind')">
+                <span>🌬️</span><span>풍력</span>
+            </div>
+            <div class="energy-tab-chip" id="chipHydro" onclick="switchEnergy('hydro')">
+                <span>💧</span><span>수력</span>
+            </div>
+            <div class="energy-tab-chip" id="chipOcean" onclick="switchEnergy('ocean')">
+                <span>🌊</span><span>해양(조력)</span>
+            </div>
+            <div class="energy-tab-chip" id="chipGeo" onclick="switchEnergy('geo')">
+                <span>🌋</span><span>지열</span>
+            </div>
+            <div class="energy-tab-chip" id="chipBio" onclick="switchEnergy('bio')">
+                <span>🌿</span><span>바이오</span>
+            </div>
+        </div>
+
+        <div class="sim-viewport">
+            <canvas id="energyCanvas" class="sim-canvas"></canvas>
+        </div>
+
+        <div class="energy-info-strip">
+            <div class="info-card">
+                <span class="info-tag">원천 에너지 형태</span>
+                <div class="info-title" id="sourceTypeLabel">태양의 빛 에너지 ☀️</div>
+            </div>
+            <div class="info-card">
+                <span class="info-tag">발전 변환 장치</span>
+                <div class="info-title" id="deviceTypeLabel" style="color: #fde047;">실리콘 태양 전지판</div>
+            </div>
+            <div class="info-card">
+                <span class="info-tag">최종 생산</span>
+                <div class="info-title" id="outputTypeLabel" style="color: #34d399;">청정 전기 에너지 ⚡</div>
+            </div>
+        </div>
+
+        <div class="fairy-bubble-card">
+            <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+            <div class="fairy-bubble-text" id="fairyEnergyText">
+                🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                "태양광 발전은 모터나 터빈 없이, <b>햇빛이 태양 전지판의 반도체에 부딪히며</b> 바로 전기를 만들어내! 소음도 없고 오염도 없어!"
+            </div>
+        </div>
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">재생 에너지 원리 점검</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 태양광, 풍력, 수력 등 <b>'재생 에너지'</b>의 가장 큰 장점은 무엇일까요?
+            <br>
+            "재생 에너지는 자연에서 계속 얻을 수 있어 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 친환경적이다!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>사용해도 고갈되지 않고 온실가스를 배출하지 않아</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>사용할수록 석유와 석탄을 더 많이 태워주어</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>밤에만 작동하여 전기를 아껴주기 때문에</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>쓰레기와 매연을 주변에 많이 뿜어내주므로</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    const energyData = {
+        solar: {
+            name: '태양광 발전',
+            source: '태양의 빛 에너지 ☀️',
+            device: '실리콘 태양 전지판',
+            output: '청정 전기 에너지 ⚡',
+            color: '#f59e0b',
+            desc: '태양광 발전은 모터나 터빈 없이, 햇빛이 태양 전지판의 반도체에 부딪히며 바로 전기를 만들어내! 소음도 없고 오염도 없어!'
+        },
+        wind: {
+            name: '풍력 발전',
+            source: '바람의 운동 에너지 🌬️',
+            device: '거대한 3엽 날개와 발전기',
+            output: '친환경 전기 에너지 ⚡',
+            color: '#38bdf8',
+            desc: '바람이 불어 날개가 회전하면 내부 코일이 돌아 운동 에너지가 전기 에너지로 즉시 변환된단다!'
+        },
+        hydro: {
+            name: '수력 발전',
+            source: '높은 곳 물의 위치 에너지 💧',
+            device: '수압 수로와 수차 터빈',
+            output: '대용량 수력 전기 ⚡',
+            color: '#3b82f6',
+            desc: '댐에 모아둔 물을 높은 곳에서 쏟아부어 그 엄청난 힘으로 터빈을 돌려 대용량 전기를 생산해!'
+        },
+        ocean: {
+            name: '해양(조력) 발전',
+            source: '바닷물 밀물·썰물의 힘 🌊',
+            device: '해양 방조제 수차 터빈',
+            output: '규칙적인 해양 전기 ⚡',
+            color: '#06b6d4',
+            desc: '달의 인력으로 생기는 밀물과 썰물의 높이 차이를 이용해 터빈을 돌리는 무한한 바다 에너지야!'
+        },
+        geo: {
+            name: '지열 발전',
+            source: '땅속 마그마의 열 에너지 🌋',
+            device: '지하 고온 증기 터빈',
+            output: '24시간 연속 전기 ⚡',
+            color: '#ef4444',
+            desc: '지하 깊은 곳의 뜨거운 열기로 물을 끓여 나오는 고압 증기로 터빈을 돌리는 안정적인 청정 에너지야!'
+        },
+        bio: {
+            name: '바이오 에너지',
+            source: '유기물 및 동식물 자원 🌿',
+            device: '바이오 가스화 장치 및 터빈',
+            output: '순환형 바이오 전기 ⚡',
+            color: '#10b981',
+            desc: '음식물 쓰레기나 가축 분뇨, 목재 칩 등을 분해할 때 나오는 메탄가스로 전기를 만들어 자원을 순환시켜!'
+        }
+    };
+
+    let curEnergyKey = 'solar';
+    let energyLoop = null;
+    let animPhase = 0;
+
+    function initEnergyCanvas() {
+        const canvas = document.getElementById('energyCanvas');
+        const dpi = ScienceLabEngine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        if (energyLoop) energyLoop.stop();
+        energyLoop = ScienceLabEngine.createLoop(() => {
+            animPhase += 0.04;
+            renderEnergyScene(dpi.ctx, dpi.width, dpi.height);
+        });
+        energyLoop.start();
+    }
+
+    function renderEnergyScene(ctx, w, h) {
+        ctx.clearRect(0, 0, w, h);
+
+        // 배경
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+        bgGrad.addColorStop(0, '#0c1a30');
+        bgGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        const cur = energyData[curEnergyKey];
+
+        // 3단계 변환 노드 좌표
+        const node1X = w * 0.2;
+        const node2X = w * 0.5;
+        const node3X = w * 0.8;
+        const centerY = h * 0.45;
+
+        // 연결 에너지 스트림 선
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(node1X, centerY);
+        ctx.lineTo(node3X, centerY);
+        ctx.stroke();
+
+        // 흐르는 에너지 입자 (애니메이션)
+        ctx.fillStyle = cur.color;
+        for (let i = 0; i < 6; i++) {
+            const particleX = node1X + ((animPhase * 40 + i * 80) % (node3X - node1X));
+            ctx.beginPath();
+            ctx.arc(particleX, centerY, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 1번 노드: 자연 에너지
+        drawNode(ctx, node1X, centerY, 38, cur.color, '자연 에너지', cur.source.slice(0, 2));
+
+        // 2번 노드: 발전 변환 장치
+        drawNode(ctx, node2X, centerY, 42, '#38bdf8', '변환 장치', '⚙️');
+
+        // 3번 노드: 전기 & 가정 공급
+        drawNode(ctx, node3X, centerY, 38, '#34d399', '가정 공급', '🏠');
+
+        // 하단 설명 텍스트
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 15px "Jua", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`[${cur.name}] 에너지 변환 파이프라인`, w * 0.5, h * 0.82);
+    }
+
+    function drawNode(ctx, x, y, radius, color, label, icon) {
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(icon, x, y);
+
+        ctx.font = 'bold 13px "Jua", sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(label, x, y + radius + 18);
+    }
+
+    function switchEnergy(key) {
+        curEnergyKey = key;
+        document.querySelectorAll('.energy-tab-chip').forEach(c => c.classList.remove('active'));
+        const chip = document.getElementById(`chip${key.charAt(0).toUpperCase() + key.slice(1)}`);
+        if (chip) chip.classList.add('active');
+
+        const cur = energyData[key];
+        document.getElementById('sourceTypeLabel').textContent = cur.source;
+        document.getElementById('deviceTypeLabel').textContent = cur.device;
+        document.getElementById('outputTypeLabel').textContent = cur.output;
+        document.getElementById('fairyEnergyText').innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>"${cur.desc}"`;
+
+        ScienceLabEngine.playClickSound();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ScienceLabEngine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+        initEnergyCanvas();
+
+        ScienceLabEngine.setupQuiz({
+            labId: 'u4_lab3',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '재생 에너지는 자연의 햇빛, 바람, 물 등을 이용해 계속 다시 생겨나므로 고갈되지 않으며 온실가스를 배출하지 않는 최고의 친환경 에너지입니다!',
+            gemAmount: 5
+        });
+    });
+</script>
+</body>
+</html>

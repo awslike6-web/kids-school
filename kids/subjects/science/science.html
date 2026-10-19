@@ -63,6 +63,9 @@
     <button class="unit-tab-btn" id="tabUnit3" onclick="filterScienceUnits('unit3')">
       🔥 [3단원] 열과 우리 생활
     </button>
+    <button class="unit-tab-btn" id="tabUnit4" onclick="filterScienceUnits('unit4')">
+      🌱 [4단원] 자원과 에너지
+    </button>
   </div>
 
   <!-- =======================================================
@@ -212,11 +215,63 @@
     </div>
   </div>
 
+  <!-- =======================================================
+       🌱 [4단원] 자원과 에너지 묶음 섹션
+       ======================================================= -->
+  <div id="unit4Section" class="unit-section-wrap" style="border-color: #86efac; background: rgba(240, 253, 244, 0.6);">
+    <div class="unit-section-header" style="border-bottom-color: #4ade80;">
+      <h2 class="unit-section-title" style="color: #15803d;">
+        <span>🌱</span>
+        <span>4단원 : 자원과 에너지</span>
+      </h2>
+      <span class="unit-section-badge" style="background: #16a34a;">초등 5-2 과학 4단원</span>
+    </div>
+
+    <div class="science-grid" style="margin-bottom: 0;">
+      <!-- 1단계: 4단원 동화 (준비중 안내 카드) -->
+      <div class="science-grid-btn" onclick="alert('📖 4단원 동화는 곧 공개될 예정입니다!')" style="cursor: pointer; border: 2.5px solid #16a34a; background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);">
+        <span class="science-btn-icon">📚</span>
+        <div class="science-btn-title" style="color: #15803d;">[1단계] 단원 동화</div>
+        <p class="science-btn-desc"><strong>『지구를 지키는 에너지 특공대』</strong><br>민수와 함께 바람, 태양, 단열의 힘으로 깨끗한 지구를 만드는 모험 이야기!</p>
+      </div>
+
+      <!-- 2단계: 4단원 어휘 -->
+      <div class="science-grid-btn" onclick="openScienceVocaDirect('5-2', '4단원')" style="border: 2.5px solid #10b981; background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%); cursor: pointer;">
+        <span class="science-btn-icon">🔬</span>
+        <div class="science-btn-title" style="color: #047857;">[2단계] 핵심 용어방</div>
+        <p class="science-btn-desc"><strong>[4단원 5종 어휘 완비]</strong><br>자원, 재생 에너지, 단열, 에너지 소비 효율 등급, 에너지 하베스팅 초성 퀴즈!</p>
+      </div>
+
+      <!-- 3단계: 4단원 5대 가상 실험실 -->
+      <div class="science-grid-btn" style="border: 2.5px solid #16a34a; background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); text-align: left; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 8px;">
+          <span class="science-btn-icon" style="margin-bottom: 8px;">🧪</span>
+          <div class="science-btn-title" style="color: #15803d; margin-bottom: 4px;">[3단계] 자원 & 에너지 탐구관 (5대 가상 실험실)</div>
+          <p class="science-btn-desc" style="margin-bottom: 0;">원하는 실험실을 터치하여 바로 탐구하세요!</p>
+        </div>
+        <div class="unit-lab-chips-box">
+          <a href="science_wind_turbine_lab.html" class="lab-chip-pill" id="chipU4Wind" style="border-color: #86efac; color: #15803d; background: #f0fdf4;">🌬️ [1] 풍력 발전</a>
+          <a href="science_resource_finite_lab.html" class="lab-chip-pill" id="chipU4Resource" style="border-color: #86efac; color: #15803d; background: #f0fdf4;">⛏️ [2] 자원 유한성</a>
+          <a href="science_renewable_energy_lab.html" class="lab-chip-pill" id="chipU4Renewable" style="border-color: #86efac; color: #15803d; background: #f0fdf4;">☀️ [3] 6대 재생에너지</a>
+          <a href="science_energy_efficiency_lab.html" class="lab-chip-pill" id="chipU4Efficiency" style="border-color: #86efac; color: #15803d; background: #f0fdf4;">🏷️ [4] 효율 등급·절전</a>
+          <a href="science_eco_house_lab.html" class="lab-chip-pill" id="chipU4EcoHouse" style="border-color: #86efac; color: #15803d; background: #f0fdf4;">🏡 [5] 단열 에코하우스</a>
+        </div>
+      </div>
+
+      <!-- 4단계: 4단원 탐구 보고서 -->
+      <div class="science-grid-btn" onclick="openScienceReport(4)" style="border: 2.5px solid #8b5cf6; background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%); cursor: pointer;">
+        <span class="science-btn-icon">📝</span>
+        <div class="science-btn-title" style="color: #6d28d9;">[4단계] 실험연계 탐구 보고서</div>
+        <p class="science-btn-desc"><strong>[개념비교표 · 실험 1~5 · 에너지 하베스팅]</strong><br>풍력 발전, 철 47년 매장량, 에코하우스 5분 냉각 곡선 및 서술형 문장 조립 미션!</p>
+      </div>
+    </div>
+  </div>
+
   <!-- 요정 코코 라이브 도크 -->
   <div class="fairy-live-dock">
     <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" style="width: 52px; height: 52px; object-fit: contain;">
     <div class="fairy-bubble">
-      <span id="fairySpeakerText">반가워! 과학방에 입장했구나. 실험하기 전 <b>안전 라이선스</b>를 먼저 따고, <b>1단원(혼합물)</b>, <b>2단원(날씨)</b>, <b>3단원(열과 우리 생활)</b>을 차근차근 탐구해 봐! 🔬</span>
+      <span id="fairySpeakerText">반가워! 과학방에 입장했구나. 실험하기 전 <b>안전 라이선스</b>를 먼저 따고, <b>1단원(혼합물)</b>부터 <b>4단원(자원과 에너지)</b>까지 차근차근 탐구해 봐! 🔬</span>
       <div class="fairy-speech" id="fairyVoiceStatus">🔊 음량 수려함 - WebSpeech API 결합</div>
     </div>
   </div>
@@ -247,14 +302,14 @@
 <script src="../../core/fairy-chatbot.js?v=20260830_no_intro"></script>
 <script src="../../core/subject_engine.js?v=20260930_step2"></script>
 <script src="../../core/image_zoom_modal.js?v=20260930_step2"></script>
-<script src="../../data/science-data.js?v=20261018_u3_v2"></script>
-<script src="../../data/science_lab_data.js?v=20261018_u3_v2"></script>
-<script src="../../js/science_safety.js?v=20261018_u3_v2"></script>
-<script src="../../js/science_storybook.js?v=20261018_u3_v2"></script>
-<script src="../../js/science_voca.js?v=20261018_u3_v2"></script>
-<script src="../../js/science_lab.js?v=20261018_u3_v2"></script>
-<script src="../../js/science_report.js?v=20261018_u3_v2"></script>
-<script src="../../js/science_common.js?v=20261018_u3_v2"></script>
+<script src="../../data/science-data.js?v=20261019_u4"></script>
+<script src="../../data/science_lab_data.js?v=20261019_u4"></script>
+<script src="../../js/science_safety.js?v=20261019_u4"></script>
+<script src="../../js/science_storybook.js?v=20261019_u4"></script>
+<script src="../../js/science_voca.js?v=20261019_u4"></script>
+<script src="../../js/science_lab.js?v=20261019_u4"></script>
+<script src="../../js/science_report.js?v=20261019_u4"></script>
+<script src="../../js/science_common.js?v=20261019_u4"></script>
 
 <script>
   // ========================================================
@@ -267,27 +322,38 @@
     const u1 = document.getElementById('unit1Section');
     const u2 = document.getElementById('unit2Section');
     const u3 = document.getElementById('unit3Section');
+    const u4 = document.getElementById('unit4Section');
 
     if (unitId === 'all') {
       document.getElementById('tabAll').classList.add('active');
       if (u1) u1.style.display = 'block';
       if (u2) u2.style.display = 'block';
       if (u3) u3.style.display = 'block';
+      if (u4) u4.style.display = 'block';
     } else if (unitId === 'unit1') {
       document.getElementById('tabUnit1').classList.add('active');
       if (u1) u1.style.display = 'block';
       if (u2) u2.style.display = 'none';
       if (u3) u3.style.display = 'none';
+      if (u4) u4.style.display = 'none';
     } else if (unitId === 'unit2') {
       document.getElementById('tabUnit2').classList.add('active');
       if (u1) u1.style.display = 'none';
       if (u2) u2.style.display = 'block';
       if (u3) u3.style.display = 'none';
+      if (u4) u4.style.display = 'none';
     } else if (unitId === 'unit3') {
       document.getElementById('tabUnit3').classList.add('active');
       if (u1) u1.style.display = 'none';
       if (u2) u2.style.display = 'none';
       if (u3) u3.style.display = 'block';
+      if (u4) u4.style.display = 'none';
+    } else if (unitId === 'unit4') {
+      document.getElementById('tabUnit4').classList.add('active');
+      if (u1) u1.style.display = 'none';
+      if (u2) u2.style.display = 'none';
+      if (u3) u3.style.display = 'none';
+      if (u4) u4.style.display = 'block';
     }
   }
 
@@ -315,6 +381,23 @@
     ];
     u3Labs.forEach(lab => {
         if (localStorage.getItem(`minmin_sci_u3_${lab.id}_cleared`) === 'true') {
+            const el = document.getElementById(lab.elId);
+            if (el && !el.innerHTML.includes('✅')) {
+                el.innerHTML += ' <span style="color:#10b981; font-weight:bold;">✅</span>';
+            }
+        }
+    });
+
+    // 4단원 5대 가상 실험실 클리어(✅) 배지 갱신
+    const u4Labs = [
+        { key: 'minmin_sci_u4_lab1_cleared', elId: 'chipU4Wind' },
+        { key: 'minmin_sci_u4_lab2_cleared', elId: 'chipU4Resource' },
+        { key: 'minmin_sci_u4_lab3_cleared', elId: 'chipU4Renewable' },
+        { key: 'minmin_sci_u4_lab4_cleared', elId: 'chipU4Efficiency' },
+        { key: 'minmin_sci_u4_lab5_cleared', elId: 'chipU4EcoHouse' }
+    ];
+    u4Labs.forEach(lab => {
+        if (localStorage.getItem(lab.key) === 'true') {
             const el = document.getElementById(lab.elId);
             if (el && !el.innerHTML.includes('✅')) {
                 el.innerHTML += ' <span style="color:#10b981; font-weight:bold;">✅</span>';

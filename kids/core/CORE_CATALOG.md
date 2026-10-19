@@ -448,6 +448,12 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   3. `kids/subjects/science/science_liquid_convection_lab.html` (498줄): 타원 와류 스트림라인 유체 입자(40개) 온도-색상 보간 대류 순환기
   4. `kids/subjects/science/science_gas_convection_lab.html` (646줄): 방 단면도 에어컨/난방기 4조합 배치 히트맵·상하층 온도계 & 전열기 적외선 복사열 차광판 차단기
   5. `kids/subjects/science/science_insulation_lab.html` (650줄): 4대 단열 부품(마개, 진공, 은도금, 폼) 조립기 & 단열 점수 실시간 연동 60분 초고속 냉각 곡선 꺾은선 그래프
+- **4단원 5대 가상 실험실 파일군**:
+  1. `kids/subjects/science/science_wind_turbine_lab.html` (434줄): 바람 세기 4단계 조절, 날개 회전 rAF 시각화, 유도 전압(0~4.5V) 및 전구 발광 시뮬레이터
+  2. `kids/subjects/science/science_resource_finite_lab.html` (420줄): 4대 자원(철·석유·담수·산림), 소비 모드별 철 잔여 매장량(47년) 카운트다운 및 3R 수명 2.2배 연장
+  3. `kids/subjects/science/science_renewable_energy_lab.html` (434줄): 6대 청정 에너지(태양광·풍력·수력·해양·지열·바이오) 탭 스위처 및 3단계 에너지 변환 파티클 스트림
+  4. `kids/subjects/science/science_energy_efficiency_lab.html` (429줄): 1~5등급 가전제품 효율 비교(1등급 35% 절전), 대기전력 차단 콘센트, LED 조명, 빗물 재활용 토글 및 월간 전기요금 산출
+  5. `kids/subjects/science/science_eco_house_lab.html` (428줄): 백열등 5분 가열(38℃ 도달) ➔ 소등 후 1분 간격 5회 실내 냉각 관찰(일반 집 23℃ vs 에어캡 뽁뽁이 공기층 에코하우스 34.1℃ 방어)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |

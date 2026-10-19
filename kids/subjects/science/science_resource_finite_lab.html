@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>한정된 자원의 유한성 탐구실 ⛏️ | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+<style>
+    .finite-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        position: relative;
+    }
+    .resource-dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        width: 100%;
+        max-width: 680px;
+    }
+    .dash-box {
+        background: #0d1b32;
+        border: 1.5px solid #224275;
+        border-radius: var(--radius-md);
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .dash-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #94a3b8;
+    }
+    .dash-val {
+        font-family: 'Jua', sans-serif;
+        font-size: 1.6rem;
+        color: #38bdf8;
+    }
+    .dash-bar-bg {
+        width: 100%;
+        height: 10px;
+        background: #1e293b;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .dash-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981, #3b82f6);
+        border-radius: 5px;
+        transition: width 0.5s ease, background 0.5s ease;
+    }
+</style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>⛏️</span>
+        <span>자원의 유한성 탐구실</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 4단원 · 자원과 에너지</span>
+        <h1 class="banner-title">
+            <span>⛏️</span>
+            <span>지구 자원의 유한성과 현명한 자원 소비</span>
+        </h1>
+        <p class="banner-desc">
+            우리가 매일 쓰는 철, 석유, 물, 숲은 영원할까요?
+            철 매장량은 약 47년 후 고갈될 위기에 처해 있습니다.
+            소비 습관과 재활용(3R) 실천에 따라 자원의 수명이 어떻게 늘어나는지 직접 시뮬레이션해 보세요!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 4단원</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
+                title="자원의 유한성 영상" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>자원의 유한성</span>
+                        </div>
+                        <h4 class="summary-card-title">한 번 쓰면 사라지는 광물</h4>
+                        <p class="summary-card-desc">
+                            철, 구리, 석유 등 지하 자원은 만들어지는 데 수억 년이 걸려 쓰면 쓸수록 바닥이 드러나요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>철 매장량 약 47년</span>
+                        </div>
+                        <h4 class="summary-card-title">교과서 속 골든타임</h4>
+                        <p class="summary-card-desc">
+                            현재 소비 속도로 쓰면 철은 47년 후 고갈될 수 있어 대체 자원 개발과 재활용이 필수예요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>3R 실천의 힘</span>
+                        </div>
+                        <h4 class="summary-card-title">줄이고, 다시 쓰고, 재활용!</h4>
+                        <p class="summary-card-desc">
+                            분리배출과 아껴 쓰기를 실천하면 자원의 수명을 2배 이상 연장할 수 있어요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 물리 실험실 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 자원 매장량 & 수명 예측 시뮬레이터</span>
+            </div>
+            <span class="source-badge">에러리스 조작</span>
+        </div>
+
+        <div class="finite-stage">
+            <div class="sim-viewport">
+                <canvas id="resourceCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="resource-dashboard">
+                <div class="dash-box">
+                    <div class="dash-head">
+                        <span id="resNameLabel">⚙️ 철(Iron) 잔여 매장량</span>
+                        <span id="resPercentLabel" style="color: #38bdf8;">100%</span>
+                    </div>
+                    <div class="dash-bar-bg">
+                        <div class="dash-bar-fill" id="resBarFill" style="width: 100%;"></div>
+                    </div>
+                    <div class="dash-val" id="resYearsLabel">잔여: 약 47년</div>
+                </div>
+
+                <div class="dash-box">
+                    <div class="dash-head">
+                        <span>🌱 소비 모드 평가</span>
+                        <span id="modeBadge" style="color: #10b981;">표준 소비</span>
+                    </div>
+                    <div class="dash-val" id="modeImpactLabel" style="font-size: 1.2rem; color: #fde047;">고갈 예상: 2073년</div>
+                    <span style="font-size: 0.8rem; color: #94a3b8;" id="modeDescLabel">현재 속도로 전 세계가 소비할 때의 기준입니다.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="ctrl-group">
+                <span class="ctrl-label">📦 자원 종류 선택:</span>
+                <button type="button" class="btn-ctrl active" id="btnResIron" onclick="selectResource('iron')">⚙️ 철 (기준 47년)</button>
+                <button type="button" class="btn-ctrl" id="btnResOil" onclick="selectResource('oil')">🛢️ 석유 (기준 50년)</button>
+                <button type="button" class="btn-ctrl" id="btnResWater" onclick="selectResource('water')">💧 깨끗한 담수</button>
+                <button type="button" class="btn-ctrl" id="btnResForest" onclick="selectResource('forest')">🌲 산림 자원</button>
+            </div>
+            <div class="ctrl-group">
+                <span class="ctrl-label">⚡ 소비 습관 모드:</span>
+                <button type="button" class="btn-ctrl" id="btnModeWaste" onclick="setConsumeMode('waste')">💥 무분별한 과소비 (-40%)</button>
+                <button type="button" class="btn-ctrl active" id="btnModeStandard" onclick="setConsumeMode('standard')">⚖️ 현재 표준 소비</button>
+                <button type="button" class="btn-ctrl" id="btnModeRecycle" onclick="setConsumeMode('recycle')">♻️ 3R 적극 재활용 (+120%)</button>
+            </div>
+        </div>
+
+        <div class="fairy-bubble-card">
+            <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+            <div class="fairy-bubble-text" id="fairyResText">
+                🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                "철은 현재 속도로 쓰면 <b>약 47년</b> 뒤에 바닥나지만, 
+                우리가 <b>[3R 적극 재활용]</b>을 실천하면 수명이 <b>100년 이상</b>으로 2배 넘게 늘어난단다!"
+            </div>
+        </div>
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">자원의 유한성 점검</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 한정된 지구 자원을 오랫동안 아껴 쓰기 위한 <b>가장 올바른 태도</b>는 무엇일까요?
+            <br>
+            "철과 석유 같은 천연자원은 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 실천해야 한다!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>유한하므로 일회용품 사용을 줄이고 재활용을</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>어차피 고갈되므로 남아있을 때 빨리 다 쓰는 것을</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>끝없이 스스로 생겨나므로 절약할 필요가 없음을</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>모든 자원을 땅속 깊은 곳에 묻어버리는 것을</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    const resources = {
+        iron: { name: '⚙️ 철(Iron)', baseYears: 47, desc: '철은 자동차, 건물, 기계를 만드는 소중한 금속 자원으로 매장량이 약 47년 정도 남았습니다.' },
+        oil: { name: '🛢️ 석유(Crude Oil)', baseYears: 50, desc: '석유는 플라스틱과 연료의 원료이지만 약 50년 후면 바닥날 수 있는 화석 자원입니다.' },
+        water: { name: '💧 깨끗한 담수', baseYears: 60, desc: '지구 전체 물 중 우리가 마실 수 있는 담수는 약 2.5%에 불과하여 오염을 막아야 합니다.' },
+        forest: { name: '🌲 산림 자원', baseYears: 70, desc: '나무는 종이와 목재를 주지만 무분별하게 베어내면 복원하는 데 수십 년이 걸립니다.' }
+    };
+
+    let curResKey = 'iron';
+    let curMode = 'standard';
+    let resLoop = null;
+
+    function initResourceCanvas() {
+        const canvas = document.getElementById('resourceCanvas');
+        const dpi = ScienceLabEngine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        if (resLoop) resLoop.stop();
+        resLoop = ScienceLabEngine.createLoop(() => {
+            renderResourceView(dpi.ctx, dpi.width, dpi.height);
+        });
+        resLoop.start();
+    }
+
+    function renderResourceView(ctx, w, h) {
+        ctx.clearRect(0, 0, w, h);
+
+        // 지하 지층 단면 렌더링
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+        bgGrad.addColorStop(0, '#0f172a');
+        bgGrad.addColorStop(0.5, '#1e293b');
+        bgGrad.addColorStop(1, '#090d16');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 지표면 풀밭
+        ctx.fillStyle = '#065f46';
+        ctx.fillRect(0, h * 0.15, w, 12);
+
+        // 지상 구조물 (재활용 공장 or 광산 굴착기)
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(w * 0.1, h * 0.05, 60, h * 0.1);
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1 + 30, h * 0.05);
+        ctx.lineTo(w * 0.1 + 70, h * 0.15);
+        ctx.lineTo(w * 0.1 - 10, h * 0.15);
+        ctx.fill();
+
+        // 지하 자원 암석층 시각화
+        const rockTop = h * 0.22;
+        const rockH = h * 0.72;
+
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fillRect(w * 0.1, rockTop, w * 0.8, rockH);
+        ctx.strokeStyle = '#4338ca';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(w * 0.1, rockTop, w * 0.8, rockH);
+
+        // 잔여 자원 비율 계산
+        let ratio = 1.0;
+        if (curMode === 'waste') ratio = 0.55;
+        if (curMode === 'recycle') ratio = 1.45;
+
+        const maxH = rockH - 20;
+        const fillH = Math.min(maxH, maxH * (ratio / 1.5));
+
+        // 자원 광맥 렌더링
+        let veinColor = '#3b82f6';
+        if (curResKey === 'iron') veinColor = '#f97316';
+        if (curResKey === 'oil') veinColor = '#a855f7';
+        if (curResKey === 'water') veinColor = '#06b6d4';
+        if (curResKey === 'forest') veinColor = '#10b981';
+
+        ctx.fillStyle = veinColor;
+        ctx.fillRect(w * 0.15, rockTop + rockH - fillH - 10, w * 0.7, fillH);
+
+        // 자원 텍스트 표시
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px "Jua", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`지하 자원 잔여 깊이: ${(ratio * 100).toFixed(0)}%`, w * 0.5, rockTop + rockH - fillH / 2);
+    }
+
+    function selectResource(key) {
+        curResKey = key;
+        document.querySelectorAll('.control-panel .ctrl-group:first-child .btn-ctrl').forEach(b => b.classList.remove('active'));
+        if (key === 'iron') document.getElementById('btnResIron').classList.add('active');
+        if (key === 'oil') document.getElementById('btnResOil').classList.add('active');
+        if (key === 'water') document.getElementById('btnResWater').classList.add('active');
+        if (key === 'forest') document.getElementById('btnResForest').classList.add('active');
+        updateDashboard();
+        ScienceLabEngine.playClickSound();
+    }
+
+    function setConsumeMode(mode) {
+        curMode = mode;
+        document.querySelectorAll('.control-panel .ctrl-group:last-child .btn-ctrl').forEach(b => b.classList.remove('active'));
+        if (mode === 'waste') document.getElementById('btnModeWaste').classList.add('active');
+        if (mode === 'standard') document.getElementById('btnModeStandard').classList.add('active');
+        if (mode === 'recycle') document.getElementById('btnModeRecycle').classList.add('active');
+        updateDashboard();
+        ScienceLabEngine.playClickSound();
+    }
+
+    function updateDashboard() {
+        const res = resources[curResKey];
+        let multiplier = 1.0;
+        let modeText = '표준 소비';
+        let badgeColor = '#10b981';
+        let desc = '현재 속도로 전 세계가 소비할 때의 기준입니다.';
+
+        if (curMode === 'waste') {
+            multiplier = 0.6;
+            modeText = '무분별한 과소비 ⚠️';
+            badgeColor = '#ef4444';
+            desc = '일회용품을 남용하고 낭비하면 자원 고갈이 훨씬 앞당겨집니다!';
+        } else if (curMode === 'recycle') {
+            multiplier = 2.2;
+            modeText = '3R 적극 재활용 🌟';
+            badgeColor = '#34d399';
+            desc = '분리수거와 재활용을 실천하여 자원 수명을 2배 이상 연장했습니다!';
+        }
+
+        const calculatedYears = Math.round(res.baseYears * multiplier);
+        const targetYear = 2026 + calculatedYears;
+
+        document.getElementById('resNameLabel').textContent = `${res.name} 잔여 매장량`;
+        document.getElementById('resPercentLabel').textContent = `${(multiplier * 100).toFixed(0)}%`;
+        document.getElementById('resBarFill').style.width = `${Math.min(100, (multiplier / 2.2) * 100)}%`;
+        document.getElementById('resYearsLabel').textContent = `잔여: 약 ${calculatedYears}년`;
+
+        const modeBadge = document.getElementById('modeBadge');
+        modeBadge.textContent = modeText;
+        modeBadge.style.color = badgeColor;
+
+        document.getElementById('modeImpactLabel').textContent = `고갈 예상: ${targetYear}년`;
+        document.getElementById('modeDescLabel').textContent = desc;
+
+        document.getElementById('fairyResText').innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>"${res.desc} <br><b>${modeText}</b> 모드에서는 약 <b>${calculatedYears}년</b> 동안 이용할 수 있어!"`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ScienceLabEngine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+        initResourceCanvas();
+        updateDashboard();
+
+        ScienceLabEngine.setupQuiz({
+            labId: 'u4_lab2',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '지하 자원은 쓸수록 고갈되는 유한성을 지니고 있으므로 일회용품 사용을 줄이고 재사용·재활용(3R)을 적극 실천해야 자원을 오래 보존할 수 있습니다!',
+            gemAmount: 5
+        });
+    });
+</script>
+</body>
+</html>

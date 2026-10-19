@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>풍력 발전기 가상 실험실 🌬️ | 민민이네 과학실험실</title>
+<link rel="stylesheet" href="../../css/science_lab_common.css">
+<style>
+    .turbine-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+        position: relative;
+    }
+    .meter-cluster {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        width: 100%;
+        max-width: 640px;
+    }
+    .meter-card {
+        background: #0d1b32;
+        border: 1.5px solid #224275;
+        border-radius: var(--radius-md);
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 180px;
+    }
+    .meter-icon {
+        font-size: 1.8rem;
+    }
+    .meter-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .meter-title {
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+    .meter-value {
+        font-family: 'Jua', sans-serif;
+        font-size: 1.3rem;
+        color: #38bdf8;
+    }
+</style>
+</head>
+<body>
+
+<!-- 상단 네비게이션 -->
+<div class="top-bar">
+    <a href="science.html" class="btn-back">⬅ 과학 대기실</a>
+    <div class="page-title">
+        <span>🌬️</span>
+        <span>풍력 발전기 실험실</span>
+    </div>
+    <div class="gem-badge">
+        <span>💎</span>
+        <span id="gemCount">0</span>
+    </div>
+</div>
+
+<div class="main-wrap">
+
+    <!-- 헤더 배너 -->
+    <div class="header-banner">
+        <span class="banner-sub">초등 5학년 2학기 과학 4단원 · 자원과 에너지</span>
+        <h1 class="banner-title">
+            <span>🌬️</span>
+            <span>바람의 세기와 풍력 발전기의 전기 생산</span>
+        </h1>
+        <p class="banner-desc">
+            바람이 세게 불수록 발전기 날개는 얼마나 빨리 돌고 전기는 얼마나 많이 만들어질까요?
+            바람의 세기를 조절하여 날개 회전과 연결된 전구의 밝기 변화를 직접 관찰해보세요!
+        </p>
+    </div>
+
+    <!-- 1단계: 교과서 영상 및 3컷 만화 요약 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>📺</span>
+                <span>[1단계] 교과서 생생 실험 클립</span>
+            </div>
+            <span class="source-badge">실험관찰 4단원</span>
+        </div>
+
+        <div class="video-frame-wrap">
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
+                title="풍력 발전 원리 영상" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="yt-fallback-bar">
+            <span>💡 영상 재생에 문제가 있나요?</span>
+            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+                📺 유튜브 새창 열기 ↗
+            </a>
+        </div>
+
+        <!-- 3컷 만화 요약 아코디언 -->
+        <div class="summary-accordion">
+            <button type="button" class="summary-toggle-btn" id="summaryToggleBtn">
+                <span>📖 영상이 안 보일 때 : 3컷 핵심 요약 카드 보기</span>
+                <span class="summary-arrow">▼ 펼치기</span>
+            </button>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-cards-grid">
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>1️⃣</span> <span>바람의 운동 에너지</span>
+                        </div>
+                        <h4 class="summary-card-title">공기의 흐름이 날개를 회전</h4>
+                        <p class="summary-card-desc">
+                            자연의 바람이 거대한 날개(블레이드)를 밀어내면서 회전 운동 에너지가 발생해요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>2️⃣</span> <span>발전기의 전기 생산</span>
+                        </div>
+                        <h4 class="summary-card-title">회전 에너지가 전기 에너지로!</h4>
+                        <p class="summary-card-desc">
+                            날개가 돌면 내부 자석과 코일이 회전하면서 깨끗한 전기 에너지가 만들어져요.
+                        </p>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-card-step">
+                            <span>3️⃣</span> <span>바람 세기와 발전량</span>
+                        </div>
+                        <h4 class="summary-card-title">바람이 셀수록 많은 전기!</h4>
+                        <p class="summary-card-desc">
+                            바람이 강할수록 날개가 빠르게 회전하여 전구 불빛이 밝아지고 발전량이 커져요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2단계: 인터랙티브 가상 물리 실험실 -->
+    <div class="section-card">
+        <div class="section-header">
+            <div class="section-tag">
+                <span>🧪</span>
+                <span>[2단계] 풍력 발전 시뮬레이터</span>
+            </div>
+            <span class="source-badge">에러리스 조작</span>
+        </div>
+
+        <div class="turbine-stage">
+            <div class="sim-viewport">
+                <canvas id="turbineCanvas" class="sim-canvas"></canvas>
+            </div>
+
+            <div class="meter-cluster">
+                <div class="meter-card">
+                    <span class="meter-icon">💨</span>
+                    <div class="meter-info">
+                        <span class="meter-title">바람 세기</span>
+                        <span class="meter-value" id="windSpeedLabel">약한 바람 (2 m/s)</span>
+                    </div>
+                </div>
+                <div class="meter-card">
+                    <span class="meter-icon">⚡</span>
+                    <div class="meter-info">
+                        <span class="meter-title">발전 전압</span>
+                        <span class="meter-value" id="voltageLabel" style="color: #fbbf24;">1.5 V</span>
+                    </div>
+                </div>
+                <div class="meter-card">
+                    <span class="meter-icon">💡</span>
+                    <div class="meter-info">
+                        <span class="meter-title">전구 상태</span>
+                        <span class="meter-value" id="bulbStatusLabel" style="color: #34d399;">은은한 불빛</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="ctrl-group">
+                <span class="ctrl-label">🌬️ 바람 세기 선택:</span>
+                <button type="button" class="btn-ctrl" id="btnWindStop" onclick="setWindLevel(0)">🚫 무풍 (0m/s)</button>
+                <button type="button" class="btn-ctrl active" id="btnWindLow" onclick="setWindLevel(1)">🍃 산들바람 (2m/s)</button>
+                <button type="button" class="btn-ctrl" id="btnWindMid" onclick="setWindLevel(2)">💨 시원한 바람 (5m/s)</button>
+                <button type="button" class="btn-ctrl" id="btnWindHigh" onclick="setWindLevel(3)">🌪️ 센 강풍 (9m/s)</button>
+            </div>
+        </div>
+
+        <div class="fairy-bubble-card">
+            <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
+            <div class="fairy-bubble-text" id="fairyWindText">
+                🧚 <b>요정 코코의 관찰 돋보기:</b><br>
+                "바람의 세기를 '센 강풍'으로 올려봐! 날개가 쌩쌩 빠르게 돌면서 발전기에서 높은 전압(4.5V)이 생겨 
+                연결된 전구가 <b>눈부시게 활활 빛나는 것</b>을 볼 수 있어!"
+            </div>
+        </div>
+    </div>
+
+    <!-- 3단계: 탐구 퀴즈 & 보석 리워드 -->
+    <div class="quiz-box">
+        <div class="quiz-header">
+            <div class="quiz-badge">💡 [3단계] 탐구 마스터 퀴즈 (+5💎)</div>
+            <span style="font-size: 0.9rem; color: #94a3b8;">풍력 발전 탐구</span>
+        </div>
+
+        <div class="quiz-question">
+            Q. 풍력 발전기에 대한 설명으로 <b>가장 알맞은 것</b>은 무엇일까요?
+            <br>
+            "풍력 발전기는 바람의 세기가 <span class="quiz-blank-slot" id="blankSlot">[ ❓ 정답 선택 ]</span> 전기를 생산한다!"
+        </div>
+
+        <div class="quiz-choices-grid">
+            <button type="button" class="quiz-choice-btn" data-ans="1">
+                <span>①</span>
+                <span>셀수록 날개가 빠르게 회전하여 더 많은</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="2">
+                <span>②</span>
+                <span>약할수록 발전기 소음이 줄어 더 많은</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="3">
+                <span>③</span>
+                <span>세든 약하든 언제나 똑같은 양의</span>
+            </button>
+            <button type="button" class="quiz-choice-btn" data-ans="4">
+                <span>④</span>
+                <span>전혀 불지 않아야 태양열을 흡수하여</span>
+            </button>
+        </div>
+
+        <div class="quiz-feedback-box" id="quizFeedback"></div>
+    </div>
+
+</div>
+
+<!-- 스크립트 로드 -->
+<script src="../../js/science_u3_engine.js"></script>
+<script>
+    let windLevel = 1; // 0: 무풍, 1: 약, 2: 중, 3: 강
+    let bladeAngle = 0;
+    let turbineLoop = null;
+
+    const windSettings = [
+        { speed: 0, speedText: '무풍 (0 m/s)', rotSpeed: 0, volt: '0.0 V', bulb: '꺼짐', bulbAlpha: 0.05, desc: "바람이 불지 않으면 날개가 돌지 않아 전기가 생기지 않아요." },
+        { speed: 2, speedText: '산들바람 (2 m/s)', rotSpeed: 0.03, volt: '1.5 V', bulb: '은은한 불빛', bulbAlpha: 0.35, desc: "산들바람이 불어 날개가 천천히 돌며 작은 전기를 만듭니다." },
+        { speed: 5, speedText: '시원한 바람 (5 m/s)', rotSpeed: 0.08, volt: '3.0 V', bulb: '밝은 불빛', bulbAlpha: 0.70, desc: "바람이 세어져 날개가 활발하게 돌고 전구가 밝아졌어요!" },
+        { speed: 9, speedText: '센 강풍 (9 m/s)', rotSpeed: 0.16, volt: '4.5 V', bulb: '눈부신 광채 🌟', bulbAlpha: 1.0, desc: "강풍 덕분에 발전기가 최고 속도로 회전하여 대량의 전기를 생산합니다!" }
+    ];
+
+    function initTurbineCanvas() {
+        const canvas = document.getElementById('turbineCanvas');
+        const dpi = ScienceLabEngine.setupCanvasDPI(canvas);
+        if (!dpi) return;
+
+        if (turbineLoop) turbineLoop.stop();
+        turbineLoop = ScienceLabEngine.createLoop(() => {
+            bladeAngle += windSettings[windLevel].rotSpeed;
+            renderTurbine(dpi.ctx, dpi.width, dpi.height);
+        });
+        turbineLoop.start();
+    }
+
+    function renderTurbine(ctx, w, h) {
+        ctx.clearRect(0, 0, w, h);
+
+        // 하늘 및 들판 배경
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0, '#0a192f');
+        skyGrad.addColorStop(0.7, '#172a45');
+        skyGrad.addColorStop(1, '#1b3a4b');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 언덕
+        ctx.fillStyle = '#0f382c';
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.quadraticCurveTo(w * 0.3, h * 0.75, w, h * 0.85);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fill();
+
+        // 바람 파티클 시각화
+        if (windLevel > 0) {
+            ctx.strokeStyle = `rgba(147, 197, 253, ${0.15 * windLevel})`;
+            ctx.lineWidth = 2;
+            const now = Date.now() * 0.002 * (windLevel + 1);
+            for (let i = 0; i < 5; i++) {
+                const y = h * 0.2 + i * (h * 0.12);
+                const offset = (now * 60 + i * 140) % (w + 100);
+                ctx.beginPath();
+                ctx.moveTo(offset - 80, y);
+                ctx.lineTo(offset, y);
+                ctx.stroke();
+            }
+        }
+
+        // 풍력 발전기 기둥
+        const tx = w * 0.38;
+        const ty = h * 0.42;
+        const poleH = h * 0.46;
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.moveTo(tx - 10, ty + poleH);
+        ctx.lineTo(tx - 6, ty);
+        ctx.lineTo(tx + 6, ty);
+        ctx.lineTo(tx + 10, ty + poleH);
+        ctx.closePath();
+        ctx.fill();
+
+        // 전선 연결선 (발전기 -> 전구 모형)
+        const bulbX = w * 0.76;
+        const bulbY = h * 0.58;
+
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty + poleH);
+        ctx.quadraticCurveTo(w * 0.55, h * 0.9, bulbX, bulbY + 40);
+        ctx.stroke();
+
+        // 전구 거치대
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(bulbX - 25, bulbY + 30, 50, 20);
+
+        // 전구 광채 렌더링
+        const curBulb = windSettings[windLevel];
+        if (curBulb.bulbAlpha > 0.1) {
+            const glow = ctx.createRadialGradient(bulbX, bulbY, 5, bulbX, bulbY, 70 * curBulb.bulbAlpha);
+            glow.addColorStop(0, `rgba(253, 224, 71, ${curBulb.bulbAlpha * 0.9})`);
+            glow.addColorStop(0.5, `rgba(250, 204, 21, ${curBulb.bulbAlpha * 0.4})`);
+            glow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(bulbX, bulbY, 70 * curBulb.bulbAlpha, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 전구 유리구
+        ctx.fillStyle = curBulb.bulbAlpha > 0.2 ? `rgba(254, 240, 138, ${0.4 + curBulb.bulbAlpha * 0.5})` : '#475569';
+        ctx.beginPath();
+        ctx.arc(bulbX, bulbY, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 전구 필라멘트
+        ctx.strokeStyle = curBulb.bulbAlpha > 0.2 ? '#f59e0b' : '#334155';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(bulbX - 8, bulbY + 12);
+        ctx.lineTo(bulbX - 4, bulbY - 5);
+        ctx.lineTo(bulbX + 4, bulbY - 5);
+        ctx.lineTo(bulbX + 8, bulbY + 12);
+        ctx.stroke();
+
+        // 풍력 발전기 날개 (3개 블레이드)
+        ctx.save();
+        ctx.translate(tx, ty);
+        ctx.rotate(bladeAngle);
+
+        for (let i = 0; i < 3; i++) {
+            ctx.save();
+            ctx.rotate((i * 2 * Math.PI) / 3);
+            
+            // 날개 블레이드
+            ctx.fillStyle = '#f1f5f9';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-14, -40, -10, -95, 0, -115);
+            ctx.bezierCurveTo(10, -95, 14, -40, 0, 0);
+            ctx.fill();
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 발전기 중앙 너셀(Nacelle)
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function setWindLevel(level) {
+        windLevel = level;
+        document.querySelectorAll('.control-panel .btn-ctrl').forEach(b => b.classList.remove('active'));
+        if (level === 0) document.getElementById('btnWindStop').classList.add('active');
+        if (level === 1) document.getElementById('btnWindLow').classList.add('active');
+        if (level === 2) document.getElementById('btnWindMid').classList.add('active');
+        if (level === 3) document.getElementById('btnWindHigh').classList.add('active');
+
+        const cur = windSettings[level];
+        document.getElementById('windSpeedLabel').textContent = cur.speedText;
+        document.getElementById('voltageLabel').textContent = cur.volt;
+        document.getElementById('bulbStatusLabel').textContent = cur.bulb;
+        document.getElementById('fairyWindText').innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>"${cur.desc}"`;
+        
+        ScienceLabEngine.playClickSound();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        ScienceLabEngine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
+        initTurbineCanvas();
+
+        ScienceLabEngine.setupQuiz({
+            labId: 'u4_lab1',
+            slotId: 'blankSlot',
+            feedbackId: 'quizFeedback',
+            answer: '1',
+            explanation: '풍력 발전기는 바람의 운동 에너지를 날개 회전을 통해 전기 에너지로 바꾸므로, 바람이 셀수록 날개가 빠르게 돌아 더 많은 전기를 생산합니다!',
+            gemAmount: 5
+        });
+    });
+</script>
+</body>
+</html>
