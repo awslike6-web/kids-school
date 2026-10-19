@@ -80,6 +80,21 @@
             border: "#ea580c",
             link: "science_temp_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/3/science_temp_story_p1.png"
+        },
+        {
+            id: "5_2_4_1",
+            grade: "5-2",
+            unit: "4단원",
+            bookNum: "6권",
+            title: "지구를 구하라! 민수의 자원과 에너지 대작전",
+            subtitle: "4단원 자원과 에너지 (유한 자원·재생 에너지·단열·에너지 하베스팅)",
+            desc: "호기심 많은 소년 민수와 과학 요정 모리가 함께 떠나는 신나는 자원과 에너지 과학 탐험 이야기!",
+            icon: "⚡",
+            color: "#16a34a",
+            bgGrad: "linear-gradient(135deg, rgba(22, 163, 74, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+            border: "#16a34a",
+            link: "science_energy_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/science/minsu/5-2/4/science_energy_story_p1.png"
         }
     ];
 

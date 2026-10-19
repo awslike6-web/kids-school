@@ -393,12 +393,12 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceSafety.renderGoldCard(container)` | 골드 연구원증 발급 카드 렌더링 및 10💎 보상 수여 |
 
 ### 🌟 `science_storybook.js` ([1단계] 과학 단원 동화 도서관 전담 엔진)
-교과서 0~3단원 과학 동화 1~5권 메타데이터(`SCIENCE_STORYBOOK_LIBRARY`) 관리 및 모달 도서관 서가 렌더링을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_storybook.js` (182줄)
+교과서 0~4단원 과학 동화 1~6권 메타데이터(`SCIENCE_STORYBOOK_LIBRARY`) 관리 및 모달 도서관 서가 렌더링을 전담하는 독립 모듈입니다.
+- **파일 위치**: `kids/js/science_storybook.js` (198줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `ScienceStorybook.renderLibrary(container)` | 과학 단원 동화 1~5권 서가 모달 UI 렌더링 |
+  | `ScienceStorybook.renderLibrary(container)` | 과학 단원 동화 1~6권 서가 모달 UI 렌더링 |
 
 ### 🌟 `science_voca.js` ([2단계] 과학 핵심 용어방 전담 엔진)
 2단계(학년/학기 ➔ 단원) 동적 선택 UI, 단원 직결 오픈(`openScienceVocaDirect`), 초성 힌트 퀴즈 렌더러(`img` / `imageUrl` 이중 호환) 및 정답 판정을 전담하는 독립 모듈입니다.
