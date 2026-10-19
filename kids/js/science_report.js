@@ -214,30 +214,39 @@
                                 🧪 가상 실험실 바로가기 ➔
                             </a>
                         ` : ''}
-                        <span style="font-size: 0.8rem; background: ${tagBg}; color: ${tagColor}; padding: 2px 8px; border-radius: 6px;">${item.page}</span>
+                        <span style="font-size: 0.8rem; background: ${tagBg}; color: ${tagColor}; padding: 2px 8px; border-radius: 6px;">${item.page || item.bookRef || ''}</span>
                     </div>
                 </div>
 
+                ${item.process ? `
                 <div style="font-size: 0.9rem; line-height: 1.55; color: #334155; margin-bottom: 8px;">
                     <b>[실험 준비 및 과정]</b><br>
                     ${item.process}
-                </div>
+                </div>` : ''}
 
                 ${item.hasEquilibriumGraph ? renderEquilibriumGraphSvg(false) : ''}
                 ${item.diagramHtml ? item.diagramHtml : ''}
 
+                ${Array.isArray(item.points) ? `
+                <ul style="margin: 0 0 8px 0; padding-left: 18px; font-size: 0.88rem; line-height: 1.55; color: #1e293b;">
+                    ${item.points.map(pt => `<li style="margin-bottom: 4px;">${pt}</li>`).join('')}
+                </ul>` : ''}
+
+                ${item.result ? `
                 <div style="background: #f8fafc; padding: 10px 12px; border-radius: 8px; border-left: 4px solid ${tagColor}; font-size: 0.88rem; line-height: 1.55; color: #1e293b; margin-bottom: 8px;">
                     <b>[실험 결과 및 관찰 내용]</b><br>
                     ${item.result}
-                </div>
+                </div>` : ''}
 
+                ${item.conclusion ? `
                 <div style="background: #f0fdf4; padding: 8px 12px; border-radius: 8px; font-size: 0.88rem; color: #166534; line-height: 1.5; margin-bottom: 6px;">
                     🎯 <b>실험 결론</b> : ${item.conclusion}
-                </div>
+                </div>` : ''}
 
+                ${item.think ? `
                 <div style="font-size: 0.85rem; color: #d97706; padding-left: 4px; margin-bottom: ${item.safetyTip ? '6px' : '0'};">
                     💡 <b>생각해 볼까요?</b> : ${item.think}
-                </div>
+                </div>` : ''}
 
                 ${item.safetyTip ? `
                     <div style="background: #fef2f2; border: 1px dashed #fca5a5; padding: 6px 10px; border-radius: 8px; font-size: 0.82rem; color: #b91c1c;">
@@ -250,13 +259,14 @@
         // 3) 하단 심화 탐구 박스 (KSTAR 인공 태양 1억 ℃ 등)
         const deepDiveHtml = data.specialDeepDive ? `
             <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white; border-radius: 18px; padding: 18px; border: 2px solid #818cf8; box-shadow: 0 6px 16px rgba(30, 27, 75, 0.2);">
+                ${data.specialDeepDive.badge ? `
                 <div style="display: inline-block; background: #f97316; color: white; font-size: 0.78rem; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px;">
                     ${data.specialDeepDive.badge}
-                </div>
+                </div>` : ''}
                 <h4 style="font-size: 1.18rem; color: #fde047; margin: 0 0 4px 0;">${data.specialDeepDive.title}</h4>
-                <div style="font-size: 0.88rem; color: #c7d2fe; margin-bottom: 10px;">${data.specialDeepDive.subtitle}</div>
+                ${data.specialDeepDive.subtitle ? `<div style="font-size: 0.88rem; color: #c7d2fe; margin-bottom: 10px;">${data.specialDeepDive.subtitle}</div>` : ''}
                 <p style="font-size: 0.88rem; line-height: 1.55; color: #e0e7ff; background: rgba(255,255,255,0.08); padding: 10px 12px; border-radius: 10px; margin: 0 0 10px 0;">
-                    ${data.specialDeepDive.description}
+                    ${data.specialDeepDive.description || data.specialDeepDive.intro || ''}
                 </p>
                 <div style="display: flex; flex-direction: column; gap: 6px;">
                     ${data.specialDeepDive.points.map(pt => `

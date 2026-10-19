@@ -425,7 +425,8 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🌟 `science_report.js` ([4단계] 『실험관찰』 실험연계 디지털 탐구 보고서 & 서술형 빌더 전담 엔진)
 1~N단원 플러그앤플레이(`window['SCIENCE_LAB_REPORT_' + unitId + '_DATA']` 및 `UNIT_THEME_DEFAULTS`) 구조로 교과서 『실험관찰』 실험연계 요약 노트(`conceptTables` 비교표, `summaryDoc` 실험 상세 분석, `hasEquilibriumGraph`·`diagramHtml` SVG 도해, `specialDeepDive` 심화 탐구, 가상 실험실 바로가기)와 참여형 탐구 미션(서술형 문장 조립 빌더·채점기준 가이드, 객관식 추론, 섞인 실험 순서 직접 조립기, 인터랙티브 별점 체크리스트), 완주 보상(+5💎)을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/science_report.js` (733줄)
+- **파일 위치**: `kids/js/science_report.js` (743줄)
+- **실험 카드 선택 필드**: `summaryDoc` 항목의 `process`·`result`·`conclusion`·`think`는 값이 있을 때만 그립니다. `points` 배열이 있으면 글머리표 목록으로 그리고, 쪽수는 `page`가 없으면 `bookRef`를 씁니다. `specialDeepDive`의 `badge`·`subtitle`은 선택이며, 본문은 `description`이 없으면 `intro`를 씁니다.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -440,7 +441,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 ### 🌟 `science_u3_engine.js` & `science_lab_common.css` (3단원 가상 실험실 공통 엔진 & 스타일)
 모바일 터치 충돌(touchmove)을 원천 배제한 에러리스 스팟 조작 UI, Retina DPI 캔버스 자동 보정(숨김 탭 `.sim-viewport` 너비 폴백 지원), 백그라운드 절전 및 서브 탭 전환 시 rAF 애니메이션 루프 라이프사이클 관리, 1회성 보석 트랜잭션 잠금, 검증된 초등 과학 유튜브 클립 & 3컷 요약 아코디언, Web Audio 효과음을 전담하는 공통 기반 엔진입니다.
 - **파일 위치**:
-  - `kids/js/science_u3_engine.js` (342줄, `window.ScienceU3Engine`)
+  - `kids/js/science_u3_engine.js` (375줄, `window.ScienceU3Engine`, 별칭 `window.ScienceLabEngine`)
   - `kids/css/science_lab_common.css` (681줄, 16:10 캔버스 뷰포트, 다크네이비 테마)
 - **3단원 5대 가상 실험실 파일군**:
   1. `kids/subjects/science/science_thermometer_lab.html` (713줄): 3초 양손 Lerp 이동 감각 착각 & 눈높이 레이저 수평 판독기
@@ -449,11 +450,11 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   4. `kids/subjects/science/science_gas_convection_lab.html` (646줄): 방 단면도 에어컨/난방기 4조합 배치 히트맵·상하층 온도계 & 전열기 적외선 복사열 차광판 차단기
   5. `kids/subjects/science/science_insulation_lab.html` (650줄): 4대 단열 부품(마개, 진공, 은도금, 폼) 조립기 & 단열 점수 실시간 연동 60분 초고속 냉각 곡선 꺾은선 그래프
 - **4단원 5대 가상 실험실 파일군**:
-  1. `kids/subjects/science/science_wind_turbine_lab.html` (434줄): 바람 세기 4단계 조절, 날개 회전 rAF 시각화, 유도 전압(0~4.5V) 및 전구 발광 시뮬레이터
-  2. `kids/subjects/science/science_resource_finite_lab.html` (420줄): 4대 자원(철·석유·담수·산림), 소비 모드별 철 잔여 매장량(47년) 카운트다운 및 3R 수명 2.2배 연장
+  1. `kids/subjects/science/science_wind_turbine_lab.html` (437줄): 바람 세기 4단계 조절, 날개 회전 rAF 시각화, 유도 전압(0~4.5V) 및 전구 발광 시뮬레이터
+  2. `kids/subjects/science/science_resource_finite_lab.html` (450줄): 4대 자원(철·석유·담수·산림), 가채연수(철 약 54년·석유 약 53년, 출처 표기) 계산기와 캐는 양 1.5배/절반 비교, 담수·산림은 순환 자원으로 대비
   3. `kids/subjects/science/science_renewable_energy_lab.html` (434줄): 6대 청정 에너지(태양광·풍력·수력·해양·지열·바이오) 탭 스위처 및 3단계 에너지 변환 파티클 스트림
   4. `kids/subjects/science/science_energy_efficiency_lab.html` (429줄): 1~5등급 가전제품 효율 비교(1등급 35% 절전), 대기전력 차단 콘센트, LED 조명, 빗물 재활용 토글 및 월간 전기요금 산출
-  5. `kids/subjects/science/science_eco_house_lab.html` (428줄): 백열등 5분 가열(38℃ 도달) ➔ 소등 후 1분 간격 5회 실내 냉각 관찰(일반 집 23℃ vs 에어캡 뽁뽁이 공기층 에코하우스 34.1℃ 방어)
+  5. `kids/subjects/science/science_eco_house_lab.html` (542줄): 가상 1분=실제 1초 가열(20→38℃) ➔ 소등 후 1분마다 5회 측정으로 빈 기록표 채우기, 실온 20℃ 냉각 법칙 가상 값(5분 뒤 23.0℃ vs 34.1℃)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -461,7 +462,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ScienceU3Engine.createLoop(renderFn)` | 백그라운드 전환 및 탭 비활성화 시 자동 절전 rAF 루프 매니저 |
   | `ScienceU3Engine.initTabs(tabsSel, panesSel, onTabChange)` | 모바일 에러리스 서브 탭 전환 및 비활성 캔버스 즉시 정지 |
   | `ScienceU3Engine.initSummaryAccordion(btnSel, contentSel)` | 유튜브 영상 임베드 오류 대비 3컷 만화 요약 아코디언 토글 |
-  | `ScienceU3Engine.setupQuiz(config)` | 퀴즈 빈칸 바인딩, 정답 판정, 피드백 및 1회성 보석(+5💎) 트랜잭션 잠금 |
+  | `ScienceU3Engine.setupQuiz(config)` | 퀴즈 보기 무작위 섞기(①~④ 번호는 화면 순서로 다시 매김, 판정은 `data-ans`), 빈칸에 정답 문장 표시, 정답 판정, 피드백 및 1회성 보석(+5💎) 트랜잭션 잠금 |
   | `ScienceU3Engine.playSuccessFanfare()` | 도-미-솔-도 4화음 팡파르 Web Audio 신시사이저 합성 재생 |
 
 ---

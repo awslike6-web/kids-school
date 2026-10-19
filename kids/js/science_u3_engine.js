@@ -259,15 +259,38 @@
     // =========================================================================
     // 7. 퀴즈 엔진 헬퍼 (공통 슬롯 바인딩 및 피드백)
     // =========================================================================
+    // 보기 버튼을 무작위로 섞고 ①~④ 번호를 화면 순서대로 다시 매김 (정답 판정은 data-ans로 유지)
+    function shuffleChoices(btnList) {
+        const btns = Array.from(btnList);
+        for (let i = btns.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [btns[i], btns[j]] = [btns[j], btns[i]];
+        }
+        const marks = ['①', '②', '③', '④', '⑤', '⑥'];
+        btns.forEach((btn, idx) => {
+            if (btn.parentNode) btn.parentNode.appendChild(btn);
+            const numSpan = btn.querySelector('span');
+            if (numSpan) numSpan.textContent = marks[idx] || `${idx + 1}`;
+        });
+        return btns;
+    }
+
+    function getChoiceText(btn) {
+        if (!btn) return '';
+        const spans = btn.querySelectorAll('span');
+        return (spans.length > 1 ? spans[spans.length - 1] : btn).textContent.trim();
+    }
+
     function setupQuiz(config) {
         const { labId, slotId, feedbackId, answer, explanation, gemAmount = 5 } = config;
         const slotEl = document.getElementById(slotId);
         const fbEl = document.getElementById(feedbackId);
-        const choiceBtns = document.querySelectorAll('.quiz-choice-btn');
+        const choiceBtns = shuffleChoices(document.querySelectorAll('.quiz-choice-btn'));
+        const answerText = getChoiceText(choiceBtns.find(b => b.getAttribute('data-ans') === answer)) || answer;
 
         // 이미 완료된 실험실인 경우 사전 표시
         if (isLabCleared(labId) && slotEl) {
-            slotEl.textContent = answer;
+            slotEl.textContent = answerText;
             slotEl.style.color = '#34d399';
             if (fbEl) {
                 fbEl.className = 'quiz-feedback-box correct show';
@@ -281,7 +304,7 @@
                 if (selected === answer) {
                     // 정답 처리
                     if (slotEl) {
-                        slotEl.textContent = `${answer} ✅`;
+                        slotEl.textContent = `${answerText} ✅`;
                         slotEl.style.color = '#34d399';
                         slotEl.style.borderBottomColor = '#10b981';
                     }

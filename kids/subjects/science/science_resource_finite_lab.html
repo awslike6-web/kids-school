@@ -55,6 +55,13 @@
         border-radius: 5px;
         transition: width 0.5s ease, background 0.5s ease;
     }
+    .source-note {
+        width: 100%;
+        max-width: 680px;
+        font-size: 0.78rem;
+        color: #94a3b8;
+        line-height: 1.4;
+    }
 </style>
 </head>
 <body>
@@ -83,8 +90,8 @@
         </h1>
         <p class="banner-desc">
             우리가 매일 쓰는 철, 석유, 물, 숲은 영원할까요?
-            철 매장량은 약 47년 후 고갈될 위기에 처해 있습니다.
-            소비 습관과 재활용(3R) 실천에 따라 자원의 수명이 어떻게 늘어나는지 직접 시뮬레이션해 보세요!
+            지금 확인된 양을 지금 속도로 캐서 쓰면 철은 약 54년, 석유는 약 53년 동안 쓸 수 있다고 해요(가채연수).
+            캐는 양을 줄이거나 늘리면 이 기간이 어떻게 바뀌는지 직접 계산해 보세요!
         </p>
     </div>
 
@@ -100,8 +107,8 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
-                title="자원의 유한성 영상" 
+                src="https://www.youtube-nocookie.com/embed/04PnZ7YXbM0?rel=0&modestbranding=1" 
+                title="석유 고갈 계산법, 가채연수 (한국석유공사)" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
             </iframe>
@@ -109,7 +116,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/04PnZ7YXbM0" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -134,11 +141,11 @@
 
                     <div class="summary-card">
                         <div class="summary-card-step">
-                            <span>2️⃣</span> <span>철 매장량 약 47년</span>
+                            <span>2️⃣</span> <span>가채연수 계산법</span>
                         </div>
-                        <h4 class="summary-card-title">교과서 속 골든타임</h4>
+                        <h4 class="summary-card-title">확인된 양 ÷ 1년에 캐는 양</h4>
                         <p class="summary-card-desc">
-                            현재 소비 속도로 쓰면 철은 47년 후 고갈될 수 있어 대체 자원 개발과 재활용이 필수예요.
+                            철은 약 54년, 석유는 약 53년이에요. 새 매장지를 찾거나 덜 쓰면 늘어나서 '정해진 고갈 날짜'는 아니에요.
                         </p>
                     </div>
 
@@ -148,7 +155,7 @@
                         </div>
                         <h4 class="summary-card-title">줄이고, 다시 쓰고, 재활용!</h4>
                         <p class="summary-card-desc">
-                            분리배출과 아껴 쓰기를 실천하면 자원의 수명을 2배 이상 연장할 수 있어요.
+                            재활용으로 새로 캐는 양을 절반으로 줄이면 같은 매장량을 2배 오래 쓸 수 있어요.
                         </p>
                     </div>
                 </div>
@@ -174,13 +181,13 @@
             <div class="resource-dashboard">
                 <div class="dash-box">
                     <div class="dash-head">
-                        <span id="resNameLabel">⚙️ 철(Iron) 잔여 매장량</span>
+                        <span id="resNameLabel">⚙️ 철(Iron) 가채연수</span>
                         <span id="resPercentLabel" style="color: #38bdf8;">100%</span>
                     </div>
                     <div class="dash-bar-bg">
                         <div class="dash-bar-fill" id="resBarFill" style="width: 100%;"></div>
                     </div>
-                    <div class="dash-val" id="resYearsLabel">잔여: 약 47년</div>
+                    <div class="dash-val" id="resYearsLabel">약 54년</div>
                 </div>
 
                 <div class="dash-box">
@@ -188,25 +195,26 @@
                         <span>🌱 소비 모드 평가</span>
                         <span id="modeBadge" style="color: #10b981;">표준 소비</span>
                     </div>
-                    <div class="dash-val" id="modeImpactLabel" style="font-size: 1.2rem; color: #fde047;">고갈 예상: 2073년</div>
+                    <div class="dash-val" id="modeImpactLabel" style="font-size: 1.2rem; color: #fde047;">지금 속도로 약 54년</div>
                     <span style="font-size: 0.8rem; color: #94a3b8;" id="modeDescLabel">현재 속도로 전 세계가 소비할 때의 기준입니다.</span>
                 </div>
             </div>
+            <div class="source-note" id="resSourceLabel">출처: 미국지질조사국(USGS) 광물 요약 2026 · 매장량 870억 t ÷ 연간 생산 16억 t (철 함량 기준)</div>
         </div>
 
         <div class="control-panel">
             <div class="ctrl-group">
                 <span class="ctrl-label">📦 자원 종류 선택:</span>
-                <button type="button" class="btn-ctrl active" id="btnResIron" onclick="selectResource('iron')">⚙️ 철 (기준 47년)</button>
-                <button type="button" class="btn-ctrl" id="btnResOil" onclick="selectResource('oil')">🛢️ 석유 (기준 50년)</button>
+                <button type="button" class="btn-ctrl active" id="btnResIron" onclick="selectResource('iron')">⚙️ 철 (약 54년)</button>
+                <button type="button" class="btn-ctrl" id="btnResOil" onclick="selectResource('oil')">🛢️ 석유 (약 53년)</button>
                 <button type="button" class="btn-ctrl" id="btnResWater" onclick="selectResource('water')">💧 깨끗한 담수</button>
                 <button type="button" class="btn-ctrl" id="btnResForest" onclick="selectResource('forest')">🌲 산림 자원</button>
             </div>
             <div class="ctrl-group">
                 <span class="ctrl-label">⚡ 소비 습관 모드:</span>
-                <button type="button" class="btn-ctrl" id="btnModeWaste" onclick="setConsumeMode('waste')">💥 무분별한 과소비 (-40%)</button>
+                <button type="button" class="btn-ctrl" id="btnModeWaste" onclick="setConsumeMode('waste')">💥 과소비 (캐는 양 1.5배)</button>
                 <button type="button" class="btn-ctrl active" id="btnModeStandard" onclick="setConsumeMode('standard')">⚖️ 현재 표준 소비</button>
-                <button type="button" class="btn-ctrl" id="btnModeRecycle" onclick="setConsumeMode('recycle')">♻️ 3R 적극 재활용 (+120%)</button>
+                <button type="button" class="btn-ctrl" id="btnModeRecycle" onclick="setConsumeMode('recycle')">♻️ 3R 실천 (캐는 양 절반)</button>
             </div>
         </div>
 
@@ -214,8 +222,7 @@
             <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
             <div class="fairy-bubble-text" id="fairyResText">
                 🧚 <b>요정 코코의 관찰 돋보기:</b><br>
-                "철은 현재 속도로 쓰면 <b>약 47년</b> 뒤에 바닥나지만, 
-                우리가 <b>[3R 적극 재활용]</b>을 실천하면 수명이 <b>100년 이상</b>으로 2배 넘게 늘어난단다!"
+                "철은 지금 속도로 캐면 <b>약 54년</b> 쓸 수 있어. <b>[3R 실천]</b>으로 새로 캐는 양을 절반으로 줄이면 같은 양으로 <b>2배 오래</b> 쓸 수 있단다!"
             </div>
         </div>
     </div>
@@ -258,13 +265,42 @@
 </div>
 
 <!-- 스크립트 로드 -->
-<script src="../../js/science_u3_engine.js"></script>
+<script src="../../js/science_u3_engine.js?v=20261019_quiz"></script>
 <script>
+    // years: 가채연수(확인된 매장량 ÷ 연간 생산량). null이면 고갈 연도가 없는 순환 자원
     const resources = {
-        iron: { name: '⚙️ 철(Iron)', baseYears: 47, desc: '철은 자동차, 건물, 기계를 만드는 소중한 금속 자원으로 매장량이 약 47년 정도 남았습니다.' },
-        oil: { name: '🛢️ 석유(Crude Oil)', baseYears: 50, desc: '석유는 플라스틱과 연료의 원료이지만 약 50년 후면 바닥날 수 있는 화석 자원입니다.' },
-        water: { name: '💧 깨끗한 담수', baseYears: 60, desc: '지구 전체 물 중 우리가 마실 수 있는 담수는 약 2.5%에 불과하여 오염을 막아야 합니다.' },
-        forest: { name: '🌲 산림 자원', baseYears: 70, desc: '나무는 종이와 목재를 주지만 무분별하게 베어내면 복원하는 데 수십 년이 걸립니다.' }
+        iron: {
+            name: '⚙️ 철(Iron)', years: 54,
+            source: '출처: 미국지질조사국(USGS) 광물 요약 2026 · 매장량 870억 t ÷ 연간 생산 16억 t (철 함량 기준)',
+            desc: '철은 자동차, 건물, 기계를 만드는 금속 자원이에요. 지금 확인된 양을 지금 속도로 캐면 약 54년 쓸 수 있어요.'
+        },
+        oil: {
+            name: '🛢️ 석유(Crude Oil)', years: 53,
+            source: '출처: 에너지연구소(Energy Institute) 세계 에너지 통계 · 2020년 기준 가채연수 53.4년',
+            desc: '석유는 플라스틱과 연료의 원료가 되는 화석 연료예요. 지금 속도라면 약 53년 쓸 수 있는 양이 확인되어 있어요.'
+        },
+        water: {
+            name: '💧 깨끗한 담수', years: null,
+            source: '지구의 물 가운데 바로 쓸 수 있는 민물은 아주 적어서(약 2.5%만 민물) 오염되지 않게 지키는 것이 중요해요.',
+            desc: '물은 비와 눈으로 다시 채워지는 순환 자원이라 정해진 고갈 연도는 없어요. 하지만 오염되면 마실 수 있는 물이 줄어들어요.'
+        },
+        forest: {
+            name: '🌲 산림 자원', years: null,
+            source: '나무는 다시 심고 가꾸면 자라나는 자원이지만, 큰 숲으로 자라기까지 수십 년이 걸려요.',
+            desc: '숲은 다시 심으면 자라는 순환 자원이라 정해진 고갈 연도는 없어요. 하지만 심는 것보다 빨리 베어 내면 숲이 줄어들어요.'
+        }
+    };
+    // 1년에 캐는(쓰는) 양의 배율 → 가채연수는 그 역수만큼 바뀜
+    const modes = {
+        waste: { label: '과소비 ⚠️', usage: 1.5, color: '#ef4444',
+            finite: '1년에 캐는 양이 1.5배로 늘면 같은 매장량을 쓸 수 있는 기간이 3분의 2로 줄어요.',
+            renew: '물을 오염시키고 나무를 마구 베면, 다시 채워지는 속도보다 빨리 줄어들어요.' },
+        standard: { label: '지금 속도', usage: 1, color: '#10b981',
+            finite: '지금처럼 캐서 쓸 때의 기준이에요.',
+            renew: '지금처럼 쓰면서 깨끗하게 관리하는 기준이에요.' },
+        recycle: { label: '3R 실천 🌟', usage: 0.5, color: '#34d399',
+            finite: '줄이고, 다시 쓰고, 재활용해서 새로 캐는 양을 절반으로 줄이면 2배 오래 쓸 수 있어요.',
+            renew: '물을 아껴 쓰고 나무를 심어 가꾸면 계속 다시 채워져요.' }
     };
 
     let curResKey = 'iron';
@@ -286,7 +322,7 @@
     function renderResourceView(ctx, w, h) {
         ctx.clearRect(0, 0, w, h);
 
-        // 지하 지층 단면 렌더링
+        // 지하 지층 단면
         const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
         bgGrad.addColorStop(0, '#0f172a');
         bgGrad.addColorStop(0.5, '#1e293b');
@@ -294,11 +330,11 @@
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, w, h);
 
-        // 지표면 풀밭
+        // 지표면
         ctx.fillStyle = '#065f46';
         ctx.fillRect(0, h * 0.15, w, 12);
 
-        // 지상 구조물 (재활용 공장 or 광산 굴착기)
+        // 지상 구조물 (광산 굴착기)
         ctx.fillStyle = '#64748b';
         ctx.fillRect(w * 0.1, h * 0.05, 60, h * 0.1);
         ctx.fillStyle = '#f59e0b';
@@ -308,39 +344,39 @@
         ctx.lineTo(w * 0.1 - 10, h * 0.15);
         ctx.fill();
 
-        // 지하 자원 암석층 시각화
+        // 자원 저장고
         const rockTop = h * 0.22;
         const rockH = h * 0.72;
-
         ctx.fillStyle = '#1e1b4b';
         ctx.fillRect(w * 0.1, rockTop, w * 0.8, rockH);
         ctx.strokeStyle = '#4338ca';
         ctx.lineWidth = 2;
         ctx.strokeRect(w * 0.1, rockTop, w * 0.8, rockH);
 
-        // 잔여 자원 비율 계산
-        let ratio = 1.0;
-        if (curMode === 'waste') ratio = 0.55;
-        if (curMode === 'recycle') ratio = 1.45;
-
+        const res = resources[curResKey];
+        const mode = modes[curMode];
+        const veinColors = { iron: '#f97316', oil: '#a855f7', water: '#06b6d4', forest: '#10b981' };
         const maxH = rockH - 20;
-        const fillH = Math.min(maxH, maxH * (ratio / 1.5));
+        let fillH;
+        let label;
+        if (res.years) {
+            // 가채연수를 0~120년 눈금 막대로 표시
+            const years = Math.round(res.years / mode.usage);
+            fillH = maxH * Math.min(1, years / 120);
+            label = `가채연수: 약 ${years}년`;
+        } else {
+            const ratio = curMode === 'waste' ? 0.45 : (curMode === 'recycle' ? 1 : 0.8);
+            fillH = maxH * ratio;
+            label = curMode === 'waste' ? '줄어드는 중 ⚠️' : '다시 채워지는 중 ♻️';
+        }
 
-        // 자원 광맥 렌더링
-        let veinColor = '#3b82f6';
-        if (curResKey === 'iron') veinColor = '#f97316';
-        if (curResKey === 'oil') veinColor = '#a855f7';
-        if (curResKey === 'water') veinColor = '#06b6d4';
-        if (curResKey === 'forest') veinColor = '#10b981';
-
-        ctx.fillStyle = veinColor;
+        ctx.fillStyle = veinColors[curResKey];
         ctx.fillRect(w * 0.15, rockTop + rockH - fillH - 10, w * 0.7, fillH);
 
-        // 자원 텍스트 표시
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 16px "Jua", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`지하 자원 잔여 깊이: ${(ratio * 100).toFixed(0)}%`, w * 0.5, rockTop + rockH - fillH / 2);
+        ctx.fillText(label, w * 0.5, rockTop + rockH - Math.max(fillH, 30) / 2 - 10);
     }
 
     function selectResource(key) {
@@ -366,39 +402,33 @@
 
     function updateDashboard() {
         const res = resources[curResKey];
-        let multiplier = 1.0;
-        let modeText = '표준 소비';
-        let badgeColor = '#10b981';
-        let desc = '현재 속도로 전 세계가 소비할 때의 기준입니다.';
-
-        if (curMode === 'waste') {
-            multiplier = 0.6;
-            modeText = '무분별한 과소비 ⚠️';
-            badgeColor = '#ef4444';
-            desc = '일회용품을 남용하고 낭비하면 자원 고갈이 훨씬 앞당겨집니다!';
-        } else if (curMode === 'recycle') {
-            multiplier = 2.2;
-            modeText = '3R 적극 재활용 🌟';
-            badgeColor = '#34d399';
-            desc = '분리수거와 재활용을 실천하여 자원 수명을 2배 이상 연장했습니다!';
-        }
-
-        const calculatedYears = Math.round(res.baseYears * multiplier);
-        const targetYear = 2026 + calculatedYears;
-
-        document.getElementById('resNameLabel').textContent = `${res.name} 잔여 매장량`;
-        document.getElementById('resPercentLabel').textContent = `${(multiplier * 100).toFixed(0)}%`;
-        document.getElementById('resBarFill').style.width = `${Math.min(100, (multiplier / 2.2) * 100)}%`;
-        document.getElementById('resYearsLabel').textContent = `잔여: 약 ${calculatedYears}년`;
-
+        const mode = modes[curMode];
         const modeBadge = document.getElementById('modeBadge');
-        modeBadge.textContent = modeText;
-        modeBadge.style.color = badgeColor;
+        modeBadge.textContent = mode.label;
+        modeBadge.style.color = mode.color;
+        document.getElementById('resSourceLabel').textContent = res.source;
 
-        document.getElementById('modeImpactLabel').textContent = `고갈 예상: ${targetYear}년`;
-        document.getElementById('modeDescLabel').textContent = desc;
-
-        document.getElementById('fairyResText').innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>"${res.desc} <br><b>${modeText}</b> 모드에서는 약 <b>${calculatedYears}년</b> 동안 이용할 수 있어!"`;
+        let fairy;
+        if (res.years) {
+            const years = Math.round(res.years / mode.usage);
+            document.getElementById('resNameLabel').textContent = `${res.name} 가채연수`;
+            document.getElementById('resPercentLabel').textContent = `캐는 양 ×${mode.usage}`;
+            document.getElementById('resBarFill').style.width = `${Math.min(100, (years / 120) * 100)}%`;
+            document.getElementById('resYearsLabel').textContent = `약 ${years}년`;
+            document.getElementById('modeImpactLabel').textContent = `${mode.label === '지금 속도' ? '지금 속도로' : '이렇게 쓰면'} 약 ${years}년`;
+            document.getElementById('modeDescLabel').textContent = mode.finite;
+            fairy = `${res.desc} <br><b>${mode.label}</b>(으)로 쓰면 약 <b>${years}년</b> 동안 쓸 수 있어!`;
+        } else {
+            const ratio = curMode === 'waste' ? 45 : (curMode === 'recycle' ? 100 : 80);
+            document.getElementById('resNameLabel').textContent = `${res.name} (순환 자원)`;
+            document.getElementById('resPercentLabel').textContent = '고갈 연도 없음';
+            document.getElementById('resBarFill').style.width = `${ratio}%`;
+            document.getElementById('resYearsLabel').textContent = curMode === 'waste' ? '줄어드는 중 ⚠️' : '다시 채워지는 중 ♻️';
+            document.getElementById('modeImpactLabel').textContent = curMode === 'waste' ? '관리하지 않으면 줄어요' : '잘 관리하면 계속 써요';
+            document.getElementById('modeDescLabel').textContent = mode.renew;
+            fairy = `${res.desc} <br>${mode.renew}`;
+        }
+        document.getElementById('fairyResText').innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>"${fairy}"`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -411,7 +441,7 @@
             slotId: 'blankSlot',
             feedbackId: 'quizFeedback',
             answer: '1',
-            explanation: '지하 자원은 쓸수록 고갈되는 유한성을 지니고 있으므로 일회용품 사용을 줄이고 재사용·재활용(3R)을 적극 실천해야 자원을 오래 보존할 수 있습니다!',
+            explanation: '철과 석유 같은 지하 자원은 쓸수록 줄어드는 유한한 자원이므로 일회용품 사용을 줄이고 재사용·재활용(3R)을 실천해야 오래 쓸 수 있습니다!',
             gemAmount: 5
         });
     });

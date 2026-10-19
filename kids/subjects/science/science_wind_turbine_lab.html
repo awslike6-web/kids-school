@@ -93,8 +93,8 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
-                title="풍력 발전 원리 영상" 
+                src="https://www.youtube-nocookie.com/embed/cbcelOlDFMI?rel=0&modestbranding=1" 
+                title="풍력발전의 원리 (한국에너지공단)" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
             </iframe>
@@ -102,7 +102,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/cbcelOlDFMI" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -169,7 +169,7 @@
                     <span class="meter-icon">💨</span>
                     <div class="meter-info">
                         <span class="meter-title">바람 세기</span>
-                        <span class="meter-value" id="windSpeedLabel">약한 바람 (2 m/s)</span>
+                        <span class="meter-value" id="windSpeedLabel">산들바람 (2 m/s)</span>
                     </div>
                 </div>
                 <div class="meter-card">
@@ -247,7 +247,7 @@
 </div>
 
 <!-- 스크립트 로드 -->
-<script src="../../js/science_u3_engine.js"></script>
+<script src="../../js/science_u3_engine.js?v=20261019_quiz"></script>
 <script>
     let windLevel = 1; // 0: 무풍, 1: 약, 2: 중, 3: 강
     let bladeAngle = 0;
@@ -373,6 +373,9 @@
         ctx.save();
         ctx.translate(tx, ty);
         ctx.rotate(bladeAngle);
+        // 좁은 화면에서 날개가 캔버스 위로 잘리지 않도록 크기 축소
+        const bladeScale = Math.min(1, (ty - 6) / 115);
+        ctx.scale(bladeScale, bladeScale);
 
         for (let i = 0; i < 3; i++) {
             ctx.save();

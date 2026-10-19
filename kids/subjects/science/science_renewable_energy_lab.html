@@ -106,8 +106,8 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
-                title="재생 에너지 발전 원리" 
+                src="https://www.youtube-nocookie.com/embed/CIxhlYjgJZI?rel=0&modestbranding=1" 
+                title="신재생에너지란 무엇인가? (YTN 사이언스)" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
             </iframe>
@@ -115,7 +115,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/CIxhlYjgJZI" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -238,7 +238,7 @@
         <div class="quiz-choices-grid">
             <button type="button" class="quiz-choice-btn" data-ans="1">
                 <span>①</span>
-                <span>사용해도 고갈되지 않고 온실가스를 배출하지 않아</span>
+                <span>사용해도 고갈되지 않고 온실가스를 거의 배출하지 않아</span>
             </button>
             <button type="button" class="quiz-choice-btn" data-ans="2">
                 <span>②</span>
@@ -260,7 +260,7 @@
 </div>
 
 <!-- 스크립트 로드 -->
-<script src="../../js/science_u3_engine.js"></script>
+<script src="../../js/science_u3_engine.js?v=20261019_quiz"></script>
 <script>
     const energyData = {
         solar: {
@@ -366,7 +366,7 @@
         }
 
         // 1번 노드: 자연 에너지
-        drawNode(ctx, node1X, centerY, 38, cur.color, '자연 에너지', cur.source.slice(0, 2));
+        drawNode(ctx, node1X, centerY, 38, cur.color, '자연 에너지', cur.source.split(' ').pop());
 
         // 2번 노드: 발전 변환 장치
         drawNode(ctx, node2X, centerY, 42, '#38bdf8', '변환 장치', '⚙️');
@@ -425,7 +425,7 @@
             slotId: 'blankSlot',
             feedbackId: 'quizFeedback',
             answer: '1',
-            explanation: '재생 에너지는 자연의 햇빛, 바람, 물 등을 이용해 계속 다시 생겨나므로 고갈되지 않으며 온실가스를 배출하지 않는 최고의 친환경 에너지입니다!',
+            explanation: '재생 에너지는 자연의 햇빛, 바람, 물 등을 이용해 계속 다시 생겨나므로 고갈되지 않으며 온실가스를 거의 배출하지 않는 친환경 에너지입니다!',
             gemAmount: 5
         });
     });

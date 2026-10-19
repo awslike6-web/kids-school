@@ -62,6 +62,11 @@
     .cooling-val.highlight-norm {
         color: #f87171;
     }
+    .table-note {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        line-height: 1.4;
+    }
 </style>
 </head>
 <body>
@@ -107,8 +112,8 @@
 
         <div class="video-frame-wrap">
             <iframe 
-                src="https://www.youtube-nocookie.com/embed/vhzXePTRvfY?rel=0&modestbranding=1" 
-                title="단열재와 에코하우스 실험 영상" 
+                src="https://www.youtube-nocookie.com/embed/cvh-D_ScKgs?rel=0&modestbranding=1" 
+                title="단열재의 원리 (국립과천과학관)" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen>
             </iframe>
@@ -116,7 +121,7 @@
 
         <div class="yt-fallback-bar">
             <span>💡 영상 재생에 문제가 있나요?</span>
-            <a href="https://youtu.be/vhzXePTRvfY" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
+            <a href="https://youtu.be/cvh-D_ScKgs" target="_blank" rel="noopener noreferrer" class="btn-yt-external">
                 📺 유튜브 새창 열기 ↗
             </a>
         </div>
@@ -186,26 +191,27 @@
                 </div>
                 <div class="cooling-grid">
                     <div class="cooling-header">구분</div>
-                    <div class="cooling-header">0분(소등직후)</div>
                     <div class="cooling-header">1분 후</div>
                     <div class="cooling-header">2분 후</div>
                     <div class="cooling-header">3분 후</div>
+                    <div class="cooling-header">4분 후</div>
                     <div class="cooling-header">5분 후</div>
 
                     <div class="cooling-header">일반 집 🏠</div>
-                    <div class="cooling-val" id="norm0">38.0℃</div>
-                    <div class="cooling-val highlight-norm" id="norm1">32.5℃</div>
-                    <div class="cooling-val highlight-norm" id="norm2">28.0℃</div>
-                    <div class="cooling-val highlight-norm" id="norm3">25.0℃</div>
-                    <div class="cooling-val highlight-norm" id="norm5">23.0℃</div>
+                    <div class="cooling-val" id="norm1">—</div>
+                    <div class="cooling-val" id="norm2">—</div>
+                    <div class="cooling-val" id="norm3">—</div>
+                    <div class="cooling-val" id="norm4">—</div>
+                    <div class="cooling-val" id="norm5">—</div>
 
                     <div class="cooling-header">에코하우스 🏡</div>
-                    <div class="cooling-val" id="eco0">38.0℃</div>
-                    <div class="cooling-val highlight-eco" id="eco1">37.2℃</div>
-                    <div class="cooling-val highlight-eco" id="eco2">36.5℃</div>
-                    <div class="cooling-val highlight-eco" id="eco3">35.4℃</div>
-                    <div class="cooling-val highlight-eco" id="eco5">34.1℃</div>
+                    <div class="cooling-val" id="eco1">—</div>
+                    <div class="cooling-val" id="eco2">—</div>
+                    <div class="cooling-val" id="eco3">—</div>
+                    <div class="cooling-val" id="eco4">—</div>
+                    <div class="cooling-val" id="eco5">—</div>
                 </div>
+                <div class="table-note">※ 실온 20℃에서 냉각 법칙으로 계산한 가상 실험 값이에요. 실제 실험에서는 재료와 교실 온도에 따라 달라져요.</div>
             </div>
         </div>
 
@@ -213,10 +219,10 @@
             <div class="ctrl-group">
                 <span class="ctrl-label">🧪 실험 단계 실행:</span>
                 <button type="button" class="btn-ctrl btn-ctrl-primary" id="btnHeat" onclick="startHeating()">
-                    🔥 1단계: 백열등 5분 가열 (온도 38℃ 상승)
+                    🔥 1단계: 백열등 5분 가열
                 </button>
                 <button type="button" class="btn-ctrl" id="btnCool" onclick="startCooling()" disabled>
-                    ❄️ 2단계: 소등 후 5분 냉각 관찰
+                    ❄️ 2단계: 소등 후 1분마다 5회 측정
                 </button>
                 <button type="button" class="btn-ctrl" onclick="resetExp()">
                     🔄 처음으로
@@ -228,8 +234,6 @@
             <img src="https://img.icons8.com/illustrations/external-pack-flat-linear-illy-cafe/512/external-fairy-fairy-tale-pack-flat-linear-illy-cafe.png" alt="요정 코코" class="fairy-img-icon">
             <div class="fairy-bubble-text" id="fairyEcoText">
                 🧚 <b>요정 코코의 관찰 돋보기:</b><br>
-                "가열 후 불을 끄면 일반 집은 열이 창문과 벽으로 숭숭 빠져나가 5분 만에 23℃로 차갑게 식지만, 
-                <b>단열 에코하우스는 뽁뽁이 공기층이 열을 지켜주어 34.1℃</b>로 따뜻함을 유지해!"
             </div>
         </div>
     </div>
@@ -272,12 +276,39 @@
 </div>
 
 <!-- 스크립트 로드 -->
-<script src="../../js/science_u3_engine.js"></script>
+<script src="../../js/science_u3_engine.js?v=20261019_quiz"></script>
 <script>
-    let expState = 'idle'; // 'idle', 'heating', 'cooling'
-    let heatProgress = 0; // 0 to 1
-    let coolMinute = 0; // 0 to 5
+    // 가상 시간: 실제 1초 = 실험 1분
+    const ROOM_TEMP = 20;
+    const HOT_TEMP = 38;
+    const HEAT_MINUTES = 5;
+    const COOL_MINUTES = 5;
+    // 냉각 상수 k (T = 실온 + (38 - 실온) × e^(-k·t)), 5분 뒤 일반 집 23.0℃ / 에코하우스 34.1℃
+    const K_NORMAL = Math.log((HOT_TEMP - ROOM_TEMP) / (23.0 - ROOM_TEMP)) / COOL_MINUTES;
+    const K_ECO = Math.log((HOT_TEMP - ROOM_TEMP) / (34.1 - ROOM_TEMP)) / COOL_MINUTES;
+    const START_FAIRY = '"먼저 <b>백열등으로 두 집을 5분 동안 데운 뒤</b>, 불을 끄고 1분마다 온도를 재 볼 거야. 어느 집이 더 오래 따뜻할지 예상해 보고 시작해!"';
+
+    let expState = 'idle'; // 'idle' | 'heating' | 'heated' | 'cooling' | 'done'
+    let simMinutes = 0;    // 현재 단계에서 흐른 가상 시간(분)
+    let recorded = 0;      // 기록표에 적은 측정 횟수
+    let lastTs = null;
     let ecoLoop = null;
+
+    function coolTemp(k, t) {
+        return ROOM_TEMP + (HOT_TEMP - ROOM_TEMP) * Math.exp(-k * t);
+    }
+
+    function currentTemps() {
+        if (expState === 'heating') {
+            const t = ROOM_TEMP + (HOT_TEMP - ROOM_TEMP) * Math.min(1, simMinutes / HEAT_MINUTES);
+            return { norm: t, eco: t };
+        }
+        if (expState === 'heated') return { norm: HOT_TEMP, eco: HOT_TEMP };
+        if (expState === 'cooling' || expState === 'done') {
+            return { norm: coolTemp(K_NORMAL, simMinutes), eco: coolTemp(K_ECO, simMinutes) };
+        }
+        return { norm: ROOM_TEMP, eco: ROOM_TEMP };
+    }
 
     function initEcoCanvas() {
         const canvas = document.getElementById('ecoCanvas');
@@ -285,10 +316,55 @@
         if (!dpi) return;
 
         if (ecoLoop) ecoLoop.stop();
-        ecoLoop = ScienceLabEngine.createLoop(() => {
+        ecoLoop = ScienceLabEngine.createLoop((ts) => {
+            // 탭 전환으로 멈췄다 돌아와도 시간이 튀지 않게 한 프레임 최대 0.1초만 반영
+            const dt = lastTs === null ? 0 : Math.min(0.1, (ts - lastTs) / 1000);
+            lastTs = ts;
+            stepSimulation(dt);
             renderEcoScene(dpi.ctx, dpi.width, dpi.height);
         });
         ecoLoop.start();
+    }
+
+    function stepSimulation(dt) {
+        if (expState === 'heating') {
+            simMinutes += dt;
+            if (simMinutes >= HEAT_MINUTES) {
+                simMinutes = HEAT_MINUTES;
+                expState = 'heated';
+                setStatus('✅ 5분 가열 끝! 두 집 모두 38℃', '#fbbf24');
+                document.getElementById('btnCool').disabled = false;
+                setFairy('"두 집 모두 <b>38℃</b>가 됐어! 이제 불을 끄고 1분마다 온도를 재 보자."');
+            }
+        } else if (expState === 'cooling') {
+            simMinutes = Math.min(COOL_MINUTES, simMinutes + dt);
+            while (recorded < COOL_MINUTES && simMinutes >= recorded + 1) {
+                recorded += 1;
+                recordMeasurement(recorded);
+            }
+            setStatus(`❄️ 소등 후 ${Math.floor(simMinutes)}분 경과 (측정 ${recorded}/5회)`, '#38bdf8');
+            if (recorded >= COOL_MINUTES) finishCooling();
+        }
+    }
+
+    function recordMeasurement(minute) {
+        const nEl = document.getElementById(`norm${minute}`);
+        const eEl = document.getElementById(`eco${minute}`);
+        nEl.textContent = `${coolTemp(K_NORMAL, minute).toFixed(1)}℃`;
+        eEl.textContent = `${coolTemp(K_ECO, minute).toFixed(1)}℃`;
+        nEl.classList.add('highlight-norm');
+        eEl.classList.add('highlight-eco');
+        ScienceLabEngine.playTone(520 + minute * 40, 'sine', 0.12);
+    }
+
+    function finishCooling() {
+        expState = 'done';
+        const dropNorm = HOT_TEMP - coolTemp(K_NORMAL, COOL_MINUTES);
+        const dropEco = HOT_TEMP - coolTemp(K_ECO, COOL_MINUTES);
+        setStatus('🏁 측정 완료! 기록표를 비교해 봐', '#34d399');
+        document.getElementById('btnHeat').disabled = false;
+        setFairy(`"5분 동안 일반 집은 <b>${dropNorm.toFixed(1)}℃</b>나 내려갔지만, 에코하우스는 <b>${dropEco.toFixed(1)}℃</b>만 내려갔어!
+            뽁뽁이 속 <b>공기층</b>과 단열재가 열이 빠져나가는 것을 막아 준 거야."`);
     }
 
     function renderEcoScene(ctx, w, h) {
@@ -301,49 +377,53 @@
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, w, h);
 
+        const temps = currentTemps();
+        const lampOn = expState === 'heating';
+
         // 두 집 모형 비교 (왼쪽: 일반 집, 오른쪽: 단열 에코하우스)
         const houseW = w * 0.36;
-        const houseH = h * 0.52;
-        const houseY = h * 0.36;
+        const houseH = h * 0.5;
+        const houseY = h * 0.34;
+        drawHouseModel(ctx, w * 0.1, houseY, houseW, houseH, '일반 집 🏠', '#475569', false, lampOn, temps.norm);
+        drawHouseModel(ctx, w * 0.54, houseY, houseW, houseH, '단열 에코하우스 🏡', '#065f46', true, lampOn, temps.eco);
 
-        const leftX = w * 0.1;
-        const rightX = w * 0.54;
-
-        // 일반 집 (단판유리, 단열재 없음)
-        drawHouseModel(ctx, leftX, houseY, houseW, houseH, '일반 집 🏠', '#475569', false, expState === 'heating');
-
-        // 단열 에코하우스 (우드록 벽체, 창문 뽁뽁이)
-        drawHouseModel(ctx, rightX, houseY, houseW, houseH, '단열 에코하우스 🏡', '#065f46', true, expState === 'heating');
-
-        // 상단 가열 전등 (가열 중일 때)
-        if (expState === 'heating') {
-            const lampGlow = ctx.createRadialGradient(w * 0.5, h * 0.15, 10, w * 0.5, h * 0.15, 160);
+        // 상단 가열 전등
+        if (lampOn) {
+            const r = Math.min(160, h * 0.5);
+            const lampGlow = ctx.createRadialGradient(w * 0.5, h * 0.12, 6, w * 0.5, h * 0.12, r);
             lampGlow.addColorStop(0, 'rgba(251, 191, 36, 0.8)');
             lampGlow.addColorStop(1, 'rgba(251, 191, 36, 0)');
             ctx.fillStyle = lampGlow;
             ctx.beginPath();
-            ctx.arc(w * 0.5, h * 0.15, 160, 0, Math.PI * 2);
+            ctx.arc(w * 0.5, h * 0.12, r, 0, Math.PI * 2);
             ctx.fill();
         }
+
+        // 가상 시계
+        let clock = '실온 20℃ · 시작 전';
+        if (expState === 'heating' || expState === 'heated') clock = `🔥 가열 ${Math.floor(simMinutes)}분 / 5분`;
+        if (expState === 'cooling' || expState === 'done') clock = `❄️ 소등 후 ${Math.floor(simMinutes)}분 / 5분`;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 13px "Jua", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(clock, 10, 18);
     }
 
-    function drawHouseModel(ctx, x, y, w, h, label, wallColor, isEco, isLampOn) {
+    // 온도가 높을수록 붉게, 실온에 가까울수록 푸르게
+    function tempColor(t) {
+        const r = Math.max(0, Math.min(1, (t - ROOM_TEMP) / (HOT_TEMP - ROOM_TEMP)));
+        return `rgb(${Math.round(56 + 192 * r)}, ${Math.round(189 - 76 * r)}, ${Math.round(248 - 135 * r)})`;
+    }
+
+    function drawHouseModel(ctx, x, y, w, h, label, wallColor, isEco, isLampOn, temp) {
         // 벽체
         ctx.fillStyle = wallColor;
         ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = isEco ? '#34d399' : '#94a3b8';
+        ctx.lineWidth = isEco ? 4 : 1.5;
+        ctx.strokeRect(x, y, w, h);
 
-        if (isEco) {
-            // 단열재 두께 표시 테두리
-            ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(x, y, w, h);
-        } else {
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x, y, w, h);
-        }
-
-        // 지붕 (삼각형)
+        // 지붕
         ctx.fillStyle = isEco ? '#047857' : '#334155';
         ctx.beginPath();
         ctx.moveTo(x - 8, y);
@@ -352,67 +432,101 @@
         ctx.closePath();
         ctx.fill();
 
-        // 창문 (뽁뽁이 표시)
-        const winX = x + w * 0.25;
-        const winY = y + h * 0.25;
-        const winW = w * 0.5;
+        // 창문: 실내 온도 색으로 표시
+        const winX = x + w * 0.2;
+        const winY = y + h * 0.18;
+        const winW = w * 0.6;
         const winH = h * 0.45;
-
-        ctx.fillStyle = isLampOn ? '#fde047' : (isEco ? '#1e3a8a' : '#0f172a');
+        ctx.fillStyle = isLampOn ? '#fde047' : tempColor(temp);
+        ctx.globalAlpha = 0.85;
         ctx.fillRect(winX, winY, winW, winH);
+        ctx.globalAlpha = 1;
 
         if (isEco) {
-            // 뽁뽁이 버블 시각화
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+            // 뽁뽁이 버블
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
             ctx.lineWidth = 1;
-            for (let bx = winX + 8; bx < winX + winW - 4; bx += 10) {
-                for (let by = winY + 8; by < winY + winH - 4; by += 10) {
+            for (let bx = winX + 6; bx < winX + winW - 3; bx += 9) {
+                for (let by = winY + 6; by < winY + winH - 3; by += 9) {
                     ctx.beginPath();
-                    ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
+                    ctx.arc(bx, by, 3, 0, Math.PI * 2);
                     ctx.stroke();
                 }
             }
         }
 
-        // 라벨 텍스트
+        // 실내 온도
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 15px "Jua", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(label, x + w * 0.5, y + h + 22);
+        ctx.fillText(`${temp.toFixed(1)}℃`, x + w * 0.5, winY + winH + 16);
 
-        // 현재 내부 온도 표시
-        let tempText = isLampOn ? '38.0℃' : (isEco ? '34.1℃ (따스함)' : '23.0℃ (식음)');
-        ctx.fillStyle = isEco ? '#34d399' : '#f87171';
-        ctx.font = 'bold 14px "Jua", sans-serif';
-        ctx.fillText(tempText, x + w * 0.5, y + h * 0.55);
+        // 라벨
+        ctx.font = 'bold 13px "Jua", sans-serif';
+        ctx.fillStyle = isEco ? '#34d399' : '#cbd5e1';
+        ctx.fillText(label, x + w * 0.5, y + h + 16);
+    }
+
+    function setStatus(text, color) {
+        const el = document.getElementById('currentStatusBadge');
+        el.textContent = text;
+        el.style.color = color;
+    }
+
+    function setFairy(html) {
+        document.getElementById('fairyEcoText').innerHTML = `🧚 <b>요정 코코의 관찰 돋보기:</b><br>${html}`;
+    }
+
+    function clearTable() {
+        for (let i = 1; i <= COOL_MINUTES; i++) {
+            ['norm', 'eco'].forEach(pre => {
+                const el = document.getElementById(`${pre}${i}`);
+                el.textContent = '—';
+                el.classList.remove('highlight-norm', 'highlight-eco');
+            });
+        }
     }
 
     function startHeating() {
+        if (expState === 'heating' || expState === 'cooling') return;
+        clearTable();
         expState = 'heating';
-        document.getElementById('currentStatusBadge').textContent = '🔥 전등 5분 가열 중 (38℃ 도달)';
-        document.getElementById('currentStatusBadge').style.color = '#fbbf24';
-        document.getElementById('btnCool').disabled = false;
+        simMinutes = 0;
+        recorded = 0;
+        document.getElementById('btnHeat').disabled = true;
+        document.getElementById('btnCool').disabled = true;
+        setStatus('🔥 백열등으로 5분 가열 중', '#fbbf24');
+        setFairy('"백열등이 두 집을 똑같이 데우고 있어. 온도가 올라가는 걸 지켜봐!"');
         ScienceLabEngine.playTone(440, 'triangle', 0.2);
     }
 
     function startCooling() {
+        if (expState !== 'heated') return;
         expState = 'cooling';
-        document.getElementById('currentStatusBadge').textContent = '❄️ 소등 후 5분 경과 (에코하우스 온도 방어)';
-        document.getElementById('currentStatusBadge').style.color = '#34d399';
+        simMinutes = 0;
+        recorded = 0;
+        document.getElementById('btnCool').disabled = true;
+        setStatus('❄️ 소등! 1분마다 온도를 기록해요', '#38bdf8');
+        setFairy('"불을 껐어! 1분마다 두 집의 온도가 기록표에 적혀. 어느 쪽이 빨리 식는지 봐!"');
         ScienceLabEngine.playTone(330, 'sine', 0.25);
     }
 
     function resetExp() {
         expState = 'idle';
-        document.getElementById('currentStatusBadge').textContent = '대기 상태';
-        document.getElementById('currentStatusBadge').style.color = '#38bdf8';
+        simMinutes = 0;
+        recorded = 0;
+        clearTable();
+        document.getElementById('btnHeat').disabled = false;
         document.getElementById('btnCool').disabled = true;
+        setStatus('대기 상태', '#38bdf8');
+        setFairy(START_FAIRY);
         ScienceLabEngine.playClickSound();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         ScienceLabEngine.initSummaryAccordion('#summaryToggleBtn', '#summaryContent');
         initEcoCanvas();
+        setFairy(START_FAIRY);
 
         ScienceLabEngine.setupQuiz({
             labId: 'u4_lab5',

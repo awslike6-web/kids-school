@@ -584,7 +584,7 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
             headers: ["구분", "정의 및 특징", "고갈 여부", "환경 영향 (온실가스)", "대표 자원/에너지"],
             rows: [
                 ["천연자원 (지하자원)", "지구 생성 과정에서 수억 년에 걸쳐 만들어진 한정된 자원", "사용할수록 고갈됨 (유한성)", "연소 시 온실가스(CO₂) 및 매연 배출", "석유, 석탄, 천연가스, 철, 구리"],
-                ["재생 에너지 (자연에너지)", "자연에서 지속적으로 얻을 수 있으며 무한히 보충되는 에너지", "고갈되지 않음 (무한 지속성)", "발전 과정에서 탄소 배출 제로(0)", "태양광, 풍력, 수력, 해양, 지열, 바이오"]
+                ["재생 에너지 (자연에너지)", "자연에서 지속적으로 얻을 수 있으며 무한히 보충되는 에너지", "고갈되지 않음 (무한 지속성)", "발전 과정에서 온실가스를 거의 배출하지 않음", "태양광, 풍력, 수력, 해양, 지열, 바이오"]
             ]
         },
         {
@@ -617,11 +617,11 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
             bookRef: "『실험관찰』 38~39쪽",
             labLink: "science_resource_finite_lab.html",
             safetyTip: "자원 카드를 분류할 때 종이에 손이 베이지 않도록 조심합니다.",
-            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 115" style="width:100%;max-width:480px;height:auto;"><rect x="20" y="15" width="80" height="24" fill="#f97316" rx="4"/><text x="60" y="32" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">⚙️ 철 47년</text><rect x="110" y="15" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="15" width="130" height="24" fill="#f97316" rx="4"/><rect x="20" y="47" width="80" height="24" fill="#a855f7" rx="4"/><text x="60" y="64" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">🛢️ 석유 50년</text><rect x="110" y="47" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="47" width="140" height="24" fill="#a855f7" rx="4"/><rect x="20" y="79" width="80" height="24" fill="#10b981" rx="4"/><text x="60" y="96" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">♻️ 3R 실천</text><rect x="110" y="79" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="79" width="215" height="24" fill="#10b981" rx="4"/><text x="400" y="96" fill="#34d399" font-size="12" font-family="'Jua',sans-serif">수명 100년+ 연장!</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 자원별 잔여 매장량 및 3R(절약·재사용·재활용) 수명 연장 효과</div></div>`,
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 115" style="width:100%;max-width:480px;height:auto;"><rect x="20" y="15" width="80" height="24" fill="#f97316" rx="4"/><text x="60" y="32" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">⚙️ 철 54년</text><rect x="110" y="15" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="15" width="99" height="24" fill="#f97316" rx="4"/><rect x="20" y="47" width="80" height="24" fill="#a855f7" rx="4"/><text x="60" y="64" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">🛢️ 석유 53년</text><rect x="110" y="47" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="47" width="97" height="24" fill="#a855f7" rx="4"/><rect x="20" y="79" width="80" height="24" fill="#10b981" rx="4"/><text x="60" y="96" fill="#ffffff" font-size="11" font-family="'Jua',sans-serif" text-anchor="middle">♻️ 3R 실천</text><rect x="110" y="79" width="220" height="24" fill="#334155" rx="4"/><rect x="110" y="79" width="198" height="24" fill="#10b981" rx="4"/><text x="400" y="96" fill="#34d399" font-size="12" font-family="'Jua',sans-serif">캐는 양 절반 ➔ 2배 오래!</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 가채연수(확인된 매장량 ÷ 1년에 캐는 양) · 철은 USGS 2026, 석유는 Energy Institute 2020년 기준</div></div>`,
             points: [
                 "⛏️ <b>지하 자원의 유한성</b>: 철, 구리, 알루미늄 등 광물 자원과 석유, 석탄 등 화석 연료는 매장량이 한정되어 있어 언젠가 고갈됩니다.",
-                "⏳ <b>철 매장량 약 47년</b>: 현재 소비 속도가 지속될 경우 인류 문명의 기초인 철 자원은 약 47년 뒤 바닥을 드러낼 위기에 처해 있습니다.",
-                "♻️ <b>3R 실천을 통한 극복</b>: 줄이기(Reduce), 다시 쓰기(Reuse), 재활용하기(Recycle)를 통해 자원의 수명을 2배 이상 연장해야 합니다."
+                "⏳ <b>가채연수로 보는 철과 석유</b>: 지금 확인된 매장량을 지금 속도로 캐면 철은 약 54년, 석유는 약 53년 쓸 수 있습니다. 새 매장지를 찾거나 덜 쓰면 늘어나므로 정해진 고갈 날짜는 아닙니다.",
+                "♻️ <b>3R 실천을 통한 극복</b>: 줄이기(Reduce), 다시 쓰기(Reuse), 재활용하기(Recycle)를 통해 새로 캐는 양을 줄이면 같은 매장량을 더 오래 쓸 수 있습니다."
             ]
         },
         {
@@ -653,7 +653,7 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
             bookRef: "『실험관찰』 44~45쪽",
             labLink: "science_eco_house_lab.html",
             safetyTip: "백열전구를 켠 직후에는 겉 표면이 매우 뜨거우므로 직접 손으로 만지지 않습니다.",
-            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 120" style="width:100%;max-width:480px;height:auto;"><path d="M 40 95 L 460 95" stroke="#475569" stroke-width="1.5"/><path d="M 40 15 L 40 95" stroke="#475569" stroke-width="1.5"/><text x="25" y="20" fill="#94a3b8" font-size="10">38℃</text><text x="25" y="55" fill="#94a3b8" font-size="10">30℃</text><text x="25" y="90" fill="#94a3b8" font-size="10">23℃</text><text x="40" y="110" fill="#94a3b8" font-size="10">0분</text><text x="145" y="110" fill="#94a3b8" font-size="10">1분</text><text x="250" y="110" fill="#94a3b8" font-size="10">2분</text><text x="355" y="110" fill="#94a3b8" font-size="10">3분</text><text x="450" y="110" fill="#94a3b8" font-size="10">5분 후</text><polyline points="40,20 145,45 250,65 355,80 450,90" fill="none" stroke="#ef4444" stroke-width="2.5"/><text x="400" y="80" fill="#ef4444" font-size="10" font-family="'Jua',sans-serif">일반 집(23℃)</text><polyline points="40,20 145,25 250,29 355,33 450,37" fill="none" stroke="#10b981" stroke-width="2.5"/><text x="400" y="32" fill="#34d399" font-size="10" font-family="'Jua',sans-serif">에코하우스(34.1℃)</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 전등 소등 후 1분 간격 5회 실내 온도 냉각 곡선 비교 (단열 보온 효과)</div></div>`,
+            diagramHtml: `<div style="background:#0b192e;border:1px solid #1e3a8a;border-radius:10px;padding:12px;margin:10px 0;text-align:center;"><svg viewBox="0 0 500 120" style="width:100%;max-width:480px;height:auto;"><path d="M 40 95 L 460 95" stroke="#475569" stroke-width="1.5"/><path d="M 40 15 L 40 95" stroke="#475569" stroke-width="1.5"/><text x="25" y="20" fill="#94a3b8" font-size="10">38℃</text><text x="25" y="55" fill="#94a3b8" font-size="10">30℃</text><text x="25" y="90" fill="#94a3b8" font-size="10">23℃</text><text x="34" y="110" fill="#94a3b8" font-size="10">0분</text><text x="118" y="110" fill="#94a3b8" font-size="10">1분</text><text x="202" y="110" fill="#94a3b8" font-size="10">2분</text><text x="286" y="110" fill="#94a3b8" font-size="10">3분</text><text x="370" y="110" fill="#94a3b8" font-size="10">4분</text><text x="454" y="110" fill="#94a3b8" font-size="10">5분</text><polyline points="40,20 124,45.2 208,62.9 292,75.5 376,83.9 460,90" fill="none" stroke="#ef4444" stroke-width="2.5"/><text x="380" y="72" fill="#ef4444" font-size="10" font-family="'Jua',sans-serif">일반 집(23℃)</text><polyline points="40,20 124,24.2 208,27.9 292,31.7 376,34.9 460,38.2" fill="none" stroke="#10b981" stroke-width="2.5"/><text x="380" y="30" fill="#34d399" font-size="10" font-family="'Jua',sans-serif">에코하우스(34.1℃)</text></svg><div style="font-size:0.85rem;color:#94a3b8;margin-top:4px;">▲ 전등 소등 후 1분 간격 5회 실내 온도 냉각 곡선 비교 (실온 20℃ 가정 · 계산한 가상 값)</div></div>`,
             points: [
                 "🏡 <b>에어캡(뽁뽁이)의 공기층 단열</b>: 뽁뽁이 비닐 방울 속의 갇힌 공기는 열전도율이 매우 낮아 유리창을 통한 열 손실을 막아 줍니다.",
                 "📉 <b>급격한 냉각 방어</b>: 난방(전등)을 끈 뒤 일반 집은 5분 만에 23℃로 차갑게 식지만, 단열 에코하우스는 34.1℃로 따뜻함을 장시간 유지합니다.",
@@ -694,7 +694,7 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
                 { id: "b4", target: "전구 불빛 상태", answer: "밝게" },
                 { id: "b5", target: "원천 에너지 형태", answer: "운동 에너지" }
             ],
-            options: ["강해질수록", "빠르게", "증가하여", "밝게", "운동 에너지", "약해질수록", "느리게", "감소하여"],
+            options: ["느리게", "운동 에너지", "강해질수록", "감소하여", "밝게", "약해질수록", "빠르게", "증가하여"],
             explanation: "완벽한 서술형 답안입니다! 바람의 세기가 강해질수록 날개가 빠르게 회전하여 더 많은 전기 에너지를 생산하므로 전구가 훨씬 밝게 빛납니다(100점 만점!)."
         },
         {
@@ -704,13 +704,13 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
             bookRef: "『실험관찰』 38~39쪽 · 자원 유한성 분석",
             questionText: "우리가 일상에서 사용하는 <b>지하 자원의 특성</b>과 <b>철 매장량</b>에 대한 설명으로 가장 알맞은 것은 무엇일까요?",
             choices: [
-                "철과 석유는 한 번 쓰면 사라지는 유한한 자원이며, 현재 소비 속도로는 철이 약 47년 후 고갈될 수 있으므로 재활용(3R)이 필수적이다.",
+                "철과 석유는 한 번 쓰면 사라지는 유한한 자원이며, 지금 속도로 캐면 철은 약 54년 쓸 수 있는 양이 확인되어 있으므로 재활용(3R)으로 아껴 써야 한다.",
                 "철은 지하 마그마에서 매일 생성되므로 마음껏 낭비해도 수만 년 동안 절대 고갈되지 않는다.",
                 "석유와 석탄은 물속에서 무한히 증식하므로 굳이 재생 에너지를 개발할 필요가 없다.",
                 "자원을 아끼는 가장 좋은 방법은 모든 광산을 즉시 폐쇄하고 원시 시대로 돌아가는 것이다."
             ],
             answer: 0,
-            explanation: "정답입니다! 철, 석유 등 천연자원은 매장량이 한정된 유한 자원이며, 특히 철은 약 47년 후 고갈될 수 있어 줄이기·재사용·재활용(3R)과 대체 에너지 개발이 필수입니다."
+            explanation: "정답입니다! 철, 석유 등 천연자원은 매장량이 한정된 유한 자원이며, 지금 속도라면 철은 약 54년 쓸 수 있는 양만 확인되어 있어 줄이기·재사용·재활용(3R)과 대체 에너지 개발이 필수입니다."
         },
         {
             id: "q3",
@@ -733,7 +733,7 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
             bookRef: "『실험관찰』 40~43쪽 · 청정 에너지 종합 분석",
             questionText: "다음 중 <b>재생 에너지</b>와 <b>에너지 소비 효율 등급</b>에 대한 설명으로 <b>옳지 않은</b> 것은 무엇일까요?",
             choices: [
-                "태양광, 풍력, 수력, 해양, 지열, 바이오 에너지는 발전 과정에서 온실가스를 배출하지 않는 청정 에너지이다.",
+                "태양광, 풍력, 수력, 해양, 지열, 바이오 에너지는 화석 연료보다 온실가스를 훨씬 적게 배출하는 청정 에너지이다.",
                 "가전제품의 에너지 소비 효율 등급은 1등급에 가까울수록 에너지를 적게 소비하는 고효율 제품이다.",
                 "가전제품을 끄고 플러그만 꽂아두어도 소비되는 전기를 '대기전력'이라고 하며, 스위치형 콘센트로 차단할 수 있다.",
                 "5등급 가전제품이 1등급보다 전기를 훨씬 적게 쓰므로 국가에서 5등급 제품 구매를 적극 권장하고 있다."
@@ -759,7 +759,7 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
                 { id: "b3", target: "미래 에너지 수확 기술", answer: "에너지 하베스팅" },
                 { id: "b4", target: "발로 밟는 발전 장치", answer: "압전 보도블록" }
             ],
-            options: ["공기층", "전도", "에너지 하베스팅", "압전 보도블록", "복사열", "화석 연료"],
+            options: ["복사열", "압전 보도블록", "전도", "화석 연료", "에너지 하베스팅", "공기층"],
             explanation: "훌륭합니다! 뽁뽁이는 [공기층]을 이용해 [전도]를 차단하며, 버려지는 에너지를 전기로 재생하는 [에너지 하베스팅]과 [압전 보도블록]은 미래 친환경 지속가능 사회의 핵심 기술입니다!"
         },
         {
@@ -769,9 +769,9 @@ window.SCIENCE_LAB_REPORT_4_DATA = {
             bookRef: "『실험관찰』 45쪽 & NotebookLM 배움 확인 체크리스트 6문항",
             questionText: "4단원 『자원과 에너지』 5가지 실험과 핵심 개념을 얼마나 완벽하게 정복했는지 각 항목마다 별점(⭐ 1~3개)을 직접 터치하여 체크해 보세요!",
             checklist: [
-                "자원의 뜻과 유한성을 이해하고, 철(47년) 등 지하 자원 고갈을 막기 위한 3R(절약·재사용·재활용)을 실천할 수 있나요?",
+                "자원의 뜻과 유한성, 가채연수(철 약 54년)를 이해하고, 지하 자원을 아끼기 위한 3R(절약·재사용·재활용)을 실천할 수 있나요?",
                 "바람의 세기에 따른 풍력 발전기 날개 회전과 전기 생산량(전압·전구 밝기)의 비례 관계를 설명할 수 있나요?",
-                "태양광, 풍력, 수력, 해양, 지열, 바이오 등 6대 재생 에너지의 발전 원리와 탄소 배출 제로 장점을 말할 수 있나요?",
+                "태양광, 풍력, 수력, 해양, 지열, 바이오 등 6대 재생 에너지의 발전 원리와 온실가스를 적게 배출하는 장점을 말할 수 있나요?",
                 "가전제품 에너지 소비 효율 등급(1~5등급)의 의미와 대기전력 차단 콘센트, LED 전등의 절전 효과를 설명할 수 있나요?",
                 "창문 뽁뽁이(공기층)와 단열재를 적용한 에코하우스의 5분 냉각 곡선 그래프를 분석하고 보온 원리를 설명할 수 있나요?",
                 "에너지 하베스팅의 뜻을 알고 일상생활(압전 보도블록, 체온 발전)에서 버려지는 에너지를 모으는 기술을 설명할 수 있나요?"
