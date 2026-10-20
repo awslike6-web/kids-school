@@ -1,30 +1,101 @@
 /**
- * ⚡ Cloudflare Worker: minmin-notion 통합 초고속 엣지 캐시 & 노션 프록시 & Edge TTS 엔진
- *
- * 💡 주요 기능:
- *  1. 🏰 노션 REST API 보안 프록시 (Notion-Version: 2022-06-28 주입, CORS 처리, Token 관리)
- *  2. ⚡ 2계층 스마트 캐시 시스템 (L1: In-Memory / L2: Cloudflare Cache API)
- *     - 동일 인스턴스 L1 메모리 캐시: 1ms 초저지연 즉답
- *     - Cloudflare Cache API (L2): 전 세계 엣지 캐싱 (origin 기반 정밀 매핑)
- *     - POST /v1/databases/:id/query 요청의 본문 해시 기반 스마트 캐싱 (TTL 5분)
- *     - X-Cache-Status: HIT / MISS 응답 헤더 제공
- *  3. 🚀 단일 번들링 부트스트랩 API (/api/bootstrap)
- *     - 접속 시 학생 인벤토리 + 오늘 시간표 + 알림장을 단 1회 호출로 일괄 번들링 응답
- *  4. 🎙️ Microsoft Edge Neural AI TTS 초고속 스트리밍 (/api/tts) 완전 내장
- *  5. 🩺 헬스체크 및 캐시 진단 (/health)
+ * ⚡ Cloudflare Worker: minmin-notion 전사 단일 통합 초고속 엣지 캐시 & 노션 프록시
+ * 
+ * 💡 통합 서빙 도메인:
+ *  1. 🧸 보육비서 (Daycare-Helper): 3대 핵심 DB 엄격 보안 가드 (guardDaycareProxy)
+ *  2. 📚 공부방 (Kids-School): 부트스트랩 번들링, 엣지 캐시, Gemini AI, Edge TTS
+ *  3. 📸 패밀리 아카이브: 모바일 퀵업로드 미디어 큐 & 노션 연동 파이프라인 2.1
  */
 
+// ============================================================================
+// 🧸 [보육비서] 노션 데이터베이스 보안 격리 가드 (Daycare Proxy Guard)
+// ============================================================================
+const protectedIds = new Set([
+  "3e0a27115b688186ad30cbaea7687006",
+  "3e0a27115b688182955ef116e4174e3a",
+  "3e0a27115b6881229eeadd49bf8a625c"
+]);
+
+function normalizeId(value) {
+  return String(value || "").replace(/-/g, "").toLowerCase();
+}
+
+function daycareDenied() {
+  return new Response(JSON.stringify({ error: "보육 기록은 보육비서에서 인증 후 이용해 주세요." }), {
+    status: 403,
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...CORS_HEADERS }
+  });
+}
+
+function constantTimeEqual(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+async function guardDaycareProxy(request, env, callRaw, resolveAuth) {
+  const url = new URL(request.url);
+  if (!url.pathname.startsWith("/v1/") || url.pathname === "/v1/gemini" || url.pathname === "/v1/audio/speech") return null;
+  const auth = resolveAuth(request, env);
+  if (!auth) return null;
+
+  if (env && env.DAYCARE_SERVICE_KEY && constantTimeEqual(request.headers.get("X-Daycare-Service-Key"), env.DAYCARE_SERVICE_KEY)) {
+    const body = ["GET", "HEAD"].includes(request.method) ? null : await request.clone().text();
+    const response = await callRaw(url.pathname + url.search, request.method, body, auth);
+    return new Response(response.body, {
+      status: response.status,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...CORS_HEADERS }
+    });
+  }
+
+  async function isProtected(type, id, depth = 0) {
+    if (protectedIds.has(normalizeId(id))) return true;
+    if (type === "databases") return false;
+    if (depth > 20 || !/^[a-f0-9-]{32,36}$/i.test(id || "")) return true;
+    const response = await callRaw(`/v1/${type}/${encodeURIComponent(id)}`, "GET", null, auth);
+    if (!response.ok) return true;
+    const object = await response.json();
+    const p = object.parent || {};
+    if (p.database_id) return protectedIds.has(normalizeId(p.database_id));
+    if (p.data_source_id) return true;
+    if (p.page_id) return isProtected("pages", p.page_id, depth + 1);
+    if (p.block_id) return isProtected("blocks", p.block_id, depth + 1);
+    return false;
+  }
+
+  const match = url.pathname.match(/^\/v1\/(databases|pages|blocks)\/([^/]+)/);
+  if (match && await isProtected(match[1], decodeURIComponent(match[2]))) return daycareDenied();
+  if (url.pathname === "/v1/search") return daycareDenied();
+
+  if (["POST", "PATCH"].includes(request.method)) {
+    let body;
+    try {
+      body = await request.clone().json();
+    } catch {
+      return daycareDenied();
+    }
+    const parent = body.parent || {};
+    if (parent.database_id && protectedIds.has(normalizeId(parent.database_id))) return daycareDenied();
+    if (parent.page_id && await isProtected("pages", parent.page_id)) return daycareDenied();
+    if (parent.block_id && await isProtected("blocks", parent.block_id)) return daycareDenied();
+  }
+  return null;
+}
+
+// ============================================================================
+// 🏰 노션 프록시 & CORS 설정
+// ============================================================================
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, User-Agent, Notion-Version, Pragma, Cache-Control, x-requested-with',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, User-Agent, Notion-Version, X-Daycare-Service-Key, Pragma, Cache-Control, x-requested-with',
   'Access-Control-Max-Age': '86400',
 };
 
 const NOTION_API_BASE = 'https://api.notion.com';
 const NOTION_VERSION = '2022-06-28';
 
-// 기본 노션 DB ID 단일 원천 (SSOT)
 const DEFAULT_DBS = {
   INVENTORY: '374a27115b688042bb61e6a102242e12',
   STUDY_LOG: '37aa27115b688001b2ffe5e6c8f82ab2',
@@ -35,9 +106,8 @@ const DEFAULT_DBS = {
   CURRICULUM: '3e8a27115b68806d94bfc81e9b3435fa'
 };
 
-// 캐시 TTL (초 단위)
-const CACHE_TTL_QUERY = 300;      // 노션 DB 쿼리: 5분 (300초)
-const CACHE_TTL_BOOTSTRAP = 180;  // 부트스트랩 번들: 3분 (180초)
+const CACHE_TTL_QUERY = 300;
+const CACHE_TTL_BOOTSTRAP = 180;
 
 // ============================================================================
 // ⚡ 2계층 스마트 캐시 시스템 (L1: In-Memory / L2: Cloudflare Cache API)
@@ -124,7 +194,6 @@ async function synthesizeEdgeTTS(text, voice = DEFAULT_VOICE, rate = '+6%', pitc
   const connectionId = crypto.randomUUID().replace(/-/g, '');
   const secMsGec = await generateSecMsGec();
   const muid = crypto.randomUUID().replace(/-/g, '').toUpperCase();
-
   const targetUrl = `https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${TRUSTED_TOKEN}&ConnectionId=${connectionId}&Sec-MS-GEC=${secMsGec}&Sec-MS-GEC-Version=${SEC_MS_GEC_VERSION}`;
 
   const resp = await fetch(targetUrl, {
@@ -141,9 +210,7 @@ async function synthesizeEdgeTTS(text, voice = DEFAULT_VOICE, rate = '+6%', pitc
   });
 
   const ws = resp.webSocket;
-  if (!ws) {
-    throw new Error(`Edge TTS WebSocket handshake failed (HTTP ${resp.status})`);
-  }
+  if (!ws) throw new Error(`Edge TTS WebSocket handshake failed (HTTP ${resp.status})`);
   ws.accept();
 
   return new Promise((resolve, reject) => {
@@ -154,22 +221,17 @@ async function synthesizeEdgeTTS(text, voice = DEFAULT_VOICE, rate = '+6%', pitc
 
     const timeout = setTimeout(() => {
       try { ws.close(); } catch (e) {}
-      if (audioChunks.length > 0) {
-        finishSuccess();
-      } else {
-        reject(new Error('Edge TTS synthesis timeout (10s). Logs: ' + JSON.stringify(debugLogs)));
-      }
+      if (audioChunks.length > 0) finishSuccess();
+      else reject(new Error('Edge TTS synthesis timeout (10s). Logs: ' + JSON.stringify(debugLogs)));
     }, 10000);
 
     const finishSuccess = () => {
       clearTimeout(timeout);
       try { ws.close(); } catch (e) {}
-
       if (audioChunks.length === 0) {
         reject(new Error('No audio chunks collected. Trace: ' + JSON.stringify(debugLogs)));
         return;
       }
-
       const totalLength = audioChunks.reduce((acc, chunk) => acc + chunk.byteLength, 0);
       const combined = new Uint8Array(totalLength);
       let offset = 0;
@@ -190,18 +252,12 @@ async function synthesizeEdgeTTS(text, voice = DEFAULT_VOICE, rate = '+6%', pitc
     ws.addEventListener('message', async (event) => {
       if (typeof event.data === 'string') {
         debugLogs.push('T:' + event.data.substring(0, 30));
-        if (event.data.includes('Path:turn.end')) {
-          finishSuccess();
-        }
+        if (event.data.includes('Path:turn.end')) finishSuccess();
       } else {
         let buf = null;
-        if (event.data instanceof ArrayBuffer) {
-          buf = event.data;
-        } else if (event.data instanceof Uint8Array) {
-          buf = event.data.buffer;
-        } else if (event.data && typeof event.data.arrayBuffer === 'function') {
-          buf = await event.data.arrayBuffer();
-        }
+        if (event.data instanceof ArrayBuffer) buf = event.data;
+        else if (event.data instanceof Uint8Array) buf = event.data.buffer;
+        else if (event.data && typeof event.data.arrayBuffer === 'function') buf = await event.data.arrayBuffer();
 
         if (buf && buf.byteLength > 2) {
           const view = new DataView(buf);
@@ -223,20 +279,15 @@ async function synthesizeEdgeTTS(text, voice = DEFAULT_VOICE, rate = '+6%', pitc
     ws.addEventListener('error', (err) => {
       clearTimeout(timeout);
       try { ws.close(); } catch (e) {}
-      reject(new Error('Edge TTS WebSocket Error: ' + (err.message || 'Unknown') + '. Logs: ' + JSON.stringify(debugLogs)));
+      reject(new Error('Edge TTS WebSocket Error: ' + (err.message || 'Unknown')));
     });
 
     ws.addEventListener('close', () => {
-      if (audioChunks.length > 0) {
-        finishSuccess();
-      }
+      if (audioChunks.length > 0) finishSuccess();
     });
   });
 }
 
-// ============================================================================
-// ⚡ 해시 및 캐시 키 생성 유틸리티
-// ============================================================================
 async function sha256Hex(str) {
   const msgUint8 = new TextEncoder().encode(str);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -244,27 +295,16 @@ async function sha256Hex(str) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/**
- * Cloudflare Cache API용 GET 가상 요청 객체 생성
- * (반드시 현재 워커의 origin 도메인을 사용하여 캐시 저장/조회 완벽 보장)
- */
 function createCacheKeyRequest(origin, virtualPath, hash) {
   const cacheUrl = `${origin}/__cf_cache${virtualPath}?h=${hash}`;
   return new Request(cacheUrl, { method: 'GET' });
 }
 
-// ============================================================================
-// 🏰 노션 API 요청 헬퍼
-// ============================================================================
 function getNotionAuthHeader(request, env) {
   const clientAuth = request.headers.get('Authorization');
-  if (clientAuth && clientAuth.startsWith('Bearer secret_')) {
-    return clientAuth;
-  }
+  if (clientAuth && clientAuth.startsWith('Bearer secret_')) return clientAuth;
   const token = env && (env.NOTION_TOKEN || env.NOTION_API_KEY);
-  if (token) {
-    return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-  }
+  if (token) return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
   return clientAuth || '';
 }
 
@@ -275,130 +315,12 @@ async function callNotionRaw(endpoint, method, body, authHeader) {
     'Notion-Version': NOTION_VERSION,
     'Content-Type': 'application/json'
   };
-
-  const options = {
-    method,
-    headers
-  };
+  const options = { method, headers };
   if (body && (method === 'POST' || method === 'PATCH' || method === 'PUT')) {
     options.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
-
   return await fetch(targetUrl, options);
 }
-
-// ============================================================================
-// 🚀 번들링 부트스트랩 API 핸들러 (/api/bootstrap)
-// ============================================================================
-async function handleBootstrap(url, request, env, ctx) {
-  const childName = url.searchParams.get('child') || '민수';
-  const forceRefresh = url.searchParams.get('force') === 'true';
-  const authHeader = getNotionAuthHeader(request, env);
-
-  if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Notion Authorization token required' }), {
-      status: 401,
-      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-    });
-  }
-
-  const cacheKeyStr = `bootstrap_${childName}`;
-  const cacheKeyReq = createCacheKeyRequest(url.origin, `/api/bootstrap`, `${encodeURIComponent(childName)}`);
-
-  // 1. L1 메모리 캐시 확인
-  if (!forceRefresh) {
-    const memCached = getFromMemoryCache(cacheKeyStr);
-    if (memCached) {
-      return createMemoryCacheResponse(memCached, 'HIT');
-    }
-  }
-
-  // 2. L2 Cloudflare Cache API 확인
-  const cache = caches.default;
-  if (!forceRefresh) {
-    try {
-      const cachedResponse = await cache.match(cacheKeyReq);
-      if (cachedResponse) {
-        const respHeaders = new Headers(cachedResponse.headers);
-        respHeaders.set('X-Cache-Status', 'HIT');
-        respHeaders.set('Access-Control-Allow-Origin', '*');
-        const bodyText = await cachedResponse.text();
-        saveToMemoryCache(cacheKeyStr, bodyText, cachedResponse.status, respHeaders, CACHE_TTL_BOOTSTRAP);
-        return new Response(bodyText, {
-          status: cachedResponse.status,
-          headers: respHeaders
-        });
-      }
-    } catch (e) {}
-  }
-
-  // 3. 캐시 부재 시 백엔드에서 3대 핵심 DB 병렬 벌크 호출
-  const inventoryDbId = (env && env.INVENTORY_DB_ID) || DEFAULT_DBS.INVENTORY;
-  const timetableDbId = (env && env.STATIC_TIMETABLE_DB_ID) || DEFAULT_DBS.STATIC_TIMETABLE;
-  const overlayDbId = (env && env.EVENT_OVERLAY_DB_ID) || DEFAULT_DBS.EVENT_OVERLAY;
-
-  try {
-    const [invRes, timeRes, overRes] = await Promise.all([
-      // 1) 학생 인벤토리
-      callNotionRaw(`/v1/databases/${inventoryDbId}/query`, 'POST', {
-        filter: { property: '이름', title: { equals: childName } }
-      }, authHeader),
-      // 2) 고정 시간표
-      callNotionRaw(`/v1/databases/${timetableDbId}/query`, 'POST', { page_size: 100 }, authHeader),
-      // 3) 알림장/이벤트 오버레이
-      callNotionRaw(`/v1/databases/${overlayDbId}/query`, 'POST', { page_size: 50 }, authHeader)
-    ]);
-
-    const [invData, timeData, overData] = await Promise.all([
-      invRes.ok ? invRes.json() : { results: [] },
-      timeRes.ok ? timeRes.json() : { results: [] },
-      overRes.ok ? overRes.json() : { results: [] }
-    ]);
-
-    const bundle = {
-      status: 'ok',
-      child: childName,
-      timestamp: new Date().toISOString(),
-      inventory: (invData.results && invData.results[0]) ? invData.results[0] : null,
-      timetable: timeData.results || [],
-      events: overData.results || []
-    };
-
-    const responseBody = JSON.stringify(bundle);
-    const respHeaders = new Headers({
-      'Content-Type': 'application/json',
-      'Cache-Control': `public, max-age=${CACHE_TTL_BOOTSTRAP}, stale-while-revalidate=300`,
-      'X-Cache-Status': 'MISS',
-      ...CORS_HEADERS
-    });
-
-    // L1 메모리 캐시 저장
-    saveToMemoryCache(cacheKeyStr, responseBody, 200, respHeaders, CACHE_TTL_BOOTSTRAP);
-
-    const response = new Response(responseBody, {
-      status: 200,
-      headers: respHeaders
-    });
-
-    // L2 엣지 캐시 저장
-    try {
-      if (ctx && ctx.waitUntil) {
-        ctx.waitUntil(cache.put(cacheKeyReq, response.clone()));
-      } else {
-        await cache.put(cacheKeyReq, response.clone());
-      }
-    } catch (e) {}
-
-    return response;
-
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message || 'Bootstrap bundle failed' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-    });
-  }
-}
-
 
 // ============================================================================
 // 📸 미디어 퀵업로드 파이프라인 핸들러 (/api/upload-media, /api/pending-media)
@@ -425,22 +347,18 @@ async function handleUploadMedia(request, env, ctx) {
     const uploadCategory = category || '만들기/공예';
     const uploadMemo = memo || '';
 
-    // 순수 Base64 데이터 추출 (data:image/...;base64, 접두사 제거)
     const base64Data = image.includes(';base64,') ? image.split(';base64,')[1] : image;
-
     let githubCommitted = false;
     let githubError = null;
 
-    // 1. GitHub API 직접 커밋 시도 (env.GITHUB_TOKEN 있을 시)
+    // 1. GitHub API 직접 커밋 (GITHUB_TOKEN 있을 시)
     const githubToken = env && (env.GITHUB_TOKEN || env.GH_TOKEN);
     if (githubToken) {
       try {
         let subFolder = '갤러리/' + uploadAuthor;
-        if (uploadCategory === '종이일기') {
-          subFolder = '일기/' + uploadAuthor;
-        } else if (uploadCategory === '특별한 날') {
-          subFolder = '갤러리/하루아카이브/공통';
-        }
+        if (uploadCategory === '종이일기') subFolder = '일기/' + uploadAuthor;
+        else if (uploadCategory === '특별한 날') subFolder = '갤러리/하루아카이브/공통';
+
         const filePath = `uploads/ex/${subFolder}/${filename}`;
         const ghUrl = `https://api.github.com/repos/awslike6-web/kids-school/contents/${encodeURI(filePath)}`;
 
@@ -458,18 +376,14 @@ async function handleUploadMedia(request, env, ctx) {
           })
         });
 
-        if (ghRes.ok) {
-          githubCommitted = true;
-        } else {
-          const ghErrText = await ghRes.text();
-          githubError = `GitHub HTTP ${ghRes.status}: ${ghErrText.substring(0, 100)}`;
-        }
+        if (ghRes.ok) githubCommitted = true;
+        else githubError = `GitHub HTTP ${ghRes.status}`;
       } catch (ghErr) {
         githubError = ghErr.message;
       }
     }
 
-    // 2. 인메모리 큐 및 L2 Cache API에 보관 (PC 스크립트 수신용)
+    // 2. 큐 보관 (메모리 + L2 Cache API 7일 보존)
     const mediaItem = {
       id: uploadId,
       filename,
@@ -490,7 +404,6 @@ async function handleUploadMedia(request, env, ctx) {
     }
     MEDIA_QUEUE.set(uploadId, mediaItem);
 
-    // L2 Cache API에 영구 보존용 저장 (7일간 유지)
     try {
       const cache = caches.default;
       const origin = new URL(request.url).origin;
@@ -502,14 +415,11 @@ async function handleUploadMedia(request, env, ctx) {
           ...CORS_HEADERS
         }
       });
-      if (ctx && ctx.waitUntil) {
-        ctx.waitUntil(cache.put(mediaReq, mediaResp));
-      } else {
-        await cache.put(mediaReq, mediaResp);
-      }
+      if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(mediaReq, mediaResp));
+      else await cache.put(mediaReq, mediaResp);
     } catch (e) {}
 
-    // 3. 노션 DB 페이지 자동 생성 (요청 시)
+    // 3. 노션 DB 페이지 자동 생성
     let notionPageId = null;
     let notionError = null;
     if (createNotionPage) {
@@ -608,7 +518,6 @@ async function handleGetPendingMedia(url, request, env) {
     });
   }
 
-  // 전체 목록 반환
   const list = [];
   for (const item of MEDIA_QUEUE.values()) {
     if (includeData) {
@@ -657,11 +566,105 @@ async function handleDeletePendingMedia(url, request) {
 }
 
 // ============================================================================
+// 🚀 번들링 부트스트랩 API 핸들러 (/api/bootstrap)
+// ============================================================================
+async function handleBootstrap(url, request, env, ctx) {
+  const childName = url.searchParams.get('child') || '민수';
+  const forceRefresh = url.searchParams.get('force') === 'true';
+  const authHeader = getNotionAuthHeader(request, env);
+
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'Notion Authorization token required' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+
+  const cacheKeyStr = `bootstrap_${childName}`;
+  const cacheKeyReq = createCacheKeyRequest(url.origin, `/api/bootstrap`, `${encodeURIComponent(childName)}`);
+
+  if (!forceRefresh) {
+    const memCached = getFromMemoryCache(cacheKeyStr);
+    if (memCached) return createMemoryCacheResponse(memCached, 'HIT');
+  }
+
+  const cache = caches.default;
+  if (!forceRefresh) {
+    try {
+      const cachedResponse = await cache.match(cacheKeyReq);
+      if (cachedResponse) {
+        const respHeaders = new Headers(cachedResponse.headers);
+        respHeaders.set('X-Cache-Status', 'HIT');
+        respHeaders.set('Access-Control-Allow-Origin', '*');
+        const bodyText = await cachedResponse.text();
+        saveToMemoryCache(cacheKeyStr, bodyText, cachedResponse.status, respHeaders, CACHE_TTL_BOOTSTRAP);
+        return new Response(bodyText, { status: cachedResponse.status, headers: respHeaders });
+      }
+    } catch (e) {}
+  }
+
+  const inventoryDbId = (env && env.INVENTORY_DB_ID) || DEFAULT_DBS.INVENTORY;
+  const timetableDbId = (env && env.STATIC_TIMETABLE_DB_ID) || DEFAULT_DBS.STATIC_TIMETABLE;
+  const overlayDbId = (env && env.EVENT_OVERLAY_DB_ID) || DEFAULT_DBS.EVENT_OVERLAY;
+
+  try {
+    const [invRes, timeRes, overRes] = await Promise.all([
+      callNotionRaw(`/v1/databases/${inventoryDbId}/query`, 'POST', {
+        filter: { property: '이름', title: { equals: childName } }
+      }, authHeader),
+      callNotionRaw(`/v1/databases/${timetableDbId}/query`, 'POST', { page_size: 100 }, authHeader),
+      callNotionRaw(`/v1/databases/${overlayDbId}/query`, 'POST', { page_size: 50 }, authHeader)
+    ]);
+
+    const [invData, timeData, overData] = await Promise.all([
+      invRes.ok ? invRes.json() : { results: [] },
+      timeRes.ok ? timeRes.json() : { results: [] },
+      overRes.ok ? overRes.json() : { results: [] }
+    ]);
+
+    const bundle = {
+      status: 'ok',
+      child: childName,
+      timestamp: new Date().toISOString(),
+      inventory: (invData.results && invData.results[0]) ? invData.results[0] : null,
+      timetable: timeData.results || [],
+      events: overData.results || []
+    };
+
+    const responseBody = JSON.stringify(bundle);
+    const respHeaders = new Headers({
+      'Content-Type': 'application/json',
+      'Cache-Control': `public, max-age=${CACHE_TTL_BOOTSTRAP}, stale-while-revalidate=300`,
+      'X-Cache-Status': 'MISS',
+      ...CORS_HEADERS
+    });
+
+    saveToMemoryCache(cacheKeyStr, responseBody, 200, respHeaders, CACHE_TTL_BOOTSTRAP);
+    const response = new Response(responseBody, { status: 200, headers: respHeaders });
+    try {
+      if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKeyReq, response.clone()));
+      else await cache.put(cacheKeyReq, response.clone());
+    } catch (e) {}
+
+    return response;
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message || 'Bootstrap bundle failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+}
+
+// ============================================================================
 // 🌐 메인 라우터 (Cloudflare Worker fetch)
 // ============================================================================
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // 0. 🧸 보육비서 노션 보안 가드 우선 검증
+    const guarded = await guardDaycareProxy(request, env, callNotionRaw, getNotionAuthHeader);
+    if (guarded) return guarded;
 
     // 1. CORS Preflight (OPTIONS)
     if (request.method === 'OPTIONS') {
@@ -673,12 +676,9 @@ export default {
       return new Response(JSON.stringify({
         status: 'ok',
         service: 'minmin-notion-edge-cache',
-        version: '2026.09-v3-l1l2',
-        features: ['notion-proxy', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts', 'quick-upload-pipeline'],
-        cacheTTL: {
-          query: `${CACHE_TTL_QUERY}s`,
-          bootstrap: `${CACHE_TTL_BOOTSTRAP}s`
-        },
+        version: '2026.10-v4-daycare-media',
+        features: ['notion-proxy', 'daycare-guard', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts', 'gemini-key', 'gemini-proxy', 'quick-upload-pipeline'],
+        cacheTTL: { query: `${CACHE_TTL_QUERY}s`, bootstrap: `${CACHE_TTL_BOOTSTRAP}s` },
         memoryCacheEntries: MEMORY_CACHE.size,
         timestamp: new Date().toISOString()
       }), {
@@ -688,12 +688,12 @@ export default {
     }
 
     // 2-B. 🔑 Gemini API 키 런타임 디스펜서 (/api/gemini-key)
-    // Cloudflare Worker 시크릿(env.GEMINI_API_KEY)을 공부방 브라우저 런타임에 안전하게 전달
     if (url.pathname === '/api/gemini-key') {
-      const apiKey = (env && env.GEMINI_API_KEY) ? env.GEMINI_API_KEY : '';
+      const apiKey = (env && (env.GEMINI_API_KEY || env.GEMINI_KEY)) ? (env.GEMINI_API_KEY || env.GEMINI_KEY) : '';
       return new Response(JSON.stringify({
         status: apiKey ? 'ok' : 'empty',
-        key: apiKey
+        key: apiKey,
+        timestamp: new Date().toISOString()
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
@@ -701,10 +701,9 @@ export default {
     }
 
     // 2-C. 🤖 Gemini AI 백엔드 프록시 (/v1/gemini)
-    // 브라우저에서 워커 프록시로 요정 코코 대화를 요청했을 때 Cloudflare 시크릿 키로 구글 최신 플래그십(gemini-3.8-flash) 호출
     if (url.pathname === '/v1/gemini') {
       try {
-        const apiKey = (env && env.GEMINI_API_KEY) ? env.GEMINI_API_KEY : '';
+        const apiKey = (env && (env.GEMINI_API_KEY || env.GEMINI_KEY)) ? (env.GEMINI_API_KEY || env.GEMINI_KEY) : '';
         if (!apiKey) {
           return new Response(JSON.stringify({ error: 'GEMINI_API_KEY secret is not configured in Worker' }), {
             status: 500,
@@ -771,7 +770,6 @@ export default {
         }
 
         const audioBuffer = await synthesizeEdgeTTS(trimmed, voice, rate, pitch);
-
         return new Response(audioBuffer, {
           status: 200,
           headers: {
@@ -788,7 +786,6 @@ export default {
       }
     }
 
-    
     // 3-B. 📸 미디어 퀵업로드 엔드포인트 (/api/upload-media)
     if (url.pathname === '/api/upload-media' && request.method === 'POST') {
       return await handleUploadMedia(request, env, ctx);
@@ -804,30 +801,9 @@ export default {
       }
     }
 
-// 4. 단일 번들링 부트스트랩 엔드포인트 (/api/bootstrap)
+    // 4. 단일 번들링 부트스트랩 엔드포인트 (/api/bootstrap)
     if (url.pathname === '/api/bootstrap') {
       return await handleBootstrap(url, request, env, ctx);
-    }
-
-    // 4-A. 📱 스크린타임 단일 원천 관제 엔드포인트 (/api/screentime)
-    if (url.pathname === '/api/screentime') {
-      // 이전 노션 장부에는 관리 쓰기를 허용하지 않습니다.
-      return new Response(JSON.stringify({ error: '가디언 전용 부모 관리 화면을 이용해 주세요.' }), {
-        status: 410, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-      });
-    }
-
-    // 4-B. 🔑 Gemini 런타임 보안 키 디스펜서 (/api/gemini-key)
-    if (url.pathname === '/api/gemini-key') {
-      const geminiKey = (env && (env.GEMINI_API_KEY || env.GEMINI_KEY)) || '';
-      return new Response(JSON.stringify({
-        status: 'ok',
-        key: geminiKey,
-        timestamp: new Date().toISOString()
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-      });
     }
 
     // 5. 노션 REST API 요청 처리 (/v1/...)
@@ -852,15 +828,11 @@ export default {
         const cacheKeyStr = `query_${bodyHash}`;
         const cacheKeyReq = createCacheKeyRequest(url.origin, url.pathname, bodyHash);
 
-        // 1) L1 메모리 캐시 확인
         if (!forceRefresh) {
           const memCached = getFromMemoryCache(cacheKeyStr);
-          if (memCached) {
-            return createMemoryCacheResponse(memCached, 'HIT');
-          }
+          if (memCached) return createMemoryCacheResponse(memCached, 'HIT');
         }
 
-        // 2) L2 Cloudflare Cache API 확인
         const cache = caches.default;
         if (!forceRefresh) {
           try {
@@ -871,15 +843,11 @@ export default {
               respHeaders.set('Access-Control-Allow-Origin', '*');
               const bodyText = await cachedResp.text();
               saveToMemoryCache(cacheKeyStr, bodyText, cachedResp.status, respHeaders, CACHE_TTL_QUERY);
-              return new Response(bodyText, {
-                status: cachedResp.status,
-                headers: respHeaders
-              });
+              return new Response(bodyText, { status: cachedResp.status, headers: respHeaders });
             }
           } catch (e) {}
         }
 
-        // 캐시 MISS: 노션 원본 API 호출 (워커 내부 제어 파라미터 force, _t 제거하여 Notion validation_error 400 방어)
         const forwardUrl = new URL(url.toString());
         forwardUrl.searchParams.delete('force');
         forwardUrl.searchParams.delete('_t');
@@ -893,49 +861,31 @@ export default {
 
         if (notionResp.ok) {
           responseHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL_QUERY}, stale-while-revalidate=600`);
-          
-          // L1 메모리 캐시 저장
           saveToMemoryCache(cacheKeyStr, respData, notionResp.status, responseHeaders, CACHE_TTL_QUERY);
 
-          const cacheableResponse = new Response(respData, {
-            status: notionResp.status,
-            headers: responseHeaders
-          });
-          
-          // L2 엣지 캐시 저장
+          const cacheableResponse = new Response(respData, { status: notionResp.status, headers: responseHeaders });
           try {
-            if (ctx && ctx.waitUntil) {
-              ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
-            } else {
-              await cache.put(cacheKeyReq, cacheableResponse.clone());
-            }
+            if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
+            else await cache.put(cacheKeyReq, cacheableResponse.clone());
           } catch (e) {}
-
           return cacheableResponse;
         } else {
-          return new Response(respData, {
-            status: notionResp.status,
-            headers: responseHeaders
-          });
+          return new Response(respData, { status: notionResp.status, headers: responseHeaders });
         }
       }
 
-      // 5-B. 노션 페이지 읽기 (GET /v1/pages/:id, GET /v1/blocks/:id/children 등)
+      // 5-B. 노션 페이지 읽기 (GET /v1/pages/:id 등)
       if (request.method === 'GET') {
         const bodyHash = await sha256Hex(url.pathname + url.search);
         const cacheKeyStr = `get_${bodyHash}`;
         const cacheKeyReq = createCacheKeyRequest(url.origin, url.pathname, bodyHash);
         const forceRefresh = url.searchParams.get('force') === 'true';
 
-        // 1) L1 메모리 캐시 확인
         if (!forceRefresh) {
           const memCached = getFromMemoryCache(cacheKeyStr);
-          if (memCached) {
-            return createMemoryCacheResponse(memCached, 'HIT');
-          }
+          if (memCached) return createMemoryCacheResponse(memCached, 'HIT');
         }
 
-        // 2) L2 Cache API 확인
         const cache = caches.default;
         if (!forceRefresh) {
           try {
@@ -946,10 +896,7 @@ export default {
               respHeaders.set('Access-Control-Allow-Origin', '*');
               const bodyText = await cachedResp.text();
               saveToMemoryCache(cacheKeyStr, bodyText, cachedResp.status, respHeaders, CACHE_TTL_QUERY);
-              return new Response(bodyText, {
-                status: cachedResp.status,
-                headers: respHeaders
-              });
+              return new Response(bodyText, { status: cachedResp.status, headers: respHeaders });
             }
           } catch (e) {}
         }
@@ -965,26 +912,18 @@ export default {
           responseHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL_QUERY}, stale-while-revalidate=600`);
           saveToMemoryCache(cacheKeyStr, respData, notionResp.status, responseHeaders, CACHE_TTL_QUERY);
 
-          const cacheableResponse = new Response(respData, {
-            status: notionResp.status,
-            headers: responseHeaders
-          });
+          const cacheableResponse = new Response(respData, { status: notionResp.status, headers: responseHeaders });
           try {
-            if (ctx && ctx.waitUntil) {
-              ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
-            } else {
-              await cache.put(cacheKeyReq, cacheableResponse.clone());
-            }
+            if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKeyReq, cacheableResponse.clone()));
+            else await cache.put(cacheKeyReq, cacheableResponse.clone());
           } catch (e) {}
           return cacheableResponse;
         }
         return new Response(respData, { status: notionResp.status, headers: responseHeaders });
       }
 
-      // 5-C. 노션 쓰기/수정 (PATCH /v1/pages/:id, POST /v1/pages 등)
-      // 쓰기 시에는 L1 메모리 캐시 전체를 무효화하여 즉시 최신 상태 반영 보장
+      // 5-C. 노션 쓰기/수정
       MEMORY_CACHE.clear();
-
       const reqBody = await request.text();
       const notionResp = await callNotionRaw(url.pathname + url.search, request.method, reqBody, authHeader);
       const respData = await notionResp.text();
@@ -993,13 +932,9 @@ export default {
       Object.entries(CORS_HEADERS).forEach(([k, v]) => responseHeaders.set(k, v));
       responseHeaders.set('X-Cache-Status', 'BYPASS-WRITE');
 
-      return new Response(respData, {
-        status: notionResp.status,
-        headers: responseHeaders
-      });
+      return new Response(respData, { status: notionResp.status, headers: responseHeaders });
     }
 
-    // 그 외 요청 404
     return new Response(JSON.stringify({ error: 'Endpoint not found', path: url.pathname }), {
       status: 404,
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
