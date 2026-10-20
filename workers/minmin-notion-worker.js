@@ -1,10 +1,10 @@
 /**
- * ⚡ Cloudflare Worker: minmin-notion 전사 단일 통합 초고속 엣지 캐시 & 노션 프록시
+ * ⚡ Cloudflare Worker: minmin-notion 전사 단일 통합 초고속 엣지 캐시 & 노션 프록시 (v4.2 완결판)
  * 
  * 💡 통합 서빙 도메인:
- *  1. 🧸 보육비서 (Daycare-Helper): 3대 핵심 DB 엄격 보안 가드 (guardDaycareProxy)
+ *  1. 🧸 보육비서 (Daycare-Helper): 3대 핵심 DB 엄격 보안 가드 (guardDaycareProxy) & CORS 안전 처리
  *  2. 📚 공부방 (Kids-School): 부트스트랩 번들링, 엣지 캐시, Gemini AI, Edge TTS
- *  3. 📸 패밀리 아카이브: 모바일 퀵업로드 미디어 큐 & 노션 연동 파이프라인 2.1
+ *  3. 📸 패밀리 아카이브: 모바일 퀵업로드 미디어 큐 & 노션 연동 파이프라인 2.1 (L2 영구 인덱스 + GitHub SHA 덮어쓰기 방어)
  */
 
 // ============================================================================
@@ -329,6 +329,40 @@ const MEDIA_QUEUE = new Map();
 const MAX_MEDIA_QUEUE_SIZE = 100;
 const GALLERY_DIARY_DB_ID = '3dfa27115b688010a85be385f91d64ee';
 
+// L2 Cache 기반 큐 인덱스 동기화 헬퍼 (워커 콜드스타트 복원 지원)
+async function syncMediaIndexCache(origin, ctx, cache) {
+  try {
+    const ids = Array.from(MEDIA_QUEUE.keys());
+    const indexReq = createCacheKeyRequest(origin, '/__pending_media_index', 'v1');
+    const indexResp = new Response(JSON.stringify(ids), {
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=604800', ...CORS_HEADERS }
+    });
+    if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(indexReq, indexResp));
+    else await cache.put(indexReq, indexResp);
+  } catch (e) {}
+}
+
+async function restoreMediaQueueFromCache(origin) {
+  try {
+    const cache = caches.default;
+    const indexReq = createCacheKeyRequest(origin, '/__pending_media_index', 'v1');
+    const indexMatch = await cache.match(indexReq);
+    if (!indexMatch) return;
+    const ids = await indexMatch.json();
+    if (!Array.isArray(ids)) return;
+
+    for (const id of ids) {
+      if (MEDIA_QUEUE.has(id)) continue;
+      const itemReq = createCacheKeyRequest(origin, `/__pending_media/${id}`, 'item');
+      const itemMatch = await cache.match(itemReq);
+      if (itemMatch) {
+        const itemData = await itemMatch.json();
+        MEDIA_QUEUE.set(id, itemData);
+      }
+    }
+  } catch (e) {}
+}
+
 async function handleUploadMedia(request, env, ctx) {
   try {
     const data = await request.json();
@@ -351,7 +385,7 @@ async function handleUploadMedia(request, env, ctx) {
     let githubCommitted = false;
     let githubError = null;
 
-    // 1. GitHub API 직접 커밋 (GITHUB_TOKEN 있을 시)
+    // 1. GitHub API 직접 커밋 (GITHUB_TOKEN 있을 시 - SHA 자동 확인으로 422 덮어쓰기 방어)
     const githubToken = env && (env.GITHUB_TOKEN || env.GH_TOKEN);
     if (githubToken) {
       try {
@@ -362,6 +396,28 @@ async function handleUploadMedia(request, env, ctx) {
         const filePath = `uploads/ex/${subFolder}/${filename}`;
         const ghUrl = `https://api.github.com/repos/awslike6-web/kids-school/contents/${encodeURI(filePath)}`;
 
+        // 중복 파일명 체크 (SHA 획득)
+        let fileSha = undefined;
+        try {
+          const checkRes = await fetch(ghUrl, {
+            headers: {
+              'Authorization': `token ${githubToken}`,
+              'User-Agent': 'Minmin-Worker-Media-Pipeline'
+            }
+          });
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            fileSha = checkData.sha;
+          }
+        } catch (e) {}
+
+        const putBody = {
+          message: `feat(media): [모바일 퀵업로드] ${uploadAuthor} ${uploadCategory} (${filename})`,
+          content: base64Data,
+          branch: 'main'
+        };
+        if (fileSha) putBody.sha = fileSha;
+
         const ghRes = await fetch(ghUrl, {
           method: 'PUT',
           headers: {
@@ -369,21 +425,20 @@ async function handleUploadMedia(request, env, ctx) {
             'User-Agent': 'Minmin-Worker-Media-Pipeline',
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            message: `feat(media): [모바일 퀵업로드] ${uploadAuthor} ${uploadCategory} (${filename})`,
-            content: base64Data,
-            branch: 'main'
-          })
+          body: JSON.stringify(putBody)
         });
 
         if (ghRes.ok) githubCommitted = true;
-        else githubError = `GitHub HTTP ${ghRes.status}`;
+        else {
+          const errText = await ghRes.text();
+          githubError = `GitHub HTTP ${ghRes.status}: ${errText.substring(0, 80)}`;
+        }
       } catch (ghErr) {
         githubError = ghErr.message;
       }
     }
 
-    // 2. 큐 보관 (메모리 + L2 Cache API 7일 보존)
+    // 2. 큐 보관 (메모리 + L2 Cache API 7일 보존 & 인덱스 갱신)
     const mediaItem = {
       id: uploadId,
       filename,
@@ -404,9 +459,10 @@ async function handleUploadMedia(request, env, ctx) {
     }
     MEDIA_QUEUE.set(uploadId, mediaItem);
 
+    const origin = new URL(request.url).origin;
+    const cache = caches.default;
+
     try {
-      const cache = caches.default;
-      const origin = new URL(request.url).origin;
       const mediaReq = createCacheKeyRequest(origin, `/__pending_media/${uploadId}`, 'item');
       const mediaResp = new Response(JSON.stringify(mediaItem), {
         headers: {
@@ -417,6 +473,8 @@ async function handleUploadMedia(request, env, ctx) {
       });
       if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(mediaReq, mediaResp));
       else await cache.put(mediaReq, mediaResp);
+
+      await syncMediaIndexCache(origin, ctx, cache);
     } catch (e) {}
 
     // 3. 노션 DB 페이지 자동 생성
@@ -504,8 +562,23 @@ async function handleGetPendingMedia(url, request, env) {
   const includeData = url.searchParams.get('include_data') === 'true';
   const targetId = url.searchParams.get('id');
 
+  // 콜드스타트 복원: 큐가 비어있으면 L2 Cache에서 인덱스 복원 시도
+  if (MEDIA_QUEUE.size === 0) {
+    await restoreMediaQueueFromCache(url.origin);
+  }
+
   if (targetId) {
-    const item = MEDIA_QUEUE.get(targetId);
+    let item = MEDIA_QUEUE.get(targetId);
+    if (!item) {
+      // 캐시에서 직접 개별 조회 시도
+      try {
+        const cache = caches.default;
+        const itemReq = createCacheKeyRequest(url.origin, `/__pending_media/${targetId}`, 'item');
+        const match = await cache.match(itemReq);
+        if (match) item = await match.json();
+      } catch (e) {}
+    }
+
     if (!item) {
       return new Response(JSON.stringify({ error: 'Media not found', id: targetId }), {
         status: 404,
@@ -538,13 +611,16 @@ async function handleGetPendingMedia(url, request, env) {
   });
 }
 
-async function handleDeletePendingMedia(url, request) {
+async function handleDeletePendingMedia(url, request, ctx) {
   const targetId = url.searchParams.get('id');
   const clearAll = url.searchParams.get('clear_all') === 'true';
+  const origin = url.origin;
+  const cache = caches.default;
 
   if (clearAll) {
     const count = MEDIA_QUEUE.size;
     MEDIA_QUEUE.clear();
+    await syncMediaIndexCache(origin, ctx, cache);
     return new Response(JSON.stringify({ status: 'ok', cleared: count }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
@@ -559,6 +635,8 @@ async function handleDeletePendingMedia(url, request) {
   }
 
   const existed = MEDIA_QUEUE.delete(targetId);
+  await syncMediaIndexCache(origin, ctx, cache);
+
   return new Response(JSON.stringify({ status: 'ok', id: targetId, deleted: existed }), {
     status: 200,
     headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
@@ -676,10 +754,10 @@ export default {
       return new Response(JSON.stringify({
         status: 'ok',
         service: 'minmin-notion-edge-cache',
-        version: '2026.10-v4-daycare-media',
+        version: '2026.10-v4.2-perfect',
         features: ['notion-proxy', 'daycare-guard', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts', 'gemini-key', 'gemini-proxy', 'quick-upload-pipeline'],
         cacheTTL: { query: `${CACHE_TTL_QUERY}s`, bootstrap: `${CACHE_TTL_BOOTSTRAP}s` },
-        memoryCacheEntries: MEMORY_CACHE.size,
+        memoryCacheEntries: MEDIA_QUEUE.size,
         timestamp: new Date().toISOString()
       }), {
         status: 200,
@@ -797,7 +875,7 @@ export default {
         return await handleGetPendingMedia(url, request, env);
       }
       if (request.method === 'DELETE') {
-        return await handleDeletePendingMedia(url, request);
+        return await handleDeletePendingMedia(url, request, ctx);
       }
     }
 
@@ -848,6 +926,7 @@ export default {
           } catch (e) {}
         }
 
+        // 🌟 force, _t 파라미터 정제 (노션 400 Bad Request 방어)
         const forwardUrl = new URL(url.toString());
         forwardUrl.searchParams.delete('force');
         forwardUrl.searchParams.delete('_t');
@@ -874,7 +953,7 @@ export default {
         }
       }
 
-      // 5-B. 노션 페이지 읽기 (GET /v1/pages/:id 등)
+      // 5-B. ⚡ 노션 페이지 읽기 (GET /v1/pages/:id 등)
       if (request.method === 'GET') {
         const bodyHash = await sha256Hex(url.pathname + url.search);
         const cacheKeyStr = `get_${bodyHash}`;
@@ -901,7 +980,11 @@ export default {
           } catch (e) {}
         }
 
-        const notionResp = await callNotionRaw(url.pathname + url.search, 'GET', null, authHeader);
+        // 🌟 [미세 보완 ①] GET 요청 시에도 force, _t 파라미터 정제 (노션 400 Bad Request 방어)
+        const forwardUrl = new URL(url.toString());
+        forwardUrl.searchParams.delete('force');
+        forwardUrl.searchParams.delete('_t');
+        const notionResp = await callNotionRaw(url.pathname + forwardUrl.search, 'GET', null, authHeader);
         const respData = await notionResp.text();
 
         const responseHeaders = new Headers(notionResp.headers);
