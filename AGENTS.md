@@ -15,6 +15,7 @@
 - 스킬을 고쳤으면 `python scripts/sync_agent_skills.py`로 사본을 맞추고, 커밋 전에 `python scripts/sync_agent_skills.py --check`가 통과해야 합니다.
 - 현재 스킬:
   - `quest-engine-spec` (5분 퀘스트 3·3·3 마스터리 엔진·에러리스 UI·VOCA_DB 숙련도 동기화)
+  - `minseo-korean-unit` (민서 국어 단원 추가: 받아쓰기 회차 → 5분방 정제 어휘 + 미니 독해 지문·mp3 등록 표준 절차)
   - `science-unit-builder` (초등 과학 5대 가상실험실 & NotebookLM 기반 『실험관찰』 실험연계 디지털 탐구 보고서·서술형 빌더·실험순서 조립 표준 제작)
 
 ## 로컬 실행·검증 메모 (이 PC 기준)
@@ -22,5 +23,5 @@
 - **한글 출력**: Python으로 한글을 출력할 때는 `python -X utf8` 또는 `PYTHONIOENCODING=utf-8`을 붙입니다.
 - **노션 Worker(`minmin-notion.awslike6.workers.dev`) 호출**:
   - Python에서 부를 때는 `User-Agent` 헤더가 없으면 403이 납니다.
-  - 배포본은 저장소 `workers/` 코드보다 오래됐습니다. 엣지 캐시 우회용 `Pragma` 헤더는 CORS에서 막히고, `?force=true`는 노션까지 넘어가 400이 납니다.
+  - 배포는 GitHub와 자동 연동되지 않습니다. `workers/minmin-notion-worker.js`를 Cloudflare 대시보드 편집기에 붙여 넣고 Deploy 하며, `/health`의 `version`으로 반영을 확인합니다(2026-10-20 기준 저장소와 같은 v4.3). 엣지 캐시 우회용 `Pragma` 헤더는 CORS에서 막히고, `?force=true`는 노션까지 넘어가 400이 납니다.
 - **운영 DB 보호**: 화면 검증 중 노션 쓰기(`PATCH/POST /v1/pages`)는 페이지 안에서 `fetch`를 가로채 막습니다. 실제 쓰기 시험은 사용자 승인 후 1건만 하고, 원래 값으로 되돌린 뒤 다시 읽어 확인합니다.

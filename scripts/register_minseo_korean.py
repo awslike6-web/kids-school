@@ -14,6 +14,7 @@
 - 기본은 미리보기(dry-run). 실제 쓰기는 --apply.
 
 사용 예:
+  python -X utf8 scripts/register_minseo_korean.py --show-dictation 5   # 학교 받아쓰기 5회 문장 보기 (시드 작성용)
   python -X utf8 scripts/register_minseo_korean.py --file scripts/data/minseo_korean_1-2_u2.json
   python -X utf8 scripts/register_minseo_korean.py --file scripts/data/minseo_korean_1-2_u2.json --apply
 """
@@ -21,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -173,13 +175,38 @@ def upsert_passages(seed: dict, apply: bool) -> tuple[int, int]:
     return created, updated
 
 
+def show_dictation(round_no: str, student: str = "민서") -> None:
+    """VOCA_DB 받아쓰기 행 중 단원이 'N회'로 시작하는 문장을 번호 순으로 출력 (2학기 회차 표기 기준)"""
+    rows = query_all(VOCA_DB_ID, {"and": [
+        {"property": "학생", "multi_select": {"contains": student}},
+        {"property": "과목", "multi_select": {"contains": "받아쓰기"}},
+        {"property": "단원", "rich_text": {"starts_with": f"{round_no}회"}},
+    ]})
+    def text(page, prop):
+        return "".join(t.get("plain_text", "") for t in page["properties"][prop].get("rich_text", []))
+    rows = [p for p in rows if re.match(rf"{round_no}회(\s|\(|$)", text(p, "단원"))]  # '1회'가 '10회'를 잡지 않게
+    rows.sort(key=lambda p: int((re.findall(r"(\d+)번", text(p, "상세설명")) or ["99"])[-1]))
+    if not rows:
+        print(f"받아쓰기 {round_no}회 문장이 없습니다.")
+        return
+    print(f"📝 {text(rows[0], '단원')} · {len(rows)}문장")
+    for p in rows:
+        print(f"   {text(p, '상세설명').split()[-1] if text(p, '상세설명') else '-':>4}  {plain_title(p, '단어')}")
+
+
 def main() -> int:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description="민서 국어 단원 묶음(VOCA 정제 어휘 + 미니 독해 지문) 노션 등록")
-    ap.add_argument("--file", "-f", required=True, help="시드 JSON 경로 (scripts/data/minseo_korean_*.json)")
+    ap.add_argument("--file", "-f", help="시드 JSON 경로 (scripts/data/minseo_korean_*.json)")
+    ap.add_argument("--show-dictation", metavar="N", help="학교 받아쓰기 N회 문장만 출력하고 끝낸다")
     ap.add_argument("--apply", action="store_true", help="실제로 노션에 쓴다 (없으면 미리보기)")
     args = ap.parse_args()
+    if args.show_dictation:
+        show_dictation(args.show_dictation)
+        return 0
+    if not args.file:
+        ap.error("--file 또는 --show-dictation 중 하나가 필요합니다")
 
     seed = json.loads(Path(args.file).read_text(encoding="utf-8"))
     mode = "실제 등록" if args.apply else "미리보기(dry-run) — 쓰려면 --apply"
