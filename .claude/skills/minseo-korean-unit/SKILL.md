@@ -54,10 +54,10 @@ description: 민서(초1) 국어 단원 추가·수정 시 사용. 학교 받아
    node -e "global.localStorage={_d:{},getItem(k){return this._d[k]??null},setItem(k,v){this._d[k]=String(v)},removeItem(){}};require('./kids/subjects/quest/quest-mastery.js');const QM=globalThis.QuestMastery,d=require('./scripts/data/minseo_korean_1-2_u4.json');const it=QM.selectUnitItems(d.voca.map((v,i)=>({id:'v'+i,word:v.word,meaning:v.meaning,detailContext:v.detail,wordType:'단어',stage:d.unit,grades:['1-2'],subject:['국어'],target:['민서']})),{childName:'민서',subjectKo:'국어',unit:d.unit,semester:'1-2'});it.forEach(x=>{const f=QM.buildFillBlank(x,it,'ko',Math.random);console.log(x.word,'|',f&&f.display,'|',f&&f.options.join(' / '))})"
    ```
 3. `node scripts/verify_quest_mastery.js`(또는 html) 전부 PASS.
-4. 화면: 공부방 ⚙️ 설정 → 노션 동기화 후, 부모 진도판 민서 국어에 `📒 N단원 … · 개수` 칩이 생기고(여러 단원 묶음 최대 10개), 국어방 미니 독해 서가에 새 단원 묶음과 지문이 보이며 mp3로 읽히는지(개발자 도구 Network에서 `mini_reading/*.mp3` 200) 확인.
+4. 화면: 부모 진도판은 열 때 노션 단원을 1회 새로 받아 와(10초 안팎, 상단 🔄 표시) 민서 국어에 `📒 N단원 … · 개수` 칩이 생기고(여러 단원 묶음 최대 10개), 국어방 미니 독해 서가에 새 단원 묶음과 지문이 보이며 mp3로 읽히는지(개발자 도구 Network에서 `mini_reading/*.mp3` 200) 확인.
 
 ## 6. 함정
-- 노션 Worker는 같은 query 본문을 5분간 캐시한다. 등록 직후 재실행 중복은 스크립트가 page_size를 바꿔 피하지만, 화면 확인은 노션 동기화가 필요하다.
+- 노션 Worker는 같은 query 본문을 5분간 캐시한다(등록 직후 5분 안에는 진도판·화면에 안 보일 수 있음). 등록 직후 재실행 중복은 스크립트가 page_size를 바꿔 피한다. 국어방 미니 독해·용어방은 하루 캐시라 ⚙️ 설정 → 노션 동기화가 필요하다.
 - Python에서 Worker를 부를 때 `User-Agent`가 없으면 403. 한글 출력은 `python -X utf8`.
 - 미니 독해 mp3 파일명은 대본 글자의 SHA-1이다. 화면 읽기 규칙(`korean_mini_reading.js`의 `linesOf`·`questionScript`)과 `build_mini_reading_audio.py`의 `clip_texts`·`question_script`는 반드시 같이 고친다.
 - 지운 VOCA 행은 노션 휴지통(30일)에서 복원한다. 대량 정리 전에는 `scripts/data/archive/`에 원본 JSON을 남긴다.

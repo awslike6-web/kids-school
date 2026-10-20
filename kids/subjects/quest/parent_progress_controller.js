@@ -392,6 +392,34 @@
     return `📚 ${list.length}개 묶음: ${list.map(u => u.replace(/^\[[^\]]*\]\s*/, '').split(' - ')[0]).join('·')}`;
   }
 
+  // 9-1. 진도판을 열 때 노션 단원 목록을 1회 강제 최신화
+  // 칩은 기기의 하루 VOCA 캐시에서만 만들어지므로, 오늘 노션에 새로 등록한 단원(예: 민서 3단원)은
+  // 캐시를 새로 받기 전까지 보이지 않는다. 아이의 5분방 진입마다 받지 않도록 부모가 진도판을 열 때 한 번만 받는다.
+  let notionUnitsRefreshed = false;
+  function refreshNotionUnitsOnce() {
+    if (notionUnitsRefreshed || typeof window.fetchVocaFromNotion !== 'function') return;
+    notionUnitsRefreshed = true;
+    const status = ['parentMinseoSettings', 'parentMinsuSettings'].map(id => {
+      const box = document.getElementById(id);
+      if (!box) return null;
+      const el = document.createElement('p');
+      el.className = 'parent-sync-status text-[11px] text-neon-cyan text-center';
+      el.textContent = '🔄 노션에서 새로 등록한 단원을 불러오는 중이에요 (10초 안팎)';
+      box.prepend(el);
+      return el;
+    }).filter(Boolean);
+    const done = text => status.forEach(el => { el.textContent = text; setTimeout(() => el.remove(), 2500); });
+    window.fetchVocaFromNotion({ filterByStudent: false, forceRefresh: true }).then(records => {
+      if (!records || records.length === 0) return done('⚠️ 노션 단원을 불러오지 못해 저장된 목록을 보여 줘요');
+      syncDynamicUnitChips();
+      renderParentProgressChips();
+      done('✅ 노션 최신 단원을 반영했어요');
+    }).catch(e => {
+      console.warn('[진도판 노션 단원 최신화]', e);
+      done('⚠️ 노션 단원을 불러오지 못해 저장된 목록을 보여 줘요');
+    });
+  }
+
   // 10. 모달 열기/닫기/탭 전환
   function openParentProgressModal(initialTab = '') {
     playUiPop();
@@ -400,6 +428,7 @@
     switchParentTab(currentParentTab);
     syncDynamicUnitChips();
     renderParentProgressChips();
+    refreshNotionUnitsOnce();
 
     const modal = document.getElementById('parentProgressModal');
     if (modal) {
