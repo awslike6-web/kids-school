@@ -29,6 +29,18 @@ if (url.pathname === '/api/tts' || url.pathname.endsWith('/tts')) {
 
 ---
 
+## 🎙️ 1-1. OpenAI TTS 대체 경로 (2026-10-20)
+- Edge 읽기 서비스가 `HTTP 403`으로 거절되면 `/api/tts`가 OpenAI TTS로 대신 만든다. 키는 브라우저가 아니라 **Worker 비밀값**에만 둔다.
+- Cloudflare 대시보드 → `minmin-notion` → Settings → Variables and Secrets:
+  | 이름 | 종류 | 값 |
+  | :--- | :--- | :--- |
+  | `OPENAI_API_KEY` | Secret | OpenAI API 키 |
+  | `TTS_ENGINE` | Text (선택) | `openai` 이면 Edge 시도를 건너뛰고 바로 OpenAI (지연 감소) |
+  | `OPENAI_TTS_MODEL` | Text (선택) | 기본 `gpt-4o-mini-tts` (`tts-1`도 가능) |
+  | `OPENAI_TTS_VOICE` | Text (선택) | 기본 한국어 `coral`, 영어 `nova` |
+- 같은 목소리·속도·문장은 Cloudflare 캐시(`/__tts_cache/<SHA-256>.mp3`, 7일)에서 다시 내보내 과금을 줄인다. 응답 헤더 `X-TTS-Engine`(edge/openai)·`X-TTS-Cache`(HIT/MISS)로 확인.
+- 미니 독해처럼 고정 문장은 `scripts/build_mini_reading_audio.py`로 Edge mp3를 미리 만들어 두는 쪽이 비용 0원이다.
+
 ## ⚙️ 2. 프론트엔드 환경 설정 (`kids/config.js`)
 
 `kids/config.js`에 발급받은 Worker URL을 등록해두면 요정 엔진이 자동으로 연결합니다:

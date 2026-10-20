@@ -190,6 +190,37 @@ async function generateSecMsGec() {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 
+// ----------------------------------------------------------------------------
+// 🎙️ OpenAI TTS 대체 엔진 (Edge TTS 거절 시 · 키는 Worker 비밀값 OPENAI_API_KEY에만 둔다)
+// - env.TTS_ENGINE = 'openai' 이면 Edge를 건너뛰고 바로 OpenAI를 쓴다
+// - env.OPENAI_TTS_MODEL(기본 gpt-4o-mini-tts) · env.OPENAI_TTS_VOICE(기본 한국어 coral / 영어 nova)
+// ----------------------------------------------------------------------------
+async function synthesizeOpenAiTTS(text, voice, rate, env) {
+  const isEnglish = /^en-/i.test(voice || '');
+  const pct = parseInt(String(rate || '+0%').replace('%', ''), 10) || 0;
+  const speed = Math.min(1.5, Math.max(0.7, 1 + pct / 100));
+  const model = env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts';
+  const body = {
+    model,
+    input: text,
+    voice: env.OPENAI_TTS_VOICE || (isEnglish ? 'nova' : 'coral'),
+    response_format: 'mp3',
+    speed
+  };
+  if (model.startsWith('gpt-4o')) {
+    body.instructions = isEnglish
+      ? 'Speak as a warm, clear native English teacher for young children. Pronounce each word slowly and clearly.'
+      : '초등학교 저학년에게 동화를 읽어 주는 다정하고 또렷한 한국어 선생님 목소리로, 받침 발음을 정확하게 읽어 주세요.';
+  }
+  const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!resp.ok) throw new Error(`OpenAI TTS HTTP ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
+  return await resp.arrayBuffer();
+}
+
 async function synthesizeEdgeTTS(text, voice = DEFAULT_VOICE, rate = '+6%', pitch = '+4Hz') {
   const connectionId = crypto.randomUUID().replace(/-/g, '');
   const secMsGec = await generateSecMsGec();
@@ -847,14 +878,38 @@ export default {
           });
         }
 
-        const audioBuffer = await synthesizeEdgeTTS(trimmed, voice, rate, pitch);
+        // 같은 문장·목소리·속도는 엣지 캐시(7일)에서 바로 돌려준다 (OpenAI 과금·Edge 재요청 절약)
+        const cache = caches.default;
+        const ttsKey = await sha256Hex(`${voice}|${rate}|${pitch}|${trimmed}`);
+        const cacheReq = new Request(`${url.origin}/__tts_cache/${ttsKey}.mp3`);
+        const hit = await cache.match(cacheReq);
+        if (hit) {
+          return new Response(hit.body, { status: 200, headers: { 'Content-Type': 'audio/mpeg', 'X-TTS-Engine': hit.headers.get('X-TTS-Engine') || 'cache', 'X-TTS-Cache': 'HIT', ...CORS_HEADERS } });
+        }
+
+        // 1순위 Edge Neural(무료) → 거절되면 2순위 OpenAI (비밀값이 있을 때만)
+        let audioBuffer = null;
+        let engine = 'edge';
+        let edgeError = null;
+        if (!(env && env.TTS_ENGINE === 'openai')) {
+          try {
+            audioBuffer = await synthesizeEdgeTTS(trimmed, voice, rate, pitch);
+          } catch (e) {
+            edgeError = e;
+          }
+        }
+        if (!audioBuffer) {
+          if (!(env && env.OPENAI_API_KEY)) throw edgeError || new Error('TTS 엔진이 설정되지 않았습니다 (OPENAI_API_KEY 없음)');
+          audioBuffer = await synthesizeOpenAiTTS(trimmed, voice, rate, env);
+          engine = 'openai';
+        }
+
+        const audioHeaders = { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'public, max-age=604800', 'X-TTS-Engine': engine };
+        const cachePut = cache.put(cacheReq, new Response(audioBuffer.slice(0), { headers: audioHeaders }));
+        if (ctx && ctx.waitUntil) ctx.waitUntil(cachePut); else await cachePut;
         return new Response(audioBuffer, {
           status: 200,
-          headers: {
-            'Content-Type': 'audio/mpeg',
-            'Cache-Control': 'public, max-age=86400, s-maxage=86400',
-            ...CORS_HEADERS
-          }
+          headers: { ...audioHeaders, 'X-TTS-Cache': 'MISS', ...CORS_HEADERS }
         });
       } catch (err) {
         return new Response(JSON.stringify({ error: err.message || 'TTS Synthesis failed' }), {

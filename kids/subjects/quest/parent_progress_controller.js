@@ -167,22 +167,23 @@
     renderParentProgressChips();
   }
 
-  // 7-1. 다중 단원 묶음 토글 (노션 단원명과 정확히 일치하는 칩만, 최대 4개)
-  // 묶을 수 없는 칩(번호형 기본 단원)이 선택돼 있으면 새 칩 하나로 바꾸고, 1개만 남으면 기존처럼 문자열로 저장한다.
-  const MAX_BUNDLE_UNITS = 4;
-  let unitWordCounts = {};
+  // 7-1. 다중 단원 묶음 토글 (노션 단원명과 정확히 일치하는 칩만, 민수 최대 4개 · 민서 최대 10개)
+  // 묶을 수 없는 칩(번호형 기본 단원·정적 문제은행)이 선택돼 있으면 새 칩 하나로 바꾸고, 1개만 남으면 기존처럼 문자열로 저장한다.
+  // 민서는 받아쓰기를 한 단원씩 끝내지 않고 여러 단원을 돌아가며 복습하므로 묶음 상한을 넉넉히 둔다.
+  const MAX_BUNDLE_UNITS = { minsu: 4, minseo: 10 };
+  let unitWordCounts = { minsu: {}, minseo: {} };
 
   function toggleParentUnit(child, subject, unit, combinable) {
     if (!currentParentSettings[child]) currentParentSettings[child] = {};
     const current = currentParentSettings[child][subject];
     const currentList = toUnitList(current);
-    const currentCombinable = currentList.length > 0 && currentList.every(u => combinableUnits.has(`${subject}::${u}`));
+    const currentCombinable = currentList.length > 0 && currentList.every(u => combinableUnits.has(`${child}::${subject}::${u}`));
     if (!combinable || !currentCombinable) return setParentUnit(child, subject, unit);
 
     let next = currentList.includes(unit) ? currentList.filter(u => u !== unit) : [...currentList, unit];
     if (next.length === 0) next = [unit];
-    if (next.length > MAX_BUNDLE_UNITS) {
-      alert(`단원은 최대 ${MAX_BUNDLE_UNITS}개까지 묶을 수 있어요.`);
+    if (next.length > MAX_BUNDLE_UNITS[child]) {
+      alert(`단원은 최대 ${MAX_BUNDLE_UNITS[child]}개까지 묶을 수 있어요.`);
       return;
     }
     currentParentSettings[child][subject] = next.length === 1 ? next[0] : next;
@@ -215,7 +216,7 @@
       const Chips = window.ParentUnitChips;
       if (!Chips) return;
       const found = Chips.collectNotionUnits();
-      unitWordCounts = found.counts.minsu || {};
+      unitWordCounts = { minsu: found.counts.minsu || {}, minseo: found.counts.minseo || {} };
       ['minseo', 'minsu'].forEach(child => {
         const prefix = child === 'minsu' ? 'parentMinsu' : 'parentMinseo';
         Object.keys(Chips.BASE_UNITS[child]).forEach(subj => {
@@ -225,11 +226,10 @@
             child, subj, container, found,
             metaMap: UNIT_META_MAP[child] && UNIT_META_MAP[child][subj],
             onPick: (unit, isNotion) => {
-              // 민서는 한 단원만 고른다. 민수는 노션 단원끼리 최대 4개 묶음 (수학 제외)
-              if (child === 'minseo') return () => setParentUnit('minseo', subj, unit);
+              // 노션 단원끼리는 여러 개 묶음 (수학·정적 문제은행 칩은 한 개만)
               const combinable = subj !== 'math' && isNotion;
-              if (combinable) combinableUnits.add(`${subj}::${unit}`);
-              return () => toggleParentUnit('minsu', subj, unit, combinable);
+              if (combinable) combinableUnits.add(`${child}::${subj}::${unit}`);
+              return () => toggleParentUnit(child, subj, unit, combinable);
             }
           });
         });
@@ -307,9 +307,10 @@
       }
     });
 
+    renderBundleSummary('minseo', 'parentMinseo', minseoSets, ['korean', 'english']);
     [['badgeMinseoKorean', 'korean'], ['badgeMinseoMath', 'math'], ['badgeMinseoEnglish', 'english']].forEach(([id, subj]) => {
       const badge = document.getElementById(id);
-      if (badge) badge.textContent = minseoUnitName(subj, minseoSets[subj]);
+      if (badge) badge.textContent = bundleBadge(minseoSets[subj], minseoUnitName(subj, minseoSets[subj]));
     });
 
     const chkMinseoRev = document.getElementById('chkMinseoReviewSem1');
@@ -350,31 +351,7 @@
       }
     });
 
-    // 과목별 묶음 요약 줄: 선택 단원 수 · 어휘 합계 · 묶음 안내
-    ['english', 'korean', 'science', 'society'].forEach(subj => {
-      const container = document.getElementById(`parentMinsu${subj.charAt(0).toUpperCase() + subj.slice(1)}Chips`);
-      if (!container) return;
-      let summary = document.getElementById(`${container.id}Summary`);
-      if (!summary) {
-        summary = document.createElement('p');
-        summary.id = `${container.id}Summary`;
-        summary.className = 'text-[11px] text-gray-400 mt-1.5 leading-snug';
-        container.insertAdjacentElement('afterend', summary);
-      }
-      const list = toUnitList(minsuSets[subj]);
-      const words = list.reduce((sum, u) => sum + (unitWordCounts[`${subj}::${u}`] || 0), 0);
-      const hasBundleChips = [...combinableUnits].some(k => k.startsWith(`${subj}::`));
-      const head = list.length > 1 ? `📚 ${list.length}개 단원 묶음` : '선택 1개 단원';
-      const count = words ? ` · 어휘 ${words}개` : '';
-      const hint = hasBundleChips ? ` · 노션 단원은 최대 ${MAX_BUNDLE_UNITS}개까지 눌러서 묶을 수 있어요` : '';
-      summary.textContent = head + count + hint;
-    });
-
-    const bundleBadge = (value, fallback) => {
-      const list = toUnitList(value);
-      if (list.length <= 1) return fallback;
-      return `📚 ${list.length}개 묶음: ${list.map(u => u.replace(/^\[[^\]]*\]\s*/, '').split(' - ')[0]).join('·')}`;
-    };
+    renderBundleSummary('minsu', 'parentMinsu', minsuSets, ['english', 'korean', 'science', 'society']);
 
     [['Math', 'math'], ['English', 'english'], ['Korean', 'korean'], ['Science', 'science'], ['Society', 'society']].forEach(([cap, subj]) => {
       const badge = document.getElementById(`badgeMinsu${cap}`);
@@ -385,6 +362,34 @@
     if (chkMinsuRev1) chkMinsuRev1.checked = !!minsuSets.includeReviewSem1;
     const chkMinsuJihye = document.getElementById('chkMinsuJihye');
     if (chkMinsuJihye) chkMinsuJihye.checked = !!minsuSets.includeJihye;
+  }
+
+  // 과목별 묶음 요약 줄: 선택 단원 수 · 어휘 합계 · 묶음 안내
+  function renderBundleSummary(child, prefix, sets, subjects) {
+    subjects.forEach(subj => {
+      const container = document.getElementById(`${prefix}${subj.charAt(0).toUpperCase() + subj.slice(1)}Chips`);
+      if (!container) return;
+      let summary = document.getElementById(`${container.id}Summary`);
+      if (!summary) {
+        summary = document.createElement('p');
+        summary.id = `${container.id}Summary`;
+        summary.className = 'text-[11px] text-gray-400 mt-1.5 leading-snug';
+        container.insertAdjacentElement('afterend', summary);
+      }
+      const list = toUnitList(sets[subj]);
+      const words = list.reduce((sum, u) => sum + ((unitWordCounts[child] || {})[`${subj}::${u}`] || 0), 0);
+      const hasBundleChips = [...combinableUnits].some(k => k.startsWith(`${child}::${subj}::`));
+      const head = list.length > 1 ? `📚 ${list.length}개 단원 묶음` : '선택 1개 단원';
+      const count = words ? ` · 어휘 ${words}개` : '';
+      const hint = hasBundleChips ? ` · 노션 단원은 최대 ${MAX_BUNDLE_UNITS[child]}개까지 눌러서 묶을 수 있어요` : '';
+      summary.textContent = head + count + hint;
+    });
+  }
+
+  function bundleBadge(value, fallback) {
+    const list = toUnitList(value);
+    if (list.length <= 1) return fallback;
+    return `📚 ${list.length}개 묶음: ${list.map(u => u.replace(/^\[[^\]]*\]\s*/, '').split(' - ')[0]).join('·')}`;
   }
 
   // 10. 모달 열기/닫기/탭 전환
