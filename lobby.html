@@ -197,15 +197,30 @@
 
           <!-- NODE 1: 국어·받아쓰기 -->
           <div class="relative z-10 flex justify-start pl-2">
-            <div id="minseo-node-korean" onclick="handleSubjectNodeClick('korean')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all relative">
-              <div id="minseo-boost-korean" class="hidden -mb-1 z-20 bg-amber-100 border border-amber-400 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce">🔥 오늘 복습 1.2x</div>
-              <div id="minseo-card-korean" class="w-20 h-20 rounded-full clay-card-mint flex items-center justify-center relative shadow-lg ring-4 ring-secondary-container/60 ring-offset-2 ring-offset-surface animate-pulse-bounce">
-                <span class="text-3xl select-none">📖</span>
-                <span id="minseo-corner-korean" class="absolute -top-1 -right-1 text-xs bg-white rounded-full p-0.5 shadow-sm">✏️</span>
-                <span class="absolute -bottom-2 bg-secondary text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">국어</span>
+            <div class="relative flex flex-col items-center">
+              <div id="minseo-pop-korean" class="hidden absolute -top-16 left-6 sm:left-10 bg-surface-container-lowest border-2 border-emerald-300 rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2 z-30 animate-float-slow whitespace-nowrap">
+                <div class="text-left">
+                  <div class="flex items-center gap-1">
+                    <span id="minseo-korean-pop-title" class="text-xs font-bold text-emerald-950">📖 국어 : 단어와 문장</span>
+                    <span id="minseo-korean-pop-mult" class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">받아쓰기</span>
+                  </div>
+                  <span id="minseo-korean-pop-desc" class="text-[10px] text-on-surface-variant font-semibold block">낱말 퀴즈 &amp; 문장 탐험</span>
+                </div>
+                <button onclick="handleSubjectNodeClick('korean')" class="bg-emerald-400 hover:bg-emerald-300 text-emerald-950 text-[11px] font-black px-2 py-1 rounded-xl shadow-sm active:scale-90 transition-transform flex items-center gap-0.5" type="button">
+                  <span>입장</span><span>➔</span>
+                </button>
+                <div class="absolute -bottom-1.5 left-6 w-3 h-3 bg-surface-container-lowest border-r-2 border-b-2 border-emerald-300 rotate-45"></div>
               </div>
-              <div id="minseo-status-korean" class="mt-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림
+              <div id="minseo-node-korean" onclick="toggleMinseoCard('minseo-pop-korean')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all relative">
+                <div id="minseo-boost-korean" class="hidden -mb-1 z-20 bg-amber-100 border border-amber-400 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce">🔥 오늘 복습 1.2x</div>
+                <div id="minseo-card-korean" class="w-20 h-20 rounded-full clay-card-mint flex items-center justify-center relative shadow-lg ring-4 ring-secondary-container/60 ring-offset-2 ring-offset-surface animate-pulse-bounce">
+                  <span class="text-3xl select-none">📖</span>
+                  <span id="minseo-corner-korean" class="absolute -top-1 -right-1 text-xs bg-white rounded-full p-0.5 shadow-sm">✏️</span>
+                  <span class="absolute -bottom-2 bg-secondary text-white text-[11px] font-extrabold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap">국어</span>
+                </div>
+                <div id="minseo-status-korean" class="mt-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림
+                </div>
               </div>
             </div>
           </div>
@@ -213,7 +228,7 @@
           <!-- NODE 2: 수학 나라 (With Dynamic Timetable Tooltip Bubble) -->
           <div class="relative z-20 flex justify-end pr-3 -mt-3 mb-2">
             <div class="relative flex flex-col items-center">
-              <div id="minseo-math-tooltip" onclick="handleSubjectNodeClick('math')" class="cursor-pointer absolute -top-16 -left-32 sm:-left-36 bg-surface-container-lowest border-2 border-amber-300 rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2 z-30 animate-float-slow whitespace-nowrap">
+              <div id="minseo-math-tooltip" class="hidden absolute -top-16 -left-32 sm:-left-36 bg-surface-container-lowest border-2 border-amber-300 rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2 z-30 animate-float-slow whitespace-nowrap">
                 <div class="text-left">
                   <div class="flex items-center gap-1">
                     <span id="minseo-math-tooltip-title" class="text-xs font-bold text-amber-900">🧮 수학 : 10 만들기</span>
@@ -221,12 +236,12 @@
                   </div>
                   <span id="minseo-math-tooltip-desc" class="text-[10px] text-on-surface-variant font-semibold block">오늘 시간표 보너스!</span>
                 </div>
-                <button class="bg-amber-300 hover:bg-amber-200 text-amber-900 text-[11px] font-black px-2 py-1 rounded-xl shadow-sm active:scale-90 transition-transform flex items-center gap-0.5" type="button">
+                <button onclick="handleSubjectNodeClick('math')" class="bg-amber-300 hover:bg-amber-200 text-amber-900 text-[11px] font-black px-2 py-1 rounded-xl shadow-sm active:scale-90 transition-transform flex items-center gap-0.5" type="button">
                   <span>도전</span><span>➔</span>
                 </button>
                 <div class="absolute -bottom-1.5 right-6 w-3 h-3 bg-surface-container-lowest border-r-2 border-b-2 border-amber-300 rotate-45"></div>
               </div>
-              <div id="minseo-node-math" onclick="handleSubjectNodeClick('math')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all mt-4 relative">
+              <div id="minseo-node-math" onclick="toggleMinseoCard('minseo-math-tooltip')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all mt-4 relative">
                 <div id="minseo-boost-math" class="hidden -mb-1 z-20 bg-amber-100 border border-amber-400 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce">🔥 오늘 복습 1.2x</div>
                 <div id="minseo-card-math" class="w-20 h-20 rounded-full clay-card-yellow flex items-center justify-center relative shadow-xl ring-4 ring-amber-300/80 ring-offset-2 ring-offset-surface">
                   <span class="text-3xl select-none">🧮</span>
@@ -242,30 +257,60 @@
 
           <!-- NODE 3: 기초 영어 -->
           <div class="relative z-10 flex justify-start pl-6 -mt-2">
-            <div id="minseo-node-english" onclick="handleSubjectNodeClick('english')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all relative">
-              <div id="minseo-boost-english" class="hidden -mb-1 z-20 bg-amber-100 border border-amber-400 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce">🔥 오늘 복습 1.2x</div>
-              <div id="minseo-card-english" class="w-16 h-16 rounded-full clay-card-lavender flex items-center justify-center relative shadow-lg ring-2 border border-purple-100 hover:shadow-xl transition-shadow">
-                <span class="text-2xl select-none">🔤</span>
-                <span id="minseo-corner-english" class="absolute -top-1 -right-1 text-xs bg-purple-100 rounded-full p-0.5 shadow-sm">✨</span>
-                <span class="absolute -bottom-2 bg-tertiary text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">영어</span>
+            <div class="relative flex flex-col items-center">
+              <div id="minseo-pop-english" class="hidden absolute -top-16 left-6 sm:left-10 bg-surface-container-lowest border-2 border-purple-300 rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2 z-30 animate-float-slow whitespace-nowrap">
+                <div class="text-left">
+                  <div class="flex items-center gap-1">
+                    <span id="minseo-english-pop-title" class="text-xs font-bold text-purple-950">🔤 영어 : 알파벳 탐험</span>
+                    <span id="minseo-english-pop-mult" class="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">파닉스</span>
+                  </div>
+                  <span id="minseo-english-pop-desc" class="text-[10px] text-on-surface-variant font-semibold block">신나는 영어 동화 &amp; 챈트</span>
+                </div>
+                <button onclick="handleSubjectNodeClick('english')" class="bg-purple-300 hover:bg-purple-200 text-purple-950 text-[11px] font-black px-2 py-1 rounded-xl shadow-sm active:scale-90 transition-transform flex items-center gap-0.5" type="button">
+                  <span>입장</span><span>➔</span>
+                </button>
+                <div class="absolute -bottom-1.5 left-6 w-3 h-3 bg-surface-container-lowest border-r-2 border-b-2 border-purple-300 rotate-45"></div>
               </div>
-              <div id="minseo-status-english" class="mt-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림
+              <div id="minseo-node-english" onclick="toggleMinseoCard('minseo-pop-english')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all relative">
+                <div id="minseo-boost-english" class="hidden -mb-1 z-20 bg-amber-100 border border-amber-400 text-amber-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce">🔥 오늘 복습 1.2x</div>
+                <div id="minseo-card-english" class="w-16 h-16 rounded-full clay-card-lavender flex items-center justify-center relative shadow-lg ring-2 border border-purple-100 hover:shadow-xl transition-shadow">
+                  <span class="text-2xl select-none">🔤</span>
+                  <span id="minseo-corner-english" class="absolute -top-1 -right-1 text-xs bg-purple-100 rounded-full p-0.5 shadow-sm">✨</span>
+                  <span class="absolute -bottom-2 bg-tertiary text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">영어</span>
+                </div>
+                <div id="minseo-status-english" class="mt-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림
+                </div>
               </div>
             </div>
           </div>
 
           <!-- NODE 4: 하루 탐험관 -->
           <div class="relative z-10 flex justify-end pr-8 -mt-2">
-            <div id="minseo-node-haru" onclick="handleSubjectNodeClick('haru')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all relative">
-              <div id="minseo-boost-haru" class="hidden -mb-1 z-20 bg-emerald-100 border border-emerald-400 text-emerald-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">🌱 30초 체크인</div>
-              <div id="minseo-card-haru" class="w-16 h-16 rounded-full clay-card-mint flex items-center justify-center relative shadow-lg border border-surface-container">
-                <span class="text-2xl select-none">🌱</span>
-                <span id="minseo-corner-haru" class="absolute -top-1.5 -right-1 text-xs bg-white rounded-full p-0.5 shadow-sm">☀️</span>
-                <span class="absolute -bottom-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">하루</span>
+            <div class="relative flex flex-col items-center">
+              <div id="minseo-pop-haru" class="hidden absolute -top-16 -left-28 sm:-left-32 bg-surface-container-lowest border-2 border-emerald-300 rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2 z-30 animate-float-slow whitespace-nowrap">
+                <div class="text-left">
+                  <div class="flex items-center gap-1">
+                    <span id="minseo-haru-pop-title" class="text-xs font-bold text-emerald-950">🌱 하루 : 30초 루틴</span>
+                    <span id="minseo-haru-pop-mult" class="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">체크인</span>
+                  </div>
+                  <span id="minseo-haru-pop-desc" class="text-[10px] text-on-surface-variant font-semibold block">오늘 기분 &amp; 칭찬 스탬프</span>
+                </div>
+                <button onclick="handleSubjectNodeClick('haru')" class="bg-emerald-300 hover:bg-emerald-200 text-emerald-950 text-[11px] font-black px-2 py-1 rounded-xl shadow-sm active:scale-90 transition-transform flex items-center gap-0.5" type="button">
+                  <span>체크</span><span>➔</span>
+                </button>
+                <div class="absolute -bottom-1.5 right-6 w-3 h-3 bg-surface-container-lowest border-r-2 border-b-2 border-emerald-300 rotate-45"></div>
               </div>
-              <div id="minseo-status-haru" class="mt-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림
+              <div id="minseo-node-haru" onclick="toggleMinseoCard('minseo-pop-haru')" class="group cursor-pointer flex flex-col items-center hover:scale-105 active:scale-95 transition-all relative">
+                <div id="minseo-boost-haru" class="hidden -mb-1 z-20 bg-emerald-100 border border-emerald-400 text-emerald-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">🌱 30초 체크인</div>
+                <div id="minseo-card-haru" class="w-16 h-16 rounded-full clay-card-mint flex items-center justify-center relative shadow-lg border border-surface-container">
+                  <span class="text-2xl select-none">🌱</span>
+                  <span id="minseo-corner-haru" class="absolute -top-1.5 -right-1 text-xs bg-white rounded-full p-0.5 shadow-sm">☀️</span>
+                  <span class="absolute -bottom-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap">하루</span>
+                </div>
+                <div id="minseo-status-haru" class="mt-3.5 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> 🟢 보물 열림
+                </div>
               </div>
             </div>
           </div>

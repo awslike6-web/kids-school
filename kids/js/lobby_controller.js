@@ -208,11 +208,23 @@ window.USER_CONFIGS = USER_CONFIGS;
       window.history.replaceState({}, '', url.toString());
     }
 
+    closeAllSubjectPopups();
     updateAdminToolbar(realName);
     updateQuestCtaAndBoosts(activeUserKey, realName);
     renderSubjectCapStates(activeUserKey);
     updateGuardianHud(activeUserKey, realName);
     fetchInventoryForUser(activeUserKey, realName);
+  }
+
+  function closeAllSubjectPopups() {
+    const allCards = [
+      'minseo-pop-korean', 'minseo-math-tooltip', 'minseo-pop-english', 'minseo-pop-haru',
+      'card-eng', 'card-kor', 'card-math', 'card-soc', 'card-sci'
+    ];
+    allCards.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    });
   }
 
   function updateAdminToolbar(realName) {
@@ -371,6 +383,10 @@ window.USER_CONFIGS = USER_CONFIGS;
         }
       }
 
+      // 민서 팝업 내부 버프/상태 동적 업데이트
+      const popMult = document.getElementById(subjKey === 'math' ? 'minseo-math-tooltip-mult' : `minseo-${subjKey}-pop-mult`);
+      const popDesc = document.getElementById(subjKey === 'math' ? 'minseo-math-tooltip-desc' : `minseo-${subjKey}-pop-desc`);
+
       // 2) 일일 한도 신호등 상태 반영 (여유 ➔ 마지막 1판 ➔ 한도 도달 시 소등)
       if (state === 'completed') {
         cardEl.classList.add('clay-card-dim', 'grayscale', 'opacity-75');
@@ -378,16 +394,38 @@ window.USER_CONFIGS = USER_CONFIGS;
         statusEl.className = 'mt-3.5 inline-flex items-center gap-1 bg-slate-200/80 text-slate-500 px-3 py-1 rounded-full font-bold text-xs';
         statusEl.innerHTML = '완료 💤';
         if (cornerEl) cornerEl.textContent = '💤';
+        if (popMult) {
+          popMult.textContent = '완료 💤';
+          popMult.className = 'bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full';
+        }
+        if (popDesc) popDesc.textContent = '오늘 시간 보물 완료! 복습하기';
       } else if (state === 'critical') {
         cardEl.classList.remove('clay-card-dim', 'grayscale', 'opacity-75');
         cardEl.classList.add('ring-4', 'ring-amber-300/80');
         statusEl.className = 'mt-3.5 inline-flex items-center gap-1 bg-amber-50 text-amber-800 px-3 py-1 rounded-full font-extrabold text-xs shadow-sm border border-amber-300 animate-pulse';
         statusEl.innerHTML = '<span>⚡</span> 🟡 마지막 1판!';
         if (cornerEl) cornerEl.textContent = '🔥';
+        if (popMult) {
+          popMult.textContent = '마지막 1판 ⚡';
+          popMult.className = 'bg-amber-100 text-amber-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full';
+        }
+        if (popDesc) popDesc.textContent = '마감 임박: 마지막 보너스 찬스!';
       } else {
         cardEl.classList.remove('clay-card-dim', 'grayscale', 'opacity-75');
         if (boost.type === 'review') {
           cardEl.classList.add('ring-4', 'ring-amber-300/80');
+          if (popMult) {
+            popMult.textContent = '1.2x';
+            popMult.className = 'bg-amber-100 text-amber-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full';
+          }
+          if (popDesc) popDesc.textContent = '오늘 시간표 복습 보너스 1.2x!';
+        } else if (boost.type === 'preview') {
+          cardEl.classList.remove('ring-4', 'ring-amber-300/80');
+          if (popMult) {
+            popMult.textContent = '+2';
+            popMult.className = 'bg-purple-100 text-purple-800 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full';
+          }
+          if (popDesc) popDesc.textContent = '내일 시간표 예습 보너스!';
         } else {
           cardEl.classList.remove('ring-4', 'ring-amber-300/80');
         }
@@ -645,6 +683,19 @@ window.USER_CONFIGS = USER_CONFIGS;
 
   window.togglePortalCard = function (cardId) {
     const cards = ['card-eng', 'card-kor', 'card-math', 'card-soc', 'card-sci'];
+    cards.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (id === cardId) {
+        el.classList.toggle('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    });
+  };
+
+  window.toggleMinseoCard = function (cardId) {
+    const cards = ['minseo-pop-korean', 'minseo-math-tooltip', 'minseo-pop-english', 'minseo-pop-haru'];
     cards.forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
