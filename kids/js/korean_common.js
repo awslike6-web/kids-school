@@ -243,6 +243,7 @@ function closeMissionView(force) {
     }
     stopDictationAudio();
     stopFairyTTS();
+    if (window.KoreanMiniReading) window.KoreanMiniReading.stop(); // 미니 독해 mp3 연속 재생 중단
 
     const finalizeDiscussion = async () => {
         const sHistory = window.sentenceHistory || [];

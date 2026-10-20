@@ -4,6 +4,10 @@
 //   (1 낱말·겹받침 → 2 인물의 생각 → 3 글쓴이의 중심 생각)
 // - 데이터: 노션 LIBRARY_DB `트랙 = 🌱 민서 미니 독해` (지문전문 + 문제데이터 JSON의 step·speaker)
 //   등록: scripts/register_minseo_korean.py (시드 scripts/data/minseo_korean_*.json)
+// - 음성: Edge-TTS 고음질 mp3(kids/assets/audio/mini_reading/<문장 SHA-1 앞 12자리>.mp3)를 먼저 틀고,
+//   파일이 없으면(지문을 고친 뒤 아직 안 만듦) 실시간 speakFairyTTS로 대신 읽는다.
+//   mp3 생성: scripts/build_mini_reading_audio.py (문장 읽기 규칙 clipTexts·questionScript와 같아야 함)
+// - 자동 읽기 켜기/끄기(🔊/🔇)는 기기에 저장되고, 화면이 바뀌면 읽던 소리는 항상 멈춘다
 // - 에러리스: 오답 경고음·감점 없이 정답 보기를 노랗게 비추고 해설 + fairyEncourage
 // - 민수용 정밀 독해(kids/core/reading_engine.js)와 데이터·화면을 공유하지 않는 병렬 모듈
 
@@ -26,14 +30,91 @@
     let triedWrong = false;   // 지금 문제에서 한 번이라도 틀렸는지
     let finished = false;
 
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-    const speak = text => { if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS(text); };
-    const stop = () => { if (typeof window.stopFairyTTS === 'function') window.stopFairyTTS(); };
+    const AUDIO_DIR = '../../assets/audio/mini_reading/'; // korean.html(kids/subjects/korean/) 기준
+    const AUTOPLAY_KEY = 'mini_reading_autoplay';
+    let audioEl = null;
+    let playToken = 0; // stop()마다 올려서 진행 중인 연속 재생을 끊는다
 
-    // 화면을 바꿀 때마다 오버레이 스크롤을 맨 위로 (다음 카드의 단계 배지·말풍선이 가려지지 않게)
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+    // ---------- 0. 음성 (고음질 mp3 → 실시간 TTS 폴백) ----------
+    function isAutoplay() {
+        try { return localStorage.getItem(AUTOPLAY_KEY) !== 'off'; } catch (e) { return true; }
+    }
+
+    async function clipUrl(text) {
+        if (!window.crypto || !crypto.subtle) return null; // file:// 등 비보안 환경은 실시간 TTS
+        const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+        const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        return `${AUDIO_DIR}${hex.slice(0, 12)}.mp3`;
+    }
+
+    function speakLive(text, token) {
+        return new Promise(resolve => {
+            if (token !== playToken || typeof window.speakFairyTTS !== 'function') return resolve();
+            window.speakFairyTTS(text, () => resolve());
+        });
+    }
+
+    async function playClip(text, token) {
+        const url = await clipUrl(text);
+        if (token !== playToken) return;
+        if (!url) return speakLive(text, token);
+        const ok = await new Promise(resolve => {
+            const a = new Audio(url);
+            audioEl = a;
+            a.onended = () => resolve(true);
+            a.onerror = () => resolve(false);
+            a.play().catch(() => resolve(false));
+        });
+        if (!ok && token === playToken) await speakLive(text, token);
+    }
+
+    // 문장들을 차례로 읽는다. 새로 읽기·멈춤·화면 전환이 오면 바로 끊긴다.
+    async function play(texts) {
+        stop();
+        try { if (localStorage.getItem('fairy_tts_enabled') === 'false') return; } catch (e) {} // 국어방 상단 '요정 음성 OFF'
+        const token = playToken;
+        for (const t of texts.filter(Boolean)) {
+            if (token !== playToken) return;
+            await playClip(t, token);
+        }
+    }
+
+    function stop() {
+        playToken++;
+        if (audioEl) {
+            audioEl.onended = audioEl.onerror = null;
+            audioEl.pause();
+            audioEl = null;
+        }
+        if (typeof window.stopFairyTTS === 'function') window.stopFairyTTS();
+    }
+
+    const linesOf = p => p.fullText.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    // 문제 읽기 대본 (scripts/build_mini_reading_audio.py question_script와 같아야 mp3가 맞는다)
+    function questionScript(q) {
+        const who = q.speaker && q.speaker.line ? `${q.speaker.name || ''}의 말. ${q.speaker.line}. ` : '';
+        return `${who}${q.question} ${q.options.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`;
+    }
+
+    function autoBtnHtml() {
+        return `<div class="mr-toolbar"><button type="button" class="mr-auto ${isAutoplay() ? 'on' : ''}" id="mrAuto">${isAutoplay() ? '🔊 자동 읽기 켜짐' : '🔇 자동 읽기 꺼짐'}</button></div>`;
+    }
+
+    // 화면을 바꿀 때마다 읽던 소리를 멈추고, 오버레이 스크롤을 맨 위로 (다음 카드의 단계 배지·말풍선이 가려지지 않게)
     function paint(html) {
+        stop();
         containerEl.innerHTML = html;
         containerEl.scrollTop = 0;
+        const auto = containerEl.querySelector('#mrAuto');
+        if (auto) auto.onclick = () => {
+            const next = !isAutoplay();
+            try { localStorage.setItem(AUTOPLAY_KEY, next ? 'on' : 'off'); } catch (e) {}
+            if (!next) stop();
+            auto.classList.toggle('on', next);
+            auto.textContent = next ? '🔊 자동 읽기 켜짐' : '🔇 자동 읽기 꺼짐';
+        };
     }
 
     function isMiniPassage(p) {
@@ -110,8 +191,9 @@
     }
 
     function renderReader() {
-        const lines = passage.fullText.split(/\n+/).map(s => s.trim()).filter(Boolean);
+        const lines = linesOf(passage);
         paint(`<div class="mr-wrap">
+            ${autoBtnHtml()}
             <div class="mr-reader">
                 <h3 class="mr-title">📖 ${esc(passage.title)}</h3>
                 ${lines.map((line, i) => `<p class="mr-line" data-i="${i}">${esc(line)}</p>`).join('')}
@@ -119,17 +201,19 @@
             </div>
             <div class="mr-actions">
                 <button type="button" class="mr-btn mr-btn-sub" id="mrListen">🔊 처음부터 듣기</button>
+                <button type="button" class="mr-btn mr-btn-sub" id="mrStop">⏹ 멈추기</button>
                 <button type="button" class="mr-btn mr-btn-main" id="mrGo">다 읽었어요! 문제 풀기 ➔</button>
             </div>
             <button type="button" class="mr-link" id="mrBack">← 다른 이야기 고르기</button>
         </div>`);
         containerEl.querySelectorAll('.mr-line').forEach(el => {
-            el.onclick = () => speak(lines[Number(el.getAttribute('data-i'))]);
+            el.onclick = () => play([lines[Number(el.getAttribute('data-i'))]]);
         });
-        containerEl.querySelector('#mrListen').onclick = () => speak(lines.join(' '));
-        containerEl.querySelector('#mrGo').onclick = () => { stop(); renderQuestion(); };
+        containerEl.querySelector('#mrListen').onclick = () => play([passage.title, ...lines]);
+        containerEl.querySelector('#mrStop').onclick = stop;
+        containerEl.querySelector('#mrGo').onclick = () => renderQuestion();
         containerEl.querySelector('#mrBack').onclick = () => renderLobby();
-        speak(`${passage.title}. ${lines.join(' ')}`);
+        if (isAutoplay()) play([passage.title, ...lines]);
     }
 
     // ---------- 3. 3단계 꼬리문제 카드 ----------
@@ -148,6 +232,7 @@
             </div>` : '';
 
         paint(`<div class="mr-wrap">
+            ${autoBtnHtml()}
             <div class="mr-progress">${qs.map((_, i) => `<span class="mr-dot ${i < qIdx ? 'done' : i === qIdx ? 'now' : ''}"></span>`).join('')}</div>
             <div class="mr-qcard">
                 <span class="mr-step">${step.icon} ${qIdx + 1}단계 · ${step.label}</span>
@@ -165,14 +250,14 @@
             </div>
         </div>`);
 
-        const sayQuestion = () => speak(`${q.speaker && q.speaker.line ? `${q.speaker.name || ''}의 말. ${q.speaker.line}. ` : ''}${q.question} ${q.options.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`);
+        const sayQuestion = () => play([questionScript(q)]);
         containerEl.querySelector('#mrSayQ').onclick = sayQuestion;
-        containerEl.querySelector('#mrReread').onclick = () => { stop(); renderPeek(); };
-        containerEl.querySelector('#mrNext').onclick = () => { stop(); qIdx++; renderQuestion(); };
+        containerEl.querySelector('#mrReread').onclick = () => renderPeek();
+        containerEl.querySelector('#mrNext').onclick = () => { qIdx++; renderQuestion(); };
         containerEl.querySelectorAll('.mr-opt').forEach(btn => {
             btn.onclick = () => choose(Number(btn.getAttribute('data-i')));
         });
-        sayQuestion();
+        if (isAutoplay()) sayQuestion();
     }
 
     function choose(i) {
@@ -209,7 +294,7 @@
 
     // 문제 풀다가 이야기 다시 보기 (진도 유지)
     function renderPeek() {
-        const lines = passage.fullText.split(/\n+/).map(s => s.trim()).filter(Boolean);
+        const lines = linesOf(passage);
         paint(`<div class="mr-wrap">
             <div class="mr-reader">
                 <h3 class="mr-title">📖 ${esc(passage.title)}</h3>
@@ -218,9 +303,9 @@
             <div class="mr-actions"><button type="button" class="mr-btn mr-btn-main" id="mrBackQ">문제로 돌아가기 ➔</button></div>
         </div>`);
         containerEl.querySelectorAll('.mr-line').forEach(el => {
-            el.onclick = () => speak(lines[Number(el.getAttribute('data-i'))]);
+            el.onclick = () => play([lines[Number(el.getAttribute('data-i'))]]);
         });
-        containerEl.querySelector('#mrBackQ').onclick = () => { stop(); renderQuestion(); };
+        containerEl.querySelector('#mrBackQ').onclick = () => renderQuestion();
     }
 
     // ---------- 4. 완주 (보상 + 학습일지) ----------
@@ -263,6 +348,7 @@
         renderLobby,
         start,
         isMissionInProgress,
+        questionScript,
         stop
     };
 })();

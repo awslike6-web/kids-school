@@ -297,8 +297,9 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 
 ### 🌟 `korean_mini_reading.js` ([4단계] 민서(초1) 미니 독해 전담 엔진)
 3~4문장 초단편 지문을 성우 TTS로 읽어 준 뒤 고정 3단계 꼬리문제(① 낱말·겹받침 → ② 인물의 생각 → ③ 글쓴이의 중심 생각)를 에러리스로 푸는 민서 전용 모듈입니다. 민수용 `reading_engine.js`와 데이터·화면을 공유하지 않는 병렬 모듈이며, 국어방 카드 `#minseoMiniReadingCard`는 민서 프로필에서만 보입니다.
-- **파일 위치**: `kids/js/korean_mini_reading.js` (약 270줄) · 스타일: `kids/css/korean.css` 하단 `.mr-*`
+- **파일 위치**: `kids/js/korean_mini_reading.js` (약 350줄) · 스타일: `kids/css/korean.css` 하단 `.mr-*`
 - **데이터**: 노션 `LIBRARY_DB` 중 `트랙 = 🌱 민서 미니 독해` (`fetchReadingPassagesFromNotion` 재사용). `문제데이터` JSON 문항 = `{ step, type:"choice", question, options[], answer(보기 문자열|번호), explanation, speaker?:{name, icon, line} }`
+- **고음질 음성**: 대본(제목·지문 줄·`questionScript(q)`)마다 `kids/assets/audio/mini_reading/<SHA-1 12자리>.mp3`를 먼저 재생, 없으면 `speakFairyTTS` 폴백. 생성: `python -X utf8 scripts/build_mini_reading_audio.py [--dry-run] [--prune]` (Edge-TTS SunHi). 자동 읽기 토글 `localStorage.mini_reading_autoplay`(`on`/`off`), 화면 전환·창 닫기 시 `KoreanMiniReading.stop()`으로 항상 멈춤.
 - **등록 도구**: `python -X utf8 scripts/register_minseo_korean.py --file scripts/data/minseo_korean_<학기>_<단원>.json [--apply]` (VOCA 정제 어휘 + 미니 독해 지문을 한 번에 갱신·신규 등록, 기본 미리보기)
 - **핵심 API**:
   | 메서드 | 설명 |

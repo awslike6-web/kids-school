@@ -548,3 +548,6 @@ body.theme--slime .quiz-choice-btn:hover { background: #ff6b9d; color: #fff; }
 .mr-done { text-align: center; padding: 24px 8px; }
 .mr-done h3 { font-family: 'Jua', sans-serif; font-size: 1.5rem; color: #15803d; margin: 6px 0; }
 .mr-stars { font-size: 2rem; margin: 4px 0; letter-spacing: 4px; }
+.mr-toolbar { display: flex; justify-content: flex-end; }
+.mr-auto { border: 2px solid #cbd5e1; background: #f8fafc; color: #64748b; border-radius: 999px; padding: 6px 14px; font-family: 'Jua', sans-serif; font-size: 0.95rem; cursor: pointer; }
+.mr-auto.on { border-color: #86efac; background: #f0fdf4; color: #15803d; }
