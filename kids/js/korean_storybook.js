@@ -101,6 +101,25 @@
             border: "#8b5cf6",
             link: "korean_1_2_1_storybook_4.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/1/book4/korean_story_p1.png"
+        },
+        {
+            id: "1_2_2_1",
+            student: "minseo",
+            studentName: "민서",
+            grade: "1학년 2학기",
+            gradeCode: "1-2",
+            targetBadge: "초등 1-2",
+            unit: "2단원",
+            bookNum: "1권",
+            title: "참외씨 뽀로의 맑고 넓은 세상 여행",
+            subtitle: "사람마다 다른 멋진 날의 의미와 정리정돈의 중요성",
+            desc: "달콤한 참외가 되기 위해 여행을 떠난 용감한 참외씨 뽀로가 다니엘, 서연이와 함께 사람마다 생각하는 '멋진 날'의 의미와 정리정돈을 배워가는 이야기예요.",
+            icon: "🌱",
+            color: "#eab308",
+            bgGrad: "linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+            border: "#eab308",
+            link: "korean_1_2_2_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/2/book1/korean_story_p1.png"
         }
     ];
 
