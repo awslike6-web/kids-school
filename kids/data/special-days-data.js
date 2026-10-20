@@ -4,6 +4,25 @@
 
 const DEFAULT_SPECIAL_DAYS_DATA = [
   {
+    id: "evt_family_20261018_opening",
+    author: "공동",
+    category: "가족/생일파티",
+    categoryIcon: "🚗",
+    title: "🚗 대구 외삼촌 '퍼펙트 자동차유리' 개업식 축하 모임!",
+    date: "2026-10-18",
+    desc: "온 가족이 함께 대구로 내려가 외삼촌(처남네)의 새로운 출발인 '퍼펙트 자동차유리' 개업을 진심으로 축하드렸어요! 가게 앞에서 다 함께 모여 예쁜 폴라로이드 사진도 찍고 따뜻한 응원의 마음을 전했습니다. 사업이 날마다 번창하고 늘 안전과 행복이 가득하길 온 가족이 힘차게 응원합니다! 🚗🎉✨",
+    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20261018_opening.jpg",
+    galleryImages: [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/together/activities/together_20261018_opening.jpg"
+    ],
+    videoUrl: "",
+    likes: 15,
+    stickers: { heart: 9, thumb: 8, star: 7, trophy: 5 },
+    comments: [
+      { author: "아빠", text: "외삼촌 개업 진심으로 축하해요! 퍼펙트 자동차유리 대박나길 응원합니다! 👍", date: "2026-10-18" }
+    ]
+  },
+  {
     id: "evt_chuseok_reunion_20260926",
     author: "공동",
     category: "가족/생일파티",
