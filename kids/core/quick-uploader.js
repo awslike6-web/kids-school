@@ -207,7 +207,7 @@
     hideStatus();
   }
 
-  // 4. 노션 DB 업로드 제출
+  // 4. 모바일 퀵업로드 미디어 & 노션 DB 원스톱 제출
   async function submitUpload() {
     if (isSubmitting || !compressedDataUrl) return;
 
@@ -215,115 +215,153 @@
     const submitBtn = document.getElementById('quSubmitBtn');
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span>⏳</span> 등록 중입니다...';
-    showStatus('loading', '🚀 성장 갤러리 & 노션 DB에 등록하고 있습니다...');
+    showStatus('loading', '🚀 클라우드 저장소 및 노션 DB에 전송하고 있습니다...');
 
     const memoText = document.getElementById('quMemoInput').value.trim();
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+
     const dateStr = `${yyyy}-${mm}-${dd}`;
-    const timeStr = today.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    const filename = `${yyyy}${mm}${dd}_${hh}${min}${ss}.jpg`;
+    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 
-    // 주인공 노션 select 매핑
-    let heroSelect = currentAuthor;
-    if (currentAuthor === '아빠' || currentAuthor === '엄마') {
-      heroSelect = '부모관리자';
-    }
-
-    // 식별 ID
-    const shortTitle = memoText || `${currentCategory} 기록`;
-    const recordTitle = `[퀵업로드] ${currentAuthor}_${dateStr} (${shortTitle})`;
-
-    // 노션 페이지 생성 바디
-    const pageBody = {
-      parent: { database_id: GALLERY_DIARY_DB_ID },
-      properties: {
-        '식별ID': {
-          title: [{ text: { content: recordTitle } }]
-        },
-        '구분': {
-          select: { name: currentCategory }
-        },
-        '주인공': {
-          select: { name: heroSelect }
-        },
-        '날짜': {
-          date: { start: dateStr }
-        },
-        '작가의 한마디/일기본문': {
-          rich_text: [{ text: { content: memoText || `[모바일 퀵업로드] ${currentAuthor}의 소중한 사진이 등록되었습니다. (${timeStr})` } }]
-        }
-      },
-      children: [
-        {
-          object: 'block',
-          type: 'callout',
-          callout: {
-            icon: { type: 'emoji', emoji: '📸' },
-            rich_text: [{
-              type: 'text',
-              text: { content: `[모바일 퀵 업로드] ${currentAuthor} (${currentCategory}) · ${dateStr} ${timeStr} 등록` }
-            }]
-          }
-        }
-      ]
-    };
-
-    if (memoText) {
-      pageBody.children.push({
-        object: 'block',
-        type: 'paragraph',
-        paragraph: {
-          rich_text: [{ type: 'text', text: { content: memoText } }]
-        }
-      });
-    }
-
+    // 1차: Cloudflare Worker 퀵업로드 미디어 엔드포인트 호출 (/api/upload-media)
     try {
-      const resp = await fetch(`${NOTION_PROXY}/v1/pages`, {
+      const uploadPayload = {
+        filename: filename,
+        author: currentAuthor,
+        category: currentCategory,
+        memo: memoText,
+        date: dateStr,
+        image: compressedDataUrl, // Canvas 1200px 압축 Base64 JPEG
+        createNotionPage: true
+      };
+
+      const resp = await fetch(`${NOTION_PROXY}/api/upload-media`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'Mozilla/5.0'
         },
-        body: JSON.stringify(pageBody)
+        body: JSON.stringify(uploadPayload)
       });
 
       if (!resp.ok) {
-        throw new Error(`노션 통신 오류 (HTTP ${resp.status})`);
+        throw new Error(`클라우드 워커 통신 오류 (HTTP ${resp.status})`);
       }
 
       const resData = await resp.json();
-      console.log('✅ [퀵 업로드 성공]', resData);
+      console.log('✅ [퀵 미디어 업로드 성공]', resData);
 
-      // 로컬 스토리지에 최근 퀵업로드 저장 (선택적)
       saveLocalQuickRecord({
         id: resData.id,
+        filename: filename,
         author: currentAuthor,
         category: currentCategory,
         memo: memoText,
         date: dateStr,
-        preview: compressedDataUrl.substring(0, 100)
+        preview: compressedDataUrl.substring(0, 100),
+        githubCommitted: resData.githubCommitted || false
       });
 
-      showStatus('success', '🎉 와아! 예쁘게 등록되었어요! (노션 & 갤러리 반영 완료)');
+      const successMsg = resData.githubCommitted
+        ? '🎉 깃허브 영구 보존소 및 노션 DB에 성공적으로 등록되었어요!'
+        : '🎉 클라우드 전송 및 노션 DB 등록 완료! (PC 동기화 대기 중)';
+
+      showStatus('success', successMsg);
       submitBtn.innerHTML = '<span>✅</span> 등록 완료!';
 
       setTimeout(() => {
         closeQuickUploader();
-        // 페이지가 갤러리나 일기장이라면 실시간 새로고침 시도
         if (typeof window.refreshGalleryFeed === 'function') {
           window.refreshGalleryFeed();
         }
       }, 1500);
 
-    } catch (err) {
-      console.error('❌ 퀵 업로드 실패:', err);
-      showStatus('error', `등록에 실패했습니다: ${err.message || '네트워크 확인 필요'}`);
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<span>🚀</span> 다시 시도하기';
-      isSubmitting = false;
+    } catch (workerErr) {
+      console.warn('⚠️ [워커 미디어 전송 일시 지연, 노션 다이렉트 폴백 실행]:', workerErr);
+
+      // 폴백 2차: 워커 미디어 API 장애 시 노션 페이지 생성으로 안전 방어
+      try {
+        let heroSelect = currentAuthor;
+        if (currentAuthor === '아빠' || currentAuthor === '엄마') heroSelect = '부모관리자';
+        const shortTitle = memoText || `${currentCategory} 기록`;
+        const recordTitle = `[퀵업로드] ${currentAuthor}_${dateStr} (${shortTitle})`;
+
+        const pageBody = {
+          parent: { database_id: GALLERY_DIARY_DB_ID },
+          properties: {
+            '식별ID': { title: [{ text: { content: recordTitle } }] },
+            '구분': { select: { name: currentCategory } },
+            '주인공': { select: { name: heroSelect } },
+            '날짜': { date: { start: dateStr } },
+            '작가의 한마디/일기본문': {
+              rich_text: [{ text: { content: memoText || `[모바일 퀵업로드] ${currentAuthor}의 소중한 사진이 등록되었습니다. (${timeStr})` } }]
+            }
+          },
+          children: [
+            {
+              object: 'block',
+              type: 'callout',
+              callout: {
+                icon: { type: 'emoji', emoji: '📸' },
+                rich_text: [{
+                  type: 'text',
+                  text: { content: `[모바일 퀵 업로드 폴백] 파일명: ${filename} · ${currentAuthor} (${currentCategory}) · ${dateStr} ${timeStr} 등록` }
+                }]
+              }
+            }
+          ]
+        };
+
+        if (memoText) {
+          pageBody.children.push({
+            object: 'block',
+            type: 'paragraph',
+            paragraph: { rich_text: [{ type: 'text', text: { content: memoText } }] }
+          });
+        }
+
+        const resp = await fetch(`${NOTION_PROXY}/v1/pages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+          body: JSON.stringify(pageBody)
+        });
+
+        if (!resp.ok) throw new Error(`노션 통신 오류 (HTTP ${resp.status})`);
+        const resData = await resp.json();
+
+        saveLocalQuickRecord({
+          id: resData.id,
+          filename: filename,
+          author: currentAuthor,
+          category: currentCategory,
+          memo: memoText,
+          date: dateStr,
+          preview: compressedDataUrl.substring(0, 100),
+          githubCommitted: false
+        });
+
+        showStatus('success', '🎉 노션 DB에 등록 완료되었습니다! (PC 동기화 필요)');
+        submitBtn.innerHTML = '<span>✅</span> 등록 완료!';
+
+        setTimeout(() => {
+          closeQuickUploader();
+          if (typeof window.refreshGalleryFeed === 'function') window.refreshGalleryFeed();
+        }, 1500);
+
+      } catch (fallbackErr) {
+        console.error('❌ 퀵 업로드 완전 실패:', fallbackErr);
+        showStatus('error', `등록에 실패했습니다: ${fallbackErr.message || '네트워크 확인 필요'}`);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>🚀</span> 다시 시도하기';
+        isSubmitting = false;
+      }
     }
   }
 

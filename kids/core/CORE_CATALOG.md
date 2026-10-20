@@ -826,17 +826,25 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   | `TimetableBoost.getTodaySchedule(user)` | 오늘 요일 기준 수업/학원 시간표 배열 반환 |
   | `TimetableBoost.renderHeaderChips(container)` | 로비 상단에 오늘 수업 칩 동적 렌더링 |
 
-### 🌟 `daily-diary.js` & `quick-uploader.js` (하루 마음일기 & 모바일 퀵업로더)
-아이들의 날씨/기분 선택형 마음일기 기록 및 스마트폰 현장 촬영 사진을 노션 임시 보관함으로 전송하는 경량 모듈입니다.
+### 🌟 `daily-diary.js` & `quick-uploader.js` (하루 마음일기 & 모바일 퀵업로더 파이프라인 2.1)
+아이들의 날씨/기분 선택형 마음일기 기록 및 스마트폰 현장 촬영 사진을 Cloudflare Worker 미디어 큐 및 노션 DB로 즉시 전송하는 고속 파이프라인 모듈입니다.
 - **파일 위치**:
   - `kids/core/daily-diary.js` (하루 마음일기 모달 & 감정 스티커)
   - `kids/core/quick-uploader.js` (모바일 사진 촬영 & 퀵업로더 프론트엔드)
+  - `workers/minmin-notion-worker.js` (미디어 수신 `/api/upload-media`, 큐 조회 `/api/pending-media`)
+  - `scripts/sync_quick_upload.py` (PC 원클릭 폰 사진 다운로드 ➔ 갤러리 최적화 ➔ Git/Notion 동기화 완결)
+- **파이프라인 2.1 아키텍처**:
+  1. **스마트폰 촬영/선택**: 캔버스 1200px 경량 고화질(JPEG 82%) 압축 ➔ Cloudflare Worker `/api/upload-media` 단 1회 전송.
+  2. **워커 자동 처리**: 큐 보관(L2 Cache API 7일 보존) + 노션 갤러리 DB(`3dfa2711...`) `[퀵업로드]` 페이지 자동 생성 (GitHub Secret 가용 시 다이렉트 커밋 지원).
+  3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ `kids-archive` & `kids-school` 깃 푸시 ➔ 노션 타임라인 기록 15초 완결!
 - **핵심 API**:
-  | 메서드 | 설명 |
+  | 메서드 / 스크립트 | 설명 |
   | :--- | :--- |
-  | `DailyDiary.openDiaryModal(user)` | 마음일기 작성 모달 열기 (기분/날씨/한줄일기) |
-  | `QuickUploader.uploadPhoto(file, child, memo)` | Cloudflare Worker를 통해 노션 성장 DB로 1초 만에 즉시 전송 |
-
+  | `window.openQuickUploader(options)` | 퀵업로더 모달 열기 (`defaultAuthor`, `defaultCategory` 지정 가능) |
+  | `POST /api/upload-media` | Base64 이미지 바이너리 + 메타데이터 수신 및 큐/노션 원스톱 처리 |
+  | `GET /api/pending-media?include_data=true` | 미처리 폰 사진 목록 및 바이너리 일괄 조회 |
+  | `DELETE /api/pending-media?id=...` | PC 동기화 완료 후 워커 큐에서 삭제 |
+  | `python scripts/sync_quick_upload.py` | 폰 사진 자동 수신부터 갤러리 배포까지 전 과정 원클릭 자동화 |
 ---
 
 ## 10. 🧭 에이전트 내비게이션 & 개발 도구 (Agent Navigation & Dev Tools)

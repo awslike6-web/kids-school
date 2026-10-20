@@ -399,6 +399,263 @@ async function handleBootstrap(url, request, env, ctx) {
   }
 }
 
+
+// ============================================================================
+// 📸 미디어 퀵업로드 파이프라인 핸들러 (/api/upload-media, /api/pending-media)
+// ============================================================================
+const MEDIA_QUEUE = new Map();
+const MAX_MEDIA_QUEUE_SIZE = 100;
+const GALLERY_DIARY_DB_ID = '3dfa27115b688010a85be385f91d64ee';
+
+async function handleUploadMedia(request, env, ctx) {
+  try {
+    const data = await request.json();
+    const { id, filename, author, category, memo, date, image, createNotionPage = true } = data;
+
+    if (!image || !filename) {
+      return new Response(JSON.stringify({ error: 'image (base64) and filename are required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    }
+
+    const uploadId = id || `up_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const uploadDate = date || new Date().toISOString().split('T')[0];
+    const uploadAuthor = author || '민수';
+    const uploadCategory = category || '만들기/공예';
+    const uploadMemo = memo || '';
+
+    // 순수 Base64 데이터 추출 (data:image/...;base64, 접두사 제거)
+    const base64Data = image.includes(';base64,') ? image.split(';base64,')[1] : image;
+
+    let githubCommitted = false;
+    let githubError = null;
+
+    // 1. GitHub API 직접 커밋 시도 (env.GITHUB_TOKEN 있을 시)
+    const githubToken = env && (env.GITHUB_TOKEN || env.GH_TOKEN);
+    if (githubToken) {
+      try {
+        let subFolder = '갤러리/' + uploadAuthor;
+        if (uploadCategory === '종이일기') {
+          subFolder = '일기/' + uploadAuthor;
+        } else if (uploadCategory === '특별한 날') {
+          subFolder = '갤러리/하루아카이브/공통';
+        }
+        const filePath = `uploads/ex/${subFolder}/${filename}`;
+        const ghUrl = `https://api.github.com/repos/awslike6-web/kids-school/contents/${encodeURI(filePath)}`;
+
+        const ghRes = await fetch(ghUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${githubToken}`,
+            'User-Agent': 'Minmin-Worker-Media-Pipeline',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `feat(media): [모바일 퀵업로드] ${uploadAuthor} ${uploadCategory} (${filename})`,
+            content: base64Data,
+            branch: 'main'
+          })
+        });
+
+        if (ghRes.ok) {
+          githubCommitted = true;
+        } else {
+          const ghErrText = await ghRes.text();
+          githubError = `GitHub HTTP ${ghRes.status}: ${ghErrText.substring(0, 100)}`;
+        }
+      } catch (ghErr) {
+        githubError = ghErr.message;
+      }
+    }
+
+    // 2. 인메모리 큐 및 L2 Cache API에 보관 (PC 스크립트 수신용)
+    const mediaItem = {
+      id: uploadId,
+      filename,
+      author: uploadAuthor,
+      category: uploadCategory,
+      memo: uploadMemo,
+      date: uploadDate,
+      timestamp: new Date().toISOString(),
+      githubCommitted,
+      githubError,
+      imageSize: base64Data.length,
+      image: image
+    };
+
+    if (MEDIA_QUEUE.size >= MAX_MEDIA_QUEUE_SIZE) {
+      const oldestKey = MEDIA_QUEUE.keys().next().value;
+      MEDIA_QUEUE.delete(oldestKey);
+    }
+    MEDIA_QUEUE.set(uploadId, mediaItem);
+
+    // L2 Cache API에 영구 보존용 저장 (7일간 유지)
+    try {
+      const cache = caches.default;
+      const origin = new URL(request.url).origin;
+      const mediaReq = createCacheKeyRequest(origin, `/__pending_media/${uploadId}`, 'item');
+      const mediaResp = new Response(JSON.stringify(mediaItem), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=604800',
+          ...CORS_HEADERS
+        }
+      });
+      if (ctx && ctx.waitUntil) {
+        ctx.waitUntil(cache.put(mediaReq, mediaResp));
+      } else {
+        await cache.put(mediaReq, mediaResp);
+      }
+    } catch (e) {}
+
+    // 3. 노션 DB 페이지 자동 생성 (요청 시)
+    let notionPageId = null;
+    let notionError = null;
+    if (createNotionPage) {
+      try {
+        const authHeader = getNotionAuthHeader(request, env);
+        if (authHeader) {
+          const shortTitle = uploadMemo || `${uploadCategory} 기록`;
+          const recordTitle = `[퀵업로드] ${uploadAuthor}_${uploadDate} (${shortTitle})`;
+          let heroSelect = uploadAuthor;
+          if (uploadAuthor === '아빠' || uploadAuthor === '엄마') heroSelect = '부모관리자';
+
+          const pageBody = {
+            parent: { database_id: GALLERY_DIARY_DB_ID },
+            properties: {
+              '식별ID': { title: [{ text: { content: recordTitle } }] },
+              '구분': { select: { name: uploadCategory } },
+              '주인공': { select: { name: heroSelect } },
+              '날짜': { date: { start: uploadDate } },
+              '작가의 한마디/일기본문': {
+                rich_text: [{ text: { content: uploadMemo || `[모바일 퀵업로드] ${uploadAuthor}의 사진이 등록되었습니다. (${filename})` } }]
+              }
+            },
+            children: [
+              {
+                object: 'block',
+                type: 'callout',
+                callout: {
+                  icon: { type: 'emoji', emoji: '📸' },
+                  rich_text: [{
+                    type: 'text',
+                    text: { content: `[모바일 퀵업로드] 파일명: ${filename} · 작성자: ${uploadAuthor} · 분류: ${uploadCategory}` }
+                  }]
+                }
+              }
+            ]
+          };
+
+          if (uploadMemo) {
+            pageBody.children.push({
+              object: 'block',
+              type: 'paragraph',
+              paragraph: { rich_text: [{ type: 'text', text: { content: uploadMemo } }] }
+            });
+          }
+
+          const nRes = await callNotionRaw('/v1/pages', 'POST', pageBody, authHeader);
+          if (nRes.ok) {
+            const nData = await nRes.json();
+            notionPageId = nData.id;
+          } else {
+            notionError = `Notion HTTP ${nRes.status}`;
+          }
+        }
+      } catch (nErr) {
+        notionError = nErr.message;
+      }
+    }
+
+    return new Response(JSON.stringify({
+      status: 'ok',
+      id: uploadId,
+      filename,
+      githubCommitted,
+      githubError,
+      notionPageId,
+      notionError,
+      timestamp: mediaItem.timestamp
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message || 'Media upload failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+}
+
+async function handleGetPendingMedia(url, request, env) {
+  const includeData = url.searchParams.get('include_data') === 'true';
+  const targetId = url.searchParams.get('id');
+
+  if (targetId) {
+    const item = MEDIA_QUEUE.get(targetId);
+    if (!item) {
+      return new Response(JSON.stringify({ error: 'Media not found', id: targetId }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+      });
+    }
+    return new Response(JSON.stringify(item), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+
+  // 전체 목록 반환
+  const list = [];
+  for (const item of MEDIA_QUEUE.values()) {
+    if (includeData) {
+      list.push(item);
+    } else {
+      const { image, ...summary } = item;
+      list.push(summary);
+    }
+  }
+
+  return new Response(JSON.stringify({
+    status: 'ok',
+    count: list.length,
+    items: list
+  }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+  });
+}
+
+async function handleDeletePendingMedia(url, request) {
+  const targetId = url.searchParams.get('id');
+  const clearAll = url.searchParams.get('clear_all') === 'true';
+
+  if (clearAll) {
+    const count = MEDIA_QUEUE.size;
+    MEDIA_QUEUE.clear();
+    return new Response(JSON.stringify({ status: 'ok', cleared: count }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+
+  if (!targetId) {
+    return new Response(JSON.stringify({ error: 'id parameter is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+  }
+
+  const existed = MEDIA_QUEUE.delete(targetId);
+  return new Response(JSON.stringify({ status: 'ok', id: targetId, deleted: existed }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+  });
+}
+
 // ============================================================================
 // 🌐 메인 라우터 (Cloudflare Worker fetch)
 // ============================================================================
@@ -417,7 +674,7 @@ export default {
         status: 'ok',
         service: 'minmin-notion-edge-cache',
         version: '2026.09-v3-l1l2',
-        features: ['notion-proxy', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts'],
+        features: ['notion-proxy', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts', 'quick-upload-pipeline'],
         cacheTTL: {
           query: `${CACHE_TTL_QUERY}s`,
           bootstrap: `${CACHE_TTL_BOOTSTRAP}s`
@@ -531,7 +788,23 @@ export default {
       }
     }
 
-    // 4. 단일 번들링 부트스트랩 엔드포인트 (/api/bootstrap)
+    
+    // 3-B. 📸 미디어 퀵업로드 엔드포인트 (/api/upload-media)
+    if (url.pathname === '/api/upload-media' && request.method === 'POST') {
+      return await handleUploadMedia(request, env, ctx);
+    }
+
+    // 3-C. 📥 대기 중인 퀵업로드 미디어 조회/삭제 (/api/pending-media)
+    if (url.pathname === '/api/pending-media') {
+      if (request.method === 'GET') {
+        return await handleGetPendingMedia(url, request, env);
+      }
+      if (request.method === 'DELETE') {
+        return await handleDeletePendingMedia(url, request);
+      }
+    }
+
+// 4. 단일 번들링 부트스트랩 엔드포인트 (/api/bootstrap)
     if (url.pathname === '/api/bootstrap') {
       return await handleBootstrap(url, request, env, ctx);
     }
