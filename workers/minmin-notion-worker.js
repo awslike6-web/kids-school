@@ -1,5 +1,5 @@
 /**
- * ⚡ Cloudflare Worker: minmin-notion 전사 단일 통합 초고속 엣지 캐시 & 노션 프록시 (v4.2 완결판)
+ * ⚡ Cloudflare Worker: minmin-notion 전사 단일 통합 초고속 엣지 캐시 & 노션 프록시 (v4.3 · TTS OpenAI 대체 경로)
  * 
  * 💡 통합 서빙 도메인:
  *  1. 🧸 보육비서 (Daycare-Helper): 3대 핵심 DB 엄격 보안 가드 (guardDaycareProxy) & CORS 안전 처리
@@ -785,8 +785,8 @@ export default {
       return new Response(JSON.stringify({
         status: 'ok',
         service: 'minmin-notion-edge-cache',
-        version: '2026.10-v4.2-perfect',
-        features: ['notion-proxy', 'daycare-guard', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts', 'gemini-key', 'gemini-proxy', 'quick-upload-pipeline'],
+        version: '2026.10-v4.3-tts-openai',
+        features: ['notion-proxy', 'daycare-guard', 'l1-memory-cache', 'l2-cache-api', 'bootstrap-bundle', 'edge-tts', 'openai-tts-fallback', 'tts-edge-cache', 'gemini-key', 'gemini-proxy', 'quick-upload-pipeline'],
         cacheTTL: { query: `${CACHE_TTL_QUERY}s`, bootstrap: `${CACHE_TTL_BOOTSTRAP}s` },
         memoryCacheEntries: MEDIA_QUEUE.size,
         timestamp: new Date().toISOString()
