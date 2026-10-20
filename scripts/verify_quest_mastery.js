@@ -273,6 +273,7 @@
     const gan = QM.buildFillBlank(u2Items[3], u2Items, 'ko', seeded(7));
     check('철자 오답이 없는 낱말(간신히)은 같은 단원 낱말로 보기', gan && gan.options[gan.answer] === '간신히' && gan.options.length === 3 && gan.options.every(o => o === '간신히' || u2Items.some(it => it.word === o)), gan && gan.options);
     check('연음(소리 나는 대로) 철자 오답: 많아요→마나요, 볶아요→보까요', QM.misspellingsOf('많아요').includes('마나요') && QM.misspellingsOf('볶아요').includes('보까요'), [QM.misspellingsOf('많아요'), QM.misspellingsOf('볶아요')]);
+    check('ㅎ 받침 소리대로 쓰기: 옳다→올타, 않고→안코, 뚫는다→뚤른다', QM.misspellingsOf('옳다').includes('올타') && QM.misspellingsOf('않고').includes('안코') && QM.misspellingsOf('뚫는다').includes('뚤른다'), [QM.misspellingsOf('옳다'), QM.misspellingsOf('않고'), QM.misspellingsOf('뚫는다')]);
     const ha = QM.buildFillBlank(u2Items[4], u2Items, 'ko', seeded(7));
     check('뜻 낱말(하마터면) 보기는 뜻 낱말 먼저', ha && ha.options.includes('간신히'), ha && ha.options);
     const lv2 = QM.buildRound({ child: 'minseo', items: u2Items, subj: 'korean', today: '2026-10-20', rng: seeded(8) }).questions;

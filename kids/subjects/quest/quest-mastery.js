@@ -346,6 +346,9 @@
   }
 
   // 연음(소리 나는 대로 쓰기): 받침 종성 → [남는 받침, 다음 'ㅇ' 자리로 넘어가는 초성] (많아요→마나요, 없어요→업써요)
+  // ㅎ 받침 소리 나는 대로 쓰기: ㄱ·ㄷ·ㅈ 앞 거센소리(옳다→올타, 않고→안코), ㅀ+ㄴ → ㄹㄹ(뚫는다→뚤른다)
+  const H_REST = { 6: 4, 15: 8, 27: 0 };
+  const ASPIRATE = { 0: 15, 3: 16, 12: 14 };
   const LIAISON = { 1: [0, 0], 2: [0, 1], 3: [1, 10], 4: [0, 2], 5: [4, 12], 6: [0, 2], 7: [0, 3], 8: [0, 5], 9: [8, 0], 10: [8, 6], 11: [8, 7], 12: [8, 10], 13: [8, 16], 14: [8, 17], 15: [0, 5], 16: [0, 6], 17: [0, 7], 18: [17, 10], 19: [0, 9], 20: [0, 10], 22: [0, 12], 23: [0, 14], 24: [0, 15], 25: [0, 16], 26: [0, 17], 27: [0, 11] };
 
   // 받아쓰기 철자 오답: 겹받침을 홑받침으로(닭→달·닥), 소리 나는 대로 쓰기(볶아요→보까요), 소리가 같은 받침·모음 바꾸기(옷→옫, 개→게)
@@ -360,6 +363,10 @@
       if (LIAISON[x.jong] && next && next.cho === 11) {
         const [rest, cho] = LIAISON[x.jong];
         secondary.push(syl.map((y, k) => (k === idx ? composeSyllable(y, y.jung, rest) : k === idx + 1 ? composeSyllable({ cho }, y.jung, y.jong) : y.ch)).join(''));
+      }
+      const hCho = next && H_REST[x.jong] !== undefined ? (ASPIRATE[next.cho] ?? (x.jong === 15 && next.cho === 2 ? 5 : undefined)) : undefined;
+      if (hCho !== undefined) {
+        secondary.push(syl.map((y, k) => (k === idx ? composeSyllable(y, y.jung, H_REST[x.jong]) : k === idx + 1 ? composeSyllable({ cho: hCho }, y.jung, y.jong) : y.ch)).join(''));
       }
       if (!DOUBLE_JONG[x.jong] && x.jong) (SOUND_ALIKE_JONG[x.jong] || []).forEach(j => secondary.push(make(x.jung, j)));
       (SOUND_ALIKE_JUNG.find(g => g.includes(x.jung)) || []).filter(v => v !== x.jung).forEach(v => secondary.push(make(v, x.jong)));
