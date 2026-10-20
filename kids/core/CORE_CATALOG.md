@@ -295,6 +295,19 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
   | `KoreanVoca.setMode(mode)` | 'choice'(객관식) ↔ 'subjective'(주관식) 전환 |
   | `KoreanVoca.getOrderToggleHtml(type)` | 랜덤 섞기 ↔ 순서대로 토글 버튼 HTML 생성 |
 
+### 🌟 `korean_mini_reading.js` ([4단계] 민서(초1) 미니 독해 전담 엔진)
+3~4문장 초단편 지문을 성우 TTS로 읽어 준 뒤 고정 3단계 꼬리문제(① 낱말·겹받침 → ② 인물의 생각 → ③ 글쓴이의 중심 생각)를 에러리스로 푸는 민서 전용 모듈입니다. 민수용 `reading_engine.js`와 데이터·화면을 공유하지 않는 병렬 모듈이며, 국어방 카드 `#minseoMiniReadingCard`는 민서 프로필에서만 보입니다.
+- **파일 위치**: `kids/js/korean_mini_reading.js` (약 270줄) · 스타일: `kids/css/korean.css` 하단 `.mr-*`
+- **데이터**: 노션 `LIBRARY_DB` 중 `트랙 = 🌱 민서 미니 독해` (`fetchReadingPassagesFromNotion` 재사용). `문제데이터` JSON 문항 = `{ step, type:"choice", question, options[], answer(보기 문자열|번호), explanation, speaker?:{name, icon, line} }`
+- **등록 도구**: `python -X utf8 scripts/register_minseo_korean.py --file scripts/data/minseo_korean_<학기>_<단원>.json [--apply]` (VOCA 정제 어휘 + 미니 독해 지문을 한 번에 갱신·신규 등록, 기본 미리보기)
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `KoreanMiniReading.renderLobby(container)` | 단원별 이야기 카드 서가 (트랙 `MINI_TRACK`만 조회) |
+  | `KoreanMiniReading.start(passageId)` | 지문 화면 진입 + TTS 자동 읽기 (문장 터치 시 그 문장만 다시 읽기) |
+  | `KoreanMiniReading.isMissionInProgress()` | 1문제 이상 풀고 완주 전이면 true (국어방 이탈 방지 가드) |
+- **보상·기록**: 첫 시도 정답 `triggerAwardDispense(1)` + `fairyPraise`, 오답은 정답 보기 노란 안내 + 해설 + `fairyEncourage`, 완주 `fairyReward` + `triggerAwardDispense(3)` + `sendStudyLogToNotion({ subject: '국어(미니독해_제목)' })`
+
 ### 🌟 `korean_sentence.js` ([5단계] AI 지문 토론방 전담 엔진)
 지문별 AI 심층 토론, 생각 확장 코칭, 부모 검수 뱃지, 실시간 대화 보상을 전담하며 2026 플래그십 표준(`gemini-3.8-flash`)을 탑재한 독립 모듈입니다.
 - **파일 위치**: `kids/js/korean_sentence.js` (196줄)

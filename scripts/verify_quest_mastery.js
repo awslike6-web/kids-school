@@ -254,6 +254,42 @@
       && scrMs.every(q => q.scramble.seq.length <= 3), rMs.questions.map(q => q.masteryType));
     reset('minseo');
 
+    // 12) 민서 2단원 정제 어휘: 상세설명 예문 속 [활용형] 빈칸 (받아쓰기 문장 ↔ 원형 낱말 연결)
+    const u2 = '2단원 (2. 낱말을 정확하게 읽어요)';
+    const u2Raw = [
+      ['n1', '닳다', '오래 써서 줄어들거나 낡아지다', '연필심이 [닳았다].'],
+      ['n2', '없다', '있지 않다', '필통에 연필이 [없다].'],
+      ['n3', '닭', '꼬끼오 하고 우는 새', '[닭]과 병아리가 모이를 먹어요.'],
+      ['n4', '간신히', '겨우, 아주 힘들게', '나무에 [간신히] 올라갔어요.'],
+      ['n5', '하마터면', '조금만 잘못했으면 큰일 날 뻔했을 때 쓰는 말', '[하마터면] 넘어질 뻔했어요.']
+    ].map(([id, word, meaning, detailContext]) => ({ id, word, meaning, detailContext, wordType: '단어', stage: u2, grades: ['1-2'], subject: ['국어'], target: ['민서'] }));
+    const u2Items = QM.selectUnitItems(u2Raw, minseoSel(u2));
+    check('2단원 정제 어휘는 낱말로 로드', u2Items.length === 5 && u2Items.every(it => it.kind === 'word' && !it.isDictation));
+    check('[활용형]은 표제어 첫 글자가 같을 때만 인정', QM.usageInDetail(u2Items[0]) === '닳았다' && QM.usageInDetail({ word: '닳다', detail: '[연필]이 닳았다' }) === '');
+    const dal = QM.buildFillBlank(u2Items[0], u2Items, 'ko', seeded(7));
+    check('닳다 → "연필심이 [ _ ]." 정답 닳았다 · 철자 오답 달았다', dal && dal.fromDetail && dal.display === '연필심이 [ _ ].' && dal.options[dal.answer] === '닳았다' && dal.options.includes('달았다'), dal);
+    const dak = QM.buildFillBlank(u2Items[2], u2Items, 'ko', seeded(7));
+    check('닭 → 달·닥 철자 오답', dak && dak.options[dak.answer] === '닭' && dak.options.includes('달') && dak.options.includes('닥'), dak && dak.options);
+    const gan = QM.buildFillBlank(u2Items[3], u2Items, 'ko', seeded(7));
+    check('철자 오답이 없는 낱말(간신히)은 같은 단원 낱말로 보기', gan && gan.options[gan.answer] === '간신히' && gan.options.length === 3 && gan.options.every(o => o === '간신히' || u2Items.some(it => it.word === o)), gan && gan.options);
+    check('연음(소리 나는 대로) 철자 오답: 많아요→마나요, 볶아요→보까요', QM.misspellingsOf('많아요').includes('마나요') && QM.misspellingsOf('볶아요').includes('보까요'), [QM.misspellingsOf('많아요'), QM.misspellingsOf('볶아요')]);
+    const ha = QM.buildFillBlank(u2Items[4], u2Items, 'ko', seeded(7));
+    check('뜻 낱말(하마터면) 보기는 뜻 낱말 먼저', ha && ha.options.includes('간신히'), ha && ha.options);
+    const lv2 = QM.buildRound({ child: 'minseo', items: u2Items, subj: 'korean', today: '2026-10-20', rng: seeded(8) }).questions;
+    check('예문 힌트에는 [ ] 표시가 없음', lv2.every(q => !/[\[\]]/.test(q.hint || '')), lv2.map(q => q.hint));
+    reset('minseo');
+    u2Items.forEach(it => setState('minseo', it.id, 3));
+    let fromDetailQs = [];
+    for (let seed = 1; seed <= 30 && fromDetailQs.length === 0; seed++) {
+      fromDetailQs = QM.buildRound({ child: 'minseo', items: u2Items, subj: 'korean', today: '2026-10-20', rng: seeded(seed) })
+        .questions.filter(q => q.fill && q.fill.fromDetail);
+    }
+    check('Lv.2 예문 빈칸 힌트는 예문(=정답)을 쓰지 않고 기본 낱말·뜻풀이로', fromDetailQs.length > 0 && fromDetailQs.every(q => {
+      const ans = q.fill.options[q.fill.answer];
+      return ans === q.item.word ? q.hint === q.item.meaning : q.hint.includes(`'${q.item.word}'`) && !q.hint.includes(ans);
+    }), fromDetailQs.map(q => q.hint));
+    reset('minseo');
+
     const pass = results.filter(r => r.ok).length;
     const lines = results.map(r => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}${r.ok ? '' : '  ' + r.extra}`);
     lines.push(`\n${pass === results.length ? 'PASS' : 'FAIL'}: ${pass}/${results.length}`);

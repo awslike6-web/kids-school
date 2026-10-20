@@ -345,7 +345,10 @@
     return 4;
   }
 
-  // 받아쓰기 철자 오답: 겹받침을 홑받침으로(닭→달·닥), 소리가 같은 받침·모음 바꾸기(옷→옫, 개→게)
+  // 연음(소리 나는 대로 쓰기): 받침 종성 → [남는 받침, 다음 'ㅇ' 자리로 넘어가는 초성] (많아요→마나요, 없어요→업써요)
+  const LIAISON = { 1: [0, 0], 2: [0, 1], 3: [1, 10], 4: [0, 2], 5: [4, 12], 6: [0, 2], 7: [0, 3], 8: [0, 5], 9: [8, 0], 10: [8, 6], 11: [8, 7], 12: [8, 10], 13: [8, 16], 14: [8, 17], 15: [0, 5], 16: [0, 6], 17: [0, 7], 18: [17, 10], 19: [0, 9], 20: [0, 10], 22: [0, 12], 23: [0, 14], 24: [0, 15], 25: [0, 16], 26: [0, 17], 27: [0, 11] };
+
+  // 받아쓰기 철자 오답: 겹받침을 홑받침으로(닭→달·닥), 소리 나는 대로 쓰기(볶아요→보까요), 소리가 같은 받침·모음 바꾸기(옷→옫, 개→게)
   function misspellingsOf(token) {
     const primary = [], secondary = [];
     const syl = syllablesOf(token);
@@ -353,7 +356,12 @@
       if (x.cho === undefined) return;
       const make = (jung, jong) => syl.map((y, k) => (k === idx ? composeSyllable(y, jung, jong) : y.ch)).join('');
       if (DOUBLE_JONG[x.jong]) DOUBLE_JONG[x.jong].forEach(j => primary.push(make(x.jung, j)));
-      else if (x.jong) (SOUND_ALIKE_JONG[x.jong] || []).forEach(j => secondary.push(make(x.jung, j)));
+      const next = syl[idx + 1];
+      if (LIAISON[x.jong] && next && next.cho === 11) {
+        const [rest, cho] = LIAISON[x.jong];
+        secondary.push(syl.map((y, k) => (k === idx ? composeSyllable(y, y.jung, rest) : k === idx + 1 ? composeSyllable({ cho }, y.jung, y.jong) : y.ch)).join(''));
+      }
+      if (!DOUBLE_JONG[x.jong] && x.jong) (SOUND_ALIKE_JONG[x.jong] || []).forEach(j => secondary.push(make(x.jung, j)));
       (SOUND_ALIKE_JUNG.find(g => g.includes(x.jung)) || []).filter(v => v !== x.jung).forEach(v => secondary.push(make(v, x.jong)));
     });
     return [...new Set(primary.concat(secondary))].filter(w => w !== token);
@@ -395,6 +403,17 @@
     return out;
   }
 
+  // 상세설명 예문의 [어절]이 표제어의 활용형(첫 글자가 같음)이면 그 어절 (닳다 ↔ "연필심이 [닳았다].")
+  function usageInDetail(item) {
+    const m = String(item.detail || '').match(/\[([^\]]+)\]/);
+    const token = m ? m[1].trim() : '';
+    return token && !/\s/.test(token) && token[0] === String(item.word || '')[0] ? token : '';
+  }
+  // 화면 힌트용: 빈칸 지정 [ ] 표시만 걷어낸 상세설명
+  function plainDetail(item) {
+    return String(item.detail || '').replace(/[\[\]]/g, '');
+  }
+
   function buildFillBlank(item, all, lang, rng) {
     // ① 문장: 우선순위로 고른 어절 1개 빈칸 + 3지선다
     if (isSentenceLike(item)) {
@@ -413,6 +432,21 @@
         : pickDistractors(item, all.filter(o => o.kind === 'word'), 'word', 2, rng);
       if (distractors.length === 2) {
         return { mode: 'choice', display: item.detail.replace(/\(\s*\)/, '[ _ ]'), ...makeChoice(item.word, distractors, rng) };
+      }
+    }
+    // ①-3 한글 낱말 + 상세설명 예문 속 [활용형] ("연필심이 [닳았다].") → 그 어절 빈칸 3지선다
+    //      보기는 철자 오답 우선, 모자라면 같은 단원 낱말(철자 낱말↔뜻 낱말 같은 갈래 먼저)로 채운다
+    const usage = lang !== 'en' && item.kind === 'word' ? usageInDetail(item) : '';
+    if (usage) {
+      const distractors = misspellingsOf(usage).slice(0, 2);
+      const words = all.filter(o => o.kind === 'word');
+      const isSpelling = o => misspellingsOf(o.word).length > 0;
+      pickDistractors(item, words.filter(o => isSpelling(o) === distractors.length > 0), 'word', 2, rng)
+        .concat(pickDistractors(item, words, 'word', 2, rng))
+        .forEach(w => { if (distractors.length < 2 && w !== usage && !distractors.includes(w)) distractors.push(w); });
+      if (distractors.length === 2) {
+        const display = item.detail.replace(`[${usage}]`, '[ _ ]').replace(/\[(?! _ \])([^\]]*)\]/g, '$1');
+        return { mode: 'choice', display, fromDetail: true, ...makeChoice(usage, distractors, rng) };
       }
     }
     // ② 영단어 + 예문 변형: 예문 속 단어 빈칸 + 3지선다
@@ -453,7 +487,7 @@
       noCredit: !!flags.noCredit,
       subject: ctx.subj,
       lang,
-      hint: item.detail || item.meaning,
+      hint: plainDetail(item) || item.meaning,
       audioText: item.word
     };
     const choiceMeaning = () => {
@@ -492,6 +526,8 @@
     }
     if (!body) body = { masteryType: 'scramble', scramble: buildScramble(item, lang, rng, ctx.maxChunks), q: `조립하기: ${item.meaning}` };
     Object.assign(q, body);
+    // 상세설명 예문 빈칸은 예문이 곧 정답이라, 힌트는 기본 낱말 모양(닳다 → 닳았다)으로 바꾼다 (같으면 뜻풀이)
+    if (q.fill && q.fill.fromDetail) q.hint = q.fill.options[q.fill.answer] === item.word ? item.meaning : `기본 낱말 '${item.word}'의 받침을 떠올려 봐요`;
     // 뜻 고르기 문제에서 상세설명이 없으면 힌트(=뜻풀이)가 곧 정답이 되므로 숨긴다
     if (q.masteryType === 'choice_audio' && !q.reverse && !item.detail) q.hint = '';
     return q;
@@ -733,7 +769,7 @@
     SUBJECT_KO, SILVER, GOLD,
     todayStr, daysBetween, parseMastery, formatMastery,
     loadStore, saveStore, mergeRemote, syncFromRecords,
-    classify, stageLabel, unitTitle, isSourceTag, koreanTier, misspellingsOf, pickBlankToken, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
+    classify, stageLabel, unitTitle, isSourceTag, koreanTier, misspellingsOf, pickBlankToken, usageInDetail, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
     levelOf, isLv3Eligible, isRusty,
     buildRound, applyResult, pushChanges, getProgressSummary, loadUnit,
     isEligibleSubject: subj => Object.prototype.hasOwnProperty.call(SUBJECT_KO, subj)

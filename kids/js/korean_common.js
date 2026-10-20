@@ -6,6 +6,7 @@
 //   * [2단계 받아쓰기] kids/js/korean_dictation.js (window.KoreanDictation)
 //   * [3단계 어휘] kids/js/korean_voca.js (window.KoreanVoca)
 //   * [4단계 독해] kids/core/reading_engine.js (window.ReadingEngine)
+//   * [4단계 민서 미니 독해] kids/js/korean_mini_reading.js (window.KoreanMiniReading)
 //   * [5단계 AI 토론] kids/js/korean_sentence.js (window.KoreanSentence)
 
 window.currentSubject = "국어"; // 전역 과목명 명시
@@ -120,6 +121,8 @@ function initializeKoreanRoom() {
         if (badgeEl) { badgeEl.className = "admin-status-badge"; badgeEl.textContent = `🎮 [${currentUserName}] 네온 관제 (클릭 시 전환)`; }
     } else {
         document.body.className = "theme--slime";
+        const miniCard = document.getElementById('minseoMiniReadingCard');
+        if (miniCard) miniCard.style.display = '';
         if (titleEl) titleEl.textContent = `${currentUserName}의 국어 멀티버스 대기실`;
         if (badgeEl) { badgeEl.className = "admin-status-badge korean--fairy"; badgeEl.textContent = `🎠 [${currentUserName}] 동화 모드 (클릭 시 전환)`; }
     }
@@ -168,6 +171,9 @@ function isKoreanMissionInProgress() {
     if (currentMissionType === 'sentence') {
         return !!activePassage;
     }
+    if (currentMissionType === 'minireading') {
+        return !!(window.KoreanMiniReading && window.KoreanMiniReading.isMissionInProgress());
+    }
     return false;
 }
 
@@ -194,6 +200,7 @@ function openMissionView(type) {
         case 'storybook': targetTitle = "단원 동화 도서관 (Storybook Library)"; targetIcon = "📚"; break;
         case 'sentence': targetTitle = "AI 지문 토론방"; targetIcon = "🗣️"; break;
         case 'reading': targetTitle = "정밀 독해 멀티버스방"; targetIcon = "📖"; break;
+        case 'minireading': targetTitle = "민서 미니 독해"; targetIcon = "🌱"; break;
         case 'voca': targetTitle = "국어 용어방"; targetIcon = "📚"; break;
         case 'dictation': targetTitle = "받아쓰기 훈련소"; targetIcon = "✍️"; break;
     }
@@ -344,6 +351,13 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         if (type === 'reading') {
             if (window.ReadingEngine && typeof window.ReadingEngine.renderLobby === 'function') {
                 await window.ReadingEngine.renderLobby(innerBody, { subject: "국어" });
+                return;
+            }
+        }
+
+        if (type === 'minireading') {
+            if (window.KoreanMiniReading && typeof window.KoreanMiniReading.renderLobby === 'function') {
+                await window.KoreanMiniReading.renderLobby(innerBody);
                 return;
             }
         }
