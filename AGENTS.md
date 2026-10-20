@@ -19,7 +19,7 @@
   - `science-unit-builder` (초등 과학 5대 가상실험실 & NotebookLM 기반 『실험관찰』 실험연계 디지털 탐구 보고서·서술형 빌더·실험순서 조립 표준 제작)
 
 ## 로컬 실행·검증 메모 (이 PC 기준)
-- **OS·런타임**: Windows이고 **Node.js가 없습니다**. JS 검증은 정적 서버(`python -m http.server`)와 브라우저로 합니다.
+- **OS·런타임**: Windows, **Node.js v24.22.0** (2026-10-20 설치). JS 엔진 검증은 `node scripts/verify_quest_mastery.js`처럼 명령으로 하고, 화면 확인은 정적 서버(`python -m http.server`)와 브라우저로 합니다.
 - **한글 출력**: Python으로 한글을 출력할 때는 `python -X utf8` 또는 `PYTHONIOENCODING=utf-8`을 붙입니다.
 - **노션 Worker(`minmin-notion.awslike6.workers.dev`) 호출**:
   - Python에서 부를 때는 `User-Agent` 헤더가 없으면 403이 납니다.

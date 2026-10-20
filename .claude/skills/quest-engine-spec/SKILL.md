@@ -66,7 +66,7 @@ description: 5분 퀘스트(quest_runner.html, 퀘스트 러너) 작업 시 사�
 7. 커밋·푸시 후 `log_dev_timeline.py`로 개발 타임라인에 기록합니다(master-tower `GEMINI.md` 절차).
 
 ## 4. 함정 (실제로 막혔던 것들)
-- **이 PC에는 Node가 없습니다**: JS 검증은 브라우저로 합니다. 브라우저가 옛 스크립트를 캐시하므로, 다시 열기 전에 `fetch(url, {cache:'reload'})`로 갱신하거나 주소에 쿼리를 붙입니다.
+- **엔진 검증은 Node로**: PC에 Node v24가 있어 `node scripts/verify_quest_mastery.js`로 바로 확인합니다. 화면 확인은 브라우저로 하며, 브라우저가 옛 스크립트를 캐시하므로 다시 열기 전에 `fetch(url, {cache:'reload'})`로 갱신하거나 주소에 쿼리를 붙입니다.
 - **가디언 계측은 실제 터치만 셉니다**: `StudyActivity.recordCorrect`는 5초 안에 `event.isTrusted === true`인 입력이 있어야 정답을 셉니다. JS `.click()`으로 푼 문제는 0으로 나오는 게 정상이고, 계측을 확인하려면 실제 클릭으로 시험합니다.
 - **관리자 모드에서는 노션에 안 씁니다**: `localStorage.currentUserName`이 `아빠`/`엄마`/`어른`이면 `updateVocaMasteryProgress`가 PATCH를 건너뛰고 true를 반환합니다. 실제 쓰기 시험 전에 확인합니다.
 - **배포된 Worker는 저장소 코드보다 옛 버전입니다**:

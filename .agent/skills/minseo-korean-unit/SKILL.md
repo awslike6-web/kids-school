@@ -49,7 +49,7 @@ description: 민서(초1) 국어 단원 추가·수정 시 사용. 학교 받아
 
 ## 5. 검증 (완료 판정)
 1. 미리보기 출력에 `⚠️ [활용형] 표시가 없어` 경고가 없을 것.
-2. 5분방 빈칸 보기 확인: Node가 있으면 아래로 낱말별 보기를 출력해 엉뚱한 보기가 없는지 본다. 없으면 브라우저에서 `scripts/verify_quest_mastery.html`(전체 회귀)만 확인한다.
+2. 5분방 빈칸 보기 확인: 아래 명령으로 낱말별 보기를 출력해 엉뚱한 보기가 없는지 본다(Node 필요, PC에 v24 설치됨).
    ```
    node -e "global.localStorage={_d:{},getItem(k){return this._d[k]??null},setItem(k,v){this._d[k]=String(v)},removeItem(){}};require('./kids/subjects/quest/quest-mastery.js');const QM=globalThis.QuestMastery,d=require('./scripts/data/minseo_korean_1-2_u4.json');const it=QM.selectUnitItems(d.voca.map((v,i)=>({id:'v'+i,word:v.word,meaning:v.meaning,detailContext:v.detail,wordType:'단어',stage:d.unit,grades:['1-2'],subject:['국어'],target:['민서']})),{childName:'민서',subjectKo:'국어',unit:d.unit,semester:'1-2'});it.forEach(x=>{const f=QM.buildFillBlank(x,it,'ko',Math.random);console.log(x.word,'|',f&&f.display,'|',f&&f.options.join(' / '))})"
    ```
