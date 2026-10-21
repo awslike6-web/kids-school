@@ -139,6 +139,25 @@
             border: "#f97316",
             link: "korean_1_2_3_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/3/book1/korean_story_p1.png"
+        },
+        {
+            id: "1_2_4_1",
+            student: "minseo",
+            studentName: "민서",
+            grade: "1학년 2학기",
+            gradeCode: "1-2",
+            targetBadge: "초등 1-2",
+            unit: "4단원",
+            bookNum: "1권",
+            title: "소금을 만드는 맷돌",
+            subtitle: "시간의 순서를 나타내는 말과 따옴표 대화글 배우기",
+            desc: "시간의 순서를 나타내는 말과 따옴표 표현을 배우는 신기한 요술 맷돌 전래동화! 욕심을 부리지 않고 정직하게 사는 마음을 배워요.",
+            icon: "🧂",
+            color: "#0284c7",
+            bgGrad: "linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+            border: "#0284c7",
+            link: "korean_1_2_4_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/4/book1/korean_story_p1.png"
         }
     ];
 
