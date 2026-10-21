@@ -81,9 +81,14 @@
 </head>
 <body class="bg-background text-on-surface font-body-md antialiased min-h-screen selection:bg-primary-container selection:text-on-primary-container relative overflow-x-hidden">
 
-  <!-- 🛠️ 부모 관리자 시뮬레이터 플로팅 바 (아빠·엄마 로그인 시에만 자동 노출) -->
-  <div id="adminQuickToolbar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white px-3 py-1.5 rounded-full shadow-2xl border border-sky-400/50 flex-wrap items-center justify-center gap-1.5 text-[11px] backdrop-blur-md max-w-[96vw]">
-    <span id="adminModeLabel" class="font-bold text-sky-300 px-1">🛠️ 관리자 검수</span>
+  <!-- 🛠️ 부모 관리자 시뮬레이터 플로팅 바 (아빠·엄마 로그인 시에만 자동 노출, 평소엔 접혀 있고 라벨을 누르면 펼침) -->
+  <div id="adminQuickToolbar" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 justify-center max-w-[96vw]">
+  <details class="group bg-slate-900/95 text-white px-3 py-1.5 rounded-full open:rounded-2xl shadow-2xl border border-sky-400/50 text-[11px] backdrop-blur-md">
+    <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer select-none flex items-center justify-center gap-1 px-1">
+      <span id="adminModeLabel" class="font-bold text-sky-300">🛠️ 관리자 검수</span>
+      <span class="text-sky-300 transition-transform group-open:rotate-180" aria-hidden="true">▲</span>
+    </summary>
+    <div class="flex flex-wrap items-center justify-center gap-1.5 pt-1.5">
     <button type="button" onclick="switchLobbyUser(window.__activeLobbyUser === 'minseo' ? 'minsu' : 'minseo')" class="px-2 py-0.5 rounded-full bg-indigo-600 hover:bg-indigo-500 font-bold">🔄 자녀전환</button>
     <button type="button" onclick="openQuickUploader()" class="px-2 py-0.5 rounded-full bg-emerald-600 hover:bg-emerald-500 font-bold">📸 사진등록</button>
     <button type="button" onclick="if(typeof syncAllNotionData==='function') syncAllNotionData();" class="px-2 py-0.5 rounded-full bg-sky-600 hover:bg-sky-500 font-bold">🔄 노션동기화</button>
@@ -93,6 +98,8 @@
     <a href="minmin_system_map.html" class="px-2 py-0.5 rounded-full bg-sky-700 hover:bg-sky-600 font-bold">🗺️ 조감도</a>
     <a id="adminTowerLink" href="https://master-tower.awslike6.workers.dev/" target="_blank" rel="noopener" class="hidden px-2 py-0.5 rounded-full bg-purple-600 hover:bg-purple-500 font-bold">🏰 관제탑</a>
     <button type="button" onclick="openDailyCapModal('korean')" class="px-2 py-0.5 rounded-full bg-rose-600 hover:bg-rose-500 font-bold">🛑 한도모달</button>
+    </div>
+  </details>
   </div>
 
   <!-- ===================================================================== -->
