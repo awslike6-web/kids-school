@@ -845,7 +845,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **파일 위치**:
   - `kids/core/daily-diary.js` (하루 마음일기 모달 & 감정 스티커)
   - `kids/core/quick-uploader.js` (모바일 사진 촬영 & 퀵업로더 프론트엔드)
-  - `workers/minmin-notion-worker.js` (미디어 수신 `/api/upload-media`, 큐 조회 `/api/pending-media`)
+  - 관제탑 저장소 `master-tower/workers/minmin-notion/worker.js` (공용 Worker · 미디어 수신 `/api/upload-media`, 큐 조회 `/api/pending-media`)
   - `scripts/sync_quick_upload.py` (PC 원클릭 폰 사진 다운로드 ➔ 갤러리 최적화 ➔ Git/Notion 동기화 완결)
 - **파이프라인 2.1 아키텍처**:
   1. **스마트폰 촬영/선택**: 캔버스 1200px 경량 고화질(JPEG 82%) 압축 ➔ Cloudflare Worker `/api/upload-media` 단 1회 전송.

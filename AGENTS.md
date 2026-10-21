@@ -23,5 +23,5 @@
 - **한글 출력**: Python으로 한글을 출력할 때는 `python -X utf8` 또는 `PYTHONIOENCODING=utf-8`을 붙입니다.
 - **노션 Worker(`minmin-notion.awslike6.workers.dev`) 호출**:
   - Python에서 부를 때는 `User-Agent` 헤더가 없으면 403이 납니다.
-  - 배포는 GitHub와 자동 연동되지 않습니다. `workers/minmin-notion-worker.js`를 Cloudflare 대시보드 편집기에 붙여 넣고 Deploy 하며, `/health`의 `version`으로 반영을 확인합니다(2026-10-20 기준 저장소와 같은 v4.3). 엣지 캐시 우회용 `Pragma` 헤더는 CORS에서 막히고, `?force=true`는 노션까지 넘어가 400이 납니다.
+  - 소스는 2026-10-21부터 관제탑 저장소 `master-tower/workers/minmin-notion/`에만 있습니다(이 저장소에는 사본 없음). 배포는 관제탑 루트에서 `npx wrangler deploy -c workers/minmin-notion/wrangler.toml`로 하고, `/health`의 `version`으로 반영을 확인합니다. 엣지 캐시 우회용 `Pragma` 헤더는 CORS에서 막히고, `?force=true`는 노션까지 넘어가 400이 납니다.
 - **운영 DB 보호**: 화면 검증 중 노션 쓰기(`PATCH/POST /v1/pages`)는 페이지 안에서 `fetch`를 가로채 막습니다. 실제 쓰기 시험은 사용자 승인 후 1건만 하고, 원래 값으로 되돌린 뒤 다시 읽어 확인합니다.

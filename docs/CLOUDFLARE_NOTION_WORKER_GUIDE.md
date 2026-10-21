@@ -4,16 +4,15 @@
 
 ---
 
-## 🚀 1. Cloudflare Dashboard에서 1분 만에 갱신 배포하기
+## 🚀 1. 소스 위치와 배포 (2026-10-21 관제탑 저장소로 이전)
 
-1. **[Cloudflare 대시보드](https://dash.cloudflare.com/)**에 로그인합니다.
-2. 좌측 메뉴에서 **`Compute (Workers & Pages)`** 클릭.
-3. 목록에서 기존 **`minmin-notion`** Worker를 클릭합니다.
-4. 우측 상단의 **`Edit code`** 버튼을 클릭합니다.
-5. 에디터 창의 기존 코드를 모두 지웁니다.
-6. 로컬 레포지토리의 [`kids-school-main/workers/minmin-notion-worker.js`](file:///g:/master-tower/kids-school-main/workers/minmin-notion-worker.js) 전체 내용을 복사하여 붙여넣습니다.
-7. 우측 상단의 **`Deploy`** (또는 `Save and Deploy`) 버튼을 클릭합니다.
-8. **배포 완료!** 즉시 전 세계 300+개 엣지 로케이션에 고속 캐싱 & 미디어 큐 엔진이 가동됩니다.
+- `minmin-notion`은 공부방·관제탑·보육비서가 함께 쓰는 전사 공용 서버라서, 소스는 이 저장소가 아니라 관제탑 저장소 [`master-tower/workers/minmin-notion/`](https://github.com/awslike6-web/master-tower/tree/main/workers/minmin-notion)에 한 벌만 둡니다.
+- 대시보드 편집기에 코드를 붙여 넣는 배포는 더 이상 하지 않습니다. 관제탑 루트에서 배포합니다:
+  ```bash
+  node --test workers/minmin-notion/*.test.js
+  npx wrangler deploy -c workers/minmin-notion/wrangler.toml
+  ```
+- 배포 후 `/health`의 `version`으로 반영을 확인합니다. 비밀값과 대시보드 변수는 배포해도 유지됩니다(`keep_vars = true`).
 
 ---
 
