@@ -95,7 +95,8 @@
     // 문제 읽기 대본 (scripts/build_mini_reading_audio.py question_script와 같아야 mp3가 맞는다)
     function questionScript(q) {
         const who = q.speaker && q.speaker.line ? `${q.speaker.name || ''}의 말. ${q.speaker.line}. ` : '';
-        return `${who}${q.question} ${q.options.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`;
+        // 차례 보기의 화살표(→)는 소리로 '그다음'이라 읽는다
+        return `${who}${q.question} ${q.options.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`.replace(/\s*→\s*/g, ', 그다음 ');
     }
 
     function autoBtnHtml() {
@@ -221,7 +222,9 @@
         const qs = passage.questions;
         if (qIdx >= qs.length) return renderDone();
         const q = qs[qIdx];
-        const step = STEP_INFO[q.step] || STEP_INFO[Math.min(qIdx + 1, 3)];
+        const base = STEP_INFO[q.step] || STEP_INFO[Math.min(qIdx + 1, 3)];
+        // 단원 목표에 맞춰 문항별로 단계 이름을 바꿀 수 있다 (예: 3단계 '일의 차례', 1단계 '문장 부호')
+        const step = { icon: q.icon || base.icon, label: q.label || base.label };
         answered = false;
         triedWrong = false;
 

@@ -44,7 +44,7 @@ def question_script(q: dict) -> str:
     sp = q.get("speaker") or {}
     who = f"{sp.get('name') or ''}의 말. {sp['line']}. " if sp.get("line") else ""
     opts = " ".join(f"{i + 1}번, {o}." for i, o in enumerate(q["options"]))
-    return f"{who}{q['question']} {opts}"
+    return re.sub(r"\s*→\s*", ", 그다음 ", f"{who}{q['question']} {opts}")  # 차례 보기의 화살표는 '그다음'으로 읽음
 
 
 def clip_texts(passage: dict) -> list[str]:
