@@ -260,7 +260,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `initializeKoreanRoom()` | 자녀 프로필 동기화, 테마 설정, 0.01초 어휘/독해 백그라운드 선캐싱 |
+  | `initializeKoreanRoom()` | 자녀 프로필 동기화(`?user=` 우선), 테마 설정, 0.01초 어휘/독해 백그라운드 선캐싱. 관리자(`currentUserName` 아빠·엄마)는 자녀 화면(`currentUser`·`currentChild`)만 바꾸고 이름은 유지 (2026-10-21, 로비 복귀 시 아이로 로그인되던 버그 수정) |
   | `openMissionView(type)` | 5대 미션 오버레이 열기 및 라우팅 (`storybook`, `dictation`, `voca`, `reading`, `sentence`) |
   | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
   | `renderSectionUI()` | 10문제 완료 즉각 학습일지 자동 전송 및 서브모듈 렌더러 호출 |

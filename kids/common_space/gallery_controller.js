@@ -46,13 +46,15 @@ function applyUserTheme() {
 }
 
 function toggleProfileManually() {
+    // 관리자(아빠·엄마)는 자녀 화면만 바꾸고 로그인 이름은 유지 (로비 관리자 바·관리자 쓰기 차단 보존)
+    const isAdmin = currentUserName === '아빠' || currentUserName === '엄마';
     if (currentUser === 'son') {
         currentUser = 'daughter';
-        currentUserName = '민서';
+        if (!isAdmin) currentUserName = '민서';
         localStorage.setItem('currentChild', 'minseo');
     } else {
         currentUser = 'son';
-        currentUserName = '민수';
+        if (!isAdmin) currentUserName = '민수';
         localStorage.setItem('currentChild', 'minsu');
     }
     window.currentUserName = currentUserName;

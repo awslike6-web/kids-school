@@ -76,10 +76,12 @@ window.setKoreanVocaMode = function(mode) {
 
 function toggleProfileManually() {
     if (currentProfile === 'son') {
-        currentProfile = 'daughter'; currentUserName = '민서'; currentTheme = 'theme--slime';
+        currentProfile = 'daughter'; currentTheme = 'theme--slime';
     } else {
-        currentProfile = 'son'; currentUserName = '민수'; currentTheme = 'theme--minecraft';
+        currentProfile = 'son'; currentTheme = 'theme--minecraft';
     }
+    // 관리자(아빠·엄마)는 자녀 화면만 바꾸고 로그인 이름은 유지 (관리자 쓰기 차단·로비 관리자 바 보존)
+    if (!isAdmin) currentUserName = currentProfile === 'daughter' ? '민서' : '민수';
     localStorage.setItem('currentUser', currentProfile);
     localStorage.setItem('currentUserName', currentUserName);
     localStorage.setItem('currentTheme', currentTheme);
@@ -92,19 +94,22 @@ function initializeKoreanRoom() {
     window.roomStartTime = window.roomStartTime || new Date(); // ⏱️ 학습 시작 시간 확정
 
     // 💡 URL 파라미터(?user=minseo 등) 기반 활성 자녀 우선 동기화
+    //    관리자(아빠·엄마)는 자녀 화면만 바꾸고 로그인 이름(currentUserName)은 덮어쓰지 않는다.
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const userParam = urlParams.get('user');
         if (userParam === 'minseo' || userParam === 'daughter') {
-            currentProfile = 'daughter'; currentUserName = '민서'; currentTheme = 'theme--slime';
+            currentProfile = 'daughter'; currentTheme = 'theme--slime';
+            if (!isAdmin) currentUserName = '민서';
             localStorage.setItem('currentUser', 'daughter');
-            localStorage.setItem('currentUserName', '민서');
+            localStorage.setItem('currentUserName', currentUserName);
             localStorage.setItem('currentTheme', 'theme--slime');
             localStorage.setItem('currentChild', 'minseo');
         } else if (userParam === 'minsu' || userParam === 'son') {
-            currentProfile = 'son'; currentUserName = '민수'; currentTheme = 'theme--minecraft';
+            currentProfile = 'son'; currentTheme = 'theme--minecraft';
+            if (!isAdmin) currentUserName = '민수';
             localStorage.setItem('currentUser', 'son');
-            localStorage.setItem('currentUserName', '민수');
+            localStorage.setItem('currentUserName', currentUserName);
             localStorage.setItem('currentTheme', 'theme--minecraft');
             localStorage.setItem('currentChild', 'minsu');
         }
