@@ -120,6 +120,25 @@
             border: "#eab308",
             link: "korean_1_2_2_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/2/book1/korean_story_p1.png"
+        },
+        {
+            id: "1_2_3_1",
+            student: "minseo",
+            studentName: "민서",
+            grade: "1학년 2학기",
+            gradeCode: "1-2",
+            targetBadge: "초등 1-2",
+            unit: "3단원",
+            bookNum: "1권",
+            title: "토리의 특별한 그림일기 발표회",
+            subtitle: "생각과 느낌을 담은 그림일기 쓰기와 바른 자세로 발표하기",
+            desc: "아기 다람쥐 토리와 함께 배우는 그림일기 쓰기 비법! 기억에 남는 일을 골라 날짜와 그림, 솔직한 마음을 적고 씩씩하게 발표해 봐요.",
+            icon: "🐿️",
+            color: "#f97316",
+            bgGrad: "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(30, 41, 59, 0.9) 100%)",
+            border: "#f97316",
+            link: "korean_1_2_3_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/3/book1/korean_story_p1.png"
         }
     ];
 
