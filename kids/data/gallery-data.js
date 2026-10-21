@@ -3,6 +3,30 @@
 
 const DEFAULT_GALLERY_DATA = [
   {
+    "id": "art_minseo_KakaoTalk_20261021_152143970_01",
+    "author": "민서",
+    "authorKey": "daughter",
+    "title": "2026 전교생 가을 나눔 장터 (민서)",
+    "category": "그림/미술",
+    "categoryIcon": "🎨",
+    "date": "2026-10-21",
+    "grade": "1학년 2학기",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_KakaoTalk_20261021_152143970_01.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_KakaoTalk_20261021_152143970_01.jpg"
+    ],
+    "hasCutout": false,
+    "artistNote": "2026년 가을 나눔 장터에서 돗자리를 펴고 인형들을 판매하며 현명한 소비와 경제를 배운 뜻깊은 하루! (전체 학년 합동 행사) 🧸🧺🍂",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": []
+  },
+  {
     "id": "art_minsu_20261020_123016",
     "author": "민수",
     "authorKey": "son",
@@ -17,6 +41,30 @@ const DEFAULT_GALLERY_DATA = [
     ],
     "hasCutout": false,
     "artistNote": "알록달록 딸기 생크림과 마카롱, 진한 초콜릿과 와플 쿠키를 정성껏 꾸며 완성한 세상에서 가장 달콤한 입체 조각 케이크 모형이에요! 🍰🍫",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": []
+  },
+  {
+    "id": "art_minseo_20261020_123112",
+    "author": "민서",
+    "authorKey": "daughter",
+    "title": "바다 속 세상 미니 서랍장",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
+    "date": "2026-10-20",
+    "grade": "1학년 2학기",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261020_123112.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261020_123112.jpg"
+    ],
+    "hasCutout": false,
+    "artistNote": "바다 그림을 바탕으로 알록달록 무지개와 파도, 클레이 물고기, 꽃게, 문어로 입체감 있게 꾸민 나만의 소중한 미니 서랍장이에요! 🌊🦀🐙",
     "likes": 0,
     "stickers": {
       "heart": 0,

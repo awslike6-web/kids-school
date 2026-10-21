@@ -4,6 +4,25 @@
 
 const DEFAULT_SPECIAL_DAYS_DATA = [
   {
+    id: "evt_school_flea_market_20261021",
+    author: "민서",
+    category: "학교생활/행사",
+    categoryIcon: "🎒",
+    title: "🎒 전교생이 함께한 2026 가을 나눔 장터!",
+    date: "2026-10-21",
+    desc: "전체 학년 친구들과 함께 즐거운 가을 나눔 장터를 열었습니다! 민서도 체육관에 돗자리를 펴고 귀여운 인형들과 물건들을 가지런히 진열하여 판매해 보았어요. 친구들과 함께 자신의 물건을 팔기 위해 열심히 노력하고, 현명한 소비를 위해 어떤 물건을 사야 할지 많이 고민하며 물건을 구입하는 알차고 뜻깊은 경제 배움의 날이었습니다! 🧸🧺🍂 (※ 민수 사진도 추후 추가 예정)",
+    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_KakaoTalk_20261021_152143970_01.jpg",
+    galleryImages: [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_KakaoTalk_20261021_152143970_01.jpg"
+    ],
+    videoUrl: "",
+    likes: 12,
+    stickers: { heart: 8, thumb: 6, star: 5, trophy: 3 },
+    comments: [
+      { author: "아빠", text: "스스로 돗자리 펴고 물건도 팔아보고 경제도 배우니 정말 대견하다 민서야! 👍", date: "2026-10-21" }
+    ]
+  },
+  {
     id: "evt_family_20261018_opening",
     author: "공동",
     category: "가족/생일파티",
