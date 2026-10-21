@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏰 민민 시스템 아키텍처 & 파이프라인 조감도</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      overflow-x: hidden;
+    }
+    /* 커스텀 스크롤바 */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+    /* 노드 카드 트랜지션 및 하이라이트 */
+    .node-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 10;
+    }
+    .node-card:hover {
+      transform: translateY(-2px);
+    }
+    .node-card.dimmed {
+      opacity: 0.2;
+      filter: grayscale(70%);
+    }
+    .node-card.highlighted {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4), 0 8px 20px -4px rgba(0, 0, 0, 0.6);
+      background-color: #1e293b !important;
+    }
+    .node-card.selected-main {
+      border-color: #f59e0b !important;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.5), 0 10px 25px -4px rgba(0, 0, 0, 0.7);
+      background-color: #1e293b !important;
+    }
+
+    /* SVG 연결선 레이어 */
+    #svg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .conn-line {
+      fill: none;
+      stroke: #334155;
+      stroke-width: 1.8;
+      opacity: 0.45;
+      transition: stroke 0.2s, stroke-width 0.2s, opacity 0.2s;
+    }
+    .conn-line.dimmed {
+      opacity: 0.06;
+    }
+    .conn-line.active-line {
+      stroke: #38bdf8;
+      stroke-width: 3;
+      opacity: 0.95;
+      stroke-dasharray: 8 4;
+      animation: dashFlow 0.8s linear infinite;
+    }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -12; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- 상단 헤더 -->
+  <!-- 모바일에서는 탭이 여러 줄이라 화면을 가리지 않도록 md 이상에서만 상단 고정 -->
+  <header class="md:sticky md:top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-6 py-4">
+    <div class="max-w-[1800px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">🏰</span>
+        <div>
+          <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            민민 시스템 아키텍처 & 파이프라인 조감도
+            <span id="sync-badge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              SSOT 기준: -
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400">
+            카드를 클릭하면 연결된 [입력 스크립트 ➔ AI 스킬 ➔ JS/CSS 모듈 ➔ 워커/캐시 ➔ 노션 DB] 배선이 한눈에 표시됩니다.
+          </p>
+        </div>
+      </div>
+
+      <!-- 메인 뷰 전환 탭 -->
+      <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-lg border border-slate-700">
+        <button onclick="switchMainView('map')" id="view-btn-map" class="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-sky-500 text-slate-950 transition">
+          🕸️ 5단계 파이프라인 맵
+        </button>
+        <button onclick="switchMainView('trouble')" id="view-btn-trouble" class="px-3.5 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition">
+          🚨 피드백 & 버그 라우터
+        </button>
+        <button onclick="switchMainView('schema')" id="view-btn-schema" class="px-3.5 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition">
+          🗄️ 노션 DB & 캐시 규칙 사전
+        </button>
+      </div>
+    </div>
+
+    <!-- 필터 바 (파이프라인 맵 전용) -->
+    <div id="map-filter-bar" class="max-w-[1800px] mx-auto mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+      <!-- 도메인 탭은 SYSTEM_MAP_DATA.domains로 renderDomainTabs()가 그립니다 -->
+      <div class="flex flex-wrap items-center gap-1.5" id="domain-tabs"></div>
+
+      <div class="flex items-center gap-2">
+        <input
+          type="text"
+          id="search-input"
+          oninput="handleSearch(this.value)"
+          placeholder="파일명, 노션 속성, 키워드 검색..."
+          class="bg-slate-800 border border-slate-700 text-xs text-white rounded-lg px-3 py-1.5 w-60 focus:outline-none focus:border-sky-400"
+        />
+        <button onclick="resetSelection()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">
+          선택 초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 1: 5단계 파이프라인 인터랙티브 맵 + 우측 상세 패널 -->
+  <!-- ========================================================= -->
+  <main id="view-map" class="flex-1 max-w-[1800px] w-full mx-auto px-6 py-6 flex flex-col xl:flex-row gap-6">
+    
+    <!-- 좌측: 5열 파이프라인 캔버스 -->
+    <div id="canvas-wrapper" class="flex-1 relative bg-slate-900/50 border border-slate-800 rounded-2xl p-5 overflow-x-auto">
+      <svg id="svg-canvas"></svg>
+
+      <div class="grid grid-cols-5 gap-5 min-w-[1150px]" id="pipeline-grid">
+        <!-- 1열 -->
+        <div class="flex flex-col gap-3">
+          <div class="pb-2 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">1. 입력 원천 & 스크립트</span>
+            <span class="text-[11px] text-slate-500">CLI / Seed</span>
+          </div>
+          <div id="col-source" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- 2열 -->
+        <div class="flex flex-col gap-3">
+          <div class="pb-2 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">2. 로컬 AI 스킬 & 명세</span>
+            <span class="text-[11px] text-slate-500">.agent/skills</span>
+          </div>
+          <div id="col-skill" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- 3열 -->
+        <div class="flex flex-col gap-3">
+          <div class="pb-2 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">3. 프론트 모듈 & 스타일</span>
+            <span class="text-[11px] text-slate-500">JS / CSS / HTML</span>
+          </div>
+          <div id="col-module" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- 4열 -->
+        <div class="flex flex-col gap-3">
+          <div class="pb-2 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">4. 파이프라인 & 캐시</span>
+            <span class="text-[11px] text-slate-500">Worker / Cache / Audio</span>
+          </div>
+          <div id="col-pipe" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- 5열 -->
+        <div class="flex flex-col gap-3">
+          <div class="pb-2 border-b border-slate-800 flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-400 uppercase tracking-wider">5. 노션 마스터 DB</span>
+            <span class="text-[11px] text-slate-500">Notion SSOT</span>
+          </div>
+          <div id="col-db" class="flex flex-col gap-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 우측: 선택한 노드 상세 인스펙터 -->
+    <aside class="w-full xl:w-96 shrink-0 bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between h-fit sticky top-36">
+      <div id="inspector-content">
+        <div class="text-center py-12 text-slate-400">
+          <div class="text-4xl mb-3">👆</div>
+          <p class="text-sm font-semibold text-slate-200">왼쪽 맵에서 카드를 클릭해 보세요</p>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            해당 파일이나 스킬이 어떤 모듈을 부르고,<br/>
+            노션 DB의 어느 속성을 건드리는지,<br/>
+            절대 건드리면 안 되는 가드레일이 무엇인지 표시됩니다.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 2: 피드백 & 버그 라우터 (트러블슈팅 치트시트) -->
+  <!-- ========================================================= -->
+  <section id="view-trouble" class="hidden flex-1 max-w-[1800px] w-full mx-auto px-6 py-6">
+    <div class="mb-5">
+      <h2 class="text-base font-bold text-white">🚨 가족 피드백 & 버그 라우팅 치트시트</h2>
+      <p class="text-xs text-slate-400 mt-1">
+        아이들이나 아내에게 피드백이 왔을 때 코드를 직접 뒤지지 마시고, 증상에 맞는 카드를 찾아 <strong>[에이전트 지시문 복사]</strong> 버튼을 눌러 안티그래비티나 클로드 코드에 붙여넣으세요.
+      </p>
+    </div>
+    <div id="trouble-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 3: 노션 DB & 로컬스토리지 스키마 사전 -->
+  <!-- ========================================================= -->
+  <section id="view-schema" class="hidden flex-1 max-w-[1800px] w-full mx-auto px-6 py-6 space-y-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <h2 class="text-base font-bold text-white mb-1">🗄️ 노션 마스터 DB 핵심 속성 & 분리 규칙</h2>
+      <p class="text-xs text-slate-400 mb-4">헷갈리기 쉬운 노션 DB 태그 분리 원칙과 프론트엔드 모듈 매핑표입니다.</p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-slate-700 text-slate-300 bg-slate-800/60">
+              <th class="p-3">노션 DB명</th>
+              <th class="p-3">데이터 구분 / 트랙</th>
+              <th class="p-3">필수 속성 (Properties)</th>
+              <th class="p-3">사용하는 곳 (모듈)</th>
+              <th class="p-3">⚠️ 절대 주의 규칙 (Guardrail)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-300">
+            <tr>
+              <td class="p-3 font-bold text-rose-400">VOCA_DB</td>
+              <td class="p-3">학교 받아쓰기 문장 (회차)</td>
+              <td class="p-3"><code class="text-amber-300">과목=받아쓰기</code>, <code class="text-amber-300">단원=N회 (단원명)</code></td>
+              <td class="p-3">국어방 받아쓰기 훈련소, 민서 3·3·3</td>
+              <td class="p-3 text-rose-300">절대 <code>국어</code> 태그를 함께 붙이지 않음 (붙이면 5분방에 통문장이 출제됨)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-rose-400">VOCA_DB</td>
+              <td class="p-3">민서 국어 정제 어휘</td>
+              <td class="p-3"><code class="text-amber-300">과목=국어</code>, <code class="text-amber-300">학년=1-2</code>, <code class="text-amber-300">학생=민서</code>, <code class="text-amber-300">어휘유형=단어</code></td>
+              <td class="p-3">5분방 3·3·3 (<code>quest-mastery.js</code>), 국어 용어방</td>
+              <td class="p-3 text-rose-300">상세설명 예문에 <code>[활용형]</code> 표제어 첫 글자 일치 필수 (Lv.2 빈칸용)</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-rose-400">VOCA_DB</td>
+              <td class="p-3">전 과목 3·3·3 마스터리</td>
+              <td class="p-3"><code class="text-amber-300">숙련도</code> (JSON/텍스트), <code class="text-amber-300">달성</code> (체크박스), <code class="text-amber-300">시험범위</code> (체크박스)</td>
+              <td class="p-3"><code>quest-mastery.js</code>, <code>quest-runner.js</code></td>
+              <td class="p-3 text-rose-300">count 6 도달 시 당일 은메달 상한, 다음날부터 Lv.3(6~8) ➔ 9 도달 시 <code>달성=true</code></td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-rose-400">LIBRARY_DB</td>
+              <td class="p-3">🌱 민서 미니 독해</td>
+              <td class="p-3"><code class="text-amber-300">트랙=🌱 민서 미니 독해</code>, <code class="text-amber-300">문제데이터</code> (Step 1·2·3 JSON), <code class="text-amber-300">출처구분</code></td>
+              <td class="p-3"><code>korean_mini_reading.js</code>, <code>build_mini_reading_audio.py</code></td>
+              <td class="p-3 text-rose-300">문장 줄바꿈 = 화면 한 줄 = SHA-1 mp3 1개. 노션에서 지문 수정 시 오디오 스크립트 재실행 필수</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-bold text-rose-400">CURRICULUM_DB</td>
+              <td class="p-3">🔬 과학 실험실 & 보고서</td>
+              <td class="p-3"><code class="text-amber-300">3e8a2711...</code> 단원 레코드 및 탐구 퀴즈</td>
+              <td class="p-3"><code>science_report.js</code>, <code>science_lab_data.js</code></td>
+              <td class="p-3 text-rose-300">단순 단어 빈칸 금지. 서술형 문장 조립 빌더(<code>rubric</code> + <code>templateHtml</code>) 강제</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <h2 class="text-base font-bold text-white mb-1">⚡ 로컬 스토리지(localStorage) & 캐시 동작 원리</h2>
+      <p class="text-xs text-slate-400 mb-4">동기화가 안 되는 것처럼 보일 때 가장 먼저 확인해야 할 브라우저 내부 상태값입니다.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-emerald-400 mb-1">1. 노션 Worker 5분 캐시 & 10분 로컬 보호</div>
+          <p class="text-slate-300 leading-relaxed">
+            Cloudflare Worker는 동일한 쿼리 본문을 최대 5분간 엣지 캐시합니다. 이를 보완하기 위해 <code>quest-mastery.js</code>는 <strong>아직 안 보낸 로컬 진도</strong>와 <strong>10분 안에 보낸 로컬 진도</strong>를 노션 값보다 우선 보호합니다.
+          </p>
+        </div>
+        <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-amber-400 mb-1">2. 관리자(아빠/엄마) 모드 쓰기 차단</div>
+          <p class="text-slate-300 leading-relaxed">
+            <code>localStorage.currentUserName</code>이 <code>아빠</code>, <code>엄마</code>, <code>어른</code>일 때는 문제를 풀어도 노션 DB를 오염시키지 않기 위해 <code>updateVocaMasteryProgress</code>가 실제 PATCH를 건너뛰고 성공(true) 처리합니다.
+          </p>
+        </div>
+        <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-4">
+          <div class="font-bold text-sky-400 mb-1">3. 과학 실험실 1회성 보석 잠금 키</div>
+          <p class="text-slate-300 leading-relaxed">
+            <code>localStorage</code>의 <code>minmin_sci_u{N}_{labId}_cleared</code> 키로 실험실 보석 중복 적립을 차단하고 <code>science.html</code> 대기실 칩에 ✅ 배지를 표시합니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 데이터(외부 파일) 및 렌더링 스크립트 -->
+  <!-- ========================================================= -->
+  <script src="scripts/data/system_map_data.js"></script>
+  <script>
+    // 데이터는 scripts/data/system_map_data.js (window.SYSTEM_MAP_DATA)에서 불러옵니다.
+    // 기준일·스킬 요약은 python scripts/sync_agent_skills.py 실행 시 자동 갱신됩니다.
+
+    // 상태 변수
+    let currentDomain = "all";
+    let selectedNodeId = null;
+    let searchQuery = "";
+
+    // 초기 렌더링
+    window.addEventListener("DOMContentLoaded", () => {
+      renderSyncBadge();
+      renderDomainTabs();
+      renderPipelineColumns();
+      renderTroubleCards();
+      setTimeout(drawConnections, 80);
+      window.addEventListener("resize", drawConnections);
+    });
+
+    // 상단 기준일 배지 (CORE_CATALOG.md 변경 시각 기준, 자동 갱신 값)
+    function renderSyncBadge() {
+      const badge = document.getElementById("sync-badge");
+      const { lastUpdated, catalogUpdatedAt } = window.SYSTEM_MAP_DATA;
+      badge.textContent = `SSOT 기준: ${lastUpdated || "미동기화"}`;
+      badge.title = catalogUpdatedAt
+        ? `CORE_CATALOG.md 변경 시각: ${catalogUpdatedAt}`
+        : "python scripts/sync_agent_skills.py를 실행하면 기준일이 채워집니다";
+    }
+
+    // 도메인 필터 탭 (데이터의 domains 목록 기준)
+    function renderDomainTabs() {
+      const tabs = [{ key: "all", label: "전체 보기" }, ...window.SYSTEM_MAP_DATA.domains];
+      document.getElementById("domain-tabs").innerHTML = tabs.map(d => `
+        <button onclick="filterDomain('${d.key}')" data-domain="${d.key}" class="domain-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700">
+          ${d.label}
+        </button>
+      `).join("");
+      highlightDomainTab(currentDomain);
+    }
+
+    function highlightDomainTab(domain) {
+      document.querySelectorAll(".domain-btn").forEach(btn => {
+        if (btn.dataset.domain === domain) {
+          btn.className = "domain-btn px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-900";
+        } else {
+          btn.className = "domain-btn px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700";
+        }
+      });
+    }
+
+    // 메인 탭 전환
+    function switchMainView(view) {
+      const views = ["map", "trouble", "schema"];
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.toggle("hidden", v !== view);
+        const btn = document.getElementById(`view-btn-${v}`);
+        if (v === view) {
+          btn.className = "px-3.5 py-1.5 rounded-md text-xs font-semibold bg-sky-500 text-slate-950 transition";
+        } else {
+          btn.className = "px-3.5 py-1.5 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition";
+        }
+      });
+      document.getElementById("map-filter-bar").classList.toggle("hidden", view !== "map");
+      if (view === "map") setTimeout(drawConnections, 50);
+    }
+
+    // 5열 노드 카드 렌더링
+    function renderPipelineColumns() {
+      const cols = ["source", "skill", "module", "pipe", "db"];
+      cols.forEach(c => {
+        document.getElementById(`col-${c}`).innerHTML = "";
+      });
+
+      const badgeColors = {
+        source: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+        skill: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+        module: "bg-sky-500/20 text-sky-300 border-sky-500/30",
+        pipe: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+        db: "bg-rose-500/20 text-rose-300 border-rose-500/30"
+      };
+
+      window.SYSTEM_MAP_DATA.nodes.forEach(node => {
+        // 도메인 및 검색어 필터 체크
+        const matchDomain = currentDomain === "all" || node.domain.includes(currentDomain);
+        const q = searchQuery.trim().toLowerCase();
+        const matchSearch = !q ||
+          node.title.toLowerCase().includes(q) ||
+          node.path.toLowerCase().includes(q) ||
+          node.summary.toLowerCase().includes(q);
+
+        if (!matchDomain || !matchSearch) return;
+
+        const card = document.createElement("div");
+        card.id = `node-${node.id}`;
+        card.dataset.nodeId = node.id;
+        card.className = "node-card cursor-pointer bg-slate-800/90 hover:bg-slate-800 border border-slate-700 rounded-xl p-3.5 shadow-sm";
+        card.onclick = () => selectNode(node.id);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded border ${badgeColors[node.col]}">
+              ${node.badge}
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono truncate max-w-[110px]" title="${node.path}">
+              ${node.path.split('/').pop()}
+            </span>
+          </div>
+          <h3 class="text-xs font-bold text-white leading-snug mb-1">${node.title}</h3>
+          <p class="text-[11px] text-slate-300 leading-relaxed line-clamp-2">${node.summary}</p>
+        `;
+
+        document.getElementById(`col-${node.col}`).appendChild(card);
+      });
+    }
+
+    // SVG 베지어 곡선 그리기
+    function drawConnections() {
+      const svg = document.getElementById("svg-canvas");
+      const wrapper = document.getElementById("canvas-wrapper");
+      if (!svg || !wrapper) return;
+
+      svg.innerHTML = "";
+      const wrapperRect = wrapper.getBoundingClientRect();
+      svg.setAttribute("width", wrapper.scrollWidth);
+      svg.setAttribute("height", wrapper.scrollHeight);
+
+      // 선택된 노드가 있을 때 연결된 간선 파악
+      const connectedSet = selectedNodeId ? getConnectedNodes(selectedNodeId) : null;
+
+      window.SYSTEM_MAP_DATA.edges.forEach(([fromId, toId]) => {
+        const fromEl = document.getElementById(`node-${fromId}`);
+        const toEl = document.getElementById(`node-${toId}`);
+        if (!fromEl || !toEl) return;
+
+        const r1 = fromEl.getBoundingClientRect();
+        const r2 = toEl.getBoundingClientRect();
+
+        const x1 = r1.right - wrapperRect.left + wrapper.scrollLeft;
+        const y1 = r1.top + r1.height / 2 - wrapperRect.top + wrapper.scrollTop;
+        const x2 = r2.left - wrapperRect.left + wrapper.scrollLeft;
+        const y2 = r2.top + r2.height / 2 - wrapperRect.top + wrapper.scrollTop;
+
+        const dx = Math.abs(x2 - x1) * 0.45;
+        const pathData = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+
+        let cls = "conn-line";
+        if (connectedSet) {
+          if (connectedSet.has(fromId) && connectedSet.has(toId)) {
+            cls += " active-line";
+          } else {
+            cls += " dimmed";
+          }
+        }
+        path.setAttribute("class", cls);
+        svg.appendChild(path);
+      });
+    }
+
+    // 특정 노드와 직·간접(상류/하류)으로 연결된 노드 집합 구하기
+    function getConnectedNodes(rootId) {
+      const visited = new Set([rootId]);
+      const edges = window.SYSTEM_MAP_DATA.edges;
+
+      // 상류(Upstream) 역추적
+      let queueUp = [rootId];
+      while (queueUp.length > 0) {
+        const curr = queueUp.shift();
+        edges.forEach(([from, to]) => {
+          if (to === curr && !visited.has(from)) {
+            visited.add(from);
+            queueUp.push(from);
+          }
+        });
+      }
+
+      // 하류(Downstream) 추적
+      let queueDown = [rootId];
+      while (queueDown.length > 0) {
+        const curr = queueDown.shift();
+        edges.forEach(([from, to]) => {
+          if (from === curr && !visited.has(to)) {
+            visited.add(to);
+            queueDown.push(to);
+          }
+        });
+      }
+      return visited;
+    }
+
+    // 노드 클릭 시 하이라이트 및 우측 상세 패널 업데이트
+    function selectNode(nodeId) {
+      if (selectedNodeId === nodeId) {
+        resetSelection();
+        return;
+      }
+      selectedNodeId = nodeId;
+      const connected = getConnectedNodes(nodeId);
+
+      document.querySelectorAll(".node-card").forEach(card => {
+        const id = card.dataset.nodeId;
+        card.classList.remove("selected-main", "highlighted", "dimmed");
+        if (id === nodeId) {
+          card.classList.add("selected-main");
+        } else if (connected.has(id)) {
+          card.classList.add("highlighted");
+        } else {
+          card.classList.add("dimmed");
+        }
+      });
+
+      drawConnections();
+      renderInspector(nodeId);
+    }
+
+    function resetSelection() {
+      selectedNodeId = null;
+      document.querySelectorAll(".node-card").forEach(card => {
+        card.classList.remove("selected-main", "highlighted", "dimmed");
+      });
+      drawConnections();
+      document.getElementById("inspector-content").innerHTML = `
+        <div class="text-center py-12 text-slate-400">
+          <div class="text-4xl mb-3">👆</div>
+          <p class="text-sm font-semibold text-slate-200">왼쪽 맵에서 카드를 클릭해 보세요</p>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            해당 파일이나 스킬이 어떤 모듈을 부르고,<br/>
+            노션 DB의 어느 속성을 건드리는지,<br/>
+            절대 건드리면 안 되는 가드레일이 무엇인지 표시됩니다.
+          </p>
+        </div>
+      `;
+    }
+
+    // 우측 상세 인스펙터 렌더링
+    function renderInspector(nodeId) {
+      const node = window.SYSTEM_MAP_DATA.nodes.find(n => n.id === nodeId);
+      if (!node) return;
+
+      const edges = window.SYSTEM_MAP_DATA.edges;
+      const upstream = edges.filter(([_, to]) => to === nodeId).map(([from]) => window.SYSTEM_MAP_DATA.nodes.find(n => n.id === from)).filter(Boolean);
+      const downstream = edges.filter(([from]) => from === nodeId).map(([_, to]) => window.SYSTEM_MAP_DATA.nodes.find(n => n.id === to)).filter(Boolean);
+
+      const container = document.getElementById("inspector-content");
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              ${node.badge}
+            </span>
+            <h2 class="text-base font-bold text-white mt-2">${node.title}</h2>
+            <p class="text-xs font-mono text-sky-400 mt-0.5 break-all bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-700">
+              📁 ${node.path}
+            </p>
+          </div>
+
+          <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-3.5">
+            <div class="text-xs font-bold text-slate-200 mb-1">🎯 핵심 역할</div>
+            <p class="text-xs text-slate-300 leading-relaxed">${node.summary}</p>
+          </div>
+
+          <div class="bg-rose-950/30 border border-rose-500/30 rounded-xl p-3.5">
+            <div class="text-xs font-bold text-rose-300 mb-2">⚠️ 핵심 가드레일 & 함정 (건드리면 안 되는 규칙)</div>
+            <ul class="space-y-1.5 text-xs text-rose-200/90 list-disc pl-4 leading-relaxed">
+              ${node.guardrails.map(g => `<li>${g}</li>`).join("")}
+            </ul>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 text-xs">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-3">
+              <div class="font-bold text-slate-300 mb-1.5">⬅️ 이전 단계 (Upstream)</div>
+              ${upstream.length ? upstream.map(u => `
+                <button onclick="selectNode('${u.id}')" class="block w-full text-left text-[11px] text-sky-300 hover:underline py-0.5 truncate">
+                  • ${u.title}
+                </button>
+              `).join("") : `<span class="text-[11px] text-slate-500">시작점 (원천 노드)</span>`}
+            </div>
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-3">
+              <div class="font-bold text-slate-300 mb-1.5">➡️ 다음 단계 (Downstream)</div>
+              ${downstream.length ? downstream.map(d => `
+                <button onclick="selectNode('${d.id}')" class="block w-full text-left text-[11px] text-emerald-300 hover:underline py-0.5 truncate">
+                  • ${d.title}
+                </button>
+              `).join("") : `<span class="text-[11px] text-slate-500">종착점 (최종 DB)</span>`}
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800">
+            <div class="text-xs font-bold text-slate-300 mb-1.5">🤖 에이전트(안티그래비티/클로드) 지시문</div>
+            <div class="bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-[11px] text-slate-300 font-mono leading-relaxed mb-2">
+              "${node.agentPrompt}"
+            </div>
+            <button
+              onclick="copyPrompt(this, '${node.agentPrompt.replace(/'/g, "\\'")}')"
+              class="w-full py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition"
+            >
+              📋 에이전트 지시 프롬프트 복사하기
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // 도메인 필터링
+    function filterDomain(domain) {
+      currentDomain = domain;
+      selectedNodeId = null;
+      highlightDomainTab(domain);
+
+      renderPipelineColumns();
+      resetSelection();
+      setTimeout(drawConnections, 50);
+    }
+
+    // 검색 필터링
+    function handleSearch(val) {
+      searchQuery = val;
+      selectedNodeId = null;
+      renderPipelineColumns();
+      setTimeout(drawConnections, 50);
+    }
+
+    // 트러블슈팅 카드 렌더링
+    function renderTroubleCards() {
+      const grid = document.getElementById("trouble-grid");
+      grid.innerHTML = window.SYSTEM_MAP_DATA.troubles.map(t => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4">
+          <div>
+            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              ${t.domain}
+            </span>
+            <h3 class="text-sm font-bold text-white mt-2.5 leading-snug">${t.symptom}</h3>
+            
+            <div class="mt-3">
+              <div class="text-xs font-semibold text-slate-300 mb-1">🔍 주요 원인 (체크 포인트)</div>
+              <ul class="text-xs text-slate-400 space-y-1 list-disc pl-4 leading-relaxed">
+                ${t.causes.map(c => `<li>${c}</li>`).join("")}
+              </ul>
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-1.5">
+              ${t.targetFiles.map(f => `
+                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">
+                  ${f}
+                </span>
+              `).join("")}
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800">
+            <button
+              onclick="copyPrompt(this, '${t.prompt.replace(/'/g, "\\'")}')"
+              class="w-full py-2 rounded-lg bg-slate-800 hover:bg-sky-500 hover:text-slate-950 text-sky-300 border border-slate-700 font-semibold text-xs transition"
+            >
+              📋 이 증상 디버깅 지시문 복사
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // 클립보드 복사 유틸
+    function copyPrompt(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = "✅ 클립보드에 복사되었습니다!";
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+      });
+    }
+  </script>
+</body>
+</html>

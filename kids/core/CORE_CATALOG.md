@@ -874,6 +874,18 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python scripts/sync_agent_skills.py          # 원본 → 사본 동기화
   python scripts/sync_agent_skills.py --check  # 커밋 전 일치 확인
   ```
+- 동기화를 실행할 때마다 아래 **시스템 조감도**의 기준일과 스킬 카드 요약도 함께 갱신합니다. `--check`는 조감도 스킬 요약이 원본과 다르면 실패하고, 기준일만 다르면 안내만 합니다.
+
+### 🌟 `minmin_system_map.html` + `scripts/data/system_map_data.js` (시스템 아키텍처 조감도, 2026-10-21)
+입력 스크립트 → 스킬·명세 → 프론트 모듈 → 파이프라인·캐시 → 노션 DB 5열 배선도, 증상별 디버깅 지시문, 노션 DB 규칙 사전을 한 화면에 보여 주는 부모·에이전트용 지도입니다. 화면은 빈 그릇이고 내용은 데이터 파일 한 벌에서 읽습니다.
+- **파일 위치**: `minmin_system_map.html` (저장소 루트, 렌더러), `scripts/data/system_map_data.js` (데이터)
+- **데이터 구조**:
+  | 전역 | 관리 방식 | 내용 |
+  | :--- | :--- | :--- |
+  | `window.SYSTEM_MAP_DATA` | 손으로 관리 | `domains`(필터 탭), `nodes`(`id`·`col`·`domain[]`·`badge`·`title`·`path`·`summary`·`guardrails`(최대 3줄)·`agentPrompt`, 스킬 카드는 `skill` 이름), `edges`(`[from, to]`, 왼쪽 열 → 오른쪽 열만), `troubles` |
+  | `window.SYSTEM_MAP_AUTO` | `sync_agent_skills.py`가 `// <AUTO-SYNC:START>`~`END` 사이만 다시 씀 | `lastUpdated`·`catalogUpdatedAt`(본 카탈로그의 git 마지막 커밋 시각, 미커밋 수정이 있으면 파일 수정 시각), `skills`(SKILL.md frontmatter의 name·description을 150자 이내로 요약) |
+- **합치기 규칙**: 데이터 파일 끝의 IIFE가 `SYSTEM_MAP_AUTO`를 `SYSTEM_MAP_DATA`에 합칩니다. `skill` 이름이 같은 카드는 요약·경로를 덮어쓰고, 지도에 없는 새 스킬은 2열에 `Skill (신규)` 카드로 자동 추가합니다(연결선은 사람이 추가).
+- **주의**: 데이터 문자열에 큰따옴표(`"`)를 넣지 않습니다(복사 버튼 `onclick` 속성이 깨짐). 카드 `path`는 master-tower 루트 기준 경로입니다. 새 과목·모듈을 추가하면 `domains`·`nodes`·`edges`를 함께 갱신합니다.
 
 ### 🌟 `scripts/agent_navi.py` (에이전트 스마트 내비게이션 & 아키텍처 라우터)
 본 카탈로그(`CORE_CATALOG.md`)를 실시간으로 직접 파싱하여, 에이전트가 작업 목표를 입력했을 때 최적의 부품 레시피, 권장 경로, 거버넌스 가드를 0.05초 만에 안내하는 스마트 GPS 도구입니다.
