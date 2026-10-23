@@ -8,6 +8,9 @@
 //   파일이 없으면(지문을 고친 뒤 아직 안 만듦) 실시간 speakFairyTTS로 대신 읽는다.
 //   mp3 생성: scripts/build_mini_reading_audio.py (문장 읽기 규칙 clipTexts·questionScript와 같아야 함)
 // - 자동 읽기 켜기/끄기(🔊/🔇)는 기기에 저장되고, 화면이 바뀌면 읽던 소리는 항상 멈춘다
+// - 그림: 노션 '이미지 URL'(스토리북 장면)이 있으면 지문 화면·이야기 다시 보기에만 띄운다.
+//   세로 그림이 잘리지 않게 전체를 줄여 넣고(모바일 위 180px / 넓은 화면 왼쪽), 누르면 화면 안 확대 창.
+//   주소가 없거나 못 불러오면 그림 칸을 지우고 글만 보인다. (예정) lineImages = 줄마다 바뀌는 그림
 // - 에러리스: 오답 경고음·감점 없이 정답 보기를 노랗게 비추고 해설 + fairyEncourage
 // - 민수용 정밀 독해(kids/core/reading_engine.js)와 데이터·화면을 공유하지 않는 병렬 모듈
 
@@ -103,9 +106,68 @@
         return `<div class="mr-toolbar"><button type="button" class="mr-auto ${isAutoplay() ? 'on' : ''}" id="mrAuto">${isAutoplay() ? '🔊 자동 읽기 켜짐' : '🔇 자동 읽기 꺼짐'}</button></div>`;
     }
 
+    // ---------- 0-2. 지문 그림 (스토리북 장면) ----------
+    const safeUrl = u => (typeof u === 'string' && /^(https:\/\/|\.\.?\/)/.test(u.trim()) ? u.trim() : '');
+    // 줄 번호의 그림: 줄별 그림(lineImages)이 있으면 그 줄 것, 없으면 대표 그림. 지금 화면은 대표 그림 1장만 쓴다.
+    function sceneImage(p, lineIdx = 0) {
+        const perLine = Array.isArray(p.lineImages) ? safeUrl(p.lineImages[lineIdx]) : '';
+        return perLine || safeUrl(p.imageUrl) || (Array.isArray(p.lineImages) ? safeUrl(p.lineImages[0]) : '');
+    }
+
+    // 지문 본문 (지문 화면·이야기 다시 보기 공용). 그림이 없으면 예전과 같은 글 카드만 나온다.
+    function readerHtml(lines, withTip) {
+        const url = sceneImage(passage);
+        const figure = url ? `<button type="button" class="mr-figure" id="mrFigure" aria-label="그림 크게 보기">
+                <img src="${esc(url)}" alt="${esc(passage.title)} 장면" loading="lazy" decoding="async">
+                <span class="mr-figure-zoom">🔍</span></button>` : '';
+        return `<div class="mr-reader-body${url ? ' has-figure' : ''}">
+            ${figure}
+            <div class="mr-reader">
+                <h3 class="mr-title">📖 ${esc(passage.title)}</h3>
+                ${lines.map((line, i) => `<p class="mr-line" data-i="${i}">${esc(line)}</p>`).join('')}
+                ${withTip ? '<p class="mr-tip">👆 문장을 누르면 그 문장만 다시 읽어 줘요</p>' : ''}
+            </div>
+        </div>`;
+    }
+
+    function bindFigure() {
+        const fig = containerEl.querySelector('#mrFigure');
+        if (!fig) return;
+        const img = fig.querySelector('img');
+        const drop = () => { // 못 불러온 그림은 깨진 아이콘 대신 칸째 지운다
+            const body = fig.closest('.mr-reader-body');
+            if (body) body.classList.remove('has-figure');
+            fig.remove();
+        };
+        img.onerror = drop;
+        if (img.complete && img.naturalWidth === 0 && img.currentSrc) drop();
+        fig.onclick = () => openLightbox(img.src, img.alt);
+    }
+
+    // 화면 안 확대 창: 아무 데나 누르거나 Esc면 닫힌다
+    function closeLightbox() {
+        const box = document.getElementById('mrLightbox');
+        if (box) box.remove();
+        document.removeEventListener('keydown', onLightboxKey);
+    }
+    function onLightboxKey(e) { if (e.key === 'Escape') closeLightbox(); }
+    function openLightbox(src, alt) {
+        closeLightbox();
+        const box = document.createElement('div');
+        box.id = 'mrLightbox';
+        box.className = 'mr-lightbox';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-label', '그림 크게 보기 (누르면 닫혀요)');
+        box.innerHTML = `<img src="${esc(src)}" alt="${esc(alt)}"><span class="mr-lightbox-hint">아무 곳이나 누르면 닫혀요</span>`;
+        box.onclick = closeLightbox;
+        document.body.appendChild(box);
+        document.addEventListener('keydown', onLightboxKey);
+    }
+
     // 화면을 바꿀 때마다 읽던 소리를 멈추고, 오버레이 스크롤을 맨 위로 (다음 카드의 단계 배지·말풍선이 가려지지 않게)
     function paint(html) {
         stop();
+        closeLightbox();
         containerEl.innerHTML = html;
         containerEl.scrollTop = 0;
         const auto = containerEl.querySelector('#mrAuto');
@@ -195,11 +257,7 @@
         const lines = linesOf(passage);
         paint(`<div class="mr-wrap">
             ${autoBtnHtml()}
-            <div class="mr-reader">
-                <h3 class="mr-title">📖 ${esc(passage.title)}</h3>
-                ${lines.map((line, i) => `<p class="mr-line" data-i="${i}">${esc(line)}</p>`).join('')}
-                <p class="mr-tip">👆 문장을 누르면 그 문장만 다시 읽어 줘요</p>
-            </div>
+            ${readerHtml(lines, true)}
             <div class="mr-actions">
                 <button type="button" class="mr-btn mr-btn-sub" id="mrListen">🔊 처음부터 듣기</button>
                 <button type="button" class="mr-btn mr-btn-sub" id="mrStop">⏹ 멈추기</button>
@@ -214,6 +272,7 @@
         containerEl.querySelector('#mrStop').onclick = stop;
         containerEl.querySelector('#mrGo').onclick = () => renderQuestion();
         containerEl.querySelector('#mrBack').onclick = () => renderLobby();
+        bindFigure();
         if (isAutoplay()) play([passage.title, ...lines]);
     }
 
@@ -299,16 +358,14 @@
     function renderPeek() {
         const lines = linesOf(passage);
         paint(`<div class="mr-wrap">
-            <div class="mr-reader">
-                <h3 class="mr-title">📖 ${esc(passage.title)}</h3>
-                ${lines.map((line, i) => `<p class="mr-line" data-i="${i}">${esc(line)}</p>`).join('')}
-            </div>
+            ${readerHtml(lines, false)}
             <div class="mr-actions"><button type="button" class="mr-btn mr-btn-main" id="mrBackQ">문제로 돌아가기 ➔</button></div>
         </div>`);
         containerEl.querySelectorAll('.mr-line').forEach(el => {
             el.onclick = () => play([lines[Number(el.getAttribute('data-i'))]]);
         });
         containerEl.querySelector('#mrBackQ').onclick = () => renderQuestion();
+        bindFigure();
     }
 
     // ---------- 4. 완주 (보상 + 학습일지) ----------
@@ -352,6 +409,7 @@
         start,
         isMissionInProgress,
         questionScript,
+        sceneImage,
         stop
     };
 })();

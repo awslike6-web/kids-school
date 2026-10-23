@@ -346,6 +346,13 @@
                     fullText: (fullText || "").trim(),
                     summary: summaryVal,
                     date: dateVal,
+                    // 지문 대표 그림(민서 미니 독해: 스토리북 장면) · 없으면 null → 화면은 글만 표시
+                    imageUrl: p["이미지 URL"]?.url || null,
+                    // (예정) 줄마다 바뀌는 그림: '줄별 이미지' rich_text에 지문 줄 순서대로 URL JSON 배열
+                    lineImages: (() => {
+                        const raw = (p["줄별 이미지"]?.rich_text || []).map(t => t.plain_text).join("");
+                        try { const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr : []; } catch (e) { return []; }
+                    })(),
                     questions: Array.isArray(questions) ? questions : [],
                     grade: (p["학년"]?.multi_select || []).map(m => m.name).join(", "),
                     student: (p["학생"]?.multi_select || []).map(m => m.name)

@@ -8,6 +8,8 @@
                   상세설명 예문의 [활용형] 표시가 5분방 Lv.2 빈칸 정답이 된다 ("연필심이 [닳았다].")
   2) LIBRARY_DB : 국어방 '민서 미니 독해' 지문 + 3단계 문제(step 1·2·3) JSON
                   출처구분/원작 출처 속성으로 저작권 확인 대상 지문을 표시한다 (없으면 속성을 만든다)
+                  시드의 image(스토리북 장면 URL)는 '이미지 URL'로 넣는다 (없으면 비워서 화면은 글만)
+                  (예정) line_images = 지문 줄 순서대로 그림 URL 배열 → '줄별 이미지'에 JSON으로 넣는다
 
 - 같은 학생·단원·단어(VOCA) / 같은 도서 키(LIBRARY)가 있으면 새로 만들지 않고 내용만 갱신한다.
   VOCA의 숙련도·달성은 건드리지 않는다.
@@ -46,7 +48,9 @@ LIBRARY_EXTRA_PROPS = {
         {"name": "교과서 원문", "color": "red"},
     ]}},
     "원작 출처": {"rich_text": {}},
+    "이미지 URL": {"url": {}},  # 미니 독해 지문 대표 그림 (스토리북 장면)
 }
+LINE_IMAGES_PROP = {"줄별 이미지": {"rich_text": {}}}  # (예정) 줄마다 바뀌는 그림. 시드에 line_images가 있을 때만 만든다
 
 
 def call(path: str, payload: dict | None = None, method: str = "POST") -> dict:
@@ -88,11 +92,12 @@ def plain_title(page: dict, prop: str) -> str:
     return "".join(t.get("plain_text", "") for t in page["properties"].get(prop, {}).get("title", []))
 
 
-def ensure_library_props(apply: bool) -> None:
+def ensure_library_props(apply: bool, need_line_images: bool = False) -> None:
     db = call(f"/v1/databases/{LIBRARY_DB_ID}", method="GET")
-    missing = {k: v for k, v in LIBRARY_EXTRA_PROPS.items() if k not in db.get("properties", {})}
+    wanted = {**LIBRARY_EXTRA_PROPS, **(LINE_IMAGES_PROP if need_line_images else {})}
+    missing = {k: v for k, v in wanted.items() if k not in db.get("properties", {})}
     if not missing:
-        print("✅ LIBRARY_DB 저작권 표시 속성(출처구분·원작 출처) 이미 있음")
+        print(f"✅ LIBRARY_DB 추가 속성({', '.join(wanted)}) 이미 있음")
         return
     print(f"🆕 LIBRARY_DB 속성 추가: {', '.join(missing)}")
     if apply:
@@ -160,7 +165,10 @@ def upsert_passages(seed: dict, apply: bool) -> tuple[int, int]:
             "문제데이터": rich(json.dumps(p["questions"], ensure_ascii=False)),
             "출처구분": {"select": {"name": p.get("source_type", "자체 창작")}},
             "원작 출처": rich(p.get("source_note", "")),
+            "이미지 URL": {"url": p.get("image") or None},
         }
+        if p.get("line_images"):
+            props["줄별 이미지"] = rich(json.dumps(p["line_images"], ensure_ascii=False))
         found = query_all(LIBRARY_DB_ID, {"property": "도서 키(ID)", "rich_text": {"equals": p["book_id"]}})
         print(f"   {'♻️ 갱신' if found else '✨ 신규'} 📖 {p['title']} ({p['book_id']}, {p.get('source_type', '자체 창작')})")
         if not apply:
@@ -213,7 +221,7 @@ def main() -> int:
     print(f"📚 {seed['student']} {seed['grade']} {seed['unit']} · {mode}")
 
     print("\n[1] LIBRARY_DB 저작권 표시 속성")
-    ensure_library_props(args.apply)
+    ensure_library_props(args.apply, any(p.get("line_images") for p in seed.get("passages", [])))
     print(f"\n[2] VOCA_DB 정제 어휘 {len(seed['voca'])}개")
     vc, vu = upsert_voca(seed, args.apply)
     print(f"\n[3] LIBRARY_DB 미니 독해 지문 {len(seed.get('passages', []))}편")
