@@ -59,10 +59,9 @@
   let sessionWrongLogs = [];
   let isRevengeMode = false;
 
-  // 초기 화면 렌더링 & 파트너 몬스터 포즈 동기화 (에러리스 원칙 준수)
+  // 초기 화면 렌더링 & 파트너 몬스터 포즈 동기화 (투명 누끼 캐릭터 에러리스 원칙 준수)
   function syncCheerMonsterReaction(state = 'stageStart', overrideSpeech = null) {
     const monsterEl = document.getElementById('cheerMonster');
-    const frameEl = document.getElementById('cheerMonsterFrame');
     const speechEl = document.getElementById('cheerSpeech');
     if (isMinseo || !global.MonsterRoster) {
       if (overrideSpeech && speechEl) speechEl.textContent = overrideSpeech;
@@ -71,19 +70,12 @@
     const monster = global.MonsterRoster.getSelectedMonster();
     const reaction = global.MonsterRoster.getRunnerReaction(state, monster.id);
 
-    if (frameEl) {
-      frameEl.className = monster.hasBackground
-        ? 'relative w-14 h-14 flex items-center justify-center shrink-0 rounded-2xl border-2 border-neon-cyan shadow-[0_0_14px_rgba(0,240,255,0.45)] overflow-hidden bg-lab-bg transition-all'
-        : 'relative w-14 h-14 flex items-center justify-center shrink-0 transition-all';
-    }
     if (monsterEl) {
       if (monsterEl.getAttribute('src') !== reaction.poseSrc) {
         monsterEl.src = reaction.poseSrc;
       }
       monsterEl.alt = monster.name;
-      monsterEl.className = monster.hasBackground
-        ? 'w-full h-full object-cover transition-transform'
-        : 'animate-cheer w-14 h-14 object-contain filter drop-shadow-md transition-transform';
+      monsterEl.className = 'animate-cheer w-14 h-14 object-contain filter drop-shadow-md transition-transform';
     }
     if (speechEl) {
       const line = overrideSpeech || reaction.speech;

@@ -56,16 +56,16 @@
             number: '2호',
             name: '콧툰봉돔돌',
             role: 'SCP-봉제괴수',
-            code: 'SCP-002 // 격리 챔버 LIVE',
+            code: 'UNIT-02 // BONGDOMDOL',
             badgeText: '2호: 콧툰봉돔돌 (SCP-봉제괴수)',
-            hasBackground: true,
+            hasBackground: false,
             poses: {
-                idle: './kids/assets/monsters/cottun_bongdomdol/idle.jpg',
-                greet: './kids/assets/monsters/cottun_bongdomdol/greet.jpg',
-                walk_left: './kids/assets/monsters/cottun_bongdomdol/walk_left.jpg',
-                walk_right: './kids/assets/monsters/cottun_bongdomdol/walk_right.jpg',
-                rage: './kids/assets/monsters/cottun_bongdomdol/rage.jpg',
-                roar: './kids/assets/monsters/cottun_bongdomdol/roar.jpg'
+                idle: './kids/assets/monsters/cottun_bongdomdol/idle.png',
+                greet: './kids/assets/monsters/cottun_bongdomdol/greet.png',
+                walk_left: './kids/assets/monsters/cottun_bongdomdol/walk_left.png',
+                walk_right: './kids/assets/monsters/cottun_bongdomdol/walk_right.png',
+                rage: './kids/assets/monsters/cottun_bongdomdol/rage.png',
+                roar: './kids/assets/monsters/cottun_bongdomdol/roar.png'
             },
             labDialogues: {
                 idle: '초록·빨강 단추 눈 이상 무! 용수철 펀치 대기 중! 🧸🔩',

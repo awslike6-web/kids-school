@@ -250,10 +250,10 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 
 ### 🌟 `monster_roster.js` (5분 퀘스트 파트너 몬스터 로스터 & 포즈/에러리스 대사 엔진, 2026-10-24 추가)
 - **파일 위치**: `kids/subjects/quest/monster_roster.js` (전역 `window.MonsterRoster`, `monster_lab.html` 및 `quest_runner.html`에서 로드)
-- **에셋 경로**: `kids/assets/monsters/cottun_bongdomdol/` (`idle.jpg`, `greet.jpg`, `walk_left.jpg`, `walk_right.jpg`, `rage.jpg`, `roar.jpg` — 640×640 웹 경량화 정사각 크롭)
+- **에셋 경로**: `kids/assets/monsters/cottun_bongdomdol/` (`idle.png`, `greet.png`, `walk_left.png`, `walk_right.png`, `rage.png`, `roar.png` — 800×800 투명 캔버스 바닥 기준 완벽 정렬 누끼 PNG)
 - **역할**:
-  - `[1호: 클레이 바이트]`(`clay_bite`, 투명 배경 PNG)와 민수 자작 캐릭터 `[2호: 콧툰봉돔돌 (SCP-봉제괴수)]`(`cottun_bongdomdol`, `hasBackground: true` 실사형 6종 포즈) 메타데이터를 단일 SSOT로 관리하고 선택값을 `localStorage.getItem('selectedMonster')`에 영속화합니다.
-  - `hasBackground: true` 캐릭터가 선택되면 `monster_lab.css`의 `.scp-viewport-frame`(사이버 네온 테두리 + 비네팅 그림자 + `[SCP-002 // 격리 챔버 LIVE]` 홀로그램 오버레이) 및 `quest_runner.html`의 `#cheerMonsterFrame` 미니 네온 포털 프레임이 자동 활성화됩니다.
+  - `[1호: 클레이 바이트]`(`clay_bite`)와 민수 자작 캐릭터 `[2호: 콧툰봉돔돌 (SCP-봉제괴수)]`(`cottun_bongdomdol`) 모두 100% 투명 배경 누끼 캐릭터로 사이버 연구실 마법진 발판 위에 동일한 레이어 위계로 서서 렌더링됩니다.
+  - `localStorage.getItem('selectedMonster')`로 선택 상태가 영속화되며, 탭 단계별 포즈 변화(1회 인사 ➔ 2~4회 걷기 ➔ 5회 과열 쉐이크 ➔ 출격 시 포효)와 퀘스트 러너 에러리스(Errorless) 응원을 지원합니다.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |

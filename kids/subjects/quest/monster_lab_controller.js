@@ -420,7 +420,7 @@
     }
   }
 
-  // 4-2. 👾 파트너 몬스터 로스터 렌더링 & 전환 (1호 클레이 바이트 ↔ 2호 콧툰봉돔돌)
+  // 4-2. 👾 파트너 몬스터 로스터 렌더링 & 전환 (1호 클레이 바이트 ↔ 2호 콧툰봉돔돌 - 연구실 발판 위 100% 동일 위계)
   let monsterTapCount = 0;
   let monsterIdleTimer = null;
 
@@ -429,11 +429,7 @@
     const monster = window.MonsterRoster.getSelectedMonster();
     window.MonsterRoster.preloadMonsterAssets(monster.id);
 
-    const viewportWrap = document.getElementById('monsterViewportWrap');
     const monsterImg = document.getElementById('monsterImg');
-    const pedestalImg = document.getElementById('pedestalImg');
-    const pedestalGlow = document.getElementById('pedestalGlowRing');
-    const holoCode = document.getElementById('scpHoloCodeText');
     const pName = document.getElementById('partnerName');
     const pDot = document.getElementById('partnerDot');
     const pRole = document.getElementById('partnerRole');
@@ -442,25 +438,15 @@
     if (pName) pName.textContent = `${monster.number} · ${monster.name}`;
     if (pRole) {
       pRole.textContent = monster.role;
-      pRole.className = monster.hasBackground
-        ? 'text-[11px] text-amber-400 font-bold'
+      pRole.className = monster.id === 'cottun_bongdomdol'
+        ? 'text-[11px] text-amber-300 font-bold'
         : 'text-[11px] text-neon-cyan font-bold';
     }
     if (pDot) {
-      pDot.className = monster.hasBackground
+      pDot.className = monster.id === 'cottun_bongdomdol'
         ? 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse'
         : 'w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse';
     }
-    if (holoCode && monster.code) holoCode.textContent = monster.code;
-
-    if (viewportWrap) {
-      viewportWrap.classList.toggle('scp-viewport-frame', !!monster.hasBackground);
-      viewportWrap.classList.toggle('mb-[88px]', !monster.hasBackground);
-      viewportWrap.classList.toggle('mb-2', !!monster.hasBackground);
-      viewportWrap.classList.toggle('scp-rage-overheat', !!isRage);
-    }
-    if (pedestalImg) pedestalImg.classList.toggle('opacity-0', !!monster.hasBackground);
-    if (pedestalGlow) pedestalGlow.classList.toggle('opacity-0', !!monster.hasBackground);
 
     if (monsterImg) {
       const nextSrc = (monster.poses && monster.poses[poseKey]) || monster.poses.idle;
@@ -468,10 +454,10 @@
         monsterImg.src = nextSrc;
       }
       monsterImg.alt = monster.name;
-      monsterImg.classList.toggle('animate-monster-float', !monster.hasBackground && poseKey === 'idle');
-      monsterImg.classList.remove('pose-swap-bounce');
+      // 포즈 전환 시 크로스페이드 바운스 & 과열 시 쉐이크
+      monsterImg.classList.remove('pose-swap-bounce', 'monster-rage-shake');
       void monsterImg.offsetWidth;
-      monsterImg.classList.add('pose-swap-bounce');
+      monsterImg.classList.add(isRage ? 'monster-rage-shake' : 'pose-swap-bounce');
     }
 
     if (speech) {
