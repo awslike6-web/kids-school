@@ -172,4 +172,8 @@ python scripts/add_activity_photo.py \
   <script src="js/haru_common.js"></script>
   ```
 
+---
 
+## 7. 가디언 활동 시간 계측 (2026-10-23)
+* `haru.html`은 `core.js`/`notion-helper.js`를 통해 `study-activity.js`를 이미 불러옵니다. `pageContext()`에 과목 `haru`('하루')를 추가하고, 하루방 첫 화면은 허브 제외 규칙의 예외로 두어 실제 조작 구간이 kind=study로 기록됩니다.
+* 유휴 90초·화면 숨김·포커스 이탈·절전 규칙은 다른 과목과 같습니다. `kids/playground/` 아래 화면은 계속 제외됩니다.

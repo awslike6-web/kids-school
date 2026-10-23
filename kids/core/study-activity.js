@@ -76,15 +76,16 @@
         if (win.__guardianStudyPhase === 'paused' || win.document.getElementById('screenTimeReceiptModal')) return null;
         const path=win.location.pathname;
         if (/playground|deprecated|parent_|admin|print_|library|gallery|my-room|timetable/.test(path)) return null;
-        let subject=path.match(/\/subjects\/(math|korean|english|science|society)\//)?.[1];
+        let subject=path.match(/\/subjects\/(math|korean|english|science|society|haru)\//)?.[1];
         if (/\/quest_runner\.html$/.test(path)) subject=new URLSearchParams(win.location.search).get('subject') || 'math';
         if (/\/subjects\/common\/storybook_viewer\.html$/.test(path)) {
             subject=new URLSearchParams(win.location.search).get('subject');
         }
         if (/\/common_space\/voca\.html$/.test(path)) subject='voca';
-        const subjects={math:'수학',korean:'국어',english:'영어',science:'과학',society:'사회',voca:'용어사전'};
+        const subjects={math:'수학',korean:'국어',english:'영어',science:'과학',society:'사회',haru:'하루',voca:'용어사전'};
         if (!subjects[subject]) return null;
-        const landing=new RegExp(`/subjects/${subject}/${subject}\\.html$`).test(path);
+        // 하루방은 첫 화면 자체가 체크인·시계판 활동 화면이라 허브 제외 규칙을 적용하지 않습니다.
+        const landing=subject !== 'haru' && new RegExp(`/subjects/${subject}/${subject}\\.html$`).test(path);
         const overlay=win.document.getElementById('missionOverlay');
         if (landing && !(overlay && overlay.getClientRects().length) && !win.__quizRewardSession) return null;
         // 퀘스트에 전달된 학생과 측정 기록의 학생을 일치시킵니다.

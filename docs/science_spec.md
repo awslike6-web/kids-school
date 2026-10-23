@@ -176,3 +176,10 @@ graph TD
 ### 2) 5분 퀘스트 과학 실험 퀴즈 실시간 융합 (`buildCurriculumQuestionsFromNotion`)
 * **출제 슬롯**: 5분 퀘스트 과학 1~3번 진도 드릴 슬롯에 실험 기구/결과 관찰 실전 사진 퀴즈를 1~2문제 자동 융합 출제.
 * **고화질 사진 돋보기 (`imageZoomModal`)**: 문제에 포함된 실험/관찰 사진을 터치하면 화면 전체로 확대해 관찰할 수 있는 라이트박스 줌 모달 기본 장착.
+
+---
+
+## 7. 가디언 활동 시간 계측 (2026-10-23)
+* 가상 실험실 16개(`science_*_lab.html`, `science_virtual_lab.html`·`science_season_airmass_lab.html` 포함)는 `</body>` 직전에 `../../core/study-activity.js?v=20261023`을 직접 로드합니다. 터치·클릭·드래그로 실제 조작한 구간만 kind=study, 과목 '과학'으로 STUDY_LOG_DB에 기록되어 Guardian 학습시간(1분=1분)에 적립됩니다.
+* `science.html` 허브는 계속 측정에서 제외합니다. 실험실 화면의 정답 보너스(quiz)는 이번 범위가 아니며, 영상만 틀어 놓은 시간 인정 여부는 2단계에서 결정합니다.
+* 새 실험실을 만들 때는 같은 스크립트 한 줄을 반드시 넣습니다.

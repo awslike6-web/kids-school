@@ -5,7 +5,7 @@
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('storybook_engine.js'))?.src;
     if (!source) return;
     const script=document.createElement('script');
-    script.src=new URL('../core/study-activity.js?v=20261010',source).href; script.async=false;
+    script.src=new URL('../core/study-activity.js?v=20261023',source).href; script.async=false;
     document.head.appendChild(script);
 })();
 /* ========================================================
