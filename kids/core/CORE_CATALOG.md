@@ -248,6 +248,20 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **`quest-runner.js`** (약 570줄, 전역 `window.QuestRunner = { boot }`): URL 파싱·`getSubjectQuest` 바인딩, 가디언 학습 상태 표시, 3·3·3 마스터리 연결부(`bootQuest`·`renderMasteryQuestion`·`handleMasteryDone`), 기존 4+1 렌더링·채점·하트·리벤지, `showClearModal`(`QuestMastery.pushChanges` → `grantRewardAndShowUI(3, true)` → `sendStudyLogToNotion`), `StudyActivity.setPhase/recordCorrect` 연동.
 - **HTML onclick 호환 전역**: `handleCheckAnswer`, `goToNextStep`, `playQuestionAudio`, `selectChoice`, `startRevengeRound`, `skipRevengeAndClear`, `confirmExit`, `closeExitModal`, `returnToLab`, `goToSubjectDeepTraining`(별칭 `goToMathDeepTraining`), `goToLobby`, `playSound`, `toggleMathMemoPad`, `clearMathMemoCanvas`, `openImageZoom`, `closeImageZoom`.
 
+### 🌟 `monster_roster.js` (5분 퀘스트 파트너 몬스터 로스터 & 포즈/에러리스 대사 엔진, 2026-10-24 추가)
+- **파일 위치**: `kids/subjects/quest/monster_roster.js` (전역 `window.MonsterRoster`, `monster_lab.html` 및 `quest_runner.html`에서 로드)
+- **에셋 경로**: `kids/assets/monsters/cottun_bongdomdol/` (`idle.jpg`, `greet.jpg`, `walk_left.jpg`, `walk_right.jpg`, `rage.jpg`, `roar.jpg` — 640×640 웹 경량화 정사각 크롭)
+- **역할**:
+  - `[1호: 클레이 바이트]`(`clay_bite`, 투명 배경 PNG)와 민수 자작 캐릭터 `[2호: 콧툰봉돔돌 (SCP-봉제괴수)]`(`cottun_bongdomdol`, `hasBackground: true` 실사형 6종 포즈) 메타데이터를 단일 SSOT로 관리하고 선택값을 `localStorage.getItem('selectedMonster')`에 영속화합니다.
+  - `hasBackground: true` 캐릭터가 선택되면 `monster_lab.css`의 `.scp-viewport-frame`(사이버 네온 테두리 + 비네팅 그림자 + `[SCP-002 // 격리 챔버 LIVE]` 홀로그램 오버레이) 및 `quest_runner.html`의 `#cheerMonsterFrame` 미니 네온 포털 프레임이 자동 활성화됩니다.
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `getSelectedMonster()` / `setSelectedMonsterId(id)` | 현재 선택된 파트너 몬스터 조회 및 `localStorage('selectedMonster')` 저장 |
+  | `preloadMonsterAssets(id)` / `preloadAllMonsters()` | `new Image()`로 포즈별 이미지 즉시 프리로드 (탭/채점 시 깜빡임 원천 방지) |
+  | `getLabTapResponse(tapCount)` | 연구소 `pokeMonster` 탭 단계별 포즈·대사 반환 (1회 `greet` 인사 / 2~4회 `walk_left`·`walk_right` 교차 / 5회 `rage` 과열+Shake, 출격 시 `roar` 포효) |
+  | `getRunnerReaction(state)` | 실전 러너 `#cheerMonster` 에러리스(Errorless) 반응 반환 (`stageStart` 투지 `rage` / `correct` 하이파이브 `greet` / `encourage` 따뜻한 격려 `walk_left` / `clear` 승리 포효 `roar`) |
+
 ---
 
 ## 2-3. 📖 국어 멀티버스 전담 엔진군 (Korean Multiverse Engines)

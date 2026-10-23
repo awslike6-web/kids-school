@@ -365,12 +365,12 @@
 
     <!-- 몬스터 치어리더 (좌측 하단 응원단) -->
     <div class="flex items-center gap-3 px-2">
-      <div class="relative w-14 h-14 flex items-center justify-center">
+      <div id="cheerMonsterFrame" class="relative w-14 h-14 flex items-center justify-center shrink-0 transition-all">
         <img 
           id="cheerMonster" 
           src="./kids/assets/images/monsters/purple_monster.png" 
           alt="치어리더 파트너" 
-          class="animate-cheer w-14 h-14 object-contain filter drop-shadow-md"
+          class="animate-cheer w-14 h-14 object-contain filter drop-shadow-md transition-transform"
         />
       </div>
       <!-- 작은 응원 말풍선 -->
@@ -582,7 +582,8 @@
   <script src="./kids/subjects/quest/quest_data_minsu.js"></script>
   <script src="./kids/subjects/quest/quest_data_minseo.js"></script>
 
-  <!-- ================= 7. 퀘스트 러너: 화면 장식·효과음(UI) → 진행 흐름·3·3·3 마스터리·노션 전송(Runner) ================= -->
+  <!-- ================= 7. 퀘스트 러너: 몬스터 로스터 → 화면 장식·효과음(UI) → 진행 흐름·3·3·3 마스터리·노션 전송(Runner) ================= -->
+  <script src="./kids/subjects/quest/monster_roster.js"></script>
   <script src="./kids/subjects/quest/quest-runner-ui.js?v=20261015-1"></script>
   <script src="./kids/subjects/quest/quest-runner.js?v=20261015-1"></script>
   <script>

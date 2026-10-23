@@ -146,23 +146,13 @@
       <div class="absolute inset-0 bg-gradient-to-t from-neon-green/10 via-transparent to-transparent rounded-full filter blur-xl pointer-events-none"></div>
 
       <!-- 3D 네온 발판 스테이지 -->
-      <img 
-        src="./kids/assets/images/monsters/lab_stage_pedestal.png" 
-        alt="Neon Pedestal Stage" 
-        class="absolute bottom-0 w-64 h-64 object-contain opacity-90 pointer-events-none filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]"
-      />
+      <img id="pedestalImg" src="./kids/assets/images/monsters/lab_stage_pedestal.png" alt="Neon Pedestal Stage" class="absolute bottom-0 w-64 h-64 object-contain opacity-90 pointer-events-none filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] transition-opacity duration-300" />
+      <div id="pedestalGlowRing" class="absolute bottom-20 w-24 h-4 bg-neon-green/45 rounded-full blur-sm animate-ring-pulse pointer-events-none transition-opacity duration-300"></div>
 
-      <!-- 발판 윗면 원형 플레이트의 네온 그림자 링 -->
-      <div class="absolute bottom-20 w-24 h-4 bg-neon-green/45 rounded-full blur-sm animate-ring-pulse pointer-events-none"></div>
-
-      <!-- 보라색 클레이 몬스터 -->
-      <div class="relative z-20 mb-[88px] flex flex-col items-center">
-        <img 
-          id="monsterImg" 
-          src="./kids/assets/images/monsters/purple_monster.png" 
-          alt="클레이 바이트" 
-          class="animate-monster-float w-28 h-28 object-contain filter drop-shadow-[0_10px_16px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform"
-        />
+      <!-- 파트너 몬스터 & SCP 격리 뷰포트 프레임 -->
+      <div id="monsterViewportWrap" class="monster-viewport-wrap relative z-20 mb-[88px] flex flex-col items-center">
+        <div id="scpHoloBadge" class="scp-holo-badge"><span class="scp-holo-dot"></span><span id="scpHoloCodeText">SCP-002 // 격리 챔버 LIVE</span></div>
+        <img id="monsterImg" src="./kids/assets/images/monsters/purple_monster.png" alt="클레이 바이트" class="animate-monster-float w-28 h-28 object-contain filter drop-shadow-[0_10px_16px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform" />
       </div>
     </div>
 
@@ -191,11 +181,21 @@
       </div>
     </div>
 
-    <!-- 파트너 심플 이름표 -->
-    <div id="partnerBadge" class="flex items-center gap-1.5 mt-2 bg-lab-card/70 border border-lab-card-border px-3 py-0.5 rounded-full shadow-md">
-      <span id="partnerName" class="text-xs font-bold text-white tracking-wide">클레이 바이트</span>
-      <span id="partnerDot" class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
-      <span id="partnerRole" class="text-[11px] text-neon-green font-bold">수호 파트너</span>
+    <!-- 파트너 심플 이름표 & 몬스터 로스터 스왑 바 -->
+    <div id="monsterRosterBar" class="flex flex-col items-center gap-1.5 mt-2 z-30">
+      <div class="flex items-center gap-1.5">
+        <button id="monsterPrevBtn" type="button" onclick="cyclePartnerMonster(-1)" class="w-6 h-6 rounded-full bg-lab-card/90 border border-neon-cyan/40 text-neon-cyan hover:bg-neon-cyan/20 flex items-center justify-center text-xs font-black active:scale-90 transition-all" title="이전 파트너">◀</button>
+        <div id="partnerBadge" class="flex items-center gap-1.5 bg-lab-card/85 border border-lab-card-border px-3 py-0.5 rounded-full shadow-md">
+          <span id="partnerName" class="text-xs font-bold text-white tracking-wide">클레이 바이트</span>
+          <span id="partnerDot" class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
+          <span id="partnerRole" class="text-[11px] text-neon-green font-bold">수호 파트너</span>
+        </div>
+        <button id="monsterNextBtn" type="button" onclick="cyclePartnerMonster(1)" class="w-6 h-6 rounded-full bg-lab-card/90 border border-neon-cyan/40 text-neon-cyan hover:bg-neon-cyan/20 flex items-center justify-center text-xs font-black active:scale-90 transition-all" title="다음 파트너">▶</button>
+      </div>
+      <div id="monsterRosterChips" class="flex items-center gap-1.5">
+        <button type="button" data-monster-chip="clay_bite" onclick="selectPartnerMonster('clay_bite')" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-neon-purple/30 border-neon-cyan text-white">👾 1호: 클레이 바이트</button>
+        <button type="button" data-monster-chip="cottun_bongdomdol" onclick="selectPartnerMonster('cottun_bongdomdol')" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-lab-card/60 border-white/15 text-gray-400 hover:text-white">🧸 2호: 콧툰봉돔돌 (SCP)</button>
+      </div>
     </div>
 
   </main>
@@ -772,8 +772,7 @@
   <script src="./kids/subjects/quest/quest_notion_synth.js?v=20261015-2"></script>
   <script src="./kids/subjects/quest/parent_unit_chips.js"></script>
   <script src="./kids/subjects/quest/parent_progress_controller.js?v=20261020b"></script>
-
-  <!-- ================= 7. 몬스터 연구소 메인 인터랙션 컨트롤러 연동 (100% 모듈화 분리) ================= -->
+  <script src="./kids/subjects/quest/monster_roster.js"></script>
   <script src="./kids/subjects/quest/monster_lab_controller.js"></script>
 </body>
 </html>

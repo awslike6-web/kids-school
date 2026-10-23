@@ -59,9 +59,43 @@
   let sessionWrongLogs = [];
   let isRevengeMode = false;
 
-  // 초기 화면 렌더링
+  // 초기 화면 렌더링 & 파트너 몬스터 포즈 동기화 (에러리스 원칙 준수)
+  function syncCheerMonsterReaction(state = 'stageStart', overrideSpeech = null) {
+    const monsterEl = document.getElementById('cheerMonster');
+    const frameEl = document.getElementById('cheerMonsterFrame');
+    const speechEl = document.getElementById('cheerSpeech');
+    if (isMinseo || !global.MonsterRoster) {
+      if (overrideSpeech && speechEl) speechEl.textContent = overrideSpeech;
+      return;
+    }
+    const monster = global.MonsterRoster.getSelectedMonster();
+    const reaction = global.MonsterRoster.getRunnerReaction(state, monster.id);
+
+    if (frameEl) {
+      frameEl.className = monster.hasBackground
+        ? 'relative w-14 h-14 flex items-center justify-center shrink-0 rounded-2xl border-2 border-neon-cyan shadow-[0_0_14px_rgba(0,240,255,0.45)] overflow-hidden bg-lab-bg transition-all'
+        : 'relative w-14 h-14 flex items-center justify-center shrink-0 transition-all';
+    }
+    if (monsterEl) {
+      if (monsterEl.getAttribute('src') !== reaction.poseSrc) {
+        monsterEl.src = reaction.poseSrc;
+      }
+      monsterEl.alt = monster.name;
+      monsterEl.className = monster.hasBackground
+        ? 'w-full h-full object-cover transition-transform'
+        : 'animate-cheer w-14 h-14 object-contain filter drop-shadow-md transition-transform';
+    }
+    if (speechEl) {
+      const line = overrideSpeech || reaction.speech;
+      speechEl.textContent = `"${String(line).replace(/^"|"$/g, '')}"`;
+    }
+  }
+
   function initScreen() {
     UI.applyChildTheme(isMinseo);
+    if (!isMinseo && global.MonsterRoster) {
+      global.MonsterRoster.preloadAllMonsters();
+    }
     document.getElementById('subjectBadgeIcon').textContent = currentQuest.icon;
     document.getElementById('subjectBadgeTitle').textContent = currentQuest.title;
     UI.applyDeepTrainingLabels(isMinseo, currentSubj, currentQuest);
@@ -112,9 +146,10 @@
     ['classicQuestionCard', 'choicesList'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('checkAnswerBtn').parentElement.classList.add('hidden');
     document.getElementById('feedbackSheet').classList.add('hidden');
-    document.getElementById('cheerSpeech').textContent = q.isRustyReview
-      ? '"반짝이던 왕관에 먼지가 쌓였어! 다시 닦아 보자! 👑"'
-      : (isMinseo ? '"천천히 해도 괜찮아! 힌트를 보면서 해보자! 🌸"' : '"틀려도 괜찮아! 힌트를 보고 스스로 찾아봐! ⚡"');
+    const stageStartSpeech = q.isRustyReview
+      ? '반짝이던 왕관에 먼지가 쌓였어! 다시 닦아 보자! 👑'
+      : (isMinseo ? '"천천히 해도 괜찮아! 힌트를 보면서 해보자! 🌸"' : null);
+    syncCheerMonsterReaction(currentIndex === 0 ? 'stageStart' : 'idle', stageStartSpeech);
     renderMasteryProgress();
     const stage = document.getElementById('masteryStage');
     stage.classList.remove('hidden');
@@ -124,8 +159,15 @@
         if (lang === 'en' && typeof speakEnglish === 'function') return speakEnglish(text);
         if (typeof speakFairyTTS === 'function') speakFairyTTS(text, null, { forceVoice: lang === 'en' ? 'en-US-JennyNeural' : 'ko-KR-SunHiNeural' });
       },
-      onPraise: () => { playSound('correct'); if (typeof fairyPraise === 'function') fairyPraise(); },
-      onEncourage: () => { if (typeof fairyEncourage === 'function') fairyEncourage(); },
+      onPraise: () => {
+        playSound('correct');
+        syncCheerMonsterReaction('correct');
+        if (typeof fairyPraise === 'function') fairyPraise();
+      },
+      onEncourage: () => {
+        syncCheerMonsterReaction('encourage');
+        if (typeof fairyEncourage === 'function') fairyEncourage();
+      },
       onDone: result => handleMasteryDone(q, result)
     });
   }
@@ -195,13 +237,14 @@
     document.getElementById('formulaBox').innerHTML = formulaHtml;
 
     if (q.isPreview) {
-      document.getElementById('cheerSpeech').textContent = isMinseo
+      const previewSpeech = isMinseo
         ? `"와! 내일 배울 비밀 낱말이야! 틀려도 하트 안 깎이니까 편하게 골라봐! 🌸"`
         : `"다음 단원 맛보기 탐험이야! 힌트를 잘 보고 자유롭게 도전해봐! ⚡"`;
+      syncCheerMonsterReaction('idle', previewSpeech);
+    } else if (isMinseo) {
+      document.getElementById('cheerSpeech').textContent = `"민서야 힘내! 예쁜 별빛을 모아보자! 🌸"`;
     } else {
-      document.getElementById('cheerSpeech').textContent = isMinseo
-        ? `"민서야 힘내! 예쁜 별빛을 모아보자! 🌸"`
-        : `"민수야 조금만 더 집중해봐! ⚡"`;
+      syncCheerMonsterReaction(currentIndex === 0 || isRevengeMode ? 'stageStart' : 'idle');
     }
 
     // 오디오 버튼 제어 (영어 및 국어 듣기 문제 지원)
@@ -331,6 +374,7 @@
 
     if (isCorrect) {
       playSound('correct');
+      syncCheerMonsterReaction('correct');
       recordCorrectItem(currentUser, currentSubj, q);
       if (!guardianQuestionIds.has(q)) guardianQuestionIds.set(q, `${guardianAttemptId}:${crypto.randomUUID()}`);
       global.StudyActivity?.recordCorrect?.(guardianQuestionIds.get(q));
@@ -372,6 +416,7 @@
       }
     } else {
       playSound('wrong');
+      syncCheerMonsterReaction('encourage');
       recordWrongItem(currentUser, currentSubj, q);
       if (!sessionMissedQuestions.some(m => m.q === q.q)) {
         sessionMissedQuestions.push(q);
@@ -495,7 +540,16 @@
       speakFairyTTS(isMinseo ? "축하해! 퀘스트 완료!" : "퀘스트 완료!");
     }
 
-    if (isMinseo) UI.skinClearModalForMinseo();
+    if (isMinseo) {
+      UI.skinClearModalForMinseo();
+    } else if (global.MonsterRoster) {
+      syncCheerMonsterReaction('clear');
+      const monster = global.MonsterRoster.getSelectedMonster();
+      const clearPartnerEl = document.getElementById('clearPartnerText');
+      if (clearPartnerEl && monster) {
+        clearPartnerEl.textContent = `${monster.number} ${monster.name} ➔ 100% 💖`;
+      }
+    }
     UI.showModal('clearModal');
 
     const curKoreanSubj = KOREAN_SUBJ_MAP[currentSubj] || "국어";

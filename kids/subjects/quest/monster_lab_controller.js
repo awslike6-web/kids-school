@@ -284,6 +284,13 @@
         minseoChamber.classList.add('flex');
       }
 
+      const prevBtn = document.getElementById('monsterPrevBtn');
+      const nextBtn = document.getElementById('monsterNextBtn');
+      const chipsWrap = document.getElementById('monsterRosterChips');
+      if (prevBtn) prevBtn.classList.add('hidden');
+      if (nextBtn) nextBtn.classList.add('hidden');
+      if (chipsWrap) chipsWrap.classList.add('hidden');
+
       // 서랍 그리드 스위칭 (민수 5대 교과 숨김, 민서 하루/국어/수학/영어/용어방 노출)
       const minsuGrid = document.getElementById('minsuSubjectGrid');
       if (minsuGrid) minsuGrid.classList.add('hidden');
@@ -387,17 +394,14 @@
       const speech = document.getElementById('speechText');
       if (speech) speech.textContent = simpleDialogues[0];
 
-      const pName = document.getElementById('partnerName');
-      if (pName) pName.textContent = '네온 드래곤';
+      const prevBtn = document.getElementById('monsterPrevBtn');
+      const nextBtn = document.getElementById('monsterNextBtn');
+      const chipsWrap = document.getElementById('monsterRosterChips');
+      if (prevBtn) prevBtn.classList.remove('hidden');
+      if (nextBtn) nextBtn.classList.remove('hidden');
+      if (chipsWrap) chipsWrap.classList.remove('hidden');
 
-      const pDot = document.getElementById('partnerDot');
-      if (pDot) pDot.className = 'w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse';
-
-      const pRole = document.getElementById('partnerRole');
-      if (pRole) {
-        pRole.textContent = '수호 비스트';
-        pRole.className = 'text-[11px] text-neon-cyan font-bold';
-      }
+      renderActivePartnerMonster('idle');
 
       const qTitle = document.getElementById('mainQuestTitle');
       if (qTitle) qTitle.textContent = '오늘의 5분 몬스터 던전 입장! 🚀';
@@ -416,26 +420,121 @@
     }
   }
 
-  // 5. 콕 찌르기 (Poke) 인터랙션
+  // 4-2. 👾 파트너 몬스터 로스터 렌더링 & 전환 (1호 클레이 바이트 ↔ 2호 콧툰봉돔돌)
+  let monsterTapCount = 0;
+  let monsterIdleTimer = null;
+
+  function renderActivePartnerMonster(poseKey = 'idle', customSpeech = null, isRage = false) {
+    if (isMinseo || !window.MonsterRoster) return;
+    const monster = window.MonsterRoster.getSelectedMonster();
+    window.MonsterRoster.preloadMonsterAssets(monster.id);
+
+    const viewportWrap = document.getElementById('monsterViewportWrap');
+    const monsterImg = document.getElementById('monsterImg');
+    const pedestalImg = document.getElementById('pedestalImg');
+    const pedestalGlow = document.getElementById('pedestalGlowRing');
+    const holoCode = document.getElementById('scpHoloCodeText');
+    const pName = document.getElementById('partnerName');
+    const pDot = document.getElementById('partnerDot');
+    const pRole = document.getElementById('partnerRole');
+    const speech = document.getElementById('speechText');
+
+    if (pName) pName.textContent = `${monster.number} · ${monster.name}`;
+    if (pRole) {
+      pRole.textContent = monster.role;
+      pRole.className = monster.hasBackground
+        ? 'text-[11px] text-amber-400 font-bold'
+        : 'text-[11px] text-neon-cyan font-bold';
+    }
+    if (pDot) {
+      pDot.className = monster.hasBackground
+        ? 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse'
+        : 'w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse';
+    }
+    if (holoCode && monster.code) holoCode.textContent = monster.code;
+
+    if (viewportWrap) {
+      viewportWrap.classList.toggle('scp-viewport-frame', !!monster.hasBackground);
+      viewportWrap.classList.toggle('mb-[88px]', !monster.hasBackground);
+      viewportWrap.classList.toggle('mb-2', !!monster.hasBackground);
+      viewportWrap.classList.toggle('scp-rage-overheat', !!isRage);
+    }
+    if (pedestalImg) pedestalImg.classList.toggle('opacity-0', !!monster.hasBackground);
+    if (pedestalGlow) pedestalGlow.classList.toggle('opacity-0', !!monster.hasBackground);
+
+    if (monsterImg) {
+      const nextSrc = (monster.poses && monster.poses[poseKey]) || monster.poses.idle;
+      if (monsterImg.getAttribute('src') !== nextSrc) {
+        monsterImg.src = nextSrc;
+      }
+      monsterImg.alt = monster.name;
+      monsterImg.classList.toggle('animate-monster-float', !monster.hasBackground && poseKey === 'idle');
+      monsterImg.classList.remove('pose-swap-bounce');
+      void monsterImg.offsetWidth;
+      monsterImg.classList.add('pose-swap-bounce');
+    }
+
+    if (speech) {
+      speech.textContent = customSpeech || (monster.labDialogues && monster.labDialogues.idle) || simpleDialogues[0];
+    }
+
+    document.querySelectorAll('[data-monster-chip]').forEach((btn) => {
+      const isSelected = btn.getAttribute('data-monster-chip') === monster.id;
+      btn.className = isSelected
+        ? 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-neon-purple/40 border-neon-cyan text-white shadow-[0_0_10px_rgba(0,240,255,0.35)]'
+        : 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-lab-card/60 border-white/15 text-gray-400 hover:text-white';
+    });
+  }
+
+  function selectPartnerMonster(monsterId) {
+    if (!window.MonsterRoster) return;
+    pokeSound('level');
+    triggerHaptic(25);
+    monsterTapCount = 0;
+    clearTimeout(monsterIdleTimer);
+    window.MonsterRoster.setSelectedMonsterId(monsterId);
+    renderActivePartnerMonster('idle');
+  }
+
+  function cyclePartnerMonster(dir = 1) {
+    if (!window.MonsterRoster) return;
+    const nextId = window.MonsterRoster.getNextMonsterId(dir);
+    selectPartnerMonster(nextId);
+  }
+
+  // 5. 콕 찌르기 (Poke) 인터랙션 (포즈 전환: 1회 greet / 2~4회 walk_left·right / 5회 rage 과열)
   function pokeMonster(event) {
     if (event) event.stopPropagation();
     pokeSound(isMinseo ? 'pop' : 'monster');
     triggerHaptic(30);
 
-    const targetAnim = isMinseo 
-      ? document.getElementById('characterPlushieWrap') 
-      : document.getElementById('monsterImg');
     const bubble = document.getElementById('monsterSpeechBubble');
     const speechText = document.getElementById('speechText');
 
-    if (targetAnim) {
-      targetAnim.classList.remove('poke-bounce');
-      void targetAnim.offsetWidth;
-      targetAnim.classList.add('poke-bounce');
+    if (!isMinseo && window.MonsterRoster) {
+      monsterTapCount += 1;
+      clearTimeout(monsterIdleTimer);
+      const reaction = window.MonsterRoster.getLabTapResponse(monsterTapCount);
+      if (reaction.isRage) {
+        triggerHaptic([40, 50, 60]);
+      }
+      renderActivePartnerMonster(reaction.poseKey, reaction.speech, reaction.isRage);
+      monsterIdleTimer = setTimeout(() => {
+        monsterTapCount = 0;
+        renderActivePartnerMonster('idle');
+      }, 3600);
+    } else {
+      const targetAnim = isMinseo
+        ? document.getElementById('characterPlushieWrap')
+        : document.getElementById('monsterImg');
+      if (targetAnim) {
+        targetAnim.classList.remove('poke-bounce');
+        void targetAnim.offsetWidth;
+        targetAnim.classList.add('poke-bounce');
+      }
+      dIndex = (dIndex + 1) % simpleDialogues.length;
+      if (speechText) speechText.textContent = simpleDialogues[dIndex];
     }
-
-    dIndex = (dIndex + 1) % simpleDialogues.length;
-    if (speechText) speechText.textContent = simpleDialogues[dIndex];
 
     if (bubble) {
       bubble.classList.remove('animate-bubble');
@@ -479,14 +578,19 @@
     }
   }
 
-  // 8. 아이 원터치 직결 출격 파이프라인
+  // 8. 아이 원터치 직결 출격 파이프라인 (출격 시 roar 포효 포즈 연출 후 진입)
   function launchQuestDirect(subj = 'math') {
     pokeSound('launch');
     triggerHaptic([50, 80, 50]);
 
-    // 출격 중 시각 피드백 (버튼 눌림 유지)
+    // 출격 중 시각 피드백 (버튼 눌림 유지 & 파트너 몬스터 포효 포즈 전환)
     const btn = document.getElementById('mainQuestBtn');
     if (btn) btn.classList.add('scale-95', 'opacity-90');
+
+    if (!isMinseo && window.MonsterRoster) {
+      const monster = window.MonsterRoster.getSelectedMonster();
+      renderActivePartnerMonster('roar', (monster.labDialogues && monster.labDialogues.roar) || '출격 준비 완료! 🚀', true);
+    }
 
     const childKey = isMinseo ? 'minseo' : 'minsu';
     const settings = window.currentParentSettings || {};
@@ -497,7 +601,7 @@
     setTimeout(() => {
       const targetUrl = `quest_runner.html?subject=${encodeURIComponent(subj)}&user=${encodeURIComponent(currentChild)}${chosenUnit ? `&unit=${encodeURIComponent(chosenUnit)}` : ''}`;
       window.location.href = targetUrl;
-    }, 250);
+    }, 380);
   }
 
   // 9. 과목 선택 (서랍에서 터치 시 직결 출격)
@@ -598,6 +702,9 @@
   window.triggerHaptic = triggerHaptic;
   window.pokeSound = pokeSound;
   window.applyTheme = applyTheme;
+  window.renderActivePartnerMonster = renderActivePartnerMonster;
+  window.selectPartnerMonster = selectPartnerMonster;
+  window.cyclePartnerMonster = cyclePartnerMonster;
   window.pokeMonster = pokeMonster;
   window.handleStartQuest = handleStartQuest;
   window.openDrawer = openDrawer;
@@ -620,8 +727,11 @@
   window.selectedMode = selectedMode;
   window.targetSubject = targetSubject;
 
-  // 14. 페이지 진입 즉시 테마 적용 및 버튼 노출 제어
+  // 14. 페이지 진입 즉시 테마 적용, 포즈 에셋 프리로드 및 버튼 노출 제어
   window.addEventListener('DOMContentLoaded', () => {
+    if (window.MonsterRoster) {
+      window.MonsterRoster.preloadAllMonsters();
+    }
     applyTheme();
     updateParentProgressBtnVisibility();
   });
