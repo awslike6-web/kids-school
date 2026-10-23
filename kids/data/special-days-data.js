@@ -4,6 +4,25 @@
 
 const DEFAULT_SPECIAL_DAYS_DATA = [
   {
+    id: "evt_minseo_pet_trainer_20261022",
+    author: "민서",
+    category: "학교생활/진로",
+    categoryIcon: "🐕",
+    title: "🐕 진로체험: 반려동물 훈련사와의 따뜻한 만남!",
+    date: "2026-10-22",
+    desc: "진로주간을 맞아 1-2학년 친구들이 멋진 반려동물 훈련사 선생님과 함께하는 특별한 진로체험 시간을 가졌습니다! 민서도 훈련사 선생님의 지도에 따라 크고 온순한 강아지의 보드라운 털을 다정하게 쓰다듬어 주며 활짝 웃는 얼굴로 깊은 교감을 나누었어요. 동물과 소통하고 교감하며 존중하는 법, 그리고 반려동물 훈련사의 멋진 역할을 직접 배우며 마음이 한 뼘 더 자란 뜻깊은 하루였습니다! 🐶🐾✨ (담임 조현애 선생님 알림)",
+    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261022_pet_trainer_01.jpg",
+    galleryImages: [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261022_pet_trainer_01.jpg"
+    ],
+    videoUrl: "",
+    likes: 12,
+    stickers: { heart: 8, thumb: 6, star: 5, trophy: 3 },
+    comments: [
+      { author: "아빠", text: "강아지를 무서워하지 않고 다정하게 쓰다듬는 민서 모습이 정말 사랑스럽다! 🐶❤️", date: "2026-10-22" }
+    ]
+  },
+  {
     id: "evt_school_flea_market_20261021",
     author: "민서",
     category: "학교생활/행사",
