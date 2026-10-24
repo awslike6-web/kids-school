@@ -1,0 +1,51 @@
+/* 수학 연산 조작방 전용: 동작 상태와 화면 크기를 함께 보존한다. */
+.cpa-app {max-width:1000px;margin:24px auto;padding:0 16px 48px;color:#334155;}
+.cpa-app * {box-sizing:border-box;}
+.cpa-app h1,.cpa-app h2,.cpa-app h3 {font-family:Jua,sans-serif;word-break:keep-all;}
+.cpa-intro {background:#fff;border:2px solid #fbcfe8;border-radius:24px;padding:24px;text-align:center;}
+.cpa-nav {display:flex;gap:8px;flex-wrap:wrap;margin:20px 0;}
+.cpa-app button,.cpa-app select {min-height:44px;border:2px solid #cbd5e1;border-radius:12px;background:#fff;color:#334155;padding:9px 14px;font:inherit;cursor:pointer;}
+.cpa-app button:hover,.cpa-app button[aria-pressed=true] {background:#fce7f3;border-color:#be185d;color:#831843;}
+.cpa-app button:focus-visible,.cpa-app select:focus-visible {outline:3px solid #0369a1;outline-offset:3px;}
+.cpa-app button:disabled,.cpa-app select:disabled {opacity:.6;cursor:default;}
+.cpa-app .primary {background:#0369a1;border-color:#0369a1;color:white;}
+.cpa-panel {background:white;border:2px solid #e2e8f0;border-radius:24px;padding:24px;}
+.cpa-panel[hidden] {display:none!important;}
+.cpa-actions {display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:16px 0;}
+.cpa-formula {font-family:Jua,sans-serif;font-size:clamp(1.45rem,4vw,2rem);text-align:center;margin:16px 0;color:#9d174d;overflow-wrap:anywhere;}
+.cpa-guide {background:#fffbeb;border-left:5px solid #d97706;border-radius:12px;padding:16px;line-height:1.8;min-height:64px;white-space:pre-line;}
+.cpa-frame-pair {display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+.cpa-frame-group {min-width:0;text-align:center;}
+.cpa-frame-group h3 {margin:12px 0 6px;font-size:1rem;}
+.cpa-frame {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;max-width:320px;background:#f1f5f9;border:3px solid #94a3b8;padding:8px;border-radius:14px;margin:12px auto;}
+.cpa-slot {aspect-ratio:1;min-width:0;background:white;border:1px dashed #94a3b8;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.cpa-chip {display:block;width:72%;height:72%;border-radius:50%;border:2px solid #334155;flex-shrink:0;}
+.cpa-chip.red {background:#fb7185;border-color:#9f1239;}
+.cpa-chip.blue {background:#38bdf8;border-color:#075985;}
+.cpa-chip.gold {background:#fbbf24;border-color:#92400e;}
+.cpa-chip.removed {background:#cbd5e1;border-color:#64748b;}
+.cpa-flight {position:fixed;z-index:20000;pointer-events:none;box-sizing:border-box;}
+.cpa-removed {display:grid;grid-template-columns:repeat(9,minmax(0,1fr));max-width:420px;gap:4px;padding:8px;background:#f8fafc;border-radius:12px;margin:12px auto;}
+.cpa-removed .cpa-slot {border-style:dotted;}
+.cpa-comparison {display:grid;gap:10px;margin-top:16px;}
+.cpa-comparison p {margin:0;border:1px solid #cbd5e1;border-radius:12px;padding:12px;line-height:1.7;}
+.cpa-train {display:flex;align-items:stretch;gap:12px;flex-wrap:wrap;margin:24px 0;}
+.cpa-wagon {flex:1 1 180px;border:3px solid #0284c7;border-radius:20px;background:#f0f9ff;padding:16px;box-shadow:0 8px 0 -3px #334155;}
+.cpa-cargo {display:flex;gap:5px;flex-wrap:wrap;min-height:36px;margin-top:12px;}
+.cpa-cargo .cpa-chip {width:22px;height:22px;}
+.cpa-partner-dice {width:70px;height:70px;border:3px solid #7c3aed;border-radius:18px;display:grid;place-items:center;background:#f5f3ff;font:2rem Jua,sans-serif;margin:12px auto;}
+.cpa-balloon {border-radius:50% 50% 45% 45%!important;background:#fce7f3!important;min-width:52px;min-height:60px!important;}
+.cpa-balloon.popped {background:#dcfce7!important;border-color:#15803d!important;transform:scale(.88);}
+.cpa-picture {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0;}
+.cpa-picture>div {border:2px dashed #fb7185;border-radius:18px;background:#fff7ed;padding:14px;}
+.cpa-fruit {display:flex;flex-wrap:wrap;font-size:1.8rem;gap:6px;}
+.cpa-builder {display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:1.3rem;}
+.cpa-builder select {max-width:90px;}
+.top-bar {flex-wrap:wrap;gap:8px;}
+#ttsToggleBtn {color:#334155!important;}
+@media(max-width:520px) {
+  .cpa-app {padding:0 10px 30px;}.cpa-panel {padding:16px 12px;}.cpa-frame-pair {grid-template-columns:1fr;gap:2px;}
+  .cpa-frame {max-width:260px;}.cpa-nav button {flex:1 1 42%;padding:9px 6px;}
+  .cpa-picture {grid-template-columns:1fr;}.cpa-intro {padding:18px 12px;}.cpa-wagon {flex-basis:100%;}
+}
+@media(prefers-reduced-motion:reduce) {.cpa-app * {animation:none!important;transition:none!important;}}

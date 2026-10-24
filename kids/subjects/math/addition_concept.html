@@ -2,294 +2,49 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>➕ 덧셈 개념 탐험대 🚀</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>➕ 덧셈 개념 탐험대</title>
   <link rel="stylesheet" href="../../css/math_factors.css">
-  <style>
-    .ten-frame {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 6px;
-      max-width: 340px;
-      margin: 15px auto;
-      background: #f8fafc;
-      padding: 10px;
-      border-radius: 14px;
-      border: 3px solid #cbd5e1;
-    }
-    .frame-slot {
-      aspect-ratio: 1;
-      background: #fff;
-      border: 2px dashed #94a3b8;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-    }
-    .candy-chip-red { width: 36px; height: 36px; border-radius: 50%; background: #f43f5e; border: 2px solid #be123c; animation: popIn 0.2s ease; }
-    .candy-chip-blue { width: 36px; height: 36px; border-radius: 50%; background: #0284c7; border: 2px solid #0369a1; animation: popIn 0.2s ease; }
-  </style>
+  <link rel="stylesheet" href="arithmetic_cpa.css">
 </head>
-<body>
-
+<body data-operation="add">
   <canvas id="confetti-canvas"></canvas>
+  <div class="top-bar"><div class="profile-badge"><span id="userIcon">👧</span> <span id="userName">민서 대원</span></div>
+    <div><button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성</button> <a class="exit-btn" href="math.html">🔙 수학 탐험 본부</a></div></div>
+  <main class="cpa-app">
+    <header class="cpa-intro"><h1>➕ 구슬을 모으는 덧셈 탐험대</h1><p>손으로 옮기고, 그림으로 보고, 식으로 말해요.</p></header>
+    <nav class="cpa-nav" aria-label="덧셈 활동">
+      <button data-panel="panel-ten" aria-pressed="false">🔴 10의 짝꿍</button><button data-panel="panel-strategy" aria-pressed="true">✨ 10 만들어 더하기</button>
+      <button data-panel="panel-train" aria-pressed="false">🚂 세 수 기차</button><button data-panel="panel-partner" aria-pressed="false">🎈 짝꿍 풍선</button>
+      <button data-panel="panel-story" aria-pressed="false">🍎 그림 문장제</button><button data-panel="panel-quiz" aria-pressed="false">🎯 개념 퀴즈</button>
+    </nav>
+    <section id="panel-ten" class="cpa-panel" hidden><h2>10을 만드는 짝꿍 찾기</h2><p>빨간 구슬 수를 고르면 파란 짝꿍이 빈칸을 채워요.</p>
+      <div id="ten-options" class="cpa-actions"></div><div class="cpa-frame" id="add-ten-frame"></div><p class="cpa-formula" id="add-frame-formula"></p><p id="add-frame-sub-formula" class="cpa-guide"></p><button id="ten-read">🔊 설명 듣기</button></section>
+    <section id="panel-strategy" class="cpa-panel"><h2>어느 쪽을 10으로 채울까요?</h2>
+      <div class="cpa-actions" id="make10-preset-buttons"><label>앞의 수 <select id="lesson-a"></select></label><span>+</span><label>뒤의 수 <select id="lesson-b"></select></label><button id="strategy-new">🎲 새 덧셈식</button></div>
+      <div class="cpa-actions"><button data-strategy="left" aria-pressed="true">뒤의 수 가르기 · 왼쪽 10</button><button data-strategy="right" aria-pressed="false">앞의 수 가르기 · 오른쪽 10</button></div>
+      <div class="cpa-formula" id="make10-equation-view" aria-live="polite"></div>
+      <div class="cpa-frame-pair"><div class="cpa-frame-group"><h3>앞의 수에서 시작한 판 · <span id="left-count"></span></h3><div class="cpa-frame" id="make10-left"></div></div>
+        <div class="cpa-frame-group"><h3>뒤의 수에서 시작한 판 · <span id="right-count"></span></h3><div class="cpa-frame" id="make10-right"></div></div></div>
 
-  <div class="top-bar">
-    <div class="profile-badge">
-      <span id="userIcon">👧</span> <span id="userName">민서 대원</span>
-    </div>
-    <div style="display: flex; gap: 8px; align-items: center;">
-      <button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()" style="background: rgba(171, 71, 188, 0.25); border-color: #ab47bc; color: #fff;">🔊 요정 음성 ON</button>
-      <button class="exit-btn" onclick="exitRoom()">🔙 수학 탐험 본부</button>
-    </div>
-  </div>
-
-  <div class="math-room-container">
-
-    <header class="math-header-hero">
-      <h1 class="hero-title">➕ 덧셈(더하기) 개념 탐험대 🚀</h1>
-      <p class="hero-subtitle">10 만들기 짝꿍수와 받아올림 가르기/모으기로 덧셈의 원리를 마스터해요!</p>
-    </header>
-
-    <!-- 1. 10 만들기 텐프레임 -->
-    <section class="math-section-card">
-      <div class="section-header-wrap">
-        <div>
-          <span class="section-badge badge-candy">섹션 1 : 10 만들기 짝꿍수</span>
-          <h2 class="section-title">🔴 10을 만드는 덧셈 짝꿍 찾기</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">빨간 칩 개수를 누르면 10을 채우는 파란 칩 짝꿍이 나타나요!</p>
-        </div>
-        <button class="speaker-btn" onclick="fairySpeak('10을 만드는 짝꿍수를 찾아보세요!')">🔊</button>
-      </div>
-
-      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
-        <button class="candy-num-btn active" onclick="setAddTenFrame(1, this)">1 + 9 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(2, this)">2 + 8 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(3, this)">3 + 7 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(4, this)">4 + 6 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(5, this)">5 + 5 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(6, this)">6 + 4 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(7, this)">7 + 3 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(8, this)">8 + 2 = 10</button>
-        <button class="candy-num-btn" onclick="setAddTenFrame(9, this)">9 + 1 = 10</button>
-      </div>
-
-      <div class="ten-frame" id="add-ten-frame"></div>
-
-      <div style="background:#fff; border-radius:16px; padding:15px; text-align:center; border:2px solid #e2e8f0; font-family:'Jua',sans-serif; margin-top:10px;">
-        <div style="font-size:1.7rem; color:#db2777;" id="add-frame-formula">1 + 9 = 10</div>
-        <div style="font-size:1.05rem; color:#475569; margin-top:4px;" id="add-frame-sub-formula">1과 9를 모으면 10이 돼요!</div>
-      </div>
+      <p class="cpa-guide" id="make10-step-guide" aria-live="polite"></p>
+      <div class="cpa-actions"><button class="primary" id="strategy-step">1단계 · 구슬 옮기기</button><button id="strategy-reset">처음부터</button><button id="strategy-read">🔊 설명 듣기</button></div>
+      <details><summary>두 가지 방법 나란히 보기</summary><p class="cpa-guide" id="strategy-comparison"></p></details>
     </section>
-
-    <!-- 2. 10을 이용해 더하기 (받아올림 기초) -->
-    <section class="math-section-card">
-      <div class="section-header-wrap">
-        <div>
-          <span class="section-badge badge-pairs">섹션 2 : 10을 만들어 더하기</span>
-          <h2 class="section-title">✨ 받아올림 덧셈의 원리 탐험</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">앞의 수를 10으로 만들기 위해 뒤의 수를 갈라서 10을 먼저 채우고 더해요!</p>
-        </div>
-        <button class="speaker-btn" onclick="speakCurrentMake10()">🔊</button>
-      </div>
-
-      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:15px;" id="make10-preset-buttons">
-        <button class="candy-num-btn active" onclick="selectMake10(8, 5, this)">8 + 5</button>
-        <button class="candy-num-btn" onclick="selectMake10(9, 4, this)">9 + 4</button>
-        <button class="candy-num-btn" onclick="selectMake10(7, 6, this)">7 + 6</button>
-        <button class="candy-num-btn" onclick="selectMake10(8, 7, this)">8 + 7</button>
-        <button class="candy-num-btn" onclick="selectMake10(9, 6, this)">9 + 6</button>
-        <button class="candy-num-btn" onclick="selectMake10(6, 7, this)">6 + 7</button>
-        <button class="candy-num-btn" onclick="selectMake10(7, 5, this)">7 + 5</button>
-        <button class="candy-num-btn" style="background:#ec4899; color:#fff; font-weight:800;" onclick="randomMake10()">🎲 랜덤 덧셈식</button>
-      </div>
-
-      <div style="max-width:560px; margin:0 auto; background:#fff; border-radius:20px; padding:22px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 6px 16px rgba(0,0,0,0.04);">
-        <div style="display:flex; justify-content:center; align-items:center; gap:12px; font-family:'Jua'; font-size:2.2rem; color:#0284c7; margin-bottom:15px; flex-wrap:wrap;" id="make10-equation-view"></div>
-        <div style="background:#fdfbf7; border:2px dashed #f472b6; border-radius:16px; padding:16px; font-family:'Jua'; font-size:1.25rem; color:#334155; line-height:1.8; text-align:left;" id="make10-step-guide"></div>
-      </div>
-    </section>
-
-    <!-- 3. 덧셈 번개 퀴즈 -->
-    <section class="math-section-card">
-      <div class="section-header-wrap">
-        <div>
-          <span class="section-badge badge-grid">섹션 3 : 덧셈 실전 퀴즈</span>
-          <h2 class="section-title">🎯 덧셈 개념 번개 퀴즈</h2>
-          <p class="section-desc" style="color:#334155; font-weight:600;">빈칸에 들어갈 알맞은 숫자를 골라주세요!</p>
-        </div>
-        <button class="speaker-btn" onclick="fairySpeak('빈칸에 들어갈 알맞은 답을 골라보세요!')">🔊</button>
-      </div>
-
-      <div style="max-width:480px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 4px 15px rgba(0,0,0,0.05);">
-        <div style="font-family:'Jua'; font-size:2.4rem; color:#be185d; margin-bottom:20px;" id="quiz-question">7 + 3 = ?</div>
-        
-        <div id="quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;"></div>
-
-        <div id="quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:30px;"></div>
-        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem;" onclick="nextQuiz()">다음 문제 ➡️</button>
-      </div>
-    </section>
-
-  </div>
-
-  <script src="../../config.js"></script>
-  <script src="../../core/core.js"></script>
-  <script src="../../core/notion-helper.js"></script>
-  <script src="../../core/fairy-config.js"></script>
-  <script src="../../core/fairy-engine.js"></script>
-  <script src="../../core/fairy-chatbot.js"></script>
-  <script src="./js/math_quiz_engine.js"></script>
-
-  <script>
-  window.currentSubject = "수학"; // 🚨 전역 과목명 명시
-    function setAddTenFrame(redCount, btn) {
-      document.querySelectorAll('.candy-num-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-
-      const frame = document.getElementById('add-ten-frame');
-      frame.innerHTML = '';
-      const blueCount = 10 - redCount;
-
-      for (let i = 0; i < 10; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'frame-slot';
-        if (i < redCount) {
-          slot.innerHTML = '<div class="candy-chip-red"></div>';
-        } else {
-          slot.innerHTML = '<div class="candy-chip-blue"></div>';
-        }
-        frame.appendChild(slot);
-      }
-
-      document.getElementById('add-frame-formula').textContent = `${redCount} + ${blueCount} = 10`;
-      document.getElementById('add-frame-sub-formula').textContent = `${redCount}과 ${blueCount}를 모으면 10이 돼요!`;
-      if (btn && typeof fairySpeak === 'function') {
-        fairySpeak(`${redCount}의 10 만들기 짝꿍은 ${blueCount}입니다!`);
-      }
-    }
-
-    let currentMake10A = 8, currentMake10B = 5;
-
-    function selectMake10(a, b, btn) {
-      currentMake10A = a;
-      currentMake10B = b;
-      document.querySelectorAll('#make10-preset-buttons .candy-num-btn').forEach(el => el.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      renderMake10Visuals(true);
-    }
-
-    function randomMake10() {
-      const list = [
-        [9, 2], [9, 3], [9, 4], [9, 5], [9, 6], [9, 7], [9, 8], [9, 9],
-        [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9],
-        [7, 4], [7, 5], [7, 6], [7, 7], [7, 8], [7, 9],
-        [6, 5], [6, 6], [6, 7], [6, 8], [6, 9]
-      ];
-      const pair = list[Math.floor(Math.random() * list.length)];
-      selectMake10(pair[0], pair[1], null);
-    }
-
-    function renderMake10Visuals(shouldSpeak = false) {
-      const a = currentMake10A;
-      const b = currentMake10B;
-      const need = 10 - a;
-      const rem = b - need;
-      const sum = a + b;
-
-      const eqView = document.getElementById('make10-equation-view');
-      if (eqView) {
-        eqView.innerHTML = `
-          <div style="background:#fee2e2; padding:8px 16px; border-radius:12px; color:#b91c1c; font-size:1.8rem; font-weight:bold;">${a} <span style="font-size:1.1rem; color:#ef4444; font-weight:normal;">(${need} 필요)</span></div>
-          <div style="font-size:1.8rem; color:#64748b;">+</div>
-          <div style="background:#e0f2fe; padding:8px 16px; border-radius:12px; color:#0369a1; font-size:1.8rem; font-weight:bold;">${b} <span style="font-size:1.1rem; color:#0284c7; font-weight:normal;">(${need}와 ${rem}로 가르기)</span></div>
-          <div style="font-size:1.8rem; color:#64748b;">=</div>
-          <div style="background:#dcfce7; padding:8px 16px; border-radius:12px; color:#15803d; font-size:1.8rem; font-weight:bold;">${sum}</div>
-        `;
-      }
-
-      const guide = document.getElementById('make10-step-guide');
-      if (guide) {
-        guide.innerHTML = `
-          <div style="margin-bottom:8px;">1단계: <strong>${b}</strong>를 <span style="color:#b91c1c; background:#fee2e2; padding:3px 10px; border-radius:10px; font-weight:bold;">[${need}]</span>와 <span style="color:#0369a1; background:#e0f2fe; padding:3px 10px; border-radius:10px; font-weight:bold;">[${rem}]</span>(으)로 갈라요.</div>
-          <div style="margin-bottom:8px;">2단계: <strong>${a}</strong>에 <strong>${need}</strong>을 더해 먼저 <span style="color:#15803d; background:#dcfce7; padding:3px 10px; border-radius:10px; font-weight:bold;">[10]</span>을 만들어요! (${a} + ${need} = 10)</div>
-          <div>3단계: 10에 남은 <strong>${rem}</strong>을 더하면 ➔ <strong style="color:#e11d48; font-size:1.5rem; text-decoration:underline;">${sum}</strong> 완성! 🎉 (10 + ${rem} = ${sum})</div>
-        `;
-      }
-
-      if (shouldSpeak && typeof fairySpeak === 'function') {
-        fairySpeak(`${a} 더하기 ${b}는, ${a}에 ${need}을 더해 10을 만들고 남은 ${rem}을 더해 ${sum}이 됩니다!`);
-      }
-    }
-
-    function speakCurrentMake10() {
-      const a = currentMake10A;
-      const b = currentMake10B;
-      const need = 10 - a;
-      const rem = b - need;
-      const sum = a + b;
-      if (typeof fairySpeak === 'function') {
-        fairySpeak(`${a} 더하기 ${b}는, ${b}를 ${need}과 ${rem}으로 갈라 10을 먼저 만들고 ${rem}을 더하면 ${sum}이 됩니다!`);
-      }
-    }
-
-    const QUIZ_LIST = [
-      { q: "7 + □ = 10", ans: 3, choices: [2, 3, 4, 5] },
-      { q: "9 + 4 = 9 + 1 + □", ans: 3, choices: [2, 3, 4, 5] },
-      { q: "10 만들기: 6의 짝꿍수는?", ans: 4, choices: [2, 3, 4, 5] },
-      { q: "8 + 6 = 10 + □", ans: 4, choices: [3, 4, 5, 6] },
-      { q: "8 + 5 = 10 + □", ans: 3, choices: [1, 2, 3, 4] },
-      { q: "10 만들기: 3의 짝꿍수는?", ans: 7, choices: [5, 6, 7, 8] },
-      { q: "7 + 5 = 10 + □", ans: 2, choices: [1, 2, 3, 4] },
-      { q: "6 + 8 = 10 + □", ans: 4, choices: [3, 4, 5, 6] }
-    ];
-
-    function renderQuiz() {
-      if (window.MathQuizEngine) {
-        MathQuizEngine.init(QUIZ_LIST, {
-          questionId: 'quiz-question',
-          choicesId: 'quiz-choices',
-          feedbackId: 'quiz-feedback',
-          rewardSubject: '수학',
-          choiceBtnClass: 'divide-btn'
-        });
-      }
-    }
-
-    function checkAnswer(selected, correct) {
-      if (window.MathQuizEngine) {
-        MathQuizEngine.checkAnswer(selected, correct);
-      }
-    }
-
-    function nextQuiz() {
-      if (window.MathQuizEngine) {
-        MathQuizEngine.next();
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      let currentProfile = localStorage.getItem('currentUser') || 'daughter';
-      const name = currentProfile === 'son' ? '민수' : '민서';
-      const icon = currentProfile === 'son' ? '👦' : '👧';
-      const themeClass = currentProfile === 'daughter' ? 'theme--slime' : 'theme--arcade';
-      document.body.className = themeClass;
-      document.getElementById('userName').textContent = `${name} 대원`;
-      document.getElementById('userIcon').textContent = icon;
-
-      setAddTenFrame(1, null);
-      renderMake10Visuals(false);
-      renderQuiz();
-
-      if (typeof initFairyAudio === 'function') initFairyAudio();
-      if (typeof initFairyChat === 'function') initFairyChat("MATH", "덧셈개념");
-      if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
-    });
-  </script>
+    <section id="panel-train" class="cpa-panel" hidden><h2>🚂 세 수의 덧셈 기차</h2><p>앞의 두 수를 먼저 계산하고, 그 결과에 마지막 수를 계산해요.</p>
+      <div class="cpa-formula" id="train-equation"></div><div class="cpa-train" id="train-cars"></div><p id="train-guide" class="cpa-guide" aria-live="polite"></p>
+      <div class="cpa-actions"><button id="train-step" class="primary">1단계</button><button id="train-reset">다시 출발</button><button id="train-new">새 기차</button><button id="train-read">🔊 설명 듣기</button></div></section>
+    <section id="panel-partner" class="cpa-panel" hidden><h2>🎈 10의 짝꿍 풍선 팡!</h2><p>1부터 9까지 숫자 주사위를 굴리고, 10을 만드는 짝꿍을 찾아요.</p>
+      <div id="partner-dice" class="cpa-partner-dice"></div><div class="cpa-frame" id="partner-frame"></div><p class="cpa-formula" id="partner-formula"></p><div class="cpa-actions" id="partner-choices"></div>
+      <p class="cpa-guide" id="partner-feedback" aria-live="polite"></p><div class="cpa-actions"><button id="partner-roll">🎲 다시 굴리기</button><button id="partner-read">🔊 설명 듣기</button></div></section>
+    <section id="panel-story" class="cpa-panel" hidden><h2>🍎 그림을 보고 식을 만들어요</h2><p id="story-text" class="cpa-guide"></p>
+      <div class="cpa-picture"><div><h3 id="story-count-a"></h3><div id="story-picture-a" class="cpa-fruit" role="img"></div></div><div><h3 id="story-count-b"></h3><div id="story-picture-b" class="cpa-fruit" role="img"></div></div></div>
+      <div class="cpa-builder"><select id="story-a" aria-label="첫 번째 수"></select><select id="story-op" aria-label="계산 기호"><option value="">?</option><option value="+">+</option><option value="-">−</option></select><select id="story-b" aria-label="두 번째 수"></select><span>=</span><select id="story-result" aria-label="계산 결과"></select></div>
+      <div class="cpa-actions"><button id="story-check" class="primary">내 식 확인</button><button id="story-new">새 이야기</button><button id="story-read">🔊 이야기 듣기</button></div><p id="story-feedback" class="cpa-guide" aria-live="polite"></p></section>
+    <section id="panel-quiz" class="cpa-panel" hidden><h2>🎯 덧셈 개념 퀴즈</h2><p class="cpa-formula" id="quiz-question"></p><div id="quiz-choices" class="cpa-actions"></div><p id="quiz-feedback" class="cpa-guide" aria-live="polite"></p><button id="quiz-next">다음 문제</button></section>
+  </main>
+  <script src="../../config.js"></script><script src="../../core/core.js"></script><script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script><script src="../../core/fairy-engine.js"></script><script src="../../core/fairy-chatbot.js"></script>
+  <script src="js/math_quiz_engine.js"></script><script src="js/arithmetic_cpa.js"></script><script src="js/arithmetic_lessons.js"></script>
 </body>
 </html>
