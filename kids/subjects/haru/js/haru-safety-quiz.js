@@ -6,6 +6,12 @@
  * - 닥터 코코 365 응급처치 증상별 가이드 및 부모 대시보드 안심 연동
  * - 노션 학습일지 DB 자동 전송
  */
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 (() => {
   let currentSafetyQuizIndex = 0;
@@ -115,7 +121,7 @@
       licenseCard.style.display = "block";
       const dateEl = document.getElementById("licenseIssueDate");
       if (dateEl) {
-        dateEl.innerText = new Date().toISOString().slice(0, 10);
+        dateEl.innerText = getKstTodayYMD();
       }
     }
 
@@ -193,7 +199,7 @@
     }
 
     const child = window.currentChild || "minseo";
-    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     const consultationLog = {
       key: guide.id,
       title: guide.title,
@@ -250,7 +256,7 @@
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const child = window.currentChild || "minseo";
     const childTitle = child === "minseo" ? "민서" : "민수";
-    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
     const nowIso = new Date().toISOString();
 
@@ -290,7 +296,7 @@
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const child = window.currentChild || "minseo";
     const childTitle = child === "minseo" ? "민서" : "민수";
-    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     const timeStr = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
     const nowIso = new Date().toISOString();
 

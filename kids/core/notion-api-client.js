@@ -4,6 +4,12 @@
 //             Rate Limit(초당 3회) 방어, 블록 텍스트 추출
 // - 골디락스 응집도: ~480줄 컴팩트 독립 모듈
 // ==============================================================================
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 (function(window) {
     'use strict';
@@ -230,7 +236,7 @@
 
     async function fetchLibraryBooksFromNotion(options = {}) {
         const forceRefresh = options.forceRefresh === true;
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = getKstTodayYMD();
         const libCacheKey = `MINMIN_LIBRARY_CACHE_V1_${todayStr}`;
 
         if (!forceRefresh) {

@@ -1,3 +1,9 @@
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 // Load the shared active-study meter once, including pages without core.js.
 (function() {
@@ -522,7 +528,7 @@
   function showCompletionModal() {
     const { childName, isMinsu, isAdmin, subject } = getCurrentReaderInfo();
     const bookId = (STORY_BOOK && STORY_BOOK.id) || window.location.pathname.split('/').pop().replace('.html', '');
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getKstTodayYMD();
     const rewardKey = `mimi_storybook_reward_${bookId}_${childName}_${todayStr}`;
     const alreadyClaimed = localStorage.getItem(rewardKey) === 'true';
 

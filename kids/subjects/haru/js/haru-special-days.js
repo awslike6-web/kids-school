@@ -6,6 +6,12 @@
  * - 4종 감정 도장 & 나만의 느낌 한 줄 작성
  * - 제목 인라인 편집 및 신규 특별한 날 추억 등록
  */
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 (() => {
   let selectedStoryPhotoBase64 = "";
@@ -426,7 +432,7 @@
 
     const category = catInput ? catInput.value : "특별한날";
     const title = titleInput.value.trim();
-    const date = dateInput && dateInput.value.trim() ? dateInput.value.trim() : new Date().toISOString().slice(0, 10);
+    const date = dateInput && dateInput.value.trim() ? dateInput.value.trim() : getKstTodayYMD();
     const desc = descInput.value.trim();
     const photoUrl = selectedStoryPhotoBase64 || (urlInput ? urlInput.value.trim() : "");
     const videoUrl = videoInput ? videoInput.value.trim() : "";

@@ -84,5 +84,41 @@ console.log(`🧪 [Verify] KST 날짜 계약 (고정 시각: UTC 2026-10-25 23:3
   assert(sb.calcStreak([page('2026-10-23T05:00:00.000Z')], '민수') === 0, '사흘 전 학습만 있으면 0일');
 }
 
+// 함수 하나를 소스에서 떼어 내기 (DOM 초기화가 섞인 전역 스크립트용)
+function pickFn(rel, name) {
+  const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  const start = src.indexOf(`function ${name}(`);
+  if (start < 0) throw new Error(`${rel}: ${name} 없음`);
+  let depth = 0;
+  for (let i = src.indexOf('{', start); i < src.length; i++) {
+    if (src[i] === '{') depth++;
+    if (src[i] === '}' && --depth === 0) return src.slice(start, i + 1);
+  }
+  throw new Error(`${rel}: ${name} 추출 실패`);
+}
+
+{
+  // 마음일기·하루방·갤러리·동화 뷰어·노션 통신: 파일마다 둔 KST 헬퍼가 같은 답을 내는지
+  const files = ['kids/core/daily-diary.js', 'kids/common_space/gallery-modal-manager.js', 'kids/common_space/gallery_controller.js',
+    'kids/core/notion-api-client.js', 'kids/js/storybook_engine.js', 'kids/subjects/haru/js/haru-safety-quiz.js',
+    'kids/subjects/haru/js/haru-special-days.js', 'kids/subjects/haru/js/haru-timeline-engine.js'];
+  const bad = files.filter(rel => {
+    const sb = sandbox();
+    vm.runInContext(`${pickFn(rel, 'getKstTodayYMD')}\nthis.f = getKstTodayYMD;`, sb);
+    return sb.f() !== TODAY;
+  });
+  assert(bad.length === 0, `파일 8개의 KST 헬퍼가 모두 ${TODAY} 반환${bad.length ? ' (실패: ' + bad.join(', ') + ')' : ''}`);
+  const raw = files.map(rel => fs.readFileSync(path.join(ROOT, rel), 'utf8')).join('\n');
+  assert(!/new Date\(\)\.toISOString\(\)\.(split\('T'\)\[0\]|slice\(0, ?10\))/.test(raw), '8개 파일에 보정 없는 UTC 날짜 자르기 0건');
+
+  const sb = sandbox();
+  sb.localStorage.setItem('mimi_daily_diaries', JSON.stringify([
+    { childName: '민서', date: TODAY, text: '아침 8시에 쓴 일기' },
+    { childName: '민서', date: '2026-10-25', text: '어제 일기' }
+  ]));
+  vm.runInContext(`${pickFn('kids/core/daily-diary.js', 'getKstTodayYMD')}\n${pickFn('kids/core/daily-diary.js', 'getStoredDiaries')}\n${pickFn('kids/core/daily-diary.js', 'getTodayDiaryCount')}\nthis.count = getTodayDiaryCount;`, sb);
+  assert(sb.count('민서') === 1, `마음일기: 오전 8:30에 '오늘 쓴 일기'를 오늘 것으로 셈 (계산값 ${sb.count('민서')})`);
+}
+
 console.log(`\n📊 [검증 결과] 통과: ${passed}건 / 실패: ${failed}건`);
 if (failed > 0) process.exit(1);

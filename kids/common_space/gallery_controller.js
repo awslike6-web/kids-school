@@ -11,6 +11,12 @@
  * 6. 브라우저 load 이벤트 기반 통합 초기화
  * ==============================================================================
  */
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 // 전역 뷰 상태 관리
 window.currentViewMode = 'art'; // 'art' (성장 작품) | 'special' (특별한 날 추억)
@@ -303,7 +309,7 @@ function openUploadModal() {
     const previewBox = document.getElementById('imgPreviewBox');
     const modal = document.getElementById('uploadModal');
 
-    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    if (dateInput) dateInput.value = getKstTodayYMD();
     if (titleInput) titleInput.value = '';
     if (noteInput) noteInput.value = '';
     if (urlInput) urlInput.value = '';
@@ -345,7 +351,7 @@ function saveNewArtwork() {
     const author = document.getElementById('newArtAuthor')?.value || '민수';
     const category = document.getElementById('newArtCategory')?.value || '그림/미술';
     const title = document.getElementById('newArtTitle')?.value.trim() || '';
-    const date = document.getElementById('newArtDate')?.value || new Date().toISOString().split('T')[0];
+    const date = document.getElementById('newArtDate')?.value || getKstTodayYMD();
     const note = document.getElementById('newArtNote')?.value.trim() || '';
 
     if (!title) {

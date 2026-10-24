@@ -1,5 +1,11 @@
 // kids/core/daily-diary.js
 // 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 일상로그 / 하루 다회 타임라인 누적 엔진)
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 // 1. 일기장 저장 및 조회 헬퍼
 function getStoredDiaries() {
@@ -133,7 +139,7 @@ async function deleteDiaryEntry(id) {
 }
 
 function getTodayDiaryCount(childName) {
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getKstTodayYMD();
     const list = getStoredDiaries();
     return list.filter(item => item.date === todayStr && item.childName === childName).length;
 }
@@ -280,7 +286,7 @@ function openDailyDiaryModal(initialTab = 'write') {
 
     const today = new Date();
     const dateFormatted = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-    const todayYMD = today.toISOString().split('T')[0];
+    const todayYMD = getKstTodayYMD(today);
     const todayCount = getTodayDiaryCount(childName);
 
     const modalWrapper = document.createElement('div');
@@ -646,7 +652,7 @@ const AI_LOG_DB_ID = "392a27115b6880dba5eede7ff33a22b9";
 
 async function getOrCreateAiDailyLog(dateStr) {
     const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
-    const targetDate = dateStr || new Date().toISOString().split('T')[0];
+    const targetDate = dateStr || getKstTodayYMD();
 
     try {
         // 1. 해당 생성일 레코드 검색
@@ -794,7 +800,7 @@ async function sendDiaryLogToNotionDirect(entry) {
                 select: { name: studentName }
             },
             "날짜": {
-                date: { start: entry.date || new Date().toISOString().split('T')[0] }
+                date: { start: entry.date || getKstTodayYMD() }
             },
             "제목": {
                 rich_text: [{ text: { content: diarySubjectTitle } }]
@@ -952,7 +958,7 @@ function parseNotionDiaryPage(page, targetChild) {
         }
     } else {
         const match = title.match(/(\d{4}[-.\s]+\d{1,2}[-.\s]+\d{1,2})/);
-        dateStr = match ? match[1].replace(/\s+/g, '').replace(/\./g, '-') : new Date().toISOString().split('T')[0];
+        dateStr = match ? match[1].replace(/\s+/g, '').replace(/\./g, '-') : getKstTodayYMD();
         timeStr = '기록';
     }
 
@@ -1498,7 +1504,7 @@ async function submitParentDiary(parentName, moodVal, contentVal, thoughtVal, da
         return false;
     }
 
-    const todayYMD = dateYMD || new Date().toISOString().split('T')[0];
+    const todayYMD = dateYMD || getKstTodayYMD();
     const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
     const author = (parentName === '엄마') ? '엄마' : '아빠';
 

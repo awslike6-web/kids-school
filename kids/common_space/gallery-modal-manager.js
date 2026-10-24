@@ -10,6 +10,12 @@
  * 5. 스티커 반응 누르기 및 가족 칭찬 댓글 관리
  * ==============================================================================
  */
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 let activeArtId = null;
 
@@ -508,7 +514,7 @@ function submitComment() {
     if (!item) return;
 
     if (!item.comments) item.comments = [];
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getKstTodayYMD();
     const newComment = { author, text, date: todayStr };
     item.comments.push(newComment);
 

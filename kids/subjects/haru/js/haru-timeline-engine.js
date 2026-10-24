@@ -7,6 +7,12 @@
  * - 추천 스티커 트레이 및 나만의 일과 직접 등록 모달
  * - 오늘 하루 완성 및 노션 타임머신 일지 비동기 전송
  */
+// 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
+function getKstTodayYMD(date = new Date()) {
+    const kst = new Date(date.getTime() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 
 (() => {
   let currentTimelineDate = "";
@@ -17,7 +23,7 @@
 
   function initTimelineState() {
     const child = window.currentChild || "minseo";
-    currentTimelineDate = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    currentTimelineDate = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     clockHourFormat = localStorage.getItem("haru_clock_format_" + child) || "24";
   }
 
@@ -54,7 +60,7 @@
     if (raw) {
       try { return JSON.parse(raw); } catch(e) { return []; }
     }
-    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     const oldRaw = localStorage.getItem(`haru_timeline_${child}_${todayStr}`);
     if (oldRaw) {
       try {
@@ -151,7 +157,7 @@
     const completeBtn = document.getElementById("timelineCompleteBtn");
     if (!dateTextEl) return;
 
-    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     const dateObj = new Date(currentTimelineDate + "T00:00:00");
     const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
     const dayStr = dayNames[dateObj.getDay()] || "";
@@ -184,7 +190,7 @@
   }
 
   function goToTodayTimeline() {
-    currentTimelineDate = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    currentTimelineDate = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     renderTimelineTab();
   }
 
@@ -373,7 +379,7 @@
     }
 
     const periodMap = { morning: "아침", lunch: "점심", evening: "저녁", night: "밤" };
-    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10);
+    const todayStr = typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD();
     const isToday = currentTimelineDate === todayStr;
 
     scrollContainer.innerHTML = filtered.map(item => {
@@ -694,7 +700,7 @@
   async function sendTimelineToNotion(items) {
     const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
-    const todayStr = currentTimelineDate || (typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : new Date().toISOString().slice(0, 10));
+    const todayStr = currentTimelineDate || (typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD());
     const childTitle = (window.currentChild || "minseo") === "minseo" ? "민서" : "민수";
     const nowIso = new Date().toISOString();
 
