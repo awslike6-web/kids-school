@@ -169,7 +169,8 @@
 - **`notion-helper.js` (대문 파사드, ~240줄)**: 모든 전역 API(`syncAllNotionData`, `sendStudyLogToNotion`, `grantReward`, `fetchNotionQuizItems` 등)를 온전히 보존하며, 6대 전문 서브모듈을 비동기 자동 결합(`_initNotionFacade`)하여 기존 호출 인터페이스의 100% 하위 호환성을 유지한다.
 - **`notion-cache-manager.js` (253줄)**: LocalStorage 1일 캐시, 프리패칭(`prefetchVocaData`, `prefetchReadingData`), 전사 통합 노션 캐시 무효화 및 일괄 갱신(`syncAllNotionData`), 토스트 안내 팝업 전담.
 - **`notion-api-client.js` (471줄)**: Cloudflare Worker 프록시 통신, VOCA/독해/도서관/시간표 쿼리, 노션 블록 파서, 지수 백오프 재시도 및 Rate Limit 방어.
-- **`notion-study-logger.js` (471줄)**: `STUDY_LOG_DB` 학습일지(중복 방어막), 오답 큐, `INVENTORY_DB` 보상/레벨업 엔진, 부모 관리자 모드 격리, 상대 경로 로비 복귀(`getRelativeLobbyUrl`).
+- **`notion-study-logger.js` (425줄)**: `STUDY_LOG_DB` 학습일지 전송 진입점(중복 방어막·오답 수집), `INVENTORY_DB` 보상/레벨업 엔진, 부모 관리자 모드 격리, 상대 경로 로비 복귀(`getRelativeLobbyUrl`).
+- **`study-log-store.js` (281줄)**: 학습일지 일일 Upsert 쓰기 단일 원천(`{학생}_{KST 날짜}_{과목}` 1건 누적)과 로비 🔥 연속 학습 스트릭(노션 학습일 기준, 기록 없으면 숨김). 5분 퀘스트·용어사전이 쓰는 `notion-reward.js`도 같은 모듈로 기록한다.
 
 ### ② 대형 로비 (`lobby.html` 및 전담 컨트롤러)
 - **`lobby.html` (119줄)**: 1,381줄의 복잡했던 인라인 스타일과 자바스크립트를 전량 외부화하여, 0.01초 로딩을 자랑하는 순수 시맨틱 마크업 뷰어로 극단적 경량화.

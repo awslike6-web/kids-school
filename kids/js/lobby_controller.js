@@ -215,11 +215,14 @@ window.USER_CONFIGS = USER_CONFIGS;
     updateGuardianHud(activeUserKey, realName);
     fetchInventoryForUser(activeUserKey, realName);
 
-    // 🔥 연속 학습 불꽃 스트릭(Streak) HUD 점등
-    if (window.StreakManager && typeof window.StreakManager.renderLobbyStreak === 'function') {
-      window.StreakManager.renderLobbyStreak('minseoStreakBadge', 'minseo', false);
-      window.StreakManager.renderLobbyStreak('minsuStreakBadge', 'minsu', true);
-    }
+    renderLobbyStreaks();
+  }
+
+  // 🔥 연속 학습 불꽃 스트릭(Streak) HUD 점등 (학습 기록이 없으면 배지 숨김)
+  function renderLobbyStreaks() {
+    if (!window.StudyLogStore) return;
+    window.StudyLogStore.renderStreakBadge('minseoStreakBadge', 'minseo', false);
+    window.StudyLogStore.renderStreakBadge('minsuStreakBadge', 'minsu', true);
   }
 
   function closeAllSubjectPopups() {
@@ -1051,6 +1054,15 @@ window.USER_CONFIGS = USER_CONFIGS;
             }
           })
           .catch(e => console.warn('[ScreenTime] 일지 동기화 경고:', e));
+      }
+
+      // 🔥 스트릭: 로컬 캐시로 먼저 그린 뒤, 노션 STUDY_LOG_DB 학습일 기준으로 다시 계산해 갱신
+      if (window.StudyLogStore) {
+        Promise.allSettled(['minseo', 'minsu'].map(child => window.StudyLogStore.refreshStreak(child)))
+          .then(results => {
+            results.filter(r => r.status === 'rejected').forEach(r => console.warn('[Streak] 학습일 동기화 경고:', r.reason));
+            renderLobbyStreaks();
+          });
       }
 
       const urlParams = new URLSearchParams(window.location.search);

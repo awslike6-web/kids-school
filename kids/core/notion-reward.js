@@ -1,12 +1,14 @@
 
-// Load the shared active-study meter once, including pages without core.js.
+// Load the shared active-study meter and study-log store once, including pages without core.js.
 (function() {
-    if (window.StudyActivity || Array.from(document.scripts).some(s => (s.src || '').includes('study-activity.js'))) return;
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-reward.js'))?.src;
     if (!source) return;
-    const script=document.createElement('script');
-    script.src=new URL('study-activity.js?v=20261023',source).href; script.async=false;
-    document.head.appendChild(script);
+    [['StudyActivity', 'study-activity.js', '?v=20261023'], ['StudyLogStore', 'study-log-store.js', '?v=20261024-1']].forEach(([globalName, file, version]) => {
+        if (window[globalName] || Array.from(document.scripts).some(s => (s.src || '').includes(file))) return;
+        const script=document.createElement('script');
+        script.src=new URL(file + version,source).href; script.async=false;
+        document.head.appendChild(script);
+    });
 })();
 // ==========================================
 // 💎 민민이네 공부방 보상·학습일지·인벤토리 연동 모듈 (notion-reward.js)
@@ -92,44 +94,9 @@ async function sendStudyLogToNotion(options = {}) {
     }
 
     try {
-        const payload = {
-            parent: { database_id: STUDY_LOG_DB_ID },
-            properties: {
-                "ID": { 
-                    title: [{ text: { content: `${childName}_${new Date().toLocaleDateString()}` } }] 
-                },
-                "학생": { 
-                    select: { name: childName } 
-                },
-                "과목": { 
-                    rich_text: [{ text: { content: subject } }] 
-                },
-                "입장": { 
-                    date: { start: startTime } 
-                },
-                "퇴장": { 
-                    date: { start: endTime } 
-                },
-                "소요시간": { 
-                    number: durationMinutes 
-                },
-                "오답리포트": { 
-                    rich_text: [{ text: { content: errorReport || "오답 없음" } }] 
-                },
-                "단어요정": { 
-                    number: wordFairyCount 
-                }
-            }
-        };
-
-        const response = await fetch(`${PROXY_URL}/v1/pages`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-            keepalive: true 
-        });
-
-        if (!response.ok) throw new Error(`노션 통신 오류 (상태: ${response.status})`);
+        // 📦 당일 같은 학생·과목은 1건으로 누적 (Upsert·스트릭 단일 원천: study-log-store.js)
+        if (!window.StudyLogStore) throw new Error("study-log-store.js가 로드되지 않았습니다");
+        await window.StudyLogStore.upsertStudyLog({ childName, subject, startTime, endTime, durationMinutes, errorReport, wordFairyCount });
 
         window.__isStudyLogSentInSession = true;
         window.__lastStudyLogHistory.push({ childName, subject, time: nowTs });

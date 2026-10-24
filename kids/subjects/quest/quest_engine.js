@@ -118,7 +118,7 @@
     if (idx !== -1) {
       qList[idx].streak = (qList[idx].streak || 0) + 1;
       qList[idx].box = Math.min(3, (qList[idx].box || 1) + 1);
-      qList[idx].lastReviewed = new Date().toISOString().slice(0, 10);
+      qList[idx].lastReviewed = getKstDateString();
       if (qList[idx].streak >= 3) {
         qList.splice(idx, 1);
       }
