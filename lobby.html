@@ -132,9 +132,10 @@
             <span id="minseoLevelBadge" class="absolute -bottom-1 -right-1.5 bg-surface-container-lowest border-2 border-secondary-container text-secondary text-label-md font-label-md px-1.5 py-0.5 rounded-full shadow-sm flex items-center">★5</span>
           </div>
           <div class="flex flex-col">
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-headline-md font-headline-md text-primary tracking-tight">별빛 꿈나라</span>
               <span id="minseoNameBadge" class="text-label-md font-label-md text-on-tertiary-container bg-tertiary-fixed px-2 py-0.5 rounded-full shadow-sm">민서</span>
+              <span id="minseoStreakBadge"></span>
             </div>
             <span id="minseoSubStatusText" class="text-label-md font-label-md text-on-surface-variant flex items-center gap-1">
               <span class="w-2 h-2 rounded-full bg-secondary-fixed-dim inline-block animate-ping"></span>
@@ -453,7 +454,10 @@
             <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-secondary rounded-full border border-surface-container-lowest shadow-[0_0_6px_#10B981]"></span>
           </div>
           <div class="flex flex-col">
-            <span id="minsuTitleLevel" class="font-title-md text-title-md font-bold tracking-wider text-primary">차원 사령관 [LVL-5]</span>
+            <div class="flex items-center gap-2">
+              <span id="minsuTitleLevel" class="font-title-md text-title-md font-bold tracking-wider text-primary">차원 사령관 [LVL-5]</span>
+              <span id="minsuStreakBadge"></span>
+            </div>
             <div class="flex items-center gap-1.5 mt-0.5">
               <span id="minsuClearanceBadge" class="font-label-sm text-[10px] text-primary-container bg-surface-container-lowest/90 px-1.5 py-0.5 rounded border border-primary-container/30 uppercase tracking-wider font-mono">CLEARANCE: O5-MINSU</span>
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
@@ -786,7 +790,8 @@
   <div id="inventoryDisplay" class="hidden"></div>
 
   <script src="./kids/config.js"></script>
-  <script src="./kids/js/lobby_controller.js"></script>
+  <script src="./kids/core/streak-manager.js?v=20261024-1"></script>
+  <script src="./kids/js/lobby_controller.js?v=20261024-1"></script>
   <script src="./kids/core/quick-uploader.js"></script>
 </body>
 </html>

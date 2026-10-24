@@ -75,12 +75,19 @@
     } catch (e) {}
   }
 
+  // 🕒 KST 로컬 날짜 단일 헬퍼 (계약 헌법 준수: toISOString 금지)
+  function getKstDateString() {
+    const now = new Date();
+    const kst = new Date(now.getTime() + (9 * 60 + now.getTimezoneOffset()) * 60000);
+    return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+  }
+
   function recordWrongItem(child, subj, questionObj) {
     if (!questionObj || !subj) return;
     const u = getNormalizedChildId(child);
     const qList = getAdaptiveQueue(u, subj);
     const existing = qList.find(item => item.q === questionObj.q);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getKstDateString();
     if (existing) {
       existing.failCount = (existing.failCount || 1) + 1;
       existing.streak = 0;
@@ -214,12 +221,49 @@
 
   // ========================================================
   // 5. 📚 노션 어휘·교재 문제 합성 & 수학 무한 암산 → quest_notion_synth.js (window.QuestNotionSynth)
-  //    호출할 때 찾으므로 두 파일의 로드 순서와 상관없다.
+  //    호출할 때 찾으므로 두 파일의 로드 순서와 상관없다. (미로드 시 빈 배열/null 안전 폴백)
   // ========================================================
-  const synth = () => window.QuestNotionSynth;
-  const buildVocaQuestionsFromNotion = (...args) => synth().buildVocaQuestionsFromNotion(...args);
-  const buildCurriculumQuestionsFromNotion = (...args) => synth().buildCurriculumQuestionsFromNotion(...args);
-  const generateDynamicMentalMath = (...args) => synth().generateDynamicMentalMath(...args);
+  const synth = () => window.QuestNotionSynth || null;
+  const buildVocaQuestionsFromNotion = (...args) => (synth() && typeof synth().buildVocaQuestionsFromNotion === 'function') ? synth().buildVocaQuestionsFromNotion(...args) : [];
+  const buildCurriculumQuestionsFromNotion = (...args) => (synth() && typeof synth().buildCurriculumQuestionsFromNotion === 'function') ? synth().buildCurriculumQuestionsFromNotion(...args) : [];
+  const generateDynamicMentalMath = (...args) => (synth() && typeof synth().generateDynamicMentalMath === 'function') ? synth().generateDynamicMentalMath(...args) : null;
+
+  // 🛡️ [원천 오프라인/빈 캐시 폴백 은행] 노션/캐시 완전 부재 시 무중단 5문항 즉시 공급
+  function getStaticFallbackQuestions(child, subj) {
+    const isMin = (child === 'minseo');
+    if (isMin) {
+      const bank = window.minseoMasterBank && window.minseoMasterBank[subj];
+      if (bank) {
+        for (const k of Object.keys(bank)) {
+          if (Array.isArray(bank[k]) && bank[k].length >= 3) {
+            return bank[k].slice(0, 5);
+          }
+        }
+      }
+      return [
+        { q: "다음 중 올바른 것은 무엇일까요?", options: ["정답 🌸", "오답 1", "오답 2", "오답 3"], answer: 0, hint: "첫 번째를 골라보세요!" },
+        { q: "1 + 1은 얼마일까요?", options: ["2", "3", "4", "5"], answer: 0, hint: "손가락 하나에 하나를 더해요" },
+        { q: "사과의 영어 낱말은?", options: ["Apple", "Banana", "Cat", "Dog"], answer: 0, hint: "A로 시작해요" },
+        { q: "우리나라의 봄에 피는 꽃은?", options: ["개나리", "코스모스", "동백꽃", "국화"], answer: 0, hint: "노란 봄꽃이에요" },
+        { q: "다음 낱말을 소리 내어 읽어보세요: [친구]", options: ["친구", "학교", "가족", "선생님"], answer: 0, hint: "다정한 벗을 뜻해요", isPreview: true }
+      ];
+    }
+    const bank = window.minsuMasterBank && window.minsuMasterBank[subj];
+    if (bank) {
+      for (const k of Object.keys(bank)) {
+        if (Array.isArray(bank[k]) && bank[k].length >= 3) {
+          return bank[k].slice(0, 5);
+        }
+      }
+    }
+    return [
+      { q: "다음 중 올바른 계산 결과는?", options: ["12 × 5 = 60", "12 × 5 = 55", "12 × 5 = 65", "12 × 5 = 70"], answer: 0, hint: "10에 5를 곱하고 2에 5를 곱해요" },
+      { q: "조선 시대 한글을 창제하신 임금님은?", options: ["세종대왕", "태조 이성계", "영조", "정조"], answer: 0, hint: "집현전 학자들과 함께 만드셨어요" },
+      { q: "지구의 자전으로 인해 일어나는 현상은?", options: ["낮과 밤의 반복", "계절의 변화", "조석 현상", "일식과 월식"], answer: 0, hint: "하루에 한 바퀴씩 스스로 돌아요" },
+      { q: "다음 영단어의 뜻으로 올바른 것은? [Environment]", options: ["환경", "경제", "과학", "우주"], answer: 0, hint: "자연과 우리 주변을 뜻해요" },
+      { q: "다음 분수 중 가장 큰 것은?", options: ["3/4", "1/2", "2/5", "1/4"], answer: 0, hint: "통분하여 분자를 비교해 보세요", isPreview: true }
+    ];
+  }
 
   // ========================================================
   // 6. 🚀 듀오링고형 Universal 4+1 출제 엔진 (정적 + 노션 마스터 융합)
@@ -251,7 +295,8 @@
 
       // 🎲 수학 과목: 답 외우기 원천 차단 무한 랜덤 암산 1문제 우선 융합
       if (subj === 'math') {
-        combinedMain.unshift(generateDynamicMentalMath('minseo', currentUnitKey));
+        const mm = generateDynamicMentalMath('minseo', currentUnitKey);
+        if (mm) combinedMain.unshift(mm);
       }
 
       // 🏛️ 사회/과학 과목: 노션 교재·사료/실험 탐구 퀴즈 1문제 우선 융합
@@ -312,8 +357,19 @@
         selected.push(combinedMain[4]);
       }
 
+      selected = (selected || []).filter(Boolean);
       while (selected.length < 5 && combinedMain.length > 0) {
         selected.push(combinedMain[selected.length % combinedMain.length]);
+      }
+
+      // 🛡️ 빈 캐시/오프라인 방어막: 유효 문제가 5개 미만이면 정적 폴백 뱅크에서 무조건 채움
+      if (selected.length < 5) {
+        console.warn(`[Quest Fallback Guard] 민서 ${subj} 데이터 부족(${selected.length}/5) -> 정적 폴백 뱅크 가동`);
+        const fallbacks = getStaticFallbackQuestions('minseo', subj);
+        for (const fb of fallbacks) {
+          if (selected.length >= 5) break;
+          selected.push(fb);
+        }
       }
 
       return {
@@ -348,7 +404,8 @@
 
     // 🎲 수학 과목: 답 외우기 원천 차단 무한 랜덤 암산 1문제 우선 융합
     if (subj === 'math') {
-      combinedMain.unshift(generateDynamicMentalMath('minsu', curUnit));
+      const mm = generateDynamicMentalMath('minsu', curUnit);
+      if (mm) combinedMain.unshift(mm);
     }
 
     // 🏛️ 사회/과학 과목: 노션 교재·사료/실험 탐구 퀴즈 1~2문제 우선 융합
@@ -417,8 +474,19 @@
       selected.push(combinedMain[4] || combinedMain[0]);
     }
 
+    selected = (selected || []).filter(Boolean);
     while (selected.length < 5 && combinedMain.length > 0) {
       selected.push(combinedMain[selected.length % combinedMain.length]);
+    }
+
+    // 🛡️ 빈 캐시/오프라인 방어막: 유효 문제가 5개 미만이면 정적 폴백 뱅크에서 무조건 채움
+    if (selected.length < 5) {
+      console.warn(`[Quest Fallback Guard] 민수 ${subj} 데이터 부족(${selected.length}/5) -> 정적 폴백 뱅크 가동`);
+      const fallbacks = getStaticFallbackQuestions('minsu', subj);
+      for (const fb of fallbacks) {
+        if (selected.length >= 5) break;
+        selected.push(fb);
+      }
     }
 
     // 제목 = 과목방 이름 + 단원 이름 (정적 문제은행 단원은 은행의 unitTitles, 그 외는 노션 캐시의 실제 단원명)

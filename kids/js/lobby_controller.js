@@ -214,6 +214,12 @@ window.USER_CONFIGS = USER_CONFIGS;
     renderSubjectCapStates(activeUserKey);
     updateGuardianHud(activeUserKey, realName);
     fetchInventoryForUser(activeUserKey, realName);
+
+    // 🔥 연속 학습 불꽃 스트릭(Streak) HUD 점등
+    if (window.StreakManager && typeof window.StreakManager.renderLobbyStreak === 'function') {
+      window.StreakManager.renderLobbyStreak('minseoStreakBadge', 'minseo', false);
+      window.StreakManager.renderLobbyStreak('minsuStreakBadge', 'minsu', true);
+    }
   }
 
   function closeAllSubjectPopups() {

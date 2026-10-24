@@ -49,7 +49,9 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | `fetchNotionTimetable()` | `notion-api-client` | 주간 시간표 전체 목록 조회 (로컬 캐시 우선) |
   | `fetchNotionVocabulary(subject, grade)` | `notion-api-client` | 과목/학년별 핵심 어휘 목록 조회 |
   | `fetchNotionQuizItems(options)` | `notion-api-client` | 5분 퀘스트용 단원별 4지선다 문항 동적 로드 |
-  | `sendStudyLogToNotion(data)` | `notion-study-logger` | 당일 학습 시간 및 오답 큐 적재 (STUDY_LOG_DB) |
+  | `sendStudyLogToNotion(data)` | `notion-study-logger` | 당일 학습 시간 및 오답 큐 일일 누적 Upsert 압축 적재 (STUDY_LOG_DB) |
+  | `StreakManager.getStreakData(child)` | `streak-manager` | 자녀별(민수/민서) 연속 학습 일수(Streak) 조회 및 갱신 |
+  | `StreakManager.renderLobbyStreak(id, child, dark)` | `streak-manager` | 로비 상단 HUD에 🔥 N일 연속 탐험 중! 배지 동적 렌더링 |
   | `grantReward(earned, subject, exp)` | `notion-study-logger` | 보석/하리보 지급 및 통합 레벨업 연산 (INVENTORY_DB) |
   | `promptQuizRetryOrSkip(opts)` | `quiz-feedback-overlay` | 오답 시 다시풀기/정답뜻풀이/보카사전 딥링크 통합 모달 출력 |
   | `getVocaCommonUrl(subject, word)` | `quiz-feedback-overlay` | 실행 위치 무관 100% 정확한 보카방(voca.html) 상대 경로 URL 생성 |

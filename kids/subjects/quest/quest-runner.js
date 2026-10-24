@@ -59,29 +59,64 @@
   let sessionWrongLogs = [];
   let isRevengeMode = false;
 
-  // 초기 화면 렌더링 & 파트너 몬스터 포즈 동기화 (투명 누끼 캐릭터 에러리스 원칙 준수)
+  // 초기 화면 렌더링 & 파트너 몬스터/요정 포즈·3단 리액션 동기화 (자작 캐릭터 3단 리액션 헌법 준수)
   function syncCheerMonsterReaction(state = 'stageStart', overrideSpeech = null) {
     const monsterEl = document.getElementById('cheerMonster');
     const speechEl = document.getElementById('cheerSpeech');
-    if (isMinseo || !global.MonsterRoster) {
-      if (overrideSpeech && speechEl) speechEl.textContent = overrideSpeech;
-      return;
+
+    let poseSrc = null;
+    let monsterName = '파트너';
+    let line = overrideSpeech;
+    let animClass = 'animate-cheer';
+
+    if (state === 'correct') {
+      animClass = 'victory-jump';
+    } else if (state === 'encourage') {
+      animClass = 'shake-gentle';
+    } else if (state === 'clear') {
+      animClass = 'animate-cheer scale-110';
     }
-    const monster = global.MonsterRoster.getSelectedMonster();
-    const reaction = global.MonsterRoster.getRunnerReaction(state, monster.id);
+
+    if (isMinseo) {
+      // 🌸 민서 요정 코코 & 삼총사 다정한 격려 리액션
+      monsterName = '요정 코코';
+      const minseoDialogues = {
+        stageStart: '오늘도 예쁘게 5분 퀘스트 시작! 🌸',
+        correct: ['우와 정답이야! 민서 최고! ✨💖', '대단해! 별빛 보석이 반짝반짝! 💎', '잘하고 있어 민서야! 힘내자! 🌸'],
+        encourage: ['괜찮아 민서야! 힌트를 보고 한 번 더 골라보자! 🌱', '아깝다! 다시 읽어보면 바로 맞힐 수 있어! 💡'],
+        clear: '와아아!! 오늘 퀘스트 완벽 클리어!! 🌸🏆'
+      };
+      if (!line) {
+        const d = minseoDialogues[state] || minseoDialogues.stageStart;
+        line = Array.isArray(d) ? d[Math.floor(Math.random() * d.length)] : d;
+      }
+    } else if (global.MonsterRoster) {
+      // 👾 민수 자작 캐릭터 (콧툰봉돔돌 / 클레이 바이트)
+      const monster = global.MonsterRoster.getSelectedMonster();
+      const reaction = global.MonsterRoster.getRunnerReaction(state, monster.id);
+      poseSrc = reaction.poseSrc;
+      monsterName = monster.name;
+      if (!line) line = reaction.speech;
+    }
 
     if (monsterEl) {
-      if (monsterEl.getAttribute('src') !== reaction.poseSrc) {
-        monsterEl.src = reaction.poseSrc;
+      if (poseSrc && monsterEl.getAttribute('src') !== poseSrc) {
+        monsterEl.src = poseSrc;
       }
-      monsterEl.alt = monster.name;
-      monsterEl.className = 'animate-cheer w-14 h-14 object-contain filter drop-shadow-md transition-transform';
+      monsterEl.alt = monsterName;
+      // CSS 키프레임 애니메이션 리셋 및 재점화
+      monsterEl.className = 'w-14 h-14 object-contain filter drop-shadow-md transition-transform';
+      void monsterEl.offsetWidth; // Force Reflow
+      monsterEl.className = `${animClass} w-14 h-14 object-contain filter drop-shadow-md transition-transform`;
     }
-    if (speechEl) {
-      const line = overrideSpeech || reaction.speech;
+
+    if (speechEl && line) {
       speechEl.textContent = `"${String(line).replace(/^"|"$/g, '')}"`;
     }
   }
+
+  // 전역 리액션 훅 노출 (fairy-engine 오디오와 동기화)
+  global.triggerCharacterReaction = syncCheerMonsterReaction;
 
   function initScreen() {
     UI.applyChildTheme(isMinseo);
@@ -107,21 +142,38 @@
     if (canMastery) {
       document.getElementById('questionText').textContent = '단원 진도를 불러오는 중이에요... ⏳';
       try {
-        const unit = await QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit });
-        if (unit) {
+        // 🛡️ 최대 3초 타임아웃 레이스 (네트워크 지연 시 즉시 폴백 전환)
+        const loadPromise = QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout_3s')), 3000));
+        const unit = await Promise.race([loadPromise, timeoutPromise]);
+
+        if (unit && Array.isArray(unit.items) && unit.items.length > 0) {
           const round = QuestMastery.buildRound({ child: unit.child, items: unit.items, subj: currentSubj });
-          masteryRound = { ...round, child: unit.child, items: unit.items };
-          // 제목 = 과목방 이름 + 실제로 불러온 노션 단원명
-          const brand = String(currentQuest.title).split(' · ')[0];
-          const unitName = QuestMastery.unitTitle(unit.items, unit.units);
-          currentQuest = { title: `${brand} · ${unitName || '3·3·3 마스터리'}`, icon: currentQuest.icon, questions: round.questions };
-          document.getElementById('heartIcons').parentElement.classList.add('hidden');
+          if (round && Array.isArray(round.questions) && round.questions.length > 0) {
+            masteryRound = { ...round, child: unit.child, items: unit.items };
+            // 제목 = 과목방 이름 + 실제로 불러온 노션 단원명
+            const brand = String(currentQuest.title).split(' · ')[0];
+            const unitName = QuestMastery.unitTitle(unit.items, unit.units);
+            currentQuest = { title: `${brand} · ${unitName || '3·3·3 마스터리'}`, icon: currentQuest.icon, questions: round.questions };
+            document.getElementById('heartIcons').parentElement.classList.add('hidden');
+          } else {
+            throw new Error('empty_mastery_questions');
+          }
+        } else {
+          throw new Error('empty_unit_items');
         }
       } catch (e) {
-        console.warn('[3·3·3 마스터리] 기존 퀘스트로 진행합니다:', e);
+        console.warn('[3·3·3 마스터리] 노션 지연/캐시 부재로 기본 퀘스트로 즉시 전환합니다:', e.message || e);
         masteryRound = null;
       }
     }
+
+    // 🛡️ 최종 방어선: currentQuest의 questions가 비어있으면 절대 멈추지 않고 정적 문제은행으로 즉시 복구
+    if (!currentQuest || !Array.isArray(currentQuest.questions) || currentQuest.questions.length === 0) {
+      console.warn('[Quest Fallback] 문제 배열 부재 감지 -> 정적 폴백 뱅크 재로딩');
+      currentQuest = getSubjectQuest(currentSubj, '', 'fallback', currentUser);
+    }
+
     initScreen();
   }
 

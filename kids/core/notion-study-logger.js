@@ -112,48 +112,128 @@
             return true; 
         }
 
+        // 🕒 KST 로컬 날짜 단일 헬퍼 (계약 헌법 준수: toISOString 금지)
+        function getKstDateString() {
+            const now = new Date();
+            const kst = new Date(now.getTime() + (9 * 60 + now.getTimezoneOffset()) * 60000);
+            return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
+        }
+
+        const todayKst = getKstDateString();
+        const logKey = `${childName}_${todayKst}_${subject}`;
+
         try {
-            const payload = {
-                parent: { database_id: STUDY_LOG_DB_ID },
-                properties: {
-                    "ID": { 
-                        title: [{ text: { content: `${childName}_${new Date().toLocaleDateString()}` } }] 
-                    },
-                    "학생": { 
-                        select: { name: childName } 
-                    },
-                    "과목": { 
-                        rich_text: [{ text: { content: subject } }] 
-                    },
-                    "입장": { 
-                        date: { start: startTime } 
-                    },
-                    "퇴장": { 
-                        date: { start: endTime } 
-                    },
-                    "소요시간": { 
-                        number: durationMinutes 
-                    },
-                    "오답리포트": { 
-                        rich_text: [{ text: { content: errorReport || "오답 없음" } }] 
-                    },
-                    "단어요정": { 
-                        number: wordFairyCount 
+            // 🔍 1. 당일 동일 학생·과목 기존 페이지 존재 여부 사전 조회 (Upsert 압축)
+            let existingPageId = null;
+            let prevDuration = 0;
+            let prevFairy = 0;
+            let prevErrors = "";
+
+            try {
+                const queryRes = await fetch(`${PROXY_URL}/v1/databases/${STUDY_LOG_DB_ID}/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        filter: {
+                            property: "ID",
+                            title: { equals: logKey }
+                        }
+                    })
+                });
+                if (queryRes.ok) {
+                    const qData = await queryRes.json();
+                    if (qData.results && qData.results.length > 0) {
+                        const page = qData.results[0];
+                        existingPageId = page.id;
+                        prevDuration = page.properties?.["소요시간"]?.number || 0;
+                        prevFairy = page.properties?.["단어요정"]?.number || 0;
+                        prevErrors = page.properties?.["오답리포트"]?.rich_text?.[0]?.text?.content || "";
                     }
                 }
-            };
+            } catch (queryErr) {
+                console.warn("⚠️ [학습일지 Upsert] 기존 레코드 조회 실패 (신규 생성으로 전환):", queryErr);
+            }
 
-            const response = await fetch(`${PROXY_URL}/v1/pages`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-                keepalive: true 
-            });
+            // 🔄 2. 기존 페이지가 있으면 PATCH 누적 압축, 없으면 POST 신규 생성
+            if (existingPageId) {
+                const newDuration = prevDuration + (durationMinutes || 0);
+                const newFairy = prevFairy + (wordFairyCount || 0);
+                let mergedErrors = prevErrors;
+                if (errorReport && errorReport !== "오답 없음") {
+                    if (!mergedErrors || mergedErrors === "오답 없음") {
+                        mergedErrors = errorReport;
+                    } else if (!mergedErrors.includes(errorReport)) {
+                        mergedErrors = `${mergedErrors} | ${errorReport}`;
+                    }
+                }
 
-            if (!response.ok) throw new Error(`노션 통신 오류 (상태: ${response.status})`);
+                const patchPayload = {
+                    properties: {
+                        "소요시간": { number: newDuration },
+                        "단어요정": { number: newFairy },
+                        "오답리포트": { rich_text: [{ text: { content: (mergedErrors || "오답 없음").slice(0, 1900) } }] },
+                        "퇴장": { date: { start: endTime } }
+                    }
+                };
+
+                const patchRes = await fetch(`${PROXY_URL}/v1/pages/${existingPageId}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(patchPayload),
+                    keepalive: true
+                });
+
+                if (!patchRes.ok) throw new Error(`노션 PATCH 통신 오류 (상태: ${patchRes.status})`);
+                console.log(`📦 [학습일지 Upsert 압축 완료] 당일 기존 레코드(${existingPageId})에 활동 누적 완료! (키: ${logKey})`);
+            } else {
+                const payload = {
+                    parent: { database_id: STUDY_LOG_DB_ID },
+                    properties: {
+                        "ID": { 
+                            title: [{ text: { content: logKey } }] 
+                        },
+                        "학생": { 
+                            select: { name: childName } 
+                        },
+                        "과목": { 
+                            rich_text: [{ text: { content: subject } }] 
+                        },
+                        "입장": { 
+                            date: { start: startTime } 
+                        },
+                        "퇴장": { 
+                            date: { start: endTime } 
+                        },
+                        "소요시간": { 
+                            number: durationMinutes 
+                        },
+                        "오답리포트": { 
+                            rich_text: [{ text: { content: errorReport || "오답 없음" } }] 
+                        },
+                        "단어요정": { 
+                            number: wordFairyCount 
+                        }
+                    }
+                };
+
+                const response = await fetch(`${PROXY_URL}/v1/pages`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                    keepalive: true 
+                });
+
+                if (!response.ok) throw new Error(`노션 통신 오류 (상태: ${response.status})`);
+                console.log(`🎉 [학습일지 신규 등록 완료] 새 일지가 기록되었습니다! (키: ${logKey})`);
+            }
 
             window.__isStudyLogSentInSession = true;
             window.__lastStudyLogHistory.push({ childName, subject, time: nowTs });
+
+            // 🔥 연속 학습 스트릭 누적 기록 (StreakManager 연동)
+            if (typeof window !== 'undefined' && window.StreakManager && typeof window.StreakManager.recordStudyActivity === 'function') {
+                window.StreakManager.recordStudyActivity(childName);
+            }
 
             console.log("🎉 노션에 학습 일지가 완벽하게 기록되었습니다!");
             return true;
