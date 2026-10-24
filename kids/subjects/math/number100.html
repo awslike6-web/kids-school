@@ -80,6 +80,33 @@
       border: 2px solid #0284c7;
       animation: popIn 0.2s ease;
     }
+
+    .activity-panel { max-width: 720px; margin: 0 auto; background: #fff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 20px; }
+    .memory-grid { display: grid; grid-template-columns: repeat(4, minmax(74px, 1fr)); gap: 10px; }
+    .memory-card { min-height: 84px; border: 0; border-radius: 15px; background: linear-gradient(145deg,#8b5cf6,#ec4899); color: transparent; font: 800 1.15rem 'Jua',sans-serif; cursor: pointer; box-shadow: 0 5px 0 #6d28d9; transition: transform .2s, background .2s; }
+    .memory-card::after { content: '⭐'; color: #fff; font-size: 1.55rem; }
+    .memory-card.is-open, .memory-card.is-matched { color: #4c1d95; background: #fef3c7; transform: translateY(3px); box-shadow: 0 2px 0 #f59e0b; }
+    .memory-card.is-open::after, .memory-card.is-matched::after { content: ''; }
+    .memory-card.is-matched { background: #dcfce7; color: #166534; }
+    .activity-status { min-height: 32px; margin: 14px 0 0; text-align: center; color: #6d28d9; font: 700 1.05rem 'Jua',sans-serif; }
+    .pair-controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .pair-basket { display: grid; grid-template-columns: repeat(5, minmax(42px,1fr)); gap: 10px; min-height: 150px; padding: 18px; border: 4px solid #d97706; border-radius: 20px 20px 34px 34px; background: #fffbeb; }
+    .pair-item { aspect-ratio: 1; border: 3px solid #f59e0b; border-radius: 50%; background: #fde68a; font-size: 1.5rem; cursor: pointer; transition: .2s; }
+    .pair-item.is-picked { transform: translateY(-8px); outline: 4px solid #c4b5fd; }
+    .pair-item.is-paired { border-color: #10b981; background: #bbf7d0; box-shadow: inset 0 0 0 4px #fff, 0 0 0 3px #10b981; }
+    .place-guide { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+    .place-number { border: 3px solid #bae6fd; border-radius: 18px; padding: 14px; text-align: center; background: #f0f9ff; }
+    .place-number.is-active { border-color: #f59e0b; background: #fef3c7; }
+    .place-digits { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .place-digit { padding: 10px 4px; border-radius: 12px; background: #fff; font: 800 1.1rem 'Jua',sans-serif; }
+    .place-digit.is-focus { background: #f472b6; color: #fff; transform: scale(1.05); }
+    .compare-middle { align-self: center; font: 800 2rem 'Jua',sans-serif; color: #ec4899; }
+    .compare-steps { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    @media (max-width: 560px) {
+      .memory-grid { grid-template-columns: repeat(2, 1fr); }
+      .place-guide { grid-template-columns: 1fr; }
+      .compare-middle { justify-self: center; }
+    }
   </style>
 </head>
 <body>
@@ -156,31 +183,73 @@
       <div class="grid-100" id="grid100"></div>
     </section>
 
-    <!-- 3. 두 수의 크기 비교 퀴즈 -->
+    <!-- 3. 순우리말 수 읽기 카드 -->
+    <section class="math-section-card" id="section-memory">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-candy">섹션 3 : 수 읽기 짝꿍 카드</span>
+          <h2 class="section-title">🃏 육십-예순, 백-온 짝꿍 찾기</h2>
+          <p class="section-desc">같은 수를 나타내는 한자어 카드와 순우리말 카드를 찾아 뒤집어 봐요!</p>
+        </div>
+        <button class="speaker-btn" onclick="speakNumberGuide()">🔊</button>
+      </div>
+      <div class="activity-panel">
+        <div class="memory-grid" id="memory-grid" aria-label="수 읽기 카드 게임"></div>
+        <div class="activity-status" id="memory-status" aria-live="polite"></div>
+        <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px;" onclick="startMemoryGame()">🔀 카드 다시 섞기</button>
+      </div>
+    </section>
+
+    <!-- 4. 짝수와 홀수 조작 -->
+    <section class="math-section-card" id="section-pairs">
+      <div class="section-header-wrap">
+        <div>
+          <span class="section-badge badge-pairs">섹션 4 : 둘씩 짝짓기</span>
+          <h2 class="section-title">🍡 사탕 바구니의 짝수·홀수</h2>
+          <p class="section-desc">사탕을 두 개씩 눌러 짝을 지어 보세요. 하나가 남으면 홀수예요!</p>
+        </div>
+        <button class="speaker-btn" onclick="playNumberTts('사탕을 두 개씩 눌러 짝을 지어 보세요. 하나가 남으면 홀수예요!')">🔊</button>
+      </div>
+      <div class="activity-panel">
+        <div class="pair-controls">
+          <button class="candy-num-btn" onclick="changePairCount(-1)">➖ 한 개 빼기</button>
+          <button class="candy-num-btn" onclick="changePairCount(1)">➕ 한 개 더하기</button>
+          <button class="candy-num-btn" onclick="randomPairCount()">🎲 다른 수</button>
+          <button class="candy-num-btn" onclick="resetPairs()">🔄 짝 다시 짓기</button>
+        </div>
+        <div class="pair-basket" id="pair-basket" aria-label="사탕 짝짓기 바구니"></div>
+        <div class="activity-status" id="pair-status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- 5. 두 수의 크기 비교 퀴즈 -->
     <section class="math-section-card" id="section-quiz">
       <div class="section-header-wrap">
         <div>
-          <span class="section-badge badge-grid">섹션 3 : 크기 비교 & 순서 퀴즈</span>
-          <h2 class="section-title">🐊 어느 쪽이 더 클까요? (크기 비교 악어)</h2>
-          <p class="section-desc">더 큰 수 쪽으로 악어 입(&gt;, &lt;)을 벌려주세요!</p>
+          <span class="section-badge badge-grid">섹션 5 : 두 자릿수 크기 비교</span>
+          <h2 class="section-title">🔍 십의 자리부터 보는 비교 돋보기</h2>
+          <p class="section-desc">① 십의 자리를 먼저 보고, 같을 때만 ② 일의 자리를 비교해요.</p>
         </div>
         <button class="speaker-btn" onclick="fairySpeak('두 수의 크기를 비교하고 알맞은 부등호를 골라보세요!')">🔊</button>
       </div>
 
-      <div style="max-width:500px; margin:0 auto; background:#fff; border-radius:20px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 8px 20px rgba(0,0,0,0.05);">
-        <div style="display:flex; justify-content:space-around; align-items:center; margin-bottom:20px;">
-          <div style="font-family:'Jua'; font-size:3rem; color:#0284c7;" id="num-a">45</div>
-          <div style="font-family:'Jua'; font-size:2.5rem; color:#ec4899; min-width:60px;" id="compare-sign">?</div>
-          <div style="font-family:'Jua'; font-size:3rem; color:#0284c7;" id="num-b">52</div>
+      <div class="activity-panel">
+        <div class="place-guide">
+          <div class="place-number" id="place-a"><strong id="num-a" style="font:800 2.4rem 'Jua'; color:#0284c7;">45</strong><div class="place-digits"><div class="place-digit tens">십의 자리 <b>4</b></div><div class="place-digit ones">일의 자리 <b>5</b></div></div></div>
+          <div class="compare-middle" id="compare-sign">?</div>
+          <div class="place-number" id="place-b"><strong id="num-b" style="font:800 2.4rem 'Jua'; color:#0284c7;">52</strong><div class="place-digits"><div class="place-digit tens">십의 자리 <b>5</b></div><div class="place-digit ones">일의 자리 <b>2</b></div></div></div>
         </div>
-
+        <div class="compare-steps">
+          <button class="candy-num-btn" id="tens-step-btn" onclick="showCompareStep(1)">① 십의 자리 보기</button>
+          <button class="candy-num-btn" id="ones-step-btn" onclick="showCompareStep(2)" disabled>② 일의 자리 보기</button>
+        </div>
         <div style="display:flex; gap:12px; justify-content:center; margin-bottom:15px;">
           <button class="divide-btn" style="font-size:1.8rem; padding:10px 24px;" onclick="chooseCompare('<')">&lt;</button>
           <button class="divide-btn" style="font-size:1.8rem; padding:10px 24px; background:#10b981;" onclick="chooseCompare('=')">=</button>
           <button class="divide-btn" style="font-size:1.8rem; padding:10px 24px;" onclick="chooseCompare('>')">&gt;</button>
         </div>
 
-        <div id="compare-feedback" style="font-family:'Jua'; font-size:1.2rem; min-height:30px;"></div>
+        <div id="compare-feedback" class="activity-status"></div>
         <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px;" onclick="nextCompareQ()">다음 문제 ➡️</button>
       </div>
     </section>
@@ -232,7 +301,7 @@
       if (total === 0) {
         readStr += ' (영)';
       } else if (total === 100) {
-        readStr += ' (백 / 일백)';
+        readStr += ' (백 / 온)';
       } else {
         const sino = (bundleCount > 0 ? SINO_TENS[bundleCount] : '') + (singleCount > 0 ? SINO_ONES[singleCount] : '');
         const pure = (bundleCount > 0 ? KOREAN_TENS[bundleCount] : '') + (singleCount > 0 ? (bundleCount > 0 ? ' ' : '') + KOREAN_ONES[singleCount] : '');
@@ -304,7 +373,96 @@
       if (typeof fairySpeak === 'function') fairySpeak(type === 'even' ? '짝수에 초록 불이 들어왔어요!' : '홀수에 빨간 불이 들어왔어요!');
     }
 
-    // 3. 크기비교 퀴즈
+    function playNumberTts(text) {
+      if (typeof speakFairyTTS === 'function') speakFairyTTS(text);
+      else if (typeof fairySpeak === 'function') fairySpeak(text);
+    }
+
+    const NUMBER_PAIRS = [
+      { value: 60, sino: '육십', pure: '예순' }, { value: 70, sino: '칠십', pure: '일흔' },
+      { value: 80, sino: '팔십', pure: '여든' }, { value: 90, sino: '구십', pure: '아흔' },
+      { value: 100, sino: '백', pure: '온' }
+    ];
+    let memoryOpen = [], memoryMatched = new Set(), memoryLocked = false;
+
+    function startMemoryGame() {
+      memoryOpen = []; memoryMatched = new Set(); memoryLocked = false;
+      const cards = NUMBER_PAIRS.flatMap(item => [
+        { key: item.value, label: `${item.value} · ${item.sino}`, speech: `${item.value}, ${item.sino}` },
+        { key: item.value, label: item.pure, speech: item.pure }
+      ]).sort(() => Math.random() - 0.5);
+      const grid = document.getElementById('memory-grid');
+      grid.innerHTML = '';
+      cards.forEach((card, index) => {
+        const button = document.createElement('button');
+        button.className = 'memory-card'; button.textContent = card.label;
+        button.dataset.key = card.key; button.dataset.index = index;
+        button.setAttribute('aria-label', `${index + 1}번 뒤집힌 카드`);
+        button.onclick = () => flipMemoryCard(button, card);
+        grid.appendChild(button);
+      });
+      document.getElementById('memory-status').textContent = '별 카드를 눌러 같은 수의 두 가지 이름을 찾아보세요.';
+    }
+
+    function flipMemoryCard(button, card) {
+      if (memoryLocked || button.classList.contains('is-open') || button.classList.contains('is-matched')) return;
+      button.classList.add('is-open'); button.setAttribute('aria-label', card.label);
+      memoryOpen.push({ button, card }); playNumberTts(card.speech);
+      if (memoryOpen.length < 2) return;
+      const [first, second] = memoryOpen;
+      if (first.card.key === second.card.key) {
+        first.button.className = second.button.className = 'memory-card is-matched';
+        memoryMatched.add(card.key); memoryOpen = [];
+        const item = NUMBER_PAIRS.find(pair => pair.value === card.key);
+        const message = `${item.sino}과 ${item.pure}은 같은 ${item.value}이에요!`;
+        document.getElementById('memory-status').textContent = `🎉 ${message}`; playNumberTts(message);
+        if (memoryMatched.size === NUMBER_PAIRS.length) {
+          document.getElementById('memory-status').textContent = '🌟 다섯 짝 완성! 백은 순우리말로 온이라고도 해요.';
+          if (typeof fairyReward === 'function') fairyReward('candy');
+        }
+      } else {
+        memoryLocked = true;
+        document.getElementById('memory-status').textContent = '괜찮아요. 두 이름을 잘 기억하고 다시 찾아봐요!';
+        if (typeof fairyEncourage === 'function') fairyEncourage();
+        setTimeout(() => { first.button.classList.remove('is-open'); second.button.classList.remove('is-open'); memoryOpen = []; memoryLocked = false; }, 850);
+      }
+    }
+
+    function speakNumberGuide() {
+      playNumberTts('육십은 예순, 칠십은 일흔, 팔십은 여든, 구십은 아흔, 백은 온이라고도 읽어요.');
+    }
+
+    let pairCount = 9, pickedPairItem = null, completedPairs = 0;
+    function renderPairBasket() {
+      const basket = document.getElementById('pair-basket'); basket.innerHTML = '';
+      for (let index = 0; index < pairCount; index++) {
+        const item = document.createElement('button'); item.className = 'pair-item'; item.textContent = '🍬';
+        item.setAttribute('aria-label', `${index + 1}번째 사탕`); item.onclick = () => pickPairItem(item);
+        basket.appendChild(item);
+      }
+      pickedPairItem = null; completedPairs = 0;
+      document.getElementById('pair-status').textContent = `${pairCount}개를 두 개씩 짝지어 보세요.`;
+    }
+    function pickPairItem(item) {
+      if (item.classList.contains('is-paired')) return;
+      if (pickedPairItem === item) { item.classList.remove('is-picked'); pickedPairItem = null; return; }
+      if (!pickedPairItem) { pickedPairItem = item; item.classList.add('is-picked'); return; }
+      pickedPairItem.classList.remove('is-picked'); pickedPairItem.classList.add('is-paired'); item.classList.add('is-paired');
+      pickedPairItem = null; completedPairs++;
+      const pairedItems = completedPairs * 2;
+      const remaining = pairCount - pairedItems;
+      if (remaining <= 1) {
+        const isEven = remaining === 0;
+        const message = isEven ? `${pairCount}은 모두 짝이 맞아서 짝수입니다.` : `${pairCount}은 한 개가 남아서 홀수입니다.`;
+        document.getElementById('pair-status').textContent = `${isEven ? '🟢' : '🟣'} ${message}`; playNumberTts(message);
+        if (typeof fairyPraise === 'function') fairyPraise();
+      } else document.getElementById('pair-status').textContent = `${completedPairs}쌍 완성! ${remaining}개가 남았어요.`;
+    }
+    function changePairCount(delta) { pairCount = Math.max(1, Math.min(20, pairCount + delta)); renderPairBasket(); }
+    function randomPairCount() { pairCount = Math.floor(Math.random() * 16) + 5; renderPairBasket(); }
+    function resetPairs() { renderPairBasket(); }
+
+    // 5. 십의 자리부터 비교하는 퀴즈
     let curA = 45, curB = 52;
     function nextCompareQ() {
       curA = Math.floor(Math.random() * 90) + 10;
@@ -313,6 +471,33 @@
       document.getElementById('num-b').textContent = curB;
       document.getElementById('compare-sign').textContent = '?';
       document.getElementById('compare-feedback').textContent = '';
+      document.querySelectorAll('.place-digit').forEach(el => el.classList.remove('is-focus'));
+      document.querySelectorAll('.place-number').forEach(el => el.classList.remove('is-active'));
+      ['place-a','place-b'].forEach((id, side) => {
+        const num = side ? curB : curA; const box = document.getElementById(id);
+        box.querySelector('.tens b').textContent = Math.floor(num / 10);
+        box.querySelector('.ones b').textContent = num % 10;
+      });
+      document.getElementById('ones-step-btn').disabled = true;
+      document.getElementById('tens-step-btn').disabled = false;
+    }
+
+    function showCompareStep(step) {
+      document.querySelectorAll('.place-digit').forEach(el => el.classList.remove('is-focus'));
+      const selector = step === 1 ? '.tens' : '.ones';
+      document.querySelectorAll(selector).forEach(el => el.classList.add('is-focus'));
+      document.querySelectorAll('.place-number').forEach(el => el.classList.add('is-active'));
+      const aDigit = step === 1 ? Math.floor(curA / 10) : curA % 10;
+      const bDigit = step === 1 ? Math.floor(curB / 10) : curB % 10;
+      const fb = document.getElementById('compare-feedback');
+      if (step === 1 && aDigit === bDigit) {
+        fb.textContent = `십의 자리 ${aDigit}이 같아요. 이제 일의 자리를 볼 차례예요.`;
+        document.getElementById('ones-step-btn').disabled = false; playNumberTts(fb.textContent);
+      } else {
+        const place = step === 1 ? '십의' : '일의';
+        fb.textContent = `${place} 자리에서 ${aDigit}와 ${bDigit}을 비교했어요. 이제 알맞은 부등호를 골라요.`;
+        playNumberTts(fb.textContent);
+      }
     }
 
     function chooseCompare(sign) {
@@ -320,12 +505,13 @@
       const fb = document.getElementById('compare-feedback');
       document.getElementById('compare-sign').textContent = sign;
       if (sign === correctSign) {
-        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! ${curA} ${sign} ${curB} 참 잘했어요!</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak(`정답이에요! ${curA}가 ${curB}보다 ${sign === '>' ? '큽니다' : (sign === '<' ? '작습니다' : '같습니다')}`);
+        const sentence = curA === curB ? `${curA}와 ${curB}는 같습니다.` : `${curA}는 ${curB}보다 ${curA > curB ? '큽니다' : '작습니다'}.`;
+        fb.innerHTML = `<span style="color:#10b981;">🎉 정답! ${sentence}</span>`;
+        playNumberTts(`정답이에요! ${sentence}`);
         if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
       } else {
-        fb.innerHTML = `<span style="color:#ef4444;">😅 다시 생각해보세요! 정답은 ${curA} ${correctSign} ${curB} 이에요.</span>`;
-        if (typeof fairySpeak === 'function') fairySpeak(`아쉬워요! 올바른 부등호는 ${correctSign} 입니다.`);
+        fb.innerHTML = '<span style="color:#7c3aed;">💡 괜찮아요. ① 십의 자리부터 다시 밝혀 볼까요?</span>';
+        showCompareStep(1); if (typeof fairyEncourage === 'function') fairyEncourage();
       }
     }
 
@@ -344,6 +530,8 @@
 
       renderBundles();
       initGrid100();
+      startMemoryGame();
+      renderPairBasket();
       nextCompareQ();
 
       if (typeof initFairyAudio === 'function') initFairyAudio();
