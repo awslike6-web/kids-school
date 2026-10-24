@@ -115,8 +115,6 @@
     }
   }
 
-  // 전역 리액션 훅 노출 (fairy-engine 오디오와 동기화)
-  global.triggerCharacterReaction = syncCheerMonsterReaction;
 
   function initScreen() {
     UI.applyChildTheme(isMinseo);
@@ -142,10 +140,8 @@
     if (canMastery) {
       document.getElementById('questionText').textContent = '단원 진도를 불러오는 중이에요... ⏳';
       try {
-        // 🛡️ 최대 3초 타임아웃 레이스 (네트워크 지연 시 즉시 폴백 전환)
-        const loadPromise = QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout_3s')), 3000));
-        const unit = await Promise.race([loadPromise, timeoutPromise]);
+        // 🛡️ 최대 3초만 기다림: 노션이 늦으면 loadUnit이 조회를 끊고 오늘 캐시로 출제 (캐시도 없으면 아래 정적 폴백)
+        const unit = await QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit, budgetMs: 3000 });
 
         if (unit && Array.isArray(unit.items) && unit.items.length > 0) {
           const round = QuestMastery.buildRound({ child: unit.child, items: unit.items, subj: currentSubj });
@@ -578,6 +574,7 @@
         .catch(e => console.warn('[3·3·3 마스터리 동기화 알림]', e));
     }
     playSound('fanfare');
+    syncCheerMonsterReaction('clear');
     if (typeof fairyReward === 'function') {
       fairyReward();
     } else if (typeof speakFairyTTS === 'function') {
@@ -587,7 +584,6 @@
     if (isMinseo) {
       UI.skinClearModalForMinseo();
     } else if (global.MonsterRoster) {
-      syncCheerMonsterReaction('clear');
       const monster = global.MonsterRoster.getSelectedMonster();
       const clearPartnerEl = document.getElementById('clearPartnerText');
       if (clearPartnerEl && monster) {

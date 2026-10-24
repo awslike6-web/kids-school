@@ -949,9 +949,6 @@ function getNonRepeatingRandomFairyVoice(list, trackKey) {
  * 🌟 정답/극찬 전용 헬퍼 (페르소나 5종 다채로운 랜덤 셔플 & 선희 고음질 음성 지원)
  */
 function fairyPraise(onEndCallback = null) {
-    if (typeof window !== 'undefined' && typeof window.triggerCharacterReaction === 'function') {
-        window.triggerCharacterReaction('correct');
-    }
     if (!isSafeSfxEnabled()) {
         if (onEndCallback) onEndCallback();
         return;
@@ -998,9 +995,6 @@ function fairyPraise(onEndCallback = null) {
  * 🌸 오답/응원 전용 헬퍼 (페르소나 4종 다채로운 랜덤 셔플 & 선희 고음질 음성 지원)
  */
 function fairyEncourage(onEndCallback = null) {
-    if (typeof window !== 'undefined' && typeof window.triggerCharacterReaction === 'function') {
-        window.triggerCharacterReaction('encourage');
-    }
     if (!isSafeSfxEnabled()) {
         if (onEndCallback) onEndCallback();
         return;
@@ -1045,9 +1039,6 @@ function fairyEncourage(onEndCallback = null) {
  * 🎁 퀘스트/레벨업/보상/완주 전용 헬퍼
  */
 function fairyReward(type = 'quest', onEndCallback = null) {
-    if (typeof window !== 'undefined' && typeof window.triggerCharacterReaction === 'function') {
-        window.triggerCharacterReaction('clear');
-    }
     if (!isSafeSfxEnabled()) {
         if (onEndCallback) onEndCallback();
         return;

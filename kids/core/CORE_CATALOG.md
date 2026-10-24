@@ -238,7 +238,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `loadUnit({child, subj, unit})` | 당일 캐시 + 노션 최신 Pull 병합, 단원 항목 반환 (3개 미만이면 null). `unit`은 문자열·`\|` 결합 문자열·배열 모두 가능, 반환에 `units`·`unitKey`(정렬 후 `+` 결합) 포함 |
+  | `loadUnit({child, subj, unit, budgetMs})` | 당일 캐시 + 노션 최신 Pull 병합, 단원 항목 반환 (3개 미만이면 null). `unit`은 문자열·`\|` 결합 문자열·배열 모두 가능, 반환에 `units`·`unitKey`(정렬 후 `+` 결합) 포함. `budgetMs`(러너는 3000)를 주면 노션 조회를 그 안에서 끊고 오늘 캐시로 출제하며, 남은 시간 1초 미만이면 단원 번호 재조회를 건너뜀 (없으면 기존 3초 + 4초). 바깥에서 `Promise.race`로 자르지 말 것: 캐시까지 버려 정적 퀘스트로 떨어짐 |
   | `stageLabel(stage)` / `unitTitle(items, units)` | 노션 단원명 → 표시 이름. 퀘스트 제목은 `과목방 이름 · unitTitle(불러온 항목)`(단일 = 단원명, 번호 느슨 매칭 = "가장 큰 단원 외 N개", 묶음 = "📚 N개 단원 묶음"). 기존 4+1 제목도 `quest_engine.js` `notionUnitName`으로 같은 규칙, 정적 문제은행 단원은 은행의 `unitTitles` |
   | `parseUnitList(unit)` | 단원 설정값 → 단원명 목록 (배열 / `\|` 결합 / 단일) |
   | `dedupeHeadwords(items, store)` | 띄어쓰기 무시 표제어가 같으면 숙련도 높은 항목 1개만 남김 (묶음 단원의 `칠전팔기` 등) |

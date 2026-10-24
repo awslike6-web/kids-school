@@ -291,6 +291,53 @@
     }), fromDetailQs.map(q => q.hint));
     reset('minseo');
 
+    // 단원 로드 대기 예산(budgetMs): 노션이 늦으면 오늘 캐시로 출제, 재조회는 남은 시간 1초 이상일 때만
+    {
+      // 노션 캐시 원본 형식(과목·학생 포함) 6개
+      const cachedL9 = ['bathroom', 'kitchen', 'bedroom', 'garden', 'mirror', 'toilet'].map((w, i) => ({
+        id: `b${i}`, word: w, meaning: `뜻${i}`, detailContext: '', wordType: '단어', stage: 'L9',
+        subject: ['영어'], target: ['민수'], createdTime: `2026-10-01T00:00:0${i}Z`
+      }));
+      const prevCache = root.getNotionCachedVocaList;
+      const prevFresh = root.fetchVocaUnitFresh;
+      const calls = [];
+      const fakeFresh = (delayMs, result) => opts => {
+        calls.push(opts.timeoutMs);
+        // 실제 fetchVocaUnitFresh처럼 timeoutMs가 지나면 조회를 끊고 null
+        return new Promise(res => setTimeout(() => res(delayMs >= opts.timeoutMs ? null : result), Math.min(delayMs, opts.timeoutMs)));
+      };
+      const load = extra => QM.loadUnit({ child: 'minsu', subj: 'english', unit: 'L9', ...extra });
+      root.getNotionCachedVocaList = () => cachedL9;
+
+      root.fetchVocaUnitFresh = fakeFresh(5000, []);
+      let t0 = Date.now();
+      const slow = await load({ budgetMs: 300 });
+      const slowMs = Date.now() - t0;
+      check('노션이 예산보다 늦으면 정적 폴백이 아니라 오늘 캐시로 출제', slow && slow.items.length >= 3 && slow.synced === false, slow && slow.items.length);
+      check('예산(300ms)을 넘겨 기다리지 않음', slowMs < 450, slowMs);
+      reset('minsu');
+
+      calls.length = 0;
+      root.fetchVocaUnitFresh = fakeFresh(400, []);
+      const skip = await load({ budgetMs: 1200 });
+      check('남은 시간 1초 미만이면 단원 번호 재조회 생략', calls.length === 1 && skip && skip.items.length >= 3, calls);
+      reset('minsu');
+
+      calls.length = 0;
+      root.fetchVocaUnitFresh = fakeFresh(0, []);
+      await load({ budgetMs: 3000 });
+      check('예산 안이면 재조회는 남은 시간만큼만', calls.length === 2 && calls[1] <= 3000 && calls[1] >= 2900, calls);
+      reset('minsu');
+
+      calls.length = 0;
+      await load({});
+      check('budgetMs 없이 부르면 기존대로 3초 + 4초', calls.length === 2 && calls[0] === 3000 && calls[1] === 4000, calls);
+      reset('minsu');
+
+      root.getNotionCachedVocaList = prevCache;
+      root.fetchVocaUnitFresh = prevFresh;
+    }
+
     const pass = results.filter(r => r.ok).length;
     const lines = results.map(r => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}${r.ok ? '' : '  ' + r.extra}`);
     lines.push(`\n${pass === results.length ? 'PASS' : 'FAIL'}: ${pass}/${results.length}`);

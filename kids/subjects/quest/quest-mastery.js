@@ -754,13 +754,18 @@
     const cached = typeof root.getNotionCachedVocaList === 'function' ? root.getNotionCachedVocaList(child) : [];
     let items = selectUnitItems(cached, sel);
     let fresh = null;
+    // budgetMs: 화면이 기다려 줄 수 있는 총 시간. 넘기면 노션 조회를 끊고 오늘 캐시로 출제한다 (없으면 기존 3초 + 4초)
+    const budget = Number(opts.budgetMs) > 0 ? Number(opts.budgetMs) : 0;
+    const startedAt = Date.now();
     if (typeof root.fetchVocaUnitFresh === 'function') {
+      const firstTimeout = budget ? Math.min(3000, budget) : 3000;
       fresh = await root.fetchVocaUnitFresh(multi
-        ? { studentName: childName, subject: subjectKo, units, timeoutMs: 3000 }
-        : { studentName: childName, subject: subjectKo, unit: units[0], timeoutMs: 3000 });
+        ? { studentName: childName, subject: subjectKo, units, timeoutMs: firstTimeout }
+        : { studentName: childName, subject: subjectKo, unit: units[0], timeoutMs: firstTimeout });
       // '3' → "3-1. …"처럼 번호 느슨 매칭이 필요한 단일 단원만 과목 전체를 다시 조회 (phonics 등 정적 단원은 생략)
-      if (!multi && fresh && selectUnitItems(fresh, sel).length < 3 && /\d/.test(units[0])) {
-        fresh = await root.fetchVocaUnitFresh({ studentName: childName, subject: subjectKo, timeoutMs: 4000 });
+      const remaining = budget ? budget - (Date.now() - startedAt) : 4000;
+      if (!multi && fresh && selectUnitItems(fresh, sel).length < 3 && /\d/.test(units[0]) && remaining >= 1000) {
+        fresh = await root.fetchVocaUnitFresh({ studentName: childName, subject: subjectKo, timeoutMs: remaining });
       }
     }
     const freshItems = fresh ? selectUnitItems(fresh, sel) : [];
