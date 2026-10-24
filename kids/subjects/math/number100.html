@@ -328,6 +328,34 @@
       renderBundles();
     }
 
+    let currentNumAudio = null;
+    function getPureKoreanNumber(n) {
+      if (n === 100) return '온';
+      const tens = Math.floor(n / 10);
+      const ones = n % 10;
+      const t = tens > 0 ? KOREAN_TENS[tens] : '';
+      const o = ones > 0 ? KOREAN_ONES[ones] : '';
+      return `${t}${o}`;
+    }
+
+    function playPureKoreanNumberAudio(num) {
+      if (typeof stopFairyTTS === 'function') stopFairyTTS();
+      if (currentNumAudio) {
+        try {
+          currentNumAudio.pause();
+          currentNumAudio.currentTime = 0;
+        } catch (e) {}
+        currentNumAudio = null;
+      }
+      const audioUrl = `../../assets/audio/math_numbers/num_${num}.mp3`;
+      const audio = new Audio(audioUrl);
+      currentNumAudio = audio;
+      audio.play().catch(() => {
+        const pureWord = getPureKoreanNumber(num);
+        if (typeof fairySpeak === 'function') fairySpeak(pureWord);
+      });
+    }
+
     // 100 수 배열판 생성
     function initGrid100() {
       const grid = document.getElementById('grid100');
@@ -337,7 +365,7 @@
         cell.className = 'cell-100';
         cell.textContent = i;
         cell.onclick = () => {
-          if (typeof fairySpeak === 'function') fairySpeak(`${i}!`);
+          playPureKoreanNumberAudio(i);
         };
         grid.appendChild(cell);
       }
