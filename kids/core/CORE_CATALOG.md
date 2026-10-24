@@ -140,6 +140,18 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   | `MathQuizEngine.renderFrac(num, den)` | 진분수 HTML 시각화 렌더러 |
   | `MathQuizEngine.renderMixed(w, num, den)` | 대분수 HTML 시각화 렌더러 |
 
+### 🌟 초1-2 수학 시계·규칙·모양 공방 (2026-10-24)
+
+- 진입: `kids/subjects/math/clock_rules.html`, `kids/subjects/math/shapes.html`.
+- `kids/subjects/math/js/clock_rules_logic.js`: 연속 분침 조작·시침 1:12 연동, 시간 구간 강조, 정각/30분 퀴즈, 구슬 반복 마디·팔찌/기차, 수 배열. 순수 API `MathPlay.timeParts(totalMinutes)` → `{hour, minute, hourAngle, minuteAngle}`, `MathPlay.findRepeat(items)` → `{unit, next}` 또는 `null`. 최소 두 마디 근거가 있을 때만 반복을 제안한다. 퀴즈는 수학적 상태로 생성하며 별도 정적 문항은행을 추가하지 않는다.
+- `kids/subjects/math/js/shapes_viewer.js`: 기존 Canvas 입체 관찰. `set3DShape`, `highlightFeature`, `autoSpin3D`, `render3D` 등 기존 핸들러 호환.
+- `kids/subjects/math/js/shapes_physics.js`: 굴리기·탑 쌓기. `selectSlideShape`, `startSlideSimulation`, `resetSlideSimulation`, `previewStack`, `runStackChallenge`.
+- `kids/subjects/math/js/shapes_logic.js`: 탭·조립·기존 분류 퀴즈·초기화. `switchLab(1..7)`, `selectWorkshopTheme`, `chooseWorkshopPart`, `resetWorkshopCurrent`, `nextWorkshopTheme`, `renderShapeQuiz`, `nextShapeQuiz`. 상태는 IIFE 내부, 기존 인라인 호출 함수는 window에 공개. 분류 정답 보상은 문항당 한 번만 실행.
+- `kids/subjects/math/js/shapes_stamp.js`: 입체의 지정 평면 강조 → 잉크 → SVG 도장, 집/기차/나비 밑그림, 조각 추가·포인터 이동·방향키 이동·회전·삭제. 별도 공개 API 없이 `lab-6`, `lab-7` DOM에 연결.
+- `kids/subjects/math/math_play.css`: 두 활동 화면의 반응형 조작 패널과 접근성 스타일. 모든 신규 리소스는 상대 경로로 로드.
+- 오디오: 기존 `speakFairyTTS`, `fairyPraise`, `fairyEncourage` 재사용. 새로운 서버/API/DB 스키마는 추가하지 않음.
+- 검증: `node scripts/verify_math_phase1.cjs` (Playwright+Chrome, 외부 요청 모의 응답, 운영 DB 쓰기 없음). 결과 및 제한은 `docs/walkthrough_math_phase1.md`.
+
 ### 🌟 `math_voca_data.js` & `math_voca.css` (수학 문장제 지시어 번역소 코어 2.0)
 `math_voca.html`(1,716줄 ➔ 495줄)의 골디락스 리팩토링으로 완성된 88제 마스터 데이터셋 캐시 및 전용 스타일시트입니다. 노션 `CURRICULUM_DB`(3e8a2711..., `구역: 지시어번역`) 및 `VOCA_DB`(375a2711...)와 100% 동기화되어 Zero-Hardcoding Headless CMS를 구현합니다.
 - **파일 위치**:
