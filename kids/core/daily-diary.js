@@ -1096,6 +1096,11 @@ async function fetchNotionDiaries(childName) {
     const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL : (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev");
     const diaryDbId = typeof DIARY_DB_ID !== 'undefined' ? DIARY_DB_ID : (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.DIARY_DB_ID ? APP_CONFIG.DIARY_DB_ID : "3dfa27115b688010a85be385f91d64ee");
     const oldStudyDbId = typeof STUDY_LOG_DB_ID !== 'undefined' ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
+    // 부모 일기는 '부모관리자'로 저장되고 제목으로 아빠·엄마를 구분한다.
+    // 노션은 없는 선택지('아빠' 등)가 조건에 하나라도 있으면 조회 전체를 400으로 거부하므로 아이 이름일 때만 넣는다.
+    const isParentAuthor = childName === '아빠' || childName === '엄마';
+    const heroOptions = isParentAuthor ? ["부모관리자", "공동"] : [childName, "부모관리자", "공동"];
+    const legacyStudentOptions = isParentAuthor ? ["부모관리자"] : [childName, "부모관리자"];
 
     // 1차: 신규 감성/일기 전용 DB(3dfa...) 쿼리
     const queryBody = {
@@ -1110,11 +1115,7 @@ async function fetchNotionDiaries(childName) {
                     ]
                 },
                 {
-                    or: [
-                        { property: "주인공", select: { equals: childName } },
-                        { property: "주인공", select: { equals: "부모관리자" } },
-                        { property: "주인공", select: { equals: "공동" } }
-                    ]
+                    or: heroOptions.map(name => ({ property: "주인공", select: { equals: name } }))
                 }
             ]
         },
@@ -1155,10 +1156,7 @@ async function fetchNotionDiaries(childName) {
                     ]
                 },
                 {
-                    or: [
-                        { property: "학생", select: { equals: childName } },
-                        { property: "학생", select: { equals: "부모관리자" } }
-                    ]
+                    or: legacyStudentOptions.map(name => ({ property: "학생", select: { equals: name } }))
                 }
             ]
         },
