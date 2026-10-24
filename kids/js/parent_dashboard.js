@@ -258,7 +258,8 @@ function calcStreak(logPages, childName) {
     .filter(p => p.properties['학생']?.select?.name === childName || p.properties['학생']?.multi_select?.some(s => s.name === childName))
     .map(p => p.properties['입장']?.date?.start || p.properties['날짜']?.date?.start || p.created_time)
     .filter(Boolean)
-    .map(d => d.split('T')[0]);
+    // '입장'은 UTC 시각으로 저장되므로 현지 날짜로 바꿔야 오전 9시 전 학습이 전날로 빠지지 않음 (날짜만 있는 값은 그대로)
+    .map(d => (/^\d{4}-\d{2}-\d{2}$/.test(d) ? d : localDateStr(new Date(d))));
 
   const unique = [...new Set(dates)].sort().reverse();
   if (!unique.length) return 0;

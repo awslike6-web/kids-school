@@ -89,8 +89,14 @@ function _matchesVocaRecord(record, options) {
 // ========================================================
 const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V12_";
 
+// 🕒 캐시 날짜는 한국 시간 기준 (UTC로 자르면 오전 9시 전에는 전날 캐시를 씀)
+function _vocaKstTodayStr() {
+    const kst = new Date(Date.now() + 9 * 3600000);
+    return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+}
+
 function _getVocaCacheKey(studentName, dbId) {
-    const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const todayStr = _vocaKstTodayStr(); // YYYY-MM-DD
     const name = (studentName || 'ALL').trim();
     return `${VOCA_CACHE_PREFIX}${dbId}_${name}_${todayStr}`;
 }
@@ -113,7 +119,7 @@ function _loadVocaFromCache(studentName, dbId) {
 function _saveVocaToCache(studentName, dbId, records) {
     try {
         if (!Array.isArray(records) || records.length === 0) return;
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = _vocaKstTodayStr();
         const key = _getVocaCacheKey(studentName, dbId);
         
         // 이전 날짜 및 구버전 캐시 전수 정리

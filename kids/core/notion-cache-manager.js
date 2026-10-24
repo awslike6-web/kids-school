@@ -10,10 +10,16 @@
     // ----------------------------------------------------
     // 1. VOCA 단어 캐시 관리
     // ----------------------------------------------------
+    // 🕒 캐시 날짜는 한국 시간 기준 (UTC로 자르면 오전 9시 전에는 전날 캐시를 씀)
+    function kstTodayStr() {
+        const kst = new Date(Date.now() + 9 * 3600000);
+        return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
+    }
+
     const VOCA_CACHE_PREFIX = "MINMIN_VOCA_CACHE_V13_";
 
     function _getVocaCacheKey(studentName, dbId) {
-        const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const todayStr = kstTodayStr(); // YYYY-MM-DD
         const name = (studentName || 'ALL').trim();
         return `${VOCA_CACHE_PREFIX}${dbId}_${name}_${todayStr}`;
     }
@@ -36,7 +42,7 @@
     function _saveVocaToCache(studentName, dbId, records) {
         try {
             if (!Array.isArray(records) || records.length === 0) return;
-            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayStr = kstTodayStr();
             const key = _getVocaCacheKey(studentName, dbId);
             
             // 이전 날짜 및 구버전 캐시 전수 정리
@@ -106,7 +112,7 @@
     const LIBRARY_CACHE_PREFIX = "MINMIN_LIBRARY_CACHE_V1_";
 
     function _getReadingCacheKey(subject, track, studentName) {
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = kstTodayStr();
         const sName = (studentName || 'ALL').trim();
         const tr = (track || 'ALL').replace(/\s+/g, '_');
         return `${READING_CACHE_PREFIX}${subject}_${tr}_${sName}_${todayStr}`;
@@ -130,7 +136,7 @@
     function _saveReadingToCache(subject, track, studentName, records) {
         try {
             if (!Array.isArray(records) || records.length === 0) return;
-            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayStr = kstTodayStr();
             const key = _getReadingCacheKey(subject, track, studentName);
             for (let i = localStorage.length - 1; i >= 0; i--) {
                 const k = localStorage.key(i);
