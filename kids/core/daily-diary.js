@@ -1132,9 +1132,11 @@ async function fetchNotionDiaries(childName) {
     // 부모 일기는 '부모관리자'로 저장되고 제목으로 아빠·엄마를 구분한다.
     // 노션은 없는 선택지('아빠' 등)가 조건에 하나라도 있으면 조회 전체를 400으로 거부하므로 아이 이름일 때만 넣는다.
     const isParentAuthor = childName === '아빠' || childName === '엄마';
-    // 🛡️ 민서/민수 본인 일기장에서는 본인(childName)이 작성한 순수 일기만 조회 (부모/공동/특별한날 잡음 원천 차단)
-    const heroOptions = isParentAuthor ? ["부모관리자", "공동"] : [childName];
-    const legacyStudentOptions = isParentAuthor ? ["부모관리자"] : [childName];
+    // 🛡️ 특별한 날·작품은 아래 '구분' 조건이 막는다. 아이 일기장에도 '부모관리자'는 남겨 두는데,
+    // 부모 모드에서 아이 일기를 대신 쓰면 주인공이 '부모관리자'(제목에 아이 이름)로 저장되기 때문이다.
+    // 빠지면 그 일기가 조회되지 않고, 동기화 정리(prune) 때 캐시에서까지 지워진다.
+    const heroOptions = isParentAuthor ? ["부모관리자", "공동"] : [childName, "부모관리자"];
+    const legacyStudentOptions = isParentAuthor ? ["부모관리자"] : [childName, "부모관리자"];
 
     // 1차: 신규 감성/일기 전용 DB(3dfa...) 쿼리 (🚨 '특별한 날', '작품' 등 비일기 카테고리 완전 배제)
     const queryBody = {
@@ -1169,6 +1171,8 @@ async function fetchNotionDiaries(childName) {
             const pages = data.results || [];
             const parsed = pages.map(p => parseNotionDiaryPage(p, childName)).filter(Boolean);
             if (parsed.length > 0) {
+                // 신규 DB를 끝까지 다 받았을 때만 캐시 정리(prune) 기준으로 쓴다 (레거시 폴백·다음 페이지가 남은 결과는 제외)
+                parsed.isCompleteDiaryDbResult = !data.has_more;
                 console.log(`📖 [신규 감성DB] ${childName} 일기 ${parsed.length}건 원격 조회 성공!`);
                 return parsed;
             }
@@ -1217,7 +1221,27 @@ async function fetchNotionDiaries(childName) {
 }
 
 // 4-5. 노션 원격 데이터와 로컬 스토리지 지능형 병합 (Merge)
-function mergeNotionDiariesIntoLocal(remoteEntries) {
+// 4-5-1. 노션이 단일 원천: 이 아이의 노션 연동 항목 중 이번 전체 조회에 없는 것은 캐시에서 뺀다.
+// 예전 코드가 캐시에 넣은 '특별한 날' 같은 비일기 항목과 노션에서 지운 일기가 여기서 정리된다.
+// 노션에 아직 안 올라간 로컬 일기와, 방금 저장해 조회에 늦게 잡힐 수 있는 10분 이내 항목은 남긴다.
+const DIARY_PRUNE_GRACE_MS = 10 * 60 * 1000;
+function pruneStaleNotionEntries(localList, remoteEntries, childName) {
+    const remoteIds = new Set(remoteEntries.map(r => r.id));
+    const graceCutoff = Date.now() - DIARY_PRUNE_GRACE_MS;
+    const kept = localList.filter(item => {
+        if (!item || item.childName !== childName) return true;
+        const pageId = item.notionPageId || (item.isNotionSynced ? item.id : null);
+        if (!pageId || remoteIds.has(pageId)) return true;
+        const createdMs = new Date(item.createdAt || item.date).getTime();
+        return createdMs > graceCutoff;
+    });
+    if (kept.length !== localList.length) {
+        console.log(`🧹 [일기장 동기화 정리] 노션에 없는 ${childName} 항목 ${localList.length - kept.length}건을 캐시에서 제거했습니다.`);
+    }
+    return kept;
+}
+
+function mergeNotionDiariesIntoLocal(remoteEntries, childName) {
     if (!remoteEntries || remoteEntries.length === 0) return getStoredDiaries();
 
     // 🛡️ 비일기 항목 필터링 방어선
@@ -1230,9 +1254,11 @@ function mergeNotionDiariesIntoLocal(remoteEntries) {
 
     const localList = getStoredDiaries();
     const deletedIds = getDeletedDiaryIds();
-    const merged = [...localList];
+    const merged = (remoteEntries.isCompleteDiaryDbResult && childName)
+        ? pruneStaleNotionEntries(localList, validRemotes, childName)
+        : [...localList];
 
-    for (const remote of remoteEntries) {
+    for (const remote of validRemotes) {
         if (deletedIds.includes(remote.id) || deletedIds.includes(remote.notionPageId)) {
             continue;
         }
@@ -1278,7 +1304,7 @@ async function syncDiariesFromNotion(childName) {
     try {
         const remotes = await fetchNotionDiaries(childName);
         if (remotes && remotes.length > 0) {
-            mergeNotionDiariesIntoLocal(remotes);
+            mergeNotionDiariesIntoLocal(remotes, childName);
             // 화면 갱신
             const histSec = document.getElementById('diaryHistorySection');
             const { childName: activeChild, isMinsu } = getCurrentDiaryTarget();
