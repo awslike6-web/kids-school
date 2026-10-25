@@ -11,7 +11,27 @@ function getKstTodayYMD(date = new Date()) {
 function getStoredDiaries() {
     try {
         const data = localStorage.getItem('mimi_daily_diaries');
-        return data ? JSON.parse(data) : [];
+        if (!data) return [];
+        const parsed = JSON.parse(data);
+        if (!Array.isArray(parsed)) return [];
+
+        // 🛡️ 로컬 오염 방어: '특별한 날', '작품', '상장' 등 일기가 아닌 항목 자동 정화(Self-healing)
+        const cleaned = parsed.filter(item => {
+            if (!item) return false;
+            if (item.category === '특별한 날' || item.category === '작품' || item.category === '상장') return false;
+            if (item.id && (String(item.id).startsWith('evt_') || String(item.id).startsWith('art_'))) return false;
+            if (item.content && (item.content.includes('[특별한 날]') || item.content.includes('[작품]'))) return false;
+            if (item.title && (item.title.includes('[특별한 날]') || item.title.includes('[작품]'))) return false;
+            return true;
+        });
+
+        // 정화된 항목이 있으면 로컬스토리지 자동 최신화
+        if (cleaned.length !== parsed.length) {
+            console.log(`🧹 [일기장 정화] 일기가 아닌 항목 ${parsed.length - cleaned.length}건을 로컬 스토리지에서 자동 제거했습니다.`);
+            localStorage.setItem('mimi_daily_diaries', JSON.stringify(cleaned));
+        }
+
+        return cleaned;
     } catch (e) {
         return [];
     }
@@ -925,9 +945,21 @@ function parseNotionDiaryPage(page, targetChild) {
     if (!page || !page.properties) return null;
     const props = page.properties;
 
+    // 🛡️ [카테고리 런타임 게이트] 신규 감성DB의 '구분' 속성이 있는 경우 일기류('마음일기', '일기', '종이일기')만 통과
+    const gubun = props["구분"]?.select?.name;
+    if (gubun && gubun !== '마음일기' && gubun !== '일기' && gubun !== '종이일기') {
+        // '특별한 날', '작품', '상장' 등 일기가 아닌 항목은 일기장 파서에서 원천 차단
+        return null;
+    }
+
     // 1) 학생/주인공 식별 (신규 '주인공' 우선, 구 '학생' 폴백)
     const student = props["주인공"]?.select?.name || props["학생"]?.select?.name || '';
     const title = props["식별ID"]?.title?.[0]?.text?.content || props["ID"]?.title?.[0]?.text?.content || '';
+
+    // 🛡️ 식별ID나 제목에 '특별한 날', '작품', 'evt_', 'art_'가 포함되어 있다면 원천 차단
+    if (title.includes('[특별한 날]') || title.includes('[작품]') || title.startsWith('evt_') || title.startsWith('art_')) {
+        return null;
+    }
 
     let matchedChild = student;
     if (student === '부모관리자' || student === '공동') {
@@ -1075,6 +1107,7 @@ function parseNotionDiaryPage(page, targetChild) {
     return {
         id: page.id,
         notionPageId: page.id,
+        category: gubun || (matchedChild === '민서' ? '마음일기' : '일기'),
         childName: matchedChild,
         isParentEntry: (student === '부모관리자'),
         date: dateStr,
@@ -1099,10 +1132,11 @@ async function fetchNotionDiaries(childName) {
     // 부모 일기는 '부모관리자'로 저장되고 제목으로 아빠·엄마를 구분한다.
     // 노션은 없는 선택지('아빠' 등)가 조건에 하나라도 있으면 조회 전체를 400으로 거부하므로 아이 이름일 때만 넣는다.
     const isParentAuthor = childName === '아빠' || childName === '엄마';
-    const heroOptions = isParentAuthor ? ["부모관리자", "공동"] : [childName, "부모관리자", "공동"];
-    const legacyStudentOptions = isParentAuthor ? ["부모관리자"] : [childName, "부모관리자"];
+    // 🛡️ 민서/민수 본인 일기장에서는 본인(childName)이 작성한 순수 일기만 조회 (부모/공동/특별한날 잡음 원천 차단)
+    const heroOptions = isParentAuthor ? ["부모관리자", "공동"] : [childName];
+    const legacyStudentOptions = isParentAuthor ? ["부모관리자"] : [childName];
 
-    // 1차: 신규 감성/일기 전용 DB(3dfa...) 쿼리
+    // 1차: 신규 감성/일기 전용 DB(3dfa...) 쿼리 (🚨 '특별한 날', '작품' 등 비일기 카테고리 완전 배제)
     const queryBody = {
         filter: {
             and: [
@@ -1110,8 +1144,7 @@ async function fetchNotionDiaries(childName) {
                     or: [
                         { property: "구분", select: { equals: "마음일기" } },
                         { property: "구분", select: { equals: "일기" } },
-                        { property: "구분", select: { equals: "종이일기" } },
-                        { property: "구분", select: { equals: "특별한 날" } }
+                        { property: "구분", select: { equals: "종이일기" } }
                     ]
                 },
                 {
@@ -1186,6 +1219,14 @@ async function fetchNotionDiaries(childName) {
 // 4-5. 노션 원격 데이터와 로컬 스토리지 지능형 병합 (Merge)
 function mergeNotionDiariesIntoLocal(remoteEntries) {
     if (!remoteEntries || remoteEntries.length === 0) return getStoredDiaries();
+
+    // 🛡️ 비일기 항목 필터링 방어선
+    const validRemotes = remoteEntries.filter(r => {
+        if (!r) return false;
+        if (r.category === '특별한 날' || r.category === '작품' || r.category === '상장') return false;
+        if (r.id && (String(r.id).startsWith('evt_') || String(r.id).startsWith('art_'))) return false;
+        return true;
+    });
 
     const localList = getStoredDiaries();
     const deletedIds = getDeletedDiaryIds();
@@ -1430,7 +1471,15 @@ function showDiarySuccessModal(childName, badgeIcon, stampMsg) {
 
 // 8. 지난 일기 히스토리 뷰 렌더러 (타임라인 시간대 및 노션 클라우드 동기화 렌더링)
 function renderDiaryHistoryList(childName, isMinsu) {
-    const list = getStoredDiaries().filter(item => item.childName === childName);
+    // 🛡️ 화면 렌더링 시에도 해당 아이의 순수 일기만 철저히 선별
+    const list = getStoredDiaries().filter(item => 
+        item.childName === childName &&
+        item.category !== '특별한 날' &&
+        item.category !== '작품' &&
+        item.category !== '상장' &&
+        !String(item.id || '').startsWith('evt_') &&
+        !String(item.id || '').startsWith('art_')
+    );
 
     return `
         <div style="display: flex; flex-direction: column; gap: 16px;">
