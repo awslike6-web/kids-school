@@ -882,7 +882,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   1. **스마트폰 촬영/선택**: 캔버스 1200px 경량 고화질(JPEG 82%) 압축 ➔ Cloudflare Worker `/api/upload-media` 단 1회 전송.
   2. **워커 자동 처리**: 큐 보관(L2 Cache API 7일 보존) + 노션 갤러리 DB(`3dfa2711...`) `[퀵업로드]` 페이지 자동 생성 (GitHub Secret 가용 시 다이렉트 커밋 지원).
   3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ `kids-archive` & `kids-school` 깃 푸시 ➔ 노션 타임라인 기록 15초 완결!
-- **일기장 노션 동기화 (`daily-diary.js`)**: `syncDiariesFromNotion(childName)` ➔ `fetchNotionDiaries`(구분 `마음일기`·`일기`·`종이일기`, 주인공 `{아이}`+`부모관리자`) ➔ `mergeNotionDiariesIntoLocal(remotes, childName)`. 신규 DB 전체 결과일 때는 `pruneStaleNotionEntries`가 노션에 없는 그 아이의 연동 캐시 항목을 지운다(미업로드·10분 이내 항목 보존). 상세 규칙은 `docs/timetable_diary_spec.md` DB 3.
+- **일기장 노션 동기화 (`daily-diary.js`)**: `syncDiariesFromNotion(childName)` ➔ `fetchNotionDiaries`(구분 `마음일기`·`일기`·`종이일기`, 주인공 `{아이}`+`부모관리자`) ➔ `mergeNotionDiariesIntoLocal(remotes, childName)`. 신규 DB 전체 결과일 때는 `pruneStaleNotionEntries`가 노션에 없는 그 아이의 연동 캐시 항목을 지운다(미업로드·10분 이내 항목 보존). 상세 규칙은 `docs/timetable_diary_spec.md` DB 3. 검증: `node scripts/verify_diary_sync.js` (실제 노션 조회까지 `--live`, 다른 버전은 `--file <경로>`).
 - **핵심 API**:
   | 메서드 / 스크립트 | 설명 |
   | :--- | :--- |
