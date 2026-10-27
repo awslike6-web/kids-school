@@ -8,6 +8,7 @@
 2. **`../GEMINI.md`** (master-tower 안에서 작업할 때): 전사 최고 헌법 (ASDST 사전 보고, 노션 개발 타임라인 기록, 안전 방어선)
 3. **`kids/core/CORE_CATALOG.md`**: 새 코드를 짜기 전에 재사용할 공통 엔진을 먼저 찾습니다.
 4. 해당 과목 명세서: `docs/{과목}_spec.md`, 노션 스키마: `docs/notion_schemas_school.md`
+   - 알림장 등록: [`docs/timetable_diary_spec.md` §4](docs/timetable_diary_spec.md)를 먼저 읽습니다(등록 규칙과 등록 도구, 날짜별 스크립트 사본 금지).
 
 ## 작업별 스킬 (필요할 때 읽기)
 - 원본 위치: `.agent/skills/<스킬>/SKILL.md`
