@@ -248,7 +248,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
   | `applyResult(child, question, [{id, firstTry}])` | 첫 시도 정답만 +1, 당일 은메달 잠금·녹슨 왕관 강등 반영 |
   | `pushChanges(child)` | 변경 단어만 노션 '숙련도'/'달성' PATCH (Non-blocking) |
   | `getProgressSummary(child, items)` | 🪨 돌 / 🟫 구리 / 🥈 은 / 💎 다이아 개수 |
-- **검증**: `scripts/verify_quest_mastery.html` (브라우저, 이 PC에는 Node 없음) 또는 Node가 있는 환경에서 `node scripts/verify_quest_mastery.js`. 작업 절차·함정은 스킬 `quest-engine-spec` 참고
+- **검증**: `node --test "tests/**/*.test.mjs"` (회귀 시험 묶음, 아래 §회귀 시험) 또는 단독으로 `node scripts/verify_quest_mastery.js` / 브라우저 `scripts/verify_quest_mastery.html`. 작업 절차·함정은 스킬 `quest-engine-spec` 참고
 
 ### 🌟 `quest-ui-renderer.js` (4대 에러리스 인터랙션 렌더러, 약 350줄)
 - **파일 위치**: `kids/subjects/quest/quest-ui-renderer.js` (전역 `window.QuestUIRenderer`)
@@ -1053,3 +1053,11 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `kids/subjects/science/*_lab.html` 16개: `<script src="../../core/study-activity.js?v=20261023">`를 직접 로드(실험실은 core/notion 파사드를 쓰지 않음). kind=study, 과목 '과학'으로 기록.
 - 캐시 버전 `study-activity.js?v=20261023`로 통일: `core.js`, `notion-helper.js`, `notion-reward.js`, `storybook_engine.js`.
 - Guardian 저장소의 사본 `learning/study-activity.js`는 이번에 고치지 않아 이 파일과 달라졌습니다(haru 판정 3줄). 서버 장부 규칙(활동1분=1분, quiz 정답2개당1분)은 그대로입니다.
+
+## 회귀 시험 묶음 `tests/` (2026-10-27)
+
+- **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.
+- `tests/regression.test.mjs`: 단독 시험 6개를 하위 프로세스로 돌려 종료 코드 0인지 확인합니다. `verify_quest_mastery.js`(3·3·3 엔진), `test_quest_fallback.js`, `test_study_logger_upsert.js`, `verify_study_log_store.js`, `verify_kst_dates.js`, `verify_diary_sync.js`. 새 단독 시험을 만들면 실패 시 `process.exitCode = 1`로 끝나게 하고 이 목록에 한 줄 추가합니다.
+- `tests/notion-contract.test.mjs`: 앱이 노션에 보내는 요청 본문의 속성 이름·타입이 `docs/notion_schemas_school.md` 표와 같은지 확인합니다. VOCA_DB `숙련도`(`count|silverDate|lastReviewed` 형식·왕복)·`달성`, 관리자 모드 쓰기 생략, STUDY_LOG_DB 학습일지(`ID`=`{학생}_{YYYY-MM-DD}_{과목}`, `오답리포트`). 노션 속성을 바꾸면 스키마 도감(`sync_notion_schemas.py`)과 코드를 함께 고쳐야 통과합니다.
+- 시험이 실제로 고장을 잡는지 확인함: 숙련도 속성명 오타, 오답리포트 속성명 변경, 금메달 기준 변경, 숙련도 구분자 변경을 일부러 넣었을 때 모두 실패.
+- **화면 시험(묶음 밖)**: `verify_math_phase1.cjs`·`verify_math_phase2.cjs`는 브라우저를 띄워 느리고(약 20초) 실행 때마다 `docs/math-phase*.png`를 다시 씁니다. playwright는 `scripts/load_playwright.cjs`가 ① 설치본 ② `PLAYWRIGHT_MODULE` ③ 이 PC의 Codex 런타임 사본 순으로 찾고, 없으면 건너뜁니다(종료 코드 0). 실행 후 바뀐 스크린샷은 커밋할 때만 남기고 아니면 `git checkout -- docs`로 되돌립니다.

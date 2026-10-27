@@ -1,0 +1,24 @@
+# 공부방 회귀 시험: 퀘스트 숙련도·학습일지·일기 동기화·KST 날짜·노션 전송 계약
+# 노션 운영 DB에는 접속하지 않는다 (모의 fetch). 실행 시간 약 2초.
+name: 공부방 회귀 시험
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: 회귀 시험 실행
+        run: node --test "tests/**/*.test.mjs"

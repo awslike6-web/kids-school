@@ -20,6 +20,7 @@
 
 ## 로컬 실행·검증 메모 (이 PC 기준)
 - **OS·런타임**: Windows, **Node.js v24.22.0** (2026-10-20 설치). JS 엔진 검증은 `node scripts/verify_quest_mastery.js`처럼 명령으로 하고, 화면 확인은 정적 서버(`python -m http.server`)와 브라우저로 합니다.
+- **회귀 시험 (커밋 전 필수)**: `node --test "tests/**/*.test.mjs"`가 모두 통과해야 합니다(약 2초, 노션 미접속). `main` 푸시마다 GitHub Actions가 같은 시험을 돌립니다. 구성은 `kids/core/CORE_CATALOG.md` 끝의 「회귀 시험 묶음」 절.
 - **한글 출력**: Python으로 한글을 출력할 때는 `python -X utf8` 또는 `PYTHONIOENCODING=utf-8`을 붙입니다.
 - **노션 Worker(`minmin-notion.awslike6.workers.dev`) 호출**:
   - Python에서 부를 때는 `User-Agent` 헤더가 없으면 403이 납니다.
