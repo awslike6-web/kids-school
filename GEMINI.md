@@ -124,7 +124,7 @@
 ---
 
 ## 6. 음성 합성(TTS) 및 보상 오디오 표준
-- **센터 교재 등록**: 새 대화에서도 [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)을 적용한다. 고정 학습 콘텐츠의 Edge MP3 생성·재생 검증을 등록 완료 기준에 포함하며, 현재 미구현 부분은 해당 절에서 확인한다.
+- **센터 교재 등록**: 새 대화에서도 [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)을 적용한다. 고정 학습 콘텐츠의 Edge MP3 생성·재생 검증을 등록 완료 기준에 포함하며, 실행 명령·현재 발화 범위·실패 시 보완 절차를 해당 절에서 확인한다.
 - 브라우저 기본 `window.speechSynthesis` 직접 호출 금지.
 - 반드시 `kids/core/fairy-config.js` 및 `kids/core/fairy-engine.js`를 통해 음성을 출력한다:
   - 한국어 안내/도서: `speakFairyTTS(text)` (`ko-KR-SunHiNeural`)

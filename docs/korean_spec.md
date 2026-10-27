@@ -257,12 +257,31 @@ graph TD
 
 **새 대화 진입점**: 센터에서 공부한 교재 사진·지문·문제를 등록하거나 고칠 때 이 절과 `docs/notion_schemas_school.md`를 먼저 읽는다. 이 절은 센터 독해의 작업 계약이며, 민서 미니 독해의 별도 생성기를 센터용으로 실행하지 않는다.
 
-**현재 구현 상태와 확인 근거 (2026-10-27 영구 파이프라인 구축 완료)**:
-- master-tower/scripts/extract_reading_from_image.py는 사진 추출 → master-tower/scripts/register_reading_passage.py 호출 → 로컬 캐시·JS 갱신까지 수행한다. 추출 실행 명령은 master-tower 루트 기준이다.
-- master-tower/scripts/build_center_reading_audio.py가 영구 표준 CLI 빌더로 구축 완료되었다. Edge-TTS(ko-KR-SunHiNeural, +0%, +0Hz) 기반으로 고음질 MP3 및 자산 매니페스트(kids/assets/audio/center_reading/manifest.json)를 자동 생성·동기화한다.
-- kids/core/reading_engine.js의 ReadingEngine.toggleTts()는 manifest.json에 등록된 센터 정적 MP3를 우선 탐색·재생하며, 오류/누락 시 공통 speakFairyTTS로 자동 폴백한다. 화면 이동·로비 복귀·문제 시작·창 닫기(eforeunload/pagehide) 시 오디오 즉시 정지 수명주기가 통합되었다.
-- **36회차 「물체와 물질」 (
-eading_center_36)**: 노션 LIBRARY_DB (Page ID: 406a2711...), VOCA_DB 7종(물체, 물질, 고유하다, 광택, 가공, 쓰임새, 딱딱하기는 삼 년 묵은 물박달나무 같다) 적재 완료. 본문 정적 MP3(8267cfa8a3c4d877.mp3, 962.7 KB) 합성 및 매니페스트 등록 완료.
+**현재 구현과 실행 경로 (2026-10-27)**:
+- 사진 등록은 master-tower 루트의 `scripts/extract_reading_from_image.py` → `scripts/register_reading_passage.py` → `scripts/build_center_reading_audio.py` 순으로 실행된다. 센터 지문을 노션에 등록하면 본문·제목·진입 안내·등록 어휘/뜻풀이의 누락 MP3를 자동 생성한다. DB 일부 실패나 MP3 생성 실패는 완료로 처리하지 않고 종료 코드 1을 반환한다.
+- `kids/core/center-reading-audio.js`가 최종 발화 대본과 합성설정 해시를 검증하고 파일을 조회한다. 국어방과 5분방 모두 `fairy-engine.js`의 `speakFairyTTS`를 통해 정적 MP3를 먼저 사용한다. 노션 본문이 바뀌면 같은 지문 ID여도 이전 음성을 재생하지 않는다.
+- `stopFairyTTS`가 정적 MP3도 중지한다. 국어방의 중지·문제 시작·나가기, 5분방의 문제 전환, 음성 OFF와 창 닫기에서 재생과 로딩 대기 중인 요청을 함께 취소한다.
+- 36회차 「물체와 물질」은 이미 등록된 콘텐츠다. 음성 보완을 위해 지문·어휘를 노션에 다시 등록하지 않는다. 기존 지문 전체를 보완할 때도 아래 읽기 전용 노션 조회 + MP3 빌드 명령을 쓴다.
+- 음성 파일이 없는 대본은 기존 실시간 TTS로 대체될 수 있으며, Worker 내부 OpenAI 대체 때문에 선희 성우를 보장하지 않는다. MP3 누락은 검사 명령으로 확인한다.
+
+**실행 명령 (master-tower 루트, edge-tts가 설치된 Python 사용)**:
+```powershell
+# 새 사진 등록: 데이터 등록 후 해당 센터 지문·어휘의 MP3 생성까지 자동 수행
+python -X utf8 scripts/extract_reading_from_image.py --images "사진1.jpg" "사진2.jpg" --order 37
+
+# 노션에서 고친 본문 반영 / 기존 지문 전체 음성 보충 (노션 읽기만 수행)
+python -X utf8 scripts/build_center_reading_audio.py --all --from-notion
+
+# 생성 전 목록·수량 확인 / 생성 후 누락·변경·불량·매핑 검사
+python -X utf8 scripts/build_center_reading_audio.py --all --from-notion --dry-run
+python -X utf8 scripts/build_center_reading_audio.py --all --from-notion --check
+
+# 교재 JSON 등록 경로도 MP3 생성 포함. 실패 시 같은 등록을 다시 하지 말고 위 빌더로 보완
+python -X utf8 scripts/register_reading_passage.py --file "검수한지문.json"
+```
+- `--from-notion`은 `LIBRARY_DB` 센터 지문 전체와 `VOCA_DB`의 `과목=국어/학생=민수`를 페이지네이션 조회한다. 다른 단원에서 섞여 나오는 보기까지 준비하기 위해 민수 국어 어휘 풀을 포함한다. DB 속성이나 학습 진도는 변경하지 않는다.
+- `--order`·`--book-id`·`--file`로 범위를 좁힐 수도 있다. 로컬 캐시의 `fullText`와 등록 JSON의 `full_text`를 모두 지원한다. 노션에서 직접 수정한 값은 반드시 `--from-notion`으로 읽는다.
+- 이 PC의 실행 가능한 Python은 `C:/Users/pc/AppData/Local/Python/pythoncore-3.14-64/python.exe`이며 edge-tts가 설치돼 있다. WindowsApps의 python 별칭이나 다른 런타임에서 패키지를 찾지 못하면 이 실행 파일을 사용한다. edge-tts가 없으면 사용 런타임에 설치 후 다시 실행한다.
 
 **데이터 구성**:
 1. 인쇄된 지문 원문과 문단을 보존하고 필기·채점 흔적은 제외한다. 교재 문제와 정답을 우선 반영하며, 추가로 만든 문항은 원문 문항과 구별해 작업 기록에 남긴다. 불명확한 글자·정답은 추측해 확정하지 않는다.
@@ -270,11 +289,11 @@ eading_center_36)**: 노션 LIBRARY_DB (Page ID: 406a2711...), VOCA_DB 7종(물�
 3. `VOCA_DB`에는 핵심 어휘·개념어·속담·사자성어를 단어·뜻풀이·활용 설명·어휘유형·과목·학생·학년·단원으로 저장한다. 5분방은 이 어휘를 3·3·3 문제로 구성한다. 독해 문제 전체를 그대로 5분방에 복제하지 않는다.
 4. 재등록 전 학생·학년·회차·지문 식별자와 기존 노션 페이지를 조회해 갱신 대상을 확정한다. 기존 학습 진도·숙련도를 보존한다. 현 등록기는 새 페이지 생성 방식이므로 수정 작업에 무조건 재실행하거나 `--sync-pending`으로 전체 캐시를 다시 등록하지 않는다.
 
-**Edge MP3 규격 (구현 목표)**:
+**Edge MP3 규격 (구현)**:
 - 생성 엔진은 로컬 `edge-tts`, 한국어 성우는 `ko-KR-SunHiNeural`, 속도 `+0%`, 피치 `+0Hz`를 기본으로 한다. 학습 속도 변경은 사용자 지정값을 따른다. MP3 생성용으로 `/api/tts` 응답을 저장하면 OpenAI 음성이 섞일 수 있으므로 Edge 생성의 대체 수단으로 쓰지 않는다.
 - 필수 대상은 **센터 지문 본문 전체(지문당 1개)**와 **해당 콘텐츠의 현재 화면 듣기 기능이 실제 발화하는 고정 대본**이다. 제목·안내·독해 발문/보기·5분방 어휘/뜻풀이/예문 중 실제 발화 경로가 있는 문자열을 목록화해 생성한다. 음성이 없는 화면 요소의 읽기 버튼을 이 작업만으로 신설하지 않는다.
 - 무작위 보기 순서·다른 단원에서 섞인 보기까지 합친 모든 조합을 미리 만들지 않는다. 재사용 가능한 대본 단위로 저장하고, 퀘스트가 선택한 실제 발화 문자열과 일치하는 자산을 조회한다. 실시간 AI 답변과 칭찬·격려·보상 음성은 기존 공통 엔진·프리셋을 사용한다.
-- 저장 경로 목표는 `kids/assets/audio/center_reading/<대본·합성설정 해시>.mp3`이다. 해시에는 정규화 버전·최종 발화 대본·엔진·성우·속도·피치를 포함한다. 생성과 재생에서 동일한 정규화 규칙을 공유하고, 생성 목록에 원문 식별자·대본 종류·해시·합성설정·파일을 기록한다. HTML 기준 경로는 상대 경로로 연결한다.
+- 저장 경로는 `kids/assets/audio/center_reading/<SHA-256 앞 24자리>.mp3`이다. 해시에 정규화 버전(v2)·엔진·성우·속도·피치·최종 대본을 포함한다. Python 생성기와 JS 재생기의 정규화는 회귀 시험으로 일치시킨다. `manifest.json` v2의 `clips`에 대본·파일·원문 식별자·대본 종류, `settings`에 합성설정을 저장한다. HTML에서 로드한 공통 모듈 위치를 기준으로 자산 경로를 계산한다.
 - 노션이 콘텐츠 원본이다. 지문·질문·보기·뜻풀이·예문을 수정하면 해당 대본 해시를 다시 계산해 바뀐 MP3만 생성한다. 이전 대본의 음성을 새 본문에 연결하지 않는다. 생성기에는 누락 확인용 dry-run과 실패 목록·실패 종료 코드를 마련한다. 존재하지 않는 생성 명령을 실행 안내에 쓰지 않는다.
 - 재생은 일치하는 정적 MP3 우선 → 파일 누락/오류 시 공통 `speakFairyTTS` 순으로 연결한다. 실시간 대체 음성은 Edge 성우를 보장하지 않으므로 누락을 기록하고 보완한다. 화면 이동·창 닫기·음성 OFF·중지에서 정적 MP3도 즉시 멈추도록 공통 오디오 수명주기에 통합한다.
 
@@ -283,5 +302,9 @@ eading_center_36)**: 노션 LIBRARY_DB (Page ID: 406a2711...), VOCA_DB 7종(물�
 2. 노션에 최종 저장된 콘텐츠로 고정 발화 목록을 확정 → 누락 MP3 생성 → 해당 지문·5분방 발화 경로 연결 → 파일 누락·대본 불일치 확인 순으로 진행한다.
 3. 실제 국어방 지문 듣기와 해당 단원의 5분방 듣기에서 MP3 요청 200·정상 재생·대본 일치를 확인한다. 문제 전환·중지·음성 OFF·닫기와 모바일 레이아웃도 확인한다. 모의 API 시험만으로 운영 재생 완료를 선언하지 않는다.
 4. 완료 보고에는 노션 독해·어휘의 성공/실패 수, MP3 대상/생성/실패 수, 실제 재생 확인 범위를 적는다. MP3 누락이나 재생 연결 미구현이면 **데이터 등록 완료 / 음성 작업 미완료**로 보고하고 후속 작업을 남긴다.
-5. 현재는 센터용 생성기와 재생 연결부터 구현해야 2~3단계를 수행할 수 있다. 문서 변경만 요청받은 대화에서는 이 선행 과제를 기록하며, 음성 기능 구현까지 완료했다고 쓰지 않는다. 코드 구현 시에는 ASDST·기존 승인 범위·회귀 검사·카탈로그 갱신·커밋 후 노션 기록 절차를 따른다.
+5. 문서의 필수 단계는 실행 가능한 명령·재생 경로와 함께 유지한다. 향후 확장 목표는 별도 예정 항목으로 분리하고 현재 등록 완료 조건에 구현되지 않은 요구를 섞지 않는다. 코드 변경 시 ASDST·회귀 검사·카탈로그 갱신·커밋 후 노션 기록을 따른다.
+
+**현재 발화 범위와 확장 시 동기화**: 정밀 독해는 본문과 진입 안내, 민수 3·3·3은 `q.audioText`의 어휘/속담을 읽는다. 생성기는 제목과 뜻풀이도 준비한다. 독해 질문·해설과 예문은 현재 자동 낭독 경로가 없어 필수 생성 목록에서 제외한다. 향후 읽기 기능을 추가할 때는 그 최종 발화 문자열을 생성 목록·회귀 시험에 함께 추가한다.
+
+**검증 명령**: master-tower에서 `python -X utf8 scripts/test_center_reading_audio.py`, 공부방에서 `node --test "tests/**/*.test.mjs"` 및 `node scripts/verify_center_audio.cjs`. 브라우저 시험은 운영 DB 쓰기를 차단하고 모바일 390px·PC 1280px에서 실제 MP3 디코딩·중지·본문 변경·5분방 러너 경로를 검사한다. 결과 이미지는 git에 넣지 않고 `master-tower/scratch/center-audio-verification/`에 둔다.
 

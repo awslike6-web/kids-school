@@ -21,9 +21,7 @@
     let containerEl = null;
 
     // 🎧 오디오 낭독 수명주기 & 센터 정적 MP3 캐시
-    let currentAudio = null;
     let isAudioPlaying = false;
-    let centerManifestCache = null;
 
     /**
      * 🏁 독해 로비 화면 (공부방 표준: 학년 선택 바 + 단원별 그룹화 서가)
@@ -73,13 +71,13 @@
             if (Array.isArray(cacheKey)) {
                 console.info(`🛡️ [ReadingEngine] 노션 조회 결과 없음 ➔ 로컬 캐시 폴백 가동 (과목: ${subject})`);
                 rawPassages = cacheKey.map(p => ({
-                    id: p.id,
+                    id: p.id || p.book_id,
                     title: p.title,
                     track: p.track || (subject === '영어' ? '🏫 교과서 독해' : '🏥 센터 독해'),
                     unit: p.unit || p.unitTitle || "1회차",
                     grade: p.grade || "5-1",
                     order: p.order || 1,
-                    fullText: p.fullText || (p.paragraphs ? p.paragraphs.map(x => x.text).join('\n') : ""),
+                    fullText: p.fullText || p.full_text || (p.paragraphs ? p.paragraphs.map(x => x.text).join('\n') : ""),
                     summary: p.summary || p.unitTitle || "",
                     date: p.date || "",
                     questions: p.questions || (p.themeQuiz ? [{
@@ -666,19 +664,17 @@
         return currentStep === 2 && !!activePassage && activeQuestionIdx > 0 && activeQuestionIdx < (activePassage.questions || []).length;
     }
 
-    // 🎧 [오디오 수명주기] 정적 MP3 및 공통 TTS 정지
-    function stopAudio() {
-        if (currentAudio) {
-            try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e) {}
-            currentAudio = null;
-        }
+    // 정적 MP3와 실시간 TTS 모두 공통 엔진의 중지 경로를 사용한다.
+    function resetAudioUI() {
         isAudioPlaying = false;
         updateTtsButtonUI(false);
-        if (typeof window.stopFairyTTS === 'function') window.stopFairyTTS();
-        else if (window.speechSynthesis && window.speechSynthesis.cancel) window.speechSynthesis.cancel();
     }
 
-    // 🎨 TTS 버튼 재생/정지 상태 UI 동기화
+    function stopAudio() {
+        resetAudioUI();
+        if (typeof window.stopFairyTTS === 'function') window.stopFairyTTS();
+    }
+
     function updateTtsButtonUI(playing) {
         const btn = containerEl ? containerEl.querySelector('.reading-tts-btn') : null;
         if (!btn) return;
@@ -688,72 +684,18 @@
         btn.style.color = playing ? '#ffffff' : '';
     }
 
-    // 📂 현재 HTML 위치에 맞춘 오디오 자산 상대 경로 반환
-    function getAudioBasePath() {
-        const path = window.location.pathname;
-        return (path.includes('/subjects/')) ? '../../assets/audio/center_reading/' :
-               (path.includes('/kids/')) ? './assets/audio/center_reading/' : '../../assets/audio/center_reading/';
-    }
-
-    // 📜 센터 독해 오디오 매니페스트(manifest.json) 지연 로드 및 메모리 캐싱
-    async function fetchCenterManifest() {
-        if (centerManifestCache) return centerManifestCache;
-        try {
-            const res = await fetch(`${getAudioBasePath()}manifest.json?v=20261027`);
-            if (res.ok) {
-                centerManifestCache = await res.json();
-                return centerManifestCache;
-            }
-        } catch (e) {
-            console.warn('[ReadingEngine] 센터 오디오 매니페스트 로드 실패:', e);
-        }
-        return null;
-    }
-
-    // 🛡️ 공통 Fairy TTS 폴백 실행
-    function fallbackToFairyTTS() {
-        if (currentAudio) { try { currentAudio.pause(); } catch(e) {} currentAudio = null; }
-        isAudioPlaying = true;
-        updateTtsButtonUI(true);
-        if (typeof window.speakFairyTTS === 'function') {
-            window.speakFairyTTS(activePassage.fullText, () => stopAudio());
-        } else {
-            setTimeout(stopAudio, 15000);
-        }
-    }
-
-    // 🎙️ 지문 본문 음성 낭독 토글 (정적 Edge-TTS MP3 우선 ➔ speakFairyTTS 폴백)
-    async function toggleTts() {
+    function toggleTts() {
         if (!activePassage || !activePassage.fullText) return;
         if (isAudioPlaying) { stopAudio(); return; }
-
-        let staticAudioUrl = null;
-        if ((activePassage.track || '').includes('센터')) {
-            const manifest = await fetchCenterManifest();
-            const bookKey = activePassage.id || activePassage.book_id || (activePassage.order ? `reading_center_${activePassage.order}` : null);
-            if (manifest?.passages?.[bookKey]?.audio_file) {
-                staticAudioUrl = `${getAudioBasePath()}${manifest.passages[bookKey].audio_file}`;
-            }
-        }
-
-        if (staticAudioUrl) {
-            try {
-                const audio = new Audio(staticAudioUrl);
-                currentAudio = audio;
-                isAudioPlaying = true;
-                updateTtsButtonUI(true);
-                audio.onended = () => stopAudio();
-                audio.onerror = (e) => { console.warn('[ReadingEngine] MP3 에러 ➔ TTS 폴백:', e); fallbackToFairyTTS(); };
-                await audio.play();
-                return;
-            } catch (err) {
-                console.warn('[ReadingEngine] play() 예외 ➔ TTS 폴백:', err);
-                fallbackToFairyTTS();
-                return;
-            }
-        }
-        fallbackToFairyTTS();
+        if (localStorage.getItem('fairy_tts_enabled') === 'false') return;
+        if (typeof window.speakFairyTTS !== 'function') return;
+        // speakFairyTTS 내부의 CenterReadingAudio가 ID 대신 본문 해시로 조회한다.
+        window.speakFairyTTS(activePassage.fullText, resetAudioUI);
+        isAudioPlaying = true;
+        updateTtsButtonUI(true);
     }
+
+    window.addEventListener('fairy-audio-stop', resetAudioUI);
 
     // 전역 인터페이스 노출 (Facade)
     window.ReadingEngine = {

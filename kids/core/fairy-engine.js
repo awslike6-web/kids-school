@@ -354,7 +354,7 @@ async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, force
         throw new Error("TTS_WORKER_URL_NOT_FOUND");
     }
 
-    stopFairyTTS();
+    stopFairyTTS(true);
     const sessionId = ++currentTtsSessionId;
 
     const sentences = splitTextIntoSentences(fullText);
@@ -504,7 +504,7 @@ async function playOpenAiTtsStream(fullText, onEndCallback = null) {
         throw new Error("OPENAI_API_KEY_NOT_FOUND");
     }
 
-    stopFairyTTS(); // 이전 재생 즉시 중단
+    stopFairyTTS(true); // 같은 발화의 공급 엔진 전환은 재생 UI를 유지
     const sessionId = ++currentTtsSessionId;
 
     const sentences = splitTextIntoSentences(fullText);
@@ -665,6 +665,25 @@ async function speakFairyTTS(text, onEndCallback = null, options = {}) {
         return;
     }
 
+    // 센터 고정 콘텐츠는 실제 대본·설정 해시가 일치하는 Edge MP3를 먼저 재생한다.
+    if (window.CenterReadingAudio && !options.skipStatic && !options.forceVoice?.startsWith('en-')) {
+        const sessionId = currentTtsSessionId;
+        try {
+            const handled = await window.CenterReadingAudio.play(trimmed, {
+                onEnd: onEndCallback,
+                onError: () => {
+                    if (sessionId === currentTtsSessionId) {
+                        speakFairyTTS(trimmed, onEndCallback, { ...options, skipStatic: true });
+                    }
+                }
+            });
+            if (handled || sessionId !== currentTtsSessionId) return;
+        } catch (error) {
+            if (sessionId !== currentTtsSessionId) return;
+            console.warn('[센터 MP3] 실시간 음성으로 전환:', error.message);
+        }
+    }
+
     // 1. 🎵 사전 녹음된 Neural AI(선희) MP3 프리셋 및 스마트 키워드 매칭 (챗봇/자유대화 skipPreset 우선 검사)
     const isSkipPreset = (options && options.skipPreset) || trimmed.length > 25 || trimmed.includes('\n');
     if (!isSkipPreset) {
@@ -786,9 +805,11 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback, options = 
 /**
  * 🛑 모든 음성 즉시 정지
  */
-function stopFairyTTS() {
+function stopFairyTTS(preserveStatus = false) {
     currentTtsSessionId++;
     isPlayingTtsQueue = false;
+    if (window.CenterReadingAudio) window.CenterReadingAudio.stop();
+    if (!preserveStatus && typeof window.dispatchEvent === 'function') window.dispatchEvent(new Event('fairy-audio-stop'));
     
     if (currentOpenAiAudio) {
         try {

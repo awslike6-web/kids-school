@@ -181,6 +181,7 @@
   }
 
   function renderMasteryQuestion(q) {
+    if (typeof stopFairyTTS === 'function') stopFairyTTS();
     document.getElementById('stepCounter').textContent = `문제 ${currentIndex + 1} / ${currentQuest.questions.length}`;
     document.getElementById('progressBar').style.width = `${((currentIndex + 1) / currentQuest.questions.length) * 100}%`;
     ['classicQuestionCard', 'choicesList'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -247,6 +248,7 @@
   // 📋 기존 4+1 문항 렌더링·선택·채점
   // ========================================================
   function renderQuestion() {
+    if (typeof stopFairyTTS === 'function') stopFairyTTS();
     if (global.StudyActivity?.setPhase && global.__guardianStudyPhase !== 'quiz') global.StudyActivity.setPhase('quiz');
     const q = currentQuest.questions[currentIndex];
     if (q && q.masteryType) return renderMasteryQuestion(q);

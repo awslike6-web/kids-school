@@ -586,7 +586,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 ### 🌟 `reading_engine.js` (모바일 핀포인트 독해 뷰어 엔진)
 노션 독해 마스터 DB(`LIBRARY_DB`)에서 지문과 문제를 실시간 수급하여, 모바일 좁은 화면에서도 스크롤 피로 없이 1문항 슬라이스 카드 및 단락 힌트 토글 방식으로 쾌적하게 학습할 수 있도록 구현된 국어·영어 공통 독립 뷰어 엔진입니다.
 - **파일 위치**: `kids/core/reading_engine.js`
-- **센터 음성 현황 (2026-10-27)**: uild_center_reading_audio.py로 고음질 Edge-TTS MP3(kids/assets/audio/center_reading/<hash>.mp3) 및 manifest.json 생성 파이프라인 구축 완료. 	oggleTts()는 매니페스트 기반 정적 MP3 우선 재생 후 speakFairyTTS 폴백 및 오디오 수명주기(로비 복귀, 문제 이동, 창 닫기 등 자동 정지) 통합 완료. 등록·완료 기준은 [docs/korean_spec.md §8-1](../../docs/korean_spec.md#센터-독해-등록-표준)을 따른다.
+- **센터 음성 현황 (2026-10-27)**: `toggleTts()` → `speakFairyTTS` → `CenterReadingAudio.play` 순으로 정적 Edge MP3를 우선 재생한다. 지문 ID가 같아도 대본·설정 해시가 달라지면 옛 파일을 사용하지 않는다. 중지·문제 전환·나가기·음성 OFF·창 닫기는 공통 `stopFairyTTS`로 취소한다. 등록·완료 기준은 [국어 명세서 §8-1](../../docs/korean_spec.md#센터-독해-등록-표준)을 따른다.
 - **스타일시트**: `kids/css/reading_engine.css` (독립 정규 스타일시트, `.reading-grade-bar`, `.reading-unit-section`, `.reading-passage-card` 등)
 - **핵심 아키텍처 & UX**:
   1. **공부방 표준 학년 선택 바 (`reading-grade-bar`)**: `5-1`, `5-2`, `전체보기` 단일 표준 칩을 통해 학기/학년별 정밀 필터링 제공.
@@ -614,12 +614,18 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 ### 🛠️ `scripts/register_reading_passage.py` (지문 ➔ 독해DB + VOCA_DB 원소스 멀티유즈 분리 적재 도구)
 아버님이 지문과 문제를 대화창이나 파일로 전달했을 때, 단 1번의 커맨드로 노션 독해 DB에 지문/문항을 등록하고 지문 속 핵심 어휘/속담/사자성어를 노션 용어사전 DB(`VOCA_DB`)에 자동 분리 적재하는 전용 CLI 파이프라인입니다.
 - **파일 위치**: `master-tower/scripts/register_reading_passage.py` (공부방 저장소 바깥, master-tower 루트 기준 실행)
-- **MP3 범위**: 현재 등록기는 데이터 등록 전용이며 음성을 생성하지 않는다. 사진 추출 진입점은 같은 위치의 `extract_reading_from_image.py`. 센터용 MP3 생성·재생 연결은 위 §8-1의 미구현 과제다.
+- **MP3 자동 생성**: 센터 지문의 노션 저장 후 `build_center_reading_audio.process_build([data])`를 호출한다. 본문·제목·진입 안내·등록 어휘/뜻풀이의 누락 파일만 생성한다. 노션 일부 실패 또는 음성 실패 시 `status=partial`, CLI 종료 코드 1. 같은 위치의 `extract_reading_from_image.py`도 이 결과를 전달한다.
 - **핵심 기능**:
   - **독해 마스터 DB 적재**: 2,000자 초과 지문/JSON을 1,900자 청크로 자동 분할하여 노션 `rich_text` 제한 완전 방어.
   - **VOCA DB 자동 분리 적재 (One-Source Multi-Use)**: 지문 속 속담, 사자성어, 개념어를 발라내어 노션 용어사전 DB(`375a2711...`)에 동시 등록 (익일 5분 퀘스트 국어 파트 및 용어방에 자동 복습 큐 형성).
   - **🛡️ 2계층 오프라인 보존 큐**: 노션 API 일시 점검(500) 시에도 `kids/data/reading_passages_cache.json`에 영구 보존하여 데이터 유실 원천 차단.
   - **전체 캐시 재등록 옵션**: master-tower 루트의 `python scripts/register_reading_passage.py --sync-pending`은 현재 캐시 전체를 새 페이지로 다시 등록하므로 중복 위험이 있다. 미등록 건을 식별하기 전에는 복구용으로 무조건 실행하지 않는다.
+
+### 🎧 `center-reading-audio.js` / `build_center_reading_audio.py` (센터 고정 음성 공통 경로)
+- **브라우저 모듈**: `kids/core/center-reading-audio.js`. 국어방·`quest_runner.html`에서 Fairy 앞에 로드한다. `CenterReadingAudio.play(text, {onEnd, onError})`는 일치 자산 재생/취소 시 true, 자산이 없으면 false를 반환한다. `stop()`은 재생·목록/해시 대기 요청을 함께 취소한다. `normalize(text)`·`hash(text, settings)`는 생성기 규격과 같다.
+- **서버 없는 로컬 생성기**: master-tower의 `scripts/build_center_reading_audio.py`. `--all --from-notion`은 최신 센터 지문·민수 국어 어휘를 읽어 누락만 생성한다. `--file`·`--order`·`--book-id`는 대상 제한, `--dry-run`은 읽기 전용 계획, `--check`는 누락·변경·불량·매핑 오류 시 종료 코드 1. `full_text`·`fullText` 모두 지원한다.
+- **자산**: `kids/assets/audio/center_reading/manifest.json` v2의 `settings`·`clips`·`passages`, `<SHA-256 24자리>.mp3`. 선희 `ko-KR-SunHiNeural`·속도 `+0%`·피치 `+0Hz`, 대본·설정 해시. 원문은 노션에 두고 생성 대본만 자산 목록에 기록한다. OpenAI로 대체할 수 있는 Worker 응답을 생성 원본으로 사용하지 않는다.
+- **시험**: `tests/center-audio.test.mjs`(공부방 회귀 묶음), `scripts/verify_center_audio.cjs`(실제 MP3·모바일/PC·실제 러너), master-tower의 `scripts/test_center_reading_audio.py`(생성·변경·실패·등록 호출). 검증 근거는 `docs/center_audio/walkthrough.md`.
 
 ---
 
