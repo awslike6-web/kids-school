@@ -434,19 +434,21 @@ async function syncArtworkToNotion(art, oldState) {
             }
         }
 
+        // 노션 DB에 있는 속성만 보낸다 (docs/notion_schemas_school.md). 없는 속성이 하나라도 있으면 저장 전체가 거부된다.
+        // 분야는 노션에 없어 화면 데이터에만 두고, 바뀐 내용은 아래 수정 이력에 남는다.
         const updateProps = {
             "제목": { rich_text: [{ type: "text", text: { content: art.title } }] },
             "날짜": { date: { start: art.date } },
-            "분야": { select: { name: art.category } },
             "작가의 한마디/일기본문": { rich_text: [{ type: "text", text: { content: art.artistNote || '' } }] }
         };
 
         if (pageId) {
-            await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+            const saveRes = await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                 method: 'PATCH',
                 headers: NOTION_HEADERS,
                 body: JSON.stringify({ properties: updateProps })
             });
+            if (!saveRes.ok) console.warn("[노션 작품 저장 거부]", saveRes.status, await saveRes.text());
             if (oldState) {
                 await appendRevisionHistoryToNotion(pageId, "작품", oldState, {
                     title: art.title,
@@ -485,23 +487,20 @@ async function syncSpecialDayToNotion(specialItem, oldState) {
             }
         }
 
+        // 노션 DB에 있는 속성만 보낸다 (분야·동영상링크는 노션에 없음)
         const updateProps = {
             "제목": { rich_text: [{ type: "text", text: { content: specialItem.title } }] },
             "날짜": { date: { start: specialItem.date } },
-            "분야": { select: { name: specialItem.category } },
             "작가의 한마디/일기본문": { rich_text: [{ type: "text", text: { content: specialItem.desc || '' } }] }
         };
 
-        if (specialItem.videoUrl) {
-            updateProps["동영상링크"] = { url: specialItem.videoUrl };
-        }
-
         if (pageId) {
-            await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
+            const saveRes = await fetch(`${NOTION_PROXY}/v1/pages/${pageId}`, {
                 method: 'PATCH',
                 headers: NOTION_HEADERS,
                 body: JSON.stringify({ properties: updateProps })
             });
+            if (!saveRes.ok) console.warn("[노션 특별한 날 저장 거부]", saveRes.status, await saveRes.text());
             if (oldState) {
                 await appendRevisionHistoryToNotion(pageId, "특별한 날", oldState, {
                     title: specialItem.title,

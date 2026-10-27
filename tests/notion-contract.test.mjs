@@ -137,3 +137,19 @@ test('STUDY_LOG_DB 학습일지·오답리포트 전송이 스키마 도감과 �
   assert.equal(props['학생'].select.name, '민수');
   assert.ok(props['오답리포트'].rich_text[0].text.content.includes('12x5 연산 실수'), '오답 내용이 오답리포트에 들어가야 합니다');
 });
+
+test('갤러리 화면: 작품·특별한 날 수정 저장이 DIARY_DB 도감 속성만 보냄', async () => {
+  const schema = schemaOf('DIARY_DB');
+  const { sandbox, calls } = loadBrowserScripts(['kids/common_space/gallery-data-sync.js']);
+  sandbox.APP_CONFIG = { GALLERY_DB_ID: '3dfa27115b688010a85be385f91d64ee' };
+  vm.runInContext("notionPageIdMap['art_t'] = 'page_art'; notionPageIdMap['evt_t'] = 'page_evt';", sandbox);
+
+  await sandbox.syncArtworkToNotion({ id: 'art_t', title: '무드등', date: '2026-10-27', category: '만들기/공예', artistNote: '설명' });
+  await sandbox.syncSpecialDayToNotion({
+    id: 'evt_t', title: '운동회', date: '2026-10-27', category: '학교행사/운동회', desc: '설명', videoUrl: 'https://example.com/v.mp4',
+  });
+
+  const patches = calls.filter(c => c.method === 'PATCH');
+  assert.equal(patches.length, 2, `저장 요청이 2건이어야 합니다: ${JSON.stringify(calls.map(c => c.method + ' ' + c.url))}`);
+  for (const c of patches) assertMatchesSchema(c.body.properties, schema, `${c.method} ${c.url}`);
+});

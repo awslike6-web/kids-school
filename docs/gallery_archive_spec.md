@@ -1,6 +1,6 @@
 # 🎨 꿈나무 갤러리 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v2.3.0 (2026-10-27 기준)  
+> **문서 버전**: v2.4.0 (2026-10-27 기준)  
 > **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품 등록 도구(`scripts/sync_quick_upload.py`)  
 > **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
 > **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
@@ -39,7 +39,7 @@ flowchart TD
    - 노션 성장 갤러리 DB(`3dfa27115b688010a85be385f91d64ee`)의 제목 속성 **`식별ID`**는 프론트엔드 데이터의 `id`와 글자 하나 틀리지 않고 같아야 한다.
    - 갤러리 작품: `art_{minsu|minseo|together}_{파일베이스명}` (예: `art_minsu_20261020_moodlight_real`)
    - 특별한 날: `evt_...` (예: `evt_minseo_pet_trainer_20261022`)
-   - ❌ 금지: `[작품] 민수_2026-10-25 (...)`처럼 한글 제목을 `식별ID`에 넣으면 웹-노션 동기화가 끊어진다. (예외: 폰 퀵업로드 임시 카드, §6)
+   - ❌ 금지: `[작품] 민수_2026-10-25 (...)`처럼 한글 제목을 `식별ID`에 넣으면 웹-노션 동기화가 끊어진다. (폰 퀵업로드 임시 카드 `[퀵업로드] ...`는 PC 등록 때 `art_...`로 바뀐다, §3①)
    - 노션 카드에 쓰는 속성 이름은 [`docs/notion_schemas_school.md`](notion_schemas_school.md)의 `3dfa2711...` 표에 있는 것만 쓴다. `분야`(카테고리) 속성은 노션에 없으므로 `gallery-meta.json`에만 둔다.
 3. **일기장 분리**: 민서/민수 일기장(`kids/core/daily-diary.js`)은 `구분`이 `마음일기`·`일기`·`종이일기`인 항목만 표시한다. 작품 카드는 `구분: 작품`, 특별한 날 카드는 `구분: 특별한 날`로 지정해 일기장에 섞이지 않게 한다.
 4. **모바일 캐시 버스팅**: `gallery-data.js`가 바뀌면 `kids/common_space/gallery.html` 하단 `<script src="../data/gallery-data.js?v=...">` 버전 쿼리도 함께 바뀌어야 스마트폰에서 새로고침 시 바로 새 작품이 뜬다 (`sync_quick_upload.py`가 자동 갱신).
@@ -70,10 +70,13 @@ flowchart TD
 모든 명령은 관제탑 루트(`g:/master-tower`)에서 실행합니다.
 
 ### ① 폰 퀵업로드 2단계
-- **1단계 (폰, 현장)**: 스마트폰 브라우저에서 퀵업로더 접속 ➔ 사진 촬영/선택 ➔ 자녀(민서/민수) 선택 ➔ 메모 작성 ➔ 전송. Cloudflare Worker(`workers/minmin-notion`)가 사진을 대기 큐에 넣고 노션 성장 DB에 임시 카드를 만든다:
+- **1단계 (폰, 현장)**: 스마트폰 브라우저에서 퀵업로더(`kids/core/quick-uploader.js`) 접속 ➔ 사진 촬영/선택 ➔ 자녀(민서/민수) 선택 ➔ 메모 작성 ➔ 전송. Cloudflare Worker(`workers/minmin-notion`)가 노션 성장 DB에 임시 카드를 만들고, 그 카드 번호(`notionPageId`)와 함께 사진을 대기 큐에 넣는다:
   - `식별ID`: `[퀵업로드] 자녀_YYYY-MM-DD (메모)`
-  - `구분`: 업로드 때 고른 분류(`작품`, `종이일기` 등), `주인공`: `민서`·`민수`(엄마·아빠는 `부모관리자`)
+  - `구분`: 업로드 때 고른 분류(`작품`, `상장`, `종이일기`, `특별한 날`), `주인공`: `민서`·`민수`(엄마·아빠는 `부모관리자`)
 - **2단계 (PC)**: 사용자가 **"퀵업로드 올린 거 등록해줘"**라고 하면 아래 명령을 1회 실행한다. 대기 큐 사진을 `uploads/ex/`로 내려받아 `gallery-meta.json`에 등록하고, 빌드·캐시 버스팅·양쪽 Git 푸시까지 끝낸다.
+  - 작품·상장은 임시 카드의 `식별ID`를 `art_...`로, `구분`을 `작품`으로 바꾸고 사진 블록을 붙인다. 카드 번호가 없는 옛 큐 항목은 `art_...`로 찾아 갱신하거나 새로 만든다. 같은 `art_...` 카드가 이미 있으면 그 카드를 갱신하고, 남은 임시 카드는 노션에서 직접 지우라고 안내한다.
+  - 노션까지 성공한 항목만 대기 큐에서 지운다. 실패한 항목은 큐에 남아 다음 실행 때 다시 처리된다.
+  - 종이일기·특별한 날 임시 카드는 이 도구가 바꾸지 않는다 (종이일기는 [`timetable_diary_spec.md` §5](timetable_diary_spec.md), 특별한 날은 §5).
 ```bash
 python -X utf8 scripts/sync_quick_upload.py
 ```
@@ -120,6 +123,8 @@ python -X utf8 scripts/sync_quick_upload.py \
 
 ---
 
-## 6. 알려진 한계
+## 6. 노션 저장 규칙 (갤러리 화면)
 
-- **폰 퀵업로드의 노션 카드 이름**: 1단계에서 Worker가 만든 임시 카드의 `식별ID`는 `[퀵업로드] ...` 형식이고, 2단계(`sync_quick_upload.py`, 옵션 없이 실행)는 이 카드를 `art_...` id로 바꾸지 않는다. 그래서 퀵업로드로 들어온 작품은 웹 데이터와 노션 카드의 `식별ID`가 다르다. 고칠 때는 2단계에서 임시 카드를 찾아 `식별ID`를 `art_...`로 바꾸는 쪽으로 `sync_quick_upload.py`를 고친다.
+- 갤러리 화면에서 작품·특별한 날의 제목·날짜·설명을 고치면 `gallery-data-sync.js`가 노션 카드의 `제목`·`날짜`·`작가의 한마디/일기본문`을 바꾸고, 바뀐 내용은 카드 본문에 수정 이력으로 남긴다.
+- 분야(카테고리)·동영상 주소는 노션 DB에 속성이 없어 보내지 않는다. 없는 속성을 하나라도 보내면 노션이 저장 전체를 거부한다 (2026-10-27까지 이 문제로 화면 수정이 노션에 저장되지 않았음).
+- 이 규칙은 공부방 회귀 시험 `tests/notion-contract.test.mjs`의 갤러리 시험이 지킨다.

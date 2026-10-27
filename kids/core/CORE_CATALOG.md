@@ -98,7 +98,8 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   | `switchViewMode(mode)` | `gallery_controller` | 'art'(성장 작품) ↔ 'special'(특별한 날 추억) 2대 뷰 모드 전환 |
   | `renderGallery()` | `gallery_controller` | 작성자/분야별 필터가 적용된 갤러리 카드 그리드 반응형 렌더링 |
   | `loadGalleryData()` | `gallery-data-sync` | 로컬 스토리지 및 마스터 데이터 병합 로드 (버전 체크 포함) |
-  | `syncFromNotionGallery()` | `gallery-data-sync` | 노션 GALLERY_DB에서 최신 제목/분야/한마디 백그라운드 동기화 |
+  | `syncFromNotionGallery()` | `gallery-data-sync` | 노션 GALLERY_DB에서 최신 제목/날짜/한마디 백그라운드 동기화 |
+  | `syncArtworkToNotion(art, oldState)` / `syncSpecialDayToNotion(item, oldState)` | `gallery-data-sync` | 화면 수정 내용을 노션 `제목`·`날짜`·`작가의 한마디/일기본문`에 저장 + 수정 이력. 분야·동영상은 노션 속성이 없어 보내지 않음 (회귀 시험 `tests/notion-contract.test.mjs`) |
   | `openDetailModal(id)` | `gallery-modal-manager` | 작품/추억 상세 모달 팝업 열기 (다중 썸네일, 비디오 링크 자동 마운트) |
   | `addStickerReaction(type)` | `gallery-modal-manager` | 하트/따봉/별/트로피 스티커 반응 누르기 및 노션 실시간 동기화 |
   | `submitComment()` | `gallery-modal-manager` | 가족 칭찬 댓글 등록 (textContent 안전 주입 및 노션 블록 적재) |
@@ -888,8 +889,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   - `scripts/sync_quick_upload.py` (PC 원클릭 폰 사진 다운로드 ➔ 갤러리 최적화 ➔ Git/Notion 동기화 완결)
 - **파이프라인 2.1 아키텍처**:
   1. **스마트폰 촬영/선택**: 캔버스 1200px 경량 고화질(JPEG 82%) 압축 ➔ Cloudflare Worker `/api/upload-media` 단 1회 전송.
-  2. **워커 자동 처리**: 큐 보관(L2 Cache API 7일 보존) + 노션 갤러리 DB(`3dfa2711...`) `[퀵업로드]` 페이지 자동 생성 (GitHub Secret 가용 시 다이렉트 커밋 지원).
-  3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ `kids-archive` & `kids-school` 깃 푸시까지 한 번에 완결.
+  2. **워커 자동 처리**: 노션 갤러리 DB(`3dfa2711...`) `[퀵업로드]` 임시 카드 생성 ➔ 그 카드 번호(`notionPageId`, Worker v4.5~)와 함께 큐 보관(L2 Cache API 7일 보존) (GitHub Secret 가용 시 다이렉트 커밋 지원).
+  3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ 작품 임시 카드의 `식별ID`를 `art_...`로 변경 ➔ `kids-archive` & `kids-school` 깃 푸시까지 한 번에 완결. 노션까지 성공한 항목만 큐에서 지운다.
 - **일기장 노션 동기화 (`daily-diary.js`)**: `syncDiariesFromNotion(childName)` ➔ `fetchNotionDiaries`(구분 `마음일기`·`일기`·`종이일기`, 주인공 `{아이}`+`부모관리자`) ➔ `mergeNotionDiariesIntoLocal(remotes, childName)`. 신규 DB 전체 결과일 때는 `pruneStaleNotionEntries`가 노션에 없는 그 아이의 연동 캐시 항목을 지운다(미업로드·10분 이내 항목 보존). 상세 규칙은 `docs/timetable_diary_spec.md` DB 3. 검증: `node scripts/verify_diary_sync.js` (실제 노션 조회까지 `--live`, 다른 버전은 `--file <경로>`).
 - **핵심 API**:
   | 메서드 / 스크립트 | 설명 |
