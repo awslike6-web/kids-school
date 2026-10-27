@@ -140,7 +140,8 @@ const server = http.createServer((req, res) => {
             await context.close();
         }
         assert.ok(audioRequests.length >= 10);
-        assert.ok(audioRequests.every(r => r.status === 200));
+        // GitHub Pages는 실제 미디어 Range 요청에 206 Partial Content로 응답할 수 있다.
+        assert.ok(audioRequests.every(r => r.status === 200 || r.status === 206));
         assert.deepEqual(errors, []);
         const report = { live, checks, decodedFiles, mp3Requests: audioRequests.length, errors, widths: [390, 1280] };
         fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2));

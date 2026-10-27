@@ -6,4 +6,7 @@
 - Python 생성기 시험 5개: 두 본문 필드·정규화/해시·내용 수정 감지·증분 생성·불량 파일·dry-run 무변경·실패 종료·등록 후 생성 호출을 모의 통신으로 검사했다.
 - 공부방 Node 회귀 시험 13개 통과. 새 시험은 노션 본문 변경 시 옛 MP3 미사용, 목록 로딩 중 취소, 음성 OFF, 실패 대체 및 오래된 종료 이벤트 무시를 확인한다.
 - 브라우저 시험 `node scripts/verify_center_audio.cjs`: 모바일 390×844·PC 1280×844, 27항목 통과, 실제 MP3 요청 516회 모두 200·전체 506파일 디코딩 성공·지문/어휘 재생 진행 확인, 페이지 오류 0. 국어방 35·36회차 지문·중지·문제 전환, 36회차 어휘로 노션 응답 → 3·3·3 문제 생성 → 실제 러너 듣기를 검사했다. 운영 노션 쓰기와 실시간 음성 API는 차단하고 정적 스타일 CDN만 허용했다.
-- 화면 이미지와 검사 JSON은 `master-tower/scratch/center-audio-verification/`에 저장한다. 390px 화면에서 가로 넘침 없음을 검사했다. 운영 배포 확인은 별도 아래 기록에 추가한다.
+- 화면 이미지와 검사 JSON은 `master-tower/scratch/center-audio-verification/`에 저장한다. 모바일·PC 이미지를 열어 확인했고 390px 화면에서 가로 넘침이 없었다.
+- **운영 배포 확인**: 공부방 `d654b4a` 기능 커밋과 `bb6f5474` 검증 모드 커밋을 main에 푸시했다. `bb6f5474`의 GitHub 회귀 시험·Pages 빌드/배포 성공. 공개 국어방 HTML 200·새 정적 음성 모듈 포함·운영 manifest v2/506개 확인.
+- **운영 E2E**: `node scripts/verify_center_audio.cjs --live` 결과 `live=true, checks=27, decodedFiles=506, mp3Requests=516, errors=[]`. GitHub Pages의 정상적인 미디어 Range 응답 206도 성공으로 인정하며, 506개 파일 전체를 디코딩하고 실제 지문·퀘스트 발화를 확인했다. 학습 DB 쓰기와 실시간 음성 API는 계속 차단했다.
+- **등록 도구 보존**: master-tower `1db6605`의 생성기·등록 연결·회귀 시험 4파일도 main 원격 푸시 완료. 이 PC에서 새 창으로 등록해도 같은 생성기를 호출한다.
