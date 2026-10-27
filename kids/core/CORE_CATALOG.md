@@ -889,7 +889,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **파이프라인 2.1 아키텍처**:
   1. **스마트폰 촬영/선택**: 캔버스 1200px 경량 고화질(JPEG 82%) 압축 ➔ Cloudflare Worker `/api/upload-media` 단 1회 전송.
   2. **워커 자동 처리**: 큐 보관(L2 Cache API 7일 보존) + 노션 갤러리 DB(`3dfa2711...`) `[퀵업로드]` 페이지 자동 생성 (GitHub Secret 가용 시 다이렉트 커밋 지원).
-  3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ `kids-archive` & `kids-school` 깃 푸시 ➔ 노션 타임라인 기록 15초 완결!
+  3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ `kids-archive` & `kids-school` 깃 푸시까지 한 번에 완결.
 - **일기장 노션 동기화 (`daily-diary.js`)**: `syncDiariesFromNotion(childName)` ➔ `fetchNotionDiaries`(구분 `마음일기`·`일기`·`종이일기`, 주인공 `{아이}`+`부모관리자`) ➔ `mergeNotionDiariesIntoLocal(remotes, childName)`. 신규 DB 전체 결과일 때는 `pruneStaleNotionEntries`가 노션에 없는 그 아이의 연동 캐시 항목을 지운다(미업로드·10분 이내 항목 보존). 상세 규칙은 `docs/timetable_diary_spec.md` DB 3. 검증: `node scripts/verify_diary_sync.js` (실제 노션 조회까지 `--live`, 다른 버전은 `--file <경로>`).
 - **핵심 API**:
   | 메서드 / 스크립트 | 설명 |
@@ -947,8 +947,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python scripts/check_session_stats.py [ID]     # 특정 대화방 진단
   ```
 
-### 🌟 `scripts/sync_quick_upload.py` (모바일 퀵업로드 · 갤러리 작품 · 특별한 날 원클릭 파이프라인 v2.2)
-모바일 퀵업로드 대기 큐 감지 또는 PC 로컬 사진(`--file`, `--sub-files`)·동영상(`--video`)을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` / `special-days-data.js` 갱신, `gallery.html?v=...` 캐시 버스팅, 노션 `3dfa2711...` 카드 Upsert(`식별ID` 1:1 매칭 + 당일 일상 `392a...` 연동), 양쪽 깃허브 푸시까지 단 1회 실행으로 완결하는 공식 단일 파이프라인입니다. 상세 규격은 [`docs/gallery_archive_spec.md`](../../docs/gallery_archive_spec.md) 참조 (단발성 스크립트 작성 금지).
+### 🌟 `scripts/sync_quick_upload.py` (모바일 퀵업로드 · 갤러리 작품 원클릭 파이프라인 v2.2)
+모바일 퀵업로드 대기 큐 감지 또는 PC 로컬 사진(`--file`, `--sub-files`)·동영상(`--video`)을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` 갱신, `gallery.html?v=...` 캐시 버스팅, 노션 `3dfa2711...` 작품 카드 Upsert(`식별ID` 1:1 매칭 + 당일 일상 `392a...` 연동), 양쪽 깃허브 푸시까지 1회 실행으로 끝내는 작품 등록 도구입니다. 노션 등록이 실패하면 오류 원문을 보여 주고 종료 코드 1. 특별한 날은 대상이 아닙니다. 상세 규격은 [`docs/gallery_archive_spec.md`](../../docs/gallery_archive_spec.md) 참조.
 - **파일 위치**: `scripts/sync_quick_upload.py` (관제탑 루트)
 - **실행 커맨드**:
   ```bash
@@ -956,10 +956,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python -X utf8 scripts/sync_quick_upload.py
 
   # 2. PC 로컬 단일/다중 사진 + MP4 영상 묶음 [갤러리 작품] 등록
-  python -X utf8 scripts/sync_quick_upload.py --type art --author "민수" --cat "만들기/공예" --date "2026-10-25" --id "art_minsu_20261020_moodlight_real" --title "작품명" --file "메인사진.jpg" --sub-files "서브사진.jpg" --video "회전영상.mp4" --note "설명"
-
-  # 3. 학교 행사·체험 [특별한 날] 등록 (일기장 혼입 원천 차단)
-  python -X utf8 scripts/sync_quick_upload.py --type special --author "민서" --cat "학교생활/진로" --date "2026-10-22" --id "evt_minseo_..." --title "행사명" --file "사진.jpg" --note "설명"
+  python -X utf8 scripts/sync_quick_upload.py --author "민수" --cat "만들기/공예" --date "2026-10-25" --id "art_minsu_20261020_moodlight_real" --title "작품명" --file "메인사진.jpg" --sub-files "서브사진.jpg" --video "회전영상.mp4" --note "설명"
   ```
 
 ### 🌟 `scripts/extract_reading_from_image.py` (교재 사진 기반 지문·문제·VOCA 추출 파이프라인)
