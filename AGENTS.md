@@ -7,8 +7,13 @@
 1. **`GEMINI.md`**: 공부방 헌법 (3단계 학습 사다리, 5분 퀘스트, 골디락스 300~600줄·상한 800줄, 상대 경로, TTS·보상 오디오 규칙)
 2. **`../GEMINI.md`** (master-tower 안에서 작업할 때): 전사 최고 헌법 (ASDST 사전 보고, 노션 개발 타임라인 기록, 안전 방어선)
 3. **`kids/core/CORE_CATALOG.md`**: 새 코드를 짜기 전에 재사용할 공통 엔진을 먼저 찾습니다.
-4. 해당 과목 명세서: `docs/{과목}_spec.md`, 노션 스키마: `docs/notion_schemas_school.md`
-   - 알림장 등록: [`docs/timetable_diary_spec.md` §4](docs/timetable_diary_spec.md)를 먼저 읽습니다(등록 규칙과 등록 도구, 날짜별 스크립트 사본 금지).
+4. 해당 과목 명세서: `docs/{과목}_spec.md`, 노션 스키마: `docs/notion_schemas_school.md` (**🚨 모든 콘텐츠 등록 작업은 단발성 스크립트 생성을 금지하며, 반드시 아래 개별 명세서의 공식 단일 도구를 사용합니다**)
+   - **갤러리 작품·특별한 날·다중 사진·3D 영상 등록**: [`docs/gallery_archive_spec.md`](docs/gallery_archive_spec.md)를 먼저 읽습니다(`python -X utf8 scripts/sync_quick_upload.py` 단일 도구 사용, 노션 `식별ID` 1:1 일치 및 `gallery.html?v=...` 갱신 필수, 단발성 스크립트 금지).
+   - **알림장 등록**: [`docs/timetable_diary_spec.md` §4](docs/timetable_diary_spec.md)를 먼저 읽습니다(`python -X utf8 scripts/register_notices.py`, 날짜별 스크립트 사본 금지).
+   - **손글씨 종이일기 등록 & 일기장 격리 규칙**: [`docs/timetable_diary_spec.md` §3·§5](docs/timetable_diary_spec.md)를 먼저 읽습니다(`python -X utf8 scripts/sync_paper_diaries.py`, 일기장에는 `마음일기`·`일기`·`종이일기`만 노출하며 `특별한 날`·`작품` 혼입 금지).
+   - **센터 교재·독해 지문·5분방 어휘 등록**: [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)을 먼저 읽습니다(데이터 구성·Edge MP3·현재 구현 상태·완료 기준).
+   - **민서(초1) 국어 받아쓰기 어휘·미니 독해 등록**: [`docs/korean_spec.md`](docs/korean_spec.md) 및 `minseo-korean-unit` 스킬(`python -X utf8 kids-school-main/scripts/register_minseo_korean.py` + `build_mini_reading_audio.py`)을 먼저 읽습니다.
+   - **단원 동화 스토리북 등록**: [`GEMINI.md` §3](GEMINI.md) (`python -X utf8 scripts/build_storybook.py` 단일 빌더 사용).
 
 ## 작업별 스킬 (필요할 때 읽기)
 - 원본 위치: `.agent/skills/<스킬>/SKILL.md`

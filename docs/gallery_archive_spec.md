@@ -1,40 +1,47 @@
-# 🎨 꿈나무 갤러리 · 성장 아카이브 · 퀵업로드 상세 명세서 (Gallery & Growth Archive Spec)
+# 🎨 꿈나무 갤러리 · 특별한 날 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v1.0.0 (2026-09-29 기준)  
-> **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 아카이브(`special_days.html`), 12년 성장 미디어 단일 원천(`kids-archive`), 모바일 퀵업로더 2단계 파이프라인  
-> **상위 헌법**: `GEMINI.md` (규칙 0호 공식 주소 체계, 규칙 11호 성장 아카이브 단일 원천, 규칙 13호 세션별 도메인 가드)  
-> **연계 명세서**: `docs/timetable_diary_spec.md` (종이일기 연동), `docs/haru_spec.md` (특별한 날 연계)
+> **문서 버전**: v2.2.0 (2026-10-27 기준)  
+> **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 원클릭 통합 파이프라인(`scripts/sync_quick_upload.py`)  
+> **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
+> **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
 
 ---
 
-## 1. 시스템 핵심 아키텍처 (SSOT & 2단계 하이브리드 파이프라인)
+## 0. 🚨 단발성(무덤) 스크립트 작성 절대 금지 & 단일 도구 원칙
 
-꿈나무 갤러리와 성장 아카이브는 **영구 보존 저장소 분리(kids-archive 단일 원천)**와 **모바일 퀵업로드 ➔ PC 원클릭 고속 배포**의 2단계 파이프라인으로 운용됩니다.
+어느 대화방에서든 사용자가 **"갤러리 작품 등록해줘"**, **"특별한 날에 등록해줘"**, **"사진 묶어서 등록해줘"**, **"퀵업로드 등록해줘"**라고 지시하면:
+1. **`scripts/`나 임시 폴더에 일회성 Python 스크립트(`process_*.py`, `register_*_notion.py` 등)를 새로 짜지 않는다.**
+2. 반드시 관제탑 루트의 공식 단일 파이프라인 **`python -X utf8 scripts/sync_quick_upload.py`** 하나로 처리한다.
+3. 만약 파이프라인에 새 옵션이 필요하면 단발성 스크립트를 만들지 말고 `scripts/sync_quick_upload.py` 본체를 개선한다.
+
+---
+
+## 1. 시스템 핵심 아키텍처 & 4대 필수 동기화 계약 (4-Point Sync Contract)
+
+갤러리 작품(`--type art`)과 특별한 날(`--type special`) 등록은 아래 **4곳이 동시에 일치**해야 웹과 모바일 화면, 노션에서 누락 없이 표시됩니다. `scripts/sync_quick_upload.py`는 이 4단계를 1회 실행으로 자동 완결합니다.
 
 ```mermaid
 flowchart TD
-    subgraph Mobile [1단계: 모바일 현장 퀵업로드]
-        A[스마트폰 웹 퀵업로더] -->|사진 촬영 & 메모| B[Cloudflare Worker]
-        B -->|1초 만에 안전 적재| C[노션 갤러리/성장 DB<br>3dfa2711... 임시 보관함]
-    end
-
-    subgraph PC [2단계: PC 원클릭 고속 파이프라인]
-        D[사용자 요청: 퀵업로드 등록해줘] --> E["python scripts/sync_quick_upload.py<br>(단 15~30초 완결)"]
-        E --> F[로컬 uploads/ex/ 원본 사진 매칭]
-        E --> G["build_gallery.py 실행<br>(1200px 리사이즈 & 웹 최적화)"]
-        G --> H[kids-archive 영구 CDN 배포<br>git commit & push]
-        G --> I[kids-school 웹 갱신<br>gallery-data.js git push]
-        E --> J[노션 정식 카드 속성 갱신 & 고화질 이미지 블록 삽입]
-        E --> K[당일 일상 기록 DB 392a... 릴레이션 자동 연결]
-        E --> L[노션 개발 타임라인 & 공부방 현황판 일괄 기록]
-    end
-
-    C -.-> E
+    A["사용자 등록 지시<br>(폰 퀵업로드 / PC 로컬 사진·다중사진·MP4 영상)"] --> B["python -X utf8 scripts/sync_quick_upload.py"]
+    B --> C["① kids-archive 영구 미디어 최적화 배포<br>(assets/media/... + data/archive-master-data.js)"]
+    B --> D["② kids-school 프론트 데이터 갱신<br>(gallery-meta.json ➔ gallery-data.js / special-days-data.js)"]
+    D --> E["③ gallery.html 캐시 버스팅 자동 갱신<br>(?v=YYYYMMDD-HHMM ➔ 모바일 즉시 반영)"]
+    B --> F["④ 노션 성장 갤러리 DB (3dfa2711...) Upsert<br>(식별ID = art_... 또는 evt_... 1:1 일치 + 당일 일상 392a... 연동)"]
 ```
 
-### 1) kids-archive 영구 보존 단일 원천 원칙 (규칙 11호)
-- **12년 성장 기록 영구 보존**: 초등/중등/고등 12년간의 모든 작품, 상장, 활동 사진은 영구 보존용 단일 원천 레포지토리인 **`kids-archive`** (`https://github.com/awslike6-web/kids-archive`)에만 보관합니다.
-- **공부방 레포지토리(kids-school) 0MB 경량화**: `kids-school`은 깃허브 권장 용량(1GB)을 방어하기 위해 작품 사진을 내부에 저장하지 않으며, `kids-archive`의 GitHub CDN 링크(`https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/...`)를 직접 참조합니다.
+### 🛡️ 4대 필수 무결성 계약 (위반 시 모바일 화면 미노출 또는 일기장 오염 발생)
+1. **웹 데이터(`gallery-data.js` / `special-days-data.js`) 누락 금지**:
+   - 노션(`3dfa2711...`)과 `kids-archive`에만 올리고 `gallery-meta.json` + `build_gallery.py`(`gallery-data.js`)를 갱신하지 않으면 **공부앱 갤러리(`gallery.html`)에 카드가 절대 나타나지 않는다.** (`gallery-data-sync.js`는 `DEFAULT_GALLERY_DATA`에 존재하는 카드를 기준으로 노션과 동기화함)
+2. **노션 `식별ID` 1:1 완전 일치 계약**:
+   - 노션 성장 갤러리 DB(`3dfa27115b688010a85be385f91d64ee`)의 제목 속성인 **`식별ID`**는 반드시 프론트엔드 데이터의 `id`와 **글자 하나 틀리지 않고 1:1로 일치**해야 한다.
+   - 갤러리 작품: `art_{minsu|minseo|together}_{파일베이스명}` (예: `art_minsu_20261020_moodlight_real`)
+   - 특별한 날: `evt_{minsu|minseo|together}_{날짜_슬러그}` (예: `evt_minseo_pet_trainer_20261022`)
+   - ❌ 금지: `[작품] 민수_2026-10-25 (...)`처럼 임의의 한글 제목을 `식별ID`에 넣으면 웹-노션 양방향 동기화가 끊어진다.
+3. **`특별한 날`과 `일기장` 엄격 분리 계약**:
+   - 학교 행사·진로체험·나눔장터·가족 나들이 등 `특별한 날` 카드는 노션 `구분` 속성을 반드시 **`특별한 날`**로 지정한다 (`일기`·`마음일기` 지정 금지).
+   - 민서/민수 일기장(`kids/core/daily-diary.js`)은 `구분`이 `마음일기`·`일기`·`종이일기`인 항목만 표시하며, `특별한 날`과 `작품`은 일기장에 섞이지 않도록 게이트키퍼로 차단되어 있다.
+4. **모바일 브라우저 캐시 버스팅(`gallery.html?v=...`)**:
+   - `gallery-data.js`나 `special-days-data.js`가 바뀌면 `kids/common_space/gallery.html` 하단 `<script src="../data/gallery-data.js?v=...">` 버전 쿼리가 함께 갱신되어야 스마트폰에서 새로고침 시 즉시 새 작품이 뜬다 (`sync_quick_upload.py`가 자동 갱신).
 
 ---
 
@@ -42,57 +49,62 @@ flowchart TD
 
 | 위치 / 저장소 | 파일 경로 | 핵심 역할 |
 | :--- | :--- | :--- |
-| **`kids-school`** | [`kids/common_space/gallery.html`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.html) | 꿈나무 갤러리 메인 뷰포트 (302줄 초경량 래퍼, 반응형 마크업) |
-| **`kids-school`** | [`kids/common_space/gallery_controller.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery_controller.js) | 갤러리 메인 뷰 컨트롤러 (331줄, 테마, 2대 뷰 스위처, 카드 그리드 렌더러) |
-| **`kids-school`** | [`kids/common_space/gallery-data-sync.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-data-sync.js) | 갤러리 데이터 및 노션 실시간 동기화 모듈 (477줄, 노션 양방향 동기화 & 영구 수정 이력) |
-| **`kids-school`** | [`kids/common_space/gallery-modal-manager.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-modal-manager.js) | 상세 모달 및 반응형 제어 모듈 (517줄, 썸네일, 메타 편집, 스티커/댓글 XSS 방어) |
-| **`kids-school`** | [`kids/common_space/gallery.css`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.css) | 갤러리 전용 3D 카드, 필터 바, 라이트박스 반응형 스타일 (833줄) |
-| **`kids-school`** | [`kids/data/gallery-data.js`](file:///g:/master-tower/kids-school-main/kids/data/gallery-data.js) | 프론트엔드 갤러리 마스터 데이터 (CDN 이미지 직결, 좋아요/스티커) |
-| **`kids-school`** | [`kids/data/gallery-meta.json`](file:///g:/master-tower/kids-school-main/kids/data/gallery-meta.json) | 개별 작품 커스텀 메타데이터 (제목, 분야, 작가의 한마디, 서브이미지 번들) |
-| **`kids-school`** | [`kids-school-main/scripts/build_gallery.py`](file:///g:/master-tower/kids-school-main/scripts/build_gallery.py) | 갤러리 자동 최적화 빌더 (1200px 리사이즈, kids-archive 배포, JS 갱신) |
-| **`kids-archive`** | [`kids-archive/data/archive-master-data.js`](file:///g:/master-tower/kids-archive/data/archive-master-data.js) | 평생 성장 포트폴리오 마스터 DB (초중고 단일 원천) |
-| **`kids-archive`** | `kids-archive/assets/media/{자녀}/{학기}/` | 웹 최적화된 고화질 영구 미디어 파일 |
-| **`master-tower`** | [`scripts/sync_quick_upload.py`](file:///g:/master-tower/scripts/sync_quick_upload.py) | **원클릭 고속 파이프라인 실행기 (15~30초 완결)** |
+| **`master-tower`** | [`scripts/sync_quick_upload.py`](file:///g:/master-tower/scripts/sync_quick_upload.py) | **[공식 단일 진입점] 폰 퀵업로드 + 로컬 사진/다중사진/동영상 + 노션 Upsert + 양쪽 Git 푸시 통합 실행기** |
+| **`kids-school`** | [`kids-school-main/scripts/build_gallery.py`](file:///g:/master-tower/kids-school-main/scripts/build_gallery.py) | `uploads/ex/갤러리/` 스캔 ➔ 1200px EXIF 보정 리사이즈 ➔ `kids-archive` 배포 ➔ `gallery-data.js` & `archive-master-data.js` 생성 (`subImages`, `videoUrl`, `videoBtnText` 지원) |
+| **`kids-school`** | [`kids/data/gallery-meta.json`](file:///g:/master-tower/kids-school-main/kids/data/gallery-meta.json) | 개별 작품 커스텀 메타데이터 (`title`, `category`, `date`, `grade`, `artistNote`, `subImages`, `videoUrl`, `videoBtnText`) |
+| **`kids-school`** | [`kids/data/gallery-data.js`](file:///g:/master-tower/kids-school-main/kids/data/gallery-data.js) | 프론트엔드 갤러리 작품 마스터 데이터 (`DEFAULT_GALLERY_DATA`) |
+| **`kids-school`** | [`kids/data/special-days-data.js`](file:///g:/master-tower/kids-school-main/kids/data/special-days-data.js) | 프론트엔드 특별한 날 추억 마스터 데이터 (`DEFAULT_SPECIAL_DAYS_DATA`) |
+| **`kids-school`** | [`kids/common_space/gallery.html`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.html) | 꿈나무 갤러리 & 특별한 날 통합 뷰포트 |
+| **`kids-school`** | [`kids/common_space/gallery_controller.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery_controller.js) | 갤러리/특별한 날 탭 전환, 필터, 카드 그리드 렌더러 |
+| **`kids-school`** | [`kids/common_space/gallery-data-sync.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-data-sync.js) | 로컬 스토리지 및 노션 DB(`3dfa2711...`) 실시간 양방향 동기화 |
+| **`kids-school`** | [`kids/common_space/gallery-modal-manager.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-modal-manager.js) | 상세 모달 뷰어 (다중 사진 썸네일 스위처 + `🎬 3D 회전영상` 인라인 `<video>` 플레이어 지원) |
+| **`kids-archive`** | [`kids-archive/data/archive-master-data.js`](file:///g:/master-tower/kids-archive/data/archive-master-data.js) | 12년 성장 포트폴리오 마스터 DB |
+| **`kids-archive`** | `kids-archive/assets/media/{minsu|minseo|together}/` | 웹 최적화된 고화질 영구 사진(`.jpg`/`.png`) 및 영상(`.mp4`) |
 
 ---
 
-## 3. 모바일 퀵업로드 2단계 파이프라인 운용 표준
+## 3. 상황별 표준 실행 명령어 (Copy-Paste Standard Recipes)
 
-### 1단계 [모바일 퀵업로드]: 현장에서 간편 등록
-- 스마트폰 브라우저에서 퀵업로더 접속 (`/gallery.html` 또는 바로가기).
-- 사진 촬영/선택 ➔ 자녀(민서/민수) 선택 ➔ 메모 작성 ➔ 전송.
-- Cloudflare Worker가 노션 성장 DB(`3dfa27115b688010a85be385f91d64ee`)에 즉시 적재:
-  - `식별ID`: `[퀵업로드] 자녀_YYYY-MM-DD (메모)`
-  - `구분`: `작품` 또는 `종이일기`
-  - `주인공`: `민서` 또는 `민수`
+모든 명령은 관제탑 루트(`g:/master-tower`)에서 실행합니다.
 
-### 2단계 [PC 동기화]: 원클릭 일괄 배포
-- PC에서 원본 사진이 로컬 `uploads/ex/` 폴더에 동기화되면, 에이전트에게 **"퀵업로드 올린 거 등록해줘"**라고 요청.
-- 에이전트는 복잡한 개별 작업을 수행하지 않고 **`python scripts/sync_quick_upload.py`를 단 1회 실행**하여 15~30초 만에 완결.
+### ① 스마트폰 퀵업로드 대기 큐 자동 수신 & 배포
+```bash
+python -X utf8 scripts/sync_quick_upload.py
+```
 
----
+### ② PC 로컬 사진(단일/다중) + MP4 동영상 묶음 ➔ [갤러리 작품] 원클릭 등록
+사용자가 다운로드 폴더(`E:\Downloads\...` 등)에 있는 작품 사진 1장 또는 여러 장, 회전 동영상(`.mp4`)을 주며 갤러리에 등록해 달라고 할 때:
+```bash
+python -X utf8 scripts/sync_quick_upload.py \
+  --type art \
+  --author "민수" \
+  --cat "만들기/공예" \
+  --date "2026-10-25" \
+  --id "art_minsu_20261020_moodlight_real" \
+  --title "은하수 달님과 별빛 마을 원통 무드등 (실물 & 도안 & 3D 회전영상)" \
+  --file "E:/Downloads/Mobile Devices/20261020_165921.jpg" \
+  --sub-files "E:/Downloads/Mobile Devices/20261025_114413.jpg" \
+  --video "C:/Users/pc/Downloads/Rotating_cylindrical_artwork.mp4" \
+  --video-btn "3D 회전 AI 영상 감상하기 🔄" \
+  --note "검은색 도화지에 집과 나무, 달님과 은하수를 그려 완성한 원통 무드등 작품입니다."
+```
+- `--file`과 `--sub-files`는 자동으로 `kids-school-main/uploads/ex/갤러리/{민수|민서}/`에 정식 파일명으로 복사됩니다.
+- `--video`에 로컬 `.mp4` 경로를 넘기면 자동으로 `kids-archive/assets/media/...`에 복사되고 CDN URL이 `videoUrl`로 연결되어, 모달의 `🎬 3D 회전영상` 탭과 하단 버튼에서 인라인 재생됩니다.
 
-## 4. 다중 사진 번들링 (사진 2장 이상 1개 카드 묶기)
+### ③ 학교 행사·체험·가족 추억 ➔ [특별한 날] 원클릭 등록
+사용자가 선생님 알림장 사진·글이나 가족 행사 사진을 주며 **"특별한 날에 등록해줘"**라고 할 때:
+```bash
+python -X utf8 scripts/sync_quick_upload.py \
+  --type special \
+  --author "민서" \
+  --cat "학교생활/진로" \
+  --date "2026-10-22" \
+  --id "evt_minseo_pet_trainer_20261022" \
+  --title "🐕 진로체험: 반려동물 훈련사와의 따뜻한 만남!" \
+  --file "E:/Downloads/pet_trainer.jpg" \
+  --note "진로주간을 맞아 1-2학년 친구들이 반려동물 훈련사 선생님과 함께한 뜻깊은 시간입니다."
+```
+- 자동으로 `kids-archive/assets/media/{자녀}/activities/`에 1200px 최적화 저장, `kids/data/special-days-data.js` 등록, `gallery.html` 캐시 버스팅, 노션 `3dfa2711...`(`구분: 특별한 날`) 카드 생성 및 양쪽 Git 푸시까지 한 번에 끝납니다.
 
-- **원칙**: 수료증(표지+본문), 만들기 과정 사진, 입체 작품 등 동일한 대상의 사진이 2장 이상일 때는 갤러리 카드를 무분별하게 여러 개로 쪼개지 않고 **1개의 카드로 번들링**합니다.
-- **구현 방식**:
-  - `gallery-meta.json`의 해당 작품 항목에 `"subImages": ["파일명2.png", "파일명3.png"]` 지정.
-  - 빌더가 자동으로 `galleryImages` 배열로 묶고, 갤러리 카드에 **`📷 N장` 배지** 및 모달 썸네일 스위처를 자동 생성.
-
----
-
-## 5. 새 대화창(세션) 인계 프로토콜 (Handover Protocol)
-
-사용자가 새 대화방을 열어 갤러리/아카이브 작업을 요청할 때, 에이전트는 본 명세서(`docs/gallery_archive_spec.md`)를 즉시 참조하여 다음 수칙을 준수합니다.
-
-1. **사용자가 "퀵업로드 올린 거 등록해줘" 또는 채팅창으로 사진 경로를 전달하며 "등록해줘"라고 할 때**:
-   - 불필요하게 긴 생각이나 여러 단계의 수동 스크립트를 작성하지 않는다.
-   - ① **폰 퀵업로드 시**: `python scripts/sync_quick_upload.py` 단 1회 실행 (자동 감지 & 15초 배포)
-   - ② **채팅 직접 전달 시**: 메타데이터 옵션과 함께 `python scripts/sync_quick_upload.py --id "..." --title "..." --author "민수" --sub "..."` 단 1회 실행
-   - 📌 **작업 내용**: `python scripts/sync_quick_upload.py` 실행
-   - 🎯 **목적/이유**: 모바일 퀵업로드 및 신규 미디어를 고속으로 일괄 최적화하고 깃/노션 배포하기 위함
-   - 위 명령 1회 실행 후 완료 보고를 드린다.
-2. **다중 사진 번들링이나 신규 수동 등록일 때**:
-   - `kids/data/gallery-meta.json`에 메타데이터(제목, 분야, 작가의 한마디, subImages)를 먼저 기록한 뒤 `sync_quick_upload.py` 또는 `build_gallery.py`를 실행한다.
-3. **손글씨 종이일기일 때**:
-   - 손글씨 내용을 1글자의 누락 없이 100% 정성껏 전사하고, `kids-archive/assets/media/minsu/paper_diary/`에 고화질 최적화 저장 후 노션 페이지 본문 콜아웃에 반영한다.
+### ④ 손글씨 종이일기 사진 등록
+- 손글씨 종이일기는 갤러리 작품이 아니므로 [`docs/timetable_diary_spec.md` §5](timetable_diary_spec.md)에 명시된 전용 도구 `python -X utf8 scripts/sync_paper_diaries.py`를 사용합니다.

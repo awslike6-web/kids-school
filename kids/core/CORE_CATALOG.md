@@ -941,12 +941,19 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python scripts/check_session_stats.py [ID]     # 특정 대화방 진단
   ```
 
-### 🌟 `scripts/sync_quick_upload.py` (모바일 퀵업로드 & 미디어 갤러리 원클릭 파이프라인)
-모바일 퀵업로드 감지 또는 로컬 신규 사진을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` 갱신, 양쪽 깃허브 푸시, 노션 연동까지 15~30초 만에 일괄 완결하는 올인원 파이프라인입니다.
+### 🌟 `scripts/sync_quick_upload.py` (모바일 퀵업로드 · 갤러리 작품 · 특별한 날 원클릭 파이프라인 v2.2)
+모바일 퀵업로드 대기 큐 감지 또는 PC 로컬 사진(`--file`, `--sub-files`)·동영상(`--video`)을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` / `special-days-data.js` 갱신, `gallery.html?v=...` 캐시 버스팅, 노션 `3dfa2711...` 카드 Upsert(`식별ID` 1:1 매칭 + 당일 일상 `392a...` 연동), 양쪽 깃허브 푸시까지 단 1회 실행으로 완결하는 공식 단일 파이프라인입니다. 상세 규격은 [`docs/gallery_archive_spec.md`](../../docs/gallery_archive_spec.md) 참조 (단발성 스크립트 작성 금지).
 - **파일 위치**: `scripts/sync_quick_upload.py` (관제탑 루트)
 - **실행 커맨드**:
   ```bash
-  python scripts/sync_quick_upload.py            # 신규 미디어 자동 감지 & 원클릭 일괄 배포
+  # 1. 폰 퀵업로드 대기 큐 자동 수신 & 일괄 배포
+  python -X utf8 scripts/sync_quick_upload.py
+
+  # 2. PC 로컬 단일/다중 사진 + MP4 영상 묶음 [갤러리 작품] 등록
+  python -X utf8 scripts/sync_quick_upload.py --type art --author "민수" --cat "만들기/공예" --date "2026-10-25" --id "art_minsu_20261020_moodlight_real" --title "작품명" --file "메인사진.jpg" --sub-files "서브사진.jpg" --video "회전영상.mp4" --note "설명"
+
+  # 3. 학교 행사·체험 [특별한 날] 등록 (일기장 혼입 원천 차단)
+  python -X utf8 scripts/sync_quick_upload.py --type special --author "민서" --cat "학교생활/진로" --date "2026-10-22" --id "evt_minseo_..." --title "행사명" --file "사진.jpg" --note "설명"
   ```
 
 ### 🌟 `scripts/extract_reading_from_image.py` (교재 사진 기반 지문·문제·VOCA 추출 파이프라인)

@@ -124,6 +124,7 @@
 ---
 
 ## 6. 음성 합성(TTS) 및 보상 오디오 표준
+- **센터 교재 등록**: 새 대화에서도 [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)을 적용한다. 고정 학습 콘텐츠의 Edge MP3 생성·재생 검증을 등록 완료 기준에 포함하며, 현재 미구현 부분은 해당 절에서 확인한다.
 - 브라우저 기본 `window.speechSynthesis` 직접 호출 금지.
 - 반드시 `kids/core/fairy-config.js` 및 `kids/core/fairy-engine.js`를 통해 음성을 출력한다:
   - 한국어 안내/도서: `speakFairyTTS(text)` (`ko-KR-SunHiNeural`)
@@ -136,10 +137,13 @@
 
 ---
 
-## 7. 성장 아카이브 분리 원칙 (`kids-archive` SSOT)
+## 7. 성장 아카이브 분리 원칙 & 미디어 등록 단일 파이프라인 (`kids-archive` SSOT)
+- **상세 명세서 (필독)**: 갤러리 작품, 다중 사진 묶음, 3D 회전 영상, 학교 행사(`특별한 날`) 등록 시 반드시 **[`docs/gallery_archive_spec.md`](docs/gallery_archive_spec.md)**를 먼저 읽고 따른다.
 - 아이들의 12년 성장 기록, 그림, 상장, 일기 고화질 원본은 영구 보존용 독립 레포지토리인 **`kids-archive`** (`https://github.com/awslike6-web/kids-archive`)를 유일한 단일 원천으로 삼는다.
 - `kids-school` 갤러리는 이미지를 내부에 복제하지 않고 `kids-archive`의 GitHub CDN 경로(`https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/...`)를 직접 참조한다.
-- 신규 작품 등록 시 `python scripts/build_gallery.py`를 실행하여 갤러리 메타데이터와 미디어를 일괄 동기화한다.
+- **🚨 단발성 스크립트 작성 금지 & 4대 동기화 계약**:
+  - 작품·특별한 날 등록 시 일회성 Python 스크립트를 새로 짜지 않고, 관제탑 루트의 **`python -X utf8 scripts/sync_quick_upload.py`** (`--type art|special`, `--file`, `--sub-files`, `--video`) 단일 도구를 실행한다.
+  - 등록 시 ① `kids-archive` 미디어·마스터데이터 ② `kids-school` 프론트 데이터(`gallery-meta.json` + `gallery-data.js` / `special-days-data.js`) ③ `gallery.html?v=...` 캐시 버스팅 ④ 노션 `3dfa2711...` 카드(`식별ID`가 `art_...` 또는 `evt_...`와 1:1 일치, `특별한 날`은 `구분: 특별한 날`로 지정해 일기장 혼입 차단) 4곳이 동시에 동기화되어야 한다.
 
 ---
 
