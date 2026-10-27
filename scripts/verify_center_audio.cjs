@@ -22,7 +22,8 @@ const server = http.createServer((req, res) => {
 
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-    const base = `http://127.0.0.1:${server.address().port}`;
+    const live = process.argv.includes('--live');
+    const base = live ? 'https://awslike6-web.github.io/kids-school' : `http://127.0.0.1:${server.address().port}`;
     const browser = await chromium.launch({ headless: true, channel: 'chrome', args: ['--autoplay-policy=no-user-gesture-required'] });
     const errors = [], audioRequests = [];
     let checks = 0, decodedFiles = 0;
@@ -32,7 +33,7 @@ const server = http.createServer((req, res) => {
             await context.route('**/*', route => {
                 const url = new URL(route.request().url());
                 const staticHost = ['cdn.tailwindcss.com', 'fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname);
-                if (url.origin === base || staticHost) return route.continue();
+                if (route.request().url().startsWith(base + '/') || staticHost) return route.continue();
                 return route.fulfill({ status: 200, contentType: 'application/json', body: '{"results":[]}' });
             });
             await context.addInitScript(() => {
@@ -141,7 +142,7 @@ const server = http.createServer((req, res) => {
         assert.ok(audioRequests.length >= 10);
         assert.ok(audioRequests.every(r => r.status === 200));
         assert.deepEqual(errors, []);
-        const report = { checks, decodedFiles, mp3Requests: audioRequests.length, errors, widths: [390, 1280] };
+        const report = { live, checks, decodedFiles, mp3Requests: audioRequests.length, errors, widths: [390, 1280] };
         fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
         console.log(JSON.stringify(report));
     } finally { await browser.close(); server.close(); }
