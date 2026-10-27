@@ -23,5 +23,5 @@ run_git_push*.bat
 run_git.js
 git
 .git_commit_msg.txt
-test_*.js
+/test_*.js
 *.tmp
