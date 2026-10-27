@@ -168,5 +168,18 @@
     "grade": "1학년 2학기",
     "date": "2026-10-22",
     "artistNote": "진로주간을 맞아 1-2학년 친구들이 멋진 반려동물 훈련사 선생님과 함께하는 특별한 진로체험 시간을 가졌어요! 민서도 훈련사 선생님의 지도에 따라 온순하고 착한 강아지를 다정하게 쓰다듬어 주며 깊은 교감을 나누었답니다. 동물과 소통하고 존중하는 법을 배우며 마음이 한 뼘 더 따뜻해진 소중한 하루였습니다! 🐶🐾✨"
+  },
+  "art_minsu_20261020_moodlight_real": {
+    "title": "빛나는 원통 무드등과 3D 회전 AI 작품 💡✨",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
+    "grade": "5학년 2학기",
+    "date": "2026-10-25",
+    "artistNote": "민수가 직접 그린 투명 도안(알코올 램프, 국어책, 손소독제, '44교시' 등)을 투명 원통에 넣고 LED 조명을 밝혀 완성한 입체 무드등이에요! 아빠가 사방에서 사진을 찍은 뒤 구글 플로우 AI에게 회전 영상으로 만들어달라고 주문했더니, 원본과는 살짝 다르게 AI 임의대로 아주 깔끔하고 매끄러운 3D 원통 조형물로 재해석해 만들어주었답니다. 도안과 실물, 그리고 AI 회전 영상까지 함께 기록해요! 💡🎨",
+    "subImages": [
+      "20261025_moodlight_drawing.jpg"
+    ],
+    "videoUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261027_moodlight_rotate.mp4",
+    "videoBtnText": "3D 회전 AI 영상 감상하기 🔄"
   }
 }

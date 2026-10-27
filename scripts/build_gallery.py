@@ -241,7 +241,7 @@ def run():
                 gallery_images.append(sub_cdn)
                 archive_gallery_images.append(sub_rel_archive)
 
-            items.append({
+            item_obj = {
                 "id": art_id,
                 "author": author_name,
                 "authorKey": author_key,
@@ -257,7 +257,12 @@ def run():
                 "likes": likes,
                 "stickers": stickers,
                 "comments": comments
-            })
+            }
+            if meta.get("videoUrl"):
+                item_obj["videoUrl"] = meta["videoUrl"]
+            if meta.get("videoBtnText"):
+                item_obj["videoBtnText"] = meta["videoBtnText"]
+            items.append(item_obj)
 
             # archive entry
             learning_pts = []

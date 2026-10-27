@@ -3,6 +3,33 @@
 
 const DEFAULT_GALLERY_DATA = [
   {
+    "id": "art_minsu_20261020_moodlight_real",
+    "author": "민수",
+    "authorKey": "son",
+    "title": "빛나는 원통 무드등과 3D 회전 AI 작품 💡✨",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
+    "date": "2026-10-25",
+    "grade": "5학년 2학기",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261020_moodlight_real.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261020_moodlight_real.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261025_moodlight_drawing.jpg"
+    ],
+    "hasCutout": false,
+    "artistNote": "민수가 직접 그린 투명 도안(알코올 램프, 국어책, 손소독제, '44교시' 등)을 투명 원통에 넣고 LED 조명을 밝혀 완성한 입체 무드등이에요! 아빠가 사방에서 사진을 찍은 뒤 구글 플로우 AI에게 회전 영상으로 만들어달라고 주문했더니, 원본과는 살짝 다르게 AI 임의대로 아주 깔끔하고 매끄러운 3D 원통 조형물로 재해석해 만들어주었답니다. 도안과 실물, 그리고 AI 회전 영상까지 함께 기록해요! 💡🎨",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": [],
+    "videoUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261027_moodlight_rotate.mp4",
+    "videoBtnText": "3D 회전 AI 영상 감상하기 🔄"
+  },
+  {
     "id": "art_minseo_20261022_pet_trainer_01",
     "author": "민서",
     "authorKey": "daughter",

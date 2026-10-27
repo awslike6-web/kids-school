@@ -37,18 +37,44 @@ function openDetailModal(id) {
 
     const imgUrl = item.imageUrl || (item.galleryImages && item.galleryImages[0]) || 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800';
     const modalImg = document.getElementById('modalImg');
-    if (modalImg) modalImg.src = imgUrl;
+    let modalVideo = document.getElementById('modalVideoPlayer');
+    if (!modalVideo && modalImg && modalImg.parentNode) {
+        modalVideo = document.createElement('video');
+        modalVideo.id = 'modalVideoPlayer';
+        modalVideo.className = 'modal-img';
+        modalVideo.controls = true;
+        modalVideo.loop = true;
+        modalVideo.muted = true;
+        modalVideo.playsInline = true;
+        modalVideo.style.display = 'none';
+        modalImg.parentNode.insertBefore(modalVideo, modalImg.nextSibling);
+    }
+    if (modalVideo) {
+        modalVideo.pause();
+        modalVideo.removeAttribute('src');
+        modalVideo.style.display = 'none';
+    }
+    if (modalImg) {
+        modalImg.style.display = 'block';
+        modalImg.src = imgUrl;
+    }
 
     const modalTitle = document.getElementById('modalTitle');
     if (modalTitle) modalTitle.textContent = item.title;
     
-    // 🖼️ 다중 사진 썸네일 스위처 제어
+    // 🖼️ 다중 사진 및 동영상 썸네일 스위처 제어
     const thumbsContainer = document.getElementById('modalThumbsContainer');
     const images = (item.galleryImages && item.galleryImages.length > 0) ? item.galleryImages : (item.imageUrl ? [item.imageUrl] : []);
     if (thumbsContainer) {
-        if (images.length > 1) {
+        if (images.length > 1 || item.videoUrl) {
             thumbsContainer.style.display = 'flex';
             thumbsContainer.innerHTML = '';
+            const resetThumbStyles = () => {
+                thumbsContainer.querySelectorAll('.modal-thumb-btn').forEach(b => {
+                    b.style.borderColor = 'rgba(0,0,0,0.1)';
+                    b.style.boxShadow = 'none';
+                });
+            };
             images.forEach((imgSrc, idx) => {
                 const thumbBtn = document.createElement('button');
                 thumbBtn.type = 'button';
@@ -61,16 +87,45 @@ function openDetailModal(id) {
                 `;
                 thumbBtn.innerHTML = `<img src="${imgSrc}" style="width:100%; height:100%; object-fit:cover; display:block;" alt="사진 ${idx + 1}">`;
                 thumbBtn.onclick = () => {
-                    if (modalImg) modalImg.src = imgSrc;
-                    thumbsContainer.querySelectorAll('.modal-thumb-btn').forEach(b => {
-                        b.style.borderColor = 'rgba(0,0,0,0.1)';
-                        b.style.boxShadow = 'none';
-                    });
+                    if (modalVideo) {
+                        modalVideo.pause();
+                        modalVideo.style.display = 'none';
+                    }
+                    if (modalImg) {
+                        modalImg.style.display = 'block';
+                        modalImg.src = imgSrc;
+                    }
+                    resetThumbStyles();
                     thumbBtn.style.borderColor = 'var(--primary, #4a90e2)';
                     thumbBtn.style.boxShadow = '0 2px 8px rgba(74,144,226,0.35)';
                 };
                 thumbsContainer.appendChild(thumbBtn);
             });
+            if (item.videoUrl) {
+                const vidThumbBtn = document.createElement('button');
+                vidThumbBtn.type = 'button';
+                vidThumbBtn.className = 'modal-thumb-btn';
+                vidThumbBtn.title = '3D 회전 영상 바로 재생';
+                vidThumbBtn.style.cssText = `
+                    height: 54px; padding: 0 12px; border-radius: 10px; border: 2.5px solid rgba(255,65,108,0.4);
+                    cursor: pointer; background: linear-gradient(135deg, #1e1b4b, #311042); color: #fff;
+                    font-family: 'Jua', sans-serif; font-size: 0.82rem; display: flex; align-items: center; gap: 4px;
+                    transition: all 0.2s ease;
+                `;
+                vidThumbBtn.innerHTML = `<span>🎬</span><span>3D 회전영상</span>`;
+                vidThumbBtn.onclick = () => {
+                    if (modalImg) modalImg.style.display = 'none';
+                    if (modalVideo) {
+                        modalVideo.src = item.videoUrl;
+                        modalVideo.style.display = 'block';
+                        modalVideo.play().catch(() => {});
+                    }
+                    resetThumbStyles();
+                    vidThumbBtn.style.borderColor = '#ff416c';
+                    vidThumbBtn.style.boxShadow = '0 2px 10px rgba(255,65,108,0.45)';
+                };
+                thumbsContainer.appendChild(vidThumbBtn);
+            }
         } else {
             thumbsContainer.style.display = 'none';
             thumbsContainer.innerHTML = '';
@@ -95,11 +150,11 @@ function openDetailModal(id) {
     const noteEl = document.getElementById('modalArtistNote');
     if (noteEl) noteEl.textContent = noteText;
 
-    // 동영상 풀영상 버튼 제어
+    // 동영상 풀영상 버튼 제어 (특별한 날 & 일반 작품 모두 지원)
     const videoBtn = document.getElementById('modalVideoBtn');
     const videoBtnText = document.getElementById('modalVideoBtnText');
     if (videoBtn) {
-        if (isSpecial && item.videoUrl) {
+        if (item.videoUrl) {
             videoBtn.href = item.videoUrl;
             if (videoBtnText) videoBtnText.textContent = item.videoBtnText || '동영상 풀영상 감상하기';
             videoBtn.style.display = 'inline-flex';
@@ -145,6 +200,11 @@ function openDetailModal(id) {
 function closeDetailModal() {
     toggleEditArtFull(false);
     cancelEditArtistNote();
+    const modalVideo = document.getElementById('modalVideoPlayer');
+    if (modalVideo) {
+        modalVideo.pause();
+        modalVideo.style.display = 'none';
+    }
     const detailModal = document.getElementById('detailModal');
     if (detailModal) detailModal.style.display = 'none';
     activeArtId = null;
