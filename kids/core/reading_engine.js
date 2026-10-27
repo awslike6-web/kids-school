@@ -20,10 +20,16 @@
     let isBottomSheetOpen = false;
     let containerEl = null;
 
+    // 🎧 오디오 낭독 수명주기 & 센터 정적 MP3 캐시
+    let currentAudio = null;
+    let isAudioPlaying = false;
+    let centerManifestCache = null;
+
     /**
      * 🏁 독해 로비 화면 (공부방 표준: 학년 선택 바 + 단원별 그룹화 서가)
      */
     async function renderReadingLobby(container, options = {}) {
+        stopAudio();
         currentStep = 0;
         activePassage = null;
         activeQuestionIdx = 0;
@@ -234,6 +240,7 @@
      * 🔄 학년 전환 (5-1, 5-2, ALL 등)
      */
     function switchGrade(gradeName) {
+        stopAudio();
         activeGrade = gradeName;
         if (containerEl) {
             renderReadingLobby(containerEl, { subject: activeSubject, grade: gradeName });
@@ -244,6 +251,7 @@
      * 🔄 레거시 트랙 전환 브리지 (하위 호환 100% 보장)
      */
     function switchTrack(trackName) {
+        stopAudio();
         activeTrack = trackName;
         if (trackName.includes('교과서')) {
             switchGrade('5-2');
@@ -260,6 +268,7 @@
      * 🚀 독해 미션 시작 (지문 정독 1단계 카드)
      */
     function startMission(passageId) {
+        stopAudio();
         activePassage = currentPassages.find(p => p.id === passageId);
         if (!activePassage) return;
 
@@ -325,6 +334,7 @@
      * 🎯 2단계: 1문항 슬라이스 집중 풀이
      */
     function startQuestions() {
+        stopAudio();
         if (!activePassage || !activePassage.questions || activePassage.questions.length === 0) {
             alert("이 지문에는 등록된 문제가 없습니다. 서가로 돌아갑니다.");
             renderReadingLobby(containerEl);
@@ -656,11 +666,93 @@
         return currentStep === 2 && !!activePassage && activeQuestionIdx > 0 && activeQuestionIdx < (activePassage.questions || []).length;
     }
 
-    function toggleTts() {
-        if (!activePassage || !activePassage.fullText) return;
-        if (typeof window.speakFairyTTS === 'function') {
-            window.speakFairyTTS(activePassage.fullText);
+    // 🎧 [오디오 수명주기] 정적 MP3 및 공통 TTS 정지
+    function stopAudio() {
+        if (currentAudio) {
+            try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e) {}
+            currentAudio = null;
         }
+        isAudioPlaying = false;
+        updateTtsButtonUI(false);
+        if (typeof window.stopFairyTTS === 'function') window.stopFairyTTS();
+        else if (window.speechSynthesis && window.speechSynthesis.cancel) window.speechSynthesis.cancel();
+    }
+
+    // 🎨 TTS 버튼 재생/정지 상태 UI 동기화
+    function updateTtsButtonUI(playing) {
+        const btn = containerEl ? containerEl.querySelector('.reading-tts-btn') : null;
+        if (!btn) return;
+        btn.innerHTML = playing ? '⏹️ 낭독 멈추기' : '🔊 요정 코코 낭독 듣기';
+        btn.classList.toggle('playing', playing);
+        btn.style.background = playing ? '#f43f5e' : '';
+        btn.style.color = playing ? '#ffffff' : '';
+    }
+
+    // 📂 현재 HTML 위치에 맞춘 오디오 자산 상대 경로 반환
+    function getAudioBasePath() {
+        const path = window.location.pathname;
+        return (path.includes('/subjects/')) ? '../../assets/audio/center_reading/' :
+               (path.includes('/kids/')) ? './assets/audio/center_reading/' : '../../assets/audio/center_reading/';
+    }
+
+    // 📜 센터 독해 오디오 매니페스트(manifest.json) 지연 로드 및 메모리 캐싱
+    async function fetchCenterManifest() {
+        if (centerManifestCache) return centerManifestCache;
+        try {
+            const res = await fetch(`${getAudioBasePath()}manifest.json?v=20261027`);
+            if (res.ok) {
+                centerManifestCache = await res.json();
+                return centerManifestCache;
+            }
+        } catch (e) {
+            console.warn('[ReadingEngine] 센터 오디오 매니페스트 로드 실패:', e);
+        }
+        return null;
+    }
+
+    // 🛡️ 공통 Fairy TTS 폴백 실행
+    function fallbackToFairyTTS() {
+        if (currentAudio) { try { currentAudio.pause(); } catch(e) {} currentAudio = null; }
+        isAudioPlaying = true;
+        updateTtsButtonUI(true);
+        if (typeof window.speakFairyTTS === 'function') {
+            window.speakFairyTTS(activePassage.fullText, () => stopAudio());
+        } else {
+            setTimeout(stopAudio, 15000);
+        }
+    }
+
+    // 🎙️ 지문 본문 음성 낭독 토글 (정적 Edge-TTS MP3 우선 ➔ speakFairyTTS 폴백)
+    async function toggleTts() {
+        if (!activePassage || !activePassage.fullText) return;
+        if (isAudioPlaying) { stopAudio(); return; }
+
+        let staticAudioUrl = null;
+        if ((activePassage.track || '').includes('센터')) {
+            const manifest = await fetchCenterManifest();
+            const bookKey = activePassage.id || activePassage.book_id || (activePassage.order ? `reading_center_${activePassage.order}` : null);
+            if (manifest?.passages?.[bookKey]?.audio_file) {
+                staticAudioUrl = `${getAudioBasePath()}${manifest.passages[bookKey].audio_file}`;
+            }
+        }
+
+        if (staticAudioUrl) {
+            try {
+                const audio = new Audio(staticAudioUrl);
+                currentAudio = audio;
+                isAudioPlaying = true;
+                updateTtsButtonUI(true);
+                audio.onended = () => stopAudio();
+                audio.onerror = (e) => { console.warn('[ReadingEngine] MP3 에러 ➔ TTS 폴백:', e); fallbackToFairyTTS(); };
+                await audio.play();
+                return;
+            } catch (err) {
+                console.warn('[ReadingEngine] play() 예외 ➔ TTS 폴백:', err);
+                fallbackToFairyTTS();
+                return;
+            }
+        }
+        fallbackToFairyTTS();
     }
 
     // 전역 인터페이스 노출 (Facade)
@@ -677,7 +769,12 @@
         chooseAnswer,
         submitShortAnswer,
         toggleTts,
+        stopAudio,
         isMissionInProgress
     };
+
+    // 창 전환/닫기 시 오디오 정지 이벤트 리스너 등록
+    window.addEventListener('beforeunload', stopAudio);
+    window.addEventListener('pagehide', stopAudio);
 
 })();

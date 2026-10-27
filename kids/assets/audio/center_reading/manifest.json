@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "voice_default": "ko-KR-SunHiNeural",
+  "rate_default": "+0%",
+  "pitch_default": "+0Hz",
+  "updated_at": "2026-10-27T19:30:07.001240+09:00",
+  "passages": {
+    "reading_center_36": {
+      "book_id": "reading_center_36",
+      "title": "물체와 물질",
+      "order": 36,
+      "audio_file": "8267cfa8a3c4d877.mp3",
+      "audio_hash": "8267cfa8a3c4d877",
+      "spoken_text_len": 1067,
+      "file_size_bytes": 985824,
+      "voice": "ko-KR-SunHiNeural",
+      "rate": "+0%",
+      "pitch": "+0Hz",
+      "updated_at": "2026-10-27T19:30:07.001064+09:00"
+    }
+  }
+}
