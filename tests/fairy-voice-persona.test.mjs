@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const read = path => fs.readFileSync(new URL(path, import.meta.url), 'utf8');
+const ttsSrc = read('../kids/core/fairy-tts.js'); // 화면과 같은 순서: 음성 합성 → 목록 → 엔진
 const engineSrc = read('../kids/core/fairy-engine.js');
 const catalogSrc = read('../kids/core/fairy-settings-catalog.js');
 
@@ -19,7 +20,7 @@ function setup({ user, persona, withCatalog = true, extraVoice = null }) {
         URLSearchParams,
         setTimeout,
         clearTimeout,
-        localStorage: { getItem: k => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)) },
+        localStorage: { getItem: k => (store.has(k) ? store.get(k) : null), setItem: (k, v) => store.set(k, String(v)), removeItem: k => store.delete(k) },
         location: { search: `?user=${user}` },
         Audio: class { constructor(src) { this.src = src; played.push(src); } play() { return Promise.resolve(); } pause() {} },
         document: {
@@ -30,10 +31,13 @@ function setup({ user, persona, withCatalog = true, extraVoice = null }) {
             head: { appendChild: tag => appended.push(tag.src) },
             addEventListener() {}
         },
-        addEventListener() {}
+        addEventListener() {},
+        dispatchEvent() {},
+        Event: class { constructor(type) { this.type = type; } }
     };
     sandbox.window = sandbox;
     vm.createContext(sandbox);
+    vm.runInContext(ttsSrc, sandbox);
     if (withCatalog) vm.runInContext(catalogSrc, sandbox);
     if (extraVoice) vm.runInContext(`VOICE_CATALOG.push(${JSON.stringify(extraVoice)});`, sandbox);
     vm.runInContext(engineSrc, sandbox);

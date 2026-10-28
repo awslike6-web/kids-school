@@ -106,9 +106,6 @@ async function initFairyChat(subject, roomType = '공부방') {
                         <button id="fairy-panel-tts-btn" onclick="toggleFairyTtsSetting()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); border-radius: 12px; color: white; font-size: 0.75rem; padding: 3px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="요정 목소리 켜기/끄기">
                             ${localStorage.getItem('fairy_tts_enabled') !== 'false' ? '🔊 음성 ON' : '🔇 음성 OFF'}
                         </button>
-                        <button onclick="if(typeof openTtsVoiceSettingsModal==='function')openTtsVoiceSettingsModal()" style="background: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.4); border-radius: 12px; color: white; font-size: 0.75rem; padding: 3px 6px; cursor: pointer;" title="고음질 음성(OpenAI TTS) 설정">
-                            ⚙️
-                        </button>
                     </div>
                     <span style="flex:1; text-align:center;">${config.name}</span>
                     <button onclick="toggleFairyWindow()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer; padding: 0 4px;" title="창 닫기">✖</button>

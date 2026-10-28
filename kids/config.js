@@ -19,11 +19,7 @@ var APP_CONFIG = {
     // 🤖 Gemini AI 프록시 보안 (클라우드플레어 워커 시크릿으로만 안전 관리, 브라우저 하드코딩 금지)
     GEMINI_API_KEY: "",
 
-    // 🎙️ [초고음질 요정 보이스] OpenAI TTS 세팅 (스튜디오 성우급 더빙)
-    OPENAI_API_KEY: (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_API_KEY')) || "",
-    OPENAI_TTS_VOICE: (typeof localStorage !== 'undefined' && localStorage.getItem('OPENAI_TTS_VOICE')) || "nova", // nova(발랄함) | shimmer(맑고 다정함) | alloy | echo | fable | onyx
-    OPENAI_TTS_MODEL: "tts-1", // 실시간 초저지연 모델 (tts-1)
-    OPENAI_TTS_SPEED: 1.06,    // 아이들이 듣기 편안한 요정 낭독 속도
+    // 🎙️ 실시간 음성은 Worker /api/tts만 부른다 (OpenAI 대체도 Worker 비밀값으로 서버에서). 브라우저에 음성 키를 두지 않는다
 
     // 🗄️ 노션 데이터베이스 ID 세팅
     INVENTORY_DB_ID: "374a27115b688042bb61e6a102242e12", // 인벤토리(보상/경험치) 창고 ID

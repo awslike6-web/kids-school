@@ -30,4 +30,4 @@
 - **노션 Worker(`minmin-notion.awslike6.workers.dev`) 호출**:
   - Python에서 부를 때는 `User-Agent` 헤더가 없으면 403이 납니다.
   - 소스는 2026-10-21부터 관제탑 저장소 `master-tower/workers/minmin-notion/`에만 있습니다(이 저장소에는 사본 없음). 배포는 관제탑 루트에서 `npx wrangler deploy -c workers/minmin-notion/wrangler.toml`로 하고, `/health`의 `version`으로 반영을 확인합니다. 엣지 캐시 우회용 `Pragma` 헤더는 CORS에서 막히고, `?force=true`는 노션까지 넘어가 400이 납니다.
-- **운영 DB 보호**: 화면 검증 중 노션 쓰기(`PATCH/POST /v1/pages`)는 페이지 안에서 `fetch`를 가로채 막습니다. 실제 쓰기 시험은 사용자 승인 후 1건만 하고, 원래 값으로 되돌린 뒤 다시 읽어 확인합니다.
+- **운영 DB 보호**: 화면 검증은 노션 쓰기 차단 서버 `python scripts/guarded_preview_server.py`(포트 8767, 미리보기 이름 `kids-school-guarded`)로 합니다. 페이지가 실리기 전부터 쓰기(`PATCH/POST /v1/pages` 등)를 막습니다. 화면마다 손으로 `fetch`를 가로채면 빠뜨리기 쉽습니다(2026-10-28 민수 「학습설정」 덮어쓰기 사고). 실제 쓰기 시험은 사용자 승인 후 1건만 하고, 원래 값으로 되돌린 뒤 다시 읽어 확인합니다.

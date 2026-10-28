@@ -74,6 +74,9 @@
         // 대본·설정 일치 검사. 노션 본문을 바꾸면 옛 음성으로 읽지 않는다.
         if (!clip || clip.spoken_text !== normalize(text) || clip.audio_file !== `${key}.mp3`) return false;
         const audio = new root.Audio(`${base}${clip.audio_file}`);
+        // 설정창 한국어 말하기 속도 (fairy-tts.js, 1.0 = 녹음 그대로)
+        const rate = typeof root.getKoreanSpeechRate === 'function' ? root.getKoreanSpeechRate() : 1;
+        if (rate !== 1) audio.playbackRate = rate;
         active = audio;
         let failed = false;
         const fail = error => {

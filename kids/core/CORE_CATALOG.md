@@ -6,26 +6,35 @@
 
 ## 1. 🎙️ 오디오 & 음성 합성 (Audio & Interaction)
 
-### 🌟 `fairy-engine.js` & `fairy-config.js`
+### 🌟 `fairy-tts.js` · `fairy-engine.js` · `fairy-config.js` (2026-10-28 두 파일로 분리)
 요정 코코의 한국어 안내, 원어민 영어 발음, 학습 보상 효과음 및 **Gemini 3.8 Flash TTS 기반 캐릭터 페르소나(민수 깐죽이 / 민서 깍쟁이)** 음성을 전담하는 통합 오디오 코어입니다.
 - **파일 위치**:
   - `kids/core/fairy-config.js` (오디오 프리셋 맵 및 설정)
-  - `kids/core/fairy-engine.js` (통합 오디오 엔진, 페르소나 비반복 셔플러 및 완주 가드 탑재)
-- **HTML 로드 방법**:
+  - `kids/core/fairy-tts.js` (약 730줄, 음성 합성: Worker 실시간 음성 문장 대기열·브라우저 음성 대체·`stopFairyTTS`·녹음 음성 재생·말하기 속도·아이별 설정 읽기)
+  - `kids/core/fairy-engine.js` (약 420줄, 요정 코코 녹음 음성 목록·키워드 라우터·캐릭터 목소리 고르기·`fairyPraise/Encourage/Reward/Greet`·음성 ON/OFF)
+  - `kids/core/fairy-settings-catalog.js` (캐릭터 목소리 목록. 모든 화면이 함께 싣는다)
+- **HTML 로드 방법** (순서 지킴: `fairy-tts.js`가 엔진보다 먼저. 새 파일 이름에 `fairy-engine.js` 글자를 넣지 않는다 — `loadCoreScripts`·자산 경로 찾기가 그 글자로 엔진을 찾음):
   ```html
   <script src="../core/fairy-config.js"></script>
-  <script src="../core/fairy-engine.js"></script>
+  <script src="../core/fairy-tts.js?v=20261028-tts"></script>
+  <script src="../core/fairy-settings-catalog.js"></script>
+  <script src="../core/fairy-engine.js?v=20261028-tts"></script>
   ```
+  동적 로더 `core.js`(`requiredCores`)·`lobby_controller.js`(`lobbyCores`)도 같은 순서. 시험 `tests/fairy-tts.test.mjs`가 엔진·설정창을 싣는 모든 화면을 검사한다.
 - **핵심 API**:
   | 메서드 | 용도 | 설명 |
   | :--- | :--- | :--- |
-  | `speakFairyTTS(text, options)` | 한국어 안내/퀴즈 | Cloudflare Worker 스트리밍 ➔ Edge-TTS(`SunHiNeural`) 직결 |
-  | `speakEnglish(text, options)` | 영어 원어민 발음 | Jenny Neural 0.85x 감속 배속 재생 + 한글 발음 디딤돌 |
+  | `speakFairyTTS(text, onEnd, options)` | 한국어 안내/퀴즈 | ① 센터 고정 MP3 ② 녹음 음성(키워드 라우터) ③ Worker `/api/tts` 실시간(Edge, 막히면 Worker가 OpenAI로 대신) ④ 브라우저 음성. 옵션 `skipPreset`·`skipStatic`·`forceVoice` |
+  | `speakEnglish(text, onEnd)` | 영어 원어민 발음 | Jenny Neural, 재생 배속 = `getEnglishSpeechRate()` |
+  | `stopFairyTTS()` | 모든 음성 정지 | 대기열·녹음 음성·센터 MP3·브라우저 음성을 멈추고 미리 받은 음성을 해제 |
+  | `getKoreanSpeechRate()` / `setKoreanSpeechRate(r)` | 한국어 말하기 속도 | 아이별 설정 `korean_speech_rate`(1.0 = Edge +6%, 0.85 = -10%, 1.15 = +22%). 실시간 음성·센터 독해 MP3에 적용, 짧은 녹음 칭찬은 원래 속도 |
+  | `getEnglishSpeechRate()` / `setEnglishSpeechRate(r)` | 영어 말하기 속도 | 아이별 설정 `english_speech_rate`(기본 0.85). 영어방 속도 단추와 설정창이 같은 값을 바꾼다 |
   | `fairyPraise(onEndCallback)` | 정답/칭찬 효과음 | 캐릭터 목소리면 `correct` 파일 중 비반복 무작위, 아니면 요정 코코 칭찬 |
   | `fairyEncourage(onEndCallback)` | 오답/격려 효과음 | 캐릭터 목소리면 `wrong` 파일 중 비반복 무작위, 아니면 요정 코코 응원 |
   | `fairyReward(type, onEndCallback)` | 완주/보상 획득 | 직전 정답 음성을 즉시 안전 중단(`stopFairyTTS`) 후 재생. `quest`·`finish`는 캐릭터 `clear` 파일 |
   | `fairyGreet(target, onEndCallback)` | 입장 인사 | `lobby`·`minsu`·`minseo`는 캐릭터 `welcome` 파일, 과목 인사는 요정 코코 |
   | `pickPersonaVoiceFile(kind)` | 캐릭터 파일 고르기 | `welcome`·`correct`·`wrong`·`clear` 중 하나. 쓸 수 있는 캐릭터 목소리가 없으면 `null` |
+- **실시간 음성 대기열 (2026-10-28~)**: `playTtsSentenceQueue`가 문장을 나눠 지금 문장 + 다음 2문장만 미리 받는다. 첫 문장부터 실패하면 브라우저 음성으로 넘어가고, 중간 문장이 실패하면 건너뛰고 끝 콜백을 한 번 부른다. 재생이 끝난 음성은 `URL.revokeObjectURL`로 해제(60자 이하 문장은 40개까지 캐시). 수식은 말로 읽는다(`3+4=7` → "3 더하기 4는 7", `-`는 등호가 있는 식 안에서만 "빼기"). 브라우저에서 OpenAI를 직접 부르거나 키를 저장하지 않는다(예전 키는 기기에서 지움, 헌법 §5).
 - **캐릭터 목소리 고르기 (2026-10-28~)**: 엔진은 `fairy-settings-catalog.js`의 `VOICE_CATALOG`만 보고 `kids/assets/voices/{voiceDir}/{voiceDir}_{상황}_{01~}.wav`를 만든다. 목록을 싣지 않는 화면에서는 엔진이 같은 폴더의 목록 파일을 한 번 불러오고, 그 전에 울리는 음성은 요정 코코로 나간다. 다음 경우에는 요정 코코로 돌아간다: 기본 선택, 음성 파일(`files`)이 없는 준비중 목소리, 다른 아이 전용 목소리(`target` 불일치. 공용 설정에 다른 아이 선택이 남아 있는 경우 포함). 회귀 시험 `tests/fairy-voice-persona.test.mjs`.
 
 ---
@@ -719,6 +728,8 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
   <body class="storybook-body">
     <div id="storybookApp"></div>
     <script src="../../core/fairy-config.js"></script>
+    <script src="../../core/fairy-tts.js"></script>
+    <script src="../../core/fairy-settings-catalog.js"></script>
     <script src="../../core/fairy-engine.js"></script>
     <script src="./data/story_도서ID.js"></script>
     <script src="../../js/storybook_engine.js"></script>
@@ -799,9 +810,11 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 - **HTML 로드 방법**:
   ```html
   <link rel="stylesheet" href="./kids/css/fairy-settings-modal.css">
+  <script src="./kids/core/fairy-tts.js?v=20261028-tts"></script> <!-- 말하기 속도 단추·미리듣기 -->
   <script src="./kids/core/fairy-settings-catalog.js"></script>
   <script src="./kids/core/fairy-settings-engine.js"></script>
   ```
+- **말하기 속도 (2026-10-28~)**: 설정창 '🗣️ 말하기 속도'에 한국어(느리게 0.85·보통 1.0·빠르게 1.15)와 영어(0.5·0.75·0.85·1배) 단추. 누르면 그 속도로 한 문장 들려준다. 값은 아이별 설정(`korean_speech_rate`·`english_speech_rate`)에 저장되고 노션 인벤토리 「학습설정」 `appSettings`에도 함께 저장된다.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -1076,6 +1089,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.
 - `tests/regression.test.mjs`: 단독 시험 6개를 하위 프로세스로 돌려 종료 코드 0인지 확인합니다. `verify_quest_mastery.js`(3·3·3 엔진), `test_quest_fallback.js`, `test_study_logger_upsert.js`, `verify_study_log_store.js`, `verify_kst_dates.js`, `verify_diary_sync.js`. 새 단독 시험을 만들면 실패 시 `process.exitCode = 1`로 끝나게 하고 이 목록에 한 줄 추가합니다.
 - `tests/fairy-voice-persona.test.mjs`: 캐릭터 목소리가 목록대로 나오는지(정답·오답·완주·인사, 비반복), 다른 아이 전용·준비중·목록 미로딩이면 요정 코코로 돌아가는지, 목록에 항목만 추가한 새 목소리가 엔진 수정 없이 재생되는지, 목록의 음성 파일이 모두 있는지 확인합니다.
+- `tests/fairy-tts.test.mjs`: 엔진·설정창을 싣는 모든 화면·로더가 `fairy-tts.js`를 먼저 싣는지, 두 파일의 최상위 이름이 겹치지 않고 공개 함수가 모두 있는지, 대기열(중간 실패 건너뛰기·끝 콜백 1번·미리 받기 3개·정지 시 해제), 수식 읽기, 말하기 속도·예전 영어 저장값 읽기, 기기 OpenAI 키 삭제를 확인합니다.
 - `tests/notion-contract.test.mjs`: 앱이 노션에 보내는 요청 본문의 속성 이름·타입이 `docs/notion_schemas_school.md` 표와 같은지 확인합니다. VOCA_DB `숙련도`(`count|silverDate|lastReviewed` 형식·왕복)·`달성`, 관리자 모드 쓰기 생략, STUDY_LOG_DB 학습일지(`ID`=`{학생}_{YYYY-MM-DD}_{과목}`, `오답리포트`). 노션 속성을 바꾸면 스키마 도감(`sync_notion_schemas.py`)과 코드를 함께 고쳐야 통과합니다.
 - 시험이 실제로 고장을 잡는지 확인함: 숙련도 속성명 오타, 오답리포트 속성명 변경, 금메달 기준 변경, 숙련도 구분자 변경을 일부러 넣었을 때 모두 실패.
+- **화면 검증 서버 (노션 쓰기 차단)**: `python scripts/guarded_preview_server.py [포트=8767]`. 모든 HTML `<head>` 맨 앞에 쓰기 차단 스크립트를 넣어 내보내므로 페이지가 실리기 전부터 노션 페이지·블록 쓰기와 업로드가 막힌다(읽기·DB 조회·음성은 통과, 막힌 요청은 `window.__blockedWrites`). 2026-10-28 차단을 늦게 걸어 민수 「학습설정」이 덮어써진 사고 뒤 도입. 화면 검증은 `python -m http.server` 대신 이 서버로 한다.
 - **화면 시험(묶음 밖)**: `verify_math_phase1.cjs`·`verify_math_phase2.cjs`는 브라우저를 띄워 느리고(약 20초) 실행 때마다 `docs/math-phase*.png`를 다시 씁니다. playwright는 `scripts/load_playwright.cjs`가 ① 설치본 ② `PLAYWRIGHT_MODULE` ③ 이 PC의 Codex 런타임 사본 순으로 찾고, 없으면 건너뜁니다(종료 코드 0). 실행 후 바뀐 스크린샷은 커밋할 때만 남기고 아니면 `git checkout -- docs`로 되돌립니다.

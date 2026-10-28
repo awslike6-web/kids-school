@@ -127,6 +127,7 @@
                     ${rates.map(r => `
                         <button type="button" 
                                 class="speech-rate-chip ${Math.abs(currentRate - r.rate) < 0.03 ? 'active' : ''}" 
+                                data-rate="${r.rate}"
                                 onclick="window.changeEnglishSpeechRate(${r.rate})" 
                                 title="${r.label}">
                             ${r.label}
@@ -135,6 +136,19 @@
                 </div>
             </div>
         `;
+    }
+
+    // 속도 단추: fairy-tts.js의 아이별 영어 속도를 바꾼다 (설정창 '말하기 속도'와 같은 값)
+    function changeEnglishSpeechRate(rate) {
+        if (typeof window.setEnglishSpeechRate === 'function') window.setEnglishSpeechRate(rate);
+        updateSpeechRateChips();
+    }
+
+    function updateSpeechRateChips() {
+        const currentRate = (typeof window.getEnglishSpeechRate === 'function') ? window.getEnglishSpeechRate() : 0.85;
+        document.querySelectorAll('.speech-rate-chip[data-rate]').forEach(chip => {
+            chip.classList.toggle('active', Math.abs(currentRate - parseFloat(chip.dataset.rate)) < 0.03);
+        });
     }
 
     // ========================================================
@@ -355,6 +369,8 @@
     // 하위 호환 글로벌 브리지
     window.speakEnglish = speakEnglish;
     window.getEnglishSpeechRateChipsHtml = getEnglishSpeechRateChipsHtml;
+    window.changeEnglishSpeechRate = changeEnglishSpeechRate;
+    window.updateSpeechRateUi = updateSpeechRateChips;
     window.getPhonicsKorean = getPhonicsKorean;
     window.renderSentencePhonicsHtml = renderSentencePhonicsHtml;
     window.getEnglishPhonicsToggleBtnHtml = getEnglishPhonicsToggleBtnHtml;

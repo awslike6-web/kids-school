@@ -380,6 +380,26 @@ const SettingsManager = {
             }).join('')
             : "";
 
+        // 5) 말하기 속도 칩 (fairy-tts.js의 속도 함수, 아이별 저장. 영어방 속도 단추와 같은 값)
+        const speechRateChips = (rates, current, setter, sample) => rates.map(r => `
+                <button type="button" class="theme-chip ${Math.abs(current - r.rate) < 0.03 ? 'active' : ''}" onclick="window.${setter}?.(${r.rate}); SettingsManager.renderModalContent(); ${sample}">
+                    <span class="theme-chip-icon">${r.icon}</span>
+                    <span class="theme-chip-name">${r.name}</span>
+                </button>`).join('');
+        const koreanRateChips = speechRateChips([
+            { rate: 0.85, icon: '🐢', name: '느리게' },
+            { rate: 1.0, icon: '🙂', name: '보통' },
+            { rate: 1.15, icon: '🐇', name: '빠르게' }
+        ], typeof getKoreanSpeechRate === 'function' ? getKoreanSpeechRate() : 1.0,
+            'setKoreanSpeechRate', "window.speakFairyTTS?.('이 빠르기로 읽어 줄게요. 잘 들리나요?', { skipPreset: true, skipStatic: true });");
+        const englishRateChips = speechRateChips([
+            { rate: 0.5, icon: '🐢', name: '0.5배' },
+            { rate: 0.75, icon: '🌱', name: '0.75배' },
+            { rate: 0.85, icon: '🟩', name: '0.85배 기본' },
+            { rate: 1.0, icon: '⚡', name: '1배' }
+        ], typeof getEnglishSpeechRate === 'function' ? getEnglishSpeechRate() : 0.85,
+            'setEnglishSpeechRate', "window.speakEnglish?.('Hello! I will read at this speed.');");
+
         const studentBadge = currentStudent === 'daughter' ? '👧 민서 맞춤' : '👦 민수 맞춤';
 
         bodyEl.innerHTML = `
@@ -417,6 +437,22 @@ const SettingsManager = {
                     <select class="settings-select" onchange="SettingsManager.set('bgm_track', this.value)">
                         ${bgmOptions}
                     </select>
+                </div>
+            </div>
+
+            <!-- 섹션 2-1: 말하기 속도 (실시간 음성·센터 독해 MP3. 짧은 칭찬 음성은 원래 속도) -->
+            <div class="settings-section">
+                <div class="section-title">
+                    <span>🗣️ 말하기 속도</span>
+                    <span class="student-tag">${studentBadge}</span>
+                </div>
+                <div class="setting-subtext" style="margin:0 0 8px;">한국어 (요정 안내·지문 읽기)</div>
+                <div class="theme-chip-grid">
+                    ${koreanRateChips}
+                </div>
+                <div class="setting-subtext" style="margin:14px 0 8px;">영어 원어민 (영어방 속도 단추와 같아요)</div>
+                <div class="theme-chip-grid">
+                    ${englishRateChips}
                 </div>
             </div>
 

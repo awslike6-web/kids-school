@@ -6,6 +6,8 @@ var requiredCores = [
     "study-activity.js?v=20261023",
     "notion-helper.js",
     "fairy-config.js",
+    "fairy-tts.js",
+    "fairy-settings-catalog.js",
     "fairy-engine.js",
     "daily-diary.js",
     "quiz-flow-controller.js",

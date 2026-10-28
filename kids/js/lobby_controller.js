@@ -112,6 +112,7 @@ window.USER_CONFIGS = USER_CONFIGS;
     'core.js',
     'notion-helper.js',
     'fairy-config.js',
+    'fairy-tts.js',
     'fairy-engine.js',
     'fairy-settings-catalog.js',
     'fairy-settings-engine.js',
