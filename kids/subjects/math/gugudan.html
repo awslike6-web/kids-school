@@ -378,6 +378,10 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
         // [트랙 3: 엔진 품 안으로 이사 온 실무 함수들]
         // =======================================================
         
+        // 로비를 거치지 않고 바로 열어도 되게 기본값을 둔다 (없으면 currentTheme 오류로 퀴즈가 안 뜸)
+        let currentProfile = localStorage.getItem('currentUser') || 'son';
+        let currentTheme = localStorage.getItem('currentTheme') || (currentProfile === 'daughter' ? '슬라임' : '마인크래프트');
+
         window.toggleProfileManually = function() {
             if (currentProfile === 'son') { currentProfile = 'daughter'; currentTheme = '슬라임'; } 
             else { currentProfile = 'son'; currentTheme = '마인크래프트'; }
