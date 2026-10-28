@@ -226,6 +226,19 @@ window.USER_CONFIGS = USER_CONFIGS;
     window.StudyLogStore.renderStreakBadge('minsuStreakBadge', 'minsu', true);
   }
 
+  function setPopupLayer(cardEl, isOpen) {
+    if (!cardEl) return;
+    let target = cardEl.parentElement;
+    while (target && target !== document.body) {
+      const z = window.getComputedStyle(target).zIndex;
+      if (z && z !== 'auto') break;
+      target = target.parentElement;
+    }
+    if (!target) return;
+    target.style.zIndex = isOpen ? '40' : '';
+    target.style.animationPlayState = isOpen ? 'paused' : '';
+  }
+
   function closeAllSubjectPopups() {
     const allCards = [
       'minseo-pop-korean', 'minseo-math-tooltip', 'minseo-pop-english', 'minseo-pop-haru',
@@ -233,7 +246,10 @@ window.USER_CONFIGS = USER_CONFIGS;
     ];
     allCards.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.classList.add('hidden');
+      if (el) {
+        el.classList.add('hidden');
+        setPopupLayer(el, false);
+      }
     });
   }
 
@@ -697,9 +713,12 @@ window.USER_CONFIGS = USER_CONFIGS;
       const el = document.getElementById(id);
       if (!el) return;
       if (id === cardId) {
+        const willOpen = el.classList.contains('hidden');
         el.classList.toggle('hidden');
+        setPopupLayer(el, willOpen);
       } else {
         el.classList.add('hidden');
+        setPopupLayer(el, false);
       }
     });
   };
@@ -710,9 +729,12 @@ window.USER_CONFIGS = USER_CONFIGS;
       const el = document.getElementById(id);
       if (!el) return;
       if (id === cardId) {
+        const willOpen = el.classList.contains('hidden');
         el.classList.toggle('hidden');
+        setPopupLayer(el, willOpen);
       } else {
         el.classList.add('hidden');
+        setPopupLayer(el, false);
       }
     });
   };
