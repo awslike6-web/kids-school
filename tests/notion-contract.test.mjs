@@ -14,6 +14,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import vm from 'node:vm';
+import { loadBrowserScripts } from './browser-sandbox.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => readFileSync(path.join(ROOT, rel), 'utf8');
@@ -38,33 +39,6 @@ function assertMatchesSchema(properties, schema, label) {
     const sentType = Object.keys(value)[0];
     assert.equal(sentType, schema[name], `${label}: '${name}'은 ${schema[name]} 타입인데 ${sentType}로 보냅니다`);
   }
-}
-
-// 브라우저 전역 스크립트를 모의 fetch·localStorage와 함께 불러온다
-function loadBrowserScripts(files, { userName = '민수' } = {}) {
-  const calls = [];
-  const fetch = async (url, options = {}) => {
-    const body = options.body ? JSON.parse(options.body) : {};
-    calls.push({ url, method: options.method || 'GET', body });
-    if (url.includes('/query')) return { ok: true, status: 200, json: async () => ({ results: [] }) };
-    return { ok: true, status: 200, json: async () => ({ id: `mock_${calls.length}` }), text: async () => '' };
-  };
-  const store = { currentUserName: userName, currentChild: 'minsu' };
-  const sandbox = {
-    console: { log() {}, info() {}, warn() {}, error: console.error },
-    setTimeout, clearTimeout, Date, Math, JSON, fetch,
-    localStorage: {
-      getItem: (k) => store[k] ?? null,
-      setItem: (k, v) => { store[k] = String(v); },
-      removeItem: (k) => { delete store[k]; },
-    },
-    location: { pathname: '/kids/subjects/quest/quest_runner.html' },
-  };
-  sandbox.window = sandbox;
-  sandbox.globalThis = sandbox;
-  vm.createContext(sandbox);
-  for (const f of files) vm.runInContext(read(f), sandbox, { filename: f });
-  return { sandbox, calls };
 }
 
 const MASTERY_FORMAT = /^\d+\|(\d{4}-\d{2}-\d{2})?\|(\d{4}-\d{2}-\d{2})?$/;
