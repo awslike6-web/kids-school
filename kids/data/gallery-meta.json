@@ -194,5 +194,19 @@
     ],
     "videoUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261028_paldo_bibimmyeon_video.mp4",
     "videoBtnText": "3D AI 영상 감상하기 🔄"
+  },
+  "art_minseo_20261028_seasons_tree": {
+    "title": "사계절 나무의 신비로운 변화 (여름·가을·겨울 그림 & AI 영상)",
+    "category": "그림/미술",
+    "categoryIcon": "🎨",
+    "date": "2026-10-28",
+    "artistNote": "여름의 푸른 숲과 따스한 해님, 가을의 붉고 노란 단풍, 겨울로 이어지는 사계절 나무의 모습을 민서의 상상력으로 그린 그림과 AI 변신 영상입니다.",
+    "grade": "1학년",
+    "subImages": [
+      "20261028_seasons_tree_autumn.jpg",
+      "20261028_seasons_tree_winter.jpg"
+    ],
+    "videoUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261028_seasons_tree_video.mp4",
+    "videoBtnText": "사계절 변신 AI 영상 감상하기 🔄"
   }
 }

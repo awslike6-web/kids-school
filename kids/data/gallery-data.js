@@ -30,6 +30,34 @@ const DEFAULT_GALLERY_DATA = [
     "videoBtnText": "3D AI 영상 감상하기 🔄"
   },
   {
+    "id": "art_minseo_20261028_seasons_tree",
+    "author": "민서",
+    "authorKey": "daughter",
+    "title": "사계절 나무의 신비로운 변화 (여름·가을·겨울 그림 & AI 영상)",
+    "category": "그림/미술",
+    "categoryIcon": "🎨",
+    "date": "2026-10-28",
+    "grade": "1학년",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261028_seasons_tree.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261028_seasons_tree.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261028_seasons_tree_autumn.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261028_seasons_tree_winter.jpg"
+    ],
+    "hasCutout": false,
+    "artistNote": "여름의 푸른 숲과 따스한 해님, 가을의 붉고 노란 단풍, 겨울로 이어지는 사계절 나무의 모습을 민서의 상상력으로 그린 그림과 AI 변신 영상입니다.",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": [],
+    "videoUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261028_seasons_tree_video.mp4",
+    "videoBtnText": "사계절 변신 AI 영상 감상하기 🔄"
+  },
+  {
     "id": "art_minsu_20261020_moodlight_real",
     "author": "민수",
     "authorKey": "son",
