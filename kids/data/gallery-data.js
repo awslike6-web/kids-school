@@ -3,6 +3,33 @@
 
 const DEFAULT_GALLERY_DATA = [
   {
+    "id": "art_minsu_20261028_paldo_bibimmyeon",
+    "author": "민수",
+    "authorKey": "son",
+    "title": "종이컵 팔도 비빔면 (면발·스프·해산물 토핑 입체 공예 & AI 영상)",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
+    "date": "2026-10-28",
+    "grade": "5학년",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261028_paldo_bibimmyeon.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261028_paldo_bibimmyeon.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261028_paldo_bibimmyeon_toppings.jpg"
+    ],
+    "hasCutout": false,
+    "artistNote": "종이컵에 파란색 팔도 비빔면 포장지를 입히고, 뚜껑과 노란 면발, 스프, 계란후라이, 새우, 문어, 버섯 등 푸짐한 종이 토핑을 정성껏 오려 만든 입체 비빔면 작품입니다.",
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": [],
+    "videoUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20261028_paldo_bibimmyeon_video.mp4",
+    "videoBtnText": "3D AI 영상 감상하기 🔄"
+  },
+  {
     "id": "art_minsu_20261020_moodlight_real",
     "author": "민수",
     "authorKey": "son",
