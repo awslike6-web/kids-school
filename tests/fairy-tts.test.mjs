@@ -116,7 +116,7 @@ test('② 세 파일을 한 화면처럼 차례로 실으면 공개 함수가 �
         'playFairyPreset', 'getBestKoreanVoice', 'unlockFairySpeechEngine', 'initFairyAudio', 'isEnglishText',
         'getCloudflareEdgeTtsConfig', 'fetchCloudflareEdgeTtsAudio', 'playCloudflareEdgeTtsStream',
         'getEnglishSpeechRate', 'setEnglishSpeechRate', 'getKoreanSpeechRate', 'setKoreanSpeechRate',
-        'fairyPraise', 'fairyEncourage', 'fairyReward', 'fairyGreet', 'resolveFairyPresetAudio', 'pickPersonaVoiceFile',
+        'fairyPraise', 'fairyEncourage', 'fairyHint', 'fairyReward', 'fairyGreet', 'resolveFairyPresetAudio', 'pickPersonaVoiceFile',
         'getFairyAssetBaseUrl', 'toggleFairyTtsSetting', 'updateTtsToggleUi'
     ];
     for (const name of exported) assert.equal(typeof sandbox.window[name], 'function', name);

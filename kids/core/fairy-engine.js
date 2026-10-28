@@ -83,25 +83,27 @@ function resolveFairyPresetAudio(text) {
     if (/과학.*실험|과학.*탐험/i.test(trimmed)) return cocoPresetFile('welcome_science');
     if (/영어.*모험|영어.*배움/i.test(trimmed)) return cocoPresetFile('welcome_english');
 
-    // 4) 오답 & 응원/힌트 키워드 우선 매칭 (예: "아쉽네요! 정답은 14"와 같이 오답 문구 내 정답 단어 포함 시 오답 우선 판별)
+    // 4) 힌트 열기 안내는 오답 판별보다 먼저 ('힌트' 글자가 오답 응원으로 빠지지 않게)
+    if (/비밀.*힌트|힌트를.*열어/i.test(trimmed)) return pickPersonaVoiceFile('hint') || cocoPresetFile('hint_open');
+
+    // 5) 오답 & 응원 키워드 우선 매칭 (예: "아쉽네요! 정답은 14"와 같이 오답 문구 내 정답 단어 포함 시 오답 우선 판별)
     if (/아쉽|아쉬|틀렸|오답|땡|다시.*생각|다시.*한번|힌트|힘내|포기하지|괜찮아|도전|아깝/i.test(trimmed)) {
         const personaWrong = pickPersonaVoiceFile('wrong');
         if (personaWrong) return personaWrong;
         return cocoRandomFile('encourages');
     }
 
-    // 5) 정답 & 칭찬 키워드 매칭 (오답 멘트가 아닐 때만 순수 정답으로 처리)
+    // 6) 정답 & 칭찬 키워드 매칭 (오답 멘트가 아닐 때만 순수 정답으로 처리)
     if (!/아쉽|아쉬|틀렸|오답|땡|다시/i.test(trimmed) && /정답|완벽|대단|천재|멋져|딩동댕|최고|잘했|맞혔|맞았|훌륭/i.test(trimmed)) {
         const personaCorrect = pickPersonaVoiceFile('correct');
         if (personaCorrect) return personaCorrect;
         return cocoRandomFile('praises');
     }
 
-    // 6) 시작 & 집중 키워드 매칭
+    // 7) 시작 & 집중 키워드 매칭
     if (/집중|시작해|출발/i.test(trimmed)) return cocoPresetFile('focus_start');
     if (/준비.*완료|신나는.*퀴즈/i.test(trimmed)) return cocoPresetFile('ready_go');
     if (/차근차근.*읽어/i.test(trimmed)) return cocoPresetFile('think_careful');
-    if (/비밀.*힌트|힌트를.*열어/i.test(trimmed)) return cocoPresetFile('hint_open');
 
     return null;
 }
@@ -161,7 +163,7 @@ function getNonRepeatingRandomFairyVoice(list, trackKey) {
 
 /**
  * 🎙️ 캐릭터 목소리 고르기: 목소리 목록(fairy-settings-catalog.js의 VOICE_CATALOG)만 보고 파일을 고른다.
- * 파일 규칙: assets/voices/{voiceDir}/{voiceDir}_{상황}_{01~}.wav (상황: welcome·correct·wrong·clear)
+ * 파일 규칙: assets/voices/{voiceDir}/{voiceDir}_{상황}_{01~}.wav (상황: welcome·correct·wrong·clear·hint)
  * 기본 요정 목소리로 돌아가는 경우: 기본 선택, 목록 미로딩, 파일 없는 '준비중' 목소리, 다른 아이 전용 목소리
  */
 function getActiveVoicePersona() {
@@ -228,6 +230,18 @@ function fairyEncourage(onEndCallback = null) {
     }
 
     playFairyVoiceOrSkip(cocoRandomFile('encourages'), onEndCallback);
+}
+
+/**
+ * 💡 힌트 열기 전용 헬퍼 (캐릭터 목소리 힌트 파일 중 무작위, 없으면 요정 코코 힌트 안내)
+ * 독해 단서 열기(reading_engine.js)·받아쓰기 초성 힌트(korean_dictation.js)에서 부른다
+ */
+function fairyHint(onEndCallback = null) {
+    if (!isSafeSfxEnabled()) {
+        if (onEndCallback) onEndCallback();
+        return;
+    }
+    playFairyVoiceOrSkip(pickPersonaVoiceFile('hint') || cocoPresetFile('hint_open'), onEndCallback);
 }
 
 /**
@@ -346,6 +360,7 @@ function updateTtsToggleUi() {
 // 🌐 브라우저 전역 공개
 window.fairyPraise = fairyPraise;
 window.fairyEncourage = fairyEncourage;
+window.fairyHint = fairyHint;
 window.fairyReward = fairyReward;
 window.fairyGreet = fairyGreet;
 window.resolveFairyPresetAudio = resolveFairyPresetAudio;

@@ -121,3 +121,15 @@ test('목록의 캐릭터 목소리 파일이 실제로 모두 있음', () => {
         assert.ok(fs.existsSync(new URL(`../kids/${v.previewFile}`, import.meta.url)), `${v.previewFile} 없음`);
     }
 });
+
+test('힌트 열기: 캐릭터 목소리면 hint 파일, 기본·다른 아이 목소리면 요정 코코 힌트 안내', () => {
+    const snarky = setup({ user: 'daughter', persona: 'snarky_minseo' });
+    assert.match(snarky.play('fairyHint')[0], /^snarky\/snarky_hint_0[12]\.wav$/);
+    const tease = setup({ user: 'son', persona: 'tease_minsu' });
+    assert.match(tease.play('fairyHint')[0], /^tease\/tease_hint_0[12]\.wav$/);
+    assert.deepEqual(setup({ user: 'son', persona: 'default' }).play('fairyHint'), ['fairy/fairy_hint_open.mp3']);
+    assert.deepEqual(setup({ user: 'daughter', persona: 'tease_minsu' }).play('fairyHint'), ['fairy/fairy_hint_open.mp3']);
+    // '힌트' 글자가 있어도 힌트 열기 안내는 오답 응원으로 빠지지 않는다
+    assert.match(tease.sandbox.resolveFairyPresetAudio('비밀 힌트를 열어볼까요?'), /tease\/tease_hint_0[12]\.wav$/);
+    assert.match(setup({ user: 'son', persona: 'default' }).sandbox.resolveFairyPresetAudio('비밀 힌트를 열어볼까요?'), /fairy_hint_open\.mp3$/);
+});

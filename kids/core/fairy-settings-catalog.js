@@ -14,10 +14,10 @@
  * - target: 노출·사용 대상 ('son' | 'daughter' | 'all'). 다른 아이에게 설정이 남아 있어도 이 아이에게만 나옴
  * - voiceDir: 해당 캐릭터의 전용 음성 폴더명 (kids/assets/voices/{voiceDir}/)
  * - files: 상황별 파일 개수. 파일 이름은 {voiceDir}_{상황}_{01~}.wav
- *     welcome(첫인사·미리듣기) · correct(정답) · wrong(오답) · clear(완주)
+ *     welcome(첫인사·미리듣기) · correct(정답) · wrong(오답) · clear(완주) · hint(힌트 열기)
  *   files가 없으면 '준비중'으로 보고 설정창에서 고를 수 없음 (기본 요정 목소리 사용)
  *
- * ➕ 새 목소리 추가: 음성 파일 11개(welcome 1·correct 5·wrong 4·clear 1)를 폴더에 넣고
+ * ➕ 새 목소리 추가: 음성 파일 13개(welcome 1·correct 5·wrong 4·clear 1·hint 2)를 폴더에 넣고
  *    아래 목록에 files를 채운 항목을 추가 (음성 생성: master-tower scripts/generate_gemini_voices.py)
  */
 var VOICE_CATALOG = [
@@ -40,7 +40,7 @@ var VOICE_CATALOG = [
         previewFile: "assets/voices/tease/tease_welcome_01.wav",
         target: "son",
         voiceDir: "tease",
-        files: { welcome: 1, correct: 5, wrong: 4, clear: 1 }
+        files: { welcome: 1, correct: 5, wrong: 4, clear: 1, hint: 2 }
     },
     // 😭 민수 전용: 엄살쟁이 슬라임 (추후 음원 추가용)
     {
@@ -61,7 +61,7 @@ var VOICE_CATALOG = [
         previewFile: "assets/voices/snarky/snarky_welcome_01.wav",
         target: "daughter",
         voiceDir: "snarky",
-        files: { welcome: 1, correct: 5, wrong: 4, clear: 1 }
+        files: { welcome: 1, correct: 5, wrong: 4, clear: 1, hint: 2 }
     },
     // 🐣 민서 전용: 껌딱지 아기새
     {

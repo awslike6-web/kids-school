@@ -120,6 +120,8 @@
             hintEl.style.display = 'block';
             hintEl.innerHTML = `<span style="background:#fef08a; padding:4px 12px; border-radius:12px; color:#713f12; font-weight:bold; font-size:1.15rem;">초성 힌트: ${chosung}</span>`;
             hintBtn.textContent = "정답 전체 보기 👀";
+            // 초성 힌트가 나올 때만 힌트 음성 (정답 보기·숨기기는 조용히)
+            if (typeof window.fairyHint === 'function') window.fairyHint();
         } else if (dictationHintLevel === 2) {
             hintEl.style.display = 'block';
             hintEl.innerHTML = `<span style="background:#dcfce7; padding:4px 12px; border-radius:12px; color:#14532d; font-weight:bold; font-size:1.15rem;">정답: ${targetSentence}</span>`;

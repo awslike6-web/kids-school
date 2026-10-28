@@ -31,9 +31,10 @@
   | `getEnglishSpeechRate()` / `setEnglishSpeechRate(r)` | 영어 말하기 속도 | 아이별 설정 `english_speech_rate`(기본 0.85). 영어방 속도 단추와 설정창이 같은 값을 바꾼다 |
   | `fairyPraise(onEndCallback)` | 정답/칭찬 효과음 | 캐릭터 목소리면 `correct` 파일 중 비반복 무작위, 아니면 요정 코코 칭찬 |
   | `fairyEncourage(onEndCallback)` | 오답/격려 효과음 | 캐릭터 목소리면 `wrong` 파일 중 비반복 무작위, 아니면 요정 코코 응원 |
+  | `fairyHint(onEndCallback)` | 힌트 열기 | 캐릭터 목소리면 `hint` 파일 2개 중 비반복 무작위, 아니면 요정 코코 `fairy_hint_open.mp3`. 독해 단서 열기(`reading_engine.js` `toggleHint`, 열 때만)·받아쓰기 초성 힌트(`korean_dictation.js`, 초성 단계만)에서 부른다 |
   | `fairyReward(type, onEndCallback)` | 완주/보상 획득 | 직전 정답 음성을 즉시 안전 중단(`stopFairyTTS`) 후 재생. `quest`·`finish`는 캐릭터 `clear` 파일 |
   | `fairyGreet(target, onEndCallback)` | 입장 인사 | `lobby`·`minsu`·`minseo`는 캐릭터 `welcome` 파일, 과목 인사는 요정 코코 |
-  | `pickPersonaVoiceFile(kind)` | 캐릭터 파일 고르기 | `welcome`·`correct`·`wrong`·`clear` 중 하나. 쓸 수 있는 캐릭터 목소리가 없으면 `null` |
+  | `pickPersonaVoiceFile(kind)` | 캐릭터 파일 고르기 | `welcome`·`correct`·`wrong`·`clear`·`hint` 중 하나. 쓸 수 있는 캐릭터 목소리가 없으면 `null` |
 - **실시간 음성 대기열 (2026-10-28~)**: `playTtsSentenceQueue`가 문장을 나눠 지금 문장 + 다음 2문장만 미리 받는다. 첫 문장부터 실패하면 브라우저 음성으로 넘어가고, 중간 문장이 실패하면 건너뛰고 끝 콜백을 한 번 부른다. 재생이 끝난 음성은 `URL.revokeObjectURL`로 해제(60자 이하 문장은 40개까지 캐시). 수식은 말로 읽는다(`3+4=7` → "3 더하기 4는 7", `-`는 등호가 있는 식 안에서만 "빼기"). 브라우저에서 OpenAI를 직접 부르거나 키를 저장하지 않는다(예전 키는 기기에서 지움, 헌법 §5).
 - **요정 코코 녹음 음성 (2026-10-28~)**: 목록 `FAIRY_AUDIO_PRESETS`(환영 8·칭찬 10·응원 8·보상 6·시작/힌트 4, 옛 이름 `aliases`)는 `fairy-settings-catalog.js`에 있다. 새 코코 음성은 mp3를 `kids/assets/sounds/fairy/`에 넣고 목록에 한 줄 추가(칭찬·응원은 배열에 추가)하면 되고 엔진은 고치지 않는다. 목록이 아직 없으면 오류 없이 소리 없이 끝 콜백만 부른다. 시험 `tests/fairy-tts.test.mjs`가 목록의 파일이 모두 있는지 확인한다.
 - **캐릭터 목소리 고르기 (2026-10-28~)**: 엔진은 `fairy-settings-catalog.js`의 `VOICE_CATALOG`만 보고 `kids/assets/voices/{voiceDir}/{voiceDir}_{상황}_{01~}.wav`를 만든다. 목록을 싣지 않는 화면에서는 엔진이 같은 폴더의 목록 파일을 한 번 불러오고, 그 전에 울리는 음성은 요정 코코로 나간다. 다음 경우에는 요정 코코로 돌아간다: 기본 선택, 음성 파일(`files`)이 없는 준비중 목소리, 다른 아이 전용 목소리(`target` 불일치. 공용 설정에 다른 아이 선택이 남아 있는 경우 포함). 회귀 시험 `tests/fairy-voice-persona.test.mjs`.
@@ -824,7 +825,7 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
   | `SettingsManager.get(key)` | 단일 설정값 조회 (`voice_persona`, `sfx_enabled`, `theme_skin` 등) |
   | `SettingsManager.set(key, val)` | 단일 설정값 저장 (`MINMIN_APP_SETTINGS` 로컬스토리지 싱크) |
   | `SettingsManager.playPreview(id, btn)` | 해당 목소리 페르소나의 대표 음성 0.05초 즉각 미리듣기 |
-- **새 목소리 추가**: ① `scripts/generate_gemini_voices.py`(master-tower)의 `STYLES`에 목소리 이름·스타일 문구를, `VOICE_SCRIPTS`에 문장 11개(첫인사 1·정답 5·오답 4·완주 1)를 넣고 생성 → `kids/assets/voices/{voiceDir}/` ② `VOICE_CATALOG`에 `voiceDir`·`target`·`previewFile`·`files: { welcome: 1, correct: 5, wrong: 4, clear: 1 }` 항목 추가. 엔진 코드는 고치지 않는다. `files`가 없는 항목은 설정창에서 '준비중'으로 잠긴다.
+- **새 목소리 추가**: ① `scripts/generate_gemini_voices.py`(master-tower)의 `STYLES`에 목소리 이름·스타일 문구를, `VOICE_SCRIPTS`에 문장 13개(첫인사 1·정답 5·오답 4·완주 1·힌트 2)를 넣고 생성 → `kids/assets/voices/{voiceDir}/` ② `VOICE_CATALOG`에 `voiceDir`·`target`·`previewFile`·`files: { welcome: 1, correct: 5, wrong: 4, clear: 1, hint: 2 }` 항목 추가. 생성한 음성은 직접 들어 보고 확인한다(기계 검사는 받아쓰기로 대본과 같은지까지만). 엔진 코드는 고치지 않는다. `files`가 없는 항목은 설정창에서 '준비중'으로 잠긴다.
 
 ### 🌟 `scripts/generate_gemini_voices.py` (Gemini 3.8 Flash 커스텀 보이스 양산기)
 Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고품질 연극 디렉팅 프롬프트를 바탕으로 대사 리스트를 개별 `.wav` 오디오 파일로 일괄 양산하는 자동화 빌더입니다.

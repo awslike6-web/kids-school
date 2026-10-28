@@ -458,6 +458,8 @@
      */
     function toggleHint() {
         isHintOpen = !isHintOpen;
+        // 단서를 열 때만 힌트 음성 (fairy-engine.js)
+        if (isHintOpen && typeof window.fairyHint === 'function') window.fairyHint();
         const box = document.getElementById('readingHintBox');
         const btn = document.getElementById('readingHintToggleBtn');
         if (box) {
