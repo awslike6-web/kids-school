@@ -214,3 +214,33 @@ test('④ 말하기 속도: 한국어는 Edge 속도로, 영어는 재생 배속
     vm.runInContext(ttsSrc, withKey.sandbox);
     assert.equal(withKey.store.has('OPENAI_API_KEY'), false);
 });
+
+test('⑤ 코코 음성 목록(FAIRY_AUDIO_PRESETS)은 목록 파일에 있고, 적힌 mp3가 모두 실제로 있다', () => {
+    const { sandbox } = makeSandbox();
+    vm.runInContext(catalogSrc, sandbox);
+    const presets = sandbox.FAIRY_AUDIO_PRESETS;
+    assert.ok(!/(?:var|const|let)\s+FAIRY_(?:AUDIO_PRESETS|PRESET_AUDIOS)/.test(engineSrc), '엔진에 목록이 남아 있음');
+    const files = Object.entries(presets).filter(([k]) => k !== 'aliases').flatMap(([, v]) => v);
+    assert.ok(files.length >= 36, `코코 음성 ${files.length}개`);
+    for (const file of files) {
+        assert.ok(fs.existsSync(path.join(repoRoot, 'kids/assets/sounds/fairy', file)), `${file} 없음`);
+    }
+    for (const [oldName, target] of Object.entries(presets.aliases)) {
+        assert.equal(typeof presets[target], 'string', `옛 이름 ${oldName} → ${target} 없음`);
+    }
+});
+
+test('⑤ 엔진은 목록 파일의 코코 음성을 쓴다 (옛 이름·무작위 칭찬·보상)', () => {
+    const { sandbox, log } = makeSandbox();
+    vm.runInContext(ttsSrc, sandbox);
+    vm.runInContext(catalogSrc, sandbox);
+    vm.runInContext(engineSrc, sandbox);
+    const name = src => src.split('/').pop();
+    assert.equal(name(sandbox.resolveFairyPresetAudio('welcome_math_minsu')), 'fairy_welcome_minsu.mp3');
+    assert.equal(name(sandbox.resolveFairyPresetAudio('hint_open')), 'fairy_hint_open.mp3');
+    assert.equal(sandbox.resolveFairyPresetAudio('aliases'), null);
+    sandbox.fairyPraise();
+    sandbox.fairyReward('diamond');
+    assert.match(name(log.played[0].src), /^fairy_praise_\d+\.mp3$/);
+    assert.equal(name(log.played[1].src), 'fairy_reward_diamond.mp3');
+});

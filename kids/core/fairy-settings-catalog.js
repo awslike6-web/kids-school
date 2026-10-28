@@ -1,6 +1,6 @@
 // ==========================================
 // 🧩 민민이네 공부방 3대 통합 데이터 도감 (fairy-settings-catalog.js)
-// 새 목소리, BGM, 테마 스킨이 생기면 이 파일의 목록에 항목 하나만 추가하면 됩니다.
+// 새 목소리, BGM, 테마 스킨, 요정 코코 녹음 음성이 생기면 이 파일의 목록에 항목 하나만 추가하면 됩니다.
 // (fairy-engine.js가 이 목록을 직접 읽으므로 엔진 코드는 고치지 않습니다)
 // ==========================================
 
@@ -159,3 +159,54 @@ var THEME_CATALOG = [
         bodyClass: "theme-dark"
     }
 ];
+
+/**
+ * 4. 🧚 요정 코코 녹음 음성 목록 (기본·대체 목소리, assets/sounds/fairy/ 기준 파일 이름)
+ * - fairy-engine.js가 이 목록만 보고 고른다: 칭찬(praises)·응원(encourages)은 무작위, 나머지는 이름으로
+ * - 캐릭터 목소리가 없거나 그 상황 파일이 없으면 이 목록으로 돌아온다
+ * ➕ 새 코코 음성: mp3를 assets/sounds/fairy/에 넣고 아래에 한 줄 추가 (칭찬·응원은 배열에 추가). 엔진은 고치지 않는다
+ *    시험 tests/fairy-tts.test.mjs가 목록의 파일이 모두 있는지 확인한다
+ */
+var FAIRY_AUDIO_PRESETS = {
+    // 1. 환영 인사 & 과목 입장 (8종)
+    welcome_lobby: "fairy_welcome_lobby.mp3",
+    welcome_minsu: "fairy_welcome_minsu.mp3",
+    welcome_minseo: "fairy_welcome_minseo.mp3",
+    welcome_math: "fairy_welcome_math.mp3",
+    welcome_korean: "fairy_welcome_korean.mp3",
+    welcome_society: "fairy_welcome_society.mp3",
+    welcome_science: "fairy_welcome_science.mp3",
+    welcome_english: "fairy_welcome_english.mp3",
+
+    // 2. 정답 & 칭찬 풀 (10종)
+    praises: [
+        "fairy_praise_1.mp3", "fairy_praise_2.mp3", "fairy_praise_3.mp3", "fairy_praise_4.mp3", "fairy_praise_5.mp3",
+        "fairy_praise_6.mp3", "fairy_praise_7.mp3", "fairy_praise_8.mp3", "fairy_praise_9.mp3", "fairy_praise_10.mp3"
+    ],
+
+    // 3. 오답 & 응원/힌트 풀 (8종)
+    encourages: [
+        "fairy_encourage_1.mp3", "fairy_encourage_2.mp3", "fairy_encourage_3.mp3", "fairy_encourage_4.mp3",
+        "fairy_encourage_5.mp3", "fairy_encourage_6.mp3", "fairy_encourage_7.mp3", "fairy_encourage_8.mp3"
+    ],
+
+    // 4. 퀘스트 완료 & 레벨업 & 보상 (6종)
+    quest_complete: "fairy_quest_complete.mp3",
+    level_up: "fairy_level_up.mp3",
+    reward_diamond: "fairy_reward_diamond.mp3",
+    reward_star: "fairy_reward_star.mp3",
+    study_finish: "fairy_study_finish.mp3",
+    streak_bonus: "fairy_streak_bonus.mp3",
+
+    // 5. 시작 & 집중 (4종)
+    focus_start: "fairy_focus_start.mp3",
+    ready_go: "fairy_ready_go.mp3",
+    think_careful: "fairy_think_careful.mp3",
+    hint_open: "fairy_hint_open.mp3",
+
+    // 6. 예전 이름 → 위 이름 (화면 코드가 옛 이름으로 불러도 같은 파일)
+    aliases: {
+        welcome_math_minsu: "welcome_minsu",
+        welcome_math_minseo: "welcome_minseo"
+    }
+};

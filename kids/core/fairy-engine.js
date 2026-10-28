@@ -1,54 +1,6 @@
 // 📄 kids/core/fairy-engine.js (요정 코코 녹음 음성 · 캐릭터 목소리 · 칭찬/응원/보상 헬퍼 · 음성 토글)
 // - 실시간 음성 합성(speakFairyTTS·대기열·정지·말하기 속도)은 fairy-tts.js에 있고, 그 파일이 먼저 실려야 한다.
-// - 캐릭터 목소리 목록(VOICE_CATALOG)은 fairy-settings-catalog.js.
-
-// 🎧 Neural AI(선희) 요정 코코 MP3 프리셋 데이터베이스
-const FAIRY_AUDIO_PRESETS = {
-    // 1. 환영 인사 & 과목 입장 (8종)
-    welcome_lobby: "fairy_welcome_lobby.mp3",
-    welcome_minsu: "fairy_welcome_minsu.mp3",
-    welcome_minseo: "fairy_welcome_minseo.mp3",
-    welcome_math: "fairy_welcome_math.mp3",
-    welcome_korean: "fairy_welcome_korean.mp3",
-    welcome_society: "fairy_welcome_society.mp3",
-    welcome_science: "fairy_welcome_science.mp3",
-    welcome_english: "fairy_welcome_english.mp3",
-
-    // 2. 정답 & 칭찬 풀 (10종)
-    praises: [
-        "fairy_praise_1.mp3", "fairy_praise_2.mp3", "fairy_praise_3.mp3", "fairy_praise_4.mp3", "fairy_praise_5.mp3",
-        "fairy_praise_6.mp3", "fairy_praise_7.mp3", "fairy_praise_8.mp3", "fairy_praise_9.mp3", "fairy_praise_10.mp3"
-    ],
-
-    // 3. 오답 & 응원/힌트 풀 (8종)
-    encourages: [
-        "fairy_encourage_1.mp3", "fairy_encourage_2.mp3", "fairy_encourage_3.mp3", "fairy_encourage_4.mp3",
-        "fairy_encourage_5.mp3", "fairy_encourage_6.mp3", "fairy_encourage_7.mp3", "fairy_encourage_8.mp3"
-    ],
-
-    // 4. 퀘스트 완료 & 레벨업 & 보상 (6종)
-    quest_complete: "fairy_quest_complete.mp3",
-    level_up: "fairy_level_up.mp3",
-    reward_diamond: "fairy_reward_diamond.mp3",
-    reward_star: "fairy_reward_star.mp3",
-    study_finish: "fairy_study_finish.mp3",
-    streak_bonus: "fairy_streak_bonus.mp3",
-
-    // 5. 시작 & 집중 (4종)
-    focus_start: "fairy_focus_start.mp3",
-    ready_go: "fairy_ready_go.mp3",
-    think_careful: "fairy_think_careful.mp3",
-    hint_open: "fairy_hint_open.mp3"
-};
-
-// 레거시 호환용 매핑
-const FAIRY_PRESET_AUDIOS = {
-    "welcome_korean": "fairy_welcome_korean.mp3",
-    "welcome_math_minsu": "fairy_welcome_minsu.mp3",
-    "welcome_math_minseo": "fairy_welcome_minseo.mp3",
-    "welcome_lobby": "fairy_welcome_lobby.mp3",
-    "quest_complete": "fairy_quest_complete.mp3"
-};
+// - 코코 녹음 음성 목록(FAIRY_AUDIO_PRESETS)·캐릭터 목소리 목록(VOICE_CATALOG)은 fairy-settings-catalog.js.
 
 /**
  * 🔍 페이지 위치(루트/하위 과목 폴더)에 관계없이 요정 음성 에셋 기본 경로 반환
@@ -68,6 +20,29 @@ function getFairyAssetBaseUrl() {
 }
 
 /**
+ * 🧚 요정 코코 녹음 음성 (목록: fairy-settings-catalog.js의 FAIRY_AUDIO_PRESETS)
+ * 목록이 아직 없으면 null → 소리 없이 넘어간다 (모든 화면이 목록을 먼저 싣는다: tests/fairy-tts.test.mjs)
+ */
+function cocoPresetFile(key) {
+    if (typeof FAIRY_AUDIO_PRESETS === 'undefined') return null;
+    const name = (FAIRY_AUDIO_PRESETS.aliases && FAIRY_AUDIO_PRESETS.aliases[key]) || key;
+    const file = FAIRY_AUDIO_PRESETS[name];
+    return typeof file === 'string' ? getFairyAssetBaseUrl() + file : null;
+}
+
+function cocoRandomFile(listKey) {
+    const list = typeof FAIRY_AUDIO_PRESETS !== 'undefined' ? FAIRY_AUDIO_PRESETS[listKey] : null;
+    if (!Array.isArray(list) || list.length === 0) return null;
+    return getFairyAssetBaseUrl() + list[Math.floor(Math.random() * list.length)];
+}
+
+/** 녹음 음성 재생. 파일이 없으면 소리 없이 끝 콜백만 부른다 */
+function playFairyVoiceOrSkip(src, onEndCallback) {
+    if (src) playFairyPresetAudio(src, onEndCallback);
+    else if (onEndCallback) onEndCallback();
+}
+
+/**
  * 🎯 입력 텍스트/의도에 따른 고음질 선희 Neural 프리셋 및 캐릭터(깐죽이/깍쟁이) 음성 매칭 라우터
  */
 function resolveFairyPresetAudio(text) {
@@ -75,67 +50,58 @@ function resolveFairyPresetAudio(text) {
     const trimmed = String(text).trim();
     // 💡 문장이 길거나(35자 초과) 줄바꿈이 포함된 AI 생성 문단은 프리셋 가로채기 방지 (실시간 TTS 낭독)
     if (trimmed.length > 35 || trimmed.includes('\n')) return null;
-    const baseUrl = getFairyAssetBaseUrl();
 
-    // 1) 직접 프리셋 키 매핑
-    if (FAIRY_AUDIO_PRESETS[trimmed] && typeof FAIRY_AUDIO_PRESETS[trimmed] === 'string') {
-        return baseUrl + FAIRY_AUDIO_PRESETS[trimmed];
-    }
-    if (FAIRY_PRESET_AUDIOS[trimmed]) {
-        return baseUrl + FAIRY_PRESET_AUDIOS[trimmed];
-    }
+    // 1) 직접 프리셋 키 매핑 (옛 이름 포함)
+    const direct = cocoPresetFile(trimmed);
+    if (direct) return direct;
 
     // 2) 퀘스트 완료 / 보상 / 레벨업 키워드 매칭
     if (/퀘스트.*완료|미션.*완료|퀘스트를.*완료/i.test(trimmed)) {
-        return pickPersonaVoiceFile('clear') || baseUrl + FAIRY_AUDIO_PRESETS.quest_complete;
+        return pickPersonaVoiceFile('clear') || cocoPresetFile('quest_complete');
     }
-    if (/레벨업|레벨.*올랐/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.level_up;
-    if (/다이아|보석/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.reward_diamond;
-    if (/별조각|황금.*별/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.reward_star;
+    if (/레벨업|레벨.*올랐/i.test(trimmed)) return cocoPresetFile('level_up');
+    if (/다이아|보석/i.test(trimmed)) return cocoPresetFile('reward_diamond');
+    if (/별조각|황금.*별/i.test(trimmed)) return cocoPresetFile('reward_star');
     if (/공부.*끝|오늘.*학습.*완료|오늘.*공부.*완료/i.test(trimmed)) {
-        return pickPersonaVoiceFile('clear') || baseUrl + FAIRY_AUDIO_PRESETS.study_finish;
+        return pickPersonaVoiceFile('clear') || cocoPresetFile('study_finish');
     }
-    if (/연속.*학습|스트릭/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.streak_bonus;
+    if (/연속.*학습|스트릭/i.test(trimmed)) return cocoPresetFile('streak_bonus');
 
     // 3) 환영 인사 키워드 매칭
     if (/민민이네.*공부방|공부방에.*온.*걸|로비/i.test(trimmed)) {
-        return pickPersonaVoiceFile('welcome') || baseUrl + FAIRY_AUDIO_PRESETS.welcome_lobby;
+        return pickPersonaVoiceFile('welcome') || cocoPresetFile('welcome_lobby');
     }
     if (/민수야.*안녕|민수.*퀘스트/i.test(trimmed)) {
-        return pickPersonaVoiceFile('welcome') || baseUrl + FAIRY_AUDIO_PRESETS.welcome_minsu;
+        return pickPersonaVoiceFile('welcome') || cocoPresetFile('welcome_minsu');
     }
     if (/민서야.*반가워|민서.*별/i.test(trimmed)) {
-        return pickPersonaVoiceFile('welcome') || baseUrl + FAIRY_AUDIO_PRESETS.welcome_minseo;
+        return pickPersonaVoiceFile('welcome') || cocoPresetFile('welcome_minseo');
     }
-    if (/수학.*탐험|수학.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_math;
-    if (/국어.*배움|국어.*탐험/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_korean;
-    if (/사회.*탐험|사회.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_society;
-    if (/과학.*실험|과학.*탐험/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_science;
-    if (/영어.*모험|영어.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_english;
+    if (/수학.*탐험|수학.*배움/i.test(trimmed)) return cocoPresetFile('welcome_math');
+    if (/국어.*배움|국어.*탐험/i.test(trimmed)) return cocoPresetFile('welcome_korean');
+    if (/사회.*탐험|사회.*배움/i.test(trimmed)) return cocoPresetFile('welcome_society');
+    if (/과학.*실험|과학.*탐험/i.test(trimmed)) return cocoPresetFile('welcome_science');
+    if (/영어.*모험|영어.*배움/i.test(trimmed)) return cocoPresetFile('welcome_english');
 
     // 4) 오답 & 응원/힌트 키워드 우선 매칭 (예: "아쉽네요! 정답은 14"와 같이 오답 문구 내 정답 단어 포함 시 오답 우선 판별)
     if (/아쉽|아쉬|틀렸|오답|땡|다시.*생각|다시.*한번|힌트|힘내|포기하지|괜찮아|도전|아깝/i.test(trimmed)) {
         const personaWrong = pickPersonaVoiceFile('wrong');
         if (personaWrong) return personaWrong;
-        const encourages = FAIRY_AUDIO_PRESETS.encourages;
-        const chosen = encourages[Math.floor(Math.random() * encourages.length)];
-        return baseUrl + chosen;
+        return cocoRandomFile('encourages');
     }
 
     // 5) 정답 & 칭찬 키워드 매칭 (오답 멘트가 아닐 때만 순수 정답으로 처리)
     if (!/아쉽|아쉬|틀렸|오답|땡|다시/i.test(trimmed) && /정답|완벽|대단|천재|멋져|딩동댕|최고|잘했|맞혔|맞았|훌륭/i.test(trimmed)) {
         const personaCorrect = pickPersonaVoiceFile('correct');
         if (personaCorrect) return personaCorrect;
-        const praises = FAIRY_AUDIO_PRESETS.praises;
-        const chosen = praises[Math.floor(Math.random() * praises.length)];
-        return baseUrl + chosen;
+        return cocoRandomFile('praises');
     }
 
     // 6) 시작 & 집중 키워드 매칭
-    if (/집중|시작해|출발/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.focus_start;
-    if (/준비.*완료|신나는.*퀴즈/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.ready_go;
-    if (/차근차근.*읽어/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.think_careful;
-    if (/비밀.*힌트|힌트를.*열어/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.hint_open;
+    if (/집중|시작해|출발/i.test(trimmed)) return cocoPresetFile('focus_start');
+    if (/준비.*완료|신나는.*퀴즈/i.test(trimmed)) return cocoPresetFile('ready_go');
+    if (/차근차근.*읽어/i.test(trimmed)) return cocoPresetFile('think_careful');
+    if (/비밀.*힌트|힌트를.*열어/i.test(trimmed)) return cocoPresetFile('hint_open');
 
     return null;
 }
@@ -244,9 +210,7 @@ function fairyPraise(onEndCallback = null) {
         return;
     }
 
-    const praises = FAIRY_AUDIO_PRESETS.praises;
-    const chosen = praises[Math.floor(Math.random() * praises.length)];
-    playFairyPresetAudio(getFairyAssetBaseUrl() + chosen, onEndCallback);
+    playFairyVoiceOrSkip(cocoRandomFile('praises'), onEndCallback);
 }
 
 /**
@@ -263,9 +227,7 @@ function fairyEncourage(onEndCallback = null) {
         return;
     }
 
-    const encourages = FAIRY_AUDIO_PRESETS.encourages;
-    const chosen = encourages[Math.floor(Math.random() * encourages.length)];
-    playFairyPresetAudio(getFairyAssetBaseUrl() + chosen, onEndCallback);
+    playFairyVoiceOrSkip(cocoRandomFile('encourages'), onEndCallback);
 }
 
 /**
@@ -288,15 +250,14 @@ function fairyReward(type = 'quest', onEndCallback = null) {
     }
 
     const map = {
-        quest: FAIRY_AUDIO_PRESETS.quest_complete,
-        level: FAIRY_AUDIO_PRESETS.level_up,
-        diamond: FAIRY_AUDIO_PRESETS.reward_diamond,
-        star: FAIRY_AUDIO_PRESETS.reward_star,
-        finish: FAIRY_AUDIO_PRESETS.study_finish,
-        streak: FAIRY_AUDIO_PRESETS.streak_bonus
+        quest: 'quest_complete',
+        level: 'level_up',
+        diamond: 'reward_diamond',
+        star: 'reward_star',
+        finish: 'study_finish',
+        streak: 'streak_bonus'
     };
-    const file = map[type] || FAIRY_AUDIO_PRESETS.quest_complete;
-    playFairyPresetAudio(getFairyAssetBaseUrl() + file, onEndCallback);
+    playFairyVoiceOrSkip(cocoPresetFile(map[type] || 'quest_complete'), onEndCallback);
 }
 
 /**
@@ -316,17 +277,16 @@ function fairyGreet(target = 'lobby', onEndCallback = null) {
     }
 
     const map = {
-        lobby: FAIRY_AUDIO_PRESETS.welcome_lobby,
-        minsu: FAIRY_AUDIO_PRESETS.welcome_minsu,
-        minseo: FAIRY_AUDIO_PRESETS.welcome_minseo,
-        math: FAIRY_AUDIO_PRESETS.welcome_math,
-        korean: FAIRY_AUDIO_PRESETS.welcome_korean,
-        society: FAIRY_AUDIO_PRESETS.welcome_society,
-        science: FAIRY_AUDIO_PRESETS.welcome_science,
-        english: FAIRY_AUDIO_PRESETS.welcome_english
+        lobby: 'welcome_lobby',
+        minsu: 'welcome_minsu',
+        minseo: 'welcome_minseo',
+        math: 'welcome_math',
+        korean: 'welcome_korean',
+        society: 'welcome_society',
+        science: 'welcome_science',
+        english: 'welcome_english'
     };
-    const file = map[target] || FAIRY_AUDIO_PRESETS.welcome_lobby;
-    playFairyPresetAudio(getFairyAssetBaseUrl() + file, onEndCallback);
+    playFairyVoiceOrSkip(cocoPresetFile(map[target] || 'welcome_lobby'), onEndCallback);
 }
 
 function toggleFairyTtsSetting() {
@@ -391,7 +351,6 @@ window.fairyGreet = fairyGreet;
 window.resolveFairyPresetAudio = resolveFairyPresetAudio;
 window.pickPersonaVoiceFile = pickPersonaVoiceFile;
 window.getFairyAssetBaseUrl = getFairyAssetBaseUrl;
-window.FAIRY_AUDIO_PRESETS = FAIRY_AUDIO_PRESETS;
 window.toggleFairyTtsSetting = toggleFairyTtsSetting;
 window.updateTtsToggleUi = updateTtsToggleUi;
 

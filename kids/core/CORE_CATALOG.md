@@ -11,14 +11,14 @@
 - **파일 위치**:
   - `kids/core/fairy-config.js` (오디오 프리셋 맵 및 설정)
   - `kids/core/fairy-tts.js` (약 730줄, 음성 합성: Worker 실시간 음성 문장 대기열·브라우저 음성 대체·`stopFairyTTS`·녹음 음성 재생·말하기 속도·아이별 설정 읽기)
-  - `kids/core/fairy-engine.js` (약 420줄, 요정 코코 녹음 음성 목록·키워드 라우터·캐릭터 목소리 고르기·`fairyPraise/Encourage/Reward/Greet`·음성 ON/OFF)
-  - `kids/core/fairy-settings-catalog.js` (캐릭터 목소리 목록. 모든 화면이 함께 싣는다)
+  - `kids/core/fairy-engine.js` (약 370줄, 키워드 라우터·캐릭터 목소리 고르기·`fairyPraise/Encourage/Reward/Greet`·음성 ON/OFF)
+  - `kids/core/fairy-settings-catalog.js` (캐릭터 목소리 목록 `VOICE_CATALOG`과 요정 코코 녹음 음성 목록 `FAIRY_AUDIO_PRESETS`. 모든 화면이 엔진보다 먼저 싣는다)
 - **HTML 로드 방법** (순서 지킴: `fairy-tts.js`가 엔진보다 먼저. 새 파일 이름에 `fairy-engine.js` 글자를 넣지 않는다 — `loadCoreScripts`·자산 경로 찾기가 그 글자로 엔진을 찾음):
   ```html
   <script src="../core/fairy-config.js"></script>
   <script src="../core/fairy-tts.js?v=20261028-tts"></script>
   <script src="../core/fairy-settings-catalog.js"></script>
-  <script src="../core/fairy-engine.js?v=20261028-tts"></script>
+  <script src="../core/fairy-engine.js?v=20261028-coco"></script>
   ```
   동적 로더 `core.js`(`requiredCores`)·`lobby_controller.js`(`lobbyCores`)도 같은 순서. 시험 `tests/fairy-tts.test.mjs`가 엔진·설정창을 싣는 모든 화면을 검사한다.
 - **핵심 API**:
@@ -35,6 +35,7 @@
   | `fairyGreet(target, onEndCallback)` | 입장 인사 | `lobby`·`minsu`·`minseo`는 캐릭터 `welcome` 파일, 과목 인사는 요정 코코 |
   | `pickPersonaVoiceFile(kind)` | 캐릭터 파일 고르기 | `welcome`·`correct`·`wrong`·`clear` 중 하나. 쓸 수 있는 캐릭터 목소리가 없으면 `null` |
 - **실시간 음성 대기열 (2026-10-28~)**: `playTtsSentenceQueue`가 문장을 나눠 지금 문장 + 다음 2문장만 미리 받는다. 첫 문장부터 실패하면 브라우저 음성으로 넘어가고, 중간 문장이 실패하면 건너뛰고 끝 콜백을 한 번 부른다. 재생이 끝난 음성은 `URL.revokeObjectURL`로 해제(60자 이하 문장은 40개까지 캐시). 수식은 말로 읽는다(`3+4=7` → "3 더하기 4는 7", `-`는 등호가 있는 식 안에서만 "빼기"). 브라우저에서 OpenAI를 직접 부르거나 키를 저장하지 않는다(예전 키는 기기에서 지움, 헌법 §5).
+- **요정 코코 녹음 음성 (2026-10-28~)**: 목록 `FAIRY_AUDIO_PRESETS`(환영 8·칭찬 10·응원 8·보상 6·시작/힌트 4, 옛 이름 `aliases`)는 `fairy-settings-catalog.js`에 있다. 새 코코 음성은 mp3를 `kids/assets/sounds/fairy/`에 넣고 목록에 한 줄 추가(칭찬·응원은 배열에 추가)하면 되고 엔진은 고치지 않는다. 목록이 아직 없으면 오류 없이 소리 없이 끝 콜백만 부른다. 시험 `tests/fairy-tts.test.mjs`가 목록의 파일이 모두 있는지 확인한다.
 - **캐릭터 목소리 고르기 (2026-10-28~)**: 엔진은 `fairy-settings-catalog.js`의 `VOICE_CATALOG`만 보고 `kids/assets/voices/{voiceDir}/{voiceDir}_{상황}_{01~}.wav`를 만든다. 목록을 싣지 않는 화면에서는 엔진이 같은 폴더의 목록 파일을 한 번 불러오고, 그 전에 울리는 음성은 요정 코코로 나간다. 다음 경우에는 요정 코코로 돌아간다: 기본 선택, 음성 파일(`files`)이 없는 준비중 목소리, 다른 아이 전용 목소리(`target` 불일치. 공용 설정에 다른 아이 선택이 남아 있는 경우 포함). 회귀 시험 `tests/fairy-voice-persona.test.mjs`.
 
 ---

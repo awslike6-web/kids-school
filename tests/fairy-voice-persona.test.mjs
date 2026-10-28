@@ -79,11 +79,16 @@ test('민서에게 민수 전용 깐죽이가 설정돼 있어도 기본 요정 
     assert.match(s.play('fairyEncourage')[0], /^fairy\/fairy_encourage_\d+\.mp3$/);
 });
 
-test('음성 파일이 없는 준비중 목소리와 목록 미로딩은 기본 요정 목소리', () => {
+test('음성 파일이 없는 준비중 목소리는 기본 요정 목소리, 목록 미로딩이면 오류 없이 조용히 넘어감', () => {
     const ready = setup({ user: 'daughter', persona: 'clingy_minseo' });
     assert.match(ready.play('fairyPraise')[0], /^fairy\/fairy_praise_\d+\.mp3$/);
+    // 코코 음성 목록도 목록 파일에 있으므로, 목록이 없으면 소리 없이 끝 콜백만 (모든 화면이 목록을 먼저 싣는다)
     const noCatalog = setup({ user: 'son', persona: 'tease_minsu', withCatalog: false });
-    assert.match(noCatalog.play('fairyPraise')[0], /^fairy\/fairy_praise_\d+\.mp3$/);
+    let ended = 0;
+    assert.deepEqual(noCatalog.play('fairyPraise', () => ended++), []);
+    assert.deepEqual(noCatalog.play('fairyReward', 'level', () => ended++), []);
+    assert.deepEqual(noCatalog.play('fairyGreet', 'math', () => ended++), []);
+    assert.equal(ended, 3);
     // 목록이 없는 화면에서는 엔진 옆의 목록 파일을 한 번 불러온다
     assert.deepEqual(noCatalog.appended, ['https://school.test/kids/core/fairy-settings-catalog.js']);
 });
