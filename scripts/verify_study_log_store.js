@@ -49,13 +49,20 @@ function makeElement() {
 // 모의 노션: STUDY_LOG_DB 페이지 저장소 + 호출 기록
 function makeMockNotion() {
   const db = {};
-  const calls = { query: 0, post: 0, patch: 0, bodies: [] };
+  const calls = { query: 0, post: 0, patch: 0, bodies: [], reads: [] };
   let seq = 0;
   const fetch = async (url, options = {}) => {
     const method = options.method || 'GET';
     const body = options.body ? JSON.parse(options.body) : {};
-    calls.bodies.push({ url, method, body, keepalive: !!options.keepalive });
     const json = data => ({ ok: true, status: 200, json: async () => data });
+    // 새 ID 재조회는 읽기 기록으로 분리해 기존 쓰기 keepalive 검사를 보존합니다.
+    if (url.includes('/v1/pages/') && method === 'GET') {
+      calls.reads.push({ url, method });
+      const id = new URL(url).pathname.split('/v1/pages/')[1];
+      return db[id] ? json(JSON.parse(JSON.stringify(db[id])))
+        : { ok: false, status: 404, json: async () => ({}) };
+    }
+    calls.bodies.push({ url, method, body, keepalive: !!options.keepalive });
     if (url.includes('/query') && method === 'POST') {
       calls.query++;
       const key = body.filter?.title?.equals;

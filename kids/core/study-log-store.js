@@ -14,6 +14,12 @@
   const MAX_QUERY_PAGES = 10;
   const ERROR_REPORT_LIMIT = 1900;
   const NO_ERRORS = '오답 없음';
+  const PAGE_IDS_KEY = 'MINMIN_STUDY_LOG_PAGES_V1';
+  const QUERY_RETRY_MS = 400;
+  const pendingByKey = new Map();
+  // Worker v4.6은 이 쿼리를 제거한 뒤 노션으로 전달하고 캐시를 우회합니다.
+  const FRESH_QUERY = 'force=true';
+  const freshUrl = path => `${path}?${FRESH_QUERY}`;
 
   // ---------- KST 날짜 (toISOString 슬라이싱 금지 계약) ----------
   const pad = n => String(n).padStart(2, '0');
@@ -55,24 +61,65 @@
   function mergeErrorReports(prev, next) {
     if (!next || next === NO_ERRORS) return prev || NO_ERRORS;
     if (!prev || prev === NO_ERRORS) return next;
-    return prev.includes(next) ? prev : `${prev} | ${next}`;
+    // ' | '는 이 모듈이 쓰는 항목 구분자 계약이며 자연어 내용을 해석하지 않습니다.
+    return prev.split(' | ').includes(next) ? prev : `${prev} | ${next}`;
   }
 
+  function loadPageIds() {
+    const date = getKstDateString();
+    try {
+      const data = JSON.parse(window.localStorage.getItem(PAGE_IDS_KEY) || 'null');
+      if (data?.date === date && data.pages && typeof data.pages === 'object') return data;
+      window.localStorage.removeItem(PAGE_IDS_KEY);
+    } catch (e) {}
+    return { date, pages: {} };
+  }
+  function rememberPage(key, id) {
+    try {
+      const data = loadPageIds();
+      if (id) data.pages[key] = id;
+      else delete data.pages[key];
+      window.localStorage.setItem(PAGE_IDS_KEY, JSON.stringify(data));
+    } catch (e) {} // 저장 공간 부족·사생활 모드가 쓰기 성공을 뒤집지 않게 합니다.
+  }
+  async function readRememberedPage(key) {
+    const id = loadPageIds().pages[key];
+    if (!id) return null;
+    try {
+      const { proxyUrl } = notionConfig();
+      const res = await window.fetch(freshUrl(`${proxyUrl}/v1/pages/${id}`));
+      if (res.status === 404) { rememberPage(key, null); return null; }
+      if (!res.ok) return null;
+      const page = await res.json();
+      if (page.archived || page.in_trash) { rememberPage(key, null); return null; }
+      return page;
+    } catch (e) { return null; }
+  }
   async function findPageByKey(key) {
     const { proxyUrl, dbId } = notionConfig();
-    try {
-      const res = await window.fetch(`${proxyUrl}/v1/databases/${dbId}/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filter: { property: 'ID', title: { equals: key } }, page_size: 1 })
-      });
-      if (!res.ok) throw new Error(`조회 상태 ${res.status}`);
-      const data = await res.json();
-      return (data.results && data.results[0]) || null;
-    } catch (e) {
-      console.warn('⚠️ [학습일지 Upsert] 당일 기록 조회 실패 → 신규 생성으로 진행:', e);
-      return null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await window.fetch(freshUrl(`${proxyUrl}/v1/databases/${dbId}/query`), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filter: { property: 'ID', title: { equals: key } }, page_size: 1 })
+        });
+        if (!res.ok) throw new Error(`조회 상태 ${res.status}`);
+        const data = await res.json(), page = (data.results && data.results[0]) || null;
+        if (page) rememberPage(key, page.id);
+        return { page, failed: false };
+      } catch (e) {
+        if (attempt === 0) await new Promise(resolve => setTimeout(resolve, QUERY_RETRY_MS));
+      }
     }
+    return { page: null, failed: true };
+  }
+  async function serialize(key, fn) {
+    if (window.navigator?.locks?.request) return window.navigator.locks.request('minmin-study-log:' + key, fn);
+    const pending = (pendingByKey.get(key) || Promise.resolve()).catch(() => {}).then(fn);
+    pendingByKey.set(key, pending);
+    try { return await pending; }
+    finally { if (pendingByKey.get(key) === pending) pendingByKey.delete(key); }
   }
 
   /**
@@ -80,15 +127,22 @@
    * @returns {Promise<{mode:'patch'|'post', pageId:string|null, key:string}>}
    */
   async function upsertStudyLog(entry) {
+    const key = buildLogKey(entry.childName, entry.subject);
+    return serialize(key, () => writeStudyLog(entry, key));
+  }
+  async function writeStudyLog(entry, key) {
     const childName = entry.childName;
     const subject = entry.subject;
     const durationMinutes = Number(entry.durationMinutes) || 0;
     const wordFairyCount = Number(entry.wordFairyCount) || 0;
     const errorReport = entry.errorReport || NO_ERRORS;
-    const key = buildLogKey(childName, subject);
     const { proxyUrl, dbId } = notionConfig();
 
-    const page = await findPageByKey(key);
+    let page = await readRememberedPage(key);
+    if (!page) {
+      const found = await findPageByKey(key); page = found.page;
+      if (found.failed) console.warn('⚠️ [학습일지 Upsert] 조회 실패로 신규 생성(중복 가능)');
+    }
     let res;
     let mode;
     if (page) {
@@ -131,6 +185,9 @@
     }
 
     if (!res.ok) throw new Error(`노션 ${mode === 'patch' ? 'PATCH' : 'POST'} 통신 오류 (상태: ${res.status})`);
+    if (mode === 'post') {
+      try { rememberPage(key, (await res.json()).id); } catch (e) {}
+    }
     console.log(mode === 'patch'
       ? `📦 [학습일지 Upsert] 당일 기록(${page.id})에 누적했습니다. (키: ${key})`
       : `🎉 [학습일지 Upsert] 오늘 첫 기록을 만들었습니다. (키: ${key})`);

@@ -30,39 +30,81 @@ function referenceStreak(days, today) {
   return { count, studiedToday, lastDate };
 }
 
-function fixture(rng, today = '2026-10-28') {
-  const pages = [], clock = { now: Date.parse(`${today}T12:00:00+09:00`) };
-  let failure = null, serial = 0;
+const PAGE_IDS = 'MINMIN_STUDY_LOG_PAGES_V1';
+function storage() {
+  const rows = new Map();
+  return { getItem: key => rows.get(key) ?? null, setItem: (key, value) => rows.set(key, String(value)), removeItem: key => rows.delete(key) };
+}
+function locks() {
+  const queues = new Map();
+  return { request(name, fn) {
+    const next = (queues.get(name) || Promise.resolve()).catch(() => {}).then(fn);
+    queues.set(name, next); return next;
+  } };
+}
+function fixture(rng, today = '2026-10-28', { cache = false } = {}) {
+  const pages = [], calls = [], warnings = [], timers = [], clock = { now: Date.parse(`${today}T12:00:00+09:00`) };
+  const isolates = Array.from({ length: 2 + integer(rng, 1) }, () => new Map());
+  const failures = { query: [], get: [], write: [] }; let serial = 0;
+  const response = (body, status = 200) => ({ ok: status < 400, status, json: async () => plain(body) });
   const wait = async () => { for (let n = integer(rng, 4); n > 0; n--) await Promise.resolve(); };
-  const fetch = async (url, options = {}) => {
-    const body = JSON.parse(options.body || '{}');
-    if (url.endsWith('/query')) {
-      const fail = failure; failure = null;
-      // 서버가 조회를 처리한 시점의 복사본입니다. 응답 지연 동안 쓰기가 끼어들 수 있습니다.
-      const key = body.filter.title.equals;
-      const results = pages.filter(p => p.properties.ID.title[0].text.content === key).map(plain);
+  const fetch = async (address, options = {}) => {
+    const url = new URL(address), method = options.method || 'GET', body = JSON.parse(options.body || '{}');
+    const isolateIndex = integer(rng, isolates.length - 1), isolate = isolates[isolateIndex];
+    const query = url.pathname.endsWith('/query'), get = method === 'GET';
+    const kind = query ? 'query' : get ? 'get' : 'write';
+    const call = { url: address, method, body, isolate: isolateIndex, kind }; calls.push(call);
+    const failure = failures[kind].shift();
+    if (failure) {
       await wait();
-      if (fail === 'throw') throw new Error('모의 조회 예외');
-      return { ok: !fail, status: fail ? 500 : 200, json: async () => ({ results }) };
+      if (failure === 'throw') throw new Error('모의 통신 예외');
+      return response({}, Number(failure));
     }
-    await wait();
-    if (options.method === 'PATCH') {
-      const page = pages.find(p => p.id === url.substring(url.lastIndexOf('/') + 1));
+    if (query || get) {
+      const key = `${method}:${url.pathname}:${options.body || ''}`, cached = isolate.get(key);
+      if (cache && url.searchParams.get('force') !== 'true' && cached?.expires > clock.now) {
+        call.cache = 'HIT'; await wait(); return response(cached.body, cached.status);
+      }
+      call.cache = 'MISS';
+      let result, status = 200;
+      if (query) {
+        const key = body.filter.title.equals;
+        result = { results: pages.filter(p => !p.archived && !p.in_trash && p.properties.ID.title[0].text.content === key).map(plain) };
+      } else {
+        const page = pages.find(p => p.id === url.pathname.substring(url.pathname.lastIndexOf('/') + 1));
+        result = page ? plain(page) : {}; if (!page) status = 404;
+      }
+      await wait();
+      if (cache) isolate.set(key, { body: plain(result), status, expires: clock.now + 300000 });
+      return response(result, status);
+    }
+    await wait(); isolate.clear();
+    if (method === 'PATCH') {
+      const page = pages.find(p => p.id === url.pathname.substring(url.pathname.lastIndexOf('/') + 1));
       assert.ok(page, '모의 페이지가 없습니다'); Object.assign(page.properties, plain(body.properties));
-      return { ok: true, status: 200, json: async () => plain(page) };
+      return response(page);
     }
-    assert.equal(options.method, 'POST'); assert.ok(url.endsWith('/v1/pages'));
+    assert.equal(method, 'POST'); assert.equal(url.pathname, '/v1/pages');
     const page = { id: `page_${++serial}`, properties: plain(body.properties) }; pages.push(page);
-    return { ok: true, status: 200, json: async () => plain(page) };
+    return response(page);
   };
-  const { sandbox, calls } = loadBrowserScripts([SOURCE], { fetch });
-  // Date.now 모의만으로 new Date()는 바뀌지 않으므로 이 샌드박스에만 생성자 시계를 둡니다.
-  sandbox.Date = class extends Date {
-    constructor(...args) { super(...(args.length ? args : [clock.now])); }
-    static now() { return clock.now; }
-  };
-  return { api: sandbox.StudyLogStore, sandbox, pages, clock, calls,
-    failQuery: mode => { failure = mode; } };
+  function client({ store = storage(), lockManager } = {}) {
+    const { sandbox } = loadBrowserScripts([SOURCE], { fetch, storage: store });
+    sandbox.navigator = lockManager ? { locks: lockManager } : {};
+    sandbox.console.warn = (...args) => warnings.push(args.map(String).join(' '));
+    // 실제 대기는 가상 시계로 진행하고, 승인된 300~600ms 재시도 간격도 검사합니다.
+    sandbox.setTimeout = (fn, ms) => { timers.push(ms); clock.now += ms; return Promise.resolve().then(fn); };
+    sandbox.Date = class extends Date {
+      constructor(...args) { super(...(args.length ? args : [clock.now])); }
+      static now() { return clock.now; }
+    };
+    return { api: sandbox.StudyLogStore, sandbox, store };
+  }
+  const primary = client();
+  return { ...primary, pages, clock, calls, warnings, timers, client, isolates,
+    fail: (kind, mode, count = 1) => failures[kind].push(...Array(count).fill(mode)),
+    // 다른 읽기 요청들이 각 isolate에 남긴 유효한 이전 GET 응답을 재현합니다.
+    prime: page => isolates.forEach(isolate => isolate.set(`GET:/v1/pages/${page.id}:`, { body: plain(page), status: 200, expires: clock.now + 300000 })) };
 }
 
 function property(name, run, options = {}) {
@@ -141,7 +183,7 @@ property('S3 순차 upsert 무작위 순서 시험: 페이지 1건과 입력 합
 });
 
 property('S4 오답 보존 무작위 순서 시험: 부분 문자열도 독립 항목', async (rng, history) => {
-  const { api, pages } = fixture(rng), base = entry(rng), reports = ['사과', '사', '오답 없음'];
+  const { api, pages } = fixture(rng), base = entry(rng), reports = ['사과', '사', '사과', '사', '오답 없음'];
   reports.push(...Array.from({ length: 1 + integer(rng, 3) }, (_, i) => `계산 실수 ${i}`));
   const expected = new Set();
   for (const errorReport of reports) {
@@ -150,20 +192,94 @@ property('S4 오답 보존 무작위 순서 시험: 부분 문자열도 독립 �
     const actual = pages[0].properties['오답리포트'].rich_text[0].text.content;
     equal('S4', actual.split(' | ').sort(), [...expected].sort(), '오답 항목 보존');
   }
-}, { todo: '반례: 사과 다음 사를 보내면 사가 누락됨 · 시드 20261028 · 수정은 별도 승인' });
+});
 
-property('S5 동시 upsert 무작위 순서 시험: 같은 키 2~3개와 합계', async (rng, history) => {
-  const { api, pages } = fixture(rng), base = entry(rng), inputs = [];
-  if (rng() < 0.5) { inputs.push(base); history.push({ initial: base }); await api.upsertStudyLog(base); }
-  const batch = Array.from({ length: 2 + integer(rng, 1) }, () => ({ ...entry(rng), subject: base.subject }));
-  inputs.push(...batch); history.push({ concurrent: batch });
-  await Promise.all(batch.map(value => api.upsertStudyLog(value))); checkSum('S5', pages, inputs);
-}, { todo: '반례: 동시 신규 생성은 2건, 기존 페이지 동시 PATCH는 합계 유실 · 시드 20261028 · 수정은 별도 승인' });
+property('S5 동시 upsert 무작위 순서 시험: 한 탭 Map·한 탭 locks·공유 locks 두 탭', async (rng, history) => {
+  for (const mode of [choose(rng, ['map', 'locks', 'tabs'])]) {
+    const f = fixture(rng, '2026-10-28', { cache: true }), manager = mode === 'map' ? undefined : locks();
+    const a = f;
+    if (manager) a.sandbox.navigator = { locks: manager };
+    const b = mode === 'tabs' ? f.client({ store: f.store, lockManager: manager }) : a;
+    const base = entry(rng), inputs = [];
+    if (rng() < 0.5) { inputs.push(base); await a.api.upsertStudyLog(base); }
+    const batch = Array.from({ length: 2 + integer(rng, 2) }, () => ({ ...entry(rng), subject: base.subject }));
+    inputs.push(...batch); history.push({ mode, concurrent: batch });
+    await Promise.all(batch.map((value, i) => (i % 2 ? b : a).api.upsertStudyLog(value)));
+    checkSum('S5', f.pages, inputs);
+    // 실패한 선행 쓰기가 다음 같은 키의 작업을 막거나 성공으로 바뀌지 않습니다.
+    f.fail('write', '500');
+    const [failed, succeeded] = await Promise.allSettled([a.api.upsertStudyLog(base), a.api.upsertStudyLog(base)]);
+    equal('S5', failed.status, 'rejected', '앞 작업의 예외 전달');
+    equal('S5', succeeded.status, 'fulfilled', '뒤 작업 계속 실행');
+    inputs.push(base); checkSum('S5', f.pages, inputs);
+  }
+});
 
-property('S6 조회 실패 무작위 순서 시험: 500·예외 이후 같은 키 1건 이하', async (rng, history) => {
-  const { api, pages, failQuery } = fixture(rng), value = entry(rng);
-  history.push({ create: value }); await api.upsertStudyLog(value);
-  const failure = choose(rng, ['500', 'throw']); failQuery(failure);
-  history.push({ failure, retry: value }); await api.upsertStudyLog(value);
-  equal('S6', pages.length <= 1, true, '조회 실패 뒤 중복 생성 금지');
-}, { todo: '반례: 기존 페이지 조회 500·예외 뒤 같은 키 2건 생성 · 시드 20261028 · 수정은 별도 승인' });
+property('S6 조회 실패 무작위 순서 시험: 기억 ID·1회 재시도·선택 A 기록 보존', async (rng, history) => {
+  for (const mode of [choose(rng, ['500', 'throw'])]) {
+    for (const scenario of ['a', 'b', 'c']) {
+      const f = fixture(rng), value = entry(rng); await f.api.upsertStudyLog(value);
+      if (scenario !== 'a') f.store.removeItem(PAGE_IDS);
+      f.calls.length = 0; f.fail('query', mode, scenario === 'b' ? 1 : 4);
+      history.push({ scenario, failure: mode, retry: value }); await f.api.upsertStudyLog(value);
+      const queries = f.calls.filter(c => c.kind === 'query').length;
+      if (scenario === 'a') { equal('S6(a)', queries, 0, '기억 ID로 조회 장애 우회'); checkSum('S6(a)', f.pages, [value, value]); }
+      if (scenario === 'b') { equal('S6(b)', queries, 2, '한 번 실패 후 재조회'); checkSum('S6(b)', f.pages, [value, value]); }
+      if (scenario === 'c') {
+        equal('S6(c)', queries, 2, '재시도까지 실패'); equal('S6(c)', f.pages.length, 2, '선택 A 신규 생성');
+        equal('S6(c)', f.pages.reduce((s, p) => s + p.properties['단어요정'].number, 0), value.wordFairyCount * 2, '입력 기록 보존');
+        equal('S6(c)', f.pages.reduce((s, p) => s + p.properties['소요시간'].number, 0), value.durationMinutes * 2, '소요시간 보존');
+        equal('S6(c)', f.warnings.length, 1, '경고 한 번');
+        equal('S6(c)', f.warnings[0].includes('조회 실패로 신규 생성(중복 가능)'), true, '중복 가능성 표시');
+      }
+      if (scenario !== 'a') equal('S6', f.timers.length === 1 && f.timers[0] >= 300 && f.timers[0] <= 600, true, '재시도 대기 300~600ms');
+    }
+  }
+});
+
+property('S5-기기 두 기기 동시 upsert 무작위 순서 시험: 알려진 한계', async (rng, history) => {
+  const f = fixture(rng), a = f, b = f.client(), value = entry(rng);
+  history.push({ devices: 2, concurrent: [value, value] });
+  await Promise.all([a.api.upsertStudyLog(value), b.api.upsertStudyLog(value)]);
+  checkSum('S5-기기', f.pages, [value, value]);
+}, { todo: '두 기기 동시 저장은 노션 고유 키 제약이 없어 막지 못함(알려진 한계)' });
+
+property('S7 캐시 무작위 순서 시험: isolate 2~3개·0~5분 순차 쓰기·최신 값 읽기', async (rng, history) => {
+  const f = fixture(rng, '2026-10-28', { cache: true }), value = entry(rng), inputs = [];
+  const count = 2 + integer(rng, 4);
+  for (let i = 0; i < count; i++) {
+    const next = { ...entry(rng), subject: value.subject }; inputs.push(next);
+    f.clock.now += integer(rng, 300000); history.push({ at: f.clock.now, input: next });
+    const result = await f.api.upsertStudyLog(next); checkSum('S7', f.pages, inputs);
+    equal('S7', result.pageId, i === 0 ? null : f.pages[0].id, '기존 반환값 보존');
+    const saved = JSON.parse(f.store.getItem(PAGE_IDS));
+    equal('S7', saved.pages[result.key], f.pages[0].id, '당일 ID 기억');
+    if (i === 0) f.prime(f.pages[0]);
+  }
+  // 저장소가 없는 다른 기기의 순차 갱신 뒤에도 이전 ID의 최신 값을 다시 읽어야 합니다.
+  const other = f.client(), remote = { ...value, durationMinutes: 1, wordFairyCount: 1 };
+  inputs.push(remote); await other.api.upsertStudyLog(remote);
+  inputs.push(remote); await f.api.upsertStudyLog(remote); checkSum('S7', f.pages, inputs);
+  for (const call of f.calls.filter(c => c.kind === 'query' || c.kind === 'get'))
+    equal('S7', new URL(call.url).searchParams.get('force'), 'true', '쓰기 직전 조회·GET 캐시 우회');
+});
+
+property('S7 ID 수명주기 무작위 순서 시험: 날짜 이동·삭제·보관·GET 장애·저장 불가', async (rng, history) => {
+  for (const mode of [choose(rng, ['404', 'archived', 'in_trash', '500', 'throw'])]) {
+    const f = fixture(rng), value = entry(rng); await f.api.upsertStudyLog(value);
+    if (mode === 'archived' || mode === 'in_trash') f.pages[0][mode] = true;
+    else if (mode === '404') f.pages.length = 0;
+    else f.fail('get', mode);
+    history.push({ mode, retry: value }); await f.api.upsertStudyLog(value);
+    const active = f.pages.filter(p => !p.archived && !p.in_trash);
+    checkSum('S7', active, mode === '500' || mode === 'throw' ? [value, value] : [value]);
+    f.clock.now += 86400000; await f.api.upsertStudyLog(value);
+    const saved = JSON.parse(f.store.getItem(PAGE_IDS));
+    equal('S7', saved.date, '2026-10-29', '날짜별 ID 교체');
+    equal('S7', Object.keys(saved.pages).length, 1, '지난 날짜 ID 폐기');
+  }
+  const f = fixture(rng), value = entry(rng);
+  f.sandbox.localStorage.setItem = () => { throw new Error('모의 저장 공간 부족'); };
+  await f.api.upsertStudyLog(value); await f.api.upsertStudyLog(value);
+  checkSum('S7', f.pages, [value, value]);
+});
