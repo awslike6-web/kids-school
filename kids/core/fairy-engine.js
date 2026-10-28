@@ -87,8 +87,6 @@ function resolveFairyPresetAudio(text) {
     // 💡 문장이 길거나(35자 초과) 줄바꿈이 포함된 AI 생성 문단은 프리셋 가로채기 방지 (실시간 TTS 낭독)
     if (trimmed.length > 35 || trimmed.includes('\n')) return null;
     const baseUrl = getFairyAssetBaseUrl();
-    const persona = getSafeVoicePersona();
-    const voiceBase = getFairyVoiceAssetBaseUrl();
 
     // 1) 직접 프리셋 키 매핑
     if (FAIRY_AUDIO_PRESETS[trimmed] && typeof FAIRY_AUDIO_PRESETS[trimmed] === 'string') {
@@ -100,33 +98,25 @@ function resolveFairyPresetAudio(text) {
 
     // 2) 퀘스트 완료 / 보상 / 레벨업 키워드 매칭
     if (/퀘스트.*완료|미션.*완료|퀘스트를.*완료/i.test(trimmed)) {
-        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_clear_01.wav';
-        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_clear_01.wav';
-        return baseUrl + FAIRY_AUDIO_PRESETS.quest_complete;
+        return pickPersonaVoiceFile('clear') || baseUrl + FAIRY_AUDIO_PRESETS.quest_complete;
     }
     if (/레벨업|레벨.*올랐/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.level_up;
     if (/다이아|보석/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.reward_diamond;
     if (/별조각|황금.*별/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.reward_star;
     if (/공부.*끝|오늘.*학습.*완료|오늘.*공부.*완료/i.test(trimmed)) {
-        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_clear_01.wav';
-        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_clear_01.wav';
-        return baseUrl + FAIRY_AUDIO_PRESETS.study_finish;
+        return pickPersonaVoiceFile('clear') || baseUrl + FAIRY_AUDIO_PRESETS.study_finish;
     }
     if (/연속.*학습|스트릭/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.streak_bonus;
 
     // 3) 환영 인사 키워드 매칭
     if (/민민이네.*공부방|공부방에.*온.*걸|로비/i.test(trimmed)) {
-        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_welcome_01.wav';
-        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_welcome_01.wav';
-        return baseUrl + FAIRY_AUDIO_PRESETS.welcome_lobby;
+        return pickPersonaVoiceFile('welcome') || baseUrl + FAIRY_AUDIO_PRESETS.welcome_lobby;
     }
     if (/민수야.*안녕|민수.*퀘스트/i.test(trimmed)) {
-        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_welcome_01.wav';
-        return baseUrl + FAIRY_AUDIO_PRESETS.welcome_minsu;
+        return pickPersonaVoiceFile('welcome') || baseUrl + FAIRY_AUDIO_PRESETS.welcome_minsu;
     }
     if (/민서야.*반가워|민서.*별/i.test(trimmed)) {
-        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_welcome_01.wav';
-        return baseUrl + FAIRY_AUDIO_PRESETS.welcome_minseo;
+        return pickPersonaVoiceFile('welcome') || baseUrl + FAIRY_AUDIO_PRESETS.welcome_minseo;
     }
     if (/수학.*탐험|수학.*배움/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_math;
     if (/국어.*배움|국어.*탐험/i.test(trimmed)) return baseUrl + FAIRY_AUDIO_PRESETS.welcome_korean;
@@ -136,14 +126,8 @@ function resolveFairyPresetAudio(text) {
 
     // 4) 오답 & 응원/힌트 키워드 우선 매칭 (예: "아쉽네요! 정답은 14"와 같이 오답 문구 내 정답 단어 포함 시 오답 우선 판별)
     if (/아쉽|아쉬|틀렸|오답|땡|다시.*생각|다시.*한번|힌트|힘내|포기하지|괜찮아|도전|아깝/i.test(trimmed)) {
-        if (persona === 'tease_minsu') {
-            const wrongFiles = ['tease_wrong_01.wav', 'tease_wrong_02.wav'];
-            return voiceBase + 'tease/' + wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
-        }
-        if (persona === 'snarky_minseo') {
-            const wrongFiles = ['snarky_wrong_01.wav', 'snarky_wrong_02.wav'];
-            return voiceBase + 'snarky/' + wrongFiles[Math.floor(Math.random() * wrongFiles.length)];
-        }
+        const personaWrong = pickPersonaVoiceFile('wrong');
+        if (personaWrong) return personaWrong;
         const encourages = FAIRY_AUDIO_PRESETS.encourages;
         const chosen = encourages[Math.floor(Math.random() * encourages.length)];
         return baseUrl + chosen;
@@ -151,8 +135,8 @@ function resolveFairyPresetAudio(text) {
 
     // 5) 정답 & 칭찬 키워드 매칭 (오답 멘트가 아닐 때만 순수 정답으로 처리)
     if (!/아쉽|아쉬|틀렸|오답|땡|다시/i.test(trimmed) && /정답|완벽|대단|천재|멋져|딩동댕|최고|잘했|맞혔|맞았|훌륭/i.test(trimmed)) {
-        if (persona === 'tease_minsu') return voiceBase + 'tease/tease_correct_01.wav';
-        if (persona === 'snarky_minseo') return voiceBase + 'snarky/snarky_correct_01.wav';
+        const personaCorrect = pickPersonaVoiceFile('correct');
+        if (personaCorrect) return personaCorrect;
         const praises = FAIRY_AUDIO_PRESETS.praises;
         const chosen = praises[Math.floor(Math.random() * praises.length)];
         return baseUrl + chosen;
@@ -887,6 +871,23 @@ function getFairyVoiceAssetBaseUrl() {
 }
 
 /**
+ * 🛡️ 지금 학생('son' | 'daughter'). SettingsManager가 없는 화면에서도 설정창과 같은 규칙으로 판단
+ */
+function getSafeStudent() {
+    if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.getCurrentStudent === 'function') {
+        return SettingsManager.getCurrentStudent();
+    }
+    try {
+        const userParam = new URLSearchParams(window.location.search).get('user');
+        if (userParam === 'daughter' || userParam === 'minseo' || userParam === '민서') return 'daughter';
+        if (userParam === 'son' || userParam === 'minsu' || userParam === '민수') return 'son';
+        if (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo'
+            || localStorage.getItem('currentUserName') === '민서') return 'daughter';
+    } catch (e) {}
+    return 'son';
+}
+
+/**
  * 🛡️ SettingsManager 유무에 관계없이 안전하게 현재 학생의 voice_persona 추출 (자가 치유 파사드)
  */
 function getSafeVoicePersona() {
@@ -894,34 +895,11 @@ function getSafeVoicePersona() {
         return SettingsManager.get('voice_persona') || 'default';
     }
     try {
-        if (typeof window !== 'undefined' && window.location) {
-            const params = new URLSearchParams(window.location.search);
-            const userParam = params.get('user');
-            let student = 'son';
-            if (userParam === 'daughter' || userParam === 'minseo' || userParam === '민서') student = 'daughter';
-            else if (userParam === 'son' || userParam === 'minsu' || userParam === '민수') student = 'son';
-            else {
-                const curUser = localStorage.getItem('currentUser');
-                const curChild = localStorage.getItem('currentChild');
-                const curName = localStorage.getItem('currentUserName');
-                if (curUser === 'daughter' || curChild === 'minseo' || curName === '민서') {
-                    student = 'daughter';
-                }
-            }
-
-            // 1. 학생별 전용 스토리지 우선 조회
-            const rawStudent = localStorage.getItem(`MINMIN_APP_SETTINGS_${student}`);
-            if (rawStudent) {
-                const parsed = JSON.parse(rawStudent);
-                if (parsed && parsed.voice_persona) return parsed.voice_persona;
-            }
-
-            // 2. 통합 스토리지 폴백 조회
-            const rawLegacy = localStorage.getItem('MINMIN_APP_SETTINGS');
-            if (rawLegacy) {
-                const parsed = JSON.parse(rawLegacy);
-                if (parsed && parsed.voice_persona) return parsed.voice_persona;
-            }
+        // 학생별 설정 우선, 없으면 통합(레거시) 설정
+        for (const key of [`MINMIN_APP_SETTINGS_${getSafeStudent()}`, 'MINMIN_APP_SETTINGS']) {
+            const raw = localStorage.getItem(key);
+            const parsed = raw ? JSON.parse(raw) : null;
+            if (parsed && parsed.voice_persona) return parsed.voice_persona;
         }
     } catch (e) {
         console.warn("[fairy-engine] safe persona lookup warning:", e);
@@ -946,13 +924,8 @@ function isSafeSfxEnabled() {
     return true;
 }
 
-// 🎙️ 직전 재생 음성 추적 (연속 동일 음성 반복 방지용 SSOT 캐시)
-const _lastFairyAudioPlayed = {
-    praise_tease: null,
-    praise_snarky: null,
-    encourage_tease: null,
-    encourage_snarky: null
-};
+// 🎙️ 직전 재생 음성 추적 (연속 동일 음성 반복 방지, 키: '{목소리id}:{상황}')
+const _lastFairyAudioPlayed = {};
 
 function getNonRepeatingRandomFairyVoice(list, trackKey) {
     if (!list || list.length === 0) return null;
@@ -967,43 +940,53 @@ function getNonRepeatingRandomFairyVoice(list, trackKey) {
 }
 
 /**
- * 🌟 정답/극찬 전용 헬퍼 (페르소나 5종 다채로운 랜덤 셔플 & 선희 고음질 음성 지원)
+ * 🎙️ 캐릭터 목소리 고르기: 목소리 목록(fairy-settings-catalog.js의 VOICE_CATALOG)만 보고 파일을 고른다.
+ * 파일 규칙: assets/voices/{voiceDir}/{voiceDir}_{상황}_{01~}.wav (상황: welcome·correct·wrong·clear)
+ * 기본 요정 목소리로 돌아가는 경우: 기본 선택, 목록 미로딩, 파일 없는 '준비중' 목소리, 다른 아이 전용 목소리
+ */
+function getActiveVoicePersona() {
+    const id = getSafeVoicePersona();
+    if (id === 'default' || typeof VOICE_CATALOG === 'undefined') return null;
+    const voice = VOICE_CATALOG.find(v => v.id === id);
+    if (!voice || !voice.voiceDir || !voice.files) return null;
+    if (voice.target !== 'all' && voice.target !== getSafeStudent()) return null;
+    return voice;
+}
+
+function pickPersonaVoiceFile(kind) {
+    const voice = getActiveVoicePersona();
+    const count = voice ? (voice.files[kind] || 0) : 0;
+    if (!count) return null;
+    const list = Array.from({ length: count }, (_, i) => `${voice.voiceDir}_${kind}_${String(i + 1).padStart(2, '0')}.wav`);
+    const chosen = getNonRepeatingRandomFairyVoice(list, `${voice.id}:${kind}`);
+    return getFairyVoiceAssetBaseUrl() + voice.voiceDir + '/' + chosen;
+}
+
+/**
+ * 📚 목소리 목록을 싣지 않는 화면에서도 캐릭터 목소리가 나오도록, 엔진 옆의 목록 파일을 한 번 불러온다.
+ * 불러오기 전에 울리는 음성은 기본 요정 목소리로 나간다.
+ */
+function ensureVoiceCatalogLoaded() {
+    if (typeof VOICE_CATALOG !== 'undefined' || typeof document === 'undefined') return;
+    if (document.querySelector('script[src*="fairy-settings-catalog.js"]')) return;
+    const engine = Array.from(document.getElementsByTagName('script')).find(s => s.src && s.src.includes('fairy-engine.js'));
+    if (!engine) return;
+    const tag = document.createElement('script');
+    tag.src = engine.src.substring(0, engine.src.lastIndexOf('/') + 1) + 'fairy-settings-catalog.js';
+    (document.head || document.documentElement).appendChild(tag);
+}
+
+/**
+ * 🌟 정답/극찬 전용 헬퍼 (캐릭터 목소리 정답 파일 중 무작위, 없으면 선희 고음질 칭찬)
  */
 function fairyPraise(onEndCallback = null) {
     if (!isSafeSfxEnabled()) {
         if (onEndCallback) onEndCallback();
         return;
     }
-
-    const persona = getSafeVoicePersona();
-    const voiceBase = getFairyVoiceAssetBaseUrl();
-
-    // 😜 깐죽이 페르소나 (정답 5종 무작위 셔플)
-    if (persona === 'tease_minsu') {
-        const correctFiles = [
-            'tease_correct_01.wav',
-            'tease_correct_02.wav',
-            'tease_correct_03.wav',
-            'tease_correct_04.wav',
-            'tease_correct_05.wav'
-        ];
-        const chosen = getNonRepeatingRandomFairyVoice(correctFiles, 'praise_tease');
-        const teaseFile = voiceBase + 'tease/' + chosen;
-        playFairyPresetAudio(teaseFile, onEndCallback);
-        return;
-    }
-    // 😼 민서 깍쟁이 페르소나 (정답 5종 무작위 셔플)
-    if (persona === 'snarky_minseo') {
-        const correctFiles = [
-            'snarky_correct_01.wav',
-            'snarky_correct_02.wav',
-            'snarky_correct_03.wav',
-            'snarky_correct_04.wav',
-            'snarky_correct_05.wav'
-        ];
-        const chosen = getNonRepeatingRandomFairyVoice(correctFiles, 'praise_snarky');
-        const snarkyFile = voiceBase + 'snarky/' + chosen;
-        playFairyPresetAudio(snarkyFile, onEndCallback);
+    const personaFile = pickPersonaVoiceFile('correct');
+    if (personaFile) {
+        playFairyPresetAudio(personaFile, onEndCallback);
         return;
     }
 
@@ -1013,41 +996,16 @@ function fairyPraise(onEndCallback = null) {
 }
 
 /**
- * 🌸 오답/응원 전용 헬퍼 (페르소나 4종 다채로운 랜덤 셔플 & 선희 고음질 음성 지원)
+ * 🌸 오답/응원 전용 헬퍼 (캐릭터 목소리 오답 파일 중 무작위, 없으면 선희 고음질 응원)
  */
 function fairyEncourage(onEndCallback = null) {
     if (!isSafeSfxEnabled()) {
         if (onEndCallback) onEndCallback();
         return;
     }
-
-    const persona = getSafeVoicePersona();
-    const voiceBase = getFairyVoiceAssetBaseUrl();
-
-    // 😜 깐죽이 페르소나 (오답 4종 중 무작위 셔플)
-    if (persona === 'tease_minsu') {
-        const wrongFiles = [
-            'tease_wrong_01.wav',
-            'tease_wrong_02.wav',
-            'tease_wrong_03.wav',
-            'tease_wrong_04.wav'
-        ];
-        const chosen = getNonRepeatingRandomFairyVoice(wrongFiles, 'encourage_tease');
-        const teaseFile = voiceBase + 'tease/' + chosen;
-        playFairyPresetAudio(teaseFile, onEndCallback);
-        return;
-    }
-    // 😼 민서 깍쟁이 페르소나 (오답 4종 중 무작위 셔플)
-    if (persona === 'snarky_minseo') {
-        const wrongFiles = [
-            'snarky_wrong_01.wav',
-            'snarky_wrong_02.wav',
-            'snarky_wrong_03.wav',
-            'snarky_wrong_04.wav'
-        ];
-        const chosen = getNonRepeatingRandomFairyVoice(wrongFiles, 'encourage_snarky');
-        const snarkyFile = voiceBase + 'snarky/' + chosen;
-        playFairyPresetAudio(snarkyFile, onEndCallback);
+    const personaFile = pickPersonaVoiceFile('wrong');
+    if (personaFile) {
+        playFairyPresetAudio(personaFile, onEndCallback);
         return;
     }
 
@@ -1068,19 +1026,10 @@ function fairyReward(type = 'quest', onEndCallback = null) {
     // 🛡️ 직전 정답 음성과 타이밍 충돌 방지: 직전 오디오 즉시 안전 정지
     stopFairyTTS();
 
-    const persona = getSafeVoicePersona();
-    const voiceBase = getFairyVoiceAssetBaseUrl();
-
-    // 😜 깐죽이 페르소나 (완주/보상 시)
-    if (persona === 'tease_minsu' && (type === 'finish' || type === 'quest')) {
-        const teaseFile = voiceBase + 'tease/tease_clear_01.wav';
-        playFairyPresetAudio(teaseFile, onEndCallback);
-        return;
-    }
-    // 😼 민서 깍쟁이 페르소나 (완주/보상 시)
-    if (persona === 'snarky_minseo' && (type === 'finish' || type === 'quest')) {
-        const snarkyFile = voiceBase + 'snarky/snarky_clear_01.wav';
-        playFairyPresetAudio(snarkyFile, onEndCallback);
+    // 완주·퀘스트 완료는 캐릭터 목소리 완주 파일
+    const personaFile = (type === 'finish' || type === 'quest') ? pickPersonaVoiceFile('clear') : null;
+    if (personaFile) {
+        playFairyPresetAudio(personaFile, onEndCallback);
         return;
     }
 
@@ -1105,19 +1054,10 @@ function fairyGreet(target = 'lobby', onEndCallback = null) {
         return;
     }
 
-    const persona = getSafeVoicePersona();
-    const voiceBase = getFairyVoiceAssetBaseUrl();
-
-    // 😜 깐죽이 페르소나 (로비 또는 민수 입장 시)
-    if (persona === 'tease_minsu' && (target === 'lobby' || target === 'minsu')) {
-        const teaseFile = voiceBase + 'tease/tease_welcome_01.wav';
-        playFairyPresetAudio(teaseFile, onEndCallback);
-        return;
-    }
-    // 😼 민서 깍쟁이 페르소나 (로비 또는 민서 입장 시)
-    if (persona === 'snarky_minseo' && (target === 'lobby' || target === 'minseo')) {
-        const snarkyFile = voiceBase + 'snarky/snarky_welcome_01.wav';
-        playFairyPresetAudio(snarkyFile, onEndCallback);
+    // 로비·아이 이름 인사는 캐릭터 목소리 첫인사 파일 (과목 입장 인사는 요정 코코 그대로)
+    const personaFile = ['lobby', 'minsu', 'minseo'].includes(target) ? pickPersonaVoiceFile('welcome') : null;
+    if (personaFile) {
+        playFairyPresetAudio(personaFile, onEndCallback);
         return;
     }
 
@@ -1311,6 +1251,7 @@ window.fairyEncourage = fairyEncourage;
 window.fairyReward = fairyReward;
 window.fairyGreet = fairyGreet;
 window.resolveFairyPresetAudio = resolveFairyPresetAudio;
+window.pickPersonaVoiceFile = pickPersonaVoiceFile;
 window.getFairyAssetBaseUrl = getFairyAssetBaseUrl;
 window.FAIRY_AUDIO_PRESETS = FAIRY_AUDIO_PRESETS;
 window.getBestKoreanVoice = getBestKoreanVoice;
@@ -1361,4 +1302,10 @@ if (typeof window !== 'undefined') {
         initFairyAudio();
         updateTtsToggleUi();
     });
+    // 목소리 목록: 화면의 <script> 태그가 모두 실행된 뒤 확인해야 중복으로 싣지 않는다
+    if (typeof document !== 'undefined' && document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureVoiceCatalogLoaded);
+    } else {
+        ensureVoiceCatalogLoaded();
+    }
 }

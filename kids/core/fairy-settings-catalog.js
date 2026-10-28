@@ -1,6 +1,7 @@
 // ==========================================
 // 🧩 민민이네 공부방 3대 통합 데이터 도감 (fairy-settings-catalog.js)
-// 새 목소리, BGM, 테마 스킨이 생기면 이 파일의 목록에 1줄만 추가하면 됩니다.
+// 새 목소리, BGM, 테마 스킨이 생기면 이 파일의 목록에 항목 하나만 추가하면 됩니다.
+// (fairy-engine.js가 이 목록을 직접 읽으므로 엔진 코드는 고치지 않습니다)
 // ==========================================
 
 /**
@@ -9,9 +10,15 @@
  * - name: 설정창에 표시될 이름
  * - badge: 뱃지 태그 (인기, 신규, 기본 등)
  * - desc: 캐릭터 한 줄 설명
- * - previewFile: 미리듣기용 음성 파일 (assets/voices/ 경로 기준)
- * - target: 노출 대상 ('son' | 'daughter' | 'all')
- * - voiceDir: 해당 캐릭터의 전용 음성 폴더명
+ * - previewFile: 미리듣기용 음성 파일 (kids/ 기준 경로)
+ * - target: 노출·사용 대상 ('son' | 'daughter' | 'all'). 다른 아이에게 설정이 남아 있어도 이 아이에게만 나옴
+ * - voiceDir: 해당 캐릭터의 전용 음성 폴더명 (kids/assets/voices/{voiceDir}/)
+ * - files: 상황별 파일 개수. 파일 이름은 {voiceDir}_{상황}_{01~}.wav
+ *     welcome(첫인사·미리듣기) · correct(정답) · wrong(오답) · clear(완주)
+ *   files가 없으면 '준비중'으로 보고 설정창에서 고를 수 없음 (기본 요정 목소리 사용)
+ *
+ * ➕ 새 목소리 추가: 음성 파일 11개(welcome 1·correct 5·wrong 4·clear 1)를 폴더에 넣고
+ *    아래 목록에 files를 채운 항목을 추가 (음성 생성: master-tower scripts/generate_gemini_voices.py)
  */
 var VOICE_CATALOG = [
     // 🧚 기본 공통 목소리
@@ -32,7 +39,8 @@ var VOICE_CATALOG = [
         desc: "푸헤헤~ 또 틀렸대요! 장난기 넘치고 얄미운 친구 톤",
         previewFile: "assets/voices/tease/tease_welcome_01.wav",
         target: "son",
-        voiceDir: "tease"
+        voiceDir: "tease",
+        files: { welcome: 1, correct: 5, wrong: 4, clear: 1 }
     },
     // 😭 민수 전용: 엄살쟁이 슬라임 (추후 음원 추가용)
     {
@@ -52,7 +60,8 @@ var VOICE_CATALOG = [
         desc: "흥! 내가 모르는 건 아니지만 언니가 먼저 풀어봐~",
         previewFile: "assets/voices/snarky/snarky_welcome_01.wav",
         target: "daughter",
-        voiceDir: "snarky"
+        voiceDir: "snarky",
+        files: { welcome: 1, correct: 5, wrong: 4, clear: 1 }
     },
     // 🐣 민서 전용: 껌딱지 아기새
     {

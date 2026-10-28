@@ -331,14 +331,19 @@ const SettingsManager = {
             const isChecked = settings.voice_persona === v.id ? "checked" : "";
             const isSelectedClass = settings.voice_persona === v.id ? "selected" : "";
             const badgeHtml = v.badge ? `<span class="voice-badge badge-${v.badge}">${v.badge}</span>` : "";
-            const previewBtnHtml = v.previewFile
+            // 음성 파일(files)이 없는 '준비중' 목소리는 골라도 기본 요정 목소리가 나오므로 선택을 막는다
+            const isReady = v.id === 'default' || !!v.files;
+            const previewBtnHtml = (isReady && v.previewFile)
                 ? `<button type="button" class="voice-preview-btn" onclick="event.stopPropagation(); SettingsManager.playPreview('${v.id}', this)">▶ 미리듣기</button>`
                 : `<span class="voice-preview-disabled">준비중</span>`;
+            const clickHtml = isReady
+                ? `onclick="SettingsManager.set('voice_persona', '${v.id}'); SettingsManager.renderModalContent();"`
+                : `aria-disabled="true"`;
 
             return `
-            <label class="voice-card ${isSelectedClass}" onclick="SettingsManager.set('voice_persona', '${v.id}'); SettingsManager.renderModalContent();">
+            <label class="voice-card ${isSelectedClass} ${isReady ? '' : 'is-disabled'}" ${clickHtml}>
                 <div class="voice-card-radio">
-                    <input type="radio" name="voice_persona" value="${v.id}" ${isChecked}>
+                    <input type="radio" name="voice_persona" value="${v.id}" ${isChecked} ${isReady ? '' : 'disabled'}>
                 </div>
                 <div class="voice-card-info">
                     <div class="voice-card-top">
