@@ -1,6 +1,6 @@
 # 🎨 꿈나무 갤러리 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v2.5.0 (2026-10-29 기준)  
+> **문서 버전**: v2.5.0 (2026-10-29 기준)
 > **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품 등록 도구(`scripts/sync_quick_upload.py`)  
 > **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
 > **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
@@ -102,6 +102,9 @@ python -X utf8 scripts/sync_quick_upload.py \
 - `--video`에 로컬 `.mp4` 경로를 넘기면 `kids-archive/assets/media/...`에 복사되고 CDN URL이 `videoUrl`로 연결되어, 모달의 `🎬 3D 회전영상` 탭과 하단 버튼에서 인라인 재생됩니다.
 - 노션 카드 등록이 실패하면 마지막 줄에 `⚠️ [일부 실패]`가 뜨고 종료 코드가 1입니다. 이때는 완료로 보고하지 말고 ❌ 메시지(노션 오류 원문)를 그대로 보고한다.
 
+### ③ 손글씨 종이일기 사진
+- 종이일기는 갤러리 작품이 아니므로 [`docs/timetable_diary_spec.md` §5](timetable_diary_spec.md)의 전용 도구 `python -X utf8 scripts/sync_paper_diaries.py`를 사용합니다.
+
 ### ④ 기존 작품에 틀린그림찾기 연결
 ```bash
 python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibimmyeon" --author "민수" --diff-file "E:/Downloads/paldo_diff.jpg" --diff-spots "E:/Downloads/spots.json"
@@ -111,9 +114,6 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibim
 - 한 옵션만 지정하면 기존 `spotDiff`의 나머지 값을 유지합니다. 둘 다 생략하면 기존 값이 그대로 남습니다. 신규 연결은 두 값을 모두 채워야 합니다.
 - 잘못된 좌표·없는 입력 파일은 복사·메타 저장·큐 처리 전에 종료 코드 1로 거절합니다. `--id`와 차이 옵션만으로 기존 작품을 갱신할 수 있으며 제목·날짜·설명을 보존합니다.
 - `--no-push`는 원격 푸시만 생략하며 기존 도구의 로컬 커밋 동작은 유지합니다. 노션 시험은 임시 환경에서 큐 조회를 모의하고 제목 옵션 없이 실행합니다.
-
-### ③ 손글씨 종이일기 사진
-- 종이일기는 갤러리 작품이 아니므로 [`docs/timetable_diary_spec.md` §5](timetable_diary_spec.md)의 전용 도구 `python -X utf8 scripts/sync_paper_diaries.py`를 사용합니다.
 
 ---
 

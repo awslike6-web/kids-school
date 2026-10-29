@@ -36,7 +36,7 @@ def validate_diff_spots(spots):
             raise ValueError(f'{i}번 좌표는 객체여야 합니다')
         for key, low, high in [('x', 0, 1), ('y', 0, 1), ('r', .03, .15)]:
             value = spot.get(key)
-            if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
+            if type(value) not in (int, float) or not low <= value <= high or not math.isfinite(value):
                 raise ValueError(f'{i}번 {key}는 {low}~{high} 범위의 숫자여야 합니다')
         hint = spot.get('hint')
         if not isinstance(hint, str) or not hint.strip() or len(hint) > 30:
@@ -67,8 +67,13 @@ def build_spot_diff(data, art_id, has_cutout, folder_full, original, target_dir,
             image = ImageOps.exif_transpose(image)
             if abs((image.width / image.height) / (size[0] / size[1]) - 1) > .01:
                 raise ValueError('원본과 바뀐 그림의 비율이 1% 넘게 다릅니다')
-            image = image.convert('RGB').resize(size, Image.Resampling.LANCZOS)
-            image.save(target, format='JPEG', quality=85, optimize=True)
+            need_convert = not target.exists() or source.stat().st_mtime > target.stat().st_mtime
+            if not need_convert:
+                with Image.open(target) as current:
+                    need_convert = current.size != size
+            if need_convert:
+                image = image.convert('RGB').resize(size, Image.Resampling.LANCZOS)
+                image.save(target, format='JPEG', quality=85, optimize=True)
         return {'modifiedImageUrl': f'{CDN_BASE}/assets/media/{sub_dir}/{sub_path}/{target.name}', 'spots': spots}
     except (ValueError, TypeError, OSError, KeyError) as error:
         print(f'⚠️ [spotDiff 제외] {art_id}: {error}')
@@ -132,7 +137,7 @@ def run():
             sub_image_to_parent[sf] = pid
         diff = m.get('spotDiff')
         if isinstance(diff, dict) and isinstance(diff.get('modifiedImage'), str):
-            diff_images.add(diff['modifiedImage'])
+            diff_images.add(Path(diff['modifiedImage']).stem)
 
     items = []
     archive_entries = []
@@ -176,7 +181,7 @@ def run():
                 continue
 
             # 다른 작품의 서브 이미지로 묶인 파일인 경우 단독 카드 생성 스킵 (부모 작품에서 변환 및 묶음 처리)
-            if f in sub_image_to_parent or f in diff_images:
+            if f in sub_image_to_parent or base_name in diff_images:
                 continue
             
             # 새 폴더에 누끼 png가 존재하는지 확인

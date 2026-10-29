@@ -4,7 +4,7 @@
 > **상태**: 구현 완료 (2026-10-29). 실제 작품 콘텐츠 등록·운영 노션 쓰기 시험은 포함하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(특히 §5 이미지 무결성, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 명세서**: [`docs/gallery_archive_spec.md`](gallery_archive_spec.md) (작품 등록 흐름·노션 저장 규칙)
-> **작업자 참고**: 이 문서만 보고 작업할 수 있게 썼다. 그래도 코드를 쓰기 전에 `AGENTS.md`에 적힌 순서대로 `GEMINI.md`와 `kids/core/CORE_CATALOG.md`를 먼저 읽는다.
+> **유지보수 참고**: 기능을 고치기 전에 `AGENTS.md`에 적힌 순서대로 `GEMINI.md`와 `kids/core/CORE_CATALOG.md`를 먼저 읽는다.
 
 ---
 
@@ -16,7 +16,7 @@
 
 ## 2. 구성 파일
 
-- `kids/common_space/gallery-spot-diff.js`: 약 400줄, IIFE·전역 `GallerySpotDiff`. 놀이·부모 도구·순수 판정 함수. 스타일은 `open()`에서 1회 삽입합니다.
+- `kids/common_space/gallery-spot-diff.js`: 359줄, IIFE·전역 `GallerySpotDiff`. 놀이·부모 도구·순수 판정 함수. 스타일은 `open()`에서 1회 삽입합니다.
 - `gallery.html`: 모달 도전 버튼과 스크립트 선행 로드. `gallery-modal-manager.js`: 버튼 조건과 열기·닫기 연결만 담당합니다.
 - `scripts/build_gallery.py`: 선택 메타 변환·검증. `validate_diff_spots`, `build_spot_diff`.
 - 관제탑 `scripts/sync_quick_upload.py`: `--diff-file` / `--diff-spots` 입력과 기존 데이터 부분 병합.
