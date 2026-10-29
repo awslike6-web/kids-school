@@ -250,7 +250,8 @@ with tempfile.TemporaryDirectory() as tmp:
     Image.new('RGBA', (100, 100), (0,0,0,0)).save(uploads / 'empty_sprite.png')
     names = {'ok': ('ok_sprite.png', '  보라 용  '), 'opaque': ('opaque_sprite.png', '용'),
              'wrong': ('wrong_sprite.jpg', '용'), 'long': ('ok_sprite.png', '가'*13),
-             'missing': ('missing_sprite.png', '용'), 'empty': ('empty_sprite.png', '용')}
+             'missing': ('missing_sprite.png', '용'), 'empty': ('empty_sprite.png', '용'),
+             'self': ('self.jpg', '용')}
     meta = {}
     for key, (filename, name) in names.items():
         Image.new('RGB', (120, 100), 'green').save(uploads / (key + '.jpg'))
@@ -260,7 +261,7 @@ with tempfile.TemporaryDirectory() as tmp:
     assert result.returncode == 0, result.stderr
     text = (data / 'gallery-data.js').read_text(encoding='utf-8')
     items = json.loads(text.split('const DEFAULT_GALLERY_DATA = ', 1)[1].split(';', 1)[0])
-    assert len(items) == 6, [item['id'] for item in items]
+    assert len(items) == 7, [item['id'] for item in items]
     assert sum('character' in item for item in items) == 1
     ok = next(item for item in items if item['id'] == 'art_minsu_ok')
     assert ok['character']['name'] == '보라 용'
@@ -272,7 +273,7 @@ with tempfile.TemporaryDirectory() as tmp:
         assert image.getchannel('A').getextrema() == (0, 255)
         box = image.getchannel('A').getbbox()
         assert 0 < box[0] < 30 and 0 < box[1] < 30, box
-    assert result.stdout.count('[character 제외]') == 5, result.stdout
+    assert result.stdout.count('[character 제외]') == 6, result.stdout
     assert '"character"' not in (archive / 'data/archive-master-data.js').read_text(encoding='utf-8')
     # 원본 업로드가 없어도 이미 보존된 캐릭터를 참조한다.
     (uploads / 'ok_sprite.png').unlink()

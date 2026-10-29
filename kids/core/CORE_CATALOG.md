@@ -123,6 +123,8 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 소리: 획득/충돌 Web Audio는 `isSafeSfxEnabled()`를 따르고, 완주는 `fairyReward('finish')`. 보석·사탕·학습·노션에는 연결하지 않습니다.
 - 정리: 일시정지·숨김·완주 시 rAF 중지, `close()`는 프레임·리스너·ResizeObserver·이미지·AudioContext를 해제하고 포커스·스크롤을 복구합니다. Esc·포커스 순환·44px 버튼을 지원합니다.
 - 빌더: `scripts/build_gallery.py`의 `validate_character_name`, `load_character_sprite`, `build_character`. 메타 `character:{sprite,name}`를 검증·정리해 `{spriteUrl,name}`으로 내보냅니다. 실패는 선택 필드만 제외합니다. 자세한 계약은 `docs/gallery_character_runner_spec.md`입니다.
+- 등록: 관제탑 `scripts/sync_quick_upload.py --character-sprite <PNG> --character-name <이름>` → `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. PNG·이름은 공부방 빌더의 검증 함수를 재사용하며 `--title` 없이 character만 부분 병합합니다. 보조 모듈에는 기존 `AUTHOR_MAP`·`strip_author_prefix`·`find_built_gallery_item`·`prepare_spot_diff`·`set_meta_spot_diff`도 모았고 입구에서 재노출합니다.
+- 등록 시험: 관제탑 `scripts/test_gallery_registration_options.py`(임시 구조·모의 큐·API·Git·제목 없는 `--no-push`). worktree에서는 `GALLERY_SCHOOL_SOURCE`로 공부방 빌더 위치를 지정합니다. 실제 콘텐츠·운영 노션에는 쓰지 않습니다.
 
 기존 1,517줄의 거대했던 `gallery_controller.js`를 331줄의 초경량 메인 뷰 컨트롤러로 슬림화하고, 단일 책임 원칙에 따라 전문 서브모듈 2종으로 완전 분리 구축한 갤러리 코어 엔진군입니다.
 - **파일 위치**:

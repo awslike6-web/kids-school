@@ -1,7 +1,7 @@
 # 🏃 꿈나무 갤러리 「자작 캐릭터 파트너 장착 & 1분 미니 런」 기능 명세서 (Gallery Character & Mini Runner Spec)
 
-> **문서 버전**: v1.1 (2026-10-29 공부방 구현)
-> **상태**: 공부방 A 구현·검증 완료. 관제탑 B 등록 옵션은 후속 구현 중. 실제 콘텐츠 등록·운영 노션 쓰기는 포함하지 않음.
+> **문서 버전**: v2.0 (2026-10-29 구현)
+> **상태**: 구현 완료 (2026-10-29). 공부방 A 검증 후 관제탑 B를 구현·검증했다. 실제 콘텐츠 등록·운영 노션 쓰기·main 병합/배포는 포함하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(§5 이미지 무결성, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 문서**: [`docs/gallery_spot_diff_spec.md`](gallery_spot_diff_spec.md)(같은 방식의 선택 필드·빌더·등록 옵션 선례), [`docs/gallery_archive_spec.md`](gallery_archive_spec.md), [`docs/character_studio_handover.md`](character_studio_handover.md)(캐릭터 그래픽 규격·남매 테마), `kids/core/CORE_CATALOG.md`의 `monster_roster.js` 절
 > **작업자 참고**: 코드를 쓰기 전에 `AGENTS.md` 순서대로 `GEMINI.md`, `CORE_CATALOG.md`, 위 연계 문서를 읽는다.
@@ -122,7 +122,7 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261101_neon_dragon
 `window.MonsterRoster`에 다음을 추가한다. 기존 함수의 동작은 바꾸지 않는다.
 ```js
 MonsterRoster.equipGalleryPartner(child, { artId, name, spriteUrl })  // child: 'son' | 'daughter'
-MonsterRoster.getGalleryPartner(child)    // → 저장값 또는 null (JSON 깨짐·필드 누락·https 아닌 주소면 null)
+MonsterRoster.getGalleryPartner(child)    // → 저장값 또는 null (JSON 깨짐·필드 누락·허용되지 않는 주소면 null)
 MonsterRoster.clearGalleryPartner(child)
 MonsterRoster.isValidCharacter(character) // gallery-data.js의 character 계약 검사 (§4-2)
 ```
@@ -197,6 +197,7 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 - 충돌 즉시 게임 종료·별 음수 허용·해제 시 선택 미복구를 각각 주입하면 시험이 실패함을 확인한 뒤 원복했다.
 - `scripts/guarded_preview_server.py`와 모의 외부 응답을 사용해 360×800·1280×800에서 장착/해제·부모 자녀별 버튼·남매 분리·연구소 순환·양쪽 연구소/실전 러너의 그림과 이름·두 테마·점프 입력·일시정지·숨김·리사이즈·완주·재시작·오류 안내·닫기/rAF 해제를 확인했다. 60초 진행은 실제 rAF 콜백에 결정적 시계를 공급해 검사했다.
 - 런타임 콘솔 오류 0·예상 밖 리소스 누락 0·`__blockedWrites` 0. 이미지 오류 사례의 의도된 404는 별도 확인했다. 소리는 함수 호출을 검사했으며 실기기 스피커/청취는 미확인이다.
+- 관제탑 `scripts/test_gallery_registration_options.py`: 9건 통과. 메타 없는 기존 작품·제목 없는 부분 병합·옵션 일부 갱신·잘못된 파일/이름/작가·없는 ID·기존 특수 작품 ID·기존 틀린그림 동작을 확인했다. 큐·API·Git을 모의하고 `--no-push`만 사용해 노션·외부 API·원격 Git 호출은 0회다.
 - 시험 그림은 기존 `kids/assets/monsters/cottun_bongdomdol/idle.png`를 브라우저 응답에만 주입했다. 실제 `gallery-data.js`·메타·아카이브는 변경하지 않았다. 화면 결과는 저장소 밖 scratch에 둔다. `walkthrough.md`는 만들지 않는다.
 
 ---
@@ -229,6 +230,7 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 ---
 
 ## 11. 관련 문서
+- 관제탑 등록 모듈: `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. 794줄이던 진입점의 선택 메타 처리를 분리해 `sync_quick_upload.py`를 708줄로 유지한다. 기존 함수는 진입점에서도 재노출한다.
 - API·저장 키·모듈: `kids/core/CORE_CATALOG.md`.
 - 작품 등록·부모 제작: `docs/gallery_archive_spec.md`.
 - 캐릭터 그래픽 규격·기존 6포즈와의 관계: `docs/character_studio_handover.md`.

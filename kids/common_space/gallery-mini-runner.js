@@ -140,7 +140,7 @@
                 who === 'parent' ? `${label}에게 장착` : '⚡ 내 공부방 파트너로 장착';
             button.onclick = () => {
                 const result = equipped ? roster.clearGalleryPartner(child) :
-                    roster.equipGalleryPartner(child, { artId: item.id, ...item.character });
+                    roster.equipGalleryPartner(child, { ...item.character, artId: item.id });
                 if (!result) { notify('이 기기에 저장하지 못했어요. 저장 공간을 확인해 주세요.'); return; }
                 if (!equipped && typeof window.fairyPraise === 'function') window.fairyPraise();
                 notify(equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${item.character.name}가 함께해요!`);
