@@ -87,6 +87,11 @@
         "key": "bongdomdol",
         "name": "콧툰봉돔돌",
         "sprite": "20260922_213854_sprite_bongdomdol.png"
+      },
+      {
+        "key": "tataltal",
+        "name": "뿌쀳히탈탈",
+        "sprite": "20260922_213854_sprite_tataltal.png"
       }
     ]
   },
