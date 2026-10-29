@@ -31,6 +31,7 @@ function openDetailModal(id) {
     }
     if (!item) return;
     activeArtId = id;
+    window.GalleryMiniRunner?.bindModal(item, { available: !isSpecial });
 
     const diffBtn = document.getElementById('modalSpotDiffBtn');
     if (diffBtn) {
@@ -209,6 +210,7 @@ function openDetailModal(id) {
 
 function closeDetailModal() {
     window.GallerySpotDiff?.close();
+    window.GalleryMiniRunner?.close();
     toggleEditArtFull(false);
     cancelEditArtistNote();
     const modalVideo = document.getElementById('modalVideoPlayer');

@@ -59,6 +59,14 @@
 ---
 
 ## 4. 🚪 대화방 구성 옵션 및 새 방 개설 인계 프롬프트
+### 갤러리 자작 캐릭터 → 파트너 (2026-10-29)
+
+- 기존 캐릭터 제작·6포즈 에셋 규격은 유지합니다. 갤러리 파트너는 작품별 선택 메타 `character: {sprite, name}`를 사용하는 별도 연결입니다. `hasCutout`으로 캐릭터 여부를 추정하지 않습니다.
+- 그림은 캐릭터 하나만 남긴 투명 PNG(완전 투명 픽셀 10% 이상), 이름은 앞뒤 공백을 뺀 1~12자입니다. 빌더는 EXIF 보정 → 알파 경계와 사방 4% 여백 → 비율 유지·긴 변 512px 이하로 정리합니다. 아카이브의 해당 작품/아이/학년 경로에 저장하며 포트폴리오 데이터에는 캐릭터 필드를 넣지 않습니다.
+- 화면 계약은 `character: {spriteUrl, name}`입니다. 갤러리 장착은 `MonsterRoster.equipGalleryPartner`를 사용하며 민수는 로스터 항목 `gallery_partner`로 6포즈를 같은 그림에 연결합니다. 민서는 연구소·러너에서 별도 저장값을 읽습니다.
+- `galleryPartner_son`/`galleryPartner_daughter`의 값은 `{artId,name,spriteUrl,equippedAt}`이고, 기존 `selectedMonster`는 민수 전용입니다. 저장 키·JSON을 화면에서 직접 다루지 않습니다. 장착은 현재 기기에서만 유지되며 노션/다른 기기에 동기화하지 않습니다.
+- 갤러리 모달에서 장착 해제·60초 미니 런을 시작합니다. 실제 작품에 캐릭터 필드를 임의로 추가하지 않습니다. 상세 API·등록 절차는 [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md), [`gallery_archive_spec.md`](gallery_archive_spec.md)를 따릅니다.
+
 
 ### [옵션 추천 가이드]
 * **추천 A (통합 1개 방)**: **`🎨 민민이네 캐릭터 & 몬스터 아틀리에`**

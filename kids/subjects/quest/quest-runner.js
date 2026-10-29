@@ -80,6 +80,11 @@
     if (isMinseo) {
       // 🌸 민서 요정 코코 & 삼총사 다정한 격려 리액션
       monsterName = '요정 코코';
+      const galleryPartner = global.MonsterRoster?.getGalleryPartner('daughter');
+      if (galleryPartner) {
+        poseSrc = galleryPartner.spriteUrl;
+        monsterName = galleryPartner.name;
+      }
       const minseoDialogues = {
         stageStart: '오늘도 예쁘게 5분 퀘스트 시작! 🌸',
         correct: ['우와 정답이야! 민서 최고! ✨💖', '대단해! 별빛 보석이 반짝반짝! 💎', '잘하고 있어 민서야! 힘내자! 🌸'],
@@ -284,7 +289,7 @@
         : `"다음 단원 맛보기 탐험이야! 힌트를 잘 보고 자유롭게 도전해봐! ⚡"`;
       syncCheerMonsterReaction('idle', previewSpeech);
     } else if (isMinseo) {
-      document.getElementById('cheerSpeech').textContent = `"민서야 힘내! 예쁜 별빛을 모아보자! 🌸"`;
+      syncCheerMonsterReaction('idle', '민서야 힘내! 예쁜 별빛을 모아보자! 🌸');
     } else {
       syncCheerMonsterReaction(currentIndex === 0 || isRevengeMode ? 'stageStart' : 'idle');
     }

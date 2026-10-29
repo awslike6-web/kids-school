@@ -116,6 +116,17 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `scripts/build_gallery.py`: `validate_diff_spots(spots)`, `build_spot_diff(...)`가 메타의 `spotDiff.modifiedImage`를 CDN의 `modifiedImageUrl`로 변환합니다. 이미지 비율·좌표·누끼·파일 오류는 놀이 데이터만 제외합니다. 포트폴리오에는 넣지 않습니다.
 - 데이터 계약·부모 제작 절차: `docs/gallery_spot_diff_spec.md`, `docs/gallery_archive_spec.md`의 「틀린그림찾기 등록」.
 
+### 🏃 `gallery-mini-runner.js` (갤러리 캐릭터 장착·60초 미니 런, 2026-10-29)
+- 위치: `kids/common_space/gallery-mini-runner.js`. IIFE·전역 `GalleryMiniRunner`만 추가합니다. 로딩 시 DOM에 접근하지 않고 `gmr-style`은 화면을 열 때 한 번 삽입합니다. 로드 순서는 `monster_roster.js` → 이 모듈 → 모달 매니저입니다.
+- 화면 API: `bindModal(item, {available, viewer})`, `start(item, {viewer, onClose})`, `close()`. 모달 매니저는 작품 여부와 호출만 연결합니다. 아이는 자기 장착/해제, 부모는 자녀별 버튼을 사용합니다. 부모 게임은 민수 테마지만 자녀 최고 기록에는 쓰지 않습니다.
+- 순수 API: `createWorld(seed, profile)`(문자열 또는 `{child,aspect,spriteAspect}`), `step(world, {jump}, dtMs)`, `hitboxOf(sprite,x,y,w,h)`, `resizeWorld(world, aspect)`. 높이 단위 물리·2단 점프·높이 70%/가로 최대 `.08` 판정·800ms 무적·최대 dt 50ms. 충돌해도 중단하지 않고 60초 후 항상 완주합니다.
+- 세로 통과 보완: 중력 `.95`·점프 `.62`·장애물 폭 `.05`. 민서는 `clamp(aspect×.25,.15,.38)`, 민수는 `clamp(aspect×.40,.18,.58)`(30초 이후 ×1.12) 높이/초입니다. `resizeWorld`는 진행 거리와 장애물/별의 상대 거리를 보존해 이미 지나간 객체를 되돌리지 않습니다. `MonsterRoster.withJosa(name,pair)`로 장착 안내·제목의 조사를 공통 처리합니다.
+- 소리: 획득/충돌 Web Audio는 `isSafeSfxEnabled()`를 따르고, 완주는 `fairyReward('finish')`. 보석·사탕·학습·노션에는 연결하지 않습니다.
+- 정리: 일시정지·숨김·완주 시 rAF 중지, `close()`는 프레임·리스너·ResizeObserver·이미지·AudioContext를 해제하고 포커스·스크롤을 복구합니다. Esc·포커스 순환·44px 버튼을 지원합니다.
+- 빌더: `scripts/build_gallery.py`의 `validate_character_name`, `load_character_sprite`, `build_character`. 메타 `character:{sprite,name}`를 검증·정리해 `{spriteUrl,name}`으로 내보냅니다. 실패는 선택 필드만 제외합니다. 자세한 계약은 `docs/gallery_character_runner_spec.md`입니다.
+- 등록: 관제탑 `scripts/sync_quick_upload.py --character-sprite <PNG> --character-name <이름>` → `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. PNG·이름은 공부방 빌더의 검증 함수를 재사용하며 `--title` 없이 character만 부분 병합합니다. 보조 모듈에는 기존 `AUTHOR_MAP`·`strip_author_prefix`·`find_built_gallery_item`·`prepare_spot_diff`·`set_meta_spot_diff`도 모았고 입구에서 재노출합니다.
+- 등록 시험: 관제탑 `scripts/test_gallery_registration_options.py`(임시 구조·모의 큐·API·Git·제목 없는 `--no-push`). worktree에서는 `GALLERY_SCHOOL_SOURCE`로 공부방 빌더 위치를 지정합니다. 실제 콘텐츠·운영 노션에는 쓰지 않습니다.
+
 기존 1,517줄의 거대했던 `gallery_controller.js`를 331줄의 초경량 메인 뷰 컨트롤러로 슬림화하고, 단일 책임 원칙에 따라 전문 서브모듈 2종으로 완전 분리 구축한 갤러리 코어 엔진군입니다.
 - **파일 위치**:
   - `kids/common_space/gallery_controller.js` (331줄): 유저 테마 적용(DOM null 안전 가드), 2대 뷰 모드 스위처(작품 vs 특별한 날), 필터 바 및 카드 그리드 렌더러, 빠른 좋아요.
@@ -295,6 +306,10 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **HTML onclick 호환 전역**: `handleCheckAnswer`, `goToNextStep`, `playQuestionAudio`, `selectChoice`, `startRevengeRound`, `skipRevengeAndClear`, `confirmExit`, `closeExitModal`, `returnToLab`, `goToSubjectDeepTraining`(별칭 `goToMathDeepTraining`), `goToLobby`, `playSound`, `toggleMathMemoPad`, `clearMathMemoCanvas`, `openImageZoom`, `closeImageZoom`.
 
 ### 🌟 `monster_roster.js` (5분 퀘스트 파트너 몬스터 로스터 & 포즈/에러리스 대사 엔진, 2026-10-24 추가)
+- **갤러리 파트너 (2026-10-29)**: `equipGalleryPartner(child, {artId,name,spriteUrl})`, `getGalleryPartner(child)`, `clearGalleryPartner(child)`, `isValidCharacter(character)`. child는 `son`/`daughter`만 받습니다. 민수는 동적 `gallery_partner`(동일 그림 포즈 6종·공용 에러리스 대사)를 로스터 끝에 추가하고 `selectedMonster`로 선택합니다. 해제하면 선택 중인 갤러리 파트너만 `clay_bite`로 복구합니다. 민서는 별도 저장만 하며 민수 선택을 바꾸지 않습니다.
+- **이름 조사**: `withJosa(name, '이/가'|'와/과'|'을/를'|'은/는')`는 한글 종성으로 조사를 선택하고 비한글은 `이(가)`처럼 병기합니다. 갤러리 파트너의 연구소·러너 대사와 미니 런 안내·제목이 이 함수 한 벌을 사용합니다.
+- **저장 원천**: `galleryPartner_son`/`galleryPartner_daughter`의 `{artId,name,spriteUrl,equippedAt}`와 `galleryRunnerBest_son`/`galleryRunnerBest_daughter`는 이 파일만 정의합니다. 최고 기록은 `getRunnerBest(child)`/`setRunnerBest(child, score)`로 읽고 갱신합니다. 모두 기기 로컬이며 기기 간·노션 동기화는 없습니다. 저장소 접근 실패는 null/false/0으로 돌려줍니다.
+- **주소**: HTTPS 또는 같은 출처 상대 주소만 허용합니다. 상대 주소는 장착 시 출처 기준 경로로 고정해 갤러리·연구소의 디렉터리 차이를 없앱니다. 실제 생성 데이터는 아카이브 CDN만 씁니다. 민서 연구소는 이미지 실패 시 기본 삼총사 그림·이름으로 돌아갑니다. 러너는 일반 문제의 첫 화면부터 파트너 반영 함수를 호출합니다.
 - **파일 위치**: `kids/subjects/quest/monster_roster.js` (전역 `window.MonsterRoster`, `monster_lab.html` 및 `quest_runner.html`에서 로드)
 - **에셋 경로**: `kids/assets/monsters/cottun_bongdomdol/` (`idle.png`, `greet.png`, `walk_left.png`, `walk_right.png`, `rage.png`, `roar.png` — 800×800 투명 캔버스 바닥 기준 완벽 정렬 누끼 PNG)
 - **역할**:
@@ -1119,6 +1134,10 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - Guardian 저장소의 사본 `learning/study-activity.js`는 이번에 고치지 않아 이 파일과 달라졌습니다(haru 판정 3줄). 서버 장부 규칙(활동1분=1분, quiz 정답2개당1분)은 그대로입니다.
 
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
+
+- `tests/gallery-character-runner.test.mjs`: DOM 없는 로드, 장착·재로드·포즈·해제·남매 분리·잘못된 저장·주소·최고 기록, 결정적 월드·입력 없는 60초 완주·충돌/무적·별·2단 점프·dt 상한·민서 장애물과 실제 데이터 CDN 계약을 검사합니다. Python/Pillow로 임시 공부방·아카이브를 만들고 빌더의 투명 PNG·크롭·512px·오류 격리·단독 카드 제외·포트폴리오 미포함·EXIF도 확인합니다. `GALLERY_TEST_PYTHON`으로 시험 Python 경로를 지정할 수 있습니다.
+- 미니 런 보완 시험은 세로 .45~가로 2.2의 6비율·그림 3비율·3시드·민수 가속 전후 162개 월드의 장애물 4,248개를 실제 `step`으로 전수 통과 검사합니다. 민수 2단 필수 장애물·판정 상자 기준 반응 시간·가속 이동량·리사이즈 거리/상태 보존·조사 4쌍도 확인합니다. 세로 .55는 기존 무입력 완주 시험에도 포함합니다.
+- `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.
 
 - `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
 

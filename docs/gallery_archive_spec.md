@@ -1,6 +1,6 @@
 # 🎨 꿈나무 갤러리 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v2.7.0 (2026-10-29 기준, 특별한 날 원천 통합·등록 도구)
+> **문서 버전**: v2.8.0 (2026-10-29 기준, 자작 캐릭터 파트너·미니 런 추가)
 > **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품·특별한 날 등록 도구(`scripts/sync_quick_upload.py` → `build_gallery.py` / `add_activity_photo.py`)  
 > **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
 > **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
@@ -63,6 +63,8 @@ flowchart TD
 | **`kids-school`** | [`kids/common_space/gallery-modal-manager.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-modal-manager.js) | 상세 모달 뷰어 (다중 사진 썸네일 스위처 + `🎬 3D 회전영상` 인라인 `<video>` 플레이어 지원) |
 | **`kids-school`** | [`kids/common_space/gallery.css`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.css) | 갤러리 전용 3D 카드, 필터 바, 라이트박스 반응형 스타일 |
 | **`kids-school`** | `kids/common_space/gallery-spot-diff.js` | `GallerySpotDiff` 놀이·부모 좌표 추출·RGB 차이 검수. 모달 매니저보다 먼저 로드 |
+| **`kids-school`** | `kids/common_space/gallery-mini-runner.js` | `GalleryMiniRunner` 장착 버튼·토스트·60초 미니 런·순수 물리 API |
+| **`kids-school`** | `kids/subjects/quest/monster_roster.js` | 갤러리 파트너·최고 기록의 자녀별 로컬 저장 원천, 민수 로스터 동적 항목 |
 | **`kids-archive`** | [`kids-archive/data/archive-master-data.js`](file:///g:/master-tower/kids-archive/data/archive-master-data.js) | 12년 성장 포트폴리오 마스터 DB |
 | **`kids-archive`** | `kids-archive/assets/media/{minsu|minseo|together}/` | 웹 최적화된 고화질 영구 사진(`.jpg`/`.png`) 및 영상(`.mp4`) |
 
@@ -194,3 +196,19 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
 자동 후보가 맞지 않을 때는 기존 **부모 관리자 좌표 추출기**를 보조로 씁니다. 로컬 `gallery-data.js`의 해당 작품에 미리보기에서 읽을 수 있는 `spotDiff.modifiedImageUrl`과 빈 `spots`를 임시로 넣고 아빠·엄마 계정으로 `gallery.html?admin=diff`를 엽니다. 원본 또는 변형 그림에서 좌표·반지름·힌트를 편집하고 「spots 전체 복사」를 누릅니다. 복사가 막히면 선택된 텍스트 영역을 복사합니다. 「차이 보기」로 검수한 뒤 임시 데이터 수정을 되돌립니다. 아이 계정에서는 이 관리자 모드가 켜지지 않습니다.
 
 자동 맞춤의 품질 기준·출력 계약·한계는 [`gallery_spot_diff_align_spec.md`](gallery_spot_diff_align_spec.md)를 참고합니다. NumPy·OpenCV·Pillow를 쓰며 OpenCV가 없으면 `python -m pip install opencv-python-headless`를 안내합니다. 작업 폴더와 검수 그림은 커밋하지 않습니다.
+
+## 8. 자작 캐릭터 파트너·미니 런 등록
+
+1. 아이의 캐릭터 그림이나 인형 사진에서 배경을 지워 **캐릭터 하나만 남긴 투명 PNG**를 준비합니다. 완전 투명 픽셀이 10% 이상이어야 합니다. 손·책상·불필요한 배경이 남지 않았는지 직접 확인합니다.
+2. 이미 등록된 작품 ID에 다음 옵션으로 붙입니다. 두 옵션 중 하나만 주면 기존 `character`의 나머지 값은 유지합니다. 이름은 앞뒤 공백을 뺀 1~12자입니다.
+   ```bash
+   python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --character-sprite "E:/Downloads/dragon.png" --character-name "보라 용"
+   ```
+3. 도구는 `uploads/ex/갤러리/{작가}/{원본베이스}_sprite.png`로 복사하기 **전에** PNG·알파·투명도·이름·기존 작품/작가를 검사합니다. 잘못된 입력은 메타를 쓰지 않고 종료 코드 1로 끝납니다. 메타에 항목이 없어도 생성 데이터에 있는 작품이면 허용합니다.
+4. `--title` 없는 호출은 `character`만 병합합니다. 기존 제목·분류·메모·틀린그림 데이터는 유지하며 캐릭터를 노션 속성/블록으로 보내지 않습니다. 두 옵션이 모두 없으면 기존 동작을 유지합니다.
+5. 빌더는 EXIF 보정 → 알파 경계와 사방 4% 여백 → 비율 유지·긴 변 512px 이하의 투명 PNG로 정리합니다. 잘못된 캐릭터는 `⚠️ [character 제외]` 경고 후 그 필드만 제외하고 작품 카드는 생성합니다. sprite는 단독 카드로 만들지 않으며 포트폴리오 데이터에는 넣지 않습니다.
+6. 갤러리에서 「내 공부방 파트너로 장착」 후 연구소와 실전 퀘스트에서 그림·이름을 확인합니다. 부모는 「민수에게/민서에게 장착」을 사용합니다. 「이 캐릭터로 달리기」로 미니 런도 한 판 확인합니다. 보석·사탕·학습시간은 지급하지 않습니다.
+
+- 등록 구현: 관제탑 `scripts/sync_quick_upload.py` → `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. 기존 `prepare_spot_diff`·부분 병합도 보조 모듈로 옮겼고 진입점에서 재노출합니다. 입력 검증은 공부방 빌더의 `validate_character_name`/`load_character_sprite`를 재사용합니다.
+- 등록 회귀 시험: 관제탑 `python -X utf8 scripts/test_gallery_registration_options.py`. worktree 시험은 `GALLERY_SCHOOL_SOURCE`에 공부방 A의 절대 경로를 지정합니다. 임시 구조·모의 큐·`--no-push`·제목 없는 호출로 검사하며 운영 API/노션/원격 Git은 호출하지 않습니다.
+- 저장·게임의 API와 한계는 [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)를 참고합니다. 파트너·최고 기록은 현재 기기에서만 유지됩니다. 실제 캐릭터 작품 등록은 별도 콘텐츠 작업입니다.
