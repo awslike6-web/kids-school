@@ -202,7 +202,7 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
 1. 아이의 캐릭터 그림이나 인형 사진에서 배경을 지워 **캐릭터 하나만 남긴 투명 PNG**를 준비합니다. 완전 투명 픽셀이 10% 이상이어야 합니다. 손·책상·불필요한 배경이 남지 않았는지 직접 확인합니다.
 2. 이미 등록된 작품 ID에 다음 옵션으로 붙입니다. 두 옵션 중 하나만 주면 기존 `character`의 나머지 값은 유지합니다. 이름은 앞뒤 공백을 뺀 1~12자입니다.
    ```bash
-   python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --character-sprite "E:/Downloads/dragon.png" --character-name "보라 용"
+   python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --character-key "main" --character-sprite "E:/Downloads/dragon.png" --character-name "보라 용"
    ```
 3. 도구는 `uploads/ex/갤러리/{작가}/{원본베이스}_sprite.png`로 복사하기 **전에** PNG·알파·투명도·이름·기존 작품/작가를 검사합니다. 잘못된 입력은 메타를 쓰지 않고 종료 코드 1로 끝납니다. 메타에 항목이 없어도 생성 데이터에 있는 작품이면 허용합니다.
 4. `--title` 없는 호출은 `character`만 병합합니다. 기존 제목·분류·메모·틀린그림 데이터는 유지하며 캐릭터를 노션 속성/블록으로 보내지 않습니다. 두 옵션이 모두 없으면 기존 동작을 유지합니다.
@@ -212,3 +212,5 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
 - 등록 구현: 관제탑 `scripts/sync_quick_upload.py` → `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. 기존 `prepare_spot_diff`·부분 병합도 보조 모듈로 옮겼고 진입점에서 재노출합니다. 입력 검증은 공부방 빌더의 `validate_character_name`/`load_character_sprite`를 재사용합니다.
 - 등록 회귀 시험: 관제탑 `python -X utf8 scripts/test_gallery_registration_options.py`. worktree 시험은 `GALLERY_SCHOOL_SOURCE`에 공부방 A의 절대 경로를 지정합니다. 임시 구조·모의 큐·`--no-push`·제목 없는 호출로 검사하며 운영 API/노션/원격 Git은 호출하지 않습니다.
 - 저장·게임의 API와 한계는 [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)를 참고합니다. 파트너·최고 기록은 현재 기기에서만 유지됩니다. 실제 캐릭터 작품 등록은 별도 콘텐츠 작업입니다.
+
+다중 캐릭터는 `--character-key`로 선택해 최대 6개를 등록합니다. `--character-remove KEY`는 해당 메타만 제거하고 파일을 보존하며 마지막 삭제는 characters 키도 제거합니다. 배열 계약과 호환·등록 규칙은 [gallery_multi_character_spec.md](gallery_multi_character_spec.md)를 따릅니다.

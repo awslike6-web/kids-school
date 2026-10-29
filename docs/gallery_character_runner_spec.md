@@ -63,6 +63,8 @@
 
 ---
 
+> 2026-10-30부터 출력은 `characters` 배열로 변경했습니다. 단일 입력·화면·옛 저장값 호환 및 새 계약은 [gallery_multi_character_spec.md](gallery_multi_character_spec.md)를 우선합니다.
+
 ## 4. D (Data · 데이터 계약)
 
 ### 4-1. `kids/data/gallery-meta.json` (사람이 쓰는 원본)
@@ -233,7 +235,7 @@ GalleryMiniRunner.resizeWorld(world, aspect)       // 상대 거리·통과 상�
 1. **캐릭터 누끼 만들기**: 아이가 그린 캐릭터나 만든 인형 사진에서 배경을 지운 PNG를 만든다. 갤럭시 갤러리 앱의 「배경 지우기」, 사진 길게 눌러 개체 복사 같은 기능을 쓴다. 캐릭터 하나만 남기고, 손이나 책상이 같이 잘리지 않게 한다.
 2. **등록**: 그 작품(원본 사진은 이미 갤러리에 있음)에 붙인다.
    ```bash
-   python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --character-sprite "E:/Downloads/xxx.png" --character-name "이름"
+   python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --character-key "main" --character-sprite "E:/Downloads/xxx.png" --character-name "이름"
    ```
 3. **확인**: 갤러리에서 장착하고 5분 퀘스트 연구소에 들어가 본다. 미니 런도 한 판 해 본다.
 

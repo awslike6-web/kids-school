@@ -31,7 +31,7 @@ test('두 모듈은 document 없는 환경에서 로드하고 닫아도 안전�
 test('민수 장착·저장·포즈 6종·재로드·로스터 순환·해제 복구', () => {
     const { roster, storage } = load();
     const saved = roster.equipGalleryPartner('son', character);
-    assert.deepEqual(Object.keys(saved).sort(), ['artId', 'equippedAt', 'name', 'spriteUrl']);
+    assert.deepEqual(Object.keys(saved).sort(), ['artId', 'charKey', 'equippedAt', 'name', 'spriteUrl']);
     assert.equal(saved.name, character.name);
     assert.equal(typeof saved.equippedAt, 'number');
     assert.deepEqual(JSON.parse(storage.getItem('galleryPartner_son')), plain(saved));
@@ -350,9 +350,9 @@ test('실제 캐릭터 데이터는 아카이브 CDN 계약을 지킨다', () =>
     const { roster } = load();
     const context = { window: {} };
     vm.runInNewContext(readFileSync(new URL('../kids/data/gallery-data.js', import.meta.url), 'utf8'), context);
-    for (const item of context.window.DEFAULT_GALLERY_DATA.filter(item => item.character)) {
-        assert.ok(roster.isValidCharacter(item.character));
-        assert.ok(item.character.spriteUrl.startsWith('https://raw.githubusercontent.com/awslike6-web/kids-archive/main/'));
+    for (const character of context.window.DEFAULT_GALLERY_DATA.flatMap(item => roster.charactersOf(item))) {
+        assert.ok(roster.isValidCharacter(character));
+        assert.ok(character.spriteUrl.startsWith('https://raw.githubusercontent.com/awslike6-web/kids-archive/main/'));
     }
 });
 
@@ -398,9 +398,9 @@ with tempfile.TemporaryDirectory() as tmp:
     text = (data / 'gallery-data.js').read_text(encoding='utf-8')
     items = json.loads(text.split('const DEFAULT_GALLERY_DATA = ', 1)[1].split(';', 1)[0])
     assert len(items) == 7, [item['id'] for item in items]
-    assert sum('character' in item for item in items) == 1
+    assert sum('characters' in item for item in items) == 1
     ok = next(item for item in items if item['id'] == 'art_minsu_ok')
-    assert ok['character']['name'] == '보라 용'
+    assert ok['characters'][0]['name'] == '보라 용'
     target = archive / 'assets/media/minsu/2026_elem_5/minsu_ok_sprite.png'
     with Image.open(target) as image:
         assert max(image.size) == 512, image.size

@@ -115,12 +115,22 @@
             validSprite(character.spriteUrl);
     }
 
+    function charactersOf(item) {
+        const entries = Array.isArray(item?.characters) ? item.characters :
+            item?.characters === undefined && item?.character ? [{ ...item.character, key: 'main' }] : [];
+        const seen = new Set();
+        return entries.slice(0, 6).filter(c => {
+            if (!isValidCharacter(c) || typeof c.key !== 'string' || !/^[a-z0-9_-]{1,32}$/.test(c.key || '') || seen.has(c.key)) return false;
+            seen.add(c.key); return true;
+        });
+    }
+
     function getGalleryPartner(child) {
         if (!Object.hasOwn(PARTNER_KEYS, child)) return null;
         try {
             const value = JSON.parse(localStorage.getItem(PARTNER_KEYS[child]));
             return isValidCharacter(value) && typeof value.artId === 'string' && value.artId.trim() &&
-                Number.isFinite(value.equippedAt) && value.equippedAt > 0 ? value : null;
+                Number.isFinite(value.equippedAt) && value.equippedAt > 0 ? { ...value, charKey: value.charKey ?? 'main' } : null;
         } catch (e) { return null; }
     }
 
@@ -168,7 +178,9 @@
             const url = new URL(spriteUrl, window.location.href);
             spriteUrl = url.pathname + url.search + url.hash;
         }
-        const value = { artId: character.artId, name: character.name.trim(), spriteUrl, equippedAt: Date.now() };
+        const charKey = character.key ?? 'main';
+        if (!/^[a-z0-9_-]{1,32}$/.test(charKey)) return null;
+        const value = { charKey, artId: character.artId, name: character.name.trim(), spriteUrl, equippedAt: Date.now() };
         try {
             localStorage.setItem(PARTNER_KEYS[child], JSON.stringify(value));
             if (child === 'son') localStorage.setItem(STORAGE_KEY, GALLERY_ID);
@@ -328,7 +340,7 @@
 
     window.MonsterRoster = {
         equipGalleryPartner, getGalleryPartner, clearGalleryPartner, isValidCharacter,
-        getRunnerBest, setRunnerBest, withJosa,
+        getRunnerBest, setRunnerBest, withJosa, charactersOf,
         MONSTER_ROSTER,
         MONSTER_ORDER,
         getSelectedMonsterId,
