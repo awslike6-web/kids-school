@@ -126,10 +126,143 @@ test('같은 시드는 같은 월드, 다른 시드는 다른 배치를 만든�
     }
 });
 
+// 장애물 하나를 오른쪽 가장자리에 놓고 실제 step으로 통과까지 진행한다.
+const FRAME_MS = 1000 / 60;
+const ASPECTS = [.45, .55, .8, 1, 1.6, 2.2];
+function jumpTrial(game, source, obstacle, first, second = -1, phase = 0) {
+    const world = { ...source, elapsed: phase, distance: obstacle.x - source.width, hits: 0, score: 0,
+        status: 'running', invincible: 0, player: { ...source.player }, stars: [], obstacles: [{ ...obstacle, hit: false }] };
+    const box = game.hitboxOf(null, world.player.x, world.player.y, world.player.w, world.player.h);
+    const speed = world.speed * (source.child === 'son' && phase >= 30000 ? 1.12 : 1);
+    const last = Math.ceil((source.width + obstacle.w - box.x) / speed * 1000 / FRAME_MS) + 2;
+    for (let frame = 0; frame <= last; frame++) {
+        if (frame === second && world.player.jumps !== 1) return false;
+        game.step(world, { jump: frame === first || frame === second }, FRAME_MS);
+        if (world.hits) return false;
+    }
+    return world.obstacles[0].x + obstacle.w - world.distance < box.x;
+}
+
+function findJumpPlan(game, world, obstacle, maxJumps, phase = 0) {
+    const box = game.hitboxOf(null, world.player.x, world.player.y, world.player.w, world.player.h);
+    const speed = world.speed * (world.child === 'son' && phase >= 30000 ? 1.12 : 1);
+    const contact = Math.ceil((world.width - box.x - box.w) / speed * 1000 / FRAME_MS);
+    for (let first = contact; first >= 0; first--)
+        if (jumpTrial(game, world, obstacle, first, -1, phase)) return [first, -1];
+    if (maxJumps === 1) return null;
+    // 먼저 정점 부근의 2단 점프를 시도하되 나머지 공중 프레임도 빠짐없이 탐색한다.
+    const delays = [40, ...Array.from({ length: 90 }, (_, i) => i + 1).filter(n => n !== 40)];
+    for (let first = contact; first >= 0; first--)
+        for (const delay of delays)
+            if (jumpTrial(game, world, obstacle, first, first + delay, phase)) return [first, first + delay];
+    return null;
+}
+
+test('전수 통과: 세로·가로 6비율 × 그림 3비율 × 3시드, 민수 가속 전후', t => {
+    const { game } = load();
+    let worlds = 0, obstacles = 0;
+    for (const aspect of ASPECTS) for (const spriteAspect of [.5, 1, 1.6]) for (const seed of [1, 42, 20261029]) {
+        for (const child of ['daughter', 'son']) for (const phase of child === 'son' ? [0, 30001] : [0]) {
+            const world = game.createWorld(seed, { child, aspect, spriteAspect });
+            world.player.w = .18 * spriteAspect;
+            const sorted = [...world.obstacles].sort((a, b) => b.h - a.h);
+            let plan = null;
+            for (const obstacle of sorted) {
+                if (!plan || !jumpTrial(game, world, obstacle, ...plan, phase))
+                    plan = findJumpPlan(game, world, obstacle, child === 'daughter' ? 1 : 2, phase);
+                assert.ok(plan, `통과 불가: ${JSON.stringify({ child, aspect, spriteAspect, seed, phase, height: obstacle.h })}`);
+                assert.ok(jumpTrial(game, world, obstacle, ...plan, phase));
+                if (child === 'daughter') assert.equal(plan[1], -1);
+                obstacles++;
+            }
+            worlds++;
+        }
+    }
+    t.diagnostic(`${worlds}개 월드·장애물 ${obstacles}개 전수 통과`);
+});
+
+test('민수의 높은 장애물은 1단으로 불가능하고 2단으로 통과한다', () => {
+    const { game } = load();
+    const world = game.createWorld(42, { child: 'son', aspect: 1.6, spriteAspect: 1 });
+    const obstacle = [...world.obstacles].sort((a, b) => b.h - a.h)[0];
+    assert.equal(findJumpPlan(game, world, obstacle, 1), null);
+    const plan = findJumpPlan(game, world, obstacle, 2);
+    assert.ok(plan && plan[1] > plan[0]);
+    assert.ok(jumpTrial(game, world, obstacle, ...plan));
+});
+
+test('반응 시간은 판정 상자 앞쪽 기준으로도 민서 1.6초·민수 1.2초 이상이다', () => {
+    const { game } = load();
+    for (const aspect of ASPECTS) for (const spriteAspect of [.5, 1, 1.6]) for (const child of ['daughter', 'son']) {
+        const world = game.createWorld(1, { child, aspect, spriteAspect });
+        const box = game.hitboxOf(null, world.player.x, world.player.y, world.player.w, world.player.h);
+        for (const boost of child === 'son' ? [1, 1.12] : [1]) {
+            const speed = world.speed * boost, minimum = child === 'daughter' ? 1.6 : 1.2;
+            assert.ok((aspect - world.player.x) / speed >= minimum);
+            assert.ok((aspect - box.x - box.w) / speed >= minimum, `${child}/${aspect}/${spriteAspect}/${boost}`);
+        }
+    }
+});
+
+test('리사이즈는 상대 거리·통과 상태·공중 상태를 보존하고 새 너비로 속도를 계산한다', () => {
+    const { game } = load();
+    const world = game.createWorld(42, { child: 'son', aspect: 1.6, spriteAspect: 1.6 });
+    for (let i = 0; i < 150; i++) game.step(world, {}, FRAME_MS);
+    game.step(world, { jump: true }, FRAME_MS);
+    world.obstacles[0].x = world.distance + world.player.x - .3;
+    world.obstacles[0].hit = true;
+    world.stars[0].taken = true;
+    const gaps = items => items.map(item => item.x - world.distance - world.player.x);
+    const beforeObstacles = gaps(world.obstacles), beforeStars = gaps(world.stars);
+    const beforePlayer = { ...world.player }, distance = world.distance;
+    for (const aspect of [.55, 2.2, .45, 1.6]) {
+        game.resizeWorld(world, aspect);
+        assert.equal(world.width, aspect);
+        assert.equal(world.distance, distance);
+        for (const [i, gap] of gaps(world.obstacles).entries()) assert.ok(Math.abs(gap - beforeObstacles[i]) < 1e-10);
+        for (const [i, gap] of gaps(world.stars).entries()) assert.ok(Math.abs(gap - beforeStars[i]) < 1e-10);
+        assert.ok(world.obstacles[0].x + world.obstacles[0].w - world.distance < world.player.x);
+        assert.equal(world.obstacles[0].hit, true);
+        assert.equal(world.stars[0].taken, true);
+        assert.equal(world.player.y, beforePlayer.y);
+        assert.equal(world.player.vy, beforePlayer.vy);
+        assert.equal(world.player.jumps, beforePlayer.jumps);
+        assert.equal(world.speed, game.createWorld(1, { child: 'son', aspect, spriteAspect: 1.6 }).speed);
+    }
+});
+
+test('속도 범위와 30초 가속은 실제 이동 거리에도 적용된다', () => {
+    const { game } = load();
+    for (const aspect of ASPECTS) for (const child of ['daughter', 'son']) {
+        const world = game.createWorld(1, { child, aspect });
+        world.obstacles = []; world.stars = [];
+        const [minimum, maximum] = child === 'daughter' ? [.15, .38] : [.18, .58];
+        assert.ok(world.speed >= minimum && world.speed <= maximum);
+        game.step(world, {}, 20);
+        const before = world.distance;
+        world.elapsed = 30001;
+        game.step(world, {}, 20);
+        const ratio = (world.distance - before) / before;
+        assert.ok(Math.abs(ratio - (child === 'son' ? 1.12 : 1)) < 1e-10);
+    }
+});
+
+test('조사: 받침·모음·비한글 이름과 네 가지 짝을 한 함수로 처리한다', () => {
+    const { roster } = load();
+    for (const [name, pair, result] of [['드래곤', '이/가', '드래곤이'], ['드래곤', '와/과', '드래곤과'],
+        ['코코', '이/가', '코코가'], ['코코', '와/과', '코코와'], ['Rex', '이/가', 'Rex이(가)'],
+        ['봉돔돌', '이/가', '봉돔돌이'], ['코코', '을/를', '코코를'], ['드래곤', '을/를', '드래곤을'],
+        ['코코', '은/는', '코코는'], ['드래곤', '은/는', '드래곤은'], ['🦖', '와/과', '🦖와(과)']])
+        assert.equal(roster.withJosa(name, pair), result);
+    roster.equipGalleryPartner('son', { ...character, name: '드래곤' });
+    assert.equal(roster.getRunnerReaction('stageStart').speech, '드래곤이 함께할게요!');
+    assert.equal(roster.getLabTapResponse(1).speech, '드래곤과 함께 시작해요!');
+});
+
 test('두 프로필 모두 입력 없이 60초를 채우고 완주한다', () => {
     const { game } = load();
-    for (const child of ['son', 'daughter']) {
-        const world = game.createWorld(17, child);
+    for (const child of ['son', 'daughter']) for (const aspect of [.55, 1.6]) {
+        const world = game.createWorld(17, { child, aspect });
         for (let i = 0; i < 1200; i++) game.step(world, {}, 50);
         assert.equal(world.elapsed, 60000);
         assert.equal(world.status, 'finished');
@@ -161,7 +294,7 @@ test('충돌은 별 한 개만 줄이고 0 미만·무적 중 추가 감소를 �
     assert.equal(world.score, 0);
 });
 
-test('별은 한 번만 획득하고 판정 상자는 그림의 70%다', () => {
+test('별은 한 번만 획득하고 판정 상자의 높이 70%·가로 상한을 적용한다', () => {
     const { game } = load();
     const world = game.createWorld(1);
     world.obstacles = [];
@@ -170,7 +303,10 @@ test('별은 한 번만 획득하고 판정 상자는 그림의 70%다', () => {
     assert.equal(world.score, 1);
     game.step(world, {}, 1);
     assert.equal(world.score, 1);
-    assert.deepEqual(plain(game.hitboxOf(null, 10, 20, 100, 200)), { x: 25, y: 50, w: 70, h: 140 });
+    const small = game.hitboxOf(null, 0, 0, .1, .2), wide = game.hitboxOf(null, 0, 0, .288, .18);
+    assert.ok(Math.abs(small.w - .07) < 1e-10 && Math.abs(small.h - .14) < 1e-10);
+    assert.equal(wide.w, .08);
+    assert.ok(Math.abs(wide.x + wide.w / 2 - .144) < 1e-10);
 });
 
 test('공중 두 번 점프 후 세 번째는 거부, 착지하면 다시 가능하다', () => {
@@ -186,7 +322,7 @@ test('공중 두 번 점프 후 세 번째는 거부, 착지하면 다시 가능
     game.step(world, { jump: true }, 10);
     assert.equal(world.player.jumps, 2);
     assert.ok(world.player.vy > velocity);
-    for (let i = 0; i < 60; i++) game.step(world, {}, 20);
+    for (let i = 0; i < 100; i++) game.step(world, {}, 20);
     assert.equal(world.player.jumps, 0);
 });
 

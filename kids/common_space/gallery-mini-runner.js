@@ -1,37 +1,57 @@
 /** 갤러리 캐릭터 60초 미니 런. 놀이·장착 화면만 담당하며 학습·노션에는 쓰지 않는다. */
 (() => {
     const PROFILES = {
-        daughter: { speed: .25, gap: 2.6, obstacle: .10, starGap: .65 },
-        son: { speed: .40, gap: 2.0, obstacle: .25, starGap: .95 }
+        daughter: { speed: .25, minSpeed: .15, maxSpeed: .38, gap: 2.6, obstacle: .10, starGap: .65 },
+        son: { speed: .40, minSpeed: .18, maxSpeed: .58, gap: 2.0, obstacle: .25, starGap: .95 }
     };
-    const DURATION = 60000, GRAVITY = 3, JUMP = 1.1, GROUND = .83;
+    const DURATION = 60000, GRAVITY = .95, JUMP = .62, GROUND = .83;
+    const OBSTACLE_WIDTH = .05, MAX_HITBOX_WIDTH = .08, PLAYER_HEIGHT = .18;
+    const PLAYER_ANCHOR = .16, LEFT_MARGIN = .01, BOOST = 1.12, BOOST_AT = 30000;
+    const speedOf = (width, child) => Math.max(PROFILES[child].minSpeed,
+        Math.min(PROFILES[child].maxSpeed, width * PROFILES[child].speed));
+    const playerX = (width, spriteWidth) => Math.max(LEFT_MARGIN, width * PLAYER_ANCHOR - spriteWidth / 2);
     let active = null;
     let toast = null;
 
-    // 모든 물리 좌표의 단위는 화면 높이. 속도만 화면 너비 비율로 정한다.
+    // 물리는 화면 높이 단위. 좁은 화면의 통과 거리와 넓은 화면의 속도 상한을 보장한다.
     function createWorld(seed = 1, profile = 'son') {
-        const child = (typeof profile === 'string' ? profile : profile.child) === 'daughter' ? 'daughter' : 'son';
-        const width = Math.max(.35, Math.min(4, Number(profile.aspect) || 1.6));
+        const settings = typeof profile === 'string' ? { child: profile } : profile || {};
+        const child = settings.child === 'daughter' ? 'daughter' : 'son';
+        const width = Math.max(.35, Math.min(4, Number(settings.aspect) || 1.6));
+        const spriteWidth = PLAYER_HEIGHT * Math.max(.01, Number(settings.spriteAspect) || 1);
         const config = PROFILES[child];
         let state = Number(seed) >>> 0;
         const random = () => { state = (Math.imul(state, 1664525) + 1013904223) >>> 0; return state / 4294967296; };
-        const speed = width * config.speed;
+        const speed = speedOf(width, child);
         const obstacles = [], stars = [];
         for (let time = 3; time < 72; time += config.gap + random()) {
             const h = child === 'daughter' ? .06 + random() * .04 : .08 + random() * (config.obstacle - .08);
-            obstacles.push({ x: width + time * speed, y: GROUND - h, w: .08, h, hit: false });
+            obstacles.push({ x: width + time * speed, y: GROUND - h, w: OBSTACLE_WIDTH, h, hit: false });
         }
         for (let time = .7; time < 72; time += config.starGap) {
             stars.push({ x: width + time * speed, y: GROUND - .06 - random() * (child === 'daughter' ? .06 : .35),
                 w: .045, h: .045, taken: false });
         }
         return { seed, child, width, speed, elapsed: 0, distance: 0, score: 0, status: 'running',
-            invincible: 0, hits: 0, player: { x: width * .16, y: GROUND - .18, w: .14, h: .18, vy: 0, jumps: 0 },
+            invincible: 0, hits: 0, player: { x: playerX(width, spriteWidth), y: GROUND - PLAYER_HEIGHT,
+                w: spriteWidth, h: PLAYER_HEIGHT, vy: 0, jumps: 0 },
             obstacles, stars };
     }
 
     function hitboxOf(sprite, x, y, w, h) {
-        return { x: x + w * .15, y: y + h * .15, w: w * .7, h: h * .7 };
+        const boxWidth = Math.min(w * .7, MAX_HITBOX_WIDTH);
+        return { x: x + (w - boxWidth) / 2, y: y + h * .15, w: boxWidth, h: h * .7 };
+    }
+
+    function resizeWorld(world, aspect) {
+        if (!Number.isFinite(aspect) || aspect <= 0 || Math.abs(aspect - world.width) <= .001) return world;
+        const nextX = playerX(aspect, world.player.w), shift = nextX - world.player.x;
+        // 진행 거리는 바꾸지 않고 같은 양만큼 옮겨 통과 여부와 접근 거리를 보존한다.
+        world.obstacles.forEach(item => { item.x += shift; });
+        world.stars.forEach(item => { item.x += shift; });
+        world.player.x = nextX;
+        world.width = aspect; world.speed = speedOf(aspect, world.child);
+        return world;
     }
 
     function overlaps(a, b) {
@@ -49,7 +69,7 @@
         p.vy += GRAVITY * dt;
         p.y += p.vy * dt;
         if (p.y + p.h >= GROUND) { p.y = GROUND - p.h; p.vy = 0; p.jumps = 0; }
-        world.distance += world.speed * dt * (world.child === 'son' && world.elapsed >= 30000 ? 1.12 : 1);
+        world.distance += world.speed * dt * (world.child === 'son' && world.elapsed >= BOOST_AT ? BOOST : 1);
         const box = hitboxOf(null, p.x, p.y, p.w, p.h);
         for (const obstacle of world.obstacles) {
             const rect = { ...obstacle, x: obstacle.x - world.distance };
@@ -143,7 +163,7 @@
                     roster.equipGalleryPartner(child, { ...item.character, artId: item.id });
                 if (!result) { notify('이 기기에 저장하지 못했어요. 저장 공간을 확인해 주세요.'); return; }
                 if (!equipped && typeof window.fairyPraise === 'function') window.fairyPraise();
-                notify(equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${item.character.name}가 함께해요!`);
+                notify(equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${roster.withJosa(item.character.name, '이/가')} 함께해요!`);
                 bindModal(item, { available, viewer: who });
             };
             host.appendChild(button);
@@ -179,14 +199,7 @@
         const { canvas, world: w, image, ctx } = session;
         const width = canvas.clientWidth, height = canvas.clientHeight;
         if (!width || !height || !ctx) return;
-        const aspect = width / height;
-        if (Math.abs(aspect - w.width) > .001) {
-            const factor = aspect / w.width;
-            w.player.x *= factor;
-            w.obstacles.forEach(item => { item.x *= factor; });
-            w.stars.forEach(item => { item.x *= factor; });
-            w.speed *= factor; w.distance *= factor; w.width = aspect;
-        }
+        resizeWorld(w, width / height);
         const ratio = Math.min(window.devicePixelRatio || 1, 2);
         if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
             canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
@@ -298,8 +311,8 @@
 
     function restart(session) {
         const aspect = session.canvas.clientWidth / Math.max(1, session.canvas.clientHeight);
-        session.world = createWorld(Date.now(), { child: session.child, aspect });
-        session.world.player.w = .18 * session.image.naturalWidth / session.image.naturalHeight;
+        session.world = createWorld(Date.now(), { child: session.child, aspect,
+            spriteAspect: session.image.naturalWidth / session.image.naturalHeight });
         session.pause.disabled = false;
         resume(session);
     }
@@ -317,7 +330,7 @@
             <h2 id="gmr-title"></h2><span data-hud></span><button type="button" data-pause disabled>잠깐 쉬기</button></header>
             <div class="gmr-stage"><canvas aria-label="화면을 누르면 점프해요"></canvas>
             <div class="gmr-message" role="status"></div></div><p>눌러서 점프! 한 번 더 누르면 더 높이! · 스페이스 / ↑</p>`;
-        root.querySelector('h2').textContent = `${item.character.name}와 달리기`;
+        root.querySelector('h2').textContent = `${window.MonsterRoster.withJosa(item.character.name, '와/과')} 달리기`;
         const previousFocus = document.activeElement, overflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden'; document.body.appendChild(root);
         const canvas = root.querySelector('canvas'), image = new Image();
@@ -381,5 +394,5 @@
         if (typeof session.onClose === 'function') session.onClose();
     }
 
-    window.GalleryMiniRunner = { start, close, createWorld, step, hitboxOf, bindModal };
+    window.GalleryMiniRunner = { start, close, createWorld, step, hitboxOf, resizeWorld, bindModal };
 })();

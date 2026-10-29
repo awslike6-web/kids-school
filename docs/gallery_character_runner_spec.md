@@ -1,6 +1,6 @@
 # 🏃 꿈나무 갤러리 「자작 캐릭터 파트너 장착 & 1분 미니 런」 기능 명세서 (Gallery Character & Mini Runner Spec)
 
-> **문서 버전**: v2.0 (2026-10-29 구현)
+> **문서 버전**: v2.1 (2026-10-29 세로 화면 통과·조사 보완)
 > **상태**: 구현 완료 (2026-10-29). 공부방 A 검증 후 관제탑 B를 구현·검증했다. 실제 콘텐츠 등록·운영 노션 쓰기·main 병합/배포는 포함하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(§5 이미지 무결성, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 문서**: [`docs/gallery_spot_diff_spec.md`](gallery_spot_diff_spec.md)(같은 방식의 선택 필드·빌더·등록 옵션 선례), [`docs/gallery_archive_spec.md`](gallery_archive_spec.md), [`docs/character_studio_handover.md`](character_studio_handover.md)(캐릭터 그래픽 규격·남매 테마), `kids/core/CORE_CATALOG.md`의 `monster_roster.js` 절
@@ -24,7 +24,7 @@
 
 ---
 
-## 2. 현재 구조 (2026-10-29 확인한 사실)
+## 2. 도입 전 구조 (2026-10-29 확인한 사실)
 
 - **민수 파트너**: `kids/subjects/quest/monster_roster.js`(234줄, 전역 `MonsterRoster`). `MONSTER_ROSTER`에 고정 2종(`clay_bite`, `cottun_bongdomdol`)이 있고, 각각 포즈 6종(`idle/greet/walk_left/walk_right/rage/roar`)과 대사(`labDialogues`, `runnerDialogues`)를 가진다. 선택은 `localStorage('selectedMonster')`에 **몬스터 ID**로 저장한다(남매 구분 없음. 민서 화면은 로스터를 쓰지 않음).
   - 연구소: `monster_lab_controller.js`(725줄)의 `renderActivePartnerMonster`가 `#monsterImg`를 그린다. 민서면 바로 돌아간다.
@@ -154,7 +154,8 @@ GalleryMiniRunner.close()                            // rAF·리스너·타이�
 // 시험용 순수 함수 (DOM 없이 동작)
 GalleryMiniRunner.createWorld(seed, profile)         // 결정적 난수로 장애물·별 배치
 GalleryMiniRunner.step(world, input, dtMs)           // 물리·충돌·점수 한 단계 진행, world를 돌려줌
-GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판정 상자
+GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 높이 70%, 가로 min(w×.7, .08), 가운데 정렬
+GalleryMiniRunner.resizeWorld(world, aspect)       // 상대 거리·통과 상태를 보존하고 너비·속도 갱신
 ```
 **규칙**
 1. **조작**: 화면 아무 곳 `pointerdown` 또는 스페이스·위 화살표 키로 점프한다. 공중에서 한 번 더 누르면 2단 점프가 된다. 길게 누를 필요는 없다.
@@ -163,10 +164,14 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 4. **난이도 프로필**: 
    | | 민서 | 민수 |
    | :--- | :--- | :--- |
-   | 속도 | 느림 (화면 너비의 약 25%/초) | 보통 (약 40%/초), 30초 뒤 조금 빨라짐 |
+   | 속도(높이/초) | `clamp(너비/높이 × .25, .15, .38)` | `clamp(너비/높이 × .40, .18, .58)`, 30초부터 ×1.12 |
    | 장애물 간격 | 넓음, 1단 점프로 모두 넘을 수 있음 | 가끔 2단 점프가 필요한 높이 |
    | 별 | 많음, 낮은 곳 위주 | 높은 곳에도 배치 |
    - 구체 수치는 파일 맨 위 상수로 둔다. 화면 크기와 상관없이 같은 체감이 되도록 **화면 높이 기준 비율 좌표**로 물리를 계산한다.
+   - 중력 `.95`, 점프 초기속도 `.62`, 장애물 폭 `.05`, 캐릭터 높이 `.18`, 판정 높이는 그림의 70%·가로 폭은 최대 `.08`이다. 한 번 점프의 이론 체공은 약 1.305초(60Hz 시험에서 1.30초), 상승은 약 `.202`다.
+   - 캐릭터 가운데는 너비의 16% 위치를 기준으로 하고, 그림 왼쪽 여백을 최소 `.01`로 둔다. 큰 그림의 판정 폭을 제한해 세로 화면에서도 통과 거리를 확보한다.
+   - 화면 비율 .45~2.2·그림 비율 .5~1.6에서 실제 판정 상자 앞쪽까지의 반응 시간은 민서 1.6초·민수 1.2초 이상이다. 민수는 30초 가속 이후도 검사한다.
+   - 리사이즈는 `resizeWorld`로 캐릭터와 장애물/별의 상대 거리를 보존한다. 진행 거리·공중 상태·이미 통과하거나 획득한 상태는 유지하고 새 너비에서 속도를 다시 계산한다. 기존 `factor` 배율 곱셈은 쓰지 않는다.
 5. **테마** (지금 보는 사람 기준, `character_studio_handover.md` 색상):
    - 민수: 어두운 사이버 퍼플 바탕 + 네온 그린(`#00ff9d`) 격자가 뒤로 흐름. 장애물은 네온 블록, 별 대신 「에너지 코어」.
    - 민서: 크림·파스텔 하늘 + 구름이 흐름. 장애물은 둥근 쿠션, 별은 별사탕·하트.
@@ -176,6 +181,7 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 8. **소리**: 별을 먹을 때는 Web Audio로 짧은 「띵」을 낸다(0.1초 미만). 부딪힐 때는 부드러운 「뽕」을 낸다. fairy-engine의 효과음 설정(`isSafeSfxEnabled` 등 기존 함수)이 꺼져 있으면 내지 않는다. 한국어 안내 음성이 필요하면 `speakFairyTTS`만 쓴다(`speechSynthesis` 직접 호출 금지).
 9. **성능**: 캔버스 해상도는 `CSS 크기 × min(devicePixelRatio, 2)`이다. 일시정지·끝 화면·숨김 상태에서는 rAF를 멈춘다(가만히 있을 때 CPU 0%). 프레임 간격(`dt`)은 최대 50ms로 자른다(탭 전환 뒤 순간이동 방지).
 10. **접근성**: 오버레이 `role="dialog"`, Esc로 닫기, 포커스 가두기. 버튼은 최소 44px.
+11. **이름의 조사**: `MonsterRoster.withJosa(name, pair)` 한 곳에서 `이/가`, `와/과`, `을/를`, `은/는`을 처리한다. 한글 종성은 `(code−0xAC00)%28`로 판단하고 비한글 끝 글자는 `이(가)`처럼 병기한다. 로스터 대사·장착 안내·제목에 모두 적용한다.
 
 ---
 
@@ -192,7 +198,9 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 
 ## 7. 시험과 확인 결과 (2026-10-29)
 
-- `node --test "tests/**/*.test.mjs"`: 총 75건, 통과 73·실패 0·기존 건너뜀 1·기존 TODO 1. 신규 시험 14건 통과.
+- `node --test "tests/**/*.test.mjs"`: 총 81건, 통과 79·실패 0·기존 건너뜀 1·기존 TODO 1. 캐릭터 시험 20건 통과.
+- 보완 전 시험이 세로 .45에서 민서 장애물 통과 불가를 재현했다. 화면 비율 `[.45,.55,.8,1,1.6,2.2]` × 그림 비율 `[.5,1,1.6]` × 시드 `[1,42,20261029]`, 민수 가속 전후를 합친 162개 월드의 장애물 4,248개를 한 개씩 분리한 사본 월드에서 실제 `step`과 점프 프레임 탐색으로 검사했다. 민서는 1단, 민수는 1단/2단으로 전수 통과했다. 높은 민수 장애물은 1단 통과 불가·2단 통과 가능도 확인했다.
+- 반응 시간(판정 상자 앞쪽 기준)·가속 실제 이동량·리사이즈 전후 거리/통과/공중 상태 보존과 조사 4쌍을 검사한다. 속도를 예전 `width * config.speed`로 되돌리면 전수 통과 시험이 실패하는지도 확인한 뒤 복원한다.
 - CI는 `.github/workflows/regression.yml`에서 Python 3.14와 로컬 검증 버전 Pillow 12.3.0을 먼저 준비합니다. 초기 CI의 Pillow 누락 오류를 수정했고, Node 20 폐기 경고가 있던 checkout/setup-node를 현재 v7로 갱신했습니다.
 - 로스터·순수 물리·실제 데이터 CDN 계약과 임시 빌더의 투명 PNG/불투명/JPG/13자 이름/파일 없음/완전 투명을 검사한다. 정상 결과의 알파·크롭·긴 변 512px·EXIF 회전과 포트폴리오 필드 미포함을 확인한다.
 - 충돌 즉시 게임 종료·별 음수 허용·해제 시 선택 미복구를 각각 주입하면 시험이 실패함을 확인한 뒤 원복했다.
@@ -200,12 +208,13 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 - 런타임 콘솔 오류 0·예상 밖 리소스 누락 0·`__blockedWrites` 0. 이미지 오류 사례의 의도된 404는 별도 확인했다. 소리는 함수 호출을 검사했으며 실기기 스피커/청취는 미확인이다.
 - 관제탑 `scripts/test_gallery_registration_options.py`: 9건 통과. 메타 없는 기존 작품·제목 없는 부분 병합·옵션 일부 갱신·잘못된 파일/이름/작가·없는 ID·기존 특수 작품 ID·기존 틀린그림 동작을 확인했다. 큐·API·Git을 모의하고 `--no-push`만 사용해 노션·외부 API·원격 Git 호출은 0회다.
 - 시험 그림은 기존 `kids/assets/monsters/cottun_bongdomdol/idle.png`를 브라우저 응답에만 주입했다. 실제 `gallery-data.js`·메타·아카이브는 변경하지 않았다. 화면 결과는 저장소 밖 scratch에 둔다. `walkthrough.md`는 만들지 않는다.
+- 보완 화면 시험: 쓰기 차단 서버와 모의 외부 응답에서 360×800·1280×800, 민서 1단/민수 2단 점프의 실제 통과를 연속 캡처로 직접 확인했다. 헤드리스 Chrome의 실제 rAF를 사용했으며 `document.visibilityState='visible'`·실제 프레임 수/경과 시간 증가·충돌 0·노션 쓰기 0을 확인했다. 시계와 rAF는 대체하지 않았다. 화면 시험용 시드/작품/진단 참조만 응답에 주입했고 저장소의 실제 데이터에는 쓰지 않았다.
 
 ---
 
 ## 8. 공개 API 보완
 
-- 로스터의 `getRunnerBest(child)`/`setRunnerBest(child, score)`가 최고 기록 키의 단일 원천이다. 낮은 값은 기존 최고 기록을 덮어쓰지 않는다. 부모 게임은 자녀 기록을 바꾸지 않는다.
+- 로스터의 `getRunnerBest(child)`/`setRunnerBest(child, score)`가 최고 기록 키의 단일 원천이다. 낮은 값은 기존 최고 기록을 덮어쓰지 않는다. 부모 게임은 자녀 기록을 바꾸지 않는다. `withJosa(name, pair)`는 이름에 조사를 붙이는 공통 함수다.
 - `GalleryMiniRunner.bindModal(item, {available, viewer})`가 장착/해제·부모 버튼·안내 토스트를 구성한다. 모달 매니저에는 호출만 둔다.
 - 상대 sprite 주소는 장착 시 같은 출처 기준 경로로 고정해 페이지 디렉터리 차이를 없앤다. 검증은 HTTPS 또는 같은 출처 상대 주소를 허용하며 실제 생성 데이터는 아카이브 CDN이어야 한다.
 
@@ -213,7 +222,7 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 
 ## 9. 배포와 저장 한계
 
-- 로스터·컨트롤러·러너·모달의 실제 로드 지점은 `?v=20261029-character`로 갱신한다.
+- 로스터와 미니 런의 실제 로드 지점은 `?v=20261029-character-fix`로 갱신한다. 기존 컨트롤러·러너·모달은 도입 버전 `20261029-character`를 유지한다.
 - 갤러리 파트너와 최고 기록은 현재 브라우저/기기의 localStorage에만 남는다. 저장 공간 차단 시 저장 실패를 안내하며 장착 완료로 표시하지 않는다.
 - 실제 자작 캐릭터 콘텐츠 등록, 운영 노션 쓰기, 기기 간 동기화는 수행하지 않았다.
 

@@ -124,6 +124,17 @@
         } catch (e) { return null; }
     }
 
+    function withJosa(name, pair) {
+        const text = String(name ?? '').trim();
+        const pairs = { '이/가': ['이', '가', '이(가)'], '와/과': ['과', '와', '와(과)'],
+            '을/를': ['을', '를', '을(를)'], '은/는': ['은', '는', '은(는)'] };
+        const choices = pairs[pair];
+        if (!text || !choices) return text;
+        const code = Array.from(text).at(-1).codePointAt(0);
+        const suffix = code >= 0xAC00 && code <= 0xD7A3 ? choices[(code - 0xAC00) % 28 ? 0 : 1] : choices[2];
+        return text + suffix;
+    }
+
     function refreshGalleryMonster() {
         const partner = getGalleryPartner('son');
         if (!partner) {
@@ -138,10 +149,10 @@
             code: 'GALLERY // PARTNER', badgeText: `자작: ${name}`, hasBackground: false,
             poses: Object.fromEntries(['idle', 'greet', 'walk_left', 'walk_right', 'rage', 'roar']
                 .map(pose => [pose, partner.spriteUrl])),
-            labDialogues: { idle: `${name} 출격 준비 완료! ⚡`, greet: `${name}와 함께 시작해요!`,
-                walk: [`${name}와 천천히 준비해요!`, '어느 과목부터 함께해 볼까?'],
-                rage: '에너지가 가득해요! ✨', roar: `${name}와 함께 출발!` },
-            runnerDialogues: { stageStart: `${name}가 함께할게요!`,
+            labDialogues: { idle: `${name} 출격 준비 완료! ⚡`, greet: `${withJosa(name, '와/과')} 함께 시작해요!`,
+                walk: [`${withJosa(name, '와/과')} 천천히 준비해요!`, '어느 과목부터 함께해 볼까?'],
+                rage: '에너지가 가득해요! ✨', roar: `${withJosa(name, '와/과')} 함께 출발!` },
+            runnerDialogues: { stageStart: `${withJosa(name, '이/가')} 함께할게요!`,
                 correct: ['멋지게 해냈어요! 🙌', '차근차근 잘하고 있어요!'],
                 encourage: ['괜찮아요! 힌트를 보고 다시 해봐요. 🌱'], clear: '끝까지 함께했어요! 🎉' }
         };
@@ -317,7 +328,7 @@
 
     window.MonsterRoster = {
         equipGalleryPartner, getGalleryPartner, clearGalleryPartner, isValidCharacter,
-        getRunnerBest, setRunnerBest,
+        getRunnerBest, setRunnerBest, withJosa,
         MONSTER_ROSTER,
         MONSTER_ORDER,
         getSelectedMonsterId,
