@@ -27,7 +27,11 @@ const DEFAULT_GALLERY_DATA = [
       "star": 0,
       "trophy": 0
     },
-    "comments": []
+    "comments": [],
+    "character": {
+      "spriteUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261029_3d_characters_sprite.png",
+      "name": "달리는 민서"
+    }
   },
   {
     "id": "art_minsu_20261028_paldo_bibimmyeon",

@@ -235,6 +235,10 @@
       "20261029_3d_track_bust.png",
       "20261029_3d_knit_bust.png",
       "20261029_3d_knit_turnaround.png"
-    ]
+    ],
+    "character": {
+      "name": "달리는 민서",
+      "sprite": "20261029_3d_characters_sprite.png"
+    }
   }
 }
