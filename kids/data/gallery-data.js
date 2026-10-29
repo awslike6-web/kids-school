@@ -1021,7 +1021,36 @@ const DEFAULT_GALLERY_DATA = [
       "star": 0,
       "trophy": 0
     },
-    "comments": []
+    "comments": [],
+    "spotDiff": {
+      "modifiedImageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_204628_diff.jpg",
+      "spots": [
+        {
+          "x": 0.52,
+          "y": 0.69,
+          "r": 0.1,
+          "hint": "대문 지붕이 짚으로 바뀌었어요"
+        },
+        {
+          "x": 0.64,
+          "y": 0.65,
+          "r": 0.09,
+          "hint": "강아지가 가운데로 왔어요"
+        },
+        {
+          "x": 0.85,
+          "y": 0.66,
+          "r": 0.12,
+          "hint": "아저씨가 오른쪽으로 갔어요"
+        },
+        {
+          "x": 0.16,
+          "y": 0.68,
+          "r": 0.12,
+          "hint": "왼쪽에 비석이 생겼어요"
+        }
+      ]
+    }
   },
   {
     "id": "art_minseo_20260906_204800",
