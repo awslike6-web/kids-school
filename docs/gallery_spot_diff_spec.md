@@ -1,20 +1,10 @@
 # 🔍 꿈나무 갤러리 「틀린그림찾기」 작업 명세서 (Gallery Spot-Diff Spec)
 
-> **문서 버전**: v1.0 (2026-10-29 작성, 구현 전)
-> **상태**: 작업 지시서. 구현이 끝나면 이 문서를 기능 명세서로 고쳐 쓰고(§9), 상태를 「구현 완료」로 바꾼다.
+> **문서 버전**: v2.0 (2026-10-29 구현)
+> **상태**: 구현 완료 (2026-10-29). 실제 작품 콘텐츠 등록·운영 노션 쓰기 시험은 포함하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(특히 §5 이미지 무결성, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 명세서**: [`docs/gallery_archive_spec.md`](gallery_archive_spec.md) (작품 등록 흐름·노션 저장 규칙)
 > **작업자 참고**: 이 문서만 보고 작업할 수 있게 썼다. 그래도 코드를 쓰기 전에 `AGENTS.md`에 적힌 순서대로 `GEMINI.md`와 `kids/core/CORE_CATALOG.md`를 먼저 읽는다.
-
----
-
-## 0. 작업 방식 (ASDST)
-
-- 코드를 쓰기 전에 이 문서의 §1~§8을 기준으로 **실행 계획을 먼저 보고하고 승인을 기다린다.** 계획에는 고칠 파일, 파일별 예상 줄 수, 이 문서와 다르게 하려는 점(있다면 이유)을 적는다.
-- 작업은 **A(공부방 저장소)**와 **B(관제탑 저장소)** 두 묶음이다. 저장소가 둘이라 커밋도 따로 한다.
-  - A: `G:/master-tower/kids-school-main` (자체 git 저장소, 공부방)
-  - B: `G:/master-tower` (관제탑 저장소, `scripts/sync_quick_upload.py`가 있음)
-- A를 먼저 끝내고 시험까지 통과시킨 뒤 B를 한다.
 
 ---
 
@@ -24,37 +14,14 @@
 
 ---
 
-## 2. S (Scope · 범위)
+## 2. 구성 파일
 
-### 새로 만드는 파일
-| 파일 | 내용 | 목표 줄 수 |
-| :--- | :--- | :--- |
-| `kids/common_space/gallery-spot-diff.js` | 놀이 화면 + 관리자 좌표 추출기 + 판정 순수 함수. IIFE, 전역 `window.GallerySpotDiff` 하나만 노출. CSS는 이 파일이 `<style id="gsd-style">` 한 번만 넣는다 | 400~600 (상한 800 미만) |
-| `tests/gallery-spot-diff.test.mjs` | 판정·검증 순수 함수 시험 + `gallery-data.js`의 `spotDiff` 계약 시험 | 제한 없음 |
-
-> 모듈 위치를 `kids/core/`가 아니라 `kids/common_space/`로 하는 이유: 갤러리에서만 쓰는 모듈이고, 같은 폴더의 `gallery_controller.js`, `gallery-modal-manager.js`와 같은 구조다.
-> CSS를 별도 파일로 만들지 않는 이유: `gallery.css`는 이미 860줄이라 더 붙이면 안 되고, 100줄 남짓한 CSS 파일을 따로 두면 파일만 잘게 쪼개진다.
-
-### 고치는 파일 (A: 공부방)
-| 파일 | 고칠 내용 | 한도 |
-| :--- | :--- | :--- |
-| `kids/common_space/gallery.html` | `gallery-modal-manager.js` 바로 앞에 `<script src="./gallery-spot-diff.js?v=...">` 한 줄. 상세 모달 버튼 영역(현재 `modalVideoBtn` 근처)에 `<button id="modalSpotDiffBtn">` 한 개 | 추가 10줄 이내 |
-| `kids/common_space/gallery-modal-manager.js` | `openDetailModal`에서 `item.spotDiff`가 유효하면 버튼을 보이고 `GallerySpotDiff.open(item)`을 연결한다. `closeDetailModal`에서 `GallerySpotDiff.close()`를 부른다 | 추가 15줄 이내 (현재 590줄) |
-| `scripts/build_gallery.py` | §3-2의 `spotDiff` 변환·검증 | |
-| `kids/core/CORE_CATALOG.md` | §2-0-1 갤러리 절에 모듈 항목, 「회귀 시험 묶음」 절에 새 시험 한 줄 | |
-| `docs/gallery_archive_spec.md` | 파일 맵 표에 새 모듈 행, 등록 명령 예시(§3)에 새 옵션, 새 절 「틀린그림찾기 등록」 | |
-| `docs/gallery_spot_diff_spec.md` | 이 문서를 구현된 내용대로 고쳐 쓰기 | |
-
-### 고치는 파일 (B: 관제탑)
-| 파일 | 고칠 내용 |
-| :--- | :--- |
-| `scripts/sync_quick_upload.py` | `--diff-file`, `--diff-spots` 옵션 (§3-3) |
-
-### 손대지 않는 것
-- `kids-archive` 저장소 안의 기존 미디어 파일, 다른 과목 모듈, Worker 코드(`workers/minmin-notion/`)
-- **노션**: 성장 갤러리 DB(`3dfa2711...`)에는 `spotDiff`용 속성이 없다. 노션으로 보내는 요청 본문에 `spotDiff`를 절대 넣지 않는다 (없는 속성을 하나라도 보내면 노션이 저장 전체를 거부함, `gallery_archive_spec.md` §6). `gallery-data-sync.js`도 고치지 않는다.
-- 보석·사탕 보상, 학습일지(`STUDY_LOG_DB`) 기록: 이번 단계에서는 넣지 않는다. 갤러리 놀이로 보석을 벌게 하면 보상 경제가 흔들리므로 나중에 따로 정한다.
-- `gallery.css` (860줄, 이미 상한 초과)
+- `kids/common_space/gallery-spot-diff.js`: 약 400줄, IIFE·전역 `GallerySpotDiff`. 놀이·부모 도구·순수 판정 함수. 스타일은 `open()`에서 1회 삽입합니다.
+- `gallery.html`: 모달 도전 버튼과 스크립트 선행 로드. `gallery-modal-manager.js`: 버튼 조건과 열기·닫기 연결만 담당합니다.
+- `scripts/build_gallery.py`: 선택 메타 변환·검증. `validate_diff_spots`, `build_spot_diff`.
+- 관제탑 `scripts/sync_quick_upload.py`: `--diff-file` / `--diff-spots` 입력과 기존 데이터 부분 병합.
+- `tests/gallery-spot-diff.test.mjs`: 판정·검증·생성 데이터 CDN 계약.
+- 노션 요청, `gallery-data-sync.js`, `gallery.css`, 보상·학습일지, 기존 미디어에는 변경을 가하지 않습니다.
 
 ---
 
@@ -198,50 +165,15 @@ GallerySpotDiff.hitTest(spots, nx, ny, rect, foundSet, minTouchPx = 22)
 
 ---
 
-## 5. T (Test · 합격 기준)
+## 5. 검증 계약
 
-### 5-1. 명령 시험 (커밋 전 필수)
-1. `node --test "tests/**/*.test.mjs"` 전부 통과. 새 `tests/gallery-spot-diff.test.mjs`는 `tests/browser-sandbox.mjs`의 `loadBrowserScripts(['kids/common_space/gallery-spot-diff.js'])`로 모듈을 싣고 다음을 확인한다:
-   - `fitRect`: 가로로 긴 상자와 세로로 긴 상자 각각에서 그림이 가운데 오고 비율이 유지된다
-   - `toNormalized`: 레터박스 여백을 누르면 `null`, 그림 네 모서리는 (0,0)·(1,1)
-   - `hitTest`: 원 안쪽은 정답, 바깥쪽은 -1, 이미 찾은 곳은 건너뜀, 두 원이 겹치면 가까운 쪽, `r`이 아주 작을 때 `minTouchPx`가 적용됨, **가로세로 비율이 다른 그림에서 `r`이 짧은 변 기준으로 계산됨**
-   - `isValid`: 개수 2개·6개, 좌표 범위 밖, `r` 범위 밖, 빈 힌트, 31자 힌트는 거짓. 정상 예시는 참
-   - **계약 시험**: `kids/data/gallery-data.js`의 `DEFAULT_GALLERY_DATA`에서 `spotDiff`가 있는 모든 항목이 `isValid`를 통과하고 `modifiedImageUrl`이 `https://raw.githubusercontent.com/awslike6-web/kids-archive/main/`으로 시작한다 (지금은 0건이어도 통과)
-   - 모듈을 실어도 `document`에 접근하지 않는다 (샌드박스에 `document`가 없어도 예외가 나지 않음)
-2. 시험이 실제로 고장을 잡는지 한 번 확인한다: `r`을 가로 길이 기준으로 바꾸거나 레터박스 계산을 빼면 시험이 실패해야 한다. 확인 후 원래대로 되돌린다.
-3. 관제탑 루트(`G:/master-tower`)에서 `python -X utf8 scripts/verify_contracts.py --mode git-diff --repo kids-school-main` → `[ALL PASS]` (이 스크립트는 공부방 저장소가 아니라 관제탑 저장소에 있음. B 작업 뒤에는 `--repo master-tower`로도 한 번 더)
-4. 빌더 확인 (로컬에 `G:/master-tower/kids-archive`가 있을 때만): 시험용 작품 1건에 `spotDiff`를 넣고 `python -X utf8 scripts/build_gallery.py`를 돌린다. 정상 데이터는 `gallery-data.js`에 들어가고, 좌표 오류·비율 불일치·파일 없음은 `⚠️ [spotDiff 제외]`가 뜨고 카드는 그대로 나오는지 본다. **확인이 끝나면 시험용 메타·이미지·생성물을 모두 되돌린다** (`git checkout -- kids/data`, kids-archive의 새 파일 삭제). 가짜 시험 데이터를 커밋하지 않는다.
-
-### 5-2. 화면 시험
-- 서버는 반드시 `python scripts/guarded_preview_server.py`(포트 8767, 노션 쓰기 차단)로 띄운다. `python -m http.server`는 쓰지 않는다.
-- 시험용 바뀐 그림은 기존 갤러리 그림 1장을 Pillow로 복사해 도형 3개를 그려 만든다. **작업 폴더 밖(임시 폴더)에 두고 커밋하지 않는다.** `gallery-data.js`에 임시로 `spotDiff`를 넣어 확인하고, 끝나면 `git checkout -- kids/data/gallery-data.js`로 되돌린다.
-- 확인할 항목 (360×800, 1280×800 두 크기):
-  1. 상세 모달에 버튼이 보이고, `spotDiff`가 없는 작품에는 보이지 않는다
-  2. 360×800에서는 위아래, 1280×800에서는 좌우로 배치된다
-  3. 정답 위치를 누르면 두 그림 모두에 원이 그려진다. 창 크기를 바꿔도 원이 같은 자리에 있다
-  4. 레터박스 여백을 누르면 아무 반응이 없고, 오답 위치는 물결만 보인다
-  5. 3곳을 모두 찾으면 축하 화면이 뜨고, 닫으면 오버레이가 DOM에서 사라진다
-  6. 아이 계정에서 `?admin=diff`를 붙여도 관리자 모드가 켜지지 않는다. 아빠 계정에서는 켜지고, 좌표 복사와 차이 보기가 동작한다
-  7. 콘솔 오류 0건. `window.__blockedWrites`가 비어 있다 (이 기능은 노션에 아무것도 쓰지 않아야 함)
-- 소리는 함수가 불렸는지만 확인하면 된다 (`fairyPraise` 등을 감싸 호출 횟수 기록).
-
-### 5-3. 보고
-- 완료 보고에는 위 항목마다 통과·실패를 적고, 확인하지 못한 항목은 못 했다고 적는다 (`GEMINI.md` §5-4: 검수 없이 「완료」라고 쓰지 않음).
-- 실제 아이 그림으로 만든 틀린그림 데이터는 이번 작업에 포함하지 않는다. 콘텐츠는 부모가 §8 절차로 따로 등록한다.
-
----
-
-## 6. 커밋 단위 (권장)
-
-| 순서 | 저장소 | 내용 |
-| :--- | :--- | :--- |
-| 1 | 공부방 | `feat(gallery): 틀린그림찾기 모듈·시험 추가` — 모듈, 시험, 모달·HTML 연결 |
-| 2 | 공부방 | `feat(gallery): 빌더 spotDiff 변환·검증` — `build_gallery.py` |
-| 3 | 공부방 | `docs(gallery): 틀린그림찾기 명세·카탈로그 갱신` |
-| 4 | 관제탑 | `feat(gallery): 작품 등록 도구 --diff-file/--diff-spots` |
-
-- `gallery.html`의 `?v=` 캐시 쿼리는 바뀐 스크립트만 새 값(`YYYYMMDD-HHMM`, KST)으로 올린다.
-- 커밋마다 `node --test "tests/**/*.test.mjs"` 통과를 확인한다. 이 저장소는 `main` 푸시 때 GitHub Actions가 같은 시험을 돌린다.
+- 공부방 루트: `node --test "tests/**/*.test.mjs"`. 새 시험은 `tests/browser-sandbox.mjs`로 DOM 없이 모듈을 불러옵니다. 반지름의 짧은 변 기준·레터박스 계산을 바꾸면 실패해야 합니다.
+- 관제탑의 `scripts/verify_contracts.py --mode file --file <변경 파일의 worktree 절대 경로>`로 파일별 검사합니다. `--mode git-diff`는 원래 저장소를 찾으므로 worktree 검증에 쓰지 않습니다.
+- 빌더는 임시 `kids-school-main` / `kids-archive` 구조에서 정상·EXIF·좌표 오류·비율 불일치·파일 없음·누끼 제외·단독 카드 제외·아카이브 대체를 확인합니다. 실제 업로드·아카이브를 변경하지 않습니다.
+- 등록 도구도 임시 구조에서 `--no-push`로 실행하며 큐 응답을 모의합니다. 제목 옵션 없이 기존 ID와 차이 옵션만 쓰므로 노션 Upsert를 실행하지 않습니다. 운영 노션 쓰기 시험은 하지 않습니다.
+- 화면은 `scripts/guarded_preview_server.py`의 쓰기 차단을 사용합니다. 포트 충돌 시 다른 로컬 포트를 지정합니다. 임시 그림·메타는 브라우저 요청에 주입하며 실제 데이터 파일은 바꾸지 않습니다.
+- 360×800·1280×800에서 버튼 표시, 공간에 따른 배치, 양쪽 터치, 크기 변경 후 표시, 여백·오답 물결·힌트·완주·다시 하기, 아이/부모 권한, 좌표 복사 2경로, 차이 문턱값·CORS/이미지 오류, 자원 정리·콘솔 오류 0·`__blockedWrites` 0을 확인합니다. 소리는 호출 횟수로 검사합니다.
+- 시험용 이미지·메타·생성물·화면 검증 결과 파일은 커밋하지 않습니다. 화면 결과는 완료 보고에 적습니다.
 
 ---
 
@@ -259,23 +191,6 @@ GallerySpotDiff.hitTest(spots, nx, ny, rect, foundSet, minTouchPx = 22)
 
 ---
 
-## 8. 부모용 콘텐츠 제작 절차 (구현 후 `gallery_archive_spec.md`로 옮김)
+## 8. 부모 콘텐츠 제작
 
-1. **바뀐 그림 만들기**: 원본 그림을 AI 이미지 편집기에 주고 "다른 곳은 하나도 바꾸지 말고, ①… ②… ③…만 바꿔 줘"라고 구체적으로 요청한다.
-   - 민서용: 3곳, 크고 분명한 차이(색 전체 바꾸기, 물건 하나 없애기), `r` 0.10~0.12
-   - 민수용: 4~5곳, 작은 차이(무늬, 개수, 방향), `r` 0.06~0.08
-2. **좌표 찍기**: 로컬에서 `gallery-data.js`의 해당 작품에 `spotDiff.modifiedImageUrl`을 임시로 적는다 (로컬 파일 경로나 아카이브 주소). 아빠 계정으로 `gallery.html?admin=diff`를 열고 바뀐 곳을 찍은 뒤 힌트를 적고 `[📋 spots 전체 복사]` → `spots.json`으로 저장한다.
-3. **차이 검수 (필수)**: `[🔬 차이 보기]`를 켜서 찍은 원 밖에 빨간 덩어리가 없는지 본다. 있으면 아이가 정답이 아닌 차이를 찾고 헷갈리므로 그림을 다시 만든다. 그 차이도 정답으로 넣을 만하면 좌표를 추가해도 된다.
-4. **등록**: `gallery-data.js` 임시 수정을 되돌리고, 관제탑 루트에서 실행한다.
-   ```bash
-   python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --title "..." --diff-file "E:/Downloads/xxx_diff.jpg" --diff-spots "E:/Downloads/spots.json"
-   ```
-5. **확인**: 배포된 갤러리에서 직접 한 판 끝까지 해 본다.
-
----
-
-## 9. 구현 후 문서 정리
-
-- 이 문서의 맨 위 상태를 「구현 완료 (날짜)」로 바꾸고, §0·§5·§6처럼 작업 지시용인 절은 줄이거나 지운다. 실제 API, 데이터 계약, 동작 규칙만 남긴다.
-- `CORE_CATALOG.md` §2-0-1에 `gallery-spot-diff.js` 항목을 추가한다 (위치, 전역 이름, 줄 수, `open/close/isValid` + 순수 함수, 로드 순서는 `gallery-modal-manager.js`보다 먼저).
-- `gallery_archive_spec.md`에는 파일 맵 행, `--diff-file`/`--diff-spots` 설명, §8 절차를 추가하고 문서 버전을 올린다.
+원본 편집 → 로컬 관리자 좌표 추출 → 차이 검수 → 등록 → 한 판 확인 절차와 명령은 [`gallery_archive_spec.md` §7](gallery_archive_spec.md)에 있습니다.

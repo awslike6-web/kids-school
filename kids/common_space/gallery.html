@@ -95,6 +95,7 @@
                 <div id="modalThumbsContainer" style="display:none; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; margin-top:8px;"></div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; margin-top:8px;">
                     <button class="modal-zoom-btn" onclick="openOriginalImage()">🪟 새 창에서 원본 보기</button>
+                    <button id="modalSpotDiffBtn" type="button" class="modal-video-btn" style="display:none;">🔍 틀린그림찾기 도전</button>
                     <a id="modalVideoBtn" href="#" target="_blank" class="modal-video-btn" style="display:none;">
                         <span>🎬</span> <span id="modalVideoBtnText">동영상 풀영상 감상하기</span>
                     </a>
@@ -294,7 +295,8 @@
 
     <!-- 🎨 갤러리 골디락스 서브모듈 로드 -->
     <script src="./gallery-data-sync.js?v=20261028-1053"></script>
-    <script src="./gallery-modal-manager.js?v=20261028-1053"></script>
+    <script src="./gallery-spot-diff.js?v=20261029-0930"></script>
+    <script src="./gallery-modal-manager.js?v=20261029-0930"></script>
     <script src="./gallery_controller.js?v=20261028-1053"></script>
 </body>
 </html>

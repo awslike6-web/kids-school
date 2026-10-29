@@ -1,6 +1,6 @@
 # 🎨 꿈나무 갤러리 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v2.4.0 (2026-10-27 기준)  
+> **문서 버전**: v2.5.0 (2026-10-29 기준)  
 > **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품 등록 도구(`scripts/sync_quick_upload.py`)  
 > **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
 > **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
@@ -61,6 +61,7 @@ flowchart TD
 | **`kids-school`** | [`kids/common_space/gallery-data-sync.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-data-sync.js) | 로컬 스토리지 및 노션 DB(`3dfa2711...`) 실시간 양방향 동기화 |
 | **`kids-school`** | [`kids/common_space/gallery-modal-manager.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-modal-manager.js) | 상세 모달 뷰어 (다중 사진 썸네일 스위처 + `🎬 3D 회전영상` 인라인 `<video>` 플레이어 지원) |
 | **`kids-school`** | [`kids/common_space/gallery.css`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.css) | 갤러리 전용 3D 카드, 필터 바, 라이트박스 반응형 스타일 |
+| **`kids-school`** | `kids/common_space/gallery-spot-diff.js` | `GallerySpotDiff` 놀이·부모 좌표 추출·RGB 차이 검수. 모달 매니저보다 먼저 로드 |
 | **`kids-archive`** | [`kids-archive/data/archive-master-data.js`](file:///g:/master-tower/kids-archive/data/archive-master-data.js) | 12년 성장 포트폴리오 마스터 DB |
 | **`kids-archive`** | `kids-archive/assets/media/{minsu|minseo|together}/` | 웹 최적화된 고화질 영구 사진(`.jpg`/`.png`) 및 영상(`.mp4`) |
 
@@ -101,6 +102,16 @@ python -X utf8 scripts/sync_quick_upload.py \
 - `--video`에 로컬 `.mp4` 경로를 넘기면 `kids-archive/assets/media/...`에 복사되고 CDN URL이 `videoUrl`로 연결되어, 모달의 `🎬 3D 회전영상` 탭과 하단 버튼에서 인라인 재생됩니다.
 - 노션 카드 등록이 실패하면 마지막 줄에 `⚠️ [일부 실패]`가 뜨고 종료 코드가 1입니다. 이때는 완료로 보고하지 말고 ❌ 메시지(노션 오류 원문)를 그대로 보고한다.
 
+### ④ 기존 작품에 틀린그림찾기 연결
+```bash
+python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibimmyeon" --author "민수" --diff-file "E:/Downloads/paldo_diff.jpg" --diff-spots "E:/Downloads/spots.json"
+```
+- `--diff-file`: 로컬 변형 그림. `uploads/ex/갤러리/{작가}/{원본베이스}_diff{확장자}`로 복사합니다.
+- `--diff-spots`: spots 배열 JSON 파일 경로를 우선으로 읽습니다. `[`로 시작하는 JSON 문자열도 허용합니다.
+- 한 옵션만 지정하면 기존 `spotDiff`의 나머지 값을 유지합니다. 둘 다 생략하면 기존 값이 그대로 남습니다. 신규 연결은 두 값을 모두 채워야 합니다.
+- 잘못된 좌표·없는 입력 파일은 복사·메타 저장·큐 처리 전에 종료 코드 1로 거절합니다. `--id`와 차이 옵션만으로 기존 작품을 갱신할 수 있으며 제목·날짜·설명을 보존합니다.
+- `--no-push`는 원격 푸시만 생략하며 기존 도구의 로컬 커밋 동작은 유지합니다. 노션 시험은 임시 환경에서 큐 조회를 모의하고 제목 옵션 없이 실행합니다.
+
 ### ③ 손글씨 종이일기 사진
 - 종이일기는 갤러리 작품이 아니므로 [`docs/timetable_diary_spec.md` §5](timetable_diary_spec.md)의 전용 도구 `python -X utf8 scripts/sync_paper_diaries.py`를 사용합니다.
 
@@ -129,3 +140,17 @@ python -X utf8 scripts/sync_quick_upload.py \
 - 갤러리 화면에서 작품·특별한 날의 제목·날짜·설명을 고치면 `gallery-data-sync.js`가 노션 카드의 `제목`·`날짜`·`작가의 한마디/일기본문`을 바꾸고, 바뀐 내용은 카드 본문에 수정 이력으로 남긴다.
 - 분야(카테고리)·동영상 주소는 노션 DB에 속성이 없어 보내지 않는다. 없는 속성을 하나라도 보내면 노션이 저장 전체를 거부한다 (2026-10-27까지 이 문제로 화면 수정이 노션에 저장되지 않았음).
 - 이 규칙은 공부방 회귀 시험 `tests/notion-contract.test.mjs`의 갤러리 시험이 지킨다.
+
+## 7. 틀린그림찾기 등록
+
+- 계약: [`gallery_spot_diff_spec.md`](gallery_spot_diff_spec.md). 메타의 선택 필드 `spotDiff`는 `modifiedImage` 파일명과 `spots` 배열입니다. 화면 결과는 `modifiedImageUrl`과 `spots`입니다. 노션 속성·블록 및 아카이브 포트폴리오 데이터에 넣지 않습니다.
+- 정답 3~5곳, `x/y` 0~1, `r` 0.03~0.15(그림의 짧은 변 비율), 힌트 1~30자입니다. 빌더는 소수 셋째 자리로 반올림합니다.
+- 변형 파일은 단독 카드로 만들지 않습니다. EXIF 보정 후 RGB/JPEG 품질 85로 원본 결과와 같은 픽셀 크기에 맞춥니다. 비율 차이가 1%를 넘거나 누끼 작품이면 제외합니다. 업로드 파일이 없으면 변환된 아카이브 파일을 확인합니다. 오류 시 `⚠️ [spotDiff 제외] {art_id}: {이유}`를 출력하고 작품 카드는 유지합니다.
+
+부모 제작 절차:
+1. 원본 그림으로 차이 3~5곳만 바꾼 이미지를 만듭니다. 민서는 3곳·크고 분명하게(`r` 0.10~0.12), 민수는 4~5곳·작은 차이(`r` 0.06~0.08)를 권장합니다.
+2. 로컬 `gallery-data.js`의 해당 작품에 임시 `spotDiff.modifiedImageUrl`(미리보기에서 읽을 수 있는 로컬 HTTP 주소 또는 아카이브 URL)과 빈 `spots`를 적습니다. Windows 파일 경로를 브라우저 URL로 직접 쓰지 않습니다. 아빠·엄마 계정으로 `gallery.html?admin=diff`에 들어갑니다. 아이 계정은 관리자 모드가 켜지지 않습니다.
+3. 원본 또는 변형 그림을 눌러 좌표를 찍습니다. 마지막 원 크기를 조절하고 힌트를 적은 뒤 「spots 전체 복사」를 눌러 `spots.json`으로 저장합니다. 클립보드가 막히면 선택된 텍스트 영역에서 복사합니다.
+4. 「차이 보기」를 켜고 원 밖의 붉은 덩어리를 확인합니다. 의도하지 않은 차이면 그림을 다시 만들고, 정답으로 쓸 차이면 5곳 이내에서 좌표를 추가합니다. 차이 문턱값은 10~120으로 조절합니다.
+5. 임시 데이터 수정을 되돌리고 §3④ 명령으로 등록합니다. 실제 작품·콘텐츠 등록은 기능 구현과 별개로 수행합니다.
+6. 배포한 갤러리에서 한 판을 끝까지 진행합니다. 이번 기능은 보석·사탕·학습시간을 지급하거나 진행 기록을 저장하지 않습니다.

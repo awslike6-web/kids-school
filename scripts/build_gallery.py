@@ -14,6 +14,8 @@ import os
 import sys
 import json
 import shutil
+import math
+from pathlib import Path
 from PIL import Image, ImageOps
 
 # Windows 콘솔 한글 인코딩 안전장치
@@ -24,6 +26,54 @@ if sys.platform == 'win32':
         pass
 
 CDN_BASE = "https://raw.githubusercontent.com/awslike6-web/kids-archive/main"
+
+def validate_diff_spots(spots):
+    """프런트와 등록 도구의 좌표 계약을 검증한다."""
+    if not isinstance(spots, list) or not 3 <= len(spots) <= 5:
+        raise ValueError('spots는 3~5개여야 합니다')
+    for i, spot in enumerate(spots, 1):
+        if not isinstance(spot, dict):
+            raise ValueError(f'{i}번 좌표는 객체여야 합니다')
+        for key, low, high in [('x', 0, 1), ('y', 0, 1), ('r', .03, .15)]:
+            value = spot.get(key)
+            if type(value) not in (int, float) or not math.isfinite(value) or not low <= value <= high:
+                raise ValueError(f'{i}번 {key}는 {low}~{high} 범위의 숫자여야 합니다')
+        hint = spot.get('hint')
+        if not isinstance(hint, str) or not hint.strip() or len(hint) > 30:
+            raise ValueError(f'{i}번 hint는 1~30자 문자열이어야 합니다')
+    return [{**{k: round(s[k], 3) for k in ('x', 'y', 'r')}, 'hint': s['hint']} for s in spots]
+
+
+def build_spot_diff(data, art_id, has_cutout, folder_full, original, target_dir, sub_dir, sub_path):
+    """오류는 놀이 데이터만 제외하며 작품 카드 생성을 막지 않는다."""
+    try:
+        if has_cutout:
+            raise ValueError('누끼 작품은 지원하지 않습니다')
+        if not isinstance(data, dict):
+            raise ValueError('spotDiff는 객체여야 합니다')
+        spots = validate_diff_spots(data.get('spots'))
+        filename = data.get('modifiedImage')
+        if not isinstance(filename, str) or not filename or '/' in filename or '\\' in filename:
+            raise ValueError('modifiedImage는 파일명이어야 합니다')
+        target = Path(target_dir) / f'{sub_dir}_{Path(filename).stem}.jpg'
+        source = Path(folder_full) / filename
+        if not source.is_file():
+            source = target
+        if not source.is_file():
+            raise ValueError('바뀐 그림 파일이 없습니다')
+        with Image.open(original) as image:
+            size = image.size
+        with Image.open(source) as image:
+            image = ImageOps.exif_transpose(image)
+            if abs((image.width / image.height) / (size[0] / size[1]) - 1) > .01:
+                raise ValueError('원본과 바뀐 그림의 비율이 1% 넘게 다릅니다')
+            image = image.convert('RGB').resize(size, Image.Resampling.LANCZOS)
+            image.save(target, format='JPEG', quality=85, optimize=True)
+        return {'modifiedImageUrl': f'{CDN_BASE}/assets/media/{sub_dir}/{sub_path}/{target.name}', 'spots': spots}
+    except (ValueError, TypeError, OSError, KeyError) as error:
+        print(f'⚠️ [spotDiff 제외] {art_id}: {error}')
+        return None
+
 
 def run():
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -76,9 +126,13 @@ def run():
 
     # 다른 작품의 서브 이미지(subImages)로 등록된 파일 매핑
     sub_image_to_parent = {}
+    diff_images = set()
     for pid, m in meta_dict.items():
         for sf in m.get('subImages', []):
             sub_image_to_parent[sf] = pid
+        diff = m.get('spotDiff')
+        if isinstance(diff, dict) and isinstance(diff.get('modifiedImage'), str):
+            diff_images.add(diff['modifiedImage'])
 
     items = []
     archive_entries = []
@@ -122,7 +176,7 @@ def run():
                 continue
 
             # 다른 작품의 서브 이미지로 묶인 파일인 경우 단독 카드 생성 스킵 (부모 작품에서 변환 및 묶음 처리)
-            if f in sub_image_to_parent:
+            if f in sub_image_to_parent or f in diff_images:
                 continue
             
             # 새 폴더에 누끼 png가 존재하는지 확인
@@ -262,6 +316,11 @@ def run():
                 item_obj["videoUrl"] = meta["videoUrl"]
             if meta.get("videoBtnText"):
                 item_obj["videoBtnText"] = meta["videoBtnText"]
+            if 'spotDiff' in meta:
+                diff = build_spot_diff(meta['spotDiff'], art_id, has_cutout, folder_full,
+                                       dest_full, target_dirs[sub_dir], sub_dir, sub_path)
+                if diff:
+                    item_obj['spotDiff'] = diff
             items.append(item_obj)
 
             # archive entry

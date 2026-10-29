@@ -32,6 +32,16 @@ function openDetailModal(id) {
     if (!item) return;
     activeArtId = id;
 
+    const diffBtn = document.getElementById('modalSpotDiffBtn');
+    if (diffBtn) {
+        const adminDiff = new URLSearchParams(location.search).get('admin') === 'diff' &&
+            ['아빠', '엄마'].includes(window.currentUserName);
+        const available = !isSpecial && window.GallerySpotDiff &&
+            (GallerySpotDiff.isValid(item.spotDiff) || (adminDiff && item.spotDiff?.modifiedImageUrl));
+        diffBtn.style.display = available ? 'inline-flex' : 'none';
+        diffBtn.onclick = available ? () => GallerySpotDiff.open(item) : null;
+    }
+
     toggleEditArtFull(false);
     cancelEditArtistNote();
 
@@ -198,6 +208,7 @@ function openDetailModal(id) {
 }
 
 function closeDetailModal() {
+    window.GallerySpotDiff?.close();
     toggleEditArtFull(false);
     cancelEditArtistNote();
     const modalVideo = document.getElementById('modalVideoPlayer');

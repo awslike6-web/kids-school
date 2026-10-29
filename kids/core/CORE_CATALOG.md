@@ -103,6 +103,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ## 2-0-1. 🎨 꿈나무 갤러리 & 성장 아카이브 코어 (Gallery & Growth Archive Engines)
 
+### 틀린그림찾기 (2026-10-29)
+- `kids/common_space/gallery-spot-diff.js` (약 400줄): 갤러리 전용 IIFE. `gallery-modal-manager.js`보다 먼저 로드하며 `window.GallerySpotDiff` 하나만 노출합니다. CSS는 `open()`에서 `gsd-style`로 한 번 삽입하고 모듈 로딩 시 DOM에 접근하지 않습니다.
+- API: `open(item, {viewer, onClose})`, `close()`, `isValid(spotDiff)`. 순수 함수 `fitRect(boxW, boxH, imgW, imgH)`, `toNormalized(px, py, rect)`, `hitTest(spots, nx, ny, rect, foundSet, minTouchPx=22)`.
+- 원본·변형 양쪽 터치, 레터박스 제외, 짧은 변 기준 반지름, 에러리스 피드백, 공간에 따른 배치, 부모 좌표 복사·RGB 차이 검수를 담당합니다. 노션·보상·학습일지는 쓰지 않습니다.
+- `scripts/build_gallery.py`: `validate_diff_spots(spots)`, `build_spot_diff(...)`가 메타의 `spotDiff.modifiedImage`를 CDN의 `modifiedImageUrl`로 변환합니다. 이미지 비율·좌표·누끼·파일 오류는 놀이 데이터만 제외합니다. 포트폴리오에는 넣지 않습니다.
+- 데이터 계약·부모 제작 절차: `docs/gallery_spot_diff_spec.md`, `docs/gallery_archive_spec.md`의 「틀린그림찾기 등록」.
+
 기존 1,517줄의 거대했던 `gallery_controller.js`를 331줄의 초경량 메인 뷰 컨트롤러로 슬림화하고, 단일 책임 원칙에 따라 전문 서브모듈 2종으로 완전 분리 구축한 갤러리 코어 엔진군입니다.
 - **파일 위치**:
   - `kids/common_space/gallery_controller.js` (331줄): 유저 테마 적용(DOM null 안전 가드), 2대 뷰 모드 스위처(작품 vs 특별한 날), 필터 바 및 카드 그리드 렌더러, 빠른 좋아요.
@@ -1089,6 +1096,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - Guardian 저장소의 사본 `learning/study-activity.js`는 이번에 고치지 않아 이 파일과 달라졌습니다(haru 판정 3줄). 서버 장부 규칙(활동1분=1분, quiz 정답2개당1분)은 그대로입니다.
 
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
+
+- `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
 
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.
 - `tests/regression.test.mjs`: 단독 시험 6개를 하위 프로세스로 돌려 종료 코드 0인지 확인합니다. `verify_quest_mastery.js`(3·3·3 엔진), `test_quest_fallback.js`, `test_study_logger_upsert.js`, `verify_study_log_store.js`, `verify_kst_dates.js`, `verify_diary_sync.js`. 새 단독 시험을 만들면 실패 시 `process.exitCode = 1`로 끝나게 하고 이 목록에 한 줄 추가합니다.
