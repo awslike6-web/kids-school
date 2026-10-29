@@ -108,11 +108,16 @@ def components(original, aligned, coverage, threshold):
     return difference, opened, labels, stats, centers, count
 
 
-def candidate_spots(labels, stats, centers, coverage):
-    height, width = labels.shape
+def coverage_edge_labels(labels, coverage):
+    """AI 그림이 끝나는 경계에 닿은 덩어리. 바꾼 곳이 아니라 덮이지 않은 띠라서 후보·경고에서 뺀다."""
     border = coverage & ~cv2.erode(coverage.astype(np.uint8), np.ones((3, 3), np.uint8),
                                   borderType=cv2.BORDER_CONSTANT, borderValue=1).astype(bool)
-    edge_labels = set(np.unique(labels[border]))
+    return set(np.unique(labels[border])) - {0}
+
+
+def candidate_spots(labels, stats, centers, coverage):
+    height, width = labels.shape
+    edge_labels = coverage_edge_labels(labels, coverage)
     candidates, warnings = [], []
     order = sorted(range(1, len(stats)), key=lambda i: (-int(stats[i, cv2.CC_STAT_AREA]), i))
     for label in order:
@@ -261,7 +266,8 @@ def compose_arrays(analysis, spots, color_match=True):
     report['passed'] = not report['reasons']
     if not report['passed']:
         return {'result': None, 'alpha': alpha, 'report': report, 'unselected': []}
-    large = [i for i in range(1, len(analysis['stats'])) if i not in chosen and
+    edge_labels = coverage_edge_labels(analysis['labels'], coverage)
+    large = [i for i in range(1, len(analysis['stats'])) if i not in chosen and i not in edge_labels and
              analysis['stats'][i, cv2.CC_STAT_AREA] >= selected.size * LARGE_CHANGE_RATIO]
     report['unselected_large_changes'] = [{'label': i, 'bbox': analysis['stats'][i, :4].tolist(),
         'area_ratio': float(analysis['stats'][i, cv2.CC_STAT_AREA] / selected.size)} for i in large]

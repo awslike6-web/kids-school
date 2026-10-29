@@ -88,6 +88,13 @@ def main():
     again = tool.compose_arrays(tool.analyze_arrays(original, ai), spots)
     checked(np.array_equal(result, again['result']), '동일 입력의 결과가 다름')
     print('통과: 맞춤부터 다시 계산한 합성 결과의 결정성')
+    # AI 그림이 끝나는 경계에 붙은 큰 차이(덮이지 않은 띠)는 후보·이동 경고에 넣지 않는다.
+    banded = ai.copy()
+    cv.rectangle(banded, (0, 300), (50, 700), (255, 255, 255), -1)
+    band = tool.compose_arrays(tool.analyze_arrays(original, banded), spots)
+    checked(band['report']['passed'] and not band['unselected'], f'경계 띠를 큰 변화로 경고: {band["report"]}')
+    checked(not any('선택하지 않은 큰 변화' in w for w in band['report']['warnings']), '경계 띠 경고 문구')
+    print('통과: AI 그림 경계 띠는 이동 경고에서 제외')
 
     root = tool.PROJECT / 'uploads/ex/갤러리/_spotdiff_work'
     root.mkdir(parents=True, exist_ok=True)
