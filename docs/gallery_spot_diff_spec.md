@@ -194,3 +194,5 @@ GallerySpotDiff.hitTest(spots, nx, ny, rect, foundSet, minTouchPx = 22)
 ## 8. 부모 콘텐츠 제작
 
 원본 편집 → 로컬 관리자 좌표 추출 → 차이 검수 → 등록 → 한 판 확인 절차와 명령은 [`gallery_archive_spec.md` §7](gallery_archive_spec.md)에 있습니다.
+
+AI 편집본의 크기·확대·시점이 원본과 다르면 `scripts/spot_diff_align.py analyze`로 맞춤과 후보를 검토하고, 부모가 고른 좌표를 `compose`에 주어 선택한 변화만 합성합니다. 좌표 계약과 기존 빌더·등록 도구는 그대로 사용합니다. 명령·품질 기준은 [`gallery_spot_diff_align_spec.md`](gallery_spot_diff_align_spec.md), 제작 절차는 [`gallery_archive_spec.md` §7](gallery_archive_spec.md)에 있습니다.

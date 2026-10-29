@@ -103,6 +103,12 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ## 2-0-1. 🎨 꿈나무 갤러리 & 성장 아카이브 코어 (Gallery & Growth Archive Engines)
 
+### AI 편집본 자동 맞춤·선택 합성 (2026-10-29)
+- `scripts/spot_diff_align.py` (약 400줄): 로컬 CLI `analyze`(맞춤·후보·검수) / `compose`(선택 영역만 합성). NumPy·OpenCV·Pillow 필요, OpenCV가 없으면 설치 안내와 종료 코드 2.
+- `--id`는 갤러리 데이터의 CDN 주소를 `G:/master-tower/kids-archive/assets/media/...`로 매핑해 최종 원본을 읽고, `--original`은 등록 전 원본을 직접 읽습니다. 좌표 검증은 `build_gallery.validate_diff_spots`를 importlib로 재사용합니다.
+- 판정 상수는 파일 상단: SIFT 4000·비율 0.75·RANSAC 3px, 정상값 30·재투영 중앙값 1.5px·배경 차이 12, 합성 덮임 100%·변화 40% 미만. 실패한 합성은 파일을 만들거나 갱신하지 않습니다.
+- 기본 출력은 무시되는 `uploads/ex/갤러리/_spotdiff_work/`. 노션·Worker·Git·네트워크는 사용하지 않으며 빌더·놀이 화면도 바꾸지 않습니다. 계약은 `docs/gallery_spot_diff_align_spec.md`, 부모 절차는 `docs/gallery_archive_spec.md` §7.
+
 ### 틀린그림찾기 (2026-10-29)
 - `kids/common_space/gallery-spot-diff.js` (359줄): 갤러리 전용 IIFE. `gallery-modal-manager.js`보다 먼저 로드하며 `window.GallerySpotDiff` 하나만 노출합니다. CSS는 `open()`에서 `gsd-style`로 한 번 삽입하고 모듈 로딩 시 DOM에 접근하지 않습니다.
 - API: `open(item, {viewer, onClose})`, `close()`, `isValid(spotDiff)`. 순수 함수 `fitRect(boxW, boxH, imgW, imgH)`, `toNormalized(px, py, rect)`, `hitTest(spots, nx, ny, rect, foundSet, minTouchPx=22)`.
@@ -1109,4 +1115,5 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/study-log-store.property.test.mjs`: 모의 fetch의 응답 지연·실패·중복·날짜 경계로 S1~S7 스트릭·캐시·순차/동시 upsert를 검사하는 무작위 순서 시험입니다(규칙별 기본 100회). 재현: `STUDYLOG_PROP_SEED=<시드> node --test tests/study-log-store.property.test.mjs`, 횟수: `STUDYLOG_PROP_RUNS`. S4 오답 보존·S5 한 탭/두 탭 직렬화·S6 선택 A·S7 Worker isolate 캐시 우회와 ID 수명주기를 검사하고, 두 기기 동시 저장 한계만 본문이 실행되는 todo로 기록합니다. 공용 `tests/browser-sandbox.mjs`의 `loadBrowserScripts(files, { userName, fetch, storage })`는 운영 DB 접속 없이 기본 모의 fetch와 시드별 저장소를 제공합니다.
 - 시험이 실제로 고장을 잡는지 확인함: 숙련도 속성명 오타, 오답리포트 속성명 변경, 금메달 기준 변경, 숙련도 구분자 변경을 일부러 넣었을 때 모두 실패.
 - **화면 검증 서버 (노션 쓰기 차단)**: `python scripts/guarded_preview_server.py [포트=8767]`. 모든 HTML `<head>` 맨 앞에 쓰기 차단 스크립트를 넣어 내보내므로 페이지가 실리기 전부터 노션 페이지·블록 쓰기와 업로드가 막힌다(읽기·DB 조회·음성은 통과, 막힌 요청은 `window.__blockedWrites`). 2026-10-28 차단을 늦게 걸어 민수 「학습설정」이 덮어써진 사고 뒤 도입. 화면 검증은 `python -m http.server` 대신 이 서버로 한다.
+- **자동 맞춤 시험(묶음 밖)**: `python -X utf8 scripts/verify_spot_diff_align.py`. 결정적 합성 표본으로 맞춤·선택 합성·마스크 밖 원본 바이트·워터마크 복원·품질 거부·이동 경고·결정성·CLI·의존성 누락을 검사합니다. OpenCV가 없으면 「건너뜀: opencv-python-headless 미설치」와 종료 코드 0. 임시 그림은 uploads 안에서 만들고 정리하며 Node/Actions 묶음에는 넣지 않습니다.
 - **화면 시험(묶음 밖)**: `verify_math_phase1.cjs`·`verify_math_phase2.cjs`는 브라우저를 띄워 느리고(약 20초) 실행 때마다 `docs/math-phase*.png`를 다시 씁니다. playwright는 `scripts/load_playwright.cjs`가 ① 설치본 ② `PLAYWRIGHT_MODULE` ③ 이 PC의 Codex 런타임 사본 순으로 찾고, 없으면 건너뜁니다(종료 코드 0). 실행 후 바뀐 스크린샷은 커밋할 때만 남기고 아니면 `git checkout -- docs`로 되돌립니다.

@@ -1,6 +1,6 @@
 # 🎨 꿈나무 갤러리 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v2.5.0 (2026-10-29 기준)
+> **문서 버전**: v2.6.0 (2026-10-29 기준)
 > **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품 등록 도구(`scripts/sync_quick_upload.py`)  
 > **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
 > **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
@@ -149,9 +149,21 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibim
 - 변형 파일은 단독 카드로 만들지 않습니다. EXIF 보정 후 RGB/JPEG 품질 85로 원본 결과와 같은 픽셀 크기에 맞춥니다. 비율 차이가 1%를 넘거나 누끼 작품이면 제외합니다. 업로드 파일이 없으면 변환된 아카이브 파일을 확인합니다. 오류 시 `⚠️ [spotDiff 제외] {art_id}: {이유}`를 출력하고 작품 카드는 유지합니다.
 
 부모 제작 절차:
-1. 원본 그림으로 차이 3~5곳만 바꾼 이미지를 만듭니다. 민서는 3곳·크고 분명하게(`r` 0.10~0.12), 민수는 4~5곳·작은 차이(`r` 0.06~0.08)를 권장합니다.
-2. 로컬 `gallery-data.js`의 해당 작품에 임시 `spotDiff.modifiedImageUrl`(미리보기에서 읽을 수 있는 로컬 HTTP 주소 또는 아카이브 URL)과 빈 `spots`를 적습니다. Windows 파일 경로를 브라우저 URL로 직접 쓰지 않습니다. 아빠·엄마 계정으로 `gallery.html?admin=diff`에 들어갑니다. 아이 계정은 관리자 모드가 켜지지 않습니다.
-3. 원본 또는 변형 그림을 눌러 좌표를 찍습니다. 마지막 원 크기를 조절하고 힌트를 적은 뒤 「spots 전체 복사」를 눌러 `spots.json`으로 저장합니다. 클립보드가 막히면 선택된 텍스트 영역에서 복사합니다.
-4. 「차이 보기」를 켜고 원 밖의 붉은 덩어리를 확인합니다. 의도하지 않은 차이면 그림을 다시 만들고, 정답으로 쓸 차이면 5곳 이내에서 좌표를 추가합니다. 차이 문턱값은 10~120으로 조절합니다.
-5. 임시 데이터 수정을 되돌리고 §3④ 명령으로 등록합니다. 실제 작품·콘텐츠 등록은 기능 구현과 별개로 수행합니다.
-6. 배포한 갤러리에서 한 판을 끝까지 진행합니다. 이번 기능은 보석·사탕·학습시간을 지급하거나 진행 기록을 저장하지 않습니다.
+1. **AI 편집**: 원본 사진과 함께 「구도·시점·색감은 그대로 두고 지정한 곳만 바꿔 줘」라고 요청합니다. 민서는 크고 분명한 차이 3곳, 민수는 작은 차이 4~5곳을 권장합니다.
+2. **분석**: 공부방 루트에서 다음 명령으로 자동 맞춤·후보·검수 그림을 만듭니다. `--id`는 최종 아카이브 원본을 로컬에서 읽습니다. 등록 전 작품은 `--original "원본 경로"`를 씁니다.
+   ```bash
+   python -X utf8 scripts/spot_diff_align.py analyze --id "art_..." --ai "E:/Downloads/gemini_edit.webp"
+   ```
+   기본 작업 폴더는 `uploads/ex/갤러리/_spotdiff_work/{id 또는 원본파일명}/`입니다. `review.jpg`를 열고 품질 수치를 `report.json`에서 확인합니다. 실패하면 AI 편집을 다시 요청합니다.
+3. **정답 선택**: `candidates.json`을 복사해 `spots.json`으로 저장합니다. 워터마크 등 불필요한 후보를 지우고 붙은 후보는 나누며 힌트 1~30자를 적습니다. 후보의 빈 힌트는 자동 등록을 막기 위한 것입니다. 옮긴 물건은 원래 자리도 확인합니다.
+4. **합성**: 같은 원본·AI 파일과 선택한 좌표로 실행합니다.
+   ```bash
+   python -X utf8 scripts/spot_diff_align.py compose --id "art_..." --ai "E:/Downloads/gemini_edit.webp" --spots "작업폴더/spots.json"
+   ```
+   `{원본베이스}_diff.jpg`와 `check.jpg`, 갱신된 `report.json`이 나옵니다. 원본과 크기가 같은지, 워터마크·예상 밖의 변화·두 겹 선·색 띠가 없는지 직접 확인합니다. 노란 점선은 선택하지 않아 원본으로 돌린 큰 변화입니다. 물건의 예전 자리라면 좌표를 보완합니다. `--no-color-match`로 색 맞춤을 끌 수 있습니다.
+5. **등록**: 검수 후 도구가 출력한 `--diff-file`·`--diff-spots` 경로를 §3④의 기존 관제탑 명령에 넣습니다. 맞춤 도구는 노션·Worker·Git·네트워크에 접근하거나 등록을 실행하지 않습니다.
+6. **확인**: 등록 후 배포된 갤러리에서 한 판을 끝까지 진행합니다. 보석·사탕·학습시간·진행 기록은 지급·저장하지 않습니다.
+
+자동 후보가 맞지 않을 때는 기존 **부모 관리자 좌표 추출기**를 보조로 씁니다. 로컬 `gallery-data.js`의 해당 작품에 미리보기에서 읽을 수 있는 `spotDiff.modifiedImageUrl`과 빈 `spots`를 임시로 넣고 아빠·엄마 계정으로 `gallery.html?admin=diff`를 엽니다. 원본 또는 변형 그림에서 좌표·반지름·힌트를 편집하고 「spots 전체 복사」를 누릅니다. 복사가 막히면 선택된 텍스트 영역을 복사합니다. 「차이 보기」로 검수한 뒤 임시 데이터 수정을 되돌립니다. 아이 계정에서는 이 관리자 모드가 켜지지 않습니다.
+
+자동 맞춤의 품질 기준·출력 계약·한계는 [`gallery_spot_diff_align_spec.md`](gallery_spot_diff_align_spec.md)를 참고합니다. NumPy·OpenCV·Pillow를 쓰며 OpenCV가 없으면 `python -m pip install opencv-python-headless`를 안내합니다. 작업 폴더와 검수 그림은 커밋하지 않습니다.
