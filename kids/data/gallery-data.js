@@ -19,7 +19,7 @@ const DEFAULT_GALLERY_DATA = [
       "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261029_3d_knit_turnaround.png"
     ],
     "hasCutout": true,
-    "artistNote": "",
+    "artistNote": "트레이닝복을 입고 체육관을 힘차게 달리는 민서와 따뜻한 민트 스웨터를 입은 민서의 다양한 3D 캐릭터 모습이에요! 정면 흉상부터 3면도까지 정성껏 완성한 나만의 3D 캐릭터 컬렉션입니다. 🏃‍♀️💚",
     "likes": 0,
     "stickers": {
       "heart": 0,
