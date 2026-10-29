@@ -1,6 +1,6 @@
 /**
  * 👾 5분 퀘스트 파트너 몬스터 로스터 & 포즈/대사 엔진 (Monster Roster SSOT)
- * - 1호: 클레이 바이트 (기본 투명 배경 네온 비스트)
+ * - 1호: 뿌쀳히탈탈 (민수 「괴수대백과」 괴수, 투명 배경 3D)
  * - 2호: 콧툰봉돔돌 (민수 자작 SCP-봉제괴수 · 실사 배경 + 6종 포즈 인터랙션)
  * - localStorage('selectedMonster') 연동 및 포즈 이미지 즉시 프리로드(Preload) 지원
  */
@@ -12,10 +12,10 @@
         clay_bite: {
             id: 'clay_bite',
             number: '1호',
-            name: '클레이 바이트',
+            name: '뿌쀳히탈탈',
             role: '수호 비스트',
             code: 'UNIT-01 // NEON BEAST',
-            badgeText: '1호: 클레이 바이트',
+            badgeText: '1호: 뿌쀳히탈탈',
             hasBackground: false,
             poses: {
                 idle: './kids/assets/images/monsters/purple_monster.png',

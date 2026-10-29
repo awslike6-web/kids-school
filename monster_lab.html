@@ -151,7 +151,7 @@
 
       <!-- 파트너 몬스터 (발판 위 투명 누끼 캐릭터) -->
       <div id="monsterViewportWrap" class="monster-viewport-wrap relative z-20 mb-[76px] flex flex-col items-center">
-        <img id="monsterImg" src="./kids/assets/images/monsters/purple_monster.png" alt="클레이 바이트" class="animate-monster-float w-36 h-36 object-contain filter drop-shadow-[0_12px_22px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-all" />
+        <img id="monsterImg" src="./kids/assets/images/monsters/purple_monster.png" alt="뿌쀳히탈탈" class="animate-monster-float w-36 h-36 object-contain filter drop-shadow-[0_12px_22px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-all" />
       </div>
     </div>
 
@@ -185,14 +185,14 @@
       <div class="flex items-center gap-1.5">
         <button id="monsterPrevBtn" type="button" onclick="cyclePartnerMonster(-1)" class="w-6 h-6 rounded-full bg-lab-card/90 border border-neon-cyan/40 text-neon-cyan hover:bg-neon-cyan/20 flex items-center justify-center text-xs font-black active:scale-90 transition-all" title="이전 파트너">◀</button>
         <div id="partnerBadge" class="flex items-center gap-1.5 bg-lab-card/85 border border-lab-card-border px-3 py-0.5 rounded-full shadow-md">
-          <span id="partnerName" class="text-xs font-bold text-white tracking-wide">클레이 바이트</span>
+          <span id="partnerName" class="text-xs font-bold text-white tracking-wide">뿌쀳히탈탈</span>
           <span id="partnerDot" class="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
           <span id="partnerRole" class="text-[11px] text-neon-green font-bold">수호 파트너</span>
         </div>
         <button id="monsterNextBtn" type="button" onclick="cyclePartnerMonster(1)" class="w-6 h-6 rounded-full bg-lab-card/90 border border-neon-cyan/40 text-neon-cyan hover:bg-neon-cyan/20 flex items-center justify-center text-xs font-black active:scale-90 transition-all" title="다음 파트너">▶</button>
       </div>
       <div id="monsterRosterChips" class="flex items-center gap-1.5">
-        <button type="button" data-monster-chip="clay_bite" onclick="selectPartnerMonster('clay_bite')" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-neon-purple/30 border-neon-cyan text-white">👾 1호: 클레이 바이트</button>
+        <button type="button" data-monster-chip="clay_bite" onclick="selectPartnerMonster('clay_bite')" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-neon-purple/30 border-neon-cyan text-white">👾 1호: 뿌쀳히탈탈</button>
         <button type="button" data-monster-chip="cottun_bongdomdol" onclick="selectPartnerMonster('cottun_bongdomdol')" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-all bg-lab-card/60 border-white/15 text-gray-400 hover:text-white">🧸 2호: 콧툰봉돔돌 (SCP)</button>
       </div>
     </div>
@@ -346,7 +346,7 @@
       </div>
       <div>
         <h3 class="text-base font-bold text-white" id="modalTitle">오늘의 5분 퀘스트</h3>
-        <p class="text-xs text-gray-300 mt-1" id="modalDesc">클레이 바이트와 함께 5문제 출격!</p>
+        <p class="text-xs text-gray-300 mt-1" id="modalDesc">뿌쀳히탈탈과 함께 5문제 출격!</p>
 
         <!-- 💡 알고리즘 권장 진도 안내 배너 -->
         <div id="modalRecommendBox" class="mt-2.5 py-1.5 px-3 rounded-xl bg-neon-cyan/15 border border-neon-cyan/40 text-[11px] text-neon-cyan font-bold">
@@ -772,7 +772,7 @@
   <script src="./kids/subjects/quest/quest_notion_synth.js?v=20261015-2"></script>
   <script src="./kids/subjects/quest/parent_unit_chips.js"></script>
   <script src="./kids/subjects/quest/parent_progress_controller.js?v=20261020b"></script>
-  <script src="./kids/subjects/quest/monster_roster.js?v=20261029-character-fix"></script>
-  <script src="./kids/subjects/quest/monster_lab_controller.js?v=20261029-character"></script>
+  <script src="./kids/subjects/quest/monster_roster.js?v=20261030-rename"></script>
+  <script src="./kids/subjects/quest/monster_lab_controller.js?v=20261030-rename"></script>
 </body>
 </html>

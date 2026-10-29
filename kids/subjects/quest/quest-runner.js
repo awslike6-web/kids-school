@@ -96,7 +96,7 @@
         line = Array.isArray(d) ? d[Math.floor(Math.random() * d.length)] : d;
       }
     } else if (global.MonsterRoster) {
-      // 👾 민수 자작 캐릭터 (콧툰봉돔돌 / 클레이 바이트)
+      // 👾 민수 자작 캐릭터 (콧툰봉돔돌 / 뿌쀳히탈탈)
       const monster = global.MonsterRoster.getSelectedMonster();
       const reaction = global.MonsterRoster.getRunnerReaction(state, monster.id);
       poseSrc = reaction.poseSrc;

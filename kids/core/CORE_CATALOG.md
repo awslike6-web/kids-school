@@ -313,7 +313,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **파일 위치**: `kids/subjects/quest/monster_roster.js` (전역 `window.MonsterRoster`, `monster_lab.html` 및 `quest_runner.html`에서 로드)
 - **에셋 경로**: `kids/assets/monsters/cottun_bongdomdol/` (`idle.png`, `greet.png`, `walk_left.png`, `walk_right.png`, `rage.png`, `roar.png` — 800×800 투명 캔버스 바닥 기준 완벽 정렬 누끼 PNG)
 - **역할**:
-  - `[1호: 클레이 바이트]`(`clay_bite`)와 민수 자작 캐릭터 `[2호: 콧툰봉돔돌 (SCP-봉제괴수)]`(`cottun_bongdomdol`) 모두 100% 투명 배경 누끼 캐릭터로 사이버 연구실 마법진 발판 위에 동일한 레이어 위계로 서서 렌더링됩니다.
+  - `[1호: 뿌쀳히탈탈]`(`clay_bite`)와 민수 자작 캐릭터 `[2호: 콧툰봉돔돌 (SCP-봉제괴수)]`(`cottun_bongdomdol`) 모두 100% 투명 배경 누끼 캐릭터로 사이버 연구실 마법진 발판 위에 동일한 레이어 위계로 서서 렌더링됩니다.
   - `localStorage.getItem('selectedMonster')`로 선택 상태가 영속화되며, 탭 단계별 포즈 변화(1회 인사 ➔ 2~4회 걷기 ➔ 5회 과열 쉐이크 ➔ 출격 시 포효)와 퀘스트 러너 에러리스(Errorless) 응원을 지원합니다.
 - **핵심 API**:
   | 메서드 | 설명 |
