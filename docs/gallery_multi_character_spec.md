@@ -170,3 +170,5 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20260922_213854" --a
 - `scripts/sync_quick_upload.py`: +3/−1, 최종 710줄.
 - `scripts/test_gallery_registration_options.py`: +49/−7, 최종 224줄.
 - 신규 `tests/gallery-multi-character.test.mjs`: 82줄.
+- `monster_lab.html`: +1/−1(캐시 쿼리만), 최종 778줄.
+- `quest_runner.html`: +1/−1(캐시 쿼리만), 최종 606줄.
