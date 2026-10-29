@@ -81,6 +81,57 @@ def build_spot_diff(data, art_id, has_cutout, folder_full, original, target_dir,
         return None
 
 
+def validate_character_name(name):
+    """앞뒤 공백을 뺀 1~12자 이름. 등록 입구도 같은 계약을 사용한다."""
+    if not isinstance(name, str) or not 1 <= len(name.strip()) <= 12:
+        raise ValueError('캐릭터 이름은 공백을 뺀 1~12자 문자열이어야 합니다')
+    return name.strip()
+
+
+def load_character_sprite(source):
+    """PNG 원본의 알파를 검증한 뒤 회전 보정한 RGBA 사본을 돌려준다."""
+    source = Path(source)
+    if source.suffix.lower() != '.png':
+        raise ValueError('캐릭터 그림은 PNG여야 합니다')
+    with Image.open(source) as image:
+        if image.format != 'PNG' or ('A' not in image.getbands() and 'transparency' not in image.info):
+            raise ValueError('알파 채널이 있는 PNG여야 합니다')
+        image = ImageOps.exif_transpose(image).convert('RGBA')
+        alpha = image.getchannel('A')
+        if alpha.histogram()[0] / (image.width * image.height) < .10:
+            raise ValueError('배경이 지워지지 않은 그림입니다 (완전 투명 픽셀 10% 미만)')
+        if alpha.getbbox() is None:
+            raise ValueError('캐릭터가 없는 완전 투명 그림입니다')
+        return image.copy()
+
+
+def build_character(data, art_id, folder_full, target_dir, sub_dir, sub_path):
+    """캐릭터 오류는 선택 필드만 제외하며 작품·포트폴리오에는 영향을 주지 않는다."""
+    try:
+        if not isinstance(data, dict):
+            raise ValueError('character는 객체여야 합니다')
+        name = validate_character_name(data.get('name'))
+        filename = data.get('sprite')
+        if not isinstance(filename, str) or not filename or filename in ('.', '..') or '/' in filename or '\\' in filename:
+            raise ValueError('sprite는 PNG 파일명이어야 합니다')
+        target = Path(target_dir) / f'{sub_dir}_{Path(filename).stem}.png'
+        source = Path(folder_full) / filename
+        if not source.is_file():
+            source = target
+        image = load_character_sprite(source)
+        left, top, right, bottom = image.getchannel('A').getbbox()
+        pad_x = max(1, math.ceil((right - left) * .04))
+        pad_y = max(1, math.ceil((bottom - top) * .04))
+        image = image.crop((left - pad_x, top - pad_y, right + pad_x, bottom + pad_y))
+        image.thumbnail((512, 512), Image.Resampling.LANCZOS)
+        if source != target or not target.is_file():
+            image.save(target, format='PNG', optimize=True)
+        return {'spriteUrl': f'{CDN_BASE}/assets/media/{sub_dir}/{sub_path}/{target.name}', 'name': name}
+    except (ValueError, TypeError, OSError, KeyError) as error:
+        print(f'⚠️ [character 제외] {art_id}: {error}')
+        return None
+
+
 def run():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
@@ -133,12 +184,16 @@ def run():
     # 다른 작품의 서브 이미지(subImages)로 등록된 파일 매핑
     sub_image_to_parent = {}
     diff_images = set()
+    character_images = set()
     for pid, m in meta_dict.items():
         for sf in m.get('subImages', []):
             sub_image_to_parent[sf] = pid
         diff = m.get('spotDiff')
         if isinstance(diff, dict) and isinstance(diff.get('modifiedImage'), str):
             diff_images.add(Path(diff['modifiedImage']).stem)
+        character = m.get('character')
+        if isinstance(character, dict) and isinstance(character.get('sprite'), str):
+            character_images.add(Path(character['sprite']).stem)
 
     items = []
     archive_entries = []
@@ -182,7 +237,8 @@ def run():
                 continue
 
             # 다른 작품의 서브 이미지로 묶인 파일인 경우 단독 카드 생성 스킵 (부모 작품에서 변환 및 묶음 처리)
-            if f in sub_image_to_parent or base_name in diff_images:
+            is_sprite = base_name in character_images and f'art_{sub_dir}_{base_name}' not in meta_dict
+            if f in sub_image_to_parent or base_name in diff_images or is_sprite:
                 continue
             
             # 새 폴더에 누끼 png가 존재하는지 확인
@@ -328,6 +384,11 @@ def run():
                 if diff:
                     item_obj['spotDiff'] = diff
             items.append(item_obj)
+            if 'character' in meta:
+                character = build_character(meta['character'], art_id, folder_full,
+                                            target_dirs[sub_dir], sub_dir, sub_path)
+                if character:
+                    item_obj['character'] = character
 
             # archive entry
             learning_pts = []

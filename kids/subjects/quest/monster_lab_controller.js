@@ -309,6 +309,19 @@
 
       const pName = document.getElementById('partnerName');
       if (pName) pName.textContent = '민수 & 냥이 & 민서 삼총사';
+      const galleryPartner = window.MonsterRoster?.getGalleryPartner('daughter');
+      const partnerImg = document.getElementById('minseoPartnerImg');
+      if (galleryPartner && partnerImg) {
+        const defaultSrc = partnerImg.getAttribute('src');
+        partnerImg.onerror = () => {
+          partnerImg.onerror = null; partnerImg.src = defaultSrc;
+          partnerImg.alt = '민수 & 냥이 & 민서 삼총사';
+          if (pName) pName.textContent = '민수 & 냥이 & 민서 삼총사';
+        };
+        partnerImg.src = galleryPartner.spriteUrl;
+        partnerImg.alt = galleryPartner.name;
+        if (pName) pName.textContent = galleryPartner.name;
+      }
 
       const pDot = document.getElementById('partnerDot');
       if (pDot) pDot.className = 'w-1.5 h-1.5 rounded-full bg-[#ff85a2] animate-pulse';

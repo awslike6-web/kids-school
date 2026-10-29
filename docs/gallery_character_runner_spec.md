@@ -1,21 +1,18 @@
-# 🏃 꿈나무 갤러리 「자작 캐릭터 파트너 장착 & 1분 미니 런」 작업 명세서 (Gallery Character & Mini Runner Spec)
+# 🏃 꿈나무 갤러리 「자작 캐릭터 파트너 장착 & 1분 미니 런」 기능 명세서 (Gallery Character & Mini Runner Spec)
 
-> **문서 버전**: v1.0 (2026-10-29 작성, 구현 전)
-> **상태**: 작업 지시서. 구현이 끝나면 §11대로 기능 명세서로 고쳐 쓴다.
+> **문서 버전**: v1.1 (2026-10-29 공부방 구현)
+> **상태**: 공부방 A 구현·검증 완료. 관제탑 B 등록 옵션은 후속 구현 중. 실제 콘텐츠 등록·운영 노션 쓰기는 포함하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(§5 이미지 무결성, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 문서**: [`docs/gallery_spot_diff_spec.md`](gallery_spot_diff_spec.md)(같은 방식의 선택 필드·빌더·등록 옵션 선례), [`docs/gallery_archive_spec.md`](gallery_archive_spec.md), [`docs/character_studio_handover.md`](character_studio_handover.md)(캐릭터 그래픽 규격·남매 테마), `kids/core/CORE_CATALOG.md`의 `monster_roster.js` 절
 > **작업자 참고**: 코드를 쓰기 전에 `AGENTS.md` 순서대로 `GEMINI.md`, `CORE_CATALOG.md`, 위 연계 문서를 읽는다.
 
 ---
 
-## 0. 작업 방식 (ASDST)
+## 0. 구성과 검증 경계
 
-- 코드를 쓰기 전에 이 문서 기준으로 **실행 계획(고칠 파일, 파일별 예상 줄 수, 이 문서와 다르게 하려는 점과 이유)을 먼저 보고하고 승인을 기다린다.**
-- 작업은 두 저장소다. 커밋도 따로 한다. **A(공부방)를 먼저 끝내고 시험을 통과한 뒤 B(관제탑)**를 한다.
-  - A: `G:/master-tower/kids-school-main`
-  - B: `G:/master-tower` (`scripts/sync_quick_upload.py`)
-- worktree에서 작업하면 계약 검사는 바뀐 파일마다 worktree 절대 경로로 `--mode file --file <경로>`를 실행한다 (`verify_contracts.py`는 `G:/master-tower` 기준으로 저장소를 찾음).
-- worktree에는 옆 폴더(`../kids-archive`)가 없다. 빌더·등록 도구 시험은 임시 복제 환경에서 하고, 등록 도구는 `--no-push`로만 돌린다. **노션 카드 Upsert가 실행되는 경로(`--title` 지정)는 시험하지 않는다.**
+- 공부방 A와 관제탑 B는 별도 저장소·커밋이다. A의 시험을 통과한 뒤 B를 구현한다.
+- worktree의 변경 파일은 관제탑 `scripts/verify_contracts.py --mode file --file <절대 경로>`로 검사한다.
+- 빌더·등록 시험은 임시 공부방/아카이브 구조에서 실행한다. 등록 도구는 `--no-push`만 사용하고 `--title`을 지정하지 않는다. 큐·외부 API·원격 Git은 모의해 운영 쓰기를 막는다.
 
 ---
 
@@ -193,56 +190,34 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 
 ---
 
-## 7. 시험용 그림
-- 실제 갤러리에는 아직 캐릭터 작품이 없다. 화면 시험에는 저장소에 있는 민수 자작 캐릭터 그림 `kids/assets/monsters/cottun_bongdomdol/idle.png`(투명 PNG)를 쓴다. 로컬 `gallery-data.js`의 작품 하나에 임시로 `character`를 넣고(`spriteUrl`은 미리보기 서버에서 열리는 상대·로컬 주소), 끝나면 `git checkout -- kids/data/gallery-data.js`로 되돌린다.
-  - 이때 `isValidCharacter`가 `https://raw.githubusercontent.com/awslike6-web/kids-archive/main/`만 허용하면 시험이 막힌다. **검증은 「`https:` 주소 또는 같은 출처의 상대 주소」를 허용**하고, 계약 시험(§8-1)에서 실제 데이터는 아카이브 CDN만 쓰는지 따로 확인한다.
-- 빌더 시험의 누끼 거부 사례는 시험 안에서 Pillow로 만든 불투명 PNG를 쓴다.
+## 7. 시험과 확인 결과 (2026-10-29)
+
+- `node --test "tests/**/*.test.mjs"`: 총 75건, 통과 73·실패 0·기존 건너뜀 1·기존 TODO 1. 신규 시험 14건 통과.
+- 로스터·순수 물리·실제 데이터 CDN 계약과 임시 빌더의 투명 PNG/불투명/JPG/13자 이름/파일 없음/완전 투명을 검사한다. 정상 결과의 알파·크롭·긴 변 512px·EXIF 회전과 포트폴리오 필드 미포함을 확인한다.
+- 충돌 즉시 게임 종료·별 음수 허용·해제 시 선택 미복구를 각각 주입하면 시험이 실패함을 확인한 뒤 원복했다.
+- `scripts/guarded_preview_server.py`와 모의 외부 응답을 사용해 360×800·1280×800에서 장착/해제·부모 자녀별 버튼·남매 분리·연구소 순환·양쪽 연구소/실전 러너의 그림과 이름·두 테마·점프 입력·일시정지·숨김·리사이즈·완주·재시작·오류 안내·닫기/rAF 해제를 확인했다. 60초 진행은 실제 rAF 콜백에 결정적 시계를 공급해 검사했다.
+- 런타임 콘솔 오류 0·예상 밖 리소스 누락 0·`__blockedWrites` 0. 이미지 오류 사례의 의도된 404는 별도 확인했다. 소리는 함수 호출을 검사했으며 실기기 스피커/청취는 미확인이다.
+- 시험 그림은 기존 `kids/assets/monsters/cottun_bongdomdol/idle.png`를 브라우저 응답에만 주입했다. 실제 `gallery-data.js`·메타·아카이브는 변경하지 않았다. 화면 결과는 저장소 밖 scratch에 둔다. `walkthrough.md`는 만들지 않는다.
 
 ---
 
-## 8. T (Test · 합격 기준)
+## 8. 공개 API 보완
 
-### 8-1. 명령 시험 (커밋 전 필수)
-1. `node --test "tests/**/*.test.mjs"` 전부 통과. 새 `tests/gallery-character-runner.test.mjs`는 `tests/browser-sandbox.mjs`의 `loadBrowserScripts`로 다음을 확인한다:
-   - **로스터**: 장착 → 저장 형식, `selectedMonster`가 `gallery_partner`가 됨, `getSelectedMonster()`의 포즈 6종이 모두 그림 주소, 다시 실어도(새 샌드박스에 같은 저장소) 유지됨, 해제하면 `clay_bite`로 돌아감, 깨진 JSON·`http:`·`javascript:` 주소는 무시, 민서 장착은 `selectedMonster`를 바꾸지 않음, 기존 2종의 동작(`getLabTapResponse`, `getRunnerReaction`)은 그대로
-   - **미니 런 순수 함수**: 같은 시드면 같은 배치, 60초 동안 `step`을 돌리면 항상 완주 상태로 끝남(아무 입력 없이도), 충돌 시 별이 1개 줄되 0 미만으로 안 내려감, 무적 시간 동안 추가 감소 없음, 2단 점프는 공중에서 한 번만, `dt` 50ms 자르기, 민서 프로필의 모든 장애물은 1단 점프 최고 높이보다 낮음
-   - **계약**: `gallery-data.js`에서 `character`가 있는 모든 항목이 `isValidCharacter`를 통과하고 `spriteUrl`이 아카이브 CDN 주소로 시작함(지금은 0건이어도 통과)
-   - 두 스크립트 모두 실을 때 `document`에 접근하지 않음
-2. 시험이 실제로 고장을 잡는지 확인한다. 아래처럼 일부러 깨뜨리면 시험이 실패해야 하고, 확인 후 되돌린다:
-   - 충돌 시 게임을 끝내도록 바꾸기
-   - 별을 음수로 허용하기
-   - 해제 시 기본 몬스터로 돌리지 않기
-3. 빌더: 임시 복제 환경에서 정상 누끼 PNG, 불투명 PNG, JPG, 이름 13자, 파일 없음을 확인한다. 정상만 `character`가 들어가고 나머지는 `⚠️ [character 제외]`가 뜨며 카드는 정상이어야 한다. 정상 결과 PNG의 여백이 잘렸는지, 긴 변이 512 이하인지, 알파가 유지됐는지 확인한다.
-4. 등록 도구(B): 임시 환경 + `--no-push`로 확인한다. 메타 없는 기존 작품 허용, 갤러리에 없는 ID 거부, 옵션만 줄 때 메타에 `character`만 생기고 다른 항목은 그대로인지, 잘못된 PNG면 메타를 안 쓰고 종료 코드 1인지 본다. **노션·외부 API·원격 git 호출이 0회**인지도 확인한다.
-5. 계약 검사: 바뀐 파일마다 `[ALL PASS]`
-
-### 8-2. 화면 시험
-- 서버는 `python scripts/guarded_preview_server.py`(포트 8767, 노션 쓰기 차단)만 쓴다.
-- 360×800, 1280×800 두 크기에서 확인한다:
-  1. `character` 있는 작품에만 버튼이 보이고, 부모 계정은 「민수에게/민서에게」 두 버튼이 보인다
-  2. 민수로 장착 → `monster_lab.html`의 `#monsterImg`, `quest_runner.html`의 `#cheerMonster`에 그 캐릭터와 이름이 보인다. 연구소에서 좌우로 넘겨 다른 몬스터를 골랐다가 다시 고를 수 있다. 해제하면 클레이 바이트로 돌아간다
-  3. 민서로 장착 → 연구소 `#minseoPartnerImg`와 러너 파트너가 바뀌고, 민수의 선택은 그대로다
-  4. 미니 런: 탭·스페이스로 1단·2단 점프, 부딪혀도 계속 달림, 60초 뒤 완주 화면, 다시 달리기, 창 크기 변경, 탭 숨김 시 일시정지, 닫은 뒤 오버레이·rAF 해제, 민서·민수 테마 차이
-  5. 콘솔 오류 0건, `window.__blockedWrites` 비어 있음
-- 결과는 완료 보고에 항목별 통과·실패로 적는다. 확인하지 못한 항목은 못 했다고 적는다(`GEMINI.md` §5-4). `walkthrough.md`는 저장소에 만들지 않는다.
+- 로스터의 `getRunnerBest(child)`/`setRunnerBest(child, score)`가 최고 기록 키의 단일 원천이다. 낮은 값은 기존 최고 기록을 덮어쓰지 않는다. 부모 게임은 자녀 기록을 바꾸지 않는다.
+- `GalleryMiniRunner.bindModal(item, {available, viewer})`가 장착/해제·부모 버튼·안내 토스트를 구성한다. 모달 매니저에는 호출만 둔다.
+- 상대 sprite 주소는 장착 시 같은 출처 기준 경로로 고정해 페이지 디렉터리 차이를 없앤다. 검증은 HTTPS 또는 같은 출처 상대 주소를 허용하며 실제 생성 데이터는 아카이브 CDN이어야 한다.
 
 ---
 
-## 9. 커밋 단위 (권장)
+## 9. 배포와 저장 한계
 
-| 순서 | 저장소 | 내용 |
-| :--- | :--- | :--- |
-| 1 | 공부방 | `feat(quest): 갤러리 파트너 저장소·로스터 동적 항목` (로스터, 연구소·러너 연결, 시험 일부) |
-| 2 | 공부방 | `feat(gallery): 자작 캐릭터 미니 런·모달 버튼` |
-| 3 | 공부방 | `feat(gallery): 빌더 character 변환·검증` |
-| 4 | 공부방 | `docs(gallery): 캐릭터 파트너·미니 런 명세·카탈로그 갱신` |
-| 5 | 관제탑 | `feat(gallery): 작품 등록 도구 --character-sprite/--character-name` |
-
-- 바뀐 스크립트의 `?v=` 캐시 쿼리를 올린다(`gallery.html`, `monster_lab.html`, `quest_runner.html` 중 실제로 바뀐 스크립트를 싣는 곳만).
+- 로스터·컨트롤러·러너·모달의 실제 로드 지점은 `?v=20261029-character`로 갱신한다.
+- 갤러리 파트너와 최고 기록은 현재 브라우저/기기의 localStorage에만 남는다. 저장 공간 차단 시 저장 실패를 안내하며 장착 완료로 표시하지 않는다.
+- 실제 자작 캐릭터 콘텐츠 등록, 운영 노션 쓰기, 기기 간 동기화는 수행하지 않았다.
 
 ---
 
-## 10. 부모용 등록 절차 (구현 후 `gallery_archive_spec.md`로 옮김)
+## 10. 부모용 등록 절차
 
 1. **캐릭터 누끼 만들기**: 아이가 그린 캐릭터나 만든 인형 사진에서 배경을 지운 PNG를 만든다. 갤럭시 갤러리 앱의 「배경 지우기」, 사진 길게 눌러 개체 복사 같은 기능을 쓴다. 캐릭터 하나만 남기고, 손이나 책상이 같이 잘리지 않게 한다.
 2. **등록**: 그 작품(원본 사진은 이미 갤러리에 있음)에 붙인다.
@@ -253,8 +228,7 @@ GalleryMiniRunner.hitboxOf(sprite, x, y, w, h)       // 그림 크기의 70% 판
 
 ---
 
-## 11. 구현 후 문서 정리
-- 이 문서 맨 위 상태를 「구현 완료 (날짜)」로 바꾸고, 작업 지시용 절(§0, §7, §8, §9)을 줄여 실제 API, 데이터 계약, 동작 규칙, 한계만 남긴다.
-- `CORE_CATALOG.md`: `monster_roster.js` 절에 새 함수와 저장 키(기기 로컬 한계 포함), 갤러리 절에 `gallery-mini-runner.js`, 회귀 시험 절에 새 시험을 추가한다.
-- `gallery_archive_spec.md`: 파일 맵, 등록 옵션, §10 절차를 추가하고 문서 버전을 올린다.
-- `character_studio_handover.md`: 「갤러리 자작 캐릭터 → 파트너」 연결 규격(필드, 그림 규격 512px·투명 PNG, 저장 키)을 한 절로 추가한다.
+## 11. 관련 문서
+- API·저장 키·모듈: `kids/core/CORE_CATALOG.md`.
+- 작품 등록·부모 제작: `docs/gallery_archive_spec.md`.
+- 캐릭터 그래픽 규격·기존 6포즈와의 관계: `docs/character_studio_handover.md`.

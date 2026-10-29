@@ -97,6 +97,102 @@
 
     const MONSTER_ORDER = ['clay_bite', 'cottun_bongdomdol'];
     const preloadedCache = new Set();
+    // 갤러리 파트너·최고 기록은 이 기기의 자녀별 저장소에만 보관한다.
+    const PARTNER_KEYS = { son: 'galleryPartner_son', daughter: 'galleryPartner_daughter' };
+    const BEST_KEYS = { son: 'galleryRunnerBest_son', daughter: 'galleryRunnerBest_daughter' };
+    const GALLERY_ID = 'gallery_partner';
+
+    function validSprite(src) {
+        if (typeof src !== 'string' || !src || /[\s\\\u0000-\u001f]/.test(src)) return false;
+        if (/^https:\/\/[^/@?#]+(?:\/[^\s]*)?$/i.test(src)) return true;
+        // 같은 출처 상대 주소는 로컬 미리보기에도 허용한다. 외부 프로토콜은 거절한다.
+        return !src.startsWith('//') && !/^[^/?#]*:/.test(src) && !src.startsWith('#');
+    }
+
+    function isValidCharacter(character) {
+        return !!character && typeof character.name === 'string' &&
+            Array.from(character.name.trim()).length >= 1 && Array.from(character.name.trim()).length <= 12 &&
+            validSprite(character.spriteUrl);
+    }
+
+    function getGalleryPartner(child) {
+        if (!Object.hasOwn(PARTNER_KEYS, child)) return null;
+        try {
+            const value = JSON.parse(localStorage.getItem(PARTNER_KEYS[child]));
+            return isValidCharacter(value) && typeof value.artId === 'string' && value.artId.trim() &&
+                Number.isFinite(value.equippedAt) && value.equippedAt > 0 ? value : null;
+        } catch (e) { return null; }
+    }
+
+    function refreshGalleryMonster() {
+        const partner = getGalleryPartner('son');
+        if (!partner) {
+            delete MONSTER_ROSTER[GALLERY_ID];
+            const index = MONSTER_ORDER.indexOf(GALLERY_ID);
+            if (index >= 0) MONSTER_ORDER.splice(index, 1);
+            return;
+        }
+        const name = partner.name;
+        MONSTER_ROSTER[GALLERY_ID] = {
+            id: GALLERY_ID, number: '자작', name, role: '갤러리 파트너',
+            code: 'GALLERY // PARTNER', badgeText: `자작: ${name}`, hasBackground: false,
+            poses: Object.fromEntries(['idle', 'greet', 'walk_left', 'walk_right', 'rage', 'roar']
+                .map(pose => [pose, partner.spriteUrl])),
+            labDialogues: { idle: `${name} 출격 준비 완료! ⚡`, greet: `${name}와 함께 시작해요!`,
+                walk: [`${name}와 천천히 준비해요!`, '어느 과목부터 함께해 볼까?'],
+                rage: '에너지가 가득해요! ✨', roar: `${name}와 함께 출발!` },
+            runnerDialogues: { stageStart: `${name}가 함께할게요!`,
+                correct: ['멋지게 해냈어요! 🙌', '차근차근 잘하고 있어요!'],
+                encourage: ['괜찮아요! 힌트를 보고 다시 해봐요. 🌱'], clear: '끝까지 함께했어요! 🎉' }
+        };
+        if (!MONSTER_ORDER.includes(GALLERY_ID)) MONSTER_ORDER.push(GALLERY_ID);
+    }
+
+    function equipGalleryPartner(child, character) {
+        if (!Object.hasOwn(PARTNER_KEYS, child) || !isValidCharacter(character) ||
+            typeof character.artId !== 'string' || !character.artId.trim()) return null;
+        let spriteUrl = character.spriteUrl;
+        // 상대 주소를 출처 기준 경로로 고정해 갤러리와 연구소의 폴더 차이를 없앤다.
+        if (!/^https:/i.test(spriteUrl) && typeof URL !== 'undefined' && window.location?.href) {
+            const url = new URL(spriteUrl, window.location.href);
+            spriteUrl = url.pathname + url.search + url.hash;
+        }
+        const value = { artId: character.artId, name: character.name.trim(), spriteUrl, equippedAt: Date.now() };
+        try {
+            localStorage.setItem(PARTNER_KEYS[child], JSON.stringify(value));
+            if (child === 'son') localStorage.setItem(STORAGE_KEY, GALLERY_ID);
+        } catch (e) { return null; }
+        if (child === 'son') refreshGalleryMonster();
+        return value;
+    }
+
+    function clearGalleryPartner(child) {
+        if (!Object.hasOwn(PARTNER_KEYS, child)) return false;
+        try {
+            localStorage.removeItem(PARTNER_KEYS[child]);
+            if (child === 'son' && localStorage.getItem(STORAGE_KEY) === GALLERY_ID)
+                localStorage.setItem(STORAGE_KEY, DEFAULT_MONSTER_ID);
+        } catch (e) { return false; }
+        if (child === 'son') refreshGalleryMonster();
+        return true;
+    }
+
+    function getRunnerBest(child) {
+        if (!Object.hasOwn(BEST_KEYS, child)) return 0;
+        try {
+            const score = Number(localStorage.getItem(BEST_KEYS[child]));
+            return Number.isSafeInteger(score) && score >= 0 ? score : 0;
+        } catch (e) { return 0; }
+    }
+
+    function setRunnerBest(child, score) {
+        if (!Object.hasOwn(BEST_KEYS, child) || !Number.isSafeInteger(score) || score < 0) return false;
+        try { localStorage.setItem(BEST_KEYS[child], String(Math.max(score, getRunnerBest(child)))); }
+        catch (e) { return false; }
+        return true;
+    }
+
+    refreshGalleryMonster();
 
     function getSelectedMonsterId() {
         try {
@@ -220,6 +316,8 @@
     }
 
     window.MonsterRoster = {
+        equipGalleryPartner, getGalleryPartner, clearGalleryPartner, isValidCharacter,
+        getRunnerBest, setRunnerBest,
         MONSTER_ROSTER,
         MONSTER_ORDER,
         getSelectedMonsterId,
