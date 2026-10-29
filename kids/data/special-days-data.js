@@ -11,9 +11,9 @@ const DEFAULT_SPECIAL_DAYS_DATA = [
     title: "🐕 진로체험: 반려동물 훈련사와의 따뜻한 만남!",
     date: "2026-10-22",
     desc: "진로주간을 맞아 1-2학년 친구들이 멋진 반려동물 훈련사 선생님과 함께하는 특별한 진로체험 시간을 가졌습니다! 민서도 훈련사 선생님의 지도에 따라 크고 온순한 강아지의 보드라운 털을 다정하게 쓰다듬어 주며 활짝 웃는 얼굴로 깊은 교감을 나누었어요. 동물과 소통하고 교감하며 존중하는 법, 그리고 반려동물 훈련사의 멋진 역할을 직접 배우며 마음이 한 뼘 더 자란 뜻깊은 하루였습니다! 🐶🐾✨ (담임 조현애 선생님 알림)",
-    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261022_pet_trainer_01.jpg",
+    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261022_pet_trainer_01.jpg",
     galleryImages: [
-      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20261022_pet_trainer_01.jpg"
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261022_pet_trainer_01.jpg"
     ],
     videoUrl: "",
     likes: 12,
@@ -30,9 +30,9 @@ const DEFAULT_SPECIAL_DAYS_DATA = [
     title: "🎒 전교생이 함께한 2026 가을 나눔 장터!",
     date: "2026-10-21",
     desc: "전체 학년 친구들과 함께 즐거운 가을 나눔 장터를 열었습니다! 민서도 체육관에 돗자리를 펴고 귀여운 인형들과 물건들을 가지런히 진열하여 판매해 보았어요. 친구들과 함께 자신의 물건을 팔기 위해 열심히 노력하고, 현명한 소비를 위해 어떤 물건을 사야 할지 많이 고민하며 물건을 구입하는 알차고 뜻깊은 경제 배움의 날이었습니다! 🧸🧺🍂 (※ 민수 사진도 추후 추가 예정)",
-    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_KakaoTalk_20261021_152143970_01.jpg",
+    imageUrl: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_KakaoTalk_20261021_152143970_01.jpg",
     galleryImages: [
-      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_KakaoTalk_20261021_152143970_01.jpg"
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_KakaoTalk_20261021_152143970_01.jpg"
     ],
     videoUrl: "",
     likes: 12,
