@@ -162,7 +162,7 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20260922_213854" --a
 
 ### 최종 파일별 줄 수와 변경량
 - `kids/common_space/gallery-mini-runner.js`: +40/−12, 최종 426줄.
-- `kids/common_space/gallery.html`: +1/−1, 최종 305줄.
+- `kids/common_space/gallery.html`: +2/−2, 최종 305줄.
 - `kids/subjects/quest/monster_roster.js`: +15/−3, 최종 355줄.
 - `scripts/build_gallery.py`: +46/−9, 최종 520줄.
 - `tests/gallery-character-runner.test.mjs`: +6/−6, 최종 433줄.
