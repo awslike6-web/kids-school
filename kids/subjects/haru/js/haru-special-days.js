@@ -5,6 +5,7 @@
  * - 고화질 사진 전체보기 팝업 모달 & 동영상 바로가기 연동
  * - 4종 감정 도장 & 나만의 느낌 한 줄 작성
  * - 제목 인라인 편집 및 신규 특별한 날 추억 등록
+ * - 기본 목록: kids/data/special-days-data.js(DEFAULT_SPECIAL_DAYS_DATA)를 haru.html이 먼저 싣는다
  */
 // 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
 function getKstTodayYMD(date = new Date()) {
@@ -49,9 +50,23 @@ function getKstTodayYMD(date = new Date()) {
     }
   }
 
+  // 특별한 날 원천은 kids/data/special-days-data.js 하나 (갤러리 특별한 날 탭과 같은 목록).
+  // 지금 아이의 행사와 가족 공동·부모 행사만 보여 준다. 작성자는 author 값으로만 가른다.
+  const CHILD_AUTHOR = { minseo: "민서", minsu: "민수" };
+  const SHARED_AUTHORS = ["공동", "공통", "아빠", "엄마"];
+
+  function getDefaultStoriesFor(child) {
+    const master = typeof DEFAULT_SPECIAL_DAYS_DATA !== "undefined" ? DEFAULT_SPECIAL_DAYS_DATA : [];
+    const own = CHILD_AUTHOR[child] || CHILD_AUTHOR.minseo;
+    return master
+      .filter(evt => evt.author === own || SHARED_AUTHORS.includes(evt.author))
+      .map(evt => ({ ...evt }))
+      .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  }
+
   function getSpecialStories() {
     const child = window.currentChild || "minseo";
-    const defaults = (window.HARU_DATA?.specialDays?.defaultEvents) || [];
+    const defaults = getDefaultStoriesFor(child);
     let customMeta = {};
     try {
       const rawMeta = localStorage.getItem("SPECIAL_DAYS_CUSTOM_META");
@@ -179,7 +194,7 @@ function getKstTodayYMD(date = new Date()) {
     const stampData = {
       emoji: emoji,
       label: label,
-      date: new Date().toISOString().slice(5, 10).replace("-", "/")
+      date: getKstTodayYMD().slice(5).replace("-", "/")
     };
     localStorage.setItem(stampKey, JSON.stringify(stampData));
 
@@ -459,10 +474,10 @@ function getKstTodayYMD(date = new Date()) {
       const emojiMatch = customStampInput.match(/^(\p{Emoji})/u);
       const emoji = emojiMatch ? emojiMatch[1] : "💮";
       const label = emojiMatch ? customStampInput.slice(emoji.length).trim() : customStampInput;
-      initialStamp = { emoji: emoji, label: label || customStampInput, date: new Date().toISOString().slice(5, 10).replace("-", "/") };
+      initialStamp = { emoji: emoji, label: label || customStampInput, date: getKstTodayYMD().slice(5).replace("-", "/") };
     } else if (stampPreset && stampPreset !== "custom") {
       const parts = stampPreset.split(" ");
-      initialStamp = { emoji: parts[0], label: parts.slice(1).join(" "), date: new Date().toISOString().slice(5, 10).replace("-", "/") };
+      initialStamp = { emoji: parts[0], label: parts.slice(1).join(" "), date: getKstTodayYMD().slice(5).replace("-", "/") };
     }
 
     const child = window.currentChild || "minseo";
@@ -513,7 +528,7 @@ function getKstTodayYMD(date = new Date()) {
     if (typeof window.speakText === "function") {
       window.speakText(`새로운 특별한 하루 이야기 [${title}]이 우리 게시판에 등록되었어요! ${curWord}를 선물합니다!`);
     }
-    alert(`🎉 [${title}] 이야기가 추억 게시판에 등록되었습니다! ${curSymbol}를 받았어요!\n\n💡 팁: 학교 사진을 12년 성장 아카이브(kids-archive)에 영구 보존하려면 [scripts/add_activity_photo.py] 도구를 활용해 보세요!`);
+    alert(`🎉 [${title}] 이야기가 추억 게시판에 등록되었습니다! ${curSymbol}를 받았어요!\n\n💡 팁: 학교 사진을 12년 성장 아카이브(kids-archive)에 영구 보존하려면 폰 퀵업로드에서 [특별한 날]로 올려 주세요!`);
   }
 
   // 전역 네임스페이스 바인딩

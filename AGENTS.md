@@ -9,6 +9,7 @@
 3. **`kids/core/CORE_CATALOG.md`**: 새 코드를 짜기 전에 재사용할 공통 엔진을 먼저 찾습니다.
 4. 해당 과목 명세서: `docs/{과목}_spec.md`, 노션 스키마: `docs/notion_schemas_school.md`. 등록 작업은 명세서에 적힌 공식 도구를 씁니다(일회성 스크립트 금지, `../GEMINI.md` §9-5).
    - 갤러리 작품 등록: [`docs/gallery_archive_spec.md`](docs/gallery_archive_spec.md)
+   - 특별한 날 등록: [`docs/gallery_archive_spec.md` §5](docs/gallery_archive_spec.md) (입구 관제탑 `scripts/sync_quick_upload.py --cat "특별한 날"`, 빌더 `scripts/add_activity_photo.py`)
    - 알림장 등록: [`docs/timetable_diary_spec.md` §4](docs/timetable_diary_spec.md)
    - 종이일기 등록: [`docs/timetable_diary_spec.md` §5](docs/timetable_diary_spec.md)
    - 센터 교재·독해 등록: [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)

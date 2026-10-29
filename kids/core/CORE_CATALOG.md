@@ -712,10 +712,13 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🌟 `haru-special-days.js` ([추억] 특별한 날 추억 피드 & 포토 갤러리 엔진)
 학교 축제, 생일, 소풍, 현장학습 등 특별한 날 추억 피드, 고화질 사진 전체보기 팝업 모달, 다중 썸네일 스위처, 4종 감정 도장 및 직접 쓰기, 제목 인라인 수정, 신규 추억 등록을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/subjects/haru/js/haru-special-days.js` (473줄)
+- **파일 위치**: `kids/subjects/haru/js/haru-special-days.js` (558줄)
+- **원천 (2026-10-29)**: 기본 목록은 갤러리와 같은 `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`) 하나다. `haru.html`이 `../../data/special-days-data.js?v=...`를 이 모듈보다 먼저 싣는다. `haru_data.js`에는 `specialDays.title`만 남았다(예시 3건 삭제).
+- **아이별 거르기**: `window.currentChild`(minseo/minsu) 기준 `author`가 그 아이(민서/민수)이거나 `공동`·`공통`·`아빠`·`엄마`인 행사만, 날짜 최신순. localStorage `haru_special_stories_{child}`의 `evt_custom_…` 이야기·`_userEditedTitle`, 갤러리 메타 `SPECIAL_DAYS_CUSTOM_META`는 그대로 덧입힌다. 시험: `tests/haru-special-days.test.mjs`.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
+  | `getSpecialStories()` | 지금 아이의 행사 목록 (원천 + 아이 이야기 + 제목 수정 + 갤러리 메타) |
   | `renderSpecialDaysTab()` | 특별한 날 추억 피드 카드 그리드 렌더링 |
   | `openSpecialPhotoModal(id, imgId)` | 고화질 사진 전체보기 팝업 모달 열기 |
   | `stampReaction(event, id, emoji, label)` | 추억 감정 도장 쾅 찍기 (+보상 지급) |
@@ -779,10 +782,21 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
   ```
 
 ### 🌟 `scripts/build_gallery.py` (성장 아카이브 동기화 빌더)
-아이들의 신규 그림, 상장, 사진을 영구 보존용 `kids-archive` 레포지토리로 전송하고 공부방 갤러리 메타데이터를 일괄 동기화합니다.
+아이들의 신규 그림, 상장, 사진을 영구 보존용 `kids-archive` 레포지토리로 전송하고 공부방 갤러리 메타데이터를 일괄 동기화합니다. `archive-master-data.js`를 다시 쓸 때 특별한 날 항목(`id`가 `evt_`로 시작)은 기존 파일에서 그대로 이어 붙입니다(작품 스캔으로 다시 만들 수 없음).
 - **실행 커맨드**:
   ```bash
   python scripts/build_gallery.py
+  ```
+
+### 🌟 `scripts/add_activity_photo.py` (특별한 날 등록 빌더, 2026-10-29 개편)
+특별한 날 등록의 파일 작업 본체입니다. 공식 입구는 관제탑 `scripts/sync_quick_upload.py --cat "특별한 날"`(노션·큐·Git)이고, 입구가 importlib로 이 모듈을 불러 씁니다. 단독 실행은 `--dry-run` 미리보기나 노션 없이 파일만 맞출 때 씁니다. 상세: [`docs/gallery_archive_spec.md` §5](../../docs/gallery_archive_spec.md).
+- **하는 일**: EXIF 회전 보정·긴 변 1200px JPEG → `kids-archive/assets/media/{minseo|minsu|together}/activities/{아이}_{YYYYMMDD}_{slug}_{NN}.jpg`, 로컬 영상 복사(또는 http 주소 연결), `kids/data/special-days-data.js` id upsert(같은 id 재실행 = 덮어쓰기, `likes`·`stickers`·`comments` 보존, 신규는 날짜 순서 자리), `archive-master-data.js` 같은 id upsert, `haru.html`·`gallery.html`의 `special-days-data.js?v=` 갱신. 날짜 기본값은 KST 오늘.
+- **id 계약**: `evt_{minseo|minsu|together}_{slug}_{YYYYMMDD}`. 작성자 `민서`·`민수`·`공동`·`공통`·`아빠`·`엄마`(뒤의 넷은 together 폴더). slug는 `--slug`(영문) 우선, 없으면 첫 사진 파일 이름(폰 사진 `20261030_143012.jpg` → `photo_143012`).
+- **핵심 API** (입구가 사용): `build_plan(author, title, desc, date, files, category, icon, slug, event_id, video, video_btn)` → `Plan`(검증만, 쓰기 없음) · `apply_plan(plan, school_root, archive_root, dry_run=False)` → 바뀐 파일 상대경로 `{'school': [...], 'archive': [...]}` · `print_plan(plan, changed)` · `group_queue_items(items)`(같은 작성자·날짜·메모 = 한 행사) · `queue_group_plan(group)`.
+- **데이터 형식**: `special-days-data.js`의 배열 본문은 JSON(따옴표 키)으로 유지한다. 빌더가 정규식 `const DEFAULT_SPECIAL_DAYS_DATA = ([...]);`로 읽고 `json.dumps(indent=2)`로 다시 쓴다.
+- **실행 커맨드**:
+  ```bash
+  python -X utf8 scripts/add_activity_photo.py --dry-run --author 민서 --date 2026-10-22 --slug pet_trainer --category "학교행사/운동회" --icon "🐕" --title "🐕 제목" --desc "본문" --file "a.jpg" --sub-files "b.jpg,c.jpg" --video "https://..."
   ```
 
 ### 🌟 `scripts/log_dev_timeline.py` & `scripts/manage_study_board.py`
@@ -983,7 +997,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   ```
 
 ### 🌟 `scripts/sync_quick_upload.py` (모바일 퀵업로드 · 갤러리 작품 원클릭 파이프라인 v2.2)
-모바일 퀵업로드 대기 큐 감지 또는 PC 로컬 사진(`--file`, `--sub-files`)·동영상(`--video`)을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` 갱신, `gallery.html?v=...` 캐시 버스팅, 노션 `3dfa2711...` 작품 카드 Upsert(`식별ID` 1:1 매칭 + 당일 일상 `392a...` 연동), 양쪽 깃허브 푸시까지 1회 실행으로 끝내는 작품 등록 도구입니다. 노션 등록이 실패하면 오류 원문을 보여 주고 종료 코드 1. 특별한 날은 대상이 아닙니다. 상세 규격은 [`docs/gallery_archive_spec.md`](../../docs/gallery_archive_spec.md) 참조.
+모바일 퀵업로드 대기 큐 감지 또는 PC 로컬 사진(`--file`, `--sub-files`)·동영상(`--video`)을 최적화하여 `kids-archive` CDN 배포, `gallery-data.js` 갱신, `gallery.html?v=...` 캐시 버스팅, 노션 `3dfa2711...` 작품 카드 Upsert(`식별ID` 1:1 매칭 + 당일 일상 `392a...` 연동), 양쪽 깃허브 푸시까지 1회 실행으로 끝내는 작품 등록 도구입니다. 노션 등록이 실패하면 오류 원문을 보여 주고 종료 코드 1. 특별한 날(큐 `구분: 특별한 날`, PC `--cat "특별한 날"`)도 이 입구로 받아 빌더 `kids-school-main/scripts/add_activity_photo.py`에 넘기고, 노션 카드를 `식별ID=evt_…`·`구분: 특별한 날`로 맞춥니다(`gallery_card_props(..., kind)`, `upsert_notion_gallery_card(..., kind=)`, `link_quick_upload_card(..., kind=)`, `register_special_days(...)`). `--dry-run`은 특별한 날에서만 되며 큐·파일·Git·노션을 건드리지 않습니다. 상세 규격은 [`docs/gallery_archive_spec.md`](../../docs/gallery_archive_spec.md) 참조.
 - **파일 위치**: `scripts/sync_quick_upload.py` (관제탑 루트)
 - **실행 커맨드**:
   ```bash
@@ -992,6 +1006,9 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
   # 2. PC 로컬 단일/다중 사진 + MP4 영상 묶음 [갤러리 작품] 등록
   python -X utf8 scripts/sync_quick_upload.py --author "민수" --cat "만들기/공예" --date "2026-10-25" --id "art_minsu_20261020_moodlight_real" --title "작품명" --file "메인사진.jpg" --sub-files "서브사진.jpg" --video "회전영상.mp4" --note "설명"
+
+  # 3. PC 사진 [특별한 날] 등록 (먼저 --dry-run)
+  python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run --author "민서" --date "2026-10-22" --slug pet_trainer --event-cat "학교행사/운동회" --icon "🐕" --title "🐕 제목" --note "알림장 본문" --file "a.jpg" --sub-files "b.jpg"
   ```
 
 ### 🌟 `scripts/extract_reading_from_image.py` (교재 사진 기반 지문·문제·VOCA 추출 파이프라인)
@@ -1112,6 +1129,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/notion-contract.test.mjs`: 앱이 노션에 보내는 요청 본문의 속성 이름·타입이 `docs/notion_schemas_school.md` 표와 같은지 확인합니다. VOCA_DB `숙련도`(`count|silverDate|lastReviewed` 형식·왕복)·`달성`, 관리자 모드 쓰기 생략, STUDY_LOG_DB 학습일지(`ID`=`{학생}_{YYYY-MM-DD}_{과목}`, `오답리포트`). 노션 속성을 바꾸면 스키마 도감(`sync_notion_schemas.py`)과 코드를 함께 고쳐야 통과합니다. 도감을 다시 만들어도 손으로 적은 비고는 유지되고, 노션에 아직 없는 예정 속성은 표 밖 ⚠️ 목록에 남아 이 시험이 실제 속성으로 세지 않습니다.
 - `tests/quest-mastery.property.test.mjs`: 독립 브라우저 샌드박스에서 시드별 30~50개 동작으로 Q1~Q6 숙련도·병합·10분 보호·noCredit·판 구성과 await 중 채점/실패 후 push 배출을 검사하는 무작위 순서 시험입니다(각 흐름 기본 100회). 재현: `QUEST_PROP_SEED=<시드> node --test tests/quest-mastery.property.test.mjs`, 횟수: `QUEST_PROP_RUNS`. 외부 변경 병합(Q3)과 마지막 성공 push 대비 dirty 유실(Q5)은 별도 흐름으로 검사합니다.
 - `tests/media-archive-paths.test.mjs`: `gallery-data.js`·`gallery-meta.json`·`special-days-data.js`·`haru_data.js` 안의 모든 kids-archive 주소를 모아 작품은 activities 밖·작가와 같은 아이 폴더, 특별한 날·하루방은 `{아이}/activities/`, 작품·특별한 날 같은 파일 중복 등록 금지를 검사합니다. 로컬에 `../kids-archive`가 있으면 파일 실존도 확인하고, CI에서는 그 항목만 건너뜁니다.
+- `tests/haru-special-days.test.mjs`: 하루방이 `special-days-data.js`를 상대 경로로 먼저 싣고 `haru_data.js`에 `defaultEvents`가 없는지, 민서 방에 민수 개인 행사가 없고 민수 방에 민서 개인 행사가 없으며 공동·부모 행사는 둘 다 보이는지, 예시 3건(`evt_children` 등)이 사라졌는지, 예전 localStorage 이야기·제목 수정·갤러리 메타가 살아 있는지 검사합니다. 아직 실제 데이터에 없는 작성자(민수 개인·아빠) 행사는 시험 안에서만 덧붙입니다.
 - `tests/study-log-store.property.test.mjs`: 모의 fetch의 응답 지연·실패·중복·날짜 경계로 S1~S7 스트릭·캐시·순차/동시 upsert를 검사하는 무작위 순서 시험입니다(규칙별 기본 100회). 재현: `STUDYLOG_PROP_SEED=<시드> node --test tests/study-log-store.property.test.mjs`, 횟수: `STUDYLOG_PROP_RUNS`. S4 오답 보존·S5 한 탭/두 탭 직렬화·S6 선택 A·S7 Worker isolate 캐시 우회와 ID 수명주기를 검사하고, 두 기기 동시 저장 한계만 본문이 실행되는 todo로 기록합니다. 공용 `tests/browser-sandbox.mjs`의 `loadBrowserScripts(files, { userName, fetch, storage })`는 운영 DB 접속 없이 기본 모의 fetch와 시드별 저장소를 제공합니다.
 - 시험이 실제로 고장을 잡는지 확인함: 숙련도 속성명 오타, 오답리포트 속성명 변경, 금메달 기준 변경, 숙련도 구분자 변경을 일부러 넣었을 때 모두 실패.
 - **화면 검증 서버 (노션 쓰기 차단)**: `python scripts/guarded_preview_server.py [포트=8767]`. 모든 HTML `<head>` 맨 앞에 쓰기 차단 스크립트를 넣어 내보내므로 페이지가 실리기 전부터 노션 페이지·블록 쓰기와 업로드가 막힌다(읽기·DB 조회·음성은 통과, 막힌 요청은 `window.__blockedWrites`). 2026-10-28 차단을 늦게 걸어 민수 「학습설정」이 덮어써진 사고 뒤 도입. 화면 검증은 `python -m http.server` 대신 이 서버로 한다.

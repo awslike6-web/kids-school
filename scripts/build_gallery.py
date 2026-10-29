@@ -13,6 +13,7 @@
 import os
 import sys
 import json
+import re
 import shutil
 import math
 from pathlib import Path
@@ -385,7 +386,14 @@ if (typeof module !== 'undefined' && module.exports) {
         archive_together = [x for x in archive_entries if x['student'] == '공동']
         archive_other = [x for x in archive_entries if x['student'] != '공동']
         archive_other.sort(key=lambda x: x['date'], reverse=True)
-        final_archive = archive_together + archive_other
+        # 특별한 날(evt_...)은 add_activity_photo.py가 넣은 항목이라 작품 스캔으로 다시 만들 수 없다 → 그대로 이어 붙인다
+        kept_events = []
+        if os.path.exists(archive_master_js):
+            with open(archive_master_js, 'r', encoding='utf-8') as f:
+                m = re.search(r'const ARCHIVE_MASTER_DATA = (\[.*\]);', f.read(), re.S)
+            if m:
+                kept_events = [x for x in json.loads(m.group(1)) if str(x.get('id', '')).startswith('evt_')]
+        final_archive = archive_together + archive_other + kept_events
 
         archive_js_content = """// 🏛️ kids-archive/data/archive-master-data.js
 // 민민이네 디지털 성장 아카이브 & 평생 포트폴리오 마스터 데이터베이스

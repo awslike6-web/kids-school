@@ -1,7 +1,7 @@
 # 🎨 꿈나무 갤러리 · 성장 아카이브 상세 명세서 (Gallery & Growth Archive Spec)
 
-> **문서 버전**: v2.6.0 (2026-10-29 기준)
-> **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품 등록 도구(`scripts/sync_quick_upload.py`)  
+> **문서 버전**: v2.7.0 (2026-10-29 기준, 특별한 날 원천 통합·등록 도구)
+> **관할 도메인**: 꿈나무 갤러리 웹(`gallery.html`), 특별한 날 추억 피드(`special-days-data.js`, `haru-special-days.js`), 12년 성장 미디어 단일 원천(`kids-archive`), 작품·특별한 날 등록 도구(`scripts/sync_quick_upload.py` → `build_gallery.py` / `add_activity_photo.py`)  
 > **상위 헌법**: `g:/master-tower/GEMINI.md`, `kids-school-main/GEMINI.md`  
 > **연계 명세서**: [`docs/timetable_diary_spec.md`](timetable_diary_spec.md) (종이일기·일기장 격리 규칙), [`docs/haru_spec.md`](haru_spec.md) (하루방 특별한 날 연계)
 
@@ -11,7 +11,7 @@
 
 - 갤러리 작품 등록("갤러리 작품 등록해줘", "사진 묶어서 등록해줘", "퀵업로드 등록해줘")은 관제탑 루트의 **`python -X utf8 scripts/sync_quick_upload.py`** 하나로 처리한다.
 - 등록할 때마다 일회성 스크립트(`process_*.py`, `register_*_notion.py` 등)를 새로 만들지 않는다. 옵션이 모자라면 `sync_quick_upload.py` 본체를 고친다.
-- 특별한 날은 이 도구의 대상이 아니다 (§5).
+- 특별한 날 등록("특별한 날 등록해줘", "행사 사진 올려줘")도 같은 입구 `sync_quick_upload.py`(`--cat "특별한 날"`, 폰 큐 `구분: 특별한 날`)로 한다. 입구가 빌더 `kids-school-main/scripts/add_activity_photo.py`를 불러 쓴다 (§5). `special-days-data.js`를 손으로 고치거나 행사 사진을 작품 경로(`build_gallery.py`)로 올리지 않는다.
 
 ---
 
@@ -51,11 +51,12 @@ flowchart TD
 
 | 위치 / 저장소 | 파일 경로 | 핵심 역할 |
 | :--- | :--- | :--- |
-| **`master-tower`** | [`scripts/sync_quick_upload.py`](file:///g:/master-tower/scripts/sync_quick_upload.py) | **[작품 등록 진입점] 폰 퀵업로드 + 로컬 사진/다중사진/동영상 + 노션 작품 카드 Upsert + 양쪽 Git 푸시**. 노션 실패 시 ❌ 원문을 보여 주고 종료 코드 1 |
+| **`master-tower`** | [`scripts/sync_quick_upload.py`](file:///g:/master-tower/scripts/sync_quick_upload.py) | **[작품·특별한 날 등록 진입점] 폰 퀵업로드 + 로컬 사진/다중사진/동영상 + 노션 카드 Upsert + 양쪽 Git 푸시**. 특별한 날은 빌더 `add_activity_photo.py`로 넘김(§5). 노션 실패 시 ❌ 원문을 보여 주고 종료 코드 1 |
 | **`kids-school`** | [`kids-school-main/scripts/build_gallery.py`](file:///g:/master-tower/kids-school-main/scripts/build_gallery.py) | `uploads/ex/갤러리/` 스캔 ➔ 1200px EXIF 보정 리사이즈 ➔ `kids-archive` 배포 ➔ `gallery-data.js` & `archive-master-data.js` 생성 (`subImages`, `videoUrl`, `videoBtnText` 지원) |
 | **`kids-school`** | [`kids/data/gallery-meta.json`](file:///g:/master-tower/kids-school-main/kids/data/gallery-meta.json) | 개별 작품 커스텀 메타데이터 (`title`, `category`, `date`, `grade`, `artistNote`, `subImages`, `videoUrl`, `videoBtnText`) |
 | **`kids-school`** | [`kids/data/gallery-data.js`](file:///g:/master-tower/kids-school-main/kids/data/gallery-data.js) | 프론트엔드 갤러리 작품 마스터 데이터 (`DEFAULT_GALLERY_DATA`) |
-| **`kids-school`** | [`kids/data/special-days-data.js`](file:///g:/master-tower/kids-school-main/kids/data/special-days-data.js) | 프론트엔드 특별한 날 추억 마스터 데이터 (`DEFAULT_SPECIAL_DAYS_DATA`) |
+| **`kids-school`** | [`kids-school-main/scripts/add_activity_photo.py`](file:///g:/master-tower/kids-school-main/scripts/add_activity_photo.py) | **[특별한 날 빌더]** 사진 EXIF 보정·1200px ➔ `kids-archive/.../activities/` ➔ `special-days-data.js`·`archive-master-data.js` id upsert ➔ `?v=` 갱신. 입구 `sync_quick_upload.py`가 불러 씀 |
+| **`kids-school`** | [`kids/data/special-days-data.js`](file:///g:/master-tower/kids-school-main/kids/data/special-days-data.js) | 특별한 날 추억 마스터 데이터 (`DEFAULT_SPECIAL_DAYS_DATA`) 단일 원천. 갤러리 특별한 날 탭과 하루방이 함께 읽음. 배열 본문은 JSON 형식 유지 |
 | **`kids-school`** | [`kids/common_space/gallery.html`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.html) | 꿈나무 갤러리 & 특별한 날 통합 뷰포트 |
 | **`kids-school`** | [`kids/common_space/gallery_controller.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery_controller.js) | 갤러리/특별한 날 탭 전환, 필터, 카드 그리드 렌더러 |
 | **`kids-school`** | [`kids/common_space/gallery-data-sync.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-data-sync.js) | 로컬 스토리지 및 노션 DB(`3dfa2711...`) 실시간 양방향 동기화 |
@@ -78,7 +79,8 @@ flowchart TD
 - **2단계 (PC)**: 사용자가 **"퀵업로드 올린 거 등록해줘"**라고 하면 아래 명령을 1회 실행한다. 대기 큐 사진을 `uploads/ex/`로 내려받아 `gallery-meta.json`에 등록하고, 빌드·캐시 버스팅·양쪽 Git 푸시까지 끝낸다.
   - 작품·상장은 임시 카드의 `식별ID`를 `art_...`로, `구분`을 `작품`으로 바꾸고 사진 블록을 붙인다. 카드 번호가 없는 옛 큐 항목은 `art_...`로 찾아 갱신하거나 새로 만든다. 같은 `art_...` 카드가 이미 있으면 그 카드를 갱신하고, 남은 임시 카드는 노션에서 직접 지우라고 안내한다.
   - 노션까지 성공한 항목만 대기 큐에서 지운다. 실패한 항목은 큐에 남아 다음 실행 때 다시 처리된다.
-  - 종이일기·특별한 날 임시 카드는 이 도구가 바꾸지 않는다 (종이일기는 [`timetable_diary_spec.md` §5](timetable_diary_spec.md), 특별한 날은 §5).
+  - 특별한 날 사진은 `uploads/ex/갤러리/하루아카이브/{민서|민수|공통}/`에 내려받아 빌더로 등록하고, 임시 카드를 `evt_...`로 바꾼다 (§5). 작품 메타(`gallery-meta.json`)에는 넣지 않는다.
+  - 종이일기 임시 카드는 이 도구가 바꾸지 않는다 ([`timetable_diary_spec.md` §5](timetable_diary_spec.md)).
 ```bash
 python -X utf8 scripts/sync_quick_upload.py
 ```
@@ -127,12 +129,37 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibim
 
 ---
 
-## 5. 특별한 날 (현재 상태)
+## 5. 특별한 날 등록
 
-- **화면**: `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`)를 갤러리의 특별한 날 탭과 하루방(`haru-special-days.js`, [`docs/haru_spec.md`](haru_spec.md))이 읽는다.
-- **노션**: 성장 갤러리 DB(`3dfa2711...`)에 `구분: 특별한 날`, `식별ID`는 데이터의 `evt_...` id와 같게 둔다.
-- **미디어 폴더**: 특별한 날·하루방 사진은 `kids-archive/assets/media/{아이}/activities/`, 작품은 학년 폴더(`2026_elem_1` 등)에 둔다. 같은 파일을 작품과 특별한 날에 함께 등록하지 않는다. `tests/media-archive-paths.test.mjs`가 검사한다(2026-10-29 행사 사진 2건이 작품 폴더에 들어간 사고 재발 방지).
-- **등록 도구는 아직 없다.** 관제탑 `scripts/sync_haru_special_days_notion.py`는 스크립트 안에 적힌 초기 4건만 노션에 올리는 도구라 새 행사 등록에는 맞지 않는다. 특별한 날 등록 요청이 오면 일회성 스크립트를 만들지 말고, 도구가 없다는 사실을 사용자에게 알리고 등록 도구를 만들지 먼저 정한다.
+### 1) 원천과 화면
+- **원천은 `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`) 하나다.** 갤러리 특별한 날 탭(`gallery-data-sync.js`)과 하루방(`haru-special-days.js`, [`docs/haru_spec.md`](haru_spec.md) §3-3)이 같은 목록을 읽는다. 2026-10-29 전에는 하루방이 `haru_data.js`의 따로 된 목록을 읽어 두 목록이 갈라졌다(하루방에만 사진 없는 예시 3건, 갤러리에만 10/18 이후 행사 3건).
+- 하루방은 지금 아이(`민서`/`민수`)의 행사와 `공동`·`공통`·`아빠`·`엄마` 행사만 보여 준다. 갤러리는 전부 보여 준다.
+- 항목 필드: `id`, `author`(민서·민수·공동·공통·아빠·엄마), `category`(갤러리 특별한 날 분류 6종), `categoryIcon`, `title`, `date`(YYYY-MM-DD), `desc`, `imageUrl`, `galleryImages`, `videoUrl`(+`videoBtnText`), 선택 `videos` 배열(하루방 영상 여러 편), `likes`, `stickers`, `comments`.
+
+### 2) 등록 명령 (관제탑 루트에서)
+- **폰**: 퀵업로더에서 `특별한 날/체험학습`을 고르고 메모를 적어 올린다 → PC에서 "퀵업로드 올린 거 등록해줘" = `python -X utf8 scripts/sync_quick_upload.py`. 같은 작성자·날짜·메모 사진은 행사 하나로 묶인다. 제목은 메모 첫 줄(`⭐ ...`), 분류는 `소중한 하루`로 들어가니 갤러리 화면 ✏️에서 고친다. 묶인 사진의 임시 카드 중 첫 장 카드를 `evt_...`로 바꾸고, 나머지 임시 카드는 노션에서 직접 지우라고 안내한다.
+- **PC 사진**: 먼저 `--dry-run`으로 할 일을 확인하고, 같은 명령에서 `--dry-run`만 빼고 실행한다.
+```bash
+python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
+  --author "민서" --date "2026-10-22" --slug pet_trainer \
+  --event-cat "학교행사/운동회" --icon "🐕" \
+  --title "🐕 진로체험: 반려동물 훈련사와의 따뜻한 만남!" --note "알림장 본문" \
+  --file "E:/Downloads/a.jpg" --sub-files "E:/Downloads/b.jpg,E:/Downloads/c.jpg" \
+  --video "https://photos.app.goo.gl/..." --video-btn "🎬 그날의 영상 보기"
+```
+- `--author`: 민서·민수·공동·공통·아빠·엄마. `--event-cat`: 가족/생일파티·생태/텃밭/체험·소풍/현장학습·학교행사/운동회·사계절 자연관찰·소중한 하루(기본). `--slug`: id에 들어갈 영문 이름(없으면 첫 사진 파일 이름). 이미 있는 행사를 고칠 때는 `--id evt_...`.
+- `--video`: 로컬 `.mp4/.mov/.webm`은 activities 폴더에 복사, http(s) 주소는 그대로 연결. 노션 카드에는 파일 영상만 동영상 블록으로 붙인다(구글 포토 링크는 데이터의 `videoUrl`로만).
+
+### 3) 도구가 하는 일 (입구 `sync_quick_upload.py` → 빌더 `kids-school-main/scripts/add_activity_photo.py`)
+1. **빌더**: EXIF 회전 보정·긴 변 1200px JPEG(quality 88) → `kids-archive/assets/media/{minseo|minsu|together}/activities/{아이}_{YYYYMMDD}_{slug}_{NN}.jpg`. `special-days-data.js`에 id `evt_{아이}_{slug}_{YYYYMMDD}`로 upsert(같은 id 재실행은 덮어쓰기, 중복 없음, `likes`·`stickers`·`comments` 보존, 신규는 날짜 순서 자리). `archive-master-data.js`에도 같은 id로 upsert(`build_gallery.py`는 다시 쓸 때 `evt_` 항목을 보존). `haru.html`·`gallery.html`의 `special-days-data.js?v=` 갱신.
+2. **입구**: 노션 성장 갤러리 DB(`3dfa2711...`) 카드를 `upsert_notion_gallery_card`로 맞춘다. 속성은 `식별ID=evt_...`, `구분: 특별한 날`, `주인공`(아빠·엄마는 `부모관리자`), `날짜`, `제목`, `작가의 한마디/일기본문`(=desc), 당일 일상 연결(§1-3)만 쓴다. 노션까지 성공한 큐 항목만 큐에서 지운다.
+3. **Git**: `kids-archive`(`assets/media`, `data/archive-master-data.js`)와 `kids-school`(`special-days-data.js`, `haru.html`, `gallery.html` 등 지정 파일만) 커밋·푸시. `--no-push`는 푸시만 생략.
+- `--dry-run`은 특별한 날에서만 된다. 큐·파일·Git·노션을 건드리지 않고 id·사진 경로·넣을 항목·바뀔 파일을 출력한다. 빌더 단독 `python -X utf8 scripts/add_activity_photo.py --dry-run ...`(공부방 루트, `--category`)도 같다. 빌더 단독 실제 실행은 노션 카드를 만들지 않으므로 공식 등록은 입구로 한다.
+- 시험 사진을 실제 `kids-archive`에 올리지 않는다(12년 보존 저장소). 도구 검증은 `--dry-run`과 임시 폴더·모의 노션으로 한다.
+
+### 4) 미디어 폴더 계약
+- 특별한 날·하루방 사진은 `kids-archive/assets/media/{아이}/activities/`, 작품은 학년 폴더(`2026_elem_1` 등)에 둔다. 같은 파일을 작품과 특별한 날에 함께 등록하지 않는다. `tests/media-archive-paths.test.mjs`가 검사한다(2026-10-29 행사 사진 2건이 작품 폴더에 들어간 사고 재발 방지).
+- 관제탑 `scripts/sync_haru_special_days_notion.py`는 초기 4건만 올리던 옛 도구라 쓰지 않는다.
 
 ---
 

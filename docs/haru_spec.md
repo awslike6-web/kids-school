@@ -57,6 +57,9 @@ graph TD
   - 완료 시 노션 학습일지 DB(`37aa2711...`)에 `[30초 하루 체크인]` 카드로 실시간 전송 (SWR 백그라운드 저장).
 
 ### 3) 🏆 탭 3: 특별한 날 추억 피드 & 성장 아카이브 (Special Days)
+- **원천 (2026-10-29)**: 기본 목록은 갤러리와 같은 `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`) 하나다. `haru.html`이 `../../data/special-days-data.js?v=...`를 `haru-special-days.js`보다 먼저 싣는다. `haru_data.js`에는 `specialDays.title`만 남았고, 사진·작성자 없던 예시 3건(어린이날·소풍·크리스마스)은 지웠다(더미 금지). 등록·필드 계약은 [`gallery_archive_spec.md` §5](gallery_archive_spec.md).
+- **아이별 보기**: 지금 아이(`window.currentChild`: minseo→민서, minsu→민수)의 `author` 행사와 `공동`·`공통`·`아빠`·`엄마` 행사만, 날짜 최신순으로 보여 준다. 다른 아이 개인 행사는 보이지 않는다.
+- **아이 기록 유지**: `localStorage` `haru_special_stories_{child}`의 `evt_custom_…` 이야기(맨 위)와 제목 수정(`_userEditedTitle`), 갤러리 화면 수정 `SPECIAL_DAYS_CUSTOM_META`는 그대로 덧입힌다. 감정 도장 `haru_stamp_{child}_{id}` 날짜는 KST 기준. 시험: `tests/haru-special-days.test.mjs`.
 - **폴라로이드 스타일 감성 포토 카드**:
   - 카테고리 칩: `🌱 생태/텃밭`, `🎒 학교활동`, `🍁 소풍/현장학습`, `🎂 가족/생일파티`, `🌿 자연관찰`, `⭐ 소중한하루`.
 - **📷 3장 사진 원터치 썸네일 전환 (`switchCardPhoto`)**:
@@ -111,31 +114,12 @@ graph TD
 ## 4. 학교 활동 사진 영구 보존 파이프라인 (kids-archive 연동)
 
 ### 1) 디렉토리 및 파일 인박스 구조
-- **로컬 업로드 인박스**: `kids-school-main/uploads/ex/갤러리/하루아카이브/`
-  - 📂 `민서/` (민서 학교 활동 사진 보관)
-  - 📂 `민수/` (민수 학교/센터 활동 사진 보관)
-  - 📂 `공통/` (남매 및 가족 행사 사진 보관)
-- **아카이브 영구 배포처**: `kids-archive/assets/media/{child}/activities/`
+- **폰 퀵업로드 받은편지함**: `kids-school-main/uploads/ex/갤러리/하루아카이브/{민서|민수|공통}/` (`sync_quick_upload.py`가 큐의 `구분: 특별한 날` 사진을 여기에 내려받는다. 아빠·엄마는 `공통`)
+- **아카이브 영구 배포처**: `kids-archive/assets/media/{minseo|minsu|together}/activities/`
 
-### 2) 빌더 스크립트 (`scripts/add_activity_photo.py`)
-```bash
-# 마법사 모드 (인자 없이 실행 시 폴더 자동 스캔 및 알림장 복붙으로 완료)
-python scripts/add_activity_photo.py
-
-# CLI 직접 지정 모드
-python scripts/add_activity_photo.py \
-  --file "경로/사진.jpg" \
-  --child minseo \
-  --title "가을 텃밭 땅콩 수확하기" \
-  --desc "5학년 선배들이 키운 땅콩을 선물받아 수확했어요!" \
-  --category "생태/텃밭" \
-  --date "2026-09-10"
-```
-- **빌더 자동화 4단계**:
-  1. **1200px 리사이즈 & 압축**: EXIF 회전 보정 및 고화질 압축(quality=88).
-  2. **GitHub CDN 주소 생성**: `https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/{child}/activities/{filename}`
-  3. **데이터베이스 동시 등록**: `archive-master-data.js` & `haru_data.js`의 `defaultEvents` 배열에 원자적 추가.
-  4. **원클릭 Git 자동 푸시**: `kids-archive`에 사진 및 메타데이터를 자동 커밋 & 푸시.
+### 2) 등록 도구 (입구 `sync_quick_upload.py` → 빌더 `scripts/add_activity_photo.py`)
+- 공식 명령과 옵션은 [`gallery_archive_spec.md` §5](gallery_archive_spec.md) 한 곳에 둔다. 요약: 관제탑 루트에서 `python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run --author 민서 --date ... --slug ... --title ... --note ... --file ...`로 확인한 뒤 `--dry-run`을 빼고 실행한다.
+- 빌더는 EXIF 회전 보정·1200px JPEG → activities 폴더, `special-days-data.js`·`archive-master-data.js` id upsert, `?v=` 갱신을 맡고, 입구가 노션 카드(`구분: 특별한 날`)·큐 정리·Git을 맡는다. 예전 마법사 모드(폴더 자동 스캔)와 `haru_data.js` 등록은 없앴다(이미 등록된 옛 사진이 받은편지함에 남아 있어 함께 올라갈 위험).
 
 ---
 
@@ -160,11 +144,12 @@ python scripts/add_activity_photo.py \
 | **`haru-checkin-engine.js`** | 548줄 | **[습관] 30초 체크인 & 저금통 엔진**<br>• 착한 습관 저금통 코인 (+20개 완주 마일스톤)<br>• 건강 운동 일주일 달력 스탬프<br>• 알록달록 마음 날씨<br>• 30초 원스톱 모달 & 노션 STUDY_LOG 적재 | `renderHabitsTab`<br>`recordHabitAction`<br>`recordWorkout`<br>`openQuickCheckInModal`<br>`finishQuickCheckIn` |
 | **`haru-timeline-engine.js`** | 662줄 | **[시간] 24시간 매직 시계판 & 타임머신**<br>• 12h/24h 동적 눈금 & 시침·분침 실시간 애니메이션<br>• 2중 동심원 지그재그 스티커 핀 배치<br>• 고정 루틴 vs 당일 일정 분기 저장<br>• 추천 스티커 트레이 & 나만의 일과 직접 쓰기 모달<br>• 오늘 하루 완성 (+2 보상) & 노션 타임머신 일지 | `renderTimelineTab`<br>`setClockHourFormat`<br>`renderClockPins`<br>`openCustomTimelineModal`<br>`completeTodayTimeline` |
 | **`haru-safety-quiz.js`** | 305줄 | **[안전] 119 안전수호대 & 닥터 코코**<br>• 생활 안전 OX 퀴즈 6문항 (무감점 힌트)<br>• 황금 안전 지킴이 면허증 발급 (+5 보너스)<br>• 닥터 코코 365 응급처치 가이드<br>• 노션 면허증 인증 및 안심 상담 일지 적재 | `renderSafetyQuizQuestion`<br>`handleSafetyQuizAnswer`<br>`renderSafetyLicense`<br>`selectFirstAidSymptom`<br>`consultDoctorCocoCustom` |
-| **`haru-special-days.js`** | 473줄 | **[추억] 특별한 날 추억 피드 & 갤러리**<br>• 특별한 날 폴라로이드 스타일 포토 카드 피드<br>• 고화질 사진 전체보기 팝업 모달 & 동영상 바로가기<br>• 4종 감정 도장 & 나만의 생각 직접 쓰기<br>• 카드 제목 인라인 즉시 수정<br>• 새로운 추억 등록 & 12년 아카이브 연동 | `renderSpecialDaysTab`<br>`openSpecialPhotoModal`<br>`stampReaction`<br>`saveEditedTitle`<br>`addNewSpecialStory` |
+| **`haru-special-days.js`** | 558줄 | **[추억] 특별한 날 추억 피드 & 갤러리**<br>• 특별한 날 폴라로이드 스타일 포토 카드 피드<br>• 고화질 사진 전체보기 팝업 모달 & 동영상 바로가기<br>• 4종 감정 도장 & 나만의 생각 직접 쓰기<br>• 카드 제목 인라인 즉시 수정<br>• 새로운 추억 등록 & 12년 아카이브 연동 | `renderSpecialDaysTab`<br>`openSpecialPhotoModal`<br>`stampReaction`<br>`saveEditedTitle`<br>`addNewSpecialStory` |
 
 - **HTML 로드 표준 (`haru.html`)**:
   ```html
   <script src="data/haru_data.js"></script>
+  <script src="../../data/special-days-data.js"></script>  <!-- 특별한 날 원천 (갤러리와 공용) -->
   <script src="js/haru-checkin-engine.js"></script>
   <script src="js/haru-timeline-engine.js"></script>
   <script src="js/haru-safety-quiz.js"></script>
