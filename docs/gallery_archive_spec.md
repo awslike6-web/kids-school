@@ -131,6 +131,7 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibim
 
 - **화면**: `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`)를 갤러리의 특별한 날 탭과 하루방(`haru-special-days.js`, [`docs/haru_spec.md`](haru_spec.md))이 읽는다.
 - **노션**: 성장 갤러리 DB(`3dfa2711...`)에 `구분: 특별한 날`, `식별ID`는 데이터의 `evt_...` id와 같게 둔다.
+- **미디어 폴더**: 특별한 날·하루방 사진은 `kids-archive/assets/media/{아이}/activities/`, 작품은 학년 폴더(`2026_elem_1` 등)에 둔다. 같은 파일을 작품과 특별한 날에 함께 등록하지 않는다. `tests/media-archive-paths.test.mjs`가 검사한다(2026-10-29 행사 사진 2건이 작품 폴더에 들어간 사고 재발 방지).
 - **등록 도구는 아직 없다.** 관제탑 `scripts/sync_haru_special_days_notion.py`는 스크립트 안에 적힌 초기 4건만 노션에 올리는 도구라 새 행사 등록에는 맞지 않는다. 특별한 날 등록 요청이 오면 일회성 스크립트를 만들지 말고, 도구가 없다는 사실을 사용자에게 알리고 등록 도구를 만들지 먼저 정한다.
 
 ---
