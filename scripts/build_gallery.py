@@ -291,9 +291,12 @@ def run():
                                 if max(sw, sh) > max_dim:
                                     scale = max_dim / max(sw, sh)
                                     simg = simg.resize((int(sw * scale), int(sh * scale)), Image.Resampling.LANCZOS)
-                                if simg.mode in ('RGBA', 'P'):
-                                    simg = simg.convert('RGB')
-                                simg.save(sub_dest_full, format='JPEG', quality=85, optimize=True)
+                                if sub_target_ext == '.png':
+                                    simg.save(sub_dest_full, format='PNG', optimize=True)
+                                else:
+                                    if simg.mode in ('RGBA', 'P'):
+                                        simg = simg.convert('RGB')
+                                    simg.save(sub_dest_full, format='JPEG', quality=85, optimize=True)
                             print(f"✨ 서브 이미지 아카이브 최적화 변환: {sub_dest_filename}")
                         except Exception as se:
                             print(f"⚠️ 서브 이미지 변환 실패 ({sub_full_source}): {se}")
