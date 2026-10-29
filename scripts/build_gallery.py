@@ -132,6 +132,43 @@ def build_character(data, art_id, folder_full, target_dir, sub_dir, sub_path):
         return None
 
 
+def character_entries(meta):
+    """배열이 있으면 우선하고 단일 입력은 main으로 정규화한다."""
+    if 'characters' in meta:
+        return meta['characters']
+    old = meta.get('character')
+    return [{**old, 'key': 'main'}] if isinstance(old, dict) else []
+
+
+def validate_character_key(key):
+    if not isinstance(key, str) or not re.fullmatch(r'[a-z0-9_-]{1,32}', key):
+        raise ValueError('캐릭터 key는 영문 소문자·숫자·밑줄·하이픈 1~32자여야 합니다')
+    return key
+
+
+def build_characters(meta, art_id, *args):
+    if 'characters' in meta and 'character' in meta:
+        print(f'⚠️ [character 제외] {art_id}: characters를 우선하고 단일 character는 무시합니다')
+    entries = character_entries(meta)
+    if not isinstance(entries, list):
+        print(f'⚠️ [character 제외] {art_id}: characters는 배열이어야 합니다')
+        return []
+    result, seen = [], set()
+    for index, entry in enumerate(entries):
+        key = entry.get('key') if isinstance(entry, dict) else None
+        try:
+            validate_character_key(key)
+            if index >= 6 or key in seen:
+                raise ValueError('7번째 이후 캐릭터 또는 중복 key입니다')
+            seen.add(key)
+            character = build_character(entry, f'{art_id}#{key}', *args)
+            if character:
+                result.append({'key': key, **character})
+        except (ValueError, TypeError) as error:
+            print(f'⚠️ [character 제외] {art_id}#{key}: {error}')
+    return result
+
+
 def run():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
@@ -191,9 +228,11 @@ def run():
         diff = m.get('spotDiff')
         if isinstance(diff, dict) and isinstance(diff.get('modifiedImage'), str):
             diff_images.add(Path(diff['modifiedImage']).stem)
-        character = m.get('character')
-        if isinstance(character, dict) and isinstance(character.get('sprite'), str):
-            character_images.add(Path(character['sprite']).stem)
+        entries = m.get('characters', [])
+        entries = entries if isinstance(entries, list) else []
+        for character in entries + [m.get('character')]:
+            if isinstance(character, dict) and isinstance(character.get('sprite'), str):
+                character_images.add(Path(character['sprite']).stem)
 
     items = []
     archive_entries = []
@@ -237,7 +276,7 @@ def run():
                 continue
 
             # 다른 작품의 서브 이미지로 묶인 파일인 경우 단독 카드 생성 스킵 (부모 작품에서 변환 및 묶음 처리)
-            is_sprite = base_name in character_images and f'art_{sub_dir}_{base_name}' not in meta_dict
+            is_sprite = (base_name in character_images or (ext_lower == '.png' and re.fullmatch(r'.+_sprite(?:_[a-z0-9_-]{1,32})?', base_name))) and f'art_{sub_dir}_{base_name}' not in meta_dict
             if f in sub_image_to_parent or base_name in diff_images or is_sprite:
                 continue
             
@@ -387,11 +426,9 @@ def run():
                 if diff:
                     item_obj['spotDiff'] = diff
             items.append(item_obj)
-            if 'character' in meta:
-                character = build_character(meta['character'], art_id, folder_full,
-                                            target_dirs[sub_dir], sub_dir, sub_path)
-                if character:
-                    item_obj['character'] = character
+            characters = build_characters(meta, art_id, folder_full, target_dirs[sub_dir], sub_dir, sub_path)
+            if characters:
+                item_obj['characters'] = characters
 
             # archive entry
             learning_pts = []

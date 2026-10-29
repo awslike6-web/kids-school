@@ -127,6 +127,11 @@
         try { return localStorage.getItem('currentUser') || 'son'; } catch (e) { return 'son'; }
     }
 
+    function viewerOfChild() {
+        try { return localStorage.getItem('currentUser') === 'daughter' ? 'daughter' : 'son'; }
+        catch (e) { return 'son'; }
+    }
+
     function notify(message) {
         ensureStyle();
         if (toast) { clearTimeout(toast.timer); toast.node.remove(); }
@@ -139,39 +144,60 @@
     }
 
     // 모달 매니저는 이 연결 함수만 호출한다. 키·JSON 형식은 로스터에서만 다룬다.
-    function bindModal(item, { available = true, viewer } = {}) {
+    function bindModal(item, { available = true, viewer, selectedKey } = {}) {
         const host = document.getElementById('modalCharacterActions');
         if (!host) return;
         host.replaceChildren();
         host.hidden = true;
         const roster = window.MonsterRoster;
-        if (!available || !roster?.isValidCharacter(item.character)) return;
+        const characters = roster?.charactersOf(item) || [];
+        if (!available || !characters.length) return;
         ensureStyle();
         host.hidden = false;
         host.className = 'gmr-equip';
         const who = viewerOf(viewer);
         const targets = who === 'parent' ? ['son', 'daughter'] : [who === 'daughter' ? 'daughter' : 'son'];
+        const currentChild = who === 'parent' ? viewerOfChild() : targets[0];
+        const saved = roster.getGalleryPartner(currentChild);
+        const key = selectedKey || (saved?.artId === item.id ? saved.charKey : null);
+        const character = characters.find(c => c.key === key) || characters[0];
+        if (characters.length > 1) {
+            const picker = document.createElement('div');
+            picker.setAttribute('role', 'group'); picker.setAttribute('aria-label', '캐릭터 고르기');
+            picker.className = 'gmr-equip';
+            for (const candidate of characters) {
+                const button = document.createElement('button'); button.type = 'button';
+                button.setAttribute('aria-pressed', String(candidate.key === character.key));
+                const image = document.createElement('img'); image.src = candidate.spriteUrl;
+                image.alt = ''; image.style.height = '40px'; image.style.maxWidth = '70px'; image.style.objectFit = 'contain';
+                button.appendChild(image); button.appendChild(document.createTextNode(candidate.name));
+                button.onclick = () => bindModal(item, { available, viewer: who, selectedKey: candidate.key });
+                picker.appendChild(button);
+            }
+            host.appendChild(picker);
+        }
         for (const child of targets) {
             const button = document.createElement('button');
             button.type = 'button';
-            const equipped = roster.getGalleryPartner(child)?.artId === item.id;
+            const partner = roster.getGalleryPartner(child);
+            const equipped = partner?.artId === item.id && partner.charKey === character.key;
             const label = child === 'son' ? '민수' : '민서';
             button.textContent = equipped ? `✅ ${who === 'parent' ? label + ' ' : ''}파트너 장착 중 · 해제하기` :
                 who === 'parent' ? `${label}에게 장착` : '⚡ 내 공부방 파트너로 장착';
             button.onclick = () => {
                 const result = equipped ? roster.clearGalleryPartner(child) :
-                    roster.equipGalleryPartner(child, { ...item.character, artId: item.id });
+                    roster.equipGalleryPartner(child, { ...character, artId: item.id });
                 if (!result) { notify('이 기기에 저장하지 못했어요. 저장 공간을 확인해 주세요.'); return; }
                 if (!equipped && typeof window.fairyPraise === 'function') window.fairyPraise();
-                notify(equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${roster.withJosa(item.character.name, '이/가')} 함께해요!`);
-                bindModal(item, { available, viewer: who });
+                notify(equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${roster.withJosa(character.name, '이/가')} 함께해요!`);
+                bindModal(item, { available, viewer: who, selectedKey: character.key });
             };
             host.appendChild(button);
         }
         const run = document.createElement('button');
         run.type = 'button';
-        run.textContent = '🎮 이 캐릭터로 달리기';
-        run.onclick = () => start(item, { viewer: who });
+        run.textContent = characters.length === 1 ? '🎮 이 캐릭터로 달리기' : `🎮 ${roster.withJosa(character.name, '와/과')} 달리기`;
+        run.onclick = () => start(item, { character, viewer: who });
         host.appendChild(run);
     }
 
@@ -317,9 +343,11 @@
         resume(session);
     }
 
-    function start(item, { viewer, onClose } = {}) {
+    function start(item, { character, viewer, onClose } = {}) {
         close();
-        if (!window.MonsterRoster?.isValidCharacter(item?.character)) return;
+        const characters = window.MonsterRoster?.charactersOf(item) || [];
+        character = character ? characters.find(c => c.key === character.key) : characters[0];
+        if (!character) return;
         ensureStyle();
         const who = viewerOf(viewer), child = who === 'daughter' ? 'daughter' : 'son';
         const root = document.createElement('section');
@@ -330,7 +358,7 @@
             <h2 id="gmr-title"></h2><span data-hud></span><button type="button" data-pause disabled>잠깐 쉬기</button></header>
             <div class="gmr-stage"><canvas aria-label="화면을 누르면 점프해요"></canvas>
             <div class="gmr-message" role="status"></div></div><p>눌러서 점프! 한 번 더 누르면 더 높이! · 스페이스 / ↑</p>`;
-        root.querySelector('h2').textContent = `${window.MonsterRoster.withJosa(item.character.name, '와/과')} 달리기`;
+        root.querySelector('h2').textContent = `${window.MonsterRoster.withJosa(character.name, '와/과')} 달리기`;
         const previousFocus = document.activeElement, overflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden'; document.body.appendChild(root);
         const canvas = root.querySelector('canvas'), image = new Image();
@@ -375,7 +403,7 @@
         image.onerror = () => {
             if (active === session) showMessage(session, '그림을 불러오지 못했어요.', [['닫기', close]]);
         };
-        image.src = item.character.spriteUrl;
+        image.src = character.spriteUrl;
     }
 
     function close() {

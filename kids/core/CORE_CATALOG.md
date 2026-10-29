@@ -1154,3 +1154,10 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **화면 검증 서버 (노션 쓰기 차단)**: `python scripts/guarded_preview_server.py [포트=8767]`. 모든 HTML `<head>` 맨 앞에 쓰기 차단 스크립트를 넣어 내보내므로 페이지가 실리기 전부터 노션 페이지·블록 쓰기와 업로드가 막힌다(읽기·DB 조회·음성은 통과, 막힌 요청은 `window.__blockedWrites`). 2026-10-28 차단을 늦게 걸어 민수 「학습설정」이 덮어써진 사고 뒤 도입. 화면 검증은 `python -m http.server` 대신 이 서버로 한다.
 - **자동 맞춤 시험(묶음 밖)**: `python -X utf8 scripts/verify_spot_diff_align.py`. 결정적 합성 표본으로 맞춤·선택 합성·마스크 밖 원본 바이트·워터마크 복원·품질 거부·이동 경고·결정성·CLI·의존성 누락을 검사합니다. OpenCV가 없으면 「건너뜀: opencv-python-headless 미설치」와 종료 코드 0. 임시 그림은 uploads 안에서 만들고 정리하며 Node/Actions 묶음에는 넣지 않습니다.
 - **화면 시험(묶음 밖)**: `verify_math_phase1.cjs`·`verify_math_phase2.cjs`는 브라우저를 띄워 느리고(약 20초) 실행 때마다 `docs/math-phase*.png`를 다시 씁니다. playwright는 `scripts/load_playwright.cjs`가 ① 설치본 ② `PLAYWRIGHT_MODULE` ③ 이 PC의 Codex 런타임 사본 순으로 찾고, 없으면 건너뜁니다(종료 코드 0). 실행 후 바뀐 스크린샷은 커밋할 때만 남기고 아니면 `git checkout -- docs`로 되돌립니다.
+
+## 갤러리 다중 캐릭터 (2026-10-30)
+- `monster_roster.js`: `charactersOf(item)`가 최대 6개 목록을 정규화합니다. 배열 우선, 단일 character는 main 호환입니다. 파트너 JSON에 charKey를 저장하고 옛 값은 main으로 읽습니다. 장착 판정은 artId+charKey입니다.
+- `gallery-mini-runner.js`: `bindModal`의 공유 선택 줄과 `start(item,{character,viewer,onClose})`로 선택 캐릭터를 사용합니다. 게임 물리는 그대로입니다.
+- `build_gallery.py`: `character_entries`·`validate_character_key`·`build_characters`. 출력 characters만 생성하고 오류는 항목별 제외합니다. 예약 sprite PNG를 일반 카드에서 제외합니다.
+- 관제탑 등록: --character-key로 대상 지정, --character-remove로 메타에서 삭제합니다. 마지막 삭제는 characters 키를 제거하며 PNG는 보존합니다. 상세 계약은 docs/gallery_multi_character_spec.md를 따릅니다.
+- `tests/gallery-multi-character.test.mjs`: 목록·옛 저장값·실제 모달 교체·빌더 오류 격리. 기존 캐릭터 시험의 저장·출력·CDN 계약도 갱신했습니다.

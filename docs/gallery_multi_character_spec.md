@@ -1,6 +1,6 @@
 # 🎭 갤러리 작품 1개에 캐릭터 여러 개 작업 지시서 (Gallery Multi-Character)
 
-> **문서 버전**: v1.0 (2026-10-30 작성, 구현 전)
+> **문서 버전**: v2.0 (2026-10-30 구현)
 > **원 명세**: [`docs/gallery_character_runner_spec.md`](gallery_character_runner_spec.md) (단일 `character` 계약), 보완 [`docs/gallery_character_runner_fix_spec.md`](gallery_character_runner_fix_spec.md)
 > **작업 범위**: 공부방(`kids-school`) + 관제탑(`master-tower`) 등록 도구. 노션은 바꾸지 않는다.
 
@@ -149,3 +149,26 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20260922_213854" --a
 - §5 시험 결과와 고장 잡기 확인 결과
 - 화면 시험에서 실제로 본 것과 못 본 것
 - 49번 작품을 새 빌더로 다시 만들었을 때 `gallery-data.js` 차이(`character` → `characters`)만 생기는지. **이 차이는 커밋하지 않고** 보고만 한다.
+
+## 8. 구현 결과 (2026-10-30)
+- 로스터 `charactersOf(item)`가 배열 우선·단일 main 호환·key/주소/중복/6개 상한을 처리합니다. 장착은 charKey를 저장하고 옛 저장값은 읽을 때만 main으로 해석합니다.
+- `GalleryMiniRunner.bindModal`은 2개 이상일 때만 선택 줄을 만들고 artId+charKey로 장착 여부를 판단합니다. 선택은 장착 뒤에도 유지하며 부모의 두 자녀 버튼이 같은 선택을 공유합니다. `start(item,{character,viewer,onClose})`는 목록 안에서 선택 캐릭터를 확인합니다.
+- 빌더 `character_entries`, `validate_character_key`, `build_characters`를 추가하고 기존 PNG 정리 함수를 재사용합니다. 단일/배열이 함께 있으면 배열을 우선하며 항목별 오류를 격리합니다. 예약 sprite PNG는 참조가 사라져도 일반 작품으로 만들지 않습니다.
+- 등록 도구 `prepare_character`/`apply_character_plan`은 key별 추가·부분 갱신·삭제를 처리합니다. 마지막 삭제는 character·characters 키를 모두 제거하고 이미지 파일은 보존합니다. 입력 오류 시 메타와 업로드가 바뀌지 않는지 스냅샷으로 확인합니다.
+- 전체 Node 시험 85건: 통과 83, 실패 0, 기존 skip 1·TODO 1. 관제탑 등록 시험 12건 통과. charKey 비교를 제거하면 A→B 교체 시험이 실패함을 확인한 뒤 복원했습니다.
+- 360×800·1280×800에서 부모 공유 선택·장착·다른 캐릭터로 교체·실제 rAF 달리기·남매 연구소/러너 반영을 확인했습니다. 런타임 오류 0, 노션 쓰기 0. 시험 데이터는 응답에만 주입했습니다.
+- 49개 작품을 임시 복제 환경에서 재빌드한 결과, 49개가 유지되고 기존 단일 character→characters(main) 변환 외 차이가 없었습니다. 실제 생성 데이터·메타는 커밋하지 않습니다.
+- 기본 로스터 두 종과 갤러리 파트너는 별개입니다. 같은 괴수를 장착하면 연구소에 자작 항목으로 하나 더 보이는 것을 허용합니다. 실제 콘텐츠 등록과 main 병합·푸시, 노션 변경은 수행하지 않습니다.
+
+### 최종 파일별 줄 수와 변경량
+- `kids/common_space/gallery-mini-runner.js`: +40/−12, 최종 426줄.
+- `kids/common_space/gallery.html`: +2/−2, 최종 305줄.
+- `kids/subjects/quest/monster_roster.js`: +15/−3, 최종 355줄.
+- `scripts/build_gallery.py`: +46/−9, 최종 520줄.
+- `tests/gallery-character-runner.test.mjs`: +6/−6, 최종 433줄.
+- `scripts/gallery_registration_options.py`: +55/−17, 최종 233줄.
+- `scripts/sync_quick_upload.py`: +3/−1, 최종 710줄.
+- `scripts/test_gallery_registration_options.py`: +49/−7, 최종 224줄.
+- 신규 `tests/gallery-multi-character.test.mjs`: 82줄.
+- `monster_lab.html`: +1/−1(캐시 쿼리만), 최종 778줄.
+- `quest_runner.html`: +1/−1(캐시 쿼리만), 최종 606줄.
