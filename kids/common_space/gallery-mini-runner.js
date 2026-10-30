@@ -121,6 +121,11 @@
         document.head.appendChild(style);
     }
 
+    // 퀘스트용 녹음(정답·완주)이 끼어들지 않도록 프리셋 라우터를 건너뛰고 상황 문장을 그대로 읽는다.
+    function say(text) {
+        if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS(text, { skipPreset: true });
+    }
+
     function viewerOf(viewer) {
         if (viewer) return viewer;
         if (['아빠', '엄마'].includes(window.currentUserName)) return 'parent';
@@ -188,8 +193,8 @@
                 const result = equipped ? roster.clearGalleryPartner(child) :
                     roster.equipGalleryPartner(child, { ...character, artId: item.id });
                 if (!result) { notify('이 기기에 저장하지 못했어요. 저장 공간을 확인해 주세요.'); return; }
-                if (!equipped && typeof window.fairyPraise === 'function') window.fairyPraise();
-                notify(equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${roster.withJosa(character.name, '이/가')} 함께해요!`);
+                const message = equipped ? '기본 파트너로 돌아왔어요!' : `이제 5분 퀘스트에서 ${roster.withJosa(character.name, '이/가')} 함께해요!`;
+                notify(message); say(message);
                 bindModal(item, { available, viewer: who, selectedKey: character.key });
             };
             host.appendChild(button);
@@ -304,7 +309,7 @@
         if (session.viewer !== 'parent') window.MonsterRoster.setRunnerBest(session.child, session.world.score);
         showMessage(session, `완주! ⭐ ${session.world.score}개${record && session.viewer !== 'parent' ? ' · 새 기록!' : ''}`,
             [['다시 달리기', () => restart(session)], ['닫기', close]]);
-        if (typeof window.fairyReward === 'function') window.fairyReward('finish');
+        say(`완주! 별 ${session.world.score}개를 모았어요.${record && session.viewer !== 'parent' ? ' 새 기록이에요!' : ''}`);
     }
 
     function frame(session, now) {
@@ -340,6 +345,7 @@
         session.world = createWorld(Date.now(), { child: session.child, aspect,
             spriteAspect: session.image.naturalWidth / session.image.naturalHeight });
         session.pause.disabled = false;
+        say(`${window.MonsterRoster.withJosa(session.name, '와/과')} 출발! 화면을 누르면 점프해요.`);
         resume(session);
     }
 
@@ -362,7 +368,7 @@
         const previousFocus = document.activeElement, overflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden'; document.body.appendChild(root);
         const canvas = root.querySelector('canvas'), image = new Image();
-        const session = active = { root, canvas, image, ctx: canvas.getContext('2d'), child, viewer: who, onClose,
+        const session = active = { root, canvas, image, ctx: canvas.getContext('2d'), child, viewer: who, onClose, name: character.name,
             previousFocus, overflow, hud: root.querySelector('[data-hud]'), pause: root.querySelector('[data-pause]'),
             message: root.querySelector('.gmr-message'), world: createWorld(1, child), ready: false,
             paused: false, raf: null, listeners: [], observer: null, audio: null };
@@ -416,6 +422,7 @@
         session.image.onload = session.image.onerror = null;
         session.image.removeAttribute('src');
         if (session.audio) void session.audio.close().catch(() => {});
+        if (typeof window.stopFairyTTS === 'function') window.stopFairyTTS();
         session.root.remove();
         document.body.style.overflow = session.overflow;
         if (session.previousFocus?.isConnected) session.previousFocus.focus();

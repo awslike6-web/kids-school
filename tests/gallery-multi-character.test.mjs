@@ -56,6 +56,17 @@ test('옛 폰 저장값은 main 장착으로 읽고 캐릭터 1개면 선택 줄
     assert.equal(JSON.parse(s.localStorage.getItem('galleryPartner_daughter')).charKey,undefined);
 });
 
+test('음성: 장착·해제는 상황 문장을 프리셋 없이 읽고 퀘스트 칭찬 녹음은 쓰지 않는다',()=>{
+    const {s,host}=setup(), said=[], quest=[];
+    s.speakFairyTTS=(text,options)=>said.push([text,options?.skipPreset]);
+    s.fairyPraise=()=>quest.push('praise'); s.fairyReward=()=>quest.push('reward');
+    s.GalleryMiniRunner.bindModal(item);
+    host.children[1].onclick();
+    host.children[1].onclick();
+    assert.deepEqual(said,[['이제 5분 퀘스트에서 드래곤이 함께해요!',true],['기본 파트너로 돌아왔어요!',true]]);
+    assert.deepEqual(quest,[]);
+});
+
 import { spawnSync } from 'node:child_process';
 const python = process.env.GALLERY_TEST_PYTHON || (process.platform==='win32' ? 'C:/Users/pc/AppData/Local/Python/pythoncore-3.14-64/python.exe' : 'python');
 test('빌더: 단일 정규화·부분 오류·중복과 7번째 제외',()=>{
