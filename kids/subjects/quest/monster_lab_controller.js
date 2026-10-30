@@ -451,12 +451,16 @@
     if (pName) pName.textContent = `${monster.number} · ${monster.name}`;
     if (pRole) {
       pRole.textContent = monster.role;
-      pRole.className = monster.id === 'cottun_bongdomdol'
+      pRole.className = monster.id === 'unknown_beast'
+        ? 'text-[11px] text-slate-300 font-bold'
+        : monster.id === 'cottun_bongdomdol'
         ? 'text-[11px] text-amber-300 font-bold'
         : 'text-[11px] text-neon-cyan font-bold';
     }
     if (pDot) {
-      pDot.className = monster.id === 'cottun_bongdomdol'
+      pDot.className = monster.id === 'unknown_beast'
+        ? 'w-1.5 h-1.5 rounded-full bg-slate-300 animate-pulse'
+        : monster.id === 'cottun_bongdomdol'
         ? 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse'
         : 'w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse';
     }
