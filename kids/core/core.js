@@ -3,7 +3,7 @@
 // ========================================================
 
 var requiredCores = [
-    "study-activity.js?v=20261023",
+    "study-activity.js?v=20261030-lesson",
     "notion-helper.js",
     "fairy-config.js",
     "fairy-tts.js",

@@ -783,7 +783,7 @@
     loadStore, saveStore, mergeRemote, syncFromRecords,
     classify, stageLabel, unitTitle, isSourceTag, koreanTier, misspellingsOf, pickBlankToken, usageInDetail, parseUnitList, selectUnitItems, dedupeHeadwords, buildStages, chunkSentence, buildScramble, buildFillBlank,
     levelOf, isLv3Eligible, isRusty,
-    buildRound, applyResult, pushChanges, getProgressSummary, loadUnit,
+    buildQuestion, buildMatch, buildRound, applyResult, pushChanges, getProgressSummary, loadUnit,
     isEligibleSubject: subj => Object.prototype.hasOwnProperty.call(SUBJECT_KO, subj)
   };
   root.QuestMastery = api;

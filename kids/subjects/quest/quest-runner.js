@@ -20,7 +20,11 @@
   // ========================================================
   const urlParams = new URLSearchParams(global.location.search);
   const currentUser = urlParams.get('user') || localStorage.getItem('currentChild') || localStorage.getItem('currentUser') || 'minsu';
-  const currentSubj = urlParams.get('subject') || 'math';
+  const currentSubj = global.QuestLessonUI.resolveSubject(urlParams, currentUser);
+  if (!urlParams.has('subject') && urlParams.get('lesson') === 'bite') {
+    const resolvedUrl = new URL(global.location.href); resolvedUrl.searchParams.set('subject', currentSubj);
+    global.history.replaceState(null, '', resolvedUrl);
+  }
   const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
   const parentSettings = (typeof getParentQuestSettings === 'function') ? getParentQuestSettings(currentUser) : null;
   // 다중 단원 묶음은 배열(부모 설정) 또는 '|' 결합 문자열(URL)로 들어온다 → '|' 문자열로 통일
@@ -146,9 +150,22 @@
       document.getElementById('questionText').textContent = '단원 진도를 불러오는 중이에요... ⏳';
       try {
         // 🛡️ 최대 3초만 기다림: 노션이 늦으면 loadUnit이 조회를 끊고 오늘 캐시로 출제 (캐시도 없으면 아래 정적 폴백)
-        const unit = await QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit, budgetMs: 3000 });
+        let unit = await QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj, unit: currentUnit, budgetMs: 3000 });
+        if ((!unit || unit.items.length < 3) && urlParams.get('from') === 'storybook') {
+          global.alert('이 이야기 문제는 준비 중이에요');
+          unit = await QuestMastery.loadUnit({ child: isMinseo ? 'minseo' : 'minsu', subj: currentSubj,
+            unit: configuredUnit || (currentSubj === 'english' ? 'L1' : '1단원 (1. 기분을 말해요)'), budgetMs: 3000 });
+        }
 
         if (unit && Array.isArray(unit.items) && unit.items.length > 0) {
+          document.getElementById('subjectBadgeTitle').textContent = `${QuestMastery.SUBJECT_KO[currentSubj]} · ${QuestMastery.unitTitle(unit.items, unit.units)}`;
+          document.getElementById('subjectBadgeIcon').textContent = currentQuest.icon;
+          if (urlParams.get('lesson') !== 'round5' && global.QuestLessonUI.start({
+            unit, subj: currentSubj, mode: urlParams.get('lesson') === 'bite' ? 'bite' : 'full', isMinseo,
+            onCompanion: (event, detail) => syncCheerMonsterReaction(({ combo: 'correct', step: 'correct', boss: 'clear' })[event] || event,
+              event === 'combo' ? `연속 ${detail.combo}개! 신나게 이어 가자!` : null),
+            onExit: lobby => lobby ? goToLobby() : returnToLab()
+          })) { UI.applyChildTheme(isMinseo); syncCheerMonsterReaction('stageStart'); return; }
           const round = QuestMastery.buildRound({ child: unit.child, items: unit.items, subj: currentSubj });
           if (round && Array.isArray(round.questions) && round.questions.length > 0) {
             masteryRound = { ...round, child: unit.child, items: unit.items };
@@ -224,7 +241,7 @@
       if (r.firstTry) global.StudyActivity?.recordCorrect?.(`${guardianAttemptId}:${q.id}:${r.id}`);
     });
     if (!result.firstTry) {
-      sessionWrongLogs.push({ q: q.q, chosen: '힌트 보고 해결', answer: q.items ? q.items.map(i => i.word).join(', ') : q.item.word });
+      sessionWrongLogs.push({ q: q.q, chosen: result.wrongPicks?.join(', ') || '힌트 보고 해결', answer: q.items ? q.items.map(i => i.word).join(', ') : q.item.word });
     }
     renderMasteryProgress();
 

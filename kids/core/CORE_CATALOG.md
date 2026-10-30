@@ -215,6 +215,18 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ## 2-2. 🎯 5분 퀘스트 & 부모 진도 제어 코어 (Quest & Parent Progress)
 
+### 레슨 구성·화면 (2026-10-30, 격리 브랜치 검증 중)
+
+- `kids/subjects/quest/quest-lesson.js`: 전역 `QuestLesson`. `buildLesson({child,items,subj,store,today,rng,mode})`가 단계 배열을 만든다. `createSession`이 재출제·콤보·중복 완료를 관리한다. `validateLesson`은 시작 전 계약을 검사한다. `QuestMastery.buildQuestion/buildMatch`를 재사용한다.
+- `kids/subjects/quest/quest-lesson-ui.js`: 전역 `QuestLessonUI`. `start({unit,subj,mode,isMinseo,onCompanion,onExit})`가 단계 저장·완주 일지·다음 레슨을 연결하고, `resolveSubject(params,child)`가 민서 과목을 선택한다. 두 스크립트를 러너 앞에 로드한다.
+- 기본 3·3·3은 full 레슨, `lesson=bite`는 3문제, `lesson=round5`는 이전 판, `engine=classic`은 4+1이다. `from=storybook`은 선택 필드 `STORY_BOOK.questLink={subject,unit}`로 들어온다.
+- `COMPANION_EVENTS`: `correct`, `encourage`, `combo`, `step`, `boss`, `clear`. 신호 detail은 `{combo,stepIndex,stepTotal,isMinseo}`이며 기존 파트너 반응을 재사용한다.
+- 저장 키 `questBiteCount_daughter_{YYYY-MM-DD}`는 `{korean,english}` 완주 횟수다. `readBiteCounts/recordBiteCompletion/biteCountKey`로 다룬다. `quest-lesson-complete` 이벤트 detail은 `{lessonId,child,mode}`다.
+- `StudyActivity.recordLessonComplete(id,startedAt)`는 실제 입력 직후 보이는 quiz에서만 v3 `lessons:[{id,startedAt,at}]`를 남긴다. 기존 시간 인정 규칙은 같다.
+- `study-log-store.js`: `MINMIN_STUDY_LOG_QUEUE_V1`에 조회/전송 실패를 보존한다. `flushQueue`는 페이지 load와 다음 upsert에서 재시도한다. `reportParts`는 1900자×40조각, 초과하면 오래된 판부터 생략한다. 운영 노션 중복 행을 정리하지 않는다.
+- 검증 경계: 자동 시험은 운영 쓰기 없이 수행한다. 모바일·PC 육안 검증과 실기기 보상 확인은 별도 결과를 명세에 기록한다.
+
+
 ### 🌟 `parent_progress_controller.js` (부모 진도 제어 및 노션 동적 단원 주입 엔진 2.0)
 5분 퀘스트의 부모 진도 관리판 모달을 100% 동적 송출(Zero Hardcoding) 방식으로 구동하며, 학기/지혜반 필터링, 망각곡선 4번 누적 복습 풀 제어, 노션 VOCA 캐시 단원 동적 합성을 총괄하는 독립 컨트롤러입니다.
 - **파일 위치**: `kids/subjects/quest/parent_progress_controller.js`

@@ -3,6 +3,7 @@
 // ========================================================
 window.STORY_BOOK = {
   id: "korean_1_2_1_b1",
+  questLink: { subject: 'korean', unit: '1단원 (1. 기분을 말해요)' },
   title: "마음 똑똑! 감정 라디오 교실 (1-2 1단원 1권)",
   icon: "📻",
   themeColor: "#ec4899",

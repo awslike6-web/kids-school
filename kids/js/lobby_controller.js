@@ -769,7 +769,7 @@ window.USER_CONFIGS = USER_CONFIGS;
 
   window.goToFiveMinQuest = function (userKey) {
     const uKey = userKey || activeUserKey;
-    window.location.href = `monster_lab.html?user=${uKey}`;
+    window.location.href = ['minseo', 'daughter'].includes(uKey) ? 'quest_runner.html?user=minseo&lesson=bite' : `monster_lab.html?user=${uKey}`;
   };
 
   window.navigateToHub = function (hubType, userKey) {

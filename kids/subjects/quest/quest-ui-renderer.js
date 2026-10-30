@@ -107,7 +107,12 @@
     wrap.appendChild(body);
     container.appendChild(wrap);
 
-    const state = { firstTry: true, errors: 0, finished: false };
+    const state = { firstTry: true, errors: 0, finished: false, wrongPicks: [] };
+    if (hooks.autoRead) setTimeout(() => {
+      if (!state.finished && wrap.isConnected) hooks.speak?.(q.q, 'ko', () => {
+        if (!state.finished && wrap.isConnected && q.lang === 'en') hooks.speak?.(q.audioText, 'en');
+      });
+    }, 300);
     const speak = () => hooks.speak && hooks.speak(q.audioText, q.lang);
     const speakerBtn = big => {
       const btn = h('button', `qm-speaker${big ? ' qm-big' : ''}`, big ? '🔊' : '🔊 듣기');
@@ -116,7 +121,9 @@
       return btn;
     };
     const showHint = () => { if (q.hint) hint.classList.remove('qm-hidden'); }; // 힌트가 비면(정답 노출 방지) 보이지 않음
-    const onWrong = () => {
+    const onWrong = chosen => {
+      if (chosen != null) state.wrongPicks.push(String(chosen));
+      hooks.onWrong?.(chosen);
       state.errors++;
       if (state.firstTry) hooks.onEncourage && hooks.onEncourage();
       state.firstTry = false;
@@ -127,7 +134,7 @@
       state.finished = true;
       hooks.onPraise && hooks.onPraise();
       const list = results || q.itemIds.map(id => ({ id, firstTry: state.firstTry }));
-      setTimeout(() => hooks.onDone && hooks.onDone({ results: list, firstTry: list.every(r => r.firstTry) }), 650);
+      setTimeout(() => hooks.onDone && hooks.onDone({ results: list, firstTry: list.every(r => r.firstTry), wrongPicks: state.wrongPicks.slice() }), 650);
     };
     if (q.hintPolicy === 'always') showHint();
     return { wrap, prompt, body, hint, state, hooks, speak, speakerBtn, onWrong, finish, showHint };
@@ -151,13 +158,14 @@
       }
       btn.onclick = () => {
         if (ui.state.finished) return;
+        if (ui.hooks.autoRead) ui.hooks.speak?.(opt, q.reverse ? q.lang : 'ko');
         if (idx === answer) {
           btn.classList.add('qm-correct');
           list.querySelectorAll('.qm-opt').forEach(b => { if (b !== btn) b.classList.add('qm-dim'); });
           ui.finish();
         } else {
           btn.classList.add('qm-dim');
-          ui.onWrong();
+          ui.onWrong(opt);
         }
       };
       list.appendChild(btn);
@@ -170,14 +178,14 @@
     if (q.audioOnly) {
       ui.prompt.appendChild(ui.speakerBtn(true));
       ui.prompt.appendChild(h('div', 'qm-meaning', '소리를 듣고 알맞은 뜻을 골라요'));
-      setTimeout(ui.speak, 250);
+      if (!hooks.autoRead) setTimeout(ui.speak, 250);
     } else if (q.reverse) {
       ui.prompt.appendChild(h('div', 'qm-meaning', esc(q.prompt || q.item.meaning)));
       ui.prompt.appendChild(h('div', 'qm-meaning', '👆 알맞은 말을 골라요'));
     } else {
       ui.prompt.appendChild(h('div', isSentence(q) ? 'qm-sentence' : 'qm-word', esc(q.item.word)));
       ui.prompt.appendChild(ui.speakerBtn(false));
-      if (q.lang === 'en') setTimeout(ui.speak, 250);
+      if (q.lang === 'en' && !hooks.autoRead) setTimeout(ui.speak, 250);
     }
     ui.prompt.appendChild(ui.hint);
     renderOptions(ui, q, q.options, q.answer);
@@ -219,8 +227,10 @@
         selected = null;
         if (matched === q.itemIds.length) ui.finish(q.itemIds.map(id => ({ id, firstTry: firstTry[id] })));
       } else {
-        firstTry[selected.id] = false;
-        ui.onWrong();
+        const left = selected.side === 'left' ? selected.id : cellData.id;
+        const right = selected.side === 'right' ? selected.id : cellData.id;
+        firstTry[left] = false;
+        ui.onWrong(q.left.find(x => x.id === left).text + '→' + q.right.find(x => x.id === right).text);
         const otherSide = selected.side === 'left' ? 'right' : 'left';
         guide(cells[otherSide][selected.id]);
       }
@@ -259,7 +269,7 @@
           pos++;
           if (pos === seq.length) onComplete();
         } else {
-          ui.onWrong();
+          ui.onWrong(b.text);
           const target = blockEls.find(x => !x.el.classList.contains('qm-used') && x.text === seq[pos]);
           guide(target && target.el);
         }
@@ -329,7 +339,7 @@
     ui.prompt.appendChild(speaker);
     ui.prompt.appendChild(ui.hint);
     const baseWrong = ui.onWrong;
-    ui.onWrong = () => { baseWrong(); speaker.classList.remove('qm-hidden'); };
+    ui.onWrong = chosen => { baseWrong(chosen); speaker.classList.remove('qm-hidden'); };
     renderSequence(ui, q, sc.seq, sc.blocks, slotEls, () => { ui.speak(); ui.finish(); }, isChunk);
     return ui;
   }

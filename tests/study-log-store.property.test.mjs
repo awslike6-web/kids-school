@@ -211,7 +211,7 @@ property('S5 동시 upsert 무작위 순서 시험: 한 탭 Map·한 탭 locks·
     const [failed, succeeded] = await Promise.allSettled([a.api.upsertStudyLog(base), a.api.upsertStudyLog(base)]);
     equal('S5', failed.status, 'rejected', '앞 작업의 예외 전달');
     equal('S5', succeeded.status, 'fulfilled', '뒤 작업 계속 실행');
-    inputs.push(base); checkSum('S5', f.pages, inputs);
+    await a.api.flushQueue(); inputs.push(base, base); checkSum('S5', f.pages, inputs);
   }
 });
 
@@ -221,18 +221,21 @@ property('S6 조회 실패 무작위 순서 시험: 기억 ID·1회 재시도·�
       const f = fixture(rng), value = entry(rng); await f.api.upsertStudyLog(value);
       if (scenario !== 'a') f.store.removeItem(PAGE_IDS);
       f.calls.length = 0; f.fail('query', mode, scenario === 'b' ? 1 : 4);
-      history.push({ scenario, failure: mode, retry: value }); await f.api.upsertStudyLog(value);
+      history.push({ scenario, failure: mode, retry: value });
+      if (scenario === 'c') await assert.rejects(f.api.upsertStudyLog(value));
+      else await f.api.upsertStudyLog(value);
       const queries = f.calls.filter(c => c.kind === 'query').length;
       if (scenario === 'a') { equal('S6(a)', queries, 0, '기억 ID로 조회 장애 우회'); checkSum('S6(a)', f.pages, [value, value]); }
       if (scenario === 'b') { equal('S6(b)', queries, 2, '한 번 실패 후 재조회'); checkSum('S6(b)', f.pages, [value, value]); }
       if (scenario === 'c') {
-        equal('S6(c)', queries, 2, '재시도까지 실패'); equal('S6(c)', f.pages.length, 2, '선택 A 신규 생성');
-        equal('S6(c)', f.pages.reduce((s, p) => s + p.properties['단어요정'].number, 0), value.wordFairyCount * 2, '입력 기록 보존');
-        equal('S6(c)', f.pages.reduce((s, p) => s + p.properties['소요시간'].number, 0), value.durationMinutes * 2, '소요시간 보존');
-        equal('S6(c)', f.warnings.length, 1, '경고 한 번');
-        equal('S6(c)', f.warnings[0].includes('조회 실패로 신규 생성(중복 가능)'), true, '중복 가능성 표시');
+        equal('S6(c)', queries, 2, '재시도까지 실패');
+        equal('S6(c)', f.pages.length, 1, '조회 실패 중 신규 생성 없음');
+        equal('S6(c)', Object.keys(JSON.parse(f.store.getItem('MINMIN_STUDY_LOG_QUEUE_V1'))).length, 1, '대기열 보존');
+        await f.api.flushQueue(); // 남아 있는 조회 실패도 계속 보존
+        await f.api.flushQueue();
+        checkSum('S6(c)', f.pages, [value, value]);
       }
-      if (scenario !== 'a') equal('S6', f.timers.length === 1 && f.timers[0] >= 300 && f.timers[0] <= 600, true, '재시도 대기 300~600ms');
+      if (scenario === 'b') equal('S6', f.timers.length === 1 && f.timers[0] >= 300 && f.timers[0] <= 600, true, '재시도 대기 300~600ms');
     }
   }
 });

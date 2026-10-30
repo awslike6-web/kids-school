@@ -370,6 +370,24 @@ function getKstTodayYMD(date = new Date()) {
     `;
 
     container.innerHTML = cardsHtml + finishCardHtml;
+    const questButton = createQuestLinkButton();
+    if (questButton) container.querySelector('.webtoon-finish-card').append(questButton);
+  }
+
+  // 연결이 확인된 책만 완독 카드·완독 창에 한입 레슨 버튼을 붙인다.
+  function createQuestLinkButton() {
+    const link = STORY_BOOK.questLink;
+    if (!link?.subject || !link?.unit) return null;
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'btn-claim-reward';
+    button.textContent = '🌟 이 이야기로 3문제!';
+    button.onclick = () => {
+      const user = new URLSearchParams(location.search).get('user') || (getCurrentReaderInfo().isMinsu ? 'minsu' : 'minseo');
+      const query = new URLSearchParams({ user, lesson: 'bite', subject: link.subject, unit: link.unit, from: 'storybook' });
+      const target = new URL('../../../quest_runner.html', document.baseURI);
+      target.search = query.toString(); location.href = target.href;
+    };
+    return button;
   }
 
   window.playWebtoonCardAudio = function(idx, lang) {
@@ -592,6 +610,8 @@ function getKstTodayYMD(date = new Date()) {
         </div>
       </div>
     `;
+    const questButton = createQuestLinkButton();
+    if (questButton) modal.querySelector('.completion-btn-row').before(questButton);
     modal.style.display = 'flex';
   }
 

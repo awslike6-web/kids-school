@@ -5,7 +5,7 @@
     const ACTIVE = 'GUARDIAN_STUDY_V2_ACTIVE_', QUEUE = 'GUARDIAN_STUDY_V2_QUEUE_';
     const LOCAL = 'GUARDIAN_STUDY_V2_DAY_';
     const CORRECT = 'GUARDIAN_STUDY_V3_ANSWERS_';
-    const dayKey = ms => new Date(ms + 9 * 3600000).toISOString().slice(0, 10);
+    const dayKey = ms => { const d=new Date(ms+9*3600000); return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`; };
     function appendRange(ranges, a, b) {
         const last = ranges[ranges.length - 1];
         if (last && last[1] === a && b - last[0] <= 120000) last[1] = b;
@@ -103,7 +103,8 @@
         const clock=new ActivityClock(Date.now(),win.performance.now());
         let context=null, id=win.crypto.randomUUID(), lastFlush=Date.now(), lastSave=0;
         let sending=false, retryAt=0, failures=0, storageHealthy=true, lastTrusted=-Infinity;
-        let foregroundInput=false, answers=[], uploadPromise;
+        let foregroundInput=false, answers=[], lessons=[], uploadPromise;
+        const completedLessons=new Set();
         const answered=new Set();
         const keys=prefix => Object.keys(store).filter(key => key.startsWith(prefix));
         const parse=key => { try { return JSON.parse(store.getItem(key)); } catch { return null; } };
@@ -112,8 +113,8 @@
         const visible=() => win.document.visibilityState === 'visible' && (win.document.hasFocus() || foregroundInput);
         const rich=text => [{text:{content:text}}];
         function makeRecord(ranges) {
-            if (!context || (!ranges.length && !answers.length)) return null;
-            return {v:3,id,kind:context.kind,ranges,answers:answers.slice(),child:context.child,subject:context.subject,savedAt:Date.now()};
+            if (!context || (!ranges.length && !answers.length && !lessons.length)) return null;
+            return {v:3,id,kind:context.kind,ranges,answers:answers.slice(),lessons:lessons.slice(),child:context.child,subject:context.subject,savedAt:Date.now()};
         }
         function save(key, record) {
             try { store.setItem(key,JSON.stringify(record)); storageHealthy=true; return true; }
@@ -149,7 +150,7 @@
             if (record && !save(QUEUE+id,record)) return false;
             if (record) updateLocal(record);
             store.removeItem(ACTIVE+id);
-            clock.drain(); answers=[]; id=win.crypto.randomUUID(); lastFlush=Date.now();
+            clock.drain(); answers=[]; lessons=[]; id=win.crypto.randomUUID(); lastFlush=Date.now();
             return true;
         }
         function sample() {
@@ -165,7 +166,7 @@
             // Keep valid intervals from before a clock correction in their own immutable batch.
             if (clock.discontinuity && clock.ranges.length) seal();
             // Include this tick before sealing, so the first 60 seconds award a complete minute.
-            if (wall-lastFlush >= 60000 && (clock.ranges.length || answers.length)) seal();
+            if (wall-lastFlush >= 60000 && (clock.ranges.length || answers.length || lessons.length)) seal();
             if (wall-lastSave >= 5000) checkpoint();
         }
         function recover() {
@@ -178,10 +179,10 @@
             for (const key of [...keys(LOCAL),...keys(CORRECT)]) if (key.slice(-10) < cutoff) store.removeItem(key);
         }
         function payload(record) {
-            const times=record.ranges.flat().concat((record.answers || []).map(a => a.at));
+            const times=record.ranges.flat().concat((record.answers || []).map(a => a.at), (record.lessons || []).map(a => a.at));
             const start=Math.min(...times), end=Math.max(...times);
             const measurement=JSON.stringify({v:record.v,id:record.id,kind:record.kind,ranges:record.ranges,
-                ...(record.v === 3 ? {answers:record.answers || []} : {})});
+                ...(record.v === 3 ? {answers:record.answers || [],lessons:record.lessons || []} : {})});
             const parts=[];
             for (let i=0;i<measurement.length;i+=1900) parts.push({text:{content:measurement.slice(i,i+1900)}});
             return {parent:{database_id:database},properties:{
@@ -200,7 +201,7 @@
                 // Limit each burst; retained immutable records are retried without minting duplicate time.
                 for (const key of keys(QUEUE).slice(0,1)) {
                     const record=parse(key);
-                    if (!record || !Array.isArray(record.ranges) || (!record.ranges.length && !record.answers?.length)) { store.removeItem(key); continue; }
+                    if (!record || !Array.isArray(record.ranges) || (!record.ranges.length && !record.answers?.length && !record.lessons?.length)) { store.removeItem(key); continue; }
                     // Read before retrying a potentially committed write (including HTTP 503).
                     // 프록시 CORS 허용 헤더만 사용합니다. Pragma는 브라우저 전송을 차단합니다.
                     const options={method:'POST',headers:{'Content-Type':'application/json'},
@@ -251,7 +252,14 @@
         win.addEventListener('online',upload);
         win.setInterval(() => { sample(); upload(); },1000);
         sample(); recover(); upload();
-        return {flush,clock, recordCorrect(answerId) {
+        return {flush,clock, recordLessonComplete(lessonId, startedAt) {
+            sample();
+            if (!context || context.kind !== 'quiz' || !visible() || win.performance.now()-lastTrusted > 5000
+                || typeof lessonId !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(lessonId)
+                || !Number.isSafeInteger(startedAt) || startedAt > Date.now() || completedLessons.has(lessonId)) return false;
+            completedLessons.add(lessonId); lessons.push({id:lessonId,startedAt,at:Date.now()});
+            checkpoint(); return true;
+        }, recordCorrect(answerId) {
             sample();
             // 채점 결과 내용은 저장하지 않습니다. 같은 시도/문항의 중복 호출만 제거합니다.
             if (!context || context.kind !== 'quiz' || !visible() || win.performance.now()-lastTrusted > 5000
@@ -278,6 +286,7 @@
         try { root.StudyActivity.meter=createBrowserMeter(root); root.StudyActivity.flush=() => root.StudyActivity.meter.flush(); }
         catch (error) { console.warn('[학습 측정] 초기화 실패: 활동 시간은 지급하지 않습니다.',error.message); }
         root.StudyActivity.setPhase=phase => root.StudyActivity.meter?.setPhase(phase);
+        root.StudyActivity.recordLessonComplete=(id, startedAt) => root.StudyActivity.meter?.recordLessonComplete(id, startedAt);
         root.StudyActivity.recordCorrect=id => root.StudyActivity.meter?.recordCorrect(id);
     }
 })(typeof window !== 'undefined' ? window : globalThis);

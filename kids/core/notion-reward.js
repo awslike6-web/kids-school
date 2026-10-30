@@ -3,7 +3,7 @@
 (function() {
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-reward.js'))?.src;
     if (!source) return;
-    [['StudyActivity', 'study-activity.js', '?v=20261023'], ['StudyLogStore', 'study-log-store.js', '?v=20261024-1']].forEach(([globalName, file, version]) => {
+    [['StudyActivity', 'study-activity.js', '?v=20261030-lesson'], ['StudyLogStore', 'study-log-store.js', '?v=20261030-lesson']].forEach(([globalName, file, version]) => {
         if (window[globalName] || Array.from(document.scripts).some(s => (s.src || '').includes(file))) return;
         const script=document.createElement('script');
         script.src=new URL(file + version,source).href; script.async=false;
@@ -867,7 +867,7 @@ async function finalizeQuizRewardSession(options = {}) {
     }
 
     // 2. 📝 노션 학습일지 안전 전송 (1세션 1회 전송 원칙, 중복 방지)
-    if (!session.isLogged && (session.solvedCount > 0 || session.correctCount > 0)) {
+    if (!session.isLogged && (session.solvedCount > 0 || session.correctCount > 0 || window.wrongNotes?.length || window.engWrongNotes?.length)) {
         session.isLogged = true;
         if (typeof sendStudyLogToNotion === 'function') {
             try {
@@ -893,7 +893,7 @@ async function finalizeQuizRewardSession(options = {}) {
 if (typeof window !== 'undefined') {
     window.addEventListener('pagehide', () => {
         const session = window.__quizRewardSession;
-        if (session && !session.isLogged && (session.solvedCount > 0 || session.correctCount > 0)) {
+        if (session && !session.isLogged && (session.solvedCount > 0 || session.correctCount > 0 || window.wrongNotes?.length || window.engWrongNotes?.length)) {
             session.isLogged = true;
             const subj = window.currentSubject || (typeof detectSubjectFromContext === 'function' ? detectSubjectFromContext() : '국어');
             if (typeof sendStudyLogToNotion === 'function') {

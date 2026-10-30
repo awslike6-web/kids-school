@@ -13,6 +13,51 @@
   const LOOKBACK_DAYS = 60;
   const MAX_QUERY_PAGES = 10;
   const ERROR_REPORT_LIMIT = 1900;
+  const QUEUE_KEY = 'MINMIN_STUDY_LOG_QUEUE_V1';
+  let flushing = null;
+  function reportParts(text) {
+    let value = String(text || NO_ERRORS);
+    const prefix = '…(앞 기록 생략) | ';
+    let trimmed = false;
+    while (value.length + (trimmed ? prefix.length : 0) > ERROR_REPORT_LIMIT * 40) {
+      const boundary = value.indexOf(' | ');
+      value = boundary < 0 ? value.slice(-(ERROR_REPORT_LIMIT * 40 - prefix.length)) : value.slice(boundary + 3);
+      trimmed = true;
+    }
+    if (trimmed) value = prefix + value;
+    const parts = [];
+    for (let i = 0; i < value.length; i += ERROR_REPORT_LIMIT) parts.push({ text: { content: value.slice(i, i + ERROR_REPORT_LIMIT) } });
+    return parts;
+  }
+  function readQueue() {
+    try { return JSON.parse(window.localStorage.getItem(QUEUE_KEY) || '{}'); } catch { return {}; }
+  }
+  function saveQueue(queue) { window.localStorage.setItem(QUEUE_KEY, JSON.stringify(queue)); }
+  function enqueue(entry, key) {
+    const queue = readQueue(), old = queue[key];
+    queue[key] = old ? { ...entry, startTime: old.startTime,
+      errorReport: mergeErrorReports(old.errorReport, entry.errorReport),
+      wordFairyCount: (Number(old.wordFairyCount) || 0) + (Number(entry.wordFairyCount) || 0),
+      durationMinutes: (Number(old.durationMinutes) || 0) + (Number(entry.durationMinutes) || 0) } : entry;
+    saveQueue(queue);
+    return { mode: 'queued', pageId: null, key };
+  }
+  function flushQueue() {
+    if (flushing) return flushing;
+    flushing = (async () => {
+      for (const key of Object.keys(readQueue())) {
+        await serialize(key, async () => {
+          const queue = readQueue(), entry = queue[key];
+          if (!entry) return;
+          try {
+            await writeStudyLog(entry, key);
+            const latest = readQueue(); delete latest[key]; saveQueue(latest);
+          } catch { /* 조회·전송 실패분은 다음 호출까지 보존 */ }
+        });
+      }
+    })().finally(() => { flushing = null; });
+    return flushing;
+  }
   const NO_ERRORS = '오답 없음';
   const PAGE_IDS_KEY = 'MINMIN_STUDY_LOG_PAGES_V1';
   const QUERY_RETRY_MS = 400;
@@ -127,8 +172,14 @@
    * @returns {Promise<{mode:'patch'|'post', pageId:string|null, key:string}>}
    */
   async function upsertStudyLog(entry) {
+    await flushQueue();
     const key = buildLogKey(entry.childName, entry.subject);
-    return serialize(key, () => writeStudyLog(entry, key));
+    return serialize(key, async () => {
+      // 남아 있는 실패분은 신규 입력과 합쳐 다음 재시도에서 한 번에 보낸다.
+      if (readQueue()[key]) return enqueue(entry, key);
+      try { return await writeStudyLog(entry, key); }
+      catch (error) { enqueue(entry, key); throw error; }
+    });
   }
   async function writeStudyLog(entry, key) {
     const childName = entry.childName;
@@ -141,7 +192,7 @@
     let page = await readRememberedPage(key);
     if (!page) {
       const found = await findPageByKey(key); page = found.page;
-      if (found.failed) console.warn('⚠️ [학습일지 Upsert] 조회 실패로 신규 생성(중복 가능)');
+      if (found.failed) throw new Error('학습일지 조회 실패: 대기열에 보존합니다');
     }
     let res;
     let mode;
@@ -156,7 +207,7 @@
           properties: {
             '소요시간': { number: (p['소요시간']?.number || 0) + durationMinutes },
             '단어요정': { number: (p['단어요정']?.number || 0) + wordFairyCount },
-            '오답리포트': { rich_text: [{ text: { content: merged.slice(0, ERROR_REPORT_LIMIT) } }] },
+            '오답리포트': { rich_text: reportParts(merged) },
             '퇴장': { date: { start: entry.endTime } }
           }
         }),
@@ -176,7 +227,7 @@
             '입장': { date: { start: entry.startTime } },
             '퇴장': { date: { start: entry.endTime } },
             '소요시간': { number: durationMinutes },
-            '오답리포트': { rich_text: [{ text: { content: errorReport.slice(0, ERROR_REPORT_LIMIT) } }] },
+            '오답리포트': { rich_text: reportParts(errorReport) },
             '단어요정': { number: wordFairyCount }
           }
         }),
@@ -317,6 +368,7 @@
   }
 
   window.StudyLogStore = {
+    reportParts, flushQueue,
     getKstDateString,
     buildLogKey,
     upsertStudyLog,
@@ -335,4 +387,5 @@
     refreshStreak,
     getKstDateString
   };
+  if (window.addEventListener) window.addEventListener('load', () => { flushQueue().catch(() => {}); });
 })(typeof window !== 'undefined' ? window : this);

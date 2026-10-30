@@ -1,7 +1,7 @@
 # 🦉 5분 퀘스트 「3단계 레슨 · 민서 한입 레슨 · 학습일지 보완」 작업 명세서 (Quest Lesson Spec)
 
 > **문서 버전**: v1.1 (2026-10-29 작성, 2026-10-30 민서 보상 A안 확정 반영)
-> **상태**: 작업 지시 (미구현). 실제 운영 노션 쓰기·main 병합/배포는 포함하지 않음.
+> **상태**: 격리 브랜치 구현·자동 검증 완료, 실제 화면 검증 대기. 운영 노션 쓰기·main 병합/푸시·배포는 수행하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(§4 5분 퀘스트, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 문서**: `.agent/skills/quest-engine-spec/SKILL.md`(3·3·3 규칙·함정), `kids/core/CORE_CATALOG.md` §2-2, [`docs/gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(파트너 캐릭터 장착 — 이미 구현됨), `docs/notion_schemas_school.md`
 > **작업자 참고**: 코드를 쓰기 전에 `AGENTS.md` 순서대로 `GEMINI.md`, `CORE_CATALOG.md`, `quest-engine-spec` 스킬을 읽는다.
@@ -265,3 +265,24 @@ QuestLesson.buildLesson({ child, items, subj, store, today, rng, mode: 'full' | 
 - 노션 Worker·노션 스키마 변경
 - 운영 노션의 중복 학습일지 줄 삭제
 - 상한 초과 파일(`lobby_controller.js`, `notion-reward.js`)에 로직 덧붙이기 (연결 몇 줄만)
+
+
+## 10. 격리 브랜치 구현 기록 (2026-10-30)
+
+- 공부방: `scratch/worktrees/quest-lesson-school`, 관제탑·가디언: `scratch/worktrees/quest-lesson-tower`, 각 `codex/quest-lesson`. 실제 가디언은 관제탑 저장소의 하위 폴더다. 관제탑 worktree의 `kids-school-main`은 공부방 worktree에 대한 로컬 junction이며 Git 산출물이 아니다.
+- 공부방·가디언 측정기는 줄바꿈 정규화 후 처음부터 동일했다. 레슨 기록 추가 뒤에도 동일하게 유지했다.
+- 기본 full/bite·round5/classic 분기, 단계 저장·재출제·신호·결과, 오답 분할/대기열, 오류 선택값, 오답만 있는 세션, 완주 보너스와 부모 표시를 구현했다. 새 파일은 각각 300~600줄 범위다.
+- 캐시 갱신을 위해 §3 파일에 더해 `kids/core/core.js`, `kids/core/notion-helper.js`, `kids/subjects/common/storybook_viewer.html`의 버전 문자열을 갱신했다. 스킬 동기화가 `scripts/data/system_map_data.js` 기준일도 자동 갱신한다.
+- 실제 노션 읽기 조회로 민서 `1단원 (1. 기분을 말해요)` 항목 10건 이상이 정확히 일치함을 확인했다. `kids/subjects/korean/data/story_1_2_1_b1.js`(마음 똑똑! 감정 라디오 교실)에만 questLink를 넣었다. 다른 책은 개별 연결 검증을 하지 않아 비워 두었다.
+- 공부방 전체 회귀: 89건 중 통과87·실패0·건너뜀1·기존 TODO1. 새 레슨 시험8건 통과. `verify_quest_mastery.js`도 통과했다. 크레딧 중복을 허용하도록 메모리 속 소스를 바꾼 경우 시작 전 계약 검증이 거부하는 것도 확인했다.
+- 가디언 전체 시험56건 통과·실패0·건너뜀0. 잠금파일 기준 pnpm 설치 후 실제 Wrangler 부모 번들 시험까지 통과했다. 운영 배포는 하지 않았다.
+- 학습일지 기존 S6 시험은 과거의 조회 실패 시 신규 생성 기대를 대기열 보존·재시도 기대로 바꿨다. 두 기기 동시 최초 작성의 노션 고유 키 부재 한계(TODO)는 그대로다.
+- 실제 브라우저 화면을 열려고 했으나 Work에서 로컬 브라우저 사용이 비활성화되어 열리지 않았다. 375×812·1280×800 실제 완주/음성/파트너/쓰기 차단 확인, 360px 가로 넘침 검사는 아직 하지 않았다. 모의 DOM 시험 결과를 육안 검증으로 대체하지 않는다.
+- 운영 중복 일지 `민수_2026-10-28_영어`는 삭제하지 않았다. 민서 기기 실제 잔액 확인과 공부방→가디언 배포는 후속 사용자 지시 뒤 진행한다.
+
+### 10-1. Claude 검수와 보완 (2026-10-30)
+
+- 쓰기 차단 서버에서 화면 시험: 민서 한입 레슨(375×812) 완주 2회, 가로 넘침 없음, 완주 기록 `lessons`가 활동측정 JSON에 실림. 그 기록을 가디언 `measuredStudyRewards`에 넣으면 민서 3분·민수 0분, 재전송은 1회로 셈. 학습일지 요약 `[한입 국어 …]` 확인. 민수 레슨 첫 화면(워밍업 1/13) 확인.
+- 보완 1: 동화 기본 보기(책 넘김)는 완독 카드가 아니라 `showCompletionModal`로 끝나서 버튼이 보이지 않았다. `createQuestLinkButton()`으로 묶어 완독 카드와 완독 창 모두에 붙였다(`storybook_engine.js` 순증 20줄). 완독 창 → 한입 레슨 이동까지 확인.
+- 보완 2: 한입 레슨은 오답을 다시 내지 않는다(`createSession`에서 `mode === 'bite'` 제외). 「딱 3문제」 약속 유지. 시험 1건 추가, 화면 흐름 시험은 3문항으로 수정. 화면에서 오답 후 `2/3` 유지 확인.
+- 아직 직접 보지 못한 것: 민수 레슨 단계 전환·콤보 배너·단계별 저장의 실제 클릭, 자동 읽기 음성 청취, 민서 기기 실제 적립(가디언 배포 후).
