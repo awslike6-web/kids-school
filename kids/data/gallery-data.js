@@ -279,6 +279,11 @@ const DEFAULT_GALLERY_DATA = [
         "key": "moreum",
         "spriteUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_213854_sprite_moreum.png",
         "name": "모름"
+      },
+      {
+        "key": "rotek",
+        "spriteUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_213854_sprite_rotek.png",
+        "name": "로텤스펲펲"
       }
     ]
   },
