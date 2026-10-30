@@ -2,6 +2,7 @@
  * 👾 5분 퀘스트 파트너 몬스터 로스터 & 포즈/대사 엔진 (Monster Roster SSOT)
  * - 1호: 뿌쀳히탈탈 (민수 「괴수대백과」 괴수, 투명 배경 3D)
  * - 2호: 콧툰봉돔돌 (민수 자작 SCP-봉제괴수 · 실사 배경 + 6종 포즈 인터랙션)
+ * - 3호: 모름 (민수 「괴수대백과」 외눈 수수께끼 괴수)
  * - localStorage('selectedMonster') 연동 및 포즈 이미지 즉시 프리로드(Preload) 지원
  */
 (() => {
@@ -92,10 +93,52 @@
                 ],
                 clear: '크아아앙!! 승리 포효!! 오늘 퀘스트 완벽 정복이다!! 🔥🏆'
             }
+        },
+        unknown_beast: {
+            id: 'unknown_beast',
+            number: '3호',
+            name: '모름',
+            role: '수수께끼 괴수',
+            code: 'UNIT-03 // UNKNOWN BEAST',
+            badgeText: '3호: 모름',
+            hasBackground: false,
+            poses: {
+                idle: './kids/assets/monsters/unknown_beast/idle.png',
+                greet: './kids/assets/monsters/unknown_beast/greet.png',
+                walk_left: './kids/assets/monsters/unknown_beast/walk_left.png',
+                walk_right: './kids/assets/monsters/unknown_beast/walk_right.png',
+                rage: './kids/assets/monsters/unknown_beast/rage.png',
+                roar: './kids/assets/monsters/unknown_beast/roar.png'
+            },
+            labDialogues: {
+                idle: '내 이름은 모름! 오늘은 어떤 수수께끼를 만나볼까? 👁️',
+                greet: '안녕? 커다란 눈으로 네가 오기를 기다렸어! 👋',
+                walk: [
+                    '왼쪽에 단서가 있나? 살금살금 찾아볼까? 👣',
+                    '오른쪽에도 궁금한 게 한가득인데? 👁️',
+                    '모르는 걸 하나씩 알아가는 탐험, 같이 갈래? 🔎'
+                ],
+                rage: '흥, 잠깐 뒤돌아 있을래? 그래도 네가 부르면 돌아볼 거야! 🌙',
+                roar: '손 번쩍! 나도 함께 탐험해도 될까? 🙌'
+            },
+            runnerDialogues: {
+                stageStart: '등 뒤에 숨겨 둔 호기심을 꺼내볼까? 오늘도 함께 탐험하자! 🔎',
+                correct: [
+                    '오? 수수께끼 하나가 풀렸는데? 눈이 번쩍! 👁️✨',
+                    '네 생각을 따라가니 새로운 단서가 보이는데? 🔎',
+                    '궁금했던 게 하나 더 밝혀졌어! 다음도 함께 볼까? 🌟'
+                ],
+                encourage: [
+                    '여기 단서가 반짝이는데? 천천히 같이 읽어볼까? 🔎',
+                    '내 커다란 눈으로도 함께 살펴볼게! 네 속도로 가볼까? 👁️',
+                    '잠깐 숨을 고르고, 마음 가는 단서부터 찾아볼까? 🌱'
+                ],
+                clear: '손 번쩍! 끝까지 함께 탐험했네? 오늘 발견한 것들을 간직할까? 🙌🏆'
+            }
         }
     };
 
-    const MONSTER_ORDER = ['clay_bite', 'cottun_bongdomdol'];
+    const MONSTER_ORDER = ['clay_bite', 'cottun_bongdomdol', 'unknown_beast'];
     const preloadedCache = new Set();
     // 갤러리 파트너·최고 기록은 이 기기의 자녀별 저장소에만 보관한다.
     const PARTNER_KEYS = { son: 'galleryPartner_son', daughter: 'galleryPartner_daughter' };

@@ -117,7 +117,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 데이터 계약·부모 제작 절차: `docs/gallery_spot_diff_spec.md`, `docs/gallery_archive_spec.md`의 「틀린그림찾기 등록」.
 
 ### 🏃 `gallery-mini-runner.js` (갤러리 캐릭터 장착·60초 미니 런, 2026-10-29)
-- 위치: `kids/common_space/gallery-mini-runner.js`. IIFE·전역 `GalleryMiniRunner`만 추가합니다. 로딩 시 DOM에 접근하지 않고 `gmr-style`은 화면을 열 때 한 번 삽입합니다. 로드 순서는 `monster_roster.js` → 이 모듈 → 모달 매니저입니다.
+- 위치: `kids/common_space/gallery-mini-runner.js`. IIFE·전역 `GalleryMiniRunner`만 추가합니다. 로딩 시 DOM에 접근하지 않고 `gmr-style`은 화면을 열 때 한 번 삽입합니다. 로드 순서는 `monster_roster.js` → 이 모듈 → 모달 매니저입니다. 3호 `unknown_beast`(모름): 투명 PNG 6포즈(인사 그림을 roar에도 사용), 수수께끼 대사·에러리스 격려. 상세: `docs/monster_moreum_spec.md`.
 - 화면 API: `bindModal(item, {available, viewer})`, `start(item, {viewer, onClose})`, `close()`. 모달 매니저는 작품 여부와 호출만 연결합니다. 아이는 자기 장착/해제, 부모는 자녀별 버튼을 사용합니다. 부모 게임은 민수 테마지만 자녀 최고 기록에는 쓰지 않습니다.
 - 순수 API: `createWorld(seed, profile)`(문자열 또는 `{child,aspect,spriteAspect}`), `step(world, {jump}, dtMs)`, `hitboxOf(sprite,x,y,w,h)`, `resizeWorld(world, aspect)`. 높이 단위 물리·2단 점프·높이 70%/가로 최대 `.08` 판정·800ms 무적·최대 dt 50ms. 충돌해도 중단하지 않고 60초 후 항상 완주합니다.
 - 세로 통과 보완: 중력 `.95`·점프 `.62`·장애물 폭 `.05`. 민서는 `clamp(aspect×.25,.15,.38)`, 민수는 `clamp(aspect×.40,.18,.58)`(30초 이후 ×1.12) 높이/초입니다. `resizeWorld`는 진행 거리와 장애물/별의 상대 거리를 보존해 이미 지나간 객체를 되돌리지 않습니다. `MonsterRoster.withJosa(name,pair)`로 장착 안내·제목의 조사를 공통 처리합니다.
