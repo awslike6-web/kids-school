@@ -33,7 +33,7 @@ graph TD
 | **실질 인지 수준** | **초등학교 3~4학년 수준 맞춤** (`minsu_learning_profile.md`) | 초등학교 1학년 눈높이 시각/청각 놀이 |
 | **UI 테마 & 보상** | 마인크래프트 블록 테마 / 에메랄드·다이아 (`💎`) | 핑크/퍼플 슬라임 테마 / 하리보 젤리 (`🍬`) |
 | **주요 학습 모드** | 단어 콕 터치, 문장 조각 블록 빌더, 1:1 한글 발음 디딤돌 | 알파벳 소릿값 매칭, 그림 카드 터치, 챈트 따라하기 |
-| **음성 기본 속도** | **0.85x (민수 안심 배속)** | 0.85x 또는 1.0x 표준 배속 |
+| **음성 기본 속도** | **0.85x (기본 배속)** | 0.85x 또는 1.0x 표준 배속 |
 
 ---
 
@@ -188,7 +188,7 @@ graph TD
 <div class="speech-speed-selector">
   <button class="speed-btn" onclick="setSpeechSpeed(0.5)">0.5x 초저속</button>
   <button class="speed-btn" onclick="setSpeechSpeed(0.7)">0.7x 저속</button>
-  <button class="speed-btn active" onclick="setSpeechSpeed(0.85)">0.85x 보통(민수안심)</button>
+  <button class="speed-btn active" onclick="setSpeechSpeed(0.85)">0.85x 기본</button>
   <button class="speed-btn" onclick="setSpeechSpeed(1.0)">1.0x 표준</button>
 </div>
 ```

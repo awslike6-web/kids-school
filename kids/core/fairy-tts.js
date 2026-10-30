@@ -69,7 +69,7 @@ function setStoredAppSetting(key, value) {
 // ========================================================
 // 🐢 말하기 속도 (아이별 저장, 영어방 속도 단추와 설정창이 같은 값을 바꾼다)
 // ========================================================
-const ENGLISH_SPEECH_RATE_DEFAULT = 0.85; // 느린 학습자 민수 안심 기본 배속
+const ENGLISH_SPEECH_RATE_DEFAULT = 0.85; // 영어 기본 배속
 const KOREAN_SPEECH_RATE_DEFAULT = 1.0;   // 1.0 = 요정 기본 속도(Edge +6%)
 
 function readSpeechRate(key, legacyKey, fallback) {

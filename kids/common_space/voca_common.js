@@ -823,7 +823,7 @@ async function askCocoFairy() {
 
   let mathGuide = '';
   if (currentActiveWord && (currentActiveWord.subject || []).includes('수학')) {
-    mathGuide = ' 이 단어는 [수학] 개념이야. 학생은 초등학교 5학년 민수(언어치료 병행, 인지/어휘 발달 배려 필요)야. 기계적인 공식 나열 대신 피자, 사탕, 초콜릿 나누기나 색종이 접기 같은 친근한 실생활 비유를 들어서 다정하고 쉽게 설명해줘. 핵심 공식은 눈에 띄게 콕 짚어주고 따뜻하게 격려해줘.';
+    mathGuide = ' 이 단어는 [수학] 개념이야. 학생은 초등학교 5학년 민수야. 어려운 한자어는 쉬운 말로 바꾸고 짧은 문장으로 말해줘. 기계적인 공식 나열 대신 피자, 사탕, 초콜릿 나누기나 색종이 접기 같은 친근한 실생활 비유를 들어서 다정하고 쉽게 설명해줘. 핵심 공식은 눈에 띄게 콕 짚어주고 따뜻하게 격려해줘.';
   }
 
   const wordContext = currentActiveWord ? `현재 아이가 공부 중인 단어: [${currentActiveWord.word}], 뜻풀이: [${currentActiveWord.meaning}].${mathGuide}` : '';

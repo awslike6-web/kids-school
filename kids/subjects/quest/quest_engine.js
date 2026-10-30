@@ -454,7 +454,7 @@
         const jihyeVoca = buildVocaQuestionsFromNotion('minsu', subj, '', { semesterScope: 'jihye' });
         if (jihyeVoca.length > 0) {
           const sample = jihyeVoca[Math.floor(Math.random() * jihyeVoca.length)];
-          sample.formula = `[지혜반 복습 🌱] ${sample.formula || ''}`;
+          sample.formula = `[기초 어휘 복습 🌱] ${sample.formula || ''}`;
           reviewQuestion = sample;
         }
       }

@@ -115,7 +115,7 @@
         const rates = [
             { rate: 0.5, label: '🐢 0.5x 아주 느리게' },
             { rate: 0.75, label: '🌱 0.75x 느리게' },
-            { rate: 0.85, label: '🟩 0.85x 민수 안심' },
+            { rate: 0.85, label: '🟩 0.85x 기본' },
             { rate: 1.0, label: '⚡ 1.0x 보통' }
         ];
         return `
