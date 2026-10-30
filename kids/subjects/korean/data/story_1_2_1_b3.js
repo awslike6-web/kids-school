@@ -1,16 +1,16 @@
 // ========================================================
-// 📖 마법 돋보기 안경과 즐거운 놀이터 (1-2 1단원 3권) 데이터 모듈 (korean_1_2_1_b3.js)
+// 📖 마음 똑똑! 감정 라디오 교실 : 슬찬이의 필통 소동 (1-2 1단원 3권) 데이터 모듈 (korean_1_2_1_b3.js)
 // ========================================================
 window.STORY_BOOK = {
   id: "korean_1_2_1_b3",
-  title: "마법 돋보기 안경과 즐거운 놀이터 (1-2 1단원 3권)",
+  title: "마음 똑똑! 감정 라디오 교실 : 슬찬이의 필통 소동 (1-2 1단원 3권)",
   icon: "🔍",
   themeColor: "#06b6d4",
   themeColorDark: "#0891b2",
   backUrl: "korean.html",
   backLabel: "🚪 국어방 대기실",
   imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/korean/minseo/1-2/1/book3/",
-  version: "20260925_webtoon_fix",
+  version: "20261030_p45_art",
   pages: [
         {
             page: 1,
