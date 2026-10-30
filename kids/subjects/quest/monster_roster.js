@@ -110,6 +110,8 @@
                 rage: './kids/assets/monsters/unknown_beast/rage.png',
                 roar: './kids/assets/monsters/unknown_beast/roar.png'
             },
+            // rage 그림이 뒷모습이라 퀘스트 시작은 앞을 보는 기본 포즈로 맞이한다.
+            runnerPoses: { stageStart: 'idle' },
             labDialogues: {
                 idle: '내 이름은 모름! 오늘은 어떤 수수께끼를 만나볼까? 👁️',
                 greet: '안녕? 커다란 눈으로 네가 오기를 기다렸어! 👋',
@@ -345,11 +347,17 @@
     function getRunnerReaction(state, monsterId) {
         const monster = MONSTER_ROSTER[monsterId] || getSelectedMonster();
         const pick = (arr) => Array.isArray(arr) ? arr[Math.floor(Math.random() * arr.length)] : arr;
+        // 몬스터마다 그림 뜻이 다를 수 있어 runnerPoses로 상황별 포즈를 바꿀 수 있다(예: 모름의 rage는 뒷모습).
+        const poseOf = (state, fallback) => {
+            const key = monster.runnerPoses?.[state];
+            return key && monster.poses[key] ? key : fallback;
+        };
 
         if (state === 'stageStart') {
+            const poseKey = poseOf('stageStart', 'rage');
             return {
-                poseKey: 'rage',
-                poseSrc: monster.poses.rage || monster.poses.idle,
+                poseKey,
+                poseSrc: monster.poses[poseKey] || monster.poses.idle,
                 speech: monster.runnerDialogues.stageStart
             };
         }

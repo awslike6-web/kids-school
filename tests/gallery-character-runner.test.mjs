@@ -445,5 +445,7 @@ test('3호 모름은 여섯 포즈 파일과 고유 대사를 제공한다', () 
     assert.deepEqual(readFileSync(new URL(`../${monster.poses.greet}`, import.meta.url)),
         readFileSync(new URL(`../${monster.poses.roar}`, import.meta.url)));
     assert.match(roster.getLabTapResponse(5, monster.id).speech, /뒤돌아/);
+    assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.idle);
+    assert.equal(roster.getRunnerReaction('stageStart', 'cottun_bongdomdol').poseKey, 'rage');
     assert.ok(monster.runnerDialogues.encourage.every(line => !/실패|오답|틀렸|실수/.test(line)));
 });
