@@ -92,6 +92,11 @@
         "key": "tataltal",
         "name": "뿌쀳히탈탈",
         "sprite": "20260922_213854_sprite_tataltal.png"
+      },
+      {
+        "key": "moreum",
+        "name": "모름",
+        "sprite": "20260922_213854_sprite_moreum.png"
       }
     ]
   },

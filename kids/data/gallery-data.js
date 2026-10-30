@@ -274,6 +274,11 @@ const DEFAULT_GALLERY_DATA = [
         "key": "tataltal",
         "spriteUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_213854_sprite_tataltal.png",
         "name": "뿌쀳히탈탈"
+      },
+      {
+        "key": "moreum",
+        "spriteUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minsu/2026_elem_5/minsu_20260922_213854_sprite_moreum.png",
+        "name": "모름"
       }
     ]
   },
