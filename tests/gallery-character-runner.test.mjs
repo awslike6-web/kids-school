@@ -41,7 +41,7 @@ test('민수 장착·저장·포즈 6종·재로드·로스터 순환·해제 �
     assert.equal(Object.values(roster.getSelectedMonster().poses).length, 6);
     assert.ok(Object.values(roster.getSelectedMonster().poses).every(src => src === spriteUrl));
     assert.equal(roster.getNextMonsterId(1), 'clay_bite');
-    assert.equal(roster.getNextMonsterId(-1), 'unknown_beast');
+    assert.equal(roster.getNextMonsterId(-1), 'rotek');
     const again = load(storage).roster;
     assert.equal(again.getSelectedMonsterId(), 'gallery_partner');
     assert.equal(again.MONSTER_ORDER.filter(id => id === 'gallery_partner').length, 1);
@@ -50,7 +50,7 @@ test('민수 장착·저장·포즈 6종·재로드·로스터 순환·해제 �
     assert.equal(again.getSelectedMonsterId(), 'clay_bite');
     assert.equal(storage.getItem('selectedMonster'), 'clay_bite');
     assert.equal(again.MONSTER_ROSTER.gallery_partner, undefined);
-    assert.deepEqual(plain(again.MONSTER_ORDER), ['clay_bite', 'cottun_bongdomdol', 'unknown_beast']);
+    assert.deepEqual(plain(again.MONSTER_ORDER), ['clay_bite', 'cottun_bongdomdol', 'unknown_beast', 'rotek']);
 });
 
 test('민서 장착·해제·기록은 민수 선택과 저장을 바꾸지 않는다', () => {
@@ -95,7 +95,7 @@ test('이름·URL 계약과 기존 두 몬스터의 포즈·대사를 보존한�
     for (const src of ['http://bad.test/a.png', 'javascript:alert(1)', 'data:image/png;base64,a', '//bad.test/a.png', '\\bad.test', ''])
         assert.equal(roster.isValidCharacter({ name: '용', spriteUrl: src }), false, src);
     for (const name of ['', '   ', '가'.repeat(13), null]) assert.equal(roster.isValidCharacter({ name, spriteUrl }), false);
-    for (const id of ['clay_bite', 'cottun_bongdomdol', 'unknown_beast']) {
+    for (const id of ['clay_bite', 'cottun_bongdomdol', 'unknown_beast', 'rotek']) {
         const monster = roster.MONSTER_ROSTER[id];
         for (const [count, pose] of [[1, 'greet'], [2, 'walk_left'], [3, 'walk_right'], [5, 'rage']]) {
             const result = roster.getLabTapResponse(count, id);
@@ -447,5 +447,22 @@ test('3호 모름은 여섯 포즈 파일과 고유 대사를 제공한다', () 
     assert.match(roster.getLabTapResponse(5, monster.id).speech, /뒤돌아/);
     assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.idle);
     assert.equal(roster.getRunnerReaction('stageStart', 'cottun_bongdomdol').poseKey, 'rage');
+    assert.ok(monster.runnerDialogues.encourage.every(line => !/실패|오답|틀렸|실수/.test(line)));
+});
+
+
+test('4호 로텤스펲펲은 여섯 포즈 파일과 고유 대사를 제공한다', () => {
+    const { roster } = load();
+    const monster = roster.MONSTER_ROSTER.rotek;
+    assert.equal(monster.name, '로텤스펲펲');
+    assert.equal(monster.hasBackground, false);
+    assert.equal(monster.number, '4호');
+    for (const pose of ['idle', 'greet', 'walk_left', 'walk_right', 'rage', 'roar']) {
+        assert.ok(existsSync(new URL(`../${monster.poses[pose]}`, import.meta.url)), pose);
+    }
+    assert.deepEqual(readFileSync(new URL(`../${monster.poses.greet}`, import.meta.url)),
+        readFileSync(new URL(`../${monster.poses.roar}`, import.meta.url)));
+    assert.match(roster.getLabTapResponse(1, monster.id).speech, /뒤집/);
+    assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.idle);
     assert.ok(monster.runnerDialogues.encourage.every(line => !/실패|오답|틀렸|실수/.test(line)));
 });

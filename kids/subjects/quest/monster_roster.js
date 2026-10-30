@@ -137,10 +137,54 @@
                 ],
                 clear: '손 번쩍! 끝까지 함께 탐험했네? 오늘 발견한 것들을 간직할까? 🙌🏆'
             }
+        },
+        rotek: {
+            id: 'rotek',
+            number: '4호',
+            name: '로텤스펲펲',
+            role: '우당탕 뒤집기 괴수',
+            code: 'UNIT-04 // ROTEK SPEP PEP',
+            badgeText: '4호: 로텤스펲펲',
+            hasBackground: false,
+            poses: {
+                idle: './kids/assets/monsters/rotek/idle.png',
+                greet: './kids/assets/monsters/rotek/greet.png',
+                walk_left: './kids/assets/monsters/rotek/walk_left.png',
+                walk_right: './kids/assets/monsters/rotek/walk_right.png',
+                rage: './kids/assets/monsters/rotek/rage.png',
+                roar: './kids/assets/monsters/rotek/roar.png'
+            },
+            // rage 그림에 번개·화남 표시가 있어 퀘스트 시작은 정면 대기 포즈로 맞이한다.
+            runnerPoses: { stageStart: 'idle' },
+            labDialogues: {
+                idle: '안녕! 나는 로텤스펲펲! 오늘은 세상을 어떻게 뒤집어볼까? 🌀',
+                greet: '반가워! 신나게 쭉쭉 늘리고 빙글 뒤집어보자! 👋',
+                walk: [
+                    '왼쪽으로 슝! 집도 구름도 뒤집어볼까? 🏠🔄',
+                    '오른쪽으로 폴짝! 키가 쑥쑥 늘어나는 마법! 🎈',
+                    '우당탕탕! 거꾸로 보면 더 재미있는 문제들이 가득해! ✨'
+                ],
+                rage: '으랏차차! 힘을 너무 줘서 번개가 찌릿찌릿! ⚡💢',
+                roar: '손 흔들흔들! 기운이 쑤욱 늘어났다! 출격 준비 완료! 🙌'
+            },
+            runnerDialogues: {
+                stageStart: '준비됐지? 재미있는 문제들을 신나게 뒤집어보자! 🌀',
+                correct: [
+                    '정답! 문제를 쏙 뒤집어서 멋지게 풀어냈어! 🌀✨',
+                    '대단해! 생각의 힘이 쑥쑥 늘어났는데? 🎈',
+                    '우와! 머릿속 마법이 팡팡 터진다! 최고야! 🌟'
+                ],
+                encourage: [
+                    '문제를 살짝 뒤집어보면 다른 정답 길이 보일 거야! 💡',
+                    '천천히 생각을 쭉쭉 늘려보자! 함께 보면 풀릴 거야! 🌱',
+                    '뒤집고 늘리고, 재미있게 하나씩 찾아가보자! 🎈'
+                ],
+                clear: '와아! 오늘 퀘스트를 완벽하게 뒤집어버렸어! 기운이 쑥쑥 늘어났네! 🏆🙌'
+            }
         }
     };
 
-    const MONSTER_ORDER = ['clay_bite', 'cottun_bongdomdol', 'unknown_beast'];
+    const MONSTER_ORDER = ['clay_bite', 'cottun_bongdomdol', 'unknown_beast', 'rotek'];
     const preloadedCache = new Set();
     // 갤러리 파트너·최고 기록은 이 기기의 자녀별 저장소에만 보관한다.
     const PARTNER_KEYS = { son: 'galleryPartner_son', daughter: 'galleryPartner_daughter' };
