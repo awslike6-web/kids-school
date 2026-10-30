@@ -230,9 +230,12 @@
 | **하루 레벨** | `number` | - |
 | **하리보 젤리 개수** | `number` | - |
 | **학습설정** | `rich_text` | - |
+| **런너기록** | `rich_text` | 미니 런 별 저금통 JSON (`gallery-runner-rewards.js` 전용). 사용자 수동 생성·유형 관리, 운영 존재 여부·유형은 이번 작업에서 조회하지 않음 |
 | **해금 맵** | `rich_text` | - |
 | **현재 맵** | `rich_text` | - |
 | **현재 테마** | `select` (슬라임, 마인크래프트) | - |
+
+> 「런너기록」은 사용자가 직접 `rich_text`로 만듭니다. GET에서 속성이 없거나 숫자형 등 다른 유형이면 로컬만 사용하고 PATCH하지 않습니다.
 
 ### 📅 [고정 시간표 DB] TIMETABLE_DB
 - **Database ID**: `32ba27115b68828bbda201a1bdce12fc`

@@ -1,4 +1,4 @@
-/** 갤러리 캐릭터 60초 미니 런. 놀이·장착 화면만 담당하며 학습·노션에는 쓰지 않는다. */
+/** 갤러리 캐릭터 60초 미니 런. 별 저금통·꾸미기는 GalleryRunnerRewards에 위임한다. */
 (() => {
     const PROFILES = {
         daughter: { speed: .25, minSpeed: .15, maxSpeed: .38, gap: 2.6, obstacle: .10, starGap: .65 },
@@ -32,7 +32,7 @@
             stars.push({ x: width + time * speed, y: GROUND - .06 - random() * (child === 'daughter' ? .06 : .35),
                 w: .045, h: .045, taken: false });
         }
-        return { seed, child, width, speed, elapsed: 0, distance: 0, score: 0, status: 'running',
+        return { seed, child, width, speed, magnet: settings.magnet === true, elapsed: 0, distance: 0, score: 0, status: 'running',
             invincible: 0, hits: 0, player: { x: playerX(width, spriteWidth), y: GROUND - PLAYER_HEIGHT,
                 w: spriteWidth, h: PLAYER_HEIGHT, vy: 0, jumps: 0 },
             obstacles, stars };
@@ -81,8 +81,9 @@
                 p.vy = -.55;
             }
         }
+        const starBox = world.magnet ? { x: box.x - .05, y: box.y - .05, w: box.w + .1, h: box.h + .1 } : box;
         for (const star of world.stars) {
-            if (!star.taken && overlaps(box, { ...star, x: star.x - world.distance })) {
+            if (!star.taken && overlaps(starBox, { ...star, x: star.x - world.distance })) {
                 star.taken = true;
                 world.score++;
             }
@@ -242,19 +243,8 @@
         const scaleX = width / w.width;
         // 리사이즈해도 이미 진행 중인 월드와 충돌 좌표는 그대로 유지한다.
         ctx.save(); ctx.scale(scaleX, unit);
-        if (daughter) {
-            ctx.fillStyle = '#ffffff';
-            for (let i = 0; i < 7; i++) {
-                const x = ((i * .63 - w.distance * .13) % (w.width + .7) + w.width + .7) % (w.width + .7) - .35;
-                ctx.beginPath(); ctx.ellipse(x, .16 + (i % 3) * .08, .18, .035, 0, 0, Math.PI * 2); ctx.fill();
-            }
-        } else {
-            ctx.strokeStyle = '#00ff9d35'; ctx.lineWidth = .002;
-            ctx.beginPath();
-            for (let x = -(w.distance * .15 % .15); x < w.width; x += .15) { ctx.moveTo(x, 0); ctx.lineTo(x, 1); }
-            for (let y = 0; y < 1; y += .10) { ctx.moveTo(0, y); ctx.lineTo(w.width, y); }
-            ctx.stroke();
-        }
+        const rewards = window.GalleryRunnerRewards, loadout = session.loadout || {};
+        rewards?.drawStage(ctx, w, loadout.stage);
         ctx.fillStyle = daughter ? '#cce5c7' : '#00ff9d55';
         ctx.fillRect(0, GROUND, w.width, 1 - GROUND);
         for (const obstacle of w.obstacles) {
@@ -267,24 +257,24 @@
         for (const star of w.stars) {
             const x = star.x - w.distance;
             if (star.taken || x < -.1 || x > w.width + .1) continue;
-            ctx.beginPath();
-            for (let i = 0; i < 10; i++) {
-                const a = i * Math.PI / 5 - Math.PI / 2, radius = i % 2 ? .012 : .025;
-                const px = x + star.w / 2 + Math.cos(a) * radius, py = star.y + star.h / 2 + Math.sin(a) * radius;
-                if (!i) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-            }
-            ctx.closePath(); ctx.fill();
+            rewards?.drawStar(ctx, star, x, loadout.star);
         }
+        if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) rewards?.drawTrail(ctx, session.trail || [], loadout.trail);
         if (image?.complete && image.naturalWidth && (!w.invincible || Math.floor(w.elapsed / 90) % 2)) {
             const p = w.player;
             const bob = p.jumps ? 0 : Math.sin(w.elapsed / 90) * .006;
+            if (w.magnet) {
+                ctx.strokeStyle = '#69cddd80'; ctx.lineWidth = .003;
+                ctx.beginPath(); ctx.arc(p.x + p.w / 2, p.y + p.h / 2, p.h * .7, 0, Math.PI * 2); ctx.stroke();
+            }
             ctx.save(); ctx.translate(p.x + p.w / 2, p.y + p.h / 2 + bob);
             ctx.rotate(p.jumps ? -.12 : 0);
             ctx.drawImage(image, -p.w / 2, -p.h / 2, p.w, p.h);
+            rewards?.drawHat(ctx, p, loadout.hat);
             ctx.restore();
         }
         ctx.restore();
-        session.hud.textContent = `⏱ ${Math.ceil((DURATION - w.elapsed) / 1000)}초 · ${daughter ? '⭐' : '⚡'} ${w.score}개`;
+        session.hud.textContent = `⏱ ${Math.ceil((DURATION - w.elapsed) / 1000)}초 · ${daughter ? '⭐' : '⚡'} ${w.score}개${w.magnet ? ' · 🧲' : ''}`;
     }
 
     function showMessage(session, title, actions) {
@@ -301,21 +291,37 @@
         session.message.querySelector('button')?.focus();
     }
 
-    function finish(session) {
+    function wardrobe(session, onBack) {
+        window.GalleryRunnerRewards?.openWardrobe(session, { child: session.child, viewer: session.viewer, onBack });
+    }
+
+    function finish(session, returning = false) {
         session.pause.disabled = true;
-        const best = window.MonsterRoster.getRunnerBest(session.child);
-        const record = session.world.score > best;
+        const rewards = window.GalleryRunnerRewards, childView = session.viewer !== 'parent';
+        if (!returning) {
+            session.record = session.world.score > window.MonsterRoster.getRunnerBest(session.child);
+            const before = childView ? rewards?.readBank(session.child)?.total || 0 : 0;
+            const bank = childView ? rewards?.addStars(session.child, session.world.score) : null;
+            session.gifts = bank ? rewards.newlyUnlocked(session.child, before, bank.total) : [];
+        }
+        const record = session.record;
         // 부모 놀이는 자녀 기록을 덮어쓰지 않는다.
-        if (session.viewer !== 'parent') window.MonsterRoster.setRunnerBest(session.child, session.world.score);
+        if (!returning && childView) window.MonsterRoster.setRunnerBest(session.child, session.world.score);
         showMessage(session, `완주! ⭐ ${session.world.score}개${record && session.viewer !== 'parent' ? ' · 새 기록!' : ''}`,
-            [['다시 달리기', () => restart(session)], ['닫기', close]]);
-        say(`완주! 별 ${session.world.score}개를 모았어요.${record && session.viewer !== 'parent' ? ' 새 기록이에요!' : ''}`);
+            [['다시 달리기', () => restart(session)], ['🎨 꾸미기', () => wardrobe(session, () => finish(session, true))], ['닫기', close]]);
+        if (childView && rewards) rewards.appendBankSummary(session, session.child, rewards.readBank(session.child).total, session.gifts);
+        if (!returning) say(`완주! 별 ${session.world.score}개를 모았어요.${record && childView ? ' 새 기록이에요!' : ''}${
+            session.gifts?.length ? ` 새 선물! ${session.gifts.map(i => i.name).join(', ')} 받았어요!` : ''}`);
     }
 
     function frame(session, now) {
         if (active !== session || session.paused || !session.ready) return;
         const before = session.world.score, hits = session.world.hits;
         step(session.world, { jump: session.jump }, session.last == null ? 0 : now - session.last);
+        const p = session.world.player;
+        if (session.last != null && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+            session.trail.push({ x: p.x, y: p.y + p.h * .6 }); if (session.trail.length > 10) session.trail.shift();
+        }
         session.jump = false; session.last = now;
         if (session.world.hits > hits) playTone(session, true);
         else if (session.world.score > before) playTone(session);
@@ -337,15 +343,22 @@
         session.paused = true; session.jump = false;
         if (session.raf != null) cancelAnimationFrame(session.raf);
         session.raf = null; session.pause.textContent = '계속 달리기';
-        showMessage(session, '잠깐 쉬어요 ☁️', [['계속 달리기', () => resume(session)], ['닫기', close]]);
+        showMessage(session, '잠깐 쉬어요 ☁️', [['계속 달리기', () => resume(session)],
+            ['🎨 꾸미기', () => wardrobe(session, () => pause(session))], ['닫기', close]]);
     }
 
     function restart(session) {
+        const rewards = window.GalleryRunnerRewards;
+        session.loadout = session.viewer === 'parent' ? session.previewLoadout || Object.fromEntries(
+            (rewards?.LADDERS[session.child] || []).filter(i => !i.at).map(i => [i.kind, i.id])) : rewards?.readBank(session.child)?.loadout;
+        session.trail = [];
         const aspect = session.canvas.clientWidth / Math.max(1, session.canvas.clientHeight);
         session.world = createWorld(Date.now(), { child: session.child, aspect,
-            spriteAspect: session.image.naturalWidth / session.image.naturalHeight });
+            spriteAspect: session.image.naturalWidth / session.image.naturalHeight,
+            magnet: session.viewer !== 'parent' && Boolean(rewards?.hasBoostToday(session.child)) });
         session.pause.disabled = false;
-        say(`${window.MonsterRoster.withJosa(session.name, '와/과')} 출발! 화면을 누르면 점프해요.`);
+        say(`${window.MonsterRoster.withJosa(session.name, '와/과')} 출발! 화면을 누르면 점프해요.${
+            session.world.magnet ? ' 오늘 공부를 마쳐서 별 자석이 켜졌어요!' : ''}`);
         resume(session);
     }
 
@@ -371,7 +384,12 @@
         const session = active = { root, canvas, image, ctx: canvas.getContext('2d'), child, viewer: who, onClose, name: character.name,
             previousFocus, overflow, hud: root.querySelector('[data-hud]'), pause: root.querySelector('[data-pause]'),
             message: root.querySelector('.gmr-message'), world: createWorld(1, child), ready: false,
-            paused: false, raf: null, listeners: [], observer: null, audio: null };
+            paused: false, raf: null, listeners: [], observer: null, audio: null, trail: [] };
+        session.redraw = () => draw(session);
+        const initialPull = who === 'parent' ? Promise.resolve() : Promise.race([
+            window.GalleryRunnerRewards?.pull(child), new Promise(resolve => {
+                session.endPull = resolve; session.pullTimer = setTimeout(resolve, 1500);
+            })]);
         const listen = (target, type, handler, options) => {
             target.addEventListener(type, handler, options);
             session.listeners.push(() => target.removeEventListener(type, handler, options));
@@ -400,7 +418,8 @@
         session.observer.observe(canvas);
         showMessage(session, '그림을 불러오고 있어요…', [['닫기', close]]);
         image.crossOrigin = 'anonymous';
-        image.onload = () => {
+        image.onload = async () => {
+            await initialPull; clearTimeout(session.pullTimer);
             if (active !== session) return;
             if (!session.ctx) { showMessage(session, '이 화면에서는 달리기를 열 수 없어요.', [['닫기', close]]); return; }
             session.ready = true; restart(session);
@@ -416,6 +435,8 @@
         const session = active;
         if (!session) return;
         active = null;
+        clearTimeout(session.pullTimer);
+        session.endPull?.();
         if (session.raf != null) cancelAnimationFrame(session.raf);
         session.listeners.forEach(remove => remove());
         session.observer?.disconnect();

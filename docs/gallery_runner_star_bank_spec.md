@@ -1,7 +1,7 @@
 # ⭐ 미니 런 「별 저금통 & 꾸미기」 기능 명세서 (Runner Star Bank Spec)
 
-> **문서 버전**: v1.0 (2026-10-31)
-> **상태**: 작업 지시 (구현 전)
+> **문서 버전**: v1.1 (2026-10-31 구현·속성 유형 방어)
+> **상태**: 코드 구현 완료 · 자동 시험 통과 · 화면 검증 보류 (재부팅 후에도 브라우저 실행·로컬 페이지 연결 실패)
 > **상위 규칙**: `kids-school-main/GEMINI.md`(§5 이미지, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 문서**: [`docs/gallery_character_runner_spec.md`](gallery_character_runner_spec.md), [`docs/gallery_multi_character_spec.md`](gallery_multi_character_spec.md), `kids/core/CORE_CATALOG.md`의 `gallery-mini-runner.js`·`monster_roster.js` 절, [`docs/notion_schemas_school.md`](notion_schemas_school.md)의 INVENTORY_DB
 > **작업자 참고**: 코드를 쓰기 전에 `AGENTS.md` 순서대로 `GEMINI.md`, `CORE_CATALOG.md`, 위 연계 문서를 읽는다.
@@ -141,7 +141,7 @@
 
 | 언제 | 무엇 |
 | :--- | :--- |
-| 런 시작(`start`) | `pull(child)`: 노션 GET(`?force=true`) → 클라우드 `total`을 C라 하면 로컬 `total = C + pending`. `loadout`은 클라우드 `updatedAt`이 더 최근이면 클라우드 값을 쓴다. 게임 시작을 기다리게 하지 않는다(뒤에서 실행). |
+| 런 시작(`start`) | `pull(child)`: 노션 GET(`?force=true`) → 클라우드 `total`을 C라 하면 로컬 `total = C + pending`. `loadout`은 클라우드 `updatedAt`이 더 최근이면 클라우드 값을 쓴다. 그림 로딩과 병행하며 §4-5대로 최대 1.5초만 기다린다. |
 | 완주(`finish`) | `addStars(child, score)`: 로컬 `total += score`, `pending += score` 저장 → `flush(child)` |
 | 꾸미기 변경 | 로컬 `loadout`, `updatedAt` 저장 → `flush(child)` (1초 디바운스) |
 
@@ -155,7 +155,7 @@
 4. 성공하면 로컬 `total = newTotal`, `pending = 0`. 실패(네트워크, 4xx·5xx, 속성 없음)는 `console.warn`만 하고 `pending`을 그대로 둔다. 다음 `flush`나 `pull` 때 다시 시도한다.
 
 - 같은 기기에서 `flush`가 겹치지 않게 한다(진행 중이면 끝난 뒤 한 번 더).
-- **GET 응답에 「런너기록」 속성이 아예 없으면** 노션 속성이 아직 없는 것이다. PATCH하지 않고 로컬만 쓴다(오류 알림 없음).
+- **GET 응답에 「런너기록」 속성이 아예 없거나 `type`이 `rich_text`가 아니면** 사용 가능한 노션 속성이 없는 것으로 처리한다. 숫자형(`number`) 등 잘못 만든 속성에도 PATCH하지 않고 로컬만 쓴다(오류 알림 없음).
 - 두 기기가 같은 순간에 저장하는 경합은 받아들인다(아이 한 명이 두 기기로 동시에 달리지 않음). 문서에 한 줄 적는다.
 - **부모 보기(`viewer === 'parent'`)는 저금통을 읽지도 쓰지도 않는다.** 부모 화면은 모든 선물이 열린 미리보기이고, 고른 꾸미기는 저장하지 않는다.
 
@@ -170,6 +170,7 @@
 - `hasBoostToday(child)`: 로컬 `boostDate`가 오늘이면 `true`. 노션 값은 `pull`이 로컬에 늦은 날짜로 합쳐 둔다.
 - 날짜는 로컬 날짜로 만든다. `.toISOString().slice(0,10)`·`.split('T')[0]` 금지(GEMINI §8-5).
 - `quest-runner.js` 퀘스트 완주 처리(`fairyReward` 근처)에서 `global.GalleryRunnerRewards?.markQuestBoost(isMinseo ? 'daughter' : 'son')` 한 번. 결과를 기다리지 않는다(퀘스트 완주 화면을 늦추지 않음). 실패해도 퀘스트 보상·학습일지에는 영향이 없다.
+- 최신 full·한입 레슨은 `showClearModal`을 거치지 않으므로 같은 파일에서 기존 `quest-lesson-complete` 이벤트도 구독한다. 각 완주 경로에서 한 번씩 호출하며, 퀘스트 파일 추가는 합계 3줄 이내다.
 - 런너 `start()`는 그림 불러오기와 함께 `pull(child)`을 기다리되 **최대 1.5초**까지만 기다린다. 그다음 `restart()`가 아이 보기일 때만 `hasBoostToday(child)`를 읽어 `magnet`을 넘긴다. 부모 보기는 늘 `false`. 노션이 늦게 와도 다음 판부터는 켜진다.
 - 노션 「런너기록」 속성이 아직 없으면 자석은 퀘스트를 푼 기기에서만 켜진다(로컬로 동작).
 - 런너: `createWorld(seed, { ..., magnet: true })`이면 별을 먹는 판정 상자를 플레이어 판정 상자보다 **사방 `.05`(높이 단위) 넓게** 쓴다. 장애물 판정은 바꾸지 않는다. `magnet` 기본값은 `false`(기존 시험 그대로 통과).
@@ -249,7 +250,7 @@
    - 둘 다 저장 실패 상태로 태블릿 40개, 폰 15개를 들고 있다가 차례로 저장 → 노션 300 + 40 + 15 = **355** (`Math.max`라면 340이 되어 실패하는 경우).
    - 저장 뒤 각 기기에서 `pull` → 두 기기 모두 노션과 같은 `total`.
 8. `flush` 실패(500, 네트워크 오류): pending 유지, 예외 없음. 다음 `flush` 성공 때 한 번만 더해짐.
-9. GET에 「런너기록」 속성이 없으면 PATCH 요청 0건.
+9. GET에 「런너기록」 속성이 없거나 `number` 등 `rich_text`가 아닌 유형이면 PATCH 요청 0건, 로컬 값 유지.
 10. 겹친 `flush` 두 번 → 겹쳐 보내지 않고 최종 total이 중복 없이 맞음.
 11. 부모 보기: `fetch` 0건, 로컬 저금통 변화 0.
 12. GET 주소에 `force=true`가 붙음.
@@ -293,3 +294,14 @@
 
 - 캐릭터별 친밀도(같은 캐릭터로 많이 달리면 5분 퀘스트 새 대사·포즈)
 - 아이 그림으로 만든 새 장애물·스테이지
+
+## 12. 구현·검증 결과 (2026-10-31)
+
+- 작업 위치: `G:/master-tower/scratch/worktrees/runner-star-bank`, 브랜치 `codex/runner-star-bank`. 신규 모듈 323줄, 런너 454줄(추가 56/삭제 35), 퀘스트 694줄(추가 3). 각 파일의 상한을 지킨다.
+- 별 저금통·꾸미기·당일 별 자석을 구현했다. 「런너기록」이 없거나 `rich_text`가 아니면 PATCH하지 않는다. `number`·`formula`·`title` 모의 시험에서 PATCH 0건과 로컬 보존을 확인했다.
+- 최신 full·한입 레슨은 기존 완주 모달을 우회하므로 기존 `quest-lesson-complete` 이벤트에도 연결했다. 레슨 UI·기존 보상·학습일지 코드는 바꾸지 않았다.
+- 저금통·DOM 기능 모의 26건, 런너 물리·기존 회귀 25건, 합계 51건 통과. 전체 `node --test "tests/**/*.test.mjs"`: 126건 중 124건 통과, 실패 0, 기존 skip 1·TODO 1. TODO는 기존 학습일지의 두 기기 동시 생성 한계다. 이번 저금통의 두 기기 순차 pending 합산은 통과했다.
+- 변경 파일 11개 각각 계약 검사 `[ALL PASS]`, `git diff --check` 통과. 기존 `minmin_system_map.html`의 캐시 버전 누락 권고 1건은 범위 밖이라 변경하지 않았다.
+- **화면 검증 미완료**: 지정 쓰기 차단 서버를 실행했지만 로컬 HTTP 요청이 실패·시간 초과되었다. 파일 미리보기는 브라우저 보안 정책에서 `file://`를 거부해 중단했다. 재부팅 후 재시도에서도 자동화용 Chrome이 시작 직후 종료되고 내장 브라우저는 연결 오류 화면에 머물렀다. 스크린샷은 없고 모바일 스크롤·레이아웃·배경 대비·터치·60fps를 육안 확인했다고 보고하지 않는다. DOM 모의는 화면 확인을 대체하지 않는다.
+- 검증 기록: `G:/master-tower/scratch/runner-star-bank/walkthrough.md`(미커밋). 임시 시험 도구·데이터는 scratch에만 두었다.
+- 노션 속성 생성·운영 노션 읽기/쓰기·개발 타임라인 기록·폰 실제 60초 플레이·main 병합·푸시는 하지 않았다. 노션 요청은 시험에서만 모의했다. 두 기기가 동시에 GET/PATCH하는 경합은 명세대로 허용한다.
