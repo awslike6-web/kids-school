@@ -121,11 +121,23 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 화면 API: `bindModal(item, {available, viewer})`, `start(item, {viewer, onClose})`, `close()`. 모달 매니저는 작품 여부와 호출만 연결합니다. 아이는 자기 장착/해제, 부모는 자녀별 버튼을 사용합니다. 부모 게임은 민수 테마지만 자녀 최고 기록에는 쓰지 않습니다.
 - 순수 API: `createWorld(seed, profile)`(문자열 또는 `{child,aspect,spriteAspect}`), `step(world, {jump}, dtMs)`, `hitboxOf(sprite,x,y,w,h)`, `resizeWorld(world, aspect)`. 높이 단위 물리·2단 점프·높이 70%/가로 최대 `.08` 판정·800ms 무적·최대 dt 50ms. 충돌해도 중단하지 않고 60초 후 항상 완주합니다.
 - 세로 통과 보완: 중력 `.95`·점프 `.62`·장애물 폭 `.05`. 민서는 `clamp(aspect×.25,.15,.38)`, 민수는 `clamp(aspect×.40,.18,.58)`(30초 이후 ×1.12) 높이/초입니다. `resizeWorld`는 진행 거리와 장애물/별의 상대 거리를 보존해 이미 지나간 객체를 되돌리지 않습니다. `MonsterRoster.withJosa(name,pair)`로 장착 안내·제목의 조사를 공통 처리합니다.
-- 소리: 획득/충돌 Web Audio는 `isSafeSfxEnabled()`를 따르고, 완주는 `fairyReward('finish')`. 보석·사탕·학습·노션에는 연결하지 않습니다.
+- 소리: 획득/충돌 Web Audio는 `isSafeSfxEnabled()`를 따르고, 완주·새 선물은 `speakFairyTTS`의 상황 문장 한 번으로 안내합니다. 보석·사탕·학습 보상에는 연결하지 않습니다. 별 저금통만 아래 모듈을 통해 노션 INVENTORY_DB 「런너기록」에 씁니다.
 - 정리: 일시정지·숨김·완주 시 rAF 중지, `close()`는 프레임·리스너·ResizeObserver·이미지·AudioContext를 해제하고 포커스·스크롤을 복구합니다. Esc·포커스 순환·44px 버튼을 지원합니다.
 - 빌더: `scripts/build_gallery.py`의 `validate_character_name`, `load_character_sprite`, `build_character`. 메타 `character:{sprite,name}`를 검증·정리해 `{spriteUrl,name}`으로 내보냅니다. 실패는 선택 필드만 제외합니다. 자세한 계약은 `docs/gallery_character_runner_spec.md`입니다.
 - 등록: 관제탑 `scripts/sync_quick_upload.py --character-sprite <PNG> --character-name <이름>` → `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. PNG·이름은 공부방 빌더의 검증 함수를 재사용하며 `--title` 없이 character만 부분 병합합니다. 보조 모듈에는 기존 `AUTHOR_MAP`·`strip_author_prefix`·`find_built_gallery_item`·`prepare_spot_diff`·`set_meta_spot_diff`도 모았고 입구에서 재노출합니다.
 - 등록 시험: 관제탑 `scripts/test_gallery_registration_options.py`(임시 구조·모의 큐·API·Git·제목 없는 `--no-push`). worktree에서는 `GALLERY_SCHOOL_SOURCE`로 공부방 빌더 위치를 지정합니다. 실제 콘텐츠·운영 노션에는 쓰지 않습니다.
+
+### ⭐ `gallery-runner-rewards.js` (미니 런 별 저금통·꾸미기·별 자석, 2026-10-31)
+- 위치: `kids/common_space/gallery-runner-rewards.js`(323줄). IIFE, 전역 `GalleryRunnerRewards` 한 개. 로딩 시 DOM 접근 없음. `gallery.html`은 로스터 → 이 모듈 → 런너 순서, `quest_runner.html`은 `quest-runner.js` 앞에서 로드합니다. 상세: `docs/gallery_runner_star_bank_spec.md`.
+- 순수 계산: 읽기 전용 `LADDERS`, `unlockedOf(child,total)`, `nextGoal(child,total)`, `newlyUnlocked(child,before,after)`. 아이별 기본 4종·선물 9종. 저장된 해금 목록 없이 누적 별로 계산합니다.
+- 로컬 API: `readBank(child)`, `addStars(child,n)`, `setLoadout(child,kind,id)`. 키 `galleryRunnerBank_son`/`galleryRunnerBank_daughter`, JSON `{v,total,pending,loadout,boostDate,updatedAt}`. 잘못된 장착은 기본값, 저장 실패는 false, 별은 0 이상 안전 정수만 허용합니다. 기존 로스터의 최고 기록 키는 유지합니다.
+- 동기화: `pull(child)`·`flush(child)`는 예외를 밖으로 던지지 않습니다. GET `?force=true`로 읽은 클라우드 `total`에 로컬 `pending`만 합산하고 PATCH 본문은 「런너기록」 한 속성뿐입니다. 「학습설정」은 읽거나 쓰지 않습니다. 속성이 없거나 `type !== 'rich_text'`이면 PATCH하지 않습니다.
+- 같은 아이의 요청은 직렬화하고 겹친 flush는 끝난 뒤 재처리합니다. PATCH 도중 생긴 pending·꾸미기 변경도 보존합니다. 다른 두 기기의 동시 GET/PATCH 경합은 허용하며 서버 원자적 합산은 제공하지 않습니다.
+- 자석: `markQuestBoost(child)`는 로컬 오늘 날짜를 저장하고 비동기 flush합니다. `hasBoostToday(child)`로 확인합니다. 기존 `showClearModal` 또는 최신 full·한입 레슨의 `quest-lesson-complete` 이벤트가 완주마다 한 번 호출하고 기존 보상·학습일지 경로는 유지합니다. 런 시작은 그림 로딩과 pull을 병행하며 동기화는 최대 1.5초만 기다립니다. 별 판정만 사방 `.05` 확장하고 장애물은 유지합니다.
+- 부모: 저금통 읽기·쓰기·fetch 없음, 자석 꺼짐. 모든 선물 미리보기는 세션에만 둡니다.
+- 화면 API: `drawStage(ctx,world,id)`, `drawTrail(ctx,points,id)`, `drawHat(ctx,player,id)`, `drawStar(ctx,star,x,id)`는 저장소·DOM·rAF 접근 없이 그립니다. 모자는 플레이어 중심으로 이동·회전한 좌표계에서 호출합니다. 꼬리 10개 위치는 세션에만 두며 동작 감소 시 수집·그리기를 생략합니다.
+- 패널: `openWardrobe(session,{child,viewer,onBack})`, `appendBankSummary(session,child,total,gifts)`는 기존 `.gmr-message` 안에만 표시합니다. `session.redraw`로 정지 화면을 갱신합니다. 44px 버튼·`aria-pressed`·progress·잠김 안내를 제공합니다.
+- 회귀 시험: `tests/gallery-runner-rewards.test.mjs`의 모의 노션 두 기기·오프라인·속성 유형·중첩 요청·로컬 자정·부모 격리, `tests/gallery-character-runner.test.mjs`의 자석·장애물·줄 수 검사를 사용합니다.
 
 기존 1,517줄의 거대했던 `gallery_controller.js`를 331줄의 초경량 메인 뷰 컨트롤러로 슬림화하고, 단일 책임 원칙에 따라 전문 서브모듈 2종으로 완전 분리 구축한 갤러리 코어 엔진군입니다.
 - **파일 위치**:
@@ -314,7 +326,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 골디락스 절대 상한(800줄 미만)에 맞춰 인라인 스크립트를 동작 변경 없이 분리했습니다. HTML에는 마크업·테마 CSS와 `window.addEventListener('DOMContentLoaded', QuestRunner.boot)` 연결부만 남습니다. 로드 순서: `quest_engine.js` → `quest_notion_synth.js` → `quest-mastery.js` → `quest-ui-renderer.js` → 문제 은행 → **`quest-runner-ui.js` → `quest-runner.js`**.
 - **`quest-runner-ui.js`** (약 270줄, 전역 `window.QuestRunnerUI`): Web Audio 효과음 `playSound(tap|correct|wrong|fanfare)`, `applyChildTheme`, 과목 심화관 버튼 라벨 `applyDeepTrainingLabels`·경로 `deepTrainingUrl`, `setMathMemoVisible`, 모달 `showModal/hideModal` + 민서 스킨(`skinRevengeModalForMinseo`·`skinClearModalForMinseo`·`skinExitModalForMinseo`), 수학 손글씨 메모장, 사진 확대 라이트박스.
 - **`quest_engine.js` `getSubjectQuest`** (2026-10-15): 4+1 결과의 보기를 매번 섞고 정답 번호를 다시 매깁니다(`withShuffledOptions`). 정적 뱅크가 정답을 첫 보기(`answer: 0`)에 적어 두어, 섞지 않으면 정답이 늘 1번이던 버그를 막습니다. 원본 뱅크 객체는 바꾸지 않습니다.
-- **`quest-runner.js`** (약 570줄, 전역 `window.QuestRunner = { boot }`): URL 파싱·`getSubjectQuest` 바인딩, 가디언 학습 상태 표시, 3·3·3 마스터리 연결부(`bootQuest`·`renderMasteryQuestion`·`handleMasteryDone`), 기존 4+1 렌더링·채점·하트·리벤지, `showClearModal`(`QuestMastery.pushChanges` → `grantRewardAndShowUI(3, true)` → `sendStudyLogToNotion`), `StudyActivity.setPhase/recordCorrect` 연동.
+- **`quest-runner.js`** (약 694줄, 전역 `window.QuestRunner = { boot }`): URL 파싱·`getSubjectQuest` 바인딩, 가디언 학습 상태 표시, 3·3·3 마스터리 연결부(`bootQuest`·`renderMasteryQuestion`·`handleMasteryDone`), 기존 4+1 렌더링·채점·하트·리벤지, `showClearModal`(`QuestMastery.pushChanges` → `grantRewardAndShowUI(3, true)` → `sendStudyLogToNotion`), `StudyActivity.setPhase/recordCorrect` 연동. 기존 완주 모달 또는 full·한입 완료 이벤트에서 `GalleryRunnerRewards.markQuestBoost(child)`를 기다리지 않고 한 번 호출해 당일 미니 런 별 자석을 켭니다.
 - **HTML onclick 호환 전역**: `handleCheckAnswer`, `goToNextStep`, `playQuestionAudio`, `selectChoice`, `startRevengeRound`, `skipRevengeAndClear`, `confirmExit`, `closeExitModal`, `returnToLab`, `goToSubjectDeepTraining`(별칭 `goToMathDeepTraining`), `goToLobby`, `playSound`, `toggleMathMemoPad`, `clearMathMemoCanvas`, `openImageZoom`, `closeImageZoom`.
 
 ### 🌟 `monster_roster.js` (5분 퀘스트 파트너 몬스터 로스터 & 포즈/에러리스 대사 엔진, 2026-10-24 추가)

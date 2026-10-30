@@ -1,6 +1,7 @@
 # 🏃 꿈나무 갤러리 「자작 캐릭터 파트너 장착 & 1분 미니 런」 기능 명세서 (Gallery Character & Mini Runner Spec)
 
 > **문서 버전**: v2.1 (2026-10-29 세로 화면 통과·조사 보완)
+> **별 저금통·꾸미기·별 자석 확장**: [gallery_runner_star_bank_spec.md](gallery_runner_star_bank_spec.md). 노션 연동은 확장 모듈의 「런너기록」 속성으로만 제한합니다.
 > **상태**: 구현 완료 (2026-10-29). 공부방 A 검증 후 관제탑 B를 구현·검증했다. 실제 콘텐츠 등록·운영 노션 쓰기·main 병합/배포는 포함하지 않음.
 > **상위 규칙**: `kids-school-main/GEMINI.md`(§5 이미지 무결성, §6 오디오, §8 클린 코드·계약), `g:/master-tower/GEMINI.md`
 > **연계 문서**: [`docs/gallery_spot_diff_spec.md`](gallery_spot_diff_spec.md)(같은 방식의 선택 필드·빌더·등록 옵션 선례), [`docs/gallery_archive_spec.md`](gallery_archive_spec.md), [`docs/character_studio_handover.md`](character_studio_handover.md)(캐릭터 그래픽 규격·남매 테마), `kids/core/CORE_CATALOG.md`의 `monster_roster.js` 절

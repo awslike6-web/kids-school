@@ -26,6 +26,8 @@
     global.history.replaceState(null, '', resolvedUrl);
   }
   const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
+  // full·한입 레슨은 기존 완주 모달을 거치지 않고 완료 이벤트를 보낸다.
+  global.addEventListener('quest-lesson-complete', () => global.GalleryRunnerRewards?.markQuestBoost(isMinseo ? 'daughter' : 'son'));
   const parentSettings = (typeof getParentQuestSettings === 'function') ? getParentQuestSettings(currentUser) : null;
   // 다중 단원 묶음은 배열(부모 설정) 또는 '|' 결합 문자열(URL)로 들어온다 → '|' 문자열로 통일
   const rawConfiguredUnit = parentSettings && parentSettings[currentSubj];
@@ -598,6 +600,7 @@
         .catch(e => console.warn('[3·3·3 마스터리 동기화 알림]', e));
     }
     playSound('fanfare');
+    global.GalleryRunnerRewards?.markQuestBoost(isMinseo ? 'daughter' : 'son');
     syncCheerMonsterReaction('clear');
     if (typeof fairyReward === 'function') {
       fairyReward();

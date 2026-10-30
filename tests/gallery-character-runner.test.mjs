@@ -20,6 +20,49 @@ function load(storage = storageOf()) {
     return { sandbox, roster: sandbox.MonsterRoster, game: sandbox.GalleryMiniRunner, storage };
 }
 
+test('별 자석 기본값은 꺼짐이고 명시적 false와 기존 물리가 같다', () => {
+    const { game } = load();
+    const defaults = game.createWorld(12, { child: 'son' }), off = game.createWorld(12, { child: 'son', magnet: false });
+    assert.equal(defaults.magnet, false);
+    for (let i = 0; i < 1200; i++) {
+        const input = { jump: i % 123 === 0 };
+        game.step(defaults, input, 50); game.step(off, input, 50);
+    }
+    assert.deepEqual(plain(defaults), plain(off));
+});
+
+test('별 자석은 사방 .04 간격을 먹고 .06 간격은 먹지 않는다', () => {
+    const { game } = load();
+    for (const magnet of [false, true]) for (const gap of [.04, .06]) for (const side of ['left', 'right', 'above', 'below']) {
+        const w = game.createWorld(1, { child: 'son', magnet }); w.obstacles = []; w.speed = 0;
+        w.player.y = .4; w.player.vy = -.00095;
+        const box = game.hitboxOf(null, w.player.x, w.player.y, w.player.w, w.player.h);
+        const star = { x: box.x, y: box.y, w: .045, h: .045, taken: false };
+        if (side === 'left') star.x = box.x - gap - star.w;
+        if (side === 'right') star.x = box.x + box.w + gap;
+        if (side === 'above') star.y = box.y - gap - star.h;
+        if (side === 'below') star.y = box.y + box.h + gap;
+        w.stars = [star]; game.step(w, {}, 1);
+        assert.equal(star.taken, magnet && gap === .04, `${magnet}/${gap}/${side}`);
+    }
+});
+
+test('자석은 장애물 충돌 판정·무적 시간을 바꾸지 않는다', () => {
+    const { game } = load();
+    const worlds = [false, true].map(magnet => game.createWorld(41, { child: 'son', magnet }));
+    for (const w of worlds) { w.stars = []; w.score = 10; }
+    for (let i = 0; i < 1200; i++) for (const w of worlds) game.step(w, {}, 50);
+    const strip = w => { const copy = plain(w); delete copy.magnet; return copy; };
+    assert.deepEqual(strip(worlds[0]), strip(worlds[1]));
+});
+
+test('런너 520줄·저금통 550줄 상한을 지킨다', () => {
+    for (const [file, max] of [[runnerFile, 520], ['kids/common_space/gallery-runner-rewards.js', 550]]) {
+        const lines = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8').trimEnd().split('\n').length;
+        assert.ok(lines <= max, `${file}: ${lines}/${max}`);
+    }
+});
+
 test('두 모듈은 document 없는 환경에서 로드하고 닫아도 안전하다', () => {
     const { sandbox, game } = load();
     assert.equal(sandbox.document, undefined);
