@@ -1034,6 +1034,10 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   - `kids/js/timetable_controller.js` (504줄): 요일·교시·과목 색·`DEFAULT_BASE_TIMETABLE`, 공유 상태, 보기 설정·날짜·공지 판정 헬퍼, `buildGridMap`·`renderLessonCell`.
   - `kids/js/timetable_grid.js` (424줄): `renderWeeklyGrid`, 모바일 열 너비·스크롤, `renderTopNoticeBanner`, `openOverlayItemModal`·`closeOverlayModal`·`openNoticeGuideModal`·`toggleOverlayItemComplete`.
   - `kids/js/timetable_notices.js` (281줄): 공지 정렬·`renderNotices`·`renderAll`, `setChildFilter`·툴팁, `loadTimetableData`, 시계 즉시 갱신·타이머·`DOMContentLoaded` 등록.
+  - `kids/css/timetable.css` (458줄): 변수·네온 칠판 테마, 로비 모니터, 주간 격자·공지판.
+  - `kids/css/timetable-overlay.css` (553줄): 이벤트 띠배너·요일 뱃지·과목 인디케이터, 모달·툴팁·모바일·가로모드·데스크톱 퀵탭 숨김.
+- **CSS 로드 순서**: `timetable.html`의 기존 Google Fonts 링크 다음에서 `kids/css/timetable.css` → `kids/css/timetable-overlay.css`를 상대 경로·동일 버전 `?v=20261031-timetable-css-split`으로 바로 다음 줄에 연속 로드합니다. 원문·규칙 순서를 보존하며 `@import`는 쓰지 않습니다.
+- **CSS 검증**: `tests/timetable-css-split.test.mjs`가 고정 fixture 재결합·600줄 상한·독립 블록 경계·상대 경로·로드 순서·캐시 버전을 검사합니다. 분리 계약은 `docs/timetable_css_split_spec.md`입니다.
 - **로드 순서 (2026-10-31 분리)**: `timetable.html`에서 기존 `kids/config.js` → `kids/core/notion-timetable.js` 뒤에 controller → grid → notices를 상대 경로·동일 버전 `?v=20261031-timetable-split`의 클래식 스크립트로 연달아 싣습니다. 원문·전역 함수·상태·DOM·통신 방식은 유지합니다.
 - **검증**: `tests/timetable-split.test.mjs`가 고정 fixture 원문 재결합·본문 바이트 보존·600줄 상한·참조·부분 로드·전역 함수/상태·시계·이벤트/타이머 등록 일치를 검사합니다(모의 환경, 운영 노션 미접속). 분리 계약은 `docs/timetable_controller_split_spec.md`입니다.
 - **핵심 API**:
