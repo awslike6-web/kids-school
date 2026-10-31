@@ -274,8 +274,10 @@ function renderBlocksView(container) {
     stepDesc = `낱개를 ${divisor}명에게 나누어주면 <strong>한 사람당 낱개 ${onesPerPerson}개씩</strong> 더 받아요!`;
     speechText = `이제 낱개들을 나누어 담아요. 한 사람당 낱개 ${onesPerPerson}개씩 더 받았어요!`;
   } else {
+    const tensPerPerson = Math.floor(tens / divisor);
+    const onesPerPerson = Math.floor(((tens % divisor) * 10 + ones) / divisor);
     stepTitle = "5단계: 최종 몫과 나머지 확인 🎉";
-    stepDesc = `한 사람당 <strong>10개 막대 ${Math.floor(quotient / 1)}개 + 낱개 ${quotient % 10}개 = 총 ${quotient}개(몫)</strong>! 남은 낱개 = <strong>${remainder}개(나머지)</strong>!`;
+    stepDesc = `한 사람당 <strong>10개 막대 ${tensPerPerson}개 + 낱개 ${onesPerPerson}개 = 총 ${quotient}개(몫)</strong>! 남은 낱개 = <strong>${remainder}개(나머지)</strong>!`;
     speechText = `짜잔! 한 사람당 총 ${quotient}개씩 받았으니 몫은 ${quotient}이고, 바구니에 못 들어간 남은 낱개 ${remainder}개가 바로 나머지예요!`;
   }
 
