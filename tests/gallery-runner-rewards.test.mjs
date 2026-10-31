@@ -51,6 +51,146 @@ function load(initial = {}, cloud = notion()) {
     return { api: sandbox.GalleryRunnerRewards, storage, cloud, sandbox, timers };
 }
 const patches = cloud => cloud.calls.filter(c => c.method === 'PATCH');
+const friendA = 'art_test#main', friendB = 'art_test#second';
+
+test('친밀도 단계·다음 단계·읽기 전용 상수의 모든 경계를 확인한다 (§7-1)', () => {
+    const { api, storage, cloud } = load();
+    for (const [runs, level, name, remaining] of [[0,1,'처음 만남',3], [2,1,'처음 만남',1], [3,2,'친구',5],
+        [7,2,'친구',1], [8,3,'단짝',7], [14,3,'단짝',1], [15,4,'절친',10], [24,4,'절친',1],
+        [25,5,'영혼의 단짝',null], [100,5,'영혼의 단짝',null]]) {
+        storage.setItem(key, JSON.stringify(bank(0, 0, { friends: { [friendA]: runs } })));
+        assert.deepEqual(plain(api.friendshipOf('son', friendA)), { runs, level, name,
+            next: remaining === null ? null : { level: level + 1, remaining } });
+    }
+    assert.ok(Object.isFrozen(api.FRIEND_LEVELS)); assert.ok(api.FRIEND_LEVELS.every(Object.isFrozen));
+    assert.equal(cloud.calls.length, 0);
+});
+
+test('addRun은 로컬 두 값을 증가시키고 PATCH 한 번·아이별 키 분리를 지킨다 (§7-2)', async () => {
+    const { api, cloud, storage } = load();
+    assert.ok(api.addRun('son', friendA));
+    assert.equal(api.readBank('son').friends[friendA], 1);
+    assert.equal(api.readBank('son').friendsPending[friendA], 1);
+    assert.deepEqual(plain(api.readBank('daughter').friends), {});
+    await api.flush('son');
+    assert.equal(patches(cloud).length, 1); assert.equal(cloud.value.friends[friendA], 1);
+    assert.deepEqual(plain(api.readBank('son').friendsPending), {});
+    assert.ok(!Object.hasOwn(cloud.value, 'friendsPending')); assert.ok(!Object.hasOwn(cloud.value, 'pending'));
+    storage.setItem(key, JSON.stringify(bank(0, 0, { friends: { [friendA]: Number.MAX_SAFE_INTEGER } })));
+    assert.equal(api.addRun('son', friendA), false);
+    assert.equal(patches(cloud).length, 1);
+});
+
+test('부모·잘못된 아이·잘못된 친밀도 키는 읽기·쓰기·요청 없이 거부한다 (§7-2)', async () => {
+    for (const invalid of ['', 'art_test', 'art_TEST#main', 'art_test#', 'art_test#UPPER', 'art_test#x/y',
+        `art_${'a'.repeat(81)}#main`, `art_test#${'a'.repeat(33)}`, null, {}, '__proto__']) {
+        const { api, cloud, storage } = load(), before = [...storage.data.entries()];
+        assert.equal(api.addRun('son', invalid), false);
+        assert.equal(api.friendshipOf('son', invalid).runs, 0);
+        assert.deepEqual([...storage.data.entries()], before); assert.equal(cloud.calls.length, 0);
+    }
+    for (const initial of [{ currentUserName: '아빠' }, { currentUserName: '엄마' }, { currentUser: 'parent' }]) {
+        const { api, cloud, storage } = load(initial), before = [...storage.data.entries()];
+        const get = storage.getItem; let reads = 0;
+        storage.getItem = k => { if (k.startsWith('galleryRunnerBank_')) reads++; return get(k); };
+        assert.equal(api.addRun('son', friendA), false); assert.equal(api.friendshipOf('son', friendA).level, 1);
+        await api.pull('son'); await api.flush('son');
+        assert.equal(reads, 0); assert.equal(cloud.calls.length, 0); assert.deepEqual([...storage.data.entries()], before);
+    }
+    const { api, cloud } = load();
+    for (const child of ['parent', '', null, '__proto__']) assert.equal(api.addRun(child, friendA), false);
+    assert.equal(cloud.calls.length, 0);
+});
+
+test('두 기기 친밀도 5+2+1은 정상 저장·오프라인 재시도 모두 8이다 (§7-3)', async () => {
+    for (const offline of [false, true]) {
+        const cloud = notion(bank(300, 0, { friends: { [friendA]: 5 } }));
+        const initial = { [key]: JSON.stringify(cloud.value) }, tablet = load(initial, cloud), phone = load(initial, cloud);
+        if (offline) cloud.fail = 'PATCH';
+        tablet.api.addRun('son', friendA); tablet.api.addRun('son', friendA); await tablet.api.flush('son');
+        phone.api.addRun('son', friendA); await phone.api.flush('son');
+        if (offline) {
+            assert.equal(cloud.value.friends[friendA], 5);
+            assert.equal(tablet.api.readBank('son').friendsPending[friendA], 2);
+            assert.equal(phone.api.readBank('son').friendsPending[friendA], 1);
+            cloud.fail = null;
+            await tablet.api.pull('son'); await phone.api.pull('son');
+        }
+        assert.equal(cloud.value.friends[friendA], 8);
+        await tablet.api.pull('son'); await phone.api.pull('son');
+        for (const device of [tablet, phone]) {
+            assert.equal(device.api.readBank('son').friends[friendA], 8);
+            assert.deepEqual(plain(device.api.readBank('son').friendsPending), {});
+        }
+    }
+});
+
+test('전송 중 추가한 같은·다른 캐릭터 pending은 보낸 만큼만 차감한다 (§7-3·4)', async () => {
+    const { api, cloud } = load({ [key]: JSON.stringify(bank(352, 52,
+        { friends: { [friendA]: 7 }, friendsPending: { [friendA]: 2 } })) },
+        notion(bank(300, 0, { friends: { [friendA]: 5 } })));
+    let changed = false;
+    cloud.beforePatch = () => {
+        if (changed) return; changed = true;
+        api.addRun('son', friendA); api.addRun('son', friendB); api.addStars('son', 4);
+    };
+    assert.equal(await api.flush('son'), true);
+    assert.equal(patches(cloud).length, 2); assert.equal(cloud.peak, 1);
+    assert.equal(cloud.value.total, 356); assert.deepEqual(cloud.value.friends, { [friendA]: 8, [friendB]: 1 });
+    assert.equal(api.readBank('son').pending, 0); assert.deepEqual(plain(api.readBank('son').friendsPending), {});
+});
+
+test('친밀도 저장 실패·속성 부재에도 두 pending을 보존한다 (§7-3·6)', async () => {
+    for (const failure of ['500', 'network', 'PATCH', 'missing', 'number']) {
+        const initial = bank(352, 52, { friends: { [friendA]: 6 }, friendsPending: { [friendA]: 1 } });
+        const { api, cloud, storage } = load({ [key]: JSON.stringify(initial) }, notion(bank(300, 0, { friends: { [friendA]: 5 } })));
+        if (['missing', 'number'].includes(failure)) cloud.propertyType = failure; else cloud.fail = failure;
+        const before = storage.getItem(key);
+        assert.equal(await api.flush('son'), false); assert.equal(storage.getItem(key), before);
+        cloud.fail = null; cloud.propertyType = 'rich_text';
+        assert.equal(await api.flush('son'), true); assert.equal(cloud.value.friends[friendA], 6);
+        assert.equal(cloud.value.total, 352); await api.flush('son'); assert.equal(cloud.value.friends[friendA], 6);
+    }
+});
+
+test('60개 항목은 전체 JSON 1900자 이하·완주 오름차순 삭제·pending 보호 (§7-5)', async () => {
+    const entries = Array.from({ length: 60 }, (_, i) => [`art_${String(i).padStart(3, '0')}_${'x'.repeat(35)}#main`, i + 1]);
+    const friends = Object.fromEntries(entries), protectedKey = entries[0][0];
+    const cloud = notion(bank(300, 0, { friends }));
+    const local = bank(302, 2, { friends: { ...friends, [protectedKey]: 2 }, friendsPending: { [protectedKey]: 1 } });
+    const { api } = load({ [key]: JSON.stringify(local) }, cloud);
+    assert.ok(JSON.stringify(cloud.value).length > 2000); assert.equal(await api.flush('son'), true);
+    const content = patches(cloud)[0].body.properties['런너기록'].rich_text[0].text.content;
+    assert.ok(content.length <= 1900); assert.equal(cloud.value.friends[protectedKey], 2);
+    const removed = entries.slice(1).filter(([k]) => !Object.hasOwn(cloud.value.friends, k));
+    assert.ok(removed.length > 0); assert.ok(removed.length < 59);
+    assert.deepEqual(removed, entries.slice(1, removed.length + 1));
+    assert.equal(cloud.value.total, 302); assert.deepEqual(plain(api.readBank('son').friends), cloud.value.friends);
+    assert.deepEqual(plain(api.readBank('son').friendsPending), {});
+});
+
+test('pending만으로 1900자를 넘으면 PATCH 0건·로컬 원문 보존 (§7-5 보완)', async () => {
+    const friends = Object.fromEntries(Array.from({ length: 60 }, (_, i) => [`art_${i}_${'x'.repeat(35)}#main`, 1]));
+    const { api, cloud, storage } = load({ [key]: JSON.stringify(bank(352, 52, { friends, friendsPending: friends })) });
+    const before = storage.getItem(key);
+    assert.equal(await api.flush('son'), false); assert.equal(patches(cloud).length, 0);
+    assert.equal(storage.getItem(key), before);
+});
+
+test('옛 v1·깨진 친밀도 값은 정규화하고 노션의 pending은 합산하지 않는다 (§7-6)', async () => {
+    for (const raw of ['{', JSON.stringify(bank()), JSON.stringify(bank(0, 0, { friends: [], friendsPending: 'broken' }))]) {
+        const { api } = load({ [key]: raw });
+        assert.deepEqual(plain(api.readBank('son').friends), {}); assert.deepEqual(plain(api.readBank('son').friendsPending), {});
+    }
+    for (const bad of [-1, 1.5, '3', null, Number.MAX_SAFE_INTEGER + 1]) {
+        const { api } = load({ [key]: JSON.stringify(bank(0, 0, { friends: { [friendA]: bad, invalid: 10 }, friendsPending: { [friendA]: bad } })) });
+        assert.deepEqual(plain(api.readBank('son').friends), { [friendA]: 0 });
+        assert.deepEqual(plain(api.readBank('son').friendsPending), { [friendA]: 0 });
+    }
+    const cloud = notion(bank(300, 0, { friends: { [friendA]: 5 }, friendsPending: { [friendA]: 99 } }));
+    const { api } = load({}, cloud); await api.pull('son');
+    assert.equal(api.readBank('son').friends[friendA], 5); assert.equal(patches(cloud).length, 0);
+});
 
 test('DOM 없이 로드하고 사다리·모든 경계·기본 네 항목·읽기 전용을 보장한다', () => {
     const { api, sandbox } = load();
@@ -381,21 +521,29 @@ test('완주 DOM: 진행 바·새 선물·마지막 선물 이후 표시를 구�
 });
 
 test('실제 finish·꾸미기·돌아가기 경로는 별을 한 번만 적립하고 완주 TTS도 한 번만 읽는다', async () => {
-    const { api, sandbox, cloud } = load({ [key]: JSON.stringify(bank(230)) });
+    const { api, sandbox, cloud } = load({ [key]: JSON.stringify(bank(230, 0, { friends: { [friendA]: 7 } })) },
+        notion(bank(300, 0, { friends: { [friendA]: 7 } })));
     const { session, Element } = attachDom(sandbox);
     vm.runInContext(readFileSync(new URL('../kids/subjects/quest/monster_roster.js', import.meta.url), 'utf8'), sandbox);
     const runner = readFileSync(new URL('../kids/common_space/gallery-mini-runner.js', import.meta.url), 'utf8');
     vm.runInContext(runner.replace('window.GalleryMiniRunner =', 'window.testFinish = finish; window.GalleryMiniRunner ='), sandbox);
     const spoken = []; sandbox.speakFairyTTS = text => spoken.push(text);
     session.pause = new Element('button'); session.world = { score:30 }; session.gifts = [];
+    session.friendKey = friendA; session.name = '테스트 용';
     sandbox.testFinish(session);
     assert.equal(api.readBank('son').total, 260); assert.equal(api.readBank('son').pending, 30);
     assert.match(session.message.textContent, /새 선물: 👑 왕관/);
     assert.equal(spoken.length, 1); assert.match(spoken[0], /새 선물!.*왕관/);
+    assert.equal(api.friendshipOf('son', friendA).runs, 8);
+    assert.match(session.message.textContent, /💖 테스트 용과 더 친해졌어요! Lv3 단짝/);
+    assert.match(spoken[0], /💖 테스트 용과 더 친해졌어요! Lv3 단짝/);
+    assert.match(session.message.querySelector('.grr-summary').children[1].textContent, /더 친해졌어요/);
     session.message.querySelectorAll('button').find(b => b.textContent === '🎨 꾸미기').onclick();
     session.message.querySelectorAll('button').find(b => b.textContent === '돌아가기').onclick();
     assert.equal(api.readBank('son').total, 260); assert.equal(spoken.length, 1);
+    assert.equal(api.friendshipOf('son', friendA).runs, 8);
     await api.flush('son'); assert.equal(cloud.value.total, 330);
+    assert.equal(cloud.value.friends[friendA], 8); assert.equal(patches(cloud).length, 1);
 });
 
 test('모든 선물 그리기 함수는 DOM·저장소 없이 주어진 좌표만 그린다', () => {
@@ -411,4 +559,37 @@ test('모든 선물 그리기 함수는 DOM·저장소 없이 주어진 좌표�
         if (gift.kind === 'star') api.drawStar(ctx, { w:.045, h:.045, y:.4 }, .5, gift.id);
     }
     assert.ok(operations > 100);
+});
+
+test('작품 창은 고른 캐릭터별 단계·최고 단계 문구를 표시하고 부모에게 숨긴다 (§7-4)', () => {
+    const { sandbox, cloud } = load({ [key]: JSON.stringify(bank(0, 0, { friends: { [friendA]:8, [friendB]:25 } })) });
+    const { Element } = attachDom(sandbox), host = new Element('div');
+    sandbox.document.body.appendChild(host);
+    const get = sandbox.document.getElementById;
+    sandbox.document.getElementById = id => id === 'modalCharacterActions' ? host : get(id);
+    sandbox.document.createTextNode = text => { const e = new Element('text'); e.textContent = text; return e; };
+    vm.runInContext(readFileSync(new URL('../kids/subjects/quest/monster_roster.js', import.meta.url), 'utf8'), sandbox);
+    vm.runInContext(readFileSync(new URL('../kids/common_space/gallery-mini-runner.js', import.meta.url), 'utf8'), sandbox);
+    const spriteUrl = './test.png';
+    const item = { id:'art_test', characters:[{ key:'main', name:'용', spriteUrl }, { key:'second', name:'새', spriteUrl }] };
+    const bind = selectedKey => sandbox.GalleryMiniRunner.bindModal(item, { viewer:'son', selectedKey });
+    bind('main'); assert.match(host.textContent, /💖 친밀도 Lv3 단짝 · 다음 단계까지 7판/);
+    bind('second'); assert.match(host.textContent, /💖 친밀도 Lv5 영혼의 단짝/); assert.ok(!host.textContent.includes('다음 단계까지'));
+    sandbox.GalleryMiniRunner.bindModal(item, { viewer:'parent' }); assert.ok(!host.textContent.includes('친밀도'));
+    assert.equal(cloud.calls.length, 0);
+});
+
+test('부모 완주는 친밀도·별 저장과 친밀도 안내가 없고 중간 닫기도 적립하지 않는다 (§7-4)', () => {
+    const { sandbox, storage, cloud } = load(), { session, Element } = attachDom(sandbox);
+    vm.runInContext(readFileSync(new URL('../kids/subjects/quest/monster_roster.js', import.meta.url), 'utf8'), sandbox);
+    const runner = readFileSync(new URL('../kids/common_space/gallery-mini-runner.js', import.meta.url), 'utf8');
+    vm.runInContext(runner.replace('window.GalleryMiniRunner =',
+        'window.testFinish = finish; window.testSetActive = session => { active = session; }; window.GalleryMiniRunner ='), sandbox);
+    const before = [...storage.data.entries()];
+    session.pause = new Element('button'); session.world = { score:30 }; session.viewer = 'parent'; session.friendKey = friendA;
+    sandbox.testFinish(session); assert.ok(!session.message.textContent.includes('💖'));
+    assert.deepEqual([...storage.data.entries()], before); assert.equal(cloud.calls.length, 0);
+    session.viewer = 'son'; session.world.status = 'running'; session.listeners = []; session.image = { removeAttribute() {} };
+    session.root = { remove() {} }; sandbox.testSetActive(session); sandbox.GalleryMiniRunner.close();
+    assert.deepEqual([...storage.data.entries()], before); assert.equal(cloud.calls.length, 0);
 });

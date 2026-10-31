@@ -25,6 +25,22 @@
     const validChild = child => child === 'son' || child === 'daughter';
     const ladderOf = child => validChild(child) ? LADDERS[child] : [];
     const integer = n => Number.isSafeInteger(n) && n >= 0;
+    const validFriendKey = key => typeof key === 'string' && /^art_[a-z0-9_]{1,80}#[a-z0-9_-]{1,32}$/.test(key);
+    const FRIEND_LEVELS = Object.freeze([
+        [0, '처음 만남'], [3, '친구'], [8, '단짝'], [15, '절친'], [25, '영혼의 단짝']
+    ].map(([at, name], i) => Object.freeze({ level: i + 1, at, name })));
+    const cleanFriends = raw => Object.fromEntries(Object.entries(raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {})
+        .filter(([key]) => validFriendKey(key)).map(([key, n]) => [key, integer(n) ? n : 0]));
+    const hasFriendPending = bank => Object.values(bank.friendsPending).some(n => n > 0);
+    function mergeFriends(cloud, pending) {
+        const friends = { ...cloud };
+        for (const [key, n] of Object.entries(pending)) {
+            const total = (friends[key] || 0) + n;
+            if (!integer(total)) throw new Error('친밀도 범위 초과');
+            friends[key] = total;
+        }
+        return friends;
+    }
     const keyOf = child => `galleryRunnerBank_${child}`;
     const queues = {}, flushing = {}, timers = {};
     const today = () => {
@@ -54,7 +70,8 @@
             loadout[kind] = choices.find(i => i.id === raw.loadout?.[kind] && i.at <= total)?.id || choices[0]?.id;
         }
         return { v: 1, total, pending: integer(raw.pending) && raw.pending <= total ? raw.pending : 0,
-            loadout, boostDate: dateOf(raw.boostDate), updatedAt: integer(raw.updatedAt) ? raw.updatedAt : 0 };
+            loadout, boostDate: dateOf(raw.boostDate), updatedAt: integer(raw.updatedAt) ? raw.updatedAt : 0,
+            friends: cleanFriends(raw.friends), friendsPending: cleanFriends(raw.friendsPending) };
     }
     function readBank(child) {
         if (!validChild(child)) return null;
@@ -68,6 +85,20 @@
         catch { return false; }
     }
     const touch = bank => { bank.updatedAt = Math.max(Date.now(), bank.updatedAt + 1); };
+    function friendshipOf(child, key) {
+        const runs = allowed(child) && validFriendKey(key) ? readBank(child).friends[key] || 0 : 0;
+        const stage = FRIEND_LEVELS.findLast(stage => runs >= stage.at), next = FRIEND_LEVELS[stage.level];
+        return { runs, level: stage.level, name: stage.name,
+            next: next ? { level: next.level, remaining: next.at - runs } : null };
+    }
+    function addRun(child, key) {
+        if (!allowed(child) || !validFriendKey(key)) return false;
+        const bank = readBank(child), runs = (bank.friends[key] || 0) + 1, pending = (bank.friendsPending[key] || 0) + 1;
+        if (!integer(runs) || !integer(pending)) return false;
+        bank.friends[key] = runs; bank.friendsPending[key] = pending;
+        if (!save(child, bank)) return false;
+        void flush(child); return bank;
+    }
     function addStars(child, n) {
         if (!allowed(child) || !integer(n)) return false;
         const bank = readBank(child);
@@ -124,7 +155,8 @@
         const total = cloud.total + local.pending;
         if (!integer(total)) throw new Error('별 개수 범위 초과');
         return clean({ ...local, total, loadout: cloud.updatedAt > local.updatedAt ? cloud.loadout : local.loadout,
-            updatedAt: Math.max(cloud.updatedAt, local.updatedAt), boostDate: laterDate(cloud.boostDate, local.boostDate) }, child);
+            updatedAt: Math.max(cloud.updatedAt, local.updatedAt), boostDate: laterDate(cloud.boostDate, local.boostDate),
+            friends: mergeFriends(cloud.friends, local.friendsPending) }, child);
     }
     async function pull(child) {
         if (!allowed(child)) return false;
@@ -132,31 +164,53 @@
             const cloud = await cloudOf(child);
             return cloud && allowed(child) ? save(child, merged(child, cloud.bank, readBank(child))) : false;
         });
-        if (result && readBank(child).pending) return flush(child);
+        if (result && (readBank(child).pending || hasFriendPending(readBank(child)))) return flush(child);
         return Boolean(result);
+    }
+    function packPayload(payload, pending) {
+        const removable = Object.keys(payload.friends).filter(key => !pending[key])
+            .sort((a, b) => payload.friends[a] - payload.friends[b] || (a < b ? -1 : a > b ? 1 : 0));
+        let text = JSON.stringify(payload);
+        for (const key of removable) {
+            if (text.length <= 1900) break;
+            delete payload.friends[key]; text = JSON.stringify(payload);
+        }
+        // 미전송 항목만으로 한도를 넘으면 전송·로컬 변경 없이 다음 저장을 기다린다.
+        if (text.length > 1900) throw new Error('친밀도 미전송 기록이 1900자를 넘습니다');
+        return text;
     }
     async function flushOnce(child) {
         const cloud = await cloudOf(child);
         if (!cloud || !allowed(child)) return false;
         const snapshot = readBank(child), bank = merged(child, cloud.bank, snapshot);
-        const { pending, ...payload } = bank;
+        const { pending, friendsPending, ...payload } = bank;
         payload.updatedAt = Math.max(Date.now(), bank.updatedAt);
+        const content = packPayload(payload, friendsPending);
         const response = await fetch(cloud.url, { method: 'PATCH', headers: cloud.headers,
-            body: JSON.stringify({ properties: { '런너기록': { rich_text: [{ text: { content: JSON.stringify(payload) } }] } } }) });
+            body: JSON.stringify({ properties: { '런너기록': { rich_text: [{ text: { content } }] } } }) });
         if (!response.ok) throw new Error(`저금통 저장 ${response.status}`);
         if (!allowed(child)) return false;
         // PATCH 도중 번 별·바꾼 꾸미기는 보존하고 보낸 pending만 차감한다.
         const latest = readBank(child), rest = latest.pending - snapshot.pending;
         if (rest < 0) throw new Error('저장 중 저금통이 바뀌었습니다');
+        const friendsRest = {};
+        for (const key of new Set([...Object.keys(snapshot.friendsPending), ...Object.keys(latest.friendsPending)])) {
+            const n = (latest.friendsPending[key] || 0) - (snapshot.friendsPending[key] || 0);
+            if (!integer(n)) throw new Error('저장 중 친밀도가 바뀌었습니다');
+            if (n) friendsRest[key] = n;
+        }
         return save(child, clean({ ...payload, total: payload.total + rest, pending: rest,
+            friends: mergeFriends(payload.friends, friendsRest), friendsPending: friendsRest,
             loadout: latest.updatedAt > snapshot.updatedAt ? latest.loadout : payload.loadout,
             updatedAt: Math.max(latest.updatedAt, payload.updatedAt), boostDate: laterDate(latest.boostDate, payload.boostDate) }, child));
     }
     function flush(child) {
         if (!allowed(child)) return Promise.resolve(false);
-        if (flushing[child]) { flushing[child].again = true; return flushing[child].promise; }
-        const job = flushing[child] = { again: false };
+        // 같은 실행 구간의 별·친밀도 적립은 GET을 시작하기 전에 한 요청으로 묶는다.
+        if (flushing[child]) { if (flushing[child].started) flushing[child].again = true; return flushing[child].promise; }
+        const job = flushing[child] = { again: false, started: false };
         job.promise = enqueue(child, async () => {
+            job.started = true;
             let result;
             do { job.again = false; result = await flushOnce(child); } while (job.again && result && allowed(child));
             return result;
@@ -318,6 +372,6 @@
         const back = document.createElement('button'); back.type = 'button'; back.textContent = '돌아가기'; back.onclick = onBack;
         session.message.appendChild(back); session.message.querySelector('button')?.focus(); return true;
     }
-    window.GalleryRunnerRewards = Object.freeze({ LADDERS, unlockedOf, nextGoal, newlyUnlocked, readBank, addStars, setLoadout,
+    window.GalleryRunnerRewards = Object.freeze({ LADDERS, FRIEND_LEVELS, friendshipOf, addRun, unlockedOf, nextGoal, newlyUnlocked, readBank, addStars, setLoadout,
         pull, flush, markQuestBoost, hasBoostToday, drawStage, drawTrail, drawHat, drawStar, openWardrobe, appendBankSummary });
 })();

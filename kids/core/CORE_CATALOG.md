@@ -127,10 +127,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 등록: 관제탑 `scripts/sync_quick_upload.py --character-sprite <PNG> --character-name <이름>` → `scripts/gallery_registration_options.py`의 `prepare_character`/`apply_character_plan`. PNG·이름은 공부방 빌더의 검증 함수를 재사용하며 `--title` 없이 character만 부분 병합합니다. 보조 모듈에는 기존 `AUTHOR_MAP`·`strip_author_prefix`·`find_built_gallery_item`·`prepare_spot_diff`·`set_meta_spot_diff`도 모았고 입구에서 재노출합니다.
 - 등록 시험: 관제탑 `scripts/test_gallery_registration_options.py`(임시 구조·모의 큐·API·Git·제목 없는 `--no-push`). worktree에서는 `GALLERY_SCHOOL_SOURCE`로 공부방 빌더 위치를 지정합니다. 실제 콘텐츠·운영 노션에는 쓰지 않습니다.
 
-### ⭐ `gallery-runner-rewards.js` (미니 런 별 저금통·꾸미기·별 자석, 2026-10-31)
-- 위치: `kids/common_space/gallery-runner-rewards.js`(323줄). IIFE, 전역 `GalleryRunnerRewards` 한 개. 로딩 시 DOM 접근 없음. `gallery.html`은 로스터 → 이 모듈 → 런너 순서, `quest_runner.html`은 `quest-runner.js` 앞에서 로드합니다. 상세: `docs/gallery_runner_star_bank_spec.md`.
+### ⭐ `gallery-runner-rewards.js` (미니 런 별 저금통·꾸미기·별 자석·친밀도, 2026-10-31)
+- 위치: `kids/common_space/gallery-runner-rewards.js`(377줄). IIFE, 전역 `GalleryRunnerRewards` 한 개. 로딩 시 DOM 접근 없음. `gallery.html`은 로스터 → 이 모듈 → 런너 순서, `quest_runner.html`은 `quest-runner.js` 앞, `monster_lab.html`은 로스터 앞에서 로드합니다. 상세: `docs/gallery_runner_star_bank_spec.md`, `docs/runner_friendship_spec.md`.
 - 순수 계산: 읽기 전용 `LADDERS`, `unlockedOf(child,total)`, `nextGoal(child,total)`, `newlyUnlocked(child,before,after)`. 아이별 기본 4종·선물 9종. 저장된 해금 목록 없이 누적 별로 계산합니다.
 - 로컬 API: `readBank(child)`, `addStars(child,n)`, `setLoadout(child,kind,id)`. 키 `galleryRunnerBank_son`/`galleryRunnerBank_daughter`, JSON `{v,total,pending,loadout,boostDate,updatedAt}`. 잘못된 장착은 기본값, 저장 실패는 false, 별은 0 이상 안전 정수만 허용합니다. 기존 로스터의 최고 기록 키는 유지합니다.
+- 친밀도 API: 읽기 전용 `FRIEND_LEVELS`, `addRun(child,key)`, `friendshipOf(child,key)` → `{runs,level,name,next:{level,remaining}|null}`. 키는 `{artId}#{charKey}`, 완주 경계는 0/3/8/15/25판. 로컬 JSON에 `friends`·`friendsPending`을 더하고 노션에는 `friends`만 보냅니다. 옛 v1은 빈 친밀도, 잘못된 숫자는 0으로 읽습니다.
+- 친밀도 동기화: GET의 키별 누적에 이 기기의 `friendsPending`만 더하고 성공한 스냅샷만 차감합니다. 같은 실행 구간의 `addStars`·`addRun`은 PATCH 한 번으로 묶으며 전송 중 새 적립은 보존합니다. 부모는 적립하지 않고 연구소는 로컬 조회만 하며 pull·flush하지 않습니다.
+- rich_text 길이: 전체 JSON이 1900자를 넘으면 pending 없는 친밀도 항목을 완주 수 오름차순(동률은 키 순서)으로 제거합니다. pending만으로도 넘으면 PATCH를 보류하고 로컬·pending을 보존합니다. 잘라낸 기록은 저장 성공 후 로컬에도 반영합니다.
 - 동기화: `pull(child)`·`flush(child)`는 예외를 밖으로 던지지 않습니다. GET `?force=true`로 읽은 클라우드 `total`에 로컬 `pending`만 합산하고 PATCH 본문은 「런너기록」 한 속성뿐입니다. 「학습설정」은 읽거나 쓰지 않습니다. 속성이 없거나 `type !== 'rich_text'`이면 PATCH하지 않습니다.
 - 같은 아이의 요청은 직렬화하고 겹친 flush는 끝난 뒤 재처리합니다. PATCH 도중 생긴 pending·꾸미기 변경도 보존합니다. 다른 두 기기의 동시 GET/PATCH 경합은 허용하며 서버 원자적 합산은 제공하지 않습니다.
 - 자석: `markQuestBoost(child)`는 로컬 오늘 날짜를 저장하고 비동기 flush합니다. `hasBoostToday(child)`로 확인합니다. 기존 `showClearModal` 또는 최신 full·한입 레슨의 `quest-lesson-complete` 이벤트가 완주마다 한 번 호출하고 기존 보상·학습일지 경로는 유지합니다. 런 시작은 그림 로딩과 pull을 병행하며 동기화는 최대 1.5초만 기다립니다. 별 판정만 사방 `.05` 확장하고 장애물은 유지합니다.
@@ -330,6 +333,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **HTML onclick 호환 전역**: `handleCheckAnswer`, `goToNextStep`, `playQuestionAudio`, `selectChoice`, `startRevengeRound`, `skipRevengeAndClear`, `confirmExit`, `closeExitModal`, `returnToLab`, `goToSubjectDeepTraining`(별칭 `goToMathDeepTraining`), `goToLobby`, `playSound`, `toggleMathMemoPad`, `clearMathMemoCanvas`, `openImageZoom`, `closeImageZoom`.
 
 ### 🌟 `monster_roster.js` (5분 퀘스트 파트너 몬스터 로스터 & 포즈/에러리스 대사 엔진, 2026-10-24 추가)
+- 친밀도 대사: `refreshGalleryMonster`는 선택 파트너 조회 시 로컬 친밀도를 반영하고 단계별 walk·correct 대사를 기존 배열에 누적합니다. 갤러리 walk는 탭 주기가 넘어가도 순환하여 추가 대사까지 도달하며 격려 대사는 유지합니다. 모듈이 없으면 기존 대사·배지 그대로입니다.
 - **갤러리 파트너 (2026-10-29)**: `equipGalleryPartner(child, {artId,name,spriteUrl})`, `getGalleryPartner(child)`, `clearGalleryPartner(child)`, `isValidCharacter(character)`. child는 `son`/`daughter`만 받습니다. 민수는 동적 `gallery_partner`(동일 그림 포즈 6종·공용 에러리스 대사)를 로스터 끝에 추가하고 `selectedMonster`로 선택합니다. 해제하면 선택 중인 갤러리 파트너만 `clay_bite`로 복구합니다. 민서는 별도 저장만 하며 민수 선택을 바꾸지 않습니다.
 - **이름 조사**: `withJosa(name, '이/가'|'와/과'|'을/를'|'은/는')`는 한글 종성으로 조사를 선택하고 비한글은 `이(가)`처럼 병기합니다. 갤러리 파트너의 연구소·러너 대사와 미니 런 안내·제목이 이 함수 한 벌을 사용합니다.
 - **저장 원천**: `galleryPartner_son`/`galleryPartner_daughter`의 `{artId,name,spriteUrl,equippedAt}`와 `galleryRunnerBest_son`/`galleryRunnerBest_daughter`는 이 파일만 정의합니다. 최고 기록은 `getRunnerBest(child)`/`setRunnerBest(child, score)`로 읽고 갱신합니다. 모두 기기 로컬이며 기기 간·노션 동기화는 없습니다. 저장소 접근 실패는 null/false/0으로 돌려줍니다.

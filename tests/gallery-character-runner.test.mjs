@@ -56,11 +56,82 @@ test('자석은 장애물 충돌 판정·무적 시간을 바꾸지 않는다', 
     assert.deepEqual(strip(worlds[0]), strip(worlds[1]));
 });
 
-test('런너 520줄·저금통 550줄 상한을 지킨다', () => {
-    for (const [file, max] of [[runnerFile, 520], ['kids/common_space/gallery-runner-rewards.js', 550]]) {
+test('런너 520줄·저금통 500줄과 친밀도 연결 파일 상한을 지킨다', () => {
+    for (const [file, max] of [[runnerFile, 520], ['kids/common_space/gallery-runner-rewards.js', 500],
+        [rosterFile, 490], ['kids/subjects/quest/monster_lab_controller.js', 754],
+        ['kids/subjects/quest/quest-runner.js', 702], ['monster_lab.html', 799]]) {
         const lines = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8').trimEnd().split('\n').length;
         assert.ok(lines <= max, `${file}: ${lines}/${max}`);
     }
+});
+
+test('친밀도 Lv1·3·5의 대사 누적·runs·배지와 기존 격려를 보존한다 (§7-7)', () => {
+    const friendKey = 'art_test#main';
+    for (const [runs, level] of [[0, 1], [8, 3], [25, 5]]) {
+        const storage = storageOf({ currentUserName: '민수', galleryRunnerBank_son: JSON.stringify({ v:1, total:0, friends:{ [friendKey]:runs } }) });
+        const { sandbox, calls } = loadBrowserScripts(['kids/common_space/gallery-runner-rewards.js', rosterFile], { storage });
+        const roster = sandbox.MonsterRoster;
+        roster.equipGalleryPartner('son', character);
+        const monster = roster.getSelectedMonster();
+        assert.equal(monster.badgeText, `자작: 테스트 용 💖Lv${level}`);
+        assert.equal(monster.labDialogues.walk.length, 2 + level - 1);
+        assert.equal(monster.runnerDialogues.correct.length, 2 + level - 1);
+        assert.deepEqual(plain(monster.labDialogues.walk.slice(0, 2)), ['테스트 용과 천천히 준비해요!', '어느 과목부터 함께해 볼까?']);
+        assert.deepEqual(plain(monster.runnerDialogues.correct.slice(0, 2)), ['멋지게 해냈어요! 🙌', '차근차근 잘하고 있어요!']);
+        assert.deepEqual(plain(monster.runnerDialogues.encourage), ['괜찮아요! 힌트를 보고 다시 해봐요. 🌱']);
+        if (level > 1) {
+            assert.equal(monster.labDialogues.walk[2], `우리 벌써 ${runs}번이나 같이 달렸어!`);
+            assert.equal(monster.runnerDialogues.correct[2], '역시 내 친구! 멋져! 💖');
+            assert.equal(monster.labDialogues.walk[3], '단짝이랑 공부하니까 더 신나! ✨');
+            assert.equal(monster.runnerDialogues.correct[3], '단짝 파워! 정답이야! 🎉');
+        }
+        if (level === 5) {
+            assert.deepEqual(plain(monster.labDialogues.walk.slice(4)), ['너랑 있으면 어떤 문제도 안 무서워!', '영혼의 단짝! 오늘도 함께 출발! 🚀']);
+            assert.deepEqual(plain(monster.runnerDialogues.correct.slice(4)), ['절친답게 척척 풀었네! 🌟', '영혼의 단짝 콤비, 최고야! 👑']);
+        }
+        assert.equal(roster.getSelectedMonster().labDialogues.walk.length, monster.labDialogues.walk.length);
+        const spoken = new Set(Array.from({ length: 15 }, (_, i) => roster.getLabTapResponse(i + 1).speech));
+        for (const line of monster.labDialogues.walk) assert.ok(spoken.has(line), `실제 탭 대사 누락: ${line}`);
+        assert.equal(calls.length, 0);
+    }
+});
+
+test('친밀도 모듈 부재는 기존 대사·배지이고 뒤늦게 로드해도 조회 시 반영한다 (§7-7)', () => {
+    const { roster, sandbox, storage } = load();
+    roster.equipGalleryPartner('son', character);
+    const original = plain(roster.getSelectedMonster());
+    assert.equal(original.badgeText, '자작: 테스트 용');
+    assert.equal(original.labDialogues.walk.length, 2); assert.equal(original.runnerDialogues.correct.length, 2);
+    storage.setItem('galleryRunnerBank_son', JSON.stringify({ v:1, total:0, friends:{ 'art_test#main':15 } }));
+    vm.runInContext(readFileSync(new URL('../kids/common_space/gallery-runner-rewards.js', import.meta.url), 'utf8'), sandbox);
+    assert.equal(roster.getSelectedMonster().badgeText, '자작: 테스트 용 💖Lv4');
+    vm.runInContext('window.GalleryRunnerRewards = undefined;', sandbox);
+    assert.deepEqual(plain(roster.getSelectedMonster()), original);
+});
+
+test('민서 연구소·퀘스트의 실제 표시 분기는 Lv1 이름만·Lv3 배지를 쓰고 통신하지 않는다 (§7-7)', () => {
+    const lab = readFileSync(new URL('../kids/subjects/quest/monster_lab_controller.js', import.meta.url), 'utf8');
+    const quest = readFileSync(new URL('../kids/subjects/quest/quest-runner.js', import.meta.url), 'utf8');
+    const labBranch = lab.slice(lab.indexOf("      const pName = document.getElementById('partnerName');"), lab.indexOf("      const pDot ="));
+    const questFunction = quest.slice(quest.indexOf('  function syncCheerMonsterReaction('), quest.indexOf('  function initScreen()'));
+    assert.ok(labBranch.length > 500); assert.ok(questFunction.length > 1000);
+    for (const runs of [0, 8]) {
+        const storage = storageOf({ currentUserName:'민서', galleryRunnerBank_daughter:JSON.stringify({ v:1, total:0, friends:{ 'art_test#main':runs } }) });
+        const { sandbox, calls } = loadBrowserScripts(['kids/common_space/gallery-runner-rewards.js', rosterFile], { storage });
+        sandbox.MonsterRoster.equipGalleryPartner('daughter', character);
+        const elements = Object.fromEntries(['partnerName', 'minseoPartnerImg', 'cheerMonster', 'cheerSpeech']
+            .map(id => [id, { getAttribute() { return './default.png'; } }]));
+        sandbox.document = { getElementById:id => elements[id] || null };
+        vm.runInContext(`{ ${labBranch} }`, sandbox);
+        vm.runInContext(`{ const global = window, isMinseo = true; ${questFunction}; syncCheerMonsterReaction(); }`, sandbox);
+        const expected = '테스트 용' + (runs ? ' 💖Lv3' : '');
+        assert.equal(elements.partnerName.textContent, expected); assert.equal(elements.cheerMonster.alt, expected);
+        elements.minseoPartnerImg.onerror(); assert.equal(elements.partnerName.textContent, '민수 & 냥이 & 민서 삼총사');
+        assert.equal(calls.length, 0);
+    }
+    const html = readFileSync(new URL('../monster_lab.html', import.meta.url), 'utf8');
+    assert.ok(html.indexOf('gallery-runner-rewards.js') < html.indexOf('monster_lab_controller.js'));
+    assert.ok(!/GalleryRunnerRewards\?*\.\s*(pull|flush)\s*\(/.test(lab + html));
 });
 
 test('두 모듈은 document 없는 환경에서 로드하고 닫아도 안전하다', () => {

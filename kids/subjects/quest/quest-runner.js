@@ -90,6 +90,8 @@
       if (galleryPartner) {
         poseSrc = galleryPartner.spriteUrl;
         monsterName = galleryPartner.name;
+        const friendship = global.GalleryRunnerRewards?.friendshipOf('daughter', `${galleryPartner.artId}#${galleryPartner.charKey}`);
+        if (friendship?.level > 1) monsterName += ` 💖Lv${friendship.level}`;
       }
       const minseoDialogues = {
         stageStart: '오늘도 예쁘게 5분 퀘스트 시작! 🌸',
