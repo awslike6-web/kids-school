@@ -1,7 +1,7 @@
 # 🧹 800줄 대청소 4차: 보상 모듈 `notion-reward.js` 분리 명세서
 
 > **문서 버전**: v1.0 (2026-10-31)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 구현·검증 완료 (2026-10-31 Claude 확인, 용어사전 로드 정리 포함)
 > **근거**: GEMINI §8-0 골디락스(파일당 800줄 미만, 300~600줄 최적), §8-4 정기 리팩토링. 노션 현황판 카드 「800줄 초과 파일 정기 대청소」의 4차분. 앞선 JS 분리: `docs/daily_diary_split_spec.md`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다. 퀘스트 쪽 계약은 `docs/quest_lesson_spec.md`.
 
@@ -55,7 +55,7 @@
    - `vm` 컨텍스트(가짜 `window`·`document`·`localStorage`, `addEventListener` 기록)에서 세 파일을 순서대로 실행하면 오류가 없고, 원래 파일을 실행했을 때와 비교해 전역 함수 이름 목록, `window`에 생긴 이름 목록, 등록된 이벤트 종류 목록이 같다.
    - 앞 파일만(1개, 1~2개) 실행해도 오류가 나지 않는다.
 2. 기존 시험 전부: `node --test "tests/**/*.test.mjs"`.
-3. 바뀐 파일마다 `python -X utf8 G:/master-tower/scripts/verify_contracts.py --mode file --file <절대 경로>` → `[ALL PASS]` (막히면 못 했다고 보고).
+3. 바뀐 파일마다 `python -X utf8 G:/master-tower/scripts/verify_contracts.py --mode file --file <절대 경로>` → `[ALL PASS]` (막히면 못 했다고 보고). 사용자 승인에 따라 `tests/fixtures/`의 원본 사본은 계약 검사에서 제외한다. fixture는 줄이지 않으며, 검사기의 fixture 예외는 Claude가 관제탑 저장소에서 따로 처리한다.
 
 ## 7. 화면 확인 (Claude가 함)
 노션 쓰기 차단 서버에서 `quest_runner.html`과 `voca.html`을 분리 전·후로 열어 스크립트 로드 목록·중복, 전역 함수, 콘솔 오류를 비교하고, 퀘스트 한 문제를 풀어 정답·오답 보상 흐름이 같은지 본다.
@@ -63,3 +63,28 @@
 ## 8. 문서
 - `CORE_CATALOG.md`, `docs/quest_lesson_spec.md`, `docs/homeschool_spec.md`에서 파일 구성·줄 수를 설명하는 곳만 새 구성으로 고친다(함수가 "notion-reward 경로"라는 설명은 그대로 둬도 된다). 지난 분리 명세서는 기록이므로 고치지 않는다.
 - 이 문서 상태를 "구현 완료"로 바꾸고 파일별 실제 줄 수 표를 적는다.
+
+## 9. 구현 기록 (2026-10-31)
+
+- 원본 1–442 / 443–891 / 892–1338줄을 그대로 분리하고 각 파일 맨 위에 지정 머리 주석 한 줄만 추가했다.
+- 실제 줄 수(머리 주석 포함):
+
+| 파일 | 실제 줄 수 |
+| :--- | ---: |
+| `kids/core/notion-reward.js` | 443 |
+| `kids/core/notion-reward-quiz.js` | 450 |
+| `kids/core/notion-reward-discussion.js` | 448 |
+
+- 두 HTML의 세 태그는 같은 버전 `20261031-reward-split`로 연달아 로드한다. 동적 로더 배열에는 기존 보상 모듈 항목이 없어 변경하지 않았다.
+- 원본 fixture는 1,338줄 그대로 보존한다. 사용자 승인에 따라 fixture만 계약 검사에서 제외하며 검사기는 수정하지 않았다.
+- 자동 검증: `node --test tests/notion-reward-split.test.mjs` 16건 통과, `node scripts/verify_study_log_store.js` 31건 통과.
+- 전체 회귀 `node --test "tests/**/*.test.mjs"`: 219건 중 통과 215·실패 2·건너뜀 1·기존 TODO 1. 실패는 기존 갤러리 Python 빌더 시험 두 건이며, Python 하위 프로세스 시작 실패로 종료 상태가 `null`이었다.
+- 계약 검사는 첫 변경 파일에 지정 명령을 실행했으나 `python` 명령을 찾지 못해 실행하지 못했다. 명세서 §0대로 반복 시도하지 않았다. fixture는 승인대로 검사 대상에서 제외했다. 필수 검사 미완료로 커밋 못 함.
+- 화면 비교·실제 클릭 검증은 §7대로 Claude가 수행하며 운영 노션 쓰기·main 병합·푸시는 하지 않는다.
+
+### Claude 확인 (2026-10-31)
+
+- `main:kids/core/notion-reward.js`와 새 파일 3개(머리 주석 제외)를 순서대로 이은 내용이 줄바꿈 형식만 빼고 같다. fixture도 같다.
+- `node --test "tests/**/*.test.mjs"`: 219개 중 통과 217개, 실패 0개(건너뜀 1·todo 1). 바뀐 파일별 계약 검사 모두 `[ALL PASS]`(fixture는 관제탑 검사기에 `tests/fixtures/` 줄 수 예외를 넣은 뒤).
+- 노션 쓰기 차단 서버 비교: `quest_runner.html`에서 보상 모듈의 전역 이름 43개가 분리 전후 같은 형으로 있고, 세 파일이 한 번씩 실리며 콘솔 오류가 없다. 분리본에서 퀘스트 1번(정답 → `+10 EXP / +3` 보상)과 2번(오답 → 하트 감소·해설)이 정상 동작했다.
+- **용어사전(`voca.html`)에서 발견한 기존 문제와 처리**: `voca.html`은 `notion-helper.js`도 싣는데, 이 파일이 `mission-reward-engine.js`·`quiz-feedback-overlay.js`를 자동으로 싣는다. 두 파일은 `notion-reward.js`와 같은 최상위 `const`(`DISCUSSION_STOP_WORDS`, `CONJUNCTION_GRADING_GUARDRAIL`)를 선언하므로, 분리 전 main에서도 콘솔에 `Identifier ... has already been declared`가 나고 `notion-reward.js` 전체가 실행되지 않았다(실행 순서에 따라 반대쪽 파일이 죽을 수도 있는 경쟁 상태). 분리하면 첫 파일만 살아나 동작이 달라지므로, 용어사전이 쓰는 세 함수(`grantRewardAndShowUI`, `setupDebouncedSTT`, `grantVocaDwellReward`)를 모두 `notion-helper.js` 쪽 모듈이 제공함을 확인하고 `voca.html`에서 `notion-reward*.js` 태그를 뺐다. 분리본 용어사전은 보상 파일 없이 오류 0건으로 열리고 세 함수가 main과 같은 코드로 있다. 재발 방지로 시험에 「notion-helper.js를 싣는 화면은 notion-reward*.js를 함께 싣지 않는다」를 추가했다.

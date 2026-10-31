@@ -58,7 +58,7 @@
 | `kids/js/lobby_controller.js` | 민서 원터치 진입 (§5-3). **기존 상한 초과 파일이므로 순증 5줄 이내** | |
 | `kids/js/storybook_engine.js` | 완독 카드에 레슨 연결 버튼 (§5-4) | 추가 20줄 이내 |
 | `kids/core/study-log-store.js` | 오답 분할 저장·조회 실패 대기열 (§5-6 ①③) | 600줄 미만 |
-| `kids/core/notion-reward.js` | 오답만 있는 퀴즈 세션도 일지 기록 (§5-6 ④). **기존 상한 초과 파일이므로 순증 5줄 이내** | |
+| `kids/core/notion-reward.js` → `notion-reward-quiz.js` → `notion-reward-discussion.js` | 보상 경로는 클래식 스크립트로 순서대로 로드. 오답만 있는 퀴즈 세션의 일지 기록 (§5-6 ④)은 `notion-reward-quiz.js` 담당 | 각각 443·450·448줄 (머리 주석 포함) |
 | `kids/core/study-activity.js` | 레슨 완주 기록 `recordLessonComplete` (§6) | 추가 25줄 이내 |
 | 가디언 `learning/study-activity.js` | 위와 같은 변경. 두 사본이 지금도 다르므로 차이를 먼저 보고한다 (§6) | |
 | 가디언 `worker/src/study-measurement.js`, `index.js`, `time-bank.js`, `parent-client.js`, `worker/test/activity.test.js` | 레슨 완주 보너스 계산·적립·부모 화면 표시·시험 (§6) | |
@@ -264,7 +264,7 @@ QuestLesson.buildLesson({ child, items, subj, store, today, rng, mode: 'full' | 
 - 레슨 완주 보너스를 민수·동화·수학으로 넓히기, 서버 승인 없이 가디언 배포
 - 노션 Worker·노션 스키마 변경
 - 운영 노션의 중복 학습일지 줄 삭제
-- 상한 초과 파일(`lobby_controller.js`, `notion-reward.js`)에 로직 덧붙이기 (연결 몇 줄만)
+- 상한 초과 파일(`lobby_controller.js`)에 로직 덧붙이기 (연결 몇 줄만)
 
 
 ## 10. 격리 브랜치 구현 기록 (2026-10-30)

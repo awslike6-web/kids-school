@@ -157,7 +157,7 @@ const load = (sandbox, file) => vm.runInContext(fs.readFileSync(path.join(CORE, 
     const streak = sb.StudyLogStore.getStreakData('민수');
     assert(streak.count >= 1 && streak.studiedToday, '전송 성공 후 오늘이 스트릭에 즉시 반영');
   }
-  await verifyUpsertPath('2. 5분 퀘스트·용어사전 경로 (notion-reward.js)', ['study-log-store.js', 'notion-reward.js']);
+  await verifyUpsertPath('2. 5분 퀘스트·용어사전 경로 (notion-reward.js)', ['study-log-store.js', 'notion-reward.js', 'notion-reward-quiz.js', 'notion-reward-discussion.js']);
   await verifyUpsertPath('3. 파사드 경로 (notion-study-logger.js)', ['study-log-store.js', 'notion-study-logger.js']);
 
   // ---------- 4. 로비 스트릭 노션 동기화 ----------
