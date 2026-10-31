@@ -320,7 +320,8 @@
         };
         partnerImg.src = galleryPartner.spriteUrl;
         partnerImg.alt = galleryPartner.name;
-        if (pName) pName.textContent = galleryPartner.name;
+        const friendship = window.GalleryRunnerRewards?.friendshipOf('daughter', `${galleryPartner.artId}#${galleryPartner.charKey}`);
+        if (pName) pName.textContent = galleryPartner.name + (friendship?.level > 1 ? ` 💖Lv${friendship.level}` : '');
       }
 
       const pDot = document.getElementById('partnerDot');

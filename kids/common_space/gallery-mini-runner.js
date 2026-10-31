@@ -182,6 +182,13 @@
             }
             host.appendChild(picker);
         }
+        if (who !== 'parent' && window.GalleryRunnerRewards) {
+            const friendship = window.GalleryRunnerRewards.friendshipOf(currentChild, `${item.id}#${character.key}`);
+            const line = document.createElement('div'); line.style.flexBasis = '100%';
+            line.textContent = `💖 친밀도 Lv${friendship.level} ${friendship.name}${
+                friendship.next ? ` · 다음 단계까지 ${friendship.next.remaining}판` : ''}`;
+            host.appendChild(line);
+        }
         for (const child of targets) {
             const button = document.createElement('button');
             button.type = 'button';
@@ -301,7 +308,12 @@
         if (!returning) {
             session.record = session.world.score > window.MonsterRoster.getRunnerBest(session.child);
             const before = childView ? rewards?.readBank(session.child)?.total || 0 : 0;
+            const friendship = childView ? rewards?.friendshipOf(session.child, session.friendKey) : null;
             const bank = childView ? rewards?.addStars(session.child, session.world.score) : null;
+            const run = childView ? rewards?.addRun(session.child, session.friendKey) : null;
+            const after = run ? rewards.friendshipOf(session.child, session.friendKey) : null;
+            session.friendshipMessage = after && after.level > friendship.level ?
+                `💖 ${window.MonsterRoster.withJosa(session.name, '와/과')} 더 친해졌어요! Lv${after.level} ${after.name}` : '';
             session.gifts = bank ? rewards.newlyUnlocked(session.child, before, bank.total) : [];
         }
         const record = session.record;
@@ -310,8 +322,14 @@
         showMessage(session, `완주! ⭐ ${session.world.score}개${record && session.viewer !== 'parent' ? ' · 새 기록!' : ''}`,
             [['다시 달리기', () => restart(session)], ['🎨 꾸미기', () => wardrobe(session, () => finish(session, true))], ['닫기', close]]);
         if (childView && rewards) rewards.appendBankSummary(session, session.child, rewards.readBank(session.child).total, session.gifts);
+        if (childView && session.friendshipMessage) {
+            const line = document.createElement('div'); line.textContent = session.friendshipMessage;
+            const summary = session.message.querySelector('.grr-summary');
+            summary.insertBefore(line, summary.children[1] || null);
+        }
         if (!returning) say(`완주! 별 ${session.world.score}개를 모았어요.${record && childView ? ' 새 기록이에요!' : ''}${
-            session.gifts?.length ? ` 새 선물! ${session.gifts.map(i => i.name).join(', ')} 받았어요!` : ''}`);
+            session.gifts?.length ? ` 새 선물! ${session.gifts.map(i => i.name).join(', ')} 받았어요!` : ''}${
+            session.friendshipMessage ? ` ${session.friendshipMessage}` : ''}`);
     }
 
     function frame(session, now) {
@@ -382,6 +400,7 @@
         document.body.style.overflow = 'hidden'; document.body.appendChild(root);
         const canvas = root.querySelector('canvas'), image = new Image();
         const session = active = { root, canvas, image, ctx: canvas.getContext('2d'), child, viewer: who, onClose, name: character.name,
+            friendKey: `${item.id}#${character.key}`,
             previousFocus, overflow, hud: root.querySelector('[data-hud]'), pause: root.querySelector('[data-pause]'),
             message: root.querySelector('.gmr-message'), world: createWorld(1, child), ready: false,
             paused: false, raf: null, listeners: [], observer: null, audio: null, trail: [] };

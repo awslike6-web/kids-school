@@ -243,9 +243,10 @@
             return;
         }
         const name = partner.name;
+        const friendship = window.GalleryRunnerRewards?.friendshipOf('son', `${partner.artId}#${partner.charKey}`);
         MONSTER_ROSTER[GALLERY_ID] = {
             id: GALLERY_ID, number: '자작', name, role: '갤러리 파트너',
-            code: 'GALLERY // PARTNER', badgeText: `자작: ${name}`, hasBackground: false,
+            code: 'GALLERY // PARTNER', badgeText: `자작: ${name}${friendship ? ` 💖Lv${friendship.level}` : ''}`, hasBackground: false,
             poses: Object.fromEntries(['idle', 'greet', 'walk_left', 'walk_right', 'rage', 'roar']
                 .map(pose => [pose, partner.spriteUrl])),
             labDialogues: { idle: `${name} 출격 준비 완료! ⚡`, greet: `${withJosa(name, '와/과')} 함께 시작해요!`,
@@ -255,6 +256,15 @@
                 correct: ['멋지게 해냈어요! 🙌', '차근차근 잘하고 있어요!'],
                 encourage: ['괜찮아요! 힌트를 보고 다시 해봐요. 🌱'], clear: '끝까지 함께했어요! 🎉' }
         };
+        if (friendship) {
+            const monster = MONSTER_ROSTER[GALLERY_ID], { level, runs } = friendship;
+            const walk = [`우리 벌써 ${runs}번이나 같이 달렸어!`, '단짝이랑 공부하니까 더 신나! ✨',
+                '너랑 있으면 어떤 문제도 안 무서워!', '영혼의 단짝! 오늘도 함께 출발! 🚀'];
+            const correct = ['역시 내 친구! 멋져! 💖', '단짝 파워! 정답이야! 🎉',
+                '절친답게 척척 풀었네! 🌟', '영혼의 단짝 콤비, 최고야! 👑'];
+            monster.labDialogues.walk.push(...walk.slice(0, level - 1));
+            monster.runnerDialogues.correct.push(...correct.slice(0, level - 1));
+        }
         if (!MONSTER_ORDER.includes(GALLERY_ID)) MONSTER_ORDER.push(GALLERY_ID);
     }
 
@@ -315,6 +325,7 @@
     }
 
     function getSelectedMonster() {
+        refreshGalleryMonster();
         return MONSTER_ROSTER[getSelectedMonsterId()] || MONSTER_ROSTER[DEFAULT_MONSTER_ID];
     }
 
@@ -368,7 +379,8 @@
         if (cycle >= 2 && cycle <= 4) {
             const poseKey = cycle % 2 === 0 ? 'walk_left' : 'walk_right';
             const walkLines = monster.labDialogues.walk || [];
-            const speech = walkLines[(cycle - 2) % walkLines.length] || monster.labDialogues.greet;
+            const offset = monster.id === GALLERY_ID && walkLines.length > 2 ? Math.floor((tapCount - 1) / 5) * 3 : 0;
+            const speech = walkLines[(offset + cycle - 2) % walkLines.length] || monster.labDialogues.greet;
             return {
                 poseKey,
                 poseSrc: monster.poses[poseKey] || monster.poses.idle,

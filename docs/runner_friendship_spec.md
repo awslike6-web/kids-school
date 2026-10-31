@@ -1,7 +1,7 @@
 # 💖 미니 런 캐릭터 친밀도 명세서 (Runner Friendship Spec)
 
 > **문서 버전**: v1.0 (2026-10-31)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 코드 구현 완료 · Python 실행·Git 인덱스 권한 제한으로 전체 검증·커밋 보류
 > **선행**: [`docs/gallery_runner_star_bank_spec.md`](gallery_runner_star_bank_spec.md) (별 저금통, 구현 완료 `34ad1216`). 같은 저장·동기화 규칙을 그대로 따른다.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`(`gallery-runner-rewards.js`·`monster_roster.js` 절), 위 선행 명세를 먼저 읽는다.
 
@@ -116,3 +116,14 @@
 ## 8. 문서 갱신
 - `CORE_CATALOG.md`의 `gallery-runner-rewards.js` 절에 친밀도 API·저장·2000자 규칙, `monster_roster.js` 절에 레벨 대사 한 줄.
 - 이 문서 상태를 "구현 완료"로 바꾸고 실제 줄 수를 적는다.
+
+## 9. 구현·검증 현황 (2026-10-31)
+
+- 승인한 작업 폴더·브랜치에서 구현했다. 친밀도는 별과 같은 pending 합산·스냅샷 차감 경로로 저장하며 정상 완주 한 판의 PATCH는 한 번이다. 전송 중 새 적립은 다음 요청으로 보존한다.
+- 전체 JSON 1900자 초과 시 pending 없는 기록부터 완주 수·키 순으로 제거한다. pending만으로 초과하면 PATCH를 보류하고 로컬 원문을 보존한다(사용자 승인 보완).
+- 실제 줄 수: `gallery-runner-rewards.js` 377, `gallery-mini-runner.js` 473, `monster_roster.js` 462, `monster_lab_controller.js` 747, `quest-runner.js` 696, `monster_lab.html` 781, `gallery.html` 306, `quest_runner.html` 609.
+- 시험 파일은 `gallery-runner-rewards.test.mjs` 595줄, `gallery-character-runner.test.mjs` 582줄이다. 로스터는 추가 대사가 실제 탭으로 선택되도록 갤러리 파트너의 walk 배열을 탭 주기 전체에 걸쳐 순환한다. 격려·기존 캐릭터 탭 규칙은 유지했다.
+- §7-1~7의 친밀도·연결 집중 시험 20건 통과. 전체 회귀는 141건 중 통과 137·실패 2·기존 skip 1·TODO 1이다. 실패 두 건은 기존 Python 빌더 시험이며 실행 파일이 `EPERM`으로 차단됐다. 실패를 skip으로 바꾸지 않았다.
+- §7-9 계약 검사는 Python 실행 시 액세스 거부로 시작하지 못했다. `[ALL PASS]`가 아니다. `git diff --check`는 통과했다.
+- 화면 육안·모바일 스크롤·TTS 실제 재생·폰 60초 플레이는 확인하지 못했다. DOM 모의는 화면 확인을 대체하지 않는다. 운영 노션 요청·노션 개발 기록·main 병합·푸시는 하지 않았다.
+- 커밋 전 필수 전체 시험·계약 검사가 충족되지 않았다. 구현 파일만 `git add`했으나 공유 Git 메타데이터의 `index.lock` 생성도 권한 거부돼 스테이징·커밋하지 못했다. 명령·원문 출력·차단 원인은 미커밋 `walkthrough.md`에 기록한다.
