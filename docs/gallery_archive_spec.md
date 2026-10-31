@@ -61,7 +61,8 @@ flowchart TD
 | **`kids-school`** | [`kids/common_space/gallery_controller.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery_controller.js) | 갤러리/특별한 날 탭 전환, 필터, 카드 그리드 렌더러 |
 | **`kids-school`** | [`kids/common_space/gallery-data-sync.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-data-sync.js) | 로컬 스토리지 및 노션 DB(`3dfa2711...`) 실시간 양방향 동기화 |
 | **`kids-school`** | [`kids/common_space/gallery-modal-manager.js`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery-modal-manager.js) | 상세 모달 뷰어 (다중 사진 썸네일 스위처 + `🎬 3D 회전영상` 인라인 `<video>` 플레이어 지원) |
-| **`kids-school`** | [`kids/common_space/gallery.css`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.css) | 갤러리 전용 3D 카드, 필터 바, 라이트박스 반응형 스타일 |
+| **`kids-school`** | [`kids/common_space/gallery.css`](file:///g:/master-tower/kids-school-main/kids/common_space/gallery.css) | 갤러리 변수·테마·내비·히어로·통계·필터·3D 카드 스타일 (406줄) |
+| **`kids-school`** | `kids/common_space/gallery-modal.css` | 라이트박스·스티커·방명록·등록 모달·빈 상태·뷰 스위처 (455줄). `gallery.css` 바로 다음에 같은 `?v=20261031-gallery-split`로 로드. `tests/gallery-css-split.test.mjs`가 원문 재결합·로드 계약 검증 |
 | **`kids-school`** | `kids/common_space/gallery-spot-diff.js` | `GallerySpotDiff` 놀이·부모 좌표 추출·RGB 차이 검수. 모달 매니저보다 먼저 로드 |
 | **`kids-school`** | `kids/common_space/gallery-mini-runner.js` | `GalleryMiniRunner` 장착 버튼·토스트·60초 미니 런·순수 물리 API |
 | **`kids-school`** | `kids/subjects/quest/monster_roster.js` | 갤러리 파트너·최고 기록의 자녀별 로컬 저장 원천, 민수 로스터 동적 항목 |

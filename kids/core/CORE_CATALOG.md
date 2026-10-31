@@ -954,14 +954,17 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 ## 7. 🎨 성장 아카이브 & 갤러리 코어 (Gallery & Growth Archive)
 
-### 🌟 `gallery_controller.js` & `gallery.css` (성장 아카이브 뷰어 컨트롤러)
+### 🌟 `gallery_controller.js` · `gallery.css` · `gallery-modal.css` (성장 아카이브 뷰어 컨트롤러)
 2,600줄에 달하던 `gallery.html`을 295줄의 초경량 래퍼로 다이어트하고 분리한 단일 책임 갤러리 전용 컨트롤러 및 반응형 스타일시트입니다.
 - **파일 위치**:
   - `kids/common_space/gallery_controller.js` (갤러리 렌더링/이벤트 컨트롤러, IIFE 격리)
-  - `kids/common_space/gallery.css` (3D 카드, 필터 바, 라이트박스 전용 스타일)
+  - `kids/common_space/gallery.css` (406줄, 변수·테마·내비·히어로·통계·필터·3D 카드)
+  - `kids/common_space/gallery-modal.css` (455줄, 라이트박스·스티커·방명록·등록 모달·빈 상태·뷰 스위처. gallery.css 다음에 로드)
+  - `tests/gallery-css-split.test.mjs`: 고정 원본 fixture와 재결합·600줄 제한·블록 경계·상대 경로·로드 순서·캐시 버전을 검사
 - **HTML 로드 방법**:
   ```html
-  <link rel="stylesheet" href="./gallery.css">
+  <link rel="stylesheet" href="./gallery.css?v=20261031-gallery-split">
+  <link rel="stylesheet" href="./gallery-modal.css?v=20261031-gallery-split">
   <script src="./gallery_controller.js"></script>
   ```
 - **핵심 API**:
