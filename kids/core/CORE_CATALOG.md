@@ -112,6 +112,11 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/common_space/my-room.html`(50줄)은 같은 폴더의 `my-room.css`(203줄), `my-room-core.js`(542줄) → `my-room-main.js`(490줄)를 원래 위치에서 상대 경로·`?v=20261031-room-split`로 로드합니다. 기존 `../config.js`가 먼저이며 클래식 스크립트·전역 상태·DOM·동작을 보존합니다.
 - core는 상태·목록·저장/동기화 함수, main은 `initRoom`·`switchTab`·`buyItem`·`selectRoomMap`·가구 렌더링/드래그·`clearRoom`과 기존 `DOMContentLoaded` 등록을 담당합니다. 검증: `tests/my-room-split.test.mjs`(고정 fixture 원문·마크업·600줄 제한·core 단독 로드·전역 함수 보존), 분리 계약: `docs/my_room_split_spec.md`.
 
+### 교재 이미지 체인저 인라인 CSS·JS 분리 (2026-10-31)
+- 루트 `admin-image-changer.html`(247줄)은 원래 인라인 위치에서 `kids/css/admin_image_changer.css`(233줄), `kids/js/admin_image_changer-core.js`(459줄) → `kids/js/admin_image_changer-main.js`(412줄)를 상대 경로·`?v=20261031-admin-split`로 로드합니다. 기존 `kids/config.js`가 먼저이며 클래식 스크립트·전역 상태·DOM·원문·동작을 보존합니다.
+- core는 설정·상태, `switchMode`·`refreshCurrentModeData`·교재/어휘 조회·파싱·필터·`renderQuestions`, `DOMContentLoaded`·전역 드래그 이벤트 등록을 담당합니다. main은 `toggleDrawer`·항목 편집·이미지 처리·토큰 모달·GitHub 업로드·노션 갱신·신규 등록·`showToast`를 담당하며 통신 방식은 바꾸지 않습니다.
+- 검증: `tests/admin-image-changer-split.test.mjs`(고정 fixture 원문·마크업·600줄 제한·core 단독 로드·전역 함수 31개·이벤트 3개 보존, 모의 fetch만 사용). 분리 계약: `docs/admin_image_changer_split_spec.md`. 전후 화면 비교는 해당 명세서 §6에 따라 Claude가 담당합니다.
+
 ## 2-0-1. 🎨 꿈나무 갤러리 & 성장 아카이브 코어 (Gallery & Growth Archive Engines)
 
 ### AI 편집본 자동 맞춤·선택 합성 (2026-10-29)
