@@ -1134,7 +1134,9 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 ## 민민 가디언 부모 관리 연결 (2026-10-11)
 
-- 화면 연결 부품: `kids/js/parent_dashboard.js`의 `renderScreenTimeWidget(childName)`과 `parent_dashboard.html`의 자녀별 가디언 링크.
+- 화면 연결 부품: `kids/js/parent_dashboard_render.js`의 `renderScreenTimeWidget(childName)`과 `parent_dashboard.html`의 자녀별 가디언 링크.
+- 부모 대시보드 JS 분리(2026-10-31): `kids/js/parent_dashboard.js`(547줄, 설정·상태·권한·소원권·통계·레이더 차트) → `kids/js/parent_dashboard_render.js`(575줄, `loadDashboardData`·스크린타임·하루 코칭·안전 알림 위젯·이벤트 등록). HTML에서 두 클래식 스크립트를 `?v=20261031-dash-split`로 연달아 로드합니다. 기존 전역 함수·최상위 상태·DOM·동작은 유지하며 `localDateStr`·`calcStreak`는 첫 파일에 남습니다.
+- 분리 계약: `docs/parent_dashboard_split_spec.md`. `tests/parent-dashboard-split.test.mjs`가 고정 원본 재결합·600줄 제한·참조·부분 로드·전역 함수와 이벤트 등록 일치를 검사합니다.
 - 전용 관리 화면: https://kids-screen-guardian.awslike6.workers.dev/parent. 프로필은 진입 메뉴이며 실제 권한은 서버의 부모 세션으로 결정합니다.
 - 구현 원천: 관제탑 `kids-screen-guardian/worker/src/parent-auth.js`(일회 로그인·14일 HttpOnly 세션·동일 쿠키 연장·역할·해제), `parent-portal.js`(HTML/CSS·브라우저 소스 제공), `parent-client.js`(브라우저 JS 문자열·로그인·미확정 요청 재시도), `index.js`(정산·명령 영수증 원자 저장).
 - API: `GET /api/parent/summary`, `POST /api/parent/grant`(child/minutes/requestId), `POST /api/parent/lock`(child/isLocked/requestId). 추가·잠금은 아빠 인증 필요, 엄마는 조회만 허용합니다.
