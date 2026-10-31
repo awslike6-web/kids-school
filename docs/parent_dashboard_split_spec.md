@@ -1,7 +1,7 @@
 # 🧹 800줄 대청소 6차: 부모 대시보드 `parent_dashboard.js` 분리 명세서
 
 > **문서 버전**: v1.0 (2026-10-31)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 구현·검증 완료 (2026-10-31 Claude 확인)
 > **근거**: GEMINI §8-0 골디락스(파일당 800줄 미만, 300~600줄 최적), §8-4 정기 리팩토링. 노션 현황판 카드 「800줄 초과 파일 정기 대청소」의 6차분. 앞선 JS 분리: `docs/notion_reward_split_spec.md`, `docs/daily_diary_split_spec.md`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다.
 
@@ -53,3 +53,28 @@
 ## 7. 문서
 - `CORE_CATALOG.md` 1137줄 근처 등 파일 구성을 설명하는 곳만 새 구성으로 고친다. 지난 분리 명세서는 기록이므로 고치지 않는다.
 - 이 문서 상태를 "구현 완료"로 바꾸고 파일별 실제 줄 수 표를 적는다.
+
+## 8. 구현 기록 (2026-10-31)
+
+- 승인한 원본 1–546 / 547–1120줄 경계를 그대로 적용했다. 각 파일 맨 위에 지정 머리 주석 한 줄만 추가했으며 본문 바이트·주석·들여쓰기는 보존했다. 머리 주석을 제외하고 두 파일을 이으면 fixture와 바이트 단위로 같다. fixture는 작업 전 원본 그대로이며 HEAD와는 줄바꿈 형식만 다르다.
+- 실제 줄 수(머리 주석 포함):
+
+| 파일 | 실제 줄 수 |
+| :--- | ---: |
+| `kids/js/parent_dashboard.js` | 547 |
+| `kids/js/parent_dashboard_render.js` | 575 |
+| `tests/fixtures/parent-dashboard-split/parent_dashboard.js` | 1120 |
+
+- HTML에서 두 클래식 스크립트를 `?v=20261031-dash-split`로 연달아 한 번씩 로드한다. 태그 변경 외 마크업 변경은 없다. `localDateStr`·`calcStreak`는 첫 파일에 남아 기존 날짜 시험은 수정하지 않았다. 카탈로그의 위젯 소속과 파일 구성을 갱신했다.
+- 신규 `tests/parent-dashboard-split.test.mjs`: 원본 재결합·600줄 상한·머리 주석·상대 경로·태그 순서/버전/중복·옛 버전 제거, APP_CONFIG 유무에 따른 단독/전체 로드·전역 함수/상태/이벤트 비교를 검사한다. 운영 노션에 접속하지 않는다.
+- `node --test tests/parent-dashboard-split.test.mjs`: 7건 통과, 실패 0건.
+- `node scripts/verify_kst_dates.js`: 9건 통과, 실패 0건.
+- `node --test "tests/**/*.test.mjs"`는 실패로 종료했다. 실패 상세와 요약을 확인하기 위해 `node --test --test-reporter=tap "tests/**/*.test.mjs"`로 재실행한 결과 233건 중 통과 229·실패 2·건너뜀 1·기존 TODO 1이었다. 실패는 기존 `gallery-character-runner.test.mjs`와 `gallery-multi-character.test.mjs`의 Python 빌더 하위 프로세스 종료 상태가 null인 두 건이다. 이번 작업에서 해당 시험·빌더는 수정하지 않았다.
+- 계약 검사는 첫 변경 JS에 지정한 `python -X utf8 G:/master-tower/scripts/verify_contracts.py --mode file --file <절대 경로>`를 실행했으나 python 명령을 찾지 못해 실행하지 못했다. §0에 따라 재시도하지 않았고 나머지 변경 파일의 계약 검사도 미실행이다. fixture는 사용자 지시대로 검사기의 `tests/fixtures/` 줄 수 예외에 해당하며 검사기를 수정하지 않았다.
+- 필수 검사 미완료로 커밋 못 함. §6의 분리 전후 화면 비교는 Claude가 수행할 항목으로 남겼다. 운영 노션 쓰기·main 병합·푸시는 하지 않았다. 명세와 다른 구현은 없다.
+
+### Claude 확인 (2026-10-31)
+
+- `main:kids/js/parent_dashboard.js`와 두 파일(머리 주석 제외)을 순서대로 이은 내용이 줄바꿈 형식만 빼고 같다. fixture도 같다.
+- `node --test "tests/**/*.test.mjs"`: 233개 중 통과 231개, 실패 0개(건너뜀 1·todo 1). Codex 환경의 갤러리 빌더 실패 2개는 Python이 막혀서였고 이 PC에서는 통과. 바뀐 파일 7개 계약 검사 모두 `[ALL PASS]`.
+- 노션 쓰기 차단 서버(새 포트 8773·8774)로 `parent_dashboard.html?role=parent` 분리 전후 비교: 화면 글자(숫자 제외) 해시, 요소 486개, 레이더 차트 2개, 쓰기 요청 0건이 같고 콘솔 오류 없음. 계산된 스타일 차이는 무작위 위치인 배경 장식 15개와, 같은 목표 너비(2%·14%·29%·15%)로 채워지는 중이던 진행 막대 4개뿐.
