@@ -1022,11 +1022,15 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   | `ScreenTimeTracker.stopTracking()` | - | 학습 세션 정지 및 차액 정산 데이터 로컬/노션 기록 |
   | `ScreenTimeTracker.addBonusTime(mins, reason)` | `mins, reason` | 미션 달성 보너스 시간 추가 적립 |
 
-### 🌟 `timetable-boost.js` & `timetable_controller.js` (시간표 부스트 엔진)
+### 🌟 `timetable-boost.js` & `timetable_controller.js`·`timetable_grid.js`·`timetable_notices.js` (시간표 부스트 엔진)
 주간 시간표를 노션에서 프리패치하여 오늘 배울 과목과 숙제를 로비 헤더에 원터치 칩으로 띄워주는 부스트 엔진입니다.
 - **파일 위치**:
   - `kids/core/timetable-boost.js` (시간표 프리패치 & 캐시 엔진)
-  - `kids/js/timetable_controller.js` (주간/일간 시간표 뷰어 컨트롤러)
+  - `kids/js/timetable_controller.js` (504줄): 요일·교시·과목 색·`DEFAULT_BASE_TIMETABLE`, 공유 상태, 보기 설정·날짜·공지 판정 헬퍼, `buildGridMap`·`renderLessonCell`.
+  - `kids/js/timetable_grid.js` (424줄): `renderWeeklyGrid`, 모바일 열 너비·스크롤, `renderTopNoticeBanner`, `openOverlayItemModal`·`closeOverlayModal`·`openNoticeGuideModal`·`toggleOverlayItemComplete`.
+  - `kids/js/timetable_notices.js` (281줄): 공지 정렬·`renderNotices`·`renderAll`, `setChildFilter`·툴팁, `loadTimetableData`, 시계 즉시 갱신·타이머·`DOMContentLoaded` 등록.
+- **로드 순서 (2026-10-31 분리)**: `timetable.html`에서 기존 `kids/config.js` → `kids/core/notion-timetable.js` 뒤에 controller → grid → notices를 상대 경로·동일 버전 `?v=20261031-timetable-split`의 클래식 스크립트로 연달아 싣습니다. 원문·전역 함수·상태·DOM·통신 방식은 유지합니다.
+- **검증**: `tests/timetable-split.test.mjs`가 고정 fixture 원문 재결합·본문 바이트 보존·600줄 상한·참조·부분 로드·전역 함수/상태·시계·이벤트/타이머 등록 일치를 검사합니다(모의 환경, 운영 노션 미접속). 분리 계약은 `docs/timetable_controller_split_spec.md`입니다.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |

@@ -40,12 +40,16 @@ graph TD
 
 | 파일 경로 | 핵심 역할 및 무결성 유지 항목 |
 | :--- | :--- |
-| [`timetable.html`](file:///g:/master-tower/kids-school-main/timetable.html) | **시간표 뷰포트**: 85줄 초경량 HTML. DOM ID(`gridContent`, `noticeContent`, `filterTabs`, `clockTime`, `topNoticeBannerArea`, `noticeGuideBtn`, `overlayModalPortal`) **절대 변경/삭제 금지**. |
-| [`kids/js/timetable_controller.js`](file:///g:/master-tower/kids-school-main/kids/js/timetable_controller.js) | **시간표 컨트롤러**: 격자 렌더링, 자녀 필터(`all`/`민수`/`민서`), `DEFAULT_BASE_TIMETABLE`, 모달 제어(`openOverlayItemModal`, `openNoticeGuideModal`). |
+| [`timetable.html`](../timetable.html) | **시간표 뷰포트**: 87줄 초경량 HTML. DOM ID(`gridContent`, `noticeContent`, `filterTabs`, `clockTime`, `topNoticeBannerArea`, `noticeGuideBtn`, `overlayModalPortal`) **절대 변경/삭제 금지**. |
+| [`kids/js/timetable_controller.js`](../kids/js/timetable_controller.js) | **기본 시간표·공통 헬퍼**(504줄): `DEFAULT_BASE_TIMETABLE`, 공유 상태, 보기 설정·날짜·공지 판정, `buildGridMap`·`renderLessonCell`. |
+| [`kids/js/timetable_grid.js`](../kids/js/timetable_grid.js) | **격자·모달**(424줄): `renderWeeklyGrid`, 모바일 열 너비·스크롤, 상단 공지 배너, `openOverlayItemModal`·`closeOverlayModal`·`openNoticeGuideModal`·`toggleOverlayItemComplete`. |
+| [`kids/js/timetable_notices.js`](../kids/js/timetable_notices.js) | **공지·초기화**(281줄): 공지 정렬·`renderNotices`·`renderAll`, 자녀 필터(`setChildFilter`)·툴팁, `loadTimetableData`, 시계·타이머·이벤트 등록. |
 | [`kids/css/timetable.css`](file:///g:/master-tower/kids-school-main/kids/css/timetable.css) | **스타일시트**: 네온 칠판 테마, 반응형 듀얼 트랙, 모바일 스크롤 최적화. |
 | [`kids/core/notion-timetable.js`](file:///g:/master-tower/kids-school-main/kids/core/notion-timetable.js) | **노션 시간표 통신 코어**: 워커 프록시 호출, 듀얼 DB 전량 쿼리, 교시 파싱(`parseTimetablePeriodSlot`), 완료 체크 패치. |
 | [`daily-diary-base.js`](../kids/core/daily-diary-base.js) → [`daily-diary-forms.js`](../kids/core/daily-diary-forms.js) → [`daily-diary-sync.js`](../kids/core/daily-diary-sync.js) → [`daily-diary-submit.js`](../kids/core/daily-diary-submit.js) | **마음일기 코어**: 순서대로 날짜·로컬 저장·STT·모달, 민서/민수 폼·노션 전송·보상, 조회·캐시 동기화, 제출·목록·전역 바인딩. 클래식 스크립트이며 로더 두 곳과 하루방·국어방·부모 일기장에서 같은 순서로 로드. HTML은 네 태그를 한 줄에 공백 하나로 연결(`?v=20261031-diary-split`). |
 | [`kids/config.js`](file:///g:/master-tower/kids-school-main/kids/config.js) | **글로벌 환경 설정**: 워커 프록시 URL, DB ID 모음. |
+
+시간표 JS는 기존 `kids/config.js` → `kids/core/notion-timetable.js` 뒤에서 controller → grid → notices 순서로 연달아 로드합니다(클래식 스크립트, 상대 경로, 세 태그 모두 `?v=20261031-timetable-split`). 기존 전역 API·최상위 상태·DOM·통신 방식은 보존합니다. 분리 계약은 [`timetable_controller_split_spec.md`](timetable_controller_split_spec.md), 원문·부분 로드·전역 함수/상태·이벤트/타이머 검증은 [`tests/timetable-split.test.mjs`](../tests/timetable-split.test.mjs)를 따릅니다.
 
 ---
 
