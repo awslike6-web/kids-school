@@ -52,6 +52,10 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   - `kids/core/study-log-store.js` (338줄): `STUDY_LOG_DB` 학습일지 **일일 Upsert 쓰기 단일 원천**(`{학생}_{KST YYYY-MM-DD}_{과목}` 키, 있으면 PATCH 누적·없으면 POST) + **연속 학습 스트릭**(노션 '입장' KST 날짜 기준, 연속이 끊긴 지점까지만 페이지 조회, 전송 성공 시 로컬 캐시에 오늘 즉시 반영, 기록 없으면 배지 숨김). `notion-study-logger.js`·`notion-reward.js` 두 경로가 모두 이 모듈만 호출하며, 두 파일 모두 미로드 시 스스로 이 모듈을 불러온다. 검증: `node scripts/verify_study_log_store.js`.
   - 학습일지는 당일 페이지 ID(`MINMIN_STUDY_LOG_PAGES_V1`)를 기억하고 조회·GET의 `?force=true`로 현재 값을 다시 읽습니다. 같은 키는 Web Locks(같은 브라우저 두 탭) 또는 Map 체인(한 탭)으로 직렬화하며 오답은 정확히 같은 구분 항목만 중복 제거합니다.
   - 조회는 400ms 뒤 한 번 재시도하고, 기억한 ID도 없고 재시도도 실패하면 선택 A에 따라 중복 가능 경고 1회와 함께 신규 생성합니다. 두 기기 동시 쓰기는 노션 고유 키 제약이 없어 보장하지 않습니다.
+  - 보상 직접 로드 경로는 클래식 스크립트 `notion-reward.js` → `notion-reward-quiz.js` → `notion-reward-discussion.js` 순서입니다. `quest_runner.html`에서 세 파일을 `?v=20261031-reward-split`로 연달아 싣습니다. `notion-helper.js`를 싣는 화면(예: `voca.html`)은 같은 이름을 선언하는 `mission-reward-engine.js`·`quiz-feedback-overlay.js`를 받으므로 `notion-reward*.js`를 함께 싣지 않습니다(`tests/notion-reward-split.test.mjs`가 검사).
+  - `kids/core/notion-reward.js` (443줄): 공용 모듈 자동 로드, `sendStudyLogToNotion`, 레벨 계산, `grantRewardAndShowUI`, 음성 세션 상태.
+  - `kids/core/notion-reward-quiz.js` (450줄): `setupDebouncedSTT`, 접속사 채점, 미션 보상, 퀴즈 보상 세션.
+  - `kids/core/notion-reward-discussion.js` (448줄): 이탈 시 세션 플러시, 토론 보상·대화 기억 연결, 오답 선택 안내, 이탈 확인, 용어 정독 보상. 원문 보존·부분 로드·전역 API·이벤트 검증은 `tests/notion-reward-split.test.mjs`, 분리 계약은 `docs/notion_reward_split_spec.md`입니다.
   - `kids/core/notion-study-logger.js` (425줄): `STUDY_LOG_DB` 학습일지 전송 진입점(중복 방어막, 오답 리포트 수집 → `StudyLogStore.upsertStudyLog`), `INVENTORY_DB` 보상/레벨업 엔진, 부모 관리자 모드 격리, 상대 경로 로비 복귀.
   - `kids/core/stt-debouncer.js`: STT 음성 인식 디바운스 및 세션 관리 (`setupDebouncedSTT`).
   - `kids/core/mission-reward-engine.js`: 미션 보상 지급 및 축하 모달 렌더러 (`claimMissionRewardOnce`, `openMissionRewardModal`, `grantVocaDwellReward`).
