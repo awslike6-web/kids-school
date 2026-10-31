@@ -1,0 +1,169 @@
+
+    /* 돋보기 자(Ruler) 측정 뷰 */
+    .ruler-container {
+      background: #ffffff;
+      border: 3px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 22px 18px;
+      margin: 15px auto;
+      max-width: 580px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .ruler-svg-wrap {
+      width: 100%;
+      overflow-x: auto;
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .ruler-svg-wrap svg {
+      width: 100%;
+      max-width: 540px;
+      height: auto;
+    }
+
+    /* 단위 환산 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+
+    /* 🪐 동적 우주 활주로 캔버스 */
+    .space-canvas-box {
+      background: linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #0f172a 100%);
+      border: 3px solid #6366f1;
+      border-radius: 20px;
+      padding: 15px 10px;
+      margin: 15px auto;
+      max-width: 580px;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+    .space-svg-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .space-svg-wrap svg {
+      width: 100%;
+      max-width: 560px;
+      height: auto;
+    }
+
+    /* 태양계 우주 탐사선 카드 그리드 */
+    .space-planet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .planet-btn-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .planet-btn-card:hover, .planet-btn-card.active {
+      transform: translateY(-3px);
+      border-color: #8b5cf6;
+      background: #f5f3ff;
+      box-shadow: 0 8px 16px rgba(139, 92, 246, 0.2);
+    }
+    .planet-icon { font-size: 2.2rem; margin-bottom: 4px; }
+    .planet-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
+    .planet-dist-tag { font-size: 0.82rem; color: #7c3aed; font-weight: 700; }
+
+    /* ⏱️ 실전 스톱워치 챌린지 상자 */
+    .stopwatch-challenge-box {
+      background: #ffffff;
+      border: 3px solid #f43f5e;
+      border-radius: 24px;
+      padding: 22px;
+      margin: 15px auto;
+      max-width: 560px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(244, 63, 94, 0.15);
+      position: relative;
+    }
+    .stopwatch-digital-clock {
+      font-family: 'Jua', sans-serif;
+      font-size: 3.2rem;
+      color: #e11d48;
+      background: #fff1f2;
+      border: 2px solid #fecdd3;
+      border-radius: 20px;
+      padding: 12px 24px;
+      display: inline-block;
+      margin: 12px 0;
+      letter-spacing: 2px;
+      min-width: 260px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .stopwatch-btn-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+    .stopwatch-action-btn {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      padding: 12px 28px;
+      border-radius: 30px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .stopwatch-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .btn-timer-start { background: linear-gradient(135deg, #10b981, #059669); }
+    .btn-timer-stop { background: linear-gradient(135deg, #f43f5e, #be123c); }
+    .btn-timer-reset { background: linear-gradient(135deg, #64748b, #475569); }
+
+    /* ⏱️ 플로팅 미니 타이머 캡슐 */
+    .floating-timer-capsule {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 2px solid #f43f5e;
+      color: #fff;
+      border-radius: 40px;
+      padding: 10px 20px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      z-index: 999;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      animation: pulseGlow 1.5s infinite alternate;
+    }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
+      to { box-shadow: 0 0 25px rgba(244, 63, 94, 0.8); }
+    }
+  
