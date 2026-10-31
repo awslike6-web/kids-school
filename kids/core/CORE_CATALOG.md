@@ -729,6 +729,19 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 2,720줄의 거대했던 `haru_common.js`를 1개의 초경량 대문 파사드와 4개의 전문 서브모듈로 완전 분리 구축한 라이프 & 통합교과 엔진군입니다.
 
+### 하루방 영역별 CSS (2026-10-31)
+
+기존 단일 스타일 2,756줄을 원문·캐스케이드 순서를 보존하여 다음 6개로 분리했습니다. 줄 수는 새 머리 주석 1줄을 포함한 실제 줄 수입니다.
+
+- `kids/css/haru-base.css` (431줄): 변수·공통·상단·습관·감상실.
+- `kids/css/haru-special-days.css` (507줄): 특별한 날 추억 게시판.
+- `kids/css/haru-checkin.css` (340줄): 30초 체크인·사진 팝업.
+- `kids/css/haru-safety.css` (507줄): 119 안전 수호대·닥터 코코.
+- `kids/css/haru-timeline-clock.css` (518줄): 타임머신 헤더·시계판·필터.
+- `kids/css/haru-timeline-list.css` (459줄): 타임라인 목록·스티커·모달·반응형.
+- **로드 계약**: `kids/subjects/haru/haru.html`의 기존 스타일 링크 자리에서 위 순서대로 `../../css/{파일명}?v=20261031-haru-split`을 직접 로드합니다. `@import`는 쓰지 않습니다. JS·공개 API는 그대로입니다.
+- **회귀 시험**: `tests/haru-css-split.test.mjs`가 고정 원본 `tests/fixtures/haru-css-split/haru.css`와 재결합 결과, 링크 순서·파일 크기·블록 경계·기존 파일 제거를 검사합니다. 계약: `docs/haru_css_split_spec.md`.
+
 ### 🌟 `haru_common.js` (하루 라이프 허브 대문 파사드)
 자녀 프로필 동적 전환(민수 초5 데일리 ↔ 민서 초1 슬기로운 하루), 5대 라이프 탭 스위칭, 초고음질 요정 엔진(Edge-TTS) 음성 제어, 하늘 명화/동요 자연·예술 감상실을 총괄하는 초경량 라우팅 파사드입니다.
 - **파일 위치**: `kids/subjects/haru/js/haru_common.js` (402줄)

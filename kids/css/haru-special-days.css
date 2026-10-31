@@ -1,0 +1,507 @@
+/* kids/css/haru-special-days.css - haru.css 분리 2/6: 특별한 날 추억 게시판 (haru.html에서 순서대로 로드) */
+/* =========================================================
+   3. 특별한 날 추억 게시판 UI
+   ========================================================= */
+.special-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.special-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  border: 2px solid #eee;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transition: all 0.2s;
+  position: relative;
+}
+.special-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--haru-green);
+  box-shadow: 0 8px 20px rgba(46, 213, 115, 0.15);
+}
+.special-card-icon {
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+.special-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.special-card-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.15rem;
+  color: var(--dark);
+  line-height: 1.35;
+  flex: 1;
+}
+.title-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  opacity: 0.45;
+  transition: all 0.2s;
+  padding: 3px 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.special-card:hover .title-edit-btn,
+.title-edit-btn:hover {
+  opacity: 1;
+  background: #f1f2f6;
+  transform: scale(1.1);
+}
+.title-edit-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  animation: fadeIn 0.2s ease-in;
+}
+.title-edit-input {
+  flex: 1;
+  border: 1.5px solid #2ed573;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+}
+.title-edit-input:focus {
+  box-shadow: 0 0 6px rgba(46, 213, 115, 0.3);
+}
+.title-save-btn {
+  background: #2ed573;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.title-cancel-btn {
+  background: #dfe4ea;
+  color: #57606f;
+  border: none;
+  border-radius: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.special-card-date {
+  font-size: 0.85rem;
+  color: #ff9f43;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.special-card-desc {
+  font-size: 0.95rem;
+  color: #57606f;
+  line-height: 1.5;
+}
+
+/* 📷 사진이 포함된 특별한 날 포토 카드 (폴라로이드 스타일) */
+.special-card.has-photo {
+  padding: 12px 12px 18px;
+  display: flex;
+  flex-direction: column;
+}
+.special-card-img-wrap {
+  width: 100%;
+  height: 210px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  margin-bottom: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.04);
+  cursor: pointer;
+}
+.special-card-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.special-card-img-wrap:hover .special-card-img {
+  transform: scale(1.03);
+}
+.special-card-zoom-chip {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  font-size: 0.73rem;
+  font-family: 'Jua', sans-serif;
+  padding: 3px 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: all 0.2s;
+  pointer-events: none;
+}
+.special-card-img-wrap:hover .special-card-zoom-chip {
+  background: rgba(255, 118, 117, 0.95);
+  transform: scale(1.05);
+}
+.special-card-category-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 9px;
+  border-radius: 8px;
+}
+.special-card-photo-count {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(46, 213, 115, 0.9);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+.special-card-video-chip {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 71, 87, 0.92);
+  color: #fff;
+  font-size: 0.75rem;
+  font-family: 'Jua', sans-serif;
+  padding: 3px 9px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.special-card-thumbs {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.special-card-thumb-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.special-card-thumb-btn.active {
+  border-color: #2ed573;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(46, 213, 115, 0.3);
+}
+.special-card-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 🌟 아이 감정 도장 (Reaction Stamp) UI */
+.special-card-reactions {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #ffd1dc;
+}
+.reaction-label {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.85rem;
+  color: #ff6b81;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.reaction-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.reaction-stamp-btn {
+  background: #fff;
+  border: 1.5px solid #ffeaa7;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Jua', sans-serif;
+  color: #4b4b4b;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+.reaction-stamp-btn:hover {
+  background: #fff9e6;
+  border-color: #feca57;
+  transform: translateY(-2px);
+}
+.reaction-stamp-btn.custom-btn {
+  background: #fdf2f8;
+  border-color: #fbcfe8;
+  color: #db2777;
+}
+.reaction-stamp-btn.custom-btn:hover {
+  background: #fce7f3;
+  border-color: #f472b6;
+}
+.custom-stamp-input-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  animation: fadeIn 0.2s ease-in;
+}
+.custom-stamp-input {
+  flex: 1;
+  border: 1.5px solid #ff9ff3;
+  border-radius: 12px;
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-family: 'Jua', sans-serif;
+  outline: none;
+}
+.custom-stamp-input:focus {
+  border-color: #f368e0;
+  box-shadow: 0 0 6px rgba(243, 104, 224, 0.3);
+}
+.custom-stamp-submit-btn {
+  background: linear-gradient(135deg, #ff9ff3, #feca57);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  font-family: 'Jua', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(254, 202, 87, 0.4);
+}
+.reaction-stamp-btn.selected {
+  background: linear-gradient(135deg, #ff9ff3, #feca57);
+  color: #fff;
+  border-color: transparent;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(254, 202, 87, 0.4);
+  animation: stampPop 0.3s ease-out;
+}
+@keyframes stampPop {
+  0% { transform: scale(0.7); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.reaction-stamp-badge {
+  background: #fdf2f8;
+  border: 1px solid #fbcfe8;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  color: #be185d;
+  font-family: 'Jua', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* 🎬 특별한 날 동영상 감상 UI */
+.special-card-video-wrap {
+  margin: 10px 0 6px 0;
+}
+.special-card-video-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  color: #ffffff !important;
+  text-decoration: none;
+  border-radius: 14px;
+  padding: 9px 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.92rem;
+  box-shadow: 0 3px 10px rgba(255, 71, 87, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.special-card-video-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 71, 87, 0.5);
+  background: linear-gradient(135deg, #ee5253, #ff4757);
+}
+.video-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.video-btn-icon {
+  font-size: 1.15rem;
+}
+.video-btn-text {
+  letter-spacing: -0.2px;
+}
+.video-btn-badge {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.76rem;
+  letter-spacing: -0.2px;
+}
+
+/* ⏹️ 플로팅 실시간 음성 중단 컨트롤러 */
+.haru-audio-floating-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 71, 87, 0.65);
+  border-radius: 30px;
+  padding: 9px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+  z-index: 9999;
+  cursor: pointer;
+  animation: slideUpAudio 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.2s;
+}
+.haru-audio-floating-bar:hover {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: #ff4757;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 10px 28px rgba(255, 71, 87, 0.45);
+}
+@keyframes slideUpAudio {
+  from { opacity: 0; transform: translateX(-50%) translateY(25px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.pulse-speaker {
+  animation: pulseSpeakerIcon 0.8s infinite alternate;
+}
+@keyframes pulseSpeakerIcon {
+  0% { transform: scale(0.9); }
+  100% { transform: scale(1.25); }
+}
+.floating-stop-chip {
+  background: linear-gradient(135deg, #ff4757, #ee5253);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  box-shadow: 0 2px 6px rgba(255, 71, 87, 0.4);
+}
+
+/* 🔊 카드 낭독 중 시각적 하이라이트 & 토글 안내 */
+.special-card.is-speaking {
+  border: 2px solid #ff4757 !important;
+  box-shadow: 0 0 18px rgba(255, 71, 87, 0.45) !important;
+  transform: translateY(-2px);
+}
+.card-speaking-badge {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 71, 87, 0.95);
+  color: #fff;
+  font-size: 0.76rem;
+  font-family: 'Jua', sans-serif;
+  padding: 3px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fadeInBadge 0.2s ease-out;
+}
+@keyframes fadeInBadge {
+  from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+.story-photo-upload-zone {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.story-img-preview-box {
+  width: 100%;
+  height: 150px;
+  border: 2px dashed #ffccd5;
+  border-radius: 14px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.8);
+  margin-bottom: 10px;
+}
+.story-img-preview-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* 이야기 등록 폼 */
+.story-write-card {
+  background: linear-gradient(135deg, #fff0f3, #fffbe6);
+  border: 2px solid #ffccd5;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 20px;
+}
+.story-write-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.2rem;
+  color: var(--dark);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 📱 반응형 */
+@media (max-width: 600px) {
+  .haru-nav-tabs { grid-template-columns: 1fr; }
+  .workout-days-row { grid-template-columns: repeat(4, 1fr); }
+  .piggy-board-grid { grid-template-columns: repeat(4, 1fr); }
+}
+

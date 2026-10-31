@@ -1,0 +1,459 @@
+/* kids/css/haru-timeline-list.css - haru.css 분리 6/6: 타임라인 목록·스티커·모달·반응형 (haru.html에서 순서대로 로드) */
+/* 우측: 타임라인 목록 및 스티커 보관함 */
+.timeline-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.timeline-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.section-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.25rem;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.item-count-chip {
+  background: #e3f2fd;
+  color: #0984e3;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.custom-add-btn {
+  background: #fdf2f8;
+  color: #db2777;
+  border: 1.5px solid #fbcfe8;
+  border-radius: 14px;
+  padding: 7px 16px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.custom-add-btn:hover {
+  background: #fce7f3;
+  transform: translateY(-2px);
+}
+
+/* 타임라인 카드 스크롤 */
+.timeline-cards-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.timeline-card-item {
+  background: #fff;
+  border-radius: 18px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 2px solid #eef2f5;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+.timeline-card-item:hover {
+  transform: translateY(-2px);
+  border-color: #74b9ff;
+  box-shadow: 0 6px 16px rgba(9, 132, 227, 0.12);
+}
+
+/* 시간 컬럼 */
+.timeline-card-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 100px;
+}
+.timeline-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.timeline-period-badge {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: 8px;
+  color: #fff;
+  line-height: 1.2;
+}
+.timeline-period-badge.morning { background: #ff7675; }
+.timeline-period-badge.lunch { background: #0984e3; }
+.timeline-period-badge.evening { background: #e17055; }
+.timeline-period-badge.night { background: #6c5ce7; }
+
+.item-repeat-chip {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+  line-height: 1.2;
+}
+.item-repeat-chip.recurring {
+  background: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+.item-repeat-chip.daily {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+.item-repeat-chip.days {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+/* 시간 직접 입력 박스 */
+.timeline-time-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  padding: 3px 6px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.timeline-time-input-wrap:hover,
+.timeline-time-input-wrap:focus-within {
+  border-color: #0984e3;
+  background: #ffffff;
+  box-shadow: 0 0 0 2.5px rgba(9, 132, 227, 0.15);
+}
+.time-prefix-icon {
+  font-size: 0.85rem;
+}
+.timeline-time-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 0;
+  width: 68px;
+}
+
+/* 본문 (아이콘 + 제목 + 메모) */
+.timeline-card-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+}
+.timeline-card-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.timeline-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.timeline-card-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  color: #2d3436;
+}
+.timeline-card-memo {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+/* 액션 버튼 */
+.timeline-card-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.timeline-icon-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+.timeline-icon-btn:hover {
+  background: #e2e8f0;
+  transform: scale(1.08);
+}
+.timeline-icon-btn.delete-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+.timeline-empty-notice {
+  text-align: center;
+  padding: 30px 10px;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 2px dashed #dfe6e9;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+/* 🎨 스티커 트레이 */
+.sticker-tray-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  border: 2px solid #eef2f5;
+}
+.tray-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.tray-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  color: var(--dark);
+}
+.tray-tip {
+  font-size: 0.8rem;
+  color: #0984e3;
+  font-weight: bold;
+}
+.sticker-tray-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.sticker-chip {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sticker-chip:hover {
+  transform: translateY(-2px);
+  background: #fff;
+  border-color: #feca57;
+  box-shadow: 0 4px 10px rgba(254, 202, 87, 0.3);
+}
+.sticker-chip-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.sticker-chip-info {
+  display: flex;
+  flex-direction: column;
+}
+.sticker-chip-title {
+  font-family: 'Jua', sans-serif;
+  font-size: 0.88rem;
+  color: var(--dark);
+}
+.sticker-chip-time {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* 커스텀 모달 입력 폼 */
+.timeline-form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.95rem;
+  outline: none;
+  box-sizing: border-box;
+}
+.timeline-form-input:focus {
+  border-color: #0984e3;
+  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.15);
+}
+.emoji-selector-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.emoji-opt {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  border-radius: 10px;
+  background: #f1f2f6;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+.emoji-opt:hover {
+  transform: scale(1.1);
+}
+.emoji-opt.active {
+  background: #fff;
+  border-color: #0984e3;
+  box-shadow: 0 2px 8px rgba(9, 132, 227, 0.25);
+}
+
+/* 나만의 일과 모달: 일정 종류 선택 토글 */
+.schedule-type-toggle-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.schedule-type-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 2px solid transparent;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.92rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.schedule-type-btn:hover {
+  background: #e2e8f0;
+}
+.schedule-type-btn.active {
+  background: #ffffff;
+  border-color: #0984e3;
+  color: #0984e3;
+  box-shadow: 0 3px 10px rgba(9, 132, 227, 0.18);
+}
+
+/* 특정 요일 선택기 UI */
+.days-selector-box {
+  margin-top: 10px;
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1.5px solid #e2e8f0;
+  animation: haruModalPop 0.2s ease;
+}
+.days-preset-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.78rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.days-preset-btn:hover {
+  background: #f1f5f9;
+  border-color: #0984e3;
+  color: #0984e3;
+}
+.weekday-chips-row {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+}
+.weekday-chip {
+  flex: 1;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+.weekday-chip.weekend {
+  color: #e11d48;
+}
+.weekday-chip:hover {
+  transform: translateY(-2px);
+  border-color: #0984e3;
+}
+.weekday-chip.active {
+  background: #0984e3;
+  border-color: #0984e3;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(9, 132, 227, 0.3);
+  font-weight: bold;
+}
+
+@media (max-width: 850px) {
+  .timeline-main-grid {
+    grid-template-columns: 1fr;
+  }
+  .magic-clock-container {
+    width: min(320px, 86vw);
+    height: min(320px, 86vw);
+  }
+}
+
+@media (max-width: 600px) {
+  .symptom-chips-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .ox-symbol {
+    font-size: 2.8rem !important;
+  }
+  .safety-hero-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  .safety-hero-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2.2rem;
+  }
+  .timeline-hero-card {
+    padding: 16px;
+  }
+  .timeline-hero-title {
+    font-size: 1.35rem;
+  }
+  .sticker-tray-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+
