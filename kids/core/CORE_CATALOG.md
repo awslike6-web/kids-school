@@ -105,6 +105,10 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ---
 
+### 마이룸 인라인 CSS·JS 분리 (2026-10-31)
+- `kids/common_space/my-room.html`(50줄)은 같은 폴더의 `my-room.css`(203줄), `my-room-core.js`(542줄) → `my-room-main.js`(490줄)를 원래 위치에서 상대 경로·`?v=20261031-room-split`로 로드합니다. 기존 `../config.js`가 먼저이며 클래식 스크립트·전역 상태·DOM·동작을 보존합니다.
+- core는 상태·목록·저장/동기화 함수, main은 `initRoom`·`switchTab`·`buyItem`·`selectRoomMap`·가구 렌더링/드래그·`clearRoom`과 기존 `DOMContentLoaded` 등록을 담당합니다. 검증: `tests/my-room-split.test.mjs`(고정 fixture 원문·마크업·600줄 제한·core 단독 로드·전역 함수 보존), 분리 계약: `docs/my_room_split_spec.md`.
+
 ## 2-0-1. 🎨 꿈나무 갤러리 & 성장 아카이브 코어 (Gallery & Growth Archive Engines)
 
 ### AI 편집본 자동 맞춤·선택 합성 (2026-10-29)

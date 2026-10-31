@@ -29,6 +29,7 @@
 * quest_runner.html: 전 과목 5분 퀘스트 메인 러너 (4+1 듀오링고 출제, 수학 손글씨 메모장, 사료 돋보기 탑재).
 * kids/subjects/quest/: quest_engine.js(핵심 출제 엔진), quest_notion_synth.js(노션 어휘·교재 문제 합성·수학 무한 암산), quest_data_minsu.js, quest_data_minseo.js.
 * kids/common_space/my-room.html: 인벤토리 및 보상 상점.
+  * `my-room.css`(203줄), `my-room-core.js`(542줄) → `my-room-main.js`(490줄)를 원래 인라인 위치에서 상대 경로로 로드한다. HTML은 50줄이며 전역 함수·DOM·동작은 보존한다. 분리 계약: `my_room_split_spec.md`, 시험: `../tests/my-room-split.test.mjs`.
 * kids/data/: 학기별 단원별 문제 정적 데이터셋.
 
 ---
