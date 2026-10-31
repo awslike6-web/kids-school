@@ -99,7 +99,7 @@ function pickFn(rel, name) {
 
 {
   // 마음일기·하루방·갤러리·동화 뷰어·노션 통신: 파일마다 둔 KST 헬퍼가 같은 답을 내는지
-  const files = ['kids/core/daily-diary.js', 'kids/common_space/gallery-modal-manager.js', 'kids/common_space/gallery_controller.js',
+  const files = ['kids/core/daily-diary-base.js', 'kids/common_space/gallery-modal-manager.js', 'kids/common_space/gallery_controller.js',
     'kids/core/notion-api-client.js', 'kids/js/storybook_engine.js', 'kids/subjects/haru/js/haru-safety-quiz.js',
     'kids/subjects/haru/js/haru-special-days.js', 'kids/subjects/haru/js/haru-timeline-engine.js'];
   const bad = files.filter(rel => {
@@ -108,7 +108,9 @@ function pickFn(rel, name) {
     return sb.f() !== TODAY;
   });
   assert(bad.length === 0, `파일 8개의 KST 헬퍼가 모두 ${TODAY} 반환${bad.length ? ' (실패: ' + bad.join(', ') + ')' : ''}`);
-  const raw = files.map(rel => fs.readFileSync(path.join(ROOT, rel), 'utf8')).join('\n');
+  // 날짜 헬퍼는 base에 있고, UTC 금지식 검사는 분리 전 일기 본문 전체를 계속 검사한다.
+  const sourceFiles = [...files, 'kids/core/daily-diary-forms.js', 'kids/core/daily-diary-sync.js', 'kids/core/daily-diary-submit.js'];
+  const raw = sourceFiles.map(rel => fs.readFileSync(path.join(ROOT, rel), 'utf8')).join('\n');
   assert(!/new Date\(\)\.toISOString\(\)\.(split\('T'\)\[0\]|slice\(0, ?10\))/.test(raw), '8개 파일에 보정 없는 UTC 날짜 자르기 0건');
 
   const sb = sandbox();
@@ -116,7 +118,7 @@ function pickFn(rel, name) {
     { childName: '민서', date: TODAY, text: '아침 8시에 쓴 일기' },
     { childName: '민서', date: '2026-10-25', text: '어제 일기' }
   ]));
-  vm.runInContext(`${pickFn('kids/core/daily-diary.js', 'getKstTodayYMD')}\n${pickFn('kids/core/daily-diary.js', 'getStoredDiaries')}\n${pickFn('kids/core/daily-diary.js', 'getTodayDiaryCount')}\nthis.count = getTodayDiaryCount;`, sb);
+  vm.runInContext(`${pickFn('kids/core/daily-diary-base.js', 'getKstTodayYMD')}\n${pickFn('kids/core/daily-diary-base.js', 'getStoredDiaries')}\n${pickFn('kids/core/daily-diary-base.js', 'getTodayDiaryCount')}\nthis.count = getTodayDiaryCount;`, sb);
   assert(sb.count('민서') === 1, `마음일기: 오전 8:30에 '오늘 쓴 일기'를 오늘 것으로 셈 (계산값 ${sb.count('민서')})`);
 }
 

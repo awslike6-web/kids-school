@@ -44,7 +44,7 @@ graph TD
 | [`kids/js/timetable_controller.js`](file:///g:/master-tower/kids-school-main/kids/js/timetable_controller.js) | **시간표 컨트롤러**: 격자 렌더링, 자녀 필터(`all`/`민수`/`민서`), `DEFAULT_BASE_TIMETABLE`, 모달 제어(`openOverlayItemModal`, `openNoticeGuideModal`). |
 | [`kids/css/timetable.css`](file:///g:/master-tower/kids-school-main/kids/css/timetable.css) | **스타일시트**: 네온 칠판 테마, 반응형 듀얼 트랙, 모바일 스크롤 최적화. |
 | [`kids/core/notion-timetable.js`](file:///g:/master-tower/kids-school-main/kids/core/notion-timetable.js) | **노션 시간표 통신 코어**: 워커 프록시 호출, 듀얼 DB 전량 쿼리, 교시 파싱(`parseTimetablePeriodSlot`), 완료 체크 패치. |
-| [`kids/core/daily-diary.js`](file:///g:/master-tower/kids-school-main/kids/core/daily-diary.js) | **마음일기 코어**: 민서(풍선/나-전달법)/민수(바이브/목표) 일기 폼, 음성인식(STT), 학습일지 DB 등록, 당일 일상 DB 연동. |
+| [`daily-diary-base.js`](../kids/core/daily-diary-base.js) → [`daily-diary-forms.js`](../kids/core/daily-diary-forms.js) → [`daily-diary-sync.js`](../kids/core/daily-diary-sync.js) → [`daily-diary-submit.js`](../kids/core/daily-diary-submit.js) | **마음일기 코어**: 순서대로 날짜·로컬 저장·STT·모달, 민서/민수 폼·노션 전송·보상, 조회·캐시 동기화, 제출·목록·전역 바인딩. 클래식 스크립트이며 로더 두 곳과 하루방·국어방·부모 일기장에서 같은 순서로 로드. HTML은 네 태그를 한 줄에 공백 하나로 연결(`?v=20261031-diary-split`). |
 | [`kids/config.js`](file:///g:/master-tower/kids-school-main/kids/config.js) | **글로벌 환경 설정**: 워커 프록시 URL, DB ID 모음. |
 
 ---
@@ -88,7 +88,7 @@ graph TD
   - `가족 칭찬 댓글` (rich_text): 가족들의 따뜻한 피드백 JSON 저장
   - `🏆 트로피`, `❤️ 하트`, `✨ 별`, `👍 최고` (number): 감정 리액션 카운트
   - `페이지 본문(Children)`: 📖 헤딩2 및 콜아웃(💖/⭐/☕), 인용 블록(💬 나-전달법/다짐)으로 가독성 극대화
-- **일기장 조회·캐시 동기화 규칙 (`kids/core/daily-diary.js`, 2026-10-25)**:
+- **일기장 조회·캐시 동기화 규칙 (`kids/core/daily-diary-sync.js`, 규칙 2026-10-25 / 분리 2026-10-31)**:
   - 조회(`fetchNotionDiaries`)는 `구분`이 `마음일기`·`일기`·`종이일기`인 페이지만 받는다. `특별한 날`·`작품`은 일기장에 들어오지 않는다.
   - 아이 일기장의 `주인공` 조건은 `{아이}` + `부모관리자`다. 부모 모드에서 아이 일기를 대신 쓰면 `주인공: 부모관리자`, 제목 `부모관리자_{날짜} ({아이} {구분})`로 저장되기 때문이다. `공동`은 넣지 않는다.
   - 노션이 단일 원천이다. 신규 DB를 다음 페이지 없이 끝까지 받은 동기화에서는, 그 아이의 노션 연동 캐시 항목(`notionPageId`) 중 결과에 없는 것을 `localStorage['mimi_daily_diaries']`에서 지운다(`pruneStaleNotionEntries`). 예전에 캐시에 들어간 `특별한 날`과 노션에서 지운 일기가 이때 정리된다.

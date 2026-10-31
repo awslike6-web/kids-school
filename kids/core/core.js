@@ -9,7 +9,10 @@ var requiredCores = [
     "fairy-tts.js",
     "fairy-settings-catalog.js",
     "fairy-engine.js",
-    "daily-diary.js",
+    "daily-diary-base.js",
+    "daily-diary-forms.js",
+    "daily-diary-sync.js",
+    "daily-diary-submit.js",
     "quiz-flow-controller.js",
     "screentime-tracker.js"
 ];
