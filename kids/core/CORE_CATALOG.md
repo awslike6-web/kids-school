@@ -200,6 +200,15 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   | `MathQuizEngine.renderFrac(num, den)` | 진분수 HTML 시각화 렌더러 |
   | `MathQuizEngine.renderMixed(w, num, den)` | 대분수 HTML 시각화 렌더러 |
 
+### 수학 페이지 인라인 CSS·JS 분리 (2026-10-31)
+
+- 대상 HTML: `kids/subjects/math/`의 `fractions_multiplication.html`, `fractions_training.html`, `math_operator_studio.html`, `ranges_estimation.html`, `length_time.html`. 마크업·기존 외부 스크립트 순서·전역 함수는 그대로 유지합니다.
+- 스타일: `kids/css/math_fractions_multiplication.css`, `math_fractions_training.css`, `math_operator_studio.css`, `math_ranges_estimation.css`, `math_length_time.css`. 각 HTML의 원래 style 위치에서 상대 경로로 로드합니다.
+- 스크립트: `kids/subjects/math/js/`의 `fractions_multiplication-core.js` → `fractions_multiplication-main.js`, `fractions_training-core.js` → `fractions_training-main.js`, `math_operator_studio-core.js` → `math_operator_studio-main.js`, `ranges_estimation-core.js` → `ranges_estimation-main.js`. `length_time.js`는 단일 파일입니다.
+- 전역 API: 분수 탐험 `switchTab`·`initPlayground`, 분수 훈련 `renderFrac`·`renderMixed`·`switchTrainMode`, 연산 스튜디오 `startStudioCalculation`·`switchViewTab`, 수의 범위 `selectRangePreset`·`setRoundingScope`, 길이·시간 `selectRulerItem`·`startStopwatchChallenge`. 호출부·동작은 변경하지 않습니다.
+- 모든 신규 참조의 캐시 버전은 `20261031-split`. 클래식 스크립트로 원래 위치에서 core → main을 연달아 로드하며, 초기화는 마지막 파일의 기존 `DOMContentLoaded`에 남습니다. IIFE·module·defer를 추가하지 않습니다.
+- 검증: `tests/math-pages-split.test.mjs`가 고정 main fixture와 원문·마크업 보존, 상대 경로 실존, 파일 크기, 인라인 블록 제거, 뒤 파일 로드 전 실행 안전성을 검사합니다. 상세 경계·줄 수는 `docs/math_pages_split_spec.md`를 따릅니다.
+
 ### 🌟 초1-2 수학 시계·규칙·모양 공방 (2026-10-24)
 
 - 진입: `kids/subjects/math/clock_rules.html`, `kids/subjects/math/shapes.html`.

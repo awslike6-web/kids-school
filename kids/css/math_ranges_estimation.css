@@ -1,0 +1,345 @@
+
+    /* 5-2 1단원: 수의 범위와 어림하기 커스텀 스타일 */
+    .numberline-box {
+      background: #ffffff;
+      border: 3px solid #0284c7;
+      border-radius: 24px;
+      padding: 20px 14px;
+      margin: 15px auto;
+      max-width: 720px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.15);
+      text-align: center;
+    }
+    body.theme--arcade .numberline-box {
+      background: #1e1e38;
+      border-color: #00d4ff;
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.2);
+    }
+    .numberline-svg-wrap {
+      width: 100%;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+    .numberline-svg-wrap svg {
+      width: 100%;
+      min-width: 520px;
+      height: 140px;
+    }
+
+    .range-preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .range-preset-btn {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.05rem;
+      color: #1e293b;
+    }
+    body.theme--arcade .range-preset-btn {
+      background: #252542;
+      border-color: #3a3a5a;
+      color: #f5f5f5;
+    }
+    .range-preset-btn:hover, .range-preset-btn.active {
+      transform: translateY(-3px);
+      border-color: #0284c7;
+      background: #f0f9ff;
+      color: #0369a1;
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
+    }
+    body.theme--arcade .range-preset-btn:hover,
+    body.theme--arcade .range-preset-btn.active {
+      background: #1a2744;
+      color: #00d4ff;
+      border-color: #00d4ff;
+    }
+
+    .range-explanation-banner {
+      background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+      border: 2px solid #38bdf8;
+      border-radius: 18px;
+      padding: 14px 20px;
+      margin-top: 15px;
+      text-align: left;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #0f172a;
+    }
+    body.theme--arcade .range-explanation-banner {
+      background: linear-gradient(135deg, #13271f 0%, #102a45 100%);
+      border-color: #00d4ff;
+      color: #e2e8f0;
+    }
+
+    .test-drop-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 15px 0 5px;
+    }
+    .test-num-card {
+      background: #f1f5f9;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #334155;
+    }
+    body.theme--arcade .test-num-card {
+      background: #2a2a48;
+      border-color: #475569;
+      color: #f1f5f9;
+    }
+    .test-num-card:hover {
+      transform: scale(1.1);
+      border-color: #f59e0b;
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    /* 2. 미끄럼틀 언덕 반올림 시뮬레이터 */
+    .hill-simulator-box {
+      background: #ffffff;
+      border: 3px solid #ec4899;
+      border-radius: 24px;
+      padding: 22px 14px;
+      margin: 15px auto;
+      max-width: 720px;
+      box-shadow: 0 8px 24px rgba(236, 72, 153, 0.15);
+      text-align: center;
+    }
+    body.theme--arcade .hill-simulator-box {
+      background: #1e1e38;
+      border-color: #ff6b9d;
+      box-shadow: 0 8px 24px rgba(255, 107, 157, 0.2);
+    }
+    .hill-svg-wrap {
+      width: 100%;
+      height: 180px;
+      position: relative;
+    }
+    .hill-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .digits-select-bar {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .digit-ball-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      color: #1e293b;
+    }
+    body.theme--arcade .digit-ball-btn {
+      background: #2b2b4d;
+      border-color: #475569;
+      color: #f8fafc;
+    }
+    .digit-ball-btn.down-digit {
+      border-color: #3b82f6;
+      color: #2563eb;
+    }
+    .digit-ball-btn.up-digit {
+      border-color: #ef4444;
+      color: #dc2626;
+    }
+    .digit-ball-btn:hover, .digit-ball-btn.active {
+      transform: scale(1.18);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+    .digit-ball-btn.down-digit.active {
+      background: #3b82f6;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+    .digit-ball-btn.up-digit.active {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #dc2626;
+    }
+
+    .magnifier-lens-box {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 20px;
+      padding: 16px;
+      margin: 15px 0;
+      text-align: center;
+    }
+    body.theme--arcade .magnifier-lens-box {
+      background: linear-gradient(135deg, #2a2215 0%, #3d2f16 100%);
+      border-color: #ffd93d;
+      color: #fef08a;
+    }
+
+    /* 3. 실생활 롤플레잉 공작소 */
+    .roleplay-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 15px 0;
+    }
+    .roleplay-card {
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    body.theme--arcade .roleplay-card {
+      background: #20203a;
+      border-color: #3e3e60;
+      color: #f1f5f9;
+    }
+    .roleplay-input {
+      font-family: 'Jua', sans-serif;
+      font-size: 1.3rem;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #94a3b8;
+      text-align: center;
+      width: 120px;
+      margin: 8px auto;
+      outline: none;
+    }
+    body.theme--arcade .roleplay-input {
+      background: #121224;
+      border-color: #555577;
+      color: #ffd93d;
+    }
+    .roleplay-result-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1.5px dashed #cbd5e1;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.15rem;
+      line-height: 1.5;
+    }
+    body.theme--arcade .roleplay-result-box {
+      background: #19192f;
+      border-color: #475569;
+    }
+
+    /* 4. 코코 탐정 퀴즈 */
+    .quiz-card-box {
+      max-width: 580px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      border: 3px solid #8b5cf6;
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+    }
+    body.theme--arcade .quiz-card-box {
+      background: #1e1e38;
+      border-color: #c77dff;
+      box-shadow: 0 8px 25px rgba(199, 125, 255, 0.2);
+    }
+
+    /* 5. 교과서 원본 e-Book 모달 */
+    .textbook-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .textbook-modal-backdrop.active {
+      display: flex;
+    }
+    .textbook-modal-content {
+      background: #1e1e32;
+      border: 3px solid #38bdf8;
+      border-radius: 24px;
+      max-width: 860px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .textbook-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: #121224;
+      border-bottom: 2px solid #3a3a5a;
+    }
+    .textbook-modal-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background: #0f172a;
+    }
+    .textbook-img-frame {
+      max-width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+    .textbook-modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #121224;
+      border-top: 2px solid #3a3a5a;
+    }
+
+    @media (max-width: 600px) {
+      .hero-title { font-size: 1.7rem; }
+      .section-title { font-size: 1.35rem; }
+      .range-preset-grid { grid-template-columns: 1fr 1fr; }
+      .numberline-box, .hill-simulator-box { padding: 14px 8px; }
+      .roleplay-card-grid { grid-template-columns: 1fr; }
+      .textbook-modal-content { max-height: 95vh; }
+      .textbook-img-frame { max-height: 50vh; }
+    }
+  

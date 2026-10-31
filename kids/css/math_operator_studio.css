@@ -1,0 +1,647 @@
+
+  :root {
+    --bg-dark: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.9);
+    --border-color: #334155;
+    --primary: #0284c7;
+    --primary-glow: rgba(2, 132, 199, 0.35);
+    --accent: #f59e0b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  body {
+    font-family: 'Nanum Gothic', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* 🎮 민수 네온 아케이드 테마 */
+  body.theme--arcade {
+    background: radial-gradient(circle at 15% 15%, #1e1b4b 0%, #0f172a 100%);
+  }
+
+  /* 🎠 민서 밀키스 동화 테마 */
+  body.theme--slime {
+    background: radial-gradient(circle at 15% 15%, #fdf2f8 0%, #fff1f2 100%);
+    color: #334155;
+    --card-bg: rgba(255, 255, 255, 0.96);
+    --border-color: #fbcfe8;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+  }
+
+  .studio-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px 80px;
+  }
+
+  /* 상단 내비게이션 바 */
+  .top-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .nav-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    backdrop-filter: blur(8px);
+  }
+  .action-btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+  }
+
+  /* 히어로 헤더 */
+  .hero-banner {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.18) 0%, rgba(139, 92, 246, 0.18) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 24px;
+    padding: 28px 20px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(12px);
+  }
+  .hero-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    background: linear-gradient(90deg, #0284c7, #8b5cf6);
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.88rem;
+    border-radius: 16px;
+    margin-bottom: 10px;
+  }
+  .hero-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 2.2rem;
+    margin: 0 0 8px;
+    background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  body.theme--slime .hero-title {
+    background: linear-gradient(135deg, #0284c7 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-desc {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.55;
+    word-break: keep-all;
+  }
+
+  /* 연산자 탭 바 */
+  .op-tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .op-tab-btn {
+    padding: 10px 22px;
+    border-radius: 9999px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .op-tab-btn:hover {
+    color: var(--text-main);
+    border-color: var(--primary);
+  }
+  .op-tab-btn.active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border-color: #38bdf8;
+    box-shadow: 0 4px 16px var(--primary-glow);
+  }
+
+  /* 문제 직접 입력 카드 */
+  .input-card {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .input-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .num-input {
+    width: 100px;
+    height: 58px;
+    font-family: 'Jua', 'JetBrains Mono', sans-serif;
+    font-size: 2.2rem;
+    text-align: center;
+    border-radius: 16px;
+    border: 2.5px solid var(--border-color);
+    background: rgba(15, 23, 42, 0.7);
+    color: #38bdf8;
+    outline: none;
+    transition: all 0.2s;
+  }
+  body.theme--slime .num-input {
+    background: #ffffff;
+    color: #0284c7;
+  }
+  .num-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 14px var(--primary-glow);
+  }
+  .op-sign {
+    font-family: 'Jua', sans-serif;
+    font-size: 2.2rem;
+    color: var(--accent);
+  }
+  .btn-submit-calc {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 16px;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+  }
+  .btn-submit-calc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+  }
+
+  /* 추천 문제 칩스 */
+  .preset-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .preset-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .preset-btn {
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .preset-btn:hover {
+    background: rgba(2, 132, 199, 0.2);
+    border-color: var(--primary);
+  }
+
+  /* 시각화 표현 4대 모드 탭 */
+  .view-tabs-container {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .view-tab-btn {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .view-tab-btn:hover {
+    color: var(--text-main);
+  }
+  .view-tab-btn.active {
+    color: #38bdf8;
+    border-bottom-color: #38bdf8;
+  }
+  body.theme--slime .view-tab-btn.active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
+  }
+
+  /* 메인 스튜디오 뷰포트 */
+  .studio-viewport {
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    padding: 26px;
+    min-height: 420px;
+    position: relative;
+  }
+
+  /* 요정 음성 및 해설 말풍선 도크 */
+  .fairy-dock {
+    margin-top: 24px;
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(139, 92, 246, 0.12) 100%);
+    border: 2px solid rgba(2, 132, 199, 0.4);
+    border-radius: 20px;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .fairy-avatar {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+  .fairy-content {
+    flex-grow: 1;
+  }
+  .fairy-name {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.05rem;
+    color: #38bdf8;
+    margin-bottom: 4px;
+  }
+  body.theme--slime .fairy-name {
+    color: #0284c7;
+  }
+  .fairy-speech-text {
+    font-size: 1.05rem;
+    color: var(--text-main);
+    line-height: 1.5;
+    word-break: keep-all;
+  }
+  .btn-replay-voice {
+    background: rgba(2, 132, 199, 0.2);
+    border: 1.5px solid #0284c7;
+    color: #38bdf8;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-family: 'Jua', sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: 0.2s;
+  }
+  .btn-replay-voice:hover {
+    background: #0284c7;
+    color: #fff;
+  }
+
+  /* ======================================================== */
+  /* [탭 1] 🧱 십진 블록 분배 모형 스타일                     */
+  /* ======================================================== */
+  .block-stage-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .block-step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 10px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+  }
+  .step-pill {
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    color: #38bdf8;
+  }
+  .nav-btn-group {
+    display: flex;
+    gap: 8px;
+  }
+  .step-control-btn {
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-family: 'Jua', sans-serif;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .step-control-btn:hover:not(:disabled) {
+    border-color: #38bdf8;
+    background: rgba(2, 132, 199, 0.2);
+  }
+  .step-control-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* 블록 그래픽 */
+  .block-display-area {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .block-group-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  body.theme--slime .block-group-box {
+    background: #fff;
+  }
+  .block-group-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .blocks-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 60px;
+    align-items: center;
+  }
+  .ten-rod {
+    display: inline-flex;
+    flex-direction: column;
+    width: 22px;
+    height: 110px;
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+    border: 1.5px solid #60a5fa;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .ten-rod::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, rgba(255,255,255,0.4) 10px, rgba(255,255,255,0.4) 11px);
+  }
+  .ten-rod.explode {
+    animation: explodeAnim 0.5s forwards;
+  }
+  @keyframes explodeAnim {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.2); filter: brightness(2); }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  .unit-cube {
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: 1.5px solid #fbbf24;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  .basket-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .person-basket {
+    background: rgba(255,255,255,0.05);
+    border: 1.5px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+  .basket-label {
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  /* ======================================================== */
+  /* [탭 2] 📝 단계별 격자 세로셈 튜터 스타일                 */
+  /* ======================================================== */
+  .vertical-tutor-container {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .division-board-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 2px solid #38bdf8;
+    border-radius: 18px;
+    padding: 24px 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  body.theme--slime .division-board-card {
+    background: #fff;
+    border-color: #0284c7;
+  }
+  .division-table {
+    border-collapse: collapse;
+    font-family: 'Courier New', monospace, 'Jua', sans-serif;
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--text-main);
+  }
+  .division-table td {
+    width: 44px;
+    height: 48px;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+  }
+  .td-quotient-line {
+    border-bottom: 3.5px solid #38bdf8;
+  }
+  .td-divisor-arc {
+    border-right: 3.5px solid #38bdf8;
+    border-radius: 0 16px 0 0;
+  }
+  .calc-step-line {
+    border-bottom: 2.5px solid #94a3b8;
+  }
+  .cell-active {
+    background: rgba(56, 189, 248, 0.25);
+    border-radius: 8px;
+    animation: pulseActive 1.2s infinite;
+  }
+  @keyframes pulseActive {
+    0%, 100% { box-shadow: 0 0 0 2px #38bdf8; }
+    50% { box-shadow: 0 0 12px #38bdf8; }
+  }
+
+  .tutor-guide-panel {
+    flex-grow: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .tutor-step-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .tutor-step-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .tutor-step-desc {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-main);
+  }
+  .interactive-choice-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .tutor-choice-btn {
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-family: 'Jua', sans-serif;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .tutor-choice-btn:hover {
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+  }
+
+  /* ======================================================== */
+  /* [탭 3] 📏 수직선 덜어내기 스타일                          */
+  /* ======================================================== */
+  .numberline-wrap {
+    padding: 20px 10px;
+  }
+  .nl-axis-container {
+    position: relative;
+    height: 140px;
+    margin-top: 40px;
+  }
+  .nl-axis-line {
+    position: absolute;
+    bottom: 30px;
+    left: 20px;
+    right: 20px;
+    height: 4px;
+    background: #64748b;
+  }
+  .nl-jump-arc {
+    position: absolute;
+    bottom: 34px;
+    border: 3px dashed #38bdf8;
+    border-bottom: none;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    pointer-events: none;
+  }
+  .nl-label {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  /* ======================================================== */
+  /* [탭 4] 🍫 면적/넓이 모델 스타일                           */
+  /* ======================================================== */
+  .area-model-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+  }
+  .area-rect-container {
+    display: flex;
+    align-items: stretch;
+    border: 3px solid #38bdf8;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .area-box {
+    padding: 24px;
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border-right: 2px dashed rgba(255,255,255,0.3);
+  }
+  .area-box:last-child {
+    border-right: none;
+  }
+
+  @media (max-width: 640px) {
+    .hero-title { font-size: 1.8rem; }
+    .num-input { width: 80px; height: 50px; font-size: 1.8rem; }
+    .vertical-tutor-container { flex-direction: column; align-items: center; }
+  }
