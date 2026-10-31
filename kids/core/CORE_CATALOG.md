@@ -61,7 +61,7 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   - `kids/core/mission-reward-engine.js`: 미션 보상 지급 및 축하 모달 렌더러 (`claimMissionRewardOnce`, `openMissionRewardModal`, `grantVocaDwellReward`).
   - `kids/core/quiz-feedback-overlay.js`: 오답 다시풀기/다음문제 오버레이, 정답·뜻풀이 카드, 보카사전 딥링크 및 이탈 방지 가드 (`promptQuizRetryOrSkip`, `getVocaCommonUrl`, `window.__quizLeaveGuard`).
   - `kids/core/quiz-flow-controller.js`: 스피드(자동)/꼼꼼탐구(수동) 2대 진행 템포 제어기 및 풀이·보카사전 딥링크 카드 (`triggerQuizAdvance`, `setQuizFlowMode`).
-  - `kids/core/fairy-chat-memory.js`: AI 요정 대화 기억 및 페르소나 매트릭스 (`parseChatMemoryPage`, `buildPersonaSystemPrompt`, `fetchRecentChatMemories`).
+  - ~~`kids/core/fairy-chat-memory.js`~~ (2026-11-01 삭제): AI 요정 대화 기억·페르소나·Gemini 직접 호출 모듈. 2026-09-04 분리 때부터 어느 화면·로더에도 연결되지 않았고 쓰임도 적어 지웠다. `fairy-chatbot.js`·`english_chat.js`·`korean_sentence.js`·`voca_common.js`는 해당 함수를 `typeof` 확인 후에만 부르므로 지금처럼 Worker 경로로 동작한다. 필요하면 git 기록에서 되살린다.
 - **핵심 API (대문 파사드를 통해 100% 하위 호환 보존)**:
   | 메서드 | 서브모듈 | 설명 |
   | :--- | :--- | :--- |
