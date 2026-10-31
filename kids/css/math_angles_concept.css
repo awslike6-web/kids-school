@@ -1,0 +1,123 @@
+
+    /* 반원 각도기 SVG 캔버스 */
+    .protractor-canvas-box {
+      background: #ffffff;
+      border: 3px solid #0284c7;
+      border-radius: 24px;
+      padding: 20px 14px;
+      margin: 15px auto;
+      max-width: 580px;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, 0.15);
+      text-align: center;
+    }
+    .protractor-svg-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .protractor-svg-wrap svg {
+      width: 100%;
+      max-width: 440px;
+      height: auto;
+    }
+
+    /* 각도 슬라이더 컨트롤러 */
+    .angle-slider-wrap {
+      margin: 15px auto;
+      max-width: 400px;
+      padding: 0 10px;
+    }
+    .angle-slider {
+      width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+    .angle-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #0284c7;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+
+    /* 각도 판정 뱃지 */
+    .angle-badge-result {
+      font-family: 'Jua', sans-serif;
+      font-size: 2.2rem;
+      color: #0284c7;
+      display: inline-block;
+      margin: 8px 0;
+    }
+    .angle-type-tag {
+      font-size: 1.15rem;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .tag-acute { background: #dcfce7; color: #15803d; border: 1.5px solid #86efac; }
+    .tag-right { background: #e0f2fe; color: #0369a1; border: 1.5px solid #7dd3fc; }
+    .tag-obtuse { background: #fef3c7; color: #b45309; border: 1.5px solid #fde68a; }
+    .tag-straight { background: #fce7f3; color: #be185d; border: 1.5px solid #fbcfe8; }
+
+    /* 카드 그리드 */
+    .angle-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .angle-btn-card {
+      background: #ffffff;
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .angle-btn-card:hover, .angle-btn-card.active {
+      transform: translateY(-3px);
+      border-color: #0284c7;
+      background: #f0f9ff;
+      box-shadow: 0 8px 16px rgba(2, 132, 199, 0.2);
+    }
+    .angle-card-icon { font-size: 2.2rem; margin-bottom: 4px; }
+    .angle-card-name { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #1e293b; font-weight: bold; }
+    .angle-card-range { font-size: 0.82rem; color: #0284c7; font-weight: 700; }
+
+    /* 삼각형 & 사각형 각의 합 시각화 */
+    .polygon-sum-box {
+      background: #fff;
+      border: 3px solid #ec4899;
+      border-radius: 24px;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 580px;
+      text-align: center;
+    }
+
+    /* 단위 환산 상자 */
+    .unit-exchange-card {
+      background: #fdfbf7;
+      border: 2px dashed #0284c7;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      font-family: 'Jua', sans-serif;
+      font-size: 1.25rem;
+      color: #1e293b;
+      line-height: 1.8;
+      text-align: left;
+    }
+  
