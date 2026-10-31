@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🎲 야추 다이스 · 가족 보드게임</title>
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="yacht.css">
+</head>
+<body>
+  <main class="yacht-shell">
+    <header class="page-header">
+      <a href="../index.html">← 놀이터</a>
+      <h1>🎲 야추 다이스</h1>
+      <button id="soundToggle" type="button" aria-pressed="false">🔊 안내 음성</button>
+    </header>
+    <section id="setupView" aria-labelledby="setupTitle">
+      <h2 id="setupTitle">우리 가족, 함께 굴려요!</h2>
+      <p>태블릿 한 대로 2~5명이 돌아가며 놀아요. 서로 다른 말을 골라 주세요.</p>
+      <label class="count-label">함께할 사람
+        <select id="playerCount" aria-label="함께할 사람 수">
+          <option value="2">2명</option><option value="3">3명</option>
+          <option value="4">4명</option><option value="5">5명</option>
+        </select>
+      </label>
+      <div id="playerSetup" class="player-setup"></div>
+      <p id="setupError" class="status-message" role="status"></p>
+      <button id="startGame" type="button" class="primary">🎲 게임 시작</button>
+      <details class="rules"><summary>어떻게 놀아요?</summary>
+        <p>한 차례에 최대 3번 굴려요. 주사위를 눌러 고정하고, 빈 칸 하나에 점수를 적어요.
+          12라운드가 끝나면 합계로 순위를 정해요. 상단 합계 63점부터 보너스 35점!</p>
+      </details>
+    </section>
+    <section id="resumeView" hidden aria-labelledby="resumeTitle">
+      <h2 id="resumeTitle">놀던 게임이 있어요</h2>
+      <p id="resumeSummary"></p>
+      <div class="actions"><button id="resumeGame" class="primary" type="button">이어서 하기</button>
+        <button id="newGame" type="button">새 게임</button></div>
+    </section>
+    <section id="gameView" hidden aria-label="야추 게임">
+      <div class="turn-heading"><span id="turnAvatar" class="turn-avatar"></span>
+        <h2 id="turnBanner" aria-live="polite" tabindex="-1"></h2></div>
+      <p id="roundBanner" class="round-banner"></p>
+      <div class="game-layout">
+        <section class="dice-panel" aria-label="주사위 굴리기">
+          <div id="dice" class="dice-row"></div>
+          <button id="rollDice" class="primary" type="button">🎲 굴리기</button>
+          <p id="keepHint" class="keep-hint"></p>
+          <p id="turnHelp" class="turn-help" role="status"></p>
+        </section>
+        <section class="score-panel" aria-label="가족 점수표">
+          <table id="scoreTable"><caption>가족 점수표 · 빈 칸을 눌러 기록해요</caption></table>
+        </section>
+      </div>
+    </section>
+    <section id="endView" hidden aria-labelledby="endTitle">
+      <h2 id="endTitle" tabindex="-1">🏆 우리 가족 야추 완료!</h2>
+      <p>끝까지 함께했어요! 다음 판도 같이 굴려요.</p>
+      <div id="winners" class="winners"></div>
+      <ol id="rankings" class="rankings"></ol>
+      <div class="actions"><button id="playAgain" class="primary" type="button">다시 하기</button>
+        <button id="backToSetup" type="button">처음으로</button></div>
+    </section>
+    <p id="saveStatus" class="status-message" role="status"></p>
+  </main>
+  <dialog id="zeroDialog" aria-labelledby="zeroTitle">
+    <h2 id="zeroTitle">정말 0점을 적을까요?</h2>
+    <p id="zeroCategory"></p>
+    <div class="actions"><button id="cancelZero" type="button">다시 생각하기</button>
+      <button id="confirmZero" type="button" class="primary">0점 적기</button></div>
+  </dialog>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../data/gallery-data.js"></script>
+  <script src="../../subjects/quest/monster_roster.js"></script>
+  <script src="yacht-engine.js"></script>
+  <script src="yacht-ui.js"></script>
+</body>
+</html>
