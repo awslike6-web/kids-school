@@ -87,11 +87,14 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **파일 위치**:
   - `lobby.html` (784줄): 민서 뷰(`#minseoLobbyView`), 민수 뷰(`#minsuLobbyView`), 과목별 팝업 카드, 중단 4칸 아지트 허브(마이룸&상점·갤러리·대시보드·시간표), 하단 5칸 고정 유틸리티 바(`📝 마음일기 · 📸 찰칵등록 · 🦖 용어사전 · 🎡 놀이터 · 👥 프로필`), 놀이터 모달(`#playgroundModalOverlay`), 시간 한도 갈림길 모달(`#dailyCapModalOverlay`), 부모 관리자 시뮬레이터 툴바(`#adminQuickToolbar`, 2026-10-21부터 `<details>` 접이식: 평소엔 검수 라벨만, 누르면 도구 버튼 펼침 · JS 변경 없음) 통합 마크업.
   - `kids/css/lobby-themes.css` (359줄): CSS RGB 채널 변수 스왑(`html.theme-minseo` vs `html.theme-minsu`)으로 Tailwind 컬러 토큰 충돌 원천 차단, `.clay-card*`, `.jelly-btn`, `.cosmic-map`, `.scanline`, `.hazard-stripe-amber`, 모달 라이트 격리 스타일.
-  - `kids/js/lobby_controller.js` (643줄): 유저/테마 즉시 스왑(`switchLobbyUser`), 노션 `INVENTORY_DB` & SWR 캐시 연동, 가디언 남은/획득 시간 HUD, 실제 학교 시간표 기반 다중 과목 부스트(`TimetableBoost` 연동으로 2~4과목 동시 점등 및 한도 도달 시 소등), 과목별 실제 일일 한도 신호등(`available`/`critical`/`completed`), 갈림길 모달 동적 치환(`openDailyCapModal`), 놀이터 모달(`openPlaygroundModal`).
+  - `kids/js/lobby_config.js` (106줄): 아바타·과목·놀이터·사용자 설정 상수, 월드 목록 구성과 `window.USER_CONFIGS`.
+  - `kids/js/lobby_subject_hud.js` (459줄): `LobbySubjectHud.create(ctx)` 공장 함수, 시간표 부스트·과목별 일일 한도·추천 과목·가디언 HUD·노션 인벤토리 동기화.
+  - `kids/js/lobby_controller.js` (566줄): 공통 코어 로더·클로저 상태·유저/테마 전환·과목 팝업·갈림길/놀이터 모달·클릭 핸들러·초기화. HTML에서 config → subject_hud → controller 순서로 같은 버전 `20261031-lobby-split`을 로드한다.
 - **핵심 API**:
   | 함수 / 프로퍼티 | 설명 |
   | :--- | :--- |
   | `window.USER_CONFIGS` | 민수/민서 전 교과 월드 맵 및 테마 속성 SSOT 데이터 (하위 호환 유지) |
+  | `window.LobbySubjectHud.create(ctx)` | 최신 학생·관리자 상태를 읽는 함수, 공유 `runtimeDailyEarned`, 이름·날짜 헬퍼를 받아 과목 상태·추천·HUD·인벤토리 함수 6개를 반환 |
   | `switchLobbyUser(targetUser)` | `'minseo'`(Light 클레이) ↔ `'minsu'`(Dark SECTOR-07) 테마·뷰·데이터 즉시 스왑 |
   | `handleSubjectNodeClick(subjKey)` | 과목 섬/포털 진입. `completed`(`💤 완료/냉각`) 상태일 때 갈림길 모달 자동 팝업 |
   | `toggleMinseoCard(cardId)` | 민서 파스텔 구름섬 과목별(국어·수학·영어·하루) 상세 팝업 툴팁 카드 토글 |
