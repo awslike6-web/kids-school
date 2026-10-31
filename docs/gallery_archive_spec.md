@@ -42,7 +42,7 @@ flowchart TD
    - ❌ 금지: `[작품] 민수_2026-10-25 (...)`처럼 한글 제목을 `식별ID`에 넣으면 웹-노션 동기화가 끊어진다. (폰 퀵업로드 임시 카드 `[퀵업로드] ...`는 PC 등록 때 `art_...`로 바뀐다, §3①)
    - 노션 카드에 쓰는 속성 이름은 [`docs/notion_schemas_school.md`](notion_schemas_school.md)의 `3dfa2711...` 표에 있는 것만 쓴다. `분야`(카테고리) 속성은 노션에 없으므로 `gallery-meta.json`에만 둔다.
 3. **당일 일상 연결**: 작품 카드의 `AI 대화록 및 일상 기록 DB` 연결은 작품 날짜의 일상 페이지(`392a...`)로 한다. 오늘 작품인데 그날 일상 페이지가 아직 없으면 `sync_quick_upload.py`가 개발 타임라인 기록과 같은 함수(`log_dev_timeline.get_or_create_daily_log_page`)로 만들어 연결한다. 지난 날짜는 있는 페이지만 연결하고, 없으면 경고만 하고 비워 둔다(2026-10-28, 작품 등록이 그날 첫 작업이라 연결이 빠지던 문제).
-4. **일기장 분리**: 민서/민수 일기장(`kids/core/daily-diary.js`)은 `구분`이 `마음일기`·`일기`·`종이일기`인 항목만 표시한다. 작품 카드는 `구분: 작품`, 특별한 날 카드는 `구분: 특별한 날`로 지정해 일기장에 섞이지 않게 한다.
+4. **일기장 분리**: 민서/민수 일기장(`kids/core/daily-diary-base.js` → `daily-diary-forms.js` → `daily-diary-sync.js` → `daily-diary-submit.js`, 클래식 스크립트 순차 로드)의 조회·파서·동기화는 `daily-diary-sync.js`가 맡으며 `구분`이 `마음일기`·`일기`·`종이일기`인 항목만 표시한다. 작품 카드는 `구분: 작품`, 특별한 날 카드는 `구분: 특별한 날`로 지정해 일기장에 섞이지 않게 한다.
 5. **모바일 캐시 버스팅**: `gallery-data.js`가 바뀌면 `kids/common_space/gallery.html` 하단 `<script src="../data/gallery-data.js?v=...">` 버전 쿼리도 함께 바뀌어야 스마트폰에서 새로고침 시 바로 새 작품이 뜬다 (`sync_quick_upload.py`가 자동 갱신).
 
 ---

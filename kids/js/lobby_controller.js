@@ -117,7 +117,10 @@ window.USER_CONFIGS = USER_CONFIGS;
     'fairy-settings-catalog.js',
     'fairy-settings-engine.js',
     'fairy-chatbot.js',
-    'daily-diary.js',
+    'daily-diary-base.js',
+    'daily-diary-forms.js',
+    'daily-diary-sync.js',
+    'daily-diary-submit.js',
     'quiz-flow-controller.js',
     'timetable-boost.js',
     'screentime-tracker.js'

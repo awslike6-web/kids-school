@@ -1,8 +1,8 @@
 // ========================================================
-// ✅ 일기장 노션 동기화 회귀 시험 (kids/core/daily-diary.js)
+// ✅ 일기장 노션 동기화 회귀 시험 (kids/core/daily-diary-{base,forms,sync,submit}.js)
 // - 실행:      node scripts/verify_diary_sync.js
 // - 실제 노션:  node scripts/verify_diary_sync.js --live   (조회만, 쓰기 없음)
-// - 다른 버전:  node scripts/verify_diary_sync.js --file <daily-diary.js 경로>
+// - 다른 버전:  node scripts/verify_diary_sync.js --core-dir <네 파일이 있는 폴더>
 // 지키는 것: 특별한 날·작품이 일기장에 들어오지 않고, 예전 코드가 이미 캐시한 특별한 날도
 // 동기화 한 번에 지워지며, 지우면 안 되는 항목(미업로드·방금 저장·부모 모드 대리 작성·다른 아이)은 남는다.
 // DOM 없음, 노션 쓰기 없음. 실패하면 종료 코드 1.
@@ -14,8 +14,12 @@ const vm = require('vm');
 
 const args = process.argv.slice(2);
 const LIVE = args.includes('--live');
-const fileArgIdx = args.indexOf('--file');
-const DIARY_JS = path.resolve(fileArgIdx >= 0 ? args[fileArgIdx + 1] : path.join(__dirname, '../kids/core/daily-diary.js'));
+const coreDirArgIdx = args.indexOf('--core-dir');
+if (coreDirArgIdx >= 0 && (!args[coreDirArgIdx + 1] || args[coreDirArgIdx + 1].startsWith('--'))) {
+  throw new Error('--core-dir 뒤에 네 파일이 있는 폴더 경로가 필요합니다.');
+}
+const CORE_DIR = path.resolve(coreDirArgIdx >= 0 ? args[coreDirArgIdx + 1] : path.join(__dirname, '../kids/core'));
+const DIARY_FILES = ['daily-diary-base.js', 'daily-diary-forms.js', 'daily-diary-sync.js', 'daily-diary-submit.js'];
 const PROXY = 'https://minmin-notion.awslike6.workers.dev';
 const DIARY_DB = '3dfa27115b688010a85be385f91d64ee';
 
@@ -94,7 +98,10 @@ function loadDiary(store, fetchImpl) {
   };
   ctx.window = ctx;
   vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(DIARY_JS, 'utf8'), ctx, { filename: DIARY_JS });
+  for (const file of DIARY_FILES) {
+    const fullPath = path.join(CORE_DIR, file);
+    vm.runInContext(fs.readFileSync(fullPath, 'utf8'), ctx, { filename: fullPath });
+  }
   return ctx;
 }
 
@@ -109,7 +116,7 @@ async function runSync(pages, opts, childName = '민서', cache = contaminatedCa
 }
 
 async function main() {
-  console.log(`대상: ${path.relative(process.cwd(), DIARY_JS)}`);
+  console.log(`대상: ${path.relative(process.cwd(), CORE_DIR)} (${DIARY_FILES.join(' → ')})`);
 
   // 1) 파서 게이트: 비일기 페이지는 일기 객체가 되지 않는다
   {

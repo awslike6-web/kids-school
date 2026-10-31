@@ -1007,10 +1007,14 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   | `TimetableBoost.getTodaySchedule(user)` | 오늘 요일 기준 수업/학원 시간표 배열 반환 |
   | `TimetableBoost.renderHeaderChips(container)` | 로비 상단에 오늘 수업 칩 동적 렌더링 |
 
-### 🌟 `daily-diary.js` & `quick-uploader.js` (하루 마음일기 & 모바일 퀵업로더 파이프라인 2.1)
+### 🌟 `daily-diary-{base,forms,sync,submit}.js` & `quick-uploader.js` (하루 마음일기 & 모바일 퀵업로더 파이프라인 2.1)
 아이들의 날씨/기분 선택형 마음일기 기록 및 스마트폰 현장 촬영 사진을 Cloudflare Worker 미디어 큐 및 노션 DB로 즉시 전송하는 고속 파이프라인 모듈입니다.
 - **파일 위치**:
-  - `kids/core/daily-diary.js` (하루 마음일기 모달 & 감정 스티커)
+  - `kids/core/daily-diary-base.js` (488줄): KST 날짜·로컬 저장·삭제·음성 입력·모달·탭
+  - `kids/core/daily-diary-forms.js` (456줄): 민서·민수 폼·선택 카드·AI 일상 로그·노션 전송·보상
+  - `kids/core/daily-diary-sync.js` (385줄): 노션 파서·조회·캐시 정리·병합·실시간 동기화
+  - `kids/core/daily-diary-submit.js` (306줄): 일기 제출·성공 모달·목록·전역 바인딩
+  - 위 네 파일은 클래식 스크립트로 base → forms → sync → submit 순서로 로드합니다. `core.js`·`lobby_controller.js`와 하루방·국어방·부모 일기장에서 같은 구성을 사용하며 HTML 세 곳은 태그 네 개를 한 줄에서 공백 하나로 연결합니다. HTML 버전은 `20261031-diary-split`입니다.
   - `kids/core/quick-uploader.js` (모바일 사진 촬영 & 퀵업로더 프론트엔드)
   - 관제탑 저장소 `master-tower/workers/minmin-notion/worker.js` (공용 Worker · 미디어 수신 `/api/upload-media`, 큐 조회 `/api/pending-media`)
   - `scripts/sync_quick_upload.py` (PC 원클릭 폰 사진 다운로드 ➔ 갤러리 최적화 ➔ Git/Notion 동기화 완결)
@@ -1018,7 +1022,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   1. **스마트폰 촬영/선택**: 캔버스 1200px 경량 고화질(JPEG 82%) 압축 ➔ Cloudflare Worker `/api/upload-media` 단 1회 전송.
   2. **워커 자동 처리**: 노션 갤러리 DB(`3dfa2711...`) `[퀵업로드]` 임시 카드 생성 ➔ 그 카드 번호(`notionPageId`, Worker v4.5~)와 함께 큐 보관(L2 Cache API 7일 보존) (GitHub Secret 가용 시 다이렉트 커밋 지원).
   3. **PC 일괄 완결**: `python scripts/sync_quick_upload.py` 실행 시 워커 대기 큐에서 폰 사진 자동 다운로드 ➔ `build_gallery.py` ➔ 작품 임시 카드의 `식별ID`를 `art_...`로 변경 ➔ `kids-archive` & `kids-school` 깃 푸시까지 한 번에 완결. 노션까지 성공한 항목만 큐에서 지운다.
-- **일기장 노션 동기화 (`daily-diary.js`)**: `syncDiariesFromNotion(childName)` ➔ `fetchNotionDiaries`(구분 `마음일기`·`일기`·`종이일기`, 주인공 `{아이}`+`부모관리자`) ➔ `mergeNotionDiariesIntoLocal(remotes, childName)`. 신규 DB 전체 결과일 때는 `pruneStaleNotionEntries`가 노션에 없는 그 아이의 연동 캐시 항목을 지운다(미업로드·10분 이내 항목 보존). 상세 규칙은 `docs/timetable_diary_spec.md` DB 3. 검증: `node scripts/verify_diary_sync.js` (실제 노션 조회까지 `--live`, 다른 버전은 `--file <경로>`).
+- **일기장 노션 동기화 (`daily-diary-sync.js`)**: `syncDiariesFromNotion(childName)` ➔ `fetchNotionDiaries`(구분 `마음일기`·`일기`·`종이일기`, 주인공 `{아이}`+`부모관리자`) ➔ `mergeNotionDiariesIntoLocal(remotes, childName)`. 신규 DB 전체 결과일 때는 `pruneStaleNotionEntries`가 노션에 없는 그 아이의 연동 캐시 항목을 지운다(미업로드·10분 이내 항목 보존). 상세 규칙은 `docs/timetable_diary_spec.md` DB 3. 검증: `node scripts/verify_diary_sync.js` (실제 노션 조회까지 `--live`, 다른 버전은 `--core-dir <네 파일이 있는 폴더>`).
+- **분리 회귀 시험**: `tests/daily-diary-split.test.mjs`가 고정 원본 fixture·600줄 상한·참조 다섯 곳·HTML 한 줄 배치·전역 함수·앞 파일만 로드하는 경우를 검사합니다. 상세 계약은 `docs/daily_diary_split_spec.md`입니다.
 - **핵심 API**:
   | 메서드 / 스크립트 | 설명 |
   | :--- | :--- |
