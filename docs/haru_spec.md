@@ -138,6 +138,17 @@ graph TD
 ## 6. 골디락스 모듈화 아키텍처 (Goldilocks Modular Architecture)
 전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 2,720줄의 거대 단일 파일이었던 `haru_common.js`를 **1개의 초경량 대문 파사드 + 4개의 전문 엔진**으로 분리하여 100% 무결성을 달성했습니다.
 
+**영역별 스타일 분리 (2026-10-31)**: 기존 단일 스타일 2,756줄을 다음 구성으로 옮겼습니다. 선택자·속성·주석·들여쓰기와 적용 순서는 보존하며 각 파일에는 머리 주석 1줄만 추가했습니다.
+
+- `kids/css/haru-base.css` (431줄): 변수·공통·상단·습관·감상실.
+- `kids/css/haru-special-days.css` (507줄): 특별한 날 추억 게시판.
+- `kids/css/haru-checkin.css` (340줄): 30초 체크인·사진 팝업.
+- `kids/css/haru-safety.css` (507줄): 119 안전 수호대·닥터 코코.
+- `kids/css/haru-timeline-clock.css` (518줄): 타임머신 헤더·시계판·필터.
+- `kids/css/haru-timeline-list.css` (459줄): 타임라인 목록·스티커·모달·반응형.
+
+`haru.html`은 기존 링크 자리에서 위 순서대로 `../../css/{파일명}?v=20261031-haru-split`을 직접 로드합니다. 새 줄 수는 머리 주석 포함이며 모두 600줄 이하입니다. 원본은 `tests/fixtures/haru-css-split/haru.css`에 보관하고 `tests/haru-css-split.test.mjs`가 재결합 일치·링크·크기·경계를 검사합니다. 상세 계약은 [하루 CSS 분리 명세서](haru_css_split_spec.md)입니다.
+
 | 모듈 파일명 | 라인 수 | 전담 역할 및 책임 | 핵심 함수 |
 | :--- | :---: | :--- | :--- |
 | **`haru_common.js`** | 402줄 | **대문 파사드 & 핵심 제어기**<br>• 민수/민서 프로필 UI 동적 세팅<br>• 5대 라이프 탭 스위칭 & 음성 즉시 중단<br>• 초고음질 요정 TTS 발화 제어<br>• 모네/고흐 하늘 명화 및 달팽이 동요 감상실 | `setupChildProfileUI`<br>`switchHaruTab`<br>`speakText`<br>`stopAllSpeech`<br>`renderArtTab` |
