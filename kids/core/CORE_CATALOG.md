@@ -231,6 +231,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 모든 신규 참조의 캐시 버전은 `20261031-split`. 클래식 스크립트로 원래 위치에서 core → main을 연달아 로드하며, 초기화는 마지막 파일의 기존 `DOMContentLoaded`에 남습니다. IIFE·module·defer를 추가하지 않습니다.
 - 검증: `tests/math-pages-split.test.mjs`가 고정 main fixture와 원문·마크업 보존, 상대 경로 실존, 파일 크기, 인라인 블록 제거, 뒤 파일 로드 전 실행 안전성을 검사합니다. 상세 경계·줄 수는 `docs/math_pages_split_spec.md`를 따릅니다.
 
+### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
+
+- `kids/subjects/math/math.html`(454줄)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.
+- `kids/subjects/math/angles_concept.html`(214줄)은 `kids/css/math_angles_concept.css`(123줄)와 `kids/subjects/math/js/angles_concept.js`(533줄)를 같은 방식으로 로드합니다. `setAngleValue`·`onSliderAngleChange`·`selectAngleType`·`switchPolygonSum`·`setQuadMethod`·`setTriCutState`·`setQuadCutState`·`setQuadSplit`·`generateMissingAngleProblem`·`nextQuiz` 등 기존 전역 핸들러와 초기화를 유지합니다.
+- 상대 경로와 캐시 버전 `20261031-math-split2`를 사용하며 클래식 스크립트·기존 외부 스크립트 순서·원문·마크업은 변경하지 않습니다. 두 페이지 모두 뒤에 오는 스크립트가 없고 JS는 한 파일씩입니다.
+- 검증: `tests/math-pages-split2.test.mjs`(고정 main fixture·600줄 제한·원문·마크업·상대 경로·단독 VM 로드). 대문 VM은 기존 `goLobbyBtn` 조회와 클릭 등록만 허용합니다. 분리 계약과 화면 확인 담당은 `docs/math_pages_split2_spec.md`를 따릅니다.
+
 ### 🌟 초1-2 수학 시계·규칙·모양 공방 (2026-10-24)
 
 - 진입: `kids/subjects/math/clock_rules.html`, `kids/subjects/math/shapes.html`.
