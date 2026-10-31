@@ -1,0 +1,109 @@
+:root { color-scheme: light; --ink: #24344b; --accent: #215b8c; --paper: #fffdf7; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #eaf3f4; color: var(--ink); font: 18px/1.5 'Jua', system-ui, sans-serif; }
+[hidden] { display: none !important; }
+button, select, input { font: inherit; color: inherit; }
+button, select { min-height: 44px; }
+button { border: 2px solid #a6bbc8; border-radius: 12px; padding: 8px 12px; background: white; cursor: pointer; }
+button:hover:not(:disabled) { background: #e5f0ff; }
+button:disabled { cursor: default; opacity: .6; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 3px solid #8f3dba; outline-offset: 3px;
+}
+.primary { background: var(--accent); border-color: var(--accent); color: white; font-weight: bold; }
+.primary:hover:not(:disabled) { background: #163e60; }
+.yacht-shell { max-width: 1480px; padding: 16px; margin: auto; }
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.page-header h1 { font-size: 26px; margin: 8px 0; }
+.page-header a { color: var(--accent); padding: 10px 0; }
+h2 { line-height: 1.3; }
+#setupView, #resumeView, #endView { background: var(--paper); padding: 24px; border-radius: 24px; margin-top: 16px; }
+.count-label { display: flex; align-items: center; gap: 16px; margin: 24px 0; }
+select, input { border: 2px solid #a6bbc8; border-radius: 10px; background: white; padding: 8px; max-width: 100%; }
+.player-setup { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+.player-card { border: 2px solid #bdcfd4; border-radius: 16px; padding: 16px; min-width: 0; margin: 0; }
+.player-card legend { font-weight: bold; padding: 0 8px; }
+.player-card label { display: grid; gap: 6px; margin: 8px 0; }
+.quick-names, .avatar-options { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.quick-names button { font-size: 16px; padding: 6px 8px; }
+.avatar-option { width: 64px; min-height: 72px; padding: 4px; display: grid; place-items: center; }
+.avatar-option[aria-pressed="true"] { border: 3px solid var(--accent); background: #d9ecff; }
+.avatar-option:disabled { opacity: .35; }
+.avatar-option small { font-size: 12px; line-height: 1.1; overflow-wrap: anywhere; }
+.avatar-image { width: 44px; height: 44px; object-fit: contain; }
+.avatar-emoji { font: 36px/1.3 system-ui, sans-serif; }
+.avatar-note { font-size: 15px; margin: 4px 0; }
+.rules { margin-top: 24px; }
+.rules summary { cursor: pointer; padding: 8px; }
+.status-message { min-height: 1.5em; color: #734522; }
+.turn-heading { display: flex; gap: 16px; align-items: center; justify-content: center; margin-top: 20px; }
+#turnBanner { font-size: 32px; margin: 8px 0; overflow-wrap: anywhere; }
+.turn-avatar .avatar-image { width: 80px; height: 80px; }
+.turn-avatar .avatar-emoji { font-size: 64px; }
+.round-banner { text-align: center; margin: 0 0 16px; }
+.game-layout { display: grid; gap: 20px; }
+.dice-panel, .score-panel { background: var(--paper); border-radius: 20px; padding: 16px; min-width: 0; }
+.dice-panel { text-align: center; }
+.dice-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 500px; margin: 12px auto 24px; }
+.die { min-width: 64px; min-height: 98px; padding: 6px; display: grid; justify-items: center; gap: 4px; border: 3px solid #b3c5cd; }
+.die[aria-pressed="true"] { border-color: #9a6200; background: #fff0b8; }
+.pips { display: grid; grid-template: repeat(3, 8px) / repeat(3, 8px); gap: 4px; padding: 4px; }
+.pip { border-radius: 50%; background: #26374c; }
+.die-value { font: bold 20px/1 system-ui, sans-serif; }
+.die-kept { font-size: 14px; min-height: 20px; }
+#rollDice { min-height: 56px; min-width: min(100%, 240px); font-size: 24px; }
+.keep-hint { margin: 12px 0 4px; }
+.turn-help { min-height: 3em; margin: 8px 0; }
+table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 18px; }
+caption { padding: 0 0 12px; text-align: left; }
+th, td { border-bottom: 1px solid #cbd9df; padding: 6px 4px; text-align: center; overflow-wrap: anywhere; }
+th:first-child { width: 30%; text-align: left; }
+thead th { vertical-align: bottom; }
+thead .avatar-image { width: 34px; height: 34px; }
+thead .avatar-emoji { font-size: 28px; }
+thead .player-name { display: block; }
+.current-column { background: #e2f0fc; }
+.score-choice { width: 100%; min-height: 44px; padding: 4px 1px; border-width: 1px; border-radius: 8px; font-size: inherit; }
+.score-choice.positive { background: #fff2bd; border-color: #9e7100; font-weight: bold; }
+.score-choice.zero { color: #69727b; background: #edf0f2; }
+.recommendation { display: block; font-size: 13px; color: #653b00; }
+.totals-row { font-weight: bold; background: #f4f0df; }
+.bonus-note { display: block; font-size: 13px; font-weight: normal; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.winners { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin: 24px 0; text-align: center; }
+.winners .avatar-image { display: block; width: 140px; height: 140px; margin: auto; }
+.winners .avatar-emoji { display: block; font-size: 100px; }
+.rankings { padding: 0; list-style: none; }
+.rankings li { padding: 12px; border-bottom: 1px solid #cbd9df; display: flex; justify-content: space-between; gap: 12px; }
+dialog { max-width: calc(100% - 32px); border: 0; border-radius: 20px; padding: 24px; color: var(--ink); }
+dialog::backdrop { background: #13273999; }
+.rolling .die { animation: shake .25s ease-in-out; }
+@keyframes shake { 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
+@media (min-width: 960px) and (orientation: landscape) {
+  .game-layout { grid-template-columns: minmax(0, 1.25fr) minmax(380px, 1fr); align-items: start; }
+  .score-panel { grid-column: 1; grid-row: 1; }
+  .dice-panel { grid-column: 2; grid-row: 1; position: sticky; top: 16px; }
+}
+@media (max-width: 600px) {
+  #setupView, #resumeView, #endView { padding: 16px; }
+  .page-header { gap: 6px; }
+  .page-header h1 { font-size: 22px; }
+  #soundToggle { font-size: 15px; padding: 6px; }
+  .turn-heading { gap: 8px; }
+  .turn-avatar .avatar-image { width: 48px; height: 48px; }
+  .turn-avatar .avatar-emoji { font-size: 40px; }
+  .dice-panel, .score-panel { padding: 12px 4px; }
+  .dice-row { gap: 4px; }
+  .die { min-width: 64px; padding: 4px 0; }
+  th, td { padding: 6px 1px; }
+  th:first-child { width: 26%; }
+  thead th, tbody th { font-size: 15px; }
+  .recommendation { font-size: 11px; }
+  .bonus-note { font-size: 11px; }
+}
+@media (max-width: 370px) {
+  .dice-row { grid-template-columns: repeat(3, 64px); justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

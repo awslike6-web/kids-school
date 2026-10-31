@@ -161,6 +161,20 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ---
 
+## 2-0-2. 🎲 가족 보드게임 · 야추 (2026-10-31)
+
+- 진입: `kids/playground/index.html`의 가족 보드게임 카드 → `kids/playground/family/yacht.html`. 2~5명이 한 기기를 돌려 쓰는 12칸·12라운드 놀이이며 보석·사탕·EXP·학습 계측·노션 저장에 연결하지 않습니다. 계약: `docs/family_yacht_spec.md`.
+- `kids/playground/family/yacht-engine.js`: DOM·저장소 없는 IIFE, 전역 `YachtEngine` 하나. `CATEGORIES`, `createGame(players,rng)`, `roll(state,rng)`, `toggleKeep(state,index)`, `scoreFor(dice,category)`, `scoreOptions(dice)`, `choose(state,category)`, `totals(scores)`, `isOver(state)`, `ranking(state)`, `hints(state,mode)`. 기본 난수는 `crypto.getRandomValues`, 시험은 RNG 주입.
+- 상태: `{v:1,gameType:'yacht',stateVersion,round,turnPlayer,players,publicBoard:{dice,kept,rollCount,scores},lastAction}`. 참가자 `{id,name,avatar,assist}`, 점수는 참가자 ID별 12칸(`null`=미기록). 초기 `lastAction:null`, 기록 행동에는 `category` 포함. 유효 행동만 새 상태·버전 +1, 무효 행동은 원본 반환. 동점은 1·1·3등.
+- 도움: `hints`는 `{previews,recommendations}`, 클래식·굴리기 전·완료 뒤는 `{}`. 전술은 빈 칸 중 점수 상위 2개, 동점이면 뒤쪽 칸 우선. 풀하우스는 같은 눈 5개도 인정합니다.
+- `kids/playground/family/yacht-ui.js`: IIFE·전역 `YachtUI.boot()`, 설정·굴리기·0점 확인·순위·이어하기. `yacht.html`은 얇은 래퍼, `yacht.css`는 가로/세로 배치·64px 주사위·동작 감소 스타일입니다.
+- 말: `gallery-data.js`의 `DEFAULT_GALLERY_DATA`와 `MonsterRoster.charactersOf(item)` 재사용. `{type:'gallery',value:{artId,charKey,name,spriteUrl}}` 또는 `{type:'emoji',value}`. 작품 ID+캐릭터 키로 중복 방지, 그림 오류·2.5초 로딩 지연 시 참가자별 서로 다른 이모지로 표시합니다. 기존 파트너 장착값은 바꾸지 않습니다.
+- 이어하기 키 `familyYachtGame`은 기기 로컬에만 저장합니다. 읽을 때 버전·참가자·12칸 점수·차례/라운드·행동을 검사하고 잘못된 값은 새 게임으로 처리합니다. 종료 시 삭제하고 저장 실패도 게임은 계속합니다.
+- 소리: `fairy-config` → `fairy-tts` → `fairy-settings-catalog` → `fairy-engine` 로드. `speakFairyTTS(text,onEnd,{skipPreset:true})`로 차례·야추를 읽고 `fairyReward()`는 종료 효과음만 냅니다. 안내 음소거는 이 화면 세션에만 적용합니다. 갤러리 CDN·공통 TTS는 허용하며 CSP는 추가하지 않습니다.
+- 검증: `tests/yacht-engine.test.mjs`가 VM에서 브라우저 IIFE를 직접 로드해 규칙·불변 상태·도움·완주·입력·리소스 계약을 검사합니다. 화면 검증은 guarded preview 서버와 외부 요청 중단 환경에서 수행하며 실제 CDN·TTS 성공과 구분합니다.
+
+---
+
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
 ### 🌟 `subject_engine.js` (4대 교과 공통 미션 엔진)
