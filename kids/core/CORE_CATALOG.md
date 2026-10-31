@@ -531,6 +531,11 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)
 
+### 2단원 실험실 3개 인라인 CSS·JS 분리 (2026-10-31)
+- `kids/subjects/science/science_season_airmass_lab.html`(420줄)·`science_cloud_lab.html`(241줄)·`science_wind_lab.html`(230줄)은 같은 이름의 CSS를 `../../css/`에서, 클래식 JS를 `./js/`에서 원래 인라인 위치·`?v=20261031-science-split`으로 로드합니다. CSS는 각각 339·250·289줄, JS는 각각 418·344·304줄입니다.
+- 원문·DOM·전역 함수를 보존합니다. 주요 API는 계절·기단 `switchMode`·`selectAirmass`·`setSeason`·`highlightMatrix`, 구름 `setSmokeMode`·`pressPump`·`openCap`·`startSqueeze`·`endSqueeze`, 바람 `switchLabMode`·`toggleLamp`·`setWindTime`입니다. 기존 `design-system.css`가 개별 CSS보다 먼저, `study-activity.js?v=20261023`은 개별 JS보다 뒤에 있습니다.
+- 세 JS는 저장된 보석 수 읽기·`gemCount` 쓰기를 즉시 실행하며, 구름만 `cloudCanvas.getContext('2d')`를 추가 실행합니다. 계절·기단의 `DOMContentLoaded` 등록 1회와 나머지 0회를 포함해 `tests/science-labs-split.test.mjs`가 고정 fixture·허용 목록으로 검증합니다. 분리 계약: `docs/science_labs_split_spec.md`. 화면 비교는 해당 명세서 §6의 별도 확인입니다.
+
 전사 최고 거버넌스 헌법(규칙 7조: 골디락스 적정 응집도 300~600줄, 절대 상한 800줄 미만)에 의거하여, 기존 1,608줄의 비대했던 `science_common.js`를 1개의 초경량 대문 파사드와 5개의 전문 서브모듈로 완전 분리 구축한 엔진군입니다.
 
 ### 🌟 `science_common.js` (과학 탐구방 대문 파사드)

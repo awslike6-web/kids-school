@@ -1,0 +1,338 @@
+
+    @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Gaegu:wght@400;700&display=swap');
+
+    :root {
+        --primary: #7c3aed;
+        --primary-dark: #6d28d9;
+        --accent: #f59e0b;
+        --bg-color: #0b1528;
+        --card-bg: #13233f;
+        --text-light: #f8fafc;
+        --siberia-color: #38bdf8;
+        --pacific-color: #ef4444;
+        --okhotsk-color: #14b8a6;
+        --yangtze-color: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Nanum Gothic', sans-serif;
+        background: var(--bg-color);
+        min-height: 100vh;
+        color: var(--text-light);
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 60px;
+    }
+
+    /* 상단 네비게이션 */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 20px; background: rgba(11, 21, 40, 0.95); backdrop-filter: blur(12px);
+        box-shadow: 0 2px 15px rgba(0,0,0,0.5); position: sticky; top: 0; z-index: 100;
+        border-bottom: 1.5px solid #1e3a66;
+    }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: #1a3258; color: #e2e8f0; border-radius: 12px; font-family: 'Jua', sans-serif;
+        font-size: 0.95rem; text-decoration: none; border: 1px solid #2d5088; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-back:hover { background: #2d5088; color: #fff; }
+    .page-title {
+        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #a78bfa;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .gem-badge {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white; font-family: 'Jua', sans-serif; padding: 6px 14px;
+        border-radius: 20px; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+
+    .main-wrap {
+        max-width: 980px; width: 100%; margin: 0 auto; padding: 18px 16px;
+        display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* 헤더 배너 */
+    .header-banner {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #1e3a8a 100%);
+        border: 2px solid #4338ca; border-radius: 20px; padding: 20px 24px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3); position: relative; overflow: hidden;
+    }
+    .banner-sub {
+        font-family: 'Jua', sans-serif; color: #c4b5fd; font-size: 0.95rem;
+        display: inline-block; margin-bottom: 6px; letter-spacing: 0.5px;
+    }
+    .banner-title {
+        font-family: 'Jua', sans-serif; font-size: 1.6rem; color: #ffffff;
+        margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+    }
+    .banner-desc {
+        color: #e0e7ff; font-size: 0.96rem; line-height: 1.55;
+    }
+
+    /* 5대 가상실험실 퀵 네비게이터 */
+    .lab-nav-pills {
+        display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+        padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.2);
+    }
+    .lab-pill {
+        padding: 6px 13px; border-radius: 16px; font-family: 'Jua', sans-serif; font-size: 0.88rem;
+        text-decoration: none; color: #cbd5e1; background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.15); transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .lab-pill:hover { background: rgba(255,255,255,0.2); color: #fff; }
+    .lab-pill.active {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        color: white; border-color: #c4b5fd; box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 탭 메뉴 */
+    .mode-tab-bar {
+        display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .mode-tab-btn {
+        flex: 1; min-width: 140px; padding: 12px 14px; border-radius: 14px; border: 2px solid #1e3a66;
+        background: #0d1b32; color: #94a3b8; font-family: 'Jua', sans-serif;
+        font-size: 1.02rem; cursor: pointer; display: flex; align-items: center;
+        justify-content: center; gap: 8px; transition: all 0.2s; white-space: nowrap;
+    }
+    .mode-tab-btn.active {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        color: white; border-color: #a78bfa; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 카드 섹션 */
+    .section-card {
+        background: var(--card-bg); border-radius: 20px; border: 2px solid #1e3a66;
+        padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .section-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1.5px solid #1e3a66; padding-bottom: 12px;
+    }
+    .section-tag {
+        font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #a78bfa;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .tip-box {
+        background: #0d1b32; border-left: 4px solid #7c3aed;
+        padding: 12px 16px; border-radius: 8px; font-size: 0.92rem; color: #e2e8f0;
+        line-height: 1.55;
+    }
+
+    /* =======================================================
+       모드 1: 입체 지도 & 4대 기단
+       ======================================================= */
+    .map-container {
+        position: relative; width: 100%; min-height: 480px;
+        background: radial-gradient(circle at center, #15294b 0%, #0a1322 100%);
+        border-radius: 18px; border: 2px solid #224275; overflow: hidden;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .korea-map-svg {
+        width: 100%; height: 100%; max-height: 480px; display: block;
+    }
+
+    /* 4대 기단 카드 그리드 */
+    .airmass-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+    }
+    .airmass-card {
+        background: #0d1b32; border-radius: 14px; border: 2px solid #1e3a66; padding: 14px;
+        cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden;
+    }
+    .airmass-card:hover, .airmass-card.active {
+        transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    .airmass-card.siberia.active { border-color: var(--siberia-color); background: #0c2742; }
+    .airmass-card.pacific.active { border-color: var(--pacific-color); background: #3b1115; }
+    .airmass-card.okhotsk.active { border-color: var(--okhotsk-color); background: #082928; }
+    .airmass-card.yangtze.active { border-color: var(--yangtze-color); background: #092e1f; }
+
+    .airmass-title-row {
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .airmass-name {
+        font-family: 'Jua', sans-serif; font-size: 1.15rem; display: flex; align-items: center; gap: 6px;
+    }
+    .airmass-season-tag {
+        font-family: 'Jua', sans-serif; font-size: 0.8rem; padding: 3px 8px; border-radius: 8px;
+    }
+    .airmass-prop-badges {
+        display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .airmass-badge {
+        font-size: 0.78rem; font-family: 'Jua', sans-serif; padding: 3px 8px; border-radius: 6px;
+        background: #1e3a66; color: #cbd5e1;
+    }
+    .airmass-desc {
+        font-size: 0.88rem; color: #cbd5e1; line-height: 1.45;
+    }
+
+    /* =======================================================
+       모드 2: 사계절 시뮬레이터
+       ======================================================= */
+    .season-selector-bar {
+        display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .season-btn {
+        padding: 10px 18px; border-radius: 12px; border: 2px solid #1e3a66;
+        background: #0d1b32; color: #cbd5e1; font-family: 'Jua', sans-serif; font-size: 1.05rem;
+        cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .season-btn:hover { border-color: #a78bfa; color: #fff; }
+    .season-btn.active {
+        background: linear-gradient(135deg, #7c3aed 0%, #4338ca 100%);
+        color: white; border-color: #c4b5fd; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+    }
+    .season-btn.active.summer {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        border-color: #fca5a5; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+    }
+    .season-btn.active.winter {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        border-color: #7dd3fc; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    }
+    .season-btn.active.monsoon {
+        background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+        border-color: #5eead4; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+    }
+
+    .season-display-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 768px) {
+        .season-display-grid { grid-template-columns: 1fr; }
+    }
+
+    .weather-board {
+        background: #0d1b32; border-radius: 16px; border: 2px solid #1e3a66; padding: 18px;
+        display: flex; flex-direction: column; gap: 14px;
+    }
+    .weather-stat-row {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #13233f; padding: 10px 14px; border-radius: 10px;
+    }
+    .stat-label { font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #94a3b8; }
+    .stat-val { font-family: 'Jua', sans-serif; font-size: 1.15rem; color: #fff; }
+
+    .life-card {
+        background: linear-gradient(135deg, #13233f 0%, #1e3a66 100%);
+        border-radius: 16px; border: 2px solid #2d5088; padding: 18px;
+        display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 10px;
+    }
+    .life-icon { font-size: 3.5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+    .life-title { font-family: 'Jua', sans-serif; font-size: 1.3rem; color: #38bdf8; }
+    .life-desc { font-size: 0.95rem; color: #e2e8f0; line-height: 1.5; }
+
+    /* 장마 충돌 특수 배너 */
+    .monsoon-special-box {
+        background: linear-gradient(135deg, #134e4a 0%, #0f172a 100%);
+        border: 2px solid #14b8a6; border-radius: 14px; padding: 16px;
+        display: none; flex-direction: column; gap: 8px; animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 10px rgba(20, 184, 166, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.5); }
+    }
+
+    /* =======================================================
+       모드 3: 2x2 원리 매트릭스
+       ======================================================= */
+    .matrix-container {
+        display: grid; grid-template-columns: 90px 1fr 1fr; gap: 8px;
+        background: #0d1b32; padding: 16px; border-radius: 16px; border: 2px solid #1e3a66;
+    }
+    .matrix-header {
+        font-family: 'Jua', sans-serif; font-size: 0.95rem; color: #94a3b8;
+        display: flex; align-items: center; justify-content: center; text-align: center;
+        background: #13233f; border-radius: 10px; padding: 8px;
+    }
+    .matrix-cell {
+        background: #162a4d; border-radius: 12px; border: 2px solid #234275; padding: 14px;
+        display: flex; flex-direction: column; gap: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .matrix-cell:hover { border-color: #a78bfa; background: #1e3969; }
+    .cell-title { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: #fff; }
+    .cell-char { font-family: 'Jua', sans-serif; font-size: 0.85rem; }
+    .cell-desc { font-size: 0.82rem; color: #cbd5e1; line-height: 1.4; }
+
+    /* =======================================================
+       모드 4: 실전 퀴즈
+       ======================================================= */
+    .quiz-card {
+        background: #0d1b32; border-radius: 16px; border: 2px solid #1e3a66; padding: 20px;
+        display: flex; flex-direction: column; gap: 16px;
+    }
+    .quiz-question {
+        font-family: 'Jua', sans-serif; font-size: 1.25rem; color: #f8fafc; line-height: 1.5;
+        display: flex; align-items: flex-start; gap: 10px;
+    }
+    .quiz-num-badge {
+        background: #7c3aed; color: white; border-radius: 50%; width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .quiz-options {
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .quiz-opt-btn {
+        padding: 13px 18px; border-radius: 12px; border: 2px solid #1e3a66;
+        background: #13233f; color: #e2e8f0; font-family: 'Nanum Gothic', sans-serif;
+        font-size: 1rem; font-weight: 700; text-align: left; cursor: pointer; transition: all 0.2s;
+    }
+    .quiz-opt-btn:hover { background: #1a3258; border-color: #38bdf8; }
+    .quiz-opt-btn.correct {
+        background: #065f46; border-color: #34d399; color: #ecfdf5;
+    }
+    .quiz-opt-btn.wrong {
+        background: #7f1d1d; border-color: #f87171; color: #fef2f2;
+    }
+    .quiz-feedback {
+        display: none; padding: 14px; border-radius: 12px; font-size: 0.95rem; line-height: 1.5;
+    }
+    .quiz-nav-row {
+        display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
+    }
+    .btn-next-quiz {
+        padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        color: white; font-family: 'Jua', sans-serif; font-size: 1rem;
+        display: none; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    /* 요정 도크 */
+    .fairy-dock {
+        background: rgba(19, 35, 63, 0.9); backdrop-filter: blur(10px);
+        border: 2px solid #1e3a66; border-radius: 18px; padding: 14px 18px;
+        display: flex; align-items: center; gap: 14px; margin-top: 8px;
+    }
+    .fairy-avatar { width: 50px; height: 50px; object-fit: contain; flex-shrink: 0; }
+    .fairy-msg { font-size: 0.95rem; color: #e2e8f0; line-height: 1.5; }
+    .fairy-msg b { color: #a78bfa; }
+
+    /* 완주 모달 */
+    .reward-modal-overlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.75); z-index: 200; align-items: center; justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+    .reward-modal {
+        background: linear-gradient(135deg, #1e1b4b 0%, #0d1b32 100%);
+        border: 2.5px solid #a78bfa; border-radius: 24px; padding: 30px; max-width: 440px; width: 90%;
+        text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 14px;
+        animation: popUp 0.3s ease-out;
+    }
+    @keyframes popUp {
+        0% { transform: scale(0.85); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .reward-btn {
+        padding: 12px 24px; border-radius: 14px; border: none; cursor: pointer;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white; font-family: 'Jua', sans-serif; font-size: 1.1rem;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }

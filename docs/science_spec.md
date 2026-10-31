@@ -114,6 +114,12 @@ graph TD
   - **4차시: 🏷️ 에너지 효율 & 스마트 절전소 (`science_energy_efficiency_lab.html`, 429줄)**: 1~5등급 가전제품 효율 비교(1등급 35% 절전), 대기전력 차단 콘센트, LED 조명, 빗물 재활용 토글 및 월간 전기요금/CO₂ 감축량 산출.
   - **5차시: 🏡 단열 에코하우스 (`science_eco_house_lab.html`, 542줄)**: 가상 1분=실제 1초로 백열등 5분 가열(20→38℃) ➔ 소등 후 1분마다 5회 측정해 빈 기록표를 채우는 냉각 실험. 값은 실온 20℃ 냉각 법칙으로 계산한 가상 값(5분 뒤 일반 집 23.0℃ vs 에코하우스 34.1℃)이며 화면에 그렇게 안내.
 
+#### 2단원 실험실 3개 인라인 분리 (2026-10-31)
+- `kids/subjects/science/`의 `science_season_airmass_lab.html`(420줄)·`science_cloud_lab.html`(241줄)·`science_wind_lab.html`(230줄)은 같은 이름의 CSS를 `../../css/`, JS를 `./js/`에서 `?v=20261031-science-split`으로 로드한다.
+- CSS는 각각 339·250·289줄, JS는 각각 418·344·304줄이다. 태그 내부 원문·나머지 DOM·전역 함수·기존 로드 순서를 보존하며, `design-system.css` → 개별 CSS, 개별 클래식 JS → `study-activity.js?v=20261023` 순서다.
+- 세 JS는 최상위에서 `min_science_gems`를 읽고 `gemCount`를 갱신한다. 구름은 `cloudCanvas.getContext('2d')`도 즉시 실행하고, 계절·기단은 `DOMContentLoaded`에서 `selectAirmass('siberia')`를 호출한다. 뒤 스크립트 선언에는 의존하지 않는다.
+- 주요 전역 API: 계절·기단 `switchMode`·`selectAirmass`·`setSeason`·`highlightMatrix`, 구름 `setSmokeMode`·`pressPump`·`openCap`·`startSqueeze`·`endSqueeze`, 바람 `switchLabMode`·`toggleLamp`·`setWindTime`. 원문·마크업·초기 접근 계약 시험은 `tests/science-labs-split.test.mjs`, 분리 계약은 `docs/science_labs_split_spec.md`를 따른다. 화면 비교는 해당 명세서 §6의 별도 확인이다.
+
 ### 3) 📝 『실험관찰』 실험연계 디지털 탐구 보고서 (`renderLabReportUI`)
 - **단원별 완벽 분리 지원**:
   - `openScienceReport(1)` ➔ 1단원 혼합물의 분리 (교과서 『실험관찰』 12~19쪽 요약 및 퀴즈 5종)
