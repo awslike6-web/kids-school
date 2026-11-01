@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../../css/design-system.css">
   <link rel="stylesheet" href="yacht.css">
   <link rel="stylesheet" href="omok.css">
+  <link rel="stylesheet" href="family-room.css">
 </head>
 <body>
   <main class="omok-shell">
@@ -15,9 +16,13 @@
       <h1>⚫ 가족 오목</h1>
       <button id="soundToggle" type="button" aria-pressed="false">🔊 안내 음성</button>
     </header>
+    <div id="roomStatus" class="family-room-status" role="status" hidden></div>
+    <section id="roomView" class="family-room-view" aria-label="가족 방" hidden></section>
     <section id="setupView" aria-labelledby="setupTitle">
+      <div class="family-room-modes"><button id="singleDevice" type="button">📱 이 기기 하나로</button>
+        <button id="multipleDevices" type="button">📱📱 여러 기기로</button></div>
       <h2 id="setupTitle">마주 앉아 함께 두어요!</h2>
-      <p>두 사람이 한 판을 함께 봐요. 1번 사람이 흑으로 먼저 둡니다.</p>
+      <p>이 기기 하나로 두 사람이 한 판을 함께 봐요. 1번 사람이 흑으로 먼저 둡니다.</p>
       <div id="playerSetup" class="player-setup"></div>
       <label class="count-label">판 크기
         <select id="boardSize" aria-label="판 크기">
@@ -36,7 +41,8 @@
       <h2 id="resumeTitle">놀던 게임이 있어요</h2>
       <p id="resumeSummary"></p>
       <div class="actions"><button id="resumeGame" type="button" class="primary">이어서 하기</button>
-        <button id="newGame" type="button">새 게임</button></div>
+        <button id="newGame" type="button">새 게임</button>
+        <button id="resumeMultipleDevices" type="button">📱📱 여러 기기로</button></div>
     </section>
     <section id="gameView" hidden aria-label="오목 게임">
       <div class="omok-layout">
@@ -59,6 +65,7 @@
         </aside>
       </div>
     </section>
+    <div id="roomActions" class="family-room-actions" hidden></div>
     <p id="saveStatus" class="status-message" role="status"></p>
   </main>
   <script src="../../core/fairy-config.js"></script>
@@ -69,6 +76,8 @@
   <script src="../../subjects/quest/monster_roster.js"></script>
   <script src="family-players.js"></script>
   <script src="omok-engine.js"></script>
+  <script src="family-room.js"></script>
+  <script src="family-room-ui.js"></script>
   <script src="omok-ui.js"></script>
 </body>
 </html>

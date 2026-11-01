@@ -7,7 +7,7 @@ export const read = name => readFileSync(new URL(name, base), 'utf8');
 export const plain = value => JSON.parse(JSON.stringify(value));
 export const CLIENT = '11111111-1111-1111-1111-111111111111';
 export const OTHER = '22222222-2222-2222-2222-222222222222';
-export function browser({ search = '', blocked = false, storage = {}, fetch: fetcher, hostname = 'localhost' } = {}) {
+export function browser({ search = '', blocked = false, storage = {}, fetch: fetcher, hostname = 'localhost', game = 'yacht' } = {}) {
   let now = 0, timerId = 0;
   const timers = new Map(), store = new Map(Object.entries(storage)), nodes = new Map(), sockets = [], requests = [], speech = [];
   const listeners = new Map();
@@ -54,13 +54,19 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
     close() { this.open = false; this.fire('close'); }
   }
   const body = new Node('body'); document.body = body;
-  for (const match of read('yacht.html').matchAll(/<(\w+)[^>]*\bid="([^"]+)"[^>]*>/g)) {
+  for (const match of read(`${game}.html`).matchAll(/<(\w+)[^>]*\bid="([^"]+)"[^>]*>/g)) {
     const n = new Node(match[1]); n.id = match[2]; n.hidden = /\bhidden\b/.test(match[0]); nodes.set(n.id, n); body.append(n);
   }
-  for (const id of ['playerSetup', 'playerCount', 'startGame', 'singleDevice', 'multipleDevices']) nodes.get('setupView').append(nodes.get(id));
-  for (const id of ['dice', 'rollDice', 'scoreTable', 'keepHint', 'turnHelp', 'turnBanner', 'turnAvatar', 'roundBanner'])
-    nodes.get('gameView').append(nodes.get(id));
-  for (const id of ['playAgain', 'backToSetup', 'winners', 'rankings', 'endTitle']) nodes.get('endView').append(nodes.get(id));
+  const nest = (parent, ids) => ids.forEach(id => nodes.get(parent).append(nodes.get(id)));
+  if (game === 'yacht') {
+    nest('setupView', ['playerSetup', 'playerCount', 'startGame', 'singleDevice', 'multipleDevices']);
+    nest('gameView', ['dice', 'rollDice', 'scoreTable', 'keepHint', 'turnHelp', 'turnBanner', 'turnAvatar', 'roundBanner']);
+    nest('endView', ['playAgain', 'backToSetup', 'winners', 'rankings', 'endTitle']);
+  } else {
+    nest('setupView', ['playerSetup', 'boardSize', 'startGame', 'singleDevice', 'multipleDevices']);
+    nest('endView', ['playAgain', 'backToSetup', 'winners', 'endTitle']);
+    nest('gameView', ['board', 'turnHeading', 'turnBanner', 'turnAvatar', 'assistLabel', 'playersStatus', 'helpText', 'selectionText', 'confirmPlace', 'endView']);
+  }
   const tick = ms => {
     const target = now + ms; let loops = 0;
     while (true) {
@@ -83,7 +89,7 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
   const context = { document, URL, URLSearchParams, TextEncoder, AbortController, console,
     Date: class extends Date { static now() { return now; } }, WebSocket: Socket,
     crypto: { randomUUID: () => CLIENT, getRandomValues: a => webcrypto.getRandomValues(a) },
-    location: { hostname, search, href: `http://${hostname}/kids/playground/family/yacht.html${search}` },
+    location: { hostname, search, href: `http://${hostname}/kids/playground/family/${game}.html${search}` },
     setTimeout: (fn, ms = 0) => { timers.set(++timerId, { fn, at: now + ms }); return timerId; },
     clearTimeout: id => timers.delete(id),
     localStorage: {
@@ -100,20 +106,20 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
   };
   context.window = context; vm.createContext(context);
   const load = name => vm.runInContext(read(name), context, { filename: name });
-  ['family-players.js', 'family-room.js', 'family-room-ui.js', 'yacht-engine.js', 'yacht-ui.js'].forEach(load);
+  ['family-players.js', 'family-room.js', 'family-room-ui.js', `${game}-engine.js`, `${game}-ui.js`].forEach(load);
   const fire = (key, event = {}) => { for (const fn of listeners.get(key) || []) fn(event); };
   const $ = id => document.getElementById(id);
   const find = (text, host = body) => host.querySelectorAll('button').find(n => n.textContent === text);
   const connect = (s = snapshot()) => { const ws = sockets.at(-1); ws.open(); ws.message(s); return ws; };
-  const boot = () => context.YachtUI.boot();
+  const boot = () => (game === 'yacht' ? context.YachtUI : context.OmokUI).boot();
   return { context, $, find, connect, boot, load, fire, tick, timers, store, nodes, sockets, requests, speech, Node, body };
 }
 export function players() {
   return [{ id: 'p1', name: '민서', avatar: { type: 'emoji', value: '🐰' }, assist: 'helper' },
     { id: 'p2', name: '민수', avatar: { type: 'emoji', value: '🐻' }, assist: 'tactic' }];
 }
-export function snapshot({ phase = 'lobby', rev = 0, state = null, hostId = CLIENT, seats, you = CLIENT } = {}) {
-  return { type: 'snapshot', room: { code: '4821', gameType: 'yacht', maxSeats: 5, phase, hostId, rev },
+export function snapshot({ phase = 'lobby', rev = 0, state = null, hostId = CLIENT, seats, you = CLIENT, gameType = 'yacht', maxSeats = 5 } = {}) {
+  return { type: 'snapshot', room: { code: '4821', gameType, maxSeats, phase, hostId, rev },
     members: [{ id: CLIENT, online: true }, { id: OTHER, online: true }],
     seats: seats || players().map((p, i) => ({ ...p, owner: i ? OTHER : CLIENT })), state, you };
 }

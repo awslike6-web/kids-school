@@ -11,14 +11,7 @@
 
   function validSnapshot(s) {
     try {
-      if (!s || s.room.gameType !== 'yacht' || !['lobby', 'playing'].includes(s.room.phase) ||
-          !Number.isInteger(s.room.maxSeats) || s.room.maxSeats < 2 || s.room.maxSeats > 5 ||
-          !Array.isArray(s.seats) || s.seats.length > s.room.maxSeats || !Array.isArray(s.members) ||
-          !s.members.every(m => typeof m.id === 'string' && typeof m.online === 'boolean') ||
-          !s.seats.every((p, i) => p.id === `p${i + 1}` && typeof p.name === 'string' &&
-            p.name.trim() && Array.from(p.name).length <= 8 && window.FamilyRoomUI.usableAvatar(p.avatar) &&
-            ['helper', 'tactic', 'classic'].includes(p.assist) &&
-            (p.owner === null || s.members.some(m => m.id === p.owner)))) return false;
+      if (!window.FamilyRoomUI.validRoom(s, 'yacht')) return false;
       if (s.room.phase === 'lobby') return s.state === null;
       const v = s.state, b = v?.publicBoard;
       if (v?.v !== 1 || v.gameType !== 'yacht' || !Array.isArray(v.players) ||
