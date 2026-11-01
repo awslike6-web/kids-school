@@ -85,7 +85,8 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
 ### 🌟 `lobby_controller.js` & `lobby-themes.css` (Stitch AI 듀얼 테마 로비 & 한도 모달 엔진)
 Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECTOR-07 차원 성계도 · 시간 한도 도달 갈림길 모달)을 골디락스 응집도(800줄 미만)로 통합한 로비 제어 엔진입니다.
 - **파일 위치**:
-  - `lobby.html` (784줄): 민서 뷰(`#minseoLobbyView`), 민수 뷰(`#minsuLobbyView`), 과목별 팝업 카드, 중단 4칸 아지트 허브(마이룸&상점·갤러리·대시보드·시간표), 하단 5칸 고정 유틸리티 바(`📝 마음일기 · 📸 찰칵등록 · 🦖 용어사전 · 🎡 놀이터 · 👥 프로필`), 놀이터 모달(`#playgroundModalOverlay`), 시간 한도 갈림길 모달(`#dailyCapModalOverlay`), 부모 관리자 시뮬레이터 툴바(`#adminQuickToolbar`, 2026-10-21부터 `<details>` 접이식: 평소엔 검수 라벨만, 누르면 도구 버튼 펼침 · JS 변경 없음) 통합 마크업.
+  - `kids/js/lobby_tailwind_config.js` (48줄, 2026-11-01): 로비 Tailwind CDN 설정(`tailwind.config` — 테마 RGB 변수 색상 47개·간격·글꼴·글자 크기). Tailwind CDN 태그 바로 다음에 클래식 스크립트로 싣는다(`?v=20261101-lobby-tw`). 시험 `tests/lobby-tailwind-config.test.mjs`.
+  - `lobby.html` (751줄): 민서 뷰(`#minseoLobbyView`), 민수 뷰(`#minsuLobbyView`), 과목별 팝업 카드, 중단 4칸 아지트 허브(마이룸&상점·갤러리·대시보드·시간표), 하단 5칸 고정 유틸리티 바(`📝 마음일기 · 📸 찰칵등록 · 🦖 용어사전 · 🎡 놀이터 · 👥 프로필`), 놀이터 모달(`#playgroundModalOverlay`), 시간 한도 갈림길 모달(`#dailyCapModalOverlay`), 부모 관리자 시뮬레이터 툴바(`#adminQuickToolbar`, 2026-10-21부터 `<details>` 접이식: 평소엔 검수 라벨만, 누르면 도구 버튼 펼침 · JS 변경 없음) 통합 마크업.
   - `kids/css/lobby-themes.css` (359줄): CSS RGB 채널 변수 스왑(`html.theme-minseo` vs `html.theme-minsu`)으로 Tailwind 컬러 토큰 충돌 원천 차단, `.clay-card*`, `.jelly-btn`, `.cosmic-map`, `.scanline`, `.hazard-stripe-amber`, 모달 라이트 격리 스타일.
   - `kids/js/lobby_config.js` (106줄): 아바타·과목·놀이터·사용자 설정 상수, 월드 목록 구성과 `window.USER_CONFIGS`.
   - `kids/js/lobby_subject_hud.js` (459줄): `LobbySubjectHud.create(ctx)` 공장 함수, 시간표 부스트·과목별 일일 한도·추천 과목·가디언 HUD·노션 인벤토리 동기화.
