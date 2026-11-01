@@ -1,7 +1,7 @@
 # 💎 보상 지급 공용 모듈 `reward-grant.js` 명세서 (오프라인 보상 보존 전 화면 확대)
 
 > **문서 버전**: v1.0 (2026-11-01)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 구현 완료 (2026-11-01, Claude 검증 완료)
 > **근거**: 앞선 작업 `docs/quest_reward_retry_spec.md`(퀘스트 화면만 보상 대기열 적용, 병합 `c057674a`), GEMINI §8-1(중복 복붙 금지 — 공통 코어는 한 벌), §6(보상 함수 시그니처 보존), §0(카탈로그 실시간 갱신).
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`(보상·학습일지 항목)를 먼저 읽는다. 앞선 명세서와 그 시험 `tests/quest-reward-retry.test.mjs`를 꼭 읽는다.
 
@@ -60,3 +60,64 @@
 ## 7. 문서
 - `CORE_CATALOG.md`: 새 모듈 항목(공개 API·자동 로드·대기열 규칙 요약) 추가, 두 파일 항목에서 보상 본체 설명을 "껍데기 → reward-grant.js"로 고친다.
 - `docs/quest_reward_retry_spec.md`는 고치지 않는다. 이 문서 상태를 "구현 완료"로 바꾸고 결과를 적는다.
+
+## 8. 구현 결과 (2026-11-01)
+
+- `kids/core/reward-grant.js`(410줄)에 기존 퀘스트 지급 본체·대기열·UI를 모았다. 클래식 스크립트 IIFE이며 새 전역은 `window.MinminRewardGrant` 하나다. API는 `grant(earned, isSilent=false, customExpType=null, context=null)`와 `flushQueue()`다.
+- `notion-reward.js`(170줄)와 `notion-study-logger.js`(194줄)는 호출 당시 학생·테마·과목·시각을 먼저 확보하고 공용 모듈을 기다려 위임한다. 공개 함수 이름·세 인자·반환 의미·logger 네임스페이스는 유지했다. 학습일지·숙련도·계측·미션 보상 코드는 바꾸지 않았다.
+- 두 껍데기는 자기 스크립트 기준 같은 폴더에서 `reward-grant.js?v=20261101-reward-grant-shared`를 중복 없이 자동 로드한다. 선행 로드·지연 로드·기존 태그 대기·로드 실패 후 재시도를 검사했다. 공용 모듈이 페이지 load 뒤 도착해도 초기 flush한다.
+- 기존 대기열 키·항목 형식·FIFO 10건·동일 flush Promise·탭 직렬화·Web Locks 미지원 시 자동 flush를 유지했다. 항목에 담긴 학생으로 지급하고, 최신 인벤토리와 지급 시점 부스트·상한을 쓴다. 전날 실패분도 지급한 날 몫이다. 상한 0개 항목은 남기고 부분 지급 성공 항목은 삭제한다.
+- 날짜·소원권 누적·스크린타임은 PATCH 성공 뒤 한 번만 반영한다. 스크린타임은 tracker → 전역 함수 → 두 기존 날짜 형식의 로컬 키 순서로 대체한다. 두 학습설정 동기화는 현재 학생과 지급 학생이 같을 때만 호출한다. PATCH 뒤 로컬/UI 오류는 재등록하지 않는다.
+- 로비 주소는 기존 상대 경로 헬퍼 우선, 없으면 명세서의 기존 절대 경로 식이다. 대기열 저장 성공 시 일반 호출은 모달로 자동 지급 안내만 표시하고, 모달이 없거나 조용한 호출이면 표시하지 않는다. 그 외 실패는 기존 실패 안내를 유지한다. 시도·본문·오류 응답 로그도 유지했다.
+- `quest_runner.html` 보상 세 태그, helper의 logger 로더, helper 자체의 버전이 고정된 화면 6곳을 갱신했다. science·voca 원문 보존 시험에는 이 버전 변경만 명시적으로 등록해 기존 바이트 비교·고정 해시를 유지했다.
+- 기존 `tests/fixtures/*` 파일은 수정하지 않았다. 이번 변경 직전 reward·logger 원문을 `tests/fixtures/reward-grant-shared/`에 새로 보존했다. fixture는 계약 검사 줄 수 대상에서 제외한다. `tests/reward-grant-approved-edits.mjs`는 고정 원문에 승인 변경을 정확히 한 번씩 적용하며 운영 소스로 기대값을 만들지 않는다.
+- 기존 보상 재시도 22개를 두 경로에서 각각 실행한다. 합집합·자동 로드·별칭·이름 충돌·변경 전 성공 결과 비교와 기존 분리 시험까지 아래 대상 시험 122개가 통과했다.
+
+실행 명령(종료 코드 0):
+
+```powershell
+node --test --test-reporter=tap tests/quest-reward-retry.test.mjs tests/notion-reward-split.test.mjs tests/reward-grant-shared.test.mjs tests/science-css-split.test.mjs tests/voca-common-split.test.mjs
+```
+
+마지막 10줄 원문:
+
+```text
+  ...
+1..122
+# tests 122
+# suites 0
+# pass 122
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 328.5788
+```
+
+전체 회귀 명령(종료 코드 1, 기본 reporter 실행 뒤 같은 묶음을 TAP으로 재검증):
+
+```powershell
+node --test --test-reporter=tap "tests/**/*.test.mjs"
+```
+
+마지막 10줄 원문:
+
+```text
+  ...
+1..442
+# tests 442
+# suites 0
+# pass 438
+# fail 2
+# cancelled 0
+# skipped 1
+# todo 1
+# duration_ms 27037.103
+```
+
+- 실패 2건은 기존 `gallery-character-runner.test.mjs`·`gallery-multi-character.test.mjs`의 Python 빌더 실행으로, `spawnSync` 종료 상태가 `null`이다. 보상 변경 관련 실패는 없다. 기존 skip·두 기기 동시 저장 TODO는 유지했다.
+- 기존 한계는 유지된다. PATCH 응답 유실·성공 뒤 큐 삭제 전 종료·Web Locks 없는 두 탭·localStorage 저장 실패에서는 정확히 한 번 지급이나 보존을 보장하지 않는다.
+
+## Claude 검증 (2026-11-01)
+- Codex 환경의 전체 시험 실패 2건은 그 샌드박스에서 Python이 실행되지 않아 생긴 것이다. 같은 작업 폴더에서 Claude가 돌린 `node --test "tests/**/*.test.mjs"`는 442개 중 440 통과·실패 0·기존 TODO 1이다. 바뀐 파일 20개 모두 계약 검사 `[ALL PASS]`.
+- 같은 주소(127.0.0.1:8798)에서 ① Worker 요청을 모두 실패시키는 재현 서버로 국어방(`korean.html`, notion-helper → notion-study-logger 껍데기 → reward-grant.js 경로)에서 민수로 조용한 지급(3)과 조용하지 않은 지급(2) → 둘 다 `false`, 대기열 2건, 이 화면엔 보상 모달이 없어 아무 창도 뜨지 않음(alert 없음), 이름 충돌 오류 없음. ② 로그인을 민서로 바꾸고 같은 주소를 쓰기 차단 서버로 열어 **퀘스트 화면**을 열자 `load` 때 대기열 2건이 모두 민수 인벤토리 페이지로 PATCH되고(2건) 대기열이 비었으며 민서 값은 그대로였다. 화면 간 대기열 공유 확인.
