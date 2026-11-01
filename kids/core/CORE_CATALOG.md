@@ -336,7 +336,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/subjects/quest/quest-lesson.js`: 전역 `QuestLesson`. `buildLesson({child,items,subj,store,today,rng,mode})`가 단계 배열을 만든다. `createSession`이 재출제·콤보·중복 완료를 관리한다. `validateLesson`은 시작 전 계약을 검사한다. `QuestMastery.buildQuestion/buildMatch`를 재사용한다.
 - `kids/subjects/quest/quest-lesson-ui.js`: 전역 `QuestLessonUI`. `start({unit,subj,mode,isMinseo,onCompanion,onExit})`가 단계 저장·완주 일지·다음 레슨을 연결하고, `resolveSubject(params,child)`가 민서 과목을 선택한다. 두 스크립트를 러너 앞에 로드한다.
 - 기본 3·3·3은 full 레슨, `lesson=bite`는 3문제, `lesson=round5`는 이전 판, `engine=classic`은 4+1이다. `from=storybook`은 선택 필드 `STORY_BOOK.questLink={subject,unit}`로 들어온다.
-- `COMPANION_EVENTS`: `correct`, `encourage`, `combo`, `step`, `boss`, `clear`. 신호 detail은 `{combo,stepIndex,stepTotal,isMinseo}`이며 기존 파트너 반응을 재사용한다.
+- `COMPANION_EVENTS`: `start`, `correct`, `encourage`, `combo`, `step`, `boss`, `clear`. 세션 신호 detail은 `{combo,stepIndex,stepTotal,isMinseo}`이다. 화면에서 `correct`·`encourage`는 `QuestLessonUI`가 보기를 고른 순간(`onPraise`·`onEncourage`)에 보내고 세션의 0.65초 뒤 신호는 넘기지 않는다. `start`는 [다음 레슨]·[한 입 더]에서 보낸다. 러너는 `syncCheerMonsterReaction`으로 파트너 리액션(`monster_roster.js`)에 연결한다.
 - 저장 키 `questBiteCount_daughter_{YYYY-MM-DD}`는 `{korean,english}` 완주 횟수다. `readBiteCounts/recordBiteCompletion/biteCountKey`로 다룬다. `quest-lesson-complete` 이벤트 detail은 `{lessonId,child,mode}`다.
 - `StudyActivity.recordLessonComplete(id,startedAt)`는 실제 입력 직후 보이는 quiz에서만 v3 `lessons:[{id,startedAt,at}]`를 남긴다. 기존 시간 인정 규칙은 같다.
 - `study-log-store.js`: `MINMIN_STUDY_LOG_QUEUE_V1`에 조회/전송 실패를 보존한다. `flushQueue`는 페이지 load와 다음 upsert에서 재시도한다. `reportParts`는 1900자×40조각, 초과하면 오래된 판부터 생략한다. 운영 노션 중복 행을 정리하지 않는다.
@@ -450,7 +450,11 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
   | `getSelectedMonster()` / `setSelectedMonsterId(id)` | 현재 선택된 파트너 몬스터 조회 및 `localStorage('selectedMonster')` 저장 |
   | `preloadMonsterAssets(id)` / `preloadAllMonsters()` | `new Image()`로 포즈별 이미지 즉시 프리로드 (탭/채점 시 깜빡임 원천 방지) |
   | `getLabTapResponse(tapCount)` | 연구소 `pokeMonster` 탭 단계별 포즈·대사 반환 (1회 `greet` 인사 / 2~4회 `walk_left`·`walk_right` 교차 / 5회 `rage` 과열+Shake, 출격 시 `roar` 포효) |
-  | `getRunnerReaction(state)` | 실전 러너 `#cheerMonster` 에러리스(Errorless) 반응 반환 (`stageStart` 투지 `rage` / `correct` 하이파이브 `greet` / `encourage` 따뜻한 격려 `walk_left` / `clear` 승리 포효 `roar`) |
+  | `getRunnerReaction(state, id)` | 실전 러너 `#cheerMonster` 에러리스 반응 반환 `{poseKey,poseSrc,speech,reaction}`. `stageStart`=손인사 `wave`, `correct`·`clear`=만세 `cheer`, `encourage`=✕ 격려 `cross`, `idle`=`null` |
+  | `playReaction(el, kind, {onEnd})` | `wave`·`cheer`·`cross` 움직임과 표시(👋·🙌·✕→💡)를 1.6초 재생하고 `onEnd`를 부른다. `kind`가 `null`이면 재생만 멈춘다. 스타일 `#mr-style`은 첫 재생 때 한 번 넣고 `prefers-reduced-motion`이면 움직임을 끈다 |
+  | `setPoseImage(img, src, child)` | 포즈 그림을 넣고 실패하면 대체한다. 민수 `son`은 선택 파트너 `idle` → 1호, 민서 `daughter`는 코코 → `minseo-char1.png` 순서이고, 실패한 주소는 다시 부르지 않는다 |
+  | `mountCheerPartner(container, src, alt)` | 기존 4+1 완주 창처럼 파트너가 가려지는 곳에 만세하는 파트너를 넣는다. 그림이 실패하면 원래 아이콘으로 돌아간다 |
+- **리액션 포즈 (2026-11-02)**: 기본은 손인사 `greet`, 만세 `greet`, 격려 `idle`이고 파트너별로 `reactionPoses`로 바꾼다(2호 만세 `rage`, 3호 만세 `walk_left`). 그림이 없는 포즈는 `idle`로 내려가며, ✕·만세 전용 그림이 생기면 이 값만 바꾼다. 그림이 1장인 1호·자작 파트너와 민서 코코는 움직임과 표시로만 구분한다. 연구소는 입장·파트너 교체 때 손인사만 하고, ✕·만세는 채점이 있는 러너에서만 나온다.
 
 ---
 
@@ -1304,6 +1308,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
 
+- `tests/monster-reactions.test.mjs`: 파트너별 리액션 포즈, 그림 1장·포즈 누락 대체, 표시 1개 유지와 끝처리 취소, 격려 표시의 빨간색 금지·동작 감소 규칙, 그림 실패 대체, 완주 창 아이콘 복귀, 기존 채점·음성 호출 보존을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/gallery-character-runner.test.mjs`: DOM 없는 로드, 장착·재로드·포즈·해제·남매 분리·잘못된 저장·주소·최고 기록, 결정적 월드·입력 없는 60초 완주·충돌/무적·별·2단 점프·dt 상한·민서 장애물과 실제 데이터 CDN 계약을 검사합니다. Python/Pillow로 임시 공부방·아카이브를 만들고 빌더의 투명 PNG·크롭·512px·오류 격리·단독 카드 제외·포트폴리오 미포함·EXIF도 확인합니다. `GALLERY_TEST_PYTHON`으로 시험 Python 경로를 지정할 수 있습니다.
 - 미니 런 보완 시험은 세로 .45~가로 2.2의 6비율·그림 3비율·3시드·민수 가속 전후 162개 월드의 장애물 4,248개를 실제 `step`으로 전수 통과 검사합니다. 민수 2단 필수 장애물·판정 상자 기준 반응 시간·가속 이동량·리사이즈 거리/상태 보존·조사 4쌍도 확인합니다. 세로 .55는 기존 무입력 완주 시험에도 포함합니다.
 - `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.

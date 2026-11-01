@@ -471,10 +471,7 @@
     }
 
     if (monsterImg) {
-      const nextSrc = (monster.poses && monster.poses[poseKey]) || monster.poses.idle;
-      if (monsterImg.getAttribute('src') !== nextSrc) {
-        monsterImg.src = nextSrc;
-      }
+      window.MonsterRoster.setPoseImage(monsterImg, (monster.poses && monster.poses[poseKey]) || monster.poses.idle);
       monsterImg.alt = monster.name;
       // 포즈 전환 시 크로스페이드 바운스 & 과열 시 쉐이크
       monsterImg.classList.remove('pose-swap-bounce', 'monster-rage-shake');
@@ -501,7 +498,15 @@
     monsterTapCount = 0;
     clearTimeout(monsterIdleTimer);
     window.MonsterRoster.setSelectedMonsterId(monsterId);
-    renderActivePartnerMonster('idle');
+    greetPartner();
+  }
+
+  function greetPartner() { // 입장·파트너 교체 때 손인사 (민서는 지금 그림 그대로 흔든다)
+    const roster = window.MonsterRoster;
+    if (isMinseo || !roster) return roster?.playReaction(document.getElementById('characterPlushieWrap'), 'wave');
+    renderActivePartnerMonster('greet', roster.getSelectedMonster().labDialogues?.greet);
+    roster.playReaction(document.getElementById('monsterImg'), 'wave');
+    monsterIdleTimer = setTimeout(() => renderActivePartnerMonster('idle'), 1700);
   }
 
   function cyclePartnerMonster(dir = 1) {
@@ -522,6 +527,7 @@
     if (!isMinseo && window.MonsterRoster) {
       monsterTapCount += 1;
       clearTimeout(monsterIdleTimer);
+      window.MonsterRoster.playReaction(document.getElementById('monsterImg'), null);
       const reaction = window.MonsterRoster.getLabTapResponse(monsterTapCount);
       if (reaction.isRage) {
         triggerHaptic([40, 50, 60]);
@@ -741,6 +747,7 @@
       window.MonsterRoster.preloadAllMonsters();
     }
     applyTheme();
+    greetPartner();
     updateParentProgressBtnVisibility();
   });
 

@@ -427,7 +427,7 @@ test('HTML 로드 순서와 퀘스트 완주 연결을 유지한다', () => {
     assert.ok(begin >= 0 && end > begin);
     const order = [], context = { global: { GalleryRunnerRewards: { markQuestBoost: child => order.push(child) } },
         masteryRound: null, playSound() {}, syncCheerMonsterReaction() {}, fairyReward() {}, isMinseo: true,
-        UI: { skinClearModalForMinseo() {}, showModal() { order.push('화면'); } }, currentSubj: 'math', KOREAN_SUBJ_MAP: { math: '수학' },
+        UI: { skinClearModalForMinseo() {}, mountClearPartner() {}, showModal() { order.push('화면'); } }, currentSubj: 'math', KOREAN_SUBJ_MAP: { math: '수학' },
         grantRewardAndShowUI: async () => order.push('기존 보상'), console };
     vm.createContext(context);
     return vm.runInContext(`${source.slice(begin, end)}\nshowClearModal()`, context).then(() => {

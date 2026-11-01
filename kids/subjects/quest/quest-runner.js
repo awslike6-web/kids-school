@@ -72,16 +72,10 @@
 
     let poseSrc = null;
     let monsterName = '파트너';
+    let idleSrc = null;
     let line = overrideSpeech;
-    let animClass = 'animate-cheer';
-
-    if (state === 'correct') {
-      animClass = 'victory-jump';
-    } else if (state === 'encourage') {
-      animClass = 'shake-gentle';
-    } else if (state === 'clear') {
-      animClass = 'animate-cheer scale-110';
-    }
+    // 시작은 손인사, 정답·완주는 만세, 오답은 ✕ 격려 (재생은 monster_roster.js가 맡는다)
+    const reactionKind = ({ stageStart: 'wave', correct: 'cheer', clear: 'cheer', encourage: 'cross' })[state] || null;
 
     if (isMinseo) {
       // 🌸 민서 요정 코코 & 삼총사 다정한 격려 리액션
@@ -108,19 +102,24 @@
       const monster = global.MonsterRoster.getSelectedMonster();
       const reaction = global.MonsterRoster.getRunnerReaction(state, monster.id);
       poseSrc = reaction.poseSrc;
+      idleSrc = monster.poses.idle;
       monsterName = monster.name;
+      global.MonsterRoster.preloadMonsterAssets(monster.id);
       if (!line) line = reaction.speech;
     }
 
     if (monsterEl) {
-      if (poseSrc && monsterEl.getAttribute('src') !== poseSrc) {
-        monsterEl.src = poseSrc;
-      }
+      const child = isMinseo ? 'daughter' : 'son';
+      if (poseSrc) global.MonsterRoster?.setPoseImage(monsterEl, poseSrc, child);
       monsterEl.alt = monsterName;
-      // CSS 키프레임 애니메이션 리셋 및 재점화
-      monsterEl.className = 'w-14 h-14 object-contain filter drop-shadow-md transition-transform';
-      void monsterEl.offsetWidth; // Force Reflow
-      monsterEl.className = `${animClass} w-14 h-14 object-contain filter drop-shadow-md transition-transform`;
+      monsterEl.className = `${reactionKind ? '' : 'animate-cheer '}w-14 h-14 object-contain filter drop-shadow-md transition-transform`;
+      global.MonsterRoster?.playReaction(monsterEl, reactionKind, {
+        onEnd: () => {
+          // 완주 결과 화면에서는 만세 포즈를 유지한다.
+          if (idleSrc && state !== 'clear') global.MonsterRoster.setPoseImage(monsterEl, idleSrc, child);
+          monsterEl.classList.add('animate-cheer');
+        }
+      });
     }
 
     if (speechEl && line) {
@@ -166,8 +165,8 @@
           document.getElementById('subjectBadgeIcon').textContent = currentQuest.icon;
           if (urlParams.get('lesson') !== 'round5' && global.QuestLessonUI.start({
             unit, subj: currentSubj, mode: urlParams.get('lesson') === 'bite' ? 'bite' : 'full', isMinseo,
-            onCompanion: (event, detail) => syncCheerMonsterReaction(({ combo: 'correct', step: 'correct', boss: 'clear' })[event] || event,
-              event === 'combo' ? `연속 ${detail.combo}개! 신나게 이어 가자!` : null),
+            onCompanion: (event, detail) => syncCheerMonsterReaction(({ start: 'stageStart', combo: 'correct', step: 'correct', boss: 'correct' })[event] || event,
+              ({ combo: `연속 ${detail.combo}개! 신나게 이어 가자!`, step: '좋아! 다음 단계도 같이 가 보자!', boss: '마지막 단계야! 차근차근 함께 해 보자!' })[event] || null),
             onExit: lobby => lobby ? goToLobby() : returnToLab()
           })) { UI.applyChildTheme(isMinseo); syncCheerMonsterReaction('stageStart'); return; }
           const round = QuestMastery.buildRound({ child: unit.child, items: unit.items, subj: currentSubj });
@@ -436,7 +435,6 @@
     const desc = document.getElementById('feedbackDesc');
     const nextBtn = document.getElementById('nextStepBtn');
     const iconWrap = document.getElementById('feedbackIconWrapper');
-    const monster = document.getElementById('cheerMonster');
 
     sheet.classList.remove('hidden');
 
@@ -451,12 +449,6 @@
         fairyPraise();
       } else if (typeof speakFairyTTS === 'function') {
         speakFairyTTS(isMinseo ? "정답이야! 참 잘했어!" : "정답이야! 대단해!");
-      }
-
-      if (monster) {
-        monster.classList.remove('victory-jump');
-        void monster.offsetWidth;
-        monster.classList.add('victory-jump');
       }
 
       const expBonus = q.isPreview ? 20 : 10;
@@ -619,6 +611,7 @@
         clearPartnerEl.textContent = `${monster.number} ${monster.name} ➔ 100% 💖`;
       }
     }
+    UI.mountClearPartner();
     UI.showModal('clearModal');
 
     const curKoreanSubj = KOREAN_SUBJ_MAP[currentSubj] || "국어";

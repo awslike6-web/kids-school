@@ -60,6 +60,8 @@
             code: 'UNIT-02 // BONGDOMDOL',
             badgeText: '2호: 콧툰봉돔돌 (SCP-봉제괴수)',
             hasBackground: false,
+            // 두 손을 드는 그림은 rage뿐이라 만세로 쓴다(입은 웃고 있다).
+            reactionPoses: { cheer: 'rage' },
             poses: {
                 idle: './kids/assets/monsters/cottun_bongdomdol/idle.png',
                 greet: './kids/assets/monsters/cottun_bongdomdol/greet.png',
@@ -110,8 +112,8 @@
                 rage: './kids/assets/monsters/unknown_beast/rage.png',
                 roar: './kids/assets/monsters/unknown_beast/roar.png'
             },
-            // rage 그림이 뒷모습이라 퀘스트 시작은 앞을 보는 기본 포즈로 맞이한다.
-            runnerPoses: { stageStart: 'idle' },
+            // walk_left 그림이 양팔을 들고 뛰는 모습이라 만세로 쓴다.
+            reactionPoses: { cheer: 'walk_left' },
             labDialogues: {
                 idle: '내 이름은 모름! 오늘은 어떤 수수께끼를 만나볼까? 👁️',
                 greet: '안녕? 커다란 눈으로 네가 오기를 기다렸어! 👋',
@@ -154,8 +156,6 @@
                 rage: './kids/assets/monsters/rotek/rage.png',
                 roar: './kids/assets/monsters/rotek/roar.png'
             },
-            // rage 그림에 번개·화남 표시가 있어 퀘스트 시작은 정면 대기 포즈로 맞이한다.
-            runnerPoses: { stageStart: 'idle' },
             labDialogues: {
                 idle: '안녕! 나는 로텤스펲펲! 오늘은 세상을 어떻게 뒤집어볼까? 🌀',
                 greet: '반가워! 신나게 쭉쭉 늘리고 빙글 뒤집어보자! 👋',
@@ -396,53 +396,122 @@
         };
     }
 
+    // 리액션별 기본 포즈. 파트너가 reactionPoses로 바꿀 수 있고, 그림이 없으면 idle로 내려간다.
+    const REACTION_POSES = { wave: 'greet', cheer: 'greet', cross: 'idle' };
+
+    function reactionPoseKey(monster, kind) {
+        const key = monster.reactionPoses?.[kind] || REACTION_POSES[kind];
+        return key && monster.poses[key] ? key : 'idle';
+    }
+
     /**
      * 퀘스트 러너(quest_runner.html) 에러리스 반응 조회
-     * state: 'stageStart' | 'correct' | 'encourage' | 'clear' | 'idle'
+     * state: 'stageStart'(손인사 wave) | 'correct'·'clear'(만세 cheer) | 'encourage'(✕ 격려 cross) | 'idle'
      */
     function getRunnerReaction(state, monsterId) {
         const monster = MONSTER_ROSTER[monsterId] || getSelectedMonster();
         const pick = (arr) => Array.isArray(arr) ? arr[Math.floor(Math.random() * arr.length)] : arr;
-        // 몬스터마다 그림 뜻이 다를 수 있어 runnerPoses로 상황별 포즈를 바꿀 수 있다(예: 모름의 rage는 뒷모습).
-        const poseOf = (state, fallback) => {
-            const key = monster.runnerPoses?.[state];
-            return key && monster.poses[key] ? key : fallback;
+        const lines = {
+            stageStart: ['wave', monster.runnerDialogues.stageStart],
+            correct: ['cheer', pick(monster.runnerDialogues.correct)],
+            encourage: ['cross', pick(monster.runnerDialogues.encourage)],
+            clear: ['cheer', monster.runnerDialogues.clear]
         };
+        const [reaction, speech] = lines[state] || [null, monster.runnerDialogues.stageStart];
+        const poseKey = reaction ? reactionPoseKey(monster, reaction) : 'idle';
+        return { poseKey, poseSrc: monster.poses[poseKey], speech, reaction };
+    }
 
-        if (state === 'stageStart') {
-            const poseKey = poseOf('stageStart', 'rage');
-            return {
-                poseKey,
-                poseSrc: monster.poses[poseKey] || monster.poses.idle,
-                speech: monster.runnerDialogues.stageStart
-            };
-        }
-        if (state === 'correct') {
-            return {
-                poseKey: 'greet',
-                poseSrc: monster.poses.greet || monster.poses.idle,
-                speech: pick(monster.runnerDialogues.correct)
-            };
-        }
-        if (state === 'encourage') {
-            return {
-                poseKey: 'walk_left',
-                poseSrc: monster.poses.walk_left || monster.poses.idle,
-                speech: pick(monster.runnerDialogues.encourage)
-            };
-        }
-        if (state === 'clear') {
-            return {
-                poseKey: 'roar',
-                poseSrc: monster.poses.roar || monster.poses.idle,
-                speech: monster.runnerDialogues.clear
-            };
-        }
-        return {
-            poseKey: 'idle',
-            poseSrc: monster.poses.idle,
-            speech: monster.runnerDialogues.stageStart
+    // 🎬 리액션 재생: 그림이 1장뿐인 파트너도 알아볼 수 있게 움직임과 작은 표시를 함께 쓴다.
+    const REACTION_MS = 1600;
+    const reactionTimers = new WeakMap();
+    const failedSprites = new Set();
+    const MINSEO_SPRITES = ['./assets/images/characters/minseo_3d_single.png', './assets/images/minseo-char1.png'];
+
+    function ensureReactionStyle() {
+        if (document.getElementById('mr-style')) return;
+        const style = document.createElement('style');
+        style.id = 'mr-style';
+        style.textContent = `
+            @keyframes mrWave { 0%, 100% { transform: rotate(0) scale(1.15); } 20%, 60% { transform: rotate(-10deg) scale(1.15); } 40%, 80% { transform: rotate(10deg) scale(1.15); } }
+            @keyframes mrCheer { 0%, 50%, 100% { transform: translateY(0) scale(1); } 25%, 75% { transform: translateY(-14px) scale(1.25); } }
+            @keyframes mrCross { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-6deg); } 70% { transform: rotate(6deg); } }
+            @keyframes mrBadge { 0% { transform: scale(0); opacity: 0; } 12%, 85% { transform: scale(1); opacity: 1; } 100% { transform: scale(.9); opacity: 0; } }
+            @keyframes mrCrossOut { 0%, 45% { opacity: 1; } 55%, 100% { opacity: 0; } }
+            @keyframes mrHintIn { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
+            .mr-wave, .mr-cheer, .mr-cross { transform-origin: 50% 100%; }
+            .mr-wave { animation: mrWave 1.2s ease-in-out !important; }
+            .mr-cheer { animation: mrCheer 1s ease-in-out !important; }
+            .mr-cross { animation: mrCross 1.2s ease-in-out !important; }
+            .mr-badge { position: absolute; top: -8px; right: -10px; z-index: 40; width: 28px; height: 28px; border-radius: 50%;
+                display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; font-weight: 900; pointer-events: none;
+                background: #fff; border: 2px solid #fde68a; color: #b45309; box-shadow: 0 2px 6px rgba(0,0,0,.25);
+                animation: mrBadge ${REACTION_MS}ms ease-out forwards; }
+            .mr-badge[data-kind="wave"]::before { content: '👋'; }
+            .mr-badge[data-kind="cheer"]::before { content: '🙌'; }
+            .mr-badge[data-kind="cross"] { background: #fef3c7; border-color: #fbbf24; }
+            .mr-badge[data-kind="cross"]::before { content: '✕'; position: absolute; animation: mrCrossOut ${REACTION_MS}ms linear forwards; }
+            .mr-badge[data-kind="cross"]::after { content: '💡'; position: absolute; opacity: 0; animation: mrHintIn ${REACTION_MS}ms linear forwards; }
+            #characterPlushieWrap.mr-wave { animation-name: mrCross !important; }
+            #minseoCharacterLayer > .mr-badge { top: 10px; right: 10px; }
+            .mr-mounted { width: 100%; height: 100%; object-fit: contain; }
+            @media (prefers-reduced-motion: reduce) {
+                .mr-wave, .mr-cheer, .mr-cross, #cheerMonster, #monsterImg, #characterPlushieWrap { animation: none !important; }
+                .mr-badge, .mr-badge::before { animation: none !important; }
+                .mr-badge[data-kind="cross"]::after { display: none; }
+            }
+        `;
+        document.head.append(style);
+    }
+
+    // kind: 'wave' | 'cheer' | 'cross'. null이면 진행 중인 리액션만 멈춘다.
+    function playReaction(el, kind, { onEnd } = {}) {
+        if (!el?.classList) return;
+        clearTimeout(reactionTimers.get(el));
+        const clearEffects = () => {
+            el.classList.remove('mr-wave', 'mr-cheer', 'mr-cross');
+            el.parentElement?.querySelector(':scope > .mr-badge')?.remove();
         };
+        clearEffects();
+        if (!kind) return;
+        ensureReactionStyle();
+        void el.offsetWidth; // 같은 리액션이 이어져도 애니메이션을 다시 시작한다.
+        el.classList.add(`mr-${kind}`);
+        const badge = document.createElement('span');
+        badge.className = 'mr-badge';
+        badge.dataset.kind = kind;
+        badge.setAttribute('aria-hidden', 'true');
+        el.parentElement?.append(badge);
+        reactionTimers.set(el, setTimeout(() => { clearEffects(); onEnd?.(); }, REACTION_MS));
+    }
+
+    // 포즈 그림을 넣되 실패하면 대체 그림으로 내려가고, 실패한 주소는 다시 부르지 않는다.
+    function setPoseImage(img, src, child = 'son') {
+        if (!img) return;
+        const fallbacks = child === 'daughter' ? MINSEO_SPRITES
+            : [getSelectedMonster().poses.idle, MONSTER_ROSTER[DEFAULT_MONSTER_ID].poses.idle];
+        const target = [src, ...fallbacks].find(candidate => candidate && !failedSprites.has(candidate));
+        img.onerror = target ? () => { failedSprites.add(target); setPoseImage(img, src, child); } : null;
+        if (img.style) img.style.visibility = target ? '' : 'hidden';
+        if (target && img.getAttribute('src') !== target) img.src = target;
+    }
+
+    // 완주 창처럼 파트너가 가려지는 곳에 만세하는 파트너를 넣는다. 그림이 실패하면 원래 아이콘으로 돌아간다.
+    function mountCheerPartner(container, src, alt) {
+        if (!container || !src) return false;
+        const original = container.textContent;
+        const img = document.createElement('img');
+        img.className = 'mr-mounted';
+        img.alt = alt || '';
+        img.onerror = () => {
+            playReaction(img, null);
+            container.textContent = original;
+        };
+        img.src = src;
+        container.style.position = 'relative';
+        container.replaceChildren(img);
+        playReaction(img, 'cheer');
+        return true;
     }
 
     window.MonsterRoster = {
@@ -457,6 +526,9 @@
         preloadMonsterAssets,
         preloadAllMonsters,
         getLabTapResponse,
-        getRunnerReaction
+        getRunnerReaction,
+        playReaction,
+        setPoseImage,
+        mountCheerPartner
     };
 })();

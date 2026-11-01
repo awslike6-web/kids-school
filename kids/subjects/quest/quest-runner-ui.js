@@ -143,6 +143,13 @@
     modal.classList.remove('flex');
   }
 
+  // 🙌 완주 창이 파트너를 덮으므로 창 안에서 만세한다 (그림을 못 넣으면 기존 아이콘)
+  function mountClearPartner() {
+    const partner = document.getElementById('cheerMonster');
+    const icon = document.getElementById('clearModalIcon');
+    if (global.MonsterRoster?.mountCheerPartner(icon, partner?.getAttribute('src'), partner?.alt)) icon.classList.remove('animate-bounce');
+  }
+
   function setClass(el, className, text) {
     if (!el) return;
     el.className = className;
@@ -266,7 +273,7 @@
 
   global.QuestRunnerUI = {
     playSound, applyChildTheme, applyDeepTrainingLabels, deepTrainingUrl, setMathMemoVisible,
-    showModal, hideModal, skinRevengeModalForMinseo, skinClearModalForMinseo, skinExitModalForMinseo,
+    showModal, hideModal, mountClearPartner, skinRevengeModalForMinseo, skinClearModalForMinseo, skinExitModalForMinseo,
     toggleMathMemoPad, clearMathMemoCanvas, openImageZoom, closeImageZoom
   };
   // HTML onclick / 동적 생성 마크업 호환 전역

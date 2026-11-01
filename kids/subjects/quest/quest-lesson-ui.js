@@ -115,6 +115,8 @@
     let wrongs, changes, autoTimer, transitionTimer, saveChain = Promise.resolve();
     const box = el('masteryStage');
     function signal(event, detail) {
+      // 정답·격려는 아래 onPraise·onEncourage가 그 순간에 보낸다(세션 신호는 0.65초 늦다).
+      if (event === 'correct' || event === 'encourage') return;
       onCompanion?.(event, detail);
       if (event === 'combo') banner('✨ ' + detail.combo + ' 콤보!');
     }
@@ -199,7 +201,8 @@
       progress.append(flags);
       root.QuestUIRenderer.render(box, q, {
         theme: isMinseo ? 'minseo' : 'minsu', autoRead: mode === 'bite', speak,
-        onPraise: () => root.fairyPraise?.(), onEncourage: () => root.fairyEncourage?.(),
+        onPraise: () => { root.fairyPraise?.(); onCompanion?.('correct', {}); },
+        onEncourage: () => { root.fairyEncourage?.(); onCompanion?.('encourage', {}); },
         onDone: result => {
           if (closed || currentToken !== token || !session.finish(result)) return;
           solved++;
@@ -273,7 +276,7 @@
       more.textContent = mode === 'bite' ? '🌸 한 입 더!' : '다음 레슨';
       more.onclick = () => {
         more.disabled = true;
-        saveChain.finally(begin);
+        saveChain.finally(() => { if (begin()) onCompanion?.('start', {}); });
       };
       const exit = document.createElement('button');
       exit.type = 'button';
