@@ -1271,6 +1271,34 @@ body {
   .checkin-card-title {
     font-size: 0.95rem !important;
   }
+  /* 375px 폰: 배너를 세로로 쌓아 제목이 한두 글자씩 끊기지 않게 */
+  .quick-checkin-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .checkin-banner-left {
+    gap: 10px;
+  }
+  .checkin-banner-left > div:last-child {
+    flex: 1;
+    min-width: 0;
+  }
+  .checkin-banner-icon {
+    font-size: 2rem;
+  }
+  .checkin-banner-title {
+    font-size: 1.15rem;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  #checkInStatusBadge {
+    white-space: nowrap;
+  }
+  .checkin-action-btn {
+    text-align: center;
+  }
 }
 
 /* =========================================================
