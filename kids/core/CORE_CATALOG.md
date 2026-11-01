@@ -252,6 +252,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 상대 경로와 캐시 버전 `20261031-math-split2`를 사용하며 클래식 스크립트·기존 외부 스크립트 순서·원문·마크업은 변경하지 않습니다. 두 페이지 모두 뒤에 오는 스크립트가 없고 JS는 한 파일씩입니다.
 - 검증: `tests/math-pages-split2.test.mjs`(고정 main fixture·600줄 제한·원문·마크업·상대 경로·단독 VM 로드). 대문 VM은 기존 `goLobbyBtn` 조회와 클릭 등록만 허용합니다. 분리 계약과 화면 확인 담당은 `docs/math_pages_split2_spec.md`를 따릅니다.
 
+### 수학 세로셈 JS 분리 (2026-11-01)
+
+- `kids/js/vertical_math_logic.js` (434줄): 전역 상태·초기화·계산 메모장·숫자패드·화면 전환·난이도·문제 생성·시작. 기존 `startGame`·`showDifficultyModal`·`pressNum`·`exitRoom` 등의 전역 API를 유지합니다.
+- `kids/js/vertical_math_grid.js` (446줄): `simulateDivision`·`renderDynamicGrid`·`nextQuestion`·`submitAnswer`·`showResult`·`printWorksheet`. 채점·완주의 `fairyPraise`·`fairyEncourage`·`fairyReward` 호출을 보존합니다.
+- `kids/subjects/math/vertical_math.html`에서 상대 경로 `../../js/vertical_math_logic.js` → `../../js/vertical_math_grid.js`를 같은 `?v=20261101-vertical-split`로 연속 로드합니다. 클래식 스크립트·기존 전역 상태·HTML 이벤트 함수를 유지합니다.
+- 원문 재결합·600줄 상한·HTML 배선·첫 파일 단독 실행·전역 함수/상태/이벤트/타이머 비교는 `tests/vertical-math-split.test.mjs`, 분리 계약과 화면 확인 담당은 `docs/vertical_math_split_spec.md`를 따릅니다.
+
 ### 수학 50까지 수 JS·CSS 분리 (2026-11-01)
 
 - `kids/subjects/math/number50.html`은 `kids/js/math_number50.js`(424줄: 사운드·보상·폭죽·탭·STAGE 1·2) → `kids/js/math_number50_stages.js`(496줄: STAGE 3·4·나가기·초기화)를 클래식 스크립트로 연속 로드합니다. 기존 전역 `switchTab`·`addStar`·`getNumberNames`·`generateNewRandomMatching`·`exitRoom` 등의 이름과 동작을 보존합니다.
