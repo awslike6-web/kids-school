@@ -48,22 +48,22 @@ def validate_diff_spots(spots):
 def build_spot_diff(data, art_id, has_cutout, folder_full, original, target_dir, sub_dir, sub_path):
     """오류는 놀이 데이터만 제외하며 작품 카드 생성을 막지 않는다."""
     try:
-        if has_cutout:
-            raise ValueError('누끼 작품은 지원하지 않습니다')
         if not isinstance(data, dict):
             raise ValueError('spotDiff는 객체여야 합니다')
         spots = validate_diff_spots(data.get('spots'))
         filename = data.get('modifiedImage')
         if not isinstance(filename, str) or not filename or '/' in filename or '\\' in filename:
             raise ValueError('modifiedImage는 파일명이어야 합니다')
-        target = Path(target_dir) / f'{sub_dir}_{Path(filename).stem}.jpg'
+        target_ext = '.png' if has_cutout else '.jpg'
+        target = Path(target_dir) / f'{sub_dir}_{Path(filename).stem}{target_ext}'
         source = Path(folder_full) / filename
         if not source.is_file():
             source = target
         if not source.is_file():
             raise ValueError('바뀐 그림 파일이 없습니다')
-        with Image.open(original) as image:
-            size = image.size
+        with Image.open(original) as orig_img:
+            size = orig_img.size
+            orig_alpha = orig_img.convert('RGBA').getchannel('A') if has_cutout else None
         with Image.open(source) as image:
             image = ImageOps.exif_transpose(image)
             if abs((image.width / image.height) / (size[0] / size[1]) - 1) > .01:
@@ -74,7 +74,11 @@ def build_spot_diff(data, art_id, has_cutout, folder_full, original, target_dir,
                     need_convert = current.size != size
             if need_convert:
                 image = image.convert('RGB').resize(size, Image.Resampling.LANCZOS)
-                image.save(target, format='JPEG', quality=85, optimize=True)
+                if has_cutout:
+                    image.putalpha(orig_alpha)
+                    image.save(target, format='PNG', optimize=True)
+                else:
+                    image.save(target, format='JPEG', quality=85, optimize=True)
         return {'modifiedImageUrl': f'{CDN_BASE}/assets/media/{sub_dir}/{sub_path}/{target.name}', 'spots': spots}
     except (ValueError, TypeError, OSError, KeyError) as error:
         print(f'⚠️ [spotDiff 제외] {art_id}: {error}')

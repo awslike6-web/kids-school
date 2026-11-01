@@ -134,7 +134,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/common_space/gallery-spot-diff.js` (359줄): 갤러리 전용 IIFE. `gallery-modal-manager.js`보다 먼저 로드하며 `window.GallerySpotDiff` 하나만 노출합니다. CSS는 `open()`에서 `gsd-style`로 한 번 삽입하고 모듈 로딩 시 DOM에 접근하지 않습니다.
 - API: `open(item, {viewer, onClose})`, `close()`, `isValid(spotDiff)`. 순수 함수 `fitRect(boxW, boxH, imgW, imgH)`, `toNormalized(px, py, rect)`, `hitTest(spots, nx, ny, rect, foundSet, minTouchPx=22)`.
 - 원본·변형 양쪽 터치, 레터박스 제외, 짧은 변 기준 반지름, 에러리스 피드백, 공간에 따른 배치, 부모 좌표 복사·RGB 차이 검수를 담당합니다. 노션·보상·학습일지는 쓰지 않습니다.
-- `scripts/build_gallery.py`: `validate_diff_spots(spots)`, `build_spot_diff(...)`가 메타의 `spotDiff.modifiedImage`를 CDN의 `modifiedImageUrl`로 변환합니다. 이미지 비율·좌표·누끼·파일 오류는 놀이 데이터만 제외합니다. 포트폴리오에는 넣지 않습니다.
+- `scripts/build_gallery.py`: `validate_diff_spots(spots)`, `build_spot_diff(...)`가 메타의 `spotDiff.modifiedImage`를 CDN의 `modifiedImageUrl`로 변환합니다. 일반 작품(`.jpg`) 및 누끼 작품(원본 알파를 입힌 투명 `.png`)을 지원하며, 이미지 비율·좌표·파일 오류는 놀이 데이터만 제외합니다. 포트폴리오에는 넣지 않습니다.
 - 데이터 계약·부모 제작 절차: `docs/gallery_spot_diff_spec.md`, `docs/gallery_archive_spec.md`의 「틀린그림찾기 등록」.
 
 ### 🏃 `gallery-mini-runner.js` (갤러리 캐릭터 장착·60초 미니 런, 2026-10-29)

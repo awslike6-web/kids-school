@@ -1,7 +1,7 @@
 # 🎄 틀린그림찾기 누끼 작품 지원 명세서 (크리스마스 트리 판)
 
 > **문서 버전**: v1.0 (2026-11-01)
-> **상태**: 작업 지시 (구현 전). 담당: Antigravity
+> **상태**: 구현 완료 (2026-11-01). 담당: Antigravity
 > **근거**: 노션 현황판 카드 「틀린그림찾기 새 판 추가 (현재 한옥 1판)」, `docs/gallery_spot_diff_spec.md`, `docs/gallery_spot_diff_align_spec.md`, `docs/gallery_archive_spec.md` §3④·§7.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다.
 
@@ -64,3 +64,11 @@ Claude가 브랜치를 시험·코드로 검증하고(보고서가 아니라 dif
 python -X utf8 scripts/sync_quick_upload.py --id "art_minseo_20260906_194054" --author "민서" --diff-file "kids-school-main/uploads/ex/갤러리/_spotdiff_work/art_minseo_20260906_194054/final/제미나이용_흰배경_diff.jpg" --diff-spots "kids-school-main/uploads/ex/갤러리/_spotdiff_work/art_minseo_20260906_194054/spots.json"
 ```
 등록 뒤 배포된 갤러리에서 한 판을 끝까지 진행해 가장자리에 가짜 차이가 없는지 본다.
+
+---
+
+## 7. 구현 결과 (Antigravity)
+- **`scripts/build_gallery.py`**: `build_spot_diff`에서 `has_cutout=True` 분기 지원 구현. 원본 PNG의 알파 채널(`orig_alpha`)을 추출하여 변형 그림에 `putalpha()`로 입힌 뒤 투명 PNG(`{sub_dir}_{stem}.png`)로 저장하고 CDN 주소도 `.png`로 생성. 누끼가 아닌 작품(`.jpg`, 품질 85)은 100% 기존과 동일하게 유지.
+- **`tests/gallery-spot-diff.test.mjs`**: `build_spot_diff` 단위 테스트 3종(누끼 투명 PNG 합성 및 알파 픽셀/RGB/크기 일치 검증, 일반 작품 JPEG 유지 검증, 비율 불일치/좌표 오류 예외 처리) 추가 완료.
+- **테스트 결과**: `node --test tests/gallery-spot-diff.test.mjs` 9/9 PASS, 전사 회귀 시험 466 PASS (0 FAIL).
+- **계약 검증**: `verify_contracts.py` 전 파일 `[ALL PASS]`.
