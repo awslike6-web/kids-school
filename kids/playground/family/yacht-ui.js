@@ -1,13 +1,10 @@
 // 한 기기를 돌려 쓰는 가족 야추. 게임 기록은 이 기기에만 저장합니다.
 (() => {
   const E = window.YachtEngine, KEY = 'familyYachtGame';
-  const EMOJI = ['🐰', '🐻', '🦊', '🐯', '🐸'];
-  const NAMES = ['민서', '민수', '아빠', '엄마', '이모'];
   const MODES = { helper: '도우미', tactic: '전술', classic: '클래식' };
   const PIPS = [[4], [0, 8], [0, 4, 8], [0, 2, 6, 8], [0, 2, 4, 6, 8], [0, 2, 3, 5, 6, 8]];
-  const failedSprites = new Set();
   const $ = id => document.getElementById(id);
-  let state = null, saved = null, drafts = [], avatars = [], muted = false, busy = false, pending = null;
+  let state = null, saved = null, setup = null, muted = false, busy = false, pending = null;
   let animationTimer = null, activeView = 'setupView';
 
   function element(tag, text, className) {
@@ -23,69 +20,7 @@
     return node;
   }
 
-  function avatarKey(avatar) {
-    return avatar.type === 'emoji' ? avatar.value : JSON.stringify([avatar.value.artId, avatar.value.charKey]);
-  }
-
-  function collectAvatars() {
-    const list = EMOJI.map(value => ({ type: 'emoji', value }));
-    const data = typeof DEFAULT_GALLERY_DATA !== 'undefined' ? DEFAULT_GALLERY_DATA : [];
-    const seen = new Set();
-    if (!Array.isArray(data) || !window.MonsterRoster?.charactersOf) return list;
-    for (const item of data) {
-      if (!item || typeof item.id !== 'string' || !item.id.trim()) continue;
-      for (const c of window.MonsterRoster.charactersOf(item)) {
-        const avatar = { type: 'gallery', value: { artId: item.id, charKey: c.key, name: c.name, spriteUrl: c.spriteUrl } };
-        const key = avatarKey(avatar);
-        if (seen.has(key)) continue;
-        seen.add(key); list.push(avatar);
-      }
-    }
-    return list;
-  }
-
-  function showAvatar(container, avatar, fallback = '🐰', onError) {
-    container.replaceChildren();
-    if (avatar.type === 'emoji') {
-      container.append(element('span', avatar.value, 'avatar-emoji'));
-      return;
-    }
-    if (failedSprites.has(avatar.value.spriteUrl)) {
-      container.append(element('span', fallback, 'avatar-emoji'));
-      return;
-    }
-    const img = element('img', undefined, 'avatar-image');
-    img.alt = avatar.value.name;
-    let settled = false;
-    const timer = setTimeout(fail, 2500);
-    function fail() {
-      if (settled) return;
-      settled = true; clearTimeout(timer);
-      failedSprites.add(avatar.value.spriteUrl);
-      img.removeAttribute('src');
-      container.replaceChildren(element('span', fallback, 'avatar-emoji'));
-      if (onError) onError();
-    }
-    img.addEventListener('error', fail, { once: true });
-    img.addEventListener('load', () => { if (!settled) { settled = true; clearTimeout(timer); } }, { once: true });
-    img.src = avatar.value.spriteUrl;
-    container.append(img);
-  }
-
-  function fallbackFor(players, player) {
-    // 성공한 그림의 자리도 예약해 두어 여러 그림이 동시에 실패해도 말이 겹치지 않습니다.
-    const used = new Set(players.filter(p => p.avatar.type === 'emoji').map(p => p.avatar.value));
-    for (const p of players.filter(p => p.avatar.type === 'gallery')) {
-      const value = EMOJI.find(v => !used.has(v));
-      if (p.id === player.id) return value;
-      used.add(value);
-    }
-    return '🐰';
-  }
-
-  function playerAvatar(container, player, players) {
-    showAvatar(container, player.avatar, fallbackFor(players, player));
-  }
+  const { playerAvatar } = window.FamilyPlayers;
 
   function setView(id) {
     activeView = id;
@@ -164,67 +99,6 @@
       if (s.stateVersion < filled * 2 + b.rollCount) throw Error();
       return { ...s, players: clean.players };
     } catch (e) { removeSaved(); return null; }
-  }
-
-  function defaultMode(name) { return name === '민서' ? 'helper' : name === '민수' ? 'tactic' : 'classic'; }
-
-  function setupPlayers(count) {
-    drafts = Array.from({ length: count }, (_, i) => drafts[i] ||
-      { id: `p${i + 1}`, name: NAMES[i], avatar: { type: 'emoji', value: EMOJI[i] }, assist: defaultMode(NAMES[i]) });
-    // 인원 증가 때 이미 선택한 이모지와 겹치면 남은 말을 고릅니다.
-    const used = new Set();
-    drafts.forEach(p => {
-      if (used.has(avatarKey(p.avatar))) p.avatar = { type: 'emoji', value: EMOJI.find(v => !used.has(v)) };
-      used.add(avatarKey(p.avatar));
-    });
-    renderSetup();
-  }
-
-  function renderSetup() {
-    const host = $('playerSetup'); host.replaceChildren();
-    drafts.forEach((p, index) => {
-      const card = element('fieldset', undefined, 'player-card');
-      card.append(element('legend', `${index + 1}번 사람`));
-      const label = element('label', '이름 (1~8자)'), input = element('input');
-      input.value = p.name; input.maxLength = 16; input.autocomplete = 'off';
-      input.setAttribute('aria-label', `${index + 1}번 사람 이름`);
-      input.addEventListener('input', () => { p.name = input.value; });
-      input.addEventListener('change', () => { p.assist = defaultMode(input.value.trim()); select.value = p.assist; });
-      label.append(input); card.append(label);
-      const quick = element('div', undefined, 'quick-names');
-      NAMES.forEach(name => quick.append(button(name, () => {
-        p.name = name; p.assist = defaultMode(name); renderSetup();
-      })));
-      card.append(quick);
-      const options = element('div', undefined, 'avatar-options');
-      options.setAttribute('role', 'group'); options.setAttribute('aria-label', `${index + 1}번 사람 말`);
-      avatars.forEach(avatar => {
-        const key = avatarKey(avatar), title = avatar.type === 'emoji' ? avatar.value : avatar.value.name;
-        const pick = button('', () => { p.avatar = avatar; renderSetup(); }, 'avatar-option');
-        pick.setAttribute('aria-label', `${title} 말`);
-        pick.setAttribute('aria-pressed', String(avatarKey(p.avatar) === key));
-        pick.disabled = drafts.some(other => other !== p && avatarKey(other.avatar) === key) ||
-          (avatar.type === 'gallery' && failedSprites.has(avatar.value.spriteUrl));
-        const image = element('span'); showAvatar(image, avatar, fallbackFor(drafts, p), () => {
-          pick.disabled = true;
-          if (avatarKey(p.avatar) === key) {
-            p.avatar = { type: 'emoji', value: fallbackFor(drafts, p) };
-            renderSetup();
-          }
-        });
-        pick.append(image);
-        if (avatar.type === 'gallery') pick.append(element('small', title));
-        options.append(pick);
-      });
-      card.append(element('p', '말 고르기', 'avatar-note'), options);
-      const modeLabel = element('label', '도움 단계'), select = element('select');
-      select.setAttribute('aria-label', `${index + 1}번 사람 도움 단계`);
-      Object.entries(MODES).forEach(([value, name]) => {
-        const option = element('option', name); option.value = value; select.append(option);
-      });
-      select.value = p.assist; select.addEventListener('change', () => { p.assist = select.value; });
-      modeLabel.append(select); card.append(modeLabel); host.append(card);
-    });
   }
 
   function finish(yacht = false) {
@@ -359,13 +233,13 @@
   }
 
   function boot() {
-    avatars = collectAvatars(); setupPlayers(2); saved = readSaved();
+    setup = window.FamilyPlayers.createSetup({ host: $('playerSetup'), count: 2, min: 2, max: 5, modes: MODES }); saved = readSaved();
     if (saved) {
       setView('resumeView');
       $('resumeSummary').textContent = `${saved.players.map(p => p.name).join(' · ')} · ${saved.round}라운드`;
     }
-    $('playerCount').addEventListener('change', () => setupPlayers(Number($('playerCount').value)));
-    $('startGame').addEventListener('click', () => { $('setupError').textContent = ''; start(drafts); });
+    $('playerCount').addEventListener('change', () => setup.setCount(Number($('playerCount').value)));
+    $('startGame').addEventListener('click', () => { $('setupError').textContent = ''; start(setup.getPlayers()); });
     $('newGame').addEventListener('click', () => { removeSaved(); saved = null; setView('setupView'); });
     $('resumeGame').addEventListener('click', () => {
       state = saved; saved = null; renderGame(); $('turnBanner').focus(); say(`${state.players[state.turnPlayer].name} 차례예요!`);
@@ -388,7 +262,7 @@
       if (choice && choice.version === state.stateVersion) commitScore(choice.category);
     });
     $('playAgain').addEventListener('click', () => start(state.players));
-    $('backToSetup').addEventListener('click', () => { stopAudio(); state = null; setView('setupView'); renderSetup(); });
+    $('backToSetup').addEventListener('click', () => { stopAudio(); state = null; setView('setupView'); setup.render(); });
     $('soundToggle').addEventListener('click', () => {
       muted = !muted; $('soundToggle').setAttribute('aria-pressed', String(muted));
       $('soundToggle').textContent = muted ? '🔇 안내 음성' : '🔊 안내 음성';

@@ -201,7 +201,7 @@ test('화면 리소스·상대 경로·로드 순서·줄 수·CSP 없음 계약
   const scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(scripts, ['../../core/fairy-config.js', '../../core/fairy-tts.js',
     '../../core/fairy-settings-catalog.js', '../../core/fairy-engine.js', '../../data/gallery-data.js',
-    '../../subjects/quest/monster_roster.js', 'yacht-engine.js', 'yacht-ui.js']);
+    '../../subjects/quest/monster_roster.js', 'yacht-engine.js', 'family-players.js', 'yacht-ui.js']);
   for (const m of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
     assert.ok(!/^(?:\/|[a-z]+:)/i.test(m[1]), m[1]); assert.ok(existsSync(new URL(m[1], base)), m[1]);
   }

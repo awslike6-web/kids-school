@@ -56,7 +56,8 @@ const PLAYGROUND_ITEMS = {
     { icon: '⚔️', title: '브롤 DPS & 밸런스 연구소', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 시뮬레이션', href: 'kids/playground/minsu/brawl_dps.html', badge: '인기' },
     { icon: '🎁', title: '스타 드롭 & 트로피 보관소', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!', href: 'kids/playground/minsu/starr_drop.html', badge: '보상' },
     { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' },
-    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 태블릿 한 대로 가족이 돌아가며 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' }
+    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 태블릿 한 대로 가족이 돌아가며 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' },
+    { icon: '⚫', title: '가족 보드게임 · 오목', desc: '내 캐릭터와 마주 앉아 다섯 돌을 이어요', href: 'kids/playground/family/omok.html', badge: '가족' }
   ],
   minseo: [
     { icon: '🎨', title: '매직 컬러링 스튜디오', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력', href: 'kids/playground/minseo/coloring.html', badge: '미술' },
@@ -64,7 +65,8 @@ const PLAYGROUND_ITEMS = {
     { icon: '🎁', title: '스타 드롭 & 트로피 보관소', desc: '톡톡 탭해서 신나는 스타 드롭 개봉!', href: 'kids/playground/minsu/starr_drop.html', badge: '보상' },
     { icon: '🔬', title: '3학년 과학 실험실 (미리보기)', desc: '동물, 곤충, 별자리 요정들의 비밀을 알아보는 과학방', href: 'kids/subjects/science/science.html?user=minseo', badge: '예습' },
     { icon: '🏛️', title: '3학년 사회 역사방 (미리보기)', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 모험', href: 'kids/subjects/society/society.html?user=minseo', badge: '예습' },
-    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 태블릿 한 대로 가족이 돌아가며 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' }
+    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 태블릿 한 대로 가족이 돌아가며 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' },
+    { icon: '⚫', title: '가족 보드게임 · 오목', desc: '내 캐릭터와 마주 앉아 다섯 돌을 이어요', href: 'kids/playground/family/omok.html', badge: '가족' }
   ]
 };
 
