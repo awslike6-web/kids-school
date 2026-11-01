@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🎯 윷놀이 · 가족 보드게임</title>
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="yacht.css">
+  <link rel="stylesheet" href="yut.css">
+</head>
+<body>
+  <main class="yut-shell">
+    <header class="page-header">
+      <a href="../index.html">← 놀이터</a>
+      <h1>🎯 가족 윷놀이</h1>
+      <button id="soundToggle" type="button" aria-pressed="false">🔊 안내 음성</button>
+    </header>
+    <section id="setupView" aria-labelledby="setupTitle">
+      <h2 id="setupTitle">마주 앉아 함께 던져요!</h2>
+      <p>이 기기 하나로 2~4명이 차례로 돌아가며 윷을 던지고 말을 옮겨요.</p>
+      <div class="setup-controls">
+        <label class="count-label">참가자 수
+          <select id="playerCount" aria-label="참가자 수">
+            <option value="2" selected>2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+          </select>
+        </label>
+        <label class="count-label">말 개수
+          <select id="pieceCount" aria-label="말 개수">
+            <option value="2">2개</option>
+            <option value="3">3개</option>
+            <option value="4" selected>4개</option>
+          </select>
+        </label>
+      </div>
+      <div id="playerSetup" class="player-setup"></div>
+      <p id="setupError" class="status-message" role="status"></p>
+      <button id="startGame" type="button" class="primary">🎯 게임 시작</button>
+      <details class="rules"><summary>어떻게 놀아요?</summary>
+        <p>윷을 던져 나온 결과만큼 말을 옮겨요. 윷이나 모가 나오면 한 번 더 던져요.</p>
+        <p>상대 말을 잡으면 대기실로 보내고 한 번 더 던져요. 같은 칸의 내 말은 함께 업고 가요.</p>
+        <p>모서리에 멈추면 지름길로 가고, 참먹이(20번 칸)를 지나면 완주해요. 모든 말이 먼저 완주하면 이겨요!</p>
+      </details>
+    </section>
+    <section id="resumeView" hidden aria-labelledby="resumeTitle">
+      <h2 id="resumeTitle">놀던 게임이 있어요</h2>
+      <p id="resumeSummary"></p>
+      <div class="actions">
+        <button id="resumeGame" type="button" class="primary">이어서 하기</button>
+        <button id="newGame" type="button">새 게임</button>
+      </div>
+    </section>
+    <section id="gameView" hidden aria-label="윷놀이 게임">
+      <div class="yut-layout">
+        <div class="board-area">
+          <div id="board" class="yut-board" role="group" aria-label="윷판">
+            <svg class="board-lines" viewBox="0 0 100 100" aria-hidden="true">
+              <rect x="0" y="0" width="100" height="100" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <line x1="100" y1="0" x2="0" y2="100" stroke="currentColor" stroke-width="1.5" />
+              <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+          </div>
+          <div class="board-footer">
+            <div id="waitingTray" class="waiting-tray" aria-label="대기 말"></div>
+            <button id="finishCell" type="button" class="finish-cell" data-pos="30" disabled>🏁 완주</button>
+          </div>
+        </div>
+        <aside class="yut-controls" aria-label="차례와 조작">
+          <div id="turnHeading" class="turn-heading">
+            <span id="turnAvatar" class="turn-avatar"></span>
+            <h2 id="turnBanner" aria-live="polite" tabindex="-1"></h2>
+          </div>
+          <p id="assistLabel" class="assist-label"></p>
+          <div id="playersStatus" class="players-status"></div>
+          <div class="throw-section">
+            <div id="sticks" class="sticks-tray" aria-label="윷가락"></div>
+            <p id="throwResult" class="throw-result" role="status"></p>
+            <button id="throwButton" type="button" class="primary throw-btn" disabled>🎲 윷 던지기</button>
+          </div>
+          <div class="move-section">
+            <div id="pendingList" class="pending-list" aria-label="던진 결과 목록"></div>
+            <p id="actionMessage" class="action-message" role="status"></p>
+            <p id="helpText" class="help-text" role="status"></p>
+            <p id="moveText" class="move-text" role="status">윷을 던져요!</p>
+            <button id="confirmMove" type="button" class="primary confirm-btn" disabled>여기로 옮기기</button>
+          </div>
+          <section id="endView" hidden aria-labelledby="endTitle">
+            <h2 id="endTitle" tabindex="-1"></h2>
+            <div id="winners" class="winners"></div>
+            <p>끝까지 함께했어요! 다음 판도 같이 던져요.</p>
+            <div class="actions">
+              <button id="playAgain" type="button" class="primary">다시 하기</button>
+              <button id="backToSetup" type="button">처음으로</button>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </section>
+    <p id="saveStatus" class="status-message" role="status"></p>
+  </main>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../data/gallery-data.js"></script>
+  <script src="../../subjects/quest/monster_roster.js"></script>
+  <script src="family-players.js"></script>
+  <script src="yut-engine.js"></script>
+  <script src="yut-ui.js"></script>
+</body>
+</html>

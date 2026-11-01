@@ -1,7 +1,7 @@
 # 🎯 가족 보드게임: 윷놀이 화면 명세서 (한 기기)
 
 > **문서 버전**: v1.0 (2026-11-02)
-> **상태**: 구현 대기. 담당: Antigravity Gemini 3.8 Flash
+> **상태**: 구현 완료. 담당: Antigravity Gemini 3.8 Flash
 > **근거**: 노션 현황판 카드 「가족 보드게임 추가: 오목·윷놀이 커스텀 맵·장기·바둑」, 엔진 `docs/family_yut_engine_spec.md`, 선례 `docs/family_omok_spec.md`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다. `kids/playground/family/`의 `yut-engine.js`, `family-players.js`, `omok.html`, `omok.css`, `omok-ui.js`와 `tests/family-browser.mjs`, `tests/family-omok.test.mjs`를 읽는다.
 

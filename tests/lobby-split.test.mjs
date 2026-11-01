@@ -20,13 +20,14 @@ const originalLines = normalize(fixture).split('\n');
 // 원본 fixture에도 같은 변경을 적용해 설정 원문·VM 상수 비교를 계속 엄격하게 유지한다.
 const yachtItem = "    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 한 기기로 돌아가며, 또는 각자 기기로 함께 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' }";
 const omokItem = "    { icon: '⚫', title: '가족 보드게임 · 오목', desc: '내 캐릭터로 다섯 돌을 이어요. 한 기기로, 또는 각자 기기로', href: 'kids/playground/family/omok.html', badge: '가족' }";
+const yutItem = "    { icon: '🎯', title: '가족 보드게임 · 윷놀이', desc: '내 캐릭터 말로 윷판을 한 바퀴! 한 기기로 돌아가며 2~4명이 함께해요', href: 'kids/playground/family/yut.html', badge: '가족' }";
 const configEdits = [
   "    { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' }",
   "    { icon: '🏛️', title: '3학년 사회 역사방 (미리보기)', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 모험', href: 'kids/subjects/society/society.html?user=minseo', badge: '예습' }"
 ];
 const applyConfigEdits = text => configEdits.reduce((result, line) => {
   assert.equal(result.split(line).length, 2, `승인 변경 대상 줄이 한 번만 있어야 함: ${line.slice(0, 40)}`);
-  return result.replace(line, `${line},\n${yachtItem},\n${omokItem}`);
+  return result.replace(line, `${line},\n${yachtItem},\n${omokItem},\n${yutItem}`);
 }, normalize(text));
 const originalRange = (first, last) => originalLines.slice(first - 1, last).join('\n') + '\n';
 const approved = new Map([
