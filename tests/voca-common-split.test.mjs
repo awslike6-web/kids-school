@@ -6,6 +6,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { replaceOnce, version as rewardVersion } from './reward-grant-approved-edits.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -56,7 +57,9 @@ test('HTML은 상대 경로·같은 버전·클래식 스크립트로 한 번씩
 
 test('HTML의 두 스크립트 배선 이외 원문은 승인 전과 같다', () => {
     const newline = html.includes('\r\n') ? '\r\n' : '\n';
-    const restored = html.replace(newline + tags[1], '')
+    // 승인된 helper 버전만 되돌린 뒤 기존 고정 해시로 나머지 모든 바이트를 검사한다.
+    const restored = replaceOnce(html, 'notion-helper.js?v=' + rewardVersion,
+        'notion-helper.js?v=20260916_1400').replace(newline + tags[1], '')
         .replace(tags[0], '<script src="./voca_common.js?v=20260916_1400"></script>');
     // 분리 직전 HTML의 UTF-8 원문 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
     assert.equal(createHash('sha256').update(restored).digest('hex'),

@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { extractedReward } from './reward-grant-approved-edits.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
@@ -12,7 +13,7 @@ const names = ['notion-reward.js', 'notion-reward-quiz.js', 'notion-reward-discu
 const files = names.map(name => `kids/core/${name}`);
 const fixture = read('tests/fixtures/notion-reward-split/notion-reward.js');
 const sources = files.map(read);
-const version = '?v=20261101-reward-retry';
+const version = '?v=20261101-reward-grant-shared';
 // 수학 분리 시험과 동일: 줄바꿈·줄 끝 공백·마지막 개행만 정규화한다.
 const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
 
@@ -376,6 +377,7 @@ const applyRewardEdits = text => rewardEdits.reduce((result, [before, after]) =>
   assert.equal(result.split(before).length, 2, '승인 변경 대상은 정확히 한 번 존재해야 함');
   return result.replace(before, after);
 }, normalize(text));
+const applySharedEdits = text => extractedReward(applyRewardEdits(text));
 
 
 test('세 파일은 지정 머리 주석을 가지며 각각 600줄 이하이고 원문을 보존한다', () => {
@@ -388,7 +390,7 @@ test('세 파일은 지정 머리 주석을 가지며 각각 600줄 이하이고
     assert.ok(header.endsWith(' (순서대로 로드)'));
     return source.slice(firstNewline + 1);
   });
-  assert.equal(normalize(bodies.join('')), applyRewardEdits(fixture));
+  assert.equal(normalize(bodies.join('')), applySharedEdits(fixture));
 });
 
 for (const [file, base] of [['quest_runner.html', './kids/core/']]) {
@@ -469,6 +471,7 @@ function sandbox(mode) {
   }
   vm.createContext(context);
   const initialNames = new Set(Object.keys(context));
+  vm.runInContext(read('kids/core/reward-grant.js'), context);
   return { context, events, injected, initialNames };
 }
 
@@ -494,7 +497,7 @@ for (const mode of ['none', 'current', 'fallback', 'preloaded']) {
   test(`${mode}: 전체 로드 후 전역 함수·window 이름·이벤트·공용 로더가 원본과 같다`, () => {
     const original = sandbox(mode);
     const split = sandbox(mode);
-    vm.runInContext(applyRewardEdits(fixture), original.context, { filename: '원본 fixture' });
+    vm.runInContext(applySharedEdits(fixture), original.context, { filename: '원본 fixture' });
     sources.forEach((source, index) => vm.runInContext(source, split.context, { filename: files[index] }));
     const result = snapshot(split);
     assert.deepEqual(result, snapshot(original));

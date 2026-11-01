@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { replaceOnce, version as rewardVersion } from './reward-grant-approved-edits.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readBytes = file => fs.readFileSync(path.join(root, file));
@@ -78,7 +79,9 @@ test('HTML 상대 경로 실존·동일 버전·지정 순서로 연속 1회 로
 test('두 CSS 링크 외 HTML은 고정 fixture와 바이트까지 같다', () => {
     assert.equal(originalHtml.split(oldTag).length, 2, '원본 링크는 1개');
     const newline = originalHtml.includes('\r\n') ? '\r\n' : '\n';
-    const expectedHtml = originalHtml.replace(oldTag, expectedTags.join(newline));
+    // 보상 공용화에서 승인한 helper 캐시 버전 변경만 원본에도 적용한다.
+    const expectedHtml = replaceOnce(originalHtml.replace(oldTag, expectedTags.join(newline)),
+        'notion-helper.js?v=20260830_no_intro', 'notion-helper.js?v=' + rewardVersion);
     assert.deepEqual(readBytes(htmlPath), Buffer.from(expectedHtml));
 });
 
