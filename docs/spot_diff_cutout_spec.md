@@ -72,3 +72,10 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minseo_20260906_194054" --
 - **`tests/gallery-spot-diff.test.mjs`**: `build_spot_diff` 단위 테스트 3종(누끼 투명 PNG 합성 및 알파 픽셀/RGB/크기 일치 검증, 일반 작품 JPEG 유지 검증, 비율 불일치/좌표 오류 예외 처리) 추가 완료.
 - **테스트 결과**: `node --test tests/gallery-spot-diff.test.mjs` 9/9 PASS, 전사 회귀 시험 466 PASS (0 FAIL).
 - **계약 검증**: `verify_contracts.py` 전 파일 `[ALL PASS]`.
+
+## 8. 검증과 등록 결과 (Claude, 2026-11-01)
+- **브랜치 검증**: diff 검토, `node --test "tests/**/*.test.mjs"` 466 통과·0 실패·todo 1(두 기기 동시 저장, 알려진 한계), 바뀐 파일 `verify_contracts.py` 전부 `[ALL PASS]`. 병합 `c40b6547`.
+- **문서 보완**: `gallery_spot_diff_spec.md`에서 빠진 저장 위치·크기 맞춤 설명을 되살림 (`c147c5e7`).
+- **등록**: `--no-push`로 먼저 실행해 결과를 확인한 뒤 푸시. kids-school `9ff19475`, kids-archive `60585c2`. 폰 대기 큐 0건, 노션 쓰기 없음. `minseo_20260906_194054_diff.png` 968×1200, 알파가 원본과 바이트 단위로 같음.
+- **화면 확인**: 쓰기 차단 서버와 실제 CDN 그림으로 PC 크기에서 한 판 완주(오답 1회 무반응, 원본·변형 양쪽 터치, 5/5 완주, 콘솔 오류 없음), 휴대폰 크기(375×812) 배치 확인. 실기기 터치와 음성은 확인하지 않음.
+- **남은 한계**: 파란 양말 발끝은 정답 원(최대 `r` 0.15) 밖이라, 거기를 누르면 정답으로 치지 않고 오답 표시만 나온다(감점 없음).
