@@ -224,7 +224,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 계약: 규칙 엔진 `docs/family_yut_engine_spec.md`, 화면 `docs/family_yut_ui_spec.md`.
 - `kids/playground/family/yut-engine.js` (272줄, 상한 300): DOM·저장소·통신 없는 IIFE, 전역 `window.YutEngine` 하나(`Object.freeze`). 공개 API `THROWS`, `STEPS`, `WAITING`, `DONE`, `routeOf(from,steps)`, `rollSticks(rng=Math.random)`, `createGame(players,pieceCount=4)`, `legalMoves(state)`, `applyThrow(state,result)`, `applyMove(state,pieceId,throwIndex)`, `rematch(state)`, `isValidSaved(state)`.
 - 상태: `{v:1,gameType:'yut',stateVersion,turnPlayer,players,publicBoard:{pieceCount,phase,pending,log,pieces},result,lastAction}`. 참가자는 `{id,name,avatar,assist}`(2~4명), 말은 `{id,owner,pos,trail}`(인당 2~4개, `-1` 대기·`1~29` 판·`30` 완주), `phase`는 `throw`/`move`/`over`. 유효 행동만 불변 새 상태·버전 +1을 반환하고 무효 행동은 원본을 그대로 반환합니다.
-- 화면: 진입 놀이터 대문의 `family/yut.html`, 로비 놀이터 목록. `yut.html`(112줄, 상한 150), `yut-ui.js`(457줄, 상한 500, IIFE 전역 `YutUI`), `yut.css`(115줄, 상한 300). 저장 키 `familyYutGame`(로컬 전용).
+- 화면: 진입 놀이터 대문의 `family/yut.html`, 로비 놀이터 목록. `yut.html`(112줄, 상한 150), `yut-ui.js`(462줄, 상한 500, IIFE 전역 `YutUI`), `yut.css`(131줄, 상한 300). 저장 키 `familyYutGame`(로컬 전용).
 - 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저).
 
 

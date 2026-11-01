@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import { browser, players, plain, read } from './family-browser.mjs';
 
 function mockRolls(b, results) {
@@ -13,13 +14,18 @@ function mockRolls(b, results) {
     mo: [0.9, 0.9, 0.9, 0.9]
   };
   results.forEach(r => vals.push(...map[r]));
-  let idx = 0;
-  b.context.Math.random = () => (idx < vals.length ? vals[idx++] : 0.9);
+  vm.runInContext(`
+    (() => {
+      const vals = ${JSON.stringify(vals)};
+      let idx = 0;
+      Math.random = () => (idx < vals.length ? vals[idx++] : 0.9);
+    })()
+  `, b.context);
 }
 
-const cell = (b, pos) => b.$('board').querySelector(`button.yut-cell[data-pos="${pos}"]`);
-const waitBtn = b => b.$('waitingTray').querySelector('button.waiting-token');
-const chip = (b, idx) => b.$('pendingList').querySelector(`button.throw-chip[data-index="${idx}"]`);
+const cell = (b, pos) => b.$('board').querySelectorAll('.yut-cell').find(n => n.dataset.pos === String(pos));
+const waitBtn = b => b.$('waitingTray').querySelectorAll('.waiting-token')[0];
+const chip = (b, idx) => b.$('pendingList').querySelectorAll('.throw-chip').find(n => n.dataset.index === String(idx));
 
 test('시작: 인원·말 개수 변경, setupError, 칸 29개와 위치, 시작 음성', () => {
   const b = browser({ game: 'yut' });
@@ -39,8 +45,9 @@ test('시작: 인원·말 개수 변경, setupError, 칸 29개와 위치, 시작
   assert.equal(b.speech[0].text, '민서부터 던져요!');
 
   // 29개 칸 확인
-  const cells = b.$('board').querySelectorAll('button.yut-cell');
+  const cells = b.$('board').querySelectorAll('.yut-cell');
   assert.equal(cells.length, 29);
+  assert.equal(cell(b, 20).querySelector('.cell-tag').textContent, '출발·도착');
   assert.equal(cell(b, 20).getAttribute('aria-label'), '20번 칸(참먹이), 빈 칸');
   assert.equal(cell(b, 23).getAttribute('aria-label'), '23번 칸(방), 빈 칸');
   assert.equal(cell(b, 1).style['--x'], 100);
@@ -70,7 +77,7 @@ test('던지기: 가락 클래스, throwResult, 윷·모 연속 던지기, 던�
   assert.equal(b.$('moveText').textContent, '옮길 말을 골라요.');
 
   // 칩 목록 확인
-  const chips = b.$('pendingList').querySelectorAll('button.throw-chip');
+  const chips = b.$('pendingList').querySelectorAll('.throw-chip');
   assert.equal(chips.length, 2);
   assert.equal(chips[0].textContent, '윷');
   assert.equal(chips[1].textContent, '도');
@@ -274,26 +281,76 @@ test('도움 단계 세 가지의 클래스와 helpText', () => {
   b.context.YutEngine.applyThrow(b.context.YutEngine.createGame(players())); // noop
 });
 
-test('완주: finishCell, 승부: 끝 화면, 음성 뒤 보상, rematch 회전', () => {
-  const b = browser({ game: 'yut' });
+test('완주: finishCell, 승부: 끝 화면, 음성 뒤 보상, rematch 회전 및 effectGeneration 방어', () => {
+  const pList = players().slice(0, 2);
+  const b0 = browser({ game: 'yut' });
+  const E = b0.context.YutEngine;
+  let s = E.createGame(pList, 2);
+  s = E.applyThrow(E.applyThrow(s, 'yut'), 'do');
+  s = E.applyMove(s, 'p1-0', 1);
+  s = E.applyMove(s, 'p1-1', 0);
+  s = E.applyThrow(s, 'backdo');
+  s = E.applyMove(E.applyThrow(s, 'backdo'), 'p1-0', 0);
+  s = E.applyThrow(s, 'backdo');
+  s = E.applyThrow(E.applyThrow(s, 'mo'), 'do');
+  s = E.applyMove(s, 'p1-0', 1);
+  s = E.applyMove(s, 'p1-1', 0);
+  s = E.applyThrow(s, 'backdo');
+  s = E.applyMove(E.applyThrow(s, 'do'), 'p1-1', 0);
+  s = E.applyThrow(s, 'backdo');
+  s = E.applyThrow(E.applyThrow(E.applyThrow(s, 'mo'), 'mo'), 'gae');
+  s = E.applyMove(s, 'p1-1', 0); // 10 -> 29
+
+  // 1) 정상 완주 및 보상, 다시하기
+  const b = browser({ game: 'yut', storage: { familyYutGame: JSON.stringify(s) } });
   b.boot();
-  b.$('pieceCount').value = '2';
-  b.$('startGame').click();
+  b.$('resumeGame').click();
+  // 개(2) 칩 선택 후 29번 말 선택 -> finishCell 활성화 후 클릭
+  chip(b, 1).click();
+  cell(b, 29).click();
+  assert.equal(b.$('finishCell').disabled, false);
+  assert.ok(b.$('finishCell').className.includes('target'));
+  b.$('finishCell').click();
 
-  // p1의 두 말을 모두 20번 칸에 위치하도록 직접 조작한 정상 저장값 로드 시뮬레이션
-  // (테스트 편의를 위해 createGame 후 말 위치 세팅 및 isValidSaved 검증)
-  let s = b.context.YutEngine.createGame(players(), 2);
-  s.publicBoard.pieces[0].pos = 20;
-  s.publicBoard.pieces[1].pos = 20;
-  s.publicBoard.phase = 'throw';
+  // 승부 확인
+  assert.equal(b.$('endView').hidden, false);
+  assert.match(b.$('endTitle').textContent, /민서, 이겼어요!/);
+  assert.equal(b.speech.at(-1).text, '민서, 이겼어요!');
 
-  // 윷 던지고 도 던짐 -> 1번 말 완주 후 2번 말도 완주하여 게임 종료
-  mockRolls(b, ['yut', 'do']);
-  b.$('throwButton').click();
-  b.$('throwButton').click();
+  // 음성 콜백 후 보상 수령
+  b.speech.at(-1).after();
+  assert.equal(b.speech.at(-1).text, 'reward');
 
-  // 1번 말 완주
-  waitBtn(b); // no waiting
+  // rematch(다시하기): 차례 회전 확인
+  b.$('playAgain').click();
+  assert.equal(b.$('endView').hidden, true);
+  assert.match(b.speech.at(-1).text, /민수부터 던져요!/);
+
+  // 2) effectGeneration 방어: 승부 음성 끝나기 전 다시하기 누르면 늦은 보상 차단
+  const bRematch = browser({ game: 'yut', storage: { familyYutGame: JSON.stringify(s) } });
+  bRematch.boot();
+  bRematch.$('resumeGame').click();
+  chip(bRematch, 1).click();
+  cell(bRematch, 29).click();
+  bRematch.$('finishCell').click();
+  const lateWinSpeech = bRematch.speech.at(-1);
+  assert.equal(lateWinSpeech.text, '민서, 이겼어요!');
+  bRematch.$('playAgain').click(); // 이전 음성 도중 다시하기 클릭
+  lateWinSpeech.after(); // 뒤늦은 음성 콜백 호출
+  assert.equal(bRematch.speech.filter(x => x.text === 'reward').length, 0); // 보상 안 나옴!
+
+  // 3) effectGeneration 방어: 승부 음성 끝나기 전 pagehide 발생 시 늦은 보상 차단
+  const bHide = browser({ game: 'yut', storage: { familyYutGame: JSON.stringify(s) } });
+  bHide.boot();
+  bHide.$('resumeGame').click();
+  chip(bHide, 1).click();
+  cell(bHide, 29).click();
+  bHide.$('finishCell').click();
+  const hideWinSpeech = bHide.speech.at(-1);
+  assert.equal(hideWinSpeech.text, '민서, 이겼어요!');
+  bHide.fire('pagehide'); // 화면 떠남
+  hideWinSpeech.after();
+  assert.equal(bHide.speech.filter(x => x.text === 'reward').length, 0); // 보상 안 나옴!
 });
 
 test('음소거 및 이어하기와 저장 차단', () => {
@@ -359,20 +416,20 @@ test('2·3·4인 무작위 한 판을 클릭으로 끝까지: 매 단계 isValid
       if (!b.$('throwButton').disabled) {
         b.$('throwButton').click();
       } else {
-        const chips = b.$('pendingList').querySelectorAll('button.throw-chip:not(:disabled)');
+        const chips = b.$('pendingList').querySelectorAll('.throw-chip:not(:disabled)');
         if (chips.length === 0) break;
         chips[0].click();
 
         // 움직일 수 있는 칸 중 하나 클릭
-        const canMoves = b.$('board').querySelectorAll('button.yut-cell.can-move');
-        const wait = b.$('waitingTray').querySelector('button.waiting-token.can-move');
+        const canMoves = b.$('board').querySelectorAll('.can-move');
+        const wait = b.$('waitingTray').querySelectorAll('.can-move')[0];
         if (wait) {
           wait.click();
         } else if (canMoves.length > 0) {
           canMoves[0].click();
         } else {
           // helper가 아닌 경우 판 위 말 클릭
-          const anyCell = b.$('board').querySelector('button.yut-cell:not(:disabled)');
+          const anyCell = b.$('board').querySelectorAll('.yut-cell').find(n => !n.disabled);
           if (anyCell) anyCell.click();
         }
 

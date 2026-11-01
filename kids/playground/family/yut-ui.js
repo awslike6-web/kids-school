@@ -14,7 +14,7 @@
   };
 
   const $ = id => document.getElementById(id);
-  let state = null, saved = null, setup = null, booted = false, muted = false;
+  let state = null, saved = null, setup = null, booted = false, muted = false, effectGeneration = 0;
   let selectedThrowIndex = null, selectedMove = null;
   let lastSticks = null, lastThrowResult = '', actionMessage = '', moveStatusText = '';
 
@@ -82,8 +82,12 @@
   function celebrate() {
     stopAudio();
     const winner = state.players.find(p => p.id === state.result.winner);
+    const finished = JSON.stringify(state), token = effectGeneration;
     const give = () => {
-      if (!muted && typeof window.fairyReward === 'function') window.fairyReward();
+      if (!muted && JSON.stringify(state) === finished && token === effectGeneration &&
+          typeof window.fairyReward === 'function') {
+        window.fairyReward();
+      }
     };
     say(`${winner.name}, 이겼어요!`, give);
   }
@@ -175,7 +179,7 @@
     const assist = player.assist;
 
     // SVG 보존하며 yut-cell 갱신
-    const cells = boardEl.querySelectorAll('button.yut-cell');
+    const cells = boardEl.querySelectorAll('.yut-cell');
     if (cells.length !== 29) {
       const svg = boardEl.querySelector('svg');
       boardEl.replaceChildren();
@@ -190,7 +194,7 @@
       }
     }
 
-    const cellNodes = boardEl.querySelectorAll('button.yut-cell');
+    const cellNodes = boardEl.querySelectorAll('.yut-cell');
     cellNodes.forEach(cell => {
       const pos = Number(cell.dataset.pos);
       cell.className = 'yut-cell';
@@ -212,6 +216,7 @@
         cell.append(token);
       } else {
         label += ', 빈 칸';
+        if (pos === 20) cell.append(element('span', '출발·도착', 'cell-tag'));
       }
 
       if (b.phase === 'move' && !state.result) {
@@ -355,8 +360,6 @@
     if (booted) return;
     booted = true;
 
-    if (!$('playerCount').value) $('playerCount').value = '2';
-    if (!$('pieceCount').value) $('pieceCount').value = '4';
     setup = F.createSetup({ host: $('playerSetup'), count: 2, min: 2, max: 4, modes: MODES });
     $('playerCount').addEventListener('change', () => {
       setup.setCount(Number($('playerCount').value));
@@ -417,6 +420,7 @@
     });
 
     $('playAgain').addEventListener('click', () => {
+      effectGeneration++;
       stopAudio();
       state = E.rematch(state);
       selectedThrowIndex = null;
@@ -432,6 +436,7 @@
     });
 
     $('backToSetup').addEventListener('click', () => {
+      effectGeneration++;
       stopAudio();
       state = null;
       selectedMove = null;
@@ -447,8 +452,8 @@
       if (muted) stopAudio();
     });
 
-    document.addEventListener('visibilitychange', () => { if (document.hidden) stopAudio(); });
-    window.addEventListener('pagehide', stopAudio);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { effectGeneration++; stopAudio(); } });
+    window.addEventListener('pagehide', () => { effectGeneration++; stopAudio(); });
   }
 
   window.YutUI = Object.freeze({ boot });

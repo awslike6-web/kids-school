@@ -15,22 +15,9 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
     createElement: tag => new Node(tag), getElementById: id => nodes.get(id) || null,
     addEventListener: (type, fn) => { const key = `document:${type}`; listeners.set(key, [...listeners.get(key) || [], fn]); } };
   function matches(node, selector) {
-    if (selector === '*') return true;
-    if (selector.includes(':not(:disabled)') && node.disabled) return false;
-    let sel = selector.replace(':not(:disabled)', '');
-    const attrMatch = sel.match(/\[([a-zA-Z0-9_-]+)(?:="([^"]*)")?\]/);
-    if (attrMatch) {
-      const [, attr, val] = attrMatch;
-      sel = sel.replace(attrMatch[0], '');
-      const hasAttr = attr.startsWith('data-') ? node.dataset[attr.slice(5)] === val : node.getAttribute(attr) === val;
-      if (!hasAttr) return false;
-      if (!sel) return true;
-    }
-    const parts = sel.split('.').filter(Boolean);
-    const tag = sel.startsWith('.') ? null : parts.shift();
-    if (tag && node.tagName !== tag.toUpperCase()) return false;
-    const classes = node.className ? node.className.split(/\s+/) : [];
-    return parts.every(c => classes.includes(c));
+    if (selector.startsWith('.')) return node.className.split(/\s+/).includes(selector.slice(1).split(':')[0]) &&
+      (!selector.includes(':not(:disabled)') || !node.disabled);
+    return node.tagName === selector.toUpperCase();
   }
   class Node {
     constructor(tag = 'div') {
@@ -76,6 +63,8 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
     nest('gameView', ['dice', 'rollDice', 'scoreTable', 'keepHint', 'turnHelp', 'turnBanner', 'turnAvatar', 'roundBanner']);
     nest('endView', ['playAgain', 'backToSetup', 'winners', 'rankings', 'endTitle']);
   } else if (game === 'yut') {
+    nodes.get('playerCount').value = '2';
+    nodes.get('pieceCount').value = '4';
     nest('setupView', ['playerCount', 'pieceCount', 'playerSetup', 'setupError', 'startGame']);
     nest('resumeView', ['resumeSummary', 'resumeGame', 'newGame']);
     nest('endView', ['endTitle', 'winners', 'playAgain', 'backToSetup']);
@@ -104,7 +93,7 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
     end(code = 1006) { this.readyState = 3; this.onclose?.({ code }); }
     actions() { return this.sent.filter(s => s !== 'ping').map(JSON.parse); }
   }
-  const context = { document, Math, URL, URLSearchParams, TextEncoder, AbortController, console,
+  const context = { document, URL, URLSearchParams, TextEncoder, AbortController, console,
     Date: class extends Date { static now() { return now; } }, WebSocket: Socket,
     crypto: { randomUUID: () => CLIENT, getRandomValues: a => webcrypto.getRandomValues(a) },
     location: { hostname, search, href: `http://${hostname}/kids/playground/family/${game}.html${search}` },
