@@ -16,16 +16,17 @@ const version = '?v=20261031-lobby-split';
 // 수학 페이지 분리 시험과 동일하며 코드 내부 공백·들여쓰기는 보존한다.
 const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
 const originalLines = normalize(fixture).split('\n');
-// 분리 뒤 승인된 설정 변경: 2026-11-01 두 아이 놀이터 목록 끝에 야추 카드 추가.
+// 분리 뒤 승인된 설정 변경: 2026-11-01 두 아이 놀이터 목록 끝에 야추·오목 카드 추가.
 // 원본 fixture에도 같은 변경을 적용해 설정 원문·VM 상수 비교를 계속 엄격하게 유지한다.
 const yachtItem = "    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 태블릿 한 대로 가족이 돌아가며 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' }";
+const omokItem = "    { icon: '⚫', title: '가족 보드게임 · 오목', desc: '내 캐릭터와 마주 앉아 다섯 돌을 이어요', href: 'kids/playground/family/omok.html', badge: '가족' }";
 const configEdits = [
   "    { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' }",
   "    { icon: '🏛️', title: '3학년 사회 역사방 (미리보기)', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 모험', href: 'kids/subjects/society/society.html?user=minseo', badge: '예습' }"
 ];
 const applyConfigEdits = text => configEdits.reduce((result, line) => {
   assert.equal(result.split(line).length, 2, `승인 변경 대상 줄이 한 번만 있어야 함: ${line.slice(0, 40)}`);
-  return result.replace(line, `${line},\n${yachtItem}`);
+  return result.replace(line, `${line},\n${yachtItem},\n${omokItem}`);
 }, normalize(text));
 const originalRange = (first, last) => originalLines.slice(first - 1, last).join('\n') + '\n';
 const approved = new Map([

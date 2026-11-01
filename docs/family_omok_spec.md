@@ -1,7 +1,7 @@
 # ⚫ 가족 보드게임: 오목 (한 기기에서 마주 앉아 두기) 명세서
 
 > **문서 버전**: v1.0 (2026-11-01)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 구현 완료 (2026-11-01, Claude 검증 완료)
 > **근거**: 노션 현황판 카드 「가족 보드게임 추가: 오목·윷놀이 커스텀 맵·장기·바둑」, 앞선 작업 `docs/family_yacht_spec.md`. 2026-11-01 가족 반응: 아이들이 야추를 재미있게 하지만 폰 한 대를 돌려 쓰는 것이 병목이다. 오목은 2인이고 판을 사이에 두고 함께 보므로 이 병목이 작다. 여러 기기 연결은 이번 범위가 아니다.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다. 야추 네 파일(`kids/playground/family/yacht*`)과 `tests/yacht-engine.test.mjs`를 읽는다.
 
@@ -116,3 +116,38 @@
 - **화면 확인은 Claude가 한다**: 쓰기 차단 서버에서 로비 → 놀이터 → 오목 진입, 실제 클릭으로 한 판 승부, 무르기, 이어하기, 320·375·768px와 가로 화면, 야추 시작 화면이 전후로 같은지.
 - `CORE_CATALOG.md`의 가족 보드게임 절에 오목(파일·API·상태 모양·이어하기 키)과 `family-players.js`를 적는다.
 - 이 문서 상태를 "구현 완료"로 바꾸고 실제 줄 수를 적는다.
+
+## 9. 구현 계약·검증 인계 (2026-11-01)
+- 승인 범위대로 오목과 참가자 공용화를 구현했습니다. 게임별 UI/엔진은 독립이며 `yacht.css`를 시작 화면·말 선택 스타일에 재사용합니다. 야추의 문구·말 저장 형식·이어하기 키는 유지합니다.
+- 엔진은 API §4-2를 유지합니다. `place`는 승부 수를 포함해 차례를 넘기고, `undo`는 `lastAction.type === 'PLACE'`인 직전 착수자만 복원합니다. UNDO 뒤 상대의 이전 돌을 연속으로 지울 수 없습니다. UI는 사람별 버튼에서 착수자 일치를 검사합니다.
+- `rematch`는 참가자 순서를 뒤집어 흑백을 바꾸고 `stateVersion + 1`, `lastAction:{type:'REMATCH'}`를 남깁니다. 새 판 수순·결과·무르기 횟수는 초기화합니다.
+- `isValidSaved`는 수순 재생·차례·승리선·결과, 참가자·크기·버전 하한·무르기 0~2회·마지막 PLACE/UNDO/REMATCH를 검사합니다. 삭제한 수의 전체 이력은 저장하지 않으므로 과거 무르기 전체나 재대결 누적 버전을 인증하는 기능은 아닙니다.
+- `FamilyPlayers` 공개 API는 `avatarKey`, `collectAvatars`, `showAvatar`, `fallbackFor`, `playerAvatar`, `defaultMode`, `createSetup({host,count,min,max,modes})`; 설정 인스턴스는 `setCount`, `render`, `getPlayers`를 제공합니다. 갤러리 말 키는 작품+캐릭터, 실패/2.5초 지연은 서로 다른 이모지로 표시하며 이전 그림 타이머는 새 표시를 덮어쓰지 않습니다.
+- 오목은 미리보기 후 같은 칸 재클릭/확인 버튼으로만 확정하고, 도움은 현재 차례에만 표시합니다. 종료 후에도 판의 승리선을 유지합니다. 음성은 시작·승부 때만, 음소거는 이 화면 세션에만 적용합니다.
+- 실행: `node --test tests/omok-engine.test.mjs tests/family-players.test.mjs tests/yacht-engine.test.mjs tests/lobby-split.test.mjs` → 61개 통과. 모의 DOM 클릭으로 두기·무르기·승부·저장 삭제·이어하기·저장 차단·음소거·도움 차례·야추 2~5명 설정/첫 굴림을 확인했습니다. 3가지 크기 × 160단계의 결정적 혼합 행동에서 저장 JSON 왕복 검증도 통과했습니다.
+- 전체 회귀: `node --test "tests/**/*.test.mjs"` 최종 466개 중 462개 통과·2개 실패·skip 1개·기존 todo 1개(종료 코드 1)입니다. Python 빌더 하위 프로세스가 시작되지 않은 갤러리 시험 2건은 오목 변경으로 통과 처리하거나 건너뛰지 않았습니다.
+- 실제 브라우저의 320·375·768px/가로 배치·로비 진입·야추 시작 화면 전후 비교, 실제 CDN/TTS와 물리 기기 검수는 Claude 확인 대기입니다. 모의 DOM 시험을 실제 화면 검수로 보지 않습니다.
+
+### 실제 줄 수 (최종 공백 제외, fixture 제외)
+- `kids/playground/family/omok-engine.js`: 143줄
+- `kids/playground/family/omok-ui.js`: 198줄
+- `kids/playground/family/omok.html`: 74줄
+- `kids/playground/family/omok.css`: 61줄
+- `kids/playground/family/family-players.js`: 159줄
+- `kids/playground/family/yacht-ui.js`: 281줄
+- `kids/playground/family/yacht.html`: 82줄
+- `kids/playground/index.html`: 197줄
+- `kids/js/lobby_config.js`: 110줄
+- `tests/omok-engine.test.mjs`: 196줄
+- `tests/family-players.test.mjs`: 172줄
+- `tests/yacht-engine.test.mjs`: 212줄
+- `tests/lobby-split.test.mjs`: 493줄
+- `kids/core/CORE_CATALOG.md`: 1313줄
+- `docs/family_yacht_spec.md`: 145줄
+- `docs/family_omok_spec.md`: 149줄
+
+## Claude 검증·수정 (2026-11-01)
+- Codex 환경의 전체 시험 실패 2건은 그 샌드박스에서 Python이 실행되지 않아 생긴 것이다. Claude가 돌린 `node --test "tests/**/*.test.mjs"`는 466개 중 464 통과·실패 0·기존 TODO 1이다. 바뀐 파일 모두 계약 검사 `[ALL PASS]`.
+- 쓰기 차단 서버에서 확인: 로비 놀이터 카드로 진입, 빈 칸 첫 터치는 미리보기·두 번째 터치에 착수, 무르기 횟수 차감과 상대 버튼 비활성, 도우미 `win`·전술 `block` 표시와 안내문, 새로고침 뒤 이어하기, 다섯 줄 강조·승리 화면, 다시 하기 흑백 교대, 15줄 320px(칸 19px, 가로 넘침 없음), 1024×768 가로 배치(판이 화면 높이 안), 콘솔 오류 없음. 판 칸 입력은 스크립트 클릭으로 시험했고, 실기기 터치와 TTS 재생은 확인하지 않았다.
+- 야추 회귀: main과 이 브랜치의 시작 화면(2인·3인)과 게임 화면이 요소별 계산 스타일·글자까지 같다.
+- Claude가 고친 점: 승부 뒤 차례·무르기·두기 칸을 숨기고 진 사람 말을 배너에 남기지 않음(`omok-ui.js`, `omok.html`의 `turnHeading`), 도움 표시를 칸 84% 크기로 키움, 좁은 폰에서 차례 글자 24px·줄바꿈 방지와 무르기 버튼 글자 줄바꿈 방지(`omok.css`).

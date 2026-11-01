@@ -1,0 +1,63 @@
+/* 설정과 말 고르기는 yacht.css 한 벌을 함께 사용합니다. */
+.omok-shell { max-width: 1480px; margin: auto; padding: 16px; }
+.omok-shell .omok-layout { display: grid; gap: 20px; margin-top: 16px; }
+.omok-shell .omok-board {
+  --size: 13; width: 100%; aspect-ratio: 1; display: grid;
+  grid-template-columns: repeat(var(--size), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--size), minmax(0, 1fr));
+  background: #e8bd7b; border-radius: 8px; overflow: hidden; align-self: start;
+  box-shadow: 0 3px 10px #51340933;
+}
+.omok-shell .intersection {
+  position: relative; min-width: 0; min-height: 0; width: 100%; height: 100%;
+  border: 0; border-radius: 0; padding: 0; background: transparent; opacity: 1;
+  touch-action: manipulation; display: grid; place-items: center;
+}
+.omok-shell .intersection { --vertical: 100%; --horizontal: 100%; --vx: 50%; --hy: 50%; }
+.omok-shell .intersection.edge-left { --horizontal: 50%; --vx: 100%; }
+.omok-shell .intersection.edge-right { --horizontal: 50%; --vx: 0%; }
+.omok-shell .intersection.edge-top { --vertical: 50%; --hy: 100%; }
+.omok-shell .intersection.edge-bottom { --vertical: 50%; --hy: 0%; }
+.omok-shell .intersection::before {
+  content: ''; position: absolute; inset: 0; background: linear-gradient(#76532a, #76532a) 50% var(--hy) / 1px var(--vertical) no-repeat,
+    linear-gradient(#76532a, #76532a) var(--vx) 50% / var(--horizontal) 1px no-repeat;
+}
+.omok-shell .intersection:hover:not(:disabled) { background-color: #ffffff30; }
+.omok-shell .intersection:focus-visible { outline-offset: -3px; z-index: 2; }
+.omok-shell .stone {
+  position: relative; width: 82%; height: 82%; border-radius: 50%;
+  box-shadow: 1px 2px 3px #0005; pointer-events: none;
+}
+.omok-shell .stone.black { background: radial-gradient(circle at 32% 25%, #626262, #101010 70%); border: 1px solid #111; }
+.omok-shell .stone.white { background: radial-gradient(circle at 32% 25%, white, #d9d9d9 75%); border: 1px solid #777; }
+.omok-shell .stone.preview { opacity: .45; }
+.omok-shell .intersection.last-move .stone::after {
+  content: ''; position: absolute; inset: 36%; border: 2px solid #ef8b00; border-radius: 50%;
+}
+.omok-shell .intersection.winning .stone { outline: 3px solid #168145; outline-offset: -2px; }
+.omok-shell .hint { position: absolute; inset: 8%; border: 3px dashed #c2410c; border-radius: 50%; background: #fed7aacc; pointer-events: none; }
+.omok-shell .hint.win { border-style: solid; border-color: #116636; background: #86efacdd; }
+.omok-shell .omok-controls { min-width: 0; padding: 16px; border-radius: 20px; background: var(--paper); }
+.omok-shell .turn-heading { margin-top: 0; justify-content: start; }
+.omok-shell #turnBanner { font-size: 32px; }
+.omok-shell .players-status { display: grid; gap: 12px; }
+.omok-shell .player-status { padding: 10px; border: 2px solid #c4d4db; border-radius: 12px; }
+.omok-shell .player-status.current { border-color: var(--accent); }
+.omok-shell .player-status strong { display: block; }
+.omok-shell .player-status button { margin-top: 8px; }
+.omok-shell .omok-help { min-height: 1.5em; }
+.omok-shell #confirmPlace { width: 100%; }
+.omok-shell #endView { padding: 0; margin-top: 20px; }
+.omok-shell .winners { margin: 16px 0; }
+.omok-shell .winners .avatar-image { width: 110px; height: 110px; }
+@media (orientation: landscape) and (min-width: 700px) {
+  .omok-shell .omok-layout { grid-template-columns: minmax(0, 1fr) minmax(260px, .65fr); align-items: start; }
+  .omok-shell .omok-board { width: min(100%, calc(100dvh - 120px)); justify-self: center; }
+}
+@media (max-width: 600px) {
+  .omok-shell .omok-controls { padding: 12px; }
+  .omok-shell .players-status { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .omok-shell .player-status { overflow-wrap: anywhere; padding: 8px; }
+  .omok-shell #turnBanner { font-size: 24px; word-break: keep-all; }
+  .omok-shell .player-status button { width: 100%; padding-inline: 4px; font-size: 14px; white-space: nowrap; }
+}

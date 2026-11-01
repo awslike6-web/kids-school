@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>⚫ 오목 · 가족 보드게임</title>
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="yacht.css">
+  <link rel="stylesheet" href="omok.css">
+</head>
+<body>
+  <main class="omok-shell">
+    <header class="page-header">
+      <a href="../index.html">← 놀이터</a>
+      <h1>⚫ 가족 오목</h1>
+      <button id="soundToggle" type="button" aria-pressed="false">🔊 안내 음성</button>
+    </header>
+    <section id="setupView" aria-labelledby="setupTitle">
+      <h2 id="setupTitle">마주 앉아 함께 두어요!</h2>
+      <p>두 사람이 한 판을 함께 봐요. 1번 사람이 흑으로 먼저 둡니다.</p>
+      <div id="playerSetup" class="player-setup"></div>
+      <label class="count-label">판 크기
+        <select id="boardSize" aria-label="판 크기">
+          <option value="9">9줄</option><option value="13" selected>13줄</option><option value="15">15줄</option>
+        </select>
+      </label>
+      <p id="setupError" class="status-message" role="status"></p>
+      <button id="startGame" type="button" class="primary">⚫ 게임 시작</button>
+      <details class="rules"><summary>어떻게 놀아요?</summary>
+        <p>빈 교차점을 골라 한 번 더 누르거나 「여기에 두기」를 눌러요.
+          가로·세로·대각선으로 다섯 개 이상 이으면 이겨요. 금수는 없어요.</p>
+        <p>자기가 막 둔 돌은 상대가 두기 전에 두 번까지 무를 수 있어요. 승부 뒤에는 무를 수 없어요.</p>
+      </details>
+    </section>
+    <section id="resumeView" hidden aria-labelledby="resumeTitle">
+      <h2 id="resumeTitle">놀던 게임이 있어요</h2>
+      <p id="resumeSummary"></p>
+      <div class="actions"><button id="resumeGame" type="button" class="primary">이어서 하기</button>
+        <button id="newGame" type="button">새 게임</button></div>
+    </section>
+    <section id="gameView" hidden aria-label="오목 게임">
+      <div class="omok-layout">
+        <div id="board" class="omok-board" role="group" aria-label="오목판"></div>
+        <aside class="omok-controls" aria-label="차례와 두기">
+          <div id="turnHeading" class="turn-heading"><span id="turnAvatar" class="turn-avatar"></span>
+            <h2 id="turnBanner" aria-live="polite" tabindex="-1"></h2></div>
+          <p id="assistLabel"></p>
+          <div id="playersStatus" class="players-status"></div>
+          <p id="helpText" class="omok-help" role="status"></p>
+          <p id="selectionText" role="status">빈 칸을 골라 주세요.</p>
+          <button id="confirmPlace" type="button" class="primary" disabled>여기에 두기</button>
+          <section id="endView" hidden aria-labelledby="endTitle">
+            <h2 id="endTitle" tabindex="-1"></h2>
+            <div id="winners" class="winners"></div>
+            <p>끝까지 함께했어요! 다음 판도 같이 두어요.</p>
+            <div class="actions"><button id="playAgain" type="button" class="primary">다시 하기</button>
+              <button id="backToSetup" type="button">처음으로</button></div>
+          </section>
+        </aside>
+      </div>
+    </section>
+    <p id="saveStatus" class="status-message" role="status"></p>
+  </main>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../data/gallery-data.js"></script>
+  <script src="../../subjects/quest/monster_roster.js"></script>
+  <script src="family-players.js"></script>
+  <script src="omok-engine.js"></script>
+  <script src="omok-ui.js"></script>
+</body>
+</html>

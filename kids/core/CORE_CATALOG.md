@@ -196,6 +196,18 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ---
 
+### ⚫ 가족 오목 · 공용 참가자 설정 (2026-11-01)
+- 진입: 로비 두 아이의 놀이터 목록 → `kids/playground/family/omok.html`, 놀이터 대문의 `family/omok.html`. 한 기기 2인, 기본 13줄(9·15줄 선택), 5개 이상 연결 승리·금수 없음. 계약: `docs/family_omok_spec.md`.
+- `kids/playground/family/omok-engine.js`: DOM·저장소·통신 없는 IIFE, 전역 `OmokEngine` 하나. 공개 API `SIZES`, `createGame(players,size=13)`, `boardOf(state)`, `place(state,x,y)`, `undo(state)`, `hints(state,mode)`, `rematch(state)`, `isValidSaved(state)`.
+- 상태: `{v:1,gameType:'omok',stateVersion,turnPlayer,players,publicBoard:{size,moves,undoLeft},result,lastAction}`. 참가자는 `{id,name,avatar,assist,stone}`, 수순은 `{x,y,by}`. 결과는 null/win(winner·line)/draw. 유효 행동만 불변 새 상태·버전 +1, 무효는 원본 반환.
+- `undo`는 직전 PLACE의 착수자만 2회까지, 승부 전 허용. UNDO 뒤 연속 무르기는 불가. `rematch`는 참가자 순서를 뒤집어 흑백을 교대하고 버전 +1·`lastAction:{type:'REMATCH'}`. helper는 win·block, tactic은 block만, classic·승부 뒤는 빈 객체.
+- `omok-ui.js`/전역 `OmokUI.boot()`: 두 번 누르기 또는 확인 버튼으로 착수, 도움·마지막 돌·승리선, 사람별 무르기, 승부·음소거·이어하기. `omok.html`은 얇은 래퍼, `omok.css`는 CSS 격자·돌과 가로/세로 배치. 시작 설정 스타일은 기존 `yacht.css`를 함께 로드해 재사용.
+- 저장 키 `familyOmokGame`은 기기 로컬 전용. 수순 재생으로 차례·결과·승리선을 검증하고 버전·무르기·마지막 행동도 확인. 형식 오류는 폐기, 종료 시 삭제, 저장소 차단에도 플레이 지속. 게임 기록 전송·보상·학습 계측 없음.
+- `kids/playground/family/family-players.js`: 야추·오목 공용 IIFE, 전역 `FamilyPlayers` 하나. `avatarKey`, `collectAvatars`, `showAvatar`, `fallbackFor`, `playerAvatar`, `defaultMode`, `createSetup({host,count,min,max,modes})`; 설정 인스턴스는 `setCount(count)`, `render()`, `getPlayers()` 제공. 갤러리 목록·작품+캐릭터 중복 제거·그림 오류/2.5초 지연·서로 다른 이모지 대체를 한 벌로 유지. 이전 그림 타이머가 새 표시를 덮어쓰지 않음.
+- 야추 HTML은 엔진 → family-players → UI 순서로 로드. 야추의 `familyYachtGame` 키·말 저장 형식·설정 문구·CSS는 보존. 오목 음성은 시작·승부 때만 공통 TTS와 종료 효과음을 사용.
+- 시험: `tests/omok-engine.test.mjs`(순수 규칙·수순 재생·리소스), `tests/family-players.test.mjs`(말 목록·대체·설정·모의 DOM 클릭·야추 공용화). 실제 화면 검수는 Claude가 쓰기 차단 서버에서 별도로 수행.
+
+
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
 ### 용어사전 공용 공간 JS 분리 (2026-11-01)

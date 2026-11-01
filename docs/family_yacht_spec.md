@@ -138,3 +138,8 @@
 - 전체 회귀 시험은 기본 Python 경로의 실행 권한 오류로 빌더 2개가 처음 실패했다. 실행 가능한 번들 Python을 `GALLERY_TEST_PYTHON`으로 지정한 뒤 통과했다. 기존 skip 1개(로컬 아카이브 없음)·todo 1개(노션 두 기기 동시 저장 한계)는 유지한다.
 - 실제 줄 수: `yacht-engine.js` 149줄, `yacht-ui.js` 407줄, `yacht.html` 81줄, `yacht.css` 109줄, `tests/yacht-engine.test.mjs` 212줄, `kids/playground/index.html` 187줄(11줄 추가), `CORE_CATALOG.md` 1201줄, 이 문서 140줄.
 - 검증 자료와 명령 결과는 로컬 `uploads/ex/family-yacht/walkthrough.md`에만 남기며 화면 시험 스크립트·로그·스크린샷과 함께 커밋하지 않는다.
+
+## 10. 오목과 참가자 설정 공용화 (2026-11-01)
+- 이름·말·도움 선택과 그림 오류/지연 대체는 `family-players.js`의 `FamilyPlayers.createSetup({host,count,min,max,modes})`·`playerAvatar`로 이동했습니다. HTML은 yacht-engine → family-players → yacht-ui 순서로 로드합니다.
+- 인원은 기존 2~5명, `familyYachtGame`·말 저장 형식·시작 문구·`yacht.css`는 유지합니다. 오목도 이 CSS를 함께 사용합니다. 이전 이미지의 늦은 실패 이벤트는 새 말 표시를 덮어쓰지 않습니다.
+- 공용 설정·그림 대체·야추 인원 변경/시작/첫 굴림은 `tests/family-players.test.mjs`의 모의 DOM으로 확인합니다. 실제 야추 시작 화면의 전후 시각 비교는 Claude 확인 대기입니다.
