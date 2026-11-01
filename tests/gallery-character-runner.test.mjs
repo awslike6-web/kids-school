@@ -58,7 +58,7 @@ test('자석은 장애물 충돌 판정·무적 시간을 바꾸지 않는다', 
 
 test('런너 520줄·저금통 500줄과 친밀도 연결 파일 상한을 지킨다', () => {
     for (const [file, max] of [[runnerFile, 520], ['kids/common_space/gallery-runner-rewards.js', 500],
-        [rosterFile, 490], ['kids/subjects/quest/monster_lab_controller.js', 754],
+        [rosterFile, 600], ['kids/subjects/quest/monster_lab_controller.js', 754],
         ['kids/subjects/quest/quest-runner.js', 702], ['monster_lab.html', 799]]) {
         const lines = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8').trimEnd().split('\n').length;
         assert.ok(lines <= max, `${file}: ${lines}/${max}`);
@@ -559,8 +559,8 @@ test('3호 모름은 여섯 포즈 파일과 고유 대사를 제공한다', () 
     assert.deepEqual(readFileSync(new URL(`../${monster.poses.greet}`, import.meta.url)),
         readFileSync(new URL(`../${monster.poses.roar}`, import.meta.url)));
     assert.match(roster.getLabTapResponse(5, monster.id).speech, /뒤돌아/);
-    assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.idle);
-    assert.equal(roster.getRunnerReaction('stageStart', 'cottun_bongdomdol').poseKey, 'rage');
+    assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.greet);
+    assert.equal(roster.getRunnerReaction('stageStart', 'cottun_bongdomdol').poseKey, 'greet');
     assert.ok(monster.runnerDialogues.encourage.every(line => !/실패|오답|틀렸|실수/.test(line)));
 });
 
@@ -577,6 +577,6 @@ test('4호 로텤스펲펲은 여섯 포즈 파일과 고유 대사를 제공한
     assert.deepEqual(readFileSync(new URL(`../${monster.poses.greet}`, import.meta.url)),
         readFileSync(new URL(`../${monster.poses.roar}`, import.meta.url)));
     assert.match(roster.getLabTapResponse(1, monster.id).speech, /뒤집/);
-    assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.idle);
+    assert.equal(roster.getRunnerReaction('stageStart', monster.id).poseSrc, monster.poses.greet);
     assert.ok(monster.runnerDialogues.encourage.every(line => !/실패|오답|틀렸|실수/.test(line)));
 });

@@ -1,7 +1,7 @@
 /** 레슨 구성과 진행 상태. 출제·숙련도 판정은 QuestMastery에 위임한다. */
 (function (root) {
   'use strict';
-  const COMPANION_EVENTS = Object.freeze(['correct', 'encourage', 'combo', 'step', 'boss', 'clear']);
+  const COMPANION_EVENTS = Object.freeze(['start', 'correct', 'encourage', 'combo', 'step', 'boss', 'clear']);
   const titles = {
     warmup: '🌱 워밍업', build: '🔨 빌드업', boss: '👑 보스', bite: '🌸 한입 레슨'
   };

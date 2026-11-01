@@ -98,9 +98,11 @@ window.STORY_BOOK = {
 - 실제 책에 값을 넣는 것은 **읽기 전용 노션 조회로 정확히 일치하는 단원이 확인된 책만** 한다. 확인되지 않으면 비워 두고, 완료 보고에 「연결 후보 / 비워 둔 책」 표로 정직하게 적는다(GEMINI §5 공란 원칙).
 
 ### 4-3. 반응 신호 (캐릭터 연결 계약)
-`QuestLesson.COMPANION_EVENTS = ['correct', 'encourage', 'combo', 'step', 'boss', 'clear']`
+`QuestLesson.COMPANION_EVENTS = ['start', 'correct', 'encourage', 'combo', 'step', 'boss', 'clear']`
 - 레슨 엔진은 `hooks.onCompanion(event, detail)`만 부른다. `detail`: `{ combo, stepIndex, stepTotal, isMinseo }`.
-- 러너는 이 신호를 `syncCheerMonsterReaction`으로 넘긴다. 기존 반응이 없는 `combo`·`step`·`boss`는 각각 `correct`·`correct`·`clear` 연출로 대신하고 대사만 바꾼다(아이를 탓하는 말 금지).
+- 러너는 이 신호를 `syncCheerMonsterReaction`으로 넘긴다. 기존 반응이 없는 `combo`·`step`·`boss`는 `correct` 연출로 대신하고 대사만 바꾼다(아이를 탓하는 말 금지). `start`는 `stageStart` 연출이다.
+- **리액션 연결 (2026-11-02)**: 시작은 손인사, 정답·완주는 만세, 오답은 ✕ 격려(연노랑 ✕ → 💡, 빨간색·경고음·하트 추가 없음)다. 파트너별 포즈와 재생 API는 `CORE_CATALOG.md`의 `monster_roster.js` 절을 따른다.
+- **신호 시점 (2026-11-02)**: 화면에서는 `QuestLessonUI`가 `onEncourage`(그 문제의 첫 오답 순간)에 `encourage`를, `onPraise`(맞힌 순간)에 `correct`를 보낸다. 세션이 0.65초 뒤 내는 같은 이름의 신호는 화면으로 넘기지 않는다. 힌트를 본 뒤 맞혀도 파트너는 칭찬 음성과 함께 만세한다.
 - 다음 작업(캐릭터 이식)은 이 신호 목록만 보고 표정·동작을 붙인다. 신호 이름을 바꾸면 이 문서와 카탈로그를 같이 고친다.
 
 ---

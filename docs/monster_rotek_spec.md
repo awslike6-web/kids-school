@@ -30,7 +30,7 @@
 - 그림을 다시 만들거나 고치지 않는다. 화면에서 이상해 보이면 고치지 말고 보고한다.
 
 ## 3. 바꿀 곳 (모름 커밋과 같은 범위)
-- `kids/subjects/quest/monster_roster.js`: `rotek` 항목(포즈 6종, `labDialogues`, `runnerDialogues`). 퀘스트 시작(`stageStart`) 포즈는 기본 `rage`이다. 화난 얼굴로 맞이하는 게 어색하면 모름처럼 `runnerPoses: { stageStart: 'idle' }`를 쓴다.
+- `kids/subjects/quest/monster_roster.js`: `rotek` 항목(포즈 6종, `labDialogues`, `runnerDialogues`). 퀘스트 시작(`stageStart`) 포즈는 기본 `rage`이다. 화난 얼굴로 맞이하는 게 어색하면 모름처럼 `runnerPoses: { stageStart: 'idle' }`를 쓴다. (2026-11-02 변경: 시작은 모두 손인사 `greet`이고 `runnerPoses`는 없어졌다. 지금 규칙은 `CORE_CATALOG.md`의 `monster_roster.js` 절.)
 - `monster_lab.html`: 선택 칩 하나. `monster_lab_controller.js`: 역할·점 색.
 - 바뀐 JS의 캐시 쿼리(`?v=`)를 `monster_lab.html`, `quest_runner.html`, `kids/common_space/gallery.html`에서 갱신.
 - `kids/core/CORE_CATALOG.md` `monster_roster.js` 절에 4호 한 줄. `tests/gallery-character-runner.test.mjs`에 모름처럼 4호 로스터 시험 추가.

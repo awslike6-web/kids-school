@@ -253,7 +253,7 @@
       const userLevel = document.getElementById('userLevel');
       if (userLevel) {
         userLevel.textContent = 'Lv.15';
-        userLevel.className = 'bg-[#ff85a2] text-white text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none';
+        userLevel.className = 'bg-[#ff85a2] text-white text-[10px] sm:text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none';
       }
 
       const streakIcon = document.getElementById('streakIcon');
@@ -262,7 +262,7 @@
       const streakText = document.getElementById('streakText');
       if (streakText) {
         streakText.textContent = '15일';
-        streakText.className = 'text-sm font-eng font-black text-[#ff85a2]';
+        streakText.className = 'text-xs sm:text-sm font-eng font-black text-[#ff85a2]';
       }
 
       const coinIcon = document.getElementById('coinIcon');
@@ -271,7 +271,7 @@
       const coinText = document.getElementById('coinText');
       if (coinText) {
         coinText.textContent = '2,450';
-        coinText.className = 'text-sm font-eng font-black text-[#a03a57]';
+        coinText.className = 'text-xs sm:text-sm font-eng font-black text-[#a03a57]';
       }
 
       // 챔버 스위칭 (민수 스테이지 숨김, 민서 튜브 챔버 노출)
@@ -362,7 +362,7 @@
       const userLevel = document.getElementById('userLevel');
       if (userLevel) {
         userLevel.textContent = 'Lv.12';
-        userLevel.className = 'bg-neon-cyan text-lab-bg text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none';
+        userLevel.className = 'bg-neon-cyan text-lab-bg text-[10px] sm:text-[11px] font-eng font-black px-1.5 py-0.5 rounded-md leading-none';
       }
 
       const streakIcon = document.getElementById('streakIcon');
@@ -371,7 +371,7 @@
       const streakText = document.getElementById('streakText');
       if (streakText) {
         streakText.textContent = '15일';
-        streakText.className = 'text-sm font-eng font-black text-fire-orange';
+        streakText.className = 'text-xs sm:text-sm font-eng font-black text-fire-orange';
       }
 
       const coinIcon = document.getElementById('coinIcon');
@@ -380,7 +380,7 @@
       const coinText = document.getElementById('coinText');
       if (coinText) {
         coinText.textContent = '120';
-        coinText.className = 'text-sm font-eng font-black text-yellow-300';
+        coinText.className = 'text-xs sm:text-sm font-eng font-black text-yellow-300';
       }
 
       const minsuStage = document.getElementById('minsuStageWrap');
@@ -471,10 +471,7 @@
     }
 
     if (monsterImg) {
-      const nextSrc = (monster.poses && monster.poses[poseKey]) || monster.poses.idle;
-      if (monsterImg.getAttribute('src') !== nextSrc) {
-        monsterImg.src = nextSrc;
-      }
+      window.MonsterRoster.setPoseImage(monsterImg, (monster.poses && monster.poses[poseKey]) || monster.poses.idle);
       monsterImg.alt = monster.name;
       // 포즈 전환 시 크로스페이드 바운스 & 과열 시 쉐이크
       monsterImg.classList.remove('pose-swap-bounce', 'monster-rage-shake');
@@ -501,7 +498,15 @@
     monsterTapCount = 0;
     clearTimeout(monsterIdleTimer);
     window.MonsterRoster.setSelectedMonsterId(monsterId);
-    renderActivePartnerMonster('idle');
+    greetPartner();
+  }
+
+  function greetPartner() { // 입장·파트너 교체 때 손인사 (민서는 지금 그림 그대로 흔든다)
+    const roster = window.MonsterRoster;
+    if (isMinseo || !roster) return roster?.playReaction(document.getElementById('characterPlushieWrap'), 'wave');
+    renderActivePartnerMonster('greet', roster.getSelectedMonster().labDialogues?.greet);
+    roster.playReaction(document.getElementById('monsterImg'), 'wave');
+    monsterIdleTimer = setTimeout(() => renderActivePartnerMonster('idle'), 1700);
   }
 
   function cyclePartnerMonster(dir = 1) {
@@ -522,6 +527,7 @@
     if (!isMinseo && window.MonsterRoster) {
       monsterTapCount += 1;
       clearTimeout(monsterIdleTimer);
+      window.MonsterRoster.playReaction(document.getElementById('monsterImg'), null);
       const reaction = window.MonsterRoster.getLabTapResponse(monsterTapCount);
       if (reaction.isRage) {
         triggerHaptic([40, 50, 60]);
@@ -741,6 +747,7 @@
       window.MonsterRoster.preloadAllMonsters();
     }
     applyTheme();
+    greetPartner();
     updateParentProgressBtnVisibility();
   });
 
