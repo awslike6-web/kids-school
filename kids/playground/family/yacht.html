@@ -6,6 +6,7 @@
   <title>🎲 야추 다이스 · 가족 보드게임</title>
   <link rel="stylesheet" href="../../css/design-system.css">
   <link rel="stylesheet" href="yacht.css">
+  <link rel="stylesheet" href="family-room.css">
 </head>
 <body>
   <main class="yacht-shell">
@@ -14,7 +15,11 @@
       <h1>🎲 야추 다이스</h1>
       <button id="soundToggle" type="button" aria-pressed="false">🔊 안내 음성</button>
     </header>
+    <div id="roomStatus" class="family-room-status" role="status" hidden></div>
+    <section id="roomView" class="family-room-view" aria-label="가족 방" hidden></section>
     <section id="setupView" aria-labelledby="setupTitle">
+      <div class="family-room-modes"><button id="singleDevice" type="button">📱 이 기기 하나로</button>
+        <button id="multipleDevices" type="button">📱📱 여러 기기로</button></div>
       <h2 id="setupTitle">우리 가족, 함께 굴려요!</h2>
       <p>태블릿 한 대로 2~5명이 돌아가며 놀아요. 서로 다른 말을 골라 주세요.</p>
       <label class="count-label">함께할 사람
@@ -61,6 +66,7 @@
       <div class="actions"><button id="playAgain" class="primary" type="button">다시 하기</button>
         <button id="backToSetup" type="button">처음으로</button></div>
     </section>
+    <div id="roomActions" class="family-room-actions" hidden></div>
     <p id="saveStatus" class="status-message" role="status"></p>
   </main>
   <dialog id="zeroDialog" aria-labelledby="zeroTitle">
@@ -77,6 +83,8 @@
   <script src="../../subjects/quest/monster_roster.js"></script>
   <script src="yacht-engine.js"></script>
   <script src="family-players.js"></script>
+  <script src="family-room.js"></script>
+  <script src="family-room-ui.js"></script>
   <script src="yacht-ui.js"></script>
 </body>
 </html>

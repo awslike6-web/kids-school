@@ -1,0 +1,19 @@
+/* 가족 방에만 적용합니다. 기존 한 기기 판의 배치와 공통 설정 스타일은 그대로 씁니다. */
+.family-room-modes { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.family-room-view { background: var(--paper); padding: 20px; border-radius: 20px; margin-top: 16px; }
+.family-room-view > button, .family-room-lobby > button { margin: 8px 12px 8px 0; }
+.family-room-view > label { display: inline-grid; gap: 6px; margin: 12px; }
+.family-room-view input[inputmode="numeric"] { width: 8ch; letter-spacing: .2em; font-size: 28px; }
+.family-room-lobby h2 { font-size: 32px; overflow-wrap: anywhere; }
+.family-room-members { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; margin: 20px 0; }
+.family-room-member { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px; border: 2px solid #bdcfd4; border-radius: 14px; }
+.family-room-member strong { overflow-wrap: anywhere; }
+.family-room-member > span { font-size: 16px; }
+.family-room-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; margin: 12px 0; background: #edf2f7; border-radius: 12px; }
+.family-room-status span { flex: 1 1 200px; }
+.family-room-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.family-room-note { min-height: 1.5em; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .family-room-view { padding: 16px; }
+  .family-room-status button { width: 100%; }
+}
