@@ -550,6 +550,10 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)
 
+### 과학방 대문 CSS 분리 (2026-11-01)
+- `kids/subjects/science/science.html`은 `../../css/science.css`(400줄: 기본·레이아웃·모달·퀴즈·애니메이션·인쇄) → `../../css/science-units.css`(401줄: 지문 요약·사진 뷰어·반응형·안전 게이트·단원 탭·실험실 칩)를 같은 `?v=20261101-science-css-split`로 연속 로드합니다.
+- 원본 1–400줄 / 401–800줄과 마지막 개행 없음을 보존하고, 둘째 파일에만 지정 머리 주석 한 줄을 추가합니다. `tests/science-css-split.test.mjs`가 고정 CSS·HTML fixture의 바이트 보존·절단 경계·600줄 제한·독립 CSS 블록·HTML 로드 계약을 검사합니다. 분리 계약과 Claude의 화면 비교는 `docs/science_css_split_spec.md`를 따릅니다.
+
 ### 2단원 실험실 3개 인라인 CSS·JS 분리 (2026-10-31)
 - `kids/subjects/science/science_season_airmass_lab.html`(420줄)·`science_cloud_lab.html`(241줄)·`science_wind_lab.html`(230줄)은 같은 이름의 CSS를 `../../css/`에서, 클래식 JS를 `./js/`에서 원래 인라인 위치·`?v=20261031-science-split`으로 로드합니다. CSS는 각각 339·250·289줄, JS는 각각 418·344·304줄입니다.
 - 원문·DOM·전역 함수를 보존합니다. 주요 API는 계절·기단 `switchMode`·`selectAirmass`·`setSeason`·`highlightMatrix`, 구름 `setSmokeMode`·`pressPump`·`openCap`·`startSqueeze`·`endSqueeze`, 바람 `switchLabMode`·`toggleLamp`·`setWindTime`입니다. 기존 `design-system.css`가 개별 CSS보다 먼저, `study-activity.js?v=20261023`은 개별 JS보다 뒤에 있습니다.
