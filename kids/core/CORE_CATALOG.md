@@ -193,6 +193,12 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
+### 용어사전 공용 공간 JS 분리 (2026-11-01)
+- `kids/common_space/voca_common.js` (459줄): 전역 상태·데이터 수신·필터·카드 목록·서식·딥링크. 주요 전역 함수는 `fetchLibraryData`, `manualSyncVocaData`, `handleDeepLinkParams`입니다.
+- `kids/common_space/voca_modal.js` (448줄): 단어 모달·TTS·음성 입력·요정 코코. 주요 전역 함수는 `openModal`, `closeModal`, `playWordViaTTS`, `askCocoFairy`입니다.
+- `kids/common_space/voca.html`에서 클래식 스크립트 `./voca_common.js` → `./voca_modal.js`를 같은 `?v=20261101-voca-split`로 연속 로드합니다. 두 파일의 최상위 상태와 HTML 이벤트 전역 함수를 유지합니다.
+- 원문 보존·600줄 상한·HTML 배선·첫 파일 단독 실행·전역 함수/상태/이벤트/타이머 비교는 `tests/voca-common-split.test.mjs`, 분리 계약은 `docs/voca_common_split_spec.md`입니다.
+
 ### 🌟 `subject_engine.js` (4대 교과 공통 미션 엔진)
 국어, 과학, 사회, 영어 4대 교과의 3단계 학습 사다리 미션 뷰와 노션 데이터 수급 스피너를 표준화한 코어입니다.
 - **파일 위치**: `kids/core/subject_engine.js`
