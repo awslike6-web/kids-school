@@ -391,6 +391,10 @@
   border: 1.5px solid rgba(255, 71, 87, 0.65);
   border-radius: 30px;
   padding: 9px 20px;
+  /* left:50% 기준 폭 계산 때문에 폰에서 글이 몇 글자씩 끊기던 문제: 내용 폭 + 화면 폭 상한 */
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -414,6 +418,13 @@
 }
 .pulse-speaker {
   animation: pulseSpeakerIcon 0.8s infinite alternate;
+  flex-shrink: 0;
+}
+.floating-audio-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 @keyframes pulseSpeakerIcon {
   0% { transform: scale(0.9); }
@@ -426,6 +437,8 @@
   border-radius: 12px;
   font-size: 0.82rem;
   box-shadow: 0 2px 6px rgba(255, 71, 87, 0.4);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* 🔊 카드 낭독 중 시각적 하이라이트 & 토글 안내 */
