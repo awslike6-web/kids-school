@@ -165,7 +165,7 @@ test('화면 리소스·공통 CSS·로드 순서·파일 상한·로비와 대�
   const html = read('omok.html'), scripts = [...html.matchAll(/<script\s+src="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(scripts, ['../../core/fairy-config.js', '../../core/fairy-tts.js', '../../core/fairy-settings-catalog.js',
     '../../core/fairy-engine.js', '../../data/gallery-data.js', '../../subjects/quest/monster_roster.js',
-    'family-players.js', 'omok-engine.js', 'omok-ui.js']);
+    'family-players.js', 'omok-engine.js', 'family-room.js', 'family-room-ui.js', 'omok-ui.js']);
   for (const [, target] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
     assert.doesNotMatch(target, /^(?:\/|[a-z]+:)/i); assert.ok(existsSync(new URL(target, base)), target);
   }

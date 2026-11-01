@@ -207,17 +207,18 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 야추 HTML은 엔진 → family-players → UI 순서로 로드. 야추의 `familyYachtGame` 키·말 저장 형식·설정 문구·CSS는 보존. 오목 음성은 시작·승부 때만 공통 TTS와 종료 효과음을 사용.
 - 시험: `tests/omok-engine.test.mjs`(순수 규칙·수순 재생·리소스), `tests/family-players.test.mjs`(말 목록·대체·설정·모의 DOM 클릭·야추 공용화). 실제 화면 검수는 Claude가 쓰기 차단 서버에서 별도로 수행.
 
-### 📱 가족 방 · 여러 기기 야추
-- 계약: `docs/family_room_spec.md` §13·§14. 운영 Worker 소스는 관제탑 `workers/family-room/`이며 배포 상태는 해당 명세서 첫머리·§12를 참조합니다. 한 기기 모드는 독립입니다. 오목 연결은 3단계입니다.
+### 📱 가족 방 · 여러 기기 야추·오목
+- 계약: `docs/family_room_spec.md` §13·§14·§15. 운영 Worker 소스는 관제탑 `workers/family-room/`이며 배포 상태는 해당 명세서 첫머리·§12를 참조합니다. 한 기기 모드는 독립입니다. 새 게임은 `mount` 연결과 `validSnapshot`만 쓰면 Worker를 고치지 않습니다.
 - `kids/playground/family/family-room.js`: DOM 없는 IIFE·전역 `FamilyRoom`. `create({gameType,maxSeats,onSnapshot,onStatus,onRejected})` → `createRoom/join/setSeats/start/submit/claim/kick/lobby/leave/reconnect/stop/getSnapshot/getStatus`. `onSnapshot(snapshot,previous,{initial})`, `onStatus({state,reason,locked,offlineSince})`. 보조 API `getClientId/readSession/serverURL/codeValid/ownSeats/permissionsFor/canClaim/seatDrafts/acknowledged/clearSession`.
-- `kids/playground/family/family-room-ui.js`: 전역 `FamilyRoomUI.mount({gameType,maxSeats,title,modes,createGame,onRoom,onGame,onLobby,onLocal,onView,onLock,validate})` → `boot/back/invalid/continueLocal/getRoom`. 입구·자동 복구·대기실·소유권·한 기기 전환. 순수 판단 API `initialSeat/usableAvatar/validDrafts/startReason`.
+- `kids/playground/family/family-room-ui.js`: 전역 `FamilyRoomUI.mount({gameType,maxSeats,title,modes,createGame,hostOptions,onRoom,onGame,onLobby,onLocal,onView,onLock,validate})` → `boot/back/invalid/continueLocal/getRoom`. 입구·자동 복구·대기실·소유권·한 기기 전환. `hostOptions()`는 방장에게만 보이는 시작 옵션 요소(오목 판 크기)를 돌려줍니다. 순수 판단 API `initialSeat/usableAvatar/validDrafts/validRoom/startReason`. `#resumeMultipleDevices`가 있으면 이어하기 화면에서도 여러 기기 입구로 갑니다. 다른 게임의 코드는 입구로 돌려보냅니다.
 - 대기실은 이 기기의 `FamilyPlayers.createSetup` 하나를 사용합니다. 추가 인자 `isTaken(avatar,player)`·`onChange(players)`, 인스턴스 `setPlayers(players)`는 조용한 복사·복원입니다. 기본 인자가 없으면 기존 한 기기 설정을 유지합니다. 이름은 400ms 지연, 잠금 중에는 최신 초안 하나만 보존합니다.
-- 로드: 기존 오디오·갤러리 → yacht-engine → family-players → family-room → family-room-ui → yacht-ui. 추가 CSS `family-room.css`는 방 선택자만 꾸밉니다. 모든 로드 경로는 상대 경로입니다.
+- 로드: 기존 오디오·갤러리 → yacht-engine → family-players → family-room → family-room-ui → yacht-ui. 오목은 family-players → omok-engine → family-room → family-room-ui → omok-ui. 추가 CSS `family-room.css`는 방 선택자만 꾸밉니다. 모든 로드 경로는 상대 경로입니다.
 - `YachtUI` 추가 순수 API `validSnapshot/inputFor/effectsFor`. 방 스냅샷 모양·버전·자리 ID를 확인하고 개인 도움·입력·효과를 분리합니다. 다시 하기는 현재 서버 rev를 쓰는 act입니다. 구경 기기는 다시 하기·reward 대상이 아닙니다.
+- `OmokUI` 추가 순수 API `validSnapshot/inputFor/effectsFor`. 판 검사는 엔진 `isValidSaved` 수순 재생과 자리 ID 집합으로 합니다(다시 하기가 흑백을 바꿔 사람 순서가 자리 순서와 다를 수 있음). 미리보기는 이 기기에만 있고 판이 바뀔 때 지웁니다. 무르기는 마지막 착수자의 기기에서만 켜집니다.
 - 서버 상수 `https://family-room.awslike6.workers.dev`, localhost·127.0.0.1만 `?roomServer=` 재정의. JSON의 `type`, 25초 문자열 ping/pong, 5초 응답·첫 판·pong 시한. 이전 소켓 이벤트는 무시하고 현재 4409만 자동 복구를 정지합니다.
-- 방 모드 저장은 `familyRoomClientId`, `familyRoomSession={code,gameType,clientId}`뿐입니다. 기존 `familyYachtGame`은 읽기 복귀·명시적 한 기기 전환 외에 방 모드에서 변경하지 않습니다. 상태·이름을 노션·로그로 보내지 않습니다.
-- 시험: `tests/family-room.test.mjs`(통신), `tests/family-room-ui.test.mjs`(대기실·복구), `tests/family-yacht.test.mjs`(입력·효과·안전·한 기기 회귀). 공용 모의 브라우저는 `tests/family-browser.mjs`이며 실제 네트워크를 사용하지 않습니다.
-- 파일 크기(끝 공백 제외): family-room.js 210줄(상한 300), family-room-ui.js 286줄(400), family-room.css 19줄(200), family-players.js 172줄(기존 대비 +13), yacht-ui.js 423줄(600), yacht.html 90줄(150).
+- 방 모드 저장은 `familyRoomClientId`, `familyRoomSession={code,gameType,clientId}`뿐입니다. 기존 `familyYachtGame`·`familyOmokGame`은 읽기 복귀·명시적 한 기기 전환 외에 방 모드에서 변경하지 않습니다. 상태·이름을 노션·로그로 보내지 않습니다.
+- 시험: `tests/family-room.test.mjs`(통신), `tests/family-room-ui.test.mjs`(대기실·복구), `tests/family-yacht.test.mjs`·`tests/family-omok.test.mjs`(입력·효과·안전·한 기기 회귀). 공용 모의 브라우저는 `tests/family-browser.mjs`(`game` 인자로 게임 선택)이며 실제 네트워크를 사용하지 않습니다.
+- 파일 크기(끝 공백 제외): family-room.js 210줄(상한 300), family-room-ui.js 310줄(400), family-room.css 19줄(200), family-players.js 172줄(기존 대비 +13), yacht-ui.js 416줄(600), yacht.html 91줄(150), omok-ui.js 321줄(600), omok.html 83줄(150).
 
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)

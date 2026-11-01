@@ -30,16 +30,27 @@
     return players.every(p => typeof p.name === 'string' && p.name.trim() && Array.from(p.name.trim()).length <= 8 &&
       usableAvatar(p.avatar) && ['helper', 'tactic', 'classic'].includes(p.assist));
   }
+  // 게임별 판 검사 앞에 공통으로 보는 방·자리 모양입니다.
+  function validRoom(s, gameType) {
+    return !!s && s.room.gameType === gameType && ['lobby', 'playing'].includes(s.room.phase) &&
+      Number.isInteger(s.room.maxSeats) && s.room.maxSeats >= 2 && s.room.maxSeats <= 5 &&
+      Array.isArray(s.seats) && s.seats.length <= s.room.maxSeats && Array.isArray(s.members) &&
+      s.members.every(m => typeof m.id === 'string' && typeof m.online === 'boolean') &&
+      s.seats.every((p, i) => p.id === `p${i + 1}` && typeof p.name === 'string' &&
+        p.name.trim() && Array.from(p.name).length <= 8 && window.FamilyRoomUI.usableAvatar(p.avatar) &&
+        ['helper', 'tactic', 'classic'].includes(p.assist) &&
+        (p.owner === null || s.members.some(m => m.id === p.owner)));
+  }
   function startReason(s, queued, locked) {
     if (s.seats.length < 2) return '게임을 시작하려면 두 자리 이상 필요해요.';
     if (queued) return '자리 설정을 보내고 있어요.';
     return locked ? '연결과 자리 설정을 기다려 주세요.' : '';
   }
-  function mount({ gameType, maxSeats = 5, title, modes, createGame, onRoom, onGame, onLobby, onLocal, onView, onLock, validate }) {
+  function mount({ gameType, maxSeats = 5, title, modes, createGame, hostOptions, onRoom, onGame, onLobby, onLocal, onView, onLock, validate }) {
     const root = document.getElementById('roomView'), strip = document.getElementById('roomStatus');
     const actions = document.getElementById('roomActions');
     let room = null, snapshot = null, lastPlaying = null, setup = null, editor = null, seatList = null;
-    let lobbyPanel = null, startButton = null, startNote = null, addButton = null, drafts = null, queued = null;
+    let lobbyPanel = null, startButton = null, startNote = null, addButton = null, optionNode = null, drafts = null, queued = null;
     let debounce = null, refreshDeferred = false, restoreDeferred = null, acceptedOwn = null, rejected = false;
     let recovering = false, autoSeat = false, spectator = false, step = '', broken = false, creating = false;
     let message = '', currentStatus = { state: 'stopped', locked: true }, deadlineReady = true;
@@ -134,6 +145,7 @@
       if (!startButton || !snapshot || !room) return;
       const host = R.permissionsFor(snapshot).host;
       startButton.hidden = !host;
+      if (optionNode) optionNode.hidden = !host;
       const why = startReason(snapshot, !!queued, room.getStatus().locked);
       startButton.disabled = !!why || broken;
       startNote.textContent = host ? why : '방장이 시작하기를 기다려요.';
@@ -172,7 +184,10 @@
         try { room.start(createGame(snapshot.seats)); }
         catch (e) { startNote.textContent = e.message; }
       });
-      lobbyPanel.append(addButton, watch, startNote, startButton, button('방 나가기', () => { room.leave(); release(); onLocal(null); }));
+      // 판 크기처럼 시작할 때만 쓰는 값은 방장 기기의 게임 화면이 정합니다.
+      optionNode = hostOptions ? hostOptions() : null;
+      lobbyPanel.append(addButton, watch, ...(optionNode ? [optionNode] : []), startNote, startButton,
+        button('방 나가기', () => { room.leave(); release(); onLocal(null); }));
     }
     function renderLobby() {
       // 게임 뒤 새로 만든 카드는 기본값이므로 서버의 내 자리로 되돌립니다.
@@ -203,7 +218,8 @@
       if (autoSeat) {
         autoSeat = false;
         if (!own.length && !spectator) {
-          const first = initialSeat(snapshot.seats);
+          // 자리가 다 찬 방에는 보내지 않고 구경으로 남습니다.
+          const first = snapshot.seats.length < snapshot.room.maxSeats ? initialSeat(snapshot.seats) : null;
           if (first) { setup.setPlayers([first]); editor.hidden = false; edited(setup.getPlayers()); }
         }
       }
@@ -214,10 +230,15 @@
       actions.replaceChildren(...snapshot.seats.filter(p => isOnline(p.owner) && p.origin !== snapshot.you && R.canClaim(snapshot, p.id))
         .map(p => claimButton(p, `${p.name} 자리 넘겨받기`)),
       button(R.permissionsFor(snapshot).host ? '대기실로' : '방 나가기', back));
-      actions.hidden = document.getElementById('gameView').hidden;
+      // 오목의 끝 화면은 판 안에 있습니다. 끝 화면 버튼과 겹쳐 보이지 않게 합니다.
+      actions.hidden = document.getElementById('gameView').hidden || !document.getElementById('endView').hidden;
     }
     function accept(s, previous, meta) {
       if (broken) return;
+      // 다른 게임의 코드를 넣으면 자리·세션을 남기지 않고 코드 입력으로 돌아갑니다.
+      if (meta.initial && !previous && s.room?.gameType !== gameType) {
+        room.leave(); release(); message = '다른 게임의 방 코드예요. 코드를 다시 확인해 주세요.'; entry(); return;
+      }
       try {
         if (!validate(s)) { invalid(); return; }
         snapshot = s;
@@ -265,7 +286,10 @@
       else { room.leave(); release(); onLocal(null); }
     }
     document.getElementById('singleDevice').addEventListener('click', local);
-    document.getElementById('multipleDevices').addEventListener('click', () => { release(); message = ''; entry(); });
+    const toEntry = () => { release(); message = ''; entry(); };
+    document.getElementById('multipleDevices').addEventListener('click', toEntry);
+    // 놀던 게임이 있어도 저장을 지우지 않고 여러 기기로 갈 수 있습니다. 「이 기기 하나로」는 이어하기로 돌아옵니다.
+    document.getElementById('resumeMultipleDevices')?.addEventListener('click', toEntry);
     document.addEventListener('visibilitychange', () => { if (!document.hidden && !creating) room?.reconnect(); });
     window.addEventListener('online', () => { if (!creating) room?.reconnect(); });
     window.addEventListener('pagehide', () => { cancelEdits(); room?.stop('pagehide'); });
@@ -282,5 +306,5 @@
       }, back, invalid, continueLocal, getRoom: () => room
     });
   }
-  window.FamilyRoomUI = Object.freeze({ mount, initialSeat, usableAvatar, validDrafts, startReason });
+  window.FamilyRoomUI = Object.freeze({ mount, initialSeat, usableAvatar, validDrafts, validRoom, startReason });
 })();
