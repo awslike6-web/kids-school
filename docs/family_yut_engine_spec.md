@@ -1,7 +1,8 @@
 # 🎲 가족 보드게임: 윷놀이 규칙 엔진 명세서 (화면 제외)
 
 > **문서 버전**: v1.0 (2026-11-02)
-> **상태**: 구현 대기. 담당: Antigravity (모델 비교 시험)
+> **상태**: 엔진 구현·병합 완료(2026-11-02, Antigravity Gemini 4 Argon `a3119b50`). 화면은 다음 작업. 아래 §0은 모델 비교 때의 작업 지시로 남겨 둔다.
+> **모델 비교 결과**: Gemini 3.8 Flash(`antigravity/yut-flash`, 병합 안 함)와 비교했다. 비공개 시험 44개는 둘 다 통과했고, 참조 구현과 무작위 4,000판을 비교해도 둘 다 차이가 없었다. 일부러 틀린 규칙을 자기 시험이 잡은 수는 Argon 28/28, Flash 22/28이고, 저장 검사 오류는 Argon 7/7, Flash 5/9다. Flash는 `publicBoard`의 여분 키를 통과시켰고 보고에 일부 부정확한 점이 있어 Argon을 채택했다.
 > **근거**: 노션 현황판 카드 「가족 보드게임 추가: 오목·윷놀이 커스텀 맵·장기·바둑」, 선례 `docs/family_omok_spec.md`, `kids/playground/family/omok-engine.js`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다. `omok-engine.js`와 `tests/omok-engine.test.mjs`를 읽는다.
 
