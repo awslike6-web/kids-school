@@ -13,9 +13,7 @@
   <link rel="stylesheet" href="../../css/haru-timeline-list.css?v=20261031-haru-split">
 </head>
 <body>
-
 <div class="haru-container">
-  
   <!-- 🛠️ 상단 액션바 -->
   <div class="haru-top-bar">
     <a href="../../../lobby.html?user=minseo" class="back-btn" id="haruExitBtn">
@@ -34,7 +32,6 @@
       </button>
     </div>
   </div>
-
   <!-- 🌅 메인 헤더 배너 -->
   <div class="haru-header-card">
     <span class="haru-header-badge">초등 1학년 2학기 통합교과 (바른·슬기로운·즐거운 생활)</span>
@@ -43,7 +40,6 @@
       매일의 좋은 습관과 건강한 운동, 신기한 하늘과 자연 관찰, 잊지 못할 특별한 날의 추억이 모두 모여있는 민서의 하루 공간이에요 ✨
     </p>
   </div>
-
   <!-- ✨ 30초 원스톱 하루 체크인 히어로 배너 -->
   <div class="quick-checkin-banner" id="quickCheckInBanner" onclick="openQuickCheckInModal()">
     <div class="checkin-banner-left">
@@ -58,7 +54,6 @@
     </div>
     <button class="checkin-action-btn" type="button" id="checkInActionBtn" onclick="openQuickCheckInModal()">체크인 시작! ➔</button>
   </div>
-
   <!-- 🧭 3대 라이프 영역 메인 네비게이션 탭 -->
   <div class="haru-nav-tabs">
     <button class="nav-tab-btn active" data-tab="habits" onclick="switchHaruTab('habits')">
@@ -87,12 +82,10 @@
       <span class="nav-tab-subtitle">위기탈출 OX · 응급 상담</span>
     </button>
   </div>
-
   <!-- =========================================================
        탭 1: 매일의 습관 & 루틴 (저금통, 건강 운동, 마음 날씨)
        ========================================================= -->
   <div class="tab-content-panel active" id="tab_habits">
-    
     <!-- 🐷 위젯 1: 하루 저금통 (30~31쪽) -->
     <div class="haru-widget-card">
       <div class="widget-title-row">
@@ -104,17 +97,14 @@
       <p style="font-size:0.95rem; color:#57606f; margin-bottom:12px;">
         착한 일을 1가지 실천할 때마다 아래 버튼을 톡 눌러주세요! 땡그랑 황금 코인이 저금통 속으로 들어갑니다.
       </p>
-      
       <!-- 20칸 돼지저금통 스티커 보드 -->
       <div class="piggy-board-grid" id="piggyBoardGrid"></div>
-
       <!-- 실천 행동 버튼들 -->
       <div style="font-family:'Jua'; font-size:1.05rem; margin-top:16px; margin-bottom:8px;" id="habitsSectionPrompt">
         ✨ 오늘 민서가 실천한 착한 행동을 골라보세요!
       </div>
       <div class="habits-grid" id="habitsActionList"></div>
     </div>
-
     <!-- 💪 위젯 2: 건강한 하루 (26~27쪽) -->
     <div class="haru-widget-card">
       <div class="widget-title-row">
@@ -126,17 +116,14 @@
       <p style="font-size:0.95rem; color:#57606f; margin-bottom:12px;" id="workoutSectionDesc">
         스트레칭, 줄넘기, 걷기와 달리기! 오늘 실천한 운동을 눌러 건강 스탬프를 찍고 젤리를 받아요.
       </p>
-
       <!-- 일주일 요일별 스탬프 달력 -->
       <div class="workout-days-row" id="workoutCalendarRow"></div>
-
       <!-- 운동 종류 선택 버튼 -->
       <div style="font-family:'Jua'; font-size:1.05rem; margin-top:16px; margin-bottom:8px;">
         🏃 오늘 실천한 운동을 골라보세요!
       </div>
       <div class="habits-grid" id="exerciseButtonsRow"></div>
     </div>
-
     <!-- 🌈 위젯 3: 마음의 하루 (28~29쪽) -->
     <div class="haru-widget-card">
       <div class="widget-title-row">
@@ -150,18 +137,14 @@
       <p style="font-size:0.95rem; color:#57606f; margin-bottom:10px;" id="moodSectionDesc">
         내 마음속에는 알록달록 무지개가 살아요! 오늘 민서의 마음 색깔은 어떤 빛깔인가요?
       </p>
-
       <!-- 감정 칩 -->
       <div class="mood-chips-row" id="moodChipsRow"></div>
     </div>
-
   </div>
-
   <!-- =========================================================
        탭 2: 자연 & 예술 감상실 (하늘의 하루, 달팽이의 하루)
        ========================================================= -->
   <div class="tab-content-panel" id="tab_art">
-    
     <!-- 🌤️ 위젯: 하늘의 하루 (22~23쪽 모네 & 고흐) -->
     <div class="haru-widget-card">
       <div class="widget-title-row">
@@ -173,7 +156,6 @@
       <p style="font-size:0.95rem; color:#57606f; margin-bottom:14px;">
         맑은 햇살이 비추는 모네의 낮 하늘과, 소용돌이치는 고흐의 밤하늘을 비교하며 감상해 보아요.
       </p>
-
       <!-- 모네 vs 고흐 2열 비교 카드 -->
       <div class="sky-art-container">
         <!-- 모네 (낮) -->
@@ -183,7 +165,6 @@
           </div>
           <div class="sky-art-body" id="monetCardBody"></div>
         </div>
-
         <!-- 고흐 (밤) -->
         <div class="sky-art-card">
           <div class="sky-art-img-wrap">
@@ -192,7 +173,6 @@
           <div class="sky-art-body" id="goghCardBody"></div>
         </div>
       </div>
-
       <!-- 오늘 우리 동네 하늘 관찰 메모 -->
       <div class="sky-review-box">
         <div style="font-family:'Jua'; font-size:1.1rem; margin-bottom:8px;">
@@ -204,7 +184,6 @@
         </button>
       </div>
     </div>
-
     <!-- 🐌 위젯: 달팽이의 하루 (24~25쪽) -->
     <div class="haru-widget-card">
       <div class="widget-title-row">
@@ -218,17 +197,13 @@
       <p style="font-size:0.95rem; color:#57606f; margin-bottom:12px;">
         비가 촉촉하게 내리면 풀잎 위로 조심조심 고개를 내미는 달팽이 동요를 부르고 자연을 느껴보아요.
       </p>
-
       <div style="background:#fdf2f8; border-radius:16px; padding:18px; text-align:center; font-family:'Gaegu', cursive; font-size:1.35rem; line-height:1.7; color:#be185d;" id="snailLyricsBox"></div>
     </div>
-
   </div>
-
   <!-- =========================================================
        탭 3: 특별한 날 추억 게시판 (가장 좋아하는 하루)
        ========================================================= -->
   <div class="tab-content-panel" id="tab_special">
-    
     <div class="haru-widget-card">
       <div class="widget-title-row">
         <div class="widget-title">
@@ -239,16 +214,13 @@
       <p style="font-size:0.95rem; color:#57606f; margin-bottom:16px;">
         생일 파티, 신나는 어린이날, 알록달록 소풍, 눈 내리는 크리스마스! 내가 가장 사랑하는 특별한 날의 추억들을 나누어 보아요.
       </p>
-
       <!-- 특별한 날 이야기 피드 그리드 -->
       <div class="special-feed-grid" id="specialFeedGrid"></div>
-
       <!-- 나만의 특별한 하루 이야기 남기기 폼 -->
       <div class="story-write-card">
         <div class="story-write-title" id="storyWriteCardTitle">
           <span>✏️</span> <span id="storyAuthorNameTag">민서</span>의 특별한 하루 이야기 남기기
         </div>
-
         <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
           <select id="newStoryCategory" class="review-input" style="flex:1; margin-bottom:0; min-width:130px; font-family:'Jua', sans-serif;">
             <option value="생태/텃밭">🌱 생태/텃밭체험</option>
@@ -261,9 +233,7 @@
           <input type="text" id="newStoryTitle" class="review-input" style="flex:2; margin-bottom:0; min-width:180px;" placeholder="특별한 날의 제목 (예: 가을 텃밭 땅콩 수확하기)" />
           <input type="text" id="newStoryDate" class="review-input" style="flex:1; margin-bottom:0; min-width:120px;" placeholder="날짜나 계절 (예: 2026-09-10, 가을)" />
         </div>
-
         <textarea id="newStoryDesc" class="review-input" rows="3" placeholder="그날 어떤 재미있는 일이 있었는지, 흙을 만지거나 모종을 심을 때 어떤 기분이었는지 적어보세요!"></textarea>
-
         <!-- 💮 내 감정 도장 선택 & 직접 입력 -->
         <div style="background: rgba(255,255,255,0.7); border-radius:14px; padding:10px 12px; margin-bottom:12px; border:1px solid #ffd1dc;">
           <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#be185d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
@@ -280,7 +250,6 @@
             <input type="text" id="newStoryCustomStamp" class="review-input" style="flex:1.5; min-width:150px; margin-bottom:0; padding:8px 10px; font-size:0.9rem; display:none;" placeholder="직접 쓸 느낌 (예: 너무 재밌었어!)" maxlength="15" />
           </div>
         </div>
-
         <!-- 📷 사진 첨부 섹션 -->
         <div style="background: rgba(255,255,255,0.7); border-radius:14px; padding:12px; margin-bottom:12px; border:1px solid #ffd1dc;">
           <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#be185d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
@@ -297,7 +266,6 @@
             💡 <b>영구 보존 안내:</b> 사진 파일은 12년 성장 아카이브(<code>kids-archive</code>) 레포지토리와 연동되어 안전하게 보존됩니다.
           </div>
         </div>
-
         <!-- 🎬 동영상 링크 첨부 섹션 (구글 포토, 유튜브, 드라이브 등) -->
         <div style="background: rgba(255,255,255,0.7); border-radius:14px; padding:12px; margin-bottom:12px; border:1px solid #ffd1dc;">
           <div style="font-family:'Jua', sans-serif; font-size:0.95rem; color:#be185d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">
@@ -310,21 +278,16 @@
             💡 <b>대용량 영상 안내:</b> 15분 이상의 고화질 영상은 구글 포토 공유 링크를 연결하면 최고화질로 끊김 없이 감상할 수 있어요!
           </div>
         </div>
-
         <button class="back-btn" id="storySubmitBtn" style="background:var(--haru-coral); color:#fff; border:none; cursor:pointer; font-size:1.05rem;" onclick="addNewSpecialStory()">
           💖 추억 게시판에 등록하고 젤리 2개 받기 🍬🍬
         </button>
       </div>
-
     </div>
-
   </div>
-
   <!-- =========================================================
        탭 4: 🕰️ 24시간 매직 타임머신 시계판 (32~57쪽 하루 일과 & 시간 표현)
        ========================================================= -->
   <div class="tab-content-panel" id="tab_timeline">
-
     <!-- 🕰️ 타임머신 헤더 & 날짜 네비게이터 -->
     <div class="timeline-hero-card">
       <div class="timeline-hero-top">
@@ -341,7 +304,6 @@
           </button>
         </div>
       </div>
-
       <!-- 📅 날짜 네비게이터 바 -->
       <div class="timeline-date-bar">
         <button type="button" class="date-nav-btn" onclick="changeTimelineDate(-1)">◀ 어제</button>
@@ -353,10 +315,8 @@
         <button type="button" class="date-today-btn" onclick="goToTodayTimeline()">오늘로 이동</button>
       </div>
     </div>
-
     <!-- 🧭 2단 메인 레이아웃 (시계판 + 타임라인 리스트) -->
     <div class="timeline-main-grid">
-
       <!-- 1. 좌측: 24시간 원형 매직 시계판 -->
       <div class="timeline-clock-section">
         <div class="section-badge-row">
@@ -370,7 +330,6 @@
           </div>
           <div class="clock-live-time" id="clockLiveTimeTag">오후 01:40</div>
         </div>
-
         <!-- 24시간 원형 시계 비주얼 -->
         <div class="magic-clock-container">
           <div class="magic-clock-dial" id="magicClockDial">
@@ -381,7 +340,6 @@
               <div class="clock-period-quad evening" title="노을빛 저녁 (17~21시)"></div>
               <div class="clock-period-quad night" title="포근한 밤 (21~06시)"></div>
             </div>
-
             <!-- 시계 중심 바늘 및 허브 -->
             <div class="clock-hand-hour" id="clockHandHour"></div>
             <div class="clock-hand-minute" id="clockHandMinute"></div>
@@ -389,13 +347,11 @@
               <span class="hub-icon">✨</span>
               <span class="hub-time" id="clockHubTime">12시</span>
             </div>
-
             <!-- 24시간 시간 눈금 및 스티커 핀 컨테이너 -->
             <div class="clock-ticks-layer" id="clockTicksLayer"></div>
             <div class="clock-pins-layer" id="clockPinsLayer"></div>
           </div>
         </div>
-
         <!-- 시간대 필터 버튼 바 -->
         <div class="period-filter-row">
           <button type="button" class="period-filter-btn active" data-period="all" onclick="filterTimelinePeriod('all')">
@@ -414,15 +370,12 @@
             🌙 밤 (21~06)
           </button>
         </div>
-
         <div class="clock-guide-tip">
           💡 <b>시계 보는 팁:</b> 시계판의 스티커를 콕 누르면 요정 코코가 시계 시간과 다정한 하루 이야기를 들려줘요!
         </div>
       </div>
-
       <!-- 2. 우측: 타임라인 일과 목록 & 스티커 보관함 -->
       <div class="timeline-list-section">
-        
         <!-- 상단 헤더 & 직접 추가 버튼 -->
         <div class="timeline-section-header">
           <div class="section-title">
@@ -433,12 +386,10 @@
             ✏️ 나만의 일과 직접 쓰기
           </button>
         </div>
-
         <!-- 등록된 일과 카드 리스트 -->
         <div class="timeline-cards-scroll" id="timelineCardsScroll">
           <!-- 동적 렌더링 -->
         </div>
-
         <!-- 🎨 하루 일과 스티커 보관함 (트레이) -->
         <div class="sticker-tray-card">
           <div class="tray-title-row">
@@ -449,18 +400,13 @@
             <!-- 동적 렌더링 -->
           </div>
         </div>
-
       </div>
-
     </div>
-
   </div>
-
   <!-- =========================================================
        탭 5: 🚨 119 안전 수호대 & 닥터 코코 (74~83쪽 위험/안전 & 응급처치)
        ========================================================= -->
   <div class="tab-content-panel" id="tab_safety">
-    
     <!-- 🚨 헤더 배너 -->
     <div class="safety-hero-card">
       <div class="safety-hero-icon">🚨</div>
@@ -471,7 +417,6 @@
         </div>
       </div>
     </div>
-
     <!-- 🚒 위젯 1: 위기탈출 OX 안전 퀴즈 -->
     <div class="safety-quiz-box">
       <div class="safety-quiz-header">
@@ -485,11 +430,9 @@
           <div class="safety-quiz-progress" id="safetyQuizProgressTag">문제 1 / 6</div>
         </div>
       </div>
-
       <div class="safety-question-text" id="safetyQuestionText">
         복도나 계단에서는 앞을 잘 보고 천천히 오른쪽으로 사뿐사뿐 걸어가요.
       </div>
-
       <div class="ox-btn-group" id="oxBtnGroup">
         <button type="button" class="ox-btn ox-btn-o" onclick="handleSafetyQuizAnswer(true)">
           <span class="ox-symbol">⭕</span>
@@ -500,7 +443,6 @@
           <span class="ox-label">아니에요 (위험해요!)</span>
         </button>
       </div>
-
       <!-- 피드백 박스 -->
       <div class="quiz-feedback-box" id="safetyQuizFeedbackBox">
         <div class="feedback-title" id="safetyFeedbackTitle">
@@ -514,7 +456,6 @@
         </button>
         <div style="clear:both;"></div>
       </div>
-
       <!-- 🏆 황금 안전 지킴이 면허증 카드 (6문제 완주 시 노출) -->
       <div class="safety-license-card" id="safetyLicenseCard">
         <div class="license-watermark">🛡️</div>
@@ -539,7 +480,6 @@
         </div>
       </div>
     </div>
-
     <!-- 🩺 위젯 2: 닥터 코코 365 응급처치 상담소 -->
     <div class="doctor-coco-box">
       <div class="doctor-coco-header">
@@ -551,7 +491,6 @@
           </div>
         </div>
       </div>
-
       <!-- 6대 다침 증상 버튼 -->
       <div class="symptom-chips-grid" id="symptomChipsGrid">
         <div class="symptom-chip" data-symptom="scrape" onclick="selectFirstAidSymptom('scrape')">
@@ -579,13 +518,11 @@
           <span class="symptom-label">눈에 모래/먼지</span>
         </div>
       </div>
-
       <!-- 직접 증상 입력바 -->
       <div class="custom-symptom-bar">
         <input type="text" id="customSymptomInput" class="custom-symptom-input" placeholder="또는 어디가 어떻게 아픈지 직접 적어보세요 (예: 넘어졌어, 손가락 베였어)" onkeydown="if(event.key==='Enter') consultDoctorCocoCustom();">
         <button type="button" class="custom-symptom-btn" onclick="consultDoctorCocoCustom()">닥터 코코에게 물어보기 🩺</button>
       </div>
-
       <!-- 처치 가이드 결과 카드 -->
       <div class="firstaid-result-card" id="firstAidResultCard">
         <div class="firstaid-title-row">
@@ -595,7 +532,6 @@
           </div>
           <span class="firstaid-badge" id="firstAidBadge">피가 나거나 껍질이 벗겨짐</span>
         </div>
-
         <div class="coco-speech-bubble">
           <div style="flex:1;" id="cocoVoiceSpeechText">
             "아팠겠다! 괜찮아, 많이 놀랐지? 먼저 흐르는 물에 깨끗이 씻고 밴드를 톡 붙이자. 그리고 선생님이나 부모님께 꼭 보여드려야 해!"
@@ -604,22 +540,17 @@
             🔊 코코 목소리 듣기
           </button>
         </div>
-
         <div class="firstaid-steps-list" id="firstAidStepsList">
           <!-- 단계별 동적 렌더링 -->
         </div>
-
         <div class="parent-notified-banner">
           <span>💌 <b>부모님 안심 알림:</b> 노션 학습일지 DB 및 부모 대시보드에 실시간 안심 기록이 등록되었습니다.</span>
           <span style="font-size:0.78rem; color:#15803d; font-weight:bold;" id="parentNotifiedTimeTag">방금 전</span>
         </div>
       </div>
     </div>
-
   </div>
-
 </div>
-
 <!-- ✨ 30초 하루 체크인 전용 모달 오버레이 -->
 <div class="haru-modal-overlay" id="quickCheckInModalOverlay" onclick="if(event.target===this) closeQuickCheckInModal();">
   <div class="haru-modal-box">
@@ -634,7 +565,6 @@
     </div>
   </div>
 </div>
-
 <!-- ✏️ 나만의 일과 직접 쓰기 전용 모달 오버레이 -->
 <div class="haru-modal-overlay" id="customTimelineModalOverlay" onclick="if(event.target===this) closeCustomTimelineModal();">
   <div class="haru-modal-box" style="max-width:460px;">
@@ -645,7 +575,6 @@
       <button class="modal-close-btn" onclick="closeCustomTimelineModal()" title="닫기">✖</button>
     </div>
     <div class="modal-body" style="padding:20px 22px;">
-      
       <!-- 일정 종류 선택: 당일 특별 일정 vs 매일 반복 vs 특정 요일 반복 -->
       <div style="margin-bottom:16px;">
         <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
@@ -663,7 +592,6 @@
           </button>
         </div>
         <input type="hidden" id="customItemScheduleType" value="daily">
-
         <!-- 특정 요일 선택 박스 (월~일 및 프리셋) -->
         <div id="customDaysSelectorBox" class="days-selector-box" style="display:none;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -686,7 +614,6 @@
           </div>
         </div>
       </div>
-      
       <!-- 시간 선택 -->
       <div style="margin-bottom:16px;">
         <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
@@ -702,7 +629,6 @@
           <input type="time" id="customItemTimeInput" class="timeline-form-input" value="14:00" style="flex:1;">
         </div>
       </div>
-
       <!-- 이모지 선택 -->
       <div style="margin-bottom:16px;">
         <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
@@ -723,7 +649,6 @@
           <span class="emoji-opt" onclick="selectCustomEmoji(this, '💖')">💖</span>
         </div>
       </div>
-
       <!-- 일과 제목 입력 -->
       <div style="margin-bottom:16px;">
         <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
@@ -731,7 +656,6 @@
         </label>
         <input type="text" id="customItemTitleInput" class="timeline-form-input" placeholder="예: 엄마랑 마트 장보기, 땅콩 수확하기" maxlength="18">
       </div>
-
       <!-- 간단 메모 입력 -->
       <div style="margin-bottom:20px;">
         <label style="display:block; font-family:'Jua', sans-serif; font-size:1.05rem; margin-bottom:8px; color:var(--dark);">
@@ -739,15 +663,12 @@
         </label>
         <input type="text" id="customItemMemoInput" class="timeline-form-input" placeholder="예: 수박이 정말 달콤하고 맛있었다!" maxlength="35">
       </div>
-
       <button type="button" class="card-footer-btn" style="width:100%; padding:12px; font-size:1.1rem; border-radius:14px;" onclick="saveCustomTimelineItem()">
         시계판에 스티커 찰칵 붙이기! 📌
       </button>
-
     </div>
   </div>
 </div>
-
 <!-- 🖼️ 특별한 날 사진 팝업 모달 오버레이 -->
 <div class="haru-modal-overlay" id="specialPhotoModalOverlay" onclick="if(event.target===this) closeSpecialPhotoModal();">
   <div class="haru-modal-box photo-modal-box">
@@ -770,14 +691,12 @@
     </div>
   </div>
 </div>
-
 <!-- ⏹️ 실시간 음성 중단 플로팅 컨트롤러 -->
 <div id="haruAudioFloatingBar" class="haru-audio-floating-bar" style="display:none;" onclick="stopAllSpeech(true)" title="터치하면 음성을 즉시 멈춰요">
   <span class="pulse-speaker">🔊</span>
   <span class="floating-audio-text" id="floatingAudioText">요정 코코 낭독 중...</span>
   <span class="floating-stop-chip">⏹️ 멈추기</span>
 </div>
-
 <!-- 스크립트 모듈 로드 -->
 <script src="../../config.js"></script>
 <script src="../../core/core.js"></script>
@@ -794,6 +713,5 @@
 <script src="js/haru-safety-quiz.js?v=20261025-1"></script>
 <script src="js/haru-special-days.js?v=20261029-sd"></script>
 <script src="js/haru_common.js?v=20261002_01"></script>
-
 </body>
 </html>
