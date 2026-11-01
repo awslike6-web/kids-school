@@ -42,9 +42,9 @@
   // 실제 입력이 계측되지 않거나 전송이 실패하면 화면에서 확인할 수 있습니다.
   const guardianStatus = document.createElement('p');
   guardianStatus.id = 'guardianStudyStatus';
-  guardianStatus.className = 'text-xs text-center py-2 opacity-80';
+  guardianStatus.className = 'text-[11px] text-center text-gray-400 -mt-2.5';
   guardianStatus.setAttribute('role', 'status');
-  document.getElementById('subjectBadgeTitle').parentElement.appendChild(guardianStatus);
+  document.getElementById('subjectBadgeTitle').parentElement.parentElement.after(guardianStatus);
   function updateGuardianStudyStatus() {
     const meter = global.StudyActivity?.meter;
     if (!meter) { guardianStatus.textContent = '학습 기록을 시작하지 못했어요. 새로고침해 주세요.'; return; }

@@ -340,12 +340,12 @@
   <main class="flex-1 flex flex-col justify-center py-4 space-y-4">
     
     <!-- 과목 테마 뱃지 -->
-    <div class="flex items-center justify-between">
-      <div class="inline-flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-3 py-1 rounded-full text-xs text-neon-cyan font-bold">
+    <div class="flex items-center justify-between gap-2">
+      <div class="min-w-0 inline-flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-3 py-1 rounded-full text-xs text-neon-cyan font-bold">
         <span id="subjectBadgeIcon">🧮</span>
         <span id="subjectBadgeTitle">수학 분쇄 던전 · 5-2 분수</span>
       </div>
-      <span class="text-xs font-eng text-gray-400 font-bold" id="stepCounter">문제 1 / 5</span>
+      <span class="shrink-0 whitespace-nowrap text-xs font-eng text-gray-400 font-bold" id="stepCounter">문제 1 / 5</span>
     </div>
 
     <!-- 🧠 3·3·3 마스터리 광물 진척도 (어휘 단원일 때만 노출) -->
@@ -602,7 +602,7 @@
   <script src="./kids/subjects/quest/monster_roster.js?v=20261031-friendship"></script>
   <script src="./kids/subjects/quest/quest-runner-ui.js?v=20261015-1"></script>
   <script src="./kids/common_space/gallery-runner-rewards.js?v=20261031-friendship"></script>
-  <script src="./kids/subjects/quest/quest-runner.js?v=20261031-friendship"></script>
+  <script src="./kids/subjects/quest/quest-runner.js?v=20261102-topbar"></script>
   <script>
     // 초기 실행 (bootQuest: 마스터리 단원이면 3·3·3 판, 아니면 기존 4+1)
     window.addEventListener('DOMContentLoaded', QuestRunner.boot);

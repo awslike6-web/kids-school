@@ -66,7 +66,7 @@
 <body class="text-white min-h-[100dvh] flex flex-col justify-between overflow-x-hidden px-2.5 py-3 sm:px-4 sm:py-4 pb-20 max-w-md mx-auto">
 
   <!-- ================= 1. 초심플 상단 HUD (로비 복귀 + 3개 칩) ================= -->
-  <header class="w-full flex items-center justify-between gap-1 sm:gap-2 pt-0.5">
+  <header class="w-full flex flex-wrap items-center justify-between gap-1 sm:gap-2 pt-0.5">
     <!-- 좌측: 🏠 공부방 로비 복귀 + 민수 아바타 & 레벨 -->
     <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
       <!-- 🚪 처음 프로필 화면 (index.html) 바로가기 -->
@@ -89,12 +89,12 @@
       </a>
 
       <!-- 유저 아바타 & 레벨 (5회 탭 시 부모 인증 비상 오픈) -->
-      <div class="flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="pokeSound('level'); if(typeof handleSecretParentUnlock==='function') handleSecretParentUnlock();">
+      <div class="flex items-center gap-1.5 bg-lab-card/80 border border-lab-card-border px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="pokeSound('level'); if(typeof handleSecretParentUnlock==='function') handleSecretParentUnlock();">
         <div id="userAvatar" class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-purple-700/60 flex items-center justify-center text-sm sm:text-base border border-neon-cyan/50">
           👦
         </div>
         <div class="flex items-center gap-1">
-          <span id="userName" class="text-xs sm:text-sm font-bold text-white">민수</span>
+          <span id="userName" class="max-[374px]:hidden text-xs sm:text-sm font-bold text-white">민수</span>
           <span id="userLevel" class="bg-neon-cyan text-lab-bg text-[10px] sm:text-[11px] font-eng font-black px-1 sm:px-1.5 py-0.5 rounded-md leading-none">
             Lv.12
           </span>
@@ -103,15 +103,15 @@
     </div>
 
     <!-- 우측 스트릭 & 코인 & 사운드 & 설정 칩 -->
-    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+    <div class="ml-auto flex items-center gap-1 sm:gap-1.5 shrink-0">
       <!-- 스트릭 칩 (불꽃 / 핑크 하트) -->
-      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="handleStreakClick()">
+      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="handleStreakClick()">
         <span id="streakIcon" class="text-sm sm:text-base animate-pulse">🔥</span>
         <span id="streakText" class="text-xs sm:text-sm font-eng font-black text-fire-orange">15일</span>
       </div>
 
       <!-- 재화 칩 (코인 / 요정가루) -->
-      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="handleCoinClick()">
+      <div class="flex items-center gap-1 bg-lab-card/80 border border-lab-card-border px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded-full shadow-lg cursor-pointer shrink-0" onclick="handleCoinClick()">
         <span id="coinIcon" class="text-sm sm:text-base">🪙</span>
         <span id="coinText" class="text-xs sm:text-sm font-eng font-black text-yellow-300">120</span>
       </div>
@@ -776,6 +776,6 @@
   <script src="./kids/subjects/quest/parent_progress_controller.js?v=20261020b"></script>
   <script src="./kids/common_space/gallery-runner-rewards.js?v=20261031-friendship"></script>
   <script src="./kids/subjects/quest/monster_roster.js?v=20261031-friendship"></script>
-  <script src="./kids/subjects/quest/monster_lab_controller.js?v=20261031-friendship"></script>
+  <script src="./kids/subjects/quest/monster_lab_controller.js?v=20261102-topbar"></script>
 </body>
 </html>
