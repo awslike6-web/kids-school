@@ -675,8 +675,8 @@ window.SYSTEM_MAP_DATA = {
 
 // <AUTO-SYNC:START> scripts/sync_agent_skills.py가 자동으로 다시 씁니다. 직접 고치지 마세요.
 window.SYSTEM_MAP_AUTO = {
-  "lastUpdated": "2026-10-30",
-  "catalogUpdatedAt": "2026-10-30 08:02",
+  "lastUpdated": "2026-11-01",
+  "catalogUpdatedAt": "2026-11-01 13:37",
   "skills": [
     {
       "name": "minseo-korean-unit",

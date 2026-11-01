@@ -1,7 +1,7 @@
 # 🛟 5분 퀘스트 오프라인 보상 보존 명세서 (보상 재시도 대기열)
 
 > **문서 버전**: v1.0 (2026-11-01)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 구현 완료 (2026-11-01, Claude 검증 완료 — §9)
 > **근거**: 노션 현황판 카드 「5분 퀘스트 오프라인·빈 캐시 폴백 보완」, `quest-engine-spec` 스킬 §4 「빈 캐시와 오프라인」, GEMINI §6(보상 오디오·`grantRewardAndShowUI` 시그니처 보존), §8-0(무결성 우선·800줄 상한).
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`(§2-2 퀘스트, 보상·학습일지 항목)를 먼저 읽는다. `.agent/skills/quest-engine-spec/SKILL.md`도 읽는다.
 
@@ -29,7 +29,7 @@ Worker(`workers.dev`)로 가는 모든 요청을 네트워크 오류로 실패�
 그래서 이번 작업은 **보상 유실 하나만** 고친다. 문제 공급·숙련도·학습일지 경로는 이미 동작하므로 바꾸지 않는다.
 
 ## 2. A (목표)
-`quest_runner.html`에서 노션에 닿지 못해 지급하지 못한 보상을 기기에 보관했다가, 다음에 연결되면 **정확히 한 번** 지급한다.
+`quest_runner.html`에서 노션에 닿지 못해 지급하지 못한 보상을 기기에 보관했다가, 다음에 연결되면 지급한다. 확인 가능한 미반영 실패 후 복구에서는 지급과 로컬 누적을 한 번만 수행하며, 응답 유실 등 정확히 한 번을 보장할 수 없는 경우는 아래 승인된 한계를 적용한다.
 
 ## 3. 범위
 - 고칠 곳: `kids/core/notion-reward.js`의 `grantRewardAndShowUI`(퀘스트 화면만 이 파일을 싣는다), 필요하면 `quest_runner.html`의 캐시 버전 문자열.
@@ -38,15 +38,17 @@ Worker(`workers.dev`)로 가는 모든 요청을 네트워크 오류로 실패�
 
 ## 4. 요구 사항
 1. **대기열**: localStorage 키 `MINMIN_REWARD_QUEUE_V1`. 항목에는 지급에 필요한 맥락을 **넣는 시점 값으로** 담는다: 학생 이름(`민수`/`민서`), 테마(`currentTheme`), 과목(`window.currentSubject`), `earned`, `customExpType`, 고유 id, 만든 시각. 비울 때는 현재 로그인 사용자가 아니라 **항목의 학생으로** 지급한다(태블릿을 두 아이가 같이 쓴다).
-2. **넣는 조건**: 노션 인벤토리가 바뀌지 않았다고 확실한 실패만 넣는다.
+2. **넣는 조건**: 아래 조회·PATCH 통신 실패만 넣는다. PATCH 네트워크 오류는 서버 미반영 여부를 확정할 수 없지만, 사용자 승인에 따라 보상 유실 방지를 우선하여 재시도한다.
    - 인벤토리 조회가 네트워크 오류이거나 응답이 실패(`!ok`)인 경우.
    - PATCH가 실패 응답(`!ok`)을 돌려준 경우, 또는 PATCH 요청 자체가 네트워크 오류로 거부된 경우.
    - **넣지 않는 경우**: 관리자 모드(`아빠`/`엄마`/`어른`), 일일 상한 도달로 0개, 학생 인벤토리가 없음(`results` 0건), 과목명이 없는 경우.
 3. **로컬 부수 효과는 지급마다 정확히 한 번**: 지금은 PATCH 전에 `last_play_date_*` 날짜 갱신, `ScreenTimeTracker.recordDailyRewardEarned`, `MINMIN_CUMULATIVE_WEALTH_*`(소원권 누적)가 실행된다. PATCH가 실패해 대기열로 갔다가 나중에 다시 지급될 때 이것들이 두 번 적용되면 안 된다. 방법(PATCH 성공 뒤로 옮기기 또는 적용 여부를 항목에 기록하기)은 계획에서 제안한다. 옮기는 경우 성공 경로의 결과값(노션에 쓰는 값·로컬 캐시·모달 문구)은 지금과 같아야 한다.
 4. **비우기(flush)**: `study-log-store.js`의 `flushQueue` 방식을 따른다(한 번에 하나씩 순서대로, 진행 중이면 같은 약속 재사용, 성공한 항목만 지움, 실패분은 다음까지 보존). 시점: 페이지 `load` 때, 그리고 보상 지급이 한 번 성공한 직후. 비울 때는 항상 조용히(`isSilent` = true) 지급하고, 비우는 도중 실패해도 같은 항목을 다시 넣지 않는다(중복 항목 금지). 한 번에 최대 10건.
+   - flush에서 일일 상한으로 0개 지급된 항목은 남겨 다음 날 재시도하고, 일부라도 지급에 성공하면 항목 전체를 삭제한다(남은 차액은 이월하지 않는다).
 5. **일일 상한·부스트**: 비울 때 그 시점의 노션 `오늘 획득_*`·시간표 부스트로 계산한다(지금 함수의 규칙 그대로). 어제 오프라인으로 끝낸 판이 오늘 들어가면 오늘 몫으로 센다 — 문서에 한 줄 남긴다.
-6. **두 탭 동시 비우기**: 같은 기기에서 퀘스트 탭 두 개가 동시에 비우면 중복 지급될 수 있다. 계획에서 막는 방법(예: localStorage 잠금 + 만료 시각)을 제안한다.
+6. **두 탭 동시 비우기 (사용자 승인)**: 같은 탭의 지급·대기열 변경은 Promise 체인으로 직렬화하고, Web Locks(`navigator.locks`)가 있으면 `minmin-reward-queue` 잠금으로 탭 사이도 직렬화한다. **Web Locks가 없어도 자동 flush를 보류하지 않고 탭 사이 잠금 없이 비운다.** 같은 flush Promise 재사용은 유지하며, 보상을 영영 못 받는 것보다 두 탭 동시 실행의 드문 중복 지급을 수용한다.
 7. 클래식 스크립트·전역 이름 유지. `notion-reward.js`는 600줄 이하로 유지한다(지금 443줄).
+8. **정확히 한 번 보장의 한계 (사용자 승인)**: PATCH는 서버에 반영됐지만 응답만 유실된 경우와 PATCH 성공 뒤 대기열 삭제 전 탭이 종료된 경우는 클라이언트만으로 구별·복구할 수 없다. 서버가 보상 id 중복 처리를 방지하지 않으므로 이러한 경우 정확히 한 번 지급을 보장하지 않는다. localStorage 저장 실패·삭제 시에도 기기 보존을 보장할 수 없다. 이번 작업에서는 서버·노션 스키마를 변경하지 않는다.
 
 ## 5. T (시험)
 1. 신규 `tests/quest-reward-retry.test.mjs`(`vm`, 가짜 `fetch`·`localStorage`, 실제 노션 접속 없음):
@@ -58,6 +60,7 @@ Worker(`workers.dev`)로 가는 모든 요청을 네트워크 오류로 실패�
    - 비우는 중 실패해도 항목이 늘지 않고, 10건 상한을 지킨다.
 2. 기존 시험 전부: `node --test "tests/**/*.test.mjs"`. `tests/notion-reward-split.test.mjs`는 `notion-reward.js`를 분리 전 fixture와 비교하므로, 이번 변경을 그 시험의 승인된 변경으로 등록하는 방식으로 고친다(fixture 파일 자체는 그대로 두고, 원본 쪽에도 같은 변경을 적용해 비교를 엄격하게 유지 — `tests/lobby-split.test.mjs`의 `applyConfigEdits` 방식 참고). 다른 비교는 느슨하게 만들지 않는다.
 3. 바뀐 파일마다 `python -X utf8 G:/master-tower/scripts/verify_contracts.py --mode file --file <절대 경로>` → `[ALL PASS]` (막히면 못 했다고 보고).
+   - `tests/fixtures/*`는 계약 검사 줄 수 대상이 아니며, 이번 작업에서도 fixture를 수정하지 않는다.
 
 ## 6. 화면 확인 (Claude가 함)
 Worker 요청을 네트워크 오류로 만드는 재현 서버에서 한 판을 끝내 대기열 1건을 확인하고, 같은 기기 상태로 쓰기 차단 서버(조회는 통과, 쓰기는 가짜 성공)에서 다시 열어 대기열이 비고 PATCH가 한 번만 나가는지, 퀘스트 완주 흐름(보상 음성·완주 모달·학습일지)이 그대로인지 본다.
@@ -66,3 +69,16 @@ Worker 요청을 네트워크 오류로 만드는 재현 서버에서 한 판을
 - `CORE_CATALOG.md`의 `notion-reward.js` 항목에 보상 대기열(키·넣는 조건·비우는 시점)을 짧게 적는다.
 - `.agent/skills/quest-engine-spec/SKILL.md` §4 「빈 캐시와 오프라인」 문단을 현재 상태(문제 공급·숙련도·학습일지·보상 모두 보존)로 고치고 `python scripts/sync_agent_skills.py`로 사본을 맞춘다(Python이 막히면 원본만 고치고 보고).
 - 이 문서 상태를 "구현 완료"로 바꾸고 결과를 적는다.
+
+## 8. 구현 결과 (2026-11-01)
+- `notion-reward.js` 내부 IIFE에 보상 대기열을 구현했다. 저장 형식은 `{ [id]: { id, childName, currentTheme, subject, earned, customExpType, createdAt } }`이며 `createdAt`은 밀리초 시각이다. 외부 공개 함수의 이름·인자·반환 의미는 유지한다.
+- 일반 지급 성공 후 잠금을 해제하고 flush한다. 재전송은 등록·재귀 flush를 하지 않으며, 최신 대기열에서 성공한 id만 삭제한다. 조회는 `?force=true`로 Worker 캐시를 우회한다. 전날 오프라인 보상을 오늘 지급하면 오늘 몫으로 계산한다.
+- 날짜 키·스크린타임 보상 누적·소원권 누적 자산을 PATCH 성공 뒤 반영한다. 성공 뒤 로컬/UI 오류가 발생해도 재지급하지 않는다. 학생 전환 후에는 항목의 학생에게 지급하고 현재 학생의 퀴즈 설정을 덮어쓰지 않는다. 재전송은 소원권 오버레이도 표시하지 않는다.
+- 기존 성공 경로의 계산식·캐시·표시 문구를 고정 fixture와 비교하고, 분리 시험은 명시적인 승인 변경을 비교용 원본에도 적용한다. fixture 파일 자체는 변경하지 않는다.
+- 자동 검증: `node --test tests/quest-reward-retry.test.mjs tests/notion-reward-split.test.mjs` 최종 38개 통과(보상 22개·분리 계약 16개). `git diff --check`와 `git diff --exit-code -- tests/fixtures`도 종료 코드 0이다.
+- 전체 회귀: `node --test "tests/**/*.test.mjs"` 실행 시점 372개 중 통과 368·실패 2·skip 1·todo 1, 종료 코드 1이다. 실패는 기존 `gallery-character-runner.test.mjs`·`gallery-multi-character.test.mjs`의 Python 빌더 두 건(`spawnSync` 결과 `status: null`)이다. 시험에 지정된 `C:/Users/pc/AppData/Local/Python/pythoncore-3.14-64/python.exe`가 없고 `python` 명령도 없다. 이후 추가한 비동기 맥락 보존·성공 후 화면 오류 시험은 위 최종 대상 시험에 포함해 통과했다. Python 실행은 반복하지 않았다.
+
+## 9. Claude 검증 (2026-11-01)
+- Codex 환경의 전체 시험 실패 2건은 그 샌드박스에서 Python이 실행되지 않아 생긴 것이다. 같은 작업 폴더에서 Claude가 돌린 `node --test "tests/**/*.test.mjs"`는 374개 중 372 통과·실패 0·기존 TODO 1이다. 바뀐 파일 모두 계약 검사 `[ALL PASS]`, `sync_agent_skills.py` 실행 후 `--check` 통과.
+- 같은 주소(127.0.0.1:8797)에서 ① Worker 요청을 모두 네트워크 오류로 만드는 재현 서버로 민수(영어)로 `grantRewardAndShowUI(3, true)` → `false`, `MINMIN_REWARD_QUEUE_V1`에 민수·영어·3 한 건, 날짜 키·누적 자산 변화 없음. ② 로그인을 민서로 바꾸고 같은 주소를 쓰기 차단 서버(조회 통과·쓰기 가짜 성공)로 다시 열자 `load` 때 대기열이 비면서 PATCH 1건이 **민수 인벤토리 페이지**로 나갔고, 민수 날짜 키·누적 자산·인벤토리 캐시가 한 번 갱신되고 민서 값은 그대로였다. 민서 국어 레슨도 정상으로 열렸다.
+- 화면에서 한 판 전체를 오프라인으로 끝내는 조작은 하지 않았다(완주 흐름은 기존과 같이 `showClearModal`이 지급을 try/catch로 부르며, 공개 함수의 인자·반환 의미는 같다).
