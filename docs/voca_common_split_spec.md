@@ -1,7 +1,7 @@
 # 🧹 800줄 대청소 15차: 용어사전 `voca_common.js` 분리 명세서
 
 > **문서 버전**: v1.0 (2026-11-01)
-> **상태**: 작업 지시 (구현 전)
+> **상태**: 구현 완료 (2026-11-01, Claude 검증 완료)
 > **근거**: GEMINI §8-0 골디락스(파일당 800줄 미만, 300~600줄 최적), §8-4 정기 리팩토링. 노션 현황판 카드 「800줄 초과 파일 정기 대청소」 두 번째 목록. 같은 방식의 앞선 작업: `docs/math_number50_split_spec.md`, `docs/parent_dashboard_split_spec.md`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다.
 
@@ -53,3 +53,33 @@
 ## 7. 문서
 - `CORE_CATALOG.md`나 과목 명세서에 이 화면 파일 구성이 적혀 있으면 새 구성으로 고치고, 없으면 `CORE_CATALOG.md`에 두 파일의 역할·로드 순서·시험을 짧게 등록한다. 지난 분리 명세서는 고치지 않는다.
 - 이 문서 상태를 "구현 완료"로 바꾸고 파일별 실제 줄 수 표를 적는다.
+
+## 8. 구현 결과 (2026-11-01)
+
+- 승인한 원본 1–459 / 460–906줄 경계를 그대로 적용했습니다. 둘째 파일에만 §3의 지정 머리 주석 한 줄을 추가했으며, 그 주석을 제외한 재결합은 fixture와 줄바꿈·공백을 포함해 바이트까지 같습니다. fixture는 구현 직전 원본을 그대로 보존합니다.
+- 458줄에서 함수가 닫히고 459줄은 빈 줄입니다. 두 구간은 각각 독립 구문 분석에 성공합니다. 첫 파일의 최상위 실행문 17개는 둘째 파일 함수·변수를 즉시 사용하지 않으며, 첫 파일은 전역 함수 17개와 load·beforeunload 이벤트 2개만 등록합니다.
+- 민수 기본값·민서 기존 전역 설정의 두 조건에서 원본과 순차 로드의 전역 함수 27개·초기 상태·이벤트 순서·500ms 예약 타이머 1개가 같습니다. 콜백은 실행하지 않고 DOM·저장소·네트워크의 예상하지 않은 접근은 실패 처리합니다.
+- voca.html의 기존 태그 뒤 주석을 보존하고 두 파일을 같은 ?v=20261101-voca-split로 연속 로드합니다. 해당 배선 외 HTML은 구현 전 원문 해시와 같습니다. 클래식 스크립트와 기존 전역 상태·HTML 이벤트 함수를 유지했습니다.
+- 계획 단계 voca_common 참조는 5개 파일·13줄이며 실제 로드는 voca.html:289 한 곳입니다. 다른 운영 로더는 없습니다. 승인에 따라 CORE_CATALOG.md §2-1 교과 공통·인터랙션 코어 앞부분에 역할·전역 API·로드 순서·시험을 짧게 등록했습니다. docs/voca_math_viewer_handover.md와 지난 분리 명세서는 수정하지 않았습니다.
+- 신규 tests/voca-common-split.test.mjs는 정확한 절단 경계·머리 주석·원문 보존·600줄 상한·독립 구문·HTML 배선/나머지 원문·다른 운영 소스의 버전 참조·첫 파일 단독 실행·원본 대비 순차 실행을 검사합니다. fixture는 사용자 확인대로 tests/fixtures/ 줄 수 검사 제외 대상입니다.
+
+| 파일 | 실제 줄 수 |
+| :--- | ---: |
+| `kids/common_space/voca_common.js` | 459 |
+| `kids/common_space/voca_modal.js` | 448 |
+| `kids/common_space/voca.html` | 293 |
+| `tests/voca-common-split.test.mjs` | 152 |
+| `tests/fixtures/voca-common-split/voca_common.js` | 906 |
+| `kids/core/CORE_CATALOG.md` | 1285 |
+| `docs/voca_common_split_spec.md` | 83 |
+
+위 표는 마지막 개행을 별도 줄로 세지 않는 물리 줄 수입니다. 시험의 split 방식으로 한 줄 크게 세어도 운영 JS 두 파일은 600줄 이하입니다.
+
+- node --test tests/voca-common-split.test.mjs: 종료 코드 0, 10개 통과·실패 0개.
+- node --test "tests/**/*.test.mjs": 종료 코드 1, 332개 중 통과 328·실패 2·건너뜀 1·기존 TODO 1. 실패는 기존 tests/gallery-character-runner.test.mjs:477 및 tests/gallery-multi-character.test.mjs:72의 Python 빌더 하위 프로세스 status=null 두 건입니다. 해당 시험은 spawn 오류 코드를 출력하지 않으므로 구체적인 실행 실패 원인은 확인하지 못했습니다. 관련 시험·빌더는 수정하지 않았습니다.
+- git diff --check: 종료 코드 1, kids/common_space/voca_common.js:459: new blank line at EOF. 원본 절단점의 빈 줄을 그대로 보존한 결과이므로 §3에 따라 제거하지 않았습니다.
+
+### Claude 검증 (2026-11-01)
+- Codex 환경의 전체 시험 실패 2건은 그 샌드박스에서 Python이 실행되지 않아 생긴 것이다. 같은 작업 폴더에서 Claude가 돌린 `node --test "tests/**/*.test.mjs"`는 332개 중 330 통과·실패 0·기존 TODO 1이다.
+- 바뀐 파일 6개 모두 `verify_contracts.py --mode file` → `[ALL PASS]`. 첫 파일 + (둘째 파일 머리 주석 뺀 것)이 main 작업 파일과 바이트까지 같다.
+- 쓰기 차단 서버 두 개(분리 전 8783, 분리 후 8784)에서 `voca.html`을 비교했다: 노션 단어 1742개, 전역 함수 258개 이름 해시, 화면 글자 해시, 태그·클래스별 계산 스타일 서명 63개, 첫 단어 모달 열기 후 모달 부분별 글자 해시와 닫기 결과가 모두 같고 콘솔 오류 없음. 분리 후 화면에서 딥링크 `?word=물박달나무`(검색어 채움·카드 1개·모달 자동 열림)와 카드 클릭 모달 열기도 동작했다.
