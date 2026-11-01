@@ -16,6 +16,17 @@ const version = '?v=20261031-lobby-split';
 // 수학 페이지 분리 시험과 동일하며 코드 내부 공백·들여쓰기는 보존한다.
 const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
 const originalLines = normalize(fixture).split('\n');
+// 분리 뒤 승인된 설정 변경: 2026-11-01 두 아이 놀이터 목록 끝에 야추 카드 추가.
+// 원본 fixture에도 같은 변경을 적용해 설정 원문·VM 상수 비교를 계속 엄격하게 유지한다.
+const yachtItem = "    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 태블릿 한 대로 가족이 돌아가며 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' }";
+const configEdits = [
+  "    { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' }",
+  "    { icon: '🏛️', title: '3학년 사회 역사방 (미리보기)', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 모험', href: 'kids/subjects/society/society.html?user=minseo', badge: '예습' }"
+];
+const applyConfigEdits = text => configEdits.reduce((result, line) => {
+  assert.equal(result.split(line).length, 2, `승인 변경 대상 줄이 한 번만 있어야 함: ${line.slice(0, 40)}`);
+  return result.replace(line, `${line},\n${yachtItem}`);
+}, normalize(text));
 const originalRange = (first, last) => originalLines.slice(first - 1, last).join('\n') + '\n';
 const approved = new Map([
   [367, ['    const uKey = userKey || activeUserKey;', '    const uKey = userKey || ctx.getActiveUserKey();']],
@@ -60,7 +71,7 @@ const bridge = `  const {
 test('세 JS는 600줄 이하이고 설정·잔여 컨트롤러·연결 코드가 승인 원문과 같다', () => {
   assert.equal(originalLines.length, 1102);
   for (const source of sources) assert.ok(source.split(/\r?\n/).length <= 600);
-  assert.equal(normalize(sources[0]), normalize(originalRange(1, 106)));
+  assert.equal(normalize(sources[0]), applyConfigEdits(originalRange(1, 106)));
   assert.equal(normalize(sources[2]), normalize(originalRange(107, 139) + bridge
     + originalRange(140, 331) + originalRange(597, 845) + originalRange(1022, 1102)));
   // 코어 로더를 기존 위치에 남겨 마음일기·음성 시험의 계약도 보존한다.
@@ -242,7 +253,7 @@ function load(split, options, probe = true) {
   };
   if (split) sources.forEach((source, index) => vm.runInContext(index === 2 ? instrument(source) : source,
     sb.context, { filename: files[index] }));
-  else vm.runInContext(instrument(fixture), sb.context, { filename: '원본 fixture' });
+  else vm.runInContext(instrument(applyConfigEdits(fixture)), sb.context, { filename: '원본 fixture' });
   return sb;
 }
 
