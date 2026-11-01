@@ -981,7 +981,42 @@ const DEFAULT_GALLERY_DATA = [
       "star": 0,
       "trophy": 0
     },
-    "comments": []
+    "comments": [],
+    "spotDiff": {
+      "modifiedImageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/2026_elem_1/minseo_20260906_194054_diff.png",
+      "spots": [
+        {
+          "x": 0.503,
+          "y": 0.045,
+          "r": 0.063,
+          "hint": "트리 꼭대기 곰돌이가 사라졌어요"
+        },
+        {
+          "x": 0.276,
+          "y": 0.659,
+          "r": 0.15,
+          "hint": "왼쪽 양말에 산타가 들어갔어요"
+        },
+        {
+          "x": 0.371,
+          "y": 0.829,
+          "r": 0.15,
+          "hint": "빨간 양말이 파랗게 변했어요"
+        },
+        {
+          "x": 0.847,
+          "y": 0.688,
+          "r": 0.15,
+          "hint": "오른쪽 양말에 루돌프가 들어갔어요"
+        },
+        {
+          "x": 0.879,
+          "y": 0.326,
+          "r": 0.15,
+          "hint": "초록 별이 노랗게 변했어요"
+        }
+      ]
+    }
   },
   {
     "id": "art_minseo_20260906_204407",
