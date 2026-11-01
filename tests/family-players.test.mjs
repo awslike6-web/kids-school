@@ -170,3 +170,37 @@ test('오목 음소거는 시작·승부 음성을 막고 도움 표시는 현�
   put(8, 2); put(4, 0);
   assert.equal(b.$('endView').hidden, false); assert.deepEqual(b.speech, []);
 });
+
+test('isTaken은 외부 말·초기 말·실패 대체에 적용하고 setPlayers는 복사하며 알리지 않는다', () => {
+  const { F, Node } = browser(), host = new Node(), changed = [];
+  const setup = F.createSetup({ host, count: 1, min: 1, max: 5, modes: modeNames,
+    isTaken: a => a.type === 'emoji' && ['🐰', '🐻'].includes(a.value), onChange: p => changed.push(p) });
+  assert.equal(setup.getPlayers()[0].avatar.value, '🦊'); assert.equal(changed.length, 0);
+  const rabbit = all(host).find(n => n.attributes['aria-label'] === '🐰 말'); assert.equal(rabbit.disabled, true);
+  const source = [{ id: 'p1', name: '그림', avatar: gallery('broken'), assist: 'classic' }];
+  setup.setPlayers(source); source[0].name = '다른 이름'; assert.equal(setup.getPlayers()[0].name, '그림');
+  assert.equal(changed.length, 0);
+});
+
+test('onChange는 이름 입력·이름 기본 도움·빠른 이름·말·도움 단계·인원 변경을 알린다', () => {
+  const { F, Node } = browser(), host = new Node(), changes = [];
+  const setup = F.createSetup({ host, count: 1, min: 1, max: 5, modes: modeNames, onChange: p => changes.push(plain(p)) });
+  const input = all(host).find(n => n.tagName === 'input'); input.value = '아빠'; input.fire('input');
+  assert.equal(changes.at(-1)[0].name, '아빠'); input.fire('change'); assert.equal(changes.at(-1)[0].assist, 'classic');
+  all(host).find(n => n.tagName === 'button' && n.textContent === '민수').click();
+  assert.equal(changes.at(-1)[0].assist, 'tactic');
+  all(host).find(n => n.attributes['aria-label'] === '🐻 말').click(); assert.equal(changes.at(-1)[0].avatar.value, '🐻');
+  const select = all(host).find(n => n.tagName === 'select'); select.value = 'helper'; select.fire('change');
+  assert.equal(changes.at(-1)[0].assist, 'helper'); setup.setCount(2); assert.equal(changes.at(-1).length, 2);
+  assert.equal(changes.length, 6);
+});
+
+test('외부 점유를 피한 그림 실패 대체도 콜백을 한 번 알린다', () => {
+  const { F, Node } = browser({ data: [{ id: 'a', characters: [{ key: 'main', name: '말', spriteUrl: 'a.png' }] }] });
+  const host = new Node(), changes = [];
+  const setup = F.createSetup({ host, count: 1, min: 1, max: 1, modes: modeNames,
+    isTaken: a => a.type === 'emoji' && a.value === '🐰', onChange: p => changes.push(p) });
+  all(host).find(n => n.attributes['aria-label'] === '말 말').click();
+  all(host).find(n => n.tagName === 'img').fire('error');
+  assert.equal(setup.getPlayers()[0].avatar.value, '🐻'); assert.equal(changes.length, 2);
+});

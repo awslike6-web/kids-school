@@ -86,8 +86,16 @@
 
   function defaultMode(name) { return name === '민서' ? 'helper' : name === '민수' ? 'tactic' : 'classic'; }
 
-  function createSetup({ host, count = 2, min = 2, max = 5, modes }) {
+  function createSetup({ host, count = 2, min = 2, max = 5, modes, isTaken = () => false, onChange }) {
     let drafts = [], avatars = collectAvatars();
+    let ready = false;
+    const copy = () => JSON.parse(JSON.stringify(drafts));
+    const changed = () => { if (ready && onChange) onChange(copy()); };
+    const fallback = p => {
+      const preferred = fallbackFor(drafts, p), candidate = { type: 'emoji', value: preferred };
+      return !isTaken(candidate, p) ? preferred : EMOJI.find(value => !isTaken({ type: 'emoji', value }, p) &&
+        !drafts.some(other => other !== p && other.avatar.type === 'emoji' && other.avatar.value === value)) || preferred;
+    };
     const MODES = modes;
     function setupPlayers(count) {
       if (!Number.isInteger(count) || count < min || count > max) throw Error('함께할 사람 수를 확인해 주세요.');
@@ -96,10 +104,11 @@
       // 인원 증가 때 이미 선택한 이모지와 겹치면 남은 말을 고릅니다.
       const used = new Set();
       drafts.forEach(p => {
-        if (used.has(avatarKey(p.avatar))) p.avatar = { type: 'emoji', value: EMOJI.find(v => !used.has(v)) };
+        if (used.has(avatarKey(p.avatar)) || isTaken(p.avatar, p)) p.avatar = { type: 'emoji',
+          value: EMOJI.find(v => !used.has(v) && !isTaken({ type: 'emoji', value: v }, p)) };
         used.add(avatarKey(p.avatar));
       });
-      renderSetup();
+      renderSetup(); changed();
     }
 
     function renderSetup() {
@@ -110,28 +119,28 @@
         const label = element('label', '이름 (1~8자)'), input = element('input');
         input.value = p.name; input.maxLength = 16; input.autocomplete = 'off';
         input.setAttribute('aria-label', `${index + 1}번 사람 이름`);
-        input.addEventListener('input', () => { p.name = input.value; });
-        input.addEventListener('change', () => { p.assist = defaultMode(input.value.trim()); select.value = p.assist; });
+        input.addEventListener('input', () => { p.name = input.value; changed(); });
+        input.addEventListener('change', () => { p.assist = defaultMode(input.value.trim()); select.value = p.assist; changed(); });
         label.append(input); card.append(label);
         const quick = element('div', undefined, 'quick-names');
         NAMES.forEach(name => quick.append(button(name, () => {
-          p.name = name; p.assist = defaultMode(name); renderSetup();
+          p.name = name; p.assist = defaultMode(name); renderSetup(); changed();
         })));
         card.append(quick);
         const options = element('div', undefined, 'avatar-options');
         options.setAttribute('role', 'group'); options.setAttribute('aria-label', `${index + 1}번 사람 말`);
         avatars.forEach(avatar => {
           const key = avatarKey(avatar), title = avatar.type === 'emoji' ? avatar.value : avatar.value.name;
-          const pick = button('', () => { p.avatar = avatar; renderSetup(); }, 'avatar-option');
+          const pick = button('', () => { p.avatar = avatar; renderSetup(); changed(); }, 'avatar-option');
           pick.setAttribute('aria-label', `${title} 말`);
           pick.setAttribute('aria-pressed', String(avatarKey(p.avatar) === key));
-          pick.disabled = drafts.some(other => other !== p && avatarKey(other.avatar) === key) ||
+          pick.disabled = isTaken(avatar, p) || drafts.some(other => other !== p && avatarKey(other.avatar) === key) ||
             (avatar.type === 'gallery' && failedSprites.has(avatar.value.spriteUrl));
-          const image = element('span'); showAvatar(image, avatar, fallbackFor(drafts, p), () => {
+          const image = element('span'); showAvatar(image, avatar, fallback(p), () => {
             pick.disabled = true;
             if (avatarKey(p.avatar) === key) {
-              p.avatar = { type: 'emoji', value: fallbackFor(drafts, p) };
-              renderSetup();
+              p.avatar = { type: 'emoji', value: fallback(p) };
+              renderSetup(); changed();
             }
           });
           pick.append(image);
@@ -144,14 +153,18 @@
         Object.entries(MODES).forEach(([value, name]) => {
           const option = element('option', name); option.value = value; select.append(option);
         });
-        select.value = p.assist; select.addEventListener('change', () => { p.assist = select.value; });
+        select.value = p.assist; select.addEventListener('change', () => { p.assist = select.value; changed(); });
         modeLabel.append(select); card.append(modeLabel); host.append(card);
       });
     }
 
     setupPlayers(count);
-    return Object.freeze({ setCount: setupPlayers, render: renderSetup,
-      getPlayers: () => JSON.parse(JSON.stringify(drafts)) });
+    ready = true;
+    return Object.freeze({ setCount: setupPlayers, render: renderSetup, getPlayers: copy,
+      setPlayers: players => {
+        if (!Array.isArray(players) || players.length < min || players.length > max) throw Error('자리 수를 확인해 주세요.');
+        drafts = JSON.parse(JSON.stringify(players)); renderSetup();
+      } });
   }
 
   window.FamilyPlayers = Object.freeze({ avatarKey, collectAvatars, showAvatar, fallbackFor,
