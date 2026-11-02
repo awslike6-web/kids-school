@@ -64,9 +64,9 @@ test('HTML의 두 스크립트 배선 이외 원문은 승인 전과 같다', ()
     const newline = html.includes('\r\n') ? '\r\n' : '\n';
     const restored = html.replace(newline + tags[1], '')
         .replace(tags[0], '<script src="../../js/vertical_math_logic.js"></script>');
-    // 분리 직전 HTML의 UTF-8 원문 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
-    assert.equal(createHash('sha256').update(restored).digest('hex'),
-        'f3c08c6302dcb2ba0395f10600d38a84eec29b3b78de38e18c91d4913f9662fa');
+    // 분리 직전 HTML의 줄바꿈을 LF로 정규화한 UTF-8 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
+    assert.equal(createHash('sha256').update(restored.replace(/\r\n/g, '\n')).digest('hex'),
+        '0cccef376121b31bfc9117b8d9cea21afcb84502c5d4fb6783c821591628a117');
 });
 
 test('다른 운영 소스에 옛 버전·버전 없는 세로셈 JS 참조가 없다', () => {

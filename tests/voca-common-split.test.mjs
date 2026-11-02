@@ -61,9 +61,9 @@ test('HTML의 두 스크립트 배선 이외 원문은 승인 전과 같다', ()
     const restored = replaceOnce(html, 'notion-helper.js?v=' + rewardVersion,
         'notion-helper.js?v=20260916_1400').replace(newline + tags[1], '')
         .replace(tags[0], '<script src="./voca_common.js?v=20260916_1400"></script>');
-    // 분리 직전 HTML의 UTF-8 원문 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
-    assert.equal(createHash('sha256').update(restored).digest('hex'),
-        '68b4297705c1e306149cc3991457e57c5c5912e06199f1acdd7954b64f7cca38');
+    // 분리 직전 HTML의 줄바꿈을 LF로 정규화한 UTF-8 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
+    assert.equal(createHash('sha256').update(restored.replace(/\r\n/g, '\n')).digest('hex'),
+        '66f861fa85eb6f1bd538292f5c23d471fd3242298d7547471eb88a8af91bbf9b');
 });
 
 test('다른 운영 소스에 옛 버전·누락된 버전의 용어사전 JS 참조가 없다', () => {
