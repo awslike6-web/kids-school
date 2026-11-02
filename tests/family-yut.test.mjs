@@ -373,7 +373,7 @@ test('음소거 및 이어하기와 저장 차단', () => {
 });
 
 test('리소스 계약: 줄 수, 상대 경로, 금지 API 없음, 로비 및 놀이터 카드', () => {
-  for (const [file, limit] of [['yut-ui.js', 500], ['yut.html', 150], ['yut.css', 300]]) {
+  for (const [file, limit] of [['yut-ui.js', 600], ['yut.html', 150], ['yut.css', 300]]) {
     const source = read(file);
     assert.ok(source.trimEnd().split('\n').length <= limit, `${file} 줄 수 초과`);
     assert.doesNotMatch(source, /innerHTML/);
@@ -384,7 +384,12 @@ test('리소스 계약: 줄 수, 상대 경로, 금지 API 없음, 로비 및 �
 
   const html = read('yut.html');
   assert.ok(html.indexOf('src="../../core/fairy-config.js"') < html.indexOf('src="yut-ui.js"'));
-  assert.doesNotMatch(html, /family-room/);
+  assert.ok(html.includes('href="family-room.css"'));
+  const scripts = ['family-players.js', 'yut-engine.js', 'family-room.js', 'family-room-ui.js', 'yut-ui.js'];
+  scripts.forEach((file, i) => {
+    assert.ok(html.includes(`src="${file}"`));
+    if (i) assert.ok(html.indexOf(`src="${scripts[i - 1]}"`) < html.indexOf(`src="${file}"`));
+  });
   assert.doesNotMatch(html, /<meta[^>]*Content-Security-Policy/i);
 
   // 로비 및 놀이터 카드 등록 확인

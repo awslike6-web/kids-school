@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../../css/design-system.css">
   <link rel="stylesheet" href="yacht.css">
   <link rel="stylesheet" href="yut.css">
+  <link rel="stylesheet" href="family-room.css">
 </head>
 <body>
   <main class="yut-shell">
@@ -15,7 +16,11 @@
       <h1>🎯 가족 윷놀이</h1>
       <button id="soundToggle" type="button" aria-pressed="false">🔊 안내 음성</button>
     </header>
+    <div id="roomStatus" class="family-room-status" role="status" hidden></div>
+    <section id="roomView" class="family-room-view" aria-label="가족 방" hidden></section>
     <section id="setupView" aria-labelledby="setupTitle">
+      <div class="family-room-modes"><button id="singleDevice" type="button">📱 이 기기 하나로</button>
+        <button id="multipleDevices" type="button">📱📱 여러 기기로</button></div>
       <h2 id="setupTitle">마주 앉아 함께 던져요!</h2>
       <p>이 기기 하나로 2~4명이 차례로 돌아가며 윷을 던지고 말을 옮겨요.</p>
       <div class="setup-controls">
@@ -49,6 +54,7 @@
       <div class="actions">
         <button id="resumeGame" type="button" class="primary">이어서 하기</button>
         <button id="newGame" type="button">새 게임</button>
+        <button id="resumeMultipleDevices" type="button">📱📱 여러 기기로</button>
       </div>
     </section>
     <section id="gameView" hidden aria-label="윷놀이 게임">
@@ -97,6 +103,7 @@
         </aside>
       </div>
     </section>
+    <div id="roomActions" class="family-room-actions" hidden></div>
     <p id="saveStatus" class="status-message" role="status"></p>
   </main>
   <script src="../../core/fairy-config.js"></script>
@@ -107,6 +114,8 @@
   <script src="../../subjects/quest/monster_roster.js"></script>
   <script src="family-players.js"></script>
   <script src="yut-engine.js"></script>
+  <script src="family-room.js"></script>
+  <script src="family-room-ui.js"></script>
   <script src="yut-ui.js"></script>
 </body>
 </html>

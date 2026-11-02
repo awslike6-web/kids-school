@@ -207,8 +207,8 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 야추 HTML은 엔진 → family-players → UI 순서로 로드. 야추의 `familyYachtGame` 키·말 저장 형식·설정 문구·CSS는 보존. 오목 음성은 시작·승부 때만 공통 TTS와 종료 효과음을 사용.
 - 시험: `tests/omok-engine.test.mjs`(순수 규칙·수순 재생·리소스), `tests/family-players.test.mjs`(말 목록·대체·설정·모의 DOM 클릭·야추 공용화). 실제 화면 검수는 Claude가 쓰기 차단 서버에서 별도로 수행.
 
-### 📱 가족 방 · 여러 기기 야추·오목
-- 계약: `docs/family_room_spec.md` §13·§14·§15. 운영 Worker 소스는 관제탑 `workers/family-room/`이며 배포 상태는 해당 명세서 첫머리·§12를 참조합니다. 한 기기 모드는 독립입니다. 새 게임은 `mount` 연결과 `validSnapshot`만 쓰면 Worker를 고치지 않습니다.
+### 📱 가족 방 · 여러 기기 야추·오목·윷놀이
+- 계약: `docs/family_room_spec.md` §13·§14·§15·§16. 운영 Worker 소스는 관제탑 `workers/family-room/`이며 배포 상태는 해당 명세서 첫머리·§12를 참조합니다. 한 기기 모드는 독립입니다. 새 게임은 `mount` 연결과 `validSnapshot`만 쓰면 Worker를 고치지 않습니다.
 - `kids/playground/family/family-room.js`: DOM 없는 IIFE·전역 `FamilyRoom`. `create({gameType,maxSeats,onSnapshot,onStatus,onRejected})` → `createRoom/join/setSeats/start/submit/claim/kick/lobby/leave/reconnect/stop/getSnapshot/getStatus`. `onSnapshot(snapshot,previous,{initial})`, `onStatus({state,reason,locked,offlineSince})`. 보조 API `getClientId/readSession/serverURL/codeValid/ownSeats/permissionsFor/canClaim/seatDrafts/acknowledged/clearSession`.
 - `kids/playground/family/family-room-ui.js`: 전역 `FamilyRoomUI.mount({gameType,maxSeats,title,modes,createGame,hostOptions,onRoom,onGame,onLobby,onLocal,onView,onLock,validate})` → `boot/back/invalid/continueLocal/getRoom`. 입구·자동 복구·대기실·소유권·한 기기 전환. `hostOptions()`는 방장에게만 보이는 시작 옵션 요소(오목 판 크기)를 돌려줍니다. 순수 판단 API `initialSeat/usableAvatar/validDrafts/validRoom/startReason`. `#resumeMultipleDevices`가 있으면 이어하기 화면에서도 여러 기기 입구로 갑니다. 다른 게임의 코드는 입구로 돌려보냅니다.
 - 대기실은 이 기기의 `FamilyPlayers.createSetup` 하나를 사용합니다. 추가 인자 `isTaken(avatar,player)`·`onChange(players)`, 인스턴스 `setPlayers(players)`는 조용한 복사·복원입니다. 기본 인자가 없으면 기존 한 기기 설정을 유지합니다. 이름은 400ms 지연, 잠금 중에는 최신 초안 하나만 보존합니다.
@@ -224,8 +224,11 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 계약: 규칙 엔진 `docs/family_yut_engine_spec.md`, 화면 `docs/family_yut_ui_spec.md`.
 - `kids/playground/family/yut-engine.js` (272줄, 상한 300): DOM·저장소·통신 없는 IIFE, 전역 `window.YutEngine` 하나(`Object.freeze`). 공개 API `THROWS`, `STEPS`, `WAITING`, `DONE`, `routeOf(from,steps)`, `rollSticks(rng=Math.random)`, `createGame(players,pieceCount=4)`, `legalMoves(state)`, `applyThrow(state,result)`, `applyMove(state,pieceId,throwIndex)`, `rematch(state)`, `isValidSaved(state)`.
 - 상태: `{v:1,gameType:'yut',stateVersion,turnPlayer,players,publicBoard:{pieceCount,phase,pending,log,pieces},result,lastAction}`. 참가자는 `{id,name,avatar,assist}`(2~4명), 말은 `{id,owner,pos,trail}`(인당 2~4개, `-1` 대기·`1~29` 판·`30` 완주), `phase`는 `throw`/`move`/`over`. 유효 행동만 불변 새 상태·버전 +1을 반환하고 무효 행동은 원본을 그대로 반환합니다.
-- 화면: 진입 놀이터 대문의 `family/yut.html`, 로비 놀이터 목록. `yut.html`(112줄, 상한 150), `yut-ui.js`(462줄, 상한 500, IIFE 전역 `YutUI`), `yut.css`(131줄, 상한 300). 저장 키 `familyYutGame`(로컬 전용).
-- 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저).
+- 화면: 진입 놀이터 대문의 `family/yut.html`, 로비 놀이터 목록. `yut.html`(121줄, 상한 150), `yut-ui.js`(577줄, 상한 600, IIFE 전역 `YutUI`), `yut.css`(131줄, 상한 300). 저장 키 `familyYutGame`(로컬 전용).
+- 가족 방(2026-11-03, 검토 대기): `FamilyRoomUI.mount({gameType:'yut',maxSeats:4,...})`와 방장 `hostOptions`의 말 개수 2~4개 선택. `YutUI` 공개 API는 `boot/validSnapshot/inputFor/effectsFor`. 로드: family-players → yut-engine → family-room → family-room-ui → yut-ui, CSS는 기존 스타일 뒤 family-room.css. Worker·공용 방 모듈·엔진은 변경하지 않습니다.
+- 방 상태는 엔진 상태 + 최상위 `lastSticks:null|boolean[4]`. 던진 기기의 결과·가락 순서를 확정 스냅샷으로 공유하고 수신 기기에서 재추첨하지 않습니다. 가락 필드를 뺀 판의 수순 재생·자리 ID 집합·말 허용 범위·최근 THROW와 가락의 일치를 검사합니다. 이동은 가락 배열 보존, 다시 하기는 배열 초기화·참가 순서 회전입니다.
+- 입력·도움은 차례 자리의 소유 기기만, 칩·말 미리보기는 기기 로컬입니다. 재접속·넘겨받기·대기실·이탈은 공용 방 경로를 사용하며 효과는 새 판 변화에만 냅니다. 방에서는 `familyYutGame`을 변경하지 않고 명시적 한 기기 전환 때만 `lastSticks`를 빼고 로컬 저장합니다.
+- 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저), `tests/family-yut-room.test.mjs`(여러 기기 가락·결과·입력·복구·자리·다시 하기·저장 분리). 가족 방 추가분은 구현 담당이 실행하지 않았으며 검토자 시험·실제 화면 확인이 남아 있습니다.
 
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)

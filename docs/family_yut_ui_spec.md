@@ -1,7 +1,8 @@
-# 🎯 가족 보드게임: 윷놀이 화면 명세서 (한 기기)
+# 🎯 가족 보드게임: 윷놀이 화면 명세서 (한 기기·가족 방)
 
-> **문서 버전**: v1.0 (2026-11-02)
-> **상태**: 구현 완료. 담당: Antigravity Gemini 3.8 Flash
+> **문서 버전**: v1.1 (2026-11-03)
+> **상태**: 한 기기 구현 완료. 가족 방 연결 구현, 시험·화면 검증은 검토자 인계(미실행).
+> **현재 작업 계약**: 아래 §0~§7은 최초 한 기기 제작 기록이다. 가족 방 연결은 §8을 따른다. 작업 브랜치는 `codex/yut-family-room`이며 구현 담당은 커밋·브랜치 변경·시험 실행을 하지 않는다.
 > **근거**: 노션 현황판 카드 「가족 보드게임 추가: 오목·윷놀이 커스텀 맵·장기·바둑」, 엔진 `docs/family_yut_engine_spec.md`, 선례 `docs/family_omok_spec.md`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다. `kids/playground/family/`의 `yut-engine.js`, `family-players.js`, `omok.html`, `omok.css`, `omok-ui.js`와 `tests/family-browser.mjs`, `tests/family-omok.test.mjs`를 읽는다.
 
@@ -162,3 +163,19 @@
 2. 기존 시험 전부: `node --test "tests/**/*.test.mjs"`. `fail 0`과 종료 코드를 보고한다(`todo`의 실패 출력은 기존 항목이다).
 3. 바뀐 파일마다 `python -X utf8 G:/master-tower/scripts/verify_contracts.py --mode file --file <절대 경로>` → `[ALL PASS]`.
 4. **실제 브라우저 확인은 Claude가 한다**(쓰기 차단 서버, 320·375·768px, 가로 화면, 말 그림, 실제 한 판). 하지 못했으면 "하지 않음"으로 적으면 된다.
+
+## 8. 가족 방 연결 (2026-11-03)
+
+- 야추·오목과 같은 `FamilyRoomUI.mount`를 사용한다. `gameType:'yut'`, `maxSeats:4`, `title:'가족 윷놀이'`, `createGame`, `hostOptions`, `validate`와 기존 콜백으로 연결한다. 공용 방 코드·Worker·규칙 엔진·기존 CSS는 수정하지 않는다. `yut-ui.js` 한도는 오목과 같은 600줄로 바꾼다.
+- `yut.html`에 `singleDevice`·`multipleDevices`·`resumeMultipleDevices`, `roomStatus`·`roomView`·`roomActions`를 추가한다. 한 기기의 기존 요소·문구·배치는 유지한다. `family-room.css`를 추가하고 `family-players` → `yut-engine` → `family-room` → `family-room-ui` → `yut-ui` 순서로 로드한다.
+- 방장은 대기실 `hostOptions`에서 말 개수 2·3·4개(기본 4)를 고른다. 시작은 확정 자리로 `YutEngine.createGame(seats,roomPieceCount)`를 호출한다. 참가 인원은 2~4명이며 한 기기에 여러 자리와 구경 기기를 허용한다.
+- 던지기는 자기 차례 기기에서만 `rollSticks()`를 한 번 호출하고 `applyThrow`로 다음 상태를 만든다. 방의 상태에는 엔진 상태와 함께 최상위 `lastSticks:null|boolean[4]`를 보낸다. 시작·다시 하기는 null, 이동은 직전 가락 배열을 유지한다. 결과뿐 아니라 가락 순서·빽도 표시도 모든 화면과 재접속에서 같다.
+- 받는 쪽은 가락으로 다시 추첨하지 않는다. `lastSticks`를 뺀 상태를 엔진 `isValidSaved`로 수순 재생하고, 가장 최근 THROW의 결과와 가락 배열이 일치하는지 `rollSticks`에 결정적인 RNG를 주입해 검사한다. 판의 참가자 ID 집합은 자리 ID 집합과 같아야 하며 갤러리 말도 공용 허용 범위로 검사한다. 다시 하기는 참가자 순서를 회전하므로 자리 순서와 달라도 된다.
+- `YutUI`는 기존 `boot`와 순수 API `validSnapshot`·`inputFor`·`effectsFor`를 제공한다. 입력·전송 잠금·차례 권한은 클릭 처리에서도 확인한다. 방에서는 확정 스냅샷 전까지 판·결과·로컬 저장을 바꾸지 않는다. 선택한 칩·말·도착 미리보기는 전송하지 않고, 판 변경·소유권 상실·전송 잠금 때 정리한다. 같은 판의 접속 알림에는 선택과 포커스를 보존한다.
+- 다른 기기의 차례와 구경 화면은 던지기·칩·말·완주·확정을 비활성화하고 개인 도움을 숨긴다. 대기 배너를 표시한다. 확정 스냅샷의 마지막 행동으로 잡기·업기·완주·추가 던지기 안내를 복원한다.
+- 차례 음성은 차례가 넘어온 기기만, 시작·다시 하기 안내는 첫 자리의 기기만, 승부 음성은 방장만 낸다. 보상 효과음은 자리가 있는 기기만 한 번 낸다. 첫 입장·재접속·같은 판 재수신에서는 지난 음성·보상을 재생하지 않는다. 한 기기는 전처럼 시작·승부 때만 말한다.
+- 다시 하기는 `rematch`를 적용한 상태를 현재 방 rev의 `act`로 보낸다. 구경 기기는 누를 수 없다. 방장은 대기실로, 나머지는 방 나가기로 이동한다. 연결 단절·4409·이탈 자리 넘겨받기·되찾기·방장 승계는 공용 방 동작을 그대로 쓴다.
+- `familyYutGame`은 방에서 쓰거나 지우지 않는다. 공용 `familyRoomClientId`·`familyRoomSession`만 사용한다. 30초 단절·만료 뒤 명시적 한 기기 전환에서는 마지막 확정 상태의 `lastSticks`만 제거해 기존 로컬 저장 계약으로 넘긴다. 한 기기 이어하기와 같이 가락 표시·미리보기는 비운다.
+- 시험: 기존 `tests/family-yut.test.mjs`는 방 로드 순서와 600줄 한도로 계약을 갱신한다. 공용 `tests/family-browser.mjs`는 윷놀이에서도 방 모듈을 로드한다. 신규 `tests/family-yut-room.test.mjs`는 가락·결과 왕복, 응답 전 불변, 입력 권한, 거절, 복구, 자리 넘겨받기, 다시 하기, 소리, 로컬 저장 분리, 조작 거부와 3·4인을 다룬다. 규칙 엔진 시험·로비 해시는 수정하지 않는다.
+- 검토자 실행: `node --test tests/yut-engine.test.mjs tests/family-yut.test.mjs tests/family-yut-room.test.mjs tests/family-room.test.mjs tests/family-room-ui.test.mjs tests/family-yacht.test.mjs tests/family-omok.test.mjs`, 이후 `node --test "tests/**/*.test.mjs"`. 계약 검사는 이 PC의 상위 폴더에 있는 도구로, 저장소 루트에서 `python -X utf8 ../scripts/verify_contracts.py --mode git-diff --repo kids-school-main`을 실행한다. 도구 파일은 수정하지 않는다.
+- 구현 담당은 시험·Python·실제 네트워크·브라우저를 실행하지 않았다. 검토자는 쓰기 차단 서버에서 320·375·768px와 가로 화면, 서로 다른 출처의 두 기기로 한 판·폰 잠금 복귀·동시 입력·대신 하기·다시 하기·가락 모양 일치를 확인한다. 실제 소리·갤러리 CDN도 별도 확인한다. 커밋·배포·노션 기록은 하지 않았다.
