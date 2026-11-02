@@ -216,7 +216,7 @@
         cell.append(token);
       } else {
         label += ', 빈 칸';
-        if (pos === 20) cell.append(element('span', '출발·도착', 'cell-tag'));
+        if (pos === 20) { const tag = element('span', undefined, 'cell-tag'); tag.append(element('span', '출발·'), element('span', '도착')); cell.append(tag); }
       }
 
       if (b.phase === 'move' && !state.result) {
