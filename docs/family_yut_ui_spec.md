@@ -1,7 +1,7 @@
 # 🎯 가족 보드게임: 윷놀이 화면 명세서 (한 기기·가족 방)
 
 > **문서 버전**: v1.1 (2026-11-03)
-> **상태**: 한 기기 구현 완료. 가족 방 연결 구현, 시험·화면 검증은 검토자 인계(미실행).
+> **상태**: 한 기기 구현 완료. 가족 방 연결 병합·운영 왕복 확인, 실기기 한 판 대기.
 > **현재 작업 계약**: 아래 §0~§7은 최초 한 기기 제작 기록이다. 가족 방 연결은 §8을 따른다. 작업 브랜치는 `codex/yut-family-room`이며 구현 담당은 커밋·브랜치 변경·시험 실행을 하지 않는다.
 > **근거**: 노션 현황판 카드 「가족 보드게임 추가: 오목·윷놀이 커스텀 맵·장기·바둑」, 엔진 `docs/family_yut_engine_spec.md`, 선례 `docs/family_omok_spec.md`.
 > **작업자 참고**: `AGENTS.md` 순서대로 `GEMINI.md`, `kids/core/CORE_CATALOG.md`를 먼저 읽는다. `kids/playground/family/`의 `yut-engine.js`, `family-players.js`, `omok.html`, `omok.css`, `omok-ui.js`와 `tests/family-browser.mjs`, `tests/family-omok.test.mjs`를 읽는다.
@@ -178,4 +178,4 @@
 - `familyYutGame`은 방에서 쓰거나 지우지 않는다. 공용 `familyRoomClientId`·`familyRoomSession`만 사용한다. 30초 단절·만료 뒤 명시적 한 기기 전환에서는 마지막 확정 상태의 `lastSticks`만 제거해 기존 로컬 저장 계약으로 넘긴다. 한 기기 이어하기와 같이 가락 표시·미리보기는 비운다.
 - 시험: 기존 `tests/family-yut.test.mjs`는 방 로드 순서와 600줄 한도로 계약을 갱신한다. 공용 `tests/family-browser.mjs`는 윷놀이에서도 방 모듈을 로드한다. 신규 `tests/family-yut-room.test.mjs`는 가락·결과 왕복, 응답 전 불변, 입력 권한, 거절, 복구, 자리 넘겨받기, 다시 하기, 소리, 로컬 저장 분리, 조작 거부와 3·4인을 다룬다. 규칙 엔진 시험·로비 해시는 수정하지 않는다.
 - 검토자 실행: `node --test tests/yut-engine.test.mjs tests/family-yut.test.mjs tests/family-yut-room.test.mjs tests/family-room.test.mjs tests/family-room-ui.test.mjs tests/family-yacht.test.mjs tests/family-omok.test.mjs`, 이후 `node --test "tests/**/*.test.mjs"`. 계약 검사는 이 PC의 상위 폴더에 있는 도구로, 저장소 루트에서 `python -X utf8 ../scripts/verify_contracts.py --mode git-diff --repo kids-school-main`을 실행한다. 도구 파일은 수정하지 않는다.
-- 구현 담당은 시험·Python·실제 네트워크·브라우저를 실행하지 않았다. 검토자는 쓰기 차단 서버에서 320·375·768px와 가로 화면, 서로 다른 출처의 두 기기로 한 판·폰 잠금 복귀·동시 입력·대신 하기·다시 하기·가락 모양 일치를 확인한다. 실제 소리·갤러리 CDN도 별도 확인한다. 커밋·배포·노션 기록은 하지 않았다.
+- 운영 Worker에서 Node 네 기기로 말 2개 한 판 156수·오래된 rev 거절·다시 하기·재접속을, 쓰기 차단 서버의 화면 한 기기와 Node 한 기기로 방 생성부터 한 판 완주·다시 하기·새로고침 복귀·방 나가기까지 확인했다. 판 상태 거부는 없었고 새로고침으로 끊기면 방장이 온라인 상대에게 넘어간다. 실기기 두 대, 실제 음성, 폰 잠금 복귀는 미확인이다.

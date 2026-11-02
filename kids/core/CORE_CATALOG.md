@@ -225,10 +225,10 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/playground/family/yut-engine.js` (272줄, 상한 300): DOM·저장소·통신 없는 IIFE, 전역 `window.YutEngine` 하나(`Object.freeze`). 공개 API `THROWS`, `STEPS`, `WAITING`, `DONE`, `routeOf(from,steps)`, `rollSticks(rng=Math.random)`, `createGame(players,pieceCount=4)`, `legalMoves(state)`, `applyThrow(state,result)`, `applyMove(state,pieceId,throwIndex)`, `rematch(state)`, `isValidSaved(state)`.
 - 상태: `{v:1,gameType:'yut',stateVersion,turnPlayer,players,publicBoard:{pieceCount,phase,pending,log,pieces},result,lastAction}`. 참가자는 `{id,name,avatar,assist}`(2~4명), 말은 `{id,owner,pos,trail}`(인당 2~4개, `-1` 대기·`1~29` 판·`30` 완주), `phase`는 `throw`/`move`/`over`. 유효 행동만 불변 새 상태·버전 +1을 반환하고 무효 행동은 원본을 그대로 반환합니다.
 - 화면: 진입 놀이터 대문의 `family/yut.html`, 로비 놀이터 목록. `yut.html`(121줄, 상한 150), `yut-ui.js`(577줄, 상한 600, IIFE 전역 `YutUI`), `yut.css`(131줄, 상한 300). 저장 키 `familyYutGame`(로컬 전용).
-- 가족 방(2026-11-03, 검토 대기): `FamilyRoomUI.mount({gameType:'yut',maxSeats:4,...})`와 방장 `hostOptions`의 말 개수 2~4개 선택. `YutUI` 공개 API는 `boot/validSnapshot/inputFor/effectsFor`. 로드: family-players → yut-engine → family-room → family-room-ui → yut-ui, CSS는 기존 스타일 뒤 family-room.css. Worker·공용 방 모듈·엔진은 변경하지 않습니다.
+- 가족 방(2026-11-03, 병합·운영 왕복 확인, 실기기 한 판 대기): `FamilyRoomUI.mount({gameType:'yut',maxSeats:4,...})`와 방장 `hostOptions`의 말 개수 2~4개 선택. `YutUI` 공개 API는 `boot/validSnapshot/inputFor/effectsFor`. 로드: family-players → yut-engine → family-room → family-room-ui → yut-ui, CSS는 기존 스타일 뒤 family-room.css. Worker·공용 방 모듈·엔진은 변경하지 않습니다.
 - 방 상태는 엔진 상태 + 최상위 `lastSticks:null|boolean[4]`. 던진 기기의 결과·가락 순서를 확정 스냅샷으로 공유하고 수신 기기에서 재추첨하지 않습니다. 가락 필드를 뺀 판의 수순 재생·자리 ID 집합·말 허용 범위·최근 THROW와 가락의 일치를 검사합니다. 이동은 가락 배열 보존, 다시 하기는 배열 초기화·참가 순서 회전입니다.
 - 입력·도움은 차례 자리의 소유 기기만, 칩·말 미리보기는 기기 로컬입니다. 재접속·넘겨받기·대기실·이탈은 공용 방 경로를 사용하며 효과는 새 판 변화에만 냅니다. 방에서는 `familyYutGame`을 변경하지 않고 명시적 한 기기 전환 때만 `lastSticks`를 빼고 로컬 저장합니다.
-- 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저), `tests/family-yut-room.test.mjs`(여러 기기 가락·결과·입력·복구·자리·다시 하기·저장 분리). 가족 방 추가분은 구현 담당이 실행하지 않았으며 검토자 시험·실제 화면 확인이 남아 있습니다.
+- 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저), `tests/family-yut-room.test.mjs`(여러 기기 가락·결과·입력·복구·자리·다시 하기·저장 분리). 가족 방은 병합·운영 왕복 확인, 실기기 한 판 대기입니다. 운영 Worker의 Node 네 기기 한 판(말 2개·156수)과 쓰기 차단 화면 한 기기·Node 한 기기의 한 판·새로고침 복귀를 확인했습니다. 실기기 두 대, 실제 음성, 폰 잠금 복귀는 미확인입니다.
 
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
