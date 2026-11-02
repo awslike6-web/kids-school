@@ -220,11 +220,12 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 시험: `tests/family-room.test.mjs`(통신), `tests/family-room-ui.test.mjs`(대기실·복구), `tests/family-yacht.test.mjs`·`tests/family-omok.test.mjs`(입력·효과·안전·한 기기 회귀). 공용 모의 브라우저는 `tests/family-browser.mjs`(`game` 인자로 게임 선택)이며 실제 네트워크를 사용하지 않습니다.
 - 파일 크기(끝 공백 제외): family-room.js 210줄(상한 300), family-room-ui.js 310줄(400), family-room.css 19줄(200), family-players.js 172줄(기존 대비 +13), yacht-ui.js 416줄(600), yacht.html 91줄(150), omok-ui.js 321줄(600), omok.html 83줄(150).
 
-### 🎲 가족 윷놀이 규칙 엔진 (2026-11-02)
-- 계약: `docs/family_yut_engine_spec.md` (이번 범위는 순수 규칙 엔진만, 화면 제외).
+### 🎲 가족 윷놀이 규칙 엔진 & 화면 (2026-11-02)
+- 계약: 규칙 엔진 `docs/family_yut_engine_spec.md`, 화면 `docs/family_yut_ui_spec.md`.
 - `kids/playground/family/yut-engine.js` (272줄, 상한 300): DOM·저장소·통신 없는 IIFE, 전역 `window.YutEngine` 하나(`Object.freeze`). 공개 API `THROWS`, `STEPS`, `WAITING`, `DONE`, `routeOf(from,steps)`, `rollSticks(rng=Math.random)`, `createGame(players,pieceCount=4)`, `legalMoves(state)`, `applyThrow(state,result)`, `applyMove(state,pieceId,throwIndex)`, `rematch(state)`, `isValidSaved(state)`.
 - 상태: `{v:1,gameType:'yut',stateVersion,turnPlayer,players,publicBoard:{pieceCount,phase,pending,log,pieces},result,lastAction}`. 참가자는 `{id,name,avatar,assist}`(2~4명), 말은 `{id,owner,pos,trail}`(인당 2~4개, `-1` 대기·`1~29` 판·`30` 완주), `phase`는 `throw`/`move`/`over`. 유효 행동만 불변 새 상태·버전 +1을 반환하고 무효 행동은 원본을 그대로 반환합니다.
-- 시험: `tests/yut-engine.test.mjs` (`node:vm` 격리, 경로·윷가락·빽도 `trail`·업기/합류·잡기 추가 던지기·빽도 폐기·승리·`rematch` 회전·`isValidSaved` 로그 재생 검증·무작위 완주).
+- 화면: 진입 놀이터 대문의 `family/yut.html`, 로비 놀이터 목록. `yut.html`(112줄, 상한 150), `yut-ui.js`(462줄, 상한 500, IIFE 전역 `YutUI`), `yut.css`(131줄, 상한 300). 저장 키 `familyYutGame`(로컬 전용).
+- 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저).
 
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)

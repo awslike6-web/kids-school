@@ -62,6 +62,13 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
     nest('setupView', ['playerSetup', 'playerCount', 'startGame', 'singleDevice', 'multipleDevices']);
     nest('gameView', ['dice', 'rollDice', 'scoreTable', 'keepHint', 'turnHelp', 'turnBanner', 'turnAvatar', 'roundBanner']);
     nest('endView', ['playAgain', 'backToSetup', 'winners', 'rankings', 'endTitle']);
+  } else if (game === 'yut') {
+    nodes.get('playerCount').value = '2';
+    nodes.get('pieceCount').value = '4';
+    nest('setupView', ['playerCount', 'pieceCount', 'playerSetup', 'setupError', 'startGame']);
+    nest('resumeView', ['resumeSummary', 'resumeGame', 'newGame']);
+    nest('endView', ['endTitle', 'winners', 'playAgain', 'backToSetup']);
+    nest('gameView', ['board', 'finishCell', 'waitingTray', 'turnHeading', 'turnBanner', 'turnAvatar', 'assistLabel', 'playersStatus', 'sticks', 'throwResult', 'throwButton', 'pendingList', 'helpText', 'moveText', 'confirmMove', 'actionMessage', 'endView']);
   } else {
     nest('setupView', ['playerSetup', 'boardSize', 'startGame', 'singleDevice', 'multipleDevices']);
     nest('endView', ['playAgain', 'backToSetup', 'winners', 'endTitle']);
@@ -106,12 +113,15 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
   };
   context.window = context; vm.createContext(context);
   const load = name => vm.runInContext(read(name), context, { filename: name });
-  ['family-players.js', 'family-room.js', 'family-room-ui.js', `${game}-engine.js`, `${game}-ui.js`].forEach(load);
+  const files = game === 'yut'
+    ? ['family-players.js', `${game}-engine.js`, `${game}-ui.js`]
+    : ['family-players.js', 'family-room.js', 'family-room-ui.js', `${game}-engine.js`, `${game}-ui.js`];
+  files.forEach(load);
   const fire = (key, event = {}) => { for (const fn of listeners.get(key) || []) fn(event); };
   const $ = id => document.getElementById(id);
   const find = (text, host = body) => host.querySelectorAll('button').find(n => n.textContent === text);
   const connect = (s = snapshot()) => { const ws = sockets.at(-1); ws.open(); ws.message(s); return ws; };
-  const boot = () => (game === 'yacht' ? context.YachtUI : context.OmokUI).boot();
+  const boot = () => (game === 'yacht' ? context.YachtUI : game === 'yut' ? context.YutUI : context.OmokUI).boot();
   return { context, $, find, connect, boot, load, fire, tick, timers, store, nodes, sockets, requests, speech, Node, body };
 }
 export function players() {
