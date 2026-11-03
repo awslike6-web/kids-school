@@ -47,7 +47,7 @@ function browser({ data = [], blocked = false, saved, yacht = false } = {}) {
   };
   context.window = context; vm.createContext(context);
   const load = file => vm.runInContext(read(file), context, { filename: file });
-  load('family-players.js');
+  load('family-players.js'); load('family-sound.js');
   const $ = id => context.document.getElementById(id);
   $('boardSize').value = '13';
   return { context, F: context.FamilyPlayers, nodes, $, timers, store, speech, Node, load };

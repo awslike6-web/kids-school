@@ -113,7 +113,7 @@ export function browser({ search = '', blocked = false, storage = {}, fetch: fet
   };
   context.window = context; vm.createContext(context);
   const load = name => vm.runInContext(read(name), context, { filename: name });
-  const files = ['family-players.js', 'family-room.js', 'family-room-ui.js', `${game}-engine.js`, `${game}-ui.js`];
+  const files = ['family-players.js', 'family-sound.js', 'family-room.js', 'family-room-ui.js', `${game}-engine.js`, `${game}-ui.js`];
   files.forEach(load);
   const fire = (key, event = {}) => { for (const fn of listeners.get(key) || []) fn(event); };
   const $ = id => document.getElementById(id);

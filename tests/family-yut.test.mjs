@@ -353,6 +353,26 @@ test('완주: finishCell, 승부: 끝 화면, 음성 뒤 보상, rematch 회전 
   assert.equal(bHide.speech.filter(x => x.text === 'reward').length, 0); // 보상 안 나옴!
 });
 
+for (const game of ['yut', 'omok', 'yacht']) {
+  test(`${game}: 전체 음성이 꺼져 있으면 버튼도 꺼짐이고, 게임에서 켜면 전체도 켜진다`, () => {
+    const b = browser({ game });
+    b.store.set('fairy_tts_enabled', 'false');
+    b.boot();
+    const toggle = b.$('soundToggle');
+    assert.equal(toggle.getAttribute('aria-pressed'), 'true');
+    assert.equal(toggle.textContent, '🔇 안내 음성');
+    toggle.click();
+    assert.equal(b.store.get('fairy_tts_enabled'), 'true');
+    assert.equal(toggle.textContent, '🔊 안내 음성');
+    toggle.click(); // 끌 때는 이 게임만 끈다
+    assert.equal(b.store.get('fairy_tts_enabled'), 'true');
+    assert.equal(toggle.textContent, '🔇 안내 음성');
+    b.store.set('fairy_tts_enabled', 'false');
+    b.fire('pageshow'); // 뒤로 가기로 돌아와도 실제 상태를 보여 준다
+    assert.equal(toggle.getAttribute('aria-pressed'), 'true');
+  });
+}
+
 test('음소거 및 이어하기와 저장 차단', () => {
   // 음소거 토글
   const b = browser({ game: 'yut' });
@@ -385,7 +405,7 @@ test('리소스 계약: 줄 수, 상대 경로, 금지 API 없음, 로비 및 �
   const html = read('yut.html');
   assert.ok(html.indexOf('src="../../core/fairy-config.js"') < html.indexOf('src="yut-ui.js"'));
   assert.ok(html.includes('href="family-room.css"'));
-  const scripts = ['family-players.js', 'yut-engine.js', 'family-room.js', 'family-room-ui.js', 'yut-ui.js'];
+  const scripts = ['family-players.js', 'family-sound.js', 'yut-engine.js', 'family-room.js', 'family-room-ui.js', 'yut-ui.js'];
   scripts.forEach((file, i) => {
     assert.ok(html.includes(`src="${file}"`));
     if (i) assert.ok(html.indexOf(`src="${scripts[i - 1]}"`) < html.indexOf(`src="${file}"`));

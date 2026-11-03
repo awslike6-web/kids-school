@@ -281,11 +281,7 @@
       if (room) { roomUI.back(); return; }
       stopAudio(); state = null; selected = null; setView('setupView'); setup.render();
     });
-    $('soundToggle').addEventListener('click', () => {
-      muted = !muted; $('soundToggle').setAttribute('aria-pressed', String(muted));
-      $('soundToggle').textContent = muted ? '🔇 안내 음성' : '🔊 안내 음성';
-      if (muted) stopAudio();
-    });
+    window.FamilySound.bindToggle($('soundToggle'), value => { muted = value; if (muted) stopAudio(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden) stopAudio(); });
     window.addEventListener('pagehide', () => { effectGeneration++; stopAudio(); });
     if (window.FamilyRoomUI) {

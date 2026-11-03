@@ -204,6 +204,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `omok-ui.js`/전역 `OmokUI.boot()`: 두 번 누르기 또는 확인 버튼으로 착수, 도움·마지막 돌·승리선, 사람별 무르기, 승부·음소거·이어하기. `omok.html`은 얇은 래퍼, `omok.css`는 CSS 격자·돌과 가로/세로 배치. 시작 설정 스타일은 기존 `yacht.css`를 함께 로드해 재사용.
 - 저장 키 `familyOmokGame`은 기기 로컬 전용. 수순 재생으로 차례·결과·승리선을 검증하고 버전·무르기·마지막 행동도 확인. 형식 오류는 폐기, 종료 시 삭제, 저장소 차단에도 플레이 지속. 게임 기록 전송·보상·학습 계측 없음.
 - `kids/playground/family/family-players.js`: 야추·오목 공용 IIFE, 전역 `FamilyPlayers` 하나. `avatarKey`, `collectAvatars`, `showAvatar`, `fallbackFor`, `playerAvatar`, `defaultMode`, `createSetup({host,count,min,max,modes})`; 설정 인스턴스는 `setCount(count)`, `render()`, `getPlayers()` 제공. 갤러리 목록·작품+캐릭터 중복 제거·그림 오류/2.5초 지연·서로 다른 이모지 대체를 한 벌로 유지. 이전 그림 타이머가 새 표시를 덮어쓰지 않음.
+- `kids/playground/family/family-sound.js`: 윷놀이·오목·야추의 안내 음성 버튼 공용 IIFE, 전역 `FamilySound` 하나. `bindToggle(button, onChange(muted))`는 `fairy_tts_enabled`가 `false`면 꺼짐으로 표시하고, 게임에서 켜면 이 값을 `true`로 바꿔 전체 음성도 켭니다. 끌 때는 그 게임 화면만 끕니다.
 - 야추 HTML은 엔진 → family-players → UI 순서로 로드. 야추의 `familyYachtGame` 키·말 저장 형식·설정 문구·CSS는 보존. 오목 음성은 시작·승부 때만 공통 TTS와 종료 효과음을 사용.
 - 시험: `tests/omok-engine.test.mjs`(순수 규칙·수순 재생·리소스), `tests/family-players.test.mjs`(말 목록·대체·설정·모의 DOM 클릭·야추 공용화). 실제 화면 검수는 Claude가 쓰기 차단 서버에서 별도로 수행.
 
