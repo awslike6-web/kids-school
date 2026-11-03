@@ -7,7 +7,19 @@
     'use strict';
 
     const STORY_BOOKS = [
-                {
+                        {
+            id: "l10",
+            badge: "⏰ 10단원 일러스트 동화",
+            title: "The Early Bird and the Night Owl",
+            koreanTitle: "일찍 일어나는 새와 밤 올빼미의 하루",
+            desc: "초등 영어 5-2 10단원 (하루 일과와 시간 묻고 답하기)",
+            keyExpr: "What time do you get up? / I get up at 6.",
+            url: "english_l10_storybook.html",
+            color: "#059669",
+            themeTagSon: "⏰ 하루 일과 투어",
+            themeTagDaughter: "🌟 즐거운 하루"
+        },
+{
             id: "l9",
             badge: "🏠 9단원 일러스트 동화",
             title: "Welcome to My Dream House!",
