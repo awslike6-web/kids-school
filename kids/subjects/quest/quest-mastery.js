@@ -168,19 +168,19 @@
       return !subjKo || subj.includes(subjKo);
     });
     const keys = parseUnitList(opts.unit).map(u => u.toLowerCase());
-    if (keys.length === 0) return [];
+    if (keys.length === 0) return []; const matchStage = (r, fn) => parseUnitList(r.stage).find(s => fn(s.toLowerCase()));
     // 다중 단원 묶음: 고른 단원명과 정확히 일치하는 항목만 합친다 (번호 느슨 매칭·학기 필터 없음 — 부모가 명시적으로 고른 단원)
     if (keys.length > 1) {
       const wanted = new Set(keys);
       const seenIds = new Set();
-      return base.filter(r => wanted.has(String(r.stage || '').trim().toLowerCase()))
-        .map(toItem).filter(it => !seenIds.has(it.id) && seenIds.add(it.id));
+      return base.filter(r => matchStage(r, s => wanted.has(s)))
+        .map(r => toItem({ ...r, stage: matchStage(r, s => wanted.has(s)) })).filter(it => !seenIds.has(it.id) && seenIds.add(it.id));
     }
     const key = keys[0];
-    let matched = base.filter(r => String(r.stage || '').trim().toLowerCase() === key);
+    let pick = r => matchStage(r, s => s === key), matched = base.filter(pick);
     if (matched.length < 3) {
       const num = (key.match(/\d+/) || [])[0];
-      if (num) matched = base.filter(r => (String(r.stage || '').match(/\d+/) || [])[0] === num);
+      if (num) { pick = r => matchStage(r, s => (s.match(/\d+/) || [])[0] === num); matched = base.filter(pick); }
     }
     // 현재 학기 우선: '3' → "3. 온도와 열"(5-2)과 "3-1. 용해…"(5-1)가 섞이지 않도록 학년으로 거른다.
     // 학기 일치 항목이 하나도 없으면(학년 미기재 단원 등) 단원 전체를 유지한다.
@@ -193,7 +193,7 @@
       if (inSemester.length >= 3) matched = inSemester;
     }
     const seen = new Set();
-    return matched.map(toItem).filter(it => !seen.has(it.id) && seen.add(it.id));
+    return matched.map(r => toItem({ ...r, stage: pick(r) || r.stage })).filter(it => !seen.has(it.id) && seen.add(it.id));
   }
 
   // 같은 표제어(띄어쓰기·대소문자 무시)가 여러 단원에 있으면 숙련도(count)가 높은 항목 1개만 남긴다.

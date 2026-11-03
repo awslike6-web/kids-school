@@ -164,6 +164,11 @@
     const korSel = unit => ({ childName: '민수', subjectKo: '국어', unit, semester: '5-2' });
     check('단원 목록 파싱: 배열·| 결합·단일', JSON.stringify(QM.parseUnitList([U14, U15])) === JSON.stringify([U14, U15]) && QM.parseUnitList(`${U14}|${U15}`).length === 2 && QM.parseUnitList('L9').length === 1);
     check('쉼표 든 단원명은 1개로 유지', QM.parseUnitList(U06).length === 1 && QM.selectUnitItems(center, korSel(U06)).length === 3);
+    const multiRow = { id: 'm_monkey', word: '원숭이도 나무에서 떨어진다', meaning: '아무리 잘하는 사람도 실수할 때가 있다', wordType: '속담', stage: `${U06} | ${U25}`, grades: ['5-1', '5-2'], subject: ['국어', '센터'], target: ['민수'] };
+    const sel06 = QM.selectUnitItems([...center, multiRow], { childName: '민수', subjectKo: '국어', unit: U06, semester: '5-1' });
+    const sel25 = QM.selectUnitItems([...center, multiRow], korSel(U25));
+    const selBoth = QM.selectUnitItems([...center, multiRow], korSel([U06, U25]));
+    check('한 단어 다중 회차(|) 병합 행: 각 회차 개별 조회 및 묶음 중복 제거', sel06.some(it => it.id === 'm_monkey' && it.stage === U06) && sel25.some(it => it.id === 'm_monkey' && it.stage === U25) && selBoth.filter(it => it.id === 'm_monkey').length === 1 && QM.unitTitle(sel06, [U06]) === QM.stageLabel(U06));
     const b3 = QM.selectUnitItems(center, korSel(`${U14}|${U15}|${U16}`));
     check('14·15·16번 묶음 = 18개', b3.length === 18, b3.length);
     check('18개 → 2 Stage', QM.buildStages(b3).length === 2, QM.buildStages(b3).length);

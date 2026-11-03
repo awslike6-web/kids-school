@@ -434,9 +434,9 @@ async function fetchVocaUnitFresh(options = {}) {
     if (options.studentName) filters.push({ property: "학생", multi_select: { contains: options.studentName } });
     if (options.subject) filters.push({ property: "과목", multi_select: { contains: options.subject } });
     if (Array.isArray(options.units) && options.units.length > 0) {
-        filters.push({ or: options.units.map(u => ({ property: "단원", rich_text: { equals: String(u) } })) });
+        filters.push({ or: options.units.map(u => ({ property: "단원", rich_text: { contains: String(u) } })) });
     } else if (options.unit) {
-        filters.push({ property: "단원", rich_text: { equals: String(options.unit) } });
+        filters.push({ property: "단원", rich_text: { contains: String(options.unit) } });
     }
 
     const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;

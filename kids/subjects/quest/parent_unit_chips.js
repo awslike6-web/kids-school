@@ -89,6 +89,8 @@
       return '1-2';
     }
     if (gStr.includes('지혜') || String(r.wordType || '').includes('지혜')) return 'jihye';
+    if (String(stage).includes('5-1')) return '5-1';
+    if (String(stage).includes('5-2')) return '5-2';
     if (gStr.includes('5-1')) return '5-1';
     if (gStr.includes('5-2')) return '5-2'; // 학년이 명시돼 있으면 단원명 숫자("[센터 5-2] 14번"의 5)로 추정하지 않음
     const otherGrade = gList.find(g => /^\d-\d$/.test(g));
@@ -120,8 +122,8 @@
       try { data = JSON.parse(localStorage.getItem(k)); } catch (e) {}
       if (!data || !Array.isArray(data.records)) continue;
       data.records.forEach(r => {
-        const stage = String(r.stage || r.level || '').trim();
-        if (!stage || stage === '기본 단원') return;
+        const stages = String(r.stage || r.level || '').split('|').map(s => s.trim()).filter(s => s && s !== '기본 단원');
+        if (stages.length === 0) return;
         const subjs = Array.isArray(r.subject) ? r.subject : [r.subject];
         const isDictation = subjs.some(s => String(s).includes('받아쓰기'));
         Object.keys(CHILD_NAME).forEach(child => {
@@ -129,13 +131,15 @@
           subjs.forEach(s => {
             const subjKey = subjectKeyOf(s);
             if (!subjKey) return;
+            stages.forEach(stage => {
             const dupKey = `${child}::${subjKey}::${stage}::${r.id || r.word}`;
             if (seenRecord.has(dupKey)) return;
             seenRecord.add(dupKey);
             units[child][subjKey].push({ stage, semType: semTypeOf(child, r, stage), isDictation });
             const key = `${subjKey}::${stage}`;
             if (r.id) (idSets[child][key] = idSets[child][key] || new Set()).add(r.id);
-            if (r.examScope) stars[child][key] = true; // 노션 `시험범위` 체크 → 칩 ⭐
+              if (r.examScope) stars[child][key] = true; // 노션 `시험범위` 체크 → 칩 ⭐
+            });
           });
         });
       });
