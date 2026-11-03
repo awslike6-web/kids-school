@@ -417,12 +417,12 @@ window.SYSTEM_MAP_DATA = {
       agentPrompt: "reading_passages_cache.json에 노션 미반영 지문이 남아 있는지 확인하고 --sync-pending으로 반영해줘."
     },
     {
-      id: "pipe_gemini", col: "pipe", domain: ["english", "korean"], badge: "AI Key Dispenser",
-      title: "Gemini 키 디스펜서 (/api/gemini-key)", path: "Cloudflare Worker Secret → 브라우저 메모리",
-      summary: "공부방 AI 회화·토론이 쓰는 Gemini 키를 Worker Secret에서 런타임 수급 (코드·저장소에 키 없음)",
+      id: "pipe_gemini", col: "pipe", domain: ["english", "korean"], badge: "AI Proxy",
+      title: "Gemini Worker 프록시 (/v1/gemini)", path: "브라우저 → Cloudflare Worker → Gemini",
+      summary: "공부방 AI 회화·토론은 Worker를 거쳐 호출합니다. 키는 Worker Secret에만 있고 브라우저로 내보내지 않습니다 (/api/gemini-key는 410)",
       guardrails: ["키를 config.js·HTML에 하드코딩하거나 atob로 숨기는 행위 절대 금지",
-        "키 수급 실패 시 하드코딩 대신 Worker Secret 상태를 점검"],
-      agentPrompt: "AI 회화가 실패할 때 /api/gemini-key 응답과 Worker Secret 설정을 점검해줘. 키 값은 출력하지 마."
+        "브라우저에 키를 내려 주는 경로를 다시 만들지 않음"],
+      agentPrompt: "AI 회화가 실패할 때 /v1/gemini 응답과 Worker Secret 설정을 점검해줘. 키 값은 출력하지 마."
     },
     {
       id: "pipe_guardian_reward", col: "pipe", domain: ["quest", "math", "science", "society", "haru", "guardian"], badge: "Guardian & Reward",
@@ -649,10 +649,10 @@ window.SYSTEM_MAP_DATA = {
     {
       symptom: "💬 \"영어방 코코랑 대화(AI 회화)를 눌렀는데 대답이 안 와!\"",
       domain: "🔤 영어 AI 회화 / Gemini 키",
-      causes: ["Worker 키 디스펜서(/api/gemini-key) 응답 실패 또는 Secret 만료",
+      causes: ["Worker 프록시(/v1/chat/completions, /v1/gemini) 응답 실패 또는 Secret 만료",
         "표준이 아닌 구형 모델명으로 호출해 거부된 경우"],
-      targetFiles: ["english_chat.js", "korean_sentence.js", "/api/gemini-key"],
-      prompt: "english_chat.js의 Gemini 호출 경로와 모델명(gemini-3.8-flash)을 확인하고 /api/gemini-key 응답 상태를 점검해줘. 키 값은 출력하지 말고 하드코딩도 하지 마."
+      targetFiles: ["english_chat.js", "korean_sentence.js", "workers/minmin-notion/worker.js"],
+      prompt: "english_chat.js의 Gemini 호출 경로와 모델명(gemini-3.8-flash)을 확인하고 Worker 프록시 응답 상태를 점검해줘. 키 값은 출력하지 말고 하드코딩도 하지 마."
     },
     {
       symptom: "💬 \"관제탑에서 아침 약 칩을 눌렀는데 노션 일상 기록에 안 남아!\"",

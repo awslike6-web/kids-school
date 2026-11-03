@@ -282,40 +282,21 @@ async function sendToFairy(presetText) {
             generationConfig: { temperature: 0.7 }
         };
 
-        let aiResponse = "";
-
-        // 런타임 키 수령 확인 및 초고속 다이렉트 호출 우선 실행 (한국 IP 통신)
-        if (typeof callDirectGoogleGemini === 'function') {
-            try {
-                if (!window.__RUNTIME_GEMINI_KEY && typeof initRuntimeGeminiKey === 'function') {
-                    await initRuntimeGeminiKey();
-                }
-                const directResult = await callDirectGoogleGemini(geminiPayload);
-                if (directResult && directResult.text) {
-                    aiResponse = directResult.text;
-                }
-            } catch (e) {
-                console.warn('다이렉트 Gemini 실패, 프록시로 폴백:', e);
+        const { text: aiResponse } = await geminiFetch(
+            `${proxyBase}/v1/gemini`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(geminiPayload)
+            },
+            {
+                maxRetries: 3,
+                baseDelayMs: 1000,
+                ui: { appendFairyMessage: true }
             }
-        }
+        );
 
-        if (!aiResponse) {
-            const { text } = await geminiFetch(
-                `${proxyBase}/v1/gemini`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(geminiPayload)
-                },
-                {
-                    maxRetries: 3,
-                    baseDelayMs: 1000,
-                    ui: { appendFairyMessage: true }
-                }
-            );
-            aiResponse = text;
-        }
-        
+
         window.fairyHistory.push({ role: "model", parts: [{ text: aiResponse }] });
 
         if (typeof trackChatMemoryAssistantMessage === 'function') {
