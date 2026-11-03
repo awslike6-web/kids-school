@@ -3109,8 +3109,7 @@
       "audio_file": "7bac1e1efd0d9b4c15cb0e10.mp3",
       "spoken_text": "원숭이도 나무에서 떨어진다",
       "sources": [
-        "3faa2711-5b68-81c6-8ad4-f358097fe1f9",
-        "3eca2711-5b68-814a-a286-c55a3bb83b7e"
+        "book_37"
       ],
       "kinds": [
         "word"
@@ -5078,6 +5077,206 @@
       "kinds": [
         "meaning"
       ]
+    },
+    "e56e5421f0a740606f19ac6a": {
+      "audio_file": "e56e5421f0a740606f19ac6a.mp3",
+      "spoken_text": "크리스틴 안녕? 지난번 편지에서 영국의 음식에 대해 자세히 알려 주어서 고마웠어. 이번에는 내가 살고 있는 한국의 전통 음식에 대해 소개하려고 해. 아주 오랜 옛날, 우리나라는 추운 겨울이 되면 채소를 쉽게 구할 수 없었어. 그래서 우리 조상들은 배추나 무 같은 채소를 소금에 절여 보관했지. 이것이 김치의 시작이란다. 그리고 거기에 온갖 양념을 더해 먹기 시작했어. 세월이 흐르면서 더욱 다양한 재료와 양념이 더해지면서 김치는 맛과 영양 면에서 점점 발전되어 왔지. 김치에는 건강을 유지하는 데 꼭 필요한 영양소들이 많이 들어 있어. 밥만으로는 채울 수 없는, 우리 몸에 이로운 영양소들이 풍부하게 들어 있지. 김치를 먹으면 여러 가지 병이 예방된다는 연구 결과도 많단다. 김치로 만들 수 있는 음식도 아주 많아. 김치찌개, 김치전, 김치볶음밥……. 그중에서도 나는 김치전을 제일 좋아해. 주룩주룩 비가 오는 날이면 우리나라 사람들은 김치전을 먹고 싶어 해. 빗방울이 떨어지는 소리와 기름에 지글지글 굽는 김치전 소리가 비슷해. 그래서 김치전이 더 생각나나 봐. 요즘 김치가 외국에서도 인기가 높아졌어. 그러자 일본이 김치가 원래 자기네 것이라며 '기무치'를 이야기했어. 하지만 김치와 기무치는 달라. 김치는 발효되면서 매콤새콤한 맛이 나지. 하지만 기무치는 발효 과정을 거치지 않아서 단맛과 신맛이 나. 2001년에는 국제적으로도 '김치(Kimchi)'라는 이름으로 인정을 받았어. 그래서 이제는 세계 다른 나라들도 '김치(Kimchi)'라는 이름을 쓰고 있어. 너에게도 김치가 어떤 맛인지 보여 주고 싶어. 또 한국에는 김치 외에도 맛있는 음식이 많아. 비빔밥, 불고기 같은 여러 가지 맛있는 한국 음식을 만들어 줄게. 나중에 꼭 한번 놀러 오렴.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "6cc9ac9240a6b3f002ca02fd": {
+      "audio_file": "6cc9ac9240a6b3f002ca02fd.mp3",
+      "spoken_text": "한국의 전통 음식, 김치",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "61da8f181de404ce1f8febd3": {
+      "audio_file": "61da8f181de404ce1f8febd3.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 한국의 전통 음식, 김치이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "e143a79d250b06d52fa7c1c2": {
+      "audio_file": "e143a79d250b06d52fa7c1c2.mp3",
+      "spoken_text": "절이다",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "c34cdd58a4a7def31199870a": {
+      "audio_file": "c34cdd58a4a7def31199870a.mp3",
+      "spoken_text": "배추나 채소, 생선 등에 소금기나 식초가 배어들게 하다.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "4379b376509c538119132e23": {
+      "audio_file": "4379b376509c538119132e23.mp3",
+      "spoken_text": "영양소",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "90befbfcfdaa2d71807878a7": {
+      "audio_file": "90befbfcfdaa2d71807878a7.mp3",
+      "spoken_text": "생물이 생명을 유지하고 자라는 데 필요한 음식물 속 성분.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "230fbde6a5e201816d8154db": {
+      "audio_file": "230fbde6a5e201816d8154db.mp3",
+      "spoken_text": "예방",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "4db4f08f4fff53e2c4a6c455": {
+      "audio_file": "4db4f08f4fff53e2c4a6c455.mp3",
+      "spoken_text": "질병이나 사고가 일어나기 전에 미리 대처하여 막음.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "a2ab2eb287edab5d792f8389": {
+      "audio_file": "a2ab2eb287edab5d792f8389.mp3",
+      "spoken_text": "국제적",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "94821cbad1dfe78330077c2c": {
+      "audio_file": "94821cbad1dfe78330077c2c.mp3",
+      "spoken_text": "여러 나라에 관계되거나 세계적인 범위를 가지는 것.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "7716c5dd3fbe9802e52abb6f": {
+      "audio_file": "7716c5dd3fbe9802e52abb6f.mp3",
+      "spoken_text": "발효",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "e8e7692577bab6550f1c4605": {
+      "audio_file": "e8e7692577bab6550f1c4605.mp3",
+      "spoken_text": "효모나 유익균 등 미생물이 유기물을 분해하여 몸에 좋은 새로운 물질을 만드는 현상.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "11bcd40f151fb28124d78faf": {
+      "audio_file": "11bcd40f151fb28124d78faf.mp3",
+      "spoken_text": "전통",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "2a56a9070f2982606f9e33ed": {
+      "audio_file": "2a56a9070f2982606f9e33ed.mp3",
+      "spoken_text": "한 집단이나 사회에서 옛날부터 전해 내려오는 고유한 사상이나 문화.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e993047c75db29077fe05358": {
+      "audio_file": "e993047c75db29077fe05358.mp3",
+      "spoken_text": "떡 줄 사람은 생각도 않는데 김칫국부터 마신다",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "ee9f60a6ce9b61f51db5686e": {
+      "audio_file": "ee9f60a6ce9b61f51db5686e.mp3",
+      "spoken_text": "상대방은 해 줄 생각도 없는데 혼자서 지레 짐작하여 기대함을 이르는 말.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "eae735840bb7b0499db460cb": {
+      "audio_file": "eae735840bb7b0499db460cb.mp3",
+      "spoken_text": "세 살 버릇 여든까지 간다",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "a27521932dc1dff6839bca5d": {
+      "audio_file": "a27521932dc1dff6839bca5d.mp3",
+      "spoken_text": "어릴 때 몸에 밴 나쁜 버릇이나 습관은 늙어서까지 고치기 어렵다는 말.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "dee76ab4f7386279f0577077": {
+      "audio_file": "dee76ab4f7386279f0577077.mp3",
+      "spoken_text": "아무리 익숙하고 능숙한 사람이라도 실수할 때가 있다는 말.",
+      "sources": [
+        "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
     }
   },
   "passages": {
@@ -5272,6 +5471,12 @@
       "audio_file": "401c6dcafcf532f78fd37b32.mp3",
       "title": "자기만 알던 거인",
       "order": 5
+    },
+    "book_37": {
+      "audio_hash": "e56e5421f0a740606f19ac6a",
+      "audio_file": "e56e5421f0a740606f19ac6a.mp3",
+      "title": "한국의 전통 음식, 김치",
+      "order": 37
     }
   },
   "settings": {
