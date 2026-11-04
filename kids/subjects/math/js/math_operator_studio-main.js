@@ -1,88 +1,83 @@
 // ========================================================
 // 📝 [탭 2] 단계별 격자 세로셈 튜터 렌더링
 // ========================================================
+const DIVISION_ROW_COLORS = { product: '#ec4899', remainder: 'inherit' };
+
+// 풀이 줄 하나를 자리 칸에 오른쪽 정렬로 그린다
+function renderDivisionRowCells(row, columnCount, isActive, isFinal) {
+  const startCol = row.endCol - row.value.length + 1;
+  let html = '';
+  for (let col = 0; col < columnCount; col++) {
+    const hasDigit = col >= startCol && col <= row.endCol;
+    const digit = hasDigit ? row.value[col - startCol] : '';
+    const classes = [];
+    if (row.kind === 'product' && col >= row.lineFromCol && col <= row.endCol) classes.push('calc-step-line');
+    if (isActive && hasDigit) classes.push('cell-active');
+
+    let color = DIVISION_ROW_COLORS[row.kind];
+    if (col === row.broughtCol) color = '#10b981';
+    if (isFinal && row.kind === 'remainder') color = '#ef4444';
+
+    html += `<td class="${classes.join(' ')}" style="color:${color};">${digit}</td>`;
+  }
+  return html;
+}
+
+function renderDivisionBoard(step, dividend, divisor) {
+  const { board } = step;
+  const digits = String(dividend).split('');
+  const isFinalStep = step.step === divisionPlan.length;
+
+  const quotientCells = board.quotient.map((digit, col) => {
+    const active = col === board.activeQuotientCol ? 'cell-active' : '';
+    return `<td class="td-quotient-line ${active}">${digit}</td>`;
+  }).join('');
+
+  const dividendCells = digits.map((digit, col) => {
+    const active = board.activeDividendCols.includes(col) ? 'cell-active' : '';
+    return `<td class="${active}" style="color:#38bdf8;">${digit}</td>`;
+  }).join('');
+
+  const workRows = board.rows.map((row, index) => {
+    const isActive = index === board.activeRow;
+    const isFinalRow = isFinalStep && index === board.rows.length - 1;
+    return `
+      <tr>
+        <td></td>
+        <td>${row.kind === 'product' ? '-' : ''}</td>
+        ${renderDivisionRowCells(row, digits.length, isActive, isFinalRow)}
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <table class="division-table">
+      <tr>
+        <td></td>
+        <td class="td-divisor-arc"></td>
+        ${quotientCells}
+      </tr>
+      <tr>
+        <td style="color:#f59e0b;">${divisor}</td>
+        <td class="td-divisor-arc">)</td>
+        ${dividendCells}
+      </tr>
+      ${workRows}
+    </table>
+  `;
+}
+
 function renderVerticalTutorView(container) {
   if (!divisionPlan || divisionPlan.length === 0) {
     buildDivisionPlan(curNumA, curNumB);
   }
 
   const curPlan = divisionPlan[tutorCurrentStep - 1] || divisionPlan[0];
-  const tensDigit = Math.floor(curNumA / 10);
-  const onesDigit = curNumA % 10;
-  const divisor = curNumB;
 
-  const qTens = Math.floor(tensDigit / divisor);
-  const multTens = qTens * divisor;
-  const remTens = tensDigit - multTens;
-  const broughtDown = (remTens * 10) + onesDigit;
-  const qOnes = Math.floor(broughtDown / divisor);
-  const multOnes = qOnes * divisor;
-  const remainder = broughtDown - multOnes;
-
-  // 세로셈 테이블 셀 렌더링
   container.innerHTML = `
     <div class="vertical-tutor-container">
       <div class="division-board-card">
-        <table class="division-table">
-          <!-- 몫 행 -->
-          <tr>
-            <td></td>
-            <td class="td-divisor-arc"></td>
-            <td class="td-quotient-line ${curPlan.focus === 'q_tens' ? 'cell-active' : ''}">
-              ${tutorCurrentStep >= 1 && qTens > 0 ? qTens : ''}
-            </td>
-            <td class="td-quotient-line ${curPlan.focus === 'q_ones' ? 'cell-active' : ''}">
-              ${tutorCurrentStep >= 5 ? qOnes : ''}
-            </td>
-          </tr>
-          <!-- 나누어지는 수 행 -->
-          <tr>
-            <td style="color:#f59e0b;">${divisor}</td>
-            <td class="td-divisor-arc">)</td>
-            <td style="color:#38bdf8;">${tensDigit}</td>
-            <td style="color:#38bdf8;">${onesDigit}</td>
-          </tr>
-          <!-- 십의 자리 곱한 값 -->
-          ${tutorCurrentStep >= 2 ? `
-          <tr>
-            <td></td>
-            <td>-</td>
-            <td class="${curPlan.focus === 'mult_tens' ? 'cell-active' : ''}" style="color:#ec4899;">${multTens}</td>
-            <td></td>
-          </tr>
-          ` : ''}
-          <!-- 십의 자리 뺀 값 및 내려쓰기 -->
-          ${tutorCurrentStep >= 3 ? `
-          <tr>
-            <td></td>
-            <td class="calc-step-line"></td>
-            <td class="calc-step-line ${curPlan.focus === 'rem_tens' ? 'cell-active' : ''}">${remTens}</td>
-            <td class="calc-step-line ${curPlan.focus === 'bring_down' ? 'cell-active' : ''}" style="color:#10b981;">
-              ${tutorCurrentStep >= 4 ? onesDigit : ''}
-            </td>
-          </tr>
-          ` : ''}
-          <!-- 일의 자리 곱한 값 -->
-          ${tutorCurrentStep >= 6 ? `
-          <tr>
-            <td></td>
-            <td>-</td>
-            <td>${Math.floor(multOnes / 10) || ''}</td>
-            <td class="${curPlan.focus === 'mult_ones' ? 'cell-active' : ''}" style="color:#ec4899;">${multOnes % 10}</td>
-          </tr>
-          ` : ''}
-          <!-- 최종 나머지 행 -->
-          ${tutorCurrentStep >= 7 ? `
-          <tr>
-            <td></td>
-            <td class="calc-step-line"></td>
-            <td class="calc-step-line"></td>
-            <td class="calc-step-line ${curPlan.focus === 'remainder' ? 'cell-active' : ''}" style="color:#ef4444;">
-              ${remainder}
-            </td>
-          </tr>
-          ` : ''}
-        </table>
+        ${renderDivisionBoard(curPlan, curNumA, curNumB)}
       </div>
 
       <div class="tutor-guide-panel">
@@ -104,7 +99,6 @@ function renderVerticalTutorView(container) {
 
   studioSpeak(curPlan.speech);
 }
-
 function changeTutorStep(delta) {
   hasUserStarted = true;
   tutorCurrentStep = Math.max(1, Math.min(divisionPlan.length, tutorCurrentStep + delta));
@@ -114,42 +108,103 @@ function changeTutorStep(delta) {
 // ========================================================
 // 📏 [탭 3] 수직선 덜어내기 렌더링
 // ========================================================
-function renderNumberLineView(container) {
-  const dividend = curNumA;
-  const divisor = curNumB;
-  const quotient = Math.floor(dividend / divisor);
-  const remainder = dividend % divisor;
+function numberLineSpeech(model, step) {
+  const { dividend, divisor, quotient, remainder, jumps } = model;
+  const divisorEul = `${divisor}${numberJosa(divisor, '을', '를')}`;
+  const resultText = divisionResultText(quotient, remainder);
 
-  const speech = `수직선에서 ${dividend}부터 ${divisor}씩 뒤로 점프하며 덜어내 볼까요? 총 ${quotient}번 덜어내고 ${remainder}이 남아요!`;
+  if (jumps.length === 0) {
+    return `${dividend}에서는 ${divisorEul} 한 번도 뺄 수 없어요. ${resultText}`;
+  }
+  if (step === 0) {
+    return `수직선에서 ${dividend}부터 ${divisor}씩 뒤로 뛰어 볼까요? 다음 점프 버튼을 눌러 보세요!`;
+  }
+
+  const jump = jumps[step - 1];
+  const previous = jumps[step - 2];
+  const skippedText = previous && jump.index > previous.index + 1
+    ? `중간의 ${jump.index - previous.index - 1}번은 건너뛰고, `
+    : '';
+  const jumpText = `${skippedText}${jump.from}에서 ${divisorEul} 빼면 ${jump.to}! ${jump.index}번 뛰었어요.`;
+  return step === jumps.length ? `${jumpText} 더는 뛸 수 없어요. ${resultText}` : jumpText;
+}
+
+function renderNumberLineView(container) {
+  const model = buildNumberLineModel(curNumA, curNumB);
+  const { dividend, divisor, quotient, remainder, jumps } = model;
+  numberLineStep = Math.max(0, Math.min(jumps.length, numberLineStep));
+
+  const isDone = numberLineStep === jumps.length;
+  const currentJump = jumps[numberLineStep - 1];
+  const currentValue = currentJump ? currentJump.to : dividend;
+  const jumpCount = currentJump ? currentJump.index : 0;
+
+  // 줄인 수직선은 칸이 좁고 번호가 길어 겹치므로 방금 뛴 점프의 번호만 적는다
+  const arcsHtml = jumps.slice(0, numberLineStep).map((jump, i) => {
+    const showCount = !model.compressed || i === numberLineStep - 1;
+    return `
+      <div class="nl-jump-arc" style="left:${jump.toPos}%; width:${jump.fromPos - jump.toPos}%;">
+        ${showCount ? `<span class="nl-jump-count">${jump.index}</span>` : ''}
+      </div>
+    `;
+  }).join('');
+
+  const ticksHtml = model.ticks.map(tick => `
+    <div class="nl-tick ${tick.value === currentValue ? 'nl-tick--current' : ''}" style="left:${tick.pos}%;"></div>
+    <div class="nl-label ${tick.low ? 'nl-label--low' : ''} ${tick.value === currentValue ? 'nl-label--current' : ''}" style="left:${tick.pos}%;">${tick.value}</div>
+  `).join('');
+
+  const gapHtml = model.gap
+    ? `<div class="nl-gap" style="left:${model.gap.pos}%;">⋯ ${model.gap.skipped}번 더</div>`
+    : '';
 
   container.innerHTML = `
     <div class="numberline-wrap">
-      <h3 style="font-family:'Jua'; color:#38bdf8; margin:0 0 10px;">📏 수직선 동수누감 (점프해서 덜어내기)</h3>
-      <p style="color:var(--text-muted); font-size:1rem; margin:0 0 20px;">
-        ${dividend}에서 ${divisor}씩 몇 번을 뺄 수 있을까요? <strong>총 ${quotient}번 덜어내고 ${remainder}이 남습니다!</strong>
-      </p>
+      <div class="block-step-nav">
+        <span class="step-pill">📏 ${divisor}씩 뒤로 뛰기 (${jumpCount} / ${quotient}번)</span>
+        <div class="nav-btn-group">
+          <button class="step-control-btn" onclick="changeNumberLineStep(-1)" ${numberLineStep === 0 ? 'disabled' : ''}>◀ 이전</button>
+          <button class="step-control-btn" onclick="changeNumberLineStep(1)" ${isDone ? 'disabled' : ''} style="background:#0284c7; color:#fff; border-color:#38bdf8;">다음 점프 ▶</button>
+        </div>
+      </div>
 
-      <div style="background:rgba(15,23,42,0.6); border:2px solid var(--border-color); border-radius:16px; padding:30px 20px; text-align:center;">
-        <div style="font-family:'Jua'; font-size:1.8rem; color:#f59e0b; margin-bottom:20px;">
-          ${dividend} - (${divisor} × ${quotient}) = <span style="color:#ef4444;">${remainder}</span>
+      <div class="nl-axis-container" role="img" aria-label="${dividend}에서 ${divisor}씩 뒤로 뛰는 수직선">
+        <div class="nl-track">
+          <div class="nl-axis-line"></div>
+          ${arcsHtml}
+          ${ticksHtml}
+          ${gapHtml}
+        </div>
+      </div>
+
+      <div style="background:rgba(15,23,42,0.6); border:2px solid var(--border-color); border-radius:16px; padding:20px; text-align:center;">
+        <div style="font-family:'Jua'; font-size:1.5rem; color:#f59e0b; margin-bottom:16px;">
+          ${isDone
+            ? `${dividend} - (${divisor} × ${quotient}) = <span style="color:#ef4444;">${remainder}</span>`
+            : `${dividend} - (${divisor} × ${jumpCount}) = ${currentValue}`}
         </div>
         <div style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:12px;">
           <div style="background:rgba(2,132,199,0.15); border:1.5px solid #0284c7; border-radius:12px; padding:14px 20px;">
             <div style="font-size:0.9rem; color:#94a3b8;">뛰어 덜어낸 횟수 (몫)</div>
-            <div style="font-family:'Jua'; font-size:2rem; color:#38bdf8;">${quotient}번</div>
+            <div style="font-family:'Jua'; font-size:2rem; color:#38bdf8;">${jumpCount}번</div>
           </div>
           <div style="background:rgba(239,68,68,0.15); border:1.5px solid #ef4444; border-radius:12px; padding:14px 20px;">
             <div style="font-size:0.9rem; color:#94a3b8;">0에 못 닿고 남은 수 (나머지)</div>
-            <div style="font-family:'Jua'; font-size:2rem; color:#ef4444;">${remainder}</div>
+            <div style="font-family:'Jua'; font-size:2rem; color:#ef4444;">${isDone ? remainder : '?'}</div>
           </div>
         </div>
       </div>
     </div>
   `;
 
-  studioSpeak(speech);
+  studioSpeak(numberLineSpeech(model, numberLineStep));
 }
 
+function changeNumberLineStep(delta) {
+  hasUserStarted = true;
+  numberLineStep += delta;
+  renderNumberLineView(document.getElementById('studioViewport'));
+}
 // ========================================================
 // 🍫 [탭 4] 면적(넓이) 모델 렌더링
 // ========================================================

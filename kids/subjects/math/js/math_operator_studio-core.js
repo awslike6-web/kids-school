@@ -15,6 +15,9 @@ const blockMaxSteps = 5;
 let tutorCurrentStep = 1;
 let divisionPlan = [];
 
+// 수직선 스텝 (0이면 아직 출발 전)
+let numberLineStep = 0;
+
 // 사용자 프로필 및 음성 재생 제어 플래그
 let currentProfile = localStorage.getItem('currentUser') || 'son';
 let hasUserStarted = false; // 🚨 최초 진입 시 자동 음성 재생 방지 플래그
@@ -92,129 +95,260 @@ function startStudioCalculation(userInitiated = false) {
     hasUserStarted = true;
   }
 
-  curNumA = parseInt(document.getElementById('numA').value, 10) || 1;
-  curNumB = parseInt(document.getElementById('numB').value, 10) || 1;
-  
-  if (curNumB === 0 && currentOp === 'div') {
-    alert('0으로는 나눌 수 없어요!');
-    curNumB = 1;
-    document.getElementById('numB').value = 1;
-  }
+  const rawA = parseInt(document.getElementById('numA').value, 10);
+  const rawB = parseInt(document.getElementById('numB').value, 10);
+  curNumA = rawA || 1;
+  curNumB = rawB || 1;
 
-  // 나눗셈 풀이 계획 수립
   if (currentOp === 'div') {
+    if (rawB === 0) alert('0으로는 나눌 수 없어요!');
+
+    // 입력칸 범위(1~999 ÷ 1~99)를 벗어난 값은 범위 안으로 맞춘 뒤 화면에도 보여 준다
+    curNumA = clampDivisionValue(curNumA, DIVIDEND_MAX);
+    curNumB = clampDivisionValue(curNumB, DIVISOR_MAX);
+    document.getElementById('numA').value = curNumA;
+    document.getElementById('numB').value = curNumB;
+
+    // 나눗셈 풀이 계획 수립
     buildDivisionPlan(curNumA, curNumB);
   }
 
   blockCurrentStep = 1;
   tutorCurrentStep = 1;
+  numberLineStep = 0;
 
   renderCurrentTab();
 }
 
 // ========================================================
 // ➗ 나눗셈 풀이 계획 엔진 (Build Division Plan)
+// 자릿수와 상관없이 세로셈을 한 자리씩 진행하고, 단계마다 칠판 상태(board)를 함께 저장한다.
+// 화면은 board만 그리므로 풀이와 화면이 어긋나지 않는다.
 // ========================================================
+const DIVIDEND_MAX = 999;
+const DIVISOR_MAX = 99;
+const DIVISION_PLACE_NAMES = ['일', '십', '백'];
+
+function clampDivisionValue(value, max) {
+  return Math.min(Math.max(value, 1), max);
+}
+
+// 숫자를 소리 내어 읽을 때 받침이 있는지로 조사를 고른다 (2·4·5·9만 받침 없음)
+function numberJosa(n, withBatchim, withoutBatchim) {
+  return [2, 4, 5, 9].includes(n % 10) ? withoutBatchim : withBatchim;
+}
+
+function divisionResultText(quotient, remainder) {
+  return `전체 몫은 ${quotient}, 나머지는 ${remainder}${numberJosa(remainder, '이에요', '예요')}.`;
+}
+
 function buildDivisionPlan(dividend, divisor) {
-  divisionPlan = [];
-  const sDiv = String(dividend);
+  const digits = String(dividend).split('').map(Number);
+  const lastCol = digits.length - 1;
   const qTotal = Math.floor(dividend / divisor);
   const rTotal = dividend % divisor;
+  const resultText = divisionResultText(qTotal, rTotal);
+  const placeName = col => DIVISION_PLACE_NAMES[lastCol - col];
+  const divisorGa = `${divisor}${numberJosa(divisor, '이', '가')}`;
 
-  // 두 자리 수 나누기 한 자리 수 표준
-  const tensDigit = Math.floor(dividend / 10);
-  const onesDigit = dividend % 10;
+  const quotient = digits.map(() => '');
+  const rows = [];
+  const plan = [];
 
-  if (sDiv.length === 2) {
-    const qTens = Math.floor(tensDigit / divisor);
-    const multTens = qTens * divisor;
-    const remTens = tensDigit - multTens;
+  const pushStep = (focus, val, title, desc, speech, marks = {}) => {
+    const step = plan.length + 1;
+    plan.push({
+      step,
+      title: `${step}단계: ${title}`,
+      desc,
+      speech,
+      focus,
+      val,
+      board: {
+        quotient: [...quotient],
+        rows: rows.map(row => ({ ...row })),
+        activeQuotientCol: marks.quotientCol ?? null,
+        activeDividendCols: marks.dividendCols ?? [],
+        activeRow: marks.row ?? null
+      }
+    });
+  };
 
-    // 1단계: 십의 자리 몫
-    if (qTens > 0) {
-      divisionPlan.push({
-        step: 1,
-        title: "1단계: 십의 자리 몫 구하기",
-        desc: `십의 자리 숫자 <strong>${tensDigit}</strong>에 ${divisor}이(가) 몇 번 들어갈까요?`,
-        speech: `십의 자리 ${tensDigit}에는 ${divisor}가 ${qTens}번 들어가요! 몫의 십의 자리에 ${qTens}을 적어볼까요?`,
-        focus: "q_tens",
-        val: qTens
+  let col = 0;
+  let running = digits[0];
+
+  // 맨 앞자리에 나누는 수가 들어가지 않으면 옆자리까지 함께 본다 (예: 56 ÷ 8은 5가 아니라 56부터)
+  if (running < divisor && lastCol > 0) {
+    const first = running;
+    while (running < divisor && col < lastCol) {
+      col++;
+      running = running * 10 + digits[col];
+    }
+    pushStep(
+      'look',
+      running,
+      '어디부터 나눌까요? 🔍',
+      `<strong>${first}</strong>에는 ${divisorGa} 들어가지 않아요. <strong>${running}</strong>까지 함께 봐요!`,
+      `${first}에는 ${divisorGa} 들어가지 않아요. 그래서 ${running}까지 함께 보고 나눌 거예요!`,
+      { dividendCols: digits.map((_, i) => i).filter(i => i <= col) }
+    );
+  }
+
+  for (;;) {
+    const q = Math.floor(running / divisor);
+    const product = q * divisor;
+    const rem = running - product;
+    const isLast = col === lastCol;
+    quotient[col] = String(q);
+
+    if (q === 0) {
+      if (isLast) {
+        // 더 내려올 수가 없으므로 지금 수가 그대로 나머지가 된다
+        if (rows.length === 0) {
+          rows.push({ kind: 'remainder', value: String(running), endCol: col, broughtCol: null });
+        }
+        pushStep(
+          'remainder',
+          running,
+          '나머지 확인 🎉',
+          `<strong>${running}</strong>에는 ${divisorGa} 들어가지 않아 몫에 0을 적어요. ${resultText}`,
+          `${running}에는 ${divisorGa} 들어가지 않아서 몫에 0을 적어요. ${resultText} 참 잘했어요!`,
+          { quotientCol: col, row: rows.length - 1 }
+        );
+        break;
+      }
+      pushStep(
+        'quotient',
+        0,
+        `${placeName(col)}의 자리 몫은 0`,
+        `<strong>${running}</strong>에는 ${divisorGa} 들어가지 않아요. 몫의 ${placeName(col)}의 자리에 <strong>0</strong>을 적어요.`,
+        `${running}에는 ${divisorGa} 들어가지 않아요. 몫의 ${placeName(col)}의 자리에 0을 적어요!`,
+        { quotientCol: col }
+      );
+    } else {
+      pushStep(
+        'quotient',
+        q,
+        `${placeName(col)}의 자리 몫 구하기`,
+        `<strong>${running}</strong>에 ${divisorGa} 몇 번 들어갈까요? <strong>${q}번</strong> 들어가요!`,
+        `${running}에는 ${divisorGa} ${q}번 들어가요! 몫의 ${placeName(col)}의 자리에 ${q}${numberJosa(q, '을', '를')} 적어요.`,
+        { quotientCol: col }
+      );
+
+      rows.push({
+        kind: 'product',
+        value: String(product),
+        endCol: col,
+        lineFromCol: col - String(running).length + 1
       });
-      // 2단계: 곱하기
-      divisionPlan.push({
-        step: 2,
-        title: "2단계: 십의 자리 곱해서 빼기",
-        desc: `${divisor} × ${qTens} = <strong>${multTens}</strong>`,
-        speech: `${divisor} 곱하기 ${qTens}은 ${multTens}이에요. ${tensDigit} 밑에 ${multTens}을 적고 빼요!`,
-        focus: "mult_tens",
-        val: multTens
-      });
-      // 3단계: 빼고 남은 수
-      divisionPlan.push({
-        step: 3,
-        title: "3단계: 십의 자리 뺀 값",
-        desc: `${tensDigit} - ${multTens} = <strong>${remTens}</strong>`,
-        speech: `${tensDigit} 빼기 ${multTens}은 ${remTens}이에요.`,
-        focus: "rem_tens",
-        val: remTens
-      });
+      pushStep(
+        'product',
+        product,
+        '곱해서 적기',
+        `${divisor} × ${q} = <strong>${product}</strong>`,
+        `${divisor} 곱하기 ${q}${numberJosa(q, '은', '는')} ${product}! ${running} 밑에 ${product}${numberJosa(product, '을', '를')} 적어요.`,
+        { row: rows.length - 1 }
+      );
+
+      rows.push({ kind: 'remainder', value: String(rem), endCol: col, broughtCol: null });
+      if (isLast) {
+        pushStep(
+          'remainder',
+          rem,
+          '빼고 나머지 확인 🎉',
+          `${running} - ${product} = <strong>${rem}</strong>. ${resultText}`,
+          `${running}에서 ${product}${numberJosa(product, '을', '를')} 빼면 ${rem}${numberJosa(rem, '이', '가')} 남아요! ${resultText} 참 잘했어요!`,
+          { row: rows.length - 1 }
+        );
+        break;
+      }
+      pushStep(
+        'subtract',
+        rem,
+        '빼기',
+        `${running} - ${product} = <strong>${rem}</strong>`,
+        `${running} 빼기 ${product}${numberJosa(product, '은', '는')} ${rem}${numberJosa(rem, '이에요', '예요')}.`,
+        { row: rows.length - 1 }
+      );
     }
 
-    // 4단계: 일의 자리 내려쓰기
-    const newCombined = (remTens * 10) + onesDigit;
-    divisionPlan.push({
-      step: 4,
-      title: "4단계: 일의 자리 내려오기 ⬇️",
-      desc: `일의 자리 <strong>${onesDigit}</strong>이 스르륵 내려와서 <strong>${newCombined}</strong>이 되었어요!`,
-      speech: `일의 자리 숫자 ${onesDigit}이 스르륵 내려와서 ${newCombined}이 되었어요! 이제 ${newCombined}을 나눌 차례예요.`,
-      focus: "bring_down",
-      val: newCombined
-    });
-
-    // 5단계: 일의 자리 몫
-    const qOnes = Math.floor(newCombined / divisor);
-    const multOnes = qOnes * divisor;
-    const finalRem = newCombined - multOnes;
-
-    divisionPlan.push({
-      step: 5,
-      title: "5단계: 일의 자리 몫 구하기",
-      desc: `<strong>${newCombined}</strong>에 ${divisor}이(가) 몇 번 들어갈까요?`,
-      speech: `${newCombined}에는 ${divisor}가 ${qOnes}번 들어가요! 몫의 일의 자리에 ${qOnes}을 올려요!`,
-      focus: "q_ones",
-      val: qOnes
-    });
-
-    // 6단계: 일의 자리 곱하기
-    divisionPlan.push({
-      step: 6,
-      title: "6단계: 곱해서 적기",
-      desc: `${divisor} × ${qOnes} = <strong>${multOnes}</strong>`,
-      speech: `${divisor} 곱하기 ${qOnes}은 ${multOnes}! ${newCombined} 밑에 ${multOnes}을 적어요.`,
-      focus: "mult_ones",
-      val: multOnes
-    });
-
-    // 7단계: 최종 나머지 확인
-    divisionPlan.push({
-      step: 7,
-      title: "7단계: 빼고 나머지 확인 🎉",
-      desc: `${newCombined} - ${multOnes} = <strong>${finalRem}</strong> (나머지: ${finalRem})`,
-      speech: `${newCombined}에서 ${multOnes}을 빼면 ${finalRem}이 남아요! 전체 몫은 ${qTotal}이고 나머지는 ${rTotal}이에요. 참 잘했어요!`,
-      focus: "remainder",
-      val: finalRem
-    });
-  } else {
-    // 한 자리 수 나누기 또는 세 자리 기본 처리
-    divisionPlan.push({
-      step: 1,
-      title: "단원 연산 한눈에 보기",
-      desc: `${dividend} ÷ ${divisor} = 몫 <strong>${qTotal}</strong>, 나머지 <strong>${rTotal}</strong>`,
-      speech: `${dividend}을 ${divisor}로 나누면 몫은 ${qTotal}이고 나머지는 ${rTotal}이에요!`,
-      focus: "all",
-      val: qTotal
-    });
+    // 다음 자리 내려쓰기: 앞이 0이면 "08"이 아니라 "8"로 적는다
+    col++;
+    const brought = digits[col];
+    running = rem * 10 + brought;
+    const current = rows[rows.length - 1];
+    current.value = String(running);
+    current.endCol = col;
+    current.broughtCol = col;
+    pushStep(
+      'bring_down',
+      running,
+      `${placeName(col)}의 자리 내려쓰기 ⬇️`,
+      `${placeName(col)}의 자리 <strong>${brought}</strong>${numberJosa(brought, '이', '가')} 스르륵 내려와서 <strong>${running}</strong>${numberJosa(running, '이', '가')} 되었어요!`,
+      `${placeName(col)}의 자리 숫자 ${brought}${numberJosa(brought, '이', '가')} 스르륵 내려와서 ${running}${numberJosa(running, '이', '가')} 되었어요! 이제 ${running}${numberJosa(running, '을', '를')} 나눌 차례예요.`,
+      { row: rows.length - 1, dividendCols: [col] }
+    );
   }
+
+  divisionPlan = plan;
+}
+
+// ========================================================
+// 📏 수직선 모델: 나누어지는 수에서 나누는 수씩 뒤로 뛰는 점프 목록과 눈금 위치(%)
+// 점프가 너무 많으면 앞뒤만 그리고 가운데는 줄여서 보여 준다 (예: 999 ÷ 1).
+// ========================================================
+function buildNumberLineModel(dividend, divisor, maxJumps = 12) {
+  const quotient = Math.floor(dividend / divisor);
+  const remainder = dividend % divisor;
+  const compressed = quotient > maxJumps;
+  const edgeJumps = Math.floor((maxJumps - 2) / 2);
+
+  const indexes = [];
+  for (let i = 1; i <= quotient; i++) {
+    if (!compressed || i <= edgeJumps || i > quotient - edgeJumps) indexes.push(i);
+  }
+  const jumps = indexes.map(index => ({
+    index,
+    from: dividend - (index - 1) * divisor,
+    to: dividend - index * divisor
+  }));
+
+  const values = new Set([0, remainder, dividend]);
+  jumps.forEach(jump => {
+    values.add(jump.from);
+    values.add(jump.to);
+  });
+  const sorted = [...values].sort((a, b) => a - b);
+
+  let gap = null;
+  let position;
+  if (compressed) {
+    // 축을 줄이면 비례가 맞지 않으므로 칸을 고르게 나누고, 줄인 구간에 한 칸을 더 비워 둔다
+    const gapStart = dividend - (quotient - edgeJumps) * divisor;
+    const gapIndex = sorted.indexOf(gapStart);
+    const slotCount = sorted.length;
+    position = value => {
+      const index = sorted.indexOf(value);
+      return ((index > gapIndex ? index + 1 : index) / slotCount) * 100;
+    };
+    gap = {
+      skipped: quotient - edgeJumps * 2,
+      pos: ((gapIndex + 1) / slotCount) * 100
+    };
+  } else {
+    position = value => (value / dividend) * 100;
+  }
+
+  return {
+    dividend,
+    divisor,
+    quotient,
+    remainder,
+    compressed,
+    gap,
+    jumps: jumps.map(jump => ({ ...jump, fromPos: position(jump.from), toPos: position(jump.to) })),
+    ticks: sorted.map((value, i) => ({ value, pos: position(value), low: i % 2 === 0 }))
+  };
 }
 
 // 탭 렌더링 디스패처

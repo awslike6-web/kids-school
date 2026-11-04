@@ -352,6 +352,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     background: rgba(15, 23, 42, 0.5);
     padding: 10px 16px;
     border-radius: 14px;
@@ -373,6 +375,7 @@
     background: var(--card-bg);
     color: var(--text-main);
     font-family: 'Jua', sans-serif;
+    white-space: nowrap;
     cursor: pointer;
     transition: 0.15s;
   }
@@ -575,38 +578,84 @@
   /* [탭 3] 📏 수직선 덜어내기 스타일                          */
   /* ======================================================== */
   .numberline-wrap {
-    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 4px 0;
   }
   .nl-axis-container {
     position: relative;
-    height: 140px;
-    margin-top: 40px;
+    height: 170px;
+  }
+  .nl-track {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 18px;
+    right: 18px;
   }
   .nl-axis-line {
     position: absolute;
-    bottom: 30px;
-    left: 20px;
-    right: 20px;
+    bottom: 56px;
+    left: 0;
+    right: 0;
     height: 4px;
     background: #64748b;
   }
   .nl-jump-arc {
     position: absolute;
-    bottom: 34px;
-    border: 3px dashed #38bdf8;
+    bottom: 60px;
+    height: 56px;
+    box-sizing: border-box;
+    border: 3px solid #38bdf8;
     border-bottom: none;
     border-radius: 50% 50% 0 0 / 100% 100% 0 0;
     pointer-events: none;
   }
+  .nl-jump-count {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.85rem;
+    color: #38bdf8;
+  }
+  .nl-tick {
+    position: absolute;
+    bottom: 50px;
+    width: 3px;
+    height: 16px;
+    margin-left: -1.5px;
+    background: #94a3b8;
+  }
+  .nl-tick--current {
+    background: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+  }
   .nl-label {
     position: absolute;
-    bottom: 0;
+    bottom: 26px;
     transform: translateX(-50%);
     font-family: 'Jua', sans-serif;
     font-size: 0.95rem;
     color: var(--text-muted);
   }
-
+  .nl-label--low {
+    bottom: 4px;
+  }
+  .nl-label--current {
+    color: #f59e0b;
+  }
+  .nl-gap {
+    position: absolute;
+    bottom: 142px;
+    transform: translateX(-50%);
+    font-family: 'Jua', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
   /* ======================================================== */
   /* [탭 4] 🍫 면적/넓이 모델 스타일                           */
   /* ======================================================== */

@@ -287,6 +287,15 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 모든 신규 참조의 캐시 버전은 `20261031-split`. 클래식 스크립트로 원래 위치에서 core → main을 연달아 로드하며, 초기화는 마지막 파일의 기존 `DOMContentLoaded`에 남습니다. IIFE·module·defer를 추가하지 않습니다.
 - 검증: `tests/math-pages-split.test.mjs`가 고정 main fixture와 원문·마크업 보존, 상대 경로 실존, 파일 크기, 인라인 블록 제거, 뒤 파일 로드 전 실행 안전성을 검사합니다. 상세 경계·줄 수는 `docs/math_pages_split_spec.md`를 따릅니다.
 
+### 연산 스튜디오 나눗셈 풀이·수직선 (2026-11-04)
+
+- `kids/subjects/math/js/math_operator_studio-core.js` (DOM 없이 호출 가능):
+  - `buildDivisionPlan(dividend, divisor)`: 1~999 ÷ 1~99 세로셈을 한 자리씩 진행해 전역 `divisionPlan`을 채웁니다. 각 단계는 `{ step, title, desc, speech, focus, val, board }`이고, `focus`는 `look`·`quotient`·`product`·`subtract`·`bring_down`·`remainder`입니다. `board`는 그 단계의 칠판 상태 `{ quotient, rows, activeQuotientCol, activeDividendCols, activeRow }`입니다.
+  - `buildNumberLineModel(dividend, divisor, maxJumps = 12)`: 점프 목록과 눈금 위치(%)를 돌려줍니다. 점프가 `maxJumps`를 넘으면 앞뒤만 남기고 `gap`으로 줄입니다.
+  - `numberJosa(n, 받침있음, 받침없음)`, `divisionResultText(몫, 나머지)`: 숫자 뒤 조사와 결과 문구입니다.
+- `math_operator_studio-main.js`: `renderDivisionBoard(step, dividend, divisor)`는 `board`만 그립니다. `renderNumberLineView`·`changeNumberLineStep(delta)`가 수직선 단계를 진행합니다.
+- 검증: `tests/operator-studio-division.test.mjs`. 스크립트·스타일을 바꾸면 `tests/fixtures/math-split/math_operator_studio.json`의 `scripts`·`styles`도 맞춰야 분리 시험이 통과합니다.
+
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
 - `kids/subjects/math/math.html`(454줄)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.
@@ -1321,6 +1330,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.
 
 - `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
+- `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.
 
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.
 - `tests/regression.test.mjs`: 단독 시험 6개를 하위 프로세스로 돌려 종료 코드 0인지 확인합니다. `verify_quest_mastery.js`(3·3·3 엔진), `test_quest_fallback.js`, `test_study_logger_upsert.js`, `verify_study_log_store.js`, `verify_kst_dates.js`, `verify_diary_sync.js`. 새 단독 시험을 만들면 실패 시 `process.exitCode = 1`로 끝나게 하고 이 목록에 한 줄 추가합니다.
