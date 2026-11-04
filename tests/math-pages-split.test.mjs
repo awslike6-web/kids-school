@@ -12,7 +12,7 @@ const version = '?v=20261031-split';
 const pages = [
     ['fractions_multiplication', 'math_fractions_multiplication.css', true],
     ['fractions_training', 'math_fractions_training.css', true],
-    ['math_operator_studio', 'math_operator_studio.css', true],
+    ['math_operator_studio', 'math_operator_studio.css', ['math_operator_studio-plans.js', 'math_operator_studio-core.js', 'math_operator_studio-blocks.js', 'math_operator_studio-numberline.js', 'math_operator_studio-main.js']],
     ['ranges_estimation', 'math_ranges_estimation.css', true],
     ['length_time', 'math_length_time.css', false]
 ];
@@ -25,7 +25,7 @@ for (const [name, cssName, split] of pages) {
     const htmlPath = `kids/subjects/math/${name}.html`;
     const html = read(htmlPath);
     const fixture = JSON.parse(read(`tests/fixtures/math-split/${name}.json`));
-    const jsNames = split ? [`${name}-core.js`, `${name}-main.js`] : [`${name}.js`];
+    const jsNames = Array.isArray(split) ? split : (split ? [`${name}-core.js`, `${name}-main.js`] : [`${name}.js`]);
     const cssHref = `../../css/${cssName}${version}`;
     const scriptSrcs = jsNames.map(file => `./js/${file}${version}`);
     const cssTag = `<link rel="stylesheet" href="${cssHref}">`;
@@ -90,7 +90,7 @@ for (const [name, cssName, split] of pages) {
         vm.createContext(sandbox);
         for (const [index, file] of jsPaths.entries()) {
             vm.runInContext(fs.readFileSync(file, 'utf8'), sandbox, { filename: file });
-            if (split && index === 0) assert.equal(events.length, 0, 'core가 먼저 초기화를 등록함');
+            if (split && index < jsPaths.length - 1) assert.equal(events.length, 0, '마지막 파일 전에는 초기화를 등록하지 않음');
         }
         assert.equal(events.length, 1, '초기화 이벤트는 한 번만 등록해야 함');
     });

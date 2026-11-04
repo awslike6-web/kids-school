@@ -437,14 +437,6 @@
     inset: 0;
     background-image: repeating-linear-gradient(0deg, transparent, transparent 9px, rgba(255,255,255,0.4) 10px, rgba(255,255,255,0.4) 11px);
   }
-  .ten-rod.explode {
-    animation: explodeAnim 0.5s forwards;
-  }
-  @keyframes explodeAnim {
-    0% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.2); filter: brightness(2); }
-    100% { transform: scale(0); opacity: 0; }
-  }
   .unit-cube {
     width: 22px;
     height: 22px;
@@ -552,27 +544,6 @@
     line-height: 1.6;
     color: var(--text-main);
   }
-  .interactive-choice-group {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-  }
-  .tutor-choice-btn {
-    padding: 10px 18px;
-    border-radius: 12px;
-    border: 2px solid var(--border-color);
-    background: var(--card-bg);
-    color: var(--text-main);
-    font-family: 'Jua', sans-serif;
-    font-size: 1.15rem;
-    cursor: pointer;
-    transition: 0.15s;
-  }
-  .tutor-choice-btn:hover {
-    border-color: #38bdf8;
-    transform: translateY(-2px);
-  }
 
   /* ======================================================== */
   /* [탭 3] 📏 수직선 덜어내기 스타일                          */
@@ -665,17 +636,26 @@
     align-items: center;
     gap: 20px;
     padding: 20px 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .area-rect-container {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: stretch;
+    max-width: 100%;
+    box-sizing: border-box;
     border: 3px solid #38bdf8;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   }
   .area-box {
-    padding: 24px;
+    padding: 14px 10px;
+    min-width: 80px;
+    flex: 1 1 80px;
+    box-sizing: border-box;
     text-align: center;
     font-family: 'Jua', sans-serif;
     display: flex;
@@ -689,8 +669,120 @@
     border-right: none;
   }
 
+  .standard-vertical-table td {
+    min-width: 28px;
+    height: 36px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .standard-vertical-table .carry-row td {
+    height: 22px;
+    font-size: 0.95rem;
+  }
+
+  /* 덧셈·뺄셈·곱셈 블록 */
+  .block-display-area--compact {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+  .block-group-box--active {
+    border-color: #38bdf8;
+    box-shadow: 0 0 12px var(--primary-glow);
+  }
+  .block-group-box--removed {
+    opacity: 0.55;
+    border-style: dashed;
+  }
+  .block-summary {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .block-place-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    width: 100%;
+  }
+  .hundred-plate, .thousand-block {
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+  }
+  .hundred-plate {
+    border: 1.5px solid #4ade80;
+    background-color: #059669;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 4.5px, rgba(255,255,255,0.35) 5px, rgba(255,255,255,0.35) 5.6px),
+      repeating-linear-gradient(90deg, transparent, transparent 4.5px, rgba(255,255,255,0.35) 5px, rgba(255,255,255,0.35) 5.6px);
+  }
+  .thousand-block {
+    border: 2px solid #c084fc;
+    background: linear-gradient(135deg, #a855f7 0%, #6d28d9 100%);
+    box-shadow: 4px 4px 0 rgba(109, 40, 217, 0.45);
+  }
+  .block-more {
+    font-family: 'Jua', sans-serif;
+    font-size: 1rem;
+    color: #38bdf8;
+    padding: 0 6px;
+  }
+  .block-place-row .ten-rod {
+    height: 70px;
+    width: 18px;
+  }
+  body.theme--slime .block-step-nav,
+  body.theme--slime .nl-result-card {
+    background: #fff;
+  }
+  .block-group-box--compact .ten-rod { height: 36px; width: 9px; }
+  .block-group-box--compact .unit-cube { width: 10px; height: 10px; }
+  .block-group-box--compact .hundred-plate { width: 30px; height: 30px; }
+
+  /* 수직선 결과·방향·안내 */
+  .nl-result-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+  }
+  .nl-label--tiny {
+    font-size: 0.72rem;
+  }
+  .nl-jump-arc::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid #38bdf8;
+  }
+  .nl-jump-arc--back::after { left: -6.5px; }
+  .nl-jump-arc--forward::after { right: -6.5px; }
+  .subtraction-guide {
+    text-align: center;
+    padding: 30px 20px;
+    border: 1.5px solid #f59e0b;
+    border-radius: 16px;
+    background: rgba(245, 158, 11, 0.12);
+    word-break: keep-all;
+  }
+  .subtraction-guide h3 {
+    margin: 0 0 10px;
+    font-family: 'Jua', sans-serif;
+    color: #f59e0b;
+  }
+  .subtraction-guide p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
   @media (max-width: 640px) {
     .hero-title { font-size: 1.8rem; }
     .num-input { width: 80px; height: 50px; font-size: 1.8rem; }
     .vertical-tutor-container { flex-direction: column; align-items: center; }
+    .area-box { padding: 10px 6px; min-width: 70px; }
   }
