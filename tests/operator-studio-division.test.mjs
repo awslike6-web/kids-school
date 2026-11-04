@@ -21,7 +21,7 @@ function loadStudio() {
         alert() {}
     };
     vm.createContext(sandbox);
-    for (const file of ['math_operator_studio-plans.js', 'math_operator_studio-core.js', 'math_operator_studio-main.js']) {
+    for (const file of ['plans', 'core', 'blocks', 'numberline', 'main'].map(part => `math_operator_studio-${part}.js`)) {
         vm.runInContext(fs.readFileSync(path.join(jsDir, file), 'utf8'), sandbox, { filename: file });
     }
     return {
@@ -29,12 +29,12 @@ function loadStudio() {
         planFor(a, b) {
             sandbox.__a = a;
             sandbox.__b = b;
-            return vm.runInContext('buildDivisionPlan(__a, __b); divisionPlan', sandbox);
+            return vm.runInContext('buildDivisionPlan(__a, __b)', sandbox);
         },
         numberLineFor: (a, b) => {
             sandbox.__a = a;
             sandbox.__b = b;
-            return vm.runInContext('buildNumberLineModel(__a, __b)', sandbox);
+            return vm.runInContext('window.OperatorStudioLines.buildNumberLineModel(__a, __b)', sandbox);
         },
         run: code => vm.runInContext(code, sandbox)
     };

@@ -68,158 +68,94 @@ function renderDivisionBoard(step, dividend, divisor) {
   `;
 }
 
+// 세로 덧셈·뺄셈·곱셈 공통 줄: 가로줄은 계산 결과 바로 위(아래 수의 밑)에 긋는다
+function renderOperandRows(board, sign, markBottomActive = true) {
+  const activeClass = col => (col === board.activeCol ? 'cell-active' : '');
+  const rowA = board.digitsA.map((digit, col) => {
+    const crossed = board.borrows?.[col]?.crossed ? 'text-decoration:line-through; opacity:0.6;' : '';
+    return `<td class="${activeClass(col)}" style="color:#38bdf8; ${crossed}">${digit}</td>`;
+  }).join('');
+  const rowB = board.digitsB.map((digit, col) => {
+    const active = markBottomActive ? activeClass(col) : '';
+    return `<td class="calc-step-line ${active}" style="color:#d97706;">${digit}</td>`;
+  }).join('');
+  return `
+    <tr><td></td>${rowA}</tr>
+    <tr><td class="calc-step-line" style="color:#f59e0b; font-weight:800;">${sign}</td>${rowB}</tr>
+  `;
+}
+
+function renderResultRow(board) {
+  const cells = board.result.map((digit, col) => {
+    const active = col === board.activeCol ? 'cell-active' : '';
+    return `<td class="${active}" style="color:#10b981; font-weight:800;">${digit}</td>`;
+  }).join('');
+  return `<tr class="result-row"><td></td>${cells}</tr>`;
+}
+
 function renderAdditionBoard(step) {
   const { board } = step;
-  const carriesRow = board.carries.map((c, col) => {
+  const carriesRow = board.carries.map((carry, col) => {
     const active = col === board.activeCarryCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#ec4899; font-size:0.95rem; font-weight:800; min-height:24px;">${c ? '①' : ''}</td>`;
-  }).join('');
-
-  const rowA = board.digitsA.map((d, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#38bdf8;">${d}</td>`;
-  }).join('');
-
-  const rowB = board.digitsB.map((d, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#fbbf24;">${d}</td>`;
-  }).join('');
-
-  const resultRow = board.result.map((d, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="calc-step-line ${active}" style="color:#10b981; font-weight:800;">${d}</td>`;
+    return `<td class="${active}" style="color:#ec4899; font-weight:800;">${carry}</td>`;
   }).join('');
 
   return `
     <table class="division-table standard-vertical-table">
-      <tr class="carry-row">
-        <td></td>
-        ${carriesRow}
-      </tr>
-      <tr>
-        <td></td>
-        ${rowA}
-      </tr>
-      <tr>
-        <td style="color:#f59e0b; font-weight:800;">+</td>
-        ${rowB}
-      </tr>
-      <tr class="result-row">
-        <td class="calc-step-line"></td>
-        ${resultRow}
-      </tr>
+      <tr class="carry-row"><td></td>${carriesRow}</tr>
+      ${renderOperandRows(board, '+')}
+      ${renderResultRow(board)}
     </table>
   `;
 }
 
+// 윗줄에는 실제로 빼는 값을 적는다. 142 − 68의 십의 자리는 받아내린 뒤 13이다.
 function renderSubtractionBoard(step) {
   const { board } = step;
-  if (step.isNegative) {
-    return `<div style="text-align:center; padding:20px; color:#ef4444; font-family:'Jua'; font-size:1.3rem;">큰 수에서 작은 수를 빼야 해요!</div>`;
-  }
-
-  const borrowsRow = board.borrows.map((b, col) => {
+  const borrowsRow = board.borrows.map((mark, col) => {
+    if (!mark) return '<td></td>';
     const active = col === board.activeBorrowCol ? 'cell-active' : '';
-    if (!b) return `<td></td>`;
-    return `<td class="${active}" style="color:#ec4899; font-size:0.95rem; font-weight:800;">${b.add10 ? '⑩' : b.val}</td>`;
-  }).join('');
-
-  const rowA = board.digitsA.map((d, col) => {
-    const b = board.borrows[col];
-    const crossed = b && b.crossed ? 'text-decoration:line-through; opacity:0.6;' : '';
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#38bdf8; ${crossed}">${d}</td>`;
-  }).join('');
-
-  const rowB = board.digitsB.map((d, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#fbbf24;">${d}</td>`;
-  }).join('');
-
-  const resultRow = board.result.map((d, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="calc-step-line ${active}" style="color:#10b981; font-weight:800;">${d}</td>`;
+    return `<td class="${active}" style="color:#ec4899; font-weight:800;">${mark.val}</td>`;
   }).join('');
 
   return `
     <table class="division-table standard-vertical-table">
-      <tr class="carry-row">
-        <td></td>
-        ${borrowsRow}
-      </tr>
-      <tr>
-        <td></td>
-        ${rowA}
-      </tr>
-      <tr>
-        <td style="color:#f59e0b; font-weight:800;">−</td>
-        ${rowB}
-      </tr>
-      <tr class="result-row">
-        <td class="calc-step-line"></td>
-        ${resultRow}
-      </tr>
+      <tr class="carry-row"><td></td>${borrowsRow}</tr>
+      ${renderOperandRows(board, '−')}
+      ${renderResultRow(board)}
     </table>
   `;
 }
 
 function renderMultiplicationBoard(step) {
   const { board } = step;
-  const carriesRow = board.carries.map((c, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#ec4899; font-size:0.95rem; font-weight:800;">${c ? `(${c})` : ''}</td>`;
+  const carriesRow = board.carries.map((carry, col) => {
+    const active = carry && col === board.activeCol ? 'cell-active' : '';
+    return `<td class="${active}" style="color:#ec4899; font-weight:800;">${carry}</td>`;
   }).join('');
 
-  const rowA = board.digitsA.map((d, col) => {
-    const active = col === board.activeCol ? 'cell-active' : '';
-    return `<td class="${active}" style="color:#38bdf8;">${d}</td>`;
-  }).join('');
-
-  const rowB = board.digitsB.map((d, col) => {
-    return `<td style="color:#fbbf24;">${d}</td>`;
-  }).join('');
-
-  let rowsHtml = '';
-  if (!board.isTwoDigit) {
-    const resultCells = (board.rows[0]?.cells || Array(board.colCount).fill('')).map((d, col) => {
-      const active = col === board.activeCol ? 'cell-active' : '';
-      return `<td class="calc-step-line ${active}" style="color:#10b981; font-weight:800;">${d}</td>`;
+  const rowsHtml = board.rows.map((row, index) => {
+    const isActive = index === board.activeRow;
+    const isPart2 = row.kind === 'part2';
+    const isAnswer = row.kind === 'sum' || row.kind === 'result';
+    const cells = row.cells.map((digit, col) => {
+      const classes = [];
+      if (isPart2) classes.push('calc-step-line');
+      if (isActive && (row.kind !== 'result' || col === board.activeCol)) classes.push('cell-active');
+      return `<td class="${classes.join(' ')}" style="color:${isAnswer ? '#10b981' : 'inherit'}; font-weight:${isAnswer ? '800' : '700'};">${digit}</td>`;
     }).join('');
-    rowsHtml = `
-      <tr class="result-row">
-        <td class="calc-step-line"></td>
-        ${resultCells}
+    return `
+      <tr>
+        <td class="${isPart2 ? 'calc-step-line' : ''}" style="color:#f59e0b; font-weight:800;">${isPart2 ? '+' : ''}</td>
+        ${cells}
       </tr>
     `;
-  } else {
-    rowsHtml = board.rows.map((r, rIdx) => {
-      const isActive = rIdx === board.activeRow;
-      const isSum = r.kind === 'sum';
-      const lineClass = isSum || rIdx === 0 ? 'calc-step-line' : '';
-      const cells = r.cells.map(d => `<td class="${lineClass} ${isActive ? 'cell-active' : ''}" style="color:${isSum ? '#10b981' : '#f8fafc'}; font-weight:${isSum ? '800' : '700'};">${d}</td>`).join('');
-      return `
-        <tr>
-          <td class="${lineClass}" style="font-size:0.8rem; color:#94a3b8;">${isSum ? '+' : ''}</td>
-          ${cells}
-        </tr>
-      `;
-    }).join('');
-  }
+  }).join('');
 
   return `
     <table class="division-table standard-vertical-table">
-      <tr class="carry-row">
-        <td></td>
-        ${carriesRow}
-      </tr>
-      <tr>
-        <td></td>
-        ${rowA}
-      </tr>
-      <tr>
-        <td style="color:#f59e0b; font-weight:800;">×</td>
-        ${rowB}
-      </tr>
+      <tr class="carry-row"><td></td>${carriesRow}</tr>
+      ${renderOperandRows(board, '×', false)}
       ${rowsHtml}
     </table>
   `;
@@ -231,6 +167,11 @@ function renderVerticalTutorView(container) {
   }
 
   const curPlan = currentPlan[tutorCurrentStep - 1] || currentPlan[0];
+  if (curPlan.isNegative) {
+    renderSubtractionGuide(container);
+    return;
+  }
+
   let boardMarkup = '';
   if (currentOp === 'div') {
     boardMarkup = renderDivisionBoard(curPlan, curNumA, curNumB);
@@ -272,54 +213,6 @@ function changeTutorStep(delta) {
   hasUserStarted = true;
   tutorCurrentStep = Math.max(1, Math.min(currentPlan.length, tutorCurrentStep + delta));
   renderVerticalTutorView(document.getElementById('studioViewport'));
-}
-
-// ========================================================
-// 📏 [탭 3] 수직선 뛰어 세기 / 덜어내기 렌더링 (4대 연산 공통)
-// ========================================================
-function renderNumberLineView(container) {
-  const model = buildOpNumberLineModel(currentOp, curNumA, curNumB);
-  if (!model) return;
-
-  const titleMap = {
-    div: '📏 수직선 동수누감 (점프해서 덜어내기)',
-    add: '📏 수직선 이어 세기 (앞으로 뛰어 세기)',
-    sub: '📏 수직선 덜어 세기 (뒤로 뛰어 세기)',
-    mul: '📏 수직선 동수누가 (일정하게 뛰어 세기)'
-  };
-
-  const jumpBadges = model.jumps.map(j => `
-    <div style="background:rgba(2,132,199,0.2); border:1.5px solid #0284c7; border-radius:10px; padding:6px 12px; text-align:center;">
-      <div style="font-size:0.75rem; color:#94a3b8;">${j.index}단계</div>
-      <div style="font-family:'Jua'; color:#38bdf8; font-size:1.1rem;">${j.from} → ${j.to}</div>
-      <div style="font-size:0.8rem; color:#f59e0b;">(${j.label})</div>
-    </div>
-  `).join('');
-
-  container.innerHTML = `
-    <div class="numberline-wrap">
-      <h3 style="font-family:'Jua'; color:#38bdf8; margin:0 0 10px;">${titleMap[currentOp]}</h3>
-      <p style="color:var(--text-muted); font-size:1rem; margin:0 0 20px;">${model.summary}</p>
-      <div style="background:rgba(15,23,42,0.6); border:2px solid var(--border-color); border-radius:16px; padding:24px 16px; text-align:center;">
-        <div style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
-          ${jumpBadges}
-          ${model.compressed ? '<div style="color:#94a3b8; font-family:\'Jua\'; align-self:center;">... 중간 생략 ...</div>' : ''}
-        </div>
-        <div style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:12px;">
-          <div style="background:rgba(2,132,199,0.15); border:1.5px solid #0284c7; border-radius:12px; padding:12px 18px;">
-            <div style="font-size:0.85rem; color:#94a3b8;">시작 수</div>
-            <div style="font-family:'Jua'; font-size:1.8rem; color:#38bdf8;">${model.startVal}</div>
-          </div>
-          <div style="background:rgba(16,185,129,0.15); border:1.5px solid #10b981; border-radius:12px; padding:12px 18px;">
-            <div style="font-size:0.85rem; color:#94a3b8;">도착한 수 (결과)</div>
-            <div style="font-family:'Jua'; font-size:1.8rem; color:#10b981;">${model.endVal}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  studioSpeak(model.summary);
 }
 
 // ========================================================
@@ -434,7 +327,7 @@ function renderMultiplicationAreaView(container) {
     `;
   }
 
-  const speech = `자리별 부분곱 넓이 모델이에요! 직사각형을 자릿수별로 나누어 부분 넓이들을 더하면 총 넓이 ${prod}가 돼요!`;
+  const speech = `자리별 부분곱 넓이 모델이에요! 직사각형을 자릿수별로 나누어 부분 넓이들을 더하면 총 넓이는 ${prod}${numberJosa(prod, '이에요', '예요')}!`;
 
   container.innerHTML = `
     <div class="area-model-wrap">

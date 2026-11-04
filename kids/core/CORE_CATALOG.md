@@ -282,25 +282,27 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 - 대상 HTML: `kids/subjects/math/`의 `fractions_multiplication.html`, `fractions_training.html`, `math_operator_studio.html`, `ranges_estimation.html`, `length_time.html`. 마크업·기존 외부 스크립트 순서·전역 함수는 그대로 유지합니다.
 - 스타일: `kids/css/math_fractions_multiplication.css`, `math_fractions_training.css`, `math_operator_studio.css`, `math_ranges_estimation.css`, `math_length_time.css`. 각 HTML의 원래 style 위치에서 상대 경로로 로드합니다.
-- 스크립트: `kids/subjects/math/js/`의 `fractions_multiplication-core.js` → `fractions_multiplication-main.js`, `fractions_training-core.js` → `fractions_training-main.js`, `math_operator_studio-core.js` → `math_operator_studio-main.js`, `ranges_estimation-core.js` → `ranges_estimation-main.js`. `length_time.js`는 단일 파일입니다.
+- 스크립트: `kids/subjects/math/js/`의 `fractions_multiplication-core.js` → `fractions_multiplication-main.js`, `fractions_training-core.js` → `fractions_training-main.js`, `math_operator_studio-plans.js` → `-core.js` → `-blocks.js` → `-numberline.js` → `-main.js`(아래 연산 스튜디오 절), `ranges_estimation-core.js` → `ranges_estimation-main.js`. `length_time.js`는 단일 파일입니다.
 - 전역 API: 분수 탐험 `switchTab`·`initPlayground`, 분수 훈련 `renderFrac`·`renderMixed`·`switchTrainMode`, 연산 스튜디오 `startStudioCalculation`·`switchViewTab`, 수의 범위 `selectRangePreset`·`setRoundingScope`, 길이·시간 `selectRulerItem`·`startStopwatchChallenge`. 호출부·동작은 변경하지 않습니다.
 - 모든 신규 참조의 캐시 버전은 `20261031-split`. 클래식 스크립트로 원래 위치에서 core → main을 연달아 로드하며, 초기화는 마지막 파일의 기존 `DOMContentLoaded`에 남습니다. IIFE·module·defer를 추가하지 않습니다.
 - 검증: `tests/math-pages-split.test.mjs`가 고정 main fixture와 원문·마크업 보존, 상대 경로 실존, 파일 크기, 인라인 블록 제거, 뒤 파일 로드 전 실행 안전성을 검사합니다. 상세 경계·줄 수는 `docs/math_pages_split_spec.md`를 따릅니다.
 
-### 연산 스튜디오 4대 사칙연산 풀이·수직선·인터랙티브 완결 (2026-11-04)
+### 연산 스튜디오 4대 연산 풀이·블록·수직선 (2026-11-04)
 
-- `kids/subjects/math/js/math_operator_studio-plans.js` (DOM 없이 호출 가능한 순수 풀이 계획 엔진):
-  - `buildDivisionPlan(dividend, divisor)`, `buildAdditionPlan(numA, numB)`, `buildSubtractionPlan(numA, numB)`, `buildMultiplicationPlan(numA, numB)`: 4대 연산 세로셈을 자리별로 전개하며 전역 `divisionPlan`/`additionPlan`/`subtractionPlan`/`multiplicationPlan`을 생성합니다. 각 단계는 `{ step, title, desc, speech, focus, val, board }` 구조이며, `board`는 세로셈 칠판 상태를 완전히 캡슐화합니다.
-  - `buildNumberLineModel(dividend, divisor, maxJumps = 12)` 및 `buildOpNumberLineModel(op, numA, numB, maxJumps = 10)`: 덧셈/곱셈 앞으로 뛰어세기, 뺄셈/나눗셈 뒤로 뛰어세기 점프 목록과 눈금(%)을 계산합니다.
-  - `clampStudioValue(val, op, role)`, `clampDivisionValue(val, role)`: 연산별 입력 범위(덧셈·뺄셈 1~999, 곱셈 1~999 × 1~99, 나눗셈 1~999 ÷ 1~99) 제어.
-- `kids/subjects/math/js/math_operator_studio-core.js` (상태·프리셋·블록 뷰 엔진):
-  - `OPERATION_PRESETS`, `OPERATION_TAB_LABELS`, `OPERATION_INPUT_CONFIG`: 연산별 전용 추천 문제, 시각화 탭 라벨(덧셈·뺄셈: 십진 블록·세로셈·수직선, 곱셈·나눗셈: 블록·세로셈·수직선·면적 모델), 입력창 속성 및 aria-label 관리.
-  - 4대 연산 십진 블록 뷰: `renderDivisionBlocksView`, `renderAdditionBlocksView`(10개 묶음 합체), `renderSubtractionBlocksView`(10개 풀림 분해), `renderMultiplicationBlocksView`(자리별 묶음 모델).
-  - 음성 구연: `studioSpeak`가 `speakFairyTTS` 단일 파사드를 통해 단계별 나긋나긋한 설명 재생.
-- `kids/subjects/math/js/math_operator_studio-main.js` (세로셈 board 렌더러·수직선·면적 모델):
-  - 세로셈 렌더링: `renderDivisionBoard`, `renderAdditionBoard`, `renderSubtractionBoard`, `renderMultiplicationBoard`가 `board` 상태를 받아 HTML DOM으로 투영.
-  - `renderAreaModelView`: 곱셈 자리별 부분곱 직사각형 그리드 및 나눗셈 면적 모델 시각화 (모바일 375px 무넘침 보장).
-- 검증: `tests/operator-studio-division.test.mjs`(나눗셈 회귀), `tests/operator-studio-plans.test.mjs`(덧셈·뺄셈·곱셈 1~999 전 범위 및 무작위 검산), `tests/math-pages-split.test.mjs`(3단 분할 무결성 및 fixture 일치).
+클래식 스크립트로 `math_operator_studio-plans.js` → `-core.js` → `-blocks.js` → `-numberline.js` → `-main.js` 순서로 싣습니다. 초기화는 마지막 파일의 `DOMContentLoaded`에 있습니다.
+
+- `math_operator_studio-plans.js` (`window.OperatorStudioPlans`, DOM 없음):
+  - `buildDivisionPlan(a, b)`, `buildAdditionPlan(a, b)`, `buildSubtractionPlan(a, b)`, `buildMultiplicationPlan(a, b)`: 단계 배열을 돌려줍니다. 각 단계는 `{ step, title, desc, speech, val, board }`이고 나눗셈은 `focus`가 더 있습니다. 뺄셈에서 앞 수가 작으면 `isNegative: true`인 한 단계만 돌려줍니다.
+  - `clampStudioValue(value, min, max)`, `clampDivisionValue(value, max)`, `numberJosa(n, 받침있음, 받침없음)`, `divisionResultText(몫, 나머지)`, `DIVIDEND_MAX`, `DIVISOR_MAX`.
+- `math_operator_studio-core.js`: 상태, `OPERATION_PRESETS`·`OPERATION_TAB_LABELS`·`OPERATION_INPUT_CONFIG`, `switchOperation`·`switchViewTab`·`loadPreset`·`startStudioCalculation`, `renderSubtractionGuide(container)`, `studioSpeak`(`speakFairyTTS`만 호출).
+- `math_operator_studio-blocks.js`:
+  - `window.OperatorStudioBlocks`: `buildAdditionBlockSteps(a, b)`, `buildSubtractionBlockSteps(a, b)`, `buildMultiplicationBlockSteps(a, b)`, `countsValue(counts)`. 단계마다 블록 묶음 `{ role, label, counts: { th, h, t, o }, active }`을 만듭니다(DOM 없음).
+  - 화면: `renderBlocksView(container)`, `changeBlockStep(delta)`. 나눗셈 분배관은 `renderDivisionBlocksView`입니다.
+- `math_operator_studio-numberline.js`:
+  - `window.OperatorStudioLines`: `buildNumberLineModel(dividend, divisor, maxJumps = 12)`, `buildOpNumberLineModel(op, a, b)`. 점프 목록과 눈금 위치(%)를 돌려줍니다. 점프가 12번을 넘으면 앞뒤만 남기고 `gap`으로 줄입니다. 뺄셈에서 앞 수가 작으면 `{ blocked: true }`입니다.
+  - 화면: `renderNumberLineView(container)`, `changeNumberLineStep(delta)`.
+- `math_operator_studio-main.js`: 세로셈 `renderDivisionBoard`·`renderAdditionBoard`·`renderSubtractionBoard`·`renderMultiplicationBoard`는 `board`만 그립니다. `renderAreaModelView`(나눗셈·곱셈), `applyTheme`.
+- 검증: `tests/operator-studio-division.test.mjs`, `tests/operator-studio-plans.test.mjs`, `tests/operator-studio-views.test.mjs`, `tests/math-pages-split.test.mjs`. 스크립트·스타일을 바꾸면 `tests/fixtures/math-split/math_operator_studio.json`의 `scripts`·`styles`도 맞춰야 분리 시험이 통과합니다. 레이아웃은 시험으로 잡지 못하므로 쓰기 차단 서버에서 확인합니다.
 
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
@@ -1337,6 +1339,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 - `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
 - `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.
+- `tests/operator-studio-plans.test.mjs`: 덧셈·뺄셈 1~999 두 수, 곱셈 1~999 × 1~99 전 범위에서 단계별 칠판(올림·칸 위 값·부분곱·진행 중 결과 칸)을 독립 계산과 대조하고, 경계 사례와 추천 문제 이름을 검사합니다.
+- `tests/operator-studio-views.test.mjs`: 가짜 DOM에서 네 연산의 모든 탭을 끝까지 눌러 만들어진 HTML을 검사합니다(잘못된 글자, 수직선 축과 점프 수, 블록 그림 변화, 앞 수가 작은 뺄셈 안내). 블록 값 보존은 전 범위로 검사합니다. 레이아웃은 검사하지 않습니다.
 
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.
 - `tests/regression.test.mjs`: 단독 시험 6개를 하위 프로세스로 돌려 종료 코드 0인지 확인합니다. `verify_quest_mastery.js`(3·3·3 엔진), `test_quest_fallback.js`, `test_study_logger_upsert.js`, `verify_study_log_store.js`, `verify_kst_dates.js`, `verify_diary_sync.js`. 새 단독 시험을 만들면 실패 시 `process.exitCode = 1`로 끝나게 하고 이 목록에 한 줄 추가합니다.

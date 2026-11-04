@@ -12,7 +12,7 @@ const version = '?v=20261031-split';
 const pages = [
     ['fractions_multiplication', 'math_fractions_multiplication.css', true],
     ['fractions_training', 'math_fractions_training.css', true],
-    ['math_operator_studio', 'math_operator_studio.css', ['math_operator_studio-plans.js', 'math_operator_studio-core.js', 'math_operator_studio-main.js']],
+    ['math_operator_studio', 'math_operator_studio.css', ['math_operator_studio-plans.js', 'math_operator_studio-core.js', 'math_operator_studio-blocks.js', 'math_operator_studio-numberline.js', 'math_operator_studio-main.js']],
     ['ranges_estimation', 'math_ranges_estimation.css', true],
     ['length_time', 'math_length_time.css', false]
 ];
