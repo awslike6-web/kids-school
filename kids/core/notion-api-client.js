@@ -202,31 +202,68 @@ function getKstTodayYMD(date = new Date()) {
         }
     }
 
-    async function updateVocaMasteryStatus(pageId, isMastered) {
+    // VOCA 행 속성 PATCH 공통: 관리자(아빠·엄마·어른) 시험은 노션에 쓰지 않고 성공으로 처리한다
+    async function patchVocaPage(pageId, properties, failLabel) {
         if (!pageId) return false;
         const savedName = localStorage.getItem('currentUserName');
-        if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
-            console.log(`🛠️ [마스터 프리패스] 관리자 모드이므로 노션 마스터 체크 갱신을 생략합니다.`);
-            return true;
-        }
-        
+        if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') return true;
         try {
             const res = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    properties: {
-                        "달성": { checkbox: isMastered }
-                    }
-                })
+                body: JSON.stringify({ properties })
             });
             if (!res.ok) throw new Error(await res.text());
-            console.log(`✅ [마스터 연동 완료] 페이지(${pageId}) 달성 상태가 ${isMastered}로 갱신되었습니다.`);
             return true;
         } catch (e) {
-            console.error("❌ VOCA 달성 상태 업데이트 실패:", e);
+            console.error(`❌ ${failLabel}:`, e);
             return false;
         }
+    }
+
+    function updateVocaMasteryStatus(pageId, isMastered) {
+        return patchVocaPage(pageId, { "달성": { checkbox: isMastered } }, "VOCA 달성 상태 업데이트 실패");
+    }
+
+    // 숙련도 Pull/Push (퀘스트 러너 전용 notion-voca.js와 같은 계약, 받아쓰기 사다리가 쓴다)
+    async function fetchVocaUnitFresh(options = {}) {
+        const filters = [];
+        if (options.studentName) filters.push({ property: "학생", multi_select: { contains: options.studentName } });
+        if (options.subject) filters.push({ property: "과목", multi_select: { contains: options.subject } });
+        if (options.unit) filters.push({ property: "단원", rich_text: { contains: String(options.unit) } });
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), options.timeoutMs || 4000);
+        let results = [];
+        let cursor;
+        try {
+            do {
+                const body = { page_size: 100 };
+                if (filters.length > 0) body.filter = { and: filters };
+                if (cursor) body.start_cursor = cursor;
+                const res = await fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                    signal: controller.signal
+                });
+                if (!res.ok) throw new Error(`노션 VOCA 단원 조회 오류 (상태: ${res.status})`);
+                const data = await res.json();
+                results = results.concat(data.results || []);
+                cursor = data.has_more ? data.next_cursor : null;
+            } while (cursor);
+            return results.map(parseVocaPage);
+        } catch (e) {
+            console.warn("[fetchVocaUnitFresh] 최신 숙련도 조회 실패 (로컬 상태로 진행):", e);
+            return null;
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+
+    function updateVocaMasteryProgress(pageId, masteryText, isAchieved = null) {
+        const properties = { "숙련도": { rich_text: [{ text: { content: String(masteryText) } }] } };
+        if (isAchieved === true || isAchieved === false) properties["달성"] = { checkbox: isAchieved };
+        return patchVocaPage(pageId, properties, "VOCA 숙련도 업데이트 실패");
     }
 
     // ----------------------------------------------------
@@ -711,6 +748,8 @@ function getKstTodayYMD(date = new Date()) {
         _buildVocaQueryBody,
         fetchVocaFromNotion,
         updateVocaMasteryStatus,
+        fetchVocaUnitFresh,
+        updateVocaMasteryProgress,
         fetchLibraryBooksFromNotion,
         fetchReadingPassagesFromNotion,
         mapNotionRecordsToReadingBooks,
@@ -733,6 +772,8 @@ function getKstTodayYMD(date = new Date()) {
     window._buildVocaQueryBody = _buildVocaQueryBody;
     window.fetchVocaFromNotion = fetchVocaFromNotion;
     window.updateVocaMasteryStatus = updateVocaMasteryStatus;
+    window.fetchVocaUnitFresh = fetchVocaUnitFresh;
+    window.updateVocaMasteryProgress = updateVocaMasteryProgress;
     window.fetchLibraryBooksFromNotion = fetchLibraryBooksFromNotion;
     window.fetchReadingPassagesFromNotion = fetchReadingPassagesFromNotion;
     window.mapNotionRecordsToReadingBooks = mapNotionRecordsToReadingBooks;

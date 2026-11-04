@@ -498,16 +498,32 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
   | `KoreanStorybook.renderLibrary(container)` | 서가 도서관 전체 UI 렌더링 |
   | `KoreanStorybook.setTab(tab)` | 전체/민수/민서 서가 탭 전환 |
 
-### 🌟 `korean_dictation.js` ([2단계] 받아쓰기 훈련소 전담 엔진)
-슬라임 음절 자석판과 직접 쓰기 하이브리드 입력, 오디오 재생, 단계적 초성 힌트, 문장 검증을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/korean_dictation.js` (266줄)
+### 🌟 `korean_dictation.js` ([2단계] 받아쓰기 훈련소 화면)
+어절 블록 → 글자 자석 → 직접 쓰기(타자·공책) 화면, 오디오 재생, 단계적 초성 힌트, 틀린 문장 재출제를 담당합니다. 규격: `docs/korean_spec.md` §5-3-2.
+- **파일 위치**: `kids/js/korean_dictation.js` (약 545줄)
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `KoreanDictation.renderUI(container)` | 자석판/직접입력 훈련소 UI 렌더링 |
-  | `KoreanDictation.verify()` | 슬라임 자석판 및 입력 문장 정답 검증 |
-  | `KoreanDictation.setInputMode(mode)` | 'magnet' ↔ 'typing' 모드 전환 |
-  | `KoreanDictation.stepHint()` | 숨김 ➔ 초성 힌트 ➔ 전체 정답 단계별 힌트 제어 |
+  | `KoreanDictation.beginSession({records, unit, child, container, onQueue})` | 노션 진도를 읽어 병합하고 이번 단계의 문장 대기열을 `onQueue`로 넘김 |
+  | `KoreanDictation.renderUI(container)` | 현재 문장의 입력 화면 렌더링 |
+  | `KoreanDictation.verify()` | 블록·자석·타자 입력 채점 |
+  | `KoreanDictation.requeueCurrent()` | 틀린 문장을 대기열 맨 뒤로 보내고 다음 문장으로 이동 |
+  | `KoreanDictation.renderRoundDone(container)` | 판 완료 화면, 다음 단계·회차 완성 안내 |
+  | `KoreanDictation.endSession()` | 진도 전송 후 회차 상태 닫기 (`closeMissionView`에서 호출) |
+  | `KoreanDictation.unitBadge(records, child)` | 회차 카드의 진도 글자 |
+
+### 🌟 `dictation_ladder.js` (받아쓰기 사다리 계산 엔진, DOM 없음)
+- **파일 위치**: `kids/js/dictation_ladder.js` (약 270줄, 전역 `window.DictationLadder`). `quest-mastery.js`보다 뒤에 로드합니다.
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `eligibleRounds(sentence)` · `currentRound(items, stateOf)` · `queueFor(items, round, stateOf)` | 문장별로 풀 수 있는 단계, 회차의 현재 단계, 이번 판 대기열 |
+  | `inputModeFor(round, wrongCount, sentence)` · `shouldShowHint(wrongCount)` | 2번 틀리면 초성, 3번 틀리면 쉬운 입력 방식 |
+  | `pickTrap(sentence)` · `buildBlocks(sentence)` · `buildLetters(sentence)` | 철자 함정과 블록·자석 재료 (`QuestMastery.misspellingsOf` 사용) |
+  | `judge(target, submission)` · `diffTokens(target, submission)` | 채점(`punct`·`space`·`letters` 구분), 틀린 어절 표시 |
+  | `mergeFromRecords(child, records, isFresh)` · `markPassed(child, id, round)` · `pushDirty(child, patchFn)` | 기기 저장(`MINMIN_DICTATION_LADDER_V1_{학생}`)과 노션 `숙련도` 동기화. `달성`은 보내지 않음 |
+
+`notion-api-client.js`도 `fetchVocaUnitFresh`·`updateVocaMasteryProgress`를 제공합니다(퀘스트 러너 전용 `notion-voca.js`와 같은 계약, 받아쓰기 사다리 사용).
 
 ### 🌟 `korean_voca.js` ([3단계] 국어 어휘 퀴즈 훈련소 전담 엔진)
 객관식(단어->뜻 3지선다) 및 주관식(뜻->단어: 긴 단어 자석 빈칸 채우기, 다단어 객관식, 직접 입력) 퀴즈와 힌트/채점을 전담하는 독립 모듈입니다.
@@ -1330,6 +1346,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.
 
 - `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
+- `tests/dictation-ladder.test.mjs`: 받아쓰기 사다리의 단계 건너뛰기·이어 하기·쉬운 방식 전환, 철자 함정, 채점 구분, 숙련도 전송·실패 재전송·병합, 학생 분리, 스크립트 순서, 보상 오디오 호출을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.
 
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.

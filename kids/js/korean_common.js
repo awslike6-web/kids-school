@@ -24,7 +24,6 @@ let selectedKoreanUnit = "";
 let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
 let koreanVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let koreanDictationOrderType = 'sequence'; // 'sequence'(1번~10번 교재순서 기본) or 'shuffle'
-let dictationInputMode = 'magnet'; // 'magnet' or 'typing'
 
 // AI 문장방 및 독해방 상태
 let readingFetchedBooks = [];
@@ -56,14 +55,9 @@ function getHangulChosung(text) {
     return res;
 }
 
-window.setDictationInputMode = function(mode) {
-    dictationInputMode = mode;
-    if (window.KoreanDictation && typeof window.KoreanDictation.setInputMode === 'function') {
-        window.KoreanDictation.setInputMode(mode);
-    } else {
-        renderSectionUI();
-    }
-};
+function getKoreanStudentName() {
+    return (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+}
 
 window.setKoreanVocaMode = function(mode) {
     koreanVocaMode = mode;
@@ -249,6 +243,10 @@ function closeMissionView(force) {
     stopDictationAudio();
     stopFairyTTS();
     if (window.KoreanMiniReading) window.KoreanMiniReading.stop(); // 미니 독해 mp3 연속 재생 중단
+    // 받아쓰기: 통과한 문장의 진도를 노션 숙련도 칸에 보내고 회차 상태를 닫는다
+    if (window.KoreanDictation && typeof window.KoreanDictation.endSession === 'function') {
+        window.KoreanDictation.endSession().catch(e => console.warn('[closeMissionView] 받아쓰기 진도 전송 경고:', e));
+    }
 
     const finalizeDiscussion = async () => {
         const sHistory = window.sentenceHistory || [];
@@ -329,6 +327,7 @@ function getKoreanOrderToggleHtml(orderType) {
 window.koreanToggleQuizOrder = function() {
     if (currentMissionType === 'dictation') {
         koreanDictationOrderType = (koreanDictationOrderType === 'shuffle') ? 'sequence' : 'shuffle';
+        window.koreanDictationOrderType = koreanDictationOrderType; // 받아쓰기 화면의 순서 버튼 글자가 읽는다
     } else if (currentMissionType === 'voca') {
         koreanVocaOrderType = (koreanVocaOrderType === 'shuffle') ? 'sequence' : 'shuffle';
     }
@@ -456,19 +455,22 @@ window.selectDynamicGrade = function(grade) {
 
 function renderDynamicUnitUI(units, container) {
     if (currentMissionType === 'dictation') {
+        const student = getKoreanStudentName();
         let html = `<div style="text-align:center; margin-bottom:20px;">
             <div style="font-family:'Jua', sans-serif; font-size:1.4rem; color:#db2777; margin-bottom:6px;">✍️ [${selectedKoreanGrade}] 오늘 숙제할 단원을 선택하세요!</div>
-            <p style="font-size:0.9rem; color:#888; margin-bottom:18px;">하루 1단원씩 자석 놀이하며 100문장 완전 정복! 🍬</p>
+            <p style="font-size:0.9rem; color:#888; margin-bottom:18px;">블록 → 자석 → 직접 쓰기로 한 단계씩 올라가요! 🍬</p>
             <div class="dictation-unit-grid">`;
         units.forEach(u => {
-            const num = parseInt(u.replace(/[^0-9]/g, '')) || 1;
-            const startNo = (num - 1) * 10 + 1;
-            const endNo = num * 10;
+            const unitRecords = allFetchedRecords.filter(r =>
+                (r.grade === selectedKoreanGrade || (r.grades && r.grades.includes(selectedKoreanGrade))) &&
+                String(r.level).trim() === u
+            );
+            const badge = window.KoreanDictation ? window.KoreanDictation.unitBadge(unitRecords, student) : '';
             html += `
                 <div class="dictation-unit-card" onclick="selectDynamicUnit('${u}')">
                     <div style="font-size:1.6rem; margin-bottom:4px;">🍬</div>
                     <div class="dictation-unit-num">${u}</div>
-                    <div class="dictation-unit-range">${startNo}번 ~ ${endNo}번</div>
+                    <div class="dictation-unit-range">${badge}</div>
                 </div>
             `;
         });
@@ -563,16 +565,37 @@ function startMissionWithFilteredData(records, innerBody) {
             return 0;
         });
     }
-    isCurrentMissionLogged = false;
-    activeSectionData = prepared.slice(0, 10); // 최대 10문제
-    window.activeSectionData = activeSectionData;
-    activeQuizIdx = 0;
-    window.activeQuizIdx = activeQuizIdx;
+    const limited = prepared.slice(0, 10); // 최대 10문제
 
-    if (activeSectionData.length === 0) {
+    // 받아쓰기는 사다리 엔진이 진도를 읽어 이번 단계에 풀 문장만 골라 준다 (틀린 문장은 이 배열 뒤에 다시 붙는다)
+    if (currentMissionType === 'dictation' && limited.length > 0 && window.KoreanDictation) {
+        window.KoreanDictation.beginSession({
+            records: limited,
+            unit: selectedKoreanUnit,
+            child: getKoreanStudentName(),
+            container: innerBody,
+            onQueue: startKoreanQueue
+        });
+        return;
+    }
+
+    if (limited.length === 0) {
+        activeSectionData = limited;
+        window.activeSectionData = activeSectionData;
+        activeQuizIdx = 0;
+        window.activeQuizIdx = activeQuizIdx;
         innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
         return;
     }
+    startKoreanQueue(limited);
+}
+
+function startKoreanQueue(queue) {
+    isCurrentMissionLogged = false;
+    activeSectionData = queue;
+    window.activeSectionData = activeSectionData;
+    activeQuizIdx = 0;
+    window.activeQuizIdx = activeQuizIdx;
     renderSectionUI();
 }
 
@@ -581,7 +604,7 @@ async function finalizeKoreanMissionImmediately() {
     isCurrentMissionLogged = true;
 
     try {
-        const student = (currentProfile === 'daughter' || currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+        const student = getKoreanStudentName();
         let subj = '국어';
         if (currentMissionType === 'dictation') {
             subj = selectedKoreanUnit ? `국어(받아쓰기_${selectedKoreanUnit})` : '국어(받아쓰기)';
@@ -670,6 +693,10 @@ function renderSectionUI() {
     if (activeQuizIdx >= activeSectionData.length) {
         // ⚡ 10문제 완료 즉각 학습일지 자동 전송
         finalizeKoreanMissionImmediately();
+        if (currentMissionType === 'dictation' && window.KoreanDictation) {
+            window.KoreanDictation.renderRoundDone(container);
+            return;
+        }
         container.innerHTML = `
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3.2rem; margin-bottom:12px;">🎉</div>
@@ -738,3 +765,4 @@ window.skipKoreanQuestion = skipKoreanQuestion;
 window.promptKoreanWrong = promptKoreanWrong;
 window.getKoreanOrderToggleHtml = getKoreanOrderToggleHtml;
 window.startMissionWithFilteredData = startMissionWithFilteredData;
+window.showLoadingSpinner = showLoadingSpinner;

@@ -186,6 +186,130 @@ body.theme--slime .quiz-choice-btn:hover { background: #ff6b9d; color: #fff; }
     color: #9d174d;
     font-weight: bold;
 }
+/* 받아쓰기 3단계 사다리 (어절 블록 → 글자 자석 → 직접 쓰기) */
+.dictation-card { border: 2.5px solid #fbcfe8; }
+.dictation-steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.dictation-step {
+    padding: 5px 10px;
+    border-radius: 14px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+.dictation-step.is-active { background: #db2777; color: #fff; }
+.dictation-step.is-done { background: #dcfce7; color: #166534; }
+.dictation-status {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.dictation-count { font-size: 0.95rem; color: #be185d; font-weight: bold; }
+.dictation-source { font-size: 0.85rem; color: #888; }
+.dictation-again { font-size: 0.85rem; color: #b45309; font-weight: bold; }
+.dictation-listen { font-size: 4rem; margin-bottom: 8px; cursor: pointer; text-align: center; }
+.dictation-listen-guide { font-size: 0.9rem; color: #888; margin-bottom: 14px; text-align: center; }
+.dictation-hint { margin-bottom: 15px; text-align: center; }
+.dictation-hint-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.15rem;
+}
+.dictation-hint-chip.is-chosung { background: #fef08a; color: #713f12; }
+.dictation-hint-chip.is-answer { background: #dcfce7; color: #14532d; }
+.dictation-board-guide {
+    color: #f472b6;
+    opacity: 0.8;
+    font-size: 1.05rem;
+    font-family: 'Gaegu', cursive;
+    text-align: center;
+}
+.dictation-board.is-correct { border-color: #10b981; }
+.dictation-board.is-wrong { border-color: #ef4444; }
+.dictation-slot-chip.is-block { font-size: 1.15rem; }
+.dictation-board-actions,
+.dictation-actions,
+.dictation-done-actions,
+.dictation-self-check {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.syllable-chip.block-chip { max-width: 100%; overflow-wrap: anywhere; }
+#dictationInputArea.is-locked { pointer-events: none; opacity: 0.75; }
+.dictation-card .quiz-button.is-erase { background: #f43f5e; padding: 8px 14px; font-size: 0.95rem; }
+.dictation-card .quiz-button.is-reset,
+.dictation-done .quiz-button.is-reset { background: #94a3b8; padding: 8px 14px; font-size: 0.95rem; }
+.quiz-button.dictation-submit-btn {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    font-size: 1.15rem;
+    padding: 12px 24px;
+}
+.quiz-button.dictation-replay-btn { background: #ff9f43; }
+.dictation-hint-btn {
+    display: block;
+    margin: 0 auto;
+    background: none;
+    border: none;
+    color: #db2777;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+.dictation-write-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.dictation-write-toggle .quiz-button { background: #cbd5e1; padding: 7px 14px; border-radius: 20px; font-size: 0.95rem; }
+.dictation-write-toggle .quiz-button.is-on { background: #8b5cf6; }
+.dictation-input { width: 100%; margin-bottom: 16px; box-sizing: border-box; }
+.dictation-notebook-guide {
+    background: #fffbeb;
+    border: 2px dashed #fbbf24;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 16px;
+    color: #78350f;
+    font-weight: bold;
+    text-align: center;
+}
+.dictation-feedback {
+    background: #fff7ed;
+    border: 2px solid #fdba74;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+    text-align: center;
+}
+.dictation-feedback-text { margin: 0 0 8px; color: #9a3412; font-weight: bold; }
+.dictation-feedback-text.is-correct { margin: 0; color: #047857; font-size: 1.15rem; }
+.dictation-feedback-answer { margin: 0 0 12px; font-size: 1.3rem; font-weight: bold; color: #1e293b; overflow-wrap: anywhere; }
+.dictation-diff-wrong { background: #fecaca; color: #991b1b; border-radius: 6px; padding: 0 4px; }
+.quiz-button.dictation-retry-btn { background: #f59e0b; }
+.dictation-self-check { margin-bottom: 0; }
+.dictation-self-check .quiz-button.is-same { background: #10b981; }
+.dictation-self-check .quiz-button.is-different { background: #f59e0b; }
+.dictation-done { text-align: center; padding: 32px 16px; }
+.dictation-done-icon { font-size: 3.2rem; margin-bottom: 12px; }
+.dictation-done-title { font-size: 1.4rem; font-weight: bold; color: var(--purple); margin-bottom: 8px; }
+.dictation-done-text { color: #475569; margin-bottom: 20px; }
 @keyframes popIn {
     0% { transform: scale(0.7); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
