@@ -125,27 +125,6 @@ for (const op of ['add', 'sub', 'mul']) {
     });
 }
 
-test('덧셈·뺄셈·곱셈 블록과 수직선 문구의 숫자 뒤 조사가 맞다', () => {
-    const studio = createStudio();
-    const steppers = { blocks: 'changeBlockStep', numberline: 'changeNumberLineStep' };
-    for (const op of ['add', 'sub', 'mul']) {
-        for (const [a, b] of CASES[op]) {
-            for (const [tab, stepper] of Object.entries(steppers)) {
-                studio.start(op, tab, a, b);
-                const texts = [...walk(studio, stepper), studio.fairy()];
-                for (const text of texts) {
-                    const plain = text.replace(/<[^>]+>/g, '');
-                    for (const match of plain.matchAll(/(\d+)(을|를|은|는|이에요|예요|과|와)(?=[\s!.,?])/g)) {
-                        const noBatchim = [2, 4, 5, 9].includes(Number(match[1]) % 10);
-                        const wrong = noBatchim ? ['을', '은', '이에요', '과'].includes(match[2]) : ['를', '는', '예요', '와'].includes(match[2]);
-                        assert.ok(!wrong, `${op} ${a},${b} ${tab}: ${match[0]}`);
-                    }
-                }
-            }
-        }
-    }
-});
-
 test('블록 묶음 값: 어느 단계에서나 전체 값이 보존된다 (전 범위)', () => {
     const sandbox = { window: {} };
     vm.createContext(sandbox);
@@ -224,6 +203,86 @@ test('수직선 모델: 네 연산의 출발·도착·눈금 순서가 전 범�
             check(`${a}×${b}`, model, a * b);
             assert.equal(model.compressed, b > 12, `${a}×${b} 줄임`);
             if (model.compressed) assert.equal(model.gap.skipped, b - model.jumps.length, `${a}×${b} 건너뛴 횟수`);
+        }
+    }
+});
+
+test('면적 모델: 칸의 합이 전 범위에서 몫·곱과 같고 0인 칸이 없다', () => {
+    const sandbox = { window: {} };
+    vm.createContext(sandbox);
+    vm.runInContext(fs.readFileSync(path.join(jsDir, FILES[0]), 'utf8'), sandbox);
+    const { buildAreaModel } = sandbox.window.OperatorStudioPlans;
+
+    for (let a = 1; a <= 999; a++) {
+        for (let b = 1; b <= 99; b++) {
+            const div = buildAreaModel('div', a, b);
+            assert.equal(div.parts.reduce((sum, part) => sum + part.height, 0), Math.floor(a / b), `${a}÷${b} 몫`);
+            assert.equal(div.parts.reduce((sum, part) => sum + part.area, 0) + div.remainder, a, `${a}÷${b} 넓이`);
+            assert.ok(div.parts.every(part => part.height > 0), `${a}÷${b} 0인 칸`);
+
+            const mul = buildAreaModel('mul', a, b);
+            assert.equal(mul.cells.reduce((sum, cell) => sum + cell.area, 0), a * b, `${a}×${b} 넓이`);
+            assert.ok(mul.cells.every(cell => cell.width > 0 && cell.height > 0), `${a}×${b} 0인 칸`);
+            assert.equal(mul.cells.length % mul.columns, 0, `${a}×${b} 줄 맞춤`);
+        }
+    }
+});
+
+test('면적 화면: 같은 수를 두 번 쓰거나 세로 0 칸을 그리지 않는다', () => {
+    const studio = createStudio();
+    const plain = () => studio.html().replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+
+    studio.start('div', 'area', 56, 8);
+    assert.ok(!plain().includes('= 7 = 7'), plain());
+    assert.ok(plain().includes('전체 세로 길이(몫) = 7'), plain());
+
+    for (const [a, b] of [[3, 5], [999, 99], [40, 4]]) {
+        studio.start('div', 'area', a, b);
+        assert.ok(!/세로 0\b/.test(plain()), `${a}÷${b}: ${plain()}`);
+    }
+
+    studio.start('div', 'area', 408, 4);
+    assert.ok(plain().includes('100 + 2 = 102'), plain());
+
+    studio.start('mul', 'area', 124, 3);
+    assert.ok(plain().includes('300 + 60 + 12 = 372'), plain());
+
+    studio.start('mul', 'area', 20, 30);
+    assert.ok(plain().includes('전체 넓이(곱) = 600'), plain());
+    assert.ok(!/(^|\s)0 × 30/.test(plain()), plain());
+});
+
+test('네 연산 모든 탭의 숫자 뒤 조사가 맞다', () => {
+    const studio = createStudio();
+    const steppers = { blocks: 'changeBlockStep', vertical: 'changeTutorStep', numberline: 'changeNumberLineStep', area: null };
+    for (const [op, cases] of Object.entries(CASES)) {
+        const tabs = op === 'add' || op === 'sub' ? ['blocks', 'vertical', 'numberline'] : Object.keys(steppers);
+        for (const [a, b] of cases) {
+            for (const tab of tabs) {
+                studio.start(op, tab, a, b);
+                const pages = steppers[tab] ? walk(studio, steppers[tab]) : [studio.html()];
+                const spokenTexts = [];
+                if (steppers[tab]) {
+                    studio.start(op, tab, a, b);
+                    spokenTexts.push(studio.fairy());
+                    for (let i = 1; i < pages.length; i++) {
+                        studio.run(`${steppers[tab]}(1)`);
+                        spokenTexts.push(studio.fairy());
+                    }
+                } else {
+                    spokenTexts.push(studio.fairy());
+                }
+                for (const text of [...pages, ...spokenTexts]) {
+                    const clean = text.replace(/<[^>]+>/g, '');
+                    for (const match of clean.matchAll(/(?<![\d×÷+−-] ?)(\d+)(을|를|은|는|이에요|예요|과|와|이고|고|이|가)(?=[\s!.,?])/g)) {
+                        const noBatchim = [2, 4, 5, 9].includes(Number(match[1]) % 10);
+                        const wrong = noBatchim
+                            ? ['을', '은', '이에요', '과', '이고', '이'].includes(match[2])
+                            : ['를', '는', '예요', '와', '고', '가'].includes(match[2]);
+                        assert.ok(!wrong, `${op} ${a},${b} ${tab}: "${match[0]}" / ${clean.slice(0, 120)}`);
+                    }
+                }
+            }
         }
     }
 });

@@ -528,6 +528,25 @@
     return plan;
   }
 
+  // 🍫 면적 모델: 수를 자리별로 나눈다 (124 → 100, 20, 4). 0인 자리는 칸을 만들지 않는다.
+  const placeParts = n => [100, 10, 1].map(unit => Math.floor(n / unit) % 10 * unit).filter(part => part > 0);
+
+  function buildAreaModel(op, numA, numB) {
+    if (op === 'mul') {
+      const widths = placeParts(numA);
+      const cells = placeParts(numB).flatMap(height => widths.map(width => ({ width, height, area: width * height })));
+      return { op, columns: widths.length, cells, total: numA * numB };
+    }
+    const quotient = Math.floor(numA / numB);
+    return {
+      op: 'div',
+      divisor: numB,
+      quotient,
+      remainder: numA % numB,
+      parts: placeParts(quotient).map(height => ({ height, area: height * numB }))
+    };
+  }
+
   window.OperatorStudioPlans = {
     DIVIDEND_MAX,
     DIVISOR_MAX,
@@ -538,6 +557,7 @@
     buildDivisionPlan,
     buildAdditionPlan,
     buildSubtractionPlan,
-    buildMultiplicationPlan
+    buildMultiplicationPlan,
+    buildAreaModel
   };
 })();

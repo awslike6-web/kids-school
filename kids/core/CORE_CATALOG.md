@@ -293,6 +293,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 - `math_operator_studio-plans.js` (`window.OperatorStudioPlans`, DOM 없음):
   - `buildDivisionPlan(a, b)`, `buildAdditionPlan(a, b)`, `buildSubtractionPlan(a, b)`, `buildMultiplicationPlan(a, b)`: 단계 배열을 돌려줍니다. 각 단계는 `{ step, title, desc, speech, val, board }`이고 나눗셈은 `focus`가 더 있습니다. 뺄셈에서 앞 수가 작으면 `isNegative: true`인 한 단계만 돌려줍니다.
+  - `buildAreaModel(op, a, b)`: 면적 탭의 칸을 만듭니다. 수를 자리별로 나누고 0인 자리는 뺍니다. 나눗셈은 `{ quotient, remainder, parts }`, 곱셈은 `{ columns, cells, total }`입니다.
   - `clampStudioValue(value, min, max)`, `clampDivisionValue(value, max)`, `numberJosa(n, 받침있음, 받침없음)`, `divisionResultText(몫, 나머지)`, `DIVIDEND_MAX`, `DIVISOR_MAX`.
 - `math_operator_studio-core.js`: 상태, `OPERATION_PRESETS`·`OPERATION_TAB_LABELS`·`OPERATION_INPUT_CONFIG`, `switchOperation`·`switchViewTab`·`loadPreset`·`startStudioCalculation`, `renderSubtractionGuide(container)`, `studioSpeak`(`speakFairyTTS`만 호출).
 - `math_operator_studio-blocks.js`:
@@ -1357,7 +1358,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/dictation-ladder.test.mjs`: 받아쓰기 사다리의 단계 건너뛰기·이어 하기·쉬운 방식 전환, 철자 함정, 채점 구분, 숙련도 전송·실패 재전송·병합, 학생 분리, 스크립트 순서, 보상 오디오 호출을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/operator-studio-plans.test.mjs`: 덧셈·뺄셈 1~999 두 수, 곱셈 1~999 × 1~99 전 범위에서 단계별 칠판(올림·칸 위 값·부분곱·진행 중 결과 칸)을 독립 계산과 대조하고, 경계 사례와 추천 문제 이름을 검사합니다.
-- `tests/operator-studio-views.test.mjs`: 가짜 DOM에서 네 연산의 모든 탭을 끝까지 눌러 만들어진 HTML을 검사합니다(잘못된 글자, 수직선 축과 점프 수, 블록 그림 변화, 앞 수가 작은 뺄셈 안내). 블록 값 보존은 전 범위로 검사합니다. 레이아웃은 검사하지 않습니다.
+- `tests/operator-studio-views.test.mjs`: 가짜 DOM에서 네 연산의 모든 탭을 끝까지 눌러 만들어진 HTML을 검사합니다(잘못된 글자, 수직선 축과 점프 수, 블록 그림 변화, 앞 수가 작은 뺄셈 안내). 블록 값 보존과 면적 칸의 합은 전 범위로, 네 연산 모든 탭의 숫자 뒤 조사는 대표 문제로 검사합니다. 레이아웃은 검사하지 않습니다.
 - `tests/coco-avatar.test.mjs`: 요정 코코 아바타 `kids/assets/images/coco_fairy.webp` 한 벌만 쓰는지 확인합니다. 사라진 외부 주소가 남지 않고, 각 페이지의 상대 경로가 실제 파일을 가리키는지 검사합니다. 그림은 민서 수학 동화 삽화(`kids-archive/assets/storybook/math/minseo/1-2/1/math_100_ill_p4.jpg`)의 코코를 원형으로 자른 192×192 이미지입니다. 그림을 바꿀 때는 이 파일만 교체합니다.
 
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.

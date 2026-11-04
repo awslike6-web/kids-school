@@ -346,8 +346,8 @@ function renderDivisionBlocksView(container) {
 
   if (blockCurrentStep === 1) {
     stepTitle = "1단계: 원래 수 블록으로 만들기";
-    stepDesc = `<strong>${curNumA}</strong>는 <strong>10개짜리 막대 ${tens}개</strong>와 <strong>낱개 큐브 ${ones}개</strong>예요.`;
-    speechText = `${curNumA}는 10개짜리 막대 ${tens}개와 낱개 큐브 ${ones}개로 이루어져 있어요. 이걸 ${divisor}명에게 똑같이 나누어 줄 거예요!`;
+    stepDesc = `<strong>${curNumA}</strong>${numberJosa(curNumA, '은', '는')} <strong>10개짜리 막대 ${tens}개</strong>와 <strong>낱개 큐브 ${ones}개</strong>예요.`;
+    speechText = `${curNumA}${numberJosa(curNumA, '은', '는')} 10개짜리 막대 ${tens}개와 낱개 큐브 ${ones}개로 이루어져 있어요. 이걸 ${divisor}명에게 똑같이 나누어 줄 거예요!`;
   } else if (blockCurrentStep === 2) {
     const tensPerPerson = Math.floor(tens / divisor);
     const leftTens = tens % divisor;
@@ -371,7 +371,7 @@ function renderDivisionBlocksView(container) {
     const onesPerPerson = Math.floor(((tens % divisor) * 10 + ones) / divisor);
     stepTitle = "5단계: 최종 몫과 나머지 확인 🎉";
     stepDesc = `한 사람당 <strong>10개 막대 ${tensPerPerson}개 + 낱개 ${onesPerPerson}개 = 총 ${quotient}개(몫)</strong>! 남은 낱개 = <strong>${remainder}개(나머지)</strong>!`;
-    speechText = `짜잔! 한 사람당 총 ${quotient}개씩 받았으니 몫은 ${quotient}이고, 바구니에 못 들어간 남은 낱개 ${remainder}개가 바로 나머지예요!`;
+    speechText = `짜잔! 한 사람당 총 ${quotient}개씩 받았으니 몫은 ${quotient}${numberJosa(quotient, '이고', '고')}, 바구니에 못 들어간 남은 낱개 ${remainder}개가 바로 나머지예요!`;
   }
 
   // 10개짜리 막대 HTML 생성

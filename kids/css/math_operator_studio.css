@@ -665,6 +665,23 @@
     gap: 6px;
     border-right: 2px dashed rgba(255,255,255,0.3);
   }
+  .area-rect-grid {
+    display: grid;
+    width: 100%;
+    max-width: 440px;
+  }
+  .area-rect-grid .area-box {
+    min-width: 0;
+    border-right: none;
+    outline: 1px dashed rgba(255,255,255,0.3);
+  }
+  .area-total {
+    font-family: 'Jua', sans-serif;
+    font-size: 1.25rem;
+    color: var(--text-main);
+    text-align: center;
+    word-break: keep-all;
+  }
   .area-box:last-child {
     border-right: none;
   }
@@ -728,14 +745,8 @@
     color: #38bdf8;
     padding: 0 6px;
   }
-  .block-place-row .ten-rod {
-    height: 70px;
-    width: 18px;
-  }
-  body.theme--slime .block-step-nav,
-  body.theme--slime .nl-result-card {
-    background: #fff;
-  }
+  .block-place-row .ten-rod { height: 70px; width: 18px; }
+  body.theme--slime .block-step-nav, body.theme--slime .nl-result-card { background: #fff; }
   .block-group-box--compact .ten-rod { height: 36px; width: 9px; }
   .block-group-box--compact .unit-cube { width: 10px; height: 10px; }
   .block-group-box--compact .hundred-plate { width: 30px; height: 30px; }
@@ -748,9 +759,7 @@
     padding: 20px;
     text-align: center;
   }
-  .nl-label--tiny {
-    font-size: 0.72rem;
-  }
+  .nl-label--tiny { font-size: 0.72rem; }
   .nl-jump-arc::after {
     content: '';
     position: absolute;
@@ -769,16 +778,8 @@
     background: rgba(245, 158, 11, 0.12);
     word-break: keep-all;
   }
-  .subtraction-guide h3 {
-    margin: 0 0 10px;
-    font-family: 'Jua', sans-serif;
-    color: #f59e0b;
-  }
-  .subtraction-guide p {
-    margin: 0;
-    font-size: 1.1rem;
-    line-height: 1.6;
-  }
+  .subtraction-guide h3 { margin: 0 0 10px; font-family: 'Jua', sans-serif; color: #f59e0b; }
+  .subtraction-guide p { margin: 0; font-size: 1.1rem; line-height: 1.6; }
 
   @media (max-width: 640px) {
     .hero-title { font-size: 1.8rem; }

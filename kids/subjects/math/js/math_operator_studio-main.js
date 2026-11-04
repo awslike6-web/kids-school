@@ -226,51 +226,65 @@ function renderAreaModelView(container) {
   }
 }
 
-function renderDivisionAreaView(container) {
-  const dividend = curNumA;
-  const divisor = curNumB;
-  const quotient = Math.floor(dividend / divisor);
-  const remainder = dividend % divisor;
-  const tensQ = Math.floor(quotient / 10) * 10;
-  const onesQ = quotient % 10;
+const AREA_BOX_COLORS = [
+  { background: 'rgba(2,132,199,0.35)', text: '#38bdf8' },
+  { background: 'rgba(16,185,129,0.35)', text: '#10b981' },
+  { background: 'rgba(245,158,11,0.3)', text: '#d97706' },
+  { background: 'rgba(168,85,247,0.3)', text: '#a855f7' }
+];
 
-  const speech = `면적 모델이에요! 가로가 ${divisor}인 직사각형의 전체 넓이가 ${dividend}일 때, 세로 길이는 몫인 ${quotient}이 되고 남는 넓이는 ${remainder}가 돼요!`;
+function renderAreaBox(index, topText, value, bottomText = '') {
+  const color = AREA_BOX_COLORS[index % AREA_BOX_COLORS.length];
+  return `
+    <div class="area-box" style="background:${color.background};">
+      <div style="color:var(--text-muted); font-size:0.85rem;">${topText}</div>
+      <div style="color:${color.text}; font-size:1.3rem;">${value}</div>
+      ${bottomText ? `<div style="color:var(--text-muted); font-size:0.8rem;">${bottomText}</div>` : ''}
+    </div>
+  `;
+}
+
+// 더할 값이 하나뿐이면 "= 7 = 7"처럼 같은 수를 두 번 쓰지 않는다
+function areaSumText(values, total, colorText) {
+  const result = `<span style="color:${colorText};">${total}</span>`;
+  return values.length > 1 ? `${values.join(' + ')} = ${result}` : result;
+}
+
+function renderDivisionAreaView(container) {
+  const model = StudioPlans.buildAreaModel('div', curNumA, curNumB);
+  const { divisor, quotient, remainder, parts } = model;
+
+  const remainderText = remainder > 0
+    ? `남는 넓이는 ${remainder}${numberJosa(remainder, '이에요', '예요')}!`
+    : '남는 넓이 없이 딱 맞아요!';
+  const speech = `면적 모델이에요! 가로가 ${divisor}인 직사각형의 전체 넓이가 ${curNumA}일 때, 세로 길이는 몫인 ${quotient}${numberJosa(quotient, '이', '가')} 돼요. ${remainderText}`;
+
+  const boxesHtml = parts
+    .map((part, i) => renderAreaBox(i, `세로 ${part.height}`, `넓이 ${part.area}`, `(${divisor} × ${part.height})`))
+    .join('');
 
   container.innerHTML = `
     <div class="area-model-wrap">
       <div style="text-align:center; max-width:600px;">
         <h3 style="font-family:'Jua'; color:#38bdf8; margin:0 0 6px;">🍫 면적 분할 모델 (나눗셈)</h3>
         <p style="color:var(--text-muted); font-size:0.95rem; margin:0;">
-          가로 길이가 <strong>${divisor}</strong>일 때, 넓이 <strong>${dividend}</strong>를 채우는 세로 길이를 찾아요!
+          가로 길이가 <strong>${divisor}</strong>일 때, 넓이 <strong>${curNumA}</strong>${numberJosa(curNumA, '을', '를')} 채우는 세로 길이를 찾아요!
         </p>
       </div>
 
       <div class="area-rect-container">
-        ${tensQ > 0 ? `
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(2,132,199,0.35) 0%, rgba(3,105,161,0.35) 100%);">
-          <div style="color:#94a3b8; font-size:0.85rem;">세로 ${tensQ}</div>
-          <div style="color:#38bdf8; font-size:1.4rem;">넓이 ${tensQ * divisor}</div>
-          <div style="color:#94a3b8; font-size:0.8rem;">(${divisor} × ${tensQ})</div>
-        </div>
-        ` : ''}
-
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(16,185,129,0.35) 0%, rgba(5,150,105,0.35) 100%);">
-          <div style="color:#94a3b8; font-size:0.85rem;">세로 ${onesQ}</div>
-          <div style="color:#4ade80; font-size:1.4rem;">넓이 ${onesQ * divisor}</div>
-          <div style="color:#94a3b8; font-size:0.8rem;">(${divisor} × ${onesQ})</div>
-        </div>
-
+        ${boxesHtml}
         ${remainder > 0 ? `
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(239,68,68,0.25) 0%, rgba(185,28,28,0.25) 100%);">
-          <div style="color:#94a3b8; font-size:0.85rem;">남은 넓이</div>
-          <div style="color:#ef4444; font-size:1.4rem;">${remainder}</div>
-          <div style="color:#94a3b8; font-size:0.8rem;">(나머지)</div>
+        <div class="area-box" style="background:rgba(239,68,68,0.2);">
+          <div style="color:var(--text-muted); font-size:0.85rem;">남은 넓이</div>
+          <div style="color:#ef4444; font-size:1.3rem;">${remainder}</div>
+          <div style="color:var(--text-muted); font-size:0.8rem;">(나머지)</div>
         </div>
         ` : ''}
       </div>
 
-      <div style="font-family:'Jua'; font-size:1.25rem; color:#f8fafc; text-align:center;">
-        전체 세로 길이(몫) = ${tensQ > 0 ? tensQ + ' + ' : ''}${onesQ} = <span style="color:#38bdf8;">${quotient}</span>
+      <div class="area-total">
+        전체 세로 길이(몫) = ${areaSumText(parts.map(part => part.height), quotient, '#38bdf8')}
         ${remainder > 0 ? ` (나머지: <span style="color:#ef4444;">${remainder}</span>)` : ''}
       </div>
     </div>
@@ -279,71 +293,29 @@ function renderDivisionAreaView(container) {
 }
 
 function renderMultiplicationAreaView(container) {
-  const tensA = Math.floor(curNumA / 10) * 10;
-  const onesA = curNumA % 10;
-  const isTwoDigitB = curNumB >= 10;
-  const tensB = Math.floor(curNumB / 10) * 10;
-  const onesB = curNumB % 10;
-  const prod = curNumA * curNumB;
+  const model = StudioPlans.buildAreaModel('mul', curNumA, curNumB);
+  const { cells, columns, total } = model;
+  const speech = `자리별 부분곱 넓이 모델이에요! 직사각형을 자리별로 나누어 부분 넓이들을 더하면 총 넓이는 ${total}${numberJosa(total, '이에요', '예요')}!`;
 
-  let boxesHtml = '';
-  if (!isTwoDigitB) {
-    boxesHtml = `
-      ${tensA > 0 ? `
-      <div class="area-box" style="background:linear-gradient(135deg, rgba(2,132,199,0.35), rgba(3,105,161,0.35));">
-        <div style="color:#94a3b8; font-size:0.85rem;">가로 ${tensA} × 세로 ${curNumB}</div>
-        <div style="color:#38bdf8; font-size:1.4rem;">넓이 ${tensA * curNumB}</div>
-      </div>
-      ` : ''}
-      <div class="area-box" style="background:linear-gradient(135deg, rgba(16,185,129,0.35), rgba(5,150,105,0.35));">
-        <div style="color:#94a3b8; font-size:0.85rem;">가로 ${onesA} × 세로 ${curNumB}</div>
-        <div style="color:#4ade80; font-size:1.4rem;">넓이 ${onesA * curNumB}</div>
-      </div>
-    `;
-  } else {
-    boxesHtml = `
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; max-width:440px;">
-        ${tensA > 0 ? `
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(2,132,199,0.35), rgba(3,105,161,0.35));">
-          <div style="color:#94a3b8; font-size:0.8rem;">${tensA} × ${tensB}</div>
-          <div style="color:#38bdf8; font-size:1.2rem;">${tensA * tensB}</div>
-        </div>
-        ` : ''}
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(245,158,11,0.35), rgba(217,119,6,0.35));">
-          <div style="color:#94a3b8; font-size:0.8rem;">${onesA} × ${tensB}</div>
-          <div style="color:#fbbf24; font-size:1.2rem;">${onesA * tensB}</div>
-        </div>
-        ${tensA > 0 ? `
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(168,85,247,0.35), rgba(126,34,206,0.35));">
-          <div style="color:#94a3b8; font-size:0.8rem;">${tensA} × ${onesB}</div>
-          <div style="color:#c084fc; font-size:1.2rem;">${tensA * onesB}</div>
-        </div>
-        ` : ''}
-        <div class="area-box" style="background:linear-gradient(135deg, rgba(16,185,129,0.35), rgba(5,150,105,0.35));">
-          <div style="color:#94a3b8; font-size:0.8rem;">${onesA} × ${onesB}</div>
-          <div style="color:#4ade80; font-size:1.2rem;">${onesA * onesB}</div>
-        </div>
-      </div>
-    `;
-  }
-
-  const speech = `자리별 부분곱 넓이 모델이에요! 직사각형을 자릿수별로 나누어 부분 넓이들을 더하면 총 넓이는 ${prod}${numberJosa(prod, '이에요', '예요')}!`;
+  const boxesHtml = cells
+    .map((cell, i) => renderAreaBox(i, `${cell.width} × ${cell.height}`, cell.area))
+    .join('');
 
   container.innerHTML = `
     <div class="area-model-wrap">
       <div style="text-align:center; max-width:600px;">
         <h3 style="font-family:'Jua'; color:#38bdf8; margin:0 0 6px;">🍫 자리별 부분곱 넓이 모델 (곱셈)</h3>
         <p style="color:var(--text-muted); font-size:0.95rem; margin:0;">
-          가로 <strong>${curNumA}</strong>와 세로 <strong>${curNumB}</strong>를 자릿수별로 나누어 넓이를 구해요!
+          가로 <strong>${curNumA}</strong>${numberJosa(curNumA, '과', '와')} 세로 <strong>${curNumB}</strong>${numberJosa(curNumB, '을', '를')} 자리별로 나누어 넓이를 구해요!
         </p>
       </div>
 
-      <div class="area-rect-container">
+      <div class="area-rect-container area-rect-grid" style="grid-template-columns:repeat(${columns}, minmax(0, 1fr));">
         ${boxesHtml}
       </div>
 
-      <div style="font-family:'Jua'; font-size:1.25rem; color:#f8fafc; text-align:center;">
-        전체 직사각형 넓이(곱) = <span style="color:#10b981;">${prod}</span>
+      <div class="area-total">
+        전체 넓이(곱) = ${areaSumText(cells.map(cell => cell.area), total, '#10b981')}
       </div>
     </div>
   `;
