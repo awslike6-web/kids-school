@@ -77,7 +77,7 @@
                 ? window.buildDiscussionAISystemPrompt('국어', activePassage)
                 : (typeof window.buildFullAISystemPrompt === 'function' ? window.buildFullAISystemPrompt('공부방', passageText) : passageText);
 
-            const proxyUrl = window.PROXY_URL || 'https://master-tower.awslike6.workers.dev';
+            const proxyUrl = window.PROXY_URL || 'https://minmin-notion.awslike6.workers.dev';
             const { text: reply } = await (typeof window.fetchWithGeminiRetry === 'function'
                 ? window.fetchWithGeminiRetry(
                     `${proxyUrl}/v1/chat/completions?type=ai`,

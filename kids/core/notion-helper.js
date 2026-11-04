@@ -31,7 +31,8 @@ window.roomStartTime = window.roomStartTime || new Date();
         'notion-study-logger.js?v=20261101-reward-grant-shared', // 📝 학습일지 & 보상/레벨업 전송 엔진
         'stt-debouncer.js',          // 🎙️ STT 음성인식 디바운서
         'mission-reward-engine.js?v=20261011-5',  // 💎 미션 보상 및 축하 모달
-        'quiz-feedback-overlay.js'   // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
+        'quiz-feedback-overlay.js',  // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
+        'gemini-chat.js'             // 🧚 AI 요정 대화 (Worker 프록시 호출·재시도·안내 문구)
     ];
 
     let basePath = '';
