@@ -665,17 +665,26 @@
     align-items: center;
     gap: 20px;
     padding: 20px 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .area-rect-container {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: stretch;
+    max-width: 100%;
+    box-sizing: border-box;
     border: 3px solid #38bdf8;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   }
   .area-box {
-    padding: 24px;
+    padding: 14px 10px;
+    min-width: 80px;
+    flex: 1 1 80px;
+    box-sizing: border-box;
     text-align: center;
     font-family: 'Jua', sans-serif;
     display: flex;
@@ -689,8 +698,20 @@
     border-right: none;
   }
 
+  .standard-vertical-table td {
+    min-width: 28px;
+    height: 36px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .standard-vertical-table .carry-row td {
+    height: 22px;
+  }
+
   @media (max-width: 640px) {
     .hero-title { font-size: 1.8rem; }
     .num-input { width: 80px; height: 50px; font-size: 1.8rem; }
     .vertical-tutor-container { flex-direction: column; align-items: center; }
+    .area-box { padding: 10px 6px; min-width: 70px; }
   }

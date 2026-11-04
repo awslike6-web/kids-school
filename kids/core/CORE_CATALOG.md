@@ -287,14 +287,20 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 모든 신규 참조의 캐시 버전은 `20261031-split`. 클래식 스크립트로 원래 위치에서 core → main을 연달아 로드하며, 초기화는 마지막 파일의 기존 `DOMContentLoaded`에 남습니다. IIFE·module·defer를 추가하지 않습니다.
 - 검증: `tests/math-pages-split.test.mjs`가 고정 main fixture와 원문·마크업 보존, 상대 경로 실존, 파일 크기, 인라인 블록 제거, 뒤 파일 로드 전 실행 안전성을 검사합니다. 상세 경계·줄 수는 `docs/math_pages_split_spec.md`를 따릅니다.
 
-### 연산 스튜디오 나눗셈 풀이·수직선 (2026-11-04)
+### 연산 스튜디오 4대 사칙연산 풀이·수직선·인터랙티브 완결 (2026-11-04)
 
-- `kids/subjects/math/js/math_operator_studio-core.js` (DOM 없이 호출 가능):
-  - `buildDivisionPlan(dividend, divisor)`: 1~999 ÷ 1~99 세로셈을 한 자리씩 진행해 전역 `divisionPlan`을 채웁니다. 각 단계는 `{ step, title, desc, speech, focus, val, board }`이고, `focus`는 `look`·`quotient`·`product`·`subtract`·`bring_down`·`remainder`입니다. `board`는 그 단계의 칠판 상태 `{ quotient, rows, activeQuotientCol, activeDividendCols, activeRow }`입니다.
-  - `buildNumberLineModel(dividend, divisor, maxJumps = 12)`: 점프 목록과 눈금 위치(%)를 돌려줍니다. 점프가 `maxJumps`를 넘으면 앞뒤만 남기고 `gap`으로 줄입니다.
-  - `numberJosa(n, 받침있음, 받침없음)`, `divisionResultText(몫, 나머지)`: 숫자 뒤 조사와 결과 문구입니다.
-- `math_operator_studio-main.js`: `renderDivisionBoard(step, dividend, divisor)`는 `board`만 그립니다. `renderNumberLineView`·`changeNumberLineStep(delta)`가 수직선 단계를 진행합니다.
-- 검증: `tests/operator-studio-division.test.mjs`. 스크립트·스타일을 바꾸면 `tests/fixtures/math-split/math_operator_studio.json`의 `scripts`·`styles`도 맞춰야 분리 시험이 통과합니다.
+- `kids/subjects/math/js/math_operator_studio-plans.js` (DOM 없이 호출 가능한 순수 풀이 계획 엔진):
+  - `buildDivisionPlan(dividend, divisor)`, `buildAdditionPlan(numA, numB)`, `buildSubtractionPlan(numA, numB)`, `buildMultiplicationPlan(numA, numB)`: 4대 연산 세로셈을 자리별로 전개하며 전역 `divisionPlan`/`additionPlan`/`subtractionPlan`/`multiplicationPlan`을 생성합니다. 각 단계는 `{ step, title, desc, speech, focus, val, board }` 구조이며, `board`는 세로셈 칠판 상태를 완전히 캡슐화합니다.
+  - `buildNumberLineModel(dividend, divisor, maxJumps = 12)` 및 `buildOpNumberLineModel(op, numA, numB, maxJumps = 10)`: 덧셈/곱셈 앞으로 뛰어세기, 뺄셈/나눗셈 뒤로 뛰어세기 점프 목록과 눈금(%)을 계산합니다.
+  - `clampStudioValue(val, op, role)`, `clampDivisionValue(val, role)`: 연산별 입력 범위(덧셈·뺄셈 1~999, 곱셈 1~999 × 1~99, 나눗셈 1~999 ÷ 1~99) 제어.
+- `kids/subjects/math/js/math_operator_studio-core.js` (상태·프리셋·블록 뷰 엔진):
+  - `OPERATION_PRESETS`, `OPERATION_TAB_LABELS`, `OPERATION_INPUT_CONFIG`: 연산별 전용 추천 문제, 시각화 탭 라벨(덧셈·뺄셈: 십진 블록·세로셈·수직선, 곱셈·나눗셈: 블록·세로셈·수직선·면적 모델), 입력창 속성 및 aria-label 관리.
+  - 4대 연산 십진 블록 뷰: `renderDivisionBlocksView`, `renderAdditionBlocksView`(10개 묶음 합체), `renderSubtractionBlocksView`(10개 풀림 분해), `renderMultiplicationBlocksView`(자리별 묶음 모델).
+  - 음성 구연: `studioSpeak`가 `speakFairyTTS` 단일 파사드를 통해 단계별 나긋나긋한 설명 재생.
+- `kids/subjects/math/js/math_operator_studio-main.js` (세로셈 board 렌더러·수직선·면적 모델):
+  - 세로셈 렌더링: `renderDivisionBoard`, `renderAdditionBoard`, `renderSubtractionBoard`, `renderMultiplicationBoard`가 `board` 상태를 받아 HTML DOM으로 투영.
+  - `renderAreaModelView`: 곱셈 자리별 부분곱 직사각형 그리드 및 나눗셈 면적 모델 시각화 (모바일 375px 무넘침 보장).
+- 검증: `tests/operator-studio-division.test.mjs`(나눗셈 회귀), `tests/operator-studio-plans.test.mjs`(덧셈·뺄셈·곱셈 1~999 전 범위 및 무작위 검산), `tests/math-pages-split.test.mjs`(3단 분할 무결성 및 fixture 일치).
 
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 

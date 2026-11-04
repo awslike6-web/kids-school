@@ -21,7 +21,7 @@ function loadStudio() {
         alert() {}
     };
     vm.createContext(sandbox);
-    for (const file of ['math_operator_studio-core.js', 'math_operator_studio-main.js']) {
+    for (const file of ['math_operator_studio-plans.js', 'math_operator_studio-core.js', 'math_operator_studio-main.js']) {
         vm.runInContext(fs.readFileSync(path.join(jsDir, file), 'utf8'), sandbox, { filename: file });
     }
     return {
