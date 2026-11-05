@@ -164,11 +164,30 @@ function openDetailModal(id) {
     // 동영상 풀영상 버튼 제어 (특별한 날 & 일반 작품 모두 지원)
     const videoBtn = document.getElementById('modalVideoBtn');
     const videoBtnText = document.getElementById('modalVideoBtnText');
+    document.querySelectorAll('.modal-extra-video-btn').forEach(b => b.remove());
     if (videoBtn) {
         if (item.videoUrl) {
             videoBtn.href = item.videoUrl;
             if (videoBtnText) videoBtnText.textContent = item.videoBtnText || '동영상 풀영상 감상하기';
             videoBtn.style.display = 'inline-flex';
+            if (Array.isArray(item.videos) && item.videos.length > 1) {
+                const parent = videoBtn.parentNode;
+                item.videos.slice(1).forEach(v => {
+                    const a = document.createElement('a');
+                    a.href = v.url;
+                    a.target = '_blank';
+                    a.className = 'modal-video-btn modal-extra-video-btn';
+                    const icon = v.icon || '🎬';
+                    const label = v.text || '추가 영상 보기';
+                    a.innerHTML = `<span>${icon}</span> <span>${label}</span>`;
+                    if (icon === '📷') {
+                        a.style.background = 'linear-gradient(135deg, #4a90e2, #0072ff)';
+                    } else if (icon === '🎢') {
+                        a.style.background = 'linear-gradient(135deg, #8a2be2, #4a00e0)';
+                    }
+                    parent.appendChild(a);
+                });
+            }
         } else {
             videoBtn.style.display = 'none';
         }
@@ -211,6 +230,7 @@ function openDetailModal(id) {
 function closeDetailModal() {
     window.GallerySpotDiff?.close();
     window.GalleryMiniRunner?.close();
+    document.querySelectorAll('.modal-extra-video-btn').forEach(b => b.remove());
     toggleEditArtFull(false);
     cancelEditArtistNote();
     const modalVideo = document.getElementById('modalVideoPlayer');

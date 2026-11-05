@@ -117,7 +117,7 @@ class Plan:
 
 
 def build_plan(author, title, desc, date, files, category=None, icon=None, slug=None,
-               event_id=None, video=None, video_btn=None):
+               event_id=None, video=None, video_btn=None, videos=None):
     """입력을 검증하고 할 일을 만든다. 파일·Git·노션은 건드리지 않는다."""
     if author not in AUTHORS:
         raise ValueError(f'--author는 {"/".join(AUTHORS)} 중 하나여야 합니다: {author!r}')
@@ -176,6 +176,11 @@ def build_plan(author, title, desc, date, files, category=None, icon=None, slug=
             video_job = (v_src, f'{media_dir}/{stem}_video{v_src.suffix.lower()}')
             entry["videoUrl"] = f'{CDN_BASE}/{video_job[1]}'
         entry["videoBtnText"] = video_btn or "🎬 그날의 영상 보기"
+    if videos and isinstance(videos, list):
+        entry["videos"] = videos
+        if not entry.get("videoUrl") and len(videos) > 0:
+            entry["videoUrl"] = videos[0].get("url")
+            entry["videoBtnText"] = videos[0].get("text") or "🎬 그날의 영상 보기"
     return Plan(event_id, author, child, entry, image_jobs, video_job)
 
 
@@ -380,15 +385,22 @@ def main(argv=None):
     p.add_argument('--sub-files', default='', help='추가 사진 경로 (쉼표 구분)')
     p.add_argument('--video', help='로컬 동영상 파일 또는 http(s) 주소')
     p.add_argument('--video-btn', help='동영상 버튼 문구')
+    p.add_argument('--videos-json', help='특별한 날 다중 영상/링크 JSON 배열 문자열')
     p.add_argument('--dry-run', action='store_true', help='파일·Git·노션을 건드리지 않고 할 일만 출력')
     p.add_argument('--no-git', action='store_true', help='Git 커밋 생략')
     p.add_argument('--no-push', action='store_true', help='Git 푸시 생략 (커밋은 함)')
     args = p.parse_args(argv)
 
     files = [args.file] + [s.strip() for s in args.sub_files.split(',') if s.strip()]
+    videos_arg = None
+    if getattr(args, 'videos_json', None):
+        try:
+            videos_arg = json.loads(args.videos_json)
+        except Exception as e:
+            print(f"⚠️ --videos-json 파싱 실패: {e}")
     try:
         plan = build_plan(args.author, args.title, args.desc, args.date, files, args.category,
-                          args.icon, args.slug, args.event_id, args.video, args.video_btn)
+                          args.icon, args.slug, args.event_id, args.video, args.video_btn, videos=videos_arg)
         changed = apply_plan(plan, dry_run=args.dry_run)
     except (ValueError, OSError) as error:
         print(f'❌ [특별한 날 입력 오류] {error}')
