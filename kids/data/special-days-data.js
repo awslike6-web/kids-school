@@ -6,6 +6,46 @@
 
 const DEFAULT_SPECIAL_DAYS_DATA = [
   {
+    "videoUrl": "https://photos.app.goo.gl/1vW5j1pYXL2mDkQ18",
+    "id": "evt_minseo_lotteworld_20261105",
+    "author": "민서",
+    "category": "소풍/현장학습",
+    "categoryIcon": "🏰",
+    "title": "🏰 민서와 함께한 마법 같은 롯데월드 모험! 🎡🐰",
+    "date": "2026-11-05",
+    "desc": "민서와 함께 환상의 나라 롯데월드로 마법 같은 가을 나들이를 다녀왔습니다! 토끼 귀 머리띠를 예쁘게 쓰고 무지개 의자에 앉아 씩씩하게 차례를 기다린 우리 민서, 생각보다 무서운 놀이기구들도 씩씩하고 용감하게 잘 타서 아빠를 깜짝 놀라게 했어요! 화려하고 신비로운 10분 롯데월드 퍼레이드 쇼와 알록달록 놀이기구들의 즐거운 순간들을 사진과 영상으로 가득 담았습니다. 🎡🎢🎠🐰✨",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261105_lotteworld_01.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261105_lotteworld_01.jpg"
+    ],
+    "videoBtnText": "🏰 10분 퍼레이드 풀영상 감상하기",
+    "videos": [
+      {
+        "url": "https://photos.app.goo.gl/1vW5j1pYXL2mDkQ18",
+        "text": "🏰 10분 퍼레이드 풀영상 감상하기",
+        "icon": "🏰"
+      },
+      {
+        "url": "https://photos.app.goo.gl/GMkyJKJbTt3gmqrv7",
+        "text": "🎢 롯데월드 놀이기구 동영상 모음",
+        "icon": "🎢"
+      },
+      {
+        "url": "https://photos.app.goo.gl/xvDRG22R3AdUtGjVA",
+        "text": "📷 구글 포토 전체 사진 앨범 보기",
+        "icon": "📷"
+      }
+    ],
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": []
+  },
+  {
     "videoUrl": "https://photos.app.goo.gl/emqV1o6i1QpDddRx9",
     "id": "evt_together_gyeongdong_market_20261031",
     "author": "공통",
