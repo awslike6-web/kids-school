@@ -238,6 +238,31 @@ def run():
             if isinstance(character, dict) and isinstance(character.get('sprite'), str):
                 character_images.add(Path(character['sprite']).stem)
 
+    # 기존 gallery-data.js 및 archive-master-data.js 로드하여 보존
+    existing_items_map = {}
+    if os.path.exists(output_js):
+        try:
+            with open(output_js, 'r', encoding='utf-8') as f:
+                m = re.search(r'const DEFAULT_GALLERY_DATA = (\[.*?\]);', f.read(), re.S)
+            if m:
+                for it in json.loads(m.group(1)):
+                    if isinstance(it, dict) and it.get('id'):
+                        existing_items_map[it['id']] = it
+        except Exception as e:
+            print(f"⚠️ 기존 gallery-data.js 읽기 오류 (무시됨): {e}")
+
+    existing_archive_map = {}
+    if os.path.exists(archive_master_js):
+        try:
+            with open(archive_master_js, 'r', encoding='utf-8') as f:
+                m = re.search(r'const ARCHIVE_MASTER_DATA = (\[.*?\]);', f.read(), re.S)
+            if m:
+                for it in json.loads(m.group(1)):
+                    if isinstance(it, dict) and it.get('id'):
+                        existing_archive_map[it['id']] = it
+        except Exception as e:
+            print(f"⚠️ 기존 archive-master-data.js 읽기 오류 (무시됨): {e}")
+
     items = []
     archive_entries = []
     
@@ -429,10 +454,11 @@ def run():
                                        dest_full, target_dirs[sub_dir], sub_dir, sub_path)
                 if diff:
                     item_obj['spotDiff'] = diff
-            items.append(item_obj)
             characters = build_characters(meta, art_id, folder_full, target_dirs[sub_dir], sub_dir, sub_path)
             if characters:
                 item_obj['characters'] = characters
+            items.append(item_obj)
+            existing_items_map[art_id] = item_obj
 
             # archive entry
             learning_pts = []
@@ -444,7 +470,7 @@ def run():
                 learning_pts.append("선과 색채의 조화를 통한 시각적 감정 표현력")
             learning_pts.append(f"{author_name}만의 독창적인 예술적 상상력과 미적 탐구")
 
-            archive_entries.append({
+            arch_entry = {
                 "id": art_id,
                 "student": author_name,
                 "studentKey": 'minsu' if author_name == '민수' else ('minseo' if author_name == '민서' else 'together'),
@@ -464,12 +490,50 @@ def run():
                 "likes": likes,
                 "reactions": stickers,
                 "comments": comments
-            })
+            }
+            archive_entries.append(arch_entry)
+            existing_archive_map[art_id] = arch_entry
             
+    # gallery-meta.json 변경사항이 기존 작품에도 반영되도록 업데이트
+    for art_id, item_obj in existing_items_map.items():
+        if art_id in meta_dict:
+            m = meta_dict[art_id]
+            if m.get('title'):
+                item_obj['title'] = m['title']
+            if m.get('category'):
+                item_obj['category'] = m['category']
+            if m.get('categoryIcon'):
+                item_obj['categoryIcon'] = m['categoryIcon']
+            if m.get('date'):
+                item_obj['date'] = m['date']
+            if m.get('artistNote'):
+                item_obj['artistNote'] = m['artistNote']
+            if m.get('grade'):
+                item_obj['grade'] = m['grade']
+            if m.get('videoUrl'):
+                item_obj['videoUrl'] = m['videoUrl']
+            if m.get('videoBtnText'):
+                item_obj['videoBtnText'] = m['videoBtnText']
+
+    for art_id, arch_obj in existing_archive_map.items():
+        if art_id in meta_dict:
+            m = meta_dict[art_id]
+            if m.get('title'):
+                arch_obj['title'] = m['title']
+            if m.get('category'):
+                arch_obj['category'] = m['category']
+            if m.get('categoryIcon'):
+                arch_obj['categoryIcon'] = m['categoryIcon']
+            if m.get('date'):
+                arch_obj['date'] = m['date']
+            if m.get('artistNote'):
+                arch_obj['description'] = m['artistNote']
+
     # 정렬: 공동 작품 최우선 -> 날짜 최신순
-    together_list = [x for x in items if x['author'] == '공동']
-    other_list = [x for x in items if x['author'] != '공동']
-    other_list.sort(key=lambda x: x['date'], reverse=True)
+    combined_items = list(existing_items_map.values())
+    together_list = [x for x in combined_items if x.get('author') == '공동']
+    other_list = [x for x in combined_items if x.get('author') != '공동']
+    other_list.sort(key=lambda x: str(x.get('date', '')), reverse=True)
     final_list = together_list + other_list
     
     # kids-school gallery-data.js 출력
@@ -488,17 +552,11 @@ if (typeof module !== 'undefined' && module.exports) {
 
     # kids-archive/data/archive-master-data.js 출력
     if os.path.exists(archive_root):
-        archive_together = [x for x in archive_entries if x['student'] == '공동']
-        archive_other = [x for x in archive_entries if x['student'] != '공동']
-        archive_other.sort(key=lambda x: x['date'], reverse=True)
-        # 특별한 날(evt_...)은 add_activity_photo.py가 넣은 항목이라 작품 스캔으로 다시 만들 수 없다 → 그대로 이어 붙인다
-        kept_events = []
-        if os.path.exists(archive_master_js):
-            with open(archive_master_js, 'r', encoding='utf-8') as f:
-                m = re.search(r'const ARCHIVE_MASTER_DATA = (\[.*\]);', f.read(), re.S)
-            if m:
-                kept_events = [x for x in json.loads(m.group(1)) if str(x.get('id', '')).startswith('evt_')]
-        final_archive = archive_together + archive_other + kept_events
+        combined_archive = list(existing_archive_map.values())
+        archive_together = [x for x in combined_archive if x.get('student') == '공동']
+        archive_other = [x for x in combined_archive if x.get('student') != '공동']
+        archive_other.sort(key=lambda x: str(x.get('date', '')), reverse=True)
+        final_archive = archive_together + archive_other
 
         archive_js_content = """// 🏛️ kids-archive/data/archive-master-data.js
 // 민민이네 디지털 성장 아카이브 & 평생 포트폴리오 마스터 데이터베이스
