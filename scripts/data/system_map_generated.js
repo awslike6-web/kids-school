@@ -137,6 +137,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "society_map.js", "path": "kids-school-main/kids/js/society_map.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
       {"name": "society_storybook.js", "path": "kids-school-main/kids/js/society_storybook.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
       {"name": "society_voca.js", "path": "kids-school-main/kids/js/society_voca.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
+      {"name": "system_map_view.js", "path": "kids-school-main/kids/js/system_map_view.js", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
       {"name": "timetable_grid.js", "path": "kids-school-main/kids/js/timetable_grid.js", "domain": ["timetable"], "docs": ["timetable_diary_spec.md", "CORE_CATALOG.md"]},
       {"name": "timetable_notices.js", "path": "kids-school-main/kids/js/timetable_notices.js", "domain": ["timetable"], "docs": ["timetable_diary_spec.md", "CORE_CATALOG.md"]},
       {"name": "vertical_math_grid.js", "path": "kids-school-main/kids/js/vertical_math_grid.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},

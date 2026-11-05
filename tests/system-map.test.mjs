@@ -24,6 +24,27 @@ test('화면이 데이터 파일을 합치는 순서대로 싣는다', () => {
         .map(name => html.indexOf(`scripts/data/${name}`));
     assert.ok(positions.every(p => p >= 0));
     assert.deepEqual(positions, [...positions].sort((a, b) => a - b));
+    // 화면 코드는 데이터를 모두 합친 뒤에 실려야 하고, 무거운 CSS 프레임워크는 쓰지 않는다.
+    const view = html.indexOf('src="kids/js/system_map_view.js');
+    assert.ok(view > positions.at(-1));
+    assert.ok(fs.existsSync(repoFile('kids/js/system_map_view.js')) && fs.existsSync(repoFile('kids/css/system_map.css')));
+    assert.doesNotMatch(html, /cdn\.tailwindcss\.com/);
+});
+
+test('증상 카드는 탭 key와 카드 id로 흐름에 연결된다', () => {
+    const data = loadMap();
+    const domains = new Set(data.domains.map(d => d.key));
+    const nodes = new Map(data.nodes.map(n => [n.id, n]));
+    assert.ok(data.troubles.length > 0);
+    for (const t of data.troubles) {
+        assert.ok(domains.has(t.domainKey), t.symptom);
+        assert.ok(Array.isArray(t.cards) && t.cards.length > 0, t.symptom);
+        for (const id of t.cards) {
+            assert.ok(nodes.has(id), `${t.domainKey}: ${id}`);
+            // 증상을 누르면 그 탭이 열리므로 카드가 그 탭에 보여야 한다.
+            assert.ok(nodes.get(id).domain.includes(t.domainKey), `${t.domainKey}: ${id}`);
+        }
+    }
 });
 
 test('카드 id·탭·따옴표 계약을 지킨다', () => {
