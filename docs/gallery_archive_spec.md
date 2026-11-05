@@ -136,8 +136,9 @@ python -X utf8 scripts/sync_quick_upload.py --id "art_minsu_20261028_paldo_bibim
 
 ### 1) 원천과 화면
 - **원천은 `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`) 하나다.** 갤러리 특별한 날 탭(`gallery-data-sync.js`)과 하루방(`haru-special-days.js`, [`docs/haru_spec.md`](haru_spec.md) §3-3)이 같은 목록을 읽는다. 2026-10-29 전에는 하루방이 `haru_data.js`의 따로 된 목록을 읽어 두 목록이 갈라졌다(하루방에만 사진 없는 예시 3건, 갤러리에만 10/18 이후 행사 3건).
-- 하루방은 지금 아이(`민서`/`민수`)의 행사와 `공동`·`공통`·`아빠`·`엄마` 행사만 보여 준다. 갤러리는 전부 보여 준다.
-- 항목 필드: `id`, `author`(민서·민수·공동·공통·아빠·엄마), `category`(갤러리 특별한 날 분류 6종), `categoryIcon`, `title`, `date`(YYYY-MM-DD), `desc`, `imageUrl`, `galleryImages`, `videoUrl`(+`videoBtnText`), 선택 `videos` 배열(하루방 영상 여러 편), `likes`, `stickers`, `comments`.
+- 하루방은 지금 아이(`민서`/`민수`)의 행사와 `공동`·`아빠`·`엄마` 행사만 보여 준다. 갤러리는 전부 보여 준다.
+- **온 가족 행사의 저장값은 `공동` 하나다.** 노션 `주인공`, 갤러리 '👨‍👩‍👧‍👦 온 가족' 이름표·탭, 아카이브 이름표가 모두 `공동`을 쓴다. 2026-11-06 경동시장을 `공통`으로 저장해 '온 가족 추억' 탭에서 빠졌다. 지금은 빌더 `normalize_author`가 `공통·가족·온가족·함께`를 `공동`으로 바꿔 저장하고, `tests/gallery-data-contract.test.mjs`가 데이터를 검사한다.
+- 항목 필드: `id`, `author`(민서·민수·공동·아빠·엄마), `category`(갤러리 특별한 날 분류 6종), `categoryIcon`, `title`, `date`(YYYY-MM-DD), `desc`, `imageUrl`, `galleryImages`, `videoUrl`(+`videoBtnText`), 선택 `videos` 배열(하루방 영상 여러 편), `likes`, `stickers`, `comments`.
 
 ### 2) 등록 명령 (관제탑 루트에서)
 - **폰**: 퀵업로더에서 `특별한 날/체험학습`을 고르고 메모를 적어 올린다 → PC에서 "퀵업로드 올린 거 등록해줘" = `python -X utf8 scripts/sync_quick_upload.py`. 같은 작성자·날짜·메모 사진은 행사 하나로 묶인다. 제목은 메모 첫 줄(`⭐ ...`), 분류는 `소중한 하루`로 들어가니 갤러리 화면 ✏️에서 고친다. 묶인 사진의 임시 카드 중 첫 장 카드를 `evt_...`로 바꾸고, 나머지 임시 카드는 노션에서 직접 지우라고 안내한다.
@@ -150,13 +151,16 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
   --file "E:/Downloads/a.jpg" --sub-files "E:/Downloads/b.jpg,E:/Downloads/c.jpg" \
   --video "https://photos.app.goo.gl/..." --video-btn "🎬 그날의 영상 보기"
 ```
-- `--author`: 민서·민수·공동·공통·아빠·엄마. `--event-cat`: 가족/생일파티·생태/텃밭/체험·소풍/현장학습·학교행사/운동회·사계절 자연관찰·소중한 하루(기본). `--slug`: id에 들어갈 영문 이름(없으면 첫 사진 파일 이름). 이미 있는 행사를 고칠 때는 `--id evt_...`.
+- `--author`: 민서·민수·공동·아빠·엄마 (`공통`·`가족`·`온가족`·`함께`는 `공동`으로 저장). `--event-cat`: 가족/생일파티·생태/텃밭/체험·소풍/현장학습·학교행사/운동회·사계절 자연관찰·소중한 하루(기본). `--slug`: id에 들어갈 영문 이름(없으면 첫 사진 파일 이름). 이미 있는 행사를 고칠 때는 `--id evt_...`.
 - `--video`: 로컬 `.mp4/.mov/.webm`은 activities 폴더에 복사, http(s) 주소는 그대로 연결. 노션 카드에는 파일 영상만 동영상 블록으로 붙인다(구글 포토 링크는 데이터의 `videoUrl`로만).
+- `--videos-json`: 영상·앨범 링크가 여러 개일 때 `'[{"url":"https://photos.app.goo.gl/...","text":"🏰 퍼레이드 풀영상"},{"url":"...","text":"🎢 놀이기구 모음"}]'`. `--video`가 없으면 첫 항목이 `videoUrl`·`videoBtnText`가 된다. `text` 맨 앞 이모지가 버튼 아이콘이 되므로 `icon`은 생략해도 된다. JSON이 틀리거나 http(s) `url`이 없는 항목이 있으면 등록 전에 종료 코드 1로 멈춘다.
+- 화면: 구글 포토·유튜브 같은 공유 주소는 새 창 버튼으로만 열린다. 갤러리 모달의 창 안 `🎬 3D 회전영상` 칸은 `.mp4/.webm/.mov/.m4v` 파일 주소일 때만 나온다.
 
 ### 3) 도구가 하는 일 (입구 `sync_quick_upload.py` → 빌더 `kids-school-main/scripts/add_activity_photo.py`)
 1. **빌더**: EXIF 회전 보정·긴 변 1200px JPEG(quality 88) → `kids-archive/assets/media/{minseo|minsu|together}/activities/{아이}_{YYYYMMDD}_{slug}_{NN}.jpg`. `special-days-data.js`에 id `evt_{아이}_{slug}_{YYYYMMDD}`로 upsert(같은 id 재실행은 덮어쓰기, 중복 없음, `likes`·`stickers`·`comments` 보존, 신규는 날짜 순서 자리). `archive-master-data.js`에도 같은 id로 upsert(`build_gallery.py`는 다시 쓸 때 `evt_` 항목을 보존). `haru.html`·`gallery.html`의 `special-days-data.js?v=` 갱신.
 2. **입구**: 노션 성장 갤러리 DB(`3dfa2711...`) 카드를 `upsert_notion_gallery_card`로 맞춘다. 속성은 `식별ID=evt_...`, `구분: 특별한 날`, `주인공`(아빠·엄마는 `부모관리자`), `날짜`, `제목`, `작가의 한마디/일기본문`(=desc), 당일 일상 연결(§1-3)만 쓴다. 노션까지 성공한 큐 항목만 큐에서 지운다.
 3. **Git**: `kids-archive`(`assets/media`, `data/archive-master-data.js`)와 `kids-school`(`special-days-data.js`, `haru.html`, `gallery.html` 등 지정 파일만) 커밋·푸시. `--no-push`는 푸시만 생략.
+4. **점검표**: 등록한 id로 `verify_gallery_entry.py`를 자동 실행한다(§9). ❌가 있으면 종료 코드 1.
 - `--dry-run`은 특별한 날에서만 된다. 큐·파일·Git·노션을 건드리지 않고 id·사진 경로·넣을 항목·바뀔 파일을 출력한다. 빌더 단독 `python -X utf8 scripts/add_activity_photo.py --dry-run ...`(공부방 루트, `--category`)도 같다. 빌더 단독 실제 실행은 노션 카드를 만들지 않으므로 공식 등록은 입구로 한다.
 - 시험 사진을 실제 `kids-archive`에 올리지 않는다(12년 보존 저장소). 도구 검증은 `--dry-run`과 임시 폴더·모의 노션으로 한다.
 
@@ -216,3 +220,20 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
 - 저장·게임의 API와 한계는 [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)를 참고합니다. 파트너·최고 기록은 현재 기기에서만 유지됩니다. 실제 캐릭터 작품 등록은 별도 콘텐츠 작업입니다.
 
 다중 캐릭터는 `--character-key`로 선택해 최대 6개를 등록합니다. `--character-remove KEY`는 해당 메타만 제거하고 파일을 보존하며 마지막 삭제는 characters 키도 제거합니다. 배열 계약과 호환·등록 규칙은 [gallery_multi_character_spec.md](gallery_multi_character_spec.md)를 따릅니다.
+
+---
+
+## 9. 등록 후 점검표 & 데이터 규칙 (누가 등록해도 같은 확인)
+
+agy·Claude·사람 누가 등록하든 같은 항목을 같은 방법으로 확인한다. 절차는 스킬 `gallery-special-day-register`(`.agent/skills/`)를 따른다.
+
+- **점검표** `scripts/verify_gallery_entry.py --id {id} [--id ...]` (공부방 루트, 읽기 전용). 관제탑 입구가 작품·특별한 날 등록과 푸시를 마친 뒤 등록한 id로 자동 실행한다(`--no-push`면 CDN 확인만 뺀다, 푸시 직후 CDN은 90초까지 다시 시도).
+  1. 데이터 파일(`special-days-data.js`/`gallery-data.js`)에 정확히 1건
+  2. 작성자 저장값 (온 가족 = `공동`)
+  3. `kids-archive/data/archive-master-data.js`에 같은 id·같은 작성자
+  4. 사진 파일 실존, 폴더 규칙(§5-4), EXIF 회전값 없음, 크기
+  5. CDN 주소가 열림
+  6. 영상 링크(`videoUrl`·`videos`)가 열림
+  7. 노션 성장 갤러리 DB 카드가 정확히 1장, `구분`·`주인공`·`날짜`·`제목` 일치 (+ 일상 기록 연결은 ⚠️ 안내)
+- 사진이 바로 서 있는지·대상이 잘리지 않았는지·제목과 맞는지는 기계가 판단하지 못한다. 점검표 끝 `👀` 목록의 사진을 직접 열어 확인한다(`GEMINI.md` §5-3). 점검표 ❌나 육안 미확인이 있으면 완료로 보고하지 않는다.
+- **데이터 규칙 시험** `tests/gallery-data-contract.test.mjs` (회귀 시험 묶음, GitHub Actions에서도 실행): 특별한 날 작성자·id·날짜·분류 6종·사진 폴더·영상 주소, 작품 작성자·id·날짜, (로컬에 `../kids-archive`가 있으면) 아카이브 마스터의 작성자와 특별한 날 짝을 검사한다. 2026-11-06 이 시험을 처음 돌렸을 때 옛 분류 `학교생활/진로`·`학교생활/행사` 2건이 걸려 `학교행사/운동회`로 고쳤다.

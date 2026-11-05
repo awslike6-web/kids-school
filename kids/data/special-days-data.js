@@ -48,7 +48,7 @@ const DEFAULT_SPECIAL_DAYS_DATA = [
   {
     "videoUrl": "https://photos.app.goo.gl/emqV1o6i1QpDddRx9",
     "id": "evt_together_gyeongdong_market_20261031",
-    "author": "공통",
+    "author": "공동",
     "category": "소풍/현장학습",
     "categoryIcon": "☕",
     "title": "☕ 레트로 감성 가득한 경동시장 나들이 & 커피한약방 탐방!",
@@ -71,7 +71,7 @@ const DEFAULT_SPECIAL_DAYS_DATA = [
   {
     "id": "evt_minseo_pet_trainer_20261022",
     "author": "민서",
-    "category": "학교생활/진로",
+    "category": "학교행사/운동회",
     "categoryIcon": "🐕",
     "title": "🐕 진로체험: 반려동물 훈련사와의 따뜻한 만남!",
     "date": "2026-10-22",
@@ -99,7 +99,7 @@ const DEFAULT_SPECIAL_DAYS_DATA = [
   {
     "id": "evt_school_flea_market_20261021",
     "author": "민서",
-    "category": "학교생활/행사",
+    "category": "학교행사/운동회",
     "categoryIcon": "🎒",
     "title": "🎒 전교생이 함께한 2026 가을 나눔 장터!",
     "date": "2026-10-21",

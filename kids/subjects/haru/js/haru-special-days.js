@@ -13,6 +13,13 @@ function getKstTodayYMD(date = new Date()) {
     return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
 }
 
+// 🏷️ 버튼 문구 맨 앞 이모지를 아이콘으로 떼어 낸다 ("🏰 퍼레이드" → 🏰 + "퍼레이드"). 아이콘이 두 번 붙지 않게 한다.
+function splitLeadingEmoji(text, fallbackIcon) {
+  const s = String(text || "");
+  const m = s.match(/^\s*(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|\p{Emoji_Modifier})*)\s*/u);
+  return m ? { icon: m[1], label: s.slice(m[0].length) } : { icon: fallbackIcon, label: s.trim() };
+}
+
 
 (() => {
   let selectedStoryPhotoBase64 = "";
@@ -375,8 +382,10 @@ function getKstTodayYMD(date = new Date()) {
         videoBtnHtml = `
           <div class="special-card-video-wrap" style="display:flex; flex-direction:column; gap:8px;" onclick="event.stopPropagation();">
             ${videoList.map(v => {
-              const label = v.text || (v.url && v.url.includes("photos.app.goo.gl") ? "구글 포토 영상 보러가기" : "동영상 보러가기");
-              const icon = v.icon || "🎬";
+              const { icon, label } = splitLeadingEmoji(
+                v.text || (v.url && v.url.includes("photos.app.goo.gl") ? "구글 포토 영상 보러가기" : "동영상 보러가기"),
+                v.icon || "🎬"
+              );
               return `
                 <a href="${v.url}" target="_blank" rel="noopener noreferrer" class="special-card-video-btn" title="동영상 감상하기 (구글 포토/유튜브/드라이브)">
                   <div class="video-btn-left">

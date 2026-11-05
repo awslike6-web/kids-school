@@ -677,8 +677,13 @@ window.SYSTEM_MAP_DATA = {
 // <AUTO-SYNC:START> scripts/sync_agent_skills.py가 자동으로 다시 씁니다. 직접 고치지 마세요.
 window.SYSTEM_MAP_AUTO = {
   "lastUpdated": "2026-11-06",
-  "catalogUpdatedAt": "2026-11-06 03:43",
+  "catalogUpdatedAt": "2026-11-06 06:38",
   "skills": [
+    {
+      "name": "gallery-special-day-register",
+      "path": "kids-school-main/.agent/skills/gallery-special-day-register/SKILL.md",
+      "summary": "갤러리 작품이나 특별한 날 추억을 등록·수정할 때 사용. 공식 입구 sync_quick_upload.py 미리보기→실행, 작성자 저장값, 구글 포토 영상 링크, 등록 후 점검표 verify_gallery_entry.py, 사진 육안 확인, 결과 보고 형식을 정한 표준…"
+    },
     {
       "name": "minseo-korean-unit",
       "path": "kids-school-main/.agent/skills/minseo-korean-unit/SKILL.md",

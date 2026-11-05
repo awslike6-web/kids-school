@@ -15,7 +15,8 @@
   5. haru.html·gallery.html의 special-days-data.js?v= 캐시 버스팅
   6. (단독 실행 때만) 바뀐 파일만 골라 두 저장소 커밋·푸시 (--no-git, --no-push)
 
-id: evt_{minseo|minsu|together}_{slug}_{YYYYMMDD}. 공동·공통·아빠·엄마는 together 폴더를 쓴다.
+id: evt_{minseo|minsu|together}_{slug}_{YYYYMMDD}. 공동·아빠·엄마는 together 폴더를 쓴다.
+작성자 "공통·가족·온가족·함께"는 "공동"으로 바꿔 저장한다 (normalize_author).
 slug는 --slug(영문 소문자·숫자·_)가 우선이고, 없으면 첫 사진 파일 이름에서 만든다.
 
 사용법 (공부방 루트에서):
@@ -56,10 +57,18 @@ AUTHORS = {
     "민서": ("minseo", "민서"),
     "민수": ("minsu", "민수"),
     "공동": ("together", "공통"),
-    "공통": ("together", "공통"),
     "아빠": ("together", "공통"),
     "엄마": ("together", "공통"),
 }
+# 온 가족 행사의 저장값은 "공동" 하나다 (노션 주인공·갤러리 '온 가족' 탭·아카이브 이름표가 모두 "공동"을 쓴다).
+# 2026-11-06 경동시장을 "공통"으로 저장해 갤러리 '온 가족 추억' 탭에서 빠진 사고 재발 방지.
+AUTHOR_ALIASES = {"공통": "공동", "가족": "공동", "온가족": "공동", "온 가족": "공동", "함께": "공동"}
+
+
+def normalize_author(author):
+    """작성자 별칭을 저장값으로 바꾼다 ("공통"·"온 가족" → "공동"). 모르는 이름은 그대로 돌려준다."""
+    name = str(author or '').strip()
+    return AUTHOR_ALIASES.get(name, name)
 # 갤러리 특별한 날 분류 (kids/common_space/gallery-data-sync.js SPECIAL_CATEGORIES와 같은 키)
 CATEGORY_ICONS = {
     "가족/생일파티": "🎂",
@@ -119,6 +128,7 @@ class Plan:
 def build_plan(author, title, desc, date, files, category=None, icon=None, slug=None,
                event_id=None, video=None, video_btn=None, videos=None):
     """입력을 검증하고 할 일을 만든다. 파일·Git·노션은 건드리지 않는다."""
+    author = normalize_author(author)
     if author not in AUTHORS:
         raise ValueError(f'--author는 {"/".join(AUTHORS)} 중 하나여야 합니다: {author!r}')
     child = AUTHORS[author][0]
@@ -176,12 +186,38 @@ def build_plan(author, title, desc, date, files, category=None, icon=None, slug=
             video_job = (v_src, f'{media_dir}/{stem}_video{v_src.suffix.lower()}')
             entry["videoUrl"] = f'{CDN_BASE}/{video_job[1]}'
         entry["videoBtnText"] = video_btn or "🎬 그날의 영상 보기"
-    if videos and isinstance(videos, list):
+    if videos:
+        videos = check_videos(videos)
         entry["videos"] = videos
-        if not entry.get("videoUrl") and len(videos) > 0:
-            entry["videoUrl"] = videos[0].get("url")
+        if not entry.get("videoUrl"):
+            entry["videoUrl"] = videos[0]["url"]
             entry["videoBtnText"] = videos[0].get("text") or "🎬 그날의 영상 보기"
     return Plan(event_id, author, child, entry, image_jobs, video_job)
+
+
+def check_videos(videos):
+    """--videos-json 값(JSON 문자열 또는 목록)을 검사해 [{url, text?, icon?}] 목록으로 돌려준다.
+    틀리면 ValueError — 경고만 하고 영상 없이 등록되는 일을 막는다."""
+    if isinstance(videos, str):
+        try:
+            videos = json.loads(videos)
+        except json.JSONDecodeError as error:
+            raise ValueError(f'--videos-json을 JSON으로 읽지 못했습니다: {error}') from None
+    if not isinstance(videos, list) or not videos:
+        raise ValueError('--videos-json은 [{"url": "https://...", "text": "버튼 문구"}] 모양의 목록이어야 합니다')
+    cleaned = []
+    for idx, v in enumerate(videos, 1):
+        url = v.get('url') if isinstance(v, dict) else None
+        if not isinstance(url, str) or not url.startswith(('http://', 'https://')):
+            raise ValueError(f'--videos-json {idx}번째 항목에 http(s) "url"이 없습니다: {v!r}')
+        item = {"url": url}
+        for key in ('text', 'icon'):
+            if v.get(key) is not None:
+                if not isinstance(v[key], str):
+                    raise ValueError(f'--videos-json {idx}번째 항목의 "{key}"는 글자여야 합니다: {v[key]!r}')
+                item[key] = v[key].strip()
+        cleaned.append(item)
+    return cleaned
 
 
 # ---------------------------------------------------------------- 데이터 파일 읽기·쓰기
@@ -373,7 +409,8 @@ def git_commit(repo, paths, message, push=True):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description='특별한 날 등록 빌더 (공식 입구: 관제탑 scripts/sync_quick_upload.py --cat "특별한 날")')
-    p.add_argument('--author', required=True, choices=list(AUTHORS), help='작성자: 민서/민수/공동/아빠/엄마')
+    p.add_argument('--author', required=True, choices=list(AUTHORS) + list(AUTHOR_ALIASES),
+                   help='작성자: 민서/민수/공동/아빠/엄마 (공통·가족·온가족·함께는 공동으로 저장)')
     p.add_argument('--title', required=True, help='제목 (앞에 이모지를 붙여 쓰는 것이 기존 형식)')
     p.add_argument('--desc', default='', help='알림장·소감 본문')
     p.add_argument('--date', help='행사 날짜 YYYY-MM-DD (기본: 오늘 KST)')
@@ -392,15 +429,10 @@ def main(argv=None):
     args = p.parse_args(argv)
 
     files = [args.file] + [s.strip() for s in args.sub_files.split(',') if s.strip()]
-    videos_arg = None
-    if getattr(args, 'videos_json', None):
-        try:
-            videos_arg = json.loads(args.videos_json)
-        except Exception as e:
-            print(f"⚠️ --videos-json 파싱 실패: {e}")
     try:
         plan = build_plan(args.author, args.title, args.desc, args.date, files, args.category,
-                          args.icon, args.slug, args.event_id, args.video, args.video_btn, videos=videos_arg)
+                          args.icon, args.slug, args.event_id, args.video, args.video_btn,
+                          videos=args.videos_json)
         changed = apply_plan(plan, dry_run=args.dry_run)
     except (ValueError, OSError) as error:
         print(f'❌ [특별한 날 입력 오류] {error}')

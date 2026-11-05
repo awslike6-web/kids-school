@@ -168,7 +168,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **파일 위치**:
   - `kids/common_space/gallery_controller.js` (331줄): 유저 테마 적용(DOM null 안전 가드), 2대 뷰 모드 스위처(작품 vs 특별한 날), 필터 바 및 카드 그리드 렌더러, 빠른 좋아요.
   - `kids/common_space/gallery-data-sync.js` (477줄): 로컬 데이터 로드/저장, 카테고리 정의, 노션 실시간 양방향 동기화 및 영구 수정 이력(Audit Trail) 콜아웃 블록 적재.
-  - `kids/common_space/gallery-modal-manager.js` (517줄): 상세 모달 뷰, 다중 사진 썸네일 스위처, 메타 웹 편집, 작가의 한마디 직접 수정, 스티커 및 칭찬 댓글(XSS 방어).
+  - `kids/common_space/gallery-modal-manager.js` (644줄): 상세 모달 뷰, 다중 사진 썸네일 스위처(창 안 `🎬 3D 회전영상` 칸은 `.mp4/.webm/.mov/.m4v` 파일 주소일 때만; 구글 포토 등 공유 주소는 새 창 버튼만), 메타 웹 편집, 작가의 한마디 직접 수정, 스티커 및 칭찬 댓글(XSS 방어).
 - **핵심 API**:
   | 함수 | 모듈 | 설명 |
   | :--- | :--- | :--- |
@@ -177,7 +177,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   | `loadGalleryData()` | `gallery-data-sync` | 로컬 스토리지 및 마스터 데이터 병합 로드 (버전 체크 포함) |
   | `syncFromNotionGallery()` | `gallery-data-sync` | 노션 GALLERY_DB에서 최신 제목/날짜/한마디 백그라운드 동기화 |
   | `syncArtworkToNotion(art, oldState)` / `syncSpecialDayToNotion(item, oldState)` | `gallery-data-sync` | 화면 수정 내용을 노션 `제목`·`날짜`·`작가의 한마디/일기본문`에 저장 + 수정 이력. 분야·동영상은 노션 속성이 없어 보내지 않음 (회귀 시험 `tests/notion-contract.test.mjs`) |
-  | `openDetailModal(id)` | `gallery-modal-manager` | 작품/추억 상세 모달 팝업 열기 (다중 썸네일, 비디오 링크 자동 마운트) |
+  | `openDetailModal(id)` | `gallery-modal-manager` | 작품/추억 상세 모달 팝업 열기 (다중 썸네일, 비디오 링크 자동 마운트). 영상 버튼: `videoUrl` 1개 + `videos` 중 그 주소와 다른 것들. 버튼 문구 맨 앞 이모지는 `splitLeadingEmoji`가 아이콘으로 떼어 내 두 번 붙지 않음 |
   | `addStickerReaction(type)` | `gallery-modal-manager` | 하트/따봉/별/트로피 스티커 반응 누르기 및 노션 실시간 동기화 |
   | `submitComment()` | `gallery-modal-manager` | 가족 칭찬 댓글 등록 (textContent 안전 주입 및 노션 블록 적재) |
 
@@ -923,7 +923,8 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🌟 `haru-special-days.js` ([추억] 특별한 날 추억 피드 & 포토 갤러리 엔진)
 학교 축제, 생일, 소풍, 현장학습 등 특별한 날 추억 피드, 고화질 사진 전체보기 팝업 모달, 다중 썸네일 스위처, 4종 감정 도장 및 직접 쓰기, 제목 인라인 수정, 신규 추억 등록을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/subjects/haru/js/haru-special-days.js` (558줄)
+- **파일 위치**: `kids/subjects/haru/js/haru-special-days.js` (567줄)
+- **영상 버튼**: `videos` 배열(없으면 `videoUrl` 1개)마다 새 창 버튼. 문구 맨 앞 이모지는 `splitLeadingEmoji`로 아이콘 자리에 옮긴다(갤러리 모달과 같은 규칙).
 - **원천 (2026-10-29)**: 기본 목록은 갤러리와 같은 `kids/data/special-days-data.js`(`DEFAULT_SPECIAL_DAYS_DATA`) 하나다. `haru.html`이 `../../data/special-days-data.js?v=...`를 이 모듈보다 먼저 싣는다. `haru_data.js`에는 `specialDays.title`만 남았다(예시 3건 삭제).
 - **아이별 거르기**: `window.currentChild`(minseo/minsu) 기준 `author`가 그 아이(민서/민수)이거나 `공동`·`공통`·`아빠`·`엄마`인 행사만, 날짜 최신순. localStorage `haru_special_stories_{child}`의 `evt_custom_…` 이야기·`_userEditedTitle`, 갤러리 메타 `SPECIAL_DAYS_CUSTOM_META`는 그대로 덧입힌다. 시험: `tests/haru-special-days.test.mjs`.
 - **핵심 API**:
@@ -1003,11 +1004,21 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 특별한 날 등록의 파일 작업 본체입니다. 공식 입구는 관제탑 `scripts/sync_quick_upload.py --cat "특별한 날"`(노션·큐·Git)이고, 입구가 importlib로 이 모듈을 불러 씁니다. 단독 실행은 `--dry-run` 미리보기나 노션 없이 파일만 맞출 때 씁니다. 상세: [`docs/gallery_archive_spec.md` §5](../../docs/gallery_archive_spec.md).
 - **하는 일**: EXIF 회전 보정·긴 변 1200px JPEG → `kids-archive/assets/media/{minseo|minsu|together}/activities/{아이}_{YYYYMMDD}_{slug}_{NN}.jpg`, 로컬 영상 복사(또는 http 주소 연결), `kids/data/special-days-data.js` id upsert(같은 id 재실행 = 덮어쓰기, `likes`·`stickers`·`comments` 보존, 신규는 날짜 순서 자리), `archive-master-data.js` 같은 id upsert, `haru.html`·`gallery.html`의 `special-days-data.js?v=` 갱신. 날짜 기본값은 KST 오늘.
 - **id 계약**: `evt_{minseo|minsu|together}_{slug}_{YYYYMMDD}`. 작성자 `민서`·`민수`·`공동`·`공통`·`아빠`·`엄마`(뒤의 넷은 together 폴더). slug는 `--slug`(영문) 우선, 없으면 첫 사진 파일 이름(폰 사진 `20261030_143012.jpg` → `photo_143012`).
-- **핵심 API** (입구가 사용): `build_plan(author, title, desc, date, files, category, icon, slug, event_id, video, video_btn)` → `Plan`(검증만, 쓰기 없음) · `apply_plan(plan, school_root, archive_root, dry_run=False)` → 바뀐 파일 상대경로 `{'school': [...], 'archive': [...]}` · `print_plan(plan, changed)` · `group_queue_items(items)`(같은 작성자·날짜·메모 = 한 행사) · `queue_group_plan(group)`.
+- **핵심 API** (입구가 사용): `build_plan(author, title, desc, date, files, category, icon, slug, event_id, video, video_btn, videos=None)` → `Plan`(검증만, 쓰기 없음) · `check_videos(videos)`(`--videos-json` 문자열/목록 → `[{url, text?, icon?}]`, http(s) url 없거나 JSON이 틀리면 `ValueError`로 등록 전에 멈춤) · `apply_plan(plan, school_root, archive_root, dry_run=False)` → 바뀐 파일 상대경로 `{'school': [...], 'archive': [...]}` · `print_plan(plan, changed)` · `group_queue_items(items)`(같은 작성자·날짜·메모 = 한 행사) · `queue_group_plan(group)`.
+- **작성자 저장값**: `AUTHORS` = 민서·민수·공동·아빠·엄마. `normalize_author(author)`가 `AUTHOR_ALIASES`(공통·가족·온가족·온 가족·함께 → 공동)를 바꾼다. `build_plan`이 맨 먼저 부르고, 점검표도 같은 규칙을 불러 쓴다(규칙은 이 파일 한 곳).
 - **데이터 형식**: `special-days-data.js`의 배열 본문은 JSON(따옴표 키)으로 유지한다. 빌더가 정규식 `const DEFAULT_SPECIAL_DAYS_DATA = ([...]);`로 읽고 `json.dumps(indent=2)`로 다시 쓴다.
 - **실행 커맨드**:
   ```bash
   python -X utf8 scripts/add_activity_photo.py --dry-run --author 민서 --date 2026-10-22 --slug pet_trainer --category "학교행사/운동회" --icon "🐕" --title "🐕 제목" --desc "본문" --file "a.jpg" --sub-files "b.jpg,c.jpg" --video "https://..."
+  ```
+
+### 🌟 `scripts/verify_gallery_entry.py` (갤러리·특별한 날 등록 후 점검표, 2026-11-06)
+누가 등록하든 같은 항목을 확인하는 읽기 전용 점검 도구입니다. 관제탑 입구 `sync_quick_upload.py`가 등록·푸시 뒤 등록한 id로 자동 실행하고, 단독으로도 씁니다. 상세: [`docs/gallery_archive_spec.md` §9](../../docs/gallery_archive_spec.md), 절차: 스킬 `gallery-special-day-register`.
+- **점검 항목**: 데이터 1건 · 작성자 저장값 · 아카이브 마스터 같은 id·작성자 · 사진 파일 실존·폴더·EXIF·크기 · CDN 열림 · 영상 링크 열림 · 노션 카드 1장(구분·주인공·날짜·제목). 끝에 육안 확인할 사진 경로(`👀`)를 출력합니다. ❌가 하나라도 있으면 종료 코드 1.
+- **옵션**: `--id`(여러 번), `--no-network`(파일·데이터만), `--no-cdn`(`--no-push` 등록), `--cdn-wait 초`(푸시 직후 10초 간격 재시도).
+- **실행 커맨드**:
+  ```bash
+  python -X utf8 scripts/verify_gallery_entry.py --id evt_minseo_lotteworld_20261105 --id art_minseo_20261028_cat_dog_crossbag
   ```
 
 ### 🌟 `scripts/log_dev_timeline.py` & `scripts/manage_study_board.py`
@@ -1374,6 +1385,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - 미니 런 보완 시험은 세로 .45~가로 2.2의 6비율·그림 3비율·3시드·민수 가속 전후 162개 월드의 장애물 4,248개를 실제 `step`으로 전수 통과 검사합니다. 민수 2단 필수 장애물·판정 상자 기준 반응 시간·가속 이동량·리사이즈 거리/상태 보존·조사 4쌍도 확인합니다. 세로 .55는 기존 무입력 완주 시험에도 포함합니다.
 - `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.
 
+- `tests/gallery-data-contract.test.mjs`: 갤러리·특별한 날 데이터 규칙. 특별한 날 작성자(민서·민수·공동·아빠·엄마, 온 가족=공동)·id·날짜·분류 6종·사진 폴더·영상 주소, 작품 작성자·id·날짜, 로컬 `../kids-archive`가 있으면 아카이브 마스터 작성자와 특별한 날 짝을 검사합니다(CI에서는 그 시험만 건너뜀).
+- `tests/special-day-video-buttons.test.mjs`: 갤러리 모달의 창 안 영상 칸은 영상 파일 주소일 때만 만들고(구글 포토 공유 주소 제외), 버튼 문구 맨 앞 이모지가 아이콘과 두 번 붙지 않는지(갤러리·하루방 `splitLeadingEmoji`, 실제 데이터 전체) 검사합니다.
 - `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
 - `tests/dictation-ladder.test.mjs`: 받아쓰기 사다리의 단계 건너뛰기·이어 하기·쉬운 방식 전환, 철자 함정, 채점 구분, 숙련도 전송·실패 재전송·병합, 학생 분리, 스크립트 순서, 보상 오디오 호출을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.

@@ -16,6 +16,18 @@ function getKstTodayYMD(date = new Date()) {
     return `${kst.getUTCFullYear()}-${String(kst.getUTCMonth() + 1).padStart(2, '0')}-${String(kst.getUTCDate()).padStart(2, '0')}`;
 }
 
+// 🎬 창 안 <video>로 바로 틀 수 있는 영상 파일인지. 구글 포토·유튜브 공유 주소는 웹페이지라 새 창 버튼으로만 연다.
+function isInlinePlayableVideo(url) {
+    return /\.(mp4|webm|mov|m4v)(?:[?#]|$)/i.test(String(url || ''));
+}
+
+// 🏷️ 버튼 문구 맨 앞 이모지를 아이콘으로 떼어 낸다 ("🏰 퍼레이드" → 🏰 + "퍼레이드"). 아이콘이 두 번 붙지 않게 한다.
+function splitLeadingEmoji(text, fallbackIcon) {
+    const s = String(text || '');
+    const m = s.match(/^\s*(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|\p{Emoji_Modifier})*)\s*/u);
+    return m ? { icon: m[1], label: s.slice(m[0].length) } : { icon: fallbackIcon, label: s.trim() };
+}
+
 
 let activeArtId = null;
 
@@ -76,8 +88,9 @@ function openDetailModal(id) {
     // 🖼️ 다중 사진 및 동영상 썸네일 스위처 제어
     const thumbsContainer = document.getElementById('modalThumbsContainer');
     const images = (item.galleryImages && item.galleryImages.length > 0) ? item.galleryImages : (item.imageUrl ? [item.imageUrl] : []);
+    const hasInlineVideo = isInlinePlayableVideo(item.videoUrl);
     if (thumbsContainer) {
-        if (images.length > 1 || item.videoUrl) {
+        if (images.length > 1 || hasInlineVideo) {
             thumbsContainer.style.display = 'flex';
             thumbsContainer.innerHTML = '';
             const resetThumbStyles = () => {
@@ -112,7 +125,7 @@ function openDetailModal(id) {
                 };
                 thumbsContainer.appendChild(thumbBtn);
             });
-            if (item.videoUrl) {
+            if (hasInlineVideo) {
                 const vidThumbBtn = document.createElement('button');
                 vidThumbBtn.type = 'button';
                 vidThumbBtn.className = 'modal-thumb-btn';
@@ -168,18 +181,26 @@ function openDetailModal(id) {
     if (videoBtn) {
         if (item.videoUrl) {
             videoBtn.href = item.videoUrl;
-            if (videoBtnText) videoBtnText.textContent = item.videoBtnText || '동영상 풀영상 감상하기';
+            const main = splitLeadingEmoji(item.videoBtnText || '동영상 풀영상 감상하기', '🎬');
+            const mainIcon = videoBtn.querySelector('span:not(#modalVideoBtnText)');
+            if (mainIcon) mainIcon.textContent = main.icon;
+            if (videoBtnText) videoBtnText.textContent = main.label;
             videoBtn.style.display = 'inline-flex';
-            if (Array.isArray(item.videos) && item.videos.length > 1) {
+            if (Array.isArray(item.videos)) {
                 const parent = videoBtn.parentNode;
-                item.videos.slice(1).forEach(v => {
+                // 첫 버튼(videoUrl)과 같은 주소는 다시 만들지 않는다
+                item.videos.filter(v => v && v.url && v.url !== item.videoUrl).forEach(v => {
                     const a = document.createElement('a');
                     a.href = v.url;
                     a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
                     a.className = 'modal-video-btn modal-extra-video-btn';
-                    const icon = v.icon || '🎬';
-                    const label = v.text || '추가 영상 보기';
-                    a.innerHTML = `<span>${icon}</span> <span>${label}</span>`;
+                    const { icon, label } = splitLeadingEmoji(v.text || '추가 영상 보기', v.icon || '🎬');
+                    const iconEl = document.createElement('span');
+                    iconEl.textContent = icon;
+                    const labelEl = document.createElement('span');
+                    labelEl.textContent = label;
+                    a.append(iconEl, ' ', labelEl);
                     if (icon === '📷') {
                         a.style.background = 'linear-gradient(135deg, #4a90e2, #0072ff)';
                     } else if (icon === '🎢') {
