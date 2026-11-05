@@ -180,8 +180,8 @@
 
 ### ③ 시스템 아키텍처 조감도 (`minmin_system_map.html`, 2026-10-21)
 - 공부방 전 과목(국어·독해, 수학, 영어, 과학, 사회, 하루)과 관제탑 라이프로그·보육비서의 [입력 스크립트 → 스킬·명세 → 모듈 → 파이프라인·캐시 → 노션 DB] 배선과 증상별 디버깅 지시문을 한 화면에 모은 지도.
-- 내용은 `scripts/data/system_map_data.js` 한 벌에서 읽는다. 기준일과 스킬 카드 요약은 `python scripts/sync_agent_skills.py`가 자동 갱신하므로 손으로 고치지 않는다 (구조·규칙: `CORE_CATALOG.md` §10).
-- 새 과목 모듈·스크립트·노션 DB를 추가하면 데이터 파일의 `nodes`·`edges`에 카드와 연결선을 함께 추가한다.
+- 설명·주의사항·증상 카드는 `scripts/data/`의 손 관리 파일에 두고, 파일 목록과 찾을 수 있는 연결선은 `python -X utf8 scripts/build_system_map.py`가 만든다. 기준일과 스킬 카드 요약은 `python scripts/sync_agent_skills.py`가 갱신하므로 손으로 고치지 않는다 (구조·규칙: `CORE_CATALOG.md` §10).
+- 새 파일은 명세나 카탈로그에 적으면 자동으로 🆕 미분류 서랍에 들어간다. `build_system_map.py`를 실행해 생성 파일을 함께 커밋한다 (`verify_contracts.py`가 낡은 목록을 막음). 자주 다루는 파일과 새 노션 DB는 손 관리 파일에 카드와 연결선을 추가한다.
 
 
 ## 학습 활동 시간과 Guardian 자동 지급 (2026-10-10)

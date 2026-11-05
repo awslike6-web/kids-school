@@ -100,7 +100,8 @@ test('운영 소스에 버전 없는 옛 number50 자산 참조가 없다', () =
         return /\.(?:html|js|mjs|cjs|css)$/.test(entry.name) ? [file] : [];
     });
     const rootFiles = fs.readdirSync(root).filter(file => /\.(?:html|js|mjs|cjs|css)$/.test(file));
-    for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')]) {
+    // system_map_generated.js는 조감도용 파일 이름 목록일 뿐 스크립트 참조가 아니다.
+    for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')].filter(name => !name.endsWith('system_map_generated.js'))) {
         assert.doesNotMatch(read(file), /math_number50(?:_stages)?\.(?:js|css)(?:#[^"'<>\s]*)?["']/,
             `${file}: 버전 없는 참조`);
     }

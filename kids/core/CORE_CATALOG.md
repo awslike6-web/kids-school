@@ -1190,18 +1190,33 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
   python scripts/sync_agent_skills.py          # 원본 → 사본 동기화
   python scripts/sync_agent_skills.py --check  # 커밋 전 일치 확인
   ```
-- 동기화를 실행할 때마다 아래 **시스템 조감도**의 기준일과 스킬 카드 요약도 함께 갱신합니다. `--check`는 조감도 스킬 요약이 원본과 다르면 실패하고, 기준일만 다르면 안내만 합니다.
+- 동기화를 실행할 때마다 아래 **시스템 조감도**의 기준일·스킬 카드 요약과 자동 데이터(`build_system_map.py`)도 함께 갱신합니다. `--check`는 조감도 스킬 요약이 원본과 다르면 실패하고, 기준일만 다르면 안내만 합니다. 파일 목록·연결선 검사는 관제탑 `verify_contracts.py`가 맡습니다.
 
-### 🌟 `minmin_system_map.html` + `scripts/data/system_map_data.js` (시스템 아키텍처 조감도, 2026-10-21)
+### 🌟 `minmin_system_map.html` + `scripts/data/system_map_*.js` (시스템 아키텍처 조감도, 2026-10-21, 자동 생성 2026-11-06)
 입력 스크립트 → 스킬·명세 → 프론트 모듈 → 파이프라인·캐시 → 노션 DB 5열 배선도, 증상별 디버깅 지시문, 노션 DB 규칙 사전을 한 화면에 보여 주는 부모·에이전트용 지도입니다. 화면은 빈 그릇이고 내용은 데이터 파일 한 벌에서 읽습니다.
-- **파일 위치**: `minmin_system_map.html` (저장소 루트, 렌더러), `scripts/data/system_map_data.js` (데이터)
+- **파일 위치**: `minmin_system_map.html` (저장소 루트, 렌더러), `scripts/data/system_map_data.js`·`system_map_nodes_life.js`·`system_map_troubles.js` (손 관리 데이터), `scripts/data/system_map_generated.js` (자동 생성), `scripts/build_system_map.py` (생성·검사 도구)
 - **데이터 구조**:
   | 전역 | 관리 방식 | 내용 |
   | :--- | :--- | :--- |
-  | `window.SYSTEM_MAP_DATA` | 손으로 관리 | `domains`(필터 탭), `nodes`(`id`·`col`·`domain[]`·`badge`·`title`·`path`·`summary`·`guardrails`(최대 3줄)·`agentPrompt`, 스킬 카드는 `skill` 이름), `edges`(`[from, to]`, 왼쪽 열 → 오른쪽 열만), `troubles` |
+  | `window.SYSTEM_MAP_DATA` | 손으로 관리 | `domains`(필터 탭), `nodes`(`id`·`col`·`domain[]`·`badge`·`title`·`path`·`summary`·`guardrails`(최대 3줄)·`agentPrompt`, 스킬 카드는 `skill` 이름), `edges`(`[from, to]`, 왼쪽 열 → 오른쪽 열만), `autoRules`(자동 생성 규칙: `pipeMarks`·`dbKeys`·`domainRules`·`edgeIgnore`) |
+  | `window.SYSTEM_MAP_LIFE` | 손으로 관리 | 갤러리·시간표·가족 놀이·가디언 카드와 연결선. 형식은 위와 같습니다. |
+  | `window.SYSTEM_MAP_TROUBLES` | 손으로 관리 | 증상별 원인·볼 파일·지시문 |
+  | `window.SYSTEM_MAP_GENERATED` | `build_system_map.py`가 파일 전체를 다시 씀 | `edges`(자동으로 찾은 연결선, 화면에 점선), `tray`(열별 미분류 서랍: `name`·`path`·`domain`·`docs`), `hidden`(비공개 저장소 파일 개수) |
   | `window.SYSTEM_MAP_AUTO` | `sync_agent_skills.py`가 `// <AUTO-SYNC:START>`~`END` 사이만 다시 씀 | `lastUpdated`·`catalogUpdatedAt`(본 카탈로그의 git 마지막 커밋 시각, 미커밋 수정이 있으면 파일 수정 시각), `skills`(SKILL.md frontmatter의 name·description을 150자 이내로 요약) |
-- **합치기 규칙**: 데이터 파일 끝의 IIFE가 `SYSTEM_MAP_AUTO`를 `SYSTEM_MAP_DATA`에 합칩니다. `skill` 이름이 같은 카드는 요약·경로를 덮어쓰고, 지도에 없는 새 스킬은 2열에 `Skill (신규)` 카드로 자동 추가합니다(연결선은 사람이 추가).
+- **합치기 규칙**: 화면이 troubles → nodes_life → generated → data 순서로 싣고, 데이터 파일 끝의 IIFE가 나머지를 `SYSTEM_MAP_DATA`에 합칩니다. `skill` 이름이 같은 카드는 요약·경로를 덮어쓰고, 지도에 없는 새 스킬은 2열에 `Skill (신규)` 카드로 자동 추가합니다(연결선은 사람이 추가).
 - **주의**: 데이터 문자열에 큰따옴표(`"`)를 넣지 않습니다(복사 버튼 `onclick` 속성이 깨짐). 카드 `path`는 master-tower 루트 기준 경로입니다. 새 과목·모듈을 추가하면 `domains`·`nodes`·`edges`를 함께 갱신합니다.
+- **`scripts/build_system_map.py`** (master-tower 안에서만 생성, 밖에서는 건너뜀):
+  ```bash
+  python -X utf8 scripts/build_system_map.py           # 자동 데이터 다시 쓰기 (같은 입력이면 같은 결과)
+  python -X utf8 scripts/build_system_map.py --check   # 어긋남 검사, 파일은 바꾸지 않음
+  python -X utf8 scripts/build_system_map.py --report  # 문서에 없는 파일 이름까지 이 PC 화면에만 출력
+  python -X utf8 scripts/build_system_map.py --json    # repo_health.py용 숫자
+  ```
+  - **서랍 규칙**: 카드에 없고 명세·카탈로그에 적힌 스크립트·명세·모듈만 서랍에 넣습니다. 문서에 없는 파일은 화면에 올리지 않습니다.
+  - **공개 규칙**: kids-school은 공개 저장소이므로 비공개 저장소(master-tower 등) 파일은 이름 없이 개수만 씁니다.
+  - **연결선 규칙**: 명세가 파일을 언급하면 스크립트 → 명세 → 모듈, 코드에 `pipeMarks` 식별자가 있으면 모듈 → 파이프라인, 스크립트에 `dbKeys` 식별자가 있으면 스크립트 → DB로 잇습니다. 같은 탭을 공유하는 카드만 잇고, 실제 관계가 아니면 `edgeIgnore`에 적습니다. 파이프라인 → DB 연결선은 손으로 관리합니다.
+  - **`--check` 판정**: 없는 파일을 가리키는 카드, 끊기거나 거꾸로 된 연결선, 스키마 지도에 없는 DB ID, 낡은 파일 목록, 공개 파일의 비공개 이름은 실패입니다. 연결선만 달라졌거나 설명 속 파일명을 못 찾거나 새 파일이 문서에 없으면 경고입니다. 카드 설명이 옳은지는 검사하지 못하므로 분기 대청소 때 사람이 봅니다.
+  - **어디서 도나**: 관제탑 `verify_contracts.py --mode git-diff`(커밋 전), `repo_health.py`(주간 점검), `sync_agent_skills.py`(생성). 공부방만 받는 GitHub Actions에서는 `tests/system-map.test.mjs`가 공부방 파일만 검사합니다.
 
 ### 🌟 `scripts/agent_navi.py` (에이전트 스마트 내비게이션 & 아키텍처 라우터)
 본 카탈로그(`CORE_CATALOG.md`)를 실시간으로 직접 파싱하여, 에이전트가 작업 목표를 입력했을 때 최적의 부품 레시피, 권장 경로, 거버넌스 가드를 0.05초 만에 안내하는 스마트 GPS 도구입니다.
@@ -1359,6 +1374,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/operator-studio-plans.test.mjs`: 덧셈·뺄셈 1~999 두 수, 곱셈 1~999 × 1~99 전 범위에서 단계별 칠판(올림·칸 위 값·부분곱·진행 중 결과 칸)을 독립 계산과 대조하고, 경계 사례와 추천 문제 이름을 검사합니다.
 - `tests/operator-studio-views.test.mjs`: 가짜 DOM에서 네 연산의 모든 탭을 끝까지 눌러 만들어진 HTML을 검사합니다(잘못된 글자, 수직선 축과 점프 수, 블록 그림 변화, 앞 수가 작은 뺄셈 안내). 블록 값 보존과 면적 칸의 합은 전 범위로, 네 연산 모든 탭의 숫자 뒤 조사는 대표 문제로 검사합니다. 레이아웃은 검사하지 않습니다.
+- `tests/system-map.test.mjs`: 시스템 조감도 데이터 파일 로드 순서, 카드 id·탭·큰따옴표 계약, 연결선 방향, 공부방 카드·서랍 경로 실존, 공개 파일의 비공개 이름 금지, 생성 파일의 시각 없음·정렬을 검사합니다.
 - `tests/coco-avatar.test.mjs`: 요정 코코 아바타 `kids/assets/images/coco_fairy.webp` 한 벌만 쓰는지 확인합니다. 사라진 외부 주소가 남지 않고, 각 페이지의 상대 경로가 실제 파일을 가리키는지 검사합니다. 그림은 민서 수학 동화 삽화(`kids-archive/assets/storybook/math/minseo/1-2/1/math_100_ill_p4.jpg`)의 코코를 원형으로 자른 192×192 이미지입니다. 그림을 바꿀 때는 이 파일만 교체합니다.
 
 - **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.

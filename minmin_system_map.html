@@ -70,6 +70,14 @@
       stroke-dasharray: 8 4;
       animation: dashFlow 0.8s linear infinite;
     }
+    .conn-line.auto-line:not(.active-line) {
+      stroke-dasharray: 3 5;
+    }
+    .tray-box summary { cursor: pointer; list-style: none; }
+    .tray-box summary::-webkit-details-marker { display: none; }
+    .tray-box summary::before { content: "▸ "; }
+    .tray-box[open] summary::before { content: "▾ "; }
+    .tray-item.tray-active { color: #fbbf24; }
     @keyframes dashFlow {
       to { stroke-dashoffset: -12; }
     }
@@ -91,7 +99,7 @@
             </span>
           </h1>
           <p class="text-xs text-slate-400">
-            카드를 클릭하면 연결된 [입력 스크립트 ➔ AI 스킬 ➔ JS/CSS 모듈 ➔ 워커/캐시 ➔ 노션 DB] 배선이 한눈에 표시됩니다.
+            카드를 클릭하면 연결된 [입력 스크립트 ➔ AI 스킬 ➔ JS/CSS 모듈 ➔ 워커/캐시 ➔ 노션 DB] 배선이 한눈에 표시됩니다. 점선은 코드·문서에서 자동으로 찾은 연결, 🆕 서랍은 아직 카드가 없는 파일입니다.
           </p>
         </div>
       </div>
@@ -308,15 +316,20 @@
   <!-- ========================================================= -->
   <!-- 데이터(외부 파일) 및 렌더링 스크립트 -->
   <!-- ========================================================= -->
-  <script src="scripts/data/system_map_data.js"></script>
+  <script src="scripts/data/system_map_troubles.js?v=20261106-auto"></script>
+  <script src="scripts/data/system_map_nodes_life.js?v=20261106-auto"></script>
+  <script src="scripts/data/system_map_generated.js?v=20261106-auto"></script>
+  <script src="scripts/data/system_map_data.js?v=20261106-auto"></script>
   <script>
-    // 데이터는 scripts/data/system_map_data.js (window.SYSTEM_MAP_DATA)에서 불러옵니다.
-    // 기준일·스킬 요약은 python scripts/sync_agent_skills.py 실행 시 자동 갱신됩니다.
+    // 손 관리 데이터(system_map_data.js·nodes_life·troubles)와 자동 생성 데이터(system_map_generated.js)를 합쳐 그립니다.
+    // 기준일·스킬 요약·자동 데이터는 python scripts/sync_agent_skills.py 실행 시 함께 갱신됩니다.
 
     // 상태 변수
     let currentDomain = "all";
     let selectedNodeId = null;
     let searchQuery = "";
+    const openTrays = new Set();
+    let trayItems = [];
 
     // 초기 렌더링
     window.addEventListener("DOMContentLoaded", () => {
@@ -381,6 +394,7 @@
       cols.forEach(c => {
         document.getElementById(`col-${c}`).innerHTML = "";
       });
+      trayItems = [];
 
       const badgeColors = {
         source: "bg-amber-500/20 text-amber-300 border-amber-500/30",
@@ -389,6 +403,8 @@
         pipe: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
         db: "bg-rose-500/20 text-rose-300 border-rose-500/30"
       };
+
+      cols.forEach(renderTray);
 
       window.SYSTEM_MAP_DATA.nodes.forEach(node => {
         // 도메인 및 검색어 필터 체크
@@ -424,6 +440,65 @@
       });
     }
 
+    // 열 맨 위의 미분류 서랍: 문서에는 있지만 아직 카드가 없는 파일
+    function renderTray(col) {
+      const data = window.SYSTEM_MAP_DATA;
+      const q = searchQuery.trim().toLowerCase();
+      const items = (data.tray[col] || []).filter(t =>
+        (currentDomain === "all" || t.domain.includes(currentDomain)) &&
+        (!q || t.path.toLowerCase().includes(q))
+      );
+      const hidden = currentDomain === "all" && !q ? (data.hidden[col] || 0) : 0;
+      if (!items.length && !hidden) return;
+
+      const box = document.createElement("details");
+      box.className = "tray-box bg-slate-950/70 border border-dashed border-slate-700 rounded-xl px-3 py-2 relative z-10";
+      box.open = openTrays.has(col) || (q && items.length > 0);
+      box.addEventListener("toggle", () => {
+        box.open ? openTrays.add(col) : openTrays.delete(col);
+        drawConnections();
+      });
+      const start = trayItems.length;
+      trayItems.push(...items);
+      box.innerHTML = `
+        <summary class="text-[11px] font-semibold text-slate-300">🆕 미분류 ${items.length}개${hidden ? ` <span class="font-normal text-slate-500">· 비공개 ${hidden}개</span>` : ""}</summary>
+        <div class="mt-2 max-h-72 overflow-y-auto space-y-0.5">
+          ${items.map((t, i) => `
+            <button onclick="selectTrayItem(${start + i}, this)" class="tray-item block w-full text-left text-[11px] font-mono text-slate-400 hover:text-sky-300 py-0.5 truncate" title="${t.path}">${t.name}</button>
+          `).join("")}
+          ${hidden ? `<p class="text-[10px] text-slate-500 pt-1">비공개 저장소 파일은 공개 페이지에 이름을 싣지 않습니다.</p>` : ""}
+        </div>
+      `;
+      document.getElementById(`col-${col}`).appendChild(box);
+    }
+
+    // 서랍 항목 클릭: 어느 문서에 적혀 있는지와 지도 등록 지시문을 보여 줍니다.
+    function selectTrayItem(index, btn) {
+      const item = trayItems[index];
+      resetSelection();
+      document.querySelectorAll(".tray-item").forEach(el => el.classList.remove("tray-active"));
+      btn.classList.add("tray-active");
+      const prompt = `${item.path}의 역할을 확인하고 kids-school-main/scripts/data/의 손 관리 파일에 조감도 카드(domain, summary, guardrails, agentPrompt, edges)를 추가한 뒤 python -X utf8 scripts/build_system_map.py를 실행해줘.`;
+      document.getElementById("inspector-content").innerHTML = `
+        <div class="space-y-4">
+          <div>
+            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded bg-slate-700/60 text-slate-200 border border-slate-600">🆕 미분류</span>
+            <h2 class="text-base font-bold text-white mt-2 break-all">${item.name}</h2>
+            <p class="text-xs font-mono text-sky-400 mt-0.5 break-all bg-slate-800/80 px-2.5 py-1.5 rounded border border-slate-700">📁 ${item.path}</p>
+          </div>
+          <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-3.5">
+            <div class="text-xs font-bold text-slate-200 mb-1">📄 적혀 있는 문서</div>
+            <p class="text-xs text-slate-300 leading-relaxed break-all">${item.docs.length ? item.docs.join(", ") : "노션 스키마 지도"}</p>
+          </div>
+          <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-3.5 text-xs text-slate-300 leading-relaxed">
+            아직 설명과 주의사항을 쓰지 않은 항목입니다. 자주 다루는 파일이면 카드로 올리세요.
+          </div>
+          <button onclick="copyPrompt(this, trayPrompt)" class="w-full py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs transition">📋 지도에 등록하는 지시문 복사하기</button>
+        </div>
+      `;
+      window.trayPrompt = prompt;
+    }
+
     // SVG 베지어 곡선 그리기
     function drawConnections() {
       const svg = document.getElementById("svg-canvas");
@@ -438,7 +513,7 @@
       // 선택된 노드가 있을 때 연결된 간선 파악
       const connectedSet = selectedNodeId ? getConnectedNodes(selectedNodeId) : null;
 
-      window.SYSTEM_MAP_DATA.edges.forEach(([fromId, toId]) => {
+      window.SYSTEM_MAP_DATA.edges.forEach(([fromId, toId], edgeIndex) => {
         const fromEl = document.getElementById(`node-${fromId}`);
         const toEl = document.getElementById(`node-${toId}`);
         if (!fromEl || !toEl) return;
@@ -458,6 +533,7 @@
         path.setAttribute("d", pathData);
 
         let cls = "conn-line";
+        if (edgeIndex >= window.SYSTEM_MAP_DATA.manualEdgeCount) cls += " auto-line";
         if (connectedSet) {
           if (connectedSet.has(fromId) && connectedSet.has(toId)) {
             cls += " active-line";
@@ -508,6 +584,7 @@
         return;
       }
       selectedNodeId = nodeId;
+      document.querySelectorAll(".tray-item").forEach(el => el.classList.remove("tray-active"));
       const connected = getConnectedNodes(nodeId);
 
       document.querySelectorAll(".node-card").forEach(card => {
@@ -528,6 +605,7 @@
 
     function resetSelection() {
       selectedNodeId = null;
+      document.querySelectorAll(".tray-item").forEach(el => el.classList.remove("tray-active"));
       document.querySelectorAll(".node-card").forEach(card => {
         card.classList.remove("selected-main", "highlighted", "dimmed");
       });

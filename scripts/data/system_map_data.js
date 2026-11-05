@@ -2,6 +2,8 @@
  * 민민 시스템 조감도 데이터 (minmin_system_map.html 전용)
  *
  * - 손으로 관리하는 구간: window.SYSTEM_MAP_DATA (도메인 · 카드 · 연결선 · 증상 카드)
+ * - 증상 카드: scripts/data/system_map_troubles.js (window.SYSTEM_MAP_TROUBLES)
+ * - 자동 생성 구간: scripts/data/system_map_generated.js (window.SYSTEM_MAP_GENERATED, build_system_map.py가 만듦)
  * - 자동 갱신 구간: AUTO-SYNC 표식 사이의 window.SYSTEM_MAP_AUTO
  *   `python scripts/sync_agent_skills.py`가 CORE_CATALOG.md 변경 시각과 스킬 frontmatter로 다시 씁니다. 직접 고치지 마세요.
  * - 카드 path는 master-tower 루트 기준 경로입니다. (공부방 파일은 kids-school-main/ 으로 시작)
@@ -19,7 +21,10 @@ window.SYSTEM_MAP_DATA = {
     { key: "haru", label: "🎒 하루" },
     { key: "guardian", label: "🛡️ 진도판 · 보상 · 가디언" },
     { key: "tower", label: "🏰 관제탑 라이프로그" },
-    { key: "daycare", label: "🧸 보육비서" }
+    { key: "daycare", label: "🧸 보육비서" },
+    { key: "gallery", label: "🎨 갤러리 · 아카이브" },
+    { key: "timetable", label: "📅 시간표 · 일기" },
+    { key: "family", label: "🎲 가족 놀이" }
   ],
   nodes: [
     // ───────── [1열: 입력 원천 & 스크립트] ─────────
@@ -146,7 +151,7 @@ window.SYSTEM_MAP_DATA = {
       title: "minseo-korean-unit", path: ".agent/skills/minseo-korean-unit/SKILL.md",
       summary: "(자동 갱신) 민서 국어 단원 추가 절차",
       guardrails: [
-        "받아쓰기 행은 절대 수정 금지, 정제 어휘에 받아쓰기 태그 혼용 금지",
+        "받아쓰기 행의 문장·뜻풀이·태그는 수정 금지 (숙련도 칸은 받아쓰기 훈련소가 진도 저장에 사용), 정제 어휘에 받아쓰기 태그 혼용 금지",
         "상세설명 예문 내 [활용형]은 표제어와 첫 글자가 같아야 Lv.2 빈칸으로 작동",
         "미니 독해 문제는 반드시 step 1(낱말) -> 2(인물 마음/말풍선) -> 3(중심생각) 3문항 구성"
       ],
@@ -170,6 +175,14 @@ window.SYSTEM_MAP_DATA = {
       guardrails: ["스킬 설명과 실제 코드가 다를 경우 항상 CORE_CATALOG.md와 실제 코드가 우선함",
         "모듈 수정 시 CORE_CATALOG.md와 해당 과목 spec 문서를 반드시 함께 최신화"],
       agentPrompt: "kids-school-main/kids/core/CORE_CATALOG.md 에서 관련 모듈의 전역 API 시그니처를 먼저 확인해줘."
+    },
+    {
+      id: "doc_quest_lesson", col: "skill", domain: ["quest", "guardian"], badge: "Spec Doc",
+      title: "quest_lesson_spec.md (3단계 레슨 명세)", path: "kids-school-main/docs/quest_lesson_spec.md",
+      summary: "3·3·3 기본 한 판인 3단계 레슨, 민서 한입 레슨, 완주 보상·학습일지 보완 규격",
+      guardrails: ["lesson=bite는 3문제, lesson=round5는 이전 판, engine=classic은 4+1",
+        "가디언은 민서 한입 레슨 보상 범위만 바꿈"],
+      agentPrompt: "kids-school-main/docs/quest_lesson_spec.md와 CORE_CATALOG.md §2-2를 읽고 레슨 구성과 보상 흐름을 점검해줘."
     },
     {
       id: "doc_korean_spec", col: "skill", domain: ["korean"], badge: "Spec Doc",
@@ -239,11 +252,25 @@ window.SYSTEM_MAP_DATA = {
     },
     {
       id: "mod_quest_runner", col: "module", domain: ["quest", "guardian"], badge: "Runner JS & UI",
-      title: "quest-runner.js & ui-renderer.js", path: "kids-school-main/kids/subjects/quest/quest-runner.js",
+      title: "quest-runner.js & quest-ui-renderer.js", path: "kids-school-main/kids/subjects/quest/quest-runner.js",
       summary: "quest_runner.html의 화면 흐름 제어, 에러리스 4대 UI(choice_audio, match_3x3, fill_blank, scramble) 렌더링",
       guardrails: ["완주 시 grantRewardAndShowUI(3, true), sendStudyLogToNotion, StudyActivity 호출 시그니처 절대 변경 금지",
         "URL에 ?engine=classic을 붙이면 기존 4+1 엔진으로 폴백 작동"],
       agentPrompt: "quest-runner.js와 quest-ui-renderer.js에서 화면 렌더링 및 완주 보상 호출 흐름을 점검해줘."
+    },
+    {
+      id: "mod_quest_lesson", col: "module", domain: ["quest", "guardian"], badge: "Lesson JS & UI",
+      title: "quest-lesson.js & quest-lesson-ui.js", path: "kids-school-main/kids/subjects/quest/quest-lesson.js",
+      summary: "3단계 레슨 단계 구성·재출제·콤보 세션과 민서 과목 선택·완주 일지 연결",
+      guardrails: ["validateLesson으로 시작 전 계약 확인", "QuestLesson은 DOM 없이 유지, 화면은 QuestLessonUI에서 처리"],
+      agentPrompt: "quest-lesson.js의 buildLesson과 quest-lesson-ui.js의 완주 흐름을 quest_lesson_spec.md 기준으로 점검해줘."
+    },
+    {
+      id: "mod_reward_grant", col: "module", domain: ["quest", "guardian", "math", "science", "society", "haru"], badge: "Reward Core",
+      title: "reward-grant.js & study-log-store.js", path: "kids-school-main/kids/core/reward-grant.js",
+      summary: "보상 지급·오프라인 재시도 대기열과 학습일지 Upsert 대기열의 단일 원천",
+      guardrails: ["보상 본체는 이 파일 한 벌, notion-reward.js는 위임 껍데기로 유지", "실패분은 대기열에 보존 후 재전송 (운영 DB 쓰기 시험은 사전 승인)"],
+      agentPrompt: "reward-grant.js의 오프라인 대기열과 study-log-store.js의 재시도 흐름을 CORE_CATALOG.md §2 기준으로 점검해줘."
     },
     {
       id: "mod_quest_classic", col: "module", domain: ["quest", "math"], badge: "Quest JS",
@@ -270,6 +297,13 @@ window.SYSTEM_MAP_DATA = {
       agentPrompt: "korean_common.js의 openMissionView 라우팅과 서브모듈 호출 관계를 CORE_CATALOG.md §2-3 기준으로 점검해줘."
     },
     {
+      id: "mod_dictation_ladder", col: "module", domain: ["korean"], badge: "Korean Engine",
+      title: "dictation_ladder.js & korean_dictation.js", path: "kids-school-main/kids/js/dictation_ladder.js",
+      summary: "받아쓰기 훈련소 3단계 사다리: 문장별 단계, 틀린 문장 반복, 채점과 노션 숙련도 동기화",
+      guardrails: ["dictation_ladder.js는 DOM 없이 유지", "노션에는 숙련도 칸만 쓰고 받아쓰기 행의 문장·뜻풀이·태그는 고치지 않음"],
+      agentPrompt: "dictation_ladder.js의 queueFor·judge와 korean_dictation.js 화면 연결을 korean_spec.md §5-3-2 기준으로 점검해줘."
+    },
+    {
       id: "mod_korean_mini", col: "module", domain: ["korean"], badge: "Korean JS",
       title: "korean_mini_reading.js", path: "kids-school-main/kids/js/korean_mini_reading.js",
       summary: "국어방 [4단계] 🌱 민서 미니 독해 서가 렌더링, 문장별 SHA-1 mp3 오디오 재생 및 3단계 퀴즈 진행",
@@ -293,6 +327,13 @@ window.SYSTEM_MAP_DATA = {
       agentPrompt: "math_quiz_engine.js와 math_voca_data.js의 정답 판정·보상 연결과 CURRICULUM_DB 동기화 상태를 점검해줘."
     },
     {
+      id: "mod_math_studio", col: "module", domain: ["math"], badge: "Math Studio",
+      title: "math_operator_studio-main.js (연산 스튜디오)", path: "kids-school-main/kids/subjects/math/js/math_operator_studio-main.js",
+      summary: "4대 연산 단계별 풀이, 블록·수직선·면적 모형을 보여 주는 인터랙티브 스튜디오",
+      guardrails: ["plans → core → blocks → numberline → main 순서로 로드", "풀이 계산(plans)은 DOM 없이 유지"],
+      agentPrompt: "math_operator_studio-plans.js의 풀이 단계와 -main.js 화면 연결을 CORE_CATALOG.md 연산 스튜디오 절 기준으로 점검해줘."
+    },
+    {
       id: "mod_english_common", col: "module", domain: ["english"], badge: "English Facade",
       title: "english_common.js & voca·phonics", path: "kids-school-main/kids/js/english_common.js",
       summary: "영어방 대문 파사드와 단어 퐁당·영단어방·문장 조각 맞추기(english_voca), 파닉스 디딤돌(english_phonics)",
@@ -304,13 +345,13 @@ window.SYSTEM_MAP_DATA = {
       id: "mod_ai_chat", col: "module", domain: ["english", "korean"], badge: "AI Chat JS",
       title: "english_chat.js & korean_sentence.js", path: "kids-school-main/kids/js/english_chat.js",
       summary: "Gemini 3.8 Flash 기반 영어 롤플레잉·국어 지문 토론, 생각 확장 코칭과 부모 검수 뱃지",
-      guardrails: ["API 키를 코드에 넣지 않고 Worker 키 디스펜서로만 수급 (공개 저장소)",
+      guardrails: ["API 키를 코드에 넣지 않고 Worker 프록시(/v1/chat/completions, /v1/gemini)로만 호출 (공개 저장소)",
         "모델은 gemini-3.8-flash → 3.6-flash 순서만 사용"],
-      agentPrompt: "english_chat.js와 korean_sentence.js의 Gemini 호출이 키 디스펜서 경로와 표준 모델을 쓰는지 점검해줘."
+      agentPrompt: "english_chat.js와 korean_sentence.js의 Gemini 호출이 Worker 프록시 경로와 표준 모델을 쓰는지 점검해줘."
     },
     {
       id: "mod_sci_report", col: "module", domain: ["science"], badge: "Science JS",
-      title: "science_report.js & lab_data.js", path: "kids-school-main/kids/js/science_report.js",
+      title: "science_report.js & science_lab_data.js", path: "kids-school-main/kids/js/science_report.js",
       summary: "N단원 플러그앤플레이 실험연계 탐구 보고서 렌더러 (개념 비교표, 실험 분석, SVG 그래프, 서술형 빌더)",
       guardrails: ["window.SCIENCE_LAB_REPORT_{N}_DATA 스키마 준수 (q1, q5 서술형 빌더, q3 실험 순서 섞기 필수)",
         "단원 수정 시 science.html 하단 스크립트 ?v=YYYYMMDD_u{N} 캐시 버전 갱신 필수"],
@@ -318,7 +359,7 @@ window.SYSTEM_MAP_DATA = {
     },
     {
       id: "mod_sci_engine", col: "module", domain: ["science", "guardian"], badge: "Lab Engine & CSS",
-      title: "science_u3_engine.js & common.css", path: "kids-school-main/kids/js/science_u3_engine.js",
+      title: "science_u3_engine.js & science_lab_common.css", path: "kids-school-main/kids/js/science_u3_engine.js",
       summary: "5대 가상 실험실 공통 엔진 (숨김 탭 Retina DPI 보정, rAF 절전 루프, 1회성 보석 잠금) 및 공통 스타일",
       guardrails: ["setupHiDPICanvas로 display:none 상태 폭 0px 붕괴 방지",
         "createLoop(drawFn)로 백그라운드 탭 CPU 점유율 0% 유지"],
@@ -358,7 +399,7 @@ window.SYSTEM_MAP_DATA = {
     },
     {
       id: "mod_storybook", col: "module", domain: ["korean", "math", "english", "science", "society"], badge: "Viewer Core",
-      title: "storybook_engine.js & viewer.css", path: "kids-school-main/kids/js/storybook_engine.js",
+      title: "storybook_engine.js & storybook_viewer.css", path: "kids-school-main/kids/js/storybook_engine.js",
       summary: "전 과목 단원 동화 도서관 공통 뷰어: 양면 펼침면 넘김, 페이지별 TTS, 75줄 래퍼 HTML이 로드",
       guardrails: ["새 책은 600줄 통짜 HTML 대신 build_storybook.py가 만든 75줄 래퍼만 추가",
         "PC는 반드시 양면 양장본 이미지로 노출 (단일 삽화 단독 노출 금지)"],
@@ -366,11 +407,11 @@ window.SYSTEM_MAP_DATA = {
     },
     {
       id: "mod_lifelog", col: "module", domain: ["tower"], badge: "Tower JS",
-      title: "lifelog.js & lifelog_quick_modal.js", path: "js/lifelog.js",
+      title: "lifelog.js (대시보드 & 퀵 기록 모달)", path: "js/lifelog.js",
       summary: "관제탑 Bio·Lifelog 대시보드(생체 브리핑·복약 칩·12주 잔디)와 원클릭 라이프로그 입력 모달",
       guardrails: ["복약 칩은 당일 일상 기록 DB에 즉시 PATCH하므로 날짜는 로컬 기준 계산",
         "야간 모드는 정오, 주간 모드는 자정 리셋 규칙 유지"],
-      agentPrompt: "js/lifelog.js의 노션 조회와 lifelog_quick_modal.js 전송 흐름을 docs/lifelog_spec.md 기준으로 점검해줘."
+      agentPrompt: "js/lifelog.js의 노션 조회와 openQuickRecordModal 전송 흐름을 docs/lifelog_spec.md 기준으로 점검해줘."
     },
     {
       id: "mod_daycare_front", col: "module", domain: ["daycare"], badge: "Daycare Facade",
@@ -387,9 +428,9 @@ window.SYSTEM_MAP_DATA = {
       title: "Notion Worker & 10분 로컬 보호 큐", path: "minmin-notion.awslike6.workers.dev + localStorage",
       summary: "노션 API 프록시(5분 엣지 캐시) 및 5문제 완주 시 최대 10건 비동기 PATCH + 실패분 재전송 대기열",
       guardrails: [
-        "Pragma: no-cache 헤더나 ?force=true 사용 금지 (CORS 및 노션 400 에러 유발)",
+        "엣지 캐시 우회는 ?force=true만 사용 (Worker가 지우고 넘김). Pragma 헤더는 CORS에서 막힘",
         "silverDate와 lastReviewed는 UTC(toISOString)가 아닌 로컬 YYYY-MM-DD 기준 사용",
-        "Worker는 GitHub 자동 배포가 아님: 대시보드에 붙여 넣고 /health version 확인"
+        "Worker는 GitHub 자동 배포가 아님: 관제탑 루트에서 npx wrangler deploy -c workers/minmin-notion/wrangler.toml 후 /health version 확인"
       ],
       agentPrompt: "노션 Worker 동기화 Pull/Push 병합 로직과 localStorage 10분 보호 규칙을 점검해줘."
     },
@@ -542,6 +583,12 @@ window.SYSTEM_MAP_DATA = {
     ["pipe_worker_cache", "db_voca"], ["pipe_worker_cache", "db_library"],
     ["pipe_guardian_reward", "db_studylog"], ["pipe_guardian_reward", "db_inventory"],
 
+    // 3단계 레슨 · 보상 · 받아쓰기 · 연산 스튜디오
+    ["doc_quest_lesson", "mod_quest_lesson"], ["doc_quest_lesson", "mod_reward_grant"], ["skill_quest", "mod_quest_lesson"],
+    ["mod_quest_lesson", "pipe_guardian_reward"], ["mod_reward_grant", "pipe_guardian_reward"], ["mod_reward_grant", "pipe_worker_cache"],
+    ["doc_korean_spec", "mod_dictation_ladder"], ["mod_dictation_ladder", "pipe_worker_cache"],
+    ["doc_math_spec", "mod_math_studio"], ["mod_math_studio", "pipe_fairy_tts"],
+
     // 수학
     ["src_math_migrate", "doc_math_spec"], ["doc_math_spec", "mod_math_quiz"], ["doc_math_spec", "mod_quest_classic"],
     ["mod_math_quiz", "pipe_guardian_reward"], ["mod_math_quiz", "pipe_fairy_tts"], ["mod_quest_classic", "pipe_worker_cache"],
@@ -585,98 +632,52 @@ window.SYSTEM_MAP_DATA = {
     ["mod_daycare_front", "pipe_daycare_worker"], ["pipe_daycare_worker", "db_daycare"], ["src_daycare_tools", "db_daycare"]
   ],
 
-  // 피드백 & 버그 라우터 시나리오
-  troubles: [
-    {
-      symptom: "💬 \"어제 분명히 다 풀었는데 오늘 보니까 진도나 은메달/금메달이 안 올라가 있어!\"",
-      domain: "🎯 5분 퀘스트 / 노션 동기화",
-      causes: [
-        "부모님(아빠/엄마) 프로필로 로그인된 상태에서 풀었을 경우 노션 PATCH를 건너뜀",
-        "당일 이미 은메달(count 6)을 딴 단어는 그날 더 풀어도 당일 상한 규칙에 의해 오르지 않음",
-        "힌트를 보고 맞힌 문제는 첫 시도 정답이 아니므로 count가 +1 되지 않음"
-      ],
-      targetFiles: ["quest-mastery.js", "quest-runner.js", "localStorage.currentUserName"],
-      prompt: "quest-engine-spec 스킬을 참고해서 5분 퀘스트 숙련도 동기화를 점검해줘. localStorage 대기열에 실패한 PATCH가 남아있는지, silverDate 로컬 날짜 계산이나 currentUserName 관리자 예외 처리 때문인지 확인해줘."
+  // build_system_map.py가 읽는 규칙. 파일 내용이 아니라 코드 식별자·경로만 봅니다.
+  autoRules: {
+    // 모듈 코드에 이 식별자가 있으면 파이프라인 카드와 잇습니다.
+    pipeMarks: {
+      pipe_worker_cache: ["minmin-notion\\.awslike6", "fetch(Voca|Curriculum|LibraryBooks|ReadingPassages)[A-Za-z]*(FromNotion|Fresh)", "updateVocaMastery", "patchVocaPage"],
+      pipe_audio_cdn: ["mini_reading/"],
+      pipe_fairy_tts: ["speakFairyTTS", "speakEnglish", "fairyPraise", "fairyEncourage", "fairyReward"],
+      pipe_reading_cache: ["reading_passages_cache"],
+      pipe_gemini: ["v1/gemini", "v1/chat/completions", "fetchWithGeminiRetry"],
+      pipe_guardian_reward: ["grantRewardAndShowUI", "sendStudyLogToNotion", "StudyActivity\\."],
+      pipe_kids_archive: ["kids-archive"],
+      pipe_family_worker: ["family-room\\.awslike6"]
     },
-    {
-      symptom: "💬 \"민서 5분 퀘스트(국어)를 켰는데 단어가 아니라 갑자기 긴 받아쓰기 통문장이 튀어나와!\"",
-      domain: "🌱 민서 국어 / VOCA_DB 태그 오염",
-      causes: ["노션 VOCA_DB의 학교 받아쓰기 문장 행에 실수로 '국어' 과목 태그가 함께 들어간 경우",
-        "반대로 정제 어휘에 '받아쓰기' 태그를 넣으면 받아쓰기 훈련소에 낱말이 섞여 나옴"],
-      targetFiles: ["VOCA_DB (과목 속성)", "register_minseo_korean.py"],
-      prompt: "minseo-korean-unit 스킬의 §1 데이터 구조 규칙을 확인해줘. 노션 VOCA_DB에서 받아쓰기 회차 문장에 '국어' 태그가 섞여 있거나 정제 어휘에 '받아쓰기' 태그가 잘못 들어간 행이 있는지 조회해서 찾아줘."
+    // 스크립트에 이 식별자가 있으면 노션 DB 카드와 잇습니다.
+    dbKeys: {
+      db_voca: ["375a27115b688038b686d3994ee12919", "VOCA_DB"],
+      db_library: ["37ca27115b688023a7d2cc5b3ff51fee", "LIBRARY_DB"],
+      db_curriculum: ["3e8a27115b68806d94bfc81e9b3435fa", "CURRICULUM_DB"],
+      db_studylog: ["37aa27115b688001b2ffe5e6c8f82ab2", "STUDY_LOG_DB"],
+      db_inventory: ["374a27115b688042bb61e6a102242e12", "INVENTORY_DB"],
+      db_daily_hub: ["392a27115b6880dba5eede7ff33a22b9", "DAILY_LIFELOG_DB"],
+      db_diary: ["3dfa27115b688010a85be385f91d64ee", "DIARY_DB"],
+      db_timetable: ["32ba27115b68828bbda201a1bdce12fc", "TIMETABLE_DB"]
     },
-    {
-      symptom: "💬 \"민서 미니 독해에서 문장을 눌렀는데 소리가 안 나거나 옛날 문장으로 읽어줘!\"",
-      domain: "🌱 민서 미니 독해 / Edge-TTS 오디오",
-      causes: ["노션 LIBRARY_DB에서 지문 텍스트를 수정한 뒤 build_mini_reading_audio.py를 다시 돌리지 않아 SHA-1 해시 mp3가 없는 상태",
-        "korean_mini_reading.js의 문장 분리 규칙과 파이썬 오디오 생성 스크립트의 텍스트 처리가 어긋난 경우"],
-      targetFiles: ["build_mini_reading_audio.py", "korean_mini_reading.js"],
-      prompt: "minseo-korean-unit 스킬 절차에 따라 python -X utf8 scripts/build_mini_reading_audio.py --dry-run 을 실행해서 노션 LIBRARY_DB 지문과 매칭되지 않는 누락된 SHA-1 mp3가 있는지 확인하고 생성해줘."
-    },
-    {
-      symptom: "💬 \"과학 가상 실험실 탭을 열었는데 화면(캔버스)이 까맣거나 찌그러져서 안 보여!\"",
-      domain: "🔬 과학 가상 실험실 / 캔버스 DPI",
-      causes: ["숨김 탭(display:none) 상태에서 캔버스 크기를 초기화해 폭이 0px로 붕괴된 현상",
-        "science.html 하단 스크립트 ?v= 캐시 버전이 옛날 버전이라 구버전 JS가 로드됨"],
-      targetFiles: ["science_u3_engine.js", "science.html"],
-      prompt: "science-unit-builder 스킬의 5대 기술 가드레일을 확인해줘. 해당 실험실 캔버스가 ScienceU3Engine.setupHiDPICanvas(canvas)를 사용해 숨김 탭 폴백 측정을 하고 있는지, science.html의 ?v= 쿼리가 최신인지 점검해줘."
-    },
-    {
-      symptom: "💬 \"부모 진도판에 새로 넣은 민서 단원 칩이 민수 화면에 뜨거나 아예 안 보여!\"",
-      domain: "🛡️ 부모 진도판 / 단원 칩 필터",
-      causes: ["노션 VOCA_DB에 단원을 등록할 때 '학생'(민수/민서) 속성을 비워두면 양쪽 진도판에 모두 노출됨",
-        "Worker 5분 캐시 때문에 방금 노션에 등록한 단원이 아직 브라우저에 내려오지 않음 (공부방 ⚙️ 설정 -> 노션 동기화 필요)"],
-      targetFiles: ["parent_unit_chips.js", "VOCA_DB (학생·학년 속성)"],
-      prompt: "quest-engine-spec 스킬의 함정 목록을 참고해 parent_unit_chips.js와 노션 VOCA_DB의 해당 단원 레코드에 '학생'과 '학년' 속성이 정확히 들어가 있는지 확인해줘."
-    },
-    {
-      symptom: "💬 \"가디언 앱/제어기에서 아이가 문제를 풀었는데도 정답 카운트가 0으로 나와!\"",
-      domain: "🛡️ 가디언 계측 / StudyActivity",
-      causes: ["자동화 테스트나 스크립트로 .click()을 호출한 경우 event.isTrusted가 false라 계측에서 제외됨 (실제 손가락/마우스 클릭만 인정)",
-        "커스텀 퀴즈 UI를 만들면서 StudyActivity.recordCorrect 호출을 누락한 경우"],
-      targetFiles: ["quest-runner.js", "StudyActivity"],
-      prompt: "quest-engine-spec의 보존 호출 규칙을 확인해 해당 퀴즈 완료 시 StudyActivity.setPhase 및 recordCorrect가 정상 호출되고 있는지 점검해줘."
-    },
-    {
-      symptom: "💬 \"민수 독해방에 새로 넣은 지문이 안 보이거나 예전 지문만 나와!\"",
-      domain: "📖 핀포인트 독해 / LIBRARY_DB",
-      causes: ["등록 당시 노션 장애로 reading_passages_cache.json 대기 큐에만 남아 있는 경우",
-        "학년(5-1, 5-2) 또는 트랙 속성이 비어 학년 바 필터에서 빠진 경우"],
-      targetFiles: ["register_reading_passage.py", "reading_engine.js", "LIBRARY_DB (학년·트랙)"],
-      prompt: "scripts/register_reading_passage.py --sync-pending으로 대기 중인 지문을 반영하고, LIBRARY_DB의 해당 지문 학년·트랙 속성이 reading_engine.js 필터와 맞는지 확인해줘."
-    },
-    {
-      symptom: "💬 \"영어방 코코랑 대화(AI 회화)를 눌렀는데 대답이 안 와!\"",
-      domain: "🔤 영어 AI 회화 / Gemini 키",
-      causes: ["Worker 프록시(/v1/chat/completions, /v1/gemini) 응답 실패 또는 Secret 만료",
-        "표준이 아닌 구형 모델명으로 호출해 거부된 경우"],
-      targetFiles: ["english_chat.js", "korean_sentence.js", "workers/minmin-notion/worker.js"],
-      prompt: "english_chat.js의 Gemini 호출 경로와 모델명(gemini-3.8-flash)을 확인하고 Worker 프록시 응답 상태를 점검해줘. 키 값은 출력하지 말고 하드코딩도 하지 마."
-    },
-    {
-      symptom: "💬 \"관제탑에서 아침 약 칩을 눌렀는데 노션 일상 기록에 안 남아!\"",
-      domain: "🏰 관제탑 라이프로그 / 일상 DB",
-      causes: ["당일 일상 기록 DB 페이지가 아직 없거나 날짜 계산이 UTC로 어긋난 경우",
-        "웹 수정 후 커밋·푸시를 안 해 Cloudflare 배포본이 옛날 코드인 경우"],
-      targetFiles: ["js/lifelog.js", "AI 대화록 및 일상 기록 DB"],
-      prompt: "docs/lifelog_spec.md를 읽고 js/lifelog.js 복약 칩의 날짜 계산과 일상 기록 DB PATCH 경로를 점검해줘. 배포본이 최신 커밋인지도 확인해줘."
-    },
-    {
-      symptom: "💬 \"보육비서에서 메모를 적었는데 다른 기기에서 열면 예전 내용이야!\"",
-      domain: "🧸 보육비서 / 원시 메모 동기화",
-      causes: ["두 기기에서 동시에 고쳐 오래된 버전이 409로 거부된 뒤 선택을 안 한 경우",
-        "오프라인 상태라 암호화 대기본에만 남아 노션 전송이 미뤄진 경우"],
-      targetFiles: ["memo-sync.js", "daycare-helper/worker.js", "DAYCARE_LOG_DB"],
-      prompt: "daycare-helper/docs/CORE_CATALOG.md의 DaycareMemo와 /api/memo 절을 읽고 메모 버전 충돌(409)과 대기본 전송 흐름을 점검해줘. 운영 자료로 쓰기 시험은 하지 마."
-    }
-  ]
+    // 경로에 이 패턴이 있으면 미분류 서랍의 탭을 정합니다. 여러 개가 맞으면 모두 적용합니다.
+    domainRules: [
+      ["^daycare-helper/", "daycare"], ["family|yacht|omok|yut", "family"],
+      ["gallery|archive|spot_diff|spot-diff|runner_|quick-upload|activity_photo", "gallery"],
+      ["timetable|diary|notice", "timetable"], ["quest|monster|parent_|mastery", "quest"],
+      ["korean|reading|dictation|center", "korean"],
+      ["math|arithmetic|vertical|fractions|gugudan|clock_|shapes_|ranges_|angles_|length_", "math"],
+      ["english|phonics|four_line", "english"], ["science", "science"], ["society", "society"], ["haru", "haru"],
+      ["screentime|study-activity|reward|study-log|study_log|guardian", "guardian"], ["lifelog|workout", "tower"]
+    ],
+    // 자동으로 찾았지만 실제 관계가 아니라고 확인한 연결선 ["from", "to"]
+    edgeIgnore: [
+      ["mod_ai_chat", "pipe_worker_cache"], // 같은 Worker 주소지만 AI 프록시 호출이며 pipe_gemini 카드에 이미 연결됨
+      ["src_dev_log", "skill_quest"] // 스킬이 작업 절차로 언급할 뿐 파이프라인 관계가 아님
+    ]
+  }
 };
 
 // <AUTO-SYNC:START> scripts/sync_agent_skills.py가 자동으로 다시 씁니다. 직접 고치지 마세요.
 window.SYSTEM_MAP_AUTO = {
-  "lastUpdated": "2026-11-04",
-  "catalogUpdatedAt": "2026-11-04 19:03",
+  "lastUpdated": "2026-11-06",
+  "catalogUpdatedAt": "2026-11-06 03:39",
   "skills": [
     {
       "name": "minseo-korean-unit",
@@ -697,10 +698,19 @@ window.SYSTEM_MAP_AUTO = {
 };
 // <AUTO-SYNC:END>
 
-// 자동 갱신 값을 화면 데이터에 합칩니다: 기준일, 스킬 카드 요약, 지도에 없는 새 스킬 카드.
+// 나뉜 데이터와 자동 갱신 값을 화면 데이터에 합칩니다: 증상 카드, 생활 영역 카드, 자동 연결선·미분류 서랍, 기준일, 스킬 카드 요약, 지도에 없는 새 스킬 카드.
 (() => {
   const data = window.SYSTEM_MAP_DATA;
   const auto = window.SYSTEM_MAP_AUTO || {};
+  const life = window.SYSTEM_MAP_LIFE || { nodes: [], edges: [] };
+  const generated = window.SYSTEM_MAP_GENERATED || { edges: [], tray: {}, hidden: {} };
+  data.troubles = window.SYSTEM_MAP_TROUBLES || [];
+  data.nodes.push(...life.nodes);
+  data.edges.push(...life.edges);
+  data.manualEdgeCount = data.edges.length;
+  data.edges.push(...generated.edges);
+  data.tray = generated.tray;
+  data.hidden = generated.hidden;
   if (auto.lastUpdated) data.lastUpdated = auto.lastUpdated;
   data.catalogUpdatedAt = auto.catalogUpdatedAt || "";
   const allDomains = data.domains.map(d => d.key);

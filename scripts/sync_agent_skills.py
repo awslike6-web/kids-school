@@ -14,6 +14,7 @@
   - lastUpdated / catalogUpdatedAt: kids/core/CORE_CATALOG.md 의 git 마지막 커밋 시각 (커밋 안 된 수정이 있으면 파일 수정 시각)
   - skills: .agent/skills/*/SKILL.md frontmatter(name, description)에서 만든 스킬 카드 요약
   master-tower 루트의 sync_agent_skills.py가 이 스크립트를 먼저 실행하므로 루트에서 돌려도 함께 갱신된다.
+  동기화 실행 시 scripts/build_system_map.py도 함께 돌려 파일 목록·자동 연결선을 다시 쓴다 (검사는 master-tower의 verify_contracts.py가 맡는다).
 """
 import argparse
 import json
@@ -224,7 +225,9 @@ def main():
     if args.check:
         sys.exit(check() | check_system_map())
     code = sync()
-    sys.exit(code | update_system_map())
+    code |= update_system_map()
+    import build_system_map
+    sys.exit(code | build_system_map.write_output())
 
 
 if __name__ == '__main__':

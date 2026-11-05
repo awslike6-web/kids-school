@@ -72,7 +72,8 @@ test('다른 운영 소스에 옛 버전·누락된 버전의 용어사전 JS �
         return entry.isDirectory() ? walk(file) : /\.(?:html|js|mjs|cjs|css)$/.test(entry.name) ? [file] : [];
     });
     const rootFiles = fs.readdirSync(root).filter(file => /\.(?:html|js|mjs|cjs|css)$/.test(file));
-    for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')]) {
+    // system_map_generated.js는 조감도용 파일 이름 목록일 뿐 스크립트 참조가 아니다.
+    for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')].filter(name => !name.endsWith('system_map_generated.js'))) {
         for (const match of read(file).matchAll(/voca_(?:common|modal)\.js([^"'<>\s]*)["']/g)) {
             assert.equal(match[1], version, `${file}: 옛 버전 또는 버전 누락`);
         }
