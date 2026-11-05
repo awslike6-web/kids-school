@@ -297,5 +297,16 @@
       "name": "달리는 민서",
       "sprite": "20261029_3d_characters_sprite.png"
     }
+  },
+  "art_minseo_20261028_cat_dog_crossbag": {
+    "title": "알록달록 냥이와 댕댕이 크로스백 (앞면 & 별빛 뒷면) 🐱🐶👜",
+    "category": "만들기/공예",
+    "categoryIcon": "✂️",
+    "date": "2026-10-28",
+    "artistNote": "학교에서 캔버스 크로스백에 귀여운 고양이와 강아지 얼굴을 그리고 알록달록 색칠했어요! 뒷면에는 반짝반짝 별들을 가득 찍어 나만의 특별하고 예쁜 가방을 완성했답니다! ✨",
+    "grade": "1학년",
+    "subImages": [
+      "20261028_cat_dog_crossbag_back.jpg"
+    ]
   }
 }
