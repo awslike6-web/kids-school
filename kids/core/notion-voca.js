@@ -283,8 +283,9 @@ async function fetchVocaFromNotion(options = {}) {
 
         const parsedRecords = allResults.map(parseVocaPage);
 
-        // ⚡ 당일 캐시 저장
-        _saveVocaToCache(cacheTarget, dbId, parsedRecords);
+        // ⚡ 당일 캐시 저장 — 서버 필터(과목+영역만 받은 결과)는 아이 전체 캐시 자리에 넣지 않는다.
+        // 넣으면 같은 날 다른 과목방(영어 등)이 그 일부만 보고 0개가 된다 (2026-11-06 발견).
+        if (!queryOptions.useServerFilter) _saveVocaToCache(cacheTarget, dbId, parsedRecords);
 
         return parsedRecords.filter(record => _matchesVocaRecord(record, queryOptions));
     } catch (error) {

@@ -241,6 +241,21 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/common_space/voca.html`에서 클래식 스크립트 `./voca_common.js` → `./voca_modal.js`를 같은 `?v=20261101-voca-split`로 연속 로드합니다. 두 파일의 최상위 상태와 HTML 이벤트 전역 함수를 유지합니다.
 - 원문 보존·600줄 상한·HTML 배선·첫 파일 단독 실행·전역 함수/상태/이벤트/타이머 비교는 `tests/voca-common-split.test.mjs`, 분리 계약은 `docs/voca_common_split_spec.md`입니다.
 
+### 🌟 `unit_chip_bar.js` (과목방 공통 학기·단원 칩 바, 2026-11-06~)
+과목방 대기실에서 학기·단원을 먼저 고르면 각 활동이 단원 선택 화면 없이 그 단원으로 바로 시작하게 하는 공통 부품입니다. 새 과목방에 단원 칩이 필요하면 이 부품에 설정만 넘기고, 칩 바를 새로 짜지 않습니다.
+- **파일 위치**: `kids/core/unit_chip_bar.js` (`window.UnitChipBar`) · 스타일 `kids/css/unit_chip_bar.css` (`.unit-chip-bar`, `.unit-chip`)
+- **쓰는 곳**: 영어방 `kids/js/english_unit_bar.js`, 사회방 `kids/js/society_unit_bar.js`
+- **계약**: 학기·단원은 과목방이 넘긴 노션 기록의 원문(정렬만 숫자 순). 표시 이름만 `gradeLabel`·`unitLabel`로 바꾼다. 고른 값은 이 기기에만 아이별로 기억(`{storagePrefix}_{son|daughter}`). 노션에서 사라진 값을 기억하고 있으면 전체 보기로 돌아간다.
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `UnitChipBar.create({globalName, boxId, storagePrefix, loadRecords, gradesOf, unitOf, gradeLabel?, unitLabel?, extraHtml?, onChange?, hints?})` | 칩 바 한 벌 만들기. `globalName`은 onclick에서 부를 전역 이름 |
+  | `bar.init()` / `bar.render()` | 기록 불러오기 후 그리기 / 다시 그리기 |
+  | `bar.applyToMission(records, {gradeUnit, grade})` | 활동을 열 때 호출. 고른 단원 자료가 있으면 `gradeUnit(g,u)`, 학기 자료만 있으면 `grade(g)`를 부르고 true. 전체 보기거나 자료가 없으면 false |
+  | `bar.countFor(records)` | 고른 학기·단원에 맞는 기록 수 (사다리 카드 배지용) |
+  | `bar.getPick()` | 현재 `{grade, unit}` |
+- **검증**: `tests/english-unit-bar.test.mjs`, `tests/society-unit-bar.test.mjs`
+
 ### 🌟 `subject_engine.js` (4대 교과 공통 미션 엔진)
 국어, 과학, 사회, 영어 4대 교과의 3단계 학습 사다리 미션 뷰와 노션 데이터 수급 스피너를 표준화한 코어입니다.
 - **파일 위치**: `kids/core/subject_engine.js`
@@ -629,7 +644,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🌟 `english_unit_bar.js` (대기실 단원 칩 바 & 「이번 단원 특별 활동」 칸, 2026-11-06~)
 영어방은 6단계 사다리(활동 순서)가 뼈대이고, 이 바에서 학기·단원을 먼저 고르면 2~4단계가 단원 선택 화면 없이 그 단원으로 바로 시작합니다. 과학방처럼 단원별 구역으로 나누지 않는 이유: 영어 단원은 활동 종류가 같고 내용(클래스 카드 단어·문장)만 바뀌기 때문입니다.
-- **파일 위치**: `kids/js/english_unit_bar.js` · 등록표 `kids/subjects/english/data/english_unit_activities.js` (`window.ENGLISH_UNIT_ACTIVITIES`)
+- **파일 위치**: `kids/js/english_unit_bar.js` (칩 바 자체는 공통 `kids/core/unit_chip_bar.js`) · 등록표 `kids/subjects/english/data/english_unit_activities.js` (`window.ENGLISH_UNIT_ACTIVITIES`)
 - **데이터**: 학기·단원 칩은 `fetchVocaFromNotion({subject:'영어'})`의 `grades`·`level` 원문으로 만든다(표시만 `L8`→`8단원`). 고른 값은 이 기기에만 아이별로 기억한다(`english_unit_pick_{son|daughter}`).
 - **특별 활동 등록**: 그 단원에만 맞는 활동이 있을 때만 등록표에 `{grade, unit, icon, title, desc, href}` 한 줄을 넣는다. 화면이 `href?grade=&unit=`으로 붙여 연다. 등록 기준은 ① 그 단원 클래스 카드 핵심 문장을 그대로 연습 ② 데이터만 바꿔 두 단원 이상에 쓰는 엔진.
 - **핵심 API**:
@@ -770,6 +785,15 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `fetchAndBuildDynamicUI(type)` | 노션 마스터 DB 실시간 쿼리 및 1·2단계 동적 학년/단원 렌더링 |
   | `renderSectionUI(type)` | 10문제 완주 체크 및 5대 전문 서브모듈 렌더러로 디스패치 |
   | `printSocietySummary()` | 당일 단원 핵심 용어 요약집 인쇄 모달 가동 |
+  | `selectSocietyGradeUnit(grade, unit)` | 대기실 단원 칩이 학기·단원을 한 번에 넘길 때 쓰는 진입점 (2026-11-06~) |
+
+### 🌟 `society_unit_bar.js` (대기실 학기·단원 칩 & 3단계 사다리 카드, 2026-11-06~)
+사회방 대기실은 GEMINI.md §1의 3단계 사다리로 나뉜다: **1단계 워밍업**(동화 도서관) → **2단계 빌드업**(용어방·역사 & 문화재 돋보기·지도 탐방실) → **3단계 딥다이브**(차트 & 도표 분석실·5분 퀘스트). 위의 학기·단원 칩(공통 `unit_chip_bar.js`)으로 단원을 고르면 카드마다 그 단원 자료 수가 뜨고, 자료가 없는 카드는 흐려진다. 활동을 열면 선택 화면 없이 그 단원으로 시작한다.
+- **파일 위치**: `kids/js/society_unit_bar.js` (`window.SocietyUnitBar`)
+- **데이터**: VOCA_DB 용어방 + 교재·사료 DB(자료분석·지도탐방·역사사료)의 「학년」(정규화 `normalizeSocietyGrade`)·「단원」 원문. 두 DB의 단원 이름은 같아야 한다(2026-11-06 노션 정리: 「1단원 (옛사람들의 삶과 문화)」→「1. 옛사람들의 삶과 문화」, 「3단원 1장/2장」→「3-1./3-2. …」).
+- **동화 연결**: `society_storybook.js`의 각 책 `units` 배열이 노션 단원 원문과 같아야 단원 칩에 걸린다. 단원을 고른 채 도서관을 열면 그 단원 동화만 보이고 「전체 서가 보기」 단추가 생긴다.
+- **5분 퀘스트 카드**: 루트 `quest_runner.html?subject=society&user=…&unit=<단원 원문>`. 단원을 안 골랐으면 부모 설정 단원으로 출발.
+- **검증**: `tests/society-unit-bar.test.mjs`
 
 ### 🌟 `society_storybook.js` ([1단계] 사회 단원 동화 도서관 전담 엔진)
 기후 대모험(5-1), 역사 시간 여행 1~6편(5-2 선사·고조선, 삼국·남북국, 고려, 조선 외침 극복, 유교 사회, 조선 후기) 등 총 7권의 고화질 사료 동화 서가 렌더링 및 뷰어 연동을 전담하는 독립 모듈입니다.
@@ -777,7 +801,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `SocietyStorybook.render(container)` | 사회 단원 동화 서가 모달 UI 렌더링 (총 7권) |
+  | `SocietyStorybook.render(container, {pick}?)` | 사회 단원 동화 서가 모달 UI 렌더링 (총 7권). `pick`을 넘기면 그 학기·단원 동화만 |
   | `SocietyStorybook.getList()` | 등록된 사회 동화 7권 메타데이터 조회 |
 
 ### 🌟 `society_voca.js` ([2단계] 사회 용어방 전담 엔진)

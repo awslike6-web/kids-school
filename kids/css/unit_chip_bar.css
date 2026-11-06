@@ -1,0 +1,67 @@
+/* ========================================================
+   📚 과목방 공통 학기·단원 칩 바 (kids/core/unit_chip_bar.js)
+   - 밝은 테마가 기본. 어두운 테마(마인크래프트·아케이드)는 아래에서 덮는다.
+   ======================================================== */
+.unit-chip-bar {
+  margin: -6px 0 22px;
+}
+.unit-chip-bar:empty {
+  display: none;
+}
+.unit-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.unit-chip-label {
+  flex: 0 0 auto;
+  font-family: 'Jua', sans-serif;
+  font-size: 1rem;
+  opacity: 0.85;
+}
+.unit-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.unit-chip {
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-family: 'Jua', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  cursor: pointer;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  transition: transform 0.15s, border-color 0.15s, color 0.15s;
+}
+.unit-chip:hover {
+  border-color: #f43f5e;
+  color: #f43f5e;
+  transform: translateY(-2px);
+}
+.unit-chip.active {
+  border-color: #f43f5e;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+}
+.unit-chip-hint {
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+  opacity: 0.85;
+}
+@media (max-width: 480px) {
+  .unit-chip-row {
+    align-items: flex-start;
+  }
+  .unit-chip-label {
+    padding-top: 9px;
+  }
+  .unit-chip {
+    padding: 7px 12px;
+    font-size: 0.9rem;
+  }
+}

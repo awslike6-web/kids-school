@@ -11,6 +11,7 @@
             id: "5_1_2",
             grade: "5학년 1학기",
             unit: "2단원 : 우리 국토의 기후",
+            units: ["2-1. 우리나라의 기후"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-1 기후",
             title: "민수와 친구들의 지구 지키기 : 기후 수업 대모험",
             subtitle: "날씨와 기후의 차이, 기온·강수량·바람과 지구온난화",
@@ -26,6 +27,7 @@
             id: "5_2_1",
             grade: "5학년 2학기",
             unit: "1단원 : 옛사람들의 삶과 문화",
+            units: ["1. 옛사람들의 삶과 문화"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-2 역사",
             title: "민수와 친구들의 사회교과서 시간 여행",
             subtitle: "구석기 주먹도끼부터 고조선 8조법까지 교과서 완전 정복",
@@ -41,6 +43,7 @@
             id: "5_2_2",
             grade: "5학년 2학기",
             unit: "1단원 : 옛사람들의 삶과 문화",
+            units: ["1. 옛사람들의 삶과 문화"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-2 삼국·남북국",
             title: "민수와 친구들의 사회교과서 시간 여행 2편",
             subtitle: "삼국의 영웅들과 찬란한 황금빛 나라 (삼국·가야·통일신라·발해)",
@@ -56,6 +59,7 @@
             id: "5_2_3",
             grade: "5학년 2학기",
             unit: "1단원 : 옛사람들의 삶과 문화",
+            units: ["1. 옛사람들의 삶과 문화"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-2 고려",
             title: "민수와 친구들의 사회교과서 시간 여행 3편",
             subtitle: "푸른 비취빛 고려와 바다 너머 코리아",
@@ -71,6 +75,7 @@
             id: "5_2_4",
             grade: "5학년 2학기",
             unit: "2단원 : 사회의 새로운 변화와 오늘날의 우리",
+            units: ["2-1. 유교 문화의 영향으로 달라진 조선 사회"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-2 조선",
             title: "민수와 친구들: 조선을 지킨 용기의 불꽃",
             subtitle: "임진왜란과 병자호란, 외침에 맞서 나라를 지킨 조선의 영웅과 백성들",
@@ -86,6 +91,7 @@
             id: "5_2_5",
             grade: "5학년 2학기",
             unit: "2단원 : 사회의 새로운 변화와 오늘날의 우리",
+            units: ["2-1. 유교 문화의 영향으로 달라진 조선 사회"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-2 유교사회",
             title: "민수와 친구들의 유교 사회 시간 여행",
             subtitle: "흥인지문부터 훈민정음까지, 예절과 지혜로 꽃피운 조선의 유교 문화",
@@ -101,6 +107,7 @@
             id: "5_2_6",
             grade: "5학년 2학기",
             unit: "2단원 : 사회의 새로운 변화와 오늘날의 우리",
+            units: ["2-2. 새로운 사회를 향한 조선 후기 사람들의 노력"], // 단원 칩 연결 키 = 노션 「단원」 원문
             bookNum: "5-2 조선 후기",
             title: "조선 후기 사회와 문화 탐험",
             subtitle: "모내기법부터 서민 문화와 실학까지, 새로운 세상을 꿈꾼 조상들의 지혜",
@@ -117,9 +124,31 @@
     /**
      * 사회 단원 동화 도서관 렌더링
      */
-    function render(innerBody) {
+    function filterBooks(pick) {
+        if (!pick || !pick.grade) return SOCIETY_STORYBOOK_LIBRARY;
+        if (pick.unit) return SOCIETY_STORYBOOK_LIBRARY.filter(b => (b.units || []).includes(pick.unit));
+        const norm = typeof window.normalizeSocietyGrade === 'function' ? window.normalizeSocietyGrade : (g => g);
+        return SOCIETY_STORYBOOK_LIBRARY.filter(b => norm(b.grade) === pick.grade);
+    }
+
+    /**
+     * 사회 단원 동화 도서관 렌더링
+     * @param {HTMLElement} innerBody
+     * @param {{pick?: {grade: string, unit: string}}} [opts]  단원 칩에서 고른 값이 있으면 그 단원 동화만 먼저 보여 준다
+     */
+    function render(innerBody, opts) {
         if (!innerBody) innerBody = document.getElementById('overlayInnerBody');
         if (!innerBody) return;
+        const pick = opts && opts.pick;
+        const books = filterBooks(pick);
+        const scopeLabel = pick && pick.grade ? (pick.unit || String(pick.grade).replace(/\s*\(.*\)$/, '') + ' 전체') : '';
+        const scopeBar = scopeLabel ? `
+                <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:center; margin:-10px 0 18px;">
+                    <span style="font-size:0.92rem; color:#cbd5e1;">📌 ${window.UnitChipBar ? window.UnitChipBar.escapeHtml(scopeLabel) : ''} 동화 ${books.length}권</span>
+                    <button type="button" onclick="SocietyStorybook.render(null)" style="font-family:'Jua',sans-serif; font-size:0.9rem; padding:6px 12px; border-radius:16px; border:2px solid #f59e0b; background:transparent; color:#f59e0b; cursor:pointer;">📚 전체 서가 보기</button>
+                </div>` : '';
+        const emptyNote = books.length === 0 ? `
+                <p style="text-align:center; color:#94a3b8; padding:24px 0;">이 단원 동화는 아직 없어요. 「전체 서가 보기」로 다른 동화를 둘러보세요.</p>` : '';
 
         innerBody.innerHTML = `
             <div style="max-width: 800px; margin: 0 auto; padding: 10px;">
@@ -131,9 +160,9 @@
                         교과서 내용이 쏙쏙 이해되는 재미있는 동화와 성우 구연동화 음성을 학기별로 만나보세요!
                     </p>
                 </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
-                    ${SOCIETY_STORYBOOK_LIBRARY.map(book => `
+                ${scopeBar}${emptyNote}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 18px;">
+                    ${books.map(book => `
                         <div style="
                             background: ${book.bgGrad};
                             border: 2px solid ${book.border};

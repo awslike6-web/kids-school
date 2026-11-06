@@ -716,41 +716,9 @@ body.theme--minecraft .phonics-toggle-btn.active {
   box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45);
 }
 /* ========================================================
-   📚 단원 칩 바 & 이번 단원 특별 활동 (english_unit_bar.js)
-   - 칩 모양은 공부방 표준 .reading-grade-chip(reading_engine.css)을 그대로 쓴다
+   ⭐ 이번 단원 특별 활동 칸 (english_unit_bar.js)
+   - 학기·단원 칩 자체는 공통 kids/css/unit_chip_bar.css
    ======================================================== */
-.english-unit-bar {
-  margin: -6px 0 22px;
-}
-.english-unit-bar:empty {
-  display: none;
-}
-.english-unit-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.english-unit-bar-label {
-  flex: 0 0 auto;
-  font-family: 'Jua', sans-serif;
-  font-size: 1rem;
-  opacity: 0.85;
-}
-.english-unit-chips.reading-grade-bar {
-  justify-content: flex-start;
-  margin-bottom: 0;
-  gap: 8px;
-}
-.english-unit-chips .reading-grade-chip {
-  padding: 8px 14px;
-  font-size: 0.95rem;
-}
-.english-unit-bar-hint {
-  margin: 4px 0 0;
-  font-size: 0.92rem;
-  opacity: 0.85;
-}
 .english-unit-special {
   margin-top: 16px;
 }

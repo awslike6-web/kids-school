@@ -32,6 +32,7 @@ graph TD
 
 | 구분 | 모듈 파일명 | 전담 역할 | 줄 수 | 네임스페이스 / 주요 API |
 | :--- | :--- | :--- | :---: | :--- |
+| **칩** | `kids/js/society_unit_bar.js` | 대기실 학기·단원 칩, 사다리 카드 자료 수, 퀘스트 링크 (공통 `kids/core/unit_chip_bar.js`) | 약 140줄 | `window.SocietyUnitBar` |
 | **대문** | `kids/js/society_common.js` | 초기화, 노션 통신, 오버레이 라우팅, 학습일지/인쇄 | ~470줄 | `openMissionView`, `initializeSocietyRoom`, `printSocietySummary` |
 | **1번** | `kids/js/society_storybook.js` | [1단계] 사회 단원 동화 도서관 (총 7권) | ~220줄 | `window.SocietyStorybook` (`render`, `getList`) |
 | **2번** | `kids/js/society_voca.js` | [2단계] 사회 핵심 용어방 (초성/자석/객관식/주관식) | 452줄 | `window.SocietyVoca` (`render`, `verifyAnswer`, `resetMasterAndReload`) |
@@ -71,6 +72,12 @@ graph TD
 
 ### 3) 📱 모바일 UI 표준
 - `.top-action-bar`는 `position: relative`로 배치하여 모바일 스크롤 시 화면을 가리지 않도록 한다.
+
+### 4) 🪜 대기실 3단계 사다리 & 학기·단원 칩 (2026-11-06~)
+- **사다리 배치** (GEMINI.md §1): 1단계 워밍업 = 📚 단원 동화 도서관 / 2단계 빌드업 = 📖 사회 용어방 · ⏳ 역사 & 문화재 돋보기 · 🗺️ 랜선 지도 탐방실 / 3단계 딥다이브 = 📊 차트 & 도표 분석실 · ⚔️ 5분 퀘스트.
+- **학기·단원 칩**: 머리 카드 아래 칩에서 학기·단원을 고르면 용어방·돋보기·지도·차트가 학년·단원 선택 화면 없이 그 단원으로 시작한다. 카드 오른쪽 위에 그 단원 자료 수(용어·사료·명소·문제)가 뜨고, 자료가 없으면 「이 단원 자료 준비 중」으로 흐려진다. 공통 부품 `kids/core/unit_chip_bar.js`, 사회방 설정 `kids/js/society_unit_bar.js`.
+- **단원 이름 계약**: VOCA_DB와 교재·사료 DB의 「단원」은 같은 원문을 쓴다(예: `1. 옛사람들의 삶과 문화`, `2-1. 유교 문화의 영향으로 달라진 조선 사회`). 새 자료를 등록할 때 다른 표기(「1단원 (…)」, 「3단원 1장」)를 쓰면 칩이 둘로 갈라진다.
+- **동화 ↔ 단원**: `society_storybook.js` 각 책의 `units`. 현재 기후 → 5-1 `2-1. 우리나라의 기후`, 역사 1~3편 → `1. 옛사람들의 삶과 문화`, 조선(임진왜란·병자호란)·유교 사회 → `2-1. …`, 조선 후기 → `2-2. …`.
 
 ---
 

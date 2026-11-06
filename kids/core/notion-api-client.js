@@ -184,8 +184,9 @@ function getKstTodayYMD(date = new Date()) {
 
             const parsedRecords = allResults.map(parseVocaPage);
 
-            // 캐시 저장
-            if (typeof window._saveVocaToCache === 'function') {
+            // 캐시 저장 — 서버 필터(과목+영역만 받은 결과)는 아이 전체 캐시 자리에 넣지 않는다.
+            // 넣으면 같은 날 다른 과목방(영어 등)이 그 일부만 보고 0개가 된다 (2026-11-06 발견).
+            if (!queryOptions.useServerFilter && typeof window._saveVocaToCache === 'function') {
                 window._saveVocaToCache(cacheTarget, dbId, parsedRecords);
             }
 
