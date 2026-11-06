@@ -627,6 +627,19 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `EnglishChat.startSentenceMission(bookId, books)` | AI 회화 토론 세션 초기화 및 채팅창 렌더링 |
   | `EnglishChat.renderSentenceChat()` | Gemini 3.8 Flash 연동 실시간 대화창 렌더링 |
 
+### 🌟 `english_unit_bar.js` (대기실 단원 칩 바 & 「이번 단원 특별 활동」 칸, 2026-11-06~)
+영어방은 6단계 사다리(활동 순서)가 뼈대이고, 이 바에서 학기·단원을 먼저 고르면 2~4단계가 단원 선택 화면 없이 그 단원으로 바로 시작합니다. 과학방처럼 단원별 구역으로 나누지 않는 이유: 영어 단원은 활동 종류가 같고 내용(클래스 카드 단어·문장)만 바뀌기 때문입니다.
+- **파일 위치**: `kids/js/english_unit_bar.js` · 등록표 `kids/subjects/english/data/english_unit_activities.js` (`window.ENGLISH_UNIT_ACTIVITIES`)
+- **데이터**: 학기·단원 칩은 `fetchVocaFromNotion({subject:'영어'})`의 `grades`·`level` 원문으로 만든다(표시만 `L8`→`8단원`). 고른 값은 이 기기에만 아이별로 기억한다(`english_unit_pick_{son|daughter}`).
+- **특별 활동 등록**: 그 단원에만 맞는 활동이 있을 때만 등록표에 `{grade, unit, icon, title, desc, href}` 한 줄을 넣는다. 화면이 `href?grade=&unit=`으로 붙여 연다. 등록 기준은 ① 그 단원 클래스 카드 핵심 문장을 그대로 연습 ② 데이터만 바꿔 두 단원 이상에 쓰는 엔진.
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `EnglishUnitBar.init()` | VOCA 조회 후 칩 바 렌더링 (english.html `DOMContentLoaded`) |
+  | `EnglishUnitBar.applyToMission(records)` | `english_common.js`가 2~4단계를 열 때 호출. 고른 단원 문제가 있으면 `selectDynamicGradeUnit(grade, unit)`, 단원 문제가 없으면 `selectDynamicGrade(grade)`로 넘기고 true. 전체 보기면 false(원래 선택 화면) |
+  | `EnglishUnitBar.getPick()` | 현재 `{grade, unit}` |
+- **검증**: `tests/english-unit-bar.test.mjs`
+
 ---
 
 ## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)

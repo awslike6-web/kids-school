@@ -291,6 +291,9 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                 candidateRecords = records.filter(isSentenceRecord);
             }
             
+            // 📚 대기실 단원 칩에서 학기·단원을 골라 두었으면 선택 화면 없이 바로 시작
+            if (window.EnglishUnitBar && window.EnglishUnitBar.applyToMission(candidateRecords)) return;
+
             const uniqueGrades = [...new Set(candidateRecords.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
             if (uniqueGrades.length === 0) {
                 startMissionWithFilteredData(candidateRecords, innerBody);
@@ -403,6 +406,12 @@ window.selectDynamicUnit = function(unit) {
         finalRecords = finalRecords.filter(isSentenceRecord);
     }
     startMissionWithFilteredData(finalRecords, innerBody);
+};
+
+// 대기실 단원 칩(english_unit_bar.js)이 학기·단원을 한 번에 넘길 때 쓴다
+window.selectDynamicGradeUnit = function(grade, unit) {
+    selectedEnglishGrade = grade;
+    selectDynamicUnit(unit);
 };
 
 function getEnglishFilteredRecords() {
