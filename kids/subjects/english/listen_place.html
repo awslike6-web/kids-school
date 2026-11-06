@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>듣고 끌어다 놓기 (Listen & Place) 🎧 | 민민이네 공부방</title>
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="../../css/english_listen_place.css">
+</head>
+<body>
+
+  <!-- 메인 앱 컨테이너 -->
+  <main id="listenPlaceApp" class="lp-main-app"></main>
+
+  <!-- 1. 공통 코어 엔진군 -->
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/study-activity.js"></script>
+
+  <!-- 2. 특별 활동 등록표 및 엔진 -->
+  <script src="data/english_unit_activities.js?v=20261106_v1"></script>
+  <script src="../../js/english_listen_place.js?v=20261106_v1"></script>
+  <script src="../../js/english_listen_place_dressup.js?v=20261106_v1"></script>
+
+  <!-- 3. 화면 초기화 진입 스크립트 -->
+  <script>
+    (function() {
+      'use strict';
+
+      document.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        const grade = params.get('grade') || '5-2';
+        const unit = params.get('unit') || 'L8';
+
+        const activities = window.ENGLISH_UNIT_ACTIVITIES || [];
+        const matched = activities.find(a => a.grade === grade && a.unit === unit);
+
+        const appEl = document.getElementById('listenPlaceApp');
+
+        if (!matched || !matched.scene) {
+          appEl.innerHTML = `
+            <div class="listen-place-card">
+              <div style="font-size:2.8rem; margin-bottom:12px;">🚧</div>
+              <h3 style="color:#ef4444; margin-bottom:8px;">준비 중인 단원이에요</h3>
+              <p style="color:var(--text-sub, #64748b); margin-bottom:20px;">
+                ${grade} ${unit} 단원의 특별 활동은 곧 오픈될 예정이에요!
+              </p>
+              <a href="english.html" class="lp-btn lp-btn-secondary">🚪 영어방 돌아가기</a>
+            </div>
+          `;
+          return;
+        }
+
+        // 등록된 scene 데이터 파일 동적 로드
+        const scriptEl = document.createElement('script');
+        scriptEl.src = matched.scene;
+        scriptEl.onload = function() {
+          if (window.EnglishListenPlace && typeof window.EnglishListenPlace.init === 'function') {
+            window.EnglishListenPlace.init({
+              grade: grade,
+              unit: unit,
+              sceneData: window.LISTEN_PLACE_SCENE,
+              containerId: 'listenPlaceApp'
+            });
+          }
+        };
+        scriptEl.onerror = function() {
+          appEl.innerHTML = `
+            <div class="listen-place-card">
+              <div style="font-size:2.8rem; margin-bottom:12px;">⚠️</div>
+              <h3 style="color:#ef4444; margin-bottom:8px;">장면 데이터를 불러오지 못했습니다</h3>
+              <p style="color:var(--text-sub, #64748b); margin-bottom:20px;">네트워크 상태를 확인해 주세요.</p>
+              <a href="english.html" class="lp-btn lp-btn-secondary">🚪 영어방 돌아가기</a>
+            </div>
+          `;
+        };
+        document.body.appendChild(scriptEl);
+      });
+    })();
+  </script>
+</body>
+</html>

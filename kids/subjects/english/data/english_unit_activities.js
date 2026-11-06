@@ -13,4 +13,5 @@
 //     href: 'listen_place.html', scene: 'data/listen_place_5-2_L8.js' }
 
 window.ENGLISH_UNIT_ACTIVITIES = [
+  { grade: '5-2', unit: 'L8', icon: '👕', title: '친구 옷 입혀 주기', desc: '문장을 듣고 옷과 머리를 끌어다 입혀요', href: 'listen_place.html', scene: 'data/listen_place_5-2_L8.js' }
 ];

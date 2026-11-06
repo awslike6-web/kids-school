@@ -640,6 +640,29 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `EnglishUnitBar.getPick()` | 현재 `{grade, unit}` |
 - **검증**: `tests/english-unit-bar.test.mjs`
 
+### 🌟 `english_listen_place.js` (영어 듣고 끌어다 놓기 공통 엔진, 2026-11-06~)
+영어 문장을 듣고, 그 문장대로 물건을 알맞은 곳에 끌어다 놓거나 눌러서 맞히는 단원 확장형 공통 엔진입니다. VOCA DB의 클래스 카드 문장을 실시간으로 읽어와 출제하며, 에러리스 피드백(감점 없음, 틀리면 정답 카드 노란 펄스 안내 및 음성 재재생)과 모바일 375px 무스크롤 인터랙션을 지원합니다.
+- **파일 위치**: `kids/js/english_listen_place.js` · 래퍼 `kids/subjects/english/listen_place.html`
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `EnglishListenPlace.registerScene(name, sceneObj)` | 새 단원 장면(dressup, room, map 등) 등록 |
+  | `EnglishListenPlace.init({ grade, unit, sceneData, containerId })` | VOCA 매핑, 유효 문제 검증, 세션 시작 및 렌더링 |
+  | `EnglishListenPlace.speak(text)` | 원어민 영어 음성 출력 브리지 |
+- **검증**: `tests/english-listen-place.test.mjs`
+
+### 👗 `english_listen_place_dressup.js` (8단원 외모·옷차림 장면 모듈, 2026-11-06~)
+코드로 그리는 인물 SVG(남자/여자)와 헤어, 눈, 모자, 안경, 상의, 하의 슬롯 레이어를 렌더링하고, 트레이 아이템 썸네일 생성 및 인물 착용을 처리합니다. 마지막 판 「Catch the Impostor」 3명 후보 렌더링을 제공합니다.
+- **파일 위치**: `kids/js/english_listen_place_dressup.js` · 데이터 `kids/subjects/english/data/listen_place_5-2_L8.js`
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `dressup.renderStage(container, who)` | 기본 인물 SVG 무대 생성 |
+  | `dressup.renderItem(item)` | 받침대 아이템 카드/미니 그래픽 생성 |
+  | `dressup.applyItem(stageEl, slot, item)` | 인물에 해당 아이템 SVG 레이어 적용 |
+  | `dressup.renderFinaleStage(container, candidates, onSelect)` | 3명 후보 비교 렌더링 및 선택 콜백 |
+- **검증**: `tests/english-listen-place.test.mjs`
+
 ---
 
 ## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)

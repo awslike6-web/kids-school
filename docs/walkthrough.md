@@ -25,3 +25,37 @@ Chrome 360×800, 1280×800에서 3호 칩 선택과 이미지 6포즈 로딩·�
 모바일 기존 헤더는 viewport 360px에서 scrollWidth 413px로 가로로 넘친다. `origin/main` 원본 HTML을 같은 조건에서 재검증해 동일 413px임을 확인했다. 이번 3호 칩 폭은 340px 안에 들어오며 PC는 1280px 내에 표시된다. 기존 헤더 문제는 이 PR의 변경 범위에 포함하지 않았다.
 
 스크린샷(커밋 제외): `G:/master-tower/scratch/moreum-lab-360.png`, `moreum-lab-1280.png`, `moreum-runner-360.png`, `moreum-runner-1280.png`.
+
+---
+
+# 영어 「듣고 끌어다 놓기」(Listen & Place) 8단원 옷 입히기 검증 기록 (2026-11-06)
+
+- **작업 브랜치**: `antigravity/english-listen-place` (`origin/main`에서 분기, kids-school-main 저장소)
+- **작업 목적**: 5-2 8단원 외모·옷차림 특별 활동 신규 구축 및 단원 확장형 공통 엔진 모듈화.
+
+## 1. 자동 검사 결과
+
+- `node --test "tests/english-listen-place.test.mjs"`: 7개 전체 통과 (`pass 7, fail 0`).
+  - 등록표 미등록 단원 차단 계약 검증
+  - VOCA 미존재 pageId 건너뛰기 계약 검증
+  - 트레이 받침대 정답+동일부위 오답 4개 추출 로직 검증
+  - 에러리스 피드백 (감점 없음, 틀리면 정답 카드 노란 펄스 안내) 검증
+  - 두 부위 문장 2개 모두 채우기 완료 계약 검증
+  - 파일 골디락스 800줄 미만 및 CSS 300줄 이하, 루트 절대경로 금지 검증
+- `node --test "tests/**/*.test.mjs"`: 687개 테스트 전체 통과 (`pass 686, fail 0, todo 1[알려진 동시저장 한계]`).
+- `python -X utf8 scripts/verify_contracts.py --mode git-diff`: `✅ [ALL PASS]` (필수 DOM 뼈대, KST 로컬 날짜, 금지 안티패턴 제로).
+- `python -X utf8 kids-school-main/scripts/build_system_map.py`: 시스템 조감도 자동 데이터 갱신 완료 (`scripts/data/system_map_generated.js`).
+
+## 2. 브라우저 및 화면 검증
+
+- **테스트 환경**: `scripts/guarded_preview_server.py 8767` 쓰기 차단 로컬 서버 구동 상태에서 Edge 헤드리스 브라우저 검증.
+- **데스크톱 (1280×900)**:
+  - `kids/subjects/english/listen_place.html?grade=5-2&unit=L8` 정상 로드 및 시작 카드 표시 확인.
+  - 상단 탑바, 문장 다시 듣기/뜻 보기, 중앙 인물 SVG 무대, 하단 4개 아이템 트레이의 정렬 및 레이아웃 무결성 확인.
+- **모바일 폰 폭 (375×812)**:
+  - 375px 좁은 폭에서도 가로 스크롤(`scrollWidth > innerWidth`) 없이 컴팩트하게 인물 및 4개 트레이 카드가 한 화면에 핏됨을 확인.
+  - 터치 및 탭(누르기) 친화적인 카드 버튼 스타일 및 터치액션(`touch-action: none`, `user-select: none`) 확인.
+- **스크린샷 (커밋 제외 / scratch 보관)**:
+  - 데스크톱: `G:/master-tower/scratch/listen_place_desktop.png` (11,886 bytes)
+  - 모바일(375px): `G:/master-tower/scratch/listen_place_mobile_375.png` (7,672 bytes)
+  - 대기실 로비: `G:/master-tower/scratch/english_lobby_desktop.png` (8,416 bytes)

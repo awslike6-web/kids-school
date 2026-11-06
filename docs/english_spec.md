@@ -61,6 +61,8 @@ graph TD
 | **`kids/js/english_voca.js`** | 🧩 [2·3·4단계] 어휘·문장 훈련소 ([2단계] 3지선다 퐁당, [3단계] 4종 어휘/슬라임 자석, [4단계] 문장 블록 빌더 & 성공 카드) | 545줄 | `window.EnglishVoca` |
 | **`kids/js/english_chat.js`** | 🗣️ [6단계] AI 코코 회화 토론 모듈 (지문별 롤플레잉, 생각 확장 대화, 2026 플래그십 `gemini-3.8-flash` 적용, 부모 검수 뱃지) | 229줄 | `window.EnglishChat` |
 | **`kids/js/english_unit_bar.js`** | 📚 대기실 단원 칩 바 & 「이번 단원 특별 활동」 칸 (아래 2-2) | 약 200줄 | `window.EnglishUnitBar` |
+| **`kids/js/english_listen_place.js`** | 🎧 [특별 활동 공통 엔진] 듣고 끌어다 놓기 (Listen & Place) 엔진 (단원 확장형, 에러리스 피드백, 누르기·끌기 지원, VOCA DB 실시간 연동) | 약 500줄 | `window.EnglishListenPlace` |
+| **`kids/js/english_listen_place_dressup.js`** | 👗 [8단원 장면] 친구 옷 입히기 장면 모듈 (인물·의류·헤어·눈 SVG 렌더링, 마지막 판 친구 찾기) | 약 420줄 | `EnglishListenPlace.registerScene('dressup', …)` |
 
 ## 2-2. 📚 단원 칩 바와 단원별 특별 활동 (2026-11-06 결정)
 
@@ -69,7 +71,13 @@ graph TD
 - **이번 단원 특별 활동**: 그 단원에만 맞는 활동이 있을 때만 단원 칩 아래에 칸이 생긴다. 등록은 `kids/subjects/english/data/english_unit_activities.js`에 한 줄. 등록 기준:
   1. 그 단원 클래스 카드의 핵심 문장을 그대로 연습한다 (수행평가와 바로 연결).
   2. 데이터만 바꿔 두 단원 이상에 쓸 수 있는 엔진이다. 단원 하나만을 위한 일회성 게임은 만들지 않는다.
-- **첫 특별 활동 (제작 예정)**: 「듣고 끌어다 놓기(Listen & Place)」 엔진. 8단원 옷 입히기부터 시작해 9단원 가구 놓기, 11단원 길 찾기로 넓힌다. 「Catch the Impostor」는 같은 엔진의 마지막 판(듣고 친구 고르기)으로 합친다. 명세: [`docs/english_listen_place_spec.md`](english_listen_place_spec.md).
+- **첫 특별 활동 (구현 완료)**: 「듣고 끌어다 놓기(Listen & Place)」 엔진 (`kids/js/english_listen_place.js`).
+  - **8단원 옷 입히기**: `kids/subjects/english/listen_place.html?grade=5-2&unit=L8` (장면 `dressup`, `kids/js/english_listen_place_dressup.js`).
+  - **입력**: 폰 폭 375px 무스크롤, 터치/마우스 끌어다 놓기와 누르기(탭) 둘 다 지원.
+  - **피드백**: 에러리스 (하트·점수 차감 없음, 틀리면 정답 카드 노란 펄스 안내 및 문장 재재생).
+  - **마지막 판 피날레**: 「Catch the Impostor (친구를 찾아라!)」를 흡수하여 3명의 후보 중 문장과 일치하는 친구를 선택.
+  - **확장성**: 9단원 방에 가구 놓기(`room`), 11단원 지도에서 길 찾기(`map`)로 장면만 갈아 끼워 확장 가능.
+  - 명세: [`docs/english_listen_place_spec.md`](english_listen_place_spec.md).
 
 ---
 
