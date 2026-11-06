@@ -53,26 +53,36 @@
 
   /**
    * 받침대(트레이) 물건 4개 고르기
-   * - 정답 물건을 먼저 넣고, 같은 부위(slot)의 다른 물건으로 채운다.
-   * - 같은 부위에 확실히 다른 물건이 3개가 안 되면(예: 안경), 다른 부위 물건(모자 등)으로 채운다.
+   * - 정답 물건을 먼저 넣고, 정답 부위(slot)마다 오답을 고르게 뽑는다.
+   * - 같은 부위에 물건이 모자라면 장면이 정한 순서(scene.fillSlots 또는 인접 슬롯, 없으면 남은 물건)로 채운다.
    */
   function pickTrayItems(allItems, answers) {
     const answerItems = allItems.filter(item => answers.includes(item.id));
     const answerSlots = [...new Set(answerItems.map(it => it.slot))];
     const picked = [...answerItems];
 
-    const sameSlotDistractors = shuffle(
-      allItems.filter(item => answerSlots.includes(item.slot) && !answers.includes(item.id))
-    );
+    for (const slot of answerSlots) {
+      if (picked.length >= 4) break;
+      const ansItem = answerItems.find(it => it.slot === slot);
+      const pool = allItems.filter(it => it.slot === slot && !picked.some(p => p.id === it.id));
+      const pref = (ansItem && Array.isArray(ansItem.confusable)) ? shuffle(pool.filter(it => ansItem.confusable.includes(it.id))) : [];
+      const cand = pref[0] || shuffle(pool)[0];
+      if (cand) picked.push(cand);
+    }
+
+    const sameSlotDistractors = shuffle(allItems.filter(item => answerSlots.includes(item.slot) && !picked.some(p => p.id === item.id)));
     for (const item of sameSlotDistractors) {
       if (picked.length >= 4) break;
       picked.push(item);
     }
 
     if (picked.length < 4) {
-      const headItems = shuffle(allItems.filter(item => item.slot === 'head' && !picked.some(p => p.id === item.id)));
-      const otherItems = shuffle(allItems.filter(item => item.slot !== 'head' && !picked.some(p => p.id === item.id)));
-      for (const item of [...headItems, ...otherItems]) {
+      const scene = _currentScene || (_sceneData && SCENES[_sceneData.scene]) || SCENES.dressup;
+      const adjSlot = (scene && Array.isArray(scene.slots) && answerSlots.length === 1) ? scene.slots[scene.slots.indexOf(answerSlots[0]) - 1] : null;
+      const fillOrder = (scene && Array.isArray(scene.fillSlots)) ? scene.fillSlots : (adjSlot ? [adjSlot] : []);
+      const fillItems = fillOrder.flatMap(s => shuffle(allItems.filter(it => it.slot === s && !picked.some(p => p.id === it.id))));
+      const otherItems = shuffle(allItems.filter(it => !picked.some(p => p.id === it.id) && !fillItems.some(f => f.id === it.id)));
+      for (const item of [...fillItems, ...otherItems]) {
         if (picked.length >= 4) break;
         picked.push(item);
       }
@@ -101,7 +111,13 @@
   }
 
   function buildFinaleCandidates(allItems, finaleQ) {
-    const targetItems = allItems.filter(it => finaleQ.answer.includes(it.id));
+    const scene = (_currentScene && typeof _currentScene.buildFinaleCandidates === 'function')
+      ? _currentScene
+      : (finaleQ && finaleQ.finaleKind && SCENES.timeline);
+    if (scene && typeof scene.buildFinaleCandidates === 'function') {
+      return scene.buildFinaleCandidates(allItems, finaleQ);
+    }
+    const targetItems = allItems.filter(it => (finaleQ.answer || []).includes(it.id));
     const c1 = { who: finaleQ.who || 'she', isAnswer: true, items: [...targetItems] };
 
     const distractorItems1 = targetItems.map((tItem, idx) => {
@@ -176,7 +192,8 @@
     const pickedRegular = twoPartQs.length > 0
       ? shuffle([twoPartQs[0], ...onePartQs.slice(0, 5), ...twoPartQs.slice(1)]).slice(0, 6)
       : onePartQs.slice(0, 6);
-    const finaleQ = finaleQs.length > 0 ? finaleQs[0] : regularQs[regularQs.length - 1];
+    const shuffledFinales = shuffle(finaleQs);
+    const finaleQ = shuffledFinales.length > 0 ? shuffledFinales[0] : regularQs[regularQs.length - 1];
 
     _questions = [...pickedRegular, { ...finaleQ, finale: true }];
     _currentQIdx = 0;

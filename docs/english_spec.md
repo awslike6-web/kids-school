@@ -63,6 +63,7 @@ graph TD
 | **`kids/js/english_unit_bar.js`** | 📚 대기실 단원 칩 바 & 「이번 단원 특별 활동」 칸 (아래 2-2) | 약 200줄 | `window.EnglishUnitBar` |
 | **`kids/js/english_listen_place.js`** | 🎧 [특별 활동 공통 엔진] 듣고 끌어다 놓기 (Listen & Place) 엔진 (단원 확장형, 에러리스 피드백, 누르기·끌기 지원, VOCA DB 실시간 연동) | 약 500줄 | `window.EnglishListenPlace` |
 | **`kids/js/english_listen_place_dressup.js`** | 👗 [8단원 장면] 친구 옷 입히기 장면 모듈 (인물·의류·헤어·눈 SVG 렌더링, 마지막 판 친구 찾기) | 약 420줄 | `EnglishListenPlace.registerScene('dressup', …)` |
+| **`kids/js/english_listen_place_timeline.js`** | 🕖 [10단원 장면] 하루 시간표 채우기 장면 모듈 (활동 그림·아날로그 시계 SVG 렌더링, 마지막 판 얼리버드/나이트아울 미니 시간표) | 약 360줄 | `EnglishListenPlace.registerScene('timeline', …)` |
 
 ## 2-2. 📚 단원 칩 바와 단원별 특별 활동 (2026-11-06 결정)
 
@@ -72,7 +73,8 @@ graph TD
   1. 그 단원 클래스 카드의 핵심 문장을 그대로 연습한다 (수행평가와 바로 연결).
   2. 데이터만 바꿔 두 단원 이상에 쓸 수 있는 엔진이다. 단원 하나만을 위한 일회성 게임은 만들지 않는다.
 - **첫 특별 활동 (구현 완료)**: 「듣고 끌어다 놓기(Listen & Place)」 엔진 (`kids/js/english_listen_place.js`).
-  - **8단원 옷 입히기**: `kids/subjects/english/listen_place.html?grade=5-2&unit=L8` (장면 `dressup`, `kids/js/english_listen_place_dressup.js`).
+  - **8단원 옷 입히기**: `kids/subjects/english/listen_place.html?grade=5-2&unit=L8` (장면 `dressup`, `kids/js/english_listen_place_dressup.js`, 데이터 `kids/subjects/english/data/listen_place_5-2_L8.js`).
+  - **10단원 하루 시간표 채우기**: `kids/subjects/english/listen_place.html?grade=5-2&unit=L10` (장면 `timeline`, `kids/js/english_listen_place_timeline.js`, 데이터 `kids/subjects/english/data/listen_place_5-2_L10.js`).
   - **입력**: 폰 폭 375px 무스크롤, 터치/마우스 끌어다 놓기와 누르기(탭) 둘 다 지원.
   - **피드백**: 에러리스 (하트·점수 차감 없음, 틀리면 정답 카드 노란 펄스 안내 및 문장 재재생).
   - **마지막 판 피날레**: 「Catch the Impostor (친구를 찾아라!)」를 흡수하여 3명의 후보 중 문장과 일치하는 친구를 선택.

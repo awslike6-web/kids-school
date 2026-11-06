@@ -677,7 +677,20 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `dressup.renderStage(container, who)` | 기본 인물 SVG 무대 생성 |
   | `dressup.renderItem(item)` | 받침대 아이템 카드/미니 그래픽 생성 |
   | `dressup.applyItem(stageEl, slot, item)` | 인물에 해당 아이템 SVG 레이어 적용 |
-  | `dressup.renderFinaleStage(container, candidates, onSelect)` | 3명 후보 비교 렌더링 및 선택 콜백 |
+| `dressup.renderFinaleStage(container, candidates, onSelect)` | 3명 후보 비교 렌더링 및 선택 콜백 |
+- **검증**: `tests/english-listen-place.test.mjs`
+
+### 🕖 `english_listen_place_timeline.js` (10단원 하루 일과·시간표 장면 모듈, 2026-11-06~)
+하루 시간표 무대(활동 칸 + 시각 칸), 활동 그림 6종 SVG, 아날로그 시계 바늘 각도 계산(`minutes` 기반 분침·시침 회전) 및 숫자 배지 썸네일, 마지막 판 「얼리버드는 누구?」(`early bird` / `night owl`) 후보 3명 미니 시간표를 생성·렌더링합니다.
+- **파일 위치**: `kids/js/english_listen_place_timeline.js` · 데이터 `kids/subjects/english/data/listen_place_5-2_L10.js`
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `timeline.renderStage(container)` | 하루 시간표(활동 칸·시각 칸) 무대 생성 |
+  | `timeline.renderItem(item)` | 활동 그림(글자 숨김) 및 아날로그 시계+숫자 받침대 카드 생성 |
+  | `timeline.applyItem(stageEl, slot, item)` | 맞힌 활동·시각 카드를 시간표 칸에 적용 |
+  | `timeline.buildFinaleCandidates(items, finaleQ)` | `early` / `night` 조건에 맞는 후보 3명 미니 시간표 생성 |
+  | `timeline.renderFinaleStage(container, candidates, onSelect)` | 후보 3명 미니 시간표 카드 렌더링 및 선택 콜백 |
 - **검증**: `tests/english-listen-place.test.mjs`
 
 ---

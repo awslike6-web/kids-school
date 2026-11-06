@@ -177,3 +177,53 @@ body.theme--minecraft .item-thumb-svg { background: #e2e8f0; border-radius: 50%;
 .res-eng { font-weight: 700; color: var(--text-main, #0f172a); font-size: 0.92rem; }
 .res-kor { font-size: 0.8rem; color: var(--text-sub, #64748b); }
 .lp-btn-icon-small { background: none; border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; padding: 3px 6px; cursor: pointer; }
+
+
+/* 10단원 timeline 장면 (하루 시간표 무대 & 미니 시간표) */
+.timeline-stage-wrapper {
+  width: 100%; height: 100%; padding: 12px 14px; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: center; gap: 10px;
+}
+.timeline-board-header {
+  font-size: 0.96rem; font-weight: 800; color: var(--primary, #2563eb);
+  text-align: center; background: var(--bg-sub, #f1f5f9); padding: 6px 12px;
+  border-radius: 999px; align-self: center; border: 1px solid var(--border-color, #e2e8f0);
+}
+.timeline-slots-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%;
+}
+.timeline-slot-box {
+  min-height: 156px; border: 2px dashed var(--border-color, #cbd5e1); border-radius: 16px;
+  background: var(--bg-sub, #f8fafc); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 10px 8px; box-sizing: border-box;
+  transition: border-color 0.2s, background 0.2s;
+}
+.timeline-slot-box.slot-filled {
+  border-style: solid; border-color: #10b981; background: rgba(16, 185, 129, 0.08);
+}
+.timeline-slot-placeholder {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+}
+.timeline-slot-icon { font-size: 2rem; line-height: 1.1; }
+.timeline-slot-title { font-size: 0.9rem; font-weight: 800; color: var(--text-main, #334155); }
+.timeline-slot-hint { font-size: 0.76rem; font-weight: 600; color: var(--text-sub, #64748b); }
+.timeline-filled-card {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center;
+}
+.timeline-filled-label { font-size: 0.9rem; font-weight: 800; color: #059669; line-height: 1.15; }
+body.theme--minecraft .timeline-filled-label { color: #34d399; }
+.timeline-filled-desc { font-size: 0.78rem; font-weight: 700; color: var(--text-sub, #64748b); }
+
+/* 마지막 판 후보 3명 미니 시간표 */
+.timeline-finale-card { padding: 10px 6px; justify-content: flex-start; gap: 8px; }
+.mini-schedule-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.mini-schedule-row {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--bg-sub, #f8fafc); border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px; padding: 5px 4px; text-align: center;
+}
+.mini-time-chip {
+  font-size: 0.76rem; font-weight: 800; color: #1d4ed8; background: #dbeafe;
+  padding: 1px 7px; border-radius: 999px;
+}
+.mini-act-text { font-size: 0.76rem; font-weight: 700; color: var(--text-main, #334155); line-height: 1.2; }

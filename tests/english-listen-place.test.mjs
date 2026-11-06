@@ -48,7 +48,7 @@ function makeDomNode(tag = 'div') {
   };
 }
 
-function createEngineSandbox(overrides = {}) {
+function createEngineSandbox(overrides = {}, dataFile = 'kids/subjects/english/data/listen_place_5-2_L8.js') {
   const container = makeDomNode('main');
   container.id = 'listenPlaceApp';
   const stageBox = makeDomNode('div');
@@ -107,9 +107,10 @@ function createEngineSandbox(overrides = {}) {
   sandbox.window = sandbox;
   vm.createContext(sandbox);
 
-  vm.runInContext(read('kids/subjects/english/data/listen_place_5-2_L8.js'), sandbox);
+  vm.runInContext(read(dataFile), sandbox);
   vm.runInContext(read('kids/js/english_listen_place.js'), sandbox);
   vm.runInContext(read('kids/js/english_listen_place_dressup.js'), sandbox);
+  vm.runInContext(read('kids/js/english_listen_place_timeline.js'), sandbox);
 
   return { sandbox, container, trayBox, rewardCalls, initCalls, finalizeCalls, warnings };
 }
@@ -119,7 +120,9 @@ test('파일 줄 수 및 금지 문자열 계약: 600줄 이하, 금지 API 없�
     { path: 'kids/subjects/english/listen_place.html', max: 120 },
     { path: 'kids/js/english_listen_place.js', max: 600 },
     { path: 'kids/js/english_listen_place_dressup.js', max: 600 },
+    { path: 'kids/js/english_listen_place_timeline.js', max: 600 },
     { path: 'kids/subjects/english/data/listen_place_5-2_L8.js', max: 200 },
+    { path: 'kids/subjects/english/data/listen_place_5-2_L10.js', max: 200 },
     { path: 'kids/css/english_listen_place.css', max: 300 },
   ];
 
@@ -137,13 +140,19 @@ test('파일 줄 수 및 금지 문자열 계약: 600줄 이하, 금지 API 없�
   }
 });
 
-test('등록표에 없는 grade·unit이면 장면을 불러오지 않는다', () => {
+test('등록표에 5-2 L8과 5-2 L10이 있고 없는 grade·unit이면 장면을 불러오지 않는다', () => {
   const { sandbox } = createEngineSandbox();
   vm.runInContext(read('kids/subjects/english/data/english_unit_activities.js'), sandbox);
   const activities = sandbox.window.ENGLISH_UNIT_ACTIVITIES || [];
 
   const matchedL8 = activities.find(a => a.grade === '5-2' && a.unit === 'L8');
   assert.ok(matchedL8, '5-2 L8은 등록표에 있어야 합니다.');
+  assert.equal(matchedL8.scene, 'data/listen_place_5-2_L8.js');
+
+  const matchedL10 = activities.find(a => a.grade === '5-2' && a.unit === 'L10');
+  assert.ok(matchedL10, '5-2 L10은 등록표에 있어야 합니다.');
+  assert.equal(matchedL10.scene, 'data/listen_place_5-2_L10.js');
+
   const unmatched = activities.find(a => a.grade === '4-1' && a.unit === 'L1');
   assert.equal(unmatched, undefined, '등록표에 없는 단원은 매칭되지 않아야 합니다.');
 });
@@ -165,7 +174,7 @@ test('캐시 모양 기록(id만 있고 pageId 없음)으로도 문제가 만들
   assert.ok(warnings.some(w => String(w[0]).includes('VOCA에 없는 pageId 건너뜀')), '없는 pageId는 경고를 남기고 건너뛰어야 합니다.');
 });
 
-test('받침대 물건은 정답을 포함해 4개이고, 같은 부위가 모자라면 다른 부위(모자 등)로 채운다', () => {
+test('8단원 회귀: 받침대 물건은 정답을 포함해 4개이고, 안경 문제는 모자(head)로 채워진다', () => {
   const { sandbox } = createEngineSandbox();
   const engine = sandbox.window.EnglishListenPlace;
   const items = sandbox.window.LISTEN_PLACE_SCENE.items;
@@ -181,7 +190,7 @@ test('받침대 물건은 정답을 포함해 4개이고, 같은 부위가 모�
   assert.equal(glassesTray.length, 4);
   assert.ok(glassesTray.some(it => it.id === 'glasses'), '정답 안경이 포함되어야 합니다.');
   assert.equal(glassesTray.filter(it => it.slot === 'glasses').length, 1, '헷갈리는 선글라스·고글 등이 없어야 합니다.');
-  assert.equal(glassesTray.filter(it => it.slot !== 'glasses').length, 3, '모자 등 다른 부위 물건 3개로 채워져야 합니다.');
+  assert.equal(glassesTray.filter(it => it.slot === 'head').length, 3, '안경 문제 받침대는 모자(head) 3개로 채워져야 합니다.');
 });
 
 test('정답 전 받침대 카드에 영어 글자가 없고, 맞힌 뒤에 영어 글자가 표시된다', async () => {
@@ -223,11 +232,9 @@ test('실제 엔진 판정(_judge): 오답에서는 보상 함수가 불리지 �
   await engine.init({ containerId: 'listenPlaceApp' });
   engine.startSession();
 
-  // 두 부위 문장으로 강제 이동하여 실제 엔진 흐름 시험
   const twoPartIdx = engine.getState().questions.findIndex(q => q.answer.length === 2 && !q.finale);
   engine.startQuestion(twoPartIdx);
 
-  // 1) 오답 시도 (순수 함수 _judge 및 실제 attemptItemById)
   const pureWrong = engine._judge(
     { answer: ['hair-short-curly', 'eyes-green'], text: 'He has short curly hair and green eyes.' },
     [],
@@ -242,13 +249,11 @@ test('실제 엔진 판정(_judge): 오답에서는 보상 함수가 불리지 �
   assert.equal(rewardCalls.length, 0, '오답에서는 rewardQuizCorrect가 불리지 않아야 합니다.');
   assert.deepEqual(Array.from(wrongRes.guideTargets), ['hair-short-curly', 'eyes-green'], '오답 시 정답 안내 대상이 정해져야 합니다.');
 
-  // 2) 두 부위 중 첫 번째 부위만 정답 시도
   const firstRes = engine.attemptItemById('hair-short-curly');
   assert.equal(firstRes.correct, true);
   assert.equal(firstRes.completed, false, '두 부위 중 하나만 맞혔을 때는 완료되지 않아야 합니다.');
   assert.equal(rewardCalls.length, 0, '아직 두 부위를 다 맞히지 않았으므로 보상이 불리지 않아야 합니다.');
 
-  // 3) 두 번째 부위까지 정답 시도
   const secondRes = engine.attemptItemById('eyes-green');
   assert.equal(secondRes.correct, true);
   assert.equal(secondRes.completed, true, '두 부위를 다 맞혀야 완료되어야 합니다.');
@@ -270,7 +275,6 @@ test('한 판 완주: 정답마다 rewardQuizCorrect가 서로 다른 번호로 
 
   assert.deepEqual(initCalls, ['listen_place'], 'initQuizRewardSession("listen_place")가 불려야 합니다.');
 
-  // 첫 문제에서 오답 1회 발생시킨 뒤 모든 문제 정답 진행
   engine.attemptItemById('pants-blue');
 
   const questions = engine.getState().questions;
@@ -301,7 +305,6 @@ test('완주 뒤 보상 세션을 되살리지 않는다 (되살리면 페이지
       { id: '3e4a2711-5b68-81af-8696-d27e8acb7ba9', word: "He's wearing a red cap.", meaning: '빨간 모자' },
       { id: '3d8a2711-5b68-81a9-aed9-f716ecd0a5ad', word: 'She has long straight hair and blue eyes.', meaning: '긴 생머리와 파란 눈' }
     ],
-    // 실제 공통 함수처럼: 완주 처리 뒤 세션을 비운다
     initQuizRewardSession: () => { sandbox.window.__quizRewardSession = { isLogged: false, correctCount: 0 }; },
     finalizeQuizRewardSession: async () => { sandbox.window.__quizRewardSession = null; }
   });
@@ -326,4 +329,105 @@ test('영어방이 받아 둔 아이별 어휘 캐시를 쓴다 (filterByStudent
   assert.equal(seen.length, 1);
   assert.equal(seen[0].subject, '영어');
   assert.equal(seen[0].filterByStudent, true);
+});
+
+test('10단원(L10) 데이터 계약: 일반 문제 answer가 모두 items에 있고 문제마다 활동 1 + 시각 1이다', () => {
+  const { sandbox } = createEngineSandbox({}, 'kids/subjects/english/data/listen_place_5-2_L10.js');
+  const sceneData = sandbox.window.LISTEN_PLACE_SCENE;
+  assert.equal(sceneData.scene, 'timeline');
+  assert.equal(sceneData.grade, '5-2');
+  assert.equal(sceneData.unit, 'L10');
+
+  const itemMap = new Map(sceneData.items.map(it => [it.id, it]));
+  const nightItem = itemMap.get('time-night');
+  assert.ok(nightItem, 'time-night 아이템이 있어야 합니다.');
+  assert.equal(nightItem.minutes, undefined, '밤 카드는 minutes가 없어야 합니다.');
+
+  const regularQs = sceneData.questions.filter(q => !q.finale);
+  assert.equal(regularQs.length, 6, '10단원 일반 문제는 6개여야 합니다.');
+
+  for (const q of regularQs) {
+    assert.equal(q.answer.length, 2, '각 일반 문제는 answer가 2개여야 합니다.');
+    const resolved = q.answer.map(id => itemMap.get(id));
+    assert.ok(resolved.every(Boolean), `answer ${q.answer.join(',')}가 모두 items에 있어야 합니다.`);
+    assert.equal(resolved.filter(it => it.slot === 'activity').length, 1, '활동(activity) 1개가 있어야 합니다.');
+    assert.equal(resolved.filter(it => it.slot === 'time').length, 1, '시각(time) 1개가 있어야 합니다.');
+  }
+});
+
+test('10단원(L10) 받침대 및 판정: 정답 2 + 오답 2(활동 1·시각 1), 시각 카드 하나만 맞히면 미완료이고 둘 다 맞혀야 완료된다', async () => {
+  const { sandbox, rewardCalls } = createEngineSandbox({
+    fetchVocaFromNotion: async () => [
+      { id: '3fea2711-5b68-81d4-b31b-d872af641716', word: 'I get up at 6.', meaning: '나는 6시에 일어나요.' },
+      { id: '3fea2711-5b68-81a3-aeea-f5c66d1da3fc', word: 'I eat breakfast at 7.', meaning: '저는 7시에 아침을 먹어요.' },
+      { id: '3fea2711-5b68-8184-af1d-cd7afa3b9bdd', word: 'I exercise at 7:50.', meaning: '저는 7시 50분에 운동합니다.' },
+      { id: '40ca2711-5b68-8186-8c8d-df76ecc9cf44', word: 'early bird', meaning: '일찍 일어나는 사람' }
+    ]
+  }, 'kids/subjects/english/data/listen_place_5-2_L10.js');
+
+  const engine = sandbox.window.EnglishListenPlace;
+  const items = sandbox.window.LISTEN_PLACE_SCENE.items;
+
+  await engine.init({ containerId: 'listenPlaceApp' });
+  engine.startSession();
+
+  const q = engine.getState().currentQuestion;
+  const tray = engine._pickTrayItems(items, q.answer);
+  assert.equal(tray.length, 4, '받침대 카드는 4장이어야 합니다.');
+
+  const correctCards = tray.filter(it => q.answer.includes(it.id));
+  const distractorCards = tray.filter(it => !q.answer.includes(it.id));
+  assert.equal(correctCards.length, 2, '정답 카드가 2장이어야 합니다.');
+  assert.equal(distractorCards.length, 2, '오답 카드가 2장이어야 합니다.');
+  assert.equal(distractorCards.filter(it => it.slot === 'activity').length, 1, '오답 중 활동(activity) 카드가 1장이어야 합니다.');
+  assert.equal(distractorCards.filter(it => it.slot === 'time').length, 1, '오답 중 시각(time) 카드가 1장이어야 합니다.');
+
+  const timeAnsId = q.answer.find(id => id.startsWith('time-'));
+  const actAnsId = q.answer.find(id => id.startsWith('act-'));
+
+  // 시각 카드 하나만 맞혔을 때 미완료
+  const resTimeOnly = engine.attemptItemById(timeAnsId);
+  assert.equal(resTimeOnly.correct, true);
+  assert.equal(resTimeOnly.completed, false, '시각 카드 하나만 맞히면 완료가 아니어야 합니다.');
+  assert.equal(rewardCalls.length, 0);
+
+  // 활동 카드까지 둘 다 맞혔을 때 완료
+  const resBoth = engine.attemptItemById(actAnsId);
+  assert.equal(resBoth.correct, true);
+  assert.equal(resBoth.completed, true, '활동과 시각 둘 다 맞혀야 완료되어야 합니다.');
+  assert.equal(rewardCalls.length, 1);
+});
+
+test('10단원(L10) 마지막 판 후보: early면 정답 후보만 6시 일어나기, night면 정답 후보만 밤 늦게까지 활동한다', async () => {
+  const { sandbox } = createEngineSandbox({}, 'kids/subjects/english/data/listen_place_5-2_L10.js');
+  const engine = sandbox.window.EnglishListenPlace;
+  const items = sandbox.window.LISTEN_PLACE_SCENE.items;
+
+  // 1) early bird 후보 검증
+  const earlyCands = engine._buildFinaleCandidates(items, { finale: true, finaleKind: 'early' });
+  assert.equal(earlyCands.length, 3);
+  const earlyAnswers = earlyCands.filter(c => c.isAnswer);
+  const earlyDistractors = earlyCands.filter(c => !c.isAnswer);
+  assert.equal(earlyAnswers.length, 1);
+  assert.equal(earlyDistractors.length, 2);
+  assert.equal(earlyAnswers[0].getUpMinutes, 360, 'early 정답 후보는 6시(360분) 기상이어야 합니다.');
+  assert.ok(earlyAnswers[0].schedule.some(s => s.activityId === 'act-get-up' && s.minutes === 360));
+  for (const d of earlyDistractors) {
+    assert.notEqual(d.getUpMinutes, 360, 'early 오답 후보는 6시 기상이 아니어야 합니다.');
+    assert.ok(!d.schedule.some(s => s.activityId === 'act-get-up' && s.minutes === 360));
+  }
+
+  // 2) night owl 후보 검증
+  const nightCands = engine._buildFinaleCandidates(items, { finale: true, finaleKind: 'night' });
+  assert.equal(nightCands.length, 3);
+  const nightAnswers = nightCands.filter(c => c.isAnswer);
+  const nightDistractors = nightCands.filter(c => !c.isAnswer);
+  assert.equal(nightAnswers.length, 1);
+  assert.equal(nightDistractors.length, 2);
+  assert.equal(nightAnswers[0].lateNightActivity, true, 'night 정답 후보는 밤 늦게까지 활동해야 합니다.');
+  assert.ok(nightAnswers[0].schedule.some(s => s.minutes === null || s.minutes > 540));
+  for (const d of nightDistractors) {
+    assert.equal(d.lateNightActivity, false, 'night 오답 후보는 밤 늦게까지 활동하지 않아야 합니다.');
+    assert.ok(!d.schedule.some(s => s.minutes === null || s.minutes > 540));
+  }
 });
