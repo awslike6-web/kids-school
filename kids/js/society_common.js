@@ -109,7 +109,10 @@ function initializeSocietyRoom() {
         const titleEl = document.getElementById('societyTitle');
         if (titleEl) titleEl.innerHTML = `<span style="color:var(--orange);">🛠️ 사회 관리자 시뮬레이터</span>`;
         const goalEl = document.getElementById('societyGoalText');
-        if (goalEl) goalEl.textContent = "🔧 아버님/어머님 테스트 구역: 실질적인 노션 전송을 완전 차단하고, 고품격 가상 검증 데이터를 지원 중입니다.";
+        if (goalEl) {
+            goalEl.textContent = "🔧 아버님/어머님 테스트 구역: 실질적인 노션 전송을 완전 차단하고, 고품격 가상 검증 데이터를 지원 중입니다.";
+            goalEl.dataset.adminLocked = '1';
+        }
         const badgeEl = document.getElementById('adminBadgeTag');
         if (badgeEl) {
             badgeEl.textContent = `🛠️ [${savedName} 검수용] 프리패스 가동`;
@@ -179,7 +182,9 @@ function openMissionView(type) {
 
     if (type === 'storybook') {
         if (window.SocietyStorybook && typeof window.SocietyStorybook.render === 'function') {
-            window.SocietyStorybook.render(innerBody);
+            // 단원 칩에서 단원을 골랐으면 그 단원 동화만 먼저 보여 준다 (전체 서가 단추 있음)
+            const pick = window.SocietyUnitBar ? window.SocietyUnitBar.getPick() : null;
+            window.SocietyStorybook.render(innerBody, pick && pick.grade ? { pick } : undefined);
         } else if (typeof renderSocietyStorybookLibrary === 'function') {
             renderSocietyStorybookLibrary(innerBody);
         }
@@ -380,8 +385,11 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         }
 
         if (records && records.length > 0) {
-            allFetchedRecords = records; 
+            allFetchedRecords = records;
             window.allFetchedRecords = records;
+
+            // 📚 대기실 단원 칩에서 학기·단원을 골라 두었으면 선택 화면 없이 바로 시작
+            if (window.SocietyUnitBar && window.SocietyUnitBar.applyToMission(records)) return;
 
             const uniqueGrades = [...new Set(records.flatMap(r => (r.grades || [r.grade]).map(normalizeSocietyGrade)))].filter(g => g && g !== "공통").sort();
 
@@ -476,6 +484,13 @@ function selectDynamicUnit(unit) {
     });
     
     startMissionWithFilteredData(finalRecords, innerBody);
+}
+
+// 대기실 단원 칩(society_unit_bar.js)이 학기·단원을 한 번에 넘길 때 쓴다
+function selectSocietyGradeUnit(grade, unit) {
+    selectedSocietyGrade = grade;
+    window.selectedSocietyGrade = grade;
+    selectDynamicUnit(unit);
 }
 
 /**
