@@ -242,6 +242,13 @@ function getKstTodayYMD(date = new Date()) {
     const version = STORY_BOOK.version || '20260904';
     const imgSrc = resolveImagePath(item, false);
     if (img && imgSrc) {
+      img.onerror = () => {
+        if (STORY_BOOK && STORY_BOOK.archiveImgBase && !img.dataset.triedArchive) {
+          img.dataset.triedArchive = 'true';
+          const altFile = (currentLang === 'kor' && item.korSpreadImg) ? item.korSpreadImg : (item.spreadImg || '');
+          if (altFile) img.src = `${STORY_BOOK.archiveImgBase}${altFile}?v=${version}`;
+        }
+      };
       img.src = `${imgSrc}?v=${version}`;
       img.alt = item.tag || `페이지 ${item.page}`;
     }

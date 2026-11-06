@@ -10,9 +10,10 @@ window.STORY_BOOK = {
   themeColorDark: "#047857",
   backUrl: "english.html",
   backLabel: "🚪 영어방 대기실",
-  version: "20261104_l10_v1",
+  version: "20261106_l10_v2",
   bilingual: true,
-  imgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/english/minsu/5-2/10/",
+  imgBase: "./images/storybook/l10/",
+  archiveImgBase: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/english/minsu/5-2/10/",
   pages: [
     {
       page: 1,

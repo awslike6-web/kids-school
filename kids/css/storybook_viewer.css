@@ -179,7 +179,7 @@ body {
 }
 .webtoon-passage {
   font-size: 1.15rem; line-height: 1.85; color: #f1f5f9; font-weight: 500;
-  word-break: keep-all; letter-spacing: -0.2px;
+  word-break: keep-all; overflow-wrap: break-word; letter-spacing: -0.2px;
 }
 .webtoon-passage b {
   color: var(--primary); font-weight: 800; text-shadow: 0 0 1px rgba(0,0,0,0.4);
