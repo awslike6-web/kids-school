@@ -152,8 +152,11 @@ for (const route of ['reward', 'logger']) {
       const state = sb => rewardState(sb).map(([key, value]) => [key, key.includes('CACHE') ? { ...JSON.parse(value), updatedAt: 0 } : value]);
       assert.deepEqual(state(after), state(before));
       assert.deepEqual(after.earned, before.earned);
-      assert.deepEqual(after.alerts, before.alerts);
-      assert.equal(after.timers.length, before.timers.length);
+      // 예전 alert 창 한 번 = 이제 누를 필요 없는 말풍선 한 번 (말풍선이 숨김 타이머를 하나 더 건다)
+      assert.deepEqual(after.alerts, []);
+      assert.equal(after.toasts.length, before.alerts.length);
+      after.toasts.forEach(t => assert.match(t, /\+3/));
+      assert.equal(after.timers.length, before.timers.length + after.toasts.length);
     });
   }
 
@@ -214,7 +217,7 @@ test('공용 모듈은 새 전역 하나만 만들며 helper의 실제 미션·�
   sb.context.MinminRewardGrant = undefined;
   sb.loadShared();
   assert.deepEqual(Object.keys(sb.context).filter(key => !before.has(key)), []);
-  assert.deepEqual(Object.keys(sb.context.MinminRewardGrant).sort(), ['flushQueue', 'grant']);
+  assert.deepEqual(Object.keys(sb.context.MinminRewardGrant).sort(), ['flushQueue', 'grant', 'toast']);
   // IIFE 내부 이름과 같은 최상위 lexical 이름을 선언해도 충돌하지 않는다.
   assert.doesNotThrow(() => vm.runInContext('const QUEUE_KEY = 1; let flushing = 2; const pending = 3;', sb.context));
 });

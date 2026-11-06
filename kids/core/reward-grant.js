@@ -14,6 +14,50 @@
     } catch { return {}; }
   }
   function saveQueue(queue) { localStorage.setItem(QUEUE_KEY, JSON.stringify(queue)); }
+
+  // 🫧 보상 말풍선: 공부 흐름을 막지 않도록 화면 위쪽에 잠깐 떴다가 저절로 사라진다.
+  // 누를 필요가 없고(pointer-events: none) 연달아 오면 한 개를 새 글자로 바꿔 다시 보여 준다(쌓이지 않음).
+  let toastTimer = null;
+  function ensureToastStyle(doc) {
+    if (doc.getElementById('minmin-reward-toast-style')) return;
+    const style = doc.createElement('style');
+    style.id = 'minmin-reward-toast-style';
+    style.textContent = `
+      .minmin-reward-toast { position: fixed; top: 14px; left: 50%; z-index: 2147483000;
+        transform: translate(-50%, -12px); opacity: 0; pointer-events: none;
+        max-width: calc(100vw - 32px); box-sizing: border-box; padding: 9px 16px; border-radius: 999px;
+        background: rgba(15, 23, 42, 0.88); color: #fff; font: 700 0.95rem/1.35 'Jua', 'Nanum Gothic', sans-serif;
+        border: 1px solid rgba(255, 255, 255, 0.28); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); text-align: center; white-space: pre-line;
+        transition: opacity 0.25s ease, transform 0.25s ease; }
+      .minmin-reward-toast.is-shown { opacity: 1; transform: translate(-50%, 0); }
+      .minmin-reward-toast.is-levelup { background: linear-gradient(135deg, #7c3aed, #db2777); }
+      .minmin-reward-toast.is-info { background: rgba(71, 85, 105, 0.92); }
+      @media (prefers-reduced-motion: reduce) { .minmin-reward-toast { transition: opacity 0.2s ease; transform: translate(-50%, 0); } }`;
+    (doc.head || doc.documentElement).appendChild(style);
+  }
+  function showRewardToast(text, options = {}) {
+    const doc = window.document;
+    if (!doc || !doc.body || !text) return false;
+    ensureToastStyle(doc);
+    let el = doc.getElementById('minminRewardToast');
+    if (!el) {
+      el = doc.createElement('div');
+      el.id = 'minminRewardToast';
+      el.className = 'minmin-reward-toast';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      doc.body.appendChild(el);
+    }
+    el.textContent = String(text);
+    el.classList.toggle('is-levelup', options.tone === 'levelup');
+    el.classList.toggle('is-info', options.tone === 'info');
+    el.classList.remove('is-shown');
+    void el.offsetWidth; // 같은 말풍선을 다시 띄울 때도 나타나는 움직임이 보이게 한다
+    el.classList.add('is-shown');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('is-shown'), options.duration || 2400);
+    return true;
+  }
   function enqueue(entry) {
     if (!entry.subject || isAdmin()) return false;
     const queue = readQueue();
@@ -136,7 +180,7 @@
             if (typeof showRewardModal === 'function' && typeof updateRewardModal === 'function') {
                 showRewardModal(`<div style="color: #ff073a; font-weight: bold;">⚠️ 오늘 ${subjectName} 보상을 모두 캤습니다!<br><span style="font-size:0.9rem; color:#666;">(일일 상한선 ${DAILY_LIMIT}개 도달)</span><br><br><button onclick="location.href=(typeof getRelativeLobbyUrl==='function'?getRelativeLobbyUrl():(window.location.pathname.includes('/kids-school/') ? '/kids-school/lobby.html' : '/lobby.html'))">로비로 나가기</button></div>`);
             } else {
-                alert(msg);
+                showRewardToast(`⏳ 오늘 ${subjectName} 보상은 다 모았어요! (${DAILY_LIMIT}/${DAILY_LIMIT})`, { tone: 'info', duration: 3000 });
             }
         }
         return false;
@@ -321,15 +365,13 @@
               </div>
             `;
         }
-        // 3️⃣ 기본 알림
+        // 3️⃣ 기본: 누를 필요 없는 작은 말풍선 (2026-11-06~, 예전에는 alert 창이라 매번 눌러 닫아야 했음)
         else {
-            let alertMsg = `🎉 보상 획득 완료!\n+${allowedCurrency}개 적립! (오늘 ${todayEarned + allowedCurrency}/${DAILY_LIMIT})`;
-            if (levelPropName) {
-                alertMsg += `\n${subjectName} 레벨: Lv.${currLevelInfo.level}`;
-            } else {
-                alertMsg += `\n용어 경험치가 상승했습니다!`;
-            }
-            alert(alertMsg);
+            const leveledUp = levelPropName && currLevelInfo.level > prevLevelInfo.level;
+            let toastMsg = `${rewardName} +${allowedCurrency}  ·  오늘 ${todayEarned + allowedCurrency}/${DAILY_LIMIT}`;
+            if (leveledUp) toastMsg += `\n🎉 ${subjectName} 레벨 업! Lv.${currLevelInfo.level}`;
+            else if (isLimitReached) toastMsg += `\n오늘 모을 수 있는 만큼 다 모았어요!`;
+            showRewardToast(toastMsg, { tone: leveledUp ? 'levelup' : 'reward', duration: leveledUp ? 3600 : 2400 });
         }
     }
 
@@ -403,7 +445,7 @@
       return paid;
     } catch (error) { console.warn('[보상 지급 실패]', error); return false; }
   }
-  window.MinminRewardGrant = { grant, flushQueue };
+  window.MinminRewardGrant = { grant, flushQueue, toast: showRewardToast };
   if (window.addEventListener) window.addEventListener('load', () => flushQueue());
   // 동적 로더가 load 뒤 완료되어도 저장된 보상을 한 번 재시도한다.
   if (typeof document !== 'undefined' && document.readyState === 'complete') flushQueue();

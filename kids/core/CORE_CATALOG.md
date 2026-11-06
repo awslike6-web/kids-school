@@ -54,7 +54,8 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   - 조회는 400ms 뒤 한 번 재시도하고, 기억한 ID도 없고 재시도도 실패하면 선택 A에 따라 중복 가능 경고 1회와 함께 신규 생성합니다. 두 기기 동시 쓰기는 노션 고유 키 제약이 없어 보장하지 않습니다.
   - 보상 직접 로드 경로는 클래식 스크립트 `notion-reward.js` → `notion-reward-quiz.js` → `notion-reward-discussion.js` 순서입니다. `quest_runner.html`에서 세 파일을 `?v=20261101-reward-grant-shared`로 연달아 싣습니다. `notion-helper.js`를 싣는 화면(예: `voca.html`)은 같은 이름을 선언하는 `mission-reward-engine.js`·`quiz-feedback-overlay.js`를 받으므로 `notion-reward*.js`를 함께 싣지 않습니다(`tests/notion-reward-split.test.mjs`가 검사).
   - `kids/core/notion-reward.js` (170줄): 공용 모듈 자동 로드, `sendStudyLogToNotion`, 레벨 계산, 음성 세션 상태. 보상 함수는 껍데기 → `reward-grant.js`로 위임합니다. 호출 시점의 학생·테마·과목을 모듈 대기 전에 보존합니다.
-  - `kids/core/reward-grant.js` (410줄): 두 지급 경로의 보상 본체·UI·오프라인 대기열 단일 원천. 클래식 스크립트 IIFE이며 새 전역은 `window.MinminRewardGrant` 하나입니다. 공개 API: `grant(earned, isSilent=false, customExpType=null, context=null)` → `Promise<boolean>`, `flushQueue()` → 진행 중 동일 Promise. 두 껍데기는 같은 폴더의 모듈을 `?v=20261101-reward-grant-shared`로 중복 없이 자동 로드하고 기다립니다. `notion-helper.js`는 새 버전 logger를 로드합니다.
+  - `kids/core/reward-grant.js` (452줄): 두 지급 경로의 보상 본체·UI·오프라인 대기열 단일 원천. 클래식 스크립트 IIFE이며 새 전역은 `window.MinminRewardGrant` 하나입니다. 공개 API: `grant(earned, isSilent=false, customExpType=null, context=null)` → `Promise<boolean>`, `flushQueue()` → 진행 중 동일 Promise, `toast(text, {tone, duration})` → 보상 말풍선.
+  - **보상 말풍선 (2026-11-06~)**: 보상 모달(`showRewardModal`)이나 `#r-detail`이 없는 화면의 보상 알림은 예전 `alert` 창(매번 눌러 닫아야 함) 대신 화면 위쪽 작은 말풍선으로 2.4초(레벨 업 3.6초) 떴다가 저절로 사라진다. 누를 필요가 없고(`pointer-events: none`) 연달아 오면 한 개를 새 글자로 바꿔 보여 준다. 일일 상한 도달 알림도 말풍선이다. 노션 저장 실패(칼럼 부족) 알림은 그대로 `alert`. 두 껍데기는 같은 폴더의 모듈을 `?v=20261101-reward-grant-shared`로 중복 없이 자동 로드하고 기다립니다. `notion-helper.js`는 새 버전 logger를 로드합니다.
   - 조회·PATCH의 네트워크 오류/실패 응답만 `MINMIN_REWARD_QUEUE_V1`에 호출 당시 학생·테마·과목·금액·경험치 유형·id·시각으로 보존합니다. 관리자·상한 0개·인벤토리 없음·과목 없음은 새 항목을 만들지 않습니다. 날짜·스크린타임 보상 누적·소원권 누적 자산은 PATCH 성공 뒤 한 번 반영합니다. 학습설정은 현재 학생에게만 두 동기화를 적용하고, 스크린타임은 tracker → 전역 함수 → 로컬 저장 순으로 대체합니다. 대기열 저장 성공 시 일반 호출은 모달로 짧게 안내하고 조용한 호출은 알리지 않습니다.
   - 보상 대기열은 페이지 `load`와 일반 지급 성공 직후, 같은 Promise를 재사용하여 FIFO 최대 10건을 조용히 재지급합니다. 모듈이 `load` 뒤 도착해도 초기 재시도를 합니다. 최신 인벤토리 조회(`?force=true`)와 지급 시점 부스트·일일 상한을 사용하므로 전날 실패분도 오늘 몫입니다. 상한 0개는 남겨 다음 날 재시도하고 부분 지급 성공은 삭제합니다. 학생 전환 후에도 항목의 학생에게 지급합니다. 검증: `tests/quest-reward-retry.test.mjs`(두 경로 각각 22개)·`tests/reward-grant-shared.test.mjs`, 계약: `docs/reward_grant_shared_spec.md`·`docs/quest_reward_retry_spec.md`.
   - 같은 탭의 지급은 순차 실행하며, Web Locks가 있으면 `minmin-reward-queue` 잠금으로 탭 사이도 직렬화합니다. **사용자 승인 선택**: Web Locks가 없어도 잠금 없이 자동 flush하며, 보상 보존을 우선해 두 탭의 드문 중복 지급 가능성을 수용합니다. PATCH 응답 유실 또는 성공 뒤 큐 삭제 전 종료 시에도 서버의 보상 id 중복 방지가 없어 정확히 한 번 지급을 보장할 수 없습니다.
@@ -665,6 +666,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `EnglishListenPlace.init({ grade, unit, sceneData, containerId })` | VOCA 매핑, 유효 문제 검증, 세션 시작 및 렌더링 |
   | `EnglishListenPlace.speak(text)` | 원어민 영어 음성 출력 브리지 |
 - **검증**: `tests/english-listen-place.test.mjs`
+- **계약 (2026-11-06 Claude 검증·병합)**: 문장은 `fetchVocaFromNotion({subject:'영어', filterByStudent:true})`(영어방이 받아 둔 아이별 캐시)에서 `pageId || id`로 찾는다. 정답마다 `rewardQuizCorrect(문제번호)`, 완주 때 `finalizeQuizRewardSession({isFullComplete:true, subject:'영어(단원)', childName, errorReport})` 한 번. 완주 뒤 보상 세션을 되살리지 않는다(되살리면 페이지를 나갈 때 학습일지가 한 번 더 나감).
 
 ### 👗 `english_listen_place_dressup.js` (8단원 외모·옷차림 장면 모듈, 2026-11-06~)
 코드로 그리는 인물 SVG(남자/여자)와 헤어, 눈, 모자, 안경, 상의, 하의 슬롯 레이어를 렌더링하고, 트레이 아이템 썸네일 생성 및 인물 착용을 처리합니다. 마지막 판 「Catch the Impostor」 3명 후보 렌더링을 제공합니다.

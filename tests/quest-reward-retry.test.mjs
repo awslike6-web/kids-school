@@ -228,8 +228,10 @@ test('일반 성공 경로의 노션 본문·로컬 값·모달 문구는 기존
   assert.deepEqual(rewardState(after).map(([key, value]) => [key, key.includes('CACHE') ? { ...JSON.parse(value), updatedAt: 0 } : value]),
     rewardState(before).map(([key, value]) => [key, key.includes('CACHE') ? { ...JSON.parse(value), updatedAt: 0 } : value]));
   assert.deepEqual(after.earned, before.earned);
-  assert.deepEqual(after.alerts, before.alerts);
-  assert.equal(after.timers.length, before.timers.length);
+  // 예전 alert 창 한 번 = 이제 누를 필요 없는 말풍선 한 번 (말풍선이 숨김 타이머를 하나 더 건다)
+  assert.deepEqual(after.alerts, []);
+  assert.equal(after.toasts.length, before.alerts.length);
+  assert.equal(after.timers.length, before.timers.length + after.toasts.length);
 });
 
 }

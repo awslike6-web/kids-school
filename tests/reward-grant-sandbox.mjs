@@ -53,6 +53,12 @@ export function server() {
 
 export function sandbox({ api = server(), store = storage(), locks, old = false, boost, route = 'reward', preload = true, setup } = {}) {
   const events = new Map(), earned = [], synced = [], flow = [], alerts = [], timers = [];
+  // 보상 말풍선(2026-11-06~)이 붙는 최소 문서: 말풍선 글자를 toasts에 모은다.
+  const toasts = [], elements = {};
+  const fakeEl = () => ({ id: '', className: '', setAttribute() {}, offsetWidth: 0,
+    classList: { toggle() {}, add() {}, remove() {} },
+    set textContent(v) { this._t = v; if (this.id === 'minminRewardToast') toasts.push(v); }, get textContent() { return this._t; } });
+  const holder = { appendChild(el) { if (el.id) elements[el.id] = el; } };
   let day = '2026. 11. 1.', sequence = 0;
   for (const [key, value] of Object.entries({ currentUser: 'son', currentUserName: '민수', currentTheme: '마인크래프트' })) {
     if (store.getItem(key) === null) store.setItem(key, value);
@@ -66,7 +72,7 @@ export function sandbox({ api = server(), store = storage(), locks, old = false,
     console: { log() {}, warn() {}, error() {} }, currentSubject: '영어',
     navigator: locks ? { locks } : {}, crypto: { randomUUID: () => `reward-${++sequence}` },
     addEventListener(type, fn) { events.set(type, fn); },
-    document: { scripts: [], getElementById: () => null },
+    document: { scripts: [], getElementById: id => elements[id] || null, createElement: fakeEl, head: holder, documentElement: holder, body: holder },
     ScreenTimeTracker: {
       syncFromInventoryProps(props, name) { synced.push(name); },
       recordDailyRewardEarned(amount, name) { earned.push({ amount, name }); }
@@ -81,7 +87,7 @@ export function sandbox({ api = server(), store = storage(), locks, old = false,
   if (!old && preload) vm.runInContext(shared, context);
   vm.runInContext(old ? (route === 'logger' ? oldLogger : fixture.split('window.__sttSession = null;')[0]) : sources[route], context);
   return {
-    context, store, api, earned, synced, flow, alerts, timers,
+    context, store, api, earned, synced, flow, alerts, timers, toasts,
     loadShared() { vm.runInContext(shared, context); },
     grant: (...args) => context.grantRewardAndShowUI(...args),
     flush: () => events.get('load')(),
