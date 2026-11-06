@@ -148,7 +148,8 @@
     renderLoading('문장 데이터를 불러오고 있어요...');
     try {
       const vocaList = typeof window.fetchVocaFromNotion === 'function'
-        ? await window.fetchVocaFromNotion({ subject: '영어', filterByStudent: false })
+        // 영어방이 미리 받아 둔 아이별 어휘 캐시를 그대로 쓴다 (전 과목·전 학생을 새로 받으면 처음 열 때 15초 넘게 걸림)
+        ? await window.fetchVocaFromNotion({ subject: '영어', filterByStudent: true })
         : [];
       _vocaMap = {};
       (vocaList || []).forEach(row => {
@@ -479,15 +480,14 @@
     const childName = resolveChildName();
     const errorReport = _wrongLogs.length > 0 ? _wrongLogs.join(' / ') : '오답 없음';
 
-    const savedSession = window.__quizRewardSession ? { ...window.__quizRewardSession } : null;
+    // 완주 보너스·완주 소리·학습일지는 공통 보상 세션이 한 번에 처리하고 세션을 비운다.
+    // (세션을 되살리면 페이지를 나갈 때 학습일지가 한 번 더 나가므로 되살리지 않는다)
     if (typeof window.finalizeQuizRewardSession === 'function') {
-      Promise.resolve(window.finalizeQuizRewardSession({
+      window.finalizeQuizRewardSession({
         isFullComplete: true,
         subject: '영어(' + unitCode + ')',
         childName,
         errorReport
-      })).finally(() => {
-        if (savedSession && !window.__quizRewardSession) window.__quizRewardSession = savedSession;
       });
     }
 

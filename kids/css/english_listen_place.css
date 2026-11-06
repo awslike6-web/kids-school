@@ -97,6 +97,8 @@ body.theme--minecraft .lp-meaning-text { color: #a5b4fc; }
 .dressup-item-card:hover { transform: translateY(-2px); border-color: #93c5fd; }
 .dressup-item-card.is-dragging { cursor: grabbing; border-color: #3b82f6; box-shadow: 0 8px 20px rgba(59,130,246,0.3); }
 .dressup-item-card.item-used { opacity: 0.55; cursor: default; pointer-events: none; border-color: #10b981; }
+/* 어두운 테마에서 검정·남색 물건이 묻히지 않게 그림 뒤에 밝은 원판을 깐다 */
+body.theme--minecraft .item-thumb-svg { background: #e2e8f0; border-radius: 50%; }
 .item-card-label { font-size: 0.74rem; font-weight: 700; text-align: center; color: var(--text-main, #334155); line-height: 1.15; min-height: 0.85rem; }
 
 /* 애니메이션 */
@@ -146,7 +148,7 @@ body.theme--minecraft .lp-meaning-text { color: #a5b4fc; }
 @keyframes lpSpin { to { transform: rotate(360deg); } }
 
 /* 피날레 3명 무대 */
-.lp-finale-stage-area { flex: 1; display: flex; align-items: center; justify-content: center; }
+.lp-finale-stage-area { display: flex; align-items: flex-start; justify-content: center; margin-top: 6px; }
 .dressup-finale-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
 .finale-person-card {
   background: var(--bg-card, #fff); border: 2px solid var(--border-color, #e2e8f0);

@@ -293,3 +293,37 @@ test('한 판 완주: 정답마다 rewardQuizCorrect가 서로 다른 번호로 
   assert.equal(finalizeCalls[0].childName, '민수');
   assert.match(finalizeCalls[0].errorReport, /\(오답: blue pants\)/, '오답 기록이 문장 (오답: 물건) 형식으로 전달되어야 합니다.');
 });
+
+test('완주 뒤 보상 세션을 되살리지 않는다 (되살리면 페이지를 나갈 때 학습일지가 한 번 더 나감)', async () => {
+  const { sandbox } = createEngineSandbox({
+    fetchVocaFromNotion: async () => [
+      { id: '3e4a2711-5b68-81fe-bfd0-ed97bdf1015c', word: "She's wearing a black skirt.", meaning: '검정 치마' },
+      { id: '3e4a2711-5b68-81af-8696-d27e8acb7ba9', word: "He's wearing a red cap.", meaning: '빨간 모자' },
+      { id: '3d8a2711-5b68-81a9-aed9-f716ecd0a5ad', word: 'She has long straight hair and blue eyes.', meaning: '긴 생머리와 파란 눈' }
+    ],
+    // 실제 공통 함수처럼: 완주 처리 뒤 세션을 비운다
+    initQuizRewardSession: () => { sandbox.window.__quizRewardSession = { isLogged: false, correctCount: 0 }; },
+    finalizeQuizRewardSession: async () => { sandbox.window.__quizRewardSession = null; }
+  });
+  const engine = sandbox.window.EnglishListenPlace;
+  await engine.init({ containerId: 'listenPlaceApp' });
+  engine.startSession();
+  const questions = engine.getState().questions;
+  for (let i = 0; i < questions.length; i++) {
+    engine.startQuestion(i);
+    const q = engine.getState().currentQuestion;
+    if (q.finale) engine.attemptFinaleByAnswer(true);
+    else q.answer.forEach(id => engine.attemptItemById(id));
+  }
+  await new Promise(r => setImmediate(r));
+  assert.equal(sandbox.window.__quizRewardSession, null);
+});
+
+test('영어방이 받아 둔 아이별 어휘 캐시를 쓴다 (filterByStudent: true)', async () => {
+  const seen = [];
+  const { sandbox } = createEngineSandbox({ fetchVocaFromNotion: async (opts) => { seen.push(opts); return []; } });
+  await sandbox.window.EnglishListenPlace.init({ containerId: 'listenPlaceApp' });
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].subject, '영어');
+  assert.equal(seen[0].filterByStudent, true);
+});
