@@ -5,6 +5,7 @@
 
 window.LISTEN_PLACE_SCENE = {
   scene: 'timeline',
+  trayGuide: '아래 그림을 누르거나 시간표 칸으로 끌어다 놓으세요',
   grade: '5-2',
   unit: 'L10',
   badge: '⭐ 5-2 10단원 특별 활동',

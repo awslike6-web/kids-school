@@ -286,7 +286,7 @@
         </div>
         <div id="lpStageArea" class="lp-stage-area"></div>
         <div class="lp-tray-wrapper">
-          <div class="lp-tray-guide">👇 아래 그림을 누르거나 인물로 끌어다 놓으세요</div>
+          <div class="lp-tray-guide">👇 ${escapeHtml(_sceneData.trayGuide || '아래 그림을 누르거나 알맞은 곳으로 끌어다 놓으세요')}</div>
           <div id="lpTrayArea" class="lp-tray-grid"></div>
         </div>
         <div id="lpNextBar" class="lp-next-bar" style="display:none;">

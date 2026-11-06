@@ -5,6 +5,7 @@
 
 window.LISTEN_PLACE_SCENE = {
   scene: 'dressup',
+  trayGuide: '아래 그림을 누르거나 인물로 끌어다 놓으세요',
   grade: '5-2',
   unit: 'L8',
   badge: '⭐ 5-2 8단원 특별 활동',
