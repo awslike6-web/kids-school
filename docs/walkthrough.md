@@ -28,34 +28,41 @@ Chrome 360×800, 1280×800에서 3호 칩 선택과 이미지 6포즈 로딩·�
 
 ---
 
-# 영어 「듣고 끌어다 놓기」(Listen & Place) 8단원 옷 입히기 검증 기록 (2026-11-06)
+# 영어 「듣고 끌어다 놓기」(Listen & Place) 8단원 옷 입히기 v2 검증 기록 (2026-11-06)
 
-- **작업 브랜치**: `antigravity/english-listen-place` (`origin/main`에서 분기, kids-school-main 저장소)
-- **작업 목적**: 5-2 8단원 외모·옷차림 특별 활동 신규 구축 및 단원 확장형 공통 엔진 모듈화.
+- **작업 폴더**: `G:/master-tower/scratch/worktrees/english-listen-place-v2`
+- **작업 브랜치**: `antigravity/english-listen-place-v2` (`origin/antigravity/english-listen-place`에서 분기 후 `origin/main` 병합)
 
 ## 1. 자동 검사 결과
 
-- `node --test "tests/english-listen-place.test.mjs"`: 7개 전체 통과 (`pass 7, fail 0`).
-  - 등록표 미등록 단원 차단 계약 검증
-  - VOCA 미존재 pageId 건너뛰기 계약 검증
-  - 트레이 받침대 정답+동일부위 오답 4개 추출 로직 검증
-  - 에러리스 피드백 (감점 없음, 틀리면 정답 카드 노란 펄스 안내) 검증
-  - 두 부위 문장 2개 모두 채우기 완료 계약 검증
-  - 파일 골디락스 800줄 미만 및 CSS 300줄 이하, 루트 절대경로 금지 검증
-- `node --test "tests/**/*.test.mjs"`: 687개 테스트 전체 통과 (`pass 686, fail 0, todo 1[알려진 동시저장 한계]`).
-- `python -X utf8 scripts/verify_contracts.py --mode git-diff`: `✅ [ALL PASS]` (필수 DOM 뼈대, KST 로컬 날짜, 금지 안티패턴 제로).
-- `python -X utf8 kids-school-main/scripts/build_system_map.py`: 시스템 조감도 자동 데이터 갱신 완료 (`scripts/data/system_map_generated.js`).
+- `node --test "tests/english-listen-place.test.mjs"`: 7개 통과 (`tests 7, pass 7, fail 0`).
+  - 파일 줄 수(600줄 이하) 및 금지 문자열(`saveStudyLogDirect`, `speechSynthesis`, `toISOString().slice`, 루트 절대경로) 없음 확인
+  - 등록표에 없는 `grade`·`unit` 차단 확인
+  - 캐시 모양 기록(`id`만 있고 `pageId` 없음)으로 문제 생성 및 없는 `page_id` 건너뛰기 확인
+  - 받침대 물건 4개 구성 및 안경 문제에서 다른 부위(모자 등)로 채우기 확인
+  - 정답 전 받침대 카드에 영어 글자가 없고 맞힌 뒤에 표시되는지 확인
+  - 실제 엔진 `_judge` 및 `attemptItemById`: 오답 시 보상 미호출·노란 안내 대상 지정, 두 부위 문장 두 개 모두 맞혀야 완료 확인
+  - 한 판 완주: 정답마다 서로 다른 번호(`0, 1, 2`)로 `rewardQuizCorrect` 호출, 완주 시 `finalizeQuizRewardSession({ isFullComplete: true, subject: '영어(L8)' })` 호출 확인
+- `node --test "tests/**/*.test.mjs"`: `tests 694, pass 691, fail 0, skipped 2, todo 1`.
+- `verify_contracts.py --mode git-diff`: `[ALL PASS]`.
 
-## 2. 브라우저 및 화면 검증
+## 2. 브라우저 조작 및 화면 확인
 
-- **테스트 환경**: `scripts/guarded_preview_server.py 8767` 쓰기 차단 로컬 서버 구동 상태에서 Edge 헤드리스 브라우저 검증.
-- **데스크톱 (1280×900)**:
-  - `kids/subjects/english/listen_place.html?grade=5-2&unit=L8` 정상 로드 및 시작 카드 표시 확인.
-  - 상단 탑바, 문장 다시 듣기/뜻 보기, 중앙 인물 SVG 무대, 하단 4개 아이템 트레이의 정렬 및 레이아웃 무결성 확인.
-- **모바일 폰 폭 (375×812)**:
-  - 375px 좁은 폭에서도 가로 스크롤(`scrollWidth > innerWidth`) 없이 컴팩트하게 인물 및 4개 트레이 카드가 한 화면에 핏됨을 확인.
-  - 터치 및 탭(누르기) 친화적인 카드 버튼 스타일 및 터치액션(`touch-action: none`, `user-select: none`) 확인.
-- **스크린샷 (커밋 제외 / scratch 보관)**:
-  - 데스크톱: `G:/master-tower/scratch/listen_place_desktop.png` (11,886 bytes)
-  - 모바일(375px): `G:/master-tower/scratch/listen_place_mobile_375.png` (7,672 bytes)
-  - 대기실 로비: `G:/master-tower/scratch/english_lobby_desktop.png` (8,416 bytes)
+- **테스트 서버**: 별도 worktree에서 `scripts/guarded_preview_server.py 8768` 구동.
+- **조작 경로**: `english.html`에서 학기 `5-2` 칩, 단원 `8단원` 칩을 차례로 누른 뒤 `⭐ 이번 단원 특별 활동` 카드(`👕 친구 옷 입혀 주기`)를 눌러 진입.
+- **진행 확인**:
+  - 민수(`currentUser='son'`, `currentUserName='민수'`)로 첫 문제에서 오답 1회 클릭 후 노란 안내 테두리 확인, 끌어다 놓기(`PointerEvent`)와 클릭을 모두 사용해 일반 6문제 + 마지막 판 1문제 완주.
+  - 민수 완주 직후 콘솔 출력:
+    - `{"c":7,"a":3}`
+    - `["PATCH https://minmin-notion.awslike6.workers.dev/v1/pages/374a2711-5b68-8030-aede-d4c2493fe233","PATCH https://minmin-notion.awslike6.workers.dev/v1/pages/374a2711-5b68-8030-aede-d4c2493fe233","PATCH https://minmin-notion.awslike6.workers.dev/v1/pages/374a2711-5b68-8030-aede-d4c2493fe233","PATCH https://minmin-notion.awslike6.workers.dev/v1/pages/374a2711-5b68-8030-aede-d4c2493fe233","POST https://minmin-notion.awslike6.workers.dev/v1/pages"]`
+  - 민서(`currentUser='daughter'`, `currentUserName='민서'`)로 분홍색 테마(`theme--slime`)에서 한 판 완주 확인.
+  - 모바일 폭 `375×812`에서 `innerWidth: 375, scrollWidth: 375`로 가로 넘침 없음 확인.
+- **화면 사진 (`G:/master-tower/scratch/` 보관, 커밋 제외)**:
+  1. `lp_v2_1_english_card.png`: 영어방 `5-2`·`8단원` 선택 상태에서 특별 활동 카드가 보이는 화면
+  2. `lp_v2_2_first_question.png`: 첫 문제 (인물 + 영어 글자 없는 받침대 카드 4개)
+  3. `lp_v2_3_wrong_guide.png`: 오답 클릭 뒤 정답 카드에 노란 안내선이 켜진 화면
+  4. `lp_v2_4_two_part_done.png`: 두 부위 문장(`He has short curly hair and green eyes.`) 두 개를 다 맞힌 화면
+  5. `lp_v2_5_finale.png`: 마지막 판 「친구를 찾아라!」 후보 3명 화면
+  6. `lp_v2_6_completed.png`: 8단원 옷 입히기 완주 카드 화면
+  7. `lp_v2_7_mobile_375.png`: 폭 375px 문제 화면
+  8. `lp_v2_8_minseo_theme.png`: 민서 테마(`theme--slime`) 문제 화면 (머리 4종 구분 확인)
