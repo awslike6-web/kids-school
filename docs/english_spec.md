@@ -305,8 +305,10 @@ graph TD
 
 ### 11단원(Where Is the Library?) 핵심 어휘 & 길 찾기 표현 SSOT:
 * **단원 제재**: 위치 묻고 길 안내하기 (Minsu Explores the Village)
-* **핵심 표현**: `Where is the library?` (도서관이 어디에 있나요?), `Go straight and turn right.` (똑바로 가서 우회전하세요.), `It's on your left.` (왼쪽에 있어요.)
-* **핵심 어휘**: `library`, `straight`, `turn`, `left`, `right`, `corner`, `first`, `second`, `third`, `floor`, `behind`, `next to`
+* **노션 등록 (2026-11-07, 교과서 기준 · 담임 클래스 카드 나오면 같은 행 글자만 고침, 행 삭제 금지)**: VOCA_DB 5-2 · `L11` 47행 = 단어 24 · 숙어 9 · 문장 14
+* **핵심 문장**: `Where is the restaurant/hospital/bank/library/flower shop?`, `Go straight two blocks and turn left.`, `Go straight one block and turn right.`, `Go straight and turn right at the big tree.`, `It's next to the hospital/flower shop.`, `It's on your left/right.`, `Thanks a lot.` / `No problem.`
+* **핵심 어휘**: 장소(restaurant, bank, hospital, library, flower shop, park, school, candy shop, ice cream shop), 방향·위치(left, right, straight, corner, behind, block, turn, next), 층·순서(floor, first, second, third), 기타(map, town, tonight), 숙어(go straight, turn left/right, next to, on your left/right, one block, two blocks, on the corner)
+* **듣고 끌어다 놓기**: `docs/english_listen_place_L11_spec.md` · 장면 `map` (2026-11-07 병합)
 
 ---
 
