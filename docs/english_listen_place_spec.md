@@ -127,7 +127,7 @@ window.LISTEN_PLACE_SCENE = {
 2. `python -X utf8 scripts/verify_contracts.py --mode git-diff` → `[ALL PASS]`.
 3. 쓰기 차단 미리보기 서버에서 민수·민서 각각 영어방 → 5-2 → 8단원 → 특별 활동 카드 → 한 판 끝까지. 폰 폭(375px)에서도 한 판. 끌어다 놓기와 누르기 둘 다.
 4. 화면 사진(데스크톱 1장, 폰 폭 1장)과 확인 내용을 `docs/walkthrough.md`에 적는다.
-5. 커밋 메시지 끝에 `Agent: antigravity (모델명)`. 브랜치를 푸시하고 **main 병합은 하지 않는다.** Claude Code가 검증한 뒤 병합한다.
+5. 커밋 메시지 끝에 `Agent: antigravity (gemini-3.8-flash)` 또는 `Agent: antigravity (gemini-4-argon)` (관제탑 `scripts/agent_commit_rules.json` 목록 그대로). 브랜치를 푸시하고 **main 병합은 하지 않는다.** Claude Code가 검증한 뒤 `--no-ff`로 병합하고 병합 커밋에 `교정:` 줄을 남긴다 (관제탑 `docs/AGENT_COMMIT_PROTOCOL.md` §4).
 
 ## 10. 보고 형식
 

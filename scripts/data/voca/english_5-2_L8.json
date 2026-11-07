@@ -1,0 +1,219 @@
+{
+  "_설명": "영어 5-2 8단원(미래엔 강정진 2022 개정) VOCA_DB 등록 자료. 관제탑 scripts/insert_eng_l8_voca.py(L8_ITEMS)를 그대로 옮겼다(2026-11-08). 노션이 원본이므로 이후 수정은 노션에서 하고, 이 파일을 다시 돌릴 때는 미리보기로 바뀔 칸을 먼저 본다. scripts/register_voca.py로 반영한다.",
+  "subject": "영어",
+  "grade": "5-2",
+  "student": "민수",
+  "unit": "L8",
+  "voca": [
+    {
+      "word": "curly hair",
+      "meaning": "곱슬머리",
+      "detail": "꼬불꼬불 곱슬거리는 머리카락 모양이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "straight hair",
+      "meaning": "생머리",
+      "detail": "웨이브 없이 곧게 쭉 뻗은 머리카락 모양이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "short hair",
+      "meaning": "짧은 머리",
+      "detail": "어깨 위로 짧게 자른 머리카락 모양이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "long hair",
+      "meaning": "긴 머리",
+      "detail": "어깨 아래로 길게 내려오는 머리카락 모양이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "blonde hair",
+      "meaning": "금발 머리",
+      "detail": "밝은 노란색이나 황금빛을 띠는 머리카락이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "brown",
+      "meaning": "갈색, 밤색",
+      "detail": "따뜻한 나무나 밤의 색깔인 갈색이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "blue",
+      "meaning": "파란색, 푸른",
+      "detail": "맑은 하늘이나 바다의 색깔인 파란색이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "green",
+      "meaning": "초록색, 녹색",
+      "detail": "싱그러운 나뭇잎과 풀밭의 색깔인 초록색이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "black",
+      "meaning": "검은색, 검은",
+      "detail": "어두운 밤하늘이나 숯의 색깔인 검은색이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "hazel",
+      "meaning": "녹갈색",
+      "detail": "갈색과 초록색이 오묘하게 섞인 아름다운 눈동자 색이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "eyes",
+      "meaning": "눈",
+      "detail": "세상을 보고 색깔을 구별하는 얼굴의 소중한 눈(두 눈)이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "glasses",
+      "meaning": "안경",
+      "detail": "눈이 잘 보이도록 쓰거나 멋으로 착용하는 안경이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "pants",
+      "meaning": "바지",
+      "detail": "다리를 감싸는 긴바지나 반바지 옷이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "shirt",
+      "meaning": "셔츠",
+      "detail": "깃과 단추가 있는 상의 옷이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "dress",
+      "meaning": "드레스, 원피스",
+      "detail": "상의와 하의가 하나로 이어진 예쁜 옷이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "he",
+      "meaning": "그 (남자)",
+      "detail": "남자 아이나 어른 남성을 가리키는 대명사예요.",
+      "type": "단어"
+    },
+    {
+      "word": "she",
+      "meaning": "그녀 (여자)",
+      "detail": "여자 아이나 어른 여성을 가리키는 대명사예요.",
+      "type": "단어"
+    },
+    {
+      "word": "find",
+      "meaning": "찾다, 발견하다",
+      "detail": "숨겨진 물건이나 친구를 눈으로 찾아내는 행동이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "cry",
+      "meaning": "울다, 외치다",
+      "detail": "슬프거나 아파서 눈물을 흘리거나 크게 소리치는 모습이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "wear",
+      "meaning": "입다, 쓰다, 착용하다",
+      "detail": "옷, 모자, 안경, 신발 등을 몸에 걸치는 동사예요.",
+      "type": "단어"
+    },
+    {
+      "word": "wrong",
+      "meaning": "틀린, 잘못된",
+      "detail": "맞지 않거나 어긋났을 때 쓰는 단어예요.",
+      "type": "단어"
+    },
+    {
+      "word": "girl",
+      "meaning": "여자아이, 딸",
+      "detail": "어린 여자 어린이나 딸을 부르는 말이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "boy",
+      "meaning": "소년, 남자아이",
+      "detail": "어린 남자 어린이나 아들을 부르는 말이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "ask",
+      "meaning": "묻다, 부탁하다",
+      "detail": "궁금한 것을 물어보거나 도움을 요청하는 말이에요.",
+      "type": "단어"
+    },
+    {
+      "word": "any",
+      "meaning": "아무런, 어떤",
+      "detail": "의문문이나 부정문에서 쓰이는 단어예요.",
+      "type": "단어"
+    },
+    {
+      "word": "What does he look like?",
+      "meaning": "그는 어떻게 생겼나요?",
+      "detail": "친구의 생김새나 외모(머리 모양, 눈 색깔 등)를 물어볼 때 쓰는 대표 질문이에요.",
+      "type": "문장"
+    },
+    {
+      "word": "She has long straight hair and blue eyes.",
+      "meaning": "그녀는 긴 생머리와 파란 눈을 가지고 있어요.",
+      "detail": "has를 써서 머리 모양과 눈의 특징을 묘사하는 문장이에요.",
+      "type": "문장"
+    },
+    {
+      "word": "He has short curly hair and green eyes.",
+      "meaning": "그는 짧은 곱슬머리와 초록색 눈을 가지고 있어요.",
+      "detail": "소라의 친구처럼 짧은 곱슬머리와 초록색 눈을 가진 특징을 묘사해요.",
+      "type": "문장"
+    },
+    {
+      "word": "What is she wearing?",
+      "meaning": "그녀는 무엇을 입고 있나요?",
+      "detail": "친구나 사람의 옷차림(모자, 셔츠, 바지, 치마 등)을 물어볼 때 쓰는 질문이에요.",
+      "type": "문장"
+    },
+    {
+      "word": "He is wearing blue pants.",
+      "meaning": "그는 파란 바지를 입고 있어요.",
+      "detail": "지금 입고 있는 옷차림을 묘사할 때 be동사 + wearing을 써요.",
+      "type": "문장"
+    },
+    {
+      "word": "She is wearing a red skirt.",
+      "meaning": "그녀는 빨간 치마를 입고 있어요.",
+      "detail": "빨간색 치마를 입고 있는 옷차림을 묘사해요.",
+      "type": "문장"
+    },
+    {
+      "word": "I don't know her.",
+      "meaning": "저는 그녀를 모릅니다.",
+      "detail": "잘 모르는 사람이나 친구를 솔직하게 모른다고 답할 때 써요.",
+      "type": "문장"
+    },
+    {
+      "word": "This is my friend, Sam.",
+      "meaning": "이 사람은 제 친구, 샘입니다.",
+      "detail": "내 소중한 친구를 다른 사람에게 소개할 때 쓰는 인사말이에요.",
+      "type": "문장"
+    },
+    {
+      "word": "He looks cool!",
+      "meaning": "그는 멋져 보여요!",
+      "detail": "친구가 멋진 옷을 입었거나 멋있을 때 칭찬해 주는 표현이에요.",
+      "type": "문장"
+    },
+    {
+      "word": "Find your friend!",
+      "meaning": "친구를 찾아라!",
+      "detail": "8단원 본문의 핵심 제재로 미션을 읽고 해당 친구를 찾는 문장이에요.",
+      "type": "문장"
+    }
+  ]
+}

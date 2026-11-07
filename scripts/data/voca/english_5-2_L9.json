@@ -1,0 +1,178 @@
+{
+  "_설명": "영어 5-2 9단원(미래엔 강정진 2022 개정) VOCA_DB 등록 자료. 관제탑 scripts/insert_eng_l9_voca.py(NEW_L9_ITEMS)를 그대로 옮겼다(2026-11-08). 노션이 원본이므로 이후 수정은 노션에서 하고, 이 파일을 다시 돌릴 때는 미리보기로 바뀔 칸을 먼저 본다. scripts/register_voca.py로 반영한다.",
+  "subject": "영어",
+  "grade": "5-2",
+  "student": "민수",
+  "unit": "L9",
+  "test_scope": true,
+  "voca": [
+    {
+      "word": "bath",
+      "meaning": "욕조, 목욕",
+      "detail": "따뜻한 물을 받아 몸을 담그는 욕조예요. 목욕을 뜻하기도 해요. (예: There is a bath in the bathroom.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "spoon",
+      "meaning": "숟가락",
+      "detail": "밥이나 국을 떠먹을 때 쓰는 숟가락이에요. (예: There is a spoon on the table.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "bed",
+      "meaning": "침대",
+      "detail": "침실에서 푹신하게 잠을 자는 침대예요. (예: There is a bed in the bedroom.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "classroom",
+      "meaning": "교실",
+      "detail": "선생님과 친구들과 함께 공부하는 학교 교실이에요. (예: This is the classroom.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "sofa",
+      "meaning": "소파",
+      "detail": "거실에 두고 편안하게 앉거나 누울 수 있는 푹신한 긴 의자예요. (예: There is a sofa in the living room.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "table",
+      "meaning": "탁자, 식탁",
+      "detail": "밥을 먹거나 물건을 올려놓는 식탁 또는 탁자예요. (예: There is a table in the kitchen.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "stove",
+      "meaning": "가스레인지, 난로",
+      "detail": "주방에서 불을 켜서 요리를 하거나 방을 따뜻하게 해주는 기구예요. (예: There is a stove in the kitchen.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "sink",
+      "meaning": "싱크대, 개수대",
+      "detail": "주방에서 그릇을 씻거나 욕실에서 손을 씻는 세면대/싱크대예요. (예: There is a sink in the kitchen.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "basement",
+      "meaning": "지하층, 지하실",
+      "detail": "건물이나 집의 땅 아래에 있는 지하층이에요. (예: This is the basement.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "oven",
+      "meaning": "오븐",
+      "detail": "빵이나 피자, 고기를 노릇노릇 굽는 조리기구예요. (예: There is an oven in the kitchen.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "fridge",
+      "meaning": "냉장고",
+      "detail": "음식을 시원하고 신선하게 보관해주는 냉장고예요. (예: There is a fridge in the kitchen.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "place",
+      "meaning": "장소, 곳",
+      "detail": "집, 학교, 공원처럼 어떤 일이 일어나거나 사람이 머무는 장소예요. (예: What a nice place!)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "This is the ...",
+      "meaning": "이것은 ….. 입니다.",
+      "detail": "특정 방이나 장소를 소개할 때 쓰는 기본 표현이에요. (예: This is the bedroom.)",
+      "pos": "표현",
+      "type": "문장"
+    },
+    {
+      "word": "There is a ... in the ...",
+      "meaning": "[방] 안에는 [가구]가 한 개 있습니다.",
+      "detail": "어떤 공간 안에 물건 하나가 어디에 있는지 위치를 설명할 때 쓰는 패턴이에요. (예: There is a toilet in the bathroom.)",
+      "pos": "표현",
+      "type": "문장"
+    },
+    {
+      "word": "a cup",
+      "meaning": "한 컵, 컵 하나",
+      "detail": "물이나 음료수를 마시는 손잡이가 달린 컵 한 개예요. (예: There is a cup on the table.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "books",
+      "meaning": "여러 책, 책들",
+      "detail": "지식과 재미난 이야기가 담겨 있는 책들이에요. book의 복수형이에요. (예: There are books on the desk.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "lamp",
+      "meaning": "램프, 스탠드 조명",
+      "detail": "방을 환하고 아늑하게 밝혀주는 전등/램프예요. (예: There is a lamp on the table.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "stars",
+      "meaning": "별, 별들",
+      "detail": "밤하늘에 반짝반짝 빛나는 별들이에요. star의 복수형이에요. (예: There are stars in the sky.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "mirror",
+      "meaning": "거울",
+      "detail": "내 얼굴과 모습을 비춰보는 유리 거울이에요. (예: There is a mirror in the bathroom.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "toothbrush",
+      "meaning": "칫솔",
+      "detail": "밥을 먹고 이를 깨끗이 닦는 칫솔이에요. (예: There is a toothbrush in the bathroom.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "hairdryer",
+      "meaning": "헤어드라이어",
+      "detail": "머리를 감고 나서 따뜻한 바람으로 머리카락을 말리는 기구예요. (예: There is a hairdryer in the bathroom.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "piano",
+      "meaning": "피아노",
+      "detail": "건반을 눌러 아름다운 소리를 내는 악기 피아노예요. (예: There is a piano in the living room.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "TV",
+      "meaning": "텔레비전, TV",
+      "detail": "만화나 재미있는 방송을 보는 텔레비전이에요. (예: There is a TV in the living room.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "robot",
+      "meaning": "로봇",
+      "detail": "사람 대신 여러 가지 일을 척척 해내는 똑똑한 기계 장난감/로봇이에요. (예: There is a robot in the bedroom.)",
+      "pos": "명사",
+      "type": "단어"
+    }
+  ]
+}

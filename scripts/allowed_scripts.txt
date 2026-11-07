@@ -1,0 +1,33 @@
+# scripts/ 허용 목록 — 검사기: scripts/check_scripts_allowlist.py, 규칙: 관제탑 docs/AGENT_COMMIT_PROTOCOL.md §8
+# 저장소 맨 위 *.py와 scripts/ 바로 아래 *.py는 이 목록에 있어야 커밋된다 (pre-commit 훅·원격 시험·주간 점검).
+# 새 공용 도구: [도구] 아래에 'scripts/파일명.py  # 목적' 한 줄을 더해 같은 커밋에 넣는다.
+# 등록 작업마다 일회성 스크립트를 새로 만들지 않는다. 공식 도구에 기능을 더한다 (GEMINI.md §9-5).
+# 다 쓴 파일은 scripts/archive/<연-월>/로 옮기고 이 목록에서 지운다.
+
+[도구]
+scripts/add_activity_photo.py
+scripts/audit_monster_lab_bloat.py
+scripts/build_gallery.py
+scripts/build_math_numbers_audio.py
+scripts/build_mini_reading_audio.py
+scripts/build_system_map.py
+scripts/check_commit_msg.py
+scripts/check_scripts_allowlist.py
+scripts/generate_pwa_icons.py
+scripts/guarded_preview_server.py
+scripts/register_minseo_korean.py
+scripts/register_voca.py  # 과목 공용 VOCA_DB 어휘 등록 (자료 scripts/data/voca/*.json)
+scripts/society_quiz_generator.py
+scripts/spot_diff_align.py
+scripts/sync_agent_skills.py
+scripts/test_register_voca.py  # register_voca.py 회귀 시험 (가짜 통신)
+scripts/verify_gallery_entry.py
+scripts/verify_monster_lab_manual.py
+scripts/verify_notion_quest_sync.py
+scripts/verify_quest_isolation.py
+scripts/verify_semester_quest.py
+scripts/verify_spot_diff_align.py
+
+# 일회성 후보를 모아 두는 구역. 2026-11-08 처음 고른 35개는 문서·스킬·코드 참조를 검색해 정리했다
+# (34개 보관, migrate_math_to_curriculum.py는 [도구]로). 새 줄을 더하지 않는다.
+[정리 대상]

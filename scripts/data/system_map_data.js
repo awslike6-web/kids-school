@@ -65,11 +65,12 @@ window.SYSTEM_MAP_DATA = {
     },
     {
       id: "src_eng_voca", col: "source", domain: ["english", "quest"], badge: "Python CLI",
-      title: "insert_eng_l*_voca.py (단원별)", path: "scripts/insert_eng_l10_voca.py",
-      summary: "영어 단원별 핵심 어휘·클래스카드 문장을 VOCA_DB(과목=영어, 학년 5-2)에 등록",
-      guardrails: ["단원마다 스크립트를 복사하지 말고 기존 스크립트 구조를 재사용",
-        "학년·학생·단원 속성이 빠지면 진도판 칩과 5분방 출제에서 누락됨"],
-      agentPrompt: "english_spec.md와 notion_schemas_school.md의 VOCA_DB 스키마를 확인한 뒤 영어 새 단원 어휘 등록 스크립트를 미리보기로 점검해줘."
+      title: "register_voca.py (과목 공용 어휘 등록)", path: "kids-school-main/scripts/register_voca.py",
+      summary: "단원 자료 JSON(scripts/data/voca/*.json)을 VOCA_DB에 맞춤. 영어 5-2 L8~L11 자료 포함, 단원별 insert_*_voca.py를 대체",
+      guardrails: ["단원마다 스크립트를 새로 만들지 말고 자료 JSON만 추가 (scripts/ 허용 목록이 막음)",
+        "기본 미리보기 → --apply는 새 행만, 기존 행 덮어쓰기는 --update일 때만 (노션에서 고친 글자 보호)",
+        "숙련도·달성은 쓰지 않음, 학년·학생·단원 속성이 빠지면 진도판 칩과 5분방 출제에서 누락됨"],
+      agentPrompt: "english_spec.md 등록 절을 읽고 새 단원 자료 JSON을 scripts/data/voca/에 만든 뒤 kids-school-main/scripts/register_voca.py로 미리보기 결과를 보여줘."
     },
     {
       id: "src_society_quiz", col: "source", domain: ["society"], badge: "Python CLI",
@@ -676,8 +677,8 @@ window.SYSTEM_MAP_DATA = {
 
 // <AUTO-SYNC:START> scripts/sync_agent_skills.py가 자동으로 다시 씁니다. 직접 고치지 마세요.
 window.SYSTEM_MAP_AUTO = {
-  "lastUpdated": "2026-11-06",
-  "catalogUpdatedAt": "2026-11-06 06:38",
+  "lastUpdated": "2026-11-07",
+  "catalogUpdatedAt": "2026-11-07 21:14",
   "skills": [
     {
       "name": "gallery-special-day-register",
