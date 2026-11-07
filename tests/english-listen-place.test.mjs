@@ -111,8 +111,9 @@ function createEngineSandbox(overrides = {}, dataFile = 'kids/subjects/english/d
   vm.runInContext(read('kids/js/english_listen_place.js'), sandbox);
   vm.runInContext(read('kids/js/english_listen_place_dressup.js'), sandbox);
   vm.runInContext(read('kids/js/english_listen_place_timeline.js'), sandbox);
+  vm.runInContext(read('kids/js/english_listen_place_map.js'), sandbox);
 
-  return { sandbox, container, trayBox, rewardCalls, initCalls, finalizeCalls, warnings };
+  return { sandbox, container, stageBox, trayBox, rewardCalls, initCalls, finalizeCalls, warnings };
 }
 
 test('파일 줄 수 및 금지 문자열 계약: 600줄 이하, 금지 API 없음, 상대 경로', () => {
@@ -121,8 +122,10 @@ test('파일 줄 수 및 금지 문자열 계약: 600줄 이하, 금지 API 없�
     { path: 'kids/js/english_listen_place.js', max: 600 },
     { path: 'kids/js/english_listen_place_dressup.js', max: 600 },
     { path: 'kids/js/english_listen_place_timeline.js', max: 600 },
+    { path: 'kids/js/english_listen_place_map.js', max: 600 },
     { path: 'kids/subjects/english/data/listen_place_5-2_L8.js', max: 200 },
     { path: 'kids/subjects/english/data/listen_place_5-2_L10.js', max: 200 },
+    { path: 'kids/subjects/english/data/listen_place_5-2_L11.js', max: 200 },
     { path: 'kids/css/english_listen_place.css', max: 300 },
   ];
 
@@ -152,6 +155,11 @@ test('등록표에 5-2 L8과 5-2 L10이 있고 없는 grade·unit이면 장면�
   const matchedL10 = activities.find(a => a.grade === '5-2' && a.unit === 'L10');
   assert.ok(matchedL10, '5-2 L10은 등록표에 있어야 합니다.');
   assert.equal(matchedL10.scene, 'data/listen_place_5-2_L10.js');
+
+  const matchedL11 = activities.find(a => a.grade === '5-2' && a.unit === 'L11');
+  assert.ok(matchedL11, '5-2 L11은 등록표에 있어야 합니다.');
+  assert.equal(matchedL11.href, 'listen_place.html');
+  assert.equal(matchedL11.scene, 'data/listen_place_5-2_L11.js');
 
   const unmatched = activities.find(a => a.grade === '4-1' && a.unit === 'L1');
   assert.equal(unmatched, undefined, '등록표에 없는 단원은 매칭되지 않아야 합니다.');
@@ -431,3 +439,150 @@ test('10단원(L10) 마지막 판 후보: early면 정답 후보만 6시 일어�
     assert.ok(!d.schedule.some(s => s.minutes === null || s.minutes > 540));
   }
 });
+
+const L11_MOCK_VOCA = [
+  { id: '411a2711-5b68-815b-8d68-eff417bbe33e', word: 'Where is the library?', meaning: '도서관은 어디에 있나요?' },
+  { id: '411a2711-5b68-8193-84ed-cc6b8a50cbe1', word: 'Where is the restaurant?', meaning: '식당은 어디에 있나요?' },
+  { id: '411a2711-5b68-81a0-9c5c-d2b5222e558f', word: 'Where is the bank?', meaning: '은행은 어디에 있나요?' },
+  { id: '411a2711-5b68-81f4-ac58-c232c502fc7c', word: 'Where is the hospital?', meaning: '병원은 어디에 있나요?' },
+  { id: '411a2711-5b68-81ef-8bb9-e68b4a44983a', word: 'Where is the flower shop?', meaning: '꽃집은 어디에 있나요?' },
+  { id: '411a2711-5b68-8174-872c-d9b89639b38d', word: 'Go straight two blocks and turn left.', meaning: '두 블록 직진해서 왼쪽으로 도세요.' },
+  { id: '411a2711-5b68-8150-8796-e7d41af7d022', word: 'Go straight one block and turn right.', meaning: '한 블록 직진해서 오른쪽으로 도세요.' },
+  { id: '411a2711-5b68-8158-b527-f2a773d7e008', word: 'Go straight and turn right at the big tree.', meaning: '직진해서 큰 나무에서 오른쪽으로 도세요.' },
+  { id: '411a2711-5b68-8176-a8ab-cc6403486c43', word: "It's on your left.", meaning: '당신의 왼쪽에 있어요.' },
+  { id: '411a2711-5b68-81fe-84ac-e6979bc045d4', word: "It's on your right.", meaning: '당신의 오른쪽에 있어요.' }
+];
+
+test('11단원(L11) 데이터 계약: 일반 문제 answer가 모두 items에 있고 문제마다 장소 1 + 위치 1이며 장소 카드에는 글자가 없다', () => {
+  const { sandbox } = createEngineSandbox({}, 'kids/subjects/english/data/listen_place_5-2_L11.js');
+  const sceneData = sandbox.window.LISTEN_PLACE_SCENE;
+  assert.equal(sceneData.scene, 'map');
+  assert.equal(sceneData.grade, '5-2');
+  assert.equal(sceneData.unit, 'L11');
+  assert.equal(sceneData.trayGuide, '아래 그림을 누르거나 지도 위 자리로 끌어다 놓으세요');
+
+  const itemMap = new Map(sceneData.items.map(it => [it.id, it]));
+  assert.ok(Array.isArray(sceneData.spots) && sceneData.spots.length >= 6 && sceneData.spots.length <= 8);
+  for (const sp of sceneData.spots) {
+    assert.ok(Array.isArray(sceneData.routes[sp.id]) && sceneData.routes[sp.id].length >= 2, `${sp.id} 경로 좌표가 있어야 합니다.`);
+  }
+
+  const regularQs = sceneData.questions.filter(q => !q.finale);
+  assert.equal(regularQs.length, 5, '11단원 일반 문제는 5개여야 합니다.');
+
+  for (const q of regularQs) {
+    assert.ok(Array.isArray(q.pageIds) && q.pageIds.length >= 2, 'pageIds 배열이 있어야 합니다.');
+    assert.equal(q.answer.length, 2, '각 일반 문제는 answer가 2개여야 합니다.');
+    const resolved = q.answer.map(id => itemMap.get(id));
+    assert.ok(resolved.every(Boolean), `answer ${q.answer.join(',')}가 모두 items에 있어야 합니다.`);
+    assert.equal(resolved.filter(it => it.slot === 'place').length, 1, '장소(place) 1개가 있어야 합니다.');
+    assert.equal(resolved.filter(it => it.slot === 'spot').length, 1, '위치(spot) 1개가 있어야 합니다.');
+  }
+
+  const mapScene = sandbox.window._PENDING_SCENES?.map || null;
+  for (const it of sceneData.items.filter(i => i.slot === 'place')) {
+    if (mapScene && typeof mapScene.renderItem === 'function') {
+      const card = mapScene.renderItem(it);
+      assert.equal(card._labelEl.textContent, '', '정답 전 장소 카드 라벨은 비어 있어야 합니다.');
+      assert.doesNotMatch(card.children[0].innerHTML, /<text/i, `${it.id} 장소 그림 썸네일에 글자가 없어야 합니다.`);
+    }
+  }
+});
+
+test('11단원(L11) pageIds 이어 붙이기: 여러 행의 문장·뜻을 순서대로 합치고 하나라도 없으면 건너뛴다', async () => {
+  const partialVoca = L11_MOCK_VOCA.filter(r => r.id !== '411a2711-5b68-81ef-8bb9-e68b4a44983a');
+  const { sandbox, warnings } = createEngineSandbox({
+    fetchVocaFromNotion: async () => partialVoca
+  }, 'kids/subjects/english/data/listen_place_5-2_L11.js');
+
+  const engine = sandbox.window.EnglishListenPlace;
+  await engine.init({ containerId: 'listenPlaceApp' });
+  const state = engine.getState();
+
+  assert.equal(state.questions.length, 5, '빠진 flower shop 1문제를 건너뛰고 일반 4 + 피날레 1 = 5문제가 되어야 합니다.');
+  assert.ok(warnings.some(w => w[1] === '411a2711-5b68-81ef-8bb9-e68b4a44983a'), '빠진 pageId로 경고를 남겨야 합니다.');
+  const libQ = state.questions.find(q => !q.finale && q.answer.includes('place-library'));
+  assert.equal(libQ.text, "Where is the library? Go straight and turn right at the big tree. It's on your left.");
+  assert.equal(libQ.meaning, '도서관은 어디에 있나요? 직진해서 큰 나무에서 오른쪽으로 도세요. 당신의 왼쪽에 있어요.');
+});
+
+test('11단원(L11) 받침대: 정답 2 + 오답 2(장소 1·위치 1)이고 위치 오답은 좌우 바뀐 자리(confusable)가 먼저 나온다', () => {
+  const { sandbox } = createEngineSandbox({}, 'kids/subjects/english/data/listen_place_5-2_L11.js');
+  const engine = sandbox.window.EnglishListenPlace;
+  const sceneData = sandbox.window.LISTEN_PLACE_SCENE;
+  const items = sceneData.items;
+  const itemMap = new Map(items.map(it => [it.id, it]));
+
+  for (const q of sceneData.questions.filter(q => !q.finale)) {
+    const ansSpotId = q.answer.find(id => id.startsWith('spot-'));
+    const ansSpot = itemMap.get(ansSpotId);
+    for (let trial = 0; trial < 25; trial++) {
+      const tray = engine._pickTrayItems(items, q.answer);
+      assert.equal(tray.length, 4, '받침대는 4장이어야 합니다.');
+      const correctCards = tray.filter(it => q.answer.includes(it.id));
+      const distractors = tray.filter(it => !q.answer.includes(it.id));
+      assert.equal(correctCards.length, 2, '정답 2장이어야 합니다.');
+      assert.equal(distractors.length, 2, '오답 2장이어야 합니다.');
+      assert.equal(distractors.filter(it => it.slot === 'place').length, 1, '장소 오답 1장이어야 합니다.');
+      const spotDistractors = distractors.filter(it => it.slot === 'spot');
+      assert.equal(spotDistractors.length, 1, '위치 오답 1장이어야 합니다.');
+      assert.ok(
+        ansSpot.confusable.includes(spotDistractors[0].id),
+        `${ansSpotId}의 위치 오답(${spotDistractors[0].id})은 confusable(${ansSpot.confusable.join(',')})에서 먼저 뽑혀야 합니다.`
+      );
+    }
+  }
+});
+
+test('11단원(L11) 완료 및 경로 화살표: 하나만 맞히면 미완료·화살표 없음, 둘 다 맞혀야 완료되고 경로 화살표가 그려진다', async () => {
+  const { sandbox, stageBox, rewardCalls } = createEngineSandbox({
+    fetchVocaFromNotion: async () => L11_MOCK_VOCA
+  }, 'kids/subjects/english/data/listen_place_5-2_L11.js');
+
+  const engine = sandbox.window.EnglishListenPlace;
+  await engine.init({ containerId: 'listenPlaceApp' });
+  engine.startSession();
+
+  const q = engine.getState().currentQuestion;
+  const placeAnsId = q.answer.find(id => id.startsWith('place-'));
+  const spotAnsId = q.answer.find(id => id.startsWith('spot-'));
+  const stageWrapper = stageBox.children[stageBox.children.length - 1];
+
+  assert.equal(stageWrapper._routeLayer.innerHTML, '', '초기 상태에서 경로 화살표는 없어야 합니다.');
+
+  const resPlaceOnly = engine.attemptItemById(placeAnsId);
+  assert.equal(resPlaceOnly.correct, true);
+  assert.equal(resPlaceOnly.completed, false, '장소 하나만 맞히면 완료가 아니어야 합니다.');
+  assert.equal(rewardCalls.length, 0);
+  assert.equal(stageWrapper._routeLayer.innerHTML, '', '하나만 맞혔을 때는 경로 화살표가 그려지지 않아야 합니다.');
+
+  const resBoth = engine.attemptItemById(spotAnsId);
+  assert.equal(resBoth.correct, true);
+  assert.equal(resBoth.completed, true, '장소와 위치를 둘 다 맞혀야 완료되어야 합니다.');
+  assert.equal(rewardCalls.length, 1);
+  assert.match(stageWrapper._routeLayer.innerHTML, /map-route-arrow/, '둘 다 맞힌 뒤 출발점→정답 자리 경로 화살표가 그려져야 합니다.');
+});
+
+test('11단원(L11) 마지막 판 후보: 정답 지도 1장만 데이터의 정답 경로와 같고 오답 2장은 좌우 반전·한 블록 더 간 경로다', () => {
+  const { sandbox } = createEngineSandbox({}, 'kids/subjects/english/data/listen_place_5-2_L11.js');
+  const engine = sandbox.window.EnglishListenPlace;
+  const sceneData = sandbox.window.LISTEN_PLACE_SCENE;
+  const finaleQ = sceneData.questions.find(q => q.finale);
+  const expectedAnswerRoute = sceneData.routes[finaleQ.answerRoute];
+
+  const cands = engine._buildFinaleCandidates(sceneData.items, finaleQ);
+  assert.equal(cands.length, 3, '후보 지도는 3장이어야 합니다.');
+
+  const answers = cands.filter(c => c.isAnswer);
+  const distractors = cands.filter(c => !c.isAnswer);
+  assert.equal(answers.length, 1, '정답 지도는 1장이어야 합니다.');
+  assert.equal(distractors.length, 2, '오답 지도는 2장이어야 합니다.');
+
+  assert.deepEqual(answers[0].route, expectedAnswerRoute, '정답 지도는 데이터의 정답 경로와 같아야 합니다.');
+  for (const d of distractors) {
+    assert.notDeepEqual(d.route, expectedAnswerRoute, '오답 지도는 데이터의 정답 경로와 달라야 합니다.');
+  }
+  const kinds = Array.from(distractors, d => d.kind).sort();
+  assert.deepEqual(kinds, ['extra-block', 'wrong-turn'], '오답 2장은 좌우 바뀐 경로와 한 블록 더 간 경로여야 합니다.');
+});
+

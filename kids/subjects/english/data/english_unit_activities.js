@@ -25,5 +25,14 @@ window.ENGLISH_UNIT_ACTIVITIES = [
     icon: '🕖',
     href: 'listen_place.html',
     scene: 'data/listen_place_5-2_L10.js'
+  },
+  {
+    grade: '5-2',
+    unit: 'L11',
+    title: '마을 길 찾기',
+    desc: '길 안내를 듣고 장소와 위치를 찾아요',
+    icon: '🧭',
+    href: 'listen_place.html',
+    scene: 'data/listen_place_5-2_L11.js'
   }
 ];

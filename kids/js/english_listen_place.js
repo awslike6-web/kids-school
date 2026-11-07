@@ -111,9 +111,8 @@
   }
 
   function buildFinaleCandidates(allItems, finaleQ) {
-    const scene = (_currentScene && typeof _currentScene.buildFinaleCandidates === 'function')
-      ? _currentScene
-      : (finaleQ && finaleQ.finaleKind && SCENES.timeline);
+    const fallbackScene = SCENES[(_sceneData || window.LISTEN_PLACE_SCENE || {}).scene] || (finaleQ && finaleQ.finaleKind && SCENES.timeline);
+    const scene = (_currentScene && typeof _currentScene.buildFinaleCandidates === 'function') ? _currentScene : fallbackScene;
     if (scene && typeof scene.buildFinaleCandidates === 'function') {
       return scene.buildFinaleCandidates(allItems, finaleQ);
     }
@@ -178,9 +177,11 @@
 
     const validQuestions = [];
     (_sceneData.questions || []).forEach(q => {
-      const voca = _vocaMap[q.pageId];
-      if (voca && voca.word) validQuestions.push({ ...q, text: voca.word, meaning: voca.meaning });
-      else console.warn('[EnglishListenPlace] VOCA에 없는 pageId 건너뜀:', q.pageId);
+      const ids = Array.isArray(q.pageIds) && q.pageIds.length > 0 ? q.pageIds : [q.pageId];
+      const rows = ids.map(id => _vocaMap[id]);
+      if (rows.every(r => r && r.word)) {
+        validQuestions.push({ ...q, text: rows.map(r => r.word).join(' '), meaning: rows.map(r => r.meaning).filter(Boolean).join(' ') });
+      } else console.warn('[EnglishListenPlace] VOCA에 없는 pageId 건너뜀:', ids.find(id => !(_vocaMap[id] && _vocaMap[id].word)));
     });
 
     if (validQuestions.length < 3) return renderError('문장을 충분히 불러오지 못했어요. (3개 미만)');

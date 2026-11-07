@@ -666,7 +666,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `EnglishListenPlace.init({ grade, unit, sceneData, containerId })` | VOCA 매핑, 유효 문제 검증, 세션 시작 및 렌더링 |
   | `EnglishListenPlace.speak(text)` | 원어민 영어 음성 출력 브리지 |
 - **검증**: `tests/english-listen-place.test.mjs`
-- **계약 (2026-11-06 Claude 검증·병합)**: 문장은 `fetchVocaFromNotion({subject:'영어', filterByStudent:true})`(영어방이 받아 둔 아이별 캐시)에서 `pageId || id`로 찾는다. 정답마다 `rewardQuizCorrect(문제번호)`, 완주 때 `finalizeQuizRewardSession({isFullComplete:true, subject:'영어(단원)', childName, errorReport})` 한 번. 완주 뒤 보상 세션을 되살리지 않는다(되살리면 페이지를 나갈 때 학습일지가 한 번 더 나감).
+- **계약 (2026-11-06 Claude 검증·병합)**: 문장은 `fetchVocaFromNotion({subject:'영어', filterByStudent:true})`(영어방이 받아 둔 아이별 캐시)에서 `pageId || id`로 찾는다. 질문과 길 안내처럼 여러 행이 나뉘어 있으면 `pageIds` 배열로 이어 붙인다. 정답마다 `rewardQuizCorrect(문제번호)`, 완주 때 `finalizeQuizRewardSession({isFullComplete:true, subject:'영어(단원)', childName, errorReport})` 한 번. 완주 뒤 보상 세션을 되살리지 않는다(되살리면 페이지를 나갈 때 학습일지가 한 번 더 나감).
 
 ### 👗 `english_listen_place_dressup.js` (8단원 외모·옷차림 장면 모듈, 2026-11-06~)
 코드로 그리는 인물 SVG(남자/여자)와 헤어, 눈, 모자, 안경, 상의, 하의 슬롯 레이어를 렌더링하고, 트레이 아이템 썸네일 생성 및 인물 착용을 처리합니다. 마지막 판 「Catch the Impostor」 3명 후보 렌더링을 제공합니다.
@@ -693,6 +693,19 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `timeline.renderFinaleStage(container, candidates, onSelect)` | 후보 3명 미니 시간표 카드 렌더링 및 선택 콜백 |
 - **검증**: `tests/english-listen-place.test.mjs`
 
+
+### 🧭 `english_listen_place_map.js` (11단원 마을 길 찾기 장면 모듈, 2026-11-07~)
+위에서 내려다본 마을 지도 무대(출발점 You are here, 큰 나무 랜드마크, A~H 건물 자리 8곳), 장소 그림 카드 9종(영어 글자 숨김)과 위치 표지 카드(A~H) 썸네일, 장소·위치 둘 다 맞혔을 때 출발점→정답 자리 경로 화살표 표시, 마지막 판 「도서관 찾아가기」 후보 지도 3장(정답 경로 1장 + 좌우 반전·한 블록 더 간 오답 2장)을 생성·렌더링합니다.
+- **파일 위치**: `kids/js/english_listen_place_map.js` · 데이터 `kids/subjects/english/data/listen_place_5-2_L11.js`
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `map.renderStage(container)` | 마을 지도 무대 및 장소·위치 상태 칩 생성 |
+  | `map.renderItem(item)` | 장소 그림(글자 숨김) 및 위치 표지(A~H) 받침대 카드 생성 |
+  | `map.applyItem(stageEl, slot, item)` | 맞힌 장소·위치 반영 및 두 개 완료 시 경로 화살표 렌더링 |
+  | `map.buildFinaleCandidates(items, finaleQ)` | 정답 경로 1장 + 오답 경로 2장 후보 생성 |
+  | `map.renderFinaleStage(container, candidates, onSelect)` | 후보 지도 3장 카드 렌더링 및 선택 콜백 |
+- **검증**: `tests/english-listen-place.test.mjs`
 ---
 
 ## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)
