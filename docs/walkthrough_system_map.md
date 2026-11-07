@@ -11,7 +11,7 @@
 ## 새로 채운 영역
 - 국어 독해: `register_reading_passage.py` → `korean_spec.md` → `korean_common.js`·`reading_engine.js` → 오프라인 캐시 → LIBRARY_DB
 - 수학: `migrate_math_to_curriculum.py` → `math_spec.md` → `math_quiz_engine.js`·`quest_engine.js` → CURRICULUM_DB·VOCA_DB
-- 영어: `insert_eng_l*_voca.py` → `english_spec.md` → `english_common.js`·`english_chat.js` → Gemini Worker 프록시·요정 TTS
+- 영어: `register_voca.py`(자료 `scripts/data/voca/`) → `english_spec.md` → `english_common.js`·`english_chat.js` → Gemini Worker 프록시·요정 TTS
 - 사회: `society_quiz_generator.py` → `society_spec.md` → `society_common.js`·`society_history.js` → CURRICULUM_DB
 - 하루: `haru_spec.md` → `haru_common.js`·체크인/시계판/안전 엔진 → 보상·STUDY_LOG·INVENTORY
 - 관제탑 라이프로그: 3대 CLI → `lifelog_spec.md` → `lifelog.js` → family-data·Worker → 일상 허브·운동/병원/차량 DB

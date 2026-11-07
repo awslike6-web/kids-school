@@ -241,15 +241,24 @@ graph TD
 ## 7. 노션 VOCA DB 연동 규격 (Notion Database Specification)
 
 * **데이터베이스 ID**: `375a27115b688038b686d3994ee12919` (VOCA DB)
-* **주요 필드 매핑**:
-  - `단어` (title): 영문 단어/문장 (예: *"What did you do last weekend?"*)
-  - `뜻` (rich_text): 한국어 뜻 (예: *"지난 주말에 뭐 했니?"*)
-  - `과목` (select): `영어`
-  - `학생` (select): `민수` / `민서`
-  - `학년-학기` (select): `5-2` / `1-2`
-  - `단원` (select): `7단원` (예: *"7. What Did You Do Yesterday?"*)
-  - `카테고리` (select): `핵심문장` / `핵심어휘`
-  - `음성파일명` (rich_text): Edge-TTS 생성 파일명 매핑
+* **주요 필드 매핑** (2026-11-08 노션 스키마 도감 `docs/notion_schemas_school.md` 기준으로 바로잡음):
+  - `단어` (title): 영문 단어/숙어/문장 (예: *"What did you do last weekend?"*)
+  - `뜻풀이` (rich_text): 한국어 뜻 (예: *"지난 주말에 뭐 했니?"*)
+  - `상세설명` (rich_text): 쓰임 설명과 예문
+  - `품사` (rich_text): 명사·동사·문장 등
+  - `과목` (multi_select): `영어`
+  - `학생` (multi_select): `민수` / `민서`
+  - `학년` (multi_select): `5-2` / `1-2`
+  - `단원` (rich_text): `L11`처럼 단원 키 원문 (단원 칩이 이 값으로 묶는다)
+  - `어휘유형` (select): `단어` / `숙어` / `문장`
+  - `시험범위` (checkbox): 3·3·3 마스터리 앞 스테이지 우선 배치
+  - `숙련도`·`달성`: 5분 퀘스트 진도 칸. 등록 도구는 쓰지 않는다
+
+### 단원 어휘 등록 절차 (2026-11-08부터)
+1. 클래스 카드·교과서 어휘를 `scripts/data/voca/english_<학년>_L<단원>.json`에 적는다 (형식: `CORE_CATALOG.md` 「과목 공용 어휘 등록기」, 예: `english_5-2_L11.json`).
+2. `python -X utf8 scripts/register_voca.py --file scripts/data/voca/english_5-2_L12.json`으로 미리보기 → 신규·바뀔 칸·선택지 경고를 확인한다.
+3. 이상 없으면 `--apply`로 새 행을 만든다. 담임 클래스 카드가 나와 글자를 바꿀 때는 노션에서 직접 고친다. 자료 JSON을 고쳐 덮어써야 할 때만 `--update`를 쓴다.
+4. 단원마다 `insert_eng_l*_voca.py` 같은 스크립트를 새로 만들지 않는다 (`scripts/` 허용 목록이 커밋을 막는다).
 
 ### 7단원(What Did You Do Yesterday?) 핵심 문장 17선 SSOT:
 1. `What did you do last summer?` (지난여름에 뭐 했니?)

@@ -27,19 +27,13 @@ import json
 import re
 import sys
 import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 
-PROXY_URL = "https://minmin-notion.awslike6.workers.dev"
-VOCA_DB_ID = "375a27115b688038b686d3994ee12919"
+# 노션 통신 함수는 과목 공용 어휘 등록기 한 벌을 같이 쓴다 (같은 scripts/ 폴더)
+from register_voca import VOCA_DB_ID, call, plain_title, query_all, rich
+
 LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee"
 MINI_TRACK = "🌱 민서 미니 독해"  # korean_mini_reading.js가 이 트랙만 읽는다
-HEADERS = {
-    "Content-Type": "application/json",
-    # 노션 Worker는 User-Agent가 없으면 403
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) minmin-register/1.0",
-}
 # 저작권 표시 속성 (판매 등 외부 공개 전에 '교과서 원문/재구성'만 골라 바꾸거나 지울 수 있게)
 LIBRARY_EXTRA_PROPS = {
     "출처구분": {"select": {"options": [
@@ -51,45 +45,6 @@ LIBRARY_EXTRA_PROPS = {
     "이미지 URL": {"url": {}},  # 미니 독해 지문 대표 그림 (스토리북 장면)
 }
 LINE_IMAGES_PROP = {"줄별 이미지": {"rich_text": {}}}  # (예정) 줄마다 바뀌는 그림. 시드에 line_images가 있을 때만 만든다
-
-
-def call(path: str, payload: dict | None = None, method: str = "POST") -> dict:
-    data = json.dumps(payload).encode("utf-8") if payload is not None else None
-    req = urllib.request.Request(f"{PROXY_URL}{path}", data=data, headers=HEADERS, method=method)
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                return json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8", errors="replace")[:300]
-            if e.code in (429, 500, 502, 503) and attempt < 2:
-                time.sleep(1.5 * (attempt + 1))
-                continue
-            raise RuntimeError(f"{method} {path} → HTTP {e.code}: {body}") from None
-    raise RuntimeError(f"{method} {path} 재시도 초과")
-
-
-def query_all(db_id: str, flt: dict) -> list[dict]:
-    """Worker는 같은 본문의 query를 5분간 엣지 캐시한다. 방금 만든 행을 놓치지 않도록 page_size를 매번 달리해 캐시를 비켜 간다."""
-    results, cursor = [], None
-    while True:
-        body = {"filter": flt, "page_size": 100 - int(time.time()) % 40}
-        if cursor:
-            body["start_cursor"] = cursor
-        data = call(f"/v1/databases/{db_id}/query", body)
-        results += data.get("results", [])
-        if not data.get("has_more"):
-            return results
-        cursor = data.get("next_cursor")
-
-
-def rich(text: str) -> dict:
-    text = text or ""
-    return {"rich_text": [{"text": {"content": text[i:i + 1900]}} for i in range(0, len(text), 1900)]}
-
-
-def plain_title(page: dict, prop: str) -> str:
-    return "".join(t.get("plain_text", "") for t in page["properties"].get(prop, {}).get("title", []))
 
 
 def ensure_library_props(apply: bool, need_line_images: bool = False) -> None:

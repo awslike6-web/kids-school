@@ -40,6 +40,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "load_playwright.cjs", "path": "kids-school-main/scripts/load_playwright.cjs", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "spot_diff_align.py", "path": "kids-school-main/scripts/spot_diff_align.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_spot_diff_align_spec.md", "gallery_spot_diff_spec.md"]},
       {"name": "test_quest_fallback.js", "path": "kids-school-main/scripts/test_quest_fallback.js", "domain": ["quest"], "docs": ["CORE_CATALOG.md"]},
+      {"name": "test_register_voca.py", "path": "kids-school-main/scripts/test_register_voca.py", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "test_study_logger_upsert.js", "path": "kids-school-main/scripts/test_study_logger_upsert.js", "domain": ["guardian"], "docs": ["CORE_CATALOG.md"]},
       {"name": "verify_center_audio.cjs", "path": "kids-school-main/scripts/verify_center_audio.cjs", "domain": ["korean"], "docs": ["korean_spec.md", "CORE_CATALOG.md"]},
       {"name": "verify_diary_sync.js", "path": "kids-school-main/scripts/verify_diary_sync.js", "domain": ["timetable"], "docs": ["timetable_diary_spec.md", "CORE_CATALOG.md"]},
@@ -196,5 +197,5 @@ window.SYSTEM_MAP_GENERATED = {
     "pipe": [],
     "db": []
   },
-  "hidden": {"source": 25, "skill": 3, "module": 0, "pipe": 0, "db": 3}
+  "hidden": {"source": 24, "skill": 3, "module": 0, "pipe": 0, "db": 3}
 };

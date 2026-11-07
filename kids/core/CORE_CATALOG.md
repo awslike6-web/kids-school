@@ -566,7 +566,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 - **데이터**: 노션 `LIBRARY_DB` 중 `트랙 = 🌱 민서 미니 독해` (`fetchReadingPassagesFromNotion` 재사용). `문제데이터` JSON 문항 = `{ step, type:"choice", question, options[], answer(보기 문자열|번호), explanation, speaker?:{name, icon, line}, label?, icon? }` (`label`·`icon`은 그 문항의 단계 이름 바꾸기, 예: '일의 차례'). 보기 속 `→`는 읽을 때 '그다음'으로 바꿔 읽는다
 - **지문 그림 (2026-10-23)**: LIBRARY_DB `이미지 URL`(→ `passage.imageUrl`)이 있으면 지문 화면·이야기 다시 보기에만 스토리북 장면을 띄운다. 세로 그림을 자르지 않고 `object-fit: contain`(모바일 위 180px 카드, 640px 이상은 지문 왼쪽 190px 칸), 누르면 화면 안 확대 창(`#mrLightbox`, 아무 데나 누르거나 Esc로 닫힘). 주소가 없거나 못 불러오면 그림 칸을 지운다. 문제 카드에는 그림을 넣지 않는다. 줄별 그림 확장용으로 `passage.lineImages`(`줄별 이미지` JSON 배열)를 읽어 두며 `sceneImage(passage, lineIdx)`가 줄 그림 → 대표 그림 순으로 고른다(지금 화면은 대표 그림 1장).
 - **고음질 음성**: 대본(제목·지문 줄·`questionScript(q)`)마다 `kids/assets/audio/mini_reading/<SHA-1 12자리>.mp3`를 먼저 재생, 없으면 `speakFairyTTS` 폴백. 생성: `python -X utf8 scripts/build_mini_reading_audio.py [--dry-run] [--prune]` (Edge-TTS SunHi). 자동 읽기 토글 `localStorage.mini_reading_autoplay`(`on`/`off`), 화면 전환·창 닫기 시 `KoreanMiniReading.stop()`으로 항상 멈춤.
-- **등록 도구**: `python -X utf8 scripts/register_minseo_korean.py --file scripts/data/minseo_korean_<학기>_<단원>.json [--apply]` (VOCA 정제 어휘 + 미니 독해 지문을 한 번에 갱신·신규 등록, 기본 미리보기)
+- **등록 도구**: `python -X utf8 scripts/register_minseo_korean.py --file scripts/data/minseo_korean_<학기>_<단원>.json [--apply]` (VOCA 정제 어휘 + 미니 독해 지문을 한 번에 갱신·신규 등록, 기본 미리보기). 노션 통신 함수(`call`·`query_all`·`rich`·`plain_title`)는 `scripts/register_voca.py`에서 불러 쓴다(2026-11-08).
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
@@ -1465,6 +1465,15 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `kids/subjects/science/*_lab.html` 16개: `<script src="../../core/study-activity.js?v=20261023">`를 직접 로드(실험실은 core/notion 파사드를 쓰지 않음). kind=study, 과목 '과학'으로 기록.
 - 캐시 버전 `study-activity.js?v=20261023`로 통일: `core.js`, `notion-helper.js`, `notion-reward.js`, `storybook_engine.js`.
 - Guardian 저장소의 사본 `learning/study-activity.js`는 이번에 고치지 않아 이 파일과 달라졌습니다(haru 판정 3줄). 서버 장부 규칙(활동1분=1분, quiz 정답2개당1분)은 그대로입니다.
+
+## 과목 공용 어휘 등록기 `scripts/register_voca.py` (2026-11-08)
+
+- **목적**: 단원 자료 JSON 1개를 노션 VOCA_DB에 맞춘다. 단원마다 `insert_*_voca.py`를 새로 만들던 방식을 대체한다(관제탑 `scripts/archive/2026-11/`로 보관).
+- **자료**: `scripts/data/voca/{과목}_{학년}_{단원}.json` = `{subject, grade, student(문자열|배열), unit, test_scope?, area?, voca:[{word, meaning, detail?, pos?, type?, area?}]}`. 지금 영어 5-2 L8·L9·L10·L11.
+- **실행**: `python -X utf8 scripts/register_voca.py --file <자료> [--apply | --update]`. 기본 미리보기, `--apply` 새 행만, `--update` 기존 행의 바뀐 칸도 덮어씀.
+- **계약**: 같은 행 = 과목·학년·학생(첫 번째)·단원 + 단어. 숙련도·달성은 쓰지 않는다(`NEVER_WRITE`). 노션에 없는 칸 이름이면 멈추고, 선택지에 없는 값은 경고한다(`check_schema`). 노션에만 있는 행은 알려 주기만 하고 지우지 않는다.
+- **핵심 API**: `sync_voca(seed, apply, update) → 건수`, `desired_props(seed, item)`, `diff_props(page, props)`, `check_schema(seed)`, 통신 `call`·`query_all`·`rich`·`plain_title`(민서 국어 도구도 사용).
+- **시험**: `python -X utf8 -m unittest scripts/test_register_voca.py` (가짜 통신 11건: 미리보기 무쓰기, 새 행만 만들기, --update 바뀐 칸만, 진도 칸 미기록, 중복·노션 전용 행, 자료 형식, 스키마 도감 대조). `regression.yml`에서도 돈다.
 
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
 
