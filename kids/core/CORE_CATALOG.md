@@ -1472,6 +1472,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/gallery-character-runner.test.mjs`: DOM 없는 로드, 장착·재로드·포즈·해제·남매 분리·잘못된 저장·주소·최고 기록, 결정적 월드·입력 없는 60초 완주·충돌/무적·별·2단 점프·dt 상한·민서 장애물과 실제 데이터 CDN 계약을 검사합니다. Python/Pillow로 임시 공부방·아카이브를 만들고 빌더의 투명 PNG·크롭·512px·오류 격리·단독 카드 제외·포트폴리오 미포함·EXIF도 확인합니다. `GALLERY_TEST_PYTHON`으로 시험 Python 경로를 지정할 수 있습니다.
 - 미니 런 보완 시험은 세로 .45~가로 2.2의 6비율·그림 3비율·3시드·민수 가속 전후 162개 월드의 장애물 4,248개를 실제 `step`으로 전수 통과 검사합니다. 민수 2단 필수 장애물·판정 상자 기준 반응 시간·가속 이동량·리사이즈 거리/상태 보존·조사 4쌍도 확인합니다. 세로 .55는 기존 무입력 완주 시험에도 포함합니다.
 - `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.
+- **커밋 메시지 검사 (2026-11-08)**: `regression.yml` 마지막 단계가 `scripts/check_commit_msg.py --range`로 푸시·PR 범위의 `Agent:`·`교정:`·`반려:` 줄 형식을 검사합니다(규칙 시행 시각 이후 커밋만, 범위 계산에 checkout `fetch-depth: 0`). `scripts/check_commit_msg.py`와 `scripts/agent_commit_rules.json`은 **관제탑 원본의 사본**이라 직접 고치지 않습니다. 관제탑 `python scripts/sync_agent_skills.py`가 맞추고 `--check`로 일치를 검사합니다. 규칙 설명은 관제탑 `docs/AGENT_COMMIT_PROTOCOL.md`.
 
 - `tests/gallery-data-contract.test.mjs`: 갤러리·특별한 날 데이터 규칙. 특별한 날 작성자(민서·민수·공동·아빠·엄마, 온 가족=공동)·id·날짜·분류 6종·사진 폴더·영상 주소, 작품 작성자·id·날짜, 로컬 `../kids-archive`가 있으면 아카이브 마스터 작성자와 특별한 날 짝을 검사합니다(CI에서는 그 시험만 건너뜀).
 - `tests/special-day-video-buttons.test.mjs`: 갤러리 모달의 창 안 영상 칸은 영상 파일 주소일 때만 만들고(구글 포토 공유 주소 제외), 버튼 문구 맨 앞 이모지가 아이콘과 두 번 붙지 않는지(갤러리·하루방 `splitLeadingEmoji`, 실제 데이터 전체) 검사합니다.

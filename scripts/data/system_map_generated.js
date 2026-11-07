@@ -34,6 +34,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "add_activity_photo.py", "path": "kids-school-main/scripts/add_activity_photo.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "haru_spec.md", "CORE_CATALOG.md"]},
       {"name": "build_gallery.py", "path": "kids-school-main/scripts/build_gallery.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_multi_character_spec.md"]},
       {"name": "build_system_map.py", "path": "kids-school-main/scripts/build_system_map.py", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
+      {"name": "check_commit_msg.py", "path": "kids-school-main/scripts/check_commit_msg.py", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "guarded_preview_server.py", "path": "kids-school-main/scripts/guarded_preview_server.py", "domain": [], "docs": ["english_listen_place_L10_spec.md", "english_listen_place_spec.md", "gallery_character_runner_fix_spec.md"]},
       {"name": "load_playwright.cjs", "path": "kids-school-main/scripts/load_playwright.cjs", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "spot_diff_align.py", "path": "kids-school-main/scripts/spot_diff_align.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_spot_diff_align_spec.md", "gallery_spot_diff_spec.md"]},
@@ -194,5 +195,5 @@ window.SYSTEM_MAP_GENERATED = {
     "pipe": [],
     "db": []
   },
-  "hidden": {"source": 19, "skill": 3, "module": 0, "pipe": 0, "db": 3}
+  "hidden": {"source": 21, "skill": 3, "module": 0, "pipe": 0, "db": 3}
 };
