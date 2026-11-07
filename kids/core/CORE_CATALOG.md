@@ -1473,6 +1473,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - 미니 런 보완 시험은 세로 .45~가로 2.2의 6비율·그림 3비율·3시드·민수 가속 전후 162개 월드의 장애물 4,248개를 실제 `step`으로 전수 통과 검사합니다. 민수 2단 필수 장애물·판정 상자 기준 반응 시간·가속 이동량·리사이즈 거리/상태 보존·조사 4쌍도 확인합니다. 세로 .55는 기존 무입력 완주 시험에도 포함합니다.
 - `.github/workflows/regression.yml`은 빌더 시험을 위해 Python 3.14·Pillow 12.3.0을 준비합니다. checkout/setup-node/setup-python은 Node 20 폐기 경고를 피하는 v7을 사용합니다. CI에서 Pillow 준비 누락으로 발생한 첫 실패를 보완했으며 시험을 건너뛰지 않습니다.
 - **커밋 메시지 검사 (2026-11-08)**: `regression.yml` 마지막 단계가 `scripts/check_commit_msg.py --range`로 푸시·PR 범위의 `Agent:`·`교정:`·`반려:` 줄 형식을 검사합니다(규칙 시행 시각 이후 커밋만, 범위 계산에 checkout `fetch-depth: 0`). `scripts/check_commit_msg.py`와 `scripts/agent_commit_rules.json`은 **관제탑 원본의 사본**이라 직접 고치지 않습니다. 관제탑 `python scripts/sync_agent_skills.py`가 맞추고 `--check`로 일치를 검사합니다. 규칙 설명은 관제탑 `docs/AGENT_COMMIT_PROTOCOL.md`.
+- **scripts 허용 목록 (2026-11-08)**: `regression.yml` 마지막 단계 `scripts/check_scripts_allowlist.py --all`이 `scripts/allowed_scripts.txt`에 없는 `scripts/*.py`·맨 위 `*.py`를 실패로 처리합니다. 새 공용 도구는 목록 `[도구]`에 목적과 함께 한 줄 추가합니다. 검사기는 관제탑 원본의 사본입니다 (관제탑 `docs/AGENT_COMMIT_PROTOCOL.md` §8).
 
 - `tests/gallery-data-contract.test.mjs`: 갤러리·특별한 날 데이터 규칙. 특별한 날 작성자(민서·민수·공동·아빠·엄마, 온 가족=공동)·id·날짜·분류 6종·사진 폴더·영상 주소, 작품 작성자·id·날짜, 로컬 `../kids-archive`가 있으면 아카이브 마스터 작성자와 특별한 날 짝을 검사합니다(CI에서는 그 시험만 건너뜀).
 - `tests/special-day-video-buttons.test.mjs`: 갤러리 모달의 창 안 영상 칸은 영상 파일 주소일 때만 만들고(구글 포토 공유 주소 제외), 버튼 문구 맨 앞 이모지가 아이콘과 두 번 붙지 않는지(갤러리·하루방 `splitLeadingEmoji`, 실제 데이터 전체) 검사합니다.

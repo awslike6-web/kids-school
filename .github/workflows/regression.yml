@@ -40,3 +40,5 @@ jobs:
           elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then RANGE="$AFTER~1..$AFTER"
           else RANGE="$BEFORE..$AFTER"; fi
           python -X utf8 scripts/check_commit_msg.py --range "$RANGE"
+      - name: scripts 허용 목록 검사 (일회성 스크립트 차단)
+        run: python -X utf8 scripts/check_scripts_allowlist.py --all
