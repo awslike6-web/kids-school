@@ -28,8 +28,6 @@ scripts/verify_quest_isolation.py
 scripts/verify_semester_quest.py
 scripts/verify_spot_diff_align.py
 
-# 2026-11-08 시행 때 이름(단원·회차·날짜·특정 내용·이관)을 보고 고른 일회성 후보. 내용은 열어 보지 않았다.
-# 다시 쓰는 도구로 확인되면 [도구]로 옮기고, 다 쓴 것은 archive로 옮기며 지운다. 이 구역에 새 줄을 더하지 않는다.
+# 일회성 후보를 모아 두는 구역. 2026-11-08 처음 고른 35개는 문서·스킬·코드 참조를 검색해 정리했다
+# (34개 보관, migrate_math_to_curriculum.py는 [도구]로). 새 줄을 더하지 않는다.
 [정리 대상]
-scripts/streamline_quest_runner.py
-scripts/verify_quest_refactoring.py
