@@ -168,4 +168,4 @@
    - **식별자 단일 계약**: 단원/어휘 식별은 오직 노션 `page_id` 원문 또는 정규화된 복합키(`{학생}::{과목}::{학기}::{단원원문}`)로만 처리한다.
    - **KST 로컬 날짜 단일 표준**: `.toISOString().slice(0, 10)` 또는 `.split('T')[0]` 사용을 금지하고, 로컬 날짜(`YYYY-MM-DD`) 헬퍼를 사용한다.
    - **사전 계약 검증 필수**: 배포/커밋 전 `python -X utf8 scripts/verify_contracts.py --mode git-diff` (또는 `--mode file --file {경로}`)를 실행해 `[ALL PASS]`를 확인한다 (`pre-commit-contract-gate` 스킬 준수).
-   - **커밋 출처 표시**: 커밋 메시지 맨 끝에 `Agent: {도구} ({모델})` 한 줄을 남긴다. 예: `Agent: codex (모델명)`, `Agent: antigravity (gemini-3.8)`. 사람 커밋과 등록 도구 자동 커밋은 제외한다. 상세 규칙은 상위 헌법 `../GEMINI.md` §2.
+   - **커밋 출처 표시**: 커밋 메시지 맨 끝에 `Agent: {도구} ({모델})` 한 줄을 남긴다. 예: `Agent: antigravity (gemini-3.8-flash)`, `Agent: antigravity (gemini-4-argon)`. 도구·모델은 관제탑 `scripts/agent_commit_rules.json` 목록과 글자까지 같게 쓴다. 사람 커밋과 등록 도구 자동 커밋은 제외한다. 다른 에이전트 브랜치를 병합할 때는 병합 커밋에 `교정: [태그] 내용`을 남긴다. 상세 규칙은 상위 헌법 `../GEMINI.md` §2와 관제탑 `docs/AGENT_COMMIT_PROTOCOL.md`.
