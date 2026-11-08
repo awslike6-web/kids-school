@@ -82,7 +82,7 @@ graph TD
 ---
 
 ## 4. 리소스 및 에셋 디렉토리 표준
-- **스토리북 이미지**: `kids/subjects/society/images/storybook/{식별자}/`
+- **스토리북 이미지**: 원본 위치: kids-archive `assets/storybook/society/{학생}/{학년-학기}/{단원}/`
   - 펼침면: `history_story_p{N}.png` (2200x1700)
   - 단일 삽화: `history_ill_p{N}.png` (1100x1700)
 - **스토리북 오디오**: `kids/assets/audio/storybook/society_{식별자}/`

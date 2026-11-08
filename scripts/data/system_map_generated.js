@@ -20,6 +20,7 @@ window.SYSTEM_MAP_GENERATED = {
     ["mod_storybook", "pipe_worker_cache"],
     ["src_audio_korean", "db_library"],
     ["src_audio_korean", "doc_korean_spec"],
+    ["src_build_storybook", "doc_korean_spec"],
     ["src_quick_upload", "skill_auto_gallery-special-day-register"],
     ["src_reg_korean", "doc_korean_spec"],
     ["src_verify_quest", "doc_quest_lesson"],

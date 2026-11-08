@@ -70,8 +70,8 @@ graph TD
 ## 4. 제미나이 젬스(Gems) 스토리북 제작 표준 프로토콜
 
 ### 1) 이미지 에셋 디렉토리 표준
-- 경로 규칙: `kids/subjects/korean/images/{학생}/{학년-학기}/{단원}/storybook/`
-  - 예: 민수 5-2 1단원 ➔ `kids/subjects/korean/images/minsu/5-2/1/storybook/`
+- 그림 원본: kids-archive `assets/storybook/korean/{학생}/{학년-학기}/{단원}/`. 화면은 동화 데이터의 `imgBase` CDN 주소로 읽는다.
+- `kids/subjects/korean/images/.../storybook/`는 `build_storybook.py`의 임시 출력 폴더다. 만든 그림은 kids-archive로 옮겨 커밋하고, 공부방 저장소에는 남기지 않는다 (2026-11-08 중복 210개 정리).
 - 파일 규격:
   - 전면 펼침면: `korean_story_p{N}.png` (1650x1275)
   - 순수 삽화: `korean_story_ill_p{N}.png` (825x1275 좌측 크롭)
