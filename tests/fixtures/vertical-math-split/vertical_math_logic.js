@@ -1,4 +1,4 @@
-// 민민 우주 정거장 세로셈 동적 훈련소 로직 (vertical_math_logic.js)
+// 김s 우주 정거장 세로셈 동적 훈련소 로직 (vertical_math_logic.js)
 
 let currentProfile = localStorage.getItem('currentUser') || 'son';
 let gameState = { mode: '', questions: [], current: 0, correctCount: 0 };
@@ -865,7 +865,7 @@ window.printWorksheet = function() {
     const currentOpName = gameState.mode ? opNames[gameState.mode] : '세로셈';
     const lvlName = gameState.lvl ? `<span style="font-size: 1.5rem; color: #555;">(${gameState.lvl.label})</span>` : '';
 
-    let html = `<div class="print-title">민민 우주 정거장 🚀 - 오늘의 ${currentOpName} 훈련 ${lvlName}</div>`;
+    let html = `<div class="print-title">김s 우주 정거장 🚀 - 오늘의 ${currentOpName} 훈련 ${lvlName}</div>`;
     
     gameState.questions.forEach((q, idx) => {
         html += `<div class="print-item-wrapper">

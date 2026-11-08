@@ -559,7 +559,7 @@ if (typeof module !== 'undefined' && module.exports) {
         final_archive = archive_together + archive_other
 
         archive_js_content = """// 🏛️ kids-archive/data/archive-master-data.js
-// 민민이네 디지털 성장 아카이브 & 평생 포트폴리오 마스터 데이터베이스
+// 김s 디지털 성장 아카이브 & 평생 포트폴리오 마스터 데이터베이스
 // ※ 단일 원천(Single Source of Truth)으로 관리되며 초·중·고 12년 성장 기록을 영구 보존합니다.
 
 const ARCHIVE_MASTER_DATA = """ + json.dumps(final_archive, ensure_ascii=False, indent=2) + """;

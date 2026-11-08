@@ -1,5 +1,5 @@
 /*
- * 민민 시스템 조감도 화면 (minmin_system_map.html 전용)
+ * 김s 시스템 조감도 화면 (minmin_system_map.html 전용)
  * - 데이터: scripts/data/system_map_*.js 가 만든 window.SYSTEM_MAP_DATA 를 읽기만 합니다.
  * - 화면 3개: 첫 화면(증상·기능·검색 입구) → 5단계 흐름(카드·서랍·연결선·상세) → DB·캐시 규칙.
  * - 주소 끝(#)으로 상태를 기억합니다: #flow/korean, #flow/all, #trouble/3, #schema (뒤로 가기 지원)

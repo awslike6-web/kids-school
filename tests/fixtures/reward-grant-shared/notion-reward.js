@@ -12,7 +12,7 @@
     });
 })();
 // ==========================================
-// 💎 민민이네 공부방 보상·학습일지·인벤토리 연동 모듈 (notion-reward.js)
+// 💎 김s 공부방 보상·학습일지·인벤토리 연동 모듈 (notion-reward.js)
 // ==========================================
 
 var PROXY_URL = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";

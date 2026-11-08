@@ -1,4 +1,4 @@
-// 민민 우주 정거장 세로셈 동적 훈련소 로직 (vertical_math_logic.js)
+// 김s 우주 정거장 세로셈 동적 훈련소 로직 (vertical_math_logic.js)
 
 let currentProfile = localStorage.getItem('currentUser') || 'son';
 let gameState = { mode: '', questions: [], current: 0, correctCount: 0 };

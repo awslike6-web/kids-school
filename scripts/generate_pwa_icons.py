@@ -1,5 +1,5 @@
 """
-민민이네 공부방 PWA 전용 고화질 아이콘 생성 스크립트 (192x192, 512x512)
+김s 공부방 PWA 전용 고화질 아이콘 생성 스크립트 (192x192, 512x512)
 """
 from PIL import Image, ImageDraw, ImageFont
 import math

@@ -18,7 +18,7 @@
 
 `mermaid
 graph TD
-    Lobby[🏰 공부방 로비] --> MathHub[🧮 민민 수학 멀티버스]
+    Lobby[🏰 공부방 로비] --> MathHub[🧮 김s 수학 멀티버스]
     
     MathHub --> G1[📚 1관문: 단원 동화 도서관 math_storybook_library.html]
     MathHub --> G2[🏫 2관문: 학년별 개념 탐험관 ranges_estimation.html 등]
@@ -138,7 +138,7 @@ graph TD
     - 외장 의존성 없는 네이티브 신디사이저 사운드(정답 딩동, 힌트 뿅, 팡파르) 탑재.
     - 비계 훈련 성공 시 +1💎, 퀴즈 10제 완주 시 +5💎/🍬 & +15 EXP 지급 모달 연동.
 
-### 5) 🧮 민민 연산 멀티 스튜디오 (`math_operator_studio.html`)
+### 5) 🧮 김s 연산 멀티 스튜디오 (`math_operator_studio.html`)
 - **직접 수식 입력 (Custom Formula Input)**: 덧셈·뺄셈(1~999), 곱셈(1~999 × 1~99), 나눗셈(1~999 ÷ 1~99) 범위에서 원하는 수식을 직접 입력하거나 연산별 추천 프리셋 버튼으로 즉시 소환. 범위를 벗어난 값은 범위 안으로 맞춰 입력칸에도 보여 주고, 0으로 나누면 경고 후 1로 바꾼다. 뺄셈에서 $A < B$ 음수가 되는 입력은 에러리스 친절 안내를 제공한다.
 - **4대 다차원 시각화 표현 탭 (Multi-Representation)**:
   - ① **🧱 십진 블록 분배·모으기·가르기**:
