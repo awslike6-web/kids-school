@@ -21,6 +21,7 @@ window.SYSTEM_MAP_GENERATED = {
     ["src_audio_korean", "db_library"],
     ["src_audio_korean", "doc_korean_spec"],
     ["src_build_storybook", "doc_korean_spec"],
+    ["src_build_storybook", "doc_society_spec"],
     ["src_quick_upload", "skill_auto_gallery-special-day-register"],
     ["src_reg_korean", "doc_korean_spec"],
     ["src_verify_quest", "doc_quest_lesson"],
@@ -28,10 +29,11 @@ window.SYSTEM_MAP_GENERATED = {
   ],
   "tray": {
     "source": [
+      {"name": "audit_dom.py", "path": "daycare-helper/scripts/audit_dom.py", "domain": ["daycare"], "docs": ["flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
       {"name": "check_ai_connection.mjs", "path": "daycare-helper/scripts/check_ai_connection.mjs", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
       {"name": "create_device_invite.mjs", "path": "daycare-helper/scripts/create_device_invite.mjs", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "verify_js_modules.py", "path": "daycare-helper/scripts/verify_js_modules.py", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "verify_memo_workspace.mjs", "path": "daycare-helper/scripts/verify_memo_workspace.mjs", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
+      {"name": "verify_js_modules.py", "path": "daycare-helper/scripts/verify_js_modules.py", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
+      {"name": "verify_memo_workspace.mjs", "path": "daycare-helper/scripts/verify_memo_workspace.mjs", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md"]},
       {"name": "add_activity_photo.py", "path": "kids-school-main/scripts/add_activity_photo.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "haru_spec.md", "CORE_CATALOG.md"]},
       {"name": "build_gallery.py", "path": "kids-school-main/scripts/build_gallery.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_multi_character_spec.md"]},
       {"name": "build_system_map.py", "path": "kids-school-main/scripts/build_system_map.py", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
@@ -75,13 +77,14 @@ window.SYSTEM_MAP_GENERATED = {
     ],
     "module": [
       {"name": "admin-usage.js", "path": "daycare-helper/public/js/admin-usage.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "implementation_plan_20261028_usage_page.md"]},
-      {"name": "ai-engine.js", "path": "daycare-helper/public/js/ai-engine.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "auth-security.js", "path": "daycare-helper/public/js/auth-security.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "child-links.js", "path": "daycare-helper/public/js/child-links.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "memo-sync.js", "path": "daycare-helper/public/js/memo-sync.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "memo-workspace.js", "path": "daycare-helper/public/js/memo-workspace.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "notion-store.js", "path": "daycare-helper/public/js/notion-store.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "photo-memo.js", "path": "daycare-helper/public/js/photo-memo.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md"]},
+      {"name": "ai-engine.js", "path": "daycare-helper/public/js/ai-engine.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
+      {"name": "auth-security.js", "path": "daycare-helper/public/js/auth-security.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
+      {"name": "child-links.js", "path": "daycare-helper/public/js/child-links.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
+      {"name": "consent.js", "path": "daycare-helper/public/js/consent.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "implementation_plan_20261108_daily_flow.md"]},
+      {"name": "memo-sync.js", "path": "daycare-helper/public/js/memo-sync.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
+      {"name": "memo-workspace.js", "path": "daycare-helper/public/js/memo-workspace.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md"]},
+      {"name": "notion-store.js", "path": "daycare-helper/public/js/notion-store.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md"]},
+      {"name": "photo-memo.js", "path": "daycare-helper/public/js/photo-memo.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "flash_spec_20261108_daily_flow_ui.md", "implementation_plan_20261108_daily_flow.md"]},
       {"name": "gallery-mini-runner.js", "path": "kids-school-main/kids/common_space/gallery-mini-runner.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_fix_spec.md", "gallery_character_runner_spec.md"]},
       {"name": "gallery-modal-manager.js", "path": "kids-school-main/kids/common_space/gallery-modal-manager.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_runner_star_bank_spec.md"]},
       {"name": "gallery-runner-rewards.js", "path": "kids-school-main/kids/common_space/gallery-runner-rewards.js", "domain": ["gallery", "guardian"], "docs": ["gallery_runner_star_bank_spec.md", "runner_friendship_spec.md", "CORE_CATALOG.md"]},
@@ -198,5 +201,5 @@ window.SYSTEM_MAP_GENERATED = {
     "pipe": [],
     "db": []
   },
-  "hidden": {"source": 23, "skill": 3, "module": 0, "pipe": 0, "db": 3}
+  "hidden": {"source": 24, "skill": 3, "module": 0, "pipe": 0, "db": 3}
 };

@@ -83,6 +83,7 @@ graph TD
 
 ## 4. 리소스 및 에셋 디렉토리 표준
 - **스토리북 이미지**: 원본 위치: kids-archive `assets/storybook/society/{학생}/{학년-학기}/{단원}/`
+  - 관제탑 `scripts/build_storybook.py`가 이 폴더에 바로 저장하고 kids-archive에만 커밋한다. 공부방 저장소에는 그림을 두지 않는다.
   - 펼침면: `history_story_p{N}.png` (2200x1700)
   - 단일 삽화: `history_ill_p{N}.png` (1100x1700)
 - **스토리북 오디오**: `kids/assets/audio/storybook/society_{식별자}/`

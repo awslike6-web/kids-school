@@ -1067,6 +1067,8 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 
 ### 🌟 `scripts/build_storybook.py` (원클릭 스토리북 빌더 & 자동 배포기)
 노트북LM/Gemini 지문과 삽화 이미지를 입력받아 양면 펼침면 합성, TTS MP3, JS 데이터, HTML 뷰어 생성부터 **무결성 검증(`ai_verify`), kids-archive & kids-school 깃 푸시, 노션 타임라인 연동까지 원스톱으로 처리하는 올인원 빌더**입니다.
+- **출력 위치**: 펼침면(`{id}_story_p{N}.png`)·삽화(`{id}_ill_p{N}.jpg`)는 kids-archive `assets/storybook/{과목}/{학생}/{학년}/{단원}/`(데이터 `imgBase` CDN과 같은 경로)에 저장합니다. 공부방에는 음성 `kids/assets/audio/storybook/{id}/`, 데이터 `kids/subjects/{과목}/data/story_{id}.js`, 뷰어 `{id}_storybook.html`만 씁니다.
+- **배포**: `commit_named_files()`가 저장소마다 빌더가 이번에 쓴 파일만 이름으로 add·commit 한 뒤 푸시합니다(`git add .` 안 씀). 공유 폴더의 다른 변경은 섞이지 않습니다.
 - **실행 커맨드**:
   ```bash
   python scripts/build_storybook.py \

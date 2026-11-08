@@ -71,7 +71,7 @@ graph TD
 
 ### 1) 이미지 에셋 디렉토리 표준
 - 그림 원본: kids-archive `assets/storybook/korean/{학생}/{학년-학기}/{단원}/`. 화면은 동화 데이터의 `imgBase` CDN 주소로 읽는다.
-- `kids/subjects/korean/images/.../storybook/`는 `build_storybook.py`의 임시 출력 폴더다. 만든 그림은 kids-archive로 옮겨 커밋하고, 공부방 저장소에는 남기지 않는다 (2026-11-08 중복 210개 정리).
+- 관제탑 `scripts/build_storybook.py`가 펼침면·삽화를 위 kids-archive 폴더에 바로 저장하고, 배포 때 그 파일만 이름으로 지정해 kids-archive에 커밋한다. 공부방 저장소에는 그림을 두지 않는다 (2026-11-08 중복 210개 정리 뒤 빌더 출력 위치 변경). 공부방에는 음성·`story_{id}.js`·뷰어 HTML만 커밋된다.
 - 파일 규격:
   - 전면 펼침면: `korean_story_p{N}.png` (1650x1275)
   - 순수 삽화: `korean_story_ill_p{N}.png` (825x1275 좌측 크롭)
