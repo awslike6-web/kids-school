@@ -1,5 +1,5 @@
 // ==========================================
-// 🏛️ 민민이네 공부방 주간·고정 시간표 및 오버레이 연동 모듈 (notion-timetable.js)
+// 🏛️ 김s 공부방 주간·고정 시간표 및 오버레이 연동 모듈 (notion-timetable.js)
 // ==========================================
 
 var PROXY_URL = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";

@@ -1,5 +1,5 @@
 // ==========================================
-// 📚 민민이네 공부방 어휘·용어사전(VOCA) 노션 연동 모듈 (notion-voca.js)
+// 📚 김s 공부방 어휘·용어사전(VOCA) 노션 연동 모듈 (notion-voca.js)
 // ==========================================
 
 var PROXY_URL = typeof APP_CONFIG !== 'undefined' && APP_CONFIG.WORKER_PROXY_URL ? APP_CONFIG.WORKER_PROXY_URL : "https://minmin-notion.awslike6.workers.dev";

@@ -63,7 +63,7 @@ test('HTML의 두 스크립트 배선 이외 원문은 승인 전과 같다', ()
         .replace(tags[0], '<script src="./voca_common.js?v=20260916_1400"></script>');
     // 분리 직전 HTML의 줄바꿈을 LF로 정규화한 UTF-8 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
     assert.equal(createHash('sha256').update(restored.replace(/\r\n/g, '\n')).digest('hex'),
-        '66f861fa85eb6f1bd538292f5c23d471fd3242298d7547471eb88a8af91bbf9b');
+        '1762ba7bbcfd190ad777351e4a9a8d94db5bfe69184d3d97c637d28b614dca3b');
 });
 
 test('다른 운영 소스에 옛 버전·누락된 버전의 용어사전 JS 참조가 없다', () => {

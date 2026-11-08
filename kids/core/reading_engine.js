@@ -1,5 +1,5 @@
 /* ========================================================
-   📖 민민이네 공부방 모바일 핀포인트 독해 뷰어 엔진 (reading_engine.js)
+   📖 김s 공부방 모바일 핀포인트 독해 뷰어 엔진 (reading_engine.js)
    - Zero-Hardcoding: 노션 독해 마스터 DB(LIBRARY_DB) 실시간 동적 송출
    - Mobile-First UX: 스크롤 핑퐁 없는 1문항 슬라이스 & 바텀시트
    - Self-Paced Scaffolding: [💡 단락 단서 힌트 토글] 자기주도 난이도 조절

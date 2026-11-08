@@ -162,7 +162,7 @@ function applyViewerUi() {
     noticeTitle.textContent = `${viewerContext.childName} 공지 · 메모`;
     noticeSub.textContent = '준비물 · 행사 · 수업 메모';
     statusHint.textContent = '5분마다 자동 새로고침';
-    document.title = `민민이네 공부방 · ${viewerContext.childName} 시간표`;
+    document.title = `김s 공부방 · ${viewerContext.childName} 시간표`;
   } else {
     brandSub.textContent = '📺 로비 모니터 · 주간 학교 시간표';
     viewerBadge.className = 'viewer-badge';
@@ -170,7 +170,7 @@ function applyViewerUi() {
     noticeTitle.textContent = '전체 행정 공지판';
     noticeSub.textContent = '결석계 · 행사 · 준비물 · 수업 메모';
     statusHint.textContent = '5분마다 자동 새로고침 · F11 전체화면 권장';
-    document.title = '민민이네 공부방 · 주간 시간표';
+    document.title = '김s 공부방 · 주간 시간표';
 
     const activeBtn = document.querySelector(`.filter-btn[data-filter="${activeChildFilter}"]`)
       || document.querySelector('.filter-btn[data-filter="all"]');

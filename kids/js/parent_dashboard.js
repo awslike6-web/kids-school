@@ -146,10 +146,10 @@ function setupAuthUI() {
     if (dsParent) dsParent.style.display = 'block';
     if (dsChild) dsChild.style.display = 'none';
     if (isMom) {
-      document.getElementById('pageTitle').textContent = '민민이네 실시간 대시보드 👩‍👧‍👦 (엄마 모드)';
+      document.getElementById('pageTitle').textContent = '김s 실시간 대시보드 👩‍👧‍👦 (엄마 모드)';
       document.getElementById('pageSubtitle').textContent = '아이들의 학습 성장과 습관을 따뜻하게 살펴보고 칭찬해 주세요.';
     } else {
-      document.getElementById('pageTitle').textContent = '민민이네 실시간 대시보드 👨‍👧‍👦 (아빠 관제)';
+      document.getElementById('pageTitle').textContent = '김s 실시간 대시보드 👨‍👧‍👦 (아빠 관제)';
       document.getElementById('pageSubtitle').textContent = '아이들의 학습 성장과 스크린타임, 인벤토리를 통합 관리합니다.';
     }
     switchView('all');

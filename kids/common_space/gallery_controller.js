@@ -87,14 +87,14 @@ function switchViewMode(mode) {
     if (mode === 'special') {
         if (btnArt) btnArt.classList.remove('active');
         if (btnSpecial) btnSpecial.classList.add('active');
-        if (heroTitle) heroTitle.innerHTML = '🌟 민민이네 특별한 날 추억관';
+        if (heroTitle) heroTitle.innerHTML = '🌟 김s 특별한 날 추억관';
         if (heroSubtitle) heroSubtitle.textContent = '생일파티, 텃밭체험, 소풍, 학교행사 등 온 가족이 함께한 눈부신 순간들을 모아보세요!';
         if (uploadBtnText) uploadBtnText.textContent = '특별한 날 추억 찰칵!';
         if (navLogoText) navLogoText.textContent = '특별한 날 추억관';
     } else {
         if (btnArt) btnArt.classList.add('active');
         if (btnSpecial) btnSpecial.classList.remove('active');
-        if (heroTitle) heroTitle.innerHTML = '🎨 민민이네 꿈나무 갤러리';
+        if (heroTitle) heroTitle.innerHTML = '🎨 김s 꿈나무 갤러리';
         if (heroSubtitle) heroSubtitle.textContent = '학교와 집에서 정성껏 만든 소중한 작품들을 감상하고 칭찬해 주세요!';
         if (uploadBtnText) uploadBtnText.textContent = '새 작품 찰칵 올리기';
         if (navLogoText) navLogoText.textContent = '꿈나무 작품 갤러리';

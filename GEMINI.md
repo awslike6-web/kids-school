@@ -1,4 +1,4 @@
-# 📚 민민이네 공부방 플랫폼 규칙 & 아키텍처 헌법 (Kids-School Guidelines)
+# 📚 김s 공부방 플랫폼 규칙 & 아키텍처 헌법 (Kids-School Guidelines)
 
 > **공식 배포 주소**: `https://awslike6-web.github.io/kids-school/`  
 > **공식 깃 저장소**: `https://github.com/awslike6-web/kids-school`  

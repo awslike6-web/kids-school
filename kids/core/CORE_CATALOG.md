@@ -1,4 +1,4 @@
-# 🧩 민민이네 공부방 공통 부품 & 코어 모듈 카탈로그 (Core Catalog)
+# 🧩 김s 공부방 공통 부품 & 코어 모듈 카탈로그 (Core Catalog)
 
 > **규칙**: 신규 기능 개발 또는 화면 수정 시 본 카탈로그에 등록된 공통 엔진을 우선적으로 임포트하여 사용해야 합니다. 동일한 기능을 위해 개별 페이지 내부에 수백 줄의 자바스크립트나 파이썬 코드를 중복 작성하지 마십시오.
 
@@ -1041,7 +1041,7 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>도서명 - 민민이네 공부방</title>
+    <title>도서명 - 김s 공부방</title>
     <link rel="stylesheet" href="../../css/design-system.css">
     <link rel="stylesheet" href="../../css/storybook_viewer.css">
   </head>
@@ -1388,7 +1388,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 
 
-## 민민 가디언 부모 관리 연결 (2026-10-11)
+## 김s 가디언 부모 관리 연결 (2026-10-11)
 
 - 화면 연결 부품: `kids/js/parent_dashboard_render.js`의 `renderScreenTimeWidget(childName)`과 `parent_dashboard.html`의 자녀별 가디언 링크.
 - 부모 대시보드 JS 분리(2026-10-31): `kids/js/parent_dashboard.js`(547줄, 설정·상태·권한·소원권·통계·레이더 차트) → `kids/js/parent_dashboard_render.js`(575줄, `loadDashboardData`·스크린타임·하루 코칭·안전 알림 위젯·이벤트 등록). HTML에서 두 클래식 스크립트를 `?v=20261031-dash-split`로 연달아 로드합니다. 기존 전역 함수·최상위 상태·DOM·동작은 유지하며 `localDateStr`·`calcStreak`는 첫 파일에 남습니다.
@@ -1401,14 +1401,14 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 - 로그인 연장: POST /api/parent/renew JSON {}. 아빠·엄마 모두 자신의 유효 세션으로 실행할 수 있습니다. 화면 열기/새로고침 때 잔여 7일 이하이면 자동으로 현재부터 14일 갱신, 로그인 연장 버튼으로 수동 갱신·만료일 표시. 만료/로그아웃 후 새 코드 필요. 자녀 시간·잠금·권한 변경 없음.
 
-## 민민 가디언 Windows 작업 지시서 (예정 기능, 2026-10-11)
+## 김s 가디언 Windows 작업 지시서 (예정 기능, 2026-10-11)
 
 - 문서 원천: 관제탑 kids-screen-guardian/docs/windows/README.md, contract.md, tasks.json, tasks/W00.md~W42.md 및 H01.md~H10.md. Windows 구현은 시작 전이며 부모 웹의 PC 로그인과 별개입니다.
 - 지시 출력 도구: docs/windows/make-packet.mjs. --check는53개 카드의 구조를 검사하고 ID 인자는 해당 카드와 공통 요약·직접 선행 receipt만 출력합니다. 선행 accepted·확인 커밋·검증 증거·고정 receipt가 없으면 다음 작업을 거부합니다.
 - 예정 모듈: Windows Core 정산, Service 키/권한·SID, Session 감지, MV3 확장, Native Host, Admin 등록, 설치/복구. 현재 런타임 모듈이 존재하거나 검증됐다고 해석하지 않습니다.
 - 기존 /api/pair·/api/screentime·/api/usage 누적 장부를 재사용하고 자정60분·학습1:1·부모 추가 출처 숨김을 유지합니다. 엄격한 다중 기기 예약은 H단계의 Worker·Android 변경까지 별도 완료해야 합니다.
 
-## 민민 가디언 공부방 오차단 수정 (Android v2.1.1, 2026-10-11)
+## 김s 가디언 공부방 오차단 수정 (Android v2.1.1, 2026-10-11)
 
 - 원천: 관제탑 kids-screen-guardian/app/src/main/java/com/awslike6/screenguardian/BrowserPolicy.java와 ScreenGuardianService.java.
 - BrowserPolicy.update(pkg, windowId, address, editingAddress)는 접근성 창별 유튜브 상태를 유지합니다. isRestricted는 등록된 네이티브 앱 또는 확인된 YOUTUBE만 제한하며 UNKNOWN은 제외합니다. reset은 앱/창·화면 잠금·서비스 중단의 이전 판정을 초기화합니다.

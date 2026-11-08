@@ -299,7 +299,7 @@ function updateStatusAndFilter(rebuildUnits = true) {
   if (fairyRoom) fairyRoom.style.display = 'block';
 
   if (msgParts.length === 0) {
-    statusMsg.textContent = `📚 민민이네 전체 지식 도서관 (총 ${filtered.length}개 단어·문장)`;
+    statusMsg.textContent = `📚 김s 전체 지식 도서관 (총 ${filtered.length}개 단어·문장)`;
   } else {
     statusMsg.textContent = `${msgParts.join(' + ')} 검색 결과 (총 ${filtered.length}개)`;
   }

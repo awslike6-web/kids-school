@@ -294,7 +294,7 @@ def sync_society_textbooks_parallel(max_images=51):
                 print(f" ⚠️ 실패 ({f_orig['name']}): {err}")
 
     js_output = f"""// kids/data/society-data.js
-// 🌍 [민민이네 공부방] 초등 5학년 1학기 사회 교과서 단원별 퀴즈 및 지문 데이터베이스
+// 🌍 [김s 공부방] 초등 5학년 1학기 사회 교과서 단원별 퀴즈 및 지문 데이터베이스
 // 구글 드라이브 실제 교과서 사진(51장) 1:1 연동 완료
 
 const SOCIETY_CURRICULUM_DATA = {json.dumps(dataset, ensure_ascii=False, indent=2)};

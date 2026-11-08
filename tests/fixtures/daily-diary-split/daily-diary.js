@@ -1,5 +1,5 @@
 // kids/core/daily-diary.js
-// 📖 민민이네 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 일상로그 / 하루 다회 타임라인 누적 엔진)
+// 📖 김s 하루 마음 일기장 (민서 1학년 감정놀이 / 민수 5학년 일상로그 / 하루 다회 타임라인 누적 엔진)
 // 🕒 한국 시간(KST) 기준 YYYY-MM-DD (toISOString 슬라이싱은 오전 9시 전에 전날 날짜가 됨)
 function getKstTodayYMD(date = new Date()) {
     const kst = new Date(date.getTime() + 9 * 3600000);

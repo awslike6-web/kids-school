@@ -731,7 +731,7 @@ async function printSocietySummary() {
     let html = `
         <div style="padding: 20px; font-family: 'Nanum Gothic', sans-serif;">
             <div style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
-                <h1 style="margin: 0; font-size: 1.8rem;">🗺️ 민민이네 공부방 - 초등 사회 핵심 요약집</h1>
+                <h1 style="margin: 0; font-size: 1.8rem;">🗺️ 김s 공부방 - 초등 사회 핵심 요약집</h1>
                 <p style="margin: 5px 0 0 0; color: #666;">단원: ${selectedSocietyGrade || '5-2'} ${selectedSocietyUnit || '1단원 옛사람들의 삶과 문화'} | 인쇄일자: ${new Date().toLocaleDateString('ko-KR')}</p>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">

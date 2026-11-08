@@ -1,5 +1,5 @@
 // 🌟 kids/data/special-days-data.js
-// 민민이네 가족 특별한 날 추억 & 체험 피드 마스터 데이터 (Single Source of Truth)
+// 김s 가족 특별한 날 추억 & 체험 피드 마스터 데이터 (Single Source of Truth)
 // ※ 갤러리 특별한 날 탭과 하루방이 함께 읽는다. 등록은 관제탑 scripts/sync_quick_upload.py --cat "특별한 날"
 //   (빌더 kids-school-main/scripts/add_activity_photo.py)이 이 파일을 다시 쓴다. 배열 본문은 JSON 형식을 유지한다.
 // ※ 12년 성장 아카이브(kids-archive CDN) 및 노션 DB(3dfa2711...)와 실시간 양방향 연동

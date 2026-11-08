@@ -1,5 +1,5 @@
 /*
- * 민민 시스템 조감도 데이터 (minmin_system_map.html 전용)
+ * 김s 시스템 조감도 데이터 (minmin_system_map.html 전용)
  *
  * - 손으로 관리하는 구간: window.SYSTEM_MAP_DATA (도메인 · 카드 · 연결선 · 증상 카드)
  * - 증상 카드: scripts/data/system_map_troubles.js (window.SYSTEM_MAP_TROUBLES)

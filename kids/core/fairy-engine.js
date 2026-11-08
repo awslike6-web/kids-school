@@ -68,7 +68,7 @@ function resolveFairyPresetAudio(text) {
     if (/연속.*학습|스트릭/i.test(trimmed)) return cocoPresetFile('streak_bonus');
 
     // 3) 환영 인사 키워드 매칭
-    if (/민민이네.*공부방|공부방에.*온.*걸|로비/i.test(trimmed)) {
+    if (/김s.*공부방|공부방에.*온.*걸|로비/i.test(trimmed)) {
         return pickPersonaVoiceFile('welcome') || cocoPresetFile('welcome_lobby');
     }
     if (/민수야.*안녕|민수.*퀘스트/i.test(trimmed)) {

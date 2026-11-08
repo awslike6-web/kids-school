@@ -15,7 +15,7 @@ function getKstTodayYMD(date = new Date()) {
     document.head.appendChild(script);
 })();
 /* ========================================================
-   📖 민민이네 공부방 스토리북 공통 뷰어 엔진 (storybook_engine.js)
+   📖 김s 공부방 스토리북 공통 뷰어 엔진 (storybook_engine.js)
    ======================================================== */
 (function() {
   let STORY_BOOK = null;
@@ -42,7 +42,7 @@ function getKstTodayYMD(date = new Date()) {
 
     // 1. 페이지 메타데이터 & 타이틀 설정
     if (STORY_BOOK.title) {
-      document.title = `${STORY_BOOK.title} 📖 | 민민이네 공부방`;
+      document.title = `${STORY_BOOK.title} 📖 | 김s 공부방`;
       const titleEl = document.getElementById('storyTitleText');
       if (titleEl) titleEl.textContent = STORY_BOOK.title;
       const titleIconEl = document.getElementById('storyTitleIcon');
