@@ -429,11 +429,15 @@ function selectUser(key, name, targetUrl) {
     localStorage.setItem('currentUser', key);
     localStorage.setItem('currentUserName', name);
     localStorage.setItem('currentChild', key === 'daughter' ? 'minseo' : 'minsu');
+    localStorage.removeItem(ADMIN_SESSION_KEY);
     location.href = targetUrl;
 }
 
 // 부모님 비밀번호 로직
-const PARENT_PASSWORD = "0000";
+const PARENT_PASSWORD = "1690";
+// 부모 검수 모드는 비밀번호를 넣은 뒤 1시간만 유지한다 (로비가 시각을 보고 아이 이름으로 되돌림)
+const ADMIN_SESSION_KEY = 'MINMIN_ADMIN_SESSION_AT';
+function markAdminSession() { localStorage.setItem(ADMIN_SESSION_KEY, String(Date.now())); }
 const MASTER_TOWER_URL = "https://master-tower.awslike6.workers.dev/";
 let pwBuffer = ""; 
 let currentAdminName = ""; // '아빠' or '엄마'
@@ -491,12 +495,14 @@ function closeAdminModal(e) {
 function goAdminCustom(url) {
   localStorage.setItem('currentUser', 'admin'); 
   localStorage.setItem('currentUserName', currentAdminName);
+  markAdminSession();
   location.href = url;
 }
 
 function goMasterTower() {
   localStorage.setItem('currentUser', 'admin');
   localStorage.setItem('currentUserName', '아빠');
+  markAdminSession();
   window.open(MASTER_TOWER_URL, '_blank');
   closeAdminModal();
 }
@@ -507,6 +513,7 @@ function goAdminTestLobby(childKey, childParam) {
   localStorage.setItem('currentUser', childKey); 
   localStorage.setItem('currentChild', childParam);
   localStorage.setItem('currentUserName', currentAdminName);
+  markAdminSession();
   location.href = `lobby.html?user=${childParam}`;
 }
 

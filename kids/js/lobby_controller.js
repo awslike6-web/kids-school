@@ -22,6 +22,8 @@
 
   let activeUserKey = 'minsu';
   let isAdminSession = false;
+  const ADMIN_SESSION_KEY = 'MINMIN_ADMIN_SESSION_AT'; // index.html markAdminSession()과 같은 키
+  const ADMIN_SESSION_MS = 60 * 60 * 1000;
   let modalState = {
     completedSubjKey: 'korean',
     recommendedSubjKey: 'math'
@@ -82,12 +84,18 @@
     const realName = getRealChildName(activeUserKey);
 
     const savedName = localStorage.getItem('currentUserName');
-    isAdminSession = (savedName === '아빠' || savedName === '엄마');
+    // 부모 검수 모드는 첫 화면에서 비밀번호를 넣은 뒤 1시간만 유지한다.
+    // 시각 기록이 없거나 지났으면 아이 이름으로 되돌려 학습일지·보상이 빠지지 않게 한다.
+    const adminAt = Number(localStorage.getItem(ADMIN_SESSION_KEY));
+    const adminAge = Date.now() - adminAt;
+    isAdminSession = (savedName === '아빠' || savedName === '엄마')
+      && adminAt > 0 && adminAge >= 0 && adminAge < ADMIN_SESSION_MS;
 
     localStorage.setItem('currentChild', activeUserKey);
     localStorage.setItem('currentUser', cfg.key);
     if (!isAdminSession) {
       localStorage.setItem('currentUserName', realName);
+      localStorage.removeItem(ADMIN_SESSION_KEY);
     }
 
     const htmlEl = document.documentElement;

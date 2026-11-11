@@ -12,7 +12,7 @@ const names = ['lobby_config.js', 'lobby_subject_hud.js', 'lobby_controller.js']
 const files = names.map(name => `kids/js/${name}`);
 const sources = files.map(read);
 const fixture = read('tests/fixtures/lobby-split/lobby_controller.js');
-const version = '?v=20261031-lobby-split';
+const version = '?v=20261112-admin-expiry';
 // 수학 페이지 분리 시험과 동일하며 코드 내부 공백·들여쓰기는 보존한다.
 const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
 const originalLines = normalize(fixture).split('\n');
@@ -28,6 +28,30 @@ const configEdits = [
 const applyConfigEdits = text => configEdits.reduce((result, line) => {
   assert.equal(result.split(line).length, 2, `승인 변경 대상 줄이 한 번만 있어야 함: ${line.slice(0, 40)}`);
   return result.replace(line, `${line},\n${yachtItem},\n${omokItem},\n${yutItem}`);
+}, normalize(text));
+// 분리 뒤 승인된 변경: 2026-11-12 부모 검수 모드 1시간 만료(index.html markAdminSession과 같은 키).
+// 원본 fixture에도 같은 변경을 적용해 나머지 원문·VM 동작 비교를 계속 엄격하게 유지한다.
+const adminSessionEdits = [
+  ['  let isAdminSession = false;\n', `  let isAdminSession = false;
+  const ADMIN_SESSION_KEY = 'MINMIN_ADMIN_SESSION_AT'; // index.html markAdminSession()과 같은 키
+  const ADMIN_SESSION_MS = 60 * 60 * 1000;
+`],
+  [`    isAdminSession = (savedName === '아빠' || savedName === '엄마');
+`, `    // 부모 검수 모드는 첫 화면에서 비밀번호를 넣은 뒤 1시간만 유지한다.
+    // 시각 기록이 없거나 지났으면 아이 이름으로 되돌려 학습일지·보상이 빠지지 않게 한다.
+    const adminAt = Number(localStorage.getItem(ADMIN_SESSION_KEY));
+    const adminAge = Date.now() - adminAt;
+    isAdminSession = (savedName === '아빠' || savedName === '엄마')
+      && adminAt > 0 && adminAge >= 0 && adminAge < ADMIN_SESSION_MS;
+`],
+  [`      localStorage.setItem('currentUserName', realName);
+    }`, `      localStorage.setItem('currentUserName', realName);
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+    }`]
+];
+const applyAdminSessionEdits = text => adminSessionEdits.reduce((result, [before, after]) => {
+  assert.equal(result.split(before).length, 2, `승인 변경 대상이 한 번만 있어야 함: ${before.trim().slice(0, 40)}`);
+  return result.replace(before, after);
 }, normalize(text));
 const originalRange = (first, last) => originalLines.slice(first - 1, last).join('\n') + '\n';
 const approved = new Map([
@@ -74,7 +98,7 @@ test('세 JS는 600줄 이하이고 설정·잔여 컨트롤러·연결 코드�
   assert.equal(originalLines.length, 1102);
   for (const source of sources) assert.ok(source.split(/\r?\n/).length <= 600);
   assert.equal(normalize(sources[0]), applyConfigEdits(originalRange(1, 106)));
-  assert.equal(normalize(sources[2]), normalize(originalRange(107, 139) + bridge
+  assert.equal(normalize(sources[2]), applyAdminSessionEdits(originalRange(107, 139) + bridge
     + originalRange(140, 331) + originalRange(597, 845) + originalRange(1022, 1102)));
   // 코어 로더를 기존 위치에 남겨 마음일기·음성 시험의 계약도 보존한다.
   assert.ok(sources[2].includes(originalRange(111, 127).trimEnd().replace(/\n/g,
@@ -123,7 +147,8 @@ const clockNow = Date.parse('2026-10-31T03:00:00Z');
 function sandbox({ user = 'minsu', admin = '', configured = true, loader = true,
   stored = {}, missing = [] } = {}) {
   const trace = [], events = [], timers = [], requests = [], coreCallbacks = [];
-  const store = new Map(Object.entries({ currentUserName: admin || (user === 'minseo' ? '민서' : '민수'), ...stored }));
+  const store = new Map(Object.entries({ currentUserName: admin || (user === 'minseo' ? '민서' : '민수'),
+    ...(admin ? { MINMIN_ADMIN_SESSION_AT: String(clockNow - 60000) } : {}), ...stored }));
   const elements = new Map(), boosts = new Map(), omitted = new Set(missing);
   let created = 0;
   const log = (...entry) => trace.push(plain(entry));
@@ -255,7 +280,7 @@ function load(split, options, probe = true) {
   };
   if (split) sources.forEach((source, index) => vm.runInContext(index === 2 ? instrument(source) : source,
     sb.context, { filename: files[index] }));
-  else vm.runInContext(instrument(applyConfigEdits(fixture)), sb.context, { filename: '원본 fixture' });
+  else vm.runInContext(instrument(applyAdminSessionEdits(applyConfigEdits(fixture))), sb.context, { filename: '원본 fixture' });
   return sb;
 }
 
@@ -319,6 +344,17 @@ for (const options of [
     assert.equal(typeof both[1].context.getSubjectCapState, 'undefined');
   });
 }
+
+test('부모 검수 이름이 남아도 시각 기록이 없거나 1시간이 지나면 아이 이름으로 되돌린다', () => {
+  // '' = 시각 기록 없음(이 기능 전에 남은 검수 이름), 1시간 경과, 미래 시각(시계 오류), 1시간 이내
+  for (const [stamp, admin] of [['', false], [String(clockNow - 3600000), false],
+    [String(clockNow + 60000), false], [String(clockNow - 3599000), true]]) {
+    const sb = load(true, { user: 'minsu', admin: '아빠', stored: { MINMIN_ADMIN_SESSION_AT: stamp } }, false);
+    assert.equal(sb.store.get('currentUserName'), admin ? '아빠' : '민수', String(stamp));
+    assert.equal(sb.store.has('MINMIN_ADMIN_SESSION_AT'), admin, String(stamp));
+    assert.equal(sb.requests.length, admin ? 0 : 1, String(stamp));
+  }
+});
 
 for (const user of ['minsu', 'minseo']) {
   test(`${user}: 일반/복습 한도 경계·override·하루 체크인과 렌더 결과가 원본과 같다`, () => {
@@ -399,6 +435,7 @@ test('관리자 전환 시 요청 생략과 비동기 HUD의 관리자 판정은
   const both = pair({ user: 'minsu' });
   for (const sb of both) {
     sb.store.set('currentUserName', '아빠');
+    sb.store.set('MINMIN_ADMIN_SESSION_AT', String(clockNow));
     sb.context.switchLobbyUser('minseo');
     assert.equal(sb.requests.length, 1);
     sb.requests[0].reply(inventory({ level: 8 }));

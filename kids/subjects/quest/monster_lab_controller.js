@@ -698,7 +698,7 @@
     if (secretTapCount >= 5) {
       secretTapCount = 0;
       const pw = prompt("🔒 부모님 비밀번호 4자리를 입력하세요:");
-      if (pw === "0000") {
+      if (pw === "1690") { // 첫 화면(index.html) PARENT_PASSWORD와 같은 값
         const btnParent = document.getElementById('btnParentProgressTrigger');
         if (btnParent) btnParent.classList.remove('hidden');
         if (typeof window.openParentProgressModal === 'function') {
