@@ -70,6 +70,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "homeschool_spec.md", "path": "kids-school-main/docs/homeschool_spec.md", "domain": [], "docs": ["homeschool_spec.md", "timetable_diary_spec.md"]},
       {"name": "monster_moreum_spec.md", "path": "kids-school-main/docs/monster_moreum_spec.md", "domain": ["quest"], "docs": ["monster_rotek_spec.md", "CORE_CATALOG.md"]},
       {"name": "monster_rotek_spec.md", "path": "kids-school-main/docs/monster_rotek_spec.md", "domain": ["quest"], "docs": ["CORE_CATALOG.md"]},
+      {"name": "notice_web_intake_spec.md", "path": "kids-school-main/docs/notice_web_intake_spec.md", "domain": ["timetable"], "docs": ["notice_web_intake_spec.md"]},
       {"name": "quest_reward_retry_spec.md", "path": "kids-school-main/docs/quest_reward_retry_spec.md", "domain": ["guardian", "quest"], "docs": ["reward_grant_shared_spec.md", "CORE_CATALOG.md"]},
       {"name": "reward_grant_shared_spec.md", "path": "kids-school-main/docs/reward_grant_shared_spec.md", "domain": ["guardian"], "docs": ["CORE_CATALOG.md"]},
       {"name": "runner_friendship_spec.md", "path": "kids-school-main/docs/runner_friendship_spec.md", "domain": ["gallery"], "docs": ["CORE_CATALOG.md"]},
