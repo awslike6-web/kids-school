@@ -10,7 +10,7 @@
 4. 해당 과목 명세서: `docs/{과목}_spec.md`, 노션 스키마: `docs/notion_schemas_school.md`. 등록 작업은 명세서에 적힌 공식 도구를 씁니다(일회성 스크립트 금지, `../GEMINI.md` §9-5).
    - 갤러리 작품 등록: [`docs/gallery_archive_spec.md`](docs/gallery_archive_spec.md) — 작품·특별한 날 등록과 "잘 등록됐는지 확인"은 `gallery-special-day-register` 스킬 순서대로 하고, 끝에 점검표 `scripts/verify_gallery_entry.py`(§9)와 사진 육안 확인을 거친다
    - 특별한 날 등록: [`docs/gallery_archive_spec.md` §5](docs/gallery_archive_spec.md) (입구 관제탑 `scripts/sync_quick_upload.py --cat "특별한 날"`, 빌더 `scripts/add_activity_photo.py`)
-   - 알림장 등록: [`docs/timetable_diary_spec.md` §4](docs/timetable_diary_spec.md)
+   - 알림장 등록: [`docs/timetable_diary_spec.md` §4](docs/timetable_diary_spec.md) · 웹 자동 수신은 `school-notice-intake` 스킬 ([`docs/notice_web_intake_spec.md`](docs/notice_web_intake_spec.md))
    - 종이일기 등록: [`docs/timetable_diary_spec.md` §5](docs/timetable_diary_spec.md)
    - 센터 교재·독해 등록: [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)
    - 민서 국어 단원 등록: `minseo-korean-unit` 스킬
@@ -25,6 +25,7 @@
   - `minseo-korean-unit` (민서 국어 단원 추가: 받아쓰기 회차 → 5분방 정제 어휘 + 미니 독해 지문·mp3 등록 표준 절차)
   - `gallery-special-day-register` (갤러리 작품·특별한 날 등록·점검: 입구 미리보기→실행, 온 가족 작성자=`공동`, 구글 포토 링크, 등록 후 점검표, 육안 확인, 보고 형식)
   - `science-unit-builder` (초등 과학 5대 가상실험실 & NotebookLM 기반 『실험관찰』 실험연계 디지털 탐구 보고서·서술형 빌더·실험순서 조립 표준 제작)
+  - `school-notice-intake` (하이클래스·클래스팅 웹 알림장 자동 수신 → 원문 보존·JSON 작성·공식 도구 노션 등록)
 
 ## 로컬 실행·검증 메모 (이 PC 기준)
 - **OS·런타임**: Windows, **Node.js v24.22.0** (2026-10-20 설치). JS 엔진 검증은 `node scripts/verify_quest_mastery.js`처럼 명령으로 하고, 화면 확인은 정적 서버(`python -m http.server`)와 브라우저로 합니다.
