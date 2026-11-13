@@ -355,12 +355,12 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
 /* 📱 화면 하단 고정 가상 키패드 */
 .numpad-container { 
   width: 100%; 
-  background: rgba(22, 22, 44, 0.95); 
+  background: var(--numpad-bg, rgba(22, 22, 44, 0.96)); 
   padding: 6px 14px 14px 14px; 
   border-radius: 20px 20px 0 0; 
   margin-top: auto; 
   border-top: 2px solid var(--border); 
-  box-shadow: 0 -8px 25px rgba(0,0,0,0.5); 
+  box-shadow: var(--numpad-shadow, 0 -8px 25px rgba(0,0,0,0.5)); 
   position: sticky;
   bottom: 0;
   z-index: 100;
@@ -403,10 +403,12 @@ body:has(#screen-game.active) .app-container { max-width: 980px; }
   pointer-events: none;
   margin-top: 0;
 }
-.numpad-btn { background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 14px; font-size: 1.8rem; font-family: 'Jua', sans-serif; color: var(--white); cursor: pointer; transition: 0.1s; }
-.numpad-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.25); }
-.numpad-btn.action { background: rgba(255, 107, 157, 0.15); border-color: var(--pink); color: var(--pink); }
-.numpad-btn.submit { grid-column: span 3; background: linear-gradient(135deg, var(--cyan), var(--blue)); color: #fff; border: none; font-size: 1.45rem; padding: 16px; }
+.numpad-btn { background: var(--numpad-btn-bg, rgba(255, 255, 255, 0.14)); border: 2px solid var(--numpad-btn-border, rgba(255,255,255,0.24)); border-radius: 16px; padding: 14px; font-size: 1.8rem; font-family: 'Jua', sans-serif; color: var(--numpad-text, #F5F5F5); cursor: pointer; transition: 0.1s; box-shadow: var(--numpad-btn-shadow, none); }
+.numpad-btn:active { transform: scale(0.95); background: var(--numpad-btn-active, rgba(255, 255, 255, 0.28)); }
+.numpad-btn.action { background: var(--numpad-action-bg, rgba(255, 107, 157, 0.2)); border-color: var(--numpad-action-border, var(--pink)); color: var(--numpad-action-text, #ff85b3); }
+.numpad-btn.submit { grid-column: span 3; background: var(--numpad-submit-bg, linear-gradient(135deg, #0284c7, #2563eb)); color: #fff; border: 2px solid transparent; font-size: 1.45rem; padding: 16px; }
+body.theme--slime .numpad-container { --numpad-bg: rgba(255, 235, 241, 0.98); --numpad-shadow: 0 -6px 20px rgba(255, 107, 157, 0.18); --numpad-btn-bg: #ffffff; --numpad-btn-border: #f48fb1; --numpad-btn-shadow: 0 2px 5px rgba(236, 72, 153, 0.14); --numpad-btn-active: #ffdce8; --numpad-text: #3b2342; --numpad-action-bg: #ffe4ef; --numpad-action-border: #e11d48; --numpad-action-text: #be123c; --numpad-submit-bg: linear-gradient(135deg, #e11d48, #be185d); }
+body.theme--slime .numpad-handle-bar span { color: #be185d; background: #ffffff; border-color: #f48fb1; }
 
 /* 결과창 */
 .result-card { background: var(--card); border-radius: 30px; padding: 40px 32px; width: 100%; text-align: center; border: 2px solid var(--border); }
