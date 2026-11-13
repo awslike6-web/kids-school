@@ -141,6 +141,7 @@ graph TD
   - `요일`은 `날짜`에서 자동 계산하므로 적지 않는다.
 - 실행: 먼저 `python -X utf8 scripts/register_notices.py scratch/notices/YYYY-MM-DD.json --dry-run`으로 확인한 뒤 `--dry-run` 없이 등록한다 (master-tower 루트에서).
 - 같은 제목·아이·날짜가 이미 있으면 건너뛰므로 다시 실행해도 중복되지 않는다. 데이터에 오류(아이·적용 범위 값, 과목 누락, 날짜 형식)가 하나라도 있으면 아무것도 등록하지 않고 오류 목록을 보여 준다.
+- 웹 자동 수신: [`notice_web_intake_spec.md`](notice_web_intake_spec.md)
 
 ---
 

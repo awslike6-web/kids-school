@@ -677,8 +677,8 @@ window.SYSTEM_MAP_DATA = {
 
 // <AUTO-SYNC:START> scripts/sync_agent_skills.py가 자동으로 다시 씁니다. 직접 고치지 마세요.
 window.SYSTEM_MAP_AUTO = {
-  "lastUpdated": "2026-11-07",
-  "catalogUpdatedAt": "2026-11-07 21:14",
+  "lastUpdated": "2026-11-09",
+  "catalogUpdatedAt": "2026-11-09 00:09",
   "skills": [
     {
       "name": "gallery-special-day-register",
@@ -694,6 +694,11 @@ window.SYSTEM_MAP_AUTO = {
       "name": "quest-engine-spec",
       "path": "kids-school-main/.agent/skills/quest-engine-spec/SKILL.md",
       "summary": "5분 퀘스트 작업 시 사용. 3·3·3 마스터리 엔진, 동적 스테이지, 에러리스 4대 UI, 노션 VOCA_DB 숙련도/달성 동기화, 영어·국어·사회·과학 단원 연동, 퀘스트 보상·학습일지·가디언 계측 흐름을 수정·점검·확장하거나 검증할 때 호출."
+    },
+    {
+      "name": "school-notice-intake",
+      "path": "kids-school-main/.agent/skills/school-notice-intake/SKILL.md",
+      "summary": "하이클래스·클래스팅 알림장 자동 수신·노션 등록, '알림장 가져와 줘' 요청 시 사용."
     },
     {
       "name": "science-unit-builder",
