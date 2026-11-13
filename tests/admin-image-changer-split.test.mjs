@@ -1,63 +1,40 @@
-// 교재 이미지 체인저 분리: 고정 원문·마크업·전역 함수·이벤트를 보존한다.
+// 교재 이미지 체인저 분리 규칙: 상대 경로·줄 상한·인라인 금지·로드 순서·HTML 호출 함수·core 단독 실행.
+// 2026-11-14: 얼린 원본(tests/fixtures/admin-image-changer-split)과의 원문·마크업·실행 결과 대조는 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assetTags, assertLoadsInOrder, assertRelativeAssets, assertNoInlineStyleOrScript,
+    assertInlineHandlersDeclared, inlineHandlerNames, resolveFrom } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const htmlPath = 'admin-image-changer.html';
 const html = read(htmlPath);
-const fixture = JSON.parse(read('tests/fixtures/admin-image-changer-split/admin-image-changer.json'));
-const version = '?v=20261031-admin-split';
-const cssHref = `kids/css/admin_image_changer.css${version}`;
-const scriptSrcs = ['core', 'main'].map(part => `kids/js/admin_image_changer-${part}.js${version}`);
-const cssTag = `<link rel="stylesheet" href="${cssHref}">`;
-const scriptTags = scriptSrcs.map(src => `<script src="${src}"></script>`);
-const newline = html.includes('\r\n') ? '\r\n' : '\n';
-const resolveAsset = url => path.resolve(root, path.dirname(htmlPath), url.split('?')[0]);
-const cssPath = resolveAsset(cssHref);
-const jsPaths = scriptSrcs.map(resolveAsset);
+const cssUrl = 'kids/css/admin_image_changer.css';
+const scriptUrls = ['core', 'main'].map(part => `kids/js/admin_image_changer-${part}.js`);
+const cssPath = path.join(root, resolveFrom(htmlPath, cssUrl));
+const jsPaths = scriptUrls.map(url => path.join(root, resolveFrom(htmlPath, url)));
 const jsSources = jsPaths.map(file => fs.readFileSync(file, 'utf8'));
-
-// 앞선 수학·마이룸 분리와 같은 정규화 기준을 사용한다.
 const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const lineCount = text => text.split(/\r?\n/).length;
 
-test('이미지 체인저: 상대 경로 실존 및 HTML·CSS·JS 600줄 이하', () => {
-    for (const url of [cssHref, ...scriptSrcs]) assert.match(url, /^kids\//);
+test('이미지 체인저: 상대 경로 실존·HTML·CSS·JS 600줄 이하·config → core → main 순서', () => {
+    for (const url of [cssUrl, ...scriptUrls]) assert.match(url, /^kids\//);
+    assertRelativeAssets(htmlPath, 'style', [cssUrl]);
+    assertRelativeAssets(htmlPath, 'script', scriptUrls);
     for (const file of [path.join(root, htmlPath), cssPath, ...jsPaths]) {
-        assert.ok(fs.existsSync(file), `파일 없음: ${file}`);
         assert.ok(lineCount(fs.readFileSync(file, 'utf8')) <= 600, `600줄 초과: ${file}`);
     }
-    assert.ok(html.includes(cssTag), 'CSS 경로·버전 불일치');
-    for (const tag of scriptTags) assert.ok(html.includes(tag), 'JS 경로·속성·버전 불일치');
+    assertLoadsInOrder(html, 'style', [cssUrl]);
+    assertLoadsInOrder(html, 'script', scriptUrls);
+    assert.deepEqual(assetTags(html, 'script').map(tag => tag.url), ['kids/config.js', ...scriptUrls]);
 });
 
 test('이미지 체인저: 인라인 style·script가 남지 않음', () => {
-    assert.equal([...html.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/gi)].length, 0);
-    for (const tag of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-        assert.match(tag[1], /\bsrc\s*=/i, '인라인 script가 남음');
-        assert.equal(tag[2].trim(), '', '외부 script 태그 안에 코드가 남음');
-    }
+    assertNoInlineStyleOrScript(html);
 });
 
-test('이미지 체인저: CSS 및 core+main 원문이 고정 fixture와 일치', () => {
-    assert.equal(fixture.source, `main:${htmlPath}`);
-    assert.equal(fixture.styles.length, 1);
-    assert.equal(fixture.scripts.length, 1);
-    assert.equal(normalize(fs.readFileSync(cssPath, 'utf8')), normalize(fixture.styles[0]));
-    assert.equal(normalize(jsSources.join('')), normalize(fixture.scripts[0]));
-});
-
-test('이미지 체인저: 원래 위치·DOM·config → core → main 순서 보존', () => {
-    const markup = html.replace(cssTag, '__ADMIN_IMAGE_CHANGER_SPLIT_STYLE__')
-        .replace(scriptTags.join(newline), '__ADMIN_IMAGE_CHANGER_SPLIT_SCRIPT__');
-    assert.equal(normalize(markup), normalize(fixture.markup));
-    assert.deepEqual([...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*>/gi)].map(tag => tag[1]),
-        ['kids/config.js', ...scriptSrcs]);
+test('이미지 체인저: HTML on* 속성이 부르는 함수가 모두 선언되어 있음', () => {
+    assertInlineHandlersDeclared(htmlPath);
 });
 
 // 등록은 기록만 하며, 초기화 전 DOM·저장소·통신·타이머 접근은 즉시 실패시킨다.
@@ -108,7 +85,7 @@ const configurations = [
 ];
 
 for (const [label, config] of configurations) {
-    test(`이미지 체인저: ${label} core 단독 실행 및 전역 함수·이벤트 보존`, () => {
+    test(`이미지 체인저: ${label} core 단독 실행·main 뒤 이벤트 불변·HTML 호출 함수 실존`, () => {
         const split = createSandbox(config);
         vm.runInContext(jsSources[0], split.sandbox, { filename: jsPaths[0] });
         const coreEvents = split.events();
@@ -119,12 +96,8 @@ for (const [label, config] of configurations) {
         ]);
         assert.equal(typeof split.sandbox.toggleDrawer, 'undefined', 'core에 main 함수가 섞임');
         vm.runInContext(jsSources[1], split.sandbox, { filename: jsPaths[1] });
-
-        const original = createSandbox(config);
-        vm.runInContext(fixture.scripts[0], original.sandbox, { filename: fixture.source });
-        assert.equal(original.functions().length, 31, '원본 전역 함수 수 변경');
-        assert.deepEqual(split.functions(), original.functions(), '전역 함수 이름 변경');
         assert.deepEqual(split.events(), coreEvents, 'main이 이벤트 등록을 변경함');
-        assert.deepEqual(split.events(), original.events(), '이벤트 대상·순서·콜백·옵션 변경');
+        const missing = inlineHandlerNames(html).filter(name => typeof split.sandbox[name] !== 'function');
+        assert.deepEqual(missing, [], 'HTML이 부르는데 core+main 로드 뒤 없는 전역 함수');
     });
 }

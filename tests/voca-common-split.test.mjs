@@ -1,72 +1,53 @@
-// 용어사전 분리: 고정 원본·HTML 배선·부분 실행·전역 API를 검사한다.
+// 용어사전 분리 규칙: 머리 주석·줄 상한·구문 분석·HTML 로드·부분 실행·HTML 호출 함수·이벤트·타이머.
+// 2026-11-14: 얼린 원본(tests/fixtures/voca-common-split)과의 459줄 경계 원문 대조, 분리 직전 HTML 해시,
+// 실행 결과 대조, 전역 함수 개수·정확한 ?v= 값 고정은 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
-import { replaceOnce, version as rewardVersion } from './reward-grant-approved-edits.mjs';
+import { root, read, lineCount, assertLoadsInOrder, assertInlineHandlersDeclared, inlineHandlersDeclaredIn } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const files = ['kids/common_space/voca_common.js', 'kids/common_space/voca_modal.js'];
-const fixture = read('tests/fixtures/voca-common-split/voca_common.js');
 const sources = files.map(read);
-const html = read('kids/common_space/voca.html');
-const version = '?v=20261101-voca-split';
+const htmlPath = 'kids/common_space/voca.html';
+const html = read(htmlPath);
 const header = '// kids/common_space/voca_modal.js - voca_common.js 분리 2/2: 단어 모달·TTS·음성 입력·요정 코코 (voca_common.js 다음에 로드)';
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const tags = ['voca_common', 'voca_modal'].map(name => `<script src="./${name}.js${version}"></script>`);
 const events = [
     { target: 'window', type: 'load', callback: '' },
     { target: 'window', type: 'beforeunload', callback: '' }
 ];
 
-test('지정 459줄 경계·머리 주석·고정 원본을 그대로 보존한다', () => {
+test('둘째 파일은 지정 머리 주석으로 시작한다', () => {
     const newline = sources[1].indexOf('\n');
     assert.ok(newline >= 0);
     assert.equal(sources[1].slice(0, newline).replace(/\r$/, ''), header);
-    const tail = sources[1].slice(newline + 1);
-    const lines = fixture.match(/[^\n]*\n|[^\n]+$/g);
-    assert.equal(lines.length, 906);
-    assert.equal(sources[0], lines.slice(0, 459).join(''));
-    assert.equal(tail, lines.slice(459).join(''));
-    assert.equal(normalize(sources[0] + tail), normalize(fixture));
-    assert.equal(sources[0] + tail, fixture, '줄바꿈·공백까지 원문 보존');
-    assert.equal(lines[458].trim(), '');
-    assert.equal(lines[459].trim(), 'let currentActiveWord = null;');
 });
 
 for (const file of files) {
     test(`${file}: 실존·600줄 이하·독립 구문 분석`, () => {
         assert.ok(fs.existsSync(path.join(root, file)));
-        assert.ok(read(file).split(/\r?\n/).length <= 600);
+        assert.ok(lineCount(read(file)) <= 600);
         assert.doesNotThrow(() => new vm.Script(read(file), { filename: file }));
     });
 }
 
-test('HTML은 상대 경로·같은 버전·클래식 스크립트로 한 번씩 연속 로드한다', () => {
-    const matches = [...html.matchAll(/<script\b[^>]*\bsrc=["'][^"']*voca_(?:common|modal)\.js[^"']*["'][^>]*>\s*<\/script>/g)];
-    assert.deepEqual(matches.map(match => match[0]), tags);
-    const between = html.slice(matches[0].index + matches[0][0].length, matches[1].index);
-    assert.match(between, /^[\t ]*<!-- 📚 이 방 고유의 사전 기능만 전담 -->\r?\n$/);
+test('HTML은 상대 경로·같은 버전·클래식 스크립트로 지정 순서 로드한다', () => {
+    // 두 태그 사이에는 안내 주석 한 줄이 있어 연속 검사 대신 순서·버전·1회만 본다.
+    const urls = ['./voca_common.js', './voca_modal.js'];
+    for (const url of urls) assertLoadsInOrder(html, 'script', [url], '용어사전');
+    const [common, modal] = urls.map(url => html.indexOf(`src="${url}?`));
+    assert.ok(common >= 0 && modal > common, 'voca_common.js 다음에 voca_modal.js');
+    const versions = urls.map(url => html.match(new RegExp(`src="${url.replace('.', '\\.')}\\?v=([^"]+)"`))[1]);
+    assert.equal(versions[0], versions[1], '두 태그 버전이 서로 다름');
     for (const file of files) assert.ok(fs.existsSync(path.join(root, file)));
-    assert.doesNotMatch(html, /voca_(?:common|modal)\.js\?v=20260916_1400/);
 });
 
-test('HTML의 두 스크립트 배선 이외 원문은 승인 전과 같다', () => {
-    const newline = html.includes('\r\n') ? '\r\n' : '\n';
-    // 승인된 helper 버전만 되돌린 뒤 기존 고정 해시로 나머지 모든 바이트를 검사한다.
-    const restored = replaceOnce(html, 'notion-helper.js?v=' + rewardVersion,
-        'notion-helper.js?v=20260916_1400').replace(newline + tags[1], '')
-        .replace(tags[0], '<script src="./voca_common.js?v=20260916_1400"></script>');
-    // 분리 직전 HTML의 줄바꿈을 LF로 정규화한 UTF-8 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
-    assert.equal(createHash('sha256').update(restored.replace(/\r\n/g, '\n')).digest('hex'),
-        '1762ba7bbcfd190ad777351e4a9a8d94db5bfe69184d3d97c637d28b614dca3b');
+test('HTML on* 속성이 부르는 함수가 모두 선언되어 있음', () => {
+    assertInlineHandlersDeclared(htmlPath);
 });
 
-test('다른 운영 소스에 옛 버전·누락된 버전의 용어사전 JS 참조가 없다', () => {
+test('다른 운영 소스에 버전 없는 용어사전 JS 참조가 없다', () => {
     const walk = dir => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap(entry => {
         const file = path.join(dir, entry.name);
         return entry.isDirectory() ? walk(file) : /\.(?:html|js|mjs|cjs|css)$/.test(entry.name) ? [file] : [];
@@ -75,7 +56,7 @@ test('다른 운영 소스에 옛 버전·누락된 버전의 용어사전 JS �
     // system_map_generated.js는 조감도용 파일 이름 목록일 뿐 스크립트 참조가 아니다.
     for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')].filter(name => !name.endsWith('system_map_generated.js'))) {
         for (const match of read(file).matchAll(/voca_(?:common|modal)\.js([^"'<>\s]*)["']/g)) {
-            assert.equal(match[1], version, `${file}: 옛 버전 또는 버전 누락`);
+            assert.match(match[1], /^\?v=[^&]+$/, `${file}: 버전 누락`);
         }
     }
 });
@@ -102,34 +83,21 @@ function sandbox(prefilled = false) {
         currentUserName: '민서', currentTheme: '슬라임'
     });
     context.window = context;
-    const initialNames = new Set(Object.keys(context));
     vm.createContext(context);
-    return { context, initialNames, registered, timers };
+    return { context, registered, timers };
 }
 
-function snapshot(sb, complete) {
-    const names = Object.keys(sb.context).filter(name => !sb.initialNames.has(name)).sort();
-    return {
-        names, functions: names.filter(name => typeof sb.context[name] === 'function'),
-        events: sb.registered, timers: sb.timers,
-        // 최상위 const/let은 window 속성이 아니므로 같은 전역 컨텍스트에서 읽는다.
-        state: vm.runInContext(`JSON.stringify({WORKER_PROXY_URL,currentUser,currentUserName,
-            currentTheme,currentSubject,allDictionaryWords,selectedStudents,selectedSubjects,
-            selectedGrades,selectedUnit,MODAL_CHAT_HISTORY,isFairyVoiceOn,viewedWordsCount,wordStartTime
-            ${complete ? ',currentActiveWord' : ''}})`, sb.context)
-    };
-}
+const readState = (sb, extra = '') => JSON.parse(vm.runInContext(`JSON.stringify({WORKER_PROXY_URL,currentUser,
+    currentUserName,currentTheme,currentSubject${extra}})`, sb.context));
 
 for (const prefilled of [false, true]) {
     const mode = prefilled ? '민서·기존 전역 설정' : '민수·기본값';
     test(`${mode}: 첫 파일만 실행해도 뒤 파일 접근·DOM·네트워크 호출이 없다`, () => {
         const sb = sandbox(prefilled);
         assert.doesNotThrow(() => vm.runInContext(sources[0], sb.context, { filename: files[0] }));
-        const result = snapshot(sb, false);
-        assert.equal(result.functions.length, 17);
-        assert.deepEqual(result.events, events);
-        assert.deepEqual(result.timers, []);
-        const state = JSON.parse(result.state);
+        assert.deepEqual(sb.registered, events);
+        assert.deepEqual(sb.timers, []);
+        const state = readState(sb);
         assert.equal(state.currentUser, prefilled ? 'daughter' : 'son');
         assert.equal(state.currentUserName, prefilled ? '민서' : '민수');
         assert.equal(state.currentTheme, prefilled ? '슬라임' : '마인크래프트');
@@ -142,15 +110,16 @@ for (const prefilled of [false, true]) {
         assert.equal(sb.context.manualSyncVocaData, vm.runInContext('manualSyncVocaData', sb.context));
     });
 
-    test(`${mode}: 순차 실행의 전역 함수·초기 상태·이벤트·타이머가 원본과 같다`, () => {
-        const original = sandbox(prefilled), split = sandbox(prefilled);
-        vm.runInContext(fixture, original.context, { filename: '원본 fixture' });
+    test(`${mode}: 순차 실행 뒤 HTML 호출 함수·이벤트·타이머·초기 상태가 갖춰진다`, () => {
+        const split = sandbox(prefilled);
         sources.forEach((source, index) => vm.runInContext(source, split.context, { filename: files[index] }));
-        const result = snapshot(split, true);
-        assert.deepEqual(result, snapshot(original, true));
-        assert.equal(result.functions.length, 27);
-        assert.deepEqual(result.events, events);
-        assert.deepEqual(result.timers, [{ callback: '', delay: 500 }]);
-        assert.equal(JSON.parse(result.state).currentActiveWord, null);
+        for (const name of ['openModal', 'closeModal', 'syncVoiceToggleBtnUi', 'askCocoFairy', 'manualSyncVocaData']) {
+            assert.equal(typeof split.context[name], 'function', `공개 함수 누락: ${name}`);
+        }
+        const missing = inlineHandlersDeclaredIn(html, sources).filter(name => typeof split.context[name] !== 'function');
+        assert.deepEqual(missing, [], 'HTML이 부르는데 로드 뒤 없는 전역 함수');
+        assert.deepEqual(split.registered, events);
+        assert.deepEqual(split.timers, [{ callback: '', delay: 500 }]);
+        assert.equal(readState(split, ',currentActiveWord').currentActiveWord, null);
     });
 }

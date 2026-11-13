@@ -88,3 +88,6 @@
 - `node --test "tests/**/*.test.mjs"`: 219개 중 통과 217개, 실패 0개(건너뜀 1·todo 1). 바뀐 파일별 계약 검사 모두 `[ALL PASS]`(fixture는 관제탑 검사기에 `tests/fixtures/` 줄 수 예외를 넣은 뒤).
 - 노션 쓰기 차단 서버 비교: `quest_runner.html`에서 보상 모듈의 전역 이름 43개가 분리 전후 같은 형으로 있고, 세 파일이 한 번씩 실리며 콘솔 오류가 없다. 분리본에서 퀘스트 1번(정답 → `+10 EXP / +3` 보상)과 2번(오답 → 하트 감소·해설)이 정상 동작했다.
 - **용어사전(`voca.html`)에서 발견한 기존 문제와 처리**: `voca.html`은 `notion-helper.js`도 싣는데, 이 파일이 `mission-reward-engine.js`·`quiz-feedback-overlay.js`를 자동으로 싣는다. 두 파일은 `notion-reward.js`와 같은 최상위 `const`(`DISCUSSION_STOP_WORDS`, `CONJUNCTION_GRADING_GUARDRAIL`)를 선언하므로, 분리 전 main에서도 콘솔에 `Identifier ... has already been declared`가 나고 `notion-reward.js` 전체가 실행되지 않았다(실행 순서에 따라 반대쪽 파일이 죽을 수도 있는 경쟁 상태). 분리하면 첫 파일만 살아나 동작이 달라지므로, 용어사전이 쓰는 세 함수(`grantRewardAndShowUI`, `setupDebouncedSTT`, `grantVocaDwellReward`)를 모두 `notion-helper.js` 쪽 모듈이 제공함을 확인하고 `voca.html`에서 `notion-reward*.js` 태그를 뺐다. 분리본 용어사전은 보상 파일 없이 오류 0건으로 열리고 세 함수가 main과 같은 코드로 있다. 재발 방지로 시험에 「notion-helper.js를 싣는 화면은 notion-reward*.js를 함께 싣지 않는다」를 추가했다.
+
+## 후속 (2026-11-14): 고정 원본 대조 시험 정리
+위 절차에서 만든 `tests/fixtures/` 원본 사본과 원문·마크업·실행 결과 통째 대조 시험은 분리가 끝난 뒤에도 정상 수정마다 fixture를 같이 고쳐야 해서 지웠습니다. 지금 이 분리 시험은 `tests/split-rules.mjs` 규칙(파일 실존·상대 경로·줄 상한·인라인 금지·같은 `?v=`로 지정 순서 로드·HTML 호출 함수 선언·공개 API 유지·부분 로드 안전성)만 봅니다. 현재 기준은 `kids/core/CORE_CATALOG.md` 「회귀 시험 묶음」 절을 따릅니다.

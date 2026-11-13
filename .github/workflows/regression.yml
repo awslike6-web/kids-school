@@ -28,6 +28,8 @@ jobs:
       - name: 갤러리 빌더 시험 의존성 준비
         run: python -m pip install Pillow==12.3.0
       - name: 회귀 시험 실행
+        env:
+          KIDS_TEST_FULL: '1'  # 연산 스튜디오 1~999 쌍 전수(로컬 기본은 표본, tests/operator-range.mjs)
         run: node --test "tests/**/*.test.mjs"
       - name: 어휘·교재 등록기 시험 (노션 미접속)
         run: python -X utf8 -m unittest scripts/test_register_voca.py scripts/test_register_curriculum.py

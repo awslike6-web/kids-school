@@ -265,9 +265,10 @@ function findJumpPlan(game, world, obstacle, maxJumps, phase = 0) {
         if (jumpTrial(game, world, obstacle, first, -1, phase)) return [first, -1];
     if (maxJumps === 1) return null;
     // 먼저 정점 부근의 2단 점프를 시도하되 나머지 공중 프레임도 빠짐없이 탐색한다.
+    // 지연을 바깥 루프에 두어야 정점 지연(40)으로 모든 첫 점프를 먼저 훑는다(탐색 공간은 같고 약 10배 빠름).
     const delays = [40, ...Array.from({ length: 90 }, (_, i) => i + 1).filter(n => n !== 40)];
-    for (let first = contact; first >= 0; first--)
-        for (const delay of delays)
+    for (const delay of delays)
+        for (let first = contact; first >= 0; first--)
             if (jumpTrial(game, world, obstacle, first, first + delay, phase)) return [first, first + delay];
     return null;
 }

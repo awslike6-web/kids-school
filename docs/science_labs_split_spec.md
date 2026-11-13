@@ -92,3 +92,6 @@
 - `main`의 세 HTML에서 뽑은 style·script 원문과 새 CSS·JS 6개가 태그 바로 뒤 줄바꿈·닫는 태그 앞 들여쓰기만 빼고 같다.
 - `node --test "tests/**/*.test.mjs"`: 301개 중 통과 299개, 실패 0개(건너뜀 1·todo 1). 바뀐 파일 16개 계약 검사 모두 `[ALL PASS]`.
 - 노션 쓰기 차단 서버(새 포트 8785·8786, 한 탭씩)로 분리 전후 비교: 계절·기단(`selectAirmass('pacific')`, `highlightMatrix('okhotsk')`), 구름(`pressPump()` 3번), 바람(`switchLabMode('wind')`, `setWindTime('night')`) 조작 전후 모두 요소 수·화면 글자·class 목록·계산된 스타일이 같다(계절·기단은 카드 선택 전환 효과가 끝난 뒤 비교). 콘솔 오류·쓰기 요청 0건.
+
+## 후속 (2026-11-14): 고정 원본 대조 시험 정리
+위 절차에서 만든 `tests/fixtures/` 원본 사본과 원문·마크업·실행 결과 통째 대조 시험은 분리가 끝난 뒤에도 정상 수정마다 fixture를 같이 고쳐야 해서 지웠습니다. 지금 이 분리 시험은 `tests/split-rules.mjs` 규칙(파일 실존·상대 경로·줄 상한·인라인 금지·같은 `?v=`로 지정 순서 로드·HTML 호출 함수 선언·공개 API 유지·부분 로드 안전성)만 봅니다. 현재 기준은 `kids/core/CORE_CATALOG.md` 「회귀 시험 묶음」 절을 따릅니다.

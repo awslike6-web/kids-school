@@ -6,7 +6,7 @@ const read = file => fs.readFileSync(new URL('../' + file, import.meta.url), 'ut
 const shared = read('kids/core/reward-grant.js');
 const sources = { reward: read('kids/core/notion-reward.js'), logger: read('kids/core/notion-study-logger.js') };
 const oldLogger = read('tests/fixtures/reward-grant-shared/notion-study-logger.js');
-const fixture = fs.readFileSync(new URL('./fixtures/notion-reward-split/notion-reward.js', import.meta.url), 'utf8');
+const fixture = fs.readFileSync(new URL('./fixtures/reward-grant-shared/notion-reward-before-split.js', import.meta.url), 'utf8');
 const QUEUE = 'MINMIN_REWARD_QUEUE_V1';
 const clone = value => JSON.parse(JSON.stringify(value));
 const initialProps = () => Object.fromEntries(Object.entries({

@@ -90,3 +90,6 @@
 - `main:kids/common_space/gallery.css`와 `gallery.css` + `gallery-modal.css`(머리 주석 제외)를 이은 내용이 줄바꿈 형식만 빼고 같다. fixture도 같다. `git diff --check`의 「406줄 빈 줄」은 원본 406줄 빈 줄을 보존한 것.
 - `node --test "tests/**/*.test.mjs"`: 239개 중 통과 237개, 실패 0개(건너뜀 1·todo 1). 바뀐 파일 7개 계약 검사 모두 `[ALL PASS]`.
 - 노션 쓰기 차단 서버(새 포트 8775·8776)로 `gallery.html` 분리 전후 비교: 갤러리 CSS 규칙 113개와 그 내용 해시가 같고, 숨은 모달을 포함한 `body` 요소 890개의 계산된 스타일(18개 속성)이 모두 같다. 콘솔 오류 없음.
+
+## 후속 (2026-11-14): 고정 원본 대조 시험 정리
+위 절차에서 만든 `tests/fixtures/` 원본 사본과 원문·마크업·실행 결과 통째 대조 시험은 분리가 끝난 뒤에도 정상 수정마다 fixture를 같이 고쳐야 해서 지웠습니다. 지금 이 분리 시험은 `tests/split-rules.mjs` 규칙(파일 실존·상대 경로·줄 상한·인라인 금지·같은 `?v=`로 지정 순서 로드·HTML 호출 함수 선언·공개 API 유지·부분 로드 안전성)만 봅니다. 현재 기준은 `kids/core/CORE_CATALOG.md` 「회귀 시험 묶음」 절을 따릅니다.

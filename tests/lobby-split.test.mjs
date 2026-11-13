@@ -1,131 +1,30 @@
-// 로비 분리: 승인한 5줄 변경·로드 계약·원본과의 상태/DOM/비동기 동작 일치를 검사한다.
+// 로비 분리 규칙과 동작: 줄 상한·로드 계약·한도/추천/검수 만료/학생 전환/비동기 HUD를 명시 기댓값으로 검사한다.
+// 2026-11-14: 얼린 원본(tests/fixtures/lobby-split)에 승인 변경을 덧입혀 원문·VM 스냅샷을 대조하던 부분은
+// 정상 수정마다 원본도 고쳐야 해 뺐다. 분리본만 실행하고 이미 있던 명시 기댓값은 그대로 둔다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assertLoadsInOrder, assetTags } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const names = ['lobby_config.js', 'lobby_subject_hud.js', 'lobby_controller.js'];
 const files = names.map(name => `kids/js/${name}`);
 const sources = files.map(read);
-const fixture = read('tests/fixtures/lobby-split/lobby_controller.js');
-const version = '?v=20261112-admin-expiry';
-// 수학 페이지 분리 시험과 동일하며 코드 내부 공백·들여쓰기는 보존한다.
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const originalLines = normalize(fixture).split('\n');
-// 분리 뒤 승인된 설정 변경: 2026-11-01 두 아이 놀이터 목록 끝에 야추·오목 카드 추가.
-// 원본 fixture에도 같은 변경을 적용해 설정 원문·VM 상수 비교를 계속 엄격하게 유지한다.
-const yachtItem = "    { icon: '🎲', title: '가족 보드게임 · 야추 다이스', desc: '내 캐릭터와 주사위 다섯 개! 한 기기로 돌아가며, 또는 각자 기기로 함께 놀아요', href: 'kids/playground/family/yacht.html', badge: '가족' }";
-const omokItem = "    { icon: '⚫', title: '가족 보드게임 · 오목', desc: '내 캐릭터로 다섯 돌을 이어요. 한 기기로, 또는 각자 기기로', href: 'kids/playground/family/omok.html', badge: '가족' }";
-const yutItem = "    { icon: '🎯', title: '가족 보드게임 · 윷놀이', desc: '내 캐릭터 말로 윷판을 한 바퀴! 한 기기로 돌아가며 2~4명이 함께해요', href: 'kids/playground/family/yut.html', badge: '가족' }";
-const configEdits = [
-  "    { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' }",
-  "    { icon: '🏛️', title: '3학년 사회 역사방 (미리보기)', desc: '우리 동네 지도와 옛날 위인 동화 속으로 떠나는 모험', href: 'kids/subjects/society/society.html?user=minseo', badge: '예습' }"
-];
-const applyConfigEdits = text => configEdits.reduce((result, line) => {
-  assert.equal(result.split(line).length, 2, `승인 변경 대상 줄이 한 번만 있어야 함: ${line.slice(0, 40)}`);
-  return result.replace(line, `${line},\n${yachtItem},\n${omokItem},\n${yutItem}`);
-}, normalize(text));
-// 분리 뒤 승인된 변경: 2026-11-12 부모 검수 모드 1시간 만료(index.html markAdminSession과 같은 키).
-// 원본 fixture에도 같은 변경을 적용해 나머지 원문·VM 동작 비교를 계속 엄격하게 유지한다.
-const adminSessionEdits = [
-  ['  let isAdminSession = false;\n', `  let isAdminSession = false;
-  const ADMIN_SESSION_KEY = 'MINMIN_ADMIN_SESSION_AT'; // index.html markAdminSession()과 같은 키
-  const ADMIN_SESSION_MS = 60 * 60 * 1000;
-`],
-  [`    isAdminSession = (savedName === '아빠' || savedName === '엄마');
-`, `    // 부모 검수 모드는 첫 화면에서 비밀번호를 넣은 뒤 1시간만 유지한다.
-    // 시각 기록이 없거나 지났으면 아이 이름으로 되돌려 학습일지·보상이 빠지지 않게 한다.
-    const adminAt = Number(localStorage.getItem(ADMIN_SESSION_KEY));
-    const adminAge = Date.now() - adminAt;
-    isAdminSession = (savedName === '아빠' || savedName === '엄마')
-      && adminAt > 0 && adminAge >= 0 && adminAge < ADMIN_SESSION_MS;
-`],
-  [`      localStorage.setItem('currentUserName', realName);
-    }`, `      localStorage.setItem('currentUserName', realName);
-      localStorage.removeItem(ADMIN_SESSION_KEY);
-    }`]
-];
-const applyAdminSessionEdits = text => adminSessionEdits.reduce((result, [before, after]) => {
-  assert.equal(result.split(before).length, 2, `승인 변경 대상이 한 번만 있어야 함: ${before.trim().slice(0, 40)}`);
-  return result.replace(before, after);
-}, normalize(text));
-const originalRange = (first, last) => originalLines.slice(first - 1, last).join('\n') + '\n';
-const approved = new Map([
-  [367, ['    const uKey = userKey || activeUserKey;', '    const uKey = userKey || ctx.getActiveUserKey();']],
-  [383, ['    const uKey = userKey || activeUserKey;', '    const uKey = userKey || ctx.getActiveUserKey();']],
-  [577, ['    const uKey = userKey || activeUserKey;', '    const uKey = userKey || ctx.getActiveUserKey();']],
-  [918, ['      minsuTitleLevel.textContent = isAdminSession', '      minsuTitleLevel.textContent = ctx.getIsAdminSession()']],
-  [928, ['    if (isAdminSession) {', '    if (ctx.getIsAdminSession()) {']]
-]);
-const prefix = `(function () {
-'use strict';
 
-function create(ctx) {
-  const { getRealChildName, getTodayKstString, runtimeDailyEarned } = ctx;
-
-`;
-const suffix = `  return {
-    getSubjectBoost,
-    getSubjectCapState,
-    renderSubjectCapStates,
-    findRecommendedSubject,
-    updateGuardianHud,
-    fetchInventoryForUser
-  };
-}
-
-window.LobbySubjectHud = { create };
-})();
-`;
-const bridge = `  const {
-    getSubjectBoost, getSubjectCapState, renderSubjectCapStates,
-    findRecommendedSubject, updateGuardianHud, fetchInventoryForUser
-  } = window.LobbySubjectHud.create({
-    getActiveUserKey: () => activeUserKey,
-    getIsAdminSession: () => isAdminSession,
-    runtimeDailyEarned,
-    getRealChildName,
-    getTodayKstString
-  });
-
-`;
-
-test('세 JS는 600줄 이하이고 설정·잔여 컨트롤러·연결 코드가 승인 원문과 같다', () => {
-  assert.equal(originalLines.length, 1102);
-  for (const source of sources) assert.ok(source.split(/\r?\n/).length <= 600);
-  assert.equal(normalize(sources[0]), applyConfigEdits(originalRange(1, 106)));
-  assert.equal(normalize(sources[2]), applyAdminSessionEdits(originalRange(107, 139) + bridge
-    + originalRange(140, 331) + originalRange(597, 845) + originalRange(1022, 1102)));
-  // 코어 로더를 기존 위치에 남겨 마음일기·음성 시험의 계약도 보존한다.
-  assert.ok(sources[2].includes(originalRange(111, 127).trimEnd().replace(/\n/g,
-    sources[2].includes('\r\n') ? '\r\n' : '\n')));
-});
-
-test('과목·HUD 본문은 지정한 다섯 줄만 바뀌고 나머지 원문·껍데기가 같다', () => {
-  for (const [line, [before]] of approved) assert.equal(originalLines[line - 1], before);
-  const movedRange = (first, last) => originalLines.slice(first - 1, last)
-    .map((line, offset) => approved.get(first + offset)?.[1] ?? line).join('\n') + '\n';
-  assert.equal(normalize(sources[1]), normalize(prefix + movedRange(332, 596)
-    + movedRange(846, 1021) + suffix));
-  const unchanged = [362, 946, 1009];
-  for (const line of unchanged) assert.ok(normalize(sources[1]).includes(originalLines[line - 1]));
+test('세 JS는 600줄 이하이고 HUD 파일은 LobbySubjectHud.create 하나만 내보낸다', () => {
+  for (const [index, source] of sources.entries()) assert.ok(lineCount(source) <= 600, `${files[index]}: 600줄 초과`);
+  assert.match(sources[1], /window\.LobbySubjectHud = \{ create \};/);
+  assert.match(sources[2], /window\.LobbySubjectHud\.create\(/);
 });
 
 test('로비는 세 클래식 스크립트를 상대 경로·같은 버전·지정 순서로 한 번씩 싣는다', () => {
   const html = read('lobby.html');
-  const tags = names.map(name => `<script src="./kids/js/${name}${version}"></script>`);
-  const loaded = [...html.matchAll(/<script\b[^>]*\bsrc=["'][^"']*lobby_(?:config|subject_hud|controller)\.js[^"']*["'][^>]*>\s*<\/script>/g)]
-    .map(match => match[0]);
-  assert.deepEqual(loaded, tags);
-  const first = html.indexOf(tags[0]);
-  const last = html.indexOf(tags[2]) + tags[2].length;
-  assert.equal(html.slice(first, last).replace(/>\s+</g, '><'), tags.join(''));
-  assert.ok(html.indexOf('./kids/core/study-log-store.js') < first);
-  assert.ok(html.indexOf('./kids/core/quick-uploader.js') > last);
+  const urls = names.map(name => `./kids/js/${name}`);
+  const [first, , last] = assertLoadsInOrder(html, 'script', urls, '로비');
+  const at = url => assetTags(html, 'script').find(tag => tag.url === url)?.start ?? -1;
+  assert.ok(at('./kids/core/study-log-store.js') >= 0 && at('./kids/core/study-log-store.js') < first.start);
+  assert.ok(at('./kids/core/quick-uploader.js') > last.start);
   for (const file of files) assert.ok(fs.existsSync(path.join(root, file)));
 });
 
@@ -265,8 +164,8 @@ function sandbox({ user = 'minsu', admin = '', configured = true, loader = true,
     initialNames: new Set(Object.keys(context)) };
 }
 
-// 비공개 함수 관찰은 VM 문자열에만 삽입한다. 디스크 fixture·운영 코드에는 넣지 않는다.
-function load(split, options, probe = true) {
+// 비공개 함수 관찰은 VM 문자열에만 삽입한다. 운영 코드에는 넣지 않는다.
+function load(options, probe = true) {
   const sb = sandbox(options);
   const instrument = source => {
     if (!probe) return source;
@@ -278,38 +177,13 @@ function load(split, options, probe = true) {
     getTodayKstString, getRealChildName
   };\n` + marker);
   };
-  if (split) sources.forEach((source, index) => vm.runInContext(index === 2 ? instrument(source) : source,
+  sources.forEach((source, index) => vm.runInContext(index === 2 ? instrument(source) : source,
     sb.context, { filename: files[index] }));
-  else vm.runInContext(instrument(applyAdminSessionEdits(applyConfigEdits(fixture))), sb.context, { filename: '원본 fixture' });
   return sb;
 }
 
-function snapshot(sb, split) {
-  const added = Object.keys(sb.context).filter(name => !sb.initialNames.has(name)).sort();
-  if (split) {
-    assert.ok(added.includes('LobbySubjectHud'));
-    assert.deepEqual(Object.keys(sb.context.LobbySubjectHud), ['create']);
-    assert.equal(typeof sb.context.LobbySubjectHud.create, 'function');
-  } else assert.ok(!added.includes('LobbySubjectHud'));
-  const kept = added.filter(name => name !== 'LobbySubjectHud');
-  return {
-    names: kept.map(name => [name, typeof sb.context[name]]),
-    constants: vm.runInContext('JSON.stringify({MINSU_AVATAR_SRC,SUBJECT_META,PLAYGROUND_ITEMS,USER_CONFIGS})', sb.context),
-    events: sb.events.map(({ target, type }) => ({ target, type })),
-    storage: [...sb.store].sort(), href: sb.context.location.href,
-    dom: [...sb.elements].map(([id, el]) => [id, el.className, el.textContent, el.innerHTML, el.src, el.href, { ...el.style }]),
-    trace: sb.trace
-  };
-}
-
-function pair(options, probe = true) {
-  return [load(false, options, probe), load(true, options, probe)];
-}
-function same(both) { assert.deepEqual(snapshot(both[1], true), snapshot(both[0], false)); }
-function valueBoth(both, action, expected) {
-  for (const sb of both) assert.deepEqual(plain(action(sb)), expected);
-  same(both);
-}
+const added = sb => Object.keys(sb.context).filter(name => !sb.initialNames.has(name));
+function value(sb, action, expected) { assert.deepEqual(plain(action(sb)), expected); }
 function inventory({ earned = {}, date = '2026-10-31', level = 7 } = {}) {
   const props = {
     '다이아몬드 개수': { number: 321 }, '하리보 개수': { number: 42 },
@@ -325,7 +199,7 @@ test('앞의 설정·공장 파일만 로드하면 DOM·이벤트·요청·초�
   const sb = sandbox();
   sources.slice(0, 2).forEach(source => vm.runInContext(source, sb.context));
   assert.deepEqual(sb.trace, []);
-  assert.deepEqual(Object.keys(sb.context).filter(name => !sb.initialNames.has(name)).sort(), ['LobbySubjectHud', 'USER_CONFIGS']);
+  assert.deepEqual(added(sb).sort(), ['LobbySubjectHud', 'USER_CONFIGS']);
 });
 
 for (const options of [
@@ -334,14 +208,17 @@ for (const options of [
   { user: 'minseo', configured: false, loader: false },
   { user: 'minsu', missing: ['minsuTitleLevel', 'minseo-card-math', 'minsu-orb-korean'] }
 ]) {
-  test(`${JSON.stringify(options)}: 초기 전역·설정·DOM·저장소·이벤트·코어 로드가 원본과 같다`, () => {
-    const both = pair(options, false);
-    same(both);
-    assert.deepEqual(both[1].events.map(({ target, type }) => [target, type]), [['document', 'click'], ['document', 'keydown']]);
-    assert.equal(both[1].context.__activeLobbyUser, options.user);
-    assert.equal(both[1].requests.length, options.admin ? 0 : 1);
-    assert.equal(typeof both[1].context.create, 'undefined');
-    assert.equal(typeof both[1].context.getSubjectCapState, 'undefined');
+  test(`${JSON.stringify(options)}: 초기 이벤트·학생·요청·코어 로드와 비공개 함수 비노출`, () => {
+    const sb = load(options, false);
+    assert.deepEqual(sb.events.map(({ target, type }) => [target, type]), [['document', 'click'], ['document', 'keydown']]);
+    assert.equal(sb.context.__activeLobbyUser, options.user);
+    assert.equal(sb.requests.length, options.admin ? 0 : 1);
+    assert.equal(sb.coreCallbacks.length, options.loader === false ? 0 : 1);
+    assert.equal(typeof sb.context.create, 'undefined');
+    assert.equal(typeof sb.context.getSubjectCapState, 'undefined');
+    assert.deepEqual(Object.keys(sb.context.LobbySubjectHud), ['create']);
+    const playground = JSON.parse(vm.runInContext('JSON.stringify(PLAYGROUND_ITEMS)', sb.context));
+    for (const child of ['minsu', 'minseo']) assert.ok(playground[child].length > 0 && playground[child].every(item => item.href && item.title), child);
   });
 }
 
@@ -349,7 +226,7 @@ test('부모 검수 이름이 남아도 시각 기록이 없거나 1시간이 �
   // '' = 시각 기록 없음(이 기능 전에 남은 검수 이름), 1시간 경과, 미래 시각(시계 오류), 1시간 이내
   for (const [stamp, admin] of [['', false], [String(clockNow - 3600000), false],
     [String(clockNow + 60000), false], [String(clockNow - 3599000), true]]) {
-    const sb = load(true, { user: 'minsu', admin: '아빠', stored: { MINMIN_ADMIN_SESSION_AT: stamp } }, false);
+    const sb = load({ user: 'minsu', admin: '아빠', stored: { MINMIN_ADMIN_SESSION_AT: stamp } }, false);
     assert.equal(sb.store.get('currentUserName'), admin ? '아빠' : '민수', String(stamp));
     assert.equal(sb.store.has('MINMIN_ADMIN_SESSION_AT'), admin, String(stamp));
     assert.equal(sb.requests.length, admin ? 0 : 1, String(stamp));
@@ -357,175 +234,148 @@ test('부모 검수 이름이 남아도 시각 기록이 없거나 1시간이 �
 });
 
 for (const user of ['minsu', 'minseo']) {
-  test(`${user}: 일반/복습 한도 경계·override·하루 체크인과 렌더 결과가 원본과 같다`, () => {
-    const both = pair({ user });
+  test(`${user}: 일반/복습 한도 경계·override·하루 체크인 상태`, () => {
+    const sb = load({ user });
     const child = user === 'minseo' ? '민서' : '민수';
     for (const [limit, cases] of [[100, [[0, 'available'], [69, 'available'], [70, 'critical'], [99, 'critical'], [100, 'completed']]],
       [150, [[104, 'available'], [105, 'critical'], [149, 'critical'], [150, 'completed']]]]) {
-      for (const sb of both) sb.boosts.set(`${child}:수학`, { type: limit === 150 ? 'review' : 'normal', limit });
+      sb.boosts.set(`${child}:수학`, { type: limit === 150 ? 'review' : 'normal', limit });
       for (const [count, expected] of cases) {
-        for (const sb of both) {
-          sb.store.set(`last_play_date_${child}_수학`, '2026-10-31');
-          sb.store.set(`today_earned_${child}_수학`, String(count));
-          sb.context.__lobbyProbe.renderSubjectCapStates();
-        }
-        valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), expected);
+        sb.store.set(`last_play_date_${child}_수학`, '2026-10-31');
+        sb.store.set(`today_earned_${child}_수학`, String(count));
+        sb.context.__lobbyProbe.renderSubjectCapStates();
+        value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), expected);
       }
     }
     for (const state of ['available', 'critical', 'completed', 'invalid', '']) {
-      for (const sb of both) sb.context.setSubjectCapOverride(user, 'math', state);
-      valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'),
+      sb.context.setSubjectCapOverride(user, 'math', state);
+      value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'),
         ['available', 'critical', 'completed'].includes(state) ? state : 'completed');
     }
-    for (const sb of both) sb.store.set(`haru_checkin_done_2026-10-31_${user}`, 'true');
-    valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('haru'), 'completed');
-    for (const sb of both) {
-      sb.store.set(`last_play_date_${child}_수학`, '2026-10-30');
-      sb.context.__lobbyProbe.renderSubjectCapStates();
-    }
-    valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'available');
-    for (const sb of both) sb.store.set(`last_play_date_${child}_수학`, new sb.context.Date().toLocaleDateString());
-    valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'completed');
+    sb.store.set(`haru_checkin_done_2026-10-31_${user}`, 'true');
+    value(sb, s => s.context.__lobbyProbe.getSubjectCapState('haru'), 'completed');
+    sb.store.set(`last_play_date_${child}_수학`, '2026-10-30');
+    sb.context.__lobbyProbe.renderSubjectCapStates();
+    value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'available');
+    sb.store.set(`last_play_date_${child}_수학`, new sb.context.Date().toLocaleDateString());
+    value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'completed');
   });
 
-  test(`${user}: 복습 우선·미완료 우선·모두 완료 추천과 모달 이동이 원본과 같다`, () => {
-    const both = pair({ user });
+  test(`${user}: 복습 우선·미완료 우선·모두 완료 추천과 모달 이동`, () => {
+    const sb = load({ user });
     const child = user === 'minseo' ? '민서' : '민수';
-    for (const sb of both) sb.boosts.set(`${child}:영어`, { type: 'review', limit: 150 });
-    valueBoth(both, sb => sb.context.__lobbyProbe.findRecommendedSubject('korean'), 'english');
-    for (const sb of both) {
-      sb.context.setSubjectCapOverride(user, 'english', 'completed');
-      sb.context.openDailyCapModal('korean');
-    }
-    valueBoth(both, sb => sb.context.__lobbyProbe.findRecommendedSubject('korean'), 'math');
-    for (const sb of both) {
-      assert.equal(sb.elements.get('capModalRecRoomName').textContent, '➔ 🧮 수학 방');
-      sb.context.handleCapModalGoRecommended();
-      assert.equal(sb.context.location.href, `kids/subjects/math/math.html?user=${user}`);
-      for (const subject of ['math', 'korean', 'english', 'society', 'science', 'haru']) sb.context.setSubjectCapOverride(user, subject, 'completed');
-      sb.context.openDailyCapModal('korean');
-      sb.context.handleCapModalReviewAnyway();
-      assert.equal(sb.context.location.href, `kids/subjects/korean/korean.html?user=${user}`);
-    }
-    valueBoth(both, sb => sb.context.__lobbyProbe.findRecommendedSubject('korean'), 'math');
+    sb.boosts.set(`${child}:영어`, { type: 'review', limit: 150 });
+    value(sb, s => s.context.__lobbyProbe.findRecommendedSubject('korean'), 'english');
+    sb.context.setSubjectCapOverride(user, 'english', 'completed');
+    sb.context.openDailyCapModal('korean');
+    value(sb, s => s.context.__lobbyProbe.findRecommendedSubject('korean'), 'math');
+    assert.equal(sb.elements.get('capModalRecRoomName').textContent, '➔ 🧮 수학 방');
+    sb.context.handleCapModalGoRecommended();
+    assert.equal(sb.context.location.href, `kids/subjects/math/math.html?user=${user}`);
+    for (const subject of ['math', 'korean', 'english', 'society', 'science', 'haru']) sb.context.setSubjectCapOverride(user, subject, 'completed');
+    sb.context.openDailyCapModal('korean');
+    sb.context.handleCapModalReviewAnyway();
+    assert.equal(sb.context.location.href, `kids/subjects/korean/korean.html?user=${user}`);
+    value(sb, s => s.context.__lobbyProbe.findRecommendedSubject('korean'), 'math');
   });
 }
 
 test('학생 전환 뒤 기본 학생·렌더·추천과 이름/날짜 헬퍼가 최신 값을 읽는다', () => {
-  const both = pair({ user: 'minsu' });
-  for (const sb of both) {
-    sb.context.setSubjectCapOverride('minsu', 'math', 'completed');
-    sb.context.setSubjectCapOverride('minseo', 'math', 'critical');
-    sb.boosts.set('민수:사회', { type: 'review', limit: 150 });
-    sb.boosts.set('민서:영어', { type: 'review', limit: 150 });
-  }
+  const sb = load({ user: 'minsu' });
+  sb.context.setSubjectCapOverride('minsu', 'math', 'completed');
+  sb.context.setSubjectCapOverride('minseo', 'math', 'critical');
+  sb.boosts.set('민수:사회', { type: 'review', limit: 150 });
+  sb.boosts.set('민서:영어', { type: 'review', limit: 150 });
   for (const [user, cap, recommendation] of [['minsu', 'completed', 'society'], ['minseo', 'critical', 'english'], ['minsu', 'completed', 'society']]) {
-    for (const sb of both) {
-      sb.context.switchLobbyUser(user);
-      sb.context.__lobbyProbe.renderSubjectCapStates();
-    }
-    valueBoth(both, sb => [sb.context.__activeLobbyUser, sb.context.__lobbyProbe.getSubjectCapState('math'),
-      sb.context.__lobbyProbe.findRecommendedSubject('korean')], [user, cap, recommendation]);
+    sb.context.switchLobbyUser(user);
+    sb.context.__lobbyProbe.renderSubjectCapStates();
+    value(sb, s => [s.context.__activeLobbyUser, s.context.__lobbyProbe.getSubjectCapState('math'),
+      s.context.__lobbyProbe.findRecommendedSubject('korean')], [user, cap, recommendation]);
   }
-  for (const sb of both) sb.context.APP_CONFIG.CHILDREN.first.name = '이름 변경';
-  valueBoth(both, sb => [sb.context.__lobbyProbe.getRealChildName('minsu'), sb.context.__lobbyProbe.getTodayKstString()], ['이름 변경', '2026-10-31']);
+  sb.context.APP_CONFIG.CHILDREN.first.name = '이름 변경';
+  value(sb, s => [s.context.__lobbyProbe.getRealChildName('minsu'), s.context.__lobbyProbe.getTodayKstString()], ['이름 변경', '2026-10-31']);
 });
 
 test('관리자 전환 시 요청 생략과 비동기 HUD의 관리자 판정은 호출 당시 값을 읽는다', async () => {
-  const both = pair({ user: 'minsu' });
-  for (const sb of both) {
-    sb.store.set('currentUserName', '아빠');
-    sb.store.set('MINMIN_ADMIN_SESSION_AT', String(clockNow));
-    sb.context.switchLobbyUser('minseo');
-    assert.equal(sb.requests.length, 1);
-    sb.requests[0].reply(inventory({ level: 8 }));
-  }
+  const sb = load({ user: 'minsu' });
+  sb.store.set('currentUserName', '아빠');
+  sb.store.set('MINMIN_ADMIN_SESSION_AT', String(clockNow));
+  sb.context.switchLobbyUser('minseo');
+  assert.equal(sb.requests.length, 1);
+  sb.requests[0].reply(inventory({ level: 8 }));
   await drain();
-  for (const sb of both) {
-    assert.equal(sb.elements.get('minsuTitleLevel').textContent, '관리자 시뮬레이터 [LVL-8]');
-    sb.store.set('currentUserName', '민수');
-    sb.context.switchLobbyUser('minsu');
-    assert.equal(sb.requests.length, 2);
-    sb.requests[1].reply(inventory({ level: 9 }));
-  }
+  assert.equal(sb.elements.get('minsuTitleLevel').textContent, '관리자 시뮬레이터 [LVL-8]');
+  sb.store.set('currentUserName', '민수');
+  sb.context.switchLobbyUser('minsu');
+  assert.equal(sb.requests.length, 2);
+  sb.requests[1].reply(inventory({ level: 9 }));
   await drain();
-  for (const sb of both) assert.equal(sb.elements.get('minsuTitleLevel').textContent, '차원 사령관 [LVL-9]');
-  same(both);
+  assert.equal(sb.elements.get('minsuTitleLevel').textContent, '차원 사령관 [LVL-9]');
 });
 
 test('캐시·클라우드 하위 객체 교체 뒤 획득량·날짜·최댓값이 최신 공유 객체를 따른다', async () => {
-  const both = pair({ user: 'minsu', stored: {
+  const sb = load({ user: 'minsu', stored: {
     MINMIN_INVENTORY_CACHE_민수: JSON.stringify({ dailyEarned: { math: 80 }, diamond: 1, level: 2 }),
     last_play_date_민수_수학: '2026-10-31', today_earned_민수_수학: '90'
   } });
-  valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
-  for (const sb of both) sb.requests[0].reply(inventory({ earned: { 수학: 100 } }));
+  value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
+  sb.requests[0].reply(inventory({ earned: { 수학: 100 } }));
   await drain();
-  valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'completed');
-  for (const sb of both) {
-    sb.context.__lobbyProbe.fetchInventoryForUser('minsu', '민수');
-    sb.requests[1].reply(inventory({ earned: { 수학: 200 }, date: '2026-10-30' }));
-  }
+  value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'completed');
+  sb.context.__lobbyProbe.fetchInventoryForUser('minsu', '민수');
+  sb.requests[1].reply(inventory({ earned: { 수학: 200 }, date: '2026-10-30' }));
   await drain();
-  valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
-  for (const sb of both) {
-    const cache = JSON.parse(sb.store.get('MINMIN_INVENTORY_CACHE_민수'));
-    assert.deepEqual(cache.dailyEarned, {});
-    sb.store.set('today_earned_민수_수학', '0');
-    sb.context.__lobbyProbe.fetchInventoryForUser('minsu', '민수');
-    sb.requests[2].reply(inventory({ earned: { 수학: 70 }, date: '' }));
-  }
+  value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
+  const cache = JSON.parse(sb.store.get('MINMIN_INVENTORY_CACHE_민수'));
+  assert.deepEqual(cache.dailyEarned, {});
+  sb.store.set('today_earned_민수_수학', '0');
+  sb.context.__lobbyProbe.fetchInventoryForUser('minsu', '민수');
+  sb.requests[2].reply(inventory({ earned: { 수학: 70 }, date: '' }));
   await drain();
-  valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
+  value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
 });
 
-test('학생 전환 뒤 역순 인벤토리 응답도 원본과 같은 DOM·학생별 획득량을 남긴다', async () => {
-  const both = pair({ user: 'minsu' });
-  for (const sb of both) {
-    sb.context.switchLobbyUser('minseo');
-    sb.requests[1].reply(inventory({ earned: { 수학: 70 } }));
-  }
+test('학생 전환 뒤 역순 인벤토리 응답도 학생별 획득량을 따로 남긴다', async () => {
+  const sb = load({ user: 'minsu' });
+  sb.context.switchLobbyUser('minseo');
+  sb.requests[1].reply(inventory({ earned: { 수학: 70 } }));
   await drain();
-  valueBoth(both, sb => sb.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
-  for (const sb of both) sb.requests[0].reply(inventory({ earned: { 수학: 100 } }));
+  value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'critical');
+  sb.requests[0].reply(inventory({ earned: { 수학: 100 } }));
   await drain();
-  valueBoth(both, sb => [sb.context.__lobbyProbe.getSubjectCapState('math'),
-    sb.context.__lobbyProbe.getSubjectCapState('math', 'minsu')], ['critical', 'completed']);
+  value(sb, s => [s.context.__lobbyProbe.getSubjectCapState('math'),
+    s.context.__lobbyProbe.getSubjectCapState('math', 'minsu')], ['critical', 'completed']);
 });
 
-test('캐시 파싱 실패·요청 실패·빈 응답은 원본과 같은 경고와 결과를 남긴다', async () => {
-  const both = pair({ stored: { MINMIN_INVENTORY_CACHE_민수: '{broken' } });
-  for (const sb of both) sb.requests[0].fail('offline');
+test('캐시 파싱 실패·요청 실패·빈 응답은 예외 없이 경고만 남기고 한도는 기본값이다', async () => {
+  const sb = load({ stored: { MINMIN_INVENTORY_CACHE_민수: '{broken' } });
+  sb.requests[0].fail('offline');
   await drain();
-  for (const sb of both) {
-    sb.context.__lobbyProbe.fetchInventoryForUser('minsu', '민수');
-    sb.requests[1].reply({ results: [] });
-  }
+  sb.context.__lobbyProbe.fetchInventoryForUser('minsu', '민수');
+  sb.requests[1].reply({ results: [] });
   await drain();
-  same(both);
+  const warnings = sb.trace.filter(entry => entry[0] === 'console' && entry[1] !== 'log');
+  assert.ok(warnings.length >= 1, '실패 경고가 남지 않음');
+  assert.ok(warnings.some(entry => entry[2].join(' ').includes('offline')), '요청 실패 사유가 경고에 없음');
+  value(sb, s => s.context.__lobbyProbe.getSubjectCapState('math'), 'available');
 });
 
-test('코어 콜백·일지 동기화·HUD·예약 일기·클릭/키보드·놀이터 동작이 원본과 같다', async () => {
-  const both = pair({ user: 'minseo' });
-  for (const sb of both) {
-    sb.context.location.search += '&action=diary';
-    sb.context.summary = { totalMinutes: 51, pendingMinutes: 8 };
-    sb.coreCallbacks[0]();
-    sb.requests.find(request => JSON.parse(request.init.body).page_size === 30).reply({ results: [{ id: 'study-log' }] });
-    sb.events.find(event => event.type === 'click').callback({ pageX: 50, pageY: 80 });
-    sb.context.openPlaygroundModal();
-    assert.ok(sb.elements.get('playgroundModalList').innerHTML.includes('매직 컬러링'));
-    sb.context.openDailyCapModal('math');
-    sb.events.find(event => event.type === 'keydown').callback({ key: 'Escape' });
-    sb.context.handleSubjectNodeClick('english');
-    sb.context.handleLobbySettingsClick({ stopPropagation() {} });
-    sb.timers.forEach(timer => timer.callback());
-  }
+test('코어 콜백·일지 동기화·HUD·예약 일기·클릭/키보드·놀이터 동작', async () => {
+  const sb = load({ user: 'minseo' });
+  sb.context.location.search += '&action=diary';
+  sb.context.summary = { totalMinutes: 51, pendingMinutes: 8 };
+  sb.coreCallbacks[0]();
+  sb.requests.find(request => JSON.parse(request.init.body).page_size === 30).reply({ results: [{ id: 'study-log' }] });
+  sb.events.find(event => event.type === 'click').callback({ pageX: 50, pageY: 80 });
+  sb.context.openPlaygroundModal();
+  assert.ok(sb.elements.get('playgroundModalList').innerHTML.includes('매직 컬러링'));
+  sb.context.openDailyCapModal('math');
+  sb.events.find(event => event.type === 'keydown').callback({ key: 'Escape' });
+  sb.context.handleSubjectNodeClick('english');
+  sb.context.handleLobbySettingsClick({ stopPropagation() {} });
+  sb.timers.forEach(timer => timer.callback());
   await drain();
-  same(both);
-  for (const sb of both) {
-    assert.equal(sb.elements.get('minseoGuardianText').textContent, '8분 획득');
-    assert.equal(sb.elements.get('minsuGuardianText').textContent, 'GUARDIAN: +51m');
-    assert.ok(sb.trace.some(entry => entry[0] === 'guardian.logs'));
-  }
+  assert.equal(sb.elements.get('minseoGuardianText').textContent, '8분 획득');
+  assert.equal(sb.elements.get('minsuGuardianText').textContent, 'GUARDIAN: +51m');
+  assert.ok(sb.trace.some(entry => entry[0] === 'guardian.logs'));
 });
