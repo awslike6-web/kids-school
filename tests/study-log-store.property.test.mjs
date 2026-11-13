@@ -240,12 +240,19 @@ property('S6 조회 실패 무작위 순서 시험: 기억 ID·1회 재시도·�
   }
 });
 
-property('S5-기기 두 기기 동시 upsert 무작위 순서 시험: 알려진 한계', async (rng, history) => {
-  const f = fixture(rng), a = f, b = f.client(), value = entry(rng);
-  history.push({ devices: 2, concurrent: [value, value] });
+// 알려진 한계: 두 기기가 같은 순간 저장하면 노션에 고유 키 제약이 없어 같은 키 페이지가 2건이 될 수 있다.
+// 예전에는 { todo }로 "1건" 단언을 걸어 두어 매 실행 "✖ failing tests" 스택(actual 2, expected 1)이
+// 찍혔고 간헐 실패로 오인되었다(2026-11-14). 지금은 허용 범위(1~2건)와 합계 무손실만 명시 단언한다.
+property('S5-기기 두 기기 동시 upsert 무작위 순서 시험: 알려진 한계(1~2건)지만 합계는 잃지 않는다', async (rng, history) => {
+  const f = fixture(rng), a = f, b = f.client(), value = entry(rng), inputs = [value, value];
+  history.push({ devices: 2, concurrent: inputs });
   await Promise.all([a.api.upsertStudyLog(value), b.api.upsertStudyLog(value)]);
-  checkSum('S5-기기', f.pages, [value, value]);
-}, { todo: '두 기기 동시 저장은 노션 고유 키 제약이 없어 막지 못함(알려진 한계)' });
+  const active = f.pages.filter(p => !p.archived && !p.in_trash);
+  equal('S5-기기', active.length >= 1 && active.length <= 2, true, `같은 키 페이지 1~2건(실제 ${active.length}건)`);
+  const total = name => active.reduce((sum, page) => sum + page.properties[name].number, 0);
+  equal('S5-기기', total('소요시간'), inputs.reduce((sum, e) => sum + e.durationMinutes, 0), '두 페이지 소요시간 합계 무손실');
+  equal('S5-기기', total('단어요정'), inputs.reduce((sum, e) => sum + e.wordFairyCount, 0), '두 페이지 단어요정 합계 무손실');
+});
 
 property('S7 캐시 무작위 순서 시험: isolate 2~3개·0~5분 순차 쓰기·최신 값 읽기', async (rng, history) => {
   const f = fixture(rng, '2026-10-28', { cache: true }), value = entry(rng), inputs = [];

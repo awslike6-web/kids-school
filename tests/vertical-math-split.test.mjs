@@ -1,23 +1,20 @@
-// 세로셈 분리: 고정 원본·HTML 배선·부분 실행·전역 API를 검사한다.
+// 세로셈 분리 규칙: 머리 주석·줄 상한·구문 분석·HTML 로드·보상 오디오 호출·부분 실행·공개 API.
+// 2026-11-14: 얼린 원본(tests/fixtures/vertical-math-split)과의 434줄 경계 바이트 대조, 분리 직전 HTML 해시,
+// 실행 결과 대조, 전역 함수 개수·정확한 ?v= 값 고정은 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { createHash } from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assertLoadsInOrder, assertInlineHandlersDeclared, inlineHandlersDeclaredIn } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const files = ['kids/js/vertical_math_logic.js', 'kids/js/vertical_math_grid.js'];
-const fixture = read('tests/fixtures/vertical-math-split/vertical_math_logic.js');
 const sources = files.map(read);
-const html = read('kids/subjects/math/vertical_math.html');
-const version = '?v=20261101-vertical-split';
+const htmlPath = 'kids/subjects/math/vertical_math.html';
+const html = read(htmlPath);
 const header = '// kids/js/vertical_math_grid.js - vertical_math_logic.js 분리 2/2: 나눗셈 시뮬레이터·격자 그리기·채점·결과·인쇄 (vertical_math_logic.js 다음에 로드)';
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const tags = ['logic', 'grid'].map(name => `<script src="../../js/vertical_math_${name}.js${version}"></script>`);
 const events = [{ target: 'document', type: 'DOMContentLoaded', callback: '' }];
+// 공개 함수(추가는 자유, 이름 변경·삭제만 실패). 앞 둘은 첫 파일, 뒤 둘은 둘째 파일에 있어야 한다.
 const globalFunctions = ['generateQuestions', 'getMemoCanvasPoint', 'initMemoPad',
     'isVerticalMathInProgress', 'resizeMemoCanvas', 'setFocus'];
 const windowFunctions = ['clearMemoPad', 'closeDifficultyModal', 'exitRoom', 'goSetup',
@@ -26,69 +23,51 @@ const windowFunctions = ['clearMemoPad', 'closeDifficultyModal', 'exitRoom', 'go
 const gridFunctions = ['nextQuestion', 'renderDynamicGrid', 'showResult', 'simulateDivision'];
 const gridWindowFunctions = ['printWorksheet', 'submitAnswer'];
 
-test('지정 434줄 경계·머리 주석·마지막 개행 없는 고정 원본을 보존한다', () => {
+test('둘째 파일은 지정 머리 주석으로 시작한다', () => {
     const newline = sources[1].indexOf('\n');
     assert.ok(newline >= 0);
     assert.equal(sources[1].slice(0, newline).replace(/\r$/, ''), header);
-    const tail = sources[1].slice(newline + 1);
-    const lines = fixture.match(/[^\n]*\n|[^\n]+$/g);
-    assert.equal(lines.length, 879);
-    assert.equal(sources[0], lines.slice(0, 434).join(''));
-    assert.equal(tail, lines.slice(434).join(''));
-    assert.equal(normalize(sources[0] + tail), normalize(fixture));
-    assert.deepEqual(Buffer.from(sources[0] + tail), Buffer.from(fixture), '바이트까지 원문 보존');
-    assert.equal(lines[432].trim(), '}');
-    assert.equal(lines[433].trim(), '');
-    assert.equal(lines[434].trim(), '// ➗ 나눗셈 롱 디비전(Long Division) 시뮬레이터');
-    assert.equal(fixture.endsWith('\n'), false);
-    assert.equal(sources[1].endsWith('\n'), false);
 });
 
 for (const file of files) {
     test(`${file}: 실존·600줄 이하·독립 구문 분석`, () => {
         assert.ok(fs.existsSync(path.join(root, file)));
-        assert.ok(read(file).split(/\r?\n/).length <= 600);
+        assert.ok(lineCount(read(file)) <= 600);
         assert.doesNotThrow(() => new vm.Script(read(file), { filename: file }));
     });
 }
 
 test('HTML은 상대 경로·같은 버전·클래식 스크립트로 한 번씩 연속 로드한다', () => {
-    const matches = [...html.matchAll(/<script\b[^>]*\bsrc=["'][^"']*vertical_math_(?:logic|grid)\.js[^"']*["'][^>]*>\s*<\/script>/g)];
-    assert.deepEqual(matches.map(match => match[0]), tags);
-    const between = html.slice(matches[0].index + matches[0][0].length, matches[1].index);
-    assert.match(between, /^\r?\n$/);
+    assertLoadsInOrder(html, 'script', files.map(file => `../../${file.slice('kids/'.length)}`), '세로셈');
     assert.doesNotMatch(html, /vertical_math_(?:logic|grid)\.js["']/);
 });
 
-test('HTML의 두 스크립트 배선 이외 원문은 승인 전과 같다', () => {
-    const newline = html.includes('\r\n') ? '\r\n' : '\n';
-    const restored = html.replace(newline + tags[1], '')
-        .replace(tags[0], '<script src="../../js/vertical_math_logic.js"></script>');
-    // 분리 직전 HTML의 줄바꿈을 LF로 정규화한 UTF-8 해시. 시험 중 git이나 네트워크는 사용하지 않는다.
-    assert.equal(createHash('sha256').update(restored.replace(/\r\n/g, '\n')).digest('hex'),
-        '2e549bd38617bac3aa7c96959c6b21c5ec6e3a4916baa2f546d51c64ce664002');
+test('HTML on* 속성이 부르는 함수가 모두 선언되어 있음', () => {
+    assertInlineHandlersDeclared(htmlPath);
 });
 
-test('다른 운영 소스에 옛 버전·버전 없는 세로셈 JS 참조가 없다', () => {
+test('다른 운영 소스에 버전 없는 세로셈 JS 참조가 없고 버전은 서로 같다', () => {
     const walk = dir => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap(entry => {
         const file = path.join(dir, entry.name);
         return entry.isDirectory() ? walk(file) : /\.(?:html|js|mjs|cjs|css)$/.test(entry.name) ? [file] : [];
     });
     const rootFiles = fs.readdirSync(root).filter(file => /\.(?:html|js|mjs|cjs|css)$/.test(file));
+    const versions = new Set();
     // system_map_generated.js는 조감도용 파일 이름 목록일 뿐 스크립트 참조가 아니다.
     for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')].filter(name => !name.endsWith('system_map_generated.js'))) {
         for (const match of read(file).matchAll(/vertical_math_(?:logic|grid)\.js([^"'<>\s]*)["']/g)) {
-            assert.equal(match[1], version, `${file}: 옛 버전 또는 버전 누락`);
+            assert.match(match[1], /^\?v=[^&]+$/, `${file}: 버전 누락`);
+            versions.add(match[1]);
         }
     }
+    assert.equal(versions.size, 1, `세로셈 JS 버전이 서로 다름: ${[...versions].join(', ')}`);
 });
 
-test('채점·완주 보상 오디오 호출은 둘째 파일에 각 1회씩 보존한다', () => {
+test('채점·완주 보상 오디오 호출은 둘째 파일에 각 1회씩 있다', () => {
     for (const name of ['fairyPraise', 'fairyEncourage', 'fairyReward']) {
         const count = text => [...text.matchAll(new RegExp(`\\b${name}\\s*\\(`, 'g'))].length;
-        assert.equal(count(fixture), 1, `${name}: 고정 원본 호출 수`);
         assert.equal(count(sources[0]), 0, `${name}: 첫 파일 호출 없음`);
-        assert.equal(count(sources[1]), count(fixture), `${name}: 호출 보존`);
+        assert.equal(count(sources[1]), 1, `${name}: 둘째 파일 1회`);
     }
 });
 
@@ -131,38 +110,26 @@ function sandbox(prefilled = false) {
         requestAnimationFrame: unexpected('requestAnimationFrame')
     };
     context.window = context;
-    const initialNames = new Set(Object.keys(context));
     vm.createContext(context);
-    return { context, initialNames, registered, timers, reads, wrongNotes };
+    return { context, registered, timers, reads, wrongNotes };
 }
 
-function snapshot(sb) {
-    const names = Object.keys(sb.context).filter(name => !sb.initialNames.has(name)).sort();
-    return {
-        names, windowFunctions: names.filter(name => typeof sb.context[name] === 'function'),
-        globalFunctions: JSON.parse(vm.runInContext(`JSON.stringify(${JSON.stringify([
-            ...globalFunctions, ...windowFunctions, ...gridFunctions, ...gridWindowFunctions
-        ])}.filter(name => eval('typeof ' + name) === 'function').sort())`, sb.context)),
-        events: sb.registered, timers: sb.timers, reads: sb.reads,
-        // 최상위 const/let은 window 속성이 아니므로 같은 전역 컨텍스트에서 읽는다.
-        state: vm.runInContext(`JSON.stringify({currentProfile,gameState,focusedInput,wrongNotes,
-            roomStartTime,isExiting,currentSubject,memoMode,memoDrawing,memoCanvasCtx,
-            isNumpadCollapsed,DIFFICULTY_LEVELS})`, sb.context)
-    };
-}
+// 최상위 function 선언과 window.이름 할당을 모두 보도록 컨텍스트 안에서 typeof로 확인한다.
+const definedIn = (sb, names) => JSON.parse(vm.runInContext(
+    `JSON.stringify(${JSON.stringify(names)}.filter(name => eval('typeof ' + name) === 'function'))`, sb.context));
 
 for (const prefilled of [false, true]) {
     const mode = prefilled ? '민서·기존 오답' : '민수·기본값';
     test(`${mode}: 첫 파일만 실행해도 뒤 파일·DOM·네트워크 접근이 없다`, () => {
         const sb = sandbox(prefilled);
         assert.doesNotThrow(() => vm.runInContext(sources[0], sb.context, { filename: files[0] }));
-        const result = snapshot(sb);
-        assert.deepEqual(result.globalFunctions, [...globalFunctions, ...windowFunctions].sort());
-        assert.deepEqual(result.windowFunctions, result.globalFunctions);
-        assert.deepEqual(result.events, events);
-        assert.deepEqual(result.timers, []);
-        assert.deepEqual(result.reads, ['currentUser', `minmin_math_wrong_${prefilled ? 'daughter' : 'son'}`]);
-        const state = JSON.parse(result.state);
+        const firstFile = [...globalFunctions, ...windowFunctions];
+        assert.deepEqual(definedIn(sb, firstFile), firstFile, '첫 파일 공개 함수 누락');
+        for (const name of windowFunctions) assert.equal(typeof sb.context[name], 'function', `window.${name} 누락`);
+        assert.deepEqual(sb.registered, events);
+        assert.deepEqual(sb.timers, []);
+        assert.deepEqual(sb.reads, ['currentUser', `minmin_math_wrong_${prefilled ? 'daughter' : 'son'}`]);
+        const state = JSON.parse(vm.runInContext('JSON.stringify({currentProfile, currentSubject, wrongNotes})', sb.context));
         assert.equal(state.currentProfile, prefilled ? 'daughter' : 'son');
         assert.equal(state.currentSubject, '수학');
         assert.deepEqual(state.wrongNotes, sb.wrongNotes);
@@ -171,15 +138,17 @@ for (const prefilled of [false, true]) {
         }
     });
 
-    test(`${mode}: 순차 실행의 전역 함수·초기 상태·이벤트·타이머가 원본과 같다`, () => {
-        const original = sandbox(prefilled), split = sandbox(prefilled);
-        vm.runInContext(fixture, original.context, { filename: '원본 fixture' });
+    test(`${mode}: 순차 실행 뒤 공개 함수·HTML 호출 함수·이벤트·타이머가 갖춰진다`, () => {
+        const split = sandbox(prefilled);
         sources.forEach((source, index) => vm.runInContext(source, split.context, { filename: files[index] }));
-        const result = snapshot(split);
-        assert.deepEqual(result, snapshot(original));
-        assert.equal(result.globalFunctions.length, 25);
-        assert.deepEqual(result.windowFunctions, result.globalFunctions);
-        assert.deepEqual(result.events, events);
-        assert.deepEqual(result.timers, []);
+        const all = [...globalFunctions, ...windowFunctions, ...gridFunctions, ...gridWindowFunctions];
+        assert.deepEqual(definedIn(split, all), all, '공개 함수 누락');
+        for (const name of [...windowFunctions, ...gridWindowFunctions]) {
+            assert.equal(typeof split.context[name], 'function', `window.${name} 누락`);
+        }
+        const missing = inlineHandlersDeclaredIn(html, sources).filter(name => typeof split.context[name] !== 'function');
+        assert.deepEqual(missing, [], 'HTML이 부르는데 로드 뒤 없는 전역 함수');
+        assert.deepEqual(split.registered, events);
+        assert.deepEqual(split.timers, []);
     });
 }

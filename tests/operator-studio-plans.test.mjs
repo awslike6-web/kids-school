@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { includePair, additionClass, subtractionClass, assertSampleCoversClasses, FULL_RANGE } from './operator-range.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sandbox = { window: {} };
@@ -36,9 +37,16 @@ function assertNumberJosa(label, plan) {
     }
 }
 
-test('덧셈 1~999 + 1~999 전 범위: 자리별 결과·올림이 계산과 일치', () => {
+test('로컬 표본은 전수와 같은 덧셈·뺄셈 구조 클래스(자릿수·올림·받아내림·결과 자릿수)를 모두 덮는다', t => {
+    const add = assertSampleCoversClasses(assert, additionClass);
+    const sub = assertSampleCoversClasses(assert, subtractionClass);
+    t.diagnostic(`덧셈 ${add}종·뺄셈 ${sub}종, ${FULL_RANGE ? '전수 실행(KIDS_TEST_FULL=1)' : '로컬 표본 실행'}`);
+});
+
+test('덧셈 1~999 + 1~999 범위(표본·전수): 자리별 결과·올림이 계산과 일치', () => {
     for (let a = 1; a <= 999; a++) {
         for (let b = 1; b <= 999; b++) {
+            if (!includePair(a, b)) continue; // 로컬 표본, KIDS_TEST_FULL=1이면 전수
             const label = `${a}+${b}`;
             const plan = buildAdditionPlan(a, b);
             const last = plan.at(-1);
@@ -65,9 +73,10 @@ test('덧셈 1~999 + 1~999 전 범위: 자리별 결과·올림이 계산과 일
     }
 });
 
-test('뺄셈 1~999 − 1~999 전 범위: 칸 위 값이 실제로 빼는 값이고 답이 일치', () => {
+test('뺄셈 1~999 − 1~999 범위(표본·전수): 칸 위 값이 실제로 빼는 값이고 답이 일치', () => {
     for (let a = 1; a <= 999; a++) {
         for (let b = 1; b <= 999; b++) {
+            if (!includePair(a, b)) continue; // 로컬 표본, KIDS_TEST_FULL=1이면 전수
             const label = `${a}-${b}`;
             const plan = buildSubtractionPlan(a, b);
             if (a < b) {
@@ -144,10 +153,11 @@ test('곱셈 1~999 × 1~99 전 범위: 진행 중 칠판·올림·부분곱이 �
 test('덧셈·뺄셈 문구: 제목 번호·undefined·숫자 조사를 일정 간격으로 전수 표본 검사', () => {
     for (let a = 1; a <= 999; a += 7) {
         for (let b = 1; b <= 999; b += 3) {
-            assertTitlesAndText(`${a}+${b}`, buildAdditionPlan(a, b));
-            assertNumberJosa(`${a}+${b}`, buildAdditionPlan(a, b));
-            assertTitlesAndText(`${a}-${b}`, a >= b ? buildSubtractionPlan(a, b) : []);
-            assertNumberJosa(`${a}-${b}`, a >= b ? buildSubtractionPlan(a, b) : []);
+            const addPlan = buildAdditionPlan(a, b), subPlan = a >= b ? buildSubtractionPlan(a, b) : [];
+            assertTitlesAndText(`${a}+${b}`, addPlan);
+            assertNumberJosa(`${a}+${b}`, addPlan);
+            assertTitlesAndText(`${a}-${b}`, subPlan);
+            assertNumberJosa(`${a}-${b}`, subPlan);
         }
     }
 });

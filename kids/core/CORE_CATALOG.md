@@ -978,7 +978,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 - `kids/css/haru-timeline-clock.css` (518줄): 타임머신 헤더·시계판·필터.
 - `kids/css/haru-timeline-list.css` (459줄): 타임라인 목록·스티커·모달·반응형.
 - **로드 계약**: `kids/subjects/haru/haru.html`의 기존 스타일 링크 자리에서 위 순서대로 `../../css/{파일명}?v=20261031-haru-split`을 직접 로드합니다. `@import`는 쓰지 않습니다. JS·공개 API는 그대로입니다.
-- **회귀 시험**: `tests/haru-css-split.test.mjs`가 고정 원본 `tests/fixtures/haru-css-split/haru.css`와 재결합 결과, 링크 순서·파일 크기·블록 경계·기존 파일 제거를 검사합니다. 계약: `docs/haru_css_split_spec.md`.
+- **회귀 시험**: `tests/haru-css-split.test.mjs`가 링크 순서·같은 버전·머리 주석·파일 크기·블록 경계·기존 파일 제거를 검사합니다(2026-11-14 고정 원본 대조 제거). 계약: `docs/haru_css_split_spec.md`.
 
 ### 🌟 `haru_common.js` (하루 라이프 허브 대문 파사드)
 자녀 프로필 동적 전환(민수 초5 데일리 ↔ 민서 초1 슬기로운 하루), 5대 라이프 탭 스위칭, 초고음질 요정 엔진(Edge-TTS) 음성 제어, 하늘 명화/동요 자연·예술 감상실을 총괄하는 초경량 라우팅 파사드입니다.
@@ -1506,6 +1506,13 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
 
+- **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
+  - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.
+  - **fixture**: 남은 것은 `tests/fixtures/reward-grant-shared/` 하나(보상 공용화 전 원문 3벌, `reward-grant-shared.test.mjs`·`reward-grant-sandbox.mjs`가 "변경 전과 같다" 비교에 사용). 새 분리 작업도 원본을 얼려 두지 말고 위 규칙 도우미를 씁니다.
+  - **연산 스튜디오 범위 시험**: 1~999 × 1~999 쌍은 로컬 기본이 결정적 표본(약 23만 쌍, `tests/operator-range.mjs`)이고, 표본이 전수와 같은 구조 클래스(자릿수·자리별 올림/받아내림·결과 자릿수, 덧셈 40종·뺄셈 43종)를 모두 덮는지 시험이 먼저 확인합니다. `KIDS_TEST_FULL=1`이면 약 100만 쌍 전수이며 `regression.yml`이 이 값으로 매 푸시 전수를 돕니다.
+  - **알려진 한계 시험**: `study-log-store.property`의 두 기기 동시 저장은 예전 `todo`라 매 실행 "✖ failing tests" 아래 `actual: 2, expected: 1` 스택이 찍혀(요약은 fail 0) 간헐 실패로 오인됐습니다. 지금은 "같은 키 페이지 1~2건 허용, 합계 무손실"을 명시 단언하므로 이 출력이 나오면 진짜 실패입니다.
+  - **느린 시험 정리**: 미니 런 전수 시험의 2단 점프 탐색 루프 순서를 바꿔 25초→약 3초(탐색 공간 동일), 몬스터 리액션 1.7초 대기 2번은 `node:test` 가짜 타이머로 바꿨습니다.
+
 - `tests/monster-reactions.test.mjs`: 파트너별 리액션 포즈, 그림 1장·포즈 누락 대체, 표시 1개 유지와 끝처리 취소, 격려 표시의 빨간색 금지·동작 감소 규칙, 그림 실패 대체, 완주 창 아이콘 복귀, 기존 채점·음성 호출 보존을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/gallery-character-runner.test.mjs`: DOM 없는 로드, 장착·재로드·포즈·해제·남매 분리·잘못된 저장·주소·최고 기록, 결정적 월드·입력 없는 60초 완주·충돌/무적·별·2단 점프·dt 상한·민서 장애물과 실제 데이터 CDN 계약을 검사합니다. Python/Pillow로 임시 공부방·아카이브를 만들고 빌더의 투명 PNG·크롭·512px·오류 격리·단독 카드 제외·포트폴리오 미포함·EXIF도 확인합니다. `GALLERY_TEST_PYTHON`으로 시험 Python 경로를 지정할 수 있습니다.
 - 미니 런 보완 시험은 세로 .45~가로 2.2의 6비율·그림 3비율·3시드·민수 가속 전후 162개 월드의 장애물 4,248개를 실제 `step`으로 전수 통과 검사합니다. 민수 2단 필수 장애물·판정 상자 기준 반응 시간·가속 이동량·리사이즈 거리/상태 보존·조사 4쌍도 확인합니다. 세로 .55는 기존 무입력 완주 시험에도 포함합니다.
@@ -1518,12 +1525,12 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/gallery-spot-diff.test.mjs`: DOM 없는 모듈 로딩, contain 영역·레터박스·네 모서리 좌표, 짧은 변 반지름·22px 터치 보완·중복/겹침 판정, 입력 검증과 생성 갤러리의 CDN 계약을 검사합니다.
 - `tests/dictation-ladder.test.mjs`: 받아쓰기 사다리의 단계 건너뛰기·이어 하기·쉬운 방식 전환, 철자 함정, 채점 구분, 숙련도 전송·실패 재전송·병합, 학생 분리, 스크립트 순서, 보상 오디오 호출을 검사합니다. 실제 표시는 화면에서 확인합니다.
 - `tests/operator-studio-division.test.mjs`: 연산 스튜디오 나눗셈의 1~999 ÷ 1~99 전 범위에서 풀이 단계(몫·곱·뺄셈·내려쓰기·나머지)를 다시 계산해 대조하고, 수직선 점프·눈금, 0으로 나누기·범위 초과 입력을 검사합니다. 실제 표시는 화면에서 확인합니다.
-- `tests/operator-studio-plans.test.mjs`: 덧셈·뺄셈 1~999 두 수, 곱셈 1~999 × 1~99 전 범위에서 단계별 칠판(올림·칸 위 값·부분곱·진행 중 결과 칸)을 독립 계산과 대조하고, 경계 사례와 추천 문제 이름을 검사합니다.
-- `tests/operator-studio-views.test.mjs`: 가짜 DOM에서 네 연산의 모든 탭을 끝까지 눌러 만들어진 HTML을 검사합니다(잘못된 글자, 수직선 축과 점프 수, 블록 그림 변화, 앞 수가 작은 뺄셈 안내). 블록 값 보존과 면적 칸의 합은 전 범위로, 네 연산 모든 탭의 숫자 뒤 조사는 대표 문제로 검사합니다. 레이아웃은 검사하지 않습니다.
+- `tests/operator-studio-plans.test.mjs`: 덧셈·뺄셈 1~999 두 수(로컬 표본·`KIDS_TEST_FULL=1` 전수, 표본의 구조 클래스 전수 포함 검사), 곱셈 1~999 × 1~99 전 범위에서 단계별 칠판(올림·칸 위 값·부분곱·진행 중 결과 칸)을 독립 계산과 대조하고, 경계 사례와 추천 문제 이름을 검사합니다.
+- `tests/operator-studio-views.test.mjs`: 가짜 DOM에서 네 연산의 모든 탭을 끝까지 눌러 만들어진 HTML을 검사합니다(잘못된 글자, 수직선 축과 점프 수, 블록 그림 변화, 앞 수가 작은 뺄셈 안내). 블록 값 보존(덧셈·뺄셈은 `operator-range.mjs` 표본·전수)과 면적 칸의 합은 전 범위로, 네 연산 모든 탭의 숫자 뒤 조사는 대표 문제로 검사합니다. 레이아웃은 검사하지 않습니다.
 - `tests/system-map.test.mjs`: 시스템 조감도 데이터·화면 파일 로드 순서와 Tailwind CDN 미사용, 증상 카드의 탭·카드 id 연결, 카드 id·탭·큰따옴표 계약, 연결선 방향, 공부방 카드·서랍 경로 실존, 공개 파일의 비공개 이름 금지, 생성 파일의 시각 없음·정렬을 검사합니다.
 - `tests/coco-avatar.test.mjs`: 요정 코코 아바타 `kids/assets/images/coco_fairy.webp` 한 벌만 쓰는지 확인합니다. 사라진 외부 주소가 남지 않고, 각 페이지의 상대 경로가 실제 파일을 가리키는지 검사합니다. 그림은 민서 수학 동화 삽화(`kids-archive/assets/storybook/math/minseo/1-2/1/math_100_ill_p4.jpg`)의 코코를 원형으로 자른 192×192 이미지입니다. 그림을 바꿀 때는 이 파일만 교체합니다.
 
-- **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (약 2초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 같은 명령을 돌립니다.
+- **실행**: 저장소 루트에서 `node --test "tests/**/*.test.mjs"` (12코어 PC 로컬 약 10초, 가장 느린 파일은 `operator-studio-plans` 약 8초). 노션 운영 DB에는 접속하지 않습니다(모의 fetch). 커밋 전에 통과해야 하고, `main` 푸시·PR마다 GitHub Actions(`.github/workflows/regression.yml`, Node 24)가 `KIDS_TEST_FULL=1`(연산 스튜디오 전수)로 같은 명령을 돌립니다.
 - `tests/regression.test.mjs`: 단독 시험 6개를 하위 프로세스로 돌려 종료 코드 0인지 확인합니다. `verify_quest_mastery.js`(3·3·3 엔진), `test_quest_fallback.js`, `test_study_logger_upsert.js`, `verify_study_log_store.js`, `verify_kst_dates.js`, `verify_diary_sync.js`. 새 단독 시험을 만들면 실패 시 `process.exitCode = 1`로 끝나게 하고 이 목록에 한 줄 추가합니다.
 - `tests/fairy-voice-persona.test.mjs`: 캐릭터 목소리가 목록대로 나오는지(정답·오답·완주·인사, 비반복), 다른 아이 전용·준비중·목록 미로딩이면 요정 코코로 돌아가는지, 목록에 항목만 추가한 새 목소리가 엔진 수정 없이 재생되는지, 목록의 음성 파일이 모두 있는지 확인합니다.
 - `tests/fairy-tts.test.mjs`: 엔진·설정창을 싣는 모든 화면·로더가 `fairy-tts.js`를 먼저 싣는지, 두 파일의 최상위 이름이 겹치지 않고 공개 함수가 모두 있는지, 대기열(중간 실패 건너뛰기·끝 콜백 1번·미리 받기 3개·정지 시 해제), 수식 읽기, 말하기 속도·예전 영어 저장값 읽기, 기기 OpenAI 키 삭제를 확인합니다.
@@ -1531,7 +1538,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - `tests/quest-mastery.property.test.mjs`: 독립 브라우저 샌드박스에서 시드별 30~50개 동작으로 Q1~Q6 숙련도·병합·10분 보호·noCredit·판 구성과 await 중 채점/실패 후 push 배출을 검사하는 무작위 순서 시험입니다(각 흐름 기본 100회). 재현: `QUEST_PROP_SEED=<시드> node --test tests/quest-mastery.property.test.mjs`, 횟수: `QUEST_PROP_RUNS`. 외부 변경 병합(Q3)과 마지막 성공 push 대비 dirty 유실(Q5)은 별도 흐름으로 검사합니다.
 - `tests/media-archive-paths.test.mjs`: `gallery-data.js`·`gallery-meta.json`·`special-days-data.js`·`haru_data.js` 안의 모든 kids-archive 주소를 모아 작품은 activities 밖·작가와 같은 아이 폴더, 특별한 날·하루방은 `{아이}/activities/`, 작품·특별한 날 같은 파일 중복 등록 금지를 검사합니다. 로컬에 `../kids-archive`가 있으면 파일 실존도 확인하고, CI에서는 그 항목만 건너뜁니다.
 - `tests/haru-special-days.test.mjs`: 하루방이 `special-days-data.js`를 상대 경로로 먼저 싣고 `haru_data.js`에 `defaultEvents`가 없는지, 민서 방에 민수 개인 행사가 없고 민수 방에 민서 개인 행사가 없으며 공동·부모 행사는 둘 다 보이는지, 예시 3건(`evt_children` 등)이 사라졌는지, 예전 localStorage 이야기·제목 수정·갤러리 메타가 살아 있는지 검사합니다. 아직 실제 데이터에 없는 작성자(민수 개인·아빠) 행사는 시험 안에서만 덧붙입니다.
-- `tests/study-log-store.property.test.mjs`: 모의 fetch의 응답 지연·실패·중복·날짜 경계로 S1~S7 스트릭·캐시·순차/동시 upsert를 검사하는 무작위 순서 시험입니다(규칙별 기본 100회). 재현: `STUDYLOG_PROP_SEED=<시드> node --test tests/study-log-store.property.test.mjs`, 횟수: `STUDYLOG_PROP_RUNS`. S4 오답 보존·S5 한 탭/두 탭 직렬화·S6 선택 A·S7 Worker isolate 캐시 우회와 ID 수명주기를 검사하고, 두 기기 동시 저장 한계만 본문이 실행되는 todo로 기록합니다. 공용 `tests/browser-sandbox.mjs`의 `loadBrowserScripts(files, { userName, fetch, storage })`는 운영 DB 접속 없이 기본 모의 fetch와 시드별 저장소를 제공합니다.
+- `tests/study-log-store.property.test.mjs`: 모의 fetch의 응답 지연·실패·중복·날짜 경계로 S1~S7 스트릭·캐시·순차/동시 upsert를 검사하는 무작위 순서 시험입니다(규칙별 기본 100회). 재현: `STUDYLOG_PROP_SEED=<시드> node --test tests/study-log-store.property.test.mjs`, 횟수: `STUDYLOG_PROP_RUNS`. S4 오답 보존·S5 한 탭/두 탭 직렬화·S6 선택 A·S7 Worker isolate 캐시 우회와 ID 수명주기를 검사하고, 두 기기 동시 저장 한계는 "페이지 1~2건 허용·합계 무손실"로 명시 단언합니다(2026-11-14, 예전 todo의 실패 스택 출력 오인 해소). 공용 `tests/browser-sandbox.mjs`의 `loadBrowserScripts(files, { userName, fetch, storage })`는 운영 DB 접속 없이 기본 모의 fetch와 시드별 저장소를 제공합니다.
 - 시험이 실제로 고장을 잡는지 확인함: 숙련도 속성명 오타, 오답리포트 속성명 변경, 금메달 기준 변경, 숙련도 구분자 변경을 일부러 넣었을 때 모두 실패.
 - **화면 검증 서버 (노션 쓰기 차단)**: `python scripts/guarded_preview_server.py [포트=8767]`. 모든 HTML `<head>` 맨 앞에 쓰기 차단 스크립트를 넣어 내보내므로 페이지가 실리기 전부터 노션 페이지·블록 쓰기와 업로드가 막힌다(읽기·DB 조회·음성은 통과, 막힌 요청은 `window.__blockedWrites`). 2026-10-28 차단을 늦게 걸어 민수 「학습설정」이 덮어써진 사고 뒤 도입. 화면 검증은 `python -m http.server` 대신 이 서버로 한다.
 - **자동 맞춤 시험(묶음 밖)**: `python -X utf8 scripts/verify_spot_diff_align.py`. 결정적 합성 표본으로 맞춤·선택 합성·마스크 밖 원본 바이트·워터마크 복원·품질 거부·이동 경고·결정성·CLI·의존성 누락을 검사합니다. OpenCV가 없으면 「건너뜀: opencv-python-headless 미설치」와 종료 코드 0. 임시 그림은 uploads 안에서 만들고 정리하며 Node/Actions 묶음에는 넣지 않습니다.

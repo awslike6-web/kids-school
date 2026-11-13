@@ -1,33 +1,31 @@
-// 마음일기 분리: 고정 원본·전역 API·다섯 진입점·부분 로드 안전성을 검사한다.
+// 마음일기 분리 규칙: 머리 주석·줄 상한·로더 배열·세 진입 화면 로드·공개 API·부분 로드 안전성.
+// 2026-11-14: 얼린 원본(tests/fixtures/daily-diary-split)과의 원문·실행 결과 대조, 분리 전 HTML 줄 수 고정,
+// 태그 한 줄 서식 고정은 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assertLoadsInOrder, assertPublicApi } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const names = ['base', 'forms', 'sync', 'submit'].map(part => `daily-diary-${part}.js`);
 const files = names.map(name => `kids/core/${name}`);
-const fixture = read('tests/fixtures/daily-diary-split/daily-diary.js');
 const sources = files.map(read);
-const version = '?v=20261031-diary-split';
-// 수학 분리 시험과 동일: 줄바꿈·줄 끝 공백·마지막 개행만 정규화한다.
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const lineCount = text => text.split(/\r?\n/).length;
+// 화면·다른 코어가 window로 부르는 공개 함수(2026-11-14 기준, 추가는 자유)
+const PUBLIC_API = ['closeDailyDiaryModal', 'deleteDiaryEntry', 'fetchNotionDiaries', 'getOrCreateAiDailyLog',
+  'getStoredDiaries', 'getTodayDiaryCount', 'insertQuickTag', 'openDailyDiaryModal', 'selectChoiceCard',
+  'startDiaryVoiceInput', 'submitMinseoDiary', 'submitMinsuDiary', 'submitParentDiary', 'switchDiaryTab',
+  'syncDiariesFromNotion', 'toggleBalloonTag', 'updateLobbyDiaryButton'];
 
-test('네 파일은 지정 머리 주석을 가지며 각각 600줄 이하이고 원본을 보존한다', () => {
-  const bodies = sources.map((source, index) => {
+test('네 파일은 지정 머리 주석을 가지며 각각 600줄 이하이고 옛 단일 파일은 없다', () => {
+  sources.forEach((source, index) => {
     assert.ok(lineCount(source) <= 600, `${files[index]}: 600줄 초과`);
     const firstNewline = source.indexOf('\n');
     assert.ok(firstNewline >= 0);
     const header = source.slice(0, firstNewline).replace(/\r$/, '');
     assert.ok(header.startsWith(`// kids/core/${names[index]} - daily-diary.js 분리 ${index + 1}/4: `));
     assert.ok(header.endsWith(' (순서대로 로드)'));
-    return source.slice(firstNewline + 1);
   });
-  assert.equal(normalize(bodies.join('')), normalize(fixture));
   assert.equal(fs.existsSync(path.join(root, 'kids/core/daily-diary.js')), false);
 });
 
@@ -43,26 +41,18 @@ for (const [file, arrayName] of [['kids/core/core.js', 'requiredCores'], ['kids/
 }
 
 const pages = [
-  ['kids/subjects/haru/haru.html', '../../core/', 799],
-  ['kids/subjects/korean/korean.html', '../../core/', 137],
-  ['parent_diary.html', './kids/core/', 719]
+  ['kids/subjects/haru/haru.html', '../../core/'],
+  ['kids/subjects/korean/korean.html', '../../core/'],
+  ['parent_diary.html', './kids/core/']
 ];
-for (const [file, base, originalLines] of pages) {
-  test(`${file}: 네 태그는 기존 한 줄에서 공백 하나로 연결되고 경로·버전·순서가 맞는다`, () => {
+for (const [file, base] of pages) {
+  test(`${file}: 네 태그를 상대 경로·같은 버전·지정 순서로 연달아 한 번씩 싣고 800줄 미만이다`, () => {
     const html = read(file);
-    const expectedTags = names.map(name => `<script src="${base}${name}${version}"></script>`);
-    const expected = expectedTags.join(' ');
-    const lines = html.split(/\r?\n/);
-    assert.equal(lines.filter(line => line.trim() === expected).length, 1);
-    const loaded = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]*daily-diary[^\"]*)"[^>]*><\/script>/g)].map(match => match[0]);
-    assert.deepEqual(loaded, expectedTags);
+    assertLoadsInOrder(html, 'script', names.map(name => base + name), file);
     for (const name of names) {
       assert.ok(fs.existsSync(path.resolve(root, path.dirname(file), base + name)));
     }
-    // 끝 개행 뒤 빈 항목은 실제 줄 수에 포함하지 않는다. 분리가 줄을 늘리지 않았는지만 본다
-    // (haru.html은 2026-11-01 빈 줄 정리로 799→717줄이 됐다).
-    const physicalLines = lines.length - Number(html.endsWith('\n'));
-    assert.ok(physicalLines <= originalLines, `${file}: ${physicalLines}줄 > 분리 전 ${originalLines}줄`);
+    assert.ok(lineCount(html) < 800, `${file}: 800줄 이상`);
   });
 }
 
@@ -88,18 +78,14 @@ function sandbox() {
   };
   return vm.createContext(context);
 }
-const functionNames = object => Object.keys(object).filter(key => typeof object[key] === 'function').sort();
 
-test('전체 로드 후 전역 함수와 명시적 window 바인딩이 원본과 같다', () => {
-  const original = sandbox();
+test('전체 로드 후 공개 함수가 window와 전역에 같은 함수로 묶인다', () => {
   const split = sandbox();
-  vm.runInContext(fixture, original, { filename: '원본 fixture' });
   sources.forEach((source, index) => vm.runInContext(source, split, { filename: files[index] }));
-  const exported = functionNames(split.window);
-  assert.ok(exported.length >= 17);
-  assert.deepEqual(exported, functionNames(original.window));
-  assert.deepEqual(functionNames(split), functionNames(original));
-  for (const name of exported) assert.equal(split.window[name], split[name], name);
+  assertPublicApi(split.window, PUBLIC_API, 'window');
+  for (const name of Object.keys(split.window).filter(key => typeof split.window[key] === 'function')) {
+    assert.equal(split.window[name], split[name], `window.${name}와 전역 ${name}이 다름`);
+  }
 });
 
 for (const count of [1, 2, 3]) {

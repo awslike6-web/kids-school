@@ -55,7 +55,9 @@ test('그림이 1장인 자작 파트너와 포즈가 빠진 파트너도 세 �
     assert.equal(roster.getRunnerReaction('stageStart', 'rotek').poseSrc, monster.poses.idle);
 });
 
-test('리액션은 표시를 하나만 붙이고 끝나면 지우며 새 리액션이 이전 끝처리를 취소한다', async () => {
+test('리액션은 표시를 하나만 붙이고 끝나면 지우며 새 리액션이 이전 끝처리를 취소한다', t => {
+    // 실제 1.7초를 두 번 기다리지 않도록 가짜 타이머로 시간을 넘긴다(샌드박스는 불러올 때의 setTimeout을 쓴다).
+    t.mock.timers.enable({ apis: ['setTimeout'] });
     const sandbox = load();
     const { frame, element } = domOf(sandbox);
     let ended = 0;
@@ -69,10 +71,10 @@ test('리액션은 표시를 하나만 붙이고 끝나면 지우며 새 리액�
     sandbox.MonsterRoster.playReaction(element, null);
     assert.equal(element.classes.size, 0);
     assert.equal(frame.children.length, 0);
-    await new Promise(resolve => setTimeout(resolve, 1700));
+    t.mock.timers.tick(1700);
     assert.equal(ended, 0);
     sandbox.MonsterRoster.playReaction(element, 'cheer', { onEnd: () => { ended += 1; } });
-    await new Promise(resolve => setTimeout(resolve, 1700));
+    t.mock.timers.tick(1700);
     assert.equal(ended, 1);
     assert.equal(element.classes.size, 0);
     assert.equal(frame.children.length, 0);

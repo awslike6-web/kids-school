@@ -1,23 +1,19 @@
-// 과학 실험실 분리: 원문·마크업·로드 순서와 승인된 초기 DOM 접근을 보존한다.
+// 과학 실험실 분리 규칙: 상대 경로·줄 상한·인라인 금지·로드·HTML 호출 함수 선언·승인된 초기 DOM 접근.
+// 2026-11-14: 얼린 원본(tests/fixtures/science-labs-split)과의 원문·마크업 통째 대조는 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assertLoadsInOrder, assertRelativeAssets, assertNoInlineStyleOrScript,
+    assertInlineHandlersDeclared, resolveFrom } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
-const version = '?v=20261031-science-split';
 const pages = [
     ['science_season_airmass_lab', ['switchMode', 'selectAirmass', 'setSeason', 'highlightMatrix', 'nextQuiz', 'closeRewardModal']],
     ['science_cloud_lab', ['setSmokeMode', 'pressPump', 'openCap', 'startSqueeze', 'endSqueeze', 'showZoom', 'resetExperiment', 'clearBlank', 'selectAnswer', 'closeZoom']],
     ['science_wind_lab', ['switchLabMode', 'toggleLamp', 'resetHeat', 'setWindTime', 'clearBlank', 'selectAnswer']]
 ];
 
-// 수학 선행 시험과 같은 정규화이며 파일을 옮길 때는 원문을 그대로 보존한다.
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const lineCount = text => text.split(/\r?\n/).length;
 const deny = label => new Proxy({}, {
     get(target, key) { throw new Error(`허용하지 않은 ${label} 읽기: ${String(key)}`); },
     set(target, key) { throw new Error(`허용하지 않은 ${label} 쓰기: ${String(key)}`); }
@@ -26,44 +22,27 @@ const deny = label => new Proxy({}, {
 for (const [name, globalFunctions] of pages) {
     const htmlPath = `kids/subjects/science/${name}.html`;
     const html = read(htmlPath);
-    const fixture = JSON.parse(read(`tests/fixtures/science-labs-split/${name}.json`));
-    const cssHref = `../../css/${name}.css${version}`;
-    const scriptSrc = `./js/${name}.js${version}`;
-    const cssTag = `<link rel="stylesheet" href="${cssHref}">`;
-    const scriptTag = `<script src="${scriptSrc}"></script>`;
-    const resolveAsset = url => path.resolve(root, path.dirname(htmlPath), url.split('?')[0]);
-    const cssPath = resolveAsset(cssHref);
-    const jsPath = resolveAsset(scriptSrc);
+    const cssUrl = `../../css/${name}.css`;
+    const scriptUrl = `./js/${name}.js`;
+    const cssPath = path.join(root, resolveFrom(htmlPath, cssUrl));
+    const jsPath = path.join(root, resolveFrom(htmlPath, scriptUrl));
 
-    test(`${name}: 상대 경로 실존 및 HTML·CSS·JS 모두 600줄 이하`, () => {
+    test(`${name}: 상대 경로 실존·HTML·CSS·JS 모두 600줄 이하·버전 있는 태그 로드`, () => {
+        assertRelativeAssets(htmlPath, 'style', [cssUrl]);
+        assertRelativeAssets(htmlPath, 'script', [scriptUrl]);
         for (const file of [path.join(root, htmlPath), cssPath, jsPath]) {
-            assert.ok(fs.existsSync(file), `파일 없음: ${file}`);
             assert.ok(lineCount(fs.readFileSync(file, 'utf8')) <= 600, `600줄 초과: ${file}`);
         }
-        assert.ok(html.includes(cssTag), 'CSS 경로·버전 불일치');
-        assert.ok(html.includes(scriptTag), 'JS 경로·속성·버전 불일치');
+        assertLoadsInOrder(html, 'style', [cssUrl], name);
+        assertLoadsInOrder(html, 'script', [scriptUrl], name);
     });
 
     test(`${name}: 인라인 style·script가 남지 않음`, () => {
-        assert.equal([...html.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/gi)].length, 0);
-        for (const tag of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-            assert.match(tag[1], /\bsrc\s*=/i, '인라인 script가 남음');
-            assert.equal(tag[2].trim(), '', '외부 script 태그 안에 코드가 남음');
-        }
+        assertNoInlineStyleOrScript(html, name);
     });
 
-    test(`${name}: 분리 CSS·JS 원문이 고정 fixture와 일치`, () => {
-        assert.equal(fixture.source, `main:${htmlPath}`);
-        assert.equal(fixture.styles.length, 1);
-        assert.equal(fixture.scripts.length, 1);
-        assert.equal(normalize(fs.readFileSync(cssPath, 'utf8')), normalize(fixture.styles[0]));
-        assert.equal(normalize(fs.readFileSync(jsPath, 'utf8')), normalize(fixture.scripts[0]));
-    });
-
-    test(`${name}: 원래 위치·DOM·기존 외부 script 순서 보존`, () => {
-        const markup = html.replace(cssTag, '__SCIENCE_SPLIT_STYLE__')
-            .replace(scriptTag, '__SCIENCE_SPLIT_SCRIPT__');
-        assert.equal(normalize(markup), normalize(fixture.markup));
+    test(`${name}: HTML on* 속성이 부르는 함수가 모두 선언되어 있음`, () => {
+        assertInlineHandlersDeclared(htmlPath);
     });
 
     test(`${name}: 다른 스크립트 없이 승인된 초기 접근·이벤트·전역 함수 보존`, () => {

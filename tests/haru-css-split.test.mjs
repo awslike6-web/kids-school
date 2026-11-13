@@ -1,15 +1,13 @@
-// 하루방 CSS 분리: 고정 원본과 로드 순서·파일 경계를 검사한다.
+// 하루방 CSS 분리 규칙: 로드 순서·위치·머리 주석·파일 경계·줄 상한.
+// 2026-11-14: 얼린 원본(tests/fixtures/haru-css-split)과의 재결합 원문 대조는 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assertLoadsInOrder } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const htmlPath = 'kids/subjects/haru/haru.html';
 const html = read(htmlPath);
-const version = '?v=20261031-haru-split';
 const parts = [
     ['haru-base.css', '변수·공통·습관·감상실'],
     ['haru-special-days.css', '특별한 날 추억 게시판'],
@@ -19,9 +17,6 @@ const parts = [
     ['haru-timeline-list.css', '타임라인 목록·스티커·모달·반응형']
 ];
 
-// 수학 분리 시험과 동일: 줄바꿈 형식·줄 끝 공백·마지막 개행만 맞춘다.
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const lineCount = text => text.split(/\r?\n/).length;
 const attribute = (tag, name) => tag.match(new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, 'i'))?.[2];
 const links = [...html.matchAll(/<link\b[^>]*>/gi)].map(match => ({
     tag: match[0],
@@ -42,7 +37,8 @@ function payload(source, name, description, index) {
 }
 
 test('하루 CSS: 상대 경로 링크 6개의 파일명·로드 순서·버전·실존', () => {
-    assert.deepEqual(haruLinks.map(link => link.href), parts.map(([name]) => `../../css/${name}${version}`));
+    assert.deepEqual(haruLinks.map(link => link.href.split('?')[0]), parts.map(([name]) => `../../css/${name}`));
+    assertLoadsInOrder(html, 'style', parts.map(([name]) => `../../css/${name}`), '하루 CSS');
     for (const link of haruLinks) {
         assert.equal(attribute(link.tag, 'rel'), 'stylesheet');
         assert.equal(path.dirname(assetPath(link.href)), path.join(root, 'kids', 'css'));
@@ -64,15 +60,6 @@ test('하루 CSS: 기존 head 위치에 연속으로 로드', () => {
     assert.ok(previous.href.startsWith('https://fonts.googleapis.com/'));
     assert.equal(html.slice(previous.index + previous.tag.length, start).trim(), '');
     assert.equal(html.slice(end, html.indexOf('</head>')).trim(), '');
-});
-
-test('하루 CSS: 머리 주석을 뺀 문서 순서 재결합이 고정 fixture와 일치', () => {
-    assert.equal(haruLinks.length, 6);
-    const joined = haruLinks.map((link, index) => {
-        const [name, description] = parts[index];
-        return payload(fs.readFileSync(assetPath(link.href), 'utf8'), name, description, index);
-    }).join('');
-    assert.equal(normalize(joined), normalize(read('tests/fixtures/haru-css-split/haru.css')));
 });
 
 for (const [index, [name, description]] of parts.entries()) {

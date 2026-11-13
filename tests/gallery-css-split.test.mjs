@@ -1,20 +1,14 @@
-// 갤러리 CSS 분리: 고정 원본과 로드 순서·파일 경계를 검사한다.
+// 갤러리 CSS 분리 규칙: 로드 순서·위치·파일 경계·줄 상한.
+// 2026-11-14: 얼린 원본(tests/fixtures/gallery-css-split)과의 재결합 원문 대조는 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assertLoadsInOrder } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const htmlPath = 'kids/common_space/gallery.html';
 const html = read(htmlPath);
-const version = '?v=20261031-gallery-split';
 const parts = ['gallery.css', 'gallery-modal.css'];
-
-// 수학 분리 시험과 동일: 줄바꿈 형식·줄 끝 공백·마지막 개행만 맞춘다.
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const lineCount = text => text.split(/\r?\n/).length;
 const attribute = (tag, name) => tag.match(new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, 'i'))?.[2];
 const links = [...html.matchAll(/<link\b[^>]*>/gi)].map(match => ({
     tag: match[0],
@@ -35,7 +29,8 @@ function payload(source, name) {
 }
 
 test('갤러리 CSS: 상대 경로 링크 2개의 파일명·로드 순서·버전·실존', () => {
-    assert.deepEqual(galleryLinks.map(link => link.href), parts.map(name => `./${name}${version}`));
+    assert.deepEqual(galleryLinks.map(link => link.href.split('?')[0]), parts.map(name => `./${name}`));
+    assertLoadsInOrder(html, 'style', parts.map(name => `./${name}`), '갤러리 CSS');
     for (const link of galleryLinks) {
         assert.equal(attribute(link.tag, 'rel'), 'stylesheet');
         assert.equal(path.dirname(assetPath(link.href)), path.join(root, 'kids', 'common_space'));
@@ -58,13 +53,6 @@ test('갤러리 CSS: design-system.css 다음의 기존 head 위치에 연속으
     assert.equal(previous.href, '../css/design-system.css');
     assert.equal(html.slice(previous.index + previous.tag.length, start).trim(), '');
     assert.equal(html.slice(end, html.indexOf('</head>')).trim(), '');
-});
-
-test('갤러리 CSS: 새 파일 머리 주석만 뺀 문서 순서 재결합이 고정 fixture와 일치', () => {
-    assert.equal(galleryLinks.length, 2);
-    const joined = galleryLinks.map((link, index) =>
-        payload(fs.readFileSync(assetPath(link.href), 'utf8'), parts[index])).join('');
-    assert.equal(normalize(joined), normalize(read('tests/fixtures/gallery-css-split/gallery.css')));
 });
 
 for (const name of parts) {

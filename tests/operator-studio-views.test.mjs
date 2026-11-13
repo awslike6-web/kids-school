@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { includePair } from './operator-range.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const jsDir = path.join(root, 'kids/subjects/math/js');
@@ -125,7 +126,7 @@ for (const op of ['add', 'sub', 'mul']) {
     });
 }
 
-test('블록 묶음 값: 어느 단계에서나 전체 값이 보존된다 (전 범위)', () => {
+test('블록 묶음 값: 어느 단계에서나 전체 값이 보존된다 (덧셈·뺄셈 표본·전수, 곱셈 전 범위)', () => {
     const sandbox = { window: {} };
     vm.createContext(sandbox);
     for (const file of FILES.slice(0, 1)) vm.runInContext(fs.readFileSync(path.join(jsDir, file), 'utf8'), sandbox);
@@ -140,6 +141,7 @@ test('블록 묶음 값: 어느 단계에서나 전체 값이 보존된다 (전 
 
     for (let a = 1; a <= 999; a++) {
         for (let b = 1; b <= 999; b++) {
+            if (!includePair(a, b)) continue; // 로컬 표본, KIDS_TEST_FULL=1이면 전수
             for (const step of blocks.buildAdditionBlockSteps(a, b)) {
                 assert.equal(total(step, ['a', 'b', 'sum']), a + b, `${a}+${b} ${step.title}`);
                 for (const group of step.groups) {

@@ -1,53 +1,32 @@
-// 과학방 CSS 분리: 원본 바이트·최상위 경계·HTML 로드 계약을 검사한다.
+// 과학방 CSS 분리 규칙: 머리 주석·줄 상한·독립 블록·HTML 로드 계약·옛 참조 없음.
+// 2026-11-14: 얼린 원본(tests/fixtures/science-css-split)과의 원문·HTML 바이트 대조, 블록 개수 고정은
+// 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { replaceOnce, version as rewardVersion } from './reward-grant-approved-edits.mjs';
+import { root, read, lineCount, assertLoadsInOrder, assertRelativeAssets } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readBytes = file => fs.readFileSync(path.join(root, file));
-const read = file => readBytes(file).toString('utf8');
 const files = ['kids/css/science.css', 'kids/css/science-units.css'];
-const fixtureDir = 'tests/fixtures/science-css-split';
-const fixture = read(`${fixtureDir}/science.css`);
 const htmlPath = 'kids/subjects/science/science.html';
 const html = read(htmlPath);
-const originalHtml = read(`${fixtureDir}/science.html`);
-const version = '?v=20261101-science-css-split';
 const header = '/* kids/css/science-units.css - science.css 분리 2/2: 지문 요약·사진 뷰어·반응형·안전 게이트·단원 탭·실험실 칩 (science.css 다음에 로드) */';
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const physicalLines = text => (text.match(/[^\n]*\n|[^\n]+$/g) ?? []).length;
+const hrefs = files.map(file => `../../${file.slice('kids/'.length)}`);
 
-test('400줄 경계·지정 머리 주석·원본 바이트와 마지막 개행 없음 보존', () => {
-    const first = readBytes(files[0]);
-    const second = readBytes(files[1]);
-    const newline = second.indexOf(10);
+test('science-units.css는 지정 머리 주석으로 시작한다', () => {
+    const second = read(files[1]);
+    const newline = second.indexOf('\n');
     assert.ok(newline >= 0, '머리 주석 다음 개행 없음');
-    assert.equal(second.subarray(0, newline).toString('utf8').replace(/\r$/, ''), header);
-    const tail = second.subarray(newline + 1);
-    const fixtureLines = fixture.match(/[^\n]*\n|[^\n]+$/g);
-    assert.equal(fixtureLines.length, 800, '마지막 개행 없는 800줄 원본');
-    assert.equal(first.toString('utf8'), fixtureLines.slice(0, 400).join(''));
-    assert.equal(tail.toString('utf8'), fixtureLines.slice(400).join(''));
-    assert.equal(normalize(first.toString('utf8') + tail), normalize(fixture));
-    assert.deepEqual(Buffer.concat([first, tail]), readBytes(`${fixtureDir}/science.css`));
-    assert.equal(second.at(-1), 125, '마지막 닫는 괄호 뒤 개행을 추가하지 않음');
-    assert.equal(physicalLines(first.toString('utf8')), 400);
-    assert.equal(physicalLines(second.toString('utf8')), 401);
+    assert.equal(second.slice(0, newline).replace(/\r$/, ''), header);
 });
 
-for (const [index, file] of files.entries()) {
+for (const file of files) {
     test(`${file}: 실존·600줄 이하·독립 CSS 블록·@import 없음`, () => {
         assert.ok(fs.existsSync(path.join(root, file)));
         const source = read(file);
-        assert.ok(source.split(/\r?\n/).length <= 600, '600줄 초과');
+        assert.ok(lineCount(source) <= 600, '600줄 초과');
         const css = source.replace(/\/\*[\s\S]*?\*\//g, '');
-        const opens = (css.match(/\{/g) ?? []).length;
-        const closes = (css.match(/\}/g) ?? []).length;
-        assert.equal(opens, closes);
-        assert.equal(opens, index === 0 ? 61 : 50);
+        assert.equal((css.match(/\{/g) ?? []).length, (css.match(/\}/g) ?? []).length);
         let depth = 0;
         for (const brace of css.match(/[{}]/g) ?? []) {
             depth += brace === '{' ? 1 : -1;
@@ -58,31 +37,11 @@ for (const [index, file] of files.entries()) {
     });
 }
 
-const expectedTags = files.map(file =>
-    `<link rel="stylesheet" href="../../${file.slice('kids/'.length)}${version}">`);
-const oldTag = '<link rel="stylesheet" href="../../css/science.css">';
-
-test('HTML 상대 경로 실존·동일 버전·지정 순서로 연속 1회 로드', () => {
-    const tags = [...html.matchAll(/<link\b[^>]*\bhref=["'][^"']*science(?:-units)?\.css[^"']*["'][^>]*>/g)];
-    assert.deepEqual(tags.map(match => match[0]), expectedTags);
-    const block = html.slice(tags[0].index, tags[1].index + tags[1][0].length);
-    assert.match(block, /^[^\r\n]+\r?\n<[^\r\n]+>$/);
-    assert.equal(block.replace(/>\s+</g, '><'), expectedTags.join(''));
-    assert.ok(tags[0].index > html.indexOf('<head>'));
-    assert.equal(html.slice(tags[1].index + tags[1][0].length, html.indexOf('</head>')).trim(), '');
-    for (const file of files) {
-        const href = `../../${file.slice('kids/'.length)}`;
-        assert.ok(fs.existsSync(path.resolve(root, path.dirname(htmlPath), href)));
-    }
-});
-
-test('두 CSS 링크 외 HTML은 고정 fixture와 바이트까지 같다', () => {
-    assert.equal(originalHtml.split(oldTag).length, 2, '원본 링크는 1개');
-    const newline = originalHtml.includes('\r\n') ? '\r\n' : '\n';
-    // 보상 공용화에서 승인한 helper 캐시 버전 변경만 원본에도 적용한다.
-    const expectedHtml = replaceOnce(originalHtml.replace(oldTag, expectedTags.join(newline)),
-        'notion-helper.js?v=20260830_no_intro', 'notion-helper.js?v=' + rewardVersion);
-    assert.deepEqual(readBytes(htmlPath), Buffer.from(expectedHtml));
+test('HTML 상대 경로 실존·같은 버전·지정 순서로 head 안에서 연속 1회 로드', () => {
+    assertRelativeAssets(htmlPath, 'style', hrefs);
+    const [first, second] = assertLoadsInOrder(html, 'style', hrefs, '과학방 CSS');
+    assert.ok(first.start > html.indexOf('<head>'));
+    assert.ok(second.end < html.indexOf('</head>'));
 });
 
 test('운영 소스의 과학방 CSS 로드는 이 HTML의 버전 있는 링크 2개뿐이다', () => {
@@ -98,12 +57,9 @@ test('운영 소스의 과학방 CSS 로드는 이 HTML의 버전 있는 링크 
         const source = read(file).replace(/\/\*[\s\S]*?\*\//g, '');
         assert.doesNotMatch(source, /science(?:-units)?\.css(?:#[^"'<>\s]*)?["']/,
             `${file}: 버전 없는 옛 참조`);
-        for (const match of source.matchAll(/science(?:-units)?\.css\?[^"'<>\s]+/g)) {
-            refs.push([file.replace(/\\/g, '/'), match[0]]);
+        for (const match of source.matchAll(/(science(?:-units)?\.css)\?[^"'<>\s]+/g)) {
+            refs.push([file.replace(/\\/g, '/'), match[1]]);
         }
     }
-    assert.deepEqual(refs, [
-        [htmlPath, `science.css${version}`],
-        [htmlPath, `science-units.css${version}`]
-    ]);
+    assert.deepEqual(refs, [[htmlPath, 'science.css'], [htmlPath, 'science-units.css']]);
 });

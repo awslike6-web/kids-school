@@ -1,63 +1,39 @@
-// 마이룸 분리: 고정 원본과 비교하여 코드·마크업·전역 함수·초기화 순서를 보존한다.
+// 마이룸 분리 규칙: 상대 경로·줄 상한·인라인 금지·로드 순서·HTML 호출 함수·core 단독 실행·초기화 1회.
+// 2026-11-14: 얼린 원본(tests/fixtures/my-room-split)과의 원문·마크업·실행 결과 대조는 정상 수정마다 깨져 뺐다.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { fileURLToPath } from 'node:url';
+import { root, read, lineCount, assetTags, assertLoadsInOrder, assertRelativeAssets, assertNoInlineStyleOrScript,
+    assertInlineHandlersDeclared, inlineHandlerNames, resolveFrom } from './split-rules.mjs';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const htmlPath = 'kids/common_space/my-room.html';
 const html = read(htmlPath);
-const fixture = JSON.parse(read('tests/fixtures/my-room-split/my-room.json'));
-const version = '?v=20261031-room-split';
-const cssHref = `./my-room.css${version}`;
-const scriptSrcs = ['core', 'main'].map(part => `./my-room-${part}.js${version}`);
-const cssTag = `<link rel="stylesheet" href="${cssHref}">`;
-const scriptTags = scriptSrcs.map(src => `<script src="${src}"></script>`);
-const newline = html.includes('\r\n') ? '\r\n' : '\n';
-const resolveAsset = url => path.resolve(root, path.dirname(htmlPath), url.split('?')[0]);
-const cssPath = resolveAsset(cssHref);
-const jsPaths = scriptSrcs.map(resolveAsset);
+const cssUrl = './my-room.css';
+const scriptUrls = ['core', 'main'].map(part => `./my-room-${part}.js`);
+const cssPath = path.join(root, resolveFrom(htmlPath, cssUrl));
+const jsPaths = scriptUrls.map(url => path.join(root, resolveFrom(htmlPath, url)));
 const jsSources = jsPaths.map(file => fs.readFileSync(file, 'utf8'));
 
-// 수학 분리 시험과 동일하게 줄바꿈 형식·줄 끝 공백·마지막 개행만 맞춘다.
-const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
-const lineCount = text => text.split(/\r?\n/).length;
-
-test('마이룸: 상대 경로 파일 실존 및 HTML·CSS·JS 600줄 이하', () => {
-    for (const url of [cssHref, ...scriptSrcs]) assert.match(url, /^\.\//);
+test('마이룸: 상대 경로 파일 실존·HTML·CSS·JS 600줄 이하·config → core → main 순서', () => {
+    for (const url of [cssUrl, ...scriptUrls]) assert.match(url, /^\.\//);
+    assertRelativeAssets(htmlPath, 'style', [cssUrl]);
+    assertRelativeAssets(htmlPath, 'script', scriptUrls);
     for (const file of [path.join(root, htmlPath), cssPath, ...jsPaths]) {
-        assert.ok(fs.existsSync(file), `파일 없음: ${file}`);
         assert.ok(lineCount(fs.readFileSync(file, 'utf8')) <= 600, `600줄 초과: ${file}`);
     }
-    assert.ok(html.includes(cssTag), 'CSS 경로·버전 불일치');
-    for (const tag of scriptTags) assert.ok(html.includes(tag), 'JS 경로·속성·버전 불일치');
+    assertLoadsInOrder(html, 'style', [cssUrl]);
+    assertLoadsInOrder(html, 'script', scriptUrls);
+    assert.deepEqual(assetTags(html, 'script').map(tag => tag.url), ['../config.js', ...scriptUrls]);
 });
 
 test('마이룸: 인라인 style·script가 남지 않음', () => {
-    assert.equal([...html.matchAll(/<style\b[^>]*>[\s\S]*?<\/style>/gi)].length, 0);
-    for (const tag of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-        assert.match(tag[1], /\bsrc\s*=/i, '인라인 script가 남음');
-        assert.equal(tag[2].trim(), '', '외부 script 태그 안에 코드가 남음');
-    }
+    assertNoInlineStyleOrScript(html);
 });
 
-test('마이룸: CSS 및 core+main 원문이 고정 fixture와 일치', () => {
-    assert.equal(fixture.source, `main:${htmlPath}`);
-    assert.equal(fixture.styles.length, 1);
-    assert.equal(fixture.scripts.length, 1);
-    assert.equal(normalize(fs.readFileSync(cssPath, 'utf8')), normalize(fixture.styles[0]));
-    assert.equal(normalize(jsSources.join('')), normalize(fixture.scripts[0]));
-});
-
-test('마이룸: 원래 위치·DOM·config → core → main 순서 보존', () => {
-    const markup = html.replace(cssTag, '__MY_ROOM_SPLIT_STYLE__')
-        .replace(scriptTags.join(newline), '__MY_ROOM_SPLIT_SCRIPT__');
-    assert.equal(normalize(markup), normalize(fixture.markup));
-    assert.deepEqual([...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*>/gi)].map(tag => tag[1]),
-        ['../config.js', ...scriptSrcs]);
+test('마이룸: HTML on* 속성이 부르는 함수가 모두 선언되어 있음', () => {
+    assertInlineHandlersDeclared(htmlPath);
 });
 
 // 이벤트는 등록만 기록하고, 초기화 전 DOM·통신·저장 접근은 실패시킨다.
@@ -93,31 +69,20 @@ function createSandbox(profile) {
         },
         fetch() { throw new Error('초기화 전 통신'); }
     };
-    const initialKeys = new Set(Object.keys(sandbox));
     vm.createContext(sandbox);
-    return {
-        sandbox, events, reads,
-        functions: () => Object.keys(sandbox)
-            .filter(key => !initialKeys.has(key) && typeof sandbox[key] === 'function').sort()
-    };
+    return { sandbox, events, reads };
 }
 
 for (const profile of [null, 'son', 'daughter']) {
-    test(`마이룸: ${profile ?? '저장값 없음'} core 단독 실행 및 전역 함수·이벤트 보존`, () => {
+    test(`마이룸: ${profile ?? '저장값 없음'} core 단독 실행·초기화 1회·HTML 호출 함수 실존`, () => {
         const split = createSandbox(profile);
         vm.runInContext(jsSources[0], split.sandbox, { filename: jsPaths[0] });
         assert.equal(split.events.length, 0, 'core가 먼저 초기화를 등록함');
         assert.deepEqual(split.reads, ['currentUser']);
         vm.runInContext(jsSources[1], split.sandbox, { filename: jsPaths[1] });
-
-        const original = createSandbox(profile);
-        vm.runInContext(fixture.scripts[0], original.sandbox, { filename: fixture.source });
-        assert.ok(original.functions().length > 0, '원본 전역 함수가 없음');
-        assert.deepEqual(split.functions(), original.functions(), '전역 함수 이름 변경');
-        assert.deepEqual(split.reads, original.reads, '저장소 읽기 변경');
+        assert.deepEqual(split.reads, ['currentUser'], 'main 로드 중 추가 저장소 읽기');
         assert.equal(split.events.length, 1, '초기화 이벤트는 한 번만 등록해야 함');
-        assert.equal(original.events.length, 1);
-        assert.equal(normalize(split.events[0].callback.toString()),
-            normalize(original.events[0].callback.toString()), '초기화 콜백 변경');
+        const missing = inlineHandlerNames(html).filter(name => typeof split.sandbox[name] !== 'function');
+        assert.deepEqual(missing, [], 'HTML이 부르는데 core+main 로드 뒤 없는 전역 함수');
     });
 }

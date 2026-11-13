@@ -99,3 +99,6 @@
 - 계약 검사: `python -X utf8 G:/master-tower/scripts/verify_contracts.py --mode file --file G:/master-tower/scratch/worktrees/math-split/kids/subjects/math/fractions_multiplication.html`은 PowerShell에서 `python` 명령을 찾지 못해 실행하지 못했다. §0에 따라 반복하지 않았으며 나머지 변경 파일의 계약 검사도 미실행이다.
 - §6의 전후 화면·콘솔·문제 풀이 비교는 Claude 담당으로 남는다. 네트워크·운영 노션 쓰기·main 병합·푸시는 수행하지 않았다.
 - 커밋 못 함: 지정 파일의 `git add`에서 `G:/master-tower/kids-school-main/.git/worktrees/math-split/index.lock` 생성이 `Permission denied`로 차단됐다. 스테이징을 반복하거나 커밋 명령으로 재시도하지 않았다. 변경 파일은 작업 폴더에 남아 있다.
+
+## 후속 (2026-11-14): 고정 원본 대조 시험 정리
+위 절차에서 만든 `tests/fixtures/` 원본 사본과 원문·마크업·실행 결과 통째 대조 시험은 분리가 끝난 뒤에도 정상 수정마다 fixture를 같이 고쳐야 해서 지웠습니다. 지금 이 분리 시험은 `tests/split-rules.mjs` 규칙(파일 실존·상대 경로·줄 상한·인라인 금지·같은 `?v=`로 지정 순서 로드·HTML 호출 함수 선언·공개 API 유지·부분 로드 안전성)만 봅니다. 현재 기준은 `kids/core/CORE_CATALOG.md` 「회귀 시험 묶음」 절을 따릅니다.
