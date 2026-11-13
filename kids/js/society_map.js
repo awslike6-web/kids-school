@@ -55,8 +55,9 @@
                     <button class="quiz-button" style="background:var(--mint);" onclick="window.SocietyMap.submitJourney()">탐방기 완성</button>
                 </div>
             </div>
-            <div style="display:flex; justify-content:center; gap:8px;">
+            <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">
                 <button class="quiz-button" style="background:#8b949e;" onclick="window.speakFairyTTS('${safeDesc}')">🔊 명소 해설 듣기</button>
+                ${typeof window.buildSocietyInteractiveLinkHtml === 'function' ? window.buildSocietyInteractiveLinkHtml(currentItem.interactiveUrl, true) : ''}
                 <button class="quiz-button" style="background:var(--pink);" onclick="window.skipToNextQuiz('map')">건너뛰기 ⏩</button>
             </div>
         `;

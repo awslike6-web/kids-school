@@ -8,6 +8,8 @@ const plain = (v) => JSON.parse(JSON.stringify(v));
 const U1 = '1. 옛사람들의 삶과 문화';
 const U21 = '2-1. 유교 문화의 영향으로 달라진 조선 사회';
 const U22 = '2-2. 새로운 사회를 향한 조선 후기 사람들의 노력';
+const U31 = '3-1. 식민 통치와 저항으로 달라진 사회와 생활 모습';
+const U32 = '3-2. 8·15 광복과 6·25 전쟁으로 달라진 사회와 생활 모습';
 
 const VOCA = [
   { grades: ['5-2'], level: U1, word: '주먹도끼' },
@@ -109,7 +111,7 @@ test('활동을 열면 고른 단원으로 바로 시작하고, 단원 자료가
 
 test('동화 서가의 units 키는 노션 단원 원문과 같고, 단원을 고르면 그 단원 동화만 걸러 보여 준다', async () => {
   const t = await load();
-  const known = new Set(['2-1. 우리나라의 기후', U1, U21, U22]);
+  const known = new Set(['2-1. 우리나라의 기후', U1, U21, U22, U31, U32]);
   for (const book of t.sb.getList()) {
     assert.ok(Array.isArray(book.units) && book.units.length > 0, `${book.id} units 없음`);
     book.units.forEach(u => assert.ok(known.has(u), `${book.id} 모르는 단원 ${u}`));
@@ -120,6 +122,10 @@ test('동화 서가의 units 키는 노션 단원 원문과 같고, 단원을 �
   assert.match(box.innerHTML, /유교 사회 시간 여행/);
   assert.doesNotMatch(box.innerHTML, /고려와 바다 너머/);
   assert.match(box.innerHTML, /전체 서가 보기/);
+  const box31 = makeElement();
+  t.sb.render(box31, { pick: { grade: '5-2 (5학년 2학기)', unit: U31 } });
+  assert.match(box31.innerHTML, /꺾이지 않는 겨레의 불꽃/);
+  assert.doesNotMatch(box31.innerHTML, /전차가 멈춘 날에서 6월의 편지까지/);
   const all = makeElement();
   t.sb.render(all);
   assert.match(all.innerHTML, /고려와 바다 너머/);

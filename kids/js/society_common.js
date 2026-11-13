@@ -758,6 +758,17 @@ async function printSocietySummary() {
     window.print();
 }
 
+// 🔗 교과서 QR 영상·공식 박물관·참고 자료 링크 버튼 공용 생성기
+function buildSocietyInteractiveLinkHtml(url, asButton = false) {
+    const cleanUrl = (url || '').trim();
+    if (!cleanUrl) return '';
+    const isQR = cleanUrl.includes('qr.i-scream.co.kr');
+    const label = isQR ? '🎬 교과서 QR 영상 보기 ↗' : cleanUrl.includes('museum') ? '🏛️ 국립박물관 공식 정보 ↗' : '🔗 교과서 참고 자료 ↗';
+    const bg = isQR ? 'linear-gradient(135deg, #0ea5e9, #0284c7)' : 'linear-gradient(135deg, #2563eb, #1d4ed8)';
+    const cls = asButton ? ' class="quiz-button"' : '';
+    return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer"${cls} style="display:inline-flex; align-items:center; gap:6px; background:${bg}; color:white; padding:10px 18px; border-radius:12px; text-decoration:none; font-family:'Jua', sans-serif; font-size:0.95rem; box-shadow:0 4px 12px rgba(37,99,235,0.3);">${label}</a>`;
+}
+
 // ========================================================
 // 🌐 전역 핵심 함수 명시적 바인딩 (인라인 HTML 이벤트 연동 철벽 방어)
 // ========================================================
@@ -777,3 +788,4 @@ window.normalizeSocietyGrade = normalizeSocietyGrade;
 window.isSocietyMissionInProgress = isSocietyMissionInProgress;
 window.stopFairyTTS = stopFairyTTS;
 window.speakFairyTTS = speakFairyTTS;
+window.buildSocietyInteractiveLinkHtml = buildSocietyInteractiveLinkHtml;

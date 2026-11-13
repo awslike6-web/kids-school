@@ -55,7 +55,7 @@
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center;">
                 <button class="quiz-button" style="background:var(--gold); color:#111;" data-art-name="${(currentItem.name || '').replace(/"/g, '&quot;')}" onclick="window.SocietyHistory.handleCollectClick(this)">💎 박물관 가랜드에 소장하기</button>
-                ${currentItem.interactiveUrl ? `<a href="${currentItem.interactiveUrl}" target="_blank" rel="noopener noreferrer" class="quiz-button" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">🏛️ 국립박물관 유물 정보 ↗</a>` : ''}
+                ${typeof window.buildSocietyInteractiveLinkHtml === 'function' ? window.buildSocietyInteractiveLinkHtml(currentItem.interactiveUrl, true) : ''}
                 <button class="quiz-button" style="background:var(--pink);" onclick="window.skipToNextQuiz('history')">다음 유물 ⏩</button>
             </div>
 

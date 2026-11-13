@@ -118,6 +118,38 @@
             border: "#06b6d4",
             link: "late_joseon_storybook.html",
             coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/6/late_joseon_story_p1.png"
+        },
+        {
+            id: "5_2_7",
+            grade: "5학년 2학기",
+            unit: "3단원 : 식민 통치와 저항, 전쟁이 바꾼 사회와 생활",
+            units: ["3-1. 식민 통치와 저항으로 달라진 사회와 생활 모습"], // 단원 칩 연결 키 = 노션 「단원」 원문
+            bookNum: "5-2 일제강점기",
+            title: "꺾이지 않는 겨레의 불꽃",
+            subtitle: "나라를 빼앗긴 어둠 속에서도 꺼지지 않았던 저항과 광복의 발걸음",
+            desc: "을사늑약의 울분과 헤이그 특사 이위종, 안중근 의사부터 유관순 열사와 3·1 운동, 대한민국 임시 정부, 봉오동·청산리 대첩, 『말모이』를 지킨 조선어학회와 한국광복군까지!",
+            icon: "🕯️",
+            color: "#b91c1c",
+            bgGrad: "linear-gradient(135deg, rgba(185, 28, 28, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
+            border: "#ef4444",
+            link: "colonial_resistance_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/7/colonial_resistance_story_p1.png"
+        },
+        {
+            id: "5_2_8",
+            grade: "5학년 2학기",
+            unit: "3단원 : 식민 통치와 저항, 전쟁이 바꾼 사회와 생활",
+            units: ["3-2. 8·15 광복과 6·25 전쟁으로 달라진 사회와 생활 모습"], // 단원 칩 연결 키 = 노션 「단원」 원문
+            bookNum: "5-2 광복·전쟁",
+            title: "전차가 멈춘 날에서 6월의 편지까지",
+            subtitle: "8·15 광복과 6·25 전쟁 속에서도 배움과 희망을 놓지 않은 민수·민서 남매",
+            desc: "1945년 8월 15일 전차가 멈춘 만세 거리, 『한글 첫 걸음』 교실과 5·10 총선거, 6·25 전쟁 피란길과 부산·거제도 천막 학교, 그리고 분단의 아픔을 넘어 평화를 바라는 편지까지!",
+            icon: "✉️",
+            color: "#1d4ed8",
+            bgGrad: "linear-gradient(135deg, rgba(29, 78, 216, 0.18) 0%, rgba(15, 23, 42, 0.9) 100%)",
+            border: "#3b82f6",
+            link: "war_life_change_storybook.html",
+            coverImg: "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/storybook/society/minsu/5-2/8/war_life_change_story_p1.png"
         }
     ];
 

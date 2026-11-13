@@ -74,7 +74,8 @@
             <div class="quiz-choices-container">
                 ${choicesHtml}
             </div>
-            <div style="margin-top: 14px; display:flex; justify-content:center;">
+            <div style="margin-top: 14px; display:flex; flex-wrap:wrap; justify-content:center; gap:10px;">
+                ${typeof window.buildSocietyInteractiveLinkHtml === 'function' ? window.buildSocietyInteractiveLinkHtml(currentItem.interactiveUrl, true) : ''}
                 <button class="quiz-button" style="background:var(--pink);" onclick="window.skipToNextQuiz('chart')">건너뛰기 ⏩</button>
             </div>
         `;
@@ -153,7 +154,9 @@
         const artPeriod = item.artifactPeriod ? `<span style="display:inline-block; background:#8b5cf6; color:white; font-size:0.8rem; padding:2px 8px; border-radius:12px; margin-left:6px;">${item.artifactPeriod}</span>` : '';
         const artUsage = (item.artifactUsage || item.meaning) ? `<div style="background:#f8fafc; border-left:4px solid #3b82f6; padding:10px 14px; border-radius:8px; margin:12px 0; text-align:left; font-size:0.95rem; color:#334155; line-height:1.55;">📌 <b>유물/자료의 쓰임새</b><br>${item.artifactUsage || item.meaning}</div>` : '';
         const expl = item.explanation ? `<div style="background:#f0fdf4; border-left:4px solid #22c55e; padding:10px 14px; border-radius:8px; margin:12px 0; text-align:left; font-size:0.95rem; color:#166534; line-height:1.55;">💡 <b>교과서 핵심 해설</b><br>${item.explanation}</div>` : '';
-        const museumBtn = item.interactiveUrl ? `<a href="${item.interactiveUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; padding:10px 18px; border-radius:12px; text-decoration:none; font-family:'Jua', sans-serif; font-size:0.95rem; box-shadow:0 4px 12px rgba(37,99,235,0.3);">🏛️ 국립박물관 공식 정보 ↗</a>` : '';
+        const museumBtn = typeof window.buildSocietyInteractiveLinkHtml === 'function'
+            ? window.buildSocietyInteractiveLinkHtml(item.interactiveUrl)
+            : (item.interactiveUrl ? `<a href="${item.interactiveUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg, #2563eb, #1d4ed8); color:white; padding:10px 18px; border-radius:12px; text-decoration:none; font-family:'Jua', sans-serif; font-size:0.95rem; box-shadow:0 4px 12px rgba(37,99,235,0.3);">🏛️ 국립박물관 공식 정보 ↗</a>` : '');
 
         modal.innerHTML = `
             <div style="background:white; border-radius:24px; max-width:540px; width:100%; padding:26px 22px; box-shadow:0 20px 40px rgba(0,0,0,0.35); text-align:center; max-height:90vh; overflow-y:auto; box-sizing:border-box; animation:popIn 0.3s ease-out;">
