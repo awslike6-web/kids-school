@@ -1,7 +1,7 @@
 {
   "_설명": "커밋 출처(Agent:)·교정(교정:)·반려(반려:) 표기의 단일 원본. 사람용 설명은 docs/AGENT_COMMIT_PROTOCOL.md. commit-msg 훅·원격 시험·월간 교정 집계가 이 파일을 함께 읽는다.",
   "version": 1,
-  "updated": "2026-11-08",
+  "updated": "2026-11-13",
   "enforced_since": "2026-11-08T05:16:16+09:00",
   "_enforced_since": "원격 시험·주간 점검은 이 시각(커밋 시각, 1단계 규칙 커밋 4cefdde) 이후 커밋만 검사한다. 그 전 표기는 aliases로 집계만 한다.",
 
@@ -12,7 +12,11 @@
     "tools": {
       "claude-code": ["claude-opus-5-5"],
       "codex": ["gpt-6.1-sol"],
-      "antigravity": ["gemini-3.8-flash", "gemini-4-argon"]
+      "antigravity": [
+        "gemini-3.8-flash",
+        "gemini-4-argon",
+        "gemini-4-hydrogen"
+      ]
     }
   },
 
