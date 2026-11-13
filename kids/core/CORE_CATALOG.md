@@ -1477,6 +1477,15 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **핵심 API**: `sync_voca(seed, apply, update) → 건수`, `desired_props(seed, item)`, `diff_props(page, props)`, `check_schema(seed)`, 통신 `call`·`query_all`·`rich`·`plain_title`(민서 국어 도구도 사용).
 - **시험**: `python -X utf8 -m unittest scripts/test_register_voca.py` (가짜 통신 11건: 미리보기 무쓰기, 새 행만 만들기, --update 바뀐 칸만, 진도 칸 미기록, 중복·노션 전용 행, 자료 형식, 스키마 도감 대조). `regression.yml`에서도 돈다.
 
+## 교재·사료 문항 등록기 `scripts/register_curriculum.py` (2026-11-13)
+
+- **목적**: 단원 자료 JSON 1개를 노션 교재·사료 마스터 DB(CURRICULUM_DB `3e8a2711…`)에 맞춘다. 사회 2-1·2-2 때 단원마다 만들던 `register_society_5_2_*_data.py`·`update_society_curriculum_media.py`(관제탑 `scripts/archive/2026-11/`)를 대체한다.
+- **자료**: `scripts/data/curriculum/{과목영문}_{학년}_{단원키}.json` = `{subject, grade, unit, items:[{title, zone, question?, choices?, answer?, explanation?, usage?, media_url?, interactive_url?}]}`. `question·choices·answer`는 셋 다 쓰거나 셋 다 비운다(보기 2~4개·줄바꿈 금지, 정답은 1부터 센 번호).
+- **실행**: `python -X utf8 scripts/register_curriculum.py --file <자료> [--apply | --update]`. 기본 미리보기, `--apply` 새 행만, `--update` 기존 행의 바뀐 칸도 덮어씀.
+- **계약**: 같은 행 = 과목·학년·단원 + 제목. 자료에 적은 칸만 쓴다(`media_url`을 빼면 퀵체인지로 바꾼 사진을 건드리지 않고, `""`이면 공란으로 맞춤). 칸 형식은 화면 읽기(`society_common.js` `fetchCurriculumFromNotion`, `science_lab.js`)와 같다: `보기 1~4` = 줄바꿈으로 이은 글, `정답` = 1~4. 노션에 없는 칸이면 멈추고, 선택지에 없는 값·사회방이 안 읽는 구역(역사사료·지도탐방·자료분석 외)은 경고한다. 사회 구역별 행이 100개를 넘으면 경고한다(사회방 화면이 100행까지만 읽음). 노션에만 있는 행은 알려 주기만 한다.
+- **핵심 API**: `sync_curriculum(seed, apply, update) → 건수`, `desired_props(seed, item)`, `diff_props(page, props)`, `check_schema(seed)`, `check_screen_limit(seed, new_by_zone)`. 통신·칸 비교는 `register_voca.py`(`call`·`query_all`·`rich`·`plain_title`·`value_of`)를 불러 쓴다.
+- **시험**: `python -X utf8 -m unittest scripts/test_register_curriculum.py` (가짜 통신 12건: 미리보기 무쓰기, 조회 키, 새 행만 만들기와 화면 형식, --update 바뀐 칸만, 사진 공란·미기재 구분, 중복·노션 전용 행, 자료 형식 11종, 문제 없는 행, 스키마 도감 대조, 화면 밖 구역, 100행 경고, 저장소 자료 JSON). `regression.yml`에서도 돈다.
+
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
 
 - `tests/monster-reactions.test.mjs`: 파트너별 리액션 포즈, 그림 1장·포즈 누락 대체, 표시 1개 유지와 끝처리 취소, 격려 표시의 빨간색 금지·동작 감소 규칙, 그림 실패 대체, 완주 창 아이콘 복귀, 기존 채점·음성 호출 보존을 검사합니다. 실제 표시는 화면에서 확인합니다.

@@ -39,11 +39,13 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "build_gallery.py", "path": "kids-school-main/scripts/build_gallery.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_multi_character_spec.md"]},
       {"name": "build_system_map.py", "path": "kids-school-main/scripts/build_system_map.py", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
       {"name": "check_commit_msg.py", "path": "kids-school-main/scripts/check_commit_msg.py", "domain": [], "docs": ["CORE_CATALOG.md"]},
-      {"name": "check_scripts_allowlist.py", "path": "kids-school-main/scripts/check_scripts_allowlist.py", "domain": [], "docs": ["CORE_CATALOG.md"]},
+      {"name": "check_scripts_allowlist.py", "path": "kids-school-main/scripts/check_scripts_allowlist.py", "domain": [], "docs": ["society_5-2_unit3_spec.md", "CORE_CATALOG.md"]},
       {"name": "guarded_preview_server.py", "path": "kids-school-main/scripts/guarded_preview_server.py", "domain": [], "docs": ["english_listen_place_L10_spec.md", "english_listen_place_spec.md", "gallery_character_runner_fix_spec.md"]},
       {"name": "load_playwright.cjs", "path": "kids-school-main/scripts/load_playwright.cjs", "domain": [], "docs": ["CORE_CATALOG.md"]},
+      {"name": "register_curriculum.py", "path": "kids-school-main/scripts/register_curriculum.py", "domain": [], "docs": ["science_spec.md", "society_5-2_unit3_spec.md", "society_spec.md"]},
       {"name": "spot_diff_align.py", "path": "kids-school-main/scripts/spot_diff_align.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_spot_diff_align_spec.md", "gallery_spot_diff_spec.md"]},
       {"name": "test_quest_fallback.js", "path": "kids-school-main/scripts/test_quest_fallback.js", "domain": ["quest"], "docs": ["CORE_CATALOG.md"]},
+      {"name": "test_register_curriculum.py", "path": "kids-school-main/scripts/test_register_curriculum.py", "domain": [], "docs": ["society_5-2_unit3_spec.md", "CORE_CATALOG.md"]},
       {"name": "test_register_voca.py", "path": "kids-school-main/scripts/test_register_voca.py", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "test_study_logger_upsert.js", "path": "kids-school-main/scripts/test_study_logger_upsert.js", "domain": ["guardian"], "docs": ["CORE_CATALOG.md"]},
       {"name": "verify_center_audio.cjs", "path": "kids-school-main/scripts/verify_center_audio.cjs", "domain": ["korean"], "docs": ["korean_spec.md", "CORE_CATALOG.md"]},
@@ -75,7 +77,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "quest_reward_retry_spec.md", "path": "kids-school-main/docs/quest_reward_retry_spec.md", "domain": ["guardian", "quest"], "docs": ["reward_grant_shared_spec.md", "CORE_CATALOG.md"]},
       {"name": "reward_grant_shared_spec.md", "path": "kids-school-main/docs/reward_grant_shared_spec.md", "domain": ["guardian"], "docs": ["CORE_CATALOG.md"]},
       {"name": "runner_friendship_spec.md", "path": "kids-school-main/docs/runner_friendship_spec.md", "domain": ["gallery"], "docs": ["CORE_CATALOG.md"]},
-      {"name": "science_spec.md", "path": "kids-school-main/docs/science_spec.md", "domain": ["science"], "docs": ["science_spec.md", "unit_production_pipeline.md"]}
+      {"name": "science_spec.md", "path": "kids-school-main/docs/science_spec.md", "domain": ["science"], "docs": ["science_spec.md", "unit_production_pipeline.md"]},
+      {"name": "society_5-2_unit3_spec.md", "path": "kids-school-main/docs/society_5-2_unit3_spec.md", "domain": ["society"], "docs": ["society_spec.md"]}
     ],
     "module": [
       {"name": "admin-usage.js", "path": "daycare-helper/public/js/admin-usage.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "implementation_plan_20261028_usage_page.md"]},
@@ -154,7 +157,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "science_voca.js", "path": "kids-school-main/kids/js/science_voca.js", "domain": ["science"], "docs": ["science_spec.md", "CORE_CATALOG.md"]},
       {"name": "society_chart.js", "path": "kids-school-main/kids/js/society_chart.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
       {"name": "society_map.js", "path": "kids-school-main/kids/js/society_map.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
-      {"name": "society_storybook.js", "path": "kids-school-main/kids/js/society_storybook.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
+      {"name": "society_storybook.js", "path": "kids-school-main/kids/js/society_storybook.js", "domain": ["society"], "docs": ["society_5-2_unit3_spec.md", "society_spec.md", "CORE_CATALOG.md"]},
       {"name": "society_unit_bar.js", "path": "kids-school-main/kids/js/society_unit_bar.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
       {"name": "society_voca.js", "path": "kids-school-main/kids/js/society_voca.js", "domain": ["society"], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
       {"name": "system_map_view.js", "path": "kids-school-main/kids/js/system_map_view.js", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
@@ -203,5 +206,5 @@ window.SYSTEM_MAP_GENERATED = {
     "pipe": [],
     "db": []
   },
-  "hidden": {"source": 24, "skill": 5, "module": 0, "pipe": 0, "db": 6}
+  "hidden": {"source": 25, "skill": 5, "module": 0, "pipe": 0, "db": 6}
 };

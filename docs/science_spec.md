@@ -178,6 +178,7 @@ graph TD
 ### 1) 교재·사료 마스터 DB (`CURRICULUM_DB_ID: 3e8a27115b68806d94bfc81e9b3435fa`)
 * **데이터 단일 원천**: 가상 실험실 사진, 실험 기구 세팅, 『실험관찰』 실물 사진 및 4지선다 퀴즈를 노션 DB에서 통합 관리.
 * **퀵체인지 2.0 (`admin-image-changer.html`)**: 관리자 화면에서 실험 사진 업로드/변경 시 깃허브 푸시와 노션 갱신을 원클릭으로 처리하며, 브라우저 로컬 캐시(`CURRICULUM_CACHE`)를 즉시 자동 무효화하여 0초 라이브 반영.
+* **문항 등록 (2026-11-13~)**: `python -X utf8 scripts/register_curriculum.py --file scripts/data/curriculum/science_{학년}_{단원키}.json` (기본 미리보기 → `--apply`). 자료 형식은 `kids/core/CORE_CATALOG.md` 「교재·사료 문항 등록기」 절. 단원마다 일회성 스크립트를 만들지 않는다.
 
 ### 2) 5분 퀘스트 과학 실험 퀴즈 실시간 융합 (`buildCurriculumQuestionsFromNotion`)
 * **출제 슬롯**: 5분 퀘스트 과학 1~3번 진도 드릴 슬롯에 실험 기구/결과 관찰 실전 사진 퀴즈를 1~2문제 자동 융합 출제.

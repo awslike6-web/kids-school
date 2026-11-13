@@ -117,6 +117,12 @@ graph TD
 ### 1) 교재·사료 마스터 DB (`CURRICULUM_DB_ID: 3e8a27115b68806d94bfc81e9b3435fa`)
 * **데이터 단일 원천**: 역사 유물 사진, 고지도, 교재 사료 및 관련 4지선다 퀴즈를 노션 DB에서 통합 관리.
 * **퀵체인지 2.0 (`admin-image-changer.html`)**: 관리자 화면에서 사진 업로드/변경 시 깃허브 푸시와 노션 갱신을 원클릭으로 처리하며, 브라우저 로컬 캐시(`CURRICULUM_CACHE`)를 즉시 자동 무효화하여 0초 만에 라이브 반영.
+* **단원 등록 (2026-11-13~)**: 공식 도구만 쓴다. 단원마다 일회성 스크립트를 만들지 않는다.
+  - 용어: `python -X utf8 scripts/register_voca.py --file scripts/data/voca/society_{학년}_{단원키}.json` (`영역 분류=용어방`, `어휘유형=개념`, `학생=[민수, 공통]`, `시험범위=true`)
+  - 사료·지도·도표 문제: `python -X utf8 scripts/register_curriculum.py --file scripts/data/curriculum/society_{학년}_{단원키}.json` (구역은 `역사사료`·`지도탐방`·`자료분석`만 화면에 나옴)
+  - 둘 다 미리보기 → 사람 확인 → `--apply`. 자료 형식은 `kids/core/CORE_CATALOG.md` 각 등록기 절.
+  - `kids/data/society-data.js` 오프라인 사본에는 새 단원을 넣지 않는다 (노션 단일 원천, GEMINI.md §8-2).
+  - 3단원 작업 지시: [`docs/society_5-2_unit3_spec.md`](society_5-2_unit3_spec.md)
 
 ### 2) 5분 퀘스트 사료 퀴즈 실시간 융합 (`buildCurriculumQuestionsFromNotion`)
 * **출제 슬롯**: 5분 퀘스트 사회 1~3번 진도 드릴 슬롯에 역사 유물/지도 실전 사진 퀴즈를 1~2문제 자동 융합 출제.

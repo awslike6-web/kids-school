@@ -15,6 +15,7 @@
    - 센터 교재·독해 등록: [`docs/korean_spec.md` §8-1](docs/korean_spec.md#센터-독해-등록-표준)
    - 민서 국어 단원 등록: `minseo-korean-unit` 스킬
    - 영어 등 단원 어휘(VOCA_DB) 등록: `scripts/register_voca.py` + 자료 `scripts/data/voca/*.json` (`docs/english_spec.md` §7, 단원별 스크립트 금지)
+   - 사회 사료·지도·도표, 과학 실험 문항(CURRICULUM_DB) 등록: `scripts/register_curriculum.py` + 자료 `scripts/data/curriculum/*.json` (`docs/society_spec.md` §6, 단원별 스크립트 금지)
 
 ## 작업별 스킬 (필요할 때 읽기)
 - 원본 위치: `.agent/skills/<스킬>/SKILL.md`
