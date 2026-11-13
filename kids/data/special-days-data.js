@@ -6,6 +6,30 @@
 
 const DEFAULT_SPECIAL_DAYS_DATA = [
   {
+    "videoUrl": "",
+    "id": "evt_minseo_horse_riding_20261113",
+    "author": "민서",
+    "category": "생태/텃밭/체험",
+    "categoryIcon": "🐴",
+    "title": "🐴 승마 체험",
+    "date": "2026-11-13",
+    "desc": "1, 2학년이 함께 말을 타고 말에게 먹이를 주었어요. 늘봄 활동 시간에 만났던 말을 다시 만나 전보다 더 친해진 사이가 되었답니다.",
+    "imageUrl": "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261113_horse_riding_01.jpg",
+    "galleryImages": [
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261113_horse_riding_01.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261113_horse_riding_02.jpg",
+      "https://raw.githubusercontent.com/awslike6-web/kids-archive/main/assets/media/minseo/activities/minseo_20261113_horse_riding_03.jpg"
+    ],
+    "likes": 0,
+    "stickers": {
+      "heart": 0,
+      "thumb": 0,
+      "star": 0,
+      "trophy": 0
+    },
+    "comments": []
+  },
+  {
     "videoUrl": "https://photos.app.goo.gl/r3cdi8cgtJ5earTMA",
     "id": "evt_minsu_everland_20261109",
     "author": "민수",
