@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🪞 5학년 합동과 대칭 탐험관 | 김s 공부방</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="../../css/math_congruence_symmetry.css?v=20261114-cs">
+</head>
+<body>
+  <div class="cs-page">
+    <header class="cs-header">
+      <a class="cs-back-link" href="math.html">🔙 수학 대문</a>
+      <div class="cs-header-titles">
+        <p class="cs-subtitle">초등 5-2 수학 3단원</p>
+        <h1 class="cs-main-title">🪞 합동과 대칭 탐험관</h1>
+      </div>
+    </header>
+
+    <section class="cs-progress-card" aria-label="탐험 진도">
+      <div class="cs-progress-top">
+        <span class="cs-progress-label">민수의 합동·대칭 탐험 진도</span>
+        <span class="cs-progress-stat">
+          <span id="csDoneCount">0</span> / 6개 관 완료 (모두 마치면 +5💎)
+        </span>
+      </div>
+      <div class="cs-progress-track">
+        <div id="csProgressFill" class="cs-progress-fill"></div>
+      </div>
+    </section>
+
+    <nav id="csTabs" class="cs-tabs" role="tablist" aria-label="합동과 대칭 탐험관 탭"></nav>
+
+    <main id="csContainer" class="cs-container"></main>
+  </div>
+
+  <div id="csCompleteModal" class="cs-modal" role="dialog" aria-modal="true" aria-labelledby="csCompleteTitle" hidden>
+    <div class="cs-modal-box">
+      <h2 id="csCompleteTitle" class="cs-modal-title">🎉 합동과 대칭 마스터!</h2>
+      <p class="cs-modal-desc">6개 관을 모두 마쳤어요!</p>
+      <p id="csCompleteReward" class="cs-modal-reward"></p>
+      <div class="cs-btn-row">
+        <button id="csCompleteClose" class="cs-btn" type="button">닫기</button>
+        <button id="csGoQuiz" class="cs-btn primary" type="button">🏆 퀴즈 배틀 하러 가기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js?v=20261028-tts"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js?v=20261028-coco"></script>
+  <script src="./js/congruence_symmetry-geo.js?v=20261114-cs"></script>
+  <script src="./js/congruence_symmetry-views.js?v=20261114-cs"></script>
+  <script src="./js/congruence_symmetry-fold.js?v=20261114-cs"></script>
+  <script src="./js/congruence_symmetry-grid.js?v=20261114-cs"></script>
+  <script src="./js/congruence_symmetry-quiz.js?v=20261114-cs"></script>
+  <script src="./js/congruence_symmetry-main.js?v=20261114-cs"></script>
+</body>
+</html>

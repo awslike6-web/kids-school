@@ -321,9 +321,26 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `math_operator_studio-main.js`: 세로셈 `renderDivisionBoard`·`renderAdditionBoard`·`renderSubtractionBoard`·`renderMultiplicationBoard`는 `board`만 그립니다. `renderAreaModelView`(나눗셈·곱셈), `applyTheme`.
 - 검증: `tests/operator-studio-division.test.mjs`, `tests/operator-studio-plans.test.mjs`, `tests/operator-studio-views.test.mjs`, `tests/math-pages-split.test.mjs`. 스크립트·스타일을 바꾸면 `tests/fixtures/math-split/math_operator_studio.json`의 `scripts`·`styles`도 맞춰야 분리 시험이 통과합니다. 레이아웃은 시험으로 잡지 못하므로 쓰기 차단 서버에서 확인합니다.
 
+### 🪞 합동과 대칭 탐험관 (5-2 3단원, 2026-11-14)
+
+`kids/subjects/math/congruence_symmetry.html`(66줄) + `kids/css/math_congruence_symmetry.css`. 공통 코어(`config`·`core`·`notion-helper`·`fairy-config`·`fairy-tts`·`fairy-settings-catalog`·`fairy-engine`) 뒤에 클래식 스크립트를 `geo` → `views` → `fold` → `grid` → `quiz` → `main` 순서로 싣습니다(모두 `kids/subjects/math/js/congruence_symmetry-*.js`, `?v=20261114-cs`). 각 파일은 IIFE이고 전역 이름 하나만 내보냅니다. 화면 내용·관별 활동은 `docs/math_spec.md` §3-7.
+
+- 파일: `kids/subjects/math/js/congruence_symmetry-geo.js`(457줄), `kids/subjects/math/js/congruence_symmetry-views.js`(445줄), `kids/subjects/math/js/congruence_symmetry-fold.js`(299줄), `kids/subjects/math/js/congruence_symmetry-grid.js`(348줄), `kids/subjects/math/js/congruence_symmetry-quiz.js`(207줄), `kids/subjects/math/js/congruence_symmetry-main.js`(285줄), `kids/css/math_congruence_symmetry.css`(558줄), 퀴즈 자료 `scripts/data/curriculum/math_5-2_3.json`.
+- `-geo.js` (`window.CongruenceGeo`, DOM 없음): 좌표는 모눈 교차점 `[x, y]`(y 아래로 증가), 다각형은 꼭짓점 배열.
+  - 합동: `normalize`, `transform(poly, rot 0..3 시계 90°, flip)`, `findCongruence(a, b)` → `{ rot, flip, map }`(map[i] = a의 i번 꼭짓점의 대응 꼭짓점), `isCongruent`, `samePointSet`.
+  - 대칭: `reflectPoint(p, axis)`, `rotatePoint(p, center, deg)`, `rotateHalf`, `candidateAxes`, `symmetryAxes`, `isPointSymmetric`, `bboxCenter`, `angleAt`(오목 각 포함 내각), `sideLength`.
+  - 문제: `SHAPES`(비대칭·선대칭·점대칭·둘 다 프리셋 14종), `makeRng(seed)`(mulberry32), `makeLinePuzzle(rng, 'v'|'h')`, `makePointPuzzle(rng)` → `{ given, answer, full, axis|center }`. 자기 교차 없는 다각형만 만듭니다.
+- `-views.js` (`window.CSViews`): `tab1` 합동 포개기, `tab2` 대응점·대응변·대응각.
+- `-fold.js` (`window.CSFold`): `tab3` 선대칭 접기(직사각형은 대각선 오답 후보 추가), `tab5` 점대칭 돌리기.
+- `-grid.js` (`window.CSGrid`): `tab4` 선대칭 완성, `tab6` 점대칭 완성(교차점 찍기 + 성질 보조선), 4·6관 뒤 픽토그램 공방.
+- `-quiz.js` (`window.CSQuiz`): `buildQuizFromPages(results)`(DOM 없음, 노션 행 → `{ title, q, choices, answerIndex, explain }`, 제목순), `UNIT`, `tab`. CURRICULUM_DB를 `과목·학년·단원(equals)·구역=탐구퀴즈`로만 읽고 대체 문제를 두지 않습니다.
+- `-main.js` (`window.CSMain`): 탭·진도·보상(`grantRewardAndShowUI`)·완주 모달, `localDateKey()`(로컬 날짜), `makeUi(say)`(관 화면 공용 그리기 도우미: `el`·`pts`·`board`·`grid`·`label`·`concept`·`hint`·`shuffle`·`gridPoint`).
+- 관 화면 계약: `render(container, ctx)`, `ctx = { geo, ui, say, praise, encourage, reward, finale, svg, complete }`. `complete()`는 여러 번 불러도 main이 페이지당 1회만 처리합니다.
+- 검증: `tests/math-congruence-symmetry.test.mjs`(프리셋 분류, 8가지 합동 변환과 대응, 문제 생성 seed 300개 대칭·자기 교차 없음, 노션 행 변환, 스크립트 순서·상대 경로·800줄 미만). 화면은 쓰기 차단 서버에서 375px·데스크톱으로 확인합니다.
+
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
-- `kids/subjects/math/math.html`(454줄)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.
+- `kids/subjects/math/math.html`(466줄, 2026-11-14 3단원 카드 2장 추가)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.
 - `kids/subjects/math/angles_concept.html`(214줄)은 `kids/css/math_angles_concept.css`(123줄)와 `kids/subjects/math/js/angles_concept.js`(533줄)를 같은 방식으로 로드합니다. `setAngleValue`·`onSliderAngleChange`·`selectAngleType`·`switchPolygonSum`·`setQuadMethod`·`setTriCutState`·`setQuadCutState`·`setQuadSplit`·`generateMissingAngleProblem`·`nextQuiz` 등 기존 전역 핸들러와 초기화를 유지합니다.
 - 상대 경로와 캐시 버전 `20261031-math-split2`를 사용하며 클래식 스크립트·기존 외부 스크립트 순서·원문·마크업은 변경하지 않습니다. 두 페이지 모두 뒤에 오는 스크립트가 없고 JS는 한 파일씩입니다.
 - 검증: `tests/math-pages-split2.test.mjs`(고정 main fixture·600줄 제한·원문·마크업·상대 경로·단독 VM 로드). 대문 VM은 기존 `goLobbyBtn` 조회와 클릭 등록만 허용합니다. 분리 계약과 화면 확인 담당은 `docs/math_pages_split2_spec.md`를 따릅니다.
