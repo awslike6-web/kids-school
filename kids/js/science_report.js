@@ -578,9 +578,6 @@
                 renderLabReportQuiz(container, qIdx + 1);
             });
         } else {
-            if (!window.wrongNotes) window.wrongNotes = [];
-            const chosenText = (q.choices || [])[selectedIdx];
-            window.wrongNotes.push({ word: q.questionText || q.title || '탐구 보고서', wrongInput: chosenText || `선택 ${selectedIdx + 1}` });
             showQuizFeedback(container, false, `오답입니다! 💡 ${q.explanation}`, () => {
                 renderLabReportQuiz(container, qIdx);
             });

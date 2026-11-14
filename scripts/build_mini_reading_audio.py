@@ -5,8 +5,8 @@
 
 노션 LIBRARY_DB `트랙 = 🌱 민서 미니 독해` 지문을 읽어, 화면이 읽어 주는 대본마다
 Edge-TTS(ko-KR-SunHiNeural) mp3를 kids/assets/audio/mini_reading/<SHA-1 앞 12자리>.mp3 로 만든다.
-  - 대본: 제목 / 지문 한 줄씩 / 문제 읽기(말풍선 + 질문 + 1번, 보기.)
-    → kids/js/korean_mini_reading.js 의 linesOf·questionScript와 글자 하나까지 같아야 한다.
+  - 대본: 제목 / 지문 한 줄씩 / 문제 질문 조각(말풍선 + 질문) / 보기 조각("1번, 보기." ~ "N번, 보기.")
+    → kids/js/korean_mini_reading.js 의 linesOf·questionClips와 글자 하나까지 같아야 한다.
   - 파일 이름이 대본 글자의 해시라서, 노션에서 지문을 고치면 이전 mp3는 자동으로 안 쓰이고
     (화면은 실시간 TTS로 대신 읽음) 이 스크립트를 다시 돌리면 새 문장만 만든다.
 
@@ -40,16 +40,37 @@ def clip_name(text: str) -> str:
     return hashlib.sha1(text.encode("utf-8")).hexdigest()[:12] + ".mp3"
 
 
-def question_script(q: dict) -> str:
+def speechify(text: str) -> str:
+    return re.sub(r"\s*→\s*", ", 그다음 ", text)  # 차례 보기의 화살표는 '그다음'으로 읽음
+
+
+def question_stem(q: dict) -> str:
     sp = q.get("speaker") or {}
     who = f"{sp.get('name') or ''}의 말. {sp['line']}. " if sp.get("line") else ""
-    opts = " ".join(f"{i + 1}번, {o}." for i, o in enumerate(q["options"]))
-    return re.sub(r"\s*→\s*", ", 그다음 ", f"{who}{q['question']} {opts}")  # 차례 보기의 화살표는 '그다음'으로 읽음
+    return speechify(f"{who}{q['question']}")
+
+
+def option_clip(pos: int, opt: str) -> str:
+    return speechify(f"{pos}번, {opt}.")
+
+
+def question_script(q: dict) -> str:
+    opts = q.get("options") or []
+    return " ".join([question_stem(q), *(option_clip(i + 1, o) for i, o in enumerate(opts))])
 
 
 def clip_texts(passage: dict) -> list[str]:
     lines = [s.strip() for s in re.split(r"\n+", passage["fullText"]) if s.strip()]
-    return [passage["title"], *lines, *(question_script(q) for q in passage["questions"])]
+    clips: list[str] = [passage["title"], *lines]
+    for q in passage["questions"]:
+        stem = question_stem(q)
+        if stem:
+            clips.append(stem)
+        opts = q.get("options") or []
+        for pos in range(1, len(opts) + 1):
+            for opt in opts:
+                clips.append(option_clip(pos, opt))
+    return clips
 
 
 def plain(prop: dict) -> str:

@@ -561,11 +561,6 @@
             }, 1200);
         } else {
             // 오답: 에러리스 학습 안내 & 힌트 자동 개방
-            if (!window.wrongNotes) window.wrongNotes = [];
-            window.wrongNotes.push({
-                word: (activePassage && activePassage.title) || q.question || '독해',
-                wrongInput: choices[selectedIdx] || `선택 ${selectedIdx + 1}`
-            });
             if (btn) btn.classList.add('wrong');
             if (typeof window.fairyEncourage === 'function') {
                 window.fairyEncourage();

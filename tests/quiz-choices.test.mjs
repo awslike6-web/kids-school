@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
 function makeSeedRng(seed) {
@@ -354,9 +357,7 @@ test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-cho
   const wrongBtn = buttons.find(b => b.choiceIndex !== 0);
   const correctBtn = buttons.find(b => b.choiceIndex === 0);
   sandbox.ReadingEngine.chooseAnswer(wrongBtn.choiceIndex);
-  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
-    { word: '세종대왕과 훈민정음', wrongInput: passage.questions[0].choices[wrongBtn.choiceIndex] },
-  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), []);
   assert.equal(awards.length, 0);
 
   sandbox.ReadingEngine.chooseAnswer(correctBtn.choiceIndex);
@@ -456,16 +457,28 @@ test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)�
   sandbox.KoreanMiniReading.start('mini-u2-1');
   clickHandlers['#mrGo'].onclick();
 
-  // 기다릴 필요 없이 sayQuestion 클릭 시 즉시 TTS 대본 확인
-  await new Promise(r => setTimeout(r, 15));
+  // play()가 [말풍선+질문, "1번, 보기.", "2번, 보기.", ...] 조각으로 호출되는지 확인
+  await new Promise(r => setTimeout(r, 30));
   assert.equal(optNodes.length, 3);
   assert.notDeepEqual(optNodes.map(n => Number(n.getAttribute('data-choice-index'))), [0, 1, 2]);
   const displayedTexts = optNodes.map((n, pos) => {
     assert.equal(n.textContent.startsWith(`${pos + 1}. `), true);
     return n.textContent.slice(`${pos + 1}. `.length);
   });
-  const expectedScript = `알맞은 말을 고르세요. 1번, ${displayedTexts[0]}. 2번, ${displayedTexts[1]}. 3번, ${displayedTexts[2]}.`;
-  assert.equal(spokenScripts.at(-1), expectedScript);
+  const expectedClips = [
+    '알맞은 말을 고르세요.',
+    `1번, ${displayedTexts[0]}.`,
+    `2번, ${displayedTexts[1]}.`,
+    `3번, ${displayedTexts[2]}.`,
+  ];
+  assert.deepEqual(spokenScripts.slice(-4), expectedClips);
+
+  // 화살표(→) 치환 규칙이 보기 조각에도 적용되는지 확인
+  const arrowQ = { question: '순서는?', options: ['앞 → 뒤', '끝'] };
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(sandbox.KoreanMiniReading.questionClips(arrowQ, ['끝', '앞 → 뒤']))),
+    ['순서는?', '1번, 끝.', '2번, 앞, 그다음 뒤.']
+  );
 
   // 이야기 다시 보기 후 돌아와도 보기 순서 유지
   const orderBeforePeek = optNodes.map(n => Number(n.getAttribute('data-i')));
@@ -473,15 +486,13 @@ test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)�
   clickHandlers['#mrBackQ'].onclick();
   assert.deepEqual(optNodes.map(n => Number(n.getAttribute('data-i'))), orderBeforePeek);
 
-  // DOM 위치가 아니라 data-i로 class(.dim / .guide / .correct) 적용 + 오답노트 보기 글자
+  // DOM 위치가 아니라 data-i로 class(.dim / .guide / .correct) 적용
   const wrongNode = optNodes.find(n => Number(n.getAttribute('data-i')) !== 0);
   const correctNode = optNodes.find(n => Number(n.getAttribute('data-i')) === 0);
   wrongNode.onclick();
   assert.equal(wrongNode.classList.contains('dim'), true);
   assert.equal(correctNode.classList.contains('guide'), true);
-  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
-    { word: '알맞은 말을 고르세요.', wrongInput: passage.questions[0].options[Number(wrongNode.getAttribute('data-i'))] },
-  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), []);
 
   correctNode.onclick();
   assert.equal(correctNode.classList.contains('correct'), true);
@@ -558,9 +569,7 @@ test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 
   const rightChoice = choiceBtns.find(b => b.choiceIndex === 0);
   sandbox.ScienceReport.submitChoiceQuiz(1, wrongChoice.choiceIndex);
   assert.match(tabContent.innerHTML, /힌트를 확인해 보세요!/);
-  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
-    { word: '어느 것이 가벼운가요?', wrongInput: sandbox.SCIENCE_LAB_REPORT_DATA.quizItems[1].choices[wrongChoice.choiceIndex] },
-  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), []);
   sandbox.ScienceReport.triggerFeedbackNext();
   assert.equal(tabContent.innerHTML, choiceHtmlBefore);
 
@@ -615,9 +624,7 @@ test('B4 science_safety.js: 안전 문제를 섞어 그리고 다시 도전 시 
   const wrongBtn = btns.find(b => b.choiceIndex !== 0);
   const rightBtn = btns.find(b => b.choiceIndex === 0);
   sandbox.ScienceSafety.submitAnswer(0, wrongBtn.choiceIndex);
-  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
-    { word: '실험 전에 꼭 써야 하는 것은?', wrongInput: '보안경' === sandbox.SCIENCE_SAFETY_LICENSE_DATA.questions[0].options[wrongBtn.choiceIndex] ? 'fail' : sandbox.SCIENCE_SAFETY_LICENSE_DATA.questions[0].options[wrongBtn.choiceIndex] },
-  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), []);
 
   // 다시 도전하기 호출 시 순서 동일
   sandbox.ScienceSafety.renderQuestion(overlayBody, 0);
@@ -691,6 +698,58 @@ test('B5 science_season_airmass_lab.js: 보기를 섞어 data-choice-index로 �
   assert.equal(renderedBtns[wrongPos].classList.contains('wrong'), true);
   assert.equal(renderedBtns[expectedCorrectPos].classList.contains('correct'), true);
   assert.match(qFeedback.innerHTML, new RegExp(`정답은 <b>${expectedCorrectPos + 1}번</b>`));
-  assert.equal(sandbox.wrongNotes.length, 1);
-  assert.equal(renderedBtns[wrongPos].innerHTML.endsWith(sandbox.wrongNotes[0].wrongInput), true);
+  assert.equal(sandbox.wrongNotes, undefined);
+});
+
+test('B2 민서 미니 독해 MP3: 모든 지문 문항의 가능한 섞인 보기 순서마다 questionClips 조각 mp3 파일이 실제로 존재한다', () => {
+  const dataDir = new URL('../scripts/data/', import.meta.url);
+  const audioDir = fileURLToPath(new URL('../kids/assets/audio/mini_reading/', import.meta.url));
+  const sandbox = {
+    console,
+    document: {
+      readyState: 'complete',
+      addEventListener() {},
+      removeEventListener() {},
+      getElementById: () => null,
+    },
+    localStorage: { getItem: () => null, setItem() {} },
+    addEventListener() {},
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/js/korean_mini_reading.js', import.meta.url), 'utf8'), sandbox);
+
+  const seedFiles = readdirSync(dataDir).filter(f => /^minseo_korean_.*\.json$/.test(f)).sort();
+  assert.ok(seedFiles.length >= 3);
+
+  const permutations = (arr) => {
+    if (arr.length <= 1) return [arr];
+    const out = [];
+    for (let i = 0; i < arr.length; i++) {
+      const rest = arr.slice(0, i).concat(arr.slice(i + 1));
+      for (const p of permutations(rest)) out.push([arr[i], ...p]);
+    }
+    return out;
+  };
+
+  let checkedClips = 0;
+  for (const file of seedFiles) {
+    const raw = readFileSync(new URL(file, dataDir), 'utf8').replace(/^\uFEFF/, '');
+    const seed = JSON.parse(raw);
+    for (const passage of seed.passages || []) {
+      for (const q of passage.questions || []) {
+        for (const orderedOptions of permutations(q.options || [])) {
+          const clips = sandbox.KoreanMiniReading.questionClips(q, orderedOptions);
+          for (const clip of clips) {
+            const hash = createHash('sha1').update(String(clip), 'utf8').digest('hex').slice(0, 12);
+            const mp3Path = join(audioDir, `${hash}.mp3`);
+            assert.equal(existsSync(mp3Path), true, `MP3 누락: ${hash}.mp3 (${clip})`);
+            checkedClips++;
+          }
+        }
+      }
+    }
+  }
+  assert.ok(checkedClips > 0);
 });

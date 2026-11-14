@@ -96,12 +96,18 @@
     }
 
     const linesOf = p => p.fullText.split(/\n+/).map(s => s.trim()).filter(Boolean);
-    // 문제 읽기 대본 (orderedOptions가 넘어오면 화면에 보이는 보기 순서대로 읽는다)
-    function questionScript(q, orderedOptions) {
+    // 차례 보기의 화살표(→)는 소리로 '그다음'이라 읽는다
+    const speechify = text => String(text || '').replace(/\s*→\s*/g, ', 그다음 ');
+    // 문제 읽기 조각 ([말풍선+질문, "1번, 보기.", "2번, 보기.", ...])
+    // → scripts/build_mini_reading_audio.py 의 question_stem·option_clip·clip_texts와 글자 하나까지 같아야 mp3가 맞는다.
+    function questionClips(q, orderedOptions) {
         const opts = Array.isArray(orderedOptions) ? orderedOptions : (q.options || []);
         const who = q.speaker && q.speaker.line ? `${q.speaker.name || ''}의 말. ${q.speaker.line}. ` : '';
-        // 차례 보기의 화살표(→)는 소리로 '그다음'이라 읽는다
-        return `${who}${q.question} ${opts.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`.replace(/\s*→\s*/g, ', 그다음 ');
+        const stem = speechify(`${who}${q.question || ''}`);
+        return [stem, ...opts.map((o, i) => speechify(`${i + 1}번, ${o}.`))].filter(Boolean);
+    }
+    function questionScript(q, orderedOptions) {
+        return questionClips(q, orderedOptions).join(' ');
     }
 
     function autoBtnHtml() {
@@ -321,7 +327,7 @@
             </div>
         </div>`);
 
-        const sayQuestion = () => play([questionScript(q, optionOrder.map(c => c.text))]);
+        const sayQuestion = () => play(questionClips(q, optionOrder.map(c => c.text)));
         containerEl.querySelector('#mrSayQ').onclick = sayQuestion;
         containerEl.querySelector('#mrReread').onclick = () => renderPeek();
         containerEl.querySelector('#mrNext').onclick = () => { qIdx++; renderQuestion(); };
@@ -355,11 +361,7 @@
         }
 
         // 에러리스: 고른 보기는 흐리게, 정답은 노랗게 비추고 해설 (경고음·감점 없음)
-        if (!triedWrong) {
-            missed.push(q.question);
-            if (!window.wrongNotes) window.wrongNotes = [];
-            window.wrongNotes.push({ word: q.question, wrongInput: (q.options && q.options[i]) || `선택 ${i + 1}` });
-        }
+        if (!triedWrong) missed.push(q.question);
         triedWrong = true;
         const pickedBtn = findBtn(i);
         const correctBtn = findBtn(correct);
@@ -425,6 +427,7 @@
         renderLobby,
         start,
         isMissionInProgress,
+        questionClips,
         questionScript,
         sceneImage,
         stop

@@ -379,10 +379,6 @@
             localStorage.setItem('min_science_gems', gems);
             document.getElementById('gemCount').textContent = gems;
         } else {
-            if (typeof window !== 'undefined') {
-                if (!window.wrongNotes) window.wrongNotes = [];
-                window.wrongNotes.push({ word: q.q, wrongInput: (q.options || [])[selectedIdx] || `선택 ${selectedIdx + 1}` });
-            }
             btnEl.classList.add('wrong');
             const correctPos = allBtns.findIndex(b => Number(b.getAttribute('data-choice-index')) === q.ans);
             const correctBtn = correctPos >= 0 ? allBtns[correctPos] : allBtns[q.ans];

@@ -82,9 +82,6 @@
         if (!container) return;
 
         if (!isCorrect) {
-            if (!window.wrongNotes) window.wrongNotes = [];
-            const chosenText = (q.options || [])[selectedIdx];
-            window.wrongNotes.push({ word: q.question || '실험실 안전', wrongInput: chosenText || `선택 ${selectedIdx + 1}` });
             container.innerHTML = `
                 <div style="max-width: 550px; margin: 30px auto; padding: 24px; text-align: center; background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: 3px solid #f87171; font-family: 'Jua', sans-serif;">
                     <div style="font-size: 3.5rem; margin-bottom: 10px;">⚠️</div>
