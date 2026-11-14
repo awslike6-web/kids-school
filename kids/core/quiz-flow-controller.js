@@ -8,6 +8,68 @@
  * 를 진입 전, 퀴즈 도중, 개별 문제 단위에서 실시간 전환할 수 있는 공통 모듈.
  */
 
+(function (globalScope) {
+    'use strict';
+
+    // 고정 순서(섞지 않는) 보기 판별 상수 테이블 (보기 글자 자체만 검사)
+    const FIXED_PAIRS = [
+        ['O', 'X'],
+        ['○', '×'],
+        ['예', '아니요'],
+        ['예', '아니오'],
+        ['맞다', '틀리다'],
+    ];
+
+    const FIXED_ORDER_PATTERNS = [
+        /^모두(?:\s*(?:다|해당))?[.!?]?$/,
+        /모두\s*(?:맞|옳|틀|해당|정답)/,
+        /^(?:둘|셋|네\s*가지|보기)\s*모두/,
+        /^(?:정답|해당)\s*없(?:음|다)[.!?]?$/,
+        /^(?:맞는|옳은|해당하는)\s*(?:것|말|답|설명이?)?\s*없(?:음|다)[.!?]?$/,
+        /^없(?:다|음)[.!?]?$/,
+        /^(?:위|위의)\s*(?:내용|보기|설명|선지|이야기|글|모두|것|중|\d)/,
+        /(?:^|\s)위의\s*(?:모두|내용|보기|설명|선지)/,
+        /[①②③④⑤]/,
+        /^(?:\([가나다라마바사ㄱ-ㅎ]\)|[ㄱ-ㅎ])(?:\s*(?:,|·|와|과|및)\s*(?:\([가나다라마바사ㄱ-ㅎ]\)|[ㄱ-ㅎ]))+(?:\s*모두)?$/,
+        /^(?:\([가나다라마바사]\)|[가나다라마바사])\s*(?:,|·|와|과|및)\s*(?:\([가나다라마바사]\)|[가나다라마바사])(?:\s*(?:,|·|와|과|및)\s*(?:\([가나다라마바사]\)|[가나다라마바사]))*(?:\s*모두)?$/,
+    ];
+
+    function shuffle(list, rng) {
+        if (!Array.isArray(list)) return [];
+        const rand = typeof rng === 'function' ? rng : Math.random;
+        const arr = list.slice();
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(rand() * (i + 1));
+            const tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+        return arr;
+    }
+
+    function isFixedOrder(choices) {
+        if (!Array.isArray(choices) || choices.length <= 1) return true;
+        const normalized = choices.map(c => String(c == null ? '' : c).trim());
+        if (normalized.length === 2) {
+            const upper = normalized.map(s => s.toUpperCase());
+            const isPair = FIXED_PAIRS.some(([a, b]) =>
+                (upper[0] === a && upper[1] === b) || (upper[0] === b && upper[1] === a)
+            );
+            if (isPair) return true;
+        }
+        return normalized.some(text => FIXED_ORDER_PATTERNS.some(re => re.test(text)));
+    }
+
+    function arrange(choices, opts) {
+        if (!Array.isArray(choices)) return [];
+        const items = choices.map((text, index) => ({ text, index }));
+        const fixed = Boolean(opts && opts.fixed === true) || isFixedOrder(choices);
+        return fixed ? items : shuffle(items, opts && opts.rng);
+    }
+
+    globalScope.QuizChoices = { arrange, shuffle, isFixedOrder };
+})(typeof window !== 'undefined' ? window : globalThis);
+
 (function () {
     const STORAGE_PREFIX = 'kids_quiz_flow_mode_';
 
@@ -554,15 +616,16 @@
     }
 
     // 전역 노출
-    window.getQuizFlowMode = getQuizFlowMode;
-    window.getAllQuizFlowModes = getAllQuizFlowModes;
-    window.setQuizFlowMode = setQuizFlowMode;
-    window.syncQuizFlowFromCloud = syncQuizFlowFromCloud;
-    window.saveQuizFlowToCloud = saveQuizFlowToCloud;
-    window.triggerQuizAdvance = triggerQuizAdvance;
-    window.cancelQuizAdvanceTimer = cancelQuizAdvanceTimer;
-    window.renderQuizFlowToggleUI = renderQuizFlowToggleUI;
-    window.autoMountHeaderToggle = autoMountHeaderToggle;
+    const _exportRoot = typeof window !== 'undefined' ? window : globalThis;
+    _exportRoot.getQuizFlowMode = getQuizFlowMode;
+    _exportRoot.getAllQuizFlowModes = getAllQuizFlowModes;
+    _exportRoot.setQuizFlowMode = setQuizFlowMode;
+    _exportRoot.syncQuizFlowFromCloud = syncQuizFlowFromCloud;
+    _exportRoot.saveQuizFlowToCloud = saveQuizFlowToCloud;
+    _exportRoot.triggerQuizAdvance = triggerQuizAdvance;
+    _exportRoot.cancelQuizAdvanceTimer = cancelQuizAdvanceTimer;
+    _exportRoot.renderQuizFlowToggleUI = renderQuizFlowToggleUI;
+    _exportRoot.autoMountHeaderToggle = autoMountHeaderToggle;
 
     if (typeof document !== 'undefined') {
         if (document.readyState === 'loading') {

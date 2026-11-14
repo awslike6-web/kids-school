@@ -171,6 +171,9 @@
         `;
 
         const choices = currentItem.choices || ["선택지 1", "선택지 2", "선택지 3", "선택지 4"];
+        const choiceOrder = window.QuizChoices
+            ? window.QuizChoices.arrange(choices)
+            : choices.map((text, index) => ({ text, index }));
         const correctIdx = currentItem.correctIdx !== undefined ? currentItem.correctIdx : 0;
         const quizQuestion = currentItem.quiz || `${currentItem.title}에서 알 수 있는 사실은 무엇일까요?`;
 
@@ -182,8 +185,8 @@
             <div class="quiz-descr" style="line-height:1.6; font-size:1.05rem;">${currentItem.desc || ""}</div>
             <p style="font-weight: bold; font-size:1.15rem; text-align: left; margin-top:14px;">❓ ${quizQuestion}</p>
             <div class="quiz-choices-container">
-                ${choices.map((choice, i) => `
-                     <button class="quiz-choice-btn" onclick="ScienceLab.verifyChoice(${i}, ${correctIdx})">${i+1}. ${choice}</button>
+                ${choiceOrder.map((c, pos) => `
+                     <button class="quiz-choice-btn" data-choice-index="${c.index}" onclick="ScienceLab.verifyChoice(${c.index}, ${correctIdx})">${pos + 1}. ${c.text}</button>
                 `).join('')}
             </div>
             <div style="margin-top: 14px; display:flex; justify-content:center;">

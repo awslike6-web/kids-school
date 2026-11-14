@@ -59,8 +59,11 @@
         `;
 
         const choices = currentItem.choices || [];
-        const choicesHtml = choices.map((choice, i) => `
-            <button class="quiz-choice-btn" data-choice-index="${i}" onclick="window.SocietyChart.handleChoiceClick(this)">${i+1}. ${choice}</button>
+        const choiceOrder = window.QuizChoices
+            ? window.QuizChoices.arrange(choices)
+            : choices.map((text, index) => ({ text, index }));
+        const choicesHtml = choiceOrder.map((c, pos) => `
+            <button class="quiz-choice-btn" data-choice-index="${c.index}" onclick="window.SocietyChart.handleChoiceClick(this)">${pos + 1}. ${c.text}</button>
         `).join('');
 
         screenWrapper.innerHTML = `
