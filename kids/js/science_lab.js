@@ -28,7 +28,9 @@
                 while (hasMore) {
                     const payload = {
                         page_size: 100,
-                        filter: { property: "과목", select: { equals: "과학" } }
+                        filter: { property: "과목", select: { equals: "과학" } },
+                        // 기본 순서는 최근 행부터라 탐구보고서 카드 짝이 거꾸로 맞았다 (2026-11-14). 노션은 분 단위로 보여 줘도 정렬은 정밀하게 한다.
+                        sorts: [{ timestamp: "created_time", direction: "ascending" }]
                     };
                     if (cursor) payload.start_cursor = cursor;
 
@@ -118,12 +120,13 @@
             const targetData = window[globalKey];
             if (!targetData) continue;
             const kws = unitKeywords[u] || [`${u}.`, `${u}단원`];
+            // 화면 카드(1→N)와 순서로 짝짓는다. 쿼리가 만든 시각 오름차순이라 등록기가 1→N으로 만든 행이 그대로 맞는다.
             const repDocs = items.filter(x => x.zone === '탐구보고서' && kws.some(k => x.unit.includes(k)));
             if (repDocs.length > 0) {
                 const baseDocs = targetData.summaryDoc || [];
                 targetData.summaryDoc = repDocs.map((it, idx) => {
                     const base = baseDocs[idx] || {};
-                    const pg = (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || base.page || '『실험관찰』';
+                    const pg = base.page || base.bookRef || (it.desc || '').match(/\[『실험관찰』[^\]]+\]/)?.[0] || '『실험관찰』';
                     const proc = (it.desc || '').match(/\[탐구 과정\]\s*([\s\S]*?)(?=\[관찰 결과\]|$)/)?.[1]?.trim() || base.process || it.desc;
                     const res = (it.desc || '').match(/\[관찰 결과\]\s*([\s\S]*?)(?=\[결론\]|$)/)?.[1]?.trim() || base.result || '';
                     const conc = (it.desc || '').match(/\[결론\]\s*([\s\S]*?)(?=\[생각해 볼까요\?\]|$)/)?.[1]?.trim() || base.conclusion || '';

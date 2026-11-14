@@ -180,6 +180,7 @@ graph TD
 * **퀵체인지 2.0 (`admin-image-changer.html`)**: 관리자 화면에서 실험 사진 업로드/변경 시 깃허브 푸시와 노션 갱신을 원클릭으로 처리하며, 브라우저 로컬 캐시(`CURRICULUM_CACHE`)를 즉시 자동 무효화하여 0초 라이브 반영.
 * **객관식 보기 섞기 (2026-11-14~)**: 화면이 문제를 열 때마다 `window.QuizChoices`로 보기 순서를 섞고 원래 번호로 채점한다. 노션·자료의 보기 순서와 정답 위치는 신경 쓰지 않아도 되고, 해설에 「1번은…」처럼 보기 번호를 쓰지 않는다. 상세: `kids/core/CORE_CATALOG.md` 「`window.QuizChoices`」 절. 대상: 실험실 퀴즈(`science_lab.js`)·탐구 보고서(`science_report.js`, 객관식·빈칸 카드)·안전 라이선스(`science_safety.js`)·기단 실험실.
 * **문항 등록 (2026-11-13~)**: `python -X utf8 scripts/register_curriculum.py --file scripts/data/curriculum/science_{학년}_{단원키}.json` (기본 미리보기 → `--apply`). 자료 형식은 `kids/core/CORE_CATALOG.md` 「교재·사료 문항 등록기」 절. 단원마다 일회성 스크립트를 만들지 않는다.
+* **탐구보고서 행 순서 계약 (2026-11-14~)**: `science_lab.js`는 과학 행을 노션 만든 시각 오름차순(`sorts: created_time ascending`)으로 읽고, `탐구보고서` 행을 단원 보고서 카드(`summaryDoc`)와 **순서대로** 짝짓는다. 그래서 자료 JSON의 탐구보고서 행은 카드 순서(실험 1→N)대로 적고 한 번에 등록한다. 카드 제목·쪽수(`bookRef`/`page`)·이미 있는 과정·결과는 화면 자료가 이기고, 화면 자료에 없는 칸(4단원의 과정·결과·결론·생각해 볼까요)만 노션 글로 채운다. 화면은 `가상실험`·`탐구퀴즈` 구역을 읽지 않는다(기록용). 등록 자료: `scripts/data/curriculum/science_5-2_3.json`(3단원 탐구퀴즈 6), `science_5-2_4.json`(4단원 가상실험 5·탐구보고서 5·탐구퀴즈 6). 서술형·순서·별점 문항은 보기 2~4개 규칙에 맞지 않아 질문 칸 없이 쓰임새·해설만 기록한다.
 
 ### 2) 5분 퀘스트 과학 실험 퀴즈 실시간 융합 (`buildCurriculumQuestionsFromNotion`)
 * **출제 슬롯**: 5분 퀘스트 과학 1~3번 진도 드릴 슬롯에 실험 기구/결과 관찰 실전 사진 퀴즈를 1~2문제 자동 융합 출제.
