@@ -193,6 +193,7 @@ test('A1 society_chart.js: 섞인 순서로 버튼 번호를 표시하되 원래
   sandbox.SocietyChart.handleChoiceClick({ getAttribute: (k) => k === 'data-choice-index' ? String(wrongBtn.choiceIndex) : null });
   assert.equal(rewards.length, 0);
   assert.equal(retries.length, 1);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [{ word: '3·1 운동 사료', wrongInput: item.choices[wrongBtn.choiceIndex] }]);
   retries[0].onRetry();
   // 재시도 후에도 DOM HTML과 버튼 순서 그대로 유지
   assert.equal(container.children[0].innerHTML, htmlBeforeRetry);
@@ -256,10 +257,440 @@ test('A2 science_lab.js: 섞인 순서로 버튼 번호를 표시하되 원래 �
 
   await sandbox.ScienceLab.verifyChoice(wrongBtn.choiceIndex, item.correctIdx);
   assert.equal(sounds[0], 'wrong');
-  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [{ word: '물의 증발 실험', wrongInput: `선택 ${wrongBtn.choiceIndex + 1}` }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [{ word: '물의 증발 실험', wrongInput: item.choices[wrongBtn.choiceIndex] }]);
   assert.equal(container.children[0].innerHTML, htmlBeforeRetry); // 재시도 시 순서 유지
 
   await sandbox.ScienceLab.verifyChoice(correctBtn.choiceIndex, item.correctIdx);
   assert.equal(sounds[1], 'correct');
   assert.deepEqual(rewards, [2]);
+});
+
+function makeMiniEl(tag = 'div', attrs = {}) {
+  const classes = new Set();
+  const attrMap = Object.assign({}, attrs);
+  return {
+    tagName: tag.toUpperCase(),
+    attributes: attrMap,
+    hidden: false,
+    style: {},
+    innerHTML: '',
+    textContent: '',
+    children: [],
+    classList: {
+      add: (c) => classes.add(c),
+      remove: (c) => classes.delete(c),
+      contains: (c) => classes.has(c),
+    },
+    setAttribute(k, v) { attrMap[k] = String(v); },
+    getAttribute(k) { return Object.hasOwn(attrMap, k) ? attrMap[k] : null; },
+    appendChild(child) { this.children.push(child); return child; },
+    querySelector() { return null; },
+    querySelectorAll() { return []; },
+    scrollIntoView() {},
+    closest() { return null; },
+  };
+}
+
+test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-choice-index로 채점하고 오답노트에 보기 글자를 남긴다', async () => {
+  const container = makeMiniEl('div');
+  const byId = {};
+  const awards = [];
+  const sandbox = {
+    console,
+    Math: Object.assign(Object.create(Math), { random: makeSeedRng(202) }),
+    setTimeout: (fn) => fn(),
+    parseInt,
+    isNaN,
+    document: {
+      readyState: 'complete',
+      head: makeFakeElement('head'),
+      body: makeFakeElement('body'),
+      createElement: (tag) => makeMiniEl(tag),
+      getElementById: (id) => byId[id] || null,
+      querySelectorAll: () => [],
+      addEventListener() {},
+    },
+    localStorage: { getItem: () => null, setItem() {} },
+    MutationObserver: class { observe() {} },
+    triggerAwardDispense: (n) => awards.push(n),
+    speakFairyTTS() {},
+    wrongNotes: [],
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  sandbox.addEventListener = () => {};
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/core/quiz-flow-controller.js', import.meta.url), 'utf8'), sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/core/reading_engine.js', import.meta.url), 'utf8'), sandbox);
+
+  const passage = {
+    id: 'p-test-1',
+    title: '세종대왕과 훈민정음',
+    track: '🏥 센터 독해',
+    grade: '5-2',
+    unit: '1단원',
+    fullText: '백성을 사랑하여 훈민정음을 만드셨다.',
+    questions: [{
+      question: '글을 만든 목적은?',
+      choices: ['백성을 널리 이롭게 하려고', '한자를 없애려고', '전쟁에 쓰려고', '세금을 늘리려고'],
+      answer: '백성을 널리 이롭게 하려고',
+      clue: '백성을 사랑하여',
+    }],
+  };
+  sandbox.fetchReadingPassagesFromNotion = async () => [passage];
+
+  await sandbox.ReadingEngine.renderLobby(container, { subject: '국어', grade: '5-2' });
+  sandbox.ReadingEngine.startMission('p-test-1');
+  sandbox.ReadingEngine.startQuestions();
+
+  const buttons = extractRenderedButtons(container.innerHTML);
+  assert.equal(buttons.length, 4);
+  assert.notDeepEqual(buttons.map(b => b.choiceIndex), [0, 1, 2, 3]);
+  buttons.forEach((b, pos) => {
+    assert.match(b.label, new RegExp(`<span class="choice-num-badge">${pos + 1}</span>`));
+    byId[`choiceBtn_${b.choiceIndex}`] = makeMiniEl('button');
+  });
+
+  const wrongBtn = buttons.find(b => b.choiceIndex !== 0);
+  const correctBtn = buttons.find(b => b.choiceIndex === 0);
+  sandbox.ReadingEngine.chooseAnswer(wrongBtn.choiceIndex);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
+    { word: '세종대왕과 훈민정음', wrongInput: passage.questions[0].choices[wrongBtn.choiceIndex] },
+  ]);
+  assert.equal(awards.length, 0);
+
+  sandbox.ReadingEngine.chooseAnswer(correctBtn.choiceIndex);
+  assert.deepEqual(awards, [1, 3]);
+});
+
+test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)이 같고 다시 보기를 다녀와도 순서가 유지되며 data-i로 정확히 채점한다', async () => {
+  const passage = {
+    id: 'mini-u2-1',
+    unit: '2단원',
+    title: '크레파스 정리',
+    summary: '정리해요',
+    fullText: '내 크레파스가 없어요.\n책상 위를 살펴보았어요.',
+    questions: [{
+      step: 1,
+      question: '알맞은 말을 고르세요.',
+      options: ['내 크레파스가 없어요!', '내 크레파스가 업어요!', '내 크레파스가 엇어요!'],
+      answer: '내 크레파스가 없어요!',
+      explanation: '받침 ㅄ을 써요.',
+    }],
+  };
+
+  let optNodes = [];
+  let explainNode = makeMiniEl('div');
+  let nextNode = makeMiniEl('button');
+  let clickHandlers = {};
+  let spokenScripts = [];
+
+  const container = {
+    _html: '',
+    get innerHTML() { return this._html; },
+    set innerHTML(val) {
+      this._html = val;
+      optNodes = [];
+      clickHandlers = {};
+      explainNode = makeMiniEl('div');
+      nextNode = makeMiniEl('button');
+      nextNode.hidden = true;
+      const reOpt = /<button[^>]*class="mr-opt"[^>]*data-i="(\d+)"[^>]*data-choice-index="(\d+)"[^>]*>([\s\S]*?)<\/button>/g;
+      let m;
+      while ((m = reOpt.exec(val)) !== null) {
+        const node = makeMiniEl('button', { 'data-i': m[1], 'data-choice-index': m[2] });
+        node.textContent = m[3].trim();
+        optNodes.push(node);
+      }
+      for (const id of ['mrListen', 'mrStop', 'mrGo', 'mrBack', 'mrSayQ', 'mrReread', 'mrNext', 'mrBackQ', 'mrAutoBtn', 'mrMore']) {
+        if (val.includes(`id="${id}"`)) {
+          clickHandlers[`#${id}`] = id === 'mrNext' ? nextNode : makeMiniEl('button');
+        }
+      }
+    },
+    querySelector(sel) {
+      if (sel === '#mrFigure' || sel === '.mr-figure') return null;
+      if (sel === '#mrExplain') return explainNode;
+      if (sel === '#mrNext') return nextNode;
+      return clickHandlers[sel] || makeMiniEl('button');
+    },
+    querySelectorAll(sel) {
+      if (sel === '.mr-opt') return optNodes;
+      if (sel === '.mr-card') return [makeMiniEl('button', { 'data-id': passage.id })];
+      return [];
+    },
+  };
+
+  const sandbox = {
+    console,
+    Math: Object.assign(Object.create(Math), { random: makeSeedRng(101) }),
+    TextEncoder,
+    document: {
+      readyState: 'complete',
+      head: makeFakeElement('head'),
+      body: makeFakeElement('body'),
+      createElement: (tag) => makeMiniEl(tag),
+      getElementById: () => null,
+      querySelectorAll: () => [],
+      addEventListener() {},
+      removeEventListener() {},
+    },
+    localStorage: { getItem: (k) => k === 'mr_autoplay' ? '1' : null, setItem() {} },
+    MutationObserver: class { observe() {} },
+    Audio: class { play() { return Promise.reject(new Error('no mp3')); } },
+    speakFairyTTS: (text, cb) => { spokenScripts.push(text); if (cb) cb(); },
+    stopFairyTTS() {},
+    fairyPraise() {},
+    fairyEncourage() {},
+    triggerAwardDispense() {},
+    fetchReadingPassagesFromNotion: async () => [passage],
+    wrongNotes: [],
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/core/quiz-flow-controller.js', import.meta.url), 'utf8'), sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/js/korean_mini_reading.js', import.meta.url), 'utf8'), sandbox);
+
+  await sandbox.KoreanMiniReading.renderLobby(container);
+  sandbox.KoreanMiniReading.start('mini-u2-1');
+  clickHandlers['#mrGo'].onclick();
+
+  // 기다릴 필요 없이 sayQuestion 클릭 시 즉시 TTS 대본 확인
+  await new Promise(r => setTimeout(r, 15));
+  assert.equal(optNodes.length, 3);
+  assert.notDeepEqual(optNodes.map(n => Number(n.getAttribute('data-choice-index'))), [0, 1, 2]);
+  const displayedTexts = optNodes.map((n, pos) => {
+    assert.equal(n.textContent.startsWith(`${pos + 1}. `), true);
+    return n.textContent.slice(`${pos + 1}. `.length);
+  });
+  const expectedScript = `알맞은 말을 고르세요. 1번, ${displayedTexts[0]}. 2번, ${displayedTexts[1]}. 3번, ${displayedTexts[2]}.`;
+  assert.equal(spokenScripts.at(-1), expectedScript);
+
+  // 이야기 다시 보기 후 돌아와도 보기 순서 유지
+  const orderBeforePeek = optNodes.map(n => Number(n.getAttribute('data-i')));
+  clickHandlers['#mrReread'].onclick();
+  clickHandlers['#mrBackQ'].onclick();
+  assert.deepEqual(optNodes.map(n => Number(n.getAttribute('data-i'))), orderBeforePeek);
+
+  // DOM 위치가 아니라 data-i로 class(.dim / .guide / .correct) 적용 + 오답노트 보기 글자
+  const wrongNode = optNodes.find(n => Number(n.getAttribute('data-i')) !== 0);
+  const correctNode = optNodes.find(n => Number(n.getAttribute('data-i')) === 0);
+  wrongNode.onclick();
+  assert.equal(wrongNode.classList.contains('dim'), true);
+  assert.equal(correctNode.classList.contains('guide'), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
+    { word: '알맞은 말을 고르세요.', wrongInput: passage.questions[0].options[Number(wrongNode.getAttribute('data-i'))] },
+  ]);
+
+  correctNode.onclick();
+  assert.equal(correctNode.classList.contains('correct'), true);
+  assert.equal(nextNode.hidden, false);
+});
+
+test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 중 순서 유지 및 오답노트에 보기 글자를 기록한다', () => {
+  const reportContainer = makeMiniEl('div');
+  const tabContent = makeMiniEl('div');
+  const byId = { reportTabContent: tabContent };
+
+  const sandbox = {
+    console,
+    Math: Object.assign(Object.create(Math), { random: makeSeedRng(404) }),
+    document: {
+      readyState: 'complete',
+      head: makeFakeElement('head'),
+      body: makeFakeElement('body'),
+      createElement: (tag) => makeMiniEl(tag),
+      getElementById: (id) => byId[id] || null,
+      querySelectorAll: () => [],
+      addEventListener() {},
+    },
+    localStorage: { getItem: () => null, setItem() {} },
+    MutationObserver: class { observe() {} },
+    wrongNotes: [],
+    SCIENCE_LAB_REPORT_DATA: {
+      title: '1단원 탐구 보고서',
+      unit: '1단원',
+      summaryDoc: [],
+      quizItems: [
+        {
+          type: 'blank',
+          questionText: '빈칸 문제',
+          templateHtml: '{b1} / {b2}',
+          blanks: [{ id: 'b1', target: '첫째', answer: '콩' }, { id: 'b2', target: '둘째', answer: '조' }],
+          options: ['콩', '조', '물'],
+          explanation: '크기 차이',
+        },
+        {
+          type: 'choice',
+          questionText: '어느 것이 가벼운가요?',
+          choices: ['스티로폼', '철구슬', '돌맹이', '구리조각'],
+          answer: 0,
+          explanation: '스티로폼이 물에 뜹니다.',
+        },
+      ],
+    },
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/core/quiz-flow-controller.js', import.meta.url), 'utf8'), sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/js/science_report.js', import.meta.url), 'utf8'), sandbox);
+
+  // 빈칸 문제 섞기 + 카드 선택 후 순서 유지
+  sandbox.ScienceReport.renderUI(reportContainer, 'quiz', 1);
+  const blankBtns = extractRenderedButtons(tabContent.innerHTML);
+  assert.equal(blankBtns.length, 3);
+  assert.notDeepEqual(blankBtns.map(b => b.choiceIndex), [0, 1, 2]);
+  const blankOrderBeforePick = blankBtns.map(b => b.choiceIndex);
+  const kongIdx = blankBtns.find(b => b.choiceIndex === 0).choiceIndex;
+  sandbox.ScienceReport.selectBlankWordByIdx(0, kongIdx);
+  const blankOrderAfterPick = extractRenderedButtons(tabContent.innerHTML).map(b => b.choiceIndex);
+  assert.deepEqual(blankOrderAfterPick, blankOrderBeforePick);
+
+  // 객관식 섞기 + 오답노트에 보기 글자 기록 + 재시도 순서 유지
+  sandbox.ScienceReport.renderQuiz(tabContent, 1);
+  const choiceHtmlBefore = tabContent.innerHTML;
+  const choiceBtns = extractRenderedButtons(choiceHtmlBefore);
+  assert.equal(choiceBtns.length, 4);
+  assert.notDeepEqual(choiceBtns.map(b => b.choiceIndex), [0, 1, 2, 3]);
+  const wrongChoice = choiceBtns.find(b => b.choiceIndex !== 0);
+  const rightChoice = choiceBtns.find(b => b.choiceIndex === 0);
+  sandbox.ScienceReport.submitChoiceQuiz(1, wrongChoice.choiceIndex);
+  assert.match(tabContent.innerHTML, /힌트를 확인해 보세요!/);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
+    { word: '어느 것이 가벼운가요?', wrongInput: sandbox.SCIENCE_LAB_REPORT_DATA.quizItems[1].choices[wrongChoice.choiceIndex] },
+  ]);
+  sandbox.ScienceReport.triggerFeedbackNext();
+  assert.equal(tabContent.innerHTML, choiceHtmlBefore);
+
+  sandbox.ScienceReport.submitChoiceQuiz(1, rightChoice.choiceIndex);
+  assert.match(tabContent.innerHTML, /훌륭해요! 정답입니다!/);
+});
+
+test('B4 science_safety.js: 안전 문제를 섞어 그리고 다시 도전 시 순서 유지, 오답노트에 보기 글자를 기록한다', () => {
+  const overlayBody = makeMiniEl('div');
+  const sandbox = {
+    console,
+    Math: Object.assign(Object.create(Math), { random: makeSeedRng(505) }),
+    document: {
+      readyState: 'complete',
+      head: makeFakeElement('head'),
+      body: makeFakeElement('body'),
+      createElement: (tag) => makeMiniEl(tag),
+      getElementById: (id) => id === 'overlayInnerBody' ? overlayBody : null,
+      querySelectorAll: () => [],
+      addEventListener() {},
+    },
+    localStorage: { getItem: () => null, setItem() {} },
+    MutationObserver: class { observe() {} },
+    grantRewardGem() {},
+    wrongNotes: [],
+    SCIENCE_SAFETY_LICENSE_DATA: {
+      title: '실험실 안전 시험',
+      questions: [{
+        category: '보안경',
+        question: '실험 전에 꼭 써야 하는 것은?',
+        options: ['보안경', '선글라스', '모자', '시계'],
+        answer: 0,
+        explanation: '눈을 보호해요.',
+      }],
+    },
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/core/quiz-flow-controller.js', import.meta.url), 'utf8'), sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/js/science_safety.js', import.meta.url), 'utf8'), sandbox);
+
+  sandbox.ScienceSafety.renderUI(overlayBody);
+  const htmlBeforeRetry = overlayBody.innerHTML;
+  const btns = extractRenderedButtons(htmlBeforeRetry);
+  assert.equal(btns.length, 4);
+  assert.notDeepEqual(btns.map(b => b.choiceIndex), [0, 1, 2, 3]);
+  btns.forEach((b, pos) => {
+    assert.match(b.label, new RegExp(`>${pos + 1}\\.<`));
+  });
+
+  const wrongBtn = btns.find(b => b.choiceIndex !== 0);
+  const rightBtn = btns.find(b => b.choiceIndex === 0);
+  sandbox.ScienceSafety.submitAnswer(0, wrongBtn.choiceIndex);
+  assert.deepEqual(JSON.parse(JSON.stringify(sandbox.wrongNotes)), [
+    { word: '실험 전에 꼭 써야 하는 것은?', wrongInput: '보안경' === sandbox.SCIENCE_SAFETY_LICENSE_DATA.questions[0].options[wrongBtn.choiceIndex] ? 'fail' : sandbox.SCIENCE_SAFETY_LICENSE_DATA.questions[0].options[wrongBtn.choiceIndex] },
+  ]);
+
+  // 다시 도전하기 호출 시 순서 동일
+  sandbox.ScienceSafety.renderQuestion(overlayBody, 0);
+  assert.equal(overlayBody.innerHTML, htmlBeforeRetry);
+
+  sandbox.ScienceSafety.submitAnswer(0, rightBtn.choiceIndex);
+  assert.match(overlayBody.innerHTML, /실험실 안전 라이선스 합격을 축하합니다/);
+});
+
+test('B5 science_season_airmass_lab.js: 보기를 섞어 data-choice-index로 채점하고 오답 시 섞인 위치의 정답 버튼과 번호를 표시한다', () => {
+  const qOptions = makeMiniEl('div');
+  const qFeedback = makeMiniEl('div');
+  const qNum = makeMiniEl('span');
+  const qText = makeMiniEl('div');
+  const quizProgress = makeMiniEl('span');
+  const btnNextQuiz = makeMiniEl('button');
+  const gemCount = makeMiniEl('span');
+  const tabs = [makeMiniEl('button'), makeMiniEl('button'), makeMiniEl('button'), makeMiniEl('button')];
+  const byId = {
+    qOptions, qFeedback, qNum, qText, quizProgress, btnNextQuiz, gemCount,
+    modeMap: makeMiniEl('div'), modeSeason: makeMiniEl('div'), modeMatrix: makeMiniEl('div'), modeQuiz: makeMiniEl('div'),
+    fairyMsg: makeMiniEl('div'),
+  };
+  let domReadyCb = null;
+
+  const sandbox = {
+    console,
+    Math: Object.assign(Object.create(Math), { random: makeSeedRng(607) }),
+    setTimeout: () => {},
+    parseInt,
+    document: {
+      readyState: 'complete',
+      head: makeFakeElement('head'),
+      body: makeFakeElement('body'),
+      createElement: (tag) => makeMiniEl(tag),
+      getElementById: (id) => byId[id] || makeMiniEl('div'),
+      querySelectorAll: (sel) => {
+        if (sel === '.quiz-opt-btn') return qOptions.children;
+        if (sel === '.mode-tab-btn') return tabs;
+        return [];
+      },
+      addEventListener(type, cb) { if (type === 'DOMContentLoaded') domReadyCb = cb; },
+    },
+    localStorage: { getItem: () => '0', setItem() {} },
+    MutationObserver: class { observe() {} },
+    AudioContext: class {},
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/core/quiz-flow-controller.js', import.meta.url), 'utf8'), sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/subjects/science/js/science_season_airmass_lab.js', import.meta.url), 'utf8'), sandbox);
+
+  assert.equal(typeof domReadyCb, 'function');
+  sandbox.switchMode('quiz');
+
+  const renderedBtns = qOptions.children;
+  assert.equal(renderedBtns.length, 4);
+  const origIndices = renderedBtns.map(b => Number(b.getAttribute('data-choice-index')));
+  assert.notDeepEqual(origIndices, [0, 1, 2, 3]);
+  renderedBtns.forEach((b, pos) => {
+    assert.equal(b.innerHTML.startsWith(`${pos + 1}. `), true);
+  });
+
+  // 1번 문항 정답은 원래 0번 인덱스('기단 (공기 덩어리)')
+  const expectedCorrectPos = origIndices.indexOf(0);
+  assert.ok(expectedCorrectPos >= 0 && expectedCorrectPos !== 0);
+  const wrongPos = origIndices.findIndex(idx => idx !== 0);
+  renderedBtns[wrongPos].onclick();
+
+  assert.equal(renderedBtns[wrongPos].classList.contains('wrong'), true);
+  assert.equal(renderedBtns[expectedCorrectPos].classList.contains('correct'), true);
+  assert.match(qFeedback.innerHTML, new RegExp(`정답은 <b>${expectedCorrectPos + 1}번</b>`));
+  assert.equal(sandbox.wrongNotes.length, 1);
+  assert.equal(renderedBtns[wrongPos].innerHTML.endsWith(sandbox.wrongNotes[0].wrongInput), true);
 });

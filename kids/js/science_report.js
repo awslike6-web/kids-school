@@ -13,8 +13,18 @@
     let userOrderPicks = [];
     let shuffledOrderPool = [];
     let lastOrderQuizKey = '';
+    let choiceOrderCache = {};
     let userStarRatings = {};
     let pendingFeedbackCallback = null;
+
+    function getArrangedItems(cacheKey, list) {
+        if (!choiceOrderCache[cacheKey]) {
+            choiceOrderCache[cacheKey] = window.QuizChoices
+                ? window.QuizChoices.arrange(list)
+                : list.map((text, index) => ({ text, index }));
+        }
+        return choiceOrderCache[cacheKey];
+    }
 
     const UNIT_THEME_DEFAULTS = {
         1: { icon: "🧪", color: "#0284c7", bg: "#e0f2fe", text: "#0369a1", border: "#bae6fd", badge: "🧪 교과서 12~19쪽 탐구 일지", guide: "교과서 『실험관찰』 12~19쪽 핵심 내용을 한눈에 읽어보세요!" },
@@ -39,6 +49,7 @@
 
     function openScienceReport(unitId = 1) {
         currentReportUnitId = unitId;
+        choiceOrderCache = {};
         if (typeof window.openMissionView === 'function') {
             window.openMissionView('report');
         }
@@ -101,7 +112,10 @@
         if (!container) container = document.getElementById('overlayInnerBody');
         if (!container) return;
 
-        if (typeof unitId !== 'undefined') currentReportUnitId = unitId;
+        if (typeof unitId !== 'undefined') {
+            if (unitId !== currentReportUnitId) choiceOrderCache = {};
+            currentReportUnitId = unitId;
+        }
         if (tabName) currentReportTab = tabName;
         const data = getActiveReportData();
         if (!data) return;
@@ -351,9 +365,9 @@
                 <div style="margin-bottom: 12px;">
                     <span style="font-size: 0.86rem; color: #64748b;">👇 알맞은 과학 구절 카드를 터치하세요 (채운 빈칸을 다시 누르면 취소됩니다):</span>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-                        ${q.options.map((opt, oIdx) => `
-                            <button class="quiz-choice-btn" style="padding: 8px 14px; font-size: 0.93rem;" onclick="ScienceReport.selectBlankWordByIdx(${qIdx}, ${oIdx})">
-                                🏷️ ${opt}
+                        ${getArrangedItems(`${currentReportUnitId}_${qIdx}_blank`, q.options).map(c => `
+                            <button class="quiz-choice-btn" data-choice-index="${c.index}" style="padding: 8px 14px; font-size: 0.93rem;" onclick="ScienceReport.selectBlankWordByIdx(${qIdx}, ${c.index})">
+                                🏷️ ${c.text}
                             </button>
                         `).join('')}
                     </div>
@@ -369,15 +383,16 @@
         }
         // 2) 객관식 4지선다 (type === 'choice')
         else if (q.type === 'choice') {
+            const choiceOrder = getArrangedItems(`${currentReportUnitId}_${qIdx}_choice`, q.choices);
             quizBodyHtml = `
                 <div style="color: #1e293b; font-size: 1.08rem; line-height: 1.55; margin-bottom: 16px;">
                     ${q.questionText}
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 10px;">
-                    ${q.choices.map((choice, idx) => `
-                        <button class="quiz-choice-btn" style="padding: 12px 16px; font-size: 0.95rem; text-align: left; justify-content: flex-start; line-height: 1.45;" onclick="ScienceReport.submitChoiceQuiz(${qIdx}, ${idx})">
-                            <span style="font-weight: bold; color: ${themeColor}; margin-right: 8px;">${idx + 1}.</span> ${choice}
+                    ${choiceOrder.map((c, pos) => `
+                        <button class="quiz-choice-btn" data-choice-index="${c.index}" style="padding: 12px 16px; font-size: 0.95rem; text-align: left; justify-content: flex-start; line-height: 1.45;" onclick="ScienceReport.submitChoiceQuiz(${qIdx}, ${c.index})">
+                            <span style="font-weight: bold; color: ${themeColor}; margin-right: 8px;">${pos + 1}.</span> ${c.text}
                         </button>
                     `).join('')}
                 </div>
@@ -563,6 +578,9 @@
                 renderLabReportQuiz(container, qIdx + 1);
             });
         } else {
+            if (!window.wrongNotes) window.wrongNotes = [];
+            const chosenText = (q.choices || [])[selectedIdx];
+            window.wrongNotes.push({ word: q.questionText || q.title || '탐구 보고서', wrongInput: chosenText || `선택 ${selectedIdx + 1}` });
             showQuizFeedback(container, false, `오답입니다! 💡 ${q.explanation}`, () => {
                 renderLabReportQuiz(container, qIdx);
             });

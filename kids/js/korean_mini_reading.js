@@ -32,6 +32,7 @@
     let missed = [];          // 첫 시도에 틀린 문제 (학습일지 오답 보고)
     let triedWrong = false;   // 지금 문제에서 한 번이라도 틀렸는지
     let finished = false;
+    let optionOrderCache = {};
 
     const AUDIO_DIR = '../../assets/audio/mini_reading/'; // korean.html(kids/subjects/korean/) 기준
     const AUTOPLAY_KEY = 'mini_reading_autoplay';
@@ -95,11 +96,12 @@
     }
 
     const linesOf = p => p.fullText.split(/\n+/).map(s => s.trim()).filter(Boolean);
-    // 문제 읽기 대본 (scripts/build_mini_reading_audio.py question_script와 같아야 mp3가 맞는다)
-    function questionScript(q) {
+    // 문제 읽기 대본 (orderedOptions가 넘어오면 화면에 보이는 보기 순서대로 읽는다)
+    function questionScript(q, orderedOptions) {
+        const opts = Array.isArray(orderedOptions) ? orderedOptions : (q.options || []);
         const who = q.speaker && q.speaker.line ? `${q.speaker.name || ''}의 말. ${q.speaker.line}. ` : '';
         // 차례 보기의 화살표(→)는 소리로 '그다음'이라 읽는다
-        return `${who}${q.question} ${q.options.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`.replace(/\s*→\s*/g, ', 그다음 ');
+        return `${who}${q.question} ${opts.map((o, i) => `${i + 1}번, ${o}.`).join(' ')}`.replace(/\s*→\s*/g, ', 그다음 ');
     }
 
     function autoBtnHtml() {
@@ -250,6 +252,7 @@
         qIdx = 0;
         missed = [];
         finished = false;
+        optionOrderCache = {};
         renderReader();
     }
 
@@ -286,6 +289,12 @@
         const step = { icon: q.icon || base.icon, label: q.label || base.label };
         answered = false;
         triedWrong = false;
+        if (!optionOrderCache[qIdx]) {
+            optionOrderCache[qIdx] = window.QuizChoices
+                ? window.QuizChoices.arrange(q.options || [])
+                : (q.options || []).map((text, index) => ({ text, index }));
+        }
+        const optionOrder = optionOrderCache[qIdx];
 
         const speaker = q.speaker && q.speaker.line ? `
             <div class="mr-speaker">
@@ -302,7 +311,7 @@
                 <p class="mr-question">${esc(q.question)}</p>
                 <button type="button" class="mr-link" id="mrSayQ">🔊 문제 다시 듣기</button>
                 <div class="mr-options">
-                    ${q.options.map((o, i) => `<button type="button" class="mr-opt" data-i="${i}">${esc(o)}</button>`).join('')}
+                    ${optionOrder.map((c, pos) => `<button type="button" class="mr-opt" data-i="${c.index}" data-choice-index="${c.index}">${pos + 1}. ${esc(c.text)}</button>`).join('')}
                 </div>
                 <div class="mr-explain" id="mrExplain" hidden></div>
             </div>
@@ -312,7 +321,7 @@
             </div>
         </div>`);
 
-        const sayQuestion = () => play([questionScript(q)]);
+        const sayQuestion = () => play([questionScript(q, optionOrder.map(c => c.text))]);
         containerEl.querySelector('#mrSayQ').onclick = sayQuestion;
         containerEl.querySelector('#mrReread').onclick = () => renderPeek();
         containerEl.querySelector('#mrNext').onclick = () => { qIdx++; renderQuestion(); };
@@ -327,13 +336,15 @@
         const q = passage.questions[qIdx];
         const correct = answerIndex(q);
         const btns = containerEl.querySelectorAll('.mr-opt');
+        const findBtn = idx => Array.from(btns).find(b => Number(b.getAttribute('data-i')) === idx);
         const explain = containerEl.querySelector('#mrExplain');
         stop();
 
         if (i === correct) {
             answered = true;
-            btns[i].classList.add('correct');
-            btns.forEach((b, k) => { if (k !== i) b.classList.add('dim'); });
+            const pickedBtn = findBtn(i);
+            if (pickedBtn) pickedBtn.classList.add('correct');
+            btns.forEach(b => { if (Number(b.getAttribute('data-i')) !== i) b.classList.add('dim'); });
             explain.innerHTML = `🎉 정답이에요! ${esc(q.explanation || '')}`;
             explain.hidden = false;
             containerEl.querySelector('#mrNext').hidden = false;
@@ -344,10 +355,16 @@
         }
 
         // 에러리스: 고른 보기는 흐리게, 정답은 노랗게 비추고 해설 (경고음·감점 없음)
-        if (!triedWrong) missed.push(q.question);
+        if (!triedWrong) {
+            missed.push(q.question);
+            if (!window.wrongNotes) window.wrongNotes = [];
+            window.wrongNotes.push({ word: q.question, wrongInput: (q.options && q.options[i]) || `선택 ${i + 1}` });
+        }
         triedWrong = true;
-        btns[i].classList.add('dim');
-        btns[correct].classList.add('guide');
+        const pickedBtn = findBtn(i);
+        const correctBtn = findBtn(correct);
+        if (pickedBtn) pickedBtn.classList.add('dim');
+        if (correctBtn) correctBtn.classList.add('guide');
         explain.innerHTML = `💡 ${esc(q.explanation || '노랗게 빛나는 답을 눌러 볼까요?')}`;
         explain.hidden = false;
         explain.scrollIntoView({ block: 'nearest', behavior: 'smooth' });

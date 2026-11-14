@@ -339,11 +339,16 @@
         const optsDiv = document.getElementById('qOptions');
         optsDiv.innerHTML = '';
 
-        q.options.forEach((optText, idx) => {
+        const optionOrder = (typeof window !== 'undefined' && window.QuizChoices)
+            ? window.QuizChoices.arrange(q.options)
+            : q.options.map((text, index) => ({ text, index }));
+
+        optionOrder.forEach((c, pos) => {
             const btn = document.createElement('button');
             btn.className = 'quiz-opt-btn';
-            btn.innerHTML = `${idx + 1}. ${optText}`;
-            btn.onclick = () => checkQuiz(idx, btn);
+            btn.setAttribute('data-choice-index', String(c.index));
+            btn.innerHTML = `${pos + 1}. ${c.text}`;
+            btn.onclick = () => checkQuiz(c.index, btn);
             optsDiv.appendChild(btn);
         });
 
@@ -357,7 +362,7 @@
         quizAnswered = true;
 
         const q = QUIZ_LIST[currentQuizIdx];
-        const allBtns = document.querySelectorAll('.quiz-opt-btn');
+        const allBtns = Array.from(document.querySelectorAll('.quiz-opt-btn'));
         const feedback = document.getElementById('qFeedback');
 
         if (selectedIdx === q.ans) {
@@ -374,13 +379,20 @@
             localStorage.setItem('min_science_gems', gems);
             document.getElementById('gemCount').textContent = gems;
         } else {
+            if (typeof window !== 'undefined') {
+                if (!window.wrongNotes) window.wrongNotes = [];
+                window.wrongNotes.push({ word: q.q, wrongInput: (q.options || [])[selectedIdx] || `선택 ${selectedIdx + 1}` });
+            }
             btnEl.classList.add('wrong');
-            allBtns[q.ans].classList.add('correct');
+            const correctPos = allBtns.findIndex(b => Number(b.getAttribute('data-choice-index')) === q.ans);
+            const correctBtn = correctPos >= 0 ? allBtns[correctPos] : allBtns[q.ans];
+            if (correctBtn) correctBtn.classList.add('correct');
+            const displayAnsNum = correctPos >= 0 ? correctPos + 1 : q.ans + 1;
             feedback.style.display = 'block';
             feedback.style.background = '#7f1d1d';
             feedback.style.color = '#fee2e2';
             feedback.style.border = '1.5px solid #f87171';
-            feedback.innerHTML = `💡 <b>아쉬워요!</b> 정답은 <b>${q.ans + 1}번</b>입니다.<br>${q.exp}`;
+            feedback.innerHTML = `💡 <b>아쉬워요!</b> 정답은 <b>${displayAnsNum}번</b>입니다.<br>${q.exp}`;
             playTone(220, 'sawtooth', 0.25);
         }
 

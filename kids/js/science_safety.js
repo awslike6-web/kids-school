@@ -7,10 +7,12 @@
 
     let safetyExamAnswers = {};
     let safetyExamCurrentIdx = 0;
+    let safetyChoiceOrders = {};
 
     function renderSafetyLicenseUI(container) {
         safetyExamAnswers = {};
         safetyExamCurrentIdx = 0;
+        safetyChoiceOrders = {};
         const data = window.SCIENCE_SAFETY_LICENSE_DATA;
         if (!data) return;
 
@@ -23,6 +25,12 @@
 
         const q = data.questions[qIdx];
         safetyExamCurrentIdx = qIdx;
+        if (!safetyChoiceOrders[qIdx]) {
+            safetyChoiceOrders[qIdx] = window.QuizChoices
+                ? window.QuizChoices.arrange(q.options)
+                : q.options.map((text, index) => ({ text, index }));
+        }
+        const optionOrder = safetyChoiceOrders[qIdx];
 
         container.innerHTML = `
             <div style="max-width: 680px; margin: 0 auto; padding: 12px; font-family: 'Jua', sans-serif;">
@@ -45,16 +53,16 @@
                     </h3>
 
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        ${q.options.map((opt, idx) => `
-                            <button class="quiz-choice-btn" style="
+                        ${optionOrder.map((c, pos) => `
+                            <button class="quiz-choice-btn" data-choice-index="${c.index}" style="
                                 padding: 14px 16px;
                                 font-size: 1.02rem;
                                 text-align: left;
                                 justify-content: flex-start;
                                 line-height: 1.4;
                                 border-radius: 12px;
-                            " onclick="ScienceSafety.submitAnswer(${qIdx}, ${idx})">
-                                <span style="font-weight: bold; color: #059669; margin-right: 8px;">${idx + 1}.</span> ${opt}
+                            " onclick="ScienceSafety.submitAnswer(${qIdx}, ${c.index})">
+                                <span style="font-weight: bold; color: #059669; margin-right: 8px;">${pos + 1}.</span> ${c.text}
                             </button>
                         `).join('')}
                     </div>
@@ -74,6 +82,9 @@
         if (!container) return;
 
         if (!isCorrect) {
+            if (!window.wrongNotes) window.wrongNotes = [];
+            const chosenText = (q.options || [])[selectedIdx];
+            window.wrongNotes.push({ word: q.question || '실험실 안전', wrongInput: chosenText || `선택 ${selectedIdx + 1}` });
             container.innerHTML = `
                 <div style="max-width: 550px; margin: 30px auto; padding: 24px; text-align: center; background: white; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.15); border: 3px solid #f87171; font-family: 'Jua', sans-serif;">
                     <div style="font-size: 3.5rem; margin-bottom: 10px;">⚠️</div>

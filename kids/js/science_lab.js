@@ -263,8 +263,9 @@
         } else {
             if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
             const currentItem = activeSectionData[activeQuizIdx] || {};
+            const chosenText = (currentItem.choices || [])[choiceIdx];
             if (!window.wrongNotes) window.wrongNotes = [];
-            window.wrongNotes.push({ word: currentItem.title || '탐구 실험', wrongInput: `선택 ${choiceIdx + 1}` });
+            window.wrongNotes.push({ word: currentItem.title || '탐구 실험', wrongInput: chosenText || `선택 ${choiceIdx + 1}` });
             if (typeof speakFairyTTS === 'function') speakFairyTTS("다시 한번 관찰해 봐!");
             alert("앗, 다시 한 번 생각해 볼까요? 교과서 사진을 확대해서 살펴보세요!");
         }

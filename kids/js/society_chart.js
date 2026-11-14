@@ -118,6 +118,12 @@
             }
             showSuccessModal(currentItem);
         } else {
+            const chosenText = (currentItem.choices || [])[selectedIdx];
+            if (!window.wrongNotes) window.wrongNotes = [];
+            window.wrongNotes.push({
+                word: currentItem.title || currentItem.artifactName || '자료 분석',
+                wrongInput: chosenText || `선택 ${selectedIdx + 1}`,
+            });
             if (typeof window.promptQuizRetryOrSkip === 'function') {
                 window.promptQuizRetryOrSkip({
                     message: '아쉽지만 틀렸어요! 돋보기를 다시 한번 살펴볼까요?',

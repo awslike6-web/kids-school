@@ -22,6 +22,7 @@
 
     // 🎧 오디오 낭독 수명주기 & 센터 정적 MP3 캐시
     let isAudioPlaying = false;
+    let questionChoiceOrders = {};
 
     /**
      * 🏁 독해 로비 화면 (공부방 표준: 학년 선택 바 + 단원별 그룹화 서가)
@@ -31,6 +32,7 @@
         currentStep = 0;
         activePassage = null;
         activeQuestionIdx = 0;
+        questionChoiceOrders = {};
         containerEl = container;
         const subject = options.subject || window.currentSubject || "국어";
         activeSubject = subject;
@@ -271,6 +273,7 @@
         if (!activePassage) return;
 
         activeQuestionIdx = 0;
+        questionChoiceOrders = {};
         userAnswers = [];
         isHintOpen = false;
         isBottomSheetOpen = false;
@@ -393,12 +396,18 @@
         } else {
             // 기본: 4지선다 객관식
             const choices = q.choices || q.options || [];
+            if (!questionChoiceOrders[activeQuestionIdx]) {
+                questionChoiceOrders[activeQuestionIdx] = window.QuizChoices
+                    ? window.QuizChoices.arrange(choices)
+                    : choices.map((text, index) => ({ text, index }));
+            }
+            const choiceOrder = questionChoiceOrders[activeQuestionIdx];
             inputHtml = `
                 <div class="reading-choices-list">
-                    ${choices.map((choice, cIdx) => `
-                        <button class="reading-choice-btn" id="choiceBtn_${cIdx}" onclick="window.ReadingEngine.chooseAnswer(${cIdx})">
-                            <span class="choice-num-badge">${cIdx + 1}</span>
-                            <span class="choice-text">${choice}</span>
+                    ${choiceOrder.map((c, pos) => `
+                        <button class="reading-choice-btn" id="choiceBtn_${c.index}" data-choice-index="${c.index}" onclick="window.ReadingEngine.chooseAnswer(${c.index})">
+                            <span class="choice-num-badge">${pos + 1}</span>
+                            <span class="choice-text">${c.text}</span>
                         </button>
                     `).join('')}
                 </div>
@@ -552,6 +561,11 @@
             }, 1200);
         } else {
             // 오답: 에러리스 학습 안내 & 힌트 자동 개방
+            if (!window.wrongNotes) window.wrongNotes = [];
+            window.wrongNotes.push({
+                word: (activePassage && activePassage.title) || q.question || '독해',
+                wrongInput: choices[selectedIdx] || `선택 ${selectedIdx + 1}`
+            });
             if (btn) btn.classList.add('wrong');
             if (typeof window.fairyEncourage === 'function') {
                 window.fairyEncourage();
