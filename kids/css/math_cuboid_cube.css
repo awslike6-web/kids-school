@@ -1,0 +1,120 @@
+/* 5-2 수학 5단원 직육면체와 정육면체 탐험관 전용 모양 (공용 틀은 math_explorer.css) */
+
+/* 입체 그리기 */
+.cc-face { fill: rgba(251, 191, 36, 0.22); stroke: none; }
+.cc-face-top { fill: rgba(251, 191, 36, 0.35); stroke: #92400e; stroke-width: 2; }
+.cc-face-side { fill: rgba(251, 191, 36, 0.22); stroke: #92400e; stroke-width: 2; }
+.cc-face-soft { fill: rgba(255, 255, 255, 0.4); }
+.cc-face-found { fill: rgba(16, 185, 129, 0.35); }
+.cc-face-chosen { fill: rgba(37, 99, 235, 0.38); stroke: #1d4ed8; stroke-width: 2; }
+.cc-face-parallel { fill: rgba(16, 185, 129, 0.38); stroke: #047857; stroke-width: 2; stroke-dasharray: 6 4; }
+.cc-face-perp { fill: rgba(249, 115, 22, 0.16); stroke: #ea580c; stroke-width: 2.5; }
+.cc-edge { fill: none; stroke: #7c2d12; stroke-width: 2.5; stroke-linecap: round; }
+.cc-edge-hidden { fill: none; stroke: #a8a29e; stroke-width: 2; stroke-dasharray: 6 5; stroke-linecap: round; }
+.cc-edge-found { stroke: #ea580c; stroke-width: 4.5; }
+.cc-edge-hidden.cc-edge-found { stroke: #f97316; }
+.cc-edge-hidden.cc-force-solid { stroke: #7c2d12; stroke-width: 2.5; stroke-dasharray: none; }
+.cc-edge.cc-force-dashed { stroke: #a8a29e; stroke-width: 2; stroke-dasharray: 6 5; }
+
+@keyframes ccEdgeBlink {
+  0%, 100% { stroke: #eab308; }
+  50% { stroke: #fde047; }
+}
+
+.cc-edge-glow { stroke-width: 5; animation: ccEdgeBlink 1s ease-in-out infinite; }
+.cc-hit-edge { stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: stroke; }
+.cc-hit-vertex { fill: transparent; cursor: pointer; pointer-events: all; }
+.cc-vertex { fill: #7c2d12; stroke: #ffffff; stroke-width: 1.5; }
+.cc-vertex-hidden { fill: #ffffff; stroke: #a8a29e; stroke-width: 2; }
+.cc-vertex-found { fill: #7c3aed; stroke: #ffffff; }
+.cc-vertex-found.cc-vertex-hidden { fill: #c4b5fd; stroke: #7c3aed; }
+.cc-tap { cursor: pointer; }
+.cc-vlabel { font-size: 15px; fill: #7c2d12; }
+.cc-vlabel-hidden { fill: #a8a29e; }
+
+/* 1관 바구니 */
+.cc-sort-stage { min-height: 120px; }
+.mx-board.cc-thumb-big { max-width: 260px; }
+.mx-board.cc-thumb { max-width: 74px; padding: 2px; margin: 0; border-width: 1px; border-radius: 10px; }
+.cc-zone-row .mx-btn { flex: 1 1 140px; }
+.cc-venn { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; align-items: stretch; }
+.cc-basket { border-radius: 18px; padding: 10px; border: 3px solid #fdba74; background: #fff7ed; }
+.cc-basket-outer { flex: 2 1 280px; }
+.cc-basket-inner { margin-top: 8px; border-color: #a78bfa; background: #f5f3ff; }
+.cc-basket-side { flex: 1 1 150px; border-color: #cbd5e1; background: #f8fafc; }
+.cc-basket-title { font-family: 'Jua', sans-serif; font-size: 1rem; color: #7c2d12; margin-bottom: 6px; }
+.cc-basket-inner .cc-basket-title { color: #5b21b6; }
+.cc-basket-side .cc-basket-title { color: #475569; }
+.cc-basket-items { display: flex; flex-wrap: wrap; gap: 6px; min-height: 40px; }
+.cc-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cc-chip-name { font-size: 0.72rem; font-weight: 700; color: #475569; }
+
+/* 3관 면 버튼 */
+.cc-face-row .mx-btn { flex: 1 1 150px; font-size: 0.9rem; }
+
+/* 전개도 SVG */
+.mx-board.cc-net-board { max-width: 360px; }
+.cc-net-cell { fill: #fffbeb; stroke: #92400e; stroke-width: 1.6; }
+.cc-net-blank { fill: #ffffff; }
+.cc-net-filled { fill: #fef3c7; }
+.cc-net-selected { fill: #dbeafe; stroke: #1d4ed8; stroke-width: 2.5; }
+.cc-net-mate { fill: #fef9c3; stroke: #ca8a04; stroke-width: 2.5; }
+.cc-net-point { fill: #6d28d9; }
+.cc-pair-a { fill: rgba(37, 99, 235, 0.3); }
+.cc-pair-b { fill: rgba(16, 185, 129, 0.32); }
+.cc-pair-c { fill: rgba(249, 115, 22, 0.3); }
+.cc-dim-line { stroke: #6d28d9; stroke-width: 2; }
+
+/* CSS 3D 접기 */
+.cc-fold-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 250px;
+  margin: 10px auto;
+  perspective: 900px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fffbeb;
+  border: 2px solid #fed7aa;
+}
+
+.cc-fold-scene {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg) rotateZ(0deg) scale(0.9);
+  transition: transform 1.2s ease;
+}
+
+.cc-fold-wrap.is-folded .cc-fold-scene { transform: rotateX(58deg) rotateZ(-38deg) scale(1.3) translate(var(--cc-dx, 0px), var(--cc-dy, 0px)) translateZ(-32px); }
+
+.cc-fold-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  transform-style: preserve-3d;
+  background: rgba(251, 191, 36, 0.55);
+  border: 2px solid #92400e;
+  transition: transform 1.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-fold-scene > .cc-fold-face { position: absolute; }
+
+/* 주사위 눈 */
+.cc-pips { display: grid; grid-template-columns: repeat(3, 10px); grid-template-rows: repeat(3, 10px); gap: 4px; }
+.cc-pip { width: 10px; height: 10px; border-radius: 50%; }
+.cc-pip.on { background: #1e293b; }
+
+@media (max-width: 420px) {
+  .cc-fold-wrap { min-height: 220px; }
+  .cc-fold-scene, .cc-fold-wrap.is-folded .cc-fold-scene { scale: 0.75; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-fold-scene, .cc-fold-face { transition: none; }
+  .cc-edge-glow { animation: none; }
+}

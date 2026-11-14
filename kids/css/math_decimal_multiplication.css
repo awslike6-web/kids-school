@@ -1,0 +1,113 @@
+/* 5-2 수학 4단원 소수의 곱셈 탐험관 전용 모양 (공용 틀은 math_explorer.css) */
+
+/* 1·2관 막대 모델 */
+.dm-bar-bg { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; }
+.dm-bar-fill { fill: rgba(13, 148, 136, 0.45); stroke: #0f766e; stroke-width: 1.5; }
+.dm-tick { stroke: #94a3b8; stroke-width: 1; }
+.dm-tick-main { stroke: #334155; stroke-width: 2; }
+.dm-marker { stroke: #ea580c; stroke-width: 2.5; stroke-dasharray: 5 4; }
+
+/* 3관 모눈 */
+.dm-grid-bg { fill: #ffffff; }
+.dm-grid-fill { fill: rgba(13, 148, 136, 0.38); }
+.dm-grid-line { stroke: #cbd5e1; stroke-width: 1; }
+.dm-grid-edge { stroke: #334155; stroke-width: 2; }
+.dm-pick-wrap { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.dm-pick-label { flex: 0 0 auto; font-weight: 700; color: var(--mx-strong); min-width: 32px; }
+.dm-pick-row { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 4px; flex: 1; }
+.mx-btn.dm-pick { min-height: 44px; min-width: 0; padding: 6px 2px; font-size: 0.92rem; }
+
+/* 4관 넓이 조각 */
+.dm-area-bg { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.dm-part { stroke: #ffffff; stroke-width: 2; }
+.dm-part-a { fill: rgba(37, 99, 235, 0.35); }
+.dm-part-b { fill: rgba(249, 115, 22, 0.4); }
+.dm-part-c { fill: rgba(16, 185, 129, 0.4); }
+.dm-part-d { fill: rgba(139, 92, 246, 0.45); }
+.dm-part-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.dm-part-line { padding: 4px 12px; border-radius: 10px; font-weight: 700; color: #1e293b; background: #f1f5f9; }
+div.dm-part-a { background: #dbeafe; }
+div.dm-part-b { background: #ffedd5; }
+div.dm-part-c { background: #d1fae5; }
+div.dm-part-d { background: #ede9fe; }
+
+/* 5관 숫자 띠와 소수점 */
+.dm-strip {
+  --dm-cell: 56px;
+  position: relative;
+  display: flex;
+  width: calc(var(--dm-cell) * 4);
+  margin: 14px auto 6px;
+  padding-bottom: 6px;
+}
+
+.dm-strip .dm-digit { width: var(--dm-cell); }
+
+.dm-digit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  font-family: 'Jua', sans-serif;
+  font-size: 2.4rem;
+  color: #0f172a;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.dm-digit-faint { color: #cbd5e1; }
+
+.dm-dot {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: #ea580c;
+  transition: left 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+.dm-dot[hidden] { display: none; }
+.dm-shift-log { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+.dm-shift-line { padding: 6px 12px; border-radius: 10px; background: var(--mx-softer); font-weight: 700; }
+
+/* 6관 소수점 찍기 */
+.dm-drill-head { font-family: 'Jua', sans-serif; font-size: 1.9rem; color: var(--mx-strong); text-align: center; margin: 4px 0 2px; }
+.dm-slot-strip { display: flex; justify-content: center; align-items: flex-end; flex-wrap: nowrap; gap: 0; margin: 14px 0 4px; }
+.dm-slot-strip .dm-digit { width: 52px; height: 60px; font-size: 2.1rem; }
+.dm-digit-pad { color: #c2410c; background: #fff7ed; border-color: #fdba74; border-style: dashed; }
+
+.dm-slot {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  margin: 0 3px 4px;
+  border-radius: 50%;
+  border: 2px dashed #94a3b8;
+  background: #f8fafc;
+  color: #ea580c;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dm-slot:hover:not(:disabled) { border-color: var(--mx-accent); background: var(--mx-softer); }
+.dm-slot.is-off { opacity: 0.35; cursor: default; }
+.dm-slot.is-correct { border-style: solid; border-color: #059669; background: #d1fae5; color: #065f46; }
+.dm-pad-note { color: #9a3412; font-weight: 700; }
+.dm-result { justify-content: center; font-size: 1.3rem; }
+
+@media (max-width: 420px) {
+  .dm-strip { --dm-cell: 48px; }
+  .dm-slot-strip .dm-digit { width: 40px; height: 52px; font-size: 1.7rem; }
+  .dm-slot { width: 28px; height: 28px; margin: 0 1px 4px; }
+  .dm-pick-row { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-dot, .dm-digit { transition: none; }
+}

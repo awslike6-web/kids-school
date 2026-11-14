@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔢 5학년 소수의 곱셈 탐험관 | 김s 공부방</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/design-system.css">
+  <link rel="stylesheet" href="../../css/math_explorer.css?v=20261114-mx">
+  <link rel="stylesheet" href="../../css/math_decimal_multiplication.css?v=20261114-mx">
+</head>
+<body class="mx-theme-decimal">
+  <div class="mx-page">
+    <header class="mx-header">
+      <a class="mx-back-link" href="math.html">🔙 수학 대문</a>
+      <div class="mx-header-titles">
+        <p class="mx-subtitle">초등 5-2 수학 4단원 · 교과서 90~107쪽</p>
+        <h1 class="mx-main-title">🔢 소수의 곱셈 탐험관</h1>
+      </div>
+    </header>
+
+    <section class="mx-progress-card" aria-label="탐험 진도">
+      <div class="mx-progress-top">
+        <span class="mx-progress-label">민수의 소수의 곱셈 탐험 진도</span>
+        <span class="mx-progress-stat">
+          <span id="mxDoneCount">0</span> / <span id="mxTotal">6</span>개 관 완료 (모두 마치면 +5💎)
+        </span>
+      </div>
+      <div class="mx-progress-track">
+        <div id="mxProgressFill" class="mx-progress-fill"></div>
+      </div>
+    </section>
+
+    <nav id="mxTabs" class="mx-tabs" role="tablist" aria-label="소수의 곱셈 탐험관 탭"></nav>
+
+    <main id="mxContainer" class="mx-container"></main>
+  </div>
+
+  <div id="mxCompleteModal" class="mx-modal" role="dialog" aria-modal="true" aria-labelledby="mxCompleteTitle" hidden>
+    <div class="mx-modal-box">
+      <h2 id="mxCompleteTitle" class="mx-modal-title">🎉 소수의 곱셈 마스터!</h2>
+      <p class="mx-modal-desc">6개 관을 모두 마쳤어요!</p>
+      <p id="mxCompleteReward" class="mx-modal-reward"></p>
+      <div class="mx-btn-row">
+        <button id="mxCompleteClose" class="mx-btn" type="button">닫기</button>
+        <button id="mxGoQuiz" class="mx-btn primary" type="button">🏆 퀴즈 배틀 하러 가기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js?v=20261028-tts"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js?v=20261028-coco"></script>
+  <script src="./js/math_explorer-shell.js?v=20261114-mx"></script>
+  <script src="./js/math_explorer-quiz.js?v=20261114-mx"></script>
+  <script src="./js/decimal_multiplication-core.js?v=20261114-mx"></script>
+  <script src="./js/decimal_multiplication-labs-a.js?v=20261114-mx"></script>
+  <script src="./js/decimal_multiplication-labs-b.js?v=20261114-mx"></script>
+</body>
+</html>

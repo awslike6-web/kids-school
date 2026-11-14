@@ -77,15 +77,10 @@
     document.querySelectorAll('#conceptModeTopic .filter-pill-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
-    const tNat = document.getElementById('topic-block-nat');
-    const tFrac = document.getElementById('topic-block-frac');
-    const tShape = document.getElementById('topic-block-shape');
-    const tMeasure = document.getElementById('topic-block-measure');
-
-    tNat.style.display = (topic === 'all' || topic === 'nat') ? 'block' : 'none';
-    tFrac.style.display = (topic === 'all' || topic === 'frac') ? 'block' : 'none';
-    tShape.style.display = (topic === 'all' || topic === 'shape') ? 'block' : 'none';
-    tMeasure.style.display = (topic === 'all' || topic === 'measure') ? 'block' : 'none';
+    // 영역 블록 id는 topic-block-{영역} (nat · frac · shape · measure · data)
+    document.querySelectorAll('#conceptModeTopic .topic-sector-block').forEach(block => {
+      block.style.display = (topic === 'all' || block.id === 'topic-block-' + topic) ? 'block' : 'none';
+    });
   }
 
   // 대문 이동 로직

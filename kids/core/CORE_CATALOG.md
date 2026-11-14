@@ -347,6 +347,34 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `-main.js` (`window.CSMain`): 탭·진도·보상(`grantRewardAndShowUI`)·완주 모달, `localDateKey()`(로컬 날짜), `makeUi(say)`(관 화면 공용 그리기 도우미: `el`·`pts`·`board`·`grid`·`label`·`concept`·`hint`·`shuffle`·`gridPoint`).
 - 관 화면 계약: `render(container, ctx)`, `ctx = { geo, ui, say, praise, encourage, reward, finale, svg, complete }`. `complete()`는 여러 번 불러도 main이 페이지당 1회만 처리합니다.
 - 검증: `tests/math-congruence-symmetry.test.mjs`(프리셋 분류, 8가지 합동 변환과 대응, 문제 생성 seed 300개 대칭·자기 교차 없음, 노션 행 변환, 스크립트 순서·상대 경로·800줄 미만). 화면은 쓰기 차단 서버에서 375px·데스크톱으로 확인합니다.
+- 이 탐험관은 아래 공용 틀(`MathExplorer`)보다 먼저 만들어 자체 `CSMain`·`CSQuiz`를 씁니다. 다음 대청소 때 공용 틀로 옮길 후보입니다(같은 동작: 탭·진도·보상·완주 창·노션 퀴즈).
+
+### 🧭 수학 단원 탐험관 공용 틀 `MathExplorer` (2026-11-14)
+
+새 단원 탐험관(관 6개 + 노션 퀴즈 배틀)은 틀을 복사하지 않고 이 부품을 씁니다. 5-2 4·5·6단원이 사용합니다.
+
+- 파일: `kids/subjects/math/js/math_explorer-shell.js`(386줄), `kids/subjects/math/js/math_explorer-quiz.js`(187줄), `kids/css/math_explorer.css`(298줄). 화면은 공통 코어(`config`·`core`·`notion-helper`·`fairy-config`·`fairy-tts`·`fairy-settings-catalog`·`fairy-engine`) 뒤에 `shell` → `quiz` → 단원 파일 순서로 싣습니다(`?v=20261114-mx`). 단원 색은 `body` 클래스 `mx-theme-decimal`·`mx-theme-cuboid`·`mx-theme-average`가 `--mx-*` 변수로 바꿉니다.
+- HTML 아이디 계약: `mxTabs`, `mxContainer`, `mxDoneCount`, `mxTotal`, `mxProgressFill`, `mxCompleteModal`, `mxCompleteReward`, `mxCompleteClose`, `mxGoQuiz`.
+- `-shell.js` (`window.MathExplorer`): `mount({ key, labs: [관…], quiz })` — 관 = `{ title, icon, sub, render(container, ctx) }`. 관 첫 완주 💎1(페이지당 1회), 모두 완주 하루 1회 +5(`localStorage` 키 `math_{key}_allclear_{학생}_{로컬 YYYY-MM-DD}`), 지급은 `grantRewardAndShowUI(n, false, 'math')`만 씁니다. `localDateKey`, `josa(낱말, 'eul'|'eun'|'gwa'|'i'|'ieyo'|'ro')`(숫자·단위·자음 기호 뒤 조사: 8을·0.4를·면 ㄴㅂㅅㄷ과·16.8 L예요), `shuffle`, `randInt`, `makeUi`.
+  - `ctx = { ui, say, praise, encourage, reward, finale, complete, isDone, redraw }`. 음성은 `speakFairyTTS`·`fairyPraise`·`fairyEncourage`·`fairyReward`로만 냅니다.
+  - `ui`: `el`·`svg`·`board(viewBox, cls)`·`text(svg, x, y, 글자, cls, anchor)`·`card`·`guide`·`concept(제목, 본문)`(🔊 버튼)·`hint`·`button`·`doneBadge`·`arrange`·`josa`, **`choiceQuestion({ question, choices, answer(원래 번호 0부터), hint, explain, onSolved, column, fixed })`** — 에러리스 3지선다. 보기는 `window.QuizChoices.arrange`로 섞고(뜻 있는 순서는 `fixed: true`) 원래 번호로 채점, 틀리면 고른 보기만 꺼지고 노란 힌트 + 정답 보기 반짝임. **`sequence(container, [function(box, next)], onDone)`** — 단계를 차례로 아래에 붙입니다.
+- `-quiz.js` (`window.MathExplorerQuiz`): `create({ grade, unit, title, intro })` → 퀴즈 탭. CURRICULUM_DB를 `과목=수학 · 학년 · 단원 equals · 구역=탐구퀴즈`로만 읽고(`buildQueryBody`), 하드코딩 대체 문제 없이 실패 시 "다시 불러오기". `buildQuizFromPages(results)`는 `CSQuiz`와 같은 계약(보기 1~4 줄 배열, 제목순). 문항 첫 정답마다 💎1.
+
+### 🔢📦📊 5-2 4·5·6단원 탐험관 (2026-11-14)
+
+공용 틀 위에 단원 파일 3개씩. 화면 내용·관별 활동·교과서 쪽수는 `docs/math_spec.md` §3-8~10.
+
+- **4단원 소수의 곱셈** `kids/subjects/math/decimal_multiplication.html` + `kids/css/math_decimal_multiplication.css`(113줄).
+  - `decimal_multiplication-core.js`(201줄, `window.DecimalCore`, DOM 없음): 소수를 `{ int, places }`로 다뤄 부동소수 오차가 없습니다. `parse`, `format`(끝자리 0 지움)·`formatRaw`(3.60 유지), `mul`, `compare`, `pointSlots(곱)` → `{ digits, padded, slot, trailingZeros }`(0.04×0.7 → `'0028'`, 앞에 0 2개, 소수점 칸 1), `areaParts(a, b)`(넓이 4조각), `pointChoices(곱)`(정답·×10·÷10 서로 다른 보기 3개), 문제 `makeLab1~4`, `makeDrillSet(5)`(끝자리 0·앞자리 0 채우기 문제를 한 판에 하나씩).
+  - `decimal_multiplication-labs-a.js`(341줄, `window.DecimalLabsA`): 1·2관 막대 모델(0.1배·1배 칠하기), 3관 모눈 넓이, `twoProblems`(교과서 문제 → 새 문제). `kids/subjects/math/js/decimal_multiplication-labs-b.js`(427줄, `window.DecimalLabsB`): 4관 넓이 4조각, 5관 숫자 띠 소수점 이동, 6관 소수점 찍기 훈련, `mount`.
+- **5단원 직육면체와 정육면체** `kids/subjects/math/cuboid_cube.html` + `kids/css/math_cuboid_cube.css`(120줄).
+  - `cuboid_cube-geo.js`(281줄, `window.CuboidGeo`, DOM 없음): 꼭짓점 기호 윗면 ㄱㄴㄷㄹ·아랫면 ㅁㅂㅅㅇ, `FACES`(면 6개·바깥 방향·짝)·`FACE_NAMES`(앞면 `ㄴㅂㅅㄷ`)·`EDGES`, `cuboid(w,h,d)`·`triangularPrism`·`squarePyramid`, `view(입체, yaw, pitch, scale, ox, oy)` → 화면 좌표·보이는 면·모서리 실선/점선·꼭짓점 보임, `parallelFace`·`perpendicularFaces`. 전개도: `foldNet(칸[[열,행]…])`(첫 칸을 바닥에 두고 이웃 칸을 경첩으로 90° 접어 칸마다 3D 모서리 좌표·`isCube`), `oppositeCells`, `meetingPoints(칸, 점)`, `CUBE_NETS`(정육면체 전개도 11종 전부)·`NOT_NETS`.
+  - `cuboid_cube-labs-a.js`(586줄, `window.CuboidLabsA`): `drawSolid(svg, ui, 입체, opts)`(면 색·모서리·꼭짓점 누르기), 1관 바구니 분류, 2관 돌려 가며 세기, 3관 평행·수직, 4관 겨냥도. `cuboid_cube-net.js`(494줄, `window.CuboidNet`): `foldView(el, 칸, 칸 내용)`(CSS 3D 접기, `fold`·`unfold`·`isFolded`), 5관 전개도, 6관 주사위·만나는 점, `mount`.
+- **6단원 평균과 가능성** `kids/subjects/math/average_probability.html` + `kids/css/math_average_probability.css`(66줄).
+  - `average_probability-core.js`(153줄, `window.AverageCore`, DOM 없음): `mean`(나누어떨어질 때만), `makeLevelData`(평균 자연수), `move`·`isLevel`, `missingValue`, `SPINNERS`(가·나·다, 한 색이 절반), `simulate(회전판, 횟수)`(기대 횟수 ± 6% 안, 절반인 색이 언제나 가장 많음 — 모의 실험이 오개념을 만들지 않게), `sequenceOf`, `LEVEL_WORDS`·`SITUATIONS`·`DICE_CARDS`.
+  - `average_probability-labs-a.js`(431줄, `window.AverageLabsA`): 1관 ○ 고르게 하기, 2관 종이띠 → 공식, 3관 모둠 비교·지워진 기록. `kids/subjects/math/js/average_probability-labs-b.js`(379줄, `window.AverageLabsB`): `drawSpinner`, 4관 가능성 말, 5관 수직선·주사위 카드 순서, 6관 회전판 모의 실험, `mount`.
+- 퀴즈 자료: `scripts/data/curriculum/math_5-2_4.json`·`_5.json`·`_6.json`(단원마다 12제, 초안 agy Hydrogen → 계산·쪽수 검토). 등록은 공식 도구 `scripts/register_curriculum.py`.
+- 검증: `tests/math-explorer-units.test.mjs`(16개: 조사, 노션 행 변환·필터, 소수 표기·0 처리·문제 생성 seed 200, 겨냥도 보임 판정, 면 관계, 헥소미노 35종 중 정육면체 전개도 11종 = 목록, 마주 보는 칸·만나는 점 대칭, 평균 자료, 모의 실험 seed 300, 퀴즈 JSON, 화면 실림 순서·상대 경로·600줄, 보상·음성 계약). 화면은 쓰기 차단 서버에서 375px·데스크톱으로 확인합니다.
 
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
@@ -1517,6 +1545,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
 
 - **객관식 보기 섞기 (2026-11-14)**: `tests/quiz-choices.test.mjs`(11개)·`tests/quiz-choices-guard.test.mjs`(2개, 새 객관식 화면이 `QuizChoices`를 빠뜨리면 실패). 위 「`window.QuizChoices`」 절.
+- **수학 5-2 4·5·6단원 탐험관 (2026-11-14)**: `tests/math-explorer-units.test.mjs`(16개). 위 「수학 단원 탐험관 공용 틀」·「5-2 4·5·6단원 탐험관」 절. 이 파일까지 60개 파일·731개(이 PC 약 10초).
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

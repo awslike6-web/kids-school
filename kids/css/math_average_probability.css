@@ -1,0 +1,66 @@
+/* 5-2 수학 6단원 평균과 가능성 탐험관 전용 모양 (공용 틀은 math_explorer.css)
+   회전판의 '빨강'은 학습 내용(색 이름)이라 쓰지만, 오답 표시에는 빨강을 쓰지 않는다. */
+
+/* 1관 ○ 옮기기 */
+.ap-col { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 2; cursor: pointer; }
+.ap-col:hover { fill: #f0f9ff; }
+.ap-col-picked { fill: #e0f2fe; stroke: #0284c7; stroke-width: 3; }
+.ap-dot { fill: #38bdf8; stroke: #0369a1; stroke-width: 2; pointer-events: none; }
+.ap-dot-picked { fill: #fde047; stroke: #ca8a04; }
+.ap-avg-line { stroke: #7c3aed; stroke-width: 2.5; stroke-dasharray: 8 6; }
+
+/* 2관 종이띠 */
+.ap-seg { stroke: #ffffff; stroke-width: 2; transition: x 0.6s ease, y 0.6s ease; }
+.ap-seg-a { fill: #93c5fd; background: #dbeafe; }
+.ap-seg-b { fill: #86efac; background: #dcfce7; }
+.ap-seg-c { fill: #fdba74; background: #ffedd5; }
+.ap-seg-d { fill: #c4b5fd; background: #ede9fe; }
+.ap-seg-e { fill: #fcd34d; background: #fef3c7; }
+.ap-fold-line { stroke: #0f172a; stroke-width: 2.5; stroke-dasharray: 5 4; }
+.ap-table { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
+.ap-table-cell { display: flex; flex-direction: column; align-items: center; min-width: 64px; padding: 6px 10px; border-radius: 12px; }
+.ap-table-name { font-size: 0.8rem; color: #475569; font-weight: 700; }
+.ap-table-val { font-family: 'Jua', sans-serif; font-size: 1.2rem; color: #0f172a; }
+
+/* 3관 모둠 비교·막대 */
+.ap-groups { display: flex; flex-wrap: wrap; gap: 10px; }
+.ap-group { flex: 1 1 200px; padding: 10px 12px; border-radius: 14px; background: var(--mx-softer); border: 2px solid var(--mx-soft); }
+.ap-group-name { font-family: 'Jua', sans-serif; font-size: 1.1rem; color: var(--mx-strong); }
+.ap-group-vals { font-weight: 700; margin: 2px 0; }
+.ap-group-sum { color: #6d28d9; font-weight: 700; }
+.ap-bar { fill: #7dd3fc; stroke: #0369a1; stroke-width: 1.5; transition: y 0.25s ease, height 0.25s ease; }
+.ap-bar-missing { fill: #fed7aa; stroke: #c2410c; stroke-dasharray: 5 3; }
+
+/* 4관 가능성 화살표 */
+.ap-scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin-bottom: 12px; position: relative; }
+.ap-scale-step { text-align: center; font-size: 0.82rem; font-weight: 700; padding: 6px 2px; border-radius: 10px; color: #0f172a; }
+.ap-scale-0 { background: #e2e8f0; }
+.ap-scale-1 { background: #e0f2fe; }
+.ap-scale-2 { background: #ede9fe; }
+.ap-scale-3 { background: #dcfce7; }
+.ap-scale-4 { background: #bbf7d0; }
+.ap-situation { padding: 12px 14px; border-radius: 14px; background: #fffbeb; border: 2px solid #fde68a; font-size: 1.08rem; font-weight: 700; margin: 6px 0; }
+
+/* 회전판 */
+.ap-wedge { stroke: #ffffff; stroke-width: 2; }
+.ap-red { fill: #f87171; }
+.ap-blue { fill: #60a5fa; }
+.ap-yellow { fill: #facc15; }
+.ap-spinner-rim { fill: none; stroke: #334155; stroke-width: 2.5; }
+.ap-spinner-pin { fill: #334155; }
+
+/* 5관 수직선·카드 */
+.ap-zone-low { fill: #e0f2fe; }
+.ap-zone-high { fill: #dcfce7; }
+.ap-nl { stroke: #334155; stroke-width: 3; }
+.ap-nl-tick { stroke: #334155; stroke-width: 2.5; }
+.ap-nl-mark { fill: #f97316; stroke: #ffffff; stroke-width: 2; }
+.ap-frac-bar { stroke: #334155; stroke-width: 1.5; }
+.ap-order-head { font-weight: 700; color: var(--mx-sub); margin-top: 6px; }
+.ap-order-track { display: flex; flex-wrap: wrap; gap: 6px; min-height: 44px; padding: 8px; border-radius: 14px; border: 2px dashed var(--mx-line); margin: 6px 0; }
+.ap-order-chip { padding: 6px 10px; border-radius: 10px; background: #d1fae5; color: #065f46; font-weight: 700; font-size: 0.9rem; }
+.mx-btn.ap-card { flex: 1 1 140px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-seg, .ap-bar { transition: none; }
+}
