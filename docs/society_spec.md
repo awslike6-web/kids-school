@@ -121,6 +121,7 @@ graph TD
 ### 1) 교재·사료 마스터 DB (`CURRICULUM_DB_ID: 3e8a27115b68806d94bfc81e9b3435fa`)
 * **데이터 단일 원천**: 역사 유물 사진, 고지도, 교재 사료 및 관련 4지선다 퀴즈를 노션 DB에서 통합 관리.
 * **퀵체인지 2.0 (`admin-image-changer.html`)**: 관리자 화면에서 사진 업로드/변경 시 깃허브 푸시와 노션 갱신을 원클릭으로 처리하며, 브라우저 로컬 캐시(`CURRICULUM_CACHE`)를 즉시 자동 무효화하여 0초 만에 라이브 반영.
+* **객관식 보기 섞기 (2026-11-14~)**: 화면이 문제를 열 때마다 `window.QuizChoices`로 보기 순서를 섞고 원래 번호로 채점한다. 노션·자료의 보기 순서와 정답 위치는 신경 쓰지 않아도 되고, 해설에 「1번은…」처럼 보기 번호를 쓰지 않는다. 상세: `kids/core/CORE_CATALOG.md` 「`window.QuizChoices`」 절. 대상: 📊 자료분석(`society_chart.js`).
 * **단원 등록 (2026-11-13~)**: 공식 도구만 쓴다. 단원마다 일회성 스크립트를 만들지 않는다.
   - 용어: `python -X utf8 scripts/register_voca.py --file scripts/data/voca/society_{학년}_{단원키}.json` (`영역 분류=용어방`, `어휘유형=개념`, `학생=[민수, 공통]`, `시험범위=true`)
   - 사료·지도·도표 문제: `python -X utf8 scripts/register_curriculum.py --file scripts/data/curriculum/society_{학년}_{단원키}.json` (구역은 `역사사료`·`지도탐방`·`자료분석`만 화면에 나옴)

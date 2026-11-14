@@ -65,7 +65,17 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   - `kids/core/stt-debouncer.js`: STT 음성 인식 디바운스 및 세션 관리 (`setupDebouncedSTT`).
   - `kids/core/mission-reward-engine.js`: 미션 보상 지급 및 축하 모달 렌더러 (`claimMissionRewardOnce`, `openMissionRewardModal`, `grantVocaDwellReward`).
   - `kids/core/quiz-feedback-overlay.js`: 오답 다시풀기/다음문제 오버레이, 정답·뜻풀이 카드, 보카사전 딥링크 및 이탈 방지 가드 (`promptQuizRetryOrSkip`, `getVocaCommonUrl`, `window.__quizLeaveGuard`).
-  - `kids/core/quiz-flow-controller.js`: 스피드(자동)/꼼꼼탐구(수동) 2대 진행 템포 제어기 및 풀이·보카사전 딥링크 카드 (`triggerQuizAdvance`, `setQuizFlowMode`).
+  - `kids/core/quiz-flow-controller.js`: 스피드(자동)/꼼꼼탐구(수동) 2대 진행 템포 제어기 및 풀이·보카사전 딥링크 카드 (`triggerQuizAdvance`, `setQuizFlowMode`). 파일 맨 앞 순수 블록에 **객관식 보기 섞기 `window.QuizChoices`** (2026-11-14, 아래 절).
+
+### 🔀 `window.QuizChoices` (객관식 보기 화면 섞기, 2026-11-14)
+- **위치**: `kids/core/quiz-flow-controller.js` 맨 앞 IIFE (DOM·localStorage 없음). `core.js`가 자동으로 싣고, `core.js`를 안 싣는 화면(`gugudan.html`, `science_season_airmass_lab.html`)은 `<script src="../../core/quiz-flow-controller.js?v=20261114-shuffle">`를 직접 싣는다.
+- **API**: `arrange(choices, {fixed, rng}) → [{text, index}]` 화면 순서(`index` = 원래 번호, 0부터) / `shuffle(list, rng)` Fisher–Yates, 원본 불변 / `isFixedOrder(choices)`.
+- **고정 순서(섞지 않음)**: 2지선다 O/X·○/×·예/아니요·맞다/틀리다, 보기 글자에 「모두 맞다」「정답 없음」「위의 내용」·①~⑤·「ㄱ, ㄴ」·「가와 나」 같은 조합형, `opts.fixed: true`. 보기 글자만 본다(일반 문장 속 「모두」「위의」는 섞음).
+- **쓰는 법**: 문제를 새로 열 때 한 번 `arrange`하고, 틀려서 다시 고를 때는 같은 순서를 쓴다. 번호 표시·TTS는 보이는 순서(`pos + 1`), 채점은 `index`(또는 보기 글자). `window.QuizChoices`가 아직 없으면 원래 순서로 그린다. `sort(() => Math.random() - 0.5)`는 고르게 섞지 못하므로 새 코드에서 쓰지 않는다.
+- **적용 화면**: 사회 자료분석(`society_chart.js`), 과학 실험실 퀴즈(`science_lab.js`)·탐구 보고서(`science_report.js`, 객관식·빈칸 카드)·안전 라이선스(`science_safety.js`)·기단 실험실, 독해 엔진(`reading_engine.js`), 민서 미니 독해(`korean_mini_reading.js`, 문제 읽기도 보이는 순서), 수학 평면도형·도형 이동·도형 공방(글자 채점), 구구단·나눗셈 개념·분수와 소수·길이와 시간(`shuffle`). 5분 퀘스트는 원래부터 `withShuffledOptions`로 섞는다.
+- **민서 미니 독해 음성**: 문제 읽기를 `[말풍선+질문, "1번, 보기.", …]` 조각으로 나눠 재생한다. `scripts/build_mini_reading_audio.py`가 보기마다 가능한 모든 번호의 조각 mp3를 만들므로 어떤 순서로 섞여도 미리 만든 Edge 음성이 나온다(2026-11-14 대본 209개).
+- **지킴이**: `tests/quiz-choices-guard.test.mjs` — 보기를 그리는 코드(`choices.map(`·`options.forEach(` 등)가 있는 `kids/`·루트 HTML 파일은 `QuizChoices`를 쓰거나 시험 안 허용 목록에 사유가 있어야 통과. `scripts/register_curriculum.py`는 해설·쓰임새에 보기 번호 표현(「1번은」·③·「보기 2」)이 있으면 경고한다.
+- **시험**: `tests/quiz-choices.test.mjs`(부품 고름·고정 규칙·화면별 채점·재시도 순서·미니 독해 mp3 실존), `tests/quiz-choices-guard.test.mjs`. 작업 기록: `docs/quiz_choice_shuffle_spec.md`.
   - ~~`kids/core/fairy-chat-memory.js`~~ (2026-11-01 삭제): AI 요정 대화 기억·페르소나·Gemini 직접 호출 모듈. 2026-09-04 분리 때부터 어느 화면·로더에도 연결되지 않았고 쓰임도 적어 지웠다. 대화 기억은 필요하면 git 기록에서 되살린다.
   - `kids/core/gemini-chat.js` (`notion-helper.js`가 로드): AI 요정 대화 공용 IIFE. 위 파일에서 재시도와 안내 문구, 아이별 말투만 옮겼다. `fetchWithGeminiRetry(url, options, {maxRetries, baseDelayMs, ui})` → `{response, data, text}`, `buildFullAISystemPrompt(roomType, extra)`, `buildDiscussionAISystemPrompt(subject, passage, extra)`, `applyGeminiResponseToWaitUI`, `showGeminiFinalFailUI`, `resetGeminiChatErrorState`, `popLastPendingUserTurn`, `createChatBubbleId`, `setChatBubbleContent`, `getActiveChildName`, `isParentProfile`를 `window`에 둔다. Worker 프록시(`/v1/gemini`, `/v1/chat/completions?type=ai`)로만 호출하고 키를 받지 않으며 대화를 Notion에 저장하지 않는다.
 - **핵심 API (대문 파사드를 통해 100% 하위 호환 보존)**:
@@ -1505,6 +1515,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **시험**: `python -X utf8 -m unittest scripts/test_register_curriculum.py` (가짜 통신 12건: 미리보기 무쓰기, 조회 키, 새 행만 만들기와 화면 형식, --update 바뀐 칸만, 사진 공란·미기재 구분, 중복·노션 전용 행, 자료 형식 11종, 문제 없는 행, 스키마 도감 대조, 화면 밖 구역, 100행 경고, 저장소 자료 JSON). `regression.yml`에서도 돈다.
 
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
+
+- **객관식 보기 섞기 (2026-11-14)**: `tests/quiz-choices.test.mjs`(11개)·`tests/quiz-choices-guard.test.mjs`(2개, 새 객관식 화면이 `QuizChoices`를 빠뜨리면 실패). 위 「`window.QuizChoices`」 절.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

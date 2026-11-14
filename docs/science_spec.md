@@ -178,6 +178,7 @@ graph TD
 ### 1) 교재·사료 마스터 DB (`CURRICULUM_DB_ID: 3e8a27115b68806d94bfc81e9b3435fa`)
 * **데이터 단일 원천**: 가상 실험실 사진, 실험 기구 세팅, 『실험관찰』 실물 사진 및 4지선다 퀴즈를 노션 DB에서 통합 관리.
 * **퀵체인지 2.0 (`admin-image-changer.html`)**: 관리자 화면에서 실험 사진 업로드/변경 시 깃허브 푸시와 노션 갱신을 원클릭으로 처리하며, 브라우저 로컬 캐시(`CURRICULUM_CACHE`)를 즉시 자동 무효화하여 0초 라이브 반영.
+* **객관식 보기 섞기 (2026-11-14~)**: 화면이 문제를 열 때마다 `window.QuizChoices`로 보기 순서를 섞고 원래 번호로 채점한다. 노션·자료의 보기 순서와 정답 위치는 신경 쓰지 않아도 되고, 해설에 「1번은…」처럼 보기 번호를 쓰지 않는다. 상세: `kids/core/CORE_CATALOG.md` 「`window.QuizChoices`」 절. 대상: 실험실 퀴즈(`science_lab.js`)·탐구 보고서(`science_report.js`, 객관식·빈칸 카드)·안전 라이선스(`science_safety.js`)·기단 실험실.
 * **문항 등록 (2026-11-13~)**: `python -X utf8 scripts/register_curriculum.py --file scripts/data/curriculum/science_{학년}_{단원키}.json` (기본 미리보기 → `--apply`). 자료 형식은 `kids/core/CORE_CATALOG.md` 「교재·사료 문항 등록기」 절. 단원마다 일회성 스크립트를 만들지 않는다.
 
 ### 2) 5분 퀘스트 과학 실험 퀴즈 실시간 융합 (`buildCurriculumQuestionsFromNotion`)

@@ -294,7 +294,7 @@ function makeMiniEl(tag = 'div', attrs = {}) {
   };
 }
 
-test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-choice-index로 채점하고 오답노트에 보기 글자를 남긴다', async () => {
+test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-choice-index로 채점하며 오답노트(wrongNotes)는 건드리지 않는다', async () => {
   const container = makeMiniEl('div');
   const byId = {};
   const awards = [];
@@ -499,7 +499,7 @@ test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)�
   assert.equal(nextNode.hidden, false);
 });
 
-test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 중 순서 유지 및 오답노트에 보기 글자를 기록한다', () => {
+test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 중 순서 유지, 오답노트(wrongNotes)는 건드리지 않는다', () => {
   const reportContainer = makeMiniEl('div');
   const tabContent = makeMiniEl('div');
   const byId = { reportTabContent: tabContent };
@@ -577,7 +577,7 @@ test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 
   assert.match(tabContent.innerHTML, /훌륭해요! 정답입니다!/);
 });
 
-test('B4 science_safety.js: 안전 문제를 섞어 그리고 다시 도전 시 순서 유지, 오답노트에 보기 글자를 기록한다', () => {
+test('B4 science_safety.js: 안전 문제를 섞어 그리고 다시 도전 시 순서 유지, 오답노트(wrongNotes)는 건드리지 않는다', () => {
   const overlayBody = makeMiniEl('div');
   const sandbox = {
     console,

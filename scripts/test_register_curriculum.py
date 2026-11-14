@@ -185,6 +185,22 @@ class ValidateTest(unittest.TestCase):
         with Patched(rows):
             self.assertEqual(rc.check_screen_limit({**SEED, "subject": "과학"}, {"실험실": 50}), [])
 
+    def test_option_number_in_explanation_warns(self):
+        def seed_with(text, key="explanation"):
+            return {**SEED, "items": [{**SEED["items"][0], key: text}]}
+        for bad in ("1번은 안창호가 세운 단체예요.", "정답은 ③이에요.", "보기 2와 비교해 보세요."):
+            warned = rc.option_number_warnings(seed_with(bad))
+            self.assertEqual(len(warned), 1, bad)
+            self.assertIn("해설", warned[0])
+        self.assertIn("핵심 쓰임새/설명", rc.option_number_warnings(seed_with("4번 보기", "usage"))[0])
+        # 쓰임새의 동그라미 숫자는 그림 위치·교과서 문제 번호라 경고하지 않는다
+        self.assertEqual(rc.option_number_warnings(seed_with("구리판 ① ➔ ② 차례로 변색", "usage")), [])
+        for ok in ("1919년 3월 1일에 시작됐어요.", "6·25 전쟁", "10번째 사건", "3·1 운동", "1번째 국회"):
+            self.assertEqual(rc.option_number_warnings(seed_with(ok)), [], ok)
+        # 저장소의 실제 자료에는 보기 번호 표현이 없어야 한다
+        for f in sorted((SCRIPTS / "data" / "curriculum").glob("*.json")):
+            self.assertEqual(rc.option_number_warnings(json.loads(f.read_text(encoding="utf-8"))), [], f.name)
+
 
 class SeedFilesTest(unittest.TestCase):
     """저장소의 실제 자료 JSON이 형식과 CURRICULUM_DB 칸·선택지(스키마 도감 기준)에 맞는지"""

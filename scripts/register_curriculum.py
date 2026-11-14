@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -53,6 +54,10 @@ SCREEN_ZONES = {"사회": ("역사사료", "지도탐방", "자료분석")}
 SCREEN_ROW_LIMIT = {"사회": 100}
 
 QUIZ_KEYS = ("question", "choices", "answer")
+# 화면이 보기를 섞으므로(QuizChoices, GEMINI.md §4-5) 해설에 「1번은…」처럼 보기 번호를 쓰면 틀린 말이 된다.
+OPTION_NUMBER_RE = re.compile(r"(?<!\d)[1-5]\s*번(?:은|는|이|가|을|를|과|와|의|\s|,|\.|$)|[①②③④⑤]|보기\s*[1-5](?!\d)")
+# 쓰임새 칸은 실험 그림 위치(①→②)·교과서 문제 번호(「얼마나 알고 있나요 ①」)를 흔히 써서 동그라미 숫자는 보지 않는다 (2026-11-14 노션 점검).
+USAGE_NUMBER_RE = re.compile(r"(?<!\d)[1-5]\s*번(?:은|는|이|가|을|를|과|와|의|\s|,|\.|$)|보기\s*[1-5](?!\d)")
 
 
 # ── 자료 검사 ───────────────────────────
@@ -156,6 +161,19 @@ def check_schema(seed: dict) -> list[str]:
     return warnings
 
 
+def option_number_warnings(seed: dict) -> list[str]:
+    """해설·쓰임새에 보기 번호 표현이 있으면 경고 (멈추지 않음). 화면이 보기를 섞으니 내용으로 설명해야 한다."""
+    warnings = []
+    for i, item in enumerate(seed.get("items") or [], 1):
+        title = (item.get("title") or "").strip() or f"{i}번째 문항"
+        for key, label, pattern in (("explanation", "해설", OPTION_NUMBER_RE), ("usage", "핵심 쓰임새/설명", USAGE_NUMBER_RE)):
+            m = pattern.search(item.get(key) or "")
+            if m:
+                warnings.append(f"[{title}] {label}에 보기 번호 표현 '{m.group(0).strip()}' — "
+                                f"화면이 보기를 섞으므로 내용으로 설명하세요")
+    return warnings
+
+
 def check_screen_limit(seed: dict, new_by_zone: dict[str, int]) -> list[str]:
     """화면이 한 번에 읽는 행 수를 넘는지. 지금 행 수 + 이번에 새로 생길 행 수로 센다."""
     limit = SCREEN_ROW_LIMIT.get(seed["subject"])
@@ -244,6 +262,8 @@ def main() -> int:
         print(f"🏛️ {seed['subject']} {seed['grade']} {seed['unit']} 문항 {len(seed['items'])}개 "
               f"({' · '.join(f'{z} {n}' for z, n in zones.items())}, 사진 {pics}) · {mode}")
         for w in check_schema(seed):
+            print(f"   ⚠️ {w}")
+        for w in option_number_warnings(seed):
             print(f"   ⚠️ {w}")
         s = sync_curriculum(seed, apply=args.apply, update=args.update)
         for w in check_screen_limit(seed, {} if s["created"] else s["new_by_zone"]):

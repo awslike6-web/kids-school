@@ -248,6 +248,9 @@ graph TD
 
 ---
 
+## 5-1. 객관식 보기 섞기 (2026-11-14~)
+- 수학방 객관식 화면도 `window.QuizChoices`로 섞는다: 평면도형·도형 이동·도형 공방(`arrange`, 글자 채점), 구구단·나눗셈 개념·분수와 소수·길이와 시간(`shuffle`, 이전의 치우친 `sort(() => Math.random() - 0.5)` 대체). `MathQuizEngine.shuffleArray`도 고르게 섞으므로 그대로 써도 된다. 새 화면은 `tests/quiz-choices-guard.test.mjs`를 통과해야 한다. 상세: `kids/core/CORE_CATALOG.md` 「`window.QuizChoices`」 절.
+
 ## 6. 5분 퀘스트 수학 특화 규격 (Infinite Random Mental Math & Scratchpad Memo)
 
 ### 1) 답 외우기 원천 차단 무한 난수 암산 엔진 (`generateDynamicMentalMath`)

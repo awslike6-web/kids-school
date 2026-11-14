@@ -83,6 +83,7 @@ description: 5분 퀘스트(quest_runner.html, 퀘스트 러너) 작업 시 사�
 - **단원 번호는 맨 앞 숫자만 봅니다**: `[센터 5-2] 14번`에서 첫 숫자를 뽑으면 학년 숫자 5가 나옵니다. 번호 비교·칩 중복 제거에는 `getLeadingUnitNumber`처럼 맨 앞 번호만 씁니다.
 - **노션에 없는 단원은 시작이 늦어질 수 있습니다**: 단원 키에 숫자가 없으면(예: `phonics`) 과목 전체 조회를 생략하고 바로 기존 4+1로 넘어갑니다. 숫자가 있으면 정확히 일치하는 단원이 없을 때 과목 전체를 한 번 더 조회합니다.
 - **4+1 정답 위치는 `getSubjectQuest`에서 섞습니다**: 정적 뱅크(`quest_data_minseo.js`·`quest_data_minsu.js`)는 정답을 첫 보기(`answer: 0`)에 적어 둡니다. 새 출제 경로를 만들면 `buildSubjectQuest`를 거쳐 `withShuffledOptions`가 적용되는지 확인하세요. 안 그러면 정답이 늘 1번이 됩니다.
+- **과목방 객관식 화면은 `window.QuizChoices`로 섞습니다 (2026-11-14~)**: 퀘스트 밖 화면(사회 자료분석·과학·독해·수학)은 `kids/core/quiz-flow-controller.js`의 `QuizChoices.arrange`를 쓰고, 새 화면은 `tests/quiz-choices-guard.test.mjs`를 통과해야 합니다. 퀘스트 렌더러는 엔진이 섞으므로 허용 목록에 있습니다.
 - **진도판 칩은 학생별로 거릅니다**: `parent_unit_chips.js`가 VOCA 캐시의 `학생`으로 칩을 나눕니다. 민서 단원을 새로 등록할 때 `학생`을 비워 두면 민수 판에도 나타납니다.
 - **빈 캐시와 오프라인**: 문제 공급은 오래된 VOCA 캐시 또는 정적 4+1 폴백으로 유지되고, 숙련도·학습일지·퀘스트 보상 실패분은 각각 로컬 대기열에 보존됩니다. 보상은 `MINMIN_REWARD_QUEUE_V1`에 학생·테마·과목을 캡처해 `load`와 일반 지급 성공 직후 조용히 재시도합니다. 상한 0개는 다음 날까지 남기고 부분 지급 성공은 삭제합니다. Web Locks 미지원에서도 자동 flush하므로 두 탭 중복 가능성과 PATCH 응답 유실 시 정확히 한 번 보장 불가 한계를 수용합니다. 상세 계약은 `docs/quest_reward_retry_spec.md`를 따릅니다. 다른 화면용 `notion-study-logger.js`의 같은 이름 함수는 후속 후보입니다.
 
