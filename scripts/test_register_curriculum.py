@@ -124,6 +124,19 @@ class SyncTest(unittest.TestCase):
         item = {k: v for k, v in SEED["items"][0].items() if k != "media_url"}
         self.assertNotIn("미디어 URL", rc.desired_props(SEED, item))
 
+    def test_blank_quiz_keys_clear_and_missing_keys_keep(self):
+        # 질문·보기·정답을 셋 다 빈 값으로 적으면 노션 문제 칸을 비운다. 셋 다 빼면 건드리지 않는다.
+        item = {"title": "[서술형] 빈칸 채우기", "zone": "탐구퀴즈",
+                "question": "", "choices": [], "answer": None, "usage": "유형: blank"}
+        rc.validate_seed({**SEED, "items": [item]})
+        props = rc.desired_props(SEED, item)
+        self.assertEqual((props["퀴즈 질문"], props["보기 1~4"], props["정답"]),
+                         (rv.rich(""), rv.rich(""), {"number": None}))
+        old = page("p1", SEED["items"][0]["title"])
+        self.assertEqual({name for name, _, _ in rc.diff_props(old, props)} >= {"퀴즈 질문", "보기 1~4", "정답"}, True)
+        kept = {k: v for k, v in item.items() if k not in rc.QUIZ_KEYS}
+        self.assertFalse({"퀴즈 질문", "보기 1~4", "정답"} & set(rc.desired_props(SEED, kept)))
+
     def test_notion_only_and_duplicate_rows_reported_not_touched(self):
         t0, t1 = SEED["items"][0]["title"], SEED["items"][1]["title"]
         rows = [page("p1", t0), page("p1b", t0), page("p2", t1),

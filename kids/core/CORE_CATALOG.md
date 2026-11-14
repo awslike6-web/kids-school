@@ -1508,7 +1508,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ## 교재·사료 문항 등록기 `scripts/register_curriculum.py` (2026-11-13)
 
 - **목적**: 단원 자료 JSON 1개를 노션 교재·사료 마스터 DB(CURRICULUM_DB `3e8a2711…`)에 맞춘다. 사회 2-1·2-2 때 단원마다 만들던 `register_society_5_2_*_data.py`·`update_society_curriculum_media.py`(관제탑 `scripts/archive/2026-11/`)를 대체한다.
-- **자료**: `scripts/data/curriculum/{과목영문}_{학년}_{단원키}.json` = `{subject, grade, unit, items:[{title, zone, question?, choices?, answer?, explanation?, usage?, media_url?, interactive_url?}]}`. `question·choices·answer`는 셋 다 쓰거나 셋 다 비운다(보기 2~4개·줄바꿈 금지, 정답은 1부터 센 번호).
+- **자료**: `scripts/data/curriculum/{과목영문}_{학년}_{단원키}.json` = `{subject, grade, unit, items:[{title, zone, question?, choices?, answer?, explanation?, usage?, media_url?, interactive_url?}]}`. `question·choices·answer`는 셋 다 쓰거나 셋 다 비운다(보기 2~4개·줄바꿈 금지, 정답은 1부터 센 번호). 셋을 빈 값(`"", [], null`)으로 적으면 노션 질문·보기·정답 칸을 비우고, 셋 다 빼면 건드리지 않는다.
 - **실행**: `python -X utf8 scripts/register_curriculum.py --file <자료> [--apply | --update]`. 기본 미리보기, `--apply` 새 행만, `--update` 기존 행의 바뀐 칸도 덮어씀.
 - **계약**: 같은 행 = 과목·학년·단원 + 제목. 자료에 적은 칸만 쓴다(`media_url`을 빼면 퀵체인지로 바꾼 사진을 건드리지 않고, `""`이면 공란으로 맞춤). 칸 형식은 화면 읽기(`society_common.js` `fetchCurriculumFromNotion`, `science_lab.js`)와 같다: `보기 1~4` = 줄바꿈으로 이은 글, `정답` = 1~4. 노션에 없는 칸이면 멈추고, 선택지에 없는 값·사회방이 안 읽는 구역(역사사료·지도탐방·자료분석 외)은 경고한다. 사회 구역별 행이 100개를 넘으면 경고한다(사회방 화면이 100행까지만 읽음). 노션에만 있는 행은 알려 주기만 한다.
 - **핵심 API**: `sync_curriculum(seed, apply, update) → 건수`, `desired_props(seed, item)`, `diff_props(page, props)`, `check_schema(seed)`, `check_screen_limit(seed, new_by_zone)`. 통신·칸 비교는 `register_voca.py`(`call`·`query_all`·`rich`·`plain_title`·`value_of`)를 불러 쓴다.

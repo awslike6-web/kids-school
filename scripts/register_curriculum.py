@@ -26,6 +26,8 @@
               "media_url": "", "interactive_url": "..."}]}
   title·zone은 필수. question·choices·answer는 셋 다 쓰거나 셋 다 비운다
   (choices 2~4개, 줄바꿈 금지, answer는 1부터 센 번호). 나머지 칸은 적은 것만 쓴다.
+  셋을 "question": "", "choices": [], "answer": null 처럼 빈 값으로 적으면 노션의 질문·보기·정답 칸을 비운다
+  (서술형·순서·별점 문항 행에 남은 엉뚱한 보기를 지울 때). 셋 다 빼면 그 칸들은 건드리지 않는다.
 
 사용 예:
   python -X utf8 scripts/register_curriculum.py --file scripts/data/curriculum/society_5-2_3-1.json            # 미리보기
@@ -108,6 +110,10 @@ def desired_props(seed: dict, item: dict) -> dict:
         props["퀴즈 질문"] = rv.rich(item["question"].strip())
         props["보기 1~4"] = rv.rich("\n".join(c.strip() for c in item["choices"]))
         props["정답"] = {"number": item["answer"]}
+    elif all(k in item for k in QUIZ_KEYS):  # 셋 다 빈 값으로 적음 = 문제 칸 비우기
+        props["퀴즈 질문"] = rv.rich("")
+        props["보기 1~4"] = rv.rich("")
+        props["정답"] = {"number": None}
     if "explanation" in item:
         props["해설"] = rv.rich(item["explanation"])
     if "usage" in item:
