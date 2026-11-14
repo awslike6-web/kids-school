@@ -103,14 +103,16 @@
       <!-- 학년 서브 필터 -->
       <div class="filter-pill-bar">
         <button class="filter-pill-btn active" onclick="filterGradeSector('all', this)">🌟 전체 학년</button>
-        <button class="filter-pill-btn" onclick="filterGradeSector('12', this)">🟢 1~2학년 기초관 (7)</button>
-        <button class="filter-pill-btn" onclick="filterGradeSector('34', this)">🚀 3~4학년 핵심관 (7)</button>
-        <button class="filter-pill-btn" onclick="filterGradeSector('56', this)">👑 5~6학년 심화관 (4)</button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('1', this)">🌱 1학년 <span class="pill-count" data-grade="1"></span></button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('2', this)">🌿 2학년 <span class="pill-count" data-grade="2"></span></button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('3', this)">🚀 3학년 <span class="pill-count" data-grade="3"></span></button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('4', this)">🛰️ 4학년 <span class="pill-count" data-grade="4"></span></button>
+        <button class="filter-pill-btn" onclick="filterGradeSector('5', this)">👑 5학년 <span class="pill-count" data-grade="5"></span></button>
       </div>
 
-      <!-- 🟢 1~2학년 기초 개념관 -->
-      <div class="grade-sector-block" id="sector-block-12">
-        <div class="sector-title active-sector-12">🟢 1~2학년 기초 개념관</div>
+      <!-- 🌱 1학년 개념관 -->
+      <div class="grade-sector-block" id="sector-block-1">
+        <div class="sector-title grade-sector-title gs-1">🌱 1학년 개념관</div>
         <div class="mission-grid">
           <a href="number50.html" class="mission-card mc-0">
             <div class="mission-icon">🐰</div>
@@ -147,7 +149,13 @@
             <div class="mission-name">시계 보기와 규칙 찾기</div>
             <div class="mission-desc">몇 시와 몇 시 30분 시계 바늘 조작기<br>알록달록 무늬와 수의 규칙을 척척 찾아요!</div>
           </a>
+        </div>
+      </div>
 
+      <!-- 🌿 2학년 개념관 -->
+      <div class="grade-sector-block" id="sector-block-2">
+        <div class="sector-title grade-sector-title gs-2">🌿 2학년 개념관</div>
+        <div class="mission-grid">
           <a href="gugudan.html" class="mission-card mc-1">
             <div class="mission-icon">🚀</div>
             <div class="mission-name">구구단 탐험대</div>
@@ -156,11 +164,10 @@
         </div>
       </div>
 
-      <!-- 🚀 3~4학년 핵심 개념관 -->
-      <div class="grade-sector-block" id="sector-block-34">
-        <div class="sector-title active-sector-34">🚀 3~4학년 핵심 개념관</div>
+      <!-- 🚀 3학년 개념관 -->
+      <div class="grade-sector-block" id="sector-block-3">
+        <div class="sector-title grade-sector-title gs-3">🚀 3학년 개념관</div>
         <div class="mission-grid">
-          
           <!-- 3학년 1학기 2단원: 평면도형 -->
           <a href="planar_shapes.html" class="mission-card mc-1">
             <div class="mission-icon">📐</div>
@@ -188,7 +195,13 @@
             <div class="mission-name">3학년: 분수와 소수 첫걸음</div>
             <div class="mission-desc">피자 쪼개기 · 정품 수직 분수 · 단위/진/가/대분수<br>0.1 수직선으로 소수의 비밀을 밝혀요!</div>
           </a>
+        </div>
+      </div>
 
+      <!-- 🛰️ 4학년 개념관 -->
+      <div class="grade-sector-block" id="sector-block-4">
+        <div class="sector-title grade-sector-title gs-4">🛰️ 4학년 개념관</div>
+        <div class="mission-grid">
           <!-- 4학년 1학기 1단원: 큰 수 -->
           <a href="big_numbers.html" class="mission-card mc-2">
             <div class="mission-icon">🌌</div>
@@ -209,13 +222,12 @@
             <div class="mission-name">4학년: 평면도형의 이동</div>
             <div class="mission-desc">밀기 · 뒤집기(좌우/상하) · 돌리기(90°~360°)<br>공간 감각을 키우는 타일 무늬 꾸미기 놀이터!</div>
           </a>
-
         </div>
       </div>
 
-      <!-- 👑 5~6학년 심화 개념관 -->
-      <div class="grade-sector-block" id="sector-block-56">
-        <div class="sector-title active-sector-56">👑 5~6학년 심화 개념관</div>
+      <!-- 👑 5학년 개념관 -->
+      <div class="grade-sector-block" id="sector-block-5">
+        <div class="sector-title grade-sector-title gs-5">👑 5학년 개념관</div>
         <div class="mission-grid">
           <!-- 5학년 2학기 1단원: 수의 범위와 어림하기 -->
           <a href="ranges_estimation.html" class="mission-card mc-2">

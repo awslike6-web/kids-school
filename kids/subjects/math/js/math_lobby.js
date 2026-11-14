@@ -49,27 +49,20 @@
     document.querySelectorAll('#conceptModeGrade .filter-pill-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
-    const s12 = document.getElementById('sector-block-12');
-    const s34 = document.getElementById('sector-block-34');
-    const s56 = document.getElementById('sector-block-56');
+    document.querySelectorAll('#conceptModeGrade .grade-sector-block').forEach(block => {
+      const show = grade === 'all' || block.id === `sector-block-${grade}`;
+      block.style.display = show ? 'block' : 'none';
+    });
+  }
 
-    if (grade === 'all') {
-      s12.style.display = 'block';
-      s34.style.display = 'block';
-      s56.style.display = 'block';
-    } else if (grade === '12') {
-      s12.style.display = 'block';
-      s34.style.display = 'none';
-      s56.style.display = 'none';
-    } else if (grade === '34') {
-      s12.style.display = 'none';
-      s34.style.display = 'block';
-      s56.style.display = 'none';
-    } else if (grade === '56') {
-      s12.style.display = 'none';
-      s34.style.display = 'none';
-      s56.style.display = 'block';
-    }
+  // 🔢 학년별 카드 개수 자동 채우기
+  function updateGradePillCounts() {
+    document.querySelectorAll('#conceptModeGrade .pill-count[data-grade]').forEach(span => {
+      const grade = span.dataset.grade;
+      const block = document.getElementById(`sector-block-${grade}`);
+      const count = block ? block.querySelectorAll('a.mission-card').length : 0;
+      span.textContent = `(${count})`;
+    });
   }
 
   // 🎯 영역 서브 필터링
@@ -115,6 +108,7 @@
         openMathSection('gateway');
       }
     }
+    updateGradePillCounts();
     checkHashAndSwitch();
     window.addEventListener('hashchange', checkHashAndSwitch);
 
