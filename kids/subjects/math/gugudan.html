@@ -354,6 +354,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
 </script>
 
 <script src="../../config.js"></script>
+<script src="../../core/quiz-flow-controller.js?v=20261114-shuffle"></script>
 
 <script>
     const requiredCores = [
@@ -571,7 +572,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
         }
 
         window.initQuiz = function() {
-            qList = [...ALL_QUESTIONS].sort(()=>Math.random()-0.5).slice(0,10);
+            qList = (window.QuizChoices ? window.QuizChoices.shuffle(ALL_QUESTIONS) : [...ALL_QUESTIONS].sort(()=>Math.random()-0.5)).slice(0,10);
             qIdx=0; qScore=0; qAnswered=false;
             document.getElementById('quiz-play').style.display='block';
             document.getElementById('result-wrap').classList.remove('show');
@@ -598,7 +599,8 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             document.getElementById('q-feedback').className = 'q-feedback'; document.getElementById('q-explain').className = 'q-explain'; document.getElementById('next-btn').className = 'next-btn';
 
             const grid = document.getElementById('choice-grid'); grid.innerHTML = '';
-            const choices = [...q.wrongs, q.ans].sort(()=>Math.random()-0.5);
+            const rawChoices = [...q.wrongs, q.ans];
+            const choices = window.QuizChoices ? window.QuizChoices.shuffle(rawChoices) : rawChoices.sort(()=>Math.random()-0.5);
             choices.forEach(c => {
                 const btn = document.createElement('button'); btn.className = 'choice'; btn.textContent = c; 
                 btn.onclick = () => window.checkQ(c, q, btn); grid.appendChild(btn);

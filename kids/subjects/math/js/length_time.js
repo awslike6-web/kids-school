@@ -127,7 +127,8 @@
         const fakeMm = fakeTotal % 10;
         choicesSet.add(`${fakeCm}cm ${fakeMm}mm (${fakeTotal}mm)`);
       }
-      const choicesArr = Array.from(choicesSet).sort(() => Math.random() - 0.5);
+      const rawChoices = Array.from(choicesSet);
+      const choicesArr = window.QuizChoices ? window.QuizChoices.shuffle(rawChoices) : rawChoices.sort(() => Math.random() - 0.5);
 
       const cBox = document.getElementById('random-bar-choices');
       cBox.innerHTML = '';

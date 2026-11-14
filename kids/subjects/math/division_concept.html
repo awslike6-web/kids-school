@@ -354,7 +354,8 @@
         choicesSet.add(fakeStr);
       }
 
-      const choicesArr = Array.from(choicesSet).sort(() => Math.random() - 0.5);
+      const rawChoices = Array.from(choicesSet);
+      const choicesArr = window.QuizChoices ? window.QuizChoices.shuffle(rawChoices) : rawChoices.sort(() => Math.random() - 0.5);
       const cBox = document.getElementById('randomDivChoices');
       cBox.innerHTML = '';
       document.getElementById('randomDivFeedback').innerHTML = '';

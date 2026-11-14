@@ -600,7 +600,8 @@
         choicesSet.set(fakeDec, `${fakeDec} (${formatVFrac(fakeTenths, 10)})`);
       }
 
-      const choicesArr = Array.from(choicesSet.entries()).sort(() => Math.random() - 0.5);
+      const rawChoices = Array.from(choicesSet.entries());
+      const choicesArr = window.QuizChoices ? window.QuizChoices.shuffle(rawChoices) : rawChoices.sort(() => Math.random() - 0.5);
 
       const cBox = document.getElementById('random-decimal-choices');
       cBox.innerHTML = '';

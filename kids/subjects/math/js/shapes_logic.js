@@ -321,7 +321,7 @@
       cBox.innerHTML = '';
       document.getElementById('shape-quiz-feedback').textContent = '';
 
-      q.choices.forEach(c => {
+      (window.QuizChoices ? window.QuizChoices.arrange(q.choices).map(c => c.text) : q.choices).forEach(c => {
         const btn = document.createElement('button');
         btn.className = 'divide-btn';
         btn.style.fontSize = '1.15rem';
