@@ -254,7 +254,14 @@ python -X utf8 scripts/register_reading_passage.py --file kids-school-main/scrip
 - 국어방 `[3단계] 국어 핵심 용어방` → 5-2 → 단원 카드, `[4단계] 정밀 독해 트레이닝` → `🏫 5-2 (2학기 교과·센터)` 탭 맨 아래 단원 묶음, 5분 퀘스트·부모 진도판 국어 칩에 단원 이름으로 나온다.
 - **지문 조회 이어 읽기 (2026-11-15)**: `kids/core/notion-api-client.js` `fetchReadingPassagesFromNotion`은 `순번` 오름차순으로 50편만 읽고 다음 쪽을 읽지 않아, 국어 지문이 50편을 넘자 뒤 순번(교과서 독해)이 화면에서 빠졌다. 한 쪽 100편씩 `next_cursor`로 끝까지 이어 읽게 고쳤다(`notion-helper.js`의 하위 모듈 꼬리표 `20261115-readingpages`).
 - 정밀 독해는 민수에게 5-1 탭을 먼저 보여 준다(`reading_engine.js` `activeGrade` 초기값). 교과서 독해는 5-2 탭에서 센터 지문 묶음 아래에 나온다.
-- 교과서 독해 지문 듣기는 실시간 읽기(`speakFairyTTS`)다. 미리 만든 Edge MP3는 센터 지문만 있다(§8-1). 교과서 지문 MP3는 `build_center_reading_audio.py`의 대상 트랙을 넓히는 후속 작업으로 남긴다.
+- **교과서 독해 Edge MP3 (2026-11-15)**: 관제탑 `scripts/build_center_reading_audio.py`가 `AUDIO_TRACKS = ('🏥 센터 독해', '🏫 교과서 독해')`의 **국어** 지문을 만든다(교과서 트랙의 영어 지문은 제외). 파일·해시·manifest는 센터와 같은 `kids/assets/audio/center_reading/`이고, 재생기는 글자 해시로 찾으므로 정밀 독해 `🔊 요정 코코 낭독 듣기`가 그대로 MP3를 튼다. `--track center|textbook|all`(기본 all)로 범위를 고른다. 지문을 등록하면 `register_reading_passage.py`가 센터·교과서 국어 지문 모두 바로 MP3를 만든다. 첫 생성: 교과서 지문 16편의 본문·제목·진입 안내와 새 낱말 62개의 낱말·뜻풀이, 172개.
+  ```powershell
+  # 관제탑 폴더에서 (노션은 읽기만)
+  python -X utf8 scripts/build_center_reading_audio.py --all --from-notion --track textbook --dry-run
+  python -X utf8 scripts/build_center_reading_audio.py --all --from-notion --track textbook
+  python -X utf8 scripts/build_center_reading_audio.py --all --from-notion --check
+  ```
+  초안 agy Hydrogen(트랙 상수·`--track`), 과목 조건·시험·생성은 Claude.
 
 ## 6. 보상 및 학습일지 가드레일 (StudyLog Guardrails)
 

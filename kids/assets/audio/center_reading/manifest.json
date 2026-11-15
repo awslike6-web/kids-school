@@ -1125,7 +1125,6 @@
       "audio_file": "20859f7c16fd639f4556acc8.mp3",
       "spoken_text": "공든 탑이 무너지랴",
       "sources": [
-        "401a2711-5b68-8172-99f9-c25e916bb24d",
         "3eca2711-5b68-81dc-8e01-cbf52c9308ad"
       ],
       "kinds": [
@@ -1606,9 +1605,6 @@
       "audio_file": "b95b66a9d70a399c6f67b50d.mp3",
       "spoken_text": "백지장도 맞들면 낫다",
       "sources": [
-        "3faa2711-5b68-8142-9578-fae715e68027",
-        "3faa2711-5b68-814f-92a4-fd8bddc3509a",
-        "3faa2711-5b68-81b4-9b21-fc56f508dbf5",
         "3eca2711-5b68-81e3-b99f-d521bbd4f9ca"
       ],
       "kinds": [
@@ -1629,8 +1625,6 @@
       "audio_file": "b9ac52b4a86718cfb583bf80.mp3",
       "spoken_text": "상부상조",
       "sources": [
-        "3faa2711-5b68-816b-81c9-d93e0ef6920e",
-        "3faa2711-5b68-81cb-9fe3-f2cc96ad4396",
         "3faa2711-5b68-817a-aba4-ce0ae1940696"
       ],
       "kinds": [
@@ -1871,7 +1865,6 @@
       "audio_file": "ad57b4fd7b7f8c52e315b26a.mp3",
       "spoken_text": "각양각색",
       "sources": [
-        "3faa2711-5b68-816f-9072-ef65dc7ab569",
         "3faa2711-5b68-81e2-89d3-f2110bba1caf"
       ],
       "kinds": [
@@ -2072,7 +2065,6 @@
       "audio_file": "e38df8d68d378fc87cc0fc21.mp3",
       "spoken_text": "무역",
       "sources": [
-        "3faa2711-5b68-817e-b503-f946489b2af4",
         "3faa2711-5b68-81a9-b82f-ca86462a43a5"
       ],
       "kinds": [
@@ -2093,9 +2085,6 @@
       "audio_file": "5243993777978e29278a5284.mp3",
       "spoken_text": "티끌 모아 태산",
       "sources": [
-        "3faa2711-5b68-81e6-96f4-cbf854e5571e",
-        "3faa2711-5b68-815e-b035-c46e79cfc340",
-        "3faa2711-5b68-814f-b021-dc7ae8ad7452",
         "3eca2711-5b68-81de-8d34-dd4841f21f03"
       ],
       "kinds": [
@@ -2156,7 +2145,6 @@
       "audio_file": "93cd4efd54115ba15950f38f.mp3",
       "spoken_text": "분류",
       "sources": [
-        "3faa2711-5b68-8148-bde9-fa93dbcaf776",
         "3faa2711-5b68-8144-be45-f9968c63b941"
       ],
       "kinds": [
@@ -2407,7 +2395,6 @@
       "audio_file": "1b4e864066f468df28897583.mp3",
       "spoken_text": "정성껏",
       "sources": [
-        "3faa2711-5b68-81ad-a150-d46cd577ac32",
         "3faa2711-5b68-81aa-98a5-f18cf3fc2e26"
       ],
       "kinds": [
@@ -2468,7 +2455,6 @@
       "audio_file": "6151b90f0378018d0cd0f4da.mp3",
       "spoken_text": "머리를 맞대다",
       "sources": [
-        "3faa2711-5b68-814a-b07a-f8649c0a5af3",
         "3faa2711-5b68-819c-b9ab-e10a5e12d1d5"
       ],
       "kinds": [
@@ -3109,7 +3095,7 @@
       "audio_file": "7bac1e1efd0d9b4c15cb0e10.mp3",
       "spoken_text": "원숭이도 나무에서 떨어진다",
       "sources": [
-        "book_37"
+        "3eca2711-5b68-814a-a286-c55a3bb83b7e"
       ],
       "kinds": [
         "word"
@@ -3579,7 +3565,6 @@
       "audio_file": "6848353a26fe864c629a2efa.mp3",
       "spoken_text": "칠전팔기",
       "sources": [
-        "3faa2711-5b68-8135-8fe1-d1b5d891cc4a",
         "3faa2711-5b68-814b-8caf-e57218f2bb6a"
       ],
       "kinds": [
@@ -3730,8 +3715,7 @@
       "audio_file": "8912415cb2c9061ee195bcb7.mp3",
       "spoken_text": "보기 좋은 떡이 먹기도 좋다",
       "sources": [
-        "3faa2711-5b68-81ef-bc1c-e32efe40f439",
-        "3faa2711-5b68-81d4-9115-e65f503d6237"
+        "3faa2711-5b68-81ef-bc1c-e32efe40f439"
       ],
       "kinds": [
         "word"
@@ -3831,7 +3815,6 @@
       "audio_file": "47613e195f9fa3494c2d9c39.mp3",
       "spoken_text": "궁중",
       "sources": [
-        "3faa2711-5b68-811d-ad5f-fb053731726e",
         "3eca2711-5b68-816c-92d9-d47ca2589332"
       ],
       "kinds": [
@@ -5112,7 +5095,7 @@
       "audio_file": "e143a79d250b06d52fa7c1c2.mp3",
       "spoken_text": "절이다",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8126-9f73-e7bb53327835"
       ],
       "kinds": [
         "word"
@@ -5122,7 +5105,7 @@
       "audio_file": "c34cdd58a4a7def31199870a.mp3",
       "spoken_text": "배추나 채소, 생선 등에 소금기나 식초가 배어들게 하다.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8126-9f73-e7bb53327835"
       ],
       "kinds": [
         "meaning"
@@ -5132,7 +5115,7 @@
       "audio_file": "4379b376509c538119132e23.mp3",
       "spoken_text": "영양소",
       "sources": [
-        "book_37"
+        "40da2711-5b68-81bd-aa22-f35209404594"
       ],
       "kinds": [
         "word"
@@ -5142,7 +5125,7 @@
       "audio_file": "90befbfcfdaa2d71807878a7.mp3",
       "spoken_text": "생물이 생명을 유지하고 자라는 데 필요한 음식물 속 성분.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-81bd-aa22-f35209404594"
       ],
       "kinds": [
         "meaning"
@@ -5152,7 +5135,7 @@
       "audio_file": "230fbde6a5e201816d8154db.mp3",
       "spoken_text": "예방",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8118-9afb-e1fc48905bce"
       ],
       "kinds": [
         "word"
@@ -5162,7 +5145,7 @@
       "audio_file": "4db4f08f4fff53e2c4a6c455.mp3",
       "spoken_text": "질병이나 사고가 일어나기 전에 미리 대처하여 막음.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8118-9afb-e1fc48905bce"
       ],
       "kinds": [
         "meaning"
@@ -5172,7 +5155,7 @@
       "audio_file": "a2ab2eb287edab5d792f8389.mp3",
       "spoken_text": "국제적",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8166-8d17-ff0435000e17"
       ],
       "kinds": [
         "word"
@@ -5182,7 +5165,7 @@
       "audio_file": "94821cbad1dfe78330077c2c.mp3",
       "spoken_text": "여러 나라에 관계되거나 세계적인 범위를 가지는 것.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8166-8d17-ff0435000e17"
       ],
       "kinds": [
         "meaning"
@@ -5192,7 +5175,7 @@
       "audio_file": "7716c5dd3fbe9802e52abb6f.mp3",
       "spoken_text": "발효",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8120-8490-d4b35a396052"
       ],
       "kinds": [
         "word"
@@ -5202,7 +5185,7 @@
       "audio_file": "e8e7692577bab6550f1c4605.mp3",
       "spoken_text": "효모나 유익균 등 미생물이 유기물을 분해하여 몸에 좋은 새로운 물질을 만드는 현상.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-8120-8490-d4b35a396052"
       ],
       "kinds": [
         "meaning"
@@ -5212,7 +5195,7 @@
       "audio_file": "11bcd40f151fb28124d78faf.mp3",
       "spoken_text": "전통",
       "sources": [
-        "book_37"
+        "40da2711-5b68-81a4-a444-c6935137e237"
       ],
       "kinds": [
         "word"
@@ -5222,7 +5205,7 @@
       "audio_file": "2a56a9070f2982606f9e33ed.mp3",
       "spoken_text": "한 집단이나 사회에서 옛날부터 전해 내려오는 고유한 사상이나 문화.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-81a4-a444-c6935137e237"
       ],
       "kinds": [
         "meaning"
@@ -5232,7 +5215,7 @@
       "audio_file": "e993047c75db29077fe05358.mp3",
       "spoken_text": "떡 줄 사람은 생각도 않는데 김칫국부터 마신다",
       "sources": [
-        "book_37"
+        "40da2711-5b68-813d-a8b4-dbad39dfdb44"
       ],
       "kinds": [
         "word"
@@ -5242,7 +5225,7 @@
       "audio_file": "ee9f60a6ce9b61f51db5686e.mp3",
       "spoken_text": "상대방은 해 줄 생각도 없는데 혼자서 지레 짐작하여 기대함을 이르는 말.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-813d-a8b4-dbad39dfdb44"
       ],
       "kinds": [
         "meaning"
@@ -5252,7 +5235,7 @@
       "audio_file": "eae735840bb7b0499db460cb.mp3",
       "spoken_text": "세 살 버릇 여든까지 간다",
       "sources": [
-        "book_37"
+        "40da2711-5b68-812e-8100-d6c14720d2c5"
       ],
       "kinds": [
         "word"
@@ -5262,7 +5245,7 @@
       "audio_file": "a27521932dc1dff6839bca5d.mp3",
       "spoken_text": "어릴 때 몸에 밴 나쁜 버릇이나 습관은 늙어서까지 고치기 어렵다는 말.",
       "sources": [
-        "book_37"
+        "40da2711-5b68-812e-8100-d6c14720d2c5"
       ],
       "kinds": [
         "meaning"
@@ -5273,6 +5256,1726 @@
       "spoken_text": "아무리 익숙하고 능숙한 사람이라도 실수할 때가 있다는 말.",
       "sources": [
         "book_37"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "8b289bc8f715f0127927f2f0": {
+      "audio_file": "8b289bc8f715f0127927f2f0.mp3",
+      "spoken_text": "때: 비 오는 오후 곳: 교실 창가 나오는 사람: 하준, 서연 하준: (창밖을 보며) 우산이 없어서 집에 못 가겠어. 서연: (가방에서 우산을 꺼내며) 내 우산을 같이 쓰자. 하준: (환하게 웃으며) 정말 고마워. 서연: (고개를 끄덕이며) 우리 집도 같은 쪽이잖아.",
+      "sources": [
+        "korean_5-2_u6_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "def908e32c21699ba0ae5555": {
+      "audio_file": "def908e32c21699ba0ae5555.mp3",
+      "spoken_text": "비 오는 날의 우산",
+      "sources": [
+        "korean_5-2_u6_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "eaa538b49e0a830fd2b9fdcc": {
+      "audio_file": "eaa538b49e0a830fd2b9fdcc.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 비 오는 날의 우산이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u6_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "2a10027ea081a13d3d5c083e": {
+      "audio_file": "2a10027ea081a13d3d5c083e.mp3",
+      "spoken_text": "눈이 펑펑 내리는 겨울 아침이었어요. 태오는 시골 버스 정류장에서 버스를 기다렸어요. 그 옆에는 할머니 한 분이 서 계셨어요. 태오는 할머니가 미끄러지실까 봐 정류장 앞의 눈을 치웠어요. 할머니는 묵묵히 태오의 손에 손난로를 쥐여 주셨어요. 두 사람은 마주 보고 웃으며 버스에 올랐어요.",
+      "sources": [
+        "korean_5-2_u6_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "fc19cab7647ee8bd1a0c9315": {
+      "audio_file": "fc19cab7647ee8bd1a0c9315.mp3",
+      "spoken_text": "눈 오는 날의 정류장",
+      "sources": [
+        "korean_5-2_u6_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "ab50f24e98f571c0da66b1cd": {
+      "audio_file": "ab50f24e98f571c0da66b1cd.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 눈 오는 날의 정류장이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u6_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "336069ec6357b09161f3de86": {
+      "audio_file": "336069ec6357b09161f3de86.mp3",
+      "spoken_text": "지우는 동생과 다투어서 마음이 무거웠어요. 그래서 모아 둔 용돈으로 동생이 좋아하는 딸기 우유를 샀어요. 지우는 동생에게 우유를 내밀며 미안하다고 말했어요. 동생은 환하게 웃으며 지우의 손을 잡았어요. 그 모습을 본 엄마가 말씀하셨어요. \"우리 집에 따뜻한 봄바람이 불어왔구나.\" 지우와 동생은 마주 보며 웃었어요.",
+      "sources": [
+        "korean_5-2_u5_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "3a970b98173a5c6b31549434": {
+      "audio_file": "3a970b98173a5c6b31549434.mp3",
+      "spoken_text": "우리 집에 분 봄바람",
+      "sources": [
+        "korean_5-2_u5_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "11ebf23c249635ce402062b1": {
+      "audio_file": "11ebf23c249635ce402062b1.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 우리 집에 분 봄바람이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u5_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "b6792b168caf00b9ebc4cdfb": {
+      "audio_file": "b6792b168caf00b9ebc4cdfb.mp3",
+      "spoken_text": "옛날에는 아주 작은 것을 볼 방법이 없었어요. 그런데 현미경이 만들어지면서 달라졌어요. 영국의 로버트 훅은 현미경으로 벼룩 같은 작은 것들을 보았어요. 그것을 크게 그려 책을 냈어요. 이 책은 아주 많이 팔려서 베스트셀러가 되었어요. 네덜란드의 레이우엔훅은 직접 만든 현미경으로 빗물을 보았어요. 빗물 속에서 움직이는 아주 작은 생물을 찾아냈어요. 그 뒤에 그는 영국의 과학자 모임인 왕립 학회 회원으로 선출되었어요.",
+      "sources": [
+        "korean_5-2_u5_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "5829b46a1e916cb7c5e56002": {
+      "audio_file": "5829b46a1e916cb7c5e56002.mp3",
+      "spoken_text": "작은 세상을 연 현미경",
+      "sources": [
+        "korean_5-2_u5_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "fc5842c8b141a7e02879476b": {
+      "audio_file": "fc5842c8b141a7e02879476b.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 작은 세상을 연 현미경이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u5_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "a9c7d1420ad3e4b5ee1fd04e": {
+      "audio_file": "a9c7d1420ad3e4b5ee1fd04e.mp3",
+      "spoken_text": "토요일 오후, 하늘이와 동생 준이가 거실에 있었어요. 하늘이는 조용히 책을 읽고 싶었어요. 하지만 준이는 큰 소리로 만화 영화를 보고 싶었어요. 둘은 서로의 마음을 들어 보았어요. 그리고 조금씩 양보하기로 했어요. 준이는 만화 영화 소리를 작게 줄였어요. 하늘이는 작은 소리는 괜찮다고 하고 옆에서 책을 읽었어요.",
+      "sources": [
+        "korean_5-2_u4_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "e40572905a4d18c127cb5a16": {
+      "audio_file": "e40572905a4d18c127cb5a16.mp3",
+      "spoken_text": "토요일 거실에서",
+      "sources": [
+        "korean_5-2_u4_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "377c58d92db85d3158d00b56": {
+      "audio_file": "377c58d92db85d3158d00b56.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 토요일 거실에서이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u4_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "5fd2a2ec5f2e154c2329f4f8": {
+      "audio_file": "5fd2a2ec5f2e154c2329f4f8.mp3",
+      "spoken_text": "사회자: 교실 화분이 자꾸 시들어요. 화분을 돌볼 방법을 토의해 봅시다. 지우: 매일 한 사람씩 돌아가며 물을 주면 좋겠어요. 도윤: 저는 주번이 일주일 동안 맡으면 좋겠어요. 사회자: 두 의견의 단점을 살펴봅시다. 서연: 매일 바뀌면 차례를 잊기 쉽고, 주번 혼자 하면 힘들어요. 지우: 그러면 두 명씩 짝을 지어 일주일씩 돌아가며 물을 주면 어때요? 사회자: 좋아요. 두 의견을 조정해서 합의점을 찾았네요.",
+      "sources": [
+        "korean_5-2_u4_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "bf71935f8c7c73fd8ed76ac3": {
+      "audio_file": "bf71935f8c7c73fd8ed76ac3.mp3",
+      "spoken_text": "교실 화분 돌보기 토의",
+      "sources": [
+        "korean_5-2_u4_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "83bb877a9b6aecba44067a49": {
+      "audio_file": "83bb877a9b6aecba44067a49.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 교실 화분 돌보기 토의이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u4_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "171f5f1a785fdbd3a618e1c0": {
+      "audio_file": "171f5f1a785fdbd3a618e1c0.mp3",
+      "spoken_text": "한 지역에서 주로 쓰는 말을 방언이라고 해요. 제주 방언에는 제주의 자연과 생활 모습이 담겨 있어요. '곶자왈'은 숲과 덤불을 뜻하는 말이에요. 화산 지형 위에 생긴 제주의 숲을 이렇게 불러요. '숨비소리'는 해녀가 물 위로 올라와 숨을 고르는 소리예요. '돔베'는 도마를 뜻해요. 이 말들을 보면 제주 사람들의 생활을 알 수 있어요. 이처럼 방언은 그 지역의 모습을 담은 소중한 말이에요.",
+      "sources": [
+        "korean_5-2_u3_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "97641e323453ed9286a81f94": {
+      "audio_file": "97641e323453ed9286a81f94.mp3",
+      "spoken_text": "제주 방언에 담긴 것",
+      "sources": [
+        "korean_5-2_u3_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "10fa996d0aa1260b374b5396": {
+      "audio_file": "10fa996d0aa1260b374b5396.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 제주 방언에 담긴 것이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u3_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "3f97d112f16a0831e390c3e5": {
+      "audio_file": "3f97d112f16a0831e390c3e5.mp3",
+      "spoken_text": "수아는 오늘 아침 학교 방송을 맡았어요. 전교생이 함께 듣는 방송이라서 표준어로 말했어요. 표준어는 온 나라 사람이 함께 쓰도록 정한 말이에요. 그래서 전교생이 모두 알아들을 수 있었어요. 쉬는 시간에는 고향 친구 다온이를 만났어요. 수아는 \"밥 묵었나?\" 하고 반갑게 물었어요. 고향 방언으로 말하니 둘 사이가 더 가깝게 느껴졌어요. 수아는 때와 곳에 맞게 말을 골라 쓴 거예요.",
+      "sources": [
+        "korean_5-2_u3_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "7e3e082f048b7dbd9a4317dd": {
+      "audio_file": "7e3e082f048b7dbd9a4317dd.mp3",
+      "spoken_text": "방송실과 쉬는 시간",
+      "sources": [
+        "korean_5-2_u3_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "8a68e2161bd9fb3740b47717": {
+      "audio_file": "8a68e2161bd9fb3740b47717.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 방송실과 쉬는 시간이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u3_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "152267d0c674de694eb74498": {
+      "audio_file": "152267d0c674de694eb74498.mp3",
+      "spoken_text": "서연이네 반은 환경 동아리 활동을 해요. 서연이는 상황에 맞는 매체를 골라 소식을 전했어요. 먼저 모임 날짜를 우리 반 친구들에게만 알리려고 했어요. 그래서 학급 누리집에 글을 올렸어요. 준비물을 두고 온 친구에게는 휴대 전화 메시지를 급히 보냈어요. 다음에는 시청에 체험 활동을 신청해야 했어요. 학교 밖 기관이라서 전자 우편을 보냈어요.",
+      "sources": [
+        "korean_5-2_u2_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "d8f97a2536f9406c6f67d23b": {
+      "audio_file": "d8f97a2536f9406c6f67d23b.mp3",
+      "spoken_text": "알맞은 매체 고르기",
+      "sources": [
+        "korean_5-2_u2_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "ea334207c03df92771e77e96": {
+      "audio_file": "ea334207c03df92771e77e96.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 알맞은 매체 고르기이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u2_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "229e6589de94df4158ba2973": {
+      "audio_file": "229e6589de94df4158ba2973.mp3",
+      "spoken_text": "민재가 어제 쓴 일기를 다시 읽어 보았어요. 그런데 어색한 문장이 두 개 있었어요. 처음 쓴 문장은 이랬어요. '어제 나는 할머니와 떡을 만들 것이다.' '나는 이 일을 결코 잊을 것이다.' 민재는 앞말과 뒷말이 어울리게, 호응이 맞게 문장을 고쳤어요. '어제 나는 할머니와 떡을 만들었다.' '나는 이 일을 결코 잊지 않을 것이다.'",
+      "sources": [
+        "korean_5-2_u2_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "cb2095b36d4a764b8210aa12": {
+      "audio_file": "cb2095b36d4a764b8210aa12.mp3",
+      "spoken_text": "일기를 고쳐 써요",
+      "sources": [
+        "korean_5-2_u2_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "4460b370f16d18ff7d3e3bd7": {
+      "audio_file": "4460b370f16d18ff7d3e3bd7.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 일기를 고쳐 써요이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u2_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "965bd3053f4dd05c23435085": {
+      "audio_file": "965bd3053f4dd05c23435085.mp3",
+      "spoken_text": "『숲속 빵집의 약속』이라는 동화책을 소개할게요. 작은 다람쥐가 숲속에 빵집을 여는 이야기예요. 빵집에 동물 친구들이 몰려와서 빵이 모자랐어요. 다람쥐는 빵을 모두에게 똑같이 분배했어요. 작은 조각이지만 함께 나누어 먹으니 모두 행복해졌어요. 이 책은 나누는 기쁨을 쉽게 알려 주어서 좋았어요. 하지만 끝부분 이야기가 너무 짧아서 아쉬웠어요.",
+      "sources": [
+        "korean_5-2_u1_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "47e7740cb178440a37d1b61b": {
+      "audio_file": "47e7740cb178440a37d1b61b.mp3",
+      "spoken_text": "숲속 빵집 이야기를 읽고",
+      "sources": [
+        "korean_5-2_u1_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "a447ca68f103daba63790201": {
+      "audio_file": "a447ca68f103daba63790201.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 숲속 빵집 이야기를 읽고이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u1_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "78cc16368d0eeef12bff20e7": {
+      "audio_file": "78cc16368d0eeef12bff20e7.mp3",
+      "spoken_text": "유관순은 서울에서 학교를 다니던 학생이었어요. 그때 우리나라는 일본에게 나라를 빼앗겼어요. 일본이 힘으로 쳐들어온 침략 때문이었어요. 1919년에 유관순은 고향으로 내려갔어요. 그리고 아우내 장터에서 사람들에게 태극기를 나누어 주었어요. 겨레가 함께 독립 만세를 외치기 위해서였어요. 유관순은 일본 헌병에게 붙잡혀 감옥에 갇혔어요. 하지만 감옥에서도 독립 만세를 멈추지 않았어요.",
+      "sources": [
+        "korean_5-2_u1_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "97413292b299f5960edcefee": {
+      "audio_file": "97413292b299f5960edcefee.mp3",
+      "spoken_text": "독립 만세를 외친 유관순",
+      "sources": [
+        "korean_5-2_u1_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "52825b4a09238c5757fb00d5": {
+      "audio_file": "52825b4a09238c5757fb00d5.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 독립 만세를 외친 유관순이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_u1_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "dd067a785f95ed243aa334ab": {
+      "audio_file": "dd067a785f95ed243aa334ab.mp3",
+      "spoken_text": "도현이는 가족과 자동차를 타고 여행을 떠났어요. 심심해진 도현이는 가방에서 책을 꺼냈어요. 그런데 흔들리는 차에서 글자를 보니 속이 울렁거렸어요. 멀미가 나서 책을 더 읽을 수 없었어요. 누나가 귀로 듣는 오디오 북을 틀어 주었어요. 도현이는 눈을 감고 이야기를 들었어요. 속도 편해지고 시간도 금방 지나갔어요.",
+      "sources": [
+        "korean_5-2_dokseo_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "a5e98a51f11a9d5ccc6e17cd": {
+      "audio_file": "a5e98a51f11a9d5ccc6e17cd.mp3",
+      "spoken_text": "차 안에서 읽는 책",
+      "sources": [
+        "korean_5-2_dokseo_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "55974233434fd650fbe94e13": {
+      "audio_file": "55974233434fd650fbe94e13.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 차 안에서 읽는 책이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_dokseo_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "0a9ea61e905d3c5097fea367": {
+      "audio_file": "0a9ea61e905d3c5097fea367.mp3",
+      "spoken_text": "옛날에는 책을 손으로 한 글자씩 베껴 써서 만들었어요. 그래서 책 한 권을 만드는 데 시간이 오래 걸렸어요. 그 뒤에 글자를 종이에 찍어 내는 인쇄 기술이 생겼어요. 같은 책을 한꺼번에 많이 만들 수 있게 되었어요. 그래서 더 많은 사람이 책을 읽게 되었어요. 요즘에는 화면으로 읽는 전자책이 있어요. 귀로 듣는 오디오 북도 있어요. 이제는 때와 곳에 맞게 책의 형태를 골라 읽을 수 있어요.",
+      "sources": [
+        "korean_5-2_dokseo_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "6e3e085ae1dbf09a6ed57b07": {
+      "audio_file": "6e3e085ae1dbf09a6ed57b07.mp3",
+      "spoken_text": "달라져 온 책",
+      "sources": [
+        "korean_5-2_dokseo_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "8e6cb981c42ba4751aed6bf7": {
+      "audio_file": "8e6cb981c42ba4751aed6bf7.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 달라져 온 책이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_dokseo_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "283fc3b4aebfb5067ddedede": {
+      "audio_file": "283fc3b4aebfb5067ddedede.mp3",
+      "spoken_text": "우리 학교 운동장에 인조 잔디가 깔렸어요. 이 소식을 두 기자가 취재해서 뉴스로 전했어요. (가) 박 기자는 운동장이 깨끗해졌다고 전했어요. 흙먼지가 날리지 않아서 옷이 덜 더러워진대요. 아이들이 뛰어놀기 좋아졌다고 했어요. (나) 최 기자는 여름 더위를 걱정했어요. 햇볕을 받으면 인조 잔디가 뜨거워지기 때문이에요. 그래서 그늘을 더 만들어야 한다고 전했어요.",
+      "sources": [
+        "korean_5-2_media_2"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "b42a1b253aa1929f06c2a680": {
+      "audio_file": "b42a1b253aa1929f06c2a680.mp3",
+      "spoken_text": "새 운동장, 두 가지 뉴스",
+      "sources": [
+        "korean_5-2_media_2"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "98ee60836a9abf543ca5345d": {
+      "audio_file": "98ee60836a9abf543ca5345d.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 새 운동장, 두 가지 뉴스이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_media_2"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "c66c7fa9dcff90206a6038c3": {
+      "audio_file": "c66c7fa9dcff90206a6038c3.mp3",
+      "spoken_text": "토요일 아침, 지호는 도서관에 가려고 했어요. 그때 누리 소통망에서 오늘 도서관이 쉰다는 글을 보았어요. 그 글에는 누가 썼는지, 어디서 들었는지 출처가 없었어요. 하지만 지호는 확인하지 않고 그대로 믿었어요. 그래서 도서관에 가지 않고 집에 있었어요. 저녁에 도서관 누리집을 보니 도서관은 하루 종일 열려 있었어요. 그 글은 허위 정보였어요. 지호는 다음부터 출처를 꼭 확인하기로 했어요.",
+      "sources": [
+        "korean_5-2_media_1"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "2bd99064f17a78bd4ec9567f": {
+      "audio_file": "2bd99064f17a78bd4ec9567f.mp3",
+      "spoken_text": "도서관이 쉰대요",
+      "sources": [
+        "korean_5-2_media_1"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "fdd44c81b8e2d2e46db6d69b": {
+      "audio_file": "fdd44c81b8e2d2e46db6d69b.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 도서관이 쉰대요이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "korean_5-2_media_1"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "f232749b286d00025474d5b2": {
+      "audio_file": "f232749b286d00025474d5b2.mp3",
+      "spoken_text": "묵묵하다",
+      "sources": [
+        "419a2711-5b68-8185-a73e-edb2a119b29d"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "20f42dad24ae9296d065045e": {
+      "audio_file": "20f42dad24ae9296d065045e.mp3",
+      "spoken_text": "말없이 잠잠하다",
+      "sources": [
+        "419a2711-5b68-8185-a73e-edb2a119b29d"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "d1b57ce562e680f8f1eb20d4": {
+      "audio_file": "d1b57ce562e680f8f1eb20d4.mp3",
+      "spoken_text": "지문",
+      "sources": [
+        "419a2711-5b68-812e-86bf-c21c999a4272"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "a5640819fe11f13a78fea70e": {
+      "audio_file": "a5640819fe11f13a78fea70e.mp3",
+      "spoken_text": "극본에서 인물의 표정이나 행동을 괄호로 알려 주는 부분",
+      "sources": [
+        "419a2711-5b68-812e-86bf-c21c999a4272"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "d59c947f15cac6e902bd81f0": {
+      "audio_file": "d59c947f15cac6e902bd81f0.mp3",
+      "spoken_text": "대사",
+      "sources": [
+        "419a2711-5b68-81ba-8f92-ee30b0f83a76"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "768357fe454292df07e97e16": {
+      "audio_file": "768357fe454292df07e97e16.mp3",
+      "spoken_text": "극본에서 인물이 직접 하는 말",
+      "sources": [
+        "419a2711-5b68-81ba-8f92-ee30b0f83a76"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "bca52a95fe6493a0824d4528": {
+      "audio_file": "bca52a95fe6493a0824d4528.mp3",
+      "spoken_text": "해설",
+      "sources": [
+        "419a2711-5b68-8198-a1ae-cc58ccdbf657"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "cfd932fc50df50ecdd7c17cf": {
+      "audio_file": "cfd932fc50df50ecdd7c17cf.mp3",
+      "spoken_text": "극본에서 때, 곳, 나오는 사람을 설명하는 부분",
+      "sources": [
+        "419a2711-5b68-8198-a1ae-cc58ccdbf657"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "c721f570f742853c70ea9237": {
+      "audio_file": "c721f570f742853c70ea9237.mp3",
+      "spoken_text": "극본",
+      "sources": [
+        "419a2711-5b68-81c2-bd55-d1566e7f4c9a"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "b2452bfde4374ff922e3bf12": {
+      "audio_file": "b2452bfde4374ff922e3bf12.mp3",
+      "spoken_text": "연극을 하려고 쓴 글",
+      "sources": [
+        "419a2711-5b68-81c2-bd55-d1566e7f4c9a"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "588dd769ff6fd5c7522f68cd": {
+      "audio_file": "588dd769ff6fd5c7522f68cd.mp3",
+      "spoken_text": "배경",
+      "sources": [
+        "419a2711-5b68-816d-94e1-e71353cf2240"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "15f9f2f5226866ed0ec78d37": {
+      "audio_file": "15f9f2f5226866ed0ec78d37.mp3",
+      "spoken_text": "이야기가 펼쳐지는 시간과 장소",
+      "sources": [
+        "419a2711-5b68-816d-94e1-e71353cf2240"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e569bf2b4b33ff1d09db1a26": {
+      "audio_file": "e569bf2b4b33ff1d09db1a26.mp3",
+      "spoken_text": "사건",
+      "sources": [
+        "419a2711-5b68-8182-a813-d12a67a3f3c1"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "fd8af06c78cd70dd4e715010": {
+      "audio_file": "fd8af06c78cd70dd4e715010.mp3",
+      "spoken_text": "이야기에서 일어나는 일",
+      "sources": [
+        "419a2711-5b68-8182-a813-d12a67a3f3c1"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "505c597e1237f540c1e0dfc5": {
+      "audio_file": "505c597e1237f540c1e0dfc5.mp3",
+      "spoken_text": "인물",
+      "sources": [
+        "419a2711-5b68-81f0-88ce-f71c473707d2"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "353d93abb1cf24ec100b2b1e": {
+      "audio_file": "353d93abb1cf24ec100b2b1e.mp3",
+      "spoken_text": "이야기에서 어떤 일을 겪는 사람이나 사물",
+      "sources": [
+        "419a2711-5b68-81f0-88ce-f71c473707d2"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "ee2df9293aed5c39e7228e65": {
+      "audio_file": "ee2df9293aed5c39e7228e65.mp3",
+      "spoken_text": "문맹률",
+      "sources": [
+        "419a2711-5b68-81a5-9218-e231f731992e"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "dc7e438267ff51f2e5c85a05": {
+      "audio_file": "dc7e438267ff51f2e5c85a05.mp3",
+      "spoken_text": "글을 읽거나 쓸 줄 모르는 사람의 비율",
+      "sources": [
+        "419a2711-5b68-81a5-9218-e231f731992e"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e49a12812e5d224f03e4e078": {
+      "audio_file": "e49a12812e5d224f03e4e078.mp3",
+      "spoken_text": "산업",
+      "sources": [
+        "419a2711-5b68-8153-8a84-f368b5a79ca7"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "9318ce9ad8841a8b9d38363a": {
+      "audio_file": "9318ce9ad8841a8b9d38363a.mp3",
+      "spoken_text": "물건이나 서비스를 만들어 내는 활동",
+      "sources": [
+        "419a2711-5b68-8153-8a84-f368b5a79ca7"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "76a049bc6b80798179447ea8": {
+      "audio_file": "76a049bc6b80798179447ea8.mp3",
+      "spoken_text": "화폐",
+      "sources": [
+        "419a2711-5b68-8135-9060-d47d20c1850e"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "6c6314034d4e2188df11a4da": {
+      "audio_file": "6c6314034d4e2188df11a4da.mp3",
+      "spoken_text": "물건을 사고팔 때 쓰는 돈",
+      "sources": [
+        "419a2711-5b68-8135-9060-d47d20c1850e"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "3e40d3c2acda950c5fa9f114": {
+      "audio_file": "3e40d3c2acda950c5fa9f114.mp3",
+      "spoken_text": "선출되다",
+      "sources": [
+        "419a2711-5b68-81fe-9ca2-e3c5c5dd1d42"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "5c08b7542b15fbb644ca7e0b": {
+      "audio_file": "5c08b7542b15fbb644ca7e0b.mp3",
+      "spoken_text": "여럿 가운데에서 뽑히다",
+      "sources": [
+        "419a2711-5b68-81fe-9ca2-e3c5c5dd1d42"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "219b0c996ee75a8083427b67": {
+      "audio_file": "219b0c996ee75a8083427b67.mp3",
+      "spoken_text": "베스트셀러",
+      "sources": [
+        "419a2711-5b68-81ff-ae96-cd6d8446b536"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "803064fd76c0f001dcea6f0a": {
+      "audio_file": "803064fd76c0f001dcea6f0a.mp3",
+      "spoken_text": "어떤 기간에 가장 많이 팔린 물건",
+      "sources": [
+        "419a2711-5b68-81ff-ae96-cd6d8446b536"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "ea5b4277c6d2ede1e5d1aa38": {
+      "audio_file": "ea5b4277c6d2ede1e5d1aa38.mp3",
+      "spoken_text": "단서",
+      "sources": [
+        "419a2711-5b68-8149-a302-e9110c19bdee"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "d43d911e8b3524fb1a1f422f": {
+      "audio_file": "d43d911e8b3524fb1a1f422f.mp3",
+      "spoken_text": "무엇을 알아내는 데 도움이 되는 것",
+      "sources": [
+        "419a2711-5b68-8149-a302-e9110c19bdee"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "7a6d06d21c9611726ff59288": {
+      "audio_file": "7a6d06d21c9611726ff59288.mp3",
+      "spoken_text": "함축된 표현",
+      "sources": [
+        "419a2711-5b68-8169-931a-fc00f8a022c6"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "b690855ef18a553ec14e72fb": {
+      "audio_file": "b690855ef18a553ec14e72fb.mp3",
+      "spoken_text": "뜻이 바로 드러나지 않고 숨겨져 있는 표현",
+      "sources": [
+        "419a2711-5b68-8169-931a-fc00f8a022c6"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "92216826c0dd322fbf4d180e": {
+      "audio_file": "92216826c0dd322fbf4d180e.mp3",
+      "spoken_text": "추론",
+      "sources": [
+        "419a2711-5b68-8131-9bcd-e0d993634973"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "549508ba78f46e32964e5af5": {
+      "audio_file": "549508ba78f46e32964e5af5.mp3",
+      "spoken_text": "글에 드러나지 않은 내용을 단서로 짐작하는 것",
+      "sources": [
+        "419a2711-5b68-8131-9bcd-e0d993634973"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "b0067b038049f6239f1935df": {
+      "audio_file": "b0067b038049f6239f1935df.mp3",
+      "spoken_text": "순화어",
+      "sources": [
+        "419a2711-5b68-8188-9d45-fc928407b78b"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "c853f175e44c0c1e218e7104": {
+      "audio_file": "c853f175e44c0c1e218e7104.mp3",
+      "spoken_text": "어려운 말이나 외국어를 알기 쉽게 다듬은 말",
+      "sources": [
+        "419a2711-5b68-8188-9d45-fc928407b78b"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "a2a6e77afe54765e2d486cde": {
+      "audio_file": "a2a6e77afe54765e2d486cde.mp3",
+      "spoken_text": "단점",
+      "sources": [
+        "419a2711-5b68-817e-be83-dec85f35436a"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "a1f5d356b7edd59072bbc6b7": {
+      "audio_file": "a1f5d356b7edd59072bbc6b7.mp3",
+      "spoken_text": "모자라거나 좋지 않은 점",
+      "sources": [
+        "419a2711-5b68-817e-be83-dec85f35436a"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "ec670c4c9868e71b25a8c14f": {
+      "audio_file": "ec670c4c9868e71b25a8c14f.mp3",
+      "spoken_text": "장점",
+      "sources": [
+        "419a2711-5b68-81cd-b4b3-dbeb09840100"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "797003c3fdd4b3a97bd3e724": {
+      "audio_file": "797003c3fdd4b3a97bd3e724.mp3",
+      "spoken_text": "좋거나 잘하는 점",
+      "sources": [
+        "419a2711-5b68-81cd-b4b3-dbeb09840100"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "3c1df7052036e26d86d17cca": {
+      "audio_file": "3c1df7052036e26d86d17cca.mp3",
+      "spoken_text": "검토",
+      "sources": [
+        "419a2711-5b68-8161-8e24-d853c9899e5b"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "f5d028a1c122f27650f2769d": {
+      "audio_file": "f5d028a1c122f27650f2769d.mp3",
+      "spoken_text": "좋은지 나쁜지 꼼꼼히 따져 봄",
+      "sources": [
+        "419a2711-5b68-8161-8e24-d853c9899e5b"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "75161aedb6e357b4d0cc46e9": {
+      "audio_file": "75161aedb6e357b4d0cc46e9.mp3",
+      "spoken_text": "합의점",
+      "sources": [
+        "419a2711-5b68-81df-83c4-da99e858a1ca"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "bf605ad04ae19f36b8aae174": {
+      "audio_file": "bf605ad04ae19f36b8aae174.mp3",
+      "spoken_text": "서로 조금씩 양보해서 의견이 하나로 모이는 지점",
+      "sources": [
+        "419a2711-5b68-81df-83c4-da99e858a1ca"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "0bb5a2cbcb9e302b66d9bcc8": {
+      "audio_file": "0bb5a2cbcb9e302b66d9bcc8.mp3",
+      "spoken_text": "조정",
+      "sources": [
+        "419a2711-5b68-814a-a72f-dd2138b23e73"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "98d878be7c6ead2b786ff6f6": {
+      "audio_file": "98d878be7c6ead2b786ff6f6.mp3",
+      "spoken_text": "서로 다른 의견을 알맞게 맞추는 것",
+      "sources": [
+        "419a2711-5b68-814a-a72f-dd2138b23e73"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "baa9fe2d50b4beaf6fac1d2f": {
+      "audio_file": "baa9fe2d50b4beaf6fac1d2f.mp3",
+      "spoken_text": "토의",
+      "sources": [
+        "419a2711-5b68-81ac-b6c2-eeab5465cb73"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "5a1b53b4b3f33b9be99f8f18": {
+      "audio_file": "5a1b53b4b3f33b9be99f8f18.mp3",
+      "spoken_text": "여러 사람이 함께 문제를 해결하려고 의견을 나누는 것",
+      "sources": [
+        "419a2711-5b68-81ac-b6c2-eeab5465cb73"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "192ea414c754aaac571a45f0": {
+      "audio_file": "192ea414c754aaac571a45f0.mp3",
+      "spoken_text": "향토",
+      "sources": [
+        "419a2711-5b68-81a0-b82a-c4f52e991896"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "089ddc9cb0125a21846ceb29": {
+      "audio_file": "089ddc9cb0125a21846ceb29.mp3",
+      "spoken_text": "시골이나 고장",
+      "sources": [
+        "419a2711-5b68-81a0-b82a-c4f52e991896"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "bc93db3d0ffdfb9c93ca4e9c": {
+      "audio_file": "bc93db3d0ffdfb9c93ca4e9c.mp3",
+      "spoken_text": "지형",
+      "sources": [
+        "419a2711-5b68-810e-b753-ca1de307aa17"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "37f1c41dd2c4e459c65c393f": {
+      "audio_file": "37f1c41dd2c4e459c65c393f.mp3",
+      "spoken_text": "땅의 생긴 모양",
+      "sources": [
+        "419a2711-5b68-810e-b753-ca1de307aa17"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e30ec908506ff0d1f2cafcc8": {
+      "audio_file": "e30ec908506ff0d1f2cafcc8.mp3",
+      "spoken_text": "자산",
+      "sources": [
+        "419a2711-5b68-817c-9a3e-e80a266cb3e7"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "11c1c9dcb5bf94b586fbd951": {
+      "audio_file": "11c1c9dcb5bf94b586fbd951.mp3",
+      "spoken_text": "소중하게 지켜야 할 값진 것",
+      "sources": [
+        "419a2711-5b68-817c-9a3e-e80a266cb3e7"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "673dd6b8e0c40eca5a686a58": {
+      "audio_file": "673dd6b8e0c40eca5a686a58.mp3",
+      "spoken_text": "원활하다",
+      "sources": [
+        "419a2711-5b68-810d-b6ed-d84fd8c13fe4"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "bd0641b50df1b9bac1bb501c": {
+      "audio_file": "bd0641b50df1b9bac1bb501c.mp3",
+      "spoken_text": "막히는 데 없이 잘되어 나가다",
+      "sources": [
+        "419a2711-5b68-810d-b6ed-d84fd8c13fe4"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "94ae2755becf091686931be2": {
+      "audio_file": "94ae2755becf091686931be2.mp3",
+      "spoken_text": "의사소통",
+      "sources": [
+        "419a2711-5b68-81e5-93c8-dce867ba50b1"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "e6dca1b96d6bfa58f6f090e6": {
+      "audio_file": "e6dca1b96d6bfa58f6f090e6.mp3",
+      "spoken_text": "생각이나 뜻을 서로 주고받음",
+      "sources": [
+        "419a2711-5b68-81e5-93c8-dce867ba50b1"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "5534a2a1af7cd642191c6d1b": {
+      "audio_file": "5534a2a1af7cd642191c6d1b.mp3",
+      "spoken_text": "방언",
+      "sources": [
+        "419a2711-5b68-810c-9763-c3beb125acf9"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "64b39c335c1ac89916a456d5": {
+      "audio_file": "64b39c335c1ac89916a456d5.mp3",
+      "spoken_text": "한 지역에서 주로 쓰는, 표준어가 아닌 말",
+      "sources": [
+        "419a2711-5b68-810c-9763-c3beb125acf9"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "ec86bf353f51997725edd056": {
+      "audio_file": "ec86bf353f51997725edd056.mp3",
+      "spoken_text": "표준어",
+      "sources": [
+        "419a2711-5b68-8157-be7f-f68ef7b3189c"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "16179573577d2cbf552ecc5f": {
+      "audio_file": "16179573577d2cbf552ecc5f.mp3",
+      "spoken_text": "우리나라 사람들이 공통으로 쓰도록 정한 말",
+      "sources": [
+        "419a2711-5b68-8157-be7f-f68ef7b3189c"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e2cd6287e07220ef32107376": {
+      "audio_file": "e2cd6287e07220ef32107376.mp3",
+      "spoken_text": "전자 우편",
+      "sources": [
+        "419a2711-5b68-81bc-85b4-c7953b8799de"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "d7353236174168312710a441": {
+      "audio_file": "d7353236174168312710a441.mp3",
+      "spoken_text": "인터넷으로 주고받는 편지",
+      "sources": [
+        "419a2711-5b68-81bc-85b4-c7953b8799de"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "5af6ab73634ce0cf20c5043e": {
+      "audio_file": "5af6ab73634ce0cf20c5043e.mp3",
+      "spoken_text": "매체",
+      "sources": [
+        "419a2711-5b68-8197-aa45-e9a0b4981016"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "c8ca5081413aa3fb2a57243f": {
+      "audio_file": "c8ca5081413aa3fb2a57243f.mp3",
+      "spoken_text": "소식이나 생각을 전하는 수단",
+      "sources": [
+        "419a2711-5b68-8197-aa45-e9a0b4981016"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "72307176b28634e963940efb": {
+      "audio_file": "72307176b28634e963940efb.mp3",
+      "spoken_text": "개요",
+      "sources": [
+        "419a2711-5b68-81aa-9eb2-c2c1b9004a05"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "fbe478e9b2e7c238c7f914a1": {
+      "audio_file": "fbe478e9b2e7c238c7f914a1.mp3",
+      "spoken_text": "글을 쓰기 전에 쓸 내용을 간단히 정리한 것",
+      "sources": [
+        "419a2711-5b68-81aa-9eb2-c2c1b9004a05"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "4e3c3d17d00a4c110456f986": {
+      "audio_file": "4e3c3d17d00a4c110456f986.mp3",
+      "spoken_text": "호응 관계",
+      "sources": [
+        "419a2711-5b68-814b-b532-e2126a6952a8"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "15954b1941f31848fe7db8ba": {
+      "audio_file": "15954b1941f31848fe7db8ba.mp3",
+      "spoken_text": "앞에 오는 말과 뒤에 오는 말이 서로 어울리는 것",
+      "sources": [
+        "419a2711-5b68-814b-b532-e2126a6952a8"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "490312fb664559afa899d053": {
+      "audio_file": "490312fb664559afa899d053.mp3",
+      "spoken_text": "문장 성분",
+      "sources": [
+        "419a2711-5b68-81af-9b6c-c97626480001"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "573bf626bbbd4f30d8d4d836": {
+      "audio_file": "573bf626bbbd4f30d8d4d836.mp3",
+      "spoken_text": "문장을 이루는 주어, 서술어, 목적어 같은 부분",
+      "sources": [
+        "419a2711-5b68-81af-9b6c-c97626480001"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "d288100e6fda828cfc5ddad6": {
+      "audio_file": "d288100e6fda828cfc5ddad6.mp3",
+      "spoken_text": "목적어",
+      "sources": [
+        "419a2711-5b68-81e6-8036-ddd1d35707ec"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "265c5689195ca660b5047ba4": {
+      "audio_file": "265c5689195ca660b5047ba4.mp3",
+      "spoken_text": "문장에서 '무엇을'에 해당하는 말",
+      "sources": [
+        "419a2711-5b68-81e6-8036-ddd1d35707ec"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "0e45bb04bfcd05ba2105ba80": {
+      "audio_file": "0e45bb04bfcd05ba2105ba80.mp3",
+      "spoken_text": "서술어",
+      "sources": [
+        "419a2711-5b68-8198-9ad6-f2eb20fd2440"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "ab96f42547d189e9ac6b53c6": {
+      "audio_file": "ab96f42547d189e9ac6b53c6.mp3",
+      "spoken_text": "주어가 무엇을 하는지, 어떠한지 알려 주는 말",
+      "sources": [
+        "419a2711-5b68-8198-9ad6-f2eb20fd2440"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "de5e4ec9ad16feac855a66d9": {
+      "audio_file": "de5e4ec9ad16feac855a66d9.mp3",
+      "spoken_text": "주어",
+      "sources": [
+        "419a2711-5b68-811b-a84b-fb10291459b3"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "3b3897f064b4759a517cd567": {
+      "audio_file": "3b3897f064b4759a517cd567.mp3",
+      "spoken_text": "문장에서 '누가'나 '무엇이'에 해당하는 말",
+      "sources": [
+        "419a2711-5b68-811b-a84b-fb10291459b3"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "0f8d8aa27f2a5dc97dda4340": {
+      "audio_file": "0f8d8aa27f2a5dc97dda4340.mp3",
+      "spoken_text": "분배하다",
+      "sources": [
+        "419a2711-5b68-810c-a044-f81edcb98436"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "533a5173bc70491f89076cd9": {
+      "audio_file": "533a5173bc70491f89076cd9.mp3",
+      "spoken_text": "여러 사람에게 각각의 몫으로 나누어 주다",
+      "sources": [
+        "419a2711-5b68-810c-a044-f81edcb98436"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "4bc2e872da3d93948be63451": {
+      "audio_file": "4bc2e872da3d93948be63451.mp3",
+      "spoken_text": "분류하다",
+      "sources": [
+        "419a2711-5b68-81a8-9ba9-fd0c93966603"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "92111765b563b86232973943": {
+      "audio_file": "92111765b563b86232973943.mp3",
+      "spoken_text": "종류에 따라서 가르다",
+      "sources": [
+        "419a2711-5b68-81a8-9ba9-fd0c93966603"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "b5d3e809263ab0b0f7ab13ed": {
+      "audio_file": "b5d3e809263ab0b0f7ab13ed.mp3",
+      "spoken_text": "겨레",
+      "sources": [
+        "419a2711-5b68-8177-bc15-cc486ffe076c"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "0ff3794ed4f03ace6c84bc98": {
+      "audio_file": "0ff3794ed4f03ace6c84bc98.mp3",
+      "spoken_text": "같은 핏줄을 이어받은 민족",
+      "sources": [
+        "419a2711-5b68-8177-bc15-cc486ffe076c"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "1a4b94b94b0a0af8f30b9fed": {
+      "audio_file": "1a4b94b94b0a0af8f30b9fed.mp3",
+      "spoken_text": "침략",
+      "sources": [
+        "419a2711-5b68-8160-9bab-cde58468e0cf"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "b1a12b313fb5386c7902752e": {
+      "audio_file": "b1a12b313fb5386c7902752e.mp3",
+      "spoken_text": "정당한 이유 없이 남의 나라에 쳐들어감",
+      "sources": [
+        "419a2711-5b68-8160-9bab-cde58468e0cf"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "f42fce54b44554b509be15e5": {
+      "audio_file": "f42fce54b44554b509be15e5.mp3",
+      "spoken_text": "애꿎다",
+      "sources": [
+        "419a2711-5b68-815e-b926-e005bf203307"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "b1b6f02ec8f0716276c1ebb2": {
+      "audio_file": "b1b6f02ec8f0716276c1ebb2.mp3",
+      "spoken_text": "아무런 잘못이 없거나 그 일과 상관이 없다",
+      "sources": [
+        "419a2711-5b68-815e-b926-e005bf203307"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "4e6657331bfc13a6137cc210": {
+      "audio_file": "4e6657331bfc13a6137cc210.mp3",
+      "spoken_text": "독서 감상문",
+      "sources": [
+        "419a2711-5b68-81ba-8b29-e60e7e49d5c2"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "bfdd9b6ae3f268b03f4d77c8": {
+      "audio_file": "bfdd9b6ae3f268b03f4d77c8.mp3",
+      "spoken_text": "책을 읽고 떠오른 생각이나 느낌을 자유롭게 쓴 글",
+      "sources": [
+        "419a2711-5b68-81ba-8b29-e60e7e49d5c2"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "6e74343bf440db9677580eed": {
+      "audio_file": "6e74343bf440db9677580eed.mp3",
+      "spoken_text": "서평",
+      "sources": [
+        "419a2711-5b68-81a3-9195-dc319bfef84e"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "2cb71df8483243dcad25589a": {
+      "audio_file": "2cb71df8483243dcad25589a.mp3",
+      "spoken_text": "책에 대한 자신의 의견이나 평가를 밝힌 글",
+      "sources": [
+        "419a2711-5b68-81a3-9195-dc319bfef84e"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "8cd7ff0ec627b443677de204": {
+      "audio_file": "8cd7ff0ec627b443677de204.mp3",
+      "spoken_text": "인상적인 부분",
+      "sources": [
+        "419a2711-5b68-81be-811c-e27b6578b9c5"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "5fd016560788374802f23173": {
+      "audio_file": "5fd016560788374802f23173.mp3",
+      "spoken_text": "글을 읽으며 마음이 움직이거나 기억에 남는 부분",
+      "sources": [
+        "419a2711-5b68-81be-811c-e27b6578b9c5"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "b4062c1f9f2baae773aef213": {
+      "audio_file": "b4062c1f9f2baae773aef213.mp3",
+      "spoken_text": "간추리다",
+      "sources": [
+        "419a2711-5b68-8131-940a-f17a83f2103f"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "28c40fe53338b6041132e3bf": {
+      "audio_file": "28c40fe53338b6041132e3bf.mp3",
+      "spoken_text": "중요한 내용만 골라 짧게 정리하다",
+      "sources": [
+        "419a2711-5b68-8131-940a-f17a83f2103f"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "08d3da525a5753b407d232db": {
+      "audio_file": "08d3da525a5753b407d232db.mp3",
+      "spoken_text": "반납",
+      "sources": [
+        "419a2711-5b68-8181-8cfe-ce00fd40b673"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "98282098401d784a4e4cc7d7": {
+      "audio_file": "98282098401d784a4e4cc7d7.mp3",
+      "spoken_text": "빌린 것을 다시 돌려줌",
+      "sources": [
+        "419a2711-5b68-8181-8cfe-ce00fd40b673"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "1bdd67a6e481b6bea18afd92": {
+      "audio_file": "1bdd67a6e481b6bea18afd92.mp3",
+      "spoken_text": "누리집",
+      "sources": [
+        "419a2711-5b68-81c1-948b-ce42816db721"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "84df65fe89ee4c21576c396d": {
+      "audio_file": "84df65fe89ee4c21576c396d.mp3",
+      "spoken_text": "인터넷에서 정보를 볼 수 있게 만든 곳",
+      "sources": [
+        "419a2711-5b68-81c1-948b-ce42816db721"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e732dcfd76e6e666d7618ec7": {
+      "audio_file": "e732dcfd76e6e666d7618ec7.mp3",
+      "spoken_text": "탐색",
+      "sources": [
+        "419a2711-5b68-8124-9fa4-d881cb2cddf5"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "e5e405ffe625e7f886156cd6": {
+      "audio_file": "e5e405ffe625e7f886156cd6.mp3",
+      "spoken_text": "필요한 것을 찾으려고 이리저리 살펴봄",
+      "sources": [
+        "419a2711-5b68-8124-9fa4-d881cb2cddf5"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "6670047c7fc07f1dc7b89165": {
+      "audio_file": "6670047c7fc07f1dc7b89165.mp3",
+      "spoken_text": "인쇄",
+      "sources": [
+        "419a2711-5b68-81ef-bbc1-c47bb7119648"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "be2a478fd02430f3057698e7": {
+      "audio_file": "be2a478fd02430f3057698e7.mp3",
+      "spoken_text": "글이나 그림을 종이에 찍어 냄",
+      "sources": [
+        "419a2711-5b68-81ef-bbc1-c47bb7119648"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "bd4c05d9834d6620f8a5418f": {
+      "audio_file": "bd4c05d9834d6620f8a5418f.mp3",
+      "spoken_text": "증강 현실",
+      "sources": [
+        "419a2711-5b68-81d3-82ca-f4bc097d3285"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "ade0c730a27aef9be0e7874d": {
+      "audio_file": "ade0c730a27aef9be0e7874d.mp3",
+      "spoken_text": "화면 속 내용이 실제 공간에 있는 것처럼 보이게 하는 기술",
+      "sources": [
+        "419a2711-5b68-81d3-82ca-f4bc097d3285"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "c062bf3fb0a7930f67abc140": {
+      "audio_file": "c062bf3fb0a7930f67abc140.mp3",
+      "spoken_text": "오디오 북",
+      "sources": [
+        "419a2711-5b68-8118-8cca-ce7cd7c85ac3"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "a388305de252ee340e733278": {
+      "audio_file": "a388305de252ee340e733278.mp3",
+      "spoken_text": "책의 내용을 녹음해 소리로 들을 수 있는 책",
+      "sources": [
+        "419a2711-5b68-8118-8cca-ce7cd7c85ac3"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "4026dc468b11c500a8794101": {
+      "audio_file": "4026dc468b11c500a8794101.mp3",
+      "spoken_text": "전자책",
+      "sources": [
+        "419a2711-5b68-8158-bb37-daa4223cd14a"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "0e177a4834340e20b922fc7d": {
+      "audio_file": "0e177a4834340e20b922fc7d.mp3",
+      "spoken_text": "디지털 기기의 화면으로 읽는 책",
+      "sources": [
+        "419a2711-5b68-8158-bb37-daa4223cd14a"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "e18fceee87e53ec03bfe2c11": {
+      "audio_file": "e18fceee87e53ec03bfe2c11.mp3",
+      "spoken_text": "취재",
+      "sources": [
+        "419a2711-5b68-81bf-828f-dc349fd035a7"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "878b16e9ec94bc2f3ac6bd86": {
+      "audio_file": "878b16e9ec94bc2f3ac6bd86.mp3",
+      "spoken_text": "기사나 뉴스에 쓸 내용을 찾아가 조사함",
+      "sources": [
+        "419a2711-5b68-81bf-828f-dc349fd035a7"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "6d9395061dda354e2c9084db": {
+      "audio_file": "6d9395061dda354e2c9084db.mp3",
+      "spoken_text": "조작",
+      "sources": [
+        "419a2711-5b68-81a3-8dc8-e1479e524d68"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "ce48aa02f970475c1bd8cfed": {
+      "audio_file": "ce48aa02f970475c1bd8cfed.mp3",
+      "spoken_text": "사실과 다르게 거짓으로 꾸며 만듦",
+      "sources": [
+        "419a2711-5b68-81a3-8dc8-e1479e524d68"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "f940ab23de1e69075105cdc6": {
+      "audio_file": "f940ab23de1e69075105cdc6.mp3",
+      "spoken_text": "과장",
+      "sources": [
+        "419a2711-5b68-81cc-a56a-ea1a62abbf47"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "e24c2226b00332ae728442be": {
+      "audio_file": "e24c2226b00332ae728442be.mp3",
+      "spoken_text": "사실보다 크게 부풀려 나타냄",
+      "sources": [
+        "419a2711-5b68-81cc-a56a-ea1a62abbf47"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "67ffafbb682b878441d5683a": {
+      "audio_file": "67ffafbb682b878441d5683a.mp3",
+      "spoken_text": "출처",
+      "sources": [
+        "419a2711-5b68-81b7-90e6-d0656ef34fd2"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "25431290ca9b1b8e9d458123": {
+      "audio_file": "25431290ca9b1b8e9d458123.mp3",
+      "spoken_text": "글이나 정보가 처음 나온 곳",
+      "sources": [
+        "419a2711-5b68-81b7-90e6-d0656ef34fd2"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "25070ba4d7fa86a7c77b1983": {
+      "audio_file": "25070ba4d7fa86a7c77b1983.mp3",
+      "spoken_text": "누리 소통망",
+      "sources": [
+        "419a2711-5b68-81fd-8451-ed9059de8b58"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "997091dcc5eef23c26dd6fe8": {
+      "audio_file": "997091dcc5eef23c26dd6fe8.mp3",
+      "spoken_text": "인터넷에서 사람들이 소식과 정보를 주고받는 서비스",
+      "sources": [
+        "419a2711-5b68-81fd-8451-ed9059de8b58"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "51a98995ebbc15183ed1809f": {
+      "audio_file": "51a98995ebbc15183ed1809f.mp3",
+      "spoken_text": "관점",
+      "sources": [
+        "419a2711-5b68-8158-a2d4-f0450395f95c"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "27992d498a33e17dfc535958": {
+      "audio_file": "27992d498a33e17dfc535958.mp3",
+      "spoken_text": "어떤 일을 바라보고 생각하는 방향이나 태도",
+      "sources": [
+        "419a2711-5b68-8158-a2d4-f0450395f95c"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "bbd45250d7f091245693b98b": {
+      "audio_file": "bbd45250d7f091245693b98b.mp3",
+      "spoken_text": "신뢰성",
+      "sources": [
+        "419a2711-5b68-811b-ae80-f068e82b6646"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "369a6d5047239a82e1f89543": {
+      "audio_file": "369a6d5047239a82e1f89543.mp3",
+      "spoken_text": "어떤 자료를 믿을 수 있는 정도",
+      "sources": [
+        "419a2711-5b68-811b-ae80-f068e82b6646"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "407b97c15be14016e650da21": {
+      "audio_file": "407b97c15be14016e650da21.mp3",
+      "spoken_text": "허위 정보",
+      "sources": [
+        "419a2711-5b68-813d-8b84-f6c47cd1745b"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "ae58c8c4da8cb7d0fa2fd593": {
+      "audio_file": "ae58c8c4da8cb7d0fa2fd593.mp3",
+      "spoken_text": "사실이 아닌 잘못된 정보",
+      "sources": [
+        "419a2711-5b68-813d-8b84-f6c47cd1745b"
       ],
       "kinds": [
         "meaning"
@@ -5477,6 +7180,102 @@
       "audio_file": "e56e5421f0a740606f19ac6a.mp3",
       "title": "한국의 전통 음식, 김치",
       "order": 37
+    },
+    "korean_5-2_u6_2": {
+      "audio_hash": "8b289bc8f715f0127927f2f0",
+      "audio_file": "8b289bc8f715f0127927f2f0.mp3",
+      "title": "비 오는 날의 우산",
+      "order": 172
+    },
+    "korean_5-2_u6_1": {
+      "audio_hash": "2a10027ea081a13d3d5c083e",
+      "audio_file": "2a10027ea081a13d3d5c083e.mp3",
+      "title": "눈 오는 날의 정류장",
+      "order": 171
+    },
+    "korean_5-2_u5_2": {
+      "audio_hash": "336069ec6357b09161f3de86",
+      "audio_file": "336069ec6357b09161f3de86.mp3",
+      "title": "우리 집에 분 봄바람",
+      "order": 162
+    },
+    "korean_5-2_u5_1": {
+      "audio_hash": "b6792b168caf00b9ebc4cdfb",
+      "audio_file": "b6792b168caf00b9ebc4cdfb.mp3",
+      "title": "작은 세상을 연 현미경",
+      "order": 161
+    },
+    "korean_5-2_u4_2": {
+      "audio_hash": "a9c7d1420ad3e4b5ee1fd04e",
+      "audio_file": "a9c7d1420ad3e4b5ee1fd04e.mp3",
+      "title": "토요일 거실에서",
+      "order": 152
+    },
+    "korean_5-2_u4_1": {
+      "audio_hash": "5fd2a2ec5f2e154c2329f4f8",
+      "audio_file": "5fd2a2ec5f2e154c2329f4f8.mp3",
+      "title": "교실 화분 돌보기 토의",
+      "order": 151
+    },
+    "korean_5-2_u3_2": {
+      "audio_hash": "171f5f1a785fdbd3a618e1c0",
+      "audio_file": "171f5f1a785fdbd3a618e1c0.mp3",
+      "title": "제주 방언에 담긴 것",
+      "order": 132
+    },
+    "korean_5-2_u3_1": {
+      "audio_hash": "3f97d112f16a0831e390c3e5",
+      "audio_file": "3f97d112f16a0831e390c3e5.mp3",
+      "title": "방송실과 쉬는 시간",
+      "order": 131
+    },
+    "korean_5-2_u2_2": {
+      "audio_hash": "152267d0c674de694eb74498",
+      "audio_file": "152267d0c674de694eb74498.mp3",
+      "title": "알맞은 매체 고르기",
+      "order": 122
+    },
+    "korean_5-2_u2_1": {
+      "audio_hash": "229e6589de94df4158ba2973",
+      "audio_file": "229e6589de94df4158ba2973.mp3",
+      "title": "일기를 고쳐 써요",
+      "order": 121
+    },
+    "korean_5-2_u1_2": {
+      "audio_hash": "965bd3053f4dd05c23435085",
+      "audio_file": "965bd3053f4dd05c23435085.mp3",
+      "title": "숲속 빵집 이야기를 읽고",
+      "order": 112
+    },
+    "korean_5-2_u1_1": {
+      "audio_hash": "78cc16368d0eeef12bff20e7",
+      "audio_file": "78cc16368d0eeef12bff20e7.mp3",
+      "title": "독립 만세를 외친 유관순",
+      "order": 111
+    },
+    "korean_5-2_dokseo_2": {
+      "audio_hash": "dd067a785f95ed243aa334ab",
+      "audio_file": "dd067a785f95ed243aa334ab.mp3",
+      "title": "차 안에서 읽는 책",
+      "order": 102
+    },
+    "korean_5-2_dokseo_1": {
+      "audio_hash": "0a9ea61e905d3c5097fea367",
+      "audio_file": "0a9ea61e905d3c5097fea367.mp3",
+      "title": "달라져 온 책",
+      "order": 101
+    },
+    "korean_5-2_media_2": {
+      "audio_hash": "283fc3b4aebfb5067ddedede",
+      "audio_file": "283fc3b4aebfb5067ddedede.mp3",
+      "title": "새 운동장, 두 가지 뉴스",
+      "order": 142
+    },
+    "korean_5-2_media_1": {
+      "audio_hash": "c66c7fa9dcff90206a6038c3",
+      "audio_file": "c66c7fa9dcff90206a6038c3.mp3",
+      "title": "도서관이 쉰대요",
+      "order": 141
     }
   },
   "settings": {

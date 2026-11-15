@@ -1003,7 +1003,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 
 ### 🎧 `center-reading-audio.js` / `build_center_reading_audio.py` (센터 고정 음성 공통 경로)
 - **브라우저 모듈**: `kids/core/center-reading-audio.js`. 국어방·`quest_runner.html`에서 Fairy 앞에 로드한다. `CenterReadingAudio.play(text, {onEnd, onError})`는 일치 자산 재생/취소 시 true, 자산이 없으면 false를 반환한다. `stop()`은 재생·목록/해시 대기 요청을 함께 취소한다. `normalize(text)`·`hash(text, settings)`는 생성기 규격과 같다.
-- **서버 없는 로컬 생성기**: master-tower의 `scripts/build_center_reading_audio.py`. `--all --from-notion`은 최신 센터 지문·민수 국어 어휘를 읽어 누락만 생성한다. `--file`·`--order`·`--book-id`는 대상 제한, `--dry-run`은 읽기 전용 계획, `--check`는 누락·변경·불량·매핑 오류 시 종료 코드 1. `full_text`·`fullText` 모두 지원한다.
+- **서버 없는 로컬 생성기**: master-tower의 `scripts/build_center_reading_audio.py`. `--all --from-notion`은 최신 센터·교과서 독해 **국어** 지문(`AUDIO_TRACKS`, 2026-11-15 교과서 추가)과 민수 국어 어휘를 읽어 누락만 생성한다. `--track center|textbook|all`(기본 all)로 트랙을 고르고, 교과서 트랙의 영어 지문과 캐시·파일의 `subject≠국어` 지문은 뺀다. `register_reading_passage.py`도 같은 상수로 센터·교과서 국어 지문 등록 직후 생성한다. `--file`·`--order`·`--book-id`는 대상 제한, `--dry-run`은 읽기 전용 계획, `--check`는 누락·변경·불량·매핑 오류 시 종료 코드 1. `full_text`·`fullText` 모두 지원한다.
 - **자산**: `kids/assets/audio/center_reading/manifest.json` v2의 `settings`·`clips`·`passages`, `<SHA-256 24자리>.mp3`. 선희 `ko-KR-SunHiNeural`·속도 `+0%`·피치 `+0Hz`, 대본·설정 해시. 원문은 노션에 두고 생성 대본만 자산 목록에 기록한다. OpenAI로 대체할 수 있는 Worker 응답을 생성 원본으로 사용하지 않는다.
 - **시험**: `tests/center-audio.test.mjs`(공부방 회귀 묶음), `scripts/verify_center_audio.cjs`(실제 MP3·모바일/PC·실제 러너), master-tower의 `scripts/test_center_reading_audio.py`(생성·변경·실패·등록 호출). 검증 근거는 `docs/center_audio/walkthrough.md`.
 
