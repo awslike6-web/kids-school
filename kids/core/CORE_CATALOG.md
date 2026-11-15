@@ -959,6 +959,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 노션 독해 마스터 DB(`LIBRARY_DB`)에서 지문과 문제를 실시간 수급하여, 모바일 좁은 화면에서도 스크롤 피로 없이 1문항 슬라이스 카드 및 단락 힌트 토글 방식으로 쾌적하게 학습할 수 있도록 구현된 국어·영어 공통 독립 뷰어 엔진입니다.
 - **파일 위치**: `kids/core/reading_engine.js`
 - **센터 음성 현황 (2026-10-27)**: `toggleTts()` → `speakFairyTTS` → `CenterReadingAudio.play` 순으로 정적 Edge MP3를 우선 재생한다. 지문 ID가 같아도 대본·설정 해시가 달라지면 옛 파일을 사용하지 않는다. 중지·문제 전환·나가기·음성 OFF·창 닫기는 공통 `stopFairyTTS`로 취소한다. 등록·완료 기준은 [국어 명세서 §8-1](../../docs/korean_spec.md#센터-독해-등록-표준)을 따른다.
+- **지문 조회 (2026-11-15)**: `kids/core/notion-api-client.js` `fetchReadingPassagesFromNotion`이 `LIBRARY_DB`를 `순번` 오름차순으로 한 쪽 100편씩 `next_cursor`로 끝까지 이어 읽는다(최대 20쪽). 전에는 50편에서 잘려 뒤 순번 지문(국어 교과서 독해 101~172)이 화면에 나오지 않았다.
 - **스타일시트**: `kids/css/reading_engine.css` (독립 정규 스타일시트, `.reading-grade-bar`, `.reading-unit-section`, `.reading-passage-card` 등)
 - **핵심 아키텍처 & UX**:
   1. **공부방 표준 학년 선택 바 (`reading-grade-bar`)**: `5-1`, `5-2`, `전체보기` 단일 표준 칩을 통해 학기/학년별 정밀 필터링 제공.
@@ -991,7 +992,14 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   - **독해 마스터 DB 적재**: 2,000자 초과 지문/JSON을 1,900자 청크로 자동 분할하여 노션 `rich_text` 제한 완전 방어.
   - **VOCA DB 자동 분리 적재 (One-Source Multi-Use)**: 지문 속 속담, 사자성어, 개념어를 발라내어 노션 용어사전 DB(`375a2711...`)에 동시 등록 (익일 5분 퀘스트 국어 파트 및 용어방에 자동 복습 큐 형성).
   - **🛡️ 2계층 오프라인 보존 큐**: 노션 API 일시 점검(500) 시에도 `kids/data/reading_passages_cache.json`에 영구 보존하여 데이터 유실 원천 차단.
-  - **전체 캐시 재등록 옵션**: master-tower 루트의 `python scripts/register_reading_passage.py --sync-pending`은 현재 캐시 전체를 새 페이지로 다시 등록하므로 중복 위험이 있다. 미등록 건을 식별하기 전에는 복구용으로 무조건 실행하지 않는다.
+  - **전체 캐시 재등록 옵션**: master-tower 루트의 `python scripts/register_reading_passage.py --sync-pending`은 현재 캐시 전체를 다시 등록한다. 도서 키가 노션과 같은 지문은 갱신되지만, 도서 키 없이 등록된 옛 센터 지문은 새 페이지가 생겨 중복 위험이 있다. 미등록 건을 식별하기 전에는 복구용으로 무조건 실행하지 않는다.
+- **미리보기·중복 방지 (2026-11-15)**:
+  - `--dry-run`: 노션·로컬 캐시에 쓰지 않고 신규/갱신 여부, 순번, 문항과 정답만 보여 준다.
+  - 같은 `도서 키(ID)`(`book_id`)가 노션에 있으면 새 페이지를 만들지 않고 그 페이지의 속성을 갱신한다(페이지 본문 블록은 처음 만들 때만 쓴다).
+  - 자료의 `source_type`(`자체 창작`·`교과서 재구성`·`교과서 원문`)·`source_note`를 `출처구분`·`원작 출처`에 쓴다. 적지 않으면 그 칸을 건드리지 않는다.
+  - 등록 전에 문항을 검사한다(질문 비어 있음, 보기 2개 미만·중복, 정답이 보기에 없음). 걸리면 아무것도 쓰지 않고 멈춘다.
+  - **단원 묶음 파일**: `{공통 칸(subject·track·unit·grade·student·difficulty), "passages": [지문…]}` 형식이면 지문을 차례로 등록한다. 교과서 독해 자료는 `kids-school-main/scripts/data/reading/{과목}_{학년}_{단원}.json`에 둔다(민수 국어 5-2: `scripts/data/reading/korean_5-2_dokseo.json`·`korean_5-2_u1.json`~`korean_5-2_u6.json`·`korean_5-2_media.json`). 규격은 [국어 명세서 §5-5](../../docs/korean_spec.md).
+  - 시험: master-tower `python -X utf8 scripts/test_center_reading_audio.py` (`RegistrationPreviewTests` 5건: 묶음 펴기, 미리보기 무쓰기, 신규 등록·출처 칸, 같은 도서 키 갱신, 문항 검사).
 
 ### 🎧 `center-reading-audio.js` / `build_center_reading_audio.py` (센터 고정 음성 공통 경로)
 - **브라우저 모듈**: `kids/core/center-reading-audio.js`. 국어방·`quest_runner.html`에서 Fairy 앞에 로드한다. `CenterReadingAudio.play(text, {onEnd, onError})`는 일치 자산 재생/취소 시 true, 자산이 없으면 false를 반환한다. `stop()`은 재생·목록/해시 대기 요청을 함께 취소한다. `normalize(text)`·`hash(text, settings)`는 생성기 규격과 같다.
