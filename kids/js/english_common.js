@@ -226,11 +226,8 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         if (type === 'stage6') {
             let notionPassages = [];
             if (typeof fetchReadingPassagesFromNotion === 'function') {
-                try {
-                    notionPassages = await fetchReadingPassagesFromNotion({ subject: "영어", student: targetStudent });
-                } catch (err) {
-                    console.warn('[english] 독해 DB 조회 실패, 로컬 지문으로 대체:', err);
-                }
+                try { notionPassages = await fetchReadingPassagesFromNotion({ subject: "영어", includeAllStudents: true }); }
+                catch (err) { console.warn('[english] 독해 DB 조회 실패, 로컬 지문으로 대체:', err); }
             }
 
             const localDb = (typeof ENGLISH_READING_DATABASE !== 'undefined' && Array.isArray(ENGLISH_READING_DATABASE))
@@ -278,8 +275,7 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             return;
         }
 
-        // 단어/문장/파닉스 등 노션 VOCA DB 연동
-        const records = await fetchVocaFromNotion({ subject: "영어", filterByStudent: true });
+        const records = window.EnglishUnitBar?.fetchRecords ? await window.EnglishUnitBar.fetchRecords() : await fetchVocaFromNotion({ subject: "영어", filterByStudent: true });
         
         if (records && records.length > 0) {
             allFetchedRecords = records;
@@ -365,26 +361,24 @@ window.selectDynamicGrade = function(grade) {
     }
 };
 
+window.toggleEnglishModalUpperPreview = async (next) => {
+    const bar = window.EnglishUnitBar;
+    if (next && bar?.getPick && bar.getPick().grade && !bar.getPick().grade.startsWith('5-')) bar.selectGrade(-1);
+    if (bar?.toggleUpperPreview) await bar.toggleUpperPreview(next);
+    else { try { localStorage.setItem('english_upper_preview_daughter', next ? '1' : '0'); } catch (_) {} }
+    if (currentMissionType) openMissionView(currentMissionType);
+};
 window._currentDynamicUnits = [];
 function renderDynamicUnitUI(units, container) {
     window._currentDynamicUnits = units;
-    let html = `<div style="text-align:center; margin-bottom:20px;">
-        <h3 style="color:var(--mint); margin-bottom:15px;">📚 [${selectedEnglishGrade}] 도전할 단원을 선택하세요!</h3>
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">`;
-    units.forEach((u, idx) => {
-        let displayLabel = u;
-        if (/^L\d+$/i.test(u)) {
-            const num = u.replace(/\D/g, '');
-            displayLabel = `${u} (${num}단원)`;
-        }
-        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.15rem; font-weight:bold;" onclick="selectDynamicUnitByIndex(${idx})">${displayLabel}</button>`;
-    });
-    html += `</div>
-        <div style="margin-top:20px;">
-            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
-        </div>
-    </div>`;
-    container.innerHTML = html;
+    const isDaughter = localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서';
+    const isPreview = Boolean(window.EnglishUnitBar?.isUpperPreview?.());
+    const previewBtn = isDaughter ? `<button class="quiz-button" style="background:${isPreview ? '#0f766e' : '#6366f1'}; width:100%; margin-bottom:10px;" onclick="toggleEnglishModalUpperPreview(${!isPreview})">${isPreview ? '🔭 5학년 단원 미리보기 ON (끄기)' : '🔭 5학년 단원·특별활동 미리보기'}</button>` : '';
+    const unitBtns = units.map((u, idx) => {
+        const label = /^L\d+$/i.test(u) ? `${u} (${u.replace(/\D/g, '')}단원)` : u;
+        return `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.15rem; font-weight:bold;" onclick="selectDynamicUnitByIndex(${idx})">${label}</button>`;
+    }).join('');
+    container.innerHTML = `<div style="text-align:center; margin-bottom:20px;"><h3 style="color:var(--mint); margin-bottom:15px;">📚 [${selectedEnglishGrade}] 도전할 단원을 선택하세요!</h3>${previewBtn}<div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">${unitBtns}</div><div style="margin-top:20px;"><button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button></div></div>`;
 }
 
 window.selectDynamicUnitByIndex = function(idx) {
@@ -466,7 +460,8 @@ function startMissionWithFilteredData(records, innerBody) {
     activeSectionData = prepareEnglishVocaRecords(filtered).slice(0, 10);
 
     if (activeSectionData.length === 0) {
-        innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.</div>`;
+        const canPreview = (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서') && !window.EnglishUnitBar?.isUpperPreview?.();
+        innerBody.innerHTML = `<div style="text-align:center; padding:40px;">해당 조건의 문제가 없습니다.${canPreview ? '<div style="margin-top:14px;"><button class="quiz-button" style="background:#6366f1;" onclick="toggleEnglishModalUpperPreview(true)">🔭 5학년 단원·특별활동 미리보기</button></div>' : ''}</div>`;
         return;
     }
     if (currentMissionType === 'stage3') {

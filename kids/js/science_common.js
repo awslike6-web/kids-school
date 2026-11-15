@@ -250,11 +250,12 @@ async function fetchAndBuildScienceUI(type, innerBody) {
             if (type === 'voca') {
                 try {
                     if (typeof fetchVocaFromNotion === 'function') {
+                        const isMinseoPreview = (currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter');
                         records = await fetchVocaFromNotion({
                             subject: "과학",
                             areaZone: "용어방",
                             useServerFilter: true,
-                            filterByStudent: true
+                            filterByStudent: !isMinseoPreview
                         });
                     }
                 } catch (netErr) {

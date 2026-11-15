@@ -161,23 +161,25 @@
     if (!_currentScene) return renderError(`장면 모듈 [${escapeHtml(sceneName)}]이 등록되지 않았습니다.`);
 
     renderLoading('문장 데이터를 불러오고 있어요...');
+    const fillVocaMap = rows => (rows || []).forEach(r => {
+      const pid = r && (r.pageId || r.id);
+      if (pid && !(_vocaMap[pid] && _vocaMap[pid].word)) _vocaMap[pid] = { word: r.word || '', meaning: r.meaning || '' };
+    });
+    const idsOf = q => (Array.isArray(q.pageIds) && q.pageIds.length > 0 ? q.pageIds : [q.pageId]);
     try {
-      const vocaList = typeof window.fetchVocaFromNotion === 'function'
-        // 영어방이 미리 받아 둔 아이별 어휘 캐시를 그대로 쓴다 (전 과목·전 학생을 새로 받으면 처음 열 때 15초 넘게 걸림)
-        ? await window.fetchVocaFromNotion({ subject: '영어', filterByStudent: true })
-        : [];
+      const hasFetch = typeof window.fetchVocaFromNotion === 'function';
       _vocaMap = {};
-      (vocaList || []).forEach(row => {
-        const pid = row && (row.pageId || row.id);
-        if (pid) _vocaMap[pid] = { word: row.word || '', meaning: row.meaning || '' };
-      });
-    } catch (e) {
-      console.warn('[EnglishListenPlace] VOCA DB 조회 중 경고:', e);
-    }
+      // 영어방이 미리 받아 둔 아이별 어휘 캐시를 먼저 쓰고, 민서 등 미리보기 시 부족할 때만 민수 어휘를 보조 조회
+      if (hasFetch) fillVocaMap(await window.fetchVocaFromNotion({ subject: '영어', filterByStudent: true }));
+      const qs = _sceneData.questions || [];
+      const matched = qs.filter(q => idsOf(q).every(id => _vocaMap[id] && _vocaMap[id].word)).length;
+      const isMinseo = (() => { try { return localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서'; } catch (_) { return false; } })();
+      if (isMinseo && matched < 3 && hasFetch) fillVocaMap(await window.fetchVocaFromNotion({ subject: '영어', studentName: '민수', filterByStudent: true }));
+    } catch (e) { console.warn('[EnglishListenPlace] VOCA DB 조회 중 경고:', e); }
 
     const validQuestions = [];
     (_sceneData.questions || []).forEach(q => {
-      const ids = Array.isArray(q.pageIds) && q.pageIds.length > 0 ? q.pageIds : [q.pageId];
+      const ids = idsOf(q);
       const rows = ids.map(id => _vocaMap[id]);
       if (rows.every(r => r && r.word)) {
         validQuestions.push({ ...q, text: rows.map(r => r.word).join(' '), meaning: rows.map(r => r.meaning).filter(Boolean).join(' ') });

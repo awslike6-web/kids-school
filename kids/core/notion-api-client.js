@@ -22,9 +22,8 @@ function getKstTodayYMD(date = new Date()) {
     const TIMETABLE_DB_ID = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TIMETABLE_DB_ID) ? APP_CONFIG.TIMETABLE_DB_ID : "e3f9b3917c2b48bfa3d47db4bd0545fd";
     const LIBRARY_DB_ID = "37ca27115b688023a7d2cc5b3ff51fee";
 
-    // ----------------------------------------------------
     // 1. VOCA DB 파서 및 쿼리 엔진
-    // ----------------------------------------------------
+    const _vocaTargetMap = new Map();
     function parseVocaPage(page) {
         const p = page.properties;
         const imgFile = p["이미지파일"]?.files?.[0];
@@ -78,26 +77,21 @@ function getKstTodayYMD(date = new Date()) {
 
     function _matchesVocaRecord(record, options) {
         if (!record.word) return false;
-
+        const pid = record.pageId || record.id;
+        if (pid && Array.isArray(record.target)) _vocaTargetMap.set(pid, record.target);
         if (options.filterByStudent !== false) {
             let loginName = (options.studentName ?? window.currentUserName ?? "민수").trim();
             if (loginName === '아빠' || loginName === '엄마' || loginName === '어른') {
                 const profile = window.currentProfile || localStorage.getItem('currentUser') || 'son';
                 loginName = profile === 'daughter' ? '민서' : '민수';
             }
-
-            if (record.target.length > 0 && !record.target.some(t => t.trim() === loginName)) {
-                return false;
-            }
+            if (record.target.length > 0 && !record.target.some(t => t.trim() === loginName)) return false;
         }
-
         if (options.subject) {
             const allowed = [options.subject, ...(options.altSubjects || [])];
             if (!record.subject.some(s => allowed.includes(s))) return false;
         }
-
         if (options.areaZone && record.areaZone !== options.areaZone) return false;
-
         return true;
     }
 
@@ -203,11 +197,13 @@ function getKstTodayYMD(date = new Date()) {
         }
     }
 
-    // VOCA 행 속성 PATCH 공통: 관리자(아빠·엄마·어른) 시험은 노션에 쓰지 않고 성공으로 처리한다
+    // VOCA 행 속성 PATCH 공통: 관리자(아빠·엄마·어른) 시험 및 민서 상급 학년 미리보기(민수 전용)는 노션 쓰기 생략
     async function patchVocaPage(pageId, properties, failLabel) {
         if (!pageId) return false;
         const savedName = localStorage.getItem('currentUserName');
         if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') return true;
+        const targets = _vocaTargetMap.get(pageId);
+        if (savedName === '민서' && Array.isArray(targets) && targets.length > 0 && !targets.includes('민서') && !targets.includes('공통')) return true;
         try {
             const res = await fetch(`${PROXY_URL}/v1/pages/${pageId}`, {
                 method: "PATCH",
@@ -313,10 +309,12 @@ function getKstTodayYMD(date = new Date()) {
         const subject = options.subject || "국어";
         const track = options.track || "";
         const targetStudent = options.student || (window.currentUserName === '민서' ? '민서' : '민수');
+        const includeAllStudents = options.includeAllStudents === true;
+        const cacheStudentKey = includeAllStudents ? 'ALL' : targetStudent;
         const forceRefresh = options.forceRefresh === true;
 
         if (!forceRefresh && typeof window._loadReadingFromCache === 'function') {
-            const cached = window._loadReadingFromCache(subject, track, targetStudent);
+            const cached = window._loadReadingFromCache(subject, track, cacheStudentKey);
             if (cached && cached.length > 0) {
                 console.log(`⚡ [Reading Cache] ${subject} (${track || '전체'}) 독해 캐시 즉시 반환 (${cached.length}건)`);
                 return cached;
@@ -337,18 +335,23 @@ function getKstTodayYMD(date = new Date()) {
                 sorts: [
                     { property: "순번", direction: "ascending" }
                 ],
-                page_size: options.pageSize || 50
+                page_size: options.pageSize || 100
             };
 
-            const response = await fetch(`${PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(queryBody)
-            });
-
-            if (!response.ok) throw new Error(`독해 DB 조회 실패 (HTTP ${response.status})`);
-            const data = await response.json();
-            const results = data.results || [];
+            // 한 쪽을 넘어도 빠지지 않게 끝까지 이어 읽는다 (50편에서 잘려 뒤 순번 지문이 안 보이던 문제, 2026-11-15)
+            const results = [];
+            for (let cursor = null, pageNo = 0; pageNo < 20; pageNo++) {
+                const response = await fetch(`${PROXY_URL}/v1/databases/${LIBRARY_DB_ID}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cursor ? { ...queryBody, start_cursor: cursor } : queryBody)
+                });
+                if (!response.ok) throw new Error(`독해 DB 조회 실패 (HTTP ${response.status})`);
+                const data = await response.json();
+                results.push(...(data.results || []));
+                cursor = data.has_more ? data.next_cursor : null;
+                if (!cursor) break;
+            }
 
             const parsedPassages = await Promise.all(results.map(async (page) => {
                 const p = page.properties;
@@ -404,12 +407,12 @@ function getKstTodayYMD(date = new Date()) {
             }));
 
             const finalPassages = parsedPassages.filter(item => {
-                if (!item.student || item.student.length === 0) return true;
+                if (includeAllStudents || !item.student || item.student.length === 0) return true;
                 return item.student.includes(targetStudent);
             });
 
             if (typeof window._saveReadingToCache === 'function') {
-                window._saveReadingToCache(subject, track, targetStudent, finalPassages);
+                window._saveReadingToCache(subject, track, cacheStudentKey, finalPassages);
             }
 
             console.log(`✅ [Reading] 독해 DB에서 ${finalPassages.length}개 지문 로드 및 캐시 저장 (트랙: ${track || '전체'})`);

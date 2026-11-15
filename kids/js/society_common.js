@@ -363,10 +363,10 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             if (type === 'voca') {
                 if (typeof fetchVocaFromNotion === 'function') {
                     records = await fetchVocaFromNotion({
-                        subject: "사회", 
+                        subject: "사회",
                         areaZone: "용어방",
                         useServerFilter: true,
-                        filterByStudent: true 
+                        filterByStudent: (currentProfile !== 'daughter' && currentUserName !== '민서')
                     });
                 }
             } else {

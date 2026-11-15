@@ -31,8 +31,9 @@
     async function loadStage(stage) {
         try {
             if (stage === 'voca') {
+                const isMinseo = (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서');
                 return typeof window.fetchVocaFromNotion === 'function'
-                    ? await window.fetchVocaFromNotion({ subject: '사회', areaZone: '용어방', useServerFilter: true, filterByStudent: true })
+                    ? await window.fetchVocaFromNotion({ subject: '사회', areaZone: '용어방', useServerFilter: true, filterByStudent: !isMinseo })
                     : [];
             }
             return typeof window.fetchCurriculumFromNotion === 'function' ? await window.fetchCurriculumFromNotion(stage) : [];

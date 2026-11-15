@@ -15,7 +15,7 @@ const RECORDS = [
 
 const plain = (v) => JSON.parse(JSON.stringify(v));
 
-function load({ profile = 'son', saved, activities = [] } = {}) {
+function load({ profile = 'son', saved, activities = [], fetchVoca = async () => RECORDS } = {}) {
   const store = { currentUser: profile };
   if (saved) store[`english_unit_pick_${profile}`] = JSON.stringify(saved);
   const box = { innerHTML: '' };
@@ -27,7 +27,7 @@ function load({ profile = 'son', saved, activities = [] } = {}) {
       setItem: (k, v) => { store[k] = String(v); },
     },
     document: { getElementById: (id) => (id === 'englishUnitBar' ? box : null) },
-    fetchVocaFromNotion: async () => RECORDS,
+    fetchVocaFromNotion: fetchVoca,
     selectDynamicGradeUnit: (g, u) => calls.push(['gradeUnit', g, u]),
     selectDynamicGrade: (g) => calls.push(['grade', g]),
   };
@@ -106,4 +106,31 @@ test('특별 활동 칸은 등록된 학기·단원을 골랐을 때만 보이�
   assert.match(t.box.innerHTML, /이번 단원 특별 활동/);
   assert.match(t.box.innerHTML, /href="listen_place\.html\?grade=5-2&amp;unit=L8"/);
   assert.match(t.box.innerHTML, /&lt;b&gt;설명&lt;\/b&gt;/);
+});
+
+test('민서(daughter)는 기본에서 5-2를 숨기고, 5학년 미리보기를 켜면 민수 5-2 단원을 합류시킨다', async () => {
+  const fetchCalls = [];
+  const minseoOnly = [{ grades: ['1-2'], level: 'L1', word: 'apple', wordType: '단어' }];
+  const t = load({
+    profile: 'daughter',
+    fetchVoca: async (opts) => {
+      fetchCalls.push(opts);
+      return opts.studentName === '민수' ? RECORDS : minseoOnly;
+    },
+  });
+  await t.bar.init();
+  assert.deepEqual(plain(t.bar._state().grades), ['1-2']);
+  assert.match(t.box.innerHTML, /🔭 5학년 단원·특별활동 미리보기/);
+
+  await t.bar.toggleUpperPreview();
+  assert.equal(t.bar.isUpperPreview(), true);
+  assert.equal(fetchCalls.some(c => c.studentName === '민수'), true);
+  assert.deepEqual(plain(t.bar._state().grades), ['1-2', '5-1', '5-2']);
+
+  t.bar.selectGrade(t.bar._state().grades.indexOf('5-2'));
+  assert.equal(t.bar.getPick().grade, '5-2');
+  await t.bar.toggleUpperPreview();
+  assert.equal(t.bar.isUpperPreview(), false);
+  assert.deepEqual(plain(t.bar._state().grades), ['1-2']);
+  assert.equal(t.bar.getPick().grade, '');
 });

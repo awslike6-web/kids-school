@@ -11,6 +11,42 @@
         return;
     }
     const esc = window.UnitChipBar.escapeHtml;
+    const PREVIEW_KEY = 'english_upper_preview_daughter';
+
+    function isDaughterProfile() {
+        try {
+            return localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서';
+        } catch (e) { return false; }
+    }
+
+    function isUpperPreview() {
+        if (!isDaughterProfile()) return false;
+        try { return localStorage.getItem(PREVIEW_KEY) === '1'; } catch (e) { return false; }
+    }
+
+    async function fetchRecords() {
+        if (typeof window.fetchVocaFromNotion !== 'function') return [];
+        const own = (await window.fetchVocaFromNotion({ subject: '영어', filterByStudent: true })) || [];
+        if (!isUpperPreview()) return own;
+        const upper = (await window.fetchVocaFromNotion({ subject: '영어', studentName: '민수', filterByStudent: true })) || [];
+        const seen = new Set();
+        return [...own, ...upper].filter(r => {
+            const key = (r && (r.pageId || r.id || r.word)) || '';
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
+    function previewToggleHtml() {
+        if (!isDaughterProfile()) return '';
+        const on = isUpperPreview();
+        return `<div class="english-preview-toggle-bar" style="margin-top:8px; display:flex; justify-content:flex-end;">
+            <button type="button" class="unit-chip${on ? ' active' : ''}" onclick="EnglishUnitBar.toggleUpperPreview()">
+                ${on ? '🎀 내 기초 단원만 보기' : '🔭 5학년 단원·특별활동 미리보기'}
+            </button>
+        </div>`;
+    }
 
     function unitLabel(unit) {
         // 표시용 이름만 바꾼다 (L8 → 8단원). 단원 값 자체는 원문 그대로 쓴다.
@@ -43,13 +79,11 @@
         globalName: 'EnglishUnitBar',
         boxId: 'englishUnitBar',
         storagePrefix: 'english_unit_pick',
-        loadRecords: () => (typeof window.fetchVocaFromNotion === 'function'
-            ? window.fetchVocaFromNotion({ subject: '영어', filterByStudent: true })
-            : Promise.resolve([])),
+        loadRecords: fetchRecords,
         gradesOf: r => (r.grades && r.grades.length) ? r.grades : [r.grade],
         unitOf: r => r.level,
         unitLabel,
-        extraHtml: specialActivitiesHtml,
+        extraHtml: (pick) => previewToggleHtml() + specialActivitiesHtml(pick),
         hints: {
             all: '📌 단원을 고르면 2~4단계가 그 단원으로 바로 시작해요.',
             unitPerStage: '📌 {grade}만 골랐어요. 단원은 단계마다 고를 수 있어요.',
@@ -57,12 +91,23 @@
         }
     });
 
+    async function toggleUpperPreview(forceState) {
+        const next = typeof forceState === 'boolean' ? forceState : !isUpperPreview();
+        try { localStorage.setItem(PREVIEW_KEY, next ? '1' : '0'); } catch (e) { /* 저장 불가 시 무시 */ }
+        if (!next && bar.getPick().grade.startsWith('5-')) bar.selectGrade(-1);
+        await bar.init();
+        return next;
+    }
+
     window.EnglishUnitBar = {
         init: bar.init,
         render: bar.render,
         selectGrade: bar.selectGrade,
         selectUnit: bar.selectUnit,
         getPick: bar.getPick,
+        fetchRecords,
+        isUpperPreview,
+        toggleUpperPreview,
         // english_common.js가 2~4단계를 열 때 부른다. 고른 학기·단원으로 바로 시작했으면 true.
         applyToMission: (candidateRecords) => bar.applyToMission(candidateRecords, {
             gradeUnit: (g, u) => window.selectDynamicGradeUnit && window.selectDynamicGradeUnit(g, u),

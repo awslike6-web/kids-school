@@ -22,6 +22,7 @@ let allFetchedRecords = [];
 let selectedKoreanGrade = "";
 let selectedKoreanUnit = "";
 let koreanVocaMode = 'choice'; // 'choice' or 'subjective'
+let koreanVocaUpperPreview = false;
 let koreanVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 let koreanDictationOrderType = 'sequence'; // 'sequence'(1번~10번 교재순서 기본) or 'shuffle'
 
@@ -399,6 +400,12 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         if (type === 'voca' || type === 'dictation') {
             const subjectTag = type === 'voca' ? "국어" : "받아쓰기";
             let records = await fetchVocaFromNotion({ subject: subjectTag, filterByStudent: true, forceRefresh: false });
+            // 받아쓰기는 민서 전용이므로 3단계 핵심 용어방(voca)에서만 민서 5학년 미리보기 합류
+            if (type === 'voca' && getKoreanStudentName() === '민서' && koreanVocaUpperPreview) {
+                const minsuRows = await fetchVocaFromNotion({ subject: subjectTag, studentName: '민수', filterByStudent: true, forceRefresh: false });
+                const seen = new Set((records || []).map(r => r.pageId || r.id || r.word));
+                records = [...(records || []), ...(minsuRows || []).filter(r => { const k = r.pageId || r.id || r.word; return k && !seen.has(k) && seen.add(k); })];
+            }
             if (type === 'voca' && records) {
                 // 국어 용어방: 순수 국어 어휘/단어만 학습 (받아쓰기 문장 제외)
                 records = records.filter(r => !r.subject.includes('받아쓰기') && r.wordType !== '문장' && r.type !== '문장');
@@ -417,7 +424,8 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
                     renderDynamicGradeUI(uniqueGrades, innerBody);
                 }
             } else {
-                innerBody.innerHTML = `<div style="text-align:center; padding:40px;">데이터가 없습니다.</div>`;
+                const previewFallback = (type === 'voca' && !koreanVocaUpperPreview) ? `<div style="margin-top:14px;">${koreanUpperPreviewBtnHtml('voca')}</div>` : '';
+                innerBody.innerHTML = `<div style="text-align:center; padding:40px;">데이터가 없습니다.${previewFallback}</div>`;
             }
         }
     } catch(e) {
@@ -426,12 +434,22 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
     }
 }
 
+window.toggleKoreanVocaUpperPreview = function(forceState) {
+    koreanVocaUpperPreview = typeof forceState === 'boolean' ? forceState : !koreanVocaUpperPreview;
+    if (currentMissionType) openMissionView(currentMissionType);
+};
+function koreanUpperPreviewBtnHtml(missionType = currentMissionType) {
+    if (missionType !== 'voca' || getKoreanStudentName() !== '민서') return '';
+    return `<button class="quiz-button" style="background:${koreanVocaUpperPreview ? '#0f766e' : '#6366f1'}; max-width:320px; width:100%; margin:0 auto 12px;" onclick="toggleKoreanVocaUpperPreview(${!koreanVocaUpperPreview})">${koreanVocaUpperPreview ? '🔭 5학년 용어 미리보기 ON (끄기)' : '🔭 5학년 용어 미리보기'}</button>`;
+}
+
 // ========================================================
 // 🎒 학년/단원 필터 UI
 // ========================================================
 function renderDynamicGradeUI(grades, container) {
     let html = `<div style="text-align:center; margin-bottom:20px;">
         <h3 style="color:var(--purple); margin-bottom:15px;">🎒 도전할 학년을 선택하세요!</h3>
+        ${koreanUpperPreviewBtnHtml()}
         <div class="grade-grid">`;
     grades.forEach(g => {
         html += `<button class="quiz-choice-btn" style="padding:15px; font-size:1.2rem;" onclick="selectDynamicGrade('${g}')">${g}</button>`;
@@ -490,6 +508,7 @@ function renderDynamicUnitUI(units, container) {
                 🔄 최신 단어 동기화
             </button>
         </div>
+        ${koreanUpperPreviewBtnHtml()}
         <div class="grade-grid">`;
     units.forEach(u => {
         html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnit('${u}')">${u}</button>`;

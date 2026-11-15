@@ -42,7 +42,7 @@
         if (options.grade) {
             activeGrade = options.grade;
         } else if (!activeGrade || activeGrade === 'ALL') {
-            activeGrade = (subject === "영어") ? "5-1" : "5-2";
+            activeGrade = (subject === "영어") ? "5-1" : (student === "민서" ? "1-2" : "5-2");
         }
 
         container.innerHTML = `
@@ -62,7 +62,8 @@
         // 노션 독해 마스터 DB에서 실시간 조회 (과목 전체 수급 후 클라이언트 스마트 필터링)
         const fetchParams = {
             subject,
-            student
+            student,
+            includeAllStudents: true
         };
 
         let rawPassages = await window.fetchReadingPassagesFromNotion(fetchParams);
@@ -101,6 +102,9 @@
         let filteredPassages = currentPassages.filter(p => {
             if (activeGrade === 'ALL') return true;
             const pGrade = p.grade || "5-1";
+            if (activeGrade === '1-2') {
+                return pGrade.includes('1-2') || pGrade.includes('1-1');
+            }
             if (activeGrade === '5-1') {
                 return pGrade.includes('5-1') || (!pGrade.includes('5-2') && !pGrade.includes('1-'));
             }
@@ -116,6 +120,13 @@
             gradeTabs = [
                 { key: "5-1", label: "📘 5-1 (1학기)" },
                 { key: "5-2", label: "📗 5-2 (2학기)" },
+                { key: "ALL", label: "🌟 전체보기" }
+            ];
+        } else if (student === "민서") {
+            gradeTabs = [
+                { key: "1-2", label: "🌱 1-2 (내 학년)" },
+                { key: "5-2", label: "🔭 5-2 (5학년 미리보기)" },
+                { key: "5-1", label: "🔭 5-1 (5학년 미리보기)" },
                 { key: "ALL", label: "🌟 전체보기" }
             ];
         } else {
