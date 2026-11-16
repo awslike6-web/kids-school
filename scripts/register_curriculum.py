@@ -44,6 +44,7 @@ import re
 import sys
 import time
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import register_voca as rv  # noqa: E402  노션 통신·칸 비교 공용 함수
@@ -56,6 +57,49 @@ SCREEN_ZONES = {"사회": ("역사사료", "지도탐방", "자료분석")}
 SCREEN_ROW_LIMIT = {"사회": 100}
 
 QUIZ_KEYS = ("question", "choices", "answer")
+# 단원 영상 부품(kids/core/video-unit.js, docs/video_unit_spec.md): 화면 ↔ 영상 연결 열쇠는 인터랙티브 URL(배포 주소).
+VIDEO_ZONE, VIDEO_QUIZ_ZONE = "단원영상", "영상확인"
+SITE_PREFIX = "https://awslike6-web.github.io/kids-school/"
+REPO = Path(__file__).resolve().parent.parent
+YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com",
+                 "youtube-nocookie.com"}
+YOUTUBE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+
+
+def youtube_id(url: str) -> str | None:
+    """유튜브 주소(watch?v=·youtu.be/·embed/·shorts/·nocookie) → 11자 영상 ID. 아니면 None."""
+    try:
+        u = urlparse((url or "").strip())
+    except ValueError:
+        return None
+    if u.scheme not in ("http", "https") or u.hostname not in YOUTUBE_HOSTS:
+        return None
+    parts = [p for p in u.path.split("/") if p]
+    if u.hostname == "youtu.be":
+        cand = parts[0] if parts else ""
+    elif parts[:1] == ["watch"]:
+        cand = (parse_qs(u.query).get("v") or [""])[0]
+    elif len(parts) >= 2 and parts[0] in ("embed", "shorts"):
+        cand = parts[1]
+    else:
+        return None
+    return cand if YOUTUBE_ID_RE.match(cand) else None
+
+
+def screen_problem(url: str) -> str | None:
+    """영상이 나올 화면 주소(인터랙티브 URL)가 계약에 맞는지. 맞으면 None, 아니면 이유."""
+    if not url:
+        return "비어 있음"
+    if url != url.strip():
+        return "앞뒤 공백"
+    if not url.startswith(SITE_PREFIX):
+        return f"{SITE_PREFIX}로 시작해야 함"
+    rest = url[len(SITE_PREFIX):]
+    if not rest or rest.endswith("/") or "?" in rest or "#" in rest:
+        return "끝 '/'·'?'·'#' 없이 파일 경로까지"
+    if not (REPO / rest).is_file():
+        return f"저장소에 {rest} 파일이 없음"
+    return None
 # 화면이 보기를 섞으므로(QuizChoices, GEMINI.md §4-5) 해설에 「1번은…」처럼 보기 번호를 쓰면 틀린 말이 된다.
 OPTION_NUMBER_RE = re.compile(r"(?<!\d)[1-5]\s*번(?:은|는|이|가|을|를|과|와|의|\s|,|\.|$)|[①②③④⑤]|보기\s*[1-5](?!\d)")
 # 쓰임새 칸은 실험 그림 위치(①→②)·교과서 문제 번호(「얼마나 알고 있나요 ①」)를 흔히 써서 동그라미 숫자는 보지 않는다 (2026-11-14 노션 점검).
@@ -76,6 +120,18 @@ def validate_seed(seed: dict) -> None:
             raise ValueError(f"자료 안에 같은 제목이 두 번 있습니다: {title}")
         seen.add(title)
         has = [k for k in QUIZ_KEYS if item.get(k) not in (None, "", [])]
+        zone = item["zone"].strip()
+        if zone in (VIDEO_ZONE, VIDEO_QUIZ_ZONE):
+            problem = screen_problem(item.get("interactive_url") or "")
+            if problem:
+                raise ValueError(f"[{title}] {zone} 행의 interactive_url(화면 주소)이 틀립니다: {problem}")
+        if zone == VIDEO_ZONE:
+            if has:
+                raise ValueError(f"[{title}] {VIDEO_ZONE} 행에는 문제를 쓰지 않습니다 (확인 문제는 {VIDEO_QUIZ_ZONE} 행으로)")
+            if not youtube_id(item.get("media_url") or ""):
+                raise ValueError(f"[{title}] media_url에서 유튜브 영상 ID(11자)를 찾을 수 없습니다: {item.get('media_url')!r}")
+        if zone == VIDEO_QUIZ_ZONE and len(has) != len(QUIZ_KEYS):
+            raise ValueError(f"[{title}] {VIDEO_QUIZ_ZONE} 행은 question·choices·answer가 모두 있어야 합니다")
         if not has:
             continue
         if len(has) != len(QUIZ_KEYS):
@@ -119,7 +175,8 @@ def desired_props(seed: dict, item: dict) -> dict:
     if "usage" in item:
         props["핵심 쓰임새/설명"] = rv.rich(item["usage"])
     if "media_url" in item:
-        props["미디어 URL"] = url_prop(item["media_url"])
+        vid = youtube_id(item["media_url"]) if item["zone"].strip() == VIDEO_ZONE else None
+        props["미디어 URL"] = url_prop(f"https://www.youtube.com/watch?v={vid}" if vid else item["media_url"])
     if "interactive_url" in item:
         props["인터랙티브 URL"] = url_prop(item["interactive_url"])
     return props
@@ -177,6 +234,21 @@ def option_number_warnings(seed: dict) -> list[str]:
             if m:
                 warnings.append(f"[{title}] {label}에 보기 번호 표현 '{m.group(0).strip()}' — "
                                 f"화면이 보기를 섞으므로 내용으로 설명하세요")
+    return warnings
+
+
+def video_warnings(seed: dict) -> list[str]:
+    """단원 영상 행 경고 (멈추지 않음): 한 화면에 영상 4개 이상, 같은 자료에 짝 영상이 없는 확인 문제."""
+    videos: dict[str, int] = {}
+    for item in seed.get("items") or []:
+        if item["zone"].strip() == VIDEO_ZONE:
+            videos[item["interactive_url"]] = videos.get(item["interactive_url"], 0) + 1
+    warnings = [f"화면 {url[len(SITE_PREFIX):]}에 단원영상이 {n}개 — 권장 1개, 최대 3개"
+                for url, n in videos.items() if n > 3]
+    for item in seed.get("items") or []:
+        if item["zone"].strip() == VIDEO_QUIZ_ZONE and item["interactive_url"] not in videos:
+            warnings.append(f"[{item['title'].strip()}] 같은 자료에 이 화면의 단원영상 행이 없습니다 — "
+                            f"노션에 있는지 확인하세요 (화면 주소는 글자까지 같아야 함)")
     return warnings
 
 
@@ -269,7 +341,7 @@ def main() -> int:
               f"({' · '.join(f'{z} {n}' for z, n in zones.items())}, 사진 {pics}) · {mode}")
         for w in check_schema(seed):
             print(f"   ⚠️ {w}")
-        for w in option_number_warnings(seed):
+        for w in option_number_warnings(seed) + video_warnings(seed):
             print(f"   ⚠️ {w}")
         s = sync_curriculum(seed, apply=args.apply, update=args.update)
         for w in check_screen_limit(seed, {} if s["created"] else s["new_by_zone"]):

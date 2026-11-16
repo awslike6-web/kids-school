@@ -1,5 +1,5 @@
 {
-  "_설명": "과학 5-2 3단원 노션 CURRICULUM_DB 보완 (2026-11-14). 근거: kids/data/science_lab_data.js SCIENCE_LAB_REPORT_3_DATA quizItems. 과학 화면은 가상실험·탐구퀴즈 구역을 읽지 않고, 탐구보고서는 화면 자료가 우선한다(science_lab.js). 서술형·순서·별점 문항은 보기 2~4개 규칙에 맞지 않아 질문 칸 없이 기록만 한다.",
+  "_설명": "과학 5-2 3단원 노션 CURRICULUM_DB 보완 (2026-11-14). 근거: kids/data/science_lab_data.js SCIENCE_LAB_REPORT_3_DATA quizItems. 과학 화면은 가상실험·탐구퀴즈 구역을 읽지 않고, 탐구보고서는 화면 자료가 우선한다(science_lab.js). 서술형·순서·별점 문항은 보기 2~4개 규칙에 맞지 않아 질문 칸 없이 기록만 한다. | 2026-11-16: 실험실 화면에 직접 박혀 있던 유튜브 영상을 단원영상 행으로 옮김(docs/video_unit_spec.md §6). 출처는 유튜브 oEmbed 채널 이름.",
   "subject": "과학",
   "grade": "5-2",
   "unit": "3. 열과 우리 생활",
@@ -66,6 +66,41 @@
       "question": "",
       "choices": [],
       "answer": null
+    },
+    {
+      "title": "🎬 알코올 온도계는 어떻게 사용할까요?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=vhzXePTRvfY",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_thermometer_lab.html",
+      "explanation": "전북수업샘터"
+    },
+    {
+      "title": "🎬 고체에서 열은 어떻게 이동할까요?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=aSOBt24wxRk",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_conduction_lab.html",
+      "explanation": "와니사이언스"
+    },
+    {
+      "title": "🎬 액체에서 열의 이동 알아보기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=I-S_3s_FUKE",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_liquid_convection_lab.html",
+      "explanation": "비상교육 비상한 과학교실"
+    },
+    {
+      "title": "🎬 기체에서 열의 이동 알아보기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=KbBeiqJVAKM",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_gas_convection_lab.html",
+      "explanation": "비상교육 비상한 과학교실"
+    },
+    {
+      "title": "🎬 단열을 이용한 보온병 만들기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=_fRlOk-jNCE",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_insulation_lab.html",
+      "explanation": "와니사이언스"
     }
   ]
 }

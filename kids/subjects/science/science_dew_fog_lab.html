@@ -94,16 +94,6 @@
         font-size: 0.82rem; font-family: 'Jua', sans-serif;
     }
 
-    /* 영상 래퍼 */
-    .video-frame-wrap {
-        position: relative; padding-bottom: 56.25%; height: 0;
-        border-radius: 14px; overflow: hidden; border: 2px solid #2d5088;
-        background: #000;
-    }
-    .video-frame-wrap iframe {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        border: 0;
-    }
     .observation-tips {
         background: #0d1b32; border-left: 4px solid #f59e0b;
         padding: 12px 16px; border-radius: 8px; font-size: 0.92rem; color: #e2e8f0;
@@ -289,6 +279,7 @@
     }
     .lab-nav-btn:hover { background: #15294b; border-color: #60a5fa; }
 </style>
+<link rel="stylesheet" href="../../css/video-unit.css?v=20261116-video">
 </head>
 <body>
 
@@ -322,24 +313,11 @@
         <div class="section-header">
             <div class="section-tag">🎬 [1단계] 3분 생생 교과서 실험 영상</div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <a href="https://www.youtube.com/watch?v=ROjo_rnyAl8" target="_blank" rel="noopener noreferrer" 
-                   style="background: #dc2626; color: white; padding: 6px 12px; border-radius: 8px; font-family: 'Jua', sans-serif; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(220,38,38,0.4);">
-                    📺 YouTube 앱/새 창에서 보기 ➔
-                </a>
                 <span class="source-badge">비상한 과학교실 공식 클립</span>
             </div>
         </div>
         
-        <div class="video-frame-wrap">
-            <!-- 비상한 과학교실 이슬과 안개 실험 영상 (ROjo_rnyAl8) -->
-            <iframe 
-                id="ytIframe"
-                src="https://www.youtube.com/embed/ROjo_rnyAl8?enablejsapi=1&origin=https://awslike6-web.github.io" 
-                title="초등 5학년 2학기 이슬과 안개 발생 실험" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen>
-            </iframe>
-        </div>
+        <div class="video-unit" data-video-unit="kids/subjects/science/science_dew_fog_lab.html"></div>
 
         <div class="observation-tips">
             💡 <b>민수의 관찰 핵심 포인트</b>:<br>
@@ -723,5 +701,6 @@
 </script>
 
 <script src="../../core/study-activity.js?v=20261023"></script>
+<script src="../../core/video-unit.js?v=20261116-video"></script>
 </body>
 </html>

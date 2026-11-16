@@ -1,5 +1,5 @@
 {
-  "_설명": "과학 5-2 4단원 노션 CURRICULUM_DB 보완 (2026-11-14). 근거: kids/data/science_lab_data.js SCIENCE_LAB_REPORT_4_DATA summaryDoc·quizItems, 실험실 5곳(science_*_lab.html) 퀴즈. 가상실험 문항·보고서 정리글 초안은 agy(gemini-4-hydrogen-medium)가 쓰고 Claude가 자료와 대조함. 과학 화면은 가상실험·탐구퀴즈 구역을 읽지 않고, 탐구보고서는 화면 자료가 우선한다(science_lab.js). 서술형·순서·별점 문항은 보기 2~4개 규칙에 맞지 않아 질문 칸 없이 기록만 한다.",
+  "_설명": "과학 5-2 4단원 노션 CURRICULUM_DB 보완 (2026-11-14). 근거: kids/data/science_lab_data.js SCIENCE_LAB_REPORT_4_DATA summaryDoc·quizItems, 실험실 5곳(science_*_lab.html) 퀴즈. 가상실험 문항·보고서 정리글 초안은 agy(gemini-4-hydrogen-medium)가 쓰고 Claude가 자료와 대조함. 과학 화면은 가상실험·탐구퀴즈 구역을 읽지 않고, 탐구보고서는 화면 자료가 우선한다(science_lab.js). 서술형·순서·별점 문항은 보기 2~4개 규칙에 맞지 않아 질문 칸 없이 기록만 한다. | 2026-11-16: 실험실 화면에 직접 박혀 있던 유튜브 영상을 단원영상 행으로 옮김(docs/video_unit_spec.md §6). 출처는 유튜브 oEmbed 채널 이름.",
   "subject": "과학",
   "grade": "5-2",
   "unit": "4. 자원과 에너지",
@@ -161,6 +161,41 @@
       "question": "",
       "choices": [],
       "answer": null
+    },
+    {
+      "title": "🎬 풍력 발전의 원리는 무엇일까?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=cbcelOlDFMI",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_wind_turbine_lab.html",
+      "explanation": "한국에너지공단"
+    },
+    {
+      "title": "🎬 석유 고갈 계산법, 가채연수",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=04PnZ7YXbM0",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_resource_finite_lab.html",
+      "explanation": "한국석유공사"
+    },
+    {
+      "title": "🎬 신재생에너지란 무엇인가?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=CIxhlYjgJZI",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_renewable_energy_lab.html",
+      "explanation": "YTN 사이언스"
+    },
+    {
+      "title": "🎬 에너지 효율 표시를 찾아볼까요?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=Mw7KrW3sIow",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_energy_efficiency_lab.html",
+      "explanation": "국가환경교육센터"
+    },
+    {
+      "title": "🎬 단열재의 원리",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=cvh-D_ScKgs",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_eco_house_lab.html",
+      "explanation": "국립과천과학관"
     }
   ]
 }

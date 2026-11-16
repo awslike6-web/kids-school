@@ -1,0 +1,185 @@
+/* kids/css/video-unit.css — 🎬 단원 영상 부품 스타일 (docs/video_unit_spec.md). 초안: 안티그래비티 Hydrogen, 검토·수정: Claude (2026-11-16) */
+.video-unit {
+  --vu-bg: #fff;
+  --vu-fg: #1e293b;
+  --vu-muted: #64748b;
+  --vu-card: #fff;
+  --vu-border: #e2e8f0;
+  --vu-btn-bg: #fff;
+  --vu-btn-fg: #1e293b;
+  --vu-sum-bg: #fef9c3;
+  --vu-ok-bg: #dcfce7;
+  --vu-hint-bg: #fef9c3;
+  --vu-expl-bg: #f1f5f9;
+  --vu-radius: 16px;
+  --vu-shadow: 0 4px 16px rgba(15, 23, 42, .08);
+  font-family: inherit;
+  /* 바깥 글자(캡션·상태줄)는 화면 색을 따른다: 과학 실험실처럼 늘 어두운 화면이 있어 OS 다크 모드로 정하면 안 보임.
+     상자(핵심 정리·확인 문제)는 자기 배경·글자색을 가진 밝은 카드라 어떤 화면에서도 읽힌다. (2026-11-16 미리보기 확인) */
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.video-unit *, .video-unit *::before, .video-unit *::after { box-sizing: border-box; }
+.video-unit [hidden] { display: none !important; }
+.video-unit .vu-item { min-width: 0; }
+.video-unit .vu-status { text-align: center; opacity: .75; padding: 16px; }
+.video-unit .vu-player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--vu-radius);
+}
+.video-unit .vu-player img,
+.video-unit .vu-player iframe,
+.video-unit .vu-player .vu-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.video-unit .vu-player img { object-fit: cover; }
+.video-unit .vu-player iframe { border: 0; }
+.video-unit .vu-thumb {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.video-unit .vu-play {
+  position: relative; /* absolute 썸네일 img 위에 그려지도록 */
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ff0033;
+  color: #fff;
+  font-size: 28px;
+  display: grid;
+  place-items: center;
+  transition: transform .15s ease;
+}
+.video-unit .vu-thumb:hover .vu-play,
+.video-unit .vu-thumb:focus-visible .vu-play { transform: scale(1.08); }
+.video-unit .vu-thumb:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.video-unit .vu-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .72);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  color: #fff;
+  text-align: center;
+}
+.video-unit .vu-overlay-title { font-size: 1.4rem; font-weight: 700; }
+.video-unit .vu-btn,
+.video-unit .vu-retry {
+  border: 0;
+  border-radius: 9999px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vu-btn-bg);
+  color: var(--vu-btn-fg);
+}
+.video-unit .vu-btn { min-height: 44px; padding: 0 18px; font-size: 1rem; }
+.video-unit .vu-retry { min-height: 36px; padding: 0 14px; font-size: .875rem; border: 1px solid var(--vu-border); }
+.video-unit .vu-btn-primary { background: #f97316; color: #fff; }
+.video-unit .vu-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  min-width: 0;
+}
+.video-unit .vu-title { font-weight: 700; min-width: 0; }
+.video-unit .vu-source { opacity: .7; font-size: .875rem; }
+.video-unit a.vu-open {
+  margin-left: auto;
+  background: #ff0033;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 9999px;
+  padding: 6px 12px;
+  font-size: .85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.video-unit .vu-summary {
+  background: var(--vu-sum-bg);
+  color: var(--vu-fg);
+  border-left: 5px solid #facc15;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+.video-unit .vu-summary-title { font-weight: 700; margin-bottom: 6px; }
+.video-unit .vu-summary-list { margin: 0; padding-left: 20px; line-height: 1.6; }
+.video-unit .vu-quiz-open { margin-top: 12px; width: 100%; }
+.video-unit .vu-quiz {
+  background: var(--vu-card);
+  color: var(--vu-fg);
+  padding: 16px;
+  border-radius: var(--vu-radius);
+  box-shadow: var(--vu-shadow);
+  margin-top: 12px;
+}
+.video-unit .vu-quiz-progress { color: var(--vu-muted); font-size: .875rem; margin-bottom: 6px; }
+.video-unit .vu-quiz-q { font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; }
+.video-unit .vu-choices { display: flex; flex-direction: column; gap: 10px; }
+.video-unit .vu-choice {
+  min-height: 52px;
+  padding: 10px 14px;
+  text-align: left;
+  border: 2px solid var(--vu-border);
+  border-radius: 12px;
+  background: var(--vu-card);
+  color: var(--vu-fg);
+  font: inherit;
+  cursor: pointer;
+  min-width: 0;
+}
+.video-unit .vu-choice.is-correct { border-color: #22c55e; background: var(--vu-ok-bg); }
+.video-unit .vu-choice.is-wrong { opacity: .55; }
+.video-unit .vu-choice.is-hint {
+  border-color: #facc15;
+  background: var(--vu-hint-bg);
+  animation: vu-hint .6s ease 1;
+}
+@keyframes vu-hint {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .video-unit .vu-choice.is-hint { animation: none; }
+}
+.video-unit .vu-quiz-expl {
+  background: var(--vu-expl-bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  font-size: .95rem;
+}
+.video-unit .vu-quiz-next { display: flex; margin: 12px 0 0 auto; }
+.video-unit .vu-quiz-done { text-align: center; font-size: 1.2rem; font-weight: 700; padding: 12px 0; }

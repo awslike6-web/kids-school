@@ -1,5 +1,5 @@
 {
-  "_설명": "과학 5-2 2단원 탐구퀴즈 바로잡기 (2026-11-14). 근거: kids/data/science_lab_data.js SCIENCE_LAB_REPORT_2_DATA quizItems. 옛 일회성 등록 때 1·2단원 질문·보기·해설이 같은 탐구 번호끼리 섞여 있어 화면 자료로 덮어씀(--update). 서술형·순서·별점 문항은 질문·보기·정답 칸을 비운다. 과학 화면은 탐구퀴즈 구역을 읽지 않는다(기록용).",
+  "_설명": "과학 5-2 2단원 탐구퀴즈 바로잡기 (2026-11-14). 근거: kids/data/science_lab_data.js SCIENCE_LAB_REPORT_2_DATA quizItems. 옛 일회성 등록 때 1·2단원 질문·보기·해설이 같은 탐구 번호끼리 섞여 있어 화면 자료로 덮어씀(--update). 서술형·순서·별점 문항은 질문·보기·정답 칸을 비운다. 과학 화면은 탐구퀴즈 구역을 읽지 않는다(기록용). | 2026-11-16: 실험실 화면에 직접 박혀 있던 유튜브 영상을 단원영상 행으로 옮김(docs/video_unit_spec.md §6). 출처는 유튜브 oEmbed 채널 이름.",
   "subject": "과학",
   "grade": "5-2",
   "unit": "2. 날씨와 우리 생활",
@@ -58,6 +58,34 @@
       "answer": null,
       "explanation": "",
       "usage": "유형: self_check | 출처: 『실험관찰』 34~35쪽 자가진단"
+    },
+    {
+      "title": "🎬 페트병으로 구름 만들기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=nigzeqE0NvY",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_cloud_lab.html",
+      "explanation": "스마트올TV"
+    },
+    {
+      "title": "🎬 모래와 물의 온도 변화 측정하기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=4V_7h0BRsK4",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_wind_lab.html",
+      "explanation": "스마트올TV"
+    },
+    {
+      "title": "🎬 이슬과 안개 발생 실험하기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=ROjo_rnyAl8",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_dew_fog_lab.html",
+      "explanation": "비상교육 비상한 과학교실"
+    },
+    {
+      "title": "🎬 건습구 습도계로 습도 측정하기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=mNnO_y6xWZ4",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/subjects/science/science_hygrometer_lab.html",
+      "explanation": "스마트올TV"
     }
   ]
 }

@@ -298,6 +298,17 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **쓰는 곳**: `kids/js/korean_voca.js`(`KoreanVoca.renderUnitDirectory`), `kids/core/reading_engine.js`(`buildPassageGroups`), `kids/js/korean_sentence.js`, `kids/js/english_chat.js`
 - **검증**: `tests/grouped-list.test.mjs`
 
+### 🎬 `video-unit.js` (단원 영상 공용 부품: 노션 등록 유튜브 영상 + 핵심 3줄 + 확인 문제, 2026-11-16~)
+스토리북 대신 단원 1단계 워밍업을 유튜브 영상으로 채울 때 쓰는 부품입니다. **영상 주소를 화면 HTML에 직접 쓰지 않고** 노션 CURRICULUM_DB 행으로 등록합니다. 명세 `docs/video_unit_spec.md`.
+- **파일 위치**: `kids/core/video-unit.js` (전역 `window.VideoUnit`) · 스타일 `kids/css/video-unit.css` (모든 클래스 `vu-` 접두어). 화면 쪽은 3줄: css 링크, `<div class="video-unit" data-video-unit="{저장소 상대 경로}"></div>`, js 스크립트. `config.js`·`core.js`가 없어도 동작.
+- **노션 계약**: `구역=단원영상` 행(제목·`미디어 URL`=유튜브·`해설`=출처·`핵심 쓰임새/설명`=핵심 문장 ` | ` 구분, 최대 3) + 선택 `구역=영상확인` 문항 행. 화면 ↔ 행 연결 열쇠는 `인터랙티브 URL` = `https://awslike6-web.github.io/kids-school/{화면 경로}` 글자 그대로. 조회는 이 주소 equals 하나만 쓰고 구역은 화면에서 거른다(아직 없는 select 선택지로 거르면 노션이 400).
+- **동작**: 마지막 성공 결과(`localStorage` `MINMIN_VIDEO_UNIT_V1:{화면}`)로 먼저 그리고 매번 노션을 다시 읽어 다를 때만 다시 그림(재생 중이면 끝난 뒤). 0건이면 캐시 지우고 숨김, 실패+캐시 없음이면 [다시 시도]. 썸네일 먼저 → ▶ 누르면 IFrame API가 `youtube-nocookie` 플레이어를 만듦(5초 안에 API 못 실으면 iframe 직접) → 끝나면 덮개 [다시 보기]/[확인 문제 풀기]. [유튜브에서 열기] 링크는 늘 보임. 확인 문제는 `QuizChoices`로 섞고(없으면 자기 위치 기준으로 `quiz-flow-controller.js`를 실음) 에러리스 채점(`fairyPraise`/`fairyEncourage`/`fairyReward`, 함수가 있을 때만). 보석·학습일지는 아직 없음(명세 §7).
+- **색**: 캡션·상태줄은 화면 글자색을 따르고(어두운 과학실험실에서도 읽힘), 핵심 정리·확인 문제는 자기 색을 가진 밝은 카드. OS 다크 모드로 바꾸지 않는다.
+- **공개 API**: `mount(el, screenKey)` → `Promise<{videos, questions, source}>`, 시험용 `parseYouTubeId`, `buildQuery`, `rowsToUnit`, `loadUnit(screenKey, onData)`, `loadYouTubeApi`, `kstNow`.
+- **등록·점검 도구**: `scripts/register_curriculum.py`(단원영상·영상확인 행 검사: 유튜브 ID 11자, 화면 주소가 배포 접두어 + 저장소 실존 파일, 영상 행에 문제 금지, 미디어 URL은 `watch?v=` 표준형으로 저장) · `scripts/check_video_links.py`(읽기 전용, 유튜브 oEmbed로 정상/퍼가기 막힘/삭제·비공개 확인, 문제 있으면 종료코드 1; ID·주소 규칙은 등록기 함수를 그대로 씀).
+- **쓰는 곳**: 과학 실험실 14개(`kids/subjects/science/science_*_lab.html`, 2·3·4단원, 영상 행 자료 `scripts/data/curriculum/science_5-2_{2,3,4}.json`). 화면의 옛 `.video-frame-wrap`·`.yt-fallback-bar` 마크업·CSS는 지웠다.
+- **검증**: `tests/video-unit.test.mjs`(15개, 과학 실험실 HTML에 유튜브 embed 주소가 다시 박히면 실패하는 지킴이 포함)
+
 ### 🌟 `subject_engine.js` (4대 교과 공통 미션 엔진)
 국어, 과학, 사회, 영어 4대 교과의 3단계 학습 사다리 미션 뷰와 노션 데이터 수급 스피너를 표준화한 코어입니다.
 - **파일 위치**: `kids/core/subject_engine.js`
@@ -1603,6 +1614,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **독해 객관식 채점 (2026-11-16)**: `tests/reading-answer-index.test.mjs`(3개, 등록 자료 `scripts/data/reading/*.json` 객관식 정답이 보기 글자와 같고 그 보기로 채점되는지 포함). 위 「`reading_engine.js`」 절. 이 파일까지 전체 748개.
 - **AI 대화 기억 저장 (2026-11-16)**: `tests/chat-memory.test.mjs`(6개). 위 「`chat-memory.js`」. `voca-common-split`의 이벤트 기대값에서 옛 `beforeunload` 저장을 뺐다. 이 파일까지 전체 754개.
 - **가족 우체통 (2026-11-16)**: `tests/family-mail.test.mjs`(13개)·`tests/family-mail-page.test.mjs`(7개). 위 「📮 가족 우체통」 절.
+- **단원 영상 부품 (2026-11-16)**: `tests/video-unit.test.mjs`(15개). 위 「🎬 `video-unit.js`」 절.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

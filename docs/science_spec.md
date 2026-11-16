@@ -114,6 +114,11 @@ graph TD
   - **4차시: 🏷️ 에너지 효율 & 스마트 절전소 (`science_energy_efficiency_lab.html`, 429줄)**: 1~5등급 가전제품 효율 비교(1등급 35% 절전), 대기전력 차단 콘센트, LED 조명, 빗물 재활용 토글 및 월간 전기요금/CO₂ 감축량 산출.
   - **5차시: 🏡 단열 에코하우스 (`science_eco_house_lab.html`, 542줄)**: 가상 1분=실제 1초로 백열등 5분 가열(20→38℃) ➔ 소등 후 1분마다 5회 측정해 빈 기록표를 채우는 냉각 실험. 값은 실온 20℃ 냉각 법칙으로 계산한 가상 값(5분 뒤 일반 집 23.0℃ vs 에코하우스 34.1℃)이며 화면에 그렇게 안내.
 
+#### 실험실 [1단계] 영상 = 노션 등록 (2026-11-16)
+- 위 2·3·4단원 실험실 14개(계절·기단 제외)의 [1단계] 유튜브 영상은 화면 HTML이 아니라 노션 CURRICULUM_DB `구역=단원영상` 행에서 온다. 화면에는 `<div class="video-unit" data-video-unit="kids/subjects/science/{파일}">`만 있고 공용 부품 `kids/core/video-unit.js`가 그린다(`docs/video_unit_spec.md`, CORE_CATALOG 「🎬 video-unit.js」).
+- 영상 바꾸기: 노션에서 그 행의 `미디어 URL`만 고치면 된다(`인터랙티브 URL`은 건드리지 않음). 새 영상은 `scripts/data/curriculum/science_5-2_{단원}.json`에 `zone: "단원영상"` 항목을 넣고 `register_curriculum.py`로 등록. 끊긴 링크 점검은 `python -X utf8 scripts/check_video_links.py`.
+- 3컷 요약 아코디언·관찰 포인트는 아직 화면 안에 있다(옮기는 것은 명세 §7 다음 판).
+
 #### 2단원 실험실 3개 인라인 분리 (2026-10-31)
 - `kids/subjects/science/`의 `science_season_airmass_lab.html`(420줄)·`science_cloud_lab.html`(241줄)·`science_wind_lab.html`(230줄)은 같은 이름의 CSS를 `../../css/`, JS를 `./js/`에서 `?v=20261031-science-split`으로 로드한다.
 - CSS는 각각 339·250·289줄, JS는 각각 418·344·304줄이다. 태그 내부 원문·나머지 DOM·전역 함수·기존 로드 순서를 보존하며, `design-system.css` → 개별 CSS, 개별 클래식 JS → `study-activity.js?v=20261023` 순서다.

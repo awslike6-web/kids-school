@@ -11,6 +11,7 @@ scripts/build_gallery.py
 scripts/build_math_numbers_audio.py
 scripts/build_mini_reading_audio.py
 scripts/build_system_map.py
+scripts/check_video_links.py  # 단원영상 유튜브 링크·화면 주소 점검, 읽기 전용 (docs/video_unit_spec.md §5)
 scripts/check_commit_msg.py
 scripts/check_scripts_allowlist.py
 scripts/generate_pwa_icons.py
