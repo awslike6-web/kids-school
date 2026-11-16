@@ -68,6 +68,11 @@
         activePassage = books.find(b => b.id === bookId);
         sentenceHistory = [];
         window.__sentenceDiscussionMemorySaved = false;
+        // 창을 닫지 않고 페이지를 떠나도 이 토론이 AI 대화 기억 보관소에 남도록 (chat-memory.js)
+        const passageForMemory = activePassage;
+        if (typeof window.registerChatMemorySource === 'function') {
+            window.registerChatMemorySource('english-stage6', () => ({ roomType: '공부방', subject: '영어', messages: sentenceHistory, passage: passageForMemory }));
+        }
 
         if (typeof window.initDiscussionRewardSession === 'function') {
             window.initDiscussionRewardSession('stage6', activePassage);

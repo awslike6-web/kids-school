@@ -32,7 +32,8 @@ window.roomStartTime = window.roomStartTime || new Date();
         'stt-debouncer.js',          // 🎙️ STT 음성인식 디바운서
         'mission-reward-engine.js?v=20261011-5',  // 💎 미션 보상 및 축하 모달
         'quiz-feedback-overlay.js',  // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
-        'gemini-chat.js'             // 🧚 AI 요정 대화 (Worker 프록시 호출·재시도·안내 문구)
+        'gemini-chat.js',            // 🧚 AI 요정 대화 (Worker 프록시 호출·재시도·안내 문구)
+        'chat-memory.js?v=20261116-memory' // 🧠 AI 대화 기억 보관소 저장 (창 닫을 때 요약 1줄)
     ];
 
     let basePath = '';

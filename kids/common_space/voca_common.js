@@ -42,14 +42,13 @@ window.addEventListener('load', async () => {
   if (typeof initChatMemorySession === 'function') {
     await initChatMemorySession('용어방');
   }
+  // 단어 창을 닫지 않고 페이지를 떠나도 코코와 나눈 말이 AI 대화 기억 보관소에 남도록 (chat-memory.js)
+  if (typeof registerChatMemorySource === 'function') {
+    registerChatMemorySource('voca-modal', () => ({ roomType: '용어방', messages: MODAL_CHAT_HISTORY, passage: null, unit: currentActiveWord?.word || '' }));
+  }
   fetchLibraryData(); 
 });
 
-window.addEventListener('beforeunload', () => {
-  if (MODAL_CHAT_HISTORY.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
-    saveChatMemoryFromConversation({ roomType: '용어방', messages: MODAL_CHAT_HISTORY });
-  }
-});
 
 async function fetchLibraryData(forceRefresh = false) {
   const loadingEl = document.getElementById('loadingArea');

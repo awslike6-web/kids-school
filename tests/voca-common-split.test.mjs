@@ -13,9 +13,9 @@ const sources = files.map(read);
 const htmlPath = 'kids/common_space/voca.html';
 const html = read(htmlPath);
 const header = '// kids/common_space/voca_modal.js - voca_common.js 분리 2/2: 단어 모달·TTS·음성 입력·요정 코코 (voca_common.js 다음에 로드)';
+// 떠날 때 대화 저장은 2026-11-16부터 chat-memory.js의 pagehide가 맡는다(예전 beforeunload 저장 삭제)
 const events = [
-    { target: 'window', type: 'load', callback: '' },
-    { target: 'window', type: 'beforeunload', callback: '' }
+    { target: 'window', type: 'load', callback: '' }
 ];
 
 test('둘째 파일은 지정 머리 주석으로 시작한다', () => {

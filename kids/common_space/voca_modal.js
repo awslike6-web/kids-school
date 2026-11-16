@@ -102,6 +102,10 @@ function closeModal(event, force = false) {
     }
     const interFrame = document.getElementById('modalInteractiveFrame');
     if (interFrame) interFrame.src = 'about:blank';
+    // 이 단어로 코코와 나눈 말을 AI 대화 기억 보관소에 남긴다 (아이가 한 마디라도 했을 때, chat-memory.js)
+    if (MODAL_CHAT_HISTORY.length > 0 && typeof saveChatMemoryFromConversation === 'function') {
+      saveChatMemoryFromConversation({ roomType: '용어방', messages: MODAL_CHAT_HISTORY.slice(), passage: null, unit: currentActiveWord?.word || '' });
+    }
     overlay.classList.remove('active'); 
     setTimeout(() => overlay.style.display = 'none', 300); 
 
