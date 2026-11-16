@@ -272,3 +272,9 @@
 - 공용 프록시의 보육 가드가 공부방 DB 상위 페이지의 부모 경로를 확인하지 못해(서비스 키 없는 요청은 막음) 프록시로 새 DB를 만들 수 없었다. 사용자가 빈 표를 만들고, 속성 9개(§5-1)는 프록시 `PATCH /v1/databases`로 설정했다. 기본 「이름」은 「제목」으로 바꿨다.
 - 메시지 페이지는 부모가 이 DB라 가드가 통과시킨다(읽음 처리의 `GET /v1/pages/{id}` 포함). 프록시 질의로 빈 DB 조회 확인.
 - 스키마 도감 `docs/notion_schemas_school.md`에 FAMILY_MESSAGE_DB 추가(관제탑 `sync_notion_schemas.py`, 제목 「김s 공부방」 고정). Worker `wrangler.toml`의 `MESSAGE_DB_ID`에 반영(관제탑 커밋 `949e4a1`).
+
+### 14-2. Worker 배포 (2026-11-16)
+- D1 `family-mail`(`f4cac9ff-7beb-4dda-83f7-d7d56314fa49`, APAC) 생성·`schema.sql` 적용. 관제탑 `main` 병합 `bdb5f60`(`교정: [통과]`), 공개키 등록 `8a2e1cf`, 배포 버전 `7a525358`.
+- VAPID 개인키는 `vapid-keys.js --pipe`로 만들어 표준출력에서 `wrangler secret put VAPID_PRIVATE_KEY`로 바로 넣었다(화면·파일·대화에 남지 않음). 가족 코드 `FAMILY_CODE`는 사용자가 터미널에 직접 입력했다.
+- 이 PC는 PowerShell 실행 정책이 `npx.ps1`을 막으므로 터미널에서는 `npx.cmd`를 쓴다(정책은 바꾸지 않음).
+- 운영 확인: `/health` → `2026.11-v1.0`, `/vapid-public-key` = `wrangler.toml`과 같음, 틀린 코드 등록 → 403 `wrong_code`(가족 코드 Secret 적용 확인), 다른 사이트 Origin → 403, 토큰 없는 `/unread` → 401. 확인용 실패 기록 1건은 D1에서 지웠다(집 와이파이 폰들과 같은 IP일 수 있어서).
