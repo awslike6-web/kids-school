@@ -181,6 +181,9 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   - `kids/common_space/gallery_controller.js` (331줄): 유저 테마 적용(DOM null 안전 가드), 2대 뷰 모드 스위처(작품 vs 특별한 날), 필터 바 및 카드 그리드 렌더러, 빠른 좋아요.
   - `kids/common_space/gallery-data-sync.js` (477줄): 로컬 데이터 로드/저장, 카테고리 정의, 노션 실시간 양방향 동기화 및 영구 수정 이력(Audit Trail) 콜아웃 블록 적재.
   - `kids/common_space/gallery-modal-manager.js` (644줄): 상세 모달 뷰, 다중 사진 썸네일 스위처(창 안 `🎬 3D 회전영상` 칸은 `.mp4/.webm/.mov/.m4v` 파일 주소일 때만; 구글 포토 등 공유 주소는 새 창 버튼만), 메타 웹 편집, 작가의 한마디 직접 수정, 스티커 및 칭찬 댓글(XSS 방어).
+  - `kids/common_space/gallery-3d-layout.js` (393줄, `window.Gallery3DLayout`, DOM 없음): 3D 전시관 계산. `buildLayout(items)`(10점씩 전시실, 좌우 벽 번갈아, 간격 3.2m)·`fitFrame`·`viewpointFor`·`clampPosition`·`planTextures`(가까운 순 예산·여유 4)·`stepIndex`·`roomLabel`.
+  - `kids/common_space/gallery-3d-scene.js` (240줄, `window.Gallery3DScene`): CFG·THEMES(`neon`·`pastel`), 벽·바닥·간판·액자·이름표 CanvasTexture, `buildHall(state)`·`buildFrames(state)`·`applyFrameDimensions`.
+  - `kids/common_space/gallery-3d-hall.js` (717줄, `window.Gallery3DHall`): `open({items, theme, heading, isBlocked, onSelect, onBackWhileBlocked, onClose})`·`close()`·`isOpen()`·`debugInfo()`. Three.js r169를 열 때만 jsdelivr에서 불러옴, 그림자 없음, DPR 1.75 상한, 움직일 때만 그림, 폰 14장/PC 24장 사진 예산, 안드로이드 뒤로가기 처리, 닫으면 dispose·`forceContextLoss`. 컨트롤러 `open3DHall()`·`getFilteredGalleryItems()`가 부름. 명세 `docs/gallery_3d_hall_spec.md`.
 - **핵심 API**:
   | 함수 | 모듈 | 설명 |
   | :--- | :--- | :--- |
@@ -1582,6 +1585,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ## 회귀 시험 묶음 `tests/` (2026-10-27)
 
 - **객관식 보기 섞기 (2026-11-14)**: `tests/quiz-choices.test.mjs`(11개)·`tests/quiz-choices-guard.test.mjs`(2개, 새 객관식 화면이 `QuizChoices`를 빠뜨리면 실패). 위 「`window.QuizChoices`」 절.
+- **갤러리 3D 전시관 (2026-11-16)**: `tests/gallery-3d-hall.test.mjs`(34개, 계산 모듈 + 엔진·장면 정적 규칙 + `gallery.html` 로드 순서). 이 파일까지 전체 790개.
 - **수학 5-2 4·5·6단원 탐험관 (2026-11-14)**: `tests/math-explorer-units.test.mjs`(16개). 위 「수학 단원 탐험관 공용 틀」·「5-2 4·5·6단원 탐험관」 절. 이 파일까지 60개 파일·731개(이 PC 약 10초).
 
 - **영어방 문제 번호 공유 (2026-11-16)**: `tests/english-stage4-advance.test.mjs`(4개). 위 「`english_common.js`」 절. 이 파일까지 전체 745개.

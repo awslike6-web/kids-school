@@ -6,6 +6,7 @@
     <title>꿈나무 작품 갤러리 - 김s 공부방</title>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Jua&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/quick-uploader.css">
+    <link rel="stylesheet" href="./gallery-3d.css?v=20261116-3dhall">
   <link rel="stylesheet" href="../css/design-system.css">
   <link rel="stylesheet" href="./gallery.css?v=20261031-gallery-split">
   <link rel="stylesheet" href="./gallery-modal.css?v=20261031-gallery-split">
@@ -53,6 +54,9 @@
                 </button>
                 <button type="button" class="view-mode-btn" id="btnModeSpecial" onclick="switchViewMode('special')">
                     <span>🌟</span> <span>특별한 날 추억</span> (<span id="countSpecials">4</span>)
+                </button>
+                <button type="button" class="view-mode-btn view-mode-btn--hall" id="btn3dHall" onclick="open3DHall()" title="지금 보이는 작품을 3D 전시관에서 걸어 다니며 감상해요">
+                    <span>🏛️</span> <span>3D 전시관</span>
                 </button>
             </div>
         </div>
@@ -302,6 +306,9 @@
     <script src="./gallery-runner-rewards.js?v=20261031-friendship"></script>
     <script src="./gallery-mini-runner.js?v=20261031-friendship"></script>
     <script src="./gallery-modal-manager.js?v=20261113-2016"></script>
+    <script src="./gallery-3d-layout.js?v=20261116-3dhall"></script>
+    <script src="./gallery-3d-scene.js?v=20261116-3dhall"></script>
+    <script src="./gallery-3d-hall.js?v=20261116-3dhall"></script>
     <script src="./gallery_controller.js?v=20261113-2016"></script>
 </body>
 </html>
