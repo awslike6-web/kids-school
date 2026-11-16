@@ -16,7 +16,7 @@
 - **HTML 로드 방법** (순서 지킴: `fairy-tts.js`가 엔진보다 먼저. 새 파일 이름에 `fairy-engine.js` 글자를 넣지 않는다 — `loadCoreScripts`·자산 경로 찾기가 그 글자로 엔진을 찾음):
   ```html
   <script src="../core/fairy-config.js"></script>
-  <script src="../core/fairy-tts.js?v=20261028-tts"></script>
+  <script src="../core/fairy-tts.js?v=20261116-mixvoice"></script>
   <script src="../core/fairy-settings-catalog.js"></script>
   <script src="../core/fairy-engine.js?v=20261028-coco"></script>
   ```
@@ -24,7 +24,7 @@
 - **핵심 API**:
   | 메서드 | 용도 | 설명 |
   | :--- | :--- | :--- |
-  | `speakFairyTTS(text, onEnd, options)` | 한국어 안내/퀴즈 | ① 센터 고정 MP3 ② 녹음 음성(키워드 라우터) ③ Worker `/api/tts` 실시간(Edge, 막히면 Worker가 OpenAI로 대신) ④ 브라우저 음성. 옵션 `skipPreset`·`skipStatic`·`forceVoice` |
+  | `speakFairyTTS(text, onEnd, options)` | 한국어 안내/퀴즈 | ① 센터 고정 MP3 ② 녹음 음성(키워드 라우터) ③ Worker `/api/tts` 실시간(Edge, 막히면 Worker가 OpenAI로 대신) ④ 브라우저 음성. 옵션 `skipPreset`·`skipStatic`·`forceVoice`·`mixedVoices`. **영어방(`currentSubject === '영어'`)에서 한영이 섞인 글은 ③에서 한글은 선희·영어는 영어 목소리(영어 배속)로 나눠 읽는다**(2026-11-16, `splitKoreanEnglishSegments`: 한글 없는 문장은 통째로 영어, 문장 안에서는 영어 두 낱말 이상 이어진 구간·따옴표 속 영어 낱말만 영어. `mixedVoices: false`로 끔, `true`로 다른 방에서도 켬) |
   | `speakEnglish(text, onEnd)` | 영어 원어민 발음 | Jenny Neural, 재생 배속 = `getEnglishSpeechRate()` |
   | `stopFairyTTS()` | 모든 음성 정지 | 대기열·녹음 음성·센터 MP3·브라우저 음성을 멈추고 미리 받은 음성을 해제 |
   | `getKoreanSpeechRate()` / `setKoreanSpeechRate(r)` | 한국어 말하기 속도 | 아이별 설정 `korean_speech_rate`(1.0 = Edge +6%, 0.85 = -10%, 1.15 = +22%). 실시간 음성·센터 독해 MP3에 적용, 짧은 녹음 칭찬은 원래 속도 |
@@ -1246,7 +1246,7 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 - **HTML 로드 방법**:
   ```html
   <link rel="stylesheet" href="./kids/css/fairy-settings-modal.css">
-  <script src="./kids/core/fairy-tts.js?v=20261028-tts"></script> <!-- 말하기 속도 단추·미리듣기 -->
+  <script src="./kids/core/fairy-tts.js?v=20261116-mixvoice"></script> <!-- 말하기 속도 단추·미리듣기 -->
   <script src="./kids/core/fairy-settings-catalog.js"></script>
   <script src="./kids/core/fairy-settings-engine.js"></script>
   ```

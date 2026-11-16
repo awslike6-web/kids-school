@@ -1,4 +1,4 @@
-// 📄 kids/core/fairy-tts.js (요정 음성 합성: Edge 실시간 음성 대기열 · 브라우저 음성 대체 · 정지 · 말하기 속도)
+// 📄 kids/core/fairy-tts.js (요정 음성 합성: Edge 실시간 음성 대기열 · 영어방 한영 나눠 읽기 · 브라우저 음성 대체 · 정지 · 말하기 속도)
 // - fairy-engine.js(코코 프리셋·캐릭터 목소리·칭찬 헬퍼)보다 먼저 실어야 한다.
 // - 실시간 음성은 Worker /api/tts 한 곳만 부른다. Edge가 막히면 Worker가 서버 비밀값으로 OpenAI를 대신 부른다.
 //   (브라우저에서 OpenAI를 직접 부르거나 키를 저장하지 않는다: 전사 헌법 §5)
@@ -300,7 +300,7 @@ async function fetchCloudflareEdgeTtsAudio(sentence, config) {
  * - 중간 문장이 실패하면 건너뛰고, 끝나면 onEnd를 한 번 부른다 (새 발화·정지로 끊기면 부르지 않음)
  * - 첫 문장 재생이 시작되면 Promise가 풀린다
  */
-function playTtsSentenceQueue(sentences, fetchAudio, { playbackRate = 1, label = 'TTS', onEnd = null } = {}) {
+function playTtsSentenceQueue(sentences, fetchAudio, { playbackRate = 1, playbackRateFor = null, label = 'TTS', onEnd = null } = {}) {
     stopFairyTTS(true); // 같은 발화의 엔진 전환은 재생 UI를 유지
     const sessionId = ++currentTtsSessionId;
     const isLive = () => sessionId === currentTtsSessionId;
@@ -363,7 +363,8 @@ function playTtsSentenceQueue(sentences, fetchAudio, { playbackRate = 1, label =
             if (!url) { playAt(i + 1); return; } // 빈 문장
 
             const audio = new Audio(url);
-            if (playbackRate !== 1) audio.playbackRate = playbackRate;
+            const rate = playbackRateFor ? playbackRateFor(sentences[i]) : playbackRate;
+            if (rate !== 1) audio.playbackRate = rate;
             currentTtsAudio = audio;
             let done = false;
             const finishSentence = err => {
@@ -410,6 +411,58 @@ async function playCloudflareEdgeTtsStream(fullText, onEndCallback = null, force
     await playTtsSentenceQueue(sentences, s => fetchCloudflareEdgeTtsAudio(s, config), {
         playbackRate: config.isEnglish ? getEnglishSpeechRate() : 1,
         label: 'Edge-TTS',
+        onEnd: onEndCallback
+    });
+}
+
+// 🇰🇷🇺🇸 영어방 한영 섞인 답변: 한글은 선희, 영어는 영어 목소리로 나눠 읽는다 (2026-11-16)
+// - 한글이 없는 문장은 통째로 영어, 한 문장 안에서는 영어 두 낱말 이상 이어진 구간과 따옴표 속 영어 낱말만 영어
+// - 숫자·문장부호는 앞 구간에 붙이고, 글자 없는 조각은 읽지 않는다
+
+/** 한 문장 → [{text, lang:'ko'|'en'}] */
+function splitKoreanEnglishSegments(sentence) {
+    const str = String(sentence || '').trim();
+    const hasKo = /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(str);
+    const hasEn = /[A-Za-z]/.test(str);
+    if (!str) return [];
+    if (!hasKo || !hasEn) return [{ text: str, lang: hasEn && !hasKo ? 'en' : 'ko' }];
+
+    const runs = [];
+    for (const piece of str.match(/[가-힣ㄱ-ㅎㅏ-ㅣ]+|[A-Za-z][A-Za-z'’]*|[^가-힣ㄱ-ㅎㅏ-ㅣA-Za-z]+/g)) {
+        const lang = /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(piece) ? 'ko' : /[A-Za-z]/.test(piece) ? 'en' : null;
+        const last = runs[runs.length - 1];
+        if (!lang && last) { last.text += piece; continue; }
+        if (last && last.lang === (lang || 'ko')) { last.text += piece; last.words += lang === 'en' ? 1 : 0; continue; }
+        runs.push({ text: piece, lang: lang || 'ko', words: lang === 'en' ? 1 : 0, quoted: /["'“‘]\s*$/.test(last ? last.text : '') });
+    }
+    // 따옴표 없는 영어 한 낱말("friend는")은 한국어 목소리로 둔다
+    const merged = [];
+    for (const run of runs) {
+        const lang = run.lang === 'en' && run.words < 2 && !run.quoted ? 'ko' : run.lang;
+        const last = merged[merged.length - 1];
+        if (last && last.lang === lang) last.text += run.text;
+        else merged.push({ text: run.text, lang });
+    }
+    return merged.map(r => ({ text: r.text.trim(), lang: r.lang })).filter(r => /[가-힣A-Za-z0-9]/.test(r.text));
+}
+
+/** 영어방에서 speakFairyTTS가 한영 나눠 읽기를 쓸지 */
+function shouldSplitKoreanEnglish(text, options = {}) {
+    if (options.forceVoice || options.mixedVoices === false) return false;
+    if (options.mixedVoices !== true && window.currentSubject !== '영어') return false;
+    return /[가-힣]/.test(text) && /[A-Za-z]{2}/.test(text);
+}
+
+/** 한영 구간을 각각 선희·영어 목소리로 이어 읽기 (영어 구간만 영어 배속) */
+async function playKoreanEnglishEdgeTtsStream(fullText, onEndCallback = null) {
+    const ko = getCloudflareEdgeTtsConfig('가');
+    const en = getCloudflareEdgeTtsConfig('a');
+    if (!ko.workerUrl) throw new Error('TTS_WORKER_URL_NOT_FOUND');
+    const segments = splitTextIntoSentences(fullText).flatMap(splitKoreanEnglishSegments);
+    console.log(`🎙️ [Edge-TTS] 한영 나눠 읽기 ${segments.length}조각 (영어 ${segments.filter(s => s.lang === 'en').length})`);
+    await playTtsSentenceQueue(segments, seg => fetchCloudflareEdgeTtsAudio(seg.text, seg.lang === 'en' ? en : ko), {
+        playbackRateFor: seg => (seg.lang === 'en' ? getEnglishSpeechRate() : 1),
+        label: 'Edge-TTS(한영)',
         onEnd: onEndCallback
     });
 }
@@ -612,9 +665,10 @@ async function speakFairyTTS(text, onEndCallback = null, options = {}) {
         return;
     }
 
-    // ③ Worker 실시간 음성 (Edge, 막히면 Worker가 OpenAI로 대신)
+    // ③ Worker 실시간 음성 (Edge, 막히면 Worker가 OpenAI로 대신). 영어방 한영 섞인 글은 목소리를 나눠 읽는다
     try {
-        await playCloudflareEdgeTtsStream(cleanText, onEndCallback, (options && options.forceVoice) || null);
+        if (shouldSplitKoreanEnglish(cleanText, options || {})) await playKoreanEnglishEdgeTtsStream(cleanText, onEndCallback);
+        else await playCloudflareEdgeTtsStream(cleanText, onEndCallback, (options && options.forceVoice) || null);
         return;
     } catch (edgeError) {
         console.warn('ℹ️ [실시간 음성 미응답] 브라우저 음성으로 전환합니다:', edgeError?.message || edgeError);
@@ -710,6 +764,8 @@ window.isEnglishText = isEnglishText;
 window.getCloudflareEdgeTtsConfig = getCloudflareEdgeTtsConfig;
 window.fetchCloudflareEdgeTtsAudio = fetchCloudflareEdgeTtsAudio;
 window.playCloudflareEdgeTtsStream = playCloudflareEdgeTtsStream;
+window.splitKoreanEnglishSegments = splitKoreanEnglishSegments;
+window.playKoreanEnglishEdgeTtsStream = playKoreanEnglishEdgeTtsStream;
 window.getEnglishSpeechRate = getEnglishSpeechRate;
 window.setEnglishSpeechRate = setEnglishSpeechRate;
 window.getKoreanSpeechRate = getKoreanSpeechRate;

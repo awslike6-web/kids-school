@@ -244,3 +244,43 @@ test('⑤ 엔진은 목록 파일의 코코 음성을 쓴다 (옛 이름·무작
     assert.match(name(log.played[0].src), /^fairy_praise_\d+\.mp3$/);
     assert.equal(name(log.played[1].src), 'fairy_reward_diamond.mp3');
 });
+
+test('⑥ 영어방 한영 섞인 답변은 구간을 나눠 한글은 선희, 영어는 영어 목소리(영어 배속)로 읽는다', async () => {
+    const { sandbox, log } = makeSandbox();
+    vm.runInContext(ttsSrc, sandbox);
+    const split = t => JSON.parse(JSON.stringify(sandbox.splitKoreanEnglishSegments(t).map(s => `${s.lang}:${s.text}`)));
+    assert.deepEqual(split("'저는 친구들이 정말 좋아요'는 영어로 'I love my friends!'라고 해요."),
+        ["ko:'저는 친구들이 정말 좋아요'는 영어로 '", "en:I love my friends!'", 'ko:라고 해요.']);
+    assert.deepEqual(split('Great job!'), ['en:Great job!']);
+    assert.deepEqual(split("'friend'는 친구라는 뜻이에요."), ["en:friend'", 'ko:는 친구라는 뜻이에요.']);
+    assert.deepEqual(split('friend는 친구예요.'), ['ko:friend는 친구예요.']); // 따옴표 없는 한 낱말은 그대로
+    assert.deepEqual(split('3시 30분이에요.'), ['ko:3시 30분이에요.']);
+
+    // 재생: 조각마다 맞는 목소리로 받고, 영어 조각만 영어 배속
+    const voices = [];
+    const realFetch = sandbox.fetch;
+    sandbox.fetch = async (url, init) => { voices.push(JSON.parse(init.body).voice); return realFetch(url, init); };
+    sandbox.currentSubject = '영어';
+    await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('끝 콜백이 오지 않음')), 2000);
+        sandbox.speakFairyTTS("좋아요! 영어로는 'I love my friends!'라고 해요. Can you say it?", () => { clearTimeout(timer); resolve(); });
+    });
+    assert.deepEqual(voices, ['ko-KR-SunHiNeural', 'ko-KR-SunHiNeural', 'en-US-JennyNeural', 'ko-KR-SunHiNeural', 'en-US-JennyNeural']);
+    assert.deepEqual(log.played.map(p => p.rate), [1, 1, 0.85, 1, 0.85]);
+});
+
+test('⑥ 영어방이 아니거나 목소리를 정한 발화는 예전처럼 한 목소리로 읽는다', async () => {
+    const { sandbox } = makeSandbox();
+    vm.runInContext(ttsSrc, sandbox);
+    const voices = [];
+    const realFetch = sandbox.fetch;
+    sandbox.fetch = async (url, init) => { voices.push(JSON.parse(init.body).voice); return realFetch(url, init); };
+    const say = (text, opts) => new Promise(resolve => sandbox.speakFairyTTS(text, resolve, opts));
+    sandbox.currentSubject = '국어';
+    await say("영어로는 'I love my friends!'라고 해요.");
+    assert.deepEqual(voices, ['ko-KR-SunHiNeural']);
+    voices.length = 0;
+    sandbox.currentSubject = '영어';
+    await say("영어로는 'I like my school!'라고 해요.", { mixedVoices: false }); // 같은 글은 캐시에서 나와 다른 글로
+    assert.deepEqual(voices, ['ko-KR-SunHiNeural']);
+});
