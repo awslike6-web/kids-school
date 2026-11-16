@@ -22,6 +22,12 @@ let selectedEnglishGrade = "";
 let selectedEnglishUnit = "";
 let englishVocaOrderType = 'shuffle'; // 'shuffle' or 'sequence'
 
+// 최상위 let은 window에 붙지 않는다. english_voca.js(4단계 「다음 문제 풀기」, 3단계 방식 다시 고르기)와
+// quiz-flow-controller.js·quiz-feedback-overlay.js는 window 경로로 읽고 쓰므로 같은 변수를 가리키게 잇는다.
+// (이음이 없으면 4단계가 첫 문장만 되풀이한다: 2026-11-16 제보, tests/english-stage4-advance.test.mjs)
+Object.defineProperty(window, 'activeQuizIdx', { configurable: true, get: () => activeQuizIdx, set: (v) => { activeQuizIdx = v; } });
+Object.defineProperty(window, 'activeSectionData', { configurable: true, get: () => activeSectionData, set: (v) => { activeSectionData = v; } });
+
 // 독해 및 토론 지문 상태
 let readingFetchedBooks = [];
 let activePassage = null;
@@ -461,7 +467,9 @@ async function advanceEnglishQuizAfterCorrect(delayMs = 1200) {
             onAdvance: renderSectionUI,
             delayMs: delayMs,
             subject: '영어',
-            explanation: expl
+            explanation: expl,
+            // 번호를 이미 올렸으므로 window.activeQuizIdx는 다음 문항이다. 용어사전 링크는 방금 푼 낱말로 건다.
+            word: prevItem ? prevItem.word : null
         });
     } else {
         setTimeout(renderSectionUI, delayMs);

@@ -679,6 +679,7 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
   | `closeMissionView(force)` | 오버레이 닫기, 보상 정산 및 세션 안전 종료 |
   | `renderSectionUI()` | 10문제 완료 즉각 학습일지 자동 전송 및 서브모듈 렌더러 호출 |
   | `renderDictionaryUI(container)` | 4선 공책 인쇄용 어휘 체크리스트 UI 렌더링 |
+- **문제 번호 공유 (2026-11-16)**: 문제 번호 `activeQuizIdx`와 문제 묶음 `activeSectionData`는 최상위 `let`이라 그대로는 `window`에 붙지 않습니다. `english_voca.js`(4단계 「다음 문제 풀기」·3단계 방식 다시 고르기)와 `quiz-flow-controller.js`·`quiz-feedback-overlay.js`가 `window` 경로로 읽고 쓰므로, `Object.defineProperty`로 같은 변수를 가리키게 이어 둡니다. 이음이 없으면 4단계가 첫 문장만 되풀이합니다(2026-10-02 분리 때부터, 11-16 제보). 정답 뒤 넘김 화면(`triggerQuizAdvance`)에는 번호가 이미 다음 문항이므로 방금 푼 낱말을 `word`로 넘깁니다. 시험: `tests/english-stage4-advance.test.mjs`(4개).
 
 ### 🌟 `english_storybook.js` ([1단계] 원서/단원 동화 도서관 전담 엔진)
 L7, L8, L9, L11 등 단원별 일러스트 동화 서가 도감 렌더링 및 뷰어 연결을 전담하는 독립 모듈입니다.
@@ -1580,6 +1581,8 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 
 - **객관식 보기 섞기 (2026-11-14)**: `tests/quiz-choices.test.mjs`(11개)·`tests/quiz-choices-guard.test.mjs`(2개, 새 객관식 화면이 `QuizChoices`를 빠뜨리면 실패). 위 「`window.QuizChoices`」 절.
 - **수학 5-2 4·5·6단원 탐험관 (2026-11-14)**: `tests/math-explorer-units.test.mjs`(16개). 위 「수학 단원 탐험관 공용 틀」·「5-2 4·5·6단원 탐험관」 절. 이 파일까지 60개 파일·731개(이 PC 약 10초).
+
+- **영어방 문제 번호 공유 (2026-11-16)**: `tests/english-stage4-advance.test.mjs`(4개). 위 「`english_common.js`」 절. 이 파일까지 전체 745개.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.
