@@ -65,6 +65,7 @@ flowchart TD
 | **`kids-school`** | `kids/common_space/gallery-modal.css` | 라이트박스·스티커·방명록·등록 모달·빈 상태·뷰 스위처 (455줄). `gallery.css` 바로 다음에 같은 `?v=20261031-gallery-split`로 로드. `tests/gallery-css-split.test.mjs`가 원문 재결합·로드 계약 검증 |
 | **`kids-school`** | `kids/common_space/gallery-spot-diff.js` | `GallerySpotDiff` 놀이·부모 좌표 추출·RGB 차이 검수. 모달 매니저보다 먼저 로드 |
 | **`kids-school`** | `kids/common_space/gallery-mini-runner.js` | `GalleryMiniRunner` 장착 버튼·토스트·60초 미니 런·순수 물리 API |
+| **`kids-school`** | `kids/common_space/gallery-3d-layout.js` · `gallery-3d-scene.js` · `gallery-3d-hall.js` · `gallery-3d.css` | `🏛️ 3D 전시관`(보기 전용). 지금 필터의 작품을 복도 벽 액자로 걸고 액자를 누르면 상세 창. 등록 자료는 따로 필요 없음(`imageUrl`·`hasCutout`·`characters[0]`을 그대로 씀). 명세 [`gallery_3d_hall_spec.md`](gallery_3d_hall_spec.md) |
 | **`kids-school`** | `kids/subjects/quest/monster_roster.js` | 갤러리 파트너·최고 기록의 자녀별 로컬 저장 원천, 민수 로스터 동적 항목 |
 | **`kids-archive`** | [`kids-archive/data/archive-master-data.js`](file:///g:/master-tower/kids-archive/data/archive-master-data.js) | 12년 성장 포트폴리오 마스터 DB |
 | **`kids-archive`** | `kids-archive/assets/media/{minsu|minseo|together}/` | 웹 최적화된 고화질 영구 사진(`.jpg`/`.png`) 및 영상(`.mp4`) |

@@ -179,15 +179,11 @@ function setCategoryFilter(category, btnEl) {
 }
 
 // 🖼️ 갤러리 카드 그리드 렌더링
-function renderGallery() {
-    const grid = document.getElementById('galleryGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
+// 목록과 3D 전시관이 함께 쓰는 필터 결과 (지금 뷰 모드·작가·분류)
+function getFilteredGalleryItems() {
     const isSpecial = window.currentViewMode === 'special';
-    const list = isSpecial ? window.specialDaysData : window.galleryData;
-
-    let filtered = list.filter(item => {
+    const list = (isSpecial ? window.specialDaysData : window.galleryData) || [];
+    return list.filter(item => {
         let matchAuthor = false;
         if (currentAuthorFilter === 'all') matchAuthor = true;
         else if (currentAuthorFilter === '공동') matchAuthor = (item.author === '공동' || item.author === '가족' || item.author === '함께');
@@ -196,6 +192,15 @@ function renderGallery() {
         const matchCategory = (currentCategoryFilter === 'all') || (item.category === currentCategoryFilter);
         return matchAuthor && matchCategory;
     });
+}
+
+function renderGallery() {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const isSpecial = window.currentViewMode === 'special';
+    const filtered = getFilteredGalleryItems();
 
     if (filtered.length === 0) {
         if (isSpecial) {
@@ -269,6 +274,44 @@ function renderGallery() {
 }
 
 // ❤️ 빠른 좋아요
+// 🏛️ 3D 전시관 열기 (gallery-3d-hall.js, 명세 docs/gallery_3d_hall_spec.md §5)
+function open3DHall() {
+    if (!window.Gallery3DHall || window.Gallery3DHall.isOpen()) return;
+    const isSpecial = window.currentViewMode === 'special';
+    const items = getFilteredGalleryItems().map(item => {
+        const together = item.author === '공동' || item.author === '가족' || item.author === '함께';
+        const imageUrl = item.imageUrl || (item.galleryImages && item.galleryImages[0]) || '';
+        const character = !isSpecial && Array.isArray(item.characters) ? item.characters[0] : null;
+        return {
+            id: item.id,
+            title: item.title || '',
+            date: item.date || '',
+            imageUrl,
+            hasCutout: !!(item.hasCutout || /\.png$/i.test(imageUrl)),
+            characterUrl: (character && character.spriteUrl) || '',
+            caption: `${together ? '온 가족' : (item.author || '')} · ${item.date || ''}`
+        };
+    }).filter(item => item.imageUrl);
+    if (items.length === 0) {
+        alert('지금 고른 조건에 맞는 작품이 없어요. 필터를 바꿔 보세요!');
+        return;
+    }
+    const isDaughterView = document.body.classList.contains('theme--hideout'); // applyUserTheme과 같은 판단
+    const theme = currentAuthorFilter === '민수' ? 'neon'
+        : currentAuthorFilter === '민서' ? 'pastel'
+        : (isDaughterView ? 'pastel' : 'neon');
+    const detailModal = document.getElementById('detailModal');
+    window.Gallery3DHall.open({
+        items,
+        theme,
+        heading: isSpecial ? '🏛️ 추억 3D 전시관' : '🏛️ 꿈나무 3D 전시관',
+        isBlocked: () => !!detailModal && detailModal.style.display === 'flex',
+        onSelect: id => openDetailModal(id),
+        onBackWhileBlocked: () => closeDetailModal(),
+        onClose: () => {}
+    });
+}
+
 function quickLike(id) {
     let item = window.galleryData.find(a => a.id === id);
     let isSpecial = false;

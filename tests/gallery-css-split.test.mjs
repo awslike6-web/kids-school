@@ -15,7 +15,8 @@ const links = [...html.matchAll(/<link\b[^>]*>/gi)].map(match => ({
     href: attribute(match[0], 'href') ?? '',
     index: match.index
 }));
-const galleryLinks = links.filter(link => /(?:^|\/)gallery(?:-[^/?#]+)?\.css(?:[?#]|$)/i.test(link.href));
+// gallery-3d.css(3D 전시관, 별도 모듈)는 분리 묶음이 아니므로 제외
+const galleryLinks = links.filter(link => /(?:^|\/)gallery(?:-(?!3d)[^/?#]+)?\.css(?:[?#]|$)/i.test(link.href));
 const assetPath = href => path.resolve(root, path.dirname(htmlPath), href.split('?')[0]);
 
 function payload(source, name) {

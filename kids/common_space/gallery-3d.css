@@ -1,0 +1,213 @@
+body.g3d-open {
+  overflow: hidden;
+}
+
+.g3d--neon {
+  --g3d-bg: #1a1030;
+  --g3d-bar: rgba(18, 11, 36, 0.78);
+  --g3d-text: #e8fff6;
+  --g3d-accent: #00ff9d;
+  --g3d-btn-text: #120b24;
+}
+
+.g3d--pastel {
+  --g3d-bg: #fff8f0;
+  --g3d-bar: rgba(255, 253, 249, 0.85);
+  --g3d-text: #5a3a44;
+  --g3d-accent: #ff6f91;
+  --g3d-btn-text: #ffffff;
+}
+
+#gallery3dOverlay {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 900;
+  background: var(--g3d-bg);
+  color: var(--g3d-text);
+  font-family: 'Jua', sans-serif;
+}
+
+.g3d-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.g3d-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.g3d-topbar,
+.g3d-bottombar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  background: var(--g3d-bar);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.g3d-topbar {
+  top: 0;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) calc(14px + env(safe-area-inset-right, 0px)) 10px calc(14px + env(safe-area-inset-left, 0px));
+}
+
+.g3d-bottombar {
+  bottom: 0;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px calc(14px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) calc(14px + env(safe-area-inset-left, 0px));
+}
+
+.g3d-heading {
+  font-size: 1.15rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g3d-room {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  background: var(--g3d-accent);
+  color: var(--g3d-btn-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.g3d-room:empty {
+  display: none;
+}
+
+.g3d-close,
+.g3d-prev,
+.g3d-next {
+  min-height: 48px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 14px;
+  background: var(--g3d-accent);
+  color: var(--g3d-btn-text);
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+.g3d-close:disabled, .g3d-prev:disabled, .g3d-next:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.g3d-close:focus-visible, .g3d-prev:focus-visible, .g3d-next:focus-visible {
+  outline: 3px solid var(--g3d-text);
+  outline-offset: 2px;
+}
+
+.g3d-counter {
+  font-size: 1.05rem;
+  min-width: 64px;
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.g3d-hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 3;
+  max-width: min(90vw, 420px);
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: var(--g3d-bar);
+  color: var(--g3d-text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+.g3d-hint--hide {
+  opacity: 0;
+}
+
+.g3d-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  max-width: min(88vw, 360px);
+  padding: 18px 24px;
+  border-radius: 18px;
+  background: var(--g3d-bar);
+  color: var(--g3d-text);
+  font-size: 1.05rem;
+  line-height: 1.4;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.g3d-status[hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .g3d-topbar,
+  .g3d-bottombar {
+    gap: 6px;
+  }
+  .g3d-topbar {
+    padding: calc(8px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) 8px calc(10px + env(safe-area-inset-left, 0px));
+  }
+  .g3d-bottombar {
+    padding: 8px calc(10px + env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) calc(10px + env(safe-area-inset-left, 0px));
+  }
+  .g3d-heading {
+    font-size: 1rem;
+  }
+  .g3d-room {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .g3d-close, .g3d-prev, .g3d-next {
+    padding: 8px 11px;
+    font-size: 0.9rem;
+  }
+  .g3d-counter {
+    font-size: 0.95rem;
+    min-width: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g3d-close, .g3d-prev, .g3d-next, .g3d-hint {
+    transition: none;
+  }
+}
