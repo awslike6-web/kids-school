@@ -1589,11 +1589,11 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ## 과목 공용 어휘 등록기 `scripts/register_voca.py` (2026-11-08)
 
 - **목적**: 단원 자료 JSON 1개를 노션 VOCA_DB에 맞춘다. 단원마다 `insert_*_voca.py`를 새로 만들던 방식을 대체한다(관제탑 `scripts/archive/2026-11/`로 보관).
-- **자료**: `scripts/data/voca/{과목}_{학년}_{단원}.json` = `{subject, grade, student(문자열|배열), unit, test_scope?, area?, voca:[{word, meaning, detail?, pos?, type?, area?}]}`. 지금 영어 5-2 L8·L9·L10·L11.
+- **자료**: `scripts/data/voca/{과목}_{학년}_{단원}.json` = `{subject, grade(문자열|배열: 1년짜리 책은 ["5-1","5-2"]), student(문자열|배열), unit, test_scope?, area?, voca:[{word, meaning, detail?, pos?, type?, area?}]}`. 지금 영어 5-2 L8~L11, 국어·사회, 과학 5-2 3·4단원 보강, 보건 5(1·2·4·5단원, 기타 과목 규칙은 `docs/other_subjects_spec.md`).
 - **실행**: `python -X utf8 scripts/register_voca.py --file <자료> [--apply | --update]`. 기본 미리보기, `--apply` 새 행만, `--update` 기존 행의 바뀐 칸도 덮어씀.
-- **계약**: 같은 행 = 과목·학년·학생(첫 번째)·단원 + 단어. 숙련도·달성은 쓰지 않는다(`NEVER_WRITE`). 노션에 없는 칸 이름이면 멈추고, 선택지에 없는 값은 경고한다(`check_schema`). 노션에만 있는 행은 알려 주기만 하고 지우지 않는다.
+- **계약**: 같은 행 = 과목·학년(첫 번째)·학생(첫 번째)·단원 + 단어. 새 과목 첫 등록 때 노션이 없는 선택지 필터에 400을 내면 기존 행 0개로 본다. 숙련도·달성은 쓰지 않는다(`NEVER_WRITE`). 노션에 없는 칸 이름이면 멈추고, 선택지에 없는 값은 경고한다(`check_schema`). 노션에만 있는 행은 알려 주기만 하고 지우지 않는다.
 - **핵심 API**: `sync_voca(seed, apply, update) → 건수`, `desired_props(seed, item)`, `diff_props(page, props)`, `check_schema(seed)`, 통신 `call`·`query_all`·`rich`·`plain_title`(민서 국어 도구도 사용).
-- **시험**: `python -X utf8 -m unittest scripts/test_register_voca.py` (가짜 통신 11건: 미리보기 무쓰기, 새 행만 만들기, --update 바뀐 칸만, 진도 칸 미기록, 중복·노션 전용 행, 자료 형식, 스키마 도감 대조). `regression.yml`에서도 돈다.
+- **시험**: `python -X utf8 -m unittest scripts/test_register_voca.py` (가짜 통신 14건: 미리보기 무쓰기, 학년 목록, 새 선택지 400, 새 행만 만들기, --update 바뀐 칸만, 진도 칸 미기록, 중복·노션 전용 행, 자료 형식, 스키마 도감 대조). `regression.yml`에서도 돈다.
 
 ## 교재·사료 문항 등록기 `scripts/register_curriculum.py` (2026-11-13)
 

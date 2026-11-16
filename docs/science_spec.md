@@ -119,6 +119,11 @@ graph TD
 - 영상 바꾸기: 노션에서 그 행의 `미디어 URL`만 고치면 된다(`인터랙티브 URL`은 건드리지 않음). 새 영상은 `scripts/data/curriculum/science_5-2_{단원}.json`에 `zone: "단원영상"` 항목을 넣고 `register_curriculum.py`로 등록. 끊긴 링크 점검은 `python -X utf8 scripts/check_video_links.py`.
 - 3컷 요약 아코디언·관찰 포인트는 아직 화면 안에 있다(옮기는 것은 명세 §7 다음 판).
 
+#### 5-2 3·4단원 어휘 보강 (2026-11-17)
+- 3단원 5개 → 13개, 4단원 5개 → 20개. 교과서 사진(3단원 62~79·82~83쪽, 4단원 88~97·102~103쪽 「배움이 탄탄」)에서 뽑았다.
+- 자료: `scripts/data/voca/science_5-2_3.json`(8개)·`science_5-2_4.json`(15개). 먼저 있던 5개씩은 노션 행 그대로 두었고 자료에는 넣지 않았다(등록기에 "노션에만 있음"으로 나옴).
+- 교과서 사진 위치: 3단원 = `H:\내 드라이브\공부\공부자료\민수\5학년\과학5-2` 30~42번째, 4단원 = 43~52번째(파일 이름순).
+
 #### 2단원 실험실 3개 인라인 분리 (2026-10-31)
 - `kids/subjects/science/`의 `science_season_airmass_lab.html`(420줄)·`science_cloud_lab.html`(241줄)·`science_wind_lab.html`(230줄)은 같은 이름의 CSS를 `../../css/`, JS를 `./js/`에서 `?v=20261031-science-split`으로 로드한다.
 - CSS는 각각 339·250·289줄, JS는 각각 418·344·304줄이다. 태그 내부 원문·나머지 DOM·전역 함수·기존 로드 순서를 보존하며, `design-system.css` → 개별 CSS, 개별 클래식 JS → `study-activity.js?v=20261023` 순서다.

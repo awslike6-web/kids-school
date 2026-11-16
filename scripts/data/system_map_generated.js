@@ -78,13 +78,14 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "monster_moreum_spec.md", "path": "kids-school-main/docs/monster_moreum_spec.md", "domain": ["quest"], "docs": ["monster_rotek_spec.md", "CORE_CATALOG.md"]},
       {"name": "monster_rotek_spec.md", "path": "kids-school-main/docs/monster_rotek_spec.md", "domain": ["quest"], "docs": ["CORE_CATALOG.md"]},
       {"name": "notice_web_intake_spec.md", "path": "kids-school-main/docs/notice_web_intake_spec.md", "domain": ["timetable"], "docs": ["notice_web_intake_spec.md", "timetable_diary_spec.md"]},
+      {"name": "other_subjects_spec.md", "path": "kids-school-main/docs/other_subjects_spec.md", "domain": [], "docs": ["CORE_CATALOG.md", "notion_schemas_school.md"]},
       {"name": "quest_reward_retry_spec.md", "path": "kids-school-main/docs/quest_reward_retry_spec.md", "domain": ["guardian", "quest"], "docs": ["reward_grant_shared_spec.md", "CORE_CATALOG.md"]},
       {"name": "quiz_choice_shuffle_spec.md", "path": "kids-school-main/docs/quiz_choice_shuffle_spec.md", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "reward_grant_shared_spec.md", "path": "kids-school-main/docs/reward_grant_shared_spec.md", "domain": ["guardian"], "docs": ["CORE_CATALOG.md"]},
       {"name": "runner_friendship_spec.md", "path": "kids-school-main/docs/runner_friendship_spec.md", "domain": ["gallery"], "docs": ["CORE_CATALOG.md"]},
       {"name": "science_spec.md", "path": "kids-school-main/docs/science_spec.md", "domain": ["science"], "docs": ["quiz_choice_shuffle_spec.md", "science_spec.md", "unit_production_pipeline.md"]},
       {"name": "society_5-2_unit3_spec.md", "path": "kids-school-main/docs/society_5-2_unit3_spec.md", "domain": ["society"], "docs": ["quiz_choice_shuffle_spec.md", "society_spec.md"]},
-      {"name": "video_unit_spec.md", "path": "kids-school-main/docs/video_unit_spec.md", "domain": [], "docs": ["science_spec.md", "CORE_CATALOG.md", "notion_schemas_school.md"]}
+      {"name": "video_unit_spec.md", "path": "kids-school-main/docs/video_unit_spec.md", "domain": [], "docs": ["other_subjects_spec.md", "science_spec.md", "CORE_CATALOG.md"]}
     ],
     "module": [
       {"name": "admin-usage.js", "path": "daycare-helper/public/js/admin-usage.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "implementation_plan_20261028_usage_page.md"]},
@@ -143,7 +144,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "subject_engine.js", "path": "kids-school-main/kids/core/subject_engine.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "timetable-boost.js", "path": "kids-school-main/kids/core/timetable-boost.js", "domain": ["timetable"], "docs": ["english_spec.md", "homeschool_spec.md", "korean_spec.md"]},
       {"name": "unit_chip_bar.js", "path": "kids-school-main/kids/core/unit_chip_bar.js", "domain": [], "docs": ["society_spec.md", "CORE_CATALOG.md"]},
-      {"name": "video-unit.js", "path": "kids-school-main/kids/core/video-unit.js", "domain": [], "docs": ["science_spec.md", "video_unit_spec.md", "CORE_CATALOG.md"]},
+      {"name": "video-unit.js", "path": "kids-school-main/kids/core/video-unit.js", "domain": [], "docs": ["other_subjects_spec.md", "science_spec.md", "video_unit_spec.md"]},
       {"name": "admin_image_changer-core.js", "path": "kids-school-main/kids/js/admin_image_changer-core.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "admin_image_changer-main.js", "path": "kids-school-main/kids/js/admin_image_changer-main.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "english_listen_place.js", "path": "kids-school-main/kids/js/english_listen_place.js", "domain": ["english"], "docs": ["english_listen_place_L10_spec.md", "english_listen_place_L11_spec.md", "english_listen_place_spec.md"]},

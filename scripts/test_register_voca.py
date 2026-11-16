@@ -97,6 +97,47 @@ class SyncTest(unittest.TestCase):
         self.assertTrue(body["properties"]["시험범위"]["checkbox"])
         self.assertEqual((stat["created"], stat["changed"], stat["updated"]), (1, 1, 0))
 
+    def test_year_long_book_grade_list(self):
+        """1년짜리 책: 학년을 목록으로 적으면 칸에는 모두 넣고, 조회는 첫 학년으로 한다."""
+        seed = {**SEED, "grade": ["5-1", "5-2"]}
+        props = rv.desired_props(seed, SEED["voca"][0])
+        self.assertEqual(rv.value_of(props["학년"]), ["5-1", "5-2"])
+        fake = FakeNotion([])
+        old_call, old_sleep = rv.call, rv.time.sleep
+        rv.call, rv.time.sleep = fake, (lambda s: None)
+        try:
+            rv.sync_voca(seed)
+        finally:
+            rv.call, rv.time.sleep = old_call, old_sleep
+        flt = fake.calls[0][2]["filter"]["and"]
+        self.assertEqual(flt[1]["multi_select"]["contains"], "5-1")
+
+    def test_new_option_query_400_means_no_rows(self):
+        """새 과목 첫 등록: 노션이 없는 선택지 필터에 400을 내면 기존 행 0개로 보고 새로 만든다."""
+        fake = FakeNotion([])
+        def call(path, payload=None, method="POST"):
+            if path.endswith("/query"):
+                raise RuntimeError('POST q → HTTP 400: multi_select option "보건" not found for property "과목".')
+            return fake(path, payload, method)
+        old_call, old_sleep = rv.call, rv.time.sleep
+        rv.call, rv.time.sleep = call, (lambda s: None)
+        try:
+            stat = rv.sync_voca(copy.deepcopy(SEED), apply=True)
+        finally:
+            rv.call, rv.time.sleep = old_call, old_sleep
+        self.assertEqual((stat["new"], stat["created"]), (len(SEED["voca"]), len(SEED["voca"])))
+
+    def test_other_query_errors_still_raise(self):
+        def call(path, payload=None, method="POST"):
+            raise RuntimeError("POST q → HTTP 500: boom")
+        old_call = rv.call
+        rv.call = call
+        try:
+            with self.assertRaises(RuntimeError):
+                rv.sync_voca(copy.deepcopy(SEED))
+        finally:
+            rv.call = old_call
+
     def test_update_patches_only_changed_fields(self):
         rows = [page("p1", "bank", 뜻풀이={"rich_text": [{"plain_text": "옛 뜻"}]}), page("p2", "Go straight.")]
         stat, fake = self.run_sync(rows, update=True)

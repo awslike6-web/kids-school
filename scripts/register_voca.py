@@ -15,7 +15,7 @@
 - 노션에만 있고 자료에 없는 행은 알려 주기만 하고 지우지 않는다.
 
 자료 형식:
-  {"_설명": "...", "subject": "영어", "grade": "5-2", "student": "민수" 또는 ["민수", "공통"], "unit": "L11",
+  {"_설명": "...", "subject": "영어", "grade": "5-2" 또는 ["5-1", "5-2"](1년짜리 책), "student": "민수" 또는 ["민수", "공통"], "unit": "L11",
    "test_scope": true,            (선택) 시험범위 칸
    "area": "용어방",               (선택) 영역 분류 기본값
    "voca": [{"word": "bank", "meaning": "은행", "detail": "...", "pos": "명사", "type": "단어", "area": "..."}]}
@@ -95,6 +95,12 @@ def students_of(seed: dict) -> list[str]:
     return [s] if isinstance(s, str) else list(s)
 
 
+def grades_of(seed: dict) -> list[str]:
+    """학년 칸 값 목록. 1년짜리 책(도덕·미술·보건 등)은 ["5-1", "5-2"]처럼 여러 개를 쓴다."""
+    g = seed["grade"]
+    return [g] if isinstance(g, str) else list(g)
+
+
 def validate_seed(seed: dict) -> None:
     for key in ("subject", "grade", "student", "unit", "voca"):
         if not seed.get(key):
@@ -115,7 +121,7 @@ def desired_props(seed: dict, item: dict) -> dict:
         "뜻풀이": rich(item["meaning"].strip()),
         "단원": rich(seed["unit"]),
         "과목": {"multi_select": [{"name": seed["subject"]}]},
-        "학년": {"multi_select": [{"name": seed["grade"]}]},
+        "학년": {"multi_select": [{"name": g} for g in grades_of(seed)]},
         "학생": {"multi_select": [{"name": s} for s in students_of(seed)]},
         "어휘유형": {"select": {"name": item.get("type") or "단어"}},
     }
@@ -183,12 +189,18 @@ def sync_voca(seed: dict, apply: bool = False, update: bool = False) -> dict:
     validate_seed(seed)
     apply = apply or update
     students = students_of(seed)
-    existing = query_all(VOCA_DB_ID, {"and": [
-        {"property": "과목", "multi_select": {"contains": seed["subject"]}},
-        {"property": "학년", "multi_select": {"contains": seed["grade"]}},
-        {"property": "학생", "multi_select": {"contains": students[0]}},
-        {"property": "단원", "rich_text": {"equals": seed["unit"]}},
-    ]})
+    try:
+        existing = query_all(VOCA_DB_ID, {"and": [
+            {"property": "과목", "multi_select": {"contains": seed["subject"]}},
+            {"property": "학년", "multi_select": {"contains": grades_of(seed)[0]}},
+            {"property": "학생", "multi_select": {"contains": students[0]}},
+            {"property": "단원", "rich_text": {"equals": seed["unit"]}},
+        ]})
+    except RuntimeError as e:
+        # 노션은 아직 없는 선택지(새 과목·학년)로 거르면 400을 낸다. 선택지가 없으면 그 행도 없다 (2026-11-17 보건 첫 등록)
+        if "HTTP 400" not in str(e) or "not found for property" not in str(e):
+            raise
+        existing = []
     by_word: dict[str, list[dict]] = {}
     for page in existing:
         by_word.setdefault(plain_title(page, "단어").strip(), []).append(page)
@@ -239,7 +251,7 @@ def main() -> int:
         seed = json.loads(Path(args.file).read_text(encoding="utf-8"))
         validate_seed(seed)
         mode = "새 행 만들기 + 기존 행 덮어쓰기" if args.update else "새 행만 만들기" if args.apply else "미리보기 — 쓰려면 --apply"
-        print(f"📚 {seed['subject']} {seed['grade']} {seed['unit']} ({', '.join(students_of(seed))}) "
+        print(f"📚 {seed['subject']} {'·'.join(grades_of(seed))} {seed['unit']} ({', '.join(students_of(seed))}) "
               f"어휘 {len(seed['voca'])}개 · {mode}")
         for w in check_schema(seed):
             print(f"   ⚠️ {w}")
