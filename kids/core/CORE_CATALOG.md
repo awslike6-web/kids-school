@@ -247,6 +247,17 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 입력·도움은 차례 자리의 소유 기기만, 칩·말 미리보기는 기기 로컬입니다. 재접속·넘겨받기·대기실·이탈은 공용 방 경로를 사용하며 효과는 새 판 변화에만 냅니다. 방에서는 `familyYutGame`을 변경하지 않고 명시적 한 기기 전환 때만 `lastSticks`를 빼고 로컬 저장합니다.
 - 시험: `tests/yut-engine.test.mjs`(순수 규칙 엔진), `tests/family-yut.test.mjs`(화면·조작·소리·이어하기 모의 브라우저), `tests/family-yut-room.test.mjs`(여러 기기 가락·결과·입력·복구·자리·다시 하기·저장 분리). 가족 방은 병합·운영 왕복 확인, 실기기 한 판 대기입니다. 운영 Worker의 Node 네 기기 한 판(말 2개·156수)과 쓰기 차단 화면 한 기기·Node 한 기기의 한 판·새로고침 복귀를 확인했습니다. 실기기 두 대, 실제 음성, 폰 잠금 복귀는 미확인입니다.
 
+## 2-0-3. 📮 가족 우체통 (가족 메시지 + 안드로이드 폰 알림, 2026-11-16)
+- 계약: `docs/family_mail_spec.md`. 서버는 관제탑 `workers/family-mail/`(Worker `family-mail`, 메시지는 노션 「가족 메시지 DB」에만 저장, 기기·구독은 D1). 4명 고정: `minsu`·`minseo`·`mom`·`dad`.
+- `kids/core/family-mail.js` (약 460줄, IIFE·전역 `FamilyMail`): 서버 통신(localhost·127.0.0.1에서만 `?mailServer=http://로컬주소`, sessionStorage에만 기억), 기기 등록 `register/unregister/getDevice`(토큰은 localStorage `familyMailDevice`, 밖으로 내주지 않음, 401이면 지우고 `familymail:device` null), 폰 알림 `pushStatus/enablePush`(버튼 click 안에서만)·앱을 열 때 구독을 서버와 맞춤(공개키가 바뀌면 다시 구독), 메시지 `send/list/markRead/refreshUnread`, `draft`(쓰다 만 글 `familyMailDraft`), `formatTime`(KST: 오늘 "오후 7:30", 올해 "11/14"), `countChars`(이모지 1글자), `speak`(`speakFairyTTS`가 있을 때만), `mailboxURL`, `onOpenMessage`, `watch`. 오류는 `FamilyMail.FamilyMailError {status, code, message(아이용 한국어)}`.
+  - 자동 감시: `<script src=".../family-mail.js?v=..." data-watch="popup|quiet">`. `popup`은 `lobby.html`·`index.html`(안 읽은 메시지 팝업 + 📮 배지), `quiet`는 우체통 화면(배지·목록 갱신만). 문제 풀이·퀘스트·게임 화면은 이 파일을 싣지 않는다(공부 흐름을 끊지 않음, 폰 알림은 그대로 옴).
+  - 확인 시점: 화면을 열 때·다시 보일 때·보이는 동안 90초마다·서비스 워커가 `postMessage`로 알릴 때. 팝업은 오래된 안 읽은 메시지 1개, 바깥을 눌러도 닫히지 않고 「확인했어요」·「답장」을 눌러야 읽음. 읽음 처리가 실패해도 이번 탭에서 다시 띄우지 않는다(sessionStorage `familyMailSeen`). 팝업 CSS는 이 파일 안(`#familyMailPopupStyle`, `.fmp-*`)이라 로비가 따로 싣지 않는다. 소리는 내지 않는다(폰 알림 소리로 충분, 캐릭터 대사가 맞지 않음).
+  - 📮 배지: `[data-family-mail-chip]`(누르면 우체통) 안의 `[data-family-mail-count]`에 숫자(100개 넘으면 "99+", 0이면 숨김). 로비는 민서 헤더 둘째 줄(하리보 옆)·민수 헤더 오른쪽 버튼 줄, 첫 화면은 「📮 가족 우체통」 버튼.
+- `sw.js` (저장소 맨 위, 약 55줄): 서비스 워커. `push` → 알림(같은 보낸 사람은 `tag`로 묶고 `renotify`로 다시 울림, 상태 표시줄 아이콘 `kids/assets/images/family-mail-badge.png` 흰색 96px) + 열린 창에 `postMessage`. `notificationclick` → 우체통이 열려 있으면 이동하지 않고 그 메시지만 열게 함(쓰던 글 보존), 없으면 새 창. **`fetch` 처리기·캐시 없음**(배포 뒤 옛 화면이 남는 사고 방지). 주소는 모두 `registration.scope` 기준 상대.
+- `kids/common_space/family_mail.html` + `family-mail-page.js`(약 520줄, 전역 `FamilyMailPage {start, recipientsFor, insertAtCursor, el}`) + `family-mail.css`(약 150줄): 처음 설정(누구 폰 4명·가족 코드·기기 이름 → 알림 받기·홈 화면 추가·배터리 안내), 받은/보낸 탭, 펼치면 읽음·🔊 읽어 주기·💌 답장, 보낸 것에 읽음 시각, 쓰기(나를 뺀 3명, 이모지 24개 커서 자리 삽입, 실패하면 글 보존·같은 clientId 재전송), 설정(알림 다시 연결, 등록 해제는 확인 창). 쿼리 `?open=<id>`·`?compose=<멤버>`·`?setup=1`. 테마 `body[data-theme=parent|minseo|minsu]`. 로드: `../config.js` → `../core/fairy-config.js` → `../core/fairy-tts.js` → `../core/family-mail.js`(quiet) → `./family-mail-page.js`. 화면 JS·CSS 초안은 안티그래비티 Hydrogen, 검토·수정은 Claude.
+- `manifest.json` 바로가기 「📮 가족 우체통」(`./kids/common_space/family_mail.html`).
+- 시험: `tests/family-mail.test.mjs`(13개: 서버 주소 재정의 제한, 상대 경로, 등록·토큰 비공개, 401, 팝업 글자 그대로·안 닫힘·확인·실패 시 되풀이 없음·답장, quiet, 배지, 보일 때만 확인, KST 시각, 금지 규칙·서비스 워커 fetch 없음, 화면 연결), `tests/family-mail-page.test.mjs`(7개: 설정·받은/보낸·쓰기 재전송·임시 글·등록 해제·도우미). 공용 모의 브라우저·모의 서버 `tests/family-mail-browser.mjs`(실제 네트워크 없음, `innerHTML`을 쓰면 오류).
+
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
@@ -1591,6 +1602,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **영어방 문제 번호 공유 (2026-11-16)**: `tests/english-stage4-advance.test.mjs`(4개). 위 「`english_common.js`」 절. 이 파일까지 전체 745개.
 - **독해 객관식 채점 (2026-11-16)**: `tests/reading-answer-index.test.mjs`(3개, 등록 자료 `scripts/data/reading/*.json` 객관식 정답이 보기 글자와 같고 그 보기로 채점되는지 포함). 위 「`reading_engine.js`」 절. 이 파일까지 전체 748개.
 - **AI 대화 기억 저장 (2026-11-16)**: `tests/chat-memory.test.mjs`(6개). 위 「`chat-memory.js`」. `voca-common-split`의 이벤트 기대값에서 옛 `beforeunload` 저장을 뺐다. 이 파일까지 전체 754개.
+- **가족 우체통 (2026-11-16)**: `tests/family-mail.test.mjs`(13개)·`tests/family-mail-page.test.mjs`(7개). 위 「📮 가족 우체통」 절.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

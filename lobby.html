@@ -112,6 +112,8 @@
           <span class="text-base select-none">🍬</span>
           <span id="minseoHariboText" class="text-label-md font-label-md text-on-tertiary-fixed font-bold tracking-tight">24 Haribo</span>
         </div>
+        <!-- 📮 가족 우체통 칩: 이 폰 주인의 안 읽은 메시지 수 (family-mail.js가 연결, 명세: docs/family_mail_spec.md §6-3) -->
+        <button id="btnMinseoFamilyMail" data-family-mail-chip aria-label="가족 우체통" class="relative flex-shrink-0 flex items-center gap-1 bg-primary-fixed/60 px-3 py-1 rounded-full shadow-inner border border-white/60 active:scale-95 transition-transform" type="button"><span class="text-base select-none">📮</span><span data-family-mail-count hidden class="min-w-[18px] h-[18px] px-1 rounded-full bg-error text-on-error text-[11px] font-bold leading-[18px] text-center"></span></button>
         <div id="minseoGuardianPill" onclick="handleGuardianClick('민서')" class="cursor-pointer flex items-center gap-2 bg-secondary-fixed/50 px-3 py-1 rounded-full shadow-inner border border-white/60 flex-1 max-w-[210px] justify-end">
           <span class="text-label-md font-label-md text-secondary font-bold flex items-center gap-0.5 whitespace-nowrap">
             <span class="material-symbols-outlined" style="font-size: 16px; font-variation-settings: 'FILL' 1;">bolt</span>
@@ -417,6 +419,7 @@
           </div>
         </div>
         <div class="flex items-center space-x-2">
+          <button id="btnMinsuFamilyMail" data-family-mail-chip aria-label="가족 우체통" class="relative w-8 h-8 rounded-full bg-surface-container/60 border border-primary-container/40 flex items-center justify-center active:scale-95 transition-all duration-150 backdrop-blur-sm text-base" type="button">📮<span data-family-mail-count hidden class="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-error text-on-error text-[10px] font-bold leading-4 text-center"></span></button>
           <button id="btnSwitchToMinseo" onclick="switchLobbyUser('minseo')" class="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-surface-container/60 border border-outline-variant/30 hover:border-pink-400 text-on-surface-variant hover:text-pink-300 transition-all duration-150 active:scale-95 text-label-sm font-label-sm backdrop-blur-sm" type="button">
             <span class="text-xs text-pink-400">🔄</span>
             <span class="text-pink-300">Minseo</span>
@@ -747,5 +750,6 @@
   <script src="./kids/js/lobby_subject_hud.js?v=20261112-admin-expiry"></script>
   <script src="./kids/js/lobby_controller.js?v=20261112-admin-expiry"></script>
   <script src="./kids/core/quick-uploader.js"></script>
+  <script src="./kids/core/family-mail.js?v=20261116-family-mail" data-watch="popup"></script>
 </body>
 </html>

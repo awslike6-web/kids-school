@@ -238,6 +238,11 @@
     </button>
   </div>
   <div style="margin-top: 24px; text-align: center; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+    <!-- 📮 가족 우체통 입구 (부모님 폰은 여기로 들어간다, 명세: docs/family_mail_spec.md §6) -->
+    <button type="button" class="qu-trigger-btn" id="indexFamilyMailBtn" data-family-mail-chip style="background: linear-gradient(135deg, #fde68a, #fbbf24); color: #78350f; border: 1.5px solid #f59e0b; position: relative;">
+      <span>📮</span> 가족 우체통
+      <span data-family-mail-count hidden style="position:absolute; top:-8px; right:-8px; min-width:22px; height:22px; padding:0 6px; border-radius:11px; background:#ef4444; color:#fff; font-size:12px; font-weight:800; line-height:22px;"></span>
+    </button>
     <button type="button" class="qu-trigger-btn" onclick="openQuickUploader()">
       <span>📸</span> 우리 가족 찰칵! 바로 올리기
     </button>
@@ -539,5 +544,6 @@ window.addEventListener('DOMContentLoaded', () => {
 <script src="./kids/core/fairy-settings-catalog.js"></script>
 <script src="./kids/core/fairy-settings-engine.js"></script>
 <script src="./kids/core/quick-uploader.js"></script>
+<script src="./kids/core/family-mail.js?v=20261116-family-mail" data-watch="popup"></script>
 </body>
 </html>
