@@ -126,7 +126,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "grouped_list.js", "path": "kids-school-main/kids/core/grouped_list.js", "domain": [], "docs": ["korean_spec.md", "CORE_CATALOG.md"]},
       {"name": "image_zoom_modal.js", "path": "kids-school-main/kids/core/image_zoom_modal.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "mission-reward-engine.js", "path": "kids-school-main/kids/core/mission-reward-engine.js", "domain": ["guardian"], "docs": ["reward_grant_shared_spec.md", "CORE_CATALOG.md"]},
-      {"name": "notion-api-client.js", "path": "kids-school-main/kids/core/notion-api-client.js", "domain": [], "docs": ["homeschool_spec.md", "korean_spec.md", "CORE_CATALOG.md"]},
+      {"name": "notion-api-client.js", "path": "kids-school-main/kids/core/notion-api-client.js", "domain": [], "docs": ["homeschool_spec.md", "korean_spec.md", "other_subjects_spec.md"]},
       {"name": "notion-cache-manager.js", "path": "kids-school-main/kids/core/notion-cache-manager.js", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
       {"name": "notion-helper.js", "path": "kids-school-main/kids/core/notion-helper.js", "domain": [], "docs": ["haru_spec.md", "homeschool_spec.md", "korean_spec.md"]},
       {"name": "notion-reward-discussion.js", "path": "kids-school-main/kids/core/notion-reward-discussion.js", "domain": ["guardian"], "docs": ["homeschool_spec.md", "quest_lesson_spec.md", "CORE_CATALOG.md"]},

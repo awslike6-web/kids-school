@@ -95,8 +95,12 @@ function getKstTodayYMD(date = new Date()) {
         return true;
     }
 
+    // 여러 쪽 조회는 정렬을 꼭 건다. 정렬 없이 넘기면 노션이 쪽 경계에서 행을 빠뜨린다
+    // (2026-11-17 확인: VOCA_DB 2,106행 중 1행 누락 → 만든 시각 정렬로 전부 수신).
+    const STABLE_SORTS = [{ timestamp: "created_time", direction: "ascending" }];
+
     function _buildVocaQueryBody(options) {
-        const body = { page_size: 100 };
+        const body = { page_size: 100, sorts: STABLE_SORTS };
         const filters = [];
 
         if (options.filterByStudent && options.studentName) {
@@ -234,7 +238,7 @@ function getKstTodayYMD(date = new Date()) {
         let cursor;
         try {
             do {
-                const body = { page_size: 100 };
+                const body = { page_size: 100, sorts: STABLE_SORTS };
                 if (filters.length > 0) body.filter = { and: filters };
                 if (cursor) body.start_cursor = cursor;
                 const res = await fetch(`${PROXY_URL}/v1/databases/${VOCA_DB_ID}/query`, {
@@ -653,7 +657,7 @@ function getKstTodayYMD(date = new Date()) {
 
         try {
             while (hasMore) {
-                const bodyData = { page_size: 100 };
+                const bodyData = { page_size: 100, sorts: STABLE_SORTS };
                 if (nextCursor) bodyData.start_cursor = nextCursor;
 
                 const response = await fetch(`${PROXY_URL}/v1/databases/${dbId}/query`, {

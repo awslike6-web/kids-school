@@ -67,10 +67,12 @@ def call(path: str, payload: dict | None = None, method: str = "POST") -> dict:
 
 
 def query_all(db_id: str, flt: dict) -> list[dict]:
-    """Worker는 같은 본문의 query를 5분간 엣지 캐시한다. 방금 만든 행을 놓치지 않도록 page_size를 매번 달리해 캐시를 비켜 간다."""
+    """Worker는 같은 본문의 query를 5분간 엣지 캐시한다. 방금 만든 행을 놓치지 않도록 page_size를 매번 달리해 캐시를 비켜 간다.
+    정렬을 꼭 건다: 정렬 없이 여러 쪽을 넘기면 노션이 쪽 경계에서 행을 빠뜨린다(2026-11-17, 2,106행 중 1행 누락)."""
     results, cursor = [], None
     while True:
-        body = {"filter": flt, "page_size": 100 - int(time.time()) % 40}
+        body = {"filter": flt, "page_size": 100 - int(time.time()) % 40,
+                "sorts": [{"timestamp": "created_time", "direction": "ascending"}]}
         if cursor:
             body["start_cursor"] = cursor
         data = call(f"/v1/databases/{db_id}/query", body)

@@ -48,7 +48,7 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
 - **파일 위치**: `kids/core/notion-helper.js` (~240줄)
 - **단일 책임 분리 서브모듈 (6대 골디락스 전문 모듈)**:
   - `kids/core/notion-cache-manager.js` (253줄): LocalStorage 1일 캐시, 프리패칭(`prefetchVocaData`, `prefetchReadingData`), 전사 통합 노션 동기화(`syncAllNotionData`), 토스트 알림 전담.
-  - `kids/core/notion-api-client.js` (471줄): Cloudflare Worker 프록시 통신, VOCA/독해/도서관/시간표 쿼리, 노션 블록 파서, 지수 백오프 재시도 및 Rate Limit 방어.
+  - `kids/core/notion-api-client.js` (471줄): Cloudflare Worker 프록시 통신, VOCA/독해/도서관/시간표 쿼리, 노션 블록 파서, 지수 백오프 재시도 및 Rate Limit 방어. 여러 쪽 DB 조회 본문에는 `STABLE_SORTS`(만든 시각 오름차순)를 꼭 넣는다: 정렬 없으면 쪽 경계에서 행이 빠진다(2026-11-17, 시험 `tests/notion-stable-sort.test.mjs`).
   - `kids/core/study-log-store.js` (338줄): `STUDY_LOG_DB` 학습일지 **일일 Upsert 쓰기 단일 원천**(`{학생}_{KST YYYY-MM-DD}_{과목}` 키, 있으면 PATCH 누적·없으면 POST) + **연속 학습 스트릭**(노션 '입장' KST 날짜 기준, 연속이 끊긴 지점까지만 페이지 조회, 전송 성공 시 로컬 캐시에 오늘 즉시 반영, 기록 없으면 배지 숨김). `notion-study-logger.js`·`notion-reward.js` 두 경로가 모두 이 모듈만 호출하며, 두 파일 모두 미로드 시 스스로 이 모듈을 불러온다. 검증: `node scripts/verify_study_log_store.js`.
   - 학습일지는 당일 페이지 ID(`MINMIN_STUDY_LOG_PAGES_V1`)를 기억하고 조회·GET의 `?force=true`로 현재 값을 다시 읽습니다. 같은 키는 Web Locks(같은 브라우저 두 탭) 또는 Map 체인(한 탭)으로 직렬화하며 오답은 정확히 같은 구분 항목만 중복 제거합니다.
   - 조회는 400ms 뒤 한 번 재시도하고, 기억한 ID도 없고 재시도도 실패하면 선택 A에 따라 중복 가능 경고 1회와 함께 신규 생성합니다. 두 기기 동시 쓰기는 노션 고유 키 제약이 없어 보장하지 않습니다.
@@ -183,7 +183,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   - `kids/common_space/gallery-modal-manager.js` (644줄): 상세 모달 뷰, 다중 사진 썸네일 스위처(창 안 `🎬 3D 회전영상` 칸은 `.mp4/.webm/.mov/.m4v` 파일 주소일 때만; 구글 포토 등 공유 주소는 새 창 버튼만), 메타 웹 편집, 작가의 한마디 직접 수정, 스티커 및 칭찬 댓글(XSS 방어).
   - `kids/common_space/gallery-3d-layout.js` (393줄, `window.Gallery3DLayout`, DOM 없음): 3D 전시관 계산. `buildLayout(items)`(10점씩 전시실, 좌우 벽 번갈아, 간격 3.2m)·`fitFrame`·`viewpointFor`·`clampPosition`·`planTextures`(가까운 순 예산·여유 4)·`stepIndex`·`roomLabel`.
   - `kids/common_space/gallery-3d-scene.js` (240줄, `window.Gallery3DScene`): CFG·THEMES(`neon`·`pastel`), 벽·바닥·간판·액자·이름표 CanvasTexture, `buildHall(state)`·`buildFrames(state)`·`applyFrameDimensions`.
-  - `kids/common_space/gallery-3d-hall.js` (717줄, `window.Gallery3DHall`): `open({items, theme, heading, isBlocked, onSelect, onBackWhileBlocked, onClose})`·`close()`·`isOpen()`·`debugInfo()`. Three.js r169를 열 때만 jsdelivr에서 불러옴, 그림자 없음, DPR 1.75 상한, 움직일 때만 그림, 폰 14장/PC 24장 사진 예산, 안드로이드 뒤로가기 처리, 닫으면 dispose·`forceContextLoss`. 컨트롤러 `open3DHall()`·`getFilteredGalleryItems()`가 부름. 명세 `docs/gallery_3d_hall_spec.md`.
+  - `kids/common_space/gallery-3d-hall.js` (745줄, `window.Gallery3DHall`): `open({items, theme, heading, isBlocked, onSelect, onBackWhileBlocked, onClose})`·`close()`·`isOpen()`·`debugInfo()`. Three.js r169를 열 때만 jsdelivr에서 불러옴, 그림자 없음, DPR 1.75 상한, 움직일 때만 그림, 폰 14장/PC 24장 사진 예산, 액자 클릭 시 앞에 선 뒤 `🔍 크게 보기` 버튼(`.g3d-view`)으로 `onSelect` 호출, 안드로이드 뒤로가기 처리, 닫으면 dispose·`forceContextLoss`. 컨트롤러 `open3DHall()`·`getFilteredGalleryItems()`가 부름. 명세 `docs/gallery_3d_hall_spec.md`.
 - **핵심 API**:
   | 함수 | 모듈 | 설명 |
   | :--- | :--- | :--- |
@@ -1589,7 +1589,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ## 과목 공용 어휘 등록기 `scripts/register_voca.py` (2026-11-08)
 
 - **목적**: 단원 자료 JSON 1개를 노션 VOCA_DB에 맞춘다. 단원마다 `insert_*_voca.py`를 새로 만들던 방식을 대체한다(관제탑 `scripts/archive/2026-11/`로 보관).
-- **자료**: `scripts/data/voca/{과목}_{학년}_{단원}.json` = `{subject, grade(문자열|배열: 1년짜리 책은 ["5-1","5-2"]), student(문자열|배열), unit, test_scope?, area?, voca:[{word, meaning, detail?, pos?, type?, area?}]}`. 지금 영어 5-2 L8~L11, 국어·사회, 과학 5-2 3·4단원 보강, 보건 5(1·2·4·5단원, 기타 과목 규칙은 `docs/other_subjects_spec.md`).
+- **자료**: `scripts/data/voca/{과목}_{학년}_{단원}.json` = `{subject, grade(문자열|배열: 1년짜리 책은 ["5-1","5-2"]), student(문자열|배열), unit, test_scope?, area?, voca:[{word, meaning, detail?, pos?, type?, area?}]}`. 지금 영어 5-2 L8~L11, 국어·사회, 과학 5-2 3·4단원 보강, 보건 5(1·2·4·5단원)·도덕 5(5~8단원)·미술 5(8~13단원·톡톡), 기타 과목 규칙은 `docs/other_subjects_spec.md`. `query_all`은 만든 시각 정렬로 쪽을 넘긴다.
 - **실행**: `python -X utf8 scripts/register_voca.py --file <자료> [--apply | --update]`. 기본 미리보기, `--apply` 새 행만, `--update` 기존 행의 바뀐 칸도 덮어씀.
 - **계약**: 같은 행 = 과목·학년(첫 번째)·학생(첫 번째)·단원 + 단어. 새 과목 첫 등록 때 노션이 없는 선택지 필터에 400을 내면 기존 행 0개로 본다. 숙련도·달성은 쓰지 않는다(`NEVER_WRITE`). 노션에 없는 칸 이름이면 멈추고, 선택지에 없는 값은 경고한다(`check_schema`). 노션에만 있는 행은 알려 주기만 하고 지우지 않는다.
 - **핵심 API**: `sync_voca(seed, apply, update) → 건수`, `desired_props(seed, item)`, `diff_props(page, props)`, `check_schema(seed)`, 통신 `call`·`query_all`·`rich`·`plain_title`(민서 국어 도구도 사용).
@@ -1615,6 +1615,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **AI 대화 기억 저장 (2026-11-16)**: `tests/chat-memory.test.mjs`(6개). 위 「`chat-memory.js`」. `voca-common-split`의 이벤트 기대값에서 옛 `beforeunload` 저장을 뺐다. 이 파일까지 전체 754개.
 - **가족 우체통 (2026-11-16)**: `tests/family-mail.test.mjs`(13개)·`tests/family-mail-page.test.mjs`(7개). 위 「📮 가족 우체통」 절.
 - **단원 영상 부품 (2026-11-16)**: `tests/video-unit.test.mjs`(15개). 위 「🎬 `video-unit.js`」 절.
+- **노션 여러 쪽 조회 정렬 (2026-11-17)**: `tests/notion-stable-sort.test.mjs`(2개). `notion-api-client.js`의 `page_size` 조회 본문마다 `sorts: STABLE_SORTS`가 있는지 본다.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.
