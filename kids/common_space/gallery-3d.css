@@ -98,7 +98,8 @@ body.g3d-open {
 
 .g3d-close,
 .g3d-prev,
-.g3d-next {
+.g3d-next,
+.g3d-view {
   min-height: 48px;
   padding: 10px 16px;
   border: none;
@@ -117,9 +118,26 @@ body.g3d-open {
   opacity: 0.4;
   cursor: not-allowed;
 }
-.g3d-close:focus-visible, .g3d-prev:focus-visible, .g3d-next:focus-visible {
+.g3d-close:focus-visible, .g3d-prev:focus-visible, .g3d-next:focus-visible, .g3d-view:focus-visible {
   outline: 3px solid var(--g3d-text);
   outline-offset: 2px;
+}
+
+.g3d-view {
+  position: absolute;
+  left: 50%;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 3;
+  border-radius: 999px;
+  padding: 10px 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+.g3d-view[hidden] {
+  display: none;
+}
+.g3d-view:active {
+  transform: translateX(-50%) scale(0.97);
 }
 
 .g3d-counter {
@@ -200,6 +218,11 @@ body.g3d-open {
     padding: 8px 11px;
     font-size: 0.9rem;
   }
+  .g3d-view {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 18px;
+    font-size: 0.95rem;
+  }
   .g3d-counter {
     font-size: 0.95rem;
     min-width: 52px;
@@ -207,7 +230,7 @@ body.g3d-open {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .g3d-close, .g3d-prev, .g3d-next, .g3d-hint {
+  .g3d-close, .g3d-prev, .g3d-next, .g3d-view, .g3d-hint {
     transition: none;
   }
 }

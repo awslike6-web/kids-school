@@ -8,7 +8,7 @@
 ---
 
 ## 1. 목표 (A)
-갤러리 목록 화면에서 `🏛️ 3D 전시관` 버튼을 누르면 화면 전체를 덮는 3D 전시관이 열린다. 지금 필터(성장 작품/특별한 날, 작가, 분류)에 맞는 작품이 벽에 액자로 걸려 있고, 아이는 화면을 끌어 둘러보고, 바닥을 눌러 걸어가고, 액자를 누르면 액자 앞으로 다가간 뒤 기존 상세 창(`openDetailModal(id)`)이 열린다. `◀ 이전 작품 / 다음 작품 ▶` 버튼만 눌러도 전부 관람할 수 있다.
+갤러리 목록 화면에서 `🏛️ 3D 전시관` 버튼을 누르면 화면 전체를 덮는 3D 전시관이 열린다. 지금 필터(성장 작품/특별한 날, 작가, 분류)에 맞는 작품이 벽에 액자로 걸려 있고, 아이는 화면을 끌어 둘러보고, 바닥을 눌러 걸어가고, 액자를 누르면 액자 앞에 다가가 서고 그 앞에서 뜨는 `🔍 크게 보기` 버튼을 누르면 기존 상세 창(`openDetailModal(id)`)이 열린다. `◀ 이전 작품 / 다음 작품 ▶` 버튼만 눌러도 전부 관람할 수 있다.
 
 보기 전용이다. 노션·보석·사탕·경험치·등록 도구·`kids-archive`와 연결하지 않는다.
 
@@ -77,7 +77,7 @@ IIFE. 공개: `window.Gallery3DHall = Object.freeze({ open, close, isOpen, debug
 - `theme`: `'neon'` | `'pastel'`.
 - `heading`: 위쪽 바에 쓸 제목 문자열.
 - `isBlocked()`: 다른 창(상세 창)이 떠 있으면 true. true인 동안 키보드·포인터 입력을 무시하고 그리기를 멈춘다.
-- `onSelect(id)`: 액자를 눌러 다가간 뒤 부른다.
+- `onSelect(id)`: 액자 앞에 서 있을 때 뜨는 `🔍 크게 보기` 버튼을 누르면 부른다.
 - `onBackWhileBlocked()`: 상세 창이 떠 있을 때 안드로이드 뒤로가기를 누르면 부른다(컨트롤러가 상세 창을 닫음). 전시관은 닫지 않는다.
 - `onClose()`: 전시관이 닫힌 뒤 부른다.
 - 이미 열려 있으면 아무것도 하지 않고 `false`. 열 때마다 세션 번호를 올리고, `open()` 안의 비동기 구간(`import()`, `document.fonts?.ready`) 뒤마다 세션이 그대로인지 확인한다. 그 사이 `close()`되었으면 만든 자원을 정리하고 `false`. 성공하면 `true`. WebGL이 없거나 Three.js를 못 불러오면 덮개에 안내 문구와 `목록으로` 버튼만 보이고 `false`.
@@ -94,7 +94,8 @@ div#gallery3dOverlay.g3d.g3d--{theme}  (position fixed, inset 0, z-index 900)
     span.g3d-heading                    (heading)
     span.g3d-room                       (지금 서 있는 전시실 간판 글자)
     button.g3d-close  "✕ 목록으로"
-  div.g3d-hint  "화면을 끌어 둘러보고, 바닥을 눌러 걸어가요. 액자를 누르면 크게 봐요"  (처음 6초 또는 첫 조작 뒤 사라짐, class g3d-hint--hide)
+  div.g3d-hint  "화면을 끌어 둘러보고, 바닥이나 액자를 눌러 다가가요. 작품 앞에서 크게 보기 버튼을 눌러 보세요"  (처음 6초 또는 첫 조작 뒤 사라짐, class g3d-hint--hide)
+  button.g3d-view  "🔍 크게 보기"       (활성 작품 시점 1.6m·시야각 이내일 때만 표시, 누르면 onSelect(id))
   div.g3d-bottombar
     button.g3d-prev  "◀ 이전 작품"
     span.g3d-counter "3 / 41"  (아직 안 고르면 "– / 41")
@@ -140,7 +141,8 @@ div#gallery3dOverlay.g3d.g3d--{theme}  (position fixed, inset 0, z-index 900)
 - 지금 눌린 `pointerId`를 Set으로 관리한다. 2개 이상이 되면 진행 중인 끌기·누르기를 취소한다. 캔버스에 `setPointerCapture`.
 - 끌기 판정: `pointerdown` 시작점에서 **누적 거리** `Math.hypot(x − startX, y − startY) > 6`px가 한 번이라도 되면 끌기(손을 뗄 때 누르기로 보지 않음).
 - 끌기 회전(화면을 잡고 끄는 느낌): 직전 이벤트와의 차이 dx, dy로 `yaw += dx × 0.005`, `pitch = clamp(pitch + dy × 0.003, −0.35, 0.35)`.
-- 누르기(끌기 아님): Raycaster로 그림 평면 → 그 액자 `viewpointFor`로 활공, 도착하면 `onSelect(id)`. 바닥 → 그 점(clampPosition)으로 활공, yaw는 그대로. 다른 것(벽 등) → 무시.
+- 누르기(끌기 아님): Raycaster로 그림 평면 → 그 액자 `viewpointFor`로 활공해 앞에 선다(도착해도 `onSelect(id)`는 자동 호출하지 않음). 바닥 → 그 점(clampPosition)으로 활공, yaw는 그대로. 다른 것(벽 등) → 무시.
+- `🔍 크게 보기` 버튼(`.g3d-view`): 현재 선택된 작품 시점(`viewpointFor`)과의 거리가 1.6m 이하이고 시야 각도 차가 0.85rad 이하일 때만 노출되며, 눌렀을 때만 `onSelect(id)`를 부른다.
 - 활공: 거리에 비례해 0.5~1.6초, ease-in-out, yaw는 가장 짧은 방향으로 보간. 활공 중 새 조작이 오면 새 목표로 바꾼다.
 - 방향 벡터(평면 x,z): 앞 = `(−sin yaw, −cos yaw)`, 오른쪽 = `(cos yaw, −sin yaw)`. `←`는 yaw 증가, `→`는 yaw 감소.
 - PC 키보드: `W/↑` 앞, `S/↓` 뒤, `A` 왼쪽·`D` 오른쪽 옆걸음, `←/→` 돌기. 속도 3m/s, 돌기 1.8rad/s. `isBlocked()`이거나 `event.target`이 `input/textarea/select/[contenteditable]`이면 무시. 키를 누르고 있는 동안만 움직이고 `blur`되면 전부 뗀 것으로 본다. 휠: 앞뒤 0.6m씩.

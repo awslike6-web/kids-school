@@ -9,8 +9,8 @@
   const THEMES = SCENE.THEMES;
 
   const MSG = Object.freeze({
-    close: "✕ 목록으로", prev: "◀ 이전 작품", next: "다음 작품 ▶",
-    hint: "화면을 끌어 둘러보고, 바닥을 눌러 걸어가요. 액자를 누르면 크게 봐요",
+    close: "✕ 목록으로", prev: "◀ 이전 작품", next: "다음 작품 ▶", view: "🔍 크게 보기",
+    hint: "화면을 끌어 둘러보고, 바닥이나 액자를 눌러 다가가요. 작품 앞에서 크게 보기 버튼을 눌러 보세요",
     loading: "불러오는 중", loadErr: "사진을 못 불러왔어요",
     initErr: "3D 화면을 열 수 없어요. 목록으로 돌아가 주세요.",
     lost: "3D 화면이 멈췄어요. 목록으로 돌아가 다시 열어 주세요", roomPrefix: "전시실 "
@@ -99,10 +99,13 @@
     prevBtn.type = "button";
     nextBtn.type = "button";
     bottombar.append(prevBtn, counterEl, nextBtn);
+    const viewBtn = el("button", "g3d-view", MSG.view);
+    viewBtn.type = "button";
+    viewBtn.hidden = true;
     const statusEl = el("div", "g3d-status");
     statusEl.hidden = true;
-    root.append(stage, topbar, hintEl, bottombar, statusEl);
-    return { root, stage, headingEl, roomEl, closeBtn, hintEl, prevBtn, counterEl, nextBtn, statusEl };
+    root.append(stage, topbar, hintEl, viewBtn, bottombar, statusEl);
+    return { root, stage, headingEl, roomEl, closeBtn, hintEl, viewBtn, prevBtn, counterEl, nextBtn, statusEl };
   }
 
   function showStatus(text) {
@@ -117,11 +120,28 @@
     if (state.hintTimer) { clearTimeout(state.hintTimer); state.hintTimer = 0; }
   }
 
+  function canViewActiveFrame() {
+    if (!state.open || state.currentIndex < 0) return false;
+    const fObj = state.frames[state.currentIndex];
+    if (!fObj || !state.opts || typeof state.opts.onSelect !== "function") return false;
+    const vp = window.Gallery3DLayout.viewpointFor(fObj.data);
+    const dist = Math.hypot(state.cam.x - vp.x, state.cam.z - vp.z);
+    const yawDiff = Math.abs(wrapAngle(vp.yaw - state.cam.yaw));
+    return dist <= 1.6 && yawDiff <= 0.85;
+  }
+
+  function updateViewBtn() {
+    if (!state.els || !state.els.viewBtn) return;
+    const show = canViewActiveFrame();
+    if (state.els.viewBtn.hidden === show) state.els.viewBtn.hidden = !show;
+  }
+
   function updateCounter() {
     if (!state.els) return;
     const total = state.frames.length;
     const cur = state.currentIndex >= 0 ? String(state.currentIndex + 1) : "–";
     state.els.counterEl.textContent = cur + " / " + total;
+    updateViewBtn();
   }
 
   function updateRoomLabel() {
@@ -314,15 +334,27 @@
     requestRender();
   }
 
+  function focusFrame(idx) {
+    const fObj = state.frames[idx];
+    if (!fObj) return;
+    state.currentIndex = idx;
+    updateCounter();
+    const vp = window.Gallery3DLayout.viewpointFor(fObj.data);
+    const dist = Math.hypot(state.cam.x - vp.x, state.cam.z - vp.z);
+    const yawDiff = Math.abs(wrapAngle(vp.yaw - state.cam.yaw));
+    if (dist < CFG.AT_VP_DIST && yawDiff < CFG.AT_VP_YAW && Math.abs(state.cam.pitch) < CFG.AT_VP_YAW) {
+      updateViewBtn();
+      return;
+    }
+    startGlide(vp.x, vp.z, vp.yaw, null);
+  }
+
   function stepIndexGlide(dir) {
     if (!state.open || checkBlocked() || state.frames.length === 0) return;
     dismissHint();
     const nextIdx = window.Gallery3DLayout.stepIndex(state.currentIndex, dir, state.frames.length);
     if (nextIdx < 0) return;
-    state.currentIndex = nextIdx;
-    updateCounter();
-    const vp = window.Gallery3DLayout.viewpointFor(state.frames[nextIdx].data);
-    startGlide(vp.x, vp.z, vp.yaw, null);
+    focusFrame(nextIdx);
   }
 
   function handleTap(clientX, clientY) {
@@ -339,21 +371,7 @@
     if (hits.length === 0) return;
     const hit = hits[0];
     if (hit.object.userData && hit.object.userData.frameIndex != null) {
-      const idx = hit.object.userData.frameIndex;
-      const fObj = state.frames[idx];
-      if (!fObj) return;
-      state.currentIndex = idx;
-      updateCounter();
-      const vp = window.Gallery3DLayout.viewpointFor(fObj.data);
-      const dist = Math.hypot(state.cam.x - vp.x, state.cam.z - vp.z);
-      const yawDiff = Math.abs(wrapAngle(vp.yaw - state.cam.yaw));
-      if (dist < CFG.AT_VP_DIST && yawDiff < CFG.AT_VP_YAW) {
-        if (typeof state.opts.onSelect === "function") state.opts.onSelect(fObj.data.id);
-        return;
-      }
-      startGlide(vp.x, vp.z, vp.yaw, () => {
-        if (state.open && typeof state.opts.onSelect === "function") state.opts.onSelect(fObj.data.id);
-      });
+      focusFrame(hit.object.userData.frameIndex);
     } else if (hit.object === state.floorMesh) {
       const c = window.Gallery3DLayout.clampPosition(hit.point.x, hit.point.z, state.layout.bounds);
       startGlide(c.x, c.z, state.cam.yaw, null);
@@ -414,6 +432,7 @@
     const keying = applyKeys(Math.min(rawDt, CFG.KEY_DT_CAP));
     if (gliding || keying) {
       updateRoomLabel();
+      updateViewBtn();
       updateTextures(false);
     }
 
@@ -491,6 +510,7 @@
         const dy = e.clientY - d.lastY;
         state.cam.yaw = wrapAngle(state.cam.yaw + dx * CFG.YAW_SENS);
         state.cam.pitch = clamp(state.cam.pitch + dy * CFG.PITCH_SENS, -CFG.MAX_PITCH, CFG.MAX_PITCH);
+        updateViewBtn();
         requestRender();
       }
       d.lastX = e.clientX;
@@ -523,6 +543,7 @@
       state.cam.x = cl.x;
       state.cam.z = cl.z;
       updateRoomLabel();
+      updateViewBtn();
       updateTextures(false);
       requestRender();
     }, { passive: false });
@@ -560,6 +581,13 @@
 
     addEvt(state.els.prevBtn, "click", () => stepIndexGlide(-1));
     addEvt(state.els.nextBtn, "click", () => stepIndexGlide(1));
+    addEvt(state.els.viewBtn, "click", () => {
+      if (!state.open || checkBlocked() || state.currentIndex < 0) return;
+      const fObj = state.frames[state.currentIndex];
+      if (fObj && state.opts && typeof state.opts.onSelect === "function") {
+        state.opts.onSelect(fObj.data.id);
+      }
+    });
   }
 
   function onPopState() {

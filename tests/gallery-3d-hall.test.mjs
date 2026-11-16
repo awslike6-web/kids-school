@@ -443,3 +443,11 @@ test('gallery.html: /kids-school/ 같은 루트 절대 경로가 없다', () => 
   assert.equal(htmlSource.includes('"/kids-school/'), false);
   assert.equal(htmlSource.includes("'/kids-school/"), false);
 });
+
+test('엔진 동작 계약: 액자 클릭은 앞에 서기까지만 하고 크게 보기 버튼으로 상세 창을 연다', () => {
+  const tapMatch = hallCodeOnly.match(/function handleTap[\s\S]*?\n  \}/);
+  assert.ok(tapMatch, 'handleTap 함수가 존재해야 한다');
+  assert.equal(tapMatch[0].includes('onSelect'), false, 'handleTap 안에서는 onSelect를 직접 부르지 않는다');
+  assert.ok(hallCodeOnly.includes('g3d-view'), '크게 보기 버튼(.g3d-view)이 엔진에 포함되어야 한다');
+  assert.ok(hallCodeOnly.includes('state.els.viewBtn'), 'viewBtn 클릭 이벤트가 연결되어야 한다');
+});
