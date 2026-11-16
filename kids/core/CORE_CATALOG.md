@@ -1007,6 +1007,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `ReadingEngine.toggleHint()` | - | 💡 결정적 단서(단락 힌트) 접이식 토글 개폐 |
   | `ReadingEngine.openBottomSheet()` / `closeBottomSheet()` | - | 📜 지문 전문 바텀시트 슬라이드업/다운 제어 |
   | `ReadingEngine.chooseAnswer(selectedIdx)` | `selectedIdx` | 객관식 채점, 에러리스 코칭 및 실시간 보상 지급 |
+  | `ReadingEngine.resolveAnswerIndex(q)` | 문항 | 객관식 정답의 원래 보기 번호(0부터). `answerIndex`·숫자 `answer` → 보기 글자와 같은 `answer` → 숫자만 적힌 `answer`("2", 1부터) 순서. 「3시 30분」처럼 숫자로 시작하는 정답 글자를 보기 번호로 읽지 않는다(2026-11-16 영어 9·10단원 오채점 수정) |
   | `ReadingEngine.submitShortAnswer()` | - | 단답형 주관식 채점 및 초성 힌트 대조 |
   | `ReadingEngine.toggleTts()` | - | 지문 음성 낭독 재생/정지 |
 
@@ -1583,6 +1584,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **수학 5-2 4·5·6단원 탐험관 (2026-11-14)**: `tests/math-explorer-units.test.mjs`(16개). 위 「수학 단원 탐험관 공용 틀」·「5-2 4·5·6단원 탐험관」 절. 이 파일까지 60개 파일·731개(이 PC 약 10초).
 
 - **영어방 문제 번호 공유 (2026-11-16)**: `tests/english-stage4-advance.test.mjs`(4개). 위 「`english_common.js`」 절. 이 파일까지 전체 745개.
+- **독해 객관식 채점 (2026-11-16)**: `tests/reading-answer-index.test.mjs`(3개, 등록 자료 `scripts/data/reading/*.json` 객관식 정답이 보기 글자와 같고 그 보기로 채점되는지 포함). 위 「`reading_engine.js`」 절. 이 파일까지 전체 748개.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

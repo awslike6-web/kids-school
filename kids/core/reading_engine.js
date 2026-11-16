@@ -465,23 +465,24 @@
     /**
      * 🎯 객관식 정답 채점 (Errorless Learning)
      */
+    // 객관식 정답의 원래 보기 번호(0부터). 화면 순서는 QuizChoices가 섞고 채점은 이 번호로 한다.
+    // 보기 글자와 같은 정답을 먼저 찾는다. 「3시 30분」처럼 숫자로 시작하는 정답을 3번 보기로 읽으면 안 된다
+    // (2026-11-16 영어 9·10단원 오채점). 숫자만 적힌 정답("2")일 때만 보기 번호(1부터)로 본다.
+    function resolveAnswerIndex(q) {
+        const choices = q.choices || q.options || [];
+        if (typeof q.answerIndex === 'number') return q.answerIndex;
+        if (typeof q.answer === 'number') return q.answer;
+        if (typeof q.answer !== 'string') return 0;
+        const answerText = q.answer.trim();
+        const foundIdx = choices.findIndex(c => String(c).trim() === answerText);
+        if (foundIdx !== -1) return foundIdx;
+        const num = /^\d+$/.test(answerText) ? Number(answerText) : NaN;
+        return (num >= 1 && num <= choices.length) ? num - 1 : 0;
+    }
+
     function chooseAnswer(selectedIdx) {
         const q = activePassage.questions[activeQuestionIdx];
-        const choices = q.choices || q.options || [];
-        let correctIdx = 0;
-        if (typeof q.answerIndex === 'number') {
-            correctIdx = q.answerIndex;
-        } else if (typeof q.answer === 'number') {
-            correctIdx = q.answer;
-        } else if (typeof q.answer === 'string') {
-            const parsedNum = parseInt(q.answer, 10);
-            if (!isNaN(parsedNum) && parsedNum >= 1 && parsedNum <= choices.length) {
-                correctIdx = parsedNum - 1;
-            } else {
-                const foundIdx = choices.findIndex(c => c.trim() === q.answer.trim());
-                correctIdx = foundIdx !== -1 ? foundIdx : 0;
-            }
-        }
+        const correctIdx = resolveAnswerIndex(q);
 
         const btn = document.getElementById(`choiceBtn_${selectedIdx}`);
 
@@ -672,6 +673,7 @@
         openBottomSheet,
         closeBottomSheet,
         chooseAnswer,
+        resolveAnswerIndex,
         submitShortAnswer,
         toggleTts,
         stopAudio,
