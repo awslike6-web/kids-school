@@ -307,11 +307,123 @@
         }
     }
 
+    // ========================================================
+    // 📂 단원 목차 (2026-11-16): 교과 단원 / 센터 회차 → 학기 묶음, 한 줄에 하나씩
+    // - 「단원」의 ' | ' 결합(여러 센터 지문에 나온 낱말 1개, korean_spec §5-1)은 QuestMastery.parseUnitList로 나눠
+    //   낱말이 자기 회차마다 들어가게 한다(결합 문자열이 버튼 1개로 생기지 않게).
+    // - 센터 판별은 등록 도구가 쓰는 고정 머리(`[센터 ` / `[🏥 센터`)만 본다. 나머지는 교과 단원.
+    // - 교과 단원 순서는 독해 DB(LIBRARY_DB)에서 「회차/단원」 값이 글자까지 같은 지문의 「순번」을 쓴다.
+    //   독해 지문이 없는 단원(0. 중학 생존 지시어 등)은 앞에 글자순으로 둔다.
+    // ========================================================
+    function unitListOf(record) {
+        const qm = window.QuestMastery;
+        if (qm && typeof qm.parseUnitList === 'function') return qm.parseUnitList(record && record.level);
+        const one = String((record && record.level) ?? '').trim();
+        return one ? [one] : [];
+    }
+
+    function recordHasUnit(record, unit) {
+        return unitListOf(record).includes(unit);
+    }
+
+    function isCenterUnit(unit) {
+        return unit.startsWith('[센터 ') || unit.startsWith('[🏥 센터');
+    }
+
+    function unitLabel(unit) {
+        const qm = window.QuestMastery;
+        return (qm && typeof qm.stageLabel === 'function') ? qm.stageLabel(unit) : unit;
+    }
+
+    async function loadTextbookUnitOrder() {
+        const order = new Map();
+        if (typeof window.fetchReadingPassagesFromNotion !== 'function') return order;
+        try {
+            const passages = await window.fetchReadingPassagesFromNotion({ subject: '국어', includeAllStudents: true });
+            (passages || []).forEach(p => {
+                const key = String(p.unit || '').trim();
+                if (!key || typeof p.order !== 'number') return;
+                order.set(key, Math.min(order.get(key) ?? Infinity, p.order));
+            });
+        } catch (e) { /* 순서표 없이 글자순으로 */ }
+        return order;
+    }
+
+    // records → [{ id, title, icon, children:[{ id, title, items:[{ id:<단원 원문>, title, meta }] }] }]
+    function buildUnitGroups(records, opts = {}) {
+        const units = new Map();
+        (records || []).forEach(r => {
+            const list = unitListOf(r).filter(u => u !== 'undefined');
+            list.forEach(key => {
+                if (!units.has(key)) units.set(key, { key, count: 0, single: {}, fallback: (r.grades && r.grades[0]) || r.grade || '' });
+                const info = units.get(key);
+                info.count += 1;
+                const g = (r.grades && r.grades.length === 1) ? r.grades[0] : (r.grades ? '' : r.grade);
+                if (list.length === 1 && g) info.single[g] = (info.single[g] || 0) + 1;
+            });
+        });
+
+        const textbookOrder = opts.textbookOrder || new Map();
+        const tops = { textbook: new Map(), center: new Map() };
+        units.forEach(info => {
+            const top = Object.entries(info.single).sort((a, b) => b[1] - a[1])[0];
+            const semester = (top && top[0]) || info.fallback || '공통';
+            const kind = isCenterUnit(info.key) ? 'center' : 'textbook';
+            if (!tops[kind].has(semester)) tops[kind].set(semester, []);
+            tops[kind].get(semester).push(info);
+        });
+
+        const byText = (a, b) => a.key.localeCompare(b.key, undefined, { numeric: true });
+        // 센터는 학기 묶음 안이라 머리([센터 5-2] 등)를 뗀 보이는 이름의 회차 번호 순 (36회차처럼 머리가 다른 행도 제자리)
+        const byCenter = (a, b) => unitLabel(a.key).localeCompare(unitLabel(b.key), undefined, { numeric: true }) || byText(a, b);
+        const byTextbook = (a, b) => {
+            const oa = textbookOrder.get(a.key), ob = textbookOrder.get(b.key);
+            if (oa === undefined && ob === undefined) return byText(a, b);
+            if (oa === undefined) return -1;
+            if (ob === undefined) return 1;
+            return oa - ob;
+        };
+        const semesterSort = (a, b) => opts.newestFirst === false
+            ? a.localeCompare(b, undefined, { numeric: true })
+            : b.localeCompare(a, undefined, { numeric: true });
+
+        const makeTop = (kind, title, icon) => {
+            const semesters = [...tops[kind].keys()].sort(semesterSort);
+            return {
+                id: `voca-${kind}`, title, icon, open: true,
+                children: semesters.map((sem, i) => ({
+                    id: `voca-${kind}-${sem}`,
+                    title: `${sem} ${kind === 'center' ? '센터 회차' : '교과 단원'}`,
+                    open: kind === 'textbook' && i === 0,
+                    items: tops[kind].get(sem).sort(kind === 'center' ? byCenter : byTextbook)
+                        .map(info => ({ id: info.key, title: unitLabel(info.key), meta: `${info.count}개` }))
+                }))
+            };
+        };
+        return [makeTop('textbook', '교과 단원', '🏫'), makeTop('center', '센터 회차', '🏥')];
+    }
+
+    async function renderUnitDirectory(container, records, opts = {}) {
+        if (!container || !window.GroupedList) return;
+        const textbookOrder = await loadTextbookUnitOrder();
+        const groups = buildUnitGroups(records, { textbookOrder, newestFirst: opts.newestFirst });
+        container.innerHTML = `${opts.headerHtml || ''}<div id="koreanUnitDirectory"></div>${opts.footerHtml || ''}`;
+        window.GroupedList.render(container.querySelector('#koreanUnitDirectory'), groups, {
+            memoryKey: opts.memoryKey || 'korean_voca',
+            emptyText: '아직 등록된 단원이 없어요.',
+            onPick: item => { if (typeof opts.onPick === 'function') opts.onPick(item.id); }
+        });
+    }
+
     // 🌐 전역 네임스페이스 및 하위 호환 브리지
     window.KoreanVoca = {
         renderUI: renderVocaUI,
         setMode: setKoreanVocaMode,
-        getOrderToggleHtml: getOrderToggleHtml
+        getOrderToggleHtml: getOrderToggleHtml,
+        buildUnitGroups,
+        renderUnitDirectory,
+        recordHasUnit,
+        isCenterUnit
     };
 
     window.renderVocaUI = renderVocaUI;

@@ -213,64 +213,28 @@ function closeMissionView(force) {
 // ========================================================
 // 📊 데이터 페칭 및 동적 UI 라우팅
 // ========================================================
+// 로비 단원 칩에서 고른 학기·단원 → 독해·토론 목록 맨 위 「⭐ 고른 단원」 (거르지 않고 펼치기만, english_spec 참고)
+function getEnglishPickedUnit() {
+    const bar = window.EnglishUnitBar;
+    const pick = bar && typeof bar.getPick === 'function' ? bar.getPick() : null;
+    if (!pick || !pick.unit) return null;
+    return { grade: pick.grade || '', unit: typeof bar.unitLabel === 'function' ? bar.unitLabel(pick.unit) : pick.unit };
+}
+
 async function fetchAndBuildDynamicUI(type, innerBody) {
     try {
         if (type === 'stage5') {
             // 📖 [5단계 독해] 코어 ReadingEngine으로 단일화
             if (window.ReadingEngine && typeof window.ReadingEngine.renderLobby === 'function') {
-                await window.ReadingEngine.renderLobby(innerBody, { subject: "영어" });
+                await window.ReadingEngine.renderLobby(innerBody, { subject: "영어", highlight: getEnglishPickedUnit() });
                 return;
             }
         }
-        
+
         if (type === 'stage6') {
-            let notionPassages = [];
-            if (typeof fetchReadingPassagesFromNotion === 'function') {
-                try { notionPassages = await fetchReadingPassagesFromNotion({ subject: "영어", includeAllStudents: true }); }
-                catch (err) { console.warn('[english] 독해 DB 조회 실패, 로컬 지문으로 대체:', err); }
-            }
-
-            const localDb = (typeof ENGLISH_READING_DATABASE !== 'undefined' && Array.isArray(ENGLISH_READING_DATABASE))
-                ? ENGLISH_READING_DATABASE
-                : [];
-
-            let mergedPassages = [];
-            const seen = new Set();
-
-            // 1. 2학기 최신 스토리북/단원 지문(8단원, 7단원 등) 우선 배치
-            for (const b of localDb) {
-                if (!seen.has(b.id)) {
-                    mergedPassages.push(b);
-                    seen.add(b.id);
-                }
-            }
-
-            // 2. 노션 독해 마스터 DB 지문 병합
-            for (const np of (notionPassages || [])) {
-                const docId = np.id || np.book_id;
-                if (docId && !seen.has(docId)) {
-                    mergedPassages.push({
-                        id: docId,
-                        title: np.title,
-                        fullText: np.fullText,
-                        summary: np.summary,
-                        translation: np.translation || np.summary || "",
-                        paragraphs: np.paragraphs || [{ id: 'p1', label: 'A', text: np.fullText }]
-                    });
-                    seen.add(docId);
-                }
-            }
-
-            readingFetchedBooks = mergedPassages;
-            window.readingFetchedBooks = readingFetchedBooks;
-
-            if (readingFetchedBooks.length === 0) {
-                innerBody.innerHTML = `<div style="text-align:center; padding:40px;">등록된 토론 지문이 없습니다.</div>`;
-                return;
-            }
-
+            // 지문은 english_chat.js가 정밀 독해와 같은 노션 독해 DB에서 읽는다 (로컬 파일은 노션 장애 때 예비).
             if (window.EnglishChat && typeof window.EnglishChat.renderSentenceUI === 'function') {
-                window.EnglishChat.renderSentenceUI(innerBody, readingFetchedBooks);
+                await window.EnglishChat.renderSentenceUI(innerBody, { highlight: getEnglishPickedUnit() });
             }
             return;
         }

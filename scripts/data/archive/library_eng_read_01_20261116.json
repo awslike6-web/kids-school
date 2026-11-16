@@ -1,0 +1,169 @@
+{
+  "설명": "독해 DB(LIBRARY_DB)에서 휴지통으로 보낸 지문 원본. register_reading_passage.py --archive eng_read_01",
+  "page": {
+    "object": "page",
+    "id": "388a2711-5b68-8028-91a4-d5560414f8ae",
+    "created_time": "2026-06-23T19:45:00.000Z",
+    "last_edited_time": "2026-10-09T02:31:00.000Z",
+    "created_by": {
+      "object": "user",
+      "id": "371d872b-594c-81a2-99aa-00026cacfee7"
+    },
+    "last_edited_by": {
+      "object": "user",
+      "id": "371d872b-594c-81a2-99aa-00026cacfee7"
+    },
+    "cover": null,
+    "icon": null,
+    "parent": {
+      "type": "database_id",
+      "database_id": "37ca2711-5b68-8023-a7d2-cc5b3ff51fee"
+    },
+    "in_trash": false,
+    "is_archived": false,
+    "is_locked": false,
+    "properties": {
+      "이미지 URL": {
+        "id": "%3AEr%5D",
+        "type": "url",
+        "url": null
+      },
+      "순번": {
+        "id": "%3EfPV",
+        "type": "number",
+        "number": null
+      },
+      "지문전문": {
+        "id": "%40RxE",
+        "type": "rich_text",
+        "rich_text": []
+      },
+      "출처구분": {
+        "id": "A%3DG_",
+        "type": "select",
+        "select": null
+      },
+      "원작 출처": {
+        "id": "BjSP",
+        "type": "rich_text",
+        "rich_text": []
+      },
+      "문제데이터": {
+        "id": "FMp%3B",
+        "type": "rich_text",
+        "rich_text": []
+      },
+      "학년": {
+        "id": "Qbt~",
+        "type": "multi_select",
+        "multi_select": [
+          {
+            "id": "2ccedc70-7438-4ab5-b0a5-3f896905c7b0",
+            "name": "5-1",
+            "color": "green"
+          }
+        ]
+      },
+      "도서 키(ID)": {
+        "id": "R%40%60h",
+        "type": "rich_text",
+        "rich_text": [
+          {
+            "type": "text",
+            "text": {
+              "content": "eng_read_01",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            },
+            "plain_text": "eng_read_01",
+            "href": null
+          }
+        ]
+      },
+      "과목": {
+        "id": "ViH%5D",
+        "type": "select",
+        "select": {
+          "id": "vqwg",
+          "name": "영어",
+          "color": "green"
+        }
+      },
+      "추천 여부": {
+        "id": "Y%5Ehi",
+        "type": "checkbox",
+        "checkbox": false
+      },
+      "난이도": {
+        "id": "ZZ%7Du",
+        "type": "select",
+        "select": null
+      },
+      "날짜": {
+        "id": "%5EwaT",
+        "type": "date",
+        "date": null
+      },
+      "학생": {
+        "id": "rkPr",
+        "type": "multi_select",
+        "multi_select": [
+          {
+            "id": "SrnS",
+            "name": "민수",
+            "color": "gray"
+          }
+        ]
+      },
+      "회차/단원": {
+        "id": "s%3FmD",
+        "type": "rich_text",
+        "rich_text": []
+      },
+      "지문구성내용": {
+        "id": "wNUz",
+        "type": "rich_text",
+        "rich_text": []
+      },
+      "트랙": {
+        "id": "%7CmI%5C",
+        "type": "select",
+        "select": null
+      },
+      "책 제목": {
+        "id": "title",
+        "type": "title",
+        "title": [
+          {
+            "type": "text",
+            "text": {
+              "content": "The Lion and the Mouse",
+              "link": null
+            },
+            "annotations": {
+              "bold": false,
+              "italic": false,
+              "strikethrough": false,
+              "underline": false,
+              "code": false,
+              "color": "default"
+            },
+            "plain_text": "The Lion and the Mouse",
+            "href": null
+          }
+        ]
+      }
+    },
+    "url": "https://app.notion.com/p/The-Lion-and-the-Mouse-388a27115b68802891a4d5560414f8ae",
+    "public_url": null,
+    "archived": false
+  },
+  "blocks": []
+}

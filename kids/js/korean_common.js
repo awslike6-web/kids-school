@@ -303,16 +303,7 @@ window.replayDictationAudio = function() {
 };
 
 function getKoreanFilteredRecords() {
-    let matchedRecords = allFetchedRecords;
-    if (selectedKoreanGrade) {
-        matchedRecords = matchedRecords.filter(r =>
-            r.grade === selectedKoreanGrade || (r.grades && r.grades.includes(selectedKoreanGrade))
-        );
-    }
-    if (selectedKoreanUnit) {
-        matchedRecords = matchedRecords.filter(r => String(r.level).trim() === selectedKoreanUnit);
-    }
-    return matchedRecords;
+    return allFetchedRecords.filter(r => koreanRecordInGrade(r) && (!selectedKoreanUnit || koreanRecordHasUnit(r, selectedKoreanUnit)));
 }
 
 function getKoreanOrderToggleHtml(orderType) {
@@ -369,30 +360,9 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
         }
 
         if (type === 'sentence') {
-            let libraryRecords = [];
-            if (typeof fetchLibraryBooksFromNotion === 'function') {
-                try {
-                    libraryRecords = await fetchLibraryBooksFromNotion();
-                } catch (err) {
-                    console.warn('[korean] 도서관 노션 조회 실패, 로컬 지문으로 대체합니다:', err);
-                }
-            }
-
-            const fallbackDb = typeof KOREAN_READING_DATABASE !== 'undefined' ? KOREAN_READING_DATABASE : [];
-            readingFetchedBooks = typeof resolveReadingPassageList === 'function'
-                ? resolveReadingPassageList(libraryRecords, fallbackDb)
-                : fallbackDb.slice(0, 10);
-            window.readingFetchedBooks = readingFetchedBooks;
-
-            if (readingFetchedBooks.length === 0) {
-                innerBody.innerHTML = `<div style="text-align:center; padding:40px;">등록된 지문이 없습니다.</div>`;
-                return;
-            }
-
+            // 지문은 korean_sentence.js가 정밀 독해와 같은 노션 독해 DB에서 읽는다.
             if (window.KoreanSentence && typeof window.KoreanSentence.renderUI === 'function') {
-                window.KoreanSentence.renderUI(innerBody);
-            } else if (typeof renderSentenceUI === 'function') {
-                renderSentenceUI(innerBody);
+                await window.KoreanSentence.renderUI(innerBody);
             }
             return;
         }
@@ -414,6 +384,10 @@ async function fetchAndBuildDynamicUI(type, innerBody) {
             if (records && records.length > 0) {
                 allFetchedRecords = records;
                 window.allFetchedRecords = records;
+                if (type === 'voca' && window.KoreanVoca && window.KoreanVoca.renderUnitDirectory) {
+                    renderKoreanVocaDirectory(innerBody);
+                    return;
+                }
                 const uniqueGrades = [...new Set(records.flatMap(r => r.grades || [r.grade]))].filter(g => g && g !== "공통").sort();
                 if (uniqueGrades.length === 0) {
                     startMissionWithFilteredData(records, innerBody);
@@ -501,24 +475,37 @@ function renderDynamicUnitUI(units, container) {
         return;
     }
 
-    let html = `<div style="text-align:center; margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:8px;">
-            <h3 style="color:var(--sky); margin:0; font-family:'Jua', sans-serif;">📚 [${selectedKoreanGrade}] 도전할 단원을 선택하세요!</h3>
-            <button onclick="window.refreshKoreanVoca()" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:12px; padding:6px 12px; font-size:0.82rem; cursor:pointer; color:#475569; display:inline-flex; align-items:center; gap:4px;" title="노션 최신 단어 즉시 동기화">
-                🔄 최신 단어 동기화
-            </button>
-        </div>
-        ${koreanUpperPreviewBtnHtml()}
-        <div class="grade-grid">`;
-    units.forEach(u => {
-        html += `<button class="quiz-choice-btn" style="padding:15px 5px; font-size:1.1rem;" onclick="selectDynamicUnit('${u}')">${u}</button>`;
+    // 용어방은 renderKoreanVocaDirectory(교과·센터 → 학기 묶음 목차)를 쓴다. 여기는 그 밖의 경우용 한 줄 목록.
+    if (window.GroupedList) {
+        container.innerHTML = `<h3 style="color:var(--sky); margin:0 0 12px; font-family:'Jua', sans-serif; text-align:center;">📚 [${selectedKoreanGrade}] 도전할 단원을 선택하세요!</h3><div id="koreanUnitList"></div>`;
+        window.GroupedList.render(container.querySelector('#koreanUnitList'),
+            [{ id: 'units', title: selectedKoreanGrade, open: true, items: units.map(u => ({ id: u, title: u })) }],
+            { onPick: item => selectDynamicUnit(item.id) });
+    }
+}
+
+// 📂 국어 용어방 단원 목차: 학년 고르기 없이 [🏫 교과 단원] [🏥 센터 회차] → 학기 묶음 (korean_voca.js)
+function renderKoreanVocaDirectory(innerBody) {
+    selectedKoreanGrade = '';
+    selectedKoreanUnit = '';
+    const headerHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <h3 style="color:var(--sky); margin:0; font-family:'Jua', sans-serif;">📚 도전할 단원을 고르세요!</h3>
+            <button onclick="window.refreshKoreanVoca()" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:12px; padding:6px 12px; font-size:0.82rem; cursor:pointer; color:#475569;" title="노션 최신 단어 즉시 동기화">🔄 최신 단어 동기화</button>
+        </div>${koreanUpperPreviewBtnHtml()}`;
+    window.KoreanVoca.renderUnitDirectory(innerBody, allFetchedRecords, {
+        headerHtml,
+        newestFirst: getKoreanStudentName() !== '민서',
+        memoryKey: `korean_voca_${getKoreanStudentName()}`,
+        onPick: unit => selectDynamicUnit(unit)
     });
-    html += `</div>
-        <div style="margin-top:20px;">
-            <button class="quiz-button" style="background:#8b949e; width:100%;" onclick="openMissionView(currentMissionType)">⬅️ 처음으로 돌아가기</button>
-        </div>
-    </div>`;
-    container.innerHTML = html;
+}
+
+// 단원 원문 1개가 이 행에 들어 있는지 (' | ' 결합 행은 회차마다 들어간다)
+function koreanRecordHasUnit(r, unit) {
+    return window.KoreanVoca && window.KoreanVoca.recordHasUnit ? window.KoreanVoca.recordHasUnit(r, unit) : String(r.level).trim() === unit;
+}
+function koreanRecordInGrade(r) {
+    return !selectedKoreanGrade || r.grade === selectedKoreanGrade || (r.grades && r.grades.includes(selectedKoreanGrade));
 }
 
 window.refreshKoreanVoca = async function() {
@@ -537,10 +524,7 @@ window.refreshKoreanVoca = async function() {
 window.selectDynamicUnit = function(unit) {
     selectedKoreanUnit = unit;
     const innerBody = document.getElementById('overlayInnerBody');
-    const finalRecords = allFetchedRecords.filter(r => 
-        (r.grade === selectedKoreanGrade || (r.grades && r.grades.includes(selectedKoreanGrade))) &&
-        String(r.level).trim() === unit
-    );
+    const finalRecords = allFetchedRecords.filter(r => koreanRecordInGrade(r) && koreanRecordHasUnit(r, unit));
     startMissionWithFilteredData(finalRecords, innerBody);
 };
 

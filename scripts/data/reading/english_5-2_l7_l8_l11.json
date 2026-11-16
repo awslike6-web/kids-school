@@ -1,0 +1,202 @@
+{
+  "_설명": "영어 5-2 정밀 독해 지문 3편(7·8·11단원). 본문은 2026-09 스토리북 작업 때 그 단원 단어·문장과 스토리북을 참고해 만들어 kids/data/english-reading-data.js에만 두었던 지문 그대로, 문항·요약 초안 agy Hydrogen, 검토 Claude. 관제탑 scripts/register_reading_passage.py --file 로 반영한다(--dry-run 미리보기). 9·10단원은 english_5-2_l9_l10.json.",
+  "subject": "영어",
+  "track": "🏫 교과서 독해",
+  "grade": "5-2",
+  "student": "민수",
+  "difficulty": "보통",
+  "passages": [
+    {
+      "title": "Minsu and Junwoo's Weekend (7단원)",
+      "book_id": "eng_read_10",
+      "unit": "7단원",
+      "order": 10,
+      "source_type": "자체 창작",
+      "source_note": "5-2 영어 7단원 핵심 표현(지난 일 말하기: What did you do last weekend? / I went ~)을 쓰는 새 이야기. 2026-09 스토리북 작업 때 만든 로컬 지문을 노션으로 옮김",
+      "summary": "민수와 준우가 월요일 아침 학교에서 만나 지난 주말에 겪은 즐거운 일을 서로 이야기했어요.",
+      "full_text": "On Monday morning, Junwoo met Minsu at school. Junwoo asked, \"Hi, Minsu! What did you do last weekend?\" Minsu smiled brightly and answered, \"I went camping with my family! We set up a tent and made a warm campfire. In the evening, we ate delicious roasted chicken. And then, we looked up at the twinkling stars together. It was a wonderful night!\"\nJunwoo said, \"That sounds so fun! What else did you do?\" Minsu replied, \"I played baseball with my dad and took many pictures. What about you, Junwoo? Did you have a good time?\"\nJunwoo smiled and said, \"Yes! I visited my grandparents with my little brother. We played with toy cars and ate sweet fruits. My grandma baked cookies for us. We had a great weekend, too!\"\nBoth boys shared happy memories of their weekend. Talking with a good friend made Monday morning even brighter.",
+      "questions": [
+        {
+          "type": "choice",
+          "question": "민수가 가족과 캠핑을 가서 저녁에 먹은 음식은 무엇인가요?",
+          "options": [
+            "맛있는 구운 닭고기 (roasted chicken)",
+            "할머니가 구워 주신 쿠키 (cookies)",
+            "달콤한 과일 (sweet fruits)",
+            "따뜻한 수프 (warm soup)"
+          ],
+          "answer": "맛있는 구운 닭고기 (roasted chicken)",
+          "clue": "In the evening, we ate delicious roasted chicken.",
+          "explanation": "민수는 가족과 캠핑을 가서 저녁에 맛있는 구운 닭고기를 먹었다고 말했어요. 쿠키와 달콤한 과일은 준우가 먹은 음식이에요."
+        },
+        {
+          "type": "choice",
+          "question": "준우가 지난 주말에 남동생과 함께 한 일로 알맞은 것은 무엇인가요?",
+          "options": [
+            "장난감 자동차를 가지고 놀기 (played with toy cars)",
+            "아빠와 야구 경기하기 (played baseball)",
+            "반짝이는 별 올려다보기 (looked up at the stars)",
+            "캠핑장에서 텐트 치기 (set up a tent)"
+          ],
+          "answer": "장난감 자동차를 가지고 놀기 (played with toy cars)",
+          "clue": "I visited my grandparents with my little brother. We played with toy cars and ate sweet fruits.",
+          "explanation": "준우는 남동생과 함께 조부모님 댁에 가서 장난감 자동차를 가지고 놀고 달콤한 과일을 먹었어요."
+        },
+        {
+          "type": "choice",
+          "question": "글에서 'I went camping with my family!'의 'went camping'은 어떤 뜻인가요?",
+          "options": [
+            "캠핑을 갔다 (지나간 일)",
+            "캠핑을 갈 것이다 (앞으로 할 일)",
+            "캠핑을 가고 싶다 (바라는 일)",
+            "캠핑을 가는 중이다 (지금 하는 일)"
+          ],
+          "answer": "캠핑을 갔다 (지나간 일)",
+          "clue": "Minsu smiled brightly and answered, \"I went camping with my family!\"",
+          "explanation": "'went'는 'go(가다)'의 과거형으로 이미 지난 주말에 한 일을 말할 때 써요. 그래서 'went camping'은 캠핑을 갔다는 뜻이에요."
+        },
+        {
+          "type": "choice",
+          "question": "월요일 아침에 친구와 주말 이야기를 나눈 민수와 준우의 마음은 어떠했나요?",
+          "options": [
+            "행복한 추억을 나누며 마음이 더 밝아졌다",
+            "주말이 끝나서 너무 속상하고 슬펐다",
+            "학교에 와서 피곤하고 지루해졌다",
+            "다음 주말까지 아무것도 하기 싫어졌다"
+          ],
+          "answer": "행복한 추억을 나누며 마음이 더 밝아졌다",
+          "clue": "Both boys shared happy memories of their weekend. Talking with a good friend made Monday morning even brighter.",
+          "explanation": "두 소년은 주말의 행복한 추억을 나누었고, 좋은 친구와 이야기하면서 월요일 아침이 더 밝고 즐거워졌어요."
+        }
+      ]
+    },
+    {
+      "title": "The Great Festival Mission (8단원)",
+      "book_id": "eng_read_12",
+      "unit": "8단원",
+      "order": 11,
+      "source_type": "자체 창작",
+      "source_note": "5-2 영어 8단원 핵심 표현(외모·옷차림 묘사: He has ~ / She is wearing ~)을 쓰는 새 이야기. 2026-09 스토리북 작업 때 만든 로컬 지문을 노션으로 옮김",
+      "summary": "학교 운동회에서 아이들이 미션 카드의 외모와 옷차림 설명을 보고 친구를 찾아 함께 모였어요.",
+      "full_text": "Today is Sports Day at school. The teacher said, \"Find your friend and come together!\"\nSora looked at her mission card. \"He has short curly hair and green eyes. He's wearing a brown T-shirt and blue pants. He's wearing yellow shoes, too. Where is he?\"\nCharlie looked at his card. \"She has long straight hair and brown eyes. She's wearing a red jacket and an orange scarf. She's wearing glasses and a green hat!\"\nAt the festival, Emily found her brother next to the sweet cotton candy. And look! It's a magic show! All the friends gathered together happily.",
+      "questions": [
+        {
+          "type": "choice",
+          "question": "소라의 미션 카드에 적힌 친구의 머리 모양과 바지 색깔은 무엇인가요?",
+          "options": [
+            "짧은 곱슬머리와 파란색 바지 (short curly hair, blue pants)",
+            "긴 생머리와 갈색 바지 (long straight hair, brown pants)",
+            "짧은 생머리와 노란색 바지 (short straight hair, yellow pants)",
+            "긴 곱슬머리와 초록색 바지 (long curly hair, green pants)"
+          ],
+          "answer": "짧은 곱슬머리와 파란색 바지 (short curly hair, blue pants)",
+          "clue": "He has short curly hair and green eyes. He's wearing a brown T-shirt and blue pants.",
+          "explanation": "소라의 카드에는 친구가 짧은 곱슬머리에 초록색 눈을 가졌고, 갈색 티셔츠와 파란색 바지를 입고 있다고 적혀 있어요."
+        },
+        {
+          "type": "choice",
+          "question": "에밀리가 축제에서 남동생을 찾은 곳은 어디인가요?",
+          "options": [
+            "달콤한 솜사탕 옆 (next to the sweet cotton candy)",
+            "교실 책상 앞 (in front of the desk)",
+            "운동장 모퉁이 (at the corner)",
+            "학교 도서관 안 (inside the library)"
+          ],
+          "answer": "달콤한 솜사탕 옆 (next to the sweet cotton candy)",
+          "clue": "At the festival, Emily found her brother next to the sweet cotton candy.",
+          "explanation": "에밀리는 축제에서 달콤한 솜사탕 옆에 있는 남동생을 찾았어요."
+        },
+        {
+          "type": "choice",
+          "question": "찰리의 카드에 나온 'She's wearing glasses and a green hat!'은 무슨 뜻인가요?",
+          "options": [
+            "그녀는 안경을 쓰고 초록색 모자를 쓰고 있어요",
+            "그녀는 안경을 벗고 초록색 모자를 들고 있어요",
+            "그녀는 갈색 눈을 가졌고 빨간색 모자를 샀어요",
+            "그녀는 주황색 목도리를 매고 구두를 신고 있어요"
+          ],
+          "answer": "그녀는 안경을 쓰고 초록색 모자를 쓰고 있어요",
+          "clue": "She's wearing glasses and a green hat!",
+          "explanation": "'is wearing'은 지금 입고 있거나 쓰고 있는 옷, 안경, 모자 등을 말할 때 써요. 그래서 안경과 초록색 모자를 쓰고 있다는 뜻이에요."
+        },
+        {
+          "type": "choice",
+          "question": "마지막에 모든 친구들이 함께 모였을 때의 기분은 어떠했나요?",
+          "options": [
+            "서로 만나서 모두 행복하고 즐거웠어요",
+            "미션을 못 끝내서 아쉽고 속상했어요",
+            "마술 쇼가 재미없어서 지루했어요",
+            "날씨가 너무 더워서 집으로 가고 싶었어요"
+          ],
+          "answer": "서로 만나서 모두 행복하고 즐거웠어요",
+          "clue": "All the friends gathered together happily.",
+          "explanation": "미션을 통해 친구와 가족을 찾은 아이들은 마술 쇼도 보며 모두 행복하게 함께 모였어요."
+        }
+      ]
+    },
+    {
+      "title": "Minsu Explores the Village (11단원)",
+      "book_id": "eng_read_11",
+      "unit": "11단원",
+      "order": 14,
+      "source_type": "자체 창작",
+      "source_note": "5-2 영어 11단원 핵심 표현(길 묻고 답하기: Where is ~? / Go straight and turn right)을 쓰는 새 이야기. 2026-09 스토리북 작업 때 만든 로컬 지문을 노션으로 옮김",
+      "summary": "민수가 준우에게 도서관 가는 길을 물어본 뒤 혼자서 도서관을 찾아내어 보람을 느꼈어요.",
+      "full_text": "Minsu arrived at a new village. He wanted to read magic books, but he did not know the way. Minsu met Junwoo and asked, \"Excuse me. Where is the library?\"\nJunwoo smiled kindly and pointed down the street. Junwoo said, \"Go straight and turn right at the corner. It is next to the sweet bakery!\"\nMinsu walked straight and turned right. And then, he saw a big wooden library on his left. He was so happy to find it!\nInside the library, Minsu opened a shiny book and found a blue diamond in the treasure box. He was proud of exploring the village by himself.",
+      "questions": [
+        {
+          "type": "choice",
+          "question": "민수가 새로운 마을에서 도서관을 찾으려고 한 이유는 무엇인가요?",
+          "options": [
+            "마법 책을 읽고 싶어서 (read magic books)",
+            "달콤한 빵을 사고 싶어서 (buy sweet bread)",
+            "준우에게 선물을 주려고 (give a gift)",
+            "새로운 친구를 사귀려고 (make new friends)"
+          ],
+          "answer": "마법 책을 읽고 싶어서 (read magic books)",
+          "clue": "He wanted to read magic books, but he did not know the way.",
+          "explanation": "민수는 마법 책을 읽고 싶었지만 길을 몰라서 준우에게 도서관이 어디인지 물어보았어요."
+        },
+        {
+          "type": "choice",
+          "question": "민수가 도서관 안의 반짝이는 책을 열었을 때 보물 상자에서 찾은 것은 무엇인가요?",
+          "options": [
+            "파란색 다이아몬드 (a blue diamond)",
+            "작은 나무 열쇠 (a small wooden key)",
+            "낡은 마을 지도 (an old village map)",
+            "달콤한 솜사탕 (sweet cotton candy)"
+          ],
+          "answer": "파란색 다이아몬드 (a blue diamond)",
+          "clue": "Inside the library, Minsu opened a shiny book and found a blue diamond in the treasure box.",
+          "explanation": "민수는 도서관 안에서 반짝이는 책을 열었고, 보물 상자 안에서 파란색 다이아몬드를 찾았어요."
+        },
+        {
+          "type": "choice",
+          "question": "준우가 알려 준 'Go straight and turn right at the corner.'는 어떤 뜻인가요?",
+          "options": [
+            "똑바로 가다가 모퉁이에서 오른쪽으로 도세요",
+            "뒤로 돌아서 모퉁이에서 왼쪽으로 도세요",
+            "모퉁이에서 잠깐 멈추고 길을 건너세요",
+            "빵집 안으로 들어가서 오른쪽으로 가세요"
+          ],
+          "answer": "똑바로 가다가 모퉁이에서 오른쪽으로 도세요",
+          "clue": "Junwoo said, \"Go straight and turn right at the corner. It is next to the sweet bakery!\"",
+          "explanation": "'Go straight'는 똑바로 가라는 뜻이고, 'turn right'는 오른쪽으로 돌라는 뜻이에요. 두 표현 모두 길을 안내할 때 자주 써요."
+        },
+        {
+          "type": "choice",
+          "question": "혼자 힘으로 마을을 탐험하고 도서관을 찾은 민수의 마음은 어떠했나요?",
+          "options": [
+            "스스로 마을을 탐험해서 무척 자랑스러웠다",
+            "길을 잃을까 봐 계속 무섭고 걱정되었다",
+            "도서관이 너무 멀어서 화가 나고 지쳤다",
+            "집으로 돌아가고 싶어서 슬프고 외로웠다"
+          ],
+          "answer": "스스로 마을을 탐험해서 무척 자랑스러웠다",
+          "clue": "He was proud of exploring the village by himself.",
+          "explanation": "민수는 도서관을 찾아 기뻤고, 혼자 힘으로 마을을 탐험한 것이 무척 자랑스러웠어요."
+        }
+      ]
+    }
+  ]
+}

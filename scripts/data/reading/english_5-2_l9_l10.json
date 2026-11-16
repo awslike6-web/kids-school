@@ -1,0 +1,138 @@
+{
+  "_설명": "영어 5-2 정밀 독해 지문 2편(9·10단원). 노션 어휘 DB의 그 단원 단어·문장과 스토리북을 참고해 새로 쓴 이야기(7·8·11단원 지문과 같은 방식). 지문·문항 초안 agy Hydrogen, 검토·손질 Claude. 관제탑 scripts/register_reading_passage.py --file 로 반영한다(--dry-run 미리보기).",
+  "subject": "영어",
+  "track": "🏫 교과서 독해",
+  "grade": "5-2",
+  "student": "민수",
+  "difficulty": "보통",
+  "passages": [
+    {
+      "title": "Welcome to Sora's Dream House (9단원)",
+      "book_id": "eng_read_13",
+      "unit": "9단원",
+      "order": 12,
+      "source_type": "자체 창작",
+      "source_note": "5-2 영어 9단원 단어·문장(There is/are ~, This is the ~, What a nice ~!, Where is ~?)과 스토리북 「Welcome to My Dream House!」를 참고해 쓴 새 이야기",
+      "summary": "소라가 친구들에게 멋진 꿈의 집과 방들을 소개해 주었어요.",
+      "full_text": "Sora welcomes Junwoo, Emily, and Charlie to her home. \"This is my dream house!\" Sora says. \"What a nice house!\" Charlie smiles.\n\"This is the living room,\" Sora says. \"There is a sofa and a piano.\" \"What a nice living room!\" Emily says. In the kitchen, there is a fridge and a sink. There are 4 chairs in the kitchen.\nJunwoo looks into the bedroom. There is a bed, a lamp, and a robot. Charlie asks, \"Where is the bathroom?\" Sora says, \"This is the bathroom.\" There is a bath and a toilet.\nEmily asks, \"What's in the garden?\" There are trees in the garden. At night, they see stars. All the friends smile happily.",
+      "questions": [
+        {
+          "type": "choice",
+          "question": "소라네 집 주방(kitchen)에는 의자가 몇 개 있나요?",
+          "options": [
+            "2개 (2 chairs)",
+            "3개 (3 chairs)",
+            "4개 (4 chairs)",
+            "5개 (5 chairs)"
+          ],
+          "answer": "4개 (4 chairs)",
+          "clue": "There are 4 chairs in the kitchen.",
+          "explanation": "지문에서 주방에 의자가 4개 있다고 했어요."
+        },
+        {
+          "type": "choice",
+          "question": "준우가 본 침실(bedroom) 안에 있는 것은 무엇인가요?",
+          "options": [
+            "침대, 램프, 로봇 (a bed, a lamp, a robot)",
+            "소파, 피아노, 텔레비전 (a sofa, a piano, a TV)",
+            "욕조, 거울, 변기 (a bath, a mirror, a toilet)",
+            "냉장고, 싱크대, 의자 (a fridge, a sink, chairs)"
+          ],
+          "answer": "침대, 램프, 로봇 (a bed, a lamp, a robot)",
+          "clue": "Junwoo looks into the bedroom. There is a bed, a lamp, and a robot.",
+          "explanation": "준우가 침실 안을 보니 침대와 램프, 로봇이 있었어요."
+        },
+        {
+          "type": "choice",
+          "question": "에밀리가 말한 \"What a nice living room!\"은 무슨 뜻인가요?",
+          "options": [
+            "거실이 정말 멋지네요!",
+            "거실은 어디에 있나요?",
+            "여기가 우리 집 거실이에요.",
+            "거실에 소파가 있어요."
+          ],
+          "answer": "거실이 정말 멋지네요!",
+          "clue": "\"What a nice living room!\" Emily says.",
+          "explanation": "\"What a nice ~!\"는 '~가 정말 멋지네요!'라고 감탄할 때 쓰는 표현이에요."
+        },
+        {
+          "type": "choice",
+          "question": "소라의 집을 구경한 친구들의 마음으로 가장 알맞은 것은 무엇인가요?",
+          "options": [
+            "집이 멋져서 모두 행복하고 즐거워해요.",
+            "집이 너무 좁아서 실망했어요.",
+            "화장실을 찾지 못해 걱정했어요.",
+            "밤이 너무 어두워서 무서워해요."
+          ],
+          "answer": "집이 멋져서 모두 행복하고 즐거워해요.",
+          "clue": "\"What a nice house!\" Charlie smiles. All the friends smile happily.",
+          "explanation": "친구들은 소라의 멋진 집을 둘러보고 마지막에 모두 행복하게 웃었어요."
+        }
+      ]
+    },
+    {
+      "title": "An Early Bird and a Night Owl (10단원)",
+      "book_id": "eng_read_14",
+      "unit": "10단원",
+      "order": 13,
+      "source_type": "자체 창작",
+      "source_note": "5-2 영어 10단원 단어·문장(What time do you ~?, I get up at 6., early bird/night owl)과 스토리북 「The Early Bird and the Night Owl」을 참고해 쓴 새 이야기",
+      "summary": "일찍 자는 준우와 밤늦게 자는 찰리의 하루 일과 이야기예요.",
+      "full_text": "Junwoo is an early bird. He says, \"I get up at 6.\" Emily says, \"That's very early!\" \"What time do you eat breakfast?\" she asks. \"I eat breakfast at 7,\" Junwoo says.\nJunwoo and his friends go to school. \"What time do you have lunch?\" Sora asks. \"We have lunch at 12:30,\" Charlie says. After school, they have soccer practice at 3:30.\nThey come home and do homework at 6. At night, Junwoo is always sleepy. \"I go to bed at 9,\" he says. Charlie says, \"I read books at night. I am a night owl!\"\nSora asks, \"What time do you sleep?\" \"I go to bed at 11,\" Charlie says. \"That's very late!\" Junwoo says. Charlie smiles, \"I will sleep early tomorrow!\"",
+      "questions": [
+        {
+          "type": "choice",
+          "question": "준우는 몇 시에 아침을 먹나요?",
+          "options": [
+            "6시 (at 6)",
+            "7시 (at 7)",
+            "9시 (at 9)",
+            "11시 (at 11)"
+          ],
+          "answer": "7시 (at 7)",
+          "clue": "\"I eat breakfast at 7,\" Junwoo says.",
+          "explanation": "준우는 6시에 일어나서 7시에 아침을 먹는다고 말했어요."
+        },
+        {
+          "type": "choice",
+          "question": "친구들은 방과 후에 몇 시에 축구 연습을 하나요?",
+          "options": [
+            "12시 30분 (at 12:30)",
+            "3시 30분 (at 3:30)",
+            "6시 (at 6)",
+            "9시 (at 9)"
+          ],
+          "answer": "3시 30분 (at 3:30)",
+          "clue": "After school, they have soccer practice at 3:30.",
+          "explanation": "방과 후에 친구들은 3시 30분에 축구 연습을 해요."
+        },
+        {
+          "type": "choice",
+          "question": "찰리가 자신을 \"night owl\"이라고 말한 것은 무슨 뜻인가요?",
+          "options": [
+            "밤에 늦게 자는 야행성인 사람",
+            "아침에 일찍 일어나는 사람",
+            "축구를 아주 잘하는 사람",
+            "아침밥을 매일 먹는 사람"
+          ],
+          "answer": "밤에 늦게 자는 야행성인 사람",
+          "clue": "Charlie says, \"I read books at night. I am a night owl!\"",
+          "explanation": "\"night owl\"은 밤에 책을 읽거나 활동하며 늦게 자는 야행성인 사람을 뜻해요."
+        },
+        {
+          "type": "choice",
+          "question": "이야기 마지막에 찰리는 내일 어떻게 하겠다고 다짐했나요?",
+          "options": [
+            "내일은 일찍 자겠다고 다짐했어요.",
+            "내일은 6시에 일어나지 않겠다고 했어요.",
+            "내일은 밤새 책을 읽겠다고 했어요.",
+            "내일은 축구 연습을 쉬겠다고 했어요."
+          ],
+          "answer": "내일은 일찍 자겠다고 다짐했어요.",
+          "clue": "Charlie smiles, \"I will sleep early tomorrow!\"",
+          "explanation": "11시에 잔다는 말을 들은 찰리는 미소 지으며 내일은 일찍 자겠다고 말했어요."
+        }
+      ]
+    }
+  ]
+}

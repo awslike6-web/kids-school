@@ -267,6 +267,22 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   | `bar.getPick()` | 현재 `{grade, unit}` |
 - **검증**: `tests/english-unit-bar.test.mjs`, `tests/society-unit-bar.test.mjs`
 
+### 🌟 `grouped_list.js` (공통 「묶음 목록」: 접고 펴는 묶음 + 한 줄 목록, 2026-11-16~)
+국어 용어방 단원 목차, 정밀 독해 지문 목록, 국어·영어 AI 지문 토론방 지문 목록이 같이 쓰는 그리기 부품입니다. 목록이 길어지는 화면에서 큰 카드·격자 버튼 대신 이 부품을 씁니다.
+- **파일 위치**: `kids/core/grouped_list.js` (`window.GroupedList`) · 스타일 `kids/css/grouped_list.css` (`.grouped-list`, `.gl-group`, `.gl-row`). 오버레이가 어두운 테마여도 읽히게 묶음·줄 색을 직접 정한다.
+- **모양**: 묶음(대분류) → 하위 묶음(소분류)을 `<details>`로 접고 편다. 줄은 한 줄에 하나(폭 100%, 최소 높이 48px, 제목 최대 2줄). `item.section`이 바뀌면 작은 소제목을 한 번 넣는다.
+- **두 가지 동작**: `expandable:false`(용어방)는 줄을 누르면 바로 `onPick`. `expandable:true`(독해·토론)는 줄을 누르면 그 아래로 요약 + [시작] 버튼이 펼쳐지고(한 번에 하나), 버튼이 `onPick`. 마우스 올림 말풍선은 쓰지 않는다(터치와 겹침, Argon 검토).
+- **기억**: `memoryKey`를 주면 마지막으로 고른 줄을 sessionStorage(`grouped_list_last_{key}`)에 두고, 목록으로 돌아오면 그 줄이 든 묶음을 펴고 그 줄로 스크롤한다.
+- **계약**: 글자·정렬·완료 판단은 부르는 쪽이 정해 넘긴다(부품은 그리기와 이스케이프만). 줄이 하나도 없는 묶음은 감춘다(안내 `note`가 있으면 보인다).
+- **핵심 API**:
+  | 메서드 | 설명 |
+  | :--- | :--- |
+  | `GroupedList.render(container, groups, {expandable?, memoryKey?, actionLabel?, emptyText?, onPick(item)})` | 그리기 + 누르기 처리 |
+  | `GroupedList.buildHtml(groups, opts)` | HTML과 줄 목록만 만들기(시험용) |
+  | groups | `[{id, title, icon?, open?, highlight?, note?, items:[{id, num?, title, meta?, summary?, section?, status?('done'|'in_progress'), actionLabel?}], children:[같은 모양]}]` |
+- **쓰는 곳**: `kids/js/korean_voca.js`(`KoreanVoca.renderUnitDirectory`), `kids/core/reading_engine.js`(`buildPassageGroups`), `kids/js/korean_sentence.js`, `kids/js/english_chat.js`
+- **검증**: `tests/grouped-list.test.mjs`
+
 ### 🌟 `subject_engine.js` (4대 교과 공통 미션 엔진)
 국어, 과학, 사회, 영어 4대 교과의 3단계 학습 사다리 미션 뷰와 노션 데이터 수급 스피너를 표준화한 코어입니다.
 - **파일 위치**: `kids/core/subject_engine.js`
@@ -607,10 +623,14 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 
 ### 🌟 `korean_voca.js` ([3단계] 국어 어휘 퀴즈 훈련소 전담 엔진)
 객관식(단어->뜻 3지선다) 및 주관식(뜻->단어: 긴 단어 자석 빈칸 채우기, 다단어 객관식, 직접 입력) 퀴즈와 힌트/채점을 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/korean_voca.js` (287줄)
+- **파일 위치**: `kids/js/korean_voca.js` (약 435줄)
+- **단원 목차 (2026-11-16)**: 학년 고르기 없이 `[🏫 교과 단원]` `[🏥 센터 회차]` → 학기 묶음(공통 `GroupedList`)으로 보여 준다. 「단원」의 ` | ` 결합(낱말 1개가 여러 센터 지문에 나옴, [국어 명세서 §5-1](../../docs/korean_spec.md))은 `QuestMastery.parseUnitList`로 나눠 낱말이 회차마다 들어간다(전에는 결합 문자열이 버튼 1개로 생기고 5-2 목록에 5-1 회차가 섞였다). 센터 판별은 등록 도구가 쓰는 고정 머리(`[센터 ` / `[🏥 센터`) 하나만 본다. 센터 회차는 머리를 뗀 이름의 번호 순, 교과 단원은 독해 DB에서 「회차/단원」이 글자까지 같은 지문의 「순번」 순(독해 지문이 없는 단원은 앞에 글자순). 단원의 학기는 그 단원 하나만 가진 행들의 학년 중 가장 많은 것.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
+  | `KoreanVoca.renderUnitDirectory(container, records, {headerHtml, newestFirst, memoryKey, onPick(unit)})` | 단원 목차 그리기 (국어방 `renderKoreanVocaDirectory`가 부름) |
+  | `KoreanVoca.buildUnitGroups(records, {textbookOrder, newestFirst})` | 단원 목차 묶음 만들기 (시험용으로도 씀) |
+  | `KoreanVoca.recordHasUnit(record, unit)` | 결합 행까지 포함해 그 단원 낱말인지 (퀴즈 거르기) |
   | `KoreanVoca.renderUI(container)` | 어휘 퀴즈 카드 렌더링 및 음성 자동 낭독 |
   | `KoreanVoca.setMode(mode)` | 'choice'(객관식) ↔ 'subjective'(주관식) 전환 |
   | `KoreanVoca.getOrderToggleHtml(type)` | 랜덤 섞기 ↔ 순서대로 토글 버튼 HTML 생성 |
@@ -632,11 +652,13 @@ VOCA_DB 어휘 단원(영어·국어·사회·과학)의 5분 퀘스트 두뇌. 
 
 ### 🌟 `korean_sentence.js` ([5단계] AI 지문 토론방 전담 엔진)
 지문별 AI 심층 토론, 생각 확장 코칭, 부모 검수 뱃지, 실시간 대화 보상을 전담하며 2026 플래그십 표준(`gemini-3.8-flash`)을 탑재한 독립 모듈입니다.
-- **파일 위치**: `kids/js/korean_sentence.js` (196줄)
+- **파일 위치**: `kids/js/korean_sentence.js` (약 250줄)
+- **지문 목록 (2026-11-16)**: 정밀 독해와 같은 노션 독해 DB 국어 지문(`ReadingEngine.loadPassages('국어')`)을 같은 묶음 목록(`ReadingEngine.buildPassageGroups`)으로 보여 준다. 전에는 「추천 여부」 10건(과목 구분 없음)을 옛 로컬 파일 `korean-reading-data.js`와 도서 키로 맞춰 보느라, 국어 키는 하나도 맞지 않고 그 파일 앞쪽의 영어 지문 8편만 나왔다.
+- **독해 → 토론 연결**: `window.openDiscussionForPassage(id)`를 두면 정밀 독해 완료 화면에 「🗣️ 이 지문으로 코코와 토론하기」가 생기고, 누르면 토론방이 그 지문으로 바로 열린다.
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `KoreanSentence.renderUI(container)` | 지문 선택 목록 렌더링 |
+  | `KoreanSentence.renderUI(container)` | 지문 선택 목록 렌더링 (async) |
   | `KoreanSentence.startMission(bookId)` | 지문 토론 세션 초기화 및 채팅창 렌더링 |
   | `KoreanSentence.processInput()` | 사용자 생각 입력 처리 및 Gemini API 통신·보상 판정 |
 
@@ -690,11 +712,12 @@ L7, L8, L9, L11 등 단원별 일러스트 동화 서가 도감 렌더링 및 �
 
 ### 🌟 `english_chat.js` ([6단계] 코코와 한 줄 인사 / AI 토론 회화 전담 엔진)
 Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉 및 생각 확장 코칭, 지문별 대화 큐, 한글 해석 토글, 부모 검수 뱃지를 전담하는 독립 모듈입니다.
-- **파일 위치**: `kids/js/english_chat.js` (229줄)
+- **파일 위치**: `kids/js/english_chat.js` (약 250줄)
+- **지문 목록 (2026-11-16)**: 노션 독해 DB 영어 지문만(`ReadingEngine.loadPassages('영어')`) 정밀 독해와 같은 묶음 목록으로. 전에는 로컬 `english-reading-data.js`(9월에 손으로 넣은 7·8·11단원·예시 지문)를 먼저 보여 줘서 독해에는 없는 단원이 토론에만 있었다. 로컬 파일은 노션이 비거나 끊길 때 예비로만 쓴다. 로비 단원 칩에서 고른 단원은 맨 위 「⭐ 고른 단원」에 펼친다(거르지 않음).
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `EnglishChat.renderSentenceUI(container, books)` | 토론 지문 선택 목록 렌더링 |
+  | `EnglishChat.renderSentenceUI(container, {highlight})` | 토론 지문 선택 목록 렌더링 (async) |
   | `EnglishChat.startSentenceMission(bookId, books)` | AI 회화 토론 세션 초기화 및 채팅창 렌더링 |
   | `EnglishChat.renderSentenceChat()` | Gemini 3.8 Flash 연동 실시간 대화창 렌더링 |
 
@@ -960,10 +983,10 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 - **파일 위치**: `kids/core/reading_engine.js`
 - **센터 음성 현황 (2026-10-27)**: `toggleTts()` → `speakFairyTTS` → `CenterReadingAudio.play` 순으로 정적 Edge MP3를 우선 재생한다. 지문 ID가 같아도 대본·설정 해시가 달라지면 옛 파일을 사용하지 않는다. 중지·문제 전환·나가기·음성 OFF·창 닫기는 공통 `stopFairyTTS`로 취소한다. 등록·완료 기준은 [국어 명세서 §8-1](../../docs/korean_spec.md#센터-독해-등록-표준)을 따른다.
 - **지문 조회 (2026-11-15)**: `kids/core/notion-api-client.js` `fetchReadingPassagesFromNotion`이 `LIBRARY_DB`를 `순번` 오름차순으로 한 쪽 100편씩 `next_cursor`로 끝까지 이어 읽는다(최대 20쪽). 전에는 50편에서 잘려 뒤 순번 지문(국어 교과서 독해 101~172)이 화면에 나오지 않았다.
-- **스타일시트**: `kids/css/reading_engine.css` (독립 정규 스타일시트, `.reading-grade-bar`, `.reading-unit-section`, `.reading-passage-card` 등)
+- **스타일시트**: `kids/css/reading_engine.css` (지문·문제 화면) + 로비 목록은 공통 `kids/css/grouped_list.css`
 - **핵심 아키텍처 & UX**:
-  1. **공부방 표준 학년 선택 바 (`reading-grade-bar`)**: `5-1`, `5-2`, `전체보기` 단일 표준 칩을 통해 학기/학년별 정밀 필터링 제공.
-  2. **단원/회차별 그룹화 서가 (`reading-unit-section`)**: 지문들이 흩어지지 않고 단원명(1단원, 2단원... / 1학기 5번...) 헤더 아래에 가지런히 그룹화 배치.
+  1. **로비 = 묶음 목록 (2026-11-16)**: 학기 탭을 없애고 대분류 트랙(🏫 교과서 → 🏥 센터 → 🌱 미니 독해) → 소분류 학기로 접고 편다. 지금 학기 묶음만 펼친다(민수는 최신 학기, 민서는 자기 학년 미니 독해를 펴고 5학년 지문은 접힌 「🔭 5학년 미리보기」). 전에는 처음 열 때 5-1 탭이 열렸다(학기 기본값 판단 오류).
+  2. **한 줄 목록 + 누르면 펼침**: 「번호 · 제목 · 문항 수」 한 줄. 센터는 「순번」이 곧 회차 번호, 교과서·미니 독해는 「회차/단원」을 소제목으로. 줄을 누르면 요약과 [도전하기]가 펼쳐진다. 다녀오면 그 줄로 돌아온다. 영어방 로비 단원 칩에서 고른 단원은 맨 위 「⭐ 고른 단원」에 모으고, 지문이 없으면 "준비 중" 안내만 띄운다.
   3. **1단계 편안한 지문 정독**: Jua/Nanum 폰트 기반 가독성 + 원어민/요정 코코 TTS 음성 낭독 + `[문제 풀기 시작! ➡️]`.
   4. **2단계 1문항 집중 슬라이스 카드**: 스크롤 핑퐁 없이 1문제씩 풀고 넘기는 모바일 최적화 UX.
   5. **💡 [결정적 단서 보기 (단락 힌트)] 접이식 토글**: 스스로 생각하게 숨겼다가, 막히면 톡 눌러 해당 문맥 2~3줄만 네온 박스로 확인.
@@ -973,9 +996,11 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
 - **핵심 API**:
   | 메서드 | 파라미터 | 설명 |
   | :--- | :--- | :--- |
-  | `ReadingEngine.renderLobby(container, options)` | `container, [opts]` | 학년 바 및 단원별 그룹화 독해 서가 로비 렌더링 |
-  | `ReadingEngine.switchGrade(gradeName)` | `gradeName` | '5-1', '5-2', 'ALL' 학년/학기 필터 즉시 전환 |
-  | `ReadingEngine.switchTrack(trackName)` | `trackName` | 레거시 트랙 전환 브리지 (센터 ➔ 5-1, 교과서 ➔ 5-2 자동 매핑) |
+  | `ReadingEngine.renderLobby(container, options)` | `container, {subject, highlight?}` | 트랙 → 학기 묶음 목록 로비 (`highlight` = `{grade, unit}`, 영어 로비 단원 칩) |
+  | `ReadingEngine.loadPassages(subject)` | `subject` | 노션 독해 DB 과목 지문 전체(노션이 비면 로컬 예비 파일, 과목으로 거름). 토론방도 씀 |
+  | `ReadingEngine.buildPassageGroups(passages, {student, highlight, actionLabel, showQuestionCount})` | | 묶음 목록 입력 만들기. 토론방도 씀 |
+  | `ReadingEngine.getActivePassageId()` | - | 지금 지문 id (완료 화면 「토론하기」) |
+  | `ReadingEngine.switchGrade()` / `switchTrack()` | - | 예전 호출 호환. 이제 목록만 다시 그린다 |
   | `ReadingEngine.startMission(passageId)` | `passageId` | 1단계 지문 정독 화면 진입 |
   | `ReadingEngine.startQuestions()` | - | 2단계 1문항 슬라이스 퀴즈 모드 시작 |
   | `ReadingEngine.toggleHint()` | - | 💡 결정적 단서(단락 힌트) 접이식 토글 개폐 |
@@ -998,6 +1023,7 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   - 같은 `도서 키(ID)`(`book_id`)가 노션에 있으면 새 페이지를 만들지 않고 그 페이지의 속성을 갱신한다(페이지 본문 블록은 처음 만들 때만 쓴다).
   - 자료의 `source_type`(`자체 창작`·`교과서 재구성`·`교과서 원문`)·`source_note`를 `출처구분`·`원작 출처`에 쓴다. 적지 않으면 그 칸을 건드리지 않는다.
   - 등록 전에 문항을 검사한다(질문 비어 있음, 보기 2개 미만·중복, 정답이 보기에 없음). 걸리면 아무것도 쓰지 않고 멈춘다.
+- **지문 보관 (2026-11-16)**: `--archive <도서 키>`는 그 지문 1개를 찾아 보여 주기만 하고, `--apply`를 붙이면 속성 원문·본문 블록을 `kids-school-main/scripts/data/archive/library_{도서 키}_{날짜}.json`에 남긴 뒤 노션 휴지통으로 보낸다(30일 안에 노션에서 되살릴 수 있음). 같은 도서 키가 0개·2개 이상이면 멈춘다.
   - **단원 묶음 파일**: `{공통 칸(subject·track·unit·grade·student·difficulty), "passages": [지문…]}` 형식이면 지문을 차례로 등록한다. 교과서 독해 자료는 `kids-school-main/scripts/data/reading/{과목}_{학년}_{단원}.json`에 둔다(민수 국어 5-2: `scripts/data/reading/korean_5-2_dokseo.json`·`korean_5-2_u1.json`~`korean_5-2_u6.json`·`korean_5-2_media.json`). 규격은 [국어 명세서 §5-5](../../docs/korean_spec.md).
   - 시험: master-tower `python -X utf8 scripts/test_center_reading_audio.py` (`RegistrationPreviewTests` 5건: 묶음 펴기, 미리보기 무쓰기, 신규 등록·출처 칸, 같은 도서 키 갱신, 문항 검사).
 

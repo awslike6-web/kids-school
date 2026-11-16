@@ -25,6 +25,7 @@ window.SYSTEM_MAP_GENERATED = {
     ["src_notices", "skill_auto_school-notice-intake"],
     ["src_quick_upload", "skill_auto_gallery-special-day-register"],
     ["src_reg_korean", "doc_korean_spec"],
+    ["src_reg_reading", "doc_english_spec"],
     ["src_verify_quest", "doc_quest_lesson"],
     ["src_verify_quest", "skill_korean"]
   ],
@@ -111,6 +112,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "fairy-settings-engine.js", "path": "kids-school-main/kids/core/fairy-settings-engine.js", "domain": [], "docs": ["gallery_runner_star_bank_spec.md", "CORE_CATALOG.md"]},
       {"name": "fairy-tts.js", "path": "kids-school-main/kids/core/fairy-tts.js", "domain": [], "docs": ["family_omok_spec.md", "family_yacht_spec.md", "family_yut_ui_spec.md"]},
       {"name": "gemini-chat.js", "path": "kids-school-main/kids/core/gemini-chat.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
+      {"name": "grouped_list.js", "path": "kids-school-main/kids/core/grouped_list.js", "domain": [], "docs": ["korean_spec.md", "CORE_CATALOG.md"]},
       {"name": "image_zoom_modal.js", "path": "kids-school-main/kids/core/image_zoom_modal.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "mission-reward-engine.js", "path": "kids-school-main/kids/core/mission-reward-engine.js", "domain": ["guardian"], "docs": ["reward_grant_shared_spec.md", "CORE_CATALOG.md"]},
       {"name": "notion-api-client.js", "path": "kids-school-main/kids/core/notion-api-client.js", "domain": [], "docs": ["homeschool_spec.md", "korean_spec.md", "CORE_CATALOG.md"]},

@@ -14,19 +14,51 @@
     // --------------------------------------------------------
     // 지문 선택 로비
     // --------------------------------------------------------
-    function renderSentenceUI(container, readingFetchedBooks = []) {
-        let buttonsHtml = readingFetchedBooks.map(book => 
-            `<button class="quiz-choice-btn" style="margin-bottom: 10px; width: 100%; text-align: left;" onclick="window.EnglishChat.startSentenceMission('${book.id}', window.readingFetchedBooks || [])">
-                🗣️ [${book.title}] Discussion Start
-            </button>`
-        ).join('');
+    let pendingPassageId = '';
 
+    // 지문 목록: 정밀 독해와 같은 노션 독해 DB(LIBRARY_DB) 영어 지문을 같은 묶음 목록(트랙 → 학기)으로.
+    // (2026-11-16 전에는 로컬 english-reading-data.js를 먼저 보여 줘서 노션에 없는 7·8·11단원과 예시 지문이 섞였다.)
+    // options.highlight {grade, unit}: 로비 단원 칩에서 고른 단원을 맨 위에 펼친다.
+    async function renderSentenceUI(container, options = {}) {
+        if (!container) return;
+        const student = (window.currentUserName === '민서' || localStorage.getItem('currentUser') === 'daughter') ? '민서' : '민수';
+        const engine = window.ReadingEngine;
+        const books = engine && engine.loadPassages ? await engine.loadPassages('영어') : (window.readingFetchedBooks || []);
+        window.readingFetchedBooks = books;
+
+        if (pendingPassageId && books.some(b => b.id === pendingPassageId)) {
+            const id = pendingPassageId;
+            pendingPassageId = '';
+            startSentenceMission(id, books);
+            return;
+        }
+        pendingPassageId = '';
+
+        if (!books.length) {
+            container.innerHTML = `<div style="text-align:center; padding:40px;">등록된 토론 지문이 없습니다.</div>`;
+            return;
+        }
         container.innerHTML = `
-            <div class="quiz-card">
-                <h3 style="color:var(--purple); margin-bottom:20px;">오늘의 영어 토론 지문입니다. 원하는 지문을 선택하세요!</h3>
-                ${buttonsHtml}
-            </div>
-        `;
+            <h3 style="color:var(--purple); margin:0 0 6px; text-align:center; font-family:'Jua', sans-serif;">🗣️ 어떤 이야기로 코코와 영어로 말해 볼까요?</h3>
+            <p style="text-align:center; color:#64748b; font-size:0.92rem; margin:0 0 14px;">글을 누르면 내용이 보여요.</p>
+            <div id="englishChatPassageList"></div>`;
+        const groups = engine && engine.buildPassageGroups
+            ? engine.buildPassageGroups(books, { student, highlight: options.highlight, showQuestionCount: false, actionLabel: 'Discussion Start 🗣️' })
+            : [{ id: 'all', title: 'Stories', open: true, items: books.map(b => ({ id: b.id, title: b.title, summary: b.summary })) }];
+        if (window.GroupedList) {
+            window.GroupedList.render(container.querySelector('#englishChatPassageList'), groups, {
+                expandable: true,
+                actionLabel: 'Discussion Start 🗣️',
+                memoryKey: `discussion_영어_${student}`,
+                onPick: item => startSentenceMission(item.id, books)
+            });
+        }
+    }
+
+    // 정밀 독해 완료 화면의 「이 지문으로 토론하기」
+    function openDiscussionForPassage(passageId) {
+        pendingPassageId = passageId || '';
+        if (typeof window.openMissionView === 'function') window.openMissionView('stage6');
     }
 
     function startSentenceMission(bookId, readingFetchedBooks = []) {
@@ -212,6 +244,7 @@
     };
 
     window.EnglishChat = EnglishChat;
+    window.openDiscussionForPassage = openDiscussionForPassage;
     window.startSentenceMission = startSentenceMission;
     window.renderSentenceChat = renderSentenceChat;
     window.toggleReadingTranslation = toggleReadingTranslation;

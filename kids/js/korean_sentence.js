@@ -9,20 +9,50 @@
     let activePassage = null;
     let sentenceHistory = [];
 
-    function renderSentenceUI(container) {
-        const books = window.readingFetchedBooks || [];
-        let buttonsHtml = books.map(book => 
-            `<button class="quiz-choice-btn" style="margin-bottom: 10px; width: 100%; text-align: left;" onclick="startSentenceMission('${book.id}')">
-                🗣️ [${book.title}] 토론 시작하기
-            </button>`
-        ).join('');
+    let pendingPassageId = '';
 
+    // 지문 목록: 정밀 독해와 같은 노션 독해 DB(LIBRARY_DB) 국어 지문을 같은 묶음 목록(트랙 → 학기)으로 보여 준다.
+    // (2026-11-16 전에는 「추천 여부」 10건을 옛 로컬 파일과 맞춰 보느라 영어 지문만 남는 문제가 있었다.)
+    async function renderSentenceUI(container) {
+        if (!container) return;
+        const student = (window.currentUserName === '민서') ? '민서' : '민수';
+        const engine = window.ReadingEngine;
+        const books = engine && engine.loadPassages ? await engine.loadPassages('국어') : (window.readingFetchedBooks || []);
+        window.readingFetchedBooks = books;
+
+        if (pendingPassageId && books.some(b => b.id === pendingPassageId)) {
+            const id = pendingPassageId;
+            pendingPassageId = '';
+            startSentenceMission(id);
+            return;
+        }
+        pendingPassageId = '';
+
+        if (!books.length) {
+            container.innerHTML = `<div style="text-align:center; padding:40px;">등록된 지문이 없습니다.</div>`;
+            return;
+        }
         container.innerHTML = `
-            <div class="quiz-card">
-                <h3 style="color:var(--purple); margin-bottom:20px;">아빠가 준비한 오늘의 토론 지문입니다. 원하는 지문을 선택하세요!</h3>
-                ${buttonsHtml}
-            </div>
-        `;
+            <h3 style="color:var(--purple); margin:0 0 6px; text-align:center; font-family:'Jua', sans-serif;">🗣️ 어떤 글로 코코와 이야기해 볼까요?</h3>
+            <p style="text-align:center; color:#64748b; font-size:0.92rem; margin:0 0 14px;">글을 누르면 내용이 보여요. 정밀 독해에서 읽은 글이면 더 좋아요!</p>
+            <div id="sentencePassageList"></div>`;
+        const groups = engine && engine.buildPassageGroups
+            ? engine.buildPassageGroups(books, { student, showQuestionCount: false, actionLabel: '토론 시작하기 🗣️' })
+            : [{ id: 'all', title: '지문', open: true, items: books.map(b => ({ id: b.id, title: b.title, summary: b.summary })) }];
+        if (window.GroupedList) {
+            window.GroupedList.render(container.querySelector('#sentencePassageList'), groups, {
+                expandable: true,
+                actionLabel: '토론 시작하기 🗣️',
+                memoryKey: `discussion_국어_${student}`,
+                onPick: item => startSentenceMission(item.id)
+            });
+        }
+    }
+
+    // 정밀 독해 완료 화면의 「이 지문으로 토론하기」 (reading_engine.js가 이 함수가 있을 때만 버튼을 그린다)
+    function openDiscussionForPassage(passageId) {
+        pendingPassageId = passageId || '';
+        if (typeof window.openMissionView === 'function') window.openMissionView('sentence');
     }
 
     function startSentenceMission(bookId) {
@@ -206,6 +236,7 @@
         appendMsg: appendSentenceMsg
     };
 
+    window.openDiscussionForPassage = openDiscussionForPassage;
     window.renderSentenceUI = renderSentenceUI;
     window.startSentenceMission = startSentenceMission;
     window.renderSentenceChat = renderSentenceChat;

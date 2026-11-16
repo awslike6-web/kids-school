@@ -105,6 +105,7 @@
         selectGrade: bar.selectGrade,
         selectUnit: bar.selectUnit,
         getPick: bar.getPick,
+        unitLabel,
         fetchRecords,
         isUpperPreview,
         toggleUpperPreview,
