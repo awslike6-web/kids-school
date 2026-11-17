@@ -26,6 +26,11 @@
     global.history.replaceState(null, '', resolvedUrl);
   }
   const isMinseo = (currentUser === 'minseo' || currentUser === 'daughter');
+  // 기타 과목(도덕·미술·보건)은 과목방·정적 문제가 없어 용어사전방에서 오고 그리로 돌아간다 (docs/other_subjects_spec.md §5)
+  const VOCA_ONLY_SUBJECTS = ['moral', 'art', 'health'];
+  const isVocaOnlySubject = VOCA_ONLY_SUBJECTS.includes(currentSubj), backToVoca = isVocaOnlySubject || urlParams.get('from') === 'voca';
+  const vocaReturnUrl = () => 'kids/common_space/voca.html?' + new URLSearchParams({ user: currentUser,
+    ...(global.QuestMastery?.SUBJECT_KO[currentSubj] ? { subject: global.QuestMastery.SUBJECT_KO[currentSubj] } : {}), ...(urlParams.get('unit') ? { unit: urlParams.get('unit') } : {}) });
   // full·한입 레슨은 기존 완주 모달을 거치지 않고 완료 이벤트를 보낸다.
   global.addEventListener('quest-lesson-complete', () => global.GalleryRunnerRewards?.markQuestBoost(isMinseo ? 'daughter' : 'son'));
   const parentSettings = (typeof getParentQuestSettings === 'function') ? getParentQuestSettings(currentUser) : null;
@@ -189,6 +194,8 @@
       }
     }
 
+    // 기타 과목은 정적 폴백 문제가 없다: 수학 문제를 내지 않고 용어사전방으로 돌려보낸다
+    if (isVocaOnlySubject && !masteryRound) { global.alert('단원을 불러오지 못했어요. 용어사전으로 돌아가요.'); global.location.href = vocaReturnUrl(); return; }
     // 🛡️ 최종 방어선: currentQuest의 questions가 비어있으면 절대 멈추지 않고 정적 문제은행으로 즉시 복구
     if (!currentQuest || !Array.isArray(currentQuest.questions) || currentQuest.questions.length === 0) {
       console.warn('[Quest Fallback] 문제 배열 부재 감지 -> 정적 폴백 뱅크 재로딩');
@@ -582,7 +589,7 @@
     showClearModal();
   }
 
-  const KOREAN_SUBJ_MAP = { math: "수학", english: "영어", korean: "국어", science: "과학", society: "사회", voca: "용어", haru: "하루" };
+  const KOREAN_SUBJ_MAP = { math: "수학", english: "영어", korean: "국어", science: "과학", society: "사회", voca: "용어", haru: "하루", moral: "도덕", art: "미술", health: "보건" };
 
   // 5문제 완독 모달 (노션 인벤토리 보상 DB + 노션 학습일지 DB 자동 전송)
   async function showClearModal() {
@@ -654,12 +661,12 @@
   // ========================================================
   function returnToLab() {
     playSound('tap');
-    global.location.href = `monster_lab.html?user=${currentUser}`;
+    global.location.href = backToVoca ? vocaReturnUrl() : `monster_lab.html?user=${currentUser}`;
   }
 
   function goToSubjectDeepTraining() {
     playSound('tap');
-    global.location.href = UI.deepTrainingUrl(isMinseo, currentSubj);
+    global.location.href = backToVoca ? vocaReturnUrl() : UI.deepTrainingUrl(isMinseo, currentSubj);
   }
 
   // 🏠 공부방 메인 로비로 직결

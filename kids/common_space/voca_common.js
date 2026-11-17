@@ -343,6 +343,7 @@ function updateStatusAndFilter(rebuildUnits = true) {
   }
 
   renderCatalogSections(filtered);
+  updateUnitQuestButton();
 }
 
 function renderCatalogSections(wordsToRender) {
@@ -495,3 +496,56 @@ function handleDeepLinkParams() {
   }
 }
 
+
+// 📚→⚔️ 기타 과목 단원 5분 퀘스트 버튼 (docs/other_subjects_spec.md §5). 초안: 안티그래비티 Hydrogen, 검토: Claude
+const VOCA_QUEST_SUBJECTS = { '도덕': 'moral', '미술': 'art', '보건': 'health' };
+
+// 단원 조건을 만족하면 퀘스트 링크 정보 반환
+function buildUnitQuestLink(words, unit, viewer, profile) {
+  if (!unit) return null;
+  if (viewer ? viewer.name === '민서' : profile === 'daughter') return null;
+
+  const matched = words.filter((w) => (w.stage || '').trim() === unit);
+  if (matched.length < 3) return null;
+
+  const subjects = new Set();
+  for (const w of matched) {
+    for (const s of (w.subject || [])) subjects.add(s);
+  }
+  if (subjects.size !== 1) return null;
+
+  const subjectKo = [...subjects][0];
+  const key = VOCA_QUEST_SUBJECTS[subjectKo];
+  if (!key) return null;
+
+  const href = '../../quest_runner.html?subject=' + key + '&user=minsu&unit=' + encodeURIComponent(unit) + '&from=voca';
+  return { href, count: matched.length, subjectKo };
+}
+
+// 현재 필터 기준으로 단원 퀘스트 버튼 표시 갱신
+function updateUnitQuestButton() {
+  const hasAny = (list, selected) => selected.length === 0 || (list || []).some((v) => selected.includes(v));
+  const words = allDictionaryWords.filter((w) => {
+    const okStudent = selectedStudents.length === 0 || (w.target || []).some((t) => t === '공통' || selectedStudents.includes(t));
+    return okStudent && hasAny(w.subject, selectedSubjects) && hasAny(w.grades, selectedGrades);
+  });
+
+  const link = buildUnitQuestLink(words, selectedUnit, VOCA_VIEWER, currentUser);
+  let btn = document.getElementById('unitQuestBtn');
+  if (!btn) {
+    const area = document.getElementById('unitFilterArea');
+    if (!area) return;
+    btn = document.createElement('a');
+    btn.id = 'unitQuestBtn';
+    btn.className = 'unit-quest-btn';
+    area.appendChild(btn);
+  }
+
+  if (!link) {
+    btn.style.display = 'none';
+    return;
+  }
+  btn.href = link.href;
+  btn.textContent = '⚔️ 이 단원 5분 퀘스트 (' + link.count + '개)';
+  btn.style.display = '';
+}

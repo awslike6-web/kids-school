@@ -9,7 +9,8 @@
   'use strict';
 
   const STORE_PREFIX = 'MINMIN_QUEST_MASTERY_V1_';
-  const SUBJECT_KO = { english: '영어', korean: '국어', society: '사회', science: '과학' };
+  // 기타 과목(도덕·미술·보건)은 용어사전방 단원 버튼으로만 들어온다 (docs/other_subjects_spec.md §5)
+  const SUBJECT_KO = { english: '영어', korean: '국어', society: '사회', science: '과학', moral: '도덕', art: '미술', health: '보건' };
   // 사자성어는 4글자 낱말처럼 짝맞추기·음절 조립이 자연스러워 단어 슬롯으로 배정한다
   const SENTENCE_TYPES = ['문장', '숙어', '관용구', '속담'];
   const SILVER = 6;
