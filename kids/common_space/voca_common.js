@@ -7,8 +7,37 @@ let currentUserName = window.currentUserName || '민수';
 let currentTheme = window.currentTheme || '마인크래프트';
 window.currentSubject = "용어사전"; // 🚨 기본 전역 과목명 명시 (학습일지 및 통계용)
 
+// 👦👧 아이별 보기 범위 (2026-11-17). 로비가 ?user=son|daughter 를 붙여 연다.
+//   'own'  : 그 아이 낱말 + 공통 낱말만 불러온다. 학생 전환 버튼이 없어 다른 아이 낱말은 열 수 없다.
+//   'mine' : 그 아이 낱말로 열리지만 「🌟 전체 학생」을 눌러 모두 볼 수 있다.
+// 민서가 자라면 daughter 값을 'mine'으로 바꾸면 다시 모든 낱말과 연결된다(노션 자료는 그대로 있다).
+// 부모(아빠·엄마 로그인)는 항상 전체 학생으로 연다.
+const VOCA_STUDENT_SCOPE = { son: 'mine', daughter: 'own' };
+const VOCA_STUDENT_NAMES = { son: '민수', minsu: '민수', daughter: '민서', minseo: '민서' };
+const VOCA_STUDENT_KEYS = { minsu: 'son', minseo: 'daughter' };
+
+function resolveVocaViewer(userParam, profile, isAdmin) {
+  if (isAdmin) return null;
+  const raw = String(userParam || profile || '').trim();
+  const key = VOCA_STUDENT_KEYS[raw] || raw;
+  const name = VOCA_STUDENT_NAMES[key];
+  if (!name) return null;
+  return { name, scope: VOCA_STUDENT_SCOPE[key] === 'own' ? 'own' : 'mine' };
+}
+
+function vocaWordForStudent(word, name) {
+  const target = word.target || [];
+  return target.includes(name) || target.includes('공통');
+}
+
+function readVocaUserParam() {
+  try { return new URLSearchParams(window.location.search).get('user'); } catch (e) { return null; }
+}
+
+const VOCA_VIEWER = resolveVocaViewer(readVocaUserParam(), window.currentProfile, window.isAdmin === true);
+
 let allDictionaryWords = [];
-let selectedStudents = []; 
+let selectedStudents = VOCA_VIEWER ? [VOCA_VIEWER.name] : [];
 let selectedSubjects = []; 
 let selectedGrades = [];   
 let selectedUnit = ""; // 🔖 선택된 단원 (Select HTML 동적 배선용)
@@ -78,6 +107,10 @@ async function fetchLibraryData(forceRefresh = false) {
       subject: (r.subject && r.subject.length) ? r.subject : ["미분류"],
       target: (r.target && r.target.length) ? r.target : ["공통"]
     }));
+    // 'own' 범위 아이는 자기·공통 낱말만 남긴다 (과목 칩·검색·딥링크까지 함께 좁혀진다)
+    if (VOCA_VIEWER && VOCA_VIEWER.scope === 'own') {
+      allDictionaryWords = allDictionaryWords.filter(w => vocaWordForStudent(w, VOCA_VIEWER.name));
+    }
 
     if (loadingEl) loadingEl.style.display = 'none';
     buildFilterButtons();
@@ -115,8 +148,14 @@ function buildFilterButtons() {
   const subArea = document.getElementById('subjectFilterArea');
   const gradeArea = document.getElementById('gradeFilterArea');
 
-  // 1. 학생 필터 빌드
+  // 1. 학생 필터 빌드 ('own' 범위면 제목과 버튼을 숨긴다)
+  const lockStudent = !!(VOCA_VIEWER && VOCA_VIEWER.scope === 'own');
   if (stuArea) {
+    stuArea.style.display = lockStudent ? 'none' : '';
+    const title = stuArea.previousElementSibling;
+    if (title && title.classList.contains('section-title')) title.style.display = lockStudent ? 'none' : '';
+  }
+  if (stuArea && !lockStudent) {
     const students = [...new Set(allDictionaryWords.flatMap(w => w.target).filter(t => t && t !== '공통' && t !== '미분류'))];
     let stuHtml = `<button class="filter-btn ${selectedStudents.length === 0 ? 'active' : ''}" onclick="selectStudentAll(this)">🌟 전체 학생</button>`;
     students.forEach(stu => {

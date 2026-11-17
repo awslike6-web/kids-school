@@ -262,9 +262,10 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
 ### 용어사전 공용 공간 JS 분리 (2026-11-01)
-- `kids/common_space/voca_common.js` (459줄): 전역 상태·데이터 수신·필터·카드 목록·서식·딥링크. 주요 전역 함수는 `fetchLibraryData`, `manualSyncVocaData`, `handleDeepLinkParams`입니다.
+- `kids/common_space/voca_common.js` (494줄): 전역 상태·데이터 수신·필터·카드 목록·서식·딥링크·아이별 보기 범위. 주요 전역 함수는 `fetchLibraryData`, `manualSyncVocaData`, `handleDeepLinkParams`, `resolveVocaViewer`입니다.
+- **아이별 보기 범위 (2026-11-17)**: 로비가 붙여 주는 `?user=son|daughter`(없으면 저장된 프로필)로 연다. 표 `VOCA_STUDENT_SCOPE`가 `'own'`이면 그 아이·공통 낱말만 불러오고 「학생별 보기」를 숨기며, `'mine'`이면 그 아이로 열되 「🌟 전체 학생」으로 바꿀 수 있다. 지금 민수 `mine`, 민서 `own`(보건 「성과 건강」 등 형 낱말 가림). 민서가 자라면 `daughter: 'mine'`으로 바꾼다. 부모 로그인은 늘 전체. 시험 `tests/voca-viewer-scope.test.mjs`(5개).
 - `kids/common_space/voca_modal.js` (448줄): 단어 모달·TTS·음성 입력·요정 코코. 주요 전역 함수는 `openModal`, `closeModal`, `playWordViaTTS`, `askCocoFairy`입니다.
-- `kids/common_space/voca.html`에서 클래식 스크립트 `./voca_common.js` → `./voca_modal.js`를 같은 `?v=20261101-voca-split`로 연속 로드합니다. 두 파일의 최상위 상태와 HTML 이벤트 전역 함수를 유지합니다.
+- `kids/common_space/voca.html`에서 클래식 스크립트 `./voca_common.js` → `./voca_modal.js`를 같은 `?v=20261117-viewer`로 연속 로드합니다. 두 파일의 최상위 상태와 HTML 이벤트 전역 함수를 유지합니다.
 - 원문 보존·600줄 상한·HTML 배선·첫 파일 단독 실행·전역 함수/상태/이벤트/타이머 비교는 `tests/voca-common-split.test.mjs`, 분리 계약은 `docs/voca_common_split_spec.md`입니다.
 
 ### 🌟 `unit_chip_bar.js` (과목방 공통 학기·단원 칩 바, 2026-11-06~)
