@@ -227,5 +227,27 @@ class SeedFilesTest(unittest.TestCase):
                 self.assertEqual(rc.check_schema(seed), [], f.name)
 
 
+class UnitScreenUrlTest(unittest.TestCase):
+    """용어사전방 단원별 화면 열쇠 (docs/other_subjects_spec.md §6)"""
+
+    def test_voca_unit_key_accepted(self):
+        for subject, unit in (("보건", "4. 건강 안전과 응급 처치"), ("미술", "1. '나'라는 우주"),
+                              ("도덕", "6. 공동체를 정의롭게!"), ("미술", "미술 톡톡. ㅇㅅㅎ")):
+            url = rc.unit_screen_url("kids/common_space/voca.html", subject, unit)
+            self.assertIsNone(rc.screen_problem(url), url)
+            self.assertNotIn(" ", url)
+
+    def test_bad_query_keys_rejected(self):
+        base = rc.SITE_PREFIX + "kids/common_space/voca.html?"
+        for bad in ("unit=1&subject=%EB%B3%B4%EA%B1%B4",          # 순서 틀림
+                    "subject=%EB%B3%B4%EA%B1%B4",                    # unit 없음
+                    "subject=%EB%B3%B4%EA%B1%B4&unit=",              # 빈 값
+                    "subject=%EB%B3%B4%EA%B1%B4&unit=4.%20%EA%B1%B4"):  # 표준형 아님(공백 %20)
+            self.assertIsNotNone(rc.screen_problem(base + bad), bad)
+        # 쿼리는 단원별 화면에만
+        self.assertIsNotNone(rc.screen_problem(rc.SITE_PREFIX + "kids/subjects/science/science_cloud_lab.html?subject=a&unit=b"))
+        self.assertIsNone(rc.screen_problem(rc.SITE_PREFIX + "kids/subjects/science/science_cloud_lab.html"))
+
+
 if __name__ == "__main__":
     unittest.main()

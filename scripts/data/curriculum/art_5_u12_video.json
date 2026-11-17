@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 12. 공간을 공감 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "12. 공간을 공감",
+  "items": [
+    {
+      "title": "🎬 건축 놀이 학교 — 절판 구조 다리",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=YaFtPm0ElCA",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=12.+%EA%B3%B5%EA%B0%84%EC%9D%84+%EA%B3%B5%EA%B0%90",
+      "explanation": "화성시어린이문화센터"
+    }
+  ]
+}

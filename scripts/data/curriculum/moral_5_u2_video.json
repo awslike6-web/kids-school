@@ -1,0 +1,15 @@
+{
+  "_설명": "도덕 「도덕 5」 2. 반성과 성찰로 성장하는 나 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "도덕",
+  "grade": "5-2",
+  "unit": "2. 반성과 성찰로 성장하는 나",
+  "items": [
+    {
+      "title": "🎬 도덕적 성찰이란?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=f3KZkYJO-C8",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%8F%84%EB%8D%95&unit=2.+%EB%B0%98%EC%84%B1%EA%B3%BC+%EC%84%B1%EC%B0%B0%EB%A1%9C+%EC%84%B1%EC%9E%A5%ED%95%98%EB%8A%94+%EB%82%98",
+      "explanation": "재이쌤"
+    }
+  ]
+}

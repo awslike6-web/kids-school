@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 미술 톡톡. 인공 지능 함께해 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "미술 톡톡. 인공 지능 함께해",
+  "items": [
+    {
+      "title": "🎬 AI가 그린 그림이 미술전 1위",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=6alFjze_LVc",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=%EB%AF%B8%EC%88%A0+%ED%86%A1%ED%86%A1.+%EC%9D%B8%EA%B3%B5+%EC%A7%80%EB%8A%A5+%ED%95%A8%EA%BB%98%ED%95%B4",
+      "explanation": "KBS News"
+    }
+  ]
+}

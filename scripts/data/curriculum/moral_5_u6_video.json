@@ -1,0 +1,15 @@
+{
+  "_설명": "도덕 「도덕 5」 6. 공동체를 정의롭게! 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "도덕",
+  "grade": "5-2",
+  "unit": "6. 공동체를 정의롭게!",
+  "items": [
+    {
+      "title": "🎬 왜 규칙을 지켜야 할까요?",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=bSTssxJilRk",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%8F%84%EB%8D%95&unit=6.+%EA%B3%B5%EB%8F%99%EC%B2%B4%EB%A5%BC+%EC%A0%95%EC%9D%98%EB%A1%AD%EA%B2%8C%21",
+      "explanation": "국가기초학력지원센터"
+    }
+  ]
+}

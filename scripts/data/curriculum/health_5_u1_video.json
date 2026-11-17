@@ -1,0 +1,15 @@
+{
+  "_설명": "보건 「보건 5」 1. 건강 증진과 질병 예방 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "보건",
+  "grade": "5-2",
+  "unit": "1. 건강 증진과 질병 예방",
+  "items": [
+    {
+      "title": "🎬 건강 증진과 생활 주기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=Vwhg_R2G-1k",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%B3%B4%EA%B1%B4&unit=1.+%EA%B1%B4%EA%B0%95+%EC%A6%9D%EC%A7%84%EA%B3%BC+%EC%A7%88%EB%B3%91+%EC%98%88%EB%B0%A9",
+      "explanation": "보건도영쌤"
+    }
+  ]
+}

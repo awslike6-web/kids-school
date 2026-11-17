@@ -1,0 +1,15 @@
+{
+  "_설명": "도덕 「도덕 5」 5. 모두에게 인권을 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "도덕",
+  "grade": "5-2",
+  "unit": "5. 모두에게 인권을",
+  "items": [
+    {
+      "title": "🎬 우리는 인권지킴이 지키 — 모두에게 소중한 인권",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=EZ5Blq5qsFg",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%8F%84%EB%8D%95&unit=5.+%EB%AA%A8%EB%91%90%EC%97%90%EA%B2%8C+%EC%9D%B8%EA%B6%8C%EC%9D%84",
+      "explanation": "충남교육청"
+    }
+  ]
+}

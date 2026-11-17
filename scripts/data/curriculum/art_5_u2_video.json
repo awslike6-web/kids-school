@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 2. 색채 연구소 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "2. 색채 연구소",
+  "items": [
+    {
+      "title": "🎬 색의 3속성: 색상, 명도, 채도",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=BmzNnFUqa_o",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=2.+%EC%83%89%EC%B1%84+%EC%97%B0%EA%B5%AC%EC%86%8C",
+      "explanation": "가볼쌤의 비주얼 가득한 세상"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 13. 미술가의 시간 여행 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "13. 미술가의 시간 여행",
+  "items": [
+    {
+      "title": "🎬 천재 화가, 조선을 그리다 — 김홍도",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=Ims25Cwv85I",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=13.+%EB%AF%B8%EC%88%A0%EA%B0%80%EC%9D%98+%EC%8B%9C%EA%B0%84+%EC%97%AC%ED%96%89",
+      "explanation": "KBS Kids"
+    }
+  ]
+}

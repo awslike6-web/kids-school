@@ -262,11 +262,12 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
 ### 용어사전 공용 공간 JS 분리 (2026-11-01)
-- `kids/common_space/voca_common.js` (552줄): 전역 상태·데이터 수신·필터·카드 목록·서식·딥링크·아이별 보기 범위. 주요 전역 함수는 `fetchLibraryData`, `manualSyncVocaData`, `handleDeepLinkParams`, `resolveVocaViewer`입니다.
+- `kids/common_space/voca_common.js` (597줄, 상한 600): 전역 상태·데이터 수신·필터·카드 목록·서식·딥링크·아이별 보기 범위. 주요 전역 함수는 `fetchLibraryData`, `manualSyncVocaData`, `handleDeepLinkParams`, `resolveVocaViewer`입니다.
 - **아이별 보기 범위 (2026-11-17)**: 로비가 붙여 주는 `?user=son|daughter`(없으면 저장된 프로필)로 연다. 표 `VOCA_STUDENT_SCOPE`가 `'own'`이면 그 아이·공통 낱말만 불러오고 「학생별 보기」를 숨기며, `'mine'`이면 그 아이로 열되 「🌟 전체 학생」으로 바꿀 수 있다. 지금 민수 `mine`, 민서 `own`(보건 「성과 건강」 등 형 낱말 가림). 민서가 자라면 `daughter: 'mine'`으로 바꾼다. 부모 로그인은 늘 전체. 시험 `tests/voca-viewer-scope.test.mjs`(5개).
 - **기타 과목 단원 5분 퀘스트 (2026-11-17)**: 단원 드롭다운에서 도덕·미술·보건 단원(한 과목·3개 이상)을 고르면 `buildUnitQuestLink`/`updateUnitQuestButton`이 「⚔️ 이 단원 5분 퀘스트」 버튼(`#unitQuestBtn`)을 띄워 `quest_runner.html?subject=moral|art|health&user=minsu&unit=…&from=voca`로 보낸다. 민서에게는 안 띄운다. 퀘스트 쪽: `quest-mastery.js` `SUBJECT_KO`·`quest-runner.js` `KOREAN_SUBJ_MAP`·`minsuMasterBank`(제목·아이콘만)에 세 과목, 나가기·심화 훈련·로드 실패는 용어사전방으로 복귀(`vocaReturnUrl`, 수학 폴백 없음). 명세 `docs/other_subjects_spec.md` §5. 시험 `tests/voca-unit-quest.test.mjs`(7)·`tests/other-subjects-quest-keys.test.mjs`(3).
+- **기타 과목 단원 영상 (2026-11-17)**: 같은 조건의 단원이면 `#unitFilterArea` 뒤에 `div.video-unit#unitVideoArea`를 두고 `VideoUnit.mount(div, vocaUnitVideoKey(과목, 단원))`. 열쇠 = `kids/common_space/voca.html?subject=…&unit=…`(URLSearchParams 표준형, 등록기 `unit_screen_url`과 글자까지 같음). 노션 행이 없으면 부품이 숨긴다. 자료 `scripts/data/curriculum/*_video.json`, 명세 `docs/other_subjects_spec.md` §6, 시험 `tests/voca-unit-video.test.mjs`(3).
 - `kids/common_space/voca_modal.js` (448줄): 단어 모달·TTS·음성 입력·요정 코코. 주요 전역 함수는 `openModal`, `closeModal`, `playWordViaTTS`, `askCocoFairy`입니다.
-- `kids/common_space/voca.html`에서 클래식 스크립트 `./voca_common.js` → `./voca_modal.js`를 같은 `?v=20261117-unitquest`로 연속 로드합니다. 두 파일의 최상위 상태와 HTML 이벤트 전역 함수를 유지합니다.
+- `kids/common_space/voca.html`에서 클래식 스크립트 `./voca_common.js` → `./voca_modal.js`를 같은 `?v=20261117-video`로 연속 로드합니다. 두 파일의 최상위 상태와 HTML 이벤트 전역 함수를 유지합니다.
 - 원문 보존·600줄 상한·HTML 배선·첫 파일 단독 실행·전역 함수/상태/이벤트/타이머 비교는 `tests/voca-common-split.test.mjs`, 분리 계약은 `docs/voca_common_split_spec.md`입니다.
 
 ### 🌟 `unit_chip_bar.js` (과목방 공통 학기·단원 칩 바, 2026-11-06~)
@@ -307,7 +308,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **동작**: 마지막 성공 결과(`localStorage` `MINMIN_VIDEO_UNIT_V1:{화면}`)로 먼저 그리고 매번 노션을 다시 읽어 다를 때만 다시 그림(재생 중이면 끝난 뒤). 0건이면 캐시 지우고 숨김, 실패+캐시 없음이면 [다시 시도]. 썸네일 먼저 → ▶ 누르면 IFrame API가 `youtube-nocookie` 플레이어를 만듦(5초 안에 API 못 실으면 iframe 직접) → 끝나면 덮개 [다시 보기]/[확인 문제 풀기]. [유튜브에서 열기] 링크는 늘 보임. 확인 문제는 `QuizChoices`로 섞고(없으면 자기 위치 기준으로 `quiz-flow-controller.js`를 실음) 에러리스 채점(`fairyPraise`/`fairyEncourage`/`fairyReward`, 함수가 있을 때만). 보석·학습일지는 아직 없음(명세 §7).
 - **색**: 캡션·상태줄은 화면 글자색을 따르고(어두운 과학실험실에서도 읽힘), 핵심 정리·확인 문제는 자기 색을 가진 밝은 카드. OS 다크 모드로 바꾸지 않는다.
 - **공개 API**: `mount(el, screenKey)` → `Promise<{videos, questions, source}>`, 시험용 `parseYouTubeId`, `buildQuery`, `rowsToUnit`, `loadUnit(screenKey, onData)`, `loadYouTubeApi`, `kstNow`.
-- **등록·점검 도구**: `scripts/register_curriculum.py`(단원영상·영상확인 행 검사: 유튜브 ID 11자, 화면 주소가 배포 접두어 + 저장소 실존 파일, 영상 행에 문제 금지, 미디어 URL은 `watch?v=` 표준형으로 저장) · `scripts/check_video_links.py`(읽기 전용, 유튜브 oEmbed로 정상/퍼가기 막힘/삭제·비공개 확인, 문제 있으면 종료코드 1; ID·주소 규칙은 등록기 함수를 그대로 씀).
+- **등록·점검 도구**: `scripts/register_curriculum.py`(단원영상·영상확인 행 검사: 유튜브 ID 11자, 화면 주소가 배포 접두어 + 저장소 실존 파일(`?`는 `QUERY_SCREENS`인 용어사전방만, `subject`·`unit` 표준형 — `unit_screen_url()`), 새 과목 첫 등록 400은 기존 행 0개, 영상 행에 문제 금지, 미디어 URL은 `watch?v=` 표준형으로 저장) · `scripts/check_video_links.py`(읽기 전용, 유튜브 oEmbed로 정상/퍼가기 막힘/삭제·비공개 확인, 문제 있으면 종료코드 1; ID·주소 규칙은 등록기 함수를 그대로 씀).
 - **쓰는 곳**: 과학 실험실 14개(`kids/subjects/science/science_*_lab.html`, 2·3·4단원, 영상 행 자료 `scripts/data/curriculum/science_5-2_{2,3,4}.json`). 화면의 옛 `.video-frame-wrap`·`.yt-fallback-bar` 마크업·CSS는 지웠다.
 - **검증**: `tests/video-unit.test.mjs`(15개, 과학 실험실 HTML에 유튜브 embed 주소가 다시 박히면 실패하는 지킴이 포함)
 

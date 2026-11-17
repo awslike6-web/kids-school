@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 9. 상상 그 이상 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "9. 상상 그 이상",
+  "items": [
+    {
+      "title": "🎬 상상화 기초",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=hF82H--qgRM",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=9.+%EC%83%81%EC%83%81+%EA%B7%B8+%EC%9D%B4%EC%83%81",
+      "explanation": "울산광역시교육연구정보원"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 6. 언제 어디서나 예술 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "6. 언제 어디서나 예술",
+  "items": [
+    {
+      "title": "🎬 스케치북 앱으로 드로잉 — 레이어 탐구",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=O481L2X_3So",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=6.+%EC%96%B8%EC%A0%9C+%EC%96%B4%EB%94%94%EC%84%9C%EB%82%98+%EC%98%88%EC%88%A0",
+      "explanation": "꿀디쌤의 미술교실"
+    }
+  ]
+}

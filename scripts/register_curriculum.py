@@ -44,7 +44,7 @@ import re
 import sys
 import time
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import register_voca as rv  # noqa: E402  노션 통신·칸 비교 공용 함수
@@ -64,6 +64,14 @@ REPO = Path(__file__).resolve().parent.parent
 YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be", "www.youtube-nocookie.com",
                  "youtube-nocookie.com"}
 YOUTUBE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+# 한 화면이 여러 단원을 보여 주는 곳(용어사전방)은 화면 주소 뒤에 ?subject=…&unit=…를 붙인 단원별 열쇠를 쓴다
+# (docs/other_subjects_spec.md §6). 쿼리는 urlencode 표준형만 받는다 — 화면(URLSearchParams)이 같은 글자로 만든다.
+QUERY_SCREENS = {"kids/common_space/voca.html": ("subject", "unit")}
+
+
+def unit_screen_url(path: str, subject: str, unit: str) -> str:
+    """단원별 화면 열쇠의 배포 주소 (용어사전방 단원 영상)."""
+    return SITE_PREFIX + path + "?" + urlencode([("subject", subject), ("unit", unit)])
 
 
 def youtube_id(url: str) -> str | None:
@@ -95,6 +103,14 @@ def screen_problem(url: str) -> str | None:
     if not url.startswith(SITE_PREFIX):
         return f"{SITE_PREFIX}로 시작해야 함"
     rest = url[len(SITE_PREFIX):]
+    if "?" in rest and "#" not in rest:
+        rest, query = rest.split("?", 1)
+        keys = QUERY_SCREENS.get(rest)
+        if not keys:
+            return f"'?'는 단원별 화면({', '.join(QUERY_SCREENS)})에만 붙일 수 있음"
+        pairs = parse_qsl(query, keep_blank_values=True)
+        if tuple(k for k, _ in pairs) != keys or not all(v.strip() for _, v in pairs) or urlencode(pairs) != query:
+            return f"쿼리는 {'·'.join(keys)} 순서의 표준형(urlencode)이어야 함"
     if not rest or rest.endswith("/") or "?" in rest or "#" in rest:
         return "끝 '/'·'?'·'#' 없이 파일 경로까지"
     if not (REPO / rest).is_file():
@@ -275,11 +291,18 @@ def sync_curriculum(seed: dict, apply: bool = False, update: bool = False) -> di
     """자료를 CURRICULUM_DB에 맞춘다 → 건수 요약. apply=새 행 만들기, update=기존 행 덮어쓰기(apply 포함)."""
     validate_seed(seed)
     apply = apply or update
-    existing = rv.query_all(CURRICULUM_DB_ID, {"and": [
-        {"property": "과목", "select": {"equals": seed["subject"]}},
-        {"property": "학년", "select": {"equals": seed["grade"]}},
-        {"property": "단원", "rich_text": {"equals": seed["unit"]}},
-    ]})
+    try:
+        existing = rv.query_all(CURRICULUM_DB_ID, {"and": [
+            {"property": "과목", "select": {"equals": seed["subject"]}},
+            {"property": "학년", "select": {"equals": seed["grade"]}},
+            {"property": "단원", "rich_text": {"equals": seed["unit"]}},
+        ]})
+    except RuntimeError as e:
+        # 새 과목 첫 등록: 노션은 아직 없는 선택지로 거르면 400을 낸다 → 기존 행 0개 (register_voca와 같은 처리)
+        if "HTTP 400" in str(e) and "not found for property" in str(e):
+            existing = []
+        else:
+            raise
     by_title: dict[str, list[dict]] = {}
     for page in existing:
         by_title.setdefault(rv.plain_title(page, "제목").strip(), []).append(page)

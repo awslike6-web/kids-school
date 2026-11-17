@@ -344,6 +344,7 @@ function updateStatusAndFilter(rebuildUnits = true) {
 
   renderCatalogSections(filtered);
   updateUnitQuestButton();
+  updateUnitVideo();
 }
 
 function renderCatalogSections(wordsToRender) {
@@ -548,4 +549,49 @@ function updateUnitQuestButton() {
   btn.href = link.href;
   btn.textContent = '⚔️ 이 단원 5분 퀘스트 (' + link.count + '개)';
   btn.style.display = '';
+}
+
+// 🎬 기타 과목 단원 영상 (docs/other_subjects_spec.md §6). 초안: 안티그래비티 Hydrogen, 검토: Claude
+function vocaUnitVideoKey(subjectKo, unit) {
+  return 'kids/common_space/voca.html?' + new URLSearchParams([['subject', subjectKo], ['unit', unit]]).toString();
+}
+function unitVideoSubject(words, unit) {
+  if (!unit) return null;
+  const subjects = [];
+  for (const w of words) {
+    if ((w.stage || '').trim() !== unit) continue;
+    for (const s of (w.subject || [])) {
+      if (!subjects.includes(s)) subjects.push(s);
+      if (subjects.length > 1) return null;
+    }
+  }
+  return subjects.length === 1 && typeof VOCA_QUEST_SUBJECTS[subjects[0]] === 'string' ? subjects[0] : null;
+}
+function updateUnitVideo() {
+  const words = allDictionaryWords.filter((w) =>
+    (!selectedStudents.length || (w.target || []).some((t) => t === '공통' || selectedStudents.includes(t))) &&
+    (!selectedSubjects.length || (w.subject || []).some((s) => selectedSubjects.includes(s))) &&
+    (!selectedGrades.length || (w.grades || []).some((g) => selectedGrades.includes(g)))
+  );
+  const subjectKo = unitVideoSubject(words, selectedUnit);
+  const key = subjectKo ? vocaUnitVideoKey(subjectKo, selectedUnit) : '';
+  let area = document.getElementById('unitVideoArea');
+  if (!area && !key) return;
+  if (!area) {
+    const filterArea = document.getElementById('unitFilterArea');
+    if (!filterArea) return;
+    area = document.createElement('div');
+    area.className = 'video-unit';
+    area.id = 'unitVideoArea';
+    filterArea.insertAdjacentElement('afterend', area);
+  }
+  if (area.dataset.videoKey === key) return;
+  // 기타 과목 단원이 아니거나 부품이 없으면 비우고 숨김. 영상 0개일 때 숨기기는 부품(mount)이 한다
+  if (!key || !window.VideoUnit) { area.replaceChildren(); area.hidden = true; area.dataset.videoKey = key; return; }
+  const next = document.createElement('div');
+  next.className = 'video-unit';
+  next.id = 'unitVideoArea';
+  next.dataset.videoKey = key;
+  area.replaceWith(next);
+  window.VideoUnit.mount(next, key).catch(() => {});
 }

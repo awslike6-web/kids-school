@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 7. 아는 만큼 보여요 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "7. 아는 만큼 보여요",
+  "items": [
+    {
+      "title": "🎬 미술 작품을 쉽게 감상하는 법",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=oN-XATc1EaI",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=7.+%EC%95%84%EB%8A%94+%EB%A7%8C%ED%81%BC+%EB%B3%B4%EC%97%AC%EC%9A%94",
+      "explanation": "전북수업샘터"
+    }
+  ]
+}

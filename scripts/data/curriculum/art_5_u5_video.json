@@ -1,0 +1,15 @@
+{
+  "_설명": "미술 「미술 5」 5. 흙, 손맛을 알다 단원 영상 (docs/other_subjects_spec.md §6). 유튜브 검색 후보 → 안티그래비티 Argon 선택 → Claude 검토 → 부모 확인 (2026-11-17). 화면 열쇠는 용어사전방 단원 주소. 1년짜리 책이지만 CURRICULUM_DB 학년은 단일 선택이라 5-2. scripts/register_curriculum.py로 반영한다.",
+  "subject": "미술",
+  "grade": "5-2",
+  "unit": "5. 흙, 손맛을 알다",
+  "items": [
+    {
+      "title": "🎬 쉽고 예쁜 도자기 만들기",
+      "zone": "단원영상",
+      "media_url": "https://www.youtube.com/watch?v=hBSXxI43_H4",
+      "interactive_url": "https://awslike6-web.github.io/kids-school/kids/common_space/voca.html?subject=%EB%AF%B8%EC%88%A0&unit=5.+%ED%9D%99%2C+%EC%86%90%EB%A7%9B%EC%9D%84+%EC%95%8C%EB%8B%A4",
+      "explanation": "천재 초등 음미체"
+    }
+  ]
+}
