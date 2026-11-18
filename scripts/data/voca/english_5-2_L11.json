@@ -1,5 +1,5 @@
 {
-  "_설명": "영어 5-2 11단원(미래엔 강정진 2022 개정) VOCA_DB 등록 자료. 관제탑 scripts/insert_eng_l11_voca.py(NEW_L11_ITEMS)를 그대로 옮겼다(2026-11-08). 노션이 원본이므로 이후 수정은 노션에서 하고, 이 파일을 다시 돌릴 때는 미리보기로 바뀔 칸을 먼저 본다. scripts/register_voca.py로 반영한다.",
+  "_설명": "영어 5-2 11단원(미래엔 강정진 2022 개정) VOCA_DB 등록 자료. 2026-11-07 교과서 47종 등록 후 2026-11-18 담임 클래스 카드(신규 단어 10·숙어 2·패턴 1 및 뜻 병기)를 반영했다. 노션이 원본이므로 이후 수정은 노션에서 하고, 이 파일을 다시 돌릴 때는 미리보기로 바뀔 칸을 먼저 본다. scripts/register_voca.py로 반영한다.",
   "subject": "영어",
   "grade": "5-2",
   "student": "민수",
@@ -36,8 +36,8 @@
     },
     {
       "word": "flower shop",
-      "meaning": "꽃집",
-      "detail": "아름다운 꽃과 화분, 식물을 파는 꽃가게예요. (예: Where is the flower shop?)",
+      "meaning": "꽃집, 꽃 가게",
+      "detail": "아름다운 꽃과 화분, 식물을 파는 꽃집(꽃 가게)이에요. (예: Where is the flower shop?)",
       "pos": "명사",
       "type": "단어"
     },
@@ -57,7 +57,7 @@
     },
     {
       "word": "candy shop",
-      "meaning": "사탕 가게",
+      "meaning": "사탕가게",
       "detail": "알록달록 달콤한 사탕과 젤리를 파는 가게예요. (예: The candy shop is on the corner.)",
       "pos": "명사",
       "type": "단어"
@@ -92,15 +92,15 @@
     },
     {
       "word": "corner",
-      "meaning": "모퉁이, 길모퉁이",
-      "detail": "두 길이나 골목이 만나서 꺾어지는 길모퉁이예요. (예: It's on the corner.)",
+      "meaning": "모서리, 길모퉁이, 구석, 모퉁이",
+      "detail": "두 길이나 골목이 만나서 꺾어지는 모서리나 길모퉁이, 구석을 뜻해요. (예: It's on the corner.)",
       "pos": "명사",
       "type": "단어"
     },
     {
       "word": "behind",
-      "meaning": "~ 뒤에",
-      "detail": "어떤 건물이나 사물의 뒷부분이나 뒤쪽에 있는 위치를 나타내요. (예: The park is behind the bank.)",
+      "meaning": "~ 뒤에, ~의 뒤에, ~보다 늦은",
+      "detail": "어떤 건물이나 사물의 뒤쪽에 있는 위치를 나타내요. 시간상 '보다 늦은'이라는 뜻으로도 써요. (예: The park is behind the bank.)",
       "pos": "전치사",
       "type": "단어"
     },
@@ -155,9 +155,9 @@
     },
     {
       "word": "tonight",
-      "meaning": "오늘 밤, 오늘 밤에",
-      "detail": "오늘 해가 지고 난 뒤의 밤 시간이에요. (예: What are you doing tonight?)",
-      "pos": "명사/부사",
+      "meaning": "오늘 밤에, 오늘 밤",
+      "detail": "오늘 해가 지고 난 뒤의 밤 시간이나 '오늘 밤에'를 뜻해요. (예: What are you doing tonight?)",
+      "pos": "부사/명사",
       "type": "단어"
     },
     {
@@ -175,22 +175,92 @@
       "type": "단어"
     },
     {
+      "word": "museum",
+      "meaning": "박물관",
+      "detail": "역사나 과학, 예술 작품 등 귀중한 자료를 모아 전시해 둔 박물관이에요. (예: Where is the museum?)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "market",
+      "meaning": "시장",
+      "detail": "채소, 과일, 생활용품 등을 사고파는 북적이는 시장이에요. (예: The market is next to the bank.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "bookstore",
+      "meaning": "서점",
+      "detail": "재미있는 동화책이나 공부에 필요한 여러 가지 책을 파는 서점이에요. (예: Where is the bookstore?)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "post office",
+      "meaning": "우체국",
+      "detail": "편지나 소포를 부치고 우표를 파는 우체국이에요. (예: The post office is on your left.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "police station",
+      "meaning": "경찰서",
+      "detail": "마을을 안전하게 지키고 시민들을 도와주는 경찰서예요. (예: Where is the police station?)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "bus stop",
+      "meaning": "버스 정류장",
+      "detail": "버스를 타기 위해 기다리거나 내리는 버스 정류장이에요. (예: The bus stop is in front of the school.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "subway station",
+      "meaning": "지하철역",
+      "detail": "지하철을 타고 내리는 지하철역이에요. (예: Go straight two blocks to the subway station.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "place",
+      "meaning": "장소",
+      "detail": "학교, 공원, 병원처럼 어떤 건물이 있거나 사람이 모이는 곳(장소)을 뜻해요. (예: What's your favorite place?)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "eight",
+      "meaning": "여덟, 여덟의",
+      "detail": "숫자 8을 나타내는 '여덟' 또는 '여덟의'라는 뜻의 단어예요. (예: I have eight books.)",
+      "pos": "명사/형용사",
+      "type": "단어"
+    },
+    {
+      "word": "festival",
+      "meaning": "축제",
+      "detail": "마을이나 학교에서 모두가 즐겁게 모여 축하하고 즐기는 축제예요. (예: There is a festival tonight.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
       "word": "go straight",
-      "meaning": "직진하다, 똑바로 가다",
-      "detail": "옆으로 돌지 않고 앞으로 곧장 걸어가는 길 안내 핵심 표현이에요. (예: Go straight two blocks.)",
+      "meaning": "직진하다, 똑바로 가다, 성실히 살다, 갱생하다",
+      "detail": "교과서 길 안내에서는 '직진하다, 똑바로 가다'로 쓰이고, 비유적으로 '성실히 살다, 갱생하다'라는 뜻도 있어요. (예: Go straight two blocks.)",
       "pos": "숙어",
       "type": "숙어"
     },
     {
       "word": "turn left",
-      "meaning": "왼쪽으로 돌다",
-      "detail": "길을 가다가 왼쪽 방향으로 꺾어 도는 표현이에요. (예: Turn left at the bank.)",
+      "meaning": "왼쪽으로 돌다, 왼편을 향하다",
+      "detail": "길을 가다가 왼쪽 방향으로 꺾어 도는(왼편을 향하는) 표현이에요. (예: Turn left at the bank.)",
       "pos": "숙어",
       "type": "숙어"
     },
     {
       "word": "turn right",
-      "meaning": "오른쪽으로 돌다",
+      "meaning": "오른쪽으로 돌다, 오른쪽으로 방향을 바꾸다",
       "detail": "길을 가다가 오른쪽 방향으로 모퉁이를 도는 표현이에요. (예: Turn right at the corner.)",
       "pos": "숙어",
       "type": "숙어"
@@ -204,14 +274,14 @@
     },
     {
       "word": "on your left",
-      "meaning": "당신의 왼쪽에",
+      "meaning": "너의 왼쪽에, 당신의 왼쪽에",
       "detail": "길 안내 시 상대방의 왼쪽 편에 건물이 있음을 알려주는 표현이에요. (예: It's on your left.)",
       "pos": "숙어",
       "type": "숙어"
     },
     {
       "word": "on your right",
-      "meaning": "당신의 오른쪽에",
+      "meaning": "너의 오른쪽에, 당신의 오른쪽에",
       "detail": "길 안내 시 상대방의 오른쪽 편에 목적지가 있음을 알려주는 표현이에요. (예: It's on your right.)",
       "pos": "숙어",
       "type": "숙어"
@@ -236,6 +306,27 @@
       "detail": "길이 꺾어지는 네거리 길모퉁이에 건물이 자리잡고 있음을 나타내요. (예: It's on the corner.)",
       "pos": "숙어",
       "type": "숙어"
+    },
+    {
+      "word": "in front of",
+      "meaning": "~ 앞에",
+      "detail": "어떤 건물이나 사물의 바로 앞쪽 위치를 나타내는 표현이에요. 반대말은 behind(~ 뒤에)예요. (예: The park is in front of the library.)",
+      "pos": "숙어",
+      "type": "숙어"
+    },
+    {
+      "word": "between A and B",
+      "meaning": "A와 B 사이에",
+      "detail": "A와 B 두 장소나 물건의 한가운데(사이)에 있을 때 쓰는 표현이에요. (예: The market is between the bank and the park.)",
+      "pos": "숙어",
+      "type": "숙어"
+    },
+    {
+      "word": "Where is the ...?",
+      "meaning": "[장소]은 어디에 있어요?",
+      "detail": "특정 장소나 건물의 위치를 정중하게 물어볼 때 쓰는 핵심 패턴이에요. ... 자리에 장소를 넣어 말해요. (예: Where is the library?)",
+      "pos": "표현",
+      "type": "문장"
     },
     {
       "word": "Where is the restaurant?",
@@ -309,15 +400,15 @@
     },
     {
       "word": "It's on your left.",
-      "meaning": "당신의 왼쪽에 있어요.",
-      "detail": "가다 보면 당신의 왼쪽 편에 건물이 보일 것이라고 짚어주는 문장이에요.",
+      "meaning": "당신의 왼쪽에 있어요, 왼편에 있어요",
+      "detail": "가다 보면 당신의 왼쪽 편(왼편)에 건물이 보일 것이라고 짚어주는 문장이에요.",
       "pos": "문장",
       "type": "문장"
     },
     {
       "word": "It's on your right.",
-      "meaning": "당신의 오른쪽에 있어요.",
-      "detail": "가다 보면 당신의 오른쪽 편에 목적지가 나타난다고 알려주는 문장이에요.",
+      "meaning": "당신의 오른쪽에 있어요, 오른편에 있어요",
+      "detail": "가다 보면 당신의 오른쪽 편(오른편)에 목적지가 나타난다고 알려주는 문장이에요.",
       "pos": "문장",
       "type": "문장"
     },
