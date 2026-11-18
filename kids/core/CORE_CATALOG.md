@@ -47,7 +47,7 @@
 Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통신하는 통합 라이브러리이자 하위 호환성 파사드(Facade)입니다. 골디락스 헌법(300~600줄)에 따라 전문 서브모듈을 분리하고 자동 결합 로더를 탑재했습니다.
 - **파일 위치**: `kids/core/notion-helper.js` (~240줄)
 - **단일 책임 분리 서브모듈 (6대 골디락스 전문 모듈)**:
-  - `kids/core/notion-cache-manager.js` (253줄): LocalStorage 1일 캐시, 프리패칭(`prefetchVocaData`, `prefetchReadingData`), 전사 통합 노션 동기화(`syncAllNotionData`), 토스트 알림 전담.
+  - `kids/core/notion-cache-manager.js` (253줄): LocalStorage 1일 캐시, 프리패칭(`prefetchVocaData`, `prefetchReadingData`), 전사 통합 노션 동기화(`syncAllNotionData`), 토스트 알림 전담. **어휘 캐시는 하루 한 벌(ALL)**: 로비·과목방의 `prefetchVocaData`는 전체를 받아 `ALL` 키에 두고, 아이별 조회(`fetchVocaFromNotion` 기본)는 아이 캐시가 없으면 `ALL`을 그 아이(학생 칸에 이름이 있는 행)로 걸러 쓴다. 용어사전방(전체)도 같은 캐시를 써서 첫 방문 약 15초 → 0.4초(2026-11-19, 시험 `tests/voca-all-cache.test.mjs`).
   - `kids/core/notion-api-client.js` (471줄): Cloudflare Worker 프록시 통신, VOCA/독해/도서관/시간표 쿼리, 노션 블록 파서, 지수 백오프 재시도 및 Rate Limit 방어. 여러 쪽 DB 조회 본문에는 `STABLE_SORTS`(만든 시각 오름차순)를 꼭 넣는다: 정렬 없으면 쪽 경계에서 행이 빠진다(2026-11-17, 시험 `tests/notion-stable-sort.test.mjs`).
   - `kids/core/study-log-store.js` (338줄): `STUDY_LOG_DB` 학습일지 **일일 Upsert 쓰기 단일 원천**(`{학생}_{KST YYYY-MM-DD}_{과목}` 키, 있으면 PATCH 누적·없으면 POST) + **연속 학습 스트릭**(노션 '입장' KST 날짜 기준, 연속이 끊긴 지점까지만 페이지 조회, 전송 성공 시 로컬 캐시에 오늘 즉시 반영, 기록 없으면 배지 숨김). `notion-study-logger.js`·`notion-reward.js` 두 경로가 모두 이 모듈만 호출하며, 두 파일 모두 미로드 시 스스로 이 모듈을 불러온다. 검증: `node scripts/verify_study_log_store.js`.
   - 학습일지는 당일 페이지 ID(`MINMIN_STUDY_LOG_PAGES_V1`)를 기억하고 조회·GET의 `?force=true`로 현재 값을 다시 읽습니다. 같은 키는 Web Locks(같은 브라우저 두 탭) 또는 Map 체인(한 탭)으로 직렬화하며 오답은 정확히 같은 구분 항목만 중복 제거합니다.
@@ -83,7 +83,7 @@ Cloudflare Worker 캐시를 통해 노션 데이터베이스와 안전하게 통
   | 메서드 | 서브모듈 | 설명 |
   | :--- | :--- | :--- |
   | `syncAllNotionData()` | `notion-cache-manager` | 전 과목 노션 캐시를 무효화하고 최신 데이터 일괄 선로딩 |
-  | `prefetchVocaData(student)` | `notion-cache-manager` | 당일 어휘 데이터를 백그라운드에서 사전 다운로드 (0.01초 로딩) |
+  | `prefetchVocaData(student)` | `notion-cache-manager` | 당일 어휘 **전체(ALL)**를 백그라운드에서 사전 다운로드. 아이별 화면·용어사전방이 같은 캐시를 씀 |
   | `fetchNotionTimetable()` | `notion-api-client` | 주간 시간표 전체 목록 조회 (로컬 캐시 우선) |
   | `fetchNotionVocabulary(subject, grade)` | `notion-api-client` | 과목/학년별 핵심 어휘 목록 조회 |
   | `fetchNotionQuizItems(options)` | `notion-api-client` | 5분 퀘스트용 단원별 4지선다 문항 동적 로드 |
@@ -1618,6 +1618,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **AI 대화 기억 저장 (2026-11-16)**: `tests/chat-memory.test.mjs`(6개). 위 「`chat-memory.js`」. `voca-common-split`의 이벤트 기대값에서 옛 `beforeunload` 저장을 뺐다. 이 파일까지 전체 754개.
 - **가족 우체통 (2026-11-16)**: `tests/family-mail.test.mjs`(13개)·`tests/family-mail-page.test.mjs`(7개). 위 「📮 가족 우체통」 절.
 - **단원 영상 부품 (2026-11-16)**: `tests/video-unit.test.mjs`(15개). 위 「🎬 `video-unit.js`」 절.
+- **어휘 캐시 한 벌 공유 (2026-11-19)**: `tests/voca-all-cache.test.mjs`(4개). ALL 캐시를 아이별로 거르기(학생 칸 빈 행 제외), 캐시 없으면 노션 1회, 미리 불러오기가 ALL을 받는지.
 - **노션 여러 쪽 조회 정렬 (2026-11-17)**: `tests/notion-stable-sort.test.mjs`(2개). `notion-api-client.js`의 `page_size` 조회 본문마다 `sorts: STABLE_SORTS`가 있는지 본다.
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).

@@ -145,9 +145,12 @@ function getKstTodayYMD(date = new Date()) {
 
         const cacheTarget = queryOptions.filterByStudent ? queryOptions.studentName : 'ALL';
 
-        // 1. 캐시 확인 (강제 새로고침이 아닐 때)
+        // 1. 캐시 확인. 아이 캐시가 없으면 로비가 받아 둔 오늘의 전체(ALL) 캐시를 그 아이 행만(서버 학생 필터와 같게, 학생 칸 빈 행 제외) 걸러 쓴다 (2026-11-19)
         if (!forceRefresh && typeof window._loadVocaFromCache === 'function') {
-            const cachedRecords = window._loadVocaFromCache(cacheTarget, dbId);
+            let cachedRecords = window._loadVocaFromCache(cacheTarget, dbId);
+            if (!(cachedRecords && cachedRecords.length) && cacheTarget !== 'ALL') {
+                cachedRecords = (window._loadVocaFromCache('ALL', dbId) || []).filter(r => Array.isArray(r.target) && r.target.some(t => String(t).trim() === cacheTarget));
+            }
             if (cachedRecords && cachedRecords.length > 0) {
                 return cachedRecords.filter(record => _matchesVocaRecord(record, queryOptions));
             }

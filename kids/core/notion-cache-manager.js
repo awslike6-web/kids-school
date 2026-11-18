@@ -202,15 +202,17 @@
             }
 
             const dbId = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.VOCA_DB_ID) || "375a27115b688038b686d3994ee12919";
-            const existing = _loadVocaFromCache(target, dbId);
+            // 전체(ALL)를 한 번 받아 두면 용어사전방(전체)과 과목방·퀘스트(아이별, ALL을 걸러 씀)가 모두 이 캐시를 쓴다 (2026-11-19).
+            // 예전엔 아이 캐시만 받아서 용어사전방이 매일 첫 방문마다 2천여 행을 다시 받았다(약 15초).
+            const existing = _loadVocaFromCache('ALL', dbId);
             if (existing && existing.length > 0) {
-                console.log(`⚡ [VOCA Prefetch] ${target}의 단어 캐시가 이미 준비되어 있습니다 (${existing.length}건).`);
+                console.log(`⚡ [VOCA Prefetch] 전체 단어 캐시가 이미 준비되어 있습니다 (${existing.length}건).`);
                 return;
             }
 
-            console.log(`🚀 [VOCA Prefetch] ${target}의 단어 데이터를 백그라운드에서 사전 동기화합니다...`);
+            console.log(`🚀 [VOCA Prefetch] 전체 단어 데이터를 백그라운드에서 사전 동기화합니다... (${target} 접속)`);
             if (typeof window.fetchVocaFromNotion === 'function') {
-                await window.fetchVocaFromNotion({ studentName: target, forceRefresh: false });
+                await window.fetchVocaFromNotion({ studentName: target, filterByStudent: false, forceRefresh: false });
                 console.log(`✅ [VOCA Prefetch] ${target} 백그라운드 프리패치 완료!`);
             }
         } catch (e) {
