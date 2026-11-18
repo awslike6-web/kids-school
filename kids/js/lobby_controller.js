@@ -131,6 +131,8 @@
     renderSubjectCapStates(activeUserKey);
     updateGuardianHud(activeUserKey, realName);
     fetchInventoryForUser(activeUserKey, realName);
+    // 🧩 오빠가 낸 문제 카드 / 동생 문제 만들기 버튼 (비동기, 실패해도 로비는 그대로, docs/family_quiz_spec.md §5-3)
+    if (window.FamilyQuiz) window.FamilyQuiz.mountLobbyCard(document.getElementById(activeUserKey === 'minseo' ? 'familyQuizCardMinseo' : 'familyQuizCardMinsu'), activeUserKey);
 
     renderLobbyStreaks();
   }

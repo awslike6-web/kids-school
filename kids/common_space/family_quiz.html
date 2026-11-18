@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>🧩 오빠가 낸 문제</title>
+  <link rel="manifest" href="../../manifest.json">
+  <link rel="icon" href="../../icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/family-quiz.css?v=20261119-fq">
+  <!-- 누구 화면인지는 ?user=minsu(출제실)|minseo(풀이방)로만 정한다. 음성 코어가 아이 목소리를 고르기 전에 정해 둔다 -->
+  <script>
+    (function () {
+      var user = new URLSearchParams(location.search).get('user');
+      var who = user === 'minseo' ? 'minseo' : user === 'minsu' ? 'minsu' : '';
+      window.FAMILY_QUIZ_USER = who;
+      if (who) {
+        window.currentChild = who;
+        window.currentProfile = who === 'minseo' ? 'daughter' : 'son';
+        window.currentUserName = who === 'minseo' ? '민서' : '민수';
+      }
+      document.documentElement.dataset.theme = who || 'minsu';
+    })();
+  </script>
+</head>
+<body class="fq-body">
+  <!-- 화면은 family-quiz-author.js(민수)·family-quiz-play.js(민서)가 그린다 (명세: docs/family_quiz_spec.md) -->
+  <main id="familyQuizApp" class="fq-app">
+    <p class="fq-loading">불러오는 중…</p>
+  </main>
+  <noscript><p class="fq-loading">자바스크립트를 켜야 문제를 풀 수 있어요.</p></noscript>
+
+  <script src="../config.js"></script>
+  <script src="../core/fairy-config.js"></script>
+  <script src="../core/fairy-tts.js?v=20261116-mixvoice"></script>
+  <script src="../core/fairy-settings-catalog.js"></script>
+  <script src="../core/fairy-engine.js?v=20261028-coco"></script>
+  <script src="../core/quiz-flow-controller.js"></script>
+  <script src="../core/family-mail.js?v=20261116-family-mail"></script>
+  <script src="../core/family-quiz-store.js?v=20261119-fq"></script>
+  <script src="./family-quiz-play.js?v=20261119-fq"></script>
+  <script src="./family-quiz-author.js?v=20261119-fq"></script>
+  <script>
+    (function () {
+      var app = document.getElementById('familyQuizApp');
+      var who = window.FAMILY_QUIZ_USER;
+      var lobbyHref = '../../lobby.html' + (who ? '?user=' + who : '');
+      if (who === 'minsu') {
+        document.title = '🧩 동생 문제 만들기';
+        window.FamilyQuizAuthor.mount(app, { lobbyHref: lobbyHref });
+      } else if (who === 'minseo') {
+        window.FamilyQuizPlay.runSolverPage(app, { lobbyHref: lobbyHref });
+      } else {
+        location.replace(lobbyHref);
+      }
+    })();
+  </script>
+</body>
+</html>

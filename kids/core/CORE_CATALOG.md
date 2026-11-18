@@ -259,6 +259,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 시험: `tests/family-mail.test.mjs`(13개: 서버 주소 재정의 제한, 상대 경로, 등록·토큰 비공개, 401, 팝업 글자 그대로·안 닫힘·확인·실패 시 되풀이 없음·답장, quiet, 배지, 보일 때만 확인, KST 시각, 금지 규칙·서비스 워커 fetch 없음, 화면 연결), `tests/family-mail-page.test.mjs`(7개: 설정·받은/보낸·쓰기 재전송·임시 글·등록 해제·도우미). 공용 모의 브라우저·모의 서버 `tests/family-mail-browser.mjs`(실제 네트워크 없음, `innerHTML`을 쓰면 오류).
 
 
+## 2-0-4. 🧩 가족 출제 퀴즈 「오빠가 낸 문제」 (2026-11-19)
+- 계약: `docs/family_quiz_spec.md`. 노션 「가족 출제 DB」(`APP_CONFIG.FAMILY_QUIZ_DB_ID`, 표: `docs/notion_schemas_school.md`). 민수가 출제하고 민서가 푼다. 보석·학습일지·5분 퀘스트와 섞지 않는다.
+- `kids/core/family-quiz-store.js` (IIFE·전역 `FamilyQuiz`): `fromPage`(행 → `{id, question, answer, wrongs[3], hint, author, solver, status, version, editedOn, solvedVersion, result, report}`), `validate(draft)` → `{ok, errors, warnings, draft}`(빈 칸·겹치는 보기·정답=오답·글자 수(문제 80·보기 20·힌트 60) 막음, 문제 40자 넘으면 경고만), `isNew`/`pickNew(list, 푸는사람, max)`(공개이고 `푼버전` 없음·`< 버전`, 고친날 오래된 순), `choicesOf`(0번 = 정답), `listForSolver`/`listByAuthor`(늘 `?force=true`, 공개 행만), `create`/`revise`(버전+1, 풀이 기록·신고 비움)/`hide`(상태=숨김, 지우지 않음)/`recordResult`(실패 시 1번 다시), `notify(from, to, 글)`(이 기기가 우체통에 from으로 등록됐을 때만, 30분에 1번 `familyQuizMailAt_{아이}`), `draft`(쓰다 만 문제 `familyQuizDraft_minsu`), `mountLobbyCard(el, 'minseo'|'minsu')`, `localDate`.
+  - 로비: `lobby.html`이 `lobby_config.js` 앞에서 싣고, `lobby_controller.js` `applyLobbyThemeAndView`가 `#familyQuizCardMinseo`(새 문제 있을 때만 「🎁 오빠가 낸 문제 N개!」) / `#familyQuizCardMinsu`(늘 「🧩 동생 문제 만들기」, 신고 수 🚩 배지)를 채운다.
+- `kids/common_space/family_quiz.html` (`?user=minsu` 출제실 / `?user=minseo` 풀이방 / 그 밖은 로비로) + `family-quiz-play.js`(전역 `FamilyQuizPlay {playRound(stage, quizzes, {record, onDone}), runSolverPage, mailText, speakThen}`: `QuizChoices.arrange`로 섞고 원래 번호 채점, 0.3초 뒤 자동 읽기, 보기 읽고 채점, 첫 오답 격려·두 번째 오답 정답 노란 안내+힌트 읽기, 🚩 이상해요 3가지 이유, 결과 `한번에`/`두번째에`/`도움받음`) + `family-quiz-author.js`(전역 `FamilyQuizAuthor {mount}`: 쓰기 칸·글자 수·🔊 들어보기·👀 민서처럼 풀어 보기(`playRound` record:false)·🚀 출시·🛠️ 고쳐서 다시 내기·내리기·내 문제 목록 칩) + `kids/css/family-quiz.css`(로비 카드 모양 포함). 아이 글은 `textContent`·`value`로만 넣는다.
+- 시험: `tests/family-quiz.test.mjs`(7개: 행 변환, 입력 검사, 새 문제 고르기, 출시·고치기·기록 값, 질의 캐시 건너뛰기, 우체통 묶음, 로비 카드).
+
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
 ### 용어사전 공용 공간 JS 분리 (2026-11-01)
