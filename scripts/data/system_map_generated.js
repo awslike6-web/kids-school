@@ -243,5 +243,5 @@ window.SYSTEM_MAP_GENERATED = {
     "pipe": [],
     "db": []
   },
-  "hidden": {"source": 28, "skill": 6, "module": 0, "pipe": 0, "db": 7}
+  "hidden": {"source": 30, "skill": 6, "module": 0, "pipe": 0, "db": 7}
 };
