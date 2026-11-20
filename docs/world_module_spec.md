@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. **P0~P3 완료(2026-11-20)**, 다음은 P4 비밀 정원 + 마이룸 인형(+ 상점 무기 연결). 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
+> **상태**: 설계 확정. **P0~P3·P4a 완료(2026-11-20)**, 다음은 P4b 마이룸 인형, P4c 상점 무기 연결. 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -490,7 +490,41 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 14. 하지 않는 것
+## 14. P4a 비밀 정원 계약 (2026-11-20) — 완료
+
+> 결과: `garden-logic.js`·`garden.js`·`garden.css`(Hydrogen) + `garden.html`(Claude). 고친 것: 초안이 `idMap`(Map)을 `map[id]`로 읽어 늘 비던 버그(그대로 두면 정원에 다녀온 뒤 광장에서 갤러리 친구가 모두 사라짐). 광장은 `GardenLogic.visibleIds`로 찾은 친구만 보여 주고 정원 포털을 열었다. `tests/world-garden.test.mjs` 7개, 폰에서 덤불→열쇠→웅덩이, 물뿌리개→꽃봉오리→친구 발견·저장, 민서 파스텔 확인.
+
+`garden.html`(Claude) + `garden-logic.js`(순수 계산, 시험 대상) + `garden.js`(화면) + `garden.css`. 광장의 정원 포털을 연다(`ready:true`).
+
+### 14-1. 「찾은 친구」 규칙 (`state.found`)
+- `found`가 **비어 있으면**(정원에 한 번도 안 감) 광장·마이룸은 지금처럼 모든 친구를 보여 준다.
+- 정원에 처음 들어가면 기준을 만든다: 갤러리 친구 중 **가장 최근 3명**(`date` 내림차순, 같으면 `id`)을 숨기고 나머지는 모두 `found`에 넣는다(한 번에 저장).
+- 그 뒤로는 `found`에 없는 갤러리 친구(= 새로 등록된 친구, 최근 순 최대 8)가 정원에 숨는다. 광장·마이룸은 `found`에 있는 친구만 보여 준다. 몬스터는 늘 보인다.
+- 아레나는 이 규칙과 상관없이 모두 보여 준다(`seen` NEW 그대로).
+
+### 14-2. `garden-logic.js` → `window.GardenLogic` (DOM 없음)
+| 이름 | 계약 |
+|---|---|
+| `SPOTS` | 숨는 곳 8개(정규화 좌표 0~1): 덤불 3(`bush`), 꽃봉오리 3(`bud`), 별빛 웅덩이 2(`pool`). 위 HUD(y<0.12)·아래 도구 줄(y>0.86)은 피함 |
+| `baseline(items, found, idMap)` | `items`=갤러리 항목. 위 규칙대로 `{toFound:[shortId], hidden:[item.id]}` |
+| `visibleIds(items, found, idMap)` | 광장·마이룸에 보일 항목 id 목록(`found` 비면 전부, 아니면 `found`에 있는 갤러리 + 모든 몬스터) |
+| `plan(hiddenIds, rng)` | 자리 배열 `[{i, kind, x, y, taps:0, water:0, open:false, content}]`. 숨은 친구를 무작위 자리에 하나씩(최대 8). 나머지: 덤불 30% `{type:'key'}` 아니면 `{type:'deco', deco:'butterfly'}`, 꽃봉오리 `{type:'deco', deco:'flower'}`, 웅덩이 `{type:'deco', deco:'star'}` |
+| `tap(spot)` | 열린 자리면 `null`. 덤불: `taps+1`, 3이 되면 열림 → `{open:true, content}`, 아니면 `{shake:true, taps}`. 꽃봉오리 `{need:'water'}`, 웅덩이 `{need:'key'}` |
+| `water(spot, amount)` | 꽃봉오리만. `water += amount`, 1 이상이면 열림 `{open:true, content}`, 아니면 `{water}` |
+| `unlock(spot, keys)` | 웅덩이만. 열쇠 0이면 `{need:'key'}`, 있으면 열림 `{open:true, content, keys: keys-1}` |
+| `nearest(spots, x, y, r=0.09)` | 정규화 좌표에서 반지름 안 가장 가까운 닫힌 자리, 없으면 `null` |
+
+### 14-3. 화면 (`garden.js` → `window.GardenUI.boot`)
+- 화면 한 장(스크롤 없음). 자리 좌표 = 정규화 × 보이는 크기. 테마는 아이별(민서 파스텔 꽃밭, 민수 네온 유적 정원).
+- 덤불은 톡톡(흔들림·`pop`), 💧 물뿌리개는 아래 도구 줄에서 끌어 꽃봉오리 위에 대면 물이 차오름(물방울 입자), 🔑 열쇠 개수 표시(웅덩이를 톡 하면 하나 씀), 열쇠가 없으면 「덤불을 톡톡 해 봐!」.
+- 친구 발견: 가운데 카드(`#found`)에 그림·「✨ 새로운 친구 발견!」·이름·탄생 이야기, 버튼 「🏠 마이룸에 데려가기」(마이룸으로)·「🌿 더 찾기」. `found`에 저장, `levelup`, 민서는 음성.
+- 열쇠 발견은 `keys+1` 저장. 장식은 나비·꽃·별 연출만.
+- 이미 찾은 친구 최대 4명이 정원을 산책(광장의 `HubLogic.stepFriend` 재사용).
+- 숨은 친구가 없으면 장식만 숨어 있고 토스트 「새 친구가 오면 여기 숨어 있을 거야!」.
+
+---
+
+## 15. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.

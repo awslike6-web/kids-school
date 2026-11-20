@@ -205,6 +205,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "world-sfx.js", "path": "kids-school-main/kids/playground/world/core/world-sfx.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "world-sprites.js", "path": "kids-school-main/kids/playground/world/core/world-sprites.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "world-view.js", "path": "kids-school-main/kids/playground/world/core/world-view.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "garden-logic.js", "path": "kids-school-main/kids/playground/world/garden-logic.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "garden.js", "path": "kids-school-main/kids/playground/world/garden.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "hub-logic.js", "path": "kids-school-main/kids/playground/world/hub-logic.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "hub.js", "path": "kids-school-main/kids/playground/world/hub.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "english_unit_activities.js", "path": "kids-school-main/kids/subjects/english/data/english_unit_activities.js", "domain": ["english"], "docs": ["english_listen_place_L10_spec.md", "english_listen_place_L11_spec.md", "english_listen_place_spec.md"]},

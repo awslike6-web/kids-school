@@ -151,7 +151,9 @@
       me.shortId = meItem ? idMap.get(meItem.id) : null;
       loadSprite(meItem);
 
-      const others = items.filter((it) => it !== meItem);
+      // 정원에서 아직 못 찾은 새 친구는 광장에 나오지 않는다(§14-1, 정원에 한 번도 안 갔으면 모두) (Claude)
+      const visible = new Set(root.GardenLogic ? GardenLogic.visibleIds(items, state.found || [], idMap) : items.map((it) => it.id));
+      const others = items.filter((it) => it !== meItem && visible.has(it.id));
       const gal = others.filter((it) => it.kind === 'gallery').slice(0, 12);
       // 갤러리에 같은 이름 캐릭터가 있으면 몬스터 쪽은 빼서 같은 친구가 둘 돌아다니지 않게 (Claude 수정)
       const galNames = new Set(items.filter((it) => it.kind === 'gallery').map((it) => it.name));

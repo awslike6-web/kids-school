@@ -36,7 +36,7 @@ test('광장: 규칙(전역 하나·금지어·줄 수·머리 주석)', () => {
 test('광장: 포털 목록과 실제 파일', () => {
   const L = H();
   assert.deepEqual(plain(L.WORLD), { w: 1080, h: 1600 });
-  assert.deepEqual(plain(L.PORTALS.map(p => [p.id, p.ready])), [['arena', true], ['myroom', true], ['garden', false], ['coop', false]]);
+  assert.deepEqual(plain(L.PORTALS.map(p => [p.id, p.ready])), [['arena', true], ['myroom', true], ['garden', true], ['coop', false]]);
   for (const p of L.PORTALS.filter(p => p.ready)) {
     assert.ok(!p.href.startsWith('/'), '상대 경로');
     assert.ok(existsSync(path.join(ROOT, DIR, p.href)), `${p.href} 파일이 있다`);
@@ -54,9 +54,9 @@ test('광장: 포털은 0.45초 머물면 들어가고, 벗어나면 처음부�
   let walk = { id: null, t: 0 }, got = null;
   for (let y = arena.y + 120; y > arena.y - 120 && !got; y -= 220 / 60) { walk = L.portalStep(walk, { x: arena.x, y }, L.PORTALS, 1 / 60); got = walk.enter; }
   assert.equal(got, 'arena', '지나가며 들어감');
-  const garden = L.PORTALS.find(p => p.id === 'garden');
+  const coop = { id: 'coop', x: 100, y: 100, r: 60, ready: false };
   st = { id: null, t: 0 };
-  for (let i = 0; i < 90; i++) { st = L.portalStep(st, { x: garden.x, y: garden.y }, L.PORTALS, 1 / 30); assert.equal(st.enter, null, '곧 열려요 포털'); }
+  for (let i = 0; i < 90; i++) { st = L.portalStep(st, { x: 100, y: 100 }, [coop], 1 / 30); assert.equal(st.enter, null, '닫힌 포털'); }
   const st0 = { id: null, t: 0 }; L.portalStep(st0, on, L.PORTALS, 0.1); assert.deepEqual(st0, { id: null, t: 0 }, '새 객체');
 });
 

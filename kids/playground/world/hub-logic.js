@@ -12,7 +12,7 @@
       id: 'myroom', name: '마이룸', icon: '🏠', x: 210, y: 1240, r: 88,
       href: '../../common_space/my-room.html', ready: true
     }),
-    Object.freeze({ id: 'garden', name: '비밀 정원', icon: '🌿', x: 870, y: 1240, r: 88, href: 'garden.html', ready: false }),
+    Object.freeze({ id: 'garden', name: '비밀 정원', icon: '🌿', x: 870, y: 1240, r: 88, href: 'garden.html', ready: true }),
     Object.freeze({
       id: 'coop', name: '남매 보물문', icon: '🎁', x: 540, y: 1500, r: 60,
       href: null, ready: false, hidden: true

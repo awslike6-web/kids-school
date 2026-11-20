@@ -1,0 +1,84 @@
+/* garden.css — 초안: 안티그래비티 Hydrogen, 검토: Claude (docs/world_module_spec.md §14) */
+
+[hidden] { display: none !important; }
+
+.garden-title {
+  flex: 1; min-width: 0; margin: 0;
+  font-size: 18px; font-weight: 700; text-align: center; color: var(--w-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.garden-keys {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--w-surface); color: var(--w-text);
+  font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums;
+  box-shadow: var(--w-shadow);
+}
+.garden-keys.is-bump { animation: garden-bump 0.6s ease; }
+
+.garden-tools {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px;
+  min-height: 96px; box-sizing: border-box;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--w-surface);
+  background: color-mix(in srgb, var(--w-surface) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-radius: 24px 24px 0 0; box-shadow: var(--w-shadow);
+}
+.garden-can {
+  width: 72px; height: 72px; flex-shrink: 0; padding: 0; border: none; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 32px; line-height: 1;
+  background: var(--w-accent); color: var(--w-surface); box-shadow: var(--w-shadow);
+  touch-action: none; cursor: grab; user-select: none;
+}
+.garden-can.is-dragging {
+  position: fixed; z-index: 40;
+  transform: scale(1.12) rotate(-14deg); cursor: grabbing; pointer-events: auto;
+}
+.garden-hint {
+  flex: 1; min-width: 0; margin: 0;
+  font-size: 15px; line-height: 1.35; color: var(--w-text);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.garden-found {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+.garden-found__card {
+  width: 100%; max-width: 320px; padding: 20px; box-sizing: border-box;
+  border-radius: 24px; background: var(--w-surface); color: var(--w-text);
+  box-shadow: var(--w-shadow);
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+  animation: garden-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.garden-found__title { margin: 0; font-size: 22px; font-weight: 700; color: var(--w-accent); }
+.garden-found__img {
+  max-width: 100%; max-height: 180px; object-fit: contain;
+  animation: garden-float 2.6s ease-in-out infinite;
+}
+.garden-found__name { margin: 0; font-size: 24px; font-weight: 700; }
+.garden-found__birth { margin: 0; font-size: 16px; }
+.garden-found__actions {
+  width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 6px;
+}
+.garden-found__btn { width: 100%; height: 56px; font-size: 17px; }
+
+@keyframes garden-bump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+@keyframes garden-pop {
+  0% { opacity: 0; transform: scale(0.82); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes garden-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-keys.is-bump, .garden-found__card, .garden-found__img { animation: none; }
+}

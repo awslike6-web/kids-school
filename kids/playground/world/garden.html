@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>🌿 비밀 정원 · 내 친구 월드</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="world.css?v=20261120-p4a">
+  <link rel="stylesheet" href="garden.css?v=20261120-p4a">
+</head>
+<body>
+  <!-- 내 친구 월드 비밀 정원 (docs/world_module_spec.md §14). 화면은 garden.js가 채운다. -->
+  <main id="stage" class="world-stage theme--slime">
+    <canvas id="cv" class="world-canvas" aria-label="비밀 정원"></canvas>
+    <header id="hud" class="world-hud-top">
+      <button id="exitBtn" class="world-exit" type="button" aria-label="광장으로">←</button>
+      <span id="title" class="world-hud-top__item garden-title">🌿 비밀 정원</span>
+      <span id="keys" class="world-hud-top__item garden-keys">🔑 0</span>
+    </header>
+    <section id="tools" class="garden-tools" data-no-stick>
+      <button id="can" class="garden-can" type="button" aria-label="물뿌리개 (끌어서 꽃봉오리에)">💧</button>
+      <span id="hint" class="garden-hint">덤불은 톡톡, 꽃봉오리엔 💧를 끌어다 줘!</span>
+    </section>
+    <div id="toast" class="world-toast" role="status" hidden></div>
+    <section id="found" class="garden-found" data-no-stick hidden>
+      <div class="garden-found__card">
+        <p class="garden-found__title">✨ 새로운 친구 발견!</p>
+        <img id="foundImg" class="garden-found__img" alt="">
+        <p id="foundName" class="garden-found__name"></p>
+        <p id="foundBirth" class="garden-found__birth"></p>
+        <div class="garden-found__actions">
+          <button id="toRoom" class="world-btn world-btn--main garden-found__btn" type="button"><span class="world-btn__label">🏠 마이룸에 데려가기</span></button>
+          <button id="keepLooking" class="world-btn garden-found__btn" type="button"><span class="world-btn__label">🌿 더 찾기</span></button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../data/gallery-data.js"></script>
+  <script src="../../subjects/quest/monster_roster.js"></script>
+  <script src="core/world-save.js?v=20261120-p4a"></script>
+  <script src="core/world-sprites.js?v=20261120-p4a"></script>
+  <script src="core/world-view.js?v=20261120-p4a"></script>
+  <script src="core/world-fx.js?v=20261120-p4a"></script>
+  <script src="core/world-sfx.js?v=20261120-p4a"></script>
+  <script src="hub-logic.js?v=20261120-p4a"></script>
+  <script src="garden-logic.js?v=20261120-p4a"></script>
+  <script src="garden.js?v=20261120-p4a"></script>
+  <script>window.GardenUI && window.GardenUI.boot();</script>
+</body>
+</html>

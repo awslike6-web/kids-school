@@ -288,6 +288,10 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   - `hub.js` (`HubUI.boot`): 나(아레나 지난 선택 또는 첫 캐릭터)·친구 산책(같은 이름 몬스터 중복 제거), 톡 → 말풍선·탄생 이야기·성격 판(cfg `p` 저장), 🗺️ 지도·남매 초대 토글(`guest`), 생일 폭죽, 포털 진입. `hub.css`.
   - 공용 `core/world-input.js` 수정: 버튼·`a`·`.world-sheet`·`.world-hud-top`·`[data-no-stick]` 위를 누르면 조이스틱이 가로채지 않음.
   - 시험: `tests/world-hub.test.mjs`(7개: 규칙, 포털 목록·파일, 포털 진입(지나가며 들어감 포함), 친구 산책·성격, 수줍, 톡·날짜·지도, 로비 입구·아레나 나가기·뼈대·중복 제거·포털 주소 연결).
+- **🌿 비밀 정원 (P4a, 2026-11-20)** — 광장 정원 포털 → `kids/playground/world/garden.html`(Claude). 명세 §14.
+  - `garden-logic.js` (`GardenLogic`, DOM 없음): `SPOTS`(덤불 3·꽃봉오리 3·웅덩이 2), `baseline`(처음엔 최근 3명만 숨기고 나머지 `found`), `visibleIds`(광장·마이룸에 보일 친구: `found` 비면 전부), `plan`, `tap`·`water`·`unlock`, `nearest`. `idMap`은 Map(`sidOf`로 객체도 받음).
+  - `garden.js` (`GardenUI.boot`): 덤불 톡톡·물뿌리개 끌기·열쇠(`keys` 저장), 친구 발견 카드(`found` 저장, 마이룸으로), 찾은 친구 산책(`HubLogic` 재사용). `garden.css`.
+  - 광장 `hub.js`는 `GardenLogic.visibleIds`로 찾은 친구만(정원 미방문이면 전부). 시험 `tests/world-garden.test.mjs`(7개).
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
