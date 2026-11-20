@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>⚔️ 아레나 · 내 친구 월드</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="world.css">
+  <link rel="stylesheet" href="arena.css">
+</head>
+<body>
+  <!-- 내 친구 월드 아레나 (docs/world_module_spec.md §12). 화면은 arena-ui.js가 채운다. -->
+  <main id="stage" class="world-stage theme--arcade">
+    <canvas id="cv" class="world-canvas" aria-label="아레나"></canvas>
+    <header id="hud" class="world-hud-top" hidden>
+      <button id="exitBtn" class="world-exit" type="button" aria-label="나가기">←</button>
+      <div class="world-hud-top__item arena-bar">
+        <span id="meName" class="arena-bar__name">나</span>
+        <span class="arena-hp"><span id="meHp" class="arena-hp__fill"></span></span>
+      </div>
+      <div class="world-hud-top__item arena-bar arena-bar--foe">
+        <span id="foeName" class="arena-bar__name">상대</span>
+        <span class="arena-hp arena-hp--foe"><span id="foeHp" class="arena-hp__fill"></span></span>
+      </div>
+      <span id="timer" class="world-hud-top__item arena-timer">0.0</span>
+    </header>
+    <div id="cheer" class="arena-cheer" aria-hidden="true"></div>
+    <section id="controls" class="world-controls" hidden>
+      <div class="world-controls__right">
+        <button class="world-btn arena-special" data-action="special" type="button" aria-label="필살기">
+          <span class="world-btn__icon">⭐</span><span id="meter" class="world-btn__label">0%</span>
+        </button>
+        <button class="world-btn" data-action="dash" type="button" aria-label="회피">
+          <span class="world-btn__icon">💨</span><span class="world-btn__label">회피</span>
+        </button>
+        <button class="world-btn world-btn--main" data-action="attack" type="button" aria-label="공격">
+          <span class="world-btn__icon">⚔️</span><span class="world-btn__label">공격</span>
+        </button>
+      </div>
+    </section>
+    <div id="toast" class="world-toast" role="status" hidden></div>
+    <section id="sheet" class="world-sheet arena-sheet" aria-label="고르기"></section>
+    <section id="result" class="world-sheet arena-result" aria-label="결과" hidden></section>
+  </main>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../core/study-log-store.js"></script>
+  <script src="../../data/gallery-data.js"></script>
+  <script src="../../subjects/quest/monster_roster.js"></script>
+  <script src="core/world-save.js"></script>
+  <script src="core/world-sprites.js"></script>
+  <script src="core/world-view.js"></script>
+  <script src="core/world-input.js"></script>
+  <script src="core/world-fx.js"></script>
+  <script src="core/world-sfx.js"></script>
+  <script src="arena-weapons.js"></script>
+  <script src="arena-fighter.js"></script>
+  <script src="arena-boss.js"></script>
+  <script src="arena-render.js"></script>
+  <script src="arena-ui.js"></script>
+  <script>window.ArenaUI && window.ArenaUI.boot();</script>
+</body>
+</html>

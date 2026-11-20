@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. **P0·P1 완료(2026-11-20)**, 다음은 P2 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
+> **상태**: 설계 확정. **P0·P1·P2 완료(2026-11-20)**, 다음은 P3 광장(로비 놀이터 입구 포함). 아레나는 지금 주소로만 들어갈 수 있다(`kids/playground/world/arena.html`). 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -322,7 +322,7 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 |---|---|---|
 | **P0 등록 입구** ✅ | `ART_CATEGORIES`에 캐릭터 분류, `--cat "캐릭터"`가 빌더·등록 도구를 통과하는지 | 갤러리 시험 + 관제탑 등록 시험, 임시 구조에서 `--no-push` 등록 1건 — 완료: `tests/gallery-character-category.test.mjs`(3), 관제탑 `test_character_category_survives_registration_and_build`(제목·분류·캐릭터를 함께 등록해 메타·빌드 결과 모두 「캐릭터」·🧸) |
 | **P1 공용 부품** ✅ | `core/` 6개 + `world.css` — 완료: 안티그래비티 Hydrogen 초안 7개(병렬), Claude 계약·시험·노션 동기화·검증. `tests/world-core.test.mjs` 23개, 폰 세로·가로·PC 화면 확인 | `tests/world-core.test.mjs`: 그림 목록 합치기(작성자 필터·놀러 오기), 대표색→효과 배정, 짧은 해시·충돌, 새 친구 판정, 두 기기 합치기(멱등·순서 무관), 1,800자 줄이기에서 `seen`·`found` 보존, 사라진 그림 숨김(삭제 아님), 깨진 저장값 복구, 카메라 균일 확대(비율 유지), dt 상한 |
-| **P2 아레나** | 시제품 4개에서 이식, 폰 조작, 계열 3 × 효과 6, 꼬마 모드 | `tests/world-arena.test.mjs`(무기 타임라인, 효과별 초당 피해 ±10%, 보스 패턴 순서, 보호막, 상점 무기 매핑, 꼬마 모드 값), §7-3 순서로 한 판씩 직접 플레이 |
+| **P2 아레나** ✅ | 시제품 4개에서 이식, 폰 조작, 계열 3 × 효과 6, 꼬마 모드 — 완료: 엔진 3개(Hydrogen 초안, 시험 실패는 모두 Claude 시험 쪽 실수였음. 계약 빈틈 1곳 수정: 라이벌에게도 보호막이 걸려 이길 수 없던 것) + 그리기·화면 연결·스타일(Hydrogen) + `arena.html`(Claude). `tests/world-arena.test.mjs` 22개, 폰 세로에서 라이벌전·보스전·승리·기록 저장·민서 테마 확인. **미룬 것**: 상점 무기 연결(마이룸 상점 `arena` 필드·보유 목록 읽기)은 P4 마이룸 작업과 함께, 과목별 오버차지는 학습일지에 과목별 오늘 기록 읽기가 생기면(지금은 「오늘 공부함」이면 필살기 게이지 1.5배) | 완료 |
 | **P3 광장** | `hub.html`·`hub.js`, 포털(아레나·마이룸), 친구 산책, 로비 놀이터 목록 한 줄 | 폰 세로에서 광장 → 아레나 → 광장 → 마이룸 왕복 |
 | **P4 정원 + 마이룸 인형** | `garden.js`, 정원 포털, `my-room-dolls.js`, 서랍 탭, 폰 드래그 | `tests/my-room-split.test.mjs` 유지 + `tests/world-garden.test.mjs`(숨기기·발견·이사), 민서 기준 터치만으로 끝까지 |
 | **P5 알·목소리** | §9-4, §9-5, 관제탑 등록 도구 `구분: 캐릭터` | 대기열 읽기 시험(모의 노션), IndexedDB 상한·권한 거부 시험 |
@@ -400,7 +400,66 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 12. 하지 않는 것
+## 12. P2 아레나 계약 (2026-11-20)
+
+구성: 계산 엔진 3개(DOM 없음, 시험 대상) → 그리기·화면 연결 2개. 엔진끼리는 서로 부르지 않고 **사건(event) 배열**을 돌려준다. 화면 연결(`arena-ui.js`)이 사건을 받아 피해 적용·연출(`WorldFX`)·소리(`WorldSFX`)로 옮긴다. 난수는 모두 인자 `rng`(0~1 함수)로 받는다(시험에서 시드 고정).
+
+### 12-0. 공통 자료 모양
+- 월드 `{w:720, h:1100}`(세로), 벽 두께 24. 엄폐물 `cover = {x, y, w, h}`(왼쪽 위·크기).
+- 전투원 `Fighter`: `{id, team:'me'|'foe', x, y, vx, vy, r, hp, maxHp, speed, aim, dashT, dashCd, invulnT, shieldT, hitAt, landedAt, slowT, slowMult, stunT, burnT, burnDps, weapon:{cls, trait, skin}, atk}`.
+- 공격 상태 `atk`: `{phase:'idle'|'windup'|'active'|'recovery'|'reload', t, step, comboT, hit:false, shots}`.
+- 탄 `Projectile`: `{x, y, vx, vy, r, dmg, kb, trait, team, life}`.
+- 보스 `Boss`: `{id, name, x, y, vx, vy, r, hp, maxHp, phase:1|2, state:'idle'|'windup'|'active'|'stunned'|'dead', t, pattern, patternIdx, level:'kid'|'normal', aim, hitAt, data}`.
+- 위험 `Hazard`: `{kind:'orb'|'zone'|'ring'|'slam', x, y, r, vx, vy, dmg, kb, armT, life, width}` (`armT > 0`이면 아직 예고 중, 피해 없음).
+- 사건: `{type:'hit', target:'me'|'foe'|'boss', dmg, x, y, kb:{x,y}, trait, crit}` · `{type:'swing', step, x, y, aim}` · `{type:'shoot', cls, x, y, aim}` · `{type:'telegraph', pattern}` · `{type:'stun', x, y}` · `{type:'phase2'}` · `{type:'shield'}` · `{type:'dash', x, y}` · `{type:'reload'}` · `{type:'down'}`(라이벌 쓰러짐).
+
+### 12-1. `arena-weapons.js` → `window.ArenaWeapons`
+| 이름 | 계약 |
+|---|---|
+| `WEAPONS` | `blade`(3연타: windup·active·recovery·range·damage·knockback·lunge·arc = 1단 .075·.085·.14·112·24·350·150·1.35, 2단 .065·.085·.145·118·28·400·175·1.4, 3단 .125·.145·.24·146·62·720·230·π(한 바퀴, crit), `comboReset` .68), `rifle`(.014·.022·.082, dmg 14, speed 1220, spread .055, kb 165, 누르고 있으면 연사), `shotgun`(.085·.045·.39, 5발×18, spread .36, speed 1020, kb 260, 반동 320) |
+| `TRAITS` | `r` 무지개 ×1.0 · `f` 불꽃 ×0.85 + 2초 화상(맞은 피해의 0.15를 2초에 나눠) · `i` 얼음 ×0.92 + 1.5초 느려짐(0.6배) · `l` 번개 ×0.92 + 0.12초 경직 · `w` 바람 ×0.95 + 넉백 1.8배 · `x` 폭발 ×0.9 + 반지름 70 작은 폭발(연출) |
+| `traitTotal(trait)` | 즉시 피해 배수 + 화상 총량 배수(모두 0.9~1.0 사이) |
+| `dps(cls, trait)` | 한 주기(블레이드는 3연타 합) 피해 × `traitTotal` ÷ 주기 시간. 샷건은 전탄 명중 기준 |
+| `fromShop(item)` / `fromCfg(cfg, colorTrait)` | 상점 항목 `arena:{class, trait}` → `{cls, trait, skin:item.id}`(필드 없으면 `null`) / 내 친구 설정 `w`·`e` → `{cls, trait}`(없으면 `blade`·`colorTrait`) |
+| `startAttack(f)` | idle이면 windup 시작(`true`), 블레이드는 recovery 중이면 다음 단 예약, 그 밖은 `false` |
+| `stepAttack(f, dt, held, rng)` | 공격 상태 진행. 사건: windup→active 순간 `swing`(블레이드) 또는 `shoot`(총, 탄 생성은 `fire`). 블레이드 `comboReset` 지나면 1단으로. 라이플은 `held`면 recovery 끝에 바로 다음 발. 돌려주는 값 `{events, projectiles}` |
+| `fire(f, rng)` | 현재 무기의 탄 배열(샷건 5발은 aim 기준 좌우 대칭 퍼짐 + 작은 난수) |
+| `meleeHits(f, targets)` | 블레이드 active 동안 한 번만: 거리 ≤ range + target.r 이고 aim과 각도 차 ≤ arc(3단은 전 방향)인 대상마다 `hit` 사건 |
+| `stepProjectiles(list, targets, covers, world, dt)` | 이동·수명·엄폐물·벽 충돌로 제거, 다른 팀 대상과 닿으면 `hit` 사건 후 제거. `{list, events}` |
+| `applyTrait(f, trait, dmg)` | 맞은 쪽에 화상·느려짐·경직 적용, 바람이면 넉백 배수 반환 |
+
+### 12-2. `arena-fighter.js` → `window.ArenaFighter`
+| 이름 | 계약 |
+|---|---|
+| `LEVELS` | `kid`(속도 140, 준비 ×1.55, 재장전 1.8초, 재장전 전 2번, 생각 간격 .48, 회피 확률 .08, 체력 160), `normal`(165, ×1.25, 1.5, 2, .3, .24, 230), `ace`(190, ×.96, 1.35, 3, .16, .45, 270) |
+| `COVERS` | `pillars4`(기둥 4개 72×72: 중심 (180,330)·(540,330)·(180,770)·(540,770)), `cross`, `open` |
+| `create({id, team, x, y, weapon, level})` | me: r 26·체력 160·속도 230, foe: `LEVELS[level]` |
+| `move(f, vec, dt, covers, world)` | 느려짐·경직 반영 이동, 엄폐물과 원-사각형 충돌로 밀어냄, 벽 안에 둠, `aim`은 이동 방향(공격 중엔 유지) |
+| `dash(f, vec)` | 쿨다운 0.9초, 0.18초 동안 속도 620, 0.35초 무적. 사건 `dash` |
+| `damage(f, hit)` | 무적·보호막 중이면 0. (화면 연결은 라이벌이 나에게 주는 피해를 난이도별 꼬마 0.5·보통 0.75·에이스 1배로 줄인다 — 폰 시험에서 시제품 수치가 1초에 체력 70%를 깎음) **내 캐릭터(`team:'me'`)는** 체력이 0 이하가 되면 0으로 두지 않고 최대 체력의 30%로, 보호막 3초(사건 `shield`). 라이벌은 0이 되면 사건 `down`(이길 수 있어야 하므로). 넉백·`hitAt` 적용. 재장전 중인 상대는 피해 ×1.3. 받은 피해 반환 |
+| `lineOfSight(a, b, covers)` | 두 중심을 잇는 선분이 엄폐물과 겹치지 않으면 `true` |
+| `think(foe, me, covers, dt, rng)` | 라이벌 생각: 무기별 거리(블레이드 90·라이플 300·샷건 160) 유지, 1.2초마다 옆걸음 방향 전환, 시야가 있고 쿨다운이 끝나면 공격, `재장전 전` 횟수만큼 쏘면 `reload`(그동안 공격 안 함, 사건 `reload`), 내 탄이 가까우면 회피 확률만큼 대시. `{move, attack, dash}` |
+| `stepStatus(f, dt)` | 대시·무적·보호막·느려짐·경직·화상 시간 감소, 화상 피해(보호막 규칙 그대로) |
+
+### 12-3. `arena-boss.js` → `window.ArenaBoss`
+| 이름 | 계약 |
+|---|---|
+| `create({id, name, level, x, y})` | normal 체력 1800·r 54·걸음 60, kid 체력 1100. 패턴: normal `charge→aoe→ring→slam` 반복, kid `charge→aoe` 반복 |
+| `step(boss, me, covers, world, dt, rng)` | `{events, hazards}`(새로 생긴 위험). idle(대기 normal 1.0초·2페이즈 0.7·kid 1.6) → windup(예고: 사건 `telegraph`) → active → idle. 준비 시간 배수: 2페이즈 ×0.85, kid ×1.4 |
+| 돌진 | 준비 .96초, 발사 0.35초 전에 방향 잠금(그 전엔 0.35초 늦은 내 위치를 따라감), 속도 680·최대 560. 엄폐물에 부딪히면 `stunned` 1.6초(사건 `stun`), 그동안 받는 피해 ×1.5. 나와 닿으면 `hit` 34·넉백 520(한 번) |
+| 장판 | 준비 .52초, 내 근처에 `zone` 4개(2페이즈 3개 + 0.55초 뒤 3개), r 76, `armT` 0.9초 뒤 한 번 터짐 28 |
+| 링 | 준비 .82초, `orb` 5발(2페이즈 7발) 부채꼴 1.15(1.55) 속도 280(330) r 10 dmg 26 수명 2.8 + 퍼지는 `ring`(속도 240·2페이즈 290, 두께 18, 최대 520, dmg 30 한 번) |
+| 내려찍기 | 준비 .98초, 내 쪽으로 최대 175 이동 후 착지 `slam` 원 r 155(172) dmg 40 넉백 600 |
+| `damage(boss, hit)` | 기절 중 ×1.5. 체력 50% 이하가 처음 되면 `phase:2`, 사건 `phase2`. 0이면 `dead`. 받은 피해 반환 |
+| `stepHazards(list, me, dt)` | 위험 이동·수명·예고 시간, 무적 아닌 나와 닿으면 `hit`(위험 하나당 한 번). `{list, events}` |
+| kid 피해 | 모든 보스 피해 ×0.6 |
+
+### 12-4. 그리기·화면 연결 (2차)
+`arena-render.js`(`ArenaRender`: 바닥·벽·엄폐물·전투원·무기·탄·위험 예고선·보스·HUD 아닌 캔버스 전부, 화면 밖 공격 가장자리 경고), `arena-ui.js`(`ArenaUI`: 시작 화면(나·상대·무기·난이도), HUD, 응원석, 결과, 오버차지, 루프·사건 처리), `arena.html`(얇은 래퍼), `arena.css`(시작·결과 화면). 1차 엔진의 실제 공개 함수 목록을 받아 만든다.
+
+---
+
+## 13. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.

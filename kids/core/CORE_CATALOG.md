@@ -276,6 +276,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `core/world-sfx.js` (137줄, `WorldSFX`): Web Audio 합성 효과음 9종(5음계 실로폰 포함), `unlock`, 음소거 키 `kids_world_sfx`.
 - `world.css` (343줄): `theme--arcade`·`theme--slime` 변수, `.world-stage`(100dvh·안전 영역·터치 제스처 차단), HUD·조작 구역(아래 28%)·버튼 56/64px·조이스틱·선택 판·칩·가로 폰 배치.
 - 시험: `tests/world-core.test.mjs`(23개: 공통 규칙, 해시 기준값·충돌 쌍, clean, merge 성질 무작위 500회, pack, cfg, 기기 저장, 모의 노션 동기화 3, 그림 목록·대표색, 화면·카메라, 입력, 연출, 소리). 375×812·812×375·1280×800에서 조이스틱·공격·그림 불러오기 확인(임시 확인 화면, 커밋 안 함).
+- **⚔️ 아레나 (P2, 2026-11-20)** — `kids/playground/world/arena.html`(65줄, Claude) + 계산 엔진 3개(DOM 없음, 사건 배열을 돌려줌) + 그리기·화면 연결. 계약 명세 §12. 아직 로비 입구 없음(P3 광장에서 연결).
+  - `arena-weapons.js` (306줄, `ArenaWeapons`): 계열 3(`blade` 3연타·`rifle` 연사·`shotgun` 5발, 시제품 수치) × 효과 6(`TRAITS` r f i l w x, `traitTotal` 0.9~1.0), `dps`, `fromShop`·`fromCfg`, `startAttack`·`stepAttack`·`fire`·`meleeHits`·`stepProjectiles`·`applyTrait`.
+  - `arena-fighter.js` (242줄, `ArenaFighter`): `LEVELS`(kid·normal·ace), `COVERS`(pillars4·cross·open), `create`·`move`(원-사각형 충돌)·`dash`(무적 0.35초)·`damage`(내 캐릭터만 보호막 부활, 라이벌은 `down`)·`lineOfSight`·`think`(라이벌 거리 유지·옆걸음·재장전 틈)·`stepStatus`.
+  - `arena-boss.js` (297줄, `ArenaBoss`): 돌진(기둥 충돌 기절, 피해 1.5배)·장판·링·내려찍기, 2페이즈, kid(2패턴·준비 1.4배·피해 0.6배), `step`·`damage`·`stepHazards`.
+  - `arena-render.js` (558줄, `ArenaRender`): `drawArena`(arcade/slime 색, 예고선, 상태 표시)·`drawOffscreen`·`drawCheer`·`TRAIT_COLORS`.
+  - `arena-ui.js` (624줄, `ArenaUI.boot`): 고르기(나·상대·무기·효과·난이도, NEW, 지난 선택 복원, 친구 설정 w·e 저장), 루프·사건 처리, 라이벌 피해 난이도 배수(0.5·0.75·1), 필살기(「오늘 공부함」이면 1.5배 빨리), 탄생 이야기 자막, 승리·기록(`arena.best`). `arena.css`(234줄).
+  - 시험: `tests/world-arena.test.mjs`(22개: 수치·효과 균형·연타·연사·근접·탄·효과, 이동 충돌·대시·패배 없음 1,000회·라이벌 쓰러짐·재장전·시야·생각, 보스 패턴 순서·예고 뒤 피해·기절·2페이즈·위험 판정·kid 피해, 화면 연결 규칙).
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
