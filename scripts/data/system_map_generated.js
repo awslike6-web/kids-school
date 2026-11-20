@@ -87,7 +87,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "science_spec.md", "path": "kids-school-main/docs/science_spec.md", "domain": ["science"], "docs": ["quiz_choice_shuffle_spec.md", "science_spec.md", "unit_production_pipeline.md"]},
       {"name": "society_5-2_unit3_spec.md", "path": "kids-school-main/docs/society_5-2_unit3_spec.md", "domain": ["society"], "docs": ["quiz_choice_shuffle_spec.md", "society_spec.md"]},
       {"name": "video_unit_spec.md", "path": "kids-school-main/docs/video_unit_spec.md", "domain": [], "docs": ["other_subjects_spec.md", "science_spec.md", "CORE_CATALOG.md"]},
-      {"name": "world_module_spec.md", "path": "kids-school-main/docs/world_module_spec.md", "domain": [], "docs": ["gallery_archive_spec.md", "notion_schemas_school.md"]}
+      {"name": "world_module_spec.md", "path": "kids-school-main/docs/world_module_spec.md", "domain": [], "docs": ["gallery_archive_spec.md", "CORE_CATALOG.md", "notion_schemas_school.md"]}
     ],
     "module": [
       {"name": "admin-usage.js", "path": "daycare-helper/public/js/admin-usage.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "implementation_plan_20261028_usage_page.md"]},
@@ -107,7 +107,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "gallery-3d-scene.js", "path": "kids-school-main/kids/common_space/gallery-3d-scene.js", "domain": ["gallery"], "docs": ["gallery_3d_hall_spec.md", "gallery_archive_spec.md", "CORE_CATALOG.md"]},
       {"name": "gallery-mini-runner.js", "path": "kids-school-main/kids/common_space/gallery-mini-runner.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_fix_spec.md", "gallery_character_runner_spec.md"]},
       {"name": "gallery-modal-manager.js", "path": "kids-school-main/kids/common_space/gallery-modal-manager.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_runner_star_bank_spec.md"]},
-      {"name": "gallery-runner-rewards.js", "path": "kids-school-main/kids/common_space/gallery-runner-rewards.js", "domain": ["gallery", "guardian"], "docs": ["gallery_runner_star_bank_spec.md", "runner_friendship_spec.md", "CORE_CATALOG.md"]},
+      {"name": "gallery-runner-rewards.js", "path": "kids-school-main/kids/common_space/gallery-runner-rewards.js", "domain": ["gallery", "guardian"], "docs": ["gallery_runner_star_bank_spec.md", "runner_friendship_spec.md", "world_module_spec.md"]},
       {"name": "gallery-spot-diff.js", "path": "kids-school-main/kids/common_space/gallery-spot-diff.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_runner_star_bank_spec.md"]},
       {"name": "my-room-core.js", "path": "kids-school-main/kids/common_space/my-room-core.js", "domain": [], "docs": ["homeschool_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "my-room-main.js", "path": "kids-school-main/kids/common_space/my-room-main.js", "domain": [], "docs": ["homeschool_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
@@ -194,6 +194,12 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "yacht-ui.js", "path": "kids-school-main/kids/playground/family/yacht-ui.js", "domain": ["family"], "docs": ["family_omok_spec.md", "family_room_spec.md", "family_yacht_spec.md"]},
       {"name": "yut-engine.js", "path": "kids-school-main/kids/playground/family/yut-engine.js", "domain": ["family"], "docs": ["family_yut_engine_spec.md", "family_yut_ui_spec.md", "CORE_CATALOG.md"]},
       {"name": "yut-ui.js", "path": "kids-school-main/kids/playground/family/yut-ui.js", "domain": ["family"], "docs": ["family_room_spec.md", "family_yut_ui_spec.md", "CORE_CATALOG.md"]},
+      {"name": "world-fx.js", "path": "kids-school-main/kids/playground/world/core/world-fx.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "world-input.js", "path": "kids-school-main/kids/playground/world/core/world-input.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "world-save.js", "path": "kids-school-main/kids/playground/world/core/world-save.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md", "notion_schemas_school.md"]},
+      {"name": "world-sfx.js", "path": "kids-school-main/kids/playground/world/core/world-sfx.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "world-sprites.js", "path": "kids-school-main/kids/playground/world/core/world-sprites.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "world-view.js", "path": "kids-school-main/kids/playground/world/core/world-view.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "english_unit_activities.js", "path": "kids-school-main/kids/subjects/english/data/english_unit_activities.js", "domain": ["english"], "docs": ["english_listen_place_L10_spec.md", "english_listen_place_L11_spec.md", "english_listen_place_spec.md"]},
       {"name": "listen_place_5-2_L10.js", "path": "kids-school-main/kids/subjects/english/data/listen_place_5-2_L10.js", "domain": ["english"], "docs": ["english_listen_place_L10_spec.md", "english_spec.md", "CORE_CATALOG.md"]},
       {"name": "listen_place_5-2_L11.js", "path": "kids-school-main/kids/subjects/english/data/listen_place_5-2_L11.js", "domain": ["english"], "docs": ["english_listen_place_L11_spec.md", "english_spec.md", "CORE_CATALOG.md"]},
