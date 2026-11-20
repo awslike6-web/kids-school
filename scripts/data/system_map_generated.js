@@ -86,7 +86,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "runner_friendship_spec.md", "path": "kids-school-main/docs/runner_friendship_spec.md", "domain": ["gallery"], "docs": ["CORE_CATALOG.md"]},
       {"name": "science_spec.md", "path": "kids-school-main/docs/science_spec.md", "domain": ["science"], "docs": ["quiz_choice_shuffle_spec.md", "science_spec.md", "unit_production_pipeline.md"]},
       {"name": "society_5-2_unit3_spec.md", "path": "kids-school-main/docs/society_5-2_unit3_spec.md", "domain": ["society"], "docs": ["quiz_choice_shuffle_spec.md", "society_spec.md"]},
-      {"name": "video_unit_spec.md", "path": "kids-school-main/docs/video_unit_spec.md", "domain": [], "docs": ["other_subjects_spec.md", "science_spec.md", "CORE_CATALOG.md"]}
+      {"name": "video_unit_spec.md", "path": "kids-school-main/docs/video_unit_spec.md", "domain": [], "docs": ["other_subjects_spec.md", "science_spec.md", "CORE_CATALOG.md"]},
+      {"name": "world_module_spec.md", "path": "kids-school-main/docs/world_module_spec.md", "domain": [], "docs": ["gallery_archive_spec.md", "notion_schemas_school.md"]}
     ],
     "module": [
       {"name": "admin-usage.js", "path": "daycare-helper/public/js/admin-usage.js", "domain": ["daycare"], "docs": ["CORE_CATALOG.md", "implementation_plan_20261028_usage_page.md"]},
@@ -108,8 +109,8 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "gallery-modal-manager.js", "path": "kids-school-main/kids/common_space/gallery-modal-manager.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_runner_star_bank_spec.md"]},
       {"name": "gallery-runner-rewards.js", "path": "kids-school-main/kids/common_space/gallery-runner-rewards.js", "domain": ["gallery", "guardian"], "docs": ["gallery_runner_star_bank_spec.md", "runner_friendship_spec.md", "CORE_CATALOG.md"]},
       {"name": "gallery-spot-diff.js", "path": "kids-school-main/kids/common_space/gallery-spot-diff.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_runner_star_bank_spec.md"]},
-      {"name": "my-room-core.js", "path": "kids-school-main/kids/common_space/my-room-core.js", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
-      {"name": "my-room-main.js", "path": "kids-school-main/kids/common_space/my-room-main.js", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
+      {"name": "my-room-core.js", "path": "kids-school-main/kids/common_space/my-room-core.js", "domain": [], "docs": ["homeschool_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "my-room-main.js", "path": "kids-school-main/kids/common_space/my-room-main.js", "domain": [], "docs": ["homeschool_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "voca_common.js", "path": "kids-school-main/kids/common_space/voca_common.js", "domain": [], "docs": ["other_subjects_spec.md", "CORE_CATALOG.md", "voca_math_viewer_handover.md"]},
       {"name": "voca_modal.js", "path": "kids-school-main/kids/common_space/voca_modal.js", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "config.js", "path": "kids-school-main/kids/config.js", "domain": [], "docs": ["family_mail_spec.md", "family_quiz_spec.md", "homeschool_spec.md"]},
@@ -139,7 +140,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "notion-study-logger.js", "path": "kids-school-main/kids/core/notion-study-logger.js", "domain": ["guardian"], "docs": ["gallery_runner_star_bank_spec.md", "homeschool_spec.md", "quest_reward_retry_spec.md"]},
       {"name": "notion-timetable.js", "path": "kids-school-main/kids/core/notion-timetable.js", "domain": ["timetable"], "docs": ["timetable_diary_spec.md", "CORE_CATALOG.md"]},
       {"name": "notion-voca.js", "path": "kids-school-main/kids/core/notion-voca.js", "domain": [], "docs": ["korean_spec.md", "CORE_CATALOG.md"]},
-      {"name": "quick-uploader.js", "path": "kids-school-main/kids/core/quick-uploader.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "CORE_CATALOG.md"]},
+      {"name": "quick-uploader.js", "path": "kids-school-main/kids/core/quick-uploader.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "quiz-feedback-overlay.js", "path": "kids-school-main/kids/core/quiz-feedback-overlay.js", "domain": [], "docs": ["reward_grant_shared_spec.md", "CORE_CATALOG.md"]},
       {"name": "quiz-flow-controller.js", "path": "kids-school-main/kids/core/quiz-flow-controller.js", "domain": [], "docs": ["english_spec.md", "quiz_choice_shuffle_spec.md", "video_unit_spec.md"]},
       {"name": "screentime-tracker.js", "path": "kids-school-main/kids/core/screentime-tracker.js", "domain": ["guardian"], "docs": ["english_spec.md", "homeschool_spec.md", "math_spec.md"]},
@@ -159,6 +160,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "english_storybook.js", "path": "kids-school-main/kids/js/english_storybook.js", "domain": ["english"], "docs": ["english_spec.md", "CORE_CATALOG.md"]},
       {"name": "english_unit_bar.js", "path": "kids-school-main/kids/js/english_unit_bar.js", "domain": ["english"], "docs": ["english_listen_place_L10_spec.md", "english_listen_place_L11_spec.md", "english_listen_place_spec.md"]},
       {"name": "english_voca.js", "path": "kids-school-main/kids/js/english_voca.js", "domain": ["english"], "docs": ["english_spec.md", "quiz_choice_shuffle_spec.md", "CORE_CATALOG.md"]},
+      {"name": "festival_controller.js", "path": "kids-school-main/kids/js/festival_controller.js", "domain": [], "docs": ["timetable_diary_spec.md", "CORE_CATALOG.md"]},
       {"name": "korean_storybook.js", "path": "kids-school-main/kids/js/korean_storybook.js", "domain": ["korean"], "docs": ["korean_spec.md", "CORE_CATALOG.md"]},
       {"name": "korean_voca.js", "path": "kids-school-main/kids/js/korean_voca.js", "domain": ["korean"], "docs": ["korean_spec.md", "quiz_choice_shuffle_spec.md", "CORE_CATALOG.md"]},
       {"name": "lobby_config.js", "path": "kids-school-main/kids/js/lobby_config.js", "domain": [], "docs": ["family_omok_spec.md", "family_yut_ui_spec.md", "other_subjects_spec.md"]},

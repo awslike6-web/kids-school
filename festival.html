@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 원신초 학예발표회 안내 | 김s 공부방</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kids/css/design-system.css">
+<link rel="stylesheet" href="kids/css/festival.css?v=20261120-fest">
+</head>
+<body>
+
+<header class="fest-topbar">
+  <nav class="fest-nav" aria-label="학예발표회 상단 이동">
+    <a class="nav-pill" href="timetable.html">← 시간표</a>
+    <a class="nav-pill nav-pill-sub" href="lobby.html">🏠 로비</a>
+  </nav>
+  <span class="dday-pill" id="festivalDday">D-day</span>
+</header>
+
+<main class="fest-main" id="festivalContent">
+  <section class="hero-card" aria-labelledby="festivalHeading">
+    <div class="hero-kicker">🎭 2026학년도 학교 행사 안내</div>
+    <h1 id="festivalHeading">2026 원신초 학예발표회</h1>
+
+    <div class="fact-grid" id="festivalFacts">
+      <div class="fact-item">
+        <span class="fact-label">📅 일시</span>
+        <strong class="fact-value" id="factDate">2026. 11. 26. (목) 09:00 ~ 12:30</strong>
+      </div>
+      <div class="fact-item">
+        <span class="fact-label">📍 장소</span>
+        <strong class="fact-value" id="factVenue">본교 꿈가꾸기실 (아우동)</strong>
+      </div>
+    </div>
+
+    <div class="warning-strip" id="warningStrip" role="note" aria-label="관람 주의사항"></div>
+
+    <div class="kids-overview" id="kidsOverview"></div>
+  </section>
+
+  <section class="live-tracker" id="liveTracker" aria-labelledby="trackerHeading">
+    <div class="tracker-head">
+      <div>
+        <h2 id="trackerHeading" class="tracker-title">🎬 현장 진행 체크</h2>
+        <p class="tracker-status" id="nextStageText" aria-live="polite">
+          끝난 무대를 체크하면 다음 우리 아이 무대까지 남은 순서를 바로 알려드려요.
+        </p>
+      </div>
+      <div class="tracker-actions">
+        <span class="progress-pill" id="progressPill">0 / 17 완료</span>
+        <button type="button" class="reset-btn" id="resetProgressBtn" hidden>초기화</button>
+      </div>
+    </div>
+    <div class="progress-bar-track" aria-hidden="true">
+      <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+  </section>
+
+  <section class="program-section" aria-labelledby="programHeading">
+    <div class="section-head">
+      <h2 id="programHeading">📋 프로그램 순서</h2>
+      <p class="section-sub">우리 아이 무대를 먼저 보고, 필요한 구간만 펼쳐 확인하세요.</p>
+    </div>
+
+    <div class="filter-bar" id="festivalFilterBar" role="group" aria-label="무대 필터 선택">
+      <button type="button" class="filter-chip active" data-filter="focus" aria-pressed="true">⭐ 민수·민서 중심</button>
+      <button type="button" class="filter-chip chip-minseo" data-filter="minseo" aria-pressed="false">👧 민서 (4+1)</button>
+      <button type="button" class="filter-chip chip-minsu" data-filter="minsu" aria-pressed="false">👦 민수 (2)</button>
+      <button type="button" class="filter-chip" data-filter="all" aria-pressed="false">📋 전체 17개</button>
+    </div>
+
+    <div class="timeline-list" id="programTimeline"></div>
+  </section>
+
+  <section class="origin-section" aria-labelledby="originHeading">
+    <h2 id="originHeading" class="visually-hidden">학교 안내 원문 및 문의</h2>
+    <details class="origin-details" id="originDetails">
+      <summary class="origin-summary">📄 학교 안내 원문 · 오시는 길 · 전화 문의 보기</summary>
+      <div class="origin-body" id="originBody"></div>
+    </details>
+  </section>
+</main>
+
+<script src="kids/data/festival_2026_data.js?v=20261120-fest"></script>
+<script src="kids/js/festival_controller.js?v=20261120-fest"></script>
+</body>
+</html>
