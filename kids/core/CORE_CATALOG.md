@@ -294,6 +294,10 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   - `garden-logic.js` (`GardenLogic`, DOM 없음): `SPOTS`(덤불 3·꽃봉오리 3·웅덩이 2), `baseline`(처음엔 최근 3명만 숨기고 나머지 `found`), `visibleIds`(광장·마이룸에 보일 친구: `found` 비면 전부), `plan`, `tap`·`water`·`unlock`, `nearest`. `idMap`은 Map(`sidOf`로 객체도 받음).
   - `garden.js` (`GardenUI.boot`): 덤불 톡톡·물뿌리개 끌기·열쇠(`keys` 저장), 친구 발견 카드(`found` 저장, 마이룸으로), 찾은 친구 산책(`HubLogic` 재사용). `garden.css`.
   - 광장 `hub.js`는 `GardenLogic.visibleIds`로 찾은 친구만(정원 미방문이면 전부). 시험 `tests/world-garden.test.mjs`(7개).
+- **🥚 알·🎙️ 내 목소리 (P5, 2026-11-21)** — 명세 §17.
+  - `core/world-eggs.js` (`WorldEggs`, Claude): `artIdFor`(등록 도구 `gallery_registration_options.py` 폴더 규칙과 같음), `pick`(대기열 중 그 아이의 `캐릭터` 최근 3), `fetchPending`(`GET /api/pending-media` 사진 없는 요약, 읽기 전용), `remember`/`known`(기기 `kids_world_eggs_{child}`). 광장 가운데 「🥚 품는 중」 둥지, 정원은 기억한 알의 친구를 알 자리로 숨기고 톡톡 3번에 「🐣 알에서 깨어났어!」(`GardenLogic.plan(hidden, rng, eggArtIds)`·`tap`).
+  - `core/world-voice.js` (`WorldVoice`, Hydrogen): `supported`, `record(child, shortId, ms)`(MediaRecorder → IndexedDB `kids_world_voice`/`clips`, 아이별 30개, 녹음 뒤 마이크 끔), `has`·`play`·`remove`, `keyOf`·`trimPlan`. 밖으로 보내지 않음. 광장 성격 판 「🎙️ 내 목소리·▶ 듣기·🗑️」, 광장 친구·마이룸 인형 톡·아레나 필살기에서 재생(없으면 실로폰).
+  - 찰칵등록(`kids/core/quick-uploader.js`) 「🧸 내 캐릭터 (월드 알)」 칩, 메모 칸 = 캐릭터 이름. 로비 `quick-uploader.js?v=20261121-p5`. 시험 `tests/world-p5.test.mjs`.
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 

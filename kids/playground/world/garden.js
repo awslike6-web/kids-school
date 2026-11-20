@@ -147,7 +147,9 @@
       }
 
       const hidden = Array.isArray(b.hidden) ? b.hidden : [];
-      spots = GardenLogic.plan(hidden, rng).map((sp) => Object.assign({}, sp, { shakeT: 0, openT: -9 }));
+      // 「🥚 알」(§17): 이 기기가 기억하는 알의 작품 id면 알 자리로 숨긴다 (Claude)
+      const eggArt = root.WorldEggs ? root.WorldEggs.known(child) : [];
+      spots = GardenLogic.plan(hidden, rng, eggArt).map((sp) => Object.assign({}, sp, { shakeT: 0, openT: -9 }));
       if (hidden.length === 0) {
         showToast('새 친구가 오면 여기 숨어 있을 거야!');
       }
@@ -190,6 +192,8 @@
             return Object.assign({}, s, { found: cur.concat([sid]) });
           });
         }
+        const titleEl = foundEl.querySelector('.garden-found__title');
+        if (titleEl) titleEl.textContent = content.egg ? '🐣 알에서 깨어났어!' : '✨ 새로운 친구 발견!';
         foundImg.src = item ? item.src : '';
         foundImg.alt = item ? item.name : '';
         foundName.textContent = item ? item.name : '';
@@ -233,7 +237,7 @@
       const spot = GardenLogic.nearest(spots, np.x, np.y);
       if (!spot) return;
 
-      if (spot.kind === 'bush') {
+      if (spot.kind === 'bush' || (spot.content && spot.content.egg)) {
         const r = GardenLogic.tap(spot);
         if (!r) return;
         if (r.shake) {
@@ -344,6 +348,27 @@
       const shake = sp.shakeT > 0 ? Math.sin(t * 48) * 6 * (sp.shakeT / 0.3) : 0;
       ctx.save();
       ctx.translate(x + shake, y);
+
+      if (!sp.open && sp.content && sp.content.egg) { // 🥚 알 자리: 흔들리는 알, 톡톡 횟수만큼 금
+        const wob = Math.sin(t * 3 + sp.i) * 0.12;
+        ctx.rotate(wob);
+        ctx.fillStyle = 'rgba(0,0,0,0.12)';
+        ctx.beginPath(); ctx.ellipse(0, R * 0.62, R * 0.55, R * 0.14, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = isSlime ? '#fff7e6' : '#f1f5f9';
+        ctx.strokeStyle = isSlime ? '#f4a261' : '#00e5ff'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.ellipse(0, 0, R * 0.55, R * 0.72, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isSlime ? '#ffb4c8' : '#7dd3fc';
+        [[-0.2, -0.25], [0.22, 0.05], [-0.1, 0.32]].forEach((d) => {
+          ctx.beginPath(); ctx.arc(d[0] * R, d[1] * R, R * 0.09, 0, Math.PI * 2); ctx.fill();
+        });
+        if (sp.taps > 0) {
+          ctx.strokeStyle = '#7c4a1e'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-R * 0.3, -R * 0.1);
+          for (let k = 0; k < sp.taps * 2; k++) ctx.lineTo(-R * 0.3 + (k + 1) * R * 0.12, (k % 2 ? -0.1 : 0.05) * R);
+          ctx.stroke();
+        }
+        ctx.restore();
+        return;
+      }
 
       if (sp.kind === 'bush') {
         const c1 = isSlime ? '#22c55e' : '#059669';

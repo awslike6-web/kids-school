@@ -92,7 +92,10 @@
     return { type: 'deco', deco: 'star' };
   }
 
-  function plan(hiddenIds, rng) {
+  // eggArtIds: 기기가 기억하는 「🥚 알」의 작품 id(§17-3). 그 친구는 알 자리로 숨는다 (Claude)
+  function plan(hiddenIds, rng, eggArtIds) {
+    const eggs = new Set(Array.isArray(eggArtIds) ? eggArtIds : []);
+    const artOf = (id) => String(id || '').replace(/^gal:/, '').split('#')[0];
     const rand = typeof rng === 'function' ? rng : mulberry32(0x6d2b79f5);
     const ids = Array.isArray(hiddenIds) ? hiddenIds : [];
     const spots = SPOTS.map(function (s, i) {
@@ -108,14 +111,17 @@
     const n = Math.min(spots.length, ids.length);
     for (let m = 0; m < order.length; m += 1) {
       const idx = order[m];
-      spots[idx].content = m < n ? { type: 'friend', id: ids[m] } : decoFor(spots[idx].kind, rand);
+      spots[idx].content = m < n
+        ? (eggs.has(artOf(ids[m])) ? { type: 'friend', id: ids[m], egg: true } : { type: 'friend', id: ids[m] })
+        : decoFor(spots[idx].kind, rand);
     }
     return spots;
   }
 
   function tap(spot) {
     if (!spot || spot.open) return null;
-    if (spot.kind === 'bush') {
+    const isEgg = !!(spot.content && spot.content.egg); // 알은 자리 종류와 상관없이 톡톡 3번
+    if (spot.kind === 'bush' || isEgg) {
       spot.taps = (spot.taps || 0) + 1;
       if (spot.taps >= 3) {
         spot.open = true;

@@ -314,7 +314,10 @@
         showBubble(bubble, (item.name || '') + '\n' + (bt || '안녕!'), 2500);
         if (root.WorldSFX && typeof root.WorldSFX.play === 'function') {
           if (typeof root.WorldSFX.unlock === 'function') root.WorldSFX.unlock();
-          root.WorldSFX.play('xylo', PERSONA_IDX[cfg.p] || 0);
+          const xylo = () => root.WorldSFX.play('xylo', PERSONA_IDX[cfg.p] || 0);
+          // 내 목소리가 있으면 목소리(§17-5, Claude)
+          if (root.WorldVoice && shortId) root.WorldVoice.play(data.profile, shortId).then(function (ok) { if (!ok) xylo(); });
+          else xylo();
         }
         if (data.profile === 'daughter' && typeof root.speakFairyTTS === 'function') {
           root.speakFairyTTS(item.name || '');

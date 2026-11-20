@@ -27,7 +27,7 @@ test('마이룸: 상대 경로 파일 실존·HTML·CSS·JS 600줄 이하·confi
     assertLoadsInOrder(html, 'script', scriptUrls);
     // 2026-11-20: 내 친구 월드 인형(world_module_spec §15) — main 뒤에 갤러리·월드 부품과 인형 모듈을 싣는다.
     const dollUrls = ['../data/gallery-data.js', '../subjects/quest/monster_roster.js', '../playground/world/core/world-save.js',
-        '../playground/world/core/world-sprites.js', '../playground/world/core/world-sfx.js', '../playground/world/hub-logic.js',
+        '../playground/world/core/world-sprites.js', '../playground/world/core/world-voice.js', '../playground/world/core/world-sfx.js', '../playground/world/hub-logic.js',
         '../playground/world/garden-logic.js', './my-room-dolls.js'];
     assert.deepEqual(assetTags(html, 'script').map(tag => tag.url), ['../config.js', ...scriptUrls, ...dollUrls]);
 });

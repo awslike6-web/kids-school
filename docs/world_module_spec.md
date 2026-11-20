@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. **P0~P4 완료(2026-11-20/21)**, 다음은 P5(「🥚 알」·내 목소리)와 아이 폰 실기 확인. 아레나 화면 연결 `arena-ui.js`가 656줄이라 600줄 목표를 넘음(다음 정리 때 나눔). 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
+> **상태**: 설계 확정. **P0~P5 완료(2026-11-20/21)**, 남은 것은 아이 폰 실기 확인(마이크 녹음·찰칵등록 알 포함). 아레나 화면 연결 `arena-ui.js`가 656줄이라 600줄 목표를 넘음(다음 정리 때 나눔). 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -566,7 +566,45 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 17. 하지 않는 것
+## 17. P5 「🥚 알」·내 목소리 계약 (2026-11-21) — 완료
+
+> 결과: `core/world-eggs.js`(Claude, Worker 대기열 요약 읽기 전용), `core/world-voice.js`(Hydrogen, IndexedDB만), 정원 알 자리·부화(Claude), 광장 둥지·성격 판 목소리 줄·톡 재생, 마이룸 인형 톡·아레나 필살기 목소리, 찰칵등록 「🧸 내 캐릭터 (월드 알)」 칩(메모 = 이름). 등록 도구는 `구분: 캐릭터`를 기존 작품 경로로 처리(수정 없음, `ICON_MAP`에 이미 있음). 확인: 폰 크기에서 정원 알 3개 → 톡톡 3번 「🐣 알에서 깨어났어!」, 실제 대기열 조회(지금은 0건이라 둥지 없음), 목소리 저장소 열기·없음 처리. **실기 남음**: 마이크 녹음(브라우저 창에서 권한 불가), 찰칵등록 → 둥지 → 등록 → 부화 한 바퀴. 시험 `tests/world-p5.test.mjs` 6개.
+
+### 17-1. 알의 흐름
+1. 아이가 로비 📸 찰칵등록에서 「🧸 내 캐릭터」 칩을 골라 그림을 찍어 올린다(메모 칸 = 캐릭터 이름). 지금 업로드 경로 그대로 Worker 대기열(`/api/pending-media`)과 노션 갤러리 DB 임시 카드(`구분: 캐릭터`)에 들어간다.
+2. **품는 중**: 광장 가운데 둥지에 대기열의 내 「캐릭터」 항목이 🥚로 보인다(최대 3, 흔들림). 톡 → 「엄마·아빠가 등록하면 정원에서 깨어나!」.
+3. 부모가 PC에서 `sync_quick_upload.py`를 돌리면 대기열 항목이 작품(`분류: 캐릭터`, 제목 = 메모)으로 등록된다. 누끼 그림은 지금처럼 `--id art_… --character-sprite … --character-name …`로 붙인다(자동 누끼 없음, §3-1 검수 그대로).
+4. **부화**: 캐릭터 그림이 붙어 갤러리 친구가 되면 정원에 숨는다. 기기가 기억하는 알(아래 `eggs`)과 작품 id가 같으면 그 자리는 덤불·꽃봉오리·웅덩이 대신 **🥚 알**로 그려지고, 톡톡 3번에 「부화!」 연출과 함께 발견된다.
+
+### 17-2. `core/world-eggs.js` → `window.WorldEggs` (Claude)
+| 이름 | 계약 |
+|---|---|
+| `artIdFor(filename, author)` | 등록 도구 규칙 그대로: 폴더 민수 `minsu`·민서 `minseo`·공동/공통 `together`, 확장자 뺀 이름에서 `art_{폴더}_`·`{폴더}_` 앞머리를 떼고 `art_{폴더}_{이름}` |
+| `pick(items, child)` | 대기열 요약 중 `category === '캐릭터'`이고 작성자가 그 아이(민수/민서)인 것, `date` 내림차순 최대 3: `{id, artId, name: memo || '새 친구', date}` |
+| `fetchPending(child)` | `GET {Worker}/api/pending-media`(사진 없는 요약) → `pick`. 실패면 `[]` |
+| `remember(child, eggs)` / `known(child)` | 기기 저장 `kids_world_eggs_{child}`에 `artId` 목록 합집합(최대 30) / 그 목록 |
+
+### 17-3. 정원 연결 (`garden-logic.js`·`garden.js`)
+- `plan(hiddenIds, rng, eggArtIds=[])`: 숨는 친구 중 `artId`가 `eggArtIds`에 있으면 그 자리 내용 `{type:'friend', id, egg:true}`.
+- `tap(spot)`: 내용이 알이면 자리 종류와 상관없이 덤불처럼 3번에 열림(`{shake, taps}` → `{open, content}`).
+- 화면: 알 자리는 흔들리는 🥚, 열리면 「🐣 부화!」 카드 제목.
+
+### 17-4. 내 목소리 `core/world-voice.js` → `window.WorldVoice` (Hydrogen 초안)
+| 이름 | 계약 |
+|---|---|
+| `supported()` | `navigator.mediaDevices.getUserMedia`·`MediaRecorder`·`indexedDB`가 모두 있으면 `true` |
+| `record(child, shortId, ms=2500)` | 마이크 허락을 받고 `ms` 동안 녹음 → IndexedDB `kids_world_voice`(store `clips`, keyPath `key` = `{child}:{shortId}`, 값 `{key, child, shortId, blob, type, at}`) 저장. 아이별 30개 넘으면 `at` 오래된 것부터 지움. 끝나면 마이크 트랙을 모두 멈춤. `Promise<boolean>` |
+| `has(child, shortId)` / `play(child, shortId)` / `remove(child, shortId)` | 있는지 / 재생(`Audio` + `URL.createObjectURL`, 끝나면 해제, 없으면 `false`) / 지움. 모두 Promise, 실패는 `false` |
+| `keyOf(child, shortId)` / `trimPlan(list, max=30)` | 순수: 키 문자열 / 지울 키 목록(`at` 오름차순으로 넘친 만큼) |
+- 목소리는 **이 기기에만**. 노션·깃허브·Worker로 보내지 않는다. 마이크를 못 쓰면 녹음 버튼을 숨기고 나머지는 그대로.
+
+### 17-5. 쓰는 곳
+- 광장 성격 판에 「🎙️ 내 목소리」(녹음 2.5초, 3·2·1 표시) · 「▶ 듣기」 · 「🗑️」. 친구를 톡 하면 목소리가 있으면 목소리, 없으면 실로폰.
+- 마이룸 인형 톡, 아레나 필살기(내 캐릭터)도 목소리가 있으면 재생.
+
+---
+
+## 18. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.

@@ -508,6 +508,7 @@
         fx.burst('star', me.x, me.y, 24);
         fx.flash(150);
         WorldSFX.play('levelup');
+        if (window.WorldVoice && sel.me !== 'runner') window.WorldVoice.play(child, sel.me); // 내 목소리 기합(§17-5)
         const dx = enemy.x - me.x;
         const dy = enemy.y - me.y;
         const dist = Math.hypot(dx, dy);

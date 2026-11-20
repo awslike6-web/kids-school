@@ -121,6 +121,26 @@
       closeBtn.addEventListener('click', closeSheet);
       sheetEl.appendChild(h2);
       sheetEl.appendChild(row);
+      // 🎙️ 내 목소리(§17-4, Claude): 이 기기에만 저장. 마이크를 못 쓰면 줄을 만들지 않는다.
+      const VO = root.WorldVoice;
+      if (VO && VO.supported() && f.shortId) {
+        const vrow = document.createElement('div');
+        vrow.className = 'hub-sheet__row';
+        const mk = (label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'world-chip';
+          b.textContent = label; b.addEventListener('click', fn); vrow.appendChild(b); return b; };
+        const recBtn = mk('🎙️ 내 목소리', () => {
+          recBtn.disabled = true; let n = 3; recBtn.textContent = '🔴 ' + n;
+          const iv = setInterval(() => { n -= 1; if (n > 0) recBtn.textContent = '🔴 ' + n; }, 800);
+          VO.record(child, f.shortId, 2500).then((ok) => {
+            clearInterval(iv); recBtn.disabled = false; recBtn.textContent = '🎙️ 내 목소리';
+            showToast(ok ? '🎙️ 목소리를 넣었어!' : '마이크를 쓸 수 없어요');
+            if (ok) WorldSFX.play('chime');
+          });
+        });
+        mk('▶ 듣기', () => { VO.play(child, f.shortId).then((ok) => { if (!ok) showToast('아직 목소리가 없어요'); }); });
+        mk('🗑️', () => { VO.remove(child, f.shortId).then(() => showToast('목소리를 지웠어요')); });
+        sheetEl.appendChild(vrow);
+      }
       sheetEl.appendChild(closeBtn);
       sheetEl.hidden = false;
     }
@@ -254,6 +274,13 @@
       if (ui || moved || !mapEl.hidden || !sheetEl.hidden) return;
       const rect = cvEl.getBoundingClientRect();
       const w = WorldView.toWorld(cam, m.view.scale, e.clientX - rect.left, e.clientY - rect.top);
+      if (pendingEggs.length && Math.hypot(w.x - NEST.x, w.y - NEST.y) < 80) {
+        const nm = pendingEggs.map((e) => e.name).join(', ');
+        showToast(`🥚 ${nm} 품는 중! 엄마·아빠가 등록하면 정원에서 깨어나!`);
+        WorldSFX.play('pop');
+        if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS('알을 품는 중이야! 엄마 아빠가 등록하면 정원에서 깨어나!');
+        return;
+      }
       const f = HubLogic.hitFriend(friends, w.x, w.y);
       if (!f) return;
       const name = (f.item && (f.item.name || f.item.title)) || f.name || '친구';
@@ -261,7 +288,9 @@
       f.bubble = name + '\n' + bText;
       f.bubbleT = 2.5;
       f.landedAt = t;
-      WorldSFX.play('xylo', XYLO[f.p] !== undefined ? XYLO[f.p] : 0);
+      const xylo = () => WorldSFX.play('xylo', XYLO[f.p] !== undefined ? XYLO[f.p] : 0);
+      if (root.WorldVoice && f.shortId) root.WorldVoice.play(child, f.shortId).then((ok) => { if (!ok) xylo(); });
+      else xylo();
       if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS(name + ' ' + bText);
       if (f.item && f.item.kind === 'gallery') openSheet(f);
     });
@@ -408,6 +437,26 @@
       }
     }
 
+    // 🥚 품는 중인 알(§17-1, Claude): 대기열의 내 「캐릭터」 항목, 광장 가운데 둥지
+    const NEST = { x: 540, y: 640 };
+    let pendingEggs = [];
+    function drawNest(ctx) {
+      ctx.save(); ctx.translate(NEST.x, NEST.y);
+      ctx.fillStyle = isDaughter ? '#c08552' : '#5b4636';
+      ctx.beginPath(); ctx.ellipse(0, 18, 70, 22, 0, 0, Math.PI * 2); ctx.fill();
+      pendingEggs.slice(0, 3).forEach((e, i) => {
+        const ex = (i - (Math.min(3, pendingEggs.length) - 1) / 2) * 38, wob = Math.sin(t * 4 + i * 1.7) * 0.15;
+        ctx.save(); ctx.translate(ex, 0); ctx.rotate(wob);
+        ctx.fillStyle = '#fff7e6'; ctx.strokeStyle = isDaughter ? '#f4a261' : '#00e5ff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.ellipse(0, 0, 16, 21, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
+      });
+      ctx.fillStyle = isDaughter ? '#7c3a12' : '#e2e8f0'; ctx.font = 'bold 18px Jua, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('🥚 품는 중', 0, 62); ctx.restore();
+    }
+    if (root.WorldEggs) {
+      root.WorldEggs.fetchPending(child).then((eggs) => { pendingEggs = eggs; root.WorldEggs.remember(child, eggs); }).catch(() => {});
+    }
+
     function render() {
       const ctx = m.ctx;
       const vw = m.view.w;
@@ -443,6 +492,7 @@
       }
 
       HubLogic.PORTALS.forEach((p) => { if (!p.hidden) drawPortal(ctx, p); });
+      if (pendingEggs.length) drawNest(ctx);
       const actors = friends.map((f) => ({ f, me: false })).concat([{ f: me, me: true }]);
       actors.sort((a, b) => a.f.y - b.f.y);
       actors.forEach((a) => { drawActor(ctx, a.f, a.me); });
