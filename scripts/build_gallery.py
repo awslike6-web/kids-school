@@ -174,10 +174,12 @@ def build_characters(meta, art_id, *args):
 
 
 def normalize_category(raw_cat):
-    """메타 분류 글자를 표준 분류와 아이콘으로 맞춘다. 「캐릭터」는 내 친구 월드용(docs/world_module_spec.md §3-1)."""
+    """메타 분류 글자를 표준 분류와 아이콘으로 맞춘다. 「캐릭터」·「무기」는 내 친구 월드용(docs/world_module_spec.md §3-1·§18)."""
     raw_cat = raw_cat if isinstance(raw_cat, str) else ''
     if "캐릭터" in raw_cat:
         return "캐릭터", "🧸"
+    if "무기" in raw_cat:  # 아레나에서 쓰는 아이가 그린 무기(docs/world_module_spec.md §18)
+        return "무기", "🗡️"
     if "종이접기" in raw_cat or "디자인" in raw_cat:
         return "종이접기/디자인", "📐"
     if "만들기" in raw_cat or "공예" in raw_cat:
@@ -475,6 +477,8 @@ def run():
                 learning_pts.append("다양한 자연물 및 복합 재료를 활용한 소근육 응용력")
             elif category == "캐릭터":
                 learning_pts.append("나만의 캐릭터를 상상하고 모습·성격을 설계하는 창작력")
+            elif category == "무기":
+                learning_pts.append("상상한 도구의 모양과 쓰임새를 디자인하는 창작력")
             else:
                 learning_pts.append("선과 색채의 조화를 통한 시각적 감정 표현력")
             learning_pts.append(f"{author_name}만의 독창적인 예술적 상상력과 미적 탐구")

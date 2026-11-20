@@ -88,6 +88,7 @@
       items: raw, charactersOf: mr.charactersOf, roster: mr.MONSTER_ROSTER,
       order: mr.MONSTER_ORDER, child, guest: false, root: '../../../'
     }) || [];
+    drawn = WorldSprites.collectWeapons ? WorldSprites.collectWeapons({ items: raw, charactersOf: mr.charactersOf, child, root: '../../../' }) : [];
     idMap = WorldSave.assignIds(items.map((i) => i.id));
     WorldSave.setLiveIds([...idMap.values()]);
     byShort = new Map();
@@ -99,7 +100,14 @@
 
   // ── 상점 무기 (§16, Claude): 마이룸 상품 중 arena 필드가 있고 아이가 산 것 ──
   let owned = new Set();
+  let drawn = []; // 아이가 그린 무기(§18): 모양만 바뀌고 쓰는 법(검·라이플·샷건)은 아이가 고름
   const ICON_BASE = '../../../assets/images/';
+  const drawnOf = (id) => drawn.find((w) => w.id === id) || null;
+  const skinSrc = (id) => {
+    const shop = id ? shopWeapons().find((it) => it.id === id) : null;
+    const d = id ? drawnOf(id) : null;
+    return shop ? ICON_BASE + shop.icon : d ? d.src : '';
+  };
   function shopWeapons() {
     const list = typeof MARKET_ITEMS !== 'undefined' && MARKET_ITEMS && Array.isArray(MARKET_ITEMS[child]) ? MARKET_ITEMS[child] : [];
     return list.filter((it) => it.arena && owned.has(it.id) && ArenaWeapons.fromShop(it));
@@ -125,7 +133,7 @@
     sel.cls = CLS_FROM_CODE[CODE_FROM_CLS[lo.cls]] || 'blade';
     sel.trait = TRAIT_LIST.some((x) => x.id === lo.trait) ? lo.trait : 'r';
     sel.level = LVL_LIST.some((x) => x.id === lo.level) ? lo.level : defLvl;
-    sel.skin = lo.skin && shopWeapons().some((it) => it.id === lo.skin) ? lo.skin : null;
+    sel.skin = lo.skin && skinSrc(lo.skin) ? lo.skin : null;
     if (sel.foe !== 'rival' && sel.level === 'ace') sel.level = defLvl;
   }
 
@@ -226,9 +234,22 @@
     }
     addSection(sheet, '상대', foeChips);
 
+    // 기본 3종은 「쓰는 법」도 겸한다: 내가 그린 무기를 고른 채로 누르면 그림은 그대로 두고 쓰는 법만 바뀜
+    const mine = drawnOf(sel.skin);
     const weaponChips = CLS_LIST.map((w) => makeChip(w.label, () => {
-      sel.cls = w.id; sel.skin = null; saveMeCfg(); renderSheet();
-    }, !sel.skin && sel.cls === w.id));
+      sel.cls = w.id; if (!drawnOf(sel.skin)) sel.skin = null; saveMeCfg(); renderSheet();
+    }, (!sel.skin || mine) && sel.cls === w.id));
+    drawn.forEach((w) => {
+      weaponChips.push(makeChip(w.name, () => {
+        const first = sel.skin !== w.id;
+        sel.skin = w.id; saveMeCfg(); renderSheet();
+        if (first) showToast('어떻게 쓸까? 🗡️검·🔫라이플·💥샷건 중에 골라 봐!');
+        // 효과는 그림 대표색으로(바꿀 수 있음)
+        WorldSprites.load(w, 128).then((res) => {
+          if (first && res && res.trait && sel.skin === w.id && !playing) { sel.trait = res.trait; renderSheet(); }
+        }).catch(warn);
+      }, sel.skin === w.id, w.src));
+    });
     shopWeapons().forEach((it) => {
       const wpn = ArenaWeapons.fromShop(it);
       weaponChips.push(makeChip(it.name, () => {
@@ -286,8 +307,8 @@
     me = ArenaFighter.create({
       id: 'me', team: 'me', x: 360, y: 900, weapon: { cls: sel.cls, trait: sel.trait, skin: sel.skin || null }
     });
-    const skinItem = sel.skin ? shopWeapons().find((it) => it.id === sel.skin) : null;
-    if (skinItem) { const img = new Image(); img.onload = () => { if (me) me.weaponImg = img; }; img.src = ICON_BASE + skinItem.icon; }
+    const skinUrl = skinSrc(sel.skin);
+    if (skinUrl) { const img = new Image(); img.onload = () => { if (me) me.weaponImg = img; }; img.src = skinUrl; }
     if (foeItem) {
       boss = ArenaBoss.create({
         id: 'boss', name: foeItem.name, level: sel.level === 'kid' ? 'kid' : 'normal', x: 360, y: 240

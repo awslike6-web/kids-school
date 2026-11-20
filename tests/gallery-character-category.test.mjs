@@ -22,11 +22,13 @@ function loadDataSync() {
 // vm 안 배열은 다른 realm이라 deepEqual을 위해 이쪽 배열로 옮긴다.
 const artKeys = () => Array.from(loadDataSync().ART_CATEGORIES, c => c.key).filter(k => k !== 'all');
 
-test('화면: 캐릭터 분류가 목록 끝에 있고 아이콘이 🧸', () => {
+test('화면: 캐릭터·무기 분류가 목록 끝에 있고 아이콘이 🧸·🗡️', () => {
   const { ART_CATEGORIES, getCategoryIcon } = loadDataSync();
-  const last = ART_CATEGORIES[ART_CATEGORIES.length - 1];
-  assert.deepEqual({ ...last }, { key: '캐릭터', label: '캐릭터 친구들', icon: '🧸' });
+  const [char, weapon] = ART_CATEGORIES.slice(-2);
+  assert.deepEqual({ ...char }, { key: '캐릭터', label: '캐릭터 친구들', icon: '🧸' });
+  assert.deepEqual({ ...weapon }, { key: '무기', label: '내가 만든 무기', icon: '🗡️' }, '무기 분류 (world_module_spec §18)');
   assert.equal(getCategoryIcon('캐릭터'), '🧸');
+  assert.equal(getCategoryIcon('무기'), '🗡️');
   // 기존 분류 아이콘은 그대로
   assert.equal(getCategoryIcon('만들기/공예'), '✂️');
   assert.equal(getCategoryIcon('그림/미술'), '🎨');
@@ -50,13 +52,13 @@ import importlib.util, json
 from pathlib import Path
 spec = importlib.util.spec_from_file_location('builder', Path.cwd()/'scripts/build_gallery.py')
 b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
-cases = ['캐릭터', '만들기/공예', '그림/미술', '종이접기/디자인', '상장/기념', '탐구/프로젝트', '수상', '', None, 123]
+cases = ['캐릭터', '무기', '만들기/공예', '그림/미술', '종이접기/디자인', '상장/기념', '탐구/프로젝트', '수상', '', None, 123]
 print(json.dumps([list(b.normalize_category(c)) for c in cases], ensure_ascii=False))
 `], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stdout + result.stderr);
   const got = JSON.parse(result.stdout.trim().split('\n').pop());
   assert.deepEqual(got, [
-    ['캐릭터', '🧸'], ['만들기/공예', '✂️'], ['그림/미술', '🎨'], ['종이접기/디자인', '📐'],
+    ['캐릭터', '🧸'], ['무기', '🗡️'], ['만들기/공예', '✂️'], ['그림/미술', '🎨'], ['종이접기/디자인', '📐'],
     ['상장/기념', '🏆'], ['탐구/프로젝트', '🔬'], ['상장/기념', '🏆'],
     ['그림/미술', '🎨'], ['그림/미술', '🎨'], ['그림/미술', '🎨']
   ]);

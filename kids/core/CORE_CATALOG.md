@@ -297,7 +297,8 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - **🥚 알·🎙️ 내 목소리 (P5, 2026-11-21)** — 명세 §17.
   - `core/world-eggs.js` (`WorldEggs`, Claude): `artIdFor`(등록 도구 `gallery_registration_options.py` 폴더 규칙과 같음), `pick`(대기열 중 그 아이의 `캐릭터` 최근 3), `fetchPending`(`GET /api/pending-media` 사진 없는 요약, 읽기 전용), `remember`/`known`(기기 `kids_world_eggs_{child}`). 광장 가운데 「🥚 품는 중」 둥지, 정원은 기억한 알의 친구를 알 자리로 숨기고 톡톡 3번에 「🐣 알에서 깨어났어!」(`GardenLogic.plan(hidden, rng, eggArtIds)`·`tap`).
   - `core/world-voice.js` (`WorldVoice`, Hydrogen): `supported`, `record(child, shortId, ms)`(MediaRecorder → IndexedDB `kids_world_voice`/`clips`, 아이별 30개, 녹음 뒤 마이크 끔), `has`·`play`·`remove`, `keyOf`·`trimPlan`. 밖으로 보내지 않음. 광장 성격 판 「🎙️ 내 목소리·▶ 듣기·🗑️」, 광장 친구·마이룸 인형 톡·아레나 필살기에서 재생(없으면 실로폰).
-  - 찰칵등록(`kids/core/quick-uploader.js`) 「🧸 내 캐릭터 (월드 알)」 칩, 메모 칸 = 캐릭터 이름. 로비 `quick-uploader.js?v=20261121-p5`. 시험 `tests/world-p5.test.mjs`.
+  - 찰칵등록(`kids/core/quick-uploader.js`) 「🧸 내 캐릭터 (월드 알)」 칩, 메모 칸 = 캐릭터 이름. 로비 `quick-uploader.js?v=20261121-wpn`. 시험 `tests/world-p5.test.mjs`.
+- **🗡️ 내가 그린 무기 (2026-11-21)** — 명세 §18. 갤러리 분류 「무기」(🗡️, 빌더·등록 도구·`ART_CATEGORIES`) 작품의 누끼 그림을 `WorldSprites.collectWeapons`가 모아 아레나 무기 줄 칩으로(모양만, 쓰는 법은 기본 3종 칩으로 고름, 효과는 대표색). `collect`는 무기 작품을 친구에서 뺀다. `arena-render` `drawWeaponBar`는 비율 유지·세로 그림 눕히기. 찰칵등록 「🗡️ 내 무기 (아레나)」 칩. 시험 `tests/world-weapons.test.mjs`.
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 

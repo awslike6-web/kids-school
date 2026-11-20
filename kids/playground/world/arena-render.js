@@ -235,11 +235,17 @@
   }
 
   function drawWeaponBar(ctx, f) {
-    // 상점에서 산 무기면 그 그림을 조준 방향으로 그린다 (§16, Claude)
-    if (f.weaponImg && f.weaponImg.naturalWidth) {
-      var size = f.r * 1.8;
-      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.aim || 0);
-      ctx.drawImage(f.weaponImg, f.r * 0.3, -size / 2, size, size); ctx.restore();
+    // 상점 무기·내가 그린 무기면 그 그림을 조준 방향으로 그린다 (§16·§18, Claude)
+    // 그림 비율을 지키고, 세로로 긴 그림(칼을 세워 그린 것)은 긴 쪽이 조준 방향을 향하게 눕힌다
+    var img = f.weaponImg;
+    if (img && img.naturalWidth && img.naturalHeight) {
+      var iw = img.naturalWidth, ih = img.naturalHeight, tall = ih > iw * 1.15;
+      var L = f.r * (Math.abs(iw - ih) > Math.min(iw, ih) * 0.15 ? 2.2 : 1.8);
+      var S = L * Math.min(iw, ih) / Math.max(iw, ih);
+      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.aim || 0); ctx.translate(f.r * 0.3 + L / 2, 0);
+      if (tall) { ctx.rotate(Math.PI / 2); ctx.drawImage(img, -S / 2, -L / 2, S, L); }
+      else ctx.drawImage(img, -L / 2, -S / 2, L, S);
+      ctx.restore();
       return;
     }
     var cls = f.weapon && f.weapon.cls ? f.weapon.cls : 'blade';

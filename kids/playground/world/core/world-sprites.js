@@ -5,6 +5,7 @@
   // 작성자 표기 상수 (실제 이름 치환 지점)
   const AUTHORS = Object.freeze({ son: '민수', daughter: '민서', shared: '공동' });
   const LOAD_TIMEOUT_MS = 4000;
+  const WEAPON_CAT = '무기'; // 「무기」 분류 작품은 친구가 아니라 아레나 무기 (§18, Claude)
   const loadCache = new Map();
 
   // 상대 경로를 루트 기준으로 보정
@@ -39,7 +40,7 @@
     if (typeof o.charactersOf === 'function') {
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
-        if (!it || typeof it !== 'object' || !allowed.has(it.author)) continue;
+        if (!it || typeof it !== 'object' || !allowed.has(it.author) || it.category === WEAPON_CAT) continue;
         let chars = null;
         try { chars = o.charactersOf(it); } catch (_) { chars = null; }
         if (!Array.isArray(chars)) continue;
@@ -226,8 +227,32 @@
     return p;
   }
 
+  // 아이가 그린 무기(§18, Claude): 「무기」 분류 작품의 누끼 그림. 그 아이와 공동 것만(손님 없음), 최신 작품 먼저.
+  function collectWeapons(opts) {
+    const o = opts && typeof opts === 'object' ? opts : {};
+    if (typeof o.charactersOf !== 'function' || !Array.isArray(o.items)) return [];
+    const allowed = new Set(authorsFor(o.child, false));
+    const out = [];
+    const seen = new Set();
+    for (const it of o.items) {
+      if (!it || typeof it !== 'object' || it.category !== WEAPON_CAT || !allowed.has(it.author) || it.id == null) continue;
+      let chars = null;
+      try { chars = o.charactersOf(it); } catch (_) { chars = null; }
+      if (!Array.isArray(chars)) continue;
+      for (const ch of chars) {
+        const key = ch && ch.key != null ? String(ch.key) : '';
+        const src = ch ? resolvePath(ch.spriteUrl || ch.src || '', o.root) : '';
+        const id = 'wpn:' + String(it.id) + '#' + key;
+        if (!key || !src || seen.has(id)) continue;
+        seen.add(id);
+        out.push({ id, artId: String(it.id), name: ch.name || it.title || '내 무기', src, author: it.author, date: it.date || '' });
+      }
+    }
+    return out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+  }
+
   const root = typeof window !== 'undefined' ? window : globalThis;
   root.WorldSprites = Object.freeze({
-    resolvePath, authorsFor, collect, hueTrait, dominantColor, newFriends, liveOnly, load
+    resolvePath, authorsFor, collect, collectWeapons, hueTrait, dominantColor, newFriends, liveOnly, load
   });
 })();

@@ -604,7 +604,29 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 18. 하지 않는 것
+## 18. 내가 그린 무기 (2026-11-21) — 완료
+
+> 사용자 요청: 「총, 칼 등의 아이템도 내 캐릭터처럼 등록해서 쓰고 싶다」. 상점 무기(§16)와 같은 원칙 — **모양만 바뀌고 세기는 같다**(그림으로 강해지지 않음).
+
+### 18-1. 흐름
+1. 아이가 로비 📸 찰칵등록에서 「🗡️ 내 무기 (아레나)」 칩을 골라 그림을 찍어 올린다(메모 칸 = 무기 이름). 대기열·노션 임시 카드에 `구분: 무기`로 들어간다. 알(§17)은 「캐릭터」만이라 둥지에는 나오지 않는다.
+2. 부모가 PC에서 캐릭터와 똑같이 등록한다: `sync_quick_upload.py`(분류 `무기`, 🗡️) → 누끼 PNG를 `--id art_… --character-sprite … --character-name …`로 붙인다(§3-1 검수 그대로). 갤러리에는 「🗡️ 내가 만든 무기」로 모인다.
+3. 아레나 고르기 화면 「무기」 줄에 그 그림 칩이 나온다(기본 3종 뒤, 상점 무기 앞, 최신 먼저). 고르면 효과가 그림 대표색으로 바뀌고(바꿀 수 있음) 「어떻게 쓸까?」 안내. 기본 3종(🗡️검·🔫라이플·💥샷건)을 누르면 그림은 그대로 두고 **쓰는 법**만 바뀐다(상점 무기는 쓰는 법이 정해져 있어 기본 칩을 누르면 해제).
+4. 싸울 때 그 그림을 조준 방향으로 그린다. 비율을 지키고, 세로로 긴 그림(칼을 세워 그린 것)은 긴 쪽이 조준 방향을 향하게 눕힌다.
+
+### 18-2. 계약
+| 곳 | 내용 |
+|---|---|
+| `core/world-sprites.js` | `collect`는 `category === '무기'` 작품을 친구에서 뺀다(광장·정원·아레나 상대·마이룸 인형 모두). `collectWeapons({items, charactersOf, child, root})` → `[{id: 'wpn:{artId}#{key}', artId, name, src, author, date}]`, 그 아이·공동 것만(손님 없음), 누끼 그림이 있는 것만, `date` 내림차순 |
+| `arena-ui.js` | `drawn` 목록, `skinSrc(id)`(상점 → 아이콘, 그린 무기 → 그림), `loadout.skin`에 `wpn:…` 저장, 없어진 무기는 기본으로 복원 |
+| `arena-render.js` `drawWeaponBar` | `f.weaponImg` 비율 유지·세로 그림 눕히기(상점 아이콘도 같은 함수) |
+| 등록 | 빌더 `normalize_category` 「무기」→🗡️, 관제탑 `sync_quick_upload.py` `ICON_MAP`, 갤러리 `ART_CATEGORIES`·선택 목록 두 곳 |
+
+시험: `tests/world-weapons.test.mjs`(4), `tests/gallery-character-category.test.mjs`(무기 분류), 관제탑 `test_weapon_category_survives_registration_and_build`. 그린 무기도 갤러리에서는 캐릭터처럼 「파트너로 장착」·미니 런이 보인다(막지 않음).
+
+---
+
+## 19. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.

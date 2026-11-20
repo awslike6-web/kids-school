@@ -46,6 +46,7 @@
             <button type="button" class="qu-chip active" data-category="종이일기"><span class="qu-emoji">📝</span>손글씨 종이일기</button>
             <button type="button" class="qu-chip" data-category="작품"><span class="qu-emoji">🎨</span>미술 작품/만들기</button>
             <button type="button" class="qu-chip" data-category="캐릭터"><span class="qu-emoji">🧸</span>내 캐릭터 (월드 알)</button>
+            <button type="button" class="qu-chip" data-category="무기"><span class="qu-emoji">🗡️</span>내 무기 (아레나)</button>
             <button type="button" class="qu-chip" data-category="상장"><span class="qu-emoji">🏆</span>상장 / 임명장</button>
             <button type="button" class="qu-chip" data-category="특별한 날"><span class="qu-emoji">🌟</span>특별한 날/체험학습</button>
           </div>
@@ -129,8 +130,10 @@
         currentCategory = btn.getAttribute('data-category');
         // 🧸 내 캐릭터: 메모 칸 = 캐릭터 이름. 올리면 내 친구 월드 광장에 「🥚 알」로 나온다 (world_module_spec §17)
         const memoInput = document.getElementById('quMemoInput');
-        if (memoInput) memoInput.placeholder = currentCategory === '캐릭터'
-          ? '캐릭터 이름을 적어 줘! 예: 보라 용' : '예: 오늘 그린 피카소 고양이, 척추 보건수업 일기';
+        // 🗡️ 내 무기: 메모 칸 = 무기 이름. 등록되면 아레나 「무기」 줄에 그 그림이 나온다 (world_module_spec §18)
+        if (memoInput) memoInput.placeholder = currentCategory === '캐릭터' ? '캐릭터 이름을 적어 줘! 예: 보라 용'
+          : currentCategory === '무기' ? '무기 이름을 적어 줘! 예: 불꽃 칼'
+          : '예: 오늘 그린 피카소 고양이, 척추 보건수업 일기';
       });
     });
 

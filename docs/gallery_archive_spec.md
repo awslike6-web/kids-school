@@ -225,6 +225,12 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
 python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민서" --title "토끼 공주" --cat "캐릭터" --date "2026-11-20" --file "E:/Downloads/rabbit.jpg" --character-sprite "E:/Downloads/rabbit_cutout.png" --character-name "토끼 공주"
 ```
 
+**무기 분류 (2026-11-21)**: 아이가 그린 칼·총 같은 무기는 `--cat "무기"`로 올리고 누끼 그림을 캐릭터와 똑같이 붙입니다(`--character-sprite`·`--character-name`). 갤러리에 「🗡️ 내가 만든 무기」로 모이고, 내 친구 월드에서는 친구로 돌아다니지 않고 아레나 「무기」 줄에만 나옵니다(모양만 바뀌고 세기는 같음, [`world_module_spec.md`](world_module_spec.md) §18). 아이는 찰칵등록 「🗡️ 내 무기 (아레나)」 칩으로 올립니다.
+
+```bash
+python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민수" --title "불꽃 칼" --cat "무기" --date "2026-11-21" --file "E:/Downloads/sword.jpg" --character-sprite "E:/Downloads/sword_cutout.png" --character-name "불꽃 칼"
+```
+
 다중 캐릭터는 `--character-key`로 선택해 최대 6개를 등록합니다. `--character-remove KEY`는 해당 메타만 제거하고 파일을 보존하며 마지막 삭제는 characters 키도 제거합니다. 배열 계약과 호환·등록 규칙은 [gallery_multi_character_spec.md](gallery_multi_character_spec.md)를 따릅니다.
 
 ---
