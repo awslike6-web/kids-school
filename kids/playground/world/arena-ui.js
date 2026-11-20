@@ -46,6 +46,7 @@
   let idMap = new Map();
   let byShort = new Map();
   let state = { arena: { best: {}, loadout: {} }, seen: [], cfg: {} };
+  let special = null; // 필살기 연출 상태 {t0, x, y, trait, hit}
   let fullToasted = false; // 필살기 가득 알림은 찰 때마다 한 번
   let sel = { me: 'runner', foe: 'rival', cls: 'blade', trait: 'r', level: 'normal' };
   let ttsGreeted = false;
@@ -278,6 +279,7 @@
   }
 
   function startGame() {
+    special = null;
     const covers = ArenaFighter.COVERS.pillars4;
     const meItem = sel.me !== 'runner' ? byShort.get(sel.me) : null;
     foeItem = sel.foe !== 'rival' ? byShort.get(sel.foe) : null;
@@ -508,28 +510,57 @@
       if (foe) handleList(ArenaFighter.stepStatus(foe, d));
 
       if (inp.pressed.has('special') && meter >= 100 && enemy && !ended) {
+        // 필살기(2026-11-21 「이펙트가 애매하다」): 충격파 고리 → 0.35초 뒤 별빛 줄기가 상대에게 날아가 어디 있든 맞고 큰 폭발
         meter = 0;
-        fx.burst('star', me.x, me.y, 24);
-        fx.flash(150);
+        special = { t0: t, x: me.x, y: me.y, trait: me.weapon.trait || 'r', hit: false };
+        const kind = BURST_KIND[special.trait] || 'star';
+        fx.flash(260); fx.shake(16, 420); fx.hitstop(120);
+        fx.burst('ring', me.x, me.y, 16); fx.burst(kind, me.x, me.y, 36); fx.burst('star', me.x, me.y, 24);
         WorldSFX.play('levelup');
+        showToast('⭐ 필살기!');
         if (window.WorldVoice && sel.me !== 'runner') window.WorldVoice.play(child, sel.me); // 내 목소리 기합(§17-5)
-        const dx = enemy.x - me.x;
-        const dy = enemy.y - me.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist <= 170) {
-          const nx = dist > 0 ? dx / dist : 0;
-          const ny = dist > 0 ? dy / dist : -1;
-          handle({
-            type: 'hit', target: boss ? 'boss' : 'foe', dmg: 60, trait: me.weapon.trait,
-            crit: true, x: enemy.x, y: enemy.y, kb: { x: nx * 500, y: ny * 500 }
-          });
+      }
+      if (special && !special.hit && t - special.t0 >= 0.35) {
+        special.hit = true;
+        const tgt = boss || foe;
+        if (tgt && !ended) {
+          const dx = tgt.x - special.x, dy = tgt.y - special.y, dist = Math.hypot(dx, dy) || 1;
+          handle({ type: 'hit', target: boss ? 'boss' : 'foe', dmg: boss ? 120 : 70, trait: special.trait,
+            crit: true, x: tgt.x, y: tgt.y, kb: { x: dx / dist * 600, y: dy / dist * 600 } });
+          const kind = BURST_KIND[special.trait] || 'star';
+          fx.burst('boom', tgt.x, tgt.y, 30); fx.burst(kind, tgt.x, tgt.y, 40); fx.burst('ring', tgt.x, tgt.y, 16);
+          fx.shake(22, 380); fx.hitstop(160); WorldSFX.play('shotgun');
         }
       }
+      if (special && t - special.t0 > 0.9) special = null;
 
       if (boss && boss.state === 'dead' && !ended) win();
     }
     cam = WorldView.follow(cam, me, viewMount.view, WORLD, dt);
     updateHud();
+  }
+
+  function drawSpecial(ctx) {
+    const k = t - special.t0, o = fx.offset(), col = (ArenaRender.TRAIT_COLORS || {})[special.trait] || '#ffd23f';
+    const tgt = boss || foe;
+    ctx.save(); ctx.translate(-cam.x + o.x, -cam.y + o.y);
+    // 충격파 고리 두 겹: 0.5초 동안 반지름 0 → 300, 점점 옅게
+    for (const lag of [0, 0.12]) {
+      const p = Math.min(1, Math.max(0, (k - lag) / 0.5));
+      if (p > 0 && p < 1) {
+        ctx.globalAlpha = 1 - p; ctx.strokeStyle = col; ctx.lineWidth = 18 * (1 - p) + 3;
+        ctx.beginPath(); ctx.arc(special.x, special.y, 300 * p, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    // 별빛 줄기: 0.2~0.45초 동안 나에게서 상대로
+    if (tgt && k > 0.2 && k < 0.6) {
+      const p = Math.min(1, (k - 0.2) / 0.15), ex = special.x + (tgt.x - special.x) * p, ey = special.y + (tgt.y - special.y) * p;
+      ctx.globalAlpha = k < 0.45 ? 1 : 1 - (k - 0.45) / 0.15;
+      ctx.lineCap = 'round'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 16;
+      ctx.beginPath(); ctx.moveTo(special.x, special.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.strokeStyle = col; ctx.lineWidth = 8; ctx.stroke();
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
   }
 
   function render() {
@@ -543,6 +574,7 @@
         boss: boss && boss.skin ? { canvas: boss.skin } : null }
     };
     ArenaRender.drawArena(viewMount.ctx, s, cam, viewMount.view, t);
+    if (special) drawSpecial(viewMount.ctx);
     const things = [];
     const enemy = boss || foe;
     if (enemy) things.push(enemy);

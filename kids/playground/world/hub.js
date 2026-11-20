@@ -261,10 +261,11 @@
 
     // 톡 = 말풍선·소리, 꾹 누르기(0.6초) = 성격·목소리 판 (2026-11-21: 누를 때마다 판이 뜨는 게 불편하다는 의견)
     let longTimer = null, longFired = false, sheetHinted = false;
+    let holdF = null, holdStart = 0; // 누르는 동안 멈춘 친구와 누르기 시작 시각(둘레 원이 차오름)
     const friendAt = (cx, cy) => {
       const rect = cvEl.getBoundingClientRect();
       const w = WorldView.toWorld(cam, m.view.scale, cx - rect.left, cy - rect.top);
-      return HubLogic.hitFriend(friends, w.x, w.y);
+      return HubLogic.hitFriend(friends, w.x, w.y, 90); // 아이 손가락이라 넉넉하게
     };
     stageEl.addEventListener('pointerdown', (e) => {
       downPos = { x: e.clientX, y: e.clientY, moved: false };
@@ -272,18 +273,22 @@
       clearTimeout(longTimer);
       const ui = e.target && e.target.closest && e.target.closest('button, a, .world-sheet, .world-hud-top, [data-no-stick]');
       if (ui || !mapEl.hidden || !sheetEl.hidden) return;
+      // 누르는 순간 그 친구는 멈춘다(돌아다니면 꾹 누르기 타이밍을 맞추기 어렵다는 의견, 2026-11-21)
+      const f0 = friendAt(e.clientX, e.clientY);
+      if (!f0) return;
+      f0.pinUntil = t + 2.5; holdF = f0; holdStart = t;
       longTimer = setTimeout(() => {
-        if (!downPos || downPos.moved) return;
-        const f = friendAt(downPos.x, downPos.y);
-        if (f && f.item && f.item.kind === 'gallery') { longFired = true; f.landedAt = t; WorldSFX.play('pop'); openSheet(f); }
+        if (!downPos || downPos.moved || holdF !== f0) return;
+        holdF = null;
+        if (f0.item && f0.item.kind === 'gallery') { longFired = true; f0.landedAt = t; WorldSFX.play('pop'); openSheet(f0); }
       }, 600);
     });
     stageEl.addEventListener('pointermove', (e) => {
       if (!downPos || downPos.moved) return;
-      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 12) { downPos.moved = true; clearTimeout(longTimer); }
+      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 12) { downPos.moved = true; clearTimeout(longTimer); holdF = null; }
     });
-    stageEl.addEventListener('pointerup', () => clearTimeout(longTimer));
-    stageEl.addEventListener('pointercancel', () => clearTimeout(longTimer));
+    stageEl.addEventListener('pointerup', () => { clearTimeout(longTimer); holdF = null; });
+    stageEl.addEventListener('pointercancel', () => { clearTimeout(longTimer); holdF = null; });
     stageEl.addEventListener('click', (e) => {
       const moved = downPos && downPos.moved;
       downPos = null;
@@ -300,12 +305,13 @@
         if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS('알을 품는 중이야! 엄마 아빠가 등록하면 정원에서 깨어나!', { skipPreset: true });
         return;
       }
-      const f = HubLogic.hitFriend(friends, w.x, w.y);
+      const f = HubLogic.hitFriend(friends, w.x, w.y, 90);
       if (!f) return;
       const name = (f.item && (f.item.name || f.item.title)) || f.name || '친구';
       const bText = HubLogic.birthText(f.item) || '안녕!';
       f.bubble = name + '\n' + bText;
       f.bubbleT = 2.5;
+      f.pinUntil = t + 2.5; // 말풍선이 떠 있는 동안 멈춤
       f.landedAt = t;
       // 내 목소리가 있으면 목소리만, 없으면 실로폰(+민서는 이름 읽기)
       const fallback = () => {
@@ -339,6 +345,11 @@
     }
 
     function drawActor(ctx, a, isMe) {
+      if (a === holdF) { // 꾹 누르는 동안 둘레 원이 0.6초에 걸쳐 차오름
+        const p = Math.min(1, (t - holdStart) / 0.6);
+        ctx.save(); ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = isDaughter ? '#f472b6' : '#00f5d4';
+        ctx.beginPath(); ctx.arc(a.x, a.y - 48, 62, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p); ctx.stroke(); ctx.restore();
+      }
       WorldFX.shadow(ctx, a.x, a.y, isMe ? 64 : 54);
       const b = WorldFX.body({ t, landedAt: a.landedAt || -9, hitAt: a.hitAt || -9 });
       const h = isMe ? 110 : 96;
@@ -444,7 +455,11 @@
       me.y = clamp(me.y + mv.y * 220 * d, 150, HubLogic.WORLD.h - 30); // 위 150: 상단 바에 가리지 않게
       if (Math.abs(mv.x) > 0.05) me.face = mv.x < 0 ? -1 : 1;
       cam = WorldView.follow(cam, me, m.view, HubLogic.WORLD, dt);
-      for (let i = 0; i < friends.length; i++) HubLogic.stepFriend(friends[i], me, d, rng, HubLogic.WORLD, t);
+      for (let i = 0; i < friends.length; i++) {
+        const fr = friends[i];
+        if (fr.pinUntil > t) { if (fr.bubbleT > 0) fr.bubbleT = Math.max(0, fr.bubbleT - d); continue; } // 눌린 친구는 멈춤
+        HubLogic.stepFriend(fr, me, d, rng, HubLogic.WORLD, t);
+      }
       portal = HubLogic.portalStep(portal, me, HubLogic.PORTALS, d);
       if (portal && portal.enter && !navigating) {
         // portalStep의 enter는 포털 id 문자열(계약 §13-1) → 목록에서 주소를 찾는다 (Claude 연결 수정)

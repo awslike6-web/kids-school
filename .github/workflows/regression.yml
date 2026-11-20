@@ -30,7 +30,20 @@ jobs:
       - name: 회귀 시험 실행
         env:
           KIDS_TEST_FULL: '1'  # 연산 스튜디오 1~999 쌍 전수(로컬 기본은 표본, tests/operator-range.mjs)
-        run: node --test "tests/**/*.test.mjs"
+        # 실패하면 시험 이름과 오류를 주석(Annotations)으로 남긴다 — 로그는 로그인해야 보이지만 주석은 공개라
+        # 실패 원인을 바로 볼 수 있다(2026-11-21: 로그를 못 봐 실패가 며칠씩 방치됨). 주석은 한 단계에 10개까지 보인다.
+        run: |
+          if ! node --test --test-reporter=spec --test-reporter-destination=stdout \
+               --test-reporter=tap --test-reporter-destination=test-results.tap "tests/**/*.test.mjs"; then
+            awk '/^ *not ok/ { if (n) print n; sub(/^ *not ok [0-9]+ - /, ""); n = $0; loc = ""; grab = 0; next }
+                 n && /^ +location:/ { loc = $0; sub(/^ +location: */, "", loc); gsub(/\047/, "", loc); sub(/.*\/tests\//, "tests/", loc); next }
+                 n && /^ +error: *[|>]-?$/ { grab = 1; next }
+                 n && /^ +error:/ { m = $0; sub(/^ +error: */, "", m); print n " (" loc ") — " m; n = ""; next }
+                 n && grab && NF { m = $0; sub(/^ +/, "", m); print n " (" loc ") — " m; n = ""; grab = 0; next }
+                 END { if (n) print n }' test-results.tap | head -10 |
+              while IFS= read -r line; do echo "::error title=회귀 시험 실패::${line}"; done
+            exit 1
+          fi
       - name: 어휘·교재 등록기 시험 (노션 미접속)
         run: python -X utf8 -m unittest scripts/test_register_voca.py scripts/test_register_curriculum.py
       - name: 커밋 메시지 형식 검사 (Agent·교정 줄)

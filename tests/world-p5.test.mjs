@@ -120,3 +120,15 @@ test('2026-11-21 의견 반영: 요정 음성은 바꿔치기 없이, 광장 톡
   assert.match(read(`${W}/arena.html`), /id="meter" class="world-btn__label">필살기</);
   assert.match(read(`${W}/arena.css`), /\.arena-special \{[^}]*conic-gradient/);
 });
+
+test('2026-11-21 의견 반영 2차: 누른 친구는 멈추고 둘레 원이 차오름, 필살기는 반드시 맞는 별빛 줄기', () => {
+  const hub = read(`${W}/hub.js`);
+  const down = hub.slice(hub.indexOf("stageEl.addEventListener('pointerdown'"), hub.indexOf("stageEl.addEventListener('pointermove'"));
+  assert.match(down, /pinUntil = t \+ 2\.5/, '누르는 순간 멈춤');
+  assert.match(hub, /if \(fr\.pinUntil > t\)[^\n]*continue;/, '멈춘 친구는 움직이지 않음');
+  assert.match(hub, /a === holdF[\s\S]{0,500}ctx\.arc\(/, '꾹 누르는 동안 원 표시');
+  const ui = read(`${W}/arena-ui.js`);
+  assert.match(ui, /function drawSpecial\(/); assert.match(ui, /if \(special\) drawSpecial\(/);
+  assert.match(ui, /special = \{ t0: t/); assert.match(ui, /crit: true/);
+  assert.match(ui, /startGame\(\) \{\s*special = null;/, '새 판에서는 지난 필살기를 지움');
+});
