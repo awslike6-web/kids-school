@@ -87,7 +87,7 @@
         toastEl.hidden = true;
       }, 2600);
       if (isSlime && typeof root.speakFairyTTS === 'function') {
-        root.speakFairyTTS(msg);
+        root.speakFairyTTS(msg, { skipPreset: true });
       }
     }
 
@@ -203,7 +203,7 @@
         fx.burst('star', px, py, 24);
         fx.flash(200);
         if (isSlime && typeof root.speakFairyTTS === 'function') {
-          root.speakFairyTTS('새로운 친구 발견! ' + (item ? item.name : ''));
+          root.speakFairyTTS('새로운 친구 발견! ' + (item ? item.name : ''), { skipPreset: true });
         }
         if (item && sid) addWalker(item, sid);
         return;

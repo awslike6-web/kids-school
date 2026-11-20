@@ -36,7 +36,7 @@
     return n;
   }
   function speak(text) {
-    try { if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS(text); } catch (e) { warn(e); }
+    try { if (typeof window.speakFairyTTS === 'function') window.speakFairyTTS(text, { skipPreset: true }); } catch (e) { warn(e); }
   }
 
   let child = 'son';
@@ -46,6 +46,7 @@
   let idMap = new Map();
   let byShort = new Map();
   let state = { arena: { best: {}, loadout: {} }, seen: [], cfg: {} };
+  let fullToasted = false; // 필살기 가득 알림은 찰 때마다 한 번
   let sel = { me: 'runner', foe: 'rival', cls: 'blade', trait: 'r', level: 'normal' };
   let ttsGreeted = false;
   let toastTimer = 0;
@@ -431,8 +432,11 @@
     const mt = $('meter');
     if (mt) {
       const full = meter >= 100;
-      mt.textContent = full ? 'GO!' : Math.floor(meter) + '%';
-      if (mt.parentElement) mt.parentElement.classList.toggle('is-full', full);
+      // 필살기: 글자는 늘 「필살기」, 게이지는 버튼 둘레가 차오름(--fill). 가득 차면 「GO!」 (2026-11-21 알아보기 어렵다는 의견)
+      mt.textContent = full ? '필살기 GO!' : '필살기';
+      if (full && !fullToasted) { fullToasted = true; showToast('⭐ 필살기가 꽉 찼어! 눌러 봐!'); }
+      if (!full) fullToasted = false;
+      if (mt.parentElement) { mt.parentElement.classList.toggle('is-full', full); mt.parentElement.style.setProperty('--fill', Math.floor(meter) + '%'); }
     }
   }
 

@@ -320,7 +320,7 @@
           else xylo();
         }
         if (data.profile === 'daughter' && typeof root.speakFairyTTS === 'function') {
-          root.speakFairyTTS(item.name || '');
+          root.speakFairyTTS(item.name || '', { skipPreset: true });
         }
       });
       room.appendChild(wrap);

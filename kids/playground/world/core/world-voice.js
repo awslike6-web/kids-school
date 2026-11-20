@@ -101,13 +101,22 @@
     }
   };
 
+  // 순수: 그 아이 목소리 중 가장 최근 것(없으면 null)
+  const pickLatest = (list, child) => (Array.isArray(list) ? list : [])
+    .filter((x) => x && x.child === child && x.blob).sort((a, b) => (b.at || 0) - (a.at || 0))[0] || null;
+
   const play = async (child, shortId) => {
     const AudioCtor = root.Audio;
     const UrlApi = root.URL;
     if (!valid(child, shortId) || !root.indexedDB || !AudioCtor || !UrlApi?.createObjectURL) return false;
     let url;
     try {
-      const item = await withStore('readonly', (s) => reqP(s.get(keyOf(child, shortId))));
+      let item = await withStore('readonly', (s) => reqP(s.get(keyOf(child, shortId))));
+      // 그 캐릭터 목소리가 없으면 그 아이가 마지막으로 녹음한 목소리(한 번 녹음하면 모든 친구가 씀, Claude 2026-11-21)
+      if (!item || !item.blob) {
+        const all = await withStore('readonly', (s) => reqP(s.getAll()));
+        item = pickLatest(all, child);
+      }
       if (!item || !item.blob) return false;
       url = UrlApi.createObjectURL(item.blob);
       const audio = new AudioCtor(url);
@@ -132,5 +141,5 @@
     }
   };
 
-  root.WorldVoice = Object.freeze({ supported, record, has, play, remove, keyOf, trimPlan });
+  root.WorldVoice = Object.freeze({ supported, record, has, play, remove, keyOf, trimPlan, pickLatest });
 })();

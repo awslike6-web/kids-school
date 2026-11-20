@@ -1,7 +1,7 @@
 // 내 친구 월드 P5 「🥚 알」·내 목소리 시험 (docs/world_module_spec.md §17). 작성: Claude.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,8 +19,12 @@ test('알: 작품 id는 등록 도구 규칙과 같다', () => {
   assert.equal(E.artIdFor('minseo_20261121_101500.jpeg', '민서'), 'art_minseo_20261121_101500');
   assert.equal(E.artIdFor('art_together_x1.png', '공동'), 'art_together_x1');
   assert.equal(E.artIdFor('', '민수'), null);
-  // 등록 도구(관제탑 gallery_registration_options.py)의 폴더 표와 같다
-  const py = readFileSync(path.join(ROOT, '..', 'scripts', 'gallery_registration_options.py'), 'utf8');
+});
+
+test('알: 등록 도구(관제탑)의 폴더 표와 같다 — 관제탑이 없는 CI에서는 건너뜀', (t) => {
+  const pyPath = path.join(ROOT, '..', 'scripts', 'gallery_registration_options.py');
+  if (!existsSync(pyPath)) { t.skip('관제탑 scripts 없음 (CI)'); return; }
+  const py = readFileSync(pyPath, 'utf8');
   for (const [who, folder] of [['민수', 'minsu'], ['민서', 'minseo'], ['공동', 'together']]) assert.ok(py.includes(`"${who}": ("${folder}"`), who);
 });
 
@@ -93,4 +97,26 @@ test('연결: 광장 둥지·목소리 줄, 정원 알, 인형·필살기 목소
     [`${W}/arena.html`, ['core/world-voice.js', 'arena-ui.js']], ['kids/common_space/my-room.html', ['world/core/world-voice.js', 'my-room-dolls.js']]]) {
     const h = read(html); const pos = files.map(f => h.indexOf(f + "?v=")); assert.ok(pos.every(p => p > 0) && pos.every((p, i) => !i || p > pos[i - 1]), html);
   }
+});
+
+test('목소리: 캐릭터 목소리가 없으면 그 아이의 최근 목소리 (한 번 녹음하면 모두)', () => {
+  const V = load(`${W}/core/world-voice.js`).WorldVoice;
+  const list = [{ child: 'son', at: 1, blob: 'a', key: 'son:a' }, { child: 'son', at: 5, blob: 'b', key: 'son:b' }, { child: 'daughter', at: 9, blob: 'c', key: 'daughter:c' }, { child: 'son', at: 7 }];
+  assert.equal(V.pickLatest(list, 'son').key, 'son:b'); assert.equal(V.pickLatest(list, 'daughter').key, 'daughter:c');
+  assert.equal(V.pickLatest([], 'son'), null);
+  assert.match(read(`${W}/core/world-voice.js`), /pickLatest\(all, child\)/, '재생할 때 대신 쓴다');
+});
+
+test('2026-11-21 의견 반영: 요정 음성은 바꿔치기 없이, 광장 톡은 말풍선만·꾹 누르면 판, 필살기 이름 표시', () => {
+  for (const f of [`${W}/arena-ui.js`, `${W}/garden.js`, `${W}/hub.js`, 'kids/common_space/my-room-dolls.js']) {
+    const calls = read(f).split('\n').filter(l => /speakFairyTTS\(/.test(l));
+    assert.ok(calls.length > 0, f);
+    for (const l of calls) assert.match(l, /skipPreset: true/, `${f}: 「정답이야」 같은 미리 녹음된 말로 바뀌지 않게 — ${l.trim()}`);
+  }
+  const hub = read(`${W}/hub.js`);
+  assert.match(hub, /longTimer = setTimeout\(/);
+  const clickBody = hub.slice(hub.indexOf("stageEl.addEventListener('click'"), hub.indexOf('function drawBubble'));
+  assert.ok(!clickBody.includes('openSheet('), '톡(click)으로는 판을 열지 않음');
+  assert.match(read(`${W}/arena.html`), /id="meter" class="world-btn__label">필살기</);
+  assert.match(read(`${W}/arena.css`), /\.arena-special \{[^}]*conic-gradient/);
 });

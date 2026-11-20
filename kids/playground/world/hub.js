@@ -259,16 +259,35 @@
       drawMap();
     });
 
+    // 톡 = 말풍선·소리, 꾹 누르기(0.6초) = 성격·목소리 판 (2026-11-21: 누를 때마다 판이 뜨는 게 불편하다는 의견)
+    let longTimer = null, longFired = false, sheetHinted = false;
+    const friendAt = (cx, cy) => {
+      const rect = cvEl.getBoundingClientRect();
+      const w = WorldView.toWorld(cam, m.view.scale, cx - rect.left, cy - rect.top);
+      return HubLogic.hitFriend(friends, w.x, w.y);
+    };
     stageEl.addEventListener('pointerdown', (e) => {
       downPos = { x: e.clientX, y: e.clientY, moved: false };
+      longFired = false;
+      clearTimeout(longTimer);
+      const ui = e.target && e.target.closest && e.target.closest('button, a, .world-sheet, .world-hud-top, [data-no-stick]');
+      if (ui || !mapEl.hidden || !sheetEl.hidden) return;
+      longTimer = setTimeout(() => {
+        if (!downPos || downPos.moved) return;
+        const f = friendAt(downPos.x, downPos.y);
+        if (f && f.item && f.item.kind === 'gallery') { longFired = true; f.landedAt = t; WorldSFX.play('pop'); openSheet(f); }
+      }, 600);
     });
     stageEl.addEventListener('pointermove', (e) => {
       if (!downPos || downPos.moved) return;
-      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 12) downPos.moved = true;
+      if (Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y) > 12) { downPos.moved = true; clearTimeout(longTimer); }
     });
+    stageEl.addEventListener('pointerup', () => clearTimeout(longTimer));
+    stageEl.addEventListener('pointercancel', () => clearTimeout(longTimer));
     stageEl.addEventListener('click', (e) => {
       const moved = downPos && downPos.moved;
       downPos = null;
+      if (longFired) { longFired = false; return; } // 꾹 눌러 판을 연 손은 톡으로 치지 않는다
       // 버튼·판·지도 위 클릭이 광장까지 내려와 뒤의 친구를 누르지 않게 (Claude 수정: 지도 「닫기」 뒤 친구가 눌리던 문제)
       const ui = e.target && e.target.closest && e.target.closest('button, a, .world-sheet, .world-hud-top, [data-no-stick]');
       if (ui || moved || !mapEl.hidden || !sheetEl.hidden) return;
@@ -278,7 +297,7 @@
         const nm = pendingEggs.map((e) => e.name).join(', ');
         showToast(`🥚 ${nm} 품는 중! 엄마·아빠가 등록하면 정원에서 깨어나!`);
         WorldSFX.play('pop');
-        if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS('알을 품는 중이야! 엄마 아빠가 등록하면 정원에서 깨어나!');
+        if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS('알을 품는 중이야! 엄마 아빠가 등록하면 정원에서 깨어나!', { skipPreset: true });
         return;
       }
       const f = HubLogic.hitFriend(friends, w.x, w.y);
@@ -288,11 +307,14 @@
       f.bubble = name + '\n' + bText;
       f.bubbleT = 2.5;
       f.landedAt = t;
-      const xylo = () => WorldSFX.play('xylo', XYLO[f.p] !== undefined ? XYLO[f.p] : 0);
-      if (root.WorldVoice && f.shortId) root.WorldVoice.play(child, f.shortId).then((ok) => { if (!ok) xylo(); });
-      else xylo();
-      if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS(name + ' ' + bText);
-      if (f.item && f.item.kind === 'gallery') openSheet(f);
+      // 내 목소리가 있으면 목소리만, 없으면 실로폰(+민서는 이름 읽기)
+      const fallback = () => {
+        WorldSFX.play('xylo', XYLO[f.p] !== undefined ? XYLO[f.p] : 0);
+        if (isDaughter && typeof root.speakFairyTTS === 'function') root.speakFairyTTS(name + ' ' + bText, { skipPreset: true });
+      };
+      if (root.WorldVoice && f.shortId) root.WorldVoice.play(child, f.shortId).then((ok) => { if (!ok) fallback(); });
+      else fallback();
+      if (!sheetHinted && f.item && f.item.kind === 'gallery') { sheetHinted = true; showToast('꾹 누르면 성격·목소리를 바꿀 수 있어!'); }
     });
 
     function drawBubble(ctx, x, y, text) {
