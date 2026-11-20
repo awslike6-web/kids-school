@@ -11,14 +11,12 @@
   --w-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
   --w-font: 'Jua', 'Nanum Gothic', sans-serif;
   position: fixed;
-  inset: 0;
-  height: 100dvh;
+  inset: 0; /* 높이를 dvh로 고정하지 않는다: 일부 폰 브라우저에서 아래 버튼이 하단바 밑으로 잘렸다 (2026-11-21 민서 폰) */
   overflow: hidden;
   background: var(--w-bg);
   color: var(--w-text);
   font-family: var(--w-font);
   font-size: 15px;
-  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -52,6 +50,7 @@
   display: block;
   width: 100%;
   height: 100%;
+  touch-action: none; /* 놀이 영역만 스크롤·확대 금지 */
 }
 
 /* 상단 HUD: 안전 영역 아래 한 줄 */
@@ -131,7 +130,7 @@
 
 .world-controls__right {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* 세로로 쌓으면 작은 폰에서 공격 버튼이 잘렸다 */
   align-items: flex-end;
   justify-content: flex-end;
   gap: 12px;
@@ -141,7 +140,9 @@
 
 /* 가상 조이스틱 */
 .world-stick {
-  position: relative;
+  position: absolute; /* 입력 부품이 left·top = 누른 곳 */
+  transform: translate(-50%, -50%);
+  z-index: 9;
   width: 112px;
   height: 112px;
   border-radius: 50%;
@@ -164,9 +165,9 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  margin: -24px 0 0 -24px; /* 가운데 맞춤은 margin으로: transform은 입력 부품이 손잡이 이동에 쓴다 */
   background: var(--w-accent);
   box-shadow: var(--w-shadow);
-  transform: translate(-50%, -50%);
   pointer-events: none;
   transition: transform 0.08s ease-out;
 }
@@ -248,7 +249,12 @@
   bottom: 0;
   z-index: 30;
   max-height: 60dvh;
+  max-height: 60vh;
+  max-height: 60dvh;
   overflow-y: auto;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 16px calc(env(safe-area-inset-right, 0px) + 16px)
     calc(env(safe-area-inset-bottom, 0px) + 18px)
     calc(env(safe-area-inset-left, 0px) + 16px);

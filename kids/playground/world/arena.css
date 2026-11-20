@@ -93,8 +93,10 @@
   bottom: 0;
   margin: 0 auto;
   max-width: 640px;
+  max-height: 78vh;
   max-height: 78dvh;
   overflow-y: auto;
+  touch-action: pan-y; /* 고르기 판은 위아래로 민다 (2026-11-21 민서 폰에서 안 밀림) */
   overscroll-behavior: contain;
   padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   border-radius: 20px 20px 0 0;
@@ -121,6 +123,7 @@
 }
 
 .arena-row {
+  touch-action: pan-x pan-y; /* 칩 줄은 옆으로, 판은 위아래로 */
   display: flex;
   flex-wrap: nowrap;
   gap: 10px;

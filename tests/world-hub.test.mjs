@@ -119,3 +119,17 @@ test('광장: 로비 입구·아레나 나가기·화면 뼈대', () => {
   assert.match(read(`${DIR}/hub.js`), /PORTALS\.find\(\(p\) => p\.id === portal\.enter\)/, '포털 enter(id)로 주소를 찾는다');
   for (const id of ['stage', 'cv', 'exitBtn', 'mapBtn', 'sheet', 'map', 'mapCv', 'guestBtn', 'mapClose', 'toast', 'title']) assert.ok(html.includes(`id="${id}"`), id);
 });
+
+test('폰 레이아웃: 조이스틱이 보이고, 버튼이 안 잘리고, 판은 밀린다 (2026-11-21 민서 폰)', () => {
+  const css = read(`${DIR}/world.css`), arena = read(`${DIR}/arena.css`), lobby = read('lobby.html');
+  const block = sel => { const i = css.indexOf(`${sel} {`); return css.slice(i, css.indexOf('}', i)); };
+  assert.ok(!/touch-action:\s*none/.test(block('.world-stage')), '화면 전체가 아니라 캔버스에만 스크롤 금지');
+  assert.match(block('.world-canvas'), /touch-action:\s*none/);
+  assert.ok(!/height:\s*100dvh/.test(block('.world-stage')), '높이를 dvh로 고정하지 않음');
+  assert.match(block('.world-stick'), /position:\s*absolute/); assert.match(block('.world-stick'), /translate\(-50%, -50%\)/);
+  assert.ok(!/transform:/.test(block('.world-stick__knob')), '손잡이 transform은 입력 부품 몫');
+  assert.match(block('.world-controls__right'), /flex-direction:\s*row/);
+  assert.match(block('.world-sheet'), /touch-action:\s*pan-y/);
+  assert.match(arena, /\.arena-sheet \{[^}]*touch-action:\s*pan-y/); assert.match(arena, /\.arena-row \{[^}]*touch-action:\s*pan-x pan-y/);
+  assert.match(lobby, /id="playgroundModalOverlay"[\s\S]{0,400}max-h-\[88vh\] overflow-y-auto/, '로비 놀이터 창은 창 안에서 스크롤');
+});
