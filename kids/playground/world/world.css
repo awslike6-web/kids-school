@@ -1,0 +1,343 @@
+/* world.css — 초안: 안티그래비티 Hydrogen, 검토: Claude (docs/world_module_spec.md §11) */
+
+/* 기본 변수 및 무대 */
+.world-stage {
+  --w-bg: #0f152b;
+  --w-surface: rgba(22, 30, 58, 0.88);
+  --w-text: #f4f7ff;
+  --w-accent: #00f5d4;
+  --w-accent-2: #ff4ecd;
+  --w-danger: #ff4d6d;
+  --w-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+  --w-font: 'Jua', 'Nanum Gothic', sans-serif;
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--w-bg);
+  color: var(--w-text);
+  font-family: var(--w-font);
+  font-size: 15px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+
+/* 아케이드 테마: 어두운 남색 + 네온 청록/분홍 */
+.theme--arcade {
+  --w-bg: #0f152b;
+  --w-surface: rgba(22, 30, 58, 0.88);
+  --w-text: #f4f7ff;
+  --w-accent: #00f5d4;
+  --w-accent-2: #ff4ecd;
+  --w-danger: #ff4d6d;
+  --w-shadow: 0 8px 24px rgba(0, 245, 212, 0.18);
+}
+
+/* 슬라임 테마: 연한 민트·분홍 파스텔 + 진한 글자 */
+.theme--slime {
+  --w-bg: linear-gradient(160deg, #e2fbf2 0%, #fde8f3 100%);
+  --w-surface: rgba(255, 255, 255, 0.9);
+  --w-text: #1e293b;
+  --w-accent: #10b981;
+  --w-accent-2: #f472b6;
+  --w-danger: #e11d48;
+  --w-shadow: 0 8px 20px rgba(30, 41, 59, 0.14);
+}
+
+/* 캔버스 */
+.world-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 상단 HUD: 안전 영역 아래 한 줄 */
+.world-hud-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px)
+    calc(env(safe-area-inset-right, 0px) + 12px) 8px
+    calc(env(safe-area-inset-left, 0px) + 12px);
+  pointer-events: none;
+}
+
+.world-hud-top__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--w-surface);
+  color: var(--w-text);
+  box-shadow: var(--w-shadow);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.world-exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 2px solid var(--w-danger);
+  border-radius: 999px;
+  background: var(--w-surface);
+  color: var(--w-danger);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  box-shadow: var(--w-shadow);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.12s ease;
+}
+
+.world-exit:active {
+  transform: scale(0.95);
+}
+
+/* 하단 조작 영역: 아래 28% + 안전 영역 */
+.world-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28%;
+  z-index: 10;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8px calc(env(safe-area-inset-right, 0px) + 16px)
+    calc(env(safe-area-inset-bottom, 0px) + 14px)
+    calc(env(safe-area-inset-left, 0px) + 16px);
+  pointer-events: none;
+}
+
+.world-controls__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-left: auto;
+  pointer-events: auto;
+}
+
+/* 가상 조이스틱 */
+.world-stick {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: var(--w-surface);
+  border: 2px solid var(--w-accent);
+  box-shadow: var(--w-shadow);
+  opacity: 0.85;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.world-stick[hidden] {
+  display: none;
+}
+
+.world-stick__knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--w-accent);
+  box-shadow: var(--w-shadow);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.08s ease-out;
+}
+
+/* 액션 버튼: 기본 56px, 메인 64px */
+.world-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 6px 10px;
+  border: 2px solid var(--w-accent);
+  border-radius: 50%;
+  background: var(--w-surface);
+  color: var(--w-text);
+  font-family: inherit;
+  font-size: 15px;
+  box-shadow: var(--w-shadow);
+  cursor: pointer;
+  touch-action: none;
+  transition: transform 0.12s ease, background-color 0.15s ease;
+}
+
+.world-btn:active {
+  transform: scale(0.93);
+}
+
+.world-btn--main {
+  min-width: 64px;
+  min-height: 64px;
+  border-color: var(--w-accent-2);
+  background: var(--w-accent);
+  color: #0f152b;
+}
+
+.world-btn__icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.world-btn__label {
+  font-size: 15px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+/* 알림 토스트 */
+.world-toast {
+  position: absolute;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 64px);
+  z-index: 20;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  border: 2px solid var(--w-accent);
+  border-radius: 999px;
+  background: var(--w-surface);
+  color: var(--w-text);
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: var(--w-shadow);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.world-toast[hidden] {
+  display: none;
+}
+
+/* 하단 선택 판(시트) */
+.world-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  max-height: 60dvh;
+  overflow-y: auto;
+  padding: 16px calc(env(safe-area-inset-right, 0px) + 16px)
+    calc(env(safe-area-inset-bottom, 0px) + 18px)
+    calc(env(safe-area-inset-left, 0px) + 16px);
+  border-top: 2px solid var(--w-accent);
+  border-radius: 20px 20px 0 0;
+  background: var(--w-surface);
+  color: var(--w-text);
+  box-shadow: var(--w-shadow);
+  transition: transform 0.22s ease;
+}
+
+.world-sheet[hidden] {
+  display: none;
+}
+
+.world-sheet__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 12px;
+}
+
+.world-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 56px;
+  min-height: 56px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background: rgba(128, 128, 128, 0.14);
+  color: var(--w-text);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+.world-chip:active {
+  transform: scale(0.95);
+}
+
+.world-chip.is-on {
+  border-color: var(--w-accent-2);
+  background: var(--w-accent);
+  color: #0f152b;
+}
+
+/* 낮은 가로 화면 대응 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .world-hud-top {
+    padding: calc(env(safe-area-inset-top, 0px) + 4px)
+      calc(env(safe-area-inset-right, 0px) + 10px) 4px
+      calc(env(safe-area-inset-left, 0px) + 10px);
+  }
+
+  .world-hud-top__item {
+    min-height: 32px;
+    padding: 4px 10px;
+  }
+
+  .world-controls {
+    height: auto;
+    top: calc(env(safe-area-inset-top, 0px) + 56px);
+    padding: 6px calc(env(safe-area-inset-right, 0px) + 12px)
+      calc(env(safe-area-inset-bottom, 0px) + 8px)
+      calc(env(safe-area-inset-left, 0px) + 12px);
+  }
+
+  .world-controls__right {
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+  }
+}
+
+/* 동작 줄이기 설정 */
+@media (prefers-reduced-motion: reduce) {
+  .world-exit,
+  .world-stick__knob,
+  .world-btn,
+  .world-toast,
+  .world-sheet,
+  .world-chip {
+    transition: none;
+    animation: none;
+  }
+}

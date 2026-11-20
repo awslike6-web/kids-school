@@ -266,6 +266,17 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `kids/common_space/family_quiz.html` (`?user=minsu` 출제실 / `?user=minseo` 풀이방 / 그 밖은 로비로) + `family-quiz-play.js`(전역 `FamilyQuizPlay {playRound(stage, quizzes, {record, onDone}), runSolverPage, mailText, speakThen}`: `QuizChoices.arrange`로 섞고 원래 번호 채점, 0.3초 뒤 자동 읽기, 보기 읽고 채점, 첫 오답 격려·두 번째 오답 정답 노란 안내+힌트 읽기, 🚩 이상해요 3가지 이유, 결과 `한번에`/`두번째에`/`도움받음`) + `family-quiz-author.js`(전역 `FamilyQuizAuthor {mount}`: 쓰기 칸·글자 수·🔊 들어보기·👀 민서처럼 풀어 보기(`playRound` record:false)·🚀 출시·🛠️ 고쳐서 다시 내기·내리기·내 문제 목록 칩) + `kids/css/family-quiz.css`(로비 카드 모양 포함). 아이 글은 `textContent`·`value`로만 넣는다.
 - 시험: `tests/family-quiz.test.mjs`(7개: 행 변환, 입력 검사, 새 문제 고르기, 출시·고치기·기록 값, 질의 캐시 건너뛰기, 우체통 묶음, 로비 카드).
 
+## 2-0-5. 🌍 내 친구 월드 공용 부품 (P1, 2026-11-20)
+- 명세: `docs/world_module_spec.md`(§11이 함수 계약). 광장·아레나·정원 화면은 아직 없음(P2~P4). 모두 `kids/playground/world/` 아래, IIFE·전역 하나·불러올 때 DOM 접근 없음. 초안: 안티그래비티 Hydrogen, 검토·노션 동기화: Claude.
+- `core/world-save.js` (351줄, `WorldSave`): 기기 저장 `kids_world_v1_{son|daughter}` + 노션 인벤토리 「월드기록」 한 칸. `fnv1a`·`shortId`(6자, 겹치면 `'#'+id` 해시로 7자)·`assignIds`·`emptyState`·`clean`·`merge`(교환·멱등·흡수, 합집합·짧은 기록·`cfg._t`·`at`)·`pack`(1,800자, best → 없는 그림 cfg 순으로 버림, seen·found는 보존)·`parseCfg`/`formatCfg`·`childOf`/`isParent`·`load`/`save`/`update`(1.5초 뒤 `flush`, 부모는 노션 안 씀, 설정 바뀌면 `cfg._t`)·`setSyncHook`·`setLiveIds`·`pull`/`flush`(「런너기록」과 같은 조회, 그 칸 하나만 PATCH, 칸 없음·유형 다름·JSON 깨짐이면 안 씀, 같으면 안 씀). 페이지 id 캐시는 런너와 같은 `MINMIN_INVENTORY_PAGE_ID_{이름}`.
+- `core/world-sprites.js` (233줄, `WorldSprites`): `collect`(갤러리 `charactersOf` + 몬스터 로스터, 작성자 필터·놀러 오기·중복 제거, 몬스터 포즈 경로 `resolvePath`로 상대 경로화), `authorsFor`, `hueTrait`·`dominantColor`(그림 대표색 → 무기 효과 f·i·l·w·x·r), `newFriends`, `liveOnly`, `load(item, size)`(`crossOrigin='anonymous'`, 4초, 줄인 화면 밖 캔버스·대표색, 캐시). kids-archive CDN 그림의 색 읽기 확인(2026-11-20).
+- `core/world-view.js` (144줄, `WorldView`): `fitView`(짧은 변 600 미만 360·이상 540, 균일 확대), `dprFor`(1~2), `clampDt`(최대 0.05초), `follow`(카메라·월드 경계·작은 축 가운데), `toScreen`/`toWorld`, `mount(canvas)`(부모 크기·DPR·ResizeObserver), `createLoop`(rAF·숨으면 멈춤).
+- `core/world-input.js` (206줄, `WorldInput`): `stickVector`, `keyboardVector`, `pickTarget`(자동 조준), `attach(el)`(왼쪽 절반 플로팅 조이스틱 `.world-stick`, `[data-action]` 버튼, Space·Shift·Q, `read()`).
+- `core/world-fx.js` (240줄, `WorldFX`): `createFx`(입자 풀 40·9종, 흔들림, 히트스톱, 화면 번쩍임), `body`(숨쉬기·착지 스쿼시·맞음 번쩍임), `shadow`, `silhouette`.
+- `core/world-sfx.js` (137줄, `WorldSFX`): Web Audio 합성 효과음 9종(5음계 실로폰 포함), `unlock`, 음소거 키 `kids_world_sfx`.
+- `world.css` (343줄): `theme--arcade`·`theme--slime` 변수, `.world-stage`(100dvh·안전 영역·터치 제스처 차단), HUD·조작 구역(아래 28%)·버튼 56/64px·조이스틱·선택 판·칩·가로 폰 배치.
+- 시험: `tests/world-core.test.mjs`(23개: 공통 규칙, 해시 기준값·충돌 쌍, clean, merge 성질 무작위 500회, pack, cfg, 기기 저장, 모의 노션 동기화 3, 그림 목록·대표색, 화면·카메라, 입력, 연출, 소리). 375×812·812×375·1280×800에서 조이스틱·공격·그림 불러오기 확인(임시 확인 화면, 커밋 안 함).
+
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 
 ### 용어사전 공용 공간 JS 분리 (2026-11-01)

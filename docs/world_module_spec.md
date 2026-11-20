@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. **P0 완료(2026-11-20)**, 다음은 P1 공용 부품. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
+> **상태**: 설계 확정. **P0·P1 완료(2026-11-20)**, 다음은 P2 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -321,7 +321,7 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 | 단계 | 내용 | 완료 기준 |
 |---|---|---|
 | **P0 등록 입구** ✅ | `ART_CATEGORIES`에 캐릭터 분류, `--cat "캐릭터"`가 빌더·등록 도구를 통과하는지 | 갤러리 시험 + 관제탑 등록 시험, 임시 구조에서 `--no-push` 등록 1건 — 완료: `tests/gallery-character-category.test.mjs`(3), 관제탑 `test_character_category_survives_registration_and_build`(제목·분류·캐릭터를 함께 등록해 메타·빌드 결과 모두 「캐릭터」·🧸) |
-| **P1 공용 부품** | `core/` 6개 + `world.css` | `tests/world-core.test.mjs`: 그림 목록 합치기(작성자 필터·놀러 오기), 대표색→효과 배정, 짧은 해시·충돌, 새 친구 판정, 두 기기 합치기(멱등·순서 무관), 1,800자 줄이기에서 `seen`·`found` 보존, 사라진 그림 숨김(삭제 아님), 깨진 저장값 복구, 카메라 균일 확대(비율 유지), dt 상한 |
+| **P1 공용 부품** ✅ | `core/` 6개 + `world.css` — 완료: 안티그래비티 Hydrogen 초안 7개(병렬), Claude 계약·시험·노션 동기화·검증. `tests/world-core.test.mjs` 23개, 폰 세로·가로·PC 화면 확인 | `tests/world-core.test.mjs`: 그림 목록 합치기(작성자 필터·놀러 오기), 대표색→효과 배정, 짧은 해시·충돌, 새 친구 판정, 두 기기 합치기(멱등·순서 무관), 1,800자 줄이기에서 `seen`·`found` 보존, 사라진 그림 숨김(삭제 아님), 깨진 저장값 복구, 카메라 균일 확대(비율 유지), dt 상한 |
 | **P2 아레나** | 시제품 4개에서 이식, 폰 조작, 계열 3 × 효과 6, 꼬마 모드 | `tests/world-arena.test.mjs`(무기 타임라인, 효과별 초당 피해 ±10%, 보스 패턴 순서, 보호막, 상점 무기 매핑, 꼬마 모드 값), §7-3 순서로 한 판씩 직접 플레이 |
 | **P3 광장** | `hub.html`·`hub.js`, 포털(아레나·마이룸), 친구 산책, 로비 놀이터 목록 한 줄 | 폰 세로에서 광장 → 아레나 → 광장 → 마이룸 왕복 |
 | **P4 정원 + 마이룸 인형** | `garden.js`, 정원 포털, `my-room-dolls.js`, 서랍 탭, 폰 드래그 | `tests/my-room-split.test.mjs` 유지 + `tests/world-garden.test.mjs`(숨기기·발견·이사), 민서 기준 터치만으로 끝까지 |
@@ -333,7 +333,74 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 11. 하지 않는 것
+## 11. P1 공용 부품 계약 (2026-11-20)
+
+공통 규칙: IIFE + `'use strict'`, 전역은 파일마다 하나(`window.X = Object.freeze({...})`), 불러올 때 DOM에 손대지 않음(시험이 node `vm`에서 `window` 대용 객체로 싣는다), `innerHTML` 금지, `speechSynthesis` 직접 호출 금지, `toISOString` 금지, 상대 경로만. 순수 함수는 DOM·`localStorage` 없이 돈다. 파일 머리에 "초안: 안티그래비티 Hydrogen, 검토: Claude".
+
+### 11-1. `world-save.js` → `window.WorldSave`
+| 함수 | 계약 |
+|---|---|
+| `fnv1a(text)` | UTF-8 바이트 FNV-1a 32비트 부호 없는 정수 |
+| `shortId(fullId, len=6)` | `fnv1a(fullId) % 36^6`을 36진수·앞을 `0`으로 채운 6자(32비트 값은 36진수 7자가 될 수 있어 나머지를 씀). `len=7`이면 뒤에 `fnv1a('#'+fullId) % 36`의 36진수 한 자를 붙임(**앞에** 붙여야 독립 해시가 됨. 뒤에 붙이면 원래 해시가 같을 때 결과도 같다) |
+| `assignIds(fullIds)` | `Map(full → short)`. 6자가 겹치는 무리는 **모두** 7자(입력 순서와 무관하게 같은 결과) |
+| `emptyState()` | `{v:1, at:0, arena:{best:{}, loadout:{}}, seen:[], found:[], cfg:{_t:0}, guest:false, keys:0}` |
+| `clean(raw)` | 잘못된 값은 버리고 빈 상태로 채움. id는 `/^[0-9a-z]{6,7}$/`, `seen`·`found`는 중복 없이 정렬, `best` 값은 0 초과 3600 이하 숫자(소수 첫째 자리 반올림), `loadout` 값은 40자 이하 문자열, `cfg` 값은 60자 이하 문자열(키는 id 형식), `keys`는 0~99 정수, `guest`는 불리언, `at`·`cfg._t`는 0 이상 정수 |
+| `merge(a, b)` | §9-2 규칙. `seen`·`found` 합집합, `best` 키마다 작은 값, `cfg`는 `_t`가 큰 쪽 전체, `keys`·`loadout`·`guest`는 `at`가 큰 쪽, `at`는 큰 값. 동점은 `JSON.stringify`가 사전순으로 큰 쪽. **교환(a,b=b,a)·멱등(a,a=clean(a))·흡수(merge(merge(a,b),b)=merge(a,b))** |
+| `pack(state, liveIds)` | 1,800자 이하 JSON 문자열. 넘치면 `arena.best` 키를 사전순으로 하나씩 버리고, 그래도 넘치면 `liveIds`에 없는 `cfg` 키를 사전순으로 버림. `seen`·`found`는 버리지 않음. 그래도 넘치면 `Error` |
+| `parseCfg(text)` / `formatCfg(obj)` | `p=a;b=k3f9a1;t=b;w=r;e=f;c=3;d=f` ↔ 객체. 키 순서 `p b t w e c d`. 허용값: `p` a(활발)·s(느긋)·m(흥부자)·h(수줍), `b` id, `t` s(자기)·e(먹기)·b(통통)·m(노래), `w` b(검)·r(라이플)·s(샷건), `e` f(불꽃)·i(얼음)·l(번개)·w(바람)·x(폭발)·r(무지개), `c` 0~5, `d` d(인형)·f(가구). 모르는 키·값은 버림 |
+| `childOf()` / `isParent()` | `localStorage.currentUser`가 `son`·`daughter`면 그 값, 아니면 `null` / `currentUserName`이 아빠·엄마·어른이면 `true` |
+| `load(child)` / `save(child, state)` | 키 `kids_world_v1_{child}`. 읽기·쓰기 실패는 삼키고 `clean` 결과·`false` 반환 |
+| `update(child, fn)` | 불러온 상태를 `fn(복사본)`에 넘기고 돌려받은 값에 `at=Date.now()`를 넣어 저장, 노션 저장을 1.5초 뒤로 미룸. 부모는 저장만 하고 노션은 건드리지 않음 |
+| `pull(child)` / `flush(child)` | 노션 「월드기록」 읽어 합치기 / 합친 값을 그 칸 하나에 PATCH. 「런너기록」(`gallery-runner-rewards.js`)과 같은 방식(Claude 작성) |
+| `setSyncHook(fn)` / `setLiveIds(ids)` | `update` 뒤 부를 함수(기본값 `flush`) / `pack`에서 살아 있는 그림 id(기본값 `null` = cfg의 그림 모두 살아 있음) |
+
+### 11-2. `world-sprites.js` → `window.WorldSprites`
+| 함수 | 계약 |
+|---|---|
+| `resolvePath(src, root)` | `./kids/…`·`kids/…`는 `root + 'kids/…'`, `http(s)://`는 그대로, 그 밖은 그대로 |
+| `authorsFor(child, guest)` | son `['민수','공동']`, daughter `['민서','공동']`, `guest`면 상대 아이 이름 추가 |
+| `collect({items, charactersOf, roster, order, child, guest, root})` | 항목 배열. 갤러리: `{id:'gal:'+artId+'#'+key, kind:'gallery', artId, charKey, name, src, poses:null, author, title, date, category}`(작성자 필터, `id`가 같은 것은 하나만). 몬스터: `order` 순서대로 `{id:'mon:'+몬스터id, kind:'monster', name, src: poses.idle, poses:{…모두 resolvePath}, author:'민수'}`. 갤러리가 먼저, 몬스터가 뒤 |
+| `hueTrait(r, g, b)` | 채도 0.25 미만·명도 0.15 미만·0.9 초과면 `r`. 색상각 0~40·330~360 `f`, 40~70 `l`, 70~170 `w`, 170~260 `i`, 260~330 `x` |
+| `dominantColor({data, width, height})` | 알파 128 초과·채도 0.25 이상 화소를 색상각 12구간으로 세어 가장 많은 구간의 평균 `{r,g,b}`. 그런 화소가 없으면 불투명 화소 평균, 그것도 없으면 `null` |
+| `newFriends(list, seen, idMap)` | `idMap.get(item.id)`가 `seen`에 없는 갤러리 항목(몬스터 제외) |
+| `liveOnly(savedShortIds, idMap)` | `idMap` 값에 있는 것만(숨김용, 저장값은 바꾸지 않음) |
+| `load(item, size)` | `Promise<{canvas, color, trait} \| null>`. `crossOrigin='anonymous'`, 4초 제한, 긴 변 `size`로 줄인 화면 밖 캔버스, 색을 못 읽으면 `color:null, trait:'r'`. 같은 `src+size`는 캐시 |
+
+### 11-3. `world-view.js` → `window.WorldView`
+| 함수 | 계약 |
+|---|---|
+| `fitView(cssW, cssH)` | 짧은 변 600 미만이면 보이는 짧은 변 360, 이상이면 540. `{scale, viewW, viewH}`, `scale = 짧은 변/보이는 짧은 변`, 가로·세로 같은 배율 |
+| `dprFor(ratio)` | 1~2로 자름(잘못된 값은 1) |
+| `clampDt(ms)` | 초 단위, 0~0.05 |
+| `follow(cam, target, view, world, dt, k=8)` | 카메라를 대상 쪽으로 `1-exp(-k·dt)`만큼 옮긴 새 `{x,y}`(왼쪽 위). 화면이 월드 안에 있게 자르고, 월드가 화면보다 작은 축은 가운데 |
+| `toScreen(cam, scale, x, y)` / `toWorld(cam, scale, sx, sy)` | 서로 역함수 |
+| `mount(canvas, onResize)` | 크기·DPR 반영, `ctx.setTransform(scale·dpr…)`, 창 크기 바뀌면 다시. `{ctx, get view(), destroy()}` |
+| `createLoop({update, render})` | rAF 루프. `visibilitychange`로 숨으면 멈추고 돌아오면 이어 감(첫 프레임 dt 0). `{start, stop, get running}` |
+
+### 11-4. `world-input.js` → `window.WorldInput`
+| 함수 | 계약 |
+|---|---|
+| `stickVector(origin, point, radius=56, dead=0.15)` | `{x, y, mag}`, `mag`는 0~1, 데드존 안이면 0 벡터. 방향은 단위 벡터×mag |
+| `keyboardVector(keys)` | `Set`의 `KeyW/A/S/D`·화살표로 단위 벡터(대각선도 길이 1), 없으면 `{x:0,y:0}` |
+| `pickTarget(from, targets, maxRange)` | `alive !== false`이고 거리가 `maxRange` 이하인 것 중 가장 가까운 것, 같으면 `id` 사전순, 없으면 `null` |
+| `attach(el, {stickZone='left'})` | 왼쪽 절반 아무 데나 누르면 그 자리에 조이스틱(포인터 id별), `[data-action]` 버튼, 키보드(Space 공격·Shift 회피·Q 무기). `{read() → {move:{x,y}, pressed:Set, held:Set}, destroy()}`. `pressed`는 `read` 한 번에 비워짐 |
+
+### 11-5. `world-fx.js` → `window.WorldFX`
+| 함수 | 계약 |
+|---|---|
+| `createFx({max=40})` | `{burst(kind,x,y,n), shake(power,ms), hitstop(ms), flash(ms), step(dt)→실제 dt(히트스톱 중 0), draw(ctx), offset()→{x,y}, get alive}`. 입자는 고정 크기 풀(넘치면 가장 오래된 것 재사용), `kind`: spark·dust·ring·fire·ice·bolt·wind·boom·star |
+| `body({t, landedAt, hitAt})` | `{sx, sy, flash}`. 숨쉬기(2초 주기, 진폭 0.03), 착지 0.25초 스쿼시(sx 최대 1.25·sy 최소 0.75, 부피 sx·sy≈1), 맞은 뒤 0.12초 `flash:true` |
+| `shadow(ctx, x, y, w)` / `silhouette(canvas)` | 발밑 타원 그림자 / 흰 실루엣 캔버스(캐시) |
+
+### 11-6. `world-sfx.js` → `window.WorldSFX`
+`play(name, i)`(hit·slash·shot·shotgun·dash·pop·chime·xylo(i=0~4, 5음계)·levelup), `unlock()`(첫 터치 때 AudioContext 생성·재개), `setMuted(b)`·`isMuted()`(키 `kids_world_sfx`=`off`면 음소거, 기기별). 오디오가 없거나 실패하면 조용히 넘어감.
+
+### 11-7. `world.css`
+`theme--arcade`·`theme--slime` 색 변수, `.world-stage`(`100dvh`, 안전 영역, `touch-action:none`, `user-select:none`, `-webkit-touch-callout:none`, `overscroll-behavior:none`), `.world-hud-top`, `.world-controls`(아래 28%), `.world-btn`(56px)·`.world-btn--main`(64px), `.world-stick`, 글자 최소 15px, `prefers-reduced-motion`.
+
+---
+
+## 12. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.
