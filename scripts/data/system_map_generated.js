@@ -110,6 +110,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "gallery-runner-rewards.js", "path": "kids-school-main/kids/common_space/gallery-runner-rewards.js", "domain": ["gallery", "guardian"], "docs": ["gallery_runner_star_bank_spec.md", "runner_friendship_spec.md", "world_module_spec.md"]},
       {"name": "gallery-spot-diff.js", "path": "kids-school-main/kids/common_space/gallery-spot-diff.js", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_character_runner_spec.md", "gallery_runner_star_bank_spec.md"]},
       {"name": "my-room-core.js", "path": "kids-school-main/kids/common_space/my-room-core.js", "domain": [], "docs": ["homeschool_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
+      {"name": "my-room-dolls.js", "path": "kids-school-main/kids/common_space/my-room-dolls.js", "domain": [], "docs": ["world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "my-room-main.js", "path": "kids-school-main/kids/common_space/my-room-main.js", "domain": [], "docs": ["homeschool_spec.md", "world_module_spec.md", "CORE_CATALOG.md"]},
       {"name": "voca_common.js", "path": "kids-school-main/kids/common_space/voca_common.js", "domain": [], "docs": ["other_subjects_spec.md", "CORE_CATALOG.md", "voca_math_viewer_handover.md"]},
       {"name": "voca_modal.js", "path": "kids-school-main/kids/common_space/voca_modal.js", "domain": [], "docs": ["CORE_CATALOG.md"]},

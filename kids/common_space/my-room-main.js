@@ -79,6 +79,8 @@
             document.getElementById('tab-shop-btn').classList.toggle('active', tabName === 'shop');
             document.getElementById('tab-inv-btn').classList.toggle('active', tabName === 'inventory');
             document.getElementById('tab-map-btn').classList.toggle('active', tabName === 'maps');
+            const friendsBtn = document.getElementById('tab-friends-btn'); // 내 친구 월드 인형 탭 (world_module_spec §15)
+            if (friendsBtn) friendsBtn.classList.toggle('active', tabName === 'friends');
             renderDock();
         }
 
@@ -129,6 +131,10 @@
 
             if (currentTab === 'maps') {
                 renderMapsDock(dock);
+                return;
+            }
+            if (currentTab === 'friends') {
+                if (window.MyRoomDolls) window.MyRoomDolls.renderDock(dock);
                 return;
             }
 
@@ -357,6 +363,7 @@
                 room.appendChild(div);
             });
             refreshAnimatedGifs(room);
+            if (window.MyRoomDolls) window.MyRoomDolls.renderRoom(room); // 갤러리 친구 인형(gal:…) 그리기
             if (keepSelection && placed.some(f => f.id === keepSelection)) {
                 setSelectedFurniture(keepSelection);
             }

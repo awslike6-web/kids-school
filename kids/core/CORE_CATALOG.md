@@ -128,6 +128,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 
 ### 마이룸 인라인 CSS·JS 분리 (2026-10-31)
 - `kids/common_space/my-room.html`(50줄)은 같은 폴더의 `my-room.css`(203줄), `my-room-core.js`(542줄) → `my-room-main.js`(490줄)를 원래 위치에서 상대 경로·`?v=20261031-room-split`로 로드합니다. 기존 `../config.js`가 먼저이며 클래식 스크립트·전역 상태·DOM·동작을 보존합니다.
+- **🧸 마이룸 인형 (2026-11-20, 내 친구 월드 P4b)**: `my-room.html`이 main 뒤에 갤러리 데이터·몬스터 로스터·월드 부품(`world-save`·`world-sprites`·`world-sfx`·`hub-logic`·`garden-logic`)과 `my-room-dolls.js`(`MyRoomDolls`: `TAGS`·`galId`·`parseGalId`·`nearTag`·`trimAlbum`·`renderDock`·`renderRoom`)·`my-room-dolls.css`를 싣는다. 「🧸 내 친구」 탭(`switchTab('friends')`)에서 찾은 갤러리 친구를 공짜로 배치(`gal:{artId}#{charKey}`, 기존 `배치 정보`에 저장), 방에서 성격대로 걷고 태그 가구(`MARKET_ITEMS` 선택 필드 `tag`: sleep·eat·bounce·music)에 반응, 톡 말풍선·실로폰, 🚶 산책 켜기/끄기(`myroom_doll_roam_{profile}`), 📸 사진첩(IndexedDB `kids_world_album`, 아이별 6장). main 연결 3줄(`switchTab`·`renderDock`·`renderRoomFurniture`). 마이룸 상태는 `let` 전역이라 이름으로 직접 읽는다. 시험 `tests/world-myroom.test.mjs`.
 - core는 상태·목록·저장/동기화 함수, main은 `initRoom`·`switchTab`·`buyItem`·`selectRoomMap`·가구 렌더링/드래그·`clearRoom`과 기존 `DOMContentLoaded` 등록을 담당합니다. 검증: `tests/my-room-split.test.mjs`(고정 fixture 원문·마크업·600줄 제한·core 단독 로드·전역 함수 보존), 분리 계약: `docs/my_room_split_spec.md`.
 
 ### 교재 이미지 체인저 인라인 CSS·JS 분리 (2026-10-31)

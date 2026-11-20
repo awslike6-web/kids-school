@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. **P0~P3·P4a 완료(2026-11-20)**, 다음은 P4b 마이룸 인형, P4c 상점 무기 연결. 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
+> **상태**: 설계 확정. **P0~P3·P4a·P4b 완료(2026-11-20)**, 다음은 P4c 상점 무기 연결. 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -524,7 +524,39 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 15. 하지 않는 것
+## 15. P4b 마이룸 인형 계약 (2026-11-20) — 완료
+
+> 결과: `my-room-dolls.js`·`my-room-dolls.css`(Hydrogen) + 기존 파일 연결(Claude). 고친 것: 초안이 마이룸 상태를 `window.placedFurniture`로 찾아 「방에 꺼내기」가 안 되던 문제(`let` 전역이라 이름으로 직접 읽어야 함). 폰 크기·부모 검수 모드(기기 저장)에서 꺼내기·걷기·톡 말풍선·사진첩 합성(배경+인형, 교차 출처 문제 없음) 확인. 아이 모드의 노션 저장은 기존 `syncRoomDataToNotion`을 그대로 쓰며 쓰기 차단 서버라 실제 쓰기는 하지 않았다. `tests/world-myroom.test.mjs` 3개, `tests/my-room-split.test.mjs` 스크립트 목록 갱신.
+
+기존 마이룸(`kids/common_space/my-room*`)에 「🧸 내 친구」 탭과 살아 있는 인형 층을 얹는다. 새 파일 `my-room-dolls.js`(Hydrogen)·`my-room-dolls.css`(Hydrogen). 기존 파일 수정(Claude): `my-room.html`(탭 버튼·스크립트), `my-room-main.js`(연결 3줄), `my-room-core.js`(상품 `tag`), `tests/my-room-split.test.mjs`(싣는 스크립트 목록).
+
+### 15-1. 기존 마이룸과 맞물리는 곳 (전역 클래식 스크립트)
+- 읽고 고쳐도 되는 전역: `placedFurniture`(배치 배열, 항목 `{id, x, y, rotation, flipX}` px), `currentProfile`('son'|'daughter'), `syncRoomDataToNotion()`(Promise, 노션 저장), `isAdminUser()`·`saveAdminRoomStateToLocal()`(부모는 기기 저장), `renderRoomFurniture()`, `renderDock()`, `dragStart`(기존 끌기 시작 함수: `.furniture-item` 요소의 mousedown/touchstart에 걸면 위치 끌기·저장까지 기존 코드가 함), `rotatePlacedItem(id)`·`flipPlacedItem(id)`, `setSelectedFurniture(id)`, `getCatalogItems(profile)`(상품 목록, 항목에 선택 필드 `tag`), `getItemAssetUrl(item)`.
+- **주의**: 위 상태 변수(`placedFurniture`·`currentProfile`·`isDragging`·`activeDragElement`)는 `let` 전역이라 `window.…`로는 보이지 않는다. 이름으로 직접(`typeof placedFurniture !== 'undefined'`) 읽는다. 함수는 `window`에 있다.
+- 인형 배치 id는 `gal:{artId}#{charKey}`. 기존 `renderRoomFurniture`는 상품 목록에 없는 id를 그리지 않고 건너뛰므로, 인형은 이 모듈이 같은 방(`#my-room`)에 `.furniture-item.doll-item`(id `furn_{배치 id}`)으로 그린다. 기존 정규화는 모르는 id도 보존한다.
+- 연결: `switchTab`이 `#tab-friends-btn`도 켜고 끄며, `renderDock`은 `currentTab === 'friends'`면 `MyRoomDolls.renderDock(dock)`, `renderRoomFurniture` 끝에서 `MyRoomDolls.renderRoom(room)`.
+
+### 15-2. `my-room-dolls.js` → `window.MyRoomDolls`
+| 이름 | 계약 |
+|---|---|
+| `TAGS` | `{sleep:'💤', eat:'😋', bounce:'🦘', music:'🎵'}`, 설정 글자 `s e b m` ↔ 이름 |
+| `galId(artId, key)` / `parseGalId(id)` | `'gal:'+artId+'#'+key` / `{artId, key}` 또는 `null` |
+| `nearTag(doll, furn, r=90)` | 인형 중심과 가구 중심(`x+44, y+44`) 거리 ≤ r인 태그 가구 중 가장 가까운 것의 태그, 없으면 `null` |
+| `trimAlbum(list, max=6)` | `{at}` 내림차순 앞 `max`개 |
+| `renderDock(dock)` | 내 갤러리 친구 카드(기존 `.item-card` 모양, 그림·이름·「방에 꺼내기」/「방에 있음」). 친구 목록 = `WorldSprites.collect`(갤러리만, `currentProfile`) 중 `GardenLogic.visibleIds`(찾은 친구). 정원에 숨은 친구가 있으면 맨 끝에 「🌿 정원에 숨은 친구 N명」 카드(정원으로 가는 링크). 꺼내기 = `placedFurniture`에 `{id: gal:…, x, y(방 안 무작위), rotation:0, flipX:false}` 추가 → 저장 → `renderRoomFurniture()`·`renderDock()`. 친구가 없으면 「갤러리에 캐릭터를 등록하면 여기 나와요!」 |
+| `renderRoom(room)` | `gal:` 배치마다 인형 요소(그림 `crossOrigin='anonymous'`), 기존 `dragStart`로 끌기, 선택 시 조작 버튼 ↻ ↔ 🪑(인형↔가구) 🏷️(가구일 때 태그 돌리기). 방 오른쪽 위에 「🚶 산책」 켜고 끄기·「📸」 버튼. 걷기 루프는 한 번만 시작 |
+| 걷기 | 인형 모드(`cfg.d !== 'f'`)는 방 안을 천천히 걸음(성격 `cfg.p` 속도: 활발 40·느긋 15·흥부자 28·수줍 22 px/초, 쉬기 1~3초). 끄는 중인 요소는 건너뜀. 걸음은 `style.left/top`만 바꾸고 저장하지 않음(끌어서 놓을 때만 기존 코드가 저장). 산책 끄기는 기기 저장 `myroom_doll_roam_{profile}` |
+| 반응 | 태그 가구 근처(`nearTag`)에 오면 3초 멈추고 머리 위 이모지(💤😋🦘🎵), 통통이면 폴짝. 인형끼리 60px 안이면 「안녕!」+💕(같은 쌍 10초에 한 번). 톡(끌지 않은 클릭) → 이름·탄생 이야기 말풍선, 5음계 실로폰, 민서는 음성 |
+| 가구 모드 | `cfg.d === 'f'`면 서 있고 태그(`cfg.t`, 기본 통통)를 가진 가구로 취급(다른 인형이 반응) |
+| 사진첩 | 📸 → 방을 캔버스로 합성(방 배경 그림 cover + 모든 `.furniture-item` 그림을 화면 위치대로) → 가로 480px 이하 JPEG 0.7 → IndexedDB(`kids_world_album`, 아이별) 최근 6장 → 사진첩 창(썸네일·내려받기·닫기). 저장 실패면 「이 기기에는 저장할 수 없어요」 |
+| 설정 저장 | 인형/가구·태그는 `WorldSave.update(currentProfile, …)`로 `cfg[shortId]`의 `d`·`t` |
+
+### 15-3. 상품 `tag` (my-room-core.js `MARKET_ITEMS`)
+민수: 네모 빨간 침대 `sleep`, 휴대 라디오 `music`, 호버보드 `bounce`. 민서: 과일 5종·하리보 `eat`, 슬라임 `bounce`.
+
+---
+
+## 16. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.
