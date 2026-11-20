@@ -179,7 +179,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 기존 1,517줄의 거대했던 `gallery_controller.js`를 331줄의 초경량 메인 뷰 컨트롤러로 슬림화하고, 단일 책임 원칙에 따라 전문 서브모듈 2종으로 완전 분리 구축한 갤러리 코어 엔진군입니다.
 - **파일 위치**:
   - `kids/common_space/gallery_controller.js` (331줄): 유저 테마 적용(DOM null 안전 가드), 2대 뷰 모드 스위처(작품 vs 특별한 날), 필터 바 및 카드 그리드 렌더러, 빠른 좋아요.
-  - `kids/common_space/gallery-data-sync.js` (477줄): 로컬 데이터 로드/저장, 카테고리 정의, 노션 실시간 양방향 동기화 및 영구 수정 이력(Audit Trail) 콜아웃 블록 적재.
+  - `kids/common_space/gallery-data-sync.js` (573줄): 로컬 데이터 로드/저장, 카테고리 정의(`ART_CATEGORIES` 5대 분류 + `캐릭터`(🧸 캐릭터 친구들, 2026-11-20 내 친구 월드 P0) · `SPECIAL_CATEGORIES`), 노션 실시간 양방향 동기화 및 영구 수정 이력(Audit Trail) 콜아웃 블록 적재. 작품 분류는 `gallery.html` 선택 목록 2곳·빌더 `build_gallery.py` `normalize_category`·관제탑 `sync_quick_upload.py` `ICON_MAP`과 같아야 한다(시험 `tests/gallery-character-category.test.mjs`).
   - `kids/common_space/gallery-modal-manager.js` (644줄): 상세 모달 뷰, 다중 사진 썸네일 스위처(창 안 `🎬 3D 회전영상` 칸은 `.mp4/.webm/.mov/.m4v` 파일 주소일 때만; 구글 포토 등 공유 주소는 새 창 버튼만), 메타 웹 편집, 작가의 한마디 직접 수정, 스티커 및 칭찬 댓글(XSS 방어).
   - `kids/common_space/gallery-3d-layout.js` (393줄, `window.Gallery3DLayout`, DOM 없음): 3D 전시관 계산. `buildLayout(items)`(10점씩 전시실, 좌우 벽 번갈아, 간격 3.2m)·`fitFrame`·`viewpointFor`·`clampPosition`·`planTextures`(가까운 순 예산·여유 4)·`stepIndex`·`roomLabel`.
   - `kids/common_space/gallery-3d-scene.js` (240줄, `window.Gallery3DScene`): CFG·THEMES(`neon`·`pastel`), 벽·바닥·간판·액자·이름표 CanvasTexture, `buildHall(state)`·`buildFrames(state)`·`applyFrameDimensions`.
@@ -1627,6 +1627,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **단원 영상 부품 (2026-11-16)**: `tests/video-unit.test.mjs`(15개). 위 「🎬 `video-unit.js`」 절.
 - **어휘 캐시 한 벌 공유 (2026-11-19)**: `tests/voca-all-cache.test.mjs`(4개). ALL 캐시를 아이별로 거르기(학생 칸 빈 행 제외), 캐시 없으면 노션 1회, 미리 불러오기가 ALL을 받는지.
 - **노션 여러 쪽 조회 정렬 (2026-11-17)**: `tests/notion-stable-sort.test.mjs`(2개). `notion-api-client.js`의 `page_size` 조회 본문마다 `sorts: STABLE_SORTS`가 있는지 본다.
+- **2026 원신초 학예발표회 안내 (2026-11-20)**: `festival.html` · `kids/data/festival_2026_data.js` · `kids/css/festival.css` · `kids/js/festival_controller.js` (`window.FestivalGuide`). `timetable.html` 상단 `#festivalGuideBtn`에서 진입하며, 민서(1·6·11·13)·민수(5·12)·10번 확인 필요 중심 1단계 요약 + 사이 무대/학교 원문 `<details>` 2단계 펼침 + 현장 진행 체크(`minmin_festival_2026_done_v1`). 시험 `tests/festival-guide.test.mjs`(3개).
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

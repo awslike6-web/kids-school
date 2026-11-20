@@ -214,6 +214,7 @@
 | **수학 레벨** | `number` | - |
 | **영어 경험치** | `number` | - |
 | **영어 레벨** | `number` | - |
+| **월드기록** | `rich_text` | 내 친구 월드 기록 JSON(1,800자 이하, `world-save.js` 전용, [`world_module_spec.md`](world_module_spec.md) §9-3). 사용자 수동 생성, 2026-11-20 읽기 전용 GET으로 `rich_text` 확인 |
 | **오늘 획득_과학** | `number` | - |
 | **오늘 획득_국어** | `number` | - |
 | **오늘 획득_사회** | `number` | - |
@@ -236,6 +237,7 @@
 | **현재 테마** | `select` (슬라임, 마인크래프트) | - |
 
 > 「런너기록」은 사용자가 직접 `rich_text`로 만듭니다. GET에서 속성이 없거나 숫자형 등 다른 유형이면 로컬만 사용하고 PATCH하지 않습니다.
+> 「월드기록」도 같은 규칙입니다. 그 칸 하나만 PATCH하고 다른 칸을 같은 요청에 넣지 않습니다.
 
 ### 📅 [고정 시간표 DB] TIMETABLE_DB
 - **Database ID**: `32ba27115b68828bbda201a1bdce12fc`

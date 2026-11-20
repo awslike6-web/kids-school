@@ -173,6 +173,22 @@ def build_characters(meta, art_id, *args):
     return result
 
 
+def normalize_category(raw_cat):
+    """메타 분류 글자를 표준 분류와 아이콘으로 맞춘다. 「캐릭터」는 내 친구 월드용(docs/world_module_spec.md §3-1)."""
+    raw_cat = raw_cat if isinstance(raw_cat, str) else ''
+    if "캐릭터" in raw_cat:
+        return "캐릭터", "🧸"
+    if "종이접기" in raw_cat or "디자인" in raw_cat:
+        return "종이접기/디자인", "📐"
+    if "만들기" in raw_cat or "공예" in raw_cat:
+        return "만들기/공예", "✂️"
+    if "상장" in raw_cat or "기념" in raw_cat or "수상" in raw_cat:
+        return "상장/기념", "🏆"
+    if "탐구" in raw_cat or "프로젝트" in raw_cat or "연구" in raw_cat:
+        return "탐구/프로젝트", "🔬"
+    return "그림/미술", "🎨"
+
+
 def run():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
@@ -373,19 +389,10 @@ def run():
             default_icon = "✂️" if has_cutout else "🎨"
             title = meta.get("title", default_title)
             
-            # 5대 표준 분야 정규화
+            # 표준 분야 정규화 (5대 분류 + 캐릭터)
             raw_cat = meta.get("category", default_cat)
             raw_icon = meta.get("categoryIcon", default_icon)
-            if "종이접기" in raw_cat or "디자인" in raw_cat:
-                category, category_icon = "종이접기/디자인", "📐"
-            elif "만들기" in raw_cat or "공예" in raw_cat:
-                category, category_icon = "만들기/공예", "✂️"
-            elif "상장" in raw_cat or "기념" in raw_cat or "수상" in raw_cat:
-                category, category_icon = "상장/기념", "🏆"
-            elif "탐구" in raw_cat or "프로젝트" in raw_cat or "연구" in raw_cat:
-                category, category_icon = "탐구/프로젝트", "🔬"
-            else:
-                category, category_icon = "그림/미술", "🎨"
+            category, category_icon = normalize_category(raw_cat)
 
             artist_note = meta.get("artistNote", f"{author_name}가 정성을 듬뿍 담아 완성한 소중하고 멋진 작품입니다.")
             likes = meta.get("likes", 0)
@@ -466,6 +473,8 @@ def run():
                 learning_pts.append("공간 감각 및 입체 조형 구조화 능력 발휘")
             if category == "만들기/공예" or category == "만들기/입체공예":
                 learning_pts.append("다양한 자연물 및 복합 재료를 활용한 소근육 응용력")
+            elif category == "캐릭터":
+                learning_pts.append("나만의 캐릭터를 상상하고 모습·성격을 설계하는 창작력")
             else:
                 learning_pts.append("선과 색채의 조화를 통한 시각적 감정 표현력")
             learning_pts.append(f"{author_name}만의 독창적인 예술적 상상력과 미적 탐구")

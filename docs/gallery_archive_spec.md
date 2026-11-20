@@ -220,6 +220,11 @@ python -X utf8 scripts/sync_quick_upload.py --cat "특별한 날" --dry-run \
 - 등록 회귀 시험: 관제탑 `python -X utf8 scripts/test_gallery_registration_options.py`. worktree 시험은 `GALLERY_SCHOOL_SOURCE`에 공부방 A의 절대 경로를 지정합니다. 임시 구조·모의 큐·`--no-push`·제목 없는 호출로 검사하며 운영 API/노션/원격 Git은 호출하지 않습니다.
 - 저장·게임의 API와 한계는 [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)를 참고합니다. 파트너·최고 기록은 현재 기기에서만 유지됩니다. 실제 캐릭터 작품 등록은 별도 콘텐츠 작업입니다.
 
+**캐릭터 전용 분류 (2026-11-20)**: 작품이라기보다 캐릭터·아이템으로 쓰고 싶은 그림은 `--cat "캐릭터"`로 올립니다. 갤러리에 「🧸 캐릭터 친구들」로 모이고, 등록된 캐릭터는 내 친구 월드(광장·아레나·정원·마이룸)에 자동으로 나옵니다([`world_module_spec.md`](world_module_spec.md) §3). 다른 분류 작품에 붙인 캐릭터도 똑같이 나옵니다.
+```bash
+python -X utf8 scripts/sync_quick_upload.py --id "art_..." --author "민서" --title "토끼 공주" --cat "캐릭터" --date "2026-11-20" --file "E:/Downloads/rabbit.jpg" --character-sprite "E:/Downloads/rabbit_cutout.png" --character-name "토끼 공주"
+```
+
 다중 캐릭터는 `--character-key`로 선택해 최대 6개를 등록합니다. `--character-remove KEY`는 해당 메타만 제거하고 파일을 보존하며 마지막 삭제는 characters 키도 제거합니다. 배열 계약과 호환·등록 규칙은 [gallery_multi_character_spec.md](gallery_multi_character_spec.md)를 따릅니다.
 
 ---

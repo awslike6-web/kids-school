@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. P0부터 단계별 구현.
+> **상태**: 설계 확정. **P0 완료(2026-11-20)**, 다음은 P1 공용 부품. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -320,7 +320,7 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 | 단계 | 내용 | 완료 기준 |
 |---|---|---|
-| **P0 등록 입구** | `ART_CATEGORIES`에 캐릭터 분류, `--cat "캐릭터"`가 빌더·등록 도구를 통과하는지 | 갤러리 시험 + 관제탑 등록 시험, 임시 구조에서 `--no-push` 등록 1건 |
+| **P0 등록 입구** ✅ | `ART_CATEGORIES`에 캐릭터 분류, `--cat "캐릭터"`가 빌더·등록 도구를 통과하는지 | 갤러리 시험 + 관제탑 등록 시험, 임시 구조에서 `--no-push` 등록 1건 — 완료: `tests/gallery-character-category.test.mjs`(3), 관제탑 `test_character_category_survives_registration_and_build`(제목·분류·캐릭터를 함께 등록해 메타·빌드 결과 모두 「캐릭터」·🧸) |
 | **P1 공용 부품** | `core/` 6개 + `world.css` | `tests/world-core.test.mjs`: 그림 목록 합치기(작성자 필터·놀러 오기), 대표색→효과 배정, 짧은 해시·충돌, 새 친구 판정, 두 기기 합치기(멱등·순서 무관), 1,800자 줄이기에서 `seen`·`found` 보존, 사라진 그림 숨김(삭제 아님), 깨진 저장값 복구, 카메라 균일 확대(비율 유지), dt 상한 |
 | **P2 아레나** | 시제품 4개에서 이식, 폰 조작, 계열 3 × 효과 6, 꼬마 모드 | `tests/world-arena.test.mjs`(무기 타임라인, 효과별 초당 피해 ±10%, 보스 패턴 순서, 보호막, 상점 무기 매핑, 꼬마 모드 값), §7-3 순서로 한 판씩 직접 플레이 |
 | **P3 광장** | `hub.html`·`hub.js`, 포털(아레나·마이룸), 친구 산책, 로비 놀이터 목록 한 줄 | 폰 세로에서 광장 → 아레나 → 광장 → 마이룸 왕복 |

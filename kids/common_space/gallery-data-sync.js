@@ -29,7 +29,9 @@ const ART_CATEGORIES = [
     { key: '만들기/공예', label: '만들기/공예', icon: '✂️' },
     { key: '종이접기/디자인', label: '종이접기/디자인', icon: '📐' },
     { key: '상장/기념', label: '상장/기념', icon: '🏆' },
-    { key: '탐구/프로젝트', label: '탐구/프로젝트', icon: '🔬' }
+    { key: '탐구/프로젝트', label: '탐구/프로젝트', icon: '🔬' },
+    // 내 친구 월드에 나오는 캐릭터·아이템 그림 (docs/world_module_spec.md §3-1)
+    { key: '캐릭터', label: '캐릭터 친구들', icon: '🧸' }
 ];
 
 const SPECIAL_CATEGORIES = [
@@ -49,6 +51,7 @@ window.specialDaysData = window.specialDaysData || [];
 function getCategoryIcon(catName) {
     if (!catName) return "🎨";
     // 작품 분류 아이콘
+    if (catName.includes("캐릭터")) return "🧸";
     if (catName.includes("만들기") || catName.includes("공예")) return "✂️";
     if (catName.includes("종이접기") || catName.includes("디자인")) return "📐";
     if (catName.includes("상장") || catName.includes("기념") || catName.includes("수상")) return "🏆";
