@@ -235,6 +235,13 @@
   }
 
   function drawWeaponBar(ctx, f) {
+    // 상점에서 산 무기면 그 그림을 조준 방향으로 그린다 (§16, Claude)
+    if (f.weaponImg && f.weaponImg.naturalWidth) {
+      var size = f.r * 1.8;
+      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.aim || 0);
+      ctx.drawImage(f.weaponImg, f.r * 0.3, -size / 2, size, size); ctx.restore();
+      return;
+    }
     var cls = f.weapon && f.weapon.cls ? f.weapon.cls : 'blade';
     var trait = f.weapon && f.weapon.trait ? f.weapon.trait : 'r';
     var tc = TRAIT_COLORS[trait] || '#ffffff';

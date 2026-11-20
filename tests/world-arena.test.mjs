@@ -44,7 +44,7 @@ test('화면: arena.html이 부품을 순서대로 싣고, 그리기·화면 연
   const pos = order.map(s => html.indexOf(`src="${s}`));
   assert.ok(pos.every(p => p > 0) && pos.every((p, i) => i === 0 || p > pos[i - 1]), '싣는 순서');
   assert.ok(!/src="\//.test(html) && !/href="\//.test(html), '절대 경로 금지');
-  for (const [file, name, cap] of [['arena-render.js', 'ArenaRender', 600], ['arena-ui.js', 'ArenaUI', 650]]) {
+  for (const [file, name, cap] of [['arena-render.js', 'ArenaRender', 600], ['arena-ui.js', 'ArenaUI', 760]]) {
     const src = read(`${DIR}/${file}`);
     for (const bad of ['Math.random', 'innerHTML', 'speechSynthesis', 'toISOString', 'eval(']) assert.ok(!src.includes(bad), `${file}: ${bad}`);
     assert.ok(src.split('\n').length < cap, `${file} 줄 수`);

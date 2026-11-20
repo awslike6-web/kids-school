@@ -290,7 +290,7 @@
     });
     queues[child] = next; return next;
   }
-  async function cloudOf(child) {
+  async function pageOf(child) {
     const config = typeof root.APP_CONFIG === 'object' && root.APP_CONFIG ? root.APP_CONFIG : {};
     const proxy = String(config.WORKER_PROXY_URL || 'https://minmin-notion.awslike6.workers.dev').replace(/\/$/, '');
     const db = config.INVENTORY_DB_ID || '374a27115b688042bb61e6a102242e12';
@@ -308,13 +308,24 @@
     }
     const url = `${proxy}/v1/pages/${encodeURIComponent(pageId)}`;
     const res = await root.fetch(`${url}?force=true`, { headers });
-    if (!res.ok) throw new Error(`월드기록 조회 ${res.status}`);
-    const prop = (await res.json()).properties?.[PROP];
+    if (!res.ok) throw new Error(`인벤토리 페이지 조회 ${res.status}`);
+    return { url, headers, props: (await res.json()).properties || {} };
+  }
+  async function cloudOf(child) {
+    const page = await pageOf(child);
+    if (!page) return null;
+    const { url, headers } = page;
+    const prop = page.props[PROP];
     if (prop?.type !== 'rich_text' || !Array.isArray(prop.rich_text)) return null;
     const text = prop.rich_text.map(p => p.plain_text ?? p.text?.content ?? '').join('');
     const raw = text ? JSON.parse(text) : {};
     if (text && (!raw || raw.v !== 1)) throw new Error('월드기록 JSON 형식 오류');
     return { url, headers, text, state: text ? clean(raw) : emptyState() };
+  }
+  // 인벤토리 페이지 속성 읽기 전용(아레나가 「보유 아이템」을 본다, §16). 부모도 읽을 수 있다. 쓰지 않는다.
+  function inventoryProps(child) {
+    if (!isChild(child) || typeof root.fetch !== 'function') return Promise.resolve(null);
+    return enqueue(child, async () => { const page = await pageOf(child); return page ? page.props : null; });
   }
   function pull(child) {
     if (!canSync(child)) return Promise.resolve(false);
@@ -346,6 +357,6 @@
 
   root.WorldSave = Object.freeze({
     fnv1a, shortId, assignIds, emptyState, clean, merge, pack,
-    parseCfg, formatCfg, childOf, isParent, load, save, update, setSyncHook, setLiveIds, pull, flush
+    parseCfg, formatCfg, childOf, isParent, load, save, update, setSyncHook, setLiveIds, pull, flush, inventoryProps
   });
 })();

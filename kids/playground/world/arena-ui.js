@@ -95,6 +95,26 @@
     }
   }
 
+  // ── 상점 무기 (§16, Claude): 마이룸 상품 중 arena 필드가 있고 아이가 산 것 ──
+  let owned = new Set();
+  const ICON_BASE = '../../../assets/images/';
+  function shopWeapons() {
+    const list = typeof MARKET_ITEMS !== 'undefined' && MARKET_ITEMS && Array.isArray(MARKET_ITEMS[child]) ? MARKET_ITEMS[child] : [];
+    return list.filter((it) => it.arena && owned.has(it.id) && ArenaWeapons.fromShop(it));
+  }
+  function readOwned(text) {
+    try { const a = JSON.parse(text || '[]'); return Array.isArray(a) ? a.filter((x) => typeof x === 'string') : []; } catch (e) { return []; }
+  }
+  function loadOwned() {
+    try { readOwned(localStorage.getItem(`${child}_owned_items`)).forEach((id) => owned.add(id)); } catch (e) { warn(e); }
+    if (!WorldSave.inventoryProps) return Promise.resolve();
+    return WorldSave.inventoryProps(child).then((props) => {
+      const prop = props && props['보유 아이템 (텍스트)'];
+      const text = prop && Array.isArray(prop.rich_text) ? prop.rich_text.map((p) => p.plain_text || '').join('') : '';
+      readOwned(text).forEach((id) => owned.add(id));
+    }).catch(warn);
+  }
+
   function syncSelectionFromState() {
     state = WorldSave.load(child) || { arena: { best: {}, loadout: {} }, seen: [], cfg: {} };
     const lo = (state.arena && state.arena.loadout) || {};
@@ -103,6 +123,7 @@
     sel.cls = CLS_FROM_CODE[CODE_FROM_CLS[lo.cls]] || 'blade';
     sel.trait = TRAIT_LIST.some((x) => x.id === lo.trait) ? lo.trait : 'r';
     sel.level = LVL_LIST.some((x) => x.id === lo.level) ? lo.level : defLvl;
+    sel.skin = lo.skin && shopWeapons().some((it) => it.id === lo.skin) ? lo.skin : null;
     if (sel.foe !== 'rival' && sel.level === 'ace') sel.level = defLvl;
   }
 
@@ -203,9 +224,16 @@
     }
     addSection(sheet, '상대', foeChips);
 
-    addSection(sheet, '무기', CLS_LIST.map((w) => makeChip(w.label, () => {
-      sel.cls = w.id; saveMeCfg(); renderSheet();
-    }, sel.cls === w.id)));
+    const weaponChips = CLS_LIST.map((w) => makeChip(w.label, () => {
+      sel.cls = w.id; sel.skin = null; saveMeCfg(); renderSheet();
+    }, !sel.skin && sel.cls === w.id));
+    shopWeapons().forEach((it) => {
+      const wpn = ArenaWeapons.fromShop(it);
+      weaponChips.push(makeChip(it.name, () => {
+        sel.skin = it.id; sel.cls = wpn.cls; sel.trait = wpn.trait; saveMeCfg(); renderSheet();
+      }, sel.skin === it.id, ICON_BASE + it.icon));
+    });
+    addSection(sheet, '무기', weaponChips);
 
     addSection(sheet, '효과', TRAIT_LIST.map((tr) => makeChip(tr.label, () => {
       sel.trait = tr.id; saveMeCfg(); renderSheet();
@@ -227,7 +255,7 @@
           const seenSet = new Set(s.seen || []);
           for (const sid of idMap.values()) seenSet.add(sid);
           const arena = Object.assign({}, s.arena, {
-            loadout: { me: sel.me, foe: sel.foe, cls: sel.cls, trait: sel.trait, level: sel.level }
+            loadout: { me: sel.me, foe: sel.foe, cls: sel.cls, trait: sel.trait, level: sel.level, skin: sel.skin || '' }
           });
           return Object.assign({}, s, { seen: [...seenSet], arena });
         });
@@ -253,8 +281,10 @@
     const meItem = sel.me !== 'runner' ? byShort.get(sel.me) : null;
     foeItem = sel.foe !== 'rival' ? byShort.get(sel.foe) : null;
     me = ArenaFighter.create({
-      id: 'me', team: 'me', x: 360, y: 900, weapon: { cls: sel.cls, trait: sel.trait, skin: null }
+      id: 'me', team: 'me', x: 360, y: 900, weapon: { cls: sel.cls, trait: sel.trait, skin: sel.skin || null }
     });
+    const skinItem = sel.skin ? shopWeapons().find((it) => it.id === sel.skin) : null;
+    if (skinItem) { const img = new Image(); img.onload = () => { if (me) me.weaponImg = img; }; img.src = ICON_BASE + skinItem.icon; }
     if (foeItem) {
       boss = ArenaBoss.create({
         id: 'boss', name: foeItem.name, level: sel.level === 'kid' ? 'kid' : 'normal', x: 360, y: 240
@@ -613,7 +643,7 @@
         studied = !!(d && d.studiedToday);
       }).catch(warn);
     }
-    Promise.resolve(WorldSave.pull(child)).then(() => {
+    Promise.all([Promise.resolve(WorldSave.pull(child)), loadOwned()]).then(() => {
       if (!playing) {
         collectFriends();
         syncSelectionFromState();
