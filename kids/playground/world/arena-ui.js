@@ -189,10 +189,12 @@
     const foeChips = [makeChip('⚔️ 라이벌', () => {
       sel.foe = 'rival'; renderSheet();
     }, sel.foe === 'rival', null, false)];
+    // 몬스터 목록에 같은 이름이 있으면 갤러리 쪽은 빼고 몬스터(화난 포즈 있음)만 보스 후보로 (Claude 수정)
+    const monNames = new Set(items.filter((x) => x.kind === 'monster').map((x) => x.name));
     for (let i = 0; i < items.length; i++) {
       const it = items[i];
       const sid = idMap.get(it.id);
-      if (!sid) continue;
+      if (!sid || (it.kind === 'gallery' && monNames.has(it.name))) continue;
       foeChips.push(makeChip(it.name, () => {
         sel.foe = sid;
         if (sel.level === 'ace') sel.level = defLvl;
@@ -557,7 +559,7 @@
     });
     const bExit = el('button', 'world-btn', '🏠 나가기');
     bExit.type = 'button';
-    bExit.addEventListener('click', () => { cleanup(); window.location.href = '../../../lobby.html'; });
+    bExit.addEventListener('click', () => { cleanup(); window.location.href = 'hub.html'; });
     acts.appendChild(bRetry);
     acts.appendChild(bPick);
     acts.appendChild(bExit);
@@ -592,7 +594,7 @@
       stage.classList.remove('theme--arcade');
       stage.classList.add('theme--slime');
     }
-    $('exitBtn').addEventListener('click', () => { cleanup(); window.location.href = '../../../lobby.html'; });
+    $('exitBtn').addEventListener('click', () => { cleanup(); window.location.href = 'hub.html'; });
     document.addEventListener('pointerdown', () => { try { WorldSFX.unlock(); } catch (e) { warn(e); } }, { once: true });
     document.addEventListener('visibilitychange', onVis);
 

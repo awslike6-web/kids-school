@@ -41,7 +41,7 @@ test('공통: 전역 하나·금지어 없음·줄 수·머리 주석', () => {
 test('화면: arena.html이 부품을 순서대로 싣고, 그리기·화면 연결도 규칙을 지킨다', () => {
   const html = read(`${DIR}/arena.html`);
   const order = ['core/world-save.js', 'core/world-view.js', 'arena-weapons.js', 'arena-fighter.js', 'arena-boss.js', 'arena-render.js', 'arena-ui.js'];
-  const pos = order.map(s => html.indexOf(`src="${s}"`));
+  const pos = order.map(s => html.indexOf(`src="${s}`));
   assert.ok(pos.every(p => p > 0) && pos.every((p, i) => i === 0 || p > pos[i - 1]), '싣는 순서');
   assert.ok(!/src="\//.test(html) && !/href="\//.test(html), '절대 경로 금지');
   for (const [file, name, cap] of [['arena-render.js', 'ArenaRender', 600], ['arena-ui.js', 'ArenaUI', 650]]) {

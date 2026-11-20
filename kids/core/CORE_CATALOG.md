@@ -283,6 +283,11 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   - `arena-render.js` (558줄, `ArenaRender`): `drawArena`(arcade/slime 색, 예고선, 상태 표시)·`drawOffscreen`·`drawCheer`·`TRAIT_COLORS`.
   - `arena-ui.js` (624줄, `ArenaUI.boot`): 고르기(나·상대·무기·효과·난이도, NEW, 지난 선택 복원, 친구 설정 w·e 저장), 루프·사건 처리, 라이벌 피해 난이도 배수(0.5·0.75·1), 필살기(「오늘 공부함」이면 1.5배 빨리), 탄생 이야기 자막, 승리·기록(`arena.best`). `arena.css`(234줄).
   - 시험: `tests/world-arena.test.mjs`(22개: 수치·효과 균형·연타·연사·근접·탄·효과, 이동 충돌·대시·패배 없음 1,000회·라이벌 쓰러짐·재장전·시야·생각, 보스 패턴 순서·예고 뒤 피해·기절·2페이즈·위험 판정·kid 피해, 화면 연결 규칙).
+- **🌍 광장 (P3, 2026-11-20)** — 로비 🎡 놀이터 목록(`kids/js/lobby_config.js` 두 아이 맨 위, `lobby.html` 캐시 `?v=20261120-world`) → `kids/playground/world/hub.html`(Claude). 아레나 나가기·결과 「나가기」는 광장으로. 월드 화면 스크립트는 `?v=` 꼬리표로 캐시를 넘긴다(고칠 때 함께 올림).
+  - `hub-logic.js` (`HubLogic`, DOM 없음): `WORLD`(1080×1600), `PORTALS`(아레나·마이룸 열림, 정원 「곧 열려요」, 남매 보물문 숨김 예약 — 반지름 88), `portalStep`(0.45초 머물면 `enter: id` 한 번), `PERSONALITY`(활발·느긋·흥부자·수줍), `createFriend`·`stepFriend`, `hitFriend`, `todayLocal`, `birthText`, `isAnniversary`, `mapFit`.
+  - `hub.js` (`HubUI.boot`): 나(아레나 지난 선택 또는 첫 캐릭터)·친구 산책(같은 이름 몬스터 중복 제거), 톡 → 말풍선·탄생 이야기·성격 판(cfg `p` 저장), 🗺️ 지도·남매 초대 토글(`guest`), 생일 폭죽, 포털 진입. `hub.css`.
+  - 공용 `core/world-input.js` 수정: 버튼·`a`·`.world-sheet`·`.world-hud-top`·`[data-no-stick]` 위를 누르면 조이스틱이 가로채지 않음.
+  - 시험: `tests/world-hub.test.mjs`(7개: 규칙, 포털 목록·파일, 포털 진입(지나가며 들어감 포함), 친구 산책·성격, 수줍, 톡·날짜·지도, 로비 입구·아레나 나가기·뼈대·중복 제거·포털 주소 연결).
 
 ## 2-1. 🌐 교과 공통 & 인터랙션 코어 (Subject & Interaction Engines)
 

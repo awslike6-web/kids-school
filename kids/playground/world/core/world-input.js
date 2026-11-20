@@ -110,6 +110,10 @@
         return;
       }
       if (stickId !== null) return;
+      // 버튼·고르기 판·덮개 위를 누른 것은 조이스틱이 가로채지 않는다 (Claude 수정: 광장 지도 「닫기」가 안 눌리던 문제)
+      const ui = e.target && typeof e.target.closest === 'function'
+        ? e.target.closest('button, a, input, select, label, .world-sheet, .world-hud-top, [data-no-stick]') : null;
+      if (ui && ui !== el && (!el.contains || el.contains(ui))) return;
       const rect = getRect();
       const rx = e.clientX - rect.left;
       const ry = e.clientY - rect.top;

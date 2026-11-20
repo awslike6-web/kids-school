@@ -53,6 +53,7 @@ const SUBJECT_META = {
 // 🎡 자녀별 놀이터 & 특별 탐험 목록
 const PLAYGROUND_ITEMS = {
   minsu: [
+    { icon: '🌍', title: '내 친구 월드', desc: '내가 그린 캐릭터들이 사는 광장! 아레나에서 보스와 한판', href: 'kids/playground/world/hub.html', badge: 'NEW' },
     { icon: '⚔️', title: '브롤 DPS & 밸런스 연구소', desc: '5학년 수학 연계! 브롤러 스탯 분석 & 1:1 시뮬레이션', href: 'kids/playground/minsu/brawl_dps.html', badge: '인기' },
     { icon: '🎁', title: '스타 드롭 & 트로피 보관소', desc: '톡톡 탭해서 전설 스타 드롭 개봉 및 보상 획득!', href: 'kids/playground/minsu/starr_drop.html', badge: '보상' },
     { icon: '🌱', title: '30초 데일리 루틴 & 저금통', desc: '착한 습관 저금통 + 건강 운동 도장 + 마음 날씨 체크인', href: 'kids/subjects/haru/haru.html?user=minsu', badge: '매일' },
@@ -61,6 +62,7 @@ const PLAYGROUND_ITEMS = {
     { icon: '🎯', title: '가족 보드게임 · 윷놀이', desc: '내 캐릭터 말로 윷판을 한 바퀴! 한 기기로 돌아가며 2~4명이 함께해요', href: 'kids/playground/family/yut.html', badge: '가족' }
   ],
   minseo: [
+    { icon: '🌍', title: '내 친구 월드', desc: '내가 그린 친구들이 뛰어노는 광장에 놀러 가요!', href: 'kids/playground/world/hub.html', badge: 'NEW' },
     { icon: '🎨', title: '매직 컬러링 스튜디오', desc: '사진을 넣으면 밑그림으로 변신! 웹 색칠 & A4 도안 출력', href: 'kids/playground/minseo/coloring.html', badge: '미술' },
     { icon: '📐', title: '인터랙티브 종이접기', desc: '비행기, 개구리, 동서남북 3D 단계별 접기 & 도안 인쇄', href: 'kids/playground/minseo/origami.html', badge: '공예' },
     { icon: '🎁', title: '스타 드롭 & 트로피 보관소', desc: '톡톡 탭해서 신나는 스타 드롭 개봉!', href: 'kids/playground/minsu/starr_drop.html', badge: '보상' },

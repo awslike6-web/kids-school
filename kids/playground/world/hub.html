@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>🌍 광장 · 내 친구 월드</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="world.css?v=20261120-p3e">
+  <link rel="stylesheet" href="hub.css?v=20261120-p3e">
+</head>
+<body>
+  <!-- 내 친구 월드 광장 (docs/world_module_spec.md §13). 화면은 hub.js가 채운다. -->
+  <main id="stage" class="world-stage theme--arcade">
+    <canvas id="cv" class="world-canvas" aria-label="광장"></canvas>
+    <header id="hud" class="world-hud-top">
+      <button id="exitBtn" class="world-exit" type="button" aria-label="나가기">←</button>
+      <span id="title" class="world-hud-top__item hub-title">🌍 광장</span>
+      <button id="mapBtn" class="world-exit hub-map-btn" type="button" aria-label="지도">🗺️</button>
+    </header>
+    <div id="toast" class="world-toast" role="status" hidden></div>
+    <section id="sheet" class="world-sheet hub-sheet" aria-label="성격 고르기" hidden></section>
+    <section id="map" class="hub-map" aria-label="지도" data-no-stick hidden>
+      <div class="hub-map__card">
+        <canvas id="mapCv" class="hub-map__canvas" width="300" height="440"></canvas>
+        <button id="guestBtn" class="world-chip hub-map__guest" type="button">🤝 친구 초대</button>
+        <button id="mapClose" class="world-btn hub-map__close" type="button"><span class="world-btn__label">닫기</span></button>
+      </div>
+    </section>
+  </main>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-tts.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-engine.js"></script>
+  <script src="../../data/gallery-data.js"></script>
+  <script src="../../subjects/quest/monster_roster.js"></script>
+  <script src="core/world-save.js?v=20261120-p3e"></script>
+  <script src="core/world-sprites.js?v=20261120-p3e"></script>
+  <script src="core/world-view.js?v=20261120-p3e"></script>
+  <script src="core/world-input.js?v=20261120-p3e"></script>
+  <script src="core/world-fx.js?v=20261120-p3e"></script>
+  <script src="core/world-sfx.js?v=20261120-p3e"></script>
+  <script src="hub-logic.js?v=20261120-p3e"></script>
+  <script src="hub.js?v=20261120-p3e"></script>
+  <script>window.HubUI && window.HubUI.boot();</script>
+</body>
+</html>

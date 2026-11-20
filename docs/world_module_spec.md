@@ -3,7 +3,7 @@
 > **문서 버전**: v0.4 (2026-11-20, 사용자 결정 8건·폰 우선 전략 반영)
 > **원안**: 제미나이 네온 대화로 만든 「통합 놀이 월드 모듈 설계서」와 시제품 6개(원본은 저장소 밖 `G:\자료\내 컴퓨터\alluploads\`, 저장소에 넣지 않음)
 > **검토**: 아르곤·네온 각 2회(설계 빈틈·아이디어 1회, 폰 전략 1회). 반영한 곳에 표시함.
-> **상태**: 설계 확정. **P0·P1·P2 완료(2026-11-20)**, 다음은 P3 광장(로비 놀이터 입구 포함). 아레나는 지금 주소로만 들어갈 수 있다(`kids/playground/world/arena.html`). 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
+> **상태**: 설계 확정. **P0~P3 완료(2026-11-20)**, 다음은 P4 비밀 정원 + 마이룸 인형(+ 상점 무기 연결). 로비 🎡 놀이터 → 「🌍 내 친구 월드」(광장) → 포털 → 아레나. 노션 「월드기록」 칸은 사용자가 만들었고 `rich_text`임을 확인함.
 > **상위 규칙**: `GEMINI.md` §0(카탈로그 재사용)·§2(로비 인지 부하)·§5(이미지 무결성)·§6(오디오)·§8(골디락스 줄 수·계약 우선·KST 날짜), 관제탑 `../GEMINI.md`
 > **연계 문서**: [`gallery_character_runner_spec.md`](gallery_character_runner_spec.md)(갤러리 캐릭터 장착), [`gallery_multi_character_spec.md`](gallery_multi_character_spec.md)(작품당 캐릭터 6개), [`my_room_split_spec.md`](my_room_split_spec.md)(마이룸 분리 계약), [`gallery_archive_spec.md`](gallery_archive_spec.md) §8(캐릭터 등록), `kids/core/CORE_CATALOG.md`
 
@@ -323,7 +323,7 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 | **P0 등록 입구** ✅ | `ART_CATEGORIES`에 캐릭터 분류, `--cat "캐릭터"`가 빌더·등록 도구를 통과하는지 | 갤러리 시험 + 관제탑 등록 시험, 임시 구조에서 `--no-push` 등록 1건 — 완료: `tests/gallery-character-category.test.mjs`(3), 관제탑 `test_character_category_survives_registration_and_build`(제목·분류·캐릭터를 함께 등록해 메타·빌드 결과 모두 「캐릭터」·🧸) |
 | **P1 공용 부품** ✅ | `core/` 6개 + `world.css` — 완료: 안티그래비티 Hydrogen 초안 7개(병렬), Claude 계약·시험·노션 동기화·검증. `tests/world-core.test.mjs` 23개, 폰 세로·가로·PC 화면 확인 | `tests/world-core.test.mjs`: 그림 목록 합치기(작성자 필터·놀러 오기), 대표색→효과 배정, 짧은 해시·충돌, 새 친구 판정, 두 기기 합치기(멱등·순서 무관), 1,800자 줄이기에서 `seen`·`found` 보존, 사라진 그림 숨김(삭제 아님), 깨진 저장값 복구, 카메라 균일 확대(비율 유지), dt 상한 |
 | **P2 아레나** ✅ | 시제품 4개에서 이식, 폰 조작, 계열 3 × 효과 6, 꼬마 모드 — 완료: 엔진 3개(Hydrogen 초안, 시험 실패는 모두 Claude 시험 쪽 실수였음. 계약 빈틈 1곳 수정: 라이벌에게도 보호막이 걸려 이길 수 없던 것) + 그리기·화면 연결·스타일(Hydrogen) + `arena.html`(Claude). `tests/world-arena.test.mjs` 22개, 폰 세로에서 라이벌전·보스전·승리·기록 저장·민서 테마 확인. **미룬 것**: 상점 무기 연결(마이룸 상점 `arena` 필드·보유 목록 읽기)은 P4 마이룸 작업과 함께, 과목별 오버차지는 학습일지에 과목별 오늘 기록 읽기가 생기면(지금은 「오늘 공부함」이면 필살기 게이지 1.5배) | 완료 |
-| **P3 광장** | `hub.html`·`hub.js`, 포털(아레나·마이룸), 친구 산책, 로비 놀이터 목록 한 줄 | 폰 세로에서 광장 → 아레나 → 광장 → 마이룸 왕복 |
+| **P3 광장** ✅ | `hub.html`·`hub.js`, 포털(아레나·마이룸), 친구 산책, 로비 놀이터 목록 한 줄 — 완료: `hub-logic.js`(Hydrogen, 시험 그대로 통과)·`hub.js`·`hub.css`(Hydrogen) + `hub.html`(Claude). 폰 시험에서 고친 것: 조이스틱이 버튼을 가로챔(공용 `world-input.js`), 지도 닫기 클릭이 뒤 친구를 누름, 포털 `enter`(id)를 객체로 잘못 씀(이동 안 됨), 포털을 지나쳐 못 들어감(0.8→0.45초·반지름 88), 같은 캐릭터가 갤러리·몬스터로 둘씩 나옴, 캐시 때문에 고친 파일이 안 실림(스크립트에 `?v=`). `tests/world-hub.test.mjs` 7개 | 완료 |
 | **P4 정원 + 마이룸 인형** | `garden.js`, 정원 포털, `my-room-dolls.js`, 서랍 탭, 폰 드래그 | `tests/my-room-split.test.mjs` 유지 + `tests/world-garden.test.mjs`(숨기기·발견·이사), 민서 기준 터치만으로 끝까지 |
 | **P5 알·목소리** | §9-4, §9-5, 관제탑 등록 도구 `구분: 캐릭터` | 대기열 읽기 시험(모의 노션), IndexedDB 상한·권한 거부 시험 |
 
@@ -459,7 +459,38 @@ kids/common_space/my-room-dolls.js (~500)  §6-2
 
 ---
 
-## 13. 하지 않는 것
+## 13. P3 광장 계약 (2026-11-20)
+
+`hub.html`(Claude) + `hub-logic.js`(순수 계산, 시험 대상) + `hub.js`(화면) + `hub.css`. 로비 🎡 놀이터 목록 두 아이 모두에 「🌍 내 친구 월드」(→ `kids/playground/world/hub.html`), 아레나 나가기·결과 「나가기」는 광장으로.
+
+### 13-1. `hub-logic.js` → `window.HubLogic` (DOM 없음)
+| 이름 | 계약 |
+|---|---|
+| `WORLD` | `{w:1080, h:1600}` |
+| `PORTALS` | `[{id:'arena', name:'아레나', icon:'⚔️', x:540, y:260, r:88, href:'arena.html', ready:true}, {id:'myroom', name:'마이룸', icon:'🏠', x:210, y:1240, r:88, href:'../../common_space/my-room.html', ready:true}, {id:'garden', name:'비밀 정원', icon:'🌿', x:870, y:1240, r:88, href:'garden.html', ready:false}, {id:'coop', name:'남매 보물문', icon:'🎁', x:540, y:1500, r:60, href:null, ready:false, hidden:true}]` — `ready:false`는 「곧 열려요」로 그리고 들어갈 수 없음, `hidden`은 그리지 않음(원안의 예약 슬롯) |
+| `portalStep(st, me, portals, dt, need=0.45)` | (폰 시험 뒤 0.8→0.45, 반지름 72→88: 조이스틱을 계속 밀면 0.65초 만에 지나쳐 못 들어갔음) `st={id, t}`. 내가 들어갈 수 있는 포털 원 안에 있으면 같은 포털 시간 누적, 다른 포털·밖이면 `{id:null, t:0}`. `t ≥ need`면 `{id, t, enter:id}`(한 번), 아니면 `enter:null`. 새 객체 반환 |
+| `PERSONALITY` | `a` 활발(속도 95, 쉬기 0.3~1.2초, 도착하면 폴짝), `s` 느긋(40, 1.5~4초), `m` 흥부자(70, 0.5~1.5초, 쉬는 동안 춤 = 좌우 흔들기), `h` 수줍(60, 1~2.5초, 나와 180 안이면 나에게서 멀어지는 쪽으로 목표) |
+| `createFriend(item, shortId, p, rng, world)` | `{id:item.id, shortId, name:item.name, item, p, x, y, tx, ty, wait, landedAt:-9, hitAt:-9, face:1, bubble:null, bubbleT:0}`, 위치는 가장자리 100 안쪽 무작위, 포털 원과 겹치지 않게(10번까지 다시) |
+| `stepFriend(f, me, dt, rng, world, t)` | 기다리는 중이면 `wait` 감소(흥부자는 `face`를 0.3초마다 뒤집음). 아니면 목표로 속도만큼 이동, 도착하면 새 쉬기 시간·새 목표(가장자리 100 안), 활발이면 `landedAt = t`. 수줍이 나와 180 안이면 쉬지 않고 반대쪽 목표. `bubbleT` 감소, 0이면 `bubble=null`. 언제나 월드 안 |
+| `hitFriend(friends, x, y, radius=70)` | 그 점에서 가장 가까운 친구(반지름 안), 없으면 `null` |
+| `todayLocal(date=new Date())` | 기기 날짜 `YYYY-MM-DD`(지역 시각 getter, `toISOString` 금지) |
+| `birthText(item)` | `item.date`가 `YYYY-MM-DD`면 `「{YYYY}년 {M}월에 태어났어!」`, 아니면 `null` |
+| `isAnniversary(dateStr, today)` | 월·일이 같고 연도가 더 뒤면 `true` |
+| `mapFit(world, w, h, pad=12)` | 미니맵: `{scale, ox, oy}`(균일 축소, 가운데) |
+
+### 13-2. 화면 (`hub.js` → `window.HubUI.boot`)
+- 테마·아이 판정은 아레나와 같다. 제목 「🌍 {민수|민서}의 광장」. 나가기 → 로비.
+- 나 = 아레나 지난 선택(`arena.loadout.me`)의 그림, 없으면 내 첫 갤러리 캐릭터, 없으면 기본 원. 조이스틱으로 걷는다(아레나와 같은 `WorldInput`), 공격 버튼 없음.
+- 친구 = 내 갤러리 캐릭터(나 제외, 최대 12) + 민수는 몬스터. 「놀러 오기」(`state.guest`)를 켜면 상대 아이 캐릭터도. 성격은 `cfg[shortId].p`(없으면 `a`). 새 친구(아직 `seen`에 없음)는 머리 위 ✨.
+- 친구를 톡: 말풍선(이름 + `birthText`), `WorldSFX.play('xylo', 성격별 0~3)`, 폴짝, 민서는 `speakFairyTTS`. 아래 판(`#sheet`)에 성격 칩 4개(⚡활발 💤느긋 🎵흥부자 🙈수줍) — 고르면 `cfg[shortId].p` 저장.
+- 포털: 빛나는 원 + 아이콘 + 이름, 서 있으면 원 둘레가 0.45초 동안 차오르고 다 차면 `chime`·화면 번쩍 뒤 이동. 「곧 열려요」 포털은 회색·🚧. 화면 밖 포털은 가장자리 화살표.
+- 🗺️ 지도 버튼: 덮개(`#map`)에 월드 축소판(포털·나·친구 점) + 「🤝 오빠/동생 친구 초대」 토글(`guest` 저장 후 친구 다시 만들기) + 닫기.
+- 생일: 오늘이 등록일 기념일인 친구가 있으면 토스트 「🎂 {이름} 태어난 날이에요!」 + 그 친구 주변 별 폭죽.
+- 광장은 `seen`을 바꾸지 않는다(새 친구 「부화」는 P4 정원).
+
+---
+
+## 14. 하지 않는 것
 
 - 새 재화, 연료, 놀이 시간 상한, 해금 조건.
 - 💎/🍬·EXP·학습 시간 지급 또는 차감.
