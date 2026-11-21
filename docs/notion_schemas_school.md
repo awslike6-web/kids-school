@@ -160,6 +160,7 @@
 | **퇴장** | `date` | - |
 | **학생** | `select` (민서, 민수, 부모관리자) | - |
 | **활동측정** | `rich_text` | - |
+| **문항기록** | `rich_text` | 문항 단위 학습 기록 JSON v1 `{"v":1,"i":{"<문항키>":[시도,틀림,힌트,"오답\|…"]},"b":[배치ID…]}`, UTF-16 1,900 단위 조각. `kids/core/learning-log.js` 전용, 이 칸 하나만 PATCH. 2026-11-21 사용자 승인 뒤 추가·실제 1회 쓰기 확인 후 원래 값(빈 칸)으로 되돌림 ([`learning_record_spec.md`](learning_record_spec.md)) |
 
 ### 📋 [공부방 개발 현황판] STUDY_BOARD_DB
 - **Database ID**: `37ca27115b68805f9910e32529ca74b6`

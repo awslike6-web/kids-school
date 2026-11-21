@@ -127,14 +127,18 @@
       state.errors++;
       if (state.firstTry) hooks.onEncourage && hooks.onEncourage();
       state.firstTry = false;
-      if (q.hintPolicy === 'on_error' || (q.hintPolicy === 'minimal' && state.errors >= 2)) showHint();
+      if (q.hintPolicy === 'on_error' || (q.hintPolicy === 'minimal' && state.errors >= 2)) {
+        showHint();
+        if (q.hint) state.hinted = true; // 틀려서 힌트를 본 경우만 센다(처음부터 보이는 'always'는 제외) — 문항기록용
+      }
     };
     const finish = results => {
       if (state.finished) return;
       state.finished = true;
       hooks.onPraise && hooks.onPraise();
       const list = results || q.itemIds.map(id => ({ id, firstTry: state.firstTry }));
-      setTimeout(() => hooks.onDone && hooks.onDone({ results: list, firstTry: list.every(r => r.firstTry), wrongPicks: state.wrongPicks.slice() }), 650);
+      setTimeout(() => hooks.onDone && hooks.onDone({ results: list, firstTry: list.every(r => r.firstTry),
+        wrongPicks: state.wrongPicks.slice(), hinted: !!state.hinted }), 650);
     };
     if (q.hintPolicy === 'always') showHint();
     return { wrap, prompt, body, hint, state, hooks, speak, speakerBtn, onWrong, finish, showHint };

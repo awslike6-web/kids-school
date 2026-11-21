@@ -136,3 +136,38 @@ test('한입 화면 흐름은 세 문항 완주·일지 한 번·다음 레슨 �
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(sequence,2);assert.equal(phases.at(-1),'quiz');
 });
+test('레슨 화면은 문항 결과를 문항기록(LearningLog)으로 넘기고 끝에 한 번 보낸다', async () => {
+  // docs/learning_record_spec.md §5 1차: VOCA page_id(32자리 16진)만 'v:' 키, 고른 오답은 문항 ID가 하나일 때만
+  const {sandbox}=loadBrowserScripts([...files,'kids/subjects/quest/quest-lesson-ui.js']);
+  class Node {
+    constructor(){this.children=[];this.style={};this.classList={add(){},remove(){}};this.parentElement=this;}
+    append(...nodes){this.children.push(...nodes);} appendChild(n){this.append(n);}
+    replaceChildren(...nodes){this.children=nodes;} remove(){} setAttribute(){} focus(){} scrollIntoView(){}
+  }
+  const nodes=new Map(), node=id=>{if(!nodes.has(id))nodes.set(id,new Node());return nodes.get(id);};
+  sandbox.document={getElementById:node,createElement:()=>new Node(),head:new Node(),body:new Node(),querySelectorAll:()=>[]};
+  let hooks, q, sequence=0;
+  sandbox.crypto={randomUUID:()=>`lesson-${++sequence}`};sandbox.CustomEvent=class{constructor(type,opts){this.type=type;this.detail=opts.detail;}};
+  sandbox.addEventListener=()=>{};sandbox.dispatchEvent=()=>{};
+  sandbox.StudyActivity={setPhase(){},recordCorrect(){},recordLessonComplete(){}};
+  sandbox.grantRewardAndShowUI=async()=>{};sandbox.sendStudyLogToNotion=async()=>{};
+  sandbox.QuestUIRenderer={render:(box,question,options)=>{box.replaceChildren();hooks=options;q=question;}};
+  const attempts=[]; let flushes=0;
+  sandbox.LearningLog={attempt:a=>{attempts.push(a);return true;},flush:async()=>{flushes++;return {sent:0};}};
+  const { sandbox: base } = loadBrowserScripts(files);
+  const hex=i=>(i.toString(16)).padStart(32,'a');
+  const items=Array.from({length:10},(_, i)=>({id:hex(i).replace(/^(.{8})(.{4})/,'$1-$2-'),word:'word'+i,
+    meaning:'뜻'+i,detail:'설명'+i,kind:'word'}));
+  assert.ok(base.QuestMastery);
+  assert.equal(sandbox.QuestLessonUI.start({unit:{child:'minseo',items,units:['테스트 단원']},subj:'korean',mode:'bite',isMinseo:true}),true);
+  for(let i=0;i<3;i++) {
+    hooks.onDone({firstTry:i!==0,wrongPicks:i===0?['고른 오답']:[],hinted:i===0,results:q.itemIds.map(id=>({id,firstTry:i!==0}))});
+    node('masteryStage').children.at(-1).onclick();
+  }
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(attempts.length,3,'한입 세 문항 = 시도 세 번');
+  assert.ok(attempts.every(a=>/^v:[0-9a-f]{32}$/.test(a.key)),'하이픈을 뺀 32자리 소문자 16진 키');
+  assert.ok(attempts.every(a=>a.child==='민서' && a.subject===base.QuestMastery.SUBJECT_KO.korean));
+  assert.deepEqual(plain(attempts.map(a=>[a.firstTry,a.hinted,a.picks])),[[false,true,['고른 오답']],[true,false,[]],[true,false,[]]]);
+  assert.equal(flushes,1,'레슨 일지를 남길 때 문항기록도 한 번 보낸다');
+});

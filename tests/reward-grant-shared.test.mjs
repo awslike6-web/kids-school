@@ -166,7 +166,7 @@ for (const route of ['reward', 'logger']) {
       const existing = { src: 'https://example.invalid/kids/core/reward-grant.js?v=' + version, addEventListener: (type, fn) => { listeners[type] = fn; } };
       const owner = { src: 'https://example.invalid/kids/core/notion-' + (route === 'reward' ? 'reward' : 'study-logger') + '.js' };
       const sb = sandbox({ route, preload: false, setup(ctx) {
-        ctx.StudyLogStore = {}; ctx.StudyActivity = {};
+        ctx.StudyLogStore = {}; ctx.StudyActivity = {}; ctx.LearningLog = {}; // 공용 학습 모듈 세 개는 미리 있다고 둔다
         Object.assign(ctx.document, {
           currentScript: mode === 'current' ? owner : null,
           scripts: mode === 'existing' ? [owner, existing] : [owner],
@@ -194,7 +194,7 @@ for (const route of ['reward', 'logger']) {
   test(`${route}: 모듈 로드 실패는 false, 다음 호출은 다시 로드한다`, async () => {
     const scripts = [];
     const sb = sandbox({ route, preload: false, setup(ctx) {
-      ctx.StudyLogStore = {}; ctx.StudyActivity = {};
+      ctx.StudyLogStore = {}; ctx.StudyActivity = {}; ctx.LearningLog = {}; // 공용 학습 모듈 세 개는 미리 있다고 둔다
       ctx.document.currentScript = { src: 'https://example.invalid/kids/core/notion-' + (route === 'reward' ? 'reward' : 'study-logger') + '.js' };
       ctx.document.createElement = () => ({});
       ctx.document.head = { appendChild: script => scripts.push(script) };

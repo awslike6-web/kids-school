@@ -146,6 +146,19 @@
         await root.grantRewardAndShowUI?.(3, true);
       }).catch(e => console.warn('[레슨 보상]', e));
     }
+    // 문항 단위 학습 기록 (docs/learning_record_spec.md §5 1차). 노션 VOCA page_id(32자리 16진)인 문항만.
+    // 고른 오답·힌트는 문항 ID가 하나일 때만 붙인다(짝짓기처럼 여러 어휘가 묶이면 어느 어휘 것인지 모름).
+    function recordItems(result) {
+      const L = root.LearningLog;
+      if (!L || !Array.isArray(result?.results)) return;
+      const single = result.results.length === 1;
+      result.results.forEach(r => {
+        const hex = String(r.id || '').replace(/-/g, '').toLowerCase();
+        if (!/^[0-9a-f]{32}$/.test(hex)) return;
+        L.attempt({ child: isMinseo ? '민서' : '민수', subject: M().SUBJECT_KO[subj], key: 'v:' + hex,
+          firstTry: !!r.firstTry, hinted: single && !!result.hinted, picks: single ? (result.wrongPicks || []) : [] });
+      });
+    }
     function log() {
       if (logged || !solved) return;
       logged = true;
@@ -156,6 +169,7 @@
         childName: isMinseo ? '민서' : '민수', subject: M().SUBJECT_KO[subj], durationMinutes: 0, errorReport: summary + report
       }))
       .catch(e => console.warn('[레슨 일지]', e));
+      root.LearningLog?.flush().catch(e => console.warn('[문항기록]', e));
     }
     function begin() {
       token++;
@@ -210,6 +224,7 @@
           result.results.forEach(r => {
             if (r.firstTry && !q.lessonRetry) root.StudyActivity?.recordCorrect(`${lessonId}:${s.answered}:${r.id}`);
           });
+          recordItems(result);
           if (!result.firstTry) wrongs.push(`${q.q} ➔ 선택: "${result.wrongPicks?.join(', ') || '힌트 보고 해결'}" / 정답: "${q.items ? q.items.map(i => i.word).join(', ') : q.item.word}"`);
           const next = document.createElement('button');
           next.type = 'button';

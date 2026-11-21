@@ -95,17 +95,19 @@ function sandbox(mode) {
   if (mode === 'preloaded') {
     context.StudyActivity = {};
     context.StudyLogStore = {};
+    context.LearningLog = {};
   }
   vm.createContext(context);
   vm.runInContext(read('kids/core/reward-grant.js'), context);
   return { context, events, injected };
 }
 
-// 공용 로더가 같은 폴더의 학습일지 모듈 두 개를 버전 붙여 순서대로 싣는다(버전 값 자체는 자유).
+// 공용 로더가 같은 폴더의 학습 모듈 세 개(측정·학습일지·문항기록)를 버전 붙여 순서대로 싣는다(버전 값 자체는 자유).
+// 문항기록(learning-log.js)은 학습일지(study-log-store.js)의 잠금·행 찾기를 쓰므로 반드시 그 뒤에 실린다.
 function assertInjected(injected, mode) {
   if (mode === 'none' || mode === 'preloaded') return assert.deepEqual(injected, []);
   assert.deepEqual(injected.map(item => [item.src.split('?')[0], item.async]),
-    ['study-activity.js', 'study-log-store.js'].map(name => [`https://example.invalid/kids/core/${name}`, false]));
+    ['study-activity.js', 'study-log-store.js', 'learning-log.js'].map(name => [`https://example.invalid/kids/core/${name}`, false]));
   for (const item of injected) assert.match(item.src, /\?v=[^&]+$/, `버전 없는 동적 로드: ${item.src}`);
 }
 

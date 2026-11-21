@@ -159,6 +159,38 @@
     }
     return { page: null, failed: true };
   }
+  // 그날 일지 행 찾기: 기억한 페이지(최신 GET) → 없으면 ID 조회. LearningLog(문항기록)도 같이 쓴다.
+  async function locateDailyPage(key) {
+    const page = await readRememberedPage(key);
+    if (page) return { page, failed: false };
+    return findPageByKey(key);
+  }
+  // 그날 일지 행 만들기. 반드시 serialize(key) 안에서 부른다(같은 ID 행이 두 개 생기지 않게).
+  async function createDailyPage(entry, key, { keepalive = false } = {}) {
+    const { proxyUrl, dbId } = notionConfig();
+    const res = await window.fetch(`${proxyUrl}/v1/pages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        parent: { database_id: dbId },
+        properties: {
+          'ID': { title: [{ text: { content: key } }] },
+          '학생': { select: { name: entry.childName } },
+          '과목': { rich_text: [{ text: { content: entry.subject } }] },
+          '입장': { date: { start: entry.startTime } },
+          '퇴장': { date: { start: entry.endTime } },
+          '소요시간': { number: Number(entry.durationMinutes) || 0 },
+          '오답리포트': { rich_text: reportParts(entry.errorReport || NO_ERRORS) },
+          '단어요정': { number: Number(entry.wordFairyCount) || 0 }
+        }
+      }),
+      keepalive
+    });
+    if (!res.ok) throw new Error(`노션 POST 통신 오류 (상태: ${res.status})`);
+    let page = null;
+    try { page = await res.json(); rememberPage(key, page.id); } catch (e) {}
+    return page;
+  }
   async function serialize(key, fn) {
     if (window.navigator?.locks?.request) return window.navigator.locks.request('minmin-study-log:' + key, fn);
     const pending = (pendingByKey.get(key) || Promise.resolve()).catch(() => {}).then(fn);
@@ -187,13 +219,11 @@
     const durationMinutes = Number(entry.durationMinutes) || 0;
     const wordFairyCount = Number(entry.wordFairyCount) || 0;
     const errorReport = entry.errorReport || NO_ERRORS;
-    const { proxyUrl, dbId } = notionConfig();
+    const { proxyUrl } = notionConfig();
 
-    let page = await readRememberedPage(key);
-    if (!page) {
-      const found = await findPageByKey(key); page = found.page;
-      if (found.failed) throw new Error('학습일지 조회 실패: 대기열에 보존합니다');
-    }
+    const found = await locateDailyPage(key);
+    if (found.failed) throw new Error('학습일지 조회 실패: 대기열에 보존합니다');
+    const page = found.page;
     let res;
     let mode;
     if (page) {
@@ -213,31 +243,10 @@
         }),
         keepalive: true
       });
+      if (!res.ok) throw new Error(`노션 PATCH 통신 오류 (상태: ${res.status})`);
     } else {
       mode = 'post';
-      res = await window.fetch(`${proxyUrl}/v1/pages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parent: { database_id: dbId },
-          properties: {
-            'ID': { title: [{ text: { content: key } }] },
-            '학생': { select: { name: childName } },
-            '과목': { rich_text: [{ text: { content: subject } }] },
-            '입장': { date: { start: entry.startTime } },
-            '퇴장': { date: { start: entry.endTime } },
-            '소요시간': { number: durationMinutes },
-            '오답리포트': { rich_text: reportParts(errorReport) },
-            '단어요정': { number: wordFairyCount }
-          }
-        }),
-        keepalive: true
-      });
-    }
-
-    if (!res.ok) throw new Error(`노션 ${mode === 'patch' ? 'PATCH' : 'POST'} 통신 오류 (상태: ${res.status})`);
-    if (mode === 'post') {
-      try { rememberPage(key, (await res.json()).id); } catch (e) {}
+      await createDailyPage({ ...entry, childName, subject, durationMinutes, wordFairyCount, errorReport }, key, { keepalive: true });
     }
     console.log(mode === 'patch'
       ? `📦 [학습일지 Upsert] 당일 기록(${page.id})에 누적했습니다. (키: ${key})`
@@ -369,6 +378,8 @@
 
   window.StudyLogStore = {
     reportParts, flushQueue,
+    // 문항기록(learning-log.js)이 같은 잠금·같은 행을 쓰도록 내보낸다 (docs/learning_record_spec.md §4-4)
+    serialize, locateDailyPage, createDailyPage, notionConfig,
     getKstDateString,
     buildLogKey,
     upsertStudyLog,

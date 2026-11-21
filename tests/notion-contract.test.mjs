@@ -112,6 +112,32 @@ test('STUDY_LOG_DB 학습일지·오답리포트 전송이 스키마 도감과 �
   assert.ok(props['오답리포트'].rich_text[0].text.content.includes('12x5 연산 실수'), '오답 내용이 오답리포트에 들어가야 합니다');
 });
 
+test('STUDY_LOG_DB 문항기록(LearningLog) 전송이 스키마 도감과 일치하고 그 칸 하나만 보냄', async () => {
+  // docs/learning_record_spec.md §4-3: 칸 확인 → 그날 행 찾기 → '문항기록' 한 칸만 PATCH
+  const schema = schemaOf('STUDY_LOG_DB');
+  const page = { id: 'page_today', properties: { '문항기록': { rich_text: [] } } };
+  const { sandbox, calls } = loadBrowserScripts(['kids/core/study-log-store.js', 'kids/core/learning-log.js'], {
+    fetch: async (url, options = {}) => {
+      const method = options.method || 'GET';
+      if (method === 'GET' && url.includes('/v1/databases/')) {
+        return { ok: true, status: 200, json: async () => ({ properties: Object.fromEntries(Object.keys(schema).map(k => [k, {}])) }) };
+      }
+      if (url.includes('/query')) return { ok: true, status: 200, json: async () => ({ results: [page] }) };
+      return { ok: true, status: 200, json: async () => page };
+    },
+  });
+  assert.equal(sandbox.LearningLog.attempt({ child: '민수', subject: '영어', key: 'v:' + 'a'.repeat(32),
+    firstTry: false, hinted: false, picks: ['sofa'] }), true);
+  const result = await sandbox.LearningLog.flush();
+  assert.equal(result.sent, 1);
+  const patches = calls.filter(c => c.method === 'PATCH');
+  assert.equal(patches.length, 1);
+  assertMatchesSchema(patches[0].body.properties, schema, 'PATCH 문항기록');
+  assert.deepEqual(Object.keys(patches[0].body.properties), ['문항기록'], '다른 칸을 같은 요청에 넣지 않는다');
+  const saved = JSON.parse(patches[0].body.properties['문항기록'].rich_text.map(t => t.text.content).join(''));
+  assert.deepEqual(JSON.parse(JSON.stringify(saved.i)), { ['v:' + 'a'.repeat(32)]: [1, 1, 0, 'sofa'] });
+});
+
 test('갤러리 화면: 작품·특별한 날 수정 저장이 DIARY_DB 도감 속성만 보냄', async () => {
   const schema = schemaOf('DIARY_DB');
   const { sandbox, calls } = loadBrowserScripts(['kids/common_space/gallery-data-sync.js']);

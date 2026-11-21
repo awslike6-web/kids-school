@@ -4,7 +4,8 @@
 (function() {
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-reward.js'))?.src;
     if (!source) return;
-    [['StudyActivity', 'study-activity.js', '?v=20261030-lesson'], ['StudyLogStore', 'study-log-store.js', '?v=20261030-lesson']].forEach(([globalName, file, version]) => {
+    [['StudyActivity', 'study-activity.js', '?v=20261030-lesson'], ['StudyLogStore', 'study-log-store.js', '?v=20261121-learning'],
+        ['LearningLog', 'learning-log.js', '?v=20261121-learning']].forEach(([globalName, file, version]) => {
         if (window[globalName] || Array.from(document.scripts).some(s => (s.src || '').includes(file))) return;
         const script=document.createElement('script');
         script.src=new URL(file + version,source).href; script.async=false;
