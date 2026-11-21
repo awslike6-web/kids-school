@@ -985,7 +985,7 @@
       "audio_file": "2655b5bf53a7eac494ce27e8.mp3",
       "spoken_text": "쓰임새",
       "sources": [
-        "406a2711-5b68-819e-bd25-d4acd2b46a33"
+        "book_39"
       ],
       "kinds": [
         "word"
@@ -995,7 +995,7 @@
       "audio_file": "77e25f5445bcfdf2c7bc997f.mp3",
       "spoken_text": "물건이 쓰이는 곳이나 쓰이는 방법",
       "sources": [
-        "406a2711-5b68-819e-bd25-d4acd2b46a33"
+        "book_39"
       ],
       "kinds": [
         "meaning"
@@ -2105,7 +2105,7 @@
       "audio_file": "6ec68e1220491fd3c0f1ef02.mp3",
       "spoken_text": "일석이조",
       "sources": [
-        "3faa2711-5b68-815d-b0af-c72e659d144e"
+        "book_39"
       ],
       "kinds": [
         "word"
@@ -2185,7 +2185,7 @@
       "audio_file": "d5012ea69831ced049358920.mp3",
       "spoken_text": "재활용",
       "sources": [
-        "3faa2711-5b68-81f4-9cf9-d294b1435726"
+        "book_39"
       ],
       "kinds": [
         "word"
@@ -4075,7 +4075,7 @@
       "audio_file": "6aa2141a1ed5060773fd9d36.mp3",
       "spoken_text": "가는 말이 고와야 오는 말이 곱다",
       "sources": [
-        "3faa2711-5b68-817d-80b2-c0d62811a61d"
+        "book_39"
       ],
       "kinds": [
         "word"
@@ -7200,6 +7200,226 @@
       "kinds": [
         "meaning"
       ]
+    },
+    "107a00693496a49d28a51d59": {
+      "audio_file": "107a00693496a49d28a51d59.mp3",
+      "spoken_text": "모든 물건은 시간이 지나면 낡고 해지기 마련입니다. 그래서 버려지기도 합니다. 물건을 함부로 버리면 쓰레기가 늘어나 환경이 오염되고 자원도 낭비됩니다. 하지만 조금만 생각을 바꾸면 새롭게 사용할 수 있는 물건이 됩니다. 이를 '새활용'이라고 합니다. 새활용은 버려지는 물건을 새롭게 꾸미거나 쓰임새를 바꿔서 가치를 높이는 일입니다. 물건을 그냥 재활용하는 것이 아니라 '새롭게 쓰는 일'입니다. 버려지는 물건을 새활용할 수 있는 방법은 무엇일까요? 첫째, 물건의 쓰임새를 바꾸는 것입니다. 더 이상 입지 않는 옷으로 가방을 만들 수 있습니다. 버려진 천으로 시장바구니를 만들 수도 있습니다. 알록달록 단추를 모아 목걸이를 만들고, 색색깔의 전선을 꼬아서 반지를 만들 수도 있습니다. 이렇게 만들어진 물건들은 독창적이고 환경도 지킬 수 있습니다. 그래서 인기가 많고 비싼 가격에 팔리기도 합니다. 둘째, 버려진 물건을 모아 예술 작품을 만들어 전시할 수 있습니다. 버려진 페트병과 음료수 캔을 모아서 멋진 작품을 만들 수도 있습니다. 헌책으로 조각품을 만들기도 합니다. 매일 버려지는 물건에서도 아름다움을 찾아내는 것입니다. 이렇게 새활용을 하면 좋은 점이 많습니다. 먼저 쓰레기를 줄여서 환경 오염을 줄일 수 있습니다. 그리고 물건을 새로 만드는 데 드는 자원을 절약할 수 있습니다. 마지막으로 독창적인 생각으로 물건의 가치를 높여서 팔면 이익을 얻을 수 있습니다. 이처럼 물건을 버리기 전에 새로운 시각으로 바라보면 본래의 쓰임새가 아니라 다른 방법으로 활용할 수 있습니다. 다 쓴 물건이라고 버리기 전에 다시 쓸 수 있는 방법을 생각해 봅시다.",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "1e1ef199cfabbe3e633a1ab2": {
+      "audio_file": "1e1ef199cfabbe3e633a1ab2.mp3",
+      "spoken_text": "새로운 가치를 만드는 새활용",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "eb2ecb7b9bc1ce10cee34b7a": {
+      "audio_file": "eb2ecb7b9bc1ce10cee34b7a.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 새로운 가치를 만드는 새활용이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "ad08e44219d2a17caaaf884c": {
+      "audio_file": "ad08e44219d2a17caaaf884c.mp3",
+      "spoken_text": "새활용",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "2a0fc7976539da33975c32e3": {
+      "audio_file": "2a0fc7976539da33975c32e3.mp3",
+      "spoken_text": "버려지는 물건을 새롭게 꾸미거나 쓰임새를 바꾸어 가치를 높이는 일",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "fdd717cb3450aa677e643988": {
+      "audio_file": "fdd717cb3450aa677e643988.mp3",
+      "spoken_text": "가치",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "2cf1f7f19a90432dfcfbd1f9": {
+      "audio_file": "2cf1f7f19a90432dfcfbd1f9.mp3",
+      "spoken_text": "물건이나 일이 지니고 있는 쓸모나 중요성",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "dd801b879c6f1b7b42790c67": {
+      "audio_file": "dd801b879c6f1b7b42790c67.mp3",
+      "spoken_text": "독창적",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "63d619c834952584739030ca": {
+      "audio_file": "63d619c834952584739030ca.mp3",
+      "spoken_text": "새롭고 남다른 것을 생각해 내거나 만들어 내는 재주나 특성이 있음",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "f90af0d5a4f0fc671e9b7b0c": {
+      "audio_file": "f90af0d5a4f0fc671e9b7b0c.mp3",
+      "spoken_text": "시각",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "d36b5bf5cffa7b8f3b8fff92": {
+      "audio_file": "d36b5bf5cffa7b8f3b8fff92.mp3",
+      "spoken_text": "사물이나 현상을 보거나 생각하는 태도나 관점",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "855268d627fe290af0f06a2e": {
+      "audio_file": "855268d627fe290af0f06a2e.mp3",
+      "spoken_text": "자원",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "ca64f5e91e8eed96a3edccf3": {
+      "audio_file": "ca64f5e91e8eed96a3edccf3.mp3",
+      "spoken_text": "석유나 나무처럼 사람이 살아가고 물건을 만드는 데 쓰는 재료",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "724e98425e23b24877762486": {
+      "audio_file": "724e98425e23b24877762486.mp3",
+      "spoken_text": "돌 하나를 던져 새 두 마리를 잡는다는 뜻으로, 한 가지 일로 두 가지 이익을 얻음을 이르는 말",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "7cbd2eaacf8215f7b9f97975": {
+      "audio_file": "7cbd2eaacf8215f7b9f97975.mp3",
+      "spoken_text": "다 쓰거나 못 쓰게 된 물건을 버리지 않고 그대로 다시 쓰는 것",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "9fa025396b03eb1e708e5eec": {
+      "audio_file": "9fa025396b03eb1e708e5eec.mp3",
+      "spoken_text": "자기가 남에게 말이나 행동을 좋게 해야 남도 자기에게 좋게 한다는 말",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "60bb708eb10b94c59f25e30a": {
+      "audio_file": "60bb708eb10b94c59f25e30a.mp3",
+      "spoken_text": "귀에 못이 박히다",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "a1a1443ab219d2ac9e5f34e6": {
+      "audio_file": "a1a1443ab219d2ac9e5f34e6.mp3",
+      "spoken_text": "같은 말을 여러 번 되풀이하여 들어 지겹거나 아주 익숙해지다",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "f389818f53fb784cf2950629": {
+      "audio_file": "f389818f53fb784cf2950629.mp3",
+      "spoken_text": "반의어",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "2ad45dc6e565146d937381e2": {
+      "audio_file": "2ad45dc6e565146d937381e2.mp3",
+      "spoken_text": "서로 뜻이 정반대가 되는 관계에 있는 말",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "51f6b7c169a307036374338c": {
+      "audio_file": "51f6b7c169a307036374338c.mp3",
+      "spoken_text": "동의어",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "17ac68c76a7ad3a254649f8e": {
+      "audio_file": "17ac68c76a7ad3a254649f8e.mp3",
+      "spoken_text": "소리와 글자는 다르지만 뜻이 서로 같거나 매우 비슷한 관계에 있는 말",
+      "sources": [
+        "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
     }
   },
   "passages": {
@@ -7502,6 +7722,12 @@
       "audio_file": "84be5a140d0c8bca6879f689.mp3",
       "title": "창백한 푸른 점, 지구",
       "order": 38
+    },
+    "book_39": {
+      "audio_hash": "107a00693496a49d28a51d59",
+      "audio_file": "107a00693496a49d28a51d59.mp3",
+      "title": "새로운 가치를 만드는 새활용",
+      "order": 39
     }
   },
   "settings": {
