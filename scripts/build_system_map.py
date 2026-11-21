@@ -355,9 +355,14 @@ def run_check(curated: dict, src: Sources) -> tuple[list[str], list[str]]:
     else:
         added = tray_paths(wanted) - tray_paths(current)
         removed = tray_paths(current) - tray_paths(wanted)
-        if added or removed or wanted['hidden'] != current['hidden']:
+        # 숨김 수(hidden)는 관제탑 비공개 파일 개수라 관제탑에 파일이 늘 때마다 바뀐다. 오류로 막으면
+        # 공부방에 숫자 한 줄짜리 커밋이 따로 생겨(2026-11 약 10건) 경고로만 알리고, 다음 조감도 재생성 때 함께 맞춘다.
+        if added or removed:
             errors.append(f'지도 파일 목록이 낡음 (추가 {len(added)}, 삭제 {len(removed)}). '
                           'python -X utf8 kids-school-main/scripts/build_system_map.py 실행 후 kids-school 저장소에 함께 커밋')
+        elif wanted['hidden'] != current['hidden']:
+            warnings.append(f"숨김 수만 다름 {current['hidden']} → {wanted['hidden']} (관제탑 비공개 파일 변화). "
+                            '따로 커밋하지 말고 다음 조감도 재생성 때 함께 맞춘다')
         elif wanted != current:
             warnings.append('자동 연결선이나 서랍 설명이 달라짐. build_system_map.py 실행 권장')
     check_cards(curated, src, current or wanted, errors, warnings)

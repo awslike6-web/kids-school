@@ -14,6 +14,8 @@ scripts/build_system_map.py
 scripts/check_video_links.py  # 단원영상 유튜브 링크·화면 주소 점검, 읽기 전용 (docs/video_unit_spec.md §5)
 scripts/check_commit_msg.py
 scripts/check_scripts_allowlist.py
+scripts/ci_local.py  # 로컬 CI: regression.yml과 같은 검사, 관제탑 pre-push 훅이 실행
+scripts/test_ci_local.py  # ci_local.py 시험 (원격 시험 단계와 같은지 대조)
 scripts/generate_pwa_icons.py
 scripts/guarded_preview_server.py
 scripts/register_curriculum.py  # 교재·사료 마스터 DB(CURRICULUM_DB) 문항 등록 (자료 scripts/data/curriculum/*.json)
