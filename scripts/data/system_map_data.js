@@ -677,8 +677,8 @@ window.SYSTEM_MAP_DATA = {
 
 // <AUTO-SYNC:START> scripts/sync_agent_skills.py가 자동으로 다시 씁니다. 직접 고치지 마세요.
 window.SYSTEM_MAP_AUTO = {
-  "lastUpdated": "2026-11-20",
-  "catalogUpdatedAt": "2026-11-20 11:32",
+  "lastUpdated": "2026-11-21",
+  "catalogUpdatedAt": "2026-11-21 14:04",
   "skills": [
     {
       "name": "gallery-special-day-register",

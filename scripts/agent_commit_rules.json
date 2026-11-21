@@ -1,7 +1,7 @@
 {
   "_설명": "커밋 출처(Agent:)·교정(교정:)·반려(반려:) 표기의 단일 원본. 사람용 설명은 docs/AGENT_COMMIT_PROTOCOL.md. commit-msg 훅·원격 시험·월간 교정 집계가 이 파일을 함께 읽는다.",
   "version": 1,
-  "updated": "2026-11-20",
+  "updated": "2026-11-21",
   "enforced_since": "2026-11-08T05:16:16+09:00",
   "_enforced_since": "원격 시험·주간 점검은 이 시각(커밋 시각, 1단계 규칙 커밋 4cefdde) 이후 커밋만 검사한다. 그 전 표기는 aliases로 집계만 한다.",
 
@@ -88,5 +88,27 @@
       "antigravity": "antigravity (?)",
       "codex": "codex (?)"
     }
+  },
+
+  "review_line": {
+    "_규칙": "L2(로직·저장·동기화·공통 코어) 경로를 고친 에이전트 커밋은 '검토: {검토자}' 줄로 교차 검토를 남긴다. 검토자마다 한 줄. 검토를 일부러 생략했으면 '검토: 없음 (사유)'. 작성자(Agent:)와 다른 계열이어야 교차 검토로 친다. 위험도 표: kids-school-main/GEMINI.md §9.",
+    "prefix": "검토: ",
+    "mode": "warn",
+    "_mode": "warn = 경고만 내고 커밋·원격 시험은 통과(2026-11-21 도입, 한 달 시험). block = 오류로 막음. 2026-12-21 월말 점검에서 경고 기록을 보고 사람이 정한다(날짜가 지나도 저절로 바뀌지 않음).",
+    "since": "2026-11-21T00:00:00+09:00",
+    "none_value": "없음",
+    "reviewers": {
+      "opus": "claude", "sonnet": "claude", "fable": "claude",
+      "argon": "gemini", "neon": "gemini", "hydrogen": "gemini", "flash": "gemini",
+      "codex": "openai"
+    },
+    "tool_family": {"claude-code": "claude", "antigravity": "gemini", "codex": "openai"},
+    "_l2_paths": "저장소 이름(원격 주소 끝)별 경로 앞부분. 이 중 하나로 시작하고 l2_exclude에 걸리지 않는 파일을 고치면 L2.",
+    "l2_paths": {
+      "kids-school": ["kids/core/", "kids/subjects/quest/", "kids/playground/world/core/", "workers/", "sw.js",
+                      "scripts/register_", "scripts/build_gallery.py"],
+      "master-tower": ["workers/", "api/", "scripts/sync_", "scripts/register_", "scripts/log_", ".githooks/"]
+    },
+    "l2_exclude": [".md", "tests/", "/test_", "docs/", "_cache.json"]
   }
 }

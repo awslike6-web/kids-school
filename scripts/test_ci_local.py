@@ -4,9 +4,14 @@
 실행: python -X utf8 -m unittest scripts/test_ci_local.py
 """
 import importlib.util
+import io
+import os
 import re
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 WORKFLOW = (ROOT / '.github' / 'workflows' / 'regression.yml').read_text(encoding='utf-8')
@@ -78,6 +83,59 @@ class WorkflowParityTest(unittest.TestCase):
     def test_concurrency_flag(self):
         node = dict(ci_local.steps(1))['회귀 시험 (node)']
         self.assertIn('--test-concurrency=1', node)
+
+
+class FindNodeTest(unittest.TestCase):
+    """PATH에 node가 없는 실행 환경(안티그래비티 앱 등) 대비: 기본 위치 탐색과 원인 안내."""
+
+    def setUp(self):
+        self.saved = {k: os.environ.get(k) for k in ('PATH', 'CI_LOCAL_NODE')}
+        self.tmp = Path(tempfile.mkdtemp())
+
+    def tearDown(self):
+        for k, v in self.saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def fake_node(self) -> Path:
+        p = self.tmp / 'node.exe'
+        p.write_text('', encoding='utf-8')
+        return p
+
+    def test_forced_path_wins(self):
+        p = self.fake_node()
+        os.environ['CI_LOCAL_NODE'] = str(p)
+        self.assertEqual(ci_local.find_node()[:2], (str(p), 'CI_LOCAL_NODE'))
+
+    def test_falls_back_to_default_places_without_path(self):
+        os.environ.pop('CI_LOCAL_NODE', None)
+        os.environ['PATH'] = str(self.tmp / 'empty')
+        p = self.fake_node()
+        with mock.patch.object(ci_local, 'node_candidates', return_value=[Path('relative/node.exe'), p]):
+            node, how, tried = ci_local.find_node()
+        self.assertEqual((node, how), (str(p), '기본 설치 위치'))
+        self.assertNotIn('relative', ' '.join(tried))
+
+    def test_nvm_versions_sorted_numerically(self):
+        for v in ('v9.11.2', 'v22.11.0', 'v18.20.4'):
+            (self.tmp / v).mkdir()
+            (self.tmp / v / 'node.exe').write_text('', encoding='utf-8')
+        with mock.patch.dict(os.environ, {'NVM_HOME': str(self.tmp)}):
+            nvm = [p.parent.name for p in ci_local.node_candidates() if p.parent.parent == self.tmp]
+        self.assertEqual(nvm, ['v22.11.0', 'v18.20.4', 'v9.11.2'])
+
+    def test_missing_node_explains_and_exits_3(self):
+        os.environ.pop('CI_LOCAL_NODE', None)
+        os.environ['PATH'] = str(self.tmp / 'empty')
+        with mock.patch.object(ci_local, 'node_candidates', return_value=[self.tmp / 'none' / 'node.exe']), \
+             mock.patch('sys.argv', ['ci_local.py']), mock.patch('sys.stdout', new_callable=io.StringIO) as out:
+            code = ci_local.main()
+        self.assertEqual(code, ci_local.NODE_MISSING)
+        self.assertIn('node를 찾지 못했습니다', out.getvalue())
+        self.assertIn('CI_LOCAL_NODE', out.getvalue())
 
 
 class FailureTailTest(unittest.TestCase):

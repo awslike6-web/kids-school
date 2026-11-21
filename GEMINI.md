@@ -170,3 +170,22 @@
    - **KST 로컬 날짜 단일 표준**: `.toISOString().slice(0, 10)` 또는 `.split('T')[0]` 사용을 금지하고, 로컬 날짜(`YYYY-MM-DD`) 헬퍼를 사용한다.
    - **사전 계약 검증 필수**: 배포/커밋 전 `python -X utf8 scripts/verify_contracts.py --mode git-diff` (또는 `--mode file --file {경로}`)를 실행해 `[ALL PASS]`를 확인한다 (`pre-commit-contract-gate` 스킬 준수).
    - **커밋 출처 표시**: 커밋 메시지 맨 끝에 `Agent: {도구} ({모델})` 한 줄을 남긴다. 예: `Agent: antigravity (gemini-3.8-flash)`, `Agent: antigravity (gemini-4-argon)`. 도구·모델은 관제탑 `scripts/agent_commit_rules.json` 목록과 글자까지 같게 쓴다. 사람 커밋과 등록 도구 자동 커밋은 제외한다. 다른 에이전트 브랜치를 병합할 때는 병합 커밋에 `교정: [태그] 내용`을 남긴다. 상세 규칙은 상위 헌법 `../GEMINI.md` §2와 관제탑 `docs/AGENT_COMMIT_PROTOCOL.md`.
+
+---
+
+## 9. 작업 위험도와 검증 관문 (모든 에이전트 공통, 2026-11-21)
+누가 주도하든(Claude·안티그래비티·코덱스, 사람과 함께든 혼자든) 같은 표를 따른다. 한 작업이 여러 등급에 걸치면 가장 높은 등급을 따른다.
+
+| 등급 | 무엇 | 필수 관문 |
+| :--- | :--- | :--- |
+| **L0 콘텐츠·문서** | 어휘·교재 JSON 등록, 명세서·카탈로그 글, 데이터 파일 | 자동 관문 |
+| **L1-화면** | 보이는 모양·배치·글자·조작이 바뀌는 HTML·CSS·화면 JS | 자동 관문 + 폰 크기(세로 360~390px) 화면을 직접 조작해 찍은 사진 |
+| **L1-리팩터** | 화면 변화가 없는 정리 (파일 나누기, 이름·중복 정리, 동작이 같은 코드 옮기기) | 자동 관문만 (화면 사진 없음) |
+| **L2 로직·저장·동기화** | 공통 코어 `kids/core/`, 퀘스트 엔진, 월드 저장, 등록 도구, 서비스 워커, Worker (정확한 경로: 관제탑 `scripts/agent_commit_rules.json` `review_line.l2_paths`) | 위 + **작성자와 다른 계열 모델의 교차 검토 1회**, 커밋에 `검토:` 줄 |
+| **L3 운영·보안** | 노션 스키마·속성, Worker 배포, 비밀값, 운영 DB 쓰기 | 위 + 사용자 사전 승인 (상위 `../GEMINI.md` §7-7 안전 방어선) |
+
+- **자동 관문**: 푸시하면 관제탑 `.githooks/pre-push`가 `scripts/ci_local.py`(원격 시험과 같은 단계)를 돌리고 실패하면 막는다. `--no-verify`로 건너뛰지 않는다. 계약 검사(§8-5 `verify_contracts.py`)도 그대로다.
+- **교차 검토 고르기**: Claude가 주도하면 `agy_call.ps1 -Role review`(아르곤↔네온), 안티그래비티가 주도하면 `claude_call.ps1 -Role opus`. Opus 한도가 없으면 초안을 쓰지 않은 모델(Hydrogen 초안이면 아르곤·네온)로 받고 그대로 `검토: neon`처럼 적는다(같은 계열이라 경고가 남는 것이 맞다).
+- **`검토:` 줄**: 검토자마다 한 줄 `검토: opus` · `검토: neon` · `검토: argon`. 일부러 생략하면 `검토: 없음 (사유)`. L2 경로를 고쳤는데 이 줄이 없거나 같은 계열이면 commit-msg 훅이 **경고만** 한다(2026-11-21~ 한 달 시험, 막지 않음. 2026-12-21 월말 점검에서 계속할지 정한다).
+- **검토 점수**: 검토 답을 확인해 반영한 뒤 `-Score -Target "대상" -Points 지적수 -Real 실제수` 한 줄 (두 래퍼가 같은 파일 `scratch/agy-work/review_scores.tsv`에 쌓는다).
+- 설계·명세 검토(코드 쓰기 전)는 아르곤·네온에게 같은 질문을 동시에 보낸다. 호출 방법과 역할은 관제탑 스킬 `antigravity-worker`·`claude-worker`.
