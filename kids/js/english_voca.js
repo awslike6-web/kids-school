@@ -546,12 +546,11 @@
         container.innerHTML = `
             <div class="quiz-card">
                 ${helpers.orderToggleHtml || ''}
+                ${typeof window.getEnglishSpeechRateChipsHtml === 'function' ? window.getEnglishSpeechRateChipsHtml() : ''}
                 <div style="font-size: 0.95rem; opacity:0.7; margin-bottom: 12px;">영어 문장 ${helpers.currentIdx + 1} / ${helpers.totalCount}</div>
                 ${imageHtml}
                 <div class="quiz-descr" style="font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 14px;">${currentItem.meaning}</div>
                 <div style="margin-bottom: 14px; color: #64748b; font-size: 0.98rem;">이 뜻에 맞는 영어 문장을 완성하세요!</div>
-                
-                ${typeof window.getEnglishSpeechRateChipsHtml === 'function' ? window.getEnglishSpeechRateChipsHtml() : ''}
 
                 ${interactiveHtml}
 

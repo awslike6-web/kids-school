@@ -87,3 +87,20 @@ test('3단계 「다른 방식으로 다시하기」는 첫 문제부터 다시 
   ctx.sandbox.EnglishVoca.selectStage3Mode('copy');
   assert.equal(ctx.run('activeQuizIdx'), 0);
 });
+
+test('4단계 문장방: 속도 조절 블록은 상단에 오고 문제 바로 다음에 보기(단어 조각)가 이어진다', () => {
+  const ctx = load();
+  ctx.sandbox.getEnglishSpeechRateChipsHtml = () => '<div class="speech-rate-control-box">속도조절</div>';
+  startStage4(ctx);
+  const html = ctx.body.innerHTML;
+  const rateIdx = html.indexOf('speech-rate-control-box');
+  const questionIdx = html.indexOf(SENTENCES[0].meaning);
+  const choicesIdx = html.indexOf('sent-word-blanks');
+  assert.ok(rateIdx > -1 && questionIdx > -1 && choicesIdx > -1);
+  assert.ok(rateIdx < questionIdx, '속도 조절 블록이 문제보다 상단에 있어야 한다');
+  assert.ok(questionIdx < choicesIdx, '문제 다음에 보기(단어 조각)가 나와야 한다');
+  assert.ok(
+    !html.slice(questionIdx, choicesIdx).includes('speech-rate-control-box'),
+    '문제와 보기 사이에 속도 조절 블록이 끼지 않아야 한다'
+  );
+});
