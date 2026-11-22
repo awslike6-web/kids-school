@@ -34,5 +34,14 @@ window.ENGLISH_UNIT_ACTIVITIES = [
     icon: '🧭',
     href: 'listen_place.html',
     scene: 'data/listen_place_5-2_L11.js'
+  },
+  {
+    grade: '5-2',
+    unit: 'L11',
+    title: '클래스카드 연습',
+    desc: '시간 걱정 없이 테스트 → 매칭을 익혀요',
+    icon: '🃏',
+    href: 'classcard.html',
+    deck: 'data/classcard_5-2_L11.js'
   }
 ];

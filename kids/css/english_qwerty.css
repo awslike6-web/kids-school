@@ -1,0 +1,191 @@
+/* kids/css/english_qwerty.css
+   ⌨️ 폰용 영문 자판 + 글자 칸 (english_qwerty.js). 폭 360~390px 기준: 키 높이 46px(좁은 화면 44px), 키 간격 3px.
+   선택자는 모두 .qw- 로 시작해 다른 화면과 겹치지 않는다. 오답은 노란 밑줄 흔들림만(빨간색 없음). */
+.qw-root {
+  --qw-key-bg: #ffffff;
+  --qw-key-text: #2f2f2f;
+  --qw-kb-bg: #e9ddd6;
+  --qw-accent: #8cc63f;
+  --qw-accent-soft: #e9f5d8;
+  --qw-warn: #f59e0b;
+  --qw-muted: #a39a94;
+  --qw-line: #e4d5cd;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* 글자 칸 */
+.qw-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  row-gap: 8px;
+  column-gap: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+.qw-slots.done { background: var(--qw-accent-soft); }
+.qw-word {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  white-space: nowrap;
+}
+.qw-slot {
+  position: relative;
+  width: 24px;
+  height: 34px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--qw-muted);
+  border-bottom: 3px solid var(--qw-line);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.qw-slot.filled { color: var(--qw-key-text); }
+.qw-slot.cur { border-bottom-color: var(--qw-accent); }
+.qw-slot.cur::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  width: 2px;
+  height: 20px;
+  background: var(--qw-accent);
+  animation: qw-cursor 1s steps(2, start) infinite;
+}
+.qw-slot.skip {
+  width: 14px;
+  color: var(--qw-muted);
+  border-bottom-color: transparent;
+}
+.qw-slot.space {
+  width: 16px;
+  border-bottom-style: dotted;
+}
+.qw-slot.shake {
+  border-bottom-color: var(--qw-warn);
+  animation: qw-shake 0.3s ease-in-out;
+}
+.qw-slots.done .qw-slot { border-bottom-color: var(--qw-accent); }
+.qw-slots.done .qw-slot.skip { border-bottom-color: transparent; }
+/* 영문 자판 */
+.qw-kb {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--qw-kb-bg);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.qw-kb.done {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.qw-row {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.qw-row.r2 { padding-inline: 5%; }
+.qw-key {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 46px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 7px;
+  background: var(--qw-key-bg);
+  color: var(--qw-key-text);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+.qw-key.wide { flex-grow: 1.6; }
+.qw-key.space {
+  flex-grow: 4.2;
+  font-size: 15px;
+}
+.qw-key.hint {
+  flex-grow: 1.8;
+  font-size: 14px;
+}
+/* 키 상태 */
+.qw-key.press {
+  transform: translateY(2px);
+  background: #e5ded9;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.18);
+}
+.qw-key.guide {
+  background: var(--qw-accent-soft);
+  box-shadow: inset 0 0 0 2px var(--qw-accent), 0 2px 0 rgba(0, 0, 0, 0.18);
+}
+.qw-key.blink {
+  /* 움직임 줄이기 설정이어도 보이도록 바탕색을 먼저 칠한다 */
+  background: #fef3c7;
+  box-shadow: inset 0 0 0 2px var(--qw-warn), 0 2px 0 rgba(0, 0, 0, 0.18);
+  animation: qw-blink 0.5s ease-in-out 4 forwards;
+}
+/* 애니메이션 및 반응형 */
+@keyframes qw-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes qw-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+@keyframes qw-blink {
+  0%, 100% {
+    background: var(--qw-accent-soft);
+    box-shadow: inset 0 0 0 2px var(--qw-accent), 0 2px 0 rgba(0, 0, 0, 0.18);
+  }
+  50% {
+    background: #fef3c7;
+    box-shadow: inset 0 0 0 2px var(--qw-warn), 0 2px 0 rgba(0, 0, 0, 0.18);
+  }
+}
+@media (max-width: 359px) {
+  .qw-key {
+    height: 44px;
+    font-size: 17px;
+  }
+  .qw-key.hint { font-size: 13px; }
+  .qw-slot { width: 21px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qw-key,
+  .qw-slot.cur::after,
+  .qw-slot.shake,
+  .qw-key.blink {
+    animation: none !important;
+    transition: none !important;
+  }
+}

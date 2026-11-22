@@ -856,6 +856,29 @@ Gemini 3.8 Flash (2026 플래그십 표준) 기반 실시간 영어 롤플레잉
   | `map.buildFinaleCandidates(items, finaleQ)` | 정답 경로 1장 + 오답 경로 2장 후보 생성 |
   | `map.renderFinaleStage(container, candidates, onSelect)` | 후보 지도 3장 카드 렌더링 및 선택 콜백 |
 - **검증**: `tests/english-listen-place.test.mjs`
+
+### 🃏 `english_classcard*.js` (영어 클래스카드 연습: 테스트 2×4 짝맞추기 → 1,500점 → 카드 넘기기 매칭, 2026-11-22~)
+담임 클래스카드 시험 구조를 그대로 연습하는 특별 활동. 시간제한(없음·천천히·기본)과 안심 모드만 다르다. 카드 묶음은 클래스카드 글자 그대로의 정적 자료(VOCA_DB 아님). 명세 `docs/english_spec.md` §2-3.
+- **파일 위치**: 화면 `kids/subjects/english/classcard.html?grade=&unit=` · CSS `kids/css/english_classcard.css` · 카드 묶음 `kids/subjects/english/data/classcard_<학년>_L<단원>.js`(첫 묶음 `kids/subjects/english/data/classcard_5-2_L11.js`)(`window.CLASSCARD_DECK`, `english_unit_activities.js`의 `deck` 칸으로 연결)
+  - `kids/js/english_classcard.js` (약 390줄, `window.EnglishClasscard`): 저장 상태(`state`, 아이·단원별 기기 저장), 소리(`sound`: `speakEnglish`·`fairyPraise/Encourage/Reward`·짧은 효과음), 보상 연결(`reward`: `claimMissionRewardOnce`·퀴즈 보상 세션·`LearningLog.question`), 로비·결과·안내창
+  - `kids/js/english_classcard_grid.js` (약 320줄, `EnglishClasscard.Grid`): 1단계 짝맞추기 화면 + 판 계산 `Grid.logic`(`initialBoard`·`refillPair(…, {leftAge, rightAge})`·`countValidPairs`·`pointsFor`, DOM 없음). 판의 짝은 실제 앱처럼 보통 1쌍·가끔 2쌍, 짝 없이 오래 남은 카드는 짝을 넣어 줌. 영어 발음은 맞혔을 때만
+  - `kids/js/english_classcard_cards.js` (약 410줄, `EnglishClasscard.Cards`): 2단계 카드 퀴즈(`buildQuestions`·`tokenize`·`isSpellable`), 6지선다는 `QuizChoices.arrange`, 철자 글자 조각/직접 입력, 밀기
+  - 2단계 철자 타이핑 비중(블럭 전체·마무리 타이핑·전체 타이핑)과 자판 위치 안내(항상·막히면 반짝·끄기)는 로비 설정(`state.spellTyping`·`state.keyGuide`). 타이핑 문항은 아래 `english_qwerty.js`를 부른다(`Cards.typingPositions`·`isTypable`).
+- **새 단원**: 카드 묶음 파일 하나 + 등록표 한 줄. 엔진은 고치지 않는다.
+- **검증**: `tests/english-classcard.test.mjs`
+
+### ⌨️ `english_qwerty.js` (폰용 영문 자판 + 글자 칸 입력기, 2026-11-23~)
+폰 OS 키보드 없이 화면 자판으로 영어 철자를 치게 하는 부품. 클래스카드 연습 2단계 타이핑 문항이 첫 사용처이고, 다른 화면에서도 그대로 쓸 수 있다. 초안 hydrogen, 검수·조립 Claude.
+- **파일 위치**: `kids/js/english_qwerty.js` (약 410줄, `window.EnglishQwerty`) · `kids/css/english_qwerty.css` (약 190줄, 선택자는 모두 `.qw-`)
+- **핵심 API**:
+  | 이름 | 설명 |
+  | :--- | :--- |
+  | `AUTO_SKIP_REGEX` | 자동 건너뜀 규칙 한 줄 (`{…}`·`/`·`~`·`.`·`?`). 실제 앱 기준이 바뀌면 이 줄만 고친다 |
+  | `buildSlots(answer)` | 순수 함수 → `[{ch, kind: 'key'|'space'|'skip', expect}]` (끝쪽·기호 뒤 띄어쓰기는 skip) |
+  | `keyOf(slot)` | 그 칸에 누를 키 `'a'~'z'`·`'space'`·`"'"`·`null` |
+  | `mount(host, {answer, guide, idleMs, onComplete, onWrong(key, expectKey), onHint})` | 글자 칸 + 10-9-7 자판을 그림 → `{input, hint, isDone, destroy}`. guide `'always'|'stuck'|'off'` |
+- **규칙**: `<input>` 없음(폰 키보드·자동완성 차단), PC `keydown`도 같은 처리(조합키·반복 무시, 숨겨진 화면 무시), 틀린 키는 칸에 안 들어가고 흔들림만(에러리스), 완료 콜백 한 번, `destroy()`가 키보드 이벤트·타이머를 정리(카드를 넘길 때 꼭 부름). 불러올 때 `document`를 건드리지 않는다.
+- **검증**: `tests/english-qwerty.test.mjs`
 ---
 
 ## 2-5. 🔬 과학 탐구방 전담 엔진군 (Science Lab Engines)

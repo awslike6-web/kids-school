@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>클래스카드 연습 🃏 | 김s 공부방</title>
+  <link rel="stylesheet" href="../../css/english_classcard.css?v=20261123-qw">
+  <link rel="stylesheet" href="../../css/english_qwerty.css?v=20261123-qw">
+</head>
+<body>
+  <div class="cc-viewport">
+    <div class="cc-shell">
+
+      <!-- 로비: 구간·시간제한·안심 모드 → 1단계 테스트 / 2단계 매칭 -->
+      <section id="cc-lobby" class="cc-screen active">
+        <header class="cc-lobby-header">
+          <div class="cc-lobby-top">
+            <a href="english.html" class="cc-exit">‹ 영어방</a>
+            <span class="cc-badge">클래스카드 · 실전 연습</span>
+          </div>
+          <h1 class="cc-lobby-title" id="cc-title">클래스카드</h1>
+          <p class="cc-lobby-sub" id="cc-source"></p>
+        </header>
+
+        <div class="cc-lobby-body">
+          <div class="cc-panel">
+            <div class="cc-panel-title"><span>📚 학습 구간</span><span id="cc-word-count"></span></div>
+            <div class="cc-pills" id="cc-section-pills"></div>
+          </div>
+
+          <div class="cc-panel">
+            <div class="cc-panel-title"><span>⏱️ 1단계 테스트 시간제한</span></div>
+            <div class="cc-pills" id="cc-timer-pills">
+              <button type="button" class="cc-pill" data-timer="none">없음</button>
+              <button type="button" class="cc-pill" data-timer="slow">천천히 3:30</button>
+              <button type="button" class="cc-pill" data-timer="normal">기본 2:00</button>
+            </div>
+          </div>
+
+          <div class="cc-panel">
+            <div class="cc-panel-title"><span>🛡️ 안심 학습</span></div>
+            <div class="cc-setting-row">
+              <div class="cc-setting-info">
+                <span class="cc-setting-label">안심 모드</span>
+                <span class="cc-setting-desc">끄면 실제 앱처럼 감점·빨간 X·3초 잠금</span>
+              </div>
+              <label class="cc-toggle">
+                <input type="checkbox" id="cc-opt-errorless" checked>
+                <span class="cc-toggle-slider"></span>
+              </label>
+            </div>
+            <div class="cc-setting-row">
+              <div class="cc-setting-info">
+                <span class="cc-setting-label">영어 음성 속도</span>
+                <span class="cc-setting-desc">영어방 속도와 같은 설정이에요</span>
+              </div>
+              <div class="cc-speed-group" id="cc-speed-group">
+                <button type="button" class="cc-speed" data-speed="0.75">0.75x</button>
+                <button type="button" class="cc-speed" data-speed="0.85">0.85x</button>
+                <button type="button" class="cc-speed" data-speed="1">1.0x</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cc-panel">
+            <div class="cc-panel-title"><span>✍️ 2단계 철자 연습</span></div>
+            <div class="cc-sub-label">타이핑 비중</div>
+            <div class="cc-pills" id="cc-typing-pills">
+              <button type="button" class="cc-pill" data-typing="tiles">블럭 전체</button>
+              <button type="button" class="cc-pill" data-typing="finish">마무리 타이핑</button>
+              <button type="button" class="cc-pill" data-typing="typing">전체 타이핑</button>
+            </div>
+            <div class="cc-sub-label">자판 위치 안내</div>
+            <div class="cc-pills" id="cc-guide-pills">
+              <button type="button" class="cc-pill" data-guide="always">항상 켜기</button>
+              <button type="button" class="cc-pill" data-guide="stuck">막히면 반짝이기</button>
+              <button type="button" class="cc-pill" data-guide="off">끄기</button>
+            </div>
+          </div>
+
+          <button type="button" class="cc-track step1" id="cc-start-step1">
+            <span class="cc-track-top"><span class="cc-step-badge">1단계 · 필수</span><span class="cc-track-go">시작하기 →</span></span>
+            <span class="cc-track-title">🎯 테스트 (2×4 짝맞추기)</span>
+            <span class="cc-track-desc">영어와 뜻의 짝을 맞춰 <strong>1,500점</strong>을 넘으면 2단계 매칭이 열려요!</span>
+            <span class="cc-progress-meta"><span>최고 점수 <strong id="cc-best-score">0점</strong></span><span id="cc-goal-status"></span></span>
+            <span class="cc-progress-bg"><span class="cc-progress-fill" id="cc-progress-fill"></span></span>
+          </button>
+
+          <button type="button" class="cc-track step2 locked" id="cc-start-step2">
+            <span class="cc-track-top"><span class="cc-step-badge" id="cc-step2-badge">2단계 · 잠김</span><span class="cc-track-go" id="cc-step2-action"></span></span>
+            <span class="cc-track-title"><span id="cc-step2-icon">🔒</span> 매칭 (카드 넘기기 6지선다·철자)</span>
+            <span class="cc-track-desc">앞면 문제를 보고 카드를 왼쪽으로 밀어 6지선다·철자 맞추기를 풀어요.</span>
+          </button>
+
+          <div class="cc-lobby-footer">
+            <span id="cc-bookmark-count"></span>
+            <span id="cc-parent-tools" hidden>
+              <button type="button" class="cc-link" id="cc-preview-toggle">2단계 미리보기 열기</button> ·
+              <button type="button" class="cc-link" id="cc-reset">기록 지우기</button>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1단계 테스트: 2×4 짝맞추기 (EnglishClasscard.Grid) -->
+      <section id="cc-test" class="cc-screen">
+        <header class="cc-test-header">
+          <div class="cc-test-row">
+            <div class="cc-row-left">
+              <button type="button" class="cc-icon-btn" id="cc-test-back" aria-label="뒤로">‹</button>
+              <div class="cc-timer" id="cc-timer">∞</div>
+            </div>
+            <div class="cc-row-right">
+              <button type="button" class="cc-btn cc-btn-dark" id="cc-test-finish">종료</button>
+              <div class="cc-score-box"><div class="cc-score-label">Score</div><div class="cc-score-value" id="cc-score">0</div></div>
+            </div>
+          </div>
+          <div class="cc-goal">
+            <div class="cc-goal-bg"><div class="cc-goal-bar" id="cc-goal-bar"></div></div>
+            <div class="cc-goal-text" id="cc-goal-text">0 / 1,500</div>
+          </div>
+        </header>
+        <main class="cc-grid-stage">
+          <div class="cc-grid" id="cc-grid"></div>
+          <div class="cc-score-pop" id="cc-score-pop"></div>
+          <div class="cc-toast" id="cc-toast"></div>
+        </main>
+      </section>
+
+      <!-- 2단계 매칭: 카드 넘기기 (EnglishClasscard.Cards) -->
+      <section id="cc-quiz" class="cc-screen">
+        <header class="cc-top-bar">
+          <button type="button" class="cc-icon-btn" id="cc-quiz-back" aria-label="뒤로">‹</button>
+          <div class="cc-quiz-counter" id="cc-quiz-counter">1<span>/10</span></div>
+          <button type="button" class="cc-icon-btn cc-star" id="cc-quiz-star" aria-label="별표">☆</button>
+        </header>
+        <main class="cc-quiz-stage">
+          <div class="cc-card-wrap" id="cc-card-wrap">
+            <div class="cc-card" id="cc-card"></div>
+          </div>
+        </main>
+      </section>
+
+      <!-- 결과 (테스트·매칭 공용) -->
+      <section id="cc-summary" class="cc-screen">
+        <header class="cc-top-bar">
+          <button type="button" class="cc-icon-btn" id="cc-summary-home" aria-label="처음 화면">‹</button>
+          <div class="cc-top-title">학습 결과</div>
+          <div class="cc-top-spacer"></div>
+        </header>
+        <div class="cc-summary-body" id="cc-summary-body"></div>
+      </section>
+
+      <div class="cc-overlay" id="cc-modal">
+        <div class="cc-modal-box">
+          <div class="cc-modal-emoji" id="cc-modal-emoji">🎉</div>
+          <h2 class="cc-modal-title" id="cc-modal-title"></h2>
+          <p class="cc-modal-desc" id="cc-modal-desc"></p>
+          <div class="cc-modal-actions" id="cc-modal-actions"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 1. 공통 코어 (english.html과 같은 순서). quiz-flow-controller(QuizChoices)·screentime-tracker는 core.js가 싣는다 -->
+  <script src="../../config.js"></script>
+  <script src="../../core/core.js"></script>
+  <script src="../../core/notion-helper.js?v=20261119-allcache"></script>
+  <script src="../../core/fairy-config.js"></script>
+  <script src="../../core/fairy-settings-catalog.js"></script>
+  <script src="../../core/fairy-settings-engine.js"></script>
+  <script src="../../core/fairy-tts.js?v=20261116-mixvoice"></script>
+  <script src="../../core/fairy-engine.js?v=20261028-coco"></script>
+
+  <!-- 2. 단원 활동 등록표 + 클래스카드 엔진 -->
+  <script src="data/english_unit_activities.js?v=20261122-cc"></script>
+  <script src="../../js/english_classcard.js?v=20261123-qw"></script>
+  <script src="../../js/english_qwerty.js?v=20261123-qw"></script>
+  <script src="../../js/english_classcard_grid.js?v=20261123-pair"></script>
+  <script src="../../js/english_classcard_cards.js?v=20261123-qw"></script>
+
+  <!-- 3. 진입: ?grade=&unit= 으로 등록표의 카드 묶음(deck) 파일을 불러 시작 -->
+  <script>
+    (function () {
+      'use strict';
+      window.currentSubject = '영어';
+
+      function fail(title, desc) {
+        var body = document.querySelector('#cc-lobby .cc-lobby-body');
+        body.innerHTML = '<div class="cc-panel cc-fail"><div class="cc-fail-emoji">🚧</div><h3></h3><p></p>' +
+          '<a href="english.html" class="cc-btn cc-btn-green">영어방으로 돌아가기</a></div>';
+        body.querySelector('h3').textContent = title;
+        body.querySelector('p').textContent = desc;
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var params = new URLSearchParams(window.location.search);
+        var grade = params.get('grade') || '5-2';
+        var unit = params.get('unit') || 'L11';
+        var list = window.ENGLISH_UNIT_ACTIVITIES || [];
+        var act = list.find(function (a) { return a.grade === grade && a.unit === unit && a.deck; });
+        if (!act) { fail('준비 중인 단원이에요', grade + ' ' + unit + ' 클래스카드는 아직 등록되지 않았어요.'); return; }
+
+        var s = document.createElement('script');
+        s.src = act.deck + '?v=20261122-cc';
+        s.onload = function () {
+          try { window.EnglishClasscard.init(window.CLASSCARD_DECK); }
+          catch (e) { console.error('[classcard]', e); fail('카드를 펼치지 못했어요', '카드 묶음 파일을 확인해 주세요.'); }
+        };
+        s.onerror = function () { fail('카드를 불러오지 못했어요', '인터넷 연결을 확인해 주세요.'); };
+        document.body.appendChild(s);
+      });
+    })();
+  </script>
+</body>
+</html>
