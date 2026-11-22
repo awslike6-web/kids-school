@@ -177,6 +177,7 @@
             userBlankAnswers = {};
             userOrderPicks = [];
             lastOrderQuizKey = '';
+            reportQuizSession = {}; // 문항기록 회차: 퀴즈 탭을 열 때마다 새로 센다
             renderLabReportQuiz(tabContent, 0);
         }
     }
@@ -545,6 +546,15 @@
         renderLabReportQuiz(tabContent, currentReportQuizIdx);
     }
 
+    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 정적 자료 's:sci-report-<단원>:<문항 번호>'
+    let reportQuizSession = {};
+    function reportTrack(qIdx) {
+        const L = window.LearningLog, data = getActiveReportData();
+        if (!L || !L.itemTracker || !data || !Array.isArray(data.quizItems)) return null;
+        return L.itemTracker({ subject: '과학', list: data.quizItems, idx: qIdx, session: reportQuizSession,
+            key: L.keyFor('s', `sci-report-${currentReportUnitId}`, qIdx) });
+    }
+
     function checkBlankAnswer(qIdx) {
         const data = getActiveReportData();
         const q = data.quizItems[qIdx];
@@ -552,6 +562,12 @@
 
         const isCorrect = blanks.length > 0 && blanks.every(b => userBlankAnswers[b.id] === b.answer);
         const container = document.getElementById('reportTabContent');
+        const track = reportTrack(qIdx);
+        const filled = blanks.length > 0 && blanks.every(b => userBlankAnswers[b.id]); // 덜 채운 제출은 답이 아님
+        if (track) {
+            if (isCorrect) track.done();
+            else if (filled) track.wrong(blanks.map(b => userBlankAnswers[b.id]).join('/'));
+        }
 
         if (isCorrect) {
             showQuizFeedback(container, true, `정답입니다! 👏 ${q.explanation}`, () => {
@@ -572,6 +588,11 @@
         const q = data.quizItems[qIdx];
         const isCorrect = (selectedIdx === q.answer);
         const container = document.getElementById('reportTabContent');
+        const track = reportTrack(qIdx);
+        if (track) {
+            if (isCorrect) track.done();
+            else track.wrong((q.choices || [])[selectedIdx]);
+        }
 
         if (isCorrect) {
             showQuizFeedback(container, true, `정답입니다! 🎉 ${q.explanation}`, () => {
@@ -618,6 +639,11 @@
         }
 
         const isCorrect = userOrderPicks.every((picked, idx) => picked.id === idx + 1);
+        const track = reportTrack(qIdx); // 단계를 다 고른 뒤의 판정만 센다(덜 고른 것은 답이 아님)
+        if (track) {
+            if (isCorrect) track.done();
+            else track.wrong(userOrderPicks.map(p => p.id).join('-'));
+        }
         if (isCorrect) {
             showQuizFeedback(container, true, `실험 순서 조립 성공! 🧪 ${q.explanation}`, () => {
                 userOrderPicks = [];

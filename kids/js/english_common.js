@@ -450,7 +450,15 @@ function startMissionWithFilteredData(records, innerBody) {
 // ========================================================
 // 🏆 퀴즈 공통 채점 흐름 및 오답노트·일지 자동 전송
 // ========================================================
+// 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 'v:' + VOCA page_id.
+// 모든 단계가 틀림(recordEnglishWrongAnswer)·맞힘(advance/rewardCorrect)·건너뛰기(skipEnglishQuestion)로 모인다.
+function englishItemTrack(idx) {
+    const L = window.LearningLog;
+    return L && L.itemTracker ? L.itemTracker({ prefix: 'v', subject: '영어', list: activeSectionData, idx }) : null;
+}
+
 async function advanceEnglishQuizAfterCorrect(delayMs = 1200) {
+    englishItemTrack(activeQuizIdx)?.done();
     if (typeof rewardQuizCorrect === 'function') {
         await rewardQuizCorrect(activeQuizIdx);
     }
@@ -477,6 +485,7 @@ async function advanceEnglishQuizAfterCorrect(delayMs = 1200) {
 }
 
 function skipEnglishQuestion() {
+    englishItemTrack(activeQuizIdx)?.skip();
     activeQuizIdx++;
     renderSectionUI();
 }
@@ -494,6 +503,9 @@ function recordEnglishWrongAnswer(item, wrongInput) {
     if (!targetWord) return;
     const meaning = (item.meaning || item.desc || '').trim();
     const wrongStr = typeof wrongInput === 'string' ? wrongInput.trim() : (wrongInput ? String(wrongInput).trim() : '오답');
+    // 지금 번호의 문항이면 지금 번호(같은 문항이 목록에 다시 붙은 경우 앞쪽 자리로 가지 않게), 아니면 목록에서 찾기
+    const itemIdx = activeSectionData[activeQuizIdx] === item ? activeQuizIdx : activeSectionData.indexOf(item);
+    englishItemTrack(itemIdx >= 0 ? itemIdx : activeQuizIdx)?.wrong(wrongStr);
 
     const existing = window.engWrongNotes.find(q => (q.word || q.text || '').trim() === targetWord);
     if (existing) {
@@ -591,7 +603,7 @@ function renderSectionUI() {
         advanceQuiz: advanceEnglishQuizAfterCorrect,
         recordWrong: recordEnglishWrongAnswer,
         promptWrong: promptEnglishWrong,
-        rewardCorrect: (idx) => { if (typeof rewardQuizCorrect === 'function') rewardQuizCorrect(idx); }
+        rewardCorrect: (idx) => { englishItemTrack(idx)?.done(); if (typeof rewardQuizCorrect === 'function') rewardQuizCorrect(idx); }
     };
 
     if (currentMissionType === 'stage1') {

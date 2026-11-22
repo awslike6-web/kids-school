@@ -607,8 +607,16 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             });
         }
 
+        // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 구구단은 81개로 유한해 사실 하나하나를 키로 한다 g:gugu-<단>x<수>
+        function guguTrack(q) {
+            const L = window.LearningLog;
+            return L && L.itemTracker ? L.itemTracker({ subject: '수학', list: qList, idx: qIdx, key: L.keyFor('g', `gugu-${q.d}x${q.t}`) }) : null;
+        }
+
         window.checkQ = function(selected, q, btn) {
             if (qAnswered) return; qAnswered = true;
+            const track = guguTrack(q);
+            if (track) { if (selected === q.ans) track.done(); else track.wrong(selected); }
             document.querySelectorAll('.choice').forEach(b => { b.disabled = true; if (+b.textContent === q.ans) b.classList.add('correct'); });
 
             const fb = document.getElementById('q-feedback'); const ex = document.getElementById('q-explain');
@@ -638,6 +646,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
                     document.getElementById('next-btn').className = 'next-btn';
                 };
                 const skip = () => {
+                    if (track) track.skip(); // 틀린 뒤 건너뛰기 = 「틀린 채 끝남」
                     window.nextQ();
                 };
 
@@ -653,7 +662,7 @@ header p { color: var(--muted); font-size: 0.95rem; margin-top: 8px; }
             }
         }
 
-        window.nextQ = function() { qIdx++; if (qIdx >= qList.length) window.showResult(); else window.renderQ(); }
+        window.nextQ = function() { const cur = qList[qIdx]; if (cur) { const t = guguTrack(cur); if (t) t.skip(); } qIdx++; if (qIdx >= qList.length) window.showResult(); else window.renderQ(); }
 
         window.showResult = async function() {
             document.getElementById('prog-fill').style.width = '100%'; document.getElementById('quiz-play').style.display='none';

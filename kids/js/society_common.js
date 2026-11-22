@@ -700,6 +700,7 @@ async function finalizeSocietyMissionImmediately() {
 }
 
 function skipToNextQuiz(type) {
+    window.LearningLog?.itemSkip?.(activeSectionData, activeQuizIdx); // 틀린 뒤 건너뛰기 = 「틀린 채 끝남」 (문항기록)
     activeQuizIdx++;
     window.activeQuizIdx = activeQuizIdx;
     const innerBody = document.getElementById('overlayInnerBody');

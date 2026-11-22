@@ -108,7 +108,8 @@
                     options: it.choices.length > 0 ? it.choices : ["보안경, 실험복 착용", "슬리퍼 착용"],
                     answer: it.correctIdx !== null ? it.correctIdx : 0,
                     explanation: it.explanation || it.desc,
-                    img: it.mediaUrl || ""
+                    img: it.mediaUrl || "",
+                    pageId: it.id // 문항기록 'c:' 키 (docs/learning_record_spec.md §5 3차)
                 };
             });
         }
@@ -248,25 +249,15 @@
         }
     }
 
-    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 2차): 'c:' + 교재 DB page_id (노션 문항만)
-    // 새로 시작한 미션(문항 목록이 바뀜)이거나 이미 끝낸 문항을 다시 만나면 새로 센다.
-    let questionTrack = null, questionTrackId = '', questionTrackList = null, questionTrackDone = false, questionTrackWrong = false;
+    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 2·3차): 'c:' + 교재 DB page_id (노션 문항만).
+    // 같은 목록·번호면 이어 쓰고, 새 미션이거나 끝낸 문항이면 새로 센다 (LearningLog.itemTracker).
+    function trackQuestion(idx) {
+        const L = window.LearningLog;
+        return L && L.itemTracker ? L.itemTracker({ prefix: 'c', subject: '과학', list: window.activeSectionData || [], idx }) : null;
+    }
     // 「건너뛰기」 버튼: 틀린 적이 있는 문항만 「틀린 채 끝남」으로 기록한다(답하지 않고 넘기면 기록 없음)
     function noteSkip() {
-        if (questionTrack && questionTrackWrong && !questionTrackDone) { questionTrack.done(); questionTrackDone = true; }
-    }
-    function trackQuestion(item, idx) {
-        const L = window.LearningLog;
-        const id = item && item.pageId ? `${item.pageId}#${idx}` : '';
-        const list = window.activeSectionData || null;
-        if (id && id === questionTrackId && list === questionTrackList && !questionTrackDone) return questionTrack;
-        questionTrackId = id;
-        questionTrackList = list;
-        questionTrackDone = false;
-        questionTrackWrong = false;
-        const key = id && L && L.keyFor ? L.keyFor('c', item.pageId) : null;
-        questionTrack = key ? L.question({ subject: '과학', key }) : null;
-        return questionTrack;
+        trackQuestion(window.activeQuizIdx || 0)?.skip();
     }
 
     // 🎯 실험 객관식 정답 판정
@@ -274,10 +265,10 @@
         const activeQuizIdx = window.activeQuizIdx || 0;
         const activeSectionData = window.activeSectionData || [];
         const trackedItem = activeSectionData[activeQuizIdx] || {};
-        const track = trackQuestion(trackedItem, activeQuizIdx);
+        const track = trackQuestion(activeQuizIdx);
         if (track) {
-            if (choiceIdx === correctIdx) { track.done(); questionTrackDone = true; }
-            else { track.wrong((trackedItem.choices || [])[choiceIdx]); questionTrackWrong = true; }
+            if (choiceIdx === correctIdx) track.done();
+            else track.wrong((trackedItem.choices || [])[choiceIdx]);
         }
 
         if (choiceIdx === correctIdx) {

@@ -286,8 +286,14 @@
         if (!currentItem) return;
 
         const answer = currentItem.word.trim().replace(/\s+/g, '');
+        // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 'v:' + VOCA page_id
+        const L = window.LearningLog;
+        const track = L && L.itemTracker
+            ? L.itemTracker({ prefix: 'v', subject: '과학', list: activeSectionData, idx: activeQuizIdx })
+            : null;
 
         if (userVal === answer) {
+            track?.done();
             if (typeof playSoundEffect === 'function') playSoundEffect('correct');
             if (typeof speakFairyTTS === 'function') speakFairyTTS("정답이야! 잘했어!");
             alert(`🎉 정답! [${currentItem.word}] 맞습니다!`);
@@ -308,11 +314,12 @@
             if (typeof playSoundEffect === 'function') playSoundEffect('wrong');
             if (!window.wrongNotes) window.wrongNotes = [];
             window.wrongNotes.push({ word: currentItem.word, wrongInput: userVal });
+            track?.wrong(userVal);
 
             if (typeof window.promptQuizRetryOrSkip === 'function') {
                 window.promptQuizRetryOrSkip({
                     onRetry: () => { input.value = ""; input.focus(); },
-                    onSkip: () => { if (typeof window.skipToNextScienceQuiz === 'function') window.skipToNextScienceQuiz(); },
+                    onSkip: () => { track?.skip(); if (typeof window.skipToNextScienceQuiz === 'function') window.skipToNextScienceQuiz(); },
                     word: currentItem.word,
                     subject: '과학',
                     meaning: currentItem.meaning || currentItem.desc || null,

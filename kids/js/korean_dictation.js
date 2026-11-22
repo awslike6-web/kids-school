@@ -319,6 +319,13 @@
     }
 
     function noteWrong(item, wrongInput) {
+        // 📒 문항기록 (docs/learning_record_spec.md §5 3차): 국어방 공용 도우미로 'v:' + VOCA page_id
+        if (typeof window.koreanItemTrack === 'function') {
+            // 틀린 낱말은 목록 끝에 다시 붙으므로 지금 번호의 문항이면 지금 번호를 먼저 쓴다
+            const list = window.activeSectionData || [], now = window.activeQuizIdx || 0;
+            const at = list[now] === item ? now : list.indexOf(item);
+            window.koreanItemTrack(at >= 0 ? at : now)?.wrong(wrongInput);
+        }
         session.wrongCounts[item.id] = (session.wrongCounts[item.id] || 0) + 1;
         if (!window.wrongNotes) window.wrongNotes = [];
         window.wrongNotes.push({ word: item.word, wrongInput });

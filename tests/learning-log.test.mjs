@@ -380,3 +380,50 @@ test('18. 행 만들기 응답에 page id가 없으면 PATCH하지 않고 실패
   assert.equal(calls.filter((c) => c.startsWith('PATCH')).length, 0, 'id 없는 페이지에 PATCH하지 않는다');
   assert.equal(L.pending().items, 1, '대기열 보존');
 });
+
+test('19. itemTracker: 같은 목록·번호면 같은 도우미(끝나도 다시 기록 안 함), 새 목록이면 새로, page_id 없으면 null, key 우선', () => {
+  const { LearningLog: L, storage } = setup();
+  storage.setItem('currentUserName', '민수');
+  const list = [{ pageId: 'aaaa' }, { word: '로컬' }];
+  const t1 = L.itemTracker({ prefix: 'v', subject: '영어', list, idx: 0 });
+  assert.equal(L.itemTracker({ prefix: 'v', subject: '영어', list, idx: 0 }), t1);
+  t1.wrong('x'); t1.done();
+  assert.equal(L.itemTracker({ prefix: 'v', subject: '영어', list, idx: 0 }).done(), false, '정답 처리가 두 번 불려도 한 번만');
+  assert.equal(L.itemTracker({ prefix: 'v', subject: '영어', list, idx: 1 }), null);
+  const fresh = L.itemTracker({ prefix: 'v', subject: '영어', list: [{ pageId: 'aaaa' }], idx: 0 });
+  assert.notEqual(fresh, t1, '새 미션(새 목록)은 새 도우미');
+  fresh.done();
+  const g = L.itemTracker({ subject: '수학', list: [{}], idx: 0, key: 'g:vm-add-2x1-carry' });
+  g.wrong('12'); assert.equal(g.skip(), true, '틀린 뒤 건너뛰기 = 기록');
+  const q = L.itemTracker({ subject: '수학', list: [{}], idx: 0, key: 'g:gugu-7x8' });
+  assert.equal(q.skip(), false, '답 없이 건너뛰기 = 기록 없음');
+  const entry = Object.values(JSON.parse(storage.getItem(QUEUE_KEY))).find((e) => e.subject === '영어');
+  sameJson(entry.pending, { 'v:aaaa': [2, 1, 0, ['x']] });
+  const math = Object.values(JSON.parse(storage.getItem(QUEUE_KEY))).find((e) => e.subject === '수학');
+  sameJson(math.pending, { 'g:vm-add-2x1-carry': [1, 1, 0, ['12']] });
+});
+
+test('20. itemTracker session·itemSkip: 같은 배열이라도 회차가 다르면 새로, 공용 건너뛰기는 열린 도우미만 skip, 범위 밖은 null', () => {
+  const { LearningLog: L, storage } = setup();
+  storage.setItem('currentUserName', '민서');
+  const list = [{ pageId: 'bbbb' }];
+  const s1 = {}, s2 = {};
+  const a = L.itemTracker({ prefix: 'c', subject: '과학', list, idx: 0, session: s1 });
+  a.wrong('x');
+  assert.equal(L.itemSkip(s1, 0), true, '틀린 뒤 공용 건너뛰기 = 기록');
+  assert.equal(L.itemSkip(s1, 3), false, '열린 도우미 없으면 아무것도 안 함');
+  const b = L.itemTracker({ prefix: 'c', subject: '과학', list, idx: 0, session: s2 });
+  assert.notEqual(b, a);
+  b.done();
+  assert.equal(L.itemTracker({ prefix: 'c', subject: '과학', list, idx: 5 }), null, '범위 밖 번호');
+  a.wrong('늦게 온 호출'); // 끝난 도우미에 늦게 온 호출은 무시
+  const entry = Object.values(JSON.parse(storage.getItem(QUEUE_KEY)))[0];
+  sameJson(entry.pending, { 'c:bbbb': [2, 1, 0, ['x']] });
+});
+
+test('21. itemTracker: pageId가 없으면 노션 page_id 모양의 id를 쓰고, 로컬 id(voca_1)는 기록하지 않는다', () => {
+  const { LearningLog: L } = setup();
+  const list = [{ id: '37ca2711-5b68-8098-ab72-cde5a75c7575' }, { id: 'voca_1' }];
+  assert.ok(L.itemTracker({ prefix: 'v', subject: '영어', list, idx: 0 }));
+  assert.equal(L.itemTracker({ prefix: 'v', subject: '영어', list, idx: 1 }), null);
+});

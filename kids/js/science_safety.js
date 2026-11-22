@@ -9,7 +9,9 @@
     let safetyExamCurrentIdx = 0;
     let safetyChoiceOrders = {};
 
+    let safetySession = {}; // 문항기록 회차: 시험을 시작할 때마다 새로 센다
     function renderSafetyLicenseUI(container) {
+        safetySession = {};
         safetyExamAnswers = {};
         safetyExamCurrentIdx = 0;
         safetyChoiceOrders = {};
@@ -80,6 +82,14 @@
         const isCorrect = (selectedIdx === q.answer);
         const container = document.getElementById('overlayInnerBody');
         if (!container) return;
+        // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 노션 문항 'c:' + page_id, 예비 자료 's:sci-safety:번호'
+        const L = window.LearningLog;
+        const track = L && L.itemTracker ? L.itemTracker({ subject: '과학', list: data.questions, idx: qIdx, session: safetySession,
+            key: q.pageId ? L.keyFor('c', q.pageId) : L.keyFor('s', 'sci-safety', q.id || qIdx) }) : null;
+        if (track) {
+            if (isCorrect) track.done();
+            else track.wrong((q.options || [])[selectedIdx]);
+        }
 
         if (!isCorrect) {
             container.innerHTML = `

@@ -240,11 +240,20 @@
     /**
      * 정답 채점 완료 처리
      */
+    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 'v:' + VOCA page_id
+    function itemTrack() {
+        const L = window.LearningLog;
+        return L && L.itemTracker
+            ? L.itemTracker({ prefix: 'v', subject: '사회', list: window.activeSectionData || [], idx: window.activeQuizIdx || 0 })
+            : null;
+    }
+
     async function handleCorrect() {
         const activeData = window.activeSectionData || [];
         const activeIdx = window.activeQuizIdx || 0;
         const curItem = activeData[activeIdx];
         if (!curItem) return;
+        itemTrack()?.done();
 
         const currentUserName = localStorage.getItem('currentUserName') || '민수';
         const wordKey = curItem.word;
@@ -290,9 +299,11 @@
             word: curWord,
             wrongInput: wrongInput
         });
+        const track = itemTrack();
+        track?.wrong(wrongInput);
 
         const retry = typeof onRetryReset === 'function' ? onRetryReset : () => {};
-        const skip = () => window.skipToNextQuiz('voca');
+        const skip = () => { track?.skip(); window.skipToNextQuiz('voca'); };
 
         if (typeof window.promptQuizRetryOrSkip === 'function') {
             const activeItem = activeData[activeIdx] || null;

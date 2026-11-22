@@ -263,6 +263,33 @@ function nextQuestion() {
   }
 }
 
+// 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 생성형 문제는 문제 하나가 아니라 유형을 키로 한다.
+// g:vm-<연산>-<A자릿수>x<B자릿수>[-carry|-borrow|-rem] (덧셈 받아올림·뺄셈 받아내림·나눗셈 나머지가 있을 때 꼬리표)
+function verticalMathTypeKey(mode, q) {
+  const a = Math.abs(q.numA), b = Math.abs(q.numB);
+  let tag = '';
+  if (mode === 'add') {
+    for (let x = a, y = b, c = 0; x > 0 || y > 0; x = Math.floor(x / 10), y = Math.floor(y / 10)) {
+      c = (x % 10) + (y % 10) + c >= 10 ? 1 : 0;
+      if (c) { tag = '-carry'; break; }
+    }
+  } else if (mode === 'sub') {
+    for (let x = a, y = b, br = 0; x > 0 || y > 0; x = Math.floor(x / 10), y = Math.floor(y / 10)) {
+      br = (x % 10) - br < (y % 10) ? 1 : 0;
+      if (br) { tag = '-borrow'; break; }
+    }
+  } else if (mode === 'div' && q.rem > 0) {
+    tag = '-rem';
+  }
+  return `vm-${mode}-${String(a).length}x${String(b).length}${tag}`;
+}
+function verticalMathTrack(q) {
+  const L = window.LearningLog;
+  if (!L || !L.itemTracker || !q) return null;
+  return L.itemTracker({ subject: '수학', list: gameState.questions, idx: gameState.current,
+    key: L.keyFor('g', verticalMathTypeKey(gameState.mode, q)) });
+}
+
 window.submitAnswer = function() {
   const q = gameState.questions[gameState.current];
   let isCorrect = false;
@@ -289,6 +316,12 @@ window.submitAnswer = function() {
     isCorrect = (userAns === q.answer);
     userAnsText = `${userAns}`;
     correctAnsText = `${q.answer}`;
+  }
+
+  const track = verticalMathTrack(q);
+  if (track) {
+      if (isCorrect) track.done();
+      else track.wrong(userAnsText);
   }
 
   const msgBox = document.getElementById('v-feedbackMsg');
@@ -377,6 +410,7 @@ window.submitAnswer = function() {
       };
 
       const goNext = () => {
+          if (track) track.skip(); // 틀린 뒤 건너뛰기 = 「틀린 채 끝남」
           resetInputs();
           gameState.current++;
           nextQuestion();

@@ -424,6 +424,7 @@ function renderSectionUI(type, container, unitObj) {
 }
 
 async function skipToNextScienceQuiz() {
+    window.LearningLog?.itemSkip?.(activeSectionData, activeQuizIdx); // 틀린 뒤 위쪽 건너뛰기도 「틀린 채 끝남」 (문항기록)
     activeQuizIdx++;
     window.activeQuizIdx = activeQuizIdx;
 

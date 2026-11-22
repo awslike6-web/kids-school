@@ -642,7 +642,15 @@ async function finalizeKoreanMissionImmediately() {
     }
 }
 
+// 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 'v:' + VOCA page_id
+function koreanItemTrack(idx) {
+    const L = window.LearningLog;
+    return L && L.itemTracker ? L.itemTracker({ prefix: 'v', subject: '국어', list: activeSectionData, idx }) : null;
+}
+window.koreanItemTrack = koreanItemTrack; // 받아쓰기(korean_dictation.js)가 오답을 남길 때 쓴다
+
 async function advanceKoreanQuizAfterCorrect(delayMs = 1200) {
+    koreanItemTrack(activeQuizIdx)?.done();
     if (typeof rewardQuizCorrect === 'function') {
         await rewardQuizCorrect(activeQuizIdx);
     }
@@ -660,6 +668,7 @@ async function advanceKoreanQuizAfterCorrect(delayMs = 1200) {
 }
 
 function skipKoreanQuestion() {
+    koreanItemTrack(activeQuizIdx)?.skip();
     activeQuizIdx++;
     window.activeQuizIdx = activeQuizIdx;
     renderSectionUI();
@@ -668,6 +677,7 @@ function skipKoreanQuestion() {
 function promptKoreanWrong(note, onRetry) {
     if (!window.wrongNotes) window.wrongNotes = [];
     window.wrongNotes.push(note);
+    koreanItemTrack(activeQuizIdx)?.wrong((typeof note === 'object' && note !== null) ? note.wrongInput : null);
     const retry = typeof onRetry === 'function' ? onRetry : () => {};
     if (typeof promptQuizRetryOrSkip === 'function') {
         const word = (typeof note === 'object' && note !== null) ? (note.word || note.text) : note;

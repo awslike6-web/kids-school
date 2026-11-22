@@ -365,19 +365,58 @@
   // 첫 시도 여부·힌트·고른 오답을 모아 attempt 한 번으로 남긴다. done()은 두 번 불러도 한 번만 기록.
   function question(base) {
     var st = { wrong: false, hinted: false, picks: [], done: false };
-    return {
+    var t = {
       wrong: function (pick) {
+        if (st.done) return; // 끝난 문항에 늦게 온 호출은 무시
         st.wrong = true;
         if (pick !== undefined && pick !== null && String(pick).trim() !== '') st.picks.push(String(pick));
       },
-      hint: function () { st.hinted = true; },
+      hint: function () { if (!st.done) st.hinted = true; },
       done: function () {
         if (st.done || !base || !base.key) return false;
         st.done = true;
         return attempt({ child: base.child || currentChild(), subject: base.subject, key: base.key,
           firstTry: !st.wrong, hinted: st.hinted, picks: st.picks });
-      }
+      },
+      // 건너뛰기(3차): 틀린 적이 있으면 「틀린 채 끝남」으로 기록, 답하지 않고 넘기면 기록 없음
+      skip: function () { return st.wrong && !st.done ? t.done() : false; },
+      isDone: function () { return st.done; }
     };
+    return t;
+  }
+
+  // 문항 목록 + 번호로 문제를 내는 화면용(3차): 같은 회차·같은 번호·같은 키면 같은 도우미를 돌려준다
+  // (이미 끝났어도 그대로 → 정답 처리가 두 번 불려도 한 번만 기록). 회차가 바뀌면 새 도우미.
+  // 회차 = opts.session(화면이 한 번 풀 때마다 만드는 빈 객체), 없으면 문항 목록 자체(미션마다 새 목록인 과목방).
+  // 정적 자료처럼 같은 목록을 다시 쓰는 화면은 session을 넘겨야 다시 풀 때 새로 센다.
+  // 키는 opts.key, 없으면 keyFor(opts.prefix || 'v', 그 문항의 pageId). 문항이 없거나 키를 못 만들면 null.
+  var trackerSets = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function itemTracker(opts) {
+    if (!opts || !opts.list || typeof opts.list !== 'object' || !trackerSets) return null;
+    var idx = opts.idx;
+    var item = opts.list[idx];
+    if (item === undefined || item === null) return null; // 범위 밖 번호
+    // 노션 문항 ID: pageId, 없으면 id가 노션 page_id 모양(32자리 16진)일 때만 (영어방 캐시 레코드는 id만 가짐).
+    // 'voca_1' 같은 로컬 ID는 노션 문항으로 착각하지 않는다.
+    var pid = item.pageId || (/^[0-9a-f]{32}$/i.test(String(item.id || '').replace(/-/g, '')) ? item.id : null);
+    var key = opts.key || keyFor(opts.prefix || 'v', pid);
+    if (!key) return null;
+    var owner = opts.session && typeof opts.session === 'object' ? opts.session : opts.list;
+    var set = trackerSets.get(owner);
+    if (!set) { set = {}; trackerSets.set(owner, set); }
+    var slot = set[idx];
+    if (slot && slot.key === key) return slot.t;
+    var fresh = question({ subject: opts.subject, key: key, child: opts.child });
+    set[idx] = { key: key, t: fresh };
+    return fresh;
+  }
+
+  // 공용 「건너뛰기」 함수용: 그 번호에 이미 열린 도우미가 있으면 skip()만 (없으면 아무것도 하지 않음).
+  // 과목방의 위쪽 건너뛰기 버튼처럼 어느 단계·접두어인지 모르는 곳에서 부른다.
+  function itemSkip(listOrSession, idx) {
+    var set = trackerSets && listOrSession && typeof listOrSession === 'object' ? trackerSets.get(listOrSession) : null;
+    var slot = set ? set[idx] : null;
+    return slot ? slot.t.skip() : false;
   }
 
   function __resetForTest() {
@@ -398,6 +437,8 @@
     keyFor: keyFor,
     currentChild: currentChild,
     question: question,
+    itemTracker: itemTracker,
+    itemSkip: itemSkip,
     __resetForTest: __resetForTest
   };
 

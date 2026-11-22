@@ -78,7 +78,7 @@
     var grade = o.grade || '5-2';
     var unit = o.unit || '';
     // 페이지가 살아 있는 동안 불러온 문항·보상 기록을 유지한다 (탭을 다시 열어도 다시 받지 않음)
-    var state = { questions: null, loading: false, error: false, idx: 0, rewarded: {}, cheered: false, redraw: null };
+    var state = { questions: null, loading: false, error: false, idx: 0, rewarded: {}, cheered: false, redraw: null, session: {} };
 
     function render(container, ctx) {
       var ui = ctx.ui;
@@ -133,6 +133,7 @@
           }
           var again = el('div', 'mx-btn-row');
           again.appendChild(ui.button('처음부터 다시', 'mx-btn primary', function () {
+            state.session = {}; // 문항기록 회차: 다시 풀면 새로 센다
             state.idx = 0;
             state.cheered = false;
             draw();
@@ -143,6 +144,10 @@
 
         var item = list[state.idx];
         var key = item.id || item.title || String(state.idx);
+        // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 3차): 노션 교재 문항 'c:' + page_id
+        var LL = global.LearningLog;
+        var track = (LL && LL.itemTracker && item.id)
+          ? LL.itemTracker({ subject: '수학', list: list, idx: state.idx, session: state.session, key: LL.keyFor('c', item.id) }) : null;
         body.appendChild(el('div', 'mx-quiz-counter', '문제 ' + (state.idx + 1) + ' / ' + list.length));
         var nextRow = el('div', 'mx-btn-row');
         nextRow.hidden = true;
@@ -157,7 +162,9 @@
           column: true,
           hint: item.explain ? '힌트: ' + item.explain : '',
           explain: item.explain,
+          onWrong: function (text) { if (track) track.wrong(text); },
           onSolved: function () {
+            if (track) track.done();
             if (!state.rewarded[key]) {
               state.rewarded[key] = true;
               ctx.reward();

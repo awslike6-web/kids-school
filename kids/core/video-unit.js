@@ -104,6 +104,7 @@
           continue;
         }
         questions.push({
+          pageId: results[i].id || '', // 문항기록 'c:' 키 (docs/learning_record_spec.md §5 3차)
           title: readTitle(p['제목']).trim(),
           question: qText,
           choices: choices,
@@ -313,6 +314,7 @@
 
     function renderQuiz(quizBox, questions) {
       var idx = 0;
+      var quizSession = {}; // 문항기록 회차: 퀴즈를 열 때마다 새로 센다 (questions는 캐시된 같은 배열)
       var prog = el('div', 'vu-quiz-progress');
       var qEl = el('div', 'vu-quiz-q');
       var choicesEl = el('div', 'vu-choices');
@@ -359,6 +361,15 @@
             if (answered) return;
             answered = true;
             for (var j = 0; j < btns.length; j++) btns[j].btn.disabled = true;
+            // 📒 문항기록 (docs/learning_record_spec.md §5 3차): 한 번만 고르는 퀴즈라 고른 즉시 끝난다.
+            // 부품이 과목을 모르므로 화면의 window.currentSubject가 있을 때만 기록한다.
+            var LL = root.LearningLog, subj = root.currentSubject;
+            var track = (LL && LL.itemTracker && typeof subj === 'string' && subj)
+              ? LL.itemTracker({ prefix: 'c', subject: subj, list: questions, idx: idx, session: quizSession }) : null;
+            if (track) {
+              if (item.index !== q.answer) track.wrong(item.text);
+              track.done();
+            }
             if (item.index === q.answer) {
               btn.classList.add('is-correct');
               callFairy('fairyPraise');
