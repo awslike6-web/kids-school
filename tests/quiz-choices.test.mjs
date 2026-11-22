@@ -5,16 +5,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-
-function makeSeedRng(seed) {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6D2B79F5) >>> 0;
-    let t = Math.imul(state ^ (state >>> 15), 1 | state);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+import { makeSeedRng, makeFakeElement, makeMiniEl, fakeLearningLog, plainLog } from './quiz-test-fakes.mjs';
 
 // DOM·localStorage 없이 순수 QuizChoices 로드 검증
 function loadQuizChoicesOnly(rng) {
@@ -28,21 +19,6 @@ function loadQuizChoicesOnly(rng) {
   vm.createContext(sandbox);
   vm.runInContext(code, sandbox, { filename: 'kids/core/quiz-flow-controller.js' });
   return sandbox.QuizChoices;
-}
-
-function makeFakeElement(tag = 'div') {
-  return {
-    tagName: tag.toUpperCase(),
-    className: '',
-    innerHTML: '',
-    style: {},
-    children: [],
-    appendChild(child) {
-      this.children.push(child);
-      return child;
-    },
-    closest() { return null; },
-  };
 }
 
 function extractRenderedButtons(html) {
@@ -167,6 +143,7 @@ test('A1 society_chart.js: 섞인 순서로 버튼 번호를 표시하되 원래
     speakFairyTTS() {},
     rewardQuizCorrect: async (idx) => rewards.push(idx),
     promptQuizRetryOrSkip: (opts) => retries.push(opts),
+    LearningLog: fakeLearningLog(),
   };
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
@@ -179,6 +156,7 @@ test('A1 society_chart.js: 섞인 순서로 버튼 번호를 표시하되 원래
     choices: ['1919년 3월 1일', '1905년 11월', '1945년 8월 15일', '1950년 6월 25일'],
     correctIdx: 0,
     quiz: '옳은 것은?',
+    pageId: 'chart-page-1',
   };
   sandbox.activeSectionData = [item];
   sandbox.activeQuizIdx = 0;
@@ -203,6 +181,9 @@ test('A1 society_chart.js: 섞인 순서로 버튼 번호를 표시하되 원래
 
   await sandbox.SocietyChart.verifyChoice(correctBtn.choiceIndex, item.correctIdx);
   assert.deepEqual(rewards, [0]);
+  // 문항기록: 교재 page_id 'c:' 키, 틀린 뒤 맞힘 = 첫 시도 아님 + 고른 오답
+  assert.deepEqual(plainLog(sandbox.LearningLog), [{ subject: '사회', key: 'c:chart-page-1', firstTry: false, hinted: false,
+    picks: [item.choices[wrongBtn.choiceIndex]] }]);
 });
 
 test('A2 science_lab.js: 섞인 순서로 버튼 번호를 표시하되 원래 번호로 채점·오답기록하고 재시도 시 순서를 유지한다', async () => {
@@ -231,6 +212,7 @@ test('A2 science_lab.js: 섞인 순서로 버튼 번호를 표시하되 원래 �
     rewardQuizCorrect: async (idx) => rewards.push(idx),
     skipToNextScienceQuiz() {},
     wrongNotes: [],
+    LearningLog: fakeLearningLog(),
   };
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
@@ -243,6 +225,7 @@ test('A2 science_lab.js: 섞인 순서로 버튼 번호를 표시하되 원래 �
     choices: ['수증기로 변해 공기 중으로 날아간다', '얼음으로 변한다', '무게가 늘어난다', '색이 파랗게 변한다'],
     correctIdx: 0,
     quiz: '실험 결과로 옳은 것은?',
+    pageId: 'lab-page-1',
   };
   sandbox.activeSectionData = [{}, {}, item];
   sandbox.activeQuizIdx = 2;
@@ -266,33 +249,9 @@ test('A2 science_lab.js: 섞인 순서로 버튼 번호를 표시하되 원래 �
   await sandbox.ScienceLab.verifyChoice(correctBtn.choiceIndex, item.correctIdx);
   assert.equal(sounds[1], 'correct');
   assert.deepEqual(rewards, [2]);
+  assert.deepEqual(plainLog(sandbox.LearningLog), [{ subject: '과학', key: 'c:lab-page-1', firstTry: false, hinted: false,
+    picks: [item.choices[wrongBtn.choiceIndex]] }]);
 });
-
-function makeMiniEl(tag = 'div', attrs = {}) {
-  const classes = new Set();
-  const attrMap = Object.assign({}, attrs);
-  return {
-    tagName: tag.toUpperCase(),
-    attributes: attrMap,
-    hidden: false,
-    style: {},
-    innerHTML: '',
-    textContent: '',
-    children: [],
-    classList: {
-      add: (c) => classes.add(c),
-      remove: (c) => classes.delete(c),
-      contains: (c) => classes.has(c),
-    },
-    setAttribute(k, v) { attrMap[k] = String(v); },
-    getAttribute(k) { return Object.hasOwn(attrMap, k) ? attrMap[k] : null; },
-    appendChild(child) { this.children.push(child); return child; },
-    querySelector() { return null; },
-    querySelectorAll() { return []; },
-    scrollIntoView() {},
-    closest() { return null; },
-  };
-}
 
 test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-choice-index로 채점하며 오답노트(wrongNotes)는 건드리지 않는다', async () => {
   const container = makeMiniEl('div');
@@ -318,6 +277,7 @@ test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-cho
     triggerAwardDispense: (n) => awards.push(n),
     speakFairyTTS() {},
     wrongNotes: [],
+    LearningLog: fakeLearningLog(),
   };
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
@@ -362,6 +322,9 @@ test('B1 reading_engine.js: 섞인 순서로 배지 번호를 그리되 data-cho
 
   sandbox.ReadingEngine.chooseAnswer(correctBtn.choiceIndex);
   assert.deepEqual(awards, [1, 3]);
+  // 문항기록: 'r:' + 지문 ID + ':' + 문항 번호, 틀리면 단서가 열려 힌트로도 센다
+  assert.deepEqual(plainLog(sandbox.LearningLog), [{ subject: '국어', key: 'r:p-test-1:0', firstTry: false, hinted: true,
+    picks: [passage.questions[0].choices[wrongBtn.choiceIndex]] }]);
 });
 
 test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)이 같고 다시 보기를 다녀와도 순서가 유지되며 data-i로 정확히 채점한다', async () => {
@@ -446,6 +409,7 @@ test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)�
     triggerAwardDispense() {},
     fetchReadingPassagesFromNotion: async () => [passage],
     wrongNotes: [],
+    LearningLog: fakeLearningLog(),
   };
   sandbox.window = sandbox;
   sandbox.globalThis = sandbox;
@@ -497,6 +461,9 @@ test('B2 korean_mini_reading.js: 섞인 보기 순서와 TTS 대본(1번, …)�
   correctNode.onclick();
   assert.equal(correctNode.classList.contains('correct'), true);
   assert.equal(nextNode.hidden, false);
+  // 문항기록: 'r:' + 지문 ID + ':' + 문항 번호, 틀린 뒤 맞힘
+  const wrongText = passage.questions[0].options[Number(wrongNode.getAttribute('data-i'))];
+  assert.deepEqual(plainLog(sandbox.LearningLog), [{ subject: '국어', key: 'r:mini-u2-1:0', firstTry: false, hinted: false, picks: [wrongText] }]);
 });
 
 test('B3 science_report.js: 객관식·빈칸 카드를 섞고 빈칸 채우기 중 순서 유지, 오답노트(wrongNotes)는 건드리지 않는다', () => {

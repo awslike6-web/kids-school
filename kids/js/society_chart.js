@@ -104,10 +104,32 @@
     /**
      * 객관식 정답 검증
      */
+    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 2차): 'c:' + 교재 DB page_id.
+    // 노션에서 온 문항만(page_id 없는 예비 자료는 기록하지 않음). 같은 문항이면 도우미를 이어 쓴다.
+    // 새로 시작한 미션(문항 목록이 바뀜)이거나 이미 끝낸 문항을 다시 만나면 새로 센다.
+    let questionTrack = null, questionTrackId = '', questionTrackList = null, questionTrackDone = false;
+    function trackQuestion(item, idx) {
+        const L = window.LearningLog;
+        const id = item && item.pageId ? `${item.pageId}#${idx}` : '';
+        const list = window.activeSectionData || null;
+        if (id && id === questionTrackId && list === questionTrackList && !questionTrackDone) return questionTrack;
+        questionTrackId = id;
+        questionTrackList = list;
+        questionTrackDone = false;
+        const key = id && L && L.keyFor ? L.keyFor('c', item.pageId) : null;
+        questionTrack = key ? L.question({ subject: '사회', key }) : null;
+        return questionTrack;
+    }
+
     async function verifyChoice(selectedIdx, correctIdx) {
         const activeData = window.activeSectionData || [];
         const activeIdx = window.activeQuizIdx || 0;
         const currentItem = activeData[activeIdx] || {};
+        const track = trackQuestion(currentItem, activeIdx);
+        if (track) {
+            if (selectedIdx === correctIdx) { track.done(); questionTrackDone = true; }
+            else track.wrong((currentItem.choices || [])[selectedIdx]);
+        }
 
         if (selectedIdx === correctIdx) {
             if (typeof window.speakFairyTTS === 'function') {
@@ -128,7 +150,7 @@
                 window.promptQuizRetryOrSkip({
                     message: '아쉽지만 틀렸어요! 돋보기를 다시 한번 살펴볼까요?',
                     onRetry: () => {},
-                    onSkip: () => window.skipToNextQuiz('chart'),
+                    onSkip: () => { if (track) { track.done(); questionTrackDone = true; } window.skipToNextQuiz('chart'); }, // 건너뛰어도 「틀린 채 끝남」으로 기록
                 });
             } else {
                 if (typeof window.speakFairyTTS === 'function') {

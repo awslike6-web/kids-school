@@ -259,8 +259,8 @@
           wordFairyCount: 0
         }, key);
       }
-      if (!page) {
-        // 행은 만들어졌는데 응답을 못 읽었을 수 있다. 바로 다시 만들면 노션 색인 전이라 같은 ID 행이
+      if (!page || !page.id) {
+        // 행은 만들어졌는데 응답을 못 읽었거나 ID가 없을 수 있다(쓰기 차단 미리보기의 가짜 응답 등). 바로 다시 만들면 노션 색인 전이라 같은 ID 행이
         // 두 개 생길 수 있으므로, 이 열람에서는 이 키를 쉬고 다음 로드 때 ID 조회로 찾게 한다.
         markFail(key);
         skippedKeys.add(key);
@@ -335,6 +335,51 @@
     return inflightFlush;
   }
 
+  // ---------- 화면용 도우미 (명세 §4-1, 2차) ----------
+  // 문항키 만들기: 노션 page_id(하이픈 포함·제외 32자리 16진)는 하이픈을 뺀 소문자, 그 밖의 ID는
+  // 영문·숫자·_.- 만 남긴다. part(문항 번호 등)가 있으면 ':'로 잇는다. 형식에 안 맞으면 null.
+  function keyFor(prefix, id, part) {
+    if (typeof prefix !== 'string' || !/^[a-z]$/.test(prefix) || id === undefined || id === null || id === '') return null;
+    var clean = function (v) { return String(v).trim().replace(/[^A-Za-z0-9_.-]/g, '_'); };
+    var hex = String(id).trim().replace(/-/g, '').toLowerCase();
+    var body = /^[0-9a-f]{32}$/.test(hex) ? hex : clean(id);
+    if (part !== undefined && part !== null && part !== '') body += ':' + clean(part);
+    var key = prefix + ':' + body;
+    return KEY_RE.test(key) ? key : null;
+  }
+
+  // 지금 공부하는 아이. 부모 시뮬레이터·알 수 없으면 null (기록하지 않음)
+  function currentChild() {
+    try {
+      var name = window.localStorage.getItem('currentUserName');
+      if (CHILDREN.indexOf(name) !== -1) return name;
+      if (ADULTS.indexOf(name) !== -1) return null;
+      var who = window.localStorage.getItem('currentUser');
+      return who === 'daughter' ? '민서' : (who === 'son' ? '민수' : null);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 문항 하나 따라가기: 틀릴 때 wrong(고른 글자), 힌트를 보면 hint(), 맞혀서 끝나면 done() 한 번.
+  // 첫 시도 여부·힌트·고른 오답을 모아 attempt 한 번으로 남긴다. done()은 두 번 불러도 한 번만 기록.
+  function question(base) {
+    var st = { wrong: false, hinted: false, picks: [], done: false };
+    return {
+      wrong: function (pick) {
+        st.wrong = true;
+        if (pick !== undefined && pick !== null && String(pick).trim() !== '') st.picks.push(String(pick));
+      },
+      hint: function () { st.hinted = true; },
+      done: function () {
+        if (st.done || !base || !base.key) return false;
+        st.done = true;
+        return attempt({ child: base.child || currentChild(), subject: base.subject, key: base.key,
+          firstTry: !st.wrong, hinted: st.hinted, picks: st.picks });
+      }
+    };
+  }
+
   function __resetForTest() {
     hasColumn = null;
     skippedKeys.clear();
@@ -350,6 +395,9 @@
     merge: merge,
     encode: encode,
     decode: decode,
+    keyFor: keyFor,
+    currentChild: currentChild,
+    question: question,
     __resetForTest: __resetForTest
   };
 

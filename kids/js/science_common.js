@@ -288,6 +288,7 @@ async function fetchAndBuildScienceUI(type, innerBody) {
                                 choices: it.choices,
                                 correctIdx: it.correctIdx,
                                 explanation: it.explanation,
+                                pageId: it.id, // 문항기록 'c:' 키 (docs/learning_record_spec.md §5 2차)
                                 _fromNotion: true
                             }));
                         }

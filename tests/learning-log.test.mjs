@@ -317,3 +317,66 @@ test('14. 보내는 중에 다시 flush()를 부르면 지금 회차 뒤 한 번
   const saved = readPageLog(LearningLog, getPage());
   sameJson(Object.keys(saved.i).sort(), ['v:q1', 'v:q2']);
 });
+
+test('15. keyFor: page_id는 하이픈 뺀 소문자 32자리, 그 밖의 ID는 안전한 글자만, 문항 번호는 ":"로 잇고 형식 밖은 null', () => {
+  const { LearningLog: L } = setup();
+  assert.equal(L.keyFor('c', '3F2A2711-5B68-8115-9A24-C330B4BF008D'), 'c:3f2a27115b6881159a24c330b4bf008d');
+  assert.equal(L.keyFor('r', '3f2a27115b6881159a24c330b4bf008d', 2), 'r:3f2a27115b6881159a24c330b4bf008d:2');
+  assert.equal(L.keyFor('r', 'mini u2/1', 0), 'r:mini_u2_1:0');
+  assert.equal(L.keyFor('r', 'center_38', '1'), 'r:center_38:1');
+  assert.equal(L.keyFor('C', 'x'), null);
+  assert.equal(L.keyFor('cc', 'x'), null);
+  assert.equal(L.keyFor('r', ''), null);
+  assert.equal(L.keyFor('r', null), null);
+  assert.equal(L.keyFor('r', 'a'.repeat(70)), null);
+});
+
+test('16. currentChild: 아이 이름·currentUser로 판정하고 부모 시뮬레이터·알 수 없음은 null', () => {
+  const cases = [
+    [{ currentUserName: '민서' }, '민서'], [{ currentUserName: '민수' }, '민수'],
+    [{ currentUserName: '아빠', currentUser: 'son' }, null], [{ currentUser: 'daughter' }, '민서'],
+    [{ currentUser: 'son' }, '민수'], [{}, null],
+  ];
+  for (const [values, expected] of cases) {
+    const { LearningLog, storage } = setup();
+    storage.removeItem('currentUserName');
+    for (const [k, v] of Object.entries(values)) storage.setItem(k, v);
+    assert.equal(LearningLog.currentChild(), expected, JSON.stringify(values));
+  }
+});
+
+test('17. question 도우미: 틀림·힌트·고른 오답을 모아 done() 한 번만 기록, 바로 맞히면 첫 시도', () => {
+  const { LearningLog, storage } = setup();
+  storage.setItem('currentUserName', '민서');
+  const q1 = LearningLog.question({ subject: '국어', key: 'r:p1:0' });
+  q1.wrong('나'); q1.hint(); q1.wrong('');
+  assert.equal(q1.done(), true);
+  assert.equal(q1.done(), false, '두 번 불러도 한 번만');
+  const q2 = LearningLog.question({ subject: '국어', key: 'r:p1:1' });
+  q2.done();
+  const queue = JSON.parse(storage.getItem(QUEUE_KEY));
+  const entry = Object.values(queue)[0];
+  assert.equal(entry.child, '민서');
+  sameJson(entry.pending, { 'r:p1:0': [1, 1, 1, ['나']], 'r:p1:1': [1, 0, 0, []] });
+  assert.equal(LearningLog.question({ subject: '국어', key: null }).done(), false, '키가 없으면 기록하지 않음');
+});
+
+test('18. 행 만들기 응답에 page id가 없으면 PATCH하지 않고 실패로 남긴다 (대기열 보존)', async () => {
+  const storage = createStorage();
+  const calls = [];
+  const mockFetch = async (url, options = {}) => {
+    const method = (options.method || 'GET').toUpperCase();
+    calls.push(`${method} ${url.replace(/^https?:\/\/[^/]+/, '').split('?')[0]}`);
+    if (method === 'GET' && url.includes('/v1/databases/')) return { ok: true, status: 200, json: async () => ({ properties: { '문항기록': {} } }) };
+    if (url.includes('/query')) return { ok: true, status: 200, json: async () => ({ results: [] }) };
+    if (method === 'POST' && url.includes('/v1/pages')) return { ok: true, status: 200, json: async () => ({ blocked: true }) }; // id 없음
+    return { ok: true, status: 200, json: async () => ({}) };
+  };
+  const { sandbox } = loadBrowserScripts(['kids/core/study-log-store.js', 'kids/core/learning-log.js'], { fetch: mockFetch, storage });
+  const L = sandbox.LearningLog;
+  L.attempt({ child: '민수', subject: '영어', key: 'v:q1', firstTry: true, hinted: false, picks: [] });
+  const result = await L.flush();
+  assert.equal(result.failed, 1);
+  assert.equal(calls.filter((c) => c.startsWith('PATCH')).length, 0, 'id 없는 페이지에 PATCH하지 않는다');
+  assert.equal(L.pending().items, 1, '대기열 보존');
+});

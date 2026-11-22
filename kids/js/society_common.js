@@ -348,6 +348,7 @@ async function fetchCurriculumFromNotion(type) {
             artifactName: title,
             artifactPeriod: "",
             artifactUsage: desc,
+            pageId: page.id, // 문항기록 'c:' 키 (docs/learning_record_spec.md §5 2차)
             _fromNotion: true
         };
     });
@@ -532,7 +533,8 @@ function startMissionWithFilteredData(records, innerBody) {
                 summaryPassage: summaryPassage,
                 artifactName: record.artifactName || titleStr,
                 artifactPeriod: record.artifactPeriod || "",
-                artifactUsage: record.artifactUsage || meaningStr
+                artifactUsage: record.artifactUsage || meaningStr,
+                pageId: record.pageId || null
             };
         } else {
             return { 

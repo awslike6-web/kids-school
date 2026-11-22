@@ -216,6 +216,7 @@
         stopAudio();
         activePassage = currentPassages.find(p => p.id === passageId);
         if (!activePassage) return;
+        questionTrackId = ''; // 같은 지문을 다시 풀면 문항기록도 새로 센다
 
         activeQuestionIdx = 0;
         questionChoiceOrders = {};
@@ -305,6 +306,7 @@
         }
 
         isHintOpen = false; // 새 문항 시작 시 힌트 기본 접힘 상태 유지
+        trackQuestion();
         const q = questions[activeQuestionIdx];
         const total = questions.length;
         const currentNum = activeQuestionIdx + 1;
@@ -412,6 +414,7 @@
      */
     function toggleHint() {
         isHintOpen = !isHintOpen;
+        if (isHintOpen) trackQuestion()?.hint(); // 단서를 열어 본 문항은 「힌트」로 센다 (문항기록)
         // 단서를 열 때만 힌트 음성 (fairy-engine.js)
         if (isHintOpen && typeof window.fairyHint === 'function') window.fairyHint();
         const box = document.getElementById('readingHintBox');
@@ -480,9 +483,30 @@
         return (num >= 1 && num <= choices.length) ? num - 1 : 0;
     }
 
+    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 2차): 키 = 'r:' + 지문 ID + ':' + 문항 번호.
+    // 같은 문항을 다시 그려도(힌트 토글 등) 기록은 이어지고, 다른 문항이 되면 새로 시작한다.
+    let questionTrack = null, questionTrackId = '';
+    function trackQuestion() {
+        const L = window.LearningLog;
+        const id = activePassage ? `${activePassage.id}#${activeQuestionIdx}` : '';
+        if (id === questionTrackId) return questionTrack;
+        questionTrackId = id;
+        const key = L && L.keyFor && activePassage ? L.keyFor('r', activePassage.id, activeQuestionIdx) : null;
+        questionTrack = key ? L.question({ subject: activeSubject, key }) : null;
+        return questionTrack;
+    }
+
     function chooseAnswer(selectedIdx) {
         const q = activePassage.questions[activeQuestionIdx];
         const correctIdx = resolveAnswerIndex(q);
+        const track = trackQuestion();
+        if (track) {
+            if (selectedIdx === correctIdx) track.done();
+            else {
+                track.wrong((q.choices || q.options || [])[selectedIdx]);
+                if ((q.clue || q.hint || q.hintParagraph || '').trim()) track.hint(); // 틀리면 단서가 자동으로 열린다(단서가 있을 때만 힌트)
+            }
+        }
 
         const btn = document.getElementById(`choiceBtn_${selectedIdx}`);
 
@@ -540,6 +564,14 @@
         const correctAnswers = Array.isArray(q.answer) ? q.answer : [String(q.answer || "").trim()];
 
         const isMatch = correctAnswers.some(ans => ans.replace(/\s+/g, '') === userText.replace(/\s+/g, ''));
+        const track = trackQuestion();
+        if (track) {
+            if (isMatch) track.done();
+            else {
+                track.wrong(userText);
+                if ((q.clue || q.hint || q.hintParagraph || '').trim()) track.hint(); // 틀리면 단서가 자동으로 열린다(단서가 있을 때만 힌트)
+            }
+        }
 
         if (isMatch) {
             inputEl.classList.add('correct');

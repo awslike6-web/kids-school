@@ -193,7 +193,7 @@
                 `).join('')}
             </div>
             <div style="margin-top: 14px; display:flex; justify-content:center;">
-                <button class="quiz-button" style="background:var(--accent);" onclick="skipToNextScienceQuiz()">건너뛰기 ⏩</button>
+                <button class="quiz-button" style="background:var(--accent);" onclick="ScienceLab.noteSkip(); skipToNextScienceQuiz()">건너뛰기 ⏩</button>
             </div>
         `;
         container.appendChild(screenWrapper);
@@ -248,10 +248,37 @@
         }
     }
 
+    // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 2차): 'c:' + 교재 DB page_id (노션 문항만)
+    // 새로 시작한 미션(문항 목록이 바뀜)이거나 이미 끝낸 문항을 다시 만나면 새로 센다.
+    let questionTrack = null, questionTrackId = '', questionTrackList = null, questionTrackDone = false, questionTrackWrong = false;
+    // 「건너뛰기」 버튼: 틀린 적이 있는 문항만 「틀린 채 끝남」으로 기록한다(답하지 않고 넘기면 기록 없음)
+    function noteSkip() {
+        if (questionTrack && questionTrackWrong && !questionTrackDone) { questionTrack.done(); questionTrackDone = true; }
+    }
+    function trackQuestion(item, idx) {
+        const L = window.LearningLog;
+        const id = item && item.pageId ? `${item.pageId}#${idx}` : '';
+        const list = window.activeSectionData || null;
+        if (id && id === questionTrackId && list === questionTrackList && !questionTrackDone) return questionTrack;
+        questionTrackId = id;
+        questionTrackList = list;
+        questionTrackDone = false;
+        questionTrackWrong = false;
+        const key = id && L && L.keyFor ? L.keyFor('c', item.pageId) : null;
+        questionTrack = key ? L.question({ subject: '과학', key }) : null;
+        return questionTrack;
+    }
+
     // 🎯 실험 객관식 정답 판정
     async function verifyExperimentChoice(choiceIdx, correctIdx) {
         const activeQuizIdx = window.activeQuizIdx || 0;
         const activeSectionData = window.activeSectionData || [];
+        const trackedItem = activeSectionData[activeQuizIdx] || {};
+        const track = trackQuestion(trackedItem, activeQuizIdx);
+        if (track) {
+            if (choiceIdx === correctIdx) { track.done(); questionTrackDone = true; }
+            else { track.wrong((trackedItem.choices || [])[choiceIdx]); questionTrackWrong = true; }
+        }
 
         if (choiceIdx === correctIdx) {
             if (typeof playSoundEffect === 'function') playSoundEffect('correct');
@@ -280,7 +307,8 @@
         applyNotionData: applyNotionDataToScienceGlobals,
         renderExperimentUI,
         renderNatureInventorUI,
-        verifyChoice: verifyExperimentChoice
+        verifyChoice: verifyExperimentChoice,
+        noteSkip
     };
 
     // 🌐 하위 호환성 전역 브리지

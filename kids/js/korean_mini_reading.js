@@ -31,6 +31,7 @@
     let answered = false;     // 지금 문제를 끝냈는지 (다음 버튼 대기)
     let missed = [];          // 첫 시도에 틀린 문제 (학습일지 오답 보고)
     let triedWrong = false;   // 지금 문제에서 한 번이라도 틀렸는지
+    let questionTrack = null, questionTrackId = ''; // 지금 문항의 문항기록 도우미 (LearningLog.question)
     let finished = false;
     let optionOrderCache = {};
 
@@ -256,6 +257,7 @@
         passage = passages.find(p => String(p.id) === String(id));
         if (!passage) return;
         qIdx = 0;
+        questionTrackId = ''; // 같은 지문을 다시 풀면 문항기록도 새로 센다
         missed = [];
         finished = false;
         optionOrderCache = {};
@@ -295,6 +297,15 @@
         const step = { icon: q.icon || base.icon, label: q.label || base.label };
         answered = false;
         triedWrong = false;
+        // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 2차): 'r:' + 지문 ID + ':' + 문항 번호.
+        // 이야기 다시 보기를 다녀와 같은 문항을 다시 그려도 도우미를 이어 쓴다(틀린 기록 유지).
+        const trackId = `${passage.id}#${qIdx}`;
+        if (trackId !== questionTrackId) {
+            const L = window.LearningLog;
+            const itemKey = L && L.keyFor ? L.keyFor('r', passage.id, qIdx) : null;
+            questionTrack = itemKey ? L.question({ subject: '국어', key: itemKey }) : null;
+            questionTrackId = trackId;
+        }
         if (!optionOrderCache[qIdx]) {
             optionOrderCache[qIdx] = window.QuizChoices
                 ? window.QuizChoices.arrange(q.options || [])
@@ -348,6 +359,7 @@
 
         if (i === correct) {
             answered = true;
+            if (questionTrack) questionTrack.done();
             const pickedBtn = findBtn(i);
             if (pickedBtn) pickedBtn.classList.add('correct');
             btns.forEach(b => { if (Number(b.getAttribute('data-i')) !== i) b.classList.add('dim'); });
@@ -361,6 +373,7 @@
         }
 
         // 에러리스: 고른 보기는 흐리게, 정답은 노랗게 비추고 해설 (경고음·감점 없음)
+        if (questionTrack) questionTrack.wrong((q.options || [])[i]);
         if (!triedWrong) missed.push(q.question);
         triedWrong = true;
         const pickedBtn = findBtn(i);
