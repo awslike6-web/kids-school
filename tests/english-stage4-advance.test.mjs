@@ -104,3 +104,29 @@ test('4단계 문장방: 속도 조절 블록은 상단에 오고 문제 바로 
     '문제와 보기 사이에 속도 조절 블록이 끼지 않아야 한다'
   );
 });
+
+test('한글 발음 사전: 5-2 8~11단원 전체 어휘·문장 토큰이 영문 그대로 남지 않고 한글 발음으로 변환된다', () => {
+  const elements = {};
+  const el = (id) => (elements[id] ||= { id, innerHTML: '', style: {}, classList: { add() {}, remove() {} } });
+  const sandbox = {
+    console: { log() {}, info() {}, warn() {}, error: console.error },
+    localStorage: { getItem: () => null, setItem() {} },
+    document: { getElementById: el, querySelectorAll: () => [], body: {} },
+  };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(readFileSync(new URL('../kids/js/english_phonics.js', import.meta.url), 'utf8'), sandbox, { filename: 'kids/js/english_phonics.js' });
+
+  for (const unitFile of ['english_5-2_L8.json', 'english_5-2_L9.json', 'english_5-2_L10.json', 'english_5-2_L11.json']) {
+    const seed = JSON.parse(readFileSync(new URL(`../scripts/data/voca/${unitFile}`, import.meta.url), 'utf8'));
+    for (const item of seed.voca) {
+      for (const tok of item.word.trim().split(/\s+/)) {
+        const kor = sandbox.getPhonicsKorean(tok);
+        assert.ok(!/[a-zA-Z]/.test(kor), `${unitFile} [${item.word}]의 '${tok}'가 영문 그대로('${kor}') 남았습니다`);
+      }
+    }
+  }
+  assert.equal(sandbox.getPhonicsKorean('Thanks'), '땡스');
+  assert.equal(sandbox.getPhonicsKorean('restaurant?'), '레스토랑?');
+  assert.equal(sandbox.getPhonicsKorean('problem.'), '프라블럼.');
+});

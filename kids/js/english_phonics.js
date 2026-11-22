@@ -50,30 +50,53 @@
         "house": "하우스", "living": "리빙", "bathroom": "배쓰룸", "bedroom": "베드룸", "garden": "가든",
         "toilet": "토일렛", "chair": "체어", "chairs": "체어스", "kitchen": "키친", "dream": "드림",
         "tree": "트리", "trees": "트리스", "4": "포", "four": "포",
+        "basement": "베이스먼트", "bath": "배쓰", "classroom": "클래스룸", "cup": "컵", "fridge": "프리지",
+        "hairdryer": "헤어드라이어", "lamp": "램프", "mirror": "미러", "oven": "오븐", "place": "플레이스",
+        "robot": "로봇", "sink": "싱크", "sofa": "소파", "spoon": "스푼", "star": "스타", "stars": "스타즈",
+        "stove": "스토브", "table": "테이블", "toothbrush": "투쓰브러시", "tv": "티비",
+
+        // 10단원 (일과 & 시각 & 빈도) 핵심 단어
+        "breakfast": "브렉퍼스트", "lunch": "런치", "homework": "홈워크", "practice": "프랙티스", "exercise": "엑서사이즈",
+        "piano": "피아노", "get": "겟", "up": "업", "bed": "베드", "sleep": "슬립", "sleepy": "슬리피",
+        "early": "얼리", "late": "레이트", "tomorrow": "투모로우", "happy": "해피", "always": "올웨이즈",
+        "dreaming": "드리밍", "book": "북", "books": "북스", "friend": "프렌드", "friends": "프렌즈",
+        "love": "러브", "time": "타임", "6": "식스", "7": "세븐", "9": "나인",
+        "after": "애프터", "all": "올", "ball": "볼", "busy": "비지", "every": "에브리",
+        "hour": "아워", "minute": "미닛", "small": "스몰", "study": "스터디", "tall": "톨",
+        "bird": "버드", "come": "컴", "home": "홈", "outside": "아웃사이드", "owl": "아울", "rest": "레스트",
 
         // 11단원 (길 찾기 & 장소 안내) 핵심 단어
-        "library": "라이브러리", "turn": "턴", "left": "레프트", "right": "라이트",
+        "library": "라이브러리", "restaurant": "레스토랑", "flower": "플라워", "shop": "샵",
+        "turn": "턴", "left": "레프트", "right": "라이트", "big": "빅", "one": "원", "two": "투",
+        "block": "블록", "blocks": "블록스", "no": "노", "problem": "프라블럼", "lot": "랏",
         "corner": "코너", "first": "퍼스트", "second": "세컨드", "third": "써드", "floor": "플로어",
         "school": "스쿨", "park": "파크", "hospital": "하스피털", "post": "포스트", "office": "오피스",
         "bank": "뱅크", "bookstore": "북스토어", "behind": "비하인드", "front": "프런트", "excuse": "익스큐즈",
-        "station": "스테이션", "store": "스토어", "market": "마켓",
+        "station": "스테이션", "store": "스토어", "market": "마켓", "museum": "뮤지엄",
+        "bus": "버스", "stop": "스탑", "candy": "캔디", "ice": "아이스", "cream": "크림",
+        "eight": "에이트", "festival": "페스티벌", "map": "맵", "police": "폴리스", "subway": "서브웨이",
+        "tonight": "투나잇", "town": "타운", "between": "비트윈", "b": "비",
 
         // 관사 & 전치사 & 접속사
         "a": "어", "an": "앤", "the": "더",
         "in": "인", "on": "온", "at": "앳", "to": "투", "for": "포", "of": "오브", "with": "위드",
-        "next": "넥스트", "under": "언더", "by": "바이", "about": "어바웃",
+        "next": "넥스트", "under": "언더", "by": "바이", "about": "어바웃", "from": "프롬",
         "and": "앤드", "but": "벗", "so": "쏘", "because": "비코즈",
 
         // 기타 주요 초등 어휘
-        "hello": "헬로", "hi": "하이", "bye": "바이", "thanks": "땡큐", "thank": "땡크",
+        "hello": "헬로", "hi": "하이", "bye": "바이", "thanks": "땡스", "thank": "땡크",
         "please": "플리즈", "sorry": "쏘리", "help": "헬프", "like": "라이크", "liked": "라이크트",
         "have": "해브", "had": "헤드", "has": "해즈", "want": "원트", "need": "니드",
+        "know": "노우", "street": "스트리트", "sounds": "사운즈", "hiking": "하이킹", "uncle": "언클",
+        "name": "네임", "new": "뉴", "meet": "미트", "today": "투데이", "favorite": "페이버릿",
+        "sure": "슈어", "whose": "후즈", "mine": "마인", "yours": "유어즈",
         "look": "룩", "listen": "리슨", "read": "리드", "write": "라이트", "speak": "스피크",
         "night": "나이트", "nose": "노즈", "nest": "네스트", "nut": "너트", "net": "넷",
         "neck": "넥", "music": "뮤직", "moon": "문", "milk": "밀크", "melon": "멜론", "monkey": "멍키", "mouse": "마우스",
 
         // 축약형
-        "what's": "왓츠", "it's": "잇츠", "i'm": "아임", "you're": "유어", "he's": "히즈", "she's": "쉬즈",
+        "what's": "왓츠", "it's": "잇츠", "i'm": "아임", "i'll": "아일", "i'd": "아이드", "that's": "댓츠",
+        "how's": "하우즈", "you're": "유어", "he's": "히즈", "she's": "쉬즈",
         "we're": "위어", "they're": "데어", "don't": "돈트", "didn't": "디든트", "can't": "캔트", "let's": "렛츠"
     };
 
