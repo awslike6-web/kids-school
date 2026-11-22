@@ -1,9 +1,9 @@
 // kids/js/english_classcard.js
 // 🃏 영어 「클래스카드 연습」 대문 모듈 (window.EnglishClasscard)
-// - 담임 클래스카드 시험 흐름을 그대로 연습한다: 1단계 테스트(2×4 짝맞추기, 1,500점) → 2단계 매칭(카드 넘기기 6지선다·철자).
+// - 담임 클래스카드 시험 흐름을 그대로 연습한다: 1단계 매칭(2×4 짝맞추기, 1,500점) → 2단계 테스트(카드 넘기기 6지선다·철자).
 // - 실제 앱과 다른 점은 시간제한(없음·천천히·기본)과 안심 모드(감점·잠금 없음)뿐이다. 아이가 구조에 익숙해지는 것이 목적.
 // - 이 파일: 공용 도구·저장 상태·소리·보상 연결·화면 전환(로비·결과·안내창).
-//   테스트 격자는 english_classcard_grid.js(EnglishClasscard.Grid), 카드 퀴즈는 english_classcard_cards.js(EnglishClasscard.Cards).
+//   매칭 격자는 english_classcard_grid.js(EnglishClasscard.Grid), 테스트 카드 퀴즈는 english_classcard_cards.js(EnglishClasscard.Cards).
 // - 카드 묶음은 kids/subjects/english/data/classcard_<학년>_L<단원>.js(window.CLASSCARD_DECK). 명세: docs/english_spec.md §2-3.
 (function () {
     'use strict';
@@ -56,7 +56,7 @@
         unlocked: false,       // 1,500점을 한 번 넘으면 계속 열림 (실제 앱과 같음)
         preview: false,        // 부모 미리보기 잠금해제
         bookmarks: [],         // 별표 카드 id
-        passRewardDate: '',    // 테스트 통과 보상을 받은 날 (하루 한 번)
+        passRewardDate: '',    // 매칭 통과 보상을 받은 날 (하루 한 번)
         spellTyping: 'tiles',  // 2단계 철자 타이핑 비중
         keyGuide: 'stuck',     // 타이핑 자판 위치 안내 (기본: 막히면 반짝이기)
 
@@ -171,14 +171,14 @@
                 subject: '영어',
                 silent: false,
                 skipStudyLog: false,
-                errorReport: `클래스카드 ${state.deck.unit} 테스트 ${score.toLocaleString()}점 통과`
+                errorReport: `클래스카드 ${state.deck.unit} 매칭 ${score.toLocaleString()}점 통과`
             })).then(ok => {
                 if (ok === false) return;
                 state.passRewardDate = today;
                 state.save();
             }).catch(() => { /* 지급 실패: 날짜를 적지 않아 다음 통과 때 다시 시도 */ });
         },
-        // 2단계 매칭: 공통 퀴즈 보상 세션 (2문제 맞힐 때마다 1개, 완주 보너스 + 학습일지 한 번)
+        // 2단계 테스트: 공통 퀴즈 보상 세션 (2문제 맞힐 때마다 1개, 완주 보너스 + 학습일지 한 번)
         quizStart() { if (typeof window.initQuizRewardSession === 'function') window.initQuizRewardSession('classcard_match'); },
         quizCorrect(idx) { if (typeof window.rewardQuizCorrect === 'function') window.rewardQuizCorrect(idx); },
         quizEnd(isFullComplete, wrongWords) {
@@ -186,7 +186,7 @@
                 window.finalizeQuizRewardSession({
                     isFullComplete,
                     subject: '영어',
-                    errorReport: wrongWords.length ? `클래스카드 ${state.deck.unit} 매칭 오답: ${wrongWords.join(', ')}` : `클래스카드 ${state.deck.unit} 매칭 오답 없음`
+                    errorReport: wrongWords.length ? `클래스카드 ${state.deck.unit} 테스트 오답: ${wrongWords.join(', ')}` : `클래스카드 ${state.deck.unit} 테스트 오답 없음`
                 });
             }
             window.LearningLog?.flush?.();
@@ -282,9 +282,9 @@
     function goQuiz() {
         if (!state.canMatch()) {
             showModal({
-                emoji: '🔒', title: '2단계 매칭이 잠겨 있어요',
-                desc: `먼저 1단계 테스트에서 ${CONFIG.PASS_SCORE.toLocaleString()}점을 넘으면 열려요!`,
-                actions: [{ label: '1단계 테스트 하러 가기', primary: true, onClick: goTest }, { label: '닫기' }]
+                emoji: '🔒', title: '2단계 테스트가 잠겨 있어요',
+                desc: `먼저 1단계 매칭에서 ${CONFIG.PASS_SCORE.toLocaleString()}점을 넘으면 열려요!`,
+                actions: [{ label: '1단계 매칭 하러 가기', primary: true, onClick: goTest }, { label: '닫기' }]
             });
             return;
         }
@@ -293,7 +293,7 @@
         EC.Cards.start();
     }
 
-    // 결과 화면 (테스트·매칭 공용)
+    // 결과 화면 (매칭·테스트 공용)
     function showSummary({ mode, emoji, title, scoreText, subtitle, wrongItems }) {
         EC.lastMode = mode; // 「다시 하기」가 방금 한 단계로 돌아가게
         const starred = state.deck.items.filter(i => state.isBookmarked(i.id));
@@ -313,8 +313,8 @@
                 <div class="cc-summary-score">${esc(scoreText)}</div>
                 <p>${esc(subtitle)}</p>
                 <div class="cc-summary-actions">
-                    ${canStep2 ? '<button type="button" class="cc-btn cc-btn-green" data-act="quiz">2단계 매칭 하러 가기 →</button>' : ''}
-                    <button type="button" class="cc-btn ${canStep2 ? 'cc-btn-outline' : 'cc-btn-green'}" data-act="retry">${mode === 'test' ? '1단계 테스트 다시 하기' : '매칭 다시 풀기'}</button>
+                    ${canStep2 ? '<button type="button" class="cc-btn cc-btn-green" data-act="quiz">2단계 테스트 하러 가기 →</button>' : ''}
+                    <button type="button" class="cc-btn ${canStep2 ? 'cc-btn-outline' : 'cc-btn-green'}" data-act="retry">${mode === 'test' ? '1단계 매칭 다시 하기' : '테스트 다시 풀기'}</button>
                     <button type="button" class="cc-btn cc-btn-outline" data-act="home">처음 화면으로</button>
                 </div>
             </div>

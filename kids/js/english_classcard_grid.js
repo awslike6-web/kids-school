@@ -1,10 +1,10 @@
 // kids/js/english_classcard_grid.js
-// 🎯 클래스카드 연습 1단계 「테스트」: 2×4 짝맞추기 (window.EnglishClasscard.Grid)
+// 🎯 클래스카드 연습 1단계 「매칭」: 2×4 짝맞추기 (window.EnglishClasscard.Grid)
 // - 왼쪽 4칸 영어, 오른쪽 4칸 뜻. 맞힌 두 칸만 새 카드로 바뀐다.
 // - 실제 클래스카드처럼 판 위에 맞는 짝은 보통 1쌍, 가끔 2쌍뿐이다(나머지 카드는 짝이 없음). 그래도 0쌍인 판은 없다.
 //   짝 없이 오래 남은 카드는 곧 짝이 들어오게 해서 한 카드가 판에 계속 머물지 않게 한다. (2026-11-23 사용자 요청)
 // - 영어 발음은 맞혔을 때만 나온다(소리 카드는 눌러서 듣기). 카드를 누르기만 해서는 읽지 않는다.
-// - 점수: 기본 50, 2연속 80, 4연속 100, 소리 카드(실전 모드) 100. 1,500점을 넘으면 2단계 매칭이 열린다.
+// - 점수: 기본 50, 2연속 80, 4연속 100, 소리 카드(실전 모드) 100. 1,500점을 넘으면 2단계 테스트가 열린다.
 // - 시간제한: 없음(무제한)·천천히·기본 (english_classcard.js CONFIG.TIMER_SECONDS).
 // - 안심 모드: 틀려도 감점·잠금 없이 살짝 흔들고 뜻을 알려 준다. 실전 모드: -50점 + 3초 잠금(실제 앱과 같음).
 // - 판 계산(logic)은 DOM 없이 돌도록 따로 두었다: tests/english-classcard.test.mjs가 짝 수·중복·오래 남은 카드를 검사한다.
@@ -278,9 +278,9 @@
         EC.showModal({
             emoji: '🎉',
             title: `${EC.CONFIG.PASS_SCORE.toLocaleString()}점 통과!`,
-            desc: '대단해요! 이제 2단계 매칭(카드 넘기기)이 열렸어요.',
+            desc: '대단해요! 이제 2단계 테스트(카드 넘기기)가 열렸어요.',
             actions: [
-                { label: '2단계 매칭 하러 가기 →', primary: true, onClick: () => { stop(); EC.goQuiz(); } },
+                { label: '2단계 테스트 하러 가기 →', primary: true, onClick: () => { stop(); EC.goQuiz(); } },
                 { label: '계속 점수 올리기', onClick: () => { g.paused = false; } }
             ]
         });
@@ -351,7 +351,7 @@
         EC.showSummary({
             mode: 'test',
             emoji: passed ? '🏆' : timeUp ? '⏰' : '👏',
-            title: passed ? '테스트 통과!' : timeUp ? '시간이 다 됐어요. 잘했어요!' : '테스트 연습 끝!',
+            title: passed ? '매칭 통과!' : timeUp ? '시간이 다 됐어요. 잘했어요!' : '매칭 연습 끝!',
             scoreText: `${g.score.toLocaleString()}점`,
             subtitle: `맞춘 짝 ${g.matched}개 · 최고 기록 ${EC.state.bestScore.toLocaleString()}점`,
             wrongItems: Array.from(g.wrongItems.values())

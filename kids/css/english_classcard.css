@@ -96,7 +96,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .cc-fail { text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }
 .cc-fail-emoji { font-size: 42px; }
 
-/* ---------- 1단계 테스트 ---------- */
+/* ---------- 1단계 매칭 ---------- */
 .cc-test-header { padding: 10px 12px 8px; background: #232427; }
 .cc-test-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .cc-row-left, .cc-row-right { display: flex; align-items: center; gap: 8px; }
@@ -137,7 +137,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .cc-toast { position: absolute; left: 12px; right: 12px; bottom: 14px; padding: 12px 14px; border-radius: 12px; background: var(--cc-amber-soft); color: #7c4a03; font-size: 15px; text-align: center; box-shadow: 0 4px 14px rgba(0,0,0,.3); opacity: 0; transform: translateY(10px); transition: .2s; pointer-events: none; }
 .cc-toast.show { opacity: 1; transform: none; }
 
-/* ---------- 2단계 매칭 ---------- */
+/* ---------- 2단계 테스트 ---------- */
 .cc-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #232427; color: var(--cc-light); }
 .cc-top-title { font-weight: 800; }
 .cc-top-spacer { width: 38px; }

@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>클래스카드 연습 🃏 | 김s 공부방</title>
-  <link rel="stylesheet" href="../../css/english_classcard.css?v=20261123-qw">
+  <link rel="stylesheet" href="../../css/english_classcard.css?v=20261123-lbl">
   <link rel="stylesheet" href="../../css/english_qwerty.css?v=20261123-qw">
 </head>
 <body>
   <div class="cc-viewport">
     <div class="cc-shell">
 
-      <!-- 로비: 구간·시간제한·안심 모드 → 1단계 테스트 / 2단계 매칭 -->
+      <!-- 로비: 구간·시간제한·안심 모드 → 1단계 매칭 / 2단계 테스트 -->
       <section id="cc-lobby" class="cc-screen active">
         <header class="cc-lobby-header">
           <div class="cc-lobby-top">
@@ -29,7 +29,7 @@
           </div>
 
           <div class="cc-panel">
-            <div class="cc-panel-title"><span>⏱️ 1단계 테스트 시간제한</span></div>
+            <div class="cc-panel-title"><span>⏱️ 1단계 매칭 시간제한</span></div>
             <div class="cc-pills" id="cc-timer-pills">
               <button type="button" class="cc-pill" data-timer="none">없음</button>
               <button type="button" class="cc-pill" data-timer="slow">천천히 3:30</button>
@@ -80,15 +80,15 @@
 
           <button type="button" class="cc-track step1" id="cc-start-step1">
             <span class="cc-track-top"><span class="cc-step-badge">1단계 · 필수</span><span class="cc-track-go">시작하기 →</span></span>
-            <span class="cc-track-title">🎯 테스트 (2×4 짝맞추기)</span>
-            <span class="cc-track-desc">영어와 뜻의 짝을 맞춰 <strong>1,500점</strong>을 넘으면 2단계 매칭이 열려요!</span>
+            <span class="cc-track-title">🎯 매칭 (2×4 짝맞추기)</span>
+            <span class="cc-track-desc">영어와 뜻의 짝을 맞춰 <strong>1,500점</strong>을 넘으면 2단계 테스트가 열려요!</span>
             <span class="cc-progress-meta"><span>최고 점수 <strong id="cc-best-score">0점</strong></span><span id="cc-goal-status"></span></span>
             <span class="cc-progress-bg"><span class="cc-progress-fill" id="cc-progress-fill"></span></span>
           </button>
 
           <button type="button" class="cc-track step2 locked" id="cc-start-step2">
             <span class="cc-track-top"><span class="cc-step-badge" id="cc-step2-badge">2단계 · 잠김</span><span class="cc-track-go" id="cc-step2-action"></span></span>
-            <span class="cc-track-title"><span id="cc-step2-icon">🔒</span> 매칭 (카드 넘기기 6지선다·철자)</span>
+            <span class="cc-track-title"><span id="cc-step2-icon">🔒</span> 테스트 (카드 넘기기 6지선다·철자)</span>
             <span class="cc-track-desc">앞면 문제를 보고 카드를 왼쪽으로 밀어 6지선다·철자 맞추기를 풀어요.</span>
           </button>
 
@@ -102,7 +102,7 @@
         </div>
       </section>
 
-      <!-- 1단계 테스트: 2×4 짝맞추기 (EnglishClasscard.Grid) -->
+      <!-- 1단계 매칭: 2×4 짝맞추기 (EnglishClasscard.Grid) -->
       <section id="cc-test" class="cc-screen">
         <header class="cc-test-header">
           <div class="cc-test-row">
@@ -127,7 +127,7 @@
         </main>
       </section>
 
-      <!-- 2단계 매칭: 카드 넘기기 (EnglishClasscard.Cards) -->
+      <!-- 2단계 테스트: 카드 넘기기 (EnglishClasscard.Cards) -->
       <section id="cc-quiz" class="cc-screen">
         <header class="cc-top-bar">
           <button type="button" class="cc-icon-btn" id="cc-quiz-back" aria-label="뒤로">‹</button>
@@ -141,7 +141,7 @@
         </main>
       </section>
 
-      <!-- 결과 (테스트·매칭 공용) -->
+      <!-- 결과 (매칭·테스트 공용) -->
       <section id="cc-summary" class="cc-screen">
         <header class="cc-top-bar">
           <button type="button" class="cc-icon-btn" id="cc-summary-home" aria-label="처음 화면">‹</button>
@@ -175,10 +175,10 @@
 
   <!-- 2. 단원 활동 등록표 + 클래스카드 엔진 -->
   <script src="data/english_unit_activities.js?v=20261122-cc"></script>
-  <script src="../../js/english_classcard.js?v=20261123-qw"></script>
+  <script src="../../js/english_classcard.js?v=20261123-lbl"></script>
   <script src="../../js/english_qwerty.js?v=20261123-qw"></script>
-  <script src="../../js/english_classcard_grid.js?v=20261123-pair"></script>
-  <script src="../../js/english_classcard_cards.js?v=20261123-qw"></script>
+  <script src="../../js/english_classcard_grid.js?v=20261123-lbl"></script>
+  <script src="../../js/english_classcard_cards.js?v=20261123-lbl"></script>
 
   <!-- 3. 진입: ?grade=&unit= 으로 등록표의 카드 묶음(deck) 파일을 불러 시작 -->
   <script>

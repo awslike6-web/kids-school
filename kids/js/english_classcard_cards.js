@@ -1,5 +1,5 @@
 // kids/js/english_classcard_cards.js
-// 🃏 클래스카드 연습 2단계 「매칭」: 카드 넘기기 6지선다·철자 (window.EnglishClasscard.Cards)
+// 🃏 클래스카드 연습 2단계 「테스트」: 카드 넘기기 6지선다·철자 (window.EnglishClasscard.Cards)
 // - 앞면에서 문제를 보고 카드를 왼쪽으로 밀면(또는 아래 띠를 누르면) 뒷면 보기가 나온다. 한 판 10장.
 // - 유형 세 가지를 돌아가며: 뜻 보고 영어 고르기 · 소리 듣고 뜻 고르기 · 뜻 보고 철자 맞추기.
 // - 보기 순서는 문제를 열 때 한 번 window.QuizChoices.arrange로 섞고, 채점은 원래 보기 번호로 한다 (GEMINI §4-5).
@@ -155,7 +155,7 @@
         EC.showSummary({
             mode: 'quiz',
             emoji: '🌟',
-            title: '2단계 매칭 완주!',
+            title: '2단계 테스트 완주!',
             scoreText: `${c.correct} / ${c.questions.length} 한 번에 정답`,
             subtitle: '차분하게 끝까지 잘 풀었어요!',
             wrongItems: Array.from(c.wrongItems.values())
