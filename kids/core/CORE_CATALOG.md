@@ -12,7 +12,7 @@
   - `kids/core/fairy-config.js` (오디오 프리셋 맵 및 설정)
   - `kids/core/fairy-tts.js` (약 730줄, 음성 합성: Worker 실시간 음성 문장 대기열·브라우저 음성 대체·`stopFairyTTS`·녹음 음성 재생·말하기 속도·아이별 설정 읽기)
   - `kids/core/fairy-engine.js` (약 370줄, 키워드 라우터·캐릭터 목소리 고르기·`fairyPraise/Encourage/Reward/Greet`·음성 ON/OFF)
-  - `kids/core/fairy-settings-catalog.js` (캐릭터 목소리 목록 `VOICE_CATALOG`과 요정 코코 녹음 음성 목록 `FAIRY_AUDIO_PRESETS`. 모든 화면이 엔진보다 먼저 싣는다)
+  - `kids/core/fairy-settings-catalog.js` (캐릭터 목소리 목록 `VOICE_CATALOG`, 요정 코코 녹음 음성 목록 `FAIRY_AUDIO_PRESETS`, 그리고 노션 `INVENTORY_DB` `학습설정` 저장용 1,900자 나눔 함수 `chunkLearningSettingsRichText(text)` — 쓰는 곳 4곳: `fairy-settings-engine.js`, `quiz-flow-controller.js`, `haru-checkin-engine.js`, `parent_progress_controller.js`. 모든 화면이 `fairy-engine.js` 및 쓰는 모듈보다 먼저 싣는다; 단 `gugudan.html`은 인라인 `loadCoreScripts`로 화면 초기화 전에 싣고, `QuizChoices`만 쓰는 `science_season_airmass_lab.html`·`video-unit.js` 단독 로드 실험실은 저장을 호출하지 않는다)
 - **HTML 로드 방법** (순서 지킴: `fairy-tts.js`가 엔진보다 먼저. 새 파일 이름에 `fairy-engine.js` 글자를 넣지 않는다 — `loadCoreScripts`·자산 경로 찾기가 그 글자로 엔진을 찾음):
   ```html
   <script src="../core/fairy-config.js"></script>
@@ -1694,6 +1694,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **어휘 캐시 한 벌 공유 (2026-11-19)**: `tests/voca-all-cache.test.mjs`(4개). ALL 캐시를 아이별로 거르기(학생 칸 빈 행 제외), 캐시 없으면 노션 1회, 미리 불러오기가 ALL을 받는지.
 - **노션 여러 쪽 조회 정렬 (2026-11-17)**: `tests/notion-stable-sort.test.mjs`(2개). `notion-api-client.js`의 `page_size` 조회 본문마다 `sorts: STABLE_SORTS`가 있는지 본다.
 - **2026 원신초 학예발표회 안내 (2026-11-20)**: `festival.html` · `kids/data/festival_2026_data.js` · `kids/css/festival.css` · `kids/js/festival_controller.js` (`window.FestivalGuide`). `timetable.html` 상단 `#festivalGuideBtn`에서 진입하며, 민서(1·6·11·13)·민수(5·12)·10번 확인 필요 중심 1단계 요약 + 사이 무대/학교 원문 `<details>` 2단계 펼침 + 현장 진행 체크(`minmin_festival_2026_done_v1`). 시험 `tests/festival-guide.test.mjs`(3개).
+- **학습설정 저장 나눔 (2026-11-23)**: `tests/learning-settings-chunk.test.mjs`(6개: 1,900자 경계·이모지 서로게이트 쌍·100조각 상한·쓰는 곳 4곳 통합·한 조각 고정 배열 금지 및 `fairy-settings-catalog.js` 선행 로드 순서 지키기).
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).
   - **분리 시험 규칙**: `tests/*split*.test.mjs` 17개와 `lobby-tailwind-config`는 더 이상 얼린 원본(`tests/fixtures/*`)과 원문·마크업·실행 결과를 통째 대조하지 않습니다(정상 수정마다 fixture도 고쳐야 했음). 공용 도우미 `tests/split-rules.mjs`로 원본 없이 지킬 규칙만 봅니다: 파일 실존·상대 경로, 600/800줄 상한, 인라인 style·script 금지, CSS 독립 블록·`@import` 없음, 태그가 지정 순서로 한 번씩 연속·같은 `?v=`(값 자체는 자유, `assertLoadsInOrder`), HTML `on*` 속성이 부르는 함수 선언 여부(`assertInlineHandlersDeclared`, 화면이 싣는 스크립트·인라인 script·`kids/core` 기준), 공개 전역 함수 목록 유지(`assertPublicApi`, 추가 자유·이름 변경/삭제만 실패), 앞 N개 파일만 실어도 부수 효과 없음, 이벤트·타이머 등록 순서. 로비 동작 시험은 분리본 단독 + 명시 기댓값으로 남았습니다.

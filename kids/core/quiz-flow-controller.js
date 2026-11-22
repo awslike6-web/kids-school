@@ -260,18 +260,27 @@
             const payloadContent = JSON.stringify(currentSettings);
             localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, payloadContent);
 
-            // 비동기 PATCH 전송 (keepalive 지원)
+            if (typeof chunkLearningSettingsRichText !== 'function') {
+                console.warn('⚠️ [학습설정 저장 중단] 나눔 함수(chunkLearningSettingsRichText)가 로드되지 않았습니다 (로컬만 저장됨).');
+                return;
+            }
+            const richTextChunks = chunkLearningSettingsRichText(payloadContent);
+            if (!richTextChunks) return;
+
+            const requestBody = JSON.stringify({
+                properties: {
+                    "학습설정": {
+                        rich_text: richTextChunks
+                    }
+                }
+            });
+
+            // 비동기 PATCH 전송 (keepalive 64KiB 브라우저 한도 방어: 한글 3바이트 기준 20,000자 미만일 때만 keepalive)
             fetch(`${proxyUrl}/v1/pages/${pageId}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    properties: {
-                        "학습설정": {
-                            rich_text: [{ text: { content: payloadContent } }]
-                        }
-                    }
-                }),
-                keepalive: true
+                body: requestBody,
+                keepalive: requestBody.length < 20000
             }).then(res => {
                 if (res.ok) {
                     console.log(`☁️ [학습설정 클라우드 동기화 성공] ${childName}:`, currentFlows);

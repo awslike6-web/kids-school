@@ -114,6 +114,13 @@ const SettingsManager = {
             const jsonStr = JSON.stringify(currentCloud);
             localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
 
+            if (typeof chunkLearningSettingsRichText !== 'function') {
+                console.warn('⚠️ [학습설정 저장 중단] 나눔 함수(chunkLearningSettingsRichText)가 로드되지 않았습니다 (로컬만 저장됨).');
+                return;
+            }
+            const richTextChunks = chunkLearningSettingsRichText(jsonStr);
+            if (!richTextChunks) return;
+
             // 노션 PATCH 요청
             const patchRes = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
                 method: "PATCH",
@@ -121,7 +128,7 @@ const SettingsManager = {
                 body: JSON.stringify({
                     properties: {
                         "학습설정": {
-                            rich_text: [{ text: { content: jsonStr } }]
+                            rich_text: richTextChunks
                         }
                     }
                 })

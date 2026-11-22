@@ -210,3 +210,36 @@ var FAIRY_AUDIO_PRESETS = {
         welcome_math_minseo: "welcome_minseo"
     }
 };
+
+/**
+ * 5. 📦 노션 인벤토리 DB '학습설정'(rich_text) 1,900자 나눔 함수
+ * - 노션 rich_text 한 조각 한도(UTF-16 2,000 코드 유닛)를 넘지 않도록 1,900자 이하로 나눈다.
+ * - 유니코드 코드 포인트 단위로 순회하여 이모지(서로게이트 쌍)를 조각 경계에서 쪼개지 않는다.
+ * - 앞뒤를 자르지 않으며, 조각이 노션 배열 한도(100개)를 넘으면 경고 후 null을 돌려줘 저장을 막는다.
+ */
+var LEARNING_SETTINGS_CHUNK_LIMIT = 1900;
+var LEARNING_SETTINGS_MAX_CHUNKS = 100;
+
+function chunkLearningSettingsRichText(text) {
+    const str = String(text == null ? '' : text);
+    if (!str) return [{ text: { content: '' } }];
+    const parts = [];
+    let buf = '';
+    for (const ch of str) {
+        if (buf.length + ch.length > LEARNING_SETTINGS_CHUNK_LIMIT) {
+            parts.push({ text: { content: buf } });
+            buf = '';
+        }
+        buf += ch;
+    }
+    if (buf) parts.push({ text: { content: buf } });
+    if (parts.length > LEARNING_SETTINGS_MAX_CHUNKS) {
+        console.warn(`⚠️ [학습설정 저장 중단] 노션 rich_text 조각 한도(${LEARNING_SETTINGS_MAX_CHUNKS}개)를 초과했습니다 (${parts.length}개, 로컬만 저장됨).`);
+        return null;
+    }
+    return parts;
+}
+
+if (typeof window !== 'undefined') {
+    window.chunkLearningSettingsRichText = chunkLearningSettingsRichText;
+}

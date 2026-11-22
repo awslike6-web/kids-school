@@ -232,7 +232,7 @@
 | **하루 경험치** | `number` | - |
 | **하루 레벨** | `number` | - |
 | **하리보 젤리 개수** | `number` | - |
-| **학습설정** | `rich_text` | - |
+| **학습설정** | `rich_text` | 여러 조각, 읽을 때 이어 붙임 (`fairy-settings-catalog.js`의 `chunkLearningSettingsRichText`: 조각당 UTF-16 1,900자 이하·이모지 경계 보존·100조각 상한) |
 | **해금 맵** | `rich_text` | - |
 | **현재 맵** | `rich_text` | - |
 | **현재 테마** | `select` (슬라임, 마인크래프트) | - |

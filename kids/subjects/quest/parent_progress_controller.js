@@ -548,18 +548,29 @@
       const jsonStr = JSON.stringify(currentCloud);
       localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, jsonStr);
 
-      await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+      if (typeof chunkLearningSettingsRichText !== 'function') {
+        console.warn('⚠️ [학습설정 저장 중단] 나눔 함수(chunkLearningSettingsRichText)가 로드되지 않았습니다 (로컬만 저장됨).');
+        return;
+      }
+      const richTextChunks = chunkLearningSettingsRichText(jsonStr);
+      if (!richTextChunks) return;
+
+      const patchRes = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           properties: {
             "학습설정": {
-              rich_text: [{ text: { content: jsonStr } }]
+              rich_text: richTextChunks
             }
           }
         })
       });
-      console.log(`☁️ [5분 퀘스트 진도 노션 저장 성공] ${childName}:`, currentParentSettings);
+      if (patchRes.ok) {
+        console.log(`☁️ [5분 퀘스트 진도 노션 저장 성공] ${childName}:`, currentParentSettings);
+      } else {
+        console.warn(`⚠️ [5분 퀘스트 진도 노션 저장 실패] HTTP ${patchRes.status}`);
+      }
     } catch (err) {
       console.warn("⚠️ [5분 퀘스트 진도 노션 저장 통신 에러]:", err);
     }

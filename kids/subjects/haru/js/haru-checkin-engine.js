@@ -89,18 +89,29 @@
       localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childName}`, payloadStr);
 
       if (pageId) {
-        await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
+        if (typeof chunkLearningSettingsRichText !== 'function') {
+          console.warn('⚠️ [학습설정 저장 중단] 나눔 함수(chunkLearningSettingsRichText)가 로드되지 않았습니다 (로컬만 저장됨).');
+          return;
+        }
+        const richTextChunks = chunkLearningSettingsRichText(payloadStr);
+        if (!richTextChunks) return;
+
+        const patchRes = await fetch(`${proxyUrl}/v1/pages/${pageId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
           body: JSON.stringify({
             properties: {
               "학습설정": {
-                rich_text: [{ text: { content: payloadStr } }]
+                rich_text: richTextChunks
               }
             }
           })
         });
-        console.log(`☁️ [노션 저금통 코인 클라우드 저장 완료] ${childName}: ${coinsVal}코인`);
+        if (patchRes.ok) {
+          console.log(`☁️ [노션 저금통 코인 클라우드 저장 완료] ${childName}: ${coinsVal}코인`);
+        } else {
+          console.warn(`⚠️ [노션 저금통 코인 클라우드 저장 실패] HTTP ${patchRes.status}`);
+        }
       }
     } catch (err) {
       console.warn("⚠️ [노션 저금통 코인 통신 예외]:", err);
