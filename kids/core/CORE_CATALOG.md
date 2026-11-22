@@ -1228,6 +1228,13 @@ PC 책넘김(Flipbook) 모드와 모바일 웹툰(Webtoon) 모드를 모두 지�
 
 ## 4. 🤖 자동화 빌더 스크립트 도감 (Automation Scripts)
 
+### 📊 `scripts/study_usage_report.mjs` (실사용 리포트, 읽기 전용, 2026-11-23)
+노션을 **읽기만** 해서 아이별 공부 시간·빈도, 문항기록 요약(첫 시도 정답률·힌트 비율), 막힌 문항 Top N(어휘 이름·최근 오답), 수학 유형별 정답률, 3·3·3 정착(은·금·녹슨 왕관, `공통`은 따로), 저장 칸 점유율(`학습설정`·`월드기록`·`런너기록`, 60% 이상 ⚠️)을 마크다운 한 장으로 낸다.
+- **실행**: `node scripts/study_usage_report.mjs [--days 30] [--since YYYY-MM-DD] [--until YYYY-MM-DD] [--child 민수|민서] [--fast] [--save] [--top 10]` (이 PC 전체 약 23초, `--fast`는 어휘 이름·정착 생략 약 9초). `--save`는 공개 저장소 밖 관제탑 `scratch/reports/`(git 추적 밖)에 저장.
+- **같은 계산 재사용**: 공부 시간은 화면 시간 보상과 같은 `study-activity.js` `measuredMinutes`, 숙련도는 `quest-mastery.js` `parseMastery`·`levelOf`·`isRusty`. 문항기록 `decodeItems`는 시험이 앱 `LearningLog.decode`와 대조.
+- **구성**: 집계·노션 읽기·`main` `study_usage_report.mjs`, 마크다운 출력부 `study_usage_report_render.mjs`(800줄 상한으로 나눔). 노션 요청은 `/query`(POST)와 `GET /v1/pages`뿐.
+- 명세 `docs/study_usage_report_spec.md`, 시험 `tests/study-usage-report.test.mjs`(11개, 노션 미접속).
+
 ### 🌟 `scripts/build_storybook.py` (원클릭 스토리북 빌더 & 자동 배포기)
 노트북LM/Gemini 지문과 삽화 이미지를 입력받아 양면 펼침면 합성, TTS MP3, JS 데이터, HTML 뷰어 생성부터 **무결성 검증(`ai_verify`), kids-archive & kids-school 깃 푸시, 노션 타임라인 연동까지 원스톱으로 처리하는 올인원 빌더**입니다.
 - **출력 위치**: 펼침면(`{id}_story_p{N}.png`)·삽화(`{id}_ill_p{N}.jpg`)는 kids-archive `assets/storybook/{과목}/{학생}/{학년}/{단원}/`(데이터 `imgBase` CDN과 같은 경로)에 저장합니다. 공부방에는 음성 `kids/assets/audio/storybook/{id}/`, 데이터 `kids/subjects/{과목}/data/story_{id}.js`, 뷰어 `{id}_storybook.html`만 씁니다.
