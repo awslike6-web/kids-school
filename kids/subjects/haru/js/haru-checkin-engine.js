@@ -586,6 +586,7 @@
 
   // 🌐 노션 완주 마일스톤 피드 전송
   async function sendMilestoneToNotion(milestoneTitle) {
+    if (isParentPreview()) return; // 부모 검수는 노션 학습일지에 쓰지 않음
     const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const child = window.currentChild || "minseo";
@@ -623,6 +624,7 @@
 
   // 🌐 노션 학습일지 DB 자동 기록
   async function sendCheckInToNotion(habit, workout, mood) {
+    if (isParentPreview()) return;
     const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const todayStr = getTodayDateStr();

@@ -305,7 +305,13 @@ function updateCurrencyDisplay() {
   curDisplay.innerText = count + curSymbol;
 }
 
+// 부모 검수(아빠·엄마·어른)는 미리보기만 — 아이 보상·기록·노션 학습일지를 남기지 않는다 (하루방 탭 공용, 2026-11-24)
+function isHaruParentPreview() {
+  return ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName'));
+}
+
 function grantReward(amount, desc) {
+  if (isHaruParentPreview()) return;
   if (window.NotionReward && typeof window.NotionReward.grantRewardDirectly === "function") {
     window.NotionReward.grantRewardDirectly(currentChild, amount, desc);
   } else {
@@ -448,6 +454,7 @@ window.playCoinSound = playCoinSound;
 window.playSuccessSound = playSuccessSound;
 window.updateCurrencyDisplay = updateCurrencyDisplay;
 window.grantReward = grantReward;
+window.isHaruParentPreview = isHaruParentPreview;
 window.renderArtTab = renderArtTab;
 window.saveTodaySkyNote = saveTodaySkyNote;
 window.playRainSound = playRainSound;

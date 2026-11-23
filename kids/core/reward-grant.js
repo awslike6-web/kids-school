@@ -198,7 +198,11 @@
     let currentWealth = previousWealth + allowedCurrency;
 
     // 🔥 복습 과목이면 경험치 1.2배 부스트 적용
-    let finalEarnedExp = Math.round(earned * (boostInfo.expMultiplier || 1.0));
+    const expCarryKey = `MINMIN_EXP_CARRY_${userName}_${subjectName}`;
+    const storedCarry = Number(localStorage.getItem(expCarryKey));
+    const rawEarnedExp = earned * (boostInfo.expMultiplier || 1.0) + (Number.isFinite(storedCarry) && storedCarry > 0 && storedCarry < 1 ? storedCarry : 0);
+    let finalEarnedExp = Math.floor(rawEarnedExp + 1e-9);
+    const expCarry = Math.round((rawEarnedExp - finalEarnedExp) * 1000) / 1000;
     let newExp = currentExp + finalEarnedExp; // 메인 경험치는 깎이지 않고 순수하게 모두 오르게 처리
 
     const prevLevelInfo = calculateLevelInfo(currentExp);
@@ -282,6 +286,7 @@
     // 지급 확인 뒤에만 로컬 보상 누적을 반영한다. 로컬 오류 때문에 재지급하지 않는다.
     for (const apply of [
       () => localStorage.setItem(lastDateKey, todayStr),
+      () => localStorage.setItem(expCarryKey, String(expCarry)),
       () => localStorage.setItem(cumKey, String(cumulativeWealth)),
       () => {
             if (allowedCurrency > 0) {

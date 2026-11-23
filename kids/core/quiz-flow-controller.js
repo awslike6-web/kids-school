@@ -72,6 +72,20 @@
 
 (function () {
     const STORAGE_PREFIX = 'kids_quiz_flow_mode_';
+    // 아이별 키: kids_quiz_flow_mode_<민수|민서>_<과목> (2026-11-24). 예전 공용 키(kids_quiz_flow_mode_<과목>)는
+    // 누구 것인지 알 수 없어 읽지 않는다 — 아이별 값은 로비가 노션 학습설정(quizFlow)에서 다시 받아 온다.
+    const flowKey = (child, subj) => `${STORAGE_PREFIX}${child}_${subj}`;
+    const isParentSession = () => ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName'));
+    // 부모 검수 중 바꾼 템포는 이 화면에서만 (아이 값·노션에 남기지 않음)
+    const previewModes = {};
+    /** 이 기기에 받아 둔 그 아이 노션 학습설정의 quizFlow (아이별 키가 아직 없을 때 — 업데이트 직후·로비 미경유) */
+    function cachedCloudMode(child, subj) {
+        try {
+            const cloud = JSON.parse(localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${child}`) || 'null');
+            const mode = cloud && cloud.quizFlow && cloud.quizFlow[subj];
+            return mode === 'speed' || mode === 'review' ? mode : null;
+        } catch (e) { return null; }
+    }
 
     // 과목별 기본 권장 모드 ('speed' | 'review')
     const DEFAULT_FLOW_MODES = {
@@ -88,21 +102,25 @@
     /**
      * 현재 과목의 템포 모드 조회 (로컬 스토리지 우선 0초 로딩)
      */
-    function getQuizFlowMode(subject) {
+    function getQuizFlowMode(subject, child) {
         const subj = subject || window.currentSubject || '기본';
-        const saved = localStorage.getItem(STORAGE_PREFIX + subj);
+        if (!child && isParentSession() && previewModes[subj]) return previewModes[subj];
+        const who = child || activeChildName();
+        const saved = localStorage.getItem(flowKey(who, subj));
         if (saved === 'speed' || saved === 'review') return saved;
+        const cached = cachedCloudMode(who, subj);
+        if (cached) return cached;
         return DEFAULT_FLOW_MODES[subj] || 'review';
     }
 
     /**
      * 모든 과목의 현재 템포 모드 맵 조회
      */
-    function getAllQuizFlowModes() {
+    function getAllQuizFlowModes(child) {
         const subjects = ['국어', '수학', '영어', '사회', '과학'];
         const result = {};
         subjects.forEach(subj => {
-            result[subj] = getQuizFlowMode(subj);
+            result[subj] = getQuizFlowMode(subj, child);
         });
         return result;
     }
@@ -113,7 +131,12 @@
     function setQuizFlowMode(subject, mode) {
         const subj = subject || window.currentSubject || '기본';
         if (mode === 'speed' || mode === 'review') {
-            localStorage.setItem(STORAGE_PREFIX + subj, mode);
+            if (isParentSession()) {
+                previewModes[subj] = mode;
+                updateAllToggleButtons(subj, mode);
+                return;
+            }
+            localStorage.setItem(flowKey(activeChildName(), subj), mode);
             updateAllToggleButtons(subj, mode);
             console.log(`⏱️ [학습 템포 모드 변경] ${subj} ➔ ${mode === 'speed' ? '⚡ 자동 넘김' : '🔍 꼼꼼 확인'}`);
             
@@ -138,8 +161,8 @@
 
     /**
      * @param cloudRaw 노션 학습설정 칸
-     * @param {string} [childName] 이 학습설정이 누구 것인지('민수'|'민서'). 주면 그 아이 캐시에 저장하고,
-     *   지금 아이가 아니면 기기 공용 템포 키는 건드리지 않는다(아이 전환 중 늦게 온 응답이 섞이지 않게).
+     * @param {string} [childName] 이 학습설정이 누구 것인지('민수'|'민서'). 그 아이 캐시·템포 키에만 저장하고,
+     *   화면 단추는 지금 아이일 때만 다시 그린다(아이 전환 중 늦게 온 응답이 섞이지 않게).
      */
     function syncQuizFlowFromCloud(cloudRaw, childName) {
         if (!cloudRaw) return;
@@ -162,7 +185,6 @@
             // 전체 클라우드 설정 캐시 보존 (screenTime 등 타 모듈 데이터 보존)
             const childKeyName = (childName === '민수' || childName === '민서') ? childName : activeChildName();
             localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childKeyName}`, jsonText);
-            if (childKeyName !== activeChildName()) return;
 
             let parsed = rawParsed;
             // 만약 상위 설정 객체 내부에 quizFlow 키가 있는 구조라면 언랩
@@ -175,16 +197,16 @@
                 Object.keys(parsed).forEach(subj => {
                     const mode = parsed[subj];
                     if (mode === 'speed' || mode === 'review') {
-                        const localVal = localStorage.getItem(STORAGE_PREFIX + subj);
-                        // 클라우드 설정을 로컬에 동기화
+                        const localVal = localStorage.getItem(flowKey(childKeyName, subj));
+                        // 클라우드 설정을 그 아이 키에 동기화
                         if (localVal !== mode) {
-                            localStorage.setItem(STORAGE_PREFIX + subj, mode);
+                            localStorage.setItem(flowKey(childKeyName, subj), mode);
                             changed = true;
                         }
                     }
                 });
 
-                if (changed) {
+                if (changed && childKeyName === activeChildName()) {
                     console.log('☁️ [클라우드 템포 동기화 완료]', parsed);
                     const currentSubj = window.currentSubject || '국어';
                     updateAllToggleButtons(currentSubj, getQuizFlowMode(currentSubj));
@@ -235,18 +257,39 @@
                 return;
             }
 
-            // 2. 기존 설정 객체(screenTime 등) 보존하며 deep merge
+            // 2. 기존 설정 객체(screenTime 등) 보존하며 deep merge — 그 아이 캐시만 (아이 구분 없는 옛 공용 키는 쓰지 않음)
             let currentSettings = {};
             try {
-                const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || localStorage.getItem("MINMIN_QUIZ_FLOW_SETTINGS") || "{}";
+                const cachedRaw = localStorage.getItem(`MINMIN_CLOUD_SETTINGS_${childName}`) || "{}";
                 currentSettings = JSON.parse(cachedRaw);
-                if (typeof currentSettings !== 'object' || currentSettings === null) currentSettings = {};
+                if (typeof currentSettings !== 'object' || currentSettings === null || Array.isArray(currentSettings)) currentSettings = {};
             } catch (e) {
                 currentSettings = {};
             }
+            // 쓸 만한 캐시가 없으면 노션의 학습설정을 먼저 읽어 바탕으로 (없이 보내면 진도 설정·저금통 등이 지워짐)
+            if (!Object.keys(currentSettings).some(k => k !== 'updatedAt' && k !== 'quizFlow')) {
+                const pageRes = await fetch(`${proxyUrl}/v1/pages/${pageId}?force=true`, { cache: 'no-store' });
+                if (!pageRes.ok) { console.warn('⚠️ [템포 저장 보류] 기존 학습설정을 읽지 못해 덮어쓰지 않습니다 (로컬만 저장됨).'); return; }
+                const page = await pageRes.json();
+                const text = (page?.properties?.['학습설정']?.rich_text || []).map(t => t.plain_text || t.text?.content || '').join('');
+                if (text) {
+                    try {
+                        const base = JSON.parse(text);
+                        if (!base || typeof base !== 'object' || Array.isArray(base)) throw new Error('학습설정이 객체가 아님');
+                        currentSettings = base;
+                    } catch (e) { console.warn('⚠️ [템포 저장 보류] 기존 학습설정을 해석하지 못해 덮어쓰지 않습니다.'); return; }
+                }
+            }
 
-            // 현재 과목별 전체 템포 맵 직렬화
-            const currentFlows = getAllQuizFlowModes();
+            // 현재 과목별 전체 템포 맵 직렬화 — 이 기기에 그 아이 값이 없는 과목은 노션에 있던 값을 그대로 둔다
+            // (새 기기에서 노션 값을 받기 전에 한 과목만 바꿔도 나머지가 기본값으로 덮이지 않게)
+            const savedFlows = currentSettings.quizFlow && typeof currentSettings.quizFlow === 'object' ? currentSettings.quizFlow : {};
+            const currentFlows = {};
+            Object.entries(getAllQuizFlowModes(childName)).forEach(([subj, mode]) => {
+                const local = localStorage.getItem(flowKey(childName, subj));
+                const kept = savedFlows[subj];
+                currentFlows[subj] = (local === 'speed' || local === 'review') ? local : ((kept === 'speed' || kept === 'review') ? kept : mode);
+            });
             currentSettings.quizFlow = currentFlows;
             currentSettings.updatedAt = new Date().toISOString();
 

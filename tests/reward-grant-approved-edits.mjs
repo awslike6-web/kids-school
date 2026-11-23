@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-export const version = '20261101-reward-grant-shared';
+export const version = '20261124-reward-carry';
 export const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
 export const beforeReward = fs.readFileSync(new URL('./fixtures/reward-grant-shared/notion-reward.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 export const beforeLogger = fs.readFileSync(new URL('./fixtures/reward-grant-shared/notion-study-logger.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
@@ -59,7 +59,9 @@ export function extractedLogger(text) {
   text = replaceOnce(text, '//             INVENTORY_DB 보상 지급, 일일 상한선 체크, 소원권/경험치/레벨 연산', '//             보상은 공용 reward-grant.js로 위임, 기존 전역 API 유지');
   text = replaceOnce(text, '// - 골디락스 응집도: ~380줄 컴팩트 독립 모듈', '// - 학습일지·로비 경로·레벨 API와 보상 모듈 자동 로드 껍데기');
   const constants = beforeLogger.slice(beforeLogger.indexOf('    const PROXY_URL'), beforeLogger.indexOf('    // 🕒 전역 학습 시작'));
-  return replaceOnce(text, constants, '');
+  text = replaceOnce(text, constants, '');
+  // 2026-11-24 승인 변경: 학습일지 모듈 폴백 로더를 자동 로더(notion-helper.js)와 같은 버전으로 (옛 버전이 따로 한 번 더 실리지 않게)
+  return replaceOnce(text, 'study-log-store.js?v=20261024-1', 'study-log-store.js?v=20261121-learning');
 }
 
 export function sharedSource() {
@@ -106,7 +108,7 @@ export function sharedSource() {
   // 동적 로더가 load 뒤 완료되어도 저장된 보상을 한 번 재시도한다.
   if (typeof document !== 'undefined' && document.readyState === 'complete') flushQueue();
 })(typeof window !== 'undefined' ? window : this);`);
-  return rewardToastEdit('// 보상 지급·오프라인 대기열의 단일 원천. 공개 전역은 MinminRewardGrant 하나입니다.\n' + body + '\n');
+  return expCarryEdit(rewardToastEdit('// 보상 지급·오프라인 대기열의 단일 원천. 공개 전역은 MinminRewardGrant 하나입니다.\n' + body + '\n'));
 }
 
 // 2026-11-06 승인 변경: 보상 알림 alert 창을 누를 필요 없는 작은 말풍선으로 바꿈 (공부 흐름 방해 방지)
@@ -115,5 +117,19 @@ export function rewardToastEdit(text) {
   text = replaceOnce(text, "                alert(msg);", "                showRewardToast(`⏳ 오늘 ${subjectName} 보상은 다 모았어요! (${DAILY_LIMIT}/${DAILY_LIMIT})`, { tone: 'info', duration: 3000 });");
   text = replaceOnce(text, "        // 3️⃣ 기본 알림\n        else {\n            let alertMsg = `🎉 보상 획득 완료!\\n+${allowedCurrency}개 적립! (오늘 ${todayEarned + allowedCurrency}/${DAILY_LIMIT})`;\n            if (levelPropName) {\n                alertMsg += `\\n${subjectName} 레벨: Lv.${currLevelInfo.level}`;\n            } else {\n                alertMsg += `\\n용어 경험치가 상승했습니다!`;\n            }\n            alert(alertMsg);\n        }\n", "        // 3️⃣ 기본: 누를 필요 없는 작은 말풍선 (2026-11-06~, 예전에는 alert 창이라 매번 눌러 닫아야 했음)\n        else {\n            const leveledUp = levelPropName && currLevelInfo.level > prevLevelInfo.level;\n            let toastMsg = `${rewardName} +${allowedCurrency}  ·  오늘 ${todayEarned + allowedCurrency}/${DAILY_LIMIT}`;\n            if (leveledUp) toastMsg += `\\n🎉 ${subjectName} 레벨 업! Lv.${currLevelInfo.level}`;\n            else if (isLimitReached) toastMsg += `\\n오늘 모을 수 있는 만큼 다 모았어요!`;\n            showRewardToast(toastMsg, { tone: leveledUp ? 'levelup' : 'reward', duration: leveledUp ? 3600 : 2400 });\n        }\n");
   text = replaceOnce(text, "  window.MinminRewardGrant = { grant, flushQueue };", "  window.MinminRewardGrant = { grant, flushQueue, toast: showRewardToast };");
+  return text;
+}
+
+// 2026-11-24 승인 변경: 복습 1.2배 경험치를 반올림하지 않고 소수점 몫을 아이·과목별로 모아 다음 지급에 더한다
+// (반올림하면 +3은 4로 약 33%, +1·+2는 그대로라 들쭉날쭉). 몫은 노션 지급이 성공한 뒤에만 저장한다.
+export function expCarryEdit(text) {
+  text = replaceOnce(text, '    let finalEarnedExp = Math.round(earned * (boostInfo.expMultiplier || 1.0));\n',
+    '    const expCarryKey = `MINMIN_EXP_CARRY_${userName}_${subjectName}`;\n'
+    + '    const storedCarry = Number(localStorage.getItem(expCarryKey));\n'
+    + '    const rawEarnedExp = earned * (boostInfo.expMultiplier || 1.0) + (Number.isFinite(storedCarry) && storedCarry > 0 && storedCarry < 1 ? storedCarry : 0);\n'
+    + '    let finalEarnedExp = Math.floor(rawEarnedExp + 1e-9);\n'
+    + '    const expCarry = Math.round((rawEarnedExp - finalEarnedExp) * 1000) / 1000;\n');
+  text = replaceOnce(text, '      () => localStorage.setItem(lastDateKey, todayStr),\n',
+    '      () => localStorage.setItem(lastDateKey, todayStr),\n      () => localStorage.setItem(expCarryKey, String(expCarry)),\n');
   return text;
 }

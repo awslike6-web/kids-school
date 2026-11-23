@@ -140,7 +140,8 @@ for (const route of ['reward', 'logger']) {
 
   for (const daughter of [false, true]) {
     test(`${route}: ${daughter ? '민서' : '민수'} voca·부스트·소원권 성공 결과는 변경 전과 같다`, async () => {
-      const options = { route, boost: () => ({ limit: 150, expMultiplier: 1.2 }) };
+      // 경험치 배수는 2026-11-24 승인 변경(소수점 몫 이월)으로 옛 반올림과 달라지므로 이 비교는 1.0배로, 이월은 아래 시험에서 따로
+      const options = { route, boost: () => ({ limit: 150, expMultiplier: 1.0 }) };
       const before = sandbox({ ...options, old: true }), after = sandbox(options);
       before.context.fetch = (url, opts) => before.api.fetch(opts.method === 'POST' && !url.includes('?') ? url + '?force=true' : url, opts);
       for (const sb of [before, after]) {
@@ -159,6 +160,16 @@ for (const route of ['reward', 'logger']) {
       assert.equal(after.timers.length, before.timers.length + after.toasts.length);
     });
   }
+
+  test(`${route}: 복습 1.2배 경험치는 반올림 대신 소수점 몫을 다음 지급에 더한다(길게 보면 정확히 1.2배)`, async () => {
+    const sb = sandbox({ route, boost: () => ({ limit: 150, expMultiplier: 1.2 }) });
+    sb.store.setItem('MINMIN_CUMULATIVE_WEALTH_민수', '148');
+    for (let i = 0; i < 5; i++) assert.equal(await sb.grant(3, true, 'voca'), true);
+    const exps = sb.api.patches().map(p => (p.body?.properties || p.properties || p)['영어 경험치'].number);
+    // 시작 18 → +3(0.6 이월) +4(0.2) +3(0.8) +4(0.4) +4(0.0) = 18 = 3×5×1.2
+    assert.deepEqual(exps, [21, 25, 28, 32, 36]);
+    assert.equal(sb.store.getItem('MINMIN_EXP_CARRY_민수_영어'), '0');
+  });
 
   for (const mode of ['current', 'fallback', 'existing']) {
     test(`${route}: ${mode} 자동 로드는 중복 삽입 없이 기다리고 최초 호출 맥락을 보존한다`, async () => {

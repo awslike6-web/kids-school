@@ -24,16 +24,17 @@ function sandbox(st, files, extra = {}) {
 }
 const cloud = JSON.stringify({ quizFlow: { 국어: 'review' }, appSettings: { sfx_enabled: false, vacation_mode: true }, questSettings: { minseo: { korean: '2단원' } } });
 
-test('퀴즈 흐름: 응답이 다른 아이 것이면 그 아이 캐시에만, 기기 공용 템포 키는 그대로', () => {
-  const st = storage({ currentUser: 'son', currentUserName: '민수', kids_quiz_flow_mode_국어: 'speed' });
+test('퀴즈 흐름: 응답은 그 아이 캐시·그 아이 템포 키에만 (2026-11-24부터 템포 키도 아이별)', () => {
+  const st = storage({ currentUser: 'son', currentUserName: '민수', kids_quiz_flow_mode_민수_국어: 'speed' });
   const sb = sandbox(st, ['kids/core/quiz-flow-controller.js']);
   sb.syncQuizFlowFromCloud(cloud, '민서');
   assert.equal(st.getItem('MINMIN_CLOUD_SETTINGS_민서'), cloud);
   assert.equal(st.getItem('MINMIN_CLOUD_SETTINGS_민수'), null);       // 예전에는 '민수'로 저장될 수 있었음
-  assert.equal(st.getItem('kids_quiz_flow_mode_국어'), 'speed');
+  assert.equal(st.getItem('kids_quiz_flow_mode_민수_국어'), 'speed');
+  assert.equal(st.getItem('kids_quiz_flow_mode_민서_국어'), 'review');
   sb.syncQuizFlowFromCloud(cloud, '민수');
   assert.equal(st.getItem('MINMIN_CLOUD_SETTINGS_민수'), cloud);
-  assert.equal(st.getItem('kids_quiz_flow_mode_국어'), 'review');
+  assert.equal(st.getItem('kids_quiz_flow_mode_민수_국어'), 'review');
   // 아이를 안 넘기면 gemini-chat.js(getActiveChildName)가 늦게 실려도 저장값으로 판단
   const seo = storage({ currentUser: 'daughter', currentUserName: '민서' });
   sandbox(seo, ['kids/core/quiz-flow-controller.js']).syncQuizFlowFromCloud(cloud);
@@ -75,7 +76,7 @@ test('하루 체크인: 부모 검수는 미리보기만 — 아이 기록·저�
     assert.equal(rewards, 0, parent);
     assert.equal(calls.filter(([m]) => m !== 'GET').length, 0, parent);
   }
-  assert.match(read('kids/subjects/haru/haru.html'), /haru-checkin-engine\.js\?v=20261123-cards/);
+  assert.match(read('kids/subjects/haru/haru.html'), /haru-checkin-engine\.js\?v=20261124-parent/);
 });
 
 test('로비 학습일지 모듈: notion-helper 자동 로더와 같은 버전 문자열 (두 번 실리지 않게)', () => {
@@ -90,14 +91,34 @@ test('로비 학습일지 모듈: notion-helper 자동 로더와 같은 버전 �
 
 // ---------- 교차 검토(아르곤) 반영 ----------
 test('퀴즈 흐름: 로비가 아이를 바꿔도(window.currentUserName은 부팅 값 그대로) 저장값으로 지금 아이를 판단', () => {
-  const st = storage({ currentUser: 'daughter', currentChild: 'minseo', currentUserName: '민서', kids_quiz_flow_mode_국어: 'speed' });
+  const st = storage({ currentUser: 'daughter', currentChild: 'minseo', currentUserName: '민서', kids_quiz_flow_mode_민서_국어: 'speed' });
   const sb = sandbox(st, ['kids/core/quiz-flow-controller.js'], { currentUserName: '민수', getActiveChildName: () => '민수' });
-  sb.syncQuizFlowFromCloud(cloud, '민서');      // 지금 아이(민서) 응답 → 템포 반영
-  assert.equal(st.getItem('kids_quiz_flow_mode_국어'), 'review');
-  st.setItem('kids_quiz_flow_mode_국어', 'speed');
-  sb.syncQuizFlowFromCloud(cloud, '민수');      // 늦게 온 민수 응답 → 민수 캐시에만
-  assert.equal(st.getItem('kids_quiz_flow_mode_국어'), 'speed');
+  sb.syncQuizFlowFromCloud(cloud, '민서');      // 지금 아이(민서) 응답 → 민서 템포 반영
+  assert.equal(sb.getQuizFlowMode('국어'), 'review');
+  st.setItem('kids_quiz_flow_mode_민서_국어', 'speed');
+  sb.syncQuizFlowFromCloud(cloud, '민수');      // 늦게 온 민수 응답 → 민수 것에만
+  assert.equal(sb.getQuizFlowMode('국어'), 'speed');
+  assert.equal(st.getItem('kids_quiz_flow_mode_민수_국어'), 'review');
   assert.equal(st.getItem('MINMIN_CLOUD_SETTINGS_민수'), cloud);
+});
+
+test('퀴즈 템포 아이별: 한 기기에서 두 아이가 따로, 옛 공용 키는 읽지 않음, 저장도 그 아이 것만 노션으로', async () => {
+  const st = storage({ currentUser: 'son', currentUserName: '민수', kids_quiz_flow_mode_사회: 'speed', MINMIN_INVENTORY_PAGE_ID_민수: 'p-minsu',
+    MINMIN_CLOUD_SETTINGS_민수: JSON.stringify({ questSettings: { minsu: {} } }) });
+  const calls = [];
+  const sb = sandbox(st, ['kids/core/fairy-settings-catalog.js', 'kids/core/quiz-flow-controller.js'], { fetch: async (url, opts = {}) => { calls.push({ url, method: opts.method || 'GET', body: opts.body }); return { ok: true, json: async () => ({}) }; } });
+  assert.equal(sb.getQuizFlowMode('사회'), 'review');   // 옛 공용 'speed'는 누구 것인지 몰라 무시 → 기본값
+  sb.setQuizFlowMode('국어', 'review');                 // 민수
+  st.setItem('currentUser', 'daughter'); st.setItem('currentUserName', '민서');
+  assert.equal(sb.getQuizFlowMode('국어'), 'speed');    // 민서는 민수 선택을 물려받지 않음 (기본값)
+  sb.setQuizFlowMode('국어', 'speed');
+  st.setItem('currentUser', 'son'); st.setItem('currentUserName', '민수');
+  assert.equal(sb.getQuizFlowMode('국어'), 'review');
+  assert.equal(sb.getAllQuizFlowModes('민서')['국어'], 'speed');
+  await new Promise(r => setTimeout(r, 10));
+  const patch = calls.filter(c => c.method === 'PATCH').find(c => c.url.includes('p-minsu'));
+  const sent = JSON.parse(JSON.parse(patch.body).properties['학습설정'].rich_text.map(t => t.text.content).join(''));
+  assert.equal(sent.quizFlow['국어'], 'review');          // 민수 페이지엔 민수 템포
 });
 
 test('설정 동기화(같은 아이): 바탕은 그 아이 전용 키 — 공용 옛 키의 다른 아이 목소리가 섞이지 않음', () => {
@@ -182,4 +203,78 @@ test('부스트를 켜면서 드러난 것: 수학 탐험관은 과목을 수학
     assert.doesNotMatch(src, /currentCount >= 100/);
   }
   for (const file of ['kids/js/english_common.js', 'kids/js/society_common.js']) assert.doesNotMatch(read(file), /완주 보너스\(\+5💎\)와 학습일지/);
+});
+
+test('하루방 시계판·안전면허·보상: 부모 검수는 보상·기록·노션 학습일지 없음 (2026-11-24)', async () => {
+  for (const parent of ['아빠', '엄마', '어른']) {
+    const st = storage({ currentUserName: parent, currentUser: 'son' });
+    const posts = [];
+    const sb = sandbox(st, ['kids/subjects/haru/js/haru_common.js', 'kids/subjects/haru/js/haru-timeline-engine.js', 'kids/subjects/haru/js/haru-safety-quiz.js'], {
+      currentChild: 'minsu', alert: () => {}, fetch: async (url, opts = {}) => { if ((opts.method || 'GET') !== 'GET') posts.push(url); return { ok: true, json: async () => ({}) }; } });
+    assert.equal(sb.isHaruParentPreview(), true);
+    sb.grantReward(5, '시험');
+    await sb.sendTimelineToNotion?.([{ time: '07:00', title: '기상' }]);
+    await sb.sendSafetyLicenseToNotion?.();
+    await sb.sendSafetyConsultationToNotion?.({ title: 'x' });
+    assert.deepEqual(posts, [], parent);
+    assert.deepEqual([...st.map.keys()].filter(k => /^(rewardCount_|haru_)/.test(k)), [], parent);
+  }
+  // 아이는 그대로 보상
+  const kid = storage({ currentUserName: '민수', currentUser: 'son' });
+  const sb = sandbox(kid, ['kids/subjects/haru/js/haru_common.js'], { currentChild: 'minsu' });
+  assert.equal(sb.isHaruParentPreview(), false);
+  for (const [file, re] of [['kids/subjects/haru/js/haru-timeline-engine.js', /async function sendTimelineToNotion\(items\) \{\r?\n\s+if \(\(window\.isHaruParentPreview \?/],
+    ['kids/subjects/haru/js/haru-safety-quiz.js', /async function sendSafetyLicenseToNotion\(\) \{\r?\n\s+if \(\(window\.isHaruParentPreview \?/],
+    ['kids/subjects/haru/js/haru-checkin-engine.js', /async function sendCheckInToNotion\(habit, workout, mood\) \{\r?\n\s+if \(isParentPreview\(\)\) return;/]]) assert.match(read(file), re, file);
+  // 공용 파일(haru_common.js, 맨 마지막에 실림)이 없어도 부모 검수 차단이 풀리지 않는다
+  const lone = storage({ currentUserName: '아빠', currentUser: 'son' });
+  const posts = [];
+  const sb2 = sandbox(lone, ['kids/subjects/haru/js/haru-timeline-engine.js', 'kids/subjects/haru/js/haru-safety-quiz.js'], {
+    currentChild: 'minsu', fetch: async (url, opts = {}) => { if ((opts.method || 'GET') !== 'GET') posts.push(url); return { ok: true, json: async () => ({}) }; } });
+  assert.equal(sb2.isHaruParentPreview, undefined);
+  await sb2.sendTimelineToNotion([{ time: '07:00', title: '기상' }]);
+  await sb2.sendSafetyLicenseToNotion();
+  assert.deepEqual(posts, []);
+});
+
+test('퀴즈 템포: 부모 검수는 그 화면에서만(저장·노션 없음), 아이별 키가 없으면 받아 둔 노션 값, 캐시가 없으면 노션을 먼저 읽고 저장', async () => {
+  const calls = [];
+  const fetchLog = async (url, opts = {}) => {
+    calls.push({ url, method: opts.method || 'GET', body: opts.body });
+    if ((opts.method || 'GET') === 'GET') return { ok: true, json: async () => ({ properties: { '학습설정': { rich_text: [{ plain_text: JSON.stringify({ piggyBank: { coins: 7 }, quizFlow: { 과학: 'speed' } }) }] } } }) };
+    return { ok: true, json: async () => ({}) };
+  };
+  // 부모 검수
+  const pst = storage({ currentUserName: '엄마', currentUser: 'son' });
+  const psb = sandbox(pst, ['kids/core/fairy-settings-catalog.js', 'kids/core/quiz-flow-controller.js'], { fetch: fetchLog });
+  psb.setQuizFlowMode('국어', 'review');
+  assert.equal(psb.getQuizFlowMode('국어'), 'review');                 // 화면에서는 바뀜
+  assert.equal([...pst.map.keys()].filter(k => k.startsWith('kids_quiz_flow_mode_')).length, 0);  // 아이 값 그대로
+  assert.equal(calls.length, 0);
+  // 받아 둔 노션 값 먼저 (업데이트 직후·로비 미경유)
+  const cst = storage({ currentUserName: '민서', currentUser: 'daughter', MINMIN_CLOUD_SETTINGS_민서: JSON.stringify({ quizFlow: { 영어: 'review' } }) });
+  assert.equal(sandbox(cst, ['kids/core/quiz-flow-controller.js']).getQuizFlowMode('영어'), 'review');
+  // 캐시가 없으면 노션을 먼저 읽어 바탕으로 (저금통 등 보존)
+  const nst = storage({ currentUserName: '민수', currentUser: 'son', MINMIN_INVENTORY_PAGE_ID_민수: 'p1' });
+  const nsb = sandbox(nst, ['kids/core/fairy-settings-catalog.js', 'kids/core/quiz-flow-controller.js'], { fetch: fetchLog });
+  nsb.setQuizFlowMode('국어', 'review');
+  await new Promise(r => setTimeout(r, 10));
+  assert.match(calls[0].url, /\/v1\/pages\/p1\?force=true$/);
+  const patch = calls.find(c => c.method === 'PATCH');
+  const sent = JSON.parse(JSON.parse(patch.body).properties['학습설정'].rich_text.map(t => t.text.content).join(''));
+  assert.deepEqual(JSON.parse(JSON.stringify(sent.piggyBank)), { coins: 7 });
+  assert.equal(sent.quizFlow['국어'], 'review');
+  assert.equal(sent.quizFlow['과학'], 'speed');                        // 노션에 있던 값 보존
+});
+
+test('퀴즈 템포 저장: 이 기기에 값이 없는 과목은 노션에 있던 값을 지킴 (새 기기에서 한 과목만 바꿀 때)', async () => {
+  const st = storage({ currentUser: 'son', currentUserName: '민수', MINMIN_INVENTORY_PAGE_ID_민수: 'p-minsu',
+    MINMIN_CLOUD_SETTINGS_민수: JSON.stringify({ quizFlow: { 국어: 'review', 수학: 'speed' }, questSettings: { minsu: {} } }) });
+  const calls = [];
+  const sb = sandbox(st, ['kids/core/fairy-settings-catalog.js', 'kids/core/quiz-flow-controller.js'], { fetch: async (url, opts = {}) => { calls.push({ url, method: opts.method || 'GET', body: opts.body }); return { ok: true, json: async () => ({}) }; } });
+  sb.setQuizFlowMode('영어', 'review');
+  await new Promise(r => setTimeout(r, 10));
+  const patch = calls.find(c => c.method === 'PATCH');
+  const sent = JSON.parse(JSON.parse(patch.body).properties['학습설정'].rich_text.map(t => t.text.content).join(''));
+  assert.deepEqual(JSON.parse(JSON.stringify(sent.quizFlow)), { 국어: 'review', 수학: 'speed', 영어: 'review', 사회: 'review', 과학: 'review' });
 });

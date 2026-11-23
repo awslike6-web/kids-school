@@ -210,7 +210,7 @@ test('④ 통합 시험: 쓰는 곳 4곳 모두 2,500자 이상 설정을 여러
             extraStore: { MINMIN_CLOUD_SETTINGS_민수: largeCloud }
         });
         vm.runInContext(read('kids/core/quiz-flow-controller.js'), sandbox);
-        sandbox.localStorage.setItem('kids_quiz_flow_mode_과학', 'speed');
+        sandbox.localStorage.setItem('kids_quiz_flow_mode_민수_과학', 'speed'); // 2026-11-24부터 템포 키는 아이별
         await sandbox.saveQuizFlowToCloud();
         const patches = calls.filter((c) => c.method === 'PATCH');
         assert.equal(patches.length, 1);
@@ -222,7 +222,7 @@ test('④ 통합 시험: 쓰는 곳 4곳 모두 2,500자 이상 설정을 여러
         assert.equal(parsed.quizFlow['과학'], 'speed');
 
         // 읽는 곳 왕복 확인
-        sandbox.localStorage.setItem('kids_quiz_flow_mode_과학', 'review');
+        sandbox.localStorage.setItem('kids_quiz_flow_mode_민수_과학', 'review');
         sandbox.syncQuizFlowFromCloud({ rich_text: rt });
         assert.equal(sandbox.getQuizFlowMode('과학'), 'speed');
 

@@ -146,7 +146,7 @@ var grantRewardAndShowUI = (function () {
         script.addEventListener('error', failed, { once: true });
       } else {
         script.onload = done; script.onerror = failed;
-        script.src = new URL('reward-grant.js?v=20261101-reward-grant-shared', source).href;
+        script.src = new URL('reward-grant.js?v=20261124-reward-carry', source).href;
         script.async = false;
         document.head.appendChild(script);
       }

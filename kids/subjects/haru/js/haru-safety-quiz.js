@@ -209,6 +209,7 @@ function getKstTodayYMD(date = new Date()) {
       time: nowTime,
       cocoSay: guide.cocoSay
     };
+    if ((window.isHaruParentPreview ? window.isHaruParentPreview() : ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName')))) return; // 부모 검수: 안내는 보여 주되 기록·노션 학습일지는 남기지 않음
     localStorage.setItem("haru_last_safety_consultation_" + child, JSON.stringify(consultationLog));
 
     sendSafetyConsultationToNotion(guide);
@@ -252,6 +253,7 @@ function getKstTodayYMD(date = new Date()) {
   // 3. 노션 학습일지 연동
   // =========================================================
   async function sendSafetyLicenseToNotion() {
+    if ((window.isHaruParentPreview ? window.isHaruParentPreview() : ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName')))) return; // 부모 검수는 노션 학습일지에 쓰지 않음
     const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const child = window.currentChild || "minseo";
@@ -292,6 +294,7 @@ function getKstTodayYMD(date = new Date()) {
   }
 
   async function sendSafetyConsultationToNotion(guide) {
+    if ((window.isHaruParentPreview ? window.isHaruParentPreview() : ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName')))) return;
     const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const child = window.currentChild || "minseo";

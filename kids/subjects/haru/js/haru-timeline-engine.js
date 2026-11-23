@@ -678,6 +678,11 @@ function getKstTodayYMD(date = new Date()) {
       return;
     }
 
+    if ((window.isHaruParentPreview ? window.isHaruParentPreview() : ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName')))) {
+      alert("부모님 미리보기예요. 일과 완성·보상·학습일지는 저장하지 않아요. 👀");
+      return;
+    }
+
     const completedKey = getTimelineCompletedKey();
     if (localStorage.getItem(completedKey) === "true") {
       alert("이미 오늘 하루 일과를 멋지게 완성했어요! ⭐");
@@ -698,6 +703,7 @@ function getKstTodayYMD(date = new Date()) {
   }
 
   async function sendTimelineToNotion(items) {
+    if ((window.isHaruParentPreview ? window.isHaruParentPreview() : ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName')))) return; // 부모 검수는 노션 학습일지에 쓰지 않음
     const proxyUrl = typeof PROXY_URL !== "undefined" ? PROXY_URL : "https://minmin-notion.awslike6.workers.dev";
     const dbId = typeof STUDY_LOG_DB_ID !== "undefined" ? STUDY_LOG_DB_ID : "37aa27115b688001b2ffe5e6c8f82ab2";
     const todayStr = currentTimelineDate || (typeof window.getTodayDateStr === "function" ? window.getTodayDateStr() : getKstTodayYMD());
