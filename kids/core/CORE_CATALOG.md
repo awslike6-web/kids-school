@@ -472,6 +472,15 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 퀴즈 자료: `scripts/data/curriculum/math_5-2_4.json`·`_5.json`·`_6.json`(단원마다 12제, 초안 agy Hydrogen → 계산·쪽수 검토). 등록은 공식 도구 `scripts/register_curriculum.py`.
 - 검증: `tests/math-explorer-units.test.mjs`(16개: 조사, 노션 행 변환·필터, 소수 표기·0 처리·문제 생성 seed 200, 겨냥도 보임 판정, 면 관계, 헥소미노 35종 중 정육면체 전개도 11종 = 목록, 마주 보는 칸·만나는 점 대칭, 평균 자료, 모의 실험 seed 300, 퀴즈 JSON, 화면 실림 순서·상대 경로·600줄, 보상·음성 계약). 화면은 쓰기 차단 서버에서 375px·데스크톱으로 확인합니다.
 
+### 🪜 4-2 분수·소수 사다리 계산 부품 (2026-11-24, 화면은 만드는 중)
+
+4학년 2학기 「분수의 덧셈과 뺄셈」·「소수의 덧셈과 뺄셈」 탐험관(`fraction_add.html`·`decimal_add.html`, 아직 없음)이 쓸 순수 계산 모듈(DOM 없음). 설계: [`docs/math_4-2_ladder_spec.md`](../../docs/math_4-2_ladder_spec.md). 화면 없이도 5분 퀘스트 등에서 무한 문제 공급원으로 쓸 수 있다.
+
+- `kids/subjects/math/js/fraction_add-core.js` (`window.FractionCore`): 분수 `{ w, n, d }`(약분 없음). `toImproper`·`toMixed`·`equals`·`add`·`sub`(분모 다르거나 0 이하면 throw)·`needsCarry`·`needsBorrow`·`split`(자연수 1을 분모 조각으로)·`label`("2와 5분의 1", "1과 4분의 3", 자연수 "2", 진분수·가분수 "5분의 9")·`LAB_KINDS`(관 1~6 → 문제 종류 3개)·`KIND_ORDER`(13종, 쉬운 것 먼저)·`makeProblem(kind, rng)`·`wrongChoices(problem)`(오답 2개 `{ value, text, mistake }`, 오개념 이름: add-denominators·keep-improper·no-carry-normalize·whole-only·no-whole-decrement·reverse-subtract·borrow-ten·add-instead·off-by-one)·`makeRound(lab, rng)`(3문제 한 판)·`makeMixedRound(rng, n=10)`(섞어 풀기)·`randInt`.
+- `kids/subjects/math/js/decimal_add-core.js` (`window.DecimalAddCore`): `decimal_multiplication-core.js`의 `DecimalCore`를 **먼저 싣고** 그 `{ int, places }`를 불러 쓴다(곱셈 파일은 고치지 않음). `add`·`sub`(끝자리 0 유지, 음수면 throw)·`align`(자리 맞춤 + 0 채운 칸 수)·`readAloud`("영 점 삼칠", "십이 점 삼사")·`digitValue(d, place)`·`shift(d, k)`(×10^k, 끝자리 0 정리)·`LAB_KINDS`·`KIND_ORDER`(16종)·`makeProblem`·`wrongChoices`(오개념 이름: read-as-whole·drop-point·drop-zero·place-up·place-down·longer-is-larger·shorter-is-larger·equal·wrong-direction·carry-as-place·reverse-subtract·right-align·no-pad·ignore-point-add·ignore-point·off-by-one, 끝자리 0 붙은 오답은 버림)·`makeRound`·`makeMixedRound`(`shift-chain` 제외)·`randInt`.
+- 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
+- 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
+
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
 - `kids/subjects/math/math.html`(466줄, 2026-11-14 3단원 카드 2장 추가)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.
