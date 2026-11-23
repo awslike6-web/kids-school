@@ -248,3 +248,20 @@ test('분모가 3이라 분자만 바꿔서는 오답이 모자라면 자연수 
   assert.equal(texts.length, 2);
   assert.ok(!texts.includes('3분의 1'));
 });
+
+test('token: 화면용 글자 표기(분자/분모)와 오답 보기 token', () => {
+  assert.equal(F.token({ w: 2, n: 1, d: 5 }), '2와 1/5');
+  assert.equal(F.token({ w: 1, n: 3, d: 4 }), '1과 3/4');
+  assert.equal(F.token({ w: 2, n: 0, d: 5 }), '2');
+  assert.equal(F.token({ w: 0, n: 3, d: 5 }), '3/5');
+  assert.equal(F.token({ w: 0, n: 9, d: 5 }), '9/5');
+  assert.throws(() => F.token({ w: 0, n: 0, d: 5 }));
+  for (const kind of F.KIND_ORDER) {
+    const p = F.makeProblem(kind, seeded(3));
+    const ans = F.token(p.answer);
+    const toks = F.wrongChoices(p).map((c) => c.token);
+    assert.equal(toks.length, 2);
+    assert.ok(toks.every((t) => typeof t === 'string' && t !== ans));
+    assert.notEqual(toks[0], toks[1]);
+  }
+});

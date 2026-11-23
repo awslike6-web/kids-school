@@ -276,6 +276,14 @@ h1, h2, h3, .mx-title, .mx-main-title, .mx-modal-title, .mx-tab-title { font-fam
 .mx-chip.green { background: #d1fae5; color: #065f46; }
 .mx-chip.purple { background: #ede9fe; color: #5b21b6; }
 
+/* 세로 분수 (mount({ fractions: true })일 때 틀이 글자 3/5·2와 3/5를 이 모양으로 그린다) */
+.mx-frac { display: inline-flex; align-items: center; gap: 2px; vertical-align: middle; margin: 0 2px; line-height: 1.05; }
+.mx-frac-whole { font-weight: 700; font-size: 1.08em; }
+.mx-frac-stack { display: inline-flex; flex-direction: column; align-items: center; font-size: 0.86em; }
+.mx-frac-num { padding: 0 3px 1px; border-bottom: 2px solid currentColor; }
+.mx-frac-den { padding: 1px 3px 0; }
+.mx-choice .mx-frac { font-size: 1.1em; }
+
 /* 완주 모달 */
 .mx-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 23, 42, 0.52); }
 .mx-modal[hidden] { display: none; }

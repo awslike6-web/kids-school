@@ -85,6 +85,16 @@
     return f.w + josa + ' ' + f.d + '분의 ' + f.n;
   }
 
+  // 화면용 글자 표기(틀이 세로 분수로 그림): "2와 1/5", "1과 3/4", "2", "3/5" (분자/분모 순서)
+  function token(f) {
+    if (f.w === 0 && f.n === 0) throw new Error('0은 쓸 수 없습니다');
+    if (f.w > 0 && f.n === 0) return String(f.w);
+    if (f.w === 0) return f.n + '/' + f.d;
+    var last = f.w % 10;
+    var josa = (last === 2 || last === 4 || last === 5 || last === 9) ? '와' : '과';
+    return f.w + josa + ' ' + f.n + '/' + f.d;
+  }
+
   var FALLBACKS = {
     'unit-count': { op: null, a: frac(0, 3, 5), b: null },
     'add-proper': { op: '+', a: frac(0, 1, 5), b: frac(0, 2, 5) },
@@ -201,7 +211,7 @@
       var t = label(v);
       if (t === ansText || used[t]) return;
       used[t] = true;
-      out.push({ value: v, text: t, mistake: mistake });
+      out.push({ value: v, text: t, token: token(v), mistake: mistake });
     }
 
     if (kind === 'unit-count') {
@@ -302,6 +312,7 @@
     needsBorrow: needsBorrow,
     split: split,
     label: label,
+    token: token,
     makeProblem: makeProblem,
     wrongChoices: wrongChoices,
     makeRound: makeRound,

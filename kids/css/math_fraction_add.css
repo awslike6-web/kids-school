@@ -1,0 +1,253 @@
+/* 초등 4학년 분수 덧셈·뺄셈 탐험관 전용 스타일 */
+body.mx-theme-fracadd {
+  --mx-head-a: #ffedd5;
+  --mx-head-b: #fce7f3;
+  --mx-line: #fdba74;
+  --mx-strong: #9a3412;
+  --mx-sub: #be185d;
+  --mx-accent: #c2410c;
+  --mx-accent-dark: #9a3412;
+  --mx-soft: #ffedd5;
+  --mx-softer: #fff7ed;
+}
+
+.fa-area,
+.mx-drill-round {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.fa-expr {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--mx-strong);
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+.fa-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--mx-sub);
+  overflow-wrap: anywhere;
+}
+
+.fa-step-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--mx-strong);
+}
+
+.fa-mixed {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.fa-wholes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fa-whole {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 30px;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.fa-whole.fa-split-target {
+  min-height: 44px;
+  height: 44px;
+  border: 3px solid #facc15;
+  cursor: pointer;
+  animation: fa-split-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes fa-split-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.25);
+  }
+}
+
+.fa-bar {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  height: 44px;
+  gap: 2px;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.fa-cell {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: #ffffff;
+  border: 1.5px solid var(--mx-line);
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fa-cell.on {
+  background: #93c5fd;
+  border-color: #60a5fa;
+}
+
+.fa-cell.on.blue {
+  background: #60a5fa;
+  border-color: #3b82f6;
+}
+
+.fa-cell.on.green {
+  background: #4ade80;
+  border-color: #22c55e;
+}
+
+.fa-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fa-stepper .mx-btn {
+  min-height: 48px;
+  padding: 10px 16px;
+  font-size: 1.05rem;
+}
+
+.fa-stepper.done::after {
+  content: '완성!';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.fa-algo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin: 0;
+  list-style: none;
+  background: var(--mx-softer);
+  border: 1px solid var(--mx-line);
+  border-radius: 12px;
+  color: #1f2937;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  counter-reset: fa-algo-step;
+  box-sizing: border-box;
+}
+
+.fa-algo > * {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  counter-increment: fa-algo-step;
+}
+
+.fa-algo > *::before {
+  content: counter(fa-algo-step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--mx-accent);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.fa-why {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mx-drill-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fa-cell {
+    transition: none;
+  }
+
+  .fa-whole.fa-split-target {
+    animation: none;
+  }
+}
+
+/* 계단 이동 링크 (3학년 ⬇ · 5학년 ⬆) */
+.mx-ladder-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.mx-ladder-links .mx-chip { text-decoration: none; font-weight: 700; padding: 6px 12px; }
+
+/* 지운 칸: 빗금 + 점선 테두리로 "지웠다"가 보이게 */
+.fa-cell.gone {
+  background: repeating-linear-gradient(135deg, #ffffff 0 5px, #fee2e2 5px 8px);
+  border-style: dashed;
+  border-color: #fca5a5;
+}
+
+/* 이미 누른 단계 버튼·잠긴 칠하기 버튼은 흐리게 */
+.fa-area .mx-btn:disabled,
+.mx-drill-round .mx-btn:disabled:not(.mx-choice) {
+  opacity: 0.45;
+  cursor: default;
+  filter: grayscale(0.4);
+}

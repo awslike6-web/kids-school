@@ -115,16 +115,82 @@
     return String(word) + (b ? pair[0] : pair[1]);
   }
 
-  function makeUi(say, praise, encourage) {
+  // 세로 분수 글자 표기 계약 (5분 퀘스트 formatFractions와 같은 꼴): 대분수 "2와 3/5"·"1과 3/4", 진분수·가분수 "3/5"
+  var FRAC_RE = /(\d+)([와과]) (\d+)\/(\d+)|(\d+)\/(\d+)/g;
+
+  // 글자 → [{ type: 'text', s } | { type: 'frac', w, n, d }] (w는 대분수일 때만)
+  function fracParts(text) {
+    var s = String(text === undefined || text === null ? '' : text);
+    var out = [];
+    var last = 0;
+    var m;
+    FRAC_RE.lastIndex = 0;
+    while ((m = FRAC_RE.exec(s)) !== null) {
+      if (m.index > last) out.push({ type: 'text', s: s.slice(last, m.index) });
+      if (m[1] !== undefined) out.push({ type: 'frac', w: m[1], j: m[2], n: m[3], d: m[4] });
+      else out.push({ type: 'frac', w: '', n: m[5], d: m[6] });
+      last = FRAC_RE.lastIndex;
+    }
+    if (last < s.length) out.push({ type: 'text', s: s.slice(last) });
+    return out;
+  }
+
+  // 분수 표기 뒤 조사: 분수는 분자를 마지막에 읽으므로("5분의 3") 분자에 맞춘다. "3/5"+을 → "3/5을", "2/5"+을 → "2/5를"
+  function josaFrac(text, type) {
+    var s = String(text);
+    var m = /(\d+)\/\d+\s*$/.exec(s);
+    var spoken = m ? m[1] : s;
+    return s + josa(spoken, type).slice(String(spoken).length);
+  }
+
+  // 음성용: "2와 3/5" → "2와 5분의 3", "3/5" → "5분의 3"
+  function fracSpeech(text) {
+    return String(text === undefined || text === null ? '' : text).replace(FRAC_RE, function (all, w, j, n1, d1, n2, d2) {
+      return w !== undefined ? w + j + ' ' + d1 + '분의 ' + n1 : d2 + '분의 ' + n2;
+    });
+  }
+
+  // 세로 분수 요소 (분자 위·가로선·분모 아래, 대분수는 자연수와 붙임). innerHTML 없이 DOM으로 만든다.
+  function fracNode(p) {
+    var wrap = el('span', p.w ? 'mx-frac mx-frac-mixed' : 'mx-frac');
+    wrap.setAttribute('aria-label', fracSpeech(p.w ? p.w + (p.j || '와') + ' ' + p.n + '/' + p.d : p.n + '/' + p.d));
+    if (p.w) wrap.appendChild(el('span', 'mx-frac-whole', p.w));
+    var stack = el('span', 'mx-frac-stack');
+    stack.appendChild(el('span', 'mx-frac-num', p.n));
+    stack.appendChild(el('span', 'mx-frac-den', p.d));
+    wrap.appendChild(stack);
+    return wrap;
+  }
+
+  // 노드 글자 채우기: 세로 분수가 켜져 있으면 분수 표기만 세로 분수 요소로, 나머지는 글자 그대로
+  function fillText(node, text, fractions) {
+    if (!fractions) {
+      node.textContent = text === undefined || text === null ? '' : String(text);
+      return node;
+    }
+    node.replaceChildren();
+    fracParts(text).forEach(function (p) {
+      node.appendChild(p.type === 'frac' ? fracNode(p) : document.createTextNode(p.s));
+    });
+    return node;
+  }
+
+  // opts.fractions: true면 질문·보기·힌트·해설·개념 카드·안내의 분수 표기를 세로 분수로 그린다
+  function makeUi(say, praise, encourage, opts) {
+    var fractions = Boolean(opts && opts.fractions);
+    function textEl(tag, cls, text) {
+      return fillText(el(tag, cls), text, fractions);
+    }
+
     function button(text, cls, onClick) {
-      var b = el('button', cls || 'mx-btn', text);
+      var b = textEl('button', cls || 'mx-btn', text);
       b.type = 'button';
       if (typeof onClick === 'function') b.addEventListener('click', onClick);
       return b;
     }
 
     function hint(hintEl, text) {
-      hintEl.textContent = text || '';
+      fillText(hintEl, text || '', fractions);
       hintEl.hidden = !text;
     }
 
@@ -133,7 +199,7 @@
     //         explain, onSolved, column, sayQuestion, onWrong(고른 글자) — 문항기록용, 선택 }
     function choiceQuestion(opts) {
       var box = el('div', 'mx-choice-box');
-      if (opts.question) box.appendChild(el('p', 'mx-question', opts.question));
+      if (opts.question) box.appendChild(textEl('p', 'mx-question', opts.question));
       var row = el('div', opts.column ? 'mx-choice-row mx-choice-col' : 'mx-choice-row');
       var hintEl = el('div', 'mx-hint');
       hintEl.hidden = true;
@@ -208,17 +274,21 @@
         return card;
       },
       guide: function (text) {
-        return el('p', 'mx-guide', text);
+        return textEl('p', 'mx-guide', text);
       },
       concept: function (title, body) {
         var card = el('div', 'mx-card mx-concept');
         var head = el('div', 'mx-concept-head');
-        head.appendChild(el('div', 'mx-title', title));
+        head.appendChild(textEl('div', 'mx-title', title));
         head.appendChild(button('🔊 들어 보기', 'mx-btn', function () { say(body); }));
         card.appendChild(head);
-        card.appendChild(el('p', 'mx-concept-body', body));
+        card.appendChild(textEl('p', 'mx-concept-body', body));
         return card;
       },
+      // 아무 노드에나 분수 표기를 세로 분수로 채운다 (단원 화면용)
+      fill: function (node, text) { return fillText(node, text, fractions); },
+      fracNode: function (text) { return fillText(el('span', 'mx-frac-line'), text, true); },
+      fractions: fractions,
       doneBadge: function (text) {
         return el('div', 'mx-done', '✅ ' + (text || '이 관을 마쳤어요!'));
       },
@@ -314,11 +384,13 @@
     }
 
     function makeCtx(tabIdx) {
-      var say = function (text) { safeCall('speakFairyTTS', text); };
+      var fractions = Boolean(cfg.fractions);
+      // 세로 분수를 켠 화면은 "3/5"를 "5분의 3"으로 바꿔 읽는다
+      var say = function (text) { safeCall('speakFairyTTS', fractions ? fracSpeech(text) : text); };
       var praise = function () { safeCall('fairyPraise'); };
       var encourage = function () { safeCall('fairyEncourage'); };
       return {
-        ui: makeUi(say, praise, encourage),
+        ui: makeUi(say, praise, encourage, { fractions: fractions }),
         say: say,
         praise: praise,
         encourage: encourage,
@@ -384,6 +456,9 @@
     shuffle: shuffle,
     randInt: randInt,
     josa: josa,
-    hasBatchim: hasBatchim
+    hasBatchim: hasBatchim,
+    fracParts: fracParts,
+    fracSpeech: fracSpeech,
+    josaFrac: josaFrac
   };
 })(typeof window !== 'undefined' ? window : globalThis);

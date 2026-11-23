@@ -325,3 +325,13 @@ test('보상·음성 계약: 공용 틀만 보석을 주고, 단원 파일은 sp
     }
   }
 });
+
+test('공용 틀: 세로 분수 글자 표기 나누기와 음성 바꾸기 (4-2 사다리, 2026-11-24)', () => {
+  const parts = plain(M.fracParts('2와 3/5 + 1과 4/5 = 4와 2/5, 3/5 남음'));
+  assert.deepEqual(parts.filter((p) => p.type === 'frac').map((p) => [p.w, p.n, p.d]), [['2', '3', '5'], ['1', '4', '5'], ['4', '2', '5'], ['', '3', '5']]);
+  assert.equal(parts.filter((p) => p.type === 'text').map((p) => p.s).join('|'), ' + | = |, | 남음');
+  assert.equal(M.fracSpeech('3/5 + 1과 4/5'), '5분의 3 + 1과 5분의 4');
+  assert.equal(M.fracSpeech('1/10배'), '10분의 1배');
+  assert.equal(M.fracSpeech('분수 없음 0.37'), '분수 없음 0.37');
+  assert.deepEqual(plain(M.fracParts('0.4 kg')), [{ type: 'text', s: '0.4 kg' }]);
+});
