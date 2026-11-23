@@ -1690,7 +1690,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **AI 대화 기억 저장 (2026-11-16)**: `tests/chat-memory.test.mjs`(6개). 위 「`chat-memory.js`」. `voca-common-split`의 이벤트 기대값에서 옛 `beforeunload` 저장을 뺐다. 이 파일까지 전체 754개.
 - **가족 우체통 (2026-11-16)**: `tests/family-mail.test.mjs`(13개)·`tests/family-mail-page.test.mjs`(7개). 위 「📮 가족 우체통」 절.
 - **단원 영상 부품 (2026-11-16)**: `tests/video-unit.test.mjs`(15개). 위 「🎬 `video-unit.js`」 절.
-- **문항 단위 학습 기록 (2026-11-21, 2차 2026-11-22)**: `tests/learning-log.test.mjs`(18개, 합치기·조각·대기열·보내기·재전송 중복 없음·칸 없음·해석 실패), `tests/quest-lesson.test.mjs` 레슨→`LearningLog` 연결 1개, `tests/notion-reward-split.test.mjs` 공용 로더가 세 모듈(측정·학습일지·문항기록)을 순서대로 싣는지.
+- **문항 단위 학습 기록 (2026-11-21, 2차 2026-11-22, 4차 2026-11-23)**: `tests/learning-log.test.mjs`(21개, 합치기·조각·대기열·보내기·재전송 중복 없음·칸 없음·해석 실패), `tests/learning-log-math.test.mjs`(10개, CPA 덧셈·뺄셈·시계·규칙·100까지 수·입체도형 퀴즈/공방·힌트/넘기기/두 바퀴째/지연 로드/실제 `keyFor`), `tests/quest-lesson.test.mjs` 레슨→`LearningLog` 연결 1개, `tests/notion-reward-split.test.mjs` 공용 로더가 세 모듈(측정·학습일지·문항기록)을 순서대로 싣는지.
 - **어휘 캐시 한 벌 공유 (2026-11-19)**: `tests/voca-all-cache.test.mjs`(4개). ALL 캐시를 아이별로 거르기(학생 칸 빈 행 제외), 캐시 없으면 노션 1회, 미리 불러오기가 ALL을 받는지.
 - **노션 여러 쪽 조회 정렬 (2026-11-17)**: `tests/notion-stable-sort.test.mjs`(2개). `notion-api-client.js`의 `page_size` 조회 본문마다 `sorts: STABLE_SORTS`가 있는지 본다.
 - **2026 원신초 학예발표회 안내 (2026-11-20)**: `festival.html` · `kids/data/festival_2026_data.js` · `kids/css/festival.css` · `kids/js/festival_controller.js` (`window.FestivalGuide`). `timetable.html` 상단 `#festivalGuideBtn`에서 진입하며, 민서(1·6·11·13)·민수(5·12)·10번 확인 필요 중심 1단계 요약 + 사이 무대/학교 원문 `<details>` 2단계 펼침 + 현장 진행 체크(`minmin_festival_2026_done_v1`). 시험 `tests/festival-guide.test.mjs`(3개).

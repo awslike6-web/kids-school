@@ -155,19 +155,37 @@
   }
   function initQuiz(subtract) {
     let correct = 0, solved = false, questionNumber = 0;
+    let track = null, keyBody = null;
+    function ensureTrack() {
+      if (track === false) return null;
+      if (track) return track;
+      const L = window.LearningLog;
+      const key = L && L.keyFor && keyBody ? L.keyFor('g', keyBody) : null;
+      track = L && L.question && key ? L.question({ subject: '수학', key }) : false;
+      return track || null;
+    }
     function render() {
+      if (track) track.skip();
+      track = null; keyBody = null;
       solved = false; const a = random(2,9), b = random(1,9), type = questionNumber++ % 2;
       if (subtract) {
         const start = type === 0 ? 10 : 10 + random(1, b - 1 || 1);
         correct = start - b; $('quiz-question').textContent = `${start} − ${b} = □`;
-      } else if (type === 0) {correct = 10 - a; $('quiz-question').textContent = `${a} + □ = 10`;}
-      else {correct = a + b; $('quiz-question').textContent = `${a} + ${b} = □`;}
+        keyBody = type === 0 ? 'cpa-sub-10' : ((start % 10) < b ? 'cpa-sub-teen-borrow' : 'cpa-sub-teen');
+      } else if (type === 0) {
+        correct = 10 - a; $('quiz-question').textContent = `${a} + □ = 10`;
+        keyBody = 'cpa-make10';
+      } else {
+        correct = a + b; $('quiz-question').textContent = `${a} + ${b} = □`;
+        keyBody = a + b >= 10 ? 'cpa-add-1x1-carry' : 'cpa-add-1x1';
+      }
       const values = new Set([correct]); while (values.size < 4) values.add(random(Math.max(0, correct - 3), correct + 3));
       $('quiz-feedback').textContent = '';
       $('quiz-choices').replaceChildren(...window.MathQuizEngine.shuffleArray([...values]).map(v => button(String(v), () => {
         if (solved) return;
-        if (v === correct) {solved = true; $('quiz-feedback').textContent = '맞았어요! 구슬과 식을 잘 연결했어요.'; praise(); window.grantRewardAndShowUI?.(1, false, 'math');}
-        else {$('quiz-feedback').textContent = '구슬판에서 10을 먼저 살펴보고 다시 골라 봐요.'; hint();}
+        const t = ensureTrack();
+        if (v === correct) {solved = true; t?.done(); $('quiz-feedback').textContent = '맞았어요! 구슬과 식을 잘 연결했어요.'; praise(); window.grantRewardAndShowUI?.(1, false, 'math');}
+        else {t?.wrong(String(v)); $('quiz-feedback').textContent = '구슬판에서 10을 먼저 살펴보고 다시 골라 봐요.'; hint();}
       })));
     }
     $('quiz-next').onclick = render; window.nextQuiz = render; render();

@@ -20,6 +20,15 @@
   let total = 630, quiz = false, answered = false, drag = null;
   let beads = [], family = 'fruit', numberStep = 2, numberStart = 2, numberAnswer = 10;
   let patternSolved = false, numberSolved = false;
+  // 📒 문항 단위 학습 기록 (docs/learning_record_spec.md §5 4차): 지연 생성 + 미로드 시 false 잠금
+  let clockTrack = null, clockKeyBody = null;
+  let patternTrack = null, patternKeyBody = null;
+  let numberTrack = null, numberKeyBody = null;
+  function openGenTrack(keyBody) {
+    const L = window.LearningLog;
+    const key = L && L.keyFor && keyBody ? L.keyFor('g', keyBody) : null;
+    return L && L.question && key ? L.question({ subject: '수학', key }) : false;
+  }
   const palettes = {fruit: ['🍓','🍌','🍇'], color: ['🔴','🔵','🟡'], shape: ['△','□','○']};
   const say = text => window.speakFairyTTS?.(text);
   const button = (text, fn) => {
@@ -67,22 +76,34 @@
   }
   [-30,-1,1,30].forEach(n => $('clock-controls').append(button(`${n > 0 ? '+' : ''}${n}분`, () => move(n))));
   $('clock-read').onclick = () => say($('clock-digital-display').textContent + '. ' + $('clock-rule-desc').textContent);
-  $('clock-explore').onclick = () => {quiz = false; answered = false; $('clock-choices').replaceChildren(); $('clock-feedback').textContent = ''; renderClock();};
+  $('clock-explore').onclick = () => {
+    if (clockTrack) clockTrack.skip();
+    clockTrack = null; clockKeyBody = null;
+    quiz = false; answered = false; $('clock-choices').replaceChildren(); $('clock-feedback').textContent = ''; renderClock();
+  };
   $('clock-quiz').onclick = () => {
+    if (clockTrack) clockTrack.skip();
+    clockTrack = null; clockKeyBody = null;
     quiz = true; answered = false; total = Math.floor(Math.random() * 24) * 30;
     const t = timeParts(total), choices = [[t.hour,t.minute], [t.hour % 12 + 1,t.minute], [t.hour,t.minute === 0 ? 30 : 0]];
+    clockKeyBody = `clock-${t.hour}-${t.minute === 0 ? '00' : '30'}`;
     $('clock-feedback').textContent = ''; $('clock-choices').replaceChildren();
     // 공통 엔진의 셔플만 사용하고 활동별 정답 가드를 유지한다.
-    window.MathQuizEngine.shuffleArray(choices).forEach(([h,m]) => $('clock-choices').append(button(`${h}시 ${m ? '30분' : '정각'}`, () => {
-      if (answered) return;
-      if (h === t.hour && m === t.minute) {
-        answered = true; renderClock(); $('clock-feedback').textContent = '잘 읽었어요! 다음 시계에도 도전해 봐요.'; window.fairyPraise?.();
-      } else {
-        $('hour-zone').hidden = false;
-        $('clock-feedback').textContent = `짧은바늘이 지나온 ${t.hour}부터 살펴봐요. 긴바늘이 6이면 30분이에요.`;
-        window.fairyEncourage?.();
-      }
-    })));
+    window.MathQuizEngine.shuffleArray(choices).forEach(([h,m]) => {
+      const label = `${h}시 ${m ? '30분' : '정각'}`;
+      $('clock-choices').append(button(label, () => {
+        if (answered) return;
+        if (clockTrack === null) clockTrack = openGenTrack(clockKeyBody);
+        if (h === t.hour && m === t.minute) {
+          answered = true; if (clockTrack) clockTrack.done(); renderClock(); $('clock-feedback').textContent = '잘 읽었어요! 다음 시계에도 도전해 봐요.'; window.fairyPraise?.();
+        } else {
+          if (clockTrack) clockTrack.wrong(label);
+          $('hour-zone').hidden = false;
+          $('clock-feedback').textContent = `짧은바늘이 지나온 ${t.hour}부터 살펴봐요. 긴바늘이 6이면 30분이에요.`;
+          window.fairyEncourage?.();
+        }
+      }));
+    });
     renderClock();
   };
   function renderBeads() {
@@ -119,36 +140,45 @@
   $('bead-next').onclick = () => {const r = findRepeat(beads); if (r && beads.length < 24) {beads.push(r.next); renderBeads();}};
   $('bead-read').onclick = () => say($('bead-feedback').textContent);
   function patternRound() {
+    if (patternTrack) patternTrack.skip();
+    patternTrack = null; patternKeyBody = null;
     patternSolved = false;
     const palette = palettes[Object.keys(palettes)[Math.floor(Math.random()*3)]];
     const size = 2 + Math.floor(Math.random()*2);
     const unit = Array.from({length:size},(_,i)=>palette[i % palette.length]);
     if (Math.random()<.5 && size===3) unit[2]=unit[1];
+    patternKeyBody = unit.length === 2 ? 'pattern-ab' : (unit[2] === unit[1] ? 'pattern-abb' : 'pattern-abc');
     const visible = Array.from({length:size*2-1},(_,i)=>unit[i%size]);
     const correct = unit[(size*2-1)%size];
     $('pattern-display').textContent = visible.join(' · ')+' · ❓';
     $('pattern-feedback').textContent = '';
     $('pattern-choices').replaceChildren(...window.MathQuizEngine.shuffleArray([...palette,'⭐']).map(value=>button(value,()=>{
       if(patternSolved)return;
-      if(value===correct){patternSolved=true;$('pattern-feedback').textContent=`맞았어요! ${unit.join(' · ')}가 반복돼요.`;window.fairyPraise?.();}
-      else{$('pattern-feedback').textContent=`첫 마디 ${unit.join(' · ')}와 다음 마디를 나란히 비교해 봐요.`;window.fairyEncourage?.();}
+      if (patternTrack === null) patternTrack = openGenTrack(patternKeyBody);
+      if(value===correct){patternSolved=true;if(patternTrack)patternTrack.done();$('pattern-feedback').textContent=`맞았어요! ${unit.join(' · ')}가 반복돼요.`;window.fairyPraise?.();}
+      else{if(patternTrack)patternTrack.wrong(String(value));$('pattern-feedback').textContent=`첫 마디 ${unit.join(' · ')}와 다음 마디를 나란히 비교해 봐요.`;window.fairyEncourage?.();}
     })));
   }
   $('pattern-next').onclick = patternRound;
   function numberRound() {
+    if (numberTrack) numberTrack.skip();
+    numberTrack = null; numberKeyBody = null;
     numberSolved = false;
     numberStep = Number($('number-step').value); numberStart = numberStep;
     numberAnswer = numberStart + numberStep * 4;
+    numberKeyBody = `skipcount-${numberStep}`;
     $('number-sequence').textContent = Array.from({length:4}, (_,i) => numberStart + i * numberStep).join(' → ') + ' → ?';
     $('number-feedback').textContent = `${numberStep}씩 커져요. 빛나는 칸 다음을 눌러 봐요.`;
     $('number-grid').replaceChildren();
     for (let n = 1; n <= 100; n++) {
       const b = button(n, () => {
         if (numberSolved) return;
+        if (numberTrack === null) numberTrack = openGenTrack(numberKeyBody);
         if (n === numberAnswer) {
           numberSolved = true;
+          if (numberTrack) numberTrack.done();
           b.classList.add('marked'); $('number-feedback').textContent = `${numberAnswer}! ${numberStep}씩 커지는 규칙이에요.`; window.fairyPraise?.();
-        } else { $('number-feedback').textContent = `${numberAnswer - numberStep}에서 ${numberStep}칸 더 가 봐요.`; window.fairyEncourage?.(); }
+        } else { if (numberTrack) numberTrack.wrong(String(n)); $('number-feedback').textContent = `${numberAnswer - numberStep}에서 ${numberStep}칸 더 가 봐요.`; window.fairyEncourage?.(); }
       });
       if (n >= numberStart && n < numberAnswer && (n - numberStart) % numberStep === 0) b.classList.add('marked');
       $('number-grid').append(b);

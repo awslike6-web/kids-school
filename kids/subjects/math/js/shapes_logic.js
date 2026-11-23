@@ -25,6 +25,20 @@
     ======================================================== */
     let wsTheme = 'robot';
     let wsStep = 0; // 0, 1, 2
+    let wsSession = {};
+    let wsTrackBlocked = false;
+    const WS_PART_LABELS = { box: '상자 모양', cylinder: '둥근기둥 모양', sphere: '공 모양' };
+
+    function workshopTrack() {
+      if (wsTrackBlocked) return null;
+      const L = window.LearningLog;
+      const cfg = WS_CONFIG[wsTheme];
+      if (!L || !L.itemTracker || !L.keyFor || !cfg || wsStep >= cfg.steps.length) {
+        if (cfg && wsStep < cfg.steps.length) wsTrackBlocked = true;
+        return null;
+      }
+      return L.itemTracker({ subject: '수학', list: cfg.steps, idx: wsStep, session: wsSession, key: L.keyFor('s', `shape-ws-${wsTheme}`, wsStep) });
+    }
 
     const WS_CONFIG = {
       robot: {
@@ -54,6 +68,9 @@
     };
 
     function selectWorkshopTheme(theme) {
+      if (window.LearningLog?.itemSkip) window.LearningLog.itemSkip(wsSession, wsStep);
+      wsSession = {};
+      wsTrackBlocked = false;
       wsTheme = theme;
       wsStep = 0;
       document.querySelectorAll('#lab-4 .shape-selector-btn').forEach(b => b.classList.remove('active'));
@@ -65,6 +82,9 @@
     }
 
     function resetWorkshopCurrent() {
+      if (window.LearningLog?.itemSkip) window.LearningLog.itemSkip(wsSession, wsStep);
+      wsSession = {};
+      wsTrackBlocked = false;
       wsStep = 0;
       renderWorkshopSVG();
       const fb = document.getElementById('lab4-feedback-box');
@@ -269,9 +289,12 @@
       const stepInfo = cfg.steps[wsStep];
       const fb = document.getElementById('lab4-feedback-box');
       const clickedBtn = document.getElementById('btn-ws-part-' + choice);
+      const track = workshopTrack();
 
       if (choice === stepInfo.correct) {
+        if (track) track.done();
         wsStep++;
+        wsTrackBlocked = false;
         renderWorkshopSVG();
 
         if (wsStep < 3) {
@@ -285,6 +308,7 @@
           triggerConfetti();
         }
       } else {
+        if (track) track.wrong(WS_PART_LABELS[choice] || String(choice));
         if (clickedBtn) {
           clickedBtn.classList.add('ws-shake');
           setTimeout(() => clickedBtn.classList.remove('ws-shake'), 450);
@@ -311,9 +335,20 @@
     ];
     let sqIdx = 0;
     let sqSolved = false;
+    let sqSession = {};
+    let sqTrackBlocked = false;
+
+    function shapeQuizTrack() {
+      if (sqTrackBlocked) return null;
+      const L = window.LearningLog;
+      if (!L || !L.itemTracker || !L.keyFor) { sqTrackBlocked = true; return null; }
+      const idx = sqIdx % SHAPE_QUIZ.length;
+      return L.itemTracker({ subject: '수학', list: SHAPE_QUIZ, idx, session: sqSession, key: L.keyFor('s', 'shape-quiz', idx) });
+    }
 
     function renderShapeQuiz() {
       sqSolved = false;
+      sqTrackBlocked = false;
       const q = SHAPE_QUIZ[sqIdx % SHAPE_QUIZ.length];
       document.getElementById('item-emoji').textContent = q.emoji;
       document.getElementById('item-name').textContent = q.name;
@@ -334,21 +369,27 @@
 
     function checkShapeAns(selected, correct) {
       if (sqSolved) return;
+      const track = shapeQuizTrack();
       const fb = document.getElementById('shape-quiz-feedback');
       if (selected === correct) {
         sqSolved = true;
+        if (track) track.done();
         fb.innerHTML = `<span style="color:#10b981;">🎉 정답! [${correct}] 맞았어요! 참 잘했어요!</span>`;
         if (typeof fairyPraise === 'function') fairyPraise();
         if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
         triggerConfetti();
       } else {
+        if (track) track.wrong(selected);
         fb.innerHTML = `<span style="color:#92400e;">💡 [${correct}]의 평평한 면과 둥근 면을 떠올리고 다시 골라 봐요.</span>`;
         if (typeof fairyEncourage === 'function') fairyEncourage();
       }
     }
 
     function nextShapeQuiz() {
+      const L = window.LearningLog;
+      if (L && L.itemSkip) L.itemSkip(sqSession, sqIdx % SHAPE_QUIZ.length);
       sqIdx++;
+      if (sqIdx % SHAPE_QUIZ.length === 0) sqSession = {};
       renderShapeQuiz();
     }
 

@@ -95,6 +95,7 @@
 | **1차 (이번)** | 5분 퀘스트 레슨 `quest-lesson-ui.js` `onDone` | `v:` | `result.results`의 각 `{id, firstTry}` + 힌트. 측정 행의 절반 이상. **렌더러(`quest-ui-renderer.js`)가 `state.hinted`를 기록해 `onDone`에 `hinted`로 넘기도록 한 줄 더한다**(지금은 힌트를 보여 주기만 함). **고른 오답(`wrongPicks`)은 문항 ID가 하나일 때만 붙인다** — 짝짓기처럼 여러 어휘가 묶인 문항은 오답이 어느 어휘 것인지 몰라 ID별 `firstTry`만 쓴다 |
 | **2차 (2026-11-22)** | 정밀 독해 `reading_engine.js`(객관식·단답형), 민서 미니 독해 `korean_mini_reading.js`, 사회 자료분석 `society_chart.js`, 과학 실험 퀴즈 `science_lab.js` | `r:`·`c:` | 아래 2차 규칙 |
 | **3차 (2026-11-22)** | 과목방 어휘 퀴즈(영어 `english_common.js`·국어 `korean_common.js`·`korean_dictation.js`·사회 `society_voca.js`·과학 `science_voca.js`), 과학 안전수칙·탐구 보고서·단원 영상 퀴즈, 수학 세로셈·구구단·탐험관 퀴즈 | `v:`·`c:`·`s:`·`g:` | 아래 3차 규칙. 공용 정답 처리 `rewardQuizCorrect(idx)`는 맞힐 때만 불려 첫 시도를 알 수 없음 → 화면마다 도우미 |
+| **4차 (2026-11-23)** | 수학 1학년 화면 4곳: CPA 덧셈·뺄셈(`arithmetic_cpa.js`), 시계와 규칙(`clock_rules_logic.js`), 100까지의 수(`number100.html`), 입체도형(`shapes_logic.js`) | `g:`·`s:` | 아래 4차 규칙. 10개 활동 연결. 제외: 조작·탐색(CPA 구슬판·기차, 시계 탐색·팔찌, 100까지 수 묶음·100칸·짝홀 바구니·기억 카드, 도형 뷰어·물리·도장·꾸미기) + CPA 짝꿍 풍선(퀴즈 탭 `cpa-make10`과 유형 중복 놀이)·그림 문장제(4칸 식 입력이라 단일 오답 추출 부적합) |
 
 - 화면을 붙일 때 규칙: 문항이 열릴 때 `LearningLog.question({ subject, key: LearningLog.keyFor(...) })`, 틀릴 때 `wrong(고른 글자)`, 힌트를 보면 `hint()`, 문항이 끝나면 `done()`. 재시도(같은 문항 다시 고르기)는 같은 시도로 친다(첫 시도 결과 + 고른 오답 모음). **같은 문항을 다시 그려도**(힌트 토글, 이야기 다시 보기) 도우미를 이어 쓴다 — 「지문 ID#문항 번호」·「page_id#순서」가 같으면 새로 만들지 않는다. 같은 지문을 처음부터 다시 풀면 새로 센다.
 - **2차 세부**
@@ -108,6 +109,11 @@
   - 영어 클래스카드 연습 2단계 테스트(2026-11-22): `s:cc-<학년>-<단원>:<카드 id>`(예 `s:cc-5-2-L11:18`). 카드 묶음 파일의 id는 바꾸지 않으므로 문항 순서 문제가 없다. 틀리면 고른 보기·놓은 조각을 `wrong`(⌨️ 타이핑은 처음 세 번의 오타 키, 띄어쓰기는 `␣`), 블럭 힌트·자판 💡 힌트는 `hint`, 맞히거나 실전 모드에서 틀려 끝나면 `done`. 1단계 매칭(짝맞추기)은 놀이라 기록하지 않는다. `docs/english_spec.md` §2-3.
   - 단원 영상 퀴즈: `c:<page_id>`(영상확인 행). 부품이 과목을 모르므로 `window.currentSubject`가 있을 때만 기록.
   - **`g:` 생성형 수학(3차)**: 문제 하나하나가 아니라 **유형**을 키로 한다. 세로셈 `g:vm-<add|sub|mul|div>-<A자릿수>x<B자릿수>[-carry|-borrow|-rem]`(덧셈은 받아올림, 뺄셈은 받아내림, 나눗셈은 나머지가 있을 때 꼬리표), 구구단 `g:gugu-<단>x<곱하는 수>`(81개로 유한해 사실 하나하나를 키로 한다). 수학 탐험관 노션 퀴즈는 `c:<page_id>`(공용 객관식 부품 `choiceQuestion`에 선택 콜백 `onWrong(고른 글자)` 추가).
+- **4차 세부 (수학 1학년 화면 4곳, 2026-11-23)**
+  - **문항키 10종**: CPA `g:cpa-make10` · `g:cpa-add-1x1` / `g:cpa-add-1x1-carry`(합 10 이상) · `g:cpa-sub-10` · `g:cpa-sub-teen` / `g:cpa-sub-teen-borrow`(`(start % 10) < b`로 판정, `b=1`이면 받아내림 없음), 시계·규칙 `g:clock-<시>-<00|30>`(24개) · `g:pattern-<ab|abc|abb>`(`unit` 모양) · `g:skipcount-<step>`, 100까지 수 `g:n100-compare-<diff-tens|same-tens|equal>`, 입체도형 `s:shape-quiz:<0..9>` · `s:shape-ws-<테마>:<0..2>`(오답은 `'상자 모양'`·`'둥근기둥 모양'`·`'공 모양'`).
+  - **넘기기·회차**: 새 문제로 넘기거나 시계 탐색(`#clock-explore`)·공방 테마 전환/재조립 시 현재 문항에 `skip()`/`itemSkip()`을 호출한다(틀린 적 있으면 「틀린 채 끝남」, 안 건드렸으면 기록 없음). `SHAPE_QUIZ`는 한 바퀴(`sqIdx % 10 === 0`)마다 새 `session`을 열고, 공방도 테마 전환·재조립마다 새 `session`을 연다.
+  - **힌트 구분**: 100까지 수의 「① 십의 자리 보기」「② 일의 자리 보기」 버튼을 **정답을 맞히기 전에 아이가 직접 누른 경우**(`showCompareStep(step, true)`)만 `hint()`로 센다. 오답 뒤 자동으로 열리는 `showCompareStep(1)`과 시계 퀴즈 오답 뒤 자동으로 열리는 `hour-zone`은 힌트로 세지 않는다.
+  - **지연 로드 잠금**: `notion-helper.js`가 `learning-log.js`를 동적 삽입하므로 초기 렌더 시점에는 키만 두고 첫 상호작용 때 도우미를 만든다. 첫 상호작용 시점에도 `window.LearningLog`가 아직 없으면 그 문항은 잠가서(기록 건너뜀), 오답 뒤 `LearningLog`가 늦게 붙었을 때 거짓 「첫 시도 성공」이 남지 않게 막는다(다음 문항부터 정상 기록).
 
 ## 6. 시험 (`tests/learning-log.test.mjs`, 노션 미접속)
 
@@ -117,6 +123,7 @@
 4. `flush` (모의 fetch): 칸 없음 → **행도 만들지 않고** 대기열 유지, 칸 있음 → `문항기록` 한 칸만 PATCH(다른 속성 없음, `keepalive` 없음), 실패 → 같은 배치 재전송 시 중복 없음, 보내는 중 들어온 `attempt`는 성공 뒤에도 `pending`에 남음, 행 없음 → `first` 시각으로 일지 행 생성 후 PATCH, `decode` null → PATCH 안 함, 5번 연속 실패 → 그 열람에서 멈춤.
 5. 퀘스트 레슨 연결: `onDone` 결과가 `attempt`로 넘어가는지(가짜 DOM), 여러 ID 문항에는 오답 글자를 붙이지 않는지, 힌트를 보면 `hinted`가 넘어오는지.
 6. `notion-contract.test.mjs`: `문항기록` 전송 속성이 도감과 같은지.
+7. 화면 연결 시험: `tests/learning-log-screens.test.mjs`(2차 독해·사회·과학), `tests/learning-log-rooms.test.mjs`(3차 과목방·과학·세로셈·탐험관), `tests/learning-log-math.test.mjs`(4차 CPA·시계/규칙·100까지 수·입체도형, 실제 `keyFor` 검증 포함).
 - 기존 시험(퀘스트 마스터리 성질 시험, 학습일지 성질 시험, 분리 규칙)이 그대로 통과.
 
 ## 7. 합격 기준
@@ -174,5 +181,19 @@
 - **브라우저 확인 중 찾은 것**: 영어방 실제 레코드(단원 바 캐시 566개)는 `pageId` 없이 `id`만 있어 기록이 0건이 될 뻔함 → page_id 모양의 `id`를 쓰도록 고침(시험 21). 시험은 `pageId`만 넣어 이 경우를 못 잡았음.
 - **시험**: `learning-log.test.mjs` 21개, `learning-log-rooms.test.mjs` 11개(영어·국어·사회·과학 어휘, 안전수칙, 보고서 재진입·빈칸, 세로셈 키, 탐험관 부품), 화면 시험·객관식 시험 그대로 통과.
 - **실제 브라우저(쓰기 차단 서버)**: 세로셈 2자리+2자리 `14+32`에 47 → 46 → `g:vm-add-2x2 = [1,1,0,["47"]]`. 영어방에서 실제 영어 어휘 Korea 틀림→맞힘 → `v:37ca…7575 = [1,1,0,["wrong-try"]]`, 답 없이 건너뛴 Canada는 기록 없음.
-- **알려진 한계**: 같은 목록 객체 안에서 같은 번호를 처음부터 다시 풀면 두 번째는 기록 안 됨(과목방은 미션마다 새 목록). 과학 실험실 개별 화면(16개)은 노션 파사드를 싣지 않아 단원 영상 퀴즈 기록은 용어사전방에서만. 정적 자료(`s:`)는 자료 순서가 바뀌면 키가 다른 문항을 가리킬 수 있음. 도형·수 감각(100까지 수)·CPA 연산·시계 등 나머지 수학 화면은 아직 연결 안 함.
+- **알려진 한계**: 같은 목록 객체 안에서 같은 번호를 처음부터 다시 풀면 두 번째는 기록 안 됨(과목방은 미션마다 새 목록, 도형 퀴즈는 한 바퀴마다 새 `session`). 과학 실험실 개별 화면(16개)은 노션 파사드를 싣지 않아 단원 영상 퀴즈 기록은 용어사전방에서만. 정적 자료(`s:`)는 자료 순서가 바뀌면 키가 다른 문항을 가리킬 수 있음. 4차(§9-4)로 도형·100까지 수·CPA·시계 퀴즈 연결을 마쳤으며, 조작·탐색 활동 및 CPA 짝꿍 풍선·그림 문장제는 §5 4차 행의 이유로 연결하지 않음.
+
+### 9-4. 4차 구현 (2026-11-23, 안티그래비티 네온 하이 주도 · Claude Opus 하이 교차 검토)
+- **고친 파일**: `kids/subjects/math/js/arithmetic_cpa.js`(CPA 퀴즈 4종), `kids/subjects/math/js/clock_rules_logic.js`(시계·반복 무늬·뛰어 세기), `kids/subjects/math/number100.html`(두 수 크기 비교 + 버튼 `onclick` 2곳), `kids/subjects/math/js/shapes_logic.js`(모양 분류 퀴즈·조립 공방). 새 공용 부품 없음.
+- **교차 검토 (Opus effort: high)**:
+  - 설계 검토: 지적 4 · 실제 3 · 반영 3 (`ensureCompareTrack` 정의 명시, 지연 로드 중 거짓 첫 시도 성공 차단 잠금, `number100.html` HTML `onclick` 원문 실행 시험, 100까지 수 힌트 범위는 사용자 확정 A안 적용).
+  - 변경(diff) 검토: 화면 코드 4곳 결함 0건. 지적 6 · 실제 5 · 반영 6 (지연 로드 잠금 시험을 4개 화면 전체로 확대, 실제 `learning-log.js` `keyFor`로 4차 키 10종 검증 추가, 제외 활동 사유 정정, 4차 세부 규칙·§9-4 결과 기록·§6 시험 목록·`CORE_CATALOG.md` 시험 개수 21개 정정).
+- **시험**: `tests/learning-log-math.test.mjs` 10개 통과(옛 코드 되돌림 시 8개 실패·1개 미존재 안전 통과·1개 실제 `keyFor` 통과), `scripts/ci_local.py` 전체 통과, `verify_contracts.py --mode git-diff` `[ALL PASS]`.
+- **실제 브라우저(쓰기 차단 서버 포트 8767, Playwright Chrome, 민서 프로필, 예외 0건)**:
+  - CPA 덧셈: `g:cpa-make10 = [1,1,0,["0"]]`, `g:cpa-add-1x1 = [1,0,0,[]]`
+  - CPA 뺄셈: `g:cpa-sub-10 = [1,1,0,["2"]]`, `g:cpa-sub-teen-borrow = [1,0,0,[]]`
+  - 시계와 규칙: `g:clock-11-00 = [1,1,0,["12시 정각"]]`, `g:clock-1-00 = [1,0,0,[]]`, `g:pattern-ab = [2,1,0,["○"]]`, `g:skipcount-2 = [1,1,0,["9"]]`, `g:skipcount-5 = [1,0,0,[]]`
+  - 100까지의 수: `g:n100-compare-diff-tens = [2,1,1,["<"]]` (오답 자동 ① 힌트 0 + 버튼 ① 직접 클릭 힌트 1)
+  - 입체도형: `s:shape-ws-robot:0 = [1,1,0,["둥근기둥 모양"]]`, `s:shape-ws-robot:1 = [1,0,0,[]]`, `s:shape-quiz:0 = [1,1,0,["둥근기둥 모양"]]`, `s:shape-quiz:1 = [1,0,0,[]]`
+  - 노션 쓰기 요청(`POST/PATCH /v1/pages`) 차단 확인 후 `MINMIN_LEARNING_LOG_V1`·`currentUser` 원상 복구.
 - **다음**: 실사용 리포트가 이 칸을 읽도록, 루틴 라인 「오늘의 길」.
