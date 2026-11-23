@@ -284,6 +284,70 @@ h1, h2, h3, .mx-title, .mx-main-title, .mx-modal-title, .mx-tab-title { font-fam
 .mx-frac-den { padding: 1px 3px 0; }
 .mx-choice .mx-frac { font-size: 1.1em; }
 
+/* 4-2 사다리 공용: 식 한 줄 · 1-2-3 계산 순서 카드 · 왜 그럴까 (MathDrill.expr/algo/why) */
+.mx-expr {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--mx-strong);
+  padding: 6px 8px;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+.mx-algo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  margin: 0;
+  list-style: none;
+  background: var(--mx-softer);
+  border: 1px solid var(--mx-line);
+  border-radius: 12px;
+  color: #1f2937;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  counter-reset: mx-algo-step;
+  box-sizing: border-box;
+}
+
+.mx-algo > * {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  counter-increment: mx-algo-step;
+}
+
+.mx-algo > *::before {
+  content: counter(mx-algo-step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--mx-accent);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.mx-why {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 계단 이동 링크 (3학년 ⬇ · 5학년 ⬆) */
+.mx-ladder-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.mx-ladder-links .mx-chip { text-decoration: none; font-weight: 700; padding: 6px 12px; }
+
 /* 완주 모달 */
 .mx-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 23, 42, 0.52); }
 .mx-modal[hidden] { display: none; }

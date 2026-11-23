@@ -68,12 +68,22 @@
     var choices = [o.answer];
     var i;
     for (i = 0; i < o.wrongs.length; i += 1) choices.push(o.wrongs[i].token);
+    // o.order: 순서가 뜻을 가지는 보기(> < =)는 이 순서로 고정해 보여 준다
+    var fixed = Array.isArray(o.order);
+    if (fixed) choices = o.order.slice();
+    var answerIdx = fixed ? choices.indexOf(o.answer) : 0;
+    function wrongOf(idx) {
+      var text = choices[idx];
+      for (var j = 0; j < o.wrongs.length; j += 1) if (o.wrongs[j].token === text) return o.wrongs[j];
+      return null;
+    }
     var box = ui.choiceQuestion({
       question: o.question,
       choices: choices,
-      answer: 0,
+      answer: answerIdx,
+      fixed: fixed,
       hint: function (wrongIdx) {
-        var w = o.wrongs[wrongIdx - 1];
+        var w = wrongOf(wrongIdx);
         return (w && o.hints && o.hints[w.mistake]) || o.hint || '반짝이는 보기를 다시 살펴볼까요?';
       },
       explain: o.explain,
@@ -173,6 +183,44 @@
     runRound(ctx.isDone() ? true : false);
   }
 
+  // 1-2-3 계산 순서 카드 (번호 동그라미는 CSS가 그림)
+  function algo(ui, steps) {
+    var box = ui.el('div', 'mx-algo');
+    var i;
+    for (i = 0; i < steps.length; i++) {
+      var row = ui.el('div', 'mx-algo-row');
+      var txt = ui.el('span', 'mx-algo-txt');
+      ui.fill(txt, steps[i]);
+      row.appendChild(txt);
+      box.appendChild(row);
+    }
+    return box;
+  }
+
+  // 접힌 [왜 그럴까?] 토글 카드
+  function why(ui, title, body) {
+    var wrap = ui.el('div', 'mx-why');
+    var card = ui.concept(title, body);
+    var opened = false;
+    var btn = ui.button('💡 왜 그럴까?', 'mx-btn mx-why-btn', function () {
+      opened = !opened;
+      if (opened) {
+        wrap.appendChild(card);
+      } else if (card.parentNode === wrap) {
+        wrap.removeChild(card);
+      }
+    });
+    wrap.appendChild(btn);
+    return wrap;
+  }
+
+  // 식 한 줄 표시
+  function expr(ui, text) {
+    var node = ui.el('div', 'mx-expr');
+    ui.fill(node, text);
+    return node;
+  }
+
   global.MathLadder = { attach: attachLadder };
-  global.MathDrill = { track: track, ask: ask, counter: counter, rounds: rounds };
+  global.MathDrill = { track: track, ask: ask, counter: counter, rounds: rounds, algo: algo, why: why, expr: expr };
 })(typeof window !== 'undefined' ? window : globalThis);

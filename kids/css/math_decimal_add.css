@@ -1,0 +1,343 @@
+/* 초등 4학년 소수 덧셈·뺄셈 학습 화면 스타일 */
+
+body.mx-theme-decadd {
+  --mx-head-a: #e0f2fe;
+  --mx-head-b: #ede9fe;
+  --mx-line: #93c5fd;
+  --mx-strong: #1e3a8a;
+  --mx-sub: #5b21b6;
+  --mx-accent: #1d4ed8;
+  --mx-accent-dark: #1e3a8a;
+  --mx-soft: #e0f2fe;
+  --mx-softer: #f5f3ff;
+}
+
+.da-area {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  color: #0f172a;
+}
+
+.da-area *,
+.da-area *::before,
+.da-area *::after {
+  box-sizing: border-box;
+}
+
+.da-area .mx-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 10x10 백 모눈 */
+.da-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 1px;
+  width: min(100%, 280px);
+  margin: 8px auto;
+  padding: 2px;
+  background: var(--mx-line);
+  border-radius: 8px;
+}
+
+.da-grid.da-mini {
+  width: min(100%, 140px);
+  margin: 0;
+}
+
+.da-cell {
+  aspect-ratio: 1;
+  background: #ffffff;
+  border: 1px solid var(--mx-line);
+  border-radius: 2px;
+  transition: background-color 0.12s ease;
+}
+
+.da-cell.on {
+  background: #60a5fa;
+  border-color: #2563eb;
+}
+
+/* 조절 버튼 줄 */
+.da-stepper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.da-stepper .mx-btn {
+  min-height: 48px;
+}
+
+/* 자릿값 띠 */
+.da-strip {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--mx-strong);
+  max-width: 100%;
+  margin: 8px auto;
+}
+
+.da-digit {
+  min-width: 32px;
+  height: 44px;
+  padding: 0 6px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid var(--mx-line);
+  border-radius: 8px;
+  color: #0f172a;
+}
+
+.da-digit.hl {
+  background: #fef08a;
+  border: 3px solid #facc15;
+}
+
+.da-point {
+  width: 14px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 900;
+  color: var(--mx-strong);
+}
+
+/* 수직선 */
+.da-line {
+  position: relative;
+  height: 56px;
+  margin: 12px 14px;
+}
+
+.da-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 20px;
+  height: 3px;
+  background: var(--mx-strong);
+  border-radius: 2px;
+}
+
+.da-tick {
+  position: absolute;
+  top: 14px;
+  width: 2px;
+  height: 14px;
+  background: var(--mx-strong);
+  transform: translateX(-50%);
+}
+
+.da-tick-label {
+  position: absolute;
+  top: 32px;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--mx-strong);
+  white-space: nowrap;
+}
+
+.da-dot {
+  position: absolute;
+  top: 14px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid #ffffff;
+  transform: translateX(-50%);
+}
+
+/* 세로셈 칸판 */
+.da-col {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  margin: 10px auto;
+  max-width: 100%;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.da-col .row-line {
+  grid-column: 1 / -1;
+  height: 3px;
+  background: var(--mx-strong);
+  border-radius: 2px;
+  margin: 2px 0;
+}
+
+.da-col .cell {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid var(--mx-line);
+  border-radius: 8px;
+  color: #0f172a;
+}
+
+.da-col .cell.pad {
+  background: #fef9c3;
+}
+
+.da-col .cell.hl {
+  border: 3px solid #facc15;
+}
+
+.da-col .cell.point {
+  width: 18px;
+  border: none;
+  background: transparent;
+  color: var(--mx-strong);
+}
+
+.da-col .carry {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.da-col .borrow {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.da-col .struck {
+  text-decoration: line-through;
+  text-decoration-color: #ef4444;
+  opacity: 0.6;
+}
+
+/* 작은 세로셈 비교 그림 */
+.da-mini-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.da-mini-col {
+  background: #ffffff;
+  border: 1.5px solid var(--mx-line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: #0f172a;
+  white-space: pre;
+  text-align: right;
+  max-width: 100%;
+}
+
+.da-label {
+  display: block;
+  margin-bottom: 4px;
+  font-family: sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--mx-strong);
+  text-align: center;
+}
+
+/* 크기 비교 및 줄 세우기 */
+.da-compare-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.da-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--mx-strong);
+}
+
+.da-chain {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.da-chain .mx-chip {
+  font-size: 1.1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .da-cell {
+    transition: none;
+  }
+}
+
+/* ===== 화면 코드가 실제로 쓰는 클래스 (초안 CSS와 이름을 맞춤, 2026-11-24) ===== */
+.da-hidden { display: none !important; }
+.da-ask-host, .da-step, .da-nl, .da-mover, .da-cmp-board { display: flex; flex-direction: column; gap: 10px; align-items: stretch; margin-top: 8px; }
+.da-mover-strip { display: flex; justify-content: center; }
+.da-cmp-row { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.da-tick-lbl { position: absolute; top: 22px; transform: translateX(-50%); font-size: 0.8rem; color: #334155; white-space: nowrap; }
+
+/* 줄 세우기 그림(가·나·다) */
+.da-mini-lbl { font-weight: 700; text-align: center; color: var(--mx-strong); margin-bottom: 4px; }
+.da-mini-row { font-family: ui-monospace, Consolas, monospace; white-space: pre; font-size: 1.05rem; line-height: 1.4; }
+.da-mini-bar { border-top: 2px solid #334155; margin-top: 2px; }
+
+/* 세로셈 칸판: 칸 44px, 소수점 칸 18px, 부호 칸 28px */
+.da-col { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
+.da-col-grid { display: inline-flex; flex-direction: column; gap: 4px; padding: 8px 10px; background: #ffffff; border: 1.5px solid var(--mx-line); border-radius: 14px; }
+.da-col-row { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.da-col-cell { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;
+  border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; color: #0f172a; box-sizing: border-box; }
+.da-col-cell.da-col-sign { width: 28px; border: none; background: transparent; color: var(--mx-strong); }
+.da-col-pt { width: 18px; height: 44px; display: inline-flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; font-size: 1.6rem; font-weight: 800; line-height: 1; box-sizing: border-box; }
+.da-col-marks .da-col-pt { height: 20px; padding: 0; }
+.da-col-mark { width: 44px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #dc2626; }
+.da-col-marks .da-col-sign { height: 20px; }
+.da-col-bar { height: 3px; background: #334155; border-radius: 2px; margin: 2px 0 2px 32px; }
+.da-col-ans .da-col-cell { background: var(--mx-softer); }
+.da-col-cell.da-col-hl { border: 3px solid #facc15; background: #fefce8; }
+.da-col-mark.da-col-hl { color: #b45309; }
+.da-col-cell.da-pad-wait { border: 3px dashed #f59e0b; background: #fef9c3; color: #b45309; }
+.da-col-ctrl { width: 100%; }
+
+@media (max-width: 380px) {
+  .da-col-cell { width: 40px; height: 40px; font-size: 1.25rem; }
+  .da-col-mark { width: 40px; }
+  .da-col-pt { height: 40px; }
+}

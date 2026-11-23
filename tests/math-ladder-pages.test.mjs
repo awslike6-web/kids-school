@@ -10,6 +10,10 @@ const PAGES = [
   {
     page: 'fraction_add', css: 'math_fraction_add', key: 'fracadd', grade: '4-2', unit: '1. 분수의 덧셈과 뺄셈', total: 7,
     js: ['math_explorer-shell', 'math_explorer-quiz', 'math_explorer-ladder', 'fraction_add-core', 'fraction_add-labs-a', 'fraction_add-labs-b']
+  },
+  {
+    page: 'decimal_add', css: 'math_decimal_add', key: 'decadd', grade: '4-2', unit: '3. 소수의 덧셈과 뺄셈', total: 7,
+    js: ['math_explorer-shell', 'math_explorer-quiz', 'math_explorer-ladder', 'decimal_multiplication-core', 'decimal_add-core', 'decimal_add-draw', 'decimal_add-labs-a', 'decimal_add-labs-b']
   }
 ];
 
@@ -91,4 +95,38 @@ test('공용 더 풀기 부품: 학습일지 키는 g:frac4-<종류>, 학습일�
   vm.runInContext(read(`${JS}math_explorer-ladder.js`), bare);
   const t = bare.window.MathDrill.track('frac4', 'unit-count');
   assert.doesNotThrow(() => { t.wrong('3/5'); t.done(); });
+});
+
+test('4-2 사다리 퀴즈 자료: 12제·3지선다·단원 원문·세로 분수 글자 표기 계약·보기 번호 표현 없음', () => {
+  const sandbox = { window: {} };
+  vm.createContext(sandbox);
+  vm.runInContext(read(`${JS}math_explorer-shell.js`), sandbox);
+  const M = sandbox.window.MathExplorer;
+  for (const u of PAGES) {
+    const file = u.page === 'fraction_add' ? 'math_4-2_1' : 'math_4-2_3';
+    const d = JSON.parse(read(`scripts/data/curriculum/${file}.json`));
+    assert.equal(d.subject, '수학');
+    assert.equal(d.grade, u.grade);
+    assert.equal(d.unit, u.unit, '화면 퀴즈 탭 단원 원문과 같음');
+    assert.equal(d.items.length, 12);
+    const answers = new Set();
+    d.items.forEach((it, i) => {
+      assert.equal(it.title.slice(0, 3), `Q${String(i + 1).padStart(2, '0')}`);
+      assert.equal(it.zone, '탐구퀴즈');
+      assert.equal(it.choices.length, 3);
+      assert.equal(new Set(it.choices).size, 3, `${it.title}: 보기 중복`);
+      assert.ok([1, 2, 3].includes(it.answer), it.title);
+      answers.add(it.answer);
+      const all = [it.question, ...it.choices, it.explanation].join(' ');
+      assert.doesNotMatch(all, /\d분의 \d/, `${it.title}: 글자 분수`);
+      assert.doesNotMatch(all, /\d[과와]\d/, `${it.title}: 대분수 띄어쓰기`);
+      assert.doesNotMatch(it.explanation, /\d번은|보기 \d|[①②③④]/, `${it.title}: 보기 번호 표현`);
+      assert.match(it.usage, /^4-2 [13]단원 · /);
+      // 대분수 조사: 자연수 끝 숫자 받침에 맞음 (2와·3과)
+      for (const p of M.fracParts(all).filter((x) => x.type === 'frac' && x.w)) {
+        assert.equal(M.josaFrac(p.w, 'gwa').slice(p.w.length), p.j, `${it.title}: ${p.w}${p.j}`);
+      }
+    });
+    assert.equal(answers.size, 3, '정답 번호가 한쪽에 몰리지 않음');
+  }
 });

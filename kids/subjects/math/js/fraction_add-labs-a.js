@@ -144,42 +144,10 @@
   }
 
   // 1-2-3 계산 순서 카드
-  function algo(ui, steps) {
-    var box = ui.el('div', 'fa-algo');
-    var i;
-    for (i = 0; i < steps.length; i++) {
-      var row = ui.el('div', 'fa-algo-row');
-      var txt = ui.el('span', 'fa-algo-txt');
-      ui.fill(txt, steps[i]);
-      row.appendChild(txt);
-      box.appendChild(row);
-    }
-    return box;
-  }
-
-  // 접힌 [왜 그럴까?] 토글 카드
-  function why(ui, title, body) {
-    var wrap = ui.el('div', 'fa-why');
-    var card = ui.concept(title, body);
-    var opened = false;
-    var btn = ui.button('💡 왜 그럴까?', 'mx-btn fa-why-btn', function () {
-      opened = !opened;
-      if (opened) {
-        wrap.appendChild(card);
-      } else if (card.parentNode === wrap) {
-        wrap.removeChild(card);
-      }
-    });
-    wrap.appendChild(btn);
-    return wrap;
-  }
-
-  // 식 한 줄 표시
-  function expr(ui, text) {
-    var node = ui.el('div', 'fa-expr');
-    ui.fill(node, text);
-    return node;
-  }
+  // 1-2-3 카드·왜 그럴까·식 한 줄은 공용 MathDrill에 있다 (소수 탐험관과 함께 씀)
+  function algo(ui, steps) { return global.MathDrill.algo(ui, steps); }
+  function why(ui, title, body) { return global.MathDrill.why(ui, title, body); }
+  function expr(ui, text) { return global.MathDrill.expr(ui, text); }
 
   var FracAddDraw = {
     bar: bar,

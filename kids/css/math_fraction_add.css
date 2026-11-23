@@ -21,17 +21,6 @@ body.mx-theme-fracadd {
   box-sizing: border-box;
 }
 
-.fa-expr {
-  font-size: 1.4rem;
-  font-weight: 700;
-  line-height: 1.5;
-  text-align: center;
-  color: var(--mx-strong);
-  padding: 6px 8px;
-  overflow-wrap: anywhere;
-  box-sizing: border-box;
-}
-
 .fa-count {
   font-size: 1.1rem;
   font-weight: 700;
@@ -168,54 +157,6 @@ body.mx-theme-fracadd {
   font-weight: 700;
 }
 
-.fa-algo {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  margin: 0;
-  list-style: none;
-  background: var(--mx-softer);
-  border: 1px solid var(--mx-line);
-  border-radius: 12px;
-  color: #1f2937;
-  font-size: 0.98rem;
-  line-height: 1.45;
-  counter-reset: fa-algo-step;
-  box-sizing: border-box;
-}
-
-.fa-algo > * {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  counter-increment: fa-algo-step;
-}
-
-.fa-algo > *::before {
-  content: counter(fa-algo-step);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--mx-accent);
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.fa-why {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .mx-drill-count {
   font-size: 0.85rem;
   font-weight: 600;
@@ -232,10 +173,6 @@ body.mx-theme-fracadd {
     animation: none;
   }
 }
-
-/* 계단 이동 링크 (3학년 ⬇ · 5학년 ⬆) */
-.mx-ladder-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
-.mx-ladder-links .mx-chip { text-decoration: none; font-weight: 700; padding: 6px 12px; }
 
 /* 지운 칸: 빗금 + 점선 테두리로 "지웠다"가 보이게 */
 .fa-cell.gone {
