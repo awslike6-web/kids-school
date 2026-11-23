@@ -424,6 +424,35 @@ test('100까지의 수: diff-tens·same-tens·equal, HTML onclick 힌트 vs 오�
   ]);
 });
 
+test('100까지의 수: 맞힌 뒤 부등호를 다시 눌러도 보상은 한 번, 정답 안내도 그대로 (다음 문제에서는 다시 풀림)', () => {
+  const r = (n) => (n - 10 + 0.01) / 90;
+  let mode = 'init';
+  const qSeq = [r(45), r(52), r(30), r(70)];
+  let qi = 0;
+  const rng = () => (mode === 'init' ? 0.5 : (qi < qSeq.length ? qSeq[qi++] : 0.5));
+  const { sb, byId } = loadNumber100({ rng });
+  mode = 'quiz';
+  let grants = 0;
+  sb.grantRewardAndShowUI = () => { grants++; };
+
+  sb.nextCompareQ(); // 45 vs 52
+  sb.chooseCompare('<');
+  const solvedHtml = byId.get('compare-feedback').innerHTML;
+  assert.match(solvedHtml, /정답/);
+  sb.chooseCompare('<'); // 같은 정답 다시
+  sb.chooseCompare('>'); // 맞힌 뒤 오답 기호
+  assert.equal(grants, 1, '맞힌 뒤 다시 눌러도 보상은 한 번');
+  assert.equal(byId.get('compare-feedback').innerHTML, solvedHtml, '맞힌 뒤 오답 안내로 덮어쓰지 않음');
+  assert.equal(byId.get('compare-sign').textContent, '<', '맞힌 부등호가 그대로');
+
+  sb.nextCompareQ(); // 30 vs 70 — 새 문제는 다시 풀 수 있다
+  sb.chooseCompare('<');
+  assert.equal(grants, 2);
+  assert.deepEqual(plainLog(sb.LearningLog).map(e => [e.key, e.firstTry]), [
+    ['g:n100-compare-diff-tens', true], ['g:n100-compare-diff-tens', true],
+  ]);
+});
+
 // ============================================================
 // 4. 입체도형 (shapes_logic.js)
 // ============================================================

@@ -495,6 +495,8 @@
     // 5. 십의 자리부터 비교하는 퀴즈
     let curA = 45, curB = 52;
     let compareTrack = null, compareKeyBody = 'n100-compare-diff-tens';
+    let compareSolved = false; // 맞힌 뒤 부등호를 다시 눌러 보상이 또 나가거나 오답 안내가 덮어쓰지 않게
+
     function compareTypeKey(a, b) {
       if (a === b) return 'n100-compare-equal';
       return Math.floor(a / 10) === Math.floor(b / 10) ? 'n100-compare-same-tens' : 'n100-compare-diff-tens';
@@ -510,6 +512,7 @@
     function nextCompareQ() {
       if (compareTrack) compareTrack.skip();
       compareTrack = null;
+      compareSolved = false;
       curA = Math.floor(Math.random() * 90) + 10;
       curB = Math.floor(Math.random() * 90) + 10;
       compareKeyBody = compareTypeKey(curA, curB);
@@ -551,11 +554,13 @@
     }
 
     function chooseCompare(sign) {
+      if (compareSolved) return;
       let correctSign = curA > curB ? '>' : (curA < curB ? '<' : '=');
       const fb = document.getElementById('compare-feedback');
       document.getElementById('compare-sign').textContent = sign;
       const track = ensureCompareTrack();
       if (sign === correctSign) {
+        compareSolved = true;
         if (track) track.done();
         const sentence = curA === curB ? `${curA}와 ${curB}는 같습니다.` : `${curA}는 ${curB}보다 ${curA > curB ? '큽니다' : '작습니다'}.`;
         fb.innerHTML = `<span style="color:#10b981;">🎉 정답! ${sentence}</span>`;
