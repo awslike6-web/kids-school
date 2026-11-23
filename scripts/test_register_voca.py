@@ -210,8 +210,8 @@ class SeedFilesTest(unittest.TestCase):
     def test_english_l11_counts(self):
         seed = json.loads((SCRIPTS / "data/voca/english_5-2_L11.json").read_text(encoding="utf-8"))
         kinds = [v["type"] for v in seed["voca"]]
-        # 2026-11-18 클래스카드 반영 뒤 60행 = 단어 34 · 숙어 11 · 문장 15 (docs/english_spec.md §7)
-        self.assertEqual((kinds.count("단어"), kinds.count("숙어"), kinds.count("문장")), (34, 11, 15))
+        # 2026-11-23 하이클래스 반영 뒤 73행 = 단어 40 · 숙어 12 · 문장 21 (docs/english_spec.md §7)
+        self.assertEqual((kinds.count("단어"), kinds.count("숙어"), kinds.count("문장")), (40, 12, 21))
 
 
 if __name__ == "__main__":

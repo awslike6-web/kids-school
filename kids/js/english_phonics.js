@@ -76,6 +76,7 @@
         "bus": "버스", "stop": "스탑", "candy": "캔디", "ice": "아이스", "cream": "크림",
         "eight": "에이트", "festival": "페스티벌", "map": "맵", "police": "폴리스", "subway": "서브웨이",
         "tonight": "투나잇", "town": "타운", "between": "비트윈", "b": "비",
+        "gold": "골드", "box": "박스", "rock": "락", "rocks": "락스",
 
         // 관사 & 전치사 & 접속사
         "a": "어", "an": "앤", "the": "더",

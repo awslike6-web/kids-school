@@ -1,5 +1,5 @@
 {
-  "_설명": "영어 5-2 11단원(미래엔 강정진 2022 개정) VOCA_DB 등록 자료. 2026-11-07 교과서 47종 등록 후 2026-11-18 담임 클래스 카드(신규 단어 10·숙어 2·패턴 1 및 뜻 병기)를 반영했다. 노션이 원본이므로 이후 수정은 노션에서 하고, 이 파일을 다시 돌릴 때는 미리보기로 바뀔 칸을 먼저 본다. scripts/register_voca.py로 반영한다.",
+  "_설명": "영어 5-2 11단원(미래엔 강정진 2022 개정) VOCA_DB 등록 자료. 2026-11-07 교과서 47종 등록, 2026-11-18 클래스 카드 13종 반영 후 2026-11-23 하이클래스 「영어 11단원 단어와 문장」 안내표(누락 13종 추가·뜻 7종 병기)를 반영했다. 노션이 원본이므로 이후 수정은 노션에서 하고, 이 파일을 다시 돌릴 때는 미리보기로 바뀔 칸을 먼저 본다. scripts/register_voca.py로 반영한다.",
   "subject": "영어",
   "grade": "5-2",
   "student": "민수",
@@ -106,8 +106,8 @@
     },
     {
       "word": "block",
-      "meaning": "블록 (거리 한 구역)",
-      "detail": "도로로 둘러싸인 도시 거리의 한 구역(블록) 단위예요. (예: Go straight one block.)",
+      "meaning": "블록 (거리 한 구역), 골목",
+      "detail": "도로로 둘러싸인 도시 거리의 한 구역(블록)이나 골목을 뜻해요. (예: Go straight one block.)",
       "pos": "명사",
       "type": "단어"
     },
@@ -169,9 +169,9 @@
     },
     {
       "word": "next",
-      "meaning": "다음의, 옆의",
-      "detail": "차례나 순서상 바로 뒤에 오거나 바로 곁에 있는 모양이에요. (예: Take the next corner.)",
-      "pos": "형용사",
+      "meaning": "다음, 옆, 다음의, 옆의",
+      "detail": "차례나 순서상 바로 뒤에 오거나 바로 옆(곁)에 있는 모양이에요. (예: Take the next corner.)",
+      "pos": "형용사/부사",
       "type": "단어"
     },
     {
@@ -245,9 +245,51 @@
       "type": "단어"
     },
     {
+      "word": "shop",
+      "meaning": "가게",
+      "detail": "물건이나 음식을 파는 가게예요. (예: Where is the flower shop?)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "gold",
+      "meaning": "금",
+      "detail": "반짝반짝 빛나는 귀한 노란색 금속인 금이에요. (예: A box of gold is under the rock.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "box",
+      "meaning": "상자",
+      "detail": "물건이나 보물을 담아 두는 네모난 상자예요. (예: Look at the box.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "rock",
+      "meaning": "돌덩이, 바위",
+      "detail": "크고 단단한 돌덩이나 바위예요. (예: It is next to the rocks.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "bird",
+      "meaning": "새",
+      "detail": "날개로 하늘을 날아다니는 새예요. (예: Look at the bird on the house.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
+      "word": "house",
+      "meaning": "집",
+      "detail": "가족들이 함께 생활하고 쉬는 집이에요. (예: My house is next to the park.)",
+      "pos": "명사",
+      "type": "단어"
+    },
+    {
       "word": "go straight",
-      "meaning": "직진하다, 똑바로 가다, 성실히 살다, 갱생하다",
-      "detail": "교과서 길 안내에서는 '직진하다, 똑바로 가다'로 쓰이고, 비유적으로 '성실히 살다, 갱생하다'라는 뜻도 있어요. (예: Go straight two blocks.)",
+      "meaning": "직진하다, 똑바로 가다, 앞으로 가다, 성실히 살다, 갱생하다",
+      "detail": "교과서 길 안내에서는 '직진하다, 똑바로 가다, 앞으로 가다'로 쓰이고, 비유적으로 '성실히 살다, 갱생하다'라는 뜻도 있어요. (예: Go straight two blocks.)",
       "pos": "숙어",
       "type": "숙어"
     },
@@ -322,6 +364,13 @@
       "type": "숙어"
     },
     {
+      "word": "No problem",
+      "meaning": "문제없다, 천만에요, 괜찮아요",
+      "detail": "문제없다는 뜻이며 감사 인사에 '천만에요, 괜찮아요'라고 답할 때 쓰는 표현이에요. (예: Thanks a lot. - No problem.)",
+      "pos": "숙어",
+      "type": "숙어"
+    },
+    {
       "word": "Where is the ...?",
       "meaning": "[장소]은 어디에 있어요?",
       "detail": "특정 장소나 건물의 위치를 정중하게 물어볼 때 쓰는 핵심 패턴이에요. ... 자리에 장소를 넣어 말해요. (예: Where is the library?)",
@@ -330,7 +379,7 @@
     },
     {
       "word": "Where is the restaurant?",
-      "meaning": "식당은 어디에 있나요?",
+      "meaning": "식당은 어디에 있나요?, 식당이 어디에 있나요?",
       "detail": "식당의 위치가 어디인지 정중하게 물어보는 표현이에요. (예: Excuse me, where is the restaurant?)",
       "pos": "문장",
       "type": "문장"
@@ -344,8 +393,15 @@
     },
     {
       "word": "Where is the bank?",
-      "meaning": "은행은 어디에 있나요?",
+      "meaning": "은행은 어디에 있나요?, 은행이 어디에 있나요?",
       "detail": "은행의 위치를 찾을 때 질문하는 표현이에요. (예: Where is the bank?)",
+      "pos": "문장",
+      "type": "문장"
+    },
+    {
+      "word": "Where is the park?",
+      "meaning": "공원이 어디에 있나요?",
+      "detail": "공원이 어디에 있는지 위치를 질문하는 표현이에요. (예: Where is the park?)",
       "pos": "문장",
       "type": "문장"
     },
@@ -378,6 +434,20 @@
       "type": "문장"
     },
     {
+      "word": "Go straight one block and turn left.",
+      "meaning": "앞으로 한 블록을 가고 왼쪽으로 돌아요",
+      "detail": "한 블록을 앞으로 직진한 뒤 왼쪽으로 돌라고 안내하는 문장이에요.",
+      "pos": "문장",
+      "type": "문장"
+    },
+    {
+      "word": "Go straight two blocks and turn right.",
+      "meaning": "앞으로 두 블록을 지나서 오른쪽으로 도세요",
+      "detail": "두 블록을 앞으로 지나간 뒤 오른쪽으로 돌라고 안내하는 문장이에요. (하이클래스 안내표 원문은 'two block'이나 복수형 'two blocks'가 바른 표현이에요)",
+      "pos": "문장",
+      "type": "문장"
+    },
+    {
       "word": "Go straight and turn right at the big tree.",
       "meaning": "직진해서 큰 나무에서 오른쪽으로 도세요.",
       "detail": "똑바로 가다가 커다란 나무가 있는 곳에서 오른쪽으로 돌라고 알려주는 문장이에요.",
@@ -388,6 +458,20 @@
       "word": "It's next to the hospital.",
       "meaning": "그것은 병원 옆에 있어요.",
       "detail": "찾으려는 목적지가 병원 바로 옆에 있음을 알려주는 위치 설명 문장이에요.",
+      "pos": "문장",
+      "type": "문장"
+    },
+    {
+      "word": "It is next to the hospital.",
+      "meaning": "병원 옆에 있어요",
+      "detail": "It's의 풀어 쓴 표현(It is)으로, 병원 옆에 있음을 알려주는 문장이에요.",
+      "pos": "문장",
+      "type": "문장"
+    },
+    {
+      "word": "It is next to the rocks.",
+      "meaning": "바위 옆에 있어요",
+      "detail": "찾으려는 장소나 보물이 바위들 바로 옆에 있음을 알려주는 문장이에요.",
       "pos": "문장",
       "type": "문장"
     },
@@ -413,16 +497,23 @@
       "type": "문장"
     },
     {
+      "word": "It is on your right.",
+      "meaning": "당신의 오른쪽에 있어요",
+      "detail": "It's의 풀어 쓴 표현(It is)으로, 오른쪽에 있음을 알려주는 문장이에요.",
+      "pos": "문장",
+      "type": "문장"
+    },
+    {
       "word": "Thanks a lot.",
-      "meaning": "정말 고맙습니다.",
+      "meaning": "정말 고맙습니다, 고마워요, 감사하다",
       "detail": "친절하게 길을 가르쳐 준 상대방에게 진심으로 고마움을 전하는 표현이에요. (예: Thanks a lot!)",
       "pos": "문장",
       "type": "문장"
     },
     {
       "word": "No problem.",
-      "meaning": "천만에요. (별말씀을요.)",
-      "detail": "감사 인사를 받았을 때 '괜찮아요, 별것 아니에요'라고 정답게 답하는 표현이에요. (예: No problem.)",
+      "meaning": "천만에요, 별말씀을요, 괜찮아요, 문제없다",
+      "detail": "감사 인사를 받았을 때 '괜찮아요, 별말씀을요, 문제없다'라고 답하는 표현이에요. (예: No problem.)",
       "pos": "문장",
       "type": "문장"
     }
