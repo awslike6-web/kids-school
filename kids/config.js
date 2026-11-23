@@ -145,8 +145,11 @@ function loadCoreScripts(localBasePath, scripts, onComplete) {
     }
 
     scripts.forEach(scriptName => {
-        // 이미 로드된 스크립트 중복 추가 방지
-        const alreadyLoaded = Array.from(document.scripts).some(s => s.src.includes(scriptName));
+        // 이미 로드된 스크립트 중복 추가 방지 — 쿼리(?v=)는 빼고 「그 폴더의 그 파일」 주소로 비교 (2026-11-24:
+        // 버전이 파일 내용 해시라 같은 파일이면 버전도 같지만, 버전 글자가 다른 옛 캐시본과도 두 번 싣지 않게)
+        const fileName = scriptName.split('?')[0];
+        const target = new URL(basePath + fileName, window.location.href).href;
+        const alreadyLoaded = Array.from(document.scripts).some(s => (s.src || '').split(/[?#]/)[0] === target);
         if (alreadyLoaded) {
             console.log(`[엔진 최적화] ${scriptName} 은(는) 이미 로드되어 건너뜁니다.`);
             loadedCount++;
@@ -155,7 +158,8 @@ function loadCoreScripts(localBasePath, scripts, onComplete) {
         }
 
         const script = document.createElement('script');
-        const cacheBuster = `?v=20260828_${Date.now()}`;
+        // 버전(?v=)이 이미 붙은 이름은 그대로, 없는 이름만 매번 새로 받게 시각을 붙인다
+        const cacheBuster = scriptName.includes('?') ? '' : `?v=20260828_${Date.now()}`;
         script.src = basePath + scriptName + cacheBuster;
         script.async = false; // 부품이 순서대로 조립되도록 강제 보장 (매우 중요)
         

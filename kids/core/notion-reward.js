@@ -4,8 +4,8 @@
 (function() {
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-reward.js'))?.src;
     if (!source) return;
-    [['StudyActivity', 'study-activity.js', '?v=20261030-lesson'], ['StudyLogStore', 'study-log-store.js', '?v=20261121-learning'],
-        ['LearningLog', 'learning-log.js', '?v=20261121-learning']].forEach(([globalName, file, version]) => {
+    [['StudyActivity', 'study-activity.js', '?v=c3dc3018'], ['StudyLogStore', 'study-log-store.js', '?v=80cfe205'],
+        ['LearningLog', 'learning-log.js', '?v=5cf3ce8e']].forEach(([globalName, file, version]) => {
         if (window[globalName] || Array.from(document.scripts).some(s => (s.src || '').includes(file))) return;
         const script=document.createElement('script');
         script.src=new URL(file + version,source).href; script.async=false;
@@ -146,7 +146,7 @@ var grantRewardAndShowUI = (function () {
         script.addEventListener('error', failed, { once: true });
       } else {
         script.onload = done; script.onerror = failed;
-        script.src = new URL('reward-grant.js?v=20261124-reward-carry', source).href;
+        script.src = new URL('reward-grant.js?v=fb866919', source).href;
         script.async = false;
         document.head.appendChild(script);
       }

@@ -46,7 +46,7 @@ test('HTML on* 속성이 부르는 함수가 모두 선언되어 있음', () => 
     assertInlineHandlersDeclared(htmlPath);
 });
 
-test('다른 운영 소스에 버전 없는 세로셈 JS 참조가 없고 버전은 서로 같다', () => {
+test('다른 운영 소스에 버전 없는 세로셈 JS 참조가 없고 같은 파일은 같은 버전으로 가리킨다', () => {
     const walk = dir => fs.readdirSync(path.join(root, dir), { withFileTypes: true }).flatMap(entry => {
         const file = path.join(dir, entry.name);
         return entry.isDirectory() ? walk(file) : /\.(?:html|js|mjs|cjs|css)$/.test(entry.name) ? [file] : [];
@@ -55,12 +55,15 @@ test('다른 운영 소스에 버전 없는 세로셈 JS 참조가 없고 버전
     const versions = new Set();
     // system_map_generated.js는 조감도용 파일 이름 목록일 뿐 스크립트 참조가 아니다.
     for (const file of [...rootFiles, ...walk('kids'), ...walk('scripts')].filter(name => !name.endsWith('system_map_generated.js'))) {
-        for (const match of read(file).matchAll(/vertical_math_(?:logic|grid)\.js([^"'<>\s]*)["']/g)) {
-            assert.match(match[1], /^\?v=[^&]+$/, `${file}: 버전 누락`);
-            versions.add(match[1]);
+        for (const match of read(file).matchAll(/vertical_math_(logic|grid)\.js([^"'<>\s]*)["']/g)) {
+            assert.match(match[2], /^\?v=[^&]+$/, `${file}: 버전 누락`);
+            versions.add(match[1] + match[2]);
         }
     }
-    assert.equal(versions.size, 1, `세로셈 JS 버전이 서로 다름: ${[...versions].join(', ')}`);
+    // 2026-11-24부터 버전은 파일마다 내용 해시(tests/version-stamps.test.mjs) — 파일별로 한 가지 값이면 된다
+    for (const name of ['logic', 'grid']) {
+        assert.equal([...versions].filter(v => v.startsWith(name)).length, 1, `세로셈 ${name} JS 버전이 자리마다 다름: ${[...versions].join(', ')}`);
+    }
 });
 
 test('채점·완주 보상 오디오 호출은 둘째 파일에 각 1회씩 있다', () => {

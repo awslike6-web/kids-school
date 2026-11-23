@@ -11,7 +11,7 @@ function getKstTodayYMD(date = new Date()) {
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('storybook_engine.js'))?.src;
     if (!source) return;
     const script=document.createElement('script');
-    script.src=new URL('../core/study-activity.js?v=20261023',source).href; script.async=false;
+    script.src=new URL('../core/study-activity.js?v=c3dc3018',source).href; script.async=false;
     document.head.appendChild(script);
 })();
 // 🛤️ 오늘의 길 완료 장부도 한 번만 싣는다 (동화 완독 신호, docs/today_path_spec.md §5-2)
@@ -20,7 +20,7 @@ function getKstTodayYMD(date = new Date()) {
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('storybook_engine.js'))?.src;
     if (!source) return;
     const script=document.createElement('script');
-    script.src=new URL('../core/today-path.js?v=20261123-path2',source).href; script.async=false;
+    script.src=new URL('../core/today-path.js?v=8c06e323',source).href; script.async=false;
     document.head.appendChild(script);
 })();
 /* ========================================================

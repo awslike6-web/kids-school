@@ -242,7 +242,7 @@
     quizChoicesPromise = new Promise(function (resolve) {
       var src;
       try {
-        src = new URL('quiz-flow-controller.js?v=20261124-flow2', SELF_SRC).href;
+        src = new URL('quiz-flow-controller.js?v=b1a38adb', SELF_SRC).href;
       } catch (e) {
         resolve(null);
         return;

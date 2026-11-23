@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { stampOfFile } from '../scripts/stamp_versions.mjs';
 
 const read = file => fs.readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 const quiet = { log() {}, info() {}, warn() {}, error() {} };
@@ -76,7 +77,7 @@ test('하루 체크인: 부모 검수는 미리보기만 — 아이 기록·저�
     assert.equal(rewards, 0, parent);
     assert.equal(calls.filter(([m]) => m !== 'GET').length, 0, parent);
   }
-  assert.match(read('kids/subjects/haru/haru.html'), /haru-checkin-engine\.js\?v=20261124-parent/);
+  assert.ok(read('kids/subjects/haru/haru.html').includes('haru-checkin-engine.js?v=' + stampOfFile('kids/subjects/haru/js/haru-checkin-engine.js')));
 });
 
 test('로비 학습일지 모듈: notion-helper 자동 로더와 같은 버전 문자열 (두 번 실리지 않게)', () => {
@@ -85,8 +86,8 @@ test('로비 학습일지 모듈: notion-helper 자동 로더와 같은 버전 �
   const inLobby = lobby.match(/study-log-store\.js\?v=([\w.-]+)/)[1];
   const inHelper = helper.match(/'study-log-store\.js\?v=([\w.-]+)'/)[1];
   assert.equal(inLobby, inHelper);
-  // notion-helper의 중복 검사는 「파일명+버전」 문자열을 src에 포함하는지로 본다
-  assert.ok(`./kids/core/study-log-store.js?v=${inLobby}`.includes(`study-log-store.js?v=${inHelper}`));
+  // notion-helper의 중복 검사는 2026-11-24부터 쿼리를 뺀 「이 폴더의 그 파일」 주소로 본다(버전은 내용 해시라 어차피 같음)
+  assert.match(helper, /const target = basePath \+ mod\.split\('\?'\)\[0\];/);
 });
 
 // ---------- 교차 검토(아르곤) 반영 ----------
@@ -178,9 +179,8 @@ test('과목방 10문제 완주 보너스: 내일 예습 과목이면 +7, 아니
 });
 
 test('시간표 부스트: 과목방(자동 로더)·퀘스트 러너·용어사전방에 실리고, 여러 번 실려도 한 번만 정의', () => {
-  assert.match(read('kids/core/notion-helper.js'), /'timetable-boost\.js\?v=20261123-boost'/);
-  assert.match(read('quest_runner.html'), /timetable-boost\.js\?v=20261123-boost/);
-  assert.match(read('kids/common_space/voca.html'), /timetable-boost\.js\?v=20261123-boost/);
+  const boostRef = 'timetable-boost.js?v=' + stampOfFile('kids/core/timetable-boost.js');
+  for (const f of ['kids/core/notion-helper.js', 'quest_runner.html', 'kids/common_space/voca.html']) assert.ok(read(f).includes(boostRef), f);
   const st = storage();
   const sb = sandbox(st, ['kids/core/timetable-boost.js']);
   const first = sb.TimetableBoost;

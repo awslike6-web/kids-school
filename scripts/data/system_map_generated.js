@@ -47,6 +47,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "load_playwright.cjs", "path": "kids-school-main/scripts/load_playwright.cjs", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "register_curriculum.py", "path": "kids-school-main/scripts/register_curriculum.py", "domain": [], "docs": ["math_spec.md", "other_subjects_spec.md", "quiz_choice_shuffle_spec.md"]},
       {"name": "spot_diff_align.py", "path": "kids-school-main/scripts/spot_diff_align.py", "domain": ["gallery"], "docs": ["gallery_archive_spec.md", "gallery_spot_diff_align_spec.md", "gallery_spot_diff_spec.md"]},
+      {"name": "stamp_versions.mjs", "path": "kids-school-main/scripts/stamp_versions.mjs", "domain": [], "docs": ["CORE_CATALOG.md"]},
       {"name": "study_usage_report.mjs", "path": "kids-school-main/scripts/study_usage_report.mjs", "domain": [], "docs": ["learning_log_math_rest_spec.md", "study_usage_report_spec.md", "today_path_spec.md"]},
       {"name": "study_usage_report_render.mjs", "path": "kids-school-main/scripts/study_usage_report_render.mjs", "domain": [], "docs": ["study_usage_report_spec.md", "CORE_CATALOG.md"]},
       {"name": "test_ci_local.py", "path": "kids-school-main/scripts/test_ci_local.py", "domain": [], "docs": ["CORE_CATALOG.md"]},
@@ -279,5 +280,5 @@ window.SYSTEM_MAP_GENERATED = {
     "pipe": [],
     "db": []
   },
-  "hidden": {"source": 30, "skill": 6, "module": 0, "pipe": 0, "db": 7}
+  "hidden": {"source": 31, "skill": 6, "module": 0, "pipe": 0, "db": 7}
 };

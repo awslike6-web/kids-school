@@ -39,9 +39,9 @@ export function assertLoadsInOrder(html, kind, urls, label = '') {
         assert.ok(picked[i].start > picked[i - 1].start, `${label} 로드 순서: ${urls[i - 1]} → ${urls[i]}`);
         assert.equal(html.slice(picked[i - 1].end, picked[i].start).trim(), '', `${label} ${urls[i - 1]}와 ${urls[i]} 사이가 연속이 아님`);
     }
-    const versions = new Set(picked.map(tag => tag.version));
-    assert.equal(versions.size, 1, `${label} 묶음 버전이 서로 다름: ${[...versions].join(', ')}`);
-    assert.ok(picked[0].version, `${label} ?v= 캐시 버전 없음`);
+    // 2026-11-24부터 ?v= 값은 파일마다 내용 해시(scripts/stamp_versions.mjs, 맞는지는 tests/version-stamps.test.mjs가 검사)
+    // → 묶음이 같은 값일 필요는 없고, 모두 버전이 붙어 있기만 하면 된다
+    for (const tag of picked) assert.ok(tag.version, `${label} ${tag.url}: ?v= 캐시 버전 없음`);
     return picked;
 }
 

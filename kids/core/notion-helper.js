@@ -24,19 +24,19 @@ window.roomStartTime = window.roomStartTime || new Date();
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
     const submodules = [
-        'study-activity.js?v=20261030-lesson', // foreground, idle, interval ledger
-        'notion-cache-manager.js?v=20261119-allcache', // ⚡ 캐시 & 프리패치 & syncAllNotionData
-        'notion-api-client.js?v=20261119-allcache',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
-        'study-log-store.js?v=20261121-learning', // 📒 학습일지 일일 Upsert & 연속 학습 스트릭 단일 원천
-        'learning-log.js?v=20261121-learning', // 📒 문항 단위 학습 기록 (학습일지 행의 '문항기록' 칸)
-        'timetable-boost.js?v=20261123-boost', // 🚀 시간표 부스트(오늘 복습 1.2배·한도 150, 내일 예습 완주 +7) — 과목방에서도 적용 (2026-11-23)
-        'today-path.js?v=20261123-path2', // 🛤️ 오늘의 길 완료 장부 (과목방·독해 완료 신호, lobby.html과 같은 버전 문자열)
-        'notion-study-logger.js?v=20261124-reward-carry', // 📝 학습일지 & 보상/레벨업 전송 엔진
-        'stt-debouncer.js',          // 🎙️ STT 음성인식 디바운서
-        'mission-reward-engine.js?v=20261123-boost',  // 💎 미션 보상 및 축하 모달
-        'quiz-feedback-overlay.js',  // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
-        'gemini-chat.js',            // 🧚 AI 요정 대화 (Worker 프록시 호출·재시도·안내 문구)
-        'chat-memory.js?v=20261116-memory' // 🧠 AI 대화 기억 보관소 저장 (창 닫을 때 요약 1줄)
+        'study-activity.js?v=c3dc3018', // foreground, idle, interval ledger
+        'notion-cache-manager.js?v=dc0ca8ba', // ⚡ 캐시 & 프리패치 & syncAllNotionData
+        'notion-api-client.js?v=b86a9650',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
+        'study-log-store.js?v=80cfe205', // 📒 학습일지 일일 Upsert & 연속 학습 스트릭 단일 원천
+        'learning-log.js?v=5cf3ce8e', // 📒 문항 단위 학습 기록 (학습일지 행의 '문항기록' 칸)
+        'timetable-boost.js?v=82713b6c', // 🚀 시간표 부스트(오늘 복습 1.2배·한도 150, 내일 예습 완주 +7) — 과목방에서도 적용 (2026-11-23)
+        'today-path.js?v=8c06e323', // 🛤️ 오늘의 길 완료 장부 (과목방·독해 완료 신호, lobby.html과 같은 버전 문자열)
+        'notion-study-logger.js?v=9ade0a15', // 📝 학습일지 & 보상/레벨업 전송 엔진
+        'stt-debouncer.js?v=11e203dd',      // 🎙️ STT 음성인식 디바운서
+        'mission-reward-engine.js?v=4329b9a2',  // 💎 미션 보상 및 축하 모달
+        'quiz-feedback-overlay.js?v=37cb3099',  // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
+        'gemini-chat.js?v=afe4670a',        // 🧚 AI 요정 대화 (Worker 프록시 호출·재시도·안내 문구)
+        'chat-memory.js?v=ffe980a6' // 🧠 AI 대화 기억 보관소 저장 (창 닫을 때 요약 1줄)
     ];
 
     let basePath = '';
@@ -51,7 +51,10 @@ window.roomStartTime = window.roomStartTime || new Date();
 
     if (basePath) {
         submodules.forEach(mod => {
-            const alreadyLoaded = Array.from(document.scripts).some(s => (s.src || '').includes(mod));
+            // 같은 파일이면 버전(내용 해시, scripts/stamp_versions.mjs)도 같으므로 쿼리는 빼고 「이 폴더의 그 파일」인지만 본다 —
+            // 로비 코어 로더처럼 다른 버전 글자로 먼저 실린 경우에도 두 번 싣지 않게, 다른 폴더의 같은 이름 파일과는 구분 (2026-11-24)
+            const target = basePath + mod.split('?')[0];
+            const alreadyLoaded = Array.from(document.scripts).some(s => (s.src || '').split(/[?#]/)[0] === target);
             if (!alreadyLoaded) {
                 const s = document.createElement('script');
                 s.src = basePath + mod;

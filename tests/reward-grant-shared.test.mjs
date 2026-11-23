@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { sandbox, entry, seed, rewardState } from './reward-grant-sandbox.mjs';
 import { beforeReward, beforeLogger, extractedReward, extractedLogger, sharedSource, normalize, version } from './reward-grant-approved-edits.mjs';
+import { stampOfFile } from '../scripts/stamp_versions.mjs';
 const read = file => fs.readFileSync(new URL('../' + file, import.meta.url), 'utf8');
 
 test('보상 본체와 두 껍데기는 고정 원문에 명시된 승인 변경만 적용하고 각각 600줄 이하', () => {
@@ -19,13 +20,13 @@ test('보상 본체와 두 껍데기는 고정 원문에 명시된 승인 변경
   }
 });
 
-test('helper 로더와 직접 로더·러너가 새 버전을 참조한다', () => {
-  assert.ok(read('kids/core/notion-helper.js').includes('notion-study-logger.js?v=' + version));
+test('helper 로더와 직접 로더·러너가 새 버전을 참조한다 (버전 = 가리키는 파일의 내용 해시)', () => {
+  assert.ok(read('kids/core/notion-helper.js').includes('notion-study-logger.js?v=' + stampOfFile('kids/core/notion-study-logger.js')));
   for (const name of ['notion-reward.js', 'notion-study-logger.js']) {
     assert.ok(read('kids/core/' + name).includes('reward-grant.js?v=' + version));
   }
   for (const name of ['notion-reward.js', 'notion-reward-quiz.js', 'notion-reward-discussion.js']) {
-    assert.ok(read('quest_runner.html').includes(name + '?v=' + version));
+    assert.ok(read('quest_runner.html').includes(name + '?v=' + stampOfFile('kids/core/' + name)), name);
   }
 });
 

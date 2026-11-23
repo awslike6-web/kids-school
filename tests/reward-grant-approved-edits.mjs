@@ -2,7 +2,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-export const version = '20261124-reward-carry';
+import { stampOfFile } from '../scripts/stamp_versions.mjs';
+
+// 2026-11-24부터 ?v= 값은 파일 내용 해시(scripts/stamp_versions.mjs) — 보상 본체를 가리키는 버전은 reward-grant.js의 해시
+export const version = stampOfFile('kids/core/reward-grant.js');
 export const normalize = text => text.replace(/\r\n/g, '\n').replace(/[\t ]+$/gm, '').replace(/\n+$/, '');
 export const beforeReward = fs.readFileSync(new URL('./fixtures/reward-grant-shared/notion-reward.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 export const beforeLogger = fs.readFileSync(new URL('./fixtures/reward-grant-shared/notion-study-logger.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
@@ -53,7 +56,16 @@ export function wrapper(owner) {
   };
 })();`;
 }
-export const extractedReward = text => replaceOnce(normalize(text), normalize(rewardBody), wrapper('notion-reward.js'));
+export const extractedReward = text => stampedLoaderEdit(replaceOnce(normalize(text), normalize(rewardBody), wrapper('notion-reward.js')));
+
+// 2026-11-24 승인 변경: 보상 껍데기의 공용 모듈 로더 배열('파일명.js', '?v=값')도 scripts/stamp_versions.mjs가 내용 해시로 찍는다
+// (기대값은 운영 파일의 해시에서 만든다 — 해시가 맞는지는 tests/version-stamps.test.mjs가 따로 검사)
+function stampedLoaderEdit(text) {
+  for (const [file, before] of [['study-activity.js', '20261030-lesson'], ['study-log-store.js', '20261121-learning'], ['learning-log.js', '20261121-learning']]) {
+    text = replaceOnce(text, `'${file}', '?v=${before}'`, `'${file}', '?v=${stampOfFile('kids/core/' + file)}'`);
+  }
+  return text;
+}
 export function extractedLogger(text) {
   text = replaceOnce(text, loggerBody, wrapper('notion-study-logger.js').split('\n').map(line => '    ' + line).join('\n'));
   text = replaceOnce(text, '//             INVENTORY_DB 보상 지급, 일일 상한선 체크, 소원권/경험치/레벨 연산', '//             보상은 공용 reward-grant.js로 위임, 기존 전역 API 유지');
@@ -61,7 +73,7 @@ export function extractedLogger(text) {
   const constants = beforeLogger.slice(beforeLogger.indexOf('    const PROXY_URL'), beforeLogger.indexOf('    // 🕒 전역 학습 시작'));
   text = replaceOnce(text, constants, '');
   // 2026-11-24 승인 변경: 학습일지 모듈 폴백 로더를 자동 로더(notion-helper.js)와 같은 버전으로 (옛 버전이 따로 한 번 더 실리지 않게)
-  return replaceOnce(text, 'study-log-store.js?v=20261024-1', 'study-log-store.js?v=20261121-learning');
+  return replaceOnce(text, 'study-log-store.js?v=20261024-1', 'study-log-store.js?v=' + stampOfFile('kids/core/study-log-store.js'));
 }
 
 export function sharedSource() {

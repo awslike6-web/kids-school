@@ -18,7 +18,7 @@
         const source = document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('notion-study-logger.js'))?.src;
         if (!source) return;
         const script = document.createElement('script');
-        script.src = new URL('study-log-store.js?v=20261121-learning', source).href;
+        script.src = new URL('study-log-store.js?v=80cfe205', source).href;
         script.async = false;
         document.head.appendChild(script);
     })();
@@ -158,7 +158,7 @@
             script.addEventListener('error', failed, { once: true });
           } else {
             script.onload = done; script.onerror = failed;
-            script.src = new URL('reward-grant.js?v=20261124-reward-carry', source).href;
+            script.src = new URL('reward-grant.js?v=fb866919', source).href;
             script.async = false;
             document.head.appendChild(script);
           }

@@ -32,14 +32,15 @@ for (const file of files) {
     });
 }
 
-test('HTML은 상대 경로·같은 버전·클래식 스크립트로 지정 순서 로드한다', () => {
+test('HTML은 상대 경로·버전 표시·클래식 스크립트로 지정 순서 로드한다', () => {
     // 두 태그 사이에는 안내 주석 한 줄이 있어 연속 검사 대신 순서·버전·1회만 본다.
     const urls = ['./voca_common.js', './voca_modal.js'];
     for (const url of urls) assertLoadsInOrder(html, 'script', [url], '용어사전');
     const [common, modal] = urls.map(url => html.indexOf(`src="${url}?`));
     assert.ok(common >= 0 && modal > common, 'voca_common.js 다음에 voca_modal.js');
+    // 2026-11-24부터 버전은 파일마다 내용 해시(tests/version-stamps.test.mjs)라 두 태그 값이 같을 필요는 없고, 둘 다 붙어 있으면 된다
     const versions = urls.map(url => html.match(new RegExp(`src="${url.replace('.', '\\.')}\\?v=([^"]+)"`))[1]);
-    assert.equal(versions[0], versions[1], '두 태그 버전이 서로 다름');
+    assert.ok(versions.every(Boolean), '버전 없는 태그');
     for (const file of files) assert.ok(fs.existsSync(path.join(root, file)));
 });
 

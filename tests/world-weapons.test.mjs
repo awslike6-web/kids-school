@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stampOfFile } from '../scripts/stamp_versions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const W = 'kids/playground/world';
@@ -57,5 +58,5 @@ test('등록 입구·갤러리: 찰칵등록 칩, 메모 안내, 빌더 분류',
   assert.match(qu, /data-category="무기"><span class="qu-emoji">🗡️<\/span>내 무기 \(아레나\)/);
   assert.match(qu, /currentCategory === '무기' \? '무기 이름을 적어 줘!/);
   assert.match(read('scripts/build_gallery.py'), /if "무기" in raw_cat:[^\n]*\n\s+return "무기", "🗡️"/);
-  assert.match(read('lobby.html'), /quick-uploader\.js\?v=20261121-wpn/);
+  assert.ok(read('lobby.html').includes('quick-uploader.js?v=' + stampOfFile('kids/core/quick-uploader.js'))); // 버전 = 내용 해시 (2026-11-24~)
 });
