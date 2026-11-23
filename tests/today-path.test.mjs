@@ -46,6 +46,8 @@ function vocaRecord(id, word, subject, stage, extra = {}) {
   return { id, word, meaning: `${word} 뜻`, subject: [subject], stage, target: ['민수'], mastery: '', isAchieved: false, ...extra };
 }
 const hex = n => n.toString(16).padStart(32, '0');
+// 민수 3단계 레슨은 단원 항목 5개 이상일 때만 다시 보기로 데려간다(spec §15-4) — L9를 5개로 채우는 낱말 2개
+const L9_MORE = [vocaRecord(hex(50), 'tree', '영어', 'L9'), vocaRecord(hex(51), 'river', '영어', 'L9')];
 const dashed = id => `${id.slice(0, 8)}-${id.slice(8, 12)}-${id.slice(12, 16)}-${id.slice(16, 20)}-${id.slice(20)}`;
 
 test('1. KST 날짜·요일: 자정 경계, 기기 시간대와 무관', () => {
@@ -132,7 +134,8 @@ test('6. 3번 대체 순서: 최근 오답 → 녹슨 왕관·은메달(민수) 
   const ids = [1, 2, 3, 4].map(hex);
   const voca = [
     vocaRecord(ids[0], 'minute', '영어', 'L9|복습'), vocaRecord(ids[1], 'lunch', '영어', 'L9'), vocaRecord(ids[2], 'sleep', '영어', 'L9'),
-    vocaRecord(ids[3], 'alone', '영어', 'L5') // L5는 1개뿐 → 데려가지 않음
+    vocaRecord(ids[3], 'alone', '영어', 'L5'), // L5는 1개뿐 → 데려가지 않음
+    ...L9_MORE
   ];
   const today = '2026-11-25';
   // 어제는 g:·r:만, 그제 v: 오답 → 그제 것을 고른다
@@ -146,11 +149,13 @@ test('6. 3번 대체 순서: 최근 오답 → 녹슨 왕관·은메달(민수) 
   assert.equal(r1.stops[2].subject, 'english');
   assert.deepEqual(r1.stops[2].keys, ['v:' + ids[0], 'v:' + ids[1]]); // 틀림 순, 틀림 0·L5·캐시 없음·s: 제외
   assert.equal(r1.stops[2].detail, '최근 헷갈린 낱말: minute · lunch');
-  assert.match(r1.stops[2].href, /^quest_runner\.html\?subject=english&user=minsu&unit=L9&tp=3$/);
+  assert.equal(r1.stops[2].href, `quest_runner.html?subject=english&user=minsu&unit=L9&focus=${ids[0]}%7C${ids[1]}&tp=3`);
+  // 민수: L9가 4개뿐이면(5개 미만) 다시 보기로 데려가지 않는다
+  assert.notEqual(plan(MINSU, at(today), { history, voca: voca.filter(v => v.id !== hex(51)) }).stops[2].source, 'wrong');
   // 민서는 한입 레슨, 하이픈 있는 id도 같은 문항
   const vocaMinseo = voca.map(v => ({ ...v, id: dashed(v.id), target: ['공통'] }));
   const r1b = plan(MINSEO, at(today), { history, voca: vocaMinseo });
-  assert.match(r1b.stops[2].href, /lesson=bite&tp=3$/);
+  assert.match(r1b.stops[2].href, /lesson=bite&focus=[0-9a-f]{32}%7C[0-9a-f]{32}&tp=3$/);
   // 사회 c: (민수) → 사회방 / 과학 c:는 제외
   const hc = { visits: {}, logs: [{ date: '2026-11-24', subject: '과학', items: { ['c:' + hex(7)]: [3, 3, 0, []] } },
     { date: '2026-11-24', subject: '사회', items: { ['c:' + hex(8)]: [1, 1, 0, []] } }] };
@@ -182,7 +187,7 @@ test('6. 3번 대체 순서: 최근 오답 → 녹슨 왕관·은메달(민수) 
 
 test('6b. 어휘 캐시가 늦게 오면 3번만 한 번 다시 고른다 (1·2·4번 그대로)', () => {
   const ids = [1, 2, 3].map(hex);
-  const voca = [vocaRecord(ids[0], 'minute', '영어', 'L9'), vocaRecord(ids[1], 'lunch', '영어', 'L9'), vocaRecord(ids[2], 'sleep', '영어', 'L9')];
+  const voca = [vocaRecord(ids[0], 'minute', '영어', 'L9'), vocaRecord(ids[1], 'lunch', '영어', 'L9'), vocaRecord(ids[2], 'sleep', '영어', 'L9'), ...L9_MORE];
   const history = { visits: { english: ['2026-11-24'] }, logs: [{ date: '2026-11-24', subject: '영어', items: { ['v:' + ids[0]]: [2, 1, 0, ['x']], ['v:' + ids[1]]: [1, 0, 0, []], 'g:vm-add-1x1': [1, 1, 0, []] } }] };
   const first = plan(MINSU, at('2026-11-25'), { history, voca: [] });
   assert.equal(first.stops[2].source, 'recent');
@@ -205,7 +210,7 @@ test('6b. 어휘 캐시가 늦게 오면 3번만 한 번 다시 고른다 (1·2�
 
 test('6c. 같은 날 두 일지 행의 같은 문항은 한 번만, 지난 단원은 마지막 방문 순(동점은 순위)', () => {
   const ids = [1, 2, 3].map(hex);
-  const voca = [vocaRecord(ids[0], 'minute', '영어', 'L9'), vocaRecord(ids[1], 'lunch', '영어', 'L9'), vocaRecord(ids[2], 'sleep', '영어', 'L9')];
+  const voca = [vocaRecord(ids[0], 'minute', '영어', 'L9'), vocaRecord(ids[1], 'lunch', '영어', 'L9'), vocaRecord(ids[2], 'sleep', '영어', 'L9'), ...L9_MORE];
   const k = 'v:' + ids[0];
   const history = { visits: {}, logs: [
     { date: '2026-11-24', subject: '영어', items: { [k]: [1, 1, 0, []], ['v:' + ids[1]]: [3, 1, 0, []] } },

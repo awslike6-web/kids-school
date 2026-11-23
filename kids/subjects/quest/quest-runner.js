@@ -170,6 +170,8 @@
           document.getElementById('subjectBadgeIcon').textContent = currentQuest.icon;
           if (urlParams.get('lesson') !== 'round5' && global.QuestLessonUI.start({
             unit, subj: currentSubj, mode: urlParams.get('lesson') === 'bite' ? 'bite' : 'full', isMinseo,
+            // 🛤️ 오늘의 길 「다시 보기」: 어제 틀린 낱말을 첫 레슨 앞자리에 (docs/today_path_spec.md §15-4)
+            focus: [...new Set(String(urlParams.get('focus') || '').split('|').filter(id => /^[0-9a-f]{32}$/.test(id)))].slice(0, 3),
             onCompanion: (event, detail) => syncCheerMonsterReaction(({ start: 'stageStart', combo: 'correct', step: 'correct', boss: 'correct' })[event] || event,
               ({ combo: `연속 ${detail.combo}개! 신나게 이어 가자!`, step: '좋아! 다음 단계도 같이 가 보자!', boss: '마지막 단계야! 차근차근 함께 해 보자!' })[event] || null),
             onExit: lobby => lobby ? goToLobby() : returnToLab()

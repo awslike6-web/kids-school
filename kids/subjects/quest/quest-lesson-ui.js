@@ -107,7 +107,7 @@
     document.head.append(style);
   }
   function start({
-    unit, subj, mode, isMinseo, onCompanion, onExit
+    unit, subj, mode, isMinseo, onCompanion, onExit, focus
   }) {
     ensureStyle();
     const child = unit.child;
@@ -171,11 +171,13 @@
       .catch(e => console.warn('[레슨 일지]', e));
       root.LearningLog?.flush().catch(e => console.warn('[문항기록]', e));
     }
+    let focusOnce = Array.isArray(focus) ? focus : []; // 첫 레슨에서만 (「다음 레슨」은 평소대로)
     function begin() {
       token++;
       lesson = root.QuestLesson.buildLesson({
-        child, items: unit.items, subj, mode
+        child, items: unit.items, subj, mode, focus: focusOnce
       });
+      focusOnce = [];
       if (!root.QuestLesson.validateLesson(lesson)) return false;
       session = root.QuestLesson.createSession(lesson, {
         onCompanion: signal, isMinseo

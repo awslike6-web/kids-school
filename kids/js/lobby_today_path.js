@@ -14,6 +14,8 @@
   const SUBJECT_EMOJI = { korean: '📖', math: '🧮', english: '🔤', society: '🏛️', science: '🧪', haru: '🌱' };
   let token = 0;
   const inflight = {};
+  const bonusInflight = {};
+  const BONUS = 3;
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -92,15 +94,49 @@
   }
 
   function haruDone(child, today) {
-    try { return localStorage.getItem(`haru_checkin_done_${today}_${child.key}`) === 'true'; } catch (e) { return false; }
+    return window.TodayPath.haruDoneOn(localStorage, child.name, today);
   }
 
-  async function build(child, today, previous, now) {
+  /** 방학 모드: 아이 전용 설정 키에서 직접 (설정 엔진이 늦게 실려도, 다른 아이 값이 번지지 않게 — spec §15-3) */
+  function vacationOf(child) {
+    try {
+      const raw = localStorage.getItem(`MINMIN_APP_SETTINGS_${child.isMinseo ? 'daughter' : 'son'}`);
+      return !!raw && JSON.parse(raw).vacation_mode === true;
+    } catch (e) { return false; }
+  }
+
+  /** 고정 시간표를 하루 한 번 로비 전용 키로 (시간표 화면 캐시 V11은 건드리지 않음, 실패면 []라 1행 이상일 때만 저장 — spec §15-5) */
+  let timetableJob = null;
+  /** 같은 날 한 번만 동시에 (아이를 바꿔도 요청 하나) */
+  function refreshTimetableOnce(today) {
+    if (!timetableJob) timetableJob = refreshStaticTimetable(today).catch(() => false).finally(() => { timetableJob = null; });
+    return timetableJob;
+  }
+
+  async function refreshStaticTimetable(today) {
+    const TB = window.TimetableBoost;
+    if (!TB || !TB.STATIC_CACHE_KEY || typeof window.fetchTimetableFromNotion !== 'function') return false;
+    try {
+      const saved = JSON.parse(localStorage.getItem(TB.STATIC_CACHE_KEY) || 'null');
+      if (saved && saved.date === today) return false;
+    } catch (e) {}
+    const rows = await window.fetchTimetableFromNotion({ dbId: config().STATIC_TIMETABLE_DB_ID || '32ba27115b68828bbda201a1bdce12fc', fetchPageContent: false });
+    if (!Array.isArray(rows) || !rows.length) return false;
+    const slim = rows.map(r => ({ child: r.child, dayOfWeek: r.dayOfWeek, subject: r.subject, periodNum: r.periodNum }));
+    try { localStorage.setItem(TB.STATIC_CACHE_KEY, JSON.stringify({ date: today, savedAt: Date.now(), rows: slim })); } catch (e) { return false; }
+    if (typeof window.__lobbyRefreshBoosts === 'function') window.__lobbyRefreshBoosts(); // 버프 배지도 새 시간표로
+    return true;
+  }
+
+  async function build(child, today, previous, now, vacation) {
     const TP = window.TodayPath;
-    await waitFor(() => window.TimetableBoost && window.LearningLog && typeof window._loadVocaFromCache === 'function', Date.now() + CORE_WAIT_MS);
+    await waitFor(() => window.TimetableBoost && window.LearningLog && typeof window._loadVocaFromCache === 'function'
+      && typeof window.fetchTimetableFromNotion === 'function', Date.now() + CORE_WAIT_MS);
     const until = Date.now() + QUERY_BUDGET_MS;
     const vocaReady = Promise.race([Promise.resolve(window.__lobbyVocaPrefetch).catch(() => {}), sleep(QUERY_BUDGET_MS)]);
-    const [pages] = await Promise.all([queryStudyLog(child.name, today, until), vocaReady]);
+    // 시간표는 늦게 와도 저장은 하고(다음 편성·버프부터), 이번 편성은 예산 안에 온 것만 쓴다
+    const timetableReady = Promise.race([refreshTimetableOnce(today), sleep(QUERY_BUDGET_MS)]);
+    const [pages] = await Promise.all([queryStudyLog(child.name, today, until), vocaReady, timetableReady]);
     const decode = window.LearningLog && window.LearningLog.decode;
     const history = pages ? TP.historyFromPages(pages, today, decode) : null;
     if (previous && history === null) return { ...previous, retried: true }; // 보정도 실패 → 그날은 그대로
@@ -110,7 +146,7 @@
       [days.todayName]: getDay(child.name, days.todayName),
       [days.nextName]: getDay(child.name, days.nextName)
     } : {};
-    const route = TP.plan({ child: child.name, childKey: child.key, now, timetable, eligible: eligibleOf(child), history, voca: loadVoca(child.name), rooms: rooms() });
+    const route = TP.plan({ child: child.name, childKey: child.key, now, timetable, eligible: eligibleOf(child), history, voca: loadVoca(child.name), rooms: rooms(), vacation });
     if (previous) route.retried = true;
     return route;
   }
@@ -174,10 +210,43 @@
         </a>`;
     }).join('');
     container.innerHTML = `<section class="tp-card ${theme}" aria-label="오늘의 길" data-date="${esc(route.date)}">
-        <div class="tp-head"><h2>🛤️ 오늘의 길</h2>${count === 4 ? '<span class="tp-all">🎉 오늘의 길 완주!</span>' : ''}<span class="tp-count">${count}/4</span></div>
+        <div class="tp-head"><h2>🛤️ 오늘의 길</h2>${count === 4 ? `<span class="tp-all">🎉 오늘의 길 완주! +${BONUS}</span>` : ''}<span class="tp-count">${count}/4</span></div>
         <div class="tp-grid">${stops}</div>
       </section>`;
     container.hidden = false;
+    if (count === 4) maybeGrantBonus(child, today, route);
+  }
+
+  /**
+   * 네 정거장 완주 보너스 +3, 하루 한 번 (spec §15-2). 기존 보상 엔진(reward-grant.js)만 쓴다.
+   * 부팅 때 두 번 그려도 한 번: 아이별 잠금 + 모듈을 기다린 뒤 장부를 다시 읽고 bonus를 먼저 저장.
+   */
+  async function maybeGrantBonus(child, today, route) {
+    const TP = window.TodayPath;
+    if (bonusInflight[child.name] || TP.isParentSession(localStorage) || TP.readLedger(localStorage, child.name, today).bonus) return false;
+    bonusInflight[child.name] = true;
+    try {
+      const ready = await waitFor(() => window.MinminRewardGrant && typeof window.MinminRewardGrant.grant === 'function', Date.now() + 10000);
+      if (!ready || (window.__activeLobbyUser && window.__activeLobbyUser !== child.key) || TP.kstDate(Date.now()) !== today
+        || TP.isParentSession(localStorage)) return false;
+      // 기다리는 동안 노선(방학 모드 등)이나 장부가 바뀌었을 수 있으니 둘 다 다시 읽는다
+      const current = TP.loadRoute(localStorage, child.name, today) || route;
+      const ledger = TP.readLedger(localStorage, child.name, today);
+      if (ledger.bonus || !TP.doneState(current, ledger, haruDone(child, today)).every(Boolean)) return false;
+      ledger.bonus = true;
+      localStorage.setItem(TP.DONE_PREFIX + child.name, JSON.stringify(ledger));
+      // 재화 칸은 currentTheme으로 정해지므로 아이별로 명시, 과목은 1번(로비엔 currentSubject가 없어 기본 '사회'로 가는 것을 막음)
+      window.MinminRewardGrant.grant(BONUS, false, null, {
+        childName: child.name, currentTheme: child.isMinseo ? '슬라임' : '마인크래프트',
+        subject: TP.SUBJECTS[current.stops[0].subject] || '국어'
+      });
+      return true;
+    } catch (e) {
+      console.warn('[오늘의 길] 완주 보너스 실패:', e);
+      return false;
+    } finally {
+      delete bonusInflight[child.name];
+    }
   }
 
   function renderLoading(container, child) {
@@ -215,15 +284,24 @@
     const now = Date.now();
     const today = TP.kstDate(now);
     const parent = TP.isParentSession(localStorage);
+    const vacation = vacationOf(child);
     let route = TP.loadRoute(localStorage, child.name, today);
+    if (TP.vacationChanged(route, vacation)) {
+      // 방학 모드를 바꿨다: 그날이라도 새로 편성(보정 대상 아님), 옛 정거장 번호 완료는 지운다 (spec §15-3)
+      if (!parent) TP.clearStopMarks(localStorage, child.name, today);
+      route = null;
+    }
     const done = route ? TP.doneState(route, TP.readLedger(localStorage, child.name, today), haruDone(child, today)) : [];
     if (route) render(container, route, child, today);
+    // 노선이 이미 있어도 고정 시간표는 하루 한 번 받아 둔다(버프 배지·다음 편성용, 코어가 실린 뒤에만)
+    if (route && typeof window.fetchTimetableFromNotion === 'function') refreshTimetableOnce(today);
     if (route && !TP.shouldReplan(route, done)) {
       if (route.reviewPending && !parent) refreshReviewWhenReady(child, today, container, my);
       return;
     }
     if (!route) renderLoading(container, child);
-    const job = inflight[child.name] || (inflight[child.name] = build(child, today, route, now).finally(() => { delete inflight[child.name]; }));
+    const jobKey = `${child.name}:${vacation}`;
+    const job = inflight[jobKey] || (inflight[jobKey] = build(child, today, route, now, vacation).finally(() => { delete inflight[jobKey]; }));
     try {
       route = await job;
     } catch (e) {
@@ -242,5 +320,5 @@
     if (event.persisted && window.__activeLobbyUser) mount(window.__activeLobbyUser);
   });
 
-  window.LobbyTodayPath = { mount, queryStudyLog };
+  window.LobbyTodayPath = { mount, queryStudyLog, refreshStaticTimetable, maybeGrantBonus };
 })();

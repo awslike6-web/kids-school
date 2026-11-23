@@ -20,7 +20,7 @@ function getKstTodayYMD(date = new Date()) {
     const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('storybook_engine.js'))?.src;
     if (!source) return;
     const script=document.createElement('script');
-    script.src=new URL('../core/today-path.js?v=20261123-path',source).href; script.async=false;
+    script.src=new URL('../core/today-path.js?v=20261123-path2',source).href; script.async=false;
     document.head.appendChild(script);
 })();
 /* ========================================================

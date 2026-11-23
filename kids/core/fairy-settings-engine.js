@@ -15,7 +15,8 @@ const SettingsManager = {
         sfx_enabled: true,
         bgm_track: "off",
         korean_speech_rate: 1.0,
-        theme_skin: "default"
+        theme_skin: "default",
+        vacation_mode: false // 🏖️ 방학 모드: 오늘의 길이 시간표 대신 골고루 편성 (docs/today_path_spec.md §15-3)
     },
 
     // 1-1. 학생별 로컬스토리지 키 생성
@@ -28,9 +29,13 @@ const SettingsManager = {
     getAll: function() {
         try {
             const studentKey = this.getStorageKey();
-            const raw = localStorage.getItem(studentKey) || localStorage.getItem(SETTINGS_STORAGE_KEY);
+            const studentRaw = localStorage.getItem(studentKey);
+            const raw = studentRaw || localStorage.getItem(SETTINGS_STORAGE_KEY);
             if (!raw) return { ...this.defaults };
-            return { ...this.defaults, ...JSON.parse(raw) };
+            const parsed = JSON.parse(raw);
+            // 방학 모드는 아이별 값만 (공용 옛 키에 남은 다른 아이 값이 번지지 않게, today_path_spec §15-3)
+            if (!studentRaw && parsed && typeof parsed === 'object') delete parsed.vacation_mode;
+            return { ...this.defaults, ...parsed };
         } catch (e) {
             console.error("설정 로드 실패, 기본값 사용:", e);
             return { ...this.defaults };
@@ -61,13 +66,24 @@ const SettingsManager = {
     },
 
     // 🌐 4-1. 노션 인벤토리 DB 비동기 클라우드 저장
-    saveToCloud: async function() {
+    // 저장 시점의 아이·설정을 먼저 잡아 두고(기다리는 동안 아이를 바꿔도 섞이지 않게) 저장은 하나씩 차례로
+    saveToCloud: function() {
         const student = this.getCurrentStudent();
+        const appSettings = this.getAll();
+        const run = () => this.saveToCloudNow(student, appSettings);
+        // 진행 중인 저장이 없으면 바로 시작, 있으면 그 뒤에 (늦게 끝난 옛 저장이 새 값을 덮지 않게)
+        const job = this._saving ? this._saving.then(run, run) : run();
+        this._saving = job;
+        job.finally(() => { if (this._saving === job) this._saving = null; });
+        return job;
+    },
+
+    saveToCloudNow: async function(student, appSettings) {
         const childName = (student === 'daughter') ? '민서' : '민수';
         
         // 관리자 모드(아빠/엄마 테스트 중)일 때는 오염 방지
         const savedName = localStorage.getItem('currentUserName');
-        if (savedName === '아빠' || savedName === '엄마') {
+        if (savedName === '아빠' || savedName === '엄마' || savedName === '어른') {
             console.log(`🛠️ [설정 저장 프리패스] ${savedName} 모드이므로 로컬만 반영합니다.`);
             return;
         }
@@ -106,9 +122,32 @@ const SettingsManager = {
             } catch(e) {
                 currentCloud = {};
             }
+            // 이 기기에 쓸 만한 캐시(비어 있지 않은 객체)가 없으면 노션의 학습설정을 먼저 읽어 바탕으로 삼는다
+            // (없이 보내면 진도 설정·저금통·퀴즈 흐름이 appSettings만 남고 지워짐, today_path_spec §15-3)
+            const usableCache = currentCloud && !Array.isArray(currentCloud)
+                && Object.keys(currentCloud).some(k => k !== 'updatedAt' && k !== 'appSettings');
+            if (!usableCache) {
+                const pageRes = await fetch(`${proxyUrl}/v1/pages/${pageId}?force=true`, { cache: 'no-store' });
+                if (!pageRes.ok) {
+                    console.warn(`⚠️ [설정 저장 보류] 기존 학습설정을 읽지 못해 덮어쓰지 않습니다 (HTTP ${pageRes.status}, 로컬만 저장됨).`);
+                    return;
+                }
+                const page = await pageRes.json();
+                const text = (page?.properties?.['학습설정']?.rich_text || []).map(t => t.plain_text || t.text?.content || '').join('');
+                if (text) {
+                    try {
+                        const base = JSON.parse(text);
+                        if (!base || typeof base !== 'object' || Array.isArray(base)) throw new Error('학습설정이 객체가 아님');
+                        currentCloud = base;
+                    } catch (e) {
+                        console.warn('⚠️ [설정 저장 보류] 기존 학습설정을 해석하지 못해 덮어쓰지 않습니다 (로컬만 저장됨).');
+                        return;
+                    }
+                }
+            }
 
-            // appSettings 업데이트
-            currentCloud.appSettings = this.getAll();
+            // appSettings 업데이트 (저장을 부른 순간의 값)
+            currentCloud.appSettings = appSettings;
             currentCloud.updatedAt = new Date().toISOString();
 
             const jsonStr = JSON.stringify(currentCloud);
@@ -161,10 +200,13 @@ const SettingsManager = {
             if (appSettings && typeof appSettings === 'object') {
                 const current = this.getAll();
                 const merged = { ...current, ...appSettings };
+                const vacationChanged = Boolean(current.vacation_mode) !== Boolean(merged.vacation_mode);
                 const studentKey = this.getStorageKey();
                 localStorage.setItem(studentKey, JSON.stringify(merged));
                 localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(merged));
                 
+                // 방학 모드 알림을 테마보다 먼저 (테마 적용이 실패해도 로비 카드는 다시 그리게)
+                if (vacationChanged) this.onSettingChanged('vacation_mode', merged.vacation_mode);
                 // 테마 등 UI 즉시 동기화
                 if (merged.theme_skin) {
                     this.applyTheme(merged.theme_skin);
@@ -181,6 +223,10 @@ const SettingsManager = {
         console.log(`⚙️ [설정 변경] ${key} ➔`, value);
         if (key === "theme_skin") {
             this.applyTheme(value);
+        }
+        // 🏖️ 방학 모드가 바뀌면 로비 「오늘의 길」을 다시 편성 (로비가 아니면 아무 일 없음)
+        if (key === "vacation_mode" && window.LobbyTodayPath && window.__activeLobbyUser) {
+            window.LobbyTodayPath.mount(window.__activeLobbyUser);
         }
     },
 
@@ -460,6 +506,20 @@ const SettingsManager = {
                 <div class="setting-subtext" style="margin:14px 0 8px;">영어 원어민 (영어방 속도 단추와 같아요)</div>
                 <div class="theme-chip-grid">
                     ${englishRateChips}
+                </div>
+            </div>
+
+            <!-- 섹션 2-2: 방학 모드 (오늘의 길, docs/today_path_spec.md §15-3) -->
+            <div class="settings-section">
+                <div class="setting-row">
+                    <div class="setting-label-group">
+                        <div class="setting-label">🏖️ 방학 모드 <span class="student-tag">${studentBadge}</span></div>
+                        <div class="setting-subtext">부모님과 정해요. 켜면 「오늘의 길」이 학교 시간표 대신 여러 과목을 골고루 골라 줘요.</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" ${settings.vacation_mode === true ? 'checked' : ''} onchange="SettingsManager.set('vacation_mode', this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 

@@ -131,7 +131,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "fairy-chatbot.js", "path": "kids-school-main/kids/core/fairy-chatbot.js", "domain": [], "docs": ["homeschool_spec.md", "CORE_CATALOG.md"]},
       {"name": "fairy-config.js", "path": "kids-school-main/kids/core/fairy-config.js", "domain": [], "docs": ["family_omok_spec.md", "family_yacht_spec.md", "family_yut_ui_spec.md"]},
       {"name": "fairy-settings-catalog.js", "path": "kids-school-main/kids/core/fairy-settings-catalog.js", "domain": [], "docs": ["family_omok_spec.md", "family_yacht_spec.md", "family_yut_ui_spec.md"]},
-      {"name": "fairy-settings-engine.js", "path": "kids-school-main/kids/core/fairy-settings-engine.js", "domain": [], "docs": ["gallery_runner_star_bank_spec.md", "learning_settings_chunk_spec.md", "CORE_CATALOG.md"]},
+      {"name": "fairy-settings-engine.js", "path": "kids-school-main/kids/core/fairy-settings-engine.js", "domain": [], "docs": ["gallery_runner_star_bank_spec.md", "learning_settings_chunk_spec.md", "today_path_spec.md"]},
       {"name": "fairy-tts.js", "path": "kids-school-main/kids/core/fairy-tts.js", "domain": [], "docs": ["family_omok_spec.md", "family_yacht_spec.md", "family_yut_ui_spec.md"]},
       {"name": "family-mail.js", "path": "kids-school-main/kids/core/family-mail.js", "domain": ["family"], "docs": ["family_mail_spec.md", "family_quiz_spec.md", "CORE_CATALOG.md"]},
       {"name": "family-quiz-store.js", "path": "kids-school-main/kids/core/family-quiz-store.js", "domain": ["family"], "docs": ["family_quiz_spec.md", "CORE_CATALOG.md"]},

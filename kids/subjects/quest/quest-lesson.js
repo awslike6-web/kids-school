@@ -63,6 +63,10 @@
     const pick = list => shuffled(list.length ? list : pool, rng)
     .sort((a, b) => (uses.get(a.id) || 0) - (uses.get(b.id) || 0) || st(a).c - st(b).c)[0];
     const low = list => list.filter(it => !M.isRusty(st(it), today));
+    // 오늘의 길 「다시 보기」 focus: 주어진 순서대로, 출제 풀에 있는 항목만 앞자리에 (today_path_spec §15-4)
+    const normId = id => String(id || '').replace(/-/g, '').toLowerCase();
+    const focusItems = [...new Set(Array.isArray(opts.focus) ? opts.focus.map(normId) : [])]
+      .map(id => pool.find(it => normId(it.id) === id)).filter(Boolean);
     const words = low(current.filter(it => it.kind === 'word'));
     const sentences = low(current.filter(it => it.kind !== 'word'));
     const step = (key, questions) => ({
@@ -71,8 +75,8 @@
     if (bite) {
       const questions = Array.from({
         length: 3
-      }, () => {
-        const it = pick(pool);
+      }, (_, i) => {
+        const it = focusItems[i] || pick(pool);
         return question(it, Math.min(2, M.levelOf(st(it))));
       });
       return {
@@ -96,9 +100,9 @@
     for (let i = 0;
     i < count[0];
     i++) {
-      if (i === 1 && matching.length === 3) warm.push(credit(M.buildMatch(matching, ctx)));
+      if (i === 1 && matching.length === 3 && !focusItems.length) warm.push(credit(M.buildMatch(matching, ctx)));
       else {
-        const it = pick(words);
+        const it = focusItems[i] || pick(words);
         warm.push(question(it, Math.min(2, M.levelOf(st(it)))));
       }
     }

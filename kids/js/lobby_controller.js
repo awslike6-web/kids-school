@@ -145,6 +145,8 @@
     window.StudyLogStore.renderStreakBadge('minseoStreakBadge', 'minseo', false);
     window.StudyLogStore.renderStreakBadge('minsuStreakBadge', 'minsu', true);
   }
+  // 🛤️ 오늘의 길이 고정 시간표를 새로 받으면 버프 배지를 다시 그린다 (docs/today_path_spec.md §15-5)
+  window.__lobbyRefreshBoosts = () => { updateQuestCtaAndBoosts(activeUserKey, getRealChildName(activeUserKey)); renderSubjectCapStates(activeUserKey); };
 
   function setPopupLayer(cardEl, isOpen) {
     if (!cardEl) return;

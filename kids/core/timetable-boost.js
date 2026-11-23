@@ -65,31 +65,41 @@
     }
 
     const TIMETABLE_CACHE_KEY = 'MINMIN_TIMETABLE_CACHE_V11'; // notion-cache-manager.js가 시간표 화면에서 채움
+    const STATIC_CACHE_KEY = 'MINMIN_TIMETABLE_STATIC_V1';   // 로비가 하루 한 번 고정 시간표만 받아 둠 { date, rows } (lobby_today_path.js)
 
     function resolveChildName(childName) {
         if (childName === '민수' || childName === '민서') return childName;
         return (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서') ? '민서' : '민수';
     }
 
-    /** 노션 고정 시간표 캐시 행 (없거나 깨졌으면 null) */
+    /** 고정 시간표 행 출처들: 시간표 화면 캐시와 로비가 받아 둔 것 중 **더 최근에 받은 것 먼저** (없거나 깨진 것은 빠짐) */
     function readStaticRows() {
+        const sources = [];
         try {
             const cached = JSON.parse(localStorage.getItem(TIMETABLE_CACHE_KEY) || 'null');
-            return cached && Array.isArray(cached.staticRows) ? cached.staticRows : null;
-        } catch (_) {
-            return null;
-        }
+            if (cached && Array.isArray(cached.staticRows)) sources.push({ at: Number(cached.cachedAt) || 0, rows: cached.staticRows });
+        } catch (_) {}
+        try {
+            const lobby = JSON.parse(localStorage.getItem(STATIC_CACHE_KEY) || 'null');
+            if (lobby && Array.isArray(lobby.rows)) sources.push({ at: Number(lobby.savedAt) || 0, rows: lobby.rows });
+        } catch (_) {}
+        return sources.sort((a, b) => b.at - a.at).map(source => source.rows);
     }
 
     /**
-     * 한 요일의 5대 교과 (교시 순, 중복 없음). docs/today_path_spec.md §4-1
-     * - 노션 등록 시간표(캐시)에 그 학생 행이 있으면 그것만 본다(그날 교과가 없으면 빈 배열).
+     * 한 요일의 5대 교과 (교시 순, 중복 없음). docs/today_path_spec.md §4-1·§15-5
+     * - 출처를 차례로 보고, 그 학생 행이 있는 첫 출처만 쓴다(그날 교과가 없으면 빈 배열).
      * - 학생·요일·과목은 노션 select 원문과 정확히 같은 글자만 받는다(약속·상상 같은 통합교과는 버림).
-     * - 캐시에 그 학생 행이 하나도 없을 때만 코드 안 기본 시간표.
+     * - 어느 출처에도 그 학생 행이 없을 때만 코드 안 기본 시간표.
+     * @param {Array[]} [sources] 행 배열들 (시험·여러 요일 한 번에 읽기용)
      */
-    function getSubjectsForDay(childName, dayName, rows = readStaticRows()) {
+    function getSubjectsForDay(childName, dayName, sources = readStaticRows()) {
         const name = resolveChildName(childName);
-        const mine = Array.isArray(rows) ? rows.filter(row => row && row.child === name) : [];
+        let mine = [];
+        for (const rows of sources || []) {
+            mine = Array.isArray(rows) ? rows.filter(row => row && row.child === name) : [];
+            if (mine.length) break;
+        }
         if (mine.length === 0) return [...((DEFAULT_TIMETABLE[name] || {})[dayName] || [])];
         const ordered = mine
             .filter(row => row.dayOfWeek === dayName && TARGET_SUBJECTS.includes(row.subject))
@@ -174,6 +184,7 @@
 
     // 전역 노출
     window.TimetableBoost = {
+        STATIC_CACHE_KEY,
         getTargetDays,
         getSubjectsForDay,
         getTimetableSubjects,
