@@ -14,6 +14,15 @@ function getKstTodayYMD(date = new Date()) {
     script.src=new URL('../core/study-activity.js?v=20261023',source).href; script.async=false;
     document.head.appendChild(script);
 })();
+// 🛤️ 오늘의 길 완료 장부도 한 번만 싣는다 (동화 완독 신호, docs/today_path_spec.md §5-2)
+(function() {
+    if (window.TodayPath || Array.from(document.scripts).some(s => (s.src || '').includes('today-path.js'))) return;
+    const source=document.currentScript?.src || Array.from(document.scripts).find(s => (s.src || '').includes('storybook_engine.js'))?.src;
+    if (!source) return;
+    const script=document.createElement('script');
+    script.src=new URL('../core/today-path.js?v=20261123-path',source).href; script.async=false;
+    document.head.appendChild(script);
+})();
 /* ========================================================
    📖 김s 공부방 스토리북 공통 뷰어 엔진 (storybook_engine.js)
    ======================================================== */
@@ -545,6 +554,7 @@ function getKstTodayYMD(date = new Date()) {
 
   function showCompletionModal() {
     const { childName, isMinsu, isAdmin, subject } = getCurrentReaderInfo();
+    window.TodayPath?.markDone({ child: childName, subject, kind: 'story' }); // 🛤️ 오늘의 길 (부모 검수면 장부가 스스로 거름)
     const bookId = (STORY_BOOK && STORY_BOOK.id) || window.location.pathname.split('/').pop().replace('.html', '');
     const todayStr = getKstTodayYMD();
     const rewardKey = `mimi_storybook_reward_${bookId}_${childName}_${todayStr}`;

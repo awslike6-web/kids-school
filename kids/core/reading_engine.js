@@ -616,6 +616,8 @@
             window.triggerAwardDispense(3, 'reading_clear');
         }
 
+        window.TodayPath?.markDone({ subject: activeSubject, kind: 'reading' }); // 🛤️ 오늘의 길 완료 신호
+
         // 노션 학습일지 자동 전송
         if (typeof window.sendStudyLogToNotion === 'function') {
             await window.sendStudyLogToNotion({

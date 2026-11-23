@@ -260,6 +260,7 @@
           lessonId, child, mode
         }
       }));
+      root.TodayPath?.markDone({ child, subject: subj, kind: 'lesson' }); // 🛤️ 오늘의 길 완료 신호
       saveChain.finally(log);
       root.fairyReward?.();
       const panel = document.createElement('div');

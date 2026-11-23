@@ -29,6 +29,7 @@ window.roomStartTime = window.roomStartTime || new Date();
         'notion-api-client.js?v=20261119-allcache',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
         'study-log-store.js?v=20261121-learning', // 📒 학습일지 일일 Upsert & 연속 학습 스트릭 단일 원천
         'learning-log.js?v=20261121-learning', // 📒 문항 단위 학습 기록 (학습일지 행의 '문항기록' 칸)
+        'today-path.js?v=20261123-path', // 🛤️ 오늘의 길 완료 장부 (과목방·독해 완료 신호, lobby.html과 같은 버전 문자열)
         'notion-study-logger.js?v=20261101-reward-grant-shared', // 📝 학습일지 & 보상/레벨업 전송 엔진
         'stt-debouncer.js',          // 🎙️ STT 음성인식 디바운서
         'mission-reward-engine.js?v=20261011-5',  // 💎 미션 보상 및 축하 모달

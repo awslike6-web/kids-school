@@ -135,6 +135,8 @@
     if (window.FamilyQuiz) window.FamilyQuiz.mountLobbyCard(document.getElementById(activeUserKey === 'minseo' ? 'familyQuizCardMinseo' : 'familyQuizCardMinsu'), activeUserKey);
 
     renderLobbyStreaks();
+    // 🛤️ 오늘의 길 카드 (하루 한 번 편성·기기에 고정, docs/today_path_spec.md)
+    if (window.LobbyTodayPath) window.LobbyTodayPath.mount(activeUserKey);
   }
 
   // 🔥 연속 학습 불꽃 스트릭(Streak) HUD 점등 (학습 기록이 없으면 배지 숨김)
@@ -526,10 +528,11 @@
       console.log('🏰 Stitch AI 듀얼 로비 & 코어 엔진 결합 완료!');
       const realName = getRealChildName(activeUserKey);
 
+      // 오늘의 길 편성이 첫 진입의 어휘 캐시를 기다릴 수 있게 Promise를 카드 그리기(applyLobbyThemeAndView)보다 먼저 남긴다 (spec §4-3)
+      if (typeof prefetchVocaData === 'function') window.__lobbyVocaPrefetch = prefetchVocaData(realName);
       applyLobbyThemeAndView(activeUserKey, false);
 
       if (typeof initFairyChat === 'function') initFairyChat('KOREAN', '로비');
-      if (typeof prefetchVocaData === 'function') prefetchVocaData(realName);
       if (typeof prefetchReadingData === 'function') prefetchReadingData({ student: realName });
 
       if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromStudyLogs === 'function') {

@@ -129,6 +129,9 @@
 
     <!-- MAIN SCROLLABLE CONTENT (MINSEO LOBBY CANVAS) -->
     <main class="relative z-10 max-w-lg mx-auto px-4 pt-32 space-y-6">
+      <!-- 🛤️ 오늘의 길: 매일 네 정거장 (LobbyTodayPath 카드, docs/today_path_spec.md) -->
+      <div id="todayPathMinseo" style="margin-top:2.5rem" hidden></div>
+
       <!-- SECTION 1: 🏝️ 별빛 모험 월드 (SUBJECT STAGE MAP) -->
       <section class="clay-card rounded-3xl p-5 relative overflow-hidden border-4 border-white/80 select-none shadow-xl">
         <div class="flex items-center justify-between mb-2 relative z-10">
@@ -455,6 +458,9 @@
 
     <!-- MAIN SPATIAL CONTAINER (MINSU) -->
     <main class="w-full max-w-md mx-auto px-space-sm sm:px-space-md pt-2 space-y-6">
+      <!-- 🛤️ 오늘의 길: 매일 네 정거장 (LobbyTodayPath 카드, docs/today_path_spec.md) -->
+      <div id="todayPathMinsu" hidden></div>
+
       <!-- SECTION 1: COSMIC STAR-MAP / DIMENSION SECTOR-07 -->
       <section class="relative">
         <div class="flex items-center justify-between px-2 pt-1 pb-2">
@@ -753,6 +759,8 @@
   <script src="./kids/config.js"></script>
   <script src="./kids/core/study-log-store.js?v=20261024-1"></script>
   <script src="./kids/core/family-quiz-store.js?v=20261120-world"></script>
+  <script src="./kids/core/today-path.js?v=20261123-path"></script>
+  <script src="./kids/js/lobby_today_path.js?v=20261123-path"></script>
   <script src="./kids/js/lobby_config.js?v=20261120-world"></script>
   <script src="./kids/js/lobby_subject_hud.js?v=20261120-world"></script>
   <script src="./kids/js/lobby_controller.js?v=20261120-world"></script>

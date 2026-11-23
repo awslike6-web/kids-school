@@ -125,6 +125,14 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
   | `handleCapModalGoRecommended()` / `handleCapModalReviewAnyway()` | 갈림길 모달 내 `[보물이 남은 OO방 바로 가기!]` 및 `[그냥 복습만 더 할래요]` 라우팅 |
   | `setSubjectCapOverride(user, subj, state)` | 과목별 일일 한도 신호등 상태(`available`·`critical`·`completed`) 런타임 제어 |
 
+### 🛤️ 오늘의 길 `today-path.js` · `lobby_today_path.js` (2026-11-23, 1차)
+아이가 고르지 않아도 매일 네 정거장(🎒 오늘 배운 것 → 🔭 내일 맛보기 → 🔁 다시 보기 → 🎡 돌림 칸)을 공부방 월드 맨 위 카드로 놓는 루틴 라인. 명세 `docs/today_path_spec.md`.
+- **파일**: `kids/core/today-path.js`(약 400줄, 전역 `TodayPath`, `module.exports`) — 순수 편성·완료 장부·노선 저장. `kids/js/lobby_today_path.js`(약 250줄, 전역 `LobbyTodayPath`) — 학습일지 하루 한 번 읽기(노션 쓰기 없음)·어휘 캐시·카드 그리기. `lobby.html`의 `#todayPathMinseo`·`#todayPathMinsu`.
+- **편성**: `TodayPath.plan({ child, childKey, now, timetable, eligible, history, voca, rooms })` → `{ v:1, date, provisional, stops[4], reviewPending? }`. 과목은 `SUBJECTS` 맵과 **정확히 같은 글자만**(괄호 단원명·통합교과 버림). 1·2·4번 과목은 서로 다르고 1·2번에 하루 없음. 순위 = 최근 7일 방문 일수 → 마지막 방문 → 시간표 순서/날짜 회전. 3번 다시 보기 = 최근 `v:`·사회 `c:` 오답(어휘 캐시 단원 3개 이상) → 녹슨 왕관·은메달(민수만) → 지난 단원. KST 날짜·요일은 `now+9h`로 직접 계산.
+- **완료 장부**: `TodayPath.markDone({ child?, subject, kind })` (`kind` = `lesson`·`quiz`·`story`·`reading`) → 기기 `MINMIN_TODAY_PATH_DONE_V1_<이름>`. URL에 `tp=1~4`가 있으면 그 정거장에만, 없으면 과목에만. 부모 시뮬레이터는 기록 안 함. 연결: 레슨 완주(`quest-lesson-ui.js`)·4+1 완주(`quest-runner.js`)·과목방 퀴즈 10문제 완주(`mission-reward-engine.js` `finalizeQuizRewardSession`, `window.currentSubject` 우선)·사회 자료분석 완주(`society_common.js`)·동화 완독(`storybook_engine.js`, 자가 삽입)·정밀 독해·민서 미니 독해. 하루는 기존 `haru_checkin_done_<날짜>_<아이 키>`를 읽음.
+- **노선 고정**: `MINMIN_TODAY_PATH_V1_<이름>`(KST 날짜). 학습일지 조회가 실패한 노선은 그날 한 번, 아무것도 안 했을 때만 다시 편성. 매일 첫 진입에 어휘 캐시가 늦으면 3번만 캐시가 채워진 뒤 한 번 다시 고름(`refreshReview`). 부모 시뮬레이터는 노선을 저장하지 않음.
+- **싣기**: `lobby.html`(`lobby_config.js` 앞)·`quest_runner.html`·`notion-helper.js` 자동 로더가 같은 `today-path.js?v=20261123-path` 문자열. 시험 `tests/today-path.test.mjs`(16개).
+
 ---
 
 ### 마이룸 인라인 CSS·JS 분리 (2026-10-31)
@@ -1428,7 +1436,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ### 🌟 `timetable-boost.js` & `timetable_controller.js`·`timetable_grid.js`·`timetable_notices.js` (시간표 부스트 엔진)
 주간 시간표를 노션에서 프리패치하여 오늘 배울 과목과 숙제를 로비 헤더에 원터치 칩으로 띄워주는 부스트 엔진입니다.
 - **파일 위치**:
-  - `kids/core/timetable-boost.js` (시간표 프리패치 & 캐시 엔진)
+  - `kids/core/timetable-boost.js` (184줄): 오늘·다음 등교일 교과와 보상 버프(🔥 오늘 복습 1.2배·한도 150 / ✨ 내일 예습 +7). **2026-11-23부터** 노션 고정 시간표 캐시 `MINMIN_TIMETABLE_CACHE_V11`의 `staticRows`(시간표 화면이 채움)를 학생·요일·과목 **정확히 같은 글자**로 읽고, 그 학생 행이 캐시에 하나도 없을 때만 코드 안 기본 시간표(민서는 「1학년 2학기 확정」 교과: 월·수·목 국·수, 금 수, 화 없음). 그전에는 아무도 채우지 않는 옛 키를 읽어 늘 기본 시간표로 돌았다. 약속·상상 같은 통합교과는 버린다.
   - `kids/js/timetable_controller.js` (504줄): 요일·교시·과목 색·`DEFAULT_BASE_TIMETABLE`, 공유 상태, 보기 설정·날짜·공지 판정 헬퍼, `buildGridMap`·`renderLessonCell`.
   - `kids/js/timetable_grid.js` (424줄): `renderWeeklyGrid`, 모바일 열 너비·스크롤, `renderTopNoticeBanner`, `openOverlayItemModal`·`closeOverlayModal`·`openNoticeGuideModal`·`toggleOverlayItemComplete`.
   - `kids/js/timetable_notices.js` (281줄): 공지 정렬·`renderNotices`·`renderAll`, `setChildFilter`·툴팁, `loadTimetableData`, 시계 즉시 갱신·타이머·`DOMContentLoaded` 등록.
@@ -1441,8 +1449,9 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **핵심 API**:
   | 메서드 | 설명 |
   | :--- | :--- |
-  | `TimetableBoost.getTodaySchedule(user)` | 오늘 요일 기준 수업/학원 시간표 배열 반환 |
-  | `TimetableBoost.renderHeaderChips(container)` | 로비 상단에 오늘 수업 칩 동적 렌더링 |
+  | `TimetableBoost.getSubjectsForDay(childName, dayName)` | 그 요일 5대 교과 한글 배열(교시 순, 중복 없음). 등록 시간표 → 기본 시간표 (2026-11-23, 오늘의 길·버프 공용) |
+  | `TimetableBoost.getTimetableSubjects(childName)` | `{ todaySubjects, tomorrowSubjects, todayName, tomorrowName, isWeekend }` (주말 `todaySubjects` 빈 배열) |
+  | `TimetableBoost.getSubjectBoostInfo(subject, childName)` | 과목 버프 `{ type: review·preview·normal, limit, expMultiplier, completionBonus, badge }` |
 
 ### 🌟 `daily-diary-{base,forms,sync,submit}.js` & `quick-uploader.js` (하루 마음일기 & 모바일 퀵업로더 파이프라인 2.1)
 아이들의 날씨/기분 선택형 마음일기 기록 및 스마트폰 현장 촬영 사진을 Cloudflare Worker 미디어 큐 및 노션 DB로 즉시 전송하는 고속 파이프라인 모듈입니다.
@@ -1694,6 +1703,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 - **어휘 캐시 한 벌 공유 (2026-11-19)**: `tests/voca-all-cache.test.mjs`(4개). ALL 캐시를 아이별로 거르기(학생 칸 빈 행 제외), 캐시 없으면 노션 1회, 미리 불러오기가 ALL을 받는지.
 - **노션 여러 쪽 조회 정렬 (2026-11-17)**: `tests/notion-stable-sort.test.mjs`(2개). `notion-api-client.js`의 `page_size` 조회 본문마다 `sorts: STABLE_SORTS`가 있는지 본다.
 - **2026 원신초 학예발표회 안내 (2026-11-20)**: `festival.html` · `kids/data/festival_2026_data.js` · `kids/css/festival.css` · `kids/js/festival_controller.js` (`window.FestivalGuide`). `timetable.html` 상단 `#festivalGuideBtn`에서 진입하며, 민서(1·6·11·13)·민수(5·12)·10번 확인 필요 중심 1단계 요약 + 사이 무대/학교 원문 `<details>` 2단계 펼침 + 현장 진행 체크(`minmin_festival_2026_done_v1`). 시험 `tests/festival-guide.test.mjs`(3개).
+- **오늘의 길 (2026-11-23)**: `tests/today-path.test.mjs`(16개: KST 자정·금→월·주말, 비교과 필터, 민서 사회·과학 제외, 1·2·4번 중복 회피 전수, 3번 대체 순서·늦은 어휘 캐시, 숙련도 3함수 `quest-mastery.js` 대조, 노선 고정·보정, 완료 장부 `tp`·부모, 연결 지점, 학습일지 조회 정렬·실패·리포트 행 나누기 대조, `getSubjectsForDay`, 싣기 버전).
 - **학습설정 저장 나눔 (2026-11-23)**: `tests/learning-settings-chunk.test.mjs`(6개: 1,900자 경계·이모지 서로게이트 쌍·100조각 상한·쓰는 곳 4곳 통합·한 조각 고정 배열 금지 및 `fairy-settings-catalog.js` 선행 로드 순서 지키기).
 
 - **정리 (2026-11-14)**: 59개 파일·702개(통과 700·건너뜀 2·실패 0), 12코어 PC 로컬 약 10초(이전 716개·약 29초).

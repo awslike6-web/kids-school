@@ -602,6 +602,7 @@
     }
     playSound('fanfare');
     global.GalleryRunnerRewards?.markQuestBoost(isMinseo ? 'daughter' : 'son');
+    global.TodayPath?.markDone({ child: isMinseo ? 'minseo' : 'minsu', subject: currentSubj, kind: 'lesson' }); // 🛤️ 오늘의 길 완료 신호
     syncCheerMonsterReaction('clear');
     if (typeof fairyReward === 'function') {
       fairyReward();

@@ -403,6 +403,7 @@
     // ---------- 4. 완주 (보상 + 학습일지) ----------
     async function renderDone() {
         finished = true;
+        window.TodayPath?.markDone({ subject: '국어', kind: 'reading' }); // 🛤️ 오늘의 길 완료 신호
         const total = passage.questions.length;
         const stars = '⭐'.repeat(total - missed.length) + '☆'.repeat(missed.length);
         paint(`<div class="mr-wrap mr-done">

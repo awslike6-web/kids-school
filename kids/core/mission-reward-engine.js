@@ -177,6 +177,8 @@ async function finalizeQuizRewardSession(options = {}) {
 
     // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (+5💎/🍬 & 과목 경험치)
     if (isFullComplete) {
+        // 🛤️ 오늘의 길 완료 신호: opts.subject는 '국어(용어방)'처럼 괄호가 붙으므로 맵과 같은 window.currentSubject 우선 (today_path_spec §5-2)
+        window.TodayPath?.markDone({ child: opts.childName, subject: window.TodayPath.subjectKey(window.currentSubject) ? window.currentSubject : opts.subject, kind: 'quiz' });
         // 🎙️ 완주 축하 음성 자동 송출 (직전 정답 음성 안전 차단 후 완주 음성 100% 보장)
         if (typeof fairyReward === 'function') {
             fairyReward('finish');

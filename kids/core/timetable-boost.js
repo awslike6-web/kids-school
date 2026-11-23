@@ -29,12 +29,12 @@
             '목요일': ['과학', '영어', '사회', '수학'],
             '금요일': ['국어']
         },
+        // 민서: timetable_controller.js 「1학년 2학기 확정 시간표」의 교과만 (화요일 교과 없음, 2026-11-23 사용자 확정)
         '민서': {
             '월요일': ['국어', '수학'],
-            '화요일': ['국어', '수학'],
             '수요일': ['국어', '수학'],
-            '목요일': ['국어'],
-            '금요일': ['국어', '수학']
+            '목요일': ['국어', '수학'],
+            '금요일': ['수학']
         }
     };
 
@@ -64,61 +64,51 @@
         };
     }
 
+    const TIMETABLE_CACHE_KEY = 'MINMIN_TIMETABLE_CACHE_V11'; // notion-cache-manager.js가 시간표 화면에서 채움
+
+    function resolveChildName(childName) {
+        if (childName === '민수' || childName === '민서') return childName;
+        return (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서') ? '민서' : '민수';
+    }
+
+    /** 노션 고정 시간표 캐시 행 (없거나 깨졌으면 null) */
+    function readStaticRows() {
+        try {
+            const cached = JSON.parse(localStorage.getItem(TIMETABLE_CACHE_KEY) || 'null');
+            return cached && Array.isArray(cached.staticRows) ? cached.staticRows : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    /**
+     * 한 요일의 5대 교과 (교시 순, 중복 없음). docs/today_path_spec.md §4-1
+     * - 노션 등록 시간표(캐시)에 그 학생 행이 있으면 그것만 본다(그날 교과가 없으면 빈 배열).
+     * - 학생·요일·과목은 노션 select 원문과 정확히 같은 글자만 받는다(약속·상상 같은 통합교과는 버림).
+     * - 캐시에 그 학생 행이 하나도 없을 때만 코드 안 기본 시간표.
+     */
+    function getSubjectsForDay(childName, dayName, rows = readStaticRows()) {
+        const name = resolveChildName(childName);
+        const mine = Array.isArray(rows) ? rows.filter(row => row && row.child === name) : [];
+        if (mine.length === 0) return [...((DEFAULT_TIMETABLE[name] || {})[dayName] || [])];
+        const ordered = mine
+            .filter(row => row.dayOfWeek === dayName && TARGET_SUBJECTS.includes(row.subject))
+            .sort((a, b) => (Number(a.periodNum) || 0) - (Number(b.periodNum) || 0));
+        return [...new Set(ordered.map(row => row.subject))];
+    }
+
     /**
      * 학생별 오늘/내일 시간표 과목 목록 조회
      * @param {string} childName - '민수' | '민서'
      * @returns {Object} { todaySubjects: string[], tomorrowSubjects: string[] }
      */
     function getTimetableSubjects(childName) {
-        const name = childName || (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentUserName') === '민서' ? '민서' : '민수');
+        const name = resolveChildName(childName);
         const { todayName, tomorrowName, isWeekend } = getTargetDays();
-
-        let todaySubjects = [];
-        let tomorrowSubjects = [];
-
-        // 1. 캐시된 노션 시간표 데이터가 있는지 확인
-        let timetableRows = window.__MINMIN_TIMETABLE_DATA || null;
-        if (!timetableRows) {
-            try {
-                const cached = localStorage.getItem('MINMIN_TIMETABLE_CACHE');
-                if (cached) timetableRows = JSON.parse(cached);
-            } catch (_) {}
-        }
-
-        if (Array.isArray(timetableRows) && timetableRows.length > 0) {
-            // 노션 시간표 데이터에서 학생 및 요일 필터링
-            timetableRows.forEach(row => {
-                const rowChild = row.child || row.student || '';
-                const rowDay = row.dayOfWeek || '';
-                const rowSubj = row.subject || row.title || '';
-
-                if (!rowChild.includes(name)) return;
-
-                // 5대 교과 매칭
-                const matchedSubj = TARGET_SUBJECTS.find(s => rowSubj.includes(s));
-                if (!matchedSubj) return;
-
-                if (!isWeekend && rowDay.includes(todayName) && !todaySubjects.includes(matchedSubj)) {
-                    todaySubjects.push(matchedSubj);
-                }
-                if (rowDay.includes(tomorrowName) && !tomorrowSubjects.includes(matchedSubj)) {
-                    tomorrowSubjects.push(matchedSubj);
-                }
-            });
-        }
-
-        // 2. 만약 시간표 데이터가 비어있으면 기본 시간표로 안전하게 폴백
-        const studentDefault = DEFAULT_TIMETABLE[name] || DEFAULT_TIMETABLE['민수'];
-        if (todaySubjects.length === 0 && !isWeekend && studentDefault[todayName]) {
-            todaySubjects = [...studentDefault[todayName]];
-        }
-        if (tomorrowSubjects.length === 0 && studentDefault[tomorrowName]) {
-            tomorrowSubjects = [...studentDefault[tomorrowName]];
-        }
-
+        const rows = readStaticRows();
         return {
-            todaySubjects,
-            tomorrowSubjects,
+            todaySubjects: isWeekend ? [] : getSubjectsForDay(name, todayName, rows),
+            tomorrowSubjects: getSubjectsForDay(name, tomorrowName, rows),
             todayName,
             tomorrowName,
             isWeekend
@@ -185,6 +175,7 @@
     // 전역 노출
     window.TimetableBoost = {
         getTargetDays,
+        getSubjectsForDay,
         getTimetableSubjects,
         getSubjectBoostInfo
     };

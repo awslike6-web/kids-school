@@ -705,7 +705,7 @@ function skipToNextQuiz(type) {
     window.activeQuizIdx = activeQuizIdx;
     const innerBody = document.getElementById('overlayInnerBody');
     if (type !== 'voca' && activeQuizIdx >= activeSectionData.length) {
-        speakFairyTTS("모든 미션을 완료했어요! 참 잘했어요!");
+        window.TodayPath?.markDone({ subject: '사회', kind: 'quiz' }); speakFairyTTS("모든 미션을 완료했어요! 참 잘했어요!"); // 🛤️ 자료분석 완주(오늘의 길)
         alert("🏆 축하합니다! 모든 사회 탐구 단계를 완료하셨습니다!");
         closeMissionView(true);
     } else {
