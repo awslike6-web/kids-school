@@ -749,14 +749,14 @@ window.triggerAwardDispense = async function(rewardAmount, type) {
     const countKey = `daily_reward_count_${currentUserName}_${todayKey}`;
     let currentCount = parseInt(localStorage.getItem(countKey) || "0");
     
-    if (currentCount >= 100) {
-        alert("🛑 오늘의 최대 획득 가능 보상(100개)을 모두 채웠습니다! 내일 다시 도전하세요!");
+    const cap = window.TimetableBoost?.getSubjectBoostInfo?.('국어', currentUserName)?.limit || 100; // 오늘 복습 과목이면 150 (보상 엔진과 같은 한도)
+    if (currentCount >= cap) {
+        alert(`🛑 오늘의 최대 획득 가능 보상(${cap}개)을 모두 채웠습니다! 내일 다시 도전하세요!`);
         return;
     }
-    
     let actualReward = rewardAmount;
-    if (currentCount + rewardAmount > 100) {
-        actualReward = 100 - currentCount;
+    if (currentCount + rewardAmount > cap) {
+        actualReward = cap - currentCount;
     }
     
     localStorage.setItem(countKey, currentCount + actualReward);

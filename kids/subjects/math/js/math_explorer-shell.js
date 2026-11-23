@@ -6,6 +6,8 @@
 //   관 = { title, icon, sub, render(container, ctx) } — 활동을 마치면 ctx.complete()
 (function (global) {
   'use strict';
+  // 보상 엔진은 과목이 없으면 기본 '사회' 칸에 적립한다 → 수학으로 명시 (시간표 부스트도 수학 기준, 2026-11-23)
+  if (!global.currentSubject) global.currentSubject = '수학';
 
   var SVG_NS = 'http://www.w3.org/2000/svg';
 

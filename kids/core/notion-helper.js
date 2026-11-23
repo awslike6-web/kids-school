@@ -29,10 +29,11 @@ window.roomStartTime = window.roomStartTime || new Date();
         'notion-api-client.js?v=20261119-allcache',      // 🌐 Worker 통신 & VOCA/독해/시간표 쿼리 및 파서
         'study-log-store.js?v=20261121-learning', // 📒 학습일지 일일 Upsert & 연속 학습 스트릭 단일 원천
         'learning-log.js?v=20261121-learning', // 📒 문항 단위 학습 기록 (학습일지 행의 '문항기록' 칸)
+        'timetable-boost.js?v=20261123-boost', // 🚀 시간표 부스트(오늘 복습 1.2배·한도 150, 내일 예습 완주 +7) — 과목방에서도 적용 (2026-11-23)
         'today-path.js?v=20261123-path2', // 🛤️ 오늘의 길 완료 장부 (과목방·독해 완료 신호, lobby.html과 같은 버전 문자열)
         'notion-study-logger.js?v=20261101-reward-grant-shared', // 📝 학습일지 & 보상/레벨업 전송 엔진
         'stt-debouncer.js',          // 🎙️ STT 음성인식 디바운서
-        'mission-reward-engine.js?v=20261123-path',  // 💎 미션 보상 및 축하 모달
+        'mission-reward-engine.js?v=20261123-boost',  // 💎 미션 보상 및 축하 모달
         'quiz-feedback-overlay.js',  // 🛡️ 오답 피드백 오버레이 & 이탈 방지 가드
         'gemini-chat.js',            // 🧚 AI 요정 대화 (Worker 프록시 호출·재시도·안내 문구)
         'chat-memory.js?v=20261116-memory' // 🧠 AI 대화 기억 보관소 저장 (창 닫을 때 요약 1줄)

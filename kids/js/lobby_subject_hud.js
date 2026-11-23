@@ -398,20 +398,23 @@ function create(ctx) {
       const page = data.results[0];
       const props = page.properties || {};
       localStorage.setItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`, page.id);
+      // 기다리는 동안 아이를 바꿨으면 공용 테마(보상 재화 칸을 정함)는 건드리지 않는다
+      const stale = userKey !== ctx.getActiveUserKey();
 
       if (typeof window.ScreenTimeTracker !== 'undefined' && typeof window.ScreenTimeTracker.syncFromInventoryProps === 'function') {
         window.ScreenTimeTracker.syncFromInventoryProps(props, childName);
         updateGuardianHud(userKey, childName);
       }
       if (props['학습설정']) {
-        if (typeof syncQuizFlowFromCloud === 'function') syncQuizFlowFromCloud(props['학습설정']);
+        // 응답이 누구 것인지 넘긴다 — 기다리는 동안 아이를 바꿔도 다른 아이 칸에 저장되지 않게
+        if (typeof syncQuizFlowFromCloud === 'function') syncQuizFlowFromCloud(props['학습설정'], childName);
         if (typeof SettingsManager !== 'undefined' && typeof SettingsManager.syncFromCloud === 'function') {
-          SettingsManager.syncFromCloud(props['학습설정']);
+          SettingsManager.syncFromCloud(props['학습설정'], childName);
         }
       }
 
       const theme = props['현재 테마']?.select?.name || defaultTheme;
-      localStorage.setItem('currentTheme', theme);
+      if (!stale) localStorage.setItem('currentTheme', theme);
 
       const diamond = props['다이아몬드 개수']?.number ?? 2253;
       const slime = typeof getDaughterRewardCount === 'function'

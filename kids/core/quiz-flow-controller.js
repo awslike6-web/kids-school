@@ -126,7 +126,22 @@
      * 🌐 노션 클라우드로부터 전달받은 '학습설정' 속성을 로컬과 안전하게 병합 (SWR)
      * @param {Object|string} cloudRaw - 노션 rich_text 속성 또는 JSON 문자열/객체
      */
-    function syncQuizFlowFromCloud(cloudRaw) {
+    /**
+     * 지금 아이 이름 — 기기 저장값으로만 판단한다. 로비는 아이를 바꿀 때 저장값만 고치고
+     * window.currentUserName(core.js가 부팅 때 고정)은 그대로라 getActiveChildName()은 처음 아이를 돌려줄 수 있다.
+     */
+    function activeChildName() {
+        const name = localStorage.getItem('currentUserName');
+        if (name === '민수' || name === '민서') return name;
+        return (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo') ? '민서' : '민수';
+    }
+
+    /**
+     * @param cloudRaw 노션 학습설정 칸
+     * @param {string} [childName] 이 학습설정이 누구 것인지('민수'|'민서'). 주면 그 아이 캐시에 저장하고,
+     *   지금 아이가 아니면 기기 공용 템포 키는 건드리지 않는다(아이 전환 중 늦게 온 응답이 섞이지 않게).
+     */
+    function syncQuizFlowFromCloud(cloudRaw, childName) {
         if (!cloudRaw) return;
         try {
             let jsonText = '';
@@ -145,8 +160,9 @@
 
             let rawParsed = JSON.parse(jsonText);
             // 전체 클라우드 설정 캐시 보존 (screenTime 등 타 모듈 데이터 보존)
-            const childKeyName = (typeof getActiveChildName === 'function' ? getActiveChildName() : null) || '민수';
+            const childKeyName = (childName === '민수' || childName === '민서') ? childName : activeChildName();
             localStorage.setItem(`MINMIN_CLOUD_SETTINGS_${childKeyName}`, jsonText);
+            if (childKeyName !== activeChildName()) return;
 
             let parsed = rawParsed;
             // 만약 상위 설정 객체 내부에 quizFlow 키가 있는 구조라면 언랩
@@ -184,8 +200,7 @@
      */
     async function saveQuizFlowToCloud() {
         try {
-            const childName = (typeof getActiveChildName === 'function' ? getActiveChildName() : null)
-                || (localStorage.getItem('currentUser') === 'daughter' || localStorage.getItem('currentChild') === 'minseo' || localStorage.getItem('currentUserName') === '민서' ? '민서' : '민수');
+            const childName = activeChildName();
 
             // 1. 캐시된 인벤토리 페이지 ID 확인
             let pageId = localStorage.getItem(`MINMIN_INVENTORY_PAGE_ID_${childName}`);

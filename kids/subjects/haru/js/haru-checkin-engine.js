@@ -23,6 +23,12 @@
     return `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')}`;
   }
 
+  // 부모 검수(아빠·엄마·어른)는 미리보기만 — 아이 기기 기록·저금통·보상·노션 학습일지를 남기지 않는다
+  // (남기면 로비 하루 신호등·오늘의 길 4번이 아이가 안 했는데 켜짐)
+  function isParentPreview() {
+    return ['아빠', '엄마', '어른'].includes(localStorage.getItem('currentUserName'));
+  }
+
   function getTodayCheckInKey() {
     const child = window.currentChild || "minseo";
     return `haru_checkin_done_${getTodayDateStr()}_${child}`;
@@ -156,6 +162,7 @@
   }
 
   function recordHabitAction(habitName) {
+    if (isParentPreview()) return;
     let coins = getPiggyCoins();
     const max = window.HARU_DATA?.dailyHabits?.piggyBank?.maxCoins || 20;
 
@@ -251,6 +258,7 @@
   }
 
   function recordWorkout(icon, name) {
+    if (isParentPreview()) return;
     const child = window.currentChild || "minseo";
     const todayIdx = new Date().getDay();
     const logs = getWorkoutLogs();
@@ -287,6 +295,7 @@
   }
 
   function selectMoodColor(mood, color, desc) {
+    if (isParentPreview()) return;
     const child = window.currentChild || "minseo";
     localStorage.setItem("haru_today_mood_" + child, mood);
     renderMindWidget();
@@ -462,6 +471,11 @@
     const { habit, workout, mood } = checkInState;
     const child = window.currentChild || "minseo";
 
+    if (isParentPreview()) {
+      renderCheckInCompletionView(false, true);
+      return;
+    }
+
     // 1) 저금통 코인 +1 적립
     let coins = getPiggyCoins();
     const max = window.HARU_DATA?.dailyHabits?.piggyBank?.maxCoins || 20;
@@ -510,7 +524,7 @@
     renderCheckInCompletionView(reachedMilestone);
   }
 
-  function renderCheckInCompletionView(reachedMilestone = false) {
+  function renderCheckInCompletionView(reachedMilestone = false, preview = false) {
     const body = document.getElementById("checkInModalInnerBody");
     if (!body) return;
 
@@ -528,7 +542,9 @@
           ${reachedMilestone ? '대박! 20칸 저금통 완주 달성!' : `${childTitle}의 30초 체크인 완료!`}
         </h2>
         <p style="font-size:1.05rem; color:#57606f; margin-bottom:20px;">
-          ${reachedMilestone 
+          ${preview
+            ? '부모님 미리보기예요. 기록·저금통·보상은 저장하지 않았어요.'
+            : reachedMilestone
             ? '20일 동안 착한 습관을 실천하여 [황금 돼지 트로피]와 [주말 가족 소원권]을 얻었어요!' 
             : `기록들이 제자리에 쏙 들어가고 오늘의 참여 ${curName}(+${curSymbol})를 받았어요!`}
         </p>
@@ -563,7 +579,7 @@
       </div>
     `;
 
-    if (!reachedMilestone && typeof window.speakText === "function") {
+    if (!preview && !reachedMilestone && typeof window.speakText === "function") {
       window.speakText(`오늘 하루 체크인 완료! 저금통과 운동 달력에 쏙 들어가고 ${curWordSpoken}를 선물받았습니다!`);
     }
   }

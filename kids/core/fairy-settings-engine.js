@@ -184,7 +184,9 @@ const SettingsManager = {
     },
 
     // 🌐 4-2. 노션 클라우드로부터 받은 학습설정 JSON 병합 (SWR)
-    syncFromCloud: function(cloudSettingsRaw) {
+    // childName('민수'|'민서')을 주면 그 아이 키에 저장. 지금 아이가 아니면 공용 옛 키·테마·알림은 건드리지 않는다
+    // (로비가 아이를 바꾸는 동안 늦게 온 응답이 다른 아이 설정을 덮지 않게)
+    syncFromCloud: function(cloudSettingsRaw, childName) {
         if (!cloudSettingsRaw) return;
         try {
             let parsed = cloudSettingsRaw;
@@ -198,7 +200,17 @@ const SettingsManager = {
             // appSettings 필드가 있으면 병합
             const appSettings = (parsed && parsed.appSettings) || (parsed && parsed.voice_persona ? parsed : null);
             if (appSettings && typeof appSettings === 'object') {
-                const current = this.getAll();
+                const target = childName === '민서' ? 'daughter' : childName === '민수' ? 'son' : this.getCurrentStudent();
+                if (target !== this.getCurrentStudent()) {
+                    let own = {};
+                    try { own = JSON.parse(localStorage.getItem(`${SETTINGS_STORAGE_KEY}_${target}`) || '{}') || {}; } catch (e) { own = {}; }
+                    localStorage.setItem(`${SETTINGS_STORAGE_KEY}_${target}`, JSON.stringify({ ...this.defaults, ...own, ...appSettings }));
+                    return;
+                }
+                // 바탕은 이 아이 전용 키(없으면 기본값) — 공용 옛 키에 남은 다른 아이 설정이 섞이지 않게
+                let ownSaved = null;
+                try { ownSaved = JSON.parse(localStorage.getItem(this.getStorageKey()) || 'null'); } catch (e) { ownSaved = null; }
+                const current = { ...this.defaults, ...(ownSaved && typeof ownSaved === 'object' ? ownSaved : {}) };
                 const merged = { ...current, ...appSettings };
                 const vacationChanged = Boolean(current.vacation_mode) !== Boolean(merged.vacation_mode);
                 const studentKey = this.getStorageKey();

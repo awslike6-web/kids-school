@@ -584,7 +584,7 @@ function renderSectionUI() {
             <div style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
                 <p style="font-size:1.4rem; color:var(--primary); margin-bottom:10px;">모든 문제를 완료했습니다!</p>
-                <p style="font-size:1rem; color:#10b981; font-weight:bold; margin-bottom:20px;">✨ 완주 보너스(+5💎)와 학습일지가 안전하게 기록되었어요!</p>
+                <p style="font-size:1rem; color:#10b981; font-weight:bold; margin-bottom:20px;">✨ 완주 보너스와 학습일지가 안전하게 기록되었어요!</p>
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     ${currentMissionType === 'stage3' ? `<button class="quiz-button" style="background:var(--sky-blue); color:white;" onclick="if(window.EnglishVoca) window.EnglishVoca.showStage3ModeSelect();">🔄 다른 방식으로 다시하기</button>` : ''}
                     <button class="quiz-button" style="background:var(--pink); color:white;" onclick="closeMissionView();">✅ 나가기</button>
@@ -735,12 +735,13 @@ window.triggerAwardDispense = async function(rewardAmount, type) {
     const todayKey = new Date().toLocaleDateString();
     const countKey = `daily_reward_count_${currentUserName}_${todayKey}`;
     let currentCount = parseInt(localStorage.getItem(countKey) || "0");
-    if (currentCount >= 100) {
-        alert("🛑 오늘의 최대 획득 가능 보상(100개)을 모두 채웠습니다! 내일 다시 도전하세요!");
+    const cap = window.TimetableBoost?.getSubjectBoostInfo?.('영어', currentUserName)?.limit || 100; // 오늘 복습 과목이면 150 (보상 엔진과 같은 한도)
+    if (currentCount >= cap) {
+        alert(`🛑 오늘의 최대 획득 가능 보상(${cap}개)을 모두 채웠습니다! 내일 다시 도전하세요!`);
         return;
     }
     let actualReward = rewardAmount;
-    if (currentCount + rewardAmount > 100) actualReward = 100 - currentCount;
+    if (currentCount + rewardAmount > cap) actualReward = cap - currentCount;
     localStorage.setItem(countKey, currentCount + actualReward);
     if (typeof grantRewardAndShowUI === 'function') {
         await grantRewardAndShowUI(actualReward, false, '영어');

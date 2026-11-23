@@ -614,7 +614,7 @@ function renderSectionUI(type, container) {
             <div class="screen loaded quiz-card" style="text-align:center; padding: 40px 20px;">
                 <div style="font-size:3.5rem; margin-bottom:10px;">🏆</div>
                 <h2 style="font-size:1.8rem; color:#A78BFA; margin-bottom:15px;">벌써 10문제를 완주했어요!</h2>
-                <p style="font-size:1.15rem; color:#10b981; font-weight:bold; margin-bottom:15px;">🎉 완주 보너스(+5💎)와 학습일지가 안전하게 기록되었어요!</p>
+                <p style="font-size:1.15rem; color:#10b981; font-weight:bold; margin-bottom:15px;">🎉 완주 보너스와 학습일지가 안전하게 기록되었어요!</p>
                 <p style="font-size:1.1rem; color:#666; margin-bottom:30px;">더 탐험하고 싶다면 계속해서 도전해볼까요?</p>
                 <div style="display:flex; justify-content:center; gap:15px;">
                     <button class="back-to-lobby-btn" style="background:#FF6B9D; color:white;" onclick="closeMissionView(true);">✅ 여기서 나가기</button>

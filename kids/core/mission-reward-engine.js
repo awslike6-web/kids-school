@@ -175,7 +175,7 @@ async function finalizeQuizRewardSession(options = {}) {
     const isFullComplete = opts.isFullComplete || false;
     const subj = opts.subject || window.currentSubject || '국어';
 
-    // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (+5💎/🍬 & 과목 경험치)
+    // 1. 🏆 10문제 전량 완수 시 완주 보너스 대량 지급 (기본 +5💎/🍬, 내일 예습 부스트 과목은 +7 — 로비 안내·notion-reward-quiz.js와 같은 계산, 2026-11-23)
     if (isFullComplete) {
         // 🛤️ 오늘의 길 완료 신호: opts.subject는 '국어(용어방)'처럼 괄호가 붙으므로 맵과 같은 window.currentSubject 우선 (today_path_spec §5-2)
         window.TodayPath?.markDone({ child: opts.childName, subject: window.TodayPath.subjectKey(window.currentSubject) ? window.currentSubject : opts.subject, kind: 'quiz' });
@@ -185,15 +185,20 @@ async function finalizeQuizRewardSession(options = {}) {
         }
 
         const bonusKey = `${buildMissionRewardKey(session.missionType, session.sessionId)}_complete_bonus`;
+        // 부스트 판정은 시간표 과목명과 정확히 같은 글자로: opts.subject는 '국어(용어방)'처럼 괄호가 붙을 수 있어 currentSubject 우선
+        const boostSubject = ['국어', '수학', '영어', '사회', '과학'].includes(window.currentSubject) ? window.currentSubject : subj;
+        const bonusAmount = (typeof window.TimetableBoost !== 'undefined'
+            ? window.TimetableBoost.getSubjectBoostInfo(boostSubject, opts.childName).completionBonus
+            : 5) || 5;
         try {
             await claimMissionRewardOnce(bonusKey, {
-                amount: 5,
+                amount: bonusAmount,
                 missionType: session.missionType,
                 subject: subj,
                 silent: false,
                 skipStudyLog: true
             });
-            console.log(`🏆 [10문제 완주 보너스 지급 완료] +5개 획득! (${subj})`);
+            console.log(`🏆 [10문제 완주 보너스 지급 완료] +${bonusAmount}개 획득! (${subj})`);
         } catch (e) {
             console.warn("완주 보너스 지급 중 오류:", e);
         }

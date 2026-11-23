@@ -1437,7 +1437,7 @@ Google AI Studio에서 생성한 커스텀 보이스(`깐죽이 3` 등)와 고�
 ### 🌟 `timetable-boost.js` & `timetable_controller.js`·`timetable_grid.js`·`timetable_notices.js` (시간표 부스트 엔진)
 주간 시간표를 노션에서 프리패치하여 오늘 배울 과목과 숙제를 로비 헤더에 원터치 칩으로 띄워주는 부스트 엔진입니다.
 - **파일 위치**:
-  - `kids/core/timetable-boost.js` (약 200줄): 오늘·다음 등교일 교과와 보상 버프(🔥 오늘 복습 1.2배·한도 150 / ✨ 내일 예습 +7). **2026-11-23부터** 노션 고정 시간표 캐시 `MINMIN_TIMETABLE_CACHE_V11`의 `staticRows`(시간표 화면이 채움)를 학생·요일·과목 **정확히 같은 글자**로 읽고, 그 학생 행이 캐시에 하나도 없을 때만 코드 안 기본 시간표(민서는 「1학년 2학기 확정」 교과: 월·수·목 국·수, 금 수, 화 없음). 그전에는 아무도 채우지 않는 옛 키를 읽어 늘 기본 시간표로 돌았다. 약속·상상 같은 통합교과는 버린다.
+  - `kids/core/timetable-boost.js` (약 200줄): 오늘·다음 등교일 교과와 보상 버프(🔥 오늘 복습 1.2배·한도 150 / ✨ 내일 예습 +7). **2026-11-23부터** 노션 고정 시간표 캐시 `MINMIN_TIMETABLE_CACHE_V11`의 `staticRows`(시간표 화면이 채움)를 학생·요일·과목 **정확히 같은 글자**로 읽고, 그 학생 행이 캐시에 하나도 없을 때만 코드 안 기본 시간표(민서는 「1학년 2학기 확정」 교과: 월·수·목 국·수, 금 수, 화 없음). 그전에는 아무도 채우지 않는 옛 키를 읽어 늘 기본 시간표로 돌았다. 약속·상상 같은 통합교과는 버린다. **2026-11-23부터 과목방(`notion-helper.js` 자동 로더)·퀘스트 러너·용어사전방에도 실린다**(그전에는 로비·용어사전방에만 실려 과목방 보상에 「오늘 복습 1.2배·한도 150」·「내일 예습 완주 +7」이 적용되지 않았음). 여러 경로로 실려도 `window.TimetableBoost`가 있으면 다시 정의하지 않는다. 과목방 10문제 완주 보너스(`mission-reward-engine.js`)도 이 값(`completionBonus`, 예습 +7·기본 +5)을 쓰며 과목은 `window.currentSubject`(괄호 없는 교과명) 우선.
   - `kids/js/timetable_controller.js` (504줄): 요일·교시·과목 색·`DEFAULT_BASE_TIMETABLE`, 공유 상태, 보기 설정·날짜·공지 판정 헬퍼, `buildGridMap`·`renderLessonCell`.
   - `kids/js/timetable_grid.js` (424줄): `renderWeeklyGrid`, 모바일 열 너비·스크롤, `renderTopNoticeBanner`, `openOverlayItemModal`·`closeOverlayModal`·`openNoticeGuideModal`·`toggleOverlayItemComplete`.
   - `kids/js/timetable_notices.js` (281줄): 공지 정렬·`renderNotices`·`renderAll`, `setChildFilter`·툴팁, `loadTimetableData`, 시계 즉시 갱신·타이머·`DOMContentLoaded` 등록.

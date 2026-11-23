@@ -17,6 +17,8 @@
  */
 
 (function () {
+    // 로비(코어 로더)·자동 로더(notion-helper.js)·화면 태그가 함께 실어도 한 번만
+    if (typeof window !== 'undefined' && window.TimetableBoost) return;
     const DAY_NAMES = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
     const TARGET_SUBJECTS = ['국어', '수학', '영어', '사회', '과학'];
 
