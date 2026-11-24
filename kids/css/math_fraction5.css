@@ -1,0 +1,462 @@
+/* 초등 5-1 분수 탐험관 2종 공용 스타일 (약분과 통분 · 분수의 덧셈과 뺄셈) */
+body.mx-theme-fracred {
+  --mx-head-a: #e0f2fe;
+  --mx-head-b: #d1fae5;
+  --mx-line: #7dd3fc;
+  --mx-strong: #0c4a6e;
+  --mx-sub: #0f766e;
+  --mx-accent: #0284c7;
+  --mx-accent-dark: #0369a1;
+  --mx-soft: #bae6fd;
+  --mx-softer: #f0f9ff;
+}
+
+body.mx-theme-fracunl {
+  --mx-head-a: #ede9fe;
+  --mx-head-b: #e0f2fe;
+  --mx-line: #c4b5fd;
+  --mx-strong: #4c1d95;
+  --mx-sub: #1d4ed8;
+  --mx-accent: #6d28d9;
+  --mx-accent-dark: #5b21b6;
+  --mx-soft: #ddd6fe;
+  --mx-softer: #f5f3ff;
+}
+
+.f5-area,
+.mx-drill-round {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 나눠지고 합쳐지는 막대 (칸 수 ≤ 24, 375px 가로 넘침 없음) */
+.f5-bar {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  height: 46px;
+  gap: 1px;
+  padding: 2px;
+  border-radius: 10px;
+  background: #e2e8f0;
+  box-sizing: border-box;
+}
+
+.f5-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  background: #ffffff;
+  border: 1px solid var(--mx-line);
+  border-radius: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.f5-bar.is-dense .f5-cell {
+  border-radius: 2px;
+}
+
+.f5-cell.on {
+  background: #93c5fd;
+  border-color: #60a5fa;
+}
+
+.f5-cell.on.blue {
+  background: #60a5fa;
+  border-color: #2563eb;
+}
+
+.f5-cell.on.green {
+  background: #4ade80;
+  border-color: #16a34a;
+}
+
+.f5-sub {
+  flex: 1 1 0;
+  height: 100%;
+  border-right: 1px dashed rgba(15, 23, 42, 0.45);
+  box-sizing: border-box;
+}
+
+.f5-sub:last-child {
+  border-right: none;
+}
+
+.f5-bar.is-splitting .f5-sub {
+  animation: f5-split-flash 0.4s ease;
+}
+
+.f5-bar.is-merging {
+  animation: f5-merge-pulse 0.4s ease;
+}
+
+@keyframes f5-split-flash {
+  0% { opacity: 0; transform: scaleX(0.7); }
+  100% { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes f5-merge-pulse {
+  0% { gap: 1px; }
+  50% { gap: 0; transform: scaleY(0.95); }
+  100% { gap: 1px; transform: scaleY(1); }
+}
+
+/* 두 막대 맞대기 */
+.f5-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 대분수 자연수 배지 */
+.f5-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-height: 36px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--mx-accent);
+  color: #ffffff;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+/* 조작 버튼 줄 (높이 ≥ 56px) */
+.f5-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.f5-action-btn {
+  min-height: 56px;
+  padding: 10px 16px;
+  font-size: 1.02rem;
+}
+
+/* 버튼 여러 개가 있는 줄은 한 줄에 나란히 (375px에서 3개가 두 줄로 꺾이지 않게) */
+.f5-action-row .f5-action-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 6px;
+  font-size: 0.95rem;
+}
+
+/* 나누기 버튼 줄 (한 줄 4칸, 높이 ≥ 56px) */
+.f5-divide-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.f5-divide-head {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--mx-strong);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.f5-divide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.f5-div-btn {
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 4px;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* 배수 칩 줄 (최대 4개 한 줄, 높이 ≥ 56px) */
+.f5-chips-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.f5-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.f5-chip-btn {
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.f5-chip-btn.is-next {
+  border-color: var(--mx-accent);
+  background: var(--mx-soft);
+  color: var(--mx-strong);
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.22);
+}
+
+.f5-chip-btn.is-miss,
+.f5-chip-btn.is-miss:disabled {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+.f5-chip-btn.is-hit,
+.f5-chip-btn.is-hit:disabled {
+  background: #10b981;
+  border-color: #059669;
+  color: #ffffff;
+}
+
+/* 한 줄 안내 영역 */
+.f5-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--mx-softer);
+  border: 1.5px solid var(--mx-line);
+  color: var(--mx-strong);
+  font-size: 0.96rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.f5-note.is-done {
+  background: #dcfce7;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+/* 소수 띠 */
+.f5-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1.5px solid var(--mx-line);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.f5-strip-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--mx-strong);
+}
+
+.f5-strip-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: var(--mx-softer);
+  border: 1.5px solid var(--mx-soft);
+}
+
+.f5-strip-arrow {
+  color: var(--mx-sub);
+  font-weight: 800;
+}
+
+.f5-dec-boxes {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.f5-dec-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid var(--mx-accent);
+  background: #ffffff;
+  color: var(--mx-strong);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.f5-dec-cell.is-zero {
+  background: #fef08a;
+  border-color: #eab308;
+  color: #713f12;
+}
+
+.f5-dec-dot {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0 1px;
+  color: var(--mx-strong);
+}
+
+/* 0~1 눈금 막대 (10등분) */
+.f5-ruler {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 10px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.f5-ruler-track {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  border-bottom: 3px solid #64748b;
+}
+
+.f5-ruler-tick {
+  position: absolute;
+  bottom: 0;
+  width: 2px;
+  height: 10px;
+  background: #94a3b8;
+  transform: translateX(-50%);
+}
+
+.f5-ruler-tick.is-major {
+  height: 16px;
+  background: #334155;
+}
+
+.f5-ruler-dot {
+  position: absolute;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mx-accent);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 0 2px var(--mx-accent);
+  transform: translateX(-50%);
+}
+
+.f5-ruler-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* 디딤돌 나누기 상자 (덜 약분한 오답 선택 시) */
+.f5-stepstone {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fffbeb;
+  border: 2px solid #fcd34d;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.f5-stepstone-title {
+  margin: 0;
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #92400e;
+  text-align: center;
+}
+
+/* 이미 누른 조작 버튼은 흐리게 */
+.f5-area .mx-btn:disabled:not(.mx-choice):not(.is-hit),
+.mx-drill-round .mx-btn:disabled:not(.mx-choice):not(.is-hit) {
+  opacity: 0.48;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f5-cell,
+  .f5-bar.is-splitting .f5-sub,
+  .f5-bar.is-merging {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* 대분수 자연수 배지 + 분수 막대 한 줄 맞춤 (375px 넘침 방지) */
+.f5-mixed-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.f5-mixed-row .f5-badge {
+  flex: 0 0 auto;
+  min-width: 76px;
+  align-self: center;
+}
+
+.f5-mixed-bars {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.f5-badge.is-pop {
+  background: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.28);
+}
+
+/* 정답 뒤 확인 장면 (합친/남은 막대·약분 자동 재생) */
+.f5-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #ecfdf5;
+  border: 1.5px solid #34d399;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.f5-confirm-label {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #065f46;
+  text-align: center;
+}

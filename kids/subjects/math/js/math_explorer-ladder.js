@@ -98,6 +98,8 @@
       onWrong: function (text) {
         tracker.wrong(text);
         if (o.ladder) attachLadder(box, o.ladder, ui, { label: o.ladderLabel, say: o.sayHint ? o.say : null });
+        // o.onWrong(고른 글자, 오답 정보 {token, mistake}|null, 문제 상자): 5-1 디딤돌(덜 약분한 답이면 나누기 줄 열기)처럼 화면이 더 할 일
+        if (typeof o.onWrong === 'function') o.onWrong(text, wrongOf(choices.indexOf(text)), box);
       },
       onSolved: function () {
         tracker.done();
