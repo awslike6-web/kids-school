@@ -1,0 +1,5 @@
+/* 2-1 덧셈과 뺄셈 탐험관 (민서): 하늘·라벤더 파스텔 테마 + 큰 보기 (docs/math_2-1_ladder_spec.md §3-0) */
+body.mx-theme-add2 {
+  --mx-head-a: #e0f2fe; --mx-head-b: #ede9fe; --mx-line: #a5b4fc; --mx-strong: #3730a3; --mx-sub: #0369a1;
+  --mx-accent: #6366f1; --mx-accent-dark: #4f46e5; --mx-soft: #e0e7ff; --mx-softer: #eef2ff;
+}

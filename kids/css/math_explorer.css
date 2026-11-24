@@ -384,6 +384,26 @@ h1, h2, h3, .mx-title, .mx-main-title, .mx-modal-title, .mx-tab-title { font-fam
 /* 🫧 말랑 버튼 고르기 창은 머리 줄 아래 한 줄 전체 (버튼 옆에 끼지 않게, 2026-11-24) */
 .mx-header .mx-squishy-panel { flex: 1 1 100%; }
 
+/* 2학년 탐험관 공통 (body.mx-grade2): 큰 보기·큰 글자, 숫자 띠, 뛰어 세기, 비교 — 2-1 사다리 */
+.tw-area { display: flex; flex-direction: column; gap: 10px; }
+body.mx-grade2 .mx-choice { font-size: 1.3rem; min-height: 56px; }
+body.mx-grade2 .mx-btn { min-height: 56px; }
+body.mx-grade2 .mx-question { font-size: 1.15rem; }
+body.mx-grade2 .mx-expr { font-size: 1.6rem; }
+
+/* 숫자 띠 (자릿값): 한 칸이 노랗게 */
+.tw-digits { display: flex; justify-content: center; gap: 8px; margin: 6px 0; }
+.tw-digit { width: 60px; height: 72px; display: inline-flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 800;
+  border: 2px solid var(--mx-line); border-radius: 14px; background: #ffffff; color: var(--mx-strong); }
+.tw-digit.is-hl { background: #fef08a; border-color: #facc15; box-shadow: 0 0 0 3px #fde68a; }
+
+/* 뛰어 세기 화살표 */
+.tw-hop { text-align: center; font-size: 1.4rem; font-weight: 700; color: var(--mx-sub); }
+
+/* 두 수 비교 줄 */
+.tw-compare { display: flex; flex-direction: column; gap: 8px; }
+.tw-compare-label { font-size: 1.4rem; font-weight: 800; color: var(--mx-strong); text-align: center; }
+
 /* 완주 모달 */
 .mx-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 23, 42, 0.52); }
 .mx-modal[hidden] { display: none; }

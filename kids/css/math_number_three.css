@@ -1,0 +1,5 @@
+/* 2-1 세 자리 수 탐험관 (민서): 복숭아·연두 파스텔 테마 + 숫자 띠 · 큰 보기 (docs/math_2-1_ladder_spec.md §3-0) */
+body.mx-theme-num3 {
+  --mx-head-a: #ffe4e6; --mx-head-b: #ecfccb; --mx-line: #fda4af; --mx-strong: #9f1239; --mx-sub: #4d7c0f;
+  --mx-accent: #e11d48; --mx-accent-dark: #be123c; --mx-soft: #ffe4e6; --mx-softer: #fff1f2;
+}
