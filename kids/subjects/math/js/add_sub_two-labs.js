@@ -337,7 +337,8 @@
         grade: '2-1',
         unit: UNIT,
         title: '퀴즈 배틀',
-        intro: '퀴즈 배틀이에요. 천천히 들어 보고 골라 볼까요?'
+        intro: '퀴즈 배틀이에요. 천천히 들어 보고 골라 볼까요?',
+        sayQuestion: true
       })
     });
   }

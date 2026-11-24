@@ -454,7 +454,7 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - `-shell.js` (`window.MathExplorer`): `mount({ key, labs: [관…], quiz })` — 관 = `{ title, icon, sub, render(container, ctx) }`. 관 첫 완주 💎1(페이지당 1회), 모두 완주 하루 1회 +5(`localStorage` 키 `math_{key}_allclear_{학생}_{로컬 YYYY-MM-DD}`), 지급은 `grantRewardAndShowUI(n, false, 'math')`만 씁니다. `localDateKey`, `josa(낱말, 'eul'|'eun'|'gwa'|'i'|'ieyo'|'ro')`(숫자·단위·자음 기호 뒤 조사: 8을·0.4를·면 ㄴㅂㅅㄷ과·16.8 L예요), `shuffle`, `randInt`, `makeUi`.
   - `ctx = { ui, say, praise, encourage, reward, finale, complete, isDone, redraw }`. 음성은 `speakFairyTTS`·`fairyPraise`·`fairyEncourage`·`fairyReward`로만 냅니다.
   - `ui`: `el`·`svg`·`board(viewBox, cls)`·`text(svg, x, y, 글자, cls, anchor)`·`card`·`guide`·`concept(제목, 본문)`(🔊 버튼)·`hint`·`button`·`doneBadge`·`arrange`·`josa`, **`choiceQuestion({ question, choices, answer(원래 번호 0부터), hint, explain, onSolved, column, fixed })`** — 에러리스 3지선다. 보기는 `window.QuizChoices.arrange`로 섞고(뜻 있는 순서는 `fixed: true`) 원래 번호로 채점, 틀리면 고른 보기만 꺼지고 노란 힌트 + 정답 보기 반짝임. **`sequence(container, [function(box, next)], onDone)`** — 단계를 차례로 아래에 붙입니다.
-- `-quiz.js` (`window.MathExplorerQuiz`): `create({ grade, unit, title, intro })` → 퀴즈 탭. CURRICULUM_DB를 `과목=수학 · 학년 · 단원 equals · 구역=탐구퀴즈`로만 읽고(`buildQueryBody`), 하드코딩 대체 문제 없이 실패 시 "다시 불러오기". `buildQuizFromPages(results)`는 `CSQuiz`와 같은 계약(보기 1~4 줄 배열, 제목순). 문항 첫 정답마다 💎1.
+- `-quiz.js` (`window.MathExplorerQuiz`): `create({ grade, unit, title, intro, sayQuestion? })` → 퀴즈 탭(`sayQuestion: true`면 문제가 뜰 때 질문을 읽어 줌, 2-1 민서 화면). CURRICULUM_DB를 `과목=수학 · 학년 · 단원 equals · 구역=탐구퀴즈`로만 읽고(`buildQueryBody`), 하드코딩 대체 문제 없이 실패 시 "다시 불러오기". `buildQuizFromPages(results)`는 `CSQuiz`와 같은 계약(보기 1~4 줄 배열, 제목순). 문항 첫 정답마다 💎1.
 
 ### 🔢📦📊 5-2 4·5·6단원 탐험관 (2026-11-14)
 

@@ -72,7 +72,7 @@
       .then(function (data) { return buildQuizFromPages(data && data.results); });
   }
 
-  // opts: { grade: '5-2', unit: '4. 소수의 곱셈', title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...' }
+  // opts: { grade: '5-2', unit: '4. 소수의 곱셈', title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기) }
   function create(opts) {
     var o = opts || {};
     var grade = o.grade || '5-2';
@@ -160,6 +160,7 @@
           choices: item.choices,
           answer: item.answerIndex,
           column: true,
+          sayQuestion: Boolean(o.sayQuestion),
           hint: item.explain ? '힌트: ' + item.explain : '',
           explain: item.explain,
           onWrong: function (text) { if (track) track.wrong(text); },
