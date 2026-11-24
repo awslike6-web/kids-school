@@ -11,6 +11,18 @@ let currentTtsAudio = null;       // 실시간 음성 대기열에서 지금 재
 let isPlayingTtsQueue = false;
 let currentTtsSessionId = 0;      // 새 발화·정지마다 올라간다. 옛 세션의 콜백은 무시
 let releaseActiveTtsQueue = null; // 정지할 때 미리 받아 둔 문장 음성을 해제하는 함수
+let fairyVoiceVolume = 1;         // 음성 소리 크기(0.1~1). 화면마다 새로 1에서 시작. 버튼 소리 화면이 낮춘다(setFairyVoiceVolume)
+
+/** 이 화면의 음성(실시간 음성·녹음 음성·브라우저 음성) 소리 크기를 정한다. 지금 나오는 음성에도 바로 적용 */
+function setFairyVoiceVolume(v) {
+    const num = Number(v);
+    fairyVoiceVolume = (isFinite(num) && num > 0) ? Math.min(1, Math.max(0.1, num)) : 1;
+    try {
+        if (currentTtsAudio) currentTtsAudio.volume = fairyVoiceVolume;
+        if (fairyPresetAudio) fairyPresetAudio.volume = fairyVoiceVolume;
+    } catch (e) {}
+    return fairyVoiceVolume;
+}
 
 // 📦 짧은 문장 음성 캐시 (칭찬·안내 멘트 재사용). 캐시에 든 주소는 재생이 끝나도 해제하지 않는다
 const ttsAudioBlobCache = new Map();
@@ -365,6 +377,7 @@ function playTtsSentenceQueue(sentences, fetchAudio, { playbackRate = 1, playbac
             const audio = new Audio(url);
             const rate = playbackRateFor ? playbackRateFor(sentences[i]) : playbackRate;
             if (rate !== 1) audio.playbackRate = rate;
+            audio.volume = fairyVoiceVolume;
             currentTtsAudio = audio;
             let done = false;
             const finishSentence = err => {
@@ -556,6 +569,7 @@ function speakWebSpeechFallback(cleanText, isQuestion, onEndCallback, options = 
 
         try {
             const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.volume = fairyVoiceVolume;
             if (isEng) {
                 utterance.lang = 'en-US';
                 utterance.rate = getEnglishSpeechRate();
@@ -727,7 +741,7 @@ function playFairyPresetAudio(src, onEndCallback = null) {
             fullSrc = getFairyAssetBaseUrl() + src;
         }
         fairyPresetAudio = new Audio(fullSrc);
-        fairyPresetAudio.volume = 1.0;
+        fairyPresetAudio.volume = fairyVoiceVolume;
         fairyPresetAudio.onended = () => {
             fairyPresetAudio = null;
             if (onEndCallback) onEndCallback();
@@ -756,6 +770,7 @@ window.speakFairy = speakFairyTTS;
 window.speakEnglish = speakEnglish;
 window.stopFairyTTS = stopFairyTTS;
 window.playFairyPresetAudio = playFairyPresetAudio;
+window.setFairyVoiceVolume = setFairyVoiceVolume;
 window.playFairyPreset = playFairyPresetAudio;
 window.getBestKoreanVoice = getBestKoreanVoice;
 window.unlockFairySpeechEngine = unlockFairySpeechEngine;

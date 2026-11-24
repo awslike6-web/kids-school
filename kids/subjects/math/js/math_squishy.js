@@ -12,6 +12,10 @@
   ];
 
   var LOCK_HINT = '빙고 한 판을 끝내면 열 수 있어요';
+  // 버튼 소리를 켠 화면에서는 정답 칭찬·설명 음성을 이만큼 낮춰 버튼 소리가 묻히지 않게 한다 (2026-11-25)
+  var VOICE_VOLUME_WITH_SOUND = 0.6;
+  // 키캡 소리 키움 배율 (2026-11-25 사용자 요청: 음성에 묻혀 잘 안 들림)
+  var KEYCAP_BOOST = 2.6;
   var STYLE_ID = 'mx-squishy-style';
   var audioCtx = null;
   var attached = false;
@@ -94,6 +98,7 @@
     var prefs = getPrefs();
     prefs.sound = id;
     savePrefs(prefs);
+    syncVoiceVolume();
     return true;
   }
 
@@ -167,14 +172,14 @@
 
   // 키캡 누름: 스위치 딸깍(1.9kHz) + 바닥 도각(삼각파 175→62Hz). 사용자의 스티치 「키캡 빙고」 시안 소리 (2026-11-25)
   function playKeycap(ctx, now) {
-    noiseClick(ctx, now, 0.014, 1900, 1.6, 0.32);
-    sweepTone(ctx, now, 'triangle', 175, 62, 0.045, 0.26);
+    noiseClick(ctx, now, 0.014, 1900, 1.6, 0.32 * KEYCAP_BOOST);
+    sweepTone(ctx, now, 'triangle', 175, 62, 0.045, 0.26 * KEYCAP_BOOST);
   }
 
   // 키캡 뗌: 위로 올라오는 가벼운 '착'
   function playKeycapUp(ctx, now) {
-    noiseClick(ctx, now, 0.01, 2600, 2, 0.18);
-    sweepTone(ctx, now, 'sine', 240, 135, 0.028, 0.1);
+    noiseClick(ctx, now, 0.01, 2600, 2, 0.18 * KEYCAP_BOOST);
+    sweepTone(ctx, now, 'sine', 240, 135, 0.028, 0.1 * KEYCAP_BOOST);
   }
 
   function playSlime(ctx, now) {
@@ -314,11 +319,22 @@
     return null;
   }
 
+  // 버튼 소리가 켜져 있으면 음성을 낮추고, 꺼져 있으면 원래대로 둔다
+  function syncVoiceVolume() {
+    if (typeof global.setFairyVoiceVolume !== 'function') return;
+    try {
+      global.setFairyVoiceVolume(getPrefs().sound === 'off' ? 1 : VOICE_VOLUME_WITH_SOUND);
+    } catch (e) {
+      // 음성 크기 조정 실패는 학습을 막지 않는다
+    }
+  }
+
   // 문서에 눌림 촉감·소리 위임 듣기를 한 번만 단다
   function attach() {
     if (attached || typeof document === 'undefined' || !document) return;
     attached = true;
     ensureStyle();
+    syncVoiceVolume();
     document.addEventListener('pointerdown', function (e) {
       var btn = closestMxBtn(e.target);
       if (!btn || btn.disabled) return;
@@ -326,6 +342,7 @@
       btn.classList.add('mx-squish');
       var sound = btn.classList.contains('mx-squishy-pick') ? 'off' : getPrefs().sound;
       play(sound);
+      syncVoiceVolume();
       function onRelease(ev) {
         if (sound === 'keycap' && ev && ev.type === 'pointerup') play('keycap-up');
         btn.removeEventListener('pointerup', onRelease);

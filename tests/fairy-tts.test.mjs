@@ -61,7 +61,7 @@ test('② 새 파일 이름에 fairy-engine.js 글자가 없고, 두 파일의 �
 function makeSandbox({ settings = {}, legacy = {}, fetchPlan = {}, user = 'son' } = {}) {
     const store = new Map(Object.entries(legacy));
     store.set(`MINMIN_APP_SETTINGS_${user}`, JSON.stringify(settings));
-    const log = { fetched: [], played: [], revoked: [], created: [] };
+    const log = { fetched: [], played: [], revoked: [], created: [], volumes: [] };
     const sandbox = {
         console: { log() {}, warn() {}, error() {} },
         URLSearchParams, setTimeout, clearTimeout, AbortController, Promise,
@@ -86,6 +86,7 @@ function makeSandbox({ settings = {}, legacy = {}, fetchPlan = {}, user = 'son' 
             constructor(src) { this.src = src; this.playbackRate = 1; }
             play() {
                 log.played.push({ src: this.src, rate: this.playbackRate });
+                log.volumes.push(this.volume);
                 setTimeout(() => this.onended && this.onended(), 1);
                 return Promise.resolve();
             }
@@ -117,7 +118,7 @@ test('② 세 파일을 한 화면처럼 차례로 실으면 공개 함수가 �
         'getCloudflareEdgeTtsConfig', 'fetchCloudflareEdgeTtsAudio', 'playCloudflareEdgeTtsStream',
         'getEnglishSpeechRate', 'setEnglishSpeechRate', 'getKoreanSpeechRate', 'setKoreanSpeechRate',
         'fairyPraise', 'fairyEncourage', 'fairyHint', 'fairyReward', 'fairyGreet', 'resolveFairyPresetAudio', 'pickPersonaVoiceFile',
-        'getFairyAssetBaseUrl', 'toggleFairyTtsSetting', 'updateTtsToggleUi'
+        'getFairyAssetBaseUrl', 'toggleFairyTtsSetting', 'updateTtsToggleUi', 'setFairyVoiceVolume'
     ];
     for (const name of exported) assert.equal(typeof sandbox.window[name], 'function', name);
     assert.equal(typeof sandbox.window.FAIRY_AUDIO_PRESETS, 'object');
@@ -283,4 +284,19 @@ test('⑥ 영어방이 아니거나 목소리를 정한 발화는 예전처럼 �
     sandbox.currentSubject = '영어';
     await say("영어로는 'I like my school!'라고 해요.", { mixedVoices: false }); // 같은 글은 캐시에서 나와 다른 글로
     assert.deepEqual(voices, ['ko-KR-SunHiNeural']);
+});
+
+test('음성 소리 크기: 기본 1, setFairyVoiceVolume으로 낮추면 실시간·녹음 음성 모두 그 크기로 재생 (버튼 소리 화면, 2026-11-25)', async () => {
+    const { sandbox, log } = makeSandbox();
+    vm.runInContext(ttsSrc, sandbox);
+    await runStream(sandbox, '기본 크기예요.');
+    assert.deepEqual(log.volumes, [1]);
+    assert.equal(sandbox.setFairyVoiceVolume(0.6), 0.6);
+    await runStream(sandbox, '작게 말해요.');
+    sandbox.playFairyPresetAudio('https://school.test/a.mp3');
+    assert.deepEqual(log.volumes, [1, 0.6, 0.6]);
+    // 이상한 값은 1로, 너무 작은 값은 0.1로
+    assert.equal(sandbox.setFairyVoiceVolume('x'), 1);
+    assert.equal(sandbox.setFairyVoiceVolume(0.01), 0.1);
+    assert.equal(sandbox.setFairyVoiceVolume(3), 1);
 });
