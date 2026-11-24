@@ -8,12 +8,13 @@
   var MAX_LOGS = 6;
   var GUESS_CAND_LIMIT = 9;
   var GUESS_ASK_LIMIT = 20;
+  var EXACT_DIGIT_LIMIT = 3; // 그 자리에 남은 숫자가 이만큼 이하일 때만 「5예요?」 칩을 보인다
 
   var CATEGORIES = [
     { id: 'size', label: '📏 크기', prefix: 'gt:' },
-    { id: 'h', label: '백의 자리', prefix: 'h:' },
-    { id: 't', label: '십의 자리', prefix: 't:' },
-    { id: 'o', label: '일의 자리', prefix: 'o:' },
+    { id: 'h', label: '백의 자리', prefix: 'h:', cmp: 'hg:', div: 100 },
+    { id: 't', label: '십의 자리', prefix: 't:', cmp: 'tg:', div: 10 },
+    { id: 'o', label: '일의 자리', prefix: 'o:', cmp: 'og:', div: 1 },
     { id: 'even', label: '짝수?', prefix: 'even' }
   ];
 
@@ -43,6 +44,7 @@
     if (!core || !cat || !Array.isArray(cands) || cands.length <= 1 || limit <= 0) {
       return [];
     }
+    if (cat.cmp) return pickDigitChips(core, cat, cands, limit);
     var all = core.chipList();
     var matched = [];
     var i, j, id, yes;
@@ -67,10 +69,47 @@
         var diff = Math.abs(va - mid) - Math.abs(vb - mid);
         return diff !== 0 ? diff : va - vb;
       });
-    } else if (categoryId === 'h' || categoryId === 't' || categoryId === 'o') {
-      matched.sort(function (a, b) { return chipNum(a) - chipNum(b); });
     }
     return matched.slice(0, limit);
+  }
+
+  // 그 자리에 아직 올 수 있는 숫자들(오름차순). 크기·짝수 묶음은 []
+  function digitsLeft(cands, categoryId) {
+    var cat = findCategory(categoryId);
+    if (!cat || !cat.cmp || !Array.isArray(cands)) return [];
+    var seen = {};
+    var out = [];
+    for (var i = 0; i < cands.length; i += 1) {
+      var d = Math.floor(cands[i] / cat.div) % 10;
+      if (!seen[d]) { seen[d] = true; out.push(d); }
+    }
+    return out.sort(function (a, b) { return a - b; });
+  }
+
+  // 자리 숫자 묶음: 남은 숫자가 많으면 「N보다 커요?」(절반에 가까운 것부터), 3개 이하로 줄면 「N이에요?」
+  function pickDigitChips(core, cat, cands, limit) {
+    var seen = {};
+    var kinds = 0;
+    var i, j, id, yes;
+    for (i = 0; i < cands.length; i += 1) {
+      var d = Math.floor(cands[i] / cat.div) % 10;
+      if (!seen[d]) { seen[d] = true; kinds += 1; }
+    }
+    var prefix = kinds > EXACT_DIGIT_LIMIT ? cat.cmp : cat.prefix;
+    var all = core.chipList();
+    var matched = [];
+    for (i = 0; i < all.length; i += 1) {
+      id = all[i];
+      if (id.indexOf(prefix) !== 0) continue;
+      yes = 0;
+      for (j = 0; j < cands.length; j += 1) {
+        if (core.chipAnswer(cands[j], id)) yes += 1;
+      }
+      if (yes > 0 && yes < cands.length) matched.push({ id: id, gap: Math.abs(yes * 2 - cands.length) });
+    }
+    if (prefix === cat.cmp) matched.sort(function (a, b) { return a.gap - b.gap || chipNum(a.id) - chipNum(b.id); });
+    var out = matched.slice(0, limit).map(function (m) { return m.id; });
+    return out.sort(function (a, b) { return chipNum(a) - chipNum(b); });
   }
 
   // 맞히기 보기 생성 (항상 answerN 포함, 오름차순)
@@ -127,6 +166,7 @@
       '.tw20-cat{min-height:56px;flex:1 1 30%;box-sizing:border-box;font-size:.95rem;font-weight:700;',
       'border:2px solid var(--mx-line,#fcd34d);background:var(--mx-bg,#fff);color:var(--mx-strong,#b45309)}',
       '.tw20-cat.is-on{background:var(--mx-accent,#f59e0b);border-color:var(--mx-strong,#b45309);color:#fff}',
+      '.tw20-digits{margin:0 0 8px;font-size:1.05rem;font-weight:800;color:var(--mx-strong,#b45309)}',
       '.tw20-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}',
       '.tw20-chip{min-height:56px;width:100%;box-sizing:border-box;padding:8px 6px;',
       'font-size:1rem;font-weight:700;word-break:keep-all;',
@@ -222,6 +262,8 @@
       meter.appendChild(fill);
 
       var catsRow = ui.el('div', 'tw20-cats');
+      var digitsEl = ui.el('p', 'tw20-digits', '');
+      digitsEl.hidden = true;
       var chipsBox = ui.el('div', 'tw20-chips');
       var emptyMsg = ui.el('p', 'tw20-empty', '이 질문은 더 안 해도 돼요. 다른 묶음을 골라요');
       emptyMsg.hidden = true;
@@ -248,6 +290,7 @@
       area.appendChild(statusBar);
       area.appendChild(meter);
       area.appendChild(catsRow);
+      area.appendChild(digitsEl);
       area.appendChild(chipsBox);
       area.appendChild(emptyMsg);
       area.appendChild(answerEl);
@@ -365,6 +408,14 @@
 
       function renderChips() {
         chipsBox.replaceChildren();
+        var left = digitsLeft(cands, selectedCat);
+        var cat = findCategory(selectedCat);
+        digitsEl.hidden = left.length === 0;
+        if (left.length) {
+          digitsEl.textContent = left.length === 1
+            ? cat.label + '는 ' + left[0] + '!'
+            : cat.label + '는 ' + left.join(' · ') + ' 중 하나';
+        }
         var list = pickChips(cands, selectedCat, MAX_CHIPS);
         if (list.length === 0) {
           chipsBox.hidden = true;
@@ -416,6 +467,7 @@
   global.NumberTwenty = {
     CATEGORIES: CATEGORIES,
     pickChips: pickChips,
+    digitsLeft: digitsLeft,
     guessOptions: guessOptions,
     lab: lab
   };

@@ -422,6 +422,10 @@
     for (i = 1; i <= 9; i++) list.push('h:' + i);
     for (i = 0; i <= 9; i++) list.push('t:' + i);
     for (i = 0; i <= 9; i++) list.push('o:' + i);
+    // 자리 숫자 크기 질문(「십의 자리가 5보다 커요?」): 숫자를 하나씩 찍지 않고 절반씩 좁힌다
+    for (i = 1; i <= 8; i++) list.push('hg:' + i);
+    for (i = 0; i <= 8; i++) list.push('tg:' + i);
+    for (i = 0; i <= 8; i++) list.push('og:' + i);
     list.push('even');
     return list;
   }
@@ -432,6 +436,9 @@
     var copula = NO_BATCHIM[val] ? '예요?' : '이에요?';
     if (id === 'even') return '짝수예요?';
     if (id.indexOf('gt:') === 0) return val + '보다 커요?';
+    if (id.indexOf('hg:') === 0) return '백의 자리가 ' + val + '보다 커요?';
+    if (id.indexOf('tg:') === 0) return '십의 자리가 ' + val + '보다 커요?';
+    if (id.indexOf('og:') === 0) return '일의 자리가 ' + val + '보다 커요?';
     if (id.indexOf('h:') === 0) return '백의 자리가 ' + val + copula;
     if (id.indexOf('t:') === 0) return '십의 자리가 ' + val + copula;
     return '일의 자리가 ' + val + copula;
@@ -443,6 +450,9 @@
     var val = Number(id.slice(id.indexOf(':') + 1));
     if (id.indexOf('gt:') === 0) return n > val;
     var d = digits(n);
+    if (id.indexOf('hg:') === 0) return d.h > val;
+    if (id.indexOf('tg:') === 0) return d.t > val;
+    if (id.indexOf('og:') === 0) return d.o > val;
     if (id.indexOf('h:') === 0) return d.h === val;
     if (id.indexOf('t:') === 0) return d.t === val;
     return d.o === val;

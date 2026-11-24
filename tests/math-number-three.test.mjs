@@ -293,7 +293,14 @@ test('스무고개: makeSecret, chipList, chipText, chipAnswer, candidates', () 
     assert.ok(Number.isInteger(sec) && sec >= 100 && sec <= 999);
   }
   const chips = T.chipList();
-  assert.equal(chips.length, 38);
+  assert.equal(chips.length, 38 + 8 + 9 + 9, '정확한 숫자 38개 + 자리 숫자 크기 26개');
+  assert.equal(T.chipText('tg:5'), '십의 자리가 5보다 커요?');
+  assert.equal(T.chipText('og:4'), '일의 자리가 4보다 커요?');
+  assert.equal(T.chipText('hg:6'), '백의 자리가 6보다 커요?');
+  assert.equal(T.chipAnswer(352, 'tg:4'), true);
+  assert.equal(T.chipAnswer(352, 'tg:5'), false);
+  assert.equal(T.chipAnswer(352, 'og:1'), true);
+  assert.equal(T.chipAnswer(352, 'hg:3'), false);
   assert.equal(T.chipText('gt:300'), '300보다 커요?');
   assert.equal(T.chipText('h:3'), '백의 자리가 3이에요?');
   assert.equal(T.chipText('t:5'), '십의 자리가 5예요?');
