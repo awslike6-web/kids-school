@@ -1,0 +1,24 @@
+/* 🎯 받침 빙고 (민서, docs/korean_spec.md §5-4-1): 공용 math_explorer.css 다음에 싣는다. 살구·하늘 테마 + 단원 칩 + 낱말 칸 글자 */
+body.mx-theme-kbingo {
+  --mx-head-a: #ffedd5; --mx-head-b: #e0f2fe; --mx-line: #fdba74; --mx-strong: #9a3412; --mx-sub: #0369a1;
+  --mx-accent: #ea580c; --mx-accent-dark: #c2410c; --mx-soft: #ffedd5; --mx-softer: #fff7ed;
+}
+
+.kb-head-tools { display: flex; gap: 8px; align-items: center; }
+
+/* 단원 고르기: 세로 한 줄 큰 칩, 켜진 칩은 진한 테두리 + ✓ */
+.kb-unit-list { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+.kb-unit { width: 100%; min-height: 56px; text-align: left; justify-content: flex-start; padding: 10px 14px;
+  font-size: 1.05rem; line-height: 1.35; word-break: keep-all; background: #ffffff; border: 2px solid var(--mx-line); color: var(--mx-ink); }
+.kb-unit.is-on { border-color: var(--mx-accent); background: var(--mx-soft); color: var(--mx-strong); font-weight: 700; }
+.kb-unit.is-on::before { content: '✓ '; }
+.kb-start { width: 100%; min-height: 56px; margin: 6px 0 4px; font-size: 1.15rem; }
+.kb-start:disabled { opacity: .45; }
+
+.kb-play-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.kb-change { min-height: 56px; }
+
+/* 낱말 칸·칩: 4글자도 한 줄 (375px에서 칸 너비 약 95px) */
+body.mx-theme-kbingo .mx-bingo-cell { font-size: 1.2rem; word-break: keep-all; line-height: 1.2; }
+body.mx-theme-kbingo .mx-bingo-chip { font-size: 1.1rem; padding: 0 2px; word-break: keep-all; }
+body.mx-theme-kbingo .mx-bingo-call { font-size: 1.2rem; }

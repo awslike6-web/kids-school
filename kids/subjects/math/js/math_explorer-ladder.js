@@ -125,8 +125,10 @@
 
   // 오늘 더 푼 문제 수와 perReward문제(기본 10)마다 주는 보상(최대 3개)을 localStorage로 관리한다
   // opts.perReward: 2학년(민서)은 6 — 3문제 한 판 두 번마다 (2026-11-24)
+  // opts.expType: 보상 경험치 종류(기본 'math'; 국어 받침 빙고는 'korean', 과목은 window.currentSubject가 정함)
   function counter(key, opts) {
     var per = (opts && opts.perReward) || 10;
+    var expType = (opts && opts.expType) || 'math';
     var child = global.currentChild || 'minsu';
     var storeKey = 'math_' + key + '_drill_' + child + '_' + localDateKey();
     var data = { solved: 0, gems: 0 };
@@ -149,7 +151,7 @@
       if (data.solved % per === 0 && data.gems < 3) {
         data.gems += 1;
         try {
-          if (typeof global.grantRewardAndShowUI === 'function') global.grantRewardAndShowUI(1, false, 'math');
+          if (typeof global.grantRewardAndShowUI === 'function') global.grantRewardAndShowUI(1, false, expType);
         } catch (e) {}
       }
       try {

@@ -123,6 +123,8 @@ function initializeKoreanRoom() {
         document.body.className = "theme--slime";
         const miniCard = document.getElementById('minseoMiniReadingCard');
         if (miniCard) miniCard.style.display = '';
+        const bingoCard = document.getElementById('minseoBatchimBingoCard');
+        if (bingoCard) bingoCard.style.display = '';
         if (titleEl) titleEl.textContent = `${currentUserName}의 국어 멀티버스 대기실`;
         if (badgeEl) { badgeEl.className = "admin-status-badge korean--fairy"; badgeEl.textContent = `🎠 [${currentUserName}] 동화 모드 (클릭 시 전환)`; }
     }

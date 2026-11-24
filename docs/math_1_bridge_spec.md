@@ -187,7 +187,7 @@ NumberTwenty.makeLab({
 ## 7. 범위 밖 (B·C·D 묶음, 다음 차례)
 
 - B: `number50.html`(숫자 키보드 입력·버저), `shapes.html`(질문 읽기·원뿔 보기), `clock_rules.html`.
-- C: 국어 🎯 받침 빙고(받아쓰기 정제 어휘, `MathBingo` 어댑터 재사용 후보).
+- C: 국어 🎯 받침 빙고 — **2026-11-24 구현**, 명세 [`korean_spec.md` §5-4-1](korean_spec.md). `MathBingo`에 함정 칩(decoys)·안내 읽기·문항기록 옵션과 공용 `makeCtx`를 더함.
 - D: 받아쓰기 글자 자석 크기, 국어방 머리 버튼 배치.
 
 ## 8. 설계 검토 기록 (2026-11-24)

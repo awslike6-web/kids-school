@@ -77,6 +77,7 @@
       '.mx-bingo-cell.is-line{border-color:var(--mx-strong,#b45309);',
       'box-shadow:0 0 0 3px var(--mx-accent,#f59e0b);animation:mxBingoLine .6s ease}',
       '.mx-bingo-cell.is-shake{animation:mxBingoShake .4s ease}',
+      '.mx-bingo-cell.is-decoy{border-style:dotted;opacity:.55;text-decoration:line-through}',
       '.mx-bingo-cell.mx-glow{border-color:var(--mx-accent,#f59e0b);',
       'box-shadow:0 0 0 3px var(--mx-accent,#f59e0b);animation:mxBingoGlow .9s ease infinite}',
       '.mx-bingo-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;',
@@ -132,9 +133,9 @@
     return { wrong: noop, done: noop };
   }
 
-  function makeCounter(ui, key, perReward) {
+  function makeCounter(ui, key, perReward, expType) {
     if (global.MathDrill && typeof global.MathDrill.counter === 'function') {
-      return global.MathDrill.counter(key, { perReward: perReward });
+      return global.MathDrill.counter(key, { perReward: perReward, expType: expType });
     }
     return {
       add: noop,
@@ -161,8 +162,16 @@
     var say = typeof ctx.say === 'function' ? ctx.say : noop;
     var praise = typeof ctx.praise === 'function' ? ctx.praise : noop;
     var encourage = typeof ctx.encourage === 'function' ? ctx.encourage : noop;
-    var cnt = makeCounter(ui, o.counterKey, o.perReward || 6);
+    var cnt = makeCounter(ui, o.counterKey, o.perReward || 6, o.expType);
+    var labels = o.labels || {};
     var roundToken = 0;
+
+    // 문항기록: 화면이 o.track(문제)를 주면 그것(국어 받침 빙고는 VOCA 낱말 키), 없으면 g:<prefix>-<종류>
+    function trackFor(p) {
+      var t = typeof o.track === 'function' ? o.track(p) : null;
+      if (t && typeof t.wrong === 'function' && typeof t.done === 'function') return t;
+      return trackProblem(o.prefix, p.kind);
+    }
 
     function startRound(extra) {
       roundToken += 1;
@@ -174,9 +183,13 @@
       card.appendChild(wrap);
       area.appendChild(card);
 
-      var problems = o.makeBingo();
+      // makeBingo는 문제 배열, 또는 { problems, decoys }(decoys = 부르지 않는 함정 칩, 국어 받침 빙고)를 준다
+      var made = o.makeBingo({ extra: Boolean(extra) });
+      var problems = Array.isArray(made) ? made : (made && made.problems) || [];
+      var decoys = (!Array.isArray(made) && made && Array.isArray(made.decoys)) ? made.decoys : [];
       var answers = [];
       for (var i = 0; i < problems.length; i += 1) answers.push(problems[i].answerText);
+      for (var di = 0; di < decoys.length; di += 1) answers.push(decoys[di].text);
 
       var phase = 'place';
       var board = [null, null, null, null, null, null, null, null, null];
@@ -193,7 +206,7 @@
       var prevLines = [];
       var locked = false;
 
-      var guideEl = ui.guide('숫자를 골라 내 판에 놓아요');
+      var guideEl = ui.guide(labels.place || '숫자를 골라 내 판에 놓아요');
       var bannerEl = ui.el('div', 'mx-bingo-banner', '');
       bannerEl.hidden = true;
       var callBar = ui.el('div', 'mx-bingo-call-bar');
@@ -231,7 +244,7 @@
         wrongCount = 0;
         clearGlow();
         ui.hint(hintEl, '');
-        tracker = trackProblem(o.prefix, p.kind);
+        tracker = trackFor(p);
         ui.fill(callEl, p.call);
         say(speakProblem(p));
       }
@@ -281,6 +294,17 @@
         if (!extra && !doneNow && typeof ctx.complete === 'function') ctx.complete();
         endBox.replaceChildren();
         endBox.appendChild(ui.doneBadge('빙고 완성! (' + poppedCount + '칸)'));
+        // 함정 칩이 있던 판: 남은 함정 칸을 표시하고 바른 글자를 함께 보여 준다 (국어 받침 빙고 「달타 → 닳다」)
+        if (decoys.length) {
+          var notes = [];
+          for (var dn = 0; dn < decoys.length; dn += 1) {
+            notes.push(decoys[dn].text + ' → ' + decoys[dn].of);
+            for (var dc = 0; dc < 9; dc += 1) {
+              if (board[dc] === decoys[dn].text) cellBtns[dc].classList.add('is-decoy');
+            }
+          }
+          endBox.appendChild(ui.guide('🙈 함정 칸: ' + notes.join(' · ')));
+        }
         endBox.appendChild(cnt.view());
         var unlockBox = buildUnlockBox();
         if (unlockBox) endBox.appendChild(unlockBox);
@@ -329,7 +353,7 @@
         if (phase === 'place') {
           if (board[idx] !== null) return;
           if (!pickedChip) {
-            ui.hint(hintEl, '먼저 아래 숫자를 골라요');
+            ui.hint(hintEl, labels.pickFirst || '먼저 아래 숫자를 골라요');
             return;
           }
           placeInCell(idx, pickedChip.text);
@@ -355,6 +379,21 @@
           praise();
           tracker.done();
           if (extra) cnt.add();
+          // 이 낱말의 함정 칸은 함께 닫혀 줄에 들어간다 (국어 받침 빙고: 함정이 3줄을 막지 않게, 바른 글자를 바로 보여 줌)
+          var closed = [];
+          for (var dj = 0; dj < decoys.length; dj += 1) {
+            if (decoys[dj].of !== cur.answerText) continue;
+            for (var dk = 0; dk < 9; dk += 1) {
+              if (board[dk] === decoys[dj].text && !marked[dk]) {
+                marked[dk] = true;
+                cellBtns[dk].classList.remove('mx-glow');
+                cellBtns[dk].classList.add('is-decoy');
+                cellBtns[dk].disabled = true;
+                closed.push(decoys[dj].text + ' → ' + decoys[dj].of);
+              }
+            }
+          }
+          if (closed.length) ui.hint(hintEl, '🙈 함정 칸 닫힘: ' + closed.join(' · '));
 
           var lines = completedLines(marked);
           if (lines.length > prevLines.length) {
@@ -397,7 +436,14 @@
         }, 400);
         encourage();
         tracker.wrong(board[idx]);
-        ui.hint(hintEl, '다시 계산해 볼까요? 🔊로 다시 들을 수 있어요');
+        // o.wrongHint(문제, 누른 칸 글자)를 주면 그 안내를 보이고 읽어 준다 (국어 받침 빙고 함정 칸)
+        var custom = typeof o.wrongHint === 'function' ? o.wrongHint(cur, board[idx]) : '';
+        if (custom) {
+          ui.hint(hintEl, custom);
+          say(custom);
+        } else {
+          ui.hint(hintEl, '다시 계산해 볼까요? 🔊로 다시 들을 수 있어요');
+        }
         wrongCount += 1;
         if (wrongCount >= 2) {
           for (var c = 0; c < 9; c += 1) {
@@ -444,7 +490,67 @@
     startRound(firstExtra);
   }
 
+  function safeCall(fnName, arg) {
+    var fn = global[fnName];
+    if (typeof fn !== 'function') return;
+    try {
+      fn(arg);
+    } catch (e) {}
+  }
+
+  // 탐험관 틀이 없는 화면용 작은 ctx (1학년 10 빙고·국어 받침 빙고)
+  // o.keyPrefix: 첫 판 보상 키 앞부분 → '{keyPrefix}_{아이}_{로컬 날짜}', o.expType: 보상 경험치 종류(기본 'math')
+  function makeCtx(o) {
+    var opt = o || {};
+    var expType = opt.expType || 'math';
+    var say = function (text) { safeCall('speakFairyTTS', text); };
+    var praise = function () { safeCall('fairyPraise'); };
+    var encourage = function () { safeCall('fairyEncourage'); };
+    var ui = global.MathExplorer.makeUi(say, praise, encourage);
+
+    function doneKey() {
+      var child = global.currentChild || 'minsu';
+      var dateKey = global.MathExplorer && typeof global.MathExplorer.localDateKey === 'function'
+        ? global.MathExplorer.localDateKey()
+        : '';
+      return opt.keyPrefix + '_' + child + '_' + dateKey;
+    }
+
+    function isDone() {
+      try {
+        return Boolean(global.localStorage.getItem(doneKey()));
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function complete() {
+      if (isDone()) return;
+      if (typeof global.grantRewardAndShowUI === 'function') {
+        try {
+          var res = global.grantRewardAndShowUI(1, false, expType);
+          if (res && typeof res.catch === 'function') res.catch(noop);
+        } catch (e) {}
+      }
+      try {
+        global.localStorage.setItem(doneKey(), '1');
+      } catch (e) {}
+    }
+
+    return {
+      ui: ui,
+      say: say,
+      praise: praise,
+      encourage: encourage,
+      complete: complete,
+      isDone: isDone,
+      hasNext: function () { return false; },
+      goNext: noop
+    };
+  }
+
   global.MathBingo = {
+    makeCtx: makeCtx,
     LINES: LINES,
     completedLines: completedLines,
     autoPlace: autoPlace,

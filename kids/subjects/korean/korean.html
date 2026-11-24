@@ -73,6 +73,13 @@
       <p class="korean-btn-desc">짧은 이야기를 귀로 듣고, 낱말 → 인물의 생각 → 글쓴이의 생각 3문제를 풀어요!</p>
     </div>
 
+    <!-- 민서 전용 놀이: 받침 빙고 (initializeKoreanRoom이 민서일 때만 표시, docs/korean_spec.md §5-4-1) -->
+    <div class="korean-grid-btn" id="minseoBatchimBingoCard" onclick="location.href='batchim_bingo.html'" style="display:none; border: 2.5px solid #f59e0b; background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);">
+      <span class="korean-btn-icon">🎯</span>
+      <div class="korean-btn-title" style="color: #b45309;">받침 빙고</div>
+      <p class="korean-btn-desc">요정이 읽어 주는 낱말을 듣고, 바른 글자 칸을 터뜨려요! 소리 나는 대로 쓴 함정 칸을 조심!</p>
+    </div>
+
     <!-- 5단계: 심화 사고력 (AI 지문 토론) -->
     <div class="korean-grid-btn" onclick="openMissionView('sentence')">
       <span class="korean-btn-icon">🗣️</span>
@@ -119,7 +126,7 @@
 <script src="../../js/korean_voca.js?v=32c5485a"></script>
 <script src="../../js/korean_sentence.js?v=206f1eed"></script>
 <script src="../../js/korean_mini_reading.js?v=2b93c925"></script>
-<script src="../../js/korean_common.js?v=55878c4d"></script>
+<script src="../../js/korean_common.js?v=005bb1b6"></script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {

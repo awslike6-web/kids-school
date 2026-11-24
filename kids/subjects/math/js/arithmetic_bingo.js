@@ -176,61 +176,10 @@
     return fallbackBoard(mode);
   }
 
-  function safeCall(fnName, arg) {
-    var fn = global[fnName];
-    if (typeof fn !== 'function') return;
-    try {
-      fn(arg);
-    } catch (e) {}
-  }
-
-  function firstDoneKey(op) {
-    var child = global.currentChild || 'minsu';
-    var dateKey = global.MathExplorer && typeof global.MathExplorer.localDateKey === 'function'
-      ? global.MathExplorer.localDateKey()
-      : '';
-    return 'math_cpa-bingo-' + op + '_first_' + child + '_' + dateKey;
-  }
-
-  // MathBingo.render가 쓰는 컨텍스트 생성
+  // MathBingo.render가 쓰는 컨텍스트 (공용 MathBingo.makeCtx, 첫 판 키 math_cpa-bingo-{add|sub}_first_{아이}_{날짜})
   function makeCtx(op) {
     var mode = op === 'sub' ? 'sub' : 'add';
-    var say = function (text) { safeCall('speakFairyTTS', text); };
-    var praise = function () { safeCall('fairyPraise'); };
-    var encourage = function () { safeCall('fairyEncourage'); };
-    var ui = global.MathExplorer.makeUi(say, praise, encourage);
-
-    function isDone() {
-      try {
-        return Boolean(global.localStorage.getItem(firstDoneKey(mode)));
-      } catch (e) {
-        return false;
-      }
-    }
-
-    function complete() {
-      if (isDone()) return;
-      if (typeof global.grantRewardAndShowUI === 'function') {
-        try {
-          var res = global.grantRewardAndShowUI(1, false, 'math');
-          if (res && typeof res.catch === 'function') res.catch(noop);
-        } catch (e) {}
-      }
-      try {
-        global.localStorage.setItem(firstDoneKey(mode), '1');
-      } catch (e) {}
-    }
-
-    return {
-      ui: ui,
-      say: say,
-      praise: praise,
-      encourage: encourage,
-      complete: complete,
-      isDone: isDone,
-      hasNext: function () { return false; },
-      goNext: noop
-    };
+    return global.MathBingo.makeCtx({ keyPrefix: 'math_cpa-bingo-' + mode + '_first', expType: 'math' });
   }
 
   // 패널 안에 안내·버튼 소리 선택·3×3 빙고를 그린다
