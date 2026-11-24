@@ -487,6 +487,15 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### 🪜 2-1 세 자리 수·덧셈과 뺄셈 계산 부품 (2026-11-24, 화면은 만드는 중)
+
+민서 2학년 1학기 예습용 탐험관(`number_three.html`·`add_sub_two.html`, 아직 없음)과 놀이(🎯 수 빙고·🔍 수 스무고개)가 쓸 순수 계산 모듈(DOM 없음). 설계: [`docs/math_2-1_ladder_spec.md`](../../docs/math_2-1_ladder_spec.md). 4-2 모듈과 같은 모양(`LAB_KINDS`·`KIND_ORDER`·`makeProblem`·`wrongChoices`·`makeRound`·`makeMixedRound`·`randInt`).
+
+- `kids/subjects/math/js/number_three-core.js` (`window.ThreeDigitCore`): `readKo(n)`(1~1000, 백·십의 1은 "일" 생략·0 자리 읽지 않음: 110 백십, 305 삼백오, 1000 천), `readKoWrong(n, 실수)`·`wrongReadings(n)`(몇백은 삼십·삼천), `digits`·`placeValue`, 문제 13종(듣고 만들기·듣고 쓰기·보고 읽기·자릿값·경계 뛰어 세기·비교), `makeMixedRound(rng, 6)`, `makeBingo(rng)`(답이 서로 다른 9문제 + `call` 글자), 스무고개 `makeSecret`·`chipList`(38개: gt·h·t·o·even)·`chipText`·`chipAnswer`·`candidates(asked)`.
+- `kids/subjects/math/js/add_sub_two-core.js` (`window.TwoDigitCore`): `add`·`sub`·`needsCarry`·`needsBorrow`, 문제 12종(받아올림·받아내림 한 번, 합 ≤ 99, 차의 십의 자리 ≥ 1, 세 수는 뺄셈이 앞·두 번이면 b > c, 관계식, 덧셈식 □), `exprText`·`speakText`(더하기·빼기 말로)·`bingoCall`, `makeBingo(rng)`. 빼기 기호는 `−`(U+2212).
+- 오개념 이름: 세 자리 수 `read-one-prefix`·`read-zero`·`read-as-tens`·`write-each-place`(3005)·`write-drop-zero`(35)·`place-ignore`·`place-shift`·`jump-boundary`(1100)·`compare-ones-first`, 덧셈과 뺄셈 `no-carry`·`write-sum`(212)·`over-carry`·`reverse-subtract`·`no-borrow-tens`·`zero-passthrough`(40−6=46)·`over-borrow`·`right-to-left`·`box-add`·`mix-terms`·`wrong-op`.
+- 검증: `tests/math-number-three.test.mjs`·`tests/math-add-sub-two.test.mjs`(계약서만 보고 따로 쓴 시험 + Claude 보정: 일의 자리 자릿값 오답, 몇백 읽기 오답, 세 수 b > c).
+
 ### 수학 대문·각도 페이지 인라인 CSS·JS 분리 (2026-10-31)
 
 - `kids/subjects/math/math.html`(466줄, 2026-11-14 3단원 카드 2장 추가)은 `kids/css/math_lobby.css`(267줄)와 `kids/subjects/math/js/math_lobby.js`(130줄)를 원래 인라인 블록 위치에서 로드합니다. 전역 함수 `openMathSection`·`switchConceptMode`·`filterGradeSector`·`filterTopicSector`, 즉시 실행되는 `goLobbyBtn` 클릭 등록과 기존 `DOMContentLoaded` 초기화를 보존합니다.

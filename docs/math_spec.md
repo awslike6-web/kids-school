@@ -252,6 +252,11 @@ graph TD
 - 민수는 많이 풀며 익숙해진 뒤 개념이 잡히므로 바로 문제로 시작하고, 관 완주 뒤 `🔁 한 판 더`로 끝없이 더 푼다(맞힌 10문제마다 💎1, 화면마다 하루 3개까지).
 - 상세 설계·진행: [`math_4-2_ladder_spec.md`](math_4-2_ladder_spec.md). 계산 부품(`FractionCore`·`DecimalAddCore`)과 두 탐험관 화면(`fraction_add.html`·`decimal_add.html`) 완료. 퀴즈 배틀 자료 `math_4-2_1.json`·`math_4-2_3.json`. 화면의 모든 분수는 세로 분수(틀 옵션 `fractions: true`), 관 안 문제도 학습일지 `g:frac4-<종류>`로 기록.
 
+### 13) 🪜 2-1 세 자리 수·덧셈과 뺄셈 사다리 (만드는 중, 2026-11-24~)
+- 민서 2학년 1학기 예습용. 「세 자리 수」(`number_three.html`)·「덧셈과 뺄셈」(`add_sub_two.html`) 탐험관 + 놀이 층(🫧 말랑 버튼·🎯 수 빙고·🔍 수 스무고개·🎁 고르는 해금·📮 요정 건의함).
+- 민서 맞춤: 질문·힌트 자동 읽기, 한 문제 10번 이내 누르기, 큰 버튼, 지난번 관 열기. 놀이 규칙이 곧 학습, 한 화면 한 장난감.
+- 상세 설계·진행: [`math_2-1_ladder_spec.md`](math_2-1_ladder_spec.md). 계산 부품(`ThreeDigitCore`·`TwoDigitCore`) 완료, 다음은 말랑 버튼·빙고.
+
 ---
 
 ## Phase 1: 초1-2 시각·모양·규칙 조작 활동 (2026-10-24)
