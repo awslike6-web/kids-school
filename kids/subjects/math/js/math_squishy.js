@@ -132,33 +132,49 @@
     return buf;
   }
 
-  function playKeycap(ctx, now) {
-    // 짧은 잡음 폭발(25ms, 2~4kHz 대역)
+  // 잡음 한 토막을 대역 필터로 걸러 짧게 낸다 (키캡 스위치의 '딸깍')
+  function noiseClick(ctx, now, sec, freq, q, vol) {
     var src = ctx.createBufferSource();
-    src.buffer = makeNoiseBuffer(ctx, 0.025);
+    src.buffer = makeNoiseBuffer(ctx, sec);
     var filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(3000, now);
-    filter.Q.setValueAtTime(1.2, now);
+    filter.frequency.setValueAtTime(freq, now);
+    filter.Q.setValueAtTime(q, now);
     var ng = ctx.createGain();
-    ng.gain.setValueAtTime(0.22, now);
-    ng.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+    ng.gain.setValueAtTime(vol, now);
+    ng.gain.exponentialRampToValueAtTime(0.001, now + sec);
     src.connect(filter);
     filter.connect(ng);
     ng.connect(ctx.destination);
     src.start(now);
-    src.stop(now + 0.026);
-    // 낮은 퉁(140Hz 사인, 40ms)
+    src.stop(now + sec + 0.002);
+  }
+
+  // 미끄러지며 낮아지는 짧은 음 (바닥에 닿는 '도각')
+  function sweepTone(ctx, now, type, from, to, sec, vol) {
     var osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(140, now);
+    osc.type = type;
+    osc.frequency.setValueAtTime(from, now);
+    osc.frequency.exponentialRampToValueAtTime(to, now + sec * 0.9);
     var og = ctx.createGain();
-    og.gain.setValueAtTime(0.22, now);
-    og.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    og.gain.setValueAtTime(vol, now);
+    og.gain.exponentialRampToValueAtTime(0.001, now + sec);
     osc.connect(og);
     og.connect(ctx.destination);
     osc.start(now);
-    osc.stop(now + 0.042);
+    osc.stop(now + sec + 0.003);
+  }
+
+  // 키캡 누름: 스위치 딸깍(1.9kHz) + 바닥 도각(삼각파 175→62Hz). 사용자의 스티치 「키캡 빙고」 시안 소리 (2026-11-25)
+  function playKeycap(ctx, now) {
+    noiseClick(ctx, now, 0.014, 1900, 1.6, 0.32);
+    sweepTone(ctx, now, 'triangle', 175, 62, 0.045, 0.26);
+  }
+
+  // 키캡 뗌: 위로 올라오는 가벼운 '착'
+  function playKeycapUp(ctx, now) {
+    noiseClick(ctx, now, 0.01, 2600, 2, 0.18);
+    sweepTone(ctx, now, 'sine', 240, 135, 0.028, 0.1);
   }
 
   function playSlime(ctx, now) {
@@ -249,6 +265,7 @@
       if (!ctx) return;
       var now = ctx.currentTime;
       if (id === 'keycap') playKeycap(ctx, now);
+      else if (id === 'keycap-up') playKeycapUp(ctx, now);
       else if (id === 'slime') playSlime(ctx, now);
       else if (id === 'mallang') playMallang(ctx, now);
       else if (id === 'jelly') playJelly(ctx, now);
@@ -307,8 +324,10 @@
       if (!btn || btn.disabled) return;
       btn.classList.remove('mx-squish-out');
       btn.classList.add('mx-squish');
-      if (!btn.classList.contains('mx-squishy-pick')) play(getPrefs().sound);
-      function onRelease() {
+      var sound = btn.classList.contains('mx-squishy-pick') ? 'off' : getPrefs().sound;
+      play(sound);
+      function onRelease(ev) {
+        if (sound === 'keycap' && ev && ev.type === 'pointerup') play('keycap-up');
         btn.removeEventListener('pointerup', onRelease);
         btn.removeEventListener('pointercancel', onRelease);
         btn.removeEventListener('pointerleave', onRelease);
