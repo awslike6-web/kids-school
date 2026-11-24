@@ -3585,7 +3585,7 @@
       "audio_file": "8d7230661f22021dd131d775.mp3",
       "spoken_text": "편견",
       "sources": [
-        "3faa2711-5b68-815f-8b85-d15cdb70f5b2"
+        "book_40"
       ],
       "kinds": [
         "word"
@@ -7365,7 +7365,7 @@
       "audio_file": "60bb708eb10b94c59f25e30a.mp3",
       "spoken_text": "귀에 못이 박히다",
       "sources": [
-        "book_39"
+        "book_40"
       ],
       "kinds": [
         "word"
@@ -7375,7 +7375,7 @@
       "audio_file": "a1a1443ab219d2ac9e5f34e6.mp3",
       "spoken_text": "같은 말을 여러 번 되풀이하여 들어 지겹거나 아주 익숙해지다",
       "sources": [
-        "book_39"
+        "book_40"
       ],
       "kinds": [
         "meaning"
@@ -7416,6 +7416,206 @@
       "spoken_text": "소리와 글자는 다르지만 뜻이 서로 같거나 매우 비슷한 관계에 있는 말",
       "sources": [
         "book_39"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "47d73a80187692aba7aa440d": {
+      "audio_file": "47d73a80187692aba7aa440d.mp3",
+      "spoken_text": "남아메리카의 높은 산맥에는 수백 종류의 감자가 자랍니다. 이곳 사람들은 수천 년 전부터 감자를 먹고 살았습니다. 그러나 지구의 다른 지역에는 감자가 전혀 없었습니다. 감자가 남아메리카의 밖으로 알려진 것은 500년밖에 되지 않습니다. 유럽 사람들이 남아메리카에 갔을 때 감자를 알게 되었습니다. 이들은 감자를 얻어 와 유럽에 심었습니다. 그런데 유럽 사람들은 감자를 좋아하지 않았다고 합니다. \"모양이 기분 나쁘게 생겼다.\", \"미개한 사람들이 먹는 것이다.\", \"감자를 만지면 질병에 걸린다.\"라고 하며 감자를 싫어했습니다. 이 때문에 유럽 사람들은 굶어 죽어 가면서도 감자를 먹지 않았다고 합니다. 감자에 대한 이런 편견은 오랫동안 이어졌습니다. 그러다가 200년이나 지났을 때, 비로소 편견을 깨는 일이 생겼습니다. 감자를 심은 밭에 불이 났는데 구워진 감자에서 맛있는 냄새가 났다고 합니다. 또 감자의 가치를 알게 된 왕이 매일 감자 먹는 모습을 일부러 보여 주며, 사람들의 잘못된 생각을 바꾸려 노력했다고 합니다. 그 결과 많은 사람이 감자를 먹기 시작하였습니다. 오늘날 감자는 전 세계에 알려졌고, 수많은 사람이 좋아합니다. 감자로 만든 요리의 수는 헤아리기 어려울 정도로 많습니다. 그러나 감자는 억울한 이유로 한때 버림받았던 식품입니다. 우리 주변에 감자처럼 억울한 이유로 외면당하는 것이 없는지 살펴봅시다.",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "passage"
+      ]
+    },
+    "ea437b718c75bcc14dc59b05": {
+      "audio_file": "ea437b718c75bcc14dc59b05.mp3",
+      "spoken_text": "감자에 대한 편견",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "title"
+      ]
+    },
+    "0871ac457d7a4efe78465eec": {
+      "audio_file": "0871ac457d7a4efe78465eec.mp3",
+      "spoken_text": "안녕! 방금 읽을 이야기는 감자에 대한 편견이에요. 편안하게 읽어보고 문제를 풀어봐요!",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "intro"
+      ]
+    },
+    "75cb274b0992ba97502f0122": {
+      "audio_file": "75cb274b0992ba97502f0122.mp3",
+      "spoken_text": "외면",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "48a5d92cf01e7fdbe152f377": {
+      "audio_file": "48a5d92cf01e7fdbe152f377.mp3",
+      "spoken_text": "마주 보기 싫어서 피하거나 얼굴을 돌리는 것",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "d5bcb878d67fbc3f1bc63f7f": {
+      "audio_file": "d5bcb878d67fbc3f1bc63f7f.mp3",
+      "spoken_text": "미개",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "2f86f7f603d8a11913c51a22": {
+      "audio_file": "2f86f7f603d8a11913c51a22.mp3",
+      "spoken_text": "문명이 발달하지 못하여 사는 수준이 낮음",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "cb87d0f94dc97321253a7931": {
+      "audio_file": "cb87d0f94dc97321253a7931.mp3",
+      "spoken_text": "억울하다",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "43ddbbe8d6e8431ae3a1f052": {
+      "audio_file": "43ddbbe8d6e8431ae3a1f052.mp3",
+      "spoken_text": "아무 잘못 없이 꾸중을 듣거나 벌을 받거나 하여 분하고 답답함",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "8f9d6d6a231850b15e375a36": {
+      "audio_file": "8f9d6d6a231850b15e375a36.mp3",
+      "spoken_text": "질병",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "473c060348545c3e55d08e18": {
+      "audio_file": "473c060348545c3e55d08e18.mp3",
+      "spoken_text": "몸과 마음에 생기는 온갖 병",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "1cc6fe75bcd235df0fda3554": {
+      "audio_file": "1cc6fe75bcd235df0fda3554.mp3",
+      "spoken_text": "공정하지 못하고 한쪽으로 치우친 생각",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "146c1e33c19a999c2d1120ec": {
+      "audio_file": "146c1e33c19a999c2d1120ec.mp3",
+      "spoken_text": "식품",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "0ccd2242db70d2680dc2204e": {
+      "audio_file": "0ccd2242db70d2680dc2204e.mp3",
+      "spoken_text": "사람이 평소에 먹는 모든 음식물",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "9f3d80dda6eed77f2aaffc98": {
+      "audio_file": "9f3d80dda6eed77f2aaffc98.mp3",
+      "spoken_text": "입은 비뚤어져도 말은 바로 해라",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "c420f3b02f53feff199c0132": {
+      "audio_file": "c420f3b02f53feff199c0132.mp3",
+      "spoken_text": "상황이 어떻든지 말은 언제나 사실대로 바르게 하여야 함을 이르는 말",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "46be1db8940ef8b8f2d8ad32": {
+      "audio_file": "46be1db8940ef8b8f2d8ad32.mp3",
+      "spoken_text": "누워서 침 뱉기",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "64ac217080ac92c9846060a1": {
+      "audio_file": "64ac217080ac92c9846060a1.mp3",
+      "spoken_text": "남을 해치려다 도리어 자기가 해를 입게 됨을 비유적으로 이르는 말",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "meaning"
+      ]
+    },
+    "97cd464e57e8ed42a77b9532": {
+      "audio_file": "97cd464e57e8ed42a77b9532.mp3",
+      "spoken_text": "가슴이 철렁하다",
+      "sources": [
+        "book_40"
+      ],
+      "kinds": [
+        "word"
+      ]
+    },
+    "3f6573c03632ab1b53f0fddc": {
+      "audio_file": "3f6573c03632ab1b53f0fddc.mp3",
+      "spoken_text": "몹시 놀라거나 걱정이 되어 가슴이 내려앉는 듯하다",
+      "sources": [
+        "book_40"
       ],
       "kinds": [
         "meaning"
@@ -7728,6 +7928,12 @@
       "audio_file": "107a00693496a49d28a51d59.mp3",
       "title": "새로운 가치를 만드는 새활용",
       "order": 39
+    },
+    "book_40": {
+      "audio_hash": "47d73a80187692aba7aa440d",
+      "audio_file": "47d73a80187692aba7aa440d.mp3",
+      "title": "감자에 대한 편견",
+      "order": 40
     }
   },
   "settings": {
