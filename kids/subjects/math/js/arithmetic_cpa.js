@@ -153,9 +153,31 @@
     $('partner-roll').onclick = () => {n = random(1, 9); render();};
     $('partner-read').onclick = () => say($('partner-feedback').textContent); render();
   }
+  // 개념 퀴즈 (2026-11-24 1학년 다리 math_1_bridge_spec §4-2): 보기 3개(정답 + 오개념 2개), 문제가 뜨면 질문을 읽고,
+  // 틀리면 그 보기만 꺼지고 힌트를 읽어 주며 정답 보기가 반짝인다(에러리스). 보상은 6문제마다(하루 3개, MathDrill.counter).
+  const QUIZ_HINTS = {
+    'make10-sum': '10이 되는 짝꿍을 찾아요', 'no-carry': '10을 넘으면 십몇이 돼요', 'add-instead': '빼면 작아져요',
+    'reverse-subtract': '10에서 먼저 빼 봐요', 'off-by-one': '하나씩 다시 세어 봐요'
+  };
+  function quizWrongs(keyBody, a, b, start, correct) {
+    const first = {
+      'cpa-make10': ['make10-sum', a + 10], 'cpa-add-1x1': ['off-by-one', correct + 1],
+      'cpa-add-1x1-carry': ['no-carry', correct - 10], 'cpa-sub-10': ['add-instead', 10 + b],
+      'cpa-sub-teen': ['add-instead', start + b], 'cpa-sub-teen-borrow': ['reverse-subtract', 10 + b - (start % 10)]
+    }[keyBody];
+    const out = [];
+    const ok = v => Number.isInteger(v) && v >= 1 && v !== correct && !out.some(w => w.value === v);
+    if (ok(first[1])) out.push({value: first[1], mistake: first[0]});
+    for (const v of [correct - 1, correct + 1, correct + 2, correct - 2, correct + 3]) {
+      if (out.length >= 2) break;
+      if (ok(v)) out.push({value: v, mistake: 'off-by-one'});
+    }
+    return out;
+  }
   function initQuiz(subtract) {
     let correct = 0, solved = false, questionNumber = 0;
-    let track = null, keyBody = null;
+    let track = null, keyBody = null, lastSpeech = '';
+    const counter = window.MathDrill && window.MathDrill.counter ? window.MathDrill.counter(subtract ? 'cpa-quiz-sub' : 'cpa-quiz-add', {perReward: 6}) : null;
     function ensureTrack() {
       if (track === false) return null;
       if (track) return track;
@@ -168,26 +190,57 @@
       if (track) track.skip();
       track = null; keyBody = null;
       solved = false; const a = random(2,9), b = random(1,9), type = questionNumber++ % 2;
+      let start = 0, speech = '', pic = null;
       if (subtract) {
-        const start = type === 0 ? 10 : 10 + random(1, b - 1 || 1);
+        start = type === 0 ? 10 : 10 + random(1, b - 1 || 1);
         correct = start - b; $('quiz-question').textContent = `${start} − ${b} = □`;
+        speech = `${start} 빼기 ${b}, 얼마예요?`;
         keyBody = type === 0 ? 'cpa-sub-10' : ((start % 10) < b ? 'cpa-sub-teen-borrow' : 'cpa-sub-teen');
+        if (type === 0) pic = [...chips(10 - b, 'blue', 'quiz-keep'), ...chips(b, 'removed', 'quiz-gone')];
       } else if (type === 0) {
         correct = 10 - a; $('quiz-question').textContent = `${a} + □ = 10`;
+        speech = `${a} 더하기 몇은 10?`;
         keyBody = 'cpa-make10';
+        pic = chips(a, 'red', 'quiz-red');
       } else {
         correct = a + b; $('quiz-question').textContent = `${a} + ${b} = □`;
+        speech = `${a} 더하기 ${b}, 얼마예요?`;
         keyBody = a + b >= 10 ? 'cpa-add-1x1-carry' : 'cpa-add-1x1';
       }
-      const values = new Set([correct]); while (values.size < 4) values.add(random(Math.max(0, correct - 3), correct + 3));
+      // 힌트가 가리키는 10칸 구슬판: 10 만들기·10에서 빼기 문제에만 보인다
+      const picHost = $('quiz-frame');
+      if (picHost) { picHost.hidden = !pic; if (pic) frame('quiz-frame', pic); }
+      const wrongs = quizWrongs(keyBody, a, b, start, correct);
+      const values = window.MathQuizEngine.shuffleArray([correct, ...wrongs.map(w => w.value)]);
       $('quiz-feedback').textContent = '';
-      $('quiz-choices').replaceChildren(...window.MathQuizEngine.shuffleArray([...values]).map(v => button(String(v), () => {
-        if (solved) return;
-        const t = ensureTrack();
-        if (v === correct) {solved = true; t?.done(); $('quiz-feedback').textContent = '맞았어요! 구슬과 식을 잘 연결했어요.'; praise(); window.grantRewardAndShowUI?.(1, false, 'math');}
-        else {t?.wrong(String(v)); $('quiz-feedback').textContent = '구슬판에서 10을 먼저 살펴보고 다시 골라 봐요.'; hint();}
-      })));
+      let rightBtn = null;
+      const buttons = values.map(v => {
+        const btn = button(String(v), () => {
+          if (solved || btn.disabled) return;
+          const t = ensureTrack();
+          if (v === correct) {
+            solved = true; t?.done(); btn.classList.add('is-correct'); rightBtn.classList.remove('cpa-glow');
+            $('quiz-feedback').textContent = '맞았어요! 구슬과 식을 잘 연결했어요.'; praise(); counter?.add();
+          } else {
+            t?.wrong(String(v));
+            btn.disabled = true; btn.classList.add('is-off'); rightBtn.classList.add('cpa-glow');
+            const w = wrongs.find(x => x.value === v);
+            const h = (w && QUIZ_HINTS[w.mistake]) || '하나씩 다시 세어 봐요';
+            $('quiz-feedback').textContent = '💡 ' + h; hint(); say(h);
+          }
+        }, 'cpa-quiz-choice');
+        if (v === correct) rightBtn = btn;
+        return btn;
+      });
+      $('quiz-choices').replaceChildren(...buttons);
+      const countHost = $('quiz-count');
+      if (countHost && counter) countHost.replaceChildren(counter.view());
+      lastSpeech = speech;
+      // 숨은 탭에서는 읽지 않는다(페이지를 열자마자 퀴즈 질문이 들리지 않게). 탭을 열 때 sayQuiz()로 읽음
+      const panel = $('panel-quiz');
+      if (!panel || !panel.hidden) say(speech);
     }
+    window.sayQuiz = () => { if (lastSpeech) say(lastSpeech); };
     $('quiz-next').onclick = render; window.nextQuiz = render; render();
   }
   function initPage(subtract) {
@@ -199,6 +252,7 @@
       document.querySelectorAll('.cpa-panel').forEach(p => p.hidden = p.id !== b.dataset.panel);
       document.querySelectorAll('[data-panel]').forEach(tab => tab.setAttribute('aria-pressed', String(tab === b)));
       window.stopFairyTTS?.();
+      if (b.dataset.panel === 'panel-quiz') window.sayQuiz?.();
     });
     initTen(subtract); initTrain(subtract); initPartner(); initQuiz(subtract);
     window.initFairyAudio?.(); window.updateTtsToggleUi?.(); window.initFairyChat?.('MATH', subtract ? '뺄셈개념' : '덧셈개념');

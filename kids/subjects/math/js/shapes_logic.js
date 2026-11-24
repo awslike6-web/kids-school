@@ -18,6 +18,7 @@
       if (num === 2) drawSlideScene();
       if (num === 3) previewStack();
       if (num === 4) renderWorkshopSVG();
+      if (num === 5) speakShapeQuiz();
     }
 
     /* ========================================================
@@ -321,18 +322,26 @@
     /* ========================================================
        5. LAB 5 : 실생활 모양 분류 퀴즈
     ======================================================== */
+    // 1학년 「여러 가지 모양」은 상자·둥근기둥·공 세 가지뿐이라 보기도 세 개 (2026-11-24, 원뿔·삼각기둥·원기둥 등 범위 밖 보기 뺌)
+    const SHAPE_KINDS = ["상자 모양", "둥근기둥 모양", "공 모양"];
     const SHAPE_QUIZ = [
-      { emoji: "🎲", name: "주사위", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원뿔 모양"] },
-      { emoji: "🥫", name: "음료수 캔", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "도넛 모양"] },
-      { emoji: "🏀", name: "농구공", ans: "공 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "달걀 모양"] },
-      { emoji: "📦", name: "택배 상자", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "삼각기둥"] },
-      { emoji: "🛢️", name: "기름 드럼통", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원뿔 모양"] },
-      { emoji: "⚽", name: "축구공", ans: "공 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "별 모양"] },
-      { emoji: "🧱", name: "붉은 벽돌", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "고깔 모양"] },
-      { emoji: "🪵", name: "통나무 토막", ans: "둥근기둥 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "하트 모양"] },
-      { emoji: "🌍", name: "지구본", ans: "공 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "도넛 모양"] },
-      { emoji: "🎁", name: "선물 상자", ans: "상자 모양", choices: ["상자 모양", "둥근기둥 모양", "공 모양", "원기둥 모양"] }
+      { emoji: "🎲", name: "주사위", ans: "상자 모양", choices: SHAPE_KINDS },
+      { emoji: "🥫", name: "음료수 캔", ans: "둥근기둥 모양", choices: SHAPE_KINDS },
+      { emoji: "🏀", name: "농구공", ans: "공 모양", choices: SHAPE_KINDS },
+      { emoji: "📦", name: "택배 상자", ans: "상자 모양", choices: SHAPE_KINDS },
+      { emoji: "🛢️", name: "기름 드럼통", ans: "둥근기둥 모양", choices: SHAPE_KINDS },
+      { emoji: "⚽", name: "축구공", ans: "공 모양", choices: SHAPE_KINDS },
+      { emoji: "🧱", name: "붉은 벽돌", ans: "상자 모양", choices: SHAPE_KINDS },
+      { emoji: "🪵", name: "통나무 토막", ans: "둥근기둥 모양", choices: SHAPE_KINDS },
+      { emoji: "🌍", name: "지구본", ans: "공 모양", choices: SHAPE_KINDS },
+      { emoji: "🎁", name: "선물 상자", ans: "상자 모양", choices: SHAPE_KINDS }
     ];
+    // 틀린 보기를 고르면 「고른 모양」의 특징을 알려 준다(정답 이름은 말하지 않음)
+    const SHAPE_HINTS = {
+      "상자 모양": "상자 모양은 평평한 면만 있어서 굴러가지 않아요",
+      "둥근기둥 모양": "둥근기둥 모양은 눕히면 구르고, 세우면 쌓을 수 있어요",
+      "공 모양": "공 모양은 평평한 면이 없어서 어느 쪽으로나 굴러요"
+    };
     let sqIdx = 0;
     let sqSolved = false;
     let sqSession = {};
@@ -358,13 +367,34 @@
 
       (window.QuizChoices ? window.QuizChoices.arrange(q.choices).map(c => c.text) : q.choices).forEach(c => {
         const btn = document.createElement('button');
-        btn.className = 'divide-btn';
-        btn.style.fontSize = '1.15rem';
-        btn.style.padding = '12px 10px';
+        btn.className = 'divide-btn shape-choice';
         btn.textContent = c;
         btn.onclick = () => checkShapeAns(c, q.ans);
         cBox.appendChild(btn);
       });
+      const countHost = document.getElementById('shape-quiz-count');
+      if (countHost && sqCounter() && countHost.replaceChildren) countHost.replaceChildren(sqCounter().view());
+      if (isLabShown(5)) speakShapeQuiz();
+    }
+
+    // 질문 읽기: 5관이 보일 때만(숨은 관에서 읽지 않음), 관을 열 때도 읽는다 (2026-11-24)
+    function isLabShown(n) {
+      const panel = document.getElementById('lab-' + n);
+      return Boolean(panel && panel.classList && panel.classList.contains('active'));
+    }
+    function speakShapeQuiz() {
+      const q = SHAPE_QUIZ[sqIdx % SHAPE_QUIZ.length];
+      if (typeof speakFairyTTS === 'function') speakFairyTTS(q.name + ', 어떤 모양일까요?');
+    }
+    // 보상: 맞힐 때마다가 아니라 6문제마다 🍬(하루 3개) — 2-1 탐험관과 같은 셈 (MathDrill.counter)
+    let sqCounterObj = null;
+    function sqCounter() {
+      if (!sqCounterObj && window.MathDrill && window.MathDrill.counter) sqCounterObj = window.MathDrill.counter('shape-quiz', { perReward: 6 });
+      return sqCounterObj;
+    }
+    function shapeQuizButtons() {
+      const box = document.getElementById('shape-quiz-choices');
+      return box && box.children ? [...box.children] : [];
     }
 
     function checkShapeAns(selected, correct) {
@@ -375,13 +405,21 @@
         sqSolved = true;
         if (track) track.done();
         fb.innerHTML = `<span style="color:#10b981;">🎉 정답! [${correct}] 맞았어요! 참 잘했어요!</span>`;
+        shapeQuizButtons().forEach(b => { if (b.textContent === correct && b.classList) { b.classList.remove('is-glow'); b.classList.add('is-correct'); } });
         if (typeof fairyPraise === 'function') fairyPraise();
-        if (typeof grantRewardAndShowUI === 'function') grantRewardAndShowUI(1, false, 'math');
+        if (sqCounter()) sqCounter().add();
         triggerConfetti();
       } else {
         if (track) track.wrong(selected);
-        fb.innerHTML = `<span style="color:#92400e;">💡 [${correct}]의 평평한 면과 둥근 면을 떠올리고 다시 골라 봐요.</span>`;
+        const hint = SHAPE_HINTS[selected] || '평평한 면과 둥근 면을 떠올려 봐요';
+        fb.innerHTML = `<span style="color:#92400e;">💡 ${hint}</span>`;
+        shapeQuizButtons().forEach(b => {
+          if (!b.classList) return;
+          if (b.textContent === selected) { b.disabled = true; b.classList.add('is-off'); }
+          if (b.textContent === correct) b.classList.add('is-glow');
+        });
         if (typeof fairyEncourage === 'function') fairyEncourage();
+        if (typeof speakFairyTTS === 'function') speakFairyTTS(hint);
       }
     }
 
@@ -462,5 +500,5 @@
       if (typeof updateTtsToggleUi === 'function') updateTtsToggleUi();
     });
 
-Object.assign(window, {switchLab, selectWorkshopTheme, resetWorkshopCurrent, nextWorkshopTheme, renderWorkshopSVG, chooseWorkshopPart, renderShapeQuiz, checkShapeAns, nextShapeQuiz, triggerConfetti, exitRoom});
+Object.assign(window, {switchLab, speakShapeQuiz, selectWorkshopTheme, resetWorkshopCurrent, nextWorkshopTheme, renderWorkshopSVG, chooseWorkshopPart, renderShapeQuiz, checkShapeAns, nextShapeQuiz, triggerConfetti, exitRoom});
 })();

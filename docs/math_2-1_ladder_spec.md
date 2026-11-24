@@ -9,7 +9,7 @@
 - 1학기 첫 단원 「세 자리 수」와 계산의 뼈대인 「덧셈과 뺄셈」(두 자리 받아올림·받아내림)부터 만든다. 겨울방학 예습용.
 
 ```
-1학년  number100.html (100까지의 수, 10개씩 묶음) · addition_concept / subtraction_concept (10 만들기, 십몇 빼기)
+1학년  number100.html (100까지의 수, 10개씩 묶음 — 2026-11-24 같은 탐험관 틀·🎯 빙고·🔍 스무고개로, math_1_bridge_spec.md) · addition_concept / subtraction_concept (10 만들기, 십몇 빼기, 🎲 10 빙고)
   ⬆
 2-1   ① number_three.html   세 자리 수                ← 이번
       ② add_sub_two.html    덧셈과 뺄셈(두 자리)       ← 이번

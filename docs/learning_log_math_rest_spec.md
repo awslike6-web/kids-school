@@ -17,7 +17,7 @@
 | :--- | :--- | :--- | :--- |
 | CPA 덧셈·뺄셈 개념 | `addition_concept.html`·`subtraction_concept.html` → `js/arithmetic_cpa.js` | `initQuiz` 안의 보기 버튼 콜백 (`v === correct`) | `initQuiz`의 `render()` (그때그때 난수) |
 | 시계와 규칙 | `clock_rules.html` → `js/clock_rules_logic.js` | 시계 퀴즈 버튼 콜백, `patternRound` 보기 콜백, `numberRound` 100칸 버튼 콜백 | 각 함수 안 (난수) |
-| 100까지의 수 | `number100.html` (인라인 스크립트) | `chooseCompare(sign)` | `nextCompareQ()` |
+| 100까지의 수 | `number100.html` (인라인 스크립트, **2026-11-24 탐험관 틀로 옮김** — 4관이 같은 키 `g:n100-compare-*`를 `MathDrill.track('n100', …)`로 잇는다, `docs/math_1_bridge_spec.md`) | `chooseCompare(sign)` | `nextCompareQ()` |
 | 입체도형 | `shapes.html` → `js/shapes_logic.js` | `checkShapeAns`, `chooseWorkshopPart` | 고정 목록 `SHAPE_QUIZ`(10개, `sqIdx`가 계속 늘며 나머지로 돎), `WS_CONFIG[테마].steps` |
 
 ## 3. 할 일 — 문항키 규칙

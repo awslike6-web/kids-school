@@ -31,3 +31,17 @@
 .hero-title {word-break:keep-all;}
 @media(max-width:420px) {.play-card{padding:12px;}#number-grid{gap:2px;}#number-grid button{font-size:.75rem;min-height:32px;border-radius:6px;}.top-bar .exit-btn{font-size:.85rem;padding:8px;}}
 @media(prefers-reduced-motion:reduce) {* {animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+
+/* 모양 분류 퀴즈 (1학년 다리 B 묶음 2026-11-24): 보기 세 개 세로 한 줄·56px, 틀린 보기는 흐리게, 정답 보기는 반짝 */
+.shape-quiz-choices { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px; }
+.shape-quiz-choices .shape-choice { min-height: 56px; font-size: 1.3rem; padding: 10px; }
+.shape-quiz-choices .shape-choice.is-off { opacity: .35; text-decoration: line-through; }
+.shape-quiz-choices .shape-choice.is-glow { box-shadow: 0 0 0 4px #fde68a; outline: 3px solid #f59e0b; }
+.shape-quiz-choices .shape-choice.is-correct { background: #10b981; }
+.shape-quiz-count { margin-top: 8px; font-size: .95rem; color: #64748b; }
+
+/* 시계·규칙 (1학년 다리 B 묶음 2026-11-24): 고르기·조작 버튼 56px(수 배열판 칸은 그대로), 에러리스 모양 */
+.play-card .play-actions button, #pattern-choices button, #clock-choices button { min-height: 56px; }
+#clock-choices button.is-off, #pattern-choices button.is-off { opacity: .35; text-decoration: line-through; }
+#clock-choices button.is-glow, #pattern-choices button.is-glow { border-color: #d97706; box-shadow: 0 0 0 4px #fde68a; }
+#clock-choices button.is-correct, #pattern-choices button.is-correct { border-color: #16a34a; background: #dcfce7; color: #14532d; }

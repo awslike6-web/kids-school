@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>➕ 덧셈 개념 탐험대</title>
+  <link rel="stylesheet" href="../../css/math_explorer.css?v=736ec6a7">
   <link rel="stylesheet" href="../../css/math_factors.css">
-  <link rel="stylesheet" href="arithmetic_cpa.css">
+  <link rel="stylesheet" href="arithmetic_cpa.css?v=e8d7fe66">
 </head>
-<body data-operation="add">
+<body data-operation="add" class="mx-grade1">
   <canvas id="confetti-canvas"></canvas>
   <div class="top-bar"><div class="profile-badge"><span id="userIcon">👧</span> <span id="userName">민서 대원</span></div>
     <div><button class="exit-btn" id="ttsToggleBtn" onclick="toggleFairyTtsSetting()">🔊 요정 음성</button> <a class="exit-btn" href="math.html">🔙 수학 탐험 본부</a></div></div>
@@ -16,7 +17,7 @@
     <nav class="cpa-nav" aria-label="덧셈 활동">
       <button data-panel="panel-ten" aria-pressed="false">🔴 10의 짝꿍</button><button data-panel="panel-strategy" aria-pressed="true">✨ 10 만들어 더하기</button>
       <button data-panel="panel-train" aria-pressed="false">🚂 세 수 기차</button><button data-panel="panel-partner" aria-pressed="false">🎈 짝꿍 풍선</button>
-      <button data-panel="panel-story" aria-pressed="false">🍎 그림 문장제</button><button data-panel="panel-quiz" aria-pressed="false">🎯 개념 퀴즈</button>
+      <button data-panel="panel-story" aria-pressed="false">🍎 그림 문장제</button><button data-panel="panel-bingo" aria-pressed="false">🎲 10 빙고</button><button data-panel="panel-quiz" aria-pressed="false">🎯 개념 퀴즈</button>
     </nav>
     <section id="panel-ten" class="cpa-panel" hidden><h2>10을 만드는 짝꿍 찾기</h2><p>빨간 구슬 수를 고르면 파란 짝꿍이 빈칸을 채워요.</p>
       <div id="ten-options" class="cpa-actions"></div><div class="cpa-frame" id="add-ten-frame"></div><p class="cpa-formula" id="add-frame-formula"></p><p id="add-frame-sub-formula" class="cpa-guide"></p><button id="ten-read">🔊 설명 듣기</button></section>
@@ -41,12 +42,15 @@
       <div class="cpa-picture"><div><h3 id="story-count-a"></h3><div id="story-picture-a" class="cpa-fruit" role="img"></div></div><div><h3 id="story-count-b"></h3><div id="story-picture-b" class="cpa-fruit" role="img"></div></div></div>
       <div class="cpa-builder"><select id="story-a" aria-label="첫 번째 수"></select><select id="story-op" aria-label="계산 기호"><option value="">?</option><option value="+">+</option><option value="-">−</option></select><select id="story-b" aria-label="두 번째 수"></select><span>=</span><select id="story-result" aria-label="계산 결과"></select></div>
       <div class="cpa-actions"><button id="story-check" class="primary">내 식 확인</button><button id="story-new">새 이야기</button><button id="story-read">🔊 이야기 듣기</button></div><p id="story-feedback" class="cpa-guide" aria-live="polite"></p></section>
-    <section id="panel-quiz" class="cpa-panel" hidden><h2>🎯 덧셈 개념 퀴즈</h2><p class="cpa-formula" id="quiz-question"></p><div id="quiz-choices" class="cpa-actions"></div><p id="quiz-feedback" class="cpa-guide" aria-live="polite"></p><button id="quiz-next">다음 문제</button></section>
+    <section id="panel-bingo" class="cpa-panel cpa-mx" hidden aria-label="10 빙고"></section>
+    <section id="panel-quiz" class="cpa-panel" hidden><h2>🎯 덧셈 개념 퀴즈</h2><p class="cpa-formula" id="quiz-question"></p><div class="cpa-frame" id="quiz-frame" hidden></div><div id="quiz-choices" class="cpa-actions cpa-quiz-row"></div><p id="quiz-feedback" class="cpa-guide" aria-live="polite"></p><div class="cpa-actions"><button id="quiz-next">다음 문제</button><span id="quiz-count"></span></div></section>
   </main>
   <script src="../../config.js"></script><script src="../../core/core.js"></script><script src="../../core/notion-helper.js"></script>
   <script src="../../core/fairy-config.js"></script><script src="../../core/fairy-tts.js?v=573718c6"></script>
   <script src="../../core/fairy-settings-catalog.js"></script>
   <script src="../../core/fairy-engine.js?v=97ebea9e"></script><script src="../../core/fairy-chatbot.js"></script>
-  <script src="js/math_quiz_engine.js"></script><script src="js/arithmetic_cpa.js"></script><script src="js/arithmetic_lessons.js"></script>
+  <script src="js/math_quiz_engine.js"></script>
+  <script src="js/math_explorer-shell.js?v=ee430d7d"></script><script src="js/math_squishy.js?v=78dba9cf"></script><script src="js/math_explorer-ladder.js?v=1e3e6738"></script>
+  <script src="js/math_bingo.js?v=aa96520d"></script><script src="js/arithmetic_bingo.js?v=d601cd7c"></script><script src="js/arithmetic_cpa.js?v=34c20475"></script><script src="js/arithmetic_lessons.js"></script>
 </body>
 </html>

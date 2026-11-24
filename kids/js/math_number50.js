@@ -30,7 +30,49 @@
         setTimeout(() => playTone(f, 'triangle', 0.15, 0.2), i * 50);
       });
     }
-    function soundWrong() { playTone(220, 'sawtooth', 0.25, 0.25); }
+    // 오답은 경고음 대신 요정 격려 (에러리스, 2026-11-24 1학년 다리 B 묶음)
+    function soundWrong() { if (typeof fairyEncourage === 'function') fairyEncourage(); }
+
+    // 3지선다 고르기 줄: 틀린 보기는 꺼지고 힌트를 읽어 주며 정답 보기가 반짝인다. 보기 순서는 QuizChoices로 섞는다
+    function renderPickChoices(box, values, answer, opts) {
+      const o = opts || {};
+      box.replaceChildren();
+      const hintEl = o.hintEl || null;
+      if (hintEl) { hintEl.hidden = true; hintEl.textContent = ''; }
+      const list = window.QuizChoices ? window.QuizChoices.arrange(values).map(c => c.text) : values.slice();
+      let rightBtn = null, solved = false;
+      list.forEach(v => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pick-btn';
+        btn.textContent = String(v);
+        if (String(v) === String(answer)) rightBtn = btn;
+        btn.onclick = () => {
+          if (solved || btn.disabled) return;
+          if (String(v) === String(answer)) {
+            solved = true; btn.classList.add('is-correct'); btn.classList.remove('is-glow');
+            soundPop();
+            if (o.onRight) o.onRight();
+          } else {
+            btn.disabled = true; btn.classList.add('is-off');
+            if (rightBtn) rightBtn.classList.add('is-glow');
+            if (hintEl && o.hint) { hintEl.hidden = false; hintEl.textContent = '💡 ' + o.hint; }
+            soundWrong();
+            if (o.hint) speak(o.hint);
+            if (o.onWrong) o.onWrong(String(v));
+          }
+        };
+        box.appendChild(btn);
+      });
+    }
+
+    // 정답과 다르고 범위 안인 오답 2개 (후보를 차례로)
+    function pickWrongs(answer, candidates, lo, hi) {
+      const out = [];
+      candidates.forEach(v => { if (out.length < 2 && Number.isInteger(v) && v >= lo && v <= hi && v !== answer && !out.includes(v)) out.push(v); });
+      [answer + 1, answer - 1, answer + 2, answer - 2].forEach(v => { if (out.length < 2 && v >= lo && v <= hi && v !== answer && !out.includes(v)) out.push(v); });
+      return out;
+    }
 
     function speak(text) {
       if (typeof speakFairyTTS === 'function') {
@@ -129,12 +171,21 @@
         card.classList.toggle('active', idx === stageNum - 1);
       });
 
+      if (typeof stopFairyTTS === 'function') stopFairyTTS();
+      // 단계를 열 때 그 단계의 질문을 읽어 준다 (숨은 단계는 읽지 않음, 2026-11-24)
+      if (stageNum === 2) speakStage2Question();
+      if (stageNum === 4 && typeof speakCompQuestion === 'function') speakCompQuestion();
       if (stageNum === 3) {
         setTimeout(() => {
           resizeMatchCanvas();
           drawMatchCanvas();
         }, 100);
       }
+    }
+
+    function isStageShown(n) {
+      const card = document.getElementById('stage-' + n);
+      return Boolean(card && card.classList.contains('active'));
     }
 
     /* =========================================================================
@@ -322,43 +373,66 @@
         modelArea.appendChild(cubeGroup);
       }
 
-      ['input-tens', 'input-ones', 'input-total'].forEach(id => {
+      ['cell-tens', 'cell-ones', 'cell-total'].forEach(id => {
         const el = document.getElementById(id);
-        el.value = '';
-        el.className = 'num-input';
+        el.textContent = '?';
+        el.className = 'grid-cell-answer';
       });
-
-      const names = getNumberNames(p.tens * 10 + p.ones);
-      document.getElementById('korean-read-hint').textContent = `(읽기: ${names.sino}, ${names.native})`;
+      const readHint = document.getElementById('korean-read-hint');
+      readHint.hidden = true;
+      readHint.textContent = '';
+      stage2Step = 0;
+      askStage2Step();
     }
 
-    function checkAnswerStage2() {
-      const p = currentProblem;
-      const userTens = parseInt(document.getElementById('input-tens').value);
-      const userOnes = parseInt(document.getElementById('input-ones').value);
-      const userTotal = parseInt(document.getElementById('input-total').value);
+    // 2단계: 묶음 → 낱개 → 모두를 차례로 고른다 (누르기 3~6번, 키보드 없음)
+    let stage2Step = 0;
+    function stage2Steps() {
+      const p = currentProblem, n = p.tens * 10 + p.ones;
+      return [
+        { q: '10개씩 묶음은 몇 개예요?', ans: p.tens, wrongs: pickWrongs(p.tens, [p.ones, p.tens + 1], 1, 9), cell: 'cell-tens', hint: '긴 막대를 하나씩 세어 봐요' },
+        { q: '낱개는 몇 개예요?', ans: p.ones, wrongs: pickWrongs(p.ones, [p.tens, p.ones + 1], 0, 9), cell: 'cell-ones', hint: '작은 조각을 하나씩 세어 봐요' },
+        { q: '모두 얼마예요?', ans: n, wrongs: pickWrongs(n, [p.ones * 10 + p.tens, p.tens + p.ones], 1, 50), cell: 'cell-total', hint: '묶음 수를 앞에, 낱개 수를 뒤에 써요' }
+      ];
+    }
 
-      const isTensCorrect = userTens === p.tens;
-      const isOnesCorrect = userOnes === p.ones;
-      const isTotalCorrect = userTotal === (p.tens * 10 + p.ones);
+    function speakStage2Question() {
+      const step = stage2Steps()[stage2Step];
+      speak(step ? step.q : '그림을 보고 10개씩 묶음과 낱개를 세어 봐요.');
+    }
 
-      document.getElementById('input-tens').className = `num-input ${isTensCorrect ? 'correct' : 'wrong'}`;
-      document.getElementById('input-ones').className = `num-input ${isOnesCorrect ? 'correct' : 'wrong'}`;
-      document.getElementById('input-total').className = `num-input ${isTotalCorrect ? 'correct' : 'wrong'}`;
-
-      if (isTensCorrect && isOnesCorrect && isTotalCorrect) {
+    function askStage2Step() {
+      const p = currentProblem, n = p.tens * 10 + p.ones;
+      const step = stage2Steps()[stage2Step];
+      const qEl = document.getElementById('s2-question');
+      const box = document.getElementById('s2-choices');
+      if (!step) {
+        const names = getNumberNames(n);
+        const readHint = document.getElementById('korean-read-hint');
+        readHint.textContent = `(읽기: ${names.sino}, ${names.native})`;
+        readHint.hidden = false;
+        qEl.textContent = '🎉 다 채웠어요!';
+        box.replaceChildren();
         soundSuccess();
         addStar(1, false);
-        const names = getNumberNames(p.tens * 10 + p.ones);
-        speak(`참 잘했어요! 10개씩 ${p.tens}묶음과 낱개 ${p.ones}개는 ${p.tens * 10 + p.ones}입니다!`);
-      } else {
-        soundWrong();
-        window.wrongNotes.push({
-          text: `50까지의 수 표 채우기 (10개씩 ${p.tens}묶음, 낱개 ${p.ones}개)`,
-          wrongInput: `${userTens || '?'}묶음 ${userOnes || '?'}개 (전체: ${userTotal || '?'})`
-        });
-        speak('다시 세어보세요. 움직이는 풀이과정을 참고해보세요!');
+        speak(`참 잘했어요! 10개씩 묶음 ${p.tens}개와 낱개 ${p.ones}개는 ${n}이에요!`);
+        return;
       }
+      qEl.textContent = step.q;
+      document.getElementById(step.cell).classList.add('is-asking');
+      if (isStageShown(2)) speak(step.q);
+      renderPickChoices(box, [step.ans, ...step.wrongs], step.ans, {
+        hint: step.hint,
+        hintEl: document.getElementById('s2-hint'),
+        onWrong: (v) => window.wrongNotes.push({ text: `50까지의 수 표 채우기 (10개씩 ${p.tens}묶음, 낱개 ${p.ones}개) · ${step.q}`, wrongInput: v }),
+        onRight: () => {
+          const cell = document.getElementById(step.cell);
+          cell.textContent = String(step.ans);
+          cell.className = 'grid-cell-answer correct';
+          stage2Step++;
+          setTimeout(askStage2Step, 500);
+        }
+      });
     }
 
     function nextProblemStage2() {

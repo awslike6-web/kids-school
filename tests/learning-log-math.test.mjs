@@ -1,5 +1,5 @@
 // 문항기록(LearningLog) 4차 연결 시험 — CPA 덧셈·뺄셈, 시계와 규칙, 100까지의 수, 입체도형
-// 실제 화면 JS 및 number100.html 인라인 스크립트를 VM 샌드박스에서 실행한다 (노션 미접속).
+// 실제 화면 JS를 VM 샌드박스에서 실행한다 (노션 미접속). 100까지의 수는 2026-11-24 탐험관 틀로 옮겨 키 연결만 본다.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -329,132 +329,21 @@ test('시계와 규칙 — 반복 무늬(ab·abc·abb)·뛰어 세기(2·5·10)�
 });
 
 // ============================================================
-// 3. 100까지의 수 (number100.html)
+// 3. 100까지의 수 — 2026-11-24 탐험관 틀로 옮김(docs/math_1_bridge_spec.md §3). 기록은 공용 MathDrill.track('n100', 종류)이
+//    맡고(지연 로드·건너뛰기는 MathDrill 쪽 동작), 4관 크기 비교가 예전 화면의 g:n100-compare-* 키를 그대로 잇는지만 본다.
 // ============================================================
-function extractInlineScript(html) {
-  const matches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
-  assert.ok(matches.length >= 1, '인라인 스크립트가 있어야 함');
-  return matches.at(-1)[1];
-}
-
-function extractButtonOnclick(html, id) {
-  const re = new RegExp(`<button[^>]*id="${id}"[^>]*onclick="([^"]+)"`);
-  const m = html.match(re);
-  assert.ok(m, `HTML에서 #${id}의 onclick 속성을 찾지 못함`);
-  return m[1];
-}
-
-function loadNumber100({ rng, withLearningLog = true } = {}) {
-  const html = read('kids/subjects/math/number100.html');
-  const script = extractInlineScript(html);
-  const tensOnclick = extractButtonOnclick(html, 'tens-step-btn');
-  const onesOnclick = extractButtonOnclick(html, 'ones-step-btn');
-  const ctx = makeBaseSandbox({ rng, withLearningLog });
-  vm.runInContext(script, ctx.sb, { filename: 'number100.html' });
-  ctx.document._fire('DOMContentLoaded');
-  const clickTensBtn = () => vm.runInContext(tensOnclick, ctx.sb);
-  const clickOnesBtn = () => vm.runInContext(onesOnclick, ctx.sb);
-  return { ...ctx, clickTensBtn, clickOnesBtn };
-}
-
-test('100까지의 수: diff-tens·same-tens·equal, HTML onclick 힌트 vs 오답 자동 단계 구분, 넘기기·제외 활동', () => {
-  // nextCompareQ: cur = Math.floor(r * 90) + 10
-  // Q1(초기 DOMContentLoaded): 45(35/90), 52(42/90) → diff-tens (<)
-  // Q2: 42(32/90), 48(38/90) → same-tens (<)
-  // Q3: 63(53/90), 63(53/90) → equal (=)
-  // Q4: 35(25/90), 39(29/90) → same-tens (<) — 오답 뒤 ② 버튼 직접 클릭 (A안: hinted true)
-  // Q5: 71(61/90), 23(13/90) → diff-tens (>) — 틀린 뒤 넘기기
-  // Q6: 82(72/90), 14(4/90)  → diff-tens (>) — 힌트만 보고 안 풀고 넘기기 (0건)
-  // Q7: 15(5/90), 25(15/90)  → diff-tens (<) — 안 건드리고 넘기기 (0건)
-  const r = (n) => (n - 10 + 0.01) / 90;
-  // startMemoryGame의 sort()가 Math.random을 소비하므로 memory 이후에 nextCompareQ가 돈다!
-  // 따라서 DOMContentLoaded 후 명시적 nextCompareQ() 호출부터 정확한 난수 제어:
-  let mode = 'init';
-  const qSeq = [r(45), r(52), r(42), r(48), r(63), r(63), r(35), r(39), r(71), r(23), r(82), r(14), r(15), r(25)];
-  let qi = 0;
-  const rng = () => (mode === 'init' ? 0.5 : (qi < qSeq.length ? qSeq[qi++] : 0.5));
-
-  const { sb, clickTensBtn, clickOnesBtn } = loadNumber100({ rng });
-  mode = 'quiz';
-
-  // Q1 (45 vs 52, diff-tens): 오답('>') → 자동 showCompareStep(1) → hinted: false → 정답('<') + 중복 클릭 무시
-  sb.nextCompareQ();
-  sb.chooseCompare('>');
-  sb.chooseCompare('<');
-  sb.chooseCompare('<'); // 중복 클릭은 무시되어 1건만 유지
-
-  // Q2 (42 vs 48, same-tens): HTML의 #tens-step-btn onclick 직접 실행 → hinted: true → 바로 맞힘('<')
-  sb.nextCompareQ();
-  clickTensBtn();
-  sb.chooseCompare('<');
-
-  // Q3 (63 vs 63, equal): 바로 맞힘('=')
-  sb.nextCompareQ();
-  sb.chooseCompare('=');
-
-  // Q4 (35 vs 39, same-tens): 오답('=') → 자동 ① 열림(hinted false) → 아이가 ② 버튼 직접 클릭(A안: hinted true) → 정답('<')
-  sb.nextCompareQ();
-  sb.chooseCompare('=');
-  clickOnesBtn();
-  sb.chooseCompare('<');
-
-  // Q5 (71 vs 23, diff-tens): 틀린 뒤 넘기기 → 틀린 채 끝남 1건
-  sb.nextCompareQ();
-  sb.chooseCompare('<');
-  sb.nextCompareQ();
-
-  // Q6 (82 vs 14): 힌트만 누르고 답 없이 넘기기 → 0건
-  clickTensBtn();
-  sb.nextCompareQ();
-
-  // Q7 (15 vs 25): 안 건드리고 넘기기 → 0건
-  sb.nextCompareQ();
-
-  // 제외 활동(묶음·기억 카드·사탕 바구니)은 기록 0건 추가
-  sb.addBundle(1);
-  sb.startMemoryGame();
-  sb.resetPairs();
-
-  assert.deepEqual(plainLog(sb.LearningLog), [
-    { subject: '수학', key: 'g:n100-compare-diff-tens', firstTry: false, hinted: false, picks: ['>'] },
-    { subject: '수학', key: 'g:n100-compare-same-tens', firstTry: true, hinted: true, picks: [] },
-    { subject: '수학', key: 'g:n100-compare-equal', firstTry: true, hinted: false, picks: [] },
-    { subject: '수학', key: 'g:n100-compare-same-tens', firstTry: false, hinted: true, picks: ['='] },
-    { subject: '수학', key: 'g:n100-compare-diff-tens', firstTry: false, hinted: false, picks: ['<'] },
-  ]);
+test('100까지의 수: 4관 크기 비교가 기존 학습일지 키 g:n100-compare-diff-tens·same-tens를 잇는다', () => {
+  const sb = { window: {} };
+  vm.createContext(sb);
+  vm.runInContext(read('kids/subjects/math/js/number100-core.js'), sb, { filename: 'number100-core.js' });
+  const kinds = JSON.parse(JSON.stringify(sb.window.HundredCore.LAB_KINDS[4]));
+  assert.ok(kinds.includes('compare-diff-tens') && kinds.includes('compare-same-tens'), kinds.join(','));
+  const labs = read('kids/subjects/math/js/number100-labs.js');
+  assert.match(labs, /prefix:\s*KEY/);
+  assert.match(labs, /var KEY = 'n100'/);
+  assert.doesNotMatch(read('kids/subjects/math/number100.html'), /<script>\s*[^<]/, '인라인 스크립트 없음');
 });
 
-test('100까지의 수: 맞힌 뒤 부등호를 다시 눌러도 보상은 한 번, 정답 안내도 그대로 (다음 문제에서는 다시 풀림)', () => {
-  const r = (n) => (n - 10 + 0.01) / 90;
-  let mode = 'init';
-  const qSeq = [r(45), r(52), r(30), r(70)];
-  let qi = 0;
-  const rng = () => (mode === 'init' ? 0.5 : (qi < qSeq.length ? qSeq[qi++] : 0.5));
-  const { sb, byId } = loadNumber100({ rng });
-  mode = 'quiz';
-  let grants = 0;
-  sb.grantRewardAndShowUI = () => { grants++; };
-
-  sb.nextCompareQ(); // 45 vs 52
-  sb.chooseCompare('<');
-  const solvedHtml = byId.get('compare-feedback').innerHTML;
-  assert.match(solvedHtml, /정답/);
-  sb.chooseCompare('<'); // 같은 정답 다시
-  sb.chooseCompare('>'); // 맞힌 뒤 오답 기호
-  assert.equal(grants, 1, '맞힌 뒤 다시 눌러도 보상은 한 번');
-  assert.equal(byId.get('compare-feedback').innerHTML, solvedHtml, '맞힌 뒤 오답 안내로 덮어쓰지 않음');
-  assert.equal(byId.get('compare-sign').textContent, '<', '맞힌 부등호가 그대로');
-
-  sb.nextCompareQ(); // 30 vs 70 — 새 문제는 다시 풀 수 있다
-  sb.chooseCompare('<');
-  assert.equal(grants, 2);
-  assert.deepEqual(plainLog(sb.LearningLog).map(e => [e.key, e.firstTry]), [
-    ['g:n100-compare-diff-tens', true], ['g:n100-compare-diff-tens', true],
-  ]);
-});
-
-// ============================================================
-// 4. 입체도형 (shapes_logic.js)
 // ============================================================
 function loadShapes({ withLearningLog = true } = {}) {
   const ctx = makeBaseSandbox({
@@ -521,7 +410,7 @@ test('입체도형 — 모양 조립 공방: s:shape-ws-<테마>:<단계>, 한�
 // ============================================================
 // 5. 공통 안전성: LearningLog 부재 및 지연 로드 방어
 // ============================================================
-test('LearningLog가 없어도 4개 화면 함수가 예외 없이 동작한다', () => {
+test('LearningLog가 없어도 3개 화면 함수가 예외 없이 동작한다 (100까지의 수는 탐험관 틀로 옮김)', () => {
   const cpa = loadCpa({ subtract: false, rng: makeRngQueue([0.0, 0.0], 55), withLearningLog: false });
   cpa.ensure('quiz-choices').children[0].click();
   cpa.ensure('quiz-next').click();
@@ -534,12 +423,6 @@ test('LearningLog가 없어도 4개 화면 함수가 예외 없이 동작한다'
   clk.ensure('pattern-next').click();
   clk.ensure('number-grid').children[0].click();
 
-  const n100 = loadNumber100({ rng: makeRngQueue([0.2, 0.6], 77), withLearningLog: false });
-  n100.clickTensBtn();
-  n100.sb.chooseCompare('>');
-  n100.sb.chooseCompare('<');
-  n100.sb.nextCompareQ();
-
   const shp = loadShapes({ withLearningLog: false });
   shp.sb.checkShapeAns('공 모양', '상자 모양');
   shp.sb.checkShapeAns('상자 모양', '상자 모양');
@@ -549,7 +432,7 @@ test('LearningLog가 없어도 4개 화면 함수가 예외 없이 동작한다'
   shp.sb.selectWorkshopTheme('car');
 });
 
-test('LearningLog 지연 로드: 초기 렌더 뒤 첫 상호작용 전 로드되면 정상 기록, 오답 중 뒤늦게 로드되면 4개 화면 모두 거짓 첫 시도 성공 차단', () => {
+test('LearningLog 지연 로드: 초기 렌더 뒤 첫 상호작용 전 로드되면 정상 기록, 오답 중 뒤늦게 로드되면 3개 화면 모두 거짓 첫 시도 성공 차단', () => {
   // 1) 초기 렌더 시점에 LearningLog 없음 → 첫 클릭 전에 붙음 → 첫 문제 정상 기록
   const cpa1 = loadCpa({ subtract: false, rng: makeRngQueue([0.0, 0.0], 88), withLearningLog: false });
   cpa1.sb.LearningLog = fakeLearningLog();
@@ -584,23 +467,6 @@ test('LearningLog 지연 로드: 초기 렌더 뒤 첫 상호작용 전 로드�
   clk.ensure('clock-quiz').click();
   clk.ensure('clock-choices').children.find(b => b.textContent === '4시 30분').click();
   assert.deepEqual(plainLog(clk.sb.LearningLog).map(x => [x.key, x.firstTry]), [['g:clock-4-30', true]]);
-
-  // 4) 100까지의 수: 오답 중 미로드 → 정답 전 로드 → 건너뛰기, 다음 문제 정상 기록
-  const r = (n) => (n - 10 + 0.01) / 90;
-  const n100Rng = makeRngQueue([], 99);
-  const n100 = loadNumber100({ rng: n100Rng, withLearningLog: false });
-  n100Rng.set(r(55), r(55));
-  n100.sb.nextCompareQ();
-  n100.sb.chooseCompare('<');
-  n100.sb.LearningLog = fakeLearningLog();
-  n100.sb.chooseCompare('=');
-  assert.deepEqual(plainLog(n100.sb.LearningLog), []);
-  n100Rng.set(r(55), r(55));
-  n100.sb.nextCompareQ();
-  n100.sb.chooseCompare('=');
-  assert.deepEqual(plainLog(n100.sb.LearningLog), [
-    { subject: '수학', key: 'g:n100-compare-equal', firstTry: true, hinted: false, picks: [] },
-  ]);
 
   // 5) 입체도형(모양 퀴즈 + 조립 공방): 오답 중 미로드 → 정답 전 로드 → 각 현재 문항 건너뛰기, 다음 문항·단계 정상 기록
   const shp = loadShapes({ withLearningLog: false });

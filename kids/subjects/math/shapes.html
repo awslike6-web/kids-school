@@ -278,7 +278,7 @@
       line-height: 1.5;
     }
   </style>
-<link rel="stylesheet" href="math_play.css">
+<link rel="stylesheet" href="math_play.css?v=18e79ad6">
 </head>
 <body>
 
@@ -506,17 +506,18 @@
           <h2 class="section-title">🔍 이 물건은 어떤 모양일까요?</h2>
           <p class="section-desc">우리 주변의 물건을 보고 알맞은 모양 상자를 척척 골라주세요!</p>
         </div>
-        <button class="speaker-btn" onclick="fairySpeak('물건의 모양을 맞춰보세요!')">🔊</button>
+        <button class="speaker-btn" onclick="speakShapeQuiz()">🔊</button>
       </div>
 
       <div style="max-width:500px; margin:0 auto; background:#fff; border-radius:24px; padding:25px; text-align:center; border:2px solid #e2e8f0; box-shadow:0 6px 16px rgba(0,0,0,0.06);">
         <div style="font-size:5rem; margin-bottom:10px;" id="item-emoji">🎲</div>
         <div style="font-family:'Jua'; font-size:2rem; color:#1e293b; margin-bottom:15px;" id="item-name">주사위</div>
 
-        <div id="shape-quiz-choices" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;"></div>
+        <div id="shape-quiz-choices" class="shape-quiz-choices"></div>
 
         <div id="shape-quiz-feedback" style="font-family:'Jua'; font-size:1.25rem; min-height:35px;"></div>
         <button class="divide-btn" style="background:#8b5cf6; width:100%; margin-top:10px; font-size:1.2rem; padding:12px;" onclick="nextShapeQuiz()">다음 문제 풀기 ➡️</button>
+        <div id="shape-quiz-count" class="shape-quiz-count"></div>
       </div>
     </section>
 
@@ -547,7 +548,8 @@
 
   <script src="js/shapes_viewer.js"></script>
   <script src="js/shapes_physics.js"></script>
-  <script src="js/shapes_logic.js"></script>
+  <script src="js/math_explorer-ladder.js?v=1e3e6738"></script>
+  <script src="js/shapes_logic.js?v=033c9112"></script>
 <script src="js/shapes_stamp.js"></script>
 </body>
 </html>

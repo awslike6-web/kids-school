@@ -322,59 +322,63 @@
       renderTrainTrack();
     }
 
+    // 기차 빈칸은 왼쪽부터 하나씩 반짝이고, 아래 3지선다로 채운다 (키보드 없음, 2026-11-24)
+    let trainBlankIdx = -1;
     function renderTrainTrack() {
       const track = document.getElementById('train-track');
-      track.innerHTML = '';
-
+      track.replaceChildren();
       currentTrainData.forEach((item, idx) => {
         const car = document.createElement('div');
         car.className = 'car-box';
-
-        if (!item.isBlank) {
-          car.innerHTML = `
-            <div class="car-icon">🚃</div>
-            <div class="car-num">${item.num}</div>
-          `;
-        } else {
-          car.innerHTML = `
-            <div class="car-icon">❓</div>
-            <input type="number" class="car-input" id="train-in-${idx}" placeholder="?">
-          `;
-        }
+        const icon = document.createElement('div');
+        icon.className = 'car-icon';
+        icon.textContent = item.isBlank && !item.filled ? '❓' : '🚃';
+        const num = document.createElement('div');
+        num.className = 'car-num' + (item.isBlank && !item.filled ? ' car-blank' : '');
+        num.id = 'train-num-' + idx;
+        num.textContent = item.isBlank && !item.filled ? '?' : String(item.num);
+        car.append(icon, num);
         track.appendChild(car);
       });
+      askTrainBlank();
     }
 
-    function checkTrainTrack() {
-      let allCorrect = true;
-
-      currentTrainData.forEach((item, idx) => {
-        if (item.isBlank) {
-          const inputEl = document.getElementById(`train-in-${idx}`);
-          const val = parseInt(inputEl.value);
-          if (val === item.num) {
-            inputEl.style.borderColor = '#10B981';
-            inputEl.style.backgroundColor = '#ECFDF5';
-          } else {
-            allCorrect = false;
-            inputEl.style.borderColor = '#EF4444';
-            inputEl.style.backgroundColor = '#FEF2F2';
-          }
-        }
-      });
-
-      if (allCorrect) {
+    function askTrainBlank() {
+      const box = document.getElementById('train-choices');
+      trainBlankIdx = currentTrainData.findIndex(item => item.isBlank && !item.filled);
+      if (trainBlankIdx < 0) {
+        box.replaceChildren();
         soundSuccess();
         addStar();
         speak('정답입니다! 칙칙폭폭 기차가 출발합니다!');
-        setTimeout(() => {
-          generateRandomTrainTrack(); // 맞추면 즉시 다음 새로운 랜덤 기차 생성!
-        }, 1200);
-      } else {
-        soundWrong();
-        speak('빈칸의 숫자를 다시 확인해보세요!');
+        setTimeout(() => { generateRandomTrainTrack(); }, 1200);
+        return;
       }
+      const target = currentTrainData[trainBlankIdx].num;
+      const marker = document.getElementById('train-num-' + trainBlankIdx);
+      if (marker) marker.classList.add('is-asking');
+      const wrongs = pickWrongs(target, [target + 10, target - 10], 1, 50);
+      renderPickChoices(box, [target, ...wrongs], target, {
+        hint: trainHint(trainBlankIdx),
+        hintEl: document.getElementById('train-hint'),
+        onWrong: (v) => window.wrongNotes.push({ text: `기차 수 순서 (빈칸 ${target})`, wrongInput: v }),
+        onRight: () => {
+          currentTrainData[trainBlankIdx].filled = true;
+          renderTrainTrack();
+        }
+      });
     }
+
+    // 빈칸 힌트: 앞 칸을 알면 「1 큰 수」, 첫 칸이면 뒤 칸 기준 「1 작은 수」
+    function trainHint(idx) {
+      const known = (i) => currentTrainData[i] && (!currentTrainData[i].isBlank || currentTrainData[i].filled);
+      if (idx > 0 && known(idx - 1)) return '앞 칸보다 1 큰 수예요';
+      if (known(idx + 1)) return '뒤 칸보다 1 작은 수예요';
+      return '수의 순서대로 세어 봐요';
+    }
+
+    // 예전 [기차 출발] 버튼 자리: 지금은 빈칸을 다 채우면 저절로 출발한다
+    function checkTrainTrack() { askTrainBlank(); }
 
     /* === 무한 크기 비교 퀴즈 로직 === */
     let compQuizType = 'greater';
@@ -393,11 +397,10 @@
       const qEl = document.getElementById('comp-quiz-question');
       if (compQuizType === 'greater') {
         qEl.innerHTML = `🚩 [문제] 두 수 중 <span style="color:#EF4444; text-decoration:underline;">더 큰 수</span>를 터치하세요!`;
-        speak(`두 수 중 더 큰 수는 어느 것일까요?`);
       } else {
         qEl.innerHTML = `🚩 [문제] 두 수 중 <span style="color:#3B82F6; text-decoration:underline;">더 작은 수</span>를 터치하세요!`;
-        speak(`두 수 중 더 작은 수는 어느 것일까요?`);
       }
+      if (isStageShown(4)) speakCompQuestion();
 
       const btnL = document.getElementById('comp-btn-left');
       const btnR = document.getElementById('comp-btn-right');
@@ -406,6 +409,11 @@
       btnL.className = 'comp-choice-card';
       btnR.className = 'comp-choice-card';
       document.getElementById('comp-feedback-msg').textContent = '';
+      document.getElementById('comp-feedback-msg').className = 'comp-fb';
+    }
+
+    function speakCompQuestion() {
+      speak(compQuizType === 'greater' ? '두 수 중 더 큰 수는 어느 것일까요?' : '두 수 중 더 작은 수는 어느 것일까요?');
     }
 
     function handleCompChoice(side) {
@@ -414,13 +422,15 @@
       const clickedBtn = side === 'left' ? document.getElementById('comp-btn-left') : document.getElementById('comp-btn-right');
       const fb = document.getElementById('comp-feedback-msg');
 
+      if (clickedBtn.classList.contains('wrong')) return;
       if (chosenNum === targetCorrect) {
         soundSuccess();
         addStar(1, false);
         compStreak++;
         document.getElementById('comp-streak-count').textContent = compStreak;
         clickedBtn.classList.add('correct');
-        fb.innerHTML = `<span style="color:#10B981;">🎉 딩동댕! 정답입니다! (${compNum1}과 ${compNum2} 중 ${targetCorrect}이(가) 맞아요)</span>`;
+        fb.textContent = `🎉 딩동댕! ${compQuizType === 'greater' ? '더 큰' : '더 작은'} 수는 ${targetCorrect}!`;
+        fb.className = 'comp-fb is-right';
         
         setTimeout(() => {
           generateNextCompQuiz();
@@ -431,10 +441,12 @@
           text: `크기 비교 (${compNum1} vs ${compNum2}, ${compQuizType === 'greater' ? '더 큰 수 찾기' : '더 작은 수 찾기'})`,
           wrongInput: `선택: ${chosenNum}`
         });
-        compStreak = 0;
-        document.getElementById('comp-streak-count').textContent = compStreak;
+        // 에러리스: 연속 기록은 그대로 두고, 고른 카드만 흐리게 + 힌트를 읽어 준다
         clickedBtn.classList.add('wrong');
-        fb.innerHTML = `<span style="color:#EF4444;">앗! 다시 생각해볼까요? 십의 자리와 일의 자리를 비교해보세요!</span>`;
+        const hint = '10개씩 묶음 수부터 비교해 봐요';
+        fb.textContent = '💡 ' + hint;
+        fb.className = 'comp-fb is-hint';
+        speak(hint);
       }
     }
 

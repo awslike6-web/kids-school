@@ -102,5 +102,7 @@ test('파일 규칙: innerHTML 없음, 인라인 style은 막대 폭만, 600줄 
   const sets = [...src.matchAll(/\.style\.([a-zA-Z]+)\s*=/g)].map((m) => m[1]);
   assert.ok(sets.every((p) => p === 'width'), `인라인 style: ${sets}`);
   assert.ok(src.split('\n').length <= 600);
-  assert.match(src, /MathDrill\.track\(\s*'num3'\s*,\s*'twenty'\s*\)/);
+  // 학습일지 키는 관 설정의 key(기본 'num3' = 2-1, 1학년은 'n100')로 g:<key>-twenty (2026-11-24 makeLab)
+  assert.match(src, /MathDrill\.track\(\s*key\s*,\s*'twenty'\s*\)/);
+  assert.match(src, /key:\s*c\.key\s*\|\|\s*'num3'/);
 });

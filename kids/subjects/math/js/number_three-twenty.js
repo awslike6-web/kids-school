@@ -24,9 +24,19 @@
     return global.ThreeDigitCore;
   }
 
-  function findCategory(categoryId) {
-    for (var i = 0; i < CATEGORIES.length; i += 1) {
-      if (CATEGORIES[i].id === categoryId) return CATEGORIES[i];
+  // opt(선택) = { core, categories }: 1학년 두 자리 설정 등 (2026-11-24, math_1_bridge_spec §3-3)
+  function catsOf(opt) {
+    return (opt && opt.categories) || CATEGORIES;
+  }
+
+  function coreOf(opt) {
+    return (opt && opt.core) || getCore();
+  }
+
+  function findCategory(categoryId, opt) {
+    var cats = catsOf(opt);
+    for (var i = 0; i < cats.length; i += 1) {
+      if (cats[i].id === categoryId) return cats[i];
     }
     return null;
   }
@@ -37,9 +47,9 @@
   }
 
   // 현재 후보를 둘로 나누는 칩만 골라 최대 max개 반환
-  function pickChips(cands, categoryId, max) {
-    var core = getCore();
-    var cat = findCategory(categoryId);
+  function pickChips(cands, categoryId, max, opt) {
+    var core = coreOf(opt);
+    var cat = findCategory(categoryId, opt);
     var limit = typeof max === 'number' ? max : MAX_CHIPS;
     if (!core || !cat || !Array.isArray(cands) || cands.length <= 1 || limit <= 0) {
       return [];
@@ -74,8 +84,8 @@
   }
 
   // 그 자리에 아직 올 수 있는 숫자들(오름차순). 크기·짝수 묶음은 []
-  function digitsLeft(cands, categoryId) {
-    var cat = findCategory(categoryId);
+  function digitsLeft(cands, categoryId, opt) {
+    var cat = findCategory(categoryId, opt);
     if (!cat || !cat.cmp || !Array.isArray(cands)) return [];
     var seen = {};
     var out = [];
@@ -198,16 +208,16 @@
     document.head.appendChild(s);
   }
 
-  function makeTracker() {
+  function makeTracker(key) {
     if (global.MathDrill && typeof global.MathDrill.track === 'function') {
-      return global.MathDrill.track('num3', 'twenty');
+      return global.MathDrill.track(key, 'twenty');
     }
     return { wrong: noop, done: noop };
   }
 
-  function makeCounter(ui) {
+  function makeCounter(ui, key) {
     if (global.MathDrill && typeof global.MathDrill.counter === 'function') {
-      return global.MathDrill.counter('num3', { perReward: 6 });
+      return global.MathDrill.counter(key, { perReward: 6 });
     }
     return {
       add: noop,
@@ -215,25 +225,50 @@
     };
   }
 
-  // 7관 수 스무고개 화면 렌더
-  function render(container, ctx) {
+  // 관 설정 기본값 = 2-1 세 자리 수 7관 (설정을 주면 1학년 두 자리 등으로 바뀜)
+  function configOf(cfg) {
+    var c = cfg || {};
+    return {
+      core: c.core || null,
+      key: c.key || 'num3',
+      total: c.total || TOTAL_CANDS,
+      categories: c.categories || CATEGORIES,
+      title: c.title || '7관 🔍 수 스무고개',
+      guide: c.guide || '내가 생각한 세 자리 수를 질문으로 맞혀 봐요!',
+      algo: c.algo || ['크기부터 물어봐요', '자리 숫자를 물어봐요'],
+      whyTitle: c.whyTitle || '어떻게 좁힐까?',
+      whyBody: c.whyBody || '300보다 큰지 물으면 절반쯤이 사라져요. 그다음 자리 숫자를 물어봐요.'
+    };
+  }
+
+  // 남은 숫자 줄: 「십의 자리는 5 · 6 · 7 중 하나」, 1학년 「10개 묶음은 5 · 6 · 7개 중 하나」
+  function digitsLine(cat, left) {
+    var name = cat.name || cat.label;
+    var me = global.MathExplorer;
+    var head = me && me.josa ? me.josa(name, 'eun') : name + '는';
+    var unit = cat.unit || '';
+    return left.length === 1
+      ? head + ' ' + left[0] + unit + '!'
+      : head + ' ' + left.join(' · ') + unit + ' 중 하나';
+  }
+
+  // 수 스무고개 화면 렌더
+  function render(container, ctx, cfg) {
     ensureStyle();
-    var core = getCore();
+    var conf = configOf(cfg);
+    var opt = { core: conf.core, categories: conf.categories };
+    var core = coreOf(opt);
     var ui = ctx.ui;
     var say = typeof ctx.say === 'function' ? ctx.say : noop;
     var praise = typeof ctx.praise === 'function' ? ctx.praise : noop;
     var encourage = typeof ctx.encourage === 'function' ? ctx.encourage : noop;
-    var counter = makeCounter(ui);
+    var counter = makeCounter(ui, conf.key);
     var roundToken = 0;
 
-    var card = ui.card('7관 🔍 수 스무고개');
-    card.appendChild(ui.guide('내가 생각한 세 자리 수를 질문으로 맞혀 봐요!'));
-    card.appendChild(global.MathDrill.algo(ui, ['크기부터 물어봐요', '자리 숫자를 물어봐요']));
-    card.appendChild(global.MathDrill.why(
-      ui,
-      '어떻게 좁힐까?',
-      '300보다 큰지 물으면 절반쯤이 사라져요. 그다음 자리 숫자를 물어봐요.'
-    ));
+    var card = ui.card(conf.title);
+    card.appendChild(ui.guide(conf.guide));
+    card.appendChild(global.MathDrill.algo(ui, conf.algo));
+    card.appendChild(global.MathDrill.why(ui, conf.whyTitle, conf.whyBody));
     var area = ui.el('div', 'tw20-area');
     card.appendChild(area);
     container.appendChild(card);
@@ -249,7 +284,7 @@
       var selectedCat = 'size';
       var busy = false;
       var solved = false;
-      var tracker = makeTracker();
+      var tracker = makeTracker(conf.key);
 
       var statusBar = ui.el('div', 'tw20-status');
       var remainEl = ui.el('span', 'tw20-remain', '');
@@ -301,15 +336,15 @@
       var catBtns = {};
 
       function updateStatus() {
-        var pct = Math.round((cands.length / TOTAL_CANDS) * 100);
+        var pct = Math.round((cands.length / conf.total) * 100);
         remainEl.textContent = '남은 수 ' + cands.length + '개';
         countEl.textContent = '질문 ' + asked.length + '번';
         fill.style.width = pct + '%';
       }
 
       function updateCatButtons() {
-        for (var i = 0; i < CATEGORIES.length; i += 1) {
-          var id = CATEGORIES[i].id;
+        for (var i = 0; i < conf.categories.length; i += 1) {
+          var id = conf.categories[i].id;
           catBtns[id].classList.toggle('is-on', id === selectedCat);
         }
       }
@@ -408,15 +443,11 @@
 
       function renderChips() {
         chipsBox.replaceChildren();
-        var left = digitsLeft(cands, selectedCat);
-        var cat = findCategory(selectedCat);
+        var left = digitsLeft(cands, selectedCat, opt);
+        var cat = findCategory(selectedCat, opt);
         digitsEl.hidden = left.length === 0;
-        if (left.length) {
-          digitsEl.textContent = left.length === 1
-            ? cat.label + '는 ' + left[0] + '!'
-            : cat.label + '는 ' + left.join(' · ') + ' 중 하나';
-        }
-        var list = pickChips(cands, selectedCat, MAX_CHIPS);
+        if (left.length) digitsEl.textContent = digitsLine(cat, left);
+        var list = pickChips(cands, selectedCat, MAX_CHIPS, opt);
         if (list.length === 0) {
           chipsBox.hidden = true;
           emptyMsg.hidden = false;
@@ -434,7 +465,7 @@
         }
       }
 
-      for (var c = 0; c < CATEGORIES.length; c += 1) {
+      for (var c = 0; c < conf.categories.length; c += 1) {
         (function (cat) {
           var btn = ui.button(cat.label, 'mx-btn tw20-cat', function () {
             if (solved) return;
@@ -444,7 +475,7 @@
           });
           catBtns[cat.id] = btn;
           catsRow.appendChild(btn);
-        })(CATEGORIES[c]);
+        })(conf.categories[c]);
       }
 
       updateStatus();
@@ -457,18 +488,25 @@
     startRound(firstExtra);
   }
 
-  var lab = {
-    title: '7관 🔍 수 스무고개',
-    icon: '🔍',
-    sub: '수 맞히기',
-    render: render
-  };
+  // 관 만들기: 설정 없으면 2-1 세 자리 수 7관, 1학년은 { core: HundredCore, key: 'n100', total: 90, categories, … }
+  function makeLab(cfg) {
+    var conf = configOf(cfg);
+    return {
+      title: conf.title,
+      icon: '🔍',
+      sub: '수 맞히기',
+      render: function (container, ctx) { render(container, ctx, cfg); }
+    };
+  }
+
+  var lab = makeLab();
 
   global.NumberTwenty = {
     CATEGORIES: CATEGORIES,
     pickChips: pickChips,
     digitsLeft: digitsLeft,
     guessOptions: guessOptions,
+    makeLab: makeLab,
     lab: lab
   };
 })(typeof window !== 'undefined' ? window : globalThis);

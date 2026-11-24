@@ -116,6 +116,8 @@
 
   function speakProblem(p) {
     if (!p) return '';
+    // 문제가 읽는 말을 따로 가지면 그것을 읽는다 (1학년 10 빙고 「8 더하기 몇은 10?」, 2026-11-24)
+    if (typeof p.speak === 'string' && p.speak) return p.speak;
     if (global.TwoDigitCore && typeof global.TwoDigitCore.speakText === 'function' &&
         (p.op || p.ops || p.kind === 'box-add')) {
       return global.TwoDigitCore.speakText(p);

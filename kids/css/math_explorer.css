@@ -384,12 +384,12 @@ h1, h2, h3, .mx-title, .mx-main-title, .mx-modal-title, .mx-tab-title { font-fam
 /* 🫧 말랑 버튼 고르기 창은 머리 줄 아래 한 줄 전체 (버튼 옆에 끼지 않게, 2026-11-24) */
 .mx-header .mx-squishy-panel { flex: 1 1 100%; }
 
-/* 2학년 탐험관 공통 (body.mx-grade2): 큰 보기·큰 글자, 숫자 띠, 뛰어 세기, 비교 — 2-1 사다리 */
+/* 저학년 탐험관 공통 (body.mx-grade2 = 2-1 사다리, body.mx-grade1 = 1학년 다리 math_1_bridge_spec): 큰 보기·큰 글자, 숫자 띠, 뛰어 세기, 비교 */
 .tw-area { display: flex; flex-direction: column; gap: 10px; }
-body.mx-grade2 .mx-choice { font-size: 1.3rem; min-height: 56px; }
-body.mx-grade2 .mx-btn { min-height: 56px; }
-body.mx-grade2 .mx-question { font-size: 1.15rem; }
-body.mx-grade2 .mx-expr { font-size: 1.6rem; }
+body.mx-grade2 .mx-choice, body.mx-grade1 .mx-choice { font-size: 1.3rem; min-height: 56px; }
+body.mx-grade2 .mx-btn, body.mx-grade1 .mx-btn { min-height: 56px; }
+body.mx-grade2 .mx-question, body.mx-grade1 .mx-question { font-size: 1.15rem; }
+body.mx-grade2 .mx-expr, body.mx-grade1 .mx-expr { font-size: 1.6rem; }
 
 /* 숫자 띠 (자릿값): 한 칸이 노랗게 */
 .tw-digits { display: flex; justify-content: center; gap: 8px; margin: 6px 0; }

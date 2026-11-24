@@ -20,16 +20,28 @@
     return ((s.h | 0) * 100) + ((s.t | 0) * 10) + (s.o | 0);
   }
 
-  // 모형 버튼 한 번 눌렀을 때 할 일 판정 (순수 함수)
-  function planPress(state, place, target) {
+  // 1학년 이름(names = { t: '10개 묶음', o: '낱개' })이면 그 이름으로 안내 (2026-11-24, math_1_bridge_spec §3-4)
+  function fullHint(place, names) {
+    if (names && names[place]) return names[place] + josaEun(names[place]) + ' 다 놓았어요';
+    return (PLACE_NAME[place] || '일') + ' 모형은 다 놓았어요';
+  }
+
+  function josaEun(word) {
+    var code = String(word).charCodeAt(String(word).length - 1) - 0xac00;
+    return code >= 0 && code <= 11171 && code % 28 !== 0 ? '은' : '는';
+  }
+
+  // 모형 버튼 한 번 눌렀을 때 할 일 판정 (순수 함수). names는 선택(1학년 이름)
+  function planPress(state, place, target, names) {
     var name = PLACE_NAME[place] || '일';
     var tgt = target ? (target[place] | 0) : 0;
     var cur = state ? (state[place] | 0) : 0;
     if (tgt <= 0) {
+      if (names && names[place]) return { action: 'blocked-zero', hint: names[place] + josaEun(names[place]) + ' 0개라 놓지 않아요' };
       return { action: 'blocked-zero', hint: name + '의 자리는 0이라 놓지 않아요' };
     }
     if (cur >= tgt) {
-      return { action: 'blocked-full', hint: name + ' 모형은 다 놓았어요' };
+      return { action: 'blocked-full', hint: fullHint(place, names) };
     }
     return { action: 'add' };
   }
@@ -307,6 +319,7 @@
     var autoBundle = Boolean(opts.autoBundle);
     var say = typeof opts.say === 'function' ? opts.say : null;
     var onDone = typeof opts.onDone === 'function' ? opts.onDone : null;
+    var names = opts.names || null;
 
     var wrap = ui.el('div', 'bt-controls');
     var row = ui.el('div', 'bt-btn-row');
@@ -348,12 +361,12 @@
     }
 
     function decidePress(cur, place) {
-      if (!autoBundle) return planPress(cur, place, target);
+      if (!autoBundle) return planPress(cur, place, target, names);
       var step = PLACE_STEP[place] || 1;
       if (toTotal(cur) + step <= toTotal(target)) return { action: 'add' };
-      var p = planPress(cur, place, target);
+      var p = planPress(cur, place, target, names);
       if (p.action !== 'add') return p;
-      return { action: 'blocked-full', hint: (PLACE_NAME[place] || '일') + ' 모형은 다 놓았어요' };
+      return { action: 'blocked-full', hint: fullHint(place, names) };
     }
 
     function handlePress(place) {
@@ -374,7 +387,7 @@
 
     for (var i = 0; i < places.length; i += 1) {
       (function (pl) {
-        var label = '＋ ' + (PLACE_NAME[pl] || '일');
+        var label = '＋ ' + ((names && names[pl]) || PLACE_NAME[pl] || '일');
         var btn = ui.button(label, 'mx-btn bt-btn', function () {
           handlePress(pl);
         });
@@ -394,6 +407,7 @@
     var remove = clamp(opts.remove || 0, 0, 19);
     var say = typeof opts.say === 'function' ? opts.say : null;
     var onDone = typeof opts.onDone === 'function' ? opts.onDone : null;
+    var names = opts.names || null;
 
     var wrap = ui.el('div', 'bt-controls');
     var row = ui.el('div', 'bt-btn-row');

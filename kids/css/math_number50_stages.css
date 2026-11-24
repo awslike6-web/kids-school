@@ -386,3 +386,31 @@
     @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
     @keyframes spin-slow { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+    /* =========================================================================
+       1학년 다리 B 묶음 (2026-11-24, docs/math_1_bridge_spec.md §9): 키보드 입력 대신 3지선다 고르기,
+       틀린 보기는 흐려지고 정답 보기가 반짝(에러리스), 버튼 56px
+       ========================================================================= */
+    .btn-action, .tab-btn { min-height: 56px; }
+    .speaker-btn { min-width: 48px; min-height: 48px; }
+    .grid-cell-answer { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; min-height: 52px;
+      border: 2px dashed var(--text-muted); border-radius: 12px; font-size: 1.5rem; font-weight: 800; background: #fff; }
+    .grid-cell-answer.is-asking { border: 3px solid #F59E0B; background: #FEF3C7; animation: pickGlow .8s ease infinite alternate; }
+    .grid-cell-answer.correct { border: 2px solid #10B981; background: #ECFDF5; color: #065F46; animation: none; }
+    .korean-read-hint { font-size: .95rem; color: var(--text-muted); margin-top: 6px; }
+    .pick-box { margin: 14px auto 4px; max-width: 420px; text-align: center; }
+    .pick-question { font-family: 'Jua', sans-serif; font-size: 1.3rem; margin: 0 0 10px; }
+    .pick-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .pick-btn { min-height: 56px; border-radius: 16px; border: 2px solid var(--text-muted); background: #fff; color: inherit;
+      font-family: 'Jua', sans-serif; font-size: 1.6rem; cursor: pointer; }
+    .pick-btn.is-off { opacity: .35; text-decoration: line-through; cursor: default; }
+    .pick-btn.is-glow { border-color: #F59E0B; box-shadow: 0 0 0 4px #FDE68A; }
+    .pick-btn.is-correct { border-color: #10B981; background: #ECFDF5; color: #065F46; }
+    .pick-hint { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: #FFFBEB; color: #92400E; font-weight: 700; }
+    .car-num.car-blank { color: #92400E; }
+    .car-num.is-asking { border-radius: 10px; background: #FEF3C7; box-shadow: 0 0 0 3px #F59E0B; animation: pickGlow .8s ease infinite alternate; }
+    .comp-choice-card.wrong { opacity: .4; }
+    .comp-fb.is-right { color: #10B981; }
+    .comp-fb.is-hint { color: #92400E; }
+    @keyframes pickGlow { from { box-shadow: 0 0 0 2px #FDE68A; } to { box-shadow: 0 0 0 5px #F59E0B; } }
+    @media (prefers-reduced-motion: reduce) { .grid-cell-answer.is-asking, .car-num.is-asking { animation: none; } }

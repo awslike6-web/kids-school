@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Jua&family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/math_number50.css?v=9b3fa265">
-  <link rel="stylesheet" href="../../css/math_number50_stages.css?v=c983c72d">
+  <link rel="stylesheet" href="../../css/math_number50_stages.css?v=09479eee">
 </head>
 <body>
 
@@ -109,11 +109,11 @@
     <section id="stage-2" class="stage-card">
       <div class="stage-header">
         <div>
-          <span class="stage-badge">그리드 답안 입력</span>
-          <h2 class="stage-title">그림을 보고 표(그리드)의 빈칸에 알맞은 수를 쓰세요</h2>
-          <p class="stage-desc">10개씩 묶음과 낱개를 세어 표 안의 빈칸을 채워보세요.</p>
+          <span class="stage-badge">세어서 고르기</span>
+          <h2 class="stage-title">그림을 보고 표의 빈칸을 채워요</h2>
+          <p class="stage-desc">10개씩 묶음 → 낱개 → 모두, 차례로 골라요.</p>
         </div>
-        <button class="speaker-btn" onclick="speak('그림을 보고 10개씩 묶음과 낱개의 수를 세어 표의 빈칸에 넣어보세요.')">🔊</button>
+        <button class="speaker-btn" onclick="speakStage2Question()">🔊</button>
       </div>
 
       <div class="problem-box">
@@ -124,28 +124,29 @@
             <tr>
               <th>10개씩 묶음</th>
               <th>낱개</th>
-              <th>전체 수 (쓰기)</th>
+              <th>모두</th>
             </tr>
           </thead>
           <tbody>
             <tr>
+              <td><span id="cell-tens" class="grid-cell-answer">?</span> 묶음</td>
+              <td><span id="cell-ones" class="grid-cell-answer">?</span> 개</td>
               <td>
-                <input type="number" id="input-tens" class="num-input" placeholder="?"> 묶음
-              </td>
-              <td>
-                <input type="number" id="input-ones" class="num-input" placeholder="?"> 개
-              </td>
-              <td>
-                <input type="number" id="input-total" class="num-input" placeholder="?">
-                <div id="korean-read-hint" style="font-size:0.9rem; color:var(--text-muted); margin-top:6px;">(읽기: - , -)</div>
+                <span id="cell-total" class="grid-cell-answer">?</span>
+                <div id="korean-read-hint" class="korean-read-hint" hidden></div>
               </td>
             </tr>
           </tbody>
         </table>
 
+        <div class="pick-box" aria-live="polite">
+          <p id="s2-question" class="pick-question"></p>
+          <div id="s2-choices" class="pick-choices"></div>
+          <p id="s2-hint" class="pick-hint" hidden></p>
+        </div>
+
         <div class="btn-group-center">
           <button class="btn-action btn-explain" onclick="showExplanationStage2()">🎬 움직이는 풀이과정</button>
-          <button class="btn-action btn-success" onclick="checkAnswerStage2()">✨ 정답 확인하기</button>
           <button class="btn-action btn-outline" onclick="nextProblemStage2()">➡️ 새로운 문제</button>
         </div>
       </div>
@@ -194,9 +195,12 @@
       <!-- 기차 수 순서 문제 -->
       <div class="train-container">
         <div style="font-size:1.15rem; font-weight:800; font-family:'Jua', sans-serif; color:#065F46;">🚂 1부터 50까지 수의 순서 맞추기</div>
-        <p style="font-size:0.9rem; color:#047857; margin-top:4px;">빈칸에 들어갈 알맞은 숫자를 입력하고 출발 버튼을 누르세요!</p>
+        <p style="font-size:0.9rem; color:#047857; margin-top:4px;">반짝이는 빈칸에 들어갈 수를 골라요. 다 채우면 기차가 출발해요!</p>
         <div class="train-track" id="train-track"></div>
-        <button class="btn-action btn-success" onclick="checkTrainTrack()">🚂 기차 출발 (정답 확인)</button>
+        <div class="pick-box" aria-live="polite">
+          <div id="train-choices" class="pick-choices"></div>
+          <p id="train-hint" class="pick-hint" hidden></p>
+        </div>
       </div>
 
       <!-- 무한 크기 비교 퀴즈 -->
@@ -240,8 +244,8 @@
   <script src="../../core/fairy-settings-catalog.js"></script>
   <script src="../../core/fairy-engine.js?v=97ebea9e"></script>
   <script src="../../core/fairy-chatbot.js"></script>
-  <script src="../../js/math_number50.js?v=4a549f2b"></script>
-  <script src="../../js/math_number50_stages.js?v=e06cabe3"></script>
+  <script src="../../js/math_number50.js?v=42bde4e5"></script>
+  <script src="../../js/math_number50_stages.js?v=774b76fa"></script>
   <script>window.currentSubject = "수학";</script>
 </body>
 </html>
