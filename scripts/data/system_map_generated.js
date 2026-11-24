@@ -268,6 +268,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "fractions_training-core.js", "path": "kids-school-main/kids/subjects/math/js/fractions_training-core.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "fractions_training-main.js", "path": "kids-school-main/kids/subjects/math/js/fractions_training-main.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "length_time.js", "path": "kids-school-main/kids/subjects/math/js/length_time.js", "domain": ["math"], "docs": ["quiz_choice_shuffle_spec.md", "CORE_CATALOG.md"]},
+      {"name": "math_bingo.js", "path": "kids-school-main/kids/subjects/math/js/math_bingo.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "math_column-draw.js", "path": "kids-school-main/kids/subjects/math/js/math_column-draw.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "math_explorer-ladder.js", "path": "kids-school-main/kids/subjects/math/js/math_explorer-ladder.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "math_4-2_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "math_explorer-quiz.js", "path": "kids-school-main/kids/subjects/math/js/math_explorer-quiz.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
