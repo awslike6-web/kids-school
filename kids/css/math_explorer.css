@@ -381,6 +381,9 @@ h1, h2, h3, .mx-title, .mx-main-title, .mx-modal-title, .mx-tab-title { font-fam
   .da-col.mx-col-big .da-col-mark { width: 48px; }
 }
 
+/* 🫧 말랑 버튼 고르기 창은 머리 줄 아래 한 줄 전체 (버튼 옆에 끼지 않게, 2026-11-24) */
+.mx-header .mx-squishy-panel { flex: 1 1 100%; }
+
 /* 완주 모달 */
 .mx-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 23, 42, 0.52); }
 .mx-modal[hidden] { display: none; }
