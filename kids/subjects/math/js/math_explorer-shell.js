@@ -468,6 +468,26 @@
     if (global.MathSquishy && typeof global.MathSquishy.mount === 'function') {
       try { global.MathSquishy.mount(document.querySelector('.mx-header')); } catch (e) { /* 꾸미기 실패는 학습을 막지 않음 */ }
     }
+    // 📮 요정 건의함 (cfg.wishBox, 2026-11-24): 아빠에게 "바라는 것"을 보내는 가족 우체통 쓰기 화면을 연다.
+    // 쓰던 글이 없을 때만 "[수학방에 바라는 것] "으로 시작하는 임시 글을 넣어 둔다(우체통 코드는 고치지 않음, 임시 글 이름 familyMailDraft).
+    if (cfg.wishBox) {
+      var head = document.querySelector('.mx-header');
+      if (head && !head.querySelector('.mx-wish-btn')) {
+        var wish = el('button', 'mx-btn mx-wish-btn', '📮 바라는 것');
+        wish.type = 'button';
+        wish.addEventListener('click', function () {
+          try {
+            var raw = global.localStorage.getItem('familyMailDraft');
+            var saved = raw ? JSON.parse(raw) : null;
+            if (!saved || !saved.text) {
+              global.localStorage.setItem('familyMailDraft', JSON.stringify({ to: 'dad', text: '[' + (cfg.wishLabel || '수학방') + '에 바라는 것] ' }));
+            }
+          } catch (e) { /* 임시 글을 못 넣어도 우체통은 연다 */ }
+          global.location.href = cfg.wishUrl || '../../common_space/family_mail.html?compose=dad';
+        });
+        head.appendChild(wish);
+      }
+    }
     selectTab(savedTab(), false);
     return { selectTab: selectTab, markDone: markDone };
   }

@@ -283,6 +283,7 @@ window.SYSTEM_MAP_GENERATED = {
       {"name": "math_squishy.js", "path": "kids-school-main/kids/subjects/math/js/math_squishy.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "number_three-core.js", "path": "kids-school-main/kids/subjects/math/js/number_three-core.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "number_three-labs.js", "path": "kids-school-main/kids/subjects/math/js/number_three-labs.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
+      {"name": "number_three-twenty.js", "path": "kids-school-main/kids/subjects/math/js/number_three-twenty.js", "domain": ["math"], "docs": ["math_2-1_ladder_spec.md", "CORE_CATALOG.md"]},
       {"name": "ranges_estimation-core.js", "path": "kids-school-main/kids/subjects/math/js/ranges_estimation-core.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "ranges_estimation-main.js", "path": "kids-school-main/kids/subjects/math/js/ranges_estimation-main.js", "domain": ["math"], "docs": ["CORE_CATALOG.md"]},
       {"name": "shapes_logic.js", "path": "kids-school-main/kids/subjects/math/js/shapes_logic.js", "domain": ["math"], "docs": ["learning_log_math_rest_spec.md", "learning_record_spec.md", "quiz_choice_shuffle_spec.md"]},

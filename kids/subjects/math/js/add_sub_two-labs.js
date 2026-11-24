@@ -331,6 +331,7 @@
     global.MathExplorer.mount({
       key: KEY,
       rememberTab: true,
+      wishBox: true,
       labs: [lab1, lab2, lab3, lab4, lab5, lab6],
       quiz: global.MathExplorerQuiz.create({
         grade: '2-1',

@@ -7,7 +7,7 @@ import { read, lineCount, assetTags, assertLoadsInOrder, assertRelativeAssets, a
 const JS = 'kids/subjects/math/js/';
 const COMMON = ['math_explorer-shell', 'math_squishy', 'math_explorer-quiz', 'math_explorer-ladder'];
 const PAGES = [
-  { page: 'number_three', css: 'math_number_three', key: 'num3', unit: '1. 세 자리 수', js: [...COMMON, 'base_ten-draw', 'math_bingo', 'number_three-core', 'number_three-labs'] },
+  { page: 'number_three', css: 'math_number_three', key: 'num3', unit: '1. 세 자리 수', js: [...COMMON, 'base_ten-draw', 'math_bingo', 'number_three-core', 'number_three-twenty', 'number_three-labs'] },
   { page: 'add_sub_two', css: 'math_add_sub_two', key: 'add2', unit: '3. 덧셈과 뺄셈', js: [...COMMON, 'base_ten-draw', 'math_column-draw', 'math_bingo', 'add_sub_two-core', 'add_sub_two-labs'] }
 ];
 
@@ -40,6 +40,7 @@ test('2-1 화면: 민서 맞춤 — 지난번 관 기억, 다음 관, 6문제 �
     const src = read(`${JS}${u.page}-labs.js`);
     assert.ok(new RegExp(`key: '${u.key}'`).test(src) || (new RegExp(`var KEY = '${u.key}'`).test(src) && /key: KEY/.test(src)), '탐험관 key');
     assert.match(src, /rememberTab: true/);
+    assert.match(src, /wishBox: true/);
     assert.match(src, /nextButton: true/);
     assert.match(src, /perReward: 6/);
     assert.match(src, /say: ctx\.say/);

@@ -406,7 +406,9 @@
     global.MathExplorer.mount({
       key: KEY,
       rememberTab: true,
-      labs: [lab1, lab2, lab3, lab4, lab5, lab6],
+      wishBox: true,
+      // 7관 🔍 수 스무고개는 number_three-twenty.js(NumberTwenty)가 있으면 붙인다 (2026-11-24)
+      labs: [lab1, lab2, lab3, lab4, lab5, lab6].concat(global.NumberTwenty ? [global.NumberTwenty.lab] : []),
       quiz: global.MathExplorerQuiz.create({
         grade: '2-1',
         unit: '1. 세 자리 수',
