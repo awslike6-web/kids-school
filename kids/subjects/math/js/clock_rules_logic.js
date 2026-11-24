@@ -201,6 +201,31 @@
   document.body.classList.add(profile === 'son' ? 'theme--arcade' : 'theme--slime');
   $('userName').textContent = profile === 'son' ? '민수 대원' : '민서 대원';
   window.currentSubject = '수학';
-  renderClock(); renderPalette(); renderBeads(); numberRound(); patternRound();
+  // 한 화면에 장난감 하나: 카드 4개를 탭으로 나눠 하나씩 보이고, 아이별로 지난번 탭을 기억한다 (2026-11-24, 1학년 다리 D 묶음)
+  function setupTabs() {
+    const cards = [...document.querySelectorAll('.play-card')];
+    if (cards.length < 2) return;
+    const labels = ['🕒 시계 읽기', '📿 규칙 만들기', '🧩 다음 구슬', '🔍 뛰어 세기'];
+    const key = 'math_clock_tab_' + (profile === 'son' ? 'minsu' : 'minseo');
+    const nav = document.createElement('nav');
+    nav.className = 'play-tabs'; nav.setAttribute('aria-label', '시계와 규칙 놀이 고르기');
+    const tabs = cards.map((card, i) => {
+      const tab = button(labels[i] || card.querySelector('h2')?.textContent || String(i + 1), () => show(i, true));
+      tab.className = 'play-tab';
+      nav.append(tab);
+      return tab;
+    });
+    function show(i, byChild) {
+      cards.forEach((card, j) => { card.hidden = j !== i; });
+      tabs.forEach((tab, j) => tab.setAttribute('aria-pressed', String(j === i)));
+      try { localStorage.setItem(key, String(i)); } catch (e) { /* 기억 못 해도 진행 */ }
+      if (byChild) { window.stopFairyTTS?.(); if (i === 1) renderBeads(); }
+    }
+    cards[0].before(nav);
+    let saved = 0;
+    try { saved = parseInt(localStorage.getItem(key), 10) || 0; } catch (e) { saved = 0; }
+    show(saved >= 0 && saved < cards.length ? saved : 0, false);
+  }
+  renderClock(); renderPalette(); renderBeads(); numberRound(); patternRound(); setupTabs();
   window.initFairyAudio?.(); window.updateTtsToggleUi?.();
 })();

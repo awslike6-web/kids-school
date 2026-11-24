@@ -45,3 +45,9 @@
 #clock-choices button.is-off, #pattern-choices button.is-off { opacity: .35; text-decoration: line-through; }
 #clock-choices button.is-glow, #pattern-choices button.is-glow { border-color: #d97706; box-shadow: 0 0 0 4px #fde68a; }
 #clock-choices button.is-correct, #pattern-choices button.is-correct { border-color: #16a34a; background: #dcfce7; color: #14532d; }
+/* 시계·규칙 탭: 장난감 하나씩 (1학년 다리 D 묶음 2026-11-24) */
+.play-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.play-tabs .play-tab { min-height: 56px; border: 2px solid #cbd5e1; border-radius: 14px; background: #fff; color: #334155; font: inherit; font-weight: 700; cursor: pointer; }
+.play-tabs .play-tab[aria-pressed="true"] { border-color: #be185d; background: #fce7f3; color: #831843; }
+.play-card[hidden] { display: none; }
+@media (min-width: 640px) { .play-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

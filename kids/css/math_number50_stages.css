@@ -414,3 +414,6 @@
     .comp-fb.is-hint { color: #92400E; }
     @keyframes pickGlow { from { box-shadow: 0 0 0 2px #FDE68A; } to { box-shadow: 0 0 0 5px #F59E0B; } }
     @media (prefers-reduced-motion: reduce) { .grid-cell-answer.is-asking, .car-num.is-asking { animation: none; } }
+    /* 눌러서 잇기: 고른 카드는 노란 테두리 */
+    .match-item { cursor: pointer; }
+    .match-item.is-picked { outline: 4px solid #F59E0B; box-shadow: 0 0 0 8px #FDE68A; }

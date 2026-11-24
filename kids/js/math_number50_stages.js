@@ -113,8 +113,36 @@
       drawMatchCanvas();
     }
 
+    // 끌어서 잇기 + 「카드 하나 누르고 → 옆 줄 카드 누르기」(폰에서는 옆 줄 점끼리 10px쯤이라 점 누르기가 어려움, 2026-11-24 1학년 다리 D 묶음)
+    let pickedCard = null;
+    function cardCol(card) {
+      const dot = card.querySelector('.match-dot');
+      return dot ? parseInt(dot.dataset.col) : -1;
+    }
+    function setPickedCard(card) {
+      if (pickedCard) pickedCard.classList.remove('is-picked');
+      pickedCard = card;
+      if (card) card.classList.add('is-picked');
+    }
+    function handleCardTap(card) {
+      if (!pickedCard || pickedCard === card) { setPickedCard(pickedCard === card ? null : card); return; }
+      const c1 = cardCol(pickedCard), c2 = cardCol(card);
+      if (c1 === c2) { setPickedCard(card); return; }
+      if (Math.abs(c1 - c2) !== 1) { setPickedCard(null); speak('바로 옆 줄끼리 이어요'); return; }
+      const left = c1 < c2 ? pickedCard : card, right = c1 < c2 ? card : pickedCard;
+      setPickedCard(null);
+      handleConnectDots(left.querySelector('.dot-right'), right.querySelector('.dot-left'));
+      drawMatchCanvas();
+    }
+
     function setupMatchEvents() {
       const wrapper = document.getElementById('match-board-wrapper');
+      pickedCard = null;
+      wrapper.onclick = function(e) {
+        if (e.target.closest('.match-dot')) return;
+        const card = e.target.closest('.match-item');
+        if (card) handleCardTap(card);
+      };
 
       wrapper.onmousedown = wrapper.ontouchstart = function(e) {
         const dot = e.target.closest('.match-dot');
@@ -153,6 +181,7 @@
         const targetDot = targetEl ? targetEl.closest('.match-dot') : null;
 
         if (targetDot && targetDot !== activeDrag.startDot) {
+          setPickedCard(null);
           handleConnectDots(activeDrag.startDot, targetDot);
         }
 
@@ -185,7 +214,10 @@
           }
         } else {
           soundWrong();
+          speak('같은 수를 나타내는 것끼리 이어요');
         }
+      } else if (col1 !== col2) {
+        speak('바로 옆 줄끼리 이어요');
       }
     }
 
