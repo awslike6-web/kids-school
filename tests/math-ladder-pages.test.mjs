@@ -9,11 +9,11 @@ const JS = 'kids/subjects/math/js/';
 const PAGES = [
   {
     page: 'fraction_add', css: 'math_fraction_add', key: 'fracadd', grade: '4-2', unit: '1. 분수의 덧셈과 뺄셈', total: 7,
-    js: ['math_explorer-shell', 'math_explorer-quiz', 'math_explorer-ladder', 'fraction_add-core', 'fraction_add-labs-a', 'fraction_add-labs-b']
+    js: ['math_explorer-shell', 'math_squishy', 'math_explorer-quiz', 'math_explorer-ladder', 'fraction_add-core', 'fraction_add-labs-a', 'fraction_add-labs-b']
   },
   {
     page: 'decimal_add', css: 'math_decimal_add', key: 'decadd', grade: '4-2', unit: '3. 소수의 덧셈과 뺄셈', total: 7,
-    js: ['math_explorer-shell', 'math_explorer-quiz', 'math_explorer-ladder', 'decimal_multiplication-core', 'decimal_add-core', 'decimal_add-draw', 'decimal_add-labs-a', 'decimal_add-labs-b']
+    js: ['math_explorer-shell', 'math_squishy', 'math_explorer-quiz', 'math_explorer-ladder', 'decimal_multiplication-core', 'decimal_add-core', 'math_column-draw', 'decimal_add-draw', 'decimal_add-labs-a', 'decimal_add-labs-b']
   }
 ];
 

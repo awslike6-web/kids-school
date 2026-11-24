@@ -22,15 +22,18 @@
   }
 
   // hostEl 안에 3학년 계단 다시 보기 버튼과 접이식 패널을 한 번만 붙인다
-  function attachLadder(hostEl, card, ui) {
+  // opts(선택, 2026-11-24): { label: 버튼 글자(기본 '🪜 3학년 계단 다시 보기'), say: 음성 함수 — 주면 판이 열릴 때 본문을 읽어 줌 }
+  function attachLadder(hostEl, card, ui, opts) {
     if (!hostEl || !card || hostEl.querySelector('.mx-ladder-btn')) return;
     ensureStyle();
+    var op = opts || {};
     var panel = null;
-    var btn = ui.button('🪜 3학년 계단 다시 보기', 'mx-btn mx-ladder-btn', function () {
+    var btn = ui.button(op.label || '🪜 3학년 계단 다시 보기', 'mx-btn mx-ladder-btn', function () {
       if (panel) {
         panel.classList.toggle('mx-ladder-hidden');
         return;
       }
+      if (typeof op.say === 'function') op.say(card.body);
       panel = ui.el('div', 'mx-ladder-panel');
       hostEl.insertBefore(panel, btn.nextSibling);
       panel.appendChild(ui.concept(card.title, card.body));
@@ -63,6 +66,8 @@
   }
 
   // 오답 유형별 힌트·계단 연결·더 풀기 카운터를 묶은 에러리스 3지선다
+  // 저학년 옵션(2026-11-24, 모두 선택): say(음성 함수) — 주면 질문을 바로 읽어 줌(speak가 있으면 그 글자를 대신 읽음: 수 읽기 문제처럼
+  //   질문에 정답 소리가 섞이면 안 될 때), sayHint — 오답 힌트도 읽어 줌, column — 보기 세로 1열, ladderLabel — 계단 버튼 글자
   function ask(ui, o) {
     var tracker = track(o.prefix, o.kind);
     var choices = [o.answer];
@@ -82,14 +87,17 @@
       choices: choices,
       answer: answerIdx,
       fixed: fixed,
+      column: Boolean(o.column),
       hint: function (wrongIdx) {
         var w = wrongOf(wrongIdx);
-        return (w && o.hints && o.hints[w.mistake]) || o.hint || '반짝이는 보기를 다시 살펴볼까요?';
+        var h = (w && o.hints && o.hints[w.mistake]) || o.hint || '반짝이는 보기를 다시 살펴볼까요?';
+        if (o.sayHint && typeof o.say === 'function') o.say(h);
+        return h;
       },
       explain: o.explain,
       onWrong: function (text) {
         tracker.wrong(text);
-        if (o.ladder) attachLadder(box, o.ladder, ui);
+        if (o.ladder) attachLadder(box, o.ladder, ui, { label: o.ladderLabel, say: o.sayHint ? o.say : null });
       },
       onSolved: function () {
         tracker.done();
@@ -97,7 +105,13 @@
         if (o.onSolved) o.onSolved();
       }
     });
+    if (typeof o.say === 'function') o.say(o.speak !== undefined ? o.speak : o.question);
     return box;
+  }
+
+  // 보상 글자: 민서는 사탕, 민수는 보석 (지급 엔진은 이미 아이별로 처리, 여기는 보이는 글자만)
+  function rewardIcon() {
+    return global.currentChild === 'minseo' ? '🍬' : '💎';
   }
 
   // 로컬 날짜 키(YYYY-MM-DD)를 구한다
@@ -109,8 +123,10 @@
     return d.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
   }
 
-  // 오늘 더 푼 문제 수와 10문제마다 주는 보석(최대 3개)을 localStorage로 관리한다
-  function counter(key) {
+  // 오늘 더 푼 문제 수와 perReward문제(기본 10)마다 주는 보상(최대 3개)을 localStorage로 관리한다
+  // opts.perReward: 2학년(민서)은 6 — 3문제 한 판 두 번마다 (2026-11-24)
+  function counter(key, opts) {
+    var per = (opts && opts.perReward) || 10;
     var child = global.currentChild || 'minsu';
     var storeKey = 'math_' + key + '_drill_' + child + '_' + localDateKey();
     var data = { solved: 0, gems: 0 };
@@ -125,12 +141,12 @@
     } catch (e) {}
 
     function label() {
-      return '오늘 더 푼 문제 ' + data.solved + '개 · 💎 ' + data.gems + '/3';
+      return '오늘 더 푼 문제 ' + data.solved + '개 · ' + rewardIcon() + ' ' + data.gems + '/3';
     }
 
     function add() {
       data.solved += 1;
-      if (data.solved % 10 === 0 && data.gems < 3) {
+      if (data.solved % per === 0 && data.gems < 3) {
         data.gems += 1;
         try {
           if (typeof global.grantRewardAndShowUI === 'function') global.grantRewardAndShowUI(1, false, 'math');
@@ -154,8 +170,9 @@
   }
 
   // 한 판씩 문제를 순서대로 풀고 끝나면 [한 판 더]로 새 판을 여는 진행기
+  // o.perReward(보상 간격), o.nextButton(true면 [다음 관 ▶] — 틀의 ctx.goNext가 있을 때) — 2026-11-24 저학년 옵션
   function rounds(container, ctx, o) {
-    var cnt = counter(o.counterKey);
+    var cnt = counter(o.counterKey, { perReward: o.perReward });
     var roundEl = ctx.ui.el('div', 'mx-drill-round');
     container.appendChild(roundEl);
 
@@ -174,9 +191,14 @@
         if (!extra) ctx.complete();
         roundEl.appendChild(ctx.ui.doneBadge('한 판 끝!'));
         roundEl.appendChild(cnt.view());
-        roundEl.appendChild(ctx.ui.button('🔁 한 판 더', 'mx-btn primary', function () {
+        var row = ctx.ui.el('div', 'mx-btn-row');
+        row.appendChild(ctx.ui.button('🔁 한 판 더', 'mx-btn primary', function () {
           runRound(true);
         }));
+        if (o.nextButton && typeof ctx.goNext === 'function' && ctx.hasNext && ctx.hasNext()) {
+          row.appendChild(ctx.ui.button('다음 관 ▶', 'mx-btn', function () { ctx.goNext(); }));
+        }
+        roundEl.appendChild(row);
       });
     }
 
@@ -222,5 +244,5 @@
   }
 
   global.MathLadder = { attach: attachLadder };
-  global.MathDrill = { track: track, ask: ask, counter: counter, rounds: rounds, algo: algo, why: why, expr: expr };
+  global.MathDrill = { track: track, ask: ask, counter: counter, rounds: rounds, algo: algo, why: why, expr: expr, rewardIcon: rewardIcon };
 })(typeof window !== 'undefined' ? window : globalThis);

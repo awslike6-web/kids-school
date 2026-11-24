@@ -487,6 +487,13 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### 🫧 수학 탐험관 공용 놀이·저학년 부품 (2026-11-24, 2-1 사다리 2단계)
+
+- `kids/subjects/math/js/math_squishy.js` (`window.MathSquishy`): **말랑 버튼**. 모든 `.mx-btn`을 누르면 말랑하게 눌렸다 튀어 오르고(CSS, 움직임 줄이기 설정이면 끔) 고른 소리를 Web Audio로 합성해 낸다(파일 없음). 소리 `SOUNDS`: 키캡 도각·슬라임 뽁·말랑 꾹·🔒젤리 퐁·🔒방울 딸랑·소리 없음. 아이별 저장 `math_squishy_{민수|민서}` = `{ sound, unlocked }`, 기본값 민서 슬라임·민수 소리 없음. `getPrefs`·`setSound`·`isUnlocked`·`unlock(id)`(🎁 고르는 해금용)·`play`·`attach`·`chooserButton`·`mount(host)`. 틀이 머리(`.mx-header`)에 `[🫧 내 버튼]`을 자동으로 붙인다 — 화면은 `math_explorer-shell.js` 바로 뒤에 이 파일만 실으면 된다(4-2·5-2 탐험관 다섯 화면에 실림). 검증 `tests/math-squishy.test.mjs`. 초안은 네온 medium(하이드로젠 high와 같은 일을 맡겨 비교한 뒤 고름).
+- `kids/subjects/math/js/math_column-draw.js` (`window.ColumnDraw.column(ui, o)`): **세로셈 칸판** 공용(4-2 소수·2-1 덧셈뺄셈). `o = { a, b, op, onDone, big?, onWrong? }`, a·b는 소수 `{int, places}` 또는 정수. 정수면 0 채우기·소수점 단계 없이 바로 자리 계산, `big`이면 큰 칸(`mx-col-big`, 52px), `onWrong`으로 틀린 자리 숫자를 학습일지에. DecimalAddCore에 기대지 않음. 칸판 모양 CSS(`.da-col-*`)는 `math_explorer.css`로 옮김. `decimal_add-draw.js`의 `column`은 이 함수로 넘긴다.
+- **공용 틀 옵션** (`math_explorer-shell.js`): `mount({ rememberTab: true })` 아이·화면별 마지막 관을 기억해 다시 열 때 그 관부터(`math_{key}_tab_{아이}`), `ctx.hasNext()`·`ctx.goNext()`(다음 관 열기), 완주 창 보상 글자가 아이별(민서 🍬, 민수 💎).
+- **`MathDrill` 저학년 옵션** (`math_explorer-ladder.js`, 모두 선택이라 4-2 화면은 그대로): `ask`에 `say`(음성 함수 → 질문 자동 읽기), `speak`(질문 대신 읽을 글자: 수 읽기 문제처럼 정답 소리가 섞이면 안 될 때), `sayHint`(오답 힌트도 읽기), `column`(보기 세로 1열), `ladderLabel`(계단 버튼 글자). `counter(key, { perReward })`(2학년은 6), 보상 글자 아이별(`MathDrill.rewardIcon()`). `rounds`에 `perReward`·`nextButton`(`[다음 관 ▶]`). `MathLadder.attach(…, { label, say })`.
+
 ### 🪜 2-1 세 자리 수·덧셈과 뺄셈 계산 부품 (2026-11-24, 화면은 만드는 중)
 
 민서 2학년 1학기 예습용 탐험관(`number_three.html`·`add_sub_two.html`, 아직 없음)과 놀이(🎯 수 빙고·🔍 수 스무고개)가 쓸 순수 계산 모듈(DOM 없음). 설계: [`docs/math_2-1_ladder_spec.md`](../../docs/math_2-1_ladder_spec.md). 4-2 모듈과 같은 모양(`LAB_KINDS`·`KIND_ORDER`·`makeProblem`·`wrongChoices`·`makeRound`·`makeMixedRound`·`randInt`).

@@ -163,79 +163,7 @@ body.mx-theme-decadd {
   transform: translateX(-50%);
 }
 
-/* 세로셈 칸판 */
-.da-col {
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  gap: 3px;
-  margin: 10px auto;
-  max-width: 100%;
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.da-col .row-line {
-  grid-column: 1 / -1;
-  height: 3px;
-  background: var(--mx-strong);
-  border-radius: 2px;
-  margin: 2px 0;
-}
-
-.da-col .cell {
-  position: relative;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #ffffff;
-  border: 1.5px solid var(--mx-line);
-  border-radius: 8px;
-  color: #0f172a;
-}
-
-.da-col .cell.pad {
-  background: #fef9c3;
-}
-
-.da-col .cell.hl {
-  border: 3px solid #facc15;
-}
-
-.da-col .cell.point {
-  width: 18px;
-  border: none;
-  background: transparent;
-  color: var(--mx-strong);
-}
-
-.da-col .carry {
-  position: absolute;
-  top: 1px;
-  right: 3px;
-  font-size: 0.75rem;
-  line-height: 1;
-  color: #dc2626;
-  font-weight: 700;
-}
-
-.da-col .borrow {
-  position: absolute;
-  top: 1px;
-  left: 3px;
-  font-size: 0.75rem;
-  line-height: 1;
-  color: #2563eb;
-  font-weight: 700;
-}
-
-.da-col .struck {
-  text-decoration: line-through;
-  text-decoration-color: #ef4444;
-  opacity: 0.6;
-}
+/* (옛 초안 .da-col .cell 규칙은 실제 화면이 쓰지 않아 지움 — 칸판 모양은 math_explorer.css, 2026-11-24) */
 
 /* 작은 세로셈 비교 그림 */
 .da-mini-wrap {
@@ -318,26 +246,4 @@ body.mx-theme-decadd {
 .da-mini-row { font-family: ui-monospace, Consolas, monospace; white-space: pre; font-size: 1.05rem; line-height: 1.4; }
 .da-mini-bar { border-top: 2px solid #334155; margin-top: 2px; }
 
-/* 세로셈 칸판: 칸 44px, 소수점 칸 18px, 부호 칸 28px */
-.da-col { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
-.da-col-grid { display: inline-flex; flex-direction: column; gap: 4px; padding: 8px 10px; background: #ffffff; border: 1.5px solid var(--mx-line); border-radius: 14px; }
-.da-col-row { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
-.da-col-cell { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;
-  border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; color: #0f172a; box-sizing: border-box; }
-.da-col-cell.da-col-sign { width: 28px; border: none; background: transparent; color: var(--mx-strong); }
-.da-col-pt { width: 18px; height: 44px; display: inline-flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; font-size: 1.6rem; font-weight: 800; line-height: 1; box-sizing: border-box; }
-.da-col-marks .da-col-pt { height: 20px; padding: 0; }
-.da-col-mark { width: 44px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #dc2626; }
-.da-col-marks .da-col-sign { height: 20px; }
-.da-col-bar { height: 3px; background: #334155; border-radius: 2px; margin: 2px 0 2px 32px; }
-.da-col-ans .da-col-cell { background: var(--mx-softer); }
-.da-col-cell.da-col-hl { border: 3px solid #facc15; background: #fefce8; }
-.da-col-mark.da-col-hl { color: #b45309; }
-.da-col-cell.da-pad-wait { border: 3px dashed #f59e0b; background: #fef9c3; color: #b45309; }
-.da-col-ctrl { width: 100%; }
-
-@media (max-width: 380px) {
-  .da-col-cell { width: 40px; height: 40px; font-size: 1.25rem; }
-  .da-col-mark { width: 40px; }
-  .da-col-pt { height: 40px; }
-}
+/* 세로셈 칸판 모양은 공용 math_explorer.css로 옮김 (2026-11-24, 2학년 덧셈·뺄셈과 함께 씀) */

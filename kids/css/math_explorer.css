@@ -348,6 +348,39 @@ h1, h2, h3, .mx-title, .mx-main-title, .mx-modal-title, .mx-tab-title { font-fam
 .mx-ladder-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
 .mx-ladder-links .mx-chip { text-decoration: none; font-weight: 700; padding: 6px 12px; }
 
+/* 세로셈 칸판 (ColumnDraw, 4-2 소수·2-1 덧셈뺄셈 공용) */
+/* 세로셈 칸판: 칸 44px, 소수점 칸 18px, 부호 칸 28px */
+.da-col { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
+.da-col-grid { display: inline-flex; flex-direction: column; gap: 4px; padding: 8px 10px; background: #ffffff; border: 1.5px solid var(--mx-line); border-radius: 14px; }
+.da-col-row { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.da-col-cell { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700;
+  border: 1.5px solid #cbd5e1; border-radius: 8px; background: #ffffff; color: #0f172a; box-sizing: border-box; }
+.da-col-cell.da-col-sign { width: 28px; border: none; background: transparent; color: var(--mx-strong); }
+.da-col-pt { width: 18px; height: 44px; display: inline-flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; font-size: 1.6rem; font-weight: 800; line-height: 1; box-sizing: border-box; }
+.da-col-marks .da-col-pt { height: 20px; padding: 0; }
+.da-col-mark { width: 44px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #dc2626; }
+.da-col-marks .da-col-sign { height: 20px; }
+.da-col-bar { height: 3px; background: #334155; border-radius: 2px; margin: 2px 0 2px 32px; }
+.da-col-ans .da-col-cell { background: var(--mx-softer); }
+.da-col-cell.da-col-hl { border: 3px solid #facc15; background: #fefce8; }
+.da-col-mark.da-col-hl { color: #b45309; }
+.da-col-cell.da-pad-wait { border: 3px dashed #f59e0b; background: #fef9c3; color: #b45309; }
+.da-col-ctrl { width: 100%; }
+
+@media (max-width: 380px) {
+  .da-col-cell { width: 40px; height: 40px; font-size: 1.25rem; }
+  .da-col-mark { width: 40px; }
+  .da-col-pt { height: 40px; }
+}
+
+/* 2학년용 큰 칸판 (ColumnDraw big: true) */
+.da-col.mx-col-big .da-col-cell { width: 52px; height: 52px; font-size: 1.6rem; }
+.da-col.mx-col-big .da-col-mark { width: 52px; font-size: 0.9rem; }
+@media (max-width: 380px) {
+  .da-col.mx-col-big .da-col-cell { width: 48px; height: 48px; }
+  .da-col.mx-col-big .da-col-mark { width: 48px; }
+}
+
 /* 완주 모달 */
 .mx-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15, 23, 42, 0.52); }
 .mx-modal[hidden] { display: none; }

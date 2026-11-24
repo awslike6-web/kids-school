@@ -293,7 +293,7 @@ test('세 화면: 공용 틀 → 단원 파일 순서, 상대 경로, 인라인 
   for (const u of UNITS) {
     const file = `kids/subjects/math/${u.page}.html`;
     const html = read(file);
-    const scripts = ['./js/math_explorer-shell.js', './js/math_explorer-quiz.js', ...u.js.map((j) => `./js/${j}.js`)];
+    const scripts = ['./js/math_explorer-shell.js', './js/math_squishy.js', './js/math_explorer-quiz.js', ...u.js.map((j) => `./js/${j}.js`)];
     assertLoadsInOrder(html, 'script', scripts, u.page);
     const engine = assetTags(html, 'script').find((t) => t.url === '../../core/fairy-engine.js');
     assert.ok(engine && engine.start < html.indexOf('./js/math_explorer-shell.js'), '요정 엔진이 먼저');

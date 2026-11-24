@@ -364,9 +364,11 @@
         }
       }
       if (modalRewardEl) {
+        // 민서는 사탕, 민수는 보석 (지급 엔진은 아이별로 처리, 여기는 보이는 글자만, 2026-11-24)
+        var minseo = global.currentChild === 'minseo';
         modalRewardEl.textContent = already
           ? '오늘 보너스는 이미 받았어요. 내일 또 도전해요!'
-          : '보석 +5💎 보너스를 받았어요!';
+          : (minseo ? '사탕 +5🍬 보너스를 받았어요!' : '보석 +5💎 보너스를 받았어요!');
       }
       modalEl.hidden = false;
     }
@@ -398,12 +400,29 @@
         finale: function () { safeCall('fairyReward'); },
         complete: function () { markDone(tabIdx); },
         isDone: function () { return Boolean(doneMap[tabIdx]); },
-        redraw: function () { selectTab(tabIdx, false); }
+        redraw: function () { selectTab(tabIdx, false); },
+        // 다음 관 열기 (저학년 [다음 관 ▶], 2026-11-24). 마지막 관 다음은 퀴즈 탭
+        hasNext: function () { return tabIdx + 1 < tabs.length; },
+        goNext: function () { if (tabIdx + 1 < tabs.length) selectTab(tabIdx + 1, true); }
       };
     }
 
     // scroll: 아이가 탭을 눌렀을 때만 내용 위치로 내려간다 (첫 화면은 제목·진도부터 보이게)
+    // cfg.rememberTab: 아이·화면별 마지막 관을 기억했다가 다시 열 때 그 관부터 (2026-11-24, 민서 "들어가는 길이 길면 피함")
+    var tabMemoryKey = 'math_' + (cfg.key || 'explorer') + '_tab_' + (global.currentChild || 'minsu');
+    function rememberTab(idx) {
+      if (!cfg.rememberTab) return;
+      try { global.localStorage.setItem(tabMemoryKey, String(idx)); } catch (e) { /* 기억 못 해도 진행 */ }
+    }
+    function savedTab() {
+      if (!cfg.rememberTab) return 0;
+      var n = 0;
+      try { n = parseInt(global.localStorage.getItem(tabMemoryKey), 10); } catch (e) { n = 0; }
+      return n >= 0 && n < tabs.length ? n : 0;
+    }
+
     function selectTab(idx, scroll) {
+      rememberTab(idx);
       tabButtons.forEach(function (b, i) {
         b.classList.toggle('active', i === idx);
         b.setAttribute('aria-selected', i === idx ? 'true' : 'false');
@@ -445,7 +464,11 @@
     }
 
     updateProgressUI();
-    selectTab(0, false);
+    // 🫧 말랑 버튼: 화면이 math_squishy.js를 실었으면 머리에 [🫧 내 버튼]을 붙이고 모든 버튼에 감촉·소리 (2026-11-24)
+    if (global.MathSquishy && typeof global.MathSquishy.mount === 'function') {
+      try { global.MathSquishy.mount(document.querySelector('.mx-header')); } catch (e) { /* 꾸미기 실패는 학습을 막지 않음 */ }
+    }
+    selectTab(savedTab(), false);
     return { selectTab: selectTab, markDone: markDone };
   }
 
