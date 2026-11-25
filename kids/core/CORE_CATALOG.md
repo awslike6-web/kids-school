@@ -488,6 +488,15 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### 📐 5-1 다각형의 둘레와 넓이 탐험관 (2026-11-25)
+
+5학년 1학기 「다각형의 둘레와 넓이」(`polygon_area.html`, 관 7개 + 퀴즈). 설계: [`docs/math_5-1_polyarea_spec.md`](../../docs/math_5-1_polyarea_spec.md). 공식은 도형마다 하나, 높이가 나오는 넓이는 식 → 값 두 번 고르기.
+
+- `kids/subjects/math/js/polygon_area-core.js` (`window.PolyAreaCore`, 순수 모듈, `MixCalcCore`를 먼저 실어야 함): 종류별 후보 풀(`poolOf`)·`makeProblem` → `{ kind, shape, measure, unit, ask, fig, formula: { tokens, text }, value, answerText, twoStep, cardLines, key }`. `fig`는 모눈 칸 좌표 그림 자료(시계 방향 `points`, 변 꼬리표, 높이 점선·연장선, 대각선, 같은 길이 빗금, `scale` 참이면 실제 비율 — 기울어진 변 길이는 세 수 (3, 4, 5)·(6, 8, 10)만). `wrongChoices(p, 'f'|'v'|'final')`(식 오답은 `evalExact` 분수 비교, 값 오답은 양의 정수·크기 위치 돌리기)·`hintFor(p, 실수)`·`makeRound`·`makeMixedRound`.
+- `kids/subjects/math/js/polygon_area-draw.js` (`window.PolyAreaDraw`): `figure(fig)` → SVG(모눈·도형·꼬리표·높이·직각 표시·대각선), `countCells`(칸 번호 장면), `workLine`(식 줄).
+- `kids/subjects/math/js/polygon_area-labs.js` (`window.PolyAreaLabs`, 1~7관 + `mount`): 학습일지 `g:area5-<종류>`(두 번 고르기는 `-f`·`-v`). `kids/css/math_polyarea.css`(`mx-theme-polyarea`, `.pa-*`).
+- 초안: 계산 부품 하이드로젠 medium, 그림·화면·CSS 네온 medium. 시험 `tests/math-polyarea5.test.mjs`(식 = 값, 그림 정합: 꼬리표 길이 = 두 점 거리·신발끈 넓이 = 정답·높이 직각과 발 위치, 풀 크기, 핵심 실수 출현 ≥ 70%, 크기 위치 ≤ 75%, 퀴즈 자료).
+
 ### 🧮 5-1 자연수의 혼합 계산 탐험관 (2026-11-25)
 
 5학년 1학기 「자연수의 혼합 계산」(`mixed_calc.html`, 관 7개 + 퀴즈). 설계: [`docs/math_5-1_mixcalc_spec.md`](../../docs/math_5-1_mixcalc_spec.md). 계산 순서 규칙 하나(`( )` → `× ÷` 앞에서부터 → `+ −` 앞에서부터), 풀이 꼴 하나(한 단계씩 줄여 아래로 쓰기). 한 문제 = 연산 수만큼 "다음 줄 식" 고르기.

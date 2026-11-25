@@ -1,0 +1,247 @@
+/* 초등 5-1 다각형의 둘레와 넓이 탐험관 전용 스타일 (주황·호박 계열, 375px 가로 넘침 없음) */
+body.mx-theme-polyarea {
+  --mx-head-a: #fef3c7;
+  --mx-head-b: #ffedd5;
+  --mx-line: #fcd34d;
+  --mx-strong: #78350f;
+  --mx-sub: #b45309;
+  --mx-accent: #d97706;
+  --mx-accent-dark: #b45309;
+  --mx-soft: #fde68a;
+  --mx-softer: #fffbeb;
+}
+
+/* 계단 이동 링크 3개 (375px 한 줄 유지) */
+body.mx-theme-polyarea .mx-ladder-links {
+  gap: 6px;
+}
+
+body.mx-theme-polyarea .mx-ladder-links .mx-chip {
+  font-size: clamp(0.76rem, 3.2vw, 0.92rem);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+/* 공식 카드 (MathDrill.algo): 첫 화면 세로 절약 */
+body.mx-theme-polyarea .mx-algo {
+  gap: 4px;
+  padding: 8px 11px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+body.mx-theme-polyarea .mx-algo > *::before {
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+}
+
+/* 문제 전체 세로 쌓기 */
+.pa-problem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 도형 그림 카드 */
+.pa-figwrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.25rem;
+  background: #ffffff;
+  border: 2px solid var(--mx-line);
+  border-radius: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+svg.pa-fig {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  max-height: 210px;
+  margin: 0 auto;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* SVG 모눈 · 도형 · 같은 길이 빗금 */
+.pa-grid {
+  stroke: #d9dee8;
+  stroke-width: 0.03;
+}
+
+.pa-shape {
+  fill: rgba(251, 146, 60, 0.22);
+  stroke: #9a3412;
+  stroke-width: 0.08;
+  stroke-linejoin: round;
+}
+
+.pa-tick {
+  stroke: #9a3412;
+  stroke-width: 0.07;
+  stroke-linecap: round;
+}
+
+/* SVG 길이 꼬리표 (사용자 단위 px) */
+.pa-label {
+  font-size: 0.72px;
+  font-weight: 800;
+  fill: #33302b;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 0.16;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.pa-hlabel {
+  fill: #1d4ed8;
+}
+
+/* 높이 점선 · 밑변 연장 점선 · 직각 표시 (파랑) */
+.pa-height,
+.pa-ext {
+  stroke: #2563eb;
+  stroke-width: 0.06;
+  stroke-dasharray: 0.25 0.18;
+  stroke-linecap: round;
+}
+
+.pa-right {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 0.05;
+  stroke-linejoin: miter;
+}
+
+/* 대각선 점선 (보라) */
+.pa-diag {
+  stroke: #7c3aed;
+  stroke-width: 0.06;
+  stroke-dasharray: 0.25 0.18;
+  stroke-linecap: round;
+}
+
+/* 2관 칸 세기 번호 */
+.pa-cellnum {
+  font-size: 0.42px;
+  fill: #8a5a00;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+  animation: pa-cell-pop 0.18s ease;
+}
+
+/* 묻는 말 · 식 줄 */
+.pa-ask {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(1rem, 4.4vw, 1.2rem);
+  line-height: 1.45;
+  text-align: center;
+  color: #1e293b;
+  word-break: keep-all;
+}
+
+.pa-ask b {
+  color: var(--mx-accent-dark);
+  font-weight: 800;
+}
+
+.pa-work {
+  min-height: 1.6em;
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(1rem, 4.4vw, 1.2rem);
+  line-height: 1.5;
+  white-space: nowrap;
+  color: #9a3412;
+  font-variant-numeric: tabular-nums;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* 보기 버튼: 값 보기는 가로 3개, 식 보기는 세로 1열 전폭 */
+.pa-problem .mx-choice-row {
+  margin-top: 4px;
+  gap: 8px;
+}
+
+.pa-problem .mx-choice-row:not(.mx-choice-col) {
+  flex-wrap: nowrap;
+}
+
+.pa-problem .mx-choice-row:not(.mx-choice-col) .mx-choice {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 6px;
+}
+
+.pa-problem .mx-choice {
+  white-space: nowrap;
+  font-size: clamp(0.98rem, 4.2vw, 1.15rem);
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  text-align: center;
+}
+
+.pa-problem .mx-choice-col .mx-choice {
+  width: 100%;
+  padding: 10px 12px;
+}
+
+/* 칸 번호 등장 키프레임 */
+@keyframes pa-cell-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 좁은 모바일 (375px 이하 가로 넘침 방지) */
+@media (max-width: 420px) {
+  body.mx-theme-polyarea .mx-ladder-links {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  body.mx-theme-polyarea .mx-ladder-links .mx-chip {
+    padding: 5px 8px;
+    font-size: 0.78rem;
+  }
+
+  .pa-work {
+    font-size: clamp(0.88rem, 3.8vw, 1.05rem);
+  }
+
+  .pa-problem .mx-choice-row:not(.mx-choice-col) {
+    gap: 6px;
+  }
+
+  .pa-problem .mx-choice-row:not(.mx-choice-col) .mx-choice {
+    font-size: clamp(0.84rem, 3.6vw, 0.98rem);
+    padding: 10px 4px;
+  }
+}
+
+/* 모션 줄이기 설정 대응 */
+@media (prefers-reduced-motion: reduce) {
+  .pa-cellnum {
+    animation: none;
+  }
+}
