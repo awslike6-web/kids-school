@@ -255,7 +255,7 @@ graph TD
 ### 12-1) ✂️ 5-1 약분과 통분·분모가 다른 분수의 덧셈과 뺄셈 (2026-11-25)
 - 4-2 분수(분모가 같은 덧셈·뺄셈)와 5-2 분수의 곱셈 사이 빈 계단. 「약분과 통분」(`fraction_reduce.html`)·「분모가 다른 분수의 덧셈과 뺄셈」(`fraction_unlike.html`), 각 관 7개 + 퀴즈 배틀. 6-1 분수의 나눗셈 준비.
 - 풀이는 하나씩만: 약분은 2·3·5·7로 더 나눌 수 없을 때까지, 통분은 큰 분모의 배수 세기, 크기 비교는 통분해서, 분수 → 소수는 분모 10·100으로. 답은 기약분수.
-- 상세 설계·진행: [`math_5-1_fraction_spec.md`](math_5-1_fraction_spec.md). 계산 부품(`FracReduceCore`·`FracUnlikeCore`), 그리기 부품(`Frac5Draw`), 두 탐험관 화면 완료. 학습일지 `g:frac5r-<종류>`·`g:frac5u-<종류>`. 퀴즈 배틀 노션 등록은 사용자 승인 뒤.
+- 상세 설계·진행: [`math_5-1_fraction_spec.md`](math_5-1_fraction_spec.md). 계산 부품(`FracReduceCore`·`FracUnlikeCore`), 그리기 부품(`Frac5Draw`), 두 탐험관 화면 완료. 학습일지 `g:frac5r-<종류>`·`g:frac5u-<종류>`. 퀴즈 배틀은 CURRICULUM_DB에 등록(2026-11-25, 단원마다 12행, `register_curriculum.py`).
 
 ### 13) 🪜 2-1 세 자리 수·덧셈과 뺄셈 사다리 (2026-11-24, 1차 완료)
 - 민서 2학년 1학기 예습용. 「세 자리 수」(`number_three.html`)·「덧셈과 뺄셈」(`add_sub_two.html`) 탐험관 + 놀이 층(🫧 말랑 버튼·🎯 수 빙고·🔍 수 스무고개·🎁 고르는 해금·📮 요정 건의함).

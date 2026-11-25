@@ -1,6 +1,6 @@
 # 🪜 5-1 약분과 통분 · 분모가 다른 분수의 덧셈과 뺄셈 탐험관 설계 명세 (math_5-1_fraction_spec.md)
 
-> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안)·두 화면(네온 초안)·퀴즈 자료 24제 완료, 375px 14개 관 확인. 남은 것: 노션 CURRICULUM_DB 등록(사용자 승인 뒤), 실제 폰 확인.
+> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안)·두 화면(네온 초안)·퀴즈 자료 24제 완료, 375px 14개 관 확인. 노션 CURRICULUM_DB 퀴즈 24행 등록(2026-11-25, 사용자 승인), 두 화면 퀴즈 탭 375px 확인. 남은 것: 실제 폰 확인.
 > 상위 명세: [`math_spec.md`](math_spec.md) · 바로 아래 계단 설계: [`math_4-2_ladder_spec.md`](math_4-2_ladder_spec.md) (이 문서는 그 §3 공통 설계를 그대로 따르고, 다른 점만 적는다) · 공용 틀: [`CORE_CATALOG.md`](../kids/core/CORE_CATALOG.md) 「수학 단원 탐험관 공용 틀 `MathExplorer`」·「4-2 분수·소수 사다리 탐험관」 · 학습자: [`minsu_learning_profile.md`](minsu_learning_profile.md)
 
 ## 1. 왜 만드나
