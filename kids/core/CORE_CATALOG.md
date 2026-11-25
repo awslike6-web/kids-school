@@ -488,6 +488,15 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### ✖️ 4-1 곱셈과 나눗셈 탐험관 (2026-11-25)
+
+4학년 1학기 「곱셈과 나눗셈」(`multiply_divide.html`, 관 7개 + 퀴즈). 3-1 나눗셈과 5-1 약수와 배수 사이 계단. 설계: [`docs/math_4-1_muldiv_spec.md`](../../docs/math_4-1_muldiv_spec.md). 방법은 하나씩만: × 몇십은 곱하는 수의 0을 떼고 곱한 뒤 붙이기, × 두 자리는 세로셈(일의 자리 곱 → 십의 자리 곱 한 칸 왼쪽 → 더하기), ÷ 몇십은 끝 0 같이 지우기(나머지에 0 다시 붙이기), ÷ 두 자리는 곱셈 줄(b × 1~9)에서 넘지 않는 가장 큰 곱, 검산은 `나누는 수 × 몫 + 나머지`.
+
+- `kids/subjects/math/js/mul_div-core.js` (`window.MulDivCore`, 순수 모듈, 다른 파일에 기대지 않음): `mulTens`·`mul2` → `{ ones, tens, answer }`·`divide`·`divTens` → `{ a2, b2, q, r2, r }`·`longDivide` → `{ q, r, steps: [{ q, take, product, remain, next }] }`·`token`(`'3…16'`, `'4'`, `'23×8+1'`)·`label`(`'몫 3, 나머지 16'`·`'몫 4'`·`'23 × 8 + 1'`)·`checkText`·`carryLostMul`·`subBorrowLost`·`subReverse`(오개념 계산)·`LAB_KINDS`(관 1~6)·`MIXED_KINDS`·`KIND_ORDER`(섞기 정렬 맵)·`makeProblem`·`wrongChoices(p, 칸?)`(오답 2개 `{ value, token, mistake }`, 세로셈 칸 `ones`·`tens`·`sum`·`q1`·`q2`·`rem`, 둘째 오답은 정답보다 큰 값·작은 값을 문제마다 번갈아 골라 크기 위치로 답이 드러나지 않음)·`makeRound`·`makeMixedRound`. 후보 풀에서 뽑는다. 시험이 연산 스튜디오(`OperatorStudioPlans`) 풀이 값과 대조한다.
+- `kids/subjects/math/js/mul_div-draw.js` (`window.MulDivDraw`, 보기 전용 그리기): `mulBoard(ui, a, b)`(`fill('ones'|'tens'|'sum', done)`·`focus`, 열 수 고정·빈 줄은 같은 빈 칸, 십의 자리 곱의 0은 회색)·`divBoard(ui, a, b, steps)`(`fillQuotient`·`fillProduct`·`fillRemain`·`focus`, 나머지 꼬리표는 판 아래 줄)·`timesLadder(ui, b)`(3×3 곱셈 줄 칩)·`checkLine(ui, a, b, q, r, done)`·`zeroCancel(ui, a, b)`(`giveZeroBack`)·`helpLine`.
+- **화면**: `mul_div-labs.js`(`window.MulDivLabs`, 1~7관 + `mount`, 학습일지 `g:md4-<종류>`·세로셈 칸은 `g:md4-<종류>-<칸>`, 2관·6관은 한 문제에 고르기 여러 번 — 6관은 q2 정답 뒤 곱한 값까지만 쓰고 나머지는 고른 뒤), `kids/css/math_muldiv.css`(`mx-theme-muldiv`, `.md4-*`). 보기 글자는 `MulDivCore.label`, 나눗셈·검산 보기는 세로 1열.
+- 초안: 계산 부품 하이드로젠 medium, 그리기·화면·CSS 네온 medium. 시험 `tests/math-muldiv4.test.mjs`(나눗셈 풀 전수·칸별 오답·크기 위치 편향 ≤ 75%·보정 보기 ≤ 10%·연산 스튜디오 값 대조·화면 계약·퀴즈 자료).
+
 ### ✂️ 5-1 약분과 통분·분모가 다른 분수 탐험관 (2026-11-25)
 
 5학년 1학기 「약분과 통분」(`fraction_reduce.html`, 관 7개 + 퀴즈)·「분모가 다른 분수의 덧셈과 뺄셈」(`fraction_unlike.html`, 관 7개 + 퀴즈). 4-2 분수와 5-2 분수의 곱셈 사이 계단. 설계: [`docs/math_5-1_fraction_spec.md`](../../docs/math_5-1_fraction_spec.md). 방법은 하나씩만: 약분은 2·3·5·7로 끝까지 나누기, 통분은 큰 분모의 배수 세기(= 최소공배수), 비교는 통분해서, 소수는 분모 10·100으로.

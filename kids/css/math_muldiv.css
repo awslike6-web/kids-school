@@ -1,0 +1,384 @@
+/* 초등 4-1 곱셈과 나눗셈 탐험관 전용 스타일 (주황·노랑 계열, 375px 가로 넘침 없음) */
+body.mx-theme-muldiv {
+  --mx-head-a: #fef3c7;
+  --mx-head-b: #ffedd5;
+  --mx-line: #fdba74;
+  --mx-strong: #9a3412;
+  --mx-sub: #b45309;
+  --mx-accent: #f97316;
+  --mx-accent-dark: #ea580c;
+  --mx-soft: #fed7aa;
+  --mx-softer: #fffbeb;
+}
+
+/* 세로셈 공통 판 (최대 5자리+1열이 375px 안에 여유 있게 배치) */
+.md4-board {
+  width: 100%;
+  max-width: 100%;
+  margin: 6px auto 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.md4-mul-grid,
+.md4-div-grid {
+  max-width: 100%;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 2px solid var(--mx-line);
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.md4-row {
+  gap: 4px;
+  padding: 2px 3px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.md4-cell {
+  width: clamp(24px, 8.2vw, 34px);
+  height: clamp(30px, 9.4vw, 38px);
+  font-size: clamp(1.05rem, 3.8vw, 1.28rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  border-radius: 7px;
+}
+
+.md4-sign {
+  width: clamp(24px, 8.2vw, 34px);
+  border: none;
+  background: transparent;
+  color: var(--mx-strong);
+  font-size: clamp(1.1rem, 4vw, 1.32rem);
+}
+
+.md4-row-static .md4-cell:not(.md4-sign) {
+  border-color: transparent;
+  background: transparent;
+}
+
+.md4-row-ans .md4-cell {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.md4-row-sum .md4-cell {
+  background: var(--mx-softer);
+}
+
+.md4-bar {
+  height: 3px;
+  background: #334155;
+  border-radius: 2px;
+  margin: 3px 4px;
+}
+
+/* 십의 자리 곱 일의 자리 연한 회색 0 */
+.md4-ghost {
+  color: #cbd5e1;
+}
+
+/* 지금 고를 줄/칸 노란 강조 */
+.md4-focus {
+  border: 2.5px solid #eab308;
+  background: #fefce8;
+  border-radius: 10px;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.28);
+}
+
+.md4-focus .md4-cell {
+  border-color: #facc15;
+  background: #fffdf0;
+}
+
+.md4-filled {
+  animation: md4-pop 0.22s ease;
+}
+
+@keyframes md4-pop {
+  0% { transform: scale(0.84); opacity: 0.35; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 나눗셈 세로셈 (교과서 b ) a 꼴) */
+.md4-div-grid {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md4-div-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md4-div-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.md4-div-row[hidden] {
+  display: none;
+}
+
+.md4-div-gutter {
+  width: clamp(32px, 10vw, 44px);
+  flex: 0 0 auto;
+  text-align: right;
+  font-size: clamp(1.05rem, 3.8vw, 1.28rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--mx-strong);
+  box-sizing: border-box;
+}
+
+.md4-div-body {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 9px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* 나누어지는 수 왼쪽 세로(살짝 둥근) + 위 가로 괄호 */
+.md4-div-bracket {
+  border-top: 2.5px solid #334155;
+  border-left: 2.5px solid #334155;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  border-top-left-radius: 10px 18px;
+  padding: 4px 4px 2px 8px;
+}
+
+.md4-div-bracket .md4-cell,
+.md4-div-prow .md4-cell,
+.md4-div-rrow .md4-cell {
+  border-color: transparent;
+  background: transparent;
+}
+
+.md4-div-final .md4-cell {
+  border-color: #cbd5e1;
+  background: #ffffff;
+}
+
+.md4-div-pad {
+  border-left: 2.5px solid transparent;
+  padding-left: 8px;
+}
+
+.md4-div-qrow .md4-spacer {
+  border-color: transparent;
+  background: transparent;
+}
+
+.md4-div-qrow .md4-qcell {
+  background: var(--mx-softer);
+  border: 2px solid var(--mx-line);
+}
+
+.md4-div-qrow .md4-qcell.md4-focus {
+  border: 2.5px solid #eab308;
+  background: #fefce8;
+}
+
+.md4-div-bar {
+  flex: 1 1 auto;
+  height: 2.5px;
+  margin-left: 8px;
+  background: #334155;
+  border-radius: 2px;
+}
+
+.md4-remtag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #fef3c7;
+  border: 1.5px solid #f59e0b;
+  color: #92400e;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.md4-remtag[hidden] {
+  display: none;
+}
+
+/* 곱셈 줄 (3열 × 3줄 작은 칩, 줄 높이 32~36px, 표시 전용) */
+.md4-ladder {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  margin: 6px 0 8px;
+  box-sizing: border-box;
+}
+
+.md4-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: var(--mx-softer);
+  border: 1.5px solid var(--mx-soft);
+  color: var(--mx-strong);
+  font-size: clamp(0.76rem, 3.1vw, 0.9rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+/* 검산 장면 */
+.md4-check {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  margin: 8px 0 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #ecfdf5;
+  border: 1.5px solid #34d399;
+  box-sizing: border-box;
+}
+
+.md4-check-step {
+  font-size: 1.08rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #065f46;
+  animation: md4-pop 0.25s ease;
+}
+
+.md4-check-ok {
+  color: #047857;
+}
+
+/* 0 지우기 줄 & 나머지 0 복원 */
+.md4-zero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  margin: 4px 0 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--mx-softer);
+  border: 1.5px solid var(--mx-line);
+  box-sizing: border-box;
+}
+
+.md4-zrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 1.18rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--mx-strong);
+}
+
+.md4-znum {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.md4-strike {
+  position: relative;
+  display: inline-block;
+  color: #94a3b8;
+  padding: 0 1px;
+}
+
+.md4-strike::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 50%;
+  height: 2.5px;
+  background: #ea580c;
+  transform: rotate(-32deg);
+  border-radius: 2px;
+}
+
+.md4-zarrow {
+  color: var(--mx-accent-dark);
+  padding: 0 4px;
+}
+
+.md4-zshort {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1.5px solid var(--mx-soft);
+}
+
+.md4-zrem {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #fef3c7;
+  border: 1.5px solid #f59e0b;
+  color: #92400e;
+  font-size: 0.98rem;
+  font-weight: 800;
+  animation: md4-pop 0.25s ease;
+}
+
+.md4-zrem-zero {
+  color: #ea580c;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 1관 ① 0 뗀 곱 도움 줄 */
+.md4-help {
+  width: fit-content;
+  max-width: 100%;
+  margin: 2px auto 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--mx-softer);
+  border: 1.5px solid var(--mx-line);
+  color: var(--mx-strong);
+  font-size: 1.05rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md4-row,
+  .md4-filled,
+  .md4-check-step,
+  .md4-zrem {
+    animation: none;
+    transition: none;
+  }
+}
