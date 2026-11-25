@@ -255,7 +255,7 @@ graph TD
 ### 12-3) 🧮 5-1 자연수의 혼합 계산 (2026-11-25)
 - 5-1 첫 단원. 「자연수의 혼합 계산」(`mixed_calc.html`), 관 7개(+ −, × ÷, + − ×, + − ÷, 모두 섞인 식, 하나의 식으로 나타내기, ⚡ 섞어 풀기) + 퀴즈 배틀.
 - 계산 순서 규칙은 하나: `( )` 안 → `× ÷` 앞에서부터 → `+ −` 앞에서부터. "곱셈 먼저"·"나눗셈 먼저" 같은 말은 쓰지 않는다. 풀이는 한 단계씩 줄여 아래로 쓰기, 한 문제에 연산 수만큼 "다음 줄 식"을 고른다.
-- 상세 설계·진행: [`math_5-1_mixcalc_spec.md`](math_5-1_mixcalc_spec.md). 계산 부품 `MixCalcCore`. 학습일지 `g:mix5-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_5-1_1.json`(12제, 노션 등록은 사용자 승인 뒤).
+- 상세 설계·진행: [`math_5-1_mixcalc_spec.md`](math_5-1_mixcalc_spec.md). 계산 부품 `MixCalcCore`. 학습일지 `g:mix5-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_5-1_1.json` → CURRICULUM_DB 12행 등록(2026-11-25, `register_curriculum.py`).
 
 ### 12-2) ✖️ 4-1 곱셈과 나눗셈 (2026-11-25)
 - 3-1 나눗셈(`division_concept.html`)과 5-1 약수와 배수 사이 빈 계단. 「곱셈과 나눗셈」(`multiply_divide.html`), 관 7개(× 몇십, × 두 자리 세로셈, ÷ 몇십, 두 자리 ÷ 두 자리, 몫이 한 자리, 몫이 두 자리 세로셈, ⚡ 섞어 풀기) + 퀴즈 배틀.
