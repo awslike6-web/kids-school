@@ -255,7 +255,7 @@ graph TD
 ### 12-5) 🔺 4-2 삼각형·사각형·다각형 (2026-11-25)
 - 4-2 도형 세 단원(2. 삼각형, 4. 사각형, 6. 다각형)을 한 탐험관에. 「삼각형·사각형·다각형」(`tri_quad.html`), 관 7개(이등변·정삼각형, 예각·직각·둔각삼각형, 수직과 평행, 사다리꼴·평행사변형, 마름모·직사각형·정사각형, 다각형·대각선, ⚡ 섞어 풀기) + 퀴즈 배틀(세 단원 문항을 함께).
 - 뜻은 한 말로만, 포함 관계는 교과서 정의 그대로. 이름 보기의 오답은 포함 관계로 따져도 늘 틀린 이름. 그림은 실제 각도·길이 비율.
-- 상세 설계·진행: [`math_4-2_shapes_spec.md`](math_4-2_shapes_spec.md). 계산 부품 `TriQuadGeo`·`TriQuadCore`, 그림은 5-1 `PolyAreaDraw`에 선택 칸(꼭짓점 이름·각·평행 표시·선분)을 더해 같이 씀. 퀴즈 틀 `MathExplorerQuiz`는 단원 배열을 받음. 학습일지 `g:tq4-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_4-2_2.json`·`_4.json`·`_6.json` (노션 등록 대기).
+- 상세 설계·진행: [`math_4-2_shapes_spec.md`](math_4-2_shapes_spec.md). 계산 부품 `TriQuadGeo`·`TriQuadCore`, 그림은 5-1 `PolyAreaDraw`에 선택 칸(꼭짓점 이름·각·평행 표시·선분)을 더해 같이 씀. 퀴즈 틀 `MathExplorerQuiz`는 단원 배열을 받음. 학습일지 `g:tq4-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_4-2_2.json`·`_4.json`·`_6.json` → CURRICULUM_DB 12행 등록(2026-11-25, `register_curriculum.py`).
 
 ### 12-4) 📐 5-1 다각형의 둘레와 넓이 (2026-11-25)
 - 5-1 마지막 단원, 도형·그래프 묶음의 첫 차례. 「다각형의 둘레와 넓이」(`polygon_area.html`), 관 7개(둘레, 넓이 세기, 큰 넓이 단위, 평행사변형, 삼각형, 마름모·사다리꼴, ⚡ 섞어 풀기) + 퀴즈 배틀. 6학년 겉넓이·원의 넓이 준비.

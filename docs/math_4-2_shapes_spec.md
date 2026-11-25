@@ -1,6 +1,6 @@
 # 🔺 4-2 삼각형·사각형·다각형 탐험관 설계 명세 (math_4-2_shapes_spec.md)
 
-> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안을 Claude가 둘로 나누고 손봄)·그림 확장(Claude)·화면·CSS(네온 초안)·퀴즈 틀 단원 배열·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 남은 것: 노션 퀴즈 등록(사용자 승인 뒤), 실제 폰 확인.
+> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안을 Claude가 둘로 나누고 손봄)·그림 확장(Claude)·화면·CSS(네온 초안)·퀴즈 틀 단원 배열·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 노션 CURRICULUM_DB 퀴즈 12행 등록(2026-11-25, 사용자 승인, 세 단원 4행씩), 퀴즈 탭 375px에서 세 단원 12제 확인. 남은 것: 실제 폰 확인.
 > 상위 명세: [`math_spec.md`](math_spec.md) · 공통 설계: [`math_4-2_ladder_spec.md`](math_4-2_ladder_spec.md) §3 · 바로 앞 탐험관: [`math_5-1_polyarea_spec.md`](math_5-1_polyarea_spec.md)(같은 틀·같은 그림 계약, 이 문서는 다른 점만 적는다) · 공용 틀: [`CORE_CATALOG.md`](../kids/core/CORE_CATALOG.md) 「수학 단원 탐험관 공용 틀 `MathExplorer`」 · 학습자: [`minsu_learning_profile.md`](minsu_learning_profile.md)
 
 ## 1. 왜 만드나
