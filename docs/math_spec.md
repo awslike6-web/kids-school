@@ -255,7 +255,7 @@ graph TD
 ### 12-4) 📐 5-1 다각형의 둘레와 넓이 (2026-11-25)
 - 5-1 마지막 단원, 도형·그래프 묶음의 첫 차례. 「다각형의 둘레와 넓이」(`polygon_area.html`), 관 7개(둘레, 넓이 세기, 큰 넓이 단위, 평행사변형, 삼각형, 마름모·사다리꼴, ⚡ 섞어 풀기) + 퀴즈 배틀. 6학년 겉넓이·원의 넓이 준비.
 - 공식은 도형마다 하나, 높이 말도 하나(「밑변과 직각으로 만나는 선의 길이」). 모눈 그림은 실제 비율이고 적힌 길이 = 그림 속 길이. 높이가 나오는 넓이(4~6관)는 식 고르기 → 값 고르기 두 번, 나머지는 값만.
-- 상세 설계·진행: [`math_5-1_polyarea_spec.md`](math_5-1_polyarea_spec.md). 계산 부품 `PolyAreaCore`(식 계산은 `MixCalcCore`를 불러 씀), 그리기 `PolyAreaDraw`. 학습일지 `g:area5-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_5-1_6.json` (노션 등록 대기).
+- 상세 설계·진행: [`math_5-1_polyarea_spec.md`](math_5-1_polyarea_spec.md). 계산 부품 `PolyAreaCore`(식 계산은 `MixCalcCore`를 불러 씀), 그리기 `PolyAreaDraw`. 학습일지 `g:area5-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_5-1_6.json` → CURRICULUM_DB 12행 등록(2026-11-25, `register_curriculum.py`).
 
 ### 12-3) 🧮 5-1 자연수의 혼합 계산 (2026-11-25)
 - 5-1 첫 단원. 「자연수의 혼합 계산」(`mixed_calc.html`), 관 7개(+ −, × ÷, + − ×, + − ÷, 모두 섞인 식, 하나의 식으로 나타내기, ⚡ 섞어 풀기) + 퀴즈 배틀.

@@ -1,6 +1,6 @@
 # 📐 5-1 다각형의 둘레와 넓이 탐험관 설계 명세 (math_5-1_polyarea_spec.md)
 
-> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안, Claude 손봄)·그림·화면·CSS(네온 초안)·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 남은 것: 노션 퀴즈 등록(사용자 승인 뒤), 실제 폰 확인.
+> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안, Claude 손봄)·그림·화면·CSS(네온 초안)·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 노션 CURRICULUM_DB 퀴즈 12행 등록(2026-11-25, 사용자 승인), 퀴즈 탭 375px 확인. 남은 것: 실제 폰 확인.
 > 상위 명세: [`math_spec.md`](math_spec.md) · 공통 설계: [`math_4-2_ladder_spec.md`](math_4-2_ladder_spec.md) §3 · 바로 앞 탐험관: [`math_5-1_mixcalc_spec.md`](math_5-1_mixcalc_spec.md)(같은 틀·같은 계약, 이 문서는 다른 점만 적는다) · 공용 틀: [`CORE_CATALOG.md`](../kids/core/CORE_CATALOG.md) 「수학 단원 탐험관 공용 틀 `MathExplorer`」 · 학습자: [`minsu_learning_profile.md`](minsu_learning_profile.md)
 
 ## 1. 왜 만드나
