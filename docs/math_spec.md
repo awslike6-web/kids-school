@@ -255,7 +255,7 @@ graph TD
 ### 12-2) ✖️ 4-1 곱셈과 나눗셈 (2026-11-25)
 - 3-1 나눗셈(`division_concept.html`)과 5-1 약수와 배수 사이 빈 계단. 「곱셈과 나눗셈」(`multiply_divide.html`), 관 7개(× 몇십, × 두 자리 세로셈, ÷ 몇십, 두 자리 ÷ 두 자리, 몫이 한 자리, 몫이 두 자리 세로셈, ⚡ 섞어 풀기) + 퀴즈 배틀.
 - 풀이는 하나씩만: × 몇십은 0 떼고 곱해서 붙이기, ÷ 몇십은 끝 0 같이 지우기(나머지에 0 다시), ÷ 두 자리 수는 나누는 수의 곱셈 줄에서 넘지 않는 가장 큰 곱, 검산은 `나누는 수 × 몫 + 나머지`. 어림해서 몫 고치기는 문제로 내지 않는다.
-- 상세 설계·진행: [`math_4-1_muldiv_spec.md`](math_4-1_muldiv_spec.md). 계산 부품 `MulDivCore`, 그리기 `MulDivDraw`. 학습일지 `g:md4-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_4-1_3.json`(12제, 노션 등록은 사용자 승인 뒤).
+- 상세 설계·진행: [`math_4-1_muldiv_spec.md`](math_4-1_muldiv_spec.md). 계산 부품 `MulDivCore`, 그리기 `MulDivDraw`. 학습일지 `g:md4-<종류>`. 퀴즈 자료 `scripts/data/curriculum/math_4-1_3.json` → CURRICULUM_DB 12행 등록(2026-11-25, `register_curriculum.py`).
 
 ### 12-1) ✂️ 5-1 약분과 통분·분모가 다른 분수의 덧셈과 뺄셈 (2026-11-25)
 - 4-2 분수(분모가 같은 덧셈·뺄셈)와 5-2 분수의 곱셈 사이 빈 계단. 「약분과 통분」(`fraction_reduce.html`)·「분모가 다른 분수의 덧셈과 뺄셈」(`fraction_unlike.html`), 각 관 7개 + 퀴즈 배틀. 6-1 분수의 나눗셈 준비.

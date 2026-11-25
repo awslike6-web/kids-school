@@ -1,6 +1,6 @@
 # ✖️➗ 4-1 곱셈과 나눗셈 탐험관 설계 명세 (math_4-1_muldiv_spec.md)
 
-> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안)·그리기·화면·CSS(네온 초안)·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 남은 것: 노션 CURRICULUM_DB 등록(사용자 승인 뒤), 실제 폰 확인.
+> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안)·그리기·화면·CSS(네온 초안)·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 노션 CURRICULUM_DB 퀴즈 12행 등록(2026-11-25, 사용자 승인), 퀴즈 탭 375px 확인. 남은 것: 실제 폰 확인.
 > 상위 명세: [`math_spec.md`](math_spec.md) · 공통 설계: [`math_4-2_ladder_spec.md`](math_4-2_ladder_spec.md) §3 (이 문서는 그것을 그대로 따르고 다른 점만 적는다) · 바로 앞 탐험관: [`math_5-1_fraction_spec.md`](math_5-1_fraction_spec.md) · 공용 틀: [`CORE_CATALOG.md`](../kids/core/CORE_CATALOG.md) 「수학 단원 탐험관 공용 틀 `MathExplorer`」 · 학습자: [`minsu_learning_profile.md`](minsu_learning_profile.md)
 
 ## 1. 왜 만드나
