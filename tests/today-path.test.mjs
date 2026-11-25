@@ -412,6 +412,20 @@ test('13. getSubjectsForDay: 등록 시간표 정확 일치·교시 순, 학생 
   if (out.isWeekend) assert.deepEqual(plain(out.todaySubjects), []);
 });
 
+test('10b. 프로필이 하나도 없으면 null, 재귀 없음', () => {
+  const now = at('2026-11-23');
+  const empty = storage();
+  assert.equal(TP.childNameOf(undefined, empty), null);
+  assert.equal(TP.childNameOf('', empty), null);
+  assert.equal(TP.childNameOf(null, empty), null);
+  assert.equal(TP.childNameOf(undefined, storage({ currentUserName: '아빠' })), null);
+  assert.equal(TP.markDone({ subject: 'korean', kind: 'reading' }, { storage: empty, now, search: '' }), false);
+  assert.equal(empty.map.size, 0);
+  // 저장값이 아이 키가 아니어도 null (한 번만 더 본다)
+  assert.equal(TP.childNameOf(undefined, storage({ currentChild: 'guest' })), null);
+  assert.equal(TP.childNameOf(undefined, storage({ currentUser: 'son' })), '민수');
+});
+
 test('14. 싣기: 같은 버전 문자열, 로비 세 태그 연속 유지', () => {
   const version = /today-path\.js\?v=([\w-]+)/;
   const lobby = read('lobby.html'), helper = read('kids/core/notion-helper.js'), runner = read('quest_runner.html'), story = read('kids/js/storybook_engine.js');

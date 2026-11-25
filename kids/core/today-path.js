@@ -360,7 +360,8 @@
     const name = safeGet(storage, 'currentUserName');
     if (name === '민수' || name === '민서') return name;
     const kid = safeGet(storage, 'currentChild') || safeGet(storage, 'currentUser');
-    return childNameOf(kid || '', storage) || null;
+    if (!kid) return null; // 프로필이 하나도 없으면 끝 (빈 값으로 다시 부르면 끝없이 돈다)
+    return childNameOf(kid, storage);
   }
   function tpOf(search) {
     try {
