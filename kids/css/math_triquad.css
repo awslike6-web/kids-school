@@ -1,0 +1,125 @@
+/* 초등 4-2 삼각형·사각형·다각형 탐험관 전용 스타일 (청록·민트 계열, 375px 가로 넘침 없음) */
+body.mx-theme-triquad {
+  --mx-head-a: #ccfbf1;
+  --mx-head-b: #cffafe;
+  --mx-line: #5eead4;
+  --mx-strong: #134e4a;
+  --mx-sub: #0f766e;
+  --mx-accent: #0d9488;
+  --mx-accent-dark: #0f766e;
+  --mx-soft: #99f6e4;
+  --mx-softer: #f0fdfa;
+}
+
+/* 계단 이동 링크 3개 (375px 한 줄 유지) */
+body.mx-theme-triquad .mx-ladder-links {
+  gap: 6px;
+}
+
+body.mx-theme-triquad .mx-ladder-links .mx-chip {
+  font-size: clamp(0.76rem, 3.2vw, 0.92rem);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+/* 뜻·성질 카드 (MathDrill.algo): 첫 화면 세로 절약 */
+body.mx-theme-triquad .mx-algo {
+  gap: 4px;
+  padding: 8px 11px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+body.mx-theme-triquad .mx-algo > *::before {
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+}
+
+/* 문제 전체 세로 쌓기 */
+.tq-problem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 보기 자리: 세로 1열 3줄 높이 확보로 2단계 전환 시 흔들림 방지 */
+.tq-choices {
+  width: 100%;
+  max-width: 100%;
+  min-height: 196px;
+  box-sizing: border-box;
+}
+
+/* 묻는 말 */
+.tq-problem .mx-question {
+  margin: 2px 0 4px;
+  font-size: clamp(1rem, 4.3vw, 1.15rem);
+  line-height: 1.45;
+  text-align: center;
+  word-break: keep-all;
+}
+
+/* 보기 버튼: 값 보기는 가로 3개, 이름 보기는 세로 1열 전폭 */
+.tq-problem .mx-choice-row {
+  margin-top: 4px;
+  gap: 8px;
+}
+
+.tq-problem .mx-choice-row:not(.mx-choice-col) {
+  flex-wrap: nowrap;
+}
+
+.tq-problem .mx-choice-row:not(.mx-choice-col) .mx-choice {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 6px;
+}
+
+.tq-problem .mx-choice {
+  white-space: nowrap;
+  font-size: clamp(0.95rem, 4.1vw, 1.1rem);
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  text-align: center;
+}
+
+.tq-problem .mx-choice-col .mx-choice {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 10px;
+}
+
+/* 좁은 모바일 (375px 이하 가로 넘침 방지) */
+@media (max-width: 420px) {
+  body.mx-theme-triquad .mx-ladder-links {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  body.mx-theme-triquad .mx-ladder-links .mx-chip {
+    padding: 5px 8px;
+    font-size: 0.78rem;
+  }
+
+  .tq-problem .mx-choice-row:not(.mx-choice-col) {
+    gap: 6px;
+  }
+
+  .tq-problem .mx-choice-row:not(.mx-choice-col) .mx-choice {
+    font-size: clamp(0.84rem, 3.6vw, 0.98rem);
+    padding: 10px 4px;
+  }
+}
+
+/* 모션 줄이기 설정 대응 */
+@media (prefers-reduced-motion: reduce) {
+  .tq-problem .mx-choice,
+  .tq-problem .mx-btn {
+    transition: none;
+    animation: none;
+  }
+}

@@ -1,4 +1,4 @@
-/* 다각형의 둘레와 넓이 (5-1 6단원) — 도형 SVG 그리기·칸 세기·식 줄 (DOM 보기 전용) */
+/* 다각형의 둘레와 넓이 (5-1 6단원)·삼각형·사각형·다각형 (4-2) — 도형 SVG 그리기·칸 세기·식 줄 (DOM 보기 전용) */
 (function (global) {
   'use strict';
 
@@ -160,6 +160,117 @@
     }
   }
 
+  // ── 4-2 삼각형·사각형·다각형 확장 (선택 칸: 없으면 5-1 그림과 똑같음) ──
+  function unit(dx, dy) { var l = Math.sqrt(dx * dx + dy * dy) || 1; return [dx / l, dy / l]; }
+
+  function drawVertexNames(svg, pts, names, c, lay) {
+    for (var i = 0; i < pts.length && i < names.length; i += 1) {
+      var u = unit(pts[i][0] - c[0], pts[i][1] - c[1]);
+      svg.appendChild(svgEl('text', {
+        class: 'pa-vname', x: round3(lay.ox + pts[i][0] + u[0] * 0.6), y: round3(lay.oy + pts[i][1] + u[1] * 0.6),
+        'text-anchor': 'middle', 'dominant-baseline': 'middle'
+      }, names[i]));
+    }
+  }
+
+  // 꼭짓점 i의 안쪽 각: 이웃 두 변 방향 u·v, 글자는 이등분선 위(좁은 각일수록 멀리)
+  function angleGeom(pts, i, lay) {
+    var n = pts.length, P = pts[i], Q = pts[(i - 1 + n) % n], R = pts[(i + 1) % n];
+    var u = unit(Q[0] - P[0], Q[1] - P[1]), v = unit(R[0] - P[0], R[1] - P[1]);
+    var th = Math.acos(Math.max(-1, Math.min(1, u[0] * v[0] + u[1] * v[1])));
+    var b = unit(u[0] + v[0], u[1] + v[1]);
+    var rt = Math.min(2.4, Math.max(1.15, 0.62 / Math.sin(th / 2)));
+    return { px: lay.ox + P[0], py: lay.oy + P[1], u: u, v: v, cross: u[0] * v[1] - u[1] * v[0], tx: lay.ox + P[0] + b[0] * rt, ty: lay.oy + P[1] + b[1] * rt };
+  }
+
+  function fillAngle(g, ag, a) {
+    while (g.firstChild) g.removeChild(g.firstChild);
+    var px = ag.px, py = ag.py, u = ag.u, v = ag.v, k, r;
+    if (a.right) {
+      g.appendChild(svgEl('path', { class: 'pa-right', d: 'M ' + round3(px + u[0] * 0.45) + ' ' + round3(py + u[1] * 0.45) +
+        ' L ' + round3(px + (u[0] + v[0]) * 0.45) + ' ' + round3(py + (u[1] + v[1]) * 0.45) + ' L ' + round3(px + v[0] * 0.45) + ' ' + round3(py + v[1] * 0.45) }));
+    } else {
+      for (k = 0; k < (a.mark === 2 ? 2 : 1); k += 1) {
+        r = 0.6 + k * 0.16;
+        g.appendChild(svgEl('path', { class: 'pa-arc', d: 'M ' + round3(px + u[0] * r) + ' ' + round3(py + u[1] * r) +
+          ' A ' + r + ' ' + r + ' 0 0 ' + (ag.cross > 0 ? 1 : 0) + ' ' + round3(px + v[0] * r) + ' ' + round3(py + v[1] * r) }));
+      }
+    }
+    if (a.text) {
+      g.appendChild(svgEl('text', { class: a.text === '?' ? 'pa-angle pa-angle-q' : 'pa-angle', x: round3(ag.tx), y: round3(ag.ty),
+        'text-anchor': 'middle', 'dominant-baseline': 'middle' }, a.text));
+    }
+  }
+
+  function drawAngles(svg, pts, angles, lay) {
+    for (var i = 0; i < angles.length; i += 1) {
+      var a = angles[i], g = svgEl('g', { class: 'pa-ang', 'data-at': String(a.at) });
+      g._ag = angleGeom(pts, a.at, lay);
+      fillAngle(g, g._ag, a);
+      svg.appendChild(g);
+    }
+  }
+
+  // 맞힌 뒤 '?' 자리를 값으로(90°면 직각 표시로)
+  function setAngle(svg, at, text, right) {
+    var g = svg && svg.querySelector('g.pa-ang[data-at="' + at + '"]');
+    if (g && g._ag) fillAngle(g, g._ag, { text: text, right: Boolean(right), mark: 1 });
+  }
+
+  // 평행 표시: 두 변에 같은 방향 '>'를 쌍 번호만큼, 변의 0.35 지점(같은 길이 빗금은 가운데)
+  function drawParallels(svg, pts, pairs, lay) {
+    var n = pts.length;
+    for (var k = 0; k < pairs.length; k += 1) {
+      var e0 = pairs[k][0], d = unit(pts[(e0 + 1) % n][0] - pts[e0][0], pts[(e0 + 1) % n][1] - pts[e0][1]);
+      for (var s = 0; s < 2; s += 1) {
+        var e = pairs[k][s], A = pts[e], B = pts[(e + 1) % n];
+        var t = (B[0] - A[0]) * d[0] + (B[1] - A[1]) * d[1] >= 0 ? 0.35 : 0.65;
+        var mx = A[0] + (B[0] - A[0]) * t, my = A[1] + (B[1] - A[1]) * t, nx = -d[1], ny = d[0], j, cx, cy;
+        for (j = 0; j <= k; j += 1) {
+          cx = lay.ox + mx + d[0] * (j - k / 2) * 0.2; cy = lay.oy + my + d[1] * (j - k / 2) * 0.2;
+          svg.appendChild(svgEl('path', { class: 'pa-par', d: 'M ' + round3(cx - d[0] * 0.14 + nx * 0.14) + ' ' + round3(cy - d[1] * 0.14 + ny * 0.14) +
+            ' L ' + round3(cx + d[0] * 0.14) + ' ' + round3(cy + d[1] * 0.14) + ' L ' + round3(cx - d[0] * 0.14 - nx * 0.14) + ' ' + round3(cy - d[1] * 0.14 - ny * 0.14) }));
+        }
+      }
+    }
+  }
+
+  // 자유 선분: kind 'line'은 끝까지 늘인 직선(평행선), 'seg'는 꼬리표와 a 끝 직각 표시(수평선 기준)
+  function drawSegments(svg, segs, lay) {
+    for (var i = 0; i < segs.length; i += 1) {
+      var sg = segs[i], ax = lay.ox + sg.a[0], ay = lay.oy + sg.a[1], bx = lay.ox + sg.b[0], by = lay.oy + sg.b[1];
+      if (sg.kind === 'line') {
+        var d = unit(bx - ax, by - ay);
+        svg.appendChild(svgEl('line', { class: 'pa-line', x1: round3(ax - d[0] * 40), y1: round3(ay - d[1] * 40), x2: round3(bx + d[0] * 40), y2: round3(by + d[1] * 40) }));
+        continue;
+      }
+      svg.appendChild(svgEl('line', { class: 'pa-seg', x1: round3(ax), y1: round3(ay), x2: round3(bx), y2: round3(by) }));
+      if (sg.right) {
+        var w = unit(bx - ax, by - ay);
+        svg.appendChild(svgEl('path', { class: 'pa-right', d: 'M ' + round3(ax + w[0] * 0.4) + ' ' + round3(ay + w[1] * 0.4) +
+          ' L ' + round3(ax + w[0] * 0.4 + 0.4) + ' ' + round3(ay + w[1] * 0.4) + ' L ' + round3(ax + 0.4) + ' ' + round3(ay) }));
+      }
+      if (sg.text) {
+        svg.appendChild(svgEl('text', { class: 'pa-label', x: round3((ax + bx) / 2 + 0.3), y: round3((ay + by) / 2),
+          'text-anchor': 'start', 'dominant-baseline': 'middle' }, sg.text));
+      }
+    }
+  }
+
+  // 6관 정답 뒤 대각선을 차례로(합쳐 1.2초 이내, 문서에서 떨어지면 멈춤)
+  function revealDiagonals(svg, fig, diags, done) {
+    var lay = layoutOf(fig), i = 0, list = diags || [];
+    var ms = reducedMotion() ? 0 : Math.min(200, Math.floor(1200 / Math.max(1, list.length)));
+    function step() {
+      if (!document.body.contains(svg)) return;
+      if (i >= list.length) { if (typeof done === 'function') done(); return; }
+      var dg = list[i]; i += 1;
+      svg.appendChild(svgEl('line', { class: 'pa-diag', x1: round3(lay.ox + dg.a[0]), y1: round3(lay.oy + dg.a[1]), x2: round3(lay.ox + dg.b[0]), y2: round3(lay.oy + dg.b[1]) }));
+      if (ms === 0) step(); else global.setTimeout(step, ms);
+    }
+    step();
+  }
+
   function figure(fig) {
     var lay = layoutOf(fig);
     var svg = svgEl('svg', {
@@ -176,6 +287,10 @@
     if (fig.diagonals && fig.diagonals.length) drawDiagonals(svg, fig.diagonals, lay);
     if (fig.height) drawHeight(svg, fig.height, c, lay);
     if (fig.labels && fig.labels.length) drawLabels(svg, fig.labels, c, lay);
+    if (fig.segments && fig.segments.length) drawSegments(svg, fig.segments, lay);
+    if (fig.parallels && fig.parallels.length) drawParallels(svg, fig.points, fig.parallels, lay);
+    if (fig.angles && fig.angles.length) drawAngles(svg, fig.points, fig.angles, lay);
+    if (fig.vertexNames && fig.vertexNames.length) drawVertexNames(svg, fig.points, fig.vertexNames, c, lay);
     return svg;
   }
 
@@ -237,5 +352,5 @@
     };
   }
 
-  global.PolyAreaDraw = { figure: figure, countCells: countCells, workLine: workLine };
+  global.PolyAreaDraw = { figure: figure, countCells: countCells, workLine: workLine, setAngle: setAngle, revealDiagonals: revealDiagonals };
 })(typeof window !== 'undefined' ? window : globalThis);

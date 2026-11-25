@@ -77,6 +77,11 @@ test('공용 퀴즈: 노션 페이지 → 문항 (보기 줄 배열·정답 범�
   const body = plain(Q.buildQueryBody('5-2', '4. 소수의 곱셈'));
   assert.deepEqual(body.filter.and[2], { property: '단원', rich_text: { equals: '4. 소수의 곱셈' } });
   assert.deepEqual(body.filter.and[3], { property: '구역', select: { equals: '탐구퀴즈' } });
+  // 단원 배열(4-2 삼각형·사각형·다각형 한 탐험관): 단원 equals를 or로 묶는다
+  const multi = plain(Q.buildQueryBody('4-2', ['2. 삼각형', '4. 사각형', '6. 다각형']));
+  assert.deepEqual(multi.filter.and[2], { or: ['2. 삼각형', '4. 사각형', '6. 다각형'].map((u) => ({ property: '단원', rich_text: { equals: u } })) });
+  assert.equal(multi.filter.and.length, 4);
+  assert.deepEqual(plain(Q.buildQueryBody('4-2', ['2. 삼각형'])).filter.and[2], { property: '단원', rich_text: { equals: '2. 삼각형' } });
 });
 
 test('소수 계산: 정수 표현으로 곱하고 끝자리 0·앞자리 0을 규칙대로 표기한다', () => {

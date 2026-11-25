@@ -47,6 +47,14 @@
     return items;
   }
 
+  // unit: 글자 하나 또는 배열(한 탐험관에 여러 단원 — 4-2 삼각형·사각형·다각형). 배열이면 단원 equals를 or로 묶는다.
+  function unitFilter(unit) {
+    if (!Array.isArray(unit)) return { property: '단원', rich_text: { equals: unit } };
+    var any = [];
+    for (var i = 0; i < unit.length; i += 1) any.push({ property: '단원', rich_text: { equals: unit[i] } });
+    return any.length === 1 ? any[0] : { or: any };
+  }
+
   function buildQueryBody(grade, unit) {
     return {
       page_size: 100,
@@ -54,7 +62,7 @@
         and: [
           { property: '과목', select: { equals: '수학' } },
           { property: '학년', select: { equals: grade } },
-          { property: '단원', rich_text: { equals: unit } },
+          unitFilter(unit),
           { property: '구역', select: { equals: '탐구퀴즈' } }
         ]
       }
@@ -72,7 +80,7 @@
       .then(function (data) { return buildQuizFromPages(data && data.results); });
   }
 
-  // opts: { grade: '5-2', unit: '4. 소수의 곱셈', title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기) }
+  // opts: { grade: '5-2', unit: '4. 소수의 곱셈'(또는 단원 글자 배열), title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기) }
   function create(opts) {
     var o = opts || {};
     var grade = o.grade || '5-2';

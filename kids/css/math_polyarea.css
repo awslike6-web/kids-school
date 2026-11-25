@@ -240,6 +240,55 @@ svg.pa-fig {
 }
 
 /* 모션 줄이기 설정 대응 */
+/* ── 4-2 삼각형·사각형·다각형 그림 칸 (PolyAreaDraw 선택 칸, 이 파일 한 곳) ── */
+.pa-vname {
+  font-size: 0.66px;
+  font-weight: 800;
+  fill: #475569;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 0.12px;
+}
+
+.pa-arc {
+  fill: none;
+  stroke: #b45309;
+  stroke-width: 0.05;
+}
+
+.pa-angle {
+  font-size: 0.62px;
+  font-weight: 800;
+  fill: #92400e;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 0.12px;
+}
+
+.pa-angle-q {
+  fill: #dc6803;
+  font-size: 0.72px;
+}
+
+.pa-par {
+  fill: none;
+  stroke: #0f766e;
+  stroke-width: 0.07;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pa-line {
+  stroke: #64748b;
+  stroke-width: 0.07;
+}
+
+.pa-seg {
+  stroke: #9a3412;
+  stroke-width: 0.08;
+  stroke-linecap: round;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pa-cellnum {
     animation: none;

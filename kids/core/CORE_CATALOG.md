@@ -488,6 +488,17 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### 🔺 4-2 삼각형·사각형·다각형 탐험관 (2026-11-25)
+
+4학년 2학기 도형 세 단원(`tri_quad.html`, 관 7개 + 퀴즈). 설계: [`docs/math_4-2_shapes_spec.md`](../../docs/math_4-2_shapes_spec.md).
+
+- `kids/subjects/math/js/tri_quad-geo.js` (`window.TriQuadGeo`, 순수): 삼각형 좌표(세 각 또는 세 변, 돌리기·상자 맞춤), 정다각형·보통 볼록 다각형, 평행사변형, 대각선 목록, 종류별 원료 풀(`poolOf`).
+- `kids/subjects/math/js/tri_quad-core.js` (`window.TriQuadCore`, 순수, `MixCalcCore`·`TriQuadGeo`를 먼저 실음): `makeProblem(kind, rng, { mixed })` → `{ kind, unit, fig, steps: [{ ask, answerText, value, choiceKind, reveal }], cardLines, key }`, `wrongChoices(p, 단계)`(값 보기는 실수 후보 + 크기 자리 돌리기, 이름 보기는 `FAMILY` 포함 관계로 늘 틀린 이름), `hintFor`, `makeRound`, `makeMixedRound`(단원마다 2문제 이상).
+- `kids/subjects/math/js/tri_quad-labs.js` (`window.TriQuadLabs`): 단계마다 보기, 정답 뒤 `PolyAreaDraw.setAngle`·`revealDiagonals`. `kids/css/math_triquad.css`(`mx-theme-triquad`, 그림 모양은 `math_polyarea.css`).
+- **`PolyAreaDraw` 선택 칸(같은 날 추가)**: `vertexNames`, `angles [{ at, text, right, mark }]`(좁은 각일수록 글자를 멀리), `parallels [[i, j]]`(같은 방향 `>`), `segments [{ a, b, text, kind: 'line'|'seg', right }]`, `points: []` 허용, `setAngle(svg, at, text, right)`, `revealDiagonals(svg, fig, diagonals, done)`. 칸이 없으면 5-1 그림과 똑같음(SVG 지문 비교로 확인).
+- **`MathExplorerQuiz.create({ unit: [...] })`**: 단원 배열이면 노션 조건 `and` 안에 `or`. 글자 하나면 그대로.
+- 초안: 계산 부품 하이드로젠 medium(Claude가 둘로 나누고 각·꼬리표·볼록·평행 쌍 고침), 화면·CSS 네온 medium. 시험 `tests/math-triquad4.test.mjs`(실제 각·평행·직각·길이 비율, 정답 따로 계산, 이름 오답 늘 틀림, 핵심 실수·크기 자리).
+
 ### 📐 5-1 다각형의 둘레와 넓이 탐험관 (2026-11-25)
 
 5학년 1학기 「다각형의 둘레와 넓이」(`polygon_area.html`, 관 7개 + 퀴즈). 설계: [`docs/math_5-1_polyarea_spec.md`](../../docs/math_5-1_polyarea_spec.md). 공식은 도형마다 하나, 높이가 나오는 넓이는 식 → 값 두 번 고르기.
