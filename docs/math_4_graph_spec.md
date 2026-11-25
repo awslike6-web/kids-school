@@ -1,6 +1,6 @@
 # 📊 4학년 막대그래프·꺾은선그래프 탐험관 설계 명세 (math_4_graph_spec.md)
 
-> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안, Claude 손봄)·그래프 그림·화면·CSS(네온 초안)·퀴즈 틀 학년 섞인 단원·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 남은 것: 노션 퀴즈 등록(사용자 승인 뒤), 실제 폰 확인.
+> 상태: **구현 완료 (2026-11-25)** · 카본(high)·네온(high) 설계 검토 반영(§11). 계산 부품(하이드로젠 초안, Claude 손봄)·그래프 그림·화면·CSS(네온 초안)·퀴즈 틀 학년 섞인 단원·퀴즈 자료 12제 완료, 375px 7개 관 끝까지 확인. 퀴즈 12제 노션 등록 끝(2026-11-26, 4-1 6행·4-2 6행). 남은 것: 실제 폰 확인.
 > 상위 명세: [`math_spec.md`](math_spec.md) · 공통 설계: [`math_4-2_ladder_spec.md`](math_4-2_ladder_spec.md) §3 · 바로 앞 탐험관: [`math_4-2_shapes_spec.md`](math_4-2_shapes_spec.md)(같은 틀·같은 계약, 이 문서는 다른 점만 적는다) · 공용 틀: [`CORE_CATALOG.md`](../kids/core/CORE_CATALOG.md) 「수학 단원 탐험관 공용 틀 `MathExplorer`」 · 학습자: [`minsu_learning_profile.md`](minsu_learning_profile.md)
 
 ## 1. 왜 만드나
