@@ -1,0 +1,169 @@
+/* 초등 4학년 막대그래프·꺾은선그래프 탐험관 전용 스타일 (하늘·남색 계열, 375px 가로 넘침 없음) */
+body.mx-theme-barline {
+  --mx-head-a: #e0f2fe;
+  --mx-head-b: #e0e7ff;
+  --mx-line: #7dd3fc;
+  --mx-strong: #1e3a8a;
+  --mx-sub: #0369a1;
+  --mx-accent: #0284c7;
+  --mx-accent-dark: #1d4ed8;
+  --mx-soft: #bae6fd;
+  --mx-softer: #f0f9ff;
+}
+
+/* 계단 이동 링크 (375px 한 줄 유지) */
+body.mx-theme-barline .mx-ladder-links {
+  gap: 6px;
+}
+
+body.mx-theme-barline .mx-ladder-links .mx-chip {
+  font-size: clamp(0.76rem, 3.2vw, 0.92rem);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+/* 뜻 카드 (MathDrill.algo): 첫 화면 세로 절약 */
+body.mx-theme-barline .mx-algo {
+  gap: 4px;
+  padding: 8px 11px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+body.mx-theme-barline .mx-algo > *::before {
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+}
+
+/* 문제 전체 세로 쌓기 */
+.gr-problem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 3관 표 (375px 5열 넘침 방지) · 합계 줄 */
+table.gr-table {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #ffffff;
+  border: 1.5px solid var(--mx-line);
+  font-size: clamp(0.85rem, 3.6vw, 1rem);
+  font-variant-numeric: tabular-nums;
+}
+
+table.gr-table th,
+table.gr-table td {
+  padding: 6px 3px;
+  border: 1px solid #cbd5e1;
+  text-align: center;
+  white-space: nowrap;
+  color: #0f172a;
+}
+
+table.gr-table tr:first-child th,
+table.gr-table tr:first-child td {
+  background: var(--mx-softer);
+  color: var(--mx-strong);
+  font-weight: 700;
+}
+
+.gr-total {
+  margin: 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(0.95rem, 4vw, 1.08rem);
+  color: var(--mx-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 그래프 카드 · SVG */
+.gr-figwrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 0.25rem;
+  background: #ffffff;
+  border: 2px solid var(--mx-line);
+  border-radius: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+svg.gr-chart {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: 0 auto;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* SVG 눈금 · 축 글자 · 제목 */
+.gr-grid { stroke: #e2e8f0; stroke-width: 1; }
+.gr-major { stroke: #94a3b8; }
+.gr-num, .gr-cat, .gr-unit { font-size: 12px; fill: #334155; font-variant-numeric: tabular-nums; }
+.gr-title { font-size: 14px; font-weight: 800; fill: #0f172a; }
+
+/* SVG 막대 · 꺾은선 · 물결선 · 확인 장면 */
+.gr-bar { fill: #38bdf8; stroke: #1e3a8a; stroke-width: 1; transition: fill 0.2s ease, stroke 0.2s ease; }
+.gr-line { fill: none; stroke: #1e3a8a; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.gr-pt { fill: #ffffff; stroke: #1e3a8a; stroke-width: 2; transition: fill 0.2s ease, stroke 0.2s ease; }
+.gr-bar.gr-on, .gr-pt.gr-on { fill: #f97316; stroke: #c2410c; }
+.gr-q { font-size: 16px; font-weight: 800; fill: #f97316; }
+.gr-wave { fill: none; stroke: #475569; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.gr-arrow { fill: none; stroke: #f97316; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.gr-diff { font-size: 13px; font-weight: 800; fill: #c2410c; paint-order: stroke; stroke: #ffffff; stroke-width: 3px; stroke-linejoin: round; }
+.gr-mid { fill: #f97316; stroke: #c2410c; stroke-width: 1.5; }
+
+/* 보기 자리 · 묻는 말 · 보기 버튼 */
+.gr-choices {
+  width: 100%;
+  max-width: 100%;
+  min-height: 196px;
+  box-sizing: border-box;
+}
+
+.gr-problem .mx-question {
+  margin: 2px 0 4px;
+  font-size: clamp(1rem, 4.3vw, 1.15rem);
+  line-height: 1.45;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.gr-problem .mx-choice-row { margin-top: 4px; gap: 8px; }
+.gr-problem .mx-choice-row:not(.mx-choice-col) { flex-wrap: nowrap; }
+.gr-problem .mx-choice-row:not(.mx-choice-col) .mx-choice { flex: 1 1 0; min-width: 0; padding: 10px 6px; }
+.gr-problem .mx-choice {
+  white-space: nowrap;
+  font-size: clamp(0.95rem, 4.1vw, 1.1rem);
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  text-align: center;
+}
+.gr-problem .mx-choice-col .mx-choice { width: 100%; min-width: 0; padding: 10px 10px; }
+
+/* 좁은 모바일 (375px 이하 가로 넘침 방지) */
+@media (max-width: 420px) {
+  body.mx-theme-barline .mx-ladder-links { flex-wrap: nowrap; gap: 5px; }
+  body.mx-theme-barline .mx-ladder-links .mx-chip { padding: 5px 8px; font-size: 0.78rem; }
+  table.gr-table th, table.gr-table td { padding: 5px 2px; }
+  .gr-problem .mx-choice-row:not(.mx-choice-col) { gap: 6px; }
+  .gr-problem .mx-choice-row:not(.mx-choice-col) .mx-choice { font-size: clamp(0.84rem, 3.6vw, 0.98rem); padding: 10px 4px; }
+}
+
+/* 모션 줄이기 설정 대응 */
+@media (prefers-reduced-motion: reduce) {
+  .gr-bar, .gr-pt, .gr-problem .mx-choice, .gr-problem .mx-btn { transition: none; animation: none; }
+}

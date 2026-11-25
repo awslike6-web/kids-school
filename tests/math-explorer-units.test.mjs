@@ -82,6 +82,12 @@ test('공용 퀴즈: 노션 페이지 → 문항 (보기 줄 배열·정답 범�
   assert.deepEqual(multi.filter.and[2], { or: ['2. 삼각형', '4. 사각형', '6. 다각형'].map((u) => ({ property: '단원', rich_text: { equals: u } })) });
   assert.equal(multi.filter.and.length, 4);
   assert.deepEqual(plain(Q.buildQueryBody('4-2', ['2. 삼각형'])).filter.and[2], { property: '단원', rich_text: { equals: '2. 삼각형' } });
+  // 학년이 섞인 출처({ grade, unit }, 4-1 막대그래프 + 4-2 꺾은선그래프): 출처마다 and를 or로
+  const mixed = plain(Q.buildQueryBody('', [{ grade: '4-1', unit: '5. 막대그래프' }, { grade: '4-2', unit: '5. 꺾은선그래프' }]));
+  assert.equal(mixed.filter.or.length, 2);
+  assert.deepEqual(mixed.filter.or[0].and[1], { property: '학년', select: { equals: '4-1' } });
+  assert.deepEqual(mixed.filter.or[1].and[2], { property: '단원', rich_text: { equals: '5. 꺾은선그래프' } });
+  assert.deepEqual(mixed.filter.or[1].and[3], { property: '구역', select: { equals: '탐구퀴즈' } });
 });
 
 test('소수 계산: 정수 표현으로 곱하고 끝자리 0·앞자리 0을 규칙대로 표기한다', () => {

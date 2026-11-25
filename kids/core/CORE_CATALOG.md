@@ -488,6 +488,16 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### 📊 4학년 막대그래프·꺾은선그래프 탐험관 (2026-11-25)
+
+4-1 「5. 막대그래프」·4-2 「5. 꺾은선그래프」(`bar_line.html`, 관 7개 + 퀴즈). 설계: [`docs/math_4_graph_spec.md`](../../docs/math_4_graph_spec.md).
+
+- `kids/subjects/math/js/bar_line-core.js` (`window.BarLineCore`, 순수, `MixCalcCore`를 먼저 실음): 주제 틀 `TOPICS`(막대 9·꺾은선 7, 꺾은선은 `mid`·`down`·`wave` 표시), 종류별 원료 풀, `makeProblem(kind, rng, { mixed })` → `{ kind, grade, chart, table, total, steps: [{ ask, answerText, value, choiceKind, reveal }], cardLines, key }`, `wrongChoices`(핵심 실수 + 해시로 큰 쪽·작은 쪽 번갈아), `hintFor`, `makeRound`, `makeMixedRound`(막대·꺾은선 4개 이상씩). 꺾은선 자료는 한두 칸씩 오르내리는 흐름.
+- `kids/subjects/math/js/bar_line-draw.js` (`window.BarLineDraw`): `chart(c)`(세로·가로 막대, 꺾은선, 몇 칸마다 숫자, 물결선 구간, `?` 빈 막대), 확인 장면 `highlight`·`revealBar`·`arrow`·`revealMid`(모두 `done`, 문서에서 떨어지면 멈춤).
+- `kids/subjects/math/js/bar_line-labs.js` (`window.BarLineLabs`): 학습일지 `g:gr4-<종류>`. `kids/css/math_barline.css`(`mx-theme-barline`, `.gr-*`).
+- **`MathExplorerQuiz.create({ unit: [{ grade, unit }, …] })`**: 학년이 섞인 출처면 노션 조건 최상위 `or` 안에 출처마다 `and`(두 단계).
+- 초안: 계산 부품 하이드로젠 medium(Claude가 꺾은선 흐름·변화 두 때·가운데 값 간격·주제 고침), 그림·화면·CSS 네온 medium. 시험 `tests/math-barline4.test.mjs`.
+
 ### 🔺 4-2 삼각형·사각형·다각형 탐험관 (2026-11-25)
 
 4학년 2학기 도형 세 단원(`tri_quad.html`, 관 7개 + 퀴즈). 설계: [`docs/math_4-2_shapes_spec.md`](../../docs/math_4-2_shapes_spec.md).

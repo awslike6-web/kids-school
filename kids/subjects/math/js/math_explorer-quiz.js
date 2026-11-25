@@ -55,18 +55,28 @@
     return any.length === 1 ? any[0] : { or: any };
   }
 
-  function buildQueryBody(grade, unit) {
+  function oneSource(grade, unitCond) {
     return {
-      page_size: 100,
-      filter: {
-        and: [
-          { property: '과목', select: { equals: '수학' } },
-          { property: '학년', select: { equals: grade } },
-          unitFilter(unit),
-          { property: '구역', select: { equals: '탐구퀴즈' } }
-        ]
-      }
+      and: [
+        { property: '과목', select: { equals: '수학' } },
+        { property: '학년', select: { equals: grade } },
+        unitCond,
+        { property: '구역', select: { equals: '탐구퀴즈' } }
+      ]
     };
+  }
+
+  // unit 배열의 원소가 { grade, unit } 객체면 학년이 섞인 조회(4-1 막대그래프 + 4-2 꺾은선그래프):
+  // 출처마다 and 하나씩을 or로 묶는다(노션 중첩 두 단계 안). 글자·글자 배열은 지금 그대로.
+  function buildQueryBody(grade, unit) {
+    if (Array.isArray(unit) && unit.length && typeof unit[0] === 'object') {
+      var any = [];
+      for (var i = 0; i < unit.length; i += 1) {
+        any.push(oneSource(unit[i].grade, { property: '단원', rich_text: { equals: unit[i].unit } }));
+      }
+      return { page_size: 100, filter: any.length === 1 ? any[0] : { or: any } };
+    }
+    return { page_size: 100, filter: oneSource(grade, unitFilter(unit)) };
   }
 
   function fetchQuiz(grade, unit) {
@@ -80,7 +90,7 @@
       .then(function (data) { return buildQuizFromPages(data && data.results); });
   }
 
-  // opts: { grade: '5-2', unit: '4. 소수의 곱셈'(또는 단원 글자 배열), title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기) }
+  // opts: { grade: '5-2', unit: '4. 소수의 곱셈'(또는 단원 글자 배열, 또는 { grade, unit } 배열), title: '🏆 소수의 곱셈 퀴즈 배틀', intro: '...', sayQuestion?: true(저학년: 질문 자동 읽기) }
   function create(opts) {
     var o = opts || {};
     var grade = o.grade || '5-2';
