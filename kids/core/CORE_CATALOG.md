@@ -488,6 +488,14 @@ Stitch AI 신규 시안 3종(민서 구름섬 클레이 파스텔 · 민수 SECT
 - 공통: `rng`는 `() => [0,1)` 함수(시험은 seed 고정). 조건에 맞는 수를 200번 안에 못 뽑으면 종류별 고정 예시로 돌아가 무한 루프가 없다. 덧셈·뺄셈 연습 문제의 소수 답은 끝자리 0이 없다.
 - 검증: `tests/math-fraction-add.test.mjs`·`tests/math-decimal-add.test.mjs`(계약 예시값, 종류마다 seed 300개 범위·결과 모양·오답 보기 규칙, 한 판 중복 없음·정렬). 시험은 계약서만 보고 따로 쓴 것(agy Hydrogen 초안 두 벌을 서로 모르게 작성).
 
+### 🧮 5-1 자연수의 혼합 계산 탐험관 (2026-11-25)
+
+5학년 1학기 「자연수의 혼합 계산」(`mixed_calc.html`, 관 7개 + 퀴즈). 설계: [`docs/math_5-1_mixcalc_spec.md`](../../docs/math_5-1_mixcalc_spec.md). 계산 순서 규칙 하나(`( )` → `× ÷` 앞에서부터 → `+ −` 앞에서부터), 풀이 꼴 하나(한 단계씩 줄여 아래로 쓰기). 한 문제 = 연산 수만큼 "다음 줄 식" 고르기.
+
+- `kids/subjects/math/js/mixed_calc-core.js` (`window.MixCalcCore`, 순수 모듈): 토큰 배열 식(`[12, '+', 4, '×', 3]`, 빼기는 U+2212)·`text`·`parse`·`nextIndex`·`step`(괄호가 수 하나가 되면 괄호도 지움)·`stripParens`·`solve` → `{ lines, marks: [{ from, to, value }], order(첫 줄 연산 토큰 번호 차례), value }`·`evalWith(tokens, 'rule'|'left'|'right'|'noparen')`·`evalExact`(분수 값)·`mixHash`·`STORIES`(6관 문장 틀 12개: 문장·묻는 말·정답 식·오답 식 2개)·`makeProblem`·`wrongChoices(p, 단계?)`(단계 보기는 지금 줄에서 만든 다음 줄 식, 관 핵심 순서 실수 먼저, 바른 꼴 2:1 다수결이 안 되게 세 무늬를 돌림, 오답 줄 최종값 = 정답이면 버림)·`makeRound`·`makeMixedRound`.
+- `kids/subjects/math/js/mixed_calc-labs.js` (`window.MixCalcLabs`, 1~7관 + `mount`, 식 사다리 그리기 포함): 학습일지 `g:mix5-<종류>-s<단계>`·7관 `g:mix5-<종류>`·6관 `g:mix5-story(-paren)`. `kids/css/math_mixcalc.css`(`mx-theme-mixcalc`, `.mc5-*`).
+- 초안: 계산 부품 하이드로젠 medium(Claude가 무늬·핵심 실수·수 조건·문장 틀 손봄), 화면·CSS 네온 medium. 시험 `tests/math-mixcalc5.test.mjs`(marks 정합, 풀 40개 이상, 핵심 순서 실수 출현 ≥ 70%, 다수결 모양 ≤ 60%, 크기 위치 ≤ 75%, 문장 틀 전수, U+2212).
+
 ### ✖️ 4-1 곱셈과 나눗셈 탐험관 (2026-11-25)
 
 4학년 1학기 「곱셈과 나눗셈」(`multiply_divide.html`, 관 7개 + 퀴즈). 3-1 나눗셈과 5-1 약수와 배수 사이 계단. 설계: [`docs/math_4-1_muldiv_spec.md`](../../docs/math_4-1_muldiv_spec.md). 방법은 하나씩만: × 몇십은 곱하는 수의 0을 떼고 곱한 뒤 붙이기, × 두 자리는 세로셈(일의 자리 곱 → 십의 자리 곱 한 칸 왼쪽 → 더하기), ÷ 몇십은 끝 0 같이 지우기(나머지에 0 다시 붙이기), ÷ 두 자리는 곱셈 줄(b × 1~9)에서 넘지 않는 가장 큰 곱, 검산은 `나누는 수 × 몫 + 나머지`.

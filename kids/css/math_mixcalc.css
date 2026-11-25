@@ -1,0 +1,271 @@
+/* 초등 5-1 자연수의 혼합 계산 탐험관 전용 스타일 (초록·청록 계열, 375px 가로 넘침 없음) */
+body.mx-theme-mixcalc {
+  --mx-head-a: #d1fae5;
+  --mx-head-b: #ccfbf1;
+  --mx-line: #5eead4;
+  --mx-strong: #065f46;
+  --mx-sub: #0f766e;
+  --mx-accent: #0d9488;
+  --mx-accent-dark: #0f766e;
+  --mx-soft: #99f6e4;
+  --mx-softer: #f0fdfa;
+}
+
+/* 단원 공통 작업 영역 */
+.mc5-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 계단 이동 링크 3개 (375px 한 줄 유지) */
+body.mx-theme-mixcalc .mx-ladder-links {
+  gap: 6px;
+}
+
+body.mx-theme-mixcalc .mx-ladder-links .mx-chip {
+  font-size: clamp(0.76rem, 3.2vw, 0.92rem);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+/* 계산 순서 카드 (MathDrill.algo 3줄 중 현재 문제 규칙 강조) */
+body.mx-theme-mixcalc .mx-algo {
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+body.mx-theme-mixcalc .mx-algo > * {
+  padding: 5px 8px;
+  border-radius: 10px;
+  color: #64748b;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body.mx-theme-mixcalc .mx-algo > *::before {
+  background: #94a3b8;
+  transition: background-color 0.2s ease;
+}
+
+body.mx-theme-mixcalc .mx-algo > .mc5-rule-on,
+.mc5-rule-on {
+  background: var(--mx-soft);
+  color: var(--mx-strong);
+  font-weight: 800;
+  box-shadow: inset 3px 0 0 var(--mx-accent-dark);
+}
+
+body.mx-theme-mixcalc .mx-algo > .mc5-rule-on::before {
+  background: var(--mx-accent-dark);
+}
+
+/* 식 사다리 (stepLadder 감싸개: 첫 줄 위 순서 번호 여유 + 높이 고정) */
+.mc5-ladder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+  max-width: 100%;
+  margin: 4px auto 10px;
+  padding: 22px 8px 14px;
+  background: #ffffff;
+  border: 2px solid var(--mx-line);
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+/* 식 사다리 한 줄 */
+.mc5-line {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  max-width: 100%;
+  white-space: nowrap;
+  font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+  font-weight: 800;
+  line-height: 2.2;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+/* 16자 초과 긴 식: 375px 한 줄 보장 */
+.mc5-line-sm {
+  font-size: clamp(0.95rem, 4vw, 1.15rem);
+}
+
+/* 새로 추가된 다음 줄 부드러운 등장 */
+.mc5-line:not(:first-child) {
+  animation: mc5-line-in 0.24s ease;
+}
+
+/* 식 토큰 (숫자·괄호·연산 기호) */
+.mc5-tok {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.12em;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+/* 연산 기호 (+, −, ×, ÷) */
+.mc5-op {
+  color: var(--mx-sub);
+  padding: 0 0.16em;
+}
+
+/* 계산한 부분 굵은 밑줄 강조 (주황 움직임 계열, 빨강 금지) */
+.mc5-mark {
+  border-bottom: 3px solid #f97316;
+  padding-bottom: 1px;
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 4px 4px 0 0;
+}
+
+.mc5-mark.mc5-op {
+  color: #c2410c;
+}
+
+/* 첫 줄 연산 기호 위 계산 순서 동그라미 번호 (①②③) */
+.mc5-num {
+  position: absolute;
+  top: -0.9em;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72em;
+  font-weight: 800;
+  line-height: 1;
+  color: #5b21b6;
+  background: #ede9fe;
+  padding: 2px 4px;
+  border-radius: 999px;
+  pointer-events: none;
+  user-select: none;
+  animation: mc5-num-pop 0.24s ease;
+}
+
+/* 6관 문장제 카드 (문장 + 묻는 말) */
+.mc5-story {
+  width: 100%;
+  max-width: 100%;
+  margin: 4px 0 10px;
+  padding: 14px 16px;
+  background: var(--mx-softer);
+  border: 2px solid var(--mx-line);
+  border-radius: 16px;
+  color: #1e293b;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.65;
+  word-break: keep-all;
+  box-sizing: border-box;
+}
+
+.mc5-story p {
+  margin: 0;
+}
+
+.mc5-story p + p {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1.5px dashed var(--mx-line);
+  color: var(--mx-strong);
+  font-weight: 800;
+}
+
+.mc5-story strong {
+  color: var(--mx-strong);
+}
+
+/* 7관 식 한 줄 표기 */
+body.mx-theme-mixcalc .mx-expr {
+  white-space: nowrap;
+  font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 식·수 보기 버튼: 세로 1열 전폭, 한 줄 유지 */
+.mx-drill-round .mx-choice,
+.mc5-area .mx-choice {
+  white-space: nowrap;
+  font-size: clamp(1rem, 4.2vw, 1.2rem);
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+}
+
+body.mx-theme-mixcalc .mx-choice-col .mx-choice {
+  padding: 10px 12px;
+}
+
+/* 등장 키프레임 */
+@keyframes mc5-line-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mc5-num-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.75);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+/* 좁은 모바일 (375px 이하 가로 넘침 방지) */
+@media (max-width: 420px) {
+  .mc5-ladder {
+    padding: 20px 6px 12px;
+  }
+
+  .mc5-story {
+    padding: 12px 13px;
+    font-size: 0.96rem;
+  }
+
+  .mx-drill-round .mx-choice,
+  .mc5-area .mx-choice {
+    padding: 10px 8px;
+  }
+
+  body.mx-theme-mixcalc .mx-ladder-links {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  body.mx-theme-mixcalc .mx-ladder-links .mx-chip {
+    padding: 5px 8px;
+    font-size: 0.78rem;
+  }
+}
+
+/* 모션 줄이기 설정 대응 */
+@media (prefers-reduced-motion: reduce) {
+  body.mx-theme-mixcalc .mx-algo > *,
+  body.mx-theme-mixcalc .mx-algo > *::before,
+  .mc5-tok,
+  .mc5-line:not(:first-child),
+  .mc5-num {
+    animation: none;
+    transition: none;
+  }
+}
