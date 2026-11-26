@@ -1,0 +1,541 @@
+/* 2-2 시각과 시간 탐험관: 보라·민트 테마 + 시계·시간 띠·하루 띠·달력·안내표·동물 배지·도장 (docs/math_2-2_time_spec.md §3~§4) */
+body.mx-theme-time2 {
+  --mx-head-a: #ede9fe;
+  --mx-head-b: #ccfbf1;
+  --mx-line: #c4b5fd;
+  --mx-strong: #4c1d95;
+  --mx-sub: #0f766e;
+  --mx-accent: #7c3aed;
+  --mx-accent-dark: #6d28d9;
+  --mx-soft: #ede9fe;
+  --mx-softer: #f5f3ff;
+  --tc-face-bg: #ffffff;
+  --tc-face-line: #8b5cf6;
+  --tc-tick: #94a3b8;
+  --tc-tick-major: #334155;
+  --tc-tick-now: #f59e0b;
+  --tc-num: #3b0764;
+  --tc-hour-hand: #4c1d95;
+  --tc-min-hand: #0d9488;
+  --tc-hour-hint: rgba(167, 139, 250, 0.28);
+  --tc-pin: #4c1d95;
+  --tc-pin-dot: #ffffff;
+  --tc-bar-bg: #ffffff;
+  --tc-bar-line: #94a3b8;
+  --tc-bar-hour-line: #475569;
+  --tc-bar-fill: rgba(13, 148, 136, 0.42);
+  --tc-bar-fill-line: #0f766e;
+  --tc-am-bg: #fef9c3;
+  --tc-pm-bg: #ede9fe;
+  --tc-tag-bg: #ffffff;
+  --tc-tag-line: #7c3aed;
+  --tc-sun: #dc2626;
+  --tc-sat: #2563eb;
+  --tc-cal-mark-bg: #fef08a;
+  --tc-cal-mark-line: #7c3aed;
+  --tc-fact-bg: #f0fdfa;
+  --tc-fact-line: #5eead4;
+  --tc-fact-ink: #115e59;
+  --tc-friend-bg: #f5f3ff;
+  --tc-friend-line: #c4b5fd;
+  --tc-stamp-bg: #ffffff;
+  --tc-stamp-on-bg: #ccfbf1;
+  --tc-stamp-on-line: #0d9488;
+}
+
+/* 공통 그림 상자 */
+.tc-box {
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 2px solid var(--mx-line, #c4b5fd);
+  background: var(--mx-softer, #f5f3ff);
+  overflow: hidden;
+}
+
+/* 시계 */
+.tc-clock-wrap {
+  width: 100%;
+  max-width: 240px;
+  margin: 8px auto;
+  box-sizing: border-box;
+}
+
+.tc-clock-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tc-clock-wrap.is-drag .tc-clock-svg {
+  cursor: grab;
+}
+
+.tc-clock-wrap.is-locked .tc-clock-svg {
+  cursor: default;
+  opacity: 0.92;
+}
+
+.tc-face {
+  fill: var(--tc-face-bg, #ffffff);
+  stroke: var(--tc-face-line, #8b5cf6);
+  stroke-width: 4;
+}
+
+.tc-hour-hint {
+  fill: var(--tc-hour-hint, rgba(167, 139, 250, 0.28));
+  pointer-events: none;
+}
+
+.tc-tick {
+  pointer-events: none;
+}
+
+.tc-tick-minor {
+  stroke: var(--tc-tick, #94a3b8);
+  stroke-width: 1.5;
+}
+
+.tc-tick-major {
+  stroke: var(--tc-tick-major, #334155);
+  stroke-width: 3;
+}
+
+.tc-tick.is-now {
+  stroke: var(--tc-tick-now, #f59e0b);
+  stroke-width: 4.5;
+}
+
+.tc-num {
+  font-size: 16px;
+  font-weight: 800;
+  fill: var(--tc-num, #3b0764);
+  pointer-events: none;
+  user-select: none;
+}
+
+.tc-hand-hour {
+  stroke: var(--tc-hour-hand, #4c1d95);
+  stroke-width: 7;
+  pointer-events: none;
+}
+
+.tc-hand-min {
+  pointer-events: none;
+}
+
+.tc-hand-min-line {
+  stroke: var(--tc-min-hand, #0d9488);
+  stroke-width: 4;
+}
+
+.tc-hand-knob {
+  fill: var(--tc-min-hand, #0d9488);
+  stroke: var(--tc-face-bg, #ffffff);
+  stroke-width: 2;
+}
+
+.tc-pin {
+  fill: var(--tc-pin, #4c1d95);
+  pointer-events: none;
+}
+
+.tc-pin-dot {
+  fill: var(--tc-pin-dot, #ffffff);
+  pointer-events: none;
+}
+
+/* 3관: 시간 띠 (폭 100% max 340px, 높이 90px 이내) */
+.tc-tbar-box {
+  max-height: 90px;
+  padding: 8px 10px 10px;
+}
+
+.tc-tbar-stage {
+  position: relative;
+  width: 100%;
+  padding: 0 14px;
+  box-sizing: border-box;
+}
+
+.tc-tbar-nums {
+  position: relative;
+  width: 100%;
+  height: 22px;
+  margin-bottom: 4px;
+}
+
+.tc-tbar-num {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--mx-strong, #4c1d95);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tc-tbar-track {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  border-radius: 8px;
+  border: 2px solid var(--tc-bar-hour-line, #475569);
+  background: var(--tc-bar-bg, #ffffff);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tc-tbar-grid {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.tc-tbar-cell {
+  flex: 0 0 auto;
+  height: 100%;
+  box-sizing: border-box;
+  border-left: 1px dashed var(--tc-bar-line, #94a3b8);
+}
+
+.tc-tbar-cell:first-child {
+  border-left: none;
+}
+
+.tc-tbar-cell.is-hour {
+  border-left: 2px solid var(--tc-bar-hour-line, #475569);
+}
+
+.tc-bar-fill {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  height: 100%;
+  box-sizing: border-box;
+  background: var(--tc-bar-fill, rgba(13, 148, 136, 0.42));
+  border-left: 2px solid var(--tc-bar-fill-line, #0f766e);
+  border-right: 2px solid var(--tc-bar-fill-line, #0f766e);
+}
+
+/* 4관: 하루 시간 띠 */
+.tc-dbar-box {
+  padding: 8px 8px 10px;
+}
+
+.tc-dbar-stage {
+  position: relative;
+  width: 100%;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.tc-dbar-tags {
+  position: relative;
+  width: 100%;
+  height: 46px;
+  margin-bottom: 2px;
+}
+
+.tc-dbar-noon {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--mx-sub, #0f766e);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tc-dbar-tag {
+  position: absolute;
+  bottom: 14px;
+  transform: translateX(-50%);
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1.5px solid var(--tc-tag-line, #7c3aed);
+  background: var(--tc-tag-bg, #ffffff);
+  color: var(--mx-strong, #4c1d95);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  user-select: none;
+  z-index: 2;
+}
+
+.tc-dbar-tag.is-hi {
+  bottom: 30px;
+  z-index: 3;
+}
+
+.tc-dbar-tag.is-left {
+  transform: translateX(0);
+}
+
+.tc-dbar-tag.is-right {
+  transform: translateX(-100%);
+}
+
+.tc-dbar-nums {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  margin-bottom: 2px;
+}
+
+.tc-dbar-num {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--mx-strong, #4c1d95);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tc-dbar-track {
+  position: relative;
+  width: 100%;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid var(--tc-bar-hour-line, #475569);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tc-dbar-grid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.tc-dbar-cell {
+  flex: 0 0 auto;
+  height: 100%;
+  box-sizing: border-box;
+  border-left: 1px solid rgba(100, 116, 139, 0.25);
+}
+
+.tc-dbar-cell:first-child {
+  border-left: none;
+}
+
+.tc-dbar-am {
+  background: var(--tc-am-bg, #fef9c3);
+}
+
+.tc-dbar-pm {
+  background: var(--tc-pm-bg, #ede9fe);
+}
+
+.tc-dbar-cell.is-step3 {
+  border-left: 1px solid var(--tc-bar-line, #94a3b8);
+}
+
+.tc-dbar-cell.is-noon {
+  border-left: 2px solid var(--tc-bar-hour-line, #475569);
+}
+
+.tc-dbar-fill {
+  z-index: 2;
+}
+
+.tc-dbar-halves {
+  display: flex;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.tc-dbar-half {
+  flex: 1 1 50%;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  user-select: none;
+}
+
+.tc-dbar-half-am {
+  color: var(--mx-sub, #0f766e);
+}
+
+.tc-dbar-half-pm {
+  color: var(--mx-strong, #4c1d95);
+}
+
+/* 5관: 달력 (CSS grid 7등분, 폭 100% max 340px, 글자 14px 이상) */
+.tc-cal-box {
+  padding: 8px;
+}
+
+.tc-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  width: 100%;
+}
+
+.tc-cal-head,
+.tc-cal-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--mx-ink, #1e293b);
+  user-select: none;
+}
+
+.tc-cal-head {
+  font-weight: 800;
+  border-bottom: 1.5px solid var(--mx-line, #c4b5fd);
+  margin-bottom: 2px;
+}
+
+.tc-cal-head.is-sun,
+.tc-cal-cell.is-sun {
+  color: var(--tc-sun, #dc2626);
+}
+
+.tc-cal-head.is-sat,
+.tc-cal-cell.is-sat {
+  color: var(--tc-sat, #2563eb);
+}
+
+.tc-cal-day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+
+.tc-cal-cell.tc-cal-mark .tc-cal-day {
+  background: var(--tc-cal-mark-bg, #fef08a);
+  border: 2px solid var(--tc-cal-mark-line, #7c3aed);
+  font-weight: 800;
+}
+
+/* 안내표 (문제 위 한 줄) */
+.tc-fact {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 2px solid var(--tc-fact-line, #5eead4);
+  background: var(--tc-fact-bg, #f0fdfa);
+  color: var(--tc-fact-ink, #115e59);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 6관: 동물 배지 (큰 이모지 + 이름) */
+.tc-friend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  margin: 0 auto 8px;
+  padding: 6px 14px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 2px solid var(--tc-friend-line, #c4b5fd);
+  background: var(--tc-friend-bg, #f5f3ff);
+  color: var(--mx-strong, #4c1d95);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.tc-friend-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.tc-friend-name {
+  line-height: 1.2;
+}
+
+/* 6관: 약속 도장 줄 */
+.tc-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 8px auto;
+}
+
+.tc-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px dashed var(--mx-line, #c4b5fd);
+  background: var(--tc-stamp-bg, #ffffff);
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tc-stamp.is-on {
+  border-style: solid;
+  border-color: var(--tc-stamp-on-line, #0d9488);
+  background: var(--tc-stamp-on-bg, #ccfbf1);
+}
+
+/* 1관③·2관②·6관: 버튼 줄 (3개 한 줄, 좁으면 2+1) */
+.tc-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 340px;
+  margin: 10px auto 0;
+}
+
+.tc-btns .mx-btn {
+  flex: 1 1 92px;
+  min-height: 56px;
+}
+
+/* 7관 시각 빙고: 「1시간 / 30분」 띄어쓰기에서만 두 줄 */
+body.mx-theme-time2 .mx-bingo-cell,
+body.mx-theme-time2 .mx-bingo-chip {
+  word-break: keep-all;
+  font-size: 0.95rem;
+  line-height: 1.15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tc-stamp {
+    transition: none;
+  }
+}
