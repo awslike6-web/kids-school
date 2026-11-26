@@ -1,10 +1,10 @@
-// 초1·2 수학 백·십·일 수 모형 그리기·조작 공용 모듈 (BaseTenDraw)
+// 초1·2 수학 (천·)백·십·일 수 모형 그리기·조작 공용 모듈 (BaseTenDraw) — 천 모형은 2-2 네 자리 수(2026-11-26)
 (function (global) {
   'use strict';
 
   var STYLE_ID = 'mx-baseten-style';
-  var PLACE_NAME = { h: '백', t: '십', o: '일' };
-  var PLACE_STEP = { h: 100, t: 10, o: 1 };
+  var PLACE_NAME = { th: '천', h: '백', t: '십', o: '일' };
+  var PLACE_STEP = { th: 1000, h: 100, t: 10, o: 1 };
   var GLOW_MS = 300;
   var ANIM_MS = 600;
   var DONE_MS = 300;
@@ -17,7 +17,7 @@
   }
 
   function toTotal(s) {
-    return ((s.h | 0) * 100) + ((s.t | 0) * 10) + (s.o | 0);
+    return ((s.th | 0) * 1000) + ((s.h | 0) * 100) + ((s.t | 0) * 10) + (s.o | 0);
   }
 
   // 1학년 이름(names = { t: '10개 묶음', o: '낱개' })이면 그 이름으로 안내 (2026-11-24, math_1_bridge_spec §3-4)
@@ -49,16 +49,18 @@
   // 목표 수(h·t·o) 도달 여부 (순수 함수)
   function isReached(state, target) {
     if (!state || !target) return false;
-    return (state.h | 0) === (target.h | 0) &&
+    return (state.th | 0) === (target.th | 0) &&
+      (state.h | 0) === (target.h | 0) &&
       (state.t | 0) === (target.t | 0) &&
       (state.o | 0) === (target.o | 0);
   }
 
-  // 10개 묶기 대상 자리 반환: 'ones' → 'tens' → null (순수 함수)
+  // 10개 묶기 대상 자리 반환: 'ones' → 'tens' → 'hundreds' → null (순수 함수)
   function carryPlan(state) {
     if (!state) return null;
     if ((state.o | 0) >= 10) return 'ones';
     if ((state.t | 0) >= 10) return 'tens';
+    if ((state.h | 0) >= 10) return 'hundreds';
     return null;
   }
 
@@ -91,6 +93,15 @@
       'linear-gradient(to bottom,var(--mx-line,#fcd34d) 1px,transparent 1px);background-size:8px 8px;',
       'color:var(--mx-strong,#b45309);font-size:.85rem;font-weight:800;display:flex;',
       'align-items:center;justify-content:center;user-select:none}',
+      '.bt-row-th{display:grid;grid-template-columns:repeat(5,48px);gap:8px 6px;justify-content:center;',
+      'min-height:52px;margin-bottom:10px}',
+      '.bt-thousand{width:48px;height:48px;box-sizing:border-box;border-radius:6px;',
+      'border:2px solid var(--mx-strong,#b45309);background-color:var(--mx-line,#fcd34d);',
+      'background-image:linear-gradient(to right,var(--mx-strong,#b45309) 1px,transparent 1px),',
+      'linear-gradient(to bottom,var(--mx-strong,#b45309) 1px,transparent 1px);background-size:12px 12px;',
+      'box-shadow:4px -4px 0 0 var(--mx-strong,#b45309);color:var(--mx-strong,#b45309);font-size:.8rem;',
+      'font-weight:900;display:flex;align-items:center;justify-content:center;user-select:none;',
+      'text-shadow:0 0 3px var(--mx-soft,#fffbeb),0 0 3px var(--mx-soft,#fffbeb)}',
       '.bt-row-to{display:flex;align-items:flex-end;justify-content:center;gap:14px;min-height:76px}',
       '.bt-group-t{display:flex;flex-wrap:wrap;align-items:flex-end;gap:4px;',
       'min-width:60px;min-height:72px;max-width:160px}',
@@ -106,9 +117,9 @@
       'var(--mx-strong,#b45309) 42%,var(--mx-strong,#b45309) 58%,transparent 58%)}',
       '.bt-hundred.is-glow,.bt-ten.is-glow,.bt-one.is-glow{',
       'box-shadow:0 0 0 3px var(--mx-accent,#f59e0b);animation:btGlow .3s ease infinite alternate}',
-      '.bt-ten.is-merge,.bt-one.is-merge{animation:btMerge .6s ease forwards}',
+      '.bt-hundred.is-merge,.bt-ten.is-merge,.bt-one.is-merge{animation:btMerge .6s ease forwards}',
       '.bt-one.is-split{animation:btSplit .6s ease}',
-      '.bt-hundred.is-pop,.bt-ten.is-pop{animation:btPop .3s ease}',
+      '.bt-thousand.is-pop,.bt-hundred.is-pop,.bt-ten.is-pop{animation:btPop .3s ease}',
       '.bt-controls{width:100%;max-width:340px;margin:8px auto;text-align:center}',
       '.bt-controls [hidden]{display:none}',
       '.bt-btn-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}',
@@ -123,15 +134,17 @@
       '100%{opacity:1;transform:scale(1) translateX(0)}}',
       '@keyframes btPop{0%{transform:scale(.7)}65%{transform:scale(1.08)}100%{transform:scale(1)}}',
       '@media (prefers-reduced-motion:reduce){',
-      '.bt-hundred,.bt-ten,.bt-one,.bt-btn.mx-glow{animation:none;transition:none}}'
+      '.bt-thousand,.bt-hundred,.bt-ten,.bt-one,.bt-btn.mx-glow{animation:none;transition:none}}'
     ].join('');
     document.head.appendChild(s);
   }
 
-  // 수 모형 판 생성 (h·t·o 각 0~19 지원)
+  // 수 모형 판 생성 (h·t·o 각 0~19 지원). init에 th가 있으면 맨 위 천 줄을 켠다(2-2 네 자리 수)
   function model(init) {
     ensureStyle();
     var src = init || {};
+    var hasTh = src.th !== undefined && src.th !== null;
+    var thCount = hasTh ? clamp(src.th, 0, 19) : 0;
     var state = {
       h: clamp(src.h || 0, 0, 19),
       t: clamp(src.t || 0, 0, 19),
@@ -139,17 +152,20 @@
     };
     var erasedCount = 0;
     var isBusy = false;
+    var thNodes = [];
     var hNodes = [];
     var tNodes = [];
     var oNodes = [];
 
     var board = makeEl('div', 'bt-board');
+    var rowTh = hasTh ? makeEl('div', 'bt-row-th') : null;
     var rowH = makeEl('div', 'bt-row-h');
     var rowTO = makeEl('div', 'bt-row-to');
     var groupT = makeEl('div', 'bt-group-t');
     var groupO = makeEl('div', 'bt-group-o');
     rowTO.appendChild(groupT);
     rowTO.appendChild(groupO);
+    if (rowTh) board.appendChild(rowTh);
     board.appendChild(rowH);
     board.appendChild(rowTO);
 
@@ -163,13 +179,21 @@
 
     function render(popPlace, splitNew) {
       var i, node;
+      if (rowTh) rowTh.replaceChildren();
       rowH.replaceChildren();
       groupT.replaceChildren();
       groupO.replaceChildren();
+      thNodes = [];
       hNodes = [];
       tNodes = [];
       oNodes = [];
 
+      for (i = 0; rowTh && i < thCount; i += 1) {
+        node = makeEl('div', 'bt-thousand', '1000');
+        if (popPlace === 'th' && i === thCount - 1) node.classList.add('is-pop');
+        thNodes.push(node);
+        rowTh.appendChild(node);
+      }
       for (i = 0; i < state.h; i += 1) {
         node = makeEl('div', 'bt-hundred', '100');
         if (popPlace === 'h' && i === state.h - 1) node.classList.add('is-pop');
@@ -192,11 +216,14 @@
     }
 
     function get() {
-      return { h: state.h, t: state.t, o: state.o };
+      var out = { h: state.h, t: state.t, o: state.o };
+      if (hasTh) out.th = thCount;
+      return out;
     }
 
     function set(h, t, o) {
       if (h && typeof h === 'object') {
+        if (hasTh) thCount = clamp(h.th || 0, 0, 19);
         state.h = clamp(h.h || 0, 0, 19);
         state.t = clamp(h.t || 0, 0, 19);
         state.o = clamp(h.o || 0, 0, 19);
@@ -221,9 +248,11 @@
     function bundle(place, done) {
       var cb = typeof done === 'function' ? done : function () {};
       var isOnes = place === 'ones';
+      var isHundreds = place === 'hundreds';
       if (isBusy) return;
       if (isOnes && state.o < 10) { cb(); return; }
-      if (!isOnes && (place !== 'tens' || state.t < 10)) { cb(); return; }
+      if (isHundreds && (!hasTh || state.h < 10)) { cb(); return; }
+      if (!isOnes && !isHundreds && (place !== 'tens' || state.t < 10)) { cb(); return; }
 
       function commit(withPop) {
         if (isOnes) {
@@ -231,6 +260,10 @@
           state.t = clamp(state.t + 1, 0, 19);
           if (erasedCount > state.o) erasedCount = state.o;
           render(withPop ? 't' : null, false);
+        } else if (isHundreds) {
+          state.h -= 10;
+          thCount = clamp(thCount + 1, 0, 19);
+          render(withPop ? 'th' : null, false);
         } else {
           state.t -= 10;
           state.h = clamp(state.h + 1, 0, 19);
@@ -245,7 +278,7 @@
       }
 
       isBusy = true;
-      var list = isOnes ? oNodes : tNodes;
+      var list = isOnes ? oNodes : (isHundreds ? hNodes : tNodes);
       var targets = list.slice(0, 10);
       var i;
       for (i = 0; i < targets.length; i += 1) targets[i].classList.add('is-glow');
@@ -379,8 +412,8 @@
         return;
       }
       ui.hint(hintEl, '');
-      cur[place] += 1;
-      m.set(cur.h, cur.t, cur.o);
+      cur[place] = (cur[place] | 0) + 1;
+      m.set(cur);
       if (autoBundle) runBundles();
       else checkDone();
     }
@@ -467,9 +500,13 @@
     return wrap;
   }
 
-  // 조작 없는 수 모형 그림(0~999)의 el만 반환
+  // 조작 없는 수 모형 그림(0~9999)의 el만 반환. 1000 이상이면 천 줄을 켠다
   function picture(n) {
-    var v = clamp(n || 0, 0, 999);
+    var v = clamp(n || 0, 0, 9999);
+    if (v >= 1000) {
+      var r = v % 1000;
+      return model({ th: (v - r) / 1000, h: (r - (r % 100)) / 100, t: ((r % 100) - (r % 10)) / 10, o: r % 10 }).el;
+    }
     var h = (v - (v % 100)) / 100;
     var rem = v % 100;
     var t = (rem - (rem % 10)) / 10;

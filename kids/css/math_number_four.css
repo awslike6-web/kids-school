@@ -1,0 +1,12 @@
+/* 2-2 네 자리 수 탐험관: 민트·살구 파스텔 테마 + 숫자 띠 4칸 · 자릿값 표 (docs/math_2-2_four_digit_spec.md §3) */
+body.mx-theme-num4 {
+  --mx-head-a: #ccfbf1; --mx-head-b: #ffedd5; --mx-line: #5eead4; --mx-strong: #115e59; --mx-sub: #c2410c;
+  --mx-accent: #0d9488; --mx-accent-dark: #0f766e; --mx-soft: #ccfbf1; --mx-softer: #f0fdfa;
+}
+.n4-strip .tw-digit { width: 56px; }
+.n4-table { display: flex; flex-direction: column; gap: 4px; width: 100%; max-width: 300px; margin: 6px auto; }
+.n4-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.n4-cell { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 10px;
+  border: 2px solid var(--mx-line); background: var(--mx-softer); color: var(--mx-strong); font-size: 1.8rem; font-weight: 800; }
+.n4-row.is-head .n4-cell { min-height: 34px; font-size: 1rem; background: var(--mx-soft); border-color: transparent; color: var(--mx-sub); }
+body.mx-theme-num4 .bt-btn-row .bt-btn { flex: 1 1 calc(50% - 8px); }
